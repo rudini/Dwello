@@ -381,6 +381,53 @@ This is a comprehensive implementation plan for the entire Dwello property manag
   - [ ] Verify cookies set correctly in browser
   - [ ] Verify redirect to dashboard
 
+### 1.X Verification: Unit Tests & E2E Tests
+
+- [ ] Unit Tests for `src/lib/server/auth.ts`
+  - [ ] Create `tests/unit/auth.test.ts`
+  - [ ] Test `generateJwt()` with valid/invalid user data
+  - [ ] Test `verifyJwt()` with valid/expired/invalid tokens
+  - [ ] Test `setSessionCookie()` sets HTTPOnly flag
+  - [ ] Test `validateXsrfToken()` with matching/mismatched tokens
+  - [ ] Test `clearAuthCookies()` removes all auth cookies
+  - [ ] Target >80% code coverage
+  - [ ] All tests pass: `npm run test`
+
+- [ ] Unit Tests for `src/lib/server/oauth.ts`
+  - [ ] Create `tests/unit/oauth.test.ts`
+  - [ ] Test `generateOAuthUrl()` with different providers
+  - [ ] Test `exchangeCodeForToken()` with mock responses
+  - [ ] Test `fetchUserProfile()` with mock provider responses
+  - [ ] Test error handling for failed OAuth flows
+  - [ ] Target >80% code coverage
+  - [ ] All tests pass: `npm run test`
+
+- [ ] Unit Tests for `src/routes/auth/**/+server.ts`
+  - [ ] Create `tests/unit/auth-routes.test.ts`
+  - [ ] Test login endpoint with invalid provider
+  - [ ] Test callback endpoint with valid/invalid state
+  - [ ] Test refresh endpoint with expired tokens
+  - [ ] Test logout endpoint clears cookies
+  - [ ] Test me endpoint returns current user
+  - [ ] All tests pass: `npm run test`
+
+- [ ] E2E Tests for Auth Flow
+  - [ ] Create `tests/e2e/auth.spec.ts`
+  - [ ] Test complete OAuth login flow (mock provider)
+  - [ ] Test login redirect to OAuth provider
+  - [ ] Test callback redirect to dashboard
+  - [ ] Test token refresh on page reload
+  - [ ] Test logout clears session and redirects
+  - [ ] All tests pass: `npm run test:e2e`
+
+- [ ] Manual Testing
+  - [ ] Run dev server: `npm run dev`
+  - [ ] Verify no TypeScript errors: `npm run type-check`
+  - [ ] Verify no linting issues: `npm run lint`
+  - [ ] Test OAuth flows in browser (with dev credentials)
+  - [ ] Check browser console for errors
+  - [ ] Verify cookies appear in DevTools
+
 **Status: Phase 1 Complete** ✅
 
 ---
@@ -547,6 +594,48 @@ This is a comprehensive implementation plan for the entire Dwello property manag
   - [ ] Request/response forwarding
   - [ ] Query parameter passing
 
+### 2.X Verification: Unit Tests & E2E Tests
+
+- [ ] Unit Tests for `src/lib/server/api-proxy.ts`
+  - [ ] Create `tests/unit/api-proxy.test.ts`
+  - [ ] Test `forwardRequest()` with valid JWT
+  - [ ] Test missing JWT returns 401
+  - [ ] Test XSRF token validation
+  - [ ] Test query parameter forwarding
+  - [ ] Test header forwarding
+  - [ ] Test error responses from backend
+  - [ ] Target >80% code coverage
+  - [ ] All tests pass: `npm run test`
+
+- [ ] Integration Tests for All Proxy Routes
+  - [ ] Create `tests/integration/api-routes.test.ts`
+  - [ ] Test all building routes (GET, POST, PUT, DELETE)
+  - [ ] Test all apartment routes (GET, POST, PUT, DELETE)
+  - [ ] Test all tenant routes (GET, POST, PUT, DELETE)
+  - [ ] Test all contract routes (GET, POST, PUT, DELETE)
+  - [ ] Test authentication enforcement (401 on missing JWT)
+  - [ ] Test XSRF protection (403 on missing token)
+  - [ ] Test query parameters passed through correctly
+  - [ ] Test pagination works
+  - [ ] All tests pass: `npm run test`
+
+- [ ] E2E Tests for API Proxy Integration
+  - [ ] Create `tests/e2e/api.spec.ts`
+  - [ ] Test complete request flow through BFF layer
+  - [ ] Test authenticated requests work
+  - [ ] Test unauthenticated requests return 401
+  - [ ] Test XSRF protection blocks requests
+  - [ ] Test response data returned to client
+  - [ ] All tests pass: `npm run test:e2e`
+
+- [ ] Manual Testing
+  - [ ] Run dev server: `npm run dev`
+  - [ ] Verify no TypeScript errors: `npm run type-check`
+  - [ ] Verify no linting issues: `npm run lint`
+  - [ ] Test API proxy with mock backend responses
+  - [ ] Check browser DevTools network tab for forwarded requests
+  - [ ] Verify XSRF token in request headers
+
 **Status: Phase 2 Complete** ✅
 
 ---
@@ -640,6 +729,43 @@ This is a comprehensive implementation plan for the entire Dwello property manag
   - [ ] User info displayed (1 test)
   - [ ] Automatic token refresh (1 test)
   - [ ] Logout clears cookies (1 test)
+
+### 3.X Verification: Unit Tests & E2E Tests
+
+- [ ] Unit Tests for `src/lib/api.ts`
+  - [ ] Create `tests/unit/api.test.ts`
+  - [ ] Test `getXsrfTokenFromCookie()` extraction
+  - [ ] Test `apiCall()` with GET/POST/PUT/DELETE
+  - [ ] Test XSRF token inclusion in headers
+  - [ ] Test 401 error handling and redirect
+  - [ ] Test request/response serialization
+  - [ ] Target >80% code coverage
+  - [ ] All tests pass: `npm run test`
+
+- [ ] Component Tests for Auth Components
+  - [ ] Create `tests/unit/auth-components.test.ts`
+  - [ ] Test LoginPage renders correctly
+  - [ ] Test user info displays after auth
+  - [ ] Test logout button works
+  - [ ] Test layout persists auth state
+  - [ ] All tests pass: `npm run test`
+
+- [ ] E2E Tests for Full Auth & Layout
+  - [ ] Create `tests/e2e/auth-layout.spec.ts`
+  - [ ] Test login flow with redirect to dashboard
+  - [ ] Test layout renders on authenticated pages
+  - [ ] Test user dropdown works
+  - [ ] Test logout redirects to login
+  - [ ] Test navigation between authenticated pages
+  - [ ] All tests pass: `npm run test:e2e`
+
+- [ ] Manual Testing
+  - [ ] Run dev server: `npm run dev`
+  - [ ] Verify no TypeScript errors: `npm run type-check`
+  - [ ] Verify no linting issues: `npm run lint`
+  - [ ] Test auth flow in browser
+  - [ ] Test page navigation works
+  - [ ] Check responsive design on mobile
 
 **Status: Phase 3 Complete** ✅
 
@@ -797,6 +923,31 @@ This is a comprehensive implementation plan for the entire Dwello property manag
   - [ ] Create/read/update/delete for each table (8 tests)
   - [ ] Foreign key constraints (3 tests)
   - [ ] Index performance (2 tests)
+
+### 4.X Verification: Unit Tests & E2E Tests
+
+- [ ] Unit Tests for Database Connection
+  - [ ] Create `tests/unit/db.test.ts`
+  - [ ] Test connection pool creation
+  - [ ] Test connection string validation
+  - [ ] Test error handling for connection failures
+  - [ ] All tests pass: `npm run test`
+
+- [ ] Integration Tests for Migrations
+  - [ ] Create `tests/integration/migrations.test.ts`
+  - [ ] Test migration application (up)
+  - [ ] Test migration rollback (down)
+  - [ ] Test schema correctness after migration
+  - [ ] Test indexes are created
+  - [ ] Verify database state after each migration
+  - [ ] All tests pass: `npm run test`
+
+- [ ] Manual Testing
+  - [ ] Run: `npm run test`
+  - [ ] Verify all migrations apply successfully
+  - [ ] Verify database schema matches specification
+  - [ ] Check indexes exist: `\d+ table_name`
+  - [ ] Verify constraint enforcement
 
 **Status: Phase 4 Complete** ✅
 
@@ -958,6 +1109,36 @@ This is a comprehensive implementation plan for the entire Dwello property manag
   - [ ] Tenants CRUD (10)
   - [ ] Contracts CRUD (10)
 
+### 5.X Verification: Unit Tests & E2E Tests
+
+- [ ] Unit Tests for All Services
+  - [ ] Test all business logic with valid/invalid inputs
+  - [ ] Test validation rules and constraints
+  - [ ] Test error handling and edge cases
+  - [ ] Target >80% code coverage
+  - [ ] All tests pass: `npm run test`
+
+- [ ] Integration Tests for All Routes
+  - [ ] Test all CRUD operations (create, read, update, delete)
+  - [ ] Test pagination and filtering
+  - [ ] Test authorization checks
+  - [ ] Test validation errors return 400
+  - [ ] Test authentication errors return 401
+  - [ ] All tests pass: `npm run test`
+
+- [ ] E2E Tests for Frontend Integration
+  - [ ] Test frontend can create/read/update/delete items
+  - [ ] Test data persists correctly
+  - [ ] Test error messages display properly
+  - [ ] All tests pass: `npm run test:e2e`
+
+- [ ] Manual Testing
+  - [ ] Run all tests: `npm run test`
+  - [ ] Verify TypeScript: `npm run type-check`
+  - [ ] Verify linting: `npm run lint`
+  - [ ] Test in browser with dev server
+  - [ ] Verify no console errors
+
 **Status: Phase 5 Complete** ✅
 
 ---
@@ -1089,6 +1270,38 @@ This is a comprehensive implementation plan for the entire Dwello property manag
 
 - [ ] Integration tests with mocked Ollama (5 tests)
 
+### 6.X Verification: Unit Tests & E2E Tests
+
+- [ ] Unit Tests for Invoice Service
+  - [ ] Test invoice CRUD operations
+  - [ ] Test Swiss cost validation
+  - [ ] Test cost categorization
+  - [ ] Target >80% code coverage
+  - [ ] All tests pass: `npm run test`
+
+- [ ] Unit Tests for LLM Integration
+  - [ ] Test LLM service with mocked Ollama
+  - [ ] Test categorization accuracy
+  - [ ] Test fallback handling
+  - [ ] All tests pass: `npm run test`
+
+- [ ] Integration Tests for Invoice Routes
+  - [ ] Test invoice CRUD endpoints
+  - [ ] Test automatic categorization
+  - [ ] Test manual override
+  - [ ] All tests pass: `npm run test`
+
+- [ ] E2E Tests for Invoice Workflow
+  - [ ] Test creating invoice and categorization
+  - [ ] Test editing invoice
+  - [ ] Test LLM suggestions appear
+  - [ ] All tests pass: `npm run test:e2e`
+
+- [ ] Manual Testing
+  - [ ] Run all tests: `npm run test`
+  - [ ] Verify Ollama connectivity (if enabled)
+  - [ ] Test in browser with dev server
+
 **Status: Phase 6 Complete** ✅
 
 ---
@@ -1174,6 +1387,23 @@ This is a comprehensive implementation plan for the entire Dwello property manag
 - [ ] Integration tests for routes (10+ tests)
   - [ ] Distribution key CRUD (8)
   - [ ] Formula testing endpoint (2)
+
+### 7.X Verification: Unit Tests & E2E Tests
+
+- [ ] Unit Tests for Distribution Key Service
+  - [ ] Test formula validation and parsing
+  - [ ] Test variable substitution
+  - [ ] Target >80% code coverage
+  - [ ] All tests pass: `npm run test`
+
+- [ ] Integration Tests for Routes
+  - [ ] Test CRUD operations
+  - [ ] Test formula evaluation
+  - [ ] All tests pass: `npm run test`
+
+- [ ] Manual Testing
+  - [ ] Run all tests: `npm run test`
+  - [ ] Test formula editor in browser
 
 **Status: Phase 7 Complete** ✅
 
@@ -1365,6 +1595,23 @@ This is a comprehensive implementation plan for the entire Dwello property manag
   - [ ] Scenario 5: Multiple buildings, mixed scenarios
   - [ ] Verify each scenario produces correct results
 
+### 8.X Verification: Unit Tests & E2E Tests
+
+- [ ] Unit Tests for Prorating Logic
+  - [ ] Test each prorating scenario
+  - [ ] Test edge cases (single day, full year, no tenants)
+  - [ ] Target >85% code coverage
+  - [ ] All tests pass: `npm run test`
+
+- [ ] Integration Tests for Statement Routes
+  - [ ] Test statement generation
+  - [ ] Test multiple scenarios
+  - [ ] All tests pass: `npm run test`
+
+- [ ] Manual Testing
+  - [ ] Run all tests: `npm run test`
+  - [ ] Verify calculations manually for test cases
+
 **Status: Phase 8 Complete** ✅
 
 ---
@@ -1470,6 +1717,29 @@ This is a comprehensive implementation plan for the entire Dwello property manag
   - [ ] Verify formatting
   - [ ] Verify QR code readability
   - [ ] Verify all data accurate
+
+### 9.X Verification: Unit Tests & E2E Tests
+
+- [ ] Unit Tests for PDF Generation
+  - [ ] Test PDF creation with valid data
+  - [ ] Test multi-language support
+  - [ ] Test QR-bill generation
+  - [ ] Target >80% code coverage
+  - [ ] All tests pass: `npm run test`
+
+- [ ] Integration Tests for PDF Routes
+  - [ ] Test PDF generation endpoint
+  - [ ] Test PDF retrieval and storage
+  - [ ] All tests pass: `npm run test`
+
+- [ ] E2E Tests for PDF Workflow
+  - [ ] Test generating and downloading PDFs
+  - [ ] All tests pass: `npm run test:e2e`
+
+- [ ] Manual Testing
+  - [ ] Run all tests: `npm run test`
+  - [ ] Generate PDFs for all scenarios
+  - [ ] Verify QR codes scan correctly
 
 **Status: Phase 9 Complete** ✅
 
@@ -1632,6 +1902,27 @@ This is a comprehensive implementation plan for the entire Dwello property manag
   - [ ] Delete building (with confirmation) (1)
   - [ ] Contract history view (1)
 
+### 10.X Verification: Unit Tests & E2E Tests
+
+- [ ] Component Tests
+  - [ ] Test all pages render correctly
+  - [ ] Test form submissions
+  - [ ] Test validation messages
+  - [ ] Target >80% code coverage
+  - [ ] All tests pass: `npm run test`
+
+- [ ] E2E Tests for Management Workflows
+  - [ ] Test building CRUD workflows
+  - [ ] Test apartment management workflows
+  - [ ] Test tenant management workflows
+  - [ ] Test contract management workflows
+  - [ ] All tests pass: `npm run test:e2e`
+
+- [ ] Manual Testing
+  - [ ] Run all tests: `npm run test`
+  - [ ] Test UI/UX in browser
+  - [ ] Test responsive design
+
 **Status: Phase 10 Complete** ✅
 
 ---
@@ -1717,6 +2008,24 @@ This is a comprehensive implementation plan for the entire Dwello property manag
   - [ ] Filter invoices (1)
   - [ ] View invoice details (1)
   - [ ] Re-categorize invoice (1)
+
+### 11.X Verification: Unit Tests & E2E Tests
+
+- [ ] Component Tests for Invoice Pages
+  - [ ] Test form validation
+  - [ ] Test API integration
+  - [ ] Target >75% code coverage
+  - [ ] All tests pass: `npm run test`
+
+- [ ] E2E Tests for Invoice Workflows
+  - [ ] Test create, read, update, delete workflows
+  - [ ] Test LLM categorization display
+  - [ ] Test filtering and sorting
+  - [ ] All tests pass: `npm run test:e2e`
+
+- [ ] Manual Testing
+  - [ ] Run all tests: `npm run test`
+  - [ ] Test in browser with dev server
 
 **Status: Phase 11 Complete** ✅
 
@@ -1804,6 +2113,24 @@ This is a comprehensive implementation plan for the entire Dwello property manag
   - [ ] Test formula (1)
   - [ ] Edit custom profile (1)
   - [ ] Edit custom key (1)
+
+### 12.X Verification: Unit Tests & E2E Tests
+
+- [ ] Component Tests for Config Pages
+  - [ ] Test form validation
+  - [ ] Test formula editor
+  - [ ] Target >75% code coverage
+  - [ ] All tests pass: `npm run test`
+
+- [ ] E2E Tests for Configuration Workflows
+  - [ ] Test config updates
+  - [ ] Test heating profile management
+  - [ ] Test distribution key management
+  - [ ] All tests pass: `npm run test:e2e`
+
+- [ ] Manual Testing
+  - [ ] Run all tests: `npm run test`
+  - [ ] Test in browser
 
 **Status: Phase 12 Complete** ✅
 
@@ -1910,6 +2237,24 @@ This is a comprehensive implementation plan for the entire Dwello property manag
   - [ ] Statement with mid-year move (1)
   - [ ] Statement with vacancy (1)
 
+### 13.X Verification: Unit Tests & E2E Tests
+
+- [ ] Component Tests for Statement Pages
+  - [ ] Test PDF download
+  - [ ] Test statement creation
+  - [ ] Target >75% code coverage
+  - [ ] All tests pass: `npm run test`
+
+- [ ] E2E Tests for Statement Workflows
+  - [ ] Test complete statement workflow
+  - [ ] Test payment marking
+  - [ ] Test PDF generation and download
+  - [ ] All tests pass: `npm run test:e2e`
+
+- [ ] Manual Testing
+  - [ ] Run all tests: `npm run test`
+  - [ ] Test full workflow in browser
+
 **Status: Phase 13 Complete** ✅
 
 ---
@@ -1966,6 +2311,24 @@ This is a comprehensive implementation plan for the entire Dwello property manag
   - [ ] Activity feed shows recent items (1)
   - [ ] Occupancy chart displays (1)
   - [ ] Quick action buttons work (1)
+
+### 14.X Verification: Unit Tests & E2E Tests
+
+- [ ] Component Tests for Dashboard
+  - [ ] Test charts render
+  - [ ] Test statistics calculate correctly
+  - [ ] Target >75% code coverage
+  - [ ] All tests pass: `npm run test`
+
+- [ ] E2E Tests for Dashboard
+  - [ ] Test dashboard loads
+  - [ ] Test all widgets display
+  - [ ] Test navigation from dashboard
+  - [ ] All tests pass: `npm run test:e2e`
+
+- [ ] Manual Testing
+  - [ ] Run all tests: `npm run test`
+  - [ ] Test in browser
 
 **Status: Phase 14 Complete** ✅
 
@@ -2069,6 +2432,22 @@ This is a comprehensive implementation plan for the entire Dwello property manag
   - [ ] Edge latest - all features (1 test)
   - [ ] Mobile Safari - responsive (1 test)
 
+### 15.X Verification: Unit Tests & E2E Tests
+
+- [ ] Full Integration Test Suite
+  - [ ] All E2E tests covering complete workflows
+  - [ ] Cross-browser testing (Chrome, Firefox, Safari)
+  - [ ] All tests pass: `npm run test:e2e`
+
+- [ ] Load Testing
+  - [ ] Test with 50+ apartments
+  - [ ] Test with 100+ invoices
+  - [ ] Verify performance targets met
+
+- [ ] Manual Testing
+  - [ ] Test on real devices
+  - [ ] Test all major workflows end-to-end
+
 **Status: Phase 15 Complete** ✅
 
 ---
@@ -2144,6 +2523,18 @@ This is a comprehensive implementation plan for the entire Dwello property manag
   - [ ] Run `npm run test`
   - [ ] All tests pass with test database
   - [ ] Coverage reports generated
+
+### 16.X Verification: Unit Tests & E2E Tests
+
+- [ ] Configuration Validation
+  - [ ] Verify all environment variables documented
+  - [ ] Test development environment setup
+  - [ ] Test production environment template
+  - [ ] All configurations load correctly
+
+- [ ] Manual Testing
+  - [ ] Run all tests: `npm run test`
+  - [ ] Verify environment files work correctly
 
 **Status: Phase 16 Complete** ✅
 
@@ -2237,6 +2628,24 @@ This is a comprehensive implementation plan for the entire Dwello property manag
   - [ ] Connection strings
   - [ ] Credentials
   - [ ] Backup procedures
+
+### 17.X Verification: Unit Tests & E2E Tests
+
+- [ ] Docker Build & Run Tests
+  - [ ] Build Docker images successfully
+  - [ ] Run containers and verify they start
+  - [ ] Test services communicate correctly
+  - [ ] Verify data persistence
+
+- [ ] Docker Compose Tests
+  - [ ] Bring up full stack: `docker-compose up`
+  - [ ] Verify all services are healthy
+  - [ ] Test API endpoints work
+  - [ ] Bring down and verify cleanup
+
+- [ ] Manual Testing
+  - [ ] Build and run locally
+  - [ ] Test complete system end-to-end
 
 **Status: Phase 17 Complete** ✅
 
@@ -2339,6 +2748,19 @@ This is a comprehensive implementation plan for the entire Dwello property manag
   - [ ] Deployment
   - [ ] Contributing
   - [ ] License
+
+### 18.X Verification: Unit Tests & E2E Tests
+
+- [ ] Documentation Validation
+  - [ ] All links work
+  - [ ] Code examples are correct
+  - [ ] README instructions work
+  - [ ] All tests still pass: `npm run test`
+
+- [ ] Manual Testing
+  - [ ] Follow README instructions
+  - [ ] Run project from scratch
+  - [ ] Verify all docs are accurate
 
 **Status: Phase 18 Complete** ✅
 
@@ -2479,6 +2901,26 @@ This is a comprehensive implementation plan for the entire Dwello property manag
   - [ ] Security verified
   - [ ] Documentation complete
 
+### 19.X Verification: All Tests Complete
+
+- [ ] Full Test Suite
+  - [ ] Unit Tests: `npm run test` - All pass
+  - [ ] E2E Tests: `npm run test:e2e` - All pass
+  - [ ] Integration Tests: All pass
+  - [ ] Load/Performance Tests: Targets met
+  - [ ] Manual QA: 57+ test cases passed
+
+- [ ] Quality Gates
+  - [ ] Code Coverage: >80% for critical paths
+  - [ ] TypeScript: No errors
+  - [ ] Linting: No warnings
+  - [ ] Security: No vulnerabilities
+
+- [ ] Manual Testing
+  - [ ] Run all tests: `npm run test && npm run test:e2e`
+  - [ ] Complete full manual testing checklist
+  - [ ] Get stakeholder sign-off
+
 **Status: Phase 19 Complete** ✅
 
 ---
@@ -2575,6 +3017,26 @@ This is a comprehensive implementation plan for the entire Dwello property manag
   - [ ] Clean commit history (1)
   - [ ] Create release branch (1)
 
+### 20.X Verification: Final Quality Check
+
+- [ ] Final Test Suite Run
+  - [ ] All unit tests pass: `npm run test`
+  - [ ] All E2E tests pass: `npm run test:e2e`
+  - [ ] No TypeScript errors: `npm run type-check`
+  - [ ] No linting issues: `npm run lint`
+  - [ ] Coverage reports reviewed
+
+- [ ] Code Quality Review
+  - [ ] All linting issues fixed
+  - [ ] All deprecated warnings removed
+  - [ ] Performance profiling complete
+  - [ ] Security scan passed
+
+- [ ] Final Manual Testing
+  - [ ] Production-like setup testing
+  - [ ] Performance validation
+  - [ ] Data integrity checks
+
 **Status: Phase 20 Complete** ✅
 
 ---
@@ -2665,6 +3127,27 @@ This is a comprehensive implementation plan for the entire Dwello property manag
   - [ ] Monitor for errors (1)
   - [ ] Monitor performance (1)
   - [ ] Address any issues immediately (1)
+
+### 21.X Verification: Go-Live Readiness
+
+- [ ] Pre-Launch Verification
+  - [ ] All tests passing on production-like environment
+  - [ ] All integrations verified (Ollama, OpenPLZ, etc.)
+  - [ ] Backup/recovery tested and working
+  - [ ] Monitoring and logging active
+  - [ ] Documentation complete and accurate
+
+- [ ] Launch Day Testing
+  - [ ] Smoke tests run successfully
+  - [ ] Critical workflows tested
+  - [ ] Data integrity verified
+  - [ ] Performance acceptable
+
+- [ ] Post-Launch Validation
+  - [ ] Monitor logs for errors
+  - [ ] Monitor performance metrics
+  - [ ] User feedback collection
+  - [ ] Issue response protocol active
 
 **Status: Phase 21 Complete - System Launched! 🚀**
 

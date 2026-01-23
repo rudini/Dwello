@@ -744,6 +744,54 @@ When updating implementation_plan.md, use this format for the note:
 - **Debugging:** Easy reference if issues arise later
 - **Handoff:** Clear state for other team members
 
+### Verification Steps: Unit Tests & E2E Tests
+
+**EVERY phase MUST include verification testing before marking complete:**
+
+1. **Unit Tests**
+   - Write unit tests for all new functions/utilities
+   - Target >80% code coverage for critical paths
+   - Run: `npm run test`
+   - All tests must PASS ✅
+   - Tests should verify:
+     - Normal operation (happy path)
+     - Edge cases and boundary conditions
+     - Error handling and validation
+     - Return types and data structures
+
+2. **E2E Tests**
+   - Write E2E tests for all user workflows
+   - Cover the key user journeys for the phase
+   - Run: `npm run test:e2e`
+   - All tests must PASS ✅
+   - E2E tests should verify:
+     - Complete feature workflows from start to finish
+     - Integration between components
+     - Navigation and page transitions
+     - Data persistence and retrieval
+
+3. **Manual Testing Checklist**
+   - Test locally in dev server
+   - Verify all UI elements render correctly
+   - Test keyboard navigation and accessibility
+   - Test on different screen sizes (responsive)
+   - Check console for any errors or warnings
+   - Verify no TypeScript errors: `npm run type-check`
+   - Verify no linting issues: `npm run lint`
+
+4. **Documentation of Tests**
+   - Create test files in `tests/unit/` and `tests/e2e/`
+   - Add test documentation in phase completion notes
+   - Include test coverage statistics
+   - Note any known limitations or skipped tests
+
+**⚠️ CRITICAL:** Do NOT mark a phase as complete unless:
+- ✅ All unit tests pass
+- ✅ All E2E tests pass
+- ✅ No TypeScript errors
+- ✅ No ESLint warnings
+- ✅ Manual testing checklist complete
+
 ### Progress Summary Update
 
 After completing a phase or major section, update the table:
