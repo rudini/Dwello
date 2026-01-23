@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+
+<html class="light" lang="de"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Immobilienverwaltung</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#135bec",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#101622",
+                        "surface-dark": "#1a2230",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Manrope', sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .icon-filled {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-[#111318] dark:text-white min-h-screen flex overflow-hidden">
+<!-- Sidebar -->
+<aside class="w-64 bg-white dark:bg-surface-dark border-r border-[#dbdfe6] dark:border-gray-800 flex-shrink-0 flex flex-col justify-between h-screen sticky top-0 z-20 hidden lg:flex">
+<div class="flex flex-col gap-4 p-4">
+<!-- User Profile -->
+<div class="flex gap-3 items-center pb-4 border-b border-[#f0f2f4] dark:border-gray-700">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-12 shadow-sm" data-alt="Profile picture of the admin user showing a professional headshot" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAKPMHqSvAWEiRM2ltWGtyJWODwkEcyXnCfXaYB2TC3pyc_FpU_MIxHZ3_bv5MEDy-sdnxXnshQCqbxDLQ1HTtPJDevT6VDzctTG-UlGUcQi23XnFSGNryJ3KE9IO0L0H8Shz4Xzq24XcIx_NCfsQClLd2cAlh14qwSKWpM_YAeCnxgb2qgHAPmPv-wCuj9wNKD16gEcR0Yhd8Wdl_TT3SUnqx-_nEPg5n11uEO4ZEhZSEizPyXsgFhHBkhnB_8HIHclsTLI4VyR5k");'></div>
+<div class="flex flex-col">
+<h1 class="text-[#111318] dark:text-white text-base font-bold leading-normal">Lukas Weber</h1>
+<p class="text-[#616f89] dark:text-gray-400 text-xs font-normal leading-normal">Immobilienverwalter</p>
+</div>
+</div>
+<!-- Navigation Links -->
+<div class="flex flex-col gap-2">
+<a class="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-[#f0f2f4] dark:hover:bg-gray-800 transition-colors group" href="#">
+<span class="material-symbols-outlined text-[#616f89] dark:text-gray-400 group-hover:text-primary transition-colors">dashboard</span>
+<p class="text-[#111318] dark:text-gray-200 text-sm font-medium leading-normal">Dashboard</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-3 rounded-lg bg-primary/10 border-l-4 border-primary" href="#">
+<span class="material-symbols-outlined text-primary icon-filled">apartment</span>
+<p class="text-primary text-sm font-bold leading-normal">Immobilien</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-[#f0f2f4] dark:hover:bg-gray-800 transition-colors group" href="#">
+<span class="material-symbols-outlined text-[#616f89] dark:text-gray-400 group-hover:text-primary transition-colors">groups</span>
+<p class="text-[#111318] dark:text-gray-200 text-sm font-medium leading-normal">Mieter</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-[#f0f2f4] dark:hover:bg-gray-800 transition-colors group" href="#">
+<span class="material-symbols-outlined text-[#616f89] dark:text-gray-400 group-hover:text-primary transition-colors">payments</span>
+<p class="text-[#111318] dark:text-gray-200 text-sm font-medium leading-normal">Finanzen</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-[#f0f2f4] dark:hover:bg-gray-800 transition-colors group" href="#">
+<span class="material-symbols-outlined text-[#616f89] dark:text-gray-400 group-hover:text-primary transition-colors">description</span>
+<p class="text-[#111318] dark:text-gray-200 text-sm font-medium leading-normal">Berichte</p>
+</a>
+</div>
+</div>
+<div class="p-4">
+<a class="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-[#f0f2f4] dark:hover:bg-gray-800 transition-colors group" href="#">
+<span class="material-symbols-outlined text-[#616f89] dark:text-gray-400 group-hover:text-primary transition-colors">settings</span>
+<p class="text-[#111318] dark:text-gray-200 text-sm font-medium leading-normal">Einstellungen</p>
+</a>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 h-screen overflow-y-auto bg-background-light dark:bg-background-dark">
+<div class="max-w-[1200px] mx-auto p-6 md:p-8 flex flex-col gap-8">
+<!-- Page Heading -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+<div class="flex flex-col gap-1">
+<h2 class="text-[#111318] dark:text-white text-3xl md:text-4xl font-black leading-tight tracking-[-0.033em]">Meine Immobilien</h2>
+<p class="text-[#616f89] dark:text-gray-400 text-base font-normal">Verwalten Sie Ihre Gebäude und Wohneinheiten an einem Ort.</p>
+</div>
+<button class="flex items-center justify-center gap-2 rounded-xl bg-primary hover:bg-blue-700 transition-colors text-white h-12 px-6 shadow-lg shadow-blue-500/30">
+<span class="material-symbols-outlined text-[20px]">add</span>
+<span class="text-sm font-bold tracking-[0.015em]">Immobilie hinzufügen</span>
+</button>
+</div>
+<!-- Stats Row -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+<div class="flex flex-col gap-2 rounded-xl p-6 bg-white dark:bg-surface-dark border border-[#dbdfe6] dark:border-gray-700 shadow-sm">
+<div class="flex justify-between items-start">
+<p class="text-[#616f89] dark:text-gray-400 text-sm font-medium uppercase tracking-wider">Gebäude Gesamt</p>
+<span class="material-symbols-outlined text-primary bg-primary/10 p-2 rounded-lg">domain</span>
+</div>
+<div class="flex items-end gap-3 mt-2">
+<p class="text-[#111318] dark:text-white text-3xl font-bold leading-none">12</p>
+<p class="text-[#07883b] text-sm font-medium bg-green-100 dark:bg-green-900/30 px-2 py-0.5 rounded text-center">+2%</p>
+</div>
+</div>
+<div class="flex flex-col gap-2 rounded-xl p-6 bg-white dark:bg-surface-dark border border-[#dbdfe6] dark:border-gray-700 shadow-sm">
+<div class="flex justify-between items-start">
+<p class="text-[#616f89] dark:text-gray-400 text-sm font-medium uppercase tracking-wider">Wohnungen Gesamt</p>
+<span class="material-symbols-outlined text-primary bg-primary/10 p-2 rounded-lg">meeting_room</span>
+</div>
+<div class="flex items-end gap-3 mt-2">
+<p class="text-[#111318] dark:text-white text-3xl font-bold leading-none">148</p>
+<p class="text-[#07883b] text-sm font-medium bg-green-100 dark:bg-green-900/30 px-2 py-0.5 rounded text-center">+12%</p>
+</div>
+</div>
+<div class="flex flex-col gap-2 rounded-xl p-6 bg-white dark:bg-surface-dark border border-[#dbdfe6] dark:border-gray-700 shadow-sm">
+<div class="flex justify-between items-start">
+<p class="text-[#616f89] dark:text-gray-400 text-sm font-medium uppercase tracking-wider">Leerstandsquote</p>
+<span class="material-symbols-outlined text-[#e73908] bg-red-50 dark:bg-red-900/20 p-2 rounded-lg">warning</span>
+</div>
+<div class="flex items-end gap-3 mt-2">
+<p class="text-[#111318] dark:text-white text-3xl font-bold leading-none">4.5%</p>
+<p class="text-[#e73908] text-sm font-medium bg-red-100 dark:bg-red-900/30 px-2 py-0.5 rounded text-center">-1.5%</p>
+</div>
+</div>
+</div>
+<!-- Search and Filter Bar -->
+<div class="flex flex-col lg:flex-row gap-4 bg-white dark:bg-surface-dark p-4 rounded-xl shadow-sm border border-[#dbdfe6] dark:border-gray-700 items-center">
+<!-- Search -->
+<label class="flex items-center w-full lg:w-96 h-11 bg-[#f0f2f4] dark:bg-gray-800 rounded-lg overflow-hidden px-4 gap-3 focus-within:ring-2 focus-within:ring-primary/50 transition-all">
+<span class="material-symbols-outlined text-[#616f89]">search</span>
+<input class="w-full bg-transparent border-none text-sm text-[#111318] dark:text-white placeholder:text-[#616f89] focus:ring-0 p-0" placeholder="Suche nach Adresse, Stadt oder Gebäudename..." type="text"/>
+</label>
+<div class="h-8 w-[1px] bg-[#dbdfe6] dark:bg-gray-700 hidden lg:block"></div>
+<!-- Chips -->
+<div class="flex gap-2 overflow-x-auto w-full pb-1 lg:pb-0 scrollbar-hide">
+<button class="whitespace-nowrap flex h-9 items-center justify-center px-4 rounded-lg bg-[#111318] dark:bg-white text-white dark:text-black text-sm font-medium transition-colors">
+                        Alle Objekte
+                    </button>
+<button class="whitespace-nowrap flex h-9 items-center justify-center px-4 rounded-lg bg-[#f0f2f4] dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-[#111318] dark:text-gray-300 text-sm font-medium transition-colors">
+                        Voll vermietet
+                    </button>
+<button class="whitespace-nowrap flex h-9 items-center justify-center px-4 rounded-lg bg-[#f0f2f4] dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-[#111318] dark:text-gray-300 text-sm font-medium transition-colors">
+                        Leerstand
+                    </button>
+<button class="whitespace-nowrap flex h-9 items-center justify-center px-4 rounded-lg bg-[#f0f2f4] dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-[#111318] dark:text-gray-300 text-sm font-medium transition-colors">
+                        Wartung erforderlich
+                    </button>
+</div>
+</div>
+<!-- Properties Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 pb-8">
+<!-- Card 1 -->
+<div class="group flex flex-col bg-white dark:bg-surface-dark rounded-xl border border-[#dbdfe6] dark:border-gray-700 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
+<div class="relative h-48 w-full overflow-hidden">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105" data-alt="Modern geometric map illustration with location pins" data-location="Map" style="background-image: url('https://placeholder.pics/svg/300');">
+</div>
+<div class="absolute top-3 right-3 bg-white/90 dark:bg-black/80 backdrop-blur-sm px-2 py-1 rounded-md text-xs font-bold text-[#111318] dark:text-white shadow-sm flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-green-500"></span> Aktiv
+                        </div>
+<!-- Mini Map Overlay Button -->
+<button class="absolute bottom-3 right-3 bg-white dark:bg-surface-dark p-2 rounded-full shadow-md text-primary hover:bg-primary hover:text-white transition-colors">
+<span class="material-symbols-outlined text-[20px]">map</span>
+</button>
+</div>
+<div class="p-5 flex flex-col gap-4 flex-1">
+<div class="flex justify-between items-start">
+<div>
+<h3 class="text-lg font-bold text-[#111318] dark:text-white mb-1 group-hover:text-primary transition-colors">Residenz am Park</h3>
+<div class="flex items-center gap-1 text-[#616f89] dark:text-gray-400 text-sm">
+<span class="material-symbols-outlined text-[16px]">location_on</span>
+<span>Musterstraße 45, 10115 Berlin</span>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-3 py-3 border-y border-[#f0f2f4] dark:border-gray-700">
+<div class="flex flex-col">
+<span class="text-xs text-[#616f89] dark:text-gray-500 font-medium uppercase">Wohnungen</span>
+<span class="text-base font-bold text-[#111318] dark:text-white">12 Einheiten</span>
+</div>
+<div class="flex flex-col">
+<span class="text-xs text-[#616f89] dark:text-gray-500 font-medium uppercase">Leerstand</span>
+<span class="text-base font-bold text-green-600">0 (0%)</span>
+</div>
+</div>
+<div class="flex gap-2 mt-auto pt-1">
+<button class="flex-1 h-9 rounded-lg border border-[#dbdfe6] dark:border-gray-600 bg-transparent text-sm font-semibold text-[#111318] dark:text-white hover:bg-[#f0f2f4] dark:hover:bg-gray-700 transition-colors flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+                                Bearbeiten
+                            </button>
+<button aria-label="Löschen" class="h-9 w-9 rounded-lg border border-[#dbdfe6] dark:border-gray-600 bg-transparent text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-200 transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="group flex flex-col bg-white dark:bg-surface-dark rounded-xl border border-[#dbdfe6] dark:border-gray-700 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
+<div class="relative h-48 w-full overflow-hidden">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105" data-alt="Aerial view of city block with map pins overlay" data-location="Map" style="background-image: url('https://placeholder.pics/svg/300');">
+</div>
+<div class="absolute top-3 right-3 bg-white/90 dark:bg-black/80 backdrop-blur-sm px-2 py-1 rounded-md text-xs font-bold text-[#111318] dark:text-white shadow-sm flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-yellow-500"></span> Wartung
+                        </div>
+<button class="absolute bottom-3 right-3 bg-white dark:bg-surface-dark p-2 rounded-full shadow-md text-primary hover:bg-primary hover:text-white transition-colors">
+<span class="material-symbols-outlined text-[20px]">map</span>
+</button>
+</div>
+<div class="p-5 flex flex-col gap-4 flex-1">
+<div class="flex justify-between items-start">
+<div>
+<h3 class="text-lg font-bold text-[#111318] dark:text-white mb-1 group-hover:text-primary transition-colors">HafenCity Loft</h3>
+<div class="flex items-center gap-1 text-[#616f89] dark:text-gray-400 text-sm">
+<span class="material-symbols-outlined text-[16px]">location_on</span>
+<span>Am Sandtorkai 22, 20457 Hamburg</span>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-3 py-3 border-y border-[#f0f2f4] dark:border-gray-700">
+<div class="flex flex-col">
+<span class="text-xs text-[#616f89] dark:text-gray-500 font-medium uppercase">Wohnungen</span>
+<span class="text-base font-bold text-[#111318] dark:text-white">8 Einheiten</span>
+</div>
+<div class="flex flex-col">
+<span class="text-xs text-[#616f89] dark:text-gray-500 font-medium uppercase">Leerstand</span>
+<span class="text-base font-bold text-yellow-600">1 (12%)</span>
+</div>
+</div>
+<div class="flex gap-2 mt-auto pt-1">
+<button class="flex-1 h-9 rounded-lg border border-[#dbdfe6] dark:border-gray-600 bg-transparent text-sm font-semibold text-[#111318] dark:text-white hover:bg-[#f0f2f4] dark:hover:bg-gray-700 transition-colors flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+                                Bearbeiten
+                            </button>
+<button aria-label="Löschen" class="h-9 w-9 rounded-lg border border-[#dbdfe6] dark:border-gray-600 bg-transparent text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-200 transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="group flex flex-col bg-white dark:bg-surface-dark rounded-xl border border-[#dbdfe6] dark:border-gray-700 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
+<div class="relative h-48 w-full overflow-hidden">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105" data-alt="Digital map interface showing street grid and building location" data-location="Map" style="background-image: url('https://placeholder.pics/svg/300');">
+</div>
+<div class="absolute top-3 right-3 bg-white/90 dark:bg-black/80 backdrop-blur-sm px-2 py-1 rounded-md text-xs font-bold text-[#111318] dark:text-white shadow-sm flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-green-500"></span> Aktiv
+                        </div>
+<button class="absolute bottom-3 right-3 bg-white dark:bg-surface-dark p-2 rounded-full shadow-md text-primary hover:bg-primary hover:text-white transition-colors">
+<span class="material-symbols-outlined text-[20px]">map</span>
+</button>
+</div>
+<div class="p-5 flex flex-col gap-4 flex-1">
+<div class="flex justify-between items-start">
+<div>
+<h3 class="text-lg font-bold text-[#111318] dark:text-white mb-1 group-hover:text-primary transition-colors">Sonnenallee Komplex</h3>
+<div class="flex items-center gap-1 text-[#616f89] dark:text-gray-400 text-sm">
+<span class="material-symbols-outlined text-[16px]">location_on</span>
+<span>Sonnenallee 154, 12059 Berlin</span>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-3 py-3 border-y border-[#f0f2f4] dark:border-gray-700">
+<div class="flex flex-col">
+<span class="text-xs text-[#616f89] dark:text-gray-500 font-medium uppercase">Wohnungen</span>
+<span class="text-base font-bold text-[#111318] dark:text-white">24 Einheiten</span>
+</div>
+<div class="flex flex-col">
+<span class="text-xs text-[#616f89] dark:text-gray-500 font-medium uppercase">Leerstand</span>
+<span class="text-base font-bold text-green-600">0 (0%)</span>
+</div>
+</div>
+<div class="flex gap-2 mt-auto pt-1">
+<button class="flex-1 h-9 rounded-lg border border-[#dbdfe6] dark:border-gray-600 bg-transparent text-sm font-semibold text-[#111318] dark:text-white hover:bg-[#f0f2f4] dark:hover:bg-gray-700 transition-colors flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+                                Bearbeiten
+                            </button>
+<button aria-label="Löschen" class="h-9 w-9 rounded-lg border border-[#dbdfe6] dark:border-gray-600 bg-transparent text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-200 transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Card 4 (With Vacancy) -->
+<div class="group flex flex-col bg-white dark:bg-surface-dark rounded-xl border border-[#dbdfe6] dark:border-gray-700 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
+<div class="relative h-48 w-full overflow-hidden">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105" data-alt="Satellite map view of urban area" data-location="Map" style="background-image: url('https://placeholder.pics/svg/300');">
+</div>
+<div class="absolute top-3 right-3 bg-white/90 dark:bg-black/80 backdrop-blur-sm px-2 py-1 rounded-md text-xs font-bold text-[#111318] dark:text-white shadow-sm flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-red-500"></span> Leerstand
+                        </div>
+<button class="absolute bottom-3 right-3 bg-white dark:bg-surface-dark p-2 rounded-full shadow-md text-primary hover:bg-primary hover:text-white transition-colors">
+<span class="material-symbols-outlined text-[20px]">map</span>
+</button>
+</div>
+<div class="p-5 flex flex-col gap-4 flex-1">
+<div class="flex justify-between items-start">
+<div>
+<h3 class="text-lg font-bold text-[#111318] dark:text-white mb-1 group-hover:text-primary transition-colors">Westend Tower</h3>
+<div class="flex items-center gap-1 text-[#616f89] dark:text-gray-400 text-sm">
+<span class="material-symbols-outlined text-[16px]">location_on</span>
+<span>Westendstraße 1, 60325 Frankfurt</span>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-3 py-3 border-y border-[#f0f2f4] dark:border-gray-700">
+<div class="flex flex-col">
+<span class="text-xs text-[#616f89] dark:text-gray-500 font-medium uppercase">Wohnungen</span>
+<span class="text-base font-bold text-[#111318] dark:text-white">56 Einheiten</span>
+</div>
+<div class="flex flex-col">
+<span class="text-xs text-[#616f89] dark:text-gray-500 font-medium uppercase">Leerstand</span>
+<span class="text-base font-bold text-[#e73908]">4 (7.1%)</span>
+</div>
+</div>
+<div class="flex gap-2 mt-auto pt-1">
+<button class="flex-1 h-9 rounded-lg border border-[#dbdfe6] dark:border-gray-600 bg-transparent text-sm font-semibold text-[#111318] dark:text-white hover:bg-[#f0f2f4] dark:hover:bg-gray-700 transition-colors flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+                                Bearbeiten
+                            </button>
+<button aria-label="Löschen" class="h-9 w-9 rounded-lg border border-[#dbdfe6] dark:border-gray-600 bg-transparent text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-200 transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Add New Card Placeholder -->
+<div class="group flex flex-col items-center justify-center bg-[#f0f2f4] dark:bg-surface-dark/50 rounded-xl border-2 border-dashed border-[#dbdfe6] dark:border-gray-700 hover:border-primary/50 dark:hover:border-primary/50 transition-all cursor-pointer h-full min-h-[380px]">
+<div class="bg-white dark:bg-gray-800 p-4 rounded-full mb-4 shadow-sm group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-primary text-3xl">add_business</span>
+</div>
+<h3 class="text-lg font-bold text-[#111318] dark:text-white">Neue Immobilie</h3>
+<p class="text-[#616f89] dark:text-gray-400 text-sm mt-1">Fügen Sie ein weiteres Gebäude hinzu</p>
+</div>
+</div>
+</div>
+</main>
+</body></html>
