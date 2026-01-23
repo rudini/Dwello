@@ -712,9 +712,14 @@ git log -5 --oneline # Last 5 commits
 
 1. ✅ **Complete the task fully** and verify it works
 2. 📝 **Update `implementation_plan.md` immediately**
-3. ✔️ **Mark the item as complete** by changing `- [ ]` to `- [x]`
+3. ✔️ **Mark EVERY checkbox as complete** - Change `- [ ]` to `- [x]` for:
+   - The main task item
+   - ALL sub-tasks and checklist items under that task
+   - Update status indicators (✅, 🔄, ⏳, ⚠️)
 4. 💬 **Add a brief note** explaining what was implemented/changed
 5. 🔄 **Update the Progress Summary table** in implementation_plan.md
+
+**⚠️ CRITICAL:** Do NOT leave unchecked boxes in completed tasks. Every sub-item should be marked `[x]` once the task is done.
 
 ### Format for Task Completion Notes
 
