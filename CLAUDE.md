@@ -796,6 +796,51 @@ When you complete a task, also note in the file:
 
 ---
 
+## Recording Learnings After Implementation
+
+### ⚠️ MANDATORY PROCESS FOR DISCOVERIES
+
+**After completing and verifying any significant implementation or bug fix, you MUST:**
+
+1. ✅ **Complete the task fully** and verify it works
+2. 📚 **Record any learnings** in the `# Learnings` section below
+3. 🔍 **Document:** Unexpected behaviors, specific commands that worked, or architectural constraints discovered
+4. 📝 **Keep entries concise** but informative (2-4 sentences per entry)
+5. 🔗 **Link to relevant code** using `file:line` format when applicable
+
+### Format for Learnings Entries
+
+When updating the Learnings section, use this format:
+
+```markdown
+### Discovery Name
+**Date:** YYYY-MM-DD | **Task:** [task name] | **Severity:** Low/Medium/High
+- **What:** Concise description of the learning
+- **Why It Matters:** Impact on future work
+- **Reference:** file:line or issue link
+- **Workaround/Solution:** If it's a constraint or issue
+```
+
+**Example:**
+```markdown
+### Bun Runtime SvelteKit Compatibility Issue
+**Date:** 2026-01-23 | **Task:** Setup SvelteKit + Elysia | **Severity:** Medium
+- **What:** HTTPOnly cookies not set correctly with Bun's response object in certain scenarios
+- **Why It Matters:** Authentication would fail silently in specific edge cases (e.g., after OAuth redirect)
+- **Reference:** src/routes/auth/callback/+server.ts:42
+- **Workaround:** Explicitly call `response.headers.append()` instead of relying on implicit cookie headers
+```
+
+### Why This Matters
+
+- **Debugging:** Future developers can avoid the same pitfalls
+- **Context:** Explains non-obvious code patterns or workarounds
+- **Performance:** Records performance findings and optimization opportunities
+- **Constraints:** Documents architectural limitations discovered during implementation
+- **Knowledge Transfer:** Captures tribal knowledge before it's forgotten
+
+---
+
 ## Session Workflow Checklist
 
 ### Beginning a Session
@@ -987,6 +1032,29 @@ docker-compose exec postgres psql -U dwello -d dwello -f /migrations/001_initial
 - Verify redirect URL in OAuth provider matches app configuration
 - Check `OAUTH_CLIENT_ID` and `OAUTH_CLIENT_SECRET`
 - Ensure `JWT_SECRET` is set and >32 characters
+
+---
+
+# 📚 Learnings
+
+This section records discoveries, unexpected behaviors, and architectural constraints learned during implementation. Each entry helps future work and serves as a reference for non-obvious decisions in the codebase.
+
+## Template for New Learnings
+
+Use this template when adding new learnings:
+
+```markdown
+### [Discovery Name]
+**Date:** YYYY-MM-DD | **Task:** [task name] | **Severity:** Low/Medium/High
+- **What:** Concise description of what was discovered
+- **Why It Matters:** Impact on current or future work
+- **Reference:** file:line or GitHub issue link
+- **Workaround/Solution:** How to work around or fix this issue
+```
+
+## Entries
+
+*(Learnings will be recorded here as implementation progresses. This section will grow as issues are discovered and architectural patterns emerge.)*
 
 ---
 
