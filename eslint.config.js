@@ -34,6 +34,8 @@ export default [
 		},
 		rules: {
 			...ts.configs.recommended.rules,
+			// Disable no-undef for TypeScript files - TypeScript handles this better
+			'no-undef': 'off',
 			'@typescript-eslint/no-unused-vars': [
 				'error',
 				{ argsIgnorePattern: '^_', varsIgnorePattern: '^_' }
