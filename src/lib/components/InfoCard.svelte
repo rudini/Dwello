@@ -5,15 +5,20 @@
 		icon: string;
 		label: string;
 		value: string | number;
+		valueClass?: string;
 	}
 
-	let { icon, label, value }: Props = $props();
+	let { icon, label, value, valueClass = 'text-text-dark' }: Props = $props();
 </script>
 
-<div class="flex flex-col gap-1">
-	<div class="flex items-center">
-		<Icon name={icon} size={20} class="text-text-secondary" />
+<div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+	<div class="flex items-center gap-3">
+		<div class="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center">
+			<Icon name={icon} size={20} class="text-blue-600" />
+		</div>
+		<div>
+			<p class="text-sm text-gray-500">{label}</p>
+			<p class="text-xl font-bold {valueClass}">{value}</p>
+		</div>
 	</div>
-	<p class="text-xs font-medium text-text-secondary">{label}</p>
-	<p class="text-lg font-bold text-text-dark">{value}</p>
 </div>

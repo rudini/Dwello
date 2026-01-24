@@ -10,14 +10,7 @@
  * - Test logout flow
  */
 
-import { test, expect, type Page, type BrowserContext } from '@playwright/test';
-
-// Helper to create a mock JWT for testing
-function createMockSessionCookie() {
-	// This is a test JWT - in real tests you'd generate a valid one
-	// For E2E, we mock the /auth/me response instead
-	return 'test-session-token';
-}
+import { test, expect, type Page } from '@playwright/test';
 
 // Helper to mock authenticated state
 async function mockAuthenticatedUser(page: Page, user = {

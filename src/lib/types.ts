@@ -1,14 +1,33 @@
 // Building types
 export interface Building {
 	id: string;
+	name?: string;
 	address: string;
-	postal_code: string;
+	postalCode: string;
 	city: string;
+	canton?: string;
 	country?: string;
 	latitude?: number;
 	longitude?: number;
-	created_at?: Date;
-	updated_at?: Date;
+	buildingType?: string;
+	yearBuilt?: number;
+	createdAt?: Date | string;
+	updatedAt?: Date | string;
+}
+
+// Building with apartment statistics
+export interface BuildingWithStats extends Building {
+	apartmentCount: number;
+	occupiedCount: number;
+	vacantCount: number;
+}
+
+// Buildings list response
+export interface BuildingsListData {
+	buildings: BuildingWithStats[];
+	total: number;
+	page: number;
+	pageSize: number;
 }
 
 // Apartment types

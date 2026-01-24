@@ -8,7 +8,7 @@ export const load = (async ({ params }: { params: { id: string } }) => {
 	const building = {
 		id: 'building-001',
 		address: 'Musterstraße 12',
-		postal_code: '8000',
+		postalCode: '8000',
 		city: 'Zürich',
 		country: 'Switzerland'
 	};
