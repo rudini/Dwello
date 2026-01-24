@@ -10,6 +10,7 @@
 	interface Props {
 		tabs: Tab[];
 		activeTab: string;
+		// eslint-disable-next-line no-unused-vars
 		onTabChange: (tabId: string) => void;
 	}
 

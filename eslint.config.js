@@ -4,17 +4,29 @@ import tsParser from '@typescript-eslint/parser';
 import svelte from 'eslint-plugin-svelte';
 import svelteParser from 'svelte-eslint-parser';
 import prettier from 'eslint-config-prettier';
+import globals from 'globals';
 
 export default [
 	js.configs.recommended,
 	{
-		files: ['**/*.ts', '**/*.svelte'],
+		files: ['**/*.ts', '**/*.js'],
 		languageOptions: {
 			parser: tsParser,
 			parserOptions: {
 				ecmaVersion: 2022,
-				sourceType: 'module',
-				extraFileExtensions: ['.svelte']
+				sourceType: 'module'
+			},
+			globals: {
+				...globals.node,
+				...globals.browser,
+				fetch: 'readonly',
+				Request: 'readonly',
+				Response: 'readonly',
+				Headers: 'readonly',
+				URL: 'readonly',
+				URLSearchParams: 'readonly',
+				TextEncoder: 'readonly',
+				TextDecoder: 'readonly'
 			}
 		},
 		plugins: {
@@ -35,6 +47,9 @@ export default [
 			parser: svelteParser,
 			parserOptions: {
 				parser: tsParser
+			},
+			globals: {
+				...globals.browser
 			}
 		},
 		plugins: {
@@ -42,6 +57,22 @@ export default [
 		},
 		rules: {
 			...svelte.configs.recommended.rules
+		}
+	},
+	{
+		files: ['tests/**/*.ts'],
+		languageOptions: {
+			globals: {
+				...globals.node,
+				describe: 'readonly',
+				it: 'readonly',
+				expect: 'readonly',
+				vi: 'readonly',
+				beforeEach: 'readonly',
+				afterEach: 'readonly',
+				beforeAll: 'readonly',
+				afterAll: 'readonly'
+			}
 		}
 	},
 	prettier,
