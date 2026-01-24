@@ -49,10 +49,10 @@
 							<div
 								class="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-medium"
 							>
-								{$user.name.charAt(0).toUpperCase()}
+								{($user.name || $user.email || '?').charAt(0).toUpperCase()}
 							</div>
 						{/if}
-						<span class="hidden md:block text-gray-700">{$user.name}</span>
+						<span class="hidden md:block text-gray-700">{$user.name || $user.email}</span>
 						<svg class="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
 							<path
 								fill-rule="evenodd"
@@ -78,7 +78,7 @@
 						>
 							<div class="py-1">
 								<div class="px-4 py-2 text-sm text-gray-700 border-b border-gray-100">
-									<p class="font-medium">{$user.name}</p>
+									<p class="font-medium">{$user.name || 'User'}</p>
 									<p class="text-gray-500 truncate">{$user.email}</p>
 								</div>
 								<a

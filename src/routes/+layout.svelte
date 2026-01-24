@@ -26,8 +26,8 @@
 		try {
 			const response = await fetch('/auth/me');
 			if (response.ok) {
-				const userData = await response.json();
-				user.set(userData);
+				const data = await response.json();
+				user.set(data.user);
 			} else {
 				// Not authenticated, redirect to login
 				clearStores();

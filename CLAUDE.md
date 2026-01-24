@@ -1137,6 +1137,60 @@ Use this template when adding new learnings:
   ```
 - **Impact:** Any component using Material Symbols must import this CSS file.
 
+### API Response Wrapper Mismatch
+**Date:** 2026-01-24 | **Task:** OAuth Login Testing | **Severity:** Medium
+- **What:** The `/auth/me` endpoint returns `{ user: {...} }` but the layout code was calling `user.set(userData)` instead of `user.set(userData.user)`, causing the store to contain the wrapper object instead of the user data.
+- **Why It Matters:** This caused `$user.name` to be undefined, breaking the Header component with "Cannot read properties of undefined (reading 'charAt')".
+- **Reference:** `src/routes/+layout.svelte:29-30`, `src/lib/components/Header.svelte:52`
+- **Workaround/Solution:** Always destructure API responses correctly:
+  ```javascript
+  // ❌ Wrong - sets the wrapper object
+  const userData = await response.json();
+  user.set(userData);
+
+  // ✅ Correct - sets the actual user object
+  const data = await response.json();
+  user.set(data.user);
+  ```
+- **Impact:** When creating API endpoints that return wrapped objects like `{ user: {...} }` or `{ data: [...] }`, ensure consuming code extracts the inner data.
+
+### Docker Compose and Backend Default Credentials Must Match
+**Date:** 2026-01-24 | **Task:** Database Setup | **Severity:** Medium
+- **What:** The `backend/src/db/connection.ts` has a default DATABASE_URL with password `dwello`, but docker-compose.yml initially used `dwello_password`. This caused "password authentication failed" errors.
+- **Why It Matters:** Development setup fails silently with confusing auth errors if defaults don't match across configuration files.
+- **Reference:** `backend/src/db/connection.ts:11`, `docker-compose.yml:8`
+- **Workaround/Solution:** Keep default credentials consistent across all config files. Use simple defaults for local dev (e.g., `dwello:dwello@localhost:5432/dwello`). Document in `.env.example` that production must override these.
+- **Impact:** Always verify default credentials match when adding new services to Docker Compose.
+
+### Port Conflicts with Multiple Dev Servers
+**Date:** 2026-01-24 | **Task:** Development Environment | **Severity:** Low
+- **What:** When both SvelteKit (Vite) and ElysiaJS try to start, stale processes can hold ports. Vite auto-increments to next available port, which breaks the expected architecture (frontend on 3000, backend on 3001).
+- **Why It Matters:** The BFF proxy expects backend on port 3001. If ports get swapped, API calls fail or route to wrong service.
+- **Reference:** `.env.local:28` (BACKEND_API_URL), `docker-compose.yml`
+- **Workaround/Solution:** Before starting dev servers, kill any stale processes:
+  ```bash
+  killall node bun 2>/dev/null
+  # Then start backend first, frontend second
+  cd backend && bun run dev &
+  npm run dev
+  ```
+- **Impact:** Consider adding a `npm run dev:all` script that handles cleanup and starts both servers in correct order.
+
+### Defensive Coding for User Properties in UI Components
+**Date:** 2026-01-24 | **Task:** OAuth Login Testing | **Severity:** Low
+- **What:** UI components that access user properties like `$user.name` should have fallbacks since OAuth providers may not always return all expected fields.
+- **Why It Matters:** Google returns `name`, but some providers might only return `email`. Components break if they assume all properties exist.
+- **Reference:** `src/lib/components/Header.svelte:52,55,81`
+- **Workaround/Solution:** Always provide fallback chains for user display:
+  ```javascript
+  // Avatar initial
+  {($user.name || $user.email || '?').charAt(0).toUpperCase()}
+
+  // Display name
+  {$user.name || $user.email}
+  ```
+- **Impact:** All user-facing components should handle partial user data gracefully.
+
 ---
 
 ## Contact & References
@@ -1154,4 +1208,4 @@ Use this template when adding new learnings:
 ---
 
 **Last Updated:** January 24, 2026
-**Status:** Implementation In Progress - Phase 10 (Frontend - Core Management Pages)
+**Status:** Implementation In Progress - Phase 5 Complete, OAuth Configured
