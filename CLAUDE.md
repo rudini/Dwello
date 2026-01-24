@@ -1107,7 +1107,35 @@ Use this template when adding new learnings:
 
 ## Entries
 
-*(Learnings will be recorded here as implementation progresses. This section will grow as issues are discovered and architectural patterns emerge.)*
+### Svelte 5 Runes: $derived for Computed Values
+**Date:** 2026-01-24 | **Task:** Apartment Details UI (Phase 10.2) | **Severity:** Low
+- **What:** In Svelte 5, computed/derived values must use the `$derived` rune rather than just assigning to a variable. Simple assignments don't reactively update when inputs change.
+- **Why It Matters:** ESLint warning: "This reference only captures the initial value of X. Did you mean to reference it inside a closure instead?" indicates missed reactive updates. Using `$derived` ensures proper reactivity.
+- **Reference:** `src/lib/components/StatusBadge.svelte:24`, `src/lib/components/Button.svelte:26`
+- **Workaround/Solution:** Replace variable assignments with `$derived`:
+  ```javascript
+  // ❌ Wrong - not reactive
+  const classes = `${base} ${variant[type]}`;
+
+  // ✅ Correct - reactive
+  const classes = $derived(`${base} ${variant[type]}`);
+  ```
+- **Impact:** All components with computed properties from props must use `$derived` for reactivity. This is a Svelte 5 migration issue for projects upgrading from Svelte 4.
+
+### Material Symbols and Font Loading
+**Date:** 2026-01-24 | **Task:** Apartment Details UI (Phase 10.2) | **Severity:** Low
+- **What:** Material Symbols icons require Google Fonts import in CSS and font variation settings configuration. SvelteKit's `+layout.svelte` doesn't automatically inject fonts into `<head>`.
+- **Why It Matters:** Icons won't render without proper CSS @import declarations. Font variation settings control icon weight and fill.
+- **Reference:** `src/styles/globals.css:1-2`, `src/lib/components/Icon.svelte:17-21`
+- **Workaround/Solution:** Add Google Fonts imports to `globals.css` and configure CSS for icon display:
+  ```css
+  @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
+
+  :global(.material-symbols-outlined) {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  }
+  ```
+- **Impact:** Any component using Material Symbols must import this CSS file.
 
 ---
 
@@ -1125,5 +1153,5 @@ Use this template when adding new learnings:
 
 ---
 
-**Last Updated:** January 23, 2026
-**Status:** Documentation Complete - Ready for Implementation
+**Last Updated:** January 24, 2026
+**Status:** Implementation In Progress - Phase 10 (Frontend - Core Management Pages)

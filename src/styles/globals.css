@@ -1,20 +1,23 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-	--color-primary: #2563eb;
-	--color-secondary: #64748b;
+	--color-primary: #135bec;
+	--color-secondary: #616f89;
 	--color-success: #10b981;
 	--color-warning: #f59e0b;
 	--color-error: #ef4444;
+	--color-text-dark: #111318;
+	--color-border-light: #dbdfe6;
 }
 
 body {
 	margin: 0;
-	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-		'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-		sans-serif;
+	font-family: 'Manrope', system-ui, sans-serif;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 }

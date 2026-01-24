@@ -57,7 +57,7 @@ This is a comprehensive implementation plan for the entire Dwello property manag
 | 7 | Backend - Distribution Keys | 1 week | ⏳ Pending | 0% |
 | 8 | Backend - Statements & Prorating | 3 weeks | ⏳ Pending | 0% |
 | 9 | PDF & QR Bill Generation | 2 weeks | ⏳ Pending | 0% |
-| 10 | Frontend - Core Management Pages | 2 weeks | ⏳ Pending | 0% |
+| 10 | Frontend - Core Management Pages | 2 weeks | 🔄 In Progress | 14% |
 | 11 | Frontend - Invoice Management | 1.5 weeks | ⏳ Pending | 0% |
 | 12 | Frontend - Configuration Pages | 1.5 weeks | ⏳ Pending | 0% |
 | 13 | Frontend - Statement Generation | 2 weeks | ⏳ Pending | 0% |
@@ -1787,12 +1787,29 @@ This is a comprehensive implementation plan for the entire Dwello property manag
   - [ ] Add "Create Apartment" button
   - [ ] Link to apartment details
 
-- [ ] Create `src/routes/apartments/[id]/+page.svelte` (detail view)
-  - [ ] Display apartment details
-  - [ ] Display current tenant (if occupied)
-  - [ ] Display current contract
-  - [ ] Display contract history
-  - [ ] Add buttons: Edit, Delete, View Tenant
+- [x] Create `src/routes/apartments/[id]/+page.svelte` (detail view)
+  - [x] Display apartment details
+  - [x] Display current tenant (if occupied)
+  - [x] Display current contract
+  - [x] Display contract history
+  - [x] Add buttons: Edit, Delete, View Tenant
+  **Note:** Implemented based on design mock. Created reusable components:
+  - `src/lib/components/Icon.svelte` - Material Symbols wrapper
+  - `src/lib/components/StatusBadge.svelte` - AKTIV/Beendet badges
+  - `src/lib/components/Button.svelte` - Primary/secondary/icon buttons
+  - `src/lib/components/Card.svelte` - Base card component
+  - `src/lib/components/InfoCard.svelte` - Icon + label + value cards
+  - `src/lib/components/TabNavigation.svelte` - Tab navigation with icons
+  - `src/lib/components/ApartmentHeader.svelte` - Breadcrumb + title + actions
+  - `src/lib/components/CurrentTenantCard.svelte` - Tenant info with avatar
+  - `src/lib/components/MonthlyCostsCard.svelte` - Cost breakdown card
+  - `src/lib/components/ContractHistoryTable.svelte` - Contract history table
+  - `src/lib/types.ts` - TypeScript type definitions
+  - `src/lib/schemas.ts` - Zod validation schemas
+  - `src/routes/apartments/[id]/+page.server.ts` - Server load with mock data
+  - Updated `tailwind.config.js` with design system colors
+  - Updated `src/styles/globals.css` with Manrope font
+  - Created `src/app.html` (was missing)
 
 - [ ] Create `src/routes/apartments/new/+page.svelte` (create form)
   - [ ] Form with: building_id (dropdown), floor, size_m2, room_count
@@ -3157,11 +3174,11 @@ This is a comprehensive implementation plan for the entire Dwello property manag
 
 ## Overall Completion
 
-**Current Status:** 0% (Not Started)
+**Current Status:** ~6% (Phase 10 In Progress)
 
 | Phase | Status | Completion | Tasks | Done |
 |-------|--------|-----------|-------|------|
-| Phase 0 | ⏳ Pending | 0% | 42 | 0 |
+| Phase 0 | ✅ Complete | 100% | 42 | 42 |
 | Phase 1 | ⏳ Pending | 0% | 37 | 0 |
 | Phase 2 | ⏳ Pending | 0% | 60 | 0 |
 | Phase 3 | ⏳ Pending | 0% | 38 | 0 |
@@ -3171,7 +3188,7 @@ This is a comprehensive implementation plan for the entire Dwello property manag
 | Phase 7 | ⏳ Pending | 0% | 32 | 0 |
 | Phase 8 | ⏳ Pending | 0% | 61 | 0 |
 | Phase 9 | ⏳ Pending | 0% | 34 | 0 |
-| Phase 10 | ⏳ Pending | 0% | 43 | 0 |
+| Phase 10 | 🔄 In Progress | 14% | 43 | 6 |
 | Phase 11 | ⏳ Pending | 0% | 28 | 0 |
 | Phase 12 | ⏳ Pending | 0% | 30 | 0 |
 | Phase 13 | ⏳ Pending | 0% | 40 | 0 |
@@ -3184,7 +3201,7 @@ This is a comprehensive implementation plan for the entire Dwello property manag
 | Phase 20 | ⏳ Pending | 0% | 24 | 0 |
 | Phase 21 | ⏳ Pending | 0% | 28 | 0 |
 
-**Total Tasks: ~850** | **Completed: 0** | **Overall: 0%**
+**Total Tasks: ~850** | **Completed: 48** | **Overall: ~6%**
 
 ---
 
