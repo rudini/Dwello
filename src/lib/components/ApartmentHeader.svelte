@@ -32,12 +32,12 @@
 			<h1 class="text-4xl font-bold text-text-dark mb-2">Wohnung {apartment.address_unit}</h1>
 			<p class="text-sm text-text-secondary flex items-center gap-1">
 				<Icon name="location_on" size={16} />
-				{building.address}, {building.postal_code} {building.city}
+				{building.address}, {building.postalCode} {building.city}
 			</p>
 		</div>
 		<div class="flex gap-3">
-			<Button variant="secondary" icon="edit">Bearbeiten</Button>
-			<Button variant="secondary" icon="file_download">Export</Button>
+			<Button variant="secondary"><Icon name="edit" size={16} />Bearbeiten</Button>
+			<Button variant="secondary"><Icon name="file_download" size={16} />Export</Button>
 		</div>
 	</div>
 </div>
