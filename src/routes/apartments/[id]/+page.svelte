@@ -55,8 +55,8 @@
 
 		<!-- Main Content - Two Column Layout -->
 		{#if activeTab === 'overview'}
-			<div class="grid grid-cols-3 gap-6">
-				<!-- Left Column -->
+			<div class="grid grid-cols-5 gap-6">
+				<!-- Left Column (Aktueller Mieter + Monatliche Kosten) -->
 				<div class="col-span-2 space-y-6">
 					{#if data.currentTenant && data.currentContract}
 						<CurrentTenantCard
@@ -68,8 +68,8 @@
 					<MonthlyCostsCard costs={data.monthlyCosts} />
 				</div>
 
-				<!-- Right Column -->
-				<div>
+				<!-- Right Column (Mietvertragshistorie) -->
+				<div class="col-span-3">
 					<ContractHistoryTable contracts={data.contractHistory} />
 				</div>
 			</div>
