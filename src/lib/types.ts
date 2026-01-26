@@ -102,3 +102,57 @@ export interface ApartmentDetailsData {
 	monthlyCosts: MonthlyCosts;
 	contractHistory: ContractHistory[];
 }
+
+// Apartment with building info for list view
+export interface ApartmentWithBuilding extends Apartment {
+	building_name?: string;
+	building_address: string;
+	building_city: string;
+	current_tenant_name?: string;
+	current_rent?: number;
+}
+
+// Apartments list response
+export interface ApartmentsListData {
+	apartments: ApartmentWithBuilding[];
+	total: number;
+	page: number;
+	pageSize: number;
+	buildings: { id: string; name: string; address: string }[];
+}
+
+// Tenant with current occupancy info for list view
+export interface TenantWithOccupancy extends Tenant {
+	current_apartment?: string;
+	current_building?: string;
+	contract_status?: 'Aktiv' | 'Beendet' | null;
+}
+
+// Tenants list response
+export interface TenantsListData {
+	tenants: TenantWithOccupancy[];
+	total: number;
+	page: number;
+	pageSize: number;
+}
+
+// Contract with full details for list view
+export interface ContractWithDetails extends RentalContract {
+	tenant_name: string;
+	tenant_first_name: string;
+	tenant_last_name: string;
+	apartment_unit: string;
+	building_name?: string;
+	building_address: string;
+	total_rent: number;
+}
+
+// Contracts list response
+export interface ContractsListData {
+	contracts: ContractWithDetails[];
+	total: number;
+	page: number;
+	pageSize: number;
+	buildings: { id: string; name: string; address: string }[];
+	apartments: { id: string; unit: string; building_id: string }[];
+}

@@ -55,10 +55,17 @@ export default [
 			}
 		},
 		plugins: {
-			svelte
+			svelte,
+			'@typescript-eslint': ts
 		},
 		rules: {
-			...svelte.configs.recommended.rules
+			...svelte.configs.recommended.rules,
+			// Ignore underscore-prefixed variables (used for callback type parameters)
+			'no-unused-vars': 'off',
+			'@typescript-eslint/no-unused-vars': [
+				'error',
+				{ argsIgnorePattern: '^_', varsIgnorePattern: '^_' }
+			]
 		}
 	},
 	{
