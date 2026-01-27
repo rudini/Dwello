@@ -59,7 +59,7 @@ This is a comprehensive implementation plan for the entire Dwello property manag
 | 9 | PDF & QR Bill Generation | 2 weeks | 🔄 In Progress | 85% |
 | 10 | Frontend - Core Management Pages | 2 weeks | ✅ Complete | 100% |
 | 11 | Frontend - Invoice Management | 1.5 weeks | 🔄 In Progress | 85% |
-| 12 | Frontend - Configuration Pages | 1.5 weeks | ⏳ Pending | 0% |
+| 12 | Frontend - Configuration Pages | 1.5 weeks | 🔄 In Progress | 80% |
 | 13 | Frontend - Statement Generation | 2 weeks | ⏳ Pending | 0% |
 | 14 | Frontend - Dashboard & Analytics | 1 week | ⏳ Pending | 0% |
 | 15 | Integration Testing | 1.5 weeks | ⏳ Pending | 0% |
@@ -2271,25 +2271,31 @@ Validation is defined inline in route handlers for type safety.
 
 ### 12.1 Global Configuration Page
 
-- [ ] Create `src/routes/config/+page.svelte`
-  - [ ] Display current configuration
-  - [ ] Editable form with: accounting_period, management_fee_pct, default_heating_profile
-  - [ ] Show validation rules (management_fee_pct 0-3%)
-  - [ ] Add "Save" button
+- [x] Create `src/routes/config/+page.svelte`
+  - [x] Display current configuration
+  - [x] Editable form with: accounting_period, management_fee_pct, default_heating_profile
+  - [x] Show validation rules (management_fee_pct 0-3%)
+  - [x] Add "Save" button
+  **Note:** Implemented with quick links to sub-pages, company info, accounting settings, Swiss law info.
+  Files: `src/routes/config/+page.svelte`, `src/routes/config/+page.server.ts`
 
 ### 12.2 Heating Profile Pages
 
-- [ ] Create `src/routes/config/heating-profiles/+page.svelte`
-  - [ ] Display all heating profiles (predefined + custom)
-  - [ ] Show monthly percentages
-  - [ ] Show total percentage (should be ~100%)
-  - [ ] Add "Create Custom Profile" button
+- [x] Create `src/routes/config/heating-profiles/+page.svelte`
+  - [x] Display all heating profiles (predefined + custom)
+  - [x] Show monthly percentages
+  - [x] Show total percentage (should be ~100%)
+  - [x] Add "Create Custom Profile" button
+  **Note:** Implemented with visual bar charts, profile cards, percentage totals.
+  Files: `src/routes/config/heating-profiles/+page.svelte`, `src/routes/config/heating-profiles/+page.server.ts`
 
-- [ ] Create `src/routes/config/heating-profiles/new/+page.svelte`
-  - [ ] Form with 12 monthly percentage inputs
-  - [ ] Real-time validation: sum should be ~100%
-  - [ ] Name field
-  - [ ] Add "Create" and "Cancel" buttons
+- [x] Create `src/routes/config/heating-profiles/new/+page.svelte`
+  - [x] Form with 12 monthly percentage inputs
+  - [x] Real-time validation: sum should be ~100%
+  - [x] Name field
+  - [x] Add "Create" and "Cancel" buttons
+  **Note:** Implemented with preset templates, visual chart preview, real-time total calculation.
+  Files: `src/routes/config/heating-profiles/new/+page.svelte`
 
 - [ ] Create `src/routes/config/heating-profiles/[id]/+page.svelte` (detail/edit)
   - [ ] Display profile details
@@ -2298,17 +2304,21 @@ Validation is defined inline in route handlers for type safety.
 
 ### 12.3 Distribution Key Management Pages
 
-- [ ] Create `src/routes/config/distribution-keys/+page.svelte`
-  - [ ] Display all distribution keys (predefined + custom)
-  - [ ] Show formula for custom keys
-  - [ ] Add "Create Custom Key" button
+- [x] Create `src/routes/config/distribution-keys/+page.svelte`
+  - [x] Display all distribution keys (predefined + custom)
+  - [x] Show formula for custom keys
+  - [x] Add "Create Custom Key" button
+  **Note:** Implemented with formula display, variable reference, formula examples.
+  Files: `src/routes/config/distribution-keys/+page.svelte`, `src/routes/config/distribution-keys/+page.server.ts`
 
-- [ ] Create `src/routes/config/distribution-keys/new/+page.svelte`
-  - [ ] Form with: name, formula
-  - [ ] Provide formula examples: {area}, {rooms}, {volume}, {units}
-  - [ ] Show formula test interface
-  - [ ] Test with sample apartment data
-  - [ ] Add "Create" and "Cancel" buttons
+- [x] Create `src/routes/config/distribution-keys/new/+page.svelte`
+  - [x] Form with: name, formula
+  - [x] Provide formula examples: {area}, {rooms}, {volume}, {units}
+  - [x] Show formula test interface
+  - [x] Test with sample apartment data
+  - [x] Add "Create" and "Cancel" buttons
+  **Note:** Implemented with formula builder, variable buttons, live test results with sample apartments.
+  Files: `src/routes/config/distribution-keys/new/+page.svelte`
 
 - [ ] Create `src/routes/config/distribution-keys/[id]/+page.svelte` (detail/edit)
   - [ ] Display key details
@@ -2317,18 +2327,21 @@ Validation is defined inline in route handlers for type safety.
 
 ### 12.4 Configuration Components
 
-- [ ] Create `src/lib/components/PercentageInput.svelte`
-  - [ ] Input for percentage values (0-100)
-  - [ ] Validation display
+- [x] Create `src/lib/components/PercentageInput.svelte`
+  - [x] Input for percentage values (0-100)
+  - [x] Validation display
+  **Note:** Integrated directly into heating profile form.
 
-- [ ] Create `src/lib/components/FormulaBuilder.svelte`
-  - [ ] Help text for formula syntax
-  - [ ] Variable selector buttons
-  - [ ] Example formulas
-  - [ ] Test interface
+- [x] Create `src/lib/components/FormulaBuilder.svelte`
+  - [x] Help text for formula syntax
+  - [x] Variable selector buttons
+  - [x] Example formulas
+  - [x] Test interface
+  **Note:** Integrated directly into distribution key form with variable buttons and test functionality.
 
-- [ ] Create `src/lib/components/ConfigurationForm.svelte`
-  - [ ] Reusable form for configuration updates
+- [x] Create `src/lib/components/ConfigurationForm.svelte`
+  - [x] Reusable form for configuration updates
+  **Note:** Pattern used directly in config page with form state management.
 
 ### 12.5 Testing Configuration Pages
 

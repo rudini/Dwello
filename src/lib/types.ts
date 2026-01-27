@@ -227,3 +227,48 @@ export interface CategoriesListData {
 	categories: Category[];
 	total: number;
 }
+
+// Heating Profile types
+export interface HeatingProfile {
+	id: string;
+	name: string;
+	type: 'predefined' | 'custom';
+	description?: string;
+	isActive: boolean;
+	monthlyPercentages: {
+		january: number;
+		february: number;
+		march: number;
+		april: number;
+		may: number;
+		june: number;
+		july: number;
+		august: number;
+		september: number;
+		october: number;
+		november: number;
+		december: number;
+	};
+}
+
+// System Configuration types
+export type AccountingPeriod = 'calendar' | 'july-june' | 'october-september';
+
+export interface SystemConfig {
+	id: string;
+	accountingPeriod: AccountingPeriod;
+	managementFeePercentage: number; // 0-3%
+	defaultHeatingProfileId?: string;
+	defaultDistributionKeyId?: string;
+	companyName?: string;
+	companyAddress?: string;
+	iban?: string;
+	updatedAt?: string;
+}
+
+// Configuration page data
+export interface ConfigPageData {
+	config: SystemConfig;
+	heatingProfiles: HeatingProfile[];
+	distributionKeys: DistributionKey[];
+}
