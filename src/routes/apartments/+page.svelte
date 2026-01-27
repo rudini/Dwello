@@ -5,7 +5,7 @@
 	import Button from '$lib/components/Button.svelte';
 	import Icon from '$lib/components/Icon.svelte';
 	import Card from '$lib/components/Card.svelte';
-	import StatusBadge from '$lib/components/StatusBadge.svelte';
+	import Badge from '$lib/components/Badge.svelte';
 
 	let { data }: { data: ApartmentsListData } = $props();
 
@@ -42,16 +42,16 @@
 
 	function getStatusVariant(
 		status: string
-	): 'success' | 'gray' | 'warning' | 'error' | 'info' | 'primary' {
+	): 'default' | 'primary' | 'success' | 'warning' | 'danger' | 'info' {
 		switch (status) {
 			case 'Vermietet':
 				return 'success';
 			case 'Leer':
 				return 'warning';
 			case 'Gesperrt':
-				return 'error';
+				return 'danger';
 			default:
-				return 'gray';
+				return 'default';
 		}
 	}
 
@@ -182,10 +182,9 @@
 								</h3>
 								<p class="text-sm text-gray-500">{apartment.floor}</p>
 							</div>
-							<StatusBadge
-								status={apartment.occupancy_status === 'Vermietet' ? 'AKTIV' : apartment.occupancy_status}
-								variant={getStatusVariant(apartment.occupancy_status)}
-							/>
+							<Badge variant={getStatusVariant(apartment.occupancy_status)}>
+								{apartment.occupancy_status}
+							</Badge>
 						</div>
 
 						<!-- Building Info -->

@@ -156,3 +156,74 @@ export interface ContractsListData {
 	buildings: { id: string; name: string; address: string }[];
 	apartments: { id: string; unit: string; building_id: string }[];
 }
+
+// Invoice Category types
+export interface Category {
+	id: string;
+	name: string;
+	nameDE?: string;
+	nameFR?: string;
+	nameIT?: string;
+	nameEN?: string;
+	isAllowedUtilityCost: boolean;
+	description?: string;
+	sortOrder?: number;
+}
+
+// Distribution Key types
+export interface DistributionKey {
+	id: string;
+	name: string;
+	nameDE?: string;
+	nameFR?: string;
+	nameIT?: string;
+	nameEN?: string;
+	type: 'predefined' | 'custom';
+	formula?: string;
+	description?: string;
+	isActive: boolean;
+}
+
+// Invoice types
+export interface Invoice {
+	id: string;
+	buildingId: string;
+	invoiceDate: string;
+	billingEntity: string;
+	description: string;
+	amount: number;
+	categoryId?: string;
+	distributionKeyId?: string;
+	isValidUtilityCost: boolean;
+	llmConfidence?: number;
+	llmReasoning?: string;
+	manualOverrideBy?: string;
+	manualOverrideReason?: string;
+	createdAt?: string;
+	updatedAt?: string;
+}
+
+// Invoice with related data for list view
+export interface InvoiceWithDetails extends Invoice {
+	buildingName?: string;
+	buildingAddress: string;
+	category?: Category;
+	distributionKey?: DistributionKey;
+	categorizationStatus: 'pending' | 'auto-categorized' | 'manual';
+}
+
+// Invoices list response
+export interface InvoicesListData {
+	invoices: InvoiceWithDetails[];
+	total: number;
+	page: number;
+	pageSize: number;
+	buildings: { id: string; name: string; address: string }[];
+	categories: Category[];
+}
+
+// Categories list response
+export interface CategoriesListData {
+	categories: Category[];
+	total: number;
+}

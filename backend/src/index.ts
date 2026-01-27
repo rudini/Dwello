@@ -10,6 +10,12 @@ import { buildingRoutes } from './routes/buildings';
 import { apartmentRoutes } from './routes/apartments';
 import { tenantRoutes } from './routes/tenants';
 import { contractRoutes } from './routes/contracts';
+import { categoryRoutes } from './routes/categories';
+import { invoiceRoutes } from './routes/invoices';
+import { distributionKeyRoutes } from './routes/distribution-keys';
+import { heatingProfileRoutes } from './routes/heating-profiles';
+import { configRoutes } from './routes/config';
+import { statementRoutes } from './routes/statements';
 
 // Test database connection on startup
 testConnection().then((connected) => {
@@ -45,6 +51,12 @@ const app = new Elysia()
 	.use(apartmentRoutes)
 	.use(tenantRoutes)
 	.use(contractRoutes)
+	.use(categoryRoutes)
+	.use(invoiceRoutes)
+	.use(distributionKeyRoutes)
+	.use(heatingProfileRoutes)
+	.use(configRoutes)
+	.use(statementRoutes)
 	.listen(3001);
 
 console.log(`🚀 Dwello Backend running at http://${app.server?.hostname}:${app.server?.port}`);
@@ -55,5 +67,11 @@ console.log('   - CRUD /api/v1/buildings');
 console.log('   - CRUD /api/v1/apartments');
 console.log('   - CRUD /api/v1/tenants');
 console.log('   - CRUD /api/v1/contracts');
+console.log('   - CRUD /api/v1/categories');
+console.log('   - CRUD /api/v1/invoices');
+console.log('   - CRUD /api/v1/distribution-keys');
+console.log('   - CRUD /api/v1/heating-profiles');
+console.log('   - CRUD /api/v1/config');
+console.log('   - CRUD /api/v1/statements');
 
 export type App = typeof app;

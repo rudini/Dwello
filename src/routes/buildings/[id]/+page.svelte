@@ -4,7 +4,7 @@
 	import Icon from '$lib/components/Icon.svelte';
 	import Card from '$lib/components/Card.svelte';
 	import InfoCard from '$lib/components/InfoCard.svelte';
-	import StatusBadge from '$lib/components/StatusBadge.svelte';
+	import Badge from '$lib/components/Badge.svelte';
 
 	let { data }: { data: BuildingDetailsData } = $props();
 
@@ -200,11 +200,11 @@
 									</div>
 								</div>
 								<div class="flex items-center gap-3">
-									<StatusBadge
-										type={apartment.occupancy_status === 'Vermietet' ? 'success' : apartment.occupancy_status === 'Leer' ? 'warning' : 'neutral'}
+									<Badge
+										variant={apartment.occupancy_status === 'Vermietet' ? 'success' : apartment.occupancy_status === 'Leer' ? 'warning' : 'default'}
 									>
 										{apartment.occupancy_status}
-									</StatusBadge>
+									</Badge>
 									<Icon name="chevron_right" size={18} class="text-gray-400" />
 								</div>
 							</a>
