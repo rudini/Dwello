@@ -5,6 +5,7 @@
 
 import { Elysia } from 'elysia';
 import { cors } from '@elysiajs/cors';
+import { swagger } from '@elysiajs/swagger';
 import { testConnection } from './db/connection';
 import { buildingRoutes } from './routes/buildings';
 import { apartmentRoutes } from './routes/apartments';
@@ -29,6 +30,31 @@ const app = new Elysia()
 		cors({
 			origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
 			credentials: true
+		})
+	)
+	.use(
+		swagger({
+			documentation: {
+				info: {
+					title: 'Dwello API',
+					version: '1.0.0',
+					description: 'Swiss Property Management System API'
+				},
+				tags: [
+					{ name: 'Buildings', description: 'Building management' },
+					{ name: 'Apartments', description: 'Apartment management' },
+					{ name: 'Tenants', description: 'Tenant management' },
+					{ name: 'Contracts', description: 'Rental contract management' },
+					{ name: 'Invoices', description: 'Invoice management with LLM categorization' },
+					{ name: 'Categories', description: 'Cost category management' },
+					{ name: 'Distribution Keys', description: 'Cost distribution keys' },
+					{ name: 'Heating Profiles', description: 'Heating distribution profiles' },
+					{ name: 'Statements', description: 'Utility cost statements' },
+					{ name: 'Config', description: 'System configuration' }
+				]
+			},
+			path: '/swagger',
+			exclude: ['/swagger', '/swagger/json']
 		})
 	)
 	// Health check endpoint
@@ -60,6 +86,7 @@ const app = new Elysia()
 	.listen(3001);
 
 console.log(`🚀 Dwello Backend running at http://${app.server?.hostname}:${app.server?.port}`);
+console.log(`📚 Swagger API docs at http://${app.server?.hostname}:${app.server?.port}/swagger`);
 console.log('📝 Available routes:');
 console.log('   - GET  /health');
 console.log('   - GET  /api/v1/dashboard');
