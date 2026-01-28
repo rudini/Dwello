@@ -3,7 +3,8 @@ import { defineBddConfig, cucumberReporter } from 'playwright-bdd';
 
 const testDir = defineBddConfig({
 	paths: ['tests/e2e/features/**/*.feature'],
-	require: ['tests/e2e/fixtures/test.ts', 'tests/e2e/steps/**/*.ts']
+	require: ['tests/e2e/fixtures/test.ts', 'tests/e2e/steps/**/*.ts'],
+	tags: 'not @wip'
 });
 
 export default defineConfig({

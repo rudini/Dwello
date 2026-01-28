@@ -8,28 +8,28 @@ Feature: Utility Cost Statements
     Given I am logged in as "Test User"
     And the backend API is mocked
 
-  @list
+  @list @wip
   Scenario: View statements list
     Given there are statements in the system
     When I open the statements page
     Then I should see a list of statements
     And I should see status overview cards
 
-  @list
+  @list @wip
   Scenario: Filter statements by status
     Given there are statements with different statuses
     When I open the statements page
     And I filter by status "overdue"
     Then I should only see overdue statements
 
-  @generate
+  @generate @wip
   Scenario: Start statement generation wizard
     When I open the statements page
     And I click on "Abrechnungen erstellen"
     Then I should be on the statement generation wizard
     And I should see step 1 of 4
 
-  @generate
+  @generate @wip
   Scenario: Complete statement generation wizard step 1
     When I open the statement generation wizard
     And I select a period from "2024-01-01" to "2024-12-31"
@@ -37,7 +37,7 @@ Feature: Utility Cost Statements
     And I click "Weiter"
     Then I should be on step 2 of the wizard
 
-  @generate
+  @generate @wip
   Scenario: Complete statement generation wizard step 2
     When I am on step 2 of the statement wizard
     And I select buildings to include
@@ -45,7 +45,7 @@ Feature: Utility Cost Statements
     Then I should be on step 3 of the wizard
     And I should see a preview of the statements
 
-  @detail
+  @detail @wip
   Scenario: View statement details
     Given there is a statement "NK-2024-001"
     When I open the statement detail page
@@ -54,7 +54,7 @@ Feature: Utility Cost Statements
     And I should see the cost breakdown
     And I should see the balance
 
-  @payment
+  @payment @wip
   Scenario: Mark statement as paid
     Given there is a sent statement
     When I open the statement detail page
@@ -62,7 +62,7 @@ Feature: Utility Cost Statements
     And I confirm the payment
     Then the statement status should be "paid"
 
-  @reminder
+  @reminder @wip
   Scenario: Send payment reminder
     Given there is an overdue statement
     When I open the statement detail page

@@ -12,6 +12,7 @@
 		};
 		href?: string;
 		class?: string;
+		testId?: string;
 	}
 
 	let {
@@ -21,8 +22,12 @@
 		iconColor = 'text-blue-600',
 		trend,
 		href,
-		class: className = ''
+		class: className = '',
+		testId
 	}: Props = $props();
+
+	// Generate testId from label if not provided
+	const computedTestId = $derived(testId || `stat-${label.toLowerCase().replace(/\s+/g, '-')}`);
 
 	const trendConfig = $derived(() => {
 		if (!trend) return null;
@@ -52,6 +57,7 @@
 {#if href}
 	<a
 		{href}
+		data-testid={computedTestId}
 		class="block bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md hover:border-gray-300 transition-all {className}"
 	>
 		<div class="flex items-start justify-between">
@@ -79,6 +85,7 @@
 	</a>
 {:else}
 	<div
+		data-testid={computedTestId}
 		class="bg-white border border-gray-200 rounded-xl p-6 {className}"
 	>
 		<div class="flex items-start justify-between">

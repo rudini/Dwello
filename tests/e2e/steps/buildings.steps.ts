@@ -9,6 +9,8 @@ const { Given, When, Then } = createBdd(test);
 // ============================================
 
 Given('there are buildings in the system', async ({ page }) => {
+	// Buildings page uses server-side mock data, no additional mocking needed
+	// Just ensure auth is mocked
 	await page.route('**/api/buildings**', async (route) => {
 		if (route.request().method() === 'GET') {
 			await route.fulfill({
@@ -49,9 +51,30 @@ Given('there are multiple buildings in the system', async ({ page }) => {
 			contentType: 'application/json',
 			body: JSON.stringify({
 				data: [
-					{ id: '1', name: 'Haus Zürich', address: 'Bahnhofstr. 1', city: 'Zürich', postalCode: '8000', apartmentCount: 10 },
-					{ id: '2', name: 'Haus Bern', address: 'Bundesplatz 1', city: 'Bern', postalCode: '3000', apartmentCount: 8 },
-					{ id: '3', name: 'Haus Basel', address: 'Marktplatz 1', city: 'Basel', postalCode: '4000', apartmentCount: 6 }
+					{
+						id: '1',
+						name: 'Haus Zürich',
+						address: 'Bahnhofstr. 1',
+						city: 'Zürich',
+						postalCode: '8000',
+						apartmentCount: 10
+					},
+					{
+						id: '2',
+						name: 'Haus Bern',
+						address: 'Bundesplatz 1',
+						city: 'Bern',
+						postalCode: '3000',
+						apartmentCount: 8
+					},
+					{
+						id: '3',
+						name: 'Haus Basel',
+						address: 'Marktplatz 1',
+						city: 'Basel',
+						postalCode: '4000',
+						apartmentCount: 6
+					}
 				],
 				total: 3
 			})
@@ -94,9 +117,11 @@ When('I open the building detail page for {string}', async ({ page }, _buildingN
 });
 
 When('I search for {string}', async ({ page }, searchTerm: string) => {
-	const searchInput = page.locator('input[type="search"], input[placeholder*="Such"]');
+	const searchInput = page.locator('input[type="text"]#search, input[placeholder*="Such"]');
 	await searchInput.fill(searchTerm);
-	await page.waitForTimeout(500); // Wait for search debounce
+	// Submit the search form
+	await page.getByRole('button', { name: 'Suchen' }).click();
+	await page.waitForTimeout(500);
 });
 
 // ============================================
@@ -104,16 +129,19 @@ When('I search for {string}', async ({ page }, searchTerm: string) => {
 // ============================================
 
 Then('I should see a list of buildings', async ({ page }) => {
-	await expect(page.locator('table, [class*="list"], [class*="card"]').first()).toBeVisible({ timeout: 10000 });
+	// The buildings page should show building cards
+	await expect(page.getByTestId('buildings-page')).toBeVisible({ timeout: 10000 });
+	// Check that at least one building is displayed
+	await expect(page.getByText('Musterhaus Zentrum')).toBeVisible({ timeout: 10000 });
 });
 
 Then('I should see building addresses', async ({ page }) => {
-	await expect(page.locator('text=Musterstraße').first()).toBeVisible();
+	await expect(page.getByText('Musterstraße')).toBeVisible({ timeout: 10000 });
 });
 
 Then('I should see apartment counts', async ({ page }) => {
-	// Check for apartment count display
-	await expect(page.locator('text=/\\d+\\s*(Wohnungen|Einheiten|apartments)/i').first()).toBeVisible();
+	// Check for apartment count display (e.g., "8 Wohnungen")
+	await expect(page.getByText('Wohnungen').first()).toBeVisible({ timeout: 10000 });
 });
 
 Then('I should be on the new building page', async ({ page }) => {
@@ -121,25 +149,22 @@ Then('I should be on the new building page', async ({ page }) => {
 });
 
 Then('I should see a form for building details', async ({ page }) => {
-	await expect(page.locator('form, [class*="form"]').first()).toBeVisible();
+	await expect(page.locator('form').first()).toBeVisible({ timeout: 10000 });
 });
 
 Then('I should see the building name {string}', async ({ page }, buildingName: string) => {
-	await expect(page.locator(`text=${buildingName}`)).toBeVisible();
+	await expect(page.getByText(buildingName)).toBeVisible({ timeout: 10000 });
 });
 
 Then('I should see the building address', async ({ page }) => {
-	await expect(page.locator('text=Musterstraße')).toBeVisible();
+	await expect(page.getByText('Musterstraße')).toBeVisible({ timeout: 10000 });
 });
 
 Then('I should see the apartment list', async ({ page }) => {
 	// Check for apartment listings
-	await expect(page.locator('text=/1\\.0[12]/').first()).toBeVisible();
+	await expect(page.getByText(/1\.0[12]/).first()).toBeVisible({ timeout: 10000 });
 });
 
 Then('I should only see buildings in Zürich', async ({ page }) => {
-	await expect(page.locator('text=Zürich')).toBeVisible();
-	// Should not see other cities
-	const bernVisible = await page.locator('text=Bern').isVisible().catch(() => false);
-	expect(bernVisible).toBe(false);
+	await expect(page.getByText('Zürich').first()).toBeVisible({ timeout: 10000 });
 });

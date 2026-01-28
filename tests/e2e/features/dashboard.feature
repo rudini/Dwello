@@ -45,8 +45,8 @@ Feature: Dashboard Overview
   @quick-actions
   Scenario: Dashboard provides quick actions
     When I open the dashboard
-    Then I should see a "Rechnung erfassen" button
-    And I should see a "Abrechnungen erstellen" button
+    Then I should see a "Rechnung erfassen" link
+    And I should see a "Abrechnungen erstellen" link
 
   @navigation
   Scenario: Navigate to buildings from dashboard

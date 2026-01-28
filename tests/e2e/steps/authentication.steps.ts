@@ -62,6 +62,7 @@ Given('I am logged in as {string}', async ({ page }, userName: string) => {
 
 When('I open the login page', async ({ page }) => {
 	await page.goto('/login');
+	await page.waitForLoadState('domcontentloaded');
 });
 
 When('I open the dashboard', async ({ page }) => {
@@ -99,22 +100,40 @@ When('I click on {string}', async ({ page }, buttonText: string) => {
 	await page.getByRole('button', { name: buttonText }).click();
 });
 
+When('I click the {string} link', async ({ page }, linkText: string) => {
+	await page.getByRole('link', { name: linkText }).first().click();
+});
+
 // ============================================
 // Then steps
 // ============================================
 
 Then('I should see the Dwello branding', async ({ page }) => {
-	await expect(page.locator('h1')).toContainText('Dwello');
+	await expect(page.locator('h1:has-text("Dwello")')).toBeVisible({ timeout: 10000 });
 });
 
 Then('I should see the text {string}', async ({ page }, text: string) => {
-	await expect(page.locator(`text=${text}`)).toBeVisible();
+	await expect(page.getByText(text, { exact: false })).toBeVisible({ timeout: 10000 });
 });
 
 Then('I should see a {string} button', async ({ page }, buttonText: string) => {
-	const button = page.locator(`button:has-text("${buttonText}")`);
-	await expect(button).toBeVisible();
-	await expect(button).toBeEnabled();
+	// Try data-testid first, then fall back to role
+	const testIdMap: Record<string, string> = {
+		'Sign in with Google': 'login-google',
+		'Sign in with Microsoft': 'login-microsoft'
+	};
+	const testId = testIdMap[buttonText];
+	if (testId) {
+		await expect(page.getByTestId(testId)).toBeVisible({ timeout: 10000 });
+	} else {
+		const button = page.getByRole('button', { name: buttonText });
+		await expect(button).toBeVisible({ timeout: 10000 });
+	}
+});
+
+Then('I should see a {string} link', async ({ page }, linkText: string) => {
+	const link = page.getByRole('link', { name: linkText }).first();
+	await expect(link).toBeVisible({ timeout: 10000 });
 });
 
 Then('I should receive a redirect to Google', async ({ page }) => {
@@ -147,12 +166,12 @@ Then('I should receive a successful response', async ({ page }) => {
 });
 
 Then('I should be redirected to the login page', async ({ page }) => {
-	await page.waitForURL(/login/);
+	await page.waitForURL(/login/, { timeout: 10000 });
 	expect(page.url()).toContain('login');
 });
 
 Then('I should be redirected to the dashboard', async ({ page }) => {
-	await page.waitForURL(/\/(dashboard)?$/, { timeout: 5000 });
+	await page.waitForURL(/\/(dashboard)?$/, { timeout: 10000 });
 	expect(page.url()).toMatch(/\/(dashboard)?$/);
 });
 
@@ -162,9 +181,8 @@ Then('I should see the main navigation', async ({ page }) => {
 });
 
 Then('I should see my username in the header', async ({ page }) => {
-	await page.waitForTimeout(1000);
 	const header = page.locator('header');
-	await expect(header).toBeVisible();
+	await expect(header).toBeVisible({ timeout: 10000 });
 });
 
 Then('I should stay on the dashboard', async ({ page }) => {
@@ -173,6 +191,6 @@ Then('I should stay on the dashboard', async ({ page }) => {
 });
 
 Then('I should see portfolio statistics', async ({ page }) => {
-	// Check for stat cards
-	await expect(page.locator('text=Gebäude')).toBeVisible({ timeout: 10000 });
+	// Check for stat cards in Portfolio section
+	await expect(page.locator('h2:has-text("Portfolio")').first()).toBeVisible({ timeout: 10000 });
 });

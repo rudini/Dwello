@@ -9,7 +9,8 @@ const { Given, When, Then } = createBdd(test);
 // ============================================
 
 Given('the backend API is mocked', async ({ page }) => {
-	// Mock dashboard API
+	// Mock dashboard API - not needed since dashboard uses server-side mock data
+	// But keep route mocking for any client-side API calls
 	await page.route('**/api/dashboard', async (route) => {
 		await route.fulfill({
 			status: 200,
@@ -45,7 +46,13 @@ Given('the backend API is mocked', async ({ page }) => {
 			contentType: 'application/json',
 			body: JSON.stringify({
 				data: [
-					{ id: '1', name: 'Musterhaus', address: 'Musterstraße 12', city: 'Zürich', postalCode: '8000' },
+					{
+						id: '1',
+						name: 'Musterhaus',
+						address: 'Musterstraße 12',
+						city: 'Zürich',
+						postalCode: '8000'
+					},
 					{ id: '2', name: 'Seepark', address: 'Seestrasse 45', city: 'Luzern', postalCode: '6004' }
 				],
 				total: 2
@@ -60,8 +67,8 @@ Given('the backend API is mocked', async ({ page }) => {
 			contentType: 'application/json',
 			body: JSON.stringify({
 				data: [
-					{ id: '1', statementNumber: 'NK-2024-001', status: 'sent', balance: 350.00 },
-					{ id: '2', statementNumber: 'NK-2024-002', status: 'overdue', balance: 520.00 }
+					{ id: '1', statementNumber: 'NK-2024-001', status: 'sent', balance: 350.0 },
+					{ id: '2', statementNumber: 'NK-2024-002', status: 'overdue', balance: 520.0 }
 				],
 				total: 2
 			})
@@ -74,15 +81,16 @@ Given('the backend API is mocked', async ({ page }) => {
 // ============================================
 
 Then('I should see the total number of buildings', async ({ page }) => {
-	await expect(page.locator('text=Gebäude')).toBeVisible({ timeout: 10000 });
+	await expect(page.getByTestId('portfolio-section')).toBeVisible({ timeout: 10000 });
+	await expect(page.getByTestId('stat-gebäude')).toBeVisible({ timeout: 10000 });
 });
 
 Then('I should see the total number of apartments', async ({ page }) => {
-	await expect(page.locator('text=Wohnungen')).toBeVisible();
+	await expect(page.getByTestId('stat-wohnungen')).toBeVisible({ timeout: 10000 });
 });
 
 Then('I should see the occupancy rate', async ({ page }) => {
-	await expect(page.locator('text=Belegungsrate')).toBeVisible();
+	await expect(page.getByTestId('stat-belegungsrate')).toBeVisible({ timeout: 10000 });
 });
 
 // ============================================
@@ -90,15 +98,16 @@ Then('I should see the occupancy rate', async ({ page }) => {
 // ============================================
 
 Then('I should see outstanding statements count', async ({ page }) => {
-	await expect(page.locator('text=Offene Abrechnungen')).toBeVisible();
+	await expect(page.getByTestId('financial-section')).toBeVisible({ timeout: 10000 });
+	await expect(page.getByTestId('stat-offene-abrechnungen')).toBeVisible({ timeout: 10000 });
 });
 
 Then('I should see total pending amount', async ({ page }) => {
-	await expect(page.locator('text=Ausstehend')).toBeVisible();
+	await expect(page.getByTestId('stat-ausstehend')).toBeVisible({ timeout: 10000 });
 });
 
 Then('I should see overdue amount', async ({ page }) => {
-	await expect(page.locator('text=Überfällig')).toBeVisible();
+	await expect(page.getByTestId('stat-überfällig')).toBeVisible({ timeout: 10000 });
 });
 
 // ============================================
@@ -106,19 +115,20 @@ Then('I should see overdue amount', async ({ page }) => {
 // ============================================
 
 Then('I should see draft statements count', async ({ page }) => {
-	await expect(page.locator('text=Entwürfe')).toBeVisible();
+	await expect(page.getByTestId('statements-status-section')).toBeVisible({ timeout: 10000 });
+	await expect(page.getByTestId('statements-draft')).toBeVisible({ timeout: 10000 });
 });
 
 Then('I should see sent statements count', async ({ page }) => {
-	await expect(page.locator('text=Versendet')).toBeVisible();
+	await expect(page.getByTestId('statements-sent')).toBeVisible({ timeout: 10000 });
 });
 
 Then('I should see paid statements count', async ({ page }) => {
-	await expect(page.locator('text=Bezahlt')).toBeVisible();
+	await expect(page.getByTestId('statements-paid')).toBeVisible({ timeout: 10000 });
 });
 
 Then('I should see overdue statements count', async ({ page }) => {
-	await expect(page.locator('text=Überfällig')).toBeVisible();
+	await expect(page.getByTestId('statements-overdue')).toBeVisible({ timeout: 10000 });
 });
 
 // ============================================
@@ -126,13 +136,11 @@ Then('I should see overdue statements count', async ({ page }) => {
 // ============================================
 
 Then('I should see the activity feed', async ({ page }) => {
-	await expect(page.locator('text=Letzte Aktivitäten')).toBeVisible();
+	await expect(page.getByText('Letzte Aktivitäten')).toBeVisible({ timeout: 10000 });
 });
 
 Then('I should see recent activities', async ({ page }) => {
-	// Check for activity items
-	const activityFeed = page.locator('text=Letzte Aktivitäten').locator('..');
-	await expect(activityFeed).toBeVisible();
+	await expect(page.getByText('Letzte Aktivitäten')).toBeVisible({ timeout: 10000 });
 });
 
 // ============================================
@@ -140,13 +148,11 @@ Then('I should see recent activities', async ({ page }) => {
 // ============================================
 
 Then('I should see the occupancy chart', async ({ page }) => {
-	await expect(page.locator('text=Belegungsrate nach Gebäude')).toBeVisible();
+	await expect(page.getByText('Belegungsrate nach Gebäude')).toBeVisible({ timeout: 10000 });
 });
 
 Then('I should see building names in the chart', async ({ page }) => {
-	// Buildings should be visible in occupancy section
-	const occupancySection = page.locator('text=Belegungsrate nach Gebäude').locator('..');
-	await expect(occupancySection).toBeVisible();
+	await expect(page.getByText('Musterhaus Zentrum')).toBeVisible({ timeout: 10000 });
 });
 
 // ============================================
@@ -154,19 +160,19 @@ Then('I should see building names in the chart', async ({ page }) => {
 // ============================================
 
 When('I click on the buildings stat card', async ({ page }) => {
-	await page.locator('text=Gebäude').click();
+	await page.getByTestId('stat-gebäude').click();
 });
 
 When('I click on the overdue statements card', async ({ page }) => {
-	await page.locator('a:has-text("Überfällig")').first().click();
+	await page.getByTestId('statements-overdue').click();
 });
 
 Then('I should be on the buildings page', async ({ page }) => {
-	await page.waitForURL(/buildings/);
+	await page.waitForURL(/buildings/, { timeout: 10000 });
 	expect(page.url()).toContain('buildings');
 });
 
 Then('I should be on the statements page with overdue filter', async ({ page }) => {
-	await page.waitForURL(/statements/);
+	await page.waitForURL(/statements/, { timeout: 10000 });
 	expect(page.url()).toContain('statements');
 });

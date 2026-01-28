@@ -75,7 +75,7 @@
 	</div>
 
 	<!-- Portfolio Overview -->
-	<div>
+	<div data-testid="portfolio-section">
 		<h2 class="text-lg font-semibold text-gray-900 mb-4">Portfolio Übersicht</h2>
 		<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
 			<StatCard
@@ -109,7 +109,7 @@
 	</div>
 
 	<!-- Financial Overview -->
-	<div>
+	<div data-testid="financial-section">
 		<h2 class="text-lg font-semibold text-gray-900 mb-4">Finanzen</h2>
 		<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
 			<StatCard
@@ -142,11 +142,12 @@
 	</div>
 
 	<!-- Statements Status -->
-	<div>
+	<div data-testid="statements-status-section">
 		<h2 class="text-lg font-semibold text-gray-900 mb-4">Abrechnungen Status</h2>
 		<div class="grid gap-4 sm:grid-cols-4">
 			<a
 				href="/statements?status=draft"
+				data-testid="statements-draft"
 				class="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-md hover:border-gray-300 transition-all"
 			>
 				<div class="flex items-center gap-3">
@@ -161,6 +162,7 @@
 			</a>
 			<a
 				href="/statements?status=sent"
+				data-testid="statements-sent"
 				class="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-md hover:border-gray-300 transition-all"
 			>
 				<div class="flex items-center gap-3">
@@ -175,6 +177,7 @@
 			</a>
 			<a
 				href="/statements?status=paid"
+				data-testid="statements-paid"
 				class="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-md hover:border-gray-300 transition-all"
 			>
 				<div class="flex items-center gap-3">
@@ -189,6 +192,7 @@
 			</a>
 			<a
 				href="/statements?status=overdue"
+				data-testid="statements-overdue"
 				class="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-md hover:border-gray-300 transition-all"
 			>
 				<div class="flex items-center gap-3">
