@@ -46,7 +46,7 @@
 	<title>Mieter - Dwello</title>
 </svelte:head>
 
-<div class="space-y-6">
+<div class="space-y-6" data-testid="tenants-page">
 	<!-- Header -->
 	<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
 		<div>
