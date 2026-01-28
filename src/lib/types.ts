@@ -272,3 +272,64 @@ export interface ConfigPageData {
 	heatingProfiles: HeatingProfile[];
 	distributionKeys: DistributionKey[];
 }
+
+// Statement types
+export type StatementStatus = 'draft' | 'sent' | 'paid' | 'overdue';
+
+export interface StatementLineItem {
+	id: string;
+	categoryId: string;
+	categoryName: string;
+	distributionKeyId?: string;
+	distributionKeyName?: string;
+	totalAmount: number;
+	tenantShare: number;
+	percentage: number;
+}
+
+export interface Statement {
+	id: string;
+	statementNumber: string;
+	tenantId: string;
+	apartmentId: string;
+	buildingId: string;
+	periodStart: string;
+	periodEnd: string;
+	statementDate: string;
+	rentalDays: number;
+	totalCosts: number;
+	totalAdvancePayments: number;
+	managementFee: number;
+	balance: number; // positive = tenant owes, negative = refund
+	status: StatementStatus;
+	paymentDeadline: string;
+	paidDate?: string;
+	lastReminderDate?: string;
+	pdfGeneratedAt?: string;
+	createdAt?: string;
+	updatedAt?: string;
+}
+
+export interface StatementWithDetails extends Statement {
+	tenantName: string;
+	tenantEmail?: string;
+	apartmentUnit: string;
+	apartmentFloor: string;
+	buildingName: string;
+	buildingAddress: string;
+	lineItems: StatementLineItem[];
+}
+
+export interface StatementsListData {
+	statements: StatementWithDetails[];
+	total: number;
+	page: number;
+	pageSize: number;
+	buildings: { id: string; name: string }[];
+	statusCounts: {
+		draft: number;
+		sent: number;
+		paid: number;
+		overdue: number;
+	};
+}

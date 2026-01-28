@@ -58,9 +58,9 @@ This is a comprehensive implementation plan for the entire Dwello property manag
 | 8 | Backend - Statements & Prorating | 3 weeks | ⏳ Pending | 0% |
 | 9 | PDF & QR Bill Generation | 2 weeks | 🔄 In Progress | 85% |
 | 10 | Frontend - Core Management Pages | 2 weeks | ✅ Complete | 100% |
-| 11 | Frontend - Invoice Management | 1.5 weeks | 🔄 In Progress | 85% |
-| 12 | Frontend - Configuration Pages | 1.5 weeks | 🔄 In Progress | 80% |
-| 13 | Frontend - Statement Generation | 2 weeks | ⏳ Pending | 0% |
+| 11 | Frontend - Invoice Management | 1.5 weeks | ✅ Complete | 100% |
+| 12 | Frontend - Configuration Pages | 1.5 weeks | ✅ Complete | 100% |
+| 13 | Frontend - Statement Generation | 2 weeks | 🔄 In Progress | 70% |
 | 14 | Frontend - Dashboard & Analytics | 1 week | ⏳ Pending | 0% |
 | 15 | Integration Testing | 1.5 weeks | ⏳ Pending | 0% |
 | 16 | Environment & Config | 3 days | ⏳ Pending | 0% |
@@ -2389,37 +2389,41 @@ Validation is defined inline in route handlers for type safety.
 
 ### 13.1 Statement Generation Wizard
 
-- [ ] Create `src/routes/statements/generate/+page.svelte` (multi-step wizard)
-  - [ ] Step 1: Select period (date range or accounting period preset)
-  - [ ] Step 2: Select buildings/apartments
-  - [ ] Step 3: Review generated statements
-  - [ ] Step 4: Generate PDFs and save
-  - [ ] Progress indicator showing current step
+- [x] Create `src/routes/statements/generate/+page.svelte` (multi-step wizard)
+  - [x] Step 1: Select period (date range or accounting period preset)
+  - [x] Step 2: Select buildings/apartments
+  - [x] Step 3: Review generated statements
+  - [x] Step 4: Generate PDFs and save
+  - [x] Progress indicator showing current step
+  **Note:** Implemented with 4-step wizard including period selection with heating profile, building selection with apartment counts, preview with cost breakdown table, and generation progress bar. Files: `src/routes/statements/generate/+page.svelte` (~450 lines), `src/routes/statements/generate/+page.server.ts` (~100 lines).
 
 - [ ] Create `src/lib/components/StatementWizard.svelte`
   - [ ] Step component wrapper
   - [ ] Navigation (Previous, Next, Generate)
   - [ ] Form validation at each step
+  **Note:** Wizard functionality integrated directly into generate page - separate component not needed.
 
 ### 13.2 Statement List Page
 
-- [ ] Create `src/routes/statements/+page.svelte`
-  - [ ] Display statements in table
-  - [ ] Columns: number, tenant, apartment, period, amount, status, actions
-  - [ ] Filters: building, status (open/paid), date range
-  - [ ] Add "Generate Statements" button
-  - [ ] Link to statement details
-  - [ ] Bulk actions: mark as paid, send reminders
+- [x] Create `src/routes/statements/+page.svelte`
+  - [x] Display statements in table
+  - [x] Columns: number, tenant, apartment, period, amount, status, actions
+  - [x] Filters: building, status (open/paid), date range
+  - [x] Add "Generate Statements" button
+  - [x] Link to statement details
+  - [x] Bulk actions: mark as paid, send reminders
+  **Note:** Implemented with status overview cards (draft/sent/paid/overdue counts), searchable table with filters, balance display with color coding. Files: `src/routes/statements/+page.svelte` (~350 lines), `src/routes/statements/+page.server.ts` (~150 lines).
 
 ### 13.3 Statement Detail Pages
 
-- [ ] Create `src/routes/statements/[id]/+page.svelte`
-  - [ ] Display full statement
-  - [ ] Show header: period, tenant, apartment, date
-  - [ ] Show line items with costs by category
-  - [ ] Show total costs, advance payments, balance
-  - [ ] Show payment status and deadline
-  - [ ] Add buttons: Edit, Delete, Download PDF, Mark as Paid, Send Reminder
+- [x] Create `src/routes/statements/[id]/+page.svelte`
+  - [x] Display full statement
+  - [x] Show header: period, tenant, apartment, date
+  - [x] Show line items with costs by category
+  - [x] Show total costs, advance payments, balance
+  - [x] Show payment status and deadline
+  - [x] Add buttons: Edit, Delete, Download PDF, Mark as Paid, Send Reminder
+  **Note:** Implemented with full cost breakdown table, payment info sidebar, action modals for mark-paid/send-reminder/delete. Files: `src/routes/statements/[id]/+page.svelte` (~400 lines), `src/routes/statements/[id]/+page.server.ts` (~90 lines).
 
 - [ ] Create `src/routes/statements/[id]/pdf/+page.ts`
   - [ ] Server route to download PDF
@@ -2427,11 +2431,12 @@ Validation is defined inline in route handlers for type safety.
 
 ### 13.4 Payment Status Management
 
-- [ ] Create `src/lib/components/PaymentStatus.svelte`
-  - [ ] Show current status (open/paid)
-  - [ ] Show payment deadline
-  - [ ] Show days overdue (if applicable)
-  - [ ] Button to mark as paid
+- [x] Create `src/lib/components/PaymentStatus.svelte`
+  - [x] Show current status (open/paid)
+  - [x] Show payment deadline
+  - [x] Show days overdue (if applicable)
+  - [x] Button to mark as paid
+  **Note:** Implemented with status-specific colors and icons, deadline display, overdue calculation. File: `src/lib/components/PaymentStatus.svelte` (~90 lines).
 
 - [ ] Create `src/routes/statements/[id]/mark-paid/+server.ts`
   - [ ] Server route to update statement status
@@ -2439,10 +2444,11 @@ Validation is defined inline in route handlers for type safety.
 
 ### 13.5 Reminder Management
 
-- [ ] Create `src/lib/components/ReminderPanel.svelte`
-  - [ ] Show last reminder date (if any)
-  - [ ] Show reminder deadline
-  - [ ] Button to send reminder
+- [x] Create `src/lib/components/ReminderPanel.svelte`
+  - [x] Show last reminder date (if any)
+  - [x] Show reminder deadline
+  - [x] Button to send reminder
+  **Note:** Implemented with multi-level reminder support (1st/2nd/3rd Mahnung), email preview modal, payment marking integration. File: `src/lib/components/ReminderPanel.svelte` (~220 lines).
 
 - [ ] Create `src/routes/statements/[id]/send-reminder/+server.ts`
   - [ ] Server route to send reminder (placeholder for Phase 2 email)
@@ -2450,17 +2456,19 @@ Validation is defined inline in route handlers for type safety.
 
 ### 13.6 Statement Preview
 
-- [ ] Create `src/lib/components/StatementPreview.svelte`
-  - [ ] Display statement formatted for PDF
-  - [ ] Multi-language support
-  - [ ] Professional formatting
+- [x] Create `src/lib/components/StatementPreview.svelte`
+  - [x] Display statement formatted for PDF
+  - [x] Multi-language support
+  - [x] Professional formatting
+  **Note:** Implemented with Swiss QR-bill style layout, cost breakdown table, payment info section with IBAN. File: `src/lib/components/StatementPreview.svelte` (~180 lines).
 
 ### 13.7 Statement Review/Edit
 
-- [ ] Create `src/routes/statements/[id]/edit/+page.svelte`
-  - [ ] Allow editing: status, line items (in advanced mode)
-  - [ ] Recalculate totals when editing
-  - [ ] Add "Save" and "Cancel" buttons
+- [x] Create `src/routes/statements/[id]/edit/+page.svelte`
+  - [x] Allow editing: status, line items (in advanced mode)
+  - [x] Recalculate totals when editing
+  - [x] Add "Save" and "Cancel" buttons
+  **Note:** Implemented with editable line items modal, real-time cost recalculation, Swiss law management fee validation (max 3%). Files: `src/routes/statements/[id]/edit/+page.svelte` (~450 lines), `src/routes/statements/[id]/edit/+page.server.ts` (~90 lines).
 
 ### 13.8 Testing Statement Pages
 
@@ -3421,9 +3429,9 @@ Validation is defined inline in route handlers for type safety.
 | Phase 8 | ⏳ Pending | 0% | 61 | 0 |
 | Phase 9 | ✅ Complete | 85% | 34 | 29 |
 | Phase 10 | ✅ Complete | 100% | 43 | 43 |
-| Phase 11 | 🔄 In Progress | 65% | 28 | 18 |
-| Phase 12 | ⏳ Pending | 0% | 30 | 0 |
-| Phase 13 | ⏳ Pending | 0% | 40 | 0 |
+| Phase 11 | ✅ Complete | 100% | 28 | 28 |
+| Phase 12 | ✅ Complete | 100% | 30 | 30 |
+| Phase 13 | 🔄 In Progress | 70% | 40 | 28 |
 | Phase 14 | ⏳ Pending | 0% | 23 | 0 |
 | Phase 15 | ⏳ Pending | 0% | 48 | 0 |
 | Phase 16 | ⏳ Pending | 0% | 26 | 0 |
