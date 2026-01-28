@@ -84,7 +84,7 @@
 	<title>Nebenkostenabrechnungen - Dwello</title>
 </svelte:head>
 
-<div class="space-y-6">
+<div class="space-y-6" data-testid="statements-page">
 	<!-- Header -->
 	<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
 		<div>
@@ -98,8 +98,9 @@
 	</div>
 
 	<!-- Status Overview Cards -->
-	<div class="grid gap-4 sm:grid-cols-4">
+	<div class="grid gap-4 sm:grid-cols-4" data-testid="status-overview">
 		<button
+			data-testid="filter-draft"
 			onclick={() => (statusFilter = statusFilter === 'draft' ? '' : 'draft')}
 			class="p-4 bg-white border rounded-xl transition-all {statusFilter === 'draft'
 				? 'border-gray-400 shadow-md'
@@ -116,6 +117,7 @@
 			</div>
 		</button>
 		<button
+			data-testid="filter-sent"
 			onclick={() => (statusFilter = statusFilter === 'sent' ? '' : 'sent')}
 			class="p-4 bg-white border rounded-xl transition-all {statusFilter === 'sent'
 				? 'border-blue-400 shadow-md'
@@ -132,6 +134,7 @@
 			</div>
 		</button>
 		<button
+			data-testid="filter-paid"
 			onclick={() => (statusFilter = statusFilter === 'paid' ? '' : 'paid')}
 			class="p-4 bg-white border rounded-xl transition-all {statusFilter === 'paid'
 				? 'border-green-400 shadow-md'
@@ -148,6 +151,7 @@
 			</div>
 		</button>
 		<button
+			data-testid="filter-overdue"
 			onclick={() => (statusFilter = statusFilter === 'overdue' ? '' : 'overdue')}
 			class="p-4 bg-white border rounded-xl transition-all {statusFilter === 'overdue'
 				? 'border-red-400 shadow-md'

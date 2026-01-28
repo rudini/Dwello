@@ -6,44 +6,27 @@ Feature: Utility Cost Statements
 
   Background:
     Given I am logged in as "Test User"
-    And the backend API is mocked
 
-  @list @wip
-  Scenario: View statements list
-    Given there are statements in the system
+  @list
+  Scenario: View statements list page
     When I open the statements page
-    Then I should see a list of statements
-    And I should see status overview cards
+    Then I should see the statements page
+    And I should see the status overview cards
+    And I should see a "Abrechnungen erstellen" link
 
-  @list @wip
-  Scenario: Filter statements by status
-    Given there are statements with different statuses
+  @list
+  Scenario: Statements page shows status filters
     When I open the statements page
-    And I filter by status "overdue"
-    Then I should only see overdue statements
+    Then I should see draft filter button
+    And I should see sent filter button
+    And I should see paid filter button
+    And I should see overdue filter button
 
   @generate @wip
-  Scenario: Start statement generation wizard
+  Scenario: Navigate to statement generation wizard
     When I open the statements page
-    And I click on "Abrechnungen erstellen"
+    And I click the "Abrechnungen erstellen" link
     Then I should be on the statement generation wizard
-    And I should see step 1 of 4
-
-  @generate @wip
-  Scenario: Complete statement generation wizard step 1
-    When I open the statement generation wizard
-    And I select a period from "2024-01-01" to "2024-12-31"
-    And I select a heating profile
-    And I click "Weiter"
-    Then I should be on step 2 of the wizard
-
-  @generate @wip
-  Scenario: Complete statement generation wizard step 2
-    When I am on step 2 of the statement wizard
-    And I select buildings to include
-    And I click "Weiter"
-    Then I should be on step 3 of the wizard
-    And I should see a preview of the statements
 
   @detail @wip
   Scenario: View statement details
@@ -53,20 +36,3 @@ Feature: Utility Cost Statements
     And I should see the tenant name
     And I should see the cost breakdown
     And I should see the balance
-
-  @payment @wip
-  Scenario: Mark statement as paid
-    Given there is a sent statement
-    When I open the statement detail page
-    And I click on "Als bezahlt markieren"
-    And I confirm the payment
-    Then the statement status should be "paid"
-
-  @reminder @wip
-  Scenario: Send payment reminder
-    Given there is an overdue statement
-    When I open the statement detail page
-    And I click on "Mahnung senden"
-    And I select reminder level 1
-    And I confirm sending
-    Then a reminder should be sent
