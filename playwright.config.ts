@@ -1,14 +1,28 @@
-import type { PlaywrightTestConfig } from '@playwright/test';
+import { defineConfig } from '@playwright/test';
+import { defineBddConfig, cucumberReporter } from 'playwright-bdd';
 
-const config: PlaywrightTestConfig = {
+const testDir = defineBddConfig({
+	paths: ['tests/e2e/features/**/*.feature'],
+	require: ['tests/e2e/fixtures/test.ts', 'tests/e2e/steps/**/*.ts']
+});
+
+export default defineConfig({
+	testDir,
+	reporter: [
+		['html'],
+		cucumberReporter('html', { outputFile: 'cucumber-report/report.html' }),
+		cucumberReporter('json', { outputFile: 'cucumber-report/report.json' })
+	],
 	webServer: {
 		command: 'npm run build && npm run preview',
-		port: 4173
+		port: 4173,
+		reuseExistingServer: !process.env.CI
 	},
-	testDir: 'tests/e2e',
-	testMatch: /(.+\.)?(test|spec)\.[jt]s/,
 	use: {
-		baseURL: 'http://localhost:4173'
+		baseURL: 'http://localhost:4173',
+		screenshot: 'only-on-failure',
+		video: 'retain-on-failure',
+		trace: 'retain-on-failure'
 	},
 	projects: [
 		{
@@ -30,6 +44,4 @@ const config: PlaywrightTestConfig = {
 			}
 		}
 	]
-};
-
-export default config;
+});

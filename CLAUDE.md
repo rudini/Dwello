@@ -354,7 +354,57 @@ Do NOT mark complete unless:
 |------|-----------|-------|--------|
 | Unit | Vitest | Business logic (prorating, calculations) | >80% coverage |
 | Integration | Vitest + supertest | API endpoints, database | - |
-| E2E | Playwright | User workflows | Critical flows |
+| E2E | Playwright + playwright-bdd | User workflows (Gherkin syntax) | Critical flows |
+
+### E2E Testing with Gherkin (BDD)
+
+**Decision:** Use [playwright-bdd](https://github.com/vitalets/playwright-bdd) for E2E tests with Gherkin syntax.
+
+**Rationale:**
+- Business-readable test scenarios in Gherkin format
+- Better collaboration between developers and stakeholders
+- Tests serve as living documentation
+- Native Playwright advantages (parallelization, screenshots, traces)
+
+**Structure:**
+```
+tests/e2e/
+├── features/           # Gherkin .feature files
+│   ├── authentication.feature
+│   ├── authenticated-user.feature
+│   ├── buildings.feature
+│   ├── statements.feature
+│   └── dashboard.feature
+├── steps/              # Step definitions
+│   ├── authentication.steps.ts
+│   ├── buildings.steps.ts
+│   ├── statements.steps.ts
+│   └── dashboard.steps.ts
+└── fixtures/           # Custom test fixtures
+    └── test.ts
+```
+
+**Commands:**
+```bash
+npm run bddgen          # Generate Playwright tests from features
+npm run test:e2e        # Generate + run E2E tests
+npm run test:e2e:ui     # Generate + run with Playwright UI
+```
+
+**Example Feature (Gherkin):**
+```gherkin
+@authentication
+Feature: User Authentication
+  As a property manager
+  I want to securely log in to Dwello
+  So that I can manage my buildings
+
+  Scenario: Login page displays correctly
+    Given I am not logged in
+    When I open the login page
+    Then I should see the Dwello branding
+    And I should see a "Sign in with Google" button
+```
 
 **Critical E2E Flows:**
 1. Building creation with OpenPLZ address search
