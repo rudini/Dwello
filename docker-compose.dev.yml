@@ -1,0 +1,73 @@
+# Docker Compose - Development Configuration
+# Usage: docker-compose -f docker-compose.dev.yml up -d
+#
+# This configuration mounts source directories for hot-reload
+# and uses development environment variables.
+
+version: '3.8'
+
+services:
+  # ============================================
+  # PostgreSQL Database (Development)
+  # ============================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: dwello-postgres-dev
+    environment:
+      POSTGRES_USER: dwello
+      POSTGRES_PASSWORD: dwello
+      POSTGRES_DB: dwello
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data_dev:/var/lib/postgresql/data
+      - ./backend/migrations:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dwello -d dwello"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - dwello-dev-network
+
+  # ============================================
+  # Ollama - LLM (Development)
+  # ============================================
+  ollama:
+    image: ollama/ollama:latest
+    container_name: dwello-ollama-dev
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data_dev:/root/.ollama
+    networks:
+      - dwello-dev-network
+    # After starting, pull the model:
+    # docker exec dwello-ollama-dev ollama pull mistral
+
+  # ============================================
+  # Test Database (for running tests)
+  # ============================================
+  postgres-test:
+    image: postgres:16-alpine
+    container_name: dwello-postgres-test
+    environment:
+      POSTGRES_USER: dwello_test
+      POSTGRES_PASSWORD: dwello_test
+      POSTGRES_DB: dwello_test
+    ports:
+      - "5433:5432"
+    tmpfs:
+      - /var/lib/postgresql/data
+    networks:
+      - dwello-dev-network
+
+networks:
+  dwello-dev-network:
+    driver: bridge
+
+volumes:
+  postgres_data_dev:
+    driver: local
+  ollama_data_dev:
+    driver: local

@@ -1,0 +1,135 @@
+# Docker Compose - Production Configuration
+# Usage: docker-compose -f docker-compose.prod.yml up -d
+
+version: '3.8'
+
+services:
+  # ============================================
+  # Frontend - SvelteKit Application
+  # ============================================
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: dwello-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - BACKEND_API_URL=http://backend:3001
+      - PUBLIC_APP_NAME=Dwello
+      - PUBLIC_APP_URL=${PUBLIC_APP_URL:-http://localhost:3000}
+      - JWT_SECRET=${JWT_SECRET}
+      - OAUTH_GOOGLE_CLIENT_ID=${OAUTH_GOOGLE_CLIENT_ID}
+      - OAUTH_GOOGLE_CLIENT_SECRET=${OAUTH_GOOGLE_CLIENT_SECRET}
+      - OAUTH_GOOGLE_REDIRECT_URI=${OAUTH_GOOGLE_REDIRECT_URI}
+      - COOKIE_DOMAIN=${COOKIE_DOMAIN:-localhost}
+      - COOKIE_SECURE=${COOKIE_SECURE:-true}
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - dwello-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ============================================
+  # Backend - ElysiaJS API
+  # ============================================
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: dwello-backend
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - DATABASE_URL=postgresql://dwello:${POSTGRES_PASSWORD:-dwello}@postgres:5432/dwello
+      - JWT_SECRET=${JWT_SECRET}
+      - OLLAMA_API_URL=http://ollama:11434
+      - OLLAMA_MODEL=${OLLAMA_MODEL:-mistral:latest}
+      - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:3000}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - dwello-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ============================================
+  # PostgreSQL Database
+  # ============================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: dwello-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: dwello
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-dwello}
+      POSTGRES_DB: dwello
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/migrations:/docker-entrypoint-initdb.d:ro
+    networks:
+      - dwello-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dwello -d dwello"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ============================================
+  # Ollama - LLM for Invoice Categorization
+  # ============================================
+  ollama:
+    image: ollama/ollama:latest
+    container_name: dwello-ollama
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - dwello-network
+    # Note: After first start, run: docker exec dwello-ollama ollama pull mistral
+
+  # ============================================
+  # Nginx Reverse Proxy (Optional)
+  # ============================================
+  # nginx:
+  #   image: nginx:alpine
+  #   container_name: dwello-nginx
+  #   restart: unless-stopped
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     - ./nginx.conf:/etc/nginx/nginx.conf:ro
+  #     - ./certs:/etc/nginx/certs:ro
+  #   depends_on:
+  #     - frontend
+  #   networks:
+  #     - dwello-network
+
+networks:
+  dwello-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local
+  ollama_data:
+    driver: local
