@@ -1,20 +1,21 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
 	import Button from '$lib/components/Button.svelte';
 	import Icon from '$lib/components/Icon.svelte';
 	import Card from '$lib/components/Card.svelte';
 
-	// Mock buildings for dropdown
-	const buildings = [
-		{ id: 'building-001', name: 'Musterhaus Zentrum', address: 'Musterstraße 12, 8000 Zürich' },
-		{ id: 'building-002', name: 'Seepark Residenz', address: 'Seestrasse 45, 6004 Luzern' },
-		{ id: 'building-003', name: 'Alpenblick', address: 'Bergweg 7, 3012 Bern' },
-		{ id: 'building-004', name: 'Sonnenhof', address: 'Bahnhofstrasse 88, 8001 Zürich' }
-	];
+	interface PageData {
+		buildings: Array<{ id: string; name: string; address: string }>;
+		presetBuildingId: string | null;
+	}
+
+	let { data }: { data: PageData } = $props();
+
+	// Get buildings from server data
+	const buildings = data.buildings;
 
 	// Check if building is preset from URL query parameter
-	const presetBuildingId = $page.url.searchParams.get('building');
+	const presetBuildingId = data.presetBuildingId;
 	const presetBuilding = presetBuildingId ? buildings.find(b => b.id === presetBuildingId) : null;
 	const isBuildingPreset = !!presetBuilding;
 
