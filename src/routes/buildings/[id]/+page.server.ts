@@ -1,3 +1,4 @@
+import { error } from '@sveltejs/kit';
 import type { BuildingWithStats, Apartment } from '$lib/types';
 
 export interface BuildingDetailsData {
@@ -5,16 +6,10 @@ export interface BuildingDetailsData {
 	apartments: Apartment[];
 }
 
-export const load = async ({ params }: { params: { id: string } }): Promise<BuildingDetailsData> => {
-	const buildingId = params.id;
-
-	// Mock data - in production, fetch from backend API via proxy
-	// const response = await fetch(`/api/buildings/${buildingId}`);
-	// const data = await response.json();
-
-	// Mock building data
-	const building: BuildingWithStats = {
-		id: buildingId,
+// Mock buildings data - same as list page
+const mockBuildings: BuildingWithStats[] = [
+	{
+		id: 'building-001',
 		name: 'Musterhaus Zentrum',
 		address: 'Musterstraße 12',
 		postalCode: '8000',
@@ -28,7 +23,70 @@ export const load = async ({ params }: { params: { id: string } }): Promise<Buil
 		apartmentCount: 8,
 		occupiedCount: 7,
 		vacantCount: 1
-	};
+	},
+	{
+		id: 'building-002',
+		name: 'Seepark Residenz',
+		address: 'Seestrasse 45',
+		postalCode: '6004',
+		city: 'Luzern',
+		canton: 'LU',
+		country: 'Switzerland',
+		latitude: 47.0502,
+		longitude: 8.3093,
+		buildingType: 'Mehrfamilienhaus',
+		yearBuilt: 2010,
+		apartmentCount: 12,
+		occupiedCount: 12,
+		vacantCount: 0
+	},
+	{
+		id: 'building-003',
+		name: 'Alpenblick',
+		address: 'Bergweg 7',
+		postalCode: '3012',
+		city: 'Bern',
+		canton: 'BE',
+		country: 'Switzerland',
+		latitude: 46.9480,
+		longitude: 7.4474,
+		buildingType: 'Mehrfamilienhaus',
+		yearBuilt: 1972,
+		apartmentCount: 6,
+		occupiedCount: 5,
+		vacantCount: 1
+	},
+	{
+		id: 'building-004',
+		name: 'Sonnenhof',
+		address: 'Bahnhofstrasse 88',
+		postalCode: '4051',
+		city: 'Basel',
+		canton: 'BS',
+		country: 'Switzerland',
+		latitude: 47.5596,
+		longitude: 7.5886,
+		buildingType: 'Geschäftshaus',
+		yearBuilt: 1995,
+		apartmentCount: 4,
+		occupiedCount: 3,
+		vacantCount: 1
+	}
+];
+
+export const load = async ({ params }: { params: { id: string } }): Promise<BuildingDetailsData> => {
+	const buildingId = params.id;
+
+	// Mock data - in production, fetch from backend API via proxy
+	// const response = await fetch(`/api/buildings/${buildingId}`);
+	// const data = await response.json();
+
+	// Find building by ID
+	const building = mockBuildings.find((b) => b.id === buildingId);
+
+	if (!building) {
+		throw error(404, 'Building not found');
+	}
 
 	// Mock apartments data
 	const apartments: Apartment[] = [
