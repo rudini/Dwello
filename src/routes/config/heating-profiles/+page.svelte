@@ -110,14 +110,13 @@
 				</div>
 
 				<!-- Monthly Chart -->
-				<div class="h-32 flex items-end gap-1 mb-2">
+				<div class="h-36 flex items-end gap-1 mb-1 bg-gray-50 rounded-lg p-2 pt-4">
 					{#each months as month}
 						{@const value = profile.monthlyPercentages[month.key]}
-						{@const height = getBarHeight(value, maxPct)}
-						<div class="flex-1 flex flex-col items-center">
+						<div class="flex-1 flex flex-col items-center justify-end h-full">
 							<div
-								class="w-full rounded-t transition-all {value > 0 ? 'bg-orange-400' : 'bg-gray-100'}"
-								style="height: {height}%"
+								class="w-full rounded-t transition-all duration-300 {value > 0 ? 'bg-primary hover:bg-primary/80' : 'bg-gray-200'}"
+								style="height: {value > 0 ? Math.max((value / 20) * 100, 8) : 4}%"
 								title="{month.label}: {value}%"
 							></div>
 						</div>
@@ -125,7 +124,7 @@
 				</div>
 
 				<!-- Month Labels -->
-				<div class="flex gap-1 text-xs text-gray-500 mb-4">
+				<div class="flex gap-1 text-xs text-gray-500 mb-3">
 					{#each months as month}
 						<div class="flex-1 text-center">{month.label}</div>
 					{/each}
