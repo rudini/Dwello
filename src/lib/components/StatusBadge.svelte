@@ -1,15 +1,14 @@
 <script lang="ts">
-	type Status = 'AKTIV' | 'Beendet';
-	type Variant = 'success' | 'gray';
+	type Variant = 'success' | 'gray' | 'info' | 'warning' | 'error';
 
 	interface Props {
-		status: Status;
+		status: string;
 		variant?: Variant;
 	}
 
 	let { status, variant = 'success' }: Props = $props();
 
-	const variantClasses = {
+	const variantClasses: Record<Variant, { container: string; text: string; dot: string }> = {
 		success: {
 			container: 'bg-green-100',
 			text: 'text-green-700',
@@ -19,10 +18,25 @@
 			container: 'bg-slate-100',
 			text: 'text-slate-600',
 			dot: 'bg-slate-400'
+		},
+		info: {
+			container: 'bg-blue-100',
+			text: 'text-blue-700',
+			dot: 'bg-blue-500'
+		},
+		warning: {
+			container: 'bg-amber-100',
+			text: 'text-amber-700',
+			dot: 'bg-amber-500'
+		},
+		error: {
+			container: 'bg-red-100',
+			text: 'text-red-700',
+			dot: 'bg-red-500'
 		}
 	};
 
-	const classes = $derived(variantClasses[variant]);
+	const classes = $derived(variantClasses[variant] || variantClasses.gray);
 </script>
 
 <div class="{classes.container} {classes.text} px-2 py-0.5 rounded inline-flex items-center gap-1.5">
