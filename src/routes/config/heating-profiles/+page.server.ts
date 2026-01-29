@@ -14,9 +14,9 @@ export const load = async (): Promise<HeatingProfilesData> => {
 			description: 'Gleichmässige Verteilung über Heizperiode (Okt-Apr)',
 			isActive: true,
 			monthlyPercentages: {
-				january: 15,
-				february: 13,
-				march: 10,
+				january: 18,
+				february: 15,
+				march: 12,
 				april: 5,
 				may: 0,
 				june: 0,
@@ -24,8 +24,8 @@ export const load = async (): Promise<HeatingProfilesData> => {
 				august: 0,
 				september: 2,
 				october: 10,
-				november: 15,
-				december: 15
+				november: 18,
+				december: 20
 			}
 		},
 		{
@@ -35,18 +35,18 @@ export const load = async (): Promise<HeatingProfilesData> => {
 			description: 'Optimiert für Schweizer Mittelland',
 			isActive: true,
 			monthlyPercentages: {
-				january: 18,
-				february: 15,
-				march: 12,
+				january: 20,
+				february: 17,
+				march: 13,
 				april: 5,
 				may: 0,
 				june: 0,
 				july: 0,
 				august: 0,
 				september: 0,
-				october: 8,
-				november: 12,
-				december: 15
+				october: 10,
+				november: 15,
+				december: 20
 			}
 		},
 		{
@@ -77,7 +77,7 @@ export const load = async (): Promise<HeatingProfilesData> => {
 			description: 'Für das milde Klima im Tessin',
 			isActive: true,
 			monthlyPercentages: {
-				january: 20,
+				january: 22,
 				february: 18,
 				march: 12,
 				april: 3,
@@ -86,16 +86,16 @@ export const load = async (): Promise<HeatingProfilesData> => {
 				july: 0,
 				august: 0,
 				september: 0,
-				october: 5,
-				november: 12,
-				december: 15
+				october: 7,
+				november: 15,
+				december: 23
 			}
 		},
 		{
 			id: 'hp-custom-1',
 			name: 'Eigenes Profil 1',
 			type: 'custom',
-			description: 'Benutzerdefiniertes Heizprofil',
+			description: 'Benutzerdefiniertes Heizprofil (unvollständig)',
 			isActive: true,
 			monthlyPercentages: {
 				january: 17,

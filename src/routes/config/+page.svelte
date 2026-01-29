@@ -39,6 +39,11 @@
 		{ value: 'october-september', label: 'Oktober - September' }
 	];
 
+	// Calculate total percentage for a heating profile
+	function getProfileTotal(profile: typeof data.heatingProfiles[0]): number {
+		return Object.values(profile.monthlyPercentages).reduce((sum, val) => sum + val, 0);
+	}
+
 	function validate(): boolean {
 		const newErrors: Record<string, string> = {};
 
@@ -294,11 +299,15 @@
 					>
 						<option value="">Kein Standard</option>
 						{#each data.heatingProfiles as profile}
-							<option value={profile.id}>{profile.name}</option>
+							{@const total = getProfileTotal(profile)}
+							{@const isValid = total === 100}
+							<option value={profile.id} disabled={!isValid}>
+								{profile.name} ({total}%){isValid ? '' : ' - nicht wählbar'}
+							</option>
 						{/each}
 					</select>
 					<p class="mt-1 text-xs text-gray-500">
-						Wird für neue Abrechnungen vorausgewählt
+						Wird für neue Abrechnungen vorausgewählt. Nur Profile mit exakt 100% Summe sind wählbar.
 					</p>
 				</div>
 				<div>

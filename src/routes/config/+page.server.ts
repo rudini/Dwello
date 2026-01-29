@@ -10,9 +10,9 @@ export const load = async (): Promise<ConfigPageData> => {
 			description: 'Gleichmässige Verteilung über Heizperiode (Okt-Apr)',
 			isActive: true,
 			monthlyPercentages: {
-				january: 15,
-				february: 13,
-				march: 10,
+				january: 18,
+				february: 15,
+				march: 12,
 				april: 5,
 				may: 0,
 				june: 0,
@@ -20,8 +20,8 @@ export const load = async (): Promise<ConfigPageData> => {
 				august: 0,
 				september: 2,
 				october: 10,
-				november: 15,
-				december: 15
+				november: 18,
+				december: 20
 			}
 		},
 		{
@@ -31,18 +31,18 @@ export const load = async (): Promise<ConfigPageData> => {
 			description: 'Optimiert für Schweizer Mittelland',
 			isActive: true,
 			monthlyPercentages: {
-				january: 18,
-				february: 15,
-				march: 12,
+				january: 20,
+				february: 17,
+				march: 13,
 				april: 5,
 				may: 0,
 				june: 0,
 				july: 0,
 				august: 0,
 				september: 0,
-				october: 8,
-				november: 12,
-				december: 15
+				october: 10,
+				november: 15,
+				december: 20
 			}
 		},
 		{
@@ -73,7 +73,7 @@ export const load = async (): Promise<ConfigPageData> => {
 			description: 'Für das milde Klima im Tessin',
 			isActive: true,
 			monthlyPercentages: {
-				january: 20,
+				january: 22,
 				february: 18,
 				march: 12,
 				april: 3,
@@ -82,9 +82,9 @@ export const load = async (): Promise<ConfigPageData> => {
 				july: 0,
 				august: 0,
 				september: 0,
-				october: 5,
-				november: 12,
-				december: 15
+				october: 7,
+				november: 15,
+				december: 23
 			}
 		}
 	];

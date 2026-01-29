@@ -15,8 +15,8 @@ const mockProfiles: HeatingProfile[] = [
 		description: 'Gleichmässige Verteilung über Heizperiode (Okt-Apr)',
 		isActive: true,
 		monthlyPercentages: {
-			january: 15, february: 13, march: 10, april: 5, may: 0, june: 0,
-			july: 0, august: 0, september: 2, october: 10, november: 15, december: 15
+			january: 18, february: 15, march: 12, april: 5, may: 0, june: 0,
+			july: 0, august: 0, september: 2, october: 10, november: 18, december: 20
 		}
 	},
 	{
@@ -26,8 +26,8 @@ const mockProfiles: HeatingProfile[] = [
 		description: 'Optimiert für Schweizer Mittelland',
 		isActive: true,
 		monthlyPercentages: {
-			january: 18, february: 15, march: 12, april: 5, may: 0, june: 0,
-			july: 0, august: 0, september: 0, october: 8, november: 12, december: 15
+			january: 20, february: 17, march: 13, april: 5, may: 0, june: 0,
+			july: 0, august: 0, september: 0, october: 10, november: 15, december: 20
 		}
 	},
 	{
@@ -48,15 +48,15 @@ const mockProfiles: HeatingProfile[] = [
 		description: 'Für das milde Klima im Tessin',
 		isActive: true,
 		monthlyPercentages: {
-			january: 20, february: 18, march: 12, april: 3, may: 0, june: 0,
-			july: 0, august: 0, september: 0, october: 5, november: 12, december: 15
+			january: 22, february: 18, march: 12, april: 3, may: 0, june: 0,
+			july: 0, august: 0, september: 0, october: 7, november: 15, december: 23
 		}
 	},
 	{
 		id: 'hp-custom-1',
 		name: 'Eigenes Profil 1',
 		type: 'custom',
-		description: 'Benutzerdefiniertes Heizprofil',
+		description: 'Benutzerdefiniertes Heizprofil (unvollständig)',
 		isActive: true,
 		monthlyPercentages: {
 			january: 17, february: 14, march: 11, april: 6, may: 1, june: 0,
