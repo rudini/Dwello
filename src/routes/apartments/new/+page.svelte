@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
 	import Button from '$lib/components/Button.svelte';
 	import Icon from '$lib/components/Icon.svelte';
 	import Card from '$lib/components/Card.svelte';
@@ -8,11 +9,17 @@
 	const buildings = [
 		{ id: 'building-001', name: 'Musterhaus Zentrum', address: 'Musterstraße 12, 8000 Zürich' },
 		{ id: 'building-002', name: 'Seepark Residenz', address: 'Seestrasse 45, 6004 Luzern' },
-		{ id: 'building-003', name: 'Alpenblick', address: 'Bergweg 7, 3012 Bern' }
+		{ id: 'building-003', name: 'Alpenblick', address: 'Bergweg 7, 3012 Bern' },
+		{ id: 'building-004', name: 'Sonnenhof', address: 'Bahnhofstrasse 88, 8001 Zürich' }
 	];
 
+	// Check if building is preset from URL query parameter
+	const presetBuildingId = $page.url.searchParams.get('building');
+	const presetBuilding = presetBuildingId ? buildings.find(b => b.id === presetBuildingId) : null;
+	const isBuildingPreset = !!presetBuilding;
+
 	// Form state
-	let buildingId = $state('');
+	let buildingId = $state(presetBuildingId || '');
 	let floor = $state('');
 	let addressUnit = $state('');
 	let sizeM2 = $state('');
@@ -76,7 +83,8 @@
 
 			// Mock success
 			await new Promise((r) => setTimeout(r, 500));
-			await goto('/apartments');
+			// Redirect back to building page if preset, otherwise to apartments list
+			await goto(isBuildingPreset ? `/buildings/${buildingId}` : '/apartments');
 		} catch (error) {
 			console.error('Error creating apartment:', error);
 			errors = { form: 'Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.' };
@@ -93,9 +101,17 @@
 <div class="max-w-2xl mx-auto space-y-6">
 	<!-- Breadcrumb -->
 	<nav class="flex items-center text-sm text-gray-500">
-		<a href="/apartments" class="hover:text-primary transition-colors">Wohnungen</a>
-		<Icon name="chevron_right" size={16} class="mx-2" />
-		<span class="text-gray-900 font-medium">Neue Wohnung</span>
+		{#if isBuildingPreset && presetBuilding}
+			<a href="/buildings" class="hover:text-primary transition-colors">Gebäude</a>
+			<Icon name="chevron_right" size={16} class="mx-2" />
+			<a href="/buildings/{presetBuilding.id}" class="hover:text-primary transition-colors">{presetBuilding.name}</a>
+			<Icon name="chevron_right" size={16} class="mx-2" />
+			<span class="text-gray-900 font-medium">Neue Wohnung</span>
+		{:else}
+			<a href="/apartments" class="hover:text-primary transition-colors">Wohnungen</a>
+			<Icon name="chevron_right" size={16} class="mx-2" />
+			<span class="text-gray-900 font-medium">Neue Wohnung</span>
+		{/if}
 	</nav>
 
 	<!-- Header -->
@@ -118,26 +134,45 @@
 				<label for="building" class="block text-sm font-medium text-gray-700 mb-1">
 					Gebäude <span class="text-red-500">*</span>
 				</label>
-				<select
-					id="building"
-					bind:value={buildingId}
-					class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary bg-white {errors.buildingId
-						? 'border-red-500'
-						: 'border-gray-300'}"
-				>
-					<option value="">Gebäude auswählen...</option>
-					{#each buildings as building}
-						<option value={building.id}>
-							{building.name || building.address}
-						</option>
-					{/each}
-				</select>
-				{#if errors.buildingId}
-					<p class="mt-1 text-sm text-red-600">{errors.buildingId}</p>
-				{:else}
+				{#if isBuildingPreset && presetBuilding}
+					<!-- Read-only field when building is preset from URL -->
+					<div class="relative">
+						<input
+							id="building"
+							type="text"
+							value={presetBuilding.name}
+							readonly
+							class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 cursor-not-allowed"
+						/>
+						<input type="hidden" name="buildingId" value={buildingId} />
+						<Icon name="lock" size={18} class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
+					</div>
 					<p class="mt-1 text-sm text-gray-500">
-						Die Wohnung wird diesem Gebäude zugeordnet.
+						{presetBuilding.address}
 					</p>
+				{:else}
+					<!-- Dropdown when no building is preset -->
+					<select
+						id="building"
+						bind:value={buildingId}
+						class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary bg-white {errors.buildingId
+							? 'border-red-500'
+							: 'border-gray-300'}"
+					>
+						<option value="">Gebäude auswählen...</option>
+						{#each buildings as building}
+							<option value={building.id}>
+								{building.name || building.address}
+							</option>
+						{/each}
+					</select>
+					{#if errors.buildingId}
+						<p class="mt-1 text-sm text-red-600">{errors.buildingId}</p>
+					{:else}
+						<p class="mt-1 text-sm text-gray-500">
+							Die Wohnung wird diesem Gebäude zugeordnet.
+						</p>
+					{/if}
 				{/if}
 			</div>
 
@@ -244,7 +279,7 @@
 
 			<!-- Actions -->
 			<div class="flex gap-3 pt-4 border-t border-gray-200">
-				<Button href="/apartments" variant="secondary">Abbrechen</Button>
+				<Button href={isBuildingPreset ? `/buildings/${presetBuildingId}` : '/apartments'} variant="secondary">Abbrechen</Button>
 				<Button type="submit" variant="primary" disabled={isSubmitting}>
 					{#if isSubmitting}
 						<span class="animate-spin">
