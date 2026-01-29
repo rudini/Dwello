@@ -14,8 +14,15 @@ When('I open the config page', async ({ page }) => {
 });
 
 When('I click the {string} quick link', async ({ page }, linkText: string) => {
+	const currentUrl = page.url();
 	await page.getByRole('link', { name: linkText }).click();
-	await page.waitForLoadState('networkidle');
+	// Wait for URL to change
+	await page.waitForFunction(
+		(prevUrl) => window.location.href !== prevUrl,
+		currentUrl,
+		{ timeout: 10000 }
+	);
+	await page.waitForLoadState('domcontentloaded');
 });
 
 When('I select {string} as the default heating profile', async ({ page }, profileName: string) => {
@@ -44,25 +51,28 @@ When('I change the management fee to {string}', async ({ page }, value: string) 
 // ============================================
 
 Then('I should see the config page', async ({ page }) => {
-	await expect(page.getByRole('heading', { name: 'Einstellungen' })).toBeVisible({ timeout: 10000 });
+	// Use level 1 to match the main page heading specifically
+	await expect(page.getByRole('heading', { name: 'Einstellungen', level: 1 })).toBeVisible({ timeout: 10000 });
 });
 
 Then('I should see the quick links section', async ({ page }) => {
-	await expect(page.getByText('Kategorien')).toBeVisible({ timeout: 10000 });
-	await expect(page.getByText('Heizprofile')).toBeVisible({ timeout: 10000 });
-	await expect(page.getByText('Verteilschlüssel')).toBeVisible({ timeout: 10000 });
+	// Use exact matches or first() to avoid duplicates in descriptions
+	await expect(page.getByText('Kategorien').first()).toBeVisible({ timeout: 10000 });
+	await expect(page.getByText('Heizprofile').first()).toBeVisible({ timeout: 10000 });
+	await expect(page.getByText('Verteilschlüssel').first()).toBeVisible({ timeout: 10000 });
 });
 
 Then('I should see the company info section', async ({ page }) => {
-	await expect(page.getByText('Unternehmensdaten')).toBeVisible({ timeout: 10000 });
+	// Use heading role to be specific
+	await expect(page.getByRole('heading', { name: /Unternehmensdaten/ })).toBeVisible({ timeout: 10000 });
 });
 
 Then('I should see the accounting settings section', async ({ page }) => {
-	await expect(page.getByText('Abrechnungseinstellungen')).toBeVisible({ timeout: 10000 });
+	await expect(page.getByRole('heading', { name: /Abrechnungseinstellungen/ })).toBeVisible({ timeout: 10000 });
 });
 
 Then('I should see the default values section', async ({ page }) => {
-	await expect(page.getByText('Standardwerte')).toBeVisible({ timeout: 10000 });
+	await expect(page.getByRole('heading', { name: /Standardwerte/ })).toBeVisible({ timeout: 10000 });
 });
 
 Then('I should be on the categories page', async ({ page }) => {

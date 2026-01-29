@@ -101,7 +101,15 @@ When('I click on {string}', async ({ page }, buttonText: string) => {
 });
 
 When('I click the {string} link', async ({ page }, linkText: string) => {
+	const currentUrl = page.url();
 	await page.getByRole('link', { name: linkText }).first().click();
+	// Wait for URL to change
+	await page.waitForFunction(
+		(prevUrl) => window.location.href !== prevUrl,
+		currentUrl,
+		{ timeout: 10000 }
+	);
+	await page.waitForLoadState('domcontentloaded');
 });
 
 // ============================================
