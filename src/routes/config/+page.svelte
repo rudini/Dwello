@@ -111,11 +111,11 @@
 	<title>Einstellungen - Dwello</title>
 </svelte:head>
 
-<div class="space-y-6">
+<div class="space-y-6" data-testid="config-page">
 	<!-- Header -->
 	<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
 		<div>
-			<h1 class="text-2xl font-bold text-gray-900">Einstellungen</h1>
+			<h1 class="text-2xl font-bold text-gray-900" data-testid="page-title">Einstellungen</h1>
 			<p class="text-gray-500 mt-1">Systemkonfiguration und Standardwerte</p>
 		</div>
 		{#if data.config.updatedAt}
@@ -135,10 +135,11 @@
 
 	<form onsubmit={handleSubmit} class="space-y-6">
 		<!-- Quick Links -->
-		<div class="grid gap-4 sm:grid-cols-3">
+		<div class="grid gap-4 sm:grid-cols-3" data-testid="quick-links">
 			<a
 				href="/config/categories"
 				class="p-4 bg-white border border-gray-200 rounded-xl hover:border-blue-300 hover:shadow-md transition-all flex items-center gap-4"
+				data-testid="quick-link-categories"
 			>
 				<div class="p-3 bg-blue-100 rounded-lg">
 					<Icon name="category" size={24} class="text-blue-600" />
@@ -151,6 +152,7 @@
 			<a
 				href="/config/heating-profiles"
 				class="p-4 bg-white border border-gray-200 rounded-xl hover:border-blue-300 hover:shadow-md transition-all flex items-center gap-4"
+				data-testid="quick-link-heating-profiles"
 			>
 				<div class="p-3 bg-orange-100 rounded-lg">
 					<Icon name="local_fire_department" size={24} class="text-orange-600" />
@@ -163,6 +165,7 @@
 			<a
 				href="/config/distribution-keys"
 				class="p-4 bg-white border border-gray-200 rounded-xl hover:border-blue-300 hover:shadow-md transition-all flex items-center gap-4"
+				data-testid="quick-link-distribution-keys"
 			>
 				<div class="p-3 bg-purple-100 rounded-lg">
 					<Icon name="calculate" size={24} class="text-purple-600" />
@@ -176,7 +179,7 @@
 
 		<!-- Company Info -->
 		<Card>
-			<h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+			<h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2" data-testid="company-info-section">
 				<Icon name="business" size={20} class="text-gray-400" />
 				Unternehmensdaten
 			</h2>
@@ -231,7 +234,7 @@
 
 		<!-- Accounting Settings -->
 		<Card>
-			<h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+			<h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2" data-testid="accounting-settings-section">
 				<Icon name="calendar_month" size={20} class="text-gray-400" />
 				Abrechnungseinstellungen
 			</h2>
@@ -283,7 +286,7 @@
 
 		<!-- Default Values -->
 		<Card>
-			<h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+			<h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2" data-testid="default-values-section">
 				<Icon name="tune" size={20} class="text-gray-400" />
 				Standardwerte
 			</h2>

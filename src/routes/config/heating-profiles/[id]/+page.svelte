@@ -45,9 +45,9 @@
 	<title>{profile.name} - Heizprofil - Dwello</title>
 </svelte:head>
 
-<div class="space-y-6">
+<div class="space-y-6" data-testid="heating-profile-detail-page">
 	<!-- Breadcrumb -->
-	<nav class="flex items-center text-sm text-gray-500">
+	<nav class="flex items-center text-sm text-gray-500" data-testid="breadcrumb">
 		<a href="/config" class="hover:text-primary transition-colors">Einstellungen</a>
 		<Icon name="chevron_right" size={16} class="mx-2" />
 		<a href="/config/heating-profiles" class="hover:text-primary transition-colors">Heizprofile</a>
@@ -59,7 +59,7 @@
 	<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
 		<div>
 			<div class="flex items-center gap-3">
-				<h1 class="text-2xl font-bold text-gray-900">{profile.name}</h1>
+				<h1 class="text-2xl font-bold text-gray-900" data-testid="profile-name">{profile.name}</h1>
 				{#if profile.type === 'predefined'}
 					<StatusBadge status="System" variant="info" />
 				{:else}
@@ -86,7 +86,7 @@
 	<div class="grid gap-6 lg:grid-cols-2">
 		<!-- Monthly Distribution Chart -->
 		<Card>
-			<h2 class="text-lg font-semibold text-gray-900 mb-4">Monatliche Verteilung</h2>
+			<h2 class="text-lg font-semibold text-gray-900 mb-4" data-testid="monthly-distribution-title">Monatliche Verteilung</h2>
 			<div class="space-y-3">
 				{#each months as month}
 					{@const percentage = profile.monthlyPercentages[month.key]}
@@ -108,7 +108,7 @@
 			</div>
 			<div class="mt-4 pt-4 border-t border-gray-200 flex justify-between items-center">
 				<span class="text-sm text-gray-600">Gesamt</span>
-				<span class="text-lg font-bold {totalPercentage === 100 ? 'text-green-600' : 'text-red-600'}">
+				<span class="text-lg font-bold {totalPercentage === 100 ? 'text-green-600' : 'text-red-600'}" data-testid="total-percentage">
 					{totalPercentage}%
 				</span>
 			</div>
@@ -122,7 +122,7 @@
 
 		<!-- Profile Info -->
 		<Card>
-			<h2 class="text-lg font-semibold text-gray-900 mb-4">Profil-Informationen</h2>
+			<h2 class="text-lg font-semibold text-gray-900 mb-4" data-testid="profile-info-title">Profil-Informationen</h2>
 			<dl class="space-y-4">
 				<div>
 					<dt class="text-sm text-gray-500">Name</dt>

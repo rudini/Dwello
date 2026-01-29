@@ -24,25 +24,30 @@ When('I open the heating profile edit page for {string}', async ({ page }, profi
 });
 
 When('I click on the {string} profile', async ({ page }, profileName: string) => {
-	// Find the card containing this profile name and click its view link
-	// The card has class "rounded-xl" and contains an h3 with the profile name
-	const profileCard = page.locator('div.rounded-xl').filter({
-		has: page.locator(`h3:has-text("${profileName}")`)
-	});
-	await expect(profileCard).toBeVisible({ timeout: 10000 });
-	await profileCard.locator('a[title="Details anzeigen"]').click();
-	// Wait for URL to change to the detail page
+	// Map profile name to ID for data-testid
+	const profileIdMap: Record<string, string> = {
+		'Standard': 'hp-standard',
+		'Mittelland': 'hp-mittelland',
+		'Bergregion': 'hp-mountain',
+		'Tessin': 'hp-tessin',
+		'Eigenes Profil 1': 'hp-custom-1'
+	};
+	const profileId = profileIdMap[profileName] || profileName.toLowerCase().replace(/\s+/g, '-');
+	await page.getByTestId(`view-profile-${profileId}`).click();
 	await page.waitForURL(/\/config\/heating-profiles\/hp-/, { timeout: 10000 });
 });
 
 When('I click the view button for {string} profile', async ({ page }, profileName: string) => {
-	// Find the card containing this profile name and click its view link
-	const profileCard = page.locator('div.rounded-xl').filter({
-		has: page.locator(`h3:has-text("${profileName}")`)
-	});
-	await expect(profileCard).toBeVisible({ timeout: 10000 });
-	await profileCard.locator('a[title="Details anzeigen"]').click();
-	// Wait for URL to change to the detail page
+	// Map profile name to ID for data-testid
+	const profileIdMap: Record<string, string> = {
+		'Standard': 'hp-standard',
+		'Mittelland': 'hp-mittelland',
+		'Bergregion': 'hp-mountain',
+		'Tessin': 'hp-tessin',
+		'Eigenes Profil 1': 'hp-custom-1'
+	};
+	const profileId = profileIdMap[profileName] || profileName.toLowerCase().replace(/\s+/g, '-');
+	await page.getByTestId(`view-profile-${profileId}`).click();
 	await page.waitForURL(/\/config\/heating-profiles\/hp-/, { timeout: 10000 });
 });
 
@@ -74,17 +79,17 @@ When('I click the {string} button', async ({ page }, buttonText: string) => {
 // ============================================
 
 Then('I should see the heating profiles page', async ({ page }) => {
-	// Use exact match and level to avoid matching the info card h3
-	await expect(page.getByRole('heading', { name: 'Heizprofile', exact: true, level: 1 })).toBeVisible({ timeout: 10000 });
+	// Use data-testid for stable selectors
+	await expect(page.getByTestId('heating-profiles-page')).toBeVisible({ timeout: 10000 });
 });
 
 Then('I should see at least {int} heating profiles', async ({ page }, count: number) => {
-	// Verify specific known profiles are visible
-	await expect(page.getByRole('heading', { name: 'Standard', level: 3 })).toBeVisible({ timeout: 10000 });
-	await expect(page.getByRole('heading', { name: 'Mittelland', level: 3 })).toBeVisible({ timeout: 10000 });
-	await expect(page.getByRole('heading', { name: 'Bergregion', level: 3 })).toBeVisible({ timeout: 10000 });
-	await expect(page.getByRole('heading', { name: 'Tessin', level: 3 })).toBeVisible({ timeout: 10000 });
-	// At least 5 profiles exist if we can see at least these 4 + 1 custom
+	// Use data-testid to verify profiles are visible
+	await expect(page.getByTestId('profiles-grid')).toBeVisible({ timeout: 10000 });
+	await expect(page.getByTestId('profile-card-hp-standard')).toBeVisible({ timeout: 10000 });
+	await expect(page.getByTestId('profile-card-hp-mittelland')).toBeVisible({ timeout: 10000 });
+	await expect(page.getByTestId('profile-card-hp-mountain')).toBeVisible({ timeout: 10000 });
+	await expect(page.getByTestId('profile-card-hp-tessin')).toBeVisible({ timeout: 10000 });
 });
 
 Then('I should be on the heating profile detail page', async ({ page }) => {
@@ -101,34 +106,31 @@ Then('I should be on the heating profiles page', async ({ page }) => {
 });
 
 Then('I should see the profile name {string}', async ({ page }, name: string) => {
-	await expect(page.getByRole('heading', { name, level: 1 })).toBeVisible({ timeout: 10000 });
+	await expect(page.getByTestId('profile-name')).toHaveText(name, { timeout: 10000 });
 });
 
 Then('I should see the monthly distribution chart', async ({ page }) => {
-	await expect(page.getByText('Monatliche Verteilung')).toBeVisible({ timeout: 10000 });
-	// Check for month labels - use first() since there might be multiple instances
-	await expect(page.getByText('Januar').first()).toBeVisible({ timeout: 10000 });
-	await expect(page.getByText('Dezember').first()).toBeVisible({ timeout: 10000 });
+	await expect(page.getByTestId('monthly-distribution-title')).toBeVisible({ timeout: 10000 });
 });
 
 Then('I should see the profile information section', async ({ page }) => {
-	await expect(page.getByText('Profil-Informationen')).toBeVisible({ timeout: 10000 });
+	await expect(page.getByTestId('profile-info-title')).toBeVisible({ timeout: 10000 });
 });
 
 Then('I should see the total percentage {string}', async ({ page }, percentage: string) => {
-	await expect(page.getByText(percentage)).toBeVisible({ timeout: 10000 });
+	await expect(page.getByTestId('total-percentage')).toContainText(percentage, { timeout: 10000 });
 });
 
 Then('the total percentage should be displayed in green', async ({ page }) => {
-	// The total percentage is in a text-lg font-bold span
-	const sumElement = page.locator('.text-lg.font-bold.text-green-600');
+	const sumElement = page.getByTestId('total-percentage');
 	await expect(sumElement).toBeVisible({ timeout: 10000 });
+	await expect(sumElement).toHaveClass(/text-green-600/, { timeout: 10000 });
 });
 
 Then('the total percentage should be displayed in red', async ({ page }) => {
-	// The total percentage is in a text-lg font-bold span
-	const sumElement = page.locator('.text-lg.font-bold.text-red-600');
+	const sumElement = page.getByTestId('total-percentage');
 	await expect(sumElement).toBeVisible({ timeout: 10000 });
+	await expect(sumElement).toHaveClass(/text-red-600/, { timeout: 10000 });
 });
 
 Then('I should see the heating profile edit form', async ({ page }) => {

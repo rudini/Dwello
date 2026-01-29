@@ -356,6 +356,49 @@ Do NOT mark complete unless:
 | Integration | Vitest + supertest | API endpoints, database | - |
 | E2E | Playwright + playwright-bdd | User workflows (Gherkin syntax) | Critical flows |
 
+### Test Selectors: data-testid First
+
+**STRICT RULE:** Always use `data-testid` attributes as the primary selector strategy in E2E and unit tests.
+
+**Priority Order:**
+1. `data-testid` - **ALWAYS prefer this** (e.g., `page.getByTestId('heating-profiles-page')`)
+2. Accessible roles with specific names (e.g., `getByRole('button', { name: 'Submit' })`)
+3. Text content (only for user-visible text assertions)
+4. CSS selectors - **AVOID** unless absolutely necessary
+
+**Naming Convention for data-testid:**
+- Use kebab-case: `data-testid="building-list-item"`
+- Include component/page context: `data-testid="apartments-page"`, `data-testid="tenant-card"`
+- For lists, use pattern: `data-testid="building-card-{id}"` or `data-testid="profile-row-0"`
+- For form elements: `data-testid="building-name-input"`, `data-testid="submit-button"`
+
+**Examples:**
+```svelte
+<!-- Component -->
+<div data-testid="heating-profiles-page">
+  <h1 data-testid="page-title">Heizprofile</h1>
+  {#each profiles as profile, i}
+    <div data-testid="profile-card-{profile.id}">
+      <span data-testid="profile-name">{profile.name}</span>
+      <span data-testid="profile-total">{total}%</span>
+    </div>
+  {/each}
+</div>
+```
+
+```typescript
+// Test
+await expect(page.getByTestId('heating-profiles-page')).toBeVisible();
+await expect(page.getByTestId('profile-card-hp-standard')).toBeVisible();
+await page.getByTestId('submit-button').click();
+```
+
+**Why data-testid:**
+- Decoupled from CSS styling (tests don't break on UI redesign)
+- Decoupled from text content (tests don't break on translations)
+- Explicit test intent (clear what's being tested)
+- Stable across refactoring
+
 ### E2E Testing with Gherkin (BDD)
 
 **Decision:** Use [playwright-bdd](https://github.com/vitalets/playwright-bdd) for E2E tests with Gherkin syntax.

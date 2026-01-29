@@ -45,19 +45,20 @@
 	<title>Heizprofile - Dwello</title>
 </svelte:head>
 
-<div class="space-y-6">
+<div class="space-y-6" data-testid="heating-profiles-page">
 	<!-- Header -->
 	<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
 		<div class="flex items-center gap-4">
 			<a
 				href="/config"
 				class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+				data-testid="back-to-config-link"
 			>
 				<Icon name="arrow_back" size={20} />
 			</a>
 			<div>
-				<h1 class="text-2xl font-bold text-gray-900">Heizprofile</h1>
-				<p class="text-gray-500 mt-1">{data.total} Profile verfügbar</p>
+				<h1 class="text-2xl font-bold text-gray-900" data-testid="page-title">Heizprofile</h1>
+				<p class="text-gray-500 mt-1" data-testid="profile-count">{data.total} Profile verfügbar</p>
 			</div>
 		</div>
 		<Button href="/config/heating-profiles/new" variant="primary">
@@ -82,15 +83,15 @@
 	</Card>
 
 	<!-- Profiles Grid -->
-	<div class="grid gap-6 lg:grid-cols-2">
+	<div class="grid gap-6 lg:grid-cols-2" data-testid="profiles-grid">
 		{#each data.profiles as profile}
 			{@const total = getTotal(profile)}
 			{@const maxPct = getMaxPercentage(profile)}
 			<Card>
-				<div class="flex items-start justify-between mb-4">
+				<div class="flex items-start justify-between mb-4" data-testid="profile-card-{profile.id}">
 					<div>
 						<div class="flex items-center gap-2">
-							<h3 class="text-lg font-semibold text-gray-900">{profile.name}</h3>
+							<h3 class="text-lg font-semibold text-gray-900" data-testid="profile-name-{profile.id}">{profile.name}</h3>
 							{#if profile.type === 'predefined'}
 								<Badge variant="info" size="sm">Vordefiniert</Badge>
 							{:else}
@@ -102,7 +103,7 @@
 						{/if}
 					</div>
 					<div class="text-right">
-						<p class="text-2xl font-bold {total === 100 ? 'text-green-600' : 'text-red-600'}">
+						<p class="text-2xl font-bold {total === 100 ? 'text-green-600' : 'text-red-600'}" data-testid="profile-total-{profile.id}">
 							{total}%
 						</p>
 						<p class="text-xs text-gray-500">Summe</p>
@@ -154,6 +155,7 @@
 							href="/config/heating-profiles/{profile.id}"
 							class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
 							title="Details anzeigen"
+							data-testid="view-profile-{profile.id}"
 						>
 							<Icon name="visibility" size={18} />
 						</a>
