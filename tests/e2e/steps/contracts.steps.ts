@@ -25,9 +25,7 @@ Then('I should see the contracts search input', async ({ page }) => {
 	await expect(page.locator('input#search')).toBeVisible({ timeout: 10000 });
 });
 
-Then('I should see the building filter', async ({ page }) => {
-	await expect(page.locator('select#building')).toBeVisible({ timeout: 10000 });
-});
+// Note: 'I should see the building filter' step is defined in apartments.steps.ts
 
 Then('I should see the status filter', async ({ page }) => {
 	await expect(page.locator('select#status')).toBeVisible({ timeout: 10000 });
