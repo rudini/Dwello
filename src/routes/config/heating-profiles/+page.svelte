@@ -102,7 +102,7 @@
 						{/if}
 					</div>
 					<div class="text-right">
-						<p class="text-2xl font-bold {total >= 99 && total <= 101 ? 'text-green-600' : 'text-amber-600'}">
+						<p class="text-2xl font-bold {total === 100 ? 'text-green-600' : 'text-red-600'}">
 							{total}%
 						</p>
 						<p class="text-xs text-gray-500">Summe</p>

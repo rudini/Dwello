@@ -108,7 +108,7 @@
 			</div>
 			<div class="mt-4 pt-4 border-t border-gray-200 flex justify-between items-center">
 				<span class="text-sm text-gray-600">Gesamt</span>
-				<span class="text-lg font-semibold {totalPercentage === 100 ? 'text-green-600' : 'text-red-600'}">
+				<span class="text-lg font-bold {totalPercentage === 100 ? 'text-green-600' : 'text-red-600'}">
 					{totalPercentage}%
 				</span>
 			</div>

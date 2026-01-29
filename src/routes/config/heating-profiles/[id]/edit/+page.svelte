@@ -13,43 +13,35 @@
 	// Form state
 	let name = $state(data.profile.name);
 	let description = $state(data.profile.description || '');
-	let january = $state(data.profile.monthlyPercentages.january);
-	let february = $state(data.profile.monthlyPercentages.february);
-	let march = $state(data.profile.monthlyPercentages.march);
-	let april = $state(data.profile.monthlyPercentages.april);
-	let may = $state(data.profile.monthlyPercentages.may);
-	let june = $state(data.profile.monthlyPercentages.june);
-	let july = $state(data.profile.monthlyPercentages.july);
-	let august = $state(data.profile.monthlyPercentages.august);
-	let september = $state(data.profile.monthlyPercentages.september);
-	let october = $state(data.profile.monthlyPercentages.october);
-	let november = $state(data.profile.monthlyPercentages.november);
-	let december = $state(data.profile.monthlyPercentages.december);
+
+	// Monthly percentages as a reactive object
+	let percentages = $state({ ...data.profile.monthlyPercentages });
 
 	let isSubmitting = $state(false);
 
 	// Get errors from form action
 	const errors = $derived(form?.errors || {});
 
-	// Calculate total
+	// Calculate total - explicitly access each property for reactivity
 	const total = $derived(
-		january + february + march + april + may + june +
-		july + august + september + october + november + december
+		percentages.january + percentages.february + percentages.march + percentages.april +
+		percentages.may + percentages.june + percentages.july + percentages.august +
+		percentages.september + percentages.october + percentages.november + percentages.december
 	);
 
 	const months = [
-		{ key: 'january', label: 'Januar', get: () => january, set: (v: number) => january = v },
-		{ key: 'february', label: 'Februar', get: () => february, set: (v: number) => february = v },
-		{ key: 'march', label: 'März', get: () => march, set: (v: number) => march = v },
-		{ key: 'april', label: 'April', get: () => april, set: (v: number) => april = v },
-		{ key: 'may', label: 'Mai', get: () => may, set: (v: number) => may = v },
-		{ key: 'june', label: 'Juni', get: () => june, set: (v: number) => june = v },
-		{ key: 'july', label: 'Juli', get: () => july, set: (v: number) => july = v },
-		{ key: 'august', label: 'August', get: () => august, set: (v: number) => august = v },
-		{ key: 'september', label: 'September', get: () => september, set: (v: number) => september = v },
-		{ key: 'october', label: 'Oktober', get: () => october, set: (v: number) => october = v },
-		{ key: 'november', label: 'November', get: () => november, set: (v: number) => november = v },
-		{ key: 'december', label: 'Dezember', get: () => december, set: (v: number) => december = v }
+		{ key: 'january' as const, label: 'Januar' },
+		{ key: 'february' as const, label: 'Februar' },
+		{ key: 'march' as const, label: 'März' },
+		{ key: 'april' as const, label: 'April' },
+		{ key: 'may' as const, label: 'Mai' },
+		{ key: 'june' as const, label: 'Juni' },
+		{ key: 'july' as const, label: 'Juli' },
+		{ key: 'august' as const, label: 'August' },
+		{ key: 'september' as const, label: 'September' },
+		{ key: 'october' as const, label: 'Oktober' },
+		{ key: 'november' as const, label: 'November' },
+		{ key: 'december' as const, label: 'Dezember' }
 	];
 </script>
 
@@ -129,7 +121,7 @@
 					<h3 class="text-sm font-medium text-gray-700">Monatliche Verteilung</h3>
 					<div class="text-sm">
 						<span class="text-gray-500">Summe:</span>
-						<span class="ml-1 font-semibold {total >= 95 && total <= 105 ? 'text-green-600' : 'text-red-600'}">
+						<span class="ml-1 font-semibold {total === 100 ? 'text-green-600' : 'text-red-600'}">
 							{total}%
 						</span>
 					</div>
@@ -154,8 +146,7 @@
 									type="number"
 									min="0"
 									max="100"
-									value={month.get()}
-									oninput={(e) => month.set(parseInt(e.currentTarget.value) || 0)}
+									bind:value={percentages[month.key]}
 									class="w-full px-3 py-2 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-sm"
 								/>
 								<span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">%</span>
@@ -174,7 +165,7 @@
 				<h3 class="text-sm font-medium text-gray-700 mb-4">Vorschau</h3>
 				<div class="h-32 flex items-end gap-1 bg-gray-50 rounded-lg p-2">
 					{#each months as month}
-						{@const value = month.get()}
+						{@const value = percentages[month.key]}
 						<div class="flex-1 flex flex-col items-center justify-end h-full">
 							<div
 								class="w-full rounded-t transition-all duration-300 {value > 0 ? 'bg-primary' : 'bg-gray-200'}"
