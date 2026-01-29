@@ -1,10 +1,13 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
+	import { enhance } from '$app/forms';
 	import Button from '$lib/components/Button.svelte';
 	import Icon from '$lib/components/Icon.svelte';
 	import Card from '$lib/components/Card.svelte';
 	import AddressSearch from '$lib/components/AddressSearch.svelte';
 	import type { Address } from '$lib/services/openplz';
+	import type { ActionData } from './$types';
+
+	let { form }: { form: ActionData } = $props();
 
 	// Form state
 	let name = $state('');
@@ -16,7 +19,9 @@
 	let yearBuilt = $state('');
 
 	let isSubmitting = $state(false);
-	let errors = $state<Record<string, string>>({});
+
+	// Get errors from form action or local validation
+	const errors = $derived(form?.errors || {});
 
 	// Swiss cantons (for manual selection fallback)
 	const cantons = [
@@ -64,67 +69,8 @@
 		postalCode = selectedAddress.postalCode;
 		city = selectedAddress.city;
 		canton = selectedAddress.cantonShort;
-
-		// Clear any previous errors for these fields
-		const { address: _a, postalCode: _p, city: _c, ...rest } = errors;
-		errors = rest;
 	}
 
-	function validate(): boolean {
-		const newErrors: Record<string, string> = {};
-
-		if (!address.trim()) {
-			newErrors.address = 'Adresse ist erforderlich';
-		}
-		if (!postalCode.trim()) {
-			newErrors.postalCode = 'PLZ ist erforderlich';
-		} else if (!/^\d{4}$/.test(postalCode)) {
-			newErrors.postalCode = 'PLZ muss 4 Ziffern haben';
-		}
-		if (!city.trim()) {
-			newErrors.city = 'Stadt ist erforderlich';
-		}
-		if (yearBuilt && (isNaN(parseInt(yearBuilt)) || parseInt(yearBuilt) < 1800 || parseInt(yearBuilt) > new Date().getFullYear())) {
-			newErrors.yearBuilt = 'Baujahr muss zwischen 1800 und heute liegen';
-		}
-
-		errors = newErrors;
-		return Object.keys(newErrors).length === 0;
-	}
-
-	async function handleSubmit(e: Event) {
-		e.preventDefault();
-
-		if (!validate()) return;
-
-		isSubmitting = true;
-
-		try {
-			// In production, call the API
-			// const response = await fetch('/api/buildings', {
-			// 	method: 'POST',
-			// 	headers: { 'Content-Type': 'application/json' },
-			// 	body: JSON.stringify({
-			// 		name: name || undefined,
-			// 		address,
-			// 		postalCode,
-			// 		city,
-			// 		canton: canton || undefined,
-			// 		buildingType: buildingType || undefined,
-			// 		yearBuilt: yearBuilt ? parseInt(yearBuilt) : undefined
-			// 	})
-			// });
-
-			// Mock success
-			await new Promise((r) => setTimeout(r, 500));
-			await goto('/buildings');
-		} catch (error) {
-			console.error('Error creating building:', error);
-			errors = { form: 'Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.' };
-		} finally {
-			isSubmitting = false;
-		}
-	}
 </script>
 
 <svelte:head>
@@ -147,7 +93,13 @@
 
 	<!-- Form -->
 	<Card>
-		<form onsubmit={handleSubmit} class="space-y-6">
+		<form method="POST" use:enhance={() => {
+			isSubmitting = true;
+			return async ({ update }) => {
+				await update();
+				isSubmitting = false;
+			};
+		}} class="space-y-6">
 			{#if errors.form}
 				<div class="bg-red-50 border border-red-200 rounded-lg p-4">
 					<p class="text-sm text-red-700">{errors.form}</p>
@@ -161,6 +113,7 @@
 				</label>
 				<input
 					id="name"
+					name="name"
 					type="text"
 					bind:value={name}
 					placeholder="z.B. Musterhaus Zentrum"
@@ -201,6 +154,7 @@
 					</label>
 					<input
 						id="address"
+						name="address"
 						type="text"
 						bind:value={address}
 						placeholder="Musterstrasse 12"
@@ -221,6 +175,7 @@
 						</label>
 						<input
 							id="postalCode"
+							name="postalCode"
 							type="text"
 							bind:value={postalCode}
 							placeholder="8000"
@@ -240,6 +195,7 @@
 						<div class="relative">
 							<input
 								id="city"
+								name="city"
 								type="text"
 								bind:value={city}
 								placeholder="Zürich"
@@ -266,6 +222,7 @@
 					</label>
 					<select
 						id="canton"
+						name="canton"
 						bind:value={canton}
 						class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary bg-white"
 					>
@@ -288,6 +245,7 @@
 						</label>
 						<select
 							id="buildingType"
+							name="buildingType"
 							bind:value={buildingType}
 							class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary bg-white"
 						>
@@ -303,6 +261,7 @@
 						</label>
 						<input
 							id="yearBuilt"
+							name="yearBuilt"
 							type="number"
 							bind:value={yearBuilt}
 							placeholder="z.B. 1985"
