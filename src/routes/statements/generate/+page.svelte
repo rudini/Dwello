@@ -267,12 +267,14 @@
 						<h3 class="text-sm font-medium text-gray-700 mb-3">Monatliche Verteilung</h3>
 						<div class="flex items-end gap-1 h-24">
 							{#each Object.entries(selectedHeatingProfile.monthlyPercentages) as [month, value]}
-								<div class="flex-1 flex flex-col items-center">
-									<div
-										class="w-full bg-blue-500 rounded-t transition-all"
-										style="height: {(value / 16) * 100}%"
-									></div>
-									<span class="text-xs text-gray-500 mt-1"
+								<div class="flex-1 flex flex-col items-center h-full">
+									<div class="w-full flex-1 relative">
+										<div
+											class="absolute bottom-0 left-0 right-0 bg-blue-500 rounded-t transition-all"
+											style="height: {(value / 16) * 100}%"
+										></div>
+									</div>
+									<span class="text-xs text-gray-500 mt-1 flex-shrink-0"
 										>{month.slice(0, 1).toUpperCase()}</span
 									>
 								</div>
