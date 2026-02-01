@@ -14,13 +14,26 @@ export default defineConfig({
 		cucumberReporter('html', { outputFile: 'cucumber-report/report.html' }),
 		cucumberReporter('json', { outputFile: 'cucumber-report/report.json' })
 	],
-	webServer: {
-		command: 'npm run build && npm run preview',
-		port: 4173,
-		reuseExistingServer: !process.env.CI
-	},
+	// Run against the full stack (frontend + backend + database)
+	// Expects: PostgreSQL on 5432, Backend on 3001, Frontend on 3000
+	webServer: [
+		{
+			// Backend server (ElysiaJS)
+			command: 'cd backend && bun run src/index.ts',
+			port: 3001,
+			reuseExistingServer: true,
+			timeout: 30000
+		},
+		{
+			// Frontend dev server (SvelteKit)
+			command: 'npm run dev',
+			port: 3000,
+			reuseExistingServer: true,
+			timeout: 30000
+		}
+	],
 	use: {
-		baseURL: 'http://localhost:4173',
+		baseURL: 'http://localhost:3000',
 		screenshot: 'only-on-failure',
 		video: 'retain-on-failure',
 		trace: 'retain-on-failure'

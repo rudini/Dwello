@@ -8,24 +8,21 @@ Feature: Dashboard Overview
     Given I am logged in as "Test User"
     And the backend API is mocked
 
-  # Note: Dashboard tests require a running backend because
-  # the page uses server-side rendering (+page.server.ts)
-
-  @overview @wip
+  @overview
   Scenario: Dashboard shows portfolio statistics
     When I open the dashboard
     Then I should see the total number of buildings
     And I should see the total number of apartments
     And I should see the occupancy rate
 
-  @financial @wip
+  @financial
   Scenario: Dashboard shows financial overview
     When I open the dashboard
     Then I should see outstanding statements count
     And I should see total pending amount
     And I should see overdue amount
 
-  @statements @wip
+  @statements
   Scenario: Dashboard shows statement status cards
     When I open the dashboard
     Then I should see draft statements count
@@ -45,7 +42,7 @@ Feature: Dashboard Overview
     Then I should see the occupancy chart
     And I should see building names in the chart
 
-  @quick-actions @wip
+  @quick-actions
   Scenario: Dashboard provides quick actions
     When I open the dashboard
     Then I should see a "Rechnung erfassen" link

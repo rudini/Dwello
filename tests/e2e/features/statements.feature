@@ -7,14 +7,14 @@ Feature: Utility Cost Statements
   Background:
     Given I am logged in as "Test User"
 
-  @list @wip
+  @list
   Scenario: View statements list page
     When I open the statements page
     Then I should see the statements page
     And I should see the status overview cards
     And I should see a "Abrechnungen erstellen" link
 
-  @list @wip
+  @list
   Scenario: Statements page shows status filters
     When I open the statements page
     Then I should see draft filter button
@@ -22,37 +22,30 @@ Feature: Utility Cost Statements
     And I should see paid filter button
     And I should see overdue filter button
 
-  @generate @wip
+  @generate
   Scenario: Navigate to statement generation wizard
     When I open the statements page
     And I click the "Abrechnungen erstellen" link
     Then I should be on the statement generation wizard
 
-  # Note: The following tests require a running backend with test data
-  # because the page uses server-side rendering (+page.server.ts) which
-  # makes API calls from Node.js, not interceptable by Playwright route mocking.
-
-  @generate @heating-profile @wip
+  @generate @heating-profile
   Scenario: Statement wizard shows heating profile chart bars
-    Given there are heating profiles with varying sums
     When I open the statement generation wizard
     Then I should see the heating profile dropdown
     And I should see the heating profile chart
     And I should see chart bars for each month
     And all chart bars should have visible height
 
-  @generate @heating-profile @validation @wip
+  @generate @heating-profile @validation
   Scenario: Only valid heating profiles are selectable
-    Given there are heating profiles with varying sums
     When I open the statement generation wizard
     Then I should see all heating profiles in the dropdown
     And valid profiles should show percentage 100%
     And invalid profiles should show their percentage and be disabled
     And invalid profiles should show "nicht wählbar" text
 
-  @generate @heating-profile @validation @wip
+  @generate @heating-profile @validation
   Scenario: First valid heating profile is auto-selected
-    Given there are heating profiles with varying sums
     When I open the statement generation wizard
     Then the first valid heating profile should be selected
     And the heating profile chart should display the selected profile
@@ -73,3 +66,4 @@ Feature: Utility Cost Statements
     And I should see statement tenant names
     And I should see statement building names
     And I should see statement numbers
+    # Note: Keep @wip until test data includes statements
