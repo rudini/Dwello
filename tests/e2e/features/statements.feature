@@ -28,6 +28,35 @@ Feature: Utility Cost Statements
     And I click the "Abrechnungen erstellen" link
     Then I should be on the statement generation wizard
 
+  # Note: The following tests require a running backend with test data
+  # because the page uses server-side rendering (+page.server.ts) which
+  # makes API calls from Node.js, not interceptable by Playwright route mocking.
+
+  @generate @heating-profile @wip
+  Scenario: Statement wizard shows heating profile chart bars
+    Given there are heating profiles with varying sums
+    When I open the statement generation wizard
+    Then I should see the heating profile dropdown
+    And I should see the heating profile chart
+    And I should see chart bars for each month
+    And all chart bars should have visible height
+
+  @generate @heating-profile @validation @wip
+  Scenario: Only valid heating profiles are selectable
+    Given there are heating profiles with varying sums
+    When I open the statement generation wizard
+    Then I should see all heating profiles in the dropdown
+    And valid profiles should show percentage 100%
+    And invalid profiles should show their percentage and be disabled
+    And invalid profiles should show "nicht wählbar" text
+
+  @generate @heating-profile @validation @wip
+  Scenario: First valid heating profile is auto-selected
+    Given there are heating profiles with varying sums
+    When I open the statement generation wizard
+    Then the first valid heating profile should be selected
+    And the heating profile chart should display the selected profile
+
   @detail @wip
   Scenario: View statement details
     Given there is a statement "NK-2024-001"

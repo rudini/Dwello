@@ -45,6 +45,115 @@ Given('there are statements in the system', async ({ page }) => {
 	});
 });
 
+Given('there are heating profiles with varying sums', async ({ page }) => {
+	await page.route('**/api/heating-profiles**', async (route) => {
+		await route.fulfill({
+			status: 200,
+			contentType: 'application/json',
+			body: JSON.stringify({
+				data: [
+					{
+						id: 'hp-standard',
+						name: 'Heating Standard',
+						type: 'predefined',
+						description: 'Standard heating profile for Switzerland',
+						isActive: true,
+						januaryPct: '14.00',
+						februaryPct: '12.00',
+						marchPct: '10.00',
+						aprilPct: '6.00',
+						mayPct: '2.00',
+						junePct: '0.00',
+						julyPct: '0.00',
+						augustPct: '0.00',
+						septemberPct: '4.00',
+						octoberPct: '8.00',
+						novemberPct: '12.00',
+						decemberPct: '14.00'
+					},
+					{
+						id: 'hp-hot-water',
+						name: 'Heating + Hot Water',
+						type: 'predefined',
+						description: 'Profile including hot water - Invalid (90%)',
+						isActive: true,
+						januaryPct: '12.00',
+						februaryPct: '10.00',
+						marchPct: '8.00',
+						aprilPct: '5.00',
+						mayPct: '2.00',
+						junePct: '0.00',
+						julyPct: '0.00',
+						augustPct: '0.00',
+						septemberPct: '3.00',
+						octoberPct: '7.00',
+						novemberPct: '10.00',
+						decemberPct: '12.00'
+					},
+					{
+						id: 'hp-mountain',
+						name: 'Heating Mountain',
+						type: 'predefined',
+						description: 'Mountain region profile - Valid (100%)',
+						isActive: true,
+						januaryPct: '16.00',
+						februaryPct: '14.00',
+						marchPct: '12.00',
+						aprilPct: '8.00',
+						mayPct: '3.00',
+						junePct: '0.00',
+						julyPct: '0.00',
+						augustPct: '0.00',
+						septemberPct: '5.00',
+						octoberPct: '10.00',
+						novemberPct: '14.00',
+						decemberPct: '18.00'
+					}
+				],
+				total: 3
+			})
+		});
+	});
+
+	// Also mock buildings for the wizard
+	await page.route('**/api/buildings**', async (route) => {
+		await route.fulfill({
+			status: 200,
+			contentType: 'application/json',
+			body: JSON.stringify({
+				data: [
+					{
+						id: 'building-001',
+						name: 'Musterhaus Zentrum',
+						address: 'Musterstraße 12',
+						postalCode: '8000',
+						city: 'Zürich',
+						apartmentCount: 12
+					}
+				],
+				total: 1
+			})
+		});
+	});
+
+	// Mock categories and distribution keys
+	await page.route('**/api/categories**', async (route) => {
+		await route.fulfill({
+			status: 200,
+			contentType: 'application/json',
+			body: JSON.stringify({ data: [], total: 0 })
+		});
+	});
+
+	await page.route('**/api/distribution-keys**', async (route) => {
+		await route.fulfill({
+			status: 200,
+			contentType: 'application/json',
+			body: JSON.stringify({ data: [], total: 0 })
+		});
+	});
+});
+
 Given('there is a statement {string}', async ({ page }, statementNumber: string) => {
 	await page.route('**/api/statements/**', async (route) => {
 		await route.fulfill({
@@ -184,4 +293,98 @@ Then('I should see statement building names', async ({ page }) => {
 Then('I should see statement numbers', async ({ page }) => {
 	// Check for statement number pattern like "NK-2024-001"
 	await expect(page.getByText(/NK-\d{4}-\d{3}/).first()).toBeVisible({ timeout: 10000 });
+});
+
+// ============================================
+// Statement Generation Wizard - Heating Profile steps
+// ============================================
+
+Then('I should see the heating profile dropdown', async ({ page }) => {
+	await expect(page.getByTestId('heating-profile-select')).toBeVisible({ timeout: 10000 });
+});
+
+Then('I should see the heating profile chart', async ({ page }) => {
+	await expect(page.getByTestId('heating-profile-chart')).toBeVisible({ timeout: 10000 });
+});
+
+Then('I should see chart bars for each month', async ({ page }) => {
+	// The chart should have 12 bars (one for each month)
+	const months = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
+	for (const month of months) {
+		await expect(page.getByTestId(`chart-bar-${month}`)).toBeVisible({ timeout: 10000 });
+	}
+});
+
+Then('all chart bars should have visible height', async ({ page }) => {
+	// Check that at least some bars have non-zero height (not all months have heating)
+	const barsContainer = page.getByTestId('heating-profile-bars');
+	const bars = barsContainer.locator('[data-testid^="chart-bar-"]');
+	const barCount = await bars.count();
+	expect(barCount).toBe(12);
+
+	// Check that winter months have visible bars (height > 0)
+	let visibleBars = 0;
+	for (let i = 0; i < barCount; i++) {
+		const bar = bars.nth(i);
+		const style = await bar.getAttribute('style');
+		if (style && style.includes('height:') && !style.includes('height: 0%')) {
+			visibleBars++;
+		}
+	}
+	// Expect at least 6 months to have visible bars (heating months)
+	expect(visibleBars).toBeGreaterThanOrEqual(6);
+});
+
+Then('I should see all heating profiles in the dropdown', async ({ page }) => {
+	const select = page.getByTestId('heating-profile-select');
+	const options = select.locator('option');
+	// Should show all 3 profiles (valid and invalid)
+	await expect(options).toHaveCount(3, { timeout: 10000 });
+});
+
+Then('valid profiles should show percentage 100%', async ({ page }) => {
+	// Heating Mountain sums to 100%
+	const mountainOption = page.getByTestId('heating-profile-option-hp-mountain');
+	const text = await mountainOption.textContent();
+	expect(text).toContain('100%');
+	// Valid profile should not be disabled
+	await expect(mountainOption).not.toBeDisabled();
+});
+
+Then('invalid profiles should show their percentage and be disabled', async ({ page }) => {
+	// Heating + Hot Water sums to 69%
+	const hotWaterOption = page.getByTestId('heating-profile-option-hp-hot-water');
+	await expect(hotWaterOption).toBeDisabled();
+	const text = await hotWaterOption.textContent();
+	// Should show the actual percentage (not 100)
+	expect(text).toMatch(/\d+%/);
+	expect(text).not.toContain('100%');
+});
+
+Then('invalid profiles should show "nicht wählbar" text', async ({ page }) => {
+	const hotWaterOption = page.getByTestId('heating-profile-option-hp-hot-water');
+	const text = await hotWaterOption.textContent();
+	expect(text).toContain('nicht wählbar');
+});
+
+Then('the first valid heating profile should be selected', async ({ page }) => {
+	const select = page.getByTestId('heating-profile-select');
+	// The first valid profile should be auto-selected
+	const selectedValue = await select.inputValue();
+	// Check that it's a valid profile (not hp-hot-water which is invalid)
+	expect(selectedValue).toBeTruthy();
+	// The selected option should not be disabled
+	const selectedOption = select.locator(`option[value="${selectedValue}"]`);
+	await expect(selectedOption).not.toBeDisabled();
+});
+
+Then('the heating profile chart should display the selected profile', async ({ page }) => {
+	// Verify the chart is visible
+	const chartContainer = page.getByTestId('heating-profile-chart');
+	await expect(chartContainer).toBeVisible({ timeout: 10000 });
+	// Verify month labels are present
+	const months = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
+	for (const month of months) {
+		await expect(page.getByTestId(`chart-label-${month}`)).toBeVisible();
+	}
 });

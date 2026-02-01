@@ -271,6 +271,7 @@
 					</label>
 					<select
 						id="heatingProfile"
+						data-testid="heating-profile-select"
 						bind:value={heatingProfileId}
 						class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 					>
@@ -281,6 +282,7 @@
 								value={profile.id}
 								disabled={!valid}
 								class={valid ? '' : 'text-gray-400'}
+								data-testid="heating-profile-option-{profile.id}"
 							>
 								{profile.name} ({sum.toFixed(sum % 1 === 0 ? 0 : 1)}%){valid ? '' : ' - nicht wählbar'}
 							</option>
@@ -293,18 +295,19 @@
 
 				<!-- Heating Profile Preview -->
 				{#if selectedHeatingProfile}
-					<div class="bg-gray-50 rounded-lg p-4">
+					<div class="bg-gray-50 rounded-lg p-4" data-testid="heating-profile-chart">
 						<h3 class="text-sm font-medium text-gray-700 mb-6">Monatliche Verteilung</h3>
-						<div class="flex items-end gap-1 h-24">
+						<div class="flex items-end gap-1 h-24" data-testid="heating-profile-bars">
 							{#each Object.entries(selectedHeatingProfile.monthlyPercentages) as [month, value]}
 								<div class="flex-1 flex flex-col items-center h-full">
 									<div class="w-full flex-1 relative">
 										<div
 											class="absolute bottom-0 left-0 right-0 bg-blue-500 rounded-t transition-all"
 											style="height: {(value / 16) * 100}%"
+											data-testid="chart-bar-{month}"
 										></div>
 									</div>
-									<span class="text-xs text-gray-500 mt-1 flex-shrink-0"
+									<span class="text-xs text-gray-500 mt-1 flex-shrink-0" data-testid="chart-label-{month}"
 										>{month.slice(0, 1).toUpperCase()}</span
 									>
 								</div>
