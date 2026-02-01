@@ -210,27 +210,27 @@ When('I filter by status {string}', async ({ page }, status: string) => {
 // ============================================
 
 Then('I should see the statements page', async ({ page }) => {
-	await expect(page.getByTestId('statements-page')).toBeVisible({ timeout: 10000 });
+	await expect(page.getByTestId('statements-page')).toBeVisible({ timeout: 5000 });
 });
 
 Then('I should see the status overview cards', async ({ page }) => {
-	await expect(page.getByTestId('status-overview')).toBeVisible({ timeout: 10000 });
+	await expect(page.getByTestId('status-overview')).toBeVisible({ timeout: 5000 });
 });
 
 Then('I should see draft filter button', async ({ page }) => {
-	await expect(page.getByTestId('filter-draft')).toBeVisible({ timeout: 10000 });
+	await expect(page.getByTestId('filter-draft')).toBeVisible({ timeout: 5000 });
 });
 
 Then('I should see sent filter button', async ({ page }) => {
-	await expect(page.getByTestId('filter-sent')).toBeVisible({ timeout: 10000 });
+	await expect(page.getByTestId('filter-sent')).toBeVisible({ timeout: 5000 });
 });
 
 Then('I should see paid filter button', async ({ page }) => {
-	await expect(page.getByTestId('filter-paid')).toBeVisible({ timeout: 10000 });
+	await expect(page.getByTestId('filter-paid')).toBeVisible({ timeout: 5000 });
 });
 
 Then('I should see overdue filter button', async ({ page }) => {
-	await expect(page.getByTestId('filter-overdue')).toBeVisible({ timeout: 10000 });
+	await expect(page.getByTestId('filter-overdue')).toBeVisible({ timeout: 5000 });
 });
 
 Then('I should be on the statement generation wizard', async ({ page }) => {
@@ -238,19 +238,19 @@ Then('I should be on the statement generation wizard', async ({ page }) => {
 });
 
 Then('I should see the statement number {string}', async ({ page }, statementNumber: string) => {
-	await expect(page.getByText(statementNumber)).toBeVisible({ timeout: 10000 });
+	await expect(page.getByText(statementNumber)).toBeVisible({ timeout: 5000 });
 });
 
 Then('I should see the tenant name', async ({ page }) => {
-	await expect(page.getByText('Hans Müller')).toBeVisible({ timeout: 10000 });
+	await expect(page.getByText('Hans Müller')).toBeVisible({ timeout: 5000 });
 });
 
 Then('I should see the cost breakdown', async ({ page }) => {
-	await expect(page.getByText('Heizung')).toBeVisible({ timeout: 10000 });
+	await expect(page.getByText('Heizung')).toBeVisible({ timeout: 5000 });
 });
 
 Then('I should see the balance', async ({ page }) => {
-	await expect(page.getByText(/CHF\s*[\d.,]+/)).toBeVisible({ timeout: 10000 });
+	await expect(page.getByText(/CHF\s*[\d.,]+/)).toBeVisible({ timeout: 5000 });
 });
 
 // ============================================
@@ -260,7 +260,7 @@ Then('I should see the balance', async ({ page }) => {
 Then('I should see statements in the list', async ({ page }) => {
 	// Wait for statement cards/rows to be visible
 	const statementLinks = page.locator('a[href^="/statements/"]');
-	await expect(statementLinks.first()).toBeVisible({ timeout: 10000 });
+	await expect(statementLinks.first()).toBeVisible({ timeout: 5000 });
 	const count = await statementLinks.count();
 	expect(count).toBeGreaterThan(0);
 });
@@ -292,7 +292,7 @@ Then('I should see statement building names', async ({ page }) => {
 
 Then('I should see statement numbers', async ({ page }) => {
 	// Check for statement number pattern like "NK-2024-001"
-	await expect(page.getByText(/NK-\d{4}-\d{3}/).first()).toBeVisible({ timeout: 10000 });
+	await expect(page.getByText(/NK-\d{4}-\d{3}/).first()).toBeVisible({ timeout: 5000 });
 });
 
 // ============================================
@@ -300,18 +300,18 @@ Then('I should see statement numbers', async ({ page }) => {
 // ============================================
 
 Then('I should see the heating profile dropdown', async ({ page }) => {
-	await expect(page.getByTestId('heating-profile-select')).toBeVisible({ timeout: 10000 });
+	await expect(page.getByTestId('heating-profile-select')).toBeVisible({ timeout: 5000 });
 });
 
 Then('I should see the heating profile chart', async ({ page }) => {
-	await expect(page.getByTestId('heating-profile-chart')).toBeVisible({ timeout: 10000 });
+	await expect(page.getByTestId('heating-profile-chart')).toBeVisible({ timeout: 5000 });
 });
 
 Then('I should see chart bars for each month', async ({ page }) => {
 	// The chart should have 12 bars (one for each month)
 	const months = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
 	for (const month of months) {
-		await expect(page.getByTestId(`chart-bar-${month}`)).toBeVisible({ timeout: 10000 });
+		await expect(page.getByTestId(`chart-bar-${month}`)).toBeVisible({ timeout: 5000 });
 	}
 });
 
@@ -339,7 +339,7 @@ Then('I should see all heating profiles in the dropdown', async ({ page }) => {
 	const select = page.getByTestId('heating-profile-select');
 	const options = select.locator('option');
 	// Should show all 3 profiles (valid and invalid)
-	await expect(options).toHaveCount(3, { timeout: 10000 });
+	await expect(options).toHaveCount(3, { timeout: 5000 });
 });
 
 Then('valid profiles should show percentage 100%', async ({ page }) => {
@@ -381,7 +381,7 @@ Then('the first valid heating profile should be selected', async ({ page }) => {
 Then('the heating profile chart should display the selected profile', async ({ page }) => {
 	// Verify the chart is visible
 	const chartContainer = page.getByTestId('heating-profile-chart');
-	await expect(chartContainer).toBeVisible({ timeout: 10000 });
+	await expect(chartContainer).toBeVisible({ timeout: 5000 });
 	// Verify month labels are present
 	const months = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
 	for (const month of months) {

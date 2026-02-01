@@ -107,7 +107,7 @@ When('I click the {string} link', async ({ page }, linkText: string) => {
 	await page.waitForFunction(
 		(prevUrl) => window.location.href !== prevUrl,
 		currentUrl,
-		{ timeout: 10000 }
+		{ timeout: 5000 }
 	);
 	await page.waitForLoadState('domcontentloaded');
 });
@@ -117,11 +117,11 @@ When('I click the {string} link', async ({ page }, linkText: string) => {
 // ============================================
 
 Then('I should see the Dwello branding', async ({ page }) => {
-	await expect(page.locator('h1:has-text("Dwello")')).toBeVisible({ timeout: 10000 });
+	await expect(page.locator('h1:has-text("Dwello")')).toBeVisible({ timeout: 5000 });
 });
 
 Then('I should see the text {string}', async ({ page }, text: string) => {
-	await expect(page.getByText(text, { exact: false })).toBeVisible({ timeout: 10000 });
+	await expect(page.getByText(text, { exact: false })).toBeVisible({ timeout: 5000 });
 });
 
 Then('I should see a {string} button', async ({ page }, buttonText: string) => {
@@ -132,16 +132,16 @@ Then('I should see a {string} button', async ({ page }, buttonText: string) => {
 	};
 	const testId = testIdMap[buttonText];
 	if (testId) {
-		await expect(page.getByTestId(testId)).toBeVisible({ timeout: 10000 });
+		await expect(page.getByTestId(testId)).toBeVisible({ timeout: 5000 });
 	} else {
 		const button = page.getByRole('button', { name: buttonText });
-		await expect(button).toBeVisible({ timeout: 10000 });
+		await expect(button).toBeVisible({ timeout: 5000 });
 	}
 });
 
 Then('I should see a {string} link', async ({ page }, linkText: string) => {
 	const link = page.getByRole('link', { name: linkText }).first();
-	await expect(link).toBeVisible({ timeout: 10000 });
+	await expect(link).toBeVisible({ timeout: 5000 });
 });
 
 Then('I should receive a redirect to Google', async ({ page }) => {
@@ -174,23 +174,23 @@ Then('I should receive a successful response', async ({ page }) => {
 });
 
 Then('I should be redirected to the login page', async ({ page }) => {
-	await page.waitForURL(/login/, { timeout: 10000 });
+	await page.waitForURL(/login/, { timeout: 5000 });
 	expect(page.url()).toContain('login');
 });
 
 Then('I should be redirected to the dashboard', async ({ page }) => {
-	await page.waitForURL(/\/(dashboard)?$/, { timeout: 10000 });
+	await page.waitForURL(/\/(dashboard)?$/, { timeout: 5000 });
 	expect(page.url()).toMatch(/\/(dashboard)?$/);
 });
 
 Then('I should see the main navigation', async ({ page }) => {
 	const nav = page.locator('nav');
-	await expect(nav.first()).toBeVisible({ timeout: 10000 });
+	await expect(nav.first()).toBeVisible({ timeout: 5000 });
 });
 
 Then('I should see my username in the header', async ({ page }) => {
 	const header = page.locator('header');
-	await expect(header).toBeVisible({ timeout: 10000 });
+	await expect(header).toBeVisible({ timeout: 5000 });
 });
 
 Then('I should stay on the dashboard', async ({ page }) => {
@@ -200,5 +200,5 @@ Then('I should stay on the dashboard', async ({ page }) => {
 
 Then('I should see portfolio statistics', async ({ page }) => {
 	// Check for stat cards in Portfolio section
-	await expect(page.locator('h2:has-text("Portfolio")').first()).toBeVisible({ timeout: 10000 });
+	await expect(page.locator('h2:has-text("Portfolio")').first()).toBeVisible({ timeout: 5000 });
 });

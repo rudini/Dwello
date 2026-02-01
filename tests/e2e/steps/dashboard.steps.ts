@@ -81,16 +81,16 @@ Given('the backend API is mocked', async ({ page }) => {
 // ============================================
 
 Then('I should see the total number of buildings', async ({ page }) => {
-	await expect(page.getByTestId('portfolio-section')).toBeVisible({ timeout: 10000 });
-	await expect(page.getByTestId('stat-gebäude')).toBeVisible({ timeout: 10000 });
+	await expect(page.getByTestId('portfolio-section')).toBeVisible({ timeout: 5000 });
+	await expect(page.getByTestId('stat-gebäude')).toBeVisible({ timeout: 5000 });
 });
 
 Then('I should see the total number of apartments', async ({ page }) => {
-	await expect(page.getByTestId('stat-wohnungen')).toBeVisible({ timeout: 10000 });
+	await expect(page.getByTestId('stat-wohnungen')).toBeVisible({ timeout: 5000 });
 });
 
 Then('I should see the occupancy rate', async ({ page }) => {
-	await expect(page.getByTestId('stat-belegungsrate')).toBeVisible({ timeout: 10000 });
+	await expect(page.getByTestId('stat-belegungsrate')).toBeVisible({ timeout: 5000 });
 });
 
 // ============================================
@@ -98,16 +98,16 @@ Then('I should see the occupancy rate', async ({ page }) => {
 // ============================================
 
 Then('I should see outstanding statements count', async ({ page }) => {
-	await expect(page.getByTestId('financial-section')).toBeVisible({ timeout: 10000 });
-	await expect(page.getByTestId('stat-offene-abrechnungen')).toBeVisible({ timeout: 10000 });
+	await expect(page.getByTestId('financial-section')).toBeVisible({ timeout: 5000 });
+	await expect(page.getByTestId('stat-offene-abrechnungen')).toBeVisible({ timeout: 5000 });
 });
 
 Then('I should see total pending amount', async ({ page }) => {
-	await expect(page.getByTestId('stat-ausstehend')).toBeVisible({ timeout: 10000 });
+	await expect(page.getByTestId('stat-ausstehend')).toBeVisible({ timeout: 5000 });
 });
 
 Then('I should see overdue amount', async ({ page }) => {
-	await expect(page.getByTestId('stat-überfällig')).toBeVisible({ timeout: 10000 });
+	await expect(page.getByTestId('stat-überfällig')).toBeVisible({ timeout: 5000 });
 });
 
 // ============================================
@@ -115,20 +115,20 @@ Then('I should see overdue amount', async ({ page }) => {
 // ============================================
 
 Then('I should see draft statements count', async ({ page }) => {
-	await expect(page.getByTestId('statements-status-section')).toBeVisible({ timeout: 10000 });
-	await expect(page.getByTestId('statements-draft')).toBeVisible({ timeout: 10000 });
+	await expect(page.getByTestId('statements-status-section')).toBeVisible({ timeout: 5000 });
+	await expect(page.getByTestId('statements-draft')).toBeVisible({ timeout: 5000 });
 });
 
 Then('I should see sent statements count', async ({ page }) => {
-	await expect(page.getByTestId('statements-sent')).toBeVisible({ timeout: 10000 });
+	await expect(page.getByTestId('statements-sent')).toBeVisible({ timeout: 5000 });
 });
 
 Then('I should see paid statements count', async ({ page }) => {
-	await expect(page.getByTestId('statements-paid')).toBeVisible({ timeout: 10000 });
+	await expect(page.getByTestId('statements-paid')).toBeVisible({ timeout: 5000 });
 });
 
 Then('I should see overdue statements count', async ({ page }) => {
-	await expect(page.getByTestId('statements-overdue')).toBeVisible({ timeout: 10000 });
+	await expect(page.getByTestId('statements-overdue')).toBeVisible({ timeout: 5000 });
 });
 
 // ============================================
@@ -136,11 +136,11 @@ Then('I should see overdue statements count', async ({ page }) => {
 // ============================================
 
 Then('I should see the activity feed', async ({ page }) => {
-	await expect(page.getByText('Letzte Aktivitäten')).toBeVisible({ timeout: 10000 });
+	await expect(page.getByText('Letzte Aktivitäten')).toBeVisible({ timeout: 5000 });
 });
 
 Then('I should see recent activities', async ({ page }) => {
-	await expect(page.getByText('Letzte Aktivitäten')).toBeVisible({ timeout: 10000 });
+	await expect(page.getByText('Letzte Aktivitäten')).toBeVisible({ timeout: 5000 });
 });
 
 // ============================================
@@ -148,11 +148,11 @@ Then('I should see recent activities', async ({ page }) => {
 // ============================================
 
 Then('I should see the occupancy chart', async ({ page }) => {
-	await expect(page.getByText('Belegungsrate nach Gebäude')).toBeVisible({ timeout: 10000 });
+	await expect(page.getByText('Belegungsrate nach Gebäude')).toBeVisible({ timeout: 5000 });
 });
 
 Then('I should see building names in the chart', async ({ page }) => {
-	await expect(page.getByText('Musterhaus Zentrum')).toBeVisible({ timeout: 10000 });
+	await expect(page.getByText('Musterhaus Zentrum')).toBeVisible({ timeout: 5000 });
 });
 
 // ============================================
@@ -168,11 +168,11 @@ When('I click on the overdue statements card', async ({ page }) => {
 });
 
 Then('I should be on the buildings page', async ({ page }) => {
-	await page.waitForURL(/buildings/, { timeout: 10000 });
+	await page.waitForURL(/buildings/, { timeout: 5000 });
 	expect(page.url()).toContain('buildings');
 });
 
 Then('I should be on the statements page with overdue filter', async ({ page }) => {
-	await page.waitForURL(/statements/, { timeout: 10000 });
+	await page.waitForURL(/statements/, { timeout: 5000 });
 	expect(page.url()).toContain('statements');
 });

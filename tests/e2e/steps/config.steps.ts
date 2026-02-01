@@ -20,7 +20,7 @@ When('I click the {string} quick link', async ({ page }, linkText: string) => {
 	await page.waitForFunction(
 		(prevUrl) => window.location.href !== prevUrl,
 		currentUrl,
-		{ timeout: 10000 }
+		{ timeout: 5000 }
 	);
 	await page.waitForLoadState('domcontentloaded');
 });
@@ -52,27 +52,27 @@ When('I change the management fee to {string}', async ({ page }, value: string) 
 
 Then('I should see the config page', async ({ page }) => {
 	// Use data-testid for stable selectors
-	await expect(page.getByTestId('config-page')).toBeVisible({ timeout: 10000 });
+	await expect(page.getByTestId('config-page')).toBeVisible({ timeout: 5000 });
 });
 
 Then('I should see the quick links section', async ({ page }) => {
 	// Use data-testid for stable selectors
-	await expect(page.getByTestId('quick-links')).toBeVisible({ timeout: 10000 });
-	await expect(page.getByTestId('quick-link-categories')).toBeVisible({ timeout: 10000 });
-	await expect(page.getByTestId('quick-link-heating-profiles')).toBeVisible({ timeout: 10000 });
-	await expect(page.getByTestId('quick-link-distribution-keys')).toBeVisible({ timeout: 10000 });
+	await expect(page.getByTestId('quick-links')).toBeVisible({ timeout: 5000 });
+	await expect(page.getByTestId('quick-link-categories')).toBeVisible({ timeout: 5000 });
+	await expect(page.getByTestId('quick-link-heating-profiles')).toBeVisible({ timeout: 5000 });
+	await expect(page.getByTestId('quick-link-distribution-keys')).toBeVisible({ timeout: 5000 });
 });
 
 Then('I should see the company info section', async ({ page }) => {
-	await expect(page.getByTestId('company-info-section')).toBeVisible({ timeout: 10000 });
+	await expect(page.getByTestId('company-info-section')).toBeVisible({ timeout: 5000 });
 });
 
 Then('I should see the accounting settings section', async ({ page }) => {
-	await expect(page.getByTestId('accounting-settings-section')).toBeVisible({ timeout: 10000 });
+	await expect(page.getByTestId('accounting-settings-section')).toBeVisible({ timeout: 5000 });
 });
 
 Then('I should see the default values section', async ({ page }) => {
-	await expect(page.getByTestId('default-values-section')).toBeVisible({ timeout: 10000 });
+	await expect(page.getByTestId('default-values-section')).toBeVisible({ timeout: 5000 });
 });
 
 Then('I should be on the categories page', async ({ page }) => {
@@ -85,7 +85,7 @@ Then('I should be on the distribution keys page', async ({ page }) => {
 
 Then('the heating profile dropdown should have options', async ({ page }) => {
 	const select = page.locator('#heatingProfile');
-	await expect(select).toBeVisible({ timeout: 10000 });
+	await expect(select).toBeVisible({ timeout: 5000 });
 	const options = await select.locator('option').count();
 	expect(options).toBeGreaterThan(1);
 });
@@ -125,14 +125,14 @@ Then('the heating profile dropdown should show {string} selected', async ({ page
 
 Then('the save button should be disabled', async ({ page }) => {
 	const saveButton = page.getByRole('button', { name: /Einstellungen speichern/ });
-	await expect(saveButton).toBeDisabled({ timeout: 10000 });
+	await expect(saveButton).toBeDisabled({ timeout: 5000 });
 });
 
 Then('the save button should be enabled', async ({ page }) => {
 	const saveButton = page.getByRole('button', { name: /Einstellungen speichern/ });
-	await expect(saveButton).toBeEnabled({ timeout: 10000 });
+	await expect(saveButton).toBeEnabled({ timeout: 5000 });
 });
 
 Then('I should see the unsaved changes indicator', async ({ page }) => {
-	await expect(page.getByText('Ungespeicherte Änderungen')).toBeVisible({ timeout: 10000 });
+	await expect(page.getByText('Ungespeicherte Änderungen')).toBeVisible({ timeout: 5000 });
 });

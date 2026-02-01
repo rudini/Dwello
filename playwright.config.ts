@@ -9,10 +9,17 @@ const testDir = defineBddConfig({
 
 export default defineConfig({
 	testDir,
+	// Run tests in parallel for speed
+	fullyParallel: true,
+	workers: process.env.CI ? 2 : 4,
+	// Shorter timeout for faster failure detection
+	timeout: 30000,
+	expect: {
+		timeout: 5000
+	},
 	reporter: [
-		['html'],
-		cucumberReporter('html', { outputFile: 'cucumber-report/report.html' }),
-		cucumberReporter('json', { outputFile: 'cucumber-report/report.json' })
+		['html', { open: 'never' }],
+		cucumberReporter('html', { outputFile: 'cucumber-report/report.html' })
 	],
 	// Run against the full stack (frontend + backend + database)
 	// Expects: PostgreSQL on 5432, Backend on 3001, Frontend on 3000
@@ -35,8 +42,8 @@ export default defineConfig({
 	use: {
 		baseURL: 'http://localhost:3000',
 		screenshot: 'only-on-failure',
-		video: 'retain-on-failure',
-		trace: 'retain-on-failure'
+		video: 'off',
+		trace: 'on-first-retry'
 	},
 	projects: [
 		{

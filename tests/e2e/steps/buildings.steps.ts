@@ -130,18 +130,18 @@ When('I search for {string}', async ({ page }, searchTerm: string) => {
 
 Then('I should see a list of buildings', async ({ page }) => {
 	// The buildings page should show building cards
-	await expect(page.getByTestId('buildings-page')).toBeVisible({ timeout: 10000 });
+	await expect(page.getByTestId('buildings-page')).toBeVisible({ timeout: 5000 });
 	// Check that at least one building is displayed
-	await expect(page.getByText('Musterhaus Zentrum')).toBeVisible({ timeout: 10000 });
+	await expect(page.getByText('Musterhaus Zentrum')).toBeVisible({ timeout: 5000 });
 });
 
 Then('I should see building addresses', async ({ page }) => {
-	await expect(page.getByText('Musterstraße')).toBeVisible({ timeout: 10000 });
+	await expect(page.getByText('Musterstraße')).toBeVisible({ timeout: 5000 });
 });
 
 Then('I should see apartment counts', async ({ page }) => {
 	// Check for apartment count display (e.g., "8 Wohnungen")
-	await expect(page.getByText('Wohnungen').first()).toBeVisible({ timeout: 10000 });
+	await expect(page.getByText('Wohnungen').first()).toBeVisible({ timeout: 5000 });
 });
 
 Then('I should be on the new building page', async ({ page }) => {
@@ -149,25 +149,25 @@ Then('I should be on the new building page', async ({ page }) => {
 });
 
 Then('I should see a form for building details', async ({ page }) => {
-	await expect(page.locator('form').first()).toBeVisible({ timeout: 10000 });
+	await expect(page.locator('form').first()).toBeVisible({ timeout: 5000 });
 });
 
 Then('I should see the building name {string}', async ({ page }, buildingName: string) => {
 	// Use heading role to be specific about which element we want
-	await expect(page.getByRole('heading', { name: buildingName })).toBeVisible({ timeout: 10000 });
+	await expect(page.getByRole('heading', { name: buildingName })).toBeVisible({ timeout: 5000 });
 });
 
 Then('I should see the building address', async ({ page }) => {
-	await expect(page.getByText('Musterstraße')).toBeVisible({ timeout: 10000 });
+	await expect(page.getByText('Musterstraße')).toBeVisible({ timeout: 5000 });
 });
 
 Then('I should see the apartment list', async ({ page }) => {
 	// Check for apartment listings
-	await expect(page.getByText(/1\.0[12]/).first()).toBeVisible({ timeout: 10000 });
+	await expect(page.getByText(/1\.0[12]/).first()).toBeVisible({ timeout: 5000 });
 });
 
 Then('I should only see buildings in Zürich', async ({ page }) => {
-	await expect(page.getByText('Zürich').first()).toBeVisible({ timeout: 10000 });
+	await expect(page.getByText('Zürich').first()).toBeVisible({ timeout: 5000 });
 });
 
 // ============================================
@@ -189,7 +189,7 @@ Then('I should see apartments grouped by floor', async ({ page }) => {
 
 Then('I should see apartment numbers in the list', async ({ page }) => {
 	// Check for apartment number patterns like "1.01", "2.01", etc.
-	await expect(page.getByText(/\d\.\d{2}/).first()).toBeVisible({ timeout: 10000 });
+	await expect(page.getByText(/\d\.\d{2}/).first()).toBeVisible({ timeout: 5000 });
 });
 
 Then('I should see apartment occupancy badges', async ({ page }) => {

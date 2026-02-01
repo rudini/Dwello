@@ -33,19 +33,19 @@ When('I submit the new apartment form', async ({ page }) => {
 // ============================================
 
 Then('I should see the apartments page', async ({ page }) => {
-	await expect(page.getByTestId('apartments-page')).toBeVisible({ timeout: 10000 });
+	await expect(page.getByTestId('apartments-page')).toBeVisible({ timeout: 5000 });
 });
 
 Then('I should see the apartments search input', async ({ page }) => {
-	await expect(page.locator('input#search')).toBeVisible({ timeout: 10000 });
+	await expect(page.locator('input#search')).toBeVisible({ timeout: 5000 });
 });
 
 Then('I should see the building filter', async ({ page }) => {
-	await expect(page.locator('select#building')).toBeVisible({ timeout: 10000 });
+	await expect(page.locator('select#building')).toBeVisible({ timeout: 5000 });
 });
 
 Then('I should see the apartment status filter', async ({ page }) => {
-	await expect(page.locator('select#status')).toBeVisible({ timeout: 10000 });
+	await expect(page.locator('select#status')).toBeVisible({ timeout: 5000 });
 });
 
 Then('I should be on the new apartment page', async ({ page }) => {
@@ -53,7 +53,7 @@ Then('I should be on the new apartment page', async ({ page }) => {
 });
 
 Then('I should see the building dropdown', async ({ page }) => {
-	await expect(page.locator('select#building')).toBeVisible({ timeout: 10000 });
+	await expect(page.locator('select#building')).toBeVisible({ timeout: 5000 });
 });
 
 Then('the building dropdown should have all buildings', async ({ page }) => {
@@ -64,12 +64,12 @@ Then('the building dropdown should have all buildings', async ({ page }) => {
 });
 
 Then('the building dropdown should be visible', async ({ page }) => {
-	await expect(page.locator('select#building')).toBeVisible({ timeout: 10000 });
+	await expect(page.locator('select#building')).toBeVisible({ timeout: 5000 });
 });
 
 Then('the building field should be readonly', async ({ page }) => {
 	const readonlyInput = page.locator('input#building[readonly]');
-	await expect(readonlyInput).toBeVisible({ timeout: 10000 });
+	await expect(readonlyInput).toBeVisible({ timeout: 5000 });
 });
 
 Then('the building field should not be readonly', async ({ page }) => {
@@ -79,51 +79,51 @@ Then('the building field should not be readonly', async ({ page }) => {
 
 Then('the building field should show {string}', async ({ page }, buildingName: string) => {
 	const readonlyInput = page.locator('input#building[readonly]');
-	await expect(readonlyInput).toHaveValue(buildingName, { timeout: 10000 });
+	await expect(readonlyInput).toHaveValue(buildingName, { timeout: 5000 });
 });
 
 Then('I should see a lock icon on the building field', async ({ page }) => {
 	// Look for the lock icon (Material Symbol)
 	const lockIcon = page.locator('text=lock').first();
-	await expect(lockIcon).toBeVisible({ timeout: 10000 });
+	await expect(lockIcon).toBeVisible({ timeout: 5000 });
 });
 
 Then('the breadcrumb should show {string}', async ({ page }, text: string) => {
 	const breadcrumb = page.locator('nav.flex.items-center.text-sm');
-	await expect(breadcrumb.getByText(text)).toBeVisible({ timeout: 10000 });
+	await expect(breadcrumb.getByText(text)).toBeVisible({ timeout: 5000 });
 });
 
 Then('the cancel button should link to {string}', async ({ page }, href: string) => {
 	const cancelButton = page.getByRole('link', { name: 'Abbrechen' });
-	await expect(cancelButton).toHaveAttribute('href', href, { timeout: 10000 });
+	await expect(cancelButton).toHaveAttribute('href', href, { timeout: 5000 });
 });
 
 Then('I should see the floor dropdown', async ({ page }) => {
-	await expect(page.locator('select#floor')).toBeVisible({ timeout: 10000 });
+	await expect(page.locator('select#floor')).toBeVisible({ timeout: 5000 });
 });
 
 Then('I should see the apartment number input', async ({ page }) => {
-	await expect(page.locator('input#addressUnit')).toBeVisible({ timeout: 10000 });
+	await expect(page.locator('input#addressUnit')).toBeVisible({ timeout: 5000 });
 });
 
 Then('I should see the size input', async ({ page }) => {
-	await expect(page.locator('input#sizeM2')).toBeVisible({ timeout: 10000 });
+	await expect(page.locator('input#sizeM2')).toBeVisible({ timeout: 5000 });
 });
 
 Then('I should see the room count dropdown', async ({ page }) => {
-	await expect(page.locator('select#roomCount')).toBeVisible({ timeout: 10000 });
+	await expect(page.locator('select#roomCount')).toBeVisible({ timeout: 5000 });
 });
 
 Then('I should see the building validation error', async ({ page }) => {
-	await expect(page.getByText('Bitte wählen Sie ein Gebäude aus')).toBeVisible({ timeout: 10000 });
+	await expect(page.getByText('Bitte wählen Sie ein Gebäude aus')).toBeVisible({ timeout: 5000 });
 });
 
 Then('I should see the floor validation error', async ({ page }) => {
-	await expect(page.getByText('Stockwerk ist erforderlich')).toBeVisible({ timeout: 10000 });
+	await expect(page.getByText('Stockwerk ist erforderlich')).toBeVisible({ timeout: 5000 });
 });
 
 Then('I should see the apartment number validation error', async ({ page }) => {
-	await expect(page.getByText('Wohnungsnummer ist erforderlich')).toBeVisible({ timeout: 10000 });
+	await expect(page.getByText('Wohnungsnummer ist erforderlich')).toBeVisible({ timeout: 5000 });
 });
 
 // ============================================
@@ -133,7 +133,7 @@ Then('I should see the apartment number validation error', async ({ page }) => {
 Then('I should see apartments in the list', async ({ page }) => {
 	// Wait for apartment cards to be visible
 	const apartmentLinks = page.locator('a[href^="/apartments/"]').filter({ hasText: 'Wohnung' });
-	await expect(apartmentLinks.first()).toBeVisible({ timeout: 10000 });
+	await expect(apartmentLinks.first()).toBeVisible({ timeout: 5000 });
 	const count = await apartmentLinks.count();
 	expect(count).toBeGreaterThan(0);
 });
@@ -166,7 +166,7 @@ Then('I should see apartment occupancy status badges', async ({ page }) => {
 Then('I should see at least one {string} badge', async ({ page }, status: string) => {
 	// Look for badges inside apartment cards, not in select dropdowns
 	const apartmentCards = page.locator('a[href^="/apartments/"]');
-	await expect(apartmentCards.getByText(status).first()).toBeVisible({ timeout: 10000 });
+	await expect(apartmentCards.getByText(status).first()).toBeVisible({ timeout: 5000 });
 });
 
 // ============================================
@@ -194,7 +194,7 @@ When('I wait for the duplicate check', async ({ page }) => {
 });
 
 Then('I should see the duplicate apartment warning', async ({ page }) => {
-	await expect(page.getByText('Wohnungsnummer bereits vergeben')).toBeVisible({ timeout: 10000 });
+	await expect(page.getByText('Wohnungsnummer bereits vergeben')).toBeVisible({ timeout: 5000 });
 });
 
 Then('I should not see the duplicate apartment warning', async ({ page }) => {
@@ -202,5 +202,5 @@ Then('I should not see the duplicate apartment warning', async ({ page }) => {
 });
 
 Then('the warning should mention apartment number {string}', async ({ page }, number: string) => {
-	await expect(page.getByText(`Die Wohnungsnummer "${number}" existiert bereits`)).toBeVisible({ timeout: 10000 });
+	await expect(page.getByText(`Die Wohnungsnummer "${number}" existiert bereits`)).toBeVisible({ timeout: 5000 });
 });

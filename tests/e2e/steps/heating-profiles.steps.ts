@@ -34,7 +34,7 @@ When('I click on the {string} profile', async ({ page }, profileName: string) =>
 	};
 	const profileId = profileIdMap[profileName] || profileName.toLowerCase().replace(/\s+/g, '-');
 	await page.getByTestId(`view-profile-${profileId}`).click();
-	await page.waitForURL(/\/config\/heating-profiles\/hp-/, { timeout: 10000 });
+	await page.waitForURL(/\/config\/heating-profiles\/hp-/, { timeout: 5000 });
 });
 
 When('I click the view button for {string} profile', async ({ page }, profileName: string) => {
@@ -48,7 +48,7 @@ When('I click the view button for {string} profile', async ({ page }, profileNam
 	};
 	const profileId = profileIdMap[profileName] || profileName.toLowerCase().replace(/\s+/g, '-');
 	await page.getByTestId(`view-profile-${profileId}`).click();
-	await page.waitForURL(/\/config\/heating-profiles\/hp-/, { timeout: 10000 });
+	await page.waitForURL(/\/config\/heating-profiles\/hp-/, { timeout: 5000 });
 });
 
 When('I change the January percentage to {string}', async ({ page }, value: string) => {
@@ -69,7 +69,7 @@ When('I click the {string} button', async ({ page }, buttonText: string) => {
 	await page.waitForFunction(
 		(prevUrl) => window.location.href !== prevUrl,
 		currentUrl,
-		{ timeout: 10000 }
+		{ timeout: 5000 }
 	);
 	await page.waitForLoadState('domcontentloaded');
 });
@@ -80,16 +80,16 @@ When('I click the {string} button', async ({ page }, buttonText: string) => {
 
 Then('I should see the heating profiles page', async ({ page }) => {
 	// Use data-testid for stable selectors
-	await expect(page.getByTestId('heating-profiles-page')).toBeVisible({ timeout: 10000 });
+	await expect(page.getByTestId('heating-profiles-page')).toBeVisible({ timeout: 5000 });
 });
 
 Then('I should see at least {int} heating profiles', async ({ page }, count: number) => {
 	// Use data-testid to verify profiles are visible
-	await expect(page.getByTestId('profiles-grid')).toBeVisible({ timeout: 10000 });
-	await expect(page.getByTestId('profile-card-hp-standard')).toBeVisible({ timeout: 10000 });
-	await expect(page.getByTestId('profile-card-hp-mittelland')).toBeVisible({ timeout: 10000 });
-	await expect(page.getByTestId('profile-card-hp-mountain')).toBeVisible({ timeout: 10000 });
-	await expect(page.getByTestId('profile-card-hp-tessin')).toBeVisible({ timeout: 10000 });
+	await expect(page.getByTestId('profiles-grid')).toBeVisible({ timeout: 5000 });
+	await expect(page.getByTestId('profile-card-hp-standard')).toBeVisible({ timeout: 5000 });
+	await expect(page.getByTestId('profile-card-hp-mittelland')).toBeVisible({ timeout: 5000 });
+	await expect(page.getByTestId('profile-card-hp-mountain')).toBeVisible({ timeout: 5000 });
+	await expect(page.getByTestId('profile-card-hp-tessin')).toBeVisible({ timeout: 5000 });
 });
 
 Then('I should be on the heating profile detail page', async ({ page }) => {
@@ -106,55 +106,55 @@ Then('I should be on the heating profiles page', async ({ page }) => {
 });
 
 Then('I should see the profile name {string}', async ({ page }, name: string) => {
-	await expect(page.getByTestId('profile-name')).toHaveText(name, { timeout: 10000 });
+	await expect(page.getByTestId('profile-name')).toHaveText(name, { timeout: 5000 });
 });
 
 Then('I should see the monthly distribution chart', async ({ page }) => {
-	await expect(page.getByTestId('monthly-distribution-title')).toBeVisible({ timeout: 10000 });
+	await expect(page.getByTestId('monthly-distribution-title')).toBeVisible({ timeout: 5000 });
 });
 
 Then('I should see the profile information section', async ({ page }) => {
-	await expect(page.getByTestId('profile-info-title')).toBeVisible({ timeout: 10000 });
+	await expect(page.getByTestId('profile-info-title')).toBeVisible({ timeout: 5000 });
 });
 
 Then('I should see the total percentage {string}', async ({ page }, percentage: string) => {
-	await expect(page.getByTestId('total-percentage')).toContainText(percentage, { timeout: 10000 });
+	await expect(page.getByTestId('total-percentage')).toContainText(percentage, { timeout: 5000 });
 });
 
 Then('the total percentage should be displayed in green', async ({ page }) => {
 	const sumElement = page.getByTestId('total-percentage');
-	await expect(sumElement).toBeVisible({ timeout: 10000 });
-	await expect(sumElement).toHaveClass(/text-green-600/, { timeout: 10000 });
+	await expect(sumElement).toBeVisible({ timeout: 5000 });
+	await expect(sumElement).toHaveClass(/text-green-600/, { timeout: 5000 });
 });
 
 Then('the total percentage should be displayed in red', async ({ page }) => {
 	const sumElement = page.getByTestId('total-percentage');
-	await expect(sumElement).toBeVisible({ timeout: 10000 });
-	await expect(sumElement).toHaveClass(/text-red-600/, { timeout: 10000 });
+	await expect(sumElement).toBeVisible({ timeout: 5000 });
+	await expect(sumElement).toHaveClass(/text-red-600/, { timeout: 5000 });
 });
 
 Then('I should see the heating profile edit form', async ({ page }) => {
-	await expect(page.getByRole('heading', { name: 'Heizprofil bearbeiten' })).toBeVisible({ timeout: 10000 });
+	await expect(page.getByRole('heading', { name: 'Heizprofil bearbeiten' })).toBeVisible({ timeout: 5000 });
 });
 
 Then('I should see the monthly percentage inputs', async ({ page }) => {
-	await expect(page.locator('input[name="january"]')).toBeVisible({ timeout: 10000 });
-	await expect(page.locator('input[name="december"]')).toBeVisible({ timeout: 10000 });
+	await expect(page.locator('input[name="january"]')).toBeVisible({ timeout: 5000 });
+	await expect(page.locator('input[name="december"]')).toBeVisible({ timeout: 5000 });
 });
 
 Then('I should see the preview chart', async ({ page }) => {
-	await expect(page.getByText('Vorschau')).toBeVisible({ timeout: 10000 });
+	await expect(page.getByText('Vorschau')).toBeVisible({ timeout: 5000 });
 });
 
 Then('the sum should update accordingly', async ({ page }) => {
 	// The sum text should exist and contain a percentage
-	await expect(page.getByText(/Summe:.*\d+%/)).toBeVisible({ timeout: 10000 });
+	await expect(page.getByText(/Summe:.*\d+%/)).toBeVisible({ timeout: 5000 });
 });
 
 Then('the sum color should reflect validity', async ({ page }) => {
 	// Should show either green (100%) or red (not 100%)
 	const sumSpan = page.locator('.font-semibold').filter({ hasText: '%' }).first();
-	await expect(sumSpan).toBeVisible({ timeout: 10000 });
+	await expect(sumSpan).toBeVisible({ timeout: 5000 });
 	const classes = await sumSpan.getAttribute('class');
 	expect(classes).toMatch(/text-(green|red)-600/);
 });
