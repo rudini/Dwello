@@ -153,7 +153,8 @@ Then('I should see a form for building details', async ({ page }) => {
 });
 
 Then('I should see the building name {string}', async ({ page }, buildingName: string) => {
-	await expect(page.getByText(buildingName)).toBeVisible({ timeout: 10000 });
+	// Use heading role to be specific about which element we want
+	await expect(page.getByRole('heading', { name: buildingName })).toBeVisible({ timeout: 10000 });
 });
 
 Then('I should see the building address', async ({ page }) => {
@@ -167,4 +168,37 @@ Then('I should see the apartment list', async ({ page }) => {
 
 Then('I should only see buildings in Zürich', async ({ page }) => {
 	await expect(page.getByText('Zürich').first()).toBeVisible({ timeout: 10000 });
+});
+
+// ============================================
+// Building detail data loading steps
+// ============================================
+
+When('I open building detail page {string}', async ({ page }, buildingId: string) => {
+	await page.goto(`/buildings/${buildingId}`);
+	await page.waitForLoadState('networkidle');
+});
+
+Then('I should see apartments grouped by floor', async ({ page }) => {
+	// Check for floor groupings - Cards contain h3 headers with stairs icon
+	// The stairs icon is rendered as text "stairs" inside a span
+	const floorHeaders = page.locator('h3').filter({ has: page.getByText('stairs') });
+	const count = await floorHeaders.count();
+	expect(count).toBeGreaterThan(0);
+});
+
+Then('I should see apartment numbers in the list', async ({ page }) => {
+	// Check for apartment number patterns like "1.01", "2.01", etc.
+	await expect(page.getByText(/\d\.\d{2}/).first()).toBeVisible({ timeout: 10000 });
+});
+
+Then('I should see apartment occupancy badges', async ({ page }) => {
+	// Check for occupancy status badges (inside apartment rows, not select options)
+	const apartmentRows = page.locator('a[href^="/apartments/"]');
+	const vermietedBadge = apartmentRows.getByText('Vermietet').first();
+	const leerBadge = apartmentRows.getByText('Leer').first();
+	// At least one of these should be visible
+	const vermietedVisible = await vermietedBadge.isVisible().catch(() => false);
+	const leerVisible = await leerBadge.isVisible().catch(() => false);
+	expect(vermietedVisible || leerVisible).toBe(true);
 });

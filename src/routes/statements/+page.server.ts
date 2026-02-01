@@ -29,34 +29,39 @@ export const load = async ({ url, fetch }): Promise<StatementsListData> => {
 		const buildingsData = await buildingsRes.json();
 
 		// Transform backend data to match frontend types
-		const statements = (statementsData.data || []).map((s: Record<string, unknown>) => ({
-			id: s.id,
-			statementNumber: s.statementNumber,
-			tenantId: s.tenantId,
-			apartmentId: s.apartmentId,
-			buildingId: s.apartment?.buildingId || '',
-			periodStart: s.periodStart,
-			periodEnd: s.periodEnd,
-			statementDate: s.statementDate,
-			rentalDays: s.rentalDays,
-			totalCosts: Number(s.totalCosts),
-			totalAdvancePayments: Number(s.totalAdvancePayments),
-			managementFee: Number(s.managementFee),
-			balance: Number(s.balance),
-			status: s.status,
-			paymentDeadline: s.paymentDeadline,
-			paidDate: s.paidDate,
-			pdfGeneratedAt: s.pdfGeneratedAt,
-			tenantName: s.tenant ? `${s.tenant.firstName} ${s.tenant.lastName}` : 'Unbekannt',
-			tenantEmail: s.tenant?.email || '',
-			apartmentUnit: s.apartment?.number || '',
-			apartmentFloor: s.apartment?.floor || '',
-			buildingName: s.building?.name || '',
-			buildingAddress: s.building?.address || '',
-			lineItems: s.lineItems || []
-		}));
+		const statements = (statementsData.data || []).map((s: Record<string, unknown>) => {
+			const tenant = s.tenant as Record<string, unknown> | null;
+			const apartment = s.apartment as Record<string, unknown> | null;
+			const building = s.building as Record<string, unknown> | null;
+			return {
+				id: s.id,
+				statementNumber: s.statementNumber,
+				tenantId: s.tenantId,
+				apartmentId: s.apartmentId,
+				buildingId: building?.id || '',
+				periodStart: s.periodStart,
+				periodEnd: s.periodEnd,
+				statementDate: s.statementDate,
+				rentalDays: s.rentalDays,
+				totalCosts: Number(s.totalCosts),
+				totalAdvancePayments: Number(s.totalAdvancePayments),
+				managementFee: Number(s.managementFee),
+				balance: Number(s.balance),
+				status: s.status,
+				paymentDeadline: s.paymentDeadline,
+				paidDate: s.paidDate,
+				pdfGeneratedAt: s.pdfGeneratedAt,
+				tenantName: tenant ? `${tenant.firstName} ${tenant.lastName}` : 'Unbekannt',
+				tenantEmail: (tenant?.email as string) || '',
+				apartmentUnit: (apartment?.number as string) || '',
+				apartmentFloor: apartment?.floor || '',
+				buildingName: (building?.name as string) || '',
+				buildingAddress: (building?.address as string) || '',
+				lineItems: s.lineItems || []
+			};
+		});
 
-		const buildings = (buildingsData.data || []).map((b: Record<string, unknown>) => ({
+		const buildings = (buildingsData.buildings || buildingsData.data || []).map((b: Record<string, unknown>) => ({
 			id: b.id,
 			name: b.name
 		}));

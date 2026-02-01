@@ -25,17 +25,17 @@ export const load = async ({ url, fetch }): Promise<ApartmentsListData> => {
 		const apartmentsData = await apartmentsRes.json();
 		const buildingsData = await buildingsRes.json();
 
-		const apartments: ApartmentWithBuilding[] = (apartmentsData.data || []).map((a: Record<string, unknown>) => ({
+		const apartments: ApartmentWithBuilding[] = (apartmentsData.apartments || apartmentsData.data || []).map((a: Record<string, unknown>) => ({
 			id: a.id,
 			building_id: a.buildingId,
 			floor: a.floor || '',
 			address_unit: a.number || '',
 			size_m2: a.area ? Number(a.area) : undefined,
 			room_count: a.rooms ? Number(a.rooms) : undefined,
-			occupancy_status: a.currentTenantId ? 'Vermietet' : 'Leer',
-			building_name: (a.building as Record<string, string>)?.name || '',
-			building_address: (a.building as Record<string, string>)?.address || '',
-			building_city: (a.building as Record<string, string>)?.city || '',
+			occupancy_status: a.status === 'occupied' ? 'Vermietet' : 'Leer',
+			building_name: (a.buildingName as string) || '',
+			building_address: (a.buildingAddress as string) || '',
+			building_city: (a.buildingCity as string) || '',
 			current_tenant_name: a.currentTenant
 				? `${(a.currentTenant as Record<string, string>).firstName} ${(a.currentTenant as Record<string, string>).lastName}`
 				: undefined,

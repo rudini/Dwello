@@ -1,5 +1,6 @@
 import type { Apartment } from '$lib/types';
-import { error } from '@sveltejs/kit';
+import type { Actions } from './$types';
+import { error, fail, redirect } from '@sveltejs/kit';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
@@ -8,7 +9,7 @@ interface ApartmentEditData {
 	buildings: { id: string; name: string; address: string }[];
 }
 
-export const load = async ({ params, fetch }): Promise<ApartmentEditData> => {
+export const load = async ({ params, fetch }: { params: { id: string }; fetch: typeof globalThis.fetch }): Promise<ApartmentEditData> => {
 	try {
 		const [apartmentRes, buildingsRes] = await Promise.all([
 			fetch(`${BACKEND_URL}/api/v1/apartments/${params.id}`),
@@ -48,5 +49,62 @@ export const load = async ({ params, fetch }): Promise<ApartmentEditData> => {
 			throw err;
 		}
 		throw error(500, 'Fehler beim Laden der Wohnung');
+	}
+};
+
+export const actions: Actions = {
+	default: async ({ request, params, fetch }) => {
+		const formData = await request.formData();
+
+		const buildingId = formData.get('buildingId') as string;
+		const number = formData.get('number') as string;
+		const floor = formData.get('floor') as string;
+		const area = formData.get('area') as string;
+		const rooms = formData.get('rooms') as string;
+
+		// Validation
+		const errors: Record<string, string> = {};
+		if (!buildingId) errors.buildingId = 'Bitte wählen Sie ein Gebäude aus';
+		if (!number?.trim()) errors.number = 'Wohnungsnummer ist erforderlich';
+		if (!floor) errors.floor = 'Stockwerk ist erforderlich';
+		if (!area?.trim()) errors.area = 'Fläche ist erforderlich';
+		if (!rooms) errors.rooms = 'Zimmeranzahl ist erforderlich';
+
+		if (Object.keys(errors).length > 0) {
+			return fail(400, { errors, values: { buildingId, number, floor, area, rooms } });
+		}
+
+		try {
+			const response = await fetch(`${BACKEND_URL}/api/v1/apartments/${params.id}`, {
+				method: 'PUT',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					buildingId,
+					number: number.trim(),
+					floor: parseInt(floor, 10),
+					area: area.trim(),
+					rooms: rooms.trim()
+				})
+			});
+
+			if (!response.ok) {
+				const errorData = await response.json().catch(() => ({}));
+				return fail(response.status, {
+					errors: { form: errorData.error || 'Fehler beim Speichern der Wohnung' },
+					values: { buildingId, number, floor, area, rooms }
+				});
+			}
+
+			throw redirect(303, `/apartments/${params.id}`);
+		} catch (err) {
+			if (err && typeof err === 'object' && 'status' in err && (err as { status: number }).status === 303) {
+				throw err;
+			}
+			console.error('Failed to update apartment:', err);
+			return fail(500, {
+				errors: { form: 'Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.' },
+				values: { buildingId, number, floor, area, rooms }
+			});
+		}
 	}
 };

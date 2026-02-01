@@ -25,3 +25,16 @@ Feature: Contract Management
     When I open the contracts page
     And I click the "Neuer Vertrag" link
     Then I should be on the new contract page
+
+  @list @data
+  Scenario: Contracts list shows contract data from backend
+    When I open the contracts page
+    Then I should see contracts in the list
+    And I should see contract tenant names
+    And I should see contract building names
+    And I should see contract apartment numbers
+
+  @list @data
+  Scenario: Contracts list shows correct status
+    When I open the contracts page
+    Then I should see at least one "AKTIV" contract status badge

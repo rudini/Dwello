@@ -36,7 +36,7 @@
 			</p>
 		</div>
 		<div class="flex gap-3">
-			<Button variant="secondary"><Icon name="edit" size={16} />Bearbeiten</Button>
+			<Button variant="secondary" href="/apartments/{apartment.id}/edit"><Icon name="edit" size={16} />Bearbeiten</Button>
 			<Button variant="secondary"><Icon name="file_download" size={16} />Export</Button>
 		</div>
 	</div>

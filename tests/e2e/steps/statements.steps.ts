@@ -143,3 +143,45 @@ Then('I should see the cost breakdown', async ({ page }) => {
 Then('I should see the balance', async ({ page }) => {
 	await expect(page.getByText(/CHF\s*[\d.,]+/)).toBeVisible({ timeout: 10000 });
 });
+
+// ============================================
+// Data loading verification steps
+// ============================================
+
+Then('I should see statements in the list', async ({ page }) => {
+	// Wait for statement cards/rows to be visible
+	const statementLinks = page.locator('a[href^="/statements/"]');
+	await expect(statementLinks.first()).toBeVisible({ timeout: 10000 });
+	const count = await statementLinks.count();
+	expect(count).toBeGreaterThan(0);
+});
+
+Then('I should see statement tenant names', async ({ page }) => {
+	// Check for known tenant names from test data
+	const tenantNames = ['Hans Müller', 'Anna Schmidt', 'Thomas Weber'];
+	let foundCount = 0;
+	for (const name of tenantNames) {
+		const count = await page.getByText(name).count();
+		if (count > 0) foundCount++;
+	}
+	expect(foundCount).toBeGreaterThan(0);
+});
+
+Then('I should see statement building names', async ({ page }) => {
+	// Check that building names are displayed
+	const buildingNames = ['Musterhaus Zentrum', 'Seepark Residenz'];
+	let found = false;
+	for (const name of buildingNames) {
+		const count = await page.getByText(name).count();
+		if (count > 0) {
+			found = true;
+			break;
+		}
+	}
+	expect(found).toBe(true);
+});
+
+Then('I should see statement numbers', async ({ page }) => {
+	// Check for statement number pattern like "NK-2024-001"
+	await expect(page.getByText(/NK-\d{4}-\d{3}/).first()).toBeVisible({ timeout: 10000 });
+});

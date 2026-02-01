@@ -125,3 +125,82 @@ Then('I should see the floor validation error', async ({ page }) => {
 Then('I should see the apartment number validation error', async ({ page }) => {
 	await expect(page.getByText('Wohnungsnummer ist erforderlich')).toBeVisible({ timeout: 10000 });
 });
+
+// ============================================
+// Data loading verification steps
+// ============================================
+
+Then('I should see apartments in the list', async ({ page }) => {
+	// Wait for apartment cards to be visible
+	const apartmentLinks = page.locator('a[href^="/apartments/"]').filter({ hasText: 'Wohnung' });
+	await expect(apartmentLinks.first()).toBeVisible({ timeout: 10000 });
+	const count = await apartmentLinks.count();
+	expect(count).toBeGreaterThan(0);
+});
+
+Then('I should see apartment building names', async ({ page }) => {
+	// Check that building names are displayed (from API's buildingName field)
+	const buildingNames = ['Musterhaus Zentrum', 'Alpenblick', 'Seepark Residenz'];
+	let found = false;
+	for (const name of buildingNames) {
+		const count = await page.getByText(name).count();
+		if (count > 0) {
+			found = true;
+			break;
+		}
+	}
+	expect(found).toBe(true);
+});
+
+Then('I should see apartment occupancy status badges', async ({ page }) => {
+	// Check for occupancy status badges (inside apartment cards, not select options)
+	const apartmentCards = page.locator('a[href^="/apartments/"]');
+	const vermietedBadge = apartmentCards.getByText('Vermietet').first();
+	const leerBadge = apartmentCards.getByText('Leer').first();
+	// At least one of these should be visible
+	const vermietedVisible = await vermietedBadge.isVisible().catch(() => false);
+	const leerVisible = await leerBadge.isVisible().catch(() => false);
+	expect(vermietedVisible || leerVisible).toBe(true);
+});
+
+Then('I should see at least one {string} badge', async ({ page }, status: string) => {
+	// Look for badges inside apartment cards, not in select dropdowns
+	const apartmentCards = page.locator('a[href^="/apartments/"]');
+	await expect(apartmentCards.getByText(status).first()).toBeVisible({ timeout: 10000 });
+});
+
+// ============================================
+// Duplicate apartment number check steps
+// ============================================
+
+When('I select building {string} from the dropdown', async ({ page }, buildingName: string) => {
+	const select = page.locator('select#building');
+	await select.selectOption({ label: buildingName });
+});
+
+When('I enter apartment number {string}', async ({ page }, number: string) => {
+	const input = page.locator('input#addressUnit');
+	await input.fill(number);
+});
+
+When('I wait for the duplicate check', async ({ page }) => {
+	// Wait for the debounce (500ms) plus API call
+	await page.waitForTimeout(800);
+	// Wait for any loading spinner to disappear
+	const spinner = page.getByText('Prüfe Verfügbarkeit...');
+	if (await spinner.isVisible().catch(() => false)) {
+		await expect(spinner).toBeHidden({ timeout: 5000 });
+	}
+});
+
+Then('I should see the duplicate apartment warning', async ({ page }) => {
+	await expect(page.getByText('Wohnungsnummer bereits vergeben')).toBeVisible({ timeout: 10000 });
+});
+
+Then('I should not see the duplicate apartment warning', async ({ page }) => {
+	await expect(page.getByText('Wohnungsnummer bereits vergeben')).toBeHidden({ timeout: 5000 });
+});
+
+Then('the warning should mention apartment number {string}', async ({ page }, number: string) => {
+	await expect(page.getByText(`Die Wohnungsnummer "${number}" existiert bereits`)).toBeVisible({ timeout: 10000 });
+});

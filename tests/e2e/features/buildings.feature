@@ -42,3 +42,11 @@ Feature: Building Management
     When I open the buildings page
     And I search for "Zürich"
     Then I should only see buildings in Zürich
+
+  @detail @data
+  Scenario: Building detail page shows apartments with correct data
+    When I open building detail page "11111111-1111-1111-1111-111111111111"
+    Then I should see the building name "Musterhaus Zentrum"
+    And I should see apartments grouped by floor
+    And I should see apartment numbers in the list
+    And I should see apartment occupancy badges

@@ -42,19 +42,17 @@ export const load = async ({ params, fetch }): Promise<BuildingDetailsData> => {
 			vacantCount: Number(buildingData.vacantCount) || 0
 		};
 
-		const apartments: Apartment[] = (apartmentsData.data || []).map((a: Record<string, unknown>) => ({
+		const apartments: Apartment[] = (apartmentsData.apartments || apartmentsData.data || []).map((a: Record<string, unknown>) => ({
 			id: a.id,
-			buildingId: a.buildingId,
-			number: a.number,
+			building_id: a.buildingId,
+			address_unit: a.number || '',
 			floor: a.floor,
-			rooms: a.rooms ? Number(a.rooms) : undefined,
-			area: a.area ? Number(a.area) : undefined,
-			hasBalcony: a.hasBalcony,
-			currentTenantId: a.currentTenantId,
-			currentTenantName: a.currentTenant
+			room_count: a.rooms ? Number(a.rooms) : undefined,
+			size_m2: a.area ? Number(a.area) : undefined,
+			occupancy_status: a.status === 'occupied' ? 'Vermietet' : 'Leer',
+			current_tenant_name: a.currentTenant
 				? `${(a.currentTenant as Record<string, string>).firstName} ${(a.currentTenant as Record<string, string>).lastName}`
-				: undefined,
-			status: a.currentTenantId ? 'occupied' : 'vacant'
+				: undefined
 		}));
 
 		return { building, apartments };

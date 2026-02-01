@@ -18,7 +18,7 @@ export const load = async ({ url, fetch }): Promise<TenantsListData> => {
 		const response = await fetch(`${BACKEND_URL}/api/v1/tenants?${params}`);
 		const data = await response.json();
 
-		const tenants: TenantWithOccupancy[] = (data.data || []).map((t: Record<string, unknown>) => ({
+		const tenants: TenantWithOccupancy[] = (data.tenants || data.data || []).map((t: Record<string, unknown>) => ({
 			id: t.id,
 			first_name: t.firstName || '',
 			last_name: t.lastName || '',
@@ -28,10 +28,10 @@ export const load = async ({ url, fetch }): Promise<TenantsListData> => {
 			postal_code: t.postalCode || '',
 			city: t.city || '',
 			current_apartment: t.currentApartment
-				? `Wohnung ${(t.currentApartment as Record<string, string>).number}`
+				? `Wohnung ${t.currentApartment}`
 				: undefined,
-			current_building: (t.currentBuilding as Record<string, string>)?.name || undefined,
-			contract_status: t.hasActiveContract ? 'Aktiv' : null
+			current_building: (t.currentBuilding as string) || undefined,
+			contract_status: Number(t.contractCount) > 0 ? 'Aktiv' : null
 		}));
 
 		return {

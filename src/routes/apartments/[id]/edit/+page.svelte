@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
+	import { enhance } from '$app/forms';
 	import Button from '$lib/components/Button.svelte';
 	import Icon from '$lib/components/Icon.svelte';
 	import Card from '$lib/components/Card.svelte';
@@ -10,22 +10,86 @@
 		buildings: { id: string; name: string; address: string }[];
 	}
 
-	let { data }: { data: PageData } = $props();
+	interface ActionData {
+		errors?: Record<string, string>;
+		values?: Record<string, string>;
+	}
 
-	// Form state - using functions to capture initial values
-	// This pattern is intentional for edit forms where we want initial snapshot
-	let buildingId = $state((() => data.apartment.building_id)());
-	let floor = $state((() => data.apartment.floor)());
-	let addressUnit = $state((() => data.apartment.address_unit)());
-	let sizeM2 = $state((() => data.apartment.size_m2.toString())());
-	let roomCount = $state((() => data.apartment.room_count.toString())());
-	let occupancyStatus = $state((() => data.apartment.occupancy_status)());
+	let { data, form }: { data: PageData; form: ActionData | null } = $props();
+
+	// Form state - initialized from apartment data or form values after failed submission
+	let buildingId = $state(form?.values?.buildingId || data.apartment.building_id);
+	let floor = $state(form?.values?.floor || String(data.apartment.floor ?? ''));
+	let addressUnit = $state(form?.values?.number || data.apartment.address_unit);
+	let sizeM2 = $state(form?.values?.area || String(data.apartment.size_m2 ?? ''));
+	let roomCount = $state(form?.values?.rooms || String(data.apartment.room_count ?? ''));
+	let occupancyStatus = $state(data.apartment.occupancy_status);
 
 	let isSubmitting = $state(false);
-	let errors = $state<Record<string, string>>({});
 
-	// Common floor options
-	const floorOptions = ['UG', 'EG', '1.OG', '2.OG', '3.OG', '4.OG', '5.OG', 'DG'];
+	// Duplicate apartment number check
+	let isCheckingDuplicate = $state(false);
+	let duplicateApartment = $state<{ id: string; number: string } | null>(null);
+	let checkTimeout: ReturnType<typeof setTimeout> | null = null;
+
+	// Check if apartment number already exists in the building
+	async function checkDuplicateNumber() {
+		const trimmedNumber = addressUnit?.trim();
+
+		// Skip check if no building selected or no number entered
+		if (!buildingId || !trimmedNumber) {
+			duplicateApartment = null;
+			return;
+		}
+
+		// Skip check if the number hasn't changed from the original
+		if (trimmedNumber === data.apartment.address_unit && buildingId === data.apartment.building_id) {
+			duplicateApartment = null;
+			return;
+		}
+
+		isCheckingDuplicate = true;
+
+		try {
+			const response = await fetch(`/api/apartments/check-number?buildingId=${encodeURIComponent(buildingId)}&number=${encodeURIComponent(trimmedNumber)}&excludeId=${data.apartment.id}`);
+
+			if (response.ok) {
+				const result = await response.json();
+				if (result.exists) {
+					duplicateApartment = { id: result.apartmentId, number: trimmedNumber };
+				} else {
+					duplicateApartment = null;
+				}
+			}
+		} catch (error) {
+			console.error('Error checking duplicate apartment number:', error);
+		} finally {
+			isCheckingDuplicate = false;
+		}
+	}
+
+	// Debounced check when apartment number or building changes
+	function handleNumberChange() {
+		if (checkTimeout) {
+			clearTimeout(checkTimeout);
+		}
+		checkTimeout = setTimeout(checkDuplicateNumber, 500);
+	}
+
+	// Get errors from form action
+	const errors = $derived(form?.errors || {});
+
+	// Floor options (as numeric values for the backend)
+	const floorOptions = [
+		{ value: '-1', label: 'UG' },
+		{ value: '0', label: 'EG' },
+		{ value: '1', label: '1.OG' },
+		{ value: '2', label: '2.OG' },
+		{ value: '3', label: '3.OG' },
+		{ value: '4', label: '4.OG' },
+		{ value: '5', label: '5.OG' },
+		{ value: '6', label: 'DG' }
+	];
 
 	// Common room count options
 	const roomOptions = ['1', '1.5', '2', '2.5', '3', '3.5', '4', '4.5', '5', '5.5', '6', '6.5'];
@@ -36,64 +100,6 @@
 		{ value: 'Leer', label: 'Leer', color: 'text-amber-600' },
 		{ value: 'Gesperrt', label: 'Gesperrt', color: 'text-red-600' }
 	];
-
-	function validate(): boolean {
-		const newErrors: Record<string, string> = {};
-
-		if (!buildingId) {
-			newErrors.buildingId = 'Bitte wählen Sie ein Gebäude aus';
-		}
-		if (!floor.trim()) {
-			newErrors.floor = 'Stockwerk ist erforderlich';
-		}
-		if (!addressUnit.trim()) {
-			newErrors.addressUnit = 'Wohnungsnummer ist erforderlich';
-		}
-		if (!sizeM2.trim()) {
-			newErrors.sizeM2 = 'Fläche ist erforderlich';
-		} else if (isNaN(parseFloat(sizeM2)) || parseFloat(sizeM2) <= 0) {
-			newErrors.sizeM2 = 'Bitte geben Sie eine gültige Fläche ein';
-		}
-		if (!roomCount) {
-			newErrors.roomCount = 'Zimmeranzahl ist erforderlich';
-		}
-
-		errors = newErrors;
-		return Object.keys(newErrors).length === 0;
-	}
-
-	async function handleSubmit(e: Event) {
-		e.preventDefault();
-
-		if (!validate()) return;
-
-		isSubmitting = true;
-
-		try {
-			// In production, call the API
-			// const response = await fetch(`/api/apartments/${data.apartment.id}`, {
-			// 	method: 'PUT',
-			// 	headers: { 'Content-Type': 'application/json' },
-			// 	body: JSON.stringify({
-			// 		building_id: buildingId,
-			// 		floor,
-			// 		address_unit: addressUnit,
-			// 		size_m2: parseFloat(sizeM2),
-			// 		room_count: parseFloat(roomCount),
-			// 		occupancy_status: occupancyStatus
-			// 	})
-			// });
-
-			// Mock success
-			await new Promise((r) => setTimeout(r, 500));
-			await goto(`/apartments/${data.apartment.id}`);
-		} catch (error) {
-			console.error('Error updating apartment:', error);
-			errors = { form: 'Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.' };
-		} finally {
-			isSubmitting = false;
-		}
-	}
 </script>
 
 <svelte:head>
@@ -120,7 +126,13 @@
 
 	<!-- Form -->
 	<Card>
-		<form onsubmit={handleSubmit} class="space-y-6">
+		<form method="POST" use:enhance={() => {
+			isSubmitting = true;
+			return async ({ update }) => {
+				await update();
+				isSubmitting = false;
+			};
+		}} class="space-y-6">
 			{#if errors.form}
 				<div class="bg-red-50 border border-red-200 rounded-lg p-4">
 					<p class="text-sm text-red-700">{errors.form}</p>
@@ -134,7 +146,9 @@
 				</label>
 				<select
 					id="building"
+					name="buildingId"
 					bind:value={buildingId}
+					onchange={handleNumberChange}
 					class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary bg-white {errors.buildingId
 						? 'border-red-500'
 						: 'border-gray-300'}"
@@ -159,6 +173,7 @@
 					</label>
 					<select
 						id="floor"
+						name="floor"
 						bind:value={floor}
 						class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary bg-white {errors.floor
 							? 'border-red-500'
@@ -166,7 +181,7 @@
 					>
 						<option value="">Stockwerk auswählen...</option>
 						{#each floorOptions as f}
-							<option value={f}>{f}</option>
+							<option value={f.value}>{f.label}</option>
 						{/each}
 					</select>
 					{#if errors.floor}
@@ -179,15 +194,37 @@
 					</label>
 					<input
 						id="addressUnit"
+						name="number"
 						type="text"
 						bind:value={addressUnit}
+						oninput={handleNumberChange}
 						placeholder="z.B. 2.04"
-						class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary {errors.addressUnit
+						class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary {errors.number || duplicateApartment
 							? 'border-red-500'
 							: 'border-gray-300'}"
 					/>
-					{#if errors.addressUnit}
-						<p class="mt-1 text-sm text-red-600">{errors.addressUnit}</p>
+					{#if isCheckingDuplicate}
+						<p class="mt-1 text-sm text-gray-500 flex items-center gap-1">
+							<span class="animate-spin inline-block">
+								<Icon name="refresh" size={14} />
+							</span>
+							Prüfe Verfügbarkeit...
+						</p>
+					{:else if duplicateApartment}
+						<div class="mt-2 bg-amber-50 border border-amber-200 rounded-lg p-3">
+							<div class="flex items-start gap-2">
+								<Icon name="warning" size={18} class="text-amber-600 mt-0.5" />
+								<div class="text-sm text-amber-800">
+									<p class="font-medium">Wohnungsnummer bereits vergeben</p>
+									<p class="mt-1">
+										Die Wohnungsnummer "{duplicateApartment.number}" existiert bereits in diesem Gebäude.
+										Bitte wählen Sie eine andere Nummer.
+									</p>
+								</div>
+							</div>
+						</div>
+					{:else if errors.number}
+						<p class="mt-1 text-sm text-red-600">{errors.number}</p>
 					{/if}
 				</div>
 			</div>
@@ -201,19 +238,20 @@
 					<div class="relative">
 						<input
 							id="sizeM2"
+							name="area"
 							type="number"
 							step="0.1"
 							min="1"
 							bind:value={sizeM2}
 							placeholder="85"
-							class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary {errors.sizeM2
+							class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary {errors.area
 								? 'border-red-500'
 								: 'border-gray-300'}"
 						/>
 						<span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">m²</span>
 					</div>
-					{#if errors.sizeM2}
-						<p class="mt-1 text-sm text-red-600">{errors.sizeM2}</p>
+					{#if errors.area}
+						<p class="mt-1 text-sm text-red-600">{errors.area}</p>
 					{/if}
 				</div>
 				<div>
@@ -222,8 +260,9 @@
 					</label>
 					<select
 						id="roomCount"
+						name="rooms"
 						bind:value={roomCount}
-						class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary bg-white {errors.roomCount
+						class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary bg-white {errors.rooms
 							? 'border-red-500'
 							: 'border-gray-300'}"
 					>
@@ -232,8 +271,8 @@
 							<option value={r}>{r} Zimmer</option>
 						{/each}
 					</select>
-					{#if errors.roomCount}
-						<p class="mt-1 text-sm text-red-600">{errors.roomCount}</p>
+					{#if errors.rooms}
+						<p class="mt-1 text-sm text-red-600">{errors.rooms}</p>
 					{/if}
 				</div>
 			</div>

@@ -24,3 +24,15 @@ Feature: Tenant Management
     When I open the tenants page
     And I click the "Neuer Mieter" link
     Then I should be on the new tenant page
+
+  @list @data
+  Scenario: Tenants list shows tenant data from backend
+    When I open the tenants page
+    Then I should see tenants in the list
+    And I should see tenant names
+    And I should see tenant email addresses
+
+  @list @data
+  Scenario: Tenants list shows current apartment info
+    When I open the tenants page
+    Then I should see tenant apartment information

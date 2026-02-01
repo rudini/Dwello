@@ -36,3 +36,11 @@ Feature: Utility Cost Statements
     And I should see the tenant name
     And I should see the cost breakdown
     And I should see the balance
+
+  @list @data
+  Scenario: Statements list shows statement data from backend
+    When I open the statements page
+    Then I should see statements in the list
+    And I should see statement tenant names
+    And I should see statement building names
+    And I should see statement numbers
