@@ -1,102 +1,101 @@
 import type { ApartmentDetailsData } from '$lib/types';
+import { error } from '@sveltejs/kit';
 
-export const load = (async ({ params }: { params: { id: string } }) => {
-	// Mock data - in production, this would fetch from the backend API
-	const apartmentId = params.id;
+const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
-	// Mock building data
-	const building = {
-		id: 'building-001',
-		address: 'Musterstraße 12',
-		postalCode: '8000',
-		city: 'Zürich',
-		country: 'Switzerland'
-	};
+export const load = async ({ params, fetch }): Promise<ApartmentDetailsData> => {
+	try {
+		const response = await fetch(`${BACKEND_URL}/api/v1/apartments/${params.id}`);
 
-	// Mock apartment data
-	const apartment = {
-		id: apartmentId,
-		building_id: 'building-001',
-		floor: '2.OG',
-		address_unit: '2.04',
-		size_m2: 85,
-		room_count: 3.5,
-		occupancy_status: 'Vermietet' as const
-	};
-
-	// Mock current tenant
-	const currentTenant = {
-		id: 'tenant-001',
-		first_name: 'Hans',
-		last_name: 'Müller',
-		email: 'h.mueller@email.com',
-		phone_number: '+41 79 123 45 67'
-	};
-
-	// Mock current contract
-	const currentContract = {
-		id: 'contract-001',
-		apartment_id: apartmentId,
-		tenant_id: 'tenant-001',
-		start_date: new Date('2021-03-01'),
-		base_rent_chf: 2100,
-		additional_rent_chf: 0,
-		advance_payment_chf: 250,
-		status: 'Aktiv' as const
-	};
-
-	// Mock monthly costs
-	const monthlyCosts = {
-		base_rent: 2100,
-		advance_payment: 250,
-		parking: 120,
-		total_brutto: 2470
-	};
-
-	// Mock contract history
-	const contractHistory = [
-		{
-			id: 'contract-001',
-			tenant_name: 'Hans Müller',
-			tenant_first_name: 'Hans',
-			tenant_last_name: 'Müller',
-			period: '01.03.2021 - Heute',
-			rent_brutto: 2470,
-			status: 'AKTIV' as const,
-			start_date: new Date('2021-03-01')
-		},
-		{
-			id: 'contract-002',
-			tenant_name: 'Sarah Weber',
-			tenant_first_name: 'Sarah',
-			tenant_last_name: 'Weber',
-			period: '01.01.2018 - 28.02.2021',
-			rent_brutto: 2350,
-			status: 'Beendet' as const,
-			start_date: new Date('2018-01-01'),
-			end_date: new Date('2021-02-28')
-		},
-		{
-			id: 'contract-003',
-			tenant_name: 'Kevin Fischer',
-			tenant_first_name: 'Kevin',
-			tenant_last_name: 'Fischer',
-			period: '01.06.2015 - 31.12.2017',
-			rent_brutto: 2200,
-			status: 'Beendet' as const,
-			start_date: new Date('2015-06-01'),
-			end_date: new Date('2017-12-31')
+		if (!response.ok) {
+			if (response.status === 404) {
+				throw error(404, 'Wohnung nicht gefunden');
+			}
+			throw error(response.status, 'Fehler beim Laden der Wohnung');
 		}
-	];
 
-	const data: ApartmentDetailsData = {
-		apartment,
-		building,
-		currentTenant,
-		currentContract,
-		monthlyCosts,
-		contractHistory
-	};
+		const data = await response.json();
 
-	return data;
-});
+		const building = {
+			id: data.building?.id || data.buildingId,
+			address: data.building?.address || '',
+			postalCode: data.building?.postalCode || '',
+			city: data.building?.city || '',
+			country: data.building?.country || 'CH'
+		};
+
+		const apartment = {
+			id: data.id,
+			building_id: data.buildingId,
+			floor: data.floor || '',
+			address_unit: data.number || '',
+			size_m2: data.area ? Number(data.area) : undefined,
+			room_count: data.rooms ? Number(data.rooms) : undefined,
+			occupancy_status: data.currentTenantId ? 'Vermietet' as const : 'Leer' as const
+		};
+
+		const currentTenant = data.currentTenant ? {
+			id: data.currentTenant.id,
+			first_name: data.currentTenant.firstName,
+			last_name: data.currentTenant.lastName,
+			email: data.currentTenant.email || '',
+			phone_number: data.currentTenant.phone || ''
+		} : null;
+
+		const currentContract = data.currentContract ? {
+			id: data.currentContract.id,
+			apartment_id: data.id,
+			tenant_id: data.currentContract.tenantId,
+			start_date: new Date(data.currentContract.startDate),
+			base_rent_chf: Number(data.currentContract.baseRent) || 0,
+			additional_rent_chf: Number(data.currentContract.additionalRent) || 0,
+			advance_payment_chf: Number(data.currentContract.advancePayment) || 0,
+			status: 'Aktiv' as const
+		} : null;
+
+		const baseRent = currentContract?.base_rent_chf || 0;
+		const additionalRent = currentContract?.additional_rent_chf || 0;
+		const advancePayment = currentContract?.advance_payment_chf || 0;
+
+		const monthlyCosts = {
+			base_rent: baseRent,
+			advance_payment: advancePayment,
+			parking: additionalRent,
+			total_brutto: baseRent + additionalRent + advancePayment
+		};
+
+		const contractHistory = (data.contractHistory || []).map((c: Record<string, unknown>) => ({
+			id: c.id,
+			tenant_name: `${c.tenantFirstName || ''} ${c.tenantLastName || ''}`.trim(),
+			tenant_first_name: c.tenantFirstName || '',
+			tenant_last_name: c.tenantLastName || '',
+			period: c.endDate
+				? `${formatDate(c.startDate as string)} - ${formatDate(c.endDate as string)}`
+				: `${formatDate(c.startDate as string)} - Heute`,
+			rent_brutto: Number(c.baseRent || 0) + Number(c.additionalRent || 0) + Number(c.advancePayment || 0),
+			status: c.endDate ? 'Beendet' as const : 'AKTIV' as const,
+			start_date: new Date(c.startDate as string),
+			end_date: c.endDate ? new Date(c.endDate as string) : undefined
+		}));
+
+		return {
+			apartment,
+			building,
+			currentTenant,
+			currentContract,
+			monthlyCosts,
+			contractHistory
+		};
+	} catch (err) {
+		console.error('Failed to fetch apartment:', err);
+		if (err && typeof err === 'object' && 'status' in err) {
+			throw err;
+		}
+		throw error(500, 'Fehler beim Laden der Wohnung');
+	}
+};
+
+function formatDate(dateStr: string): string {
+	const date = new Date(dateStr);
+	return date.toLocaleDateString('de-CH');
+}

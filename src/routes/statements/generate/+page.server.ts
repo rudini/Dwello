@@ -1,5 +1,7 @@
 import type { Building, Category, DistributionKey, HeatingProfile } from '$lib/types';
 
+const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
+
 interface GenerateStatementData {
 	buildings: (Building & { apartmentCount: number })[];
 	categories: Category[];
@@ -11,109 +13,91 @@ interface GenerateStatementData {
 	};
 }
 
-export const load = async (): Promise<GenerateStatementData> => {
-	// Mock buildings with apartment counts
-	const buildings = [
-		{
-			id: 'building-001',
-			name: 'Musterhaus Zentrum',
-			address: 'Musterstraße 12',
-			postalCode: '8000',
-			city: 'Zürich',
-			apartmentCount: 12
-		},
-		{
-			id: 'building-002',
-			name: 'Seepark Residenz',
-			address: 'Seestrasse 45',
-			postalCode: '6004',
-			city: 'Luzern',
-			apartmentCount: 8
-		},
-		{
-			id: 'building-003',
-			name: 'Alpenblick',
-			address: 'Bergweg 7',
-			postalCode: '3800',
-			city: 'Interlaken',
-			apartmentCount: 6
-		}
-	];
+export const load = async ({ fetch }: { fetch: typeof globalThis.fetch }): Promise<GenerateStatementData> => {
+	try {
+		const [buildingsRes, categoriesRes, distributionKeysRes, heatingProfilesRes] = await Promise.all([
+			fetch(`${BACKEND_URL}/api/v1/buildings?limit=100`),
+			fetch(`${BACKEND_URL}/api/v1/categories?limit=100`),
+			fetch(`${BACKEND_URL}/api/v1/distribution-keys?limit=100`),
+			fetch(`${BACKEND_URL}/api/v1/heating-profiles?limit=100`)
+		]);
 
-	const categories: Category[] = [
-		{ id: 'cat-001', name: 'Heizung', isAllowedUtilityCost: true, sortOrder: 1 },
-		{ id: 'cat-002', name: 'Warmwasser', isAllowedUtilityCost: true, sortOrder: 2 },
-		{ id: 'cat-003', name: 'Wasser/Abwasser', isAllowedUtilityCost: true, sortOrder: 3 },
-		{ id: 'cat-004', name: 'Allgemeinstrom', isAllowedUtilityCost: true, sortOrder: 4 },
-		{ id: 'cat-005', name: 'Hauswart', isAllowedUtilityCost: true, sortOrder: 5 },
-		{ id: 'cat-006', name: 'Gartenpflege', isAllowedUtilityCost: true, sortOrder: 6 },
-		{ id: 'cat-007', name: 'Kehricht', isAllowedUtilityCost: true, sortOrder: 7 }
-	];
+		const buildingsData = buildingsRes.ok ? await buildingsRes.json() : { buildings: [], data: [] };
+		const categoriesData = categoriesRes.ok ? await categoriesRes.json() : { data: [] };
+		const distributionKeysData = distributionKeysRes.ok ? await distributionKeysRes.json() : { data: [] };
+		const heatingProfilesData = heatingProfilesRes.ok ? await heatingProfilesRes.json() : { data: [] };
 
-	const distributionKeys: DistributionKey[] = [
-		{ id: 'dk-heating', name: 'Heizkosten', type: 'predefined', isActive: true },
-		{ id: 'dk-units', name: 'Nach Einheiten', type: 'predefined', isActive: true },
-		{ id: 'dk-area', name: 'Nach Fläche', type: 'predefined', isActive: true },
-		{ id: 'dk-persons', name: 'Nach Personen', type: 'predefined', isActive: true }
-	];
+		const buildings = (buildingsData.buildings || buildingsData.data || []).map((b: Record<string, unknown>) => ({
+			id: b.id,
+			name: b.name || '',
+			address: b.address || '',
+			postalCode: b.postalCode || '',
+			city: b.city || '',
+			apartmentCount: b.apartmentCount ? Number(b.apartmentCount) : (b._count as { apartments: number })?.apartments || 0
+		}));
 
-	const heatingProfiles: HeatingProfile[] = [
-		{
-			id: 'hp-standard',
-			name: 'Standard',
-			type: 'predefined',
-			description: 'Standardverteilung für die Schweiz',
-			isActive: true,
-			monthlyPercentages: {
-				january: 15,
-				february: 13,
-				march: 11,
-				april: 8,
-				may: 3,
-				june: 0,
-				july: 0,
-				august: 0,
-				september: 3,
-				october: 9,
-				november: 13,
-				december: 15
+		const categories: Category[] = (categoriesData.data || []).map((c: Record<string, unknown>) => ({
+			id: c.id,
+			name: c.name || '',
+			isAllowedUtilityCost: c.isAllowedUtilityCost ?? true,
+			sortOrder: c.sortOrder ? Number(c.sortOrder) : 0
+		}));
+
+		const distributionKeys: DistributionKey[] = (distributionKeysData.data || []).map((dk: Record<string, unknown>) => ({
+			id: dk.id,
+			name: dk.name || '',
+			type: dk.type || 'predefined',
+			isActive: dk.isActive ?? true
+		}));
+
+		const heatingProfiles: HeatingProfile[] = (heatingProfilesData.data || []).map((hp: Record<string, unknown>) => ({
+			id: hp.id,
+			name: hp.name || '',
+			type: hp.type || 'predefined',
+			description: hp.description || '',
+			isActive: hp.isActive ?? true,
+			monthlyPercentages: hp.monthlyPercentages || {
+				january: parseFloat(hp.januaryPct as string) || 0,
+				february: parseFloat(hp.februaryPct as string) || 0,
+				march: parseFloat(hp.marchPct as string) || 0,
+				april: parseFloat(hp.aprilPct as string) || 0,
+				may: parseFloat(hp.mayPct as string) || 0,
+				june: parseFloat(hp.junePct as string) || 0,
+				july: parseFloat(hp.julyPct as string) || 0,
+				august: parseFloat(hp.augustPct as string) || 0,
+				september: parseFloat(hp.septemberPct as string) || 0,
+				october: parseFloat(hp.octoberPct as string) || 0,
+				november: parseFloat(hp.novemberPct as string) || 0,
+				december: parseFloat(hp.decemberPct as string) || 0
 			}
-		},
-		{
-			id: 'hp-mittelland',
-			name: 'Mittelland',
-			type: 'predefined',
-			description: 'Optimiert für das Schweizer Mittelland',
-			isActive: true,
-			monthlyPercentages: {
-				january: 16,
-				february: 14,
-				march: 12,
-				april: 7,
-				may: 2,
-				june: 0,
-				july: 0,
-				august: 0,
-				september: 2,
-				october: 8,
-				november: 12,
-				december: 15
+		}));
+
+		// Default to previous calendar year
+		const currentYear = new Date().getFullYear();
+		const defaultPeriod = {
+			start: `${currentYear - 1}-01-01`,
+			end: `${currentYear - 1}-12-31`
+		};
+
+		return {
+			buildings,
+			categories,
+			distributionKeys,
+			heatingProfiles,
+			defaultPeriod
+		};
+	} catch (err) {
+		console.error('Failed to fetch data for statement generation:', err);
+		const currentYear = new Date().getFullYear();
+		return {
+			buildings: [],
+			categories: [],
+			distributionKeys: [],
+			heatingProfiles: [],
+			defaultPeriod: {
+				start: `${currentYear - 1}-01-01`,
+				end: `${currentYear - 1}-12-31`
 			}
-		}
-	];
-
-	// Default to previous calendar year
-	const currentYear = new Date().getFullYear();
-	const defaultPeriod = {
-		start: `${currentYear - 1}-01-01`,
-		end: `${currentYear - 1}-12-31`
-	};
-
-	return {
-		buildings,
-		categories,
-		distributionKeys,
-		heatingProfiles,
-		defaultPeriod
-	};
+		};
+	}
 };

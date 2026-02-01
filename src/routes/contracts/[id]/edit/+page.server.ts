@@ -1,4 +1,7 @@
 import type { RentalContract } from '$lib/types';
+import { error } from '@sveltejs/kit';
+
+const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
 interface ContractEditData {
 	contract: RentalContract;
@@ -6,66 +9,55 @@ interface ContractEditData {
 	apartments: { id: string; unit: string; building: string; status: string }[];
 }
 
-export const load = async ({ params }: { params: { id: string } }): Promise<ContractEditData> => {
-	const { id } = params;
+export const load = async ({ params, fetch }): Promise<ContractEditData> => {
+	try {
+		const [contractRes, tenantsRes, apartmentsRes] = await Promise.all([
+			fetch(`${BACKEND_URL}/api/v1/contracts/${params.id}`),
+			fetch(`${BACKEND_URL}/api/v1/tenants?limit=100`),
+			fetch(`${BACKEND_URL}/api/v1/apartments?limit=100`)
+		]);
 
-	// Mock tenants for dropdown
-	const tenants = [
-		{ id: 'tenant-001', name: 'Hans Müller' },
-		{ id: 'tenant-002', name: 'Maria Schmidt' },
-		{ id: 'tenant-003', name: 'Peter Weber' },
-		{ id: 'tenant-004', name: 'Anna Keller' },
-		{ id: 'tenant-005', name: 'Thomas Brunner' },
-		{ id: 'tenant-006', name: 'Sarah Fischer' },
-		{ id: 'tenant-007', name: 'Kevin Meier' }
-	];
-
-	// Mock apartments for dropdown
-	const apartments = [
-		{ id: 'apt-001', unit: '2.04', building: 'Musterhaus Zentrum', status: 'Vermietet' },
-		{ id: 'apt-002', unit: '1.02', building: 'Musterhaus Zentrum', status: 'Vermietet' },
-		{ id: 'apt-003', unit: '0.01', building: 'Musterhaus Zentrum', status: 'Leer' },
-		{ id: 'apt-004', unit: '3.01', building: 'Seepark Residenz', status: 'Vermietet' },
-		{ id: 'apt-005', unit: '2.02', building: 'Seepark Residenz', status: 'Vermietet' },
-		{ id: 'apt-006', unit: '1.01', building: 'Seepark Residenz', status: 'Leer' }
-	];
-
-	// Mock contracts
-	const mockContracts: Record<string, RentalContract> = {
-		'contract-001': {
-			id: 'contract-001',
-			apartment_id: 'apt-001',
-			tenant_id: 'tenant-001',
-			start_date: '2021-03-01',
-			base_rent_chf: 2100,
-			additional_rent_chf: 250,
-			advance_payment_chf: 120,
-			status: 'Aktiv'
-		},
-		'contract-002': {
-			id: 'contract-002',
-			apartment_id: 'apt-002',
-			tenant_id: 'tenant-002',
-			start_date: '2022-06-15',
-			base_rent_chf: 1650,
-			additional_rent_chf: 200,
-			status: 'Aktiv'
+		if (!contractRes.ok) {
+			if (contractRes.status === 404) {
+				throw error(404, 'Vertrag nicht gefunden');
+			}
+			throw error(contractRes.status, 'Fehler beim Laden des Vertrags');
 		}
-	};
 
-	const contract = mockContracts[id] || {
-		id,
-		apartment_id: 'apt-001',
-		tenant_id: 'tenant-001',
-		start_date: '2020-01-01',
-		base_rent_chf: 1500,
-		additional_rent_chf: 200,
-		status: 'Aktiv' as const
-	};
+		const data = await contractRes.json();
+		const tenantsData = await tenantsRes.json();
+		const apartmentsData = await apartmentsRes.json();
 
-	return {
-		contract,
-		tenants,
-		apartments
-	};
+		const contract: RentalContract = {
+			id: data.id,
+			apartment_id: data.apartmentId,
+			tenant_id: data.tenantId,
+			start_date: data.startDate,
+			end_date: data.endDate,
+			base_rent_chf: Number(data.baseRent) || 0,
+			additional_rent_chf: Number(data.additionalRent) || 0,
+			advance_payment_chf: Number(data.advancePayment) || 0,
+			status: data.endDate ? 'Beendet' : 'Aktiv'
+		};
+
+		const tenants = (tenantsData.data || []).map((t: Record<string, unknown>) => ({
+			id: t.id,
+			name: `${t.firstName} ${t.lastName}`
+		}));
+
+		const apartments = (apartmentsData.data || []).map((a: Record<string, unknown>) => ({
+			id: a.id,
+			unit: a.number || '',
+			building: (a.building as Record<string, string>)?.name || '',
+			status: a.currentTenantId ? 'Vermietet' : 'Leer'
+		}));
+
+		return { contract, tenants, apartments };
+	} catch (err) {
+		console.error('Failed to fetch contract for edit:', err);
+		if (err && typeof err === 'object' && 'status' in err) {
+			throw err;
+		}
+		throw error(500, 'Fehler beim Laden des Vertrags');
+	}
 };

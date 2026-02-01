@@ -1,4 +1,7 @@
 import type { RentalContract, Tenant, Apartment, Building } from '$lib/types';
+import { error } from '@sveltejs/kit';
+
+const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
 interface ContractDetailsData {
 	contract: RentalContract & {
@@ -14,136 +17,72 @@ interface ContractDetailsData {
 	};
 }
 
-export const load = async ({ params }: { params: { id: string } }): Promise<ContractDetailsData> => {
-	const { id } = params;
+export const load = async ({ params, fetch }): Promise<ContractDetailsData> => {
+	try {
+		const response = await fetch(`${BACKEND_URL}/api/v1/contracts/${params.id}`);
 
-	// Mock data - in production, fetch from API
-	// const response = await fetch(`/api/contracts/${id}`);
-	// const data = await response.json();
-
-	// Mock contract details
-	const mockContracts: Record<string, ContractDetailsData> = {
-		'contract-001': {
-			contract: {
-				id: 'contract-001',
-				apartment_id: 'apt-001',
-				tenant_id: 'tenant-001',
-				start_date: '2021-03-01',
-				base_rent_chf: 2100,
-				additional_rent_chf: 250,
-				advance_payment_chf: 120,
-				status: 'Aktiv',
-				tenant: {
-					id: 'tenant-001',
-					first_name: 'Hans',
-					last_name: 'Müller',
-					email: 'h.mueller@email.com',
-					phone_number: '+41 79 123 45 67'
-				},
-				apartment: {
-					id: 'apt-001',
-					building_id: 'building-001',
-					floor: '2.OG',
-					address_unit: '2.04',
-					size_m2: 85,
-					room_count: 3.5,
-					occupancy_status: 'Vermietet'
-				},
-				building: {
-					id: 'building-001',
-					name: 'Musterhaus Zentrum',
-					address: 'Musterstraße 12',
-					postalCode: '8000',
-					city: 'Zürich'
-				}
-			},
-			rentBreakdown: {
-				baseRent: 2100,
-				additionalRent: 250,
-				advancePayment: 120,
-				total: 2470
+		if (!response.ok) {
+			if (response.status === 404) {
+				throw error(404, 'Vertrag nicht gefunden');
 			}
-		},
-		'contract-002': {
-			contract: {
-				id: 'contract-002',
-				apartment_id: 'apt-002',
-				tenant_id: 'tenant-002',
-				start_date: '2022-06-15',
-				base_rent_chf: 1650,
-				additional_rent_chf: 200,
-				status: 'Aktiv',
-				tenant: {
-					id: 'tenant-002',
-					first_name: 'Maria',
-					last_name: 'Schmidt',
-					email: 'm.schmidt@email.com',
-					phone_number: '+41 78 234 56 78'
-				},
-				apartment: {
-					id: 'apt-002',
-					building_id: 'building-001',
-					floor: '1.OG',
-					address_unit: '1.02',
-					size_m2: 65,
-					room_count: 2.5,
-					occupancy_status: 'Vermietet'
-				},
-				building: {
-					id: 'building-001',
-					name: 'Musterhaus Zentrum',
-					address: 'Musterstraße 12',
-					postalCode: '8000',
-					city: 'Zürich'
-				}
-			},
-			rentBreakdown: {
-				baseRent: 1650,
-				additionalRent: 200,
-				advancePayment: 0,
-				total: 1850
-			}
+			throw error(response.status, 'Fehler beim Laden des Vertrags');
 		}
-	};
 
-	const data = mockContracts[id] || {
-		contract: {
-			id,
-			apartment_id: 'apt-001',
-			tenant_id: 'tenant-001',
-			start_date: '2020-01-01',
-			base_rent_chf: 1500,
-			additional_rent_chf: 200,
-			status: 'Aktiv' as const,
+		const data = await response.json();
+
+		const baseRent = Number(data.baseRent) || 0;
+		const additionalRent = Number(data.additionalRent) || 0;
+		const advancePayment = Number(data.advancePayment) || 0;
+
+		const contract = {
+			id: data.id,
+			apartment_id: data.apartmentId,
+			tenant_id: data.tenantId,
+			start_date: data.startDate,
+			end_date: data.endDate,
+			base_rent_chf: baseRent,
+			additional_rent_chf: additionalRent,
+			advance_payment_chf: advancePayment,
+			status: data.endDate ? 'Beendet' as const : 'Aktiv' as const,
 			tenant: {
-				id: 'tenant-001',
-				first_name: 'Unbekannt',
-				last_name: 'Mieter',
-				email: 'unbekannt@email.com'
+				id: data.tenant?.id || data.tenantId,
+				first_name: data.tenant?.firstName || '',
+				last_name: data.tenant?.lastName || '',
+				email: data.tenant?.email || '',
+				phone_number: data.tenant?.phone || ''
 			},
 			apartment: {
-				id: 'apt-001',
-				building_id: 'building-001',
-				floor: '1.OG',
-				address_unit: '1.01',
-				size_m2: 70,
-				room_count: 3,
+				id: data.apartment?.id || data.apartmentId,
+				building_id: data.apartment?.buildingId || '',
+				floor: data.apartment?.floor || '',
+				address_unit: data.apartment?.number || '',
+				size_m2: data.apartment?.area ? Number(data.apartment.area) : undefined,
+				room_count: data.apartment?.rooms ? Number(data.apartment.rooms) : undefined,
 				occupancy_status: 'Vermietet' as const
 			},
 			building: {
-				id: 'building-001',
-				address: 'Unbekannte Strasse',
-				postalCode: '0000',
-				city: 'Unbekannt'
+				id: data.building?.id || '',
+				name: data.building?.name || '',
+				address: data.building?.address || '',
+				postalCode: data.building?.postalCode || '',
+				city: data.building?.city || ''
 			}
-		},
-		rentBreakdown: {
-			baseRent: 1500,
-			additionalRent: 200,
-			advancePayment: 0,
-			total: 1700
-		}
-	};
+		};
 
-	return data;
+		return {
+			contract,
+			rentBreakdown: {
+				baseRent,
+				additionalRent,
+				advancePayment,
+				total: baseRent + additionalRent + advancePayment
+			}
+		};
+	} catch (err) {
+		console.error('Failed to fetch contract:', err);
+		if (err && typeof err === 'object' && 'status' in err) {
+			throw err;
+		}
+		throw error(500, 'Fehler beim Laden des Vertrags');
+	}
 };

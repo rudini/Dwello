@@ -1,145 +1,93 @@
 import type { SystemConfig, HeatingProfile, DistributionKey, ConfigPageData } from '$lib/types';
 
-export const load = async (): Promise<ConfigPageData> => {
-	// Mock heating profiles
-	const mockHeatingProfiles: HeatingProfile[] = [
-		{
-			id: 'hp-standard',
-			name: 'Standard',
-			type: 'predefined',
-			description: 'Gleichmässige Verteilung über Heizperiode (Okt-Apr)',
-			isActive: true,
-			monthlyPercentages: {
-				january: 18,
-				february: 15,
-				march: 12,
-				april: 5,
-				may: 0,
-				june: 0,
-				july: 0,
-				august: 0,
-				september: 2,
-				october: 10,
-				november: 18,
-				december: 20
-			}
-		},
-		{
-			id: 'hp-mittelland',
-			name: 'Mittelland',
-			type: 'predefined',
-			description: 'Optimiert für Schweizer Mittelland',
-			isActive: true,
-			monthlyPercentages: {
-				january: 20,
-				february: 17,
-				march: 13,
-				april: 5,
-				may: 0,
-				june: 0,
-				july: 0,
-				august: 0,
-				september: 0,
-				october: 10,
-				november: 15,
-				december: 20
-			}
-		},
-		{
-			id: 'hp-mountain',
-			name: 'Bergregion',
-			type: 'predefined',
-			description: 'Für höher gelegene Regionen mit längerer Heizperiode',
-			isActive: true,
-			monthlyPercentages: {
-				january: 16,
-				february: 14,
-				march: 12,
-				april: 8,
-				may: 3,
-				june: 0,
-				july: 0,
-				august: 0,
-				september: 3,
-				october: 10,
-				november: 14,
-				december: 15
-			}
-		},
-		{
-			id: 'hp-tessin',
-			name: 'Tessin',
-			type: 'predefined',
-			description: 'Für das milde Klima im Tessin',
-			isActive: true,
-			monthlyPercentages: {
-				january: 22,
-				february: 18,
-				march: 12,
-				april: 3,
-				may: 0,
-				june: 0,
-				july: 0,
-				august: 0,
-				september: 0,
-				october: 7,
-				november: 15,
-				december: 23
-			}
-		}
-	];
+const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
-	// Mock distribution keys
-	const mockDistributionKeys: DistributionKey[] = [
-		{
-			id: 'dk-units',
-			name: 'Nach Einheiten',
-			type: 'predefined',
-			description: 'Gleichmässige Verteilung pro Wohnung',
-			isActive: true
-		},
-		{
-			id: 'dk-area',
-			name: 'Nach Fläche',
-			type: 'predefined',
-			formula: '{area}',
-			description: 'Verteilung nach Wohnfläche in m²',
-			isActive: true
-		},
-		{
-			id: 'dk-rooms',
-			name: 'Nach Zimmern',
-			type: 'predefined',
-			formula: '{rooms}',
-			description: 'Verteilung nach Zimmeranzahl',
-			isActive: true
-		},
-		{
-			id: 'dk-heating',
-			name: 'Heizkosten',
-			type: 'predefined',
-			formula: '{area} * 0.7 + {rooms} * 0.3',
-			description: 'Kombination aus Fläche und Zimmern für Heizkosten',
-			isActive: true
-		}
-	];
+export const load = async ({ fetch }: { fetch: typeof globalThis.fetch }): Promise<ConfigPageData> => {
+	try {
+		const [configRes, heatingProfilesRes, distributionKeysRes] = await Promise.all([
+			fetch(`${BACKEND_URL}/api/v1/config`),
+			fetch(`${BACKEND_URL}/api/v1/heating-profiles?limit=100`),
+			fetch(`${BACKEND_URL}/api/v1/distribution-keys?limit=100`)
+		]);
 
-	// Mock system configuration
-	const mockConfig: SystemConfig = {
-		id: 'config-001',
-		accountingPeriod: 'calendar',
-		managementFeePercentage: 2.5,
-		defaultHeatingProfileId: 'hp-standard',
-		defaultDistributionKeyId: 'dk-area',
-		companyName: 'Muster Immobilien AG',
-		companyAddress: 'Bahnhofstrasse 1, 8001 Zürich',
-		iban: 'CH93 0076 2011 6238 5295 7',
-		updatedAt: '2025-01-15T10:30:00Z'
-	};
+		const configData = configRes.ok ? await configRes.json() : null;
+		const heatingProfilesData = heatingProfilesRes.ok ? await heatingProfilesRes.json() : { data: [] };
+		const distributionKeysData = distributionKeysRes.ok ? await distributionKeysRes.json() : { data: [] };
 
-	return {
-		config: mockConfig,
-		heatingProfiles: mockHeatingProfiles,
-		distributionKeys: mockDistributionKeys
-	};
+		const config: SystemConfig = configData ? {
+			id: configData.id || 'config-001',
+			accountingPeriod: configData.accountingPeriod || 'calendar',
+			managementFeePercentage: configData.managementFeePercentage ? Number(configData.managementFeePercentage) : 3,
+			defaultHeatingProfileId: configData.defaultHeatingProfileId || '',
+			defaultDistributionKeyId: configData.defaultDistributionKeyId || '',
+			companyName: configData.companyName || '',
+			companyAddress: configData.companyAddress || '',
+			iban: configData.iban || '',
+			updatedAt: configData.updatedAt || new Date().toISOString()
+		} : {
+			id: 'config-001',
+			accountingPeriod: 'calendar',
+			managementFeePercentage: 3,
+			defaultHeatingProfileId: '',
+			defaultDistributionKeyId: '',
+			companyName: '',
+			companyAddress: '',
+			iban: '',
+			updatedAt: new Date().toISOString()
+		};
+
+		const heatingProfiles: HeatingProfile[] = (heatingProfilesData.data || []).map((hp: Record<string, unknown>) => ({
+			id: hp.id,
+			name: hp.name || '',
+			type: hp.type || 'predefined',
+			description: hp.description || '',
+			isActive: hp.isActive ?? true,
+			monthlyPercentages: hp.monthlyPercentages || {
+				january: parseFloat(hp.januaryPct as string) || 0,
+				february: parseFloat(hp.februaryPct as string) || 0,
+				march: parseFloat(hp.marchPct as string) || 0,
+				april: parseFloat(hp.aprilPct as string) || 0,
+				may: parseFloat(hp.mayPct as string) || 0,
+				june: parseFloat(hp.junePct as string) || 0,
+				july: parseFloat(hp.julyPct as string) || 0,
+				august: parseFloat(hp.augustPct as string) || 0,
+				september: parseFloat(hp.septemberPct as string) || 0,
+				october: parseFloat(hp.octoberPct as string) || 0,
+				november: parseFloat(hp.novemberPct as string) || 0,
+				december: parseFloat(hp.decemberPct as string) || 0
+			}
+		}));
+
+		const distributionKeys: DistributionKey[] = (distributionKeysData.data || []).map((dk: Record<string, unknown>) => ({
+			id: dk.id,
+			name: dk.name || '',
+			type: dk.type || 'predefined',
+			formula: dk.formula || undefined,
+			description: dk.description || '',
+			isActive: dk.isActive ?? true
+		}));
+
+		return {
+			config,
+			heatingProfiles,
+			distributionKeys
+		};
+	} catch (err) {
+		console.error('Failed to fetch config:', err);
+		return {
+			config: {
+				id: 'config-001',
+				accountingPeriod: 'calendar',
+				managementFeePercentage: 3,
+				defaultHeatingProfileId: '',
+				defaultDistributionKeyId: '',
+				companyName: '',
+				companyAddress: '',
+				iban: '',
+				updatedAt: new Date().toISOString()
+			},
+			heatingProfiles: [],
+			distributionKeys: []
+		};
+	}
 };

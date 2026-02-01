@@ -1,121 +1,51 @@
 import type { HeatingProfile } from '$lib/types';
 
+const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
+
 interface HeatingProfilesData {
 	profiles: HeatingProfile[];
 	total: number;
 }
 
-export const load = async (): Promise<HeatingProfilesData> => {
-	const mockProfiles: HeatingProfile[] = [
-		{
-			id: 'hp-standard',
-			name: 'Standard',
-			type: 'predefined',
-			description: 'Gleichmässige Verteilung über Heizperiode (Okt-Apr)',
-			isActive: true,
-			monthlyPercentages: {
-				january: 18,
-				february: 15,
-				march: 12,
-				april: 5,
-				may: 0,
-				june: 0,
-				july: 0,
-				august: 0,
-				september: 2,
-				october: 10,
-				november: 18,
-				december: 20
-			}
-		},
-		{
-			id: 'hp-mittelland',
-			name: 'Mittelland',
-			type: 'predefined',
-			description: 'Optimiert für Schweizer Mittelland',
-			isActive: true,
-			monthlyPercentages: {
-				january: 20,
-				february: 17,
-				march: 13,
-				april: 5,
-				may: 0,
-				june: 0,
-				july: 0,
-				august: 0,
-				september: 0,
-				october: 10,
-				november: 15,
-				december: 20
-			}
-		},
-		{
-			id: 'hp-mountain',
-			name: 'Bergregion',
-			type: 'predefined',
-			description: 'Für höher gelegene Regionen mit längerer Heizperiode',
-			isActive: true,
-			monthlyPercentages: {
-				january: 16,
-				february: 14,
-				march: 12,
-				april: 8,
-				may: 3,
-				june: 0,
-				july: 0,
-				august: 0,
-				september: 3,
-				october: 10,
-				november: 14,
-				december: 15
-			}
-		},
-		{
-			id: 'hp-tessin',
-			name: 'Tessin',
-			type: 'predefined',
-			description: 'Für das milde Klima im Tessin',
-			isActive: true,
-			monthlyPercentages: {
-				january: 22,
-				february: 18,
-				march: 12,
-				april: 3,
-				may: 0,
-				june: 0,
-				july: 0,
-				august: 0,
-				september: 0,
-				october: 7,
-				november: 15,
-				december: 23
-			}
-		},
-		{
-			id: 'hp-custom-1',
-			name: 'Eigenes Profil 1',
-			type: 'custom',
-			description: 'Benutzerdefiniertes Heizprofil (unvollständig)',
-			isActive: true,
-			monthlyPercentages: {
-				january: 17,
-				february: 14,
-				march: 11,
-				april: 6,
-				may: 1,
-				june: 0,
-				july: 0,
-				august: 0,
-				september: 1,
-				october: 9,
-				november: 13,
-				december: 16
-			}
-		}
-	];
+export const load = async ({ fetch }: { fetch: typeof globalThis.fetch }): Promise<HeatingProfilesData> => {
+	try {
+		const response = await fetch(`${BACKEND_URL}/api/v1/heating-profiles?limit=100`);
 
-	return {
-		profiles: mockProfiles,
-		total: mockProfiles.length
-	};
+		if (!response.ok) {
+			console.error('Failed to fetch heating profiles:', response.status);
+			return { profiles: [], total: 0 };
+		}
+
+		const data = await response.json();
+
+		const profiles: HeatingProfile[] = (data.data || []).map((hp: Record<string, unknown>) => ({
+			id: hp.id,
+			name: hp.name || '',
+			type: hp.type || 'predefined',
+			description: hp.description || '',
+			isActive: hp.isActive ?? true,
+			monthlyPercentages: hp.monthlyPercentages || {
+				january: parseFloat(hp.januaryPct as string) || 0,
+				february: parseFloat(hp.februaryPct as string) || 0,
+				march: parseFloat(hp.marchPct as string) || 0,
+				april: parseFloat(hp.aprilPct as string) || 0,
+				may: parseFloat(hp.mayPct as string) || 0,
+				june: parseFloat(hp.junePct as string) || 0,
+				july: parseFloat(hp.julyPct as string) || 0,
+				august: parseFloat(hp.augustPct as string) || 0,
+				september: parseFloat(hp.septemberPct as string) || 0,
+				october: parseFloat(hp.octoberPct as string) || 0,
+				november: parseFloat(hp.novemberPct as string) || 0,
+				december: parseFloat(hp.decemberPct as string) || 0
+			}
+		}));
+
+		return {
+			profiles,
+			total: data.total || profiles.length
+		};
+	} catch (err) {
+		console.error('Failed to fetch heating profiles:', err);
+		return { profiles: [], total: 0 };
+	}
 };

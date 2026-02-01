@@ -1,28 +1,55 @@
 import { error, redirect } from '@sveltejs/kit';
 import type { BuildingWithStats } from '$lib/types';
-import { getBuilding, mockBuildings } from '$lib/server/mockData';
 import type { Actions } from './$types';
+
+const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
 export interface BuildingEditData {
 	building: BuildingWithStats;
 }
 
-export const load = async ({ params }: { params: { id: string } }): Promise<BuildingEditData> => {
-	const buildingId = params.id;
+export const load = async ({ params, fetch }): Promise<BuildingEditData> => {
+	try {
+		const response = await fetch(`${BACKEND_URL}/api/v1/buildings/${params.id}`);
 
-	// Find building by ID from shared mock data
-	const building = getBuilding(buildingId);
+		if (!response.ok) {
+			if (response.status === 404) {
+				throw error(404, 'Gebäude nicht gefunden');
+			}
+			throw error(response.status, 'Fehler beim Laden des Gebäudes');
+		}
 
-	if (!building) {
-		throw error(404, 'Building not found');
+		const data = await response.json();
+
+		const building: BuildingWithStats = {
+			id: data.id,
+			name: data.name || '',
+			address: data.address,
+			postalCode: data.postalCode,
+			city: data.city,
+			canton: data.canton,
+			country: data.country || 'CH',
+			latitude: data.latitude ? Number(data.latitude) : undefined,
+			longitude: data.longitude ? Number(data.longitude) : undefined,
+			yearBuilt: data.yearBuilt ? Number(data.yearBuilt) : undefined,
+			buildingType: data.buildingType,
+			apartmentCount: Number(data.apartmentCount) || 0,
+			occupiedCount: Number(data.occupiedCount) || 0,
+			vacantCount: Number(data.vacantCount) || 0
+		};
+
+		return { building };
+	} catch (err) {
+		console.error('Failed to fetch building for edit:', err);
+		if (err && typeof err === 'object' && 'status' in err) {
+			throw err;
+		}
+		throw error(500, 'Fehler beim Laden des Gebäudes');
 	}
-
-	return { building };
 };
 
 export const actions: Actions = {
-	default: async ({ request, params }) => {
-		const buildingId = params.id;
+	default: async ({ request, params, fetch }) => {
 		const formData = await request.formData();
 
 		const name = formData.get('name') as string;
@@ -54,24 +81,30 @@ export const actions: Actions = {
 			return { success: false, errors };
 		}
 
-		// Find and update the building
-		const buildingIndex = mockBuildings.findIndex((b) => b.id === buildingId);
-		if (buildingIndex === -1) {
-			throw error(404, 'Building not found');
+		try {
+			const response = await fetch(`${BACKEND_URL}/api/v1/buildings/${params.id}`, {
+				method: 'PUT',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					name: name || null,
+					address,
+					postalCode,
+					city,
+					canton: canton || null,
+					buildingType: buildingType || null,
+					yearBuilt: yearBuilt ? parseInt(yearBuilt) : null
+				})
+			});
+
+			if (!response.ok) {
+				const error = await response.json();
+				return { success: false, errors: { _form: error.message || 'Fehler beim Speichern' } };
+			}
+		} catch (err) {
+			console.error('Failed to update building:', err);
+			return { success: false, errors: { _form: 'Fehler beim Speichern' } };
 		}
 
-		// Update the building
-		mockBuildings[buildingIndex] = {
-			...mockBuildings[buildingIndex],
-			name: name || undefined,
-			address,
-			postalCode,
-			city,
-			canton: canton || undefined,
-			buildingType: buildingType || undefined,
-			yearBuilt: yearBuilt ? parseInt(yearBuilt) : undefined
-		};
-
-		throw redirect(303, `/buildings/${buildingId}`);
+		throw redirect(303, `/buildings/${params.id}`);
 	}
 };

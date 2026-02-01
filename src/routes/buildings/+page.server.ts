@@ -1,43 +1,53 @@
 import type { BuildingsListData } from '$lib/types';
-import { mockBuildings } from '$lib/server/mockData';
 
-export const load = async ({ url }: { url: URL }): Promise<BuildingsListData> => {
+const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
+
+export const load = async ({ url, fetch }): Promise<BuildingsListData> => {
 	const page = parseInt(url.searchParams.get('page') || '1', 10);
 	const pageSize = parseInt(url.searchParams.get('pageSize') || '10', 10);
 	const search = url.searchParams.get('search') || '';
 	const city = url.searchParams.get('city') || '';
 
-	// In production, this would fetch from the backend API via the proxy
-	// const response = await fetch(`/api/buildings?page=${page}&pageSize=${pageSize}&search=${search}&city=${city}`);
-	// const data = await response.json();
+	try {
+		const params = new URLSearchParams();
+		params.set('limit', String(pageSize));
+		params.set('offset', String((page - 1) * pageSize));
+		if (search) params.set('search', search);
+		if (city) params.set('city', city);
 
-	// Filter by search term
-	let filteredBuildings = [...mockBuildings];
-	if (search) {
-		const searchLower = search.toLowerCase();
-		filteredBuildings = filteredBuildings.filter(
-			(b) =>
-				b.name?.toLowerCase().includes(searchLower) ||
-				b.address.toLowerCase().includes(searchLower) ||
-				b.city.toLowerCase().includes(searchLower)
-		);
+		const response = await fetch(`${BACKEND_URL}/api/v1/buildings?${params}`);
+		const data = await response.json();
+
+		const buildings = (data.buildings || data.data || []).map((b: Record<string, unknown>) => ({
+			id: b.id,
+			name: b.name || '',
+			address: b.address,
+			postalCode: b.postalCode,
+			city: b.city,
+			canton: b.canton,
+			country: b.country || 'CH',
+			latitude: b.latitude ? Number(b.latitude) : undefined,
+			longitude: b.longitude ? Number(b.longitude) : undefined,
+			yearBuilt: b.yearBuilt ? Number(b.yearBuilt) : undefined,
+			buildingType: b.buildingType,
+			apartmentCount: Number(b.apartmentCount) || 0,
+			occupiedCount: Number(b.occupiedCount) || 0,
+			vacantCount: Number(b.vacantCount) || 0
+		}));
+
+		return {
+			buildings,
+			total: data.total || 0,
+			page,
+			pageSize
+		};
+	} catch (error) {
+		console.error('Failed to fetch buildings:', error);
+		return {
+			buildings: [],
+			total: 0,
+			page,
+			pageSize
+		};
 	}
-
-	// Filter by city
-	if (city) {
-		filteredBuildings = filteredBuildings.filter((b) =>
-			b.city.toLowerCase().includes(city.toLowerCase())
-		);
-	}
-
-	// Paginate
-	const start = (page - 1) * pageSize;
-	const paginatedBuildings = filteredBuildings.slice(start, start + pageSize);
-
-	return {
-		buildings: paginatedBuildings,
-		total: filteredBuildings.length,
-		page,
-		pageSize
-	};
 };

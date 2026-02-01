@@ -1,27 +1,35 @@
 import type { RequestHandler } from './$types';
 
-export const GET: RequestHandler = async ({ params }) => {
+const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
+
+export const GET: RequestHandler = async ({ params, fetch }) => {
 	const { id } = params;
 
-	// TODO: In production, this would fetch the PDF from the backend
-	// const response = await fetch(`${BACKEND_URL}/api/v1/statements/${id}/pdf`, {
-	//   headers: { Authorization: `Bearer ${jwt}` }
-	// });
-	// return new Response(response.body, {
-	//   headers: {
-	//     'Content-Type': 'application/pdf',
-	//     'Content-Disposition': `attachment; filename="abrechnung-${id}.pdf"`
-	//   }
-	// });
+	try {
+		const response = await fetch(`${BACKEND_URL}/api/v1/statements/${id}/pdf`);
 
-	// For now, return a placeholder response
-	// In production, this would stream the actual PDF file
-	const placeholderMessage = `PDF für Abrechnung ${id} wird generiert...`;
-
-	return new Response(placeholderMessage, {
-		status: 200,
-		headers: {
-			'Content-Type': 'text/plain; charset=utf-8'
+		if (!response.ok) {
+			const error = await response.json().catch(() => ({ error: 'PDF not available' }));
+			return new Response(JSON.stringify(error), {
+				status: response.status,
+				headers: { 'Content-Type': 'application/json' }
+			});
 		}
-	});
+
+		const pdfBuffer = await response.arrayBuffer();
+
+		return new Response(pdfBuffer, {
+			status: 200,
+			headers: {
+				'Content-Type': 'application/pdf',
+				'Content-Disposition': `attachment; filename="abrechnung-${id}.pdf"`
+			}
+		});
+	} catch (error) {
+		console.error('PDF download error:', error);
+		return new Response(JSON.stringify({ error: 'Failed to download PDF' }), {
+			status: 500,
+			headers: { 'Content-Type': 'application/json' }
+		});
+	}
 };

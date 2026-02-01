@@ -16,6 +16,8 @@
 	let showSendReminderModal = $state(false);
 	let showDeleteModal = $state(false);
 	let isProcessing = $state(false);
+	let isGeneratingPdf = $state(false);
+	let pdfGeneratedAt = $state(data.statement.pdfGeneratedAt);
 
 	function formatCurrency(amount: number): string {
 		return new Intl.NumberFormat('de-CH', {
@@ -100,6 +102,27 @@
 		isProcessing = false;
 	}
 
+	async function handleGeneratePdf() {
+		isGeneratingPdf = true;
+		try {
+			const response = await fetch(`/api/statements/${data.statement.id}/generate-pdf`, {
+				method: 'POST'
+			});
+			if (response.ok) {
+				pdfGeneratedAt = new Date().toISOString();
+			} else {
+				const error = await response.json();
+				console.error('PDF generation failed:', error);
+				alert('PDF-Generierung fehlgeschlagen: ' + (error.error || 'Unbekannter Fehler'));
+			}
+		} catch (error) {
+			console.error('PDF generation error:', error);
+			alert('PDF-Generierung fehlgeschlagen');
+		} finally {
+			isGeneratingPdf = false;
+		}
+	}
+
 	const subtotal = $derived(data.statement.lineItems.reduce((sum, item) => sum + item.tenantShare, 0));
 </script>
 
@@ -130,15 +153,15 @@
 			</div>
 		</div>
 		<div class="flex flex-wrap items-center gap-2">
-			{#if data.statement.pdfGeneratedAt}
-				<Button href="/api/statements/{data.statement.id}/pdf" variant="secondary">
+			{#if pdfGeneratedAt}
+				<Button href="/statements/{data.statement.id}/pdf" variant="secondary">
 					<Icon name="picture_as_pdf" size={20} />
 					PDF herunterladen
 				</Button>
 			{:else}
-				<Button variant="secondary">
+				<Button variant="secondary" onclick={handleGeneratePdf} disabled={isGeneratingPdf}>
 					<Icon name="picture_as_pdf" size={20} />
-					PDF generieren
+					{isGeneratingPdf ? 'Wird generiert...' : 'PDF generieren'}
 				</Button>
 			{/if}
 			{#if data.statement.status === 'sent' || data.statement.status === 'overdue'}
@@ -337,7 +360,7 @@
 			</Card>
 
 			<!-- Metadata -->
-			{#if data.statement.createdAt || data.statement.pdfGeneratedAt}
+			{#if data.statement.createdAt || pdfGeneratedAt}
 				<Card>
 					<h2 class="text-sm font-semibold text-gray-500 mb-3">Metadaten</h2>
 					<div class="space-y-2 text-sm">
@@ -347,10 +370,10 @@
 								<span class="text-gray-700">{formatDateTime(data.statement.createdAt)}</span>
 							</div>
 						{/if}
-						{#if data.statement.pdfGeneratedAt}
+						{#if pdfGeneratedAt}
 							<div class="flex justify-between">
 								<span class="text-gray-500">PDF generiert</span>
-								<span class="text-gray-700">{formatDateTime(data.statement.pdfGeneratedAt)}</span>
+								<span class="text-gray-700">{formatDateTime(pdfGeneratedAt)}</span>
 							</div>
 						{/if}
 					</div>

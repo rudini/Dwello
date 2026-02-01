@@ -1,63 +1,38 @@
 import type { DistributionKey } from '$lib/types';
 
+const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
+
 interface DistributionKeysData {
 	keys: DistributionKey[];
 	total: number;
 }
 
-export const load = async (): Promise<DistributionKeysData> => {
-	const mockKeys: DistributionKey[] = [
-		{
-			id: 'dk-units',
-			name: 'Nach Einheiten',
-			type: 'predefined',
-			description: 'Gleichmässige Verteilung pro Wohneinheit',
-			isActive: true
-		},
-		{
-			id: 'dk-area',
-			name: 'Nach Fläche',
-			type: 'predefined',
-			formula: '{area}',
-			description: 'Verteilung proportional zur Wohnfläche in m²',
-			isActive: true
-		},
-		{
-			id: 'dk-rooms',
-			name: 'Nach Zimmern',
-			type: 'predefined',
-			formula: '{rooms}',
-			description: 'Verteilung proportional zur Zimmeranzahl',
-			isActive: true
-		},
-		{
-			id: 'dk-heating',
-			name: 'Heizkosten',
-			type: 'predefined',
-			formula: '{area} * 0.7 + {rooms} * 0.3',
-			description: 'Gewichtete Kombination aus Fläche (70%) und Zimmern (30%)',
-			isActive: true
-		},
-		{
-			id: 'dk-water',
-			name: 'Wasserverbrauch',
-			type: 'predefined',
-			formula: '{persons}',
-			description: 'Verteilung nach Personenanzahl',
-			isActive: true
-		},
-		{
-			id: 'dk-custom-1',
-			name: 'Eigener Schlüssel 1',
-			type: 'custom',
-			formula: '{area} * 0.5 + {rooms} * 0.3 + {persons} * 0.2',
-			description: 'Kombination aus Fläche, Zimmern und Personen',
-			isActive: true
-		}
-	];
+export const load = async ({ fetch }: { fetch: typeof globalThis.fetch }): Promise<DistributionKeysData> => {
+	try {
+		const response = await fetch(`${BACKEND_URL}/api/v1/distribution-keys?limit=100`);
 
-	return {
-		keys: mockKeys,
-		total: mockKeys.length
-	};
+		if (!response.ok) {
+			console.error('Failed to fetch distribution keys:', response.status);
+			return { keys: [], total: 0 };
+		}
+
+		const data = await response.json();
+
+		const keys: DistributionKey[] = (data.data || []).map((d: Record<string, unknown>) => ({
+			id: d.id,
+			name: d.name || '',
+			type: d.type || 'predefined',
+			formula: d.formula || undefined,
+			description: d.description || '',
+			isActive: d.isActive ?? true
+		}));
+
+		return {
+			keys,
+			total: data.total || keys.length
+		};
+	} catch (err) {
+		console.error('Failed to fetch distribution keys:', err);
+		return { keys: [], total: 0 };
+	}
 };

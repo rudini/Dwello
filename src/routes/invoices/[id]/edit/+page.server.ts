@@ -1,4 +1,7 @@
 import type { InvoiceWithDetails, Category, DistributionKey } from '$lib/types';
+import { error } from '@sveltejs/kit';
+
+const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
 interface InvoiceEditData {
 	invoice: InvoiceWithDetails;
@@ -7,95 +10,72 @@ interface InvoiceEditData {
 	distributionKeys: DistributionKey[];
 }
 
-export const load = async ({ params }: { params: { id: string } }): Promise<InvoiceEditData> => {
-	const { id } = params;
+export const load = async ({ params, fetch }): Promise<InvoiceEditData> => {
+	try {
+		const [invoiceRes, buildingsRes, categoriesRes, distributionKeysRes] = await Promise.all([
+			fetch(`${BACKEND_URL}/api/v1/invoices/${params.id}`),
+			fetch(`${BACKEND_URL}/api/v1/buildings?limit=100`),
+			fetch(`${BACKEND_URL}/api/v1/categories?limit=100`),
+			fetch(`${BACKEND_URL}/api/v1/distribution-keys?limit=100`)
+		]);
 
-	// Mock categories
-	const mockCategories: Category[] = [
-		{ id: 'cat-001', name: 'Heizung', isAllowedUtilityCost: true },
-		{ id: 'cat-002', name: 'Warmwasser', isAllowedUtilityCost: true },
-		{ id: 'cat-003', name: 'Wasser/Abwasser', isAllowedUtilityCost: true },
-		{ id: 'cat-004', name: 'Allgemeinstrom', isAllowedUtilityCost: true },
-		{ id: 'cat-005', name: 'Hauswart', isAllowedUtilityCost: true },
-		{ id: 'cat-006', name: 'Aufzug', isAllowedUtilityCost: true },
-		{ id: 'cat-007', name: 'Gartenpflege', isAllowedUtilityCost: true },
-		{ id: 'cat-008', name: 'Kehricht', isAllowedUtilityCost: true },
-		{ id: 'cat-009', name: 'Reparaturen', isAllowedUtilityCost: false },
-		{ id: 'cat-010', name: 'Versicherung', isAllowedUtilityCost: false }
-	];
-
-	// Mock distribution keys
-	const mockDistributionKeys: DistributionKey[] = [
-		{ id: 'dk-units', name: 'Nach Einheiten', type: 'predefined', isActive: true },
-		{ id: 'dk-area', name: 'Nach Fläche', type: 'predefined', isActive: true },
-		{ id: 'dk-heating', name: 'Heizkosten', type: 'predefined', isActive: true },
-		{ id: 'dk-rooms', name: 'Nach Zimmern', type: 'predefined', isActive: true }
-	];
-
-	// Mock buildings
-	const mockBuildings = [
-		{ id: 'building-001', name: 'Musterhaus Zentrum', address: 'Musterstraße 12, 8000 Zürich' },
-		{ id: 'building-002', name: 'Seepark Residenz', address: 'Seestrasse 45, 6004 Luzern' },
-		{ id: 'building-003', name: 'Alpenblick', address: 'Bergweg 7, 3012 Bern' },
-		{ id: 'building-004', name: 'Sonnenhof', address: 'Bahnhofstrasse 88, 4051 Basel' }
-	];
-
-	// Mock invoice data
-	const mockInvoices: Record<string, InvoiceWithDetails> = {
-		'inv-001': {
-			id: 'inv-001',
-			buildingId: 'building-001',
-			invoiceDate: '2025-01-15',
-			billingEntity: 'Energie Zürich AG',
-			description: 'Heizöllieferung Q4 2024',
-			amount: 8500,
-			categoryId: 'cat-001',
-			distributionKeyId: 'dk-heating',
-			isValidUtilityCost: true,
-			llmConfidence: 0.95,
-			llmReasoning: 'Heizölrechnung erkannt anhand Lieferant und Beschreibung',
-			buildingName: 'Musterhaus Zentrum',
-			buildingAddress: 'Musterstraße 12, 8000 Zürich',
-			category: mockCategories[0],
-			distributionKey: mockDistributionKeys[2],
-			categorizationStatus: 'auto-categorized'
-		},
-		'inv-002': {
-			id: 'inv-002',
-			buildingId: 'building-001',
-			invoiceDate: '2025-01-10',
-			billingEntity: 'Wasserwerke Zürich',
-			description: 'Wasserabrechnung 2024',
-			amount: 2400,
-			categoryId: 'cat-003',
-			distributionKeyId: 'dk-units',
-			isValidUtilityCost: true,
-			llmConfidence: 0.92,
-			buildingName: 'Musterhaus Zentrum',
-			buildingAddress: 'Musterstraße 12, 8000 Zürich',
-			category: mockCategories[2],
-			distributionKey: mockDistributionKeys[0],
-			categorizationStatus: 'auto-categorized'
+		if (!invoiceRes.ok) {
+			if (invoiceRes.status === 404) {
+				throw error(404, 'Rechnung nicht gefunden');
+			}
+			throw error(invoiceRes.status, 'Fehler beim Laden der Rechnung');
 		}
-	};
 
-	const invoice = mockInvoices[id] || {
-		id,
-		buildingId: 'building-001',
-		invoiceDate: '2025-01-01',
-		billingEntity: 'Unbekannt',
-		description: '',
-		amount: 0,
-		isValidUtilityCost: true,
-		buildingName: '',
-		buildingAddress: '',
-		categorizationStatus: 'pending'
-	};
+		const data = await invoiceRes.json();
+		const buildingsData = await buildingsRes.json();
+		const categoriesData = await categoriesRes.json();
+		const distributionKeysData = await distributionKeysRes.json();
 
-	return {
-		invoice,
-		buildings: mockBuildings,
-		categories: mockCategories,
-		distributionKeys: mockDistributionKeys
-	};
+		const invoice: InvoiceWithDetails = {
+			id: data.id,
+			buildingId: data.buildingId,
+			invoiceDate: data.invoiceDate,
+			billingEntity: data.billingEntity || '',
+			description: data.description || '',
+			amount: Number(data.amount) || 0,
+			categoryId: data.categoryId,
+			distributionKeyId: data.distributionKeyId,
+			isValidUtilityCost: data.isValidUtilityCost ?? true,
+			llmConfidence: data.llmConfidence ? Number(data.llmConfidence) : undefined,
+			llmReasoning: data.llmReasoning,
+			buildingName: data.building?.name || '',
+			buildingAddress: data.building?.address || '',
+			category: data.category,
+			distributionKey: data.distributionKey,
+			categorizationStatus: data.categorizationStatus || 'pending'
+		};
+
+		const buildings = (buildingsData.buildings || buildingsData.data || []).map((b: Record<string, unknown>) => ({
+			id: b.id,
+			name: b.name || '',
+			address: `${b.address}, ${b.postalCode} ${b.city}`
+		}));
+
+		const categories: Category[] = (categoriesData.data || []).map((c: Record<string, unknown>) => ({
+			id: c.id,
+			name: c.name,
+			isAllowedUtilityCost: c.isAllowedUtilityCost,
+			description: c.description
+		}));
+
+		const distributionKeys: DistributionKey[] = (distributionKeysData.data || []).map((d: Record<string, unknown>) => ({
+			id: d.id,
+			name: d.name,
+			type: d.type,
+			isActive: d.isActive
+		}));
+
+		return { invoice, buildings, categories, distributionKeys };
+	} catch (err) {
+		console.error('Failed to fetch invoice for edit:', err);
+		if (err && typeof err === 'object' && 'status' in err) {
+			throw err;
+		}
+		throw error(500, 'Fehler beim Laden der Rechnung');
+	}
 };
