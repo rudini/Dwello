@@ -8,7 +8,7 @@
 	}
 
 	const navItems: NavItem[] = [
-		{ name: 'Dashboard', href: '/', icon: 'dashboard' },
+		{ name: 'Dashboard', href: '/dashboard', icon: 'dashboard' },
 		{ name: 'Buildings', href: '/buildings', icon: 'apartment' },
 		{ name: 'Apartments', href: '/apartments', icon: 'door_front' },
 		{ name: 'Tenants', href: '/tenants', icon: 'people' },
@@ -19,8 +19,8 @@
 	];
 
 	function isActive(href: string, currentPath: string): boolean {
-		if (href === '/') {
-			return currentPath === '/';
+		if (href === '/dashboard') {
+			return currentPath === '/' || currentPath === '/dashboard';
 		}
 		return currentPath.startsWith(href);
 	}
