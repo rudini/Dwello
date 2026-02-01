@@ -264,7 +264,7 @@
 				<!-- Heating Profile Preview -->
 				{#if selectedHeatingProfile}
 					<div class="bg-gray-50 rounded-lg p-4">
-						<h3 class="text-sm font-medium text-gray-700 mb-3">Monatliche Verteilung</h3>
+						<h3 class="text-sm font-medium text-gray-700 mb-6">Monatliche Verteilung</h3>
 						<div class="flex items-end gap-1 h-24">
 							{#each Object.entries(selectedHeatingProfile.monthlyPercentages) as [month, value]}
 								<div class="flex-1 flex flex-col items-center h-full">
