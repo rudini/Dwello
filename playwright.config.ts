@@ -32,10 +32,10 @@ export default defineConfig({
 			timeout: 30000
 		},
 		{
-			// Frontend dev server (SvelteKit)
-			command: 'npm run dev',
+			// Frontend dev server (SvelteKit) with E2E test mode enabled
+			command: 'E2E_TEST_MODE=true npm run dev',
 			port: 3000,
-			reuseExistingServer: true,
+			reuseExistingServer: !process.env.CI,
 			timeout: 30000
 		}
 	],

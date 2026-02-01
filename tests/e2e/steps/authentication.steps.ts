@@ -9,6 +9,18 @@ const { Given, When, Then } = createBdd(test);
 // ============================================
 
 Given('I am not logged in', async ({ page }) => {
+	// Set cookie to tell server-side to skip auth (return null user)
+	// This works with E2E_TEST_MODE in +layout.server.ts
+	await page.context().addCookies([
+		{
+			name: 'e2e-skip-auth',
+			value: 'true',
+			domain: 'localhost',
+			path: '/'
+		}
+	]);
+
+	// Also mock the auth/me API for any client-side checks
 	await page.route('**/auth/me', async (route) => {
 		await route.fulfill({
 			status: 401,

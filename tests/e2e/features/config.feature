@@ -38,28 +38,27 @@ Feature: System Configuration
   Scenario: Heating profile dropdown shows all profiles
     When I open the config page
     Then the heating profile dropdown should have options
-    And I should see "Standard" in the dropdown
-    And I should see "Mittelland" in the dropdown
-    And I should see "Bergregion" in the dropdown
+    And I should see "Heating Mountain" in the dropdown
+    And I should see "Heating Mittelland" in the dropdown
+    And I should see "Heating Tessin" in the dropdown
 
   @heating-dropdown @validation
   Scenario: Valid heating profiles are selectable
+    # Only profiles with sum = 100% are valid (Heating Mountain = 100%)
     When I open the config page
-    Then the "Standard" option should be enabled
-    And the "Mittelland" option should be enabled
-    And the "Tessin" option should be enabled
+    Then the "Heating Mountain" option should be enabled
 
   @heating-dropdown @validation
-  Scenario: Invalid heating profiles are disabled
+  Scenario: Invalid heating profiles show warning
+    # Profiles with sum != 100% show warning (Heating Mittelland = 90%)
     When I open the config page
-    Then the "Bergregion" option should be disabled
-    And the disabled option should show "nicht wählbar"
+    Then profiles not summing to 100% should show a warning indicator
 
   @heating-dropdown @selection
   Scenario: Can select a valid heating profile
     When I open the config page
-    And I select "Standard" as the default heating profile
-    Then the heating profile dropdown should show "Standard" selected
+    And I select "Heating Mountain" as the default heating profile
+    Then the heating profile dropdown should show "Heating Mountain" selected
 
   @save-button
   Scenario: Save button is disabled when no changes

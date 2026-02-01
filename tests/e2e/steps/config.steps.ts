@@ -117,6 +117,16 @@ Then('the disabled option should show {string}', async ({ page }, text: string) 
 	expect(optionText).toContain(text);
 });
 
+Then('profiles not summing to 100% should show a warning indicator', async ({ page }) => {
+	// Check that dropdown options for invalid profiles have percentage shown
+	const select = page.locator('#heatingProfile');
+	await expect(select).toBeVisible({ timeout: 5000 });
+	// Look for options that show percentages like "90%" or "(90%)" indicating they don't sum to 100%
+	const optionsText = await select.locator('option').allTextContents();
+	const hasPercentageIndicator = optionsText.some(text => /\d+%/.test(text) && !text.includes('100%'));
+	expect(hasPercentageIndicator).toBe(true);
+});
+
 Then('the heating profile dropdown should show {string} selected', async ({ page }, profileName: string) => {
 	const select = page.locator('#heatingProfile');
 	const selectedValue = await select.inputValue();

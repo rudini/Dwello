@@ -51,42 +51,54 @@ export async function listBuildings(filters: BuildingFilters = {}): Promise<{
 		conditions.push(eq(buildings.canton, canton.toUpperCase()));
 	}
 
-	// Get buildings with apartment stats using subquery
+	// Get buildings first
 	const buildingsQuery = db
-		.select({
-			id: buildings.id,
-			name: buildings.name,
-			address: buildings.address,
-			postalCode: buildings.postalCode,
-			city: buildings.city,
-			canton: buildings.canton,
-			country: buildings.country,
-			latitude: buildings.latitude,
-			longitude: buildings.longitude,
-			buildingType: buildings.buildingType,
-			yearBuilt: buildings.yearBuilt,
-			createdAt: buildings.createdAt,
-			updatedAt: buildings.updatedAt,
-			apartmentCount: sql<number>`(SELECT COUNT(*) FROM apartments WHERE apartments.building_id = ${buildings.id})`.as(
-				'apartment_count'
-			),
-			occupiedCount: sql<number>`(SELECT COUNT(*) FROM apartments WHERE apartments.building_id = ${buildings.id} AND apartments.status = 'occupied')`.as(
-				'occupied_count'
-			),
-			vacantCount: sql<number>`(SELECT COUNT(*) FROM apartments WHERE apartments.building_id = ${buildings.id} AND apartments.status = 'vacant')`.as(
-				'vacant_count'
-			)
-		})
+		.select()
 		.from(buildings)
 		.orderBy(desc(buildings.updatedAt))
 		.limit(limit)
 		.offset(offset);
 
 	// Apply conditions if any
-	const results =
+	const buildingResults =
 		conditions.length > 0
 			? await buildingsQuery.where(conditions.length === 1 ? conditions[0] : sql`${conditions[0]}`)
 			: await buildingsQuery;
+
+	// Get apartment counts for all buildings
+	const buildingIds = buildingResults.map((b) => b.id);
+
+	const apartmentCounts = buildingIds.length > 0
+		? await db
+				.select({
+					buildingId: apartments.buildingId,
+					total: sql<number>`count(*)`,
+					occupied: sql<number>`count(*) filter (where status = 'occupied')`,
+					vacant: sql<number>`count(*) filter (where status = 'vacant')`
+				})
+				.from(apartments)
+				.where(sql`${apartments.buildingId} IN (${sql.join(buildingIds.map(id => sql`${id}`), sql`, `)})`)
+				.groupBy(apartments.buildingId)
+		: [];
+
+	// Create a map for quick lookup
+	const countsMap = new Map(
+		apartmentCounts.map((c) => [
+			c.buildingId,
+			{ total: Number(c.total), occupied: Number(c.occupied), vacant: Number(c.vacant) }
+		])
+	);
+
+	// Combine buildings with their counts
+	const results: BuildingWithStats[] = buildingResults.map((b) => {
+		const counts = countsMap.get(b.id) || { total: 0, occupied: 0, vacant: 0 };
+		return {
+			...b,
+			apartmentCount: counts.total,
+			occupiedCount: counts.occupied,
+			vacantCount: counts.vacant
+		};
+	});
 
 	// Get total count
 	const countQuery = db.select({ count: sql<number>`count(*)` }).from(buildings);
@@ -97,7 +109,7 @@ export async function listBuildings(filters: BuildingFilters = {}): Promise<{
 			: await countQuery;
 
 	return {
-		buildings: results as BuildingWithStats[],
+		buildings: results,
 		total: Number(total)
 	};
 }
@@ -106,36 +118,31 @@ export async function listBuildings(filters: BuildingFilters = {}): Promise<{
  * Get a single building by ID with apartment list
  */
 export async function getBuilding(id: string): Promise<BuildingWithStats | null> {
+	// First get the building
 	const [building] = await db
-		.select({
-			id: buildings.id,
-			name: buildings.name,
-			address: buildings.address,
-			postalCode: buildings.postalCode,
-			city: buildings.city,
-			canton: buildings.canton,
-			country: buildings.country,
-			latitude: buildings.latitude,
-			longitude: buildings.longitude,
-			buildingType: buildings.buildingType,
-			yearBuilt: buildings.yearBuilt,
-			createdAt: buildings.createdAt,
-			updatedAt: buildings.updatedAt,
-			apartmentCount: sql<number>`(SELECT COUNT(*) FROM apartments WHERE apartments.building_id = ${buildings.id})`.as(
-				'apartment_count'
-			),
-			occupiedCount: sql<number>`(SELECT COUNT(*) FROM apartments WHERE apartments.building_id = ${buildings.id} AND apartments.status = 'occupied')`.as(
-				'occupied_count'
-			),
-			vacantCount: sql<number>`(SELECT COUNT(*) FROM apartments WHERE apartments.building_id = ${buildings.id} AND apartments.status = 'vacant')`.as(
-				'vacant_count'
-			)
-		})
+		.select()
 		.from(buildings)
 		.where(eq(buildings.id, id))
 		.limit(1);
 
-	return (building as BuildingWithStats) || null;
+	if (!building) return null;
+
+	// Get apartment counts separately for reliability
+	const [counts] = await db
+		.select({
+			total: sql<number>`count(*)`,
+			occupied: sql<number>`count(*) filter (where status = 'occupied')`,
+			vacant: sql<number>`count(*) filter (where status = 'vacant')`
+		})
+		.from(apartments)
+		.where(eq(apartments.buildingId, id));
+
+	return {
+		...building,
+		apartmentCount: Number(counts?.total ?? 0),
+		occupiedCount: Number(counts?.occupied ?? 0),
+		vacantCount: Number(counts?.vacant ?? 0)
+	};
 }
 
 /**

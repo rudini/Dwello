@@ -34,33 +34,33 @@ Feature: Apartment Management
 
   @create @preset-building
   Scenario: Building is preset when navigating from building detail
-    When I open the new apartment page with building "building-001"
+    When I open the new apartment page with building "11111111-1111-1111-1111-111111111111"
     Then the building field should be readonly
     And the building field should show "Musterhaus Zentrum"
     And I should see a lock icon on the building field
 
   @create @preset-building
   Scenario: Breadcrumb shows building path when preset
-    When I open the new apartment page with building "building-001"
+    When I open the new apartment page with building "11111111-1111-1111-1111-111111111111"
     Then the breadcrumb should show "Gebäude"
     And the breadcrumb should show "Musterhaus Zentrum"
     And the breadcrumb should show "Neue Wohnung"
 
   @create @preset-building
   Scenario: Cancel button returns to building when preset
-    When I open the new apartment page with building "building-001"
-    Then the cancel button should link to "/buildings/building-001"
+    When I open the new apartment page with building "11111111-1111-1111-1111-111111111111"
+    Then the cancel button should link to "/buildings/11111111-1111-1111-1111-111111111111"
 
   @create @preset-building
   Scenario: Building preset works for different buildings
-    When I open the new apartment page with building "building-004"
+    When I open the new apartment page with building "22222222-2222-2222-2222-222222222222"
     Then the building field should be readonly
-    And the building field should show "Sonnenhof"
-    And the cancel button should link to "/buildings/building-004"
+    And the building field should show "Seepark Residenz"
+    And the cancel button should link to "/buildings/22222222-2222-2222-2222-222222222222"
 
   @create @preset-building
   Scenario: Invalid building preset falls back to dropdown
-    When I open the new apartment page with building "building-999"
+    When I open the new apartment page with building "99999999-9999-9999-9999-999999999999"
     Then the building dropdown should be visible
     And the building field should not be readonly
 

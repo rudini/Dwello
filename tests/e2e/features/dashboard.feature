@@ -6,7 +6,6 @@ Feature: Dashboard Overview
 
   Background:
     Given I am logged in as "Test User"
-    And the backend API is mocked
 
   @overview
   Scenario: Dashboard shows portfolio statistics

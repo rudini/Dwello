@@ -8,98 +8,19 @@ const { Given, When, Then } = createBdd(test);
 // Given steps
 // ============================================
 
-Given('there are buildings in the system', async ({ page }) => {
-	// Buildings page uses server-side mock data, no additional mocking needed
-	// Just ensure auth is mocked
-	await page.route('**/api/buildings**', async (route) => {
-		if (route.request().method() === 'GET') {
-			await route.fulfill({
-				status: 200,
-				contentType: 'application/json',
-				body: JSON.stringify({
-					data: [
-						{
-							id: 'building-001',
-							name: 'Musterhaus Zentrum',
-							address: 'Musterstraße 12',
-							postalCode: '8000',
-							city: 'Zürich',
-							apartmentCount: 12
-						},
-						{
-							id: 'building-002',
-							name: 'Seepark Residenz',
-							address: 'Seestrasse 45',
-							postalCode: '6004',
-							city: 'Luzern',
-							apartmentCount: 8
-						}
-					],
-					total: 2
-				})
-			});
-		} else {
-			await route.continue();
-		}
-	});
+// These Given steps are no longer needed since we're using real backend data
+// They're kept as no-ops for backward compatibility with any remaining feature files
+
+Given('there are buildings in the system', async () => {
+	// No-op: Real backend data is used
 });
 
-Given('there are multiple buildings in the system', async ({ page }) => {
-	await page.route('**/api/buildings**', async (route) => {
-		await route.fulfill({
-			status: 200,
-			contentType: 'application/json',
-			body: JSON.stringify({
-				data: [
-					{
-						id: '1',
-						name: 'Haus Zürich',
-						address: 'Bahnhofstr. 1',
-						city: 'Zürich',
-						postalCode: '8000',
-						apartmentCount: 10
-					},
-					{
-						id: '2',
-						name: 'Haus Bern',
-						address: 'Bundesplatz 1',
-						city: 'Bern',
-						postalCode: '3000',
-						apartmentCount: 8
-					},
-					{
-						id: '3',
-						name: 'Haus Basel',
-						address: 'Marktplatz 1',
-						city: 'Basel',
-						postalCode: '4000',
-						apartmentCount: 6
-					}
-				],
-				total: 3
-			})
-		});
-	});
+Given('there are multiple buildings in the system', async () => {
+	// No-op: Real backend data is used
 });
 
-Given('there is a building {string} in the system', async ({ page }, buildingName: string) => {
-	await page.route('**/api/buildings/**', async (route) => {
-		await route.fulfill({
-			status: 200,
-			contentType: 'application/json',
-			body: JSON.stringify({
-				id: 'building-001',
-				name: buildingName,
-				address: 'Musterstraße 12',
-				postalCode: '8000',
-				city: 'Zürich',
-				apartments: [
-					{ id: 'apt-1', unit: '1.01', floor: '1. OG', size_m2: 75, rooms: 3.5 },
-					{ id: 'apt-2', unit: '1.02', floor: '1. OG', size_m2: 85, rooms: 4.5 }
-				]
-			})
-		});
-	});
+Given('there is a building {string} in the system', async ({}, _buildingName: string) => {
+	// No-op: Real backend data is used
 });
 
 // ============================================
@@ -131,12 +52,25 @@ When('I search for {string}', async ({ page }, searchTerm: string) => {
 Then('I should see a list of buildings', async ({ page }) => {
 	// The buildings page should show building cards
 	await expect(page.getByTestId('buildings-page')).toBeVisible({ timeout: 5000 });
-	// Check that at least one building is displayed
-	await expect(page.getByText('Musterhaus Zentrum')).toBeVisible({ timeout: 5000 });
+	// Check that at least one of the seed buildings is displayed
+	const building1 = page.getByText('Musterhaus Zentrum');
+	const building2 = page.getByText('Seepark Residenz');
+	const building3 = page.getByText('Alpenblick');
+	const anyVisible = await building1.isVisible().catch(() => false) ||
+		await building2.isVisible().catch(() => false) ||
+		await building3.isVisible().catch(() => false);
+	expect(anyVisible).toBe(true);
 });
 
 Then('I should see building addresses', async ({ page }) => {
-	await expect(page.getByText('Musterstraße')).toBeVisible({ timeout: 5000 });
+	// Check for one of the real building addresses
+	const addr1 = page.getByText('Bahnhofstrasse');
+	const addr2 = page.getByText('Seeweg');
+	const addr3 = page.getByText('Bergstrasse');
+	const anyVisible = await addr1.isVisible().catch(() => false) ||
+		await addr2.isVisible().catch(() => false) ||
+		await addr3.isVisible().catch(() => false);
+	expect(anyVisible).toBe(true);
 });
 
 Then('I should see apartment counts', async ({ page }) => {

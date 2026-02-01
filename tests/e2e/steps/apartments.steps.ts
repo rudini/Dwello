@@ -58,9 +58,10 @@ Then('I should see the building dropdown', async ({ page }) => {
 
 Then('the building dropdown should have all buildings', async ({ page }) => {
 	const select = page.locator('select#building');
+	await expect(select).toBeVisible({ timeout: 5000 });
 	const options = await select.locator('option').count();
-	// Should have at least 4 buildings + 1 placeholder
-	expect(options).toBeGreaterThanOrEqual(5);
+	// Should have at least 3 buildings + 1 placeholder = 4 options
+	expect(options).toBeGreaterThanOrEqual(4);
 });
 
 Then('the building dropdown should be visible', async ({ page }) => {
