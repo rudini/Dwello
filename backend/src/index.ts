@@ -6,7 +6,9 @@
 import { Elysia } from 'elysia';
 import { cors } from '@elysiajs/cors';
 import { swagger } from '@elysiajs/swagger';
-import { testConnection } from './db/connection';
+import { db, testConnection } from './db/connection';
+import { buildings, apartments, utilityStatements } from './db/schema';
+import { count, eq, lt, and, or, isNull } from 'drizzle-orm';
 import { buildingRoutes } from './routes/buildings';
 import { apartmentRoutes } from './routes/apartments';
 import { tenantRoutes } from './routes/tenants';
@@ -63,15 +65,43 @@ const app = new Elysia()
 		timestamp: new Date().toISOString(),
 		service: 'dwello-backend'
 	}))
-	// Dashboard endpoint (placeholder - will be enhanced later)
-	.get('/api/v1/dashboard', () => ({
-		totalBuildings: 0,
-		totalApartments: 0,
-		occupiedApartments: 0,
-		vacantApartments: 0,
-		pendingStatements: 0,
-		overdueStatements: 0
-	}))
+	// Dashboard endpoint
+	.get('/api/v1/dashboard', async () => {
+		const today = new Date().toISOString().split('T')[0];
+
+		const [buildingsCount] = await db.select({ count: count() }).from(buildings);
+		const [apartmentsCount] = await db.select({ count: count() }).from(apartments);
+		const [occupiedCount] = await db
+			.select({ count: count() })
+			.from(apartments)
+			.where(eq(apartments.status, 'occupied'));
+		const [vacantCount] = await db
+			.select({ count: count() })
+			.from(apartments)
+			.where(eq(apartments.status, 'vacant'));
+		const [pendingCount] = await db
+			.select({ count: count() })
+			.from(utilityStatements)
+			.where(or(eq(utilityStatements.status, 'draft'), eq(utilityStatements.status, 'sent')));
+		const [overdueCount] = await db
+			.select({ count: count() })
+			.from(utilityStatements)
+			.where(
+				and(
+					eq(utilityStatements.status, 'sent'),
+					lt(utilityStatements.paymentDeadline, today)
+				)
+			);
+
+		return {
+			totalBuildings: buildingsCount?.count ?? 0,
+			totalApartments: apartmentsCount?.count ?? 0,
+			occupiedApartments: occupiedCount?.count ?? 0,
+			vacantApartments: vacantCount?.count ?? 0,
+			pendingStatements: pendingCount?.count ?? 0,
+			overdueStatements: overdueCount?.count ?? 0
+		};
+	})
 	// Register route modules
 	.use(buildingRoutes)
 	.use(apartmentRoutes)
