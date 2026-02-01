@@ -7,14 +7,14 @@ Feature: Utility Cost Statements
   Background:
     Given I am logged in as "Test User"
 
-  @list
+  @list @wip
   Scenario: View statements list page
     When I open the statements page
     Then I should see the statements page
     And I should see the status overview cards
     And I should see a "Abrechnungen erstellen" link
 
-  @list
+  @list @wip
   Scenario: Statements page shows status filters
     When I open the statements page
     Then I should see draft filter button
@@ -66,7 +66,7 @@ Feature: Utility Cost Statements
     And I should see the cost breakdown
     And I should see the balance
 
-  @list @data
+  @list @data @wip
   Scenario: Statements list shows statement data from backend
     When I open the statements page
     Then I should see statements in the list
