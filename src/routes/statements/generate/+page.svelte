@@ -21,6 +21,21 @@
 	const buildings = $derived(data.buildings);
 	const heatingProfiles = $derived(data.heatingProfiles);
 
+	// Helper to calculate sum of monthly percentages
+	function getProfileSum(profile: HeatingProfile): number {
+		return Object.values(profile.monthlyPercentages).reduce((sum, val) => sum + Number(val), 0);
+	}
+
+	// Check if profile is valid (sums to 100%)
+	function isProfileValid(profile: HeatingProfile): boolean {
+		return Math.abs(getProfileSum(profile) - 100) < 0.01;
+	}
+
+	// Get first valid profile for initial selection
+	const validHeatingProfiles = $derived(
+		heatingProfiles.filter((p) => isProfileValid(p))
+	);
+
 	// Wizard state
 	let currentStep = $state(1);
 	const totalSteps = 4;
@@ -28,13 +43,20 @@
 	// Step 1: Period
 	let periodStart = $state('');
 	let periodEnd = $state('');
-	let heatingProfileId = $state('hp-standard');
+	let heatingProfileId = $state('');
 
-	// Initialize period from props
+	// Initialize period and heating profile from props
 	$effect(() => {
 		if (data.defaultPeriod) {
 			periodStart = data.defaultPeriod.start;
 			periodEnd = data.defaultPeriod.end;
+		}
+	});
+
+	// Set initial heating profile to first valid one
+	$effect(() => {
+		if (validHeatingProfiles.length > 0 && !heatingProfileId) {
+			heatingProfileId = validHeatingProfiles[0].id;
 		}
 	});
 
@@ -253,7 +275,15 @@
 						class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 					>
 						{#each heatingProfiles as profile}
-							<option value={profile.id}>{profile.name}</option>
+							{@const sum = getProfileSum(profile)}
+							{@const valid = isProfileValid(profile)}
+							<option
+								value={profile.id}
+								disabled={!valid}
+								class={valid ? '' : 'text-gray-400'}
+							>
+								{profile.name} ({sum.toFixed(sum % 1 === 0 ? 0 : 1)}%){valid ? '' : ' - nicht wählbar'}
+							</option>
 						{/each}
 					</select>
 					{#if selectedHeatingProfile?.description}
