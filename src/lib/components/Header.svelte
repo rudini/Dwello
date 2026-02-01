@@ -1,8 +1,16 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { user, clearStores } from '$lib/stores';
+	import { clearStores } from '$lib/stores';
+	import type { User } from '$lib/stores';
+
+	let { user }: { user: User | null } = $props();
 
 	let showDropdown = $state(false);
+	let imageError = $state(false);
+
+	function handleImageError() {
+		imageError = true;
+	}
 
 	async function logout() {
 		try {
@@ -36,23 +44,29 @@
 			</div>
 
 			<!-- User Menu -->
-			{#if $user}
+			{#if user}
 				<div class="relative">
 					<button
 						type="button"
 						onclick={toggleDropdown}
 						class="flex items-center gap-2 text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
 					>
-						{#if $user.picture}
-							<img src={$user.picture} alt={$user.name} class="h-8 w-8 rounded-full" />
+						{#if user.picture && !imageError}
+							<img
+								src={user.picture}
+								alt={user.name}
+								class="h-8 w-8 rounded-full"
+								onerror={handleImageError}
+								referrerpolicy="no-referrer"
+							/>
 						{:else}
 							<div
 								class="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-medium"
 							>
-								{($user.name || $user.email || '?').charAt(0).toUpperCase()}
+								{(user.name || user.email || '?').charAt(0).toUpperCase()}
 							</div>
 						{/if}
-						<span class="hidden md:block text-gray-700">{$user.name || $user.email}</span>
+						<span class="hidden md:block text-gray-700">{user.name || user.email}</span>
 						<svg class="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
 							<path
 								fill-rule="evenodd"
@@ -78,8 +92,8 @@
 						>
 							<div class="py-1">
 								<div class="px-4 py-2 text-sm text-gray-700 border-b border-gray-100">
-									<p class="font-medium">{$user.name || 'User'}</p>
-									<p class="text-gray-500 truncate">{$user.email}</p>
+									<p class="font-medium">{user.name || 'User'}</p>
+									<p class="text-gray-500 truncate">{user.email}</p>
 								</div>
 								<a
 									href="/settings"

@@ -8,7 +8,7 @@ import { writable, derived, type Readable } from 'svelte/store';
  * User interface from JWT payload
  */
 export interface User {
-	id: string;
+	sub: string;
 	email: string;
 	name: string;
 	picture?: string;
@@ -81,11 +81,6 @@ export const user = writable<User | null>(null);
  * Derived store for authentication status
  */
 export const isAuthenticated: Readable<boolean> = derived(user, ($user) => $user !== null);
-
-/**
- * Loading state for authentication check
- */
-export const authLoading = writable<boolean>(true);
 
 /**
  * Buildings store
