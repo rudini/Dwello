@@ -6,6 +6,11 @@
 	import Icon from '$lib/components/Icon.svelte';
 	import Card from '$lib/components/Card.svelte';
 
+	function getGoogleMapsDirectionsUrl(address: string, city: string, postalCode: string): string {
+		const destination = encodeURIComponent(`${address}, ${postalCode} ${city}, Switzerland`);
+		return `https://www.google.com/maps/dir/?api=1&destination=${destination}`;
+	}
+
 	let { data }: { data: BuildingsListData } = $props();
 
 	let searchTerm = $state($page.url.searchParams.get('search') || '');
@@ -133,9 +138,12 @@
 	{:else}
 		<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 			{#each data.buildings as building}
-				<a
-					href="/buildings/{building.id}"
-					class="block bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-blue-300 transition-all duration-200"
+				<div
+					role="button"
+					tabindex="0"
+					onclick={() => goto(`/buildings/${building.id}`)}
+					onkeydown={(e) => e.key === 'Enter' && goto(`/buildings/${building.id}`)}
+					class="block bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-blue-300 transition-all duration-200 cursor-pointer"
 				>
 					<div class="p-5">
 						<!-- Building Name & Address -->
@@ -158,6 +166,16 @@
 							{#if building.canton}
 								<span class="ml-1 text-gray-400">({building.canton})</span>
 							{/if}
+							<a
+								href={getGoogleMapsDirectionsUrl(building.address, building.city, building.postalCode)}
+								target="_blank"
+								rel="noopener noreferrer"
+								class="ml-auto text-gray-400 hover:text-primary transition-colors"
+								title="Route in Google Maps öffnen"
+								onclick={(e) => e.stopPropagation()}
+							>
+								<Icon name="directions" size={18} />
+							</a>
 						</div>
 
 						<!-- Stats -->
@@ -197,7 +215,7 @@
 							</div>
 						{/if}
 					</div>
-				</a>
+				</div>
 			{/each}
 		</div>
 
