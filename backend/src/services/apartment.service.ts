@@ -24,6 +24,13 @@ export interface ApartmentFilters {
 
 export interface ApartmentWithDetails extends Apartment {
 	buildingName?: string;
+	building?: {
+		id: string;
+		name: string | null;
+		address: string | null;
+		postalCode: string | null;
+		city: string | null;
+	};
 	currentTenantName?: string;
 	currentContractId?: string;
 }
@@ -103,7 +110,10 @@ export async function getApartment(id: string): Promise<ApartmentWithDetails | n
 			status: apartments.status,
 			createdAt: apartments.createdAt,
 			updatedAt: apartments.updatedAt,
-			buildingName: buildings.name
+			buildingName: buildings.name,
+			buildingAddress: buildings.address,
+			buildingPostalCode: buildings.postalCode,
+			buildingCity: buildings.city
 		})
 		.from(apartments)
 		.leftJoin(buildings, eq(apartments.buildingId, buildings.id))
@@ -132,6 +142,13 @@ export async function getApartment(id: string): Promise<ApartmentWithDetails | n
 
 	return {
 		...apartment,
+		building: {
+			id: apartment.buildingId,
+			name: apartment.buildingName,
+			address: apartment.buildingAddress,
+			postalCode: apartment.buildingPostalCode,
+			city: apartment.buildingCity
+		},
 		currentTenantName: currentContract?.tenantName,
 		currentContractId: currentContract?.contractId
 	} as ApartmentWithDetails;

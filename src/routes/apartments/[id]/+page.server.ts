@@ -18,9 +18,10 @@ export const load = async ({ params, fetch }): Promise<ApartmentDetailsData> => 
 
 		const building = {
 			id: data.building?.id || data.buildingId,
-			address: data.building?.address || '',
-			postalCode: data.building?.postalCode || '',
-			city: data.building?.city || '',
+			name: data.building?.name || data.buildingName || '',
+			address: data.building?.address || data.buildingAddress || '',
+			postalCode: data.building?.postalCode || data.buildingPostalCode || '',
+			city: data.building?.city || data.buildingCity || '',
 			country: data.building?.country || 'CH'
 		};
 

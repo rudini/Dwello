@@ -9,31 +9,25 @@
 	}
 
 	let { apartment, building }: Props = $props();
-
-	const breadcrumbs = $derived([
-		{ label: building.address, href: '#' },
-		{ label: apartment.floor, href: '#' },
-		{ label: `Wohnung ${apartment.address_unit}`, href: '#' }
-	]);
 </script>
 
 <div class="mb-8">
-	<nav class="flex items-center gap-2 mb-4 text-sm text-slate-600">
-		{#each breadcrumbs as crumb, idx}
-			<a href={crumb.href} class="hover:text-primary transition-colors">{crumb.label}</a>
-			{#if idx < breadcrumbs.length - 1}
-				<span class="text-slate-400">/</span>
-			{/if}
-		{/each}
+	<!-- Breadcrumb -->
+	<nav class="flex items-center text-sm text-gray-500 mb-4">
+		<a href="/apartments" class="hover:text-blue-600 transition-colors">Wohnungen</a>
+		<Icon name="chevron_right" size={16} class="mx-2" />
+		<span class="text-gray-900 font-medium">{apartment.address_unit}</span>
 	</nav>
 
 	<div class="flex justify-between items-start">
 		<div>
 			<h1 class="text-4xl font-bold text-text-dark mb-2">Wohnung {apartment.address_unit}</h1>
+			{#if building.address || building.city}
 			<p class="text-sm text-text-secondary flex items-center gap-1">
 				<Icon name="location_on" size={16} />
-				{building.address}, {building.postalCode} {building.city}
+				{[building.address, [building.postalCode, building.city].filter(Boolean).join(' ')].filter(Boolean).join(', ')}
 			</p>
+		{/if}
 		</div>
 		<div class="flex gap-3">
 			<Button variant="secondary" href="/apartments/{apartment.id}/edit"><Icon name="edit" size={16} />Bearbeiten</Button>
