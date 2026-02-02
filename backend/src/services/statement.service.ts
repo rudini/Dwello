@@ -3,7 +3,7 @@
  * Business logic for utility statement operations
  */
 
-import { eq, sql, desc, and, gte, lte, ilike, or } from 'drizzle-orm';
+import { eq, sql, desc, and, gte, lte, lt, ilike, or } from 'drizzle-orm';
 import { db } from '../db/connection';
 import {
 	utilityStatements,
@@ -77,7 +77,29 @@ export async function listStatements(filters: StatementFilters = {}): Promise<{
 	}
 
 	if (status) {
-		conditions.push(eq(utilityStatements.status, status));
+		const today = new Date().toISOString().split('T')[0];
+		// Handle 'overdue' as a computed status (sent + past deadline)
+		if (status === 'overdue') {
+			conditions.push(
+				and(
+					eq(utilityStatements.status, 'sent'),
+					lt(utilityStatements.paymentDeadline, today)
+				)
+			);
+		} else if (status === 'sent') {
+			// 'sent' filter should exclude overdue (sent with past deadline)
+			conditions.push(
+				and(
+					eq(utilityStatements.status, 'sent'),
+					or(
+						gte(utilityStatements.paymentDeadline, today),
+						sql`${utilityStatements.paymentDeadline} IS NULL`
+					)
+				)
+			);
+		} else {
+			conditions.push(eq(utilityStatements.status, status));
+		}
 	}
 
 	if (periodStart) {
@@ -127,7 +149,8 @@ export async function listStatements(filters: StatementFilters = {}): Promise<{
 	const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 	const results = whereClause ? await query.where(whereClause) : await query;
 
-	// Get line items for each statement
+	// Get line items for each statement and compute effective status
+	const today = new Date().toISOString().split('T')[0];
 	const statementsWithLineItems: StatementWithDetails[] = await Promise.all(
 		results.map(async (row) => {
 			const lineItems = await db
@@ -136,8 +159,17 @@ export async function listStatements(filters: StatementFilters = {}): Promise<{
 				.where(eq(utilityStatementLineItems.statementId, row.statement.id))
 				.orderBy(utilityStatementLineItems.sortOrder);
 
+			// Compute effective status: if sent and past deadline, show as overdue
+			const effectiveStatus =
+				row.statement.status === 'sent' &&
+				row.statement.paymentDeadline &&
+				row.statement.paymentDeadline < today
+					? 'overdue'
+					: row.statement.status;
+
 			return {
 				...row.statement,
+				status: effectiveStatus,
 				tenant: row.tenant,
 				apartment: row.apartment,
 				building: row.building,
@@ -204,8 +236,18 @@ export async function getStatement(id: string): Promise<StatementWithDetails | n
 		.where(eq(utilityStatementLineItems.statementId, id))
 		.orderBy(utilityStatementLineItems.sortOrder);
 
+	// Compute effective status: if sent and past deadline, show as overdue
+	const today = new Date().toISOString().split('T')[0];
+	const effectiveStatus =
+		result.statement.status === 'sent' &&
+		result.statement.paymentDeadline &&
+		result.statement.paymentDeadline < today
+			? 'overdue'
+			: result.statement.status;
+
 	return {
 		...result.statement,
+		status: effectiveStatus,
 		tenant: result.tenant,
 		apartment: result.apartment,
 		building: result.building,
@@ -408,6 +450,8 @@ export async function statementExists(id: string): Promise<boolean> {
 
 /**
  * Get statement count by status for a building
+ * Note: overdue is calculated dynamically (status='sent' AND payment_deadline < today)
+ * Note: sent count excludes overdue statements
  */
 export async function getStatementCountsByStatus(buildingId?: string): Promise<{
 	draft: number;
@@ -416,6 +460,8 @@ export async function getStatementCountsByStatus(buildingId?: string): Promise<{
 	overdue: number;
 	total: number;
 }> {
+	const today = new Date().toISOString().split('T')[0];
+
 	const counts = {
 		draft: 0,
 		sent: 0,
@@ -424,34 +470,77 @@ export async function getStatementCountsByStatus(buildingId?: string): Promise<{
 		total: 0
 	};
 
-	let results: { status: string; count: number }[];
+	// Base condition for building filter
+	const buildingCondition = buildingId
+		? eq(apartments.buildingId, buildingId)
+		: undefined;
 
-	if (buildingId) {
-		results = await db
-			.select({
-				status: utilityStatements.status,
-				count: sql<number>`count(*)`
-			})
-			.from(utilityStatements)
-			.leftJoin(apartments, eq(utilityStatements.apartmentId, apartments.id))
-			.where(eq(apartments.buildingId, buildingId))
-			.groupBy(utilityStatements.status);
-	} else {
-		results = await db
-			.select({
-				status: utilityStatements.status,
-				count: sql<number>`count(*)`
-			})
-			.from(utilityStatements)
-			.groupBy(utilityStatements.status);
-	}
+	// Query for draft and paid (straightforward status counts)
+	const baseQuery = buildingId
+		? db.select({ status: utilityStatements.status, count: sql<number>`count(*)` })
+				.from(utilityStatements)
+				.leftJoin(apartments, eq(utilityStatements.apartmentId, apartments.id))
+				.where(buildingCondition)
+				.groupBy(utilityStatements.status)
+		: db.select({ status: utilityStatements.status, count: sql<number>`count(*)` })
+				.from(utilityStatements)
+				.groupBy(utilityStatements.status);
+
+	const results = await baseQuery;
 
 	for (const row of results) {
-		if (row.status in counts) {
-			counts[row.status as keyof typeof counts] = Number(row.count);
+		if (row.status === 'draft' || row.status === 'paid') {
+			counts[row.status] = Number(row.count);
 		}
 		counts.total += Number(row.count);
 	}
+
+	// Calculate overdue count (sent statements past payment deadline)
+	const overdueConditions = [
+		eq(utilityStatements.status, 'sent'),
+		lt(utilityStatements.paymentDeadline, today)
+	];
+	if (buildingCondition) overdueConditions.push(buildingCondition);
+
+	const overdueQuery = buildingId
+		? db.select({ count: sql<number>`count(*)` })
+				.from(utilityStatements)
+				.leftJoin(apartments, eq(utilityStatements.apartmentId, apartments.id))
+				.where(and(...overdueConditions))
+		: db.select({ count: sql<number>`count(*)` })
+				.from(utilityStatements)
+				.where(and(eq(utilityStatements.status, 'sent'), lt(utilityStatements.paymentDeadline, today)));
+
+	const [overdueResult] = await overdueQuery;
+	counts.overdue = Number(overdueResult?.count ?? 0);
+
+	// Calculate sent count (sent statements NOT past deadline)
+	const sentConditions = [
+		eq(utilityStatements.status, 'sent'),
+		or(
+			gte(utilityStatements.paymentDeadline, today),
+			sql`${utilityStatements.paymentDeadline} IS NULL`
+		)
+	];
+	if (buildingCondition) sentConditions.push(buildingCondition);
+
+	const sentQuery = buildingId
+		? db.select({ count: sql<number>`count(*)` })
+				.from(utilityStatements)
+				.leftJoin(apartments, eq(utilityStatements.apartmentId, apartments.id))
+				.where(and(...sentConditions))
+		: db.select({ count: sql<number>`count(*)` })
+				.from(utilityStatements)
+				.where(and(
+					eq(utilityStatements.status, 'sent'),
+					or(
+						gte(utilityStatements.paymentDeadline, today),
+						sql`${utilityStatements.paymentDeadline} IS NULL`
+					)
+				));
+
+	const [sentResult] = await sentQuery;
+	counts.sent = Number(sentResult?.count ?? 0);
 
 	return counts;
 }

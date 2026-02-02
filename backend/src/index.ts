@@ -8,7 +8,7 @@ import { cors } from '@elysiajs/cors';
 import { swagger } from '@elysiajs/swagger';
 import { db, testConnection } from './db/connection';
 import { buildings, apartments, utilityStatements, invoices } from './db/schema';
-import { count, eq, lt, and, sum, desc, gte } from 'drizzle-orm';
+import { count, eq, lt, and, sum, desc, gte, or, sql } from 'drizzle-orm';
 import { buildingRoutes } from './routes/buildings';
 import { apartmentRoutes } from './routes/apartments';
 import { tenantRoutes } from './routes/tenants';
@@ -93,10 +93,19 @@ const app = new Elysia()
 			.select({ count: count() })
 			.from(utilityStatements)
 			.where(eq(utilityStatements.status, 'draft'));
+		// Sent count excludes overdue (sent with past deadline)
 		const [sentCount] = await db
 			.select({ count: count() })
 			.from(utilityStatements)
-			.where(eq(utilityStatements.status, 'sent'));
+			.where(
+				and(
+					eq(utilityStatements.status, 'sent'),
+					or(
+						gte(utilityStatements.paymentDeadline, today),
+						sql`${utilityStatements.paymentDeadline} IS NULL`
+					)
+				)
+			);
 		const [paidCount] = await db
 			.select({ count: count() })
 			.from(utilityStatements)
