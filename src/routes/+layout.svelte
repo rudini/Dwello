@@ -46,7 +46,7 @@
 								'X-XSRF-TOKEN':
 									document.cookie
 										.split(';')
-										.find((c) => c.trim().startsWith('xsrf-token='))
+										.find((c) => c.trim().startsWith('dwello_xsrf='))
 										?.split('=')[1] || ''
 							}
 						});

@@ -35,26 +35,26 @@ describe('Client API Helper', () => {
 	});
 
 	describe('getXsrfTokenFromCookie', () => {
-		it('should return null when no xsrf-token cookie exists', () => {
+		it('should return null when no dwello_xsrf cookie exists', () => {
 			document.cookie = 'other-cookie=value';
 			const token = getXsrfTokenFromCookie();
 			expect(token).toBeNull();
 		});
 
-		it('should extract xsrf-token from cookies', () => {
-			document.cookie = 'xsrf-token=test-token-123';
+		it('should extract dwello_xsrf from cookies', () => {
+			document.cookie = 'dwello_xsrf=test-token-123';
 			const token = getXsrfTokenFromCookie();
 			expect(token).toBe('test-token-123');
 		});
 
 		it('should handle URL-encoded token values', () => {
-			document.cookie = 'xsrf-token=' + encodeURIComponent('token=with=equals');
+			document.cookie = 'dwello_xsrf=' + encodeURIComponent('token=with=equals');
 			const token = getXsrfTokenFromCookie();
 			expect(token).toBe('token=with=equals');
 		});
 
 		it('should handle multiple cookies', () => {
-			document.cookie = 'session=abc; xsrf-token=my-token; other=xyz';
+			document.cookie = 'session=abc; dwello_xsrf=my-token; other=xyz';
 			const token = getXsrfTokenFromCookie();
 			expect(token).toBe('my-token');
 		});
@@ -95,7 +95,7 @@ describe('Client API Helper', () => {
 		});
 
 		it('should include XSRF token for POST requests', async () => {
-			document.cookie = 'xsrf-token=csrf-token-123';
+			document.cookie = 'dwello_xsrf=csrf-token-123';
 			fetchSpy.mockResolvedValue({
 				ok: true,
 				status: 201,
@@ -120,7 +120,7 @@ describe('Client API Helper', () => {
 		});
 
 		it('should include XSRF token for PUT requests', async () => {
-			document.cookie = 'xsrf-token=csrf-token-456';
+			document.cookie = 'dwello_xsrf=csrf-token-456';
 			fetchSpy.mockResolvedValue({
 				ok: true,
 				status: 200,
@@ -144,7 +144,7 @@ describe('Client API Helper', () => {
 		});
 
 		it('should include XSRF token for DELETE requests', async () => {
-			document.cookie = 'xsrf-token=csrf-token-789';
+			document.cookie = 'dwello_xsrf=csrf-token-789';
 			fetchSpy.mockResolvedValue({
 				ok: true,
 				status: 204,
@@ -165,7 +165,7 @@ describe('Client API Helper', () => {
 		});
 
 		it('should NOT include XSRF token for GET requests', async () => {
-			document.cookie = 'xsrf-token=csrf-token';
+			document.cookie = 'dwello_xsrf=csrf-token';
 			fetchSpy.mockResolvedValue({
 				ok: true,
 				status: 200,
