@@ -1,0 +1,8 @@
+[test]
+# Coverage configuration
+coverage = true
+coverageDir = "coverage"
+coverageReporter = ["text", "lcov"]
+
+# Skip coverage for test files and external dependencies
+coverageSkipTestFiles = true
