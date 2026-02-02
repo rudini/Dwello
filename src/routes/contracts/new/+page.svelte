@@ -84,6 +84,7 @@
 		isSubmitting = true;
 
 		try {
+			// Backend expects string values for decimal fields
 			const response = await apiCall('/contracts', {
 				method: 'POST',
 				body: {
@@ -91,9 +92,9 @@
 					apartmentId: apartmentId,
 					startDate: startDate,
 					endDate: isUnlimited ? null : endDate,
-					baseRent: baseRent,
-					additionalRent: additionalRent || '0',
-					monthlyAdvancePayment: advancePayment || '0'
+					baseRent: String(baseRent),
+					additionalRent: String(additionalRent || 0),
+					monthlyAdvancePayment: String(advancePayment || 0)
 				}
 			});
 

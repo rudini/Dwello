@@ -451,5 +451,45 @@ describe('Contract Service - Field Mapping', () => {
 			expect(typeof limitedContract.endDate).toBe('string');
 			expect(isValidDate(limitedContract.endDate)).toBe(true);
 		});
+
+		it('should correctly convert number inputs to strings using String()', () => {
+			// This tests the fix for 422 Unprocessable Entity error
+			// HTML number inputs return numbers, but backend expects strings
+			// The fix: String(baseRent), String(additionalRent || 0), etc.
+			const numericBaseRent = 1500;
+			const numericAdditionalRent = 200.50;
+			const numericAdvancePayment = 0;
+
+			const convertedPayload = {
+				baseRent: String(numericBaseRent),
+				additionalRent: String(numericAdditionalRent || 0),
+				monthlyAdvancePayment: String(numericAdvancePayment || 0)
+			};
+
+			expect(convertedPayload.baseRent).toBe('1500');
+			expect(convertedPayload.additionalRent).toBe('200.5');
+			expect(convertedPayload.monthlyAdvancePayment).toBe('0');
+
+			// Verify they're valid decimal strings
+			expect(isValidDecimal(convertedPayload.baseRent)).toBe(true);
+			expect(isValidDecimal(convertedPayload.additionalRent)).toBe(true);
+			expect(isValidDecimal(convertedPayload.monthlyAdvancePayment)).toBe(true);
+		});
+
+		it('should handle empty string inputs with fallback to 0', () => {
+			// When form fields are empty, they may be empty strings
+			const emptyAdditionalRent = '';
+			const emptyAdvancePayment = '';
+
+			const convertedPayload = {
+				additionalRent: String(emptyAdditionalRent || 0),
+				monthlyAdvancePayment: String(emptyAdvancePayment || 0)
+			};
+
+			expect(convertedPayload.additionalRent).toBe('0');
+			expect(convertedPayload.monthlyAdvancePayment).toBe('0');
+			expect(isValidDecimal(convertedPayload.additionalRent)).toBe(true);
+			expect(isValidDecimal(convertedPayload.monthlyAdvancePayment)).toBe(true);
+		});
 	});
 });

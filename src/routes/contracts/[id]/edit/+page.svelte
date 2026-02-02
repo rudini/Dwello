@@ -3,6 +3,7 @@
 	import Button from '$lib/components/Button.svelte';
 	import Icon from '$lib/components/Icon.svelte';
 	import Card from '$lib/components/Card.svelte';
+	import { apiCall } from '$lib/api';
 	import type { RentalContract } from '$lib/types';
 
 	interface PageData {
@@ -84,27 +85,30 @@
 		isSubmitting = true;
 
 		try {
-			// In production, call the API
-			// const response = await fetch(`/api/contracts/${data.contract.id}`, {
-			// 	method: 'PUT',
-			// 	headers: { 'Content-Type': 'application/json' },
-			// 	body: JSON.stringify({
-			// 		tenant_id: tenantId,
-			// 		apartment_id: apartmentId,
-			// 		start_date: startDate,
-			// 		end_date: isUnlimited ? null : endDate,
-			// 		base_rent_chf: parseFloat(baseRent),
-			// 		additional_rent_chf: parseFloat(additionalRent) || 0,
-			// 		advance_payment_chf: parseFloat(advancePayment) || 0
-			// 	})
-			// });
+			// Backend expects string values for decimal fields
+			const response = await apiCall(`/contracts/${data.contract.id}`, {
+				method: 'PUT',
+				body: {
+					tenantId: tenantId,
+					apartmentId: apartmentId,
+					startDate: startDate,
+					endDate: isUnlimited ? null : endDate,
+					baseRent: String(baseRent),
+					additionalRent: String(additionalRent || 0),
+					monthlyAdvancePayment: String(advancePayment || 0)
+				}
+			});
 
-			// Mock success
-			await new Promise((r) => setTimeout(r, 500));
+			if (response.error) {
+				errors = { form: response.error.message || 'Ein Fehler ist aufgetreten' };
+				return;
+			}
+
 			await goto(`/contracts/${data.contract.id}`);
 		} catch (error) {
 			console.error('Error updating contract:', error);
-			errors = { form: 'Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.' };
+			const message = error instanceof Error ? error.message : 'Ein Fehler ist aufgetreten';
+			errors = { form: message };
 		} finally {
 			isSubmitting = false;
 		}
