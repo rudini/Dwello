@@ -239,4 +239,139 @@ describe('Formula Service', () => {
 			expect(FORMULA_VARIABLES).toHaveLength(4);
 		});
 	});
+
+	describe('parseFormula - edge cases', () => {
+		it('should detect unexpected closing parenthesis', () => {
+			const result = parseFormula('{area}) + {rooms}');
+			expect(result.isValid).toBe(false);
+			expect(result.errors.some(e => e.includes('unexpected closing'))).toBe(true);
+		});
+
+		it('should warn about division by zero', () => {
+			const result = parseFormula('{area} / 0');
+			expect(result.errors.some(e => e.includes('division by zero'))).toBe(true);
+		});
+
+		it('should not warn about division by 0.5', () => {
+			const result = parseFormula('{area} / 0.5');
+			expect(result.errors.some(e => e.includes('division by zero'))).toBe(false);
+		});
+
+		it('should handle whitespace-only formula', () => {
+			const result = parseFormula('   ');
+			expect(result.isValid).toBe(false);
+		});
+
+		it('should handle formula with only operators', () => {
+			const result = parseFormula('+ - * /');
+			expect(result.isValid).toBe(false);
+		});
+	});
+
+	describe('evaluateFormula - edge cases', () => {
+		it('should handle division resulting in Infinity', () => {
+			const result = evaluateFormula('{area} / ({rooms} - {rooms})', { area: 100, rooms: 3 });
+			expect(result.isValid).toBe(false);
+			expect(result.error).toContain('invalid number');
+		});
+
+		it('should handle very large numbers', () => {
+			const result = evaluateFormula('{area} * {area} * {area}', { area: 1000000, rooms: 1 });
+			expect(result.isValid).toBe(true);
+			expect(result.value).toBe(1e18);
+		});
+
+		it('should handle zero values', () => {
+			const result = evaluateFormula('{area} * {rooms}', { area: 0, rooms: 0 });
+			expect(result.isValid).toBe(true);
+			expect(result.value).toBe(0);
+		});
+
+		it('should handle negative intermediate results', () => {
+			const result = evaluateFormula('{area} - 100', { area: 50, rooms: 1 });
+			expect(result.isValid).toBe(true);
+			expect(result.value).toBe(-50);
+		});
+
+		it('should return error for invalid formula syntax', () => {
+			const result = evaluateFormula('{area} +* {rooms}', { area: 80, rooms: 3 });
+			expect(result.isValid).toBe(false);
+		});
+
+		it('should handle complex nested parentheses', () => {
+			const result = evaluateFormula('(({area} + {rooms}) * 2) / 4', { area: 80, rooms: 4 });
+			expect(result.isValid).toBe(true);
+			expect(result.value).toBe(42);
+		});
+
+		it('should use units value when provided', () => {
+			const result = evaluateFormula('{units}', { area: 80, rooms: 3, units: 1 });
+			expect(result.isValid).toBe(true);
+			expect(result.value).toBe(1);
+		});
+
+		it('should use volume value when provided', () => {
+			const result = evaluateFormula('{volume}', { area: 100, rooms: 3, volume: 250 });
+			expect(result.isValid).toBe(true);
+			expect(result.value).toBe(250);
+		});
+	});
+
+	describe('calculateDistribution - edge cases', () => {
+		it('should handle single apartment', () => {
+			const result = calculateDistribution('{area}', [{ area: 100, rooms: 3 }], 1000);
+			expect(result.isValid).toBe(true);
+			expect(result.distributions[0].share).toBe(1);
+			expect(result.distributions[0].amount).toBe(1000);
+		});
+
+		it('should handle many apartments', () => {
+			const apartments = Array(10).fill(null).map((_, i) => ({ area: 50 + i * 10, rooms: 2 + i * 0.5 }));
+			const result = calculateDistribution('{area}', apartments, 10000);
+			expect(result.isValid).toBe(true);
+			expect(result.distributions).toHaveLength(10);
+			const totalAmount = result.distributions.reduce((sum, d) => sum + d.amount, 0);
+			expect(totalAmount).toBeCloseTo(10000, 1);
+		});
+
+		it('should fail for formula with negative result', () => {
+			const result = calculateDistribution('{area} - 200', [{ area: 100, rooms: 3 }], 1000);
+			expect(result.isValid).toBe(false);
+			expect(result.error).toContain('negative');
+		});
+
+		it('should handle decimal shares correctly', () => {
+			const apartments = [
+				{ area: 33.33, rooms: 2 },
+				{ area: 33.33, rooms: 2 },
+				{ area: 33.34, rooms: 2 }
+			];
+			const result = calculateDistribution('{area}', apartments, 1000);
+			expect(result.isValid).toBe(true);
+			const totalShare = result.distributions.reduce((sum, d) => sum + d.share, 0);
+			expect(totalShare).toBeCloseTo(1, 4);
+		});
+	});
+
+	describe('validateFormulaForDistribution - edge cases', () => {
+		it('should validate units formula', () => {
+			const result = validateFormulaForDistribution('{units}');
+			expect(result.isValid).toBe(true);
+		});
+
+		it('should validate volume formula', () => {
+			const result = validateFormulaForDistribution('{volume}');
+			expect(result.isValid).toBe(true);
+		});
+
+		it('should validate complex mixed formula', () => {
+			const result = validateFormulaForDistribution('({area} * 0.5) + ({rooms} * 20) + ({units} * 10)');
+			expect(result.isValid).toBe(true);
+		});
+
+		it('should reject formula with syntax error', () => {
+			const result = validateFormulaForDistribution('{area} ++ {rooms}');
+			expect(result.isValid).toBe(false);
+		});
+	});
 });
