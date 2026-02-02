@@ -4,30 +4,22 @@
 	import Button from '$lib/components/Button.svelte';
 	import Icon from '$lib/components/Icon.svelte';
 	import Card from '$lib/components/Card.svelte';
+	import { apiCall } from '$lib/api';
+
+	// Get data from server
+	interface PageData {
+		tenants: { id: string; name: string }[];
+		apartments: { id: string; unit: string; building: string; status: string }[];
+	}
+	let { data }: { data: PageData } = $props();
 
 	// Get pre-filled tenant or apartment from URL
 	const prefilledTenant = $page.url.searchParams.get('tenant') || '';
 	const prefilledApartment = $page.url.searchParams.get('apartment') || '';
 
-	// Mock data for dropdowns
-	const tenants = [
-		{ id: 'tenant-001', name: 'Hans Müller' },
-		{ id: 'tenant-002', name: 'Maria Schmidt' },
-		{ id: 'tenant-003', name: 'Peter Weber' },
-		{ id: 'tenant-004', name: 'Anna Keller' },
-		{ id: 'tenant-005', name: 'Thomas Brunner' },
-		{ id: 'tenant-006', name: 'Sarah Fischer' },
-		{ id: 'tenant-007', name: 'Kevin Meier' }
-	];
-
-	const apartments = [
-		{ id: 'apt-001', unit: '2.04', building: 'Musterhaus Zentrum', status: 'Vermietet' },
-		{ id: 'apt-002', unit: '1.02', building: 'Musterhaus Zentrum', status: 'Vermietet' },
-		{ id: 'apt-003', unit: '0.01', building: 'Musterhaus Zentrum', status: 'Leer' },
-		{ id: 'apt-004', unit: '3.01', building: 'Seepark Residenz', status: 'Vermietet' },
-		{ id: 'apt-005', unit: '2.02', building: 'Seepark Residenz', status: 'Vermietet' },
-		{ id: 'apt-006', unit: '1.01', building: 'Seepark Residenz', status: 'Leer' }
-	];
+	// Use data from server
+	const tenants = $derived(data.tenants || []);
+	const apartments = $derived(data.apartments || []);
 
 	// Form state
 	let tenantId = $state(prefilledTenant);
@@ -80,12 +72,6 @@
 			newErrors.advancePayment = 'Bitte geben Sie einen gültigen Betrag ein';
 		}
 
-		// Check if apartment is available
-		const selectedApartment = apartments.find((a) => a.id === apartmentId);
-		if (selectedApartment && selectedApartment.status === 'Vermietet') {
-			newErrors.apartmentId = 'Diese Wohnung ist bereits vermietet';
-		}
-
 		errors = newErrors;
 		return Object.keys(newErrors).length === 0;
 	}
@@ -98,27 +84,29 @@
 		isSubmitting = true;
 
 		try {
-			// In production, call the API
-			// const response = await fetch('/api/contracts', {
-			// 	method: 'POST',
-			// 	headers: { 'Content-Type': 'application/json' },
-			// 	body: JSON.stringify({
-			// 		tenant_id: tenantId,
-			// 		apartment_id: apartmentId,
-			// 		start_date: startDate,
-			// 		end_date: isUnlimited ? null : endDate,
-			// 		base_rent_chf: parseFloat(baseRent),
-			// 		additional_rent_chf: parseFloat(additionalRent) || 0,
-			// 		advance_payment_chf: parseFloat(advancePayment) || 0
-			// 	})
-			// });
+			const response = await apiCall('/contracts', {
+				method: 'POST',
+				body: {
+					tenantId: tenantId,
+					apartmentId: apartmentId,
+					startDate: startDate,
+					endDate: isUnlimited ? null : endDate,
+					baseRent: baseRent,
+					additionalRent: additionalRent || '0',
+					monthlyAdvancePayment: advancePayment || '0'
+				}
+			});
 
-			// Mock success
-			await new Promise((r) => setTimeout(r, 500));
+			if (response.error) {
+				errors = { form: response.error.message || 'Ein Fehler ist aufgetreten' };
+				return;
+			}
+
 			await goto('/contracts');
 		} catch (error) {
 			console.error('Error creating contract:', error);
-			errors = { form: 'Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.' };
+			const message = error instanceof Error ? error.message : 'Ein Fehler ist aufgetreten';
+			errors = { form: message };
 		} finally {
 			isSubmitting = false;
 		}
