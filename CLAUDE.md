@@ -338,6 +338,10 @@ Do NOT mark complete unless:
 - ✅ No TypeScript errors (`npm run type-check`)
 - ✅ No ESLint warnings (`npm run lint`)
 
+## Unit Tests Required for Every Fix
+
+**STRICT RULE:** Every bug fix MUST include unit tests that verify the fix and prevent regression. Write tests in `backend/src/__tests__/` for backend fixes and `src/__tests__/` for frontend fixes.
+
 ## Session Workflow
 
 **Start:** Read `implementation_plan.md` → Find next `- [ ]` item → Review requirements → Reference docs (PRD, tech-stack, api-specification)
