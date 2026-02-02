@@ -3075,7 +3075,9 @@ Validation is defined inline in route handlers for type safety.
   - [ ] Edit contract dates (1)
   - [ ] Delete contract (1)
   - [ ] View contract with PDF (1)
-  - [ ] Contract overlap prevention (1)
+  - [x] Contract overlap prevention (1)
+    **Note:** Implemented client-side availability checking when apartment is selected. Shows availability info (green/blue/red boxes), sets min date on start date input, disables form when blocked. Files: `src/lib/utils/contract-availability.ts` (NEW), `src/lib/utils/__tests__/contract-availability.test.ts` (NEW - 14 tests), `src/routes/contracts/new/+page.svelte`, `src/routes/contracts/[id]/edit/+page.svelte`
+    **Status:** ✅ Verified - all 170 tests pass
 
 - [ ] Invoice Management
   - [ ] Create invoice (1)

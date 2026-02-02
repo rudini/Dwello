@@ -5,6 +5,12 @@
 	import Card from '$lib/components/Card.svelte';
 	import { apiCall } from '$lib/api';
 	import type { RentalContract } from '$lib/types';
+	import {
+		computeAvailability,
+		checkDateRangeOverlap,
+		type AvailabilityInfo,
+		type ContractForAvailability
+	} from '$lib/utils/contract-availability';
 
 	interface PageData {
 		contract: RentalContract;
@@ -34,6 +40,86 @@
 
 	let isSubmitting = $state(false);
 	let errors = $state<Record<string, string>>({});
+
+	// Availability state - now per apartment
+	let isLoadingAvailability = $state(true);
+	let apartmentAvailability = $state<Map<string, AvailabilityInfo>>(new Map());
+	let apartmentContracts = $state<ContractForAvailability[]>([]);
+
+	// The ID of the current contract being edited (to exclude from overlap checks)
+	// Using function to capture initial value (intentional for edit form)
+	const currentContractId = (() => data.contract.id)();
+	const originalApartmentId = (() => data.contract.apartment_id)();
+
+	// Selected apartment's availability
+	const selectedAvailability = $derived(apartmentId ? apartmentAvailability.get(apartmentId) : null);
+
+	// Fetch availability for all apartments on mount
+	$effect(() => {
+		fetchAllApartmentAvailability();
+	});
+
+	// Update contracts when apartment changes (for overlap checking)
+	$effect(() => {
+		if (apartmentId) {
+			fetchApartmentContracts(apartmentId);
+		} else {
+			apartmentContracts = [];
+		}
+	});
+
+	// Check for date range overlap (excluding current contract)
+	const overlapWarning = $derived.by(() => {
+		if (!startDate || apartmentContracts.length === 0) return null;
+		const result = checkDateRangeOverlap(
+			startDate,
+			isUnlimited ? null : endDate || null,
+			apartmentContracts,
+			currentContractId
+		);
+		return result.hasOverlap ? result.message : null;
+	});
+
+	async function fetchAllApartmentAvailability() {
+		isLoadingAvailability = true;
+		const availabilityMap = new Map<string, AvailabilityInfo>();
+
+		try {
+			// Fetch contracts for all apartments in parallel
+			const apartmentList = data.apartments || [];
+			const promises = apartmentList.map(async (apt) => {
+				const response = await apiCall<{ contracts: ContractForAvailability[] }>(
+					`/contracts?apartmentId=${apt.id}`
+				);
+				const contracts = response.data?.contracts || [];
+				// For the original apartment, exclude current contract from availability check
+				const excludeId = apt.id === originalApartmentId ? currentContractId : undefined;
+				return { id: apt.id, availability: computeAvailability(contracts, excludeId) };
+			});
+
+			const results = await Promise.all(promises);
+			for (const result of results) {
+				availabilityMap.set(result.id, result.availability);
+			}
+		} catch (error) {
+			console.error('Error fetching apartment availability:', error);
+		} finally {
+			apartmentAvailability = availabilityMap;
+			isLoadingAvailability = false;
+		}
+	}
+
+	async function fetchApartmentContracts(aptId: string) {
+		try {
+			const response = await apiCall<{ contracts: ContractForAvailability[] }>(
+				`/contracts?apartmentId=${aptId}`
+			);
+			apartmentContracts = response.data?.contracts || [];
+		} catch (error) {
+			console.error('Error fetching apartment contracts:', error);
+			apartmentContracts = [];
+		}
+	}
 
 	// Derived total
 	const totalRent = $derived.by(() => {
@@ -197,26 +283,57 @@
 				<label for="apartment" class="block text-sm font-medium text-gray-700 mb-1">
 					Wohnung <span class="text-red-500">*</span>
 				</label>
-				<select
-					id="apartment"
-					bind:value={apartmentId}
-					class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary bg-white {errors.apartmentId
-						? 'border-red-500'
-						: 'border-gray-300'}"
-				>
-					<option value="">Wohnung auswählen...</option>
-					{#each data.apartments as apt}
-						<option
-							value={apt.id}
-							disabled={apt.status === 'Vermietet' && apt.id !== data.contract.apartment_id}
-						>
-							Wohnung {apt.unit} - {apt.building}
-							{#if apt.id === data.contract.apartment_id}(aktuell){/if}
-						</option>
-					{/each}
-				</select>
+				{#if isLoadingAvailability}
+					<div class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 flex items-center gap-2 text-gray-500">
+						<span class="animate-spin">
+							<Icon name="refresh" size={16} />
+						</span>
+						Verfügbarkeit wird geprüft...
+					</div>
+				{:else}
+					<select
+						id="apartment"
+						bind:value={apartmentId}
+						data-testid="apartment-select"
+						class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary bg-white {errors.apartmentId
+							? 'border-red-500'
+							: 'border-gray-300'}"
+					>
+						<option value="">Wohnung auswählen...</option>
+						{#each data.apartments as apt}
+							{@const aptAvailability = apartmentAvailability.get(apt.id)}
+							{@const isCurrentApartment = apt.id === originalApartmentId}
+							<option
+								value={apt.id}
+								disabled={!isCurrentApartment && aptAvailability?.hasOngoingContract}
+							>
+								Wohnung {apt.unit} - {apt.building}
+								{#if isCurrentApartment}
+									(aktuell)
+								{:else if aptAvailability?.hasOngoingContract}
+									(nicht verfügbar)
+								{:else if aptAvailability?.availableFrom}
+									(verfügbar ab {aptAvailability.availableFrom})
+								{/if}
+							</option>
+						{/each}
+					</select>
+				{/if}
 				{#if errors.apartmentId}
 					<p class="mt-1 text-sm text-red-600">{errors.apartmentId}</p>
+				{/if}
+
+				<!-- Availability Info for "available from" case when changing apartment -->
+				{#if apartmentId !== originalApartmentId && selectedAvailability?.statusType === 'available-from'}
+					<div
+						class="mt-2 p-3 rounded-lg flex items-start gap-2 bg-blue-50 border border-blue-200"
+						data-testid="availability-info"
+					>
+						<Icon name="info" size={18} class="text-blue-600" />
+						<span class="text-sm text-blue-700">
+							{selectedAvailability.message}
+						</span>
+					</div>
 				{/if}
 			</div>
 
@@ -233,6 +350,8 @@
 							id="startDate"
 							type="date"
 							bind:value={startDate}
+							min={apartmentId !== originalApartmentId ? selectedAvailability?.availableFrom || undefined : undefined}
+							data-testid="start-date-input"
 							class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary {errors.startDate
 								? 'border-red-500'
 								: 'border-gray-300'}"
@@ -268,6 +387,17 @@
 					/>
 					<span class="text-sm text-gray-700">Unbefristeter Vertrag</span>
 				</label>
+
+				<!-- Overlap Warning -->
+				{#if overlapWarning}
+					<div
+						class="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg flex items-start gap-2"
+						data-testid="overlap-warning"
+					>
+						<Icon name="warning" size={18} class="text-amber-600 mt-0.5" />
+						<span class="text-sm text-amber-700">{overlapWarning}</span>
+					</div>
+				{/if}
 			</div>
 
 			<!-- Rent -->
@@ -359,7 +489,12 @@
 			<!-- Actions -->
 			<div class="flex gap-3 pt-4 border-t border-gray-200">
 				<Button href="/contracts/{data.contract.id}" variant="secondary">Abbrechen</Button>
-				<Button type="submit" variant="primary" disabled={isSubmitting}>
+				<Button
+					type="submit"
+					variant="primary"
+					disabled={isSubmitting}
+					data-testid="submit-button"
+				>
 					{#if isSubmitting}
 						<span class="animate-spin">
 							<Icon name="refresh" size={18} />
