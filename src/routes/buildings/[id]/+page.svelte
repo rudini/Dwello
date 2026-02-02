@@ -69,16 +69,10 @@
 	<div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
 		<div>
 			<h1 class="text-2xl font-bold text-gray-900">{building.name || building.address}</h1>
-			{#if building.name}
-				<p class="text-lg text-gray-600 mt-1">{building.address}</p>
-			{/if}
-			<div class="flex items-center gap-2 mt-2 text-gray-500">
-				<Icon name="location_on" size={18} />
-				<span>
-					{building.postalCode} {building.city}
-					{#if building.canton}({building.canton}){/if}
-				</span>
-			</div>
+			<p class="text-sm text-gray-500 flex items-center gap-1 mt-2">
+				<Icon name="location_on" size={16} />
+				{[building.address, [building.postalCode, building.city].filter(Boolean).join(' ')].filter(Boolean).join(', ')}{#if building.canton} ({building.canton}){/if}
+			</p>
 		</div>
 		<div class="flex gap-2">
 			<Button href="/buildings/{building.id}/edit" variant="secondary">
