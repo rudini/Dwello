@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { StatementWithDetails, StatementStatus } from '$lib/types';
+	import { addToast } from '$lib/stores';
 	import Button from '$lib/components/Button.svelte';
 	import Icon from '$lib/components/Icon.svelte';
 	import Card from '$lib/components/Card.svelte';
@@ -110,14 +111,15 @@
 			});
 			if (response.ok) {
 				pdfGeneratedAt = new Date().toISOString();
+				addToast('success', 'PDF wurde erfolgreich generiert');
 			} else {
 				const error = await response.json();
 				console.error('PDF generation failed:', error);
-				alert('PDF-Generierung fehlgeschlagen: ' + (error.error || 'Unbekannter Fehler'));
+				addToast('error', 'PDF-Generierung fehlgeschlagen: ' + (error.error || 'Unbekannter Fehler'));
 			}
 		} catch (error) {
 			console.error('PDF generation error:', error);
-			alert('PDF-Generierung fehlgeschlagen');
+			addToast('error', 'PDF-Generierung fehlgeschlagen');
 		} finally {
 			isGeneratingPdf = false;
 		}

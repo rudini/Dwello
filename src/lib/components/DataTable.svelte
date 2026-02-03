@@ -58,6 +58,16 @@
 		if (sortKey !== column.key) return 'unfold_more';
 		return sortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward';
 	}
+
+	function getSortLabel(column: Column): string {
+		if (sortKey !== column.key) {
+			return `${column.label} sortieren`;
+		}
+		if (sortDirection === 'asc') {
+			return `${column.label} absteigend sortieren`;
+		}
+		return `${column.label} Sortierung aufheben`;
+	}
 </script>
 
 <div class="overflow-x-auto {className}">
@@ -72,10 +82,11 @@
 							<button
 								type="button"
 								onclick={() => handleSort(column)}
-								class="inline-flex items-center gap-1 hover:text-gray-700 transition-colors"
+								class="inline-flex items-center gap-1 hover:text-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
+								aria-label={getSortLabel(column)}
 							>
 								{column.label}
-								<Icon name={getSortIcon(column)} size={16} class="text-gray-400" />
+								<Icon name={getSortIcon(column)} size={16} class="text-gray-400" aria-hidden="true" />
 							</button>
 						{:else}
 							{column.label}

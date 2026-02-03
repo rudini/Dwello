@@ -31,6 +31,10 @@
 		oninput
 	}: Props = $props();
 
+	const errorId = $derived(error ? `${id}-error` : undefined);
+	const hintId = $derived(hint && !error ? `${id}-hint` : undefined);
+	const describedBy = $derived([errorId, hintId].filter(Boolean).join(' ') || undefined);
+
 	function handleInput(e: Event) {
 		const target = e.target as HTMLTextAreaElement;
 		value = target.value;
@@ -55,9 +59,9 @@
 	<label for={id} class="block text-sm font-medium text-gray-700">
 		{label}
 		{#if required}
-			<span class="text-red-500">*</span>
+			<span class="text-red-500" aria-hidden="true">*</span>
 		{:else if hint}
-			<span class="text-gray-400 font-normal">({hint})</span>
+			<span id={hintId} class="text-gray-400 font-normal">({hint})</span>
 		{/if}
 	</label>
 
@@ -68,6 +72,9 @@
 		{disabled}
 		{rows}
 		{maxlength}
+		aria-invalid={error ? 'true' : undefined}
+		aria-describedby={describedBy}
+		aria-required={required}
 		oninput={handleInput}
 		onchange={handleChange}
 		class={textareaClasses}
@@ -75,13 +82,13 @@
 
 	<div class="flex justify-between items-center">
 		{#if error}
-			<p class="text-sm text-red-600">{error}</p>
+			<p id={errorId} class="text-sm text-red-600" role="alert">{error}</p>
 		{:else}
 			<span></span>
 		{/if}
 
 		{#if maxlength}
-			<p class="text-xs text-gray-400">
+			<p class="text-xs text-gray-400" aria-live="polite">
 				{charCount}/{maxlength}
 			</p>
 		{/if}

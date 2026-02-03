@@ -25,3 +25,62 @@ body {
 code {
 	font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }
+
+/* Focus ring utilities for accessibility */
+@layer utilities {
+	.focus-ring {
+		@apply focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2;
+	}
+
+	.focus-ring-inset {
+		@apply focus:outline-none focus:ring-2 focus:ring-primary focus:ring-inset;
+	}
+
+	.focus-visible-ring {
+		@apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2;
+	}
+}
+
+/* Animation utilities for toasts and modals */
+@layer utilities {
+	.animate-in {
+		animation: animateIn 0.2s ease-out;
+	}
+
+	.slide-in-from-right {
+		--tw-enter-translate-x: 100%;
+	}
+
+	.fade-in {
+		--tw-enter-opacity: 0;
+	}
+
+	.zoom-in-95 {
+		--tw-enter-scale: 0.95;
+	}
+
+	@keyframes animateIn {
+		from {
+			opacity: var(--tw-enter-opacity, 1);
+			transform: translate(var(--tw-enter-translate-x, 0), var(--tw-enter-translate-y, 0))
+				scale(var(--tw-enter-scale, 1));
+		}
+		to {
+			opacity: 1;
+			transform: translate(0, 0) scale(1);
+		}
+	}
+}
+
+/* Screen reader only utility */
+.sr-only {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border-width: 0;
+}

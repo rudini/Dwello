@@ -1,0 +1,180 @@
+{
+	"app": {
+		"name": "Dwello",
+		"tagline": "Swiss Property Management System"
+	},
+	"nav": {
+		"dashboard": "Dashboard",
+		"buildings": "Buildings",
+		"apartments": "Apartments",
+		"tenants": "Tenants",
+		"contracts": "Contracts",
+		"invoices": "Invoices",
+		"statements": "Statements",
+		"configuration": "Configuration",
+		"help": "Help & Support"
+	},
+	"auth": {
+		"signIn": "Sign in",
+		"signOut": "Sign out",
+		"signInWith": "Sign in with {provider}",
+		"signingIn": "Signing in...",
+		"settings": "Settings",
+		"secureAuth": "Secure OAuth 2.0 authentication",
+		"termsAgreement": "By signing in, you agree to our terms of service.",
+		"dataLocation": "Your data is stored securely in Switzerland.",
+		"loginFailed": "Failed to initiate login. Please try again."
+	},
+	"common": {
+		"search": "Search",
+		"filter": "Filter",
+		"clearFilters": "Clear filters",
+		"save": "Save",
+		"cancel": "Cancel",
+		"delete": "Delete",
+		"edit": "Edit",
+		"add": "Add",
+		"create": "Create",
+		"close": "Close",
+		"confirm": "Confirm",
+		"back": "Back",
+		"next": "Next",
+		"previous": "Previous",
+		"loading": "Loading...",
+		"noResults": "No results found",
+		"total": "Total",
+		"page": "Page",
+		"of": "of",
+		"results": "results",
+		"yes": "Yes",
+		"no": "No",
+		"required": "Required",
+		"optional": "Optional",
+		"error": "Error",
+		"success": "Success",
+		"warning": "Warning",
+		"info": "Information"
+	},
+	"status": {
+		"active": "Active",
+		"inactive": "Inactive",
+		"draft": "Draft",
+		"sent": "Sent",
+		"paid": "Paid",
+		"overdue": "Overdue",
+		"occupied": "Occupied",
+		"vacant": "Vacant",
+		"reserved": "Reserved"
+	},
+	"buildings": {
+		"title": "Buildings",
+		"new": "New Building",
+		"noBuildings": "No buildings found",
+		"createFirst": "Create your first building to get started.",
+		"tryOtherSearch": "Try different search terms.",
+		"apartments": "Apartments",
+		"occupancy": "Occupancy",
+		"yearBuilt": "Year Built",
+		"address": "Address",
+		"city": "City",
+		"postalCode": "Postal Code",
+		"canton": "Canton",
+		"buildingType": "Building Type"
+	},
+	"apartments": {
+		"title": "Apartments",
+		"new": "New Apartment",
+		"noApartments": "No apartments",
+		"addToBuilding": "Add apartments to this building.",
+		"floor": "Floor",
+		"rooms": "Rooms",
+		"area": "Area",
+		"unit": "Unit Number"
+	},
+	"tenants": {
+		"title": "Tenants",
+		"new": "New Tenant",
+		"noTenants": "No tenants found",
+		"createFirst": "Create your first tenant to get started.",
+		"tryOtherSearch": "Try different search terms or filters.",
+		"allTenants": "All Tenants",
+		"activeTenants": "Active Tenants",
+		"formerTenants": "Former Tenants",
+		"noActiveRental": "No active rental",
+		"firstName": "First Name",
+		"lastName": "Last Name",
+		"email": "Email",
+		"phone": "Phone"
+	},
+	"contracts": {
+		"title": "Contracts",
+		"new": "New Contract",
+		"baseRent": "Base Rent",
+		"additionalRent": "Additional Rent",
+		"akonto": "Advance Payment",
+		"startDate": "Start Date",
+		"endDate": "End Date"
+	},
+	"invoices": {
+		"title": "Invoices",
+		"new": "New Invoice",
+		"amount": "Amount",
+		"date": "Date",
+		"category": "Category",
+		"distributionKey": "Distribution Key"
+	},
+	"statements": {
+		"title": "Statements",
+		"new": "New Statement",
+		"period": "Period",
+		"totalCosts": "Total Costs",
+		"balance": "Balance",
+		"paymentDeadline": "Payment Deadline",
+		"generatePdf": "Generate PDF",
+		"downloadPdf": "Download PDF",
+		"generating": "Generating...",
+		"pdfGenerationFailed": "PDF generation failed",
+		"unknownError": "Unknown error",
+		"markAsPaid": "Mark as Paid",
+		"sendReminder": "Send Reminder",
+		"costBreakdown": "Cost Breakdown",
+		"subtotal": "Subtotal",
+		"managementFee": "Management Fee",
+		"advancePayments": "Advance Payments",
+		"refundToTenant": "Refund to tenant",
+		"paymentByTenant": "Payment by tenant",
+		"balanced": "Balanced"
+	},
+	"config": {
+		"title": "Configuration",
+		"accountingPeriod": "Accounting Period",
+		"managementFeePercent": "Management Fee (%)"
+	},
+	"toast": {
+		"savedSuccessfully": "Saved successfully",
+		"deletedSuccessfully": "Deleted successfully",
+		"errorOccurred": "An error occurred",
+		"changesSaved": "Changes saved",
+		"operationFailed": "Operation failed"
+	},
+	"modal": {
+		"confirmDelete": "Confirm Delete",
+		"areYouSure": "Are you sure?",
+		"cannotBeUndone": "This action cannot be undone."
+	},
+	"validation": {
+		"required": "This field is required",
+		"invalidEmail": "Invalid email address",
+		"invalidPhone": "Invalid phone number",
+		"minLength": "Minimum {min} characters required",
+		"maxLength": "Maximum {max} characters allowed"
+	},
+	"accessibility": {
+		"skipToMain": "Skip to main content",
+		"openMenu": "Open menu",
+		"closeMenu": "Close menu",
+		"sortAscending": "Sort ascending",
+		"sortDescending": "Sort descending",
+		"notSorted": "Not sorted"
+	}
+}

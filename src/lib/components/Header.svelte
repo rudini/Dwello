@@ -1,6 +1,9 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { _ } from 'svelte-i18n';
 	import { clearStores } from '$lib/stores';
+	import { openMobileNav } from '$lib/stores/navigation';
+	import Icon from './Icon.svelte';
 	import type { User } from '$lib/stores';
 
 	let { user }: { user: User | null } = $props();
@@ -36,8 +39,17 @@
 <header class="bg-white shadow-sm border-b border-gray-200">
 	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 		<div class="flex justify-between items-center h-16">
-			<!-- Logo and Brand -->
-			<div class="flex items-center">
+			<!-- Mobile menu button and Logo -->
+			<div class="flex items-center gap-2">
+				<button
+					type="button"
+					onclick={openMobileNav}
+					class="md:hidden p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+					aria-label="Menü öffnen"
+					data-testid="mobile-menu-button"
+				>
+					<Icon name="menu" size={24} />
+				</button>
 				<a href="/" class="flex items-center gap-2">
 					<span class="text-xl font-bold text-gray-900">Dwello</span>
 				</a>
@@ -84,7 +96,7 @@
 							class="fixed inset-0 z-10"
 							onclick={closeDropdown}
 							onkeydown={(e) => e.key === 'Escape' && closeDropdown()}
-							aria-label="Close menu"
+							aria-label={$_('accessibility.closeMenu')}
 						></button>
 
 						<div
@@ -100,14 +112,14 @@
 									class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
 									onclick={closeDropdown}
 								>
-									Settings
+									{$_('auth.settings')}
 								</a>
 								<button
 									type="button"
 									onclick={logout}
 									class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
 								>
-									Sign out
+									{$_('auth.signOut')}
 								</button>
 							</div>
 						</div>

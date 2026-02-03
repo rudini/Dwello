@@ -62,6 +62,51 @@
 			handleClose();
 		}
 	}
+
+	// Focus trap implementation
+	let modalElement = $state<HTMLElement | null>(null);
+	let previousActiveElement: HTMLElement | null = null;
+
+	$effect(() => {
+		if (open && modalElement) {
+			// Store previously focused element
+			previousActiveElement = document.activeElement as HTMLElement;
+
+			// Get all focusable elements within modal
+			const focusableElements = modalElement.querySelectorAll<HTMLElement>(
+				'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+			);
+			const firstElement = focusableElements[0];
+			const lastElement = focusableElements[focusableElements.length - 1];
+
+			// Focus first element
+			firstElement?.focus();
+
+			// Handle tab key to trap focus
+			const handleTabKey = (e: KeyboardEvent) => {
+				if (e.key !== 'Tab') return;
+
+				if (e.shiftKey) {
+					if (document.activeElement === firstElement) {
+						e.preventDefault();
+						lastElement?.focus();
+					}
+				} else {
+					if (document.activeElement === lastElement) {
+						e.preventDefault();
+						firstElement?.focus();
+					}
+				}
+			};
+
+			document.addEventListener('keydown', handleTabKey);
+			return () => {
+				document.removeEventListener('keydown', handleTabKey);
+				// Return focus to previously focused element
+				previousActiveElement?.focus();
+			};
+		}
+	});
 </script>
 
 <svelte:window onkeydown={handleKeydown} />
@@ -77,6 +122,7 @@
 	>
 		<!-- Modal -->
 		<div
+			bind:this={modalElement}
 			class="bg-white rounded-xl shadow-xl max-w-md w-full animate-in fade-in zoom-in-95 duration-200"
 			role="dialog"
 			aria-modal="true"

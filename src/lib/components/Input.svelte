@@ -43,6 +43,10 @@
 		oninput
 	}: Props = $props();
 
+	const errorId = $derived(error ? `${id}-error` : undefined);
+	const hintId = $derived(hint && !error ? `${id}-hint` : undefined);
+	const describedBy = $derived([errorId, hintId].filter(Boolean).join(' ') || undefined);
+
 	function handleInput(e: Event) {
 		const target = e.target as HTMLInputElement;
 		value = target.value;
@@ -65,15 +69,15 @@
 	<label for={id} class="block text-sm font-medium text-gray-700">
 		{label}
 		{#if required}
-			<span class="text-red-500">*</span>
+			<span class="text-red-500" aria-hidden="true">*</span>
 		{:else if hint}
-			<span class="text-gray-400 font-normal">({hint})</span>
+			<span id={hintId} class="text-gray-400 font-normal">({hint})</span>
 		{/if}
 	</label>
 
 	<div class="relative">
 		{#if prefix}
-			<span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">{prefix}</span>
+			<span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" aria-hidden="true">{prefix}</span>
 		{/if}
 
 		<input
@@ -86,17 +90,20 @@
 			{max}
 			{step}
 			{maxlength}
+			aria-invalid={error ? 'true' : undefined}
+			aria-describedby={describedBy}
+			aria-required={required}
 			oninput={handleInput}
 			onchange={handleChange}
 			class={inputClasses}
 		/>
 
 		{#if suffix}
-			<span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">{suffix}</span>
+			<span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400" aria-hidden="true">{suffix}</span>
 		{/if}
 	</div>
 
 	{#if error}
-		<p class="text-sm text-red-600">{error}</p>
+		<p id={errorId} class="text-sm text-red-600" role="alert">{error}</p>
 	{/if}
 </div>

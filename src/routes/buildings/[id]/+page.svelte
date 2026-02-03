@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { BuildingDetailsData } from './+page.server';
+	import { addToast } from '$lib/stores';
 	import Button from '$lib/components/Button.svelte';
 	import Icon from '$lib/components/Icon.svelte';
 	import Card from '$lib/components/Card.svelte';
@@ -48,7 +49,7 @@
 		}
 
 		// Mock delete success
-		alert('Gebäude wurde gelöscht (Mock)');
+		addToast('success', 'Gebäude wurde erfolgreich gelöscht');
 		showDeleteConfirm = false;
 	}
 </script>

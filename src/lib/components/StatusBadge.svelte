@@ -39,7 +39,11 @@
 	const classes = $derived(variantClasses[variant] || variantClasses.gray);
 </script>
 
-<div class="{classes.container} {classes.text} px-2 py-0.5 rounded inline-flex items-center gap-1.5">
-	<span class="{classes.dot} w-1.5 h-1.5 rounded-full"></span>
+<div
+	class="{classes.container} {classes.text} px-2 py-0.5 rounded inline-flex items-center gap-1.5"
+	role="status"
+	aria-label="Status: {status}"
+>
+	<span class="{classes.dot} w-1.5 h-1.5 rounded-full" aria-hidden="true"></span>
 	<span class="text-xs font-medium">{status}</span>
 </div>

@@ -1,6 +1,12 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 
+	interface Props {
+		class?: string;
+	}
+
+	let { class: className = '' }: Props = $props();
+
 	interface NavItem {
 		name: string;
 		href: string;
@@ -9,13 +15,13 @@
 
 	const navItems: NavItem[] = [
 		{ name: 'Dashboard', href: '/dashboard', icon: 'dashboard' },
-		{ name: 'Buildings', href: '/buildings', icon: 'apartment' },
-		{ name: 'Apartments', href: '/apartments', icon: 'door_front' },
-		{ name: 'Tenants', href: '/tenants', icon: 'people' },
-		{ name: 'Contracts', href: '/contracts', icon: 'description' },
-		{ name: 'Invoices', href: '/invoices', icon: 'receipt_long' },
-		{ name: 'Statements', href: '/statements', icon: 'summarize' },
-		{ name: 'Configuration', href: '/config', icon: 'settings' }
+		{ name: 'Gebäude', href: '/buildings', icon: 'apartment' },
+		{ name: 'Wohnungen', href: '/apartments', icon: 'door_front' },
+		{ name: 'Mieter', href: '/tenants', icon: 'people' },
+		{ name: 'Verträge', href: '/contracts', icon: 'description' },
+		{ name: 'Rechnungen', href: '/invoices', icon: 'receipt_long' },
+		{ name: 'Abrechnungen', href: '/statements', icon: 'summarize' },
+		{ name: 'Konfiguration', href: '/config', icon: 'settings' }
 	];
 
 	function isActive(href: string, currentPath: string): boolean {
@@ -26,7 +32,7 @@
 	}
 </script>
 
-<nav class="bg-gray-800 w-64 min-h-screen p-4">
+<nav class="bg-gray-800 w-64 min-h-screen p-4 {className}" aria-label="Hauptnavigation">
 	<div class="space-y-1">
 		{#each navItems as item}
 			{@const active = isActive(item.href, $page.url.pathname)}
@@ -51,7 +57,7 @@
 			class="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-gray-300 rounded-lg hover:bg-gray-700 hover:text-white transition-colors duration-150"
 		>
 			<span class="material-symbols-outlined text-xl" aria-hidden="true">help</span>
-			<span>Help & Support</span>
+			<span>Hilfe & Support</span>
 		</a>
 	</div>
 </nav>

@@ -3,14 +3,16 @@
 		name: string;
 		size?: number;
 		class?: string;
+		'aria-hidden'?: boolean | 'true' | 'false';
 	}
 
-	let { name, size = 24, class: className = '' }: Props = $props();
+	let { name, size = 24, class: className = '', 'aria-hidden': ariaHidden }: Props = $props();
 </script>
 
 <span
 	class="material-symbols-outlined {className}"
 	style="font-size: {size}px; line-height: {size}px; width: {size}px; height: {size}px;"
+	aria-hidden={ariaHidden}
 >
 	{name}
 </span>

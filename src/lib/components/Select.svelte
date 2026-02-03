@@ -33,6 +33,10 @@
 		onchange
 	}: Props = $props();
 
+	const errorId = $derived(error ? `${id}-error` : undefined);
+	const hintId = $derived(hint && !error ? `${id}-hint` : undefined);
+	const describedBy = $derived([errorId, hintId].filter(Boolean).join(' ') || undefined);
+
 	function handleChange(e: Event) {
 		const target = e.target as HTMLSelectElement;
 		value = target.value;
@@ -50,13 +54,22 @@
 	<label for={id} class="block text-sm font-medium text-gray-700">
 		{label}
 		{#if required}
-			<span class="text-red-500">*</span>
+			<span class="text-red-500" aria-hidden="true">*</span>
 		{:else if hint}
-			<span class="text-gray-400 font-normal">({hint})</span>
+			<span id={hintId} class="text-gray-400 font-normal">({hint})</span>
 		{/if}
 	</label>
 
-	<select {id} {value} {disabled} onchange={handleChange} class={selectClasses}>
+	<select
+		{id}
+		{value}
+		{disabled}
+		aria-invalid={error ? 'true' : undefined}
+		aria-describedby={describedBy}
+		aria-required={required}
+		onchange={handleChange}
+		class={selectClasses}
+	>
 		{#if placeholder}
 			<option value="">{placeholder}</option>
 		{/if}
@@ -68,6 +81,6 @@
 	</select>
 
 	{#if error}
-		<p class="text-sm text-red-600">{error}</p>
+		<p id={errorId} class="text-sm text-red-600" role="alert">{error}</p>
 	{/if}
 </div>

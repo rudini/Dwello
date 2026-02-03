@@ -5,11 +5,18 @@
 	import { goto } from '$app/navigation';
 	import { user, clearStores } from '$lib/stores';
 	import { getXsrfTokenFromCookie } from '$lib/api';
+	import { initI18n } from '$lib/i18n';
+	import { isLoading as i18nLoading } from 'svelte-i18n';
 	import Header from '$lib/components/Header.svelte';
 	import Navigation from '$lib/components/Navigation.svelte';
+	import MobileNav from '$lib/components/MobileNav.svelte';
 	import Footer from '$lib/components/Footer.svelte';
+	import ToastContainer from '$lib/components/ToastContainer.svelte';
 	import type { LayoutData } from './$types';
 	import type { Snippet } from 'svelte';
+
+	// Initialize i18n
+	initI18n();
 
 	let { data, children }: { data: LayoutData; children: Snippet } = $props();
 
@@ -73,21 +80,36 @@
 	<title>Dwello - Property Management</title>
 </svelte:head>
 
+<!-- Skip to main content link for accessibility -->
+<a
+	href="#main-content"
+	class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary focus:text-white focus:rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+>
+	Zum Hauptinhalt springen
+</a>
+
 {#if showAuthenticatedLayout}
 	<!-- Authenticated Layout -->
 	<div class="min-h-screen flex flex-col bg-slate-50">
 		<Header user={data.user} />
 		<div class="flex flex-1">
-			<Navigation />
-			<main class="flex-1 p-6">
+			<Navigation class="hidden md:block" />
+			<main id="main-content" class="flex-1 p-4 md:p-6" tabindex="-1">
 				{@render children()}
 			</main>
 		</div>
 		<Footer />
 	</div>
+	<!-- Mobile navigation drawer -->
+	<MobileNav />
 {:else}
 	<!-- Public Layout (Login, Error pages) -->
 	<div class="min-h-screen bg-slate-50">
-		{@render children()}
+		<main id="main-content" tabindex="-1">
+			{@render children()}
+		</main>
 	</div>
 {/if}
+
+<!-- Toast notifications -->
+<ToastContainer />
