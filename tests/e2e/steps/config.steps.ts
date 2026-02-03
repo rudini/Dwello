@@ -10,7 +10,7 @@ const { When, Then } = createBdd(test);
 
 When('I open the config page', async ({ page }) => {
 	await page.goto('/config');
-	await page.waitForLoadState('networkidle');
+	await page.waitForLoadState('domcontentloaded');
 });
 
 When('I click the {string} quick link', async ({ page }, linkText: string) => {

@@ -10,17 +10,17 @@ const { When, Then } = createBdd(test);
 
 When('I open the heating profiles page', async ({ page }) => {
 	await page.goto('/config/heating-profiles');
-	await page.waitForLoadState('networkidle');
+	await page.waitForLoadState('domcontentloaded');
 });
 
 When('I open the heating profile detail page for {string}', async ({ page }, profileId: string) => {
 	await page.goto(`/config/heating-profiles/${profileId}`);
-	await page.waitForLoadState('networkidle');
+	await page.waitForLoadState('domcontentloaded');
 });
 
 When('I open the heating profile edit page for {string}', async ({ page }, profileId: string) => {
 	await page.goto(`/config/heating-profiles/${profileId}/edit`);
-	await page.waitForLoadState('networkidle');
+	await page.waitForLoadState('domcontentloaded');
 });
 
 When('I click on the {string} profile', async ({ page }, profileName: string) => {

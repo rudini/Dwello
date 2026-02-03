@@ -10,17 +10,17 @@ const { When, Then } = createBdd(test);
 
 When('I open the apartments page', async ({ page }) => {
 	await page.goto('/apartments');
-	await page.waitForLoadState('networkidle');
+	await page.waitForLoadState('domcontentloaded');
 });
 
 When('I open the new apartment page', async ({ page }) => {
 	await page.goto('/apartments/new');
-	await page.waitForLoadState('networkidle');
+	await page.waitForLoadState('domcontentloaded');
 });
 
 When('I open the new apartment page with building {string}', async ({ page }, buildingId: string) => {
 	await page.goto(`/apartments/new?building=${buildingId}`);
-	await page.waitForLoadState('networkidle');
+	await page.waitForLoadState('domcontentloaded');
 });
 
 When('I submit the new apartment form', async ({ page }) => {

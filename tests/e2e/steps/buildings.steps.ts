@@ -110,7 +110,7 @@ Then('I should only see buildings in Zürich', async ({ page }) => {
 
 When('I open building detail page {string}', async ({ page }, buildingId: string) => {
 	await page.goto(`/buildings/${buildingId}`);
-	await page.waitForLoadState('networkidle');
+	await page.waitForLoadState('domcontentloaded');
 });
 
 Then('I should see apartments grouped by floor', async ({ page }) => {
