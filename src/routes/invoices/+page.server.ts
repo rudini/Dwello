@@ -30,11 +30,11 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<InvoicesList
 		const buildingsData = await buildingsRes.json();
 		const categoriesData = await categoriesRes.json();
 
-		const invoices: InvoiceWithDetails[] = (invoicesData.data || []).map((inv: Record<string, unknown>) => ({
+		const invoices: InvoiceWithDetails[] = (invoicesData.invoices || invoicesData.data || []).map((inv: Record<string, unknown>) => ({
 			id: inv.id,
 			buildingId: inv.buildingId,
 			invoiceDate: inv.invoiceDate,
-			billingEntity: inv.billingEntity || '',
+			billingEntity: inv.billingEntityName || inv.billingEntity || '',
 			description: inv.description || '',
 			amount: Number(inv.amount) || 0,
 			categoryId: inv.categoryId,

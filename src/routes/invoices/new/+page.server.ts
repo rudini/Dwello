@@ -5,11 +5,12 @@
 
 import type { PageServerLoad } from './$types';
 import { redirect } from '@sveltejs/kit';
+import { getJwtFromCookie } from '$lib/server/auth';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
 export const load: PageServerLoad = async ({ cookies }) => {
-	const sessionToken = cookies.get('session');
+	const sessionToken = getJwtFromCookie(cookies);
 
 	if (!sessionToken) {
 		throw redirect(302, '/login');
@@ -30,7 +31,7 @@ export const load: PageServerLoad = async ({ cookies }) => {
 		]);
 
 		if (!buildingsRes.ok || !categoriesRes.ok || !distributionKeysRes.ok) {
-			console.error('Failed to fetch form data');
+			console.error('Failed to fetch invoice form data');
 			return {
 				buildings: [],
 				categories: [],
@@ -47,9 +48,9 @@ export const load: PageServerLoad = async ({ cookies }) => {
 		]);
 
 		return {
-			buildings: buildingsData.buildings || buildingsData || [],
-			categories: categoriesData.categories || categoriesData || [],
-			distributionKeys: distributionKeysData.distributionKeys || distributionKeysData || [],
+			buildings: buildingsData.buildings || buildingsData.data || buildingsData || [],
+			categories: categoriesData.categories || categoriesData.data || categoriesData || [],
+			distributionKeys: distributionKeysData.distributionKeys || distributionKeysData.data || distributionKeysData || [],
 			llmAvailable: llmStatusData.llmAvailable || false
 		};
 	} catch (error) {

@@ -342,6 +342,15 @@ Do NOT mark complete unless:
 
 **STRICT RULE:** Every bug fix MUST include unit tests that verify the fix and prevent regression. Write tests in `backend/src/__tests__/` for backend fixes and `src/__tests__/` for frontend fixes.
 
+## No Mocks in Development
+
+**STRICT RULE:** When running the application in development mode:
+- **NEVER use mock data** - Always connect to the real PostgreSQL database
+- **NEVER use mock API responses** - Always call the real backend endpoints
+- **NEVER use hardcoded/fake data in components** - Always fetch from the database via the API
+
+This ensures the development experience matches production behavior and catches integration issues early.
+
 ## Session Workflow
 
 **Start:** Read `implementation_plan.md` → Find next `- [ ]` item → Review requirements → Reference docs (PRD, tech-stack, api-specification)

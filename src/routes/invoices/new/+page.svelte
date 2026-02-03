@@ -67,7 +67,7 @@
 			}>('/invoices/categorize', {
 				billingEntityName: billingEntity.trim(),
 				description: description.trim(),
-				amount: amount || '0'
+				amount: String(amount || '0')
 			});
 
 			if (response.error) {
@@ -116,7 +116,7 @@
 				invoiceDate,
 				billingEntityName: billingEntity.trim(),
 				description: description.trim(),
-				amount,
+				amount: String(amount),
 				categoryId: categoryId || null,
 				distributionKeyId: distributionKeyId || null,
 				isValidUtilityCost
