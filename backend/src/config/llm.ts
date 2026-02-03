@@ -8,8 +8,8 @@ export const llmConfig = {
 	// Ollama API endpoint
 	baseUrl: process.env.OLLAMA_API_URL || 'http://localhost:11434',
 
-	// Model to use for categorization
-	model: process.env.OLLAMA_MODEL || 'mistral',
+	// Model to use for categorization (qwen2.5:3b is small but accurate for German)
+	model: process.env.OLLAMA_MODEL || 'qwen2.5:3b',
 
 	// Request timeout in milliseconds
 	timeout: parseInt(process.env.OLLAMA_TIMEOUT || '30000', 10),
