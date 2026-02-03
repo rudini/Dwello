@@ -15,7 +15,7 @@ import {
 	validateInvoice,
 	getInvoicesForStatement
 } from '../services/invoice.service';
-import { isOllamaAvailable, getCacheStats } from '../services/llm.service';
+import { isOllamaAvailable, getCacheStats, categorizeInvoice } from '../services/llm.service';
 import { getUtilityCostRules } from '../services/utility-validation.service';
 
 // Validation schemas
@@ -97,6 +97,38 @@ export const invoiceRoutes = new Elysia({ prefix: '/api/v1/invoices' })
 	.get('/utility-rules', async () => {
 		return getUtilityCostRules();
 	})
+	// Categorize invoice data using LLM (preview without creating)
+	.post(
+		'/categorize',
+		async ({ body }) => {
+			const result = await categorizeInvoice({
+				billingEntityName: body.billingEntityName,
+				description: body.description,
+				amount: body.amount
+			});
+
+			return {
+				category: result.category
+					? {
+							id: result.category.id,
+							name: result.category.name,
+							isAllowedUtilityCost: result.category.isAllowedUtilityCost
+						}
+					: null,
+				confidence: result.confidence,
+				isAllowedUtilityCost: result.isAllowedUtilityCost,
+				reasoning: result.reasoning,
+				source: result.source
+			};
+		},
+		{
+			body: t.Object({
+				billingEntityName: t.String({ minLength: 1 }),
+				description: t.String({ minLength: 1 }),
+				amount: t.String()
+			})
+		}
+	)
 	// Get invoices for statement generation (by building and period)
 	.get(
 		'/for-statement/:buildingId',

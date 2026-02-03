@@ -4,34 +4,11 @@
 	import Icon from '$lib/components/Icon.svelte';
 	import Card from '$lib/components/Card.svelte';
 	import Badge from '$lib/components/Badge.svelte';
+	import { api } from '$lib/api';
+	import { addToast } from '$lib/stores';
 
-	// Mock data for form
-	const buildings = [
-		{ id: 'building-001', name: 'Musterhaus Zentrum', address: 'Musterstraße 12, 8000 Zürich' },
-		{ id: 'building-002', name: 'Seepark Residenz', address: 'Seestrasse 45, 6004 Luzern' },
-		{ id: 'building-003', name: 'Alpenblick', address: 'Bergweg 7, 3012 Bern' },
-		{ id: 'building-004', name: 'Sonnenhof', address: 'Bahnhofstrasse 88, 4051 Basel' }
-	];
-
-	const categories = [
-		{ id: 'cat-001', name: 'Heizung', isAllowedUtilityCost: true },
-		{ id: 'cat-002', name: 'Warmwasser', isAllowedUtilityCost: true },
-		{ id: 'cat-003', name: 'Wasser/Abwasser', isAllowedUtilityCost: true },
-		{ id: 'cat-004', name: 'Allgemeinstrom', isAllowedUtilityCost: true },
-		{ id: 'cat-005', name: 'Hauswart', isAllowedUtilityCost: true },
-		{ id: 'cat-006', name: 'Aufzug', isAllowedUtilityCost: true },
-		{ id: 'cat-007', name: 'Gartenpflege', isAllowedUtilityCost: true },
-		{ id: 'cat-008', name: 'Kehricht', isAllowedUtilityCost: true },
-		{ id: 'cat-009', name: 'Reparaturen', isAllowedUtilityCost: false },
-		{ id: 'cat-010', name: 'Versicherung', isAllowedUtilityCost: false }
-	];
-
-	const distributionKeys = [
-		{ id: 'dk-units', name: 'Nach Einheiten' },
-		{ id: 'dk-area', name: 'Nach Fläche' },
-		{ id: 'dk-heating', name: 'Heizkosten' },
-		{ id: 'dk-rooms', name: 'Nach Zimmern' }
-	];
+	// Server-loaded data
+	let { data } = $props();
 
 	// Form state
 	let buildingId = $state('');
@@ -46,9 +23,10 @@
 	// LLM categorization state
 	let isCategorizingLLM = $state(false);
 	let llmSuggestion = $state<{
-		categoryId: string;
+		category: { id: string; name: string; isAllowedUtilityCost: boolean } | null;
 		confidence: number;
-		reasoning: string;
+		reasoning?: string;
+		isAllowedUtilityCost: boolean;
 	} | null>(null);
 
 	// Form validation
@@ -56,7 +34,7 @@
 	let isSubmitting = $state(false);
 
 	// Derived values
-	const selectedCategory = $derived.by(() => categories.find(c => c.id === categoryId));
+	const selectedCategory = $derived.by(() => data.categories.find((c: { id: string }) => c.id === categoryId));
 
 	function validate(): boolean {
 		const newErrors: Record<string, string> = {};
@@ -72,63 +50,54 @@
 	}
 
 	async function triggerLLMCategorization() {
-		if (!billingEntity.trim() || !description.trim()) {
+		if (!billingEntity.trim() || !description.trim() || !data.llmAvailable) {
 			return;
 		}
 
 		isCategorizingLLM = true;
 		llmSuggestion = null;
 
-		// Simulate LLM categorization (in production, this would call the backend)
-		await new Promise(resolve => setTimeout(resolve, 1500));
+		try {
+			const response = await api.post<{
+				category: { id: string; name: string; isAllowedUtilityCost: boolean } | null;
+				confidence: number;
+				isAllowedUtilityCost: boolean;
+				reasoning?: string;
+				source: string;
+			}>('/invoices/categorize', {
+				billingEntityName: billingEntity.trim(),
+				description: description.trim(),
+				amount: amount || '0'
+			});
 
-		// Mock LLM response based on keywords
-		const descLower = description.toLowerCase();
-		const entityLower = billingEntity.toLowerCase();
-
-		let suggestion = {
-			categoryId: 'cat-005', // Default to Hauswart
-			confidence: 0.75,
-			reasoning: 'Basierend auf der Beschreibung kategorisiert.'
-		};
-
-		if (descLower.includes('heiz') || descLower.includes('öl') || descLower.includes('gas')) {
-			suggestion = { categoryId: 'cat-001', confidence: 0.92, reasoning: 'Heizkosten erkannt anhand Schlüsselwörter (Heizöl, Gas)' };
-		} else if (descLower.includes('wasser') && !descLower.includes('warm')) {
-			suggestion = { categoryId: 'cat-003', confidence: 0.88, reasoning: 'Wasser/Abwasser erkannt' };
-		} else if (descLower.includes('warmwasser')) {
-			suggestion = { categoryId: 'cat-002', confidence: 0.90, reasoning: 'Warmwasser erkannt' };
-		} else if (descLower.includes('strom') || entityLower.includes('ekz') || entityLower.includes('ewz')) {
-			suggestion = { categoryId: 'cat-004', confidence: 0.87, reasoning: 'Stromrechnung von Energieversorger erkannt' };
-		} else if (descLower.includes('lift') || entityLower.includes('schindler') || entityLower.includes('aufzug')) {
-			suggestion = { categoryId: 'cat-006', confidence: 0.91, reasoning: 'Aufzugswartung erkannt' };
-		} else if (descLower.includes('garten') || descLower.includes('rasen') || descLower.includes('pflege')) {
-			suggestion = { categoryId: 'cat-007', confidence: 0.85, reasoning: 'Gartenpflege erkannt' };
-		} else if (descLower.includes('kehricht') || descLower.includes('abfall') || descLower.includes('müll')) {
-			suggestion = { categoryId: 'cat-008', confidence: 0.89, reasoning: 'Abfallentsorgung erkannt' };
-		} else if (descLower.includes('reparatur') || descLower.includes('defekt') || descLower.includes('ersatz')) {
-			suggestion = { categoryId: 'cat-009', confidence: 0.86, reasoning: 'Reparatur erkannt - nicht umlagefähige Nebenkosten' };
-		} else if (entityLower.includes('hauswart') || descLower.includes('reinigung')) {
-			suggestion = { categoryId: 'cat-005', confidence: 0.84, reasoning: 'Hauswartdienste erkannt' };
+			if (response.error) {
+				console.error('LLM categorization error:', response.error);
+				addToast('error', 'KI-Kategorisierung fehlgeschlagen');
+			} else if (response.data) {
+				llmSuggestion = {
+					category: response.data.category,
+					confidence: response.data.confidence,
+					reasoning: response.data.reasoning,
+					isAllowedUtilityCost: response.data.isAllowedUtilityCost
+				};
+			}
+		} catch (error) {
+			console.error('LLM categorization failed:', error);
+		} finally {
+			isCategorizingLLM = false;
 		}
-
-		llmSuggestion = suggestion;
-		isCategorizingLLM = false;
 	}
 
 	function acceptLLMSuggestion() {
 		const suggestion = llmSuggestion;
-		if (suggestion) {
-			categoryId = suggestion.categoryId;
-			const cat = categories.find(c => c.id === suggestion.categoryId);
-			if (cat) {
-				isValidUtilityCost = cat.isAllowedUtilityCost;
-			}
+		if (suggestion?.category) {
+			categoryId = suggestion.category.id;
+			isValidUtilityCost = suggestion.isAllowedUtilityCost;
 		}
 	}
 
 	function handleCategoryChange() {
-		const cat = categories.find(c => c.id === categoryId);
+		const cat = data.categories.find((c: { id: string }) => c.id === categoryId);
 		if (cat) {
 			isValidUtilityCost = cat.isAllowedUtilityCost;
 		}
@@ -141,22 +110,29 @@
 
 		isSubmitting = true;
 
-		// Simulate API call
-		await new Promise(resolve => setTimeout(resolve, 1000));
+		try {
+			const response = await api.post('/invoices', {
+				buildingId,
+				invoiceDate,
+				billingEntityName: billingEntity.trim(),
+				description: description.trim(),
+				amount,
+				categoryId: categoryId || null,
+				distributionKeyId: distributionKeyId || null,
+				isValidUtilityCost
+			});
 
-		// In production, this would POST to the API
-		console.log('Creating invoice:', {
-			buildingId,
-			invoiceDate,
-			billingEntity,
-			description,
-			amount: parseFloat(amount),
-			categoryId,
-			distributionKeyId,
-			isValidUtilityCost
-		});
-
-		goto('/invoices');
+			if (response.error) {
+				addToast('error', response.error.message || 'Fehler beim Erstellen der Rechnung');
+			} else {
+				addToast('success', 'Rechnung erfolgreich erstellt');
+				goto('/invoices');
+			}
+		} catch (error) {
+			addToast('error', 'Fehler beim Erstellen der Rechnung');
+		} finally {
+			isSubmitting = false;
+		}
 	}
 </script>
 
@@ -179,6 +155,14 @@
 		</div>
 	</div>
 
+	<!-- LLM Status Banner -->
+	{#if data.llmAvailable}
+		<div class="flex items-center gap-2 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700">
+			<Icon name="auto_awesome" size={18} />
+			<span>KI-Kategorisierung ist aktiv. Die Rechnung wird automatisch analysiert.</span>
+		</div>
+	{/if}
+
 	<form onsubmit={handleSubmit} class="space-y-6">
 		<!-- Basic Info -->
 		<Card>
@@ -195,7 +179,7 @@
 						class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 {errors.buildingId ? 'border-red-500' : 'border-gray-300'}"
 					>
 						<option value="">Gebäude auswählen...</option>
-						{#each buildings as building}
+						{#each data.buildings as building}
 							<option value={building.id}>{building.name} - {building.address}</option>
 						{/each}
 					</select>
@@ -290,22 +274,25 @@
 						<div class="animate-spin">
 							<Icon name="progress_activity" size={24} />
 						</div>
-						<span>Analysiere Rechnung...</span>
+						<span>Analysiere Rechnung mit KI...</span>
 					</div>
 				{:else if llmSuggestion}
 					{@const suggestion = llmSuggestion}
-					{@const suggestedCategory = categories.find(c => c.id === suggestion.categoryId)}
 					<div class="space-y-4">
 						<div class="p-4 bg-blue-50 border border-blue-200 rounded-lg">
 							<div class="flex items-start justify-between gap-4">
 								<div class="flex-1">
 									<div class="flex items-center gap-2 mb-2">
 										<span class="font-medium text-gray-900">Vorgeschlagene Kategorie:</span>
-										<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
-											{suggestedCategory?.name}
-										</span>
-										{#if suggestedCategory && !suggestedCategory.isAllowedUtilityCost}
-											<Badge variant="danger">Nicht umlagefähig</Badge>
+										{#if suggestion.category}
+											<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+												{suggestion.category.name}
+											</span>
+											{#if !suggestion.isAllowedUtilityCost}
+												<Badge variant="danger">Nicht umlagefähig</Badge>
+											{/if}
+										{:else}
+											<span class="text-gray-500">Keine Kategorie gefunden</span>
 										{/if}
 									</div>
 									<div class="flex items-center gap-2 text-sm text-gray-600 mb-2">
@@ -318,20 +305,24 @@
 										</div>
 										<span class="font-medium">{Math.round(suggestion.confidence * 100)}%</span>
 									</div>
-									<p class="text-sm text-gray-500">
-										<Icon name="lightbulb" size={16} class="inline mr-1" />
-										{suggestion.reasoning}
-									</p>
+									{#if suggestion.reasoning}
+										<p class="text-sm text-gray-500">
+											<Icon name="lightbulb" size={16} class="inline mr-1" />
+											{suggestion.reasoning}
+										</p>
+									{/if}
 								</div>
-								<Button
-									type="button"
-									variant="primary"
-									size="sm"
-									onclick={acceptLLMSuggestion}
-								>
-									<Icon name="check" size={16} />
-									Übernehmen
-								</Button>
+								{#if suggestion.category}
+									<Button
+										type="button"
+										variant="primary"
+										size="sm"
+										onclick={acceptLLMSuggestion}
+									>
+										<Icon name="check" size={16} />
+										Übernehmen
+									</Button>
+								{/if}
 							</div>
 						</div>
 					</div>
@@ -356,12 +347,12 @@
 					>
 						<option value="">Kategorie auswählen...</option>
 						<optgroup label="Umlagefähige Kosten">
-							{#each categories.filter(c => c.isAllowedUtilityCost) as category}
+							{#each data.categories.filter((c: { isAllowedUtilityCost: boolean }) => c.isAllowedUtilityCost) as category}
 								<option value={category.id}>{category.name}</option>
 							{/each}
 						</optgroup>
 						<optgroup label="Nicht umlagefähige Kosten">
-							{#each categories.filter(c => !c.isAllowedUtilityCost) as category}
+							{#each data.categories.filter((c: { isAllowedUtilityCost: boolean }) => !c.isAllowedUtilityCost) as category}
 								<option value={category.id}>{category.name}</option>
 							{/each}
 						</optgroup>
@@ -379,7 +370,7 @@
 						class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 					>
 						<option value="">Verteilschlüssel auswählen...</option>
-						{#each distributionKeys as key}
+						{#each data.distributionKeys as key}
 							<option value={key.id}>{key.name}</option>
 						{/each}
 					</select>

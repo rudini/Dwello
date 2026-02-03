@@ -24,32 +24,32 @@ export const llmConfig = {
 	cacheTtl: parseInt(process.env.OLLAMA_CACHE_TTL || '3600', 10)
 };
 
-// Swiss utility cost categories for the prompt
+// Swiss utility cost categories for the prompt (English names match database)
 export const SWISS_UTILITY_CATEGORIES = {
 	allowed: [
-		'Heizung',
-		'Warmwasser',
-		'Wasser/Abwasser',
-		'Allgemeinstrom',
-		'Hauswartung',
-		'Gartenpflege',
-		'Schneeräumung',
-		'Lift/Aufzug',
-		'Gebäudereinigung',
-		'Kehricht/Entsorgung',
-		'TV/Kabelgebühren',
-		'Verwaltungskosten',
-		'Versicherungsprämien (Gebäudeversicherung)',
-		'Schädlingsbekämpfung'
+		{ en: 'Heating', de: 'Heizung' },
+		{ en: 'Hot Water', de: 'Warmwasser' },
+		{ en: 'Cold Water', de: 'Kaltwasser' },
+		{ en: 'Wastewater', de: 'Abwasser' },
+		{ en: 'Electricity Common Areas', de: 'Allgemeinstrom' },
+		{ en: 'Elevator', de: 'Lift/Aufzug' },
+		{ en: 'Caretaker', de: 'Hauswartung' },
+		{ en: 'Garden Maintenance', de: 'Gartenpflege' },
+		{ en: 'Snow Removal', de: 'Schneeräumung' },
+		{ en: 'Waste Disposal', de: 'Kehricht/Entsorgung' },
+		{ en: 'TV/Cable', de: 'TV/Kabelgebühren' },
+		{ en: 'Pest Control', de: 'Schädlingsbekämpfung' },
+		{ en: 'Fire Extinguisher Maintenance', de: 'Feuerlöscher-Wartung' },
+		{ en: 'Chimney Sweep', de: 'Kaminfeger' },
+		{ en: 'Administration', de: 'Verwaltungskosten' }
 	],
 	notAllowed: [
-		'Reparaturen',
-		'Renovationen',
-		'Grundsteuern',
-		'Hypothekarzinsen',
-		'Anschlussgebühren',
-		'Wertvermehrende Investitionen',
-		'Rechtskosten'
+		{ en: 'Repairs', de: 'Reparaturen' },
+		{ en: 'Renovation', de: 'Renovationen' },
+		{ en: 'Property Tax', de: 'Grundsteuern' },
+		{ en: 'Mortgage Interest', de: 'Hypothekarzinsen' },
+		{ en: 'Building Insurance', de: 'Gebäudeversicherung' },
+		{ en: 'Capital Improvements', de: 'Wertvermehrende Investitionen' }
 	]
 };
 
@@ -57,22 +57,24 @@ export const SWISS_UTILITY_CATEGORIES = {
 export const CATEGORIZATION_PROMPT = `Du bist ein Experte für Schweizer Nebenkostenabrechnungen. Analysiere die folgende Rechnung und kategorisiere sie.
 
 ERLAUBTE KATEGORIEN (können auf Mieter umgelegt werden):
-${SWISS_UTILITY_CATEGORIES.allowed.map((c) => `- ${c}`).join('\n')}
+${SWISS_UTILITY_CATEGORIES.allowed.map((c) => `- ${c.en} (${c.de})`).join('\n')}
 
 NICHT ERLAUBTE KATEGORIEN (dürfen NICHT auf Mieter umgelegt werden):
-${SWISS_UTILITY_CATEGORIES.notAllowed.map((c) => `- ${c}`).join('\n')}
+${SWISS_UTILITY_CATEGORIES.notAllowed.map((c) => `- ${c.en} (${c.de})`).join('\n')}
 
 RECHNUNGSDATEN:
 Rechnungssteller: {billing_entity}
 Beschreibung: {description}
 Betrag: CHF {amount}
 
+WICHTIG: Der "category" Wert muss EXAKT einer der englischen Kategorienamen sein (z.B. "Heating", "Cold Water", "Repairs").
+
 Antworte NUR im folgenden JSON-Format:
 {
-  "category": "Kategoriename",
+  "category": "English Category Name",
   "confidence": 0.95,
   "isAllowedUtilityCost": true,
-  "reasoning": "Kurze Begründung"
+  "reasoning": "Kurze Begründung auf Deutsch"
 }`;
 
 /**
