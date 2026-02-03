@@ -1,8 +1,9 @@
 import type { StatementsListData } from '$lib/types';
+import type { PageServerLoad } from './$types';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
-export const load = async ({ url, fetch }): Promise<StatementsListData> => {
+export const load: PageServerLoad = async ({ url, fetch }): Promise<StatementsListData> => {
 	const page = parseInt(url.searchParams.get('page') || '1');
 	const pageSize = 10;
 	const status = url.searchParams.get('status') || undefined;

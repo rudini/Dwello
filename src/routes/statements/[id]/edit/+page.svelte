@@ -15,8 +15,8 @@
 
 	// Extract initial values from props (these don't need to be reactive to data changes)
 	const statement = $derived(data.statement);
-	const categories = $derived(categories);
-	const distributionKeys = $derived(distributionKeys);
+	const categories = $derived(data.categories);
+	const distributionKeys = $derived(data.distributionKeys);
 	const totalAdvancePayments = $derived(data.statement.totalAdvancePayments);
 
 	// Form state - initialized once from props
@@ -104,8 +104,8 @@
 	}
 
 	function saveLineItem() {
-		const category = categories.find((c) => c.id === newLine.categoryId);
-		const distributionKey = distributionKeys.find((d) => d.id === newLine.distributionKeyId);
+		const category = categories.find((c: Category) => c.id === newLine.categoryId);
+		const distributionKey = distributionKeys.find((d: DistributionKey) => d.id === newLine.distributionKeyId);
 
 		const lineItem: StatementLineItem = {
 			id: editingLineIndex !== null ? lineItems[editingLineIndex].id : `li-new-${Date.now()}`,

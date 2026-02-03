@@ -206,23 +206,23 @@
 										<div
 											class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold text-sm flex-shrink-0"
 										>
-											{getInitials(contract.tenant_first_name, contract.tenant_last_name)}
+											{getInitials(contract.tenantFirstName, contract.tenantLastName)}
 										</div>
 										<div>
-											<p class="font-medium text-gray-900">{contract.tenant_name}</p>
+											<p class="font-medium text-gray-900">{contract.tenantName}</p>
 										</div>
 									</div>
 								</td>
 								<!-- Apartment -->
 								<td class="py-4 px-4">
-									<p class="font-medium text-gray-900">Wohnung {contract.apartment_unit}</p>
-									<p class="text-sm text-gray-500">{contract.building_name}</p>
+									<p class="font-medium text-gray-900">Wohnung {contract.apartmentNumber}</p>
+									<p class="text-sm text-gray-500">{contract.buildingName}</p>
 								</td>
 								<!-- Period -->
 								<td class="py-4 px-4 text-gray-600">
-									{formatDate(contract.start_date)}
-									{#if contract.end_date}
-										- {formatDate(contract.end_date)}
+									{formatDate(contract.startDate)}
+									{#if contract.endDate}
+										- {formatDate(contract.endDate)}
 									{:else}
 										- heute
 									{/if}
@@ -230,15 +230,15 @@
 								<!-- Rent -->
 								<td class="py-4 px-4 text-right">
 									<span class="font-semibold text-gray-900">
-										{formatCurrency(contract.total_rent)}
+										{formatCurrency(contract.totalRent)}
 									</span>
 									<span class="text-sm text-gray-500">/Mt.</span>
 								</td>
 								<!-- Status -->
 								<td class="py-4 px-4 text-center">
 									<StatusBadge
-										status={contract.status === 'Aktiv' ? 'AKTIV' : 'Beendet'}
-										variant={contract.status === 'Aktiv' ? 'success' : 'gray'}
+										status={!contract.endDate ? 'AKTIV' : 'Beendet'}
+										variant={!contract.endDate ? 'success' : 'gray'}
 									/>
 								</td>
 								<!-- Actions -->

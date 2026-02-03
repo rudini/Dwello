@@ -5,26 +5,40 @@
 
 import { Elysia } from 'elysia';
 import * as jose from 'jose';
+import { z } from 'zod';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'development-secret-key-change-in-production';
 
-export interface JwtPayload {
-	sub: string;
-	email: string;
-	name: string;
-	provider: string;
-	iat: number;
-	exp: number;
-}
+/**
+ * Zod schema for JWT payload validation
+ */
+const JwtPayloadSchema = z.object({
+	sub: z.string(),
+	email: z.string().email(),
+	name: z.string(),
+	provider: z.string(),
+	iat: z.number(),
+	exp: z.number()
+});
+
+export type JwtPayload = z.infer<typeof JwtPayloadSchema>;
 
 /**
- * Verify and decode a JWT token
+ * Verify and decode a JWT token with proper validation
  */
 export async function verifyJwt(token: string): Promise<JwtPayload | null> {
 	try {
 		const secret = new TextEncoder().encode(JWT_SECRET);
 		const { payload } = await jose.jwtVerify(token, secret);
-		return payload as unknown as JwtPayload;
+
+		// Validate payload structure with Zod
+		const result = JwtPayloadSchema.safeParse(payload);
+		if (!result.success) {
+			console.warn('JWT payload validation failed:', result.error.message);
+			return null;
+		}
+
+		return result.data;
 	} catch {
 		return null;
 	}

@@ -7,6 +7,16 @@ import { browser } from '$app/environment';
 import { goto } from '$app/navigation';
 
 /**
+ * XSRF cookie name constant - must match server-side cookie name
+ */
+export const XSRF_COOKIE_NAME = 'dwello_xsrf';
+
+/**
+ * HTTP methods that require XSRF token
+ */
+const MUTATION_METHODS = ['POST', 'PUT', 'DELETE', 'PATCH'] as const;
+
+/**
  * API error response structure
  */
 interface ApiError {
@@ -60,11 +70,41 @@ export function getXsrfTokenFromCookie(): string | null {
 	const cookies = document.cookie.split(';');
 	for (const cookie of cookies) {
 		const [name, value] = cookie.trim().split('=');
-		if (name === 'dwello_xsrf') {
+		if (name === XSRF_COOKIE_NAME) {
 			return decodeURIComponent(value);
 		}
 	}
 	return null;
+}
+
+/**
+ * Check if method requires XSRF token
+ */
+function isMutationMethod(method: string): boolean {
+	return MUTATION_METHODS.includes(method as (typeof MUTATION_METHODS)[number]);
+}
+
+/**
+ * Build request headers with optional XSRF token for mutations
+ */
+function buildRequestHeaders(
+	method: string,
+	customHeaders: Record<string, string> = {}
+): Record<string, string> {
+	const headers: Record<string, string> = {
+		'Content-Type': 'application/json',
+		...customHeaders
+	};
+
+	// Add XSRF token for mutation requests
+	if (isMutationMethod(method)) {
+		const xsrfToken = getXsrfTokenFromCookie();
+		if (xsrfToken) {
+			headers['X-XSRF-TOKEN'] = xsrfToken;
+		}
+	}
+
+	return headers;
 }
 
 /**
@@ -90,20 +130,8 @@ export async function apiCall<T>(
 ): Promise<ApiResponse<T>> {
 	const { method = 'GET', body, headers = {}, params } = options;
 
-	// Build request headers
-	const requestHeaders: Record<string, string> = {
-		'Content-Type': 'application/json',
-		...headers
-	};
-
-	// Add XSRF token for mutation requests
-	const mutationMethods = ['POST', 'PUT', 'DELETE', 'PATCH'];
-	if (mutationMethods.includes(method)) {
-		const xsrfToken = getXsrfTokenFromCookie();
-		if (xsrfToken) {
-			requestHeaders['X-XSRF-TOKEN'] = xsrfToken;
-		}
-	}
+	// Build request headers with XSRF token for mutations
+	const requestHeaders = buildRequestHeaders(method, headers);
 
 	// Build fetch options
 	const fetchOptions: RequestInit = {
@@ -113,7 +141,7 @@ export async function apiCall<T>(
 	};
 
 	// Add body for mutation requests
-	if (body && mutationMethods.includes(method)) {
+	if (body && isMutationMethod(method)) {
 		fetchOptions.body = JSON.stringify(body);
 	}
 
@@ -168,28 +196,35 @@ export async function apiCall<T>(
 /**
  * API call with pagination support
  * Extracts pagination info from response headers
+ * SECURITY: Now properly includes XSRF token for mutation requests
  */
 export async function apiCallPaginated<T>(
 	path: string,
 	options: ApiCallOptions = {}
 ): Promise<ApiResponse<PaginatedResponse<T>>> {
-	const { params = {} } = options;
+	const { params = {}, body } = options;
+	const method = options.method || 'GET';
 
 	// Build URL and make request
 	const url = buildUrl(path, params);
 
-	// Build request headers
-	const requestHeaders: Record<string, string> = {
-		'Content-Type': 'application/json',
-		...options.headers
+	// Build request headers with XSRF token for mutations
+	const requestHeaders = buildRequestHeaders(method, options.headers);
+
+	// Build fetch options
+	const fetchOptions: RequestInit = {
+		method,
+		headers: requestHeaders,
+		credentials: 'same-origin'
 	};
 
+	// Add body for mutation requests
+	if (body && isMutationMethod(method)) {
+		fetchOptions.body = JSON.stringify(body);
+	}
+
 	try {
-		const response = await fetch(url, {
-			method: options.method || 'GET',
-			headers: requestHeaders,
-			credentials: 'same-origin'
-		});
+		const response = await fetch(url, fetchOptions);
 
 		// Handle 401 - redirect to login
 		if (response.status === 401) {

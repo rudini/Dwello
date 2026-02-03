@@ -143,14 +143,14 @@
 							<div
 								class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold text-lg flex-shrink-0"
 							>
-								{getInitials(tenant.first_name, tenant.last_name)}
+								{getInitials(tenant.firstName, tenant.lastName)}
 							</div>
 							<div class="flex-1 min-w-0">
 								<div class="flex items-center justify-between gap-2">
 									<h3 class="font-semibold text-gray-900 truncate">
-										{tenant.first_name} {tenant.last_name}
+										{tenant.firstName} {tenant.lastName}
 									</h3>
-									{#if tenant.contract_status === 'Aktiv'}
+									{#if tenant.contractCount > 0}
 										<StatusBadge status="AKTIV" variant="success" />
 									{/if}
 								</div>
@@ -159,19 +159,19 @@
 						</div>
 
 						<!-- Contact Info -->
-						{#if tenant.phone_number}
+						{#if tenant.phone}
 							<div class="flex items-center text-sm text-gray-600 mb-3">
 								<Icon name="phone" size={16} class="mr-2 text-gray-400" />
-								<span>{tenant.phone_number}</span>
+								<span>{tenant.phone}</span>
 							</div>
 						{/if}
 
 						<!-- Current Occupancy -->
 						<div class="pt-3 border-t border-gray-100">
-							{#if tenant.current_apartment && tenant.current_building}
+							{#if tenant.currentApartment && tenant.currentBuilding}
 								<div class="flex items-center text-sm text-gray-600">
 									<Icon name="home" size={16} class="mr-2 text-gray-400" />
-									<span class="truncate">{tenant.current_apartment} - {tenant.current_building}</span>
+									<span class="truncate">{tenant.currentApartment} - {tenant.currentBuilding}</span>
 								</div>
 							{:else}
 								<div class="flex items-center text-sm text-gray-400">

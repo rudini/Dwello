@@ -16,12 +16,12 @@
 	<nav class="flex items-center text-sm text-gray-500 mb-4">
 		<a href="/apartments" class="hover:text-blue-600 transition-colors">Wohnungen</a>
 		<Icon name="chevron_right" size={16} class="mx-2" />
-		<span class="text-gray-900 font-medium">{apartment.address_unit}</span>
+		<span class="text-gray-900 font-medium">{apartment.number}</span>
 	</nav>
 
 	<div class="flex justify-between items-start">
 		<div>
-			<h1 class="text-4xl font-bold text-text-dark mb-2">Wohnung {apartment.address_unit}</h1>
+			<h1 class="text-4xl font-bold text-text-dark mb-2">Wohnung {apartment.number}</h1>
 			{#if building.address || building.city}
 			<p class="text-sm text-text-secondary flex items-center gap-1">
 				<Icon name="location_on" size={16} />

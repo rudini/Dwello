@@ -1,4 +1,5 @@
 import type { RentalContract } from '$lib/types';
+import type { PageServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
@@ -9,7 +10,7 @@ interface ContractEditData {
 	apartments: { id: string; unit: string; building: string; status: string }[];
 }
 
-export const load = async ({ params, fetch }): Promise<ContractEditData> => {
+export const load: PageServerLoad = async ({ params, fetch }): Promise<ContractEditData> => {
 	try {
 		const [contractRes, tenantsRes, apartmentsRes] = await Promise.all([
 			fetch(`${BACKEND_URL}/api/v1/contracts/${params.id}`),
@@ -30,14 +31,13 @@ export const load = async ({ params, fetch }): Promise<ContractEditData> => {
 
 		const contract: RentalContract = {
 			id: data.id,
-			apartment_id: data.apartmentId,
-			tenant_id: data.tenantId,
-			start_date: data.startDate,
-			end_date: data.endDate,
-			base_rent_chf: Number(data.baseRent) || 0,
-			additional_rent_chf: Number(data.additionalRent) || 0,
-			advance_payment_chf: Number(data.advancePayment) || 0,
-			status: data.endDate ? 'Beendet' : 'Aktiv'
+			apartmentId: data.apartmentId,
+			tenantId: data.tenantId,
+			startDate: data.startDate,
+			endDate: data.endDate || null,
+			baseRent: data.baseRent || '0',
+			additionalRent: data.additionalRent || null,
+			monthlyAdvancePayment: data.monthlyAdvancePayment || '0'
 		};
 
 		const tenants = (tenantsData.data || []).map((t: Record<string, unknown>) => ({
@@ -49,7 +49,7 @@ export const load = async ({ params, fetch }): Promise<ContractEditData> => {
 			id: a.id,
 			unit: a.number || '',
 			building: (a.building as Record<string, string>)?.name || '',
-			status: a.currentTenantId ? 'Vermietet' : 'Leer'
+			status: a.status || (a.currentTenantId ? 'occupied' : 'vacant')
 		}));
 
 		return { contract, tenants, apartments };

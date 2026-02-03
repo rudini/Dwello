@@ -1,4 +1,5 @@
 import type { StatementWithDetails } from '$lib/types';
+import type { PageServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
@@ -7,7 +8,7 @@ interface StatementDetailData {
 	statement: StatementWithDetails;
 }
 
-export const load = async ({ params, fetch }): Promise<StatementDetailData> => {
+export const load: PageServerLoad = async ({ params, fetch }): Promise<StatementDetailData> => {
 	try {
 		const response = await fetch(`${BACKEND_URL}/api/v1/statements/${params.id}`);
 

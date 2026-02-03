@@ -3,7 +3,7 @@
  * Business logic for utility cost category operations
  */
 
-import { eq, sql, asc, ilike } from 'drizzle-orm';
+import { eq, sql, asc, ilike, and } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { categories, invoices, type Category, type NewCategory } from '../db/schema';
 
@@ -62,22 +62,17 @@ export async function listCategories(filters: CategoryFilters = {}): Promise<{
 		.offset(offset);
 
 	// Apply conditions if any
-	const results =
-		conditions.length > 0
-			? await categoriesQuery.where(
-					conditions.length === 1 ? conditions[0] : sql`${conditions.join(' AND ')}`
-				)
-			: await categoriesQuery;
+	const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+	const results = whereClause
+		? await categoriesQuery.where(whereClause)
+		: await categoriesQuery;
 
 	// Get total count
 	const countQuery = db.select({ count: sql<number>`count(*)` }).from(categories);
 
-	const [{ count: total }] =
-		conditions.length > 0
-			? await countQuery.where(
-					conditions.length === 1 ? conditions[0] : sql`${conditions.join(' AND ')}`
-				)
-			: await countQuery;
+	const [{ count: total }] = whereClause
+		? await countQuery.where(whereClause)
+		: await countQuery;
 
 	return {
 		categories: results as CategoryWithUsage[],

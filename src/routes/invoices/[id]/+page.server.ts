@@ -1,4 +1,5 @@
 import type { InvoiceWithDetails } from '$lib/types';
+import type { PageServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
@@ -7,7 +8,7 @@ interface InvoiceDetailData {
 	invoice: InvoiceWithDetails;
 }
 
-export const load = async ({ params, fetch }): Promise<InvoiceDetailData> => {
+export const load: PageServerLoad = async ({ params, fetch }): Promise<InvoiceDetailData> => {
 	try {
 		const response = await fetch(`${BACKEND_URL}/api/v1/invoices/${params.id}`);
 

@@ -1,8 +1,9 @@
 import type { ContractsListData, ContractWithDetails } from '$lib/types';
+import type { PageServerLoad } from './$types';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
-export const load = async ({ url, fetch }): Promise<ContractsListData> => {
+export const load: PageServerLoad = async ({ url, fetch }): Promise<ContractsListData> => {
 	const page = parseInt(url.searchParams.get('page') || '1', 10);
 	const pageSize = parseInt(url.searchParams.get('pageSize') || '12', 10);
 	const search = url.searchParams.get('search') || '';
@@ -29,22 +30,21 @@ export const load = async ({ url, fetch }): Promise<ContractsListData> => {
 		const apartmentsData = await apartmentsRes.json();
 
 		const contracts: ContractWithDetails[] = (contractsData.contracts || contractsData.data || []).map((c: Record<string, unknown>) => ({
-			id: c.id,
-			apartment_id: c.apartmentId,
-			tenant_id: c.tenantId,
-			start_date: c.startDate,
-			end_date: c.endDate,
-			base_rent_chf: Number(c.baseRent) || 0,
-			additional_rent_chf: Number(c.additionalRent) || 0,
-			advance_payment_chf: Number(c.monthlyAdvancePayment) || 0,
-			status: c.endDate ? 'Beendet' : 'Aktiv',
-			tenant_name: (c.tenantName as string) || '',
-			tenant_first_name: '',
-			tenant_last_name: '',
-			apartment_unit: (c.apartmentNumber as string) || '',
-			building_name: (c.buildingName as string) || '',
-			building_address: (c.buildingAddress as string) || '',
-			total_rent: Number(c.baseRent || 0) + Number(c.additionalRent || 0) + Number(c.monthlyAdvancePayment || 0)
+			id: c.id as string,
+			apartmentId: c.apartmentId as string,
+			tenantId: c.tenantId as string,
+			startDate: c.startDate as string,
+			endDate: (c.endDate as string) || null,
+			baseRent: (c.baseRent as string) || '0',
+			additionalRent: (c.additionalRent as string) || null,
+			monthlyAdvancePayment: (c.monthlyAdvancePayment as string) || '0',
+			tenantName: (c.tenantName as string) || '',
+			tenantFirstName: '',
+			tenantLastName: '',
+			apartmentNumber: (c.apartmentNumber as string) || '',
+			buildingName: (c.buildingName as string) || '',
+			buildingAddress: (c.buildingAddress as string) || '',
+			totalRent: Number(c.baseRent || 0) + Number(c.additionalRent || 0) + Number(c.monthlyAdvancePayment || 0)
 		}));
 
 		const buildings = (buildingsData.buildings || buildingsData.data || []).map((b: Record<string, unknown>) => ({
@@ -55,8 +55,8 @@ export const load = async ({ url, fetch }): Promise<ContractsListData> => {
 
 		const apartments = (apartmentsData.apartments || apartmentsData.data || []).map((a: Record<string, unknown>) => ({
 			id: a.id,
-			unit: a.number || '',
-			building_id: a.buildingId
+			number: a.number || '',
+			buildingId: a.buildingId
 		}));
 
 		return {
@@ -67,8 +67,8 @@ export const load = async ({ url, fetch }): Promise<ContractsListData> => {
 			buildings,
 			apartments
 		};
-	} catch (error) {
-		console.error('Failed to fetch contracts:', error);
+	} catch (err) {
+		console.error('Failed to fetch contracts:', err);
 		return {
 			contracts: [],
 			total: 0,

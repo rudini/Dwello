@@ -42,7 +42,7 @@
 </script>
 
 <svelte:head>
-	<title>{data.tenant.first_name} {data.tenant.last_name} - Dwello</title>
+	<title>{data.tenant.firstName} {data.tenant.lastName} - Dwello</title>
 </svelte:head>
 
 <div class="space-y-6">
@@ -51,7 +51,7 @@
 		<a href="/tenants" class="hover:text-primary transition-colors">Mieter</a>
 		<Icon name="chevron_right" size={16} class="mx-2" />
 		<span class="text-gray-900 font-medium">
-			{data.tenant.first_name} {data.tenant.last_name}
+			{data.tenant.firstName} {data.tenant.lastName}
 		</span>
 	</nav>
 
@@ -62,12 +62,12 @@
 			<div
 				class="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-2xl"
 			>
-				{getInitials(data.tenant.first_name, data.tenant.last_name)}
+				{getInitials(data.tenant.firstName, data.tenant.lastName)}
 			</div>
 			<div>
 				<div class="flex items-center gap-3">
 					<h1 class="text-2xl font-bold text-gray-900">
-						{data.tenant.first_name} {data.tenant.last_name}
+						{data.tenant.firstName} {data.tenant.lastName}
 					</h1>
 					{#if data.currentOccupancy}
 						<StatusBadge status="AKTIV" variant="success" />
@@ -105,13 +105,13 @@
 							</a>
 						</div>
 					</div>
-					{#if data.tenant.phone_number}
+					{#if data.tenant.phone}
 						<div class="flex items-start gap-3">
 							<Icon name="phone" size={20} class="text-gray-400 mt-0.5" />
 							<div>
 								<p class="text-sm text-gray-500">Telefon</p>
-								<a href="tel:{data.tenant.phone_number}" class="text-primary hover:underline">
-									{data.tenant.phone_number}
+								<a href="tel:{data.tenant.phone}" class="text-primary hover:underline">
+									{data.tenant.phone}
 								</a>
 							</div>
 						</div>
@@ -122,8 +122,8 @@
 							<div>
 								<p class="text-sm text-gray-500">Adresse</p>
 								<p class="text-gray-900">{data.tenant.address}</p>
-								{#if data.tenant.postal_code && data.tenant.city}
-									<p class="text-gray-900">{data.tenant.postal_code} {data.tenant.city}</p>
+								{#if data.tenant.postalCode && data.tenant.city}
+									<p class="text-gray-900">{data.tenant.postalCode} {data.tenant.city}</p>
 								{/if}
 							</div>
 						</div>
@@ -236,12 +236,12 @@
 										</td>
 										<td class="py-4 px-4 text-gray-600">{contract.period}</td>
 										<td class="py-4 px-4 text-right font-medium text-gray-900">
-											{formatCurrency(contract.rent_brutto)}
+											{formatCurrency(contract.rentBrutto)}
 										</td>
 										<td class="py-4 px-4 text-center">
 											<StatusBadge
-												status={contract.status}
-												variant={contract.status === 'AKTIV' ? 'success' : 'gray'}
+												status={contract.isActive ? 'AKTIV' : 'Beendet'}
+												variant={contract.isActive ? 'success' : 'gray'}
 											/>
 										</td>
 										<td class="py-4 px-4 text-right">
@@ -271,7 +271,7 @@
 				<div>
 					<h3 class="text-lg font-semibold text-gray-900">Mieter löschen</h3>
 					<p class="text-sm text-gray-500">
-						{data.tenant.first_name} {data.tenant.last_name}
+						{data.tenant.firstName} {data.tenant.lastName}
 					</p>
 				</div>
 			</div>

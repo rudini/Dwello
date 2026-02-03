@@ -139,7 +139,7 @@
 				<div>
 					<p class="text-sm text-gray-500">Koordinaten</p>
 					<p class="font-medium text-sm">
-						{building.latitude.toFixed(4)}, {building.longitude.toFixed(4)}
+						{Number(building.latitude).toFixed(4)}, {Number(building.longitude).toFixed(4)}
 					</p>
 				</div>
 			{/if}
@@ -187,17 +187,17 @@
 								<div class="flex items-center gap-4">
 									<div class="flex items-center gap-2">
 										<Icon name="door_front" size={18} class="text-gray-400" />
-										<span class="font-medium">{apartment.address_unit}</span>
+										<span class="font-medium">{apartment.number}</span>
 									</div>
 									<div class="text-sm text-gray-500">
-										{apartment.room_count} Zimmer &middot; {apartment.size_m2} m²
+										{apartment.rooms} Zimmer &middot; {apartment.area} m²
 									</div>
 								</div>
 								<div class="flex items-center gap-3">
 									<Badge
-										variant={apartment.occupancy_status === 'Vermietet' ? 'success' : apartment.occupancy_status === 'Leer' ? 'warning' : 'default'}
+										variant={apartment.status === 'occupied' ? 'success' : apartment.status === 'vacant' ? 'warning' : 'default'}
 									>
-										{apartment.occupancy_status}
+										{apartment.status === 'occupied' ? 'Vermietet' : apartment.status === 'vacant' ? 'Leer' : 'Reserviert'}
 									</Badge>
 									<Icon name="chevron_right" size={18} class="text-gray-400" />
 								</div>

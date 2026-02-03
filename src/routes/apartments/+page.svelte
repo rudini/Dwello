@@ -44,14 +44,27 @@
 		status: string
 	): 'default' | 'primary' | 'success' | 'warning' | 'danger' | 'info' {
 		switch (status) {
-			case 'Vermietet':
+			case 'occupied':
 				return 'success';
-			case 'Leer':
+			case 'vacant':
 				return 'warning';
-			case 'Gesperrt':
+			case 'reserved':
 				return 'danger';
 			default:
 				return 'default';
+		}
+	}
+
+	function getStatusLabel(status: string): string {
+		switch (status) {
+			case 'occupied':
+				return 'Vermietet';
+			case 'vacant':
+				return 'Leer';
+			case 'reserved':
+				return 'Reserviert';
+			default:
+				return status;
 		}
 	}
 
@@ -178,53 +191,53 @@
 						<div class="flex items-start justify-between mb-3">
 							<div class="flex-1 min-w-0">
 								<h3 class="font-semibold text-gray-900 text-lg">
-									Wohnung {apartment.address_unit}
+									Wohnung {apartment.number}
 								</h3>
 								<p class="text-sm text-gray-500">{apartment.floor}</p>
 							</div>
-							<Badge variant={getStatusVariant(apartment.occupancy_status)}>
-								{apartment.occupancy_status}
+							<Badge variant={getStatusVariant(apartment.status)}>
+								{getStatusLabel(apartment.status)}
 							</Badge>
 						</div>
 
 						<!-- Building Info -->
 						<div class="flex items-center text-sm text-gray-600 mb-4">
 							<Icon name="apartment" size={16} class="mr-1 text-gray-400" />
-							<span class="truncate">{apartment.building_name || apartment.building_address}</span>
+							<span class="truncate">{apartment.buildingName || apartment.buildingAddress}</span>
 						</div>
 
 						<!-- Apartment Details -->
 						<div class="grid grid-cols-2 gap-3 mb-4">
 							<div class="flex items-center text-sm">
 								<Icon name="straighten" size={16} class="mr-1 text-gray-400" />
-								<span>{apartment.size_m2} m²</span>
+								<span>{apartment.area} m²</span>
 							</div>
 							<div class="flex items-center text-sm">
 								<Icon name="meeting_room" size={16} class="mr-1 text-gray-400" />
-								<span>{apartment.room_count} Zimmer</span>
+								<span>{apartment.rooms} Zimmer</span>
 							</div>
 						</div>
 
 						<!-- Tenant & Rent Info -->
 						<div class="pt-3 border-t border-gray-100">
-							{#if apartment.occupancy_status === 'Vermietet' && apartment.current_tenant_name}
+							{#if apartment.status === 'occupied' && apartment.currentTenantName}
 								<div class="flex items-center justify-between">
 									<div class="flex items-center text-sm text-gray-600 min-w-0">
 										<Icon name="person" size={16} class="mr-1 text-gray-400 flex-shrink-0" />
-										<span class="truncate">{apartment.current_tenant_name}</span>
+										<span class="truncate">{apartment.currentTenantName}</span>
 									</div>
-									{#if apartment.current_rent}
+									{#if apartment.currentRent}
 										<span class="text-sm font-medium text-primary ml-2">
-											{formatCurrency(apartment.current_rent)}/Mt.
+											{formatCurrency(apartment.currentRent)}/Mt.
 										</span>
 									{/if}
 								</div>
-							{:else if apartment.occupancy_status === 'Leer'}
+							{:else if apartment.status === 'vacant'}
 								<div class="flex items-center text-sm text-amber-600">
 									<Icon name="warning" size={16} class="mr-1" />
 									<span>Leerstehend</span>
 								</div>
-							{:else if apartment.occupancy_status === 'Gesperrt'}
+							{:else if apartment.status === 'reserved'}
 								<div class="flex items-center text-sm text-red-600">
 									<Icon name="block" size={16} class="mr-1" />
 									<span>Gesperrt</span>

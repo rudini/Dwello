@@ -57,10 +57,10 @@
 								<div
 									class="w-8 h-8 rounded-full bg-gradient-to-br from-slate-400 to-slate-600 flex items-center justify-center text-white text-xs font-semibold"
 								>
-									{getInitials(contract.tenant_first_name, contract.tenant_last_name)}
+									{getInitials(contract.tenantFirstName, contract.tenantLastName)}
 								</div>
 								<div>
-									<p class="text-sm font-medium text-text-dark">{contract.tenant_name}</p>
+									<p class="text-sm font-medium text-text-dark">{contract.tenantName}</p>
 									<p class="text-xs text-text-secondary">Privat</p>
 								</div>
 							</div>
@@ -69,10 +69,10 @@
 							<p class="text-sm text-text-dark">{contract.period}</p>
 						</td>
 						<td class="py-4 px-4">
-							<p class="text-sm font-medium text-text-dark">{formatCurrency(contract.rent_brutto)}</p>
+							<p class="text-sm font-medium text-text-dark">{formatCurrency(contract.rentBrutto)}</p>
 						</td>
 						<td class="py-4 px-4">
-							<StatusBadge status={contract.status} variant={contract.status === 'AKTIV' ? 'success' : 'gray'} />
+							<StatusBadge status={contract.isActive ? 'AKTIV' : 'Beendet'} variant={contract.isActive ? 'success' : 'gray'} />
 						</td>
 						<td class="py-4 px-4">
 							<button

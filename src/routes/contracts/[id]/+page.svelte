@@ -50,7 +50,7 @@
 		// In production, call the API
 		// await fetch(`/api/contracts/${data.contract.id}`, {
 		// 	method: 'PUT',
-		// 	body: JSON.stringify({ end_date: new Date().toISOString(), status: 'Beendet' })
+		// 	body: JSON.stringify({ endDate: new Date().toISOString(), status: 'Beendet' })
 		// });
 		await new Promise((r) => setTimeout(r, 500));
 		showEndContractModal = false;
@@ -67,7 +67,7 @@
 </script>
 
 <svelte:head>
-	<title>Mietvertrag - {data.contract.tenant.first_name} {data.contract.tenant.last_name} - Dwello</title>
+	<title>Mietvertrag - {data.contract.tenant.firstName} {data.contract.tenant.lastName} - Dwello</title>
 </svelte:head>
 
 <div class="space-y-6">
@@ -76,7 +76,7 @@
 		<a href="/contracts" class="hover:text-primary transition-colors">Mietverträge</a>
 		<Icon name="chevron_right" size={16} class="mx-2" />
 		<span class="text-gray-900 font-medium">
-			{data.contract.tenant.first_name} {data.contract.tenant.last_name} - Wohnung {data.contract.apartment.address_unit}
+			{data.contract.tenant.firstName} {data.contract.tenant.lastName} - Wohnung {data.contract.apartment.number}
 		</span>
 	</nav>
 
@@ -86,12 +86,12 @@
 			<div class="flex items-center gap-3">
 				<h1 class="text-2xl font-bold text-gray-900">Mietvertrag</h1>
 				<StatusBadge
-					status={data.contract.status === 'Aktiv' ? 'AKTIV' : 'Beendet'}
-					variant={data.contract.status === 'Aktiv' ? 'success' : 'gray'}
+					status={!data.contract.endDate ? 'AKTIV' : 'Beendet'}
+					variant={!data.contract.endDate ? 'success' : 'gray'}
 				/>
 			</div>
 			<p class="text-gray-500 mt-1">
-				Wohnung {data.contract.apartment.address_unit} - {data.contract.building.name || data.contract.building.address}
+				Wohnung {data.contract.apartment.number} - {data.contract.building.name || data.contract.building.address}
 			</p>
 		</div>
 		<div class="flex gap-2">
@@ -99,7 +99,7 @@
 				<Icon name="edit" size={18} />
 				Bearbeiten
 			</Button>
-			{#if data.contract.status === 'Aktiv'}
+			{#if !data.contract.endDate}
 				<Button variant="secondary" onclick={() => (showEndContractModal = true)}>
 					<Icon name="event_busy" size={18} />
 					Beenden
@@ -123,11 +123,11 @@
 					<div
 						class="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xl"
 					>
-						{getInitials(data.contract.tenant.first_name, data.contract.tenant.last_name)}
+						{getInitials(data.contract.tenant.firstName, data.contract.tenant.lastName)}
 					</div>
 					<div>
 						<p class="font-semibold text-gray-900">
-							{data.contract.tenant.first_name} {data.contract.tenant.last_name}
+							{data.contract.tenant.firstName} {data.contract.tenant.lastName}
 						</p>
 						<a
 							href="mailto:{data.contract.tenant.email}"
@@ -137,11 +137,11 @@
 						</a>
 					</div>
 				</div>
-				{#if data.contract.tenant.phone_number}
+				{#if data.contract.tenant.phone}
 					<div class="flex items-center text-sm text-gray-600 mb-4">
 						<Icon name="phone" size={16} class="mr-2 text-gray-400" />
-						<a href="tel:{data.contract.tenant.phone_number}" class="hover:text-primary">
-							{data.contract.tenant.phone_number}
+						<a href="tel:{data.contract.tenant.phone}" class="hover:text-primary">
+							{data.contract.tenant.phone}
 						</a>
 					</div>
 				{/if}
@@ -158,7 +158,7 @@
 					<div class="flex items-start gap-3">
 						<Icon name="door_front" size={20} class="text-gray-400 mt-0.5" />
 						<div>
-							<p class="font-medium text-gray-900">Wohnung {data.contract.apartment.address_unit}</p>
+							<p class="font-medium text-gray-900">Wohnung {data.contract.apartment.number}</p>
 							<p class="text-sm text-gray-500">{data.contract.apartment.floor}</p>
 						</div>
 					</div>
@@ -174,11 +174,11 @@
 					<div class="flex items-center gap-6 text-sm text-gray-600 pt-2">
 						<span class="flex items-center gap-1">
 							<Icon name="straighten" size={16} class="text-gray-400" />
-							{data.contract.apartment.size_m2} m²
+							{data.contract.apartment.area} m²
 						</span>
 						<span class="flex items-center gap-1">
 							<Icon name="meeting_room" size={16} class="text-gray-400" />
-							{data.contract.apartment.room_count} Zimmer
+							{data.contract.apartment.rooms} Zimmer
 						</span>
 					</div>
 				</div>
@@ -200,14 +200,14 @@
 					<div>
 						<p class="text-sm text-gray-500 mb-1">Vertragsbeginn</p>
 						<p class="text-lg font-semibold text-gray-900">
-							{formatDate(data.contract.start_date)}
+							{formatDate(data.contract.startDate)}
 						</p>
 					</div>
 					<div>
 						<p class="text-sm text-gray-500 mb-1">Vertragsende</p>
-						{#if data.contract.end_date}
+						{#if data.contract.endDate}
 							<p class="text-lg font-semibold text-gray-900">
-								{formatDate(data.contract.end_date)}
+								{formatDate(data.contract.endDate)}
 							</p>
 						{:else}
 							<p class="text-lg font-semibold text-green-600">Unbefristet</p>
@@ -280,7 +280,7 @@
 				<div>
 					<h3 class="text-lg font-semibold text-gray-900">Vertrag beenden</h3>
 					<p class="text-sm text-gray-500">
-						{data.contract.tenant.first_name} {data.contract.tenant.last_name}
+						{data.contract.tenant.firstName} {data.contract.tenant.lastName}
 					</p>
 				</div>
 			</div>
@@ -316,7 +316,7 @@
 				Sind Sie sicher, dass Sie diesen Mietvertrag vollständig löschen möchten? Alle
 				zugehörigen Daten werden unwiderruflich entfernt.
 			</p>
-			{#if data.contract.status === 'Aktiv'}
+			{#if !data.contract.endDate}
 				<div class="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-6">
 					<div class="flex items-start gap-2">
 						<Icon name="warning" size={18} class="text-amber-600 mt-0.5" />
@@ -331,7 +331,7 @@
 				<Button
 					variant="danger"
 					onclick={handleDelete}
-					disabled={data.contract.status === 'Aktiv'}
+					disabled={!data.contract.endDate}
 				>
 					<Icon name="delete" size={18} />
 					Löschen

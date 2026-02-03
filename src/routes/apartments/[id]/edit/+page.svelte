@@ -18,12 +18,12 @@
 	let { data, form }: { data: PageData; form: ActionData | null } = $props();
 
 	// Form state - initialized from apartment data or form values after failed submission
-	let buildingId = $state(form?.values?.buildingId || data.apartment.building_id);
+	let buildingId = $state(form?.values?.buildingId || data.apartment.buildingId);
 	let floor = $state(form?.values?.floor || String(data.apartment.floor ?? ''));
-	let addressUnit = $state(form?.values?.number || data.apartment.address_unit);
-	let sizeM2 = $state(form?.values?.area || String(data.apartment.size_m2 ?? ''));
-	let roomCount = $state(form?.values?.rooms || String(data.apartment.room_count ?? ''));
-	let occupancyStatus = $state(data.apartment.occupancy_status);
+	let addressUnit = $state(form?.values?.number || data.apartment.number);
+	let sizeM2 = $state(form?.values?.area || String(data.apartment.area ?? ''));
+	let roomCount = $state(form?.values?.rooms || String(data.apartment.rooms ?? ''));
+	let occupancyStatus = $state(data.apartment.status);
 
 	let isSubmitting = $state(false);
 
@@ -43,7 +43,7 @@
 		}
 
 		// Skip check if the number hasn't changed from the original
-		if (trimmedNumber === data.apartment.address_unit && buildingId === data.apartment.building_id) {
+		if (trimmedNumber === data.apartment.number && buildingId === data.apartment.buildingId) {
 			duplicateApartment = null;
 			return;
 		}
@@ -103,7 +103,7 @@
 </script>
 
 <svelte:head>
-	<title>Wohnung {data.apartment.address_unit} bearbeiten - Dwello</title>
+	<title>Wohnung {data.apartment.number} bearbeiten - Dwello</title>
 </svelte:head>
 
 <div class="max-w-2xl mx-auto space-y-6">
@@ -112,7 +112,7 @@
 		<a href="/apartments" class="hover:text-primary transition-colors">Wohnungen</a>
 		<Icon name="chevron_right" size={16} class="mx-2" />
 		<a href="/apartments/{data.apartment.id}" class="hover:text-primary transition-colors">
-			Wohnung {data.apartment.address_unit}
+			Wohnung {data.apartment.number}
 		</a>
 		<Icon name="chevron_right" size={16} class="mx-2" />
 		<span class="text-gray-900 font-medium">Bearbeiten</span>
@@ -120,7 +120,7 @@
 
 	<!-- Header -->
 	<div>
-		<h1 class="text-2xl font-bold text-gray-900">Wohnung {data.apartment.address_unit} bearbeiten</h1>
+		<h1 class="text-2xl font-bold text-gray-900">Wohnung {data.apartment.number} bearbeiten</h1>
 		<p class="text-gray-500 mt-1">Ändern Sie die Wohnungsdaten.</p>
 	</div>
 
@@ -297,7 +297,7 @@
 			</div>
 
 			<!-- Warning if changing status while rented -->
-			{#if data.apartment.occupancy_status === 'Vermietet' && occupancyStatus !== 'Vermietet'}
+			{#if data.apartment.status === 'occupied' && occupancyStatus !== 'occupied'}
 				<div class="bg-amber-50 border border-amber-200 rounded-lg p-4">
 					<div class="flex items-start gap-3">
 						<Icon name="warning" size={20} class="text-amber-600 mt-0.5" />

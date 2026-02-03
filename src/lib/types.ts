@@ -1,16 +1,20 @@
+// ============================================================================
+// Core Entity Types - Match backend schema (camelCase)
+// ============================================================================
+
 // Building types
 export interface Building {
 	id: string;
-	name?: string;
+	name: string;
 	address: string;
 	postalCode: string;
 	city: string;
-	canton?: string;
+	canton: string;
 	country?: string;
-	latitude?: number;
-	longitude?: number;
-	buildingType?: string;
-	yearBuilt?: number;
+	latitude?: string | number | null;
+	longitude?: string | number | null;
+	buildingType?: string | null;
+	yearBuilt?: number | null;
 	createdAt?: Date | string;
 	updatedAt?: Date | string;
 }
@@ -30,86 +34,92 @@ export interface BuildingsListData {
 	pageSize: number;
 }
 
-// Apartment types
+// Apartment status values (match backend)
+export type ApartmentStatus = 'occupied' | 'vacant' | 'reserved';
+
+// Apartment types (camelCase to match backend)
 export interface Apartment {
 	id: string;
-	building_id: string;
-	floor: string;
-	address_unit: string;
-	size_m2: number;
-	room_count: number;
-	occupancy_status: 'Vermietet' | 'Leer' | 'Gesperrt';
-	created_at?: Date;
-	updated_at?: Date;
+	buildingId: string;
+	number: string;
+	floor: number;
+	area: string | number; // decimal from DB
+	rooms: string | number; // decimal from DB (e.g., 3.5)
+	status: ApartmentStatus;
+	createdAt?: Date | string;
+	updatedAt?: Date | string;
 }
 
-// Tenant types
+// Tenant types (camelCase to match backend)
 export interface Tenant {
 	id: string;
-	first_name: string;
-	last_name: string;
-	email: string;
-	phone_number?: string;
-	address?: string;
-	postal_code?: string;
-	city?: string;
-	created_at?: Date;
-	updated_at?: Date;
+	firstName: string;
+	lastName: string;
+	email?: string | null;
+	phone?: string | null;
+	language: 'de' | 'fr' | 'it' | 'rm' | 'en';
+	address?: string | null;
+	postalCode?: string | null;
+	city?: string | null;
+	createdAt?: Date | string;
+	updatedAt?: Date | string;
 }
 
-// Rental Contract types
+// Rental Contract types (camelCase to match backend)
 export interface RentalContract {
 	id: string;
-	apartment_id: string;
-	tenant_id: string;
-	start_date: Date | string;
-	end_date?: Date | string;
-	base_rent_chf: number;
-	additional_rent_chf?: number;
-	advance_payment_chf?: number;
-	status: 'Aktiv' | 'Beendet';
-	created_at?: Date;
-	updated_at?: Date;
+	apartmentId: string;
+	tenantId: string;
+	startDate: string;
+	endDate?: string | null;
+	baseRent: string | number; // decimal from DB
+	additionalRent?: string | number | null;
+	monthlyAdvancePayment: string | number; // Akonto
+	referenceIndex?: string | number | null;
+	contractPdf?: string | null;
+	notes?: string | null;
+	createdAt?: Date | string;
+	updatedAt?: Date | string;
 }
 
 // Contract History item (derived from RentalContract + Tenant)
 export interface ContractHistory {
 	id: string;
-	tenant_name: string;
-	tenant_first_name: string;
-	tenant_last_name: string;
+	tenantName: string;
+	tenantFirstName: string;
+	tenantLastName: string;
 	period: string; // "DD.MM.YYYY - DD.MM.YYYY"
-	rent_brutto: number; // in CHF
-	status: 'AKTIV' | 'Beendet';
-	start_date: Date | string;
-	end_date?: Date | string;
+	rentBrutto: number; // in CHF
+	isActive: boolean;
+	startDate: string;
+	endDate?: string | null;
 }
 
 // Monthly costs breakdown
 export interface MonthlyCosts {
-	base_rent: number;
-	advance_payment?: number;
-	parking?: number;
-	total_brutto: number;
+	baseRent: number;
+	advancePayment?: number;
+	additionalRent?: number;
+	totalBrutto: number;
 }
 
 // Apartment Details page data
 export interface ApartmentDetailsData {
 	apartment: Apartment;
 	building: Building;
-	currentTenant?: Tenant;
-	currentContract?: RentalContract;
+	currentTenant?: Tenant | null;
+	currentContract?: RentalContract | null;
 	monthlyCosts: MonthlyCosts;
 	contractHistory: ContractHistory[];
 }
 
 // Apartment with building info for list view
 export interface ApartmentWithBuilding extends Apartment {
-	building_name?: string;
-	building_address: string;
-	building_city: string;
-	current_tenant_name?: string;
-	current_rent?: number;
+	buildingName?: string;
+	buildingAddress: string;
+	buildingCity: string;
+	currentTenantName?: string | null;
+	currentRent?: number | null;
 }
 
 // Apartments list response
@@ -123,9 +133,9 @@ export interface ApartmentsListData {
 
 // Tenant with current occupancy info for list view
 export interface TenantWithOccupancy extends Tenant {
-	current_apartment?: string;
-	current_building?: string;
-	contract_status?: 'Aktiv' | 'Beendet' | null;
+	currentApartment?: string | null;
+	currentBuilding?: string | null;
+	contractCount: number;
 }
 
 // Tenants list response
@@ -138,13 +148,13 @@ export interface TenantsListData {
 
 // Contract with full details for list view
 export interface ContractWithDetails extends RentalContract {
-	tenant_name: string;
-	tenant_first_name: string;
-	tenant_last_name: string;
-	apartment_unit: string;
-	building_name?: string;
-	building_address: string;
-	total_rent: number;
+	tenantName: string;
+	tenantFirstName: string;
+	tenantLastName: string;
+	apartmentNumber: string;
+	buildingName?: string;
+	buildingAddress: string;
+	totalRent: number;
 }
 
 // Contracts list response
@@ -154,7 +164,7 @@ export interface ContractsListData {
 	page: number;
 	pageSize: number;
 	buildings: { id: string; name: string; address: string }[];
-	apartments: { id: string; unit: string; building_id: string }[];
+	apartments: { id: string; number: string; buildingId: string }[];
 }
 
 // Invoice Category types

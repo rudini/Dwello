@@ -1,8 +1,9 @@
 import type { InvoicesListData, InvoiceWithDetails, Category } from '$lib/types';
+import type { PageServerLoad } from './$types';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
-export const load = async ({ url, fetch }): Promise<InvoicesListData> => {
+export const load: PageServerLoad = async ({ url, fetch }): Promise<InvoicesListData> => {
 	const page = parseInt(url.searchParams.get('page') || '1', 10);
 	const pageSize = parseInt(url.searchParams.get('pageSize') || '20', 10);
 	const search = url.searchParams.get('search') || '';

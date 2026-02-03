@@ -1,8 +1,9 @@
 import type { TenantsListData, TenantWithOccupancy } from '$lib/types';
+import type { PageServerLoad } from './$types';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
-export const load = async ({ url, fetch }): Promise<TenantsListData> => {
+export const load: PageServerLoad = async ({ url, fetch }): Promise<TenantsListData> => {
 	const page = parseInt(url.searchParams.get('page') || '1', 10);
 	const pageSize = parseInt(url.searchParams.get('pageSize') || '12', 10);
 	const search = url.searchParams.get('search') || '';
@@ -19,19 +20,20 @@ export const load = async ({ url, fetch }): Promise<TenantsListData> => {
 		const data = await response.json();
 
 		const tenants: TenantWithOccupancy[] = (data.tenants || data.data || []).map((t: Record<string, unknown>) => ({
-			id: t.id,
-			first_name: t.firstName || '',
-			last_name: t.lastName || '',
-			email: t.email || '',
-			phone_number: t.phone || '',
-			address: t.address || '',
-			postal_code: t.postalCode || '',
-			city: t.city || '',
-			current_apartment: t.currentApartment
+			id: t.id as string,
+			firstName: (t.firstName as string) || '',
+			lastName: (t.lastName as string) || '',
+			email: (t.email as string) || null,
+			phone: (t.phone as string) || null,
+			language: (t.language as 'de' | 'fr' | 'it' | 'rm' | 'en') || 'de',
+			address: (t.address as string) || null,
+			postalCode: (t.postalCode as string) || null,
+			city: (t.city as string) || null,
+			currentApartment: t.currentApartment
 				? `Wohnung ${t.currentApartment}`
-				: undefined,
-			current_building: (t.currentBuilding as string) || undefined,
-			contract_status: Number(t.contractCount) > 0 ? 'Aktiv' : null
+				: null,
+			currentBuilding: (t.currentBuilding as string) || null,
+			contractCount: Number(t.contractCount) || 0
 		}));
 
 		return {
@@ -40,8 +42,8 @@ export const load = async ({ url, fetch }): Promise<TenantsListData> => {
 			page,
 			pageSize
 		};
-	} catch (error) {
-		console.error('Failed to fetch tenants:', error);
+	} catch (err) {
+		console.error('Failed to fetch tenants:', err);
 		return {
 			tenants: [],
 			total: 0,

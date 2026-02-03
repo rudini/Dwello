@@ -9,7 +9,7 @@
  * - Hot Water Only (Warmwasser)
  */
 
-import { eq, sql, asc, ilike } from 'drizzle-orm';
+import { eq, sql, asc, ilike, and } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { heatingProfiles, type HeatingProfile, type NewHeatingProfile } from '../db/schema';
 
@@ -155,18 +155,17 @@ export async function listHeatingProfiles(filters: HeatingProfileFilters = {}): 
 		.offset(offset);
 
 	// Apply conditions if any
-	const results =
-		conditions.length > 0
-			? await profilesQuery.where(conditions.length === 1 ? conditions[0] : sql`${conditions.join(' AND ')}`)
-			: await profilesQuery;
+	const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+	const results = whereClause
+		? await profilesQuery.where(whereClause)
+		: await profilesQuery;
 
 	// Get total count
 	const countQuery = db.select({ count: sql<number>`count(*)` }).from(heatingProfiles);
 
-	const [{ count: total }] =
-		conditions.length > 0
-			? await countQuery.where(conditions.length === 1 ? conditions[0] : sql`${conditions.join(' AND ')}`)
-			: await countQuery;
+	const [{ count: total }] = whereClause
+		? await countQuery.where(whereClause)
+		: await countQuery;
 
 	return {
 		heatingProfiles: results,

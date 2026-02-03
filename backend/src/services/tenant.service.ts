@@ -3,7 +3,7 @@
  * Business logic for tenant operations
  */
 
-import { eq, ilike, or, sql, desc, and } from 'drizzle-orm';
+import { eq, ilike, or, sql, desc, and, inArray } from 'drizzle-orm';
 import { db } from '../db/connection';
 import {
 	tenants,
@@ -86,34 +86,47 @@ export async function listTenants(filters: TenantFilters = {}): Promise<{
 		? await countQuery.where(whereClause)
 		: await countQuery;
 
-	// Get current occupancy for each tenant
-	const tenantsWithOccupancy = await Promise.all(
-		results.map(async (tenant) => {
-			const today = new Date().toISOString().split('T')[0];
-			const [currentContract] = await db
-				.select({
-					apartmentNumber: apartments.number,
-					buildingName: buildings.name
-				})
-				.from(rentalContracts)
-				.leftJoin(apartments, eq(rentalContracts.apartmentId, apartments.id))
-				.leftJoin(buildings, eq(apartments.buildingId, buildings.id))
-				.where(
-					and(
-						eq(rentalContracts.tenantId, tenant.id),
-						sql`${rentalContracts.startDate} <= ${today}`,
-						sql`(${rentalContracts.endDate} IS NULL OR ${rentalContracts.endDate} >= ${today})`
-					)
-				)
-				.limit(1);
+	// Batch load current occupancy for all tenants (avoids N+1 query)
+	const tenantIds = results.map((t) => t.id);
+	const today = new Date().toISOString().split('T')[0];
 
-			return {
-				...tenant,
-				currentApartment: currentContract?.apartmentNumber,
-				currentBuilding: currentContract?.buildingName
-			} as TenantWithOccupancy;
-		})
+	const currentContracts =
+		tenantIds.length > 0
+			? await db
+					.select({
+						tenantId: rentalContracts.tenantId,
+						apartmentNumber: apartments.number,
+						buildingName: buildings.name
+					})
+					.from(rentalContracts)
+					.leftJoin(apartments, eq(rentalContracts.apartmentId, apartments.id))
+					.leftJoin(buildings, eq(apartments.buildingId, buildings.id))
+					.where(
+						and(
+							inArray(rentalContracts.tenantId, tenantIds),
+							sql`${rentalContracts.startDate} <= ${today}`,
+							sql`(${rentalContracts.endDate} IS NULL OR ${rentalContracts.endDate} >= ${today})`
+						)
+					)
+			: [];
+
+	// Create a map of tenant ID to their current occupancy
+	const occupancyByTenantId = new Map(
+		currentContracts.map((c) => [
+			c.tenantId,
+			{ apartmentNumber: c.apartmentNumber, buildingName: c.buildingName }
+		])
 	);
+
+	// Build results with occupancy data
+	const tenantsWithOccupancy: TenantWithOccupancy[] = results.map((tenant) => {
+		const occupancy = occupancyByTenantId.get(tenant.id);
+		return {
+			...tenant,
+			currentApartment: occupancy?.apartmentNumber,
+			currentBuilding: occupancy?.buildingName
+		} as TenantWithOccupancy;
+	});
 
 	return {
 		tenants: tenantsWithOccupancy,

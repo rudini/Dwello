@@ -1,9 +1,10 @@
-import type { ApartmentDetailsData } from '$lib/types';
+import type { ApartmentDetailsData, Apartment, Building, Tenant, RentalContract, MonthlyCosts, ContractHistory, ApartmentStatus } from '$lib/types';
+import type { PageServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
-export const load = async ({ params, fetch }): Promise<ApartmentDetailsData> => {
+export const load: PageServerLoad = async ({ params, fetch }): Promise<ApartmentDetailsData> => {
 	try {
 		const response = await fetch(`${BACKEND_URL}/api/v1/apartments/${params.id}`);
 
@@ -16,67 +17,76 @@ export const load = async ({ params, fetch }): Promise<ApartmentDetailsData> => 
 
 		const data = await response.json();
 
-		const building = {
+		// Map building data (camelCase from backend)
+		const building: Building = {
 			id: data.building?.id || data.buildingId,
 			name: data.building?.name || data.buildingName || '',
 			address: data.building?.address || data.buildingAddress || '',
 			postalCode: data.building?.postalCode || data.buildingPostalCode || '',
 			city: data.building?.city || data.buildingCity || '',
+			canton: data.building?.canton || data.buildingCanton || '',
 			country: data.building?.country || 'CH'
 		};
 
-		const apartment = {
+		// Map apartment data (camelCase from backend)
+		const status: ApartmentStatus = data.status || (data.currentTenantId ? 'occupied' : 'vacant');
+		const apartment: Apartment = {
 			id: data.id,
-			building_id: data.buildingId,
-			floor: data.floor || '',
-			address_unit: data.number || '',
-			size_m2: data.area ? Number(data.area) : undefined,
-			room_count: data.rooms ? Number(data.rooms) : undefined,
-			occupancy_status: data.currentTenantId ? 'Vermietet' as const : 'Leer' as const
+			buildingId: data.buildingId,
+			number: data.number || '',
+			floor: data.floor || 0,
+			area: data.area || '0',
+			rooms: data.rooms || '0',
+			status
 		};
 
-		const currentTenant = data.currentTenant ? {
+		// Map tenant data (camelCase from backend)
+		const currentTenant: Tenant | null = data.currentTenant ? {
 			id: data.currentTenant.id,
-			first_name: data.currentTenant.firstName,
-			last_name: data.currentTenant.lastName,
-			email: data.currentTenant.email || '',
-			phone_number: data.currentTenant.phone || ''
+			firstName: data.currentTenant.firstName,
+			lastName: data.currentTenant.lastName,
+			email: data.currentTenant.email || null,
+			phone: data.currentTenant.phone || null,
+			language: data.currentTenant.language || 'de'
 		} : null;
 
-		const currentContract = data.currentContract ? {
+		// Map contract data (camelCase from backend)
+		const currentContract: RentalContract | null = data.currentContract ? {
 			id: data.currentContract.id,
-			apartment_id: data.id,
-			tenant_id: data.currentContract.tenantId,
-			start_date: new Date(data.currentContract.startDate),
-			base_rent_chf: Number(data.currentContract.baseRent) || 0,
-			additional_rent_chf: Number(data.currentContract.additionalRent) || 0,
-			advance_payment_chf: Number(data.currentContract.advancePayment) || 0,
-			status: 'Aktiv' as const
+			apartmentId: data.id,
+			tenantId: data.currentContract.tenantId,
+			startDate: data.currentContract.startDate,
+			endDate: data.currentContract.endDate || null,
+			baseRent: data.currentContract.baseRent || '0',
+			additionalRent: data.currentContract.additionalRent || null,
+			monthlyAdvancePayment: data.currentContract.monthlyAdvancePayment || '0'
 		} : null;
 
-		const baseRent = currentContract?.base_rent_chf || 0;
-		const additionalRent = currentContract?.additional_rent_chf || 0;
-		const advancePayment = currentContract?.advance_payment_chf || 0;
+		// Calculate monthly costs
+		const baseRent = Number(currentContract?.baseRent || 0);
+		const additionalRent = Number(currentContract?.additionalRent || 0);
+		const advancePayment = Number(currentContract?.monthlyAdvancePayment || 0);
 
-		const monthlyCosts = {
-			base_rent: baseRent,
-			advance_payment: advancePayment,
-			parking: additionalRent,
-			total_brutto: baseRent + additionalRent + advancePayment
+		const monthlyCosts: MonthlyCosts = {
+			baseRent,
+			advancePayment,
+			additionalRent,
+			totalBrutto: baseRent + additionalRent + advancePayment
 		};
 
-		const contractHistory = (data.contractHistory || []).map((c: Record<string, unknown>) => ({
-			id: c.id,
-			tenant_name: `${c.tenantFirstName || ''} ${c.tenantLastName || ''}`.trim(),
-			tenant_first_name: c.tenantFirstName || '',
-			tenant_last_name: c.tenantLastName || '',
+		// Map contract history (camelCase from backend)
+		const contractHistory: ContractHistory[] = (data.contractHistory || []).map((c: Record<string, unknown>) => ({
+			id: c.id as string,
+			tenantName: `${c.tenantFirstName || ''} ${c.tenantLastName || ''}`.trim(),
+			tenantFirstName: (c.tenantFirstName || '') as string,
+			tenantLastName: (c.tenantLastName || '') as string,
 			period: c.endDate
 				? `${formatDate(c.startDate as string)} - ${formatDate(c.endDate as string)}`
 				: `${formatDate(c.startDate as string)} - Heute`,
-			rent_brutto: Number(c.baseRent || 0) + Number(c.additionalRent || 0) + Number(c.advancePayment || 0),
-			status: c.endDate ? 'Beendet' as const : 'AKTIV' as const,
-			start_date: new Date(c.startDate as string),
-			end_date: c.endDate ? new Date(c.endDate as string) : undefined
+			rentBrutto: Number(c.baseRent || 0) + Number(c.additionalRent || 0) + Number(c.advancePayment || 0),
+			isActive: !c.endDate,
+			startDate: c.startDate as string,
+			endDate: (c.endDate as string) || null
 		}));
 
 		return {

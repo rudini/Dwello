@@ -8,7 +8,9 @@ export interface BuildingEditData {
 	building: BuildingWithStats;
 }
 
-export const load = async ({ params, fetch }): Promise<BuildingEditData> => {
+import type { PageServerLoad } from './$types';
+
+export const load: PageServerLoad = async ({ params, fetch }): Promise<BuildingEditData> => {
 	try {
 		const response = await fetch(`${BACKEND_URL}/api/v1/buildings/${params.id}`);
 

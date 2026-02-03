@@ -1,4 +1,5 @@
 import type { Tenant, ContractHistory } from '$lib/types';
+import type { PageServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
@@ -14,7 +15,7 @@ interface TenantDetailsData {
 	contractHistory: ContractHistory[];
 }
 
-export const load = async ({ params, fetch }): Promise<TenantDetailsData> => {
+export const load: PageServerLoad = async ({ params, fetch }): Promise<TenantDetailsData> => {
 	try {
 		const response = await fetch(`${BACKEND_URL}/api/v1/tenants/${params.id}`);
 
@@ -29,13 +30,14 @@ export const load = async ({ params, fetch }): Promise<TenantDetailsData> => {
 
 		const tenant: Tenant = {
 			id: data.id,
-			first_name: data.firstName || '',
-			last_name: data.lastName || '',
-			email: data.email || '',
-			phone_number: data.phone || '',
-			address: data.address || '',
-			postal_code: data.postalCode || '',
-			city: data.city || ''
+			firstName: data.firstName || '',
+			lastName: data.lastName || '',
+			email: data.email || null,
+			phone: data.phone || null,
+			language: data.language || 'de',
+			address: data.address || null,
+			postalCode: data.postalCode || null,
+			city: data.city || null
 		};
 
 		const currentOccupancy = data.currentContract ? {
@@ -48,17 +50,17 @@ export const load = async ({ params, fetch }): Promise<TenantDetailsData> => {
 		} : null;
 
 		const contractHistory: ContractHistory[] = (data.contracts || []).map((c: Record<string, unknown>) => ({
-			id: c.id,
-			tenant_name: `${tenant.first_name} ${tenant.last_name}`,
-			tenant_first_name: tenant.first_name,
-			tenant_last_name: tenant.last_name,
+			id: c.id as string,
+			tenantName: `${tenant.firstName} ${tenant.lastName}`,
+			tenantFirstName: tenant.firstName,
+			tenantLastName: tenant.lastName,
 			period: c.endDate
 				? `${formatDate(c.startDate as string)} - ${formatDate(c.endDate as string)}`
 				: `${formatDate(c.startDate as string)} - heute`,
-			rent_brutto: Number(c.baseRent || 0) + Number(c.additionalRent || 0) + Number(c.advancePayment || 0),
-			status: c.endDate ? 'Beendet' : 'AKTIV',
-			start_date: c.startDate as string,
-			end_date: c.endDate as string | undefined
+			rentBrutto: Number(c.baseRent || 0) + Number(c.additionalRent || 0) + Number(c.advancePayment || 0),
+			isActive: !c.endDate,
+			startDate: c.startDate as string,
+			endDate: (c.endDate as string) || null
 		}));
 
 		return { tenant, currentOccupancy, contractHistory };

@@ -1,4 +1,5 @@
-import type { RentalContract, Tenant, Apartment, Building } from '$lib/types';
+import type { RentalContract, Tenant, Apartment, Building, ApartmentStatus } from '$lib/types';
+import type { PageServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
@@ -17,7 +18,7 @@ interface ContractDetailsData {
 	};
 }
 
-export const load = async ({ params, fetch }): Promise<ContractDetailsData> => {
+export const load: PageServerLoad = async ({ params, fetch }): Promise<ContractDetailsData> => {
 	try {
 		const response = await fetch(`${BACKEND_URL}/api/v1/contracts/${params.id}`);
 
@@ -32,40 +33,42 @@ export const load = async ({ params, fetch }): Promise<ContractDetailsData> => {
 
 		const baseRent = Number(data.baseRent) || 0;
 		const additionalRent = Number(data.additionalRent) || 0;
-		const advancePayment = Number(data.advancePayment) || 0;
+		const advancePayment = Number(data.monthlyAdvancePayment || data.advancePayment) || 0;
 
-		const contract = {
+		const apartmentStatus: ApartmentStatus = data.apartment?.status || 'occupied';
+		const contract: RentalContract & { tenant: Tenant; apartment: Apartment; building: Building } = {
 			id: data.id,
-			apartment_id: data.apartmentId,
-			tenant_id: data.tenantId,
-			start_date: data.startDate,
-			end_date: data.endDate,
-			base_rent_chf: baseRent,
-			additional_rent_chf: additionalRent,
-			advance_payment_chf: advancePayment,
-			status: data.endDate ? 'Beendet' as const : 'Aktiv' as const,
+			apartmentId: data.apartmentId,
+			tenantId: data.tenantId,
+			startDate: data.startDate,
+			endDate: data.endDate || null,
+			baseRent: data.baseRent || '0',
+			additionalRent: data.additionalRent || null,
+			monthlyAdvancePayment: data.monthlyAdvancePayment || '0',
 			tenant: {
 				id: data.tenant?.id || data.tenantId,
-				first_name: data.tenant?.firstName || '',
-				last_name: data.tenant?.lastName || '',
-				email: data.tenant?.email || '',
-				phone_number: data.tenant?.phone || ''
+				firstName: data.tenant?.firstName || '',
+				lastName: data.tenant?.lastName || '',
+				email: data.tenant?.email || null,
+				phone: data.tenant?.phone || null,
+				language: data.tenant?.language || 'de'
 			},
 			apartment: {
 				id: data.apartment?.id || data.apartmentId,
-				building_id: data.apartment?.buildingId || '',
-				floor: data.apartment?.floor || '',
-				address_unit: data.apartment?.number || '',
-				size_m2: data.apartment?.area ? Number(data.apartment.area) : undefined,
-				room_count: data.apartment?.rooms ? Number(data.apartment.rooms) : undefined,
-				occupancy_status: 'Vermietet' as const
+				buildingId: data.apartment?.buildingId || '',
+				number: data.apartment?.number || '',
+				floor: data.apartment?.floor || 0,
+				area: data.apartment?.area || '0',
+				rooms: data.apartment?.rooms || '0',
+				status: apartmentStatus
 			},
 			building: {
 				id: data.building?.id || '',
 				name: data.building?.name || '',
 				address: data.building?.address || '',
 				postalCode: data.building?.postalCode || '',
-				city: data.building?.city || ''
+				city: data.building?.city || '',
+				canton: data.building?.canton || ''
 			}
 		};
 

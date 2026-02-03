@@ -4,12 +4,14 @@
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { user, clearStores } from '$lib/stores';
+	import { getXsrfTokenFromCookie } from '$lib/api';
 	import Header from '$lib/components/Header.svelte';
 	import Navigation from '$lib/components/Navigation.svelte';
 	import Footer from '$lib/components/Footer.svelte';
 	import type { LayoutData } from './$types';
+	import type { Snippet } from 'svelte';
 
-	let { data, children }: { data: LayoutData; children: any } = $props();
+	let { data, children }: { data: LayoutData; children: Snippet } = $props();
 
 	// Pages that don't require authentication
 	const publicPaths = ['/login', '/auth', '/error'];
@@ -40,15 +42,10 @@
 			async () => {
 				if ($user && !isPublicPath($page.url.pathname)) {
 					try {
+						const xsrfToken = getXsrfTokenFromCookie();
 						const response = await fetch('/auth/refresh', {
 							method: 'POST',
-							headers: {
-								'X-XSRF-TOKEN':
-									document.cookie
-										.split(';')
-										.find((c) => c.trim().startsWith('dwello_xsrf='))
-										?.split('=')[1] || ''
-							}
+							headers: xsrfToken ? { 'X-XSRF-TOKEN': xsrfToken } : {}
 						});
 						if (!response.ok) {
 							console.warn('Token refresh failed, logging out');

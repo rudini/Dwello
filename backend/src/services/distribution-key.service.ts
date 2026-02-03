@@ -3,7 +3,7 @@
  * Business logic for distribution key operations
  */
 
-import { eq, sql, asc, ilike } from 'drizzle-orm';
+import { eq, sql, asc, ilike, and } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { distributionKeys, type DistributionKey, type NewDistributionKey } from '../db/schema';
 import {
@@ -129,18 +129,17 @@ export async function listDistributionKeys(filters: DistributionKeyFilters = {})
 		.offset(offset);
 
 	// Apply conditions if any
-	const results =
-		conditions.length > 0
-			? await keysQuery.where(conditions.length === 1 ? conditions[0] : sql`${conditions.join(' AND ')}`)
-			: await keysQuery;
+	const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+	const results = whereClause
+		? await keysQuery.where(whereClause)
+		: await keysQuery;
 
 	// Get total count
 	const countQuery = db.select({ count: sql<number>`count(*)` }).from(distributionKeys);
 
-	const [{ count: total }] =
-		conditions.length > 0
-			? await countQuery.where(conditions.length === 1 ? conditions[0] : sql`${conditions.join(' AND ')}`)
-			: await countQuery;
+	const [{ count: total }] = whereClause
+		? await countQuery.where(whereClause)
+		: await countQuery;
 
 	return {
 		distributionKeys: results as DistributionKeyWithUsage[],

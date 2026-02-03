@@ -3,7 +3,7 @@
  * Business logic for utility statement operations
  */
 
-import { eq, sql, desc, and, gte, lte, lt, ilike, or } from 'drizzle-orm';
+import { eq, sql, desc, and, gte, lte, lt, ilike, or, inArray } from 'drizzle-orm';
 import { db } from '../db/connection';
 import {
 	utilityStatements,
@@ -149,34 +149,45 @@ export async function listStatements(filters: StatementFilters = {}): Promise<{
 	const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 	const results = whereClause ? await query.where(whereClause) : await query;
 
-	// Get line items for each statement and compute effective status
+	// Batch load all line items for the fetched statements (avoids N+1 query)
+	const statementIds = results.map((r) => r.statement.id);
+	const allLineItems =
+		statementIds.length > 0
+			? await db
+					.select()
+					.from(utilityStatementLineItems)
+					.where(inArray(utilityStatementLineItems.statementId, statementIds))
+					.orderBy(utilityStatementLineItems.statementId, utilityStatementLineItems.sortOrder)
+			: [];
+
+	// Group line items by statement ID for quick lookup
+	const lineItemsByStatementId = new Map<string, typeof allLineItems>();
+	for (const item of allLineItems) {
+		const existing = lineItemsByStatementId.get(item.statementId) || [];
+		existing.push(item);
+		lineItemsByStatementId.set(item.statementId, existing);
+	}
+
+	// Build results with line items and compute effective status
 	const today = new Date().toISOString().split('T')[0];
-	const statementsWithLineItems: StatementWithDetails[] = await Promise.all(
-		results.map(async (row) => {
-			const lineItems = await db
-				.select()
-				.from(utilityStatementLineItems)
-				.where(eq(utilityStatementLineItems.statementId, row.statement.id))
-				.orderBy(utilityStatementLineItems.sortOrder);
+	const statementsWithLineItems: StatementWithDetails[] = results.map((row) => {
+		// Compute effective status: if sent and past deadline, show as overdue
+		const effectiveStatus =
+			row.statement.status === 'sent' &&
+			row.statement.paymentDeadline &&
+			row.statement.paymentDeadline < today
+				? 'overdue'
+				: row.statement.status;
 
-			// Compute effective status: if sent and past deadline, show as overdue
-			const effectiveStatus =
-				row.statement.status === 'sent' &&
-				row.statement.paymentDeadline &&
-				row.statement.paymentDeadline < today
-					? 'overdue'
-					: row.statement.status;
-
-			return {
-				...row.statement,
-				status: effectiveStatus,
-				tenant: row.tenant,
-				apartment: row.apartment,
-				building: row.building,
-				lineItems
-			};
-		})
-	);
+		return {
+			...row.statement,
+			status: effectiveStatus,
+			tenant: row.tenant,
+			apartment: row.apartment,
+			building: row.building,
+			lineItems: lineItemsByStatementId.get(row.statement.id) || []
+		};
+	});
 
 	// Get total count
 	let countQuery = db

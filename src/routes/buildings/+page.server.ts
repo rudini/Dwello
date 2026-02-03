@@ -1,8 +1,9 @@
 import type { BuildingsListData } from '$lib/types';
+import type { PageServerLoad } from './$types';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
-export const load = async ({ url, fetch }): Promise<BuildingsListData> => {
+export const load: PageServerLoad = async ({ url, fetch }): Promise<BuildingsListData> => {
 	const page = parseInt(url.searchParams.get('page') || '1', 10);
 	const pageSize = parseInt(url.searchParams.get('pageSize') || '10', 10);
 	const search = url.searchParams.get('search') || '';

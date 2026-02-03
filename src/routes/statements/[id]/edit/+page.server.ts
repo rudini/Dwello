@@ -1,4 +1,5 @@
 import type { StatementWithDetails, Category, DistributionKey } from '$lib/types';
+import type { PageServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
@@ -9,7 +10,7 @@ interface StatementEditData {
 	distributionKeys: DistributionKey[];
 }
 
-export const load = async ({ params, fetch }): Promise<StatementEditData> => {
+export const load: PageServerLoad = async ({ params, fetch }): Promise<StatementEditData> => {
 	try {
 		const [statementRes, categoriesRes, distributionKeysRes] = await Promise.all([
 			fetch(`${BACKEND_URL}/api/v1/statements/${params.id}`),

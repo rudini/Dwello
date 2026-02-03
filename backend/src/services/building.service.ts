@@ -3,7 +3,7 @@
  * Business logic for building operations
  */
 
-import { eq, ilike, or, sql, desc } from 'drizzle-orm';
+import { eq, ilike, or, sql, desc, and, inArray } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { buildings, apartments, type Building, type NewBuilding } from '../db/schema';
 
@@ -60,10 +60,10 @@ export async function listBuildings(filters: BuildingFilters = {}): Promise<{
 		.offset(offset);
 
 	// Apply conditions if any
-	const buildingResults =
-		conditions.length > 0
-			? await buildingsQuery.where(conditions.length === 1 ? conditions[0] : sql`${conditions[0]}`)
-			: await buildingsQuery;
+	const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+	const buildingResults = whereClause
+		? await buildingsQuery.where(whereClause)
+		: await buildingsQuery;
 
 	// Get apartment counts for all buildings
 	const buildingIds = buildingResults.map((b) => b.id);
@@ -77,7 +77,7 @@ export async function listBuildings(filters: BuildingFilters = {}): Promise<{
 					vacant: sql<number>`count(*) filter (where status = 'vacant')`
 				})
 				.from(apartments)
-				.where(sql`${apartments.buildingId} IN (${sql.join(buildingIds.map(id => sql`${id}`), sql`, `)})`)
+				.where(inArray(apartments.buildingId, buildingIds))
 				.groupBy(apartments.buildingId)
 		: [];
 
@@ -103,10 +103,9 @@ export async function listBuildings(filters: BuildingFilters = {}): Promise<{
 	// Get total count
 	const countQuery = db.select({ count: sql<number>`count(*)` }).from(buildings);
 
-	const [{ count: total }] =
-		conditions.length > 0
-			? await countQuery.where(conditions.length === 1 ? conditions[0] : sql`${conditions[0]}`)
-			: await countQuery;
+	const [{ count: total }] = whereClause
+		? await countQuery.where(whereClause)
+		: await countQuery;
 
 	return {
 		buildings: results,

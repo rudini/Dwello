@@ -1,8 +1,9 @@
-import type { ApartmentsListData, ApartmentWithBuilding } from '$lib/types';
+import type { ApartmentsListData, ApartmentWithBuilding, ApartmentStatus } from '$lib/types';
+import type { PageServerLoad } from './$types';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
-export const load = async ({ url, fetch }): Promise<ApartmentsListData> => {
+export const load: PageServerLoad = async ({ url, fetch }): Promise<ApartmentsListData> => {
 	const page = parseInt(url.searchParams.get('page') || '1', 10);
 	const pageSize = parseInt(url.searchParams.get('pageSize') || '12', 10);
 	const search = url.searchParams.get('search') || '';
@@ -25,22 +26,25 @@ export const load = async ({ url, fetch }): Promise<ApartmentsListData> => {
 		const apartmentsData = await apartmentsRes.json();
 		const buildingsData = await buildingsRes.json();
 
-		const apartments: ApartmentWithBuilding[] = (apartmentsData.apartments || apartmentsData.data || []).map((a: Record<string, unknown>) => ({
-			id: a.id,
-			building_id: a.buildingId,
-			floor: a.floor || '',
-			address_unit: a.number || '',
-			size_m2: a.area ? Number(a.area) : undefined,
-			room_count: a.rooms ? Number(a.rooms) : undefined,
-			occupancy_status: a.status === 'occupied' ? 'Vermietet' : 'Leer',
-			building_name: (a.buildingName as string) || '',
-			building_address: (a.buildingAddress as string) || '',
-			building_city: (a.buildingCity as string) || '',
-			current_tenant_name: a.currentTenant
-				? `${(a.currentTenant as Record<string, string>).firstName} ${(a.currentTenant as Record<string, string>).lastName}`
-				: undefined,
-			current_rent: a.currentRent ? Number(a.currentRent) : undefined
-		}));
+		const apartments: ApartmentWithBuilding[] = (apartmentsData.apartments || apartmentsData.data || []).map((a: Record<string, unknown>) => {
+			const aptStatus: ApartmentStatus = (a.status as ApartmentStatus) || 'vacant';
+			return {
+				id: a.id as string,
+				buildingId: a.buildingId as string,
+				number: (a.number as string) || '',
+				floor: (a.floor as number) || 0,
+				area: a.area || '0',
+				rooms: a.rooms || '0',
+				status: aptStatus,
+				buildingName: (a.buildingName as string) || '',
+				buildingAddress: (a.buildingAddress as string) || '',
+				buildingCity: (a.buildingCity as string) || '',
+				currentTenantName: a.currentTenant
+					? `${(a.currentTenant as Record<string, string>).firstName} ${(a.currentTenant as Record<string, string>).lastName}`
+					: null,
+				currentRent: a.currentRent ? Number(a.currentRent) : null
+			};
+		});
 
 		const buildings = (buildingsData.buildings || buildingsData.data || []).map((b: Record<string, unknown>) => ({
 			id: b.id,
@@ -55,8 +59,8 @@ export const load = async ({ url, fetch }): Promise<ApartmentsListData> => {
 			pageSize,
 			buildings
 		};
-	} catch (error) {
-		console.error('Failed to fetch apartments:', error);
+	} catch (err) {
+		console.error('Failed to fetch apartments:', err);
 		return {
 			apartments: [],
 			total: 0,

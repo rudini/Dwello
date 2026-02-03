@@ -1,8 +1,17 @@
 /**
  * Svelte Stores for Application State
+ *
+ * Core entity types are imported from types.ts to ensure consistency
+ * with the backend schema.
  */
 
 import { writable, derived, type Readable } from 'svelte/store';
+import type {
+	BuildingWithStats,
+	Apartment as TypesApartment,
+	Tenant as TypesTenant,
+	Statement as TypesStatement
+} from './types';
 
 /**
  * User interface from JWT payload
@@ -15,62 +24,11 @@ export interface User {
 	provider?: string;
 }
 
-/**
- * Building interface
- */
-export interface Building {
-	id: number;
-	name: string;
-	address: string;
-	city: string;
-	postalCode: string;
-	canton: string;
-	latitude?: number;
-	longitude?: number;
-	apartmentCount?: number;
-	occupiedCount?: number;
-}
-
-/**
- * Apartment interface
- */
-export interface Apartment {
-	id: number;
-	buildingId: number;
-	number: string;
-	floor: number;
-	area: number;
-	rooms: number;
-	status: 'occupied' | 'vacant' | 'reserved';
-	currentTenantId?: number;
-}
-
-/**
- * Tenant interface
- */
-export interface Tenant {
-	id: number;
-	firstName: string;
-	lastName: string;
-	email?: string;
-	phone?: string;
-	language: 'de' | 'fr' | 'it' | 'rm' | 'en';
-}
-
-/**
- * Statement interface
- */
-export interface Statement {
-	id: number;
-	tenantId: number;
-	apartmentId: number;
-	periodStart: string;
-	periodEnd: string;
-	status: 'draft' | 'sent' | 'paid' | 'overdue';
-	totalAmount: number;
-	paidAmount: number;
-	dueDate?: string;
-}
+// Re-export types for convenience (use types from types.ts)
+export type Building = BuildingWithStats;
+export type Apartment = TypesApartment;
+export type Tenant = TypesTenant;
+export type Statement = TypesStatement;
 
 /**
  * User store - holds current authenticated user

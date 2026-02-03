@@ -13,9 +13,9 @@
 
 	let { tenant, contract, status }: Props = $props();
 
-	const initials = $derived(`${tenant.first_name[0]}${tenant.last_name[0]}`.toUpperCase());
+	const initials = $derived(`${tenant.firstName[0]}${tenant.lastName[0]}`.toUpperCase());
 
-	const contractDate = $derived(new Date(contract.start_date).toLocaleDateString('de-CH', {
+	const contractDate = $derived(new Date(contract.startDate).toLocaleDateString('de-CH', {
 		day: '2-digit',
 		month: '2-digit',
 		year: 'numeric'
@@ -35,7 +35,7 @@
 			{initials}
 		</div>
 		<div>
-			<p class="text-base font-bold text-text-dark">{tenant.first_name} {tenant.last_name}</p>
+			<p class="text-base font-bold text-text-dark">{tenant.firstName} {tenant.lastName}</p>
 			<p class="text-xs text-text-secondary">Vertrag seit: {contractDate}</p>
 		</div>
 	</div>
@@ -47,10 +47,10 @@
 				<a href="mailto:{tenant.email}" class="text-sm text-primary hover:underline">{tenant.email}</a>
 			</div>
 		{/if}
-		{#if tenant.phone_number}
+		{#if tenant.phone}
 			<div class="flex items-center gap-3">
 				<Icon name="phone" size={18} class="text-text-secondary" />
-				<a href="tel:{tenant.phone_number}" class="text-sm text-primary hover:underline">{tenant.phone_number}</a>
+				<a href="tel:{tenant.phone}" class="text-sm text-primary hover:underline">{tenant.phone}</a>
 			</div>
 		{/if}
 	</div>

@@ -13,12 +13,12 @@
 
 	// Form state - using functions to capture initial values
 	// This pattern is intentional for edit forms where we want initial snapshot
-	let firstName = $state((() => data.tenant.first_name)());
-	let lastName = $state((() => data.tenant.last_name)());
+	let firstName = $state((() => data.tenant.firstName)());
+	let lastName = $state((() => data.tenant.lastName)());
 	let email = $state((() => data.tenant.email)());
-	let phoneNumber = $state((() => data.tenant.phone_number || '')());
+	let phoneNumber = $state((() => data.tenant.phone || '')());
 	let address = $state((() => data.tenant.address || '')());
-	let postalCode = $state((() => data.tenant.postal_code || '')());
+	let postalCode = $state((() => data.tenant.postalCode || '')());
 	let city = $state((() => data.tenant.city || '')());
 
 	let isSubmitting = $state(false);
@@ -33,7 +33,7 @@
 		if (!lastName.trim()) {
 			newErrors.lastName = 'Nachname ist erforderlich';
 		}
-		if (!email.trim()) {
+		if (!email || !email.trim()) {
 			newErrors.email = 'E-Mail ist erforderlich';
 		} else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
 			newErrors.email = 'Bitte geben Sie eine gültige E-Mail-Adresse ein';
@@ -62,12 +62,12 @@
 			// 	method: 'PUT',
 			// 	headers: { 'Content-Type': 'application/json' },
 			// 	body: JSON.stringify({
-			// 		first_name: firstName,
-			// 		last_name: lastName,
+			// 		firstName: firstName,
+			// 		lastName: lastName,
 			// 		email,
-			// 		phone_number: phoneNumber || null,
+			// 		phone: phoneNumber || null,
 			// 		address: address || null,
-			// 		postal_code: postalCode || null,
+			// 		postalCode: postalCode || null,
 			// 		city: city || null
 			// 	})
 			// });
@@ -85,7 +85,7 @@
 </script>
 
 <svelte:head>
-	<title>{data.tenant.first_name} {data.tenant.last_name} bearbeiten - Dwello</title>
+	<title>{data.tenant.firstName} {data.tenant.lastName} bearbeiten - Dwello</title>
 </svelte:head>
 
 <div class="max-w-2xl mx-auto space-y-6">
@@ -94,7 +94,7 @@
 		<a href="/tenants" class="hover:text-primary transition-colors">Mieter</a>
 		<Icon name="chevron_right" size={16} class="mx-2" />
 		<a href="/tenants/{data.tenant.id}" class="hover:text-primary transition-colors">
-			{data.tenant.first_name} {data.tenant.last_name}
+			{data.tenant.firstName} {data.tenant.lastName}
 		</a>
 		<Icon name="chevron_right" size={16} class="mx-2" />
 		<span class="text-gray-900 font-medium">Bearbeiten</span>
@@ -103,7 +103,7 @@
 	<!-- Header -->
 	<div>
 		<h1 class="text-2xl font-bold text-gray-900">
-			{data.tenant.first_name} {data.tenant.last_name} bearbeiten
+			{data.tenant.firstName} {data.tenant.lastName} bearbeiten
 		</h1>
 		<p class="text-gray-500 mt-1">Ändern Sie die Kontaktdaten des Mieters.</p>
 	</div>

@@ -1,5 +1,5 @@
-import type { Apartment } from '$lib/types';
-import type { Actions } from './$types';
+import type { Apartment, ApartmentStatus } from '$lib/types';
+import type { Actions, PageServerLoad } from './$types';
 import { error, fail, redirect } from '@sveltejs/kit';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
@@ -9,7 +9,7 @@ interface ApartmentEditData {
 	buildings: { id: string; name: string; address: string }[];
 }
 
-export const load = async ({ params, fetch }: { params: { id: string }; fetch: typeof globalThis.fetch }): Promise<ApartmentEditData> => {
+export const load: PageServerLoad = async ({ params, fetch }): Promise<ApartmentEditData> => {
 	try {
 		const [apartmentRes, buildingsRes] = await Promise.all([
 			fetch(`${BACKEND_URL}/api/v1/apartments/${params.id}`),
@@ -26,14 +26,15 @@ export const load = async ({ params, fetch }: { params: { id: string }; fetch: t
 		const data = await apartmentRes.json();
 		const buildingsData = await buildingsRes.json();
 
+		const status: ApartmentStatus = data.status || (data.currentTenantId ? 'occupied' : 'vacant');
 		const apartment: Apartment = {
 			id: data.id,
-			building_id: data.buildingId,
-			floor: data.floor || '',
-			address_unit: data.number || '',
-			size_m2: data.area ? Number(data.area) : undefined,
-			room_count: data.rooms ? Number(data.rooms) : undefined,
-			occupancy_status: data.currentTenantId ? 'Vermietet' : 'Leer'
+			buildingId: data.buildingId,
+			number: data.number || '',
+			floor: data.floor || 0,
+			area: data.area || '0',
+			rooms: data.rooms || '0',
+			status
 		};
 
 		const buildings = (buildingsData.buildings || buildingsData.data || []).map((b: Record<string, unknown>) => ({

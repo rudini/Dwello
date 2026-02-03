@@ -18,9 +18,9 @@
 	}
 
 	const costItems = $derived([
-		{ label: 'Nettomiete', value: costs.base_rent },
-		...(costs.advance_payment ? [{ label: 'Nebenkosten (Aconto)', value: costs.advance_payment }] : []),
-		...(costs.parking ? [{ label: 'Parkplatz (Nr. 12)', value: costs.parking }] : [])
+		{ label: 'Nettomiete', value: costs.baseRent },
+		...(costs.advancePayment ? [{ label: 'Nebenkosten (Aconto)', value: costs.advancePayment }] : []),
+		...(costs.additionalRent ? [{ label: 'Zusatzmiete', value: costs.additionalRent }] : [])
 	]);
 </script>
 
@@ -39,7 +39,7 @@
 	<div class="border-t border-slate-200 pt-4">
 		<div class="flex justify-between items-center">
 			<span class="font-bold text-text-dark">Total Brutto</span>
-			<span class="text-2xl font-bold text-primary">{formatCurrency(costs.total_brutto)}</span>
+			<span class="text-2xl font-bold text-primary">{formatCurrency(costs.totalBrutto)}</span>
 		</div>
 	</div>
 </Card>

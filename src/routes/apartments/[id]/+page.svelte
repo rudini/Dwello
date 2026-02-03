@@ -24,7 +24,7 @@
 </script>
 
 <svelte:head>
-	<title>Wohnung {data.apartment.address_unit} - Dwello</title>
+	<title>Wohnung {data.apartment.number} - Dwello</title>
 </svelte:head>
 
 <div class="space-y-6">
@@ -34,16 +34,16 @@
 	<!-- Info Cards Grid -->
 	<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
 		<div class="bg-white border border-slate-200 rounded-xl shadow-sm p-6">
-			<InfoCard icon="check_circle" label="Status" value={data.apartment.occupancy_status} />
+			<InfoCard icon="check_circle" label="Status" value={data.apartment.status} />
 		</div>
 		<div class="bg-white border border-slate-200 rounded-xl shadow-sm p-6">
-			<InfoCard icon="home" label="Zimmer" value={data.apartment.room_count} />
+			<InfoCard icon="home" label="Zimmer" value={String(data.apartment.rooms)} />
 		</div>
 		<div class="bg-white border border-slate-200 rounded-xl shadow-sm p-6">
-			<InfoCard icon="apartment" label="Stockwerk" value={data.apartment.floor} />
+			<InfoCard icon="apartment" label="Stockwerk" value={String(data.apartment.floor)} />
 		</div>
 		<div class="bg-white border border-slate-200 rounded-xl shadow-sm p-6">
-			<InfoCard icon="straighten" label="Fläche" value="{data.apartment.size_m2} m²" />
+			<InfoCard icon="straighten" label="Fläche" value="{data.apartment.area} m²" />
 		</div>
 	</div>
 
