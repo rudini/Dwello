@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
+	import { goto, invalidateAll } from '$app/navigation';
+	import { api } from '$lib/api';
 	import type { InvoiceWithDetails } from '$lib/types';
 	import Button from '$lib/components/Button.svelte';
 	import Icon from '$lib/components/Icon.svelte';
@@ -11,7 +12,9 @@
 
 	let showDeleteModal = $state(false);
 	let isDeleting = $state(false);
+	let deleteError = $state('');
 	let isRecategorizing = $state(false);
+	let recategorizeError = $state('');
 
 	function formatCurrency(amount: number): string {
 		return new Intl.NumberFormat('de-CH', {
@@ -28,20 +31,29 @@
 		return new Date(dateString).toLocaleString('de-CH');
 	}
 
-
 	async function handleDelete() {
 		isDeleting = true;
-		// Simulate API call
-		await new Promise(resolve => setTimeout(resolve, 1000));
+		deleteError = '';
+		const result = await api.delete(`/invoices/${data.invoice.id}`);
+		if (result.error) {
+			deleteError = result.error.message;
+			isDeleting = false;
+			return;
+		}
 		goto('/invoices');
 	}
 
 	async function handleRecategorize() {
 		isRecategorizing = true;
-		// Simulate API call
-		await new Promise(resolve => setTimeout(resolve, 2000));
+		recategorizeError = '';
+		const result = await api.post(`/invoices/${data.invoice.id}/recategorize`);
+		if (result.error) {
+			recategorizeError = result.error.message;
+			isRecategorizing = false;
+			return;
+		}
+		await invalidateAll();
 		isRecategorizing = false;
-		// In production, this would refresh the data
 	}
 </script>
 
@@ -96,6 +108,12 @@
 			</Button>
 		</div>
 	</div>
+
+	{#if recategorizeError}
+		<div class="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+			Kategorisierung fehlgeschlagen: {recategorizeError}
+		</div>
+	{/if}
 
 	<div class="grid gap-6 lg:grid-cols-3">
 		<!-- Main Info -->
@@ -296,6 +314,11 @@
 		<p class="text-sm text-gray-500">{data.invoice.description}</p>
 		<p class="text-sm font-medium text-gray-900 mt-1">{formatCurrency(data.invoice.amount)}</p>
 	</div>
+	{#if deleteError}
+		<div class="p-3 bg-red-50 border border-red-200 rounded-lg mb-4 text-sm text-red-700">
+			{deleteError}
+		</div>
+	{/if}
 	<div class="flex justify-end gap-3">
 		<Button variant="secondary" onclick={() => showDeleteModal = false}>
 			Abbrechen

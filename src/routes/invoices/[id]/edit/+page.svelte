@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { api } from '$lib/api';
 	import type { InvoiceWithDetails, Category, DistributionKey } from '$lib/types';
 	import Button from '$lib/components/Button.svelte';
 	import Icon from '$lib/components/Icon.svelte';
@@ -41,6 +42,7 @@
 	// Form validation
 	let errors = $state<Record<string, string>>({});
 	let isSubmitting = $state(false);
+	let submitError = $state('');
 
 	// Derived values
 	const selectedCategory = $derived.by(() => data.categories.find(c => c.id === categoryId));
@@ -88,23 +90,30 @@
 		if (!validate()) return;
 
 		isSubmitting = true;
+		submitError = '';
 
-		// Simulate API call
-		await new Promise(resolve => setTimeout(resolve, 1000));
-
-		// In production, this would PUT to the API
-		console.log('Updating invoice:', {
-			id: data.invoice.id,
+		const body: Record<string, unknown> = {
 			buildingId,
 			invoiceDate,
-			billingEntity,
+			billingEntityName: billingEntity,
 			description,
-			amount: parseFloat(amount),
-			categoryId,
-			distributionKeyId,
-			isValidUtilityCost,
-			overrideReason
-		});
+			amount: String(parseFloat(amount)),
+			categoryId: categoryId || null,
+			distributionKeyId: distributionKeyId || null,
+			isValidUtilityCost
+		};
+
+		if (overrideReason.trim()) {
+			body.manualOverrideReason = overrideReason.trim();
+		}
+
+		const result = await api.put(`/invoices/${data.invoice.id}`, body);
+
+		if (result.error) {
+			submitError = result.error.message;
+			isSubmitting = false;
+			return;
+		}
 
 		goto(`/invoices/${data.invoice.id}`);
 	}
@@ -360,6 +369,12 @@
 				</div>
 			</div>
 		</Card>
+
+		{#if submitError}
+			<div class="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+				Fehler beim Speichern: {submitError}
+			</div>
+		{/if}
 
 		<!-- Actions -->
 		<div class="flex items-center justify-between">

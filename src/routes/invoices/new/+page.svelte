@@ -80,6 +80,12 @@
 					reasoning: response.data.reasoning,
 					isAllowedUtilityCost: response.data.isAllowedUtilityCost
 				};
+
+				// Auto-apply category when confidence is high enough
+				if (response.data.category && response.data.confidence >= 0.7) {
+					categoryId = response.data.category.id;
+					isValidUtilityCost = response.data.isAllowedUtilityCost;
+				}
 			}
 		} catch (error) {
 			console.error('LLM categorization failed:', error);
