@@ -121,8 +121,12 @@ export function parseLLMResponse(response: string): LLMCategorizationResult | nu
 			return null;
 		}
 
+		// Clean category name: LLMs often append German translation in parentheses
+		// e.g. "Garden Maintenance (Gartenpflege)" → "Garden Maintenance"
+		const cleanedCategory = parsed.category.replace(/\s*\(.*\)\s*$/, '').trim();
+
 		return {
-			category: parsed.category,
+			category: cleanedCategory,
 			confidence: Math.max(0, Math.min(1, parsed.confidence)), // Clamp to 0-1
 			isAllowedUtilityCost: parsed.isAllowedUtilityCost,
 			reasoning: parsed.reasoning

@@ -57,7 +57,7 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<InvoicesList
 			address: `${b.address}, ${b.postalCode} ${b.city}`
 		}));
 
-		const categories: Category[] = (categoriesData.data || []).map((c: Record<string, unknown>) => ({
+		const categories: Category[] = (categoriesData.categories || categoriesData.data || []).map((c: Record<string, unknown>) => ({
 			id: c.id,
 			name: c.name,
 			isAllowedUtilityCost: c.isAllowedUtilityCost,

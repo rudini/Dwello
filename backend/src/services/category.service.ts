@@ -110,15 +110,26 @@ export async function getCategory(id: string): Promise<CategoryWithUsage | null>
 
 /**
  * Get category by name (for LLM categorization matching)
+ * Searches English name, then German name (nameDE) as fallback
  */
 export async function getCategoryByName(name: string): Promise<Category | null> {
-	const [category] = await db
+	// Try exact match on English name first
+	const [byEnglish] = await db
 		.select()
 		.from(categories)
 		.where(ilike(categories.name, name))
 		.limit(1);
 
-	return category || null;
+	if (byEnglish) return byEnglish;
+
+	// Fallback: try German name (LLM sometimes returns German category names)
+	const [byGerman] = await db
+		.select()
+		.from(categories)
+		.where(ilike(categories.nameDE, name))
+		.limit(1);
+
+	return byGerman || null;
 }
 
 /**
