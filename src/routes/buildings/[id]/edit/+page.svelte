@@ -93,7 +93,7 @@
 		<form method="POST" use:enhance={() => {
 			isSubmitting = true;
 			return async ({ update }) => {
-				await update();
+				await update({ reset: false });
 				isSubmitting = false;
 			};
 		}} class="space-y-6">

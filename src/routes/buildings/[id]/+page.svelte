@@ -243,7 +243,7 @@
 				>
 					Abbrechen
 				</Button>
-				<Button variant="danger" onclick={handleDelete}>
+				<Button variant="danger" onclick={handleDelete} disabled={!!deleteError}>
 					Ja, löschen
 				</Button>
 			</div>

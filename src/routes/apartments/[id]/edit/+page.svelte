@@ -17,13 +17,19 @@
 
 	let { data, form }: { data: PageData; form: ActionData | null } = $props();
 
+	// Normalize decimal strings: "3.0" → "3", "3.5" → "3.5"
+	function normalizeDecimal(val: string): string {
+		const num = parseFloat(val);
+		return isNaN(num) ? val : String(num);
+	}
+
 	// Form state - initialized from apartment data or form values after failed submission
 	let buildingId = $state(form?.values?.buildingId || data.apartment.buildingId);
 	let floor = $state(form?.values?.floor || String(data.apartment.floor ?? ''));
 	let addressUnit = $state(form?.values?.number || data.apartment.number);
 	let sizeM2 = $state(form?.values?.area || String(data.apartment.area ?? ''));
-	let roomCount = $state(form?.values?.rooms || String(data.apartment.rooms ?? ''));
-	let occupancyStatus = $state(data.apartment.status);
+	let roomCount = $state(normalizeDecimal(form?.values?.rooms || String(data.apartment.rooms ?? '')));
+	let occupancyStatus = $state(form?.values?.status || data.apartment.status);
 
 	let isSubmitting = $state(false);
 
@@ -94,11 +100,11 @@
 	// Common room count options
 	const roomOptions = ['1', '1.5', '2', '2.5', '3', '3.5', '4', '4.5', '5', '5.5', '6', '6.5'];
 
-	// Status options
+	// Status options (values must match ApartmentStatus type: 'occupied' | 'vacant' | 'reserved')
 	const statusOptions = [
-		{ value: 'Vermietet', label: 'Vermietet', color: 'text-green-600' },
-		{ value: 'Leer', label: 'Leer', color: 'text-amber-600' },
-		{ value: 'Gesperrt', label: 'Gesperrt', color: 'text-red-600' }
+		{ value: 'occupied', label: 'Vermietet', color: 'text-green-600' },
+		{ value: 'vacant', label: 'Leer', color: 'text-amber-600' },
+		{ value: 'reserved', label: 'Gesperrt', color: 'text-red-600' }
 	];
 </script>
 
@@ -129,7 +135,7 @@
 		<form method="POST" use:enhance={() => {
 			isSubmitting = true;
 			return async ({ update }) => {
-				await update();
+				await update({ reset: false });
 				isSubmitting = false;
 			};
 		}} class="space-y-6">
@@ -284,6 +290,7 @@
 				</label>
 				<select
 					id="status"
+					name="status"
 					bind:value={occupancyStatus}
 					class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary bg-white"
 				>

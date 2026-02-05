@@ -62,6 +62,7 @@ export const actions: Actions = {
 		const floor = formData.get('floor') as string;
 		const area = formData.get('area') as string;
 		const rooms = formData.get('rooms') as string;
+		const status = formData.get('status') as string;
 
 		// Validation
 		const errors: Record<string, string> = {};
@@ -72,7 +73,7 @@ export const actions: Actions = {
 		if (!rooms) errors.rooms = 'Zimmeranzahl ist erforderlich';
 
 		if (Object.keys(errors).length > 0) {
-			return fail(400, { errors, values: { buildingId, number, floor, area, rooms } });
+			return fail(400, { errors, values: { buildingId, number, floor, area, rooms, status } });
 		}
 
 		try {
@@ -84,7 +85,8 @@ export const actions: Actions = {
 					number: number.trim(),
 					floor: parseInt(floor, 10),
 					area: area.trim(),
-					rooms: rooms.trim()
+					rooms: rooms.trim(),
+					status: status || undefined
 				})
 			});
 
@@ -92,7 +94,7 @@ export const actions: Actions = {
 				const errorData = await response.json().catch(() => ({}));
 				return fail(response.status, {
 					errors: { form: errorData.error || 'Fehler beim Speichern der Wohnung' },
-					values: { buildingId, number, floor, area, rooms }
+					values: { buildingId, number, floor, area, rooms, status }
 				});
 			}
 
@@ -104,7 +106,7 @@ export const actions: Actions = {
 			console.error('Failed to update apartment:', err);
 			return fail(500, {
 				errors: { form: 'Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.' },
-				values: { buildingId, number, floor, area, rooms }
+				values: { buildingId, number, floor, area, rooms, status }
 			});
 		}
 	}

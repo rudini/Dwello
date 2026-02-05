@@ -137,9 +137,9 @@
 						class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary bg-white"
 					>
 						<option value="">Alle Status</option>
-						<option value="Vermietet">Vermietet</option>
-						<option value="Leer">Leer</option>
-						<option value="Gesperrt">Gesperrt</option>
+						<option value="occupied">Vermietet</option>
+						<option value="vacant">Leer</option>
+						<option value="reserved">Gesperrt</option>
 					</select>
 				</div>
 			</div>
