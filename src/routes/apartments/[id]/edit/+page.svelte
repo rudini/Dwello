@@ -4,6 +4,7 @@
 	import Icon from '$lib/components/Icon.svelte';
 	import Card from '$lib/components/Card.svelte';
 	import type { Apartment } from '$lib/types';
+	import { normalizeDecimal } from '$lib/utils/format';
 
 	interface PageData {
 		apartment: Apartment;
@@ -16,12 +17,6 @@
 	}
 
 	let { data, form }: { data: PageData; form: ActionData | null } = $props();
-
-	// Normalize decimal strings: "3.0" → "3", "3.5" → "3.5"
-	function normalizeDecimal(val: string): string {
-		const num = parseFloat(val);
-		return isNaN(num) ? val : String(num);
-	}
 
 	// Form state - initialized from apartment data or form values after failed submission
 	let buildingId = $state(form?.values?.buildingId || data.apartment.buildingId);
