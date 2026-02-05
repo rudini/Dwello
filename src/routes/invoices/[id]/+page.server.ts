@@ -25,7 +25,7 @@ export const load: PageServerLoad = async ({ params, fetch }): Promise<InvoiceDe
 			id: data.id,
 			buildingId: data.buildingId,
 			invoiceDate: data.invoiceDate,
-			billingEntity: data.billingEntity || '',
+			billingEntity: data.billingEntityName || data.billingEntity || '',
 			description: data.description || '',
 			amount: Number(data.amount) || 0,
 			categoryId: data.categoryId,
