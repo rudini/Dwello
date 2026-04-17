@@ -46,6 +46,26 @@ Scopes - Frontend: `auth`, `buildings`, `apartments`, `tenants`, `contracts`, `i
 
 ---
 
+# CODING GUIDELINES
+
+## Think Before Coding
+
+Don't assume. Don't hide confusion. Surface tradeoffs. State assumptions explicitly. If multiple interpretations exist, present them — don't pick silently. If a simpler approach exists, say so. Push back when warranted.
+
+## Simplicity First
+
+Minimum code that solves the problem. Nothing speculative. No features beyond what was asked. No abstractions for single-use code. No "flexibility" or "configurability" that wasn't requested. No error handling for impossible scenarios.
+
+## Surgical Changes
+
+Touch only what you must. Don't "improve" adjacent code, comments, or formatting. Don't refactor things that aren't broken. Match existing style. Remove imports/variables/functions that YOUR changes made unused, but don't remove pre-existing dead code unless asked. Every changed line should trace directly to the request.
+
+## Goal-Driven Execution
+
+Transform tasks into verifiable goals. For multi-step tasks, state a brief plan with verification checks. "Fix the bug" → write a test that reproduces it, then make it pass.
+
+---
+
 # WORKFLOW RULES
 
 ## Update implementation_plan.md After Every Task

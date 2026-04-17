@@ -15,7 +15,9 @@
       "Read(.svelte-kit/**)",
       "Edit(node_modules/**)",
       "Edit(dist/**)",
-      "Edit(build/**)"
+      "Edit(build/**)",
+      "Read(backend/node_modules/**)",
+      "Edit(backend/node_modules/**)"
     ]
   }
 }
