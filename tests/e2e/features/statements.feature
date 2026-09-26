@@ -13,7 +13,8 @@ Funktionalität: Nebenkostenabrechnungen
     Und für "Anna Keller" im Gebäude "Ahornhof" gibt es die Nebenkostenabrechnung 2024
     Und der Liegenschaftsverwalter ist auf der Abrechnungsliste
 
-  Szenario: Abrechnung wird in der Liste angezeigt
+  Szenario: Abrechnungen eines Gebäudes anzeigen
+    Wenn der Liegenschaftsverwalter die Abrechnungen im Gebäude "Ahornhof" anzeigt
     Dann sieht der Liegenschaftsverwalter die Abrechnung von "Anna Keller" mit dem Status "Entwurf"
 
   Szenario: Abrechnungen eines Mieters suchen
@@ -37,5 +38,6 @@ Funktionalität: Nebenkostenabrechnungen
     Dann ist der Liegenschaftsverwalter auf der Seite "Abrechnungen erstellen"
 
   Szenario: Abrechnung öffnen
+    Angenommen der Liegenschaftsverwalter zeigt die Abrechnungen im Gebäude "Ahornhof" an
     Wenn der Liegenschaftsverwalter die Abrechnung 2024 von "Anna Keller" öffnet
     Dann ist der Liegenschaftsverwalter auf der Detailseite der Abrechnung 2024 von "Anna Keller"

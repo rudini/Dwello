@@ -14,9 +14,13 @@ export const searchStatements = (term: string) => async (actor: Actor) => {
 	await statementSearchButton(actor.page).click();
 };
 
-export const showDraftsOfBuilding = (buildingId: string) => async (actor: Actor) => {
+export const showStatementsOfBuilding = (buildingId: string) => async (actor: Actor) => {
 	await statementBuildingFilter(actor.page).selectOption(buildingId);
 	await statementSearchButton(actor.page).click();
+};
+
+export const showDraftsOfBuilding = (buildingId: string) => async (actor: Actor) => {
+	await showStatementsOfBuilding(buildingId)(actor);
 	await draftFilter(actor.page).click();
 };
 

@@ -7,6 +7,7 @@ import {
 	openStatement,
 	searchStatements,
 	showDraftsOfBuilding,
+	showStatementsOfBuilding,
 	startGeneratingStatements,
 	turnToNextPage
 } from '../tasks/statements';
@@ -86,5 +87,19 @@ Then(
 	'ist der Liegenschaftsverwalter auf der Detailseite der Abrechnung {int} von {string}',
 	async ({ verwalter, seed }, year: number, tenant: string) => {
 		await expect(verwalter.page).toHaveURL(`/statements/${seed.idOf(`Abrechnung ${tenant} ${year}`)}`);
+	}
+);
+
+When(
+	'der Liegenschaftsverwalter die Abrechnungen im Gebäude {string} anzeigt',
+	async ({ verwalter, seed }, building: string) => {
+		await verwalter.perform(showStatementsOfBuilding(seed.idOf(building)!));
+	}
+);
+
+Given(
+	'der Liegenschaftsverwalter zeigt die Abrechnungen im Gebäude {string} an',
+	async ({ verwalter, seed }, building: string) => {
+		await verwalter.perform(showStatementsOfBuilding(seed.idOf(building)!));
 	}
 );
