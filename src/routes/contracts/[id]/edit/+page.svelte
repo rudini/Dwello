@@ -493,7 +493,7 @@
 					type="submit"
 					variant="primary"
 					disabled={isSubmitting}
-					data-testid="submit-button"
+					testid="submit-button"
 				>
 					{#if isSubmitting}
 						<span class="animate-spin">

@@ -2,9 +2,7 @@ import { expect } from '@playwright/test';
 import { createBdd, type DataTable } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { visit } from '../interactions/navigation';
-import { errorMessage } from '../questions/building-form';
 import {
-	cancelEditing,
 	changePostalCode,
 	changeYearBuilt,
 	registerBuilding,
@@ -35,14 +33,6 @@ When(
 
 When('der Liegenschaftsverwalter das Gebäude ohne Angaben speichert', async ({ verwalter }) => {
 	await verwalter.perform(saveBuilding);
-});
-
-When('der Liegenschaftsverwalter die Bearbeitung abbricht', async ({ verwalter }) => {
-	await verwalter.perform(cancelEditing);
-});
-
-Then('sieht der Liegenschaftsverwalter die Fehlermeldung {string}', async ({ verwalter }, text: string) => {
-	await expect(errorMessage(verwalter, text)).toBeVisible();
 });
 
 Given(

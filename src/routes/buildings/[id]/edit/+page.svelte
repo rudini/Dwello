@@ -243,7 +243,7 @@
 
 			<!-- Actions -->
 			<div class="flex gap-3 pt-4 border-t border-gray-200">
-				<Button href="/buildings/{building.id}" variant="secondary" testid="building-form-cancel">Abbrechen</Button>
+				<Button href="/buildings/{building.id}" variant="secondary" testid="form-cancel">Abbrechen</Button>
 				<Button type="submit" variant="primary" disabled={isSubmitting} testid="building-form-submit">
 					{#if isSubmitting}
 						<span class="animate-spin">

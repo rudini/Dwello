@@ -85,3 +85,7 @@ Then(
 		await expect(verwalter.page).toHaveTitle(`Mietvertrag - ${names.get(tenant) ?? tenant} - Dwello`);
 	}
 );
+
+Then('ist der Liegenschaftsverwalter auf der Mietvertragsliste', async ({ verwalter }) => {
+	await expect(verwalter.page).toHaveURL(/\/contracts$/);
+});
