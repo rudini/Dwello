@@ -185,17 +185,23 @@ export function calculateManagementFee(
  */
 export function calculateTotalAdvancePayments(
 	monthlyAdvancePayment: number,
-	rentalDays: number,
-	_totalPeriodDays: number
+	rentalStart: Date,
+	rentalEnd: Date
 ): number {
-	// Calculate prorated advance payments
-	const fullMonths = Math.floor(rentalDays / 30);
-	const partialDays = rentalDays % 30;
+	// Advances are due per calendar month; a partial month counts by its share of days
+	let months = 0;
+	const cursor = new Date(Date.UTC(rentalStart.getUTCFullYear(), rentalStart.getUTCMonth(), 1));
+	while (cursor <= rentalEnd) {
+		const year = cursor.getUTCFullYear();
+		const month = cursor.getUTCMonth();
+		const daysInMonth = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
+		const firstDay = rentalStart > cursor ? rentalStart.getUTCDate() : 1;
+		const lastDay = rentalEnd < new Date(Date.UTC(year, month, daysInMonth)) ? rentalEnd.getUTCDate() : daysInMonth;
+		months += (lastDay - firstDay + 1) / daysInMonth;
+		cursor.setUTCMonth(month + 1);
+	}
 
-	const fullMonthsPayment = fullMonths * monthlyAdvancePayment;
-	const partialPayment = (partialDays / 30) * monthlyAdvancePayment;
-
-	return Math.round((fullMonthsPayment + partialPayment) * 100) / 100;
+	return Math.round(months * monthlyAdvancePayment * 100) / 100;
 }
 
 /**
@@ -336,8 +342,8 @@ export async function calculateStatementForContract(
 	const monthlyAdvance = parseFloat(contract.monthlyAdvancePayment);
 	const totalAdvancePayments = calculateTotalAdvancePayments(
 		monthlyAdvance,
-		rentalDays,
-		totalPeriodDays
+		contractOverlap.overlapStart,
+		contractOverlap.overlapEnd
 	);
 
 	// Calculate balance
