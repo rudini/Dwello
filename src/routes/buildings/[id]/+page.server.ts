@@ -1,6 +1,6 @@
-import { error } from '@sveltejs/kit';
+import { error, fail, redirect } from '@sveltejs/kit';
 import type { BuildingWithStats, Apartment, ApartmentStatus } from '$lib/types';
-import type { PageServerLoad } from './$types';
+import type { Actions, PageServerLoad } from './$types';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
@@ -63,5 +63,15 @@ export const load: PageServerLoad = async ({ params, fetch }): Promise<BuildingD
 			throw err;
 		}
 		throw error(500, 'Fehler beim Laden des Gebäudes');
+	}
+};
+
+export const actions: Actions = {
+	delete: async ({ params, fetch }) => {
+		const response = await fetch(`${BACKEND_URL}/api/v1/buildings/${params.id}`, { method: 'DELETE' });
+		if (!response.ok) {
+			return fail(response.status, { deleteError: 'Gebäude konnte nicht gelöscht werden.' });
+		}
+		throw redirect(303, '/buildings');
 	}
 };

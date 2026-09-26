@@ -93,18 +93,18 @@ export const actions: Actions = {
 					postalCode,
 					city,
 					canton: canton || null,
-					buildingType: buildingType || null,
+					buildingType: buildingType || undefined,
 					yearBuilt: yearBuilt ? parseInt(yearBuilt) : null
 				})
 			});
 
 			if (!response.ok) {
 				const error = await response.json();
-				return { success: false, errors: { _form: error.message || 'Fehler beim Speichern' } };
+				return { success: false, errors: { form: error.message || 'Fehler beim Speichern' } };
 			}
 		} catch (err) {
 			console.error('Failed to update building:', err);
-			return { success: false, errors: { _form: 'Fehler beim Speichern' } };
+			return { success: false, errors: { form: 'Fehler beim Speichern' } };
 		}
 
 		throw redirect(303, `/buildings/${params.id}`);

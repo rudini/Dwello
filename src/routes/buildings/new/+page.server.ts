@@ -49,7 +49,7 @@ export const actions: Actions = {
 					city,
 					canton: canton || null,
 					country: 'CH',
-					buildingType: buildingType || null,
+					buildingType: buildingType || undefined,
 					yearBuilt: yearBuilt ? parseInt(yearBuilt) : null,
 					latitude: latitude ? parseFloat(latitude) : null,
 					longitude: longitude ? parseFloat(longitude) : null
@@ -58,7 +58,7 @@ export const actions: Actions = {
 
 			if (!response.ok) {
 				const error = await response.json();
-				return { success: false, errors: { _form: error.message || 'Fehler beim Erstellen' } };
+				return { success: false, errors: { form: error.message || 'Fehler beim Erstellen' } };
 			}
 
 			const newBuilding = await response.json();
@@ -68,7 +68,7 @@ export const actions: Actions = {
 				throw err;
 			}
 			console.error('Failed to create building:', err);
-			return { success: false, errors: { _form: 'Fehler beim Erstellen' } };
+			return { success: false, errors: { form: 'Fehler beim Erstellen' } };
 		}
 	}
 };
