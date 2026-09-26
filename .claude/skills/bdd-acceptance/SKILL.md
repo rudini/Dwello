@@ -7,6 +7,20 @@ description: Generate Gherkin acceptance criteria and executable playwright-bdd 
 
 Turn any running system into **living documentation**: Gherkin `.feature` files that express business intent, backed by executable playwright-bdd step definitions structured with the **Screenplay Pattern**.
 
+## Dwello project context (overrides generic defaults below)
+
+playwright-bdd is already set up in this repo. **Extend the existing setup; never re-bootstrap it.**
+
+- Config: `playwright.config.ts` — `defineBddConfig({ paths: ['tests/e2e/features/**/*.feature'], require: ['tests/e2e/fixtures/test.ts', 'tests/e2e/steps/**/*.ts'] })`, `tags: 'not @wip'`
+- Layout: `tests/e2e/features/`, `tests/e2e/steps/`, `tests/e2e/fixtures/test.ts`. Put `tasks/`, `questions/`, `interactions/` under `tests/e2e/` too.
+- Run: `npm run test:e2e` (= `bddgen && playwright test`). The `webServer` config starts the backend (3001) and the frontend with `E2E_TEST_MODE=true` (3000). PostgreSQL must be running on 5432 (`docker compose -f docker-compose.dev.yml up -d postgres`).
+- Auth: OAuth only (Google/Microsoft), BFF with HTTPOnly cookies. There is no password login and no storageState. `E2E_TEST_MODE=true` bypasses auth in `src/routes/+layout.server.ts`. Skip the global-setup login, `.env.test` credentials and per-role projects from Phase 3.
+- Actor: single role **Liegenschaftsverwalter** (see `UBIQUITOUS_LANGUAGE.md`). Use no role tags. Unauthenticated scenarios belong in `authentication.feature`.
+- UI copy is German. Match visible text exactly (e.g. "Neues Gebäude").
+- Selectors: `data-testid` only (kebab-case, with component context, e.g. `building-card-{id}`). Add missing `data-testid` attributes to the Svelte components.
+- No mocks: seed data through real backend endpoints, never `page.route()` fakes (project rule in `CLAUDE.md`).
+- Before writing new steps, check `tests/e2e/steps/` for an existing step with the same text. playwright-bdd fails on duplicate step definitions.
+
 ## Leading concepts
 
 | Term | Meaning |
@@ -61,6 +75,8 @@ If `UBIQUITOUS_LANGUAGE.md` exists, read it first — use it as ground truth.
 
 Do this before writing any feature files. A broken pipeline discovered after 20 features is expensive.
 
+**If playwright-bdd is already configured** (check `playwright.config.ts` for `defineBddConfig`), skip install and config. Only add missing fixtures and folders, then do the tracer run.
+
 ### Install
 ```bash
 npm install -D playwright-bdd @playwright/test
@@ -99,16 +115,27 @@ export class Actor {
 import { test as base } from 'playwright-bdd';
 import { Actor } from './actor';
 
-type Roles = { student: Actor; lecturer: Actor; expert: Actor; guest: Actor };
+type Fixtures = {
+  student: Actor; lecturer: Actor; expert: Actor; guest: Actor;
+  names: Map<string, string>; // Gherkin name -> UUID-namespaced name created in Given
+};
 
-export const test = base.extend<Roles>({
+export const test = base.extend<Fixtures>({
   student:  async ({ page }, use) => use(new Actor('Student', page)),
   lecturer: async ({ page }, use) => use(new Actor('Lecturer', page)),
   expert:   async ({ page }, use) => use(new Actor('Expert', page)),
-  guest:    async ({ page }, use) => use(new Actor('Guest', page)),
+  // Guest needs its own context: the shared `page` carries the project's storageState
+  guest: async ({ browser, baseURL }, use) => {
+    const context = await browser.newContext({ baseURL });
+    await use(new Actor('Guest', await context.newPage()));
+    await context.close();
+  },
+  names: async ({}, use) => use(new Map()),
 });
 export { expect } from '@playwright/test';
 ```
+
+All step files get `Given/When/Then` from `createBdd(test)`. playwright-bdd v8 has no direct `Given` export, and only `createBdd(test)` exposes the custom fixtures.
 
 ### Global setup — storageState per role + DB truncate
 ```typescript
@@ -127,7 +154,7 @@ const ROLES = [
 export default async function globalSetup() {
   fs.mkdirSync('tests/.auth', { recursive: true });
 
-  // Truncate test data
+  // Truncate test data — adapt to the system's real reset mechanism (endpoint, SQL, seed script)
   const api = await request.newContext({ baseURL: BASE_URL });
   await api.post('/api/test/reset');
   await api.dispose();
@@ -224,7 +251,6 @@ Feature: Thesis List
     Then Student is on the Submit Thesis page
 
   Scenario: Access Thesis List unauthenticated
-    Given Student is not authenticated
     When Guest navigates to the Thesis List
     Then Guest is redirected to the Login page
 ```
@@ -238,7 +264,7 @@ Feature: Thesis List
 - Terminal pages (confirmation, 404) have no navigation scenarios
 - `Scenario Outline` for data-driven cases only
 
-**Test isolation rule**: every entity created in a `Given` step uses a UUID-namespaced identifier to prevent cross-scenario interference in parallel runs. Global setup truncates test data before the suite.
+**Test isolation rule**: every entity created in a `Given` step uses a UUID-namespaced identifier to prevent cross-scenario interference in parallel runs. Store the mapping in the `names` fixture, and resolve it in later steps with `names.get(title) ?? title`. Global setup truncates test data before the suite.
 
 **Completion criterion**: every page has a `.feature` file; every exit from each page has a navigation scenario; no scenario crosses page boundaries.
 
@@ -247,7 +273,7 @@ Feature: Thesis List
 ### Layer rules
 - **Steps** → delegate only. No raw Playwright calls. `When` steps call Tasks. `Then` steps call Questions. `Given` navigation steps call Interactions.
 - **Tasks** → sequences of Interactions. Business intent, no selectors.
-- **Questions** → call Interactions to locate elements, return observable values.
+- **Questions** → call Interactions to locate elements and return Locators. `Then` steps assert with web-first `expect(locator)`, which retries. Never return snapshot values like `isVisible()` or `textContent()`, because they don't wait and cause flaky tests.
 - **Interactions** → only layer that touches `page.getByTestId()`. Require `data-testid` attributes on HTML elements.
 
 ### Interaction
@@ -266,8 +292,7 @@ export const thesisByTitle = (page: Page, title: string) =>
 import { Actor } from '../fixtures/actor';
 import { thesisByTitle } from '../interactions/thesis-rows.interaction';
 
-export const thesisIsListed = async (actor: Actor, title: string): Promise<boolean> =>
-  thesisByTitle(actor.page, title).isVisible();
+export const listedThesis = (actor: Actor, title: string) => thesisByTitle(actor.page, title);
 ```
 
 ### Task
@@ -284,36 +309,35 @@ export const openThesis = (title: string) => async (actor: Actor) => {
 ### Step definitions
 ```typescript
 // tests/steps/thesis-list.steps.ts
-import { Given, When, Then } from 'playwright-bdd';
+import { createBdd } from 'playwright-bdd';
 import { test, expect } from '../fixtures/index';
 import { openThesis } from '../tasks/open-thesis.task';
-import { thesisIsListed } from '../questions/thesis-list.question';
+import { listedThesis } from '../questions/thesis-list.question';
 import { randomUUID } from 'crypto';
 
-Given('a thesis {string} exists for Student', async ({ request }, title: string) => {
-  await request.post('/api/theses', {
-    data: { title: `${title}-${randomUUID()}`, owner: 'student' },
-  });
+const { Given, When, Then } = createBdd(test);
+
+Given('a thesis {string} exists for Student', async ({ request, names }, title: string) => {
+  const unique = `${title}-${randomUUID()}`;
+  const res = await request.post('/api/theses', { data: { title: unique, owner: 'student' } });
+  expect(res.ok()).toBe(true);
+  names.set(title, unique);
 });
 
 Given('Student is on the Thesis List page', async ({ student }) => {
   await student.page.goto('/thesis');
 });
 
-Then('Student sees {string} listed', async ({ student }, title: string) => {
-  expect(await thesisIsListed(student, title)).toBe(true);
+Then('Student sees {string} listed', async ({ student, names }, title: string) => {
+  await expect(listedThesis(student, names.get(title) ?? title)).toBeVisible();
 });
 
-When('Student opens {string}', async ({ student }, title: string) => {
-  await student.perform(openThesis(title));
+When('Student opens {string}', async ({ student, names }, title: string) => {
+  await student.perform(openThesis(names.get(title) ?? title));
 });
 
 Then('Student is on the Thesis Detail page', async ({ student }) => {
   await expect(student.page).toHaveURL(/\/thesis\/[^/]+$/);
-});
-
-Given('Student is not authenticated', async ({ guest }) => {
-  // guest fixture has no storageState — nothing to do
 });
 
 When('Guest navigates to the Thesis List', async ({ guest }) => {
@@ -329,7 +353,7 @@ Then('Guest is redirected to the Login page', async ({ guest }) => {
 
 **Browser-only state** (localStorage, sessionStorage — not auth): use `page.addInitScript()` in a `Given` step.
 
-**Completion criterion**: every `Given/When/Then` in every `.feature` has a matching step; every step delegates to Task/Question/Interaction; no `page.locator` or raw Playwright calls in step or Question bodies.
+**Completion criterion**: every `Given/When/Then` in every `.feature` has a matching step; every step delegates to Task/Question/Interaction; no `page.locator`/`getByTestId` outside Interactions (web-first `expect(...)` in `Then` steps is allowed); no duplicate step texts across step files; `npm run test:e2e` is green.
 
 ## API-only variant
 
@@ -337,8 +361,8 @@ When the system has no UI, drop the Screenplay Pattern's Interaction and Actor l
 
 - **Scope**: one `.feature` file per resource (`invoices.feature`, `workspaces.feature`)
 - **No** role tags, no storageState, no navigation scenarios
-- **Auth**: Bearer token in a `Before` hook, sourced from env var
-- **Steps**: use `request` fixture directly — no Actor, no Tasks
+- **Auth**: set `extraHTTPHeaders` (e.g. Bearer token from env var) in `playwright.config.ts` `use`, or the system's session cookie. For BFF systems, test through the BFF.
+- **Steps**: use `request` fixture directly — no Actor, no Tasks. Keep the response in a scenario-scoped fixture, not a module-level variable, because module state leaks between scenarios in the same worker.
 
 ```gherkin
 Feature: Invoices API
@@ -356,17 +380,21 @@ Feature: Invoices API
 
 ```typescript
 // tests/steps/invoices-api.steps.ts
-import { Given, When, Then } from 'playwright-bdd';
-import { test, expect } from '../fixtures/index';
+import { createBdd } from 'playwright-bdd';
+import { test as base, expect } from '../fixtures/index';
+import type { APIResponse } from '@playwright/test';
 
-let response: Awaited<ReturnType<typeof import('@playwright/test').APIRequestContext.prototype.get>>;
+const test = base.extend<{ last: { response?: APIResponse } }>({
+  last: async ({}, use) => use({}),
+});
+const { When, Then } = createBdd(test);
 
-When('a POST to /api/invoices with valid data', async ({ request }) => {
-  response = await request.post('/api/invoices', { data: { amount: 100 } });
+When('a POST to /api/invoices with valid data', async ({ request, last }) => {
+  last.response = await request.post('/api/invoices', { data: { amount: 100 } });
 });
 
-Then('the response status is {int}', async ({}, status: number) => {
-  expect(response.status()).toBe(status);
+Then('the response status is {int}', async ({ last }, status: number) => {
+  expect(last.response!.status()).toBe(status);
 });
 ```
 
