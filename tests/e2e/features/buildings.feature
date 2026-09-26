@@ -1,34 +1,34 @@
+# language: de
 @buildings
-Feature: Building Management
-  As a property manager
-  I want to manage my buildings
-  So that I can track all my properties
+Funktionalität: Gebäudeliste
+  Als Liegenschaftsverwalter
+  möchte ich alle meine Gebäude überblicken
+  damit ich schnell das richtige Gebäude finde
 
-  Background:
-    Given I am logged in as "Test User"
+  Grundlage:
+    Angenommen das Gebäude "Lindenhof" in "Winterthur" existiert
+    Und der Liegenschaftsverwalter ist auf der Gebäudeliste
 
-  @list
-  Scenario: View buildings list
-    When I open the buildings page
-    Then I should see a list of buildings
-    And I should see a "Neues Gebäude" link
+  Szenario: Gebäude wird in der Liste angezeigt
+    Dann sieht der Liegenschaftsverwalter das Gebäude "Lindenhof" in der Liste
 
-  @list
-  Scenario: Buildings list shows key information
-    When I open the buildings page
-    Then I should see building addresses
-    And I should see apartment counts
+  Szenario: Gebäude nach Namen suchen
+    Wenn der Liegenschaftsverwalter nach "Lindenhof" sucht
+    Dann sieht der Liegenschaftsverwalter das Gebäude "Lindenhof" in der Liste
+    Und die Liste enthält genau 1 Gebäude
 
-  @search
-  Scenario: Search for buildings
-    When I open the buildings page
-    And I search for "Zürich"
-    Then I should only see buildings in Zürich
+  Szenario: Suche ohne Treffer
+    Wenn der Liegenschaftsverwalter nach "Gibt es nicht" sucht
+    Dann sieht der Liegenschaftsverwalter den Hinweis "Keine Gebäude gefunden"
 
-  @detail @data
-  Scenario: Building detail page shows apartments with correct data
-    When I open building detail page "11111111-1111-1111-1111-111111111111"
-    Then I should see the building name "Musterhaus Zentrum"
-    And I should see apartments grouped by floor
-    And I should see apartment numbers in the list
-    And I should see apartment occupancy badges
+  Szenario: Gebäude nach Stadt filtern
+    Wenn der Liegenschaftsverwalter die Gebäude nach der Stadt "Winterthur" filtert
+    Dann sieht der Liegenschaftsverwalter das Gebäude "Lindenhof" in der Liste
+
+  Szenario: Zur Erfassung eines neuen Gebäudes wechseln
+    Wenn der Liegenschaftsverwalter ein neues Gebäude erfassen will
+    Dann ist der Liegenschaftsverwalter auf der Seite "Neues Gebäude"
+
+  Szenario: Gebäude öffnen
+    Wenn der Liegenschaftsverwalter das Gebäude "Lindenhof" öffnet
+    Dann ist der Liegenschaftsverwalter auf der Detailseite von "Lindenhof"

@@ -61,7 +61,7 @@
 			<h1 class="text-2xl font-bold text-gray-900">Gebäude</h1>
 			<p class="text-gray-500 mt-1">{data.total} Gebäude insgesamt</p>
 		</div>
-		<Button href="/buildings/new" variant="primary">
+		<Button href="/buildings/new" variant="primary" testid="building-new-button">
 			<Icon name="add" size={20} />
 			Neues Gebäude
 		</Button>
@@ -81,6 +81,8 @@
 						/>
 						<input
 							id="search"
+							name="search"
+							data-testid="building-search-input"
 							type="text"
 							bind:value={searchTerm}
 							placeholder="Name, Adresse oder Stadt..."
@@ -92,6 +94,8 @@
 					<label for="city" class="block text-sm font-medium text-gray-700 mb-1">Stadt</label>
 					<input
 						id="city"
+						name="city"
+						data-testid="building-city-filter"
 						type="text"
 						bind:value={cityFilter}
 						placeholder="z.B. Zürich"
@@ -100,7 +104,7 @@
 				</div>
 			</div>
 			<div class="flex gap-2">
-				<Button type="submit" variant="primary" size="sm">
+				<Button type="submit" variant="primary" size="sm" testid="building-search-submit">
 					<Icon name="search" size={16} />
 					Suchen
 				</Button>
@@ -117,7 +121,7 @@
 	<!-- Buildings List -->
 	{#if data.buildings.length === 0}
 		<Card>
-			<div class="text-center py-12">
+			<div class="text-center py-12" data-testid="buildings-empty">
 				<Icon name="apartment" size={48} class="mx-auto text-gray-300 mb-4" />
 				<h3 class="text-lg font-medium text-gray-900 mb-2">Keine Gebäude gefunden</h3>
 				<p class="text-gray-500 mb-6">
@@ -141,6 +145,7 @@
 				<div
 					role="button"
 					tabindex="0"
+					data-testid="building-card-{building.id}"
 					onclick={() => goto(`/buildings/${building.id}`)}
 					onkeydown={(e) => e.key === 'Enter' && goto(`/buildings/${building.id}`)}
 					class="block bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-blue-300 transition-all duration-200 cursor-pointer"

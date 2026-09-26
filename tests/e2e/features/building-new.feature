@@ -1,0 +1,30 @@
+# language: de
+@buildings
+Funktionalität: Neues Gebäude erfassen
+  Als Liegenschaftsverwalter
+  möchte ich neue Gebäude erfassen
+  damit ich ihre Wohnungen und Mietverträge verwalten kann
+
+  Grundlage:
+    Angenommen der Liegenschaftsverwalter ist auf der Seite "Neues Gebäude"
+
+  Szenario: Gebäude erfassen
+    Wenn der Liegenschaftsverwalter folgendes Gebäude erfasst:
+      | Name    | Rosengarten |
+      | Adresse | Rosenweg 5  |
+      | PLZ     | 8400        |
+      | Ort     | Winterthur  |
+      | Kanton  | ZH          |
+    Dann ist der Liegenschaftsverwalter auf der Detailseite von "Rosengarten"
+
+  Szenario: Pflichtangaben fehlen
+    Wenn der Liegenschaftsverwalter das Gebäude ohne Angaben speichert
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Adresse ist erforderlich"
+
+  Szenario: Erfassung abbrechen
+    Wenn der Liegenschaftsverwalter die Bearbeitung abbricht
+    Dann ist der Liegenschaftsverwalter auf der Gebäudeliste
+
+  Szenario: Über den Breadcrumb zur Gebäudeliste
+    Wenn der Liegenschaftsverwalter im Breadcrumb "Gebäude" wählt
+    Dann ist der Liegenschaftsverwalter auf der Gebäudeliste

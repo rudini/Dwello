@@ -1,5 +1,7 @@
 <script lang="ts">
+	import { enhance } from '$app/forms';
 	import type { BuildingDetailsData } from './+page.server';
+	import type { ActionData, SubmitFunction } from './$types';
 	import { addToast } from '$lib/stores';
 	import Button from '$lib/components/Button.svelte';
 	import Icon from '$lib/components/Icon.svelte';
@@ -7,7 +9,7 @@
 	import InfoCard from '$lib/components/InfoCard.svelte';
 	import Badge from '$lib/components/Badge.svelte';
 
-	let { data }: { data: BuildingDetailsData } = $props();
+	let { data, form }: { data: BuildingDetailsData; form: ActionData } = $props();
 
 	// Reactive accessors for data
 	const building = $derived(data.building);
@@ -37,21 +39,18 @@
 	let showDeleteConfirm = $state(false);
 	let deleteError = $state('');
 
-	async function handleDelete() {
-		// In production, call the API
-		// const response = await fetch(`/api/buildings/${building.id}`, { method: 'DELETE' });
-		// if (response.ok) { goto('/buildings'); }
-
+	const handleDelete: SubmitFunction = ({ cancel }) => {
 		if (building.apartmentCount > 0) {
 			deleteError =
 				'Dieses Gebäude kann nicht gelöscht werden, da es noch Wohnungen enthält. Bitte löschen Sie zuerst alle Wohnungen.';
+			cancel();
 			return;
 		}
-
-		// Mock delete success
-		addToast('success', 'Gebäude wurde erfolgreich gelöscht');
-		showDeleteConfirm = false;
-	}
+		return async ({ result, update }) => {
+			if (result.type === 'redirect') addToast('success', 'Gebäude wurde erfolgreich gelöscht');
+			await update();
+		};
+	};
 </script>
 
 <svelte:head>
@@ -61,7 +60,7 @@
 <div class="space-y-6">
 	<!-- Breadcrumb -->
 	<nav class="flex items-center text-sm text-gray-500">
-		<a href="/buildings" class="hover:text-blue-600 transition-colors">Gebäude</a>
+		<a href="/buildings" data-testid="breadcrumb-link" class="hover:text-blue-600 transition-colors">Gebäude</a>
 		<Icon name="chevron_right" size={16} class="mx-2" />
 		<span class="text-gray-900 font-medium">{building.name || building.address}</span>
 	</nav>
@@ -76,11 +75,11 @@
 			</p>
 		</div>
 		<div class="flex gap-2">
-			<Button href="/buildings/{building.id}/edit" variant="secondary">
+			<Button href="/buildings/{building.id}/edit" variant="secondary" testid="building-edit-button">
 				<Icon name="edit" size={18} />
 				Bearbeiten
 			</Button>
-			<Button variant="danger" onclick={() => (showDeleteConfirm = true)}>
+			<Button variant="danger" onclick={() => (showDeleteConfirm = true)} testid="building-delete-button">
 				<Icon name="delete" size={18} />
 				Löschen
 			</Button>
@@ -133,7 +132,7 @@
 			{#if building.yearBuilt}
 				<div>
 					<p class="text-sm text-gray-500">Baujahr</p>
-					<p class="font-medium">{building.yearBuilt}</p>
+					<p class="font-medium" data-testid="building-year-built">{building.yearBuilt}</p>
 				</div>
 			{/if}
 			{#if building.latitude && building.longitude}
@@ -151,7 +150,7 @@
 	<div class="space-y-4">
 		<div class="flex items-center justify-between">
 			<h2 class="text-lg font-semibold text-gray-900">Wohnungen</h2>
-			<Button href="/apartments/new?building={building.id}" variant="secondary" size="sm">
+			<Button href="/apartments/new?building={building.id}" variant="secondary" size="sm" testid="apartment-add-button">
 				<Icon name="add" size={16} />
 				Wohnung hinzufügen
 			</Button>
@@ -165,7 +164,7 @@
 					<p class="text-gray-500 mb-4">
 						Fügen Sie Wohnungen zu diesem Gebäude hinzu.
 					</p>
-					<Button href="/apartments/new?building={building.id}" variant="primary">
+					<Button href="/apartments/new?building={building.id}" variant="primary" testid="apartment-first-create-button">
 						<Icon name="add" size={20} />
 						Erste Wohnung erstellen
 					</Button>
@@ -183,6 +182,7 @@
 						{#each apartmentsByFloor[floor] as apartment}
 							<a
 								href="/apartments/{apartment.id}"
+								data-testid="apartment-row-{apartment.id}"
 								class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
 							>
 								<div class="flex items-center gap-4">
@@ -227,13 +227,13 @@
 				möchten? Diese Aktion kann nicht rückgängig gemacht werden.
 			</p>
 
-			{#if deleteError}
+			{#if deleteError || form?.deleteError}
 				<div class="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
-					<p class="text-sm text-red-700">{deleteError}</p>
+					<p class="text-sm text-red-700" data-testid="form-error">{deleteError || form?.deleteError}</p>
 				</div>
 			{/if}
 
-			<div class="flex gap-3 justify-end">
+			<form method="POST" action="?/delete" use:enhance={handleDelete} class="flex gap-3 justify-end">
 				<Button
 					variant="secondary"
 					onclick={() => {
@@ -243,10 +243,10 @@
 				>
 					Abbrechen
 				</Button>
-				<Button variant="danger" onclick={handleDelete} disabled={!!deleteError}>
+				<Button type="submit" variant="danger" disabled={!!deleteError} testid="building-delete-confirm">
 					Ja, löschen
 				</Button>
-			</div>
+			</form>
 		</div>
 	</div>
 {/if}

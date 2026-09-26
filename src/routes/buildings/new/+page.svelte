@@ -80,7 +80,7 @@
 <div class="max-w-2xl mx-auto space-y-6">
 	<!-- Breadcrumb -->
 	<nav class="flex items-center text-sm text-gray-500">
-		<a href="/buildings" class="hover:text-primary transition-colors">Gebäude</a>
+		<a href="/buildings" data-testid="breadcrumb-link" class="hover:text-primary transition-colors">Gebäude</a>
 		<Icon name="chevron_right" size={16} class="mx-2" />
 		<span class="text-gray-900 font-medium">Neues Gebäude</span>
 	</nav>
@@ -102,7 +102,7 @@
 		}} class="space-y-6">
 			{#if errors.form}
 				<div class="bg-red-50 border border-red-200 rounded-lg p-4">
-					<p class="text-sm text-red-700">{errors.form}</p>
+					<p class="text-sm text-red-700" data-testid="form-error">{errors.form}</p>
 				</div>
 			{/if}
 
@@ -113,6 +113,7 @@
 				</label>
 				<input
 					id="name"
+					data-testid="building-name-input"
 					name="name"
 					type="text"
 					bind:value={name}
@@ -154,6 +155,7 @@
 					</label>
 					<input
 						id="address"
+						data-testid="building-address-input"
 						name="address"
 						type="text"
 						bind:value={address}
@@ -163,7 +165,7 @@
 							: 'border-gray-300'}"
 					/>
 					{#if errors.address}
-						<p class="mt-1 text-sm text-red-600">{errors.address}</p>
+						<p class="mt-1 text-sm text-red-600" data-testid="form-error">{errors.address}</p>
 					{/if}
 				</div>
 
@@ -175,6 +177,7 @@
 						</label>
 						<input
 							id="postalCode"
+							data-testid="building-postal-code-input"
 							name="postalCode"
 							type="text"
 							bind:value={postalCode}
@@ -185,7 +188,7 @@
 								: 'border-gray-300'}"
 						/>
 						{#if errors.postalCode}
-							<p class="mt-1 text-sm text-red-600">{errors.postalCode}</p>
+							<p class="mt-1 text-sm text-red-600" data-testid="form-error">{errors.postalCode}</p>
 						{/if}
 					</div>
 					<div class="sm:col-span-2">
@@ -195,6 +198,7 @@
 						<div class="relative">
 							<input
 								id="city"
+								data-testid="building-city-input"
 								name="city"
 								type="text"
 								bind:value={city}
@@ -210,7 +214,7 @@
 							{/if}
 						</div>
 						{#if errors.city}
-							<p class="mt-1 text-sm text-red-600">{errors.city}</p>
+							<p class="mt-1 text-sm text-red-600" data-testid="form-error">{errors.city}</p>
 						{/if}
 					</div>
 				</div>
@@ -222,6 +226,7 @@
 					</label>
 					<select
 						id="canton"
+						data-testid="building-canton-select"
 						name="canton"
 						bind:value={canton}
 						class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary bg-white"
@@ -261,6 +266,7 @@
 						</label>
 						<input
 							id="yearBuilt"
+							data-testid="building-year-built-input"
 							name="yearBuilt"
 							type="number"
 							bind:value={yearBuilt}
@@ -272,7 +278,7 @@
 								: 'border-gray-300'}"
 						/>
 						{#if errors.yearBuilt}
-							<p class="mt-1 text-sm text-red-600">{errors.yearBuilt}</p>
+							<p class="mt-1 text-sm text-red-600" data-testid="form-error">{errors.yearBuilt}</p>
 						{/if}
 					</div>
 				</div>
@@ -280,8 +286,8 @@
 
 			<!-- Actions -->
 			<div class="flex gap-3 pt-4 border-t border-gray-200">
-				<Button href="/buildings" variant="secondary">Abbrechen</Button>
-				<Button type="submit" variant="primary" disabled={isSubmitting}>
+				<Button href="/buildings" variant="secondary" testid="building-form-cancel">Abbrechen</Button>
+				<Button type="submit" variant="primary" disabled={isSubmitting} testid="building-form-submit">
 					{#if isSubmitting}
 						<span class="animate-spin">
 							<Icon name="refresh" size={18} />

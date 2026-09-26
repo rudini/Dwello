@@ -13,6 +13,7 @@
 		disabled?: boolean;
 		class?: string;
 		ariaLabel?: string;
+		testid?: string;
 		children?: Snippet;
 	}
 
@@ -25,6 +26,7 @@
 		disabled = false,
 		class: className = '',
 		ariaLabel,
+		testid,
 		children
 	}: Props = $props();
 
@@ -56,13 +58,13 @@
 </script>
 
 {#if href && !disabled}
-	<a {href} class={classes} aria-label={ariaLabel}>
+	<a {href} class={classes} aria-label={ariaLabel} data-testid={testid}>
 		{#if children}
 			{@render children()}
 		{/if}
 	</a>
 {:else}
-	<button {type} {disabled} onclick={onclick} class={classes} aria-label={ariaLabel}>
+	<button {type} {disabled} onclick={onclick} class={classes} aria-label={ariaLabel} data-testid={testid}>
 		{#if children}
 			{@render children()}
 		{/if}
