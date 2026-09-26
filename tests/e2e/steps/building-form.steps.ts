@@ -1,4 +1,3 @@
-import { expect } from '@playwright/test';
 import { createBdd, type DataTable } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { visit } from '../interactions/navigation';
@@ -9,7 +8,7 @@ import {
 	saveBuilding
 } from '../tasks/building-form';
 
-const { Given, When, Then } = createBdd(test);
+const { Given, When } = createBdd(test);
 
 Given('der Liegenschaftsverwalter ist auf der Seite "Neues Gebäude"', async ({ verwalter }) => {
 	await visit(verwalter.page, '/buildings/new');
