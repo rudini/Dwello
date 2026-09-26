@@ -40,15 +40,15 @@ export const load: PageServerLoad = async ({ params, fetch }): Promise<ContractE
 			monthlyAdvancePayment: data.monthlyAdvancePayment || '0'
 		};
 
-		const tenants = (tenantsData.data || []).map((t: Record<string, unknown>) => ({
+		const tenants = (tenantsData.tenants || []).map((t: Record<string, unknown>) => ({
 			id: t.id,
 			name: `${t.firstName} ${t.lastName}`
 		}));
 
-		const apartments = (apartmentsData.data || []).map((a: Record<string, unknown>) => ({
+		const apartments = (apartmentsData.apartments || []).map((a: Record<string, unknown>) => ({
 			id: a.id,
 			unit: a.number || '',
-			building: (a.building as Record<string, string>)?.name || '',
+			building: (a.buildingName as string) || '',
 			status: a.status || (a.currentTenantId ? 'occupied' : 'vacant')
 		}));
 

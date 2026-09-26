@@ -29,14 +29,14 @@
 
 	// Form state - using functions to capture initial values
 	// This pattern is intentional for edit forms where we want initial snapshot
-	let tenantId = $state((() => data.contract.tenant_id)());
-	let apartmentId = $state((() => data.contract.apartment_id)());
-	let startDate = $state((() => formatDateForInput(data.contract.start_date))());
-	let endDate = $state((() => formatDateForInput(data.contract.end_date))());
-	let baseRent = $state((() => data.contract.base_rent_chf.toString())());
-	let additionalRent = $state((() => data.contract.additional_rent_chf?.toString() || '')());
-	let advancePayment = $state((() => data.contract.advance_payment_chf?.toString() || '')());
-	let isUnlimited = $state((() => !data.contract.end_date)());
+	let tenantId = $state((() => data.contract.tenantId)());
+	let apartmentId = $state((() => data.contract.apartmentId)());
+	let startDate = $state((() => formatDateForInput(data.contract.startDate))());
+	let endDate = $state((() => formatDateForInput(data.contract.endDate))());
+	let baseRent = $state((() => data.contract.baseRent)());
+	let additionalRent = $state((() => data.contract.additionalRent || '')());
+	let advancePayment = $state((() => data.contract.monthlyAdvancePayment || '')());
+	let isUnlimited = $state((() => !data.contract.endDate)());
 
 	let isSubmitting = $state(false);
 	let errors = $state<Record<string, string>>({});
@@ -49,7 +49,7 @@
 	// The ID of the current contract being edited (to exclude from overlap checks)
 	// Using function to capture initial value (intentional for edit form)
 	const currentContractId = (() => data.contract.id)();
-	const originalApartmentId = (() => data.contract.apartment_id)();
+	const originalApartmentId = (() => data.contract.apartmentId)();
 
 	// Selected apartment's availability
 	const selectedAvailability = $derived(apartmentId ? apartmentAvailability.get(apartmentId) : null);
