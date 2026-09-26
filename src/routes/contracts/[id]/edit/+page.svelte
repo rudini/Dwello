@@ -216,7 +216,7 @@
 <div class="max-w-2xl mx-auto space-y-6">
 	<!-- Breadcrumb -->
 	<nav class="flex items-center text-sm text-gray-500">
-		<a href="/contracts" class="hover:text-primary transition-colors">Mietverträge</a>
+		<a href="/contracts" data-testid="breadcrumb-link" class="hover:text-primary transition-colors">Mietverträge</a>
 		<Icon name="chevron_right" size={16} class="mx-2" />
 		<a href="/contracts/{data.contract.id}" class="hover:text-primary transition-colors">
 			Vertrag
