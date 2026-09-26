@@ -74,7 +74,7 @@
 			<h1 class="text-2xl font-bold text-gray-900">Mietverträge</h1>
 			<p class="text-gray-500 mt-1">{data.total} Verträge insgesamt</p>
 		</div>
-		<Button href="/contracts/new" variant="primary">
+		<Button href="/contracts/new" variant="primary" testid="contract-new-button">
 			<Icon name="add" size={20} />
 			Neuer Vertrag
 		</Button>
@@ -94,6 +94,8 @@
 						/>
 						<input
 							id="search"
+							name="search"
+							data-testid="contract-search-input"
 							type="text"
 							bind:value={searchTerm}
 							placeholder="Mieter, Wohnung oder Gebäude..."
@@ -105,6 +107,8 @@
 					<label for="building" class="block text-sm font-medium text-gray-700 mb-1">Gebäude</label>
 					<select
 						id="building"
+						name="building"
+						data-testid="contract-building-filter"
 						bind:value={buildingFilter}
 						class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary bg-white"
 					>
@@ -118,6 +122,8 @@
 					<label for="status" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
 					<select
 						id="status"
+						name="status"
+						data-testid="contract-status-filter"
 						bind:value={statusFilter}
 						class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary bg-white"
 					>
@@ -128,7 +134,7 @@
 				</div>
 			</div>
 			<div class="flex gap-2">
-				<Button type="submit" variant="primary" size="sm">
+				<Button type="submit" variant="primary" size="sm" testid="contract-search-submit">
 					<Icon name="search" size={16} />
 					Suchen
 				</Button>
@@ -199,7 +205,7 @@
 					</thead>
 					<tbody class="divide-y divide-gray-100">
 						{#each data.contracts as contract}
-							<tr class="hover:bg-gray-50 transition-colors">
+							<tr class="hover:bg-gray-50 transition-colors" data-testid="contract-row-{contract.id}">
 								<!-- Tenant -->
 								<td class="py-4 px-4">
 									<div class="flex items-center gap-3">
@@ -244,10 +250,10 @@
 								<!-- Actions -->
 								<td class="py-4 px-4 text-right">
 									<div class="flex items-center justify-end gap-2">
-										<Button href="/contracts/{contract.id}" variant="secondary" size="sm">
+										<Button href="/contracts/{contract.id}" variant="secondary" size="sm" testid="contract-view-button">
 											<Icon name="visibility" size={16} />
 										</Button>
-										<Button href="/contracts/{contract.id}/edit" variant="secondary" size="sm">
+										<Button href="/contracts/{contract.id}/edit" variant="secondary" size="sm" testid="contract-edit-button">
 											<Icon name="edit" size={16} />
 										</Button>
 									</div>

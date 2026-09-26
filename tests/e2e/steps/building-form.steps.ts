@@ -1,6 +1,5 @@
 import { expect } from '@playwright/test';
 import { createBdd, type DataTable } from 'playwright-bdd';
-import { randomUUID } from 'crypto';
 import { test } from '../fixtures/test';
 import { visit } from '../interactions/navigation';
 import { errorMessage } from '../questions/building-form';
@@ -20,13 +19,11 @@ Given('der Liegenschaftsverwalter ist auf der Seite "Neues Gebäude"', async ({ 
 
 When(
 	'der Liegenschaftsverwalter folgendes Gebäude erfasst:',
-	async ({ verwalter, names }, table: DataTable) => {
+	async ({ verwalter, seed }, table: DataTable) => {
 		const fields = table.rowsHash();
-		const name = `${fields.Name} ${randomUUID()}`;
-		names.set(fields.Name, name);
 		await verwalter.perform(
 			registerBuilding({
-				name,
+				name: seed.unique(fields.Name),
 				address: fields.Adresse,
 				postalCode: fields.PLZ,
 				city: fields.Ort,
