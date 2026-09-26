@@ -1,71 +1,41 @@
+# language: de
 @statements
-Feature: Utility Cost Statements
-  As a property manager
-  I want to generate and manage utility cost statements
-  So that I can bill tenants correctly according to Swiss law
+Funktionalität: Nebenkostenabrechnungen
+  Als Liegenschaftsverwalter
+  möchte ich alle Nebenkostenabrechnungen überblicken
+  damit ich weiss, welche versendet, bezahlt oder überfällig sind
 
-  Background:
-    Given I am logged in as "Test User"
+  Grundlage:
+    Angenommen das Gebäude "Ahornhof" in "Winterthur" existiert
+    Und im Gebäude "Ahornhof" gibt es die leere Wohnung "2.01"
+    Und der Mieter "Anna Keller" existiert
+    Und "Anna Keller" mietet die Wohnung "2.01" seit "2014-01-01" für "950" Franken mit "150" Franken Akonto
+    Und für "Anna Keller" im Gebäude "Ahornhof" gibt es die Nebenkostenabrechnung 2024
+    Und der Liegenschaftsverwalter ist auf der Abrechnungsliste
 
-  @list
-  Scenario: View statements list page
-    When I open the statements page
-    Then I should see the statements page
-    And I should see the status overview cards
-    And I should see a "Abrechnungen erstellen" link
+  Szenario: Abrechnung wird in der Liste angezeigt
+    Dann sieht der Liegenschaftsverwalter die Abrechnung von "Anna Keller" mit dem Status "Entwurf"
 
-  @list
-  Scenario: Statements page shows status filters
-    When I open the statements page
-    Then I should see draft filter button
-    And I should see sent filter button
-    And I should see paid filter button
-    And I should see overdue filter button
+  Szenario: Abrechnungen eines Mieters suchen
+    Wenn der Liegenschaftsverwalter die Abrechnungen von "Anna Keller" sucht
+    Dann sieht der Liegenschaftsverwalter die Abrechnung 2024 von "Anna Keller"
+    Und die Abrechnungsliste enthält genau 1 Abrechnung
 
-  @generate
-  Scenario: Navigate to statement generation wizard
-    When I open the statements page
-    And I click the "Abrechnungen erstellen" link
-    Then I should be on the statement generation wizard
+  Szenario: Weitere Abrechnungen auf der nächsten Seite
+    Angenommen für "Anna Keller" im Gebäude "Ahornhof" gibt es die Nebenkostenabrechnungen 2014 bis 2023
+    Wenn der Liegenschaftsverwalter die Abrechnungen von "Anna Keller" sucht
+    Und der Liegenschaftsverwalter zur nächsten Seite blättert
+    Dann sieht der Liegenschaftsverwalter die Abrechnung 2024 von "Anna Keller"
 
-  @generate @heating-profile @wip
-  # Wizard UI structure may differ from expected
-  Scenario: Statement wizard shows heating profile chart bars
-    When I open the statement generation wizard
-    Then I should see the heating profile dropdown
-    And I should see the heating profile chart
-    And I should see chart bars for each month
-    And all chart bars should have visible height
+  Szenario: Nur Entwürfe anzeigen
+    Wenn der Liegenschaftsverwalter nur die Entwürfe im Gebäude "Ahornhof" anzeigt
+    Dann sieht der Liegenschaftsverwalter die Abrechnung von "Anna Keller" mit dem Status "Entwurf"
+    Und die Abrechnungsliste enthält genau 1 Abrechnung
 
-  @generate @heating-profile @validation @wip
-  # Uses mock validation rules that differ from actual implementation
-  Scenario: Only valid heating profiles are selectable
-    When I open the statement generation wizard
-    Then I should see all heating profiles in the dropdown
-    And valid profiles should show percentage 100%
-    And invalid profiles should show their percentage and be disabled
-    And invalid profiles should show "nicht wählbar" text
+  Szenario: Abrechnungen erstellen
+    Wenn der Liegenschaftsverwalter neue Abrechnungen erstellen will
+    Dann ist der Liegenschaftsverwalter auf der Seite "Abrechnungen erstellen"
 
-  @generate @heating-profile @validation
-  Scenario: First valid heating profile is auto-selected
-    When I open the statement generation wizard
-    Then the first valid heating profile should be selected
-    And the heating profile chart should display the selected profile
-
-  @detail @wip
-  Scenario: View statement details
-    Given there is a statement "NK-2024-001"
-    When I open the statement detail page
-    Then I should see the statement number "NK-2024-001"
-    And I should see the tenant name
-    And I should see the cost breakdown
-    And I should see the balance
-
-  @list @data @wip
-  Scenario: Statements list shows statement data from backend
-    When I open the statements page
-    Then I should see statements in the list
-    And I should see statement tenant names
-    And I should see statement building names
-    And I should see statement numbers
-    # Note: Keep @wip until test data includes statements
+  Szenario: Abrechnung öffnen
+    Wenn der Liegenschaftsverwalter die Abrechnung 2024 von "Anna Keller" öffnet
+    Dann ist der Liegenschaftsverwalter auf der Detailseite der Abrechnung 2024 von "Anna Keller"

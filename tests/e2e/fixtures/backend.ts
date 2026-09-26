@@ -61,7 +61,11 @@ export function testData(request: APIRequestContext) {
 			ids.set(title, tenant.id);
 		},
 
-		async contract(tenantTitle: string, apartmentNumber: string, contract: { startDate: string; endDate?: string; baseRent: string }) {
+		async contract(
+			tenantTitle: string,
+			apartmentNumber: string,
+			contract: { startDate: string; endDate?: string; baseRent: string; monthlyAdvancePayment?: string }
+		) {
 			const created = await post('contracts', {
 				tenantId: ids.get(tenantTitle),
 				apartmentId: ids.get(apartmentNumber),
@@ -70,21 +74,37 @@ export function testData(request: APIRequestContext) {
 				...contract
 			});
 			ids.set(`Mietvertrag ${tenantTitle}`, created.id);
+			ids.set(`Wohnung von ${tenantTitle}`, created.apartmentId);
+		},
+
+		async statement(tenantTitle: string, buildingTitle: string, year: number) {
+			const statement = await post('statements/generate', {
+				contractId: ids.get(`Mietvertrag ${tenantTitle}`),
+				buildingId: ids.get(buildingTitle),
+				periodStart: `${year}-01-01`,
+				periodEnd: `${year}-12-31`
+			});
+			ids.set(`Abrechnung ${tenantTitle} ${year}`, statement.id);
 		},
 
 		async cleanUp() {
-			for (const name of names.values()) {
-				const token = name.split(' ').pop();
+			const tokens = [...names.values()].map((name) => name.split(' ').pop());
+			for (const token of tokens) {
+				for (const tenant of (await get(`tenants?search=${token}`)).tenants) {
+					for (const statement of (await get(`statements?tenantId=${tenant.id}&limit=100`)).data) {
+						await remove(`statements/${statement.id}`);
+					}
+					await removeContracts(`tenantId=${tenant.id}`);
+					await remove(`tenants/${tenant.id}`);
+				}
+			}
+			for (const token of tokens) {
 				for (const building of (await get(`buildings?search=${token}`)).buildings) {
 					for (const apartment of (await get(`apartments?buildingId=${building.id}&limit=100`)).apartments) {
 						await removeContracts(`apartmentId=${apartment.id}`);
 						await remove(`apartments/${apartment.id}`);
 					}
 					await remove(`buildings/${building.id}`);
-				}
-				for (const tenant of (await get(`tenants?search=${token}`)).tenants) {
-					await removeContracts(`tenantId=${tenant.id}`);
-					await remove(`tenants/${tenant.id}`);
 				}
 			}
 		}
