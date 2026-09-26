@@ -5,6 +5,7 @@
 	import Button from '$lib/components/Button.svelte';
 	import Icon from '$lib/components/Icon.svelte';
 	import Card from '$lib/components/Card.svelte';
+	import FieldError from '$lib/components/FieldError.svelte';
 
 	let { data, form }: { data: BuildingEditData; form: ActionData } = $props();
 
@@ -103,10 +104,10 @@
 				</div>
 			{/if}
 
-			<!-- Name (optional) -->
+			<!-- Name -->
 			<div>
 				<label for="name" class="block text-sm font-medium text-gray-700 mb-1">
-					Gebäudename <span class="text-gray-400">(optional)</span>
+					Gebäudename <span class="text-red-500">*</span>
 				</label>
 				<input
 					id="name"
@@ -118,8 +119,9 @@
 					class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 				/>
 				<p class="mt-1 text-sm text-gray-500">
-					Ein optionaler Name zur besseren Identifikation des Gebäudes.
+					Ein Name zur besseren Identifikation des Gebäudes.
 				</p>
+				<FieldError message={errors.name} />
 			</div>
 
 			<!-- Address -->
@@ -138,9 +140,7 @@
 						? 'border-red-500'
 						: 'border-gray-300'}"
 				/>
-				{#if errors.address}
-					<p class="mt-1 text-sm text-red-600" data-testid="form-error">{errors.address}</p>
-				{/if}
+				<FieldError message={errors.address} />
 			</div>
 
 			<!-- Postal Code & City -->
@@ -161,9 +161,7 @@
 							? 'border-red-500'
 							: 'border-gray-300'}"
 					/>
-					{#if errors.postalCode}
-						<p class="mt-1 text-sm text-red-600" data-testid="form-error">{errors.postalCode}</p>
-					{/if}
+					<FieldError message={errors.postalCode} />
 				</div>
 				<div class="sm:col-span-2">
 					<label for="city" class="block text-sm font-medium text-gray-700 mb-1">
@@ -180,16 +178,14 @@
 							? 'border-red-500'
 							: 'border-gray-300'}"
 					/>
-					{#if errors.city}
-						<p class="mt-1 text-sm text-red-600" data-testid="form-error">{errors.city}</p>
-					{/if}
+					<FieldError message={errors.city} />
 				</div>
 			</div>
 
 			<!-- Canton -->
 			<div>
 				<label for="canton" class="block text-sm font-medium text-gray-700 mb-1">
-					Kanton <span class="text-gray-400">(optional)</span>
+					Kanton <span class="text-red-500">*</span>
 				</label>
 				<select
 					id="canton"
@@ -203,6 +199,7 @@
 						<option value={c.value}>{c.label} ({c.value})</option>
 					{/each}
 				</select>
+				<FieldError message={errors.canton} />
 			</div>
 
 			<!-- Building Type & Year Built -->
@@ -240,9 +237,7 @@
 							? 'border-red-500'
 							: 'border-gray-300'}"
 					/>
-					{#if errors.yearBuilt}
-						<p class="mt-1 text-sm text-red-600" data-testid="form-error">{errors.yearBuilt}</p>
-					{/if}
+					<FieldError message={errors.yearBuilt} />
 				</div>
 			</div>
 

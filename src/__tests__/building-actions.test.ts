@@ -13,9 +13,14 @@ const validBuilding = {
 	canton: 'ZH'
 };
 
-function run(action: Action, backend: (url: string, init?: RequestInit) => Response, params = {}) {
+function run(
+	action: Action,
+	backend: (url: string, init?: RequestInit) => Response,
+	params = {},
+	fields: Record<string, string> = validBuilding
+) {
 	const body = new FormData();
-	for (const [key, value] of Object.entries(validBuilding)) body.set(key, value);
+	for (const [key, value] of Object.entries(fields)) body.set(key, value);
 	const request = new Request('http://localhost/', { method: 'POST', body });
 	const fetch = async (url: string, init?: RequestInit) => backend(url, init);
 	return action({ request, fetch, params } as never);
@@ -81,5 +86,18 @@ describe('Gebäude löschen', () => {
 		});
 
 		expect(result).toMatchObject({ status: 400, data: { deleteError: 'Gebäude konnte nicht gelöscht werden.' } });
+	});
+});
+
+describe.each([
+	['Neues Gebäude', newActions.default],
+	['Gebäude bearbeiten', editActions.default]
+])('%s', (_page, action) => {
+	it('verlangt Gebäudename und Kanton', async () => {
+		const result = await run(action as Action, rejected, { id: 'b1' }, { ...validBuilding, name: '', canton: '' });
+
+		expect(result).toMatchObject({
+			errors: { name: 'Gebäudename ist erforderlich', canton: 'Kanton ist erforderlich' }
+		});
 	});
 });

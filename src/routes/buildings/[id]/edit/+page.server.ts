@@ -1,5 +1,6 @@
 import { error, redirect } from '@sveltejs/kit';
 import type { BuildingWithStats } from '$lib/types';
+import { formError, parseBuildingForm } from '$lib/server/building-form';
 import type { Actions } from './$types';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
@@ -52,33 +53,7 @@ export const load: PageServerLoad = async ({ params, fetch }): Promise<BuildingE
 
 export const actions: Actions = {
 	default: async ({ request, params, fetch }) => {
-		const formData = await request.formData();
-
-		const name = formData.get('name') as string;
-		const address = formData.get('address') as string;
-		const postalCode = formData.get('postalCode') as string;
-		const city = formData.get('city') as string;
-		const canton = formData.get('canton') as string;
-		const buildingType = formData.get('buildingType') as string;
-		const yearBuilt = formData.get('yearBuilt') as string;
-
-		// Validate required fields
-		const errors: Record<string, string> = {};
-		if (!address?.trim()) {
-			errors.address = 'Adresse ist erforderlich';
-		}
-		if (!postalCode?.trim()) {
-			errors.postalCode = 'PLZ ist erforderlich';
-		} else if (!/^\d{4}$/.test(postalCode)) {
-			errors.postalCode = 'PLZ muss 4 Ziffern haben';
-		}
-		if (!city?.trim()) {
-			errors.city = 'Stadt ist erforderlich';
-		}
-		if (yearBuilt && (isNaN(parseInt(yearBuilt)) || parseInt(yearBuilt) < 1800 || parseInt(yearBuilt) > new Date().getFullYear())) {
-			errors.yearBuilt = 'Baujahr muss zwischen 1800 und heute liegen';
-		}
-
+		const { building, errors } = parseBuildingForm(await request.formData());
 		if (Object.keys(errors).length > 0) {
 			return { success: false, errors };
 		}
@@ -87,24 +62,16 @@ export const actions: Actions = {
 			const response = await fetch(`${BACKEND_URL}/api/v1/buildings/${params.id}`, {
 				method: 'PUT',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					name: name || null,
-					address,
-					postalCode,
-					city,
-					canton: canton || null,
-					buildingType: buildingType || undefined,
-					yearBuilt: yearBuilt ? parseInt(yearBuilt) : null
-				})
+				body: JSON.stringify(building)
 			});
 
 			if (!response.ok) {
 				const error = await response.json();
-				return { success: false, errors: { form: error.message || 'Fehler beim Speichern' } };
+				return formError(error.message || 'Fehler beim Speichern');
 			}
 		} catch (err) {
 			console.error('Failed to update building:', err);
-			return { success: false, errors: { form: 'Fehler beim Speichern' } };
+			return formError('Fehler beim Speichern');
 		}
 
 		throw redirect(303, `/buildings/${params.id}`);
