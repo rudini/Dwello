@@ -4,66 +4,46 @@
 
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import { contractRoutes } from '../routes/contracts';
-import { createBuilding, deleteBuilding } from '../services/building.service';
-import { createApartment, deleteApartment } from '../services/apartment.service';
-import { createTenant, deleteTenant } from '../services/tenant.service';
-import { createContract, deleteContract } from '../services/contract.service';
+import { createRental } from './helpers/rental';
 
 const token = crypto.randomUUID();
-const ids = { building: '', apartment: '', tenant: '', contract: '' };
+let rental: Awaited<ReturnType<typeof createRental>>;
 
-const list = async (query: string): Promise<{ contracts: { id: string }[]; total: number }> =>
-	(await contractRoutes.handle(new Request(`http://localhost/api/v1/contracts?${query}`))).json();
+const get = async (path: string) =>
+	(await contractRoutes.handle(new Request(`http://localhost/api/v1/contracts${path}`))).json();
 
 beforeAll(async () => {
-	ids.building = (
-		await createBuilding({ name: `Ahornhof ${token}`, address: 'Testweg 1', postalCode: '8400', city: 'Winterthur', canton: 'ZH' })
-	).id;
-	ids.apartment = (
-		await createApartment({ buildingId: ids.building, number: '2.01', floor: 2, area: '70', rooms: '3.5' })
-	).id;
-	ids.tenant = (await createTenant({ firstName: 'Anna', lastName: `Keller ${token}` })).id;
-	ids.contract = (
-		await createContract({
-			apartmentId: ids.apartment,
-			tenantId: ids.tenant,
-			startDate: '2024-04-01',
-			baseRent: '950',
-			monthlyAdvancePayment: '0'
-		})
-	).id;
+	rental = await createRental(token, { startDate: '2024-04-01', monthlyAdvancePayment: '0' });
 });
 
 afterAll(async () => {
-	await deleteContract(ids.contract);
-	await deleteTenant(ids.tenant);
-	await deleteApartment(ids.apartment);
-	await deleteBuilding(ids.building);
+	await rental.remove();
 });
 
 describe('GET /api/v1/contracts?search', () => {
 	it('findet Mietverträge über den Namen des Mieters', async () => {
-		const result = await list(`search=${encodeURIComponent(`Anna Keller ${token}`)}`);
+		const result = (await get(`?search=${encodeURIComponent(`Anna Keller ${token}`)}`)) as {
+			contracts: { id: string }[];
+			total: number;
+		};
 
-		expect(result.contracts.map((c) => c.id)).toEqual([ids.contract]);
+		expect(result.contracts.map((c) => c.id)).toEqual([rental.contract]);
 		expect(result.total).toBe(1);
 	});
 
 	it('findet Mietverträge über den Gebäudenamen', async () => {
-		const result = await list(`search=${token}`);
+		const result = (await get(`?search=${token}`)) as { contracts: { id: string }[] };
 
-		expect(result.contracts.map((c) => c.id)).toEqual([ids.contract]);
+		expect(result.contracts.map((c) => c.id)).toEqual([rental.contract]);
 	});
 });
 
 describe('GET /api/v1/contracts/:id', () => {
 	it('liefert Mieter, Wohnung und Gebäude des Mietvertrags', async () => {
-		const response = await contractRoutes.handle(new Request(`http://localhost/api/v1/contracts/${ids.contract}`));
-
-		expect(await response.json()).toMatchObject({
-			tenant: { id: ids.tenant, firstName: 'Anna', lastName: `Keller ${token}` },
-			apartment: { id: ids.apartment, number: '2.01', floor: 2 },
-			building: { id: ids.building, name: `Ahornhof ${token}`, postalCode: '8400', city: 'Winterthur' }
+		expect(await get(`/${rental.contract}`)).toMatchObject({
+			tenant: { id: rental.tenant, firstName: 'Anna', lastName: `Keller ${token}` },
+			apartment: { id: rental.apartment, number: '2.01', floor: 2 },
+			building: { id: rental.building, name: `Ahornhof ${token}`, postalCode: '8400', city: 'Winterthur' }
 		});
 	});
 });

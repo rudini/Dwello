@@ -37,78 +37,53 @@ export interface StatementWithDetails extends UtilityStatement {
 }
 
 /**
+ * Status filter; 'overdue' is computed as sent with a past payment deadline
+ */
+function statusCondition(status: string) {
+	const today = new Date().toISOString().split('T')[0];
+	if (status === 'overdue') {
+		return and(eq(utilityStatements.status, 'sent'), lt(utilityStatements.paymentDeadline, today));
+	}
+	if (status === 'sent') {
+		// 'sent' excludes overdue (sent with past deadline)
+		return and(
+			eq(utilityStatements.status, 'sent'),
+			or(gte(utilityStatements.paymentDeadline, today), sql`${utilityStatements.paymentDeadline} IS NULL`)
+		);
+	}
+	return eq(utilityStatements.status, status);
+}
+
+/**
+ * Where conditions for listStatements; tenant and building columns come from its joins
+ */
+function statementFilterConditions(filters: StatementFilters) {
+	const { search, buildingId, apartmentId, tenantId, status, periodStart, periodEnd } = filters;
+	return [
+		search &&
+			or(
+				ilike(utilityStatements.statementNumber, `%${search}%`),
+				ilike(sql`${tenants.firstName} || ' ' || ${tenants.lastName}`, `%${search}%`)
+			),
+		apartmentId && eq(utilityStatements.apartmentId, apartmentId),
+		tenantId && eq(utilityStatements.tenantId, tenantId),
+		buildingId && eq(apartments.buildingId, buildingId),
+		status && statusCondition(status),
+		periodStart && gte(utilityStatements.periodStart, periodStart),
+		periodEnd && lte(utilityStatements.periodEnd, periodEnd)
+	].filter((condition) => !!condition);
+}
+
+/**
  * List statements with optional filters and pagination
  */
 export async function listStatements(filters: StatementFilters = {}): Promise<{
 	statements: StatementWithDetails[];
 	total: number;
 }> {
-	const {
-		search,
-		buildingId,
-		apartmentId,
-		tenantId,
-		status,
-		periodStart,
-		periodEnd,
-		limit = 20,
-		offset = 0
-	} = filters;
+	const { limit = 20, offset = 0 } = filters;
 
-	// Build where conditions
-	const conditions = [];
-
-	if (search) {
-		conditions.push(
-			or(
-				ilike(utilityStatements.statementNumber, `%${search}%`),
-				ilike(tenants.firstName, `%${search}%`),
-				ilike(tenants.lastName, `%${search}%`)
-			)
-		);
-	}
-
-	if (apartmentId) {
-		conditions.push(eq(utilityStatements.apartmentId, apartmentId));
-	}
-
-	if (tenantId) {
-		conditions.push(eq(utilityStatements.tenantId, tenantId));
-	}
-
-	if (status) {
-		const today = new Date().toISOString().split('T')[0];
-		// Handle 'overdue' as a computed status (sent + past deadline)
-		if (status === 'overdue') {
-			conditions.push(
-				and(
-					eq(utilityStatements.status, 'sent'),
-					lt(utilityStatements.paymentDeadline, today)
-				)
-			);
-		} else if (status === 'sent') {
-			// 'sent' filter should exclude overdue (sent with past deadline)
-			conditions.push(
-				and(
-					eq(utilityStatements.status, 'sent'),
-					or(
-						gte(utilityStatements.paymentDeadline, today),
-						sql`${utilityStatements.paymentDeadline} IS NULL`
-					)
-				)
-			);
-		} else {
-			conditions.push(eq(utilityStatements.status, status));
-		}
-	}
-
-	if (periodStart) {
-		conditions.push(gte(utilityStatements.periodStart, periodStart));
-	}
-
-	if (periodEnd) {
-		conditions.push(lte(utilityStatements.periodEnd, periodEnd));
-	}
+	const conditions = statementFilterConditions(filters);
 
 	// Build the query with joins
 	let query = db
@@ -140,10 +115,6 @@ export async function listStatements(filters: StatementFilters = {}): Promise<{
 		.limit(limit)
 		.offset(offset);
 
-	// Filter by buildingId through apartments
-	if (buildingId) {
-		conditions.push(eq(apartments.buildingId, buildingId));
-	}
 
 	// Apply conditions
 	const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
