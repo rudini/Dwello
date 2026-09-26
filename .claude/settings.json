@@ -1,10 +1,37 @@
 {
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "autocompact_percentage_override": 75,
+  "extraKnownMarketplaces": {
+    "fallow-skills": {
+      "source": {
+        "source": "github",
+        "repo": "fallow-rs/fallow-skills"
+      }
+    },
+    "ponytail": {
+      "source": {
+        "source": "github",
+        "repo": "DietrichGebert/ponytail"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "fallow@fallow-skills": true,
+    "ponytail@ponytail": true
+  },
   "deniedMcpServers": [
-    { "serverName": "claude_ai_Gmail" },
-    { "serverName": "claude_ai_Google_Calendar" },
-    { "serverName": "notebooklm" },
-    { "serverName": "ide" }
+    {
+      "serverName": "claude_ai_Gmail"
+    },
+    {
+      "serverName": "claude_ai_Google_Calendar"
+    },
+    {
+      "serverName": "notebooklm"
+    },
+    {
+      "serverName": "ide"
+    }
   ],
   "permissions": {
     "deny": [
@@ -18,6 +45,19 @@
       "Edit(build/**)",
       "Read(backend/node_modules/**)",
       "Edit(backend/node_modules/**)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/fallow-gate.sh"
+          }
+        ]
+      }
     ]
   }
 }
