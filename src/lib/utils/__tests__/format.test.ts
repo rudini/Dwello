@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { normalizeDecimal } from '../format';
+import { formatCurrency, formatDate, normalizeDecimal } from '../format';
 
 describe('normalizeDecimal', () => {
 	it('strips trailing .0 from whole numbers', () => {
@@ -44,5 +44,12 @@ describe('normalizeDecimal', () => {
 		dbValues.forEach((dbVal, i) => {
 			expect(normalizeDecimal(dbVal)).toBe(expectedOptions[i]);
 		});
+	});
+});
+
+describe('formatCurrency / formatDate', () => {
+	it('formatiert Franken und Datum im Schweizer Format', () => {
+		expect(formatCurrency(1800).replace(/\s/g, ' ')).toBe("CHF 1'800.00");
+		expect(formatDate('2024-12-31')).toBe('31.12.2024');
 	});
 });

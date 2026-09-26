@@ -18,3 +18,13 @@ export function normalizeDecimal(val: string): string {
 	const num = parseFloat(val);
 	return isNaN(num) ? val : String(num);
 }
+
+/** Swiss franc amount, e.g. "CHF 1'800.00" */
+export function formatCurrency(amount: number): string {
+	return new Intl.NumberFormat('de-CH', { style: 'currency', currency: 'CHF' }).format(amount);
+}
+
+/** Swiss date, e.g. "31.12.2024" */
+export function formatDate(dateString: string): string {
+	return new Date(dateString).toLocaleDateString('de-CH');
+}
