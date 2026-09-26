@@ -4,7 +4,7 @@ import { test } from '../fixtures/test';
 import { visit } from '../interactions/navigation';
 import { apartmentChoice } from '../questions/contract-form';
 import { listedContract } from '../questions/contracts';
-import { registerContract, saveContract } from '../tasks/contract-form';
+import { changeBaseRent, registerContract, saveContract } from '../tasks/contract-form';
 import { searchContracts } from '../tasks/contracts';
 
 const { Given, When, Then } = createBdd(test);
@@ -38,3 +38,18 @@ Then(
 		await expect(apartmentChoice(verwalter, seed.idOf(apartment)!)).toBeDisabled();
 	}
 );
+
+Given(
+	'der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Mietvertrags von {string}',
+	async ({ verwalter, seed }, tenant: string) => {
+		await visit(verwalter.page, `/contracts/${seed.idOf(`Mietvertrag ${tenant}`)}/edit`);
+	}
+);
+
+When('der Liegenschaftsverwalter den Mietzins auf {string} Franken ändert', async ({ verwalter }, baseRent: string) => {
+	await verwalter.perform(changeBaseRent(baseRent));
+});
+
+When('der Liegenschaftsverwalter den Mietzins leert', async ({ verwalter }) => {
+	await verwalter.perform(changeBaseRent(''));
+});

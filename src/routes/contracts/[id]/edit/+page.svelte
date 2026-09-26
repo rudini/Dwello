@@ -3,6 +3,7 @@
 	import Button from '$lib/components/Button.svelte';
 	import Icon from '$lib/components/Icon.svelte';
 	import Card from '$lib/components/Card.svelte';
+	import FieldError from '$lib/components/FieldError.svelte';
 	import { apiCall } from '$lib/api';
 	import type { RentalContract } from '$lib/types';
 	import {
@@ -218,7 +219,7 @@
 	<nav class="flex items-center text-sm text-gray-500">
 		<a href="/contracts" data-testid="breadcrumb-link" class="hover:text-primary transition-colors">Mietverträge</a>
 		<Icon name="chevron_right" size={16} class="mx-2" />
-		<a href="/contracts/{data.contract.id}" class="hover:text-primary transition-colors">
+		<a href="/contracts/{data.contract.id}" data-testid="breadcrumb-link" class="hover:text-primary transition-colors">
 			Vertrag
 		</a>
 		<Icon name="chevron_right" size={16} class="mx-2" />
@@ -236,7 +237,7 @@
 		<form onsubmit={handleSubmit} class="space-y-6">
 			{#if errors.form}
 				<div class="bg-red-50 border border-red-200 rounded-lg p-4">
-					<p class="text-sm text-red-700">{errors.form}</p>
+					<p class="text-sm text-red-700" data-testid="form-error">{errors.form}</p>
 				</div>
 			{/if}
 
@@ -273,9 +274,7 @@
 						<option value={tenant.id}>{tenant.name}</option>
 					{/each}
 				</select>
-				{#if errors.tenantId}
-					<p class="mt-1 text-sm text-red-600">{errors.tenantId}</p>
-				{/if}
+				<FieldError message={errors.tenantId} />
 			</div>
 
 			<!-- Apartment Selection -->
@@ -319,9 +318,7 @@
 						{/each}
 					</select>
 				{/if}
-				{#if errors.apartmentId}
-					<p class="mt-1 text-sm text-red-600">{errors.apartmentId}</p>
-				{/if}
+				<FieldError message={errors.apartmentId} />
 
 				<!-- Availability Info for "available from" case when changing apartment -->
 				{#if apartmentId !== originalApartmentId && selectedAvailability?.statusType === 'available-from'}
@@ -356,9 +353,7 @@
 								? 'border-red-500'
 								: 'border-gray-300'}"
 						/>
-						{#if errors.startDate}
-							<p class="mt-1 text-sm text-red-600">{errors.startDate}</p>
-						{/if}
+						<FieldError message={errors.startDate} />
 					</div>
 					<div>
 						<label for="endDate" class="block text-sm font-medium text-gray-700 mb-1">
@@ -373,9 +368,7 @@
 								? 'border-red-500'
 								: 'border-gray-300'} {isUnlimited ? 'bg-gray-50 text-gray-400' : ''}"
 						/>
-						{#if errors.endDate}
-							<p class="mt-1 text-sm text-red-600">{errors.endDate}</p>
-						{/if}
+						<FieldError message={errors.endDate} />
 					</div>
 				</div>
 
@@ -413,6 +406,7 @@
 							<span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">CHF</span>
 							<input
 								id="baseRent"
+								data-testid="contract-base-rent-input"
 								type="number"
 								step="0.01"
 								min="0"
@@ -423,9 +417,7 @@
 									: 'border-gray-300'}"
 							/>
 						</div>
-						{#if errors.baseRent}
-							<p class="mt-1 text-sm text-red-600">{errors.baseRent}</p>
-						{/if}
+						<FieldError message={errors.baseRent} />
 					</div>
 
 					<div>
@@ -446,9 +438,7 @@
 									: 'border-gray-300'}"
 							/>
 						</div>
-						{#if errors.additionalRent}
-							<p class="mt-1 text-sm text-red-600">{errors.additionalRent}</p>
-						{/if}
+						<FieldError message={errors.additionalRent} />
 					</div>
 
 					<div>
@@ -469,9 +459,7 @@
 									: 'border-gray-300'}"
 							/>
 						</div>
-						{#if errors.advancePayment}
-							<p class="mt-1 text-sm text-red-600">{errors.advancePayment}</p>
-						{/if}
+						<FieldError message={errors.advancePayment} />
 					</div>
 				</div>
 
@@ -488,7 +476,7 @@
 
 			<!-- Actions -->
 			<div class="flex gap-3 pt-4 border-t border-gray-200">
-				<Button href="/contracts/{data.contract.id}" variant="secondary">Abbrechen</Button>
+				<Button href="/contracts/{data.contract.id}" variant="secondary" testid="form-cancel">Abbrechen</Button>
 				<Button
 					type="submit"
 					variant="primary"

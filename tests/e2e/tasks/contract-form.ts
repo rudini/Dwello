@@ -20,3 +20,8 @@ export const registerContract = (contract: ContractData) => async (actor: Actor)
 export const saveContract = async (actor: Actor) => {
 	await contractSubmitButton(actor.page).click();
 };
+
+export const changeBaseRent = (baseRent: string) => async (actor: Actor) => {
+	await baseRentInput(actor.page).fill(baseRent);
+	await contractSubmitButton(actor.page).click();
+};
