@@ -1,10 +1,12 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
+	import { enhance } from '$app/forms';
 	import Button from '$lib/components/Button.svelte';
 	import Icon from '$lib/components/Icon.svelte';
 	import Card from '$lib/components/Card.svelte';
 	import StatusBadge from '$lib/components/StatusBadge.svelte';
+	import FieldError from '$lib/components/FieldError.svelte';
 	import type { RentalContract, Tenant, Apartment, Building } from '$lib/types';
+	import type { ActionData } from './$types';
 
 	interface PageData {
 		contract: RentalContract & {
@@ -20,7 +22,7 @@
 		};
 	}
 
-	let { data }: { data: PageData } = $props();
+	let { data, form }: { data: PageData; form: ActionData } = $props();
 
 	let showEndContractModal = $state(false);
 	let showDeleteModal = $state(false);
@@ -46,24 +48,6 @@
 		return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
 	}
 
-	async function handleEndContract() {
-		// In production, call the API
-		// await fetch(`/api/contracts/${data.contract.id}`, {
-		// 	method: 'PUT',
-		// 	body: JSON.stringify({ endDate: new Date().toISOString(), status: 'Beendet' })
-		// });
-		await new Promise((r) => setTimeout(r, 500));
-		showEndContractModal = false;
-		// Reload page
-		window.location.reload();
-	}
-
-	async function handleDelete() {
-		// In production, call the API
-		// await fetch(`/api/contracts/${data.contract.id}`, { method: 'DELETE' });
-		await new Promise((r) => setTimeout(r, 500));
-		await goto('/contracts');
-	}
 </script>
 
 <svelte:head>
@@ -73,7 +57,7 @@
 <div class="space-y-6">
 	<!-- Breadcrumb -->
 	<nav class="flex items-center text-sm text-gray-500">
-		<a href="/contracts" class="hover:text-primary transition-colors">Mietverträge</a>
+		<a href="/contracts" data-testid="breadcrumb-link" class="hover:text-primary transition-colors">Mietverträge</a>
 		<Icon name="chevron_right" size={16} class="mx-2" />
 		<span class="text-gray-900 font-medium">
 			{data.contract.tenant.firstName} {data.contract.tenant.lastName} - Wohnung {data.contract.apartment.number}
@@ -85,27 +69,29 @@
 		<div>
 			<div class="flex items-center gap-3">
 				<h1 class="text-2xl font-bold text-gray-900">Mietvertrag</h1>
-				<StatusBadge
-					status={!data.contract.endDate ? 'AKTIV' : 'Beendet'}
-					variant={!data.contract.endDate ? 'success' : 'gray'}
-				/>
+				<span data-testid="contract-status">
+					<StatusBadge
+						status={!data.contract.endDate ? 'AKTIV' : 'Beendet'}
+						variant={!data.contract.endDate ? 'success' : 'gray'}
+					/>
+				</span>
 			</div>
-			<p class="text-gray-500 mt-1">
+			<p class="text-gray-500 mt-1" data-testid="contract-apartment">
 				Wohnung {data.contract.apartment.number} - {data.contract.building.name || data.contract.building.address}
 			</p>
 		</div>
 		<div class="flex gap-2">
-			<Button href="/contracts/{data.contract.id}/edit" variant="secondary">
+			<Button href="/contracts/{data.contract.id}/edit" variant="secondary" testid="contract-edit-button">
 				<Icon name="edit" size={18} />
 				Bearbeiten
 			</Button>
 			{#if !data.contract.endDate}
-				<Button variant="secondary" onclick={() => (showEndContractModal = true)}>
+				<Button variant="secondary" onclick={() => (showEndContractModal = true)} testid="contract-end-button">
 					<Icon name="event_busy" size={18} />
 					Beenden
 				</Button>
 			{/if}
-			<Button variant="danger" onclick={() => (showDeleteModal = true)}>
+			<Button variant="danger" onclick={() => (showDeleteModal = true)} testid="contract-delete-button">
 				<Icon name="delete" size={18} />
 				Löschen
 			</Button>
@@ -145,7 +131,7 @@
 						</a>
 					</div>
 				{/if}
-				<Button href="/tenants/{data.contract.tenant.id}" variant="secondary" size="sm">
+				<Button href="/tenants/{data.contract.tenant.id}" variant="secondary" size="sm" testid="contract-tenant-link">
 					<Icon name="person" size={16} />
 					Mieterprofil ansehen
 				</Button>
@@ -183,7 +169,7 @@
 					</div>
 				</div>
 				<div class="mt-4 pt-4 border-t border-gray-100">
-					<Button href="/apartments/{data.contract.apartment.id}" variant="secondary" size="sm">
+					<Button href="/apartments/{data.contract.apartment.id}" variant="secondary" size="sm" testid="contract-apartment-link">
 						<Icon name="visibility" size={16} />
 						Wohnung ansehen
 					</Button>
@@ -244,7 +230,7 @@
 						class="flex justify-between items-center py-3 border-t border-gray-200 mt-2"
 					>
 						<span class="font-semibold text-gray-900">Total Bruttomiete</span>
-						<span class="text-xl font-bold text-primary">
+						<span class="text-xl font-bold text-primary" data-testid="contract-total-rent">
 							{formatCurrency(data.rentBreakdown.total)}
 						</span>
 					</div>
@@ -255,11 +241,11 @@
 			<Card>
 				<h2 class="text-lg font-semibold text-gray-900 mb-4">Aktionen</h2>
 				<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-					<Button href="/statements?contract={data.contract.id}" variant="secondary">
+					<Button href="/statements?contract={data.contract.id}" variant="secondary" testid="contract-statements-link">
 						<Icon name="receipt_long" size={18} />
 						Nebenkostenabrechnungen
 					</Button>
-					<Button href="/invoices?building={data.contract.building.id}" variant="secondary">
+					<Button href="/invoices?building={data.contract.building.id}" variant="secondary" testid="contract-invoices-link">
 						<Icon name="receipt" size={18} />
 						Rechnungen anzeigen
 					</Button>
@@ -288,13 +274,22 @@
 				Sind Sie sicher, dass Sie diesen Mietvertrag beenden möchten? Das Vertragsende wird auf
 				das heutige Datum gesetzt und die Wohnung wird als "Leer" markiert.
 			</p>
-			<div class="flex gap-3 justify-end">
+			<FieldError message={form?.endError} />
+			<form
+				method="POST"
+				action="?/end"
+				use:enhance={() => async ({ update }) => {
+					await update();
+					showEndContractModal = false;
+				}}
+				class="flex gap-3 justify-end"
+			>
 				<Button variant="secondary" onclick={() => (showEndContractModal = false)}>Abbrechen</Button>
-				<Button variant="primary" onclick={handleEndContract}>
+				<Button type="submit" variant="primary" testid="contract-end-confirm">
 					<Icon name="event_busy" size={18} />
 					Vertrag beenden
 				</Button>
-			</div>
+			</form>
 		</div>
 	</div>
 {/if}
@@ -326,17 +321,19 @@
 					</div>
 				</div>
 			{/if}
-			<div class="flex gap-3 justify-end">
+			<FieldError message={form?.deleteError} />
+			<form method="POST" action="?/delete" use:enhance class="flex gap-3 justify-end">
 				<Button variant="secondary" onclick={() => (showDeleteModal = false)}>Abbrechen</Button>
 				<Button
+					type="submit"
 					variant="danger"
-					onclick={handleDelete}
 					disabled={!data.contract.endDate}
+					testid="contract-delete-confirm"
 				>
 					<Icon name="delete" size={18} />
 					Löschen
 				</Button>
-			</div>
+			</form>
 		</div>
 	</div>
 {/if}
