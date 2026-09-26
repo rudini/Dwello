@@ -19,7 +19,7 @@ import {
 	prorateCosts,
 	handleMidYearMoves
 } from './prorating.service';
-import { getApartment } from './apartment.service';
+import { getApartment, listApartments } from './apartment.service';
 import { getContract } from './contract.service';
 
 /**
@@ -91,9 +91,7 @@ function groupInvoicesByCategory(
 				distributionKeyName: invoice.distributionKey?.name || 'Gleichmässig',
 				totalAmount: 0,
 				invoices: [],
-				isHeatingCost: invoice.category?.name?.toLowerCase().includes('heiz') ||
-					invoice.category?.name?.toLowerCase().includes('wärme') ||
-					false
+				isHeatingCost: /heiz|wärme|heating/i.test(invoice.category?.name ?? '')
 			});
 		}
 
@@ -260,15 +258,13 @@ export async function calculateStatementForContract(
 	// Group invoices by category
 	const invoiceGroups = groupInvoicesByCategory(invoices);
 
-	// Get building apartments for distribution calculation
-	// This is a simplified version - in production, you'd get this from the building
-	const buildingApartments = [
-		{
-			id: apartment.id,
-			area: parseFloat(apartment.area),
-			rooms: parseFloat(apartment.rooms)
-		}
-	];
+	// All apartments of the building share its costs according to the distribution key
+	const { apartments: buildingApartmentRows } = await listApartments({ buildingId, limit: 1000 });
+	const buildingApartments = buildingApartmentRows.map((a) => ({
+		id: a.id,
+		area: parseFloat(a.area),
+		rooms: parseFloat(a.rooms)
+	}));
 
 	// Calculate line items
 	const lineItems: CalculatedLineItem[] = [];
