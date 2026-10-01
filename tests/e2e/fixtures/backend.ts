@@ -16,6 +16,7 @@ export function testData(request: APIRequestContext, token: string) {
 	const post = (path: string, data: object) => request.post(`${BACKEND_API}/${path}`, { data, headers }).then(body);
 	const get = (path: string) => request.get(`${BACKEND_API}/${path}`, { headers }).then(body);
 	const remove = (path: string) => request.delete(`${BACKEND_API}/${path}`, { headers });
+	const extras: string[] = []; // invoices and heating profiles, removed before their building
 	const unique = (title: string) => {
 		const name = `${title} ${randomUUID()}`;
 		names.set(title, name);
@@ -78,14 +79,43 @@ export function testData(request: APIRequestContext, token: string) {
 			ids.set(`Wohnung von ${tenantTitle}`, created.apartmentId);
 		},
 
-		async statement(tenantTitle: string, buildingTitle: string, year: number) {
+		async statement(tenantTitle: string, buildingTitle: string, year: number, heatingProfileTitle?: string) {
 			const statement = await post('statements/generate', {
 				contractId: ids.get(`Mietvertrag ${tenantTitle}`),
 				buildingId: ids.get(buildingTitle),
 				periodStart: `${year}-01-01`,
-				periodEnd: `${year}-12-31`
+				periodEnd: `${year}-12-31`,
+				heatingProfileId: heatingProfileTitle && ids.get(heatingProfileTitle)
 			});
 			ids.set(`Abrechnung ${tenantTitle} ${year}`, statement.id);
+		},
+
+		// Monthly shares January..December in percent
+		async heatingProfile(title: string, monthly: number[]) {
+			const months = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
+			const profile = await post('heating-profiles', {
+				name: unique(title),
+				...Object.fromEntries(months.map((month, i) => [`${month}Pct`, monthly[i]]))
+			});
+			ids.set(title, profile.id);
+			extras.push(`heating-profiles/${profile.id}`);
+		},
+
+		// Heating costs of the building, distributed by area
+		async heatingInvoice(buildingTitle: string, amount: string, year: number) {
+			const heating = (await get('categories?limit=100')).categories.find((c: { name: string }) => c.name === 'Heating');
+			const perArea = (await get('distribution-keys')).data.find((k: { name: string }) => k.name === 'Per Area (m²)');
+			const invoice = await post('invoices', {
+				buildingId: ids.get(buildingTitle),
+				categoryId: heating.id,
+				distributionKeyId: perArea.id,
+				billingEntityName: 'Heizöl AG',
+				description: `Heizöl ${year}`,
+				amount,
+				invoiceDate: `${year}-06-30`,
+				isValidUtilityCost: true
+			});
+			extras.unshift(`invoices/${invoice.id}`);
 		},
 
 		async cleanUp() {
@@ -99,6 +129,7 @@ export function testData(request: APIRequestContext, token: string) {
 					await remove(`tenants/${tenant.id}`);
 				}
 			}
+			for (const path of extras) await remove(path);
 			for (const token of tokens) {
 				for (const building of (await get(`buildings?search=${token}`)).buildings) {
 					for (const apartment of (await get(`apartments?buildingId=${building.id}&limit=100`)).apartments) {
