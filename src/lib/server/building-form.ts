@@ -1,4 +1,4 @@
-export const formError = (form: string) => ({ success: false, errors: { form } });
+export const formError = (form: string) => ({ success: false, errors: { form } as Record<string, string> });
 
 export function parseBuildingForm(formData: FormData) {
 	const field = (key: string) => String(formData.get(key) ?? '').trim();

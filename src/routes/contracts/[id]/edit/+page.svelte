@@ -22,7 +22,7 @@
 	let { data }: { data: PageData } = $props();
 
 	// Helper to format date for input
-	function formatDateForInput(dateStr: string | Date | undefined): string {
+	function formatDateForInput(dateStr: string | Date | null | undefined): string {
 		if (!dateStr) return '';
 		const date = new Date(dateStr);
 		return date.toISOString().split('T')[0];
@@ -34,9 +34,9 @@
 	let apartmentId = $state((() => data.contract.apartmentId)());
 	let startDate = $state((() => formatDateForInput(data.contract.startDate))());
 	let endDate = $state((() => formatDateForInput(data.contract.endDate))());
-	let baseRent = $state((() => data.contract.baseRent)());
-	let additionalRent = $state((() => data.contract.additionalRent || '')());
-	let advancePayment = $state((() => data.contract.monthlyAdvancePayment || '')());
+	let baseRent = $state((() => String(data.contract.baseRent))());
+	let additionalRent = $state((() => String(data.contract.additionalRent || ''))());
+	let advancePayment = $state((() => String(data.contract.monthlyAdvancePayment || ''))());
 	let isUnlimited = $state((() => !data.contract.endDate)());
 
 	let isSubmitting = $state(false);
@@ -242,7 +242,7 @@
 			{/if}
 
 			<!-- Warning for active contract -->
-			{#if data.contract.status === 'Aktiv'}
+			{#if !data.contract.endDate}
 				<div class="bg-amber-50 border border-amber-200 rounded-lg p-4">
 					<div class="flex items-start gap-3">
 						<Icon name="warning" size={20} class="text-amber-600 mt-0.5" />
