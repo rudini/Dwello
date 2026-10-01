@@ -3,14 +3,13 @@
  */
 
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
-import { contractRoutes } from '../routes/contracts';
+import { callApi } from './helpers/auth';
 import { createRental } from './helpers/rental';
 
 const token = crypto.randomUUID();
 let rental: Awaited<ReturnType<typeof createRental>>;
 
-const get = async (path: string) =>
-	(await contractRoutes.handle(new Request(`http://localhost/api/v1/contracts${path}`))).json();
+const get = async (path: string) => (await callApi(`/api/v1/contracts${path}`)).json();
 
 beforeAll(async () => {
 	rental = await createRental(token, { startDate: '2024-04-01', monthlyAdvancePayment: '0' });

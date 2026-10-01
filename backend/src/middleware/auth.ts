@@ -49,7 +49,8 @@ export async function verifyJwt(token: string): Promise<JwtPayload | null> {
  * Validates JWT from Authorization header
  */
 export const authMiddleware = new Elysia({ name: 'auth' })
-	.derive(async ({ headers, set }) => {
+	// 'scoped' so the hooks protect the routes of every module that uses this plugin
+	.derive({ as: 'scoped' }, async ({ headers, set }) => {
 		const authHeader = headers.authorization;
 
 		if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -81,7 +82,7 @@ export const authMiddleware = new Elysia({ name: 'auth' })
 			error: null
 		};
 	})
-	.onBeforeHandle(({ user, error, set }) => {
+	.onBeforeHandle({ as: 'scoped' }, ({ user, error, set }) => {
 		if (!user && error) {
 			set.status = 401;
 			return error;

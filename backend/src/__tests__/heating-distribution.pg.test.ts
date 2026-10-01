@@ -10,11 +10,11 @@ import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import { eq } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { categories, distributionKeys, heatingProfiles, invoices } from '../db/schema';
-import { statementRoutes } from '../routes/statements';
 import { createBuilding, deleteBuilding } from '../services/building.service';
 import { createApartment, deleteApartment } from '../services/apartment.service';
 import { createTenant, deleteTenant } from '../services/tenant.service';
 import { createContract, deleteContract } from '../services/contract.service';
+import { callApi } from './helpers/auth';
 
 type LineItem = { isHeatingCost: boolean; apartmentShare: number; tenantShare: number; sharePercentage: number };
 
@@ -43,13 +43,11 @@ async function rent(firstName: string, apartmentId: string, startDate: string, e
 }
 
 async function heatingLine(contractId: string): Promise<LineItem> {
-	const response = await statementRoutes.handle(
-		new Request('http://localhost/api/v1/statements/preview', {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ contractId, periodStart: '2024-01-01', periodEnd: '2024-12-31', heatingProfileId })
-		})
-	);
+	const response = await callApi('/api/v1/statements/preview', {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({ contractId, periodStart: '2024-01-01', periodEnd: '2024-12-31', heatingProfileId })
+	});
 	const preview = (await response.json()) as { lineItems: LineItem[] };
 	return preview.lineItems.find((item) => item.isHeatingCost)!;
 }

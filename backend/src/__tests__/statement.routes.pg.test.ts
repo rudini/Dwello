@@ -3,16 +3,15 @@
  */
 
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
-import { statementRoutes } from '../routes/statements';
 import { deleteStatement } from '../services/statement.service';
+import { callApi } from './helpers/auth';
 import { createRental } from './helpers/rental';
 
 const token = crypto.randomUUID();
 let rental: Awaited<ReturnType<typeof createRental>>;
 let statementId: string;
 
-const call = async (path: string, init?: RequestInit) =>
-	(await statementRoutes.handle(new Request(`http://localhost/api/v1/statements${path}`, init))).json();
+const call = async (path: string, init?: RequestInit) => (await callApi(`/api/v1/statements${path}`, init)).json();
 
 beforeAll(async () => {
 	rental = await createRental(token, { startDate: '2024-01-01', monthlyAdvancePayment: '150' });
