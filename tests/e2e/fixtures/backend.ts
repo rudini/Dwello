@@ -9,12 +9,13 @@ async function body(response: APIResponse) {
 }
 
 // Scenario-scoped test data: Gherkin names map to UUID-namespaced names, and everything is removed afterwards.
-export function testData(request: APIRequestContext) {
+export function testData(request: APIRequestContext, token: string) {
 	const names = new Map<string, string>();
 	const ids = new Map<string, string>();
-	const post = (path: string, data: object) => request.post(`${BACKEND_API}/${path}`, { data }).then(body);
-	const get = (path: string) => request.get(`${BACKEND_API}/${path}`).then(body);
-	const remove = (path: string) => request.delete(`${BACKEND_API}/${path}`);
+	const headers = { Authorization: `Bearer ${token}` };
+	const post = (path: string, data: object) => request.post(`${BACKEND_API}/${path}`, { data, headers }).then(body);
+	const get = (path: string) => request.get(`${BACKEND_API}/${path}`, { headers }).then(body);
+	const remove = (path: string) => request.delete(`${BACKEND_API}/${path}`, { headers });
 	const unique = (title: string) => {
 		const name = `${title} ${randomUUID()}`;
 		names.set(title, name);

@@ -2,7 +2,7 @@ import { test as base } from 'playwright-bdd';
 import type { Page } from '@playwright/test';
 import { Actor } from './actor';
 import { testData, type TestData } from './backend';
-import { sessionCookies } from './session';
+import { sessionCookies, sessionToken } from './session';
 
 // Define custom fixtures for Dwello E2E tests
 export const test = base.extend<{
@@ -18,13 +18,16 @@ export const test = base.extend<{
 	seed: TestData;
 	names: Map<string, string>;
 }>({
-	verwalter: async ({ page, baseURL }, use) => {
+	// Every page belongs to the signed-in Liegenschaftsverwalter
+	page: async ({ page, baseURL }, use) => {
 		await page.context().addCookies(await sessionCookies(baseURL!));
-		await use(new Actor('Liegenschaftsverwalter', page));
+		await use(page);
 	},
 
+	verwalter: async ({ page }, use) => use(new Actor('Liegenschaftsverwalter', page)),
+
 	seed: async ({ request }, use) => {
-		const data = testData(request);
+		const data = testData(request, await sessionToken());
 		await use(data);
 		await data.cleanUp();
 	},
