@@ -15,6 +15,7 @@ export function testData(request: APIRequestContext, token: string) {
 	const headers = { Authorization: `Bearer ${token}` };
 	const post = (path: string, data: object) => request.post(`${BACKEND_API}/${path}`, { data, headers }).then(body);
 	const get = (path: string) => request.get(`${BACKEND_API}/${path}`, { headers }).then(body);
+	const put = (path: string, data: object) => request.put(`${BACKEND_API}/${path}`, { data, headers }).then(body);
 	const remove = (path: string) => request.delete(`${BACKEND_API}/${path}`, { headers });
 	const extras: string[] = []; // invoices and heating profiles, removed before their building
 	const unique = (title: string) => {
@@ -88,6 +89,10 @@ export function testData(request: APIRequestContext, token: string) {
 				heatingProfileId: heatingProfileTitle && ids.get(heatingProfileTitle)
 			});
 			ids.set(`Abrechnung ${tenantTitle} ${year}`, statement.id);
+		},
+
+		async sendStatement(tenantTitle: string, year: number) {
+			await put(`statements/${ids.get(`Abrechnung ${tenantTitle} ${year}`)}/status`, { status: 'sent' });
 		},
 
 		// Monthly shares January..December in percent

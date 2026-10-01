@@ -6,12 +6,15 @@
 	import Card from '$lib/components/Card.svelte';
 	import Badge from '$lib/components/Badge.svelte';
 	import Modal from '$lib/components/Modal.svelte';
+	import FieldError from '$lib/components/FieldError.svelte';
+	import { enhance } from '$app/forms';
+	import type { ActionData } from './$types';
 
 	interface PageData {
 		statement: StatementWithDetails;
 	}
 
-	let { data }: { data: PageData } = $props();
+	let { data, form }: { data: PageData; form: ActionData } = $props();
 
 	let showMarkPaidModal = $state(false);
 	let showSendReminderModal = $state(false);
@@ -79,27 +82,11 @@
 		return 'Ausgeglichen';
 	}
 
-	async function handleMarkPaid() {
-		isProcessing = true;
-		await new Promise((resolve) => setTimeout(resolve, 1000));
-		console.log('Marking as paid:', data.statement.id);
-		showMarkPaidModal = false;
-		isProcessing = false;
-	}
-
 	async function handleSendReminder() {
 		isProcessing = true;
 		await new Promise((resolve) => setTimeout(resolve, 1000));
 		console.log('Sending reminder:', data.statement.id);
 		showSendReminderModal = false;
-		isProcessing = false;
-	}
-
-	async function handleDelete() {
-		isProcessing = true;
-		await new Promise((resolve) => setTimeout(resolve, 1000));
-		console.log('Deleting:', data.statement.id);
-		showDeleteModal = false;
 		isProcessing = false;
 	}
 
@@ -138,6 +125,7 @@
 		<div class="flex items-start gap-4">
 			<a
 				href="/statements"
+				data-testid="back-link"
 				class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
 			>
 				<Icon name="arrow_back" size={20} />
@@ -145,9 +133,11 @@
 			<div>
 				<div class="flex items-center gap-3 mb-1">
 					<h1 class="text-2xl font-bold text-gray-900">{data.statement.statementNumber}</h1>
-					<Badge variant={getStatusVariant(data.statement.status)}>
-						{getStatusLabel(data.statement.status)}
-					</Badge>
+					<span data-testid="statement-status">
+						<Badge variant={getStatusVariant(data.statement.status)}>
+							{getStatusLabel(data.statement.status)}
+						</Badge>
+					</span>
 				</div>
 				<p class="text-gray-500">
 					Periode: {formatDate(data.statement.periodStart)} - {formatDate(data.statement.periodEnd)}
@@ -171,19 +161,26 @@
 					<Icon name="mail" size={20} />
 					Mahnung senden
 				</Button>
-				<Button variant="primary" onclick={() => (showMarkPaidModal = true)}>
+				<Button
+					variant="primary"
+					onclick={() => (showMarkPaidModal = true)}
+					testid="statement-mark-paid-button"
+				>
 					<Icon name="paid" size={20} />
 					Als bezahlt markieren
 				</Button>
 			{/if}
 			{#if data.statement.status === 'draft'}
-				<Button variant="primary">
-					<Icon name="send" size={20} />
-					Versenden
-				</Button>
+				<form method="POST" action="?/send" use:enhance>
+					<Button type="submit" variant="primary" testid="statement-send-button">
+						<Icon name="send" size={20} />
+						Versenden
+					</Button>
+				</form>
 			{/if}
 		</div>
 	</div>
+	<FieldError message={form?.actionError} />
 
 	<div class="grid gap-6 lg:grid-cols-3">
 		<!-- Main Content -->
@@ -204,7 +201,7 @@
 						</thead>
 						<tbody class="divide-y divide-gray-100">
 							{#each data.statement.lineItems as item}
-								<tr>
+								<tr data-testid="statement-line-item">
 									<td class="py-3 text-gray-900">{item.categoryName}</td>
 									<td class="py-3 text-gray-500 text-sm">{item.distributionKeyName}</td>
 									<td class="py-3 text-right text-gray-500">{formatCurrency(item.totalAmount)}</td>
@@ -264,7 +261,9 @@
 					{#if data.statement.paidDate}
 						<div>
 							<p class="text-sm text-gray-500">Bezahlt am</p>
-							<p class="font-medium text-green-600">{formatDate(data.statement.paidDate)}</p>
+							<p class="font-medium text-green-600" data-testid="statement-paid-date">
+								{formatDate(data.statement.paidDate)}
+							</p>
 						</div>
 					{/if}
 					{#if data.statement.lastReminderDate}
@@ -304,7 +303,12 @@
 						{/if}
 					</div>
 				</div>
-				<Button href="/tenants/{data.statement.tenantId}" variant="secondary" class="w-full">
+				<Button
+					href="/tenants/{data.statement.tenantId}"
+					variant="secondary"
+					class="w-full"
+					testid="statement-tenant-link"
+				>
 					<Icon name="person" size={18} />
 					Mieter anzeigen
 				</Button>
@@ -335,6 +339,7 @@
 						href="/apartments/{data.statement.apartmentId}"
 						variant="secondary"
 						class="w-full"
+						testid="statement-apartment-link"
 					>
 						<Icon name="apartment" size={18} />
 						Wohnung anzeigen
@@ -346,7 +351,12 @@
 			<Card>
 				<h2 class="text-lg font-semibold text-gray-900 mb-4">Aktionen</h2>
 				<div class="space-y-2">
-					<Button href="/statements/{data.statement.id}/edit" variant="secondary" class="w-full">
+					<Button
+						href="/statements/{data.statement.id}/edit"
+						variant="secondary"
+						class="w-full"
+						testid="statement-edit-button"
+					>
 						<Icon name="edit" size={18} />
 						Bearbeiten
 					</Button>
@@ -354,6 +364,7 @@
 						variant="secondary"
 						class="w-full text-red-600 hover:bg-red-50"
 						onclick={() => (showDeleteModal = true)}
+						testid="statement-delete-button"
 					>
 						<Icon name="delete" size={18} />
 						Löschen
@@ -398,18 +409,21 @@
 			{formatCurrency(Math.abs(data.statement.balance))}
 		</p>
 	</div>
-	<div class="flex justify-end gap-3">
+	<form
+		method="POST"
+		action="?/markPaid"
+		use:enhance={() => async ({ update }) => {
+			await update();
+			showMarkPaidModal = false;
+		}}
+		class="flex justify-end gap-3"
+	>
 		<Button variant="secondary" onclick={() => (showMarkPaidModal = false)}>Abbrechen</Button>
-		<Button variant="primary" onclick={handleMarkPaid} disabled={isProcessing}>
-			{#if isProcessing}
-				<Icon name="progress_activity" size={20} class="animate-spin" />
-				Wird verarbeitet...
-			{:else}
-				<Icon name="check" size={20} />
-				Als bezahlt markieren
-			{/if}
+		<Button type="submit" variant="primary" testid="statement-mark-paid-confirm">
+			<Icon name="check" size={20} />
+			Als bezahlt markieren
 		</Button>
-	</div>
+	</form>
 </Modal>
 
 <!-- Send Reminder Modal -->
@@ -460,21 +474,19 @@
 			{data.statement.tenantName} · {data.statement.buildingName}
 		</p>
 	</div>
-	<div class="flex justify-end gap-3">
+	<form
+		method="POST"
+		action="?/delete"
+		use:enhance={() => async ({ update }) => {
+			await update();
+			showDeleteModal = false;
+		}}
+		class="flex justify-end gap-3"
+	>
 		<Button variant="secondary" onclick={() => (showDeleteModal = false)}>Abbrechen</Button>
-		<Button
-			variant="primary"
-			onclick={handleDelete}
-			disabled={isProcessing}
-			class="bg-red-600 hover:bg-red-700"
-		>
-			{#if isProcessing}
-				<Icon name="progress_activity" size={20} class="animate-spin" />
-				Wird gelöscht...
-			{:else}
-				<Icon name="delete" size={20} />
-				Löschen
-			{/if}
+		<Button type="submit" variant="danger" testid="statement-delete-confirm">
+			<Icon name="delete" size={20} />
+			Löschen
 		</Button>
-	</div>
+	</form>
 </Modal>

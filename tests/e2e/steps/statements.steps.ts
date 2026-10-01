@@ -2,7 +2,7 @@ import { expect } from '@playwright/test';
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { visit } from '../interactions/navigation';
-import { allListedStatements, listedStatement, statementOfYear } from '../questions/statements';
+import { allListedStatements, listedStatement, statementOfYear, statementPath } from '../questions/statements';
 import {
 	openStatement,
 	searchStatements,
@@ -86,7 +86,7 @@ Then('die Abrechnungsliste enthält genau {int} Abrechnung', async ({ verwalter 
 Then(
 	'ist der Liegenschaftsverwalter auf der Detailseite der Abrechnung {int} von {string}',
 	async ({ verwalter, seed }, year: number, tenant: string) => {
-		await expect(verwalter.page).toHaveURL(`/statements/${seed.idOf(`Abrechnung ${tenant} ${year}`)}`);
+		await expect(verwalter.page).toHaveURL(statementPath(seed, tenant, year));
 	}
 );
 
