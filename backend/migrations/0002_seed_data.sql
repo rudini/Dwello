@@ -57,7 +57,7 @@ INSERT INTO heating_profiles (name, name_de, name_fr, name_it, name_en, type,
     description) VALUES
 ('Heating + Hot Water', 'Heizung + Warmwasser', 'Chauffage + eau chaude', 'Riscaldamento + acqua calda', 'Heating + Hot Water', 'predefined',
     14.00, 12.00, 10.00, 6.00, 3.00, 2.00,
-    2.00, 2.00, 4.00, 8.00, 12.00, 15.00,
+    2.00, 2.00, 4.00, 8.00, 12.00, 25.00,
     'Standard profile for combined heating and hot water systems');
 
 -- Heating Only - Mittelland (Swiss Plateau)
@@ -66,7 +66,7 @@ INSERT INTO heating_profiles (name, name_de, name_fr, name_it, name_en, type,
     july_pct, august_pct, september_pct, october_pct, november_pct, december_pct,
     description) VALUES
 ('Heating Mittelland', 'Heizung Mittelland', 'Chauffage Plateau', 'Riscaldamento Altipiano', 'Heating Plateau', 'predefined',
-    18.00, 14.00, 11.00, 5.00, 0.00, 0.00,
+    28.00, 14.00, 11.00, 5.00, 0.00, 0.00,
     0.00, 0.00, 2.00, 8.00, 14.00, 18.00,
     'Heating profile for Swiss Plateau region (Bern, Zürich, Basel, etc.)');
 
@@ -86,7 +86,7 @@ INSERT INTO heating_profiles (name, name_de, name_fr, name_it, name_en, type,
     july_pct, august_pct, september_pct, october_pct, november_pct, december_pct,
     description) VALUES
 ('Heating Tessin', 'Heizung Tessin', 'Chauffage Tessin', 'Riscaldamento Ticino', 'Heating Ticino', 'predefined',
-    20.00, 16.00, 12.00, 4.00, 0.00, 0.00,
+    30.00, 16.00, 12.00, 4.00, 0.00, 0.00,
     0.00, 0.00, 0.00, 6.00, 14.00, 18.00,
     'Heating profile for Ticino and southern regions');
 
@@ -96,7 +96,7 @@ INSERT INTO heating_profiles (name, name_de, name_fr, name_it, name_en, type,
     july_pct, august_pct, september_pct, october_pct, november_pct, december_pct,
     description) VALUES
 ('Hot Water Only', 'Nur Warmwasser', 'Eau chaude seulement', 'Solo acqua calda', 'Hot Water Only', 'predefined',
-    8.50, 8.00, 8.50, 8.00, 8.50, 8.00,
+    8.50, 8.50, 8.50, 8.00, 8.50, 8.00,
     8.50, 8.50, 8.00, 8.50, 8.00, 8.50,
     'Even distribution for hot water only systems');
 
