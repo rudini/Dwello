@@ -8,3 +8,4 @@ export const roomsSelect = (page: Page) => page.getByTestId('apartment-rooms-sel
 export const statusSelect = (page: Page) => page.getByTestId('apartment-status-select');
 export const numberTakenWarning = (page: Page) => page.getByTestId('apartment-number-taken');
 export const submitButton = (page: Page) => page.getByTestId('apartment-submit');
+export const rentedStatus = (page: Page) => page.getByTestId('apartment-status-rented');

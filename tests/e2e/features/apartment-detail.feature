@@ -29,6 +29,14 @@ Funktionalität: Wohnungsdetail
     Dann ist die Wohnung nicht vermietet
     Und hat die Wohnung den Status "Leer"
 
+  Szenario: Wohnung mit künftigem Mieter
+    Angenommen im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
+    Und der Mieter "Carla Rossi" existiert
+    Und "Carla Rossi" mietet die Wohnung "3.02" seit "2099-11-01" für "900" Franken
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Wohnung "3.02"
+    Dann hat die Wohnung den Status "Vermietet ab 1.11.2099"
+    Und ist die Wohnung nicht vermietet
+
   Szenario: Wohnung bearbeiten
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite der Wohnung "3.01"
     Wenn der Liegenschaftsverwalter die Wohnung bearbeiten will

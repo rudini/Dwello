@@ -3,7 +3,7 @@ import { load } from '../routes/apartments/[id]/+page.server';
 import { actions as newActions } from '../routes/apartments/new/+page.server';
 import { actions as editActions } from '../routes/apartments/[id]/edit/+page.server';
 import { grossRent } from '../lib/server/contract-history';
-import { floorLabel } from '../lib/apartment';
+import { floorLabel, statusText } from '../lib/apartment';
 import { runAction } from './helpers/action';
 
 const API = 'http://localhost:3001/api/v1';
@@ -64,6 +64,7 @@ describe('Wohnungsdetail', () => {
 	it('zeigt den aktuellen Mieter mit seinem Vertrag', async () => {
 		const data = await loadApartment({ 'apartments/a1': apartment, contracts: { contracts } });
 
+		expect(data.apartment).toMatchObject({ status: 'occupied', nextContractStart: null });
 		expect(data.currentContract).toEqual({
 			id: 'c2',
 			tenantId: 't2',
@@ -120,6 +121,17 @@ describe('Bruttomiete', () => {
 		expect(grossRent({ baseRent: '1200.00', additionalRent: '50.00', monthlyAdvancePayment: '180.00' })).toBe(
 			1430
 		);
+	});
+});
+
+describe('Wohnungsstatus', () => {
+	it.each([
+		['occupied', null, 'Vermietet'],
+		['relet', '2026-11-01', 'Vermietet ab 1.11.2026'],
+		['vacant', null, 'Leer'],
+		['reserved', null, 'Gesperrt']
+	] as const)('zeigt %s (nächster Vertrag ab %s) als %s', (status, nextContractStart, text) => {
+		expect(statusText({ status, nextContractStart })).toBe(text);
 	});
 });
 
@@ -187,5 +199,12 @@ describe('Wohnung bearbeiten', () => {
 				body: { number: '4.01', floor: 4, area: '68', rooms: '2.5', status: 'reserved' }
 			}
 		]);
+	});
+
+	it('lässt den Status einer vermieteten Wohnung unverändert', async () => {
+		const { calls, result } = runAction(editActions.default, 'a1', 200, fields);
+
+		await expect(result).rejects.toMatchObject({ status: 303 });
+		expect(calls[0].body).toEqual({ number: '4.01', floor: 4, area: '68', rooms: '2.5' });
 	});
 });

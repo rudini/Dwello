@@ -20,6 +20,12 @@ Funktionalität: Wohnung bearbeiten
     Wenn der Liegenschaftsverwalter die Wohnung sperrt
     Dann hat die Wohnung den Status "Gesperrt"
 
+  Szenario: Vermietet ergibt sich aus dem Mietvertrag
+    Angenommen der Mieter "Anna Keller" existiert
+    Und "Anna Keller" mietet die Wohnung "4.02" seit "2020-01-01" für "950" Franken
+    Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite der Wohnung "4.02"
+    Dann kann der Liegenschaftsverwalter den Status "Vermietet" nicht von Hand ändern
+
   Szenario: Wohnungsnummer ist im Gebäude schon vergeben
     Wenn der Liegenschaftsverwalter die Wohnungsnummer auf "4.02" ändert
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Die Wohnungsnummer 4.02 existiert bereits in diesem Gebäude."

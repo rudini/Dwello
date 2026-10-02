@@ -60,7 +60,7 @@ export const apartments = pgTable(
 		floor: integer('floor').notNull().default(0),
 		area: decimal('area', { precision: 8, scale: 2 }).notNull(), // m²
 		rooms: decimal('rooms', { precision: 3, scale: 1 }).notNull(), // e.g., 3.5
-		status: varchar('status', { length: 20 }).notNull().default('vacant'), // occupied, vacant, reserved
+		status: varchar('status', { length: 20 }).notNull().default('vacant'), // vacant, reserved; occupied is computed from the contracts (apartmentStatus)
 		createdAt: timestamp('created_at').defaultNow().notNull(),
 		updatedAt: timestamp('updated_at').defaultNow().notNull()
 	},

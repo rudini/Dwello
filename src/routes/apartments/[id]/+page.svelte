@@ -4,7 +4,7 @@
 	import CurrentTenantCard from '$lib/components/CurrentTenantCard.svelte';
 	import MonthlyCostsCard from '$lib/components/MonthlyCostsCard.svelte';
 	import ContractHistoryTable from '$lib/components/ContractHistoryTable.svelte';
-	import { floorLabel, statusLabels } from '$lib/apartment';
+	import { floorLabel, statusText } from '$lib/apartment';
 	import { normalizeDecimal } from '$lib/utils/format';
 	import type { PageData } from './$types';
 
@@ -23,7 +23,7 @@
 
 	<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
 		<div class={cardClass} data-testid="apartment-info-status">
-			<InfoCard icon="check_circle" label="Status" value={statusLabels[apartment.status]} />
+			<InfoCard icon="check_circle" label="Status" value={statusText(apartment)} />
 		</div>
 		<div class={cardClass} data-testid="apartment-info-rooms">
 			<InfoCard icon="home" label="Zimmer" value={normalizeDecimal(apartment.rooms)} />

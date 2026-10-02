@@ -19,6 +19,12 @@ Funktionalität: Wohnungsliste
     Und ist die Wohnung "2.02" "Vermietet"
     Und die Wohnungsliste enthält genau 2 Wohnungen
 
+  Szenario: Wiedervermietete Wohnung
+    Angenommen der Mieter "Carla Rossi" existiert
+    Und "Carla Rossi" mietet die Wohnung "2.01" seit "2099-11-01" für "900" Franken
+    Wenn der Liegenschaftsverwalter die Wohnungen im Gebäude "Ahornhof" anzeigt
+    Dann ist die Wohnung "2.01" "Vermietet ab 1.11.2099"
+
   Szenario: Nur leere Wohnungen anzeigen
     Wenn der Liegenschaftsverwalter nur die leeren Wohnungen im Gebäude "Ahornhof" anzeigt
     Dann ist die Wohnung "2.01" "Leer"

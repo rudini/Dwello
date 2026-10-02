@@ -35,7 +35,8 @@ export interface BuildingsListData {
 }
 
 // Apartment status values (match backend)
-export type ApartmentStatus = 'occupied' | 'vacant' | 'reserved';
+// occupied and relet follow from the rental contracts; vacant and reserved are set by hand
+export type ApartmentStatus = 'occupied' | 'relet' | 'vacant' | 'reserved';
 
 // Apartment types (camelCase to match backend)
 export interface Apartment {
@@ -107,8 +108,7 @@ export interface ApartmentWithBuilding extends Apartment {
 	buildingName?: string;
 	buildingAddress: string;
 	buildingCity: string;
-	currentTenantName?: string | null;
-	currentRent?: number | null;
+	nextContractStart?: string | null;
 }
 
 // Apartments list response

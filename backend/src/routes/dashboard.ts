@@ -7,6 +7,7 @@ import { Elysia } from 'elysia';
 import { count, eq, lt, and, sum, desc, gte, or, sql, type SQL } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { buildings, apartments, utilityStatements, invoices } from '../db/schema';
+import { apartmentStatus } from '../services/apartment.service';
 
 const countApartments = async (where?: SQL) =>
 	Number((await db.select({ count: count() }).from(apartments).where(where))[0]?.count ?? 0);
@@ -22,12 +23,14 @@ const occupancyRate = (occupied: number, total: number) => (total > 0 ? (occupie
 async function portfolio() {
 	const [totalBuildings] = await db.select({ count: count() }).from(buildings);
 	const totalApartments = await countApartments();
-	const occupiedApartments = await countApartments(eq(apartments.status, 'occupied'));
+	const occupiedApartments = await countApartments(sql`${apartmentStatus} = 'occupied'`);
 	return {
 		totalBuildings: Number(totalBuildings?.count ?? 0),
 		totalApartments,
 		occupiedApartments,
-		vacantApartments: await countApartments(eq(apartments.status, 'vacant')),
+		vacantApartments: await countApartments(sql`${apartmentStatus} = 'vacant'`),
+		reletApartments: await countApartments(sql`${apartmentStatus} = 'relet'`),
+		reservedApartments: await countApartments(sql`${apartmentStatus} = 'reserved'`),
 		occupancyRate: Math.round(occupancyRate(occupiedApartments, totalApartments) * 10) / 10
 	};
 }
@@ -49,7 +52,7 @@ async function buildingOccupancy() {
 		buildingList.map(async (building) => {
 			const inBuilding = eq(apartments.buildingId, building.id);
 			const total = await countApartments(inBuilding);
-			const occupied = await countApartments(and(inBuilding, eq(apartments.status, 'occupied')));
+			const occupied = await countApartments(and(inBuilding, sql`${apartmentStatus} = 'occupied'`));
 			return {
 				buildingId: building.id,
 				buildingName: building.name,

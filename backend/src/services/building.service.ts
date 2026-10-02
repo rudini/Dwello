@@ -6,6 +6,7 @@
 import { eq, ilike, or, sql, desc, and, inArray } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { buildings, apartments, type Building, type NewBuilding } from '../db/schema';
+import { apartmentStatus } from './apartment.service';
 
 export interface BuildingFilters {
 	search?: string;
@@ -73,8 +74,8 @@ export async function listBuildings(filters: BuildingFilters = {}): Promise<{
 				.select({
 					buildingId: apartments.buildingId,
 					total: sql<number>`count(*)`,
-					occupied: sql<number>`count(*) filter (where status = 'occupied')`,
-					vacant: sql<number>`count(*) filter (where status = 'vacant')`
+					occupied: sql<number>`count(*) filter (where ${apartmentStatus} = 'occupied')`,
+					vacant: sql<number>`count(*) filter (where ${apartmentStatus} = 'vacant')`
 				})
 				.from(apartments)
 				.where(inArray(apartments.buildingId, buildingIds))
@@ -130,8 +131,8 @@ export async function getBuilding(id: string): Promise<BuildingWithStats | null>
 	const [counts] = await db
 		.select({
 			total: sql<number>`count(*)`,
-			occupied: sql<number>`count(*) filter (where status = 'occupied')`,
-			vacant: sql<number>`count(*) filter (where status = 'vacant')`
+			occupied: sql<number>`count(*) filter (where ${apartmentStatus} = 'occupied')`,
+			vacant: sql<number>`count(*) filter (where ${apartmentStatus} = 'vacant')`
 		})
 		.from(apartments)
 		.where(eq(apartments.buildingId, id));

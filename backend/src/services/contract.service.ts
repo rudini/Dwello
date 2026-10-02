@@ -14,7 +14,7 @@ import {
 	type RentalContract,
 	type NewRentalContract
 } from '../db/schema';
-import { updateApartmentStatus } from './apartment.service';
+import { apartmentStatus } from './apartment.service';
 
 export interface ContractFilters {
 	apartmentId?: string;
@@ -175,7 +175,7 @@ export async function getContract(id: string): Promise<ContractWithDetails | nul
 				floor: apartments.floor,
 				area: apartments.area,
 				rooms: apartments.rooms,
-				status: apartments.status
+				status: apartmentStatus
 			},
 			building: {
 				id: buildings.id,
@@ -345,8 +345,6 @@ export async function createContract(data: NewRentalContract): Promise<RentalCon
 
 	const [contract] = await db.insert(rentalContracts).values(data).returning();
 
-	// Update apartment status
-	await updateApartmentStatus(data.apartmentId);
 
 	return contract;
 }
@@ -385,8 +383,6 @@ export async function updateContract(
 		.where(eq(rentalContracts.id, id))
 		.returning();
 
-	// Update apartment status
-	await updateApartmentStatus(current.apartmentId);
 
 	return contract || null;
 }
@@ -422,8 +418,6 @@ export async function deleteContract(id: string): Promise<{ success: boolean; er
 		return { success: false, error: 'Contract not found' };
 	}
 
-	// Update apartment status
-	await updateApartmentStatus(contract.apartmentId);
 
 	return { success: true };
 }

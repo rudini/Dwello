@@ -2,7 +2,7 @@ import { expect } from '@playwright/test';
 import { createBdd, type DataTable } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { visit } from '../interactions/navigation';
-import { numberTaken } from '../questions/apartment-form';
+import { manualStatusChoice, numberTaken, statusFromContracts } from '../questions/apartment-form';
 import {
 	blockApartment,
 	changeArea,
@@ -74,5 +74,13 @@ Then(
 	'warnt das Formular, dass die Wohnungsnummer {string} vergeben ist',
 	async ({ verwalter }, number: string) => {
 		await expect(numberTaken(verwalter)).toContainText(`"${number}" existiert bereits`);
+	}
+);
+
+Then(
+	'kann der Liegenschaftsverwalter den Status {string} nicht von Hand ändern',
+	async ({ verwalter }, status: string) => {
+		await expect(statusFromContracts(verwalter)).toHaveText(status);
+		await expect(manualStatusChoice(verwalter)).toHaveCount(0);
 	}
 );

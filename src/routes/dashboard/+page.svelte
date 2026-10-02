@@ -1,47 +1,12 @@
 <script lang="ts">
+	import type { PageData } from './$types';
 	import Button from '$lib/components/Button.svelte';
 	import Icon from '$lib/components/Icon.svelte';
 	import StatCard from '$lib/components/StatCard.svelte';
 	import ActivityFeed from '$lib/components/ActivityFeed.svelte';
 	import OccupancyChart from '$lib/components/OccupancyChart.svelte';
 
-	interface DashboardData {
-		portfolio: {
-			totalBuildings: number;
-			totalApartments: number;
-			occupiedApartments: number;
-			vacantApartments: number;
-			occupancyRate: number;
-		};
-		financial: {
-			outstandingStatements: number;
-			totalPending: number;
-			overdueAmount: number;
-			paidThisMonth: number;
-		};
-		statements: {
-			draft: number;
-			sent: number;
-			paid: number;
-			overdue: number;
-		};
-		recentActivity: {
-			id: string;
-			type: 'statement_created' | 'invoice_added' | 'payment_received' | 'reminder_sent';
-			title: string;
-			description: string;
-			timestamp: string;
-		}[];
-		buildingOccupancy: {
-			buildingId: string;
-			buildingName: string;
-			totalApartments: number;
-			occupiedApartments: number;
-			occupancyRate: number;
-		}[];
-	}
-
-	let { data }: { data: DashboardData } = $props();
+	let { data }: { data: PageData } = $props();
 
 	function formatCurrency(amount: number): string {
 		return new Intl.NumberFormat('de-CH', {
@@ -98,6 +63,27 @@
 				icon="groups"
 				iconColor="text-green-600"
 				href="/tenants"
+			/>
+			<StatCard
+				label="Wiedervermietet"
+				value={data.portfolio.reletApartments}
+				icon="event_available"
+				iconColor="text-sky-600"
+				href="/apartments?status=relet"
+			/>
+			<StatCard
+				label="Leer"
+				value={data.portfolio.vacantApartments}
+				icon="door_open"
+				iconColor="text-amber-600"
+				href="/apartments?status=vacant"
+			/>
+			<StatCard
+				label="Gesperrt"
+				value={data.portfolio.reservedApartments}
+				icon="block"
+				iconColor="text-red-600"
+				href="/apartments?status=reserved"
 			/>
 			<StatCard
 				label="Belegungsrate"

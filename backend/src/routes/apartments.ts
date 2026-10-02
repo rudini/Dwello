@@ -22,9 +22,13 @@ const numberTakenError = (number: string) => ({
 });
 
 // Validation schemas
+// "occupied" follows from the rental contracts, the property manager sets only vacant or reserved
+const manualStatus = t.Union([t.Literal('vacant'), t.Literal('reserved')]);
 const apartmentQuerySchema = t.Object({
 	buildingId: t.Optional(t.String()),
-	status: t.Optional(t.Union([t.Literal('occupied'), t.Literal('vacant'), t.Literal('reserved')])),
+	status: t.Optional(
+		t.Union([t.Literal('occupied'), t.Literal('relet'), t.Literal('vacant'), t.Literal('reserved')])
+	),
 	floor: t.Optional(t.String()),
 	limit: t.Optional(t.String()),
 	offset: t.Optional(t.String())
@@ -36,7 +40,7 @@ const apartmentBodySchema = t.Object({
 	floor: t.Number(),
 	area: t.Optional(t.Nullable(t.String())),
 	rooms: t.Optional(t.Nullable(t.String())),
-	status: t.Optional(t.Union([t.Literal('occupied'), t.Literal('vacant'), t.Literal('reserved')]))
+	status: t.Optional(manualStatus)
 });
 
 const apartmentUpdateSchema = t.Partial(
@@ -45,9 +49,7 @@ const apartmentUpdateSchema = t.Partial(
 		floor: t.Number(),
 		area: t.Optional(t.Nullable(t.String())),
 		rooms: t.Optional(t.Nullable(t.String())),
-		status: t.Optional(
-			t.Union([t.Literal('occupied'), t.Literal('vacant'), t.Literal('reserved')])
-		)
+		status: t.Optional(manualStatus)
 	})
 );
 

@@ -5,7 +5,9 @@ interface DashboardData {
 		totalBuildings: number;
 		totalApartments: number;
 		occupiedApartments: number;
+		reletApartments: number;
 		vacantApartments: number;
+		reservedApartments: number;
 		occupancyRate: number;
 	};
 	financial: {
@@ -53,7 +55,9 @@ export const load: PageServerLoad = async ({ fetch }): Promise<DashboardData> =>
 				totalBuildings: 0,
 				totalApartments: 0,
 				occupiedApartments: 0,
+				reletApartments: 0,
 				vacantApartments: 0,
+				reservedApartments: 0,
 				occupancyRate: 0
 			},
 			financial: {

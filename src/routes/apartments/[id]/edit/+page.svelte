@@ -40,7 +40,7 @@
 
 			<ApartmentFormFields buildingId={apartment.buildingId} {apartment} {errors} />
 
-			<StatusField current={apartment.status} />
+			<StatusField {apartment} />
 
 			<div class="flex gap-3 pt-4 border-t border-gray-200">
 				<Button href="/apartments/{apartment.id}" variant="secondary" testid="form-cancel">Abbrechen</Button>
