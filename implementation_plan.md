@@ -1416,6 +1416,11 @@ Validation is defined inline in route handlers for type safety.
   **Files:** `backend/migrations/0007_remove_unsupported_distribution_keys.sql` (new), `backend/src/__tests__/distribution-key.pg.test.ts` (new)
   **Tests:** `distribution-key.pg.test.ts`: 3 pass (`bun run test:pg`).
 
+- [x] Fix `getUtilityCostRules` returning `{ en, de }` objects instead of the declared `string[]`
+  **Note:** Now returns the German category names. Fixes 6 failing tests in `utility-validation.service.test.ts` and 2 tsc errors.
+  **Files:** `backend/src/services/utility-validation.service.ts`
+  **Tests:** Backend `bun run test`: 335 pass, 0 fail. 48 pre-existing tsc errors remain (test mocks).
+
 ### 7.5 Validation Schemas
 
 - [x] Create validation schemas using Elysia t.Object
