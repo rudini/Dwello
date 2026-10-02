@@ -27,3 +27,13 @@ export async function saveRecord(
 	}
 	throw redirect(303, options.location(id ?? saved.id!));
 }
+
+/** Form action body: deletes the record and opens `location`, or reports why the backend keeps it */
+export async function deleteRecord(fetch: typeof globalThis.fetch, url: string, failure: string, location: string) {
+	const response = await fetch(url, { method: 'DELETE' });
+	if (!response.ok) {
+		const { error: message } = await response.json().catch(() => ({}));
+		return fail(response.status, { error: (message as string) ?? failure });
+	}
+	throw redirect(303, location);
+}

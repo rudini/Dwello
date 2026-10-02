@@ -119,7 +119,7 @@ export async function listDistributionKeys(filters: DistributionKeyFilters = {})
 			sortOrder: distributionKeys.sortOrder,
 			createdAt: distributionKeys.createdAt,
 			updatedAt: distributionKeys.updatedAt,
-			invoiceCount: sql<number>`(SELECT COUNT(*) FROM invoices WHERE invoices.distribution_key_id = ${distributionKeys.id})`.as(
+			invoiceCount: sql<number>`(SELECT COUNT(*) FROM invoices WHERE invoices.distribution_key_id = "distribution_keys"."id")`.as(
 				'invoice_count'
 			)
 		})
@@ -165,7 +165,7 @@ export async function getDistributionKey(id: string): Promise<DistributionKeyWit
 			sortOrder: distributionKeys.sortOrder,
 			createdAt: distributionKeys.createdAt,
 			updatedAt: distributionKeys.updatedAt,
-			invoiceCount: sql<number>`(SELECT COUNT(*) FROM invoices WHERE invoices.distribution_key_id = ${distributionKeys.id})`.as(
+			invoiceCount: sql<number>`(SELECT COUNT(*) FROM invoices WHERE invoices.distribution_key_id = "distribution_keys"."id")`.as(
 				'invoice_count'
 			)
 		})

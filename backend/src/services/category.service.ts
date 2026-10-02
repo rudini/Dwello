@@ -3,9 +3,10 @@
  * Business logic for utility cost category operations
  */
 
-import { eq, sql, asc, ilike, and } from 'drizzle-orm';
+import { eq, sql, asc, ilike, and, or } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { categories, invoices, type Category, type NewCategory } from '../db/schema';
+import { Conflict } from './conflict';
 
 export interface CategoryFilters {
 	search?: string;
@@ -31,7 +32,7 @@ export async function listCategories(filters: CategoryFilters = {}): Promise<{
 	const conditions = [];
 
 	if (search) {
-		conditions.push(ilike(categories.name, `%${search}%`));
+		conditions.push(or(ilike(categories.name, `%${search}%`), ilike(categories.nameDE, `%${search}%`)));
 	}
 
 	if (isAllowedUtilityCost !== undefined) {
@@ -52,7 +53,7 @@ export async function listCategories(filters: CategoryFilters = {}): Promise<{
 			sortOrder: categories.sortOrder,
 			createdAt: categories.createdAt,
 			updatedAt: categories.updatedAt,
-			invoiceCount: sql<number>`(SELECT COUNT(*) FROM invoices WHERE invoices.category_id = ${categories.id})`.as(
+			invoiceCount: sql<number>`(SELECT COUNT(*) FROM invoices WHERE invoices.category_id = "categories"."id")`.as(
 				'invoice_count'
 			)
 		})
@@ -97,7 +98,7 @@ export async function getCategory(id: string): Promise<CategoryWithUsage | null>
 			sortOrder: categories.sortOrder,
 			createdAt: categories.createdAt,
 			updatedAt: categories.updatedAt,
-			invoiceCount: sql<number>`(SELECT COUNT(*) FROM invoices WHERE invoices.category_id = ${categories.id})`.as(
+			invoiceCount: sql<number>`(SELECT COUNT(*) FROM invoices WHERE invoices.category_id = "categories"."id")`.as(
 				'invoice_count'
 			)
 		})
@@ -143,15 +144,20 @@ export async function getAllowedCategories(): Promise<Category[]> {
 		.orderBy(asc(categories.sortOrder), asc(categories.name));
 }
 
+/** English and German names identify a category (LLM matching), so both stay unique */
+async function ensureNameIsFree(name: string, id?: string) {
+	const existing = await getCategoryByName(name);
+	if (existing && existing.id !== id) {
+		throw new Conflict(`Eine Kategorie mit dem Namen "${name}" existiert bereits.`);
+	}
+}
+
 /**
  * Create a new category
  */
 export async function createCategory(data: NewCategory): Promise<Category> {
-	// Check for duplicate name
-	const existing = await getCategoryByName(data.name);
-	if (existing) {
-		throw new Error(`Category with name "${data.name}" already exists`);
-	}
+	await ensureNameIsFree(data.name);
+	if (data.nameDE) await ensureNameIsFree(data.nameDE);
 
 	const [category] = await db.insert(categories).values(data).returning();
 	return category;
@@ -161,13 +167,8 @@ export async function createCategory(data: NewCategory): Promise<Category> {
  * Update an existing category
  */
 export async function updateCategory(id: string, data: Partial<NewCategory>): Promise<Category | null> {
-	// Check for duplicate name if name is being changed
-	if (data.name) {
-		const existing = await getCategoryByName(data.name);
-		if (existing && existing.id !== id) {
-			throw new Error(`Category with name "${data.name}" already exists`);
-		}
-	}
+	if (data.name) await ensureNameIsFree(data.name, id);
+	if (data.nameDE) await ensureNameIsFree(data.nameDE, id);
 
 	const [category] = await db
 		.update(categories)
@@ -182,17 +183,19 @@ export async function updateCategory(id: string, data: Partial<NewCategory>): Pr
  * Delete a category
  * Returns false if category is used by invoices
  */
-export async function deleteCategory(id: string): Promise<{ success: boolean; error?: string }> {
+export async function deleteCategory(id: string): Promise<{ success: boolean; conflict?: boolean; error?: string }> {
 	// Check for invoices using this category
 	const [invoiceCount] = await db
 		.select({ count: sql<number>`count(*)` })
 		.from(invoices)
 		.where(eq(invoices.categoryId, id));
 
-	if (Number(invoiceCount.count) > 0) {
+	const count = Number(invoiceCount.count);
+	if (count > 0) {
 		return {
 			success: false,
-			error: `Cannot delete category used by ${invoiceCount.count} invoices. Reassign invoices first.`
+			conflict: true,
+			error: `Die Kategorie wird von ${count} ${count === 1 ? 'Rechnung' : 'Rechnungen'} verwendet und kann nicht gelöscht werden.`
 		};
 	}
 

@@ -1,7 +1,7 @@
-import { error, fail, redirect } from '@sveltejs/kit';
+import { error } from '@sveltejs/kit';
 import type { HeatingProfile } from '$lib/types';
 import { MONTHS, profileTotal } from '$lib/heating-profile';
-import { saveRecord } from './save-form';
+import { deleteRecord, saveRecord } from './save-form';
 
 const API = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1/heating-profiles`;
 
@@ -53,11 +53,5 @@ export async function saveHeatingProfile(fetch: typeof globalThis.fetch, request
 	});
 }
 
-export async function deleteHeatingProfile(fetch: typeof globalThis.fetch, id: string) {
-	const response = await fetch(`${API}/${id}`, { method: 'DELETE' });
-	if (!response.ok) {
-		const { error: message } = await response.json().catch(() => ({}));
-		return fail(response.status, { error: (message as string) ?? 'Heizprofil konnte nicht gelöscht werden.' });
-	}
-	throw redirect(303, '/config/heating-profiles');
-}
+export const deleteHeatingProfile = (fetch: typeof globalThis.fetch, id: string) =>
+	deleteRecord(fetch, `${API}/${id}`, 'Heizprofil konnte nicht gelöscht werden.', '/config/heating-profiles');

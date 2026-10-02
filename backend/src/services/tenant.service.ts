@@ -88,7 +88,7 @@ export async function listTenants(filters: TenantFilters = {}): Promise<{
 			createdAt: tenants.createdAt,
 			updatedAt: tenants.updatedAt,
 			isActive,
-			contractCount: sql<number>`(SELECT COUNT(*) FROM rental_contracts WHERE rental_contracts.tenant_id = ${tenants.id})`.as(
+			contractCount: sql<number>`(SELECT COUNT(*) FROM rental_contracts WHERE rental_contracts.tenant_id = "tenants"."id")`.as(
 				'contract_count'
 			)
 		})
@@ -172,7 +172,7 @@ export async function getTenant(id: string): Promise<TenantWithOccupancy | null>
 			correspondenceChannel: tenants.correspondenceChannel,
 			createdAt: tenants.createdAt,
 			updatedAt: tenants.updatedAt,
-			contractCount: sql<number>`(SELECT COUNT(*) FROM rental_contracts WHERE rental_contracts.tenant_id = ${tenants.id})`.as(
+			contractCount: sql<number>`(SELECT COUNT(*) FROM rental_contracts WHERE rental_contracts.tenant_id = "tenants"."id")`.as(
 				'contract_count'
 			)
 		})

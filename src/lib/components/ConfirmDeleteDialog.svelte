@@ -9,6 +9,7 @@
 		error,
 		disabled = false,
 		testid,
+		id,
 		onclose
 	}: {
 		title: string;
@@ -16,6 +17,7 @@
 		error?: string;
 		disabled?: boolean;
 		testid: string;
+		id?: string; // the record to delete, when the page lists several
 		onclose: () => void;
 	} = $props();
 </script>
@@ -26,6 +28,7 @@
 		<p class="text-gray-600" data-testid="delete-dialog-message">{message}</p>
 		<FieldError message={error} />
 		<form method="POST" action="?/delete" use:enhance class="flex gap-3 justify-end">
+			{#if id}<input type="hidden" name="id" value={id} />{/if}
 			<Button variant="secondary" onclick={onclose}>Abbrechen</Button>
 			<Button type="submit" variant="danger" {disabled} {testid}>Löschen</Button>
 		</form>

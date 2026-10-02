@@ -12,6 +12,7 @@
 import { eq, sql, asc, ilike, and } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { configuration, heatingProfiles, type HeatingProfile, type NewHeatingProfile } from '../db/schema';
+import { Conflict } from './conflict';
 
 export interface HeatingProfileFilters {
 	search?: string;
@@ -199,8 +200,6 @@ export async function getHeatingProfileByName(name: string): Promise<HeatingProf
 	return profile || null;
 }
 
-/** The request conflicts with existing data (HTTP 409) */
-export class HeatingProfileConflict extends Error {}
 
 /**
  * Validate that monthly percentages sum to approximately 100%
@@ -255,7 +254,7 @@ export async function createHeatingProfile(data: NewHeatingProfile): Promise<Hea
 	// Check for duplicate name
 	const existing = await getHeatingProfileByName(data.name);
 	if (existing) {
-		throw new HeatingProfileConflict(`Ein Heizprofil mit dem Namen "${data.name}" existiert bereits.`);
+		throw new Conflict(`Ein Heizprofil mit dem Namen "${data.name}" existiert bereits.`);
 	}
 
 	// Validate percentages
@@ -318,7 +317,7 @@ export async function updateHeatingProfile(
 	if (data.name && data.name !== existing.name) {
 		const duplicate = await getHeatingProfileByName(data.name);
 		if (duplicate && duplicate.id !== id) {
-			throw new HeatingProfileConflict(`Ein Heizprofil mit dem Namen "${data.name}" existiert bereits.`);
+			throw new Conflict(`Ein Heizprofil mit dem Namen "${data.name}" existiert bereits.`);
 		}
 	}
 

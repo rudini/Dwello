@@ -5,7 +5,7 @@
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import { deleteConfig, getConfig, setConfig } from '../services/config.service';
 import { getHeatingProfileByName, deleteHeatingProfile } from '../services/heating-profile.service';
-import { callApi } from './helpers/auth';
+import { callApi, sendJson } from './helpers/auth';
 
 const token = crypto.randomUUID();
 const months = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
@@ -14,12 +14,7 @@ const months = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 
 const shares = (total = 100) =>
 	Object.fromEntries(months.map((month, i) => [`${month}Pct`, i === 0 ? total - 88 : 8]));
 
-const send = (method: string, path: string, body?: object) =>
-	callApi(`/api/v1/heating-profiles${path}`, {
-		method,
-		headers: { 'content-type': 'application/json' },
-		body: body && JSON.stringify(body)
-	});
+const send = (method: string, path: string, body?: object) => sendJson(method, `/api/v1/heating-profiles${path}`, body);
 
 const create = (name: string, total = 100) => send('POST', '', { name: `${name} ${token}`, ...shares(total) });
 const idOf = async (response: Response) => ((await response.json()) as { id: string }).id;

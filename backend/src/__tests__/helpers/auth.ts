@@ -20,3 +20,7 @@ export const callApi = async (path: string, init: RequestInit = {}) =>
 			headers: { ...init.headers, authorization: `Bearer ${await signToken()}` }
 		})
 	);
+
+// JSON request to an authenticated endpoint, e.g. sendJson('POST', '/api/v1/categories', { name })
+export const sendJson = (method: string, path: string, body?: object) =>
+	callApi(path, { method, headers: { 'content-type': 'application/json' }, body: body && JSON.stringify(body) });

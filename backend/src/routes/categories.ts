@@ -13,6 +13,8 @@ import {
 	updateCategory,
 	deleteCategory
 } from '../services/category.service';
+import { Conflict } from '../services/conflict';
+import { deleteResponse } from './delete-response';
 
 // Validation schemas
 const categoryQuerySchema = t.Object({
@@ -78,7 +80,7 @@ export const categoryRoutes = new Elysia({ prefix: '/api/v1/categories' })
 				set.status = 201;
 				return category;
 			} catch (error) {
-				set.status = 400;
+				set.status = error instanceof Conflict ? 409 : 400;
 				return { error: error instanceof Error ? error.message : 'Failed to create category' };
 			}
 		},
@@ -98,7 +100,7 @@ export const categoryRoutes = new Elysia({ prefix: '/api/v1/categories' })
 				}
 				return category;
 			} catch (error) {
-				set.status = 400;
+				set.status = error instanceof Conflict ? 409 : 400;
 				return { error: error instanceof Error ? error.message : 'Failed to update category' };
 			}
 		},
@@ -107,12 +109,4 @@ export const categoryRoutes = new Elysia({ prefix: '/api/v1/categories' })
 		}
 	)
 	// Delete category
-	.delete('/:id', async ({ params, set }) => {
-		const result = await deleteCategory(params.id);
-		if (!result.success) {
-			set.status = result.error === 'Category not found' ? 404 : 400;
-			return { error: result.error };
-		}
-		set.status = 204;
-		return null;
-	});
+	.delete('/:id', async ({ params, set }) => deleteResponse(set, await deleteCategory(params.id)));

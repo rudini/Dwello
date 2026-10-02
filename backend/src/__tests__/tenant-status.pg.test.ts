@@ -31,11 +31,12 @@ async function tenantWith(name: string, startDate?: string, endDate?: string, ap
 	contracts.push(contract.id);
 }
 
-const list = async (status = '') => {
+const listed = async (status = '') => {
 	const response = await callApi(`/api/v1/tenants?search=${token}${status && `&status=${status}`}`);
-	const { tenants: found } = (await response.json()) as { tenants: { firstName: string; isActive: boolean }[] };
-	return Object.fromEntries(found.map((t) => [t.firstName, t.isActive]));
+	return ((await response.json()) as { tenants: { firstName: string; isActive: boolean; contractCount: string }[] })
+		.tenants;
 };
+const list = async (status = '') => Object.fromEntries((await listed(status)).map((t) => [t.firstName, t.isActive]));
 
 beforeAll(async () => {
 	rental = await createRental(token, { startDate: day(-1), monthlyAdvancePayment: '100' });
@@ -61,6 +62,12 @@ describe('Mieterliste nach Mietstatus', () => {
 
 	it('zeigt nur aktive Mieter', async () => {
 		expect(Object.keys(await list('active')).sort()).toEqual(['Anna', 'Künftig']);
+	});
+
+	it('zählt die Mietverträge jedes Mieters', async () => {
+		const counts = Object.fromEntries((await listed()).map((t) => [t.firstName, Number(t.contractCount)]));
+
+		expect(counts).toEqual({ Anna: 1, Ehemalig: 1, Künftig: 1, Ohne: 0 });
 	});
 
 	it('zeigt nur ehemalige Mieter', async () => {

@@ -14,9 +14,9 @@ import {
 	initializePredefinedHeatingProfiles,
 	validatePercentages,
 	getMonthlyPercentages,
-	calculateHeatingShare,
-	HeatingProfileConflict
+	calculateHeatingShare
 } from '../services/heating-profile.service';
+import { Conflict } from '../services/conflict';
 
 export const heatingProfileRoutes = new Elysia({ prefix: '/api/v1/heating-profiles' })
 	// List all heating profiles
@@ -177,7 +177,7 @@ export const heatingProfileRoutes = new Elysia({ prefix: '/api/v1/heating-profil
 				set.status = 201;
 				return profile;
 			} catch (error) {
-				set.status = error instanceof HeatingProfileConflict ? 409 : 400;
+				set.status = error instanceof Conflict ? 409 : 400;
 				return { error: error instanceof Error ? error.message : 'Failed to create heating profile' };
 			}
 		},
@@ -241,7 +241,7 @@ export const heatingProfileRoutes = new Elysia({ prefix: '/api/v1/heating-profil
 
 				return profile;
 			} catch (error) {
-				set.status = error instanceof HeatingProfileConflict ? 409 : 400;
+				set.status = error instanceof Conflict ? 409 : 400;
 				return { error: error instanceof Error ? error.message : 'Failed to update heating profile' };
 			}
 		},
