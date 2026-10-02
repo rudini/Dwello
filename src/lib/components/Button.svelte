@@ -9,6 +9,7 @@
 		size?: Size;
 		href?: string;
 		type?: 'button' | 'submit' | 'reset';
+		formaction?: string; // submits the form to another action, e.g. '?/test'
 		onclick?: () => void;
 		disabled?: boolean;
 		class?: string;
@@ -22,6 +23,7 @@
 		size = 'md',
 		href,
 		type = 'button',
+		formaction,
 		onclick,
 		disabled = false,
 		class: className = '',
@@ -64,7 +66,7 @@
 		{/if}
 	</a>
 {:else}
-	<button {type} {disabled} onclick={onclick} class={classes} aria-label={ariaLabel} data-testid={testid}>
+	<button {type} {formaction} {disabled} onclick={onclick} class={classes} aria-label={ariaLabel} data-testid={testid}>
 		{#if children}
 			{@render children()}
 		{/if}

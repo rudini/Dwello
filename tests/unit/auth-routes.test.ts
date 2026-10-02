@@ -130,6 +130,46 @@ describe('Auth Routes Integration Tests', () => {
 			expect(authModule.setOAuthStateCookie).toHaveBeenCalled();
 		});
 
+		it('merkt sich Anbieter und die verlangte Seite für den Rückruf', async () => {
+			const { GET } = await import('$lib/../routes/auth/login/+server');
+			const cookies = createMockCookies();
+			const event = createMockRequestEvent({
+				url: 'http://localhost:3000/auth/login?provider=google&redirectTo=%2Fbuildings%3Fsearch%3DSee',
+				cookies
+			});
+
+			await GET(event as never).catch(() => {});
+
+			expect(JSON.parse(cookies._store.get('dwello_login')!)).toEqual({ provider: 'google', redirectTo: '/buildings?search=See' });
+		});
+
+		it.each(['//evil.example/phish', 'https://evil.example', '/\\evil.example'])(
+			'führt nach der Anmeldung nie auf eine fremde Seite (%s)',
+			async (target) => {
+				const { GET } = await import('$lib/../routes/auth/login/+server');
+				const cookies = createMockCookies();
+				const event = createMockRequestEvent({
+					url: `http://localhost:3000/auth/login?provider=google&redirectTo=${encodeURIComponent(target)}`,
+					cookies
+				});
+
+				await GET(event as never).catch(() => {});
+
+				expect(JSON.parse(cookies._store.get('dwello_login')!).redirectTo).toBe('/dashboard');
+			}
+		);
+
+		it('zeigt die Anmeldeseite mit Hinweis, wenn der Anbieter nicht eingerichtet ist', async () => {
+			vi.mocked(oauthModule.validateProviderConfig).mockReturnValueOnce(false);
+			const { GET } = await import('$lib/../routes/auth/login/+server');
+
+			const redirect = await GET(createMockRequestEvent({ url: 'http://localhost:3000/auth/login?provider=microsoft' }) as never).catch(
+				(r) => r
+			);
+
+			expect(redirect).toMatchObject({ status: 303, location: '/login?error=unavailable' });
+		});
+
 		it('should return 400 for missing provider', async () => {
 			const { GET } = await import('$lib/../routes/auth/login/+server');
 			const event = createMockRequestEvent({
@@ -173,79 +213,65 @@ describe('Auth Routes Integration Tests', () => {
 	});
 
 	describe('GET /auth/callback', () => {
-		it('should exchange code and create session on valid callback', async () => {
-			const { GET } = await import('$lib/../routes/auth/callback/+server');
+		// The login flow cookie remembers the provider and the page to return to
+		const flowCookies = (flow: object = { provider: 'microsoft', redirectTo: '/statements?status=overdue' }) => {
 			const cookies = createMockCookies();
 			cookies._store.set('dwello_oauth_state', 'mock-state-abc123');
+			cookies._store.set('dwello_login', JSON.stringify(flow));
+			return cookies;
+		};
+		const callback = async (query: string, cookies = flowCookies()) => {
+			const { GET } = await import('$lib/../routes/auth/callback/+server');
+			const event = createMockRequestEvent({ url: `http://localhost:3000/auth/callback?${query}`, cookies });
+			return GET(event as never).then(
+				() => expect.fail('Should have thrown redirect'),
+				(redirect) => redirect
+			);
+		};
 
-			const event = createMockRequestEvent({
-				url: 'http://localhost:3000/auth/callback?code=auth-code-123&state=mock-state-abc123',
-				cookies
-			});
+		it('meldet an und öffnet die Seite, die vor der Anmeldung verlangt wurde', async () => {
+			const redirect = await callback('code=auth-code-123&state=mock-state-abc123');
 
-			try {
-				await GET(event as any);
-				expect.fail('Should have thrown redirect');
-			} catch (error: any) {
-				expect(error.status).toBe(302);
-				expect(error.location).toBe('/dashboard');
-			}
-
-			expect(oauthModule.exchangeCodeForToken).toHaveBeenCalled();
-			expect(oauthModule.fetchUserProfile).toHaveBeenCalled();
+			expect(redirect).toMatchObject({ status: 303, location: '/statements?status=overdue' });
 			expect(authModule.setSessionCookie).toHaveBeenCalled();
 			expect(authModule.setXsrfToken).toHaveBeenCalled();
 		});
 
-		it('should return 400 for missing code', async () => {
-			const { GET } = await import('$lib/../routes/auth/callback/+server');
-			const event = createMockRequestEvent({
-				url: 'http://localhost:3000/auth/callback?state=some-state'
-			});
+		it('tauscht den Code nur beim Anbieter, über den die Anmeldung lief', async () => {
+			await callback('code=auth-code-123&state=mock-state-abc123');
 
-			const response = await GET(event as any);
-			expect(response.status).toBe(400);
-
-			const data = await response.json();
-			expect(data.error.code).toBe('VALIDATION_ERROR');
+			expect(oauthModule.exchangeCodeForToken).toHaveBeenCalledTimes(1);
+			expect(oauthModule.exchangeCodeForToken).toHaveBeenCalledWith('auth-code-123', 'microsoft');
 		});
 
-		it('should return 400 for missing state', async () => {
-			const { GET } = await import('$lib/../routes/auth/callback/+server');
-			const event = createMockRequestEvent({
-				url: 'http://localhost:3000/auth/callback?code=some-code'
-			});
+		it('zeigt die Anmeldeseite mit Hinweis, wenn die Anmeldung beim Anbieter abgebrochen wurde', async () => {
+			const redirect = await callback('error=access_denied&error_description=User%20denied%20access');
 
-			const response = await GET(event as any);
-			expect(response.status).toBe(400);
+			expect(redirect).toMatchObject({ status: 303, location: '/login?error=cancelled' });
 		});
 
-		it('should return 400 for state mismatch', async () => {
-			vi.mocked(authModule.validateOAuthState).mockReturnValueOnce(false);
+		it.each([
+			['ohne Code', 'state=mock-state-abc123'],
+			['ohne State', 'code=auth-code'],
+			['mit fremdem State', 'code=auth-code&state=wrong-state']
+		])('lehnt den Rückruf %s ab und zeigt die Anmeldeseite', async (_case, query) => {
+			vi.mocked(authModule.validateOAuthState).mockImplementation((_cookies, state) => state === 'mock-state-abc123');
 
-			const { GET } = await import('$lib/../routes/auth/callback/+server');
-			const event = createMockRequestEvent({
-				url: 'http://localhost:3000/auth/callback?code=auth-code&state=wrong-state'
-			});
+			const redirect = await callback(query);
 
-			const response = await GET(event as any);
-			expect(response.status).toBe(400);
-
-			const data = await response.json();
-			expect(data.error.message).toContain('state');
+			expect(redirect).toMatchObject({ status: 303, location: '/login?error=failed' });
+			expect(authModule.setSessionCookie).not.toHaveBeenCalled();
+			expect(authModule.clearAuthCookies).toHaveBeenCalled();
 		});
 
-		it('should handle OAuth provider error response', async () => {
-			const { GET } = await import('$lib/../routes/auth/callback/+server');
-			const event = createMockRequestEvent({
-				url: 'http://localhost:3000/auth/callback?error=access_denied&error_description=User%20denied%20access'
-			});
+		it('lehnt den Rückruf ohne begonnene Anmeldung ab', async () => {
+			const cookies = createMockCookies();
+			cookies._store.set('dwello_oauth_state', 'mock-state-abc123');
 
-			const response = await GET(event as any);
-			expect(response.status).toBe(400);
+			const redirect = await callback('code=auth-code&state=mock-state-abc123', cookies);
 
-			const data = await response.json();
-			expect(data.error.message).toContain('denied');
+			expect(redirect).toMatchObject({ status: 303, location: '/login?error=failed' });
+			expect(oauthModule.exchangeCodeForToken).not.toHaveBeenCalled();
 		});
 	});
 

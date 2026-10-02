@@ -1,6 +1,6 @@
 import type { RentalContract, Tenant, Apartment, Building, ApartmentStatus } from '$lib/types';
-import type { PageServerLoad } from './$types';
-import { error } from '@sveltejs/kit';
+import type { Actions, PageServerLoad } from './$types';
+import { error, fail, redirect } from '@sveltejs/kit';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
@@ -87,5 +87,25 @@ export const load: PageServerLoad = async ({ params, fetch }): Promise<ContractD
 			throw err;
 		}
 		throw error(500, 'Fehler beim Laden des Vertrags');
+	}
+};
+
+export const actions: Actions = {
+	end: async ({ params, fetch }) => {
+		const response = await fetch(`${BACKEND_URL}/api/v1/contracts/${params.id}`, {
+			method: 'PUT',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ endDate: new Date().toISOString().split('T')[0] })
+		});
+		if (!response.ok) {
+			return fail(response.status, { endError: 'Mietvertrag konnte nicht beendet werden.' });
+		}
+	},
+	delete: async ({ params, fetch }) => {
+		const response = await fetch(`${BACKEND_URL}/api/v1/contracts/${params.id}`, { method: 'DELETE' });
+		if (!response.ok) {
+			return fail(response.status, { deleteError: 'Mietvertrag konnte nicht gelöscht werden.' });
+		}
+		throw redirect(303, '/contracts');
 	}
 };

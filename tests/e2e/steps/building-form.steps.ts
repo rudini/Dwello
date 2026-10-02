@@ -1,18 +1,14 @@
-import { expect } from '@playwright/test';
 import { createBdd, type DataTable } from 'playwright-bdd';
-import { randomUUID } from 'crypto';
 import { test } from '../fixtures/test';
 import { visit } from '../interactions/navigation';
-import { errorMessage } from '../questions/building-form';
 import {
-	cancelEditing,
 	changePostalCode,
 	changeYearBuilt,
 	registerBuilding,
 	saveBuilding
 } from '../tasks/building-form';
 
-const { Given, When, Then } = createBdd(test);
+const { Given, When } = createBdd(test);
 
 Given('der Liegenschaftsverwalter ist auf der Seite "Neues Gebäude"', async ({ verwalter }) => {
 	await visit(verwalter.page, '/buildings/new');
@@ -20,13 +16,11 @@ Given('der Liegenschaftsverwalter ist auf der Seite "Neues Gebäude"', async ({ 
 
 When(
 	'der Liegenschaftsverwalter folgendes Gebäude erfasst:',
-	async ({ verwalter, names }, table: DataTable) => {
+	async ({ verwalter, seed }, table: DataTable) => {
 		const fields = table.rowsHash();
-		const name = `${fields.Name} ${randomUUID()}`;
-		names.set(fields.Name, name);
 		await verwalter.perform(
 			registerBuilding({
-				name,
+				name: seed.unique(fields.Name),
 				address: fields.Adresse,
 				postalCode: fields.PLZ,
 				city: fields.Ort,
@@ -38,14 +32,6 @@ When(
 
 When('der Liegenschaftsverwalter das Gebäude ohne Angaben speichert', async ({ verwalter }) => {
 	await verwalter.perform(saveBuilding);
-});
-
-When('der Liegenschaftsverwalter die Bearbeitung abbricht', async ({ verwalter }) => {
-	await verwalter.perform(cancelEditing);
-});
-
-Then('sieht der Liegenschaftsverwalter die Fehlermeldung {string}', async ({ verwalter }, text: string) => {
-	await expect(errorMessage(verwalter, text)).toBeVisible();
 });
 
 Given(

@@ -1,5 +1,4 @@
 import type { Actor } from '../fixtures/actor';
-import { breadcrumbLink } from '../interactions/navigation';
 import {
 	buildingCard,
 	cityFilterInput,
@@ -24,8 +23,4 @@ export const startNewBuilding = async (actor: Actor) => {
 
 export const openBuilding = (name: string) => async (actor: Actor) => {
 	await buildingCard(actor.page, name).click();
-};
-
-export const chooseBreadcrumb = (label: string) => async (actor: Actor) => {
-	await breadcrumbLink(actor.page, label).click();
 };

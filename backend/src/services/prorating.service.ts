@@ -335,6 +335,8 @@ export interface ProratingResult {
 	totalPeriodDays: number;
 	contracts: Array<{
 		contract: ContractWithDetails;
+		overlapStart: Date;
+		overlapEnd: Date;
 		overlapDays: number;
 		shareOfPeriod: number;
 	}>;
@@ -362,11 +364,7 @@ export async function calculateApartmentProrating(
 		periodStart,
 		periodEnd,
 		totalPeriodDays,
-		contracts: contracts.map((c) => ({
-			contract: c.contract,
-			overlapDays: c.overlapDays,
-			shareOfPeriod: c.shareOfPeriod
-		})),
+		contracts,
 		vacancy,
 		occupiedDays,
 		occupancyRate: totalPeriodDays > 0 ? occupiedDays / totalPeriodDays : 0

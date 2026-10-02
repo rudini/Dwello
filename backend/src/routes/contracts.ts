@@ -23,6 +23,7 @@ const contractQuerySchema = t.Object({
 	tenantId: t.Optional(t.String()),
 	buildingId: t.Optional(t.String()),
 	status: t.Optional(t.Union([t.Literal('active'), t.Literal('ended'), t.Literal('future')])),
+	search: t.Optional(t.String()),
 	limit: t.Optional(t.String()),
 	offset: t.Optional(t.String())
 });
@@ -69,6 +70,7 @@ export const contractRoutes = new Elysia({ prefix: '/api/v1/contracts' })
 				tenantId: query.tenantId,
 				buildingId: query.buildingId,
 				status: query.status,
+				search: query.search,
 				limit: query.limit ? parseInt(query.limit, 10) : undefined,
 				offset: query.offset ? parseInt(query.offset, 10) : undefined
 			};

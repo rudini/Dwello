@@ -22,7 +22,6 @@ export { default as Header } from './Header.svelte';
 export { default as Footer } from './Footer.svelte';
 export { default as Navigation } from './Navigation.svelte';
 export { default as Breadcrumb } from './Breadcrumb.svelte';
-export { default as TabNavigation } from './TabNavigation.svelte';
 
 // Data Display Components
 export { default as DataTable } from './DataTable.svelte';

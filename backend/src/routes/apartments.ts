@@ -15,10 +15,24 @@ import {
 } from '../services/apartment.service';
 import { buildingExists } from '../services/building.service';
 
+// Apartment numbers are unique per building (apartments_building_number_idx)
+// Drizzle wraps the PostgreSQL error (DrizzleQueryError.cause)
+const numberTaken = (error: unknown) => {
+	const { code, cause } = error as { code?: string; cause?: { code?: string } };
+	return (code ?? cause?.code) === '23505';
+};
+const numberTakenError = (number: string) => ({
+	error: `Die Wohnungsnummer ${number} existiert bereits in diesem Gebäude.`
+});
+
 // Validation schemas
+// "occupied" follows from the rental contracts, the property manager sets only vacant or reserved
+const manualStatus = t.Union([t.Literal('vacant'), t.Literal('reserved')]);
 const apartmentQuerySchema = t.Object({
 	buildingId: t.Optional(t.String()),
-	status: t.Optional(t.Union([t.Literal('occupied'), t.Literal('vacant'), t.Literal('reserved')])),
+	status: t.Optional(
+		t.Union([t.Literal('occupied'), t.Literal('relet'), t.Literal('vacant'), t.Literal('reserved')])
+	),
 	floor: t.Optional(t.String()),
 	limit: t.Optional(t.String()),
 	offset: t.Optional(t.String())
@@ -30,7 +44,7 @@ const apartmentBodySchema = t.Object({
 	floor: t.Number(),
 	area: t.Optional(t.Nullable(t.String())),
 	rooms: t.Optional(t.Nullable(t.String())),
-	status: t.Optional(t.Union([t.Literal('occupied'), t.Literal('vacant'), t.Literal('reserved')]))
+	status: t.Optional(manualStatus)
 });
 
 const apartmentUpdateSchema = t.Partial(
@@ -39,9 +53,7 @@ const apartmentUpdateSchema = t.Partial(
 		floor: t.Number(),
 		area: t.Optional(t.Nullable(t.String())),
 		rooms: t.Optional(t.Nullable(t.String())),
-		status: t.Optional(
-			t.Union([t.Literal('occupied'), t.Literal('vacant'), t.Literal('reserved')])
-		)
+		status: t.Optional(manualStatus)
 	})
 );
 
@@ -98,6 +110,10 @@ export const apartmentRoutes = new Elysia({ prefix: '/api/v1/apartments' })
 				set.status = 201;
 				return apartment;
 			} catch (error) {
+				if (numberTaken(error)) {
+					set.status = 409;
+					return numberTakenError(body.number);
+				}
 				set.status = 400;
 				return { error: error instanceof Error ? error.message : 'Failed to create apartment' };
 			}
@@ -110,7 +126,14 @@ export const apartmentRoutes = new Elysia({ prefix: '/api/v1/apartments' })
 	.put(
 		'/:id',
 		async ({ params, body, set }) => {
-			const apartment = await updateApartment(params.id, body);
+			let apartment;
+			try {
+				apartment = await updateApartment(params.id, body);
+			} catch (error) {
+				if (!numberTaken(error)) throw error;
+				set.status = 409;
+				return numberTakenError(body.number!);
+			}
 			if (!apartment) {
 				set.status = 404;
 				return { error: 'Apartment not found' };

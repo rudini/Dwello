@@ -35,16 +35,17 @@
 	</div>
 
 	<div class="p-6 space-y-5">
-		{#each buildings as building}
-			<div>
+		{#each buildings as building (building.buildingId)}
+			<div data-testid="occupancy-row">
 				<div class="flex items-center justify-between mb-2">
 					<a
 						href="/buildings/{building.buildingId}"
+						data-testid="occupancy-building"
 						class="text-sm font-medium text-gray-900 hover:text-blue-600 transition-colors"
 					>
 						{building.buildingName}
 					</a>
-					<span class="text-sm font-semibold {getOccupancyTextColor(building.occupancyRate)}">
+					<span class="text-sm font-semibold {getOccupancyTextColor(building.occupancyRate)}" data-testid="occupancy-rate">
 						{building.occupancyRate.toFixed(1)}%
 					</span>
 				</div>
@@ -55,20 +56,13 @@
 							style="width: {building.occupancyRate}%"
 						></div>
 					</div>
-					<span class="text-xs text-gray-500 w-16 text-right">
+					<span class="text-xs text-gray-500 w-16 text-right" data-testid="occupancy-count">
 						{building.occupiedApartments}/{building.totalApartments}
 					</span>
 				</div>
 			</div>
+		{:else}
+			<p class="text-sm text-gray-500">Noch keine Gebäude erfasst.</p>
 		{/each}
-	</div>
-
-	<div class="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-xl">
-		<div class="flex items-center justify-between text-sm">
-			<span class="text-gray-500">Durchschnittliche Belegung</span>
-			<span class="font-semibold text-gray-900">
-				{(buildings.reduce((sum, b) => sum + b.occupancyRate, 0) / buildings.length).toFixed(1)}%
-			</span>
-		</div>
 	</div>
 </div>

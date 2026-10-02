@@ -3,7 +3,7 @@
  * Business logic for distribution key operations
  */
 
-import { eq, sql, asc, ilike, and } from 'drizzle-orm';
+import { eq, sql, asc, ilike, and, or } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { distributionKeys, type DistributionKey, type NewDistributionKey } from '../db/schema';
 import {
@@ -11,6 +11,8 @@ import {
 	calculateDistribution,
 	type FormulaVariables
 } from './formula.service';
+import { Conflict } from './conflict';
+import { isDefaultSetting } from './default-setting';
 
 export interface DistributionKeyFilters {
 	search?: string;
@@ -97,7 +99,7 @@ export async function listDistributionKeys(filters: DistributionKeyFilters = {})
 	const conditions = [];
 
 	if (search) {
-		conditions.push(ilike(distributionKeys.name, `%${search}%`));
+		conditions.push(or(ilike(distributionKeys.name, `%${search}%`), ilike(distributionKeys.nameDE, `%${search}%`)));
 	}
 
 	if (type) {
@@ -119,7 +121,7 @@ export async function listDistributionKeys(filters: DistributionKeyFilters = {})
 			sortOrder: distributionKeys.sortOrder,
 			createdAt: distributionKeys.createdAt,
 			updatedAt: distributionKeys.updatedAt,
-			invoiceCount: sql<number>`(SELECT COUNT(*) FROM invoices WHERE invoices.distribution_key_id = ${distributionKeys.id})`.as(
+			invoiceCount: sql<number>`(SELECT COUNT(*) FROM invoices WHERE invoices.distribution_key_id = "distribution_keys"."id")`.as(
 				'invoice_count'
 			)
 		})
@@ -165,7 +167,7 @@ export async function getDistributionKey(id: string): Promise<DistributionKeyWit
 			sortOrder: distributionKeys.sortOrder,
 			createdAt: distributionKeys.createdAt,
 			updatedAt: distributionKeys.updatedAt,
-			invoiceCount: sql<number>`(SELECT COUNT(*) FROM invoices WHERE invoices.distribution_key_id = ${distributionKeys.id})`.as(
+			invoiceCount: sql<number>`(SELECT COUNT(*) FROM invoices WHERE invoices.distribution_key_id = "distribution_keys"."id")`.as(
 				'invoice_count'
 			)
 		})
@@ -177,39 +179,43 @@ export async function getDistributionKey(id: string): Promise<DistributionKeyWit
 }
 
 /**
- * Get distribution key by name (for lookups)
+ * Get distribution key by English or German name (for lookups)
  */
 export async function getDistributionKeyByName(name: string): Promise<DistributionKey | null> {
 	const [key] = await db
 		.select()
 		.from(distributionKeys)
-		.where(ilike(distributionKeys.name, name))
+		.where(or(ilike(distributionKeys.name, name), ilike(distributionKeys.nameDE, name)))
 		.limit(1);
 
 	return key || null;
+}
+
+/** English and German names identify a distribution key, so both stay unique */
+async function ensureNameIsFree(name: string, id?: string) {
+	const existing = await getDistributionKeyByName(name);
+	if (existing && existing.id !== id) {
+		throw new Conflict(`Ein Verteilschlüssel mit dem Namen "${name}" existiert bereits.`);
+	}
+}
+
+function ensureValidFormula(formula: string) {
+	const validation = validateFormulaForDistribution(formula);
+	if (!validation.isValid) throw new Error(`Die Formel ist ungültig: ${validation.errors.join(' ')}`);
 }
 
 /**
  * Create a new distribution key
  */
 export async function createDistributionKey(data: NewDistributionKey): Promise<DistributionKey> {
-	// Check for duplicate name
-	const existing = await getDistributionKeyByName(data.name);
-	if (existing) {
-		throw new Error(`Distribution key with name "${data.name}" already exists`);
-	}
+	await ensureNameIsFree(data.name);
+	if (data.nameDE) await ensureNameIsFree(data.nameDE);
 
 	// Validate formula if provided (required for custom keys)
 	if (data.type === 'custom' && !data.formula) {
-		throw new Error('Custom distribution keys require a formula');
+		throw new Error('Bitte geben Sie eine Formel ein.');
 	}
-
-	if (data.formula) {
-		const validation = validateFormulaForDistribution(data.formula);
-		if (!validation.isValid) {
-			throw new Error(`Invalid formula: ${validation.errors.join('; ')}`);
-		}
-	}
+	if (data.formula) ensureValidFormula(data.formula);
 
 	const [key] = await db.insert(distributionKeys).values(data).returning();
 	return key;
@@ -230,29 +236,17 @@ export async function updateDistributionKey(
 
 	// Don't allow changing predefined keys to custom or vice versa
 	if (data.type && data.type !== existing.type) {
-		throw new Error('Cannot change distribution key type');
+		throw new Error('Die Art des Verteilschlüssels kann nicht geändert werden.');
 	}
 
 	// Don't allow modifying predefined formulas
 	if (existing.type === 'predefined' && data.formula && data.formula !== existing.formula) {
-		throw new Error('Cannot modify formula of predefined distribution key');
+		throw new Error('Die Formel vordefinierter Verteilschlüssel kann nicht geändert werden.');
 	}
 
-	// Check for duplicate name if name is being changed
-	if (data.name && data.name !== existing.name) {
-		const duplicate = await getDistributionKeyByName(data.name);
-		if (duplicate && duplicate.id !== id) {
-			throw new Error(`Distribution key with name "${data.name}" already exists`);
-		}
-	}
-
-	// Validate formula if being changed
-	if (data.formula && data.formula !== existing.formula) {
-		const validation = validateFormulaForDistribution(data.formula);
-		if (!validation.isValid) {
-			throw new Error(`Invalid formula: ${validation.errors.join('; ')}`);
-		}
-	}
+	if (data.name) await ensureNameIsFree(data.name, id);
+	if (data.nameDE) await ensureNameIsFree(data.nameDE, id);
+	if (data.formula && data.formula !== existing.formula) ensureValidFormula(data.formula);
 
 	const [key] = await db
 		.update(distributionKeys)
@@ -267,7 +261,7 @@ export async function updateDistributionKey(
  * Delete a distribution key
  * Returns false if key is used by invoices
  */
-export async function deleteDistributionKey(id: string): Promise<{ success: boolean; error?: string }> {
+export async function deleteDistributionKey(id: string): Promise<{ success: boolean; conflict?: boolean; error?: string }> {
 	// Check if key exists
 	const existing = await getDistributionKey(id);
 	if (!existing) {
@@ -276,15 +270,21 @@ export async function deleteDistributionKey(id: string): Promise<{ success: bool
 
 	// Don't allow deleting predefined keys
 	if (existing.type === 'predefined') {
-		return { success: false, error: 'Cannot delete predefined distribution key' };
+		return { success: false, error: 'Vordefinierte Verteilschlüssel können nicht gelöscht werden.' };
 	}
 
-	// Check for invoices using this key
-	if (Number(existing.invoiceCount) > 0) {
+	const count = Number(existing.invoiceCount);
+	if (count > 0) {
 		return {
 			success: false,
-			error: `Cannot delete distribution key used by ${existing.invoiceCount} invoices. Reassign invoices first.`
+			conflict: true,
+			error: `Nach dem Verteilschlüssel ${count === 1 ? 'wird 1 Rechnung' : `werden ${count} Rechnungen`} verteilt, er kann nicht gelöscht werden.`
 		};
+	}
+
+	// New invoices propose the default key of the settings
+	if (await isDefaultSetting('default_distribution_key_id', id)) {
+		return { success: false, conflict: true, error: 'Der Verteilschlüssel ist in den Einstellungen als Standard hinterlegt.' };
 	}
 
 	await db.delete(distributionKeys).where(eq(distributionKeys.id, id));

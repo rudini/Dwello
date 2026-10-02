@@ -8,6 +8,7 @@
 	import Card from '$lib/components/Card.svelte';
 	import InfoCard from '$lib/components/InfoCard.svelte';
 	import Badge from '$lib/components/Badge.svelte';
+	import { statusLabels, statusVariants } from '$lib/apartment';
 
 	let { data, form }: { data: BuildingDetailsData; form: ActionData } = $props();
 
@@ -196,9 +197,9 @@
 								</div>
 								<div class="flex items-center gap-3">
 									<Badge
-										variant={apartment.status === 'occupied' ? 'success' : apartment.status === 'vacant' ? 'warning' : 'default'}
+										variant={statusVariants[apartment.status]}
 									>
-										{apartment.status === 'occupied' ? 'Vermietet' : apartment.status === 'vacant' ? 'Leer' : 'Reserviert'}
+										{statusLabels[apartment.status]}
 									</Badge>
 									<Icon name="chevron_right" size={18} class="text-gray-400" />
 								</div>

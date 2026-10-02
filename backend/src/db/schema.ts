@@ -60,7 +60,7 @@ export const apartments = pgTable(
 		floor: integer('floor').notNull().default(0),
 		area: decimal('area', { precision: 8, scale: 2 }).notNull(), // m²
 		rooms: decimal('rooms', { precision: 3, scale: 1 }).notNull(), // e.g., 3.5
-		status: varchar('status', { length: 20 }).notNull().default('vacant'), // occupied, vacant, reserved
+		status: varchar('status', { length: 20 }).notNull().default('vacant'), // vacant, reserved; occupied is computed from the contracts (apartmentStatus)
 		createdAt: timestamp('created_at').defaultNow().notNull(),
 		updatedAt: timestamp('updated_at').defaultNow().notNull()
 	},
@@ -92,6 +92,7 @@ export const tenants = pgTable('tenants', {
 	address: varchar('address', { length: 500 }),
 	postalCode: varchar('postal_code', { length: 10 }),
 	city: varchar('city', { length: 100 }),
+	correspondenceChannel: varchar('correspondence_channel', { length: 10 }).notNull().default('letter'), // email, letter
 	createdAt: timestamp('created_at').defaultNow().notNull(),
 	updatedAt: timestamp('updated_at').defaultNow().notNull()
 });
@@ -384,6 +385,35 @@ export const utilityStatementLineItemsRelations = relations(
 );
 
 // ============================================================================
+// Documents Table (generated letters such as payment reminders)
+// ============================================================================
+export const documents = pgTable(
+	'documents',
+	{
+		id: uuid('id').defaultRandom().primaryKey(),
+		tenantId: uuid('tenant_id')
+			.notNull()
+			.references(() => tenants.id, { onDelete: 'restrict' }),
+		statementId: uuid('statement_id').references(() => utilityStatements.id, { onDelete: 'restrict' }),
+		type: varchar('type', { length: 30 }).notNull(), // reminder
+		reminderLevel: integer('reminder_level'), // 1 = Zahlungserinnerung, 2 and 3 = Mahnung
+		title: varchar('title', { length: 255 }).notNull(),
+		fileName: varchar('file_name', { length: 255 }).notNull(),
+		pdf: text('pdf').notNull(), // Base64 encoded PDF
+		channel: varchar('channel', { length: 10 }).notNull(), // email, letter
+		status: varchar('status', { length: 20 }).notNull(), // sent, to_send
+		sentAt: timestamp('sent_at'),
+		deliveryError: text('delivery_error'),
+		createdAt: timestamp('created_at').defaultNow().notNull()
+	},
+	(table) => [
+		index('documents_tenant_id_idx').on(table.tenantId),
+		index('documents_statement_id_idx').on(table.statementId),
+		index('documents_status_idx').on(table.status)
+	]
+);
+
+// ============================================================================
 // Configuration Table (Key-Value Store)
 // ============================================================================
 export const configuration = pgTable(
@@ -431,6 +461,9 @@ export type NewUtilityStatement = typeof utilityStatements.$inferInsert;
 
 export type UtilityStatementLineItem = typeof utilityStatementLineItems.$inferSelect;
 export type NewUtilityStatementLineItem = typeof utilityStatementLineItems.$inferInsert;
+
+export type Document = typeof documents.$inferSelect;
+export type NewDocument = typeof documents.$inferInsert;
 
 export type Configuration = typeof configuration.$inferSelect;
 export type NewConfiguration = typeof configuration.$inferInsert;

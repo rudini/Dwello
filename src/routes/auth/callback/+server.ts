@@ -1,134 +1,51 @@
 /**
  * Auth Callback Endpoint
  * GET /auth/callback?code=xxx&state=xxx
- * Handles OAuth callback, exchanges code for token, creates session
+ * Handles the OAuth callback: exchanges the code with the provider the login started with,
+ * creates the session and opens the page that was asked for before signing in.
+ * Any failure leads back to the login page with a message.
  */
 
 import { redirect } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import {
-	validateOAuthState,
-	generateJwt,
-	setSessionCookie,
-	setXsrfToken,
-	clearAuthCookies
-} from '$lib/server/auth';
-import {
-	exchangeCodeForToken,
-	fetchUserProfile
-} from '$lib/server/oauth';
-import {
-	ValidationError,
-	OAuthError,
-	handleRequestError,
-	logOAuthEvent,
-	logAuthError
-} from '$lib/server/error-handler';
+import { validateOAuthState, generateJwt, setSessionCookie, setXsrfToken, clearAuthCookies } from '$lib/server/auth';
+import { exchangeCodeForToken, fetchUserProfile } from '$lib/server/oauth';
+import { logAuthError, logOAuthEvent } from '$lib/server/error-handler';
 import { cookieConfig } from '$lib/server/jwt-config';
+import { loginPage, takeLoginFlow } from '$lib/server/login-flow';
 
 export const GET: RequestHandler = async ({ url, cookies }) => {
-	try {
-		// Extract parameters from callback
-		const code = url.searchParams.get('code');
-		const state = url.searchParams.get('state');
-		const error = url.searchParams.get('error');
-		const errorDescription = url.searchParams.get('error_description');
+	const code = url.searchParams.get('code');
+	const state = url.searchParams.get('state');
+	const flow = takeLoginFlow(cookies);
 
-		// Handle OAuth provider errors
-		if (error) {
-			throw new OAuthError(
-				errorDescription || `OAuth error: ${error}`,
-				'unknown',
-				400
-			);
-		}
-
-		// Validate required parameters
-		if (!code) {
-			throw new ValidationError('Authorization code is required', 'code');
-		}
-
-		if (!state) {
-			throw new ValidationError('State parameter is required', 'state');
-		}
-
-		// Validate state parameter (CSRF protection)
-		if (!validateOAuthState(cookies, state)) {
-			logAuthError(
-				new Error('OAuth state mismatch'),
-				{ operation: 'callback_state_validation' }
-			);
-			throw new OAuthError(
-				'Invalid state parameter. Possible CSRF attack.',
-				'unknown',
-				400
-			);
-		}
-
-		logOAuthEvent('callback_received', 'unknown', { hasCode: !!code });
-
-		// Determine provider from stored session or default
-		// In a real app, you might store the provider in the state or a separate cookie
-		// For now, we'll try both providers (Google first, then Microsoft)
-		let userPayload;
-		let successProvider: string = 'google';
-
-		try {
-			// Try Google first
-			const tokenResponse = await exchangeCodeForToken(code, 'google');
-			logOAuthEvent('token_exchanged', 'google');
-
-			userPayload = await fetchUserProfile(tokenResponse.access_token, 'google');
-			logOAuthEvent('profile_fetched', 'google', { userId: userPayload.sub });
-		} catch {
-			// Try Microsoft if Google fails
-			try {
-				const tokenResponse = await exchangeCodeForToken(code, 'microsoft');
-				logOAuthEvent('token_exchanged', 'microsoft');
-
-				userPayload = await fetchUserProfile(tokenResponse.access_token, 'microsoft');
-				successProvider = 'microsoft';
-				logOAuthEvent('profile_fetched', 'microsoft', { userId: userPayload.sub });
-			} catch {
-				throw new OAuthError(
-					'Failed to exchange authorization code with any provider',
-					'unknown',
-					400
-				);
-			}
-		}
-
-		// Generate JWT
-		const jwt = await generateJwt(userPayload);
-
-		// Clear OAuth state cookie
-		cookies.delete(cookieConfig.oauthStateName, {
-			path: cookieConfig.path,
-			domain: cookieConfig.domain
-		});
-
-		// Set session cookie (HTTPOnly, Secure, SameSite=Lax)
-		setSessionCookie(cookies, jwt);
-
-		// Set XSRF token cookie (readable by JavaScript)
-		setXsrfToken(cookies);
-
-		logOAuthEvent('login_complete', successProvider, {
-			userId: userPayload.sub,
-			email: userPayload.email
-		});
-
-		// Redirect to dashboard
-		throw redirect(302, '/dashboard');
-	} catch (error) {
-		// Re-throw redirects
-		if (error instanceof Response || (error && typeof error === 'object' && 'status' in error)) {
-			throw error;
-		}
-
-		// Clear any partial auth state on error
+	// The user cancelled at the provider (e.g. access_denied)
+	if (url.searchParams.get('error')) {
 		clearAuthCookies(cookies);
-
-		return handleRequestError(error, 'callback');
+		throw redirect(303, loginPage('cancelled'));
 	}
+
+	// CSRF protection: the state must be the one this browser started the login with
+	if (!code || !state || !flow || !validateOAuthState(cookies, state)) {
+		logAuthError(new Error('OAuth callback without a matching login'), { operation: 'callback_state_validation' });
+		clearAuthCookies(cookies);
+		throw redirect(303, loginPage('failed'));
+	}
+
+	let jwt: string;
+	try {
+		const token = await exchangeCodeForToken(code, flow.provider);
+		const user = await fetchUserProfile(token.access_token, flow.provider);
+		jwt = await generateJwt(user);
+		logOAuthEvent('login_complete', flow.provider, { userId: user.sub, email: user.email });
+	} catch (error) {
+		logAuthError(error instanceof Error ? error : new Error(String(error)), { operation: 'callback' });
+		clearAuthCookies(cookies);
+		throw redirect(303, loginPage('failed'));
+	}
+
+	cookies.delete(cookieConfig.oauthStateName, { path: cookieConfig.path, domain: cookieConfig.domain });
+	setSessionCookie(cookies, jwt);
+	setXsrfToken(cookies);
+	throw redirect(303, flow.redirectTo);
 };

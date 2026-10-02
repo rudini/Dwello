@@ -1,0 +1,32 @@
+import type { Locator } from '@playwright/test';
+import type { Actor } from '../fixtures/actor';
+import {
+	confirmDeleteStatementButton,
+	confirmMarkPaidButton,
+	deleteStatementButton,
+	markPaidButton,
+	sendStatementButton,
+	statementApartmentLink,
+	statementEditButton,
+	statementTenantLink
+} from '../interactions/statement-detail';
+
+const click = (target: (page: Actor['page']) => Locator) => async (actor: Actor) => {
+	await target(actor.page).click();
+};
+
+export const sendStatement = click(sendStatementButton);
+
+export const markStatementPaid = async (actor: Actor) => {
+	await markPaidButton(actor.page).click();
+	await confirmMarkPaidButton(actor.page).click();
+};
+
+export const deleteStatement = async (actor: Actor) => {
+	await deleteStatementButton(actor.page).click();
+	await confirmDeleteStatementButton(actor.page).click();
+};
+
+export const editStatementFromDetail = click(statementEditButton);
+export const openStatementTenant = click(statementTenantLink);
+export const openStatementApartment = click(statementApartmentLink);

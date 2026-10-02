@@ -1,71 +1,55 @@
-import type { StatementWithDetails } from '$lib/types';
-import type { PageServerLoad } from './$types';
-import { error } from '@sveltejs/kit';
+import type { Actions, PageServerLoad } from './$types';
+import { fail, redirect } from '@sveltejs/kit';
+import { loadStatement } from '$lib/server/statement';
+import { loadDocuments } from '$lib/server/documents';
+import { markStatementPaid, sendStatementReminder } from '$lib/server/statement-actions';
+import type { StatementDocument } from '$lib/types';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
-interface StatementDetailData {
-	statement: StatementWithDetails;
-}
+export const load: PageServerLoad = async ({ params, fetch }) => ({
+	statement: await loadStatement(fetch, params.id),
+	reminders: await loadDocuments(fetch, `statementId=${params.id}`)
+});
 
-export const load: PageServerLoad = async ({ params, fetch }): Promise<StatementDetailData> => {
-	try {
-		const response = await fetch(`${BACKEND_URL}/api/v1/statements/${params.id}`);
+type Fetch = typeof globalThis.fetch;
 
+const changeStatus = async (fetch: Fetch, id: string, body: object, failure: string) => {
+	const response = await fetch(`${BACKEND_URL}/api/v1/statements/${id}/status`, {
+		method: 'PUT',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify(body)
+	});
+	if (!response.ok) return fail(response.status, { actionError: failure });
+};
+
+export const actions: Actions = {
+	send: ({ params, fetch }) =>
+		changeStatus(fetch, params.id, { status: 'sent' }, 'Abrechnung konnte nicht versendet werden.'),
+	markPaid: async ({ params, fetch }) => {
+		const response = await markStatementPaid(fetch, params.id);
 		if (!response.ok) {
-			if (response.status === 404) {
-				throw error(404, 'Abrechnung nicht gefunden');
-			}
-			throw error(response.status, 'Fehler beim Laden der Abrechnung');
+			return fail(response.status, {
+				actionError: 'Abrechnung konnte nicht als bezahlt markiert werden.'
+			});
 		}
-
-		const data = await response.json();
-
-		// Transform backend data to match frontend types
-		const statement: StatementWithDetails = {
-			id: data.id,
-			statementNumber: data.statementNumber,
-			tenantId: data.tenantId,
-			apartmentId: data.apartmentId,
-			buildingId: data.apartment?.buildingId || '',
-			periodStart: data.periodStart,
-			periodEnd: data.periodEnd,
-			statementDate: data.statementDate,
-			rentalDays: data.rentalDays,
-			totalCosts: Number(data.totalCosts),
-			totalAdvancePayments: Number(data.totalAdvancePayments),
-			managementFee: Number(data.managementFee),
-			balance: Number(data.balance),
-			status: data.status,
-			paymentDeadline: data.paymentDeadline,
-			paidDate: data.paidDate,
-			pdfGeneratedAt: data.pdfGeneratedAt,
-			lastReminderDate: data.lastReminderDate,
-			createdAt: data.createdAt,
-			tenantName: data.tenant ? `${data.tenant.firstName} ${data.tenant.lastName}` : 'Unbekannt',
-			tenantEmail: data.tenant?.email || '',
-			apartmentUnit: data.apartment?.number || '',
-			apartmentFloor: data.apartment?.floor || '',
-			buildingName: data.building?.name || '',
-			buildingAddress: data.building?.address || '',
-			lineItems: (data.lineItems || []).map((item: Record<string, unknown>) => ({
-				id: item.id,
-				categoryId: item.categoryId,
-				categoryName: item.categoryName || item.description || 'Unbekannt',
-				distributionKeyId: item.distributionKeyId,
-				distributionKeyName: item.distributionKeyName || '',
-				totalAmount: Number(item.totalAmount),
-				tenantShare: Number(item.tenantShare),
-				percentage: Number(item.sharePercentage) || 0
-			}))
-		};
-
-		return { statement };
-	} catch (err) {
-		console.error('Failed to fetch statement:', err);
-		if (err && typeof err === 'object' && 'status' in err) {
-			throw err;
+	},
+	remind: async ({ params, fetch }) => {
+		const response = await sendStatementReminder(fetch, params.id);
+		const result = await response.json();
+		if (!response.ok) {
+			return fail(response.status, {
+				actionError: result.error ?? 'Mahnung konnte nicht erstellt werden.'
+			});
 		}
-		throw error(500, 'Fehler beim Laden der Abrechnung');
+		return { reminder: result as { document: StatementDocument; deliveryError?: string } };
+	},
+	delete: async ({ params, fetch }) => {
+		const response = await fetch(`${BACKEND_URL}/api/v1/statements/${params.id}`, {
+			method: 'DELETE'
+		});
+		if (!response.ok)
+			return fail(response.status, { actionError: 'Abrechnung konnte nicht gelöscht werden.' });
+		throw redirect(303, '/statements');
 	}
 };

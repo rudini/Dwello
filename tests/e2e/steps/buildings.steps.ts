@@ -4,7 +4,6 @@ import { test } from '../fixtures/test';
 import { visit } from '../interactions/navigation';
 import { allListedBuildings, emptyList, listedBuilding } from '../questions/buildings';
 import {
-	chooseBreadcrumb,
 	filterByCity,
 	openBuilding,
 	searchBuildings,
@@ -55,20 +54,6 @@ When('der Liegenschaftsverwalter das Gebäude {string} öffnet', async ({ verwal
 	await verwalter.perform(openBuilding(names.get(title) ?? title));
 });
 
-Then('ist der Liegenschaftsverwalter auf der Seite {string}', async ({ verwalter }, title: string) => {
-	await expect(verwalter.page).toHaveTitle(`${title} - Dwello`);
-});
-
-Then(
-	'ist der Liegenschaftsverwalter auf der Detailseite von {string}',
-	async ({ verwalter, names }, title: string) => {
-		await expect(verwalter.page).toHaveTitle(`${names.get(title) ?? title} - Dwello`);
-	}
-);
-
-When('der Liegenschaftsverwalter im Breadcrumb {string} wählt', async ({ verwalter, names }, label: string) => {
-	await verwalter.perform(chooseBreadcrumb(names.get(label) ?? label));
-});
 
 Then('ist der Liegenschaftsverwalter auf der Gebäudeliste', async ({ verwalter }) => {
 	await expect(verwalter.page).toHaveURL(/\/buildings$/);

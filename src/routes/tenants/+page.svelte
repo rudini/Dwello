@@ -4,6 +4,7 @@
 	import type { TenantsListData } from '$lib/types';
 	import Button from '$lib/components/Button.svelte';
 	import Icon from '$lib/components/Icon.svelte';
+	import SearchField from '$lib/components/SearchField.svelte';
 	import Card from '$lib/components/Card.svelte';
 	import StatusBadge from '$lib/components/StatusBadge.svelte';
 
@@ -53,7 +54,7 @@
 			<h1 class="text-2xl font-bold text-gray-900">Mieter</h1>
 			<p class="text-gray-500 mt-1">{data.total} Mieter insgesamt</p>
 		</div>
-		<Button href="/tenants/new" variant="primary">
+		<Button href="/tenants/new" variant="primary" testid="tenants-new-button">
 			<Icon name="person_add" size={20} />
 			Neuer Mieter
 		</Button>
@@ -63,27 +64,12 @@
 	<Card>
 		<form onsubmit={(e) => { e.preventDefault(); handleSearch(); }} class="space-y-4">
 			<div class="flex flex-col sm:flex-row gap-4">
-				<div class="flex-1">
-					<label for="search" class="block text-sm font-medium text-gray-700 mb-1">Suche</label>
-					<div class="relative">
-						<Icon
-							name="search"
-							size={20}
-							class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-						/>
-						<input
-							id="search"
-							type="text"
-							bind:value={searchTerm}
-							placeholder="Name, E-Mail oder Gebäude..."
-							class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
-						/>
-					</div>
-				</div>
+				<SearchField bind:value={searchTerm} placeholder="Name, E-Mail oder Gebäude..." testid="tenants-search-input" />
 				<div class="w-full sm:w-48">
 					<label for="status" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
 					<select
 						id="status"
+						data-testid="tenants-status-filter"
 						bind:value={statusFilter}
 						class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary bg-white"
 					>
@@ -94,7 +80,7 @@
 				</div>
 			</div>
 			<div class="flex gap-2">
-				<Button type="submit" variant="primary" size="sm">
+				<Button type="submit" variant="primary" size="sm" testid="tenants-search-submit">
 					<Icon name="search" size={16} />
 					Suchen
 				</Button>
@@ -134,6 +120,7 @@
 			{#each data.tenants as tenant}
 				<a
 					href="/tenants/{tenant.id}"
+					data-testid="tenant-card-{tenant.id}"
 					class="block bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-primary/30 transition-all duration-200"
 				>
 					<div class="p-5">
@@ -150,8 +137,8 @@
 									<h3 class="font-semibold text-gray-900 truncate">
 										{tenant.firstName} {tenant.lastName}
 									</h3>
-									{#if tenant.contractCount > 0}
-										<StatusBadge status="AKTIV" variant="success" />
+									{#if tenant.isActive}
+										<span data-testid="tenant-active"><StatusBadge status="AKTIV" variant="success" /></span>
 									{/if}
 								</div>
 								<p class="text-sm text-gray-500 truncate">{tenant.email}</p>

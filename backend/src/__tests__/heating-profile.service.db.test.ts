@@ -142,7 +142,7 @@ describe('Heating Profile Service - Database Operations', () => {
 				decemberPct: '24.00'
 			};
 
-			await expect(createHeatingProfile(profile)).rejects.toThrow('already exists');
+			await expect(createHeatingProfile(profile)).rejects.toThrow('existiert bereits');
 		});
 
 		it('should throw error for invalid percentages', async () => {
@@ -171,7 +171,7 @@ describe('Heating Profile Service - Database Operations', () => {
 				decemberPct: '50.00'
 			};
 
-			await expect(createHeatingProfile(profile)).rejects.toThrow('must sum to 100%');
+			await expect(createHeatingProfile(profile)).rejects.toThrow('müssen zusammen 100 % ergeben');
 		});
 
 		it('should create valid profile', async () => {

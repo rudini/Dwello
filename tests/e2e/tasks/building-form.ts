@@ -1,7 +1,6 @@
 import type { Actor } from '../fixtures/actor';
 import {
 	addressInput,
-	cancelButton,
 	cantonSelect,
 	cityInput,
 	nameInput,
@@ -23,10 +22,6 @@ export const registerBuilding = (building: BuildingData) => async (actor: Actor)
 
 export const saveBuilding = async (actor: Actor) => {
 	await submitButton(actor.page).click();
-};
-
-export const cancelEditing = async (actor: Actor) => {
-	await cancelButton(actor.page).click();
 };
 
 export const changeYearBuilt = (year: string) => async (actor: Actor) => {

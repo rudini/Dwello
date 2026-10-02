@@ -5,8 +5,7 @@ import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 const config = {
 	// Consult https://svelte.dev/docs/kit/integrations
 	// for more information about preprocessors
-	// Style preprocessing breaks under Vitest 2 (bundles an older Vite than vite-plugin-svelte 5 expects)
-	preprocess: vitePreprocess({ style: !process.env.VITEST }),
+	preprocess: vitePreprocess(),
 
 	kit: {
 		// adapter-auto only supports some environments, see https://svelte.dev/docs/kit/adapter-auto for a list.

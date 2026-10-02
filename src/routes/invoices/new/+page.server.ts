@@ -23,11 +23,12 @@ export const load: PageServerLoad = async ({ cookies }) => {
 
 	try {
 		// Fetch all required data in parallel
-		const [buildingsRes, categoriesRes, distributionKeysRes, llmStatusRes] = await Promise.all([
+		const [buildingsRes, categoriesRes, distributionKeysRes, llmStatusRes, defaultKeyRes] = await Promise.all([
 			fetch(`${BACKEND_URL}/api/v1/buildings`, { headers }),
 			fetch(`${BACKEND_URL}/api/v1/categories`, { headers }),
 			fetch(`${BACKEND_URL}/api/v1/distribution-keys`, { headers }),
-			fetch(`${BACKEND_URL}/api/v1/invoices/llm-status`, { headers })
+			fetch(`${BACKEND_URL}/api/v1/invoices/llm-status`, { headers }),
+			fetch(`${BACKEND_URL}/api/v1/config/default_distribution_key_id`, { headers })
 		]);
 
 		if (!buildingsRes.ok || !categoriesRes.ok || !distributionKeysRes.ok) {
@@ -51,7 +52,9 @@ export const load: PageServerLoad = async ({ cookies }) => {
 			buildings: buildingsData.buildings || buildingsData.data || buildingsData || [],
 			categories: categoriesData.categories || categoriesData.data || categoriesData || [],
 			distributionKeys: distributionKeysData.distributionKeys || distributionKeysData.data || distributionKeysData || [],
-			llmAvailable: llmStatusData.llmAvailable || false
+			llmAvailable: llmStatusData.llmAvailable || false,
+			// Preselected as set in the settings
+			defaultDistributionKeyId: (await defaultKeyRes.json()).value ?? ''
 		};
 	} catch (error) {
 		console.error('Error loading invoice form data:', error);

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { untrack } from 'svelte';
 	import Button from '$lib/components/Button.svelte';
 	import Icon from '$lib/components/Icon.svelte';
 	import Card from '$lib/components/Card.svelte';
@@ -17,7 +18,7 @@
 	let description = $state('');
 	let amount = $state('');
 	let categoryId = $state('');
-	let distributionKeyId = $state('');
+	let distributionKeyId = $state(untrack(() => data.defaultDistributionKeyId ?? ''));
 	let isValidUtilityCost = $state(true);
 
 	// LLM categorization state

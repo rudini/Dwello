@@ -3,7 +3,7 @@
  * Business logic for rental contract operations
  */
 
-import { eq, and, or, sql, desc, gte, lte, isNull } from 'drizzle-orm';
+import { eq, and, or, sql, desc, gte, lte, isNull, ilike } from 'drizzle-orm';
 import { db } from '../db/connection';
 import {
 	rentalContracts,
@@ -14,13 +14,14 @@ import {
 	type RentalContract,
 	type NewRentalContract
 } from '../db/schema';
-import { updateApartmentStatus } from './apartment.service';
+import { apartmentStatus } from './apartment.service';
 
 export interface ContractFilters {
 	apartmentId?: string;
 	tenantId?: string;
 	buildingId?: string;
 	status?: 'active' | 'ended' | 'future';
+	search?: string;
 	limit?: number;
 	offset?: number;
 }
@@ -40,7 +41,7 @@ export async function listContracts(filters: ContractFilters = {}): Promise<{
 	contracts: ContractWithDetails[];
 	total: number;
 }> {
-	const { apartmentId, tenantId, buildingId, status, limit = 50, offset = 0 } = filters;
+	const { apartmentId, tenantId, buildingId, status, search, limit = 50, offset = 0 } = filters;
 	const today = new Date().toISOString().split('T')[0];
 
 	// Build conditions
@@ -56,6 +57,17 @@ export async function listContracts(filters: ContractFilters = {}): Promise<{
 
 	if (buildingId) {
 		conditions.push(eq(apartments.buildingId, buildingId));
+	}
+
+	if (search) {
+		const pattern = `%${search}%`;
+		conditions.push(
+			or(
+				ilike(sql`${tenants.firstName} || ' ' || ${tenants.lastName}`, pattern),
+				ilike(apartments.number, pattern),
+				ilike(buildings.name, pattern)
+			)
+		);
 	}
 
 	if (status === 'active') {
@@ -110,7 +122,9 @@ export async function listContracts(filters: ContractFilters = {}): Promise<{
 	const countQuery = db
 		.select({ count: sql<number>`count(*)` })
 		.from(rentalContracts)
-		.leftJoin(apartments, eq(rentalContracts.apartmentId, apartments.id));
+		.leftJoin(tenants, eq(rentalContracts.tenantId, tenants.id))
+		.leftJoin(apartments, eq(rentalContracts.apartmentId, apartments.id))
+		.leftJoin(buildings, eq(apartments.buildingId, buildings.id));
 
 	const [{ count: total }] = whereClause
 		? await countQuery.where(whereClause)
@@ -145,7 +159,32 @@ export async function getContract(id: string): Promise<ContractWithDetails | nul
 			tenantEmail: tenants.email,
 			apartmentNumber: apartments.number,
 			buildingName: buildings.name,
-			buildingAddress: buildings.address
+			buildingAddress: buildings.address,
+			tenant: {
+				id: tenants.id,
+				firstName: tenants.firstName,
+				lastName: tenants.lastName,
+				email: tenants.email,
+				phone: tenants.phone,
+				language: tenants.language
+			},
+			apartment: {
+				id: apartments.id,
+				buildingId: apartments.buildingId,
+				number: apartments.number,
+				floor: apartments.floor,
+				area: apartments.area,
+				rooms: apartments.rooms,
+				status: apartmentStatus
+			},
+			building: {
+				id: buildings.id,
+				name: buildings.name,
+				address: buildings.address,
+				postalCode: buildings.postalCode,
+				city: buildings.city,
+				canton: buildings.canton
+			}
 		})
 		.from(rentalContracts)
 		.leftJoin(tenants, eq(rentalContracts.tenantId, tenants.id))
@@ -306,8 +345,6 @@ export async function createContract(data: NewRentalContract): Promise<RentalCon
 
 	const [contract] = await db.insert(rentalContracts).values(data).returning();
 
-	// Update apartment status
-	await updateApartmentStatus(data.apartmentId);
 
 	return contract;
 }
@@ -346,8 +383,6 @@ export async function updateContract(
 		.where(eq(rentalContracts.id, id))
 		.returning();
 
-	// Update apartment status
-	await updateApartmentStatus(current.apartmentId);
 
 	return contract || null;
 }
@@ -383,8 +418,6 @@ export async function deleteContract(id: string): Promise<{ success: boolean; er
 		return { success: false, error: 'Contract not found' };
 	}
 
-	// Update apartment status
-	await updateApartmentStatus(contract.apartmentId);
 
 	return { success: true };
 }

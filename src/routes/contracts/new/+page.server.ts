@@ -1,4 +1,6 @@
 import type { PageServerLoad } from './$types';
+import { statusLabels } from '$lib/apartment';
+import type { ApartmentStatus } from '$lib/types';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
@@ -14,7 +16,7 @@ interface Apartment {
 	floor: number;
 	buildingId: string;
 	buildingName: string;
-	status: string;
+	status: ApartmentStatus;
 }
 
 export const load: PageServerLoad = async ({ fetch }) => {
@@ -39,7 +41,7 @@ export const load: PageServerLoad = async ({ fetch }) => {
 			id: a.id,
 			unit: a.number,
 			building: a.buildingName || 'Unbekannt',
-			status: a.status === 'occupied' ? 'Vermietet' : a.status === 'vacant' ? 'Leer' : a.status
+			status: statusLabels[a.status]
 		}));
 
 		return { tenants, apartments };

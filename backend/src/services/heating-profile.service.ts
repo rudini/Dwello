@@ -12,6 +12,8 @@
 import { eq, sql, asc, ilike, and } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { heatingProfiles, type HeatingProfile, type NewHeatingProfile } from '../db/schema';
+import { Conflict } from './conflict';
+import { isDefaultSetting } from './default-setting';
 
 export interface HeatingProfileFilters {
 	search?: string;
@@ -199,6 +201,7 @@ export async function getHeatingProfileByName(name: string): Promise<HeatingProf
 	return profile || null;
 }
 
+
 /**
  * Validate that monthly percentages sum to approximately 100%
  */
@@ -227,7 +230,7 @@ export function validatePercentages(percentages: MonthlyPercentages): {
 		return {
 			isValid: false,
 			sum,
-			error: `Monthly percentages must sum to 100% (current sum: ${sum.toFixed(2)}%)`
+			error: `Die Monatsanteile müssen zusammen 100 % ergeben (aktuell ${Number(sum.toFixed(2))} %).`
 		};
 	}
 
@@ -237,7 +240,7 @@ export function validatePercentages(percentages: MonthlyPercentages): {
 			return {
 				isValid: false,
 				sum,
-				error: `Percentage for ${month} cannot be negative`
+				error: `Der Anteil für ${month} darf nicht negativ sein.`
 			};
 		}
 	}
@@ -252,7 +255,7 @@ export async function createHeatingProfile(data: NewHeatingProfile): Promise<Hea
 	// Check for duplicate name
 	const existing = await getHeatingProfileByName(data.name);
 	if (existing) {
-		throw new Error(`Heating profile with name "${data.name}" already exists`);
+		throw new Conflict(`Ein Heizprofil mit dem Namen "${data.name}" existiert bereits.`);
 	}
 
 	// Validate percentages
@@ -315,7 +318,7 @@ export async function updateHeatingProfile(
 	if (data.name && data.name !== existing.name) {
 		const duplicate = await getHeatingProfileByName(data.name);
 		if (duplicate && duplicate.id !== id) {
-			throw new Error(`Heating profile with name "${data.name}" already exists`);
+			throw new Conflict(`Ein Heizprofil mit dem Namen "${data.name}" existiert bereits.`);
 		}
 	}
 
@@ -354,7 +357,9 @@ export async function updateHeatingProfile(
 /**
  * Delete a heating profile
  */
-export async function deleteHeatingProfile(id: string): Promise<{ success: boolean; error?: string }> {
+export async function deleteHeatingProfile(
+	id: string
+): Promise<{ success: boolean; conflict?: boolean; error?: string }> {
 	// Check if profile exists
 	const existing = await getHeatingProfile(id);
 	if (!existing) {
@@ -363,10 +368,13 @@ export async function deleteHeatingProfile(id: string): Promise<{ success: boole
 
 	// Don't allow deleting predefined profiles
 	if (existing.type === 'predefined') {
-		return { success: false, error: 'Cannot delete predefined heating profile' };
+		return { success: false, error: 'Vordefinierte Heizprofile können nicht gelöscht werden.' };
 	}
 
-	// TODO: Check if profile is in use by configuration
+	// New statements propose the default profile of the settings
+	if (await isDefaultSetting('default_heating_profile_id', id)) {
+		return { success: false, conflict: true, error: 'Das Heizprofil ist in den Einstellungen als Standard hinterlegt.' };
+	}
 
 	await db.delete(heatingProfiles).where(eq(heatingProfiles.id, id));
 

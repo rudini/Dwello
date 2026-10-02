@@ -39,7 +39,7 @@
 	<div class="border-t border-slate-200 pt-4">
 		<div class="flex justify-between items-center">
 			<span class="font-bold text-text-dark">Total Brutto</span>
-			<span class="text-2xl font-bold text-primary">{formatCurrency(costs.totalBrutto)}</span>
+			<span class="text-2xl font-bold text-primary" data-testid="monthly-costs-total">{formatCurrency(costs.totalBrutto)}</span>
 		</div>
 	</div>
 </Card>

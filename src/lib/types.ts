@@ -35,7 +35,8 @@ export interface BuildingsListData {
 }
 
 // Apartment status values (match backend)
-export type ApartmentStatus = 'occupied' | 'vacant' | 'reserved';
+// occupied and relet follow from the rental contracts; vacant and reserved are set by hand
+export type ApartmentStatus = 'occupied' | 'relet' | 'vacant' | 'reserved';
 
 // Apartment types (camelCase to match backend)
 export interface Apartment {
@@ -61,6 +62,7 @@ export interface Tenant {
 	address?: string | null;
 	postalCode?: string | null;
 	city?: string | null;
+	correspondenceChannel?: 'email' | 'letter';
 	createdAt?: Date | string;
 	updatedAt?: Date | string;
 }
@@ -86,11 +88,10 @@ export interface RentalContract {
 export interface ContractHistory {
 	id: string;
 	tenantName: string;
-	tenantFirstName: string;
-	tenantLastName: string;
 	period: string; // "DD.MM.YYYY - DD.MM.YYYY"
 	rentBrutto: number; // in CHF
-	isActive: boolean;
+	status: 'active' | 'ended' | 'future';
+	apartment?: string;
 	startDate: string;
 	endDate?: string | null;
 }
@@ -103,23 +104,12 @@ export interface MonthlyCosts {
 	totalBrutto: number;
 }
 
-// Apartment Details page data
-export interface ApartmentDetailsData {
-	apartment: Apartment;
-	building: Building;
-	currentTenant?: Tenant | null;
-	currentContract?: RentalContract | null;
-	monthlyCosts: MonthlyCosts;
-	contractHistory: ContractHistory[];
-}
-
 // Apartment with building info for list view
 export interface ApartmentWithBuilding extends Apartment {
 	buildingName?: string;
 	buildingAddress: string;
 	buildingCity: string;
-	currentTenantName?: string | null;
-	currentRent?: number | null;
+	nextContractStart?: string | null;
 }
 
 // Apartments list response
@@ -135,7 +125,7 @@ export interface ApartmentsListData {
 export interface TenantWithOccupancy extends Tenant {
 	currentApartment?: string | null;
 	currentBuilding?: string | null;
-	contractCount: number;
+	isActive: boolean; // a contract runs today or is signed for later
 }
 
 // Tenants list response
@@ -261,28 +251,6 @@ export interface HeatingProfile {
 	};
 }
 
-// System Configuration types
-export type AccountingPeriod = 'calendar' | 'july-june' | 'october-september';
-
-export interface SystemConfig {
-	id: string;
-	accountingPeriod: AccountingPeriod;
-	managementFeePercentage: number; // 0-3%
-	defaultHeatingProfileId?: string;
-	defaultDistributionKeyId?: string;
-	companyName?: string;
-	companyAddress?: string;
-	iban?: string;
-	updatedAt?: string;
-}
-
-// Configuration page data
-export interface ConfigPageData {
-	config: SystemConfig;
-	heatingProfiles: HeatingProfile[];
-	distributionKeys: DistributionKey[];
-}
-
 // Statement types
 export type StatementStatus = 'draft' | 'sent' | 'paid' | 'overdue';
 
@@ -310,12 +278,14 @@ export interface Statement {
 	totalCosts: number;
 	totalAdvancePayments: number;
 	managementFee: number;
+	managementFeePercent: number; // rate used when the statement was generated
 	balance: number; // positive = tenant owes, negative = refund
 	status: StatementStatus;
 	paymentDeadline: string;
 	paidDate?: string;
 	lastReminderDate?: string;
 	pdfGeneratedAt?: string;
+	notes?: string | null;
 	createdAt?: string;
 	updatedAt?: string;
 }
@@ -323,6 +293,7 @@ export interface Statement {
 export interface StatementWithDetails extends Statement {
 	tenantName: string;
 	tenantEmail?: string;
+	tenantCorrespondenceChannel?: 'email' | 'letter';
 	apartmentUnit: string;
 	apartmentFloor: string;
 	buildingName: string;
@@ -342,4 +313,22 @@ export interface StatementsListData {
 		paid: number;
 		overdue: number;
 	};
+}
+
+// Stored letters such as payment reminders (PDF lives in the backend)
+export interface StatementDocument {
+	id: string;
+	tenantId: string;
+	statementId: string | null;
+	type: 'reminder';
+	reminderLevel: number | null;
+	title: string;
+	fileName: string;
+	channel: 'email' | 'letter';
+	status: 'sent' | 'to_send';
+	sentAt: string | null;
+	deliveryError: string | null;
+	createdAt: string;
+	tenantName: string;
+	statementNumber: string | null;
 }

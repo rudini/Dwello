@@ -20,6 +20,8 @@ Funktionalität: Neues Gebäude erfassen
   Szenario: Pflichtangaben fehlen
     Wenn der Liegenschaftsverwalter das Gebäude ohne Angaben speichert
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Adresse ist erforderlich"
+    Und sieht der Liegenschaftsverwalter die Fehlermeldung "Gebäudename ist erforderlich"
+    Und sieht der Liegenschaftsverwalter die Fehlermeldung "Kanton ist erforderlich"
 
   Szenario: Erfassung abbrechen
     Wenn der Liegenschaftsverwalter die Bearbeitung abbricht

@@ -14,9 +14,34 @@ import {
 	type NewApartment
 } from '../db/schema';
 
+export type ApartmentStatus = 'occupied' | 'relet' | 'vacant' | 'reserved';
+
+/** First day of the next rental contract that has not started yet */
+const nextContractStart = sql<string | null>`(
+	select min(c.start_date)::text from rental_contracts c
+	where c.apartment_id = "apartments"."id" and c.start_date > current_date
+)`;
+
+/**
+ * Occupied while a rental contract runs today; relet when only a future contract is signed;
+ * otherwise as the property manager set it (vacant or reserved).
+ * Computed on every read, so it is right on the day a contract starts or ends.
+ * The outer columns are named explicitly: drizzle leaves them unqualified in single-table selects.
+ */
+export const apartmentStatus = sql<ApartmentStatus>`(case
+	when exists (
+		select 1 from rental_contracts c
+		where c.apartment_id = "apartments"."id"
+			and c.start_date <= current_date
+			and (c.end_date is null or c.end_date >= current_date)
+	) then 'occupied'
+	when ${nextContractStart} is not null then 'relet'
+	else "apartments"."status"
+end)`;
+
 export interface ApartmentFilters {
 	buildingId?: string;
-	status?: 'occupied' | 'vacant' | 'reserved';
+	status?: ApartmentStatus;
 	floor?: number;
 	limit?: number;
 	offset?: number;
@@ -33,6 +58,7 @@ export interface ApartmentWithDetails extends Apartment {
 	};
 	currentTenantName?: string;
 	currentContractId?: string;
+	nextContractStart?: string | null;
 }
 
 /**
@@ -52,7 +78,7 @@ export async function listApartments(filters: ApartmentFilters = {}): Promise<{
 	}
 
 	if (status) {
-		conditions.push(eq(apartments.status, status));
+		conditions.push(sql`${apartmentStatus} = ${status}`);
 	}
 
 	if (floor !== undefined) {
@@ -68,7 +94,8 @@ export async function listApartments(filters: ApartmentFilters = {}): Promise<{
 			floor: apartments.floor,
 			area: apartments.area,
 			rooms: apartments.rooms,
-			status: apartments.status,
+			status: apartmentStatus,
+			nextContractStart,
 			createdAt: apartments.createdAt,
 			updatedAt: apartments.updatedAt,
 			buildingName: buildings.name
@@ -107,7 +134,8 @@ export async function getApartment(id: string): Promise<ApartmentWithDetails | n
 			floor: apartments.floor,
 			area: apartments.area,
 			rooms: apartments.rooms,
-			status: apartments.status,
+			status: apartmentStatus,
+			nextContractStart,
 			createdAt: apartments.createdAt,
 			updatedAt: apartments.updatedAt,
 			buildingName: buildings.name,
@@ -251,33 +279,6 @@ export async function deleteApartment(id: string): Promise<{ success: boolean; e
 	}
 
 	return { success: true };
-}
-
-/**
- * Update apartment status based on contracts
- */
-export async function updateApartmentStatus(id: string): Promise<void> {
-	const today = new Date().toISOString().split('T')[0];
-
-	const [activeContract] = await db
-		.select({ id: rentalContracts.id })
-		.from(rentalContracts)
-		.where(
-			and(
-				eq(rentalContracts.apartmentId, id),
-				sql`${rentalContracts.startDate} <= ${today}`,
-				sql`(${rentalContracts.endDate} IS NULL OR ${rentalContracts.endDate} >= ${today})`
-			)
-		)
-		.limit(1);
-
-	await db
-		.update(apartments)
-		.set({
-			status: activeContract ? 'occupied' : 'vacant',
-			updatedAt: new Date()
-		})
-		.where(eq(apartments.id, id));
 }
 
 /**

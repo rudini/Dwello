@@ -1,38 +1,16 @@
-import type { DistributionKey } from '$lib/types';
+import { error } from '@sveltejs/kit';
+import { deleteDistributionKey, toDistributionKey } from '$lib/server/distribution-key';
+import type { Actions, PageServerLoad } from './$types';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
-interface DistributionKeysData {
-	keys: DistributionKey[];
-	total: number;
-}
+export const load: PageServerLoad = async ({ fetch }) => {
+	const response = await fetch(`${BACKEND_URL}/api/v1/distribution-keys?limit=100`);
+	if (!response.ok) throw error(response.status, 'Fehler beim Laden der Verteilschlüssel');
+	const { data } = await response.json();
+	return { keys: (data as Record<string, unknown>[]).map(toDistributionKey) };
+};
 
-export const load = async ({ fetch }: { fetch: typeof globalThis.fetch }): Promise<DistributionKeysData> => {
-	try {
-		const response = await fetch(`${BACKEND_URL}/api/v1/distribution-keys?limit=100`);
-
-		if (!response.ok) {
-			console.error('Failed to fetch distribution keys:', response.status);
-			return { keys: [], total: 0 };
-		}
-
-		const data = await response.json();
-
-		const keys: DistributionKey[] = (data.data || []).map((d: Record<string, unknown>) => ({
-			id: d.id,
-			name: d.name || '',
-			type: d.type || 'predefined',
-			formula: d.formula || undefined,
-			description: d.description || '',
-			isActive: d.isActive ?? true
-		}));
-
-		return {
-			keys,
-			total: data.total || keys.length
-		};
-	} catch (err) {
-		console.error('Failed to fetch distribution keys:', err);
-		return { keys: [], total: 0 };
-	}
+export const actions: Actions = {
+	delete: async ({ request, fetch }) => deleteDistributionKey(fetch, String((await request.formData()).get('id')))
 };

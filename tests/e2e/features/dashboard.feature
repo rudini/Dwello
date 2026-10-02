@@ -1,60 +1,38 @@
+# language: de
 @dashboard
-Feature: Dashboard Overview
-  As a property manager
-  I want to see an overview of my portfolio
-  So that I can quickly assess my business status
+Funktionalität: Dashboard
+  Als Liegenschaftsverwalter
+  möchte ich auf einen Blick sehen, wie es um meine Liegenschaften steht
+  damit ich weiss, wo ich handeln muss
 
-  Background:
-    Given I am logged in as "Test User"
+  Grundlage:
+    Angenommen das Gebäude "Seeblick" in "Winterthur" existiert
+    Und im Gebäude "Seeblick" gibt es die leere Wohnung "1.01"
+    Und im Gebäude "Seeblick" gibt es die leere Wohnung "1.02"
+    Und der Mieter "Anna Keller" existiert
+    Und "Anna Keller" mietet die Wohnung "1.01" seit "2020-01-01" für "900" Franken
 
-  @overview
-  Scenario: Dashboard shows portfolio statistics
-    When I open the dashboard
-    Then I should see the total number of buildings
-    And I should see the total number of apartments
-    And I should see the occupancy rate
+  Szenario: Belegung pro Gebäude
+    Wenn der Liegenschaftsverwalter das Dashboard öffnet
+    Dann ist das Gebäude "Seeblick" zu "50.0%" belegt
+    Und sind im Gebäude "Seeblick" "1/2" Wohnungen vermietet
 
-  @financial
-  Scenario: Dashboard shows financial overview
-    When I open the dashboard
-    Then I should see outstanding statements count
-    And I should see total pending amount
-    And I should see overdue amount
+  Szenario: Gebäude aus der Belegung öffnen
+    Angenommen der Liegenschaftsverwalter öffnet das Dashboard
+    Wenn der Liegenschaftsverwalter in der Belegung das Gebäude "Seeblick" öffnet
+    Dann ist der Liegenschaftsverwalter auf der Detailseite von "Seeblick"
 
-  @statements
-  Scenario: Dashboard shows statement status cards
-    When I open the dashboard
-    Then I should see draft statements count
-    And I should see sent statements count
-    And I should see paid statements count
-    And I should see overdue statements count
+  Szenario: Leere Wohnungen ansehen
+    Angenommen der Liegenschaftsverwalter öffnet das Dashboard
+    Wenn der Liegenschaftsverwalter die Kennzahl "Leer" öffnet
+    Dann sieht der Liegenschaftsverwalter die leeren Wohnungen
 
-  @activity @wip
-  Scenario: Dashboard shows recent activity
-    When I open the dashboard
-    Then I should see the activity feed
-    And I should see recent activities
+  Szenario: Überfällige Abrechnungen ansehen
+    Angenommen der Liegenschaftsverwalter öffnet das Dashboard
+    Wenn der Liegenschaftsverwalter die überfälligen Abrechnungen öffnet
+    Dann sieht der Liegenschaftsverwalter die überfälligen Abrechnungen
 
-  @occupancy @wip
-  Scenario: Dashboard shows occupancy chart
-    When I open the dashboard
-    Then I should see the occupancy chart
-    And I should see building names in the chart
-
-  @quick-actions
-  Scenario: Dashboard provides quick actions
-    When I open the dashboard
-    Then I should see a "Rechnung erfassen" link
-    And I should see a "Abrechnungen erstellen" link
-
-  @navigation @wip
-  Scenario: Navigate to buildings from dashboard
-    When I open the dashboard
-    And I click on the buildings stat card
-    Then I should be on the buildings page
-
-  @navigation @wip
-  Scenario: Navigate to statements from dashboard
-    When I open the dashboard
-    And I click on the overdue statements card
-    Then I should be on the statements page with overdue filter
+  Szenario: Abrechnungen über die Schnellaktion erstellen
+    Angenommen der Liegenschaftsverwalter öffnet das Dashboard
+    Wenn der Liegenschaftsverwalter die Schnellaktion "Abrechnungen erstellen" wählt
+    Dann ist der Liegenschaftsverwalter auf der Seite "Abrechnungen erstellen"

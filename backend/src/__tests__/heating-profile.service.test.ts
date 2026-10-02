@@ -124,7 +124,7 @@ describe('Heating Profile Service', () => {
 			};
 			const result = validatePercentages(percentages);
 			expect(result.isValid).toBe(false);
-			expect(result.error).toContain('must sum to 100%');
+			expect(result.error).toContain('müssen zusammen 100 % ergeben');
 		});
 
 		it('should reject negative percentages', () => {
@@ -135,7 +135,7 @@ describe('Heating Profile Service', () => {
 			};
 			const result = validatePercentages(percentages);
 			expect(result.isValid).toBe(false);
-			expect(result.error).toContain('cannot be negative');
+			expect(result.error).toContain('darf nicht negativ sein');
 		});
 	});
 
@@ -498,7 +498,7 @@ describe('Heating Profile Service', () => {
 			};
 			const result = validatePercentages(percentages);
 			expect(result.isValid).toBe(false);
-			expect(result.error).toContain('negative');
+			expect(result.error).toBe('Der Anteil für january darf nicht negativ sein.');
 		});
 	});
 

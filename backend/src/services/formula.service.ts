@@ -72,7 +72,7 @@ export function parseFormula(formula: string): ParseResult {
 		return {
 			isValid: false,
 			variables: [],
-			errors: ['Formula cannot be empty'],
+			errors: ['Bitte geben Sie eine Formel ein.'],
 			normalizedFormula: ''
 		};
 	}
@@ -94,13 +94,13 @@ export function parseFormula(formula: string): ParseResult {
 				foundVariables.push(varName as FormulaVariable);
 			}
 		} else {
-			errors.push(`Unknown variable: {${varName}}. Supported: ${FORMULA_VARIABLES.join(', ')}`);
+			errors.push(`Unbekannte Variable {${varName}}. Erlaubt sind {area}, {rooms}, {volume} und {units}.`);
 		}
 	}
 
 	// Check that formula contains at least one variable
 	if (foundVariableNames.length === 0) {
-		errors.push('Formula must contain at least one variable: {area}, {rooms}, {volume}, or {units}');
+		errors.push('Die Formel braucht mindestens eine Variable: {area}, {rooms}, {volume} oder {units}.');
 	}
 
 	// Check for invalid characters (only allow numbers, operators, parentheses, and variables)
@@ -108,7 +108,7 @@ export function parseFormula(formula: string): ParseResult {
 	const invalidChars = formulaWithoutVars.match(/[^0-9+\-*/().%\s]/g);
 	if (invalidChars) {
 		const uniqueChars = [...new Set(invalidChars)];
-		errors.push(`Invalid characters in formula: ${uniqueChars.join(', ')}`);
+		errors.push(`Unzulässige Zeichen in der Formel: ${uniqueChars.join(' ')}`);
 	}
 
 	// Check for balanced parentheses
@@ -117,22 +117,22 @@ export function parseFormula(formula: string): ParseResult {
 		if (char === '(') parenCount++;
 		if (char === ')') parenCount--;
 		if (parenCount < 0) {
-			errors.push('Unbalanced parentheses: unexpected closing parenthesis');
+			errors.push('Die Formel schliesst eine Klammer, die nicht geöffnet wurde.');
 			break;
 		}
 	}
 	if (parenCount > 0) {
-		errors.push('Unbalanced parentheses: missing closing parenthesis');
+		errors.push('In der Formel fehlt eine schliessende Klammer.');
 	}
 
 	// Check for consecutive operators
 	if (/[+\-*/]{2,}/.test(formulaWithoutVars.replace(/\s/g, ''))) {
-		errors.push('Invalid formula: consecutive operators');
+		errors.push('Zwei Rechenzeichen folgen direkt aufeinander.');
 	}
 
 	// Check for division by zero potential (literal /0)
 	if (/\/\s*0(?!\.)/.test(formulaWithoutVars)) {
-		errors.push('Warning: Formula contains division by zero');
+		errors.push('Die Formel teilt durch null.');
 	}
 
 	// Normalize variable names to lowercase
@@ -169,7 +169,7 @@ export function evaluateFormula(formula: string, variables: FormulaVariables): E
 			return {
 				isValid: false,
 				value: 0,
-				error: `Missing value for variable: {${variable}}`
+				error: `Der Wert für {${variable}} fehlt.`
 			};
 		}
 	}
@@ -196,7 +196,7 @@ export function evaluateFormula(formula: string, variables: FormulaVariables): E
 			return {
 				isValid: false,
 				value: 0,
-				error: 'Formula evaluation resulted in invalid number'
+				error: 'Die Formel ergibt keine gültige Zahl.'
 			};
 		}
 
@@ -208,7 +208,7 @@ export function evaluateFormula(formula: string, variables: FormulaVariables): E
 		return {
 			isValid: false,
 			value: 0,
-			error: `Formula evaluation error: ${error instanceof Error ? error.message : 'Unknown error'}`
+			error: `Die Formel kann nicht berechnet werden: ${error instanceof Error ? error.message : 'unbekannter Fehler'}`
 		};
 	}
 }
@@ -229,15 +229,15 @@ export function testFormula(formula: string, testCases: FormulaTestCase[]): Form
 export function getDefaultTestCases(): FormulaTestCase[] {
 	return [
 		{
-			label: 'Small apartment (50m², 2 rooms)',
+			label: 'Kleine Wohnung (50 m², 2 Zimmer)',
 			variables: { area: 50, rooms: 2, volume: 125, units: 1 }
 		},
 		{
-			label: 'Medium apartment (80m², 3.5 rooms)',
+			label: 'Mittlere Wohnung (80 m², 3.5 Zimmer)',
 			variables: { area: 80, rooms: 3.5, volume: 200, units: 1 }
 		},
 		{
-			label: 'Large apartment (120m², 5 rooms)',
+			label: 'Grosse Wohnung (120 m², 5 Zimmer)',
 			variables: { area: 120, rooms: 5, volume: 300, units: 1 }
 		}
 	];
@@ -265,7 +265,7 @@ export function calculateDistribution(
 			return {
 				isValid: false,
 				distributions: [],
-				error: `Formula evaluation failed for apartment: ${result.error}`
+				error: `Die Formel kann für eine Wohnung nicht berechnet werden: ${result.error}`
 			};
 		}
 
@@ -273,7 +273,7 @@ export function calculateDistribution(
 			return {
 				isValid: false,
 				distributions: [],
-				error: 'Formula resulted in negative value'
+				error: 'Die Formel ergibt einen negativen Wert.'
 			};
 		}
 
@@ -286,7 +286,7 @@ export function calculateDistribution(
 		return {
 			isValid: false,
 			distributions: [],
-			error: 'Total distribution value is zero - cannot calculate shares'
+			error: 'Die Formel ergibt für alle Wohnungen null, so lassen sich keine Anteile berechnen.'
 		};
 	}
 
@@ -328,11 +328,11 @@ export function validateFormulaForDistribution(formula: string): {
 
 	for (const testResult of testResults) {
 		if (!testResult.result.isValid) {
-			errors.push(`Test "${testResult.testCase.label}" failed: ${testResult.result.error}`);
+			errors.push(`${testResult.testCase.label}: ${testResult.result.error}`);
 		} else if (testResult.result.value < 0) {
-			errors.push(`Test "${testResult.testCase.label}" resulted in negative value`);
+			errors.push(`Die Formel ergibt für die ${testResult.testCase.label} einen negativen Wert.`);
 		} else if (testResult.result.value === 0) {
-			warnings.push(`Test "${testResult.testCase.label}" resulted in zero value`);
+			warnings.push(`Die Formel ergibt für die ${testResult.testCase.label} null.`);
 		}
 	}
 
@@ -341,7 +341,7 @@ export function validateFormulaForDistribution(formula: string): {
 	const distribution = calculateDistribution(formula, testApts, 1000);
 
 	if (!distribution.isValid) {
-		errors.push(`Distribution calculation failed: ${distribution.error}`);
+		errors.push(distribution.error ?? 'Die Verteilung kann nicht berechnet werden.');
 	}
 
 	return {

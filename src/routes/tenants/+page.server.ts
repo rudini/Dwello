@@ -33,7 +33,7 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<TenantsListD
 				? `Wohnung ${t.currentApartment}`
 				: null,
 			currentBuilding: (t.currentBuilding as string) || null,
-			contractCount: Number(t.contractCount) || 0
+			isActive: t.isActive === true
 		}));
 
 		return {

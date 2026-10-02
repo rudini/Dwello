@@ -1,35 +1,32 @@
 <script lang="ts">
-	import type { StatementWithDetails, StatementStatus } from '$lib/types';
+	import type { StatementDocument, StatementWithDetails, StatementStatus } from '$lib/types';
+	import ReminderModal from './ReminderModal.svelte';
+	import ReminderHistory from './ReminderHistory.svelte';
+	import ReminderFeedback from './ReminderFeedback.svelte';
 	import { addToast } from '$lib/stores';
 	import Button from '$lib/components/Button.svelte';
 	import Icon from '$lib/components/Icon.svelte';
 	import Card from '$lib/components/Card.svelte';
 	import Badge from '$lib/components/Badge.svelte';
 	import Modal from '$lib/components/Modal.svelte';
+	import FieldError from '$lib/components/FieldError.svelte';
+	import { enhance } from '$app/forms';
+	import { untrack } from 'svelte';
+	import { formatCurrency, formatDate } from '$lib/utils/format';
+	import type { ActionData } from './$types';
 
 	interface PageData {
 		statement: StatementWithDetails;
+		reminders: StatementDocument[];
 	}
 
-	let { data }: { data: PageData } = $props();
+	let { data, form }: { data: PageData; form: ActionData } = $props();
 
 	let showMarkPaidModal = $state(false);
 	let showSendReminderModal = $state(false);
 	let showDeleteModal = $state(false);
-	let isProcessing = $state(false);
 	let isGeneratingPdf = $state(false);
-	let pdfGeneratedAt = $state(data.statement.pdfGeneratedAt);
-
-	function formatCurrency(amount: number): string {
-		return new Intl.NumberFormat('de-CH', {
-			style: 'currency',
-			currency: 'CHF'
-		}).format(amount);
-	}
-
-	function formatDate(dateString: string): string {
-		return new Date(dateString).toLocaleDateString('de-CH');
-	}
+	let pdfGeneratedAt = $state(untrack(() => data.statement.pdfGeneratedAt));
 
 	function formatDateTime(dateString: string): string {
 		return new Date(dateString).toLocaleString('de-CH');
@@ -79,30 +76,6 @@
 		return 'Ausgeglichen';
 	}
 
-	async function handleMarkPaid() {
-		isProcessing = true;
-		await new Promise((resolve) => setTimeout(resolve, 1000));
-		console.log('Marking as paid:', data.statement.id);
-		showMarkPaidModal = false;
-		isProcessing = false;
-	}
-
-	async function handleSendReminder() {
-		isProcessing = true;
-		await new Promise((resolve) => setTimeout(resolve, 1000));
-		console.log('Sending reminder:', data.statement.id);
-		showSendReminderModal = false;
-		isProcessing = false;
-	}
-
-	async function handleDelete() {
-		isProcessing = true;
-		await new Promise((resolve) => setTimeout(resolve, 1000));
-		console.log('Deleting:', data.statement.id);
-		showDeleteModal = false;
-		isProcessing = false;
-	}
-
 	async function handleGeneratePdf() {
 		isGeneratingPdf = true;
 		try {
@@ -115,7 +88,10 @@
 			} else {
 				const error = await response.json();
 				console.error('PDF generation failed:', error);
-				addToast('error', 'PDF-Generierung fehlgeschlagen: ' + (error.error || 'Unbekannter Fehler'));
+				addToast(
+					'error',
+					'PDF-Generierung fehlgeschlagen: ' + (error.error || 'Unbekannter Fehler')
+				);
 			}
 		} catch (error) {
 			console.error('PDF generation error:', error);
@@ -125,7 +101,9 @@
 		}
 	}
 
-	const subtotal = $derived(data.statement.lineItems.reduce((sum, item) => sum + item.tenantShare, 0));
+	const subtotal = $derived(
+		data.statement.lineItems.reduce((sum, item) => sum + item.tenantShare, 0)
+	);
 </script>
 
 <svelte:head>
@@ -138,6 +116,7 @@
 		<div class="flex items-start gap-4">
 			<a
 				href="/statements"
+				data-testid="back-link"
 				class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
 			>
 				<Icon name="arrow_back" size={20} />
@@ -145,9 +124,11 @@
 			<div>
 				<div class="flex items-center gap-3 mb-1">
 					<h1 class="text-2xl font-bold text-gray-900">{data.statement.statementNumber}</h1>
-					<Badge variant={getStatusVariant(data.statement.status)}>
-						{getStatusLabel(data.statement.status)}
-					</Badge>
+					<span data-testid="statement-status">
+						<Badge variant={getStatusVariant(data.statement.status)}>
+							{getStatusLabel(data.statement.status)}
+						</Badge>
+					</span>
 				</div>
 				<p class="text-gray-500">
 					Periode: {formatDate(data.statement.periodStart)} - {formatDate(data.statement.periodEnd)}
@@ -167,23 +148,35 @@
 				</Button>
 			{/if}
 			{#if data.statement.status === 'sent' || data.statement.status === 'overdue'}
-				<Button variant="secondary" onclick={() => (showSendReminderModal = true)}>
+				<Button
+					variant="secondary"
+					onclick={() => (showSendReminderModal = true)}
+					testid="statement-reminder-button"
+				>
 					<Icon name="mail" size={20} />
 					Mahnung senden
 				</Button>
-				<Button variant="primary" onclick={() => (showMarkPaidModal = true)}>
+				<Button
+					variant="primary"
+					onclick={() => (showMarkPaidModal = true)}
+					testid="statement-mark-paid-button"
+				>
 					<Icon name="paid" size={20} />
 					Als bezahlt markieren
 				</Button>
 			{/if}
 			{#if data.statement.status === 'draft'}
-				<Button variant="primary">
-					<Icon name="send" size={20} />
-					Versenden
-				</Button>
+				<form method="POST" action="?/send" use:enhance>
+					<Button type="submit" variant="primary" testid="statement-send-button">
+						<Icon name="send" size={20} />
+						Versenden
+					</Button>
+				</form>
 			{/if}
 		</div>
 	</div>
+	<FieldError message={form?.actionError} />
+	<ReminderFeedback reminder={form?.reminder} />
 
 	<div class="grid gap-6 lg:grid-cols-3">
 		<!-- Main Content -->
@@ -204,7 +197,7 @@
 						</thead>
 						<tbody class="divide-y divide-gray-100">
 							{#each data.statement.lineItems as item}
-								<tr>
+								<tr data-testid="statement-line-item">
 									<td class="py-3 text-gray-900">{item.categoryName}</td>
 									<td class="py-3 text-gray-500 text-sm">{item.distributionKeyName}</td>
 									<td class="py-3 text-right text-gray-500">{formatCurrency(item.totalAmount)}</td>
@@ -218,11 +211,12 @@
 						<tfoot class="border-t border-gray-200">
 							<tr>
 								<td colspan="4" class="pt-3 text-right font-medium text-gray-700">Zwischensumme</td>
-								<td class="pt-3 text-right font-medium text-gray-900">{formatCurrency(subtotal)}</td>
+								<td class="pt-3 text-right font-medium text-gray-900">{formatCurrency(subtotal)}</td
+								>
 							</tr>
 							<tr>
 								<td colspan="4" class="py-1 text-right text-sm text-gray-500">
-									Verwaltungsgebühr (3%)
+									Verwaltungsgebühr ({data.statement.managementFeePercent}%)
 								</td>
 								<td class="py-1 text-right text-gray-700">
 									{formatCurrency(data.statement.managementFee)}
@@ -253,18 +247,24 @@
 				</div>
 			</Card>
 
+			<ReminderHistory reminders={data.reminders} />
+
 			<!-- Payment Info -->
 			<Card>
 				<h2 class="text-lg font-semibold text-gray-900 mb-4">Zahlungsinformationen</h2>
 				<div class="grid gap-4 sm:grid-cols-2">
 					<div>
 						<p class="text-sm text-gray-500">Zahlungsfrist</p>
-						<p class="font-medium text-gray-900">{formatDate(data.statement.paymentDeadline)}</p>
+						<p class="font-medium text-gray-900" data-testid="statement-payment-deadline">
+							{formatDate(data.statement.paymentDeadline)}
+						</p>
 					</div>
 					{#if data.statement.paidDate}
 						<div>
 							<p class="text-sm text-gray-500">Bezahlt am</p>
-							<p class="font-medium text-green-600">{formatDate(data.statement.paidDate)}</p>
+							<p class="font-medium text-green-600" data-testid="statement-paid-date">
+								{formatDate(data.statement.paidDate)}
+							</p>
 						</div>
 					{/if}
 					{#if data.statement.lastReminderDate}
@@ -280,6 +280,14 @@
 						<p class="font-medium text-gray-900">{formatDate(data.statement.statementDate)}</p>
 					</div>
 				</div>
+				{#if data.statement.notes}
+					<div class="mt-4">
+						<p class="text-sm text-gray-500">Bemerkungen</p>
+						<p class="text-gray-900 whitespace-pre-line" data-testid="statement-notes">
+							{data.statement.notes}
+						</p>
+					</div>
+				{/if}
 			</Card>
 		</div>
 
@@ -304,7 +312,12 @@
 						{/if}
 					</div>
 				</div>
-				<Button href="/tenants/{data.statement.tenantId}" variant="secondary" class="w-full">
+				<Button
+					href="/tenants/{data.statement.tenantId}"
+					variant="secondary"
+					class="w-full"
+					testid="statement-tenant-link"
+				>
 					<Icon name="person" size={18} />
 					Mieter anzeigen
 				</Button>
@@ -335,6 +348,7 @@
 						href="/apartments/{data.statement.apartmentId}"
 						variant="secondary"
 						class="w-full"
+						testid="statement-apartment-link"
 					>
 						<Icon name="apartment" size={18} />
 						Wohnung anzeigen
@@ -346,7 +360,12 @@
 			<Card>
 				<h2 class="text-lg font-semibold text-gray-900 mb-4">Aktionen</h2>
 				<div class="space-y-2">
-					<Button href="/statements/{data.statement.id}/edit" variant="secondary" class="w-full">
+					<Button
+						href="/statements/{data.statement.id}/edit"
+						variant="secondary"
+						class="w-full"
+						testid="statement-edit-button"
+					>
 						<Icon name="edit" size={18} />
 						Bearbeiten
 					</Button>
@@ -354,6 +373,7 @@
 						variant="secondary"
 						class="w-full text-red-600 hover:bg-red-50"
 						onclick={() => (showDeleteModal = true)}
+						testid="statement-delete-button"
 					>
 						<Icon name="delete" size={18} />
 						Löschen
@@ -386,7 +406,11 @@
 </div>
 
 <!-- Mark as Paid Modal -->
-<Modal open={showMarkPaidModal} title="Als bezahlt markieren" onclose={() => (showMarkPaidModal = false)}>
+<Modal
+	open={showMarkPaidModal}
+	title="Als bezahlt markieren"
+	onclose={() => (showMarkPaidModal = false)}
+>
 	<p class="text-gray-600 mb-4">
 		Möchten Sie diese Abrechnung als bezahlt markieren? Das heutige Datum wird als Zahlungsdatum
 		eingetragen.
@@ -398,55 +422,29 @@
 			{formatCurrency(Math.abs(data.statement.balance))}
 		</p>
 	</div>
-	<div class="flex justify-end gap-3">
+	<form
+		method="POST"
+		action="?/markPaid"
+		use:enhance={() =>
+			async ({ update }) => {
+				await update();
+				showMarkPaidModal = false;
+			}}
+		class="flex justify-end gap-3"
+	>
 		<Button variant="secondary" onclick={() => (showMarkPaidModal = false)}>Abbrechen</Button>
-		<Button variant="primary" onclick={handleMarkPaid} disabled={isProcessing}>
-			{#if isProcessing}
-				<Icon name="progress_activity" size={20} class="animate-spin" />
-				Wird verarbeitet...
-			{:else}
-				<Icon name="check" size={20} />
-				Als bezahlt markieren
-			{/if}
+		<Button type="submit" variant="primary" testid="statement-mark-paid-confirm">
+			<Icon name="check" size={20} />
+			Als bezahlt markieren
 		</Button>
-	</div>
+	</form>
 </Modal>
 
-<!-- Send Reminder Modal -->
-<Modal open={showSendReminderModal} title="Mahnung senden" onclose={() => (showSendReminderModal = false)}>
-	<p class="text-gray-600 mb-4">
-		Möchten Sie eine Zahlungserinnerung an den Mieter senden?
-	</p>
-	<div class="p-3 bg-gray-50 rounded-lg mb-4">
-		<p class="font-medium text-gray-900">{data.statement.tenantName}</p>
-		{#if data.statement.tenantEmail}
-			<p class="text-sm text-gray-500">{data.statement.tenantEmail}</p>
-		{/if}
-		<p class="text-lg font-bold text-red-600 mt-2">
-			Offen: {formatCurrency(Math.abs(data.statement.balance))}
-		</p>
-	</div>
-	{#if data.statement.lastReminderDate}
-		<div class="p-3 bg-amber-50 border border-amber-200 rounded-lg mb-4 flex items-start gap-2">
-			<Icon name="warning" size={18} class="text-amber-500 flex-shrink-0 mt-0.5" />
-			<p class="text-sm text-amber-700">
-				Letzte Mahnung wurde am {formatDate(data.statement.lastReminderDate)} gesendet.
-			</p>
-		</div>
-	{/if}
-	<div class="flex justify-end gap-3">
-		<Button variant="secondary" onclick={() => (showSendReminderModal = false)}>Abbrechen</Button>
-		<Button variant="primary" onclick={handleSendReminder} disabled={isProcessing}>
-			{#if isProcessing}
-				<Icon name="progress_activity" size={20} class="animate-spin" />
-				Wird gesendet...
-			{:else}
-				<Icon name="send" size={20} />
-				Mahnung senden
-			{/if}
-		</Button>
-	</div>
-</Modal>
+<ReminderModal
+	bind:open={showSendReminderModal}
+	statement={data.statement}
+	sentReminders={data.reminders.length}
+/>
 
 <!-- Delete Modal -->
 <Modal open={showDeleteModal} title="Abrechnung löschen" onclose={() => (showDeleteModal = false)}>
@@ -460,21 +458,20 @@
 			{data.statement.tenantName} · {data.statement.buildingName}
 		</p>
 	</div>
-	<div class="flex justify-end gap-3">
+	<form
+		method="POST"
+		action="?/delete"
+		use:enhance={() =>
+			async ({ update }) => {
+				await update();
+				showDeleteModal = false;
+			}}
+		class="flex justify-end gap-3"
+	>
 		<Button variant="secondary" onclick={() => (showDeleteModal = false)}>Abbrechen</Button>
-		<Button
-			variant="primary"
-			onclick={handleDelete}
-			disabled={isProcessing}
-			class="bg-red-600 hover:bg-red-700"
-		>
-			{#if isProcessing}
-				<Icon name="progress_activity" size={20} class="animate-spin" />
-				Wird gelöscht...
-			{:else}
-				<Icon name="delete" size={20} />
-				Löschen
-			{/if}
+		<Button type="submit" variant="danger" testid="statement-delete-confirm">
+			<Icon name="delete" size={20} />
+			Löschen
 		</Button>
-	</div>
+	</form>
 </Modal>

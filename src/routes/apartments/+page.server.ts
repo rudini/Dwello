@@ -39,10 +39,7 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<ApartmentsLi
 				buildingName: (a.buildingName as string) || '',
 				buildingAddress: (a.buildingAddress as string) || '',
 				buildingCity: (a.buildingCity as string) || '',
-				currentTenantName: a.currentTenant
-					? `${(a.currentTenant as Record<string, string>).firstName} ${(a.currentTenant as Record<string, string>).lastName}`
-					: null,
-				currentRent: a.currentRent ? Number(a.currentRent) : null
+				nextContractStart: (a.nextContractStart as string) ?? null
 			};
 		});
 

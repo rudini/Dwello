@@ -1,0 +1,61 @@
+import { describe, it, expect } from 'vitest';
+import { actions, load } from '../routes/documents/+page.server';
+import { GET as pdf } from '../routes/documents/[id]/pdf/+server';
+import { runAction } from './helpers/action';
+
+const API = 'http://localhost:3001/api/v1/documents';
+
+function backend(answer: Response) {
+	const urls: string[] = [];
+	const fetch = async (url: string) => {
+		urls.push(url);
+		return answer;
+	};
+	return { urls, fetch: fetch as typeof globalThis.fetch };
+}
+
+describe('Dokumente', () => {
+	it('zeigt nur die zu versendenden Dokumente, wenn so gefiltert', async () => {
+		const { urls, fetch } = backend(Response.json({ data: [{ id: 'd1' }] }));
+
+		const data = await load({
+			fetch,
+			url: new URL('http://localhost/documents?status=to_send')
+		} as never);
+
+		expect(urls).toEqual([`${API}?status=to_send`]);
+		expect(data).toEqual({ documents: [{ id: 'd1' }], status: 'to_send' });
+	});
+
+	it('zeigt ohne Filter alle Dokumente', async () => {
+		const { urls, fetch } = backend(Response.json({ data: [] }));
+
+		await load({ fetch, url: new URL('http://localhost/documents') } as never);
+
+		expect(urls).toEqual([API]);
+	});
+
+	it('hält fest, dass ein Brief versendet wurde', async () => {
+		const { calls, result } = runAction(actions.markSent, '', 200, { id: 'd1' });
+		await result;
+
+		expect(calls).toEqual([{ method: 'PUT', url: `${API}/d1/sent`, body: undefined }]);
+	});
+
+	it('liefert das PDF eines Dokuments zum Herunterladen', async () => {
+		const file = new Response('%PDF-1.4', {
+			headers: {
+				'content-type': 'application/pdf',
+				'content-disposition': 'attachment; filename="Mahnung.pdf"'
+			}
+		});
+		const { urls, fetch } = backend(file);
+
+		const response = await pdf({ fetch, params: { id: 'd1' } } as never);
+
+		expect(urls).toEqual([`${API}/d1/pdf`]);
+		expect(response.headers.get('content-type')).toBe('application/pdf');
+		expect(response.headers.get('content-disposition')).toBe('attachment; filename="Mahnung.pdf"');
+		expect(await response.text()).toBe('%PDF-1.4');
+	});
+});

@@ -1,86 +1,54 @@
 <script lang="ts">
 	import ApartmentHeader from '$lib/components/ApartmentHeader.svelte';
 	import InfoCard from '$lib/components/InfoCard.svelte';
-	import TabNavigation from '$lib/components/TabNavigation.svelte';
 	import CurrentTenantCard from '$lib/components/CurrentTenantCard.svelte';
 	import MonthlyCostsCard from '$lib/components/MonthlyCostsCard.svelte';
 	import ContractHistoryTable from '$lib/components/ContractHistoryTable.svelte';
-	import type { ApartmentDetailsData } from '$lib/types';
+	import { floorLabel, statusText } from '$lib/apartment';
+	import { normalizeDecimal } from '$lib/utils/format';
+	import type { PageData } from './$types';
 
-	let { data }: { data: ApartmentDetailsData } = $props();
+	let { data }: { data: PageData } = $props();
 
-	let activeTab = $state('overview');
-
-	const tabs = [
-		{ id: 'overview', label: 'Übersicht', icon: 'grid_view' },
-		{ id: 'contracts', label: 'Mietverträge', icon: 'description' },
-		{ id: 'finances', label: 'Finanzen', icon: 'account_balance' },
-		{ id: 'documents', label: 'Dokumente', icon: 'folder' }
-	];
-
-	function handleTabChange(tabId: string) {
-		activeTab = tabId;
-	}
+	const apartment = $derived(data.apartment);
+	const cardClass = 'bg-white border border-slate-200 rounded-xl shadow-sm p-6';
 </script>
 
 <svelte:head>
-	<title>Wohnung {data.apartment.number} - Dwello</title>
+	<title>Wohnung {apartment.number} - Dwello</title>
 </svelte:head>
 
 <div class="space-y-6">
-	<!-- Header -->
-	<ApartmentHeader apartment={data.apartment} building={data.building} />
+	<ApartmentHeader {apartment} building={apartment.building} />
 
-	<!-- Info Cards Grid -->
 	<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-		<div class="bg-white border border-slate-200 rounded-xl shadow-sm p-6">
-			<InfoCard icon="check_circle" label="Status" value={data.apartment.status} />
+		<div class={cardClass} data-testid="apartment-info-status">
+			<InfoCard icon="check_circle" label="Status" value={statusText(apartment)} />
 		</div>
-		<div class="bg-white border border-slate-200 rounded-xl shadow-sm p-6">
-			<InfoCard icon="home" label="Zimmer" value={String(data.apartment.rooms)} />
+		<div class={cardClass} data-testid="apartment-info-rooms">
+			<InfoCard icon="home" label="Zimmer" value={normalizeDecimal(apartment.rooms)} />
 		</div>
-		<div class="bg-white border border-slate-200 rounded-xl shadow-sm p-6">
-			<InfoCard icon="apartment" label="Stockwerk" value={String(data.apartment.floor)} />
+		<div class={cardClass} data-testid="apartment-info-floor">
+			<InfoCard icon="apartment" label="Stockwerk" value={floorLabel(apartment.floor)} />
 		</div>
-		<div class="bg-white border border-slate-200 rounded-xl shadow-sm p-6">
-			<InfoCard icon="straighten" label="Fläche" value="{data.apartment.area} m²" />
+		<div class={cardClass} data-testid="apartment-info-area">
+			<InfoCard icon="straighten" label="Fläche" value="{normalizeDecimal(apartment.area)} m²" />
 		</div>
 	</div>
 
-	<!-- Tab Navigation -->
-	<TabNavigation {tabs} {activeTab} onTabChange={handleTabChange} />
-
-	<!-- Main Content - Two Column Layout -->
-	{#if activeTab === 'overview'}
-		<div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
-			<!-- Left Column (Aktueller Mieter + Monatliche Kosten) -->
-			<div class="lg:col-span-2 space-y-6">
-				{#if data.currentTenant && data.currentContract}
-					<CurrentTenantCard
-						tenant={data.currentTenant}
-						contract={data.currentContract}
-						status="AKTIV"
-					/>
-				{/if}
+	<div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+		<div class="lg:col-span-2 space-y-6">
+			{#if data.currentContract}
+				<CurrentTenantCard contract={data.currentContract} />
 				<MonthlyCostsCard costs={data.monthlyCosts} />
-			</div>
-
-			<!-- Right Column (Mietvertragshistorie) -->
-			<div class="lg:col-span-3">
-				<ContractHistoryTable contracts={data.contractHistory} />
-			</div>
+			{:else}
+				<div class={cardClass}>
+					<p class="text-slate-600" data-testid="apartment-vacant">Diese Wohnung ist derzeit nicht vermietet.</p>
+				</div>
+			{/if}
 		</div>
-	{:else if activeTab === 'contracts'}
-		<div class="bg-white border border-slate-200 rounded-xl shadow-sm p-6">
-			<p class="text-slate-600">Mietverträge Tab - Kommt bald</p>
+		<div class="lg:col-span-3">
+			<ContractHistoryTable contracts={data.contractHistory} />
 		</div>
-	{:else if activeTab === 'finances'}
-		<div class="bg-white border border-slate-200 rounded-xl shadow-sm p-6">
-			<p class="text-slate-600">Finanzen Tab - Kommt bald</p>
-		</div>
-	{:else if activeTab === 'documents'}
-		<div class="bg-white border border-slate-200 rounded-xl shadow-sm p-6">
-			<p class="text-slate-600">Dokumente Tab - Kommt bald</p>
-		</div>
-	{/if}
+	</div>
 </div>

@@ -4,6 +4,7 @@
 	import type { SubmitFunction } from '@sveltejs/kit';
 	import Button from '$lib/components/Button.svelte';
 	import Icon from '$lib/components/Icon.svelte';
+	import FieldError from '$lib/components/FieldError.svelte';
 	import AddressSearch from '$lib/components/AddressSearch.svelte';
 	import type { Address } from '$lib/services/openplz';
 
@@ -45,7 +46,7 @@
 			addressHeading: '',
 			addressLabel: 'Adresse',
 			addressPlaceholder: 'Strasse und Hausnummer',
-			cantonHint: '(optional)',
+			cantonHint: '',
 			detailsHeading: '',
 			fieldHint: '(optional)',
 			addressSectionClass: 'space-y-6',
@@ -136,12 +137,6 @@
 	}
 </script>
 
-{#snippet fieldError(field: string)}
-	{#if errors[field]}
-		<p class="mt-1 text-sm text-red-600" data-testid="form-error">{errors[field]}</p>
-	{/if}
-{/snippet}
-
 {#snippet heading(text: string, hint = '')}
 	{#if text}
 		<h3 class="text-sm font-medium text-gray-700">{text} <span class="text-gray-400">{hint}</span></h3>
@@ -155,10 +150,10 @@
 		</div>
 	{/if}
 
-	<!-- Name (optional) -->
+	<!-- Name -->
 	<div>
 		<label for="name" class="block text-sm font-medium text-gray-700 mb-1">
-			Gebäudename <span class="text-gray-400">(optional)</span>
+			Gebäudename <span class="text-red-500">*</span>
 		</label>
 		<input
 			id="name"
@@ -170,8 +165,9 @@
 			class="{inputClass} border-gray-300"
 		/>
 		<p class="mt-1 text-sm text-gray-500">
-			Ein optionaler Name zur besseren Identifikation des Gebäudes.
+			Ein Name zur besseren Identifikation des Gebäudes.
 		</p>
+		<FieldError message={errors.name} />
 	</div>
 
 	{#if isCreate}
@@ -213,7 +209,7 @@
 				placeholder={copy.addressPlaceholder}
 				class="{inputClass} {borderFor('address')}"
 			/>
-			{@render fieldError('address')}
+			<FieldError message={errors.address} />
 		</div>
 
 		<!-- Postal Code & City -->
@@ -232,7 +228,7 @@
 					maxlength="4"
 					class="{inputClass} {borderFor('postalCode')}"
 				/>
-				{@render fieldError('postalCode')}
+				<FieldError message={errors.postalCode} />
 			</div>
 			<div class="sm:col-span-2">
 				<label for="city" class="block text-sm font-medium text-gray-700 mb-1">
@@ -254,14 +250,14 @@
 						</span>
 					{/if}
 				</div>
-				{@render fieldError('city')}
+				<FieldError message={errors.city} />
 			</div>
 		</div>
 
 		<!-- Canton -->
 		<div>
 			<label for="canton" class="block text-sm font-medium text-gray-700 mb-1">
-				Kanton <span class="text-gray-400">{copy.cantonHint}</span>
+				Kanton <span class="text-red-500">*</span> <span class="text-gray-400">{copy.cantonHint}</span>
 			</label>
 			<select
 				id="canton"
@@ -275,6 +271,7 @@
 					<option value={c.value}>{c.label} ({c.value})</option>
 				{/each}
 			</select>
+			<FieldError message={errors.canton} />
 		</div>
 	</div>
 
@@ -309,14 +306,14 @@
 					max={new Date().getFullYear()}
 					class="{inputClass} {borderFor('yearBuilt')}"
 				/>
-				{@render fieldError('yearBuilt')}
+				<FieldError message={errors.yearBuilt} />
 			</div>
 		</div>
 	</div>
 
 	<!-- Actions -->
 	<div class="flex gap-3 pt-4 border-t border-gray-200">
-		<Button href={cancelHref} variant="secondary" testid="building-form-cancel">Abbrechen</Button>
+		<Button href={cancelHref} variant="secondary" testid="form-cancel">Abbrechen</Button>
 		<Button type="submit" variant="primary" disabled={isSubmitting} testid="building-form-submit">
 			{#if isSubmitting}
 				<span class="animate-spin">

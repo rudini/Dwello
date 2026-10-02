@@ -13,13 +13,12 @@
 import { getInvoicesForStatement } from './invoice.service';
 import { calculateBuildingDistribution } from './distribution-key.service';
 import { getTypedConfig } from './config.service';
-import { MAX_MANAGEMENT_FEE_PERCENT } from './utility-validation.service';
 import {
 	calculateApartmentProrating,
 	prorateCosts,
 	handleMidYearMoves
 } from './prorating.service';
-import { getApartment } from './apartment.service';
+import { getApartment, listApartments } from './apartment.service';
 import { getContract } from './contract.service';
 
 /**
@@ -91,9 +90,7 @@ function groupInvoicesByCategory(
 				distributionKeyName: invoice.distributionKey?.name || 'Gleichmässig',
 				totalAmount: 0,
 				invoices: [],
-				isHeatingCost: invoice.category?.name?.toLowerCase().includes('heiz') ||
-					invoice.category?.name?.toLowerCase().includes('wärme') ||
-					false
+				isHeatingCost: /heiz|wärme|heating/i.test(invoice.category?.name ?? '')
 			});
 		}
 
@@ -160,24 +157,10 @@ async function calculateApartmentShare(
 export function calculateManagementFee(
 	totalCosts: number,
 	feePercentage: number
-): { fee: number; actualPercentage: number; isValid: boolean; error?: string } {
-	// Validate against Swiss law maximum
-	if (feePercentage > MAX_MANAGEMENT_FEE_PERCENT) {
-		return {
-			fee: 0,
-			actualPercentage: feePercentage,
-			isValid: false,
-			error: `Management fee cannot exceed ${MAX_MANAGEMENT_FEE_PERCENT}%`
-		};
-	}
-
+): { fee: number; actualPercentage: number } {
 	const fee = Math.round((totalCosts * feePercentage) / 100 * 100) / 100;
 
-	return {
-		fee,
-		actualPercentage: feePercentage,
-		isValid: true
-	};
+	return { fee, actualPercentage: feePercentage };
 }
 
 /**
@@ -185,17 +168,23 @@ export function calculateManagementFee(
  */
 export function calculateTotalAdvancePayments(
 	monthlyAdvancePayment: number,
-	rentalDays: number,
-	_totalPeriodDays: number
+	rentalStart: Date,
+	rentalEnd: Date
 ): number {
-	// Calculate prorated advance payments
-	const fullMonths = Math.floor(rentalDays / 30);
-	const partialDays = rentalDays % 30;
+	// Advances are due per calendar month; a partial month counts by its share of days
+	let months = 0;
+	const cursor = new Date(Date.UTC(rentalStart.getUTCFullYear(), rentalStart.getUTCMonth(), 1));
+	while (cursor <= rentalEnd) {
+		const year = cursor.getUTCFullYear();
+		const month = cursor.getUTCMonth();
+		const daysInMonth = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
+		const firstDay = rentalStart > cursor ? rentalStart.getUTCDate() : 1;
+		const lastDay = rentalEnd < new Date(Date.UTC(year, month, daysInMonth)) ? rentalEnd.getUTCDate() : daysInMonth;
+		months += (lastDay - firstDay + 1) / daysInMonth;
+		cursor.setUTCMonth(month + 1);
+	}
 
-	const fullMonthsPayment = fullMonths * monthlyAdvancePayment;
-	const partialPayment = (partialDays / 30) * monthlyAdvancePayment;
-
-	return Math.round((fullMonthsPayment + partialPayment) * 100) / 100;
+	return Math.round(months * monthlyAdvancePayment * 100) / 100;
 }
 
 /**
@@ -212,7 +201,8 @@ export async function calculateStatementForContract(
 	contractId: string,
 	periodStart: Date,
 	periodEnd: Date,
-	heatingProfileId?: string
+	heatingProfileId?: string,
+	managementFeePercent?: number
 ): Promise<StatementCalculation> {
 	// Get contract details
 	const contract = await getContract(contractId);
@@ -254,15 +244,13 @@ export async function calculateStatementForContract(
 	// Group invoices by category
 	const invoiceGroups = groupInvoicesByCategory(invoices);
 
-	// Get building apartments for distribution calculation
-	// This is a simplified version - in production, you'd get this from the building
-	const buildingApartments = [
-		{
-			id: apartment.id,
-			area: parseFloat(apartment.area),
-			rooms: parseFloat(apartment.rooms)
-		}
-	];
+	// All apartments of the building share its costs according to the distribution key
+	const { apartments: buildingApartmentRows } = await listApartments({ buildingId, limit: 1000 });
+	const buildingApartments = buildingApartmentRows.map((a) => ({
+		id: a.id,
+		area: parseFloat(a.area),
+		rooms: parseFloat(a.rooms)
+	}));
 
 	// Calculate line items
 	const lineItems: CalculatedLineItem[] = [];
@@ -321,13 +309,9 @@ export async function calculateStatementForContract(
 
 	subtotal = Math.round(subtotal * 100) / 100;
 
-	// Calculate management fee
-	const configFeePercent = await getTypedConfig('management_fee_pct');
-	const managementFeeResult = calculateManagementFee(subtotal, configFeePercent);
-
-	if (!managementFeeResult.isValid) {
-		console.warn(`Management fee validation warning: ${managementFeeResult.error}`);
-	}
+	// Management fee: chosen per generation run, otherwise the configured default
+	const feePercent = managementFeePercent ?? (await getTypedConfig('management_fee_pct'));
+	const managementFeeResult = calculateManagementFee(subtotal, feePercent);
 
 	const managementFee = managementFeeResult.fee;
 	const totalCosts = Math.round((subtotal + managementFee) * 100) / 100;
@@ -336,8 +320,8 @@ export async function calculateStatementForContract(
 	const monthlyAdvance = parseFloat(contract.monthlyAdvancePayment);
 	const totalAdvancePayments = calculateTotalAdvancePayments(
 		monthlyAdvance,
-		rentalDays,
-		totalPeriodDays
+		contractOverlap.overlapStart,
+		contractOverlap.overlapEnd
 	);
 
 	// Calculate balance

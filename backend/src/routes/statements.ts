@@ -4,6 +4,7 @@
  */
 
 import { Elysia, t } from 'elysia';
+import { deleteResponse } from './delete-response';
 import { eq } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { utilityStatements } from '../db/schema';
@@ -22,6 +23,24 @@ import { calculateStatementForContract, generateStatementNumber } from '../servi
 import { getTypedConfig } from '../services/config.service';
 import { generateStatementPDFBase64, type StatementPDFData, type Language } from '../services/pdf.service';
 import { generateQRReference, type QRBillConfig } from '../services/qr-bill.service';
+
+// Calculation parameters shared by preview and generate; the management fee overrides the configured default
+const calculationBody = t.Object({
+	contractId: t.String(),
+	periodStart: t.String(),
+	periodEnd: t.String(),
+	heatingProfileId: t.Optional(t.String()),
+	managementFeePercent: t.Optional(t.Number({ minimum: 0 }))
+});
+
+const calculate = (body: typeof calculationBody.static) =>
+	calculateStatementForContract(
+		body.contractId,
+		new Date(body.periodStart),
+		new Date(body.periodEnd),
+		body.heatingProfileId,
+		body.managementFeePercent
+	);
 
 export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 	// List all statements
@@ -90,12 +109,7 @@ export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 		'/preview',
 		async ({ body, set }) => {
 			try {
-				const calculation = await calculateStatementForContract(
-					body.contractId,
-					new Date(body.periodStart),
-					new Date(body.periodEnd),
-					body.heatingProfileId
-				);
+				const calculation = await calculate(body);
 
 				return {
 					preview: true,
@@ -107,12 +121,7 @@ export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 			}
 		},
 		{
-			body: t.Object({
-				contractId: t.String(),
-				periodStart: t.String(),
-				periodEnd: t.String(),
-				heatingProfileId: t.Optional(t.String())
-			})
+			body: calculationBody
 		}
 	)
 
@@ -122,12 +131,7 @@ export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 		async ({ body, set }) => {
 			try {
 				// Calculate the statement
-				const calculation = await calculateStatementForContract(
-					body.contractId,
-					new Date(body.periodStart),
-					new Date(body.periodEnd),
-					body.heatingProfileId
-				);
+				const calculation = await calculate(body);
 
 				// Generate statement number
 				const statementNumber = await generateStatementNumber(
@@ -178,13 +182,7 @@ export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 			}
 		},
 		{
-			body: t.Object({
-				contractId: t.String(),
-				buildingId: t.String(),
-				periodStart: t.String(),
-				periodEnd: t.String(),
-				heatingProfileId: t.Optional(t.String())
-			})
+			body: t.Composite([calculationBody, t.Object({ buildingId: t.String() })])
 		}
 	)
 
@@ -282,17 +280,7 @@ export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 	// Delete a statement
 	.delete(
 		'/:id',
-		async ({ params, set }) => {
-			const result = await deleteStatement(params.id);
-
-			if (!result.success) {
-				set.status = result.error?.includes('not found') ? 404 : 400;
-				return { error: result.error };
-			}
-
-			set.status = 204;
-			return null;
-		},
+		async ({ params, set }) => deleteResponse(set, await deleteStatement(params.id)),
 		{
 			params: t.Object({
 				id: t.String()

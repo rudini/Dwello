@@ -1,52 +1,44 @@
+# language: de
 @authentication
-Feature: User Authentication
-  As a property manager
-  I want to securely log in to Dwello
-  So that I can manage my buildings and utility statements
+Funktionalität: Anmeldung
+  Als Liegenschaftsverwalter
+  möchte ich mich mit meinem Google- oder Microsoft-Konto anmelden
+  damit nur ich die Daten meiner Liegenschaften sehe
 
-  Background:
-    Given I am not logged in
+  Szenario: Anmeldeseite bietet die eingerichteten Anbieter an
+    Wenn ein Besucher die Anmeldeseite öffnet
+    Dann kann sich der Besucher mit "Google" anmelden
+    Aber nicht mit "Microsoft"
 
-  @login-page
-  Scenario: Login page displays correctly
-    When I open the login page
-    Then I should see the Dwello branding
-    And I should see the text "Sign in to your account"
-    And I should see a "Sign in with Google" button
-    And I should see a "Sign in with Microsoft" button
+  Szenario: Ohne Anmeldung keine Daten
+    Wenn ein Besucher die überfälligen Abrechnungen aufruft
+    Dann ist der Besucher auf der Seite "Anmelden"
 
-  @login-page
-  Scenario: Login page shows security information
-    When I open the login page
-    Then I should see the text "Secure OAuth 2.0 authentication"
-    And I should see the text "Your data is stored securely in Switzerland"
+  Szenario: Anmeldung mit Google beginnen
+    Angenommen ein Besucher hat die überfälligen Abrechnungen aufgerufen
+    Wenn der Besucher sich mit "Google" anmeldet
+    Dann leitet Dwello den Besucher zur Anmeldung bei Google weiter
 
-  @oauth
-  Scenario: Google OAuth initiates redirect
-    When I call the login API with provider "google"
-    Then I should receive a redirect to Google
+  Szenario: Anmeldung bei Google abgebrochen
+    Wenn Google den Besucher nach einer abgebrochenen Anmeldung zurückschickt
+    Dann ist der Besucher auf der Seite "Anmelden"
+    Und sieht der Besucher den Hinweis "Die Anmeldung wurde abgebrochen."
 
-  @oauth
-  Scenario: Invalid OAuth provider is rejected
-    When I call the login API with provider "facebook"
-    Then I should receive a validation error
+  Szenario: Abgelaufene Sitzung
+    Angenommen die Sitzung des Liegenschaftsverwalters ist abgelaufen
+    Wenn der Liegenschaftsverwalter das Dashboard öffnet
+    Dann ist der Liegenschaftsverwalter auf der Seite "Anmelden"
 
-  @oauth
-  Scenario: Missing OAuth provider returns error
-    When I call the login API without a provider
-    Then I should receive a validation error
+  Szenario: Angemeldet mit eigenem Namen
+    Wenn der Liegenschaftsverwalter das Dashboard öffnet
+    Dann sieht der Liegenschaftsverwalter seinen Namen "Vera Verwalter" in der Kopfzeile
 
-  @protected-routes
-  Scenario: Protected dashboard requires authentication
-    When I try to access the dashboard
-    Then I should be redirected to the login page
+  Szenario: Angemeldete brauchen die Anmeldeseite nicht
+    Wenn der Liegenschaftsverwalter die Anmeldeseite öffnet
+    Dann ist der Liegenschaftsverwalter auf der Seite "Dashboard"
 
-  @protected-routes
-  Scenario: Protected buildings page requires authentication
-    When I try to access the buildings page
-    Then I should be redirected to the login page
-
-  @logout
-  Scenario: Logout API clears session
-    When I call the logout API
-    Then I should receive a successful response
+  Szenario: Abmelden
+    Angenommen der Liegenschaftsverwalter öffnet das Dashboard
+    Wenn der Liegenschaftsverwalter sich abmeldet
+    Dann ist der Liegenschaftsverwalter auf der Seite "Anmelden"
+    Und führt das Dashboard den Liegenschaftsverwalter wieder zur Anmeldung

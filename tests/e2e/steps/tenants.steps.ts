@@ -1,67 +1,84 @@
 import { expect } from '@playwright/test';
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
+import { visit } from '../interactions/navigation';
+import { activeBadge, allListedTenants, listedTenant } from '../questions/tenants';
+import {
+	createTenantByEmail,
+	openTenant,
+	searchTenant,
+	startNewTenant,
+	submitEmptyTenant
+} from '../tasks/tenants';
 
-const { When, Then } = createBdd(test);
+const { Given, When, Then } = createBdd(test);
 
-// ============================================
-// When steps
-// ============================================
-
-When('I open the tenants page', async ({ page }) => {
-	await page.goto('/tenants');
-	await page.waitForLoadState('domcontentloaded');
+Given('der Liegenschaftsverwalter ist auf der Mieterliste', async ({ verwalter }) => {
+	await visit(verwalter.page, '/tenants');
 });
 
-// ============================================
-// Then steps
-// ============================================
-
-Then('I should see the tenants page', async ({ page }) => {
-	await expect(page.getByTestId('tenants-page')).toBeVisible({ timeout: 5000 });
+Given('der Liegenschaftsverwalter ist auf der Seite "Neuer Mieter"', async ({ verwalter }) => {
+	await visit(verwalter.page, '/tenants/new');
 });
 
-Then('I should see the tenants search input', async ({ page }) => {
-	await expect(page.locator('input#search')).toBeVisible({ timeout: 5000 });
+Given('der Liegenschaftsverwalter sucht den Mieter {string}', async ({ verwalter, names }, tenant: string) => {
+	await verwalter.perform(searchTenant(names.get(tenant) ?? tenant));
 });
 
-Then('I should see the tenant status filter', async ({ page }) => {
-	await expect(page.locator('select#status')).toBeVisible({ timeout: 5000 });
+When('der Liegenschaftsverwalter den Mieter {string} sucht', async ({ verwalter, names }, tenant: string) => {
+	await verwalter.perform(searchTenant(names.get(tenant) ?? tenant));
 });
 
-Then('I should be on the new tenant page', async ({ page }) => {
-	expect(page.url()).toContain('/tenants/new');
+When('der Liegenschaftsverwalter einen neuen Mieter erfassen will', async ({ verwalter }) => {
+	await verwalter.perform(startNewTenant);
 });
 
-// ============================================
-// Data loading verification steps
-// ============================================
-
-Then('I should see tenants in the list', async ({ page }) => {
-	// Wait for tenant cards/rows to be visible
-	const tenantLinks = page.locator('a[href^="/tenants/"]');
-	await expect(tenantLinks.first()).toBeVisible({ timeout: 5000 });
-	const count = await tenantLinks.count();
-	expect(count).toBeGreaterThan(0);
+When('der Liegenschaftsverwalter den Mieter {string} öffnet', async ({ verwalter, names }, tenant: string) => {
+	await verwalter.perform(openTenant(names.get(tenant) ?? tenant));
 });
 
-Then('I should see tenant names', async ({ page }) => {
-	// Check for known tenant names from test data
-	const tenantNames = ['Hans Müller', 'Anna Schmidt', 'Pierre Dubois', 'Marco Bernasconi', 'Laura Keller'];
-	let foundCount = 0;
-	for (const name of tenantNames) {
-		const count = await page.getByText(name).count();
-		if (count > 0) foundCount++;
+When(
+	'der Liegenschaftsverwalter den Mieter {string} mit Korrespondenz per E-Mail erfasst',
+	async ({ verwalter, seed }, tenant: string) => {
+		await verwalter.perform(createTenantByEmail(seed.unique(tenant)));
 	}
-	expect(foundCount).toBeGreaterThan(0);
+);
+
+When('der Liegenschaftsverwalter den Mieter ohne Namen erfassen will', async ({ verwalter }) => {
+	await verwalter.perform(submitEmptyTenant);
 });
 
-Then('I should see tenant email addresses', async ({ page }) => {
-	// Check for email pattern
-	await expect(page.getByText(/@example\.ch/).first()).toBeVisible({ timeout: 5000 });
+Then('sieht der Liegenschaftsverwalter den Mieter {string}', async ({ verwalter, names }, tenant: string) => {
+	await expect(listedTenant(verwalter, names.get(tenant) ?? tenant)).toBeVisible();
 });
 
-Then('I should see tenant apartment information', async ({ page }) => {
-	// Check for "Wohnung" followed by apartment number
-	await expect(page.getByText(/Wohnung \d/).first()).toBeVisible({ timeout: 5000 });
+Then('die Mieterliste enthält genau {int} Mieter', async ({ verwalter }, count: number) => {
+	await expect(allListedTenants(verwalter)).toHaveCount(count);
 });
+
+Then(
+	'wohnt {string} laut Mieterliste in der Wohnung {string}',
+	async ({ verwalter, names }, tenant: string, apartment: string) => {
+		await expect(listedTenant(verwalter, names.get(tenant) ?? tenant)).toContainText(`${apartment} - `);
+	}
+);
+
+Then('ist der Liegenschaftsverwalter auf der Mieterliste', async ({ verwalter }) => {
+	await expect(verwalter.page).toHaveTitle('Mieter - Dwello');
+});
+
+When(
+	'der Liegenschaftsverwalter die {word} Mieter mit dem Namen {string} sucht',
+	async ({ verwalter, names }, kind: string, tenant: string) => {
+		const status = { aktiven: 'active', ehemaligen: 'inactive' }[kind]!;
+		await verwalter.perform(searchTenant(names.get(tenant) ?? tenant, status));
+	}
+);
+
+Then(
+	'sieht der Liegenschaftsverwalter den Mieter {string} als {word} Mieter',
+	async ({ verwalter, names }, tenant: string, kind: string) => {
+		await expect(listedTenant(verwalter, names.get(tenant)!)).toBeVisible();
+		await expect(activeBadge(verwalter, names.get(tenant)!)).toHaveCount(kind === 'aktiven' ? 1 : 0);
+	}
+);
