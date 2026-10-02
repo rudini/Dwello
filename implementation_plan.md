@@ -698,6 +698,10 @@ This is a comprehensive implementation plan for the entire Dwello property manag
   - [x] Check if already authenticated on mount
 
   **Note:** Implemented in src/routes/login/+page.svelte (180 lines). Professional design with SVG icons.
+  **Rebuilt (Session 3):** Offers only configured providers (`+page.server.ts`), plain links to `/auth/login` with
+  `redirectTo`, German messages for cancelled/failed sign-ins (`?error=`). Signed-in users are redirected on the
+  server instead of an `/auth/me` call on mount. Renders on the server again (was a 500 on direct load; translations
+  awaited in `src/routes/+layout.ts`). E2E: `tests/e2e/features/authentication.feature`.
 
 ### 3.3 Protected Layout with Auth Check
 
@@ -710,6 +714,11 @@ This is a comprehensive implementation plan for the entire Dwello property manag
   - [x] Public paths bypass auth check (login, auth, error)
 
   **Note:** Implemented conditional layout rendering based on auth state.
+  **Rebuilt (Session 3):** Protection moved to the server: `src/hooks.server.ts` (`handle`) verifies the session JWT on
+  every request; pages without a valid session redirect to `/login?redirectTo=…`, `/api/*` answers 401, expired
+  sessions count as signed out. `E2E_TEST_MODE` bypass removed. OAuth callback exchanges the code only with the
+  provider the login started with (`src/lib/server/login-flow.ts`). Tests: `src/__tests__/auth-guard.test.ts`,
+  `tests/unit/auth-routes.test.ts`.
 
 - [x] Create `src/lib/stores.ts`
   - [x] `user` store (writable)
@@ -895,6 +904,9 @@ This is a comprehensive implementation plan for the entire Dwello property manag
 - [x] Create migration scripts in `package.json`
   - [x] `npm run db:generate` - Generate migrations from schema
   - [x] `npm run db:migrate` - Run migrations
+    **Note (Session 3):** `bun run db:migrate` now runs `backend/scripts/migrate.ts` (`src/db/migrate.ts`): applies the
+    SQL files a database does not have yet, recorded in `schema_migrations`; databases migrated by hand are recognised
+    once. `bun run dev`, the Docker image and the E2E database use it. Test: `migrations.pg.test.ts`.
   - [x] `npm run db:push` - Push schema directly
   - [x] `npm run db:studio` - Open Drizzle Studio GUI
 
@@ -2208,6 +2220,13 @@ Validation is defined inline in route handlers for type safety.
   **Note:** Implemented create form with multi-language translation support, Swiss law info panel, validation.
   Files: `src/routes/config/categories/new/+page.svelte`
 
+- [x] Rebuild against the real API (Session 3; create and delete were simulated with setTimeout)
+  - [x] Create, edit (`[id]/edit`) and delete via form actions; German name shown and edited, English key kept
+  - [x] Backend: German messages, 409 for duplicate names and categories with invoices, search by German name
+  - [x] Fix invoice count always 0 (unqualified column in drizzle subquery)
+  **Note:** Files: `src/lib/server/category.ts`, `src/routes/config/categories/**`, `backend/src/services/category.service.ts`.
+  Tests: `src/__tests__/categories.test.ts`, `category-admin.pg.test.ts`, E2E `categories.feature` (7 scenarios).
+
 ### 11.4 LLM Categorization UI
 
 - [x] Create `src/lib/components/InvoiceCategorization.svelte`
@@ -2278,6 +2297,8 @@ Validation is defined inline in route handlers for type safety.
   - [x] Add "Save" button
   **Note:** Implemented with quick links to sub-pages, company info, accounting settings, Swiss law info.
   Files: `src/routes/config/+page.svelte`, `src/routes/config/+page.server.ts`
+  **Rebuilt (Session 3):** Settings are saved for real (`src/lib/server/settings.ts`) with validation of PLZ, Swiss IBAN
+  and fee; the statement wizard and new invoices use the defaults. E2E: `settings.feature`.
 
 ### 12.2 Heating Profile Pages
 
@@ -2297,10 +2318,13 @@ Validation is defined inline in route handlers for type safety.
   **Note:** Implemented with preset templates, visual chart preview, real-time total calculation.
   Files: `src/routes/config/heating-profiles/new/+page.svelte`
 
-- [ ] Create `src/routes/config/heating-profiles/[id]/+page.svelte` (detail/edit)
-  - [ ] Display profile details
-  - [ ] Allow editing (if custom)
-  - [ ] Show usage in configuration
+- [x] Create `src/routes/config/heating-profiles/[id]/+page.svelte` (detail/edit)
+  - [x] Display profile details
+  - [x] Allow editing (if custom) — `[id]/edit`, predefined profiles answer 403
+  - [x] Show usage in configuration — the default profile of the settings cannot be deleted (409 with reason)
+  **Note (Session 3):** Create, edit and delete via form actions against the real API, German validation messages.
+  Files: `src/lib/server/heating-profile.ts`, `src/routes/config/heating-profiles/**`, `HeatingProfileForm.svelte`.
+  Tests: `src/__tests__/heating-profiles.test.ts`, `heating-profile-admin.pg.test.ts`, E2E `heating-profiles.feature`.
 
 ### 12.3 Distribution Key Management Pages
 
@@ -2319,11 +2343,19 @@ Validation is defined inline in route handlers for type safety.
   - [x] Add "Create" and "Cancel" buttons
   **Note:** Implemented with formula builder, variable buttons, live test results with sample apartments.
   Files: `src/routes/config/distribution-keys/new/+page.svelte`
+  **Rebuilt (Session 3):** Saves via the real API (was simulated); the formula test runs in the backend
+  (`?/test` action) instead of `eval` in the browser; only the variables the backend knows are offered
+  (`{persons}` was offered but always rejected); formula messages in German.
 
-- [ ] Create `src/routes/config/distribution-keys/[id]/+page.svelte` (detail/edit)
-  - [ ] Display key details
-  - [ ] Allow editing formula (if custom)
-  - [ ] Show formula test results
+- [x] Create `src/routes/config/distribution-keys/[id]/edit/+page.svelte` (edit; no separate detail page)
+  - [x] Display key details — in the list (formula, kind, invoices distributed by it)
+  - [x] Allow editing formula (if custom) — predefined keys answer 403
+  - [x] Show formula test results
+  **Note (Session 3):** Delete from the list; keys with invoices or set as default in the settings stay (409 with reason).
+  Files: `src/lib/server/distribution-key.ts`, `src/routes/config/distribution-keys/**`.
+  Tests: `src/__tests__/distribution-keys.test.ts`, `distribution-key-admin.pg.test.ts`, E2E `distribution-keys.feature`.
+  **Open:** predefined keys "Per Person" (`{persons}`) and "By Consumption" (`{consumption}`) use variables the formula
+  engine does not know.
 
 ### 12.4 Configuration Components
 
@@ -2345,37 +2377,40 @@ Validation is defined inline in route handlers for type safety.
 
 ### 12.5 Testing Configuration Pages
 
-- [ ] Unit tests for config API calls (6 tests)
-  - [ ] Config fetch (1)
-  - [ ] Config update (1)
-  - [ ] Heating profile list (1)
-  - [ ] Heating profile create (1)
-  - [ ] Distribution key list (1)
-  - [ ] Distribution key create (1)
+- [x] Unit tests for config API calls (6 tests)
+  - [x] Config fetch (1)
+  - [x] Config update (1)
+  - [x] Heating profile list (1)
+  - [x] Heating profile create (1)
+  - [x] Distribution key list (1)
+  - [x] Distribution key create (1)
+  **Note (Session 3):** `src/__tests__/settings.test.ts`, `heating-profiles.test.ts`, `categories.test.ts`, `distribution-keys.test.ts`.
 
 - [ ] E2E tests for configuration flows (8+ tests)
-  - [ ] Update accounting period (1)
-  - [ ] Update management fee percentage (1)
-  - [ ] Create custom heating profile (1)
-  - [ ] Validate percentage sum (1)
-  - [ ] Create custom distribution key (1)
-  - [ ] Test formula (1)
-  - [ ] Edit custom profile (1)
-  - [ ] Edit custom key (1)
+  - [ ] Update accounting period (1) — unit tests only
+  - [ ] Update management fee percentage (1) — unit tests only
+  - [x] Create custom heating profile (1)
+  - [x] Validate percentage sum (1)
+  - [x] Create custom distribution key (1)
+  - [x] Test formula (1)
+  - [x] Edit custom profile (1)
+  - [x] Edit custom key (1)
+  **Note (Session 3):** German features `settings.feature`, `heating-profiles.feature`, `categories.feature`,
+  `distribution-keys.feature`.
 
 ### 12.X Verification: Unit Tests & E2E Tests
 
 - [ ] Component Tests for Config Pages
-  - [ ] Test form validation
-  - [ ] Test formula editor
-  - [ ] Target >75% code coverage
-  - [ ] All tests pass: `npm run test`
+  - [x] Test form validation
+  - [x] Test formula editor
+  - [ ] Target >75% code coverage — not measured
+  - [x] All tests pass: `npm run test`
 
-- [ ] E2E Tests for Configuration Workflows
-  - [ ] Test config updates
-  - [ ] Test heating profile management
-  - [ ] Test distribution key management
-  - [ ] All tests pass: `npm run test:e2e`
+- [x] E2E Tests for Configuration Workflows
+  - [x] Test config updates
+  - [x] Test heating profile management
+  - [x] Test distribution key management
+  - [x] All tests pass: `npm run test:e2e`
 
 - [ ] Manual Testing
   - [ ] Run all tests: `npm run test`
@@ -2530,6 +2565,9 @@ Validation is defined inline in route handlers for type safety.
   - [x] Recent activity: latest invoices, recent statements
   - [x] Quick actions: generate statements, create invoice
   **Note:** Implemented comprehensive dashboard with portfolio stats, financial overview, statement status cards, activity feed, occupancy chart, and quick actions grid. Files: `src/routes/dashboard/+page.svelte` (~250 lines), `src/routes/dashboard/+page.server.ts` (~110 lines).
+  **Rebuilt (Session 3):** Fixed figures: open statements include overdue ones, pending amount excludes refunds,
+  payments appear when recorded, occupancy rounded and without NaN, "Vermietet" opens rented apartments; load errors
+  show an error page instead of zeros. Apartment status (incl. "Wiedervermietet") is computed from rental contracts.
 
 ### 14.2 Dashboard Statistics Components
 
@@ -2566,17 +2604,18 @@ Validation is defined inline in route handlers for type safety.
 
 ### 14.5 Testing Dashboard
 
-- [ ] Unit tests for dashboard API calls (3 tests)
-  - [ ] Dashboard data fetch (1)
-  - [ ] Statistics calculation (1)
-  - [ ] Recent activity fetch (1)
+- [x] Unit tests for dashboard API calls (3 tests)
+  - [x] Dashboard data fetch (1) — `src/__tests__/dashboard.test.ts`
+  - [x] Statistics calculation (1) — `dashboard.pg.test.ts` (before/after against the real database)
+  - [x] Recent activity fetch (1) — `dashboard-activity.test.ts`, `dashboard.pg.test.ts`
 
 - [ ] E2E tests for dashboard (5+ tests)
-  - [ ] Dashboard loads with data (1)
-  - [ ] Statistics display correctly (1)
-  - [ ] Activity feed shows recent items (1)
-  - [ ] Occupancy chart displays (1)
-  - [ ] Quick action buttons work (1)
+  - [x] Dashboard loads with data (1)
+  - [ ] Statistics display correctly (1) — global counts change with parallel scenarios; covered by `dashboard.pg.test.ts`
+  - [ ] Activity feed shows recent items (1) — same reason; covered by the pg test
+  - [x] Occupancy chart displays (1)
+  - [x] Quick action buttons work (1)
+  **Note (Session 3):** German feature `dashboard.feature` (5 scenarios, incl. navigation to filtered lists).
 
 ### 14.X Verification: Unit Tests & E2E Tests
 
@@ -2587,10 +2626,10 @@ Validation is defined inline in route handlers for type safety.
   - [ ] All tests pass: `npm run test`
 
 - [ ] E2E Tests for Dashboard
-  - [ ] Test dashboard loads
-  - [ ] Test all widgets display
-  - [ ] Test navigation from dashboard
-  - [ ] All tests pass: `npm run test:e2e`
+  - [x] Test dashboard loads
+  - [ ] Test all widgets display — see 14.5
+  - [x] Test navigation from dashboard
+  - [x] All tests pass: `npm run test:e2e`
 
 - [ ] Manual Testing
   - [ ] Run all tests: `npm run test`
@@ -2676,9 +2715,9 @@ Validation is defined inline in route handlers for type safety.
   - [ ] XSRF protection on all POST/PUT/DELETE (1 test)
   - [ ] XSS protection in form inputs (1 test)
   - [ ] SQL injection prevention (1 test)
-  - [ ] Unauthorized access denied (1 test)
+  - [x] Unauthorized access denied (1 test) — `auth-guard.test.ts`, `auth.pg.test.ts`, E2E `authentication.feature`
   - [ ] Session hijacking prevention (1 test)
-  - [ ] JWT expiration enforced (1 test)
+  - [x] JWT expiration enforced (1 test) — `auth-guard.test.ts`, E2E "Abgelaufene Sitzung"
 
 ### 15.6 Multi-Language Testing
 
@@ -3256,14 +3295,18 @@ Validation is defined inline in route handlers for type safety.
 
 ### 20.3 Dependency Audit
 
-- [ ] Run security audit
-  - [ ] `npm audit`
-  - [ ] Fix critical vulnerabilities (1)
-  - [ ] Update dependencies if needed (1)
+- [x] Run security audit
+  - [x] `npm audit`
+  - [x] Fix critical vulnerabilities (1)
+  - [x] Update dependencies if needed (1)
 
-- [ ] Check for outdated dependencies
-  - [ ] `npm outdated`
-  - [ ] Update minor versions (1)
+- [x] Check for outdated dependencies
+  - [x] `npm outdated`
+  - [x] Update minor versions (1)
+  **Note (Session 3, commit bb7721b):** npm audit 32 → 3 low (cookie inside SvelteKit 2, fixed by SvelteKit 3);
+  bun audit 9 → 0 (drizzle-orm 0.45 fixes SQL injection). vitest 5, playwright-bdd 9, overrides for transitive
+  esbuild/file-type/nanoid. Open majors without security reason: SvelteKit 3/Vite 8, Tailwind 4, Zod 4, TypeScript 7,
+  ESLint 10, jose 6.
 
 ### 20.4 Final Code Review
 
@@ -3441,6 +3484,9 @@ Validation is defined inline in route handlers for type safety.
 ## Overall Completion
 
 **Current Status:** ~11% (Phase 10 Complete - Frontend Core Pages, Shared Components, OpenPLZ & Tests Done)
+
+> **Note (Session 3):** The phase status is kept current in the "Implementation Phases" table at the top. The task
+> counts below were not recounted and are outdated (e.g. phases 1–7 are complete, not 0%).
 
 | Phase | Status | Completion | Tasks | Done |
 |-------|--------|-----------|-------|------|
@@ -3672,6 +3718,54 @@ After completing each task, add a note here:
 - Tests use nested objects for canton/commune/district (not flat strings)
 - searchAddress catches errors and returns empty array (doesn't throw)
 - formatAddressWithCanton doesn't include street (by design)
+
+---
+
+## Session 3 - September/October 2026: BDD Rebuild, Fixes & Hardening
+
+Branch `claude/ecstatic-hawking-2urqri`. Every area was rebuilt test-first with German Gherkin features
+(playwright-bdd, Screenplay pattern, `data-testid` selectors, test data through the real API, no mocks).
+Every bug fix has a unit or database test.
+
+### Areas rebuilt ✅
+
+| Area | Commits | E2E features |
+|------|---------|--------------|
+| Buildings (list, new, detail with real delete, edit; name and canton required) | b16cbb3, 41574d6, 61e2dd7 | `buildings`, `building-new`, `building-detail`, `building-edit` |
+| Contracts (list, new, detail, edit; end and delete for real, active contract warning) | 70adcd1 … d5fc272 | `contracts`, `contract-new`, `contract-detail`, `contract-edit` |
+| Statements (list filtered on the server, generation via backend, send/pay/delete, edit, fee per run, reminders by e-mail or letter) | fd326c3 … 8cf4cdb | `statements`, `statement-generate`, `statement-detail`, `statement-edit`, `statement-reminder`, `documents` |
+| Apartments (new, detail, edit; status computed from contracts incl. "Wiedervermietet") | 12a697d, 38f2225, 8a603cd | `apartments`, `apartment-new`, `apartment-detail`, `apartment-edit` |
+| Tenants (detail with rental and history, delete, active/former filter) | e02f678 | `tenants`, `tenant-new`, `tenant-detail`, `tenant-edit` |
+| Settings (save for real, defaults used by wizard and invoices) | cc68626 | `settings` |
+| Heating profiles, cost categories, distribution keys (create/edit/delete via real API) | 2c04a8d, 18255fe, ddeb381 | `heating-profiles`, `categories`, `distribution-keys` |
+| Dashboard (correct figures, error page instead of zeros) | 1e4cdd1 | `dashboard` |
+| Authentication (server-side guard, no E2E bypass, provider-bound callback, login page) | 59640d3 | `authentication` |
+
+### Infrastructure ✅
+- E2E runs against its own database `dwello_e2e`, recreated before every run; backend 3101, frontend 3100 (9a077ae)
+- Migrations applied automatically (`bun run db:migrate`, `bun run dev`, Docker) with `schema_migrations` (85f925c)
+- Mail module with SMTP and Resend, mail catcher for E2E (36cb488)
+- Dependencies upgraded, vulnerabilities fixed (bb7721b)
+
+### Security fixes ✅
+- Backend required no valid JWT on every API route (1d7ea32); BFF now forwards the session JWT (dcbb15a)
+- Pages were rendered without a session (only the browser redirected); now enforced in `src/hooks.server.ts`
+- OAuth code was sent to both providers; redirect target after login limited to app pages
+- drizzle-orm SQL injection (GHSA-gpj5-g38j-94v9) fixed by the upgrade to 0.45
+
+### Verification (state at bb7721b)
+- E2E: 173 scenarios pass (`npx playwright test`), 28 German features
+- Frontend unit tests: 332 pass; svelte-check: 5 errors (pre-existing, down from 13)
+- Backend: all `*.pg.test.ts` pass; other tests 331 pass / 21 fail (failing before Session 3, see below); tsc 50 errors (pre-existing)
+- fallow audit: pass (no introduced dead code, duplication or complexity)
+
+### Open
+- [ ] 21 backend tests failing since before Session 3 (mocked database tests, heating profile, utility validation, formatting)
+- [ ] Predefined distribution keys "Per Person" (`{persons}`) and "By Consumption" (`{consumption}`) use variables the formula engine does not know
+- [ ] Invoices pages not yet rebuilt with German E2E; category badge on invoices still shows the English name
+- [ ] Login page and header follow the browser language (English browsers see them in English, the rest is German)
+- [ ] Majors without security reason: SvelteKit 3/Vite 8, Tailwind 4, Zod 4, TypeScript 7, ESLint 10, jose 6
+- [ ] Phase 8 status in the table above was not re-evaluated; the progress task counts are outdated
 
 ---
 
