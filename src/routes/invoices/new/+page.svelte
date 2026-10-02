@@ -7,7 +7,7 @@
 	import InvoiceDataFields from '$lib/components/InvoiceDataFields.svelte';
 	import InvoiceFormActions from '$lib/components/InvoiceFormActions.svelte';
 	import InvoiceSuggestion from '$lib/components/InvoiceSuggestion.svelte';
-	import type { Suggestion } from '$lib/components/SuggestedCategory.svelte';
+	import { suggestionProvenance, type Suggestion } from '$lib/invoice';
 	import PageTrail from '$lib/components/PageTrail.svelte';
 	import { api } from '$lib/api';
 	import { addToast } from '$lib/stores';
@@ -115,7 +115,8 @@
 				amount: String(amount),
 				categoryId: categoryId || null,
 				distributionKeyId: distributionKeyId || null,
-				isValidUtilityCost
+				isValidUtilityCost,
+				...suggestionProvenance(llmSuggestion)
 			});
 
 			if (response.error) {

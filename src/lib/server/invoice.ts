@@ -15,6 +15,7 @@ export function toInvoice(r: Record<string, unknown>): InvoiceWithDetails {
 	const building = r.building as Record<string, string> | null;
 	const category = r.category as Related;
 	const key = r.distributionKey as Related;
+	const suggested = r.llmCategory as Related;
 	return {
 		id: r.id as string,
 		buildingId: r.buildingId as string,
@@ -35,6 +36,7 @@ export function toInvoice(r: Record<string, unknown>): InvoiceWithDetails {
 		buildingAddress: building?.address || '',
 		category: category ? toCategory(category) : undefined,
 		distributionKey: key ? { id: key.id as string, name: toDistributionKey(key).name } : undefined,
+		llmCategory: suggested ? { id: suggested.id as string, name: toCategory(suggested).name } : undefined,
 		categorizationStatus: categorizationStatus(r)
 	};
 }

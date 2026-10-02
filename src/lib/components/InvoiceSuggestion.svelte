@@ -1,7 +1,8 @@
 <script lang="ts">
 	import Card from './Card.svelte';
 	import Icon from './Icon.svelte';
-	import SuggestedCategory, { type Suggestion } from './SuggestedCategory.svelte';
+	import type { Suggestion } from '$lib/invoice';
+	import SuggestedCategory from './SuggestedCategory.svelte';
 
 	// The KI categorizing a new invoice, then its suggestion
 	let {

@@ -38,6 +38,9 @@ const invoiceBodySchema = t.Object({
 	billingEntityAddress: t.Optional(t.Nullable(t.String())),
 	description: t.String({ minLength: 1 }),
 	categoryId: t.Optional(t.Nullable(t.String())),
+	// Category the KI suggested in the form, and how sure it was (0 to 1)
+	llmCategoryId: t.Optional(t.Nullable(t.String())),
+	llmConfidence: t.Optional(t.Nullable(t.String())),
 	distributionKeyId: t.Optional(t.Nullable(t.String())),
 	amount: t.String(), // Decimal as string
 	isValidUtilityCost: t.Optional(t.Boolean()),

@@ -209,6 +209,7 @@ export interface InvoiceWithDetails extends Invoice {
 	buildingAddress: string;
 	category?: Category;
 	distributionKey?: Pick<DistributionKey, 'id' | 'name'>;
+	llmCategory?: Pick<Category, 'id' | 'name'>; // what the KI suggested
 	categorizationStatus: 'pending' | 'auto-categorized' | 'manual';
 }
 
