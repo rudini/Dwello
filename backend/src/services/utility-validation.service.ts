@@ -27,8 +27,8 @@ export interface UtilityCostRules {
 export function getUtilityCostRules(): UtilityCostRules {
 	return {
 		maxManagementFeePercent: MAX_MANAGEMENT_FEE_PERCENT,
-		allowedCategories: SWISS_UTILITY_CATEGORIES.allowed,
-		notAllowedCategories: SWISS_UTILITY_CATEGORIES.notAllowed,
+		allowedCategories: SWISS_UTILITY_CATEGORIES.allowed.map((c) => c.de),
+		notAllowedCategories: SWISS_UTILITY_CATEGORIES.notAllowed.map((c) => c.de),
 		notes: [
 			'Nebenkosten müssen verbrauchsabhängig oder nach Fläche verteilt werden',
 			'Verwaltungskosten dürfen maximal 3% der Nebenkosten betragen',
