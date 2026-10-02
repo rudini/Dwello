@@ -208,7 +208,7 @@ export interface InvoiceWithDetails extends Invoice {
 	buildingName?: string;
 	buildingAddress: string;
 	category?: Category;
-	distributionKey?: DistributionKey;
+	distributionKey?: Pick<DistributionKey, 'id' | 'name'>;
 	categorizationStatus: 'pending' | 'auto-categorized' | 'manual';
 }
 

@@ -66,7 +66,7 @@
 			<h1 class="text-2xl font-bold text-gray-900">Rechnungen</h1>
 			<p class="text-gray-500 mt-1">{data.total} Rechnungen insgesamt</p>
 		</div>
-		<Button href="/invoices/new" variant="primary">
+		<Button href="/invoices/new" variant="primary" testid="invoice-new-button">
 			<Icon name="add" size={20} />
 			Neue Rechnung
 		</Button>
@@ -87,6 +87,7 @@
 						/>
 						<input
 							id="search"
+							data-testid="invoice-search-input"
 							type="text"
 							bind:value={searchTerm}
 							placeholder="Lieferant, Beschreibung..."
@@ -100,6 +101,7 @@
 					<label for="building" class="block text-sm font-medium text-gray-700 mb-1">Gebäude</label>
 					<select
 						id="building"
+						data-testid="invoice-building-filter"
 						bind:value={buildingFilter}
 						class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 					>
@@ -130,6 +132,7 @@
 					<label for="validity" class="block text-sm font-medium text-gray-700 mb-1">Umlagefähigkeit</label>
 					<select
 						id="validity"
+						data-testid="invoice-validity-filter"
 						bind:value={validityFilter}
 						class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 					>
@@ -140,7 +143,7 @@
 				</div>
 			</div>
 			<div class="flex gap-2">
-				<Button type="submit" variant="primary" size="sm">
+				<Button type="submit" variant="primary" size="sm" testid="invoice-search-submit">
 					<Icon name="search" size={16} />
 					Suchen
 				</Button>
@@ -206,7 +209,7 @@
 					</thead>
 					<tbody class="divide-y divide-gray-200">
 						{#each data.invoices as invoice}
-							<tr class="hover:bg-gray-50 transition-colors">
+							<tr class="hover:bg-gray-50 transition-colors" data-testid="invoice-row-{invoice.id}">
 								<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
 									{formatDate(invoice.invoiceDate)}
 								</td>
@@ -217,14 +220,14 @@
 								</td>
 								<td class="px-6 py-4 whitespace-nowrap">
 									{#if invoice.category}
-										<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+										<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800" data-testid="invoice-category">
 											{invoice.category.name}
 										</span>
 									{:else}
 										<span class="text-sm text-gray-400">-</span>
 									{/if}
 								</td>
-								<td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-right">
+								<td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-right" data-testid="invoice-amount">
 									{formatCurrency(invoice.amount)}
 								</td>
 								<td class="px-6 py-4 whitespace-nowrap text-center">
@@ -234,7 +237,7 @@
 										<Badge variant="danger">Nicht umlagefähig</Badge>
 									{/if}
 								</td>
-								<td class="px-6 py-4 whitespace-nowrap text-center">
+								<td class="px-6 py-4 whitespace-nowrap text-center" data-testid="invoice-status">
 									{#if invoice.categorizationStatus === 'auto-categorized'}
 										<Badge variant="success">Auto</Badge>
 									{:else if invoice.categorizationStatus === 'manual'}
@@ -249,6 +252,7 @@
 											href="/invoices/{invoice.id}"
 											class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
 											title="Ansehen"
+											data-testid="invoice-view-button"
 										>
 											<Icon name="visibility" size={18} />
 										</a>
@@ -256,6 +260,7 @@
 											href="/invoices/{invoice.id}/edit"
 											class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
 											title="Bearbeiten"
+											data-testid="invoice-edit-button"
 										>
 											<Icon name="edit" size={18} />
 										</a>

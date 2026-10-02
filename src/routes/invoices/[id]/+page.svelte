@@ -7,6 +7,7 @@
 	import Card from '$lib/components/Card.svelte';
 	import Badge from '$lib/components/Badge.svelte';
 	import Modal from '$lib/components/Modal.svelte';
+	import PageTrail from '$lib/components/PageTrail.svelte';
 
 	let { data }: { data: { invoice: InvoiceWithDetails } } = $props();
 
@@ -62,22 +63,18 @@
 </svelte:head>
 
 <div class="space-y-6">
+	<PageTrail links={[{ href: '/invoices', label: 'Rechnungen' }]} current={data.invoice.billingEntity} />
+
 	<!-- Header -->
 	<div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
 		<div class="flex items-start gap-4">
-			<a
-				href="/invoices"
-				class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-			>
-				<Icon name="arrow_back" size={20} />
-			</a>
 			<div>
 				<div class="flex items-center gap-3 mb-2">
 					<h1 class="text-2xl font-bold text-gray-900">{data.invoice.billingEntity}</h1>
 					{#if data.invoice.categorizationStatus === 'auto-categorized'}
 						<Badge variant="success">Automatisch kategorisiert</Badge>
 					{:else if data.invoice.categorizationStatus === 'manual'}
-						<Badge variant="info">Manuell überschrieben</Badge>
+						<Badge variant="info">Manuell kategorisiert</Badge>
 					{:else}
 						<Badge variant="warning">Kategorisierung ausstehend</Badge>
 					{/if}
@@ -98,11 +95,11 @@
 				{/if}
 				Neu kategorisieren
 			</Button>
-			<Button href="/invoices/{data.invoice.id}/edit" variant="secondary">
+			<Button href="/invoices/{data.invoice.id}/edit" variant="secondary" testid="invoice-edit-button">
 				<Icon name="edit" size={20} />
 				Bearbeiten
 			</Button>
-			<Button variant="secondary" onclick={() => showDeleteModal = true}>
+			<Button variant="secondary" onclick={() => showDeleteModal = true} testid="invoice-delete-button">
 				<Icon name="delete" size={20} />
 				Löschen
 			</Button>
@@ -128,12 +125,12 @@
 					</div>
 					<div>
 						<dt class="text-sm font-medium text-gray-500">Betrag</dt>
-						<dd class="mt-1 text-xl font-semibold text-gray-900">{formatCurrency(data.invoice.amount)}</dd>
+						<dd class="mt-1 text-xl font-semibold text-gray-900" data-testid="invoice-amount">{formatCurrency(data.invoice.amount)}</dd>
 					</div>
 					<div class="sm:col-span-2">
 						<dt class="text-sm font-medium text-gray-500">Gebäude</dt>
 						<dd class="mt-1">
-							<a href="/buildings/{data.invoice.buildingId}" class="text-blue-600 hover:text-blue-700">
+							<a href="/buildings/{data.invoice.buildingId}" class="text-blue-600 hover:text-blue-700" data-testid="invoice-building-link">
 								{data.invoice.buildingName}
 							</a>
 							<p class="text-sm text-gray-500">{data.invoice.buildingAddress}</p>
@@ -154,7 +151,7 @@
 						<dt class="text-sm font-medium text-gray-500">Kategorie</dt>
 						<dd class="mt-1">
 							{#if data.invoice.category}
-								<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+								<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-blue-100 text-blue-800" data-testid="invoice-category">
 									{data.invoice.category.name}
 								</span>
 							{:else}
@@ -166,7 +163,7 @@
 						<dt class="text-sm font-medium text-gray-500">Verteilschlüssel</dt>
 						<dd class="mt-1">
 							{#if data.invoice.distributionKey}
-								<span class="text-gray-900">{data.invoice.distributionKey.name}</span>
+								<span class="text-gray-900" data-testid="invoice-distribution-key">{data.invoice.distributionKey.name}</span>
 							{:else}
 								<span class="text-gray-400">Nicht zugewiesen</span>
 							{/if}
@@ -174,7 +171,7 @@
 					</div>
 					<div>
 						<dt class="text-sm font-medium text-gray-500">Umlagefähigkeit</dt>
-						<dd class="mt-1">
+						<dd class="mt-1" data-testid="invoice-utility-cost">
 							{#if data.invoice.isValidUtilityCost}
 								<Badge variant="success">Umlagefähig</Badge>
 							{:else}
@@ -284,7 +281,7 @@
 			<!-- Swiss Law Info -->
 			{#if !data.invoice.isValidUtilityCost}
 				<Card>
-					<div class="flex items-start gap-3">
+					<div class="flex items-start gap-3" data-testid="invoice-legal-note">
 						<Icon name="gavel" size={20} class="text-amber-500 flex-shrink-0 mt-0.5" />
 						<div>
 							<h3 class="font-medium text-gray-900 mb-1">Schweizer Mietrecht</h3>
@@ -320,7 +317,7 @@
 		</div>
 	{/if}
 	<div class="flex justify-end gap-3">
-		<Button variant="secondary" onclick={() => showDeleteModal = false}>
+		<Button variant="secondary" onclick={() => showDeleteModal = false} testid="invoice-delete-cancel">
 			Abbrechen
 		</Button>
 		<Button
@@ -328,6 +325,7 @@
 			onclick={handleDelete}
 			disabled={isDeleting}
 			class="bg-red-600 hover:bg-red-700"
+			testid="invoice-delete-confirm"
 		>
 			{#if isDeleting}
 				<Icon name="progress_activity" size={20} class="animate-spin" />

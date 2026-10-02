@@ -119,168 +119,75 @@ function buildUrl(path: string, params?: Record<string, string>): string {
 	return url;
 }
 
-/**
- * Main API call helper
- * Automatically includes XSRF token for mutation requests
- * Handles 401 errors by redirecting to login
- */
-export async function apiCall<T>(
-	path: string,
-	options: ApiCallOptions = {}
-): Promise<ApiResponse<T>> {
-	const { method = 'GET', body, headers = {}, params } = options;
-
-	// Build request headers with XSRF token for mutations
-	const requestHeaders = buildRequestHeaders(method, headers);
-
-	// Build fetch options
-	const fetchOptions: RequestInit = {
+function requestInit(method: string, body: unknown, headers: Record<string, string>): RequestInit {
+	return {
 		method,
-		headers: requestHeaders,
-		credentials: 'same-origin' // Include cookies
+		// XSRF token for mutations
+		headers: buildRequestHeaders(method, headers),
+		credentials: 'same-origin', // Include cookies
+		// Body only for mutation requests
+		body: body && isMutationMethod(method) ? JSON.stringify(body) : undefined
 	};
+}
 
-	// Add body for mutation requests
-	if (body && isMutationMethod(method)) {
-		fetchOptions.body = JSON.stringify(body);
+/**
+ * The error of a failed response; an expired session also leads to the login
+ */
+async function failure(response: Response): Promise<ApiError> {
+	if (response.status === 401) {
+		if (browser) await goto('/login');
+		return { code: 'UNAUTHORIZED', message: 'Session expired. Please log in again.' };
 	}
+	const errorData = await response.json().catch(() => ({
+		error: { code: 'UNKNOWN_ERROR', message: 'An unexpected error occurred' }
+	}));
+	return errorData.error || { code: `HTTP_${response.status}`, message: response.statusText || 'Request failed' };
+}
 
+/**
+ * Sends a request to the BFF and reads a successful response with `read`
+ */
+async function request<T>(
+	path: string,
+	{ method = 'GET', body, headers = {}, params }: ApiCallOptions,
+	read: (response: Response) => Promise<T>
+): Promise<ApiResponse<T>> {
 	try {
-		const url = buildUrl(path, params);
-		const response = await fetch(url, fetchOptions);
-
-		// Handle 401 - redirect to login
-		if (response.status === 401) {
-			if (browser) {
-				await goto('/login');
-			}
-			return {
-				error: {
-					code: 'UNAUTHORIZED',
-					message: 'Session expired. Please log in again.'
-				}
-			};
-		}
-
-		// Handle other error responses
-		if (!response.ok) {
-			const errorData = await response.json().catch(() => ({
-				error: {
-					code: 'UNKNOWN_ERROR',
-					message: 'An unexpected error occurred'
-				}
-			}));
-
-			return {
-				error: errorData.error || {
-					code: `HTTP_${response.status}`,
-					message: response.statusText || 'Request failed'
-				}
-			};
-		}
-
-		// Parse successful response
-		const data = await response.json();
-		return { data };
+		const response = await fetch(buildUrl(path, params), requestInit(method, body, headers));
+		if (!response.ok) return { error: await failure(response) };
+		return { data: await read(response) };
 	} catch (error) {
 		// Network or other errors
-		return {
-			error: {
-				code: 'NETWORK_ERROR',
-				message: error instanceof Error ? error.message : 'Network request failed'
-			}
-		};
+		const message = error instanceof Error ? error.message : 'Network request failed';
+		return { error: { code: 'NETWORK_ERROR', message } };
 	}
+}
+
+/**
+ * Main API call helper
+ */
+export async function apiCall<T>(path: string, options: ApiCallOptions = {}): Promise<ApiResponse<T>> {
+	// A response without content has no body
+	return request(path, options, async (response) => (response.status === 204 ? undefined : response.json()));
 }
 
 /**
  * API call with pagination support
  * Extracts pagination info from response headers
- * SECURITY: Now properly includes XSRF token for mutation requests
  */
 export async function apiCallPaginated<T>(
 	path: string,
 	options: ApiCallOptions = {}
 ): Promise<ApiResponse<PaginatedResponse<T>>> {
-	const { params = {}, body } = options;
-	const method = options.method || 'GET';
-
-	// Build URL and make request
-	const url = buildUrl(path, params);
-
-	// Build request headers with XSRF token for mutations
-	const requestHeaders = buildRequestHeaders(method, options.headers);
-
-	// Build fetch options
-	const fetchOptions: RequestInit = {
-		method,
-		headers: requestHeaders,
-		credentials: 'same-origin'
-	};
-
-	// Add body for mutation requests
-	if (body && isMutationMethod(method)) {
-		fetchOptions.body = JSON.stringify(body);
-	}
-
-	try {
-		const response = await fetch(url, fetchOptions);
-
-		// Handle 401 - redirect to login
-		if (response.status === 401) {
-			if (browser) {
-				await goto('/login');
-			}
-			return {
-				error: {
-					code: 'UNAUTHORIZED',
-					message: 'Session expired. Please log in again.'
-				}
-			};
-		}
-
-		// Handle other error responses
-		if (!response.ok) {
-			const errorData = await response.json().catch(() => ({
-				error: {
-					code: 'UNKNOWN_ERROR',
-					message: 'An unexpected error occurred'
-				}
-			}));
-
-			return {
-				error: errorData.error || {
-					code: `HTTP_${response.status}`,
-					message: response.statusText || 'Request failed'
-				}
-			};
-		}
-
-		// Parse data
-		const data = await response.json();
-
-		// Extract pagination from headers
-		const pagination: PaginationInfo = {
+	return request(path, options, async (response) => ({
+		data: await response.json(),
+		pagination: {
 			totalCount: parseInt(response.headers.get('X-Total-Count') || '0', 10),
 			page: parseInt(response.headers.get('X-Page') || '1', 10),
 			pageSize: parseInt(response.headers.get('X-Page-Size') || '10', 10),
 			totalPages: parseInt(response.headers.get('X-Total-Pages') || '1', 10)
-		};
-
-		return {
-			data: {
-				data,
-				pagination
-			}
-		};
-	} catch (error) {
-		return {
-			error: {
-				code: 'NETWORK_ERROR',
-				message: error instanceof Error ? error.message : 'Network request failed'
-			}
-		};
-	}
+		}
+	}));
 }
 
 /**

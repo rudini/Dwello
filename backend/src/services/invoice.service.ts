@@ -32,9 +32,39 @@ export interface InvoiceFilters {
 
 export interface InvoiceWithDetails extends Invoice {
 	building: { id: string; name: string; address: string } | null;
-	category: { id: string; name: string; isAllowedUtilityCost: boolean } | null;
-	distributionKey: { id: string; name: string } | null;
+	category: { id: string; name: string; nameDE: string | null; isAllowedUtilityCost: boolean } | null;
+	distributionKey: { id: string; name: string; nameDE: string | null } | null;
 	llmCategory: { id: string; name: string } | null;
+}
+
+/**
+ * Invoices with their building, category and distribution key (names in English and German)
+ */
+function selectWithDetails() {
+	return db
+		.select({
+			invoice: invoices,
+			building: {
+				id: buildings.id,
+				name: buildings.name,
+				address: buildings.address
+			},
+			category: {
+				id: categories.id,
+				name: categories.name,
+				nameDE: categories.nameDE,
+				isAllowedUtilityCost: categories.isAllowedUtilityCost
+			},
+			distributionKey: {
+				id: distributionKeys.id,
+				name: distributionKeys.name,
+				nameDE: distributionKeys.nameDE
+			}
+		})
+		.from(invoices)
+		.leftJoin(buildings, eq(invoices.buildingId, buildings.id))
+		.leftJoin(categories, eq(invoices.categoryId, categories.id))
+		.leftJoin(distributionKeys, eq(invoices.distributionKeyId, distributionKeys.id));
 }
 
 /**
@@ -94,28 +124,7 @@ export async function listInvoices(filters: InvoiceFilters = {}): Promise<{
 	}
 
 	// Build the query with joins
-	const query = db
-		.select({
-			invoice: invoices,
-			building: {
-				id: buildings.id,
-				name: buildings.name,
-				address: buildings.address
-			},
-			category: {
-				id: categories.id,
-				name: categories.name,
-				isAllowedUtilityCost: categories.isAllowedUtilityCost
-			},
-			distributionKey: {
-				id: distributionKeys.id,
-				name: distributionKeys.name
-			}
-		})
-		.from(invoices)
-		.leftJoin(buildings, eq(invoices.buildingId, buildings.id))
-		.leftJoin(categories, eq(invoices.categoryId, categories.id))
-		.leftJoin(distributionKeys, eq(invoices.distributionKeyId, distributionKeys.id))
+	const query = selectWithDetails()
 		.orderBy(desc(invoices.invoiceDate), desc(invoices.createdAt))
 		.limit(limit)
 		.offset(offset);
@@ -149,28 +158,7 @@ export async function listInvoices(filters: InvoiceFilters = {}): Promise<{
  * Get a single invoice by ID with all related data
  */
 export async function getInvoice(id: string): Promise<InvoiceWithDetails | null> {
-	const [result] = await db
-		.select({
-			invoice: invoices,
-			building: {
-				id: buildings.id,
-				name: buildings.name,
-				address: buildings.address
-			},
-			category: {
-				id: categories.id,
-				name: categories.name,
-				isAllowedUtilityCost: categories.isAllowedUtilityCost
-			},
-			distributionKey: {
-				id: distributionKeys.id,
-				name: distributionKeys.name
-			}
-		})
-		.from(invoices)
-		.leftJoin(buildings, eq(invoices.buildingId, buildings.id))
-		.leftJoin(categories, eq(invoices.categoryId, categories.id))
-		.leftJoin(distributionKeys, eq(invoices.distributionKeyId, distributionKeys.id))
+	const [result] = await selectWithDetails()
 		.where(eq(invoices.id, id))
 		.limit(1);
 
@@ -418,28 +406,7 @@ export async function getInvoicesForStatement(
 	periodStart: string,
 	periodEnd: string
 ): Promise<InvoiceWithDetails[]> {
-	const results = await db
-		.select({
-			invoice: invoices,
-			building: {
-				id: buildings.id,
-				name: buildings.name,
-				address: buildings.address
-			},
-			category: {
-				id: categories.id,
-				name: categories.name,
-				isAllowedUtilityCost: categories.isAllowedUtilityCost
-			},
-			distributionKey: {
-				id: distributionKeys.id,
-				name: distributionKeys.name
-			}
-		})
-		.from(invoices)
-		.leftJoin(buildings, eq(invoices.buildingId, buildings.id))
-		.leftJoin(categories, eq(invoices.categoryId, categories.id))
-		.leftJoin(distributionKeys, eq(invoices.distributionKeyId, distributionKeys.id))
+	const results = await selectWithDetails()
 		.where(
 			and(
 				eq(invoices.buildingId, buildingId),

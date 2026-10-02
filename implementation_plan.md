@@ -2289,11 +2289,19 @@ Validation is defined inline in route handlers for type safety.
   - [ ] Target >75% code coverage
   - [ ] All tests pass: `npm run test`
 
-- [ ] E2E Tests for Invoice Workflows
-  - [ ] Test create, read, update, delete workflows
-  - [ ] Test LLM categorization display
-  - [ ] Test filtering and sorting
-  - [ ] All tests pass: `npm run test:e2e`
+- [x] E2E Tests for Invoice Workflows
+  - [x] Test create, read, update, delete workflows
+  - [ ] Test LLM categorization display (needs a running Ollama; not part of the E2E environment)
+  - [x] Test filtering (search, building, chargeability); sorting not tested
+  - [x] All tests pass: `npm run test:e2e`
+
+  **Note (Session 3):** German features `invoices.feature`, `invoice-new.feature`, `invoice-detail.feature`,
+  `invoice-edit.feature` (23 scenarios). Fixed: chargeability filter had no effect (sent `validity`, backend reads
+  `isValidUtilityCost`); category and distribution key shown in English; status always "Ausstehend"; new invoice offered
+  only the first 20 buildings; deleting an invoice failed in the BFF proxy and client on `204 No Content`. Unit tests:
+  `src/__tests__/invoices.test.ts`, `tests/unit/api.test.ts`, `tests/unit/api-proxy.test.ts`,
+  `backend/src/__tests__/invoice-names.pg.test.ts`. Shared mapping `src/lib/server/invoice.ts`; form parts
+  `InvoiceDataFields`, `InvoiceCategoryFields`, `InvoiceFormActions`, `InvoiceSuggestion` in `src/lib/components/`.
 
 - [ ] Manual Testing
   - [ ] Run all tests: `npm run test`
@@ -3757,6 +3765,7 @@ Every bug fix has a unit or database test.
 | Heating profiles, cost categories, distribution keys (create/edit/delete via real API) | 2c04a8d, 18255fe, ddeb381 | `heating-profiles`, `categories`, `distribution-keys` |
 | Dashboard (correct figures, error page instead of zeros) | 1e4cdd1 | `dashboard` |
 | Authentication (server-side guard, no E2E bypass, provider-bound callback, login page) | 59640d3 | `authentication` |
+| Invoices (list with working filters, new, detail with real delete, edit; German category and key names) | see Phase 11.X | `invoices`, `invoice-new`, `invoice-detail`, `invoice-edit` |
 
 ### Infrastructure ✅
 - E2E runs against its own database `dwello_e2e`, recreated before every run; backend 3101, frontend 3100 (9a077ae)
@@ -3770,16 +3779,18 @@ Every bug fix has a unit or database test.
 - OAuth code was sent to both providers; redirect target after login limited to app pages
 - drizzle-orm SQL injection (GHSA-gpj5-g38j-94v9) fixed by the upgrade to 0.45
 
-### Verification (state at bb7721b)
-- E2E: 173 scenarios pass (`npx playwright test`), 28 German features
-- Frontend unit tests: 332 pass; svelte-check: 5 errors (pre-existing, down from 13)
-- Backend: all `*.pg.test.ts` pass; other tests 331 pass / 21 fail (failing before Session 3, see below); tsc 50 errors (pre-existing)
+### Verification (state after the invoices rebuild, on main 04675a4)
+- E2E: 196 scenarios pass (`npx playwright test`), 32 German features
+- Frontend unit tests: 347 pass; svelte-check: 5 errors (pre-existing, down from 13)
+- Backend: all `*.pg.test.ts` pass; other tests 337 pass / 15 fail (heating profile service, failing on main as well); tsc 48 errors (pre-existing)
 - fallow audit: pass (no introduced dead code, duplication or complexity)
 
 ### Open
-- [ ] 21 backend tests failing since before Session 3 (mocked database tests, heating profile, utility validation, formatting)
-- [ ] Predefined distribution keys "Per Person" (`{persons}`) and "By Consumption" (`{consumption}`) use variables the formula engine does not know
-- [ ] Invoices pages not yet rebuilt with German E2E; category badge on invoices still shows the English name
+- [ ] 15 backend tests failing (heating profile service; was 21 before main isolated the test files)
+- [x] Predefined distribution keys "Per Person" and "By Consumption" removed on main (migration 0007)
+- [x] Invoices pages rebuilt with German E2E (Phase 11.X)
+- [ ] "Neu kategorisieren" without a running KI changes nothing and says nothing (backend answers success without category)
+- [ ] The reason for overriding the KI category is required in the edit form but not stored (no column; `manualOverrideReason` is dropped)
 - [ ] Login page and header follow the browser language (English browsers see them in English, the rest is German)
 - [ ] Majors without security reason: SvelteKit 3/Vite 8, Tailwind 4, Zod 4, TypeScript 7, ESLint 10, jose 6
 - [ ] Phase 8 status in the table above was not re-evaluated; the progress task counts are outdated

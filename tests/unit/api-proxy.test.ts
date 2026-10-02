@@ -328,6 +328,13 @@ describe('API Proxy Helper Functions', () => {
 
 			expect(body).toEqual({ id: 1, name: 'Test' });
 		});
+
+		it('passes on "204 No Content" without a body, e.g. after a delete', async () => {
+			const response = createProxyResponse({ status: 204, data: '', headers: new Headers() });
+
+			expect(response.status).toBe(204);
+			expect(await response.text()).toBe('');
+		});
 	});
 
 	describe('createBinaryResponse', () => {
