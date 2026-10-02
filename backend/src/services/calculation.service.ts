@@ -13,7 +13,6 @@
 import { getInvoicesForStatement } from './invoice.service';
 import { calculateBuildingDistribution } from './distribution-key.service';
 import { getTypedConfig } from './config.service';
-import { MAX_MANAGEMENT_FEE_PERCENT } from './utility-validation.service';
 import {
 	calculateApartmentProrating,
 	prorateCosts,
@@ -158,24 +157,10 @@ async function calculateApartmentShare(
 export function calculateManagementFee(
 	totalCosts: number,
 	feePercentage: number
-): { fee: number; actualPercentage: number; isValid: boolean; error?: string } {
-	// Validate against Swiss law maximum
-	if (feePercentage > MAX_MANAGEMENT_FEE_PERCENT) {
-		return {
-			fee: 0,
-			actualPercentage: feePercentage,
-			isValid: false,
-			error: `Management fee cannot exceed ${MAX_MANAGEMENT_FEE_PERCENT}%`
-		};
-	}
-
+): { fee: number; actualPercentage: number } {
 	const fee = Math.round((totalCosts * feePercentage) / 100 * 100) / 100;
 
-	return {
-		fee,
-		actualPercentage: feePercentage,
-		isValid: true
-	};
+	return { fee, actualPercentage: feePercentage };
 }
 
 /**
@@ -216,7 +201,8 @@ export async function calculateStatementForContract(
 	contractId: string,
 	periodStart: Date,
 	periodEnd: Date,
-	heatingProfileId?: string
+	heatingProfileId?: string,
+	managementFeePercent?: number
 ): Promise<StatementCalculation> {
 	// Get contract details
 	const contract = await getContract(contractId);
@@ -323,13 +309,9 @@ export async function calculateStatementForContract(
 
 	subtotal = Math.round(subtotal * 100) / 100;
 
-	// Calculate management fee
-	const configFeePercent = await getTypedConfig('management_fee_pct');
-	const managementFeeResult = calculateManagementFee(subtotal, configFeePercent);
-
-	if (!managementFeeResult.isValid) {
-		console.warn(`Management fee validation warning: ${managementFeeResult.error}`);
-	}
+	// Management fee: chosen per generation run, otherwise the configured default
+	const feePercent = managementFeePercent ?? (await getTypedConfig('management_fee_pct'));
+	const managementFeeResult = calculateManagementFee(subtotal, feePercent);
 
 	const managementFee = managementFeeResult.fee;
 	const totalCosts = Math.round((subtotal + managementFee) * 100) / 100;

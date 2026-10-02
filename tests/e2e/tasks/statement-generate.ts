@@ -3,6 +3,8 @@ import {
 	backLink,
 	buildingCheckbox,
 	generateButton,
+	heatingProfileSelect,
+	managementFeeInput,
 	nextButton,
 	periodEndInput,
 	periodStartInput,
@@ -10,14 +12,24 @@ import {
 	showStatementsButton
 } from '../interactions/statement-generate';
 
-export const openPreview = (year: number, buildingId: string) => async (actor: Actor) => {
-	await periodStartInput(actor.page).fill(`${year}-01-01`);
-	await periodEndInput(actor.page).fill(`${year}-12-31`);
-	await nextButton(actor.page).click();
-	await buildingCheckbox(actor.page, buildingId).check();
-	await nextButton(actor.page).click();
-	await previewCount(actor.page).waitFor(); // the preview is calculated on the server
+type RunOptions = { heatingProfileId?: string; managementFeePercent?: number };
+
+export const setManagementFee = (percent: number) => async (actor: Actor) => {
+	await managementFeeInput(actor.page).fill(String(percent));
 };
+
+export const openPreview =
+	(year: number, buildingId: string, options: RunOptions = {}) =>
+	async (actor: Actor) => {
+		await periodStartInput(actor.page).fill(`${year}-01-01`);
+		await periodEndInput(actor.page).fill(`${year}-12-31`);
+		if (options.heatingProfileId) await heatingProfileSelect(actor.page).selectOption(options.heatingProfileId);
+		if (options.managementFeePercent !== undefined) await setManagementFee(options.managementFeePercent)(actor);
+		await nextButton(actor.page).click();
+		await buildingCheckbox(actor.page, buildingId).check();
+		await nextButton(actor.page).click();
+		await previewCount(actor.page).waitFor(); // the preview is calculated on the server
+	};
 
 export const generateStatements = (year: number, buildingId: string) => async (actor: Actor) => {
 	await openPreview(year, buildingId)(actor);

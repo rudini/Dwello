@@ -24,6 +24,31 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Wenn der Liegenschaftsverwalter die Abrechnungen 2024 für das Gebäude "Lindenhof" erstellt
     Dann wurden 2 Nebenkostenabrechnungen erstellt
 
+  Szenario: Erhöhte Verwaltungspauschale gilt für alle Mieter der Liegenschaft
+    Angenommen das Heizprofil "Winter" verteilt die Heizkosten so:
+      | Monat     | Anteil |
+      | Januar    | 18     |
+      | Februar   | 14     |
+      | März      | 11     |
+      | April     | 5      |
+      | Mai       | 2      |
+      | Juni      | 0      |
+      | Juli      | 0      |
+      | August    | 0      |
+      | September | 2      |
+      | Oktober   | 8      |
+      | November  | 14     |
+      | Dezember  | 26     |
+    Und im Gebäude "Lindenhof" gibt es eine Heizkostenrechnung über "1000" Franken für 2024
+    Und der Liegenschaftsverwalter ist auf der Seite zum Erstellen von Abrechnungen
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" mit dem Heizprofil "Winter" und 4.5 % Verwaltungspauschale öffnet
+    Dann kostet die Abrechnung von "Eva Frei" "CHF 449.35"
+    Und kostet die Abrechnung von "Marc Huber" "CHF 543.40"
+
+  Szenario: Hinweis bei Verwaltungspauschale über dem Richtwert
+    Wenn der Liegenschaftsverwalter die Verwaltungspauschale auf 4.5 % setzt
+    Dann sieht der Liegenschaftsverwalter den Hinweis, dass die Verwaltungspauschale über dem üblichen Richtwert liegt
+
   Szenario: Mietverträge ausserhalb der Periode werden nicht abgerechnet
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2023 für das Gebäude "Lindenhof" öffnet
     Dann meldet die Vorschau, dass es in der Periode keine Mietverträge gibt

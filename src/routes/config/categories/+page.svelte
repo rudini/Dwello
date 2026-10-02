@@ -118,7 +118,7 @@
 				<h3 class="font-medium text-gray-900 mb-1">Schweizer Mietrecht (Art. 257a-257b OR)</h3>
 				<p class="text-sm text-gray-600">
 					<strong>Umlagefähige Nebenkosten:</strong> Heizung, Warmwasser, Wasser/Abwasser,
-					Allgemeinstrom, Hauswart, Aufzug, Gartenpflege, Kehricht, Verwaltungsgebühr (max. 3%).
+					Allgemeinstrom, Hauswart, Aufzug, Gartenpflege, Kehricht, Verwaltungsgebühr (üblich bis 3%).
 				</p>
 				<p class="text-sm text-gray-600 mt-1">
 					<strong>Nicht umlagefähig:</strong> Reparaturen, Versicherungen, Steuern, Hypothekenzinsen,

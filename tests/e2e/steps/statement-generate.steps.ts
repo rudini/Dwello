@@ -4,6 +4,7 @@ import { test } from '../fixtures/test';
 import { visit } from '../interactions/navigation';
 import {
 	allPreviewRows,
+	feeAboveGuideline,
 	generationOutcome,
 	noContractsInPeriod,
 	previewRow
@@ -12,6 +13,7 @@ import {
 	generateStatements,
 	openPreview,
 	returnToStatementList,
+	setManagementFee,
 	showCreatedStatements
 } from '../tasks/statement-generate';
 
@@ -77,3 +79,27 @@ Then('wurden {int} Nebenkostenabrechnungen erstellt', async ({ verwalter }, coun
 		`${count} Nebenkostenabrechnungen wurden erfolgreich erstellt.`
 	);
 });
+
+When(
+	'der Liegenschaftsverwalter die Vorschau der Abrechnungen {int} für das Gebäude {string} mit dem Heizprofil {string} und {float} % Verwaltungspauschale öffnet',
+	async ({ verwalter, seed }, year: number, building: string, profile: string, fee: number) => {
+		await verwalter.perform(
+			openPreview(year, seed.idOf(building)!, { heatingProfileId: seed.idOf(profile), managementFeePercent: fee })
+		);
+	}
+);
+
+When('der Liegenschaftsverwalter die Verwaltungspauschale auf {float} % setzt', async ({ verwalter }, fee: number) => {
+	await verwalter.perform(setManagementFee(fee));
+});
+
+Then('kostet die Abrechnung von {string} {string}', async ({ verwalter, names }, tenant: string, amount: string) => {
+	await expect(previewRow(verwalter, names.get(tenant) ?? tenant)).toContainText(amount);
+});
+
+Then(
+	'sieht der Liegenschaftsverwalter den Hinweis, dass die Verwaltungspauschale über dem üblichen Richtwert liegt',
+	async ({ verwalter }) => {
+		await expect(feeAboveGuideline(verwalter)).toBeVisible();
+	}
+);

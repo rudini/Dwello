@@ -3,6 +3,7 @@
 	import Icon from '$lib/components/Icon.svelte';
 	import Card from '$lib/components/Card.svelte';
 	import { enhance } from '$app/forms';
+	import { untrack } from 'svelte';
 	import type { SubmitFunction } from '@sveltejs/kit';
 	import WizardProgress from './WizardProgress.svelte';
 	import WizardStep from './WizardStep.svelte';
@@ -14,6 +15,7 @@
 	interface GenerateStatementData {
 		buildings: (Building & { apartmentCount: number })[];
 		heatingProfiles: HeatingProfile[];
+		defaultManagementFeePercent: number;
 		defaultPeriod: {
 			start: string;
 			end: string;
@@ -27,12 +29,15 @@
 	const totalSteps = 4;
 
 	// Step 1 (period, defaults from the loader) and step 2 (buildings) selection
-	let selection = $state<WizardSelection>({
-		periodStart: data.defaultPeriod.start,
-		periodEnd: data.defaultPeriod.end,
-		heatingProfileId: '',
-		buildingIds: []
-	});
+	let selection = $state<WizardSelection>(
+		untrack(() => ({
+			periodStart: data.defaultPeriod.start,
+			periodEnd: data.defaultPeriod.end,
+			heatingProfileId: '',
+			managementFeePercent: data.defaultManagementFeePercent,
+			buildingIds: []
+		}))
+	);
 
 	// Step 3: Preview, one row per rental contract in the period (kept when a later step fails)
 	let previewRows = $state<PreviewRow[]>([]);
@@ -48,7 +53,11 @@
 
 	const canProceed = $derived(
 		[
-			!!selection.periodStart && !!selection.periodEnd && !!selection.heatingProfileId,
+			!!selection.periodStart &&
+				!!selection.periodEnd &&
+				!!selection.heatingProfileId &&
+				Number.isFinite(selection.managementFeePercent) &&
+				selection.managementFeePercent >= 0,
 			selection.buildingIds.length > 0,
 			previewRows.length > 0
 		][currentStep - 1] ?? false
@@ -92,6 +101,7 @@
 		<input type="hidden" name="periodStart" value={selection.periodStart} />
 		<input type="hidden" name="periodEnd" value={selection.periodEnd} />
 		<input type="hidden" name="heatingProfileId" value={selection.heatingProfileId} />
+		<input type="hidden" name="managementFeePercent" value={selection.managementFeePercent} />
 		<input type="hidden" name="buildingIds" value={selection.buildingIds.join(',')} />
 
 		<Card>

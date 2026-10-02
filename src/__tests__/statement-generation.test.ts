@@ -6,7 +6,8 @@ const period = {
 	buildingIds: ['b1'],
 	periodStart: '2024-01-01',
 	periodEnd: '2024-12-31',
-	heatingProfileId: 'hp1'
+	heatingProfileId: 'hp1',
+	managementFeePercent: 4.5
 };
 
 const contract = (id: string, startDate: string, endDate: string | null) => ({
@@ -62,7 +63,7 @@ describe('Abrechnungen erstellen', () => {
 		]);
 	});
 
-	it('berechnet die Vorschau mit Periode und Heizprofil', async () => {
+	it('berechnet die Vorschau mit Periode, Heizprofil und Verwaltungspauschale', async () => {
 		const { fetch, posts } = backend();
 		await previewStatements(fetch, period);
 
@@ -72,7 +73,8 @@ describe('Abrechnungen erstellen', () => {
 				contractId: 'auszug',
 				periodStart: '2024-01-01',
 				periodEnd: '2024-12-31',
-				heatingProfileId: 'hp1'
+				heatingProfileId: 'hp1',
+				managementFeePercent: 4.5
 			}
 		});
 	});
@@ -90,7 +92,8 @@ describe('Abrechnungen erstellen', () => {
 			buildingId: 'b1',
 			periodStart: '2024-01-01',
 			periodEnd: '2024-12-31',
-			heatingProfileId: 'hp1'
+			heatingProfileId: 'hp1',
+			managementFeePercent: 4.5
 		});
 	});
 

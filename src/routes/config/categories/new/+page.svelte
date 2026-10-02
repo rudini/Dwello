@@ -242,7 +242,7 @@
 							</li>
 							<li class="flex items-center gap-1">
 								<Icon name="check" size={14} class="text-green-600" />
-								Verwaltungsgebühren (max. 3%)
+								Verwaltungsgebühren (üblich bis 3%)
 							</li>
 						</ul>
 						<p class="mt-2 text-blue-700">

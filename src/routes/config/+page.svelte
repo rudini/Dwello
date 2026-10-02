@@ -48,8 +48,8 @@
 		const newErrors: Record<string, string> = {};
 
 		const fee = parseFloat(managementFeePercentage);
-		if (isNaN(fee) || fee < 0 || fee > 3) {
-			newErrors.managementFeePercentage = 'Die Verwaltungsgebühr muss zwischen 0% und 3% liegen';
+		if (isNaN(fee) || fee < 0) {
+			newErrors.managementFeePercentage = 'Die Verwaltungsgebühr darf nicht negativ sein';
 		}
 
 		if (iban && !validateIBAN(iban)) {
@@ -266,7 +266,6 @@
 							type="number"
 							step="0.1"
 							min="0"
-							max="3"
 							bind:value={managementFeePercentage}
 							class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 {errors.managementFeePercentage
 								? 'border-red-500'
@@ -278,7 +277,7 @@
 						<p class="mt-1 text-sm text-red-500">{errors.managementFeePercentage}</p>
 					{/if}
 					<p class="mt-1 text-xs text-gray-500">
-						Maximal 3% gemäss schweizerischem Mietrecht
+						Vorschlag beim Erstellen der Abrechnungen. Üblicher Richtwert: bis 3%
 					</p>
 				</div>
 			</div>
@@ -341,9 +340,10 @@
 				<div>
 					<h3 class="font-medium text-gray-900 mb-1">Schweizer Mietrecht</h3>
 					<p class="text-sm text-gray-600">
-						Die Verwaltungsgebühr ist gemäss Art. 257b OR auf maximal 3% der umlagefähigen
-						Nebenkosten beschränkt. Diese Gebühr deckt den administrativen Aufwand für die
-						Erstellung der Nebenkostenabrechnung.
+						Für die Verwaltungsgebühr gilt üblicherweise ein Richtwert von höchstens 3% der
+						umlagefähigen Nebenkosten. Diese Gebühr deckt den administrativen Aufwand für die
+						Erstellung der Nebenkostenabrechnung und kann beim Erstellen der Abrechnungen pro
+						Liegenschaft und Periode angepasst werden.
 					</p>
 				</div>
 			</div>

@@ -5,6 +5,7 @@
 	import BuildingStep from './BuildingStep.svelte';
 	import PreviewStep from './PreviewStep.svelte';
 	import GenerationStep from './GenerationStep.svelte';
+	import ManagementFeeField from './ManagementFeeField.svelte';
 	import type { PreviewRow, WizardSelection } from './preview';
 
 	let {
@@ -37,6 +38,9 @@
 		bind:periodEnd={selection.periodEnd}
 		bind:heatingProfileId={selection.heatingProfileId}
 	/>
+	<div class="mt-6">
+		<ManagementFeeField bind:value={selection.managementFeePercent} />
+	</div>
 {:else if currentStep === 2}
 	<BuildingStep {buildings} bind:selectedBuildingIds={selection.buildingIds} />
 {:else if currentStep === 3}

@@ -12,22 +12,25 @@ const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
 type Row = Record<string, unknown>;
 
-async function rows(fetch: typeof globalThis.fetch, path: string, key: string): Promise<Row[]> {
+async function json(fetch: typeof globalThis.fetch, path: string): Promise<Row> {
 	const response = await fetch(`${BACKEND_URL}/api/v1/${path}`);
-	return response.ok ? ((await response.json())[key] ?? []) : [];
+	return response.ok ? response.json() : {};
 }
 
 export const load = async ({ fetch }: { fetch: typeof globalThis.fetch }) => {
-	const [buildings, heatingProfiles] = await Promise.all([
-		rows(fetch, 'buildings?limit=100', 'buildings'),
-		rows(fetch, 'heating-profiles?limit=100', 'data')
+	const [buildings, heatingProfiles, managementFee] = await Promise.all([
+		json(fetch, 'buildings?limit=100'),
+		json(fetch, 'heating-profiles?limit=100'),
+		json(fetch, 'config/management_fee_pct')
 	]);
 
 	// Default to previous calendar year
 	const lastYear = new Date().getFullYear() - 1;
 	return {
-		buildings: buildings as unknown as (Building & { apartmentCount: number })[],
-		heatingProfiles: heatingProfiles.map(toHeatingProfile),
+		buildings: (buildings.buildings ?? []) as (Building & { apartmentCount: number })[],
+		heatingProfiles: ((heatingProfiles.data ?? []) as Row[]).map(toHeatingProfile),
+		// Default from the configuration, adjustable per generation run
+		defaultManagementFeePercent: Number(managementFee.value ?? 3),
 		defaultPeriod: { start: `${lastYear}-01-01`, end: `${lastYear}-12-31` }
 	};
 };
@@ -36,7 +39,8 @@ const generationRequest = (formData: FormData): GenerationRequest => ({
 	buildingIds: String(formData.get('buildingIds')).split(',').filter(Boolean),
 	periodStart: String(formData.get('periodStart')),
 	periodEnd: String(formData.get('periodEnd')),
-	heatingProfileId: String(formData.get('heatingProfileId'))
+	heatingProfileId: String(formData.get('heatingProfileId')),
+	managementFeePercent: Number(formData.get('managementFeePercent'))
 });
 
 const failed = (err: unknown) =>

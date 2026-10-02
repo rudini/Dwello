@@ -23,6 +23,24 @@ import { getTypedConfig } from '../services/config.service';
 import { generateStatementPDFBase64, type StatementPDFData, type Language } from '../services/pdf.service';
 import { generateQRReference, type QRBillConfig } from '../services/qr-bill.service';
 
+// Calculation parameters shared by preview and generate; the management fee overrides the configured default
+const calculationBody = t.Object({
+	contractId: t.String(),
+	periodStart: t.String(),
+	periodEnd: t.String(),
+	heatingProfileId: t.Optional(t.String()),
+	managementFeePercent: t.Optional(t.Number({ minimum: 0 }))
+});
+
+const calculate = (body: typeof calculationBody.static) =>
+	calculateStatementForContract(
+		body.contractId,
+		new Date(body.periodStart),
+		new Date(body.periodEnd),
+		body.heatingProfileId,
+		body.managementFeePercent
+	);
+
 export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 	// List all statements
 	.get(
@@ -90,12 +108,7 @@ export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 		'/preview',
 		async ({ body, set }) => {
 			try {
-				const calculation = await calculateStatementForContract(
-					body.contractId,
-					new Date(body.periodStart),
-					new Date(body.periodEnd),
-					body.heatingProfileId
-				);
+				const calculation = await calculate(body);
 
 				return {
 					preview: true,
@@ -107,12 +120,7 @@ export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 			}
 		},
 		{
-			body: t.Object({
-				contractId: t.String(),
-				periodStart: t.String(),
-				periodEnd: t.String(),
-				heatingProfileId: t.Optional(t.String())
-			})
+			body: calculationBody
 		}
 	)
 
@@ -122,12 +130,7 @@ export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 		async ({ body, set }) => {
 			try {
 				// Calculate the statement
-				const calculation = await calculateStatementForContract(
-					body.contractId,
-					new Date(body.periodStart),
-					new Date(body.periodEnd),
-					body.heatingProfileId
-				);
+				const calculation = await calculate(body);
 
 				// Generate statement number
 				const statementNumber = await generateStatementNumber(
@@ -178,13 +181,7 @@ export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 			}
 		},
 		{
-			body: t.Object({
-				contractId: t.String(),
-				buildingId: t.String(),
-				periodStart: t.String(),
-				periodEnd: t.String(),
-				heatingProfileId: t.Optional(t.String())
-			})
+			body: t.Composite([calculationBody, t.Object({ buildingId: t.String() })])
 		}
 	)
 

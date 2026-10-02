@@ -2,6 +2,9 @@ import type { Page } from '@playwright/test';
 
 export const periodStartInput = (page: Page) => page.getByTestId('period-start-input');
 export const periodEndInput = (page: Page) => page.getByTestId('period-end-input');
+export const heatingProfileSelect = (page: Page) => page.getByTestId('heating-profile-select');
+export const managementFeeInput = (page: Page) => page.getByTestId('management-fee-input');
+export const managementFeeHint = (page: Page) => page.getByTestId('management-fee-hint');
 export const buildingCheckbox = (page: Page, buildingId: string) =>
 	page.getByTestId(`generate-building-${buildingId}`);
 export const nextButton = (page: Page) => page.getByTestId('wizard-next');
