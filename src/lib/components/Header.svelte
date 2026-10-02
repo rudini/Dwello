@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { _ } from 'svelte-i18n';
 	import { clearStores } from '$lib/stores';
+	import { getXsrfTokenFromCookie } from '$lib/api';
 	import { openMobileNav } from '$lib/stores/navigation';
 	import Icon from './Icon.svelte';
 	import type { User } from '$lib/stores';
@@ -17,7 +18,8 @@
 
 	async function logout() {
 		try {
-			await fetch('/auth/logout', { method: 'POST' });
+			const xsrfToken = getXsrfTokenFromCookie();
+			await fetch('/auth/logout', { method: 'POST', headers: xsrfToken ? { 'X-XSRF-TOKEN': xsrfToken } : {} });
 			clearStores();
 			await goto('/login');
 		} catch (error) {
@@ -61,6 +63,7 @@
 					<button
 						type="button"
 						onclick={toggleDropdown}
+						data-testid="user-menu-button"
 						class="flex items-center gap-2 text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
 					>
 						{#if user.picture && !imageError}
@@ -78,7 +81,7 @@
 								{(user.name || user.email || '?').charAt(0).toUpperCase()}
 							</div>
 						{/if}
-						<span class="hidden md:block text-gray-700">{user.name || user.email}</span>
+						<span class="hidden md:block text-gray-700" data-testid="user-name">{user.name || user.email}</span>
 						<svg class="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
 							<path
 								fill-rule="evenodd"
@@ -108,7 +111,7 @@
 									<p class="text-gray-500 truncate">{user.email}</p>
 								</div>
 								<a
-									href="/settings"
+									href="/config"
 									class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
 									onclick={closeDropdown}
 								>
@@ -117,6 +120,7 @@
 								<button
 									type="button"
 									onclick={logout}
+									data-testid="logout-button"
 									class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
 								>
 									{$_('auth.signOut')}

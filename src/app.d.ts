@@ -4,11 +4,13 @@ declare global {
 	namespace App {
 		// interface Error {}
 		interface Locals {
+			// The signed-in user, from the session JWT (hooks.server.ts)
 			user?: {
-				id: string;
+				sub: string;
 				email: string;
 				name: string;
 				provider: string;
+				picture?: string;
 			};
 		}
 		// interface PageData {}

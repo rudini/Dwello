@@ -12,12 +12,8 @@ import {
 	isValidProvider,
 	validateProviderConfig
 } from '$lib/server/oauth';
-import {
-	ValidationError,
-	OAuthError,
-	handleRequestError,
-	logOAuthEvent
-} from '$lib/server/error-handler';
+import { ValidationError, handleRequestError, logOAuthEvent } from '$lib/server/error-handler';
+import { loginPage, rememberLoginFlow } from '$lib/server/login-flow';
 
 export const GET: RequestHandler = async ({ url, cookies }) => {
 	try {
@@ -36,12 +32,9 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
 			);
 		}
 
-		// Check if provider is configured
+		// The login page offers configured providers only; anything else leads back to it
 		if (!validateProviderConfig(provider)) {
-			throw new OAuthError(
-				`OAuth provider "${provider}" is not configured`,
-				provider
-			);
+			throw redirect(303, loginPage('unavailable'));
 		}
 
 		// Generate CSRF protection state
@@ -49,6 +42,7 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
 
 		// Store state in secure cookie
 		setOAuthStateCookie(cookies, state);
+		rememberLoginFlow(cookies, provider, url.searchParams.get('redirectTo'));
 
 		// Log the event
 		logOAuthEvent('login_initiated', provider, {

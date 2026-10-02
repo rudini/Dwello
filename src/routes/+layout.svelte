@@ -5,8 +5,6 @@
 	import { goto } from '$app/navigation';
 	import { user, clearStores } from '$lib/stores';
 	import { getXsrfTokenFromCookie } from '$lib/api';
-	import { initI18n } from '$lib/i18n';
-	import { isLoading as i18nLoading } from 'svelte-i18n';
 	import Header from '$lib/components/Header.svelte';
 	import Navigation from '$lib/components/Navigation.svelte';
 	import MobileNav from '$lib/components/MobileNav.svelte';
@@ -15,13 +13,10 @@
 	import type { LayoutData } from './$types';
 	import type { Snippet } from 'svelte';
 
-	// Initialize i18n
-	initI18n();
-
 	let { data, children }: { data: LayoutData; children: Snippet } = $props();
 
-	// Pages that don't require authentication
-	const publicPaths = ['/login', '/auth', '/error'];
+	// Pages without the app frame; hooks.server.ts lets only signed-in users reach the others
+	const publicPaths = ['/login', '/auth'];
 
 	function isPublicPath(path: string): boolean {
 		return publicPaths.some((p) => path.startsWith(p));
@@ -33,13 +28,6 @@
 			user.set(data.user);
 		} else {
 			user.set(null);
-		}
-	});
-
-	// Redirect to login if not authenticated on protected pages
-	$effect(() => {
-		if (!isPublicPath($page.url.pathname) && !data.user) {
-			goto('/login');
 		}
 	});
 

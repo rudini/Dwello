@@ -1,5 +1,6 @@
 import { defineConfig } from '@playwright/test';
 import { defineBddConfig, cucumberReporter } from 'playwright-bdd';
+import { E2E_JWT_SECRET } from './tests/e2e/fixtures/session';
 
 const E2E_BACKEND_URL = 'http://localhost:3101';
 const E2E_DATABASE_URL =
@@ -45,6 +46,7 @@ export default defineConfig({
 			env: {
 				PORT: '3101',
 				DATABASE_URL: E2E_DATABASE_URL,
+				JWT_SECRET: E2E_JWT_SECRET,
 				MAIL_TRANSPORT: 'smtp',
 				MAIL_FROM: 'verwaltung@dwello.test',
 				SMTP_HOST: '127.0.0.1',
@@ -52,20 +54,28 @@ export default defineConfig({
 			}
 		},
 		{
-			// Frontend dev server (SvelteKit) with E2E test mode enabled, talking to the E2E backend
+			// Frontend dev server (SvelteKit) talking to the E2E backend. Sessions are real JWTs signed with the
+			// same secret (fixtures/session.ts); Google sign-in is configured with test credentials and never completes.
 			command: 'npm run dev -- --port 3100 --strictPort',
 			port: 3100,
 			reuseExistingServer: !process.env.CI,
 			timeout: 30000,
 			env: {
-				E2E_TEST_MODE: 'true',
 				BACKEND_URL: E2E_BACKEND_URL,
-				BACKEND_API_URL: E2E_BACKEND_URL
+				BACKEND_API_URL: E2E_BACKEND_URL,
+				JWT_SECRET: E2E_JWT_SECRET,
+				OAUTH_GOOGLE_CLIENT_ID: 'e2e-google-client',
+				OAUTH_GOOGLE_CLIENT_SECRET: 'e2e-google-secret',
+				OAUTH_GOOGLE_REDIRECT_URI: 'http://localhost:3100/auth/callback',
+				OAUTH_MICROSOFT_CLIENT_ID: '',
+				OAUTH_MICROSOFT_CLIENT_SECRET: '',
+				OAUTH_MICROSOFT_REDIRECT_URI: ''
 			}
 		}
 	],
 	use: {
 		baseURL: 'http://localhost:3100',
+		locale: 'de-CH',
 		screenshot: 'only-on-failure',
 		video: 'off',
 		trace: 'on-first-retry'
