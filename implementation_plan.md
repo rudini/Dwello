@@ -2289,7 +2289,7 @@ Validation is defined inline in route handlers for type safety.
   - [ ] Target >75% code coverage
   - [ ] All tests pass: `npm run test`
 
-- [x] E2E Tests for Invoice Workflows
+- [ ] E2E Tests for Invoice Workflows (open: KI categorization display, sorting)
   - [x] Test create, read, update, delete workflows
   - [ ] Test LLM categorization display (needs a running Ollama; not part of the E2E environment)
   - [x] Test filtering (search, building, chargeability); sorting not tested

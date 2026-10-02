@@ -1,13 +1,5 @@
-<script lang="ts" module>
-	export type Suggestion = {
-		category: { id: string; name: string; isAllowedUtilityCost: boolean } | null;
-		confidence: number;
-		reasoning?: string;
-		isAllowedUtilityCost: boolean;
-	};
-</script>
-
 <script lang="ts">
+	import type { Suggestion } from '$lib/invoice';
 	import Badge from './Badge.svelte';
 	import Button from './Button.svelte';
 	import Icon from './Icon.svelte';

@@ -3,6 +3,7 @@ import { load as listLoad } from '../routes/invoices/+page.server';
 import { load as detailLoad } from '../routes/invoices/[id]/+page.server';
 import { load as editLoad } from '../routes/invoices/[id]/edit/+page.server';
 import { load as newLoad } from '../routes/invoices/new/+page.server';
+import { suggestionProvenance } from '../lib/invoice';
 
 const API = 'http://localhost:3001/api/v1';
 
@@ -88,6 +89,28 @@ describe('Rechnungsdetail', () => {
 
 		expect(shown.category?.name).toBe('Hauswart');
 		expect(shown.distributionKey?.name).toBe('Pro Fläche (m²)');
+	});
+});
+
+describe('Ursprüngliche KI-Kategorisierung', () => {
+	it('zeigt die Kategorie der KI deutsch, auch wenn die Rechnung inzwischen anders eingeordnet ist', async () => {
+		const values = { categoryId: 'c2', category: repairs, llmCategoryId: 'c1', llmCategory: caretaker, wasManuallyOverridden: true };
+		const { fetch } = backend({ '/invoices/i1': invoice(values) });
+
+		const { invoice: shown } = (await detailLoad({ params: { id: 'i1' }, fetch } as never)) as {
+			invoice: { llmCategory?: { name: string }; categorizationStatus: string };
+		};
+
+		expect(shown.llmCategory?.name).toBe('Hauswart');
+		expect(shown.categorizationStatus).toBe('manual');
+	});
+
+	it('hält beim Erfassen fest, welche Kategorie die KI vorgeschlagen hat', () => {
+		const suggestion = { category: { id: 'c1', name: 'Hauswart', isAllowedUtilityCost: true }, confidence: 0.92, isAllowedUtilityCost: true };
+
+		expect(suggestionProvenance(suggestion)).toEqual({ llmCategoryId: 'c1', llmConfidence: '0.92' });
+		expect(suggestionProvenance({ ...suggestion, category: null })).toEqual({});
+		expect(suggestionProvenance(null)).toEqual({});
 	});
 });
 
