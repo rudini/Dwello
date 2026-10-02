@@ -64,6 +64,14 @@ describe('Migrationen anwenden', () => {
 		expect(totals.map((row) => Number(row.total))).toEqual(totals.map(() => 100));
 	});
 
+	it('entfernt bei einer von Hand bis 0006 migrierten Datenbank die Schlüssel pro Person und nach Verbrauch', async () => {
+		const name = await database(upTo('0006'));
+
+		expect(await migrate(`${server}/${name}`, migrations)).toEqual(files.filter((file) => file > '0006~'));
+		const removed = await query(name, `SELECT name FROM distribution_keys WHERE name IN ('Per Person', 'By Consumption')`);
+		expect(removed).toEqual([]);
+	});
+
 	it('erkennt eine von Hand vollständig migrierte Datenbank', async () => {
 		const name = await database(files);
 

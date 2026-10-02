@@ -9,7 +9,8 @@ import pg from 'pg';
 
 /**
  * Databases set up before schema_migrations existed ran the files by hand.
- * The newest marker found tells how far: 0006 changed the apartment status check,
+ * The newest marker found tells how far: 0007 deleted the "Per Person" and "By Consumption" keys,
+ * 0006 changed the apartment status check,
  * 0005 created the documents table, 0001-0003 created and filled the schema
  * (0004 only corrects rows that still have the wrong total, so it may run again).
  */
@@ -29,7 +30,11 @@ export async function migrate(connectionString: string, directory: string) {
 		const files = (await readdir(directory)).filter((file) => file.endsWith('.sql')).sort();
 		const tracked = (await client.query(`SELECT to_regclass('schema_migrations') AS name`)).rows[0].name;
 		if (!tracked) {
-			const { latest } = (await client.query(ALREADY_APPLIED)).rows[0];
+			let { latest } = (await client.query(ALREADY_APPLIED)).rows[0];
+			if (latest === '0006') {
+				const removed = `SELECT 1 FROM distribution_keys WHERE name IN ('Per Person', 'By Consumption')`;
+				if ((await client.query(removed)).rowCount === 0) latest = '0007';
+			}
 			await client.query('CREATE TABLE schema_migrations (name text PRIMARY KEY, applied_at timestamptz NOT NULL DEFAULT now())');
 			for (const file of files.filter((file) => latest && file <= `${latest}~`)) {
 				await client.query('INSERT INTO schema_migrations (name) VALUES ($1)', [file]);

@@ -1408,6 +1408,14 @@ Validation is defined inline in route handlers for type safety.
 
   **Note:** 5 predefined distribution keys defined in `PREDEFINED_DISTRIBUTION_KEYS` array with multi-language names (DE, FR, IT, EN).
 
+- [x] Remove unsupported seed keys "Per Person" (`{persons}`) and "By Consumption" (`{consumption}`)
+  - [x] Migration reassigns their invoices/line items to "Per Unit" and deletes them
+  - [x] Real-DB test: every stored key and every keyed invoice of a building distributes validly
+
+  **Note:** The formula engine only supports `{area}`, `{rooms}`, `{volume}`, `{units}`; the data model has no occupant counts or meter readings. Statement calculation had silently fallen back to an equal split for these keys, so "Per Unit" keeps results unchanged.
+  **Files:** `backend/migrations/0007_remove_unsupported_distribution_keys.sql` (new), `backend/src/__tests__/distribution-key.pg.test.ts` (new)
+  **Tests:** `distribution-key.pg.test.ts`: 3 pass (`bun run test:pg`).
+
 ### 7.5 Validation Schemas
 
 - [x] Create validation schemas using Elysia t.Object
