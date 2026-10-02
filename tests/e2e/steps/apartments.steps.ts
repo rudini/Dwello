@@ -8,11 +8,6 @@ const { When, Then } = createBdd(test);
 // When steps
 // ============================================
 
-When('I open the apartments page', async ({ page }) => {
-	await page.goto('/apartments');
-	await page.waitForLoadState('domcontentloaded');
-});
-
 When('I open the new apartment page', async ({ page }) => {
 	await page.goto('/apartments/new');
 	await page.waitForLoadState('domcontentloaded');
@@ -31,26 +26,6 @@ When('I submit the new apartment form', async ({ page }) => {
 // ============================================
 // Then steps
 // ============================================
-
-Then('I should see the apartments page', async ({ page }) => {
-	await expect(page.getByTestId('apartments-page')).toBeVisible({ timeout: 5000 });
-});
-
-Then('I should see the apartments search input', async ({ page }) => {
-	await expect(page.locator('input#search')).toBeVisible({ timeout: 5000 });
-});
-
-Then('I should see the building filter', async ({ page }) => {
-	await expect(page.locator('select#building')).toBeVisible({ timeout: 5000 });
-});
-
-Then('I should see the apartment status filter', async ({ page }) => {
-	await expect(page.locator('select#status')).toBeVisible({ timeout: 5000 });
-});
-
-Then('I should be on the new apartment page', async ({ page }) => {
-	expect(page.url()).toContain('/apartments/new');
-});
 
 Then('I should see the building dropdown', async ({ page }) => {
 	await expect(page.locator('select#building')).toBeVisible({ timeout: 5000 });
@@ -130,45 +105,6 @@ Then('I should see the apartment number validation error', async ({ page }) => {
 // ============================================
 // Data loading verification steps
 // ============================================
-
-Then('I should see apartments in the list', async ({ page }) => {
-	// Wait for apartment cards to be visible
-	const apartmentLinks = page.locator('a[href^="/apartments/"]').filter({ hasText: 'Wohnung' });
-	await expect(apartmentLinks.first()).toBeVisible({ timeout: 5000 });
-	const count = await apartmentLinks.count();
-	expect(count).toBeGreaterThan(0);
-});
-
-Then('I should see apartment building names', async ({ page }) => {
-	// Check that building names are displayed (from API's buildingName field)
-	const buildingNames = ['Musterhaus Zentrum', 'Alpenblick', 'Seepark Residenz'];
-	let found = false;
-	for (const name of buildingNames) {
-		const count = await page.getByText(name).count();
-		if (count > 0) {
-			found = true;
-			break;
-		}
-	}
-	expect(found).toBe(true);
-});
-
-Then('I should see apartment occupancy status badges', async ({ page }) => {
-	// Check for occupancy status badges (inside apartment cards, not select options)
-	const apartmentCards = page.locator('a[href^="/apartments/"]');
-	const vermietedBadge = apartmentCards.getByText('Vermietet').first();
-	const leerBadge = apartmentCards.getByText('Leer').first();
-	// At least one of these should be visible
-	const vermietedVisible = await vermietedBadge.isVisible().catch(() => false);
-	const leerVisible = await leerBadge.isVisible().catch(() => false);
-	expect(vermietedVisible || leerVisible).toBe(true);
-});
-
-Then('I should see at least one {string} badge', async ({ page }, status: string) => {
-	// Look for badges inside apartment cards, not in select dropdowns
-	const apartmentCards = page.locator('a[href^="/apartments/"]');
-	await expect(apartmentCards.getByText(status).first()).toBeVisible({ timeout: 5000 });
-});
 
 // ============================================
 // Duplicate apartment number check steps

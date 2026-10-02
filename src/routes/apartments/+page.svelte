@@ -4,6 +4,7 @@
 	import type { ApartmentsListData } from '$lib/types';
 	import Button from '$lib/components/Button.svelte';
 	import Icon from '$lib/components/Icon.svelte';
+	import SearchField from '$lib/components/SearchField.svelte';
 	import Card from '$lib/components/Card.svelte';
 	import Badge from '$lib/components/Badge.svelte';
 
@@ -89,7 +90,7 @@
 			<h1 class="text-2xl font-bold text-gray-900">Wohnungen</h1>
 			<p class="text-gray-500 mt-1">{data.total} Wohnungen insgesamt</p>
 		</div>
-		<Button href="/apartments/new" variant="primary">
+		<Button href="/apartments/new" variant="primary" testid="apartments-new-button">
 			<Icon name="add" size={20} />
 			Neue Wohnung
 		</Button>
@@ -99,27 +100,12 @@
 	<Card>
 		<form onsubmit={(e) => { e.preventDefault(); handleSearch(); }} class="space-y-4">
 			<div class="flex flex-col sm:flex-row gap-4">
-				<div class="flex-1">
-					<label for="search" class="block text-sm font-medium text-gray-700 mb-1">Suche</label>
-					<div class="relative">
-						<Icon
-							name="search"
-							size={20}
-							class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-						/>
-						<input
-							id="search"
-							type="text"
-							bind:value={searchTerm}
-							placeholder="Wohnungsnummer, Gebäude oder Mieter..."
-							class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
-						/>
-					</div>
-				</div>
+				<SearchField bind:value={searchTerm} placeholder="Wohnungsnummer, Gebäude oder Mieter..." testid="apartments-search-input" />
 				<div class="w-full sm:w-48">
 					<label for="building" class="block text-sm font-medium text-gray-700 mb-1">Gebäude</label>
 					<select
 						id="building"
+						data-testid="apartments-building-filter"
 						bind:value={buildingFilter}
 						class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary bg-white"
 					>
@@ -133,6 +119,7 @@
 					<label for="status" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
 					<select
 						id="status"
+						data-testid="apartments-status-filter"
 						bind:value={statusFilter}
 						class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary bg-white"
 					>
@@ -144,7 +131,7 @@
 				</div>
 			</div>
 			<div class="flex gap-2">
-				<Button type="submit" variant="primary" size="sm">
+				<Button type="submit" variant="primary" size="sm" testid="apartments-search-submit">
 					<Icon name="search" size={16} />
 					Suchen
 				</Button>
@@ -184,6 +171,7 @@
 			{#each data.apartments as apartment}
 				<a
 					href="/apartments/{apartment.id}"
+					data-testid="apartment-card-{apartment.id}"
 					class="block bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-primary/30 transition-all duration-200"
 				>
 					<div class="p-5">
@@ -195,9 +183,11 @@
 								</h3>
 								<p class="text-sm text-gray-500">{apartment.floor}</p>
 							</div>
-							<Badge variant={getStatusVariant(apartment.status)}>
-								{getStatusLabel(apartment.status)}
-							</Badge>
+							<span data-testid="apartment-status">
+								<Badge variant={getStatusVariant(apartment.status)}>
+									{getStatusLabel(apartment.status)}
+								</Badge>
+							</span>
 						</div>
 
 						<!-- Building Info -->
