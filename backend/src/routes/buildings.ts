@@ -32,7 +32,7 @@ const buildingBodySchema = t.Object({
 	country: t.Optional(t.String()),
 	latitude: t.Optional(t.Nullable(t.String())),
 	longitude: t.Optional(t.Nullable(t.String())),
-	buildingType: t.Optional(t.String()),
+	buildingType: t.Optional(t.Nullable(t.String())),
 	yearBuilt: t.Optional(t.Nullable(t.Number()))
 });
 

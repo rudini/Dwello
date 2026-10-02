@@ -34,13 +34,21 @@ const sentBody = async (action: Action, params = {}) => {
 	return body;
 };
 
+// Elysia answers schema violations with { message }, the building routes with { error }
 const rejected = () => Response.json({ message: 'Kanton fehlt' }, { status: 422 });
+const refused = () => Response.json({ error: 'Gebäude existiert bereits' }, { status: 400 });
 
 describe('Neues Gebäude', () => {
 	it('zeigt die Fehlermeldung des Backends im Formular', async () => {
 		const result = await run(newActions.default as Action, rejected);
 
 		expect(result).toEqual({ success: false, errors: { form: 'Kanton fehlt' } });
+	});
+
+	it('zeigt die Fehlermeldung der Gebäude-Route im Formular', async () => {
+		const result = await run(newActions.default as Action, refused);
+
+		expect(result).toEqual({ success: false, errors: { form: 'Gebäude existiert bereits' } });
 	});
 
 	it('lässt den optionalen Gebäudetyp weg, statt null zu senden', async () => {
@@ -55,8 +63,14 @@ describe('Gebäude bearbeiten', () => {
 		expect(result).toEqual({ success: false, errors: { form: 'Kanton fehlt' } });
 	});
 
-	it('lässt den optionalen Gebäudetyp weg, statt null zu senden', async () => {
-		expect(await sentBody(editActions.default as Action, { id: 'b1' })).not.toHaveProperty('buildingType');
+	it('zeigt die Fehlermeldung der Gebäude-Route im Formular', async () => {
+		const result = await run(editActions.default as Action, refused, { id: 'b1' });
+
+		expect(result).toEqual({ success: false, errors: { form: 'Gebäude existiert bereits' } });
+	});
+
+	it('sendet null, damit ein leerer Gebäudetyp den gespeicherten Wert löscht', async () => {
+		expect(await sentBody(editActions.default as Action, { id: 'b1' })).toMatchObject({ buildingType: null });
 	});
 });
 

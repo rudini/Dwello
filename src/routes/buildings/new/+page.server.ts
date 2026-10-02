@@ -58,7 +58,7 @@ export const actions: Actions = {
 
 			if (!response.ok) {
 				const error = await response.json();
-				return { success: false, errors: { form: error.message || 'Fehler beim Erstellen' } };
+				return { success: false, errors: { form: error.error || error.message || 'Fehler beim Erstellen' } };
 			}
 
 			const newBuilding = await response.json();

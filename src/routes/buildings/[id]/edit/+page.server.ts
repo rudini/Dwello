@@ -93,14 +93,14 @@ export const actions: Actions = {
 					postalCode,
 					city,
 					canton: canton || null,
-					buildingType: buildingType || undefined,
+					buildingType: buildingType || null,
 					yearBuilt: yearBuilt ? parseInt(yearBuilt) : null
 				})
 			});
 
 			if (!response.ok) {
 				const error = await response.json();
-				return { success: false, errors: { form: error.message || 'Fehler beim Speichern' } };
+				return { success: false, errors: { form: error.error || error.message || 'Fehler beim Speichern' } };
 			}
 		} catch (err) {
 			console.error('Failed to update building:', err);
