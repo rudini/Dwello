@@ -165,6 +165,11 @@ npm run test
 npm run test:e2e
 ```
 
+The E2E run starts its own stack (backend on 3101, frontend on 3100) against its own database `dwello_e2e`,
+recreated from `backend/migrations` before every run (`cd backend && bun run e2e-db`). The development
+servers and database are never touched; only PostgreSQL on 5432 is required. Override the database with
+`E2E_DATABASE_URL`.
+
 ### Coverage
 ```bash
 npm run test -- --coverage

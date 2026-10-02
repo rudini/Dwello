@@ -18,7 +18,8 @@
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
-    "mail-catcher": "bun scripts/mail-catcher.ts"
+    "mail-catcher": "bun scripts/mail-catcher.ts",
+    "e2e-db": "bun scripts/e2e-db.ts"
   },
   "dependencies": {
     "@elysiajs/cors": "^1.2.0",

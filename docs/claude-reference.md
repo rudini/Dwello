@@ -256,6 +256,11 @@ npm run test:e2e        # Generate + run E2E tests
 npm run test:e2e:ui     # Generate + run with Playwright UI
 ```
 
+The E2E run starts its own stack (backend on 3101, frontend on 3100) against its own database `dwello_e2e`,
+recreated from `backend/migrations` before every run (`cd backend && bun run e2e-db`). The development
+servers and database are never touched; only PostgreSQL on 5432 is required. Override the database with
+`E2E_DATABASE_URL`.
+
 **Critical E2E Flows:**
 1. Building creation with OpenPLZ address search
 2. Tenant move with contract change

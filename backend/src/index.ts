@@ -13,7 +13,7 @@ testConnection().then((connected) => {
 	}
 });
 
-app.listen(3001);
+app.listen(Number(process.env.PORT) || 3001);
 
 console.log(`🚀 Dwello Backend running at http://${app.server?.hostname}:${app.server?.port}`);
 console.log(`📚 Swagger API docs at http://${app.server?.hostname}:${app.server?.port}/swagger`);

@@ -1,7 +1,7 @@
 import { randomUUID } from 'crypto';
 import type { APIRequestContext, APIResponse } from '@playwright/test';
 
-const BACKEND_API = 'http://localhost:3001/api/v1';
+const BACKEND_API = 'http://localhost:3101/api/v1'; // E2E backend (playwright.config.ts)
 
 async function body(response: APIResponse) {
 	if (!response.ok()) throw new Error(`${response.url()} antwortet ${response.status()}: ${await response.text()}`);
