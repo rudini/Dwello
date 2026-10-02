@@ -16,6 +16,7 @@
 		buildings: (Building & { apartmentCount: number })[];
 		heatingProfiles: HeatingProfile[];
 		defaultManagementFeePercent: number;
+		defaultHeatingProfileId: string;
 		defaultPeriod: {
 			start: string;
 			end: string;
@@ -33,7 +34,7 @@
 		untrack(() => ({
 			periodStart: data.defaultPeriod.start,
 			periodEnd: data.defaultPeriod.end,
-			heatingProfileId: '',
+			heatingProfileId: data.defaultHeatingProfileId,
 			managementFeePercent: data.defaultManagementFeePercent,
 			buildingIds: []
 		}))

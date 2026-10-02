@@ -251,28 +251,6 @@ export interface HeatingProfile {
 	};
 }
 
-// System Configuration types
-export type AccountingPeriod = 'calendar' | 'july-june' | 'october-september';
-
-export interface SystemConfig {
-	id: string;
-	accountingPeriod: AccountingPeriod;
-	managementFeePercentage: number; // usually up to 3%, not a limit
-	defaultHeatingProfileId?: string;
-	defaultDistributionKeyId?: string;
-	companyName?: string;
-	companyAddress?: string;
-	iban?: string;
-	updatedAt?: string;
-}
-
-// Configuration page data
-export interface ConfigPageData {
-	config: SystemConfig;
-	heatingProfiles: HeatingProfile[];
-	distributionKeys: DistributionKey[];
-}
-
 // Statement types
 export type StatementStatus = 'draft' | 'sent' | 'paid' | 'overdue';
 

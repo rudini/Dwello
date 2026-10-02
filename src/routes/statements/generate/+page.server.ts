@@ -6,6 +6,7 @@ import {
 	previewStatements,
 	type GenerationRequest
 } from '$lib/server/statement-generation';
+import { lastCompletedPeriod, type AccountingPeriodType } from '$lib/accounting-period';
 import type { Actions } from './$types';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
@@ -18,20 +19,20 @@ async function json(fetch: typeof globalThis.fetch, path: string): Promise<Row> 
 }
 
 export const load = async ({ fetch }: { fetch: typeof globalThis.fetch }) => {
-	const [buildings, heatingProfiles, managementFee] = await Promise.all([
+	const [buildings, heatingProfiles, config] = await Promise.all([
 		json(fetch, 'buildings?limit=100'),
 		json(fetch, 'heating-profiles?limit=100'),
-		json(fetch, 'config/management_fee_pct')
+		json(fetch, 'config')
 	]);
+	const settings = (config.data ?? {}) as Record<string, string | null>;
 
-	// Default to previous calendar year
-	const lastYear = new Date().getFullYear() - 1;
+	// Defaults from the settings, adjustable per generation run
 	return {
 		buildings: (buildings.buildings ?? []) as (Building & { apartmentCount: number })[],
 		heatingProfiles: ((heatingProfiles.data ?? []) as Row[]).map(toHeatingProfile),
-		// Default from the configuration, adjustable per generation run
-		defaultManagementFeePercent: Number(managementFee.value ?? 3),
-		defaultPeriod: { start: `${lastYear}-01-01`, end: `${lastYear}-12-31` }
+		defaultManagementFeePercent: Number(settings.management_fee_pct ?? 3),
+		defaultPeriod: lastCompletedPeriod((settings.accounting_period ?? 'calendar') as AccountingPeriodType),
+		defaultHeatingProfileId: settings.default_heating_profile_id ?? ''
 	};
 };
 
