@@ -188,7 +188,8 @@ export async function getStatement(id: string): Promise<StatementWithDetails | n
 				id: tenants.id,
 				firstName: tenants.firstName,
 				lastName: tenants.lastName,
-				email: tenants.email
+				email: tenants.email,
+				correspondenceChannel: tenants.correspondenceChannel
 			},
 			apartment: {
 				id: apartments.id,

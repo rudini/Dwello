@@ -52,6 +52,7 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<StatementsLi
 				paymentDeadline: s.paymentDeadline,
 				paidDate: s.paidDate,
 				pdfGeneratedAt: s.pdfGeneratedAt,
+				lastReminderDate: s.reminderSentDate,
 				tenantName: tenant ? `${tenant.firstName} ${tenant.lastName}` : 'Unbekannt',
 				tenantEmail: (tenant?.email as string) || '',
 				apartmentUnit: (apartment?.number as string) || '',

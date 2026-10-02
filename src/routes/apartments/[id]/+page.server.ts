@@ -1,6 +1,7 @@
 import type { ApartmentDetailsData, Apartment, Building, Tenant, RentalContract, MonthlyCosts, ContractHistory, ApartmentStatus } from '$lib/types';
 import type { PageServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
+import { toContractHistory } from '$lib/server/contract-history';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
@@ -75,19 +76,11 @@ export const load: PageServerLoad = async ({ params, fetch }): Promise<Apartment
 		};
 
 		// Map contract history (camelCase from backend)
-		const contractHistory: ContractHistory[] = (data.contractHistory || []).map((c: Record<string, unknown>) => ({
-			id: c.id as string,
-			tenantName: `${c.tenantFirstName || ''} ${c.tenantLastName || ''}`.trim(),
-			tenantFirstName: (c.tenantFirstName || '') as string,
-			tenantLastName: (c.tenantLastName || '') as string,
-			period: c.endDate
-				? `${formatDate(c.startDate as string)} - ${formatDate(c.endDate as string)}`
-				: `${formatDate(c.startDate as string)} - Heute`,
-			rentBrutto: Number(c.baseRent || 0) + Number(c.additionalRent || 0) + Number(c.advancePayment || 0),
-			isActive: !c.endDate,
-			startDate: c.startDate as string,
-			endDate: (c.endDate as string) || null
-		}));
+		const contractHistory: ContractHistory[] = (data.contractHistory || []).map(
+			(c: Record<string, string>) =>
+				toContractHistory(c, { firstName: c.tenantFirstName ?? '', lastName: c.tenantLastName ?? '' })
+		);
+
 
 		return {
 			apartment,
@@ -105,8 +98,3 @@ export const load: PageServerLoad = async ({ params, fetch }): Promise<Apartment
 		throw error(500, 'Fehler beim Laden der Wohnung');
 	}
 };
-
-function formatDate(dateStr: string): string {
-	const date = new Date(dateStr);
-	return date.toLocaleDateString('de-CH');
-}

@@ -3,8 +3,9 @@
 	import Button from '$lib/components/Button.svelte';
 	import Icon from '$lib/components/Icon.svelte';
 	import Card from '$lib/components/Card.svelte';
+	import DocumentRow from '$lib/components/DocumentRow.svelte';
 	import StatusBadge from '$lib/components/StatusBadge.svelte';
-	import type { Tenant, ContractHistory } from '$lib/types';
+	import type { Tenant, ContractHistory, StatementDocument } from '$lib/types';
 
 	interface PageData {
 		tenant: Tenant;
@@ -15,6 +16,7 @@
 			startDate: string;
 		} | null;
 		contractHistory: ContractHistory[];
+		documents: StatementDocument[];
 	}
 
 	let { data }: { data: PageData } = $props();
@@ -51,7 +53,8 @@
 		<a href="/tenants" class="hover:text-primary transition-colors">Mieter</a>
 		<Icon name="chevron_right" size={16} class="mx-2" />
 		<span class="text-gray-900 font-medium">
-			{data.tenant.firstName} {data.tenant.lastName}
+			{data.tenant.firstName}
+			{data.tenant.lastName}
 		</span>
 	</nav>
 
@@ -67,7 +70,8 @@
 			<div>
 				<div class="flex items-center gap-3">
 					<h1 class="text-2xl font-bold text-gray-900">
-						{data.tenant.firstName} {data.tenant.lastName}
+						{data.tenant.firstName}
+						{data.tenant.lastName}
 					</h1>
 					{#if data.currentOccupancy}
 						<StatusBadge status="AKTIV" variant="success" />
@@ -103,6 +107,15 @@
 							<a href="mailto:{data.tenant.email}" class="text-primary hover:underline">
 								{data.tenant.email}
 							</a>
+						</div>
+					</div>
+					<div class="flex items-start gap-3">
+						<Icon name="forward_to_inbox" size={20} class="text-gray-400 mt-0.5" />
+						<div>
+							<p class="text-sm text-gray-500">Korrespondenz</p>
+							<p class="text-gray-900" data-testid="tenant-channel">
+								{data.tenant.correspondenceChannel === 'email' ? 'Per E-Mail' : 'Per Brief'}
+							</p>
 						</div>
 					</div>
 					{#if data.tenant.phone}
@@ -192,9 +205,7 @@
 					<div class="text-center py-12">
 						<Icon name="description" size={48} class="mx-auto text-gray-300 mb-4" />
 						<h3 class="text-lg font-medium text-gray-900 mb-2">Keine Verträge</h3>
-						<p class="text-gray-500 mb-4">
-							Dieser Mieter hat noch keine Mietverträge.
-						</p>
+						<p class="text-gray-500 mb-4">Dieser Mieter hat noch keine Mietverträge.</p>
 						<Button href="/contracts/new?tenant={data.tenant.id}" variant="primary">
 							<Icon name="add" size={18} />
 							Ersten Vertrag erstellen
@@ -256,6 +267,19 @@
 					</div>
 				{/if}
 			</Card>
+
+			<Card>
+				<h2 class="text-lg font-semibold text-gray-900 mb-4">Dokumente</h2>
+				{#if data.documents.length === 0}
+					<p class="text-gray-500">Noch keine Dokumente.</p>
+				{:else}
+					<ul class="divide-y divide-gray-100" data-testid="tenant-documents">
+						{#each data.documents as document (document.id)}
+							<DocumentRow {document} />
+						{/each}
+					</ul>
+				{/if}
+			</Card>
 		</div>
 	</div>
 </div>
@@ -271,13 +295,14 @@
 				<div>
 					<h3 class="text-lg font-semibold text-gray-900">Mieter löschen</h3>
 					<p class="text-sm text-gray-500">
-						{data.tenant.firstName} {data.tenant.lastName}
+						{data.tenant.firstName}
+						{data.tenant.lastName}
 					</p>
 				</div>
 			</div>
 			<p class="text-gray-600 mb-6">
-				Sind Sie sicher, dass Sie diesen Mieter löschen möchten? Diese Aktion kann nicht
-				rückgängig gemacht werden.
+				Sind Sie sicher, dass Sie diesen Mieter löschen möchten? Diese Aktion kann nicht rückgängig
+				gemacht werden.
 			</p>
 			{#if data.currentOccupancy}
 				<div class="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-6">
@@ -291,11 +316,7 @@
 			{/if}
 			<div class="flex gap-3 justify-end">
 				<Button variant="secondary" onclick={() => (showDeleteModal = false)}>Abbrechen</Button>
-				<Button
-					variant="danger"
-					onclick={handleDelete}
-					disabled={!!data.currentOccupancy}
-				>
+				<Button variant="danger" onclick={handleDelete} disabled={!!data.currentOccupancy}>
 					<Icon name="delete" size={18} />
 					Löschen
 				</Button>

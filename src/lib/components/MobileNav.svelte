@@ -1,31 +1,8 @@
 <script lang="ts">
 	import { page } from '$app/stores';
+	import { isActive, navItems } from '$lib/navigation';
 	import { mobileNavOpen, closeMobileNav } from '$lib/stores/navigation';
 	import Icon from './Icon.svelte';
-
-	interface NavItem {
-		name: string;
-		href: string;
-		icon: string;
-	}
-
-	const navItems: NavItem[] = [
-		{ name: 'Dashboard', href: '/dashboard', icon: 'dashboard' },
-		{ name: 'Gebäude', href: '/buildings', icon: 'apartment' },
-		{ name: 'Wohnungen', href: '/apartments', icon: 'door_front' },
-		{ name: 'Mieter', href: '/tenants', icon: 'people' },
-		{ name: 'Verträge', href: '/contracts', icon: 'description' },
-		{ name: 'Rechnungen', href: '/invoices', icon: 'receipt_long' },
-		{ name: 'Abrechnungen', href: '/statements', icon: 'summarize' },
-		{ name: 'Konfiguration', href: '/config', icon: 'settings' }
-	];
-
-	function isActive(href: string, currentPath: string): boolean {
-		if (href === '/dashboard') {
-			return currentPath === '/' || currentPath === '/dashboard';
-		}
-		return currentPath.startsWith(href);
-	}
 
 	function handleNavClick() {
 		closeMobileNav();

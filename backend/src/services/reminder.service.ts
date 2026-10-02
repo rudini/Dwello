@@ -1,0 +1,107 @@
+/**
+ * Reminder Service
+ * Payment reminders for unpaid utility statements: Zahlungserinnerung, 2. and 3. Mahnung.
+ * Each reminder is stored as a PDF document and goes out through the tenant's correspondence channel:
+ * by e-mail, or kept as "to_send" for the property manager to print and post.
+ */
+
+import { createMailTransport, MailConfigError } from '../mail';
+import { getTypedConfig } from './config.service';
+import { countReminders, createDocument, markDocumentSent, recordDeliveryError } from './document.service';
+import { reminderLetter } from './reminder-letter';
+import { renderReminderPdf, type PostalAddress } from './reminder-pdf';
+import { getStatement, updateStatement } from './statement.service';
+import { getTenant } from './tenant.service';
+
+const MAX_REMINDER_LEVEL = 3;
+const PAYMENT_DAYS = 10; // new payment deadline in each reminder
+
+/** The request cannot be fulfilled (shown to the property manager) */
+export class ReminderError extends Error {
+	constructor(
+		message: string,
+		readonly status = 400
+	) {
+		super(message);
+	}
+}
+
+type Document = NonNullable<Awaited<ReturnType<typeof markDocumentSent>>>;
+
+const isoDate = (date: Date) => date.toISOString().split('T')[0];
+
+async function sender(): Promise<PostalAddress & { iban: string }> {
+	return {
+		name: await getTypedConfig('company_name'),
+		address: await getTypedConfig('company_address'),
+		postalCode: await getTypedConfig('company_postal_code'),
+		city: await getTypedConfig('company_city'),
+		iban: await getTypedConfig('iban')
+	};
+}
+
+async function nextLevel(statementId: string, status: string) {
+	if (!['sent', 'overdue'].includes(status)) {
+		throw new ReminderError('Nur versendete Abrechnungen können gemahnt werden.');
+	}
+	const level = (await countReminders(statementId)) + 1;
+	if (level > MAX_REMINDER_LEVEL) throw new ReminderError('Es wurden bereits 3 Mahnungen versendet.');
+	return level;
+}
+
+async function deliverByEmail(document: Document, to: string | null, letter: ReturnType<typeof reminderLetter>, pdf: Buffer) {
+	try {
+		if (!to) throw new Error('Der Mieter hat keine E-Mail-Adresse.');
+		await createMailTransport().send({
+			to,
+			subject: letter.subject,
+			text: letter.text,
+			attachments: [{ filename: document.fileName, content: pdf, contentType: 'application/pdf' }]
+		});
+		return { document: (await markDocumentSent(document.id))! };
+	} catch (error) {
+		const deliveryError =
+			error instanceof MailConfigError
+				? 'Der E-Mail-Versand ist nicht eingerichtet.'
+				: (error as Error).message;
+		return { document: (await recordDeliveryError(document.id, deliveryError))!, deliveryError };
+	}
+}
+
+export async function sendReminder(statementId: string) {
+	const statement = await getStatement(statementId);
+	if (!statement) throw new ReminderError('Abrechnung nicht gefunden.', 404);
+	const level = await nextLevel(statementId, statement.status);
+	const tenant = (await getTenant(statement.tenantId))!;
+	const from = await sender();
+	const today = new Date();
+
+	const letter = reminderLetter({
+		level,
+		statementNumber: statement.statementNumber,
+		periodStart: statement.periodStart,
+		periodEnd: statement.periodEnd,
+		balance: Number(statement.balance),
+		deadline: isoDate(new Date(today.getTime() + PAYMENT_DAYS * 86_400_000)),
+		tenant,
+		sender: { name: from.name, iban: from.iban }
+	});
+	const recipient = { ...tenant, name: `${tenant.firstName} ${tenant.lastName}` };
+	const pdf = await renderReminderPdf(letter, from, recipient, today.toLocaleDateString('de-CH'));
+
+	const document = await createDocument({
+		tenantId: tenant.id,
+		statementId,
+		type: 'reminder',
+		reminderLevel: level,
+		title: letter.title,
+		fileName: `${letter.title} ${statement.statementNumber}.pdf`.replace(/[^\w. -]/g, '_'),
+		pdf: pdf.toString('base64'),
+		channel: tenant.correspondenceChannel,
+		status: 'to_send'
+	});
+	await updateStatement(statementId, { reminderSentDate: isoDate(today) });
+
+	if (tenant.correspondenceChannel !== 'email') return { document };
+	return deliverByEmail(document, tenant.email, letter, pdf);
+}

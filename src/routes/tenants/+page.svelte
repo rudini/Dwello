@@ -53,7 +53,7 @@
 			<h1 class="text-2xl font-bold text-gray-900">Mieter</h1>
 			<p class="text-gray-500 mt-1">{data.total} Mieter insgesamt</p>
 		</div>
-		<Button href="/tenants/new" variant="primary">
+		<Button href="/tenants/new" variant="primary" testid="tenants-new-button">
 			<Icon name="person_add" size={20} />
 			Neuer Mieter
 		</Button>
@@ -73,6 +73,7 @@
 						/>
 						<input
 							id="search"
+							data-testid="tenants-search-input"
 							type="text"
 							bind:value={searchTerm}
 							placeholder="Name, E-Mail oder Gebäude..."
@@ -94,7 +95,7 @@
 				</div>
 			</div>
 			<div class="flex gap-2">
-				<Button type="submit" variant="primary" size="sm">
+				<Button type="submit" variant="primary" size="sm" testid="tenants-search-submit">
 					<Icon name="search" size={16} />
 					Suchen
 				</Button>
@@ -134,6 +135,7 @@
 			{#each data.tenants as tenant}
 				<a
 					href="/tenants/{tenant.id}"
+					data-testid="tenant-card-{tenant.id}"
 					class="block bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-primary/30 transition-all duration-200"
 				>
 					<div class="p-5">

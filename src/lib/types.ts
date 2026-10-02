@@ -61,6 +61,7 @@ export interface Tenant {
 	address?: string | null;
 	postalCode?: string | null;
 	city?: string | null;
+	correspondenceChannel?: 'email' | 'letter';
 	createdAt?: Date | string;
 	updatedAt?: Date | string;
 }
@@ -325,6 +326,7 @@ export interface Statement {
 export interface StatementWithDetails extends Statement {
 	tenantName: string;
 	tenantEmail?: string;
+	tenantCorrespondenceChannel?: 'email' | 'letter';
 	apartmentUnit: string;
 	apartmentFloor: string;
 	buildingName: string;
@@ -344,4 +346,22 @@ export interface StatementsListData {
 		paid: number;
 		overdue: number;
 	};
+}
+
+// Stored letters such as payment reminders (PDF lives in the backend)
+export interface StatementDocument {
+	id: string;
+	tenantId: string;
+	statementId: string | null;
+	type: 'reminder';
+	reminderLevel: number | null;
+	title: string;
+	fileName: string;
+	channel: 'email' | 'letter';
+	status: 'sent' | 'to_send';
+	sentAt: string | null;
+	deliveryError: string | null;
+	createdAt: string;
+	tenantName: string;
+	statementNumber: string | null;
 }

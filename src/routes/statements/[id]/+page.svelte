@@ -1,5 +1,8 @@
 <script lang="ts">
-	import type { StatementWithDetails, StatementStatus } from '$lib/types';
+	import type { StatementDocument, StatementWithDetails, StatementStatus } from '$lib/types';
+	import ReminderModal from './ReminderModal.svelte';
+	import ReminderHistory from './ReminderHistory.svelte';
+	import ReminderFeedback from './ReminderFeedback.svelte';
 	import { addToast } from '$lib/stores';
 	import Button from '$lib/components/Button.svelte';
 	import Icon from '$lib/components/Icon.svelte';
@@ -14,6 +17,7 @@
 
 	interface PageData {
 		statement: StatementWithDetails;
+		reminders: StatementDocument[];
 	}
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
@@ -21,7 +25,6 @@
 	let showMarkPaidModal = $state(false);
 	let showSendReminderModal = $state(false);
 	let showDeleteModal = $state(false);
-	let isProcessing = $state(false);
 	let isGeneratingPdf = $state(false);
 	let pdfGeneratedAt = $state(untrack(() => data.statement.pdfGeneratedAt));
 
@@ -71,14 +74,6 @@
 		if (balance > 0) return 'Nachzahlung durch Mieter';
 		if (balance < 0) return 'Rückerstattung an Mieter';
 		return 'Ausgeglichen';
-	}
-
-	async function handleSendReminder() {
-		isProcessing = true;
-		await new Promise((resolve) => setTimeout(resolve, 1000));
-		console.log('Sending reminder:', data.statement.id);
-		showSendReminderModal = false;
-		isProcessing = false;
 	}
 
 	async function handleGeneratePdf() {
@@ -153,7 +148,11 @@
 				</Button>
 			{/if}
 			{#if data.statement.status === 'sent' || data.statement.status === 'overdue'}
-				<Button variant="secondary" onclick={() => (showSendReminderModal = true)}>
+				<Button
+					variant="secondary"
+					onclick={() => (showSendReminderModal = true)}
+					testid="statement-reminder-button"
+				>
 					<Icon name="mail" size={20} />
 					Mahnung senden
 				</Button>
@@ -177,6 +176,7 @@
 		</div>
 	</div>
 	<FieldError message={form?.actionError} />
+	<ReminderFeedback reminder={form?.reminder} />
 
 	<div class="grid gap-6 lg:grid-cols-3">
 		<!-- Main Content -->
@@ -246,6 +246,8 @@
 					</table>
 				</div>
 			</Card>
+
+			<ReminderHistory reminders={data.reminders} />
 
 			<!-- Payment Info -->
 			<Card>
@@ -438,43 +440,11 @@
 	</form>
 </Modal>
 
-<!-- Send Reminder Modal -->
-<Modal
-	open={showSendReminderModal}
-	title="Mahnung senden"
-	onclose={() => (showSendReminderModal = false)}
->
-	<p class="text-gray-600 mb-4">Möchten Sie eine Zahlungserinnerung an den Mieter senden?</p>
-	<div class="p-3 bg-gray-50 rounded-lg mb-4">
-		<p class="font-medium text-gray-900">{data.statement.tenantName}</p>
-		{#if data.statement.tenantEmail}
-			<p class="text-sm text-gray-500">{data.statement.tenantEmail}</p>
-		{/if}
-		<p class="text-lg font-bold text-red-600 mt-2">
-			Offen: {formatCurrency(Math.abs(data.statement.balance))}
-		</p>
-	</div>
-	{#if data.statement.lastReminderDate}
-		<div class="p-3 bg-amber-50 border border-amber-200 rounded-lg mb-4 flex items-start gap-2">
-			<Icon name="warning" size={18} class="text-amber-500 flex-shrink-0 mt-0.5" />
-			<p class="text-sm text-amber-700">
-				Letzte Mahnung wurde am {formatDate(data.statement.lastReminderDate)} gesendet.
-			</p>
-		</div>
-	{/if}
-	<div class="flex justify-end gap-3">
-		<Button variant="secondary" onclick={() => (showSendReminderModal = false)}>Abbrechen</Button>
-		<Button variant="primary" onclick={handleSendReminder} disabled={isProcessing}>
-			{#if isProcessing}
-				<Icon name="progress_activity" size={20} class="animate-spin" />
-				Wird gesendet...
-			{:else}
-				<Icon name="send" size={20} />
-				Mahnung senden
-			{/if}
-		</Button>
-	</div>
-</Modal>
+<ReminderModal
+	bind:open={showSendReminderModal}
+	statement={data.statement}
+	sentReminders={data.reminders.length}
+/>
 
 <!-- Delete Modal -->
 <Modal open={showDeleteModal} title="Abrechnung löschen" onclose={() => (showDeleteModal = false)}>

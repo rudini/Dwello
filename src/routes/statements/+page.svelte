@@ -6,6 +6,13 @@
 	import Card from '$lib/components/Card.svelte';
 	import Badge from '$lib/components/Badge.svelte';
 	import { formatCurrency, formatDate } from '$lib/utils/format';
+	import { invalidateAll } from '$app/navigation';
+
+	// Payment received today; the endpoint stores it in the database
+	async function markPaid(id: string) {
+		await fetch(`/statements/${id}/mark-paid`, { method: 'POST' });
+		await invalidateAll();
+	}
 
 	let { data }: { data: StatementsListData } = $props();
 
@@ -334,6 +341,8 @@
 											<button
 												class="p-1.5 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
 												title="Als bezahlt markieren"
+												data-testid="statement-row-mark-paid"
+												onclick={() => markPaid(statement.id)}
 											>
 												<Icon name="paid" size={18} />
 											</button>

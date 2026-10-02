@@ -15,6 +15,7 @@ import { invoiceRoutes } from './routes/invoices';
 import { distributionKeyRoutes } from './routes/distribution-keys';
 import { heatingProfileRoutes } from './routes/heating-profiles';
 import { configRoutes } from './routes/config';
+import { documentRoutes } from './routes/documents';
 import { statementRoutes } from './routes/statements';
 import { authMiddleware } from './middleware/auth';
 
@@ -69,4 +70,5 @@ export const app = new Elysia()
 	.use(distributionKeyRoutes)
 	.use(heatingProfileRoutes)
 	.use(configRoutes)
-	.use(statementRoutes);
+	.use(statementRoutes)
+	.use(documentRoutes);

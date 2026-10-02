@@ -25,11 +25,24 @@ export default defineConfig({
 	// Expects: PostgreSQL on 5432, Backend on 3001, Frontend on 3000
 	webServer: [
 		{
-			// Backend server (ElysiaJS)
+			// Mail catcher: real SMTP server that keeps reminders sent by e-mail for the tests to read
+			command: 'cd backend && bun run mail-catcher',
+			port: 2526,
+			reuseExistingServer: true,
+			timeout: 30000
+		},
+		{
+			// Backend server (ElysiaJS), sending e-mail to the mail catcher
 			command: 'cd backend && bun run src/index.ts',
 			port: 3001,
 			reuseExistingServer: true,
-			timeout: 30000
+			timeout: 30000,
+			env: {
+				MAIL_TRANSPORT: 'smtp',
+				MAIL_FROM: 'verwaltung@dwello.test',
+				SMTP_HOST: '127.0.0.1',
+				SMTP_PORT: '2525'
+			}
 		},
 		{
 			// Frontend dev server (SvelteKit) with E2E test mode enabled

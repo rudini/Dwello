@@ -31,7 +31,8 @@ const tenantBodySchema = t.Object({
 	language: t.Optional(t.String()),
 	address: t.Optional(t.Nullable(t.String())),
 	postalCode: t.Optional(t.Nullable(t.String())),
-	city: t.Optional(t.Nullable(t.String()))
+	city: t.Optional(t.Nullable(t.String())),
+	correspondenceChannel: t.Optional(t.Union([t.Literal('email'), t.Literal('letter')]))
 });
 
 const tenantUpdateSchema = t.Partial(tenantBodySchema);

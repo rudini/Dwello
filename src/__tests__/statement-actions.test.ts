@@ -51,3 +51,21 @@ describe('Abrechnung löschen', () => {
 		});
 	});
 });
+
+describe('Mahnung senden', () => {
+	it('lässt das Backend die nächste Mahnung erstellen und versenden', async () => {
+		const { calls, result } = runAction(actions.remind, 's1', 201);
+		await result;
+
+		expect(calls).toEqual([{ method: 'POST', url: `${API}/reminders`, body: undefined }]);
+	});
+
+	it('zeigt die Begründung des Backends, wenn keine Mahnung möglich ist', async () => {
+		const { result } = runAction(actions.remind, 's1', 400);
+
+		expect(await result).toMatchObject({
+			status: 400,
+			data: { actionError: 'Mahnung konnte nicht erstellt werden.' }
+		});
+	});
+});

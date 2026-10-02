@@ -91,6 +91,23 @@ export function testData(request: APIRequestContext, token: string) {
 			ids.set(`Abrechnung ${tenantTitle} ${year}`, statement.id);
 		},
 
+		// E-mail address and postal address, so both channels can deliver
+		async correspondence(tenantTitle: string, channel: 'email' | 'letter') {
+			const email = `${ids.get(tenantTitle)}@dwello.test`;
+			await put(`tenants/${ids.get(tenantTitle)}`, {
+				email,
+				address: 'Ahornweg 3',
+				postalCode: '8400',
+				city: 'Winterthur',
+				correspondenceChannel: channel
+			});
+			names.set(`E-Mail ${tenantTitle}`, email);
+		},
+
+		async remind(tenantTitle: string, year: number) {
+			await post(`statements/${ids.get(`Abrechnung ${tenantTitle} ${year}`)}/reminders`, {});
+		},
+
 		async sendStatement(tenantTitle: string, year: number) {
 			await put(`statements/${ids.get(`Abrechnung ${tenantTitle} ${year}`)}/status`, { status: 'sent' });
 		},

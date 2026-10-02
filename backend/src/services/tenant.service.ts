@@ -43,8 +43,7 @@ export async function listTenants(filters: TenantFilters = {}): Promise<{
 	if (search) {
 		conditions.push(
 			or(
-				ilike(tenants.firstName, `%${search}%`),
-				ilike(tenants.lastName, `%${search}%`),
+				ilike(sql`${tenants.firstName} || ' ' || ${tenants.lastName}`, `%${search}%`),
 				ilike(tenants.email, `%${search}%`)
 			)
 		);
@@ -66,6 +65,7 @@ export async function listTenants(filters: TenantFilters = {}): Promise<{
 			address: tenants.address,
 			postalCode: tenants.postalCode,
 			city: tenants.city,
+			correspondenceChannel: tenants.correspondenceChannel,
 			createdAt: tenants.createdAt,
 			updatedAt: tenants.updatedAt,
 			contractCount: sql<number>`(SELECT COUNT(*) FROM rental_contracts WHERE rental_contracts.tenant_id = ${tenants.id})`.as(
@@ -149,6 +149,7 @@ export async function getTenant(id: string): Promise<TenantWithOccupancy | null>
 			address: tenants.address,
 			postalCode: tenants.postalCode,
 			city: tenants.city,
+			correspondenceChannel: tenants.correspondenceChannel,
 			createdAt: tenants.createdAt,
 			updatedAt: tenants.updatedAt,
 			contractCount: sql<number>`(SELECT COUNT(*) FROM rental_contracts WHERE rental_contracts.tenant_id = ${tenants.id})`.as(

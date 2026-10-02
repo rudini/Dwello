@@ -21,7 +21,9 @@ export const actions: Actions = {
 			})
 		});
 		if (!response.ok) {
-			return fail(response.status, { errors: { form: 'Abrechnung konnte nicht gespeichert werden.' } });
+			return fail(response.status, {
+				errors: { form: 'Abrechnung konnte nicht gespeichert werden.' }
+			});
 		}
 		throw redirect(303, `/statements/${params.id}`);
 	}
