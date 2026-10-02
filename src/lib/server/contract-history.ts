@@ -8,17 +8,12 @@ const amount = (value: unknown) => Number(value ?? 0);
 
 /** Gross monthly rent of a contract: base rent, additional costs and advance payment */
 export const grossRent = (c: BackendContract) =>
-	amount(c.baseRent) + amount(c.additionalRent) + amount(c.advancePayment);
+	amount(c.baseRent) + amount(c.additionalRent) + amount(c.monthlyAdvancePayment);
 
 /** One row of a contract history (apartment or tenant page) */
-export const toContractHistory = (
-	c: BackendContract,
-	tenant: { firstName: string; lastName: string }
-): ContractHistory => ({
+export const toContractHistory = (c: BackendContract, tenantName: string): ContractHistory => ({
 	id: c.id,
-	tenantName: `${tenant.firstName} ${tenant.lastName}`.trim(),
-	tenantFirstName: tenant.firstName,
-	tenantLastName: tenant.lastName,
+	tenantName,
 	period: `${formatDate(c.startDate)} - ${c.endDate ? formatDate(c.endDate) : 'heute'}`,
 	rentBrutto: grossRent(c),
 	isActive: !c.endDate,

@@ -27,7 +27,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		tenant,
 		currentOccupancy: currentOccupancy(data),
 		contractHistory: (data.contracts ?? []).map((c: Record<string, unknown>) =>
-			toContractHistory(c, tenant)
+			toContractHistory(c, `${tenant.firstName} ${tenant.lastName}`)
 		) as ContractHistory[],
 		documents: await loadDocuments(fetch, `tenantId=${tenant.id}`)
 	};

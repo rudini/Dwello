@@ -1,79 +1,69 @@
+# language: de
 @apartments
-Feature: New Apartment
-  As a property manager
-  I want to add apartments to my buildings
-  So that I can track units in my buildings
+Funktionalität: Neue Wohnung
+  Als Liegenschaftsverwalter
+  möchte ich die Wohnungen meiner Gebäude erfassen
+  damit ich sie vermieten und abrechnen kann
 
-  Background:
-    Given I am logged in as "Test User"
+  Grundlage:
+    Angenommen das Gebäude "Birkenhof" in "Winterthur" existiert
+    Und im Gebäude "Birkenhof" gibt es die leere Wohnung "1.01"
 
-  @create
-  Scenario: New apartment page shows building dropdown
-    When I open the new apartment page
-    Then I should see the building dropdown
-    And the building dropdown should have all buildings
+  Szenario: Wohnung erfassen
+    Angenommen der Liegenschaftsverwalter ist auf der Seite "Neue Wohnung"
+    Wenn der Liegenschaftsverwalter im Gebäude "Birkenhof" folgende Wohnung erfasst:
+      | Nummer    | 2.01 |
+      | Stockwerk | 2    |
+      | Fläche    | 68   |
+      | Zimmer    | 2.5  |
+    Dann ist der Liegenschaftsverwalter auf der Seite "Wohnung 2.01"
+    Und hat die Wohnung den Status "Leer"
+    Und hat die Wohnung "2.5" Zimmer und "68 m²" im Stockwerk "2. OG"
 
-  @create @preset-building
-  Scenario: Building is preset when navigating from building detail
-    When I open the new apartment page with building "11111111-1111-1111-1111-111111111111"
-    Then the building field should be readonly
-    And the building field should show "Musterhaus Zentrum"
-    And I should see a lock icon on the building field
+  Szenario: Wohnung im Gebäude erfassen
+    Angenommen der Liegenschaftsverwalter erfasst eine neue Wohnung im Gebäude "Birkenhof"
+    Wenn der Liegenschaftsverwalter folgende Wohnung erfasst:
+      | Nummer    | 0.01 |
+      | Stockwerk | 0    |
+      | Fläche    | 45   |
+      | Zimmer    | 1.5  |
+    Dann ist der Liegenschaftsverwalter auf der Seite "Wohnung 0.01"
+    Und gehört die Wohnung zum Gebäude "Birkenhof"
 
-  @create @preset-building
-  Scenario: Breadcrumb shows building path when preset
-    When I open the new apartment page with building "11111111-1111-1111-1111-111111111111"
-    Then the breadcrumb should show "Gebäude"
-    And the breadcrumb should show "Musterhaus Zentrum"
-    And the breadcrumb should show "Neue Wohnung"
+  Szenario: Pflichtangaben fehlen
+    Angenommen der Liegenschaftsverwalter ist auf der Seite "Neue Wohnung"
+    Wenn der Liegenschaftsverwalter die Wohnung ohne Angaben speichert
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Bitte wählen Sie ein Gebäude aus"
+    Und sieht der Liegenschaftsverwalter die Fehlermeldung "Wohnungsnummer ist erforderlich"
+    Und sieht der Liegenschaftsverwalter die Fehlermeldung "Fläche ist erforderlich"
 
-  @create @preset-building
-  Scenario: Cancel button returns to building when preset
-    When I open the new apartment page with building "11111111-1111-1111-1111-111111111111"
-    Then the cancel button should link to "/buildings/11111111-1111-1111-1111-111111111111"
+  Szenario: Wohnungsnummer ist im Gebäude schon vergeben
+    Angenommen der Liegenschaftsverwalter erfasst eine neue Wohnung im Gebäude "Birkenhof"
+    Wenn der Liegenschaftsverwalter die Wohnungsnummer "1.01" eingibt
+    Dann warnt das Formular, dass die Wohnungsnummer "1.01" vergeben ist
+    Wenn der Liegenschaftsverwalter folgende Wohnung erfasst:
+      | Nummer    | 1.01 |
+      | Stockwerk | 1    |
+      | Fläche    | 70   |
+      | Zimmer    | 3.5  |
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Die Wohnungsnummer 1.01 existiert bereits in diesem Gebäude."
 
-  @create @preset-building
-  Scenario: Building preset works for different buildings
-    When I open the new apartment page with building "22222222-2222-2222-2222-222222222222"
-    Then the building field should be readonly
-    And the building field should show "Seepark Residenz"
-    And the cancel button should link to "/buildings/22222222-2222-2222-2222-222222222222"
+  Szenario: Erfassen abbrechen
+    Angenommen der Liegenschaftsverwalter ist auf der Seite "Neue Wohnung"
+    Wenn der Liegenschaftsverwalter die Bearbeitung abbricht
+    Dann ist der Liegenschaftsverwalter auf der Seite "Wohnungen"
 
-  @create @preset-building
-  Scenario: Invalid building preset falls back to dropdown
-    When I open the new apartment page with building "99999999-9999-9999-9999-999999999999"
-    Then the building dropdown should be visible
-    And the building field should not be readonly
+  Szenario: Erfassen im Gebäude abbrechen
+    Angenommen der Liegenschaftsverwalter erfasst eine neue Wohnung im Gebäude "Birkenhof"
+    Wenn der Liegenschaftsverwalter die Bearbeitung abbricht
+    Dann ist der Liegenschaftsverwalter auf der Detailseite von "Birkenhof"
 
-  @create @form
-  Scenario: New apartment form has required fields
-    When I open the new apartment page
-    Then I should see the floor dropdown
-    And I should see the apartment number input
-    And I should see the size input
-    And I should see the room count dropdown
+  Szenario: Über den Breadcrumb zur Wohnungsliste
+    Angenommen der Liegenschaftsverwalter ist auf der Seite "Neue Wohnung"
+    Wenn der Liegenschaftsverwalter im Breadcrumb "Wohnungen" wählt
+    Dann ist der Liegenschaftsverwalter auf der Seite "Wohnungen"
 
-  @create @form
-  Scenario: New apartment form shows validation errors
-    When I open the new apartment page
-    And I submit the new apartment form
-    Then I should see the building validation error
-    And I should see the floor validation error
-    And I should see the apartment number validation error
-
-  @duplicate-check
-  Scenario: Duplicate apartment number warning on new apartment form
-    When I open the new apartment page
-    And I select building "Musterhaus Zentrum" from the dropdown
-    And I enter apartment number "1.01"
-    And I wait for the duplicate check
-    Then I should see the duplicate apartment warning
-    And the warning should mention apartment number "1.01"
-
-  @duplicate-check
-  Scenario: No warning for unique apartment number
-    When I open the new apartment page
-    And I select building "Musterhaus Zentrum" from the dropdown
-    And I enter apartment number "99.99"
-    And I wait for the duplicate check
-    Then I should not see the duplicate apartment warning
+  Szenario: Über den Breadcrumb zum Gebäude
+    Angenommen der Liegenschaftsverwalter erfasst eine neue Wohnung im Gebäude "Birkenhof"
+    Wenn der Liegenschaftsverwalter im Breadcrumb "Birkenhof" wählt
+    Dann ist der Liegenschaftsverwalter auf der Detailseite von "Birkenhof"

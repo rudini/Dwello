@@ -3,57 +3,36 @@
 	import StatusBadge from './StatusBadge.svelte';
 	import Button from './Button.svelte';
 	import Icon from './Icon.svelte';
-	import type { Tenant, RentalContract } from '../types';
+	import { formatDate } from '$lib/utils/format';
 
-	interface Props {
-		tenant: Tenant;
-		contract: RentalContract;
-		status: 'AKTIV' | 'Beendet';
+	interface CurrentContract {
+		tenantId: string;
+		tenantName: string;
+		tenantEmail: string | null;
+		startDate: string;
 	}
 
-	let { tenant, contract, status }: Props = $props();
-
-	const initials = $derived(`${tenant.firstName[0]}${tenant.lastName[0]}`.toUpperCase());
-
-	const contractDate = $derived(new Date(contract.startDate).toLocaleDateString('de-CH', {
-		day: '2-digit',
-		month: '2-digit',
-		year: 'numeric'
-	}));
+	let { contract }: { contract: CurrentContract } = $props();
 </script>
 
 <Card>
 	<div class="flex justify-between items-start mb-4">
 		<h3 class="text-lg font-bold text-text-dark">Aktueller Mieter</h3>
-		<StatusBadge {status} variant={status === 'AKTIV' ? 'success' : 'gray'} />
+		<StatusBadge status="AKTIV" variant="success" />
 	</div>
 
-	<div class="flex items-center gap-4 mb-6">
-		<div
-			class="w-16 h-16 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold text-lg"
-		>
-			{initials}
-		</div>
-		<div>
-			<p class="text-base font-bold text-text-dark">{tenant.firstName} {tenant.lastName}</p>
-			<p class="text-xs text-text-secondary">Vertrag seit: {contractDate}</p>
-		</div>
-	</div>
-
-	<div class="space-y-4 mb-6">
-		{#if tenant.email}
-			<div class="flex items-center gap-3">
+	<div class="mb-6">
+		<p class="text-base font-bold text-text-dark" data-testid="current-tenant-name">{contract.tenantName}</p>
+		<p class="text-xs text-text-secondary">Vertrag seit: {formatDate(contract.startDate)}</p>
+		{#if contract.tenantEmail}
+			<p class="flex items-center gap-2 mt-3">
 				<Icon name="email" size={18} class="text-text-secondary" />
-				<a href="mailto:{tenant.email}" class="text-sm text-primary hover:underline">{tenant.email}</a>
-			</div>
-		{/if}
-		{#if tenant.phone}
-			<div class="flex items-center gap-3">
-				<Icon name="phone" size={18} class="text-text-secondary" />
-				<a href="tel:{tenant.phone}" class="text-sm text-primary hover:underline">{tenant.phone}</a>
-			</div>
+				<a href="mailto:{contract.tenantEmail}" class="text-sm text-primary hover:underline">{contract.tenantEmail}</a>
+			</p>
 		{/if}
 	</div>
 
-	<Button variant="secondary" class="w-full">Mieterprofil ansehen</Button>
+	<Button variant="secondary" class="w-full" href="/tenants/{contract.tenantId}" testid="current-tenant-profile">
+		Mieterprofil ansehen
+	</Button>
 </Card>

@@ -15,6 +15,12 @@ import {
 } from '../services/apartment.service';
 import { buildingExists } from '../services/building.service';
 
+// Apartment numbers are unique per building (apartments_building_number_idx)
+const numberTaken = (error: unknown) => (error as { code?: string }).code === '23505';
+const numberTakenError = (number: string) => ({
+	error: `Die Wohnungsnummer ${number} existiert bereits in diesem Gebäude.`
+});
+
 // Validation schemas
 const apartmentQuerySchema = t.Object({
 	buildingId: t.Optional(t.String()),
@@ -98,6 +104,10 @@ export const apartmentRoutes = new Elysia({ prefix: '/api/v1/apartments' })
 				set.status = 201;
 				return apartment;
 			} catch (error) {
+				if (numberTaken(error)) {
+					set.status = 409;
+					return numberTakenError(body.number);
+				}
 				set.status = 400;
 				return { error: error instanceof Error ? error.message : 'Failed to create apartment' };
 			}
@@ -110,7 +120,14 @@ export const apartmentRoutes = new Elysia({ prefix: '/api/v1/apartments' })
 	.put(
 		'/:id',
 		async ({ params, body, set }) => {
-			const apartment = await updateApartment(params.id, body);
+			let apartment;
+			try {
+				apartment = await updateApartment(params.id, body);
+			} catch (error) {
+				if (!numberTaken(error)) throw error;
+				set.status = 409;
+				return numberTakenError(body.number!);
+			}
 			if (!apartment) {
 				set.status = 404;
 				return { error: 'Apartment not found' };

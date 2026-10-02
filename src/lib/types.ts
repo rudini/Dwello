@@ -87,8 +87,6 @@ export interface RentalContract {
 export interface ContractHistory {
 	id: string;
 	tenantName: string;
-	tenantFirstName: string;
-	tenantLastName: string;
 	period: string; // "DD.MM.YYYY - DD.MM.YYYY"
 	rentBrutto: number; // in CHF
 	isActive: boolean;
@@ -102,16 +100,6 @@ export interface MonthlyCosts {
 	advancePayment?: number;
 	additionalRent?: number;
 	totalBrutto: number;
-}
-
-// Apartment Details page data
-export interface ApartmentDetailsData {
-	apartment: Apartment;
-	building: Building;
-	currentTenant?: Tenant | null;
-	currentContract?: RentalContract | null;
-	monthlyCosts: MonthlyCosts;
-	contractHistory: ContractHistory[];
 }
 
 // Apartment with building info for list view
