@@ -3770,6 +3770,10 @@ Every bug fix has a unit or database test.
 ### Infrastructure ✅
 - E2E runs against its own database `dwello_e2e`, recreated before every run; backend 3101, frontend 3100 (9a077ae)
 - Migrations applied automatically (`bun run db:migrate`, `bun run dev`, Docker) with `schema_migrations` (85f925c)
+- `bun run dev` and `bun run db:migrate` in `backend/` read the shared `.env`/`.env.local` of the project root (then
+  `backend/.env`), so frontend and backend use the same `JWT_SECRET`; before, the backend fell back to its built-in
+  secret, rejected every request with 401 and the dashboard showed an error, the lists stayed empty
+  (`backend/src/__tests__/env-files.test.ts`)
 - Mail module with SMTP and Resend, mail catcher for E2E (36cb488)
 - Dependencies upgraded, vulnerabilities fixed (bb7721b)
 
