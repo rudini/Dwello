@@ -3,9 +3,9 @@
  * and test data that cannot be deleted (sent statements, reminders) never reaches the development database.
  */
 
-import { readdir, readFile } from 'fs/promises';
 import { join } from 'path';
 import pg from 'pg';
+import { migrate } from '../src/db/migrate';
 
 const url = new URL(process.env.DATABASE_URL || 'postgresql://dwello:dwello@localhost:5432/dwello_e2e');
 const database = url.pathname.slice(1);
@@ -25,7 +25,6 @@ const maintenance = new URL(url);
 maintenance.pathname = '/postgres';
 await run(maintenance.href, `DROP DATABASE IF EXISTS "${database}" WITH (FORCE)`, `CREATE DATABASE "${database}"`);
 
-const files = (await readdir(migrations)).filter((file) => file.endsWith('.sql')).sort();
-await run(url.href, ...(await Promise.all(files.map((file) => readFile(join(migrations, file), 'utf8')))));
+const applied = await migrate(url.href, migrations);
 
-console.log(`E2E-Datenbank ${database} neu aufgesetzt (${files.length} Migrationen)`);
+console.log(`E2E-Datenbank ${database} neu aufgesetzt (${applied.length} Migrationen)`);

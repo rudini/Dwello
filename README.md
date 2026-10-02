@@ -83,13 +83,18 @@ Dwello is a comprehensive web application for managing residential properties in
    ```bash
    cd backend
    bun run dev
-   # Runs on http://localhost:3001
+   # Applies missing database migrations, then runs on http://localhost:3001
    ```
 
-6. **Run database migrations**
+6. **Database migrations**
+
+   `bun run dev` (and the Docker image on start) applies the SQL files in `backend/migrations` that the
+   database does not have yet; `schema_migrations` records what is applied. To run them alone:
    ```bash
-   # Coming soon
+   cd backend
+   bun run db:migrate   # uses DATABASE_URL, default postgresql://dwello:dwello@localhost:5432/dwello
    ```
+   A schema change is a new numbered SQL file (e.g. `0007_<what>.sql`), never an edit of an applied one.
 
 ---
 
