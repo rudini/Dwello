@@ -1,6 +1,7 @@
+import { fetchRecord } from '$lib/server/save-form';
 import type { PageServerLoad } from './$types';
 
-interface DashboardData {
+export interface DashboardData {
 	portfolio: {
 		totalBuildings: number;
 		totalApartments: number;
@@ -11,20 +12,15 @@ interface DashboardData {
 		occupancyRate: number;
 	};
 	financial: {
-		outstandingStatements: number;
-		totalPending: number;
+		outstandingStatements: number; // sent, overdue included
+		totalPending: number; // what tenants still owe, refunds excluded
 		overdueAmount: number;
 		paidThisMonth: number;
 	};
-	statements: {
-		draft: number;
-		sent: number;
-		paid: number;
-		overdue: number;
-	};
+	statements: { draft: number; sent: number; paid: number; overdue: number };
 	recentActivity: {
 		id: string;
-		type: 'statement_created' | 'invoice_added' | 'payment_received' | 'reminder_sent';
+		type: 'statement_created' | 'invoice_added' | 'payment_received';
 		title: string;
 		description: string;
 		timestamp: string;
@@ -40,40 +36,5 @@ interface DashboardData {
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
-export const load: PageServerLoad = async ({ fetch }): Promise<DashboardData> => {
-	try {
-		const response = await fetch(`${BACKEND_URL}/api/v1/dashboard`);
-		if (!response.ok) {
-			throw new Error(`Backend returned ${response.status}`);
-		}
-		return await response.json();
-	} catch (error) {
-		console.error('Failed to fetch dashboard data:', error);
-		// Return empty data when backend is unavailable
-		return {
-			portfolio: {
-				totalBuildings: 0,
-				totalApartments: 0,
-				occupiedApartments: 0,
-				reletApartments: 0,
-				vacantApartments: 0,
-				reservedApartments: 0,
-				occupancyRate: 0
-			},
-			financial: {
-				outstandingStatements: 0,
-				totalPending: 0,
-				overdueAmount: 0,
-				paidThisMonth: 0
-			},
-			statements: {
-				draft: 0,
-				sent: 0,
-				paid: 0,
-				overdue: 0
-			},
-			recentActivity: [],
-			buildingOccupancy: []
-		};
-	}
-};
+export const load: PageServerLoad = async ({ fetch }): Promise<DashboardData> =>
+	fetchRecord(fetch, `${BACKEND_URL}/api/v1/dashboard`, 'Dashboard');

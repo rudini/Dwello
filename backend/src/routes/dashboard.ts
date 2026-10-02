@@ -4,10 +4,11 @@
  */
 
 import { Elysia } from 'elysia';
-import { count, eq, lt, and, sum, desc, gte, or, sql, type SQL } from 'drizzle-orm';
+import { count, eq, and, sum, desc, gt, gte, sql, type SQL } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { buildings, apartments, utilityStatements, invoices } from '../db/schema';
 import { apartmentStatus } from '../services/apartment.service';
+import { statusCondition } from '../services/statement.service';
 
 const countApartments = async (where?: SQL) =>
 	Number((await db.select({ count: count() }).from(apartments).where(where))[0]?.count ?? 0);
@@ -18,7 +19,8 @@ const countStatements = async (where: SQL | undefined) =>
 const sumStatements = async (column: typeof utilityStatements.balance | typeof utilityStatements.paidAmount, where: SQL | undefined) =>
 	Number((await db.select({ total: sum(column) }).from(utilityStatements).where(where))[0]?.total ?? 0);
 
-const occupancyRate = (occupied: number, total: number) => (total > 0 ? (occupied / total) * 100 : 0);
+// Percent with one decimal place
+const occupancyRate = (occupied: number, total: number) => (total > 0 ? Math.round((occupied / total) * 1000) / 10 : 0);
 
 async function portfolio() {
 	const [totalBuildings] = await db.select({ count: count() }).from(buildings);
@@ -31,18 +33,7 @@ async function portfolio() {
 		vacantApartments: await countApartments(sql`${apartmentStatus} = 'vacant'`),
 		reletApartments: await countApartments(sql`${apartmentStatus} = 'relet'`),
 		reservedApartments: await countApartments(sql`${apartmentStatus} = 'reserved'`),
-		occupancyRate: Math.round(occupancyRate(occupiedApartments, totalApartments) * 10) / 10
-	};
-}
-
-function statementFilters(today: string) {
-	const sent = eq(utilityStatements.status, 'sent');
-	return {
-		draft: eq(utilityStatements.status, 'draft'),
-		// Sent excludes overdue (sent with past deadline)
-		sent: and(sent, or(gte(utilityStatements.paymentDeadline, today), sql`${utilityStatements.paymentDeadline} IS NULL`)),
-		paid: eq(utilityStatements.status, 'paid'),
-		overdue: and(sent, lt(utilityStatements.paymentDeadline, today))
+		occupancyRate: occupancyRate(occupiedApartments, totalApartments)
 	};
 }
 
@@ -64,17 +55,45 @@ async function buildingOccupancy() {
 	);
 }
 
+type Activity = {
+	id: string;
+	type: 'statement_created' | 'invoice_added' | 'payment_received';
+	title: string;
+	description: string;
+	timestamp: string;
+};
+
+/** A statement's creation and, once paid, its payment when it was recorded (paid statements stay unchanged) */
+export function statementActivities(s: { id: string; statementNumber: string; status: string; createdAt: Date; updatedAt: Date }) {
+	const description = `Abrechnung ${s.statementNumber}`;
+	const activities: Activity[] = [
+		{ id: `${s.id}-created`, type: 'statement_created', title: 'Abrechnung erstellt', description, timestamp: s.createdAt.toISOString() }
+	];
+	if (s.status === 'paid') {
+		activities.push({
+			id: `${s.id}-paid`,
+			type: 'payment_received',
+			title: 'Zahlung eingegangen',
+			description,
+			timestamp: s.updatedAt.toISOString()
+		});
+	}
+	return activities;
+}
+
 async function recentActivity() {
-	const recentStatements = await db.select().from(utilityStatements).orderBy(desc(utilityStatements.createdAt)).limit(5);
+	const created = await db.select().from(utilityStatements).orderBy(desc(utilityStatements.createdAt)).limit(5);
+	// Payments of older statements count as recent as well
+	const paid = await db
+		.select()
+		.from(utilityStatements)
+		.where(eq(utilityStatements.status, 'paid'))
+		.orderBy(desc(utilityStatements.updatedAt))
+		.limit(5);
 	const recentInvoices = await db.select().from(invoices).orderBy(desc(invoices.createdAt)).limit(5);
+	const statementEvents = new Map([...created, ...paid].flatMap(statementActivities).map((a) => [a.id, a]));
 	return [
-		...recentStatements.map((s) => ({
-			id: s.id,
-			type: s.status === 'paid' ? 'payment_received' : ('statement_created' as const),
-			title: s.status === 'paid' ? 'Zahlung eingegangen' : 'Abrechnung erstellt',
-			description: `Abrechnung ${s.statementNumber}`,
-			timestamp: s.createdAt.toISOString()
-		})),
+		...statementEvents.values(),
 		...recentInvoices.map((i) => ({
 			id: i.id,
 			type: 'invoice_added' as const,
@@ -87,29 +106,30 @@ async function recentActivity() {
 		.slice(0, 5);
 }
 
+// Amounts the tenants still owe; refunds (negative balance) are owed to the tenants instead
+const owed = (status: string) => and(statusCondition(status), gt(utilityStatements.balance, '0'));
+
 export const dashboardRoutes = new Elysia().get('/api/v1/dashboard', async () => {
-	const today = new Date().toISOString().split('T')[0];
 	const thisMonth = new Date();
 	thisMonth.setDate(1);
 	const monthStart = thisMonth.toISOString().split('T')[0];
-	const filters = statementFilters(today);
 
 	const statements = {
-		draft: await countStatements(filters.draft),
-		sent: await countStatements(filters.sent),
-		paid: await countStatements(filters.paid),
-		overdue: await countStatements(filters.overdue)
+		draft: await countStatements(statusCondition('draft')),
+		sent: await countStatements(statusCondition('sent')),
+		paid: await countStatements(statusCondition('paid')),
+		overdue: await countStatements(statusCondition('overdue'))
 	};
 
 	return {
 		portfolio: await portfolio(),
 		financial: {
-			outstandingStatements: statements.sent,
-			totalPending: await sumStatements(utilityStatements.balance, eq(utilityStatements.status, 'sent')),
-			overdueAmount: await sumStatements(utilityStatements.balance, filters.overdue),
+			outstandingStatements: await countStatements(statusCondition('open')),
+			totalPending: await sumStatements(utilityStatements.balance, owed('open')),
+			overdueAmount: await sumStatements(utilityStatements.balance, owed('overdue')),
 			paidThisMonth: await sumStatements(
 				utilityStatements.paidAmount,
-				and(eq(utilityStatements.status, 'paid'), gte(utilityStatements.paidDate, monthStart))
+				and(statusCondition('paid'), gte(utilityStatements.paidDate, monthStart))
 			)
 		},
 		statements,

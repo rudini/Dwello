@@ -37,10 +37,12 @@ export interface StatementWithDetails extends UtilityStatement {
 }
 
 /**
- * Status filter; 'overdue' is computed as sent with a past payment deadline
+ * Status filter; 'overdue' is computed as sent with a past payment deadline,
+ * 'open' covers all sent statements that are not paid yet (overdue included)
  */
-function statusCondition(status: string) {
+export function statusCondition(status: string) {
 	const today = new Date().toISOString().split('T')[0];
+	if (status === 'open') return eq(utilityStatements.status, 'sent');
 	if (status === 'overdue') {
 		return and(eq(utilityStatements.status, 'sent'), lt(utilityStatements.paymentDeadline, today));
 	}
