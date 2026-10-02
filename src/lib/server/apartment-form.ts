@@ -1,4 +1,4 @@
-import { fail, redirect } from '@sveltejs/kit';
+import { saveRecord } from './save-form';
 
 const API = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1/apartments`;
 
@@ -26,19 +26,9 @@ function parseApartmentForm(formData: FormData, isNew: boolean) {
 
 /** Form action body shared by "Neue Wohnung" (POST) and "Wohnung bearbeiten" (PUT) */
 export async function saveApartment(fetch: typeof globalThis.fetch, request: Request, id?: string) {
-	const { body, errors } = parseApartmentForm(await request.formData(), !id);
-	if (Object.keys(errors).length > 0) return fail(400, { errors });
-
-	const response = await fetch(id ? `${API}/${id}` : API, {
-		method: id ? 'PUT' : 'POST',
-		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify(body)
-	});
-	const saved = await response.json().catch(() => ({}));
-	if (!response.ok) {
+	return saveRecord(fetch, API, parseApartmentForm(await request.formData(), !id), id, {
 		// 409: the apartment number is taken, the backend says which one
-		const message = response.status === 409 ? saved.error : 'Wohnung konnte nicht gespeichert werden.';
-		return fail(response.status, { errors: { form: message } as Record<string, string> });
-	}
-	throw redirect(303, `/apartments/${id ?? saved.id}`);
+		failure: (status, saved) => (status === 409 ? saved.error! : 'Wohnung konnte nicht gespeichert werden.'),
+		location: (saved) => `/apartments/${saved}`
+	});
 }

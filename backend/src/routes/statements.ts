@@ -4,6 +4,7 @@
  */
 
 import { Elysia, t } from 'elysia';
+import { deleteResponse } from './delete-response';
 import { eq } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { utilityStatements } from '../db/schema';
@@ -279,17 +280,7 @@ export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 	// Delete a statement
 	.delete(
 		'/:id',
-		async ({ params, set }) => {
-			const result = await deleteStatement(params.id);
-
-			if (!result.success) {
-				set.status = result.error?.includes('not found') ? 404 : 400;
-				return { error: result.error };
-			}
-
-			set.status = 204;
-			return null;
-		},
+		async ({ params, set }) => deleteResponse(set, await deleteStatement(params.id)),
 		{
 			params: t.Object({
 				id: t.String()

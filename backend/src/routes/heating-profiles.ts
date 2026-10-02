@@ -4,6 +4,7 @@
  */
 
 import { Elysia, t } from 'elysia';
+import { deleteResponse } from './delete-response';
 import {
 	listHeatingProfiles,
 	getHeatingProfile,
@@ -13,7 +14,8 @@ import {
 	initializePredefinedHeatingProfiles,
 	validatePercentages,
 	getMonthlyPercentages,
-	calculateHeatingShare
+	calculateHeatingShare,
+	HeatingProfileConflict
 } from '../services/heating-profile.service';
 
 export const heatingProfileRoutes = new Elysia({ prefix: '/api/v1/heating-profiles' })
@@ -175,7 +177,7 @@ export const heatingProfileRoutes = new Elysia({ prefix: '/api/v1/heating-profil
 				set.status = 201;
 				return profile;
 			} catch (error) {
-				set.status = 400;
+				set.status = error instanceof HeatingProfileConflict ? 409 : 400;
 				return { error: error instanceof Error ? error.message : 'Failed to create heating profile' };
 			}
 		},
@@ -239,7 +241,7 @@ export const heatingProfileRoutes = new Elysia({ prefix: '/api/v1/heating-profil
 
 				return profile;
 			} catch (error) {
-				set.status = 400;
+				set.status = error instanceof HeatingProfileConflict ? 409 : 400;
 				return { error: error instanceof Error ? error.message : 'Failed to update heating profile' };
 			}
 		},
@@ -273,17 +275,7 @@ export const heatingProfileRoutes = new Elysia({ prefix: '/api/v1/heating-profil
 	// Delete a heating profile
 	.delete(
 		'/:id',
-		async ({ params, set }) => {
-			const result = await deleteHeatingProfile(params.id);
-
-			if (!result.success) {
-				set.status = result.error?.includes('not found') ? 404 : 400;
-				return { error: result.error };
-			}
-
-			set.status = 204;
-			return null;
-		},
+		async ({ params, set }) => deleteResponse(set, await deleteHeatingProfile(params.id)),
 		{
 			params: t.Object({
 				id: t.String()

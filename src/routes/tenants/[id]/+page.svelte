@@ -5,7 +5,7 @@
 	import TenantDocumentsCard from './TenantDocumentsCard.svelte';
 	import TenantContactCard from './TenantContactCard.svelte';
 	import TenantRentalCard from './TenantRentalCard.svelte';
-	import DeleteTenantDialog from './DeleteTenantDialog.svelte';
+	import ConfirmDeleteDialog from '$lib/components/ConfirmDeleteDialog.svelte';
 	import type { ActionData, PageData } from './$types';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
@@ -15,6 +15,13 @@
 	const contact = $derived(tenant.email ?? '');
 	const deleteError = $derived(form?.error);
 	let deleting = $state(false);
+	const hasContracts = $derived(data.contractHistory.length > 0);
+	// Statements and documents refer to tenants with contracts
+	const deleteMessage = $derived(
+		hasContracts
+			? 'Mieter mit Mietverträgen bleiben erhalten, weil Abrechnungen und Dokumente auf sie verweisen.'
+			: 'Der Mieter wird endgültig gelöscht.'
+	);
 	// A refused delete keeps the dialog open with the reason
 	const dialogOpen = $derived(deleting || Boolean(deleteError));
 </script>
@@ -66,10 +73,12 @@
 </div>
 
 {#if dialogOpen}
-	<DeleteTenantDialog
-		{name}
-		hasContracts={data.contractHistory.length > 0}
+	<ConfirmDeleteDialog
+		title="{name} löschen?"
+		message={deleteMessage}
 		error={deleteError}
+		disabled={hasContracts}
+		testid="tenant-delete-confirm"
 		onclose={() => (deleting = false)}
 	/>
 {/if}

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { HeatingProfile } from '$lib/types';
-	import HeatingProfileChart from './HeatingProfileChart.svelte';
+	import HeatingProfileChart from '$lib/components/HeatingProfileChart.svelte';
 
 	let {
 		heatingProfiles,
@@ -40,6 +40,7 @@
 	);
 
 	const selectedHeatingProfile = $derived(heatingProfiles.find((p) => p.id === heatingProfileId));
+	const heatingShares = $derived(selectedHeatingProfile?.monthlyPercentages);
 </script>
 
 <div class="space-y-6">
@@ -103,5 +104,5 @@
 		{/if}
 	</div>
 
-	<HeatingProfileChart profile={selectedHeatingProfile} />
+	<HeatingProfileChart shares={heatingShares} />
 </div>

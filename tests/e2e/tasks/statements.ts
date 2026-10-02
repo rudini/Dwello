@@ -1,6 +1,7 @@
 import type { Actor } from '../fixtures/actor';
 import {
 	draftFilter,
+	filteredBy,
 	generateStatementsButton,
 	nextPageLink,
 	openStatementLink,
@@ -17,11 +18,13 @@ export const searchStatements = (term: string) => async (actor: Actor) => {
 export const showStatementsOfBuilding = (buildingId: string) => async (actor: Actor) => {
 	await statementBuildingFilter(actor.page).selectOption(buildingId);
 	await statementSearchButton(actor.page).click();
+	await filteredBy(actor.page, { building: buildingId });
 };
 
 export const showDraftsOfBuilding = (buildingId: string) => async (actor: Actor) => {
 	await showStatementsOfBuilding(buildingId)(actor);
 	await draftFilter(actor.page).click();
+	await filteredBy(actor.page, { building: buildingId, status: 'draft' });
 };
 
 export const turnToNextPage = async (actor: Actor) => {

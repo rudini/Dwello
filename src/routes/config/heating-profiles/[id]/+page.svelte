@@ -1,173 +1,77 @@
 <script lang="ts">
-	import type { HeatingProfileDetailData } from './+page.server';
+	import PageTrail from '$lib/components/PageTrail.svelte';
+	import Badge from '$lib/components/Badge.svelte';
 	import Button from '$lib/components/Button.svelte';
-	import Icon from '$lib/components/Icon.svelte';
 	import Card from '$lib/components/Card.svelte';
-	import StatusBadge from '$lib/components/StatusBadge.svelte';
+	import HeatingProfileChart from '$lib/components/HeatingProfileChart.svelte';
+	import Icon from '$lib/components/Icon.svelte';
+	import { MONTHS, profileTotal } from '$lib/heating-profile';
+	import ConfirmDeleteDialog from '$lib/components/ConfirmDeleteDialog.svelte';
+	import type { ActionData, PageData } from './$types';
 
-	let { data }: { data: HeatingProfileDetailData } = $props();
+	let { data, form }: { data: PageData; form: ActionData } = $props();
 
 	const profile = $derived(data.profile);
-
-	// Month names in German
-	const months = [
-		{ key: 'january', label: 'Januar' },
-		{ key: 'february', label: 'Februar' },
-		{ key: 'march', label: 'März' },
-		{ key: 'april', label: 'April' },
-		{ key: 'may', label: 'Mai' },
-		{ key: 'june', label: 'Juni' },
-		{ key: 'july', label: 'Juli' },
-		{ key: 'august', label: 'August' },
-		{ key: 'september', label: 'September' },
-		{ key: 'october', label: 'Oktober' },
-		{ key: 'november', label: 'November' },
-		{ key: 'december', label: 'Dezember' }
-	] as const;
-
-	// Calculate total percentage
-	const totalPercentage = $derived(
-		Object.values(profile.monthlyPercentages).reduce((sum, val) => sum + val, 0)
-	);
-
-	// Calculate heating period
-	const heatingMonths = $derived(
-		months.filter(m => profile.monthlyPercentages[m.key] > 0)
-	);
-	const heatingPeriod = $derived(
-		heatingMonths.length > 0
-			? `${heatingMonths[0].label} - ${heatingMonths[heatingMonths.length - 1].label}`
-			: 'Keine Heizperiode definiert'
-	);
+	const total = $derived(profileTotal(profile.monthlyPercentages));
+	// Predefined profiles follow common Swiss practice and stay as they are
+	const custom = $derived(profile.type === 'custom');
+	const deleteError = $derived(form?.error);
+	let deleting = $state(false);
+	const dialogOpen = $derived(deleting || Boolean(deleteError));
 </script>
 
 <svelte:head>
-	<title>{profile.name} - Heizprofil - Dwello</title>
+	<title>{profile.name} - Dwello</title>
 </svelte:head>
 
 <div class="space-y-6" data-testid="heating-profile-detail-page">
-	<!-- Breadcrumb -->
-	<nav class="flex items-center text-sm text-gray-500" data-testid="breadcrumb">
-		<a href="/config" class="hover:text-primary transition-colors">Einstellungen</a>
-		<Icon name="chevron_right" size={16} class="mx-2" />
-		<a href="/config/heating-profiles" class="hover:text-primary transition-colors">Heizprofile</a>
-		<Icon name="chevron_right" size={16} class="mx-2" />
-		<span class="text-gray-900 font-medium">{profile.name}</span>
-	</nav>
+	<PageTrail links={[{ href: '/config', label: 'Einstellungen' }, { href: '/config/heating-profiles', label: 'Heizprofile' }]} current={profile.name} />
 
-	<!-- Header -->
-	<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+	<div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
 		<div>
-			<div class="flex items-center gap-3">
-				<h1 class="text-2xl font-bold text-gray-900" data-testid="profile-name">{profile.name}</h1>
-				{#if profile.type === 'predefined'}
-					<StatusBadge status="System" variant="info" />
-				{:else}
-					<StatusBadge status="Benutzerdefiniert" variant="success" />
-				{/if}
-			</div>
+			<h1 class="text-2xl font-bold text-gray-900 flex items-center gap-3">
+				{profile.name}
+				<Badge variant={custom ? 'primary' : 'info'} size="sm">{custom ? 'Eigenes Profil' : 'Vordefiniert'}</Badge>
+			</h1>
 			<p class="text-gray-500 mt-1">{profile.description}</p>
 		</div>
-		<div class="flex gap-2">
-			<Button href="/config/heating-profiles" variant="secondary">
-				<Icon name="arrow_back" size={18} />
-				Zurück
-			</Button>
-			{#if profile.type === 'custom'}
-				<Button href="/config/heating-profiles/{profile.id}/edit" variant="primary">
+		{#if custom}
+			<div class="flex gap-2">
+				<Button href="/config/heating-profiles/{profile.id}/edit" variant="secondary" testid="heating-profile-edit-button">
 					<Icon name="edit" size={18} />
 					Bearbeiten
 				</Button>
-			{/if}
-		</div>
+				<Button variant="danger" onclick={() => (deleting = true)} testid="heating-profile-delete-button">
+					<Icon name="delete" size={18} />
+					Löschen
+				</Button>
+			</div>
+		{/if}
 	</div>
 
-	<!-- Profile Details -->
-	<div class="grid gap-6 lg:grid-cols-2">
-		<!-- Monthly Distribution Chart -->
-		<Card>
-			<h2 class="text-lg font-semibold text-gray-900 mb-4" data-testid="monthly-distribution-title">Monatliche Verteilung</h2>
-			<div class="space-y-3">
-				{#each months as month}
-					{@const percentage = profile.monthlyPercentages[month.key]}
-					<div class="flex items-center gap-3">
-						<span class="w-24 text-sm text-gray-600">{month.label}</span>
-						<div class="flex-1 bg-gray-100 rounded-full h-6 overflow-hidden">
-							<div
-								class="h-full bg-primary rounded-full transition-all duration-300 flex items-center justify-end pr-2"
-								style="width: {Math.max(percentage * 5, percentage > 0 ? 10 : 0)}%"
-							>
-								{#if percentage > 0}
-									<span class="text-xs font-medium text-white">{percentage}%</span>
-								{/if}
-							</div>
-						</div>
-						<span class="w-12 text-right text-sm font-medium text-gray-900">{percentage}%</span>
-					</div>
-				{/each}
-			</div>
-			<div class="mt-4 pt-4 border-t border-gray-200 flex justify-between items-center">
-				<span class="text-sm text-gray-600">Gesamt</span>
-				<span class="text-lg font-bold {totalPercentage === 100 ? 'text-green-600' : 'text-red-600'}" data-testid="total-percentage">
-					{totalPercentage}%
-				</span>
-			</div>
-			{#if totalPercentage !== 100}
-				<p class="mt-2 text-sm text-red-600">
-					<Icon name="warning" size={16} class="inline mr-1" />
-					Die Summe sollte 100% betragen
-				</p>
-			{/if}
-		</Card>
-
-		<!-- Profile Info -->
-		<Card>
-			<h2 class="text-lg font-semibold text-gray-900 mb-4" data-testid="profile-info-title">Profil-Informationen</h2>
-			<dl class="space-y-4">
-				<div>
-					<dt class="text-sm text-gray-500">Name</dt>
-					<dd class="text-gray-900 font-medium">{profile.name}</dd>
+	<Card>
+		<HeatingProfileChart shares={profile.monthlyPercentages} />
+		<dl class="grid grid-cols-3 sm:grid-cols-6 gap-3 mt-6">
+			{#each MONTHS as month (month.key)}
+				<div class="text-center p-2 bg-gray-50 rounded-lg">
+					<dt class="text-xs text-gray-500">{month.label}</dt>
+					<dd class="font-semibold text-gray-900" data-testid="heating-profile-share-{month.key}">{profile.monthlyPercentages[month.key]} %</dd>
 				</div>
-				<div>
-					<dt class="text-sm text-gray-500">Typ</dt>
-					<dd class="text-gray-900">
-						{profile.type === 'predefined' ? 'Vordefiniert (System)' : 'Benutzerdefiniert'}
-					</dd>
-				</div>
-				<div>
-					<dt class="text-sm text-gray-500">Beschreibung</dt>
-					<dd class="text-gray-900">{profile.description}</dd>
-				</div>
-				<div>
-					<dt class="text-sm text-gray-500">Status</dt>
-					<dd>
-						{#if profile.isActive}
-							<StatusBadge status="Aktiv" variant="success" />
-						{:else}
-							<StatusBadge status="Inaktiv" variant="warning" />
-						{/if}
-					</dd>
-				</div>
-				<div>
-					<dt class="text-sm text-gray-500">Heizperiode</dt>
-					<dd class="text-gray-900">{heatingPeriod}</dd>
-				</div>
-			</dl>
-
-			{#if profile.type === 'predefined'}
-				<div class="mt-6 p-4 bg-blue-50 rounded-lg">
-					<div class="flex items-start gap-3">
-						<Icon name="info" size={20} class="text-blue-600 mt-0.5" />
-						<div>
-							<p class="text-sm text-blue-800 font-medium">Systemdefiniertes Profil</p>
-							<p class="text-sm text-blue-600 mt-1">
-								Dieses Profil ist vordefiniert und kann nicht bearbeitet werden.
-								Sie können es jedoch als Vorlage für ein eigenes Profil verwenden.
-							</p>
-						</div>
-					</div>
-				</div>
-			{/if}
-		</Card>
-	</div>
+			{/each}
+		</dl>
+		<p class="mt-4 pt-4 border-t border-gray-100 flex justify-between">
+			<span class="font-medium text-gray-700">Summe</span>
+			<span class="font-bold" data-testid="heating-profile-total">{total} %</span>
+		</p>
+	</Card>
 </div>
+
+{#if dialogOpen}
+	<ConfirmDeleteDialog
+		title="Heizprofil «{profile.name}» löschen?"
+		message="Bereits erstellte Abrechnungen behalten ihre Heizkostenverteilung."
+		error={deleteError}
+		testid="heating-profile-delete-confirm"
+		onclose={() => (deleting = false)}
+	/>
+{/if}

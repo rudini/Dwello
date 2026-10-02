@@ -30,6 +30,32 @@ export function testData(request: APIRequestContext, token: string) {
 		}
 	}
 
+	async function removeTenants(token: string) {
+		for (const tenant of (await get(`tenants?search=${token}`)).tenants) {
+			for (const statement of (await get(`statements?tenantId=${tenant.id}&limit=100`)).data) {
+				await remove(`statements/${statement.id}`);
+			}
+			await removeContracts(`tenantId=${tenant.id}`);
+			await remove(`tenants/${tenant.id}`);
+		}
+	}
+
+	async function removeHeatingProfiles(token: string) {
+		for (const profile of (await get(`heating-profiles?search=${token}`)).data) {
+			await remove(`heating-profiles/${profile.id}`);
+		}
+	}
+
+	async function removeBuildings(token: string) {
+		for (const building of (await get(`buildings?search=${token}`)).buildings) {
+			for (const apartment of (await get(`apartments?buildingId=${building.id}&limit=100`)).apartments) {
+				await removeContracts(`apartmentId=${apartment.id}`);
+				await remove(`apartments/${apartment.id}`);
+			}
+			await remove(`buildings/${building.id}`);
+		}
+	}
+
 	return {
 		names,
 		idOf: (key: string) => ids.get(key),
@@ -141,26 +167,12 @@ export function testData(request: APIRequestContext, token: string) {
 		},
 
 		async cleanUp() {
-			const tokens = [...names.values()].map((name) => name.split(' ').pop());
-			for (const token of tokens) {
-				for (const tenant of (await get(`tenants?search=${token}`)).tenants) {
-					for (const statement of (await get(`statements?tenantId=${tenant.id}&limit=100`)).data) {
-						await remove(`statements/${statement.id}`);
-					}
-					await removeContracts(`tenantId=${tenant.id}`);
-					await remove(`tenants/${tenant.id}`);
-				}
-			}
+			const tokens = [...names.values()].map((name) => name.split(' ').pop()!);
+			for (const token of tokens) await removeTenants(token);
 			for (const path of extras) await remove(path);
-			for (const token of tokens) {
-				for (const building of (await get(`buildings?search=${token}`)).buildings) {
-					for (const apartment of (await get(`apartments?buildingId=${building.id}&limit=100`)).apartments) {
-						await removeContracts(`apartmentId=${apartment.id}`);
-						await remove(`apartments/${apartment.id}`);
-					}
-					await remove(`buildings/${building.id}`);
-				}
-			}
+			// Heating profiles created through the UI carry a scenario name as well
+			for (const token of tokens) await removeHeatingProfiles(token);
+			for (const token of tokens) await removeBuildings(token);
 		}
 	};
 }

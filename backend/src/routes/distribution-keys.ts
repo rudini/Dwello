@@ -4,6 +4,7 @@
  */
 
 import { Elysia, t } from 'elysia';
+import { deleteResponse } from './delete-response';
 import {
 	listDistributionKeys,
 	getDistributionKey,
@@ -202,17 +203,7 @@ export const distributionKeyRoutes = new Elysia({ prefix: '/api/v1/distribution-
 	// Delete a distribution key
 	.delete(
 		'/:id',
-		async ({ params, set }) => {
-			const result = await deleteDistributionKey(params.id);
-
-			if (!result.success) {
-				set.status = result.error?.includes('not found') ? 404 : 400;
-				return { error: result.error };
-			}
-
-			set.status = 204;
-			return null;
-		},
+		async ({ params, set }) => deleteResponse(set, await deleteDistributionKey(params.id)),
 		{
 			params: t.Object({
 				id: t.String()

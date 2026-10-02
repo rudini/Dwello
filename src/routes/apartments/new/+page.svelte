@@ -1,4 +1,5 @@
 <script lang="ts">
+	import PageTrail from '$lib/components/PageTrail.svelte';
 	import { enhance } from '$app/forms';
 	import { untrack } from 'svelte';
 	import Button from '$lib/components/Button.svelte';
@@ -31,13 +32,7 @@
 </svelte:head>
 
 <div class="max-w-2xl mx-auto space-y-6">
-	<nav class="flex items-center text-sm text-gray-500">
-		{#each crumbs as crumb (crumb.href)}
-			<a href={crumb.href} data-testid="breadcrumb-link" class="hover:text-primary transition-colors">{crumb.label}</a>
-			<Icon name="chevron_right" size={16} class="mx-2" />
-		{/each}
-		<span class="text-gray-900 font-medium">Neue Wohnung</span>
-	</nav>
+	<PageTrail links={crumbs} current="Neue Wohnung" />
 
 	<div>
 		<h1 class="text-2xl font-bold text-gray-900">Neue Wohnung erstellen</h1>
