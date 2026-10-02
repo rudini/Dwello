@@ -194,7 +194,8 @@ export function createProxyResponse<T>(proxyResponse: ProxyResponse<T>): Respons
 		}
 	}
 
-	return new Response(JSON.stringify(data), {
+	// A response without content may carry no body
+	return new Response(status === 204 ? null : JSON.stringify(data), {
 		status,
 		headers: responseHeaders
 	});

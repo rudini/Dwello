@@ -229,6 +229,14 @@ describe('Client API Helper', () => {
 			expect(result.error).toBeUndefined();
 		});
 
+		it('accepts "204 No Content" without reading a body, e.g. after a delete', async () => {
+			fetchSpy.mockResolvedValue(new Response(null, { status: 204 }));
+
+			const result = await apiCall('/invoices/i1', { method: 'DELETE' });
+
+			expect(result).toEqual({ data: undefined });
+		});
+
 		it('should handle network errors', async () => {
 			fetchSpy.mockRejectedValue(new Error('Network request failed'));
 

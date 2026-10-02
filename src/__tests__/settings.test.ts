@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { actions, load } from '../routes/config/+page.server';
 import { load as loadWizard } from '../routes/statements/generate/+page.server';
 import { lastCompletedPeriod } from '../lib/accounting-period';
@@ -136,13 +136,11 @@ describe('Standardwerte im Abrechnungs-Assistenten', () => {
 describe('Standard-Verteilschlüssel bei neuen Rechnungen', () => {
 	it('schlägt den Verteilschlüssel aus den Einstellungen vor', async () => {
 		const { load: loadInvoiceForm } = await import('../routes/invoices/new/+page.server');
-		vi.stubGlobal('fetch', async (url: string) =>
-			Response.json(url === `${API}/config/default_distribution_key_id` ? { value: 'dk1' } : { data: [] })
-		);
+		const fetch = async (url: string) =>
+			Response.json(url === `${API}/config/default_distribution_key_id` ? { value: 'dk1' } : { data: [] });
 
-		const data = (await loadInvoiceForm({ cookies: { get: () => 'jwt' } } as never)) as Record<string, unknown>;
+		const data = (await loadInvoiceForm({ fetch } as never)) as Record<string, unknown>;
 
 		expect(data.defaultDistributionKeyId).toBe('dk1');
-		vi.unstubAllGlobals();
 	});
 });
