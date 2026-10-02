@@ -8,7 +8,7 @@
     "dev": "bun scripts/migrate.ts && bun run --hot src/index.ts",
     "build": "bun build src/index.ts --outdir dist --target bun",
     "start": "bun run dist/index.js",
-    "test": "bun test --path-ignore-patterns='**/*.pg.test.ts' && bun test .pg.test",
+    "test": "bun test --isolate --path-ignore-patterns='**/*.pg.test.ts' && bun test .pg.test",
     "test:pg": "bun test .pg.test",
     "test:coverage": "bun test --coverage",
     "type-check": "tsc --noEmit",
