@@ -1,10 +1,9 @@
 <script lang="ts">
-	import { enhance } from '$app/forms';
 	import { untrack } from 'svelte';
-	import Button from '$lib/components/Button.svelte';
 	import FieldError from '$lib/components/FieldError.svelte';
+	import RecordForm from '$lib/components/RecordForm.svelte';
 	import HeatingProfileChart from '$lib/components/HeatingProfileChart.svelte';
-	import Icon from '$lib/components/Icon.svelte';
+	import TextField from '$lib/components/TextField.svelte';
 	import { MONTHS, profileTotal } from '$lib/heating-profile';
 	import type { HeatingProfile } from '$lib/types';
 
@@ -25,18 +24,10 @@
 	const description = $derived(profile?.description ?? '');
 </script>
 
-<form method="POST" use:enhance={() => ({ update }) => update({ reset: false })} class="space-y-6">
-	<FieldError message={errors.form} />
+<RecordForm error={errors.form} {cancelHref} {submitLabel} submitTestid="heating-profile-submit">
 
-	<div>
-		<label for="name" class="block text-sm font-medium text-gray-700 mb-1">Name <span class="text-red-500">*</span></label>
-		<input id="name" name="name" value={name} data-testid="heating-profile-name-input" class={inputClass} />
-		<FieldError message={errors.name} />
-	</div>
-	<div>
-		<label for="description" class="block text-sm font-medium text-gray-700 mb-1">Beschreibung</label>
-		<input id="description" name="description" value={description} class={inputClass} />
-	</div>
+	<TextField label="Name" name="name" value={name} required error={errors.name} testid="heating-profile-name-input" />
+	<TextField label="Beschreibung" name="description" value={description} />
 
 	<div>
 		<div class="flex items-center justify-between mb-3">
@@ -69,12 +60,4 @@
 	</div>
 
 	<HeatingProfileChart {shares} />
-
-	<div class="flex gap-3 pt-4 border-t border-gray-200">
-		<Button href={cancelHref} variant="secondary" testid="form-cancel">Abbrechen</Button>
-		<Button type="submit" variant="primary" testid="heating-profile-submit">
-			<Icon name="save" size={18} />
-			{submitLabel}
-		</Button>
-	</div>
-</form>
+</RecordForm>

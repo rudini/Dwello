@@ -37,31 +37,31 @@ describe('Formula Service', () => {
 		it('should reject empty formula', () => {
 			const result = parseFormula('');
 			expect(result.isValid).toBe(false);
-			expect(result.errors).toContain('Formula cannot be empty');
+			expect(result.errors).toContain('Bitte geben Sie eine Formel ein.');
 		});
 
 		it('should reject formula without variables', () => {
 			const result = parseFormula('100 + 50');
 			expect(result.isValid).toBe(false);
-			expect(result.errors.some(e => e.includes('must contain at least one variable'))).toBe(true);
+			expect(result.errors.some(e => e.includes('braucht mindestens eine Variable'))).toBe(true);
 		});
 
 		it('should reject unknown variables', () => {
 			const result = parseFormula('{area} + {unknown}');
 			expect(result.isValid).toBe(false);
-			expect(result.errors.some(e => e.includes('Unknown variable'))).toBe(true);
+			expect(result.errors.some(e => e.includes('Unbekannte Variable'))).toBe(true);
 		});
 
 		it('should detect unbalanced parentheses', () => {
 			const result = parseFormula('({area} + {rooms}');
 			expect(result.isValid).toBe(false);
-			expect(result.errors.some(e => e.includes('parentheses'))).toBe(true);
+			expect(result.errors.some(e => e.includes('Klammer'))).toBe(true);
 		});
 
 		it('should detect consecutive operators', () => {
 			const result = parseFormula('{area} ++ {rooms}');
 			expect(result.isValid).toBe(false);
-			expect(result.errors.some(e => e.includes('consecutive operators'))).toBe(true);
+			expect(result.errors.some(e => e.includes('Zwei Rechenzeichen folgen direkt aufeinander'))).toBe(true);
 		});
 
 		it('should normalize variable names to lowercase', () => {
@@ -106,7 +106,7 @@ describe('Formula Service', () => {
 		it('should fail for missing variable value', () => {
 			const result = evaluateFormula('{area} + {volume}', { area: 80, rooms: 3.5 });
 			expect(result.isValid).toBe(false);
-			expect(result.error).toContain('Missing value');
+			expect(result.error).toContain('fehlt');
 		});
 
 		it('should use default volume calculation when volume not provided', () => {
@@ -193,7 +193,7 @@ describe('Formula Service', () => {
 			];
 			const result = calculateDistribution('{area}', zeroApartments, 1000);
 			expect(result.isValid).toBe(false);
-			expect(result.error).toContain('zero');
+			expect(result.error).toContain('null');
 		});
 	});
 
@@ -244,17 +244,17 @@ describe('Formula Service', () => {
 		it('should detect unexpected closing parenthesis', () => {
 			const result = parseFormula('{area}) + {rooms}');
 			expect(result.isValid).toBe(false);
-			expect(result.errors.some(e => e.includes('unexpected closing'))).toBe(true);
+			expect(result.errors.some(e => e.includes('nicht geöffnet'))).toBe(true);
 		});
 
 		it('should warn about division by zero', () => {
 			const result = parseFormula('{area} / 0');
-			expect(result.errors.some(e => e.includes('division by zero'))).toBe(true);
+			expect(result.errors.some(e => e.includes('teilt durch null'))).toBe(true);
 		});
 
 		it('should not warn about division by 0.5', () => {
 			const result = parseFormula('{area} / 0.5');
-			expect(result.errors.some(e => e.includes('division by zero'))).toBe(false);
+			expect(result.errors.some(e => e.includes('teilt durch null'))).toBe(false);
 		});
 
 		it('should handle whitespace-only formula', () => {
@@ -272,7 +272,7 @@ describe('Formula Service', () => {
 		it('should handle division resulting in Infinity', () => {
 			const result = evaluateFormula('{area} / ({rooms} - {rooms})', { area: 100, rooms: 3 });
 			expect(result.isValid).toBe(false);
-			expect(result.error).toContain('invalid number');
+			expect(result.error).toContain('keine gültige Zahl');
 		});
 
 		it('should handle very large numbers', () => {

@@ -17,7 +17,7 @@ export function testData(request: APIRequestContext, token: string) {
 	const get = (path: string) => request.get(`${BACKEND_API}/${path}`, { headers }).then(body);
 	const put = (path: string, data: object) => request.put(`${BACKEND_API}/${path}`, { data, headers }).then(body);
 	const remove = (path: string) => request.delete(`${BACKEND_API}/${path}`, { headers });
-	const extras: string[] = []; // invoices, heating profiles and categories, removed before their building
+	const extras: string[] = []; // invoices and configuration records, removed before their building
 	const unique = (title: string) => {
 		const name = `${title} ${randomUUID()}`;
 		names.set(title, name);
@@ -46,18 +46,30 @@ export function testData(request: APIRequestContext, token: string) {
 		}
 	}
 
+	async function removeDistributionKeys(token: string) {
+		for (const key of (await get(`distribution-keys?search=${token}`)).data) {
+			await remove(`distribution-keys/${key.id}`);
+		}
+	}
+
 	async function removeCategories(token: string) {
 		for (const category of (await get(`categories?search=${token}`)).categories) {
 			await remove(`categories/${category.id}`);
 		}
 	}
 
-	async function invoice(buildingTitle: string, categoryId: string, description: string, amount: string, invoiceDate: string) {
-		const perArea = (await get('distribution-keys')).data.find((k: { name: string }) => k.name === 'Per Area (m²)');
+	async function invoice(
+		buildingTitle: string,
+		{ categoryId, distributionKeyId }: { categoryId?: string; distributionKeyId?: string },
+		description: string,
+		amount: string,
+		invoiceDate: string
+	) {
+		const keys = (await get('distribution-keys')).data;
 		const created = await post('invoices', {
 			buildingId: ids.get(buildingTitle),
-			categoryId,
-			distributionKeyId: perArea.id,
+			categoryId: categoryId ?? (await get('categories?search=Caretaker')).categories[0].id,
+			distributionKeyId: distributionKeyId ?? keys.find((k: { name: string }) => k.name === 'Per Area (m²)').id,
 			billingEntityName: 'Muster AG',
 			description,
 			amount,
@@ -173,7 +185,7 @@ export function testData(request: APIRequestContext, token: string) {
 		// Heating costs of the building, distributed by area
 		async heatingInvoice(buildingTitle: string, amount: string, year: number) {
 			const heating = (await get('categories?limit=100')).categories.find((c: { name: string }) => c.name === 'Heating');
-			await invoice(buildingTitle, heating.id, `Heizöl ${year}`, amount, `${year}-06-30`);
+			await invoice(buildingTitle, { categoryId: heating.id }, `Heizöl ${year}`, amount, `${year}-06-30`);
 		},
 
 		async category(title: string, isAllowedUtilityCost: boolean) {
@@ -184,7 +196,18 @@ export function testData(request: APIRequestContext, token: string) {
 		},
 
 		async invoiceInCategory(buildingTitle: string, categoryTitle: string) {
-			await invoice(buildingTitle, ids.get(categoryTitle)!, 'Reinigung Q1', '450.00', '2026-03-31');
+			await invoice(buildingTitle, { categoryId: ids.get(categoryTitle) }, 'Reinigung Q1', '450.00', '2026-03-31');
+		},
+
+		async distributionKey(title: string, formula: string) {
+			const name = unique(title);
+			const key = await post('distribution-keys', { name, nameDE: name, type: 'custom', formula });
+			ids.set(title, key.id);
+			extras.push(`distribution-keys/${key.id}`);
+		},
+
+		async invoiceByKey(buildingTitle: string, keyTitle: string) {
+			await invoice(buildingTitle, { distributionKeyId: ids.get(keyTitle) }, 'Hauswart Q1', '900.00', '2026-03-31');
 		},
 
 		async cleanUp() {
@@ -194,6 +217,7 @@ export function testData(request: APIRequestContext, token: string) {
 			// Heating profiles created through the UI carry a scenario name as well
 			for (const token of tokens) await removeHeatingProfiles(token);
 			for (const token of tokens) await removeCategories(token);
+			for (const token of tokens) await removeDistributionKeys(token);
 			for (const token of tokens) await removeBuildings(token);
 		}
 	};

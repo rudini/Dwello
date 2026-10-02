@@ -1,8 +1,6 @@
 <script lang="ts">
-	import { enhance } from '$app/forms';
-	import Button from '$lib/components/Button.svelte';
-	import FieldError from '$lib/components/FieldError.svelte';
-	import Icon from '$lib/components/Icon.svelte';
+	import RecordForm from '$lib/components/RecordForm.svelte';
+	import TextField from '$lib/components/TextField.svelte';
 	import type { Category } from '$lib/types';
 
 	let {
@@ -25,24 +23,24 @@
 	});
 </script>
 
-<form method="POST" use:enhance={() => ({ update }) => update({ reset: false })} class="space-y-6">
-	<FieldError message={errors.form} />
+<RecordForm error={errors.form} cancelHref="/config/categories" {submitLabel} submitTestid="category-submit">
 
 	<div class="grid gap-4 sm:grid-cols-2">
-		<div>
-			<label for="name" class="block text-sm font-medium text-gray-700 mb-1">Name <span class="text-red-500">*</span></label>
-			<input id="name" name="name" value={values.name} placeholder="z.B. Treppenhausreinigung" data-testid="category-name-input" class={inputClass} />
-			<FieldError message={errors.name} />
-		</div>
+		<TextField
+			label="Name"
+			name="name"
+			value={values.name}
+			required
+			placeholder="z.B. Treppenhausreinigung"
+			error={errors.name}
+			testid="category-name-input"
+		/>
 		<div>
 			<label for="sortOrder" class="block text-sm font-medium text-gray-700 mb-1">Reihenfolge</label>
 			<input id="sortOrder" name="sortOrder" type="number" min="0" value={values.sortOrder} class={inputClass} />
 		</div>
 	</div>
-	<div>
-		<label for="description" class="block text-sm font-medium text-gray-700 mb-1">Beschreibung</label>
-		<input id="description" name="description" value={values.description} data-testid="category-description-input" class={inputClass} />
-	</div>
+	<TextField label="Beschreibung" name="description" value={values.description} />
 
 	<label class="flex items-start gap-3 p-4 bg-gray-50 rounded-lg cursor-pointer">
 		<input
@@ -72,12 +70,4 @@
 			{/each}
 		</div>
 	</fieldset>
-
-	<div class="flex gap-3 pt-4 border-t border-gray-200">
-		<Button href="/config/categories" variant="secondary" testid="form-cancel">Abbrechen</Button>
-		<Button type="submit" variant="primary" testid="category-submit">
-			<Icon name="save" size={18} />
-			{submitLabel}
-		</Button>
-	</div>
-</form>
+</RecordForm>

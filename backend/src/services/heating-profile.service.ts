@@ -11,8 +11,9 @@
 
 import { eq, sql, asc, ilike, and } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { configuration, heatingProfiles, type HeatingProfile, type NewHeatingProfile } from '../db/schema';
+import { heatingProfiles, type HeatingProfile, type NewHeatingProfile } from '../db/schema';
 import { Conflict } from './conflict';
+import { isDefaultSetting } from './default-setting';
 
 export interface HeatingProfileFilters {
 	search?: string;
@@ -371,11 +372,7 @@ export async function deleteHeatingProfile(
 	}
 
 	// New statements propose the default profile of the settings
-	const [defaultProfile] = await db
-		.select({ value: configuration.value })
-		.from(configuration)
-		.where(eq(configuration.key, 'default_heating_profile_id'));
-	if (defaultProfile?.value === id) {
+	if (await isDefaultSetting('default_heating_profile_id', id)) {
 		return { success: false, conflict: true, error: 'Das Heizprofil ist in den Einstellungen als Standard hinterlegt.' };
 	}
 

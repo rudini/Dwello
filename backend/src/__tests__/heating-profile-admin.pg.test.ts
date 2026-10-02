@@ -5,7 +5,8 @@
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import { deleteConfig, getConfig, setConfig } from '../services/config.service';
 import { getHeatingProfileByName, deleteHeatingProfile } from '../services/heating-profile.service';
-import { callApi, sendJson } from './helpers/auth';
+import { sendJson } from './helpers/auth';
+import { expectRejection, firstPredefined, idOf } from './helpers/records';
 
 const token = crypto.randomUUID();
 const months = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
@@ -17,7 +18,6 @@ const shares = (total = 100) =>
 const send = (method: string, path: string, body?: object) => sendJson(method, `/api/v1/heating-profiles${path}`, body);
 
 const create = (name: string, total = 100) => send('POST', '', { name: `${name} ${token}`, ...shares(total) });
-const idOf = async (response: Response) => ((await response.json()) as { id: string }).id;
 
 // The test sets the default profile; the database keeps the one it had before
 let previousDefault: string | null;
@@ -73,12 +73,8 @@ describe('Eigene Heizprofile', () => {
 	});
 
 	it('behält vordefinierte Heizprofile', async () => {
-		const predefined = await callApi('/api/v1/heating-profiles?type=predefined');
-		const { data } = (await predefined.json()) as { data: { id: string }[] };
+		const response = await send('DELETE', `/${await firstPredefined('heating-profiles')}`);
 
-		const response = await send('DELETE', `/${data[0].id}`);
-
-		expect(response.status).toBe(400);
-		expect(await response.json()).toEqual({ error: 'Vordefinierte Heizprofile können nicht gelöscht werden.' });
+		await expectRejection(response, 400, 'Vordefinierte Heizprofile können nicht gelöscht werden.');
 	});
 });

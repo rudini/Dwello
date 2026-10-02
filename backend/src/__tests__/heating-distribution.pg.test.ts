@@ -9,12 +9,13 @@
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import { eq } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { categories, distributionKeys, heatingProfiles, invoices } from '../db/schema';
+import { categories, heatingProfiles, invoices } from '../db/schema';
 import { createBuilding, deleteBuilding } from '../services/building.service';
 import { createApartment, deleteApartment } from '../services/apartment.service';
 import { createTenant, deleteTenant } from '../services/tenant.service';
 import { createContract, deleteContract } from '../services/contract.service';
 import { callApi } from './helpers/auth';
+import { insertInvoice } from './helpers/records';
 
 type LineItem = { isHeatingCost: boolean; apartmentShare: number; tenantShare: number; sharePercentage: number };
 
@@ -69,17 +70,7 @@ beforeAll(async () => {
 	created.apartments.push(large.id, small.id);
 
 	const [heating] = await db.select().from(categories).where(eq(categories.name, 'Heating'));
-	const [perArea] = await db.select().from(distributionKeys).where(eq(distributionKeys.name, 'Per Area (m²)'));
-	await db.insert(invoices).values({
-		buildingId: building.id,
-		categoryId: heating.id,
-		distributionKeyId: perArea.id,
-		billingEntityName: 'Heizöl AG',
-		description: 'Heizöl 2024',
-		amount: '1000.00',
-		invoiceDate: '2024-06-30',
-		isValidUtilityCost: true
-	});
+	await insertInvoice(building.id, { categoryId: heating.id, description: 'Heizöl 2024', amount: '1000.00', invoiceDate: '2024-06-30' });
 	const [profile] = await db
 		.insert(heatingProfiles)
 		.values({

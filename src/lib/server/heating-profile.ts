@@ -1,7 +1,6 @@
-import { error } from '@sveltejs/kit';
 import type { HeatingProfile } from '$lib/types';
 import { MONTHS, profileTotal } from '$lib/heating-profile';
-import { deleteRecord, saveRecord } from './save-form';
+import { deleteRecord, fetchRecord, saveRecord } from './save-form';
 
 const API = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1/heating-profiles`;
 
@@ -19,12 +18,8 @@ export function toHeatingProfile(hp: Record<string, unknown>): HeatingProfile {
 	} as HeatingProfile;
 }
 
-export async function fetchHeatingProfile(fetch: typeof globalThis.fetch, id: string) {
-	const response = await fetch(`${API}/${id}`);
-	if (response.status === 404) throw error(404, 'Heizprofil nicht gefunden');
-	if (!response.ok) throw error(response.status, 'Fehler beim Laden des Heizprofils');
-	return toHeatingProfile(await response.json());
-}
+export const fetchHeatingProfile = async (fetch: typeof globalThis.fetch, id: string) =>
+	toHeatingProfile(await fetchRecord(fetch, `${API}/${id}`, 'Heizprofil'));
 
 function parseHeatingProfile(formData: FormData) {
 	const field = (key: string) => String(formData.get(key) ?? '').trim();

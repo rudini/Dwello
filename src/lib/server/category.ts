@@ -1,6 +1,5 @@
-import { error } from '@sveltejs/kit';
 import type { Category } from '$lib/types';
-import { deleteRecord, saveRecord } from './save-form';
+import { deleteRecord, fetchRecord, saveRecord } from './save-form';
 
 const API = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1/categories`;
 const LIST = '/config/categories';
@@ -22,12 +21,8 @@ export function toCategory(c: Record<string, unknown>): CategoryWithUsage {
 	};
 }
 
-export async function fetchCategory(fetch: typeof globalThis.fetch, id: string) {
-	const response = await fetch(`${API}/${id}`);
-	if (response.status === 404) throw error(404, 'Kategorie nicht gefunden');
-	if (!response.ok) throw error(response.status, 'Fehler beim Laden der Kategorie');
-	return toCategory(await response.json());
-}
+export const fetchCategory = async (fetch: typeof globalThis.fetch, id: string) =>
+	toCategory(await fetchRecord(fetch, `${API}/${id}`, 'Kategorie'));
 
 function parseCategory(formData: FormData) {
 	const field = (key: string) => String(formData.get(key) ?? '').trim();

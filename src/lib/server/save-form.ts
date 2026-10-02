@@ -1,4 +1,4 @@
-import { fail, redirect } from '@sveltejs/kit';
+import { error, fail, redirect } from '@sveltejs/kit';
 
 type Saved = { id?: string; error?: string };
 
@@ -36,4 +36,12 @@ export async function deleteRecord(fetch: typeof globalThis.fetch, url: string, 
 		return fail(response.status, { error: (message as string) ?? failure });
 	}
 	throw redirect(303, location);
+}
+
+/** Page load body: the record as JSON, or an error page naming what is missing */
+export async function fetchRecord(fetch: typeof globalThis.fetch, url: string, record: string) {
+	const response = await fetch(url);
+	if (response.status === 404) throw error(404, `${record} nicht gefunden`);
+	if (!response.ok) throw error(response.status, `${record} konnte nicht geladen werden`);
+	return response.json();
 }

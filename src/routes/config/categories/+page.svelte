@@ -1,9 +1,9 @@
 <script lang="ts">
 	import Button from '$lib/components/Button.svelte';
 	import Icon from '$lib/components/Icon.svelte';
-	import Card from '$lib/components/Card.svelte';
 	import ConfirmDeleteDialog from '$lib/components/ConfirmDeleteDialog.svelte';
 	import PageTrail from '$lib/components/PageTrail.svelte';
+	import RecordTable from '$lib/components/RecordTable.svelte';
 	import type { CategoryWithUsage } from '$lib/server/category';
 	import CategoryRow from './CategoryRow.svelte';
 	import type { ActionData, PageData } from './$types';
@@ -60,26 +60,11 @@
 		{/each}
 	</div>
 
-	<Card padding={false}>
-		<div class="overflow-x-auto">
-			<table class="w-full">
-				<thead class="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-					<tr>
-						<th class="px-6 py-3 text-left">Kategorie</th>
-						<th class="px-6 py-3 text-left">Beschreibung</th>
-						<th class="px-6 py-3 text-center">Umlagefähig</th>
-						<th class="px-6 py-3 text-center">Verwendung</th>
-						<th class="px-6 py-3"><span class="sr-only">Aktionen</span></th>
-					</tr>
-				</thead>
-				<tbody class="divide-y divide-gray-200">
-					{#each shown as category (category.id)}
-						<CategoryRow {category} ondelete={() => (toDelete = category)} />
-					{/each}
-				</tbody>
-			</table>
-		</div>
-	</Card>
+	<RecordTable columns={[{ label: 'Kategorie' }, { label: 'Beschreibung' }, { label: 'Umlagefähig', align: 'center' }, { label: 'Verwendung', align: 'center' }]}>
+		{#each shown as category (category.id)}
+			<CategoryRow {category} ondelete={() => (toDelete = category)} />
+		{/each}
+	</RecordTable>
 </div>
 
 {#if toDelete}

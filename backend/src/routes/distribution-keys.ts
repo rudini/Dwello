@@ -5,6 +5,7 @@
 
 import { Elysia, t } from 'elysia';
 import { deleteResponse } from './delete-response';
+import { Conflict } from '../services/conflict';
 import {
 	listDistributionKeys,
 	getDistributionKey,
@@ -137,7 +138,7 @@ export const distributionKeyRoutes = new Elysia({ prefix: '/api/v1/distribution-
 				set.status = 201;
 				return key;
 			} catch (error) {
-				set.status = 400;
+				set.status = error instanceof Conflict ? 409 : 400;
 				return { error: error instanceof Error ? error.message : 'Failed to create distribution key' };
 			}
 		},
@@ -179,7 +180,7 @@ export const distributionKeyRoutes = new Elysia({ prefix: '/api/v1/distribution-
 
 				return key;
 			} catch (error) {
-				set.status = 400;
+				set.status = error instanceof Conflict ? 409 : 400;
 				return { error: error instanceof Error ? error.message : 'Failed to update distribution key' };
 			}
 		},
