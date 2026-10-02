@@ -95,13 +95,14 @@ describe('Wohnungsstatus aus den Mietverträgen', () => {
 		expect(building.occupiedCount).toBe(occupied.total);
 	});
 
-	it('zählt wiedervermietete Wohnungen im Dashboard separat', async () => {
+	it('zählt Wohnungen im Dashboard wie in der Liste', async () => {
 		const relet = await listApartments({ status: 'relet', limit: 1000 });
 		const response = await callApi('/api/v1/dashboard');
 		const { portfolio } = (await response.json()) as { portfolio: Record<string, number> };
 
 		expect(portfolio.reletApartments).toBe(relet.total);
 		expect(portfolio.reservedApartments).toBe((await listApartments({ status: 'reserved', limit: 1000 })).total);
+		expect(portfolio.occupiedApartments).toBe((await listApartments({ status: 'occupied', limit: 1000 })).total);
 	});
 
 	it('wird vom Ändern der Wohnung nicht überschrieben', async () => {

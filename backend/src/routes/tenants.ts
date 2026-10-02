@@ -18,7 +18,7 @@ import {
 const tenantQuerySchema = t.Object({
 	search: t.Optional(t.String()),
 	language: t.Optional(t.String()),
-	hasActiveContract: t.Optional(t.String()),
+	status: t.Optional(t.Union([t.Literal('active'), t.Literal('inactive')])),
 	limit: t.Optional(t.String()),
 	offset: t.Optional(t.String())
 });
@@ -46,7 +46,7 @@ export const tenantRoutes = new Elysia({ prefix: '/api/v1/tenants' })
 			const filters = {
 				search: query.search,
 				language: query.language,
-				hasActiveContract: query.hasActiveContract === 'true' ? true : undefined,
+				status: query.status,
 				limit: query.limit ? parseInt(query.limit, 10) : undefined,
 				offset: query.offset ? parseInt(query.offset, 10) : undefined
 			};

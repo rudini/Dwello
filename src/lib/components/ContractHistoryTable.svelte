@@ -3,20 +3,12 @@
 	import StatusBadge from './StatusBadge.svelte';
 	import type { ContractHistory } from '../types';
 	import { formatCurrency } from '$lib/utils/format';
+	import { contractBadges } from '$lib/contract-status';
 
-	let { contracts }: { contracts: ContractHistory[] } = $props();
+	// On an apartment page each contract is named by its tenant, on a tenant page by its apartment
+	let { contracts, by = 'tenant' }: { contracts: ContractHistory[]; by?: 'tenant' | 'apartment' } = $props();
 
-	const initials = (name: string) =>
-		name
-			.split(' ')
-			.map((word) => word[0])
-			.join('')
-			.slice(0, 2)
-			.toUpperCase();
-	const badge = (contract: ContractHistory) =>
-		contract.isActive
-			? ({ status: 'AKTIV', variant: 'success' } as const)
-			: ({ status: 'Beendet', variant: 'gray' } as const);
+	const party = (contract: ContractHistory) => (by === 'tenant' ? contract.tenantName : contract.apartment);
 	const headerClass = 'text-left py-3 px-4 text-xs font-semibold uppercase tracking-wide text-text-secondary';
 </script>
 
@@ -30,7 +22,7 @@
 			<table class="w-full">
 				<thead>
 					<tr class="border-b border-slate-200">
-						<th class="{headerClass} px-0">Mieter</th>
+						<th class="{headerClass} px-0">{by === 'tenant' ? 'Mieter' : 'Wohnung'}</th>
 						<th class={headerClass}>Zeitraum</th>
 						<th class={headerClass}>Mietzins (brutto)</th>
 						<th class={headerClass}>Status</th>
@@ -40,19 +32,16 @@
 					{#each contracts as contract (contract.id)}
 						<tr class="border-b border-slate-100 hover:bg-slate-50 transition-colors" data-testid="contract-history-row">
 							<td class="py-4 px-0">
-								<a href="/contracts/{contract.id}" class="flex items-center gap-3" data-testid="contract-history-link">
-									<span
-										class="w-8 h-8 rounded-full bg-gradient-to-br from-slate-400 to-slate-600 flex items-center justify-center text-white text-xs font-semibold"
-									>
-										{initials(contract.tenantName)}
-									</span>
-									<span class="text-sm font-medium text-text-dark hover:text-primary">{contract.tenantName}</span>
-								</a>
+								<a
+									href="/contracts/{contract.id}"
+									class="text-sm font-medium text-text-dark hover:text-primary"
+									data-testid="contract-history-link">{party(contract)}</a
+								>
 							</td>
 							<td class="py-4 px-4 text-sm text-text-dark">{contract.period}</td>
 							<td class="py-4 px-4 text-sm font-medium text-text-dark">{formatCurrency(contract.rentBrutto)}</td>
 							<td class="py-4 px-4">
-								<StatusBadge {...badge(contract)} />
+								<StatusBadge {...contractBadges[contract.status]} />
 							</td>
 						</tr>
 					{/each}

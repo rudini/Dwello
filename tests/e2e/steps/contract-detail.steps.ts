@@ -2,7 +2,7 @@ import { expect } from '@playwright/test';
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { visit } from '../interactions/navigation';
-import { apartmentOfContract, deleteConfirmation, statusOfContract, totalRent } from '../questions/contract-detail';
+import { apartmentOfContract, statusOfContract, totalRent } from '../questions/contract-detail';
 import { listedContract } from '../questions/contracts';
 import {
 	deleteContract,
@@ -67,10 +67,6 @@ Then('sieht der Liegenschaftsverwalter den monatlichen Mietzins {string}', async
 
 Then('hat der Mietvertrag den Status {string}', async ({ verwalter }, status: string) => {
 	await expect(statusOfContract(verwalter)).toHaveText(status);
-});
-
-Then('kann der Liegenschaftsverwalter das Löschen nicht bestätigen', async ({ verwalter }) => {
-	await expect(deleteConfirmation(verwalter)).toBeDisabled();
 });
 
 Then('der Mietvertrag von {string} ist nicht mehr auffindbar', async ({ verwalter, names }, tenant: string) => {

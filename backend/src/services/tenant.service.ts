@@ -17,7 +17,7 @@ import {
 export interface TenantFilters {
 	search?: string;
 	language?: string;
-	hasActiveContract?: boolean;
+	status?: 'active' | 'inactive';
 	limit?: number;
 	offset?: number;
 }
@@ -26,7 +26,22 @@ export interface TenantWithOccupancy extends Tenant {
 	currentApartment?: string;
 	currentBuilding?: string;
 	contractCount: number;
+	isActive: boolean;
 }
+
+// Correlated subqueries name the outer column explicitly: drizzle leaves it unqualified in single-table selects
+/** Active: a rental contract runs today or is signed for later */
+const isActive = sql<boolean>`exists (
+	select 1 from rental_contracts c
+	where c.tenant_id = "tenants"."id" and (c.end_date is null or c.end_date >= current_date)
+)`;
+const hasContracts = sql`exists (select 1 from rental_contracts c where c.tenant_id = "tenants"."id")`;
+
+// Former tenants had contracts that all ended
+const statusConditions = {
+	active: isActive,
+	inactive: sql`${hasContracts} and not ${isActive}`
+};
 
 /**
  * List tenants with optional filters
@@ -35,7 +50,7 @@ export async function listTenants(filters: TenantFilters = {}): Promise<{
 	tenants: TenantWithOccupancy[];
 	total: number;
 }> {
-	const { search, language, limit = 50, offset = 0 } = filters;
+	const { search, language, status, limit = 50, offset = 0 } = filters;
 
 	// Build conditions
 	const conditions = [];
@@ -53,6 +68,10 @@ export async function listTenants(filters: TenantFilters = {}): Promise<{
 		conditions.push(eq(tenants.language, language));
 	}
 
+	if (status) {
+		conditions.push(statusConditions[status]);
+	}
+
 	// Query with current occupancy
 	const query = db
 		.select({
@@ -68,6 +87,7 @@ export async function listTenants(filters: TenantFilters = {}): Promise<{
 			correspondenceChannel: tenants.correspondenceChannel,
 			createdAt: tenants.createdAt,
 			updatedAt: tenants.updatedAt,
+			isActive,
 			contractCount: sql<number>`(SELECT COUNT(*) FROM rental_contracts WHERE rental_contracts.tenant_id = ${tenants.id})`.as(
 				'contract_count'
 			)

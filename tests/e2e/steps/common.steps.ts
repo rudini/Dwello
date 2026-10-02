@@ -1,7 +1,7 @@
 import { expect } from '@playwright/test';
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { errorMessage } from '../questions/form';
+import { deleteConfirmation, errorMessage } from '../questions/form';
 import { cancelEditing, chooseBreadcrumb } from '../tasks/form';
 
 const { When, Then } = createBdd(test);
@@ -28,3 +28,14 @@ Then(
 Then('sieht der Liegenschaftsverwalter die Fehlermeldung {string}', async ({ verwalter }, text: string) => {
 	await expect(errorMessage(verwalter, text)).toBeVisible();
 });
+
+Then('kann der Liegenschaftsverwalter das Löschen nicht bestätigen', async ({ verwalter }) => {
+	await expect(deleteConfirmation(verwalter)).toBeDisabled();
+});
+
+Then(
+	'ist der Liegenschaftsverwalter auf der Bearbeitungsseite von {string}',
+	async ({ verwalter, names }, title: string) => {
+		await expect(verwalter.page).toHaveTitle(`${names.get(title) ?? title} bearbeiten - Dwello`);
+	}
+);

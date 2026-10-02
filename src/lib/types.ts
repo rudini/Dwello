@@ -90,7 +90,8 @@ export interface ContractHistory {
 	tenantName: string;
 	period: string; // "DD.MM.YYYY - DD.MM.YYYY"
 	rentBrutto: number; // in CHF
-	isActive: boolean;
+	status: 'active' | 'ended' | 'future';
+	apartment?: string;
 	startDate: string;
 	endDate?: string | null;
 }
@@ -124,7 +125,7 @@ export interface ApartmentsListData {
 export interface TenantWithOccupancy extends Tenant {
 	currentApartment?: string | null;
 	currentBuilding?: string | null;
-	contractCount: number;
+	isActive: boolean; // a contract runs today or is signed for later
 }
 
 // Tenants list response

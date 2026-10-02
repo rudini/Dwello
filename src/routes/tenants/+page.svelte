@@ -69,6 +69,7 @@
 					<label for="status" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
 					<select
 						id="status"
+						data-testid="tenants-status-filter"
 						bind:value={statusFilter}
 						class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary bg-white"
 					>
@@ -136,8 +137,8 @@
 									<h3 class="font-semibold text-gray-900 truncate">
 										{tenant.firstName} {tenant.lastName}
 									</h3>
-									{#if tenant.contractCount > 0}
-										<StatusBadge status="AKTIV" variant="success" />
+									{#if tenant.isActive}
+										<span data-testid="tenant-active"><StatusBadge status="AKTIV" variant="success" /></span>
 									{/if}
 								</div>
 								<p class="text-sm text-gray-500 truncate">{tenant.email}</p>

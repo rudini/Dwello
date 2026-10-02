@@ -19,23 +19,24 @@ export type ApartmentStatus = 'occupied' | 'relet' | 'vacant' | 'reserved';
 /** First day of the next rental contract that has not started yet */
 const nextContractStart = sql<string | null>`(
 	select min(c.start_date)::text from rental_contracts c
-	where c.apartment_id = ${apartments.id} and c.start_date > current_date
+	where c.apartment_id = "apartments"."id" and c.start_date > current_date
 )`;
 
 /**
  * Occupied while a rental contract runs today; relet when only a future contract is signed;
  * otherwise as the property manager set it (vacant or reserved).
  * Computed on every read, so it is right on the day a contract starts or ends.
+ * The outer columns are named explicitly: drizzle leaves them unqualified in single-table selects.
  */
 export const apartmentStatus = sql<ApartmentStatus>`(case
 	when exists (
 		select 1 from rental_contracts c
-		where c.apartment_id = ${apartments.id}
+		where c.apartment_id = "apartments"."id"
 			and c.start_date <= current_date
 			and (c.end_date is null or c.end_date >= current_date)
 	) then 'occupied'
 	when ${nextContractStart} is not null then 'relet'
-	else ${apartments.status}
+	else "apartments"."status"
 end)`;
 
 export interface ApartmentFilters {

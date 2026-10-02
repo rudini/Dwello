@@ -2,7 +2,7 @@ import { expect } from '@playwright/test';
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { visit } from '../interactions/navigation';
-import { allListedTenants, listedTenant } from '../questions/tenants';
+import { activeBadge, allListedTenants, listedTenant } from '../questions/tenants';
 import {
 	createTenantByEmail,
 	openTenant,
@@ -66,3 +66,19 @@ Then(
 Then('ist der Liegenschaftsverwalter auf der Mieterliste', async ({ verwalter }) => {
 	await expect(verwalter.page).toHaveTitle('Mieter - Dwello');
 });
+
+When(
+	'der Liegenschaftsverwalter die {word} Mieter mit dem Namen {string} sucht',
+	async ({ verwalter, names }, kind: string, tenant: string) => {
+		const status = { aktiven: 'active', ehemaligen: 'inactive' }[kind]!;
+		await verwalter.perform(searchTenant(names.get(tenant) ?? tenant, status));
+	}
+);
+
+Then(
+	'sieht der Liegenschaftsverwalter den Mieter {string} als {word} Mieter',
+	async ({ verwalter, names }, tenant: string, kind: string) => {
+		await expect(listedTenant(verwalter, names.get(tenant)!)).toBeVisible();
+		await expect(activeBadge(verwalter, names.get(tenant)!)).toHaveCount(kind === 'aktiven' ? 1 : 0);
+	}
+);

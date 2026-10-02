@@ -84,13 +84,13 @@ describe('Wohnungsdetail', () => {
 		const data = await loadApartment({ 'apartments/a1': apartment, contracts: { contracts } });
 
 		expect(data.contractHistory).toEqual([
-			expect.objectContaining({ id: 'c2', tenantName: 'Beat Huber', rentBrutto: 1430, isActive: true }),
+			expect.objectContaining({ id: 'c2', tenantName: 'Beat Huber', rentBrutto: 1430, status: 'active' }),
 			expect.objectContaining({
 				id: 'c1',
 				tenantName: 'Eva Graf',
 				period: '1.1.2018 - 31.3.2022',
 				rentBrutto: 1250,
-				isActive: false
+				status: 'ended'
 			})
 		]);
 	});
