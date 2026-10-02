@@ -1413,13 +1413,17 @@ Validation is defined inline in route handlers for type safety.
   - [x] Real-DB test: every stored key and every keyed invoice of a building distributes validly
 
   **Note:** The formula engine only supports `{area}`, `{rooms}`, `{volume}`, `{units}`; the data model has no occupant counts or meter readings. Statement calculation had silently fallen back to an equal split for these keys, so "Per Unit" keeps results unchanged.
-  **Files:** `backend/migrations/0007_remove_unsupported_distribution_keys.sql` (new), `backend/src/__tests__/distribution-key.pg.test.ts` (new)
+  **Files:** `backend/migrations/0007_remove_unsupported_distribution_keys.sql` (new), `backend/src/__tests__/distribution-key.pg.test.ts` (new), `backend/src/db/migrate.ts` (0007 marker), `backend/src/__tests__/migrations.pg.test.ts`
   **Tests:** `distribution-key.pg.test.ts`: 3 pass (`bun run test:pg`).
 
 - [x] Fix `getUtilityCostRules` returning `{ en, de }` objects instead of the declared `string[]`
   **Note:** Now returns the German category names. Fixes 6 failing tests in `utility-validation.service.test.ts` and 2 tsc errors.
   **Files:** `backend/src/services/utility-validation.service.ts`
-  **Tests:** Backend `bun run test`: 335 pass, 0 fail. 48 pre-existing tsc errors remain (test mocks).
+  **Tests:** 6 tests in `utility-validation.service.test.ts` pass again; backend tsc errors 50 → 48.
+
+- [x] Run backend unit tests with `bun test --isolate`
+  **Note:** `mock.module` in some test files leaked into other files in the shared process (15 failures). With `--isolate` the unit run has 351 pass, 1 fail (`deleteHeatingProfile` predefined profile, also failing on main); `bun run test:pg`: 103 pass.
+  **Files:** `backend/package.json`
 
 ### 7.5 Validation Schemas
 
