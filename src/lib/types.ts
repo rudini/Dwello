@@ -267,7 +267,7 @@ export type AccountingPeriod = 'calendar' | 'july-june' | 'october-september';
 export interface SystemConfig {
 	id: string;
 	accountingPeriod: AccountingPeriod;
-	managementFeePercentage: number; // 0-3%
+	managementFeePercentage: number; // usually up to 3%, not a limit
 	defaultHeatingProfileId?: string;
 	defaultDistributionKeyId?: string;
 	companyName?: string;
@@ -310,12 +310,14 @@ export interface Statement {
 	totalCosts: number;
 	totalAdvancePayments: number;
 	managementFee: number;
+	managementFeePercent: number; // rate used when the statement was generated
 	balance: number; // positive = tenant owes, negative = refund
 	status: StatementStatus;
 	paymentDeadline: string;
 	paidDate?: string;
 	lastReminderDate?: string;
 	pdfGeneratedAt?: string;
+	notes?: string | null;
 	createdAt?: string;
 	updatedAt?: string;
 }

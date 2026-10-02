@@ -8,6 +8,8 @@
 	import Modal from '$lib/components/Modal.svelte';
 	import FieldError from '$lib/components/FieldError.svelte';
 	import { enhance } from '$app/forms';
+	import { untrack } from 'svelte';
+	import { formatCurrency, formatDate } from '$lib/utils/format';
 	import type { ActionData } from './$types';
 
 	interface PageData {
@@ -21,18 +23,7 @@
 	let showDeleteModal = $state(false);
 	let isProcessing = $state(false);
 	let isGeneratingPdf = $state(false);
-	let pdfGeneratedAt = $state(data.statement.pdfGeneratedAt);
-
-	function formatCurrency(amount: number): string {
-		return new Intl.NumberFormat('de-CH', {
-			style: 'currency',
-			currency: 'CHF'
-		}).format(amount);
-	}
-
-	function formatDate(dateString: string): string {
-		return new Date(dateString).toLocaleDateString('de-CH');
-	}
+	let pdfGeneratedAt = $state(untrack(() => data.statement.pdfGeneratedAt));
 
 	function formatDateTime(dateString: string): string {
 		return new Date(dateString).toLocaleString('de-CH');
@@ -102,7 +93,10 @@
 			} else {
 				const error = await response.json();
 				console.error('PDF generation failed:', error);
-				addToast('error', 'PDF-Generierung fehlgeschlagen: ' + (error.error || 'Unbekannter Fehler'));
+				addToast(
+					'error',
+					'PDF-Generierung fehlgeschlagen: ' + (error.error || 'Unbekannter Fehler')
+				);
 			}
 		} catch (error) {
 			console.error('PDF generation error:', error);
@@ -112,7 +106,9 @@
 		}
 	}
 
-	const subtotal = $derived(data.statement.lineItems.reduce((sum, item) => sum + item.tenantShare, 0));
+	const subtotal = $derived(
+		data.statement.lineItems.reduce((sum, item) => sum + item.tenantShare, 0)
+	);
 </script>
 
 <svelte:head>
@@ -215,11 +211,12 @@
 						<tfoot class="border-t border-gray-200">
 							<tr>
 								<td colspan="4" class="pt-3 text-right font-medium text-gray-700">Zwischensumme</td>
-								<td class="pt-3 text-right font-medium text-gray-900">{formatCurrency(subtotal)}</td>
+								<td class="pt-3 text-right font-medium text-gray-900">{formatCurrency(subtotal)}</td
+								>
 							</tr>
 							<tr>
 								<td colspan="4" class="py-1 text-right text-sm text-gray-500">
-									Verwaltungsgebühr (3%)
+									Verwaltungsgebühr ({data.statement.managementFeePercent}%)
 								</td>
 								<td class="py-1 text-right text-gray-700">
 									{formatCurrency(data.statement.managementFee)}
@@ -256,7 +253,9 @@
 				<div class="grid gap-4 sm:grid-cols-2">
 					<div>
 						<p class="text-sm text-gray-500">Zahlungsfrist</p>
-						<p class="font-medium text-gray-900">{formatDate(data.statement.paymentDeadline)}</p>
+						<p class="font-medium text-gray-900" data-testid="statement-payment-deadline">
+							{formatDate(data.statement.paymentDeadline)}
+						</p>
 					</div>
 					{#if data.statement.paidDate}
 						<div>
@@ -279,6 +278,14 @@
 						<p class="font-medium text-gray-900">{formatDate(data.statement.statementDate)}</p>
 					</div>
 				</div>
+				{#if data.statement.notes}
+					<div class="mt-4">
+						<p class="text-sm text-gray-500">Bemerkungen</p>
+						<p class="text-gray-900 whitespace-pre-line" data-testid="statement-notes">
+							{data.statement.notes}
+						</p>
+					</div>
+				{/if}
 			</Card>
 		</div>
 
@@ -397,7 +404,11 @@
 </div>
 
 <!-- Mark as Paid Modal -->
-<Modal open={showMarkPaidModal} title="Als bezahlt markieren" onclose={() => (showMarkPaidModal = false)}>
+<Modal
+	open={showMarkPaidModal}
+	title="Als bezahlt markieren"
+	onclose={() => (showMarkPaidModal = false)}
+>
 	<p class="text-gray-600 mb-4">
 		Möchten Sie diese Abrechnung als bezahlt markieren? Das heutige Datum wird als Zahlungsdatum
 		eingetragen.
@@ -412,10 +423,11 @@
 	<form
 		method="POST"
 		action="?/markPaid"
-		use:enhance={() => async ({ update }) => {
-			await update();
-			showMarkPaidModal = false;
-		}}
+		use:enhance={() =>
+			async ({ update }) => {
+				await update();
+				showMarkPaidModal = false;
+			}}
 		class="flex justify-end gap-3"
 	>
 		<Button variant="secondary" onclick={() => (showMarkPaidModal = false)}>Abbrechen</Button>
@@ -427,10 +439,12 @@
 </Modal>
 
 <!-- Send Reminder Modal -->
-<Modal open={showSendReminderModal} title="Mahnung senden" onclose={() => (showSendReminderModal = false)}>
-	<p class="text-gray-600 mb-4">
-		Möchten Sie eine Zahlungserinnerung an den Mieter senden?
-	</p>
+<Modal
+	open={showSendReminderModal}
+	title="Mahnung senden"
+	onclose={() => (showSendReminderModal = false)}
+>
+	<p class="text-gray-600 mb-4">Möchten Sie eine Zahlungserinnerung an den Mieter senden?</p>
 	<div class="p-3 bg-gray-50 rounded-lg mb-4">
 		<p class="font-medium text-gray-900">{data.statement.tenantName}</p>
 		{#if data.statement.tenantEmail}
@@ -477,10 +491,11 @@
 	<form
 		method="POST"
 		action="?/delete"
-		use:enhance={() => async ({ update }) => {
-			await update();
-			showDeleteModal = false;
-		}}
+		use:enhance={() =>
+			async ({ update }) => {
+				await update();
+				showDeleteModal = false;
+			}}
 		class="flex justify-end gap-3"
 	>
 		<Button variant="secondary" onclick={() => (showDeleteModal = false)}>Abbrechen</Button>
