@@ -16,7 +16,11 @@ import {
 import { buildingExists } from '../services/building.service';
 
 // Apartment numbers are unique per building (apartments_building_number_idx)
-const numberTaken = (error: unknown) => (error as { code?: string }).code === '23505';
+// Drizzle wraps the PostgreSQL error (DrizzleQueryError.cause)
+const numberTaken = (error: unknown) => {
+	const { code, cause } = error as { code?: string; cause?: { code?: string } };
+	return (code ?? cause?.code) === '23505';
+};
 const numberTakenError = (number: string) => ({
 	error: `Die Wohnungsnummer ${number} existiert bereits in diesem Gebäude.`
 });
