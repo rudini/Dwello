@@ -18,7 +18,13 @@
 			<Icon name="email" size={20} class="text-gray-400 mt-0.5" />
 			<div>
 				<dt class="text-sm text-gray-500">E-Mail</dt>
-				<dd><a href="mailto:{tenant.email}" class="text-primary hover:underline">{tenant.email ?? '–'}</a></dd>
+				<dd>
+					{#if tenant.email}
+						<a href="mailto:{tenant.email}" class="text-primary hover:underline" data-testid="tenant-email-link">{tenant.email}</a>
+					{:else}
+						<span class="text-gray-900">–</span>
+					{/if}
+				</dd>
 			</div>
 		</div>
 		<div class="flex items-start gap-3">
