@@ -28,3 +28,36 @@ export function fireEvent(field: HTMLInputElement | HTMLSelectElement | HTMLText
 	field.dispatchEvent(new Event(type, { bubbles: true }));
 	flushSync();
 }
+
+export type ApiCall = { method: string; path: string; body?: unknown };
+
+/**
+ * Answers the browser's calls to the BFF (`/api/...`), the way the backend would, and records them.
+ * `answer` gets each call and returns [status, body].
+ */
+export function fakeBff(answer: (call: ApiCall) => [number, unknown?] = () => [200, {}]) {
+	const calls: ApiCall[] = [];
+	globalThis.fetch = (async (url: string, init?: RequestInit) => {
+		const call = {
+			method: init?.method ?? 'GET',
+			path: String(url).replace(/^\/api/, ''),
+			body: init?.body ? JSON.parse(String(init.body)) : undefined
+		};
+		calls.push(call);
+		const [status, body] = answer(call);
+		return new Response(status === 204 ? null : JSON.stringify(body ?? {}), { status });
+	}) as typeof fetch;
+	return calls;
+}
+
+/** Waits until pending promises (e.g. an API call after a click) have settled and the DOM is updated */
+export async function settle() {
+	for (let i = 0; i < 5; i++) await new Promise((resolve) => setTimeout(resolve, 0));
+	flushSync();
+}
+
+/** Submits the form around a submit button, as pressing it does in a browser (jsdom does not) */
+export function submit(testid: string) {
+	byTestId(testid)!.closest('form')!.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+	flushSync();
+}
