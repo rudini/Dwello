@@ -14,7 +14,7 @@
 	const status = $derived(statusBadges[invoice.categorizationStatus]);
 </script>
 
-<tr class="hover:bg-gray-50 transition-colors">
+<tr class="hover:bg-gray-50 transition-colors" data-testid="invoice-row-{invoice.id}">
 	<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
 		{formatDate(invoice.invoiceDate)}
 	</td>
@@ -25,14 +25,14 @@
 	</td>
 	<td class="px-6 py-4 whitespace-nowrap">
 		{#if invoice.category}
-			<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+			<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800" data-testid="invoice-category">
 				{invoice.category.name}
 			</span>
 		{:else}
 			<span class="text-sm text-gray-400">-</span>
 		{/if}
 	</td>
-	<td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-right">
+	<td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-right" data-testid="invoice-amount">
 		{formatCurrency(invoice.amount)}
 	</td>
 	<td class="px-6 py-4 whitespace-nowrap text-center">
@@ -42,7 +42,7 @@
 			<Badge variant="danger">Nicht umlagefähig</Badge>
 		{/if}
 	</td>
-	<td class="px-6 py-4 whitespace-nowrap text-center">
+	<td class="px-6 py-4 whitespace-nowrap text-center" data-testid="invoice-status">
 		<Badge variant={status.variant}>{status.label}</Badge>
 	</td>
 	<td class="px-6 py-4 whitespace-nowrap text-right text-sm">
@@ -51,6 +51,7 @@
 				href="/invoices/{invoice.id}"
 				class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
 				title="Ansehen"
+				data-testid="invoice-view-button"
 			>
 				<Icon name="visibility" size={18} />
 			</a>
@@ -58,6 +59,7 @@
 				href="/invoices/{invoice.id}/edit"
 				class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
 				title="Bearbeiten"
+				data-testid="invoice-edit-button"
 			>
 				<Icon name="edit" size={18} />
 			</a>

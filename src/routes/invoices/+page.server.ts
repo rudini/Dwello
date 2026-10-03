@@ -1,4 +1,6 @@
-import type { InvoicesListData, InvoiceWithDetails, Category } from '$lib/types';
+import type { InvoicesListData } from '$lib/types';
+import { toCategory } from '$lib/server/category';
+import { toInvoice } from '$lib/server/invoice';
 import type { PageServerLoad } from './$types';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
@@ -18,7 +20,7 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<InvoicesList
 		if (search) params.set('search', search);
 		if (buildingId) params.set('buildingId', buildingId);
 		if (categoryId) params.set('categoryId', categoryId);
-		if (validity) params.set('validity', validity);
+		if (validity) params.set('isValidUtilityCost', String(validity === 'valid'));
 
 		const [invoicesRes, buildingsRes, categoriesRes] = await Promise.all([
 			fetch(`${BACKEND_URL}/api/v1/invoices?${params}`),
@@ -30,26 +32,7 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<InvoicesList
 		const buildingsData = await buildingsRes.json();
 		const categoriesData = await categoriesRes.json();
 
-		const invoices: InvoiceWithDetails[] = (invoicesData.invoices || invoicesData.data || []).map((inv: Record<string, unknown>) => ({
-			id: inv.id,
-			buildingId: inv.buildingId,
-			invoiceDate: inv.invoiceDate,
-			billingEntity: inv.billingEntityName || inv.billingEntity || '',
-			description: inv.description || '',
-			amount: Number(inv.amount) || 0,
-			categoryId: inv.categoryId,
-			distributionKeyId: inv.distributionKeyId,
-			isValidUtilityCost: inv.isValidUtilityCost ?? true,
-			llmConfidence: inv.llmConfidence ? Number(inv.llmConfidence) : undefined,
-			llmReasoning: inv.llmReasoning,
-			manualOverrideBy: inv.manualOverrideBy,
-			manualOverrideReason: inv.manualOverrideReason,
-			buildingName: (inv.building as Record<string, string>)?.name || '',
-			buildingAddress: (inv.building as Record<string, string>)?.address || '',
-			category: inv.category as Category | undefined,
-			distributionKey: inv.distributionKey,
-			categorizationStatus: inv.categorizationStatus || 'pending'
-		}));
+		const invoices = (invoicesData.invoices || invoicesData.data || []).map(toInvoice);
 
 		const buildings = (buildingsData.buildings || buildingsData.data || []).map((b: Record<string, unknown>) => ({
 			id: b.id,
@@ -57,12 +40,7 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<InvoicesList
 			address: `${b.address}, ${b.postalCode} ${b.city}`
 		}));
 
-		const categories: Category[] = (categoriesData.categories || categoriesData.data || []).map((c: Record<string, unknown>) => ({
-			id: c.id,
-			name: c.name,
-			isAllowedUtilityCost: c.isAllowedUtilityCost,
-			description: c.description
-		}));
+		const categories = (categoriesData.categories || categoriesData.data || []).map(toCategory);
 
 		return {
 			invoices,

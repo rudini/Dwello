@@ -32,13 +32,15 @@ export interface InvoiceFilters {
 
 export interface InvoiceWithDetails extends Invoice {
 	building: { id: string; name: string; address: string } | null;
-	category: { id: string; name: string; isAllowedUtilityCost: boolean } | null;
-	distributionKey: { id: string; name: string } | null;
-	llmCategory: { id: string; name: string } | null;
+	category: { id: string; name: string; nameDE: string | null; isAllowedUtilityCost: boolean } | null;
+	distributionKey: { id: string; name: string; nameDE: string | null } | null;
+	llmCategory: { id: string; name: string; nameDE: string | null } | null;
 }
 
-/** Invoices with their building, category and distribution key */
-function selectInvoicesWithDetails() {
+/**
+ * Invoices with their building, category and distribution key (names in English and German)
+ */
+function selectWithDetails() {
 	return db
 		.select({
 			invoice: invoices,
@@ -50,11 +52,13 @@ function selectInvoicesWithDetails() {
 			category: {
 				id: categories.id,
 				name: categories.name,
+				nameDE: categories.nameDE,
 				isAllowedUtilityCost: categories.isAllowedUtilityCost
 			},
 			distributionKey: {
 				id: distributionKeys.id,
-				name: distributionKeys.name
+				name: distributionKeys.name,
+				nameDE: distributionKeys.nameDE
 			}
 		})
 		.from(invoices)
@@ -122,7 +126,7 @@ export async function listInvoices(filters: InvoiceFilters = {}): Promise<{
 	const whereClause = and(...conditions);
 
 	// Build the query with joins
-	const results = await selectInvoicesWithDetails()
+	const results = await selectWithDetails()
 		.where(whereClause)
 		.orderBy(desc(invoices.invoiceDate), desc(invoices.createdAt))
 		.limit(limit)
@@ -151,7 +155,7 @@ export async function listInvoices(filters: InvoiceFilters = {}): Promise<{
  * Get a single invoice by ID with all related data
  */
 export async function getInvoice(id: string): Promise<InvoiceWithDetails | null> {
-	const [result] = await selectInvoicesWithDetails()
+	const [result] = await selectWithDetails()
 		.where(eq(invoices.id, id))
 		.limit(1);
 
@@ -161,7 +165,7 @@ export async function getInvoice(id: string): Promise<InvoiceWithDetails | null>
 	let llmCategory = null;
 	if (result.invoice.llmCategoryId) {
 		const [llmCat] = await db
-			.select({ id: categories.id, name: categories.name })
+			.select({ id: categories.id, name: categories.name, nameDE: categories.nameDE })
 			.from(categories)
 			.where(eq(categories.id, result.invoice.llmCategoryId))
 			.limit(1);
@@ -175,6 +179,29 @@ export async function getInvoice(id: string): Promise<InvoiceWithDetails | null>
 		distributionKey: result.distributionKey,
 		llmCategory
 	};
+}
+
+/**
+ * The KI's category for an invoice without one; a sure suggestion (85% and more) becomes its category
+ */
+async function categorizeWithKi(data: NewInvoice): Promise<Pick<NewInvoice, 'llmCategoryId' | 'llmConfidence'>> {
+	try {
+		const categorization = await categorizeInvoice({
+			billingEntityName: data.billingEntityName,
+			description: data.description,
+			amount: data.amount
+		});
+		if (!categorization.category || categorization.confidence < 0.7) return {};
+
+		if (categorization.confidence >= 0.85) {
+			data.categoryId = categorization.category.id;
+			data.isValidUtilityCost = categorization.isAllowedUtilityCost;
+		}
+		return { llmCategoryId: categorization.category.id, llmConfidence: String(categorization.confidence) };
+	} catch (error) {
+		console.warn('LLM categorization failed, continuing without:', error);
+		return {};
+	}
 }
 
 /**
@@ -194,40 +221,15 @@ export async function createInvoice(
 		throw new Error('Category not found');
 	}
 
-	// Auto-categorize with LLM if no category provided
-	let llmCategoryId: string | null = null;
-	let llmConfidence: string | null = null;
-
-	if (!data.categoryId && !options.skipLlmCategorization) {
-		try {
-			const categorization = await categorizeInvoice({
-				billingEntityName: data.billingEntityName,
-				description: data.description,
-				amount: data.amount
-			});
-
-			if (categorization.category && categorization.confidence >= 0.7) {
-				llmCategoryId = categorization.category.id;
-				llmConfidence = String(categorization.confidence);
-
-				// If confidence is high enough, auto-assign the category
-				if (categorization.confidence >= 0.85) {
-					data.categoryId = categorization.category.id;
-					data.isValidUtilityCost = categorization.isAllowedUtilityCost;
-				}
-			}
-		} catch (error) {
-			console.warn('LLM categorization failed, continuing without:', error);
-		}
-	}
+	// Without a category the KI categorizes the invoice; a suggestion taken in the form arrives in data
+	const suggestion = !data.categoryId && !options.skipLlmCategorization ? await categorizeWithKi(data) : {};
 
 	// Insert the invoice
 	const [invoice] = await db
 		.insert(invoices)
 		.values({
 			...data,
-			llmCategoryId,
-			llmConfidence,
+			...suggestion,
 			wasManuallyOverridden: false
 		})
 		.returning();
@@ -399,7 +401,7 @@ export async function getInvoicesForStatement(
 	periodStart: string,
 	periodEnd: string
 ): Promise<InvoiceWithDetails[]> {
-	const results = await selectInvoicesWithDetails()
+	const results = await selectWithDetails()
 		.where(
 			and(
 				eq(invoices.buildingId, buildingId),

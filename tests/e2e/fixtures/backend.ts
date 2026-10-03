@@ -60,7 +60,7 @@ export function testData(request: APIRequestContext, token: string) {
 
 	async function invoice(
 		buildingTitle: string,
-		{ categoryId, distributionKeyId }: { categoryId?: string; distributionKeyId?: string },
+		{ categoryId, distributionKeyId, ...values }: { categoryId?: string; distributionKeyId?: string; [field: string]: unknown },
 		description: string,
 		amount: string,
 		invoiceDate: string
@@ -74,9 +74,11 @@ export function testData(request: APIRequestContext, token: string) {
 			description,
 			amount,
 			invoiceDate,
-			isValidUtilityCost: true
+			isValidUtilityCost: true,
+			...values
 		});
 		extras.unshift(`invoices/${created.id}`);
+		return created.id as string;
 	}
 
 	async function removeBuildings(token: string) {
@@ -84,6 +86,10 @@ export function testData(request: APIRequestContext, token: string) {
 			for (const apartment of (await get(`apartments?buildingId=${building.id}&limit=100`)).apartments) {
 				await removeContracts(`apartmentId=${apartment.id}`);
 				await remove(`apartments/${apartment.id}`);
+			}
+			// Invoices entered through the UI
+			for (const invoice of (await get(`invoices?buildingId=${building.id}&limit=100`)).invoices) {
+				await remove(`invoices/${invoice.id}`);
 			}
 			await remove(`buildings/${building.id}`);
 		}
@@ -197,6 +203,19 @@ export function testData(request: APIRequestContext, token: string) {
 
 		async invoiceInCategory(buildingTitle: string, categoryTitle: string) {
 			await invoice(buildingTitle, { categoryId: ids.get(categoryTitle) }, 'Reinigung Q1', '450.00', '2026-03-31');
+		},
+
+		// Invoice of a supplier, in a predefined category given by its German name, dated today
+		async supplierInvoice(supplier: string, buildingTitle: string, amount: string, description: string, categoryName: string) {
+			const category = (await get('categories?limit=100')).categories.find((c: { nameDE: string }) => c.nameDE === categoryName);
+			const id = await invoice(
+				buildingTitle,
+				{ categoryId: category.id, billingEntityName: unique(supplier), isValidUtilityCost: category.isAllowedUtilityCost },
+				description,
+				amount,
+				new Date().toISOString().split('T')[0]
+			);
+			ids.set(`Rechnung ${supplier}`, id);
 		},
 
 		async distributionKey(title: string, formula: string) {
