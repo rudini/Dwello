@@ -3784,7 +3784,8 @@ Every bug fix has a unit or database test.
 - fallow audit: pass (no introduced dead code, duplication or complexity)
 
 ### Open
-- [ ] 21 backend tests failing since before Session 3 (mocked database tests, heating profile, utility validation, formatting)
+- [x] 21 backend tests failing since before Session 3 (mocked database tests, heating profile, utility validation, formatting)
+  **Note:** Last two fixed: `heating-profile.service.db.test.ts` expected the English error, the service returns the German one; `format.test.ts` expected a straight apostrophe, de-CH formats with ’. All backend (352 + 103 pg) and frontend (358) unit tests pass.
 - [ ] Predefined distribution keys "Per Person" (`{persons}`) and "By Consumption" (`{consumption}`) use variables the formula engine does not know
 - [ ] Invoices pages not yet rebuilt with German E2E; category badge on invoices still shows the English name
 - [ ] Login page and header follow the browser language (English browsers see them in English, the rest is German)

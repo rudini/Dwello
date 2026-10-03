@@ -222,7 +222,7 @@ describe('Heating Profile Service - Database Operations', () => {
 			const result = await deleteHeatingProfile('pred-id');
 
 			expect(result.success).toBe(false);
-			expect(result.error).toContain('predefined');
+			expect(result.error).toBe('Vordefinierte Heizprofile können nicht gelöscht werden.');
 		});
 
 		it('should delete custom profile successfully', async () => {

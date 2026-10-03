@@ -19,7 +19,7 @@ export function normalizeDecimal(val: string): string {
 	return isNaN(num) ? val : String(num);
 }
 
-/** Swiss franc amount, e.g. "CHF 1'800.00" */
+/** Swiss franc amount, e.g. "CHF 1’800.00" */
 export function formatCurrency(amount: number): string {
 	return new Intl.NumberFormat('de-CH', { style: 'currency', currency: 'CHF' }).format(amount);
 }
