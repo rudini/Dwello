@@ -7,6 +7,7 @@
 	import FieldError from '$lib/components/FieldError.svelte';
 	import FormActions from '$lib/components/FormActions.svelte';
 	import Icon from '$lib/components/Icon.svelte';
+	import { keepEarlyChoice } from '$lib/early-choice';
 	import {
 		availableFrom,
 		contractBody,
@@ -158,12 +159,13 @@
 			<select
 				id="tenant"
 				data-testid="contract-tenant-select"
-				bind:value={form.tenantId}
+				onchange={(e) => (form.tenantId = e.currentTarget.value)}
+				use:keepEarlyChoice={(id) => (form.tenantId = id)}
 				class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary bg-white {fieldBorder(errors.tenantId)}"
 			>
-				<option value="">Mieter auswählen...</option>
+				<option value="" selected={!form.tenantId}>Mieter auswählen...</option>
 				{#each tenants as tenant (tenant.id)}
-					<option value={tenant.id}>{tenant.name}</option>
+					<option value={tenant.id} selected={tenant.id === form.tenantId}>{tenant.name}</option>
 				{/each}
 			</select>
 			<FieldError message={errors.tenantId} />

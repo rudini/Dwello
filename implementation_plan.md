@@ -3938,6 +3938,12 @@ unit or database tests.
   - Unit tests hydrate real server-rendered HTML (`src/__tests__/filter-fields.dom.test.ts`, helper
     `src/__tests__/helpers/hydrate.ts`); E2E scenarios "Gebäude wählen, bevor die Liste fertig geladen ist" in
     `apartments.feature` and `statements.feature` hold the client JS back (`visitWhileLoading`): failed before, pass now
+- [x] Same for the selects of the entry forms: new apartment (building), apartment status, settings defaults, contract
+  tenant, heating profile of the statement wizard (the contract apartment select only renders once its availability is loaded)
+  - `selected` options everywhere; where a component keeps the choice in state, the action `keepEarlyChoice`
+    (`src/lib/early-choice.ts`, also used by `FilterSelect`) hands the choice on once the page is live
+  - Unit tests `src/__tests__/form-selects.dom.test.ts` (hydration helper now resolves `$lib` imports); E2E scenario
+    "Mieter wählen, bevor die Seite fertig geladen ist" in `contract-new.feature`: failed before, pass now
 
 ---
 

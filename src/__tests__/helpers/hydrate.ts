@@ -30,15 +30,19 @@ export async function serverRender(file: string, props: Record<string, unknown>)
 	}
 }
 
-/** Compiles a component and the components it imports (relative paths) for the server into dir */
+/** Compiles a component and the components it imports (relative or $lib paths) for the server into dir */
 function compileForServer(filename: string, dir: string): string {
 	const { js } = compile(readFileSync(filename, 'utf8'), { filename, generate: 'server' });
 	const code = js.code
 		// The server build of svelte (onMount does nothing there), not the browser build this project resolves
 		.replace("from 'svelte'", `from '${resolve('node_modules/svelte/src/index-server.js')}'`)
-		.replace(/from '(\.[^']+\.svelte)'/g, (_, child: string) => {
-			return `from '${compileForServer(resolve(dirname(filename), child), dir)}'`;
-		});
+		.replace(/from '((?:\.|\$lib\/)[^']+\.svelte)'/g, (_, child: string) => {
+			const path = child.startsWith('$lib/')
+				? resolve('src/lib', child.slice(5))
+				: resolve(dirname(filename), child);
+			return `from '${compileForServer(path, dir)}'`;
+		})
+		.replace(/from '\$lib\//g, `from '${resolve('src/lib')}/`);
 	const module = join(dir, `${basename(filename, '.svelte')}.js`);
 	writeFileSync(module, code);
 	return module;

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import FieldError from '$lib/components/FieldError.svelte';
+	import { keepEarlyChoice } from '$lib/early-choice';
 
 	type Building = { id: string; name: string; address: string };
 
@@ -26,6 +27,7 @@
 			id="building"
 			name="buildingId"
 			onchange={(e) => onselect(e.currentTarget.value)}
+			use:keepEarlyChoice={onselect}
 			data-testid="apartment-building-select"
 			class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary bg-white"
 		>

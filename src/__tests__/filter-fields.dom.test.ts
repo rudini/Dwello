@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import FilterSelect from '$lib/components/FilterSelect.svelte';
 import SearchField from '$lib/components/SearchField.svelte';
-import { byTestId } from './helpers/dom';
+import { byTestId, show } from './helpers/dom';
 import { hydrateAs, serverRender } from './helpers/hydrate';
 
 const buildings = {
@@ -46,5 +46,17 @@ describe('Filter vor der Hydration', () => {
 
 		expect(byTestId<HTMLInputElement>('search')!.value).toBe('Ahorn');
 		expect(searched).toBe('Ahorn');
+	});
+
+	it('übernimmt beim Anzeigen ohne Hydration die vorgegebene Auswahl', () => {
+		const chosen: string[] = [];
+		show(FilterSelect, {
+			...buildings,
+			value: 'b2',
+			onchange: (value: string) => chosen.push(value)
+		});
+
+		expect(byTestId<HTMLSelectElement>('building-filter')!.value).toBe('b2');
+		expect(chosen.every((value) => value === 'b2')).toBe(true);
 	});
 });

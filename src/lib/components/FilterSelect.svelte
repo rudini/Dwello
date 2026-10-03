@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { keepEarlyChoice } from '$lib/early-choice';
 
 	let {
 		id,
@@ -18,20 +18,12 @@
 		testid: string;
 		onchange: (value: string) => void;
 	} = $props();
-
-	// Svelte resets a <select value> to the server value when it hydrates, so the choice is rendered as
-	// selected options instead, and a choice made before hydration is handed on once the component is live
-	let select: HTMLSelectElement;
-
-	onMount(() => {
-		if (select.value !== value) onchange(select.value);
-	});
 </script>
 
 <div class="w-full sm:w-48">
 	<label for={id} class="block text-sm font-medium text-gray-700 mb-1">{label}</label>
 	<select
-		bind:this={select}
+		use:keepEarlyChoice={onchange}
 		{id}
 		data-testid={testid}
 		onchange={(e) => onchange(e.currentTarget.value)}
