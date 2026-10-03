@@ -1,20 +1,34 @@
 import type { Actor } from '../fixtures/actor';
-import { occupancyBuilding, overdueStatementsTile, quickAction, vacantTile } from '../interactions/dashboard';
+import { headerAction, occupancyBuilding, quickAction, statementsTile, statTile } from '../interactions/dashboard';
 
-const tiles = { Leer: vacantTile };
+// Labels contain each other ("Vermietet" / "Wiedervermietet"), so tiles are found by their test id
+const tiles: Record<string, string> = {
+	Gebäude: 'stat-buildings',
+	Wohnungen: 'stat-apartments',
+	Vermietet: 'stat-occupied',
+	Wiedervermietet: 'stat-relet',
+	Leer: 'stat-vacant',
+	Gesperrt: 'stat-reserved',
+	'Davon überfällig': 'stat-overdue-amount'
+};
+const statementStatuses: Record<string, string> = { Entwürfe: 'draft', Versendet: 'sent', Bezahlt: 'paid', Überfällig: 'overdue' };
 
 export const openBuildingFromOccupancy = (building: string) => async (actor: Actor) => {
 	await occupancyBuilding(actor.page, building).click();
 };
 
-export const openTile = (label: keyof typeof tiles) => async (actor: Actor) => {
-	await tiles[label](actor.page).click();
+export const openTile = (label: string) => async (actor: Actor) => {
+	await statTile(actor.page, tiles[label]).click();
 };
 
-export const openOverdueStatements = async (actor: Actor) => {
-	await overdueStatementsTile(actor.page).click();
+export const openStatementsWithStatus = (label: string) => async (actor: Actor) => {
+	await statementsTile(actor.page, statementStatuses[label]).click();
 };
 
 export const chooseQuickAction = (label: string) => async (actor: Actor) => {
 	await quickAction(actor.page, label).click();
+};
+
+export const chooseHeaderAction = (label: string) => async (actor: Actor) => {
+	await headerAction(actor.page, label).click();
 };

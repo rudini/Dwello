@@ -64,3 +64,17 @@ Funktionalität: Mietvertragsdetail
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
     Wenn der Liegenschaftsverwalter die Rechnungen des Gebäudes anzeigt
     Dann ist der Liegenschaftsverwalter auf der Seite "Rechnungen"
+
+  Szenario: E-Mail an den Mieter schreiben
+    Angenommen "Anna Keller" hat eine E-Mail-Adresse
+    Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
+    Dann kann der Liegenschaftsverwalter "Anna Keller" eine E-Mail schreiben
+
+  Szenario: Mieter ohne E-Mail-Adresse
+    Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
+    Dann kann der Liegenschaftsverwalter "Anna Keller" keine E-Mail schreiben
+
+  Szenario: Mieter anrufen
+    Angenommen "Anna Keller" hat die Telefonnummer "+41 52 123 45 67"
+    Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
+    Dann kann der Liegenschaftsverwalter "Anna Keller" unter "+41 52 123 45 67" anrufen

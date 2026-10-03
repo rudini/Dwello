@@ -2,7 +2,7 @@ import { expect } from '@playwright/test';
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { visit } from '../interactions/navigation';
-import { allListedBuildings, emptyList, listedBuilding } from '../questions/buildings';
+import { allListedBuildings, emptyList, listedBuilding, routeTo } from '../questions/buildings';
 import {
 	filterByCity,
 	openBuilding,
@@ -58,3 +58,15 @@ When('der Liegenschaftsverwalter das Gebäude {string} öffnet', async ({ verwal
 Then('ist der Liegenschaftsverwalter auf der Gebäudeliste', async ({ verwalter }) => {
 	await expect(verwalter.page).toHaveURL(/\/buildings$/);
 });
+
+// Google Maps opens in a new tab outside Dwello, so the link itself is checked
+Then(
+	'führt die Route in Google Maps von der Liste zu {string} an {string}',
+	async ({ verwalter, names }, building: string, address: string) => {
+		const destination = encodeURIComponent(`${address}, Switzerland`);
+		await expect(routeTo(verwalter, names.get(building) ?? building)).toHaveAttribute(
+			'href',
+			`https://www.google.com/maps/dir/?api=1&destination=${destination}`
+		);
+	}
+);

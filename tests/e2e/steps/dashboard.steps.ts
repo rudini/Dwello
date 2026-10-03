@@ -2,8 +2,14 @@ import { expect } from '@playwright/test';
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { visit } from '../interactions/navigation';
-import { occupancyOf, rentedApartmentsOf, statusFilter } from '../questions/dashboard';
-import { chooseQuickAction, openBuildingFromOccupancy, openOverdueStatements, openTile } from '../tasks/dashboard';
+import { occupancyOf, rentedApartmentsOf, statusFilter, statusFilterFor } from '../questions/dashboard';
+import {
+	chooseHeaderAction,
+	chooseQuickAction,
+	openBuildingFromOccupancy,
+	openStatementsWithStatus,
+	openTile
+} from '../tasks/dashboard';
 
 const { Given, When, Then } = createBdd(test);
 
@@ -22,16 +28,20 @@ When(
 	}
 );
 
-When('der Liegenschaftsverwalter die Kennzahl "Leer" öffnet', async ({ verwalter }) => {
-	await verwalter.perform(openTile('Leer'));
+When('der Liegenschaftsverwalter die Kennzahl {string} öffnet', async ({ verwalter }, label: string) => {
+	await verwalter.perform(openTile(label));
 });
 
-When('der Liegenschaftsverwalter die überfälligen Abrechnungen öffnet', async ({ verwalter }) => {
-	await verwalter.perform(openOverdueStatements);
+When('der Liegenschaftsverwalter die Abrechnungen {string} öffnet', async ({ verwalter }, label: string) => {
+	await verwalter.perform(openStatementsWithStatus(label));
 });
 
 When('der Liegenschaftsverwalter die Schnellaktion {string} wählt', async ({ verwalter }, label: string) => {
 	await verwalter.perform(chooseQuickAction(label));
+});
+
+When('der Liegenschaftsverwalter oben die Aktion {string} wählt', async ({ verwalter }, label: string) => {
+	await verwalter.perform(chooseHeaderAction(label));
 });
 
 Then('ist das Gebäude {string} zu {string} belegt', async ({ verwalter, names }, building: string, rate: string) => {
@@ -45,12 +55,7 @@ Then(
 	}
 );
 
-Then('sieht der Liegenschaftsverwalter die leeren Wohnungen', async ({ verwalter }) => {
-	await expect(verwalter.page).toHaveTitle('Wohnungen - Dwello');
-	expect(statusFilter(verwalter)).toBe('vacant');
-});
-
-Then('sieht der Liegenschaftsverwalter die überfälligen Abrechnungen', async ({ verwalter }) => {
-	await expect(verwalter.page).toHaveTitle('Nebenkostenabrechnungen - Dwello');
-	expect(statusFilter(verwalter)).toBe('overdue');
+Then('die Liste zeigt nur {string}', async ({ verwalter }, label: string) => {
+	await expect(verwalter.page).toHaveURL(/status=/);
+	expect(statusFilter(verwalter)).toBe(statusFilterFor(label));
 });

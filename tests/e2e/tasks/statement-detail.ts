@@ -4,12 +4,15 @@ import {
 	confirmDeleteStatementButton,
 	confirmMarkPaidButton,
 	deleteStatementButton,
+	downloadPdfLink,
+	generatePdfButton,
 	markPaidButton,
 	sendStatementButton,
 	statementApartmentLink,
 	statementEditButton,
 	statementTenantLink
 } from '../interactions/statement-detail';
+import { downloadFrom } from './download';
 
 const click = (target: (page: Actor['page']) => Locator) => async (actor: Actor) => {
 	await target(actor.page).click();
@@ -30,3 +33,9 @@ export const deleteStatement = async (actor: Actor) => {
 export const editStatementFromDetail = click(statementEditButton);
 export const openStatementTenant = click(statementTenantLink);
 export const openStatementApartment = click(statementApartmentLink);
+
+export const generateStatementPdf = click(generatePdfButton);
+
+export const downloadStatementPdf = async (actor: Actor) => {
+	await downloadFrom(downloadPdfLink(actor.page))(actor);
+};

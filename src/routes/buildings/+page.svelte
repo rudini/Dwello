@@ -136,6 +136,7 @@
 							{/if}
 							<a
 								href={getGoogleMapsDirectionsUrl(building.address, building.city, building.postalCode)}
+								data-testid="building-route-link"
 								target="_blank"
 								rel="noopener noreferrer"
 								class="ml-auto text-gray-400 hover:text-primary transition-colors"

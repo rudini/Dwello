@@ -100,12 +100,21 @@
 		</div>
 		<div class="flex flex-wrap items-center gap-2">
 			{#if pdfGeneratedAt}
-				<Button href="/statements/{data.statement.id}/pdf" variant="secondary">
+				<Button
+					href="/statements/{data.statement.id}/pdf"
+					variant="secondary"
+					testid="statement-pdf-download"
+				>
 					<Icon name="picture_as_pdf" size={20} />
 					PDF herunterladen
 				</Button>
 			{:else}
-				<Button variant="secondary" onclick={handleGeneratePdf} disabled={isGeneratingPdf}>
+				<Button
+					variant="secondary"
+					onclick={handleGeneratePdf}
+					disabled={isGeneratingPdf}
+					testid="statement-generate-pdf-button"
+				>
 					<Icon name="picture_as_pdf" size={20} />
 					{isGeneratingPdf ? 'Wird generiert...' : 'PDF generieren'}
 				</Button>

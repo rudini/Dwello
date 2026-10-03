@@ -7,8 +7,10 @@ import {
 	openStatementLink,
 	statementBuildingFilter,
 	statementSearchButton,
+	statementPdfLink,
 	statementSearchInput
 } from '../interactions/statements';
+import { downloadFrom } from './download';
 
 export const searchStatements = (term: string) => async (actor: Actor) => {
 	await statementSearchInput(actor.page).fill(term);
@@ -38,3 +40,8 @@ export const startGeneratingStatements = async (actor: Actor) => {
 export const openStatement = (tenantName: string, year: number) => async (actor: Actor) => {
 	await openStatementLink(actor.page, tenantName, year).click();
 };
+
+export const downloadStatementPdfFromList =
+	(tenantName: string, year: number) => async (actor: Actor) => {
+		await downloadFrom(statementPdfLink(actor.page, tenantName, year))(actor);
+	};

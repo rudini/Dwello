@@ -295,6 +295,7 @@
 										{#if statement.pdfGeneratedAt}
 											<a
 												href="/api/statements/{statement.id}/pdf"
+												data-testid="statement-pdf-link"
 												class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
 												title="PDF herunterladen"
 												download

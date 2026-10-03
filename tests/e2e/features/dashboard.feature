@@ -22,17 +22,61 @@ Funktionalität: Dashboard
     Wenn der Liegenschaftsverwalter in der Belegung das Gebäude "Seeblick" öffnet
     Dann ist der Liegenschaftsverwalter auf der Detailseite von "Seeblick"
 
-  Szenario: Leere Wohnungen ansehen
+  Szenariogrundriss: Kennzahl öffnen
     Angenommen der Liegenschaftsverwalter öffnet das Dashboard
-    Wenn der Liegenschaftsverwalter die Kennzahl "Leer" öffnet
-    Dann sieht der Liegenschaftsverwalter die leeren Wohnungen
+    Wenn der Liegenschaftsverwalter die Kennzahl "<Kennzahl>" öffnet
+    Dann ist der Liegenschaftsverwalter auf der Seite "<Seite>"
 
-  Szenario: Überfällige Abrechnungen ansehen
-    Angenommen der Liegenschaftsverwalter öffnet das Dashboard
-    Wenn der Liegenschaftsverwalter die überfälligen Abrechnungen öffnet
-    Dann sieht der Liegenschaftsverwalter die überfälligen Abrechnungen
+    Beispiele:
+      | Kennzahl  | Seite     |
+      | Gebäude   | Gebäude   |
+      | Wohnungen | Wohnungen |
 
-  Szenario: Abrechnungen über die Schnellaktion erstellen
+  Szenariogrundriss: Gefilterte Kennzahl öffnen
     Angenommen der Liegenschaftsverwalter öffnet das Dashboard
-    Wenn der Liegenschaftsverwalter die Schnellaktion "Abrechnungen erstellen" wählt
-    Dann ist der Liegenschaftsverwalter auf der Seite "Abrechnungen erstellen"
+    Wenn der Liegenschaftsverwalter die Kennzahl "<Kennzahl>" öffnet
+    Dann ist der Liegenschaftsverwalter auf der Seite "<Seite>"
+    Und die Liste zeigt nur "<Status>"
+
+    Beispiele:
+      | Kennzahl         | Seite                   | Status          |
+      | Vermietet        | Wohnungen               | Vermietet       |
+      | Wiedervermietet  | Wohnungen               | Wiedervermietet |
+      | Leer             | Wohnungen               | Leer            |
+      | Gesperrt         | Wohnungen               | Gesperrt        |
+      | Davon überfällig | Nebenkostenabrechnungen | Überfällig      |
+
+  Szenariogrundriss: Abrechnungen nach Status öffnen
+    Angenommen der Liegenschaftsverwalter öffnet das Dashboard
+    Wenn der Liegenschaftsverwalter die Abrechnungen "<Status>" öffnet
+    Dann ist der Liegenschaftsverwalter auf der Seite "Nebenkostenabrechnungen"
+    Und die Liste zeigt nur "<Status>"
+
+    Beispiele:
+      | Status     |
+      | Entwürfe   |
+      | Versendet  |
+      | Bezahlt    |
+      | Überfällig |
+
+  Szenariogrundriss: Schnellaktion wählen
+    Angenommen der Liegenschaftsverwalter öffnet das Dashboard
+    Wenn der Liegenschaftsverwalter die Schnellaktion "<Schnellaktion>" wählt
+    Dann ist der Liegenschaftsverwalter auf der Seite "<Seite>"
+
+    Beispiele:
+      | Schnellaktion          | Seite                  |
+      | Gebäude hinzufügen     | Neues Gebäude          |
+      | Mieter hinzufügen      | Neuer Mieter           |
+      | Rechnung erfassen      | Neue Rechnung          |
+      | Abrechnungen erstellen | Abrechnungen erstellen |
+
+  Szenariogrundriss: Aktion in der Kopfzeile wählen
+    Angenommen der Liegenschaftsverwalter öffnet das Dashboard
+    Wenn der Liegenschaftsverwalter oben die Aktion "<Aktion>" wählt
+    Dann ist der Liegenschaftsverwalter auf der Seite "<Seite>"
+
+    Beispiele:
+      | Aktion                 | Seite                  |
+      | Rechnung erfassen      | Neue Rechnung          |
+      | Abrechnungen erstellen | Abrechnungen erstellen |

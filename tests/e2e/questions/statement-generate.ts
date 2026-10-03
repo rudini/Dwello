@@ -2,6 +2,7 @@ import type { Actor } from '../fixtures/actor';
 import {
 	generationResult,
 	managementFeeHint,
+	periodStartInput,
 	previewEmpty,
 	previewRows
 } from '../interactions/statement-generate';
@@ -12,3 +13,4 @@ export const allPreviewRows = (actor: Actor) => previewRows(actor.page);
 export const noContractsInPeriod = (actor: Actor) => previewEmpty(actor.page);
 export const generationOutcome = (actor: Actor) => generationResult(actor.page);
 export const feeAboveGuideline = (actor: Actor) => managementFeeHint(actor.page);
+export const periodChoice = (actor: Actor) => periodStartInput(actor.page);

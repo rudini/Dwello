@@ -2,11 +2,14 @@ import { expect } from '@playwright/test';
 import { createBdd, type DataTable } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { visit } from '../interactions/navigation';
+import { downloadedFile } from '../questions/download';
 import { heatingCosts, statusOfStatement } from '../questions/statement-detail';
 import { statementPath } from '../questions/statements';
 import {
 	deleteStatement,
+	downloadStatementPdf,
 	editStatementFromDetail,
+	generateStatementPdf,
 	markStatementPaid,
 	openStatementApartment,
 	openStatementTenant,
@@ -86,3 +89,17 @@ Then(
 		await expect(verwalter.page).toHaveURL(`${statementPath(seed, tenant, year)}/edit`);
 	}
 );
+
+When('der Liegenschaftsverwalter das PDF der Abrechnung erstellt', async ({ verwalter }) => {
+	await verwalter.perform(generateStatementPdf);
+});
+
+When('der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt', async ({ verwalter }) => {
+	await verwalter.perform(downloadStatementPdf);
+});
+
+Then('erhält der Liegenschaftsverwalter die Abrechnung als PDF', async ({ verwalter }) => {
+	const file = await downloadedFile(verwalter);
+	expect(file.name).toMatch(/\.pdf$/);
+	expect(file.header).toBe('%PDF-');
+});
