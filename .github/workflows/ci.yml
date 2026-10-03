@@ -61,11 +61,11 @@ jobs:
       - run: npm ci
       - run: bun install --frozen-lockfile
         working-directory: backend
-      - name: Frontend unit tests
-        run: npx vitest run
       - name: Apply database migrations
         run: bun run db:migrate
         working-directory: backend
+      - name: Frontend unit tests
+        run: npx vitest run
       - name: Backend unit tests
         if: ${{ !cancelled() }}
         run: bun run test
