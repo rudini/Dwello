@@ -52,7 +52,7 @@
 				>
 					<Icon name="menu" size={24} />
 				</button>
-				<a href="/" class="flex items-center gap-2">
+				<a href="/" class="flex items-center gap-2" data-testid="header-logo">
 					<span class="text-xl font-bold text-gray-900">Dwello</span>
 				</a>
 			</div>
@@ -112,6 +112,7 @@
 								</div>
 								<a
 									href="/config"
+									data-testid="user-menu-settings"
 									class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
 									onclick={closeDropdown}
 								>
