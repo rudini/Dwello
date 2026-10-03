@@ -2,9 +2,13 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import type { BuildingsListData } from '$lib/types';
+	import { listSearchUrl } from '$lib/list-url';
 	import Button from '$lib/components/Button.svelte';
 	import Icon from '$lib/components/Icon.svelte';
 	import Card from '$lib/components/Card.svelte';
+	import SearchField from '$lib/components/SearchField.svelte';
+	import FilterActions from '$lib/components/FilterActions.svelte';
+	import ListPagination from '$lib/components/ListPagination.svelte';
 
 	function getGoogleMapsDirectionsUrl(address: string, city: string, postalCode: string): string {
 		const destination = encodeURIComponent(`${address}, ${postalCode} ${city}, Switzerland`);
@@ -16,23 +20,11 @@
 	let searchTerm = $state($page.url.searchParams.get('search') || '');
 	let cityFilter = $state($page.url.searchParams.get('city') || '');
 
-	// Derived values - using function syntax to properly track reactive props
-	const totalPages = $derived.by(() => Math.ceil(data.total / data.pageSize));
-	const hasNextPage = $derived.by(() => data.page < totalPages);
-	const hasPrevPage = $derived.by(() => data.page > 1);
+	const filtered = $derived(!!(searchTerm || cityFilter));
 
-	function handleSearch() {
-		const params = new URLSearchParams();
-		if (searchTerm) params.set('search', searchTerm);
-		if (cityFilter) params.set('city', cityFilter);
-		params.set('page', '1');
-		goto(`/buildings?${params.toString()}`);
-	}
-
-	function handlePageChange(newPage: number) {
-		const params = new URLSearchParams($page.url.searchParams);
-		params.set('page', newPage.toString());
-		goto(`/buildings?${params.toString()}`);
+	function handleSearch(event: SubmitEvent) {
+		event.preventDefault();
+		goto(listSearchUrl('/buildings', { search: searchTerm, city: cityFilter }));
 	}
 
 	function clearFilters() {
@@ -69,27 +61,9 @@
 
 	<!-- Search and Filters -->
 	<Card>
-		<form onsubmit={(e) => { e.preventDefault(); handleSearch(); }} class="space-y-4">
+		<form onsubmit={handleSearch} class="space-y-4">
 			<div class="flex flex-col sm:flex-row gap-4">
-				<div class="flex-1">
-					<label for="search" class="block text-sm font-medium text-gray-700 mb-1">Suche</label>
-					<div class="relative">
-						<Icon
-							name="search"
-							size={20}
-							class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-						/>
-						<input
-							id="search"
-							name="search"
-							data-testid="building-search-input"
-							type="text"
-							bind:value={searchTerm}
-							placeholder="Name, Adresse oder Stadt..."
-							class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-						/>
-					</div>
-				</div>
+				<SearchField bind:value={searchTerm} placeholder="Name, Adresse oder Stadt..." testid="building-search-input" />
 				<div class="w-full sm:w-48">
 					<label for="city" class="block text-sm font-medium text-gray-700 mb-1">Stadt</label>
 					<input
@@ -103,18 +77,7 @@
 					/>
 				</div>
 			</div>
-			<div class="flex gap-2">
-				<Button type="submit" variant="primary" size="sm" testid="building-search-submit">
-					<Icon name="search" size={16} />
-					Suchen
-				</Button>
-				{#if searchTerm || cityFilter}
-					<Button type="button" variant="secondary" size="sm" onclick={clearFilters}>
-						<Icon name="close" size={16} />
-						Filter löschen
-					</Button>
-				{/if}
-			</div>
+			<FilterActions {filtered} onclear={clearFilters} testid="building-search-submit" />
 		</form>
 	</Card>
 
@@ -125,13 +88,13 @@
 				<Icon name="apartment" size={48} class="mx-auto text-gray-300 mb-4" />
 				<h3 class="text-lg font-medium text-gray-900 mb-2">Keine Gebäude gefunden</h3>
 				<p class="text-gray-500 mb-6">
-					{#if searchTerm || cityFilter}
+					{#if filtered}
 						Versuchen Sie es mit anderen Suchbegriffen.
 					{:else}
 						Erstellen Sie Ihr erstes Gebäude, um loszulegen.
 					{/if}
 				</p>
-				{#if !searchTerm && !cityFilter}
+				{#if !filtered}
 					<Button href="/buildings/new" variant="primary">
 						<Icon name="add" size={20} />
 						Erstes Gebäude erstellen
@@ -224,33 +187,6 @@
 			{/each}
 		</div>
 
-		<!-- Pagination -->
-		{#if totalPages > 1}
-			<div class="flex items-center justify-between">
-				<p class="text-sm text-gray-600">
-					Seite {data.page} von {totalPages} ({data.total} Ergebnisse)
-				</p>
-				<div class="flex gap-2">
-					<Button
-						variant="secondary"
-						size="sm"
-						disabled={!hasPrevPage}
-						onclick={() => handlePageChange(data.page - 1)}
-					>
-						<Icon name="chevron_left" size={16} />
-						Zurück
-					</Button>
-					<Button
-						variant="secondary"
-						size="sm"
-						disabled={!hasNextPage}
-						onclick={() => handlePageChange(data.page + 1)}
-					>
-						Weiter
-						<Icon name="chevron_right" size={16} />
-					</Button>
-				</div>
-			</div>
-		{/if}
+		<ListPagination {data} />
 	{/if}
 </div>

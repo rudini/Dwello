@@ -2,6 +2,7 @@
 	import { goto, invalidateAll } from '$app/navigation';
 	import { api } from '$lib/api';
 	import type { InvoiceWithDetails } from '$lib/types';
+	import { formatCurrency, formatDate } from '$lib/utils/format';
 	import Button from '$lib/components/Button.svelte';
 	import Icon from '$lib/components/Icon.svelte';
 	import Card from '$lib/components/Card.svelte';
@@ -15,17 +16,6 @@
 	let deleteError = $state('');
 	let isRecategorizing = $state(false);
 	let recategorizeError = $state('');
-
-	function formatCurrency(amount: number): string {
-		return new Intl.NumberFormat('de-CH', {
-			style: 'currency',
-			currency: 'CHF'
-		}).format(amount);
-	}
-
-	function formatDate(dateString: string): string {
-		return new Date(dateString).toLocaleDateString('de-CH');
-	}
 
 	function formatDateTime(dateString: string): string {
 		return new Date(dateString).toLocaleString('de-CH');

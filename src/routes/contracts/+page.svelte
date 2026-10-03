@@ -2,9 +2,14 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import type { ContractsListData } from '$lib/types';
+	import { listSearchUrl } from '$lib/list-url';
 	import Button from '$lib/components/Button.svelte';
 	import Icon from '$lib/components/Icon.svelte';
 	import Card from '$lib/components/Card.svelte';
+	import SearchField from '$lib/components/SearchField.svelte';
+	import FilterSelect from '$lib/components/FilterSelect.svelte';
+	import FilterActions from '$lib/components/FilterActions.svelte';
+	import ListPagination from '$lib/components/ListPagination.svelte';
 	import StatusBadge from '$lib/components/StatusBadge.svelte';
 
 	let { data }: { data: ContractsListData } = $props();
@@ -13,24 +18,17 @@
 	let buildingFilter = $state($page.url.searchParams.get('building') || '');
 	let statusFilter = $state($page.url.searchParams.get('status') || '');
 
-	// Derived values
-	const totalPages = $derived.by(() => Math.ceil(data.total / data.pageSize));
-	const hasNextPage = $derived.by(() => data.page < totalPages);
-	const hasPrevPage = $derived.by(() => data.page > 1);
+	const buildingOptions = $derived(data.buildings.map((b) => ({ value: b.id, label: b.name || b.address })));
+	const statusOptions = [
+		{ value: 'active', label: 'Aktive Verträge' },
+		{ value: 'ended', label: 'Beendete Verträge' }
+	];
 
-	function handleSearch() {
-		const params = new URLSearchParams();
-		if (searchTerm) params.set('search', searchTerm);
-		if (buildingFilter) params.set('building', buildingFilter);
-		if (statusFilter) params.set('status', statusFilter);
-		params.set('page', '1');
-		goto(`/contracts?${params.toString()}`);
-	}
+	const filtered = $derived(!!(searchTerm || buildingFilter || statusFilter));
 
-	function handlePageChange(newPage: number) {
-		const params = new URLSearchParams($page.url.searchParams);
-		params.set('page', newPage.toString());
-		goto(`/contracts?${params.toString()}`);
+	function handleSearch(event: SubmitEvent) {
+		event.preventDefault();
+		goto(listSearchUrl('/contracts', { search: searchTerm, building: buildingFilter, status: statusFilter }));
 	}
 
 	function clearFilters() {
@@ -82,69 +80,33 @@
 
 	<!-- Search and Filters -->
 	<Card>
-		<form onsubmit={(e) => { e.preventDefault(); handleSearch(); }} class="space-y-4">
+		<form onsubmit={handleSearch} class="space-y-4">
 			<div class="flex flex-col sm:flex-row gap-4">
-				<div class="flex-1">
-					<label for="search" class="block text-sm font-medium text-gray-700 mb-1">Suche</label>
-					<div class="relative">
-						<Icon
-							name="search"
-							size={20}
-							class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-						/>
-						<input
-							id="search"
-							name="search"
-							data-testid="contract-search-input"
-							type="text"
-							bind:value={searchTerm}
-							placeholder="Mieter, Wohnung oder Gebäude..."
-							class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
-						/>
-					</div>
-				</div>
-				<div class="w-full sm:w-48">
-					<label for="building" class="block text-sm font-medium text-gray-700 mb-1">Gebäude</label>
-					<select
-						id="building"
-						name="building"
-						data-testid="contract-building-filter"
-						bind:value={buildingFilter}
-						class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary bg-white"
-					>
-						<option value="">Alle Gebäude</option>
-						{#each data.buildings as building}
-							<option value={building.id}>{building.name || building.address}</option>
-						{/each}
-					</select>
-				</div>
-				<div class="w-full sm:w-40">
-					<label for="status" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-					<select
-						id="status"
-						name="status"
-						data-testid="contract-status-filter"
-						bind:value={statusFilter}
-						class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary bg-white"
-					>
-						<option value="">Alle Verträge</option>
-						<option value="active">Aktive Verträge</option>
-						<option value="ended">Beendete Verträge</option>
-					</select>
-				</div>
+				<SearchField bind:value={searchTerm} placeholder="Mieter, Wohnung oder Gebäude..." testid="contract-search-input" />
+				<FilterSelect
+					id="building"
+					label="Gebäude"
+					allLabel="Alle Gebäude"
+					options={buildingOptions}
+					value={buildingFilter}
+					testid="contract-building-filter"
+					onchange={(value) => (buildingFilter = value)}
+				/>
+				<FilterSelect
+					id="status"
+					label="Status"
+					allLabel="Alle Verträge"
+					options={statusOptions}
+					value={statusFilter}
+					testid="contract-status-filter"
+					onchange={(value) => (statusFilter = value)}
+				/>
 			</div>
-			<div class="flex gap-2">
-				<Button type="submit" variant="primary" size="sm" testid="contract-search-submit">
-					<Icon name="search" size={16} />
-					Suchen
-				</Button>
-				{#if searchTerm || buildingFilter || statusFilter}
-					<Button type="button" variant="secondary" size="sm" onclick={clearFilters}>
-						<Icon name="close" size={16} />
-						Filter löschen
-					</Button>
-				{/if}
-			</div>
+			<FilterActions
+				{filtered}
+				onclear={clearFilters}
+				testid="contract-search-submit"
+			/>
 		</form>
 	</Card>
 
@@ -155,13 +117,13 @@
 				<Icon name="description" size={48} class="mx-auto text-gray-300 mb-4" />
 				<h3 class="text-lg font-medium text-gray-900 mb-2">Keine Verträge gefunden</h3>
 				<p class="text-gray-500 mb-6">
-					{#if searchTerm || buildingFilter || statusFilter}
+					{#if filtered}
 						Versuchen Sie es mit anderen Suchbegriffen oder Filtern.
 					{:else}
 						Erstellen Sie Ihren ersten Mietvertrag, um loszulegen.
 					{/if}
 				</p>
-				{#if !searchTerm && !buildingFilter && !statusFilter}
+				{#if !filtered}
 					<Button href="/contracts/new" variant="primary">
 						<Icon name="add" size={20} />
 						Ersten Vertrag erstellen
@@ -265,33 +227,6 @@
 			</div>
 		</Card>
 
-		<!-- Pagination -->
-		{#if totalPages > 1}
-			<div class="flex items-center justify-between">
-				<p class="text-sm text-gray-600">
-					Seite {data.page} von {totalPages} ({data.total} Ergebnisse)
-				</p>
-				<div class="flex gap-2">
-					<Button
-						variant="secondary"
-						size="sm"
-						disabled={!hasPrevPage}
-						onclick={() => handlePageChange(data.page - 1)}
-					>
-						<Icon name="chevron_left" size={16} />
-						Zurück
-					</Button>
-					<Button
-						variant="secondary"
-						size="sm"
-						disabled={!hasNextPage}
-						onclick={() => handlePageChange(data.page + 1)}
-					>
-						Weiter
-						<Icon name="chevron_right" size={16} />
-					</Button>
-				</div>
-			</div>
-		{/if}
+		<ListPagination {data} />
 	{/if}
 </div>

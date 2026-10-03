@@ -1,11 +1,12 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import type { StatementsListData, StatementStatus } from '$lib/types';
+	import type { StatementsListData } from '$lib/types';
 	import Button from '$lib/components/Button.svelte';
 	import Icon from '$lib/components/Icon.svelte';
 	import Card from '$lib/components/Card.svelte';
 	import Badge from '$lib/components/Badge.svelte';
 	import { formatCurrency, formatDate } from '$lib/utils/format';
+	import { balanceClass, statusLabels, statusVariants } from '$lib/statement';
 	import { invalidateAll } from '$app/navigation';
 
 	// Payment received today; the endpoint stores it in the database
@@ -30,42 +31,6 @@
 		}
 		if (!('page' in changes)) params.delete('page');
 		return `/statements?${params}`;
-	}
-
-	function getStatusVariant(status: StatementStatus): 'default' | 'primary' | 'success' | 'warning' | 'danger' | 'info' {
-		switch (status) {
-			case 'draft':
-				return 'default';
-			case 'sent':
-				return 'info';
-			case 'paid':
-				return 'success';
-			case 'overdue':
-				return 'danger';
-			default:
-				return 'default';
-		}
-	}
-
-	function getStatusLabel(status: StatementStatus): string {
-		switch (status) {
-			case 'draft':
-				return 'Entwurf';
-			case 'sent':
-				return 'Versendet';
-			case 'paid':
-				return 'Bezahlt';
-			case 'overdue':
-				return 'Überfällig';
-			default:
-				return status;
-		}
-	}
-
-	function getBalanceClass(balance: number): string {
-		if (balance > 0) return 'text-red-600';
-		if (balance < 0) return 'text-green-600';
-		return 'text-gray-600';
 	}
 
 	function getBalanceLabel(balance: number): string {
@@ -302,14 +267,14 @@
 									<p class="text-sm text-gray-500">{statement.rentalDays} Tage</p>
 								</td>
 								<td class="px-6 py-4 text-right">
-									<p class="font-medium {getBalanceClass(statement.balance)}">
+									<p class="font-medium {balanceClass(statement.balance)}">
 										{formatCurrency(Math.abs(statement.balance))}
 									</p>
 									<p class="text-xs text-gray-500">{getBalanceLabel(statement.balance)}</p>
 								</td>
 								<td class="px-6 py-4 text-center">
-									<Badge variant={getStatusVariant(statement.status)}>
-										{getStatusLabel(statement.status)}
+									<Badge variant={statusVariants[statement.status]}>
+										{statusLabels[statement.status]}
 									</Badge>
 									{#if statement.status === 'overdue' && statement.lastReminderDate}
 										<p class="text-xs text-gray-500 mt-1">

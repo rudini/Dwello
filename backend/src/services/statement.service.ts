@@ -87,8 +87,10 @@ export async function listStatements(filters: StatementFilters = {}): Promise<{
 
 	const conditions = statementFilterConditions(filters);
 
+	const whereClause = and(...conditions);
+
 	// Build the query with joins
-	let query = db
+	const results = await db
 		.select({
 			statement: utilityStatements,
 			tenant: {
@@ -113,14 +115,10 @@ export async function listStatements(filters: StatementFilters = {}): Promise<{
 		.leftJoin(tenants, eq(utilityStatements.tenantId, tenants.id))
 		.leftJoin(apartments, eq(utilityStatements.apartmentId, apartments.id))
 		.leftJoin(buildings, eq(apartments.buildingId, buildings.id))
+		.where(whereClause)
 		.orderBy(desc(utilityStatements.statementDate), desc(utilityStatements.createdAt))
 		.limit(limit)
 		.offset(offset);
-
-
-	// Apply conditions
-	const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
-	const results = whereClause ? await query.where(whereClause) : await query;
 
 	// Batch load all line items for the fetched statements (avoids N+1 query)
 	const statementIds = results.map((r) => r.statement.id);
@@ -163,15 +161,12 @@ export async function listStatements(filters: StatementFilters = {}): Promise<{
 	});
 
 	// Get total count
-	let countQuery = db
+	const [{ count: total }] = await db
 		.select({ count: sql<number>`count(*)` })
 		.from(utilityStatements)
 		.leftJoin(apartments, eq(utilityStatements.apartmentId, apartments.id))
-		.leftJoin(tenants, eq(utilityStatements.tenantId, tenants.id));
-
-	const [{ count: total }] = whereClause
-		? await countQuery.where(whereClause)
-		: await countQuery;
+		.leftJoin(tenants, eq(utilityStatements.tenantId, tenants.id))
+		.where(whereClause);
 
 	return {
 		statements: statementsWithLineItems,

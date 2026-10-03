@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { StatementWithDetails } from '$lib/types';
+	import { formatCurrency, formatDate } from '$lib/utils/format';
 	import Icon from './Icon.svelte';
 
 	interface Props {
@@ -8,17 +9,6 @@
 	}
 
 	let { statement, class: className = '' }: Props = $props();
-
-	function formatCurrency(amount: number): string {
-		return new Intl.NumberFormat('de-CH', {
-			style: 'currency',
-			currency: 'CHF'
-		}).format(amount);
-	}
-
-	function formatDate(dateString: string): string {
-		return new Date(dateString).toLocaleDateString('de-CH');
-	}
 
 	const balance = $derived(statement.balance);
 	const isRefund = $derived(balance < 0);

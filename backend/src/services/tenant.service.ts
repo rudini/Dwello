@@ -43,6 +43,25 @@ const statusConditions = {
 	inactive: sql`${hasContracts} and not ${isActive}`
 };
 
+/** Tenant with the number of contracts it has */
+const tenantFields = {
+	id: tenants.id,
+	firstName: tenants.firstName,
+	lastName: tenants.lastName,
+	email: tenants.email,
+	phone: tenants.phone,
+	language: tenants.language,
+	address: tenants.address,
+	postalCode: tenants.postalCode,
+	city: tenants.city,
+	correspondenceChannel: tenants.correspondenceChannel,
+	createdAt: tenants.createdAt,
+	updatedAt: tenants.updatedAt,
+	contractCount: sql<number>`(SELECT COUNT(*) FROM rental_contracts WHERE rental_contracts.tenant_id = "tenants"."id")`.as(
+		'contract_count'
+	)
+};
+
 /**
  * List tenants with optional filters
  */
@@ -72,39 +91,20 @@ export async function listTenants(filters: TenantFilters = {}): Promise<{
 		conditions.push(statusConditions[status]);
 	}
 
+	const whereClause = and(...conditions);
+
 	// Query with current occupancy
-	const query = db
-		.select({
-			id: tenants.id,
-			firstName: tenants.firstName,
-			lastName: tenants.lastName,
-			email: tenants.email,
-			phone: tenants.phone,
-			language: tenants.language,
-			address: tenants.address,
-			postalCode: tenants.postalCode,
-			city: tenants.city,
-			correspondenceChannel: tenants.correspondenceChannel,
-			createdAt: tenants.createdAt,
-			updatedAt: tenants.updatedAt,
-			isActive,
-			contractCount: sql<number>`(SELECT COUNT(*) FROM rental_contracts WHERE rental_contracts.tenant_id = "tenants"."id")`.as(
-				'contract_count'
-			)
-		})
+	const results = await db
+		.select({ ...tenantFields, isActive })
 		.from(tenants)
+		.where(whereClause)
 		.orderBy(tenants.lastName, tenants.firstName)
 		.limit(limit)
 		.offset(offset);
 
-	const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
-	const results = whereClause ? await query.where(whereClause) : await query;
-
 	// Get total count
 	const countQuery = db.select({ count: sql<number>`count(*)` }).from(tenants);
-	const [{ count: total }] = whereClause
-		? await countQuery.where(whereClause)
-		: await countQuery;
+	const [{ count: total }] = await countQuery.where(whereClause);
 
 	// Batch load current occupancy for all tenants (avoids N+1 query)
 	const tenantIds = results.map((t) => t.id);
@@ -159,23 +159,7 @@ export async function listTenants(filters: TenantFilters = {}): Promise<{
  */
 export async function getTenant(id: string): Promise<TenantWithOccupancy | null> {
 	const [tenant] = await db
-		.select({
-			id: tenants.id,
-			firstName: tenants.firstName,
-			lastName: tenants.lastName,
-			email: tenants.email,
-			phone: tenants.phone,
-			language: tenants.language,
-			address: tenants.address,
-			postalCode: tenants.postalCode,
-			city: tenants.city,
-			correspondenceChannel: tenants.correspondenceChannel,
-			createdAt: tenants.createdAt,
-			updatedAt: tenants.updatedAt,
-			contractCount: sql<number>`(SELECT COUNT(*) FROM rental_contracts WHERE rental_contracts.tenant_id = "tenants"."id")`.as(
-				'contract_count'
-			)
-		})
+		.select(tenantFields)
 		.from(tenants)
 		.where(eq(tenants.id, id))
 		.limit(1);

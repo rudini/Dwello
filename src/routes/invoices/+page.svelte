@@ -2,10 +2,15 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import type { InvoicesListData } from '$lib/types';
+	import { listSearchUrl } from '$lib/list-url';
 	import Button from '$lib/components/Button.svelte';
 	import Icon from '$lib/components/Icon.svelte';
 	import Card from '$lib/components/Card.svelte';
-	import Badge from '$lib/components/Badge.svelte';
+	import SearchField from '$lib/components/SearchField.svelte';
+	import FilterSelect from '$lib/components/FilterSelect.svelte';
+	import FilterActions from '$lib/components/FilterActions.svelte';
+	import ListPagination from '$lib/components/ListPagination.svelte';
+	import InvoiceRow from './InvoiceRow.svelte';
 
 	let { data }: { data: InvoicesListData } = $props();
 
@@ -14,24 +19,25 @@
 	let categoryFilter = $state($page.url.searchParams.get('categoryId') || '');
 	let validityFilter = $state($page.url.searchParams.get('validity') || '');
 
-	const totalPages = $derived.by(() => Math.ceil(data.total / data.pageSize));
-	const hasNextPage = $derived.by(() => data.page < totalPages);
-	const hasPrevPage = $derived.by(() => data.page > 1);
+	const buildingOptions = $derived(data.buildings.map((b) => ({ value: b.id, label: b.name || b.address })));
+	const categoryOptions = $derived(data.categories.map((c) => ({ value: c.id, label: c.name })));
+	const validityOptions = [
+		{ value: 'valid', label: 'Umlagefähig' },
+		{ value: 'invalid', label: 'Nicht umlagefähig' }
+	];
 
-	function handleSearch() {
-		const params = new URLSearchParams();
-		if (searchTerm) params.set('search', searchTerm);
-		if (buildingFilter) params.set('buildingId', buildingFilter);
-		if (categoryFilter) params.set('categoryId', categoryFilter);
-		if (validityFilter) params.set('validity', validityFilter);
-		params.set('page', '1');
-		goto(`/invoices?${params.toString()}`);
-	}
+	const filtered = $derived(!!(searchTerm || buildingFilter || categoryFilter || validityFilter));
 
-	function handlePageChange(newPage: number) {
-		const params = new URLSearchParams($page.url.searchParams);
-		params.set('page', newPage.toString());
-		goto(`/invoices?${params.toString()}`);
+	function handleSearch(event: SubmitEvent) {
+		event.preventDefault();
+		goto(
+			listSearchUrl('/invoices', {
+				search: searchTerm,
+				buildingId: buildingFilter,
+				categoryId: categoryFilter,
+				validity: validityFilter
+			})
+		);
 	}
 
 	function clearFilters() {
@@ -40,17 +46,6 @@
 		categoryFilter = '';
 		validityFilter = '';
 		goto('/invoices');
-	}
-
-	function formatCurrency(amount: number): string {
-		return new Intl.NumberFormat('de-CH', {
-			style: 'currency',
-			currency: 'CHF'
-		}).format(amount);
-	}
-
-	function formatDate(dateString: string): string {
-		return new Date(dateString).toLocaleDateString('de-CH');
 	}
 
 </script>
@@ -74,83 +69,42 @@
 
 	<!-- Search and Filters -->
 	<Card>
-		<form onsubmit={(e) => { e.preventDefault(); handleSearch(); }} class="space-y-4">
-			<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-				<!-- Search -->
-				<div class="sm:col-span-2 lg:col-span-1">
-					<label for="search" class="block text-sm font-medium text-gray-700 mb-1">Suche</label>
-					<div class="relative">
-						<Icon
-							name="search"
-							size={20}
-							class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-						/>
-						<input
-							id="search"
-							type="text"
-							bind:value={searchTerm}
-							placeholder="Lieferant, Beschreibung..."
-							class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-						/>
-					</div>
-				</div>
-
-				<!-- Building Filter -->
-				<div>
-					<label for="building" class="block text-sm font-medium text-gray-700 mb-1">Gebäude</label>
-					<select
-						id="building"
-						bind:value={buildingFilter}
-						class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-					>
-						<option value="">Alle Gebäude</option>
-						{#each data.buildings as building}
-							<option value={building.id}>{building.name || building.address}</option>
-						{/each}
-					</select>
-				</div>
-
-				<!-- Category Filter -->
-				<div>
-					<label for="category" class="block text-sm font-medium text-gray-700 mb-1">Kategorie</label>
-					<select
-						id="category"
-						bind:value={categoryFilter}
-						class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-					>
-						<option value="">Alle Kategorien</option>
-						{#each data.categories as category}
-							<option value={category.id}>{category.name}</option>
-						{/each}
-					</select>
-				</div>
-
-				<!-- Validity Filter -->
-				<div>
-					<label for="validity" class="block text-sm font-medium text-gray-700 mb-1">Umlagefähigkeit</label>
-					<select
-						id="validity"
-						bind:value={validityFilter}
-						class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-					>
-						<option value="">Alle</option>
-						<option value="valid">Umlagefähig</option>
-						<option value="invalid">Nicht umlagefähig</option>
-					</select>
-				</div>
+		<form onsubmit={handleSearch} class="space-y-4">
+			<div class="flex flex-col sm:flex-row gap-4">
+				<SearchField bind:value={searchTerm} placeholder="Lieferant, Beschreibung..." testid="invoice-search-input" />
+				<FilterSelect
+					id="building"
+					label="Gebäude"
+					allLabel="Alle Gebäude"
+					options={buildingOptions}
+					value={buildingFilter}
+					testid="invoice-building-filter"
+					onchange={(value) => (buildingFilter = value)}
+				/>
+				<FilterSelect
+					id="category"
+					label="Kategorie"
+					allLabel="Alle Kategorien"
+					options={categoryOptions}
+					value={categoryFilter}
+					testid="invoice-category-filter"
+					onchange={(value) => (categoryFilter = value)}
+				/>
+				<FilterSelect
+					id="validity"
+					label="Umlagefähigkeit"
+					allLabel="Alle"
+					options={validityOptions}
+					value={validityFilter}
+					testid="invoice-validity-filter"
+					onchange={(value) => (validityFilter = value)}
+				/>
 			</div>
-			<div class="flex gap-2">
-				<Button type="submit" variant="primary" size="sm">
-					<Icon name="search" size={16} />
-					Suchen
-				</Button>
-				{#if searchTerm || buildingFilter || categoryFilter || validityFilter}
-					<Button type="button" variant="secondary" size="sm" onclick={clearFilters}>
-						<Icon name="close" size={16} />
-						Filter löschen
-					</Button>
-				{/if}
-			</div>
+			<FilterActions
+				{filtered}
+				onclear={clearFilters}
+				testid="invoice-search-submit"
+			/>
 		</form>
 	</Card>
 
@@ -160,14 +114,10 @@
 			<div class="text-center py-12">
 				<Icon name="receipt_long" size={48} class="mx-auto text-gray-300 mb-4" />
 				<h3 class="text-lg font-medium text-gray-900 mb-2">Keine Rechnungen gefunden</h3>
-				<p class="text-gray-500 mb-6">
-					{#if searchTerm || buildingFilter || categoryFilter || validityFilter}
-						Versuchen Sie es mit anderen Filtern.
-					{:else}
-						Erstellen Sie Ihre erste Rechnung, um loszulegen.
-					{/if}
-				</p>
-				{#if !searchTerm && !buildingFilter && !categoryFilter && !validityFilter}
+				{#if filtered}
+					<p class="text-gray-500 mb-6">Versuchen Sie es mit anderen Filtern.</p>
+				{:else}
+					<p class="text-gray-500 mb-6">Erstellen Sie Ihre erste Rechnung, um loszulegen.</p>
 					<Button href="/invoices/new" variant="primary">
 						<Icon name="add" size={20} />
 						Erste Rechnung erstellen
@@ -206,95 +156,13 @@
 					</thead>
 					<tbody class="divide-y divide-gray-200">
 						{#each data.invoices as invoice}
-							<tr class="hover:bg-gray-50 transition-colors">
-								<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-									{formatDate(invoice.invoiceDate)}
-								</td>
-								<td class="px-6 py-4">
-									<div class="text-sm font-medium text-gray-900">{invoice.billingEntity}</div>
-									<div class="text-sm text-gray-500 truncate max-w-xs">{invoice.description}</div>
-									<div class="text-xs text-gray-400 mt-1">{invoice.buildingName}</div>
-								</td>
-								<td class="px-6 py-4 whitespace-nowrap">
-									{#if invoice.category}
-										<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-											{invoice.category.name}
-										</span>
-									{:else}
-										<span class="text-sm text-gray-400">-</span>
-									{/if}
-								</td>
-								<td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-right">
-									{formatCurrency(invoice.amount)}
-								</td>
-								<td class="px-6 py-4 whitespace-nowrap text-center">
-									{#if invoice.isValidUtilityCost}
-										<Badge variant="success">Umlagefähig</Badge>
-									{:else}
-										<Badge variant="danger">Nicht umlagefähig</Badge>
-									{/if}
-								</td>
-								<td class="px-6 py-4 whitespace-nowrap text-center">
-									{#if invoice.categorizationStatus === 'auto-categorized'}
-										<Badge variant="success">Auto</Badge>
-									{:else if invoice.categorizationStatus === 'manual'}
-										<Badge variant="info">Manuell</Badge>
-									{:else}
-										<Badge variant="warning">Ausstehend</Badge>
-									{/if}
-								</td>
-								<td class="px-6 py-4 whitespace-nowrap text-right text-sm">
-									<div class="flex items-center justify-end gap-2">
-										<a
-											href="/invoices/{invoice.id}"
-											class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-											title="Ansehen"
-										>
-											<Icon name="visibility" size={18} />
-										</a>
-										<a
-											href="/invoices/{invoice.id}/edit"
-											class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-											title="Bearbeiten"
-										>
-											<Icon name="edit" size={18} />
-										</a>
-									</div>
-								</td>
-							</tr>
+							<InvoiceRow {invoice} />
 						{/each}
 					</tbody>
 				</table>
 			</div>
 		</Card>
 
-		<!-- Pagination -->
-		{#if totalPages > 1}
-			<div class="flex items-center justify-between">
-				<p class="text-sm text-gray-600">
-					Seite {data.page} von {totalPages} ({data.total} Ergebnisse)
-				</p>
-				<div class="flex gap-2">
-					<Button
-						variant="secondary"
-						size="sm"
-						disabled={!hasPrevPage}
-						onclick={() => handlePageChange(data.page - 1)}
-					>
-						<Icon name="chevron_left" size={16} />
-						Zurück
-					</Button>
-					<Button
-						variant="secondary"
-						size="sm"
-						disabled={!hasNextPage}
-						onclick={() => handlePageChange(data.page + 1)}
-					>
-						Weiter
-						<Icon name="chevron_right" size={16} />
-					</Button>
-				</div>
-			</div>
-		{/if}
+		<ListPagination {data} />
 	{/if}
 </div>

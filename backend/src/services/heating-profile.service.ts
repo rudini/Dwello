@@ -37,6 +37,14 @@ export interface MonthlyPercentages {
 	december: number;
 }
 
+/** Columns holding a profile's monthly shares, January to December */
+const percentageFields = [
+	'januaryPct', 'februaryPct', 'marchPct', 'aprilPct', 'mayPct', 'junePct',
+	'julyPct', 'augustPct', 'septemberPct', 'octoberPct', 'novemberPct', 'decemberPct'
+] as const;
+
+type MonthlyShares = Pick<HeatingProfile, (typeof percentageFields)[number]>;
+
 /**
  * Predefined heating profiles for Swiss regions
  * All percentages sum to 100%
@@ -259,22 +267,7 @@ export async function createHeatingProfile(data: NewHeatingProfile): Promise<Hea
 	}
 
 	// Validate percentages
-	const percentages: MonthlyPercentages = {
-		january: parseFloat(data.januaryPct),
-		february: parseFloat(data.februaryPct),
-		march: parseFloat(data.marchPct),
-		april: parseFloat(data.aprilPct),
-		may: parseFloat(data.mayPct),
-		june: parseFloat(data.junePct),
-		july: parseFloat(data.julyPct),
-		august: parseFloat(data.augustPct),
-		september: parseFloat(data.septemberPct),
-		october: parseFloat(data.octoberPct),
-		november: parseFloat(data.novemberPct),
-		december: parseFloat(data.decemberPct)
-	};
-
-	const validation = validatePercentages(percentages);
+	const validation = validatePercentages(getMonthlyPercentages(data));
 	if (!validation.isValid) {
 		throw new Error(validation.error);
 	}
@@ -302,16 +295,8 @@ export async function updateHeatingProfile(
 	}
 
 	// Don't allow modifying predefined profiles' percentages
-	if (existing.type === 'predefined') {
-		const percentageFields = [
-			'januaryPct', 'februaryPct', 'marchPct', 'aprilPct', 'mayPct', 'junePct',
-			'julyPct', 'augustPct', 'septemberPct', 'octoberPct', 'novemberPct', 'decemberPct'
-		];
-		for (const field of percentageFields) {
-			if (data[field as keyof typeof data] !== undefined) {
-				throw new Error('Cannot modify percentages of predefined heating profile');
-			}
-		}
+	if (existing.type === 'predefined' && percentageFields.some((field) => data[field] !== undefined)) {
+		throw new Error('Cannot modify percentages of predefined heating profile');
 	}
 
 	// Check for duplicate name if name is being changed
@@ -324,22 +309,10 @@ export async function updateHeatingProfile(
 
 	// Validate percentages if any are being changed
 	if (existing.type === 'custom') {
-		const percentages: MonthlyPercentages = {
-			january: parseFloat(data.januaryPct ?? existing.januaryPct),
-			february: parseFloat(data.februaryPct ?? existing.februaryPct),
-			march: parseFloat(data.marchPct ?? existing.marchPct),
-			april: parseFloat(data.aprilPct ?? existing.aprilPct),
-			may: parseFloat(data.mayPct ?? existing.mayPct),
-			june: parseFloat(data.junePct ?? existing.junePct),
-			july: parseFloat(data.julyPct ?? existing.julyPct),
-			august: parseFloat(data.augustPct ?? existing.augustPct),
-			september: parseFloat(data.septemberPct ?? existing.septemberPct),
-			october: parseFloat(data.octoberPct ?? existing.octoberPct),
-			november: parseFloat(data.novemberPct ?? existing.novemberPct),
-			december: parseFloat(data.decemberPct ?? existing.decemberPct)
-		};
-
-		const validation = validatePercentages(percentages);
+		const shares = Object.fromEntries(
+			percentageFields.map((field) => [field, data[field] ?? existing[field]])
+		) as MonthlyShares;
+		const validation = validatePercentages(getMonthlyPercentages(shares));
 		if (!validation.isValid) {
 			throw new Error(validation.error);
 		}
@@ -423,7 +396,7 @@ export function getMonthlyPercentage(profile: HeatingProfile, month: number): nu
 /**
  * Get all monthly percentages as an object
  */
-export function getMonthlyPercentages(profile: HeatingProfile): MonthlyPercentages {
+export function getMonthlyPercentages(profile: MonthlyShares): MonthlyPercentages {
 	return {
 		january: parseFloat(profile.januaryPct),
 		february: parseFloat(profile.februaryPct),

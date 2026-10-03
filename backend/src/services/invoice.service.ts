@@ -37,6 +37,32 @@ export interface InvoiceWithDetails extends Invoice {
 	llmCategory: { id: string; name: string } | null;
 }
 
+/** Invoices with their building, category and distribution key */
+function selectInvoicesWithDetails() {
+	return db
+		.select({
+			invoice: invoices,
+			building: {
+				id: buildings.id,
+				name: buildings.name,
+				address: buildings.address
+			},
+			category: {
+				id: categories.id,
+				name: categories.name,
+				isAllowedUtilityCost: categories.isAllowedUtilityCost
+			},
+			distributionKey: {
+				id: distributionKeys.id,
+				name: distributionKeys.name
+			}
+		})
+		.from(invoices)
+		.leftJoin(buildings, eq(invoices.buildingId, buildings.id))
+		.leftJoin(categories, eq(invoices.categoryId, categories.id))
+		.leftJoin(distributionKeys, eq(invoices.distributionKeyId, distributionKeys.id));
+}
+
 /**
  * List invoices with optional filters and pagination
  */
@@ -93,36 +119,14 @@ export async function listInvoices(filters: InvoiceFilters = {}): Promise<{
 		conditions.push(eq(invoices.wasManuallyOverridden, wasManuallyOverridden));
 	}
 
+	const whereClause = and(...conditions);
+
 	// Build the query with joins
-	const query = db
-		.select({
-			invoice: invoices,
-			building: {
-				id: buildings.id,
-				name: buildings.name,
-				address: buildings.address
-			},
-			category: {
-				id: categories.id,
-				name: categories.name,
-				isAllowedUtilityCost: categories.isAllowedUtilityCost
-			},
-			distributionKey: {
-				id: distributionKeys.id,
-				name: distributionKeys.name
-			}
-		})
-		.from(invoices)
-		.leftJoin(buildings, eq(invoices.buildingId, buildings.id))
-		.leftJoin(categories, eq(invoices.categoryId, categories.id))
-		.leftJoin(distributionKeys, eq(invoices.distributionKeyId, distributionKeys.id))
+	const results = await selectInvoicesWithDetails()
+		.where(whereClause)
 		.orderBy(desc(invoices.invoiceDate), desc(invoices.createdAt))
 		.limit(limit)
 		.offset(offset);
-
-	// Apply conditions
-	const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
-	const results = whereClause ? await query.where(whereClause) : await query;
 
 	// Transform results
 	const invoiceList: InvoiceWithDetails[] = results.map((row) => ({
@@ -135,9 +139,7 @@ export async function listInvoices(filters: InvoiceFilters = {}): Promise<{
 
 	// Get total count
 	const countQuery = db.select({ count: sql<number>`count(*)` }).from(invoices);
-	const [{ count: total }] = whereClause
-		? await countQuery.where(whereClause)
-		: await countQuery;
+	const [{ count: total }] = await countQuery.where(whereClause);
 
 	return {
 		invoices: invoiceList,
@@ -149,28 +151,7 @@ export async function listInvoices(filters: InvoiceFilters = {}): Promise<{
  * Get a single invoice by ID with all related data
  */
 export async function getInvoice(id: string): Promise<InvoiceWithDetails | null> {
-	const [result] = await db
-		.select({
-			invoice: invoices,
-			building: {
-				id: buildings.id,
-				name: buildings.name,
-				address: buildings.address
-			},
-			category: {
-				id: categories.id,
-				name: categories.name,
-				isAllowedUtilityCost: categories.isAllowedUtilityCost
-			},
-			distributionKey: {
-				id: distributionKeys.id,
-				name: distributionKeys.name
-			}
-		})
-		.from(invoices)
-		.leftJoin(buildings, eq(invoices.buildingId, buildings.id))
-		.leftJoin(categories, eq(invoices.categoryId, categories.id))
-		.leftJoin(distributionKeys, eq(invoices.distributionKeyId, distributionKeys.id))
+	const [result] = await selectInvoicesWithDetails()
 		.where(eq(invoices.id, id))
 		.limit(1);
 
@@ -418,28 +399,7 @@ export async function getInvoicesForStatement(
 	periodStart: string,
 	periodEnd: string
 ): Promise<InvoiceWithDetails[]> {
-	const results = await db
-		.select({
-			invoice: invoices,
-			building: {
-				id: buildings.id,
-				name: buildings.name,
-				address: buildings.address
-			},
-			category: {
-				id: categories.id,
-				name: categories.name,
-				isAllowedUtilityCost: categories.isAllowedUtilityCost
-			},
-			distributionKey: {
-				id: distributionKeys.id,
-				name: distributionKeys.name
-			}
-		})
-		.from(invoices)
-		.leftJoin(buildings, eq(invoices.buildingId, buildings.id))
-		.leftJoin(categories, eq(invoices.categoryId, categories.id))
-		.leftJoin(distributionKeys, eq(invoices.distributionKeyId, distributionKeys.id))
+	const results = await selectInvoicesWithDetails()
 		.where(
 			and(
 				eq(invoices.buildingId, buildingId),

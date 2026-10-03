@@ -2,9 +2,13 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import type { TenantsListData } from '$lib/types';
+	import { listSearchUrl } from '$lib/list-url';
 	import Button from '$lib/components/Button.svelte';
 	import Icon from '$lib/components/Icon.svelte';
 	import SearchField from '$lib/components/SearchField.svelte';
+	import FilterSelect from '$lib/components/FilterSelect.svelte';
+	import FilterActions from '$lib/components/FilterActions.svelte';
+	import ListPagination from '$lib/components/ListPagination.svelte';
 	import Card from '$lib/components/Card.svelte';
 	import StatusBadge from '$lib/components/StatusBadge.svelte';
 
@@ -13,23 +17,16 @@
 	let searchTerm = $state($page.url.searchParams.get('search') || '');
 	let statusFilter = $state($page.url.searchParams.get('status') || '');
 
-	// Derived values
-	const totalPages = $derived.by(() => Math.ceil(data.total / data.pageSize));
-	const hasNextPage = $derived.by(() => data.page < totalPages);
-	const hasPrevPage = $derived.by(() => data.page > 1);
+	const statusOptions = [
+		{ value: 'active', label: 'Aktive Mieter' },
+		{ value: 'inactive', label: 'Ehemalige Mieter' }
+	];
 
-	function handleSearch() {
-		const params = new URLSearchParams();
-		if (searchTerm) params.set('search', searchTerm);
-		if (statusFilter) params.set('status', statusFilter);
-		params.set('page', '1');
-		goto(`/tenants?${params.toString()}`);
-	}
+	const filtered = $derived(!!(searchTerm || statusFilter));
 
-	function handlePageChange(newPage: number) {
-		const params = new URLSearchParams($page.url.searchParams);
-		params.set('page', newPage.toString());
-		goto(`/tenants?${params.toString()}`);
+	function handleSearch(event: SubmitEvent) {
+		event.preventDefault();
+		goto(listSearchUrl('/tenants', { search: searchTerm, status: statusFilter }));
 	}
 
 	function clearFilters() {
@@ -62,35 +59,20 @@
 
 	<!-- Search and Filters -->
 	<Card>
-		<form onsubmit={(e) => { e.preventDefault(); handleSearch(); }} class="space-y-4">
+		<form onsubmit={handleSearch} class="space-y-4">
 			<div class="flex flex-col sm:flex-row gap-4">
 				<SearchField bind:value={searchTerm} placeholder="Name, E-Mail oder Gebäude..." testid="tenants-search-input" />
-				<div class="w-full sm:w-48">
-					<label for="status" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-					<select
-						id="status"
-						data-testid="tenants-status-filter"
-						bind:value={statusFilter}
-						class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary bg-white"
-					>
-						<option value="">Alle Mieter</option>
-						<option value="active">Aktive Mieter</option>
-						<option value="inactive">Ehemalige Mieter</option>
-					</select>
-				</div>
+				<FilterSelect
+					id="status"
+					label="Status"
+					allLabel="Alle Mieter"
+					options={statusOptions}
+					value={statusFilter}
+					testid="tenants-status-filter"
+					onchange={(value) => (statusFilter = value)}
+				/>
 			</div>
-			<div class="flex gap-2">
-				<Button type="submit" variant="primary" size="sm" testid="tenants-search-submit">
-					<Icon name="search" size={16} />
-					Suchen
-				</Button>
-				{#if searchTerm || statusFilter}
-					<Button type="button" variant="secondary" size="sm" onclick={clearFilters}>
-						<Icon name="close" size={16} />
-						Filter löschen
-					</Button>
-				{/if}
-			</div>
+			<FilterActions {filtered} onclear={clearFilters} testid="tenants-search-submit" />
 		</form>
 	</Card>
 
@@ -101,13 +83,13 @@
 				<Icon name="person" size={48} class="mx-auto text-gray-300 mb-4" />
 				<h3 class="text-lg font-medium text-gray-900 mb-2">Keine Mieter gefunden</h3>
 				<p class="text-gray-500 mb-6">
-					{#if searchTerm || statusFilter}
+					{#if filtered}
 						Versuchen Sie es mit anderen Suchbegriffen oder Filtern.
 					{:else}
 						Erstellen Sie Ihren ersten Mieter, um loszulegen.
 					{/if}
 				</p>
-				{#if !searchTerm && !statusFilter}
+				{#if !filtered}
 					<Button href="/tenants/new" variant="primary">
 						<Icon name="person_add" size={20} />
 						Ersten Mieter erstellen
@@ -172,33 +154,6 @@
 			{/each}
 		</div>
 
-		<!-- Pagination -->
-		{#if totalPages > 1}
-			<div class="flex items-center justify-between">
-				<p class="text-sm text-gray-600">
-					Seite {data.page} von {totalPages} ({data.total} Ergebnisse)
-				</p>
-				<div class="flex gap-2">
-					<Button
-						variant="secondary"
-						size="sm"
-						disabled={!hasPrevPage}
-						onclick={() => handlePageChange(data.page - 1)}
-					>
-						<Icon name="chevron_left" size={16} />
-						Zurück
-					</Button>
-					<Button
-						variant="secondary"
-						size="sm"
-						disabled={!hasNextPage}
-						onclick={() => handlePageChange(data.page + 1)}
-					>
-						Weiter
-						<Icon name="chevron_right" size={16} />
-					</Button>
-				</div>
-			</div>
-		{/if}
+		<ListPagination {data} />
 	{/if}
 </div>

@@ -85,8 +85,10 @@ export async function listApartments(filters: ApartmentFilters = {}): Promise<{
 		conditions.push(eq(apartments.floor, floor));
 	}
 
+	const whereClause = and(...conditions);
+
 	// Query with building name and current tenant
-	const query = db
+	const results = await db
 		.select({
 			id: apartments.id,
 			buildingId: apartments.buildingId,
@@ -102,19 +104,15 @@ export async function listApartments(filters: ApartmentFilters = {}): Promise<{
 		})
 		.from(apartments)
 		.leftJoin(buildings, eq(apartments.buildingId, buildings.id))
+		.where(whereClause)
 		.orderBy(buildings.name, apartments.floor, apartments.number)
 		.limit(limit)
 		.offset(offset);
 
-	const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
-	const results = whereClause ? await query.where(whereClause) : await query;
-
 	// Get total count
 	const countQuery = db.select({ count: sql<number>`count(*)` }).from(apartments);
 
-	const [{ count: total }] = whereClause
-		? await countQuery.where(whereClause)
-		: await countQuery;
+	const [{ count: total }] = await countQuery.where(whereClause);
 
 	return {
 		apartments: results as ApartmentWithDetails[],
