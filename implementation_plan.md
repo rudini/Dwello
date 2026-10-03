@@ -69,6 +69,7 @@ This is a comprehensive implementation plan for the entire Dwello property manag
 | 19 | Manual Testing & QA | 1 week | ⏳ Pending | 0% |
 | 20 | Optimization & Cleanup | 3 days | ⏳ Pending | 0% |
 | 21 | Go-Live Preparation | 3 days | ⏳ Pending | 0% |
+| 22 | MVA Migration (Modular Monolith) | 2 weeks | 🔄 In Progress | 3% |
 
 **Total Duration:** ~22 weeks for full MVP
 
@@ -3504,6 +3505,67 @@ Validation is defined inline in route handlers for type safety.
 
 ---
 
+## Phase 22: MVA Migration (Modular Monolith)
+
+**Plan:** [docs/migration-mva.md](./docs/migration-mva.md) | **Glossary:** [UBIQUITOUS_LANGUAGE.md](./UBIQUITOUS_LANGUAGE.md)
+
+Behavior-preserving restructuring of the backend into three modules (`rental`, `costs`, `settlement`) plus infrastructure. Events, value objects, read models, ACLs and repositories are deliberately out of scope (see "Bewusst nicht umgesetzt" in the plan).
+
+- [x] Review and rewrite the migration plan
+  **Note:** Rewrote `docs/migration-mva.md` (modules instead of bounded contexts, five steps, glossary terms from `UBIQUITOUS_LANGUAGE.md`). No code changed. **Status:** ✅ Complete
+
+### 22.1 ADR, Quality Scenarios, Glossary
+
+- [ ] Confirm or replace quality scenarios Q1–Q5
+- [ ] Write ADR in `docs/adr/` (subdomains, modules, dependency rules, technical debt list)
+- [ ] Clean up `UBIQUITOUS_LANGUAGE.md`
+  - [ ] Belegungsstatus: align `occupancy_status` entry with derived `apartmentStatus`
+  - [ ] Mahnung / Zahlungserinnerung: settle on one term
+  - [ ] Abrechnungsperiode: merge the two definitions or state the difference
+  - [ ] Add entry for Dokument (`documents` table)
+  - [ ] Note the owning module per glossary section
+
+### 22.2 Characterization Tests for the Core Domain
+
+- [ ] Review existing tests for `calculation`, `prorating`, `heating-profile`, `distribution-key`
+- [ ] Add tests that pin today's statement results (real PostgreSQL, no mocks)
+  - [ ] Tenant change within the Abrechnungsperiode
+  - [ ] Empty apartment
+  - [ ] Heizprofil
+  - [ ] Multiple Verteilschlüssel
+
+### 22.3 Module Folders and Boundary Rule
+
+- [ ] Inventory write access to tables of other modules
+- [ ] Move services to `backend/src/modules/settlement/` with `index.ts` (own commit)
+- [ ] Move services to `backend/src/modules/costs/` with `index.ts` (own commit)
+- [ ] Move services to `backend/src/modules/rental/` with `index.ts` (own commit)
+- [ ] Configure `fallow` boundary rule and add it to `npm run lint` / CI
+- [ ] Resolve back-references from `rental` and `costs` to statement tables
+- [ ] Resolve `config.service` dependency on `settlement`
+- [ ] Boundary check reports zero violations
+
+### 22.4 Move Statement Generation out of the Route
+
+- [ ] Move orchestration from `backend/src/routes/statements.ts` into `settlement` use-case functions
+- [ ] Remove direct database access from the route
+- [ ] Verify statement and line items are written atomically; add transaction with test if not
+- [ ] Unit test calls statement generation without HTTP and without PDF rendering (scenario Q5)
+
+### 22.5 Stop and Reassess
+
+- [ ] Check scenarios Q1–Q5 against the code
+- [ ] Record remaining technical debt in the ADR
+
+### 22.X Verification
+
+- [ ] All unit tests pass
+- [ ] All E2E tests pass
+- [ ] No TypeScript errors
+- [ ] No ESLint warnings
+
+---
+
 # Progress Tracking
 
 ## Overall Completion
@@ -3537,6 +3599,7 @@ Validation is defined inline in route handlers for type safety.
 | Phase 19 | ⏳ Pending | 0% | 57 | 0 |
 | Phase 20 | ⏳ Pending | 0% | 24 | 0 |
 | Phase 21 | ⏳ Pending | 0% | 28 | 0 |
+| Phase 22 | 🔄 In Progress | 3% | 33 | 1 |
 
 **Total Tasks: ~850** | **Completed: 114** | **Overall: ~13%**
 
@@ -3798,6 +3861,7 @@ Every bug fix has a unit or database test.
 - [ ] Login page and header follow the browser language (English browsers see them in English, the rest is German)
 - [ ] Majors without security reason: SvelteKit 3/Vite 8, Tailwind 4, Zod 4, TypeScript 7, ESLint 10, jose 6
 - [ ] Phase 8 status in the table above was not re-evaluated; the progress task counts are outdated
+- [x] MVA migration plan documented in `docs/migration-mva.md` (modular monolith with three modules, boundary rule, five steps; tracked as Phase 22)
 
 ---
 
@@ -3836,7 +3900,7 @@ Every bug fix has a unit or database test.
 
 ---
 
-**Last Updated:** January 26, 2026
+**Last Updated:** October 3, 2026
 **Total Duration:** ~22 weeks
 **Target:** Full MVP production-ready system
 
