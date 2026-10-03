@@ -21,7 +21,8 @@ export function normalizeDecimal(val: string): string {
 
 /** Swiss franc amount, e.g. "CHF 1’800.00" */
 export function formatCurrency(amount: number): string {
-	return new Intl.NumberFormat('de-CH', { style: 'currency', currency: 'CHF' }).format(amount);
+	// ICU versions differ in the de-CH thousands separator (' or ’); always show the typographic one
+	return new Intl.NumberFormat('de-CH', { style: 'currency', currency: 'CHF' }).format(amount).replace(/'/g, '’');
 }
 
 /** Swiss date, e.g. "31.12.2024" */
