@@ -111,6 +111,10 @@ smallest thing that fails if the logic breaks: an `assert`-based
 fixtures, no per-function suites unless asked. Trivial one-liners need no
 test, YAGNI applies to tests too.
 
+The repository's own testing rules win over this section. In Dwello,
+`CLAUDE.md` requires a Vitest unit test for every bug fix, one-liners
+included: write that test in the project's suite, and keep it small.
+
 ## Boundaries
 
 Ponytail governs what you build, not how you talk (pair with Caveman for

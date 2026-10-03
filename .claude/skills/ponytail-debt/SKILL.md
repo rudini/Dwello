@@ -14,10 +14,10 @@ can't quietly become permanent.
 
 ## Scan
 
-Grep the repo for comment markers, skipping `node_modules`, `.git`, and build
-output:
+Grep the repo for comment markers, skipping `node_modules`, `.git`, `.claude`
+(skill instructions, not project code), and build output:
 
-`grep -rnE --exclude-dir=.git --exclude-dir=node_modules --exclude-dir=dist --exclude-dir=build '(#|//|/[*]) ?ponytail:' .`  (add other comment prefixes if your stack uses them)
+`grep -rnE --exclude-dir=.git --exclude-dir=.claude --exclude-dir=node_modules --exclude-dir=dist --exclude-dir=build '(#|//|/[*]) ?ponytail:' .`  (add other comment prefixes if your stack uses them)
 
 Each hit is one ledger row. The comment prefix keeps prose that merely mentions
 the convention out of the ledger.
