@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { actions as newActions } from '../routes/config/heating-profiles/new/+page.server';
-import { actions as editActions } from '../routes/config/heating-profiles/[id]/edit/+page.server';
+import { actions as editActions, load as editLoad } from '../routes/config/heating-profiles/[id]/edit/+page.server';
+import { load as listLoad } from '../routes/config/heating-profiles/+page.server';
 import { actions as detailActions } from '../routes/config/heating-profiles/[id]/+page.server';
 import { profileTotal } from '../lib/heating-profile';
 import { runAction } from './helpers/action';
@@ -81,5 +82,23 @@ describe('Heizprofil löschen', () => {
 		const { result } = runAction(detailActions.delete, 'hp1', 409, {}, { error: message });
 
 		expect(await result).toMatchObject({ status: 409, data: { error: message } });
+	});
+});
+
+describe('Heizprofile laden', () => {
+	it('lädt alle Heizprofile für die Übersicht', async () => {
+		const fetch = (async (url: string) => {
+			expect(url).toBe('http://localhost:3001/api/v1/heating-profiles?limit=100');
+			return Response.json({ data: [{ id: 'hp1', name: 'Winter', type: 'custom', januaryPct: '18' }] });
+		}) as typeof globalThis.fetch;
+
+		const { profiles } = (await listLoad({ fetch } as never)) as { profiles: { id: string }[] };
+		expect(profiles.map((p) => p.id)).toEqual(['hp1']);
+	});
+
+	it('verweigert das Bearbeiten vordefinierter Profile', async () => {
+		const fetch = (async () => Response.json({ data: { id: 'hp1', name: 'Standard', type: 'predefined' } })) as typeof globalThis.fetch;
+
+		await expect(editLoad({ fetch, params: { id: 'hp1' } } as never)).rejects.toMatchObject({ status: 403 });
 	});
 });

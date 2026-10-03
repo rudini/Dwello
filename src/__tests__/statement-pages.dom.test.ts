@@ -1,0 +1,181 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { readable } from 'svelte/store';
+
+let url = new URL('http://localhost/statements');
+vi.mock('$app/environment', () => ({ browser: true }));
+vi.mock('$app/navigation', () => ({ goto: vi.fn(), invalidateAll: vi.fn() }));
+vi.mock('$app/forms', () => ({ enhance: () => ({ destroy() {} }) }));
+vi.mock('$app/stores', () => ({ page: { subscribe: (run: (value: unknown) => void) => readable({ url }).subscribe(run) } }));
+
+import { invalidateAll } from '$app/navigation';
+import StatementsPage from '../routes/statements/+page.svelte';
+import StatementPage from '../routes/statements/[id]/+page.svelte';
+import { allByTestId, byTestId, click, fakeBff, settle, show } from './helpers/dom';
+import { statement } from './helpers/statement';
+
+const text = () => document.body.textContent ?? '';
+const counts = { draft: 3, sent: 2, paid: 5, overdue: 1 };
+
+beforeEach(() => {
+	url = new URL('http://localhost/statements');
+	vi.mocked(invalidateAll).mockClear();
+});
+
+describe('Abrechnungsliste', () => {
+	const list = (statements: ReturnType<typeof statement>[], total = statements.length, page = 1) =>
+		show(StatementsPage, {
+			data: { statements, total, page, pageSize: 10, buildings: [{ id: 'b1', name: 'Ahornhof' }], statusCounts: counts }
+		} as never);
+
+	it('zeigt Status, Saldo und die passenden Aktionen pro Abrechnung', () => {
+		list([
+			statement(),
+			statement({ id: 's2', status: 'overdue', lastReminderDate: '2025-03-10', pdfGeneratedAt: '2025-01-16T08:00:00Z', balance: -40 })
+		]);
+
+		expect(byTestId('statement-row-s1')!.textContent).toContain('Entwurf');
+		expect(byTestId('statement-row-s1')!.querySelector('[data-testid="statement-row-mark-paid"]')).toBeNull();
+		const overdue = byTestId('statement-row-s2')!;
+		expect(overdue.textContent).toContain('Überfällig');
+		expect(overdue.textContent).toContain('Rückerstattung');
+		expect(overdue.querySelector('[data-testid="statement-pdf-link"]')!.getAttribute('href')).toBe('/api/statements/s2/pdf');
+	});
+
+	it('hält den Zahlungseingang direkt aus der Liste fest', async () => {
+		const calls = fakeBff();
+		list([statement({ status: 'sent' })]);
+
+		click('statement-row-mark-paid');
+		await settle();
+
+		expect(calls).toEqual([{ method: 'POST', path: '/statements/s1/mark-paid', body: undefined }]);
+		expect(invalidateAll).toHaveBeenCalled();
+	});
+
+	it('schaltet einen Statusfilter ein und wieder aus, und behält die übrigen Filter', () => {
+		url = new URL('http://localhost/statements?search=Keller&status=draft&page=2');
+		list([statement()]);
+
+		expect(byTestId('filter-draft')!.getAttribute('href')).toBe('/statements?search=Keller');
+		expect(byTestId('filter-sent')!.getAttribute('href')).toBe('/statements?search=Keller&status=sent');
+	});
+
+	it('blättert und behält dabei die Filter', () => {
+		url = new URL('http://localhost/statements?status=sent&page=2');
+		list([statement()], 25, 2);
+
+		expect(byTestId('pagination-next')!.getAttribute('href')).toBe('/statements?status=sent&page=3');
+		expect(text()).toContain('Seite 2 von 3');
+	});
+
+	it('lädt ohne Abrechnungen zum Erstellen ein', () => {
+		list([]);
+		expect(text()).toContain('Erstellen Sie Ihre erste Nebenkostenabrechnung.');
+	});
+
+	it('rät bei einer leeren Suche, die Filter anzupassen', () => {
+		url = new URL('http://localhost/statements?search=Niemand');
+		list([]);
+		expect(text()).toContain('Versuchen Sie, Ihre Filter anzupassen.');
+		expect(text()).not.toContain('Erstellen Sie Ihre erste Nebenkostenabrechnung.');
+	});
+});
+
+describe('Abrechnungsdetail', () => {
+	const detail = (overrides = {}, form: object | null = null, reminders: unknown[] = []) =>
+		show(StatementPage, { data: { statement: statement(overrides), reminders }, form } as never);
+
+	it('zeigt die Kostenpositionen und den Saldo', () => {
+		detail();
+
+		expect(allByTestId('statement-line-item').map((row) => row.textContent)).toEqual([
+			expect.stringContaining('Heizung'),
+			expect.stringContaining('Hauswartung')
+		]);
+		expect(text()).toContain('Nachzahlung durch Mieter');
+	});
+
+	it('bietet einen Entwurf zum Versenden, Bearbeiten und Löschen an', () => {
+		detail();
+
+		expect(byTestId('statement-send-button')).not.toBeNull();
+		expect(byTestId('statement-mark-paid-button')).toBeNull();
+		click('statement-delete-button');
+		expect(byTestId('statement-delete-confirm')).not.toBeNull();
+	});
+
+	it('bietet eine versendete Abrechnung zum Mahnen und Bezahlen an', () => {
+		detail({ status: 'sent' });
+
+		expect(byTestId('statement-send-button')).toBeNull();
+		click('statement-mark-paid-button');
+		expect(byTestId('statement-mark-paid-confirm')).not.toBeNull();
+	});
+
+	it('erstellt das PDF und bietet es danach zum Herunterladen an', async () => {
+		const calls = fakeBff(() => [200, { success: true }]);
+		detail();
+
+		click('statement-generate-pdf-button');
+		await settle();
+
+		expect(calls).toEqual([{ method: 'POST', path: '/statements/s1/generate-pdf', body: undefined }]);
+		expect(byTestId('statement-pdf-download')!.getAttribute('href')).toBe('/statements/s1/pdf');
+	});
+
+	it('bleibt beim Erstellen-Button, wenn das PDF nicht erstellt werden kann', async () => {
+		fakeBff(() => [400, { error: 'IBAN not configured' }]);
+		detail();
+
+		click('statement-generate-pdf-button');
+		await settle();
+
+		expect(byTestId('statement-pdf-download')).toBeNull();
+		expect(byTestId<HTMLButtonElement>('statement-generate-pdf-button')!.disabled).toBe(false);
+	});
+
+	it('kündigt die nächste Mahnung mit ihrem Versandweg an', () => {
+		detail({ status: 'overdue' });
+		click('statement-reminder-button');
+		expect(byTestId('reminder-delivery-info')!.textContent).toContain('Zahlungserinnerung');
+		expect(byTestId('reminder-delivery-info')!.textContent).toContain('per E-Mail an anna@example.ch');
+	});
+
+	it('lässt nach drei Mahnungen keine weitere zu', () => {
+		const reminder = (level: number) => ({
+			id: `d${level}`,
+			tenantId: 't1',
+			statementId: 's1',
+			type: 'reminder',
+			reminderLevel: level,
+			title: `${level}. Mahnung`,
+			fileName: `mahnung-${level}.pdf`,
+			channel: 'letter',
+			status: 'sent',
+			sentAt: '2025-03-01T00:00:00Z',
+			deliveryError: null,
+			createdAt: '2025-03-01T00:00:00Z',
+			tenantName: 'Anna Keller',
+			statementNumber: 'NK-2024-0001'
+		});
+		detail({ status: 'overdue', tenantCorrespondenceChannel: 'letter' }, null, [reminder(1), reminder(2), reminder(3)]);
+
+		click('statement-reminder-button');
+		expect(text()).toContain('Es wurden bereits 3 Mahnungen versendet.');
+		expect(byTestId<HTMLButtonElement>('statement-reminder-confirm')!.disabled).toBe(true);
+	});
+
+	it('meldet, wenn eine Mahnung nicht per E-Mail zugestellt werden konnte', () => {
+		const document = { title: 'Zahlungserinnerung', channel: 'email' };
+		detail({ status: 'overdue' }, { reminder: { document, deliveryError: 'Mailserver nicht erreichbar.' } });
+
+		expect(byTestId('reminder-feedback')!.textContent).toContain(
+			'Zahlungserinnerung: Mailserver nicht erreichbar. Sie liegt in den Dokumenten zum Versand bereit.'
+		);
+	});
+
+	it('bestätigt eine versendete Mahnung je nach Versandweg', () => {
+		detail({ status: 'overdue' }, { reminder: { document: { title: '2. Mahnung', channel: 'letter' } } });
+		expect(byTestId('reminder-feedback')!.textContent).toContain('2. Mahnung liegt als Brief zum Ausdrucken in den Dokumenten bereit.');
+	});
+});
