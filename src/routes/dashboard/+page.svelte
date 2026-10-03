@@ -41,11 +41,11 @@
 			<p class="text-gray-500 mt-1">Willkommen bei Dwello</p>
 		</div>
 		<div class="flex items-center gap-3">
-			<Button href="/invoices/new" variant="secondary">
+			<Button href="/invoices/new" variant="secondary" testid="dashboard-action">
 				<Icon name="receipt" size={20} />
 				Rechnung erfassen
 			</Button>
-			<Button href="/statements/generate" variant="primary">
+			<Button href="/statements/generate" variant="primary" testid="dashboard-action">
 				<Icon name="receipt_long" size={20} />
 				Abrechnungen erstellen
 			</Button>

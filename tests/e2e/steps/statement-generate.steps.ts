@@ -7,9 +7,11 @@ import {
 	feeAboveGuideline,
 	generationOutcome,
 	noContractsInPeriod,
+	periodChoice,
 	previewRow
 } from '../questions/statement-generate';
 import {
+	generateMore,
 	generateStatements,
 	openPreview,
 	returnToStatementList,
@@ -103,3 +105,12 @@ Then(
 		await expect(feeAboveGuideline(verwalter)).toBeVisible();
 	}
 );
+
+When('der Liegenschaftsverwalter weitere Abrechnungen erstellen will', async ({ verwalter }) => {
+	await verwalter.perform(generateMore);
+});
+
+Then('beginnt der Liegenschaftsverwalter wieder mit der Wahl der Periode', async ({ verwalter }) => {
+	await expect(periodChoice(verwalter)).toBeVisible();
+	await expect(generationOutcome(verwalter)).toHaveCount(0);
+});

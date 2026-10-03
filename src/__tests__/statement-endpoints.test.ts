@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { POST as markPaid } from '../routes/statements/[id]/mark-paid/+server';
 import { POST as sendReminder } from '../routes/statements/[id]/send-reminder/+server';
+import { POST as generatePdf } from '../routes/api/statements/[id]/generate-pdf/+server';
 
 const API = 'http://localhost:3001/api/v1/statements/s1';
 
@@ -51,5 +52,14 @@ describe('POST /statements/[id]/send-reminder', () => {
 		const response = await result;
 		expect(response.status).toBe(400);
 		expect(await response.json()).toEqual({ error: 'Es wurden bereits 3 Mahnungen versendet.' });
+	});
+});
+
+describe('POST /api/statements/[id]/generate-pdf', () => {
+	it('sendet dem Backend einen JSON-Body, den es als Objekt validiert', async () => {
+		const { calls, result } = call(generatePdf, 200, { success: true });
+
+		expect((await result).status).toBe(200);
+		expect(calls).toEqual([{ method: 'POST', url: `${API}/generate-pdf`, body: {} }]);
 	});
 });

@@ -16,3 +16,5 @@ export const openStatementLink = (page: Page, tenantName: string, year: number) 
 // Filters navigate on the client; the list is filtered once the URL carries them
 export const filteredBy = (page: Page, filters: Record<string, string>) =>
 	page.waitForURL((url) => Object.entries(filters).every(([key, value]) => url.searchParams.get(key) === value));
+export const statementPdfLink = (page: Page, tenantName: string, year: number) =>
+	statementRowForYear(page, tenantName, year).getByTestId('statement-pdf-link');

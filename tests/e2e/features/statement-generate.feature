@@ -61,3 +61,8 @@ Funktionalität: Nebenkostenabrechnungen erstellen
   Szenario: Zurück zur Abrechnungsliste
     Wenn der Liegenschaftsverwalter zur Abrechnungsliste zurückkehrt
     Dann ist der Liegenschaftsverwalter auf der Seite "Nebenkostenabrechnungen"
+
+  Szenario: Weitere Abrechnungen erstellen
+    Angenommen der Liegenschaftsverwalter hat die Abrechnungen 2024 für das Gebäude "Lindenhof" erstellt
+    Wenn der Liegenschaftsverwalter weitere Abrechnungen erstellen will
+    Dann beginnt der Liegenschaftsverwalter wieder mit der Wahl der Periode

@@ -20,3 +20,7 @@ Funktionalität: Neuer Mieter
   Szenario: Erfassen abbrechen
     Wenn der Liegenschaftsverwalter die Bearbeitung abbricht
     Dann ist der Liegenschaftsverwalter auf der Mieterliste
+
+  Szenario: Über den Breadcrumb zur Mieterliste
+    Wenn der Liegenschaftsverwalter im Breadcrumb "Mieter" wählt
+    Dann ist der Liegenschaftsverwalter auf der Seite "Mieter"

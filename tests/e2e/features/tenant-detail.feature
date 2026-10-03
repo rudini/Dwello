@@ -61,3 +61,12 @@ Funktionalität: Mieterdetail
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mieters "Lea Frei"
     Wenn der Liegenschaftsverwalter im Breadcrumb "Mieter" wählt
     Dann ist der Liegenschaftsverwalter auf der Mieterliste
+
+  Szenario: E-Mail an den Mieter schreiben
+    Angenommen "Lea Frei" hat eine E-Mail-Adresse
+    Und der Liegenschaftsverwalter ist auf der Detailseite des Mieters "Lea Frei"
+    Dann kann der Liegenschaftsverwalter "Lea Frei" eine E-Mail schreiben
+
+  Szenario: Mieter ohne E-Mail-Adresse
+    Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mieters "Lea Frei"
+    Dann kann der Liegenschaftsverwalter "Lea Frei" keine E-Mail schreiben

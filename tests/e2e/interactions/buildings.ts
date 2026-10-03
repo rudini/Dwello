@@ -8,3 +8,5 @@ export const searchButton = (page: Page) => page.getByTestId('building-search-su
 export const cityFilterInput = (page: Page) => page.getByTestId('building-city-filter');
 export const emptyListNotice = (page: Page) => page.getByTestId('buildings-empty');
 export const newBuildingButton = (page: Page) => page.getByTestId('building-new-button');
+export const routeLink = (page: Page, name: string) =>
+	buildingCard(page, name).getByTestId('building-route-link');

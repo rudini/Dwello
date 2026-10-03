@@ -15,3 +15,4 @@ export const previewEmpty = (page: Page) => page.getByTestId('preview-empty');
 export const generationResult = (page: Page) => page.getByTestId('generation-result');
 export const showStatementsButton = (page: Page) => page.getByTestId('show-statements-button');
 export const backLink = (page: Page) => page.getByTestId('back-link');
+export const generateMoreButton = (page: Page) => page.getByTestId('generate-more-button');

@@ -61,3 +61,8 @@ Funktionalität: Wohnungsdetail
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite der Wohnung "3.01"
     Wenn der Liegenschaftsverwalter im Breadcrumb "Lindenhof" wählt
     Dann ist der Liegenschaftsverwalter auf der Detailseite von "Lindenhof"
+
+  Szenario: E-Mail an den aktuellen Mieter schreiben
+    Angenommen "Beat Huber" hat eine E-Mail-Adresse
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Wohnung "3.01"
+    Dann kann der Liegenschaftsverwalter "Beat Huber" eine E-Mail schreiben

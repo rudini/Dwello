@@ -311,6 +311,7 @@ export const utilityStatements = pgTable(
 		paidAmount: decimal('paid_amount', { precision: 12, scale: 2 }),
 		reminderSentDate: date('reminder_sent_date'),
 		pdfBlob: text('pdf_blob'), // Base64 encoded PDF
+		pdfGeneratedAt: timestamp('pdf_generated_at'),
 		qrBillReference: varchar('qr_bill_reference', { length: 27 }), // Swiss QR reference
 		notes: text('notes'),
 		createdAt: timestamp('created_at').defaultNow().notNull(),

@@ -414,6 +414,7 @@ export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 					.update(utilityStatements)
 					.set({
 						pdfBlob: pdfBase64,
+						pdfGeneratedAt: new Date(),
 						qrBillReference: qrReference,
 						updatedAt: new Date()
 					})

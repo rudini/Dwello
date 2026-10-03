@@ -10,8 +10,10 @@
 			<div class="flex items-center gap-4">
 				<span>v{version}</span>
 				<span class="hidden sm:inline">|</span>
-				<a href="/privacy" class="hover:text-gray-700">Privacy</a>
-				<a href="/terms" class="hover:text-gray-700">Terms</a>
+				<a href="/privacy" class="hover:text-gray-700" data-testid="footer-link">Datenschutz</a>
+				<a href="/terms" class="hover:text-gray-700" data-testid="footer-link"
+					>Nutzungsbedingungen</a
+				>
 			</div>
 		</div>
 	</div>

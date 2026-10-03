@@ -27,7 +27,7 @@
 		{#if contract.tenantEmail}
 			<p class="flex items-center gap-2 mt-3">
 				<Icon name="email" size={18} class="text-text-secondary" />
-				<a href="mailto:{contract.tenantEmail}" class="text-sm text-primary hover:underline">{contract.tenantEmail}</a>
+				<a href="mailto:{contract.tenantEmail}" class="text-sm text-primary hover:underline" data-testid="tenant-email-link">{contract.tenantEmail}</a>
 			</p>
 		{/if}
 	</div>

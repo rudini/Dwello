@@ -32,3 +32,6 @@ Funktionalität: Gebäudeliste
   Szenario: Gebäude öffnen
     Wenn der Liegenschaftsverwalter das Gebäude "Lindenhof" öffnet
     Dann ist der Liegenschaftsverwalter auf der Detailseite von "Lindenhof"
+
+  Szenario: Route zum Gebäude planen
+    Dann führt die Route in Google Maps von der Liste zu "Lindenhof" an "Testweg 1, 8400 Winterthur"

@@ -3871,6 +3871,44 @@ Every bug fix has a unit or database test.
 - [ ] Phase 8 status in the table above was not re-evaluated; the progress task counts are outdated
 - [x] MVA migration plan documented in `docs/migration-mva.md` (modular monolith with three modules, boundary rule, five steps; tracked as Phase 22)
 
+## Session 4 - October 2026: BDD Coverage Audit
+
+Branch `claude/vigilant-bohr-d3oojn`. Audit against the `/bdd-acceptance` completion criteria: every page has a
+feature, every exit from a page has a navigation scenario. Gaps closed test-first; bugs found on the way fixed with
+unit or database tests.
+
+### Coverage gaps closed ✅
+- [x] Global navigation: sidebar (9 areas + help), logo, settings in the user menu, footer links (`navigation.feature`)
+- [x] New pages `/help`, `/privacy`, `/terms` (were dead links in sidebar and footer); footer labels now German
+  (`help.feature`, `privacy.feature`, `terms.feature`). The privacy and terms texts describe what the code does
+  (OAuth data, local Ollama, SMTP/Resend, Google Fonts, cookies) and still need a legal review
+- [x] Dashboard: all figure tiles, statement status tiles, quick actions and header actions (`dashboard.feature`)
+- [x] Breadcrumbs on new/edit tenant (`tenant-new.feature`, `tenant-edit.feature`)
+- [x] Statement PDF download from list and detail; "Weitere erstellen" in the wizard
+- [x] E-mail and phone links (tenant detail, contract detail, apartment detail), Google Maps route (building list)
+- [x] Placeholder pages `/analytics`, `/reports` (`analytics.feature`, `reports.feature`)
+
+### Bugs fixed ✅
+- [x] "PDF generieren" always failed: the BFF proxy posted without a body, the backend answered 422
+  (`src/routes/api/statements/[id]/generate-pdf/+server.ts`; test `statement-endpoints.test.ts`)
+- [x] The PDF was never offered for download after a reload: the backend had no `pdf_generated_at`
+  (migration `0008_statement_pdf_generated_at.sql`, set by `generate-pdf`; tests `statement.routes.pg.test.ts`,
+  `migrations.pg.test.ts`); a changed payment deadline discards the stored PDF so it can be generated again
+  (`updateStatement`; test `statement.routes.pg.test.ts`)
+- [x] "Weitere erstellen" kept the wizard on step 4: same-URL navigation keeps the page state; the link now reloads
+  (`Button` prop `reload`; test `generation-step.test.ts`)
+- [x] Tenant without e-mail address got a `mailto:null` link on tenant and contract detail (test `tenant-email-link.test.ts`)
+
+### Verification
+- E2E: 251 scenarios pass on Chromium, 38 German features (Firefox and WebKit not run in this environment; CI runs them)
+- Frontend unit tests: 376 pass; svelte-check: 5 errors, tsc 3 errors (pre-existing, none in changed files)
+- Backend: 354 tests + 108 PostgreSQL tests pass; tsc 48 errors (unchanged from main)
+
+### Open
+- [ ] The statement list returns the whole base64 PDF of every row (`statement: utilityStatements` in the list select)
+- [ ] "Alle Aktivitäten anzeigen" links to `/activity`, which does not exist; unreachable today (backend returns at most 5)
+- [ ] Mobile navigation drawer has no scenarios (same targets as the sidebar)
+
 ---
 
 # Success Criteria

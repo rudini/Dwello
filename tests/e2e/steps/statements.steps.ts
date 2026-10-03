@@ -4,6 +4,7 @@ import { test } from '../fixtures/test';
 import { visit } from '../interactions/navigation';
 import { allListedStatements, listedStatement, statementOfYear, statementPath } from '../questions/statements';
 import {
+	downloadStatementPdfFromList,
 	openStatement,
 	searchStatements,
 	showDraftsOfBuilding,
@@ -101,5 +102,20 @@ Given(
 	'der Liegenschaftsverwalter zeigt die Abrechnungen im Gebäude {string} an',
 	async ({ verwalter, seed }, building: string) => {
 		await verwalter.perform(showStatementsOfBuilding(seed.idOf(building)!));
+	}
+);
+
+Given('die Verwaltung hat die IBAN {string} hinterlegt', async ({ seed }, iban: string) => {
+	await seed.iban(iban);
+});
+
+Given('für die Abrechnung {int} von {string} gibt es ein PDF', async ({ seed }, year: number, tenant: string) => {
+	await seed.statementPdf(tenant, year);
+});
+
+When(
+	'der Liegenschaftsverwalter das PDF der Abrechnung {int} von {string} herunterlädt',
+	async ({ verwalter, names }, year: number, tenant: string) => {
+		await verwalter.perform(downloadStatementPdfFromList(names.get(tenant) ?? tenant, year));
 	}
 );

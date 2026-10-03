@@ -115,18 +115,21 @@
 						<p class="font-semibold text-gray-900">
 							{data.contract.tenant.firstName} {data.contract.tenant.lastName}
 						</p>
-						<a
-							href="mailto:{data.contract.tenant.email}"
-							class="text-sm text-primary hover:underline"
-						>
-							{data.contract.tenant.email}
-						</a>
+						{#if data.contract.tenant.email}
+							<a
+								href="mailto:{data.contract.tenant.email}"
+								class="text-sm text-primary hover:underline"
+								data-testid="tenant-email-link"
+							>
+								{data.contract.tenant.email}
+							</a>
+						{/if}
 					</div>
 				</div>
 				{#if data.contract.tenant.phone}
 					<div class="flex items-center text-sm text-gray-600 mb-4">
 						<Icon name="phone" size={16} class="mr-2 text-gray-400" />
-						<a href="tel:{data.contract.tenant.phone}" class="hover:text-primary">
+						<a href="tel:{data.contract.tenant.phone}" class="hover:text-primary" data-testid="tenant-phone-link">
 							{data.contract.tenant.phone}
 						</a>
 					</div>

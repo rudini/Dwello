@@ -41,3 +41,10 @@ Funktionalität: Nebenkostenabrechnungen
     Angenommen der Liegenschaftsverwalter zeigt die Abrechnungen im Gebäude "Ahornhof" an
     Wenn der Liegenschaftsverwalter die Abrechnung 2024 von "Anna Keller" öffnet
     Dann ist der Liegenschaftsverwalter auf der Detailseite der Abrechnung 2024 von "Anna Keller"
+
+  Szenario: PDF einer Abrechnung herunterladen
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und für die Abrechnung 2024 von "Anna Keller" gibt es ein PDF
+    Und der Liegenschaftsverwalter zeigt die Abrechnungen im Gebäude "Ahornhof" an
+    Wenn der Liegenschaftsverwalter das PDF der Abrechnung 2024 von "Anna Keller" herunterlädt
+    Dann erhält der Liegenschaftsverwalter die Abrechnung als PDF

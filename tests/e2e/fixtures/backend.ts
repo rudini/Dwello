@@ -156,6 +156,17 @@ export function testData(request: APIRequestContext, token: string) {
 			ids.set(`Abrechnung ${tenantTitle} ${year}`, statement.id);
 		},
 
+		// Unique per scenario: tenants of parallel scenarios must not share an address
+		async email(tenantTitle: string) {
+			const email = `${ids.get(tenantTitle)}@dwello.test`;
+			await put(`tenants/${ids.get(tenantTitle)}`, { email });
+			names.set(`E-Mail ${tenantTitle}`, email);
+		},
+
+		async phone(tenantTitle: string, phone: string) {
+			await put(`tenants/${ids.get(tenantTitle)}`, { phone });
+		},
+
 		// E-mail address and postal address, so both channels can deliver
 		async correspondence(tenantTitle: string, channel: 'email' | 'letter') {
 			const email = `${ids.get(tenantTitle)}@dwello.test`;
@@ -171,6 +182,15 @@ export function testData(request: APIRequestContext, token: string) {
 
 		async remind(tenantTitle: string, year: number) {
 			await post(`statements/${ids.get(`Abrechnung ${tenantTitle} ${year}`)}/reminders`, {});
+		},
+
+		// Global setting: every scenario that needs one uses the same IBAN, so parallel runs agree
+		async iban(iban: string) {
+			await put('config', { iban: iban.replace(/\s/g, '') });
+		},
+
+		async statementPdf(tenantTitle: string, year: number) {
+			await post(`statements/${ids.get(`Abrechnung ${tenantTitle} ${year}`)}/generate-pdf`, {});
 		},
 
 		async sendStatement(tenantTitle: string, year: number) {

@@ -21,3 +21,11 @@ Funktionalität: Mieter bearbeiten
   Szenario: Bearbeitung abbrechen
     Wenn der Liegenschaftsverwalter die Bearbeitung abbricht
     Dann ist der Liegenschaftsverwalter auf der Detailseite von "Anna Keller"
+
+  Szenario: Über den Breadcrumb zur Mieterliste
+    Wenn der Liegenschaftsverwalter im Breadcrumb "Mieter" wählt
+    Dann ist der Liegenschaftsverwalter auf der Seite "Mieter"
+
+  Szenario: Über den Breadcrumb zum Mieter
+    Wenn der Liegenschaftsverwalter im Breadcrumb "Anna Keller" wählt
+    Dann ist der Liegenschaftsverwalter auf der Detailseite von "Anna Keller"

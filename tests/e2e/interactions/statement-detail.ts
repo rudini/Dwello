@@ -11,3 +11,5 @@ export const confirmDeleteStatementButton = (page: Page) => page.getByTestId('st
 export const statementEditButton = (page: Page) => page.getByTestId('statement-edit-button');
 export const statementTenantLink = (page: Page) => page.getByTestId('statement-tenant-link');
 export const statementApartmentLink = (page: Page) => page.getByTestId('statement-apartment-link');
+export const generatePdfButton = (page: Page) => page.getByTestId('statement-generate-pdf-button');
+export const downloadPdfLink = (page: Page) => page.getByTestId('statement-pdf-download');

@@ -3,6 +3,7 @@ import {
 	backLink,
 	buildingCheckbox,
 	generateButton,
+	generateMoreButton,
 	heatingProfileSelect,
 	managementFeeInput,
 	nextButton,
@@ -35,6 +36,10 @@ export const generateStatements = (year: number, buildingId: string) => async (a
 	await openPreview(year, buildingId)(actor);
 	await nextButton(actor.page).click();
 	await generateButton(actor.page).click();
+};
+
+export const generateMore = async (actor: Actor) => {
+	await generateMoreButton(actor.page).click();
 };
 
 export const showCreatedStatements = async (actor: Actor) => {

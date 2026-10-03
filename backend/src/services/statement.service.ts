@@ -289,10 +289,13 @@ export async function updateStatement(
 		}
 	}
 
+	// The PDF prints the payment deadline; a changed deadline discards it so it can be generated again
+	const pdfOutdated = data.paymentDeadline !== undefined && data.paymentDeadline !== existing.paymentDeadline;
+
 	// Update the statement
 	const [updated] = await db
 		.update(utilityStatements)
-		.set({ ...data, updatedAt: new Date() })
+		.set({ ...data, ...(pdfOutdated && { pdfBlob: null, pdfGeneratedAt: null }), updatedAt: new Date() })
 		.where(eq(utilityStatements.id, id))
 		.returning();
 

@@ -10,7 +10,9 @@ export const POST: RequestHandler = async ({ params, fetch }) => {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json'
-			}
+			},
+			// The backend validates the body as an object; without one it answers 422
+			body: '{}'
 		});
 
 		const data = await response.json();
