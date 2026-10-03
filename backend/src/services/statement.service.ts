@@ -3,7 +3,7 @@
  * Business logic for utility statement operations
  */
 
-import { eq, sql, desc, and, gte, lte, lt, ilike, or, inArray } from 'drizzle-orm';
+import { eq, sql, desc, and, gte, lte, lt, ilike, or, inArray, getTableColumns } from 'drizzle-orm';
 import { db } from '../db/connection';
 import {
 	utilityStatements,
@@ -29,7 +29,10 @@ export interface StatementFilters {
 	offset?: number;
 }
 
-export interface StatementWithDetails extends UtilityStatement {
+// The base64 PDF is only served by the /pdf routes, never with list or detail data
+const { pdfBlob: _pdfBlob, ...statementColumns } = getTableColumns(utilityStatements);
+
+export interface StatementWithDetails extends Omit<UtilityStatement, 'pdfBlob'> {
 	tenant: { id: string; firstName: string; lastName: string; email: string | null } | null;
 	apartment: { id: string; number: string; floor: number; area: string } | null;
 	building: { id: string; name: string; address: string } | null;
@@ -92,7 +95,7 @@ export async function listStatements(filters: StatementFilters = {}): Promise<{
 	// Build the query with joins
 	const results = await db
 		.select({
-			statement: utilityStatements,
+			statement: statementColumns,
 			tenant: {
 				id: tenants.id,
 				firstName: tenants.firstName,
@@ -180,7 +183,7 @@ export async function listStatements(filters: StatementFilters = {}): Promise<{
 export async function getStatement(id: string): Promise<StatementWithDetails | null> {
 	const [result] = await db
 		.select({
-			statement: utilityStatements,
+			statement: statementColumns,
 			tenant: {
 				id: tenants.id,
 				firstName: tenants.firstName,

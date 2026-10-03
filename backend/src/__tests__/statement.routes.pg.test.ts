@@ -94,3 +94,23 @@ describe('POST /api/v1/statements/:id/generate-pdf', () => {
 			expect(await pdfGeneratedAt()).not.toBeNull();
 		}));
 });
+
+describe('GET /api/v1/statements ohne PDF-Inhalt', () => {
+	it('liefert in Liste und Detail nur den Zeitpunkt, das PDF selbst kommt über /pdf', () =>
+		withIban(async () => {
+			await generatePdf();
+
+			const listed = (await call(`?search=${encodeURIComponent(`Anna Keller ${token}`)}`)) as {
+				data: Record<string, unknown>[];
+			};
+			const detail = (await call(`/${statementId}`)) as Record<string, unknown>;
+
+			for (const statement of [listed.data[0], detail]) {
+				expect(statement.pdfGeneratedAt).not.toBeNull();
+				expect(statement).not.toHaveProperty('pdfBlob');
+			}
+			expect((await callApi(`/api/v1/statements/${statementId}/pdf`)).headers.get('content-type')).toBe(
+				'application/pdf'
+			);
+		}));
+});
