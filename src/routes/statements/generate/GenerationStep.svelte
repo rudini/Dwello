@@ -25,7 +25,7 @@
 				<Icon name="visibility" size={20} />
 				Abrechnungen anzeigen
 			</Button>
-			<Button href="/statements/generate" variant="secondary">
+			<Button href="/statements/generate" reload variant="secondary" testid="generate-more-button">
 				<Icon name="add" size={20} />
 				Weitere erstellen
 			</Button>

@@ -8,6 +8,7 @@
 		variant?: Variant;
 		size?: Size;
 		href?: string;
+		reload?: boolean; // follows href with a full page load instead of client-side navigation
 		type?: 'button' | 'submit' | 'reset';
 		formaction?: string; // submits the form to another action, e.g. '?/test'
 		onclick?: () => void;
@@ -22,6 +23,7 @@
 		variant = 'primary',
 		size = 'md',
 		href,
+		reload = false,
 		type = 'button',
 		formaction,
 		onclick,
@@ -60,7 +62,7 @@
 </script>
 
 {#if href && !disabled}
-	<a {href} class={classes} aria-label={ariaLabel} data-testid={testid}>
+	<a {href} class={classes} aria-label={ariaLabel} data-testid={testid} data-sveltekit-reload={reload || undefined}>
 		{#if children}
 			{@render children()}
 		{/if}
