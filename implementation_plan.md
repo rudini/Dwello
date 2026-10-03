@@ -3763,6 +3763,13 @@ Every bug fix has a unit or database test.
 - Migrations applied automatically (`bun run db:migrate`, `bun run dev`, Docker) with `schema_migrations` (85f925c)
 - Mail module with SMTP and Resend, mail catcher for E2E (36cb488)
 - Dependencies upgraded, vulnerabilities fixed (bb7721b)
+- GitHub Actions CI (`.github/workflows/ci.yml`): build, unit tests (frontend + backend on PostgreSQL), E2E (Playwright, all browsers), fallow audit; on pushes to main and pull requests
+- Duplicated code removed so `fallow audit` passes against main:
+  - List pages buildings/contracts/invoices/tenants use `SearchField`, `FilterSelect`, `FilterActions` and `ListPagination` (`src/lib/list-url.ts`)
+  - New and edit contract share `src/routes/contracts/ContractForm.svelte` (logic in `src/lib/contract-form.ts`)
+  - Statement status labels in `src/lib/statement.ts`; invoice row in `src/routes/invoices/InvoiceRow.svelte`
+  - Backend: shared selects in contract/invoice/tenant services, `and()` without empty-check, `updateHeatingProfile` simplified
+  - Tests: `list-url`, `statement-status`, `contract-form` (unit); E2E 173 scenarios pass on Chromium
 
 ### Security fixes ✅
 - Backend required no valid JWT on every API route (1d7ea32); BFF now forwards the session JWT (dcbb15a)

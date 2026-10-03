@@ -1,0 +1,131 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: 22
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - uses: oven-sh/setup-bun@v2
+      - run: npm ci
+      - run: bun install --frozen-lockfile
+        working-directory: backend
+      - name: Build frontend
+        run: npm run build
+      - name: Build backend
+        run: bun run build
+        working-directory: backend
+
+  unit-tests:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: dwello
+          POSTGRES_PASSWORD: dwello
+          POSTGRES_DB: dwello
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U dwello"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://dwello:dwello@localhost:5432/dwello
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - uses: oven-sh/setup-bun@v2
+      - run: npm ci
+      - run: bun install --frozen-lockfile
+        working-directory: backend
+      - name: Frontend unit tests
+        run: npx vitest run
+      - name: Apply database migrations
+        run: bun run db:migrate
+        working-directory: backend
+      - name: Backend unit tests
+        if: ${{ !cancelled() }}
+        run: bun run test
+        working-directory: backend
+
+  e2e-tests:
+    name: E2E tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: dwello
+          POSTGRES_PASSWORD: dwello
+          POSTGRES_DB: dwello
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U dwello"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - uses: oven-sh/setup-bun@v2
+      - run: npm ci
+      - run: bun install --frozen-lockfile
+        working-directory: backend
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+      - name: E2E tests
+        run: npm run test:e2e
+      - name: Upload reports
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-reports
+          path: |
+            playwright-report/
+            cucumber-report/
+            test-results/
+          retention-days: 7
+
+  fallow:
+    name: Fallow audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - name: Fallow audit
+        # Pull requests: changes against the target branch; pushes: changes of the pushed commits
+        run: npx fallow audit --base "${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || github.event.before }}"
