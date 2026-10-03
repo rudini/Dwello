@@ -42,26 +42,55 @@ describe('GET /api/v1/statements?search', () => {
 	});
 });
 
+// The PDF needs an IBAN for the QR-bill; the previous value is restored afterwards
+async function withIban(test: () => Promise<void>) {
+	const iban = await getConfig('iban');
+	await setConfig('iban', 'CH9300762011623852957');
+	try {
+		await test();
+	} finally {
+		if (iban) await setConfig('iban', iban);
+		else await deleteConfig('iban');
+	}
+}
+
+const json = (method: string, body: object) => ({
+	method,
+	headers: { 'Content-Type': 'application/json' },
+	body: JSON.stringify(body)
+});
+const generatePdf = () => call(`/${statementId}/generate-pdf`, json('POST', {}));
+const pdfGeneratedAt = async () => ((await call(`/${statementId}`)) as { pdfGeneratedAt: string | null }).pdfGeneratedAt;
+
 describe('POST /api/v1/statements/:id/generate-pdf', () => {
-	it('hält fest, wann das PDF erstellt wurde, damit Liste und Detail es zum Herunterladen anbieten', async () => {
-		const iban = await getConfig('iban');
-		await setConfig('iban', 'CH9300762011623852957');
-		try {
+	it('hält fest, wann das PDF erstellt wurde, damit Liste und Detail es zum Herunterladen anbieten', () =>
+		withIban(async () => {
 			const before = Date.now();
-			await call(`/${statementId}/generate-pdf`, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: '{}'
-			});
+			await generatePdf();
 
 			const listed = (await call(`?search=${encodeURIComponent(`Anna Keller ${token}`)}`)) as {
 				data: { pdfGeneratedAt: string | null }[];
 			};
 			const generatedAt = new Date(listed.data[0].pdfGeneratedAt!).getTime();
 			expect(generatedAt).toBeGreaterThanOrEqual(before - 1000);
-		} finally {
-			if (iban) await setConfig('iban', iban);
-			else await deleteConfig('iban');
-		}
-	});
+		}));
+
+	it('verwirft das PDF, wenn sich die Zahlungsfrist ändert, damit es neu erstellt werden kann', () =>
+		withIban(async () => {
+			await generatePdf();
+
+			await call(`/${statementId}`, json('PUT', { paymentDeadline: '2025-03-31' }));
+			expect(await pdfGeneratedAt()).toBeNull();
+
+			await generatePdf();
+			expect(await pdfGeneratedAt()).not.toBeNull();
+		}));
+
+	it('behält das PDF, wenn nur die Bemerkung ändert', () =>
+		withIban(async () => {
+			await generatePdf();
+
+			await call(`/${statementId}`, json('PUT', { notes: 'Ratenzahlung vereinbart' }));
+			expect(await pdfGeneratedAt()).not.toBeNull();
+		}));
 });

@@ -3893,7 +3893,8 @@ unit or database tests.
   (`src/routes/api/statements/[id]/generate-pdf/+server.ts`; test `statement-endpoints.test.ts`)
 - [x] The PDF was never offered for download after a reload: the backend had no `pdf_generated_at`
   (migration `0008_statement_pdf_generated_at.sql`, set by `generate-pdf`; tests `statement.routes.pg.test.ts`,
-  `migrations.pg.test.ts`)
+  `migrations.pg.test.ts`); a changed payment deadline discards the stored PDF so it can be generated again
+  (`updateStatement`; test `statement.routes.pg.test.ts`)
 - [x] "Weitere erstellen" kept the wizard on step 4: same-URL navigation keeps the page state; the link now reloads
   (`Button` prop `reload`; test `generation-step.test.ts`)
 - [x] Tenant without e-mail address got a `mailto:null` link on tenant and contract detail (test `tenant-email-link.test.ts`)
