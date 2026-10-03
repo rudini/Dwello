@@ -1,6 +1,6 @@
 # Dwello Full System Implementation Plan
 
-**Status:** Ready for Implementation
+**Status:** In progress (see [Progress Tracking](#progress-tracking))
 **Date Created:** January 23, 2026
 **Architecture:** SvelteKit BFF + ElysiaJS Backend + PostgreSQL
 **Scope:** Complete MVP with all 11 core features
@@ -48,30 +48,34 @@ This is a comprehensive implementation plan for the entire Dwello property manag
 | # | Phase | Duration | Status | Completion |
 |---|-------|----------|--------|-----------|
 | 0 | Project Initialization | 1 week | ✅ Complete | 100% |
-| 1 | SvelteKit Auth Routes (BFF) | 1 week | ✅ Complete | 100% |
-| 2 | API Proxy Routes (BFF) | 1 week | ✅ Complete | 100% |
+| 1 | SvelteKit Auth Routes (BFF) | 1 week | 🔄 In Progress | 95% |
+| 2 | API Proxy Routes (BFF) | 1 week | 🔄 In Progress | 92% |
 | 3 | Client-Side Auth & Layout | 3 days | ✅ Complete | 100% |
 | 4 | Database Schema & Migrations | 3 days | ✅ Complete | 100% |
 | 5 | Backend - Core Entities | 2 weeks | ✅ Complete | 100% |
-| 6 | Backend - Invoices & LLM | 2 weeks | ✅ Complete | 100% |
-| 7 | Backend - Distribution Keys | 1 week | ✅ Complete | 100% |
-| 8 | Backend - Statements & Prorating | 3 weeks | ⏳ Pending | 0% |
-| 9 | PDF & QR Bill Generation | 2 weeks | 🔄 In Progress | 85% |
-| 10 | Frontend - Core Management Pages | 2 weeks | ✅ Complete | 100% |
-| 11 | Frontend - Invoice Management | 1.5 weeks | ✅ Complete | 100% |
-| 12 | Frontend - Configuration Pages | 1.5 weeks | ✅ Complete | 100% |
-| 13 | Frontend - Statement Generation | 2 weeks | ✅ Complete | 100% |
-| 14 | Frontend - Dashboard & Analytics | 1 week | ✅ Complete | 100% |
-| 15 | Integration Testing | 1.5 weeks | ⏳ Pending | 0% |
-| 16 | Environment & Config | 3 days | ✅ Complete | 100% |
-| 17 | Docker & Deployment | 1 week | ✅ Complete | 100% |
+| 6 | Backend - Invoices & LLM | 2 weeks | 🔄 In Progress | 56% |
+| 7 | Backend - Distribution Keys | 1 week | 🔄 In Progress | 94% |
+| 8 | Backend - Statements & Prorating | 3 weeks | 🔄 In Progress | 94% |
+| 9 | PDF & QR Bill Generation | 2 weeks | 🔄 In Progress | 57% |
+| 10 | Frontend - Core Management Pages | 2 weeks | 🔄 In Progress | 98% |
+| 11 | Frontend - Invoice Management | 1.5 weeks | 🔄 In Progress | 71% |
+| 12 | Frontend - Configuration Pages | 1.5 weeks | 🔄 In Progress | 80% |
+| 13 | Frontend - Statement Generation | 2 weeks | 🔄 In Progress | 88% |
+| 14 | Frontend - Dashboard & Analytics | 1 week | 🔄 In Progress | 82% |
+| 15 | Integration Testing | 1.5 weeks | 🔄 In Progress | 14% |
+| 16 | Environment & Config | 3 days | 🔄 In Progress | 58% |
+| 17 | Docker & Deployment | 1 week | 🔄 In Progress | 47% |
 | 18 | Documentation & Tests | 1 week | ⏳ Pending | 0% |
 | 19 | Manual Testing & QA | 1 week | ⏳ Pending | 0% |
-| 20 | Optimization & Cleanup | 3 days | ⏳ Pending | 0% |
+| 20 | Optimization & Cleanup | 3 days | 🔄 In Progress | 10% |
 | 21 | Go-Live Preparation | 3 days | ⏳ Pending | 0% |
-| 22 | MVA Migration (Modular Monolith) | 2 weeks | 🔄 In Progress | 3% |
+| 22 | MVA Migration (Modular Monolith) | 2 weeks | 🔄 In Progress | 4% |
 
 **Total Duration:** ~22 weeks for full MVP
+
+Completion counts the top-level checklist items of each phase (recounted in Session 4). The open items of
+phases 1–14 are mostly manual tests (bundled in Phase 19), coverage targets (no coverage provider for Vitest)
+and tests that need a running Ollama.
 
 ---
 
@@ -240,7 +244,7 @@ This is a comprehensive implementation plan for the entire Dwello property manag
 
 ---
 
-## Phase 1: SvelteKit Auth Routes (BFF Layer - Authentication) ✅
+## Phase 1: SvelteKit Auth Routes (BFF Layer - Authentication)
 
 **Status:** Complete
 **Commits:**
@@ -450,7 +454,7 @@ This is a comprehensive implementation plan for the entire Dwello property manag
   - [ ] Check browser console for errors
   - [ ] Verify cookies appear in DevTools
 
-**Status: Phase 1 Complete** ✅
+**Status: Phase 1 In Progress** 🔄 (95%, open items above)
 
 **Phase 1 Summary:**
 - **Files Created:** 5 server-side auth utilities + 5 auth route handlers
@@ -461,7 +465,7 @@ This is a comprehensive implementation plan for the entire Dwello property manag
 
 ---
 
-## Phase 2: API Proxy Routes (BFF Layer - API Proxying) ✅
+## Phase 2: API Proxy Routes (BFF Layer - API Proxying)
 
 **Status:** Complete
 **Commit:** 0776c81 feat(api): implement API proxy layer for BFF architecture
@@ -618,16 +622,16 @@ This is a comprehensive implementation plan for the entire Dwello property manag
 
 ### 2.X Verification: Unit Tests & E2E Tests
 
-- [ ] Unit Tests for `src/lib/server/api-proxy.ts`
-  - [ ] Create `tests/unit/api-proxy.test.ts`
-  - [ ] Test `forwardRequest()` with valid JWT
-  - [ ] Test missing JWT returns 401
-  - [ ] Test XSRF token validation
-  - [ ] Test query parameter forwarding
-  - [ ] Test header forwarding
-  - [ ] Test error responses from backend
-  - [ ] Target >80% code coverage
-  - [ ] All tests pass: `npm run test`
+- [x] Unit Tests for `src/lib/server/api-proxy.ts`
+  - [x] Create `tests/unit/api-proxy.test.ts`
+  - [x] Test `forwardRequest()` with valid JWT
+  - [x] Test missing JWT returns 401 (`JWTError`)
+  - [x] Test XSRF token validation
+  - [x] Test query parameter forwarding
+  - [x] Test header forwarding
+  - [x] Test error responses from backend (timeout, connection error)
+  - [ ] Target >80% code coverage — not measurable: no coverage provider for Vitest installed
+  - [x] All tests pass: `npm run test`
 
 - [ ] Integration Tests for All Proxy Routes
   - [ ] Create `tests/integration/api-routes.test.ts`
@@ -641,14 +645,14 @@ This is a comprehensive implementation plan for the entire Dwello property manag
   - [ ] Test pagination works
   - [ ] All tests pass: `npm run test`
 
-- [ ] E2E Tests for API Proxy Integration
-  - [ ] Create `tests/e2e/api.spec.ts`
-  - [ ] Test complete request flow through BFF layer
-  - [ ] Test authenticated requests work
-  - [ ] Test unauthenticated requests return 401
-  - [ ] Test XSRF protection blocks requests
-  - [ ] Test response data returned to client
-  - [ ] All tests pass: `npm run test:e2e`
+- [x] E2E Tests for API Proxy Integration
+  - [x] ~~Create `tests/e2e/api.spec.ts`~~ replaced by the BDD features: every scenario runs through the BFF
+  - [x] Test complete request flow through BFF layer
+  - [x] Test authenticated requests work
+  - [x] Test unauthenticated requests return 401 — `authentication.feature` "Ohne Anmeldung keine Daten"
+  - [x] Test XSRF protection blocks requests — unit level only (`tests/unit/api-proxy.test.ts`)
+  - [x] Test response data returned to client
+  - [x] All tests pass: `npm run test:e2e`
 
 - [ ] Manual Testing
   - [ ] Run dev server: `npm run dev`
@@ -658,7 +662,7 @@ This is a comprehensive implementation plan for the entire Dwello property manag
   - [ ] Check browser DevTools network tab for forwarded requests
   - [ ] Verify XSRF token in request headers
 
-**Status: Phase 2 Complete** ✅
+**Status: Phase 2 In Progress** 🔄 (92%, open items above)
 
 ---
 
@@ -786,11 +790,12 @@ This is a comprehensive implementation plan for the entire Dwello property manag
   - [x] All tests pass: `npm run test` ✅
   **Note:** 21 tests in tests/unit/api.test.ts - all passing
 
-- [ ] Component Tests for Auth Components
-  **Note:** Deferred to Phase 5 - requires component testing setup
+- [x] Component Tests for Auth Components
+  **Note:** `src/__tests__/login-page.test.ts`, `src/__tests__/auth-guard.test.ts`, `hooks.server.test.ts`
 
-- [ ] E2E Tests for Full Auth & Layout
-  **Note:** Deferred to Phase 5 - requires mock backend
+- [x] E2E Tests for Full Auth & Layout
+  **Note (Session 3/4):** `authentication.feature` (login, expired session, logout), `navigation.feature`
+  (sidebar, header, user menu, footer)
 
 - [x] Verification
   - [x] No linting errors: `npm run lint` ✅
@@ -917,8 +922,9 @@ This is a comprehensive implementation plan for the entire Dwello property manag
   - [x] `testConnection()` called in index.ts
   - [x] Warning logged if connection fails
 
-- [ ] Integration tests for schema
-  **Note:** Deferred - requires PostgreSQL test database setup
+- [x] Integration tests for schema
+  **Note:** `migrations.pg.test.ts` applies all migrations to empty and hand-migrated databases; every
+  `*.pg.test.ts` runs against the migrated schema
 
 ### 4.X Verification
 
@@ -1280,14 +1286,15 @@ Validation is defined inline in route handlers for type safety.
   - [ ] Caching (2)
   - [ ] Response parsing (2)
 
-- [ ] Unit tests for utility validation (6 tests)
-  - [ ] Allowed/disallowed categories (4)
-  - [ ] Management fee limits (2)
+- [x] Unit tests for utility validation (6 tests) — `utility-validation.service.test.ts` (53),
+  `utility-validation.service.integration.test.ts` (23)
+  - [x] Allowed/disallowed categories (4)
+  - [x] Management fee limits (2)
 
-- [ ] Integration tests for invoice routes (15+ tests)
+- [ ] Integration tests for invoice routes (15+ tests) — so far only `invoice-names.pg.test.ts` (3)
   - [ ] Invoice CRUD (10)
   - [ ] LLM categorization (3)
-  - [ ] Category management (2)
+  - [ ] Category management (2) — covered on the service level by `category-admin.pg.test.ts`
 
 - [ ] Integration tests with mocked Ollama (5 tests)
 
@@ -1313,17 +1320,17 @@ Validation is defined inline in route handlers for type safety.
   - [ ] All tests pass: `npm run test`
 
 - [ ] E2E Tests for Invoice Workflow
-  - [ ] Test creating invoice and categorization
-  - [ ] Test editing invoice
-  - [ ] Test LLM suggestions appear
-  - [ ] All tests pass: `npm run test:e2e`
+  - [x] Test creating invoice and categorization — `invoice-new.feature` (manual category)
+  - [x] Test editing invoice — `invoice-edit.feature`
+  - [ ] Test LLM suggestions appear — needs a running Ollama; not part of the E2E environment
+  - [x] All tests pass: `npm run test:e2e`
 
 - [ ] Manual Testing
   - [ ] Run all tests: `npm run test`
   - [ ] Verify Ollama connectivity (if enabled)
   - [ ] Test in browser with dev server
 
-**Status: Phase 6 Complete** ✅
+**Status: Phase 6 In Progress** 🔄 (56%, open items above)
 
 ---
 
@@ -1438,23 +1445,22 @@ Validation is defined inline in route handlers for type safety.
 
 ### 7.6 Testing Distribution Keys
 
-- [ ] Unit tests for distribution key service (12 tests)
-  - [ ] Create, read, update, delete (4)
-  - [ ] Formula validation (4)
-  - [ ] Formula evaluation (2)
-  - [ ] Distribution calculation (2)
+- [x] Unit tests for distribution key service (12 tests) — `distribution-key-admin.pg.test.ts` (7),
+  `distribution-key.pg.test.ts` (3), formula validation and evaluation in `formula.service.test.ts`
+  - [x] Create, read, update, delete (4)
+  - [x] Formula validation (4)
+  - [x] Formula evaluation (2)
+  - [x] Distribution calculation (2)
 
-- [ ] Unit tests for formula service (10 tests)
-  - [ ] Formula parsing (3)
-  - [ ] Variable substitution (2)
-  - [ ] Expression evaluation (3)
-  - [ ] Error handling (2)
+- [x] Unit tests for formula service (10 tests) — `formula.service.test.ts` (52)
+  - [x] Formula parsing (3)
+  - [x] Variable substitution (2)
+  - [x] Expression evaluation (3)
+  - [x] Error handling (2)
 
 - [ ] Integration tests for routes (10+ tests)
-  - [ ] Distribution key CRUD (8)
+  - [ ] Distribution key CRUD (8) — service tests on PostgreSQL and E2E exist, no route-level tests
   - [ ] Formula testing endpoint (2)
-
-  **Note:** Tests deferred to Phase 15 (Integration Testing) - backend requires PostgreSQL test database setup.
 
 ### 7.X Verification: Unit Tests & E2E Tests
 
@@ -1464,21 +1470,21 @@ Validation is defined inline in route handlers for type safety.
   - [x] Formula evaluation
   - [x] Distribution calculations
 
-- [ ] Unit Tests (deferred to Phase 15)
-  - [ ] Test formula validation and parsing
-  - [ ] Test variable substitution
-  - [ ] Target >80% code coverage
-  - [ ] All tests pass: `npm run test`
+- [x] Unit Tests (deferred to Phase 15)
+  - [x] Test formula validation and parsing — `formula.service.test.ts` (52)
+  - [x] Test variable substitution
+  - [ ] Target >80% code coverage — not checked
+  - [x] All tests pass: `npm run test`
 
-- [ ] Integration Tests (deferred to Phase 15)
-  - [ ] Test CRUD operations
-  - [ ] Test formula evaluation
-  - [ ] All tests pass: `npm run test`
+- [x] Integration Tests (deferred to Phase 15)
+  - [x] Test CRUD operations — `distribution-key-admin.pg.test.ts`, E2E `distribution-keys.feature`
+  - [x] Test formula evaluation — `distribution-key.pg.test.ts`, E2E "Formel mit Beispielwohnungen testen"
+  - [x] All tests pass: `npm run test`
 
 - [x] Lint check passes (0 errors, warnings in test files only)
 - [x] All 156 tests pass: `npm run test`
 
-**Status: Phase 7 Complete** ✅
+**Status: Phase 7 In Progress** 🔄 (94%, open items above)
 
 ---
 
@@ -1674,12 +1680,14 @@ Validation is defined inline in route handlers for type safety.
 
 ### 8.10 Testing Statements & Prorating
 
-- [ ] Unit tests for prorating service (20 tests)
-- [ ] Unit tests for calculation service (16 tests)
-- [ ] Unit tests for statement service (10 tests)
-- [ ] Integration tests for statement generation (20+ tests)
-
-  **Note:** Tests deferred to Phase 15 (Integration Testing) - backend requires PostgreSQL test database setup.
+- [x] Unit tests for prorating service (20 tests) — `prorating.service.test.ts` (61)
+- [ ] Unit tests for calculation service (16 tests) — so far 7: `advance-payments.test.ts` (5),
+  `management-fee.test.ts` (2)
+- [x] Unit tests for statement service (10 tests) — `statement.service.test.ts` (18)
+- [x] Integration tests for statement generation (20+ tests)
+  **Note (Session 4 cleanup):** `statement.routes.pg.test.ts` (4), `heating-distribution.pg.test.ts` (4),
+  `management-fee.pg.test.ts` (2), `reminders.pg.test.ts` (9), `prorating.service.integration.test.ts` (13),
+  plus the E2E features `statement-generate` and `statement-detail`
 
 ### 8.X Verification
 
@@ -1690,13 +1698,13 @@ Validation is defined inline in route handlers for type safety.
   - [x] Prorating calculations
   - [x] Statement calculation engine
 
-- [ ] Unit Tests (deferred to Phase 15)
-- [ ] Integration Tests (deferred to Phase 15)
+- [x] Unit Tests (deferred to Phase 15) — prorating, statement and formula services; calculation service still open
+- [x] Integration Tests (deferred to Phase 15) — see the integration tests item above
 
 - [x] Lint check passes (0 errors, warnings in test files only)
 - [x] All 156 tests pass: `npm run test`
 
-**Status: Phase 8 Complete** ✅
+**Status: Phase 8 In Progress** 🔄 (94%, open items above)
 
 ---
 
@@ -1782,12 +1790,8 @@ Validation is defined inline in route handlers for type safety.
 
 ### 9.5 Async PDF Generation
 
-- [ ] Create background job for PDF generation
-  - [ ] Generate PDFs asynchronously
-  - [ ] Don't block statement creation
-  - [ ] Queue system for multiple PDFs
-  - [ ] Job status tracking
-  **Note:** Deferred - current sync implementation is sufficient for MVP scale (<50 apartments).
+- [x] ~~Create background job for PDF generation~~ **Dropped:** PDFs are generated synchronously on request;
+  sufficient for the MVP scale (<50 apartments)
 
 ### 9.6 Testing PDF & QR
 
@@ -1824,14 +1828,14 @@ Validation is defined inline in route handlers for type safety.
   - [ ] Target >80% code coverage
   - [ ] All tests pass: `npm run test`
 
-- [ ] Integration Tests for PDF Routes
-  - [ ] Test PDF generation endpoint
-  - [ ] Test PDF retrieval and storage
-  - [ ] All tests pass: `npm run test`
+- [x] Integration Tests for PDF Routes
+  - [x] Test PDF generation endpoint — `statement.routes.pg.test.ts`
+  - [x] Test PDF retrieval and storage — `statement.routes.pg.test.ts`, E2E downloads check the `%PDF` header
+  - [x] All tests pass: `npm run test`
 
-- [ ] E2E Tests for PDF Workflow
-  - [ ] Test generating and downloading PDFs
-  - [ ] All tests pass: `npm run test:e2e`
+- [x] E2E Tests for PDF Workflow
+  - [x] Test generating and downloading PDFs — `statement-detail.feature`, `statements.feature` (Session 4)
+  - [x] All tests pass: `npm run test:e2e`
 
 - [ ] Manual Testing
   - [ ] Run all tests: `npm run test`
@@ -1839,7 +1843,7 @@ Validation is defined inline in route handlers for type safety.
   - [ ] Verify QR codes scan correctly
   **Note:** Tests deferred to Phase 15. Code implementation verified with TypeScript compilation and lint.
 
-**Status: Phase 9 Complete** ✅
+**Status: Phase 9 In Progress** 🔄 (57%, open items above)
 **Completed:** January 27, 2026
 **Dependencies Added:** pdfkit, qrcode, @types/pdfkit, @types/qrcode
 
@@ -2173,7 +2177,7 @@ Validation is defined inline in route handlers for type safety.
   - [ ] Test UI/UX in browser
   - [ ] Test responsive design
 
-**Status: Phase 10 Complete** ✅
+**Status: Phase 10 In Progress** 🔄 (98%, open items above)
 
 ---
 
@@ -2264,31 +2268,31 @@ Validation is defined inline in route handlers for type safety.
 
 ### 11.5 Testing Invoice Pages
 
-- [ ] Unit tests for invoice API calls (6 tests)
-  - [ ] Invoice list fetch (1)
-  - [ ] Invoice create (1)
-  - [ ] Invoice update (1)
-  - [ ] Invoice delete (1)
-  - [ ] Category list fetch (1)
-  - [ ] Category create (1)
+- [x] Unit tests for invoice API calls (6 tests)
+  - [x] Invoice list fetch (1) — `src/__tests__/invoices.test.ts`
+  - [x] Invoice create (1) — `invoices.test.ts`
+  - [x] Invoice update (1) — `invoices.test.ts`
+  - [x] Invoice delete (1) — `tests/unit/api.test.ts`, `tests/unit/api-proxy.test.ts` (204 No Content)
+  - [x] Category list fetch (1) — `src/__tests__/categories.test.ts`
+  - [x] Category create (1) — `categories.test.ts`
 
 - [ ] E2E tests for invoice flows (8+ tests)
-  - [ ] Create invoice with LLM categorization (1)
-  - [ ] Override category (1)
-  - [ ] Edit invoice (1)
-  - [ ] Delete invoice (1)
-  - [ ] Create custom category (1)
-  - [ ] Filter invoices (1)
-  - [ ] View invoice details (1)
-  - [ ] Re-categorize invoice (1)
+  - [ ] Create invoice with LLM categorization (1) — needs a running Ollama; not part of the E2E environment
+  - [x] Override category (1) — `invoice-edit.feature` "Rechnung einer nicht umlagefähigen Kategorie zuordnen"
+  - [x] Edit invoice (1) — `invoice-edit.feature`
+  - [x] Delete invoice (1) — `invoice-detail.feature`
+  - [x] Create custom category (1) — `categories.feature`
+  - [x] Filter invoices (1) — `invoices.feature`
+  - [x] View invoice details (1) — `invoice-detail.feature`
+  - [ ] Re-categorize invoice (1) — needs a running Ollama
 
 ### 11.X Verification: Unit Tests & E2E Tests
 
 - [ ] Component Tests for Invoice Pages
-  - [ ] Test form validation
-  - [ ] Test API integration
-  - [ ] Target >75% code coverage
-  - [ ] All tests pass: `npm run test`
+  - [x] Test form validation — `src/__tests__/invoices.test.ts`
+  - [x] Test API integration — `invoices.test.ts`, `tests/unit/invoice-mapping.test.ts`
+  - [ ] Target >75% code coverage — not measurable: no coverage provider for Vitest installed
+  - [x] All tests pass: `npm run test`
 
 - [ ] E2E Tests for Invoice Workflows (open: KI categorization display, sorting)
   - [x] Test create, read, update, delete workflows
@@ -2308,7 +2312,7 @@ Validation is defined inline in route handlers for type safety.
   - [ ] Run all tests: `npm run test`
   - [ ] Test in browser with dev server
 
-**Status: Phase 11 Complete** ✅
+**Status: Phase 11 In Progress** 🔄 (71%, open items above)
 
 ---
 
@@ -2429,7 +2433,7 @@ Validation is defined inline in route handlers for type safety.
 - [ ] Component Tests for Config Pages
   - [x] Test form validation
   - [x] Test formula editor
-  - [ ] Target >75% code coverage — not measured
+  - [ ] Target >75% code coverage — not measurable: no coverage provider for Vitest installed
   - [x] All tests pass: `npm run test`
 
 - [x] E2E Tests for Configuration Workflows
@@ -2442,7 +2446,7 @@ Validation is defined inline in route handlers for type safety.
   - [ ] Run all tests: `npm run test`
   - [ ] Test in browser
 
-**Status: Phase 12 Complete** ✅
+**Status: Phase 12 In Progress** 🔄 (80%, open items above)
 
 ---
 
@@ -2458,11 +2462,8 @@ Validation is defined inline in route handlers for type safety.
   - [x] Progress indicator showing current step
   **Note:** Implemented with 4-step wizard including period selection with heating profile, building selection with apartment counts, preview with cost breakdown table, and generation progress bar. Files: `src/routes/statements/generate/+page.svelte` (~450 lines), `src/routes/statements/generate/+page.server.ts` (~100 lines).
 
-- [ ] Create `src/lib/components/StatementWizard.svelte`
-  - [ ] Step component wrapper
-  - [ ] Navigation (Previous, Next, Generate)
-  - [ ] Form validation at each step
-  **Note:** Wizard functionality integrated directly into generate page - separate component not needed.
+- [x] ~~Create `src/lib/components/StatementWizard.svelte`~~ **Dropped:** the wizard lives in
+  `src/routes/statements/generate/` (`WizardStep`, `WizardNavigation`, `WizardProgress`, one component per step)
 
 ### 13.2 Statement List Page
 
@@ -2536,47 +2537,47 @@ Validation is defined inline in route handlers for type safety.
 
 ### 13.8 Testing Statement Pages
 
-- [ ] Unit tests for statement API calls (6 tests)
-  - [ ] Statement list fetch (1)
-  - [ ] Statement create (1)
-  - [ ] Statement fetch detail (1)
-  - [ ] Statement update (1)
-  - [ ] Statement delete (1)
-  - [ ] PDF download (1)
+- [x] Unit tests for statement API calls (6 tests)
+  - [x] Statement list fetch (1) — `statement-mapping.test.ts`, `statement-status.test.ts`
+  - [x] Statement create (1) — `statement-generation.test.ts`
+  - [x] Statement fetch detail (1) — `statement-mapping.test.ts`
+  - [x] Statement update (1) — `statement-edit-actions.test.ts`
+  - [x] Statement delete (1) — `statement-actions.test.ts`
+  - [x] PDF download (1) — `statement-endpoints.test.ts`
 
-- [ ] E2E tests for statement flows (12+ tests)
-  - [ ] Generate statements wizard flow (1)
-  - [ ] View statement details (1)
-  - [ ] Download PDF (1)
-  - [ ] Mark as paid (1)
-  - [ ] Send reminder (1)
-  - [ ] Edit statement (1)
-  - [ ] Delete statement (1)
-  - [ ] Filter statements (1)
-  - [ ] Bulk mark as paid (1)
-  - [ ] Statement with multi-contract apartment (1)
-  - [ ] Statement with mid-year move (1)
-  - [ ] Statement with vacancy (1)
+- [x] E2E tests for statement flows (12+ tests)
+  - [x] Generate statements wizard flow (1) — `statement-generate.feature`
+  - [x] View statement details (1) — `statement-detail.feature`
+  - [x] Download PDF (1) — `statement-detail.feature`, `statements.feature`
+  - [x] Mark as paid (1)
+  - [x] Send reminder (1) — `statement-reminder.feature`
+  - [x] Edit statement (1) — `statement-edit.feature`
+  - [x] Delete statement (1)
+  - [x] Filter statements (1) — `statements.feature`
+  - [x] ~~Bulk mark as paid (1)~~ **Dropped:** the statement list has no bulk actions
+  - [x] Statement with multi-contract apartment (1)
+  - [x] Statement with mid-year move (1)
+  - [x] Statement with vacancy (1) — the last three in "Heizkosten bei Mieterwechsel mit Leerstand"
 
 ### 13.X Verification: Unit Tests & E2E Tests
 
 - [ ] Component Tests for Statement Pages
-  - [ ] Test PDF download
-  - [ ] Test statement creation
-  - [ ] Target >75% code coverage
-  - [ ] All tests pass: `npm run test`
+  - [x] Test PDF download — `statement-endpoints.test.ts`
+  - [x] Test statement creation — `statement-generation.test.ts`, `generation-step.test.ts`
+  - [ ] Target >75% code coverage — not measurable: no coverage provider for Vitest installed
+  - [x] All tests pass: `npm run test`
 
-- [ ] E2E Tests for Statement Workflows
-  - [ ] Test complete statement workflow
-  - [ ] Test payment marking
-  - [ ] Test PDF generation and download
-  - [ ] All tests pass: `npm run test:e2e`
+- [x] E2E Tests for Statement Workflows
+  - [x] Test complete statement workflow — `statement-generate.feature`, `statement-detail.feature`
+  - [x] Test payment marking — "Zahlungseingang festhalten"
+  - [x] Test PDF generation and download — "PDF erstellen und herunterladen" (Session 4)
+  - [x] All tests pass: `npm run test:e2e`
 
 - [ ] Manual Testing
   - [ ] Run all tests: `npm run test`
   - [ ] Test full workflow in browser
 
-**Status: Phase 13 Complete** ✅
+**Status: Phase 13 In Progress** 🔄 (88%, open items above)
 
 ---
 
@@ -2635,25 +2636,27 @@ Validation is defined inline in route handlers for type safety.
   - [x] Statistics calculation (1) — `dashboard.pg.test.ts` (before/after against the real database)
   - [x] Recent activity fetch (1) — `dashboard-activity.test.ts`, `dashboard.pg.test.ts`
 
-- [ ] E2E tests for dashboard (5+ tests)
+- [x] E2E tests for dashboard (5+ tests)
   - [x] Dashboard loads with data (1)
-  - [ ] Statistics display correctly (1) — global counts change with parallel scenarios; covered by `dashboard.pg.test.ts`
-  - [ ] Activity feed shows recent items (1) — same reason; covered by the pg test
+  - [x] Statistics display correctly (1) — `dashboard.pg.test.ts` (global counts change with parallel scenarios)
+  - [x] Activity feed shows recent items (1) — `dashboard.pg.test.ts`, `dashboard-activity.test.ts`
   - [x] Occupancy chart displays (1)
   - [x] Quick action buttons work (1)
-  **Note (Session 3):** German feature `dashboard.feature` (5 scenarios, incl. navigation to filtered lists).
+  **Note (Session 4):** `dashboard.feature` has 19 scenarios: every figure tile, statement status tile, quick action
+  and header action.
 
 ### 14.X Verification: Unit Tests & E2E Tests
 
 - [ ] Component Tests for Dashboard
-  - [ ] Test charts render
-  - [ ] Test statistics calculate correctly
-  - [ ] Target >75% code coverage
-  - [ ] All tests pass: `npm run test`
+  - [x] Test charts render — `src/__tests__/dashboard.test.ts`
+  - [x] Test statistics calculate correctly — `dashboard.pg.test.ts`, `dashboard-activity.test.ts`
+  - [ ] Target >75% code coverage — not measurable: no coverage provider for Vitest installed
+  - [x] All tests pass: `npm run test`
 
-- [ ] E2E Tests for Dashboard
+- [x] E2E Tests for Dashboard
   - [x] Test dashboard loads
-  - [ ] Test all widgets display — see 14.5
+  - [x] Test all widgets display — figures and activity in `dashboard.pg.test.ts` (global counts change with
+    parallel E2E scenarios); every tile and action is a navigation scenario in `dashboard.feature`
   - [x] Test navigation from dashboard
   - [x] All tests pass: `npm run test:e2e`
 
@@ -2661,7 +2664,7 @@ Validation is defined inline in route handlers for type safety.
   - [ ] Run all tests: `npm run test`
   - [ ] Test in browser
 
-**Status: Phase 14 Complete** ✅
+**Status: Phase 14 In Progress** 🔄 (82%, open items above)
 
 ---
 
@@ -2684,22 +2687,22 @@ Validation is defined inline in route handlers for type safety.
   - [ ] Verify statement calculations (1 test)
   - [ ] Download PDF (1 test)
 
-- [ ] Test complex prorating scenarios (6+ tests)
-  - [ ] Multiple contracts in one period (1 test)
-  - [ ] Mid-year move with heating proration (1 test)
-  - [ ] Vacancy periods (1 test)
-  - [ ] All three combined (1 test)
-  - [ ] Management fee calculation (1 test)
-  - [ ] Swiss law compliance (1 test)
+- [x] Test complex prorating scenarios (6+ tests)
+  - [x] Multiple contracts in one period (1 test) — `statement-detail.feature` "Heizkosten bei Mieterwechsel mit Leerstand"
+  - [x] Mid-year move with heating proration (1 test) — same outline, `heating-distribution.pg.test.ts`
+  - [x] Vacancy periods (1 test) — same outline (April vacant, the landlord pays)
+  - [x] All three combined (1 test) — same outline, `statement-generate.feature`
+  - [x] Management fee calculation (1 test) — `management-fee*.test.ts`, "Erhöhte Verwaltungspauschale"
+  - [x] Swiss law compliance (1 test) — `utility-validation.service*.test.ts` (76 tests)
 
 ### 15.2 Cross-Component Integration
 
-- [ ] Test authentication throughout app (5+ tests)
-  - [ ] Login → Access protected routes (1 test)
-  - [ ] Token refresh (1 test)
-  - [ ] Logout → Access denied (1 test)
-  - [ ] Invalid token → Redirect to login (1 test)
-  - [ ] XSRF protection on all mutations (1 test)
+- [x] Test authentication throughout app (5+ tests)
+  - [x] Login → Access protected routes (1 test) — every E2E scenario runs with a real session cookie
+  - [x] Token refresh (1 test) — `tests/unit/auth-routes.test.ts`
+  - [x] Logout → Access denied (1 test) — `authentication.feature` "Abmelden"
+  - [x] Invalid token → Redirect to login (1 test) — "Abgelaufene Sitzung", `hooks.server.test.ts`
+  - [x] XSRF protection on all mutations (1 test) — `tests/unit/api-proxy.test.ts`, `tests/unit/api.test.ts`
 
 - [ ] Test data consistency across flows (6+ tests)
   - [ ] Update building → Reflected in statements (1 test)
@@ -2712,11 +2715,11 @@ Validation is defined inline in route handlers for type safety.
 ### 15.3 Error Handling & Edge Cases
 
 - [ ] Test error scenarios (10+ tests)
-  - [ ] Offline backend → User-friendly error (1 test)
+  - [x] Offline backend → User-friendly error (1 test) — `dashboard.test.ts` (error instead of zeros)
   - [ ] Database connection error → Graceful fallback (1 test)
-  - [ ] Invalid input → Validation errors (1 test)
-  - [ ] Duplicate contract → Prevented (1 test)
-  - [ ] Missing required fields → Error display (1 test)
+  - [x] Invalid input → Validation errors (1 test) — e.g. "Ungültige PLZ", "Ungültige IBAN" scenarios
+  - [x] Duplicate contract → Prevented (1 test) — `contract-new.feature` "Vermietete Wohnung ist nicht verfügbar"
+  - [x] Missing required fields → Error display (1 test) — "Pflichtangaben fehlen" scenarios
   - [ ] Concurrent updates → Last write wins (1 test)
   - [ ] PDF generation failure → Error handling (1 test)
   - [ ] LLM timeout → Fallback to manual (1 test)
@@ -2757,9 +2760,9 @@ Validation is defined inline in route handlers for type safety.
 ### 15.7 Browser Compatibility
 
 - [ ] Test on multiple browsers (5+ tests)
-  - [ ] Chrome latest - all features (1 test)
-  - [ ] Firefox latest - all features (1 test)
-  - [ ] Safari latest - all features (1 test)
+  - [x] Chrome latest - all features (1 test) — CI runs every E2E scenario on Chromium
+  - [x] Firefox latest - all features (1 test) — CI, Firefox project
+  - [x] Safari latest - all features (1 test) — CI, WebKit project
   - [ ] Edge latest - all features (1 test)
   - [ ] Mobile Safari - responsive (1 test)
 
@@ -2779,7 +2782,7 @@ Validation is defined inline in route handlers for type safety.
   - [ ] Test on real devices
   - [ ] Test all major workflows end-to-end
 
-**Status: Phase 15 Complete** ✅
+**Status: Phase 15 In Progress** 🔄 (14%, open items above)
 
 ---
 
@@ -2804,42 +2807,43 @@ Validation is defined inline in route handlers for type safety.
 ### 16.2 Build Configuration
 
 - [ ] Setup frontend build
-  - [ ] `npm run build` in root
-  - [ ] Output: SvelteKit build
-  - [ ] Verify bundle size <150KB
+  - [x] `npm run build` in root (CI job "Build")
+  - [x] Output: SvelteKit build
+  - [ ] Verify bundle size <150KB — not measured per page; all client JS of all pages together is ~200 KB gzipped
 
-- [ ] Setup backend build
-  - [ ] `npm run build` in backend/
-  - [ ] Output: compiled JavaScript
+- [x] Setup backend build
+  - [x] `bun run build` in backend/ (CI job "Build")
+  - [x] Output: compiled JavaScript (`backend/dist`)
 
 ### 16.3 Node & Runtime Configuration
 
-- [ ] Update `package.json` scripts
-  - [ ] `npm run dev` - Start dev server
-  - [ ] `npm run dev:api` - Start API dev server
-  - [ ] `npm run build` - Build frontend
-  - [ ] `npm run preview` - Preview build
-  - [ ] `npm run test` - Run tests
-  - [ ] `npm run test:e2e` - Run E2E tests
-  - [ ] `npm run lint` - Run linter
-  - [ ] `npm run format` - Format code
-  - [ ] `npm run type-check` - TypeScript check
-  - [ ] `npm run db:migrate` - Run migrations
+- [x] Update `package.json` scripts
+  - [x] `npm run dev` - Start dev server
+  - [x] ~~`npm run dev:api`~~ backend runs with `bun run dev` in `backend/`
+  - [x] `npm run build` - Build frontend
+  - [x] `npm run preview` - Preview build
+  - [x] `npm run test` - Run tests
+  - [x] `npm run test:e2e` - Run E2E tests
+  - [x] `npm run lint` - Run linter
+  - [x] `npm run format` - Format code
+  - [x] `npm run type-check` - TypeScript check
+  - [x] ~~`npm run db:migrate`~~ in `backend/`: `bun run db:migrate`
 
-- [ ] Update `backend/package.json` scripts
-  - [ ] Similar scripts for backend
+- [x] Update `backend/package.json` scripts
+  - [x] Similar scripts for backend (`dev`, `build`, `test`, `test:pg`, `type-check`, `lint`, `db:migrate`, `e2e-db`)
 
 ### 16.4 Database Configuration
 
-- [ ] Setup local PostgreSQL
-  - [ ] Create database `dwello`
-  - [ ] Create user `dwello` with password
-  - [ ] Grant all privileges
-  - [ ] Test connection
+- [x] Setup local PostgreSQL
+  - [x] Create database `dwello` (`docker-compose.dev.yml`, service `postgres`)
+  - [x] Create user `dwello` with password
+  - [x] Grant all privileges
+  - [x] Test connection (CI service container, `bun run db:migrate`)
 
-- [ ] Setup test database
-  - [ ] Create database `dwello_test`
-  - [ ] Used for integration tests
+- [x] Setup test database
+  - [x] ~~Create database `dwello_test`~~ replaced: `*.pg.test.ts` run against the development database with
+    UUID-namespaced data; E2E recreates `dwello_e2e` from the migrations before every run
+  - [x] Used for integration tests
 
 ### 16.5 LLM Configuration
 
@@ -2852,9 +2856,9 @@ Validation is defined inline in route handlers for type safety.
 ### 16.6 Testing Configuration
 
 - [ ] Verify test database setup
-  - [ ] Run `npm run test`
-  - [ ] All tests pass with test database
-  - [ ] Coverage reports generated
+  - [x] Run `npm run test`
+  - [x] All tests pass with test database (CI: unit tests on PostgreSQL, E2E on `dwello_e2e`)
+  - [ ] Coverage reports generated — backend only (`bun test --coverage`); no coverage provider for Vitest
 
 ### 16.X Verification: Unit Tests & E2E Tests
 
@@ -2868,7 +2872,7 @@ Validation is defined inline in route handlers for type safety.
   - [ ] Run all tests: `npm run test`
   - [ ] Verify environment files work correctly
 
-**Status: Phase 16 Complete** ✅
+**Status: Phase 16 In Progress** 🔄 (58%, open items above)
 
 ---
 
@@ -2949,6 +2953,7 @@ Validation is defined inline in route handlers for type safety.
   - [ ] Database initialization
   - [ ] Health checks
   - [ ] Backup strategy
+  **Note (Session 4 cleanup):** README "Deployment" only lists the two compose commands and points to `.env.example`
 
 - [x] Create `.dockerignore` (frontend)
   - [x] Exclude: node_modules, .git, .svelte-kit, dist, tests, docs
@@ -2964,11 +2969,8 @@ Validation is defined inline in route handlers for type safety.
 
 ### 17.6 Database Initialization
 
-- [ ] Create `init-db.sh` script
-  - [ ] Create database
-  - [ ] Run migrations
-  - [ ] Populate initial data
-  - [ ] Set permissions
+- [x] ~~Create `init-db.sh` script~~ **Dropped:** the backend container applies the migrations on start
+  (`backend/Dockerfile`: `bun scripts/migrate.ts && bun run src/index.ts`); `schema_migrations` tracks them
 
 - [ ] Document database setup
   - [ ] Connection strings
@@ -2993,7 +2995,7 @@ Validation is defined inline in route handlers for type safety.
   - [ ] Build and run locally
   - [ ] Test complete system end-to-end
 
-**Status: Phase 17 Complete** ✅
+**Status: Phase 17 In Progress** 🔄 (47%, open items above)
 
 ---
 
@@ -3108,7 +3110,7 @@ Validation is defined inline in route handlers for type safety.
   - [ ] Run project from scratch
   - [ ] Verify all docs are accurate
 
-**Status: Phase 18 Complete** ✅
+**Status: Phase 18 Pending** ⏳
 
 ---
 
@@ -3269,7 +3271,7 @@ Validation is defined inline in route handlers for type safety.
   - [ ] Complete full manual testing checklist
   - [ ] Get stakeholder sign-off
 
-**Status: Phase 19 Complete** ✅
+**Status: Phase 19 Pending** ⏳
 
 ---
 
@@ -3389,7 +3391,7 @@ Validation is defined inline in route handlers for type safety.
   - [ ] Performance validation
   - [ ] Data integrity checks
 
-**Status: Phase 20 Complete** ✅
+**Status: Phase 20 In Progress** 🔄 (10%, open items above)
 
 ---
 
@@ -3501,7 +3503,7 @@ Validation is defined inline in route handlers for type safety.
   - [ ] User feedback collection
   - [ ] Issue response protocol active
 
-**Status: Phase 21 Complete - System Launched! 🚀**
+**Status: Phase 21 Pending** ⏳
 
 ---
 
@@ -3570,38 +3572,39 @@ Behavior-preserving restructuring of the backend into three modules (`rental`, `
 
 ## Overall Completion
 
-**Current Status:** ~11% (Phase 10 Complete - Frontend Core Pages, Shared Components, OpenPLZ & Tests Done)
+**Current Status:** ~62% of the top-level checklist items. Features (phases 0–14) are built and
+covered by unit, PostgreSQL and E2E tests; deployment, documentation, QA and go-live (phases 15–22) are mostly open.
 
-> **Note (Session 3):** The phase status is kept current in the "Implementation Phases" table at the top. The task
-> counts below were not recounted and are outdated (e.g. phases 1–7 are complete, not 0%).
+> **Note (Session 4):** Recounted from the checklists below after verifying every open item of phases 0–17
+> against the code and tests. Items replaced by a different solution are struck through and marked **Dropped**.
 
 | Phase | Status | Completion | Tasks | Done |
 |-------|--------|-----------|-------|------|
-| Phase 0 | ✅ Complete | 100% | 42 | 42 |
-| Phase 1 | ⏳ Pending | 0% | 37 | 0 |
-| Phase 2 | ⏳ Pending | 0% | 60 | 0 |
-| Phase 3 | ⏳ Pending | 0% | 38 | 0 |
-| Phase 4 | ⏳ Pending | 0% | 31 | 0 |
-| Phase 5 | ⏳ Pending | 0% | 44 | 0 |
-| Phase 6 | ⏳ Pending | 0% | 48 | 0 |
-| Phase 7 | ⏳ Pending | 0% | 32 | 0 |
-| Phase 8 | ⏳ Pending | 0% | 61 | 0 |
-| Phase 9 | ✅ Complete | 85% | 34 | 29 |
-| Phase 10 | ✅ Complete | 100% | 43 | 43 |
-| Phase 11 | ✅ Complete | 100% | 28 | 28 |
-| Phase 12 | ✅ Complete | 100% | 30 | 30 |
-| Phase 13 | ✅ Complete | 100% | 40 | 40 |
-| Phase 14 | ✅ Complete | 100% | 23 | 23 |
-| Phase 15 | ⏳ Pending | 0% | 48 | 0 |
-| Phase 16 | ✅ Complete | 100% | 26 | 26 |
-| Phase 17 | ✅ Complete | 100% | 28 | 28 |
-| Phase 18 | ⏳ Pending | 0% | 36 | 0 |
-| Phase 19 | ⏳ Pending | 0% | 57 | 0 |
-| Phase 20 | ⏳ Pending | 0% | 24 | 0 |
-| Phase 21 | ⏳ Pending | 0% | 28 | 0 |
-| Phase 22 | 🔄 In Progress | 3% | 33 | 1 |
+| Phase 0 | ✅ Complete | 100% | 23 | 23 |
+| Phase 1 | 🔄 In Progress | 95% | 19 | 18 |
+| Phase 2 | 🔄 In Progress | 92% | 25 | 23 |
+| Phase 3 | ✅ Complete | 100% | 15 | 15 |
+| Phase 4 | ✅ Complete | 100% | 10 | 10 |
+| Phase 5 | ✅ Complete | 100% | 17 | 17 |
+| Phase 6 | 🔄 In Progress | 56% | 18 | 10 |
+| Phase 7 | 🔄 In Progress | 94% | 16 | 15 |
+| Phase 8 | 🔄 In Progress | 94% | 18 | 17 |
+| Phase 9 | 🔄 In Progress | 57% | 14 | 8 |
+| Phase 10 | 🔄 In Progress | 98% | 41 | 40 |
+| Phase 11 | 🔄 In Progress | 71% | 14 | 10 |
+| Phase 12 | 🔄 In Progress | 80% | 15 | 12 |
+| Phase 13 | 🔄 In Progress | 88% | 16 | 14 |
+| Phase 14 | 🔄 In Progress | 82% | 11 | 9 |
+| Phase 15 | 🔄 In Progress | 14% | 14 | 2 |
+| Phase 16 | 🔄 In Progress | 58% | 12 | 7 |
+| Phase 17 | 🔄 In Progress | 47% | 17 | 8 |
+| Phase 18 | ⏳ Pending | 0% | 14 | 0 |
+| Phase 19 | ⏳ Pending | 0% | 25 | 0 |
+| Phase 20 | 🔄 In Progress | 10% | 21 | 2 |
+| Phase 21 | ⏳ Pending | 0% | 22 | 0 |
+| Phase 22 | 🔄 In Progress | 4% | 24 | 1 |
 
-**Total Tasks: ~850** | **Completed: 114** | **Overall: ~13%**
+**Total Tasks: 421** | **Completed: 261** | **Overall: ~62%**
 
 ---
 
@@ -3868,7 +3871,8 @@ Every bug fix has a unit or database test.
 - [ ] The reason for overriding the KI category is required in the edit form but not stored (no column; `manualOverrideReason` is dropped)
 - [ ] Login page and header follow the browser language (English browsers see them in English, the rest is German)
 - [ ] Majors without security reason: SvelteKit 3/Vite 8, Tailwind 4, Zod 4, TypeScript 7, ESLint 10, jose 6
-- [ ] Phase 8 status in the table above was not re-evaluated; the progress task counts are outdated
+- [x] Phase 8 status in the table above was not re-evaluated; the progress task counts are outdated
+  **Note:** Recounted in Session 4 (plan cleanup)
 - [x] MVA migration plan documented in `docs/migration-mva.md` (modular monolith with three modules, boundary rule, five steps; tracked as Phase 22)
 
 ## Session 4 - October 2026: BDD Coverage Audit
@@ -3903,6 +3907,13 @@ unit or database tests.
 - E2E: 251 scenarios pass on Chromium, 38 German features (Firefox and WebKit not run in this environment; CI runs them)
 - Frontend unit tests: 376 pass; svelte-check: 5 errors, tsc 3 errors (pre-existing, none in changed files)
 - Backend: 354 tests + 108 PostgreSQL tests pass; tsc 48 errors (unchanged from main)
+
+### Plan cleanup ✅
+- [x] Every open item of phases 0–17 checked against code and tests: 47 checklist blocks updated with the test
+  or feature that covers them, or with what is still missing; four tasks replaced by another solution marked
+  **Dropped** (`init-db.sh`, PDF background job, `StatementWizard.svelte`, bulk mark as paid)
+- [x] Both progress tables and the per-phase status lines recounted from the top-level checklist items
+  (261 of 421 done, ~62%); before, they contradicted each other (e.g. Phase 8 "0%", Phase 15 "Complete")
 
 ### Open
 - [ ] The statement list returns the whole base64 PDF of every row (`statement: utilityStatements` in the list select)
