@@ -3925,7 +3925,9 @@ unit or database tests.
   unit-tested yet (covered by E2E)
 
 ### Open
-- [ ] The statement list returns the whole base64 PDF of every row (`statement: utilityStatements` in the list select)
+- [x] The statement list returns the whole base64 PDF of every row (`statement: utilityStatements` in the list select)
+  - List and detail select every column but `pdfBlob` (`statementColumns` in `backend/src/services/statement.service.ts`);
+    the PDF is only served by `/:id/pdf` and `/:id/pdf/base64`; pg test in `backend/src/__tests__/statement.routes.pg.test.ts`
 - [ ] "Alle Aktivitäten anzeigen" links to `/activity`, which does not exist; unreachable today (backend returns at most 5)
 - [ ] Mobile navigation drawer has no scenarios (same targets as the sidebar)
 
