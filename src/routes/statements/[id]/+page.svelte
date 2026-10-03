@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { StatementDocument, StatementWithDetails, StatementStatus } from '$lib/types';
+	import type { StatementDocument, StatementWithDetails } from '$lib/types';
 	import ReminderModal from './ReminderModal.svelte';
 	import ReminderHistory from './ReminderHistory.svelte';
 	import ReminderFeedback from './ReminderFeedback.svelte';
@@ -13,6 +13,7 @@
 	import { enhance } from '$app/forms';
 	import { untrack } from 'svelte';
 	import { formatCurrency, formatDate } from '$lib/utils/format';
+	import { balanceClass, statusLabels, statusVariants } from '$lib/statement';
 	import type { ActionData } from './$types';
 
 	interface PageData {
@@ -30,44 +31,6 @@
 
 	function formatDateTime(dateString: string): string {
 		return new Date(dateString).toLocaleString('de-CH');
-	}
-
-	function getStatusVariant(
-		status: StatementStatus
-	): 'default' | 'primary' | 'success' | 'warning' | 'danger' | 'info' {
-		switch (status) {
-			case 'draft':
-				return 'default';
-			case 'sent':
-				return 'info';
-			case 'paid':
-				return 'success';
-			case 'overdue':
-				return 'danger';
-			default:
-				return 'default';
-		}
-	}
-
-	function getStatusLabel(status: StatementStatus): string {
-		switch (status) {
-			case 'draft':
-				return 'Entwurf';
-			case 'sent':
-				return 'Versendet';
-			case 'paid':
-				return 'Bezahlt';
-			case 'overdue':
-				return 'Überfällig';
-			default:
-				return status;
-		}
-	}
-
-	function getBalanceClass(balance: number): string {
-		if (balance > 0) return 'text-red-600';
-		if (balance < 0) return 'text-green-600';
-		return 'text-gray-600';
 	}
 
 	function getBalanceLabel(balance: number): string {
@@ -125,8 +88,8 @@
 				<div class="flex items-center gap-3 mb-1">
 					<h1 class="text-2xl font-bold text-gray-900">{data.statement.statementNumber}</h1>
 					<span data-testid="statement-status">
-						<Badge variant={getStatusVariant(data.statement.status)}>
-							{getStatusLabel(data.statement.status)}
+						<Badge variant={statusVariants[data.statement.status]}>
+							{statusLabels[data.statement.status]}
 						</Badge>
 					</span>
 				</div>
@@ -235,10 +198,10 @@
 								</td>
 							</tr>
 							<tr class="font-bold text-lg">
-								<td colspan="4" class="pt-3 text-right {getBalanceClass(data.statement.balance)}">
+								<td colspan="4" class="pt-3 text-right {balanceClass(data.statement.balance)}">
 									{getBalanceLabel(data.statement.balance)}
 								</td>
-								<td class="pt-3 text-right {getBalanceClass(data.statement.balance)}">
+								<td class="pt-3 text-right {balanceClass(data.statement.balance)}">
 									{formatCurrency(Math.abs(data.statement.balance))}
 								</td>
 							</tr>
@@ -418,7 +381,7 @@
 	<div class="p-3 bg-gray-50 rounded-lg mb-4">
 		<p class="font-medium text-gray-900">{data.statement.statementNumber}</p>
 		<p class="text-sm text-gray-500">{data.statement.tenantName}</p>
-		<p class="text-lg font-bold {getBalanceClass(data.statement.balance)} mt-2">
+		<p class="text-lg font-bold {balanceClass(data.statement.balance)} mt-2">
 			{formatCurrency(Math.abs(data.statement.balance))}
 		</p>
 	</div>

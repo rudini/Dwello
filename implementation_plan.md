@@ -3839,6 +3839,13 @@ Every bug fix has a unit or database test.
   (`backend/src/__tests__/env-files.test.ts`)
 - Mail module with SMTP and Resend, mail catcher for E2E (36cb488)
 - Dependencies upgraded, vulnerabilities fixed (bb7721b)
+- GitHub Actions CI (`.github/workflows/ci.yml`): build, unit tests (frontend + backend on PostgreSQL), E2E (Playwright, all browsers), fallow audit; on pushes to main and pull requests
+- Duplicated code removed so `fallow audit` passes against main:
+  - List pages buildings/contracts/invoices/tenants use `SearchField`, `FilterSelect`, `FilterActions` and `ListPagination` (`src/lib/list-url.ts`)
+  - New and edit contract share `src/routes/contracts/ContractForm.svelte` (logic in `src/lib/contract-form.ts`)
+  - Statement status labels in `src/lib/statement.ts`; invoice row in `src/routes/invoices/InvoiceRow.svelte`
+  - Backend: shared selects in contract/invoice/tenant services, `and()` without empty-check, `updateHeatingProfile` simplified
+  - Tests: `list-url`, `statement-status`, `contract-form` (unit); E2E 173 scenarios pass on Chromium
 
 ### Security fixes ✅
 - Backend required no valid JWT on every API route (1d7ea32); BFF now forwards the session JWT (dcbb15a)
@@ -3853,7 +3860,8 @@ Every bug fix has a unit or database test.
 - fallow audit: pass (no introduced dead code, duplication or complexity)
 
 ### Open
-- [ ] 15 backend tests failing (heating profile service; was 21 before main isolated the test files)
+- [x] Backend tests failing since before Session 3 (heating profile service, formatting)
+  **Note:** `heating-profile.service.db.test.ts` expected the English error, the service returns the German one; `format.test.ts` expected a straight apostrophe, de-CH formats with ’.
 - [x] Predefined distribution keys "Per Person" and "By Consumption" removed on main (migration 0007)
 - [x] Invoices pages rebuilt with German E2E (Phase 11.X)
 - [ ] "Neu kategorisieren" without a running KI changes nothing and says nothing (backend answers success without category)

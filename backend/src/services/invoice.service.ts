@@ -123,15 +123,14 @@ export async function listInvoices(filters: InvoiceFilters = {}): Promise<{
 		conditions.push(eq(invoices.wasManuallyOverridden, wasManuallyOverridden));
 	}
 
+	const whereClause = and(...conditions);
+
 	// Build the query with joins
-	const query = selectWithDetails()
+	const results = await selectWithDetails()
+		.where(whereClause)
 		.orderBy(desc(invoices.invoiceDate), desc(invoices.createdAt))
 		.limit(limit)
 		.offset(offset);
-
-	// Apply conditions
-	const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
-	const results = whereClause ? await query.where(whereClause) : await query;
 
 	// Transform results
 	const invoiceList: InvoiceWithDetails[] = results.map((row) => ({
@@ -144,9 +143,7 @@ export async function listInvoices(filters: InvoiceFilters = {}): Promise<{
 
 	// Get total count
 	const countQuery = db.select({ count: sql<number>`count(*)` }).from(invoices);
-	const [{ count: total }] = whereClause
-		? await countQuery.where(whereClause)
-		: await countQuery;
+	const [{ count: total }] = await countQuery.where(whereClause);
 
 	return {
 		invoices: invoiceList,

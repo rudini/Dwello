@@ -16,6 +16,47 @@ import {
 } from '../db/schema';
 import { apartmentStatus } from './apartment.service';
 
+/** Contract with the names of its tenant, apartment and building; selected with those three tables joined */
+const contractFields = {
+	id: rentalContracts.id,
+	apartmentId: rentalContracts.apartmentId,
+	tenantId: rentalContracts.tenantId,
+	startDate: rentalContracts.startDate,
+	endDate: rentalContracts.endDate,
+	baseRent: rentalContracts.baseRent,
+	additionalRent: rentalContracts.additionalRent,
+	monthlyAdvancePayment: rentalContracts.monthlyAdvancePayment,
+	referenceIndex: rentalContracts.referenceIndex,
+	contractPdf: rentalContracts.contractPdf,
+	notes: rentalContracts.notes,
+	createdAt: rentalContracts.createdAt,
+	updatedAt: rentalContracts.updatedAt,
+	tenantName: sql<string>`${tenants.firstName} || ' ' || ${tenants.lastName}`,
+	tenantEmail: tenants.email,
+	apartmentNumber: apartments.number,
+	buildingName: buildings.name,
+	buildingAddress: buildings.address
+};
+
+/** Contracts with their tenant, apartment and building, as contractFields */
+function selectContracts() {
+	return db
+		.select(contractFields)
+		.from(rentalContracts)
+		.leftJoin(tenants, eq(rentalContracts.tenantId, tenants.id))
+		.leftJoin(apartments, eq(rentalContracts.apartmentId, apartments.id))
+		.leftJoin(buildings, eq(apartments.buildingId, buildings.id));
+}
+
+/** Contracts of an apartment running at some point between two dates (open-ended ones included) */
+function apartmentContractsBetween(apartmentId: string, from: string, to: string) {
+	return and(
+		eq(rentalContracts.apartmentId, apartmentId),
+		lte(rentalContracts.startDate, to),
+		or(isNull(rentalContracts.endDate), gte(rentalContracts.endDate, from))
+	);
+}
+
 export interface ContractFilters {
 	apartmentId?: string;
 	tenantId?: string;
@@ -85,38 +126,14 @@ export async function listContracts(filters: ContractFilters = {}): Promise<{
 		conditions.push(sql`${rentalContracts.startDate} > ${today}`);
 	}
 
+	const whereClause = and(...conditions);
+
 	// Query with tenant and apartment info
-	const query = db
-		.select({
-			id: rentalContracts.id,
-			apartmentId: rentalContracts.apartmentId,
-			tenantId: rentalContracts.tenantId,
-			startDate: rentalContracts.startDate,
-			endDate: rentalContracts.endDate,
-			baseRent: rentalContracts.baseRent,
-			additionalRent: rentalContracts.additionalRent,
-			monthlyAdvancePayment: rentalContracts.monthlyAdvancePayment,
-			referenceIndex: rentalContracts.referenceIndex,
-			contractPdf: rentalContracts.contractPdf,
-			notes: rentalContracts.notes,
-			createdAt: rentalContracts.createdAt,
-			updatedAt: rentalContracts.updatedAt,
-			tenantName: sql<string>`${tenants.firstName} || ' ' || ${tenants.lastName}`,
-			tenantEmail: tenants.email,
-			apartmentNumber: apartments.number,
-			buildingName: buildings.name,
-			buildingAddress: buildings.address
-		})
-		.from(rentalContracts)
-		.leftJoin(tenants, eq(rentalContracts.tenantId, tenants.id))
-		.leftJoin(apartments, eq(rentalContracts.apartmentId, apartments.id))
-		.leftJoin(buildings, eq(apartments.buildingId, buildings.id))
+	const results = await selectContracts()
+		.where(whereClause)
 		.orderBy(desc(rentalContracts.startDate))
 		.limit(limit)
 		.offset(offset);
-
-	const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
-	const results = whereClause ? await query.where(whereClause) : await query;
 
 	// Get total count
 	const countQuery = db
@@ -126,9 +143,7 @@ export async function listContracts(filters: ContractFilters = {}): Promise<{
 		.leftJoin(apartments, eq(rentalContracts.apartmentId, apartments.id))
 		.leftJoin(buildings, eq(apartments.buildingId, buildings.id));
 
-	const [{ count: total }] = whereClause
-		? await countQuery.where(whereClause)
-		: await countQuery;
+	const [{ count: total }] = await countQuery.where(whereClause);
 
 	return {
 		contracts: results as ContractWithDetails[],
@@ -142,24 +157,7 @@ export async function listContracts(filters: ContractFilters = {}): Promise<{
 export async function getContract(id: string): Promise<ContractWithDetails | null> {
 	const [contract] = await db
 		.select({
-			id: rentalContracts.id,
-			apartmentId: rentalContracts.apartmentId,
-			tenantId: rentalContracts.tenantId,
-			startDate: rentalContracts.startDate,
-			endDate: rentalContracts.endDate,
-			baseRent: rentalContracts.baseRent,
-			additionalRent: rentalContracts.additionalRent,
-			monthlyAdvancePayment: rentalContracts.monthlyAdvancePayment,
-			referenceIndex: rentalContracts.referenceIndex,
-			contractPdf: rentalContracts.contractPdf,
-			notes: rentalContracts.notes,
-			createdAt: rentalContracts.createdAt,
-			updatedAt: rentalContracts.updatedAt,
-			tenantName: sql<string>`${tenants.firstName} || ' ' || ${tenants.lastName}`,
-			tenantEmail: tenants.email,
-			apartmentNumber: apartments.number,
-			buildingName: buildings.name,
-			buildingAddress: buildings.address,
+			...contractFields,
 			tenant: {
 				id: tenants.id,
 				firstName: tenants.firstName,
@@ -242,38 +240,8 @@ export async function getActiveContract(
 	apartmentId: string,
 	date: string
 ): Promise<ContractWithDetails | null> {
-	const [contract] = await db
-		.select({
-			id: rentalContracts.id,
-			apartmentId: rentalContracts.apartmentId,
-			tenantId: rentalContracts.tenantId,
-			startDate: rentalContracts.startDate,
-			endDate: rentalContracts.endDate,
-			baseRent: rentalContracts.baseRent,
-			additionalRent: rentalContracts.additionalRent,
-			monthlyAdvancePayment: rentalContracts.monthlyAdvancePayment,
-			referenceIndex: rentalContracts.referenceIndex,
-			contractPdf: rentalContracts.contractPdf,
-			notes: rentalContracts.notes,
-			createdAt: rentalContracts.createdAt,
-			updatedAt: rentalContracts.updatedAt,
-			tenantName: sql<string>`${tenants.firstName} || ' ' || ${tenants.lastName}`,
-			tenantEmail: tenants.email,
-			apartmentNumber: apartments.number,
-			buildingName: buildings.name,
-			buildingAddress: buildings.address
-		})
-		.from(rentalContracts)
-		.leftJoin(tenants, eq(rentalContracts.tenantId, tenants.id))
-		.leftJoin(apartments, eq(rentalContracts.apartmentId, apartments.id))
-		.leftJoin(buildings, eq(apartments.buildingId, buildings.id))
-		.where(
-			and(
-				eq(rentalContracts.apartmentId, apartmentId),
-				lte(rentalContracts.startDate, date),
-				or(isNull(rentalContracts.endDate), gte(rentalContracts.endDate, date))
-			)
-		)
+	const [contract] = await selectContracts()
+		.where(apartmentContractsBetween(apartmentId, date, date))
 		.limit(1);
 
 	return (contract as ContractWithDetails) || null;
@@ -291,38 +259,8 @@ export async function getContractsByPeriod(
 	// A contract is in the period if:
 	// - It starts before or during the period AND
 	// - It ends during or after the period (or has no end date)
-	const contracts = await db
-		.select({
-			id: rentalContracts.id,
-			apartmentId: rentalContracts.apartmentId,
-			tenantId: rentalContracts.tenantId,
-			startDate: rentalContracts.startDate,
-			endDate: rentalContracts.endDate,
-			baseRent: rentalContracts.baseRent,
-			additionalRent: rentalContracts.additionalRent,
-			monthlyAdvancePayment: rentalContracts.monthlyAdvancePayment,
-			referenceIndex: rentalContracts.referenceIndex,
-			contractPdf: rentalContracts.contractPdf,
-			notes: rentalContracts.notes,
-			createdAt: rentalContracts.createdAt,
-			updatedAt: rentalContracts.updatedAt,
-			tenantName: sql<string>`${tenants.firstName} || ' ' || ${tenants.lastName}`,
-			tenantEmail: tenants.email,
-			apartmentNumber: apartments.number,
-			buildingName: buildings.name,
-			buildingAddress: buildings.address
-		})
-		.from(rentalContracts)
-		.leftJoin(tenants, eq(rentalContracts.tenantId, tenants.id))
-		.leftJoin(apartments, eq(rentalContracts.apartmentId, apartments.id))
-		.leftJoin(buildings, eq(apartments.buildingId, buildings.id))
-		.where(
-			and(
-				eq(rentalContracts.apartmentId, apartmentId),
-				lte(rentalContracts.startDate, periodEnd),
-				or(isNull(rentalContracts.endDate), gte(rentalContracts.endDate, periodStart))
-			)
-		)
+	const contracts = await selectContracts()
+		.where(apartmentContractsBetween(apartmentId, periodStart, periodEnd))
 		.orderBy(rentalContracts.startDate);
 
 	return contracts as ContractWithDetails[];

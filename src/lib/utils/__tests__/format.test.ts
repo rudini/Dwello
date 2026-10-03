@@ -49,7 +49,8 @@ describe('normalizeDecimal', () => {
 
 describe('formatCurrency / formatDate', () => {
 	it('formatiert Franken und Datum im Schweizer Format', () => {
-		expect(formatCurrency(1800).replace(/\s/g, ' ')).toBe("CHF 1'800.00");
+		// Same separator whichever ICU version Node ships with
+		expect(formatCurrency(1800).replace(/\s/g, ' ')).toBe('CHF 1’800.00');
 		expect(formatDate('2024-12-31')).toBe('31.12.2024');
 	});
 });
