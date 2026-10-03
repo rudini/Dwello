@@ -3928,6 +3928,11 @@ unit or database tests.
 - [x] The statement list returns the whole base64 PDF of every row (`statement: utilityStatements` in the list select)
   - List and detail select every column but `pdfBlob` (`statementColumns` in `backend/src/services/statement.service.ts`);
     the PDF is only served by `/:id/pdf` and `/:id/pdf/base64`; pg test in `backend/src/__tests__/statement.routes.pg.test.ts`
+- [x] Flaky E2E on WebKit ("Wohnungen eines Gebäudes mit Belegung" landed on `/apartments?page=1`): `visit()` took
+  network idle for hydrated, and hydration resets a field changed before it. The root layout now sets
+  `body[data-hydrated]` in `onMount` (runs after every component below), and `visit()` waits for it
+  (`src/routes/+layout.svelte`, `tests/e2e/interactions/navigation.ts`). Reproduced with 40× CPU throttling:
+  old `visit` 3/3 failed, new 3/3 passed
 - [ ] "Alle Aktivitäten anzeigen" links to `/activity`, which does not exist; unreachable today (backend returns at most 5)
 - [ ] Mobile navigation drawer has no scenarios (same targets as the sidebar)
 

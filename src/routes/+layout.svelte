@@ -58,6 +58,11 @@
 		return () => clearInterval(refreshInterval);
 	});
 
+	// Runs after every component below is mounted: the page now reacts to input (E2E tests wait for it)
+	onMount(() => {
+		document.body.dataset.hydrated = 'true';
+	});
+
 	// Derived state for showing authenticated layout
 	const showAuthenticatedLayout = $derived(!isPublicPath($page.url.pathname) && data.user !== null);
 </script>
