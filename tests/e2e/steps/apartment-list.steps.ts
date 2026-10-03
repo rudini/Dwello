@@ -3,7 +3,12 @@ import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { visit } from '../interactions/navigation';
 import { allListedApartments, occupancyOf } from '../questions/apartments';
-import { openApartment, showApartmentsOfBuilding, startNewApartment } from '../tasks/apartments';
+import {
+	openApartment,
+	showApartmentsOfBuilding,
+	showApartmentsOfBuildingWhileLoading,
+	startNewApartment
+} from '../tasks/apartments';
 
 const { Given, When, Then } = createBdd(test);
 
@@ -29,6 +34,13 @@ When(
 	'der Liegenschaftsverwalter nur die leeren Wohnungen im Gebäude {string} anzeigt',
 	async ({ verwalter, seed }, building: string) => {
 		await verwalter.perform(showApartmentsOfBuilding(seed.idOf(building)!, 'vacant'));
+	}
+);
+
+When(
+	'der Liegenschaftsverwalter das Gebäude {string} wählt, bevor die Wohnungsliste fertig geladen ist, und sucht',
+	async ({ verwalter, seed }, building: string) => {
+		await verwalter.perform(showApartmentsOfBuildingWhileLoading(seed.idOf(building)!));
 	}
 );
 

@@ -7,12 +7,23 @@ import {
 	filteredBy,
 	newApartmentButton
 } from '../interactions/apartments';
+import { visitWhileLoading } from '../interactions/navigation';
 
 export const showApartmentsOfBuilding =
 	(buildingId: string, status = '') =>
 	async (actor: Actor) => {
 		await apartmentBuildingFilter(actor.page).selectOption(buildingId);
 		await apartmentStatusFilter(actor.page).selectOption(status);
+		await apartmentSearchButton(actor.page).click();
+		await filteredBy(actor.page, buildingId);
+	};
+
+// The building is chosen before the page is hydrated; the search runs once it is
+export const showApartmentsOfBuildingWhileLoading =
+	(buildingId: string) => async (actor: Actor) => {
+		const loaded = await visitWhileLoading(actor.page, '/apartments');
+		await apartmentBuildingFilter(actor.page).selectOption(buildingId);
+		await loaded();
 		await apartmentSearchButton(actor.page).click();
 		await filteredBy(actor.page, buildingId);
 	};
