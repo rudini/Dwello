@@ -40,7 +40,10 @@ const invoice = (overrides = {}) => ({
 const text = () => document.body.textContent ?? '';
 const button = (label: string) => [...document.querySelectorAll('button')].find((b) => b.textContent?.includes(label))!;
 
-beforeEach(() => vi.mocked(goto).mockClear());
+beforeEach(() => {
+	vi.mocked(goto).mockClear();
+	vi.mocked(invalidateAll).mockClear();
+});
 
 describe('Rechnungsliste', () => {
 	const list = (invoices: ReturnType<typeof invoice>[]) =>

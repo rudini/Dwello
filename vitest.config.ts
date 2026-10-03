@@ -40,6 +40,7 @@ export default defineConfig({
 				'node_modules/',
 				'src/**/*.spec.ts',
 				'src/**/*.test.ts',
+				'src/__tests__/**',
 				'.svelte-kit/',
 				'build/',
 				'tests/mocks/**'

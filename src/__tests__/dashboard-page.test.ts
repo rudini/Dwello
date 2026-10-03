@@ -27,7 +27,8 @@ describe('Dashboard', () => {
 	it('zeigt die Kennzahlen des Portfolios mit Belegungsrate', () => {
 		const body = page();
 
-		expect(body).toMatch(/data-testid="stat-vacant"[\s\S]*?>2</);
+		const vacant = body.match(/<a[^>]*data-testid="stat-vacant"[\s\S]*?<\/a>/)![0];
+		expect(vacant).toMatch(/>2</);
 		expect(body).toContain('75.0%');
 	});
 

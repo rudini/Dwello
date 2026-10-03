@@ -73,11 +73,14 @@ describe('Einstellungen', () => {
 	});
 });
 
+// The whole <input> tag of the checkbox, whatever the order of its attributes
+const checkbox = (body: string) => body.match(/<input[^>]*data-testid="category-allowed-checkbox"[^>]*>/)![0];
+
 describe('Kategorie erfassen und bearbeiten', () => {
 	it('beginnt eine neue Kategorie als umlagefähig', () => {
 		const body = render(NewCategoryPage, { props: { form: null } as never }).body;
 
-		expect(body).toMatch(/data-testid="category-allowed-checkbox"[^>]*checked|checked[^>]*data-testid="category-allowed-checkbox"/);
+		expect(checkbox(body)).toContain('checked');
 		expect(body).toContain('Kategorie erstellen');
 	});
 
@@ -95,7 +98,7 @@ describe('Kategorie erfassen und bearbeiten', () => {
 		expect(body).toContain('value="Hauswartung"');
 		expect(body).toContain('value="Conciergerie"');
 		expect(body).toContain('value="4"');
-		expect(body).not.toMatch(/data-testid="category-allowed-checkbox"[^>]*checked/);
+		expect(checkbox(body)).not.toContain('checked');
 		expect(body).toContain('Name ist schon vergeben');
 	});
 });

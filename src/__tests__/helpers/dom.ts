@@ -2,9 +2,11 @@ import { afterEach } from 'vitest';
 import { flushSync, mount, unmount, type Component } from 'svelte';
 
 const mounted: ReturnType<typeof mount>[] = [];
+const realFetch = globalThis.fetch;
 afterEach(() => {
 	while (mounted.length) unmount(mounted.pop()!);
 	document.body.innerHTML = '';
+	globalThis.fetch = realFetch; // fakeBff replaces it per test
 });
 
 /** Mounts a component into the document, removed again after the test */
