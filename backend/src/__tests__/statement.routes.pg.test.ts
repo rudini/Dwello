@@ -3,6 +3,7 @@
  */
 
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
+import { deleteConfig, getConfig, setConfig } from '../services/config.service';
 import { deleteStatement } from '../services/statement.service';
 import { callApi } from './helpers/auth';
 import { createRental } from './helpers/rental';
@@ -38,5 +39,29 @@ describe('GET /api/v1/statements?search', () => {
 		const result = (await call(`?search=${encodeURIComponent(`Anna Keller ${token}`)}`)) as { data: { id: string }[] };
 
 		expect(result.data.map((s) => s.id)).toEqual([statementId]);
+	});
+});
+
+describe('POST /api/v1/statements/:id/generate-pdf', () => {
+	it('hält fest, wann das PDF erstellt wurde, damit Liste und Detail es zum Herunterladen anbieten', async () => {
+		const iban = await getConfig('iban');
+		await setConfig('iban', 'CH9300762011623852957');
+		try {
+			const before = Date.now();
+			await call(`/${statementId}/generate-pdf`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: '{}'
+			});
+
+			const listed = (await call(`?search=${encodeURIComponent(`Anna Keller ${token}`)}`)) as {
+				data: { pdfGeneratedAt: string | null }[];
+			};
+			const generatedAt = new Date(listed.data[0].pdfGeneratedAt!).getTime();
+			expect(generatedAt).toBeGreaterThanOrEqual(before - 1000);
+		} finally {
+			if (iban) await setConfig('iban', iban);
+			else await deleteConfig('iban');
+		}
 	});
 });

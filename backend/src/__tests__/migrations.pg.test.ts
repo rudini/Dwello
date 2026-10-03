@@ -72,6 +72,17 @@ describe('Migrationen anwenden', () => {
 		expect(removed).toEqual([]);
 	});
 
+	it('ergänzt bei einer von Hand bis 0007 migrierten Datenbank den Zeitpunkt der PDF-Erstellung', async () => {
+		const name = await database(upTo('0007'));
+
+		expect(await migrate(`${server}/${name}`, migrations)).toEqual(files.filter((file) => file > '0007~'));
+		const columns = await query(
+			name,
+			`SELECT column_name FROM information_schema.columns WHERE table_name = 'utility_statements' AND column_name = 'pdf_generated_at'`
+		);
+		expect(columns).toEqual([{ column_name: 'pdf_generated_at' }]);
+	});
+
 	it('erkennt eine von Hand vollständig migrierte Datenbank', async () => {
 		const name = await database(files);
 
