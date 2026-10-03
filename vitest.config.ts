@@ -14,6 +14,8 @@ export default defineConfig({
 		},
 		coverage: {
 			provider: 'v8',
+			// Every source file counts, also those no test loads; otherwise untested pages are left out
+			include: ['src/**/*.{ts,svelte}'],
 			reporter: ['text', 'html', 'lcov'],
 			exclude: [
 				'node_modules/',
