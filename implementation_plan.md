@@ -63,7 +63,7 @@ This is a comprehensive implementation plan for the entire Dwello property manag
 | 13 | Frontend - Statement Generation | 2 weeks | 🔄 In Progress | 88% |
 | 14 | Frontend - Dashboard & Analytics | 1 week | 🔄 In Progress | 82% |
 | 15 | Integration Testing | 1.5 weeks | 🔄 In Progress | 14% |
-| 16 | Environment & Config | 3 days | 🔄 In Progress | 58% |
+| 16 | Environment & Config | 3 days | 🔄 In Progress | 67% |
 | 17 | Docker & Deployment | 1 week | 🔄 In Progress | 47% |
 | 18 | Documentation & Tests | 1 week | ⏳ Pending | 0% |
 | 19 | Manual Testing & QA | 1 week | ⏳ Pending | 0% |
@@ -74,8 +74,9 @@ This is a comprehensive implementation plan for the entire Dwello property manag
 **Total Duration:** ~22 weeks for full MVP
 
 Completion counts the top-level checklist items of each phase (recounted in Session 4). The open items of
-phases 1–14 are mostly manual tests (bundled in Phase 19), coverage targets (no coverage provider for Vitest)
-and tests that need a running Ollama.
+phases 1–14 are mostly manual tests (bundled in Phase 19), coverage targets for the Svelte pages (unit-test
+coverage of the pages is 7–14%; they are tested through E2E, which the coverage report does not count) and tests
+that need a running Ollama.
 
 ---
 
@@ -630,7 +631,7 @@ and tests that need a running Ollama.
   - [x] Test query parameter forwarding
   - [x] Test header forwarding
   - [x] Test error responses from backend (timeout, connection error)
-  - [ ] Target >80% code coverage — not measurable: no coverage provider for Vitest installed
+  - [x] Target >80% code coverage — 99% of statements (`npm run test:coverage`)
   - [x] All tests pass: `npm run test`
 
 - [ ] Integration Tests for All Proxy Routes
@@ -1473,7 +1474,7 @@ Validation is defined inline in route handlers for type safety.
 - [x] Unit Tests (deferred to Phase 15)
   - [x] Test formula validation and parsing — `formula.service.test.ts` (52)
   - [x] Test variable substitution
-  - [ ] Target >80% code coverage — not checked
+  - [x] Target >80% code coverage — `formula.service.ts` 100% functions, 96% lines (`bun test --coverage`)
   - [x] All tests pass: `npm run test`
 
 - [x] Integration Tests (deferred to Phase 15)
@@ -2291,7 +2292,8 @@ Validation is defined inline in route handlers for type safety.
 - [ ] Component Tests for Invoice Pages
   - [x] Test form validation — `src/__tests__/invoices.test.ts`
   - [x] Test API integration — `invoices.test.ts`, `tests/unit/invoice-mapping.test.ts`
-  - [ ] Target >75% code coverage — not measurable: no coverage provider for Vitest installed
+  - [ ] Target >75% code coverage — 13% of `src/routes/invoices` (server loads and actions are tested, the
+    Svelte pages only through E2E, which `npm run test:coverage` does not count)
   - [x] All tests pass: `npm run test`
 
 - [ ] E2E Tests for Invoice Workflows (open: KI categorization display, sorting)
@@ -2433,7 +2435,7 @@ Validation is defined inline in route handlers for type safety.
 - [ ] Component Tests for Config Pages
   - [x] Test form validation
   - [x] Test formula editor
-  - [ ] Target >75% code coverage — not measurable: no coverage provider for Vitest installed
+  - [ ] Target >75% code coverage — 14% of `src/routes/config` (Svelte pages tested through E2E only)
   - [x] All tests pass: `npm run test`
 
 - [x] E2E Tests for Configuration Workflows
@@ -2564,7 +2566,7 @@ Validation is defined inline in route handlers for type safety.
 - [ ] Component Tests for Statement Pages
   - [x] Test PDF download — `statement-endpoints.test.ts`
   - [x] Test statement creation — `statement-generation.test.ts`, `generation-step.test.ts`
-  - [ ] Target >75% code coverage — not measurable: no coverage provider for Vitest installed
+  - [ ] Target >75% code coverage — 10% of `src/routes/statements` (Svelte pages tested through E2E only)
   - [x] All tests pass: `npm run test`
 
 - [x] E2E Tests for Statement Workflows
@@ -2650,7 +2652,7 @@ Validation is defined inline in route handlers for type safety.
 - [ ] Component Tests for Dashboard
   - [x] Test charts render — `src/__tests__/dashboard.test.ts`
   - [x] Test statistics calculate correctly — `dashboard.pg.test.ts`, `dashboard-activity.test.ts`
-  - [ ] Target >75% code coverage — not measurable: no coverage provider for Vitest installed
+  - [ ] Target >75% code coverage — 7% of `src/routes/dashboard` (Svelte pages tested through E2E only)
   - [x] All tests pass: `npm run test`
 
 - [x] E2E Tests for Dashboard
@@ -2855,10 +2857,10 @@ Validation is defined inline in route handlers for type safety.
 
 ### 16.6 Testing Configuration
 
-- [ ] Verify test database setup
+- [x] Verify test database setup
   - [x] Run `npm run test`
   - [x] All tests pass with test database (CI: unit tests on PostgreSQL, E2E on `dwello_e2e`)
-  - [ ] Coverage reports generated — backend only (`bun test --coverage`); no coverage provider for Vitest
+  - [x] Coverage reports generated — `npm run test:coverage` (frontend, `@vitest/coverage-v8`), `bun test --coverage` (backend)
 
 ### 16.X Verification: Unit Tests & E2E Tests
 
@@ -2872,7 +2874,7 @@ Validation is defined inline in route handlers for type safety.
   - [ ] Run all tests: `npm run test`
   - [ ] Verify environment files work correctly
 
-**Status: Phase 16 In Progress** 🔄 (58%, open items above)
+**Status: Phase 16 In Progress** 🔄 (67%, open items above)
 
 ---
 
@@ -3596,7 +3598,7 @@ covered by unit, PostgreSQL and E2E tests; deployment, documentation, QA and go-
 | Phase 13 | 🔄 In Progress | 88% | 16 | 14 |
 | Phase 14 | 🔄 In Progress | 82% | 11 | 9 |
 | Phase 15 | 🔄 In Progress | 14% | 14 | 2 |
-| Phase 16 | 🔄 In Progress | 58% | 12 | 7 |
+| Phase 16 | 🔄 In Progress | 67% | 12 | 8 |
 | Phase 17 | 🔄 In Progress | 47% | 17 | 8 |
 | Phase 18 | ⏳ Pending | 0% | 14 | 0 |
 | Phase 19 | ⏳ Pending | 0% | 25 | 0 |
@@ -3604,7 +3606,7 @@ covered by unit, PostgreSQL and E2E tests; deployment, documentation, QA and go-
 | Phase 21 | ⏳ Pending | 0% | 22 | 0 |
 | Phase 22 | 🔄 In Progress | 4% | 24 | 1 |
 
-**Total Tasks: 421** | **Completed: 261** | **Overall: ~62%**
+**Total Tasks: 421** | **Completed: 262** | **Overall: ~62%**
 
 ---
 
@@ -3913,7 +3915,13 @@ unit or database tests.
   or feature that covers them, or with what is still missing; four tasks replaced by another solution marked
   **Dropped** (`init-db.sh`, PDF background job, `StatementWizard.svelte`, bulk mark as paid)
 - [x] Both progress tables and the per-phase status lines recounted from the top-level checklist items
-  (261 of 421 done, ~62%); before, they contradicted each other (e.g. Phase 8 "0%", Phase 15 "Complete")
+  (262 of 421 done, ~62%, after the coverage provider); before, they contradicted each other (e.g. Phase 8 "0%", Phase 15 "Complete")
+
+### Test coverage ✅
+- [x] Coverage provider `@vitest/coverage-v8` installed (matching Vitest 5.0.3), script `npm run test:coverage`;
+  the report now includes every source file, also those no test loads (`coverage.include` in `vitest.config.ts`)
+- Frontend unit-test coverage: 28% of statements overall; `src/lib/server` 91%, `api-proxy.ts` 99%; Svelte pages and
+  components 7–14% (they are covered by the 251 E2E scenarios, which this report does not count)
 
 ### Open
 - [ ] The statement list returns the whole base64 PDF of every row (`statement: utilityStatements` in the list select)
