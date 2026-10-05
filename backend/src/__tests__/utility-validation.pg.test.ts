@@ -1,59 +1,46 @@
 /**
- * Integration tests for utility validation service async functions
- * Uses mocked database dependencies
+ * Validating invoices for a utility statement against the categories in the real PostgreSQL database
  */
 
-import { describe, it, expect, mock, beforeEach } from 'bun:test';
-
-// Mock the category service before importing utility validation service
-const mockGetCategory = mock((): Promise<unknown> => Promise.resolve(null));
-
-mock.module('../services/category.service', () => ({
-	getCategory: mockGetCategory
-}));
-
-// Now import the service under test
+import { beforeAll, describe, it, expect } from 'bun:test';
+import { eq } from 'drizzle-orm';
+import { db } from '../db/connection';
+import { categories } from '../db/schema';
 import {
 	isAllowedUtilityCost,
 	validateInvoiceForUtilityStatement,
 	validateInvoicesForStatement
 } from '../services/utility-validation.service';
 
-describe('Utility Validation Service - Async Functions', () => {
-	beforeEach(() => {
-		mockGetCategory.mockClear();
-	});
+// Predefined categories (migrations): caretaker costs may be passed on to tenants, repairs may not
+let allowed: string;
+let notAllowed: string;
+const unknown = crypto.randomUUID();
 
+const categoryId = async (name: string) =>
+	(await db.select().from(categories).where(eq(categories.name, name)))[0].id;
+
+beforeAll(async () => {
+	allowed = await categoryId('Caretaker');
+	notAllowed = await categoryId('Repairs');
+});
+
+describe('Utility Validation Service - Async Functions', () => {
 	describe('isAllowedUtilityCost', () => {
 		it('should return false when category not found', async () => {
-			mockGetCategory.mockResolvedValue(null);
-
-			const result = await isAllowedUtilityCost('cat-1');
+			const result = await isAllowedUtilityCost(unknown);
 
 			expect(result).toBe(false);
-			expect(mockGetCategory).toHaveBeenCalledWith('cat-1');
 		});
 
 		it('should return true when category allows utility costs', async () => {
-			mockGetCategory.mockResolvedValue({
-				id: 'cat-1',
-				name: 'Heizung',
-				isAllowedUtilityCost: true
-			});
-
-			const result = await isAllowedUtilityCost('cat-1');
+			const result = await isAllowedUtilityCost(allowed);
 
 			expect(result).toBe(true);
 		});
 
 		it('should return false when category does not allow utility costs', async () => {
-			mockGetCategory.mockResolvedValue({
-				id: 'cat-1',
-				name: 'Reparaturen',
-				isAllowedUtilityCost: false
-			});
-
-			const result = await isAllowedUtilityCost('cat-1');
+			const result = await isAllowedUtilityCost(notAllowed);
 
 			expect(result).toBe(false);
 		});
@@ -61,13 +48,8 @@ describe('Utility Validation Service - Async Functions', () => {
 
 	describe('validateInvoiceForUtilityStatement', () => {
 		it('should return error when invoice is not marked as valid utility cost', async () => {
-			mockGetCategory.mockResolvedValue({
-				id: 'cat-1',
-				isAllowedUtilityCost: true
-			});
-
 			const result = await validateInvoiceForUtilityStatement({
-				categoryId: 'cat-1',
+				categoryId: allowed,
 				amount: 100,
 				isValidUtilityCost: false,
 				description: 'Test invoice'
@@ -90,47 +72,32 @@ describe('Utility Validation Service - Async Functions', () => {
 		});
 
 		it('should return error when category is not allowed', async () => {
-			mockGetCategory.mockResolvedValue({
-				id: 'cat-1',
-				isAllowedUtilityCost: false
-			});
-
 			const result = await validateInvoiceForUtilityStatement({
-				categoryId: 'cat-1',
+				categoryId: notAllowed,
 				amount: 100,
 				isValidUtilityCost: true,
 				description: 'Test invoice'
 			});
 
 			expect(result.isValid).toBe(false);
-			expect(result.errors.some(e => e.includes('nicht umlagefähig'))).toBe(true);
+			expect(result.errors.some((e) => e.includes('nicht umlagefähig'))).toBe(true);
 		});
 
 		it('should return error for zero amount', async () => {
-			mockGetCategory.mockResolvedValue({
-				id: 'cat-1',
-				isAllowedUtilityCost: true
-			});
-
 			const result = await validateInvoiceForUtilityStatement({
-				categoryId: 'cat-1',
+				categoryId: allowed,
 				amount: 0,
 				isValidUtilityCost: true,
 				description: 'Test invoice'
 			});
 
 			expect(result.isValid).toBe(false);
-			expect(result.errors.some(e => e.includes('grösser als 0'))).toBe(true);
+			expect(result.errors.some((e) => e.includes('grösser als 0'))).toBe(true);
 		});
 
 		it('should return error for negative amount', async () => {
-			mockGetCategory.mockResolvedValue({
-				id: 'cat-1',
-				isAllowedUtilityCost: true
-			});
-
 			const result = await validateInvoiceForUtilityStatement({
-				categoryId: 'cat-1',
+				categoryId: allowed,
 				amount: -100,
 				isValidUtilityCost: true,
 				description: 'Test invoice'
@@ -140,13 +107,8 @@ describe('Utility Validation Service - Async Functions', () => {
 		});
 
 		it('should return error for NaN amount', async () => {
-			mockGetCategory.mockResolvedValue({
-				id: 'cat-1',
-				isAllowedUtilityCost: true
-			});
-
 			const result = await validateInvoiceForUtilityStatement({
-				categoryId: 'cat-1',
+				categoryId: allowed,
 				amount: 'invalid',
 				isValidUtilityCost: true,
 				description: 'Test invoice'
@@ -156,13 +118,8 @@ describe('Utility Validation Service - Async Functions', () => {
 		});
 
 		it('should handle string amount', async () => {
-			mockGetCategory.mockResolvedValue({
-				id: 'cat-1',
-				isAllowedUtilityCost: true
-			});
-
 			const result = await validateInvoiceForUtilityStatement({
-				categoryId: 'cat-1',
+				categoryId: allowed,
 				amount: '100.50',
 				isValidUtilityCost: true,
 				description: 'Test invoice'
@@ -172,13 +129,8 @@ describe('Utility Validation Service - Async Functions', () => {
 		});
 
 		it('should return valid for correct invoice', async () => {
-			mockGetCategory.mockResolvedValue({
-				id: 'cat-1',
-				isAllowedUtilityCost: true
-			});
-
 			const result = await validateInvoiceForUtilityStatement({
-				categoryId: 'cat-1',
+				categoryId: allowed,
 				amount: 100,
 				isValidUtilityCost: true,
 				description: 'Heating costs'
@@ -189,77 +141,52 @@ describe('Utility Validation Service - Async Functions', () => {
 		});
 
 		it('should warn for suspicious keyword: reparatur', async () => {
-			mockGetCategory.mockResolvedValue({
-				id: 'cat-1',
-				isAllowedUtilityCost: true
-			});
-
 			const result = await validateInvoiceForUtilityStatement({
-				categoryId: 'cat-1',
+				categoryId: allowed,
 				amount: 100,
 				isValidUtilityCost: true,
 				description: 'Reparatur der Heizung'
 			});
 
-			expect(result.warnings.some(w => w.includes('reparatur'))).toBe(true);
+			expect(result.warnings.some((w) => w.includes('reparatur'))).toBe(true);
 		});
 
 		it('should warn for suspicious keyword: renovation', async () => {
-			mockGetCategory.mockResolvedValue({
-				id: 'cat-1',
-				isAllowedUtilityCost: true
-			});
-
 			const result = await validateInvoiceForUtilityStatement({
-				categoryId: 'cat-1',
+				categoryId: allowed,
 				amount: 100,
 				isValidUtilityCost: true,
 				description: 'Renovation des Badezimmers'
 			});
 
-			expect(result.warnings.some(w => w.includes('renovation'))).toBe(true);
+			expect(result.warnings.some((w) => w.includes('renovation'))).toBe(true);
 		});
 
 		it('should warn for suspicious keyword: steuer', async () => {
-			mockGetCategory.mockResolvedValue({
-				id: 'cat-1',
-				isAllowedUtilityCost: true
-			});
-
 			const result = await validateInvoiceForUtilityStatement({
-				categoryId: 'cat-1',
+				categoryId: allowed,
 				amount: 100,
 				isValidUtilityCost: true,
 				description: 'Grundsteuer 2024'
 			});
 
-			expect(result.warnings.some(w => w.includes('steuer'))).toBe(true);
+			expect(result.warnings.some((w) => w.includes('steuer'))).toBe(true);
 		});
 
 		it('should warn for suspicious keyword: hypothek', async () => {
-			mockGetCategory.mockResolvedValue({
-				id: 'cat-1',
-				isAllowedUtilityCost: true
-			});
-
 			const result = await validateInvoiceForUtilityStatement({
-				categoryId: 'cat-1',
+				categoryId: allowed,
 				amount: 100,
 				isValidUtilityCost: true,
 				description: 'Hypothekarzins Q1'
 			});
 
-			expect(result.warnings.some(w => w.includes('hypothek'))).toBe(true);
+			expect(result.warnings.some((w) => w.includes('hypothek'))).toBe(true);
 		});
 
 		it('should accumulate multiple warnings', async () => {
-			mockGetCategory.mockResolvedValue({
-				id: 'cat-1',
-				isAllowedUtilityCost: true
-			});
-
 			const result = await validateInvoiceForUtilityStatement({
-				categoryId: 'cat-1',
+				categoryId: allowed,
 				amount: 100,
 				isValidUtilityCost: true,
 				description: 'Reparatur und Renovation Steuer'
@@ -280,22 +207,17 @@ describe('Utility Validation Service - Async Functions', () => {
 		});
 
 		it('should separate valid and invalid invoices', async () => {
-			mockGetCategory.mockResolvedValue({
-				id: 'cat-1',
-				isAllowedUtilityCost: true
-			});
-
 			const invoices = [
 				{
 					id: 'inv-1',
-					categoryId: 'cat-1',
+					categoryId: allowed,
 					amount: 100,
 					isValidUtilityCost: true,
 					description: 'Valid invoice'
 				},
 				{
 					id: 'inv-2',
-					categoryId: 'cat-1',
+					categoryId: allowed,
 					amount: 200,
 					isValidUtilityCost: false, // Invalid
 					description: 'Invalid invoice'
@@ -305,27 +227,22 @@ describe('Utility Validation Service - Async Functions', () => {
 			const result = await validateInvoicesForStatement(invoices);
 
 			expect(result.validInvoices).toContain('inv-1');
-			expect(result.invalidInvoices.some(i => i.id === 'inv-2')).toBe(true);
+			expect(result.invalidInvoices.some((i) => i.id === 'inv-2')).toBe(true);
 		});
 
 		it('should calculate total valid amount', async () => {
-			mockGetCategory.mockResolvedValue({
-				id: 'cat-1',
-				isAllowedUtilityCost: true
-			});
-
 			const invoices = [
 				{
 					id: 'inv-1',
-					categoryId: 'cat-1',
+					categoryId: allowed,
 					amount: 100,
 					isValidUtilityCost: true,
 					description: 'Invoice 1'
 				},
 				{
 					id: 'inv-2',
-					categoryId: 'cat-1',
-					amount: 250.50,
+					categoryId: allowed,
+					amount: 250.5,
 					isValidUtilityCost: true,
 					description: 'Invoice 2'
 				}
@@ -333,19 +250,14 @@ describe('Utility Validation Service - Async Functions', () => {
 
 			const result = await validateInvoicesForStatement(invoices);
 
-			expect(result.totalValidAmount).toBe(350.50);
+			expect(result.totalValidAmount).toBe(350.5);
 		});
 
 		it('should handle string amounts', async () => {
-			mockGetCategory.mockResolvedValue({
-				id: 'cat-1',
-				isAllowedUtilityCost: true
-			});
-
 			const invoices = [
 				{
 					id: 'inv-1',
-					categoryId: 'cat-1',
+					categoryId: allowed,
 					amount: '100.25',
 					isValidUtilityCost: true,
 					description: 'Invoice 1'
@@ -358,22 +270,17 @@ describe('Utility Validation Service - Async Functions', () => {
 		});
 
 		it('should collect warnings from all invoices', async () => {
-			mockGetCategory.mockResolvedValue({
-				id: 'cat-1',
-				isAllowedUtilityCost: true
-			});
-
 			const invoices = [
 				{
 					id: 'inv-1',
-					categoryId: 'cat-1',
+					categoryId: allowed,
 					amount: 100,
 					isValidUtilityCost: true,
 					description: 'Reparatur invoice'
 				},
 				{
 					id: 'inv-2',
-					categoryId: 'cat-1',
+					categoryId: allowed,
 					amount: 200,
 					isValidUtilityCost: true,
 					description: 'Renovation invoice'
@@ -383,17 +290,15 @@ describe('Utility Validation Service - Async Functions', () => {
 			const result = await validateInvoicesForStatement(invoices);
 
 			expect(result.warnings.length).toBe(2);
-			expect(result.warnings.some(w => w.id === 'inv-1')).toBe(true);
-			expect(result.warnings.some(w => w.id === 'inv-2')).toBe(true);
+			expect(result.warnings.some((w) => w.id === 'inv-1')).toBe(true);
+			expect(result.warnings.some((w) => w.id === 'inv-2')).toBe(true);
 		});
 
 		it('should include error details for invalid invoices', async () => {
-			mockGetCategory.mockResolvedValue(null);
-
 			const invoices = [
 				{
 					id: 'inv-1',
-					categoryId: 'cat-1',
+					categoryId: unknown,
 					amount: 100,
 					isValidUtilityCost: true,
 					description: 'Invoice'
@@ -407,30 +312,24 @@ describe('Utility Validation Service - Async Functions', () => {
 		});
 
 		it('should handle mixed valid, invalid, and warning invoices', async () => {
-			// First call for cat-1 (allowed), second for cat-2 (not allowed)
-			mockGetCategory
-				.mockResolvedValueOnce({ id: 'cat-1', isAllowedUtilityCost: true })
-				.mockResolvedValueOnce({ id: 'cat-2', isAllowedUtilityCost: false })
-				.mockResolvedValueOnce({ id: 'cat-1', isAllowedUtilityCost: true });
-
 			const invoices = [
 				{
 					id: 'inv-1',
-					categoryId: 'cat-1',
+					categoryId: allowed,
 					amount: 100,
 					isValidUtilityCost: true,
 					description: 'Valid invoice'
 				},
 				{
 					id: 'inv-2',
-					categoryId: 'cat-2',
+					categoryId: notAllowed,
 					amount: 200,
 					isValidUtilityCost: true,
 					description: 'Invalid category'
 				},
 				{
 					id: 'inv-3',
-					categoryId: 'cat-1',
+					categoryId: allowed,
 					amount: 300,
 					isValidUtilityCost: true,
 					description: 'Reparatur warning'
@@ -441,8 +340,8 @@ describe('Utility Validation Service - Async Functions', () => {
 
 			expect(result.validInvoices).toContain('inv-1');
 			expect(result.validInvoices).toContain('inv-3');
-			expect(result.invalidInvoices.some(i => i.id === 'inv-2')).toBe(true);
-			expect(result.warnings.some(w => w.id === 'inv-3')).toBe(true);
+			expect(result.invalidInvoices.some((i) => i.id === 'inv-2')).toBe(true);
+			expect(result.warnings.some((w) => w.id === 'inv-3')).toBe(true);
 			expect(result.totalValidAmount).toBe(400); // inv-1 + inv-3
 		});
 	});
