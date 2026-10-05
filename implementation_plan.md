@@ -3855,6 +3855,10 @@ Every bug fix has a unit or database test.
     backend and data; both renderings are compared cell by cell (`tests/ui-screenshots/changed-areas.ts`), the
     comment shows the framed page and the page before in a collapsible section; tests:
     `tests/unit/ui-screenshot-changed-areas.test.ts`
+- [x] Faster CI on pull requests (job `changes` decides what runs; pushes to main still run everything):
+  frontend unit tests only for files importing a change (`vitest --changed`, all when `package.json`/Vitest config
+  change), backend unit tests only when `backend/` changed, E2E on Chromium only and skipped when only documentation
+  (`docs/`, `screens/`, `.claude/`, `*.md`) changed
 - Duplicated code removed so `fallow audit` passes against main:
   - List pages buildings/contracts/invoices/tenants use `SearchField`, `FilterSelect`, `FilterActions` and `ListPagination` (`src/lib/list-url.ts`)
   - New and edit contract share `src/routes/contracts/ContractForm.svelte` (logic in `src/lib/contract-form.ts`)

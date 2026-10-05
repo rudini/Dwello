@@ -13,6 +13,27 @@ env:
   NODE_VERSION: 22
 
 jobs:
+  # On pull requests: which parts the change touches, so tests of untouched parts are skipped; pushes to main run everything
+  changes:
+    name: Changes
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.diff.outputs.backend }}
+      app: ${{ steps.diff.outputs.app }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: diff
+        run: |
+          if [ "${{ github.event_name }}" != pull_request ]; then
+            echo "backend=true" >> "$GITHUB_OUTPUT" && echo "app=true" >> "$GITHUB_OUTPUT" && exit 0
+          fi
+          git diff --name-only "origin/${{ github.base_ref }}...HEAD" | tee changed.txt
+          echo "backend=$(grep -q '^backend/' changed.txt && echo true || echo false)" >> "$GITHUB_OUTPUT"
+          # Anything but documentation can change what the app does
+          echo "app=$(grep -qvE '^(docs/|screens/|\.claude/)|\.md$' changed.txt && echo true || echo false)" >> "$GITHUB_OUTPUT"
+
   build:
     name: Build
     runs-on: ubuntu-latest
@@ -34,6 +55,7 @@ jobs:
 
   unit-tests:
     name: Unit tests
+    needs: changes
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -53,6 +75,8 @@ jobs:
       DATABASE_URL: postgresql://dwello:dwello@localhost:5432/dwello
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
@@ -65,14 +89,17 @@ jobs:
         run: bun run db:migrate
         working-directory: backend
       - name: Frontend unit tests
-        run: npx vitest run
+        # Pull requests: only tests importing a changed file (all of them when package.json or the Vitest config change)
+        run: npx vitest run --passWithNoTests ${{ github.event_name == 'pull_request' && format('--changed origin/{0}', github.base_ref) || '' }}
       - name: Backend unit tests
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && needs.changes.outputs.backend == 'true' }}
         run: bun run test
         working-directory: backend
 
   e2e-tests:
     name: E2E tests
+    needs: changes
+    if: needs.changes.outputs.app == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     services:
@@ -99,10 +126,11 @@ jobs:
       - run: npm ci
       - run: bun install --frozen-lockfile
         working-directory: backend
+      # Pull requests: Chromium only; pushes to main: every browser
       - name: Install Playwright browsers
-        run: npx playwright install --with-deps
+        run: npx playwright install --with-deps ${{ github.event_name == 'pull_request' && 'chromium' || '' }}
       - name: E2E tests
-        run: npm run test:e2e
+        run: npm run test:e2e ${{ github.event_name == 'pull_request' && '-- --project=chromium' || '' }}
       - name: Upload reports
         if: ${{ failure() }}
         uses: actions/upload-artifact@v4
