@@ -3,7 +3,7 @@
  * Uses mocked database dependencies
  */
 
-import { describe, it, expect, mock, beforeEach, afterEach } from 'bun:test';
+import { describe, it, expect, mock, beforeEach } from 'bun:test';
 
 // Mock the contract service before importing prorating service
 const mockGetContractsByPeriod = mock(() => Promise.resolve([]));

@@ -3,7 +3,7 @@
  * Tests core business logic for utility cost prorating
  */
 
-import { describe, it, expect, mock, beforeEach } from 'bun:test';
+import { describe, it, expect } from 'bun:test';
 import {
 	calculateDaysBetween,
 	calculateOverlap,
@@ -11,8 +11,7 @@ import {
 	prorateCosts,
 	handleVacancy,
 	distributeCostsAcrossContracts,
-	type ContractPeriodOverlap,
-	type Period
+	type ContractPeriodOverlap
 } from '../services/prorating.service';
 
 describe('Prorating Service', () => {
