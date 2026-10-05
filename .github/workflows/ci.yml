@@ -121,11 +121,11 @@ jobs:
       - run: npm ci
       - run: bun install --frozen-lockfile
         working-directory: backend
-      # Pull requests: Chromium only; pushes to main: every browser
+      # Pull requests: Chromium and the API driver only; pushes to main: every browser and the API driver
       - name: Install Playwright browsers
         run: npx playwright install --with-deps ${{ github.event_name == 'pull_request' && 'chromium' || '' }}
       - name: E2E tests
-        run: npm run test:e2e ${{ github.event_name == 'pull_request' && '-- --project=chromium' || '' }}
+        run: npm run test:e2e ${{ github.event_name == 'pull_request' && '-- --project=chromium --project=api' || '' }}
       - name: Upload reports
         if: ${{ failure() }}
         uses: actions/upload-artifact@v4

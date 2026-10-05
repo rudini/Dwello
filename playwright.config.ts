@@ -1,6 +1,7 @@
 import { defineConfig } from '@playwright/test';
 import { defineBddConfig, cucumberReporter } from 'playwright-bdd';
 import { E2E_JWT_SECRET } from './tests/e2e/fixtures/session';
+import type { Driver } from './tests/e2e/fixtures/test';
 
 const E2E_BACKEND_URL = 'http://localhost:3101';
 const E2E_DATABASE_URL =
@@ -12,7 +13,7 @@ const testDir = defineBddConfig({
 	tags: 'not @wip'
 });
 
-export default defineConfig({
+export default defineConfig<{ driver: Driver }>({
 	testDir,
 	// Run tests in parallel for speed
 	fullyParallel: true,
@@ -84,6 +85,12 @@ export default defineConfig({
 		trace: 'on-first-retry'
 	},
 	projects: [
+		{
+			// The @api scenarios once more through the backend API instead of the browser (API protocol driver)
+			name: 'api',
+			grep: /@api/,
+			use: { browserName: 'chromium', driver: 'api' }
+		},
 		{
 			name: 'chromium',
 			use: {

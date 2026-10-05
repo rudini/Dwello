@@ -29,7 +29,7 @@ Die Menge bleibt eine Pyramide, viele schnelle Unit-Tests unten. Die **Reihenfol
 
 | Ebene | Tests | Ort | Runner | Gegen was | Test-Doubles |
 |---|---|---|---|---|---|
-| Akzeptanz (E2E) | 258 Testfälle aus 39 Features | `tests/e2e/features/*.feature` | Playwright + playwright-bdd | Browser → SvelteKit-Build (`node build`) → Elysia → PostgreSQL `dwello_e2e` (vor jedem Lauf neu migriert) | keine API-Mocks; SMTP-Mail-Catcher statt Mail-Provider, signiertes Session-JWT statt Google-OAuth |
+| Akzeptanz (E2E) | 258 Testfälle aus 40 Features (+2 über den API-Driver) | `tests/e2e/features/*.feature` | Playwright + playwright-bdd | Browser → SvelteKit-Build (`node build`) → Elysia → PostgreSQL `dwello_e2e` (vor jedem Lauf neu migriert) | keine API-Mocks; SMTP-Mail-Catcher statt Mail-Provider, signiertes Session-JWT statt Google-OAuth |
 | Integration | 160 in 27 Dateien | `backend/src/__tests__/*.pg.test.ts` | `bun test` | Elysia-App in-process (`app.handle`) → PostgreSQL `dwello_test` (vor jedem Lauf neu migriert) | keine; lokaler SMTP-Server für Mails |
 | Unit Backend | 244 in 10 Dateien | `backend/src/__tests__/*.test.ts` | `bun test --isolate` | reine Funktionen der Services | keine |
 | Unit Frontend | 454 in 53 Dateien | `src/__tests__`, `src/lib/utils/__tests__`, `tests/unit` | Vitest (`server`: node, `dom`: jsdom) | Load-Funktionen, Actions, BFF, Komponenten | Fake-Backend per `fetch`-Stub / `fakeBff`, `vi.mock` für `$app/*` |
@@ -47,8 +47,16 @@ Regeln:
 |---|---|---|
 | Test Cases (Executable Specifications) | *Was* das Business will, in Fachsprache | `tests/e2e/features/*.feature` (Deutsch, Rolle „Liegenschaftsverwalter“, Begriffe aus `UBIQUITOUS_LANGUAGE.md`) |
 | Domain Specific Language | Wiederverwendbare fachliche Sprache | `tests/e2e/steps/`, Screenplay: `fixtures/actor.ts`, `tasks/`, `questions/` |
-| Protocol Drivers | Übersetzen die DSL in Interaktionen | `tests/e2e/interactions/` (Browser über Playwright); Vorbedingungen über die API in `fixtures/backend.ts` |
+| Protocol Drivers | Übersetzen die DSL in Interaktionen | UI-Driver: `tests/e2e/interactions/` (Browser über Playwright). API-Driver: `tasks/*-api.ts` über `seed.backend` (Backend-API). Vorbedingungen immer über die API (`fixtures/backend.ts`) |
 | System under Test | Produktionsähnlich deployt | `npm run build && node build` + Backend + eigene Datenbank (`playwright.config.ts`) |
+
+### Zwei Protocol Drivers
+
+Dasselbe Szenario kann über den Browser oder direkt über die Backend-API laufen. Die Fixture-Option `driver` (`ui` | `api`, `fixtures/test.ts`) wählt den Weg; nur Steps, die mit dem System sprechen, verzweigen danach. Szenarien mit dem Tag `@api` laufen zusätzlich im Playwright-Projekt `api` ohne Seitenaufrufe.
+
+- Wofür `@api`: fachliche Regeln und Berechnungen, die nicht von der Bedienung abhängen (Beispiel: `statement-management-fee.feature`).
+- Wofür nur UI: Bedienabläufe, Navigation, Formulare.
+- Ein neuer `@api`-Step braucht beide Wege; der API-Weg lebt in `tasks/<bereich>-api.ts`.
 
 Isolation wie bei Farley:
 
@@ -66,19 +74,20 @@ Isolation wie bei Farley:
 
 Beispiel: `tests/e2e/features/statement-management-fee.feature` (Verwaltungspauschale nach Verteilschlüssel).
 
+Bedienung, die kein Fachverhalten ist, steht in eigenen Features: `breadcrumb.feature` (Breadcrumb aller Seiten als ein Szenariogrundriss) und `hydration.feature` (Auswahl, bevor eine Seite fertig geladen ist).
+
 ## Ausführen
 
 | Ebene | Lokal | CI (`.github/workflows/ci.yml`) |
 |---|---|---|
 | Unit Frontend | `npm run test` | Job „Unit tests“; in PRs nur Tests geänderter Dateien |
 | Unit + Integration Backend | `cd backend && bun run test` (nur DB: `bun run test:pg`) | Job „Unit tests“, wenn `backend/` geändert |
-| Akzeptanz | `npm run test:e2e` | Job „E2E tests“; PRs nur Chromium, `main` alle Browser |
+| Akzeptanz | `npm run test:e2e` (nur API-Driver: `-- --project=api`) | Job „E2E tests“; PRs Chromium und `api`, `main` alle Browser und `api` |
 
 Voraussetzung lokal: PostgreSQL auf Port 5432 mit Benutzer `dwello`. Die Testdatenbanken `dwello_test` und `dwello_e2e` werden automatisch neu aufgesetzt; die Entwicklungsdatenbank bleibt unberührt.
 
 ## Offen
 
-- [ ] Zweiter Protocol Driver über die Backend-API, damit fachliche Szenarien ohne Browser laufen
-- [ ] UI-Detail-Szenarien bündeln (Breadcrumb-Navigation, Hydration)
+- [ ] API-Driver auf weitere fachliche Features ausdehnen (heute nur `statement-management-fee.feature`); der Zeitgewinn ist klein, solange das Anlegen der Testdaten dominiert
 - [ ] Coverage-Schwelle in Vitest und bun, in CI erzwungen
 - [ ] Vertrag BFF ↔ Backend: Frontend-Fakes können abdriften, geprüft wird er nur in E2E

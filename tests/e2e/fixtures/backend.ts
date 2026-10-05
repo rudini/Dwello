@@ -98,6 +98,7 @@ export function testData(request: APIRequestContext, token: string) {
 	return {
 		names,
 		idOf: (key: string) => ids.get(key),
+		backend: { get, post }, // the backend API as the signed-in Liegenschaftsverwalter (API protocol driver)
 		unique,
 
 		async building(title: string, city: string) {
