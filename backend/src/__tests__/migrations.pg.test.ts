@@ -83,6 +83,17 @@ describe('Migrationen anwenden', () => {
 		expect(columns).toEqual([{ column_name: 'pdf_generated_at' }]);
 	});
 
+	it('ergänzt bei einer von Hand bis 0008 migrierten Datenbank den Grund für das Überschreiben der KI-Kategorie', async () => {
+		const name = await database(upTo('0008'));
+
+		expect(await migrate(`${server}/${name}`, migrations)).toEqual(files.filter((file) => file > '0008~'));
+		const columns = await query(
+			name,
+			`SELECT column_name FROM information_schema.columns WHERE table_name = 'invoices' AND column_name = 'manual_override_reason'`
+		);
+		expect(columns).toEqual([{ column_name: 'manual_override_reason' }]);
+	});
+
 	it('erkennt eine von Hand vollständig migrierte Datenbank', async () => {
 		const name = await database(files);
 

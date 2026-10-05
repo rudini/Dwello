@@ -4,13 +4,25 @@ import { test } from '../fixtures/test';
 import { visit } from '../interactions/navigation';
 import { nonAllocableCategoryWarning, utilityCostChoice } from '../questions/invoice-form';
 import { amountOfListedInvoice, categoryOfListedInvoice } from '../questions/invoices';
-import { chooseCategory, clearSupplier, correctAmount, recategorize, registerInvoice, saveInvoice } from '../tasks/invoice-form';
+import {
+	chooseCategory,
+	clearSupplier,
+	correctAmount,
+	overrideCategory,
+	recategorize,
+	registerInvoice,
+	saveInvoice
+} from '../tasks/invoice-form';
 import { searchInvoices } from '../tasks/invoices';
 
 const { Given, When, Then } = createBdd(test);
 
 Given('der Liegenschaftsverwalter ist auf der Seite "Neue Rechnung"', async ({ verwalter }) => {
 	await visit(verwalter.page, '/invoices/new');
+});
+
+Given('die KI hat die Kategorie der Rechnung von {string} vorgeschlagen', async ({ seed }, supplier: string) => {
+	await seed.kiSuggestion(supplier);
 });
 
 Given('der Liegenschaftsverwalter bearbeitet die Rechnung von {string}', async ({ verwalter, seed }, supplier: string) => {
@@ -41,6 +53,13 @@ When('der Liegenschaftsverwalter den Betrag auf {string} Franken korrigiert', as
 When('der Liegenschaftsverwalter die Rechnung der Kategorie {string} zuordnet', async ({ verwalter }, category: string) => {
 	await verwalter.perform(recategorize(category));
 });
+
+When(
+	'der Liegenschaftsverwalter die Rechnung mit dem Grund {string} der Kategorie {string} zuordnet',
+	async ({ verwalter }, reason: string, category: string) => {
+		await verwalter.perform(overrideCategory(category, reason));
+	}
+);
 
 When('der Liegenschaftsverwalter die Rechnung ohne Rechnungssteller speichert', async ({ verwalter }) => {
 	await verwalter.perform(clearSupplier);

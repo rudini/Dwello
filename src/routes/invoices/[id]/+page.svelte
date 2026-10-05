@@ -77,6 +77,7 @@
 				variant="secondary"
 				onclick={handleRecategorize}
 				disabled={isRecategorizing}
+				testid="invoice-recategorize-button"
 			>
 				{#if isRecategorizing}
 					<Icon name="progress_activity" size={20} class="animate-spin" />
@@ -97,7 +98,7 @@
 	</div>
 
 	{#if recategorizeError}
-		<div class="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+		<div data-testid="invoice-recategorize-error" class="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
 			Kategorisierung fehlgeschlagen: {recategorizeError}
 		</div>
 	{/if}
@@ -196,16 +197,18 @@
 					</div>
 				{/if}
 
-				{#if data.invoice.manualOverrideBy}
+				{#if data.invoice.manualOverrideReason}
 					<div class="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-lg">
 						<h3 class="text-sm font-medium text-amber-800 mb-1 flex items-center gap-2">
 							<Icon name="edit_note" size={16} />
 							Manuell überschrieben
 						</h3>
 						{#if data.invoice.manualOverrideReason}
-							<p class="text-sm text-amber-700">{data.invoice.manualOverrideReason}</p>
+							<p data-testid="invoice-override-reason" class="text-sm text-amber-700">{data.invoice.manualOverrideReason}</p>
 						{/if}
-						<p class="text-xs text-amber-600 mt-1">von {data.invoice.manualOverrideBy}</p>
+						{#if data.invoice.manualOverrideBy}
+							<p class="text-xs text-amber-600 mt-1">von {data.invoice.manualOverrideBy}</p>
+						{/if}
 					</div>
 				{/if}
 			</Card>

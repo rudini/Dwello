@@ -3883,8 +3883,18 @@ Every bug fix has a unit or database test.
   **Note:** `heating-profile.service.db.test.ts` expected the English error, the service returns the German one; `format.test.ts` expected a straight apostrophe, de-CH formats with ’.
 - [x] Predefined distribution keys "Per Person" and "By Consumption" removed on main (migration 0007)
 - [x] Invoices pages rebuilt with German E2E (Phase 11.X)
-- [ ] "Neu kategorisieren" without a running KI changes nothing and says nothing (backend answers success without category)
-- [ ] The reason for overriding the KI category is required in the edit form but not stored (no column; `manualOverrideReason` is dropped)
+- [x] "Neu kategorisieren" without a running KI changes nothing and says nothing (backend answers success without category)
+  **Note:** The backend now answers 503 "Die KI ist nicht erreichbar oder hat keine passende Kategorie geliefert." when the
+  KI names no category (`KI_UNAVAILABLE` in `backend/src/services/invoice.service.ts`, `backend/src/routes/invoices.ts`).
+  `src/lib/api.ts` read backend errors as `{ error: { message } }`, the backend sends `{ error: 'text' }`, so the detail
+  page showed nothing; it now takes the text. Tests: `backend/src/__tests__/invoice-categorization.pg.test.ts`,
+  `src/__tests__/invoice-pages.dom.test.ts`, E2E "Neu kategorisieren ohne laufende KI" (`invoice-detail.feature`)
+- [x] The reason for overriding the KI category is required in the edit form but not stored (no column; `manualOverrideReason` is dropped)
+  **Note:** PRD asks for the override justification to be logged. Column `invoices.manual_override_reason`
+  (migration `0009_invoice_override_reason.sql`, marker in `backend/src/db/migrate.ts`, `backend/src/db/schema.ts`),
+  accepted by the invoice body schema; the detail page shows the reason without `manualOverrideBy` (never set).
+  Tests: `invoice-categorization.pg.test.ts`, `migrations.pg.test.ts`, `invoice-pages.dom.test.ts`, E2E
+  "Kategorie der KI mit Begründung überschreiben" (`invoice-edit.feature`)
 - [ ] Login page and header follow the browser language (English browsers see them in English, the rest is German)
 - [ ] Majors without security reason: SvelteKit 3/Vite 8, Tailwind 4, Zod 4, TypeScript 7, ESLint 10, jose 6
 - [x] Phase 8 status in the table above was not re-evaluated; the progress task counts are outdated

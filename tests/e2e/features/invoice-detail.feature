@@ -21,6 +21,11 @@ Funktionalität: Rechnungsdetail
     Dann ist die Rechnung nicht umlagefähig
     Und erklärt ein Hinweis, dass die Kosten nach Mietrecht nicht auf die Mieter umlegbar sind
 
+  Szenario: Neu kategorisieren ohne laufende KI
+    Wenn der Liegenschaftsverwalter die Rechnung neu kategorisieren lässt
+    Dann erfährt der Liegenschaftsverwalter, dass die KI nicht erreichbar ist oder keine passende Kategorie geliefert hat
+    Und sieht der Liegenschaftsverwalter die Kategorie "Hauswart" und den Verteilschlüssel "Pro Fläche (m²)"
+
   Szenario: Rechnung löschen
     Wenn der Liegenschaftsverwalter die Rechnung löscht
     Dann ist der Liegenschaftsverwalter auf der Rechnungsliste

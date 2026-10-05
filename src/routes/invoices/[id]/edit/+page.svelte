@@ -177,6 +177,7 @@
 						</label>
 						<textarea
 							id="overrideReason"
+							data-testid="invoice-override-reason-input"
 							bind:value={overrideReason}
 							rows={2}
 							placeholder="Warum wird die KI-Kategorisierung überschrieben?"

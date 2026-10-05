@@ -310,6 +310,9 @@ export async function deleteInvoice(id: string): Promise<{ success: boolean; err
 	return { success: true };
 }
 
+/** Answer of the recategorization when the KI does not run or names no known category */
+export const KI_UNAVAILABLE = 'Die KI ist nicht erreichbar oder hat keine passende Kategorie geliefert.';
+
 /**
  * Re-categorize an invoice using LLM
  */
@@ -336,17 +339,19 @@ export async function recategorizeInvoiceById(id: string): Promise<{
 			amount: invoice.amount
 		});
 
-		// Update invoice with new categorization
-		if (result.category) {
-			await db
-				.update(invoices)
-				.set({
-					llmCategoryId: result.category.id,
-					llmConfidence: String(result.confidence),
-					updatedAt: new Date()
-				})
-				.where(eq(invoices.id, id));
+		if (!result.category) {
+			return { success: false, error: KI_UNAVAILABLE };
 		}
+
+		// Update invoice with new categorization
+		await db
+			.update(invoices)
+			.set({
+				llmCategoryId: result.category.id,
+				llmConfidence: String(result.confidence),
+				updatedAt: new Date()
+			})
+			.where(eq(invoices.id, id));
 
 		const updatedInvoice = await getInvoice(id);
 
@@ -354,7 +359,7 @@ export async function recategorizeInvoiceById(id: string): Promise<{
 			success: true,
 			invoice: updatedInvoice || undefined,
 			categorization: {
-				category: result.category?.name || null,
+				category: result.category.name,
 				confidence: result.confidence,
 				isAllowedUtilityCost: result.isAllowedUtilityCost,
 				reasoning: result.reasoning

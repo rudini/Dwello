@@ -141,6 +141,8 @@ async function failure(response: Response): Promise<ApiError> {
 	const errorData = await response.json().catch(() => ({
 		error: { code: 'UNKNOWN_ERROR', message: 'An unexpected error occurred' }
 	}));
+	// The backend names its error as text, e.g. { error: 'Invoice not found' }
+	if (typeof errorData.error === 'string') return { code: `HTTP_${response.status}`, message: errorData.error };
 	return errorData.error || { code: `HTTP_${response.status}`, message: response.statusText || 'Request failed' };
 }
 
