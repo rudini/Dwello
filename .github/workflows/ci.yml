@@ -71,8 +71,6 @@ jobs:
           --health-interval 5s
           --health-timeout 5s
           --health-retries 10
-    env:
-      DATABASE_URL: postgresql://dwello:dwello@localhost:5432/dwello
     steps:
       - uses: actions/checkout@v4
         with:
@@ -84,9 +82,6 @@ jobs:
       - uses: oven-sh/setup-bun@v2
       - run: npm ci
       - run: bun install --frozen-lockfile
-        working-directory: backend
-      - name: Apply database migrations
-        run: bun run db:migrate
         working-directory: backend
       - name: Frontend unit tests
         # Pull requests: only tests importing a changed file (all of them when package.json or the Vitest config change)
