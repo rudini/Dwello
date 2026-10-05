@@ -27,8 +27,7 @@ const token = crypto.randomUUID();
 const created = {
 	building: '',
 	apartments: [] as string[],
-	tenants: [] as string[],
-	contracts: [] as string[]
+	tenants: [] as string[]
 };
 const statements: string[] = [];
 let heatingProfileId: string;
@@ -98,7 +97,6 @@ async function rent(
 		monthlyAdvancePayment
 	});
 	created.tenants.push(tenant.id);
-	created.contracts.push(contract.id);
 	return contract.id;
 }
 
@@ -122,8 +120,9 @@ beforeAll(async () => {
 	contracts.b = await rent('Mieter B', large.id, '180', '2024-06-16');
 	contracts.c = await rent('Mieterin C', small.id, '120', '2023-04-01');
 
-	const category = async (name: string) =>
-		(await db.select().from(categories).where(eq(categories.name, name)))[0].id;
+	const categoryId = Object.fromEntries(
+		(await db.select().from(categories)).map((c) => [c.name, c.id])
+	);
 	const key = async (name: string) =>
 		(await db.select().from(distributionKeys).where(eq(distributionKeys.name, name)))[0].id;
 	const invoice = (
@@ -132,30 +131,29 @@ beforeAll(async () => {
 		amount: string,
 		invoiceDate: string,
 		isValidUtilityCost = true
-	) =>
-		category(categoryName).then((categoryId) => ({
-			buildingId: building.id,
-			categoryId,
-			distributionKeyId,
-			billingEntityName: 'Muster AG',
-			description: `${categoryName} ${invoiceDate}`,
-			amount,
-			invoiceDate,
-			isValidUtilityCost
-		}));
+	) => ({
+		buildingId: building.id,
+		categoryId: categoryId[categoryName],
+		distributionKeyId,
+		billingEntityName: 'Muster AG',
+		description: `${categoryName} ${invoiceDate}`,
+		amount,
+		invoiceDate,
+		isValidUtilityCost
+	});
 	const heatingKey = await key('Heating (Area 70% / Unit 30%)');
 	const perArea = await key('Per Area (m²)');
 	await db.insert(invoices).values([
-		await invoice('Heating', heatingKey, '3000.00', '2024-02-15'),
-		await invoice('Caretaker', perArea, '1200.00', '2024-03-31'),
-		await invoice('Cold Water', await key('Per Unit'), '600.00', '2024-05-31'),
-		await invoice('Waste Disposal', await key('Per Rooms'), '450.00', '2024-07-31'),
-		await invoice('Elevator', null, '330.00', '2024-08-31'),
+		invoice('Heating', heatingKey, '3000.00', '2024-02-15'),
+		invoice('Caretaker', perArea, '1200.00', '2024-03-31'),
+		invoice('Cold Water', await key('Per Unit'), '600.00', '2024-05-31'),
+		invoice('Waste Disposal', await key('Per Rooms'), '450.00', '2024-07-31'),
+		invoice('Elevator', null, '330.00', '2024-08-31'),
 		// Same category and key as the March invoice: both form one line item
-		await invoice('Caretaker', perArea, '300.00', '2024-09-30'),
+		invoice('Caretaker', perArea, '300.00', '2024-09-30'),
 		// Not umlagefähig and outside the period: neither appears in the statement
-		await invoice('Mortgage Interest', perArea, '5000.00', '2024-10-31', false),
-		await invoice('Caretaker', perArea, '999.00', '2023-12-31')
+		invoice('Mortgage Interest', perArea, '5000.00', '2024-10-31', false),
+		invoice('Caretaker', perArea, '999.00', '2023-12-31')
 	]);
 
 	const [profile] = await db
@@ -182,7 +180,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
 	for (const id of statements) await deleteStatement(id);
-	for (const id of created.contracts) await deleteContract(id);
+	for (const id of Object.values(contracts)) await deleteContract(id);
 	for (const id of created.tenants) await deleteTenant(id);
 	await db.delete(invoices).where(eq(invoices.buildingId, created.building));
 	for (const id of created.apartments) await deleteApartment(id);
