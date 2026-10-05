@@ -92,7 +92,7 @@ describe('Heating Profile Service - Database Operations', () => {
 
 			const result = await getHeatingProfile('test-id');
 
-			expect(result).toEqual(mockProfile);
+			expect<unknown>(result).toEqual(mockProfile);
 		});
 	});
 
@@ -111,7 +111,7 @@ describe('Heating Profile Service - Database Operations', () => {
 
 			const result = await getHeatingProfileByName('Mittelland');
 
-			expect(result).toEqual(mockProfile);
+			expect<unknown>(result).toEqual(mockProfile);
 		});
 	});
 

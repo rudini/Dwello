@@ -43,7 +43,6 @@ const createMockProfile = (percentages: Partial<MonthlyPercentages> = {}): Heati
 		octoberPct: String(merged.october),
 		novemberPct: String(merged.november),
 		decemberPct: String(merged.december),
-		isActive: true,
 		createdAt: new Date(),
 		updatedAt: new Date()
 	};

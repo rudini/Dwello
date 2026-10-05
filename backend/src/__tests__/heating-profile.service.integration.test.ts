@@ -197,12 +197,12 @@ describe('Heating Profile Service - Database Functions (Mocked)', () => {
 			return {
 				id: 'mittelland-1',
 				name: mittelland.name,
-				nameDE: mittelland.nameDE,
-				nameFR: mittelland.nameFR,
-				nameIT: mittelland.nameIT,
-				nameEN: mittelland.nameEN,
-				type: mittelland.type,
-				description: mittelland.description,
+				nameDE: mittelland.nameDE ?? null,
+				nameFR: mittelland.nameFR ?? null,
+				nameIT: mittelland.nameIT ?? null,
+				nameEN: mittelland.nameEN ?? null,
+				type: mittelland.type ?? 'predefined',
+				description: mittelland.description ?? null,
 				januaryPct: mittelland.januaryPct,
 				februaryPct: mittelland.februaryPct,
 				marchPct: mittelland.marchPct,
@@ -215,7 +215,6 @@ describe('Heating Profile Service - Database Functions (Mocked)', () => {
 				octoberPct: mittelland.octoberPct,
 				novemberPct: mittelland.novemberPct,
 				decemberPct: mittelland.decemberPct,
-				isActive: true,
 				createdAt: new Date(),
 				updatedAt: new Date()
 			};
@@ -286,7 +285,6 @@ describe('Heating Profile Service - Database Functions (Mocked)', () => {
 			octoberPct: '10',
 			novemberPct: '14',
 			decemberPct: '20',
-			isActive: true,
 			createdAt: new Date(),
 			updatedAt: new Date()
 		});
@@ -331,7 +329,6 @@ describe('Heating Profile Service - Database Functions (Mocked)', () => {
 			octoberPct: '10.0',
 			novemberPct: '14.0',
 			decemberPct: '19.0',
-			isActive: true,
 			createdAt: new Date(),
 			updatedAt: new Date()
 		});
