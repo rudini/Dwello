@@ -4,6 +4,7 @@ import {
 	channelSelect,
 	cityInput,
 	emailInput,
+	languageSelect,
 	postalCodeInput,
 	submitTenantButton
 } from '../interactions/tenant-form';
@@ -20,5 +21,10 @@ export const correspondByLetter = (address: string, place: string) => async (act
 export const correspondByEmailWithoutAddress = async (actor: Actor) => {
 	await channelSelect(actor.page).selectOption('email');
 	await emailInput(actor.page).fill('');
+	await submitTenantButton(actor.page).click();
+};
+
+export const chooseLanguage = (language: string) => async (actor: Actor) => {
+	await languageSelect(actor.page).selectOption({ label: language });
 	await submitTenantButton(actor.page).click();
 };

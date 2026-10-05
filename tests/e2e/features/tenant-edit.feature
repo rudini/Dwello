@@ -14,6 +14,13 @@ Funktionalität: Mieter bearbeiten
     Dann ist der Liegenschaftsverwalter auf der Detailseite von "Anna Keller"
     Und "Anna Keller" erhält Korrespondenz "Per Brief"
 
+  Szenario: Sprache der Korrespondenz festlegen
+    Angenommen "Anna Keller" wünscht Korrespondenz per Brief
+    Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Mieters "Anna Keller"
+    Wenn der Liegenschaftsverwalter die Sprache "Französisch" festlegt
+    Dann ist der Liegenschaftsverwalter auf der Detailseite von "Anna Keller"
+    Und "Anna Keller" erhält Korrespondenz auf "Französisch"
+
   Szenario: Korrespondenz per E-Mail braucht eine E-Mail-Adresse
     Wenn der Liegenschaftsverwalter die Korrespondenz per E-Mail festlegt, ohne E-Mail-Adresse
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Für die Korrespondenz per E-Mail ist eine E-Mail-Adresse erforderlich"

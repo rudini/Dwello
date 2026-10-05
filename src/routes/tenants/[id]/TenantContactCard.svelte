@@ -2,6 +2,7 @@
 	import Card from '$lib/components/Card.svelte';
 	import Icon from '$lib/components/Icon.svelte';
 	import type { Tenant } from '$lib/types';
+	import { languageLabels } from '$lib/tenant';
 
 	let { tenant }: { tenant: Tenant } = $props();
 
@@ -36,6 +37,15 @@
 			<div>
 				<dt class="text-sm text-gray-500">Korrespondenz</dt>
 				<dd class="text-gray-900" data-testid="tenant-channel">{channel}</dd>
+			</div>
+		</div>
+		<div class="flex items-start gap-3">
+			<Icon name="translate" size={20} class="text-gray-400 mt-0.5" />
+			<div>
+				<dt class="text-sm text-gray-500">Sprache</dt>
+				<dd class="text-gray-900" data-testid="tenant-language">
+					{languageLabels[tenant.language] ?? languageLabels.de}
+				</dd>
 			</div>
 		</div>
 		<div class="flex items-start gap-3">

@@ -5,6 +5,7 @@
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import { deleteConfig, getConfig, setConfig } from '../services/config.service';
 import { deleteStatement } from '../services/statement.service';
+import { updateTenant } from '../services/tenant.service';
 import { callApi } from './helpers/auth';
 import { createRental } from './helpers/rental';
 
@@ -92,6 +93,34 @@ describe('POST /api/v1/statements/:id/generate-pdf', () => {
 
 			await call(`/${statementId}`, json('PUT', { notes: 'Ratenzahlung vereinbart' }));
 			expect(await pdfGeneratedAt()).not.toBeNull();
+		}));
+});
+
+// Title in the document information of the stored PDF (PDFKit keeps it in an object of its own)
+async function pdfTitle() {
+	const pdf = Buffer.from(await (await callApi(`/api/v1/statements/${statementId}/pdf`)).arrayBuffer()).toString('latin1');
+	const [, ref] = pdf.match(/\/Title (\d+) 0 R/) ?? [];
+	const [, raw = ''] = pdf.match(new RegExp(`\\n${ref} 0 obj\\n\\((.*?)\\)\\nendobj`, 's')) ?? [];
+	// PDFKit writes non-ASCII text as UTF-16BE behind a byte order mark
+	return raw.startsWith('\xfe\xff') ? Buffer.from(raw.slice(2), 'latin1').swap16().toString('utf16le') : raw;
+}
+
+describe('PDF in der Sprache des Mieters', () => {
+	it('erstellt das PDF in der Sprache, die beim Mieter hinterlegt ist', () =>
+		withIban(async () => {
+			await updateTenant(rental.tenant, { language: 'fr' });
+			try {
+				await generatePdf();
+				expect(await pdfTitle()).toStartWith('Décompte des charges');
+			} finally {
+				await updateTenant(rental.tenant, { language: 'de' });
+			}
+		}));
+
+	it('erstellt das PDF ohne andere Angabe auf Deutsch', () =>
+		withIban(async () => {
+			await generatePdf();
+			expect(await pdfTitle()).toStartWith('Nebenkostenabrechnung');
 		}));
 });
 

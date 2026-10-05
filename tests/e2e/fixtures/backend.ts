@@ -169,6 +169,10 @@ export function testData(request: APIRequestContext, token: string) {
 		},
 
 		// E-mail address and postal address, so both channels can deliver
+		async language(tenantTitle: string, language: string) {
+			await put(`tenants/${ids.get(tenantTitle)}`, { language });
+		},
+
 		async correspondence(tenantTitle: string, channel: 'email' | 'letter') {
 			const email = `${ids.get(tenantTitle)}@dwello.test`;
 			await put(`tenants/${ids.get(tenantTitle)}`, {

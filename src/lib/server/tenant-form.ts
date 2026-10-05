@@ -1,4 +1,5 @@
 import { fail, redirect } from '@sveltejs/kit';
+import { languageLabels } from '$lib/tenant';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
@@ -14,7 +15,8 @@ function readFields(formData: FormData) {
 		address: field('address'),
 		postalCode: field('postalCode'),
 		city: field('city'),
-		correspondenceChannel: field('correspondenceChannel') === 'email' ? 'email' : 'letter'
+		correspondenceChannel: field('correspondenceChannel') === 'email' ? 'email' : 'letter',
+		language: field('language') in languageLabels ? field('language') : 'de'
 	};
 }
 
