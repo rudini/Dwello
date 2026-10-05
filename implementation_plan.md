@@ -3851,6 +3851,10 @@ Every bug fix has a unit or database test.
     E2E stack, seeds one building/apartment/tenant/contract/invoice/statement/configuration record for `[id]` pages
   - Images live on the branch `ui-screenshots` (`pr-<nr>/<sha>/`), linked with `?raw=true` (private repository)
   - Tests: `tests/unit/ui-screenshot-routes.test.ts`
+  - [x] Changes are framed in red: the base branch's frontend (checkout in `UI_BASE_DIR`) runs on 3200 against the same
+    backend and data; both renderings are compared cell by cell (`tests/ui-screenshots/changed-areas.ts`), the
+    comment shows the framed page and the page before in a collapsible section; tests:
+    `tests/unit/ui-screenshot-changed-areas.test.ts`
 - Duplicated code removed so `fallow audit` passes against main:
   - List pages buildings/contracts/invoices/tenants use `SearchField`, `FilterSelect`, `FilterActions` and `ListPagination` (`src/lib/list-url.ts`)
   - New and edit contract share `src/routes/contracts/ContractForm.svelte` (logic in `src/lib/contract-form.ts`)
