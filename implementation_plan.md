@@ -3843,6 +3843,14 @@ Every bug fix has a unit or database test.
 - Mail module with SMTP and Resend, mail catcher for E2E (36cb488)
 - Dependencies upgraded, vulnerabilities fixed (bb7721b)
 - GitHub Actions CI (`.github/workflows/ci.yml`): build, unit tests (frontend + backend on PostgreSQL), E2E (Playwright, all browsers), fallow audit; on pushes to main and pull requests
+- [x] UI screenshots on pull requests (CI job `ui-screenshots`): the pages a pull request changes are photographed and
+  posted as one comment on the pull request, updated on every push
+  - `tests/ui-screenshots/affected-routes.ts` maps changed files to pages: changed page, every page below a changed
+    layout, every page importing a changed component/module (transitively), every page for `src/app.*`/`src/hooks.*`
+  - `tests/ui-screenshots/screenshots.spec.ts` (config `playwright.screenshots.config.ts`, Chromium 1440×900) runs on the
+    E2E stack, seeds one building/apartment/tenant/contract/invoice/statement/configuration record for `[id]` pages
+  - Images live on the branch `ui-screenshots` (`pr-<nr>/<sha>/`), linked with `?raw=true` (private repository)
+  - Tests: `tests/unit/ui-screenshot-routes.test.ts`
 - Duplicated code removed so `fallow audit` passes against main:
   - List pages buildings/contracts/invoices/tenants use `SearchField`, `FilterSelect`, `FilterActions` and `ListPagination` (`src/lib/list-url.ts`)
   - New and edit contract share `src/routes/contracts/ContractForm.svelte` (logic in `src/lib/contract-form.ts`)
@@ -3987,7 +3995,7 @@ unit or database tests.
 
 ---
 
-**Last Updated:** October 3, 2026
+**Last Updated:** October 5, 2026
 **Total Duration:** ~22 weeks
 **Target:** Full MVP production-ready system
 
