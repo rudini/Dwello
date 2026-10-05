@@ -1,6 +1,6 @@
 [test]
 # Coverage configuration
-coverage = true
+# Coverage only with --coverage, as in `bun run test` (minimum checked by scripts/coverage-check.ts)
 coverageDir = "coverage"
 coverageReporter = ["text", "lcov"]
 
