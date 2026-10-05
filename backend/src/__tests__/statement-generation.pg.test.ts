@@ -1,0 +1,335 @@
+/**
+ * Characterization tests: statement generation pinned against the real PostgreSQL database
+ *
+ * They record what POST /api/v1/statements/generate computes and stores today, so the move of
+ * the settlement logic into modules (phase 22.3/22.4) cannot change any amount unnoticed.
+ * The expected values were observed from the code, then checked by hand (see comments).
+ *
+ * Building "Lindenhof", Abrechnungsperiode 1.1.–31.12.2024 (leap year, 366 days):
+ * - 1.01: 80 m², 3.5 rooms. Tenant A 1.1.–30.4. (121 days), vacant 1.5.–15.6., tenant B from 16.6. (199 days)
+ * - 1.02: 40 m², 1.5 rooms. Tenant C all year (366 days)
+ * - 1.03: 30 m², 2.5 rooms. Empty all year
+ * Totals: 150 m², 7.5 rooms, 3 units.
+ */
+
+import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
+import { eq } from 'drizzle-orm';
+import { db } from '../db/connection';
+import { categories, distributionKeys, heatingProfiles, invoices } from '../db/schema';
+import { createBuilding, deleteBuilding } from '../services/building.service';
+import { createApartment, deleteApartment } from '../services/apartment.service';
+import { createTenant, deleteTenant } from '../services/tenant.service';
+import { createContract, deleteContract } from '../services/contract.service';
+import { deleteStatement } from '../services/statement.service';
+import { sendJson } from './helpers/auth';
+
+const token = crypto.randomUUID();
+const created = {
+	building: '',
+	apartments: [] as string[],
+	tenants: [] as string[],
+	contracts: [] as string[]
+};
+const statements: string[] = [];
+let heatingProfileId: string;
+const contracts = { a: '', b: '', c: '' };
+
+type StoredStatement = {
+	rentalDays: number;
+	totalCosts: string;
+	totalAdvancePayments: string;
+	managementFee: string;
+	balance: string;
+	lineItems: {
+		description: string;
+		totalAmount: string;
+		tenantShare: string;
+		sharePercentage: string;
+	}[];
+};
+
+/** Generates the statement for 2024 like the UI does and reads back what was stored */
+async function generate(contractId: string, heatingProfile?: string) {
+	const response = await sendJson('POST', '/api/v1/statements/generate', {
+		contractId,
+		buildingId: created.building,
+		periodStart: '2024-01-01',
+		periodEnd: '2024-12-31',
+		heatingProfileId: heatingProfile,
+		// Explicit, so a changed default in the configuration does not change the pinned amounts
+		managementFeePercent: 3
+	});
+	expect(response.status).toBe(201);
+	const { id } = (await response.json()) as { id: string };
+	statements.push(id);
+
+	const stored = (await (
+		await sendJson('GET', `/api/v1/statements/${id}`)
+	).json()) as StoredStatement;
+	return {
+		rentalDays: stored.rentalDays,
+		totalCosts: stored.totalCosts,
+		totalAdvancePayments: stored.totalAdvancePayments,
+		managementFee: stored.managementFee,
+		balance: stored.balance,
+		lines: stored.lineItems.map((l) => [
+			l.description,
+			l.totalAmount,
+			l.tenantShare,
+			l.sharePercentage
+		])
+	};
+}
+
+async function rent(
+	firstName: string,
+	apartmentId: string,
+	monthlyAdvancePayment: string,
+	startDate: string,
+	endDate?: string
+) {
+	const tenant = await createTenant({ firstName, lastName: `Lindenhof ${token}` });
+	const contract = await createContract({
+		apartmentId,
+		tenantId: tenant.id,
+		startDate,
+		endDate,
+		baseRent: '1500',
+		monthlyAdvancePayment
+	});
+	created.tenants.push(tenant.id);
+	created.contracts.push(contract.id);
+	return contract.id;
+}
+
+beforeAll(async () => {
+	const building = await createBuilding({
+		name: `Lindenhof ${token}`,
+		address: 'Lindenweg 3',
+		postalCode: '3000',
+		city: 'Bern',
+		canton: 'BE'
+	});
+	created.building = building.id;
+	const apartment = (number: string, area: string, rooms: string) =>
+		createApartment({ buildingId: building.id, number, floor: 1, area, rooms });
+	const large = await apartment('1.01', '80', '3.5');
+	const small = await apartment('1.02', '40', '1.5');
+	const empty = await apartment('1.03', '30', '2.5');
+	created.apartments.push(large.id, small.id, empty.id);
+
+	contracts.a = await rent('Mieterin A', large.id, '200', '2024-01-01', '2024-04-30');
+	contracts.b = await rent('Mieter B', large.id, '180', '2024-06-16');
+	contracts.c = await rent('Mieterin C', small.id, '120', '2023-04-01');
+
+	const category = async (name: string) =>
+		(await db.select().from(categories).where(eq(categories.name, name)))[0].id;
+	const key = async (name: string) =>
+		(await db.select().from(distributionKeys).where(eq(distributionKeys.name, name)))[0].id;
+	const invoice = (
+		categoryName: string,
+		distributionKeyId: string | null,
+		amount: string,
+		invoiceDate: string,
+		isValidUtilityCost = true
+	) =>
+		category(categoryName).then((categoryId) => ({
+			buildingId: building.id,
+			categoryId,
+			distributionKeyId,
+			billingEntityName: 'Muster AG',
+			description: `${categoryName} ${invoiceDate}`,
+			amount,
+			invoiceDate,
+			isValidUtilityCost
+		}));
+	const heatingKey = await key('Heating (Area 70% / Unit 30%)');
+	const perArea = await key('Per Area (m²)');
+	await db.insert(invoices).values([
+		await invoice('Heating', heatingKey, '3000.00', '2024-02-15'),
+		await invoice('Caretaker', perArea, '1200.00', '2024-03-31'),
+		await invoice('Cold Water', await key('Per Unit'), '600.00', '2024-05-31'),
+		await invoice('Waste Disposal', await key('Per Rooms'), '450.00', '2024-07-31'),
+		await invoice('Elevator', null, '330.00', '2024-08-31'),
+		// Same category and key as the March invoice: both form one line item
+		await invoice('Caretaker', perArea, '300.00', '2024-09-30'),
+		// Not umlagefähig and outside the period: neither appears in the statement
+		await invoice('Mortgage Interest', perArea, '5000.00', '2024-10-31', false),
+		await invoice('Caretaker', perArea, '999.00', '2023-12-31')
+	]);
+
+	const [profile] = await db
+		.insert(heatingProfiles)
+		.values({
+			name: `Lindenhof ${token}`,
+			type: 'custom',
+			januaryPct: '18',
+			februaryPct: '14',
+			marchPct: '11',
+			aprilPct: '5',
+			mayPct: '1',
+			junePct: '1',
+			julyPct: '0',
+			augustPct: '0',
+			septemberPct: '2',
+			octoberPct: '8',
+			novemberPct: '14',
+			decemberPct: '26'
+		})
+		.returning();
+	heatingProfileId = profile.id;
+});
+
+afterAll(async () => {
+	for (const id of statements) await deleteStatement(id);
+	for (const id of created.contracts) await deleteContract(id);
+	for (const id of created.tenants) await deleteTenant(id);
+	await db.delete(invoices).where(eq(invoices.buildingId, created.building));
+	for (const id of created.apartments) await deleteApartment(id);
+	await deleteBuilding(created.building);
+	await db.delete(heatingProfiles).where(eq(heatingProfiles.id, heatingProfileId));
+});
+
+// Line items: [category, building total, tenant share, share of the apartment's costs in %]
+const lineC = [
+	// Heating key 0.7 × area + 0.3 × units: (0.7 × 40 + 0.3) / (0.7 × 150 + 0.9) × 3000 = 801.70
+	['Heating', '3000.00', '801.70', '100.0000'],
+	// Both caretaker invoices (1200 + 300) by area: 40 / 150 × 1500
+	['Caretaker', '1500.00', '400.00', '100.0000'],
+	// Per unit: 600 / 3
+	['Cold Water', '600.00', '200.00', '100.0000'],
+	// Per rooms: 1.5 / 7.5 × 450
+	['Waste Disposal', '450.00', '90.00', '100.0000'],
+	// Invoice without distribution key: split equally, 330 / 3
+	['Elevator', '330.00', '110.00', '100.0000']
+];
+
+describe('Mehrere Verteilschlüssel', () => {
+	it('verteilt jede Kostenart nach ihrem Schlüssel und lässt Hypothekarzins und Vorjahresrechnung weg', async () => {
+		expect(await generate(contracts.c)).toEqual({
+			// Contract started 2023, counted from the start of the period
+			rentalDays: 366,
+			lines: lineC,
+			// Subtotal 1601.70 + 3 % management fee 48.05
+			managementFee: '48.05',
+			totalCosts: '1649.75',
+			// 12 × 120
+			totalAdvancePayments: '1440.00',
+			balance: '209.75'
+		});
+	});
+});
+
+describe('Mieterwechsel in der Abrechnungsperiode', () => {
+	it('belastet die ausziehende Mieterin nach Tagen (121 von 366)', async () => {
+		expect(await generate(contracts.a)).toEqual({
+			rentalDays: 121,
+			lines: [
+				// Apartment share 56.3 / 105.9 × 3000 = 1594.90, × 121 / 366
+				['Heating', '3000.00', '527.28', '33.0600'],
+				// 80 / 150 × 1500 = 800, × 121 / 366
+				['Caretaker', '1500.00', '264.48', '33.0600'],
+				['Cold Water', '600.00', '66.12', '33.0600'],
+				// 3.5 / 7.5 × 450 = 210, × 121 / 366
+				['Waste Disposal', '450.00', '69.43', '33.0600'],
+				['Elevator', '330.00', '36.37', '33.0600']
+			],
+			// Subtotal 963.68 + 3 %
+			managementFee: '28.91',
+			totalCosts: '992.59',
+			// January to April, 4 × 200
+			totalAdvancePayments: '800.00',
+			balance: '192.59'
+		});
+	});
+
+	it('belastet den einziehenden Mieter nach Tagen (199 von 366) und rechnet den Juni anteilig ab', async () => {
+		expect(await generate(contracts.b)).toEqual({
+			rentalDays: 199,
+			lines: [
+				['Heating', '3000.00', '867.17', '54.3700'],
+				['Caretaker', '1500.00', '434.97', '54.3700'],
+				['Cold Water', '600.00', '108.74', '54.3700'],
+				['Waste Disposal', '450.00', '114.18', '54.3700'],
+				['Elevator', '330.00', '59.81', '54.3700']
+			],
+			// Subtotal 1584.87 + 3 %
+			managementFee: '47.55',
+			totalCosts: '1632.42',
+			// 16.–30. June = 15 / 30 × 180, plus July to December 6 × 180
+			totalAdvancePayments: '1170.00',
+			balance: '462.42'
+		});
+	});
+});
+
+describe('Leerstand', () => {
+	it('lässt die Kosten der leeren Wohnung und der Lücke zwischen den Mietern beim Vermieter', async () => {
+		const charged = [
+			await generate(contracts.a),
+			await generate(contracts.b),
+			await generate(contracts.c)
+		];
+		const landlord = charged[0].lines.map(([category, total], i) => [
+			category,
+			(Number(total) - charged.reduce((sum, s) => sum + Number(s.lines[i][2]), 0)).toFixed(2)
+		]);
+
+		// Empty apartment 1.03 all year plus apartment 1.01 from 1.5. to 15.6. (46 days)
+		expect(landlord).toEqual([
+			// 603.40 + 46 / 366 × 1594.90
+			['Heating', '803.85'],
+			// 300 + 46 / 366 × 800
+			['Caretaker', '400.55'],
+			['Cold Water', '225.14'],
+			// 150 + 46 / 366 × 210
+			['Waste Disposal', '176.39'],
+			// 110 + 46 / 366 × 110 = 123.83; the tenants' shares are rounded separately
+			['Elevator', '123.82']
+		]);
+	});
+});
+
+// Runs in UTC or Swiss time. In time zones behind UTC (e.g. America/New_York) the heating profile shifts by a day
+// and the heating shares change (A: 778.93 instead of 765.55); that is today's behavior, not pinned here.
+describe('Heizprofil', () => {
+	it('belastet die ausziehende Mieterin mit Januar bis April gemäss Heizprofil, die übrigen Kosten nach Tagen', async () => {
+		expect(await generate(contracts.a, heatingProfileId)).toEqual({
+			rentalDays: 121,
+			lines: [
+				// 18 + 14 + 11 + 5 = 48 % of 1594.90
+				['Heating', '3000.00', '765.55', '48.0000'],
+				['Caretaker', '1500.00', '264.48', '33.0600'],
+				['Cold Water', '600.00', '66.12', '33.0600'],
+				['Waste Disposal', '450.00', '69.43', '33.0600'],
+				['Elevator', '330.00', '36.37', '33.0600']
+			],
+			managementFee: '36.06',
+			totalCosts: '1238.01',
+			totalAdvancePayments: '800.00',
+			balance: '438.01'
+		});
+	});
+
+	it('belastet den einziehenden Mieter ab 16. Juni gemäss Heizprofil', async () => {
+		expect(await generate(contracts.b, heatingProfileId)).toEqual({
+			rentalDays: 199,
+			lines: [
+				// June 1 % × 15 / 30 days + September to December 2 + 8 + 14 + 26 = 50.5 % of 1594.90
+				['Heating', '3000.00', '805.42', '50.5000'],
+				['Caretaker', '1500.00', '434.97', '54.3700'],
+				['Cold Water', '600.00', '108.74', '54.3700'],
+				['Waste Disposal', '450.00', '114.18', '54.3700'],
+				['Elevator', '330.00', '59.81', '54.3700']
+			],
+			managementFee: '45.69',
+			totalCosts: '1568.81',
+			totalAdvancePayments: '1170.00',
+			balance: '398.81'
+		});
+	});
+
+	it('ergibt für ein ganzes Jahr dieselbe Abrechnung wie ohne Heizprofil', async () => {
+		expect((await generate(contracts.c, heatingProfileId)).lines).toEqual(lineC);
+	});
+});

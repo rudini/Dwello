@@ -3529,12 +3529,14 @@ Behavior-preserving restructuring of the backend into three modules (`rental`, `
 
 ### 22.2 Characterization Tests for the Core Domain
 
-- [ ] Review existing tests for `calculation`, `prorating`, `heating-profile`, `distribution-key`
-- [ ] Add tests that pin today's statement results (real PostgreSQL, no mocks)
-  - [ ] Tenant change within the Abrechnungsperiode
-  - [ ] Empty apartment
-  - [ ] Heizprofil
-  - [ ] Multiple Verteilschlüssel
+- [x] Review existing tests for `calculation`, `prorating`, `heating-profile`, `distribution-key`
+  **Note:** Pure functions are well covered by unit tests (`prorating.service.test.ts`, `heating-profile.service.test.ts`, `formula.service.test.ts`, `advance-payments.test.ts`, `management-fee.test.ts`). The async parts are tested only against mocks (`prorating.service.integration.test.ts`, `heating-profile.service.db/integration.test.ts`). Real-DB coverage: `distribution-key.pg.test.ts` (keys evaluate, sums match), `heating-distribution.pg.test.ts` (heating line via `/preview`), `management-fee.pg.test.ts` (fee via `/preview`). Gap: `calculateStatementForContract` and the stored result of `/generate` (line items, totals, Akonto, Saldo) were not pinned.
+- [x] Add tests that pin today's statement results (real PostgreSQL, no mocks)
+  - [x] Tenant change within the Abrechnungsperiode
+  - [x] Empty apartment
+  - [x] Heizprofil
+  - [x] Multiple Verteilschlüssel
+  **Note:** `backend/src/__tests__/statement-generation.pg.test.ts` (7 tests). Interface: `POST /api/v1/statements/generate`, then `GET /api/v1/statements/:id`; both stay stable through 22.3/22.4 while the internals move. One building (80/40/30 m², one apartment empty), 2024, five Kostenarten with four keys plus an invoice without key; excluded: not umlagefähig, previous year. Values observed and checked by hand; mutations of day count, rounding, heating proration, Akonto and management fee each turn tests red. Observed today: heating-profile shares depend on the server time zone (correct in UTC/Swiss time, different behind UTC, e.g. America/New_York); apartment share is rounded to cents before prorating, so landlord remainders can be off by 1 Rappen; `generateStatementNumber` still uses a random placeholder sequence. **Status:** ✅ Complete
 
 ### 22.3 Module Folders and Boundary Rule
 
