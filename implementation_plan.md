@@ -2693,7 +2693,7 @@ Validation is defined inline in route handlers for type safety.
   - [x] Vacancy periods (1 test) — same outline (April vacant, the landlord pays)
   - [x] All three combined (1 test) — same outline, `statement-generate.feature`
   - [x] Management fee calculation (1 test) — `management-fee*.test.ts`, "Erhöhte Verwaltungspauschale"
-  - [x] Swiss law compliance (1 test) — `utility-validation.service*.test.ts` (76 tests)
+  - [x] Swiss law compliance (1 test) — `utility-validation.service.test.ts` + `utility-validation.pg.test.ts` (76 tests)
 
 ### 15.2 Cross-Component Integration
 
@@ -4038,6 +4038,39 @@ manager's workflow (Gebäude → Wohnungen → Mieter/Vertrag → Rechnungen →
 - [ ] Rename "Konfiguration" (sidebar) to "Einstellungen" (page title, user menu) once the E2E feature tables are updated
 - [ ] Contracts and invoices lists: rows could open the record on click like the cards do
 - [ ] Filters still need "Suchen"; applying a select on change would be quicker (the E2E tasks click the button)
+
+---
+
+## Session 7 - October 2026: Test Pyramid toward ATDD (Dave Farley)
+
+Branch `claude/laughing-knuth-xkt849`. Closes the gaps between the test suite and acceptance-test-driven development:
+acceptance scenario first, unit TDD as the inner loop, integration tests only against a real database.
+
+### Done ✅
+- [x] ATDD rule in `CLAUDE.md`: scenario first with `@wip`, a feature is done when its scenario is green; testing
+  strategy table rewritten (acceptance, integration on `dwello_test`, unit)
+- [x] PostgreSQL tests on their own database: `backend/scripts/test-db.ts` (preload of `bun run test:pg`) recreates
+  `dwello_test` from the migrations (`TEST_DATABASE_URL` overrides); `scripts/e2e-db.ts` comment/log generalised;
+  CI no longer migrates the development database for the unit-test job
+- [x] Mirror and DB-mock tests replaced: removed `contract.service.test.ts` and `statement.service.test.ts` (tested
+  copies of the logic), `heating-profile.service.db.test.ts` and `heating-profile.service.integration.test.ts`
+  (mocked DB; covered by `heating-profile.service.test.ts` and `heating-profile-admin.pg.test.ts`),
+  `tests/unit/example.test.ts`; new `contract-overlap.pg.test.ts` (3), `prorating.pg.test.ts` (4, replaces
+  `prorating.service.integration.test.ts`), `utility-validation.pg.test.ts` (23, real categories instead of a mocked
+  category service); `helpers/rental.ts` accepts an end date
+- [x] E2E against the production build: `playwright.config.ts` starts the frontend with `npm run build && node build`
+  (adapter-node, `PORT`/`ORIGIN`) instead of `vite dev`; README and `docs/claude-reference.md` updated
+
+### Verification
+- Backend: 244 unit tests and 155 PostgreSQL tests pass; development database untouched by the PostgreSQL tests
+  (`pg_stat_database.tup_inserted` unchanged); mutations of the overlap boundary and of the heating-profile lookup
+  make the new tests fail
+- Frontend: 466 unit tests pass; lint 0 problems, tsc 0 errors (frontend and backend)
+- E2E (Chromium): 256 passed against the production build (dev server before: 256 passed)
+
+### Open
+- [ ] Second protocol driver (backend API) so business scenarios can run without a browser
+- [ ] Coverage threshold in Vitest and bun, enforced in CI
 
 ---
 
