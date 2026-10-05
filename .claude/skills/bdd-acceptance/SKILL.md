@@ -23,29 +23,27 @@ playwright-bdd is already set up in this repo. **Extend the existing setup; neve
 
 ## Leading concepts
 
-| Term                  | Meaning                                                                                      |
-| --------------------- | -------------------------------------------------------------------------------------------- |
-| **Actor**             | Named role from the domain ("Student", "Lecturer", "Expert") — one per scenario, one browser |
-| **Task**              | What the Actor tries to accomplish ("Submit Thesis", "Publish Review") — maps to `When`      |
-| **Question**          | What the Actor observes to verify state ("How many theses are listed?") — maps to `Then`     |
-| **Interaction**       | Atomic `page.getByTestId()` call — lives in `interactions/`, called by Tasks and Questions   |
-| **Page scope**        | One `.feature` file per distinct page/screen — keeps scenarios short and independent         |
-| **Precondition step** | A `Given` that seeds server state via API call or sets browser state via `addInitScript`     |
-| **Tracer run**        | First feature fully wired and green — proves the pipeline before scaling                     |
+| Term | Meaning |
+|---|---|
+| **Actor** | Named role from the domain ("Student", "Lecturer", "Expert") — one per scenario, one browser |
+| **Task** | What the Actor tries to accomplish ("Submit Thesis", "Publish Review") — maps to `When` |
+| **Question** | What the Actor observes to verify state ("How many theses are listed?") — maps to `Then` |
+| **Interaction** | Atomic `page.getByTestId()` call — lives in `interactions/`, called by Tasks and Questions |
+| **Page scope** | One `.feature` file per distinct page/screen — keeps scenarios short and independent |
+| **Precondition step** | A `Given` that seeds server state via API call or sets browser state via `addInitScript` |
+| **Tracer run** | First feature fully wired and green — proves the pipeline before scaling |
 
 ## Phase 1 — Discover the system
 
 **Branch here — UI system or API-only?**
 
 Explore the codebase to build a system map:
-
 - Routes/pages: router files, `pages/`, `app/`, controllers, view templates
 - API endpoints: REST routes, GraphQL schema, OpenAPI spec
 - Domain entities: model files, schema definitions, type files
 - User roles: auth middleware, route guards, role enums
 
 Output a flat list:
-
 ```
 Type:     UI (SPA / server-rendered) | API-only
 Pages:    /login, /dashboard, /thesis-list, /thesis/:id
@@ -60,7 +58,6 @@ Roles:    Student, Lecturer, Expert, Guest
 Draft candidate domain terms from discovery. Prefer names from the code (model names, route labels, UI copy). Flag ambiguous or technical names.
 
 Present to the user:
-
 ```
 Actors:    Student, Lecturer, Expert, Guest
 Entities:  Thesis, Submission, Review
@@ -81,13 +78,11 @@ Do this before writing any feature files. A broken pipeline discovered after 20 
 **If playwright-bdd is already configured** (check `playwright.config.ts` for `defineBddConfig`), skip install and config. Only add missing fixtures and folders, then do the tracer run.
 
 ### Install
-
 ```bash
 npm install -D playwright-bdd @playwright/test
 ```
 
 ### Directory layout
-
 ```
 tests/
   .auth/              ← storageState files per role (gitignored)
@@ -101,49 +96,41 @@ tests/
 ```
 
 ### Actor class
-
 ```typescript
 // tests/fixtures/actor.ts
 import { Page } from '@playwright/test';
 
 export class Actor {
-	constructor(
-		public readonly name: string,
-		public readonly page: Page
-	) {}
+  constructor(public readonly name: string, public readonly page: Page) {}
 
-	async perform(task: (actor: Actor) => Promise<void>): Promise<void> {
-		await task(this);
-	}
+  async perform(task: (actor: Actor) => Promise<void>): Promise<void> {
+    await task(this);
+  }
 }
 ```
 
 ### Fixtures
-
 ```typescript
 // tests/fixtures/index.ts
 import { test as base } from 'playwright-bdd';
 import { Actor } from './actor';
 
 type Fixtures = {
-	student: Actor;
-	lecturer: Actor;
-	expert: Actor;
-	guest: Actor;
-	names: Map<string, string>; // Gherkin name -> UUID-namespaced name created in Given
+  student: Actor; lecturer: Actor; expert: Actor; guest: Actor;
+  names: Map<string, string>; // Gherkin name -> UUID-namespaced name created in Given
 };
 
 export const test = base.extend<Fixtures>({
-	student: async ({ page }, use) => use(new Actor('Student', page)),
-	lecturer: async ({ page }, use) => use(new Actor('Lecturer', page)),
-	expert: async ({ page }, use) => use(new Actor('Expert', page)),
-	// Guest needs its own context: the shared `page` carries the project's storageState
-	guest: async ({ browser, baseURL }, use) => {
-		const context = await browser.newContext({ baseURL });
-		await use(new Actor('Guest', await context.newPage()));
-		await context.close();
-	},
-	names: async ({}, use) => use(new Map())
+  student:  async ({ page }, use) => use(new Actor('Student', page)),
+  lecturer: async ({ page }, use) => use(new Actor('Lecturer', page)),
+  expert:   async ({ page }, use) => use(new Actor('Expert', page)),
+  // Guest needs its own context: the shared `page` carries the project's storageState
+  guest: async ({ browser, baseURL }, use) => {
+    const context = await browser.newContext({ baseURL });
+    await use(new Actor('Guest', await context.newPage()));
+    await context.close();
+  },
+  names: async ({}, use) => use(new Map()),
 });
 export { expect } from '@playwright/test';
 ```
@@ -151,7 +138,6 @@ export { expect } from '@playwright/test';
 All step files get `Given/When/Then` from `createBdd(test)`. playwright-bdd v8 has no direct `Given` export, and only `createBdd(test)` exposes the custom fixtures.
 
 ### Global setup — storageState per role + DB truncate
-
 ```typescript
 // tests/global-setup.ts
 import { request } from '@playwright/test';
@@ -160,76 +146,68 @@ import * as fs from 'fs';
 const BASE_URL = process.env.BASE_URL ?? 'http://localhost:3000';
 
 const ROLES = [
-	{ name: 'student', email: process.env.STUDENT_EMAIL!, password: process.env.STUDENT_PASSWORD! },
-	{
-		name: 'lecturer',
-		email: process.env.LECTURER_EMAIL!,
-		password: process.env.LECTURER_PASSWORD!
-	},
-	{ name: 'expert', email: process.env.EXPERT_EMAIL!, password: process.env.EXPERT_PASSWORD! }
+  { name: 'student',  email: process.env.STUDENT_EMAIL!,  password: process.env.STUDENT_PASSWORD! },
+  { name: 'lecturer', email: process.env.LECTURER_EMAIL!, password: process.env.LECTURER_PASSWORD! },
+  { name: 'expert',   email: process.env.EXPERT_EMAIL!,   password: process.env.EXPERT_PASSWORD! },
 ];
 
 export default async function globalSetup() {
-	fs.mkdirSync('tests/.auth', { recursive: true });
+  fs.mkdirSync('tests/.auth', { recursive: true });
 
-	// Truncate test data — adapt to the system's real reset mechanism (endpoint, SQL, seed script)
-	const api = await request.newContext({ baseURL: BASE_URL });
-	await api.post('/api/test/reset');
-	await api.dispose();
+  // Truncate test data — adapt to the system's real reset mechanism (endpoint, SQL, seed script)
+  const api = await request.newContext({ baseURL: BASE_URL });
+  await api.post('/api/test/reset');
+  await api.dispose();
 
-	// Generate storageState per role
-	for (const role of ROLES) {
-		const ctx = await request.newContext({ baseURL: BASE_URL });
-		await ctx.post('/api/auth/login', { data: { email: role.email, password: role.password } });
-		await ctx.storageState({ path: `tests/.auth/${role.name}.json` });
-		await ctx.dispose();
-	}
+  // Generate storageState per role
+  for (const role of ROLES) {
+    const ctx = await request.newContext({ baseURL: BASE_URL });
+    await ctx.post('/api/auth/login', { data: { email: role.email, password: role.password } });
+    await ctx.storageState({ path: `tests/.auth/${role.name}.json` });
+    await ctx.dispose();
+  }
 }
 ```
 
 ### playwright.config.ts
-
 ```typescript
 import { defineConfig } from '@playwright/test';
 import { defineBddConfig } from 'playwright-bdd';
 
 const testDir = defineBddConfig({
-	features: 'tests/features/**/*.feature',
-	steps: ['tests/steps/**/*.steps.ts', 'tests/fixtures/index.ts'],
-	outputDir: '.bdd'
+  features: 'tests/features/**/*.feature',
+  steps: ['tests/steps/**/*.steps.ts', 'tests/fixtures/index.ts'],
+  outputDir: '.bdd',
 });
 
 export default defineConfig({
-	testDir,
-	globalSetup: 'tests/global-setup.ts',
-	use: { baseURL: process.env.BASE_URL ?? 'http://localhost:3000' },
-	projects: [
-		{ name: 'student', use: { storageState: 'tests/.auth/student.json' }, grep: /@student/ },
-		{ name: 'lecturer', use: { storageState: 'tests/.auth/lecturer.json' }, grep: /@lecturer/ },
-		{ name: 'expert', use: { storageState: 'tests/.auth/expert.json' }, grep: /@expert/ },
-		{ name: 'guest', grep: /@guest/ }
-	]
+  testDir,
+  globalSetup: 'tests/global-setup.ts',
+  use: { baseURL: process.env.BASE_URL ?? 'http://localhost:3000' },
+  projects: [
+    { name: 'student',  use: { storageState: 'tests/.auth/student.json' },  grep: /@student/ },
+    { name: 'lecturer', use: { storageState: 'tests/.auth/lecturer.json' }, grep: /@lecturer/ },
+    { name: 'expert',   use: { storageState: 'tests/.auth/expert.json' },   grep: /@expert/ },
+    { name: 'guest',    grep: /@guest/ },
+  ],
 });
 ```
 
 ### .gitignore entries
-
 ```
 .bdd/
 tests/.auth/
 ```
 
 ### package.json scripts
-
 ```json
 {
-	"test:bdd": "bddgen && playwright test",
-	"test:bdd:gen": "bddgen"
+  "test:bdd": "bddgen && playwright test",
+  "test:bdd:gen": "bddgen"
 }
 ```
 
 ### .env.test (never commit)
-
 ```
 BASE_URL=http://localhost:3000
 STUDENT_EMAIL=student@test.com
@@ -278,7 +256,6 @@ Feature: Thesis List
 ```
 
 **Gherkin rules**:
-
 - Role tag (`@student`, `@lecturer`) on every feature — drives auth, never put `Given [Actor] is authenticated` in Background
 - Actor names in steps, not "user" or "I" generically
 - Describe WHAT, never HOW — no button IDs, no CSS selectors, no field names
@@ -294,25 +271,22 @@ Feature: Thesis List
 ## Phase 5 — Generate step definitions (Screenplay Pattern)
 
 ### Layer rules
-
 - **Steps** → delegate only. No raw Playwright calls. `When` steps call Tasks. `Then` steps call Questions. `Given` navigation steps call Interactions.
 - **Tasks** → sequences of Interactions. Business intent, no selectors.
 - **Questions** → call Interactions to locate elements and return Locators. `Then` steps assert with web-first `expect(locator)`, which retries. Never return snapshot values like `isVisible()` or `textContent()`, because they don't wait and cause flaky tests.
 - **Interactions** → only layer that touches `page.getByTestId()`. Require `data-testid` attributes on HTML elements.
 
 ### Interaction
-
 ```typescript
 // tests/interactions/thesis-rows.interaction.ts
 import { Page } from '@playwright/test';
 
 export const thesisRows = (page: Page) => page.getByTestId('thesis-row');
 export const thesisByTitle = (page: Page, title: string) =>
-	page.getByTestId('thesis-row').filter({ hasText: title });
+  page.getByTestId('thesis-row').filter({ hasText: title });
 ```
 
 ### Question
-
 ```typescript
 // tests/questions/thesis-list.question.ts
 import { Actor } from '../fixtures/actor';
@@ -322,19 +296,17 @@ export const listedThesis = (actor: Actor, title: string) => thesisByTitle(actor
 ```
 
 ### Task
-
 ```typescript
 // tests/tasks/open-thesis.task.ts
 import { Actor } from '../fixtures/actor';
 import { thesisByTitle } from '../interactions/thesis-rows.interaction';
 
 export const openThesis = (title: string) => async (actor: Actor) => {
-	await thesisByTitle(actor.page, title).click();
+  await thesisByTitle(actor.page, title).click();
 };
 ```
 
 ### Step definitions
-
 ```typescript
 // tests/steps/thesis-list.steps.ts
 import { createBdd } from 'playwright-bdd';
@@ -346,34 +318,34 @@ import { randomUUID } from 'crypto';
 const { Given, When, Then } = createBdd(test);
 
 Given('a thesis {string} exists for Student', async ({ request, names }, title: string) => {
-	const unique = `${title}-${randomUUID()}`;
-	const res = await request.post('/api/theses', { data: { title: unique, owner: 'student' } });
-	expect(res.ok()).toBe(true);
-	names.set(title, unique);
+  const unique = `${title}-${randomUUID()}`;
+  const res = await request.post('/api/theses', { data: { title: unique, owner: 'student' } });
+  expect(res.ok()).toBe(true);
+  names.set(title, unique);
 });
 
 Given('Student is on the Thesis List page', async ({ student }) => {
-	await student.page.goto('/thesis');
+  await student.page.goto('/thesis');
 });
 
 Then('Student sees {string} listed', async ({ student, names }, title: string) => {
-	await expect(listedThesis(student, names.get(title) ?? title)).toBeVisible();
+  await expect(listedThesis(student, names.get(title) ?? title)).toBeVisible();
 });
 
 When('Student opens {string}', async ({ student, names }, title: string) => {
-	await student.perform(openThesis(names.get(title) ?? title));
+  await student.perform(openThesis(names.get(title) ?? title));
 });
 
 Then('Student is on the Thesis Detail page', async ({ student }) => {
-	await expect(student.page).toHaveURL(/\/thesis\/[^/]+$/);
+  await expect(student.page).toHaveURL(/\/thesis\/[^/]+$/);
 });
 
 When('Guest navigates to the Thesis List', async ({ guest }) => {
-	await guest.page.goto('/thesis');
+  await guest.page.goto('/thesis');
 });
 
 Then('Guest is redirected to the Login page', async ({ guest }) => {
-	await expect(guest.page).toHaveURL(/\/login/);
+  await expect(guest.page).toHaveURL(/\/login/);
 });
 ```
 
@@ -413,16 +385,16 @@ import { test as base, expect } from '../fixtures/index';
 import type { APIResponse } from '@playwright/test';
 
 const test = base.extend<{ last: { response?: APIResponse } }>({
-	last: async ({}, use) => use({})
+  last: async ({}, use) => use({}),
 });
 const { When, Then } = createBdd(test);
 
 When('a POST to /api/invoices with valid data', async ({ request, last }) => {
-	last.response = await request.post('/api/invoices', { data: { amount: 100 } });
+  last.response = await request.post('/api/invoices', { data: { amount: 100 } });
 });
 
 Then('the response status is {int}', async ({ last }, status: number) => {
-	expect(last.response!.status()).toBe(status);
+  expect(last.response!.status()).toBe(status);
 });
 ```
 

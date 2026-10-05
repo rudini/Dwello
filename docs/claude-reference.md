@@ -92,7 +92,6 @@ dwello/
 ## BFF Architecture Detail
 
 **Request Flow:**
-
 ```
 Frontend -> apiCall() -> BFF (SvelteKit) -> Backend (ElysiaJS) -> DB
                           |                    |
@@ -101,15 +100,13 @@ Frontend -> apiCall() -> BFF (SvelteKit) -> Backend (ElysiaJS) -> DB
 ```
 
 **Layer Responsibilities:**
-
-| Layer                                           | Handles                                                              | Never                          |
-| ----------------------------------------------- | -------------------------------------------------------------------- | ------------------------------ |
-| **BFF** (`src/routes/auth/`, `src/routes/api/`) | OAuth flow, JWT in HTTPOnly cookies, XSRF tokens, proxies to backend | Returns tokens to client       |
-| **Backend** (`backend/src/routes/`)             | JWT validation from Authorization header, business logic             | OAuth, cookies                 |
-| **Client**                                      | `apiCall()` from `src/lib/api.ts`, UI                                | Token management, localStorage |
+| Layer | Handles | Never |
+|-------|---------|-------|
+| **BFF** (`src/routes/auth/`, `src/routes/api/`) | OAuth flow, JWT in HTTPOnly cookies, XSRF tokens, proxies to backend | Returns tokens to client |
+| **Backend** (`backend/src/routes/`) | JWT validation from Authorization header, business logic | OAuth, cookies |
+| **Client** | `apiCall()` from `src/lib/api.ts`, UI | Token management, localStorage |
 
 **Example Flow:**
-
 ```typescript
 // Client
 const buildings = await apiCall('/buildings');
@@ -117,7 +114,7 @@ const buildings = await apiCall('/buildings');
 // BFF: /api/buildings/+server.ts
 const jwt = cookies.get('session');
 fetch('http://localhost:3001/api/v1/buildings', {
-	headers: { Authorization: `Bearer ${jwt}` }
+  headers: { Authorization: `Bearer ${jwt}` }
 });
 
 // Backend: validates JWT, returns data
@@ -148,17 +145,14 @@ All 11 features detailed in `docs/PRD-Dwello.md`:
 ### Prorating Calculations
 
 **Scenario 1: Multiple contracts in same period**
-
 - Tenant A: Jan 1 - Mar 15 (74 days), Tenant B: Mar 16 - Dec 31 (291 days)
 - Total costs CHF 12,000 -> Tenant A: 12,000 x (74/365) = CHF 2,438
 
 **Scenario 2: Heating with mid-year move**
-
 - Tenant moved Oct 1 - Dec 31, Mittelland profile: Oct 8%, Nov 10%, Dec 12%
 - Total heating CHF 10,000 -> Tenant share: 10,000 x 0.30 = CHF 3,000
 
 ### Swiss Utility Cost Rules
-
 - Allowed: Heating, hot water, water, wastewater, electricity, property maintenance (garden, snow), building infrastructure (elevator, caretaker), waste, management fee (max 3%)
 - Not Allowed: Repairs & maintenance (unless service contract), taxes, insurance, connection fees, financing costs
 
@@ -167,20 +161,17 @@ All 11 features detailed in `docs/PRD-Dwello.md`:
 ## Key Decisions & Trade-offs
 
 ### Why SvelteKit + ElysiaJS + Bun?
-
 - **Svelte:** Smallest bundle size, best DX, no VDOM overhead
 - **Elysia:** Fast TypeScript framework, perfect for Bun
 - **Bun:** 2-3x faster than Node.js, native TypeScript
 - **Trade-off:** Smaller ecosystems, but all dependencies available
 
 ### Why Local LLM (Ollama)?
-
 - **Privacy:** All data stays on-premises
 - **Cost:** No API fees
 - **Trade-off:** Limited to smaller models (Mistral 7B)
 
 ### Why BFF Pattern?
-
 - **Security:** JWT in HTTPOnly cookies (XSS protected)
 - **Simplicity:** No client-side token management
 - **Trade-off:** Slightly more server-side complexity
@@ -202,13 +193,13 @@ All 11 features detailed in `docs/PRD-Dwello.md`:
 
 ## Performance Targets
 
-| Metric                         | Target             |
-| ------------------------------ | ------------------ |
-| Page load time                 | <2s (p95)          |
-| API response                   | <500ms (p95)       |
-| PDF generation                 | <5s per statement  |
-| Statement generation (50 apts) | <60s               |
-| LLM categorization             | <2s (with caching) |
+| Metric | Target |
+|--------|--------|
+| Page load time | <2s (p95) |
+| API response | <500ms (p95) |
+| PDF generation | <5s per statement |
+| Statement generation (50 apts) | <60s |
+| LLM categorization | <2s (with caching) |
 
 ---
 
@@ -228,21 +219,18 @@ docker-compose -f docker-compose.prod.yml up  # Production
 ## Troubleshooting
 
 **Ollama not connecting:**
-
 ```bash
 docker-compose logs ollama
 docker exec dwello-ollama ollama pull mistral
 ```
 
 **Database migration failed / "column ... does not exist":**
-
 ```bash
 cd backend && bun run db:migrate   # applies missing files from backend/migrations, records them in schema_migrations
 docker-compose logs postgres
 ```
 
 **OAuth callback failing:**
-
 - Verify redirect URL matches OAuth provider config
 - Check `OAUTH_CLIENT_ID` and `OAUTH_CLIENT_SECRET`
 - Ensure `JWT_SECRET` is set and >32 characters
@@ -254,7 +242,6 @@ docker-compose logs postgres
 Uses [playwright-bdd](https://github.com/vitalets/playwright-bdd) for E2E tests with Gherkin syntax.
 
 **Structure:**
-
 ```
 tests/e2e/
 ├── features/           # Gherkin .feature files
@@ -263,7 +250,6 @@ tests/e2e/
 ```
 
 **Commands:**
-
 ```bash
 npm run bddgen          # Generate Playwright tests from features
 npm run test:e2e        # Generate + run E2E tests
@@ -276,7 +262,6 @@ servers and database are never touched; only PostgreSQL on 5432 is required. Ove
 `E2E_DATABASE_URL`.
 
 **Critical E2E Flows:**
-
 1. Building creation with OpenPLZ address search
 2. Tenant move with contract change
 3. Invoice addition with LLM categorization

@@ -96,11 +96,11 @@ NEVER use mock data, mock API responses, or hardcoded/fake data in components du
 
 ## Testing Strategy
 
-| Type        | Framework                   | Focus                         |
-| ----------- | --------------------------- | ----------------------------- |
-| Unit        | Vitest                      | Business logic, >80% coverage |
-| Integration | Vitest + supertest          | API endpoints, database       |
-| E2E         | Playwright + playwright-bdd | User workflows (Gherkin)      |
+| Type | Framework | Focus |
+|------|-----------|-------|
+| Unit | Vitest | Business logic, >80% coverage |
+| Integration | Vitest + supertest | API endpoints, database |
+| E2E | Playwright + playwright-bdd | User workflows (Gherkin) |
 
 ### Test Selectors: data-testid First
 

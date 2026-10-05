@@ -10,7 +10,6 @@
 This document provides detailed specification of the PostgreSQL database schema for Dwello, including all tables, relationships, indexes, and constraints.
 
 **Core Principles:**
-
 - ACID compliance for financial data integrity
 - Comprehensive audit trails for regulatory compliance
 - Efficient querying for reporting and statement generation
@@ -21,18 +20,15 @@ This document provides detailed specification of the PostgreSQL database schema 
 ## Database Setup
 
 ### PostgreSQL Version
-
 - **Minimum:** PostgreSQL 13
 - **Recommended:** PostgreSQL 15+
 
 ### Extensions
-
 ```sql
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 ```
 
 ### Initial Configuration
-
 ```sql
 -- Set timezone to UTC (all timestamps stored in UTC)
 SET TIMEZONE = 'UTC';
@@ -553,7 +549,6 @@ buildings (1)
 ### Version Control
 
 All migrations tracked in version-controlled SQL files:
-
 ```
 migrations/
   ├── 001_initial_schema.sql
@@ -576,7 +571,6 @@ migrations/
 ### Query Optimization
 
 **Statement Generation Query Example:**
-
 ```sql
 -- Get all invoices for a building in a period
 SELECT i.*, c.name, dk.name, dk.formula
@@ -590,7 +584,6 @@ ORDER BY i.invoice_date DESC;
 ```
 
 **Active Tenant Query:**
-
 ```sql
 -- Get current tenant for an apartment
 SELECT t.*, rc.*
@@ -605,7 +598,6 @@ LIMIT 1;
 ### Archival Strategy (Future)
 
 For tables with many historical records (statements, audit logs):
-
 - Archive records older than 2 years to separate tables
 - Keep hot data in main tables
 - Use table partitioning for very large tables (>10M records)
@@ -645,14 +637,12 @@ For tables with many historical records (statements, audit logs):
 ### Recovery Procedures
 
 **Full Database Recovery:**
-
 ```bash
 # Restore from backup
 pg_restore -d dwello backup_file.dump
 ```
 
 **Point-in-Time Recovery:**
-
 ```bash
 # WAL archiving configured to enable PITR
 ```
@@ -670,7 +660,6 @@ pg_restore -d dwello backup_file.dump
 ### Audit Trail
 
 All data modifications logged to `audit_logs` table with:
-
 - Before/after values
 - User/action information
 - Timestamp in UTC
