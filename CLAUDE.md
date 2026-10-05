@@ -68,6 +68,10 @@ Transform tasks into verifiable goals. For multi-step tasks, state a brief plan 
 
 # WORKFLOW RULES
 
+## Acceptance Test First (ATDD)
+
+Every feature or behavior change starts with an acceptance test: write the scenario in business language in the matching `tests/e2e/features/*.feature`, tag it `@wip` (excluded from runs, so the pipeline stays green), and watch it fail for the right reason. Then drive the implementation with `/tdd` until the scenario passes, and remove `@wip`. A feature is done when its scenario is green without `@wip`, not when unit tests pass.
+
 ## Run /tdd and /ponytail for Every Implementation
 
 Every implementation (feature or fix) runs both skills: `/tdd` (red-green, one behavior at a time, tests through public interfaces) and `/ponytail` (shortest working diff). Check the finished change against both before committing.
@@ -98,9 +102,9 @@ NEVER use mock data, mock API responses, or hardcoded/fake data in components du
 
 | Type | Framework | Focus |
 |------|-----------|-------|
-| Unit | Vitest | Business logic, >80% coverage |
-| Integration | Vitest + supertest | API endpoints, database |
-| E2E | Playwright + playwright-bdd | User workflows (Gherkin) |
+| Acceptance (outer loop, written first) | Playwright + playwright-bdd | What the business wants: Gherkin scenarios against the built app and a fresh database |
+| Integration | `bun test` (`backend/src/__tests__/*.pg.test.ts`) | API routes, SQL, mail against a real PostgreSQL test database (`dwello_test`), no mocks |
+| Unit (inner loop, TDD) | Vitest (frontend), `bun test` (backend) | What the developer intends: business logic through public exports, >80% coverage |
 
 ### Test Selectors: data-testid First
 
