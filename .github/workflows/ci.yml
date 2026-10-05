@@ -164,7 +164,7 @@ jobs:
         run: |
           git diff --name-only "origin/${{ github.base_ref }}...HEAD" | bun tests/ui-screenshots/affected-routes.ts > ui-routes.txt
           cat ui-routes.txt
-          echo "any=$([ -s ui-routes.txt ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+          echo "any=$(grep -q . ui-routes.txt && echo true || echo false)" >> "$GITHUB_OUTPUT"
       - uses: actions/setup-node@v4
         if: steps.routes.outputs.any == 'true'
         with:
