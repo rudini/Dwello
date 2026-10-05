@@ -19,12 +19,17 @@ import {
 	showCreatedStatements
 } from '../tasks/statement-generate';
 
+import { openPreviewViaApi, previewTotalOf } from '../tasks/statement-generate-api';
+
 const { Given, When, Then } = createBdd(test);
+
+// "CHF 1’250.50" → 1250.5
+const francs = (amount: string) => Number(amount.replace(/[^\d.]/g, ''));
 
 Given(
 	'der Liegenschaftsverwalter ist auf der Seite zum Erstellen von Abrechnungen',
-	async ({ verwalter }) => {
-		await visit(verwalter.page, '/statements/generate');
+	async ({ verwalter, driver }) => {
+		if (driver === 'ui') await visit(verwalter.page, '/statements/generate');
 	}
 );
 
@@ -93,8 +98,12 @@ When(
 
 When(
 	'der Liegenschaftsverwalter die Vorschau der Abrechnungen {int} für das Gebäude {string} mit {float} % Verwaltungspauschale nach dem Verteilschlüssel {string} öffnet',
-	async ({ verwalter, seed }, year: number, building: string, fee: number, key: string) => {
-		await verwalter.perform(openPreview(year, seed.idOf(building)!, { managementFeePercent: fee, managementFeeKey: key }));
+	async ({ verwalter, seed, driver }, year: number, building: string, fee: number, key: string) => {
+		await verwalter.perform(
+			driver === 'api'
+				? openPreviewViaApi(seed, year, seed.idOf(building)!, fee, key)
+				: openPreview(year, seed.idOf(building)!, { managementFeePercent: fee, managementFeeKey: key })
+		);
 	}
 );
 
@@ -102,9 +111,13 @@ When('der Liegenschaftsverwalter die Verwaltungspauschale auf {float} % setzt', 
 	await verwalter.perform(setManagementFee(fee));
 });
 
-Then('kostet die Abrechnung von {string} {string}', async ({ verwalter, names }, tenant: string, amount: string) => {
-	await expect(previewRow(verwalter, names.get(tenant) ?? tenant)).toContainText(amount);
-});
+Then(
+	'kostet die Abrechnung von {string} {string}',
+	async ({ verwalter, names, driver }, tenant: string, amount: string) => {
+		if (driver === 'api') expect(previewTotalOf(verwalter, names.get(tenant) ?? tenant)).toBe(francs(amount));
+		else await expect(previewRow(verwalter, names.get(tenant) ?? tenant)).toContainText(amount);
+	}
+);
 
 Then(
 	'sieht der Liegenschaftsverwalter den Hinweis, dass die Verwaltungspauschale über dem üblichen Richtwert liegt',

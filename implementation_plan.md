@@ -4099,9 +4099,20 @@ acceptance scenario first, unit TDD as the inner loop, integration tests only ag
   profiles, reminders, documents, configuration keys, Verwaltungspauschale)
 - Verification: backend 244 unit + 160 PostgreSQL, frontend 454, E2E (Chromium) 258 passed
 
+### ATDD follow-ups ✅
+- [x] `docs/test-pyramid.md`: test pyramid, layers, rules, Farley's four layers, ATDD workflow (linked in `CLAUDE.md`)
+- [x] UI-detail scenarios separated from the business features: the 22 breadcrumb scenarios are one outline in
+  `tests/e2e/features/breadcrumb.feature`, the 3 scenarios acting before hydration are in `hydration.feature`
+  (no test runs saved: each outline row is its own test)
+- [x] API protocol driver: fixture option `driver` (`tests/e2e/fixtures/test.ts`), Playwright project `api` runs the
+  `@api` scenarios through the backend API (`tasks/statement-generate-api.ts`, `seed.backend`); first feature
+  `statement-management-fee.feature`; CI runs `api` in pull requests too. A backend mutation (key ignored) fails the
+  API run
+- Verification: E2E Chromium 258 + api 2 passed after the rebase onto main (3232703)
+
 ### Open
-- [ ] Second protocol driver (backend API)
-- [ ] Statement PDF in the tenant's language (the PDF supports de/fr/it/rm/en, the tenant's language is not used) so business scenarios can run without a browser
+- [ ] Extend the API driver to further business features (the gain stays small while seeding dominates)
+- [ ] Statement PDF in the tenant's language (the PDF supports de/fr/it/rm/en, the tenant's language is not used)
 - [ ] Coverage threshold in Vitest and bun, enforced in CI
 
 ---

@@ -1,5 +1,5 @@
 # language: de
-@statements
+@statements @api
 Funktionalität: Verwaltungspauschale verteilen
   Als Liegenschaftsverwalter
   möchte ich die Verwaltungspauschale der Liegenschaft nach einem Verteilschlüssel auf die Wohnungen verteilen
