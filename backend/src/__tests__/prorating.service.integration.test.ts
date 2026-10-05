@@ -6,18 +6,18 @@
 import { describe, it, expect, mock, beforeEach } from 'bun:test';
 
 // Mock the contract service before importing prorating service
-const mockGetContractsByPeriod = mock(() => Promise.resolve([]));
+const mockGetContractsByPeriod = mock((): Promise<unknown[]> => Promise.resolve([]));
 
 mock.module('../services/contract.service', () => ({
 	getContractsByPeriod: mockGetContractsByPeriod
 }));
 
 // Mock the heating profile service
-const mockGetHeatingProfile = mock(() => Promise.resolve(null));
+const mockGetHeatingProfile = mock((): Promise<unknown> => Promise.resolve(null));
 const mockCalculateHeatingShare = mock(() => ({
 	share: 0,
 	percentage: 0,
-	monthBreakdown: []
+	monthBreakdown: [] as { month: number; percentage: number }[]
 }));
 
 mock.module('../services/heating-profile.service', () => ({

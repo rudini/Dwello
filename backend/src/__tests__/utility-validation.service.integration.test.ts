@@ -6,7 +6,7 @@
 import { describe, it, expect, mock, beforeEach } from 'bun:test';
 
 // Mock the category service before importing utility validation service
-const mockGetCategory = mock(() => Promise.resolve(null));
+const mockGetCategory = mock((): Promise<unknown> => Promise.resolve(null));
 
 mock.module('../services/category.service', () => ({
 	getCategory: mockGetCategory
