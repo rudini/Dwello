@@ -4,6 +4,7 @@
  */
 
 import { describe, it, expect } from 'bun:test';
+import type { ContractWithDetails } from '../services/contract.service';
 import {
 	calculateDaysBetween,
 	calculateOverlap,
@@ -184,7 +185,7 @@ describe('Prorating Service', () => {
 
 		it('should detect no vacancy when fully occupied', () => {
 			const contracts: ContractPeriodOverlap[] = [{
-				contract: {} as any,
+				contract: {} as ContractWithDetails,
 				overlapStart: new Date('2024-01-01'),
 				overlapEnd: new Date('2024-12-31'),
 				overlapDays: 366,
@@ -198,7 +199,7 @@ describe('Prorating Service', () => {
 
 		it('should detect vacancy at start of period', () => {
 			const contracts: ContractPeriodOverlap[] = [{
-				contract: {} as any,
+				contract: {} as ContractWithDetails,
 				overlapStart: new Date('2024-03-01'),
 				overlapEnd: new Date('2024-12-31'),
 				overlapDays: 306,
@@ -214,14 +215,14 @@ describe('Prorating Service', () => {
 		it('should detect vacancy between contracts', () => {
 			const contracts: ContractPeriodOverlap[] = [
 				{
-					contract: {} as any,
+					contract: {} as ContractWithDetails,
 					overlapStart: new Date('2024-01-01'),
 					overlapEnd: new Date('2024-03-31'),
 					overlapDays: 91,
 					shareOfPeriod: 91/366
 				},
 				{
-					contract: {} as any,
+					contract: {} as ContractWithDetails,
 					overlapStart: new Date('2024-06-01'),
 					overlapEnd: new Date('2024-12-31'),
 					overlapDays: 214,
@@ -237,7 +238,7 @@ describe('Prorating Service', () => {
 
 		it('should detect vacancy at end of period', () => {
 			const contracts: ContractPeriodOverlap[] = [{
-				contract: {} as any,
+				contract: {} as ContractWithDetails,
 				overlapStart: new Date('2024-01-01'),
 				overlapEnd: new Date('2024-09-30'),
 				overlapDays: 274,
@@ -253,8 +254,8 @@ describe('Prorating Service', () => {
 	describe('distributeCostsAcrossContracts', () => {
 		it('should distribute costs equally for equal overlap', () => {
 			const contracts: ContractPeriodOverlap[] = [
-				{ contract: { id: '1' } as any, overlapStart: new Date(), overlapEnd: new Date(), overlapDays: 183, shareOfPeriod: 0.5 },
-				{ contract: { id: '2' } as any, overlapStart: new Date(), overlapEnd: new Date(), overlapDays: 183, shareOfPeriod: 0.5 }
+				{ contract: { id: '1' } as ContractWithDetails, overlapStart: new Date(), overlapEnd: new Date(), overlapDays: 183, shareOfPeriod: 0.5 },
+				{ contract: { id: '2' } as ContractWithDetails, overlapStart: new Date(), overlapEnd: new Date(), overlapDays: 183, shareOfPeriod: 0.5 }
 			];
 
 			const result = distributeCostsAcrossContracts(contracts, 10000);
@@ -265,8 +266,8 @@ describe('Prorating Service', () => {
 
 		it('should distribute costs proportionally for unequal overlap', () => {
 			const contracts: ContractPeriodOverlap[] = [
-				{ contract: { id: '1' } as any, overlapStart: new Date(), overlapEnd: new Date(), overlapDays: 100, shareOfPeriod: 0.25 },
-				{ contract: { id: '2' } as any, overlapStart: new Date(), overlapEnd: new Date(), overlapDays: 300, shareOfPeriod: 0.75 }
+				{ contract: { id: '1' } as ContractWithDetails, overlapStart: new Date(), overlapEnd: new Date(), overlapDays: 100, shareOfPeriod: 0.25 },
+				{ contract: { id: '2' } as ContractWithDetails, overlapStart: new Date(), overlapEnd: new Date(), overlapDays: 300, shareOfPeriod: 0.75 }
 			];
 
 			const result = distributeCostsAcrossContracts(contracts, 10000);
@@ -282,7 +283,7 @@ describe('Prorating Service', () => {
 
 		it('should handle single contract', () => {
 			const contracts: ContractPeriodOverlap[] = [
-				{ contract: { id: '1' } as any, overlapStart: new Date(), overlapEnd: new Date(), overlapDays: 365, shareOfPeriod: 1 }
+				{ contract: { id: '1' } as ContractWithDetails, overlapStart: new Date(), overlapEnd: new Date(), overlapDays: 365, shareOfPeriod: 1 }
 			];
 
 			const result = distributeCostsAcrossContracts(contracts, 10000);
@@ -293,8 +294,8 @@ describe('Prorating Service', () => {
 
 		it('should use heating shares when provided', () => {
 			const contracts: ContractPeriodOverlap[] = [
-				{ contract: { id: '1' } as any, overlapStart: new Date(), overlapEnd: new Date(), overlapDays: 100, shareOfPeriod: 0.25 },
-				{ contract: { id: '2' } as any, overlapStart: new Date(), overlapEnd: new Date(), overlapDays: 300, shareOfPeriod: 0.75 }
+				{ contract: { id: '1' } as ContractWithDetails, overlapStart: new Date(), overlapEnd: new Date(), overlapDays: 100, shareOfPeriod: 0.25 },
+				{ contract: { id: '2' } as ContractWithDetails, overlapStart: new Date(), overlapEnd: new Date(), overlapDays: 300, shareOfPeriod: 0.75 }
 			];
 
 			const heatingShares = new Map([['1', 0.4], ['2', 0.6]]);
@@ -306,7 +307,7 @@ describe('Prorating Service', () => {
 
 		it('should handle missing heating share gracefully', () => {
 			const contracts: ContractPeriodOverlap[] = [
-				{ contract: { id: '1' } as any, overlapStart: new Date(), overlapEnd: new Date(), overlapDays: 100, shareOfPeriod: 0.5 }
+				{ contract: { id: '1' } as ContractWithDetails, overlapStart: new Date(), overlapEnd: new Date(), overlapDays: 100, shareOfPeriod: 0.5 }
 			];
 
 			const heatingShares = new Map<string, number>(); // Empty map
@@ -449,9 +450,9 @@ describe('Prorating Service', () => {
 
 		it('should handle multiple gaps between contracts', () => {
 			const contracts: ContractPeriodOverlap[] = [
-				{ contract: {} as any, overlapStart: new Date('2024-01-01'), overlapEnd: new Date('2024-02-29'), overlapDays: 60, shareOfPeriod: 60/366 },
-				{ contract: {} as any, overlapStart: new Date('2024-04-01'), overlapEnd: new Date('2024-05-31'), overlapDays: 61, shareOfPeriod: 61/366 },
-				{ contract: {} as any, overlapStart: new Date('2024-08-01'), overlapEnd: new Date('2024-12-31'), overlapDays: 153, shareOfPeriod: 153/366 }
+				{ contract: {} as ContractWithDetails, overlapStart: new Date('2024-01-01'), overlapEnd: new Date('2024-02-29'), overlapDays: 60, shareOfPeriod: 60/366 },
+				{ contract: {} as ContractWithDetails, overlapStart: new Date('2024-04-01'), overlapEnd: new Date('2024-05-31'), overlapDays: 61, shareOfPeriod: 61/366 },
+				{ contract: {} as ContractWithDetails, overlapStart: new Date('2024-08-01'), overlapEnd: new Date('2024-12-31'), overlapDays: 153, shareOfPeriod: 153/366 }
 			];
 
 			const result = handleVacancy(contracts, periodStart, periodEnd);
@@ -460,8 +461,8 @@ describe('Prorating Service', () => {
 
 		it('should handle overlapping contracts', () => {
 			const contracts: ContractPeriodOverlap[] = [
-				{ contract: {} as any, overlapStart: new Date('2024-01-01'), overlapEnd: new Date('2024-06-30'), overlapDays: 182, shareOfPeriod: 182/366 },
-				{ contract: {} as any, overlapStart: new Date('2024-06-01'), overlapEnd: new Date('2024-12-31'), overlapDays: 214, shareOfPeriod: 214/366 }
+				{ contract: {} as ContractWithDetails, overlapStart: new Date('2024-01-01'), overlapEnd: new Date('2024-06-30'), overlapDays: 182, shareOfPeriod: 182/366 },
+				{ contract: {} as ContractWithDetails, overlapStart: new Date('2024-06-01'), overlapEnd: new Date('2024-12-31'), overlapDays: 214, shareOfPeriod: 214/366 }
 			];
 
 			const result = handleVacancy(contracts, periodStart, periodEnd);
@@ -470,8 +471,8 @@ describe('Prorating Service', () => {
 
 		it('should handle unsorted contracts', () => {
 			const contracts: ContractPeriodOverlap[] = [
-				{ contract: {} as any, overlapStart: new Date('2024-06-01'), overlapEnd: new Date('2024-12-31'), overlapDays: 214, shareOfPeriod: 214/366 },
-				{ contract: {} as any, overlapStart: new Date('2024-01-01'), overlapEnd: new Date('2024-03-31'), overlapDays: 91, shareOfPeriod: 91/366 }
+				{ contract: {} as ContractWithDetails, overlapStart: new Date('2024-06-01'), overlapEnd: new Date('2024-12-31'), overlapDays: 214, shareOfPeriod: 214/366 },
+				{ contract: {} as ContractWithDetails, overlapStart: new Date('2024-01-01'), overlapEnd: new Date('2024-03-31'), overlapDays: 91, shareOfPeriod: 91/366 }
 			];
 
 			const result = handleVacancy(contracts, periodStart, periodEnd);
@@ -484,9 +485,9 @@ describe('Prorating Service', () => {
 	describe('distributeCostsAcrossContracts - additional edge cases', () => {
 		it('should handle three contracts with equal days', () => {
 			const contracts: ContractPeriodOverlap[] = [
-				{ contract: { id: '1' } as any, overlapStart: new Date(), overlapEnd: new Date(), overlapDays: 100, shareOfPeriod: 1/3 },
-				{ contract: { id: '2' } as any, overlapStart: new Date(), overlapEnd: new Date(), overlapDays: 100, shareOfPeriod: 1/3 },
-				{ contract: { id: '3' } as any, overlapStart: new Date(), overlapEnd: new Date(), overlapDays: 100, shareOfPeriod: 1/3 }
+				{ contract: { id: '1' } as ContractWithDetails, overlapStart: new Date(), overlapEnd: new Date(), overlapDays: 100, shareOfPeriod: 1/3 },
+				{ contract: { id: '2' } as ContractWithDetails, overlapStart: new Date(), overlapEnd: new Date(), overlapDays: 100, shareOfPeriod: 1/3 },
+				{ contract: { id: '3' } as ContractWithDetails, overlapStart: new Date(), overlapEnd: new Date(), overlapDays: 100, shareOfPeriod: 1/3 }
 			];
 
 			const result = distributeCostsAcrossContracts(contracts, 9000);
@@ -498,8 +499,8 @@ describe('Prorating Service', () => {
 
 		it('should handle heating shares with partial coverage', () => {
 			const contracts: ContractPeriodOverlap[] = [
-				{ contract: { id: '1' } as any, overlapStart: new Date(), overlapEnd: new Date(), overlapDays: 100, shareOfPeriod: 0.5 },
-				{ contract: { id: '2' } as any, overlapStart: new Date(), overlapEnd: new Date(), overlapDays: 100, shareOfPeriod: 0.5 }
+				{ contract: { id: '1' } as ContractWithDetails, overlapStart: new Date(), overlapEnd: new Date(), overlapDays: 100, shareOfPeriod: 0.5 },
+				{ contract: { id: '2' } as ContractWithDetails, overlapStart: new Date(), overlapEnd: new Date(), overlapDays: 100, shareOfPeriod: 0.5 }
 			];
 
 			const heatingShares = new Map([['1', 0.3]]); // Only one contract has heating share
@@ -511,7 +512,7 @@ describe('Prorating Service', () => {
 
 		it('should handle zero overlap days', () => {
 			const contracts: ContractPeriodOverlap[] = [
-				{ contract: { id: '1' } as any, overlapStart: new Date(), overlapEnd: new Date(), overlapDays: 0, shareOfPeriod: 0 }
+				{ contract: { id: '1' } as ContractWithDetails, overlapStart: new Date(), overlapEnd: new Date(), overlapDays: 0, shareOfPeriod: 0 }
 			];
 
 			const result = distributeCostsAcrossContracts(contracts, 10000);
@@ -521,8 +522,8 @@ describe('Prorating Service', () => {
 
 		it('should handle decimal day values', () => {
 			const contracts: ContractPeriodOverlap[] = [
-				{ contract: { id: '1' } as any, overlapStart: new Date(), overlapEnd: new Date(), overlapDays: 33.5, shareOfPeriod: 0.33 },
-				{ contract: { id: '2' } as any, overlapStart: new Date(), overlapEnd: new Date(), overlapDays: 66.5, shareOfPeriod: 0.67 }
+				{ contract: { id: '1' } as ContractWithDetails, overlapStart: new Date(), overlapEnd: new Date(), overlapDays: 33.5, shareOfPeriod: 0.33 },
+				{ contract: { id: '2' } as ContractWithDetails, overlapStart: new Date(), overlapEnd: new Date(), overlapDays: 66.5, shareOfPeriod: 0.67 }
 			];
 
 			const result = distributeCostsAcrossContracts(contracts, 10000);
@@ -532,8 +533,8 @@ describe('Prorating Service', () => {
 
 		it('should not use heating shares when flag is false', () => {
 			const contracts: ContractPeriodOverlap[] = [
-				{ contract: { id: '1' } as any, overlapStart: new Date(), overlapEnd: new Date(), overlapDays: 100, shareOfPeriod: 0.25 },
-				{ contract: { id: '2' } as any, overlapStart: new Date(), overlapEnd: new Date(), overlapDays: 300, shareOfPeriod: 0.75 }
+				{ contract: { id: '1' } as ContractWithDetails, overlapStart: new Date(), overlapEnd: new Date(), overlapDays: 100, shareOfPeriod: 0.25 },
+				{ contract: { id: '2' } as ContractWithDetails, overlapStart: new Date(), overlapEnd: new Date(), overlapDays: 300, shareOfPeriod: 0.75 }
 			];
 
 			const heatingShares = new Map([['1', 0.9], ['2', 0.1]]);
@@ -551,8 +552,8 @@ describe('Prorating Service', () => {
 
 		it('should calculate total vacant days correctly for multiple gaps', () => {
 			const contracts: ContractPeriodOverlap[] = [
-				{ contract: {} as any, overlapStart: new Date('2024-02-01'), overlapEnd: new Date('2024-03-31'), overlapDays: 60, shareOfPeriod: 60/366 },
-				{ contract: {} as any, overlapStart: new Date('2024-06-01'), overlapEnd: new Date('2024-08-31'), overlapDays: 92, shareOfPeriod: 92/366 }
+				{ contract: {} as ContractWithDetails, overlapStart: new Date('2024-02-01'), overlapEnd: new Date('2024-03-31'), overlapDays: 60, shareOfPeriod: 60/366 },
+				{ contract: {} as ContractWithDetails, overlapStart: new Date('2024-06-01'), overlapEnd: new Date('2024-08-31'), overlapDays: 92, shareOfPeriod: 92/366 }
 			];
 
 			const result = handleVacancy(contracts, periodStart, periodEnd);
@@ -563,7 +564,7 @@ describe('Prorating Service', () => {
 
 		it('should handle contract starting after period start with exact day precision', () => {
 			const contracts: ContractPeriodOverlap[] = [{
-				contract: {} as any,
+				contract: {} as ContractWithDetails,
 				overlapStart: new Date('2024-01-15'),
 				overlapEnd: new Date('2024-12-31'),
 				overlapDays: 352,
@@ -577,7 +578,7 @@ describe('Prorating Service', () => {
 
 		it('should handle contract ending before period end with exact day precision', () => {
 			const contracts: ContractPeriodOverlap[] = [{
-				contract: {} as any,
+				contract: {} as ContractWithDetails,
 				overlapStart: new Date('2024-01-01'),
 				overlapEnd: new Date('2024-12-15'),
 				overlapDays: 350,
@@ -591,8 +592,8 @@ describe('Prorating Service', () => {
 
 		it('should handle adjacent contracts with no gap', () => {
 			const contracts: ContractPeriodOverlap[] = [
-				{ contract: {} as any, overlapStart: new Date('2024-01-01'), overlapEnd: new Date('2024-06-30'), overlapDays: 182, shareOfPeriod: 0.5 },
-				{ contract: {} as any, overlapStart: new Date('2024-07-01'), overlapEnd: new Date('2024-12-31'), overlapDays: 184, shareOfPeriod: 0.5 }
+				{ contract: {} as ContractWithDetails, overlapStart: new Date('2024-01-01'), overlapEnd: new Date('2024-06-30'), overlapDays: 182, shareOfPeriod: 0.5 },
+				{ contract: {} as ContractWithDetails, overlapStart: new Date('2024-07-01'), overlapEnd: new Date('2024-12-31'), overlapDays: 184, shareOfPeriod: 0.5 }
 			];
 
 			const result = handleVacancy(contracts, periodStart, periodEnd);

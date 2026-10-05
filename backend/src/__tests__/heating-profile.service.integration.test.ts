@@ -90,9 +90,9 @@ describe('Heating Profile Service - Database Functions (Mocked)', () => {
 
 		it('should not include id, createdAt, updatedAt', () => {
 			for (const profile of PREDEFINED_HEATING_PROFILES) {
-				expect((profile as any).id).toBeUndefined();
-				expect((profile as any).createdAt).toBeUndefined();
-				expect((profile as any).updatedAt).toBeUndefined();
+				expect((profile as Record<string, unknown>).id).toBeUndefined();
+				expect((profile as Record<string, unknown>).createdAt).toBeUndefined();
+				expect((profile as Record<string, unknown>).updatedAt).toBeUndefined();
 			}
 		});
 

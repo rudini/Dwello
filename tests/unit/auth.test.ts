@@ -4,6 +4,7 @@
  */
 
 import { describe, it, expect, vi } from 'vitest';
+import type { Cookies } from '@sveltejs/kit';
 import {
 	generateJwt,
 	verifyJwt,
@@ -31,7 +32,7 @@ function createMockCookies() {
 			cookieStore.delete(name);
 		}),
 		_store: cookieStore
-	};
+	} as unknown as Cookies & { _store: Map<string, string> };
 }
 
 // Sample user payload for testing
@@ -130,7 +131,7 @@ describe('Cookie Management', () => {
 			const cookies = createMockCookies();
 			const jwt = 'test-jwt-token';
 
-			setSessionCookie(cookies as any, jwt);
+			setSessionCookie(cookies, jwt);
 
 			expect(cookies.set).toHaveBeenCalledWith(
 				'dwello_session',
@@ -145,7 +146,7 @@ describe('Cookie Management', () => {
 		it('should set HTTPOnly flag', () => {
 			const cookies = createMockCookies();
 
-			setSessionCookie(cookies as any, 'test-token');
+			setSessionCookie(cookies, 'test-token');
 
 			expect(cookies.set).toHaveBeenCalledWith(
 				expect.any(String),
@@ -157,7 +158,7 @@ describe('Cookie Management', () => {
 		it('should set SameSite attribute', () => {
 			const cookies = createMockCookies();
 
-			setSessionCookie(cookies as any, 'test-token');
+			setSessionCookie(cookies, 'test-token');
 
 			expect(cookies.set).toHaveBeenCalledWith(
 				expect.any(String),
@@ -171,7 +172,7 @@ describe('Cookie Management', () => {
 		it('should generate and set XSRF token', () => {
 			const cookies = createMockCookies();
 
-			const token = setXsrfToken(cookies as any);
+			const token = setXsrfToken(cookies);
 
 			expect(token).toBeDefined();
 			expect(typeof token).toBe('string');
@@ -181,7 +182,7 @@ describe('Cookie Management', () => {
 		it('should NOT set HTTPOnly flag (must be readable by JS)', () => {
 			const cookies = createMockCookies();
 
-			setXsrfToken(cookies as any);
+			setXsrfToken(cookies);
 
 			expect(cookies.set).toHaveBeenCalledWith(
 				'dwello_xsrf',
@@ -194,8 +195,8 @@ describe('Cookie Management', () => {
 			const cookies1 = createMockCookies();
 			const cookies2 = createMockCookies();
 
-			const token1 = setXsrfToken(cookies1 as any);
-			const token2 = setXsrfToken(cookies2 as any);
+			const token1 = setXsrfToken(cookies1);
+			const token2 = setXsrfToken(cookies2);
 
 			expect(token1).not.toBe(token2);
 		});
@@ -206,7 +207,7 @@ describe('Cookie Management', () => {
 			const cookies = createMockCookies();
 			cookies._store.set('dwello_session', 'stored-jwt-token');
 
-			const jwt = getJwtFromCookie(cookies as any);
+			const jwt = getJwtFromCookie(cookies);
 
 			expect(jwt).toBe('stored-jwt-token');
 		});
@@ -214,7 +215,7 @@ describe('Cookie Management', () => {
 		it('should return null if no session cookie', () => {
 			const cookies = createMockCookies();
 
-			const jwt = getJwtFromCookie(cookies as any);
+			const jwt = getJwtFromCookie(cookies);
 
 			expect(jwt).toBeNull();
 		});
@@ -224,7 +225,7 @@ describe('Cookie Management', () => {
 		it('should delete session cookie', () => {
 			const cookies = createMockCookies();
 
-			clearAuthCookies(cookies as any);
+			clearAuthCookies(cookies);
 
 			expect(cookies.delete).toHaveBeenCalledWith(
 				'dwello_session',
@@ -235,7 +236,7 @@ describe('Cookie Management', () => {
 		it('should delete XSRF cookie', () => {
 			const cookies = createMockCookies();
 
-			clearAuthCookies(cookies as any);
+			clearAuthCookies(cookies);
 
 			expect(cookies.delete).toHaveBeenCalledWith(
 				'dwello_xsrf',
@@ -246,7 +247,7 @@ describe('Cookie Management', () => {
 		it('should delete OAuth state cookie', () => {
 			const cookies = createMockCookies();
 
-			clearAuthCookies(cookies as any);
+			clearAuthCookies(cookies);
 
 			expect(cookies.delete).toHaveBeenCalledWith(
 				'dwello_oauth_state',
@@ -267,7 +268,7 @@ describe('XSRF Token Validation', () => {
 				headers: { 'X-XSRF-TOKEN': token }
 			});
 
-			const result = validateXsrfToken(request, cookies as any);
+			const result = validateXsrfToken(request, cookies);
 
 			expect(result).toBe(true);
 		});
@@ -280,7 +281,7 @@ describe('XSRF Token Validation', () => {
 				headers: { 'X-XSRF-TOKEN': 'different-token' }
 			});
 
-			const result = validateXsrfToken(request, cookies as any);
+			const result = validateXsrfToken(request, cookies);
 
 			expect(result).toBe(false);
 		});
@@ -292,7 +293,7 @@ describe('XSRF Token Validation', () => {
 				headers: { 'X-XSRF-TOKEN': 'header-token' }
 			});
 
-			const result = validateXsrfToken(request, cookies as any);
+			const result = validateXsrfToken(request, cookies);
 
 			expect(result).toBe(false);
 		});
@@ -303,7 +304,7 @@ describe('XSRF Token Validation', () => {
 
 			const request = new Request('http://localhost');
 
-			const result = validateXsrfToken(request, cookies as any);
+			const result = validateXsrfToken(request, cookies);
 
 			expect(result).toBe(false);
 		});
@@ -316,7 +317,7 @@ describe('XSRF Token Validation', () => {
 				headers: { 'X-XSRF-TOKEN': 'much-longer-token' }
 			});
 
-			const result = validateXsrfToken(request, cookies as any);
+			const result = validateXsrfToken(request, cookies);
 
 			expect(result).toBe(false);
 		});
@@ -345,7 +346,7 @@ describe('OAuth State Management', () => {
 		it('should set state cookie with HTTPOnly', () => {
 			const cookies = createMockCookies();
 
-			setOAuthStateCookie(cookies as any, 'test-state');
+			setOAuthStateCookie(cookies, 'test-state');
 
 			expect(cookies.set).toHaveBeenCalledWith(
 				'dwello_oauth_state',
@@ -357,7 +358,7 @@ describe('OAuth State Management', () => {
 		it('should set short maxAge (10 minutes)', () => {
 			const cookies = createMockCookies();
 
-			setOAuthStateCookie(cookies as any, 'test-state');
+			setOAuthStateCookie(cookies, 'test-state');
 
 			expect(cookies.set).toHaveBeenCalledWith(
 				expect.any(String),
@@ -373,7 +374,7 @@ describe('OAuth State Management', () => {
 			const state = 'matching-state-value';
 			cookies._store.set('dwello_oauth_state', state);
 
-			const result = validateOAuthState(cookies as any, state);
+			const result = validateOAuthState(cookies, state);
 
 			expect(result).toBe(true);
 		});
@@ -382,7 +383,7 @@ describe('OAuth State Management', () => {
 			const cookies = createMockCookies();
 			cookies._store.set('dwello_oauth_state', 'stored-state');
 
-			const result = validateOAuthState(cookies as any, 'different-state');
+			const result = validateOAuthState(cookies, 'different-state');
 
 			expect(result).toBe(false);
 		});
@@ -390,7 +391,7 @@ describe('OAuth State Management', () => {
 		it('should return false if no stored state', () => {
 			const cookies = createMockCookies();
 
-			const result = validateOAuthState(cookies as any, 'expected-state');
+			const result = validateOAuthState(cookies, 'expected-state');
 
 			expect(result).toBe(false);
 		});
@@ -399,7 +400,7 @@ describe('OAuth State Management', () => {
 			const cookies = createMockCookies();
 			cookies._store.set('dwello_oauth_state', 'stored-state');
 
-			const result = validateOAuthState(cookies as any, '');
+			const result = validateOAuthState(cookies, '');
 
 			expect(result).toBe(false);
 		});
