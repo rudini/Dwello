@@ -1,5 +1,5 @@
 /**
- * Preload of the PostgreSQL tests (bun run test:pg): recreates the test database from the migrations and points the
+ * Preload of the backend tests (bun run test, bun run test:pg): recreates the test database from the migrations and points the
  * tests at it, so they never write into the development database. TEST_DATABASE_URL overrides the default.
  */
 

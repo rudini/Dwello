@@ -73,8 +73,6 @@ jobs:
           --health-retries 10
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
@@ -84,8 +82,8 @@ jobs:
       - run: bun install --frozen-lockfile
         working-directory: backend
       - name: Frontend unit tests
-        # Pull requests: only tests importing a changed file (all of them when package.json or the Vitest config change)
-        run: npx vitest run --passWithNoTests ${{ github.event_name == 'pull_request' && format('--changed origin/{0}', github.base_ref) || '' }}
+        # All tests, so the coverage thresholds in vitest.config.ts apply to the whole frontend
+        run: npm run test:coverage
       - name: Backend unit tests
         if: ${{ !cancelled() && needs.changes.outputs.backend == 'true' }}
         run: bun run test

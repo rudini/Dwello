@@ -167,7 +167,7 @@ npm run test
 
 ### Backend Tests (bun)
 ```bash
-cd backend && bun run test     # unit tests, then the PostgreSQL tests
+cd backend && bun run test     # unit and PostgreSQL tests, fails if coverage drops (scripts/coverage-check.ts)
 cd backend && bun run test:pg  # PostgreSQL tests only
 ```
 
