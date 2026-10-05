@@ -19,10 +19,7 @@ new SMTPServer({
 	onData(stream, _session, callback) {
 		simpleParser(stream).then((mail) => {
 			messages.push({
-				to: [mail.to ?? []]
-					.flat()
-					.map((address) => address.text)
-					.join(', '),
+				to: [mail.to ?? []].flat().map((address) => address.text).join(', '),
 				subject: mail.subject ?? '',
 				text: mail.text ?? '',
 				attachments: mail.attachments.map((a) => a.filename ?? '')

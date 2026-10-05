@@ -32,12 +32,7 @@ export interface InvoiceFilters {
 
 export interface InvoiceWithDetails extends Invoice {
 	building: { id: string; name: string; address: string } | null;
-	category: {
-		id: string;
-		name: string;
-		nameDE: string | null;
-		isAllowedUtilityCost: boolean;
-	} | null;
+	category: { id: string; name: string; nameDE: string | null; isAllowedUtilityCost: boolean } | null;
 	distributionKey: { id: string; name: string; nameDE: string | null } | null;
 	llmCategory: { id: string; name: string; nameDE: string | null } | null;
 }
@@ -160,7 +155,9 @@ export async function listInvoices(filters: InvoiceFilters = {}): Promise<{
  * Get a single invoice by ID with all related data
  */
 export async function getInvoice(id: string): Promise<InvoiceWithDetails | null> {
-	const [result] = await selectWithDetails().where(eq(invoices.id, id)).limit(1);
+	const [result] = await selectWithDetails()
+		.where(eq(invoices.id, id))
+		.limit(1);
 
 	if (!result) return null;
 
@@ -187,9 +184,7 @@ export async function getInvoice(id: string): Promise<InvoiceWithDetails | null>
 /**
  * The KI's category for an invoice without one; a sure suggestion (85% and more) becomes its category
  */
-async function categorizeWithKi(
-	data: NewInvoice
-): Promise<Pick<NewInvoice, 'llmCategoryId' | 'llmConfidence'>> {
+async function categorizeWithKi(data: NewInvoice): Promise<Pick<NewInvoice, 'llmCategoryId' | 'llmConfidence'>> {
 	try {
 		const categorization = await categorizeInvoice({
 			billingEntityName: data.billingEntityName,
@@ -202,10 +197,7 @@ async function categorizeWithKi(
 			data.categoryId = categorization.category.id;
 			data.isValidUtilityCost = categorization.isAllowedUtilityCost;
 		}
-		return {
-			llmCategoryId: categorization.category.id,
-			llmConfidence: String(categorization.confidence)
-		};
+		return { llmCategoryId: categorization.category.id, llmConfidence: String(categorization.confidence) };
 	} catch (error) {
 		console.warn('LLM categorization failed, continuing without:', error);
 		return {};
@@ -230,8 +222,7 @@ export async function createInvoice(
 	}
 
 	// Without a category the KI categorizes the invoice; a suggestion taken in the form arrives in data
-	const suggestion =
-		!data.categoryId && !options.skipLlmCategorization ? await categorizeWithKi(data) : {};
+	const suggestion = !data.categoryId && !options.skipLlmCategorization ? await categorizeWithKi(data) : {};
 
 	// Insert the invoice
 	const [invoice] = await db
@@ -320,8 +311,7 @@ export async function deleteInvoice(id: string): Promise<{ success: boolean; err
 }
 
 /** Answer of the recategorization when the KI does not run or names no known category */
-export const KI_UNAVAILABLE =
-	'Die KI ist nicht erreichbar oder hat keine passende Kategorie geliefert.';
+export const KI_UNAVAILABLE = 'Die KI ist nicht erreichbar oder hat keine passende Kategorie geliefert.';
 
 /**
  * Re-categorize an invoice using LLM

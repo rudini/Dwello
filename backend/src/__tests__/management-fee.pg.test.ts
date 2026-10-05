@@ -65,9 +65,7 @@ describe('Verwaltungspauschale in der Konfiguration', () => {
 		});
 
 	it('lässt einen Standardsatz über 3 % zu', async () => {
-		const before = (await (await callApi('/api/v1/config/management_fee_pct')).json()) as {
-			value: number;
-		};
+		const before = (await (await callApi('/api/v1/config/management_fee_pct')).json()) as { value: number };
 		try {
 			expect((await setFee('4.5')).status).toBe(200);
 		} finally {

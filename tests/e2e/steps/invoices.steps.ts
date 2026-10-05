@@ -9,26 +9,13 @@ import {
 	listedInvoice,
 	statusOfListedInvoice
 } from '../questions/invoices';
-import {
-	editInvoice,
-	filterInvoices,
-	searchInvoices,
-	startNewInvoice,
-	viewInvoice
-} from '../tasks/invoices';
+import { editInvoice, filterInvoices, searchInvoices, startNewInvoice, viewInvoice } from '../tasks/invoices';
 
 const { Given, When, Then } = createBdd(test);
 
 Given(
 	'{string} stellt dem Gebäude {string} {string} Franken für {string} in der Kategorie {string} in Rechnung',
-	async (
-		{ seed },
-		supplier: string,
-		building: string,
-		amount: string,
-		description: string,
-		category: string
-	) => {
+	async ({ seed }, supplier: string, building: string, amount: string, description: string, category: string) => {
 		await seed.supplierInvoice(supplier, building, amount, description, category);
 	}
 );
@@ -37,12 +24,9 @@ Given('der Liegenschaftsverwalter ist auf der Rechnungsliste', async ({ verwalte
 	await visit(verwalter.page, '/invoices');
 });
 
-When(
-	'der Liegenschaftsverwalter nach dem Rechnungssteller {string} sucht',
-	async ({ verwalter, names }, supplier: string) => {
-		await verwalter.perform(searchInvoices(names.get(supplier) ?? supplier));
-	}
-);
+When('der Liegenschaftsverwalter nach dem Rechnungssteller {string} sucht', async ({ verwalter, names }, supplier: string) => {
+	await verwalter.perform(searchInvoices(names.get(supplier) ?? supplier));
+});
 
 When(
 	'der Liegenschaftsverwalter die Rechnungen nach dem Gebäude {string} filtert',
@@ -54,9 +38,7 @@ When(
 When(
 	'der Liegenschaftsverwalter die nicht umlagefähigen Rechnungen im Gebäude {string} anzeigt',
 	async ({ verwalter, seed }, building: string) => {
-		await verwalter.perform(
-			filterInvoices({ buildingId: seed.idOf(building)!, validity: 'invalid' })
-		);
+		await verwalter.perform(filterInvoices({ buildingId: seed.idOf(building)!, validity: 'invalid' }));
 	}
 );
 
@@ -64,12 +46,9 @@ When('der Liegenschaftsverwalter eine neue Rechnung erfassen will', async ({ ver
 	await verwalter.perform(startNewInvoice);
 });
 
-When(
-	'der Liegenschaftsverwalter die Rechnung von {string} ansieht',
-	async ({ verwalter, names }, supplier: string) => {
-		await verwalter.perform(viewInvoice(names.get(supplier) ?? supplier));
-	}
-);
+When('der Liegenschaftsverwalter die Rechnung von {string} ansieht', async ({ verwalter, names }, supplier: string) => {
+	await verwalter.perform(viewInvoice(names.get(supplier) ?? supplier));
+});
 
 When(
 	'der Liegenschaftsverwalter die Rechnung von {string} bearbeiten will',
@@ -94,9 +73,7 @@ Then('die Rechnungsliste enthält genau {int} Rechnung', async ({ verwalter }, c
 Then(
 	'ist die Rechnung von {string} als {string} kategorisiert',
 	async ({ verwalter, names }, supplier: string, status: string) => {
-		await expect(statusOfListedInvoice(verwalter, names.get(supplier) ?? supplier)).toHaveText(
-			status
-		);
+		await expect(statusOfListedInvoice(verwalter, names.get(supplier) ?? supplier)).toHaveText(status);
 	}
 );
 
@@ -107,9 +84,7 @@ Then('ist der Liegenschaftsverwalter auf der Rechnungsliste', async ({ verwalter
 Then(
 	'ist der Liegenschaftsverwalter auf der Detailseite der Rechnung von {string}',
 	async ({ verwalter, names }, supplier: string) => {
-		await expect(verwalter.page).toHaveTitle(
-			`${names.get(supplier) ?? supplier} - Rechnung - Dwello`
-		);
+		await expect(verwalter.page).toHaveTitle(`${names.get(supplier) ?? supplier} - Rechnung - Dwello`);
 	}
 );
 

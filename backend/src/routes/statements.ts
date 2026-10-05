@@ -19,16 +19,9 @@ import {
 	getStatementCountsByStatus,
 	markOverdueStatements
 } from '../services/statement.service';
-import {
-	calculateStatementForContract,
-	generateStatementNumber
-} from '../services/calculation.service';
+import { calculateStatementForContract, generateStatementNumber } from '../services/calculation.service';
 import { getTypedConfig } from '../services/config.service';
-import {
-	generateStatementPDFBase64,
-	type StatementPDFData,
-	type Language
-} from '../services/pdf.service';
+import { generateStatementPDFBase64, type StatementPDFData, type Language } from '../services/pdf.service';
 import { generateQRReference, type QRBillConfig } from '../services/qr-bill.service';
 
 // Calculation parameters shared by preview and generate; the management fee overrides the configured default
@@ -395,14 +388,12 @@ export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 						tenantShare: parseFloat(item.tenantShare),
 						sharePercentage: item.sharePercentage ? parseFloat(item.sharePercentage) / 100 : 0
 					})),
-					subtotal: parseFloat(statement.totalCosts) - parseFloat(statement.managementFee || '0'),
+					subtotal:
+						parseFloat(statement.totalCosts) - parseFloat(statement.managementFee || '0'),
 					managementFee: parseFloat(statement.managementFee || '0'),
-					managementFeePercent:
-						parseFloat(statement.managementFee || '0') > 0
-							? (parseFloat(statement.managementFee || '0') /
-									(parseFloat(statement.totalCosts) - parseFloat(statement.managementFee || '0'))) *
-								100
-							: 0,
+					managementFeePercent: parseFloat(statement.managementFee || '0') > 0
+						? (parseFloat(statement.managementFee || '0') / (parseFloat(statement.totalCosts) - parseFloat(statement.managementFee || '0'))) * 100
+						: 0,
 					totalCosts: parseFloat(statement.totalCosts),
 					totalAdvancePayments: parseFloat(statement.totalAdvancePayments),
 					balance: parseFloat(statement.balance),
@@ -481,8 +472,7 @@ export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 
 				// Set response headers
 				set.headers['content-type'] = 'application/pdf';
-				set.headers['content-disposition'] =
-					`attachment; filename="statement-${result.statementNumber}.pdf"`;
+				set.headers['content-disposition'] = `attachment; filename="statement-${result.statementNumber}.pdf"`;
 
 				return pdfBuffer;
 			} catch (error) {

@@ -8,8 +8,7 @@ import { callApi, sendJson } from './auth';
 /** Records of one API resource (e.g. 'categories') that a test creates and removes again */
 export function apiRecords(resource: string) {
 	const created: string[] = [];
-	const send = (method: string, path: string, body?: object) =>
-		sendJson(method, `/api/v1/${resource}${path}`, body);
+	const send = (method: string, path: string, body?: object) => sendJson(method, `/api/v1/${resource}${path}`, body);
 	return {
 		send,
 		async create(body: object) {
@@ -37,21 +36,12 @@ export async function firstPredefined(resource: string) {
 	return ((await response.json()) as { data: { id: string }[] }).data[0].id;
 }
 
-type Invoice = {
-	categoryId?: string;
-	distributionKeyId?: string;
-	description?: string;
-	amount?: string;
-	invoiceDate?: string;
-};
+type Invoice = { categoryId?: string; distributionKeyId?: string; description?: string; amount?: string; invoiceDate?: string };
 
 /** Invoice of the building, by default caretaker costs distributed by area */
 export async function insertInvoice(buildingId: string, invoice: Invoice = {}) {
 	const [caretaker] = await db.select().from(categories).where(eq(categories.name, 'Caretaker'));
-	const [perArea] = await db
-		.select()
-		.from(distributionKeys)
-		.where(eq(distributionKeys.name, 'Per Area (m²)'));
+	const [perArea] = await db.select().from(distributionKeys).where(eq(distributionKeys.name, 'Per Area (m²)'));
 	await db.insert(invoices).values({
 		buildingId,
 		categoryId: caretaker.id,
@@ -67,13 +57,7 @@ export async function insertInvoice(buildingId: string, invoice: Invoice = {}) {
 
 /** A building with one invoice; returns its removal */
 export async function invoicedBuilding(name: string, invoice: Invoice) {
-	const building = await createBuilding({
-		name,
-		address: 'Testweg 1',
-		postalCode: '8400',
-		city: 'Winterthur',
-		canton: 'ZH'
-	});
+	const building = await createBuilding({ name, address: 'Testweg 1', postalCode: '8400', city: 'Winterthur', canton: 'ZH' });
 	await insertInvoice(building.id, invoice);
 	return async () => {
 		await db.delete(invoices).where(eq(invoices.buildingId, building.id));

@@ -24,11 +24,7 @@ describe('Letzte Aktivitäten', () => {
 
 	// Paid statements stay unchanged, so their last update is the moment the payment was recorded
 	it('meldet die Zahlung, wenn sie erfasst wurde, zusätzlich zur Erstellung', () => {
-		const activities = statementActivities({
-			...statement,
-			status: 'paid',
-			updatedAt: new Date('2026-04-15T14:30:00Z')
-		});
+		const activities = statementActivities({ ...statement, status: 'paid', updatedAt: new Date('2026-04-15T14:30:00Z') });
 
 		expect(activities.map((a) => [a.title, a.timestamp])).toEqual([
 			['Abrechnung erstellt', '2026-03-01T09:00:00.000Z'],

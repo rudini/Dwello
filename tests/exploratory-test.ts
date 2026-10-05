@@ -108,10 +108,7 @@ async function testPage(page: Page, url: string, pageName: string) {
 				action: 'Page Load',
 				status: 'error',
 				message: 'Redirected to login - authentication may have failed',
-				screenshot: await takeScreenshot(
-					page,
-					`auth-failed-${pageName.replace(/\s+/g, '-').toLowerCase()}`
-				)
+				screenshot: await takeScreenshot(page, `auth-failed-${pageName.replace(/\s+/g, '-').toLowerCase()}`)
 			});
 			return;
 		}
@@ -129,6 +126,7 @@ async function testPage(page: Page, url: string, pageName: string) {
 		await testButtons(page, pageName);
 		await testForms(page, pageName);
 		await testSelectOptions(page, pageName);
+
 	} catch (error) {
 		await logResult({
 			page: pageName,
@@ -151,8 +149,7 @@ async function testLinks(page: Page, pageName: string) {
 			const isVisible = await link.isVisible();
 
 			if (!href || testedUrls.has(href) || !isVisible) continue;
-			if (href.startsWith('http') || href.startsWith('mailto:') || href.startsWith('tel:'))
-				continue;
+			if (href.startsWith('http') || href.startsWith('mailto:') || href.startsWith('tel:')) continue;
 
 			testedUrls.add(href);
 
@@ -162,6 +159,7 @@ async function testLinks(page: Page, pageName: string) {
 				status: 'success',
 				message: `${text?.trim().substring(0, 40) || 'No text'} → ${href}`
 			});
+
 		} catch {
 			// Link might have been removed from DOM
 		}
@@ -196,6 +194,7 @@ async function testButtons(page: Page, pageName: string) {
 				status: 'success',
 				message: `${text?.trim().substring(0, 30) || 'No text'} (type: ${type || 'button'})`
 			});
+
 		} catch {
 			// Button might have been removed from DOM
 		}
@@ -216,6 +215,7 @@ async function testForms(page: Page, pageName: string) {
 				status: 'success',
 				message: `Found form with ${inputs.length} input(s)`
 			});
+
 		} catch {
 			// Form might have been removed
 		}
@@ -246,6 +246,7 @@ async function testSelectOptions(page: Page, pageName: string) {
 				status: 'success',
 				message: `${options.length} options (${disabledCount} disabled)`
 			});
+
 		} catch {
 			// Select might have been removed
 		}
@@ -412,6 +413,7 @@ async function testHeatingProfileEdit(page: Page, baseUrl: string) {
 			status: parseInt(newValue) === parseInt(currentValue) + 1 ? 'success' : 'warning',
 			message: `After ArrowUp: ${currentValue} → ${newValue}`
 		});
+
 	} catch (error) {
 		await logResult({
 			page: 'Heating Profile Edit',
@@ -475,6 +477,7 @@ async function testConfigPage(page: Page, baseUrl: string) {
 		}
 
 		await takeScreenshot(page, 'config-heating-dropdown');
+
 	} catch (error) {
 		await logResult({
 			page: 'Config',
@@ -531,7 +534,7 @@ async function runExploratoryTests() {
 
 	// Listen for console errors (but don't spam)
 	const consoleErrors: string[] = [];
-	page.on('console', (msg) => {
+	page.on('console', msg => {
 		if (msg.type() === 'error' && !msg.text().includes('401')) {
 			consoleErrors.push(msg.text());
 			if (consoleErrors.length <= 5) {
@@ -541,7 +544,7 @@ async function runExploratoryTests() {
 	});
 
 	// Listen for page errors
-	page.on('pageerror', (error) => {
+	page.on('pageerror', error => {
 		console.log(`   🔴 Page Error: ${error.message}`);
 	});
 
@@ -577,7 +580,7 @@ async function runExploratoryTests() {
 		{ url: '/config/heating-profiles/hp-custom-1/edit', name: 'Heating Profile Edit' },
 		{ url: '/config/heating-profiles/new', name: 'New Heating Profile' },
 		{ url: '/config/distribution-keys', name: 'Distribution Keys' },
-		{ url: '/config/distribution-keys/new', name: 'New Distribution Key' }
+		{ url: '/config/distribution-keys/new', name: 'New Distribution Key' },
 	];
 
 	for (const pageInfo of pagesToTest) {
@@ -600,9 +603,9 @@ async function runExploratoryTests() {
 	console.log('\n' + '='.repeat(60));
 	console.log('📊 TEST SUMMARY\n');
 
-	const successCount = results.filter((r) => r.status === 'success').length;
-	const errorCount = results.filter((r) => r.status === 'error').length;
-	const warningCount = results.filter((r) => r.status === 'warning').length;
+	const successCount = results.filter(r => r.status === 'success').length;
+	const errorCount = results.filter(r => r.status === 'error').length;
+	const warningCount = results.filter(r => r.status === 'warning').length;
 
 	console.log(`✅ Success: ${successCount}`);
 	console.log(`❌ Errors: ${errorCount}`);
@@ -610,21 +613,17 @@ async function runExploratoryTests() {
 
 	if (errorCount > 0) {
 		console.log('\n❌ ERRORS FOUND:\n');
-		results
-			.filter((r) => r.status === 'error')
-			.forEach((r) => {
-				console.log(`   [${r.page}] ${r.action}: ${r.message}`);
-				if (r.screenshot) console.log(`      Screenshot: tests/screenshots/${r.screenshot}`);
-			});
+		results.filter(r => r.status === 'error').forEach(r => {
+			console.log(`   [${r.page}] ${r.action}: ${r.message}`);
+			if (r.screenshot) console.log(`      Screenshot: tests/screenshots/${r.screenshot}`);
+		});
 	}
 
 	if (warningCount > 0) {
 		console.log('\n⚠️ WARNINGS:\n');
-		results
-			.filter((r) => r.status === 'warning')
-			.forEach((r) => {
-				console.log(`   [${r.page}] ${r.action}: ${r.message}`);
-			});
+		results.filter(r => r.status === 'warning').forEach(r => {
+			console.log(`   [${r.page}] ${r.action}: ${r.message}`);
+		});
 	}
 
 	if (consoleErrors.length > 5) {

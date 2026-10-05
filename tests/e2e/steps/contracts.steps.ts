@@ -26,14 +26,7 @@ Given(
 
 Given(
 	'{string} mietete die Wohnung {string} von {string} bis {string} für {string} Franken',
-	async (
-		{ seed },
-		tenant: string,
-		apartment: string,
-		startDate: string,
-		endDate: string,
-		baseRent: string
-	) => {
+	async ({ seed }, tenant: string, apartment: string, startDate: string, endDate: string, baseRent: string) => {
 		await seed.contract(tenant, apartment, { startDate, endDate, baseRent });
 	}
 );
@@ -49,19 +42,13 @@ Then(
 	}
 );
 
-When(
-	'der Liegenschaftsverwalter nach dem Mieter {string} sucht',
-	async ({ verwalter, names }, tenant: string) => {
-		await verwalter.perform(searchContracts(names.get(tenant) ?? tenant));
-	}
-);
+When('der Liegenschaftsverwalter nach dem Mieter {string} sucht', async ({ verwalter, names }, tenant: string) => {
+	await verwalter.perform(searchContracts(names.get(tenant) ?? tenant));
+});
 
-Then(
-	'die Mietvertragsliste enthält genau {int} Mietvertrag',
-	async ({ verwalter }, count: number) => {
-		await expect(allListedContracts(verwalter)).toHaveCount(count);
-	}
-);
+Then('die Mietvertragsliste enthält genau {int} Mietvertrag', async ({ verwalter }, count: number) => {
+	await expect(allListedContracts(verwalter)).toHaveCount(count);
+});
 
 When(
 	'der Liegenschaftsverwalter die Mietverträge nach dem Gebäude {string} filtert',
@@ -81,12 +68,9 @@ When('der Liegenschaftsverwalter einen neuen Mietvertrag erfassen will', async (
 	await verwalter.perform(startNewContract);
 });
 
-When(
-	'der Liegenschaftsverwalter den Mietvertrag von {string} ansieht',
-	async ({ verwalter, names }, tenant: string) => {
-		await verwalter.perform(viewContract(names.get(tenant) ?? tenant));
-	}
-);
+When('der Liegenschaftsverwalter den Mietvertrag von {string} ansieht', async ({ verwalter, names }, tenant: string) => {
+	await verwalter.perform(viewContract(names.get(tenant) ?? tenant));
+});
 
 When(
 	'der Liegenschaftsverwalter den Mietvertrag von {string} bearbeiten will',
@@ -98,9 +82,7 @@ When(
 Then(
 	'ist der Liegenschaftsverwalter auf der Detailseite des Mietvertrags von {string}',
 	async ({ verwalter, names }, tenant: string) => {
-		await expect(verwalter.page).toHaveTitle(
-			`Mietvertrag - ${names.get(tenant) ?? tenant} - Dwello`
-		);
+		await expect(verwalter.page).toHaveTitle(`Mietvertrag - ${names.get(tenant) ?? tenant} - Dwello`);
 	}
 );
 

@@ -11,12 +11,7 @@ import {
 	tenancyLawNote,
 	utilityCostOfInvoice
 } from '../questions/invoice-detail';
-import {
-	deleteInvoice,
-	openBuildingOfInvoice,
-	recategorizeInvoice,
-	startEditingInvoice
-} from '../tasks/invoice-detail';
+import { deleteInvoice, openBuildingOfInvoice, recategorizeInvoice, startEditingInvoice } from '../tasks/invoice-detail';
 
 const { Given, When, Then } = createBdd(test);
 
@@ -43,12 +38,9 @@ When('der Liegenschaftsverwalter das Gebäude der Rechnung öffnet', async ({ ve
 	await verwalter.perform(openBuildingOfInvoice);
 });
 
-Then(
-	'sieht der Liegenschaftsverwalter den Betrag {string}',
-	async ({ verwalter }, amount: string) => {
-		await expect(amountOfInvoice(verwalter)).toHaveText(amount);
-	}
-);
+Then('sieht der Liegenschaftsverwalter den Betrag {string}', async ({ verwalter }, amount: string) => {
+	await expect(amountOfInvoice(verwalter)).toHaveText(amount);
+});
 
 Then(
 	'sieht der Liegenschaftsverwalter die Kategorie {string} und den Verteilschlüssel {string}',

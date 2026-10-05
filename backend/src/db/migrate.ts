@@ -33,25 +33,20 @@ export async function migrate(connectionString: string, directory: string) {
 	await client.connect();
 	try {
 		const files = (await readdir(directory)).filter((file) => file.endsWith('.sql')).sort();
-		const tracked = (await client.query(`SELECT to_regclass('schema_migrations') AS name`)).rows[0]
-			.name;
+		const tracked = (await client.query(`SELECT to_regclass('schema_migrations') AS name`)).rows[0].name;
 		if (!tracked) {
 			let { latest } = (await client.query(ALREADY_APPLIED)).rows[0];
 			if (latest === '0006') {
 				const removed = `SELECT 1 FROM distribution_keys WHERE name IN ('Per Person', 'By Consumption')`;
 				if ((await client.query(removed)).rowCount === 0) latest = '0007';
 			}
-			await client.query(
-				'CREATE TABLE schema_migrations (name text PRIMARY KEY, applied_at timestamptz NOT NULL DEFAULT now())'
-			);
+			await client.query('CREATE TABLE schema_migrations (name text PRIMARY KEY, applied_at timestamptz NOT NULL DEFAULT now())');
 			for (const file of files.filter((file) => latest && file <= `${latest}~`)) {
 				await client.query('INSERT INTO schema_migrations (name) VALUES ($1)', [file]);
 			}
 		}
 
-		const done = new Set(
-			(await client.query('SELECT name FROM schema_migrations')).rows.map((row) => row.name)
-		);
+		const done = new Set((await client.query('SELECT name FROM schema_migrations')).rows.map((row) => row.name));
 		const pending = files.filter((file) => !done.has(file));
 		for (const file of pending) {
 			await client.query('BEGIN');
@@ -61,9 +56,7 @@ export async function migrate(connectionString: string, directory: string) {
 				await client.query('COMMIT');
 			} catch (error) {
 				await client.query('ROLLBACK');
-				throw new Error(
-					`Migration ${file} fehlgeschlagen: ${error instanceof Error ? error.message : error}`
-				);
+				throw new Error(`Migration ${file} fehlgeschlagen: ${error instanceof Error ? error.message : error}`);
 			}
 		}
 		return pending;

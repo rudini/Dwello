@@ -178,9 +178,7 @@ export const heatingProfileRoutes = new Elysia({ prefix: '/api/v1/heating-profil
 				return profile;
 			} catch (error) {
 				set.status = error instanceof Conflict ? 409 : 400;
-				return {
-					error: error instanceof Error ? error.message : 'Failed to create heating profile'
-				};
+				return { error: error instanceof Error ? error.message : 'Failed to create heating profile' };
 			}
 		},
 		{
@@ -244,9 +242,7 @@ export const heatingProfileRoutes = new Elysia({ prefix: '/api/v1/heating-profil
 				return profile;
 			} catch (error) {
 				set.status = error instanceof Conflict ? 409 : 400;
-				return {
-					error: error instanceof Error ? error.message : 'Failed to update heating profile'
-				};
+				return { error: error instanceof Error ? error.message : 'Failed to update heating profile' };
 			}
 		},
 		{

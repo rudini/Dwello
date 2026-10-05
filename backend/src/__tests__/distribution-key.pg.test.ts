@@ -36,9 +36,7 @@ describe('Distribution keys in statement calculation (real DB)', () => {
 		const buildingApartments = await getBuildingApartments();
 		expect(buildingApartments.length).toBeGreaterThan(1);
 
-		const keys = await db
-			.select({ id: distributionKeys.id, name: distributionKeys.name })
-			.from(distributionKeys);
+		const keys = await db.select({ id: distributionKeys.id, name: distributionKeys.name }).from(distributionKeys);
 		expect(keys.length).toBeGreaterThan(0);
 
 		for (const key of keys) {

@@ -24,10 +24,8 @@ export const openPreview =
 	async (actor: Actor) => {
 		await periodStartInput(actor.page).fill(`${year}-01-01`);
 		await periodEndInput(actor.page).fill(`${year}-12-31`);
-		if (options.heatingProfileId)
-			await heatingProfileSelect(actor.page).selectOption(options.heatingProfileId);
-		if (options.managementFeePercent !== undefined)
-			await setManagementFee(options.managementFeePercent)(actor);
+		if (options.heatingProfileId) await heatingProfileSelect(actor.page).selectOption(options.heatingProfileId);
+		if (options.managementFeePercent !== undefined) await setManagementFee(options.managementFeePercent)(actor);
 		await nextButton(actor.page).click();
 		await buildingCheckbox(actor.page, buildingId).check();
 		await nextButton(actor.page).click();

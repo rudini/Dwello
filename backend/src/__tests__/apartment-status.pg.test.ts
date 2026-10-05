@@ -17,8 +17,7 @@ import { getBuilding } from '../services/building.service';
 import { callApi } from './helpers/auth';
 import { createRental } from './helpers/rental';
 
-const day = (offset: number) =>
-	new Date(Date.now() + offset * 86_400_000).toISOString().split('T')[0];
+const day = (offset: number) => new Date(Date.now() + offset * 86_400_000).toISOString().split('T')[0];
 
 let rental: Awaited<ReturnType<typeof createRental>>;
 const contracts: string[] = [];
@@ -27,39 +26,20 @@ const contracts: string[] = [];
 async function contractFor(apartmentId: string, startDate: string, endDate: string | null = null) {
 	const [contract] = await db
 		.insert(rentalContracts)
-		.values({
-			apartmentId,
-			tenantId: rental.tenant,
-			startDate,
-			endDate,
-			baseRent: '900',
-			monthlyAdvancePayment: '100'
-		})
+		.values({ apartmentId, tenantId: rental.tenant, startDate, endDate, baseRent: '900', monthlyAdvancePayment: '100' })
 		.returning();
 	contracts.push(contract.id);
 }
 
 async function apartment(number: string, status: 'vacant' | 'reserved' = 'vacant') {
-	return (
-		await createApartment({
-			buildingId: rental.building,
-			number,
-			floor: 1,
-			area: '50',
-			rooms: '2',
-			status
-		})
-	).id;
+	return (await createApartment({ buildingId: rental.building, number, floor: 1, area: '50', rooms: '2', status })).id;
 }
 
 const statusOf = async (id: string) => (await getApartment(id))!.status;
 
 beforeAll(async () => {
 	// Apartment 2.01 rented since yesterday
-	rental = await createRental(crypto.randomUUID(), {
-		startDate: day(-1),
-		monthlyAdvancePayment: '100'
-	});
+	rental = await createRental(crypto.randomUUID(), { startDate: day(-1), monthlyAdvancePayment: '100' });
 });
 
 afterAll(async () => {
@@ -121,12 +101,8 @@ describe('Wohnungsstatus aus den Mietverträgen', () => {
 		const { portfolio } = (await response.json()) as { portfolio: Record<string, number> };
 
 		expect(portfolio.reletApartments).toBe(relet.total);
-		expect(portfolio.reservedApartments).toBe(
-			(await listApartments({ status: 'reserved', limit: 1000 })).total
-		);
-		expect(portfolio.occupiedApartments).toBe(
-			(await listApartments({ status: 'occupied', limit: 1000 })).total
-		);
+		expect(portfolio.reservedApartments).toBe((await listApartments({ status: 'reserved', limit: 1000 })).total);
+		expect(portfolio.occupiedApartments).toBe((await listApartments({ status: 'occupied', limit: 1000 })).total);
 	});
 
 	it('wird vom Ändern der Wohnung nicht überschrieben', async () => {

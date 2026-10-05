@@ -74,7 +74,9 @@ export const invoiceRoutes = new Elysia({ prefix: '/api/v1/invoices' })
 				dateFrom: query.dateFrom,
 				dateTo: query.dateTo,
 				isValidUtilityCost:
-					query.isValidUtilityCost !== undefined ? query.isValidUtilityCost === 'true' : undefined,
+					query.isValidUtilityCost !== undefined
+						? query.isValidUtilityCost === 'true'
+						: undefined,
 				wasManuallyOverridden:
 					query.wasManuallyOverridden !== undefined
 						? query.wasManuallyOverridden === 'true'
@@ -168,8 +170,7 @@ export const invoiceRoutes = new Elysia({ prefix: '/api/v1/invoices' })
 	.post('/:id/recategorize', async ({ params, set }) => {
 		const result = await recategorizeInvoiceById(params.id);
 		if (!result.success) {
-			set.status =
-				result.error === 'Invoice not found' ? 404 : result.error === KI_UNAVAILABLE ? 503 : 500;
+			set.status = result.error === 'Invoice not found' ? 404 : result.error === KI_UNAVAILABLE ? 503 : 500;
 			return { error: result.error };
 		}
 		return result;

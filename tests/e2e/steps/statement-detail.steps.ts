@@ -18,15 +18,9 @@ import {
 
 const { Given, When, Then } = createBdd(test);
 
-Given(
-	'das Heizprofil {string} verteilt die Heizkosten so:',
-	async ({ seed }, title: string, table: DataTable) => {
-		await seed.heatingProfile(
-			title,
-			table.hashes().map((row) => Number(row.Anteil))
-		);
-	}
-);
+Given('das Heizprofil {string} verteilt die Heizkosten so:', async ({ seed }, title: string, table: DataTable) => {
+	await seed.heatingProfile(title, table.hashes().map((row) => Number(row.Anteil)));
+});
 
 Given(
 	'im Gebäude {string} gibt es eine Heizkostenrechnung über {string} Franken für {int}',
@@ -42,12 +36,9 @@ Given(
 	}
 );
 
-Given(
-	'die Abrechnung {int} von {string} ist versendet',
-	async ({ seed }, year: number, tenant: string) => {
-		await seed.sendStatement(tenant, year);
-	}
-);
+Given('die Abrechnung {int} von {string} ist versendet', async ({ seed }, year: number, tenant: string) => {
+	await seed.sendStatement(tenant, year);
+});
 
 Given(
 	'der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung {int} von {string}',

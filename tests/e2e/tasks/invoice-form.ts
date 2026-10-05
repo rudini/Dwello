@@ -9,13 +9,7 @@ import {
 	supplierInput
 } from '../interactions/invoice-form';
 
-export type InvoiceData = {
-	buildingId: string;
-	supplier: string;
-	amount: string;
-	description: string;
-	category: string;
-};
+export type InvoiceData = { buildingId: string; supplier: string; amount: string; description: string; category: string };
 
 export const chooseCategory = (category: string) => async (actor: Actor) => {
 	await categorySelect(actor.page).selectOption({ label: category });

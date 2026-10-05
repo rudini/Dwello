@@ -10,11 +10,7 @@ import {
 	grossMonthlyRent,
 	vacancy
 } from '../questions/apartment-detail';
-import {
-	editApartment,
-	openContractFromHistory,
-	openTenantProfile
-} from '../tasks/apartment-detail';
+import { editApartment, openContractFromHistory, openTenantProfile } from '../tasks/apartment-detail';
 
 const { Given, When, Then } = createBdd(test);
 

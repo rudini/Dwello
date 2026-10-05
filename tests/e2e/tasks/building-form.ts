@@ -9,13 +9,7 @@ import {
 	yearBuiltInput
 } from '../interactions/building-form';
 
-export type BuildingData = {
-	name: string;
-	address: string;
-	postalCode: string;
-	city: string;
-	canton: string;
-};
+export type BuildingData = { name: string; address: string; postalCode: string; city: string; canton: string };
 
 export const registerBuilding = (building: BuildingData) => async (actor: Actor) => {
 	await nameInput(actor.page).fill(building.name);

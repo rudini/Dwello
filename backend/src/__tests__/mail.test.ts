@@ -12,13 +12,7 @@ const message: MailMessage = {
 	to: 'anna.keller@example.com',
 	subject: '1. Mahnung NK-2024-1',
 	text: 'Guten Tag Frau Keller',
-	attachments: [
-		{
-			filename: 'mahnung.pdf',
-			content: Buffer.from('%PDF-1.4 test'),
-			contentType: 'application/pdf'
-		}
-	]
+	attachments: [{ filename: 'mahnung.pdf', content: Buffer.from('%PDF-1.4 test'), contentType: 'application/pdf' }]
 };
 
 describe('Versand über SMTP', () => {
@@ -102,9 +96,7 @@ describe('Versand über Resend', () => {
 				to: ['anna.keller@example.com'],
 				subject: '1. Mahnung NK-2024-1',
 				text: 'Guten Tag Frau Keller',
-				attachments: [
-					{ filename: 'mahnung.pdf', content: Buffer.from('%PDF-1.4 test').toString('base64') }
-				]
+				attachments: [{ filename: 'mahnung.pdf', content: Buffer.from('%PDF-1.4 test').toString('base64') }]
 			}
 		});
 	});
@@ -121,17 +113,13 @@ describe('Konfiguration', () => {
 	});
 
 	it('lehnt unbekannte Versandwege ab', () => {
-		expect(() => createMailTransport({ MAIL_TRANSPORT: 'fax', MAIL_FROM: 'a@b.ch' })).toThrow(
-			MailConfigError
-		);
+		expect(() => createMailTransport({ MAIL_TRANSPORT: 'fax', MAIL_FROM: 'a@b.ch' })).toThrow(MailConfigError);
 	});
 
 	it('verlangt die Zugangsdaten des gewählten Versandwegs', () => {
 		expect(() => createMailTransport({ MAIL_TRANSPORT: 'resend', MAIL_FROM: 'a@b.ch' })).toThrow(
 			'RESEND_API_KEY'
 		);
-		expect(() => createMailTransport({ MAIL_TRANSPORT: 'smtp', MAIL_FROM: 'a@b.ch' })).toThrow(
-			'SMTP_HOST'
-		);
+		expect(() => createMailTransport({ MAIL_TRANSPORT: 'smtp', MAIL_FROM: 'a@b.ch' })).toThrow('SMTP_HOST');
 	});
 });

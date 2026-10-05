@@ -49,40 +49,28 @@ When('der Liegenschaftsverwalter die Wohnung des Mietvertrags öffnet', async ({
 	await verwalter.perform(openContractApartment);
 });
 
-When(
-	'der Liegenschaftsverwalter die Nebenkostenabrechnungen des Mietvertrags anzeigt',
-	async ({ verwalter }) => {
-		await verwalter.perform(showContractStatements);
-	}
-);
+When('der Liegenschaftsverwalter die Nebenkostenabrechnungen des Mietvertrags anzeigt', async ({ verwalter }) => {
+	await verwalter.perform(showContractStatements);
+});
 
 When('der Liegenschaftsverwalter die Rechnungen des Gebäudes anzeigt', async ({ verwalter }) => {
 	await verwalter.perform(showBuildingInvoices);
 });
 
-Then(
-	'sieht der Liegenschaftsverwalter die Wohnung {string} im Mietvertrag',
-	async ({ verwalter }, number: string) => {
-		await expect(apartmentOfContract(verwalter)).toContainText(`Wohnung ${number}`);
-	}
-);
+Then('sieht der Liegenschaftsverwalter die Wohnung {string} im Mietvertrag', async ({ verwalter }, number: string) => {
+	await expect(apartmentOfContract(verwalter)).toContainText(`Wohnung ${number}`);
+});
 
-Then(
-	'sieht der Liegenschaftsverwalter den monatlichen Mietzins {string}',
-	async ({ verwalter }, amount: string) => {
-		await expect(totalRent(verwalter)).toHaveText(amount);
-	}
-);
+Then('sieht der Liegenschaftsverwalter den monatlichen Mietzins {string}', async ({ verwalter }, amount: string) => {
+	await expect(totalRent(verwalter)).toHaveText(amount);
+});
 
 Then('hat der Mietvertrag den Status {string}', async ({ verwalter }, status: string) => {
 	await expect(statusOfContract(verwalter)).toHaveText(status);
 });
 
-Then(
-	'der Mietvertrag von {string} ist nicht mehr auffindbar',
-	async ({ verwalter, names }, tenant: string) => {
-		const name = names.get(tenant) ?? tenant;
-		await verwalter.perform(searchContracts(name));
-		await expect(listedContract(verwalter, name)).toHaveCount(0);
-	}
-);
+Then('der Mietvertrag von {string} ist nicht mehr auffindbar', async ({ verwalter, names }, tenant: string) => {
+	const name = names.get(tenant) ?? tenant;
+	await verwalter.perform(searchContracts(name));
+	await expect(listedContract(verwalter, name)).toHaveCount(0);
+});

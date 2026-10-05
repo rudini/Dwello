@@ -14,5 +14,4 @@ export const currentTenant = (actor: Actor) => currentTenantName(actor.page);
 export const grossMonthlyRent = (actor: Actor) => monthlyTotal(actor.page);
 export const vacancy = (actor: Actor) => vacancyNote(actor.page);
 export const contractHistory = (actor: Actor) => historyRows(actor.page);
-export const buildingOfApartment = (actor: Actor, buildingName: string) =>
-	breadcrumbLink(actor.page, buildingName);
+export const buildingOfApartment = (actor: Actor, buildingName: string) => breadcrumbLink(actor.page, buildingName);

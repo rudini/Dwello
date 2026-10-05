@@ -19,9 +19,7 @@ afterAll(async () => {
 
 describe('GET /api/v1/tenants?search', () => {
 	it('findet Mieter über Vor- und Nachnamen', async () => {
-		const response = await callApi(
-			`/api/v1/tenants?search=${encodeURIComponent(`Hans Müller ${token}`)}`
-		);
+		const response = await callApi(`/api/v1/tenants?search=${encodeURIComponent(`Hans Müller ${token}`)}`);
 		const result = (await response.json()) as { tenants: { id: string }[] };
 
 		expect(result.tenants.map((t) => t.id)).toEqual([tenantId]);

@@ -25,9 +25,7 @@ function importName(file: string) {
  * the page itself, every page below a changed layout, and every page importing a changed module, transitively.
  */
 export function affectedRoutes(changed: string[], files: string[], read: (file: string) => string) {
-	const pages = files
-		.filter((file) => basename(file) === '+page.svelte')
-		.map((file) => dirname(file));
+	const pages = files.filter((file) => basename(file) === '+page.svelte').map((file) => dirname(file));
 	const routes = new Set<string>();
 	const seen = new Set<string>();
 	const queue = changed.filter((file) => file.startsWith('src/') && !isTest(file));
@@ -45,9 +43,7 @@ export function affectedRoutes(changed: string[], files: string[], read: (file: 
 		if (dir === 'src' && /^(app|hooks)\./.test(name)) {
 			pages.forEach((page) => routes.add(routeOf(page))); // shell of every page
 		} else if (dir.startsWith('src/routes') && /^\+(layout|error)\./.test(name)) {
-			pages
-				.filter((page) => page === dir || page.startsWith(`${dir}/`))
-				.forEach((page) => routes.add(routeOf(page)));
+			pages.filter((page) => page === dir || page.startsWith(`${dir}/`)).forEach((page) => routes.add(routeOf(page)));
 		} else if (dir.startsWith('src/routes') && name.startsWith('+page.')) {
 			routes.add(routeOf(dir));
 		} else {
@@ -61,7 +57,6 @@ export function affectedRoutes(changed: string[], files: string[], read: (file: 
 if (process.argv[1]?.endsWith('affected-routes.ts')) {
 	const changed = readFileSync(0, 'utf8').split('\n').filter(Boolean);
 	const cache = new Map<string, string>();
-	const read = (file: string) =>
-		cache.get(file) ?? cache.set(file, readFileSync(file, 'utf8')).get(file)!;
+	const read = (file: string) => cache.get(file) ?? cache.set(file, readFileSync(file, 'utf8')).get(file)!;
 	console.log(affectedRoutes(changed, sourceFiles(), read).join('\n'));
 }

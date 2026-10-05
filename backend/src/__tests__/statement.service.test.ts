@@ -18,14 +18,22 @@ function computeEffectiveStatus(
 }
 
 // Helper to determine if a statement should be counted as sent (not overdue)
-function isSentNotOverdue(status: string, paymentDeadline: string | null, today: string): boolean {
+function isSentNotOverdue(
+	status: string,
+	paymentDeadline: string | null,
+	today: string
+): boolean {
 	if (status !== 'sent') return false;
 	if (!paymentDeadline) return true; // No deadline = still sent
 	return paymentDeadline >= today; // Deadline not passed = still sent
 }
 
 // Helper to determine if a statement should be counted as overdue
-function isOverdue(status: string, paymentDeadline: string | null, today: string): boolean {
+function isOverdue(
+	status: string,
+	paymentDeadline: string | null,
+	today: string
+): boolean {
 	return status === 'sent' && paymentDeadline !== null && paymentDeadline < today;
 }
 
@@ -117,45 +125,33 @@ describe('Statement Service - Overdue Status Calculation', () => {
 		const statements = [
 			{ id: '1', status: 'draft', paymentDeadline: null },
 			{ id: '2', status: 'sent', paymentDeadline: '2025-02-15' }, // overdue
-			{ id: '3', status: 'paid', paymentDeadline: '2025-02-10' }
+			{ id: '3', status: 'paid', paymentDeadline: '2025-02-10' },
 		];
 
 		it('should have consistent counts (sent + overdue from db sent = total sent in db)', () => {
-			const dbSentCount = statements.filter((s) => s.status === 'sent').length;
-			const sentCount = statements.filter((s) =>
-				isSentNotOverdue(s.status, s.paymentDeadline, today)
-			).length;
-			const overdueCount = statements.filter((s) =>
-				isOverdue(s.status, s.paymentDeadline, today)
-			).length;
+			const dbSentCount = statements.filter(s => s.status === 'sent').length;
+			const sentCount = statements.filter(s => isSentNotOverdue(s.status, s.paymentDeadline, today)).length;
+			const overdueCount = statements.filter(s => isOverdue(s.status, s.paymentDeadline, today)).length;
 
 			// Sent in DB should equal sent (not overdue) + overdue
 			expect(sentCount + overdueCount).toBe(dbSentCount);
 		});
 
 		it('should not double count any statement', () => {
-			const draftCount = statements.filter((s) => s.status === 'draft').length;
-			const sentCount = statements.filter((s) =>
-				isSentNotOverdue(s.status, s.paymentDeadline, today)
-			).length;
-			const paidCount = statements.filter((s) => s.status === 'paid').length;
-			const overdueCount = statements.filter((s) =>
-				isOverdue(s.status, s.paymentDeadline, today)
-			).length;
+			const draftCount = statements.filter(s => s.status === 'draft').length;
+			const sentCount = statements.filter(s => isSentNotOverdue(s.status, s.paymentDeadline, today)).length;
+			const paidCount = statements.filter(s => s.status === 'paid').length;
+			const overdueCount = statements.filter(s => isOverdue(s.status, s.paymentDeadline, today)).length;
 
 			// Total should equal original count
 			expect(draftCount + sentCount + paidCount + overdueCount).toBe(statements.length);
 		});
 
 		it('should correctly categorize the test data', () => {
-			const draftCount = statements.filter((s) => s.status === 'draft').length;
-			const sentCount = statements.filter((s) =>
-				isSentNotOverdue(s.status, s.paymentDeadline, today)
-			).length;
-			const paidCount = statements.filter((s) => s.status === 'paid').length;
-			const overdueCount = statements.filter((s) =>
-				isOverdue(s.status, s.paymentDeadline, today)
-			).length;
+			const draftCount = statements.filter(s => s.status === 'draft').length;
+			const sentCount = statements.filter(s => isSentNotOverdue(s.status, s.paymentDeadline, today)).length;
+			const paidCount = statements.filter(s => s.status === 'paid').length;
+			const overdueCount = statements.filter(s => isOverdue(s.status, s.paymentDeadline, today)).length;
 
 			expect(draftCount).toBe(1);
 			expect(sentCount).toBe(0); // The sent one is overdue

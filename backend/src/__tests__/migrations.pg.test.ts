@@ -35,8 +35,7 @@ const files = (await readdir(migrations)).filter((file) => file.endsWith('.sql')
 const upTo = (prefix: string) => files.filter((file) => file <= `${prefix}~`);
 
 afterAll(async () => {
-	for (const name of databases)
-		await query('postgres', `DROP DATABASE IF EXISTS "${name}" WITH (FORCE)`);
+	for (const name of databases) await query('postgres', `DROP DATABASE IF EXISTS "${name}" WITH (FORCE)`);
 });
 
 describe('Migrationen anwenden', () => {
@@ -55,9 +54,7 @@ describe('Migrationen anwenden', () => {
 		// Whether 0004 ran cannot be told apart; it only corrects wrong totals, so it runs again
 		expect(applied).toEqual(files.filter((file) => file > '0003~'));
 		// The statement page reads the tenant's correspondence channel and the documents
-		expect(await query(name, `SELECT to_regclass('documents') AS documents`)).toEqual([
-			{ documents: 'documents' }
-		]);
+		expect(await query(name, `SELECT to_regclass('documents') AS documents`)).toEqual([{ documents: 'documents' }]);
 		// 0004 must not raise the corrected heating profiles a second time
 		const totals = await query(
 			name,
@@ -70,22 +67,15 @@ describe('Migrationen anwenden', () => {
 	it('entfernt bei einer von Hand bis 0006 migrierten Datenbank die Schlüssel pro Person und nach Verbrauch', async () => {
 		const name = await database(upTo('0006'));
 
-		expect(await migrate(`${server}/${name}`, migrations)).toEqual(
-			files.filter((file) => file > '0006~')
-		);
-		const removed = await query(
-			name,
-			`SELECT name FROM distribution_keys WHERE name IN ('Per Person', 'By Consumption')`
-		);
+		expect(await migrate(`${server}/${name}`, migrations)).toEqual(files.filter((file) => file > '0006~'));
+		const removed = await query(name, `SELECT name FROM distribution_keys WHERE name IN ('Per Person', 'By Consumption')`);
 		expect(removed).toEqual([]);
 	});
 
 	it('ergänzt bei einer von Hand bis 0007 migrierten Datenbank den Zeitpunkt der PDF-Erstellung', async () => {
 		const name = await database(upTo('0007'));
 
-		expect(await migrate(`${server}/${name}`, migrations)).toEqual(
-			files.filter((file) => file > '0007~')
-		);
+		expect(await migrate(`${server}/${name}`, migrations)).toEqual(files.filter((file) => file > '0007~'));
 		const columns = await query(
 			name,
 			`SELECT column_name FROM information_schema.columns WHERE table_name = 'utility_statements' AND column_name = 'pdf_generated_at'`
@@ -96,9 +86,7 @@ describe('Migrationen anwenden', () => {
 	it('ergänzt bei einer von Hand bis 0008 migrierten Datenbank den Grund für das Überschreiben der KI-Kategorie', async () => {
 		const name = await database(upTo('0008'));
 
-		expect(await migrate(`${server}/${name}`, migrations)).toEqual(
-			files.filter((file) => file > '0008~')
-		);
+		expect(await migrate(`${server}/${name}`, migrations)).toEqual(files.filter((file) => file > '0008~'));
 		const columns = await query(
 			name,
 			`SELECT column_name FROM information_schema.columns WHERE table_name = 'invoices' AND column_name = 'manual_override_reason'`

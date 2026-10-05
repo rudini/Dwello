@@ -41,7 +41,7 @@ describe('Utility Validation Service', () => {
 			expect(rules.notes).toBeDefined();
 			expect(rules.notes.length).toBeGreaterThan(0);
 			// Check for key Swiss rules
-			expect(rules.notes.some((n) => n.includes('3%'))).toBe(true);
+			expect(rules.notes.some(n => n.includes('3%'))).toBe(true);
 		});
 	});
 
@@ -124,24 +124,22 @@ describe('Utility Validation Service', () => {
 	describe('getUtilityCostRules - detailed checks', () => {
 		it('should include heating in allowed categories', () => {
 			const rules = getUtilityCostRules();
-			expect(rules.allowedCategories.some((c) => c.toLowerCase().includes('heiz'))).toBe(true);
+			expect(rules.allowedCategories.some(c => c.toLowerCase().includes('heiz'))).toBe(true);
 		});
 
 		it('should include water in allowed categories', () => {
 			const rules = getUtilityCostRules();
-			expect(rules.allowedCategories.some((c) => c.toLowerCase().includes('wasser'))).toBe(true);
+			expect(rules.allowedCategories.some(c => c.toLowerCase().includes('wasser'))).toBe(true);
 		});
 
 		it('should include repairs in not allowed categories', () => {
 			const rules = getUtilityCostRules();
-			expect(rules.notAllowedCategories.some((c) => c.toLowerCase().includes('reparatur'))).toBe(
-				true
-			);
+			expect(rules.notAllowedCategories.some(c => c.toLowerCase().includes('reparatur'))).toBe(true);
 		});
 
 		it('should include taxes in not allowed categories', () => {
 			const rules = getUtilityCostRules();
-			expect(rules.notAllowedCategories.some((c) => c.toLowerCase().includes('steuer'))).toBe(true);
+			expect(rules.notAllowedCategories.some(c => c.toLowerCase().includes('steuer'))).toBe(true);
 		});
 	});
 
@@ -264,8 +262,8 @@ describe('Utility Validation Service', () => {
 
 		it('should include elevator in allowed (if applicable)', () => {
 			const rules = getUtilityCostRules();
-			const hasElevator = rules.allowedCategories.some(
-				(c) => c.toLowerCase().includes('aufzug') || c.toLowerCase().includes('lift')
+			const hasElevator = rules.allowedCategories.some(c =>
+				c.toLowerCase().includes('aufzug') || c.toLowerCase().includes('lift')
 			);
 			// Either has elevator or doesn't - just verify structure works
 			expect(typeof hasElevator).toBe('boolean');
@@ -273,8 +271,8 @@ describe('Utility Validation Service', () => {
 
 		it('should include caretaker/Hauswart in allowed', () => {
 			const rules = getUtilityCostRules();
-			const hasCaretaker = rules.allowedCategories.some(
-				(c) => c.toLowerCase().includes('hauswart') || c.toLowerCase().includes('concierge')
+			const hasCaretaker = rules.allowedCategories.some(c =>
+				c.toLowerCase().includes('hauswart') || c.toLowerCase().includes('concierge')
 			);
 			expect(typeof hasCaretaker).toBe('boolean');
 		});
@@ -282,22 +280,25 @@ describe('Utility Validation Service', () => {
 		it('notes should be in German', () => {
 			const rules = getUtilityCostRules();
 			// Check for German-specific characters or words
-			const hasGerman = rules.notes.some(
-				(n) =>
-					n.includes('Nebenkosten') || n.includes('Verwaltungskosten') || n.includes('Mietvertrag')
+			const hasGerman = rules.notes.some(n =>
+				n.includes('Nebenkosten') ||
+				n.includes('Verwaltungskosten') ||
+				n.includes('Mietvertrag')
 			);
 			expect(hasGerman).toBe(true);
 		});
 
 		it('notes should mention the 3% rule', () => {
 			const rules = getUtilityCostRules();
-			const mentions3Percent = rules.notes.some((n) => n.includes('3%'));
+			const mentions3Percent = rules.notes.some(n => n.includes('3%'));
 			expect(mentions3Percent).toBe(true);
 		});
 
 		it('notes should mention repairs are not allowed', () => {
 			const rules = getUtilityCostRules();
-			const mentionsRepairs = rules.notes.some((n) => n.toLowerCase().includes('reparatur'));
+			const mentionsRepairs = rules.notes.some(n =>
+				n.toLowerCase().includes('reparatur')
+			);
 			expect(mentionsRepairs).toBe(true);
 		});
 	});

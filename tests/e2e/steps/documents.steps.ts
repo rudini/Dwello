@@ -9,12 +9,9 @@ const { Given, When, Then } = createBdd(test);
 
 const CHANNELS: Record<string, 'email' | 'letter'> = { 'E-Mail': 'email', Brief: 'letter' };
 
-Given(
-	'{string} wünscht Korrespondenz per {word}',
-	async ({ seed }, tenant: string, channel: string) => {
-		await seed.correspondence(tenant, CHANNELS[channel]);
-	}
-);
+Given('{string} wünscht Korrespondenz per {word}', async ({ seed }, tenant: string, channel: string) => {
+	await seed.correspondence(tenant, CHANNELS[channel]);
+});
 
 Given(
 	'{string} hat für die Abrechnung {int} bereits eine Zahlungserinnerung erhalten',
@@ -23,12 +20,9 @@ Given(
 	}
 );
 
-Given(
-	'der Liegenschaftsverwalter ist bei den zu versendenden Dokumenten',
-	async ({ verwalter }) => {
-		await visit(verwalter.page, '/documents?status=to_send');
-	}
-);
+Given('der Liegenschaftsverwalter ist bei den zu versendenden Dokumenten', async ({ verwalter }) => {
+	await visit(verwalter.page, '/documents?status=to_send');
+});
 
 When('der Liegenschaftsverwalter eine Mahnung sendet', async ({ verwalter }) => {
 	await verwalter.perform(sendReminder);
@@ -50,28 +44,18 @@ Then(
 	async ({ request, names }, tenant: string) => {
 		const address = names.get(`E-Mail ${tenant}`)!;
 		await expect
-			.poll(async () =>
-				(await mailsTo(request, address)).map((m) => [m.subject.split(' – ')[0], m.attachments])
-			)
+			.poll(async () => (await mailsTo(request, address)).map((m) => [m.subject.split(' – ')[0], m.attachments]))
 			.toEqual([['Zahlungserinnerung', [expect.stringMatching(/\.pdf$/)]]]);
 	}
 );
 
-Then(
-	'die Abrechnung führt die {string} als {string}',
-	async ({ verwalter }, title: string, delivery: string) => {
-		await expect(deliveryOf(verwalter, title)).toHaveText(delivery);
-	}
-);
+Then('die Abrechnung führt die {string} als {string}', async ({ verwalter }, title: string, delivery: string) => {
+	await expect(deliveryOf(verwalter, title)).toHaveText(delivery);
+});
 
-Then(
-	'ist die {string} an {string} zu versenden',
-	async ({ verwalter, names }, title: string, tenant: string) => {
-		await expect(documentFor(verwalter, title, names.get(tenant) ?? tenant)).toContainText(
-			'Zu versenden'
-		);
-	}
-);
+Then('ist die {string} an {string} zu versenden', async ({ verwalter, names }, title: string, tenant: string) => {
+	await expect(documentFor(verwalter, title, names.get(tenant) ?? tenant)).toContainText('Zu versenden');
+});
 
 Then(
 	'ist die {string} an {string} nicht mehr zu versenden',

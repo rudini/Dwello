@@ -254,18 +254,17 @@ describe('Heating Profile Service - Database Operations', () => {
 
 	describe('PREDEFINED_HEATING_PROFILES', () => {
 		it('should have all required profiles', () => {
-			const profileNames = PREDEFINED_HEATING_PROFILES.map((p) => p.name);
+			const profileNames = PREDEFINED_HEATING_PROFILES.map(p => p.name);
 
-			expect(profileNames.some((n) => n.includes('Mittelland'))).toBe(true);
-			expect(profileNames.some((n) => n === 'Bergregion')).toBe(true);
-			expect(profileNames.some((n) => n === 'Tessin')).toBe(true);
-			expect(profileNames.some((n) => n.includes('Warmwasser'))).toBe(true);
+			expect(profileNames.some(n => n.includes('Mittelland'))).toBe(true);
+			expect(profileNames.some(n => n === 'Bergregion')).toBe(true);
+			expect(profileNames.some(n => n === 'Tessin')).toBe(true);
+			expect(profileNames.some(n => n.includes('Warmwasser'))).toBe(true);
 		});
 
 		it('should have valid percentage sums', () => {
 			for (const profile of PREDEFINED_HEATING_PROFILES) {
-				const sum =
-					parseFloat(profile.januaryPct!) +
+				const sum = parseFloat(profile.januaryPct!) +
 					parseFloat(profile.februaryPct!) +
 					parseFloat(profile.marchPct!) +
 					parseFloat(profile.aprilPct!) +

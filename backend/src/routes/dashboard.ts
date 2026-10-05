@@ -16,22 +16,11 @@ const countApartments = async (where?: SQL) =>
 const countStatements = async (where: SQL | undefined) =>
 	Number((await db.select({ count: count() }).from(utilityStatements).where(where))[0]?.count ?? 0);
 
-const sumStatements = async (
-	column: typeof utilityStatements.balance | typeof utilityStatements.paidAmount,
-	where: SQL | undefined
-) =>
-	Number(
-		(
-			await db
-				.select({ total: sum(column) })
-				.from(utilityStatements)
-				.where(where)
-		)[0]?.total ?? 0
-	);
+const sumStatements = async (column: typeof utilityStatements.balance | typeof utilityStatements.paidAmount, where: SQL | undefined) =>
+	Number((await db.select({ total: sum(column) }).from(utilityStatements).where(where))[0]?.total ?? 0);
 
 // Percent with one decimal place
-const occupancyRate = (occupied: number, total: number) =>
-	total > 0 ? Math.round((occupied / total) * 1000) / 10 : 0;
+const occupancyRate = (occupied: number, total: number) => (total > 0 ? Math.round((occupied / total) * 1000) / 10 : 0);
 
 async function portfolio() {
 	const [totalBuildings] = await db.select({ count: count() }).from(buildings);
@@ -75,22 +64,10 @@ type Activity = {
 };
 
 /** A statement's creation and, once paid, its payment when it was recorded (paid statements stay unchanged) */
-export function statementActivities(s: {
-	id: string;
-	statementNumber: string;
-	status: string;
-	createdAt: Date;
-	updatedAt: Date;
-}) {
+export function statementActivities(s: { id: string; statementNumber: string; status: string; createdAt: Date; updatedAt: Date }) {
 	const description = `Abrechnung ${s.statementNumber}`;
 	const activities: Activity[] = [
-		{
-			id: `${s.id}-created`,
-			type: 'statement_created',
-			title: 'Abrechnung erstellt',
-			description,
-			timestamp: s.createdAt.toISOString()
-		}
+		{ id: `${s.id}-created`, type: 'statement_created', title: 'Abrechnung erstellt', description, timestamp: s.createdAt.toISOString() }
 	];
 	if (s.status === 'paid') {
 		activities.push({
@@ -105,11 +82,7 @@ export function statementActivities(s: {
 }
 
 async function recentActivity() {
-	const created = await db
-		.select()
-		.from(utilityStatements)
-		.orderBy(desc(utilityStatements.createdAt))
-		.limit(5);
+	const created = await db.select().from(utilityStatements).orderBy(desc(utilityStatements.createdAt)).limit(5);
 	// Payments of older statements count as recent as well
 	const paid = await db
 		.select()
@@ -117,14 +90,8 @@ async function recentActivity() {
 		.where(eq(utilityStatements.status, 'paid'))
 		.orderBy(desc(utilityStatements.updatedAt))
 		.limit(5);
-	const recentInvoices = await db
-		.select()
-		.from(invoices)
-		.orderBy(desc(invoices.createdAt))
-		.limit(5);
-	const statementEvents = new Map(
-		[...created, ...paid].flatMap(statementActivities).map((a) => [a.id, a])
-	);
+	const recentInvoices = await db.select().from(invoices).orderBy(desc(invoices.createdAt)).limit(5);
+	const statementEvents = new Map([...created, ...paid].flatMap(statementActivities).map((a) => [a.id, a]));
 	return [
 		...statementEvents.values(),
 		...recentInvoices.map((i) => ({

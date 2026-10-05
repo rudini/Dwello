@@ -1,10 +1,5 @@
 import type { Actor } from '../fixtures/actor';
-import {
-	googleSignIn,
-	loginButton,
-	logoutButton,
-	userMenuButton
-} from '../interactions/authentication';
+import { googleSignIn, loginButton, logoutButton, userMenuButton } from '../interactions/authentication';
 
 export const signInWith = (provider: string) => async (actor: Actor) => {
 	actor.remember('Anmeldung bei Google', googleSignIn(actor.page));

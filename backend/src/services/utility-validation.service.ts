@@ -105,7 +105,9 @@ export async function validateInvoiceForUtilityStatement(invoice: {
 	const descLower = invoice.description.toLowerCase();
 	for (const keyword of suspiciousKeywords) {
 		if (descLower.includes(keyword)) {
-			warnings.push(`Beschreibung enthält "${keyword}" - bitte prüfen ob umlagefähig`);
+			warnings.push(
+				`Beschreibung enthält "${keyword}" - bitte prüfen ob umlagefähig`
+			);
 		}
 	}
 

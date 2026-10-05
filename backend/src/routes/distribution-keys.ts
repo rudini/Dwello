@@ -139,9 +139,7 @@ export const distributionKeyRoutes = new Elysia({ prefix: '/api/v1/distribution-
 				return key;
 			} catch (error) {
 				set.status = error instanceof Conflict ? 409 : 400;
-				return {
-					error: error instanceof Error ? error.message : 'Failed to create distribution key'
-				};
+				return { error: error instanceof Error ? error.message : 'Failed to create distribution key' };
 			}
 		},
 		{
@@ -183,9 +181,7 @@ export const distributionKeyRoutes = new Elysia({ prefix: '/api/v1/distribution-
 				return key;
 			} catch (error) {
 				set.status = error instanceof Conflict ? 409 : 400;
-				return {
-					error: error instanceof Error ? error.message : 'Failed to update distribution key'
-				};
+				return { error: error instanceof Error ? error.message : 'Failed to update distribution key' };
 			}
 		},
 		{

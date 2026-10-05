@@ -4,8 +4,7 @@ import type { APIRequestContext, APIResponse } from '@playwright/test';
 const BACKEND_API = 'http://localhost:3101/api/v1'; // E2E backend (playwright.config.ts)
 
 async function body(response: APIResponse) {
-	if (!response.ok())
-		throw new Error(`${response.url()} antwortet ${response.status()}: ${await response.text()}`);
+	if (!response.ok()) throw new Error(`${response.url()} antwortet ${response.status()}: ${await response.text()}`);
 	return response.json();
 }
 
@@ -14,11 +13,9 @@ export function testData(request: APIRequestContext, token: string) {
 	const names = new Map<string, string>();
 	const ids = new Map<string, string>();
 	const headers = { Authorization: `Bearer ${token}` };
-	const post = (path: string, data: object) =>
-		request.post(`${BACKEND_API}/${path}`, { data, headers }).then(body);
+	const post = (path: string, data: object) => request.post(`${BACKEND_API}/${path}`, { data, headers }).then(body);
 	const get = (path: string) => request.get(`${BACKEND_API}/${path}`, { headers }).then(body);
-	const put = (path: string, data: object) =>
-		request.put(`${BACKEND_API}/${path}`, { data, headers }).then(body);
+	const put = (path: string, data: object) => request.put(`${BACKEND_API}/${path}`, { data, headers }).then(body);
 	const remove = (path: string) => request.delete(`${BACKEND_API}/${path}`, { headers });
 	const extras: string[] = []; // invoices and configuration records, removed before their building
 	const unique = (title: string) => {
@@ -63,11 +60,7 @@ export function testData(request: APIRequestContext, token: string) {
 
 	async function invoice(
 		buildingTitle: string,
-		{
-			categoryId,
-			distributionKeyId,
-			...values
-		}: { categoryId?: string; distributionKeyId?: string; [field: string]: unknown },
+		{ categoryId, distributionKeyId, ...values }: { categoryId?: string; distributionKeyId?: string; [field: string]: unknown },
 		description: string,
 		amount: string,
 		invoiceDate: string
@@ -76,8 +69,7 @@ export function testData(request: APIRequestContext, token: string) {
 		const created = await post('invoices', {
 			buildingId: ids.get(buildingTitle),
 			categoryId: categoryId ?? (await get('categories?search=Caretaker')).categories[0].id,
-			distributionKeyId:
-				distributionKeyId ?? keys.find((k: { name: string }) => k.name === 'Per Area (m²)').id,
+			distributionKeyId: distributionKeyId ?? keys.find((k: { name: string }) => k.name === 'Per Area (m²)').id,
 			billingEntityName: 'Muster AG',
 			description,
 			amount,
@@ -91,8 +83,7 @@ export function testData(request: APIRequestContext, token: string) {
 
 	async function removeBuildings(token: string) {
 		for (const building of (await get(`buildings?search=${token}`)).buildings) {
-			for (const apartment of (await get(`apartments?buildingId=${building.id}&limit=100`))
-				.apartments) {
+			for (const apartment of (await get(`apartments?buildingId=${building.id}&limit=100`)).apartments) {
 				await removeContracts(`apartmentId=${apartment.id}`);
 				await remove(`apartments/${apartment.id}`);
 			}
@@ -141,12 +132,7 @@ export function testData(request: APIRequestContext, token: string) {
 		async contract(
 			tenantTitle: string,
 			apartmentNumber: string,
-			contract: {
-				startDate: string;
-				endDate?: string;
-				baseRent: string;
-				monthlyAdvancePayment?: string;
-			}
+			contract: { startDate: string; endDate?: string; baseRent: string; monthlyAdvancePayment?: string }
 		) {
 			const created = await post('contracts', {
 				tenantId: ids.get(tenantTitle),
@@ -159,12 +145,7 @@ export function testData(request: APIRequestContext, token: string) {
 			ids.set(`Wohnung von ${tenantTitle}`, created.apartmentId);
 		},
 
-		async statement(
-			tenantTitle: string,
-			buildingTitle: string,
-			year: number,
-			heatingProfileTitle?: string
-		) {
+		async statement(tenantTitle: string, buildingTitle: string, year: number, heatingProfileTitle?: string) {
 			const statement = await post('statements/generate', {
 				contractId: ids.get(`Mietvertrag ${tenantTitle}`),
 				buildingId: ids.get(buildingTitle),
@@ -213,27 +194,12 @@ export function testData(request: APIRequestContext, token: string) {
 		},
 
 		async sendStatement(tenantTitle: string, year: number) {
-			await put(`statements/${ids.get(`Abrechnung ${tenantTitle} ${year}`)}/status`, {
-				status: 'sent'
-			});
+			await put(`statements/${ids.get(`Abrechnung ${tenantTitle} ${year}`)}/status`, { status: 'sent' });
 		},
 
 		// Monthly shares January..December in percent
 		async heatingProfile(title: string, monthly: number[]) {
-			const months = [
-				'january',
-				'february',
-				'march',
-				'april',
-				'may',
-				'june',
-				'july',
-				'august',
-				'september',
-				'october',
-				'november',
-				'december'
-			];
+			const months = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
 			const profile = await post('heating-profiles', {
 				name: unique(title),
 				...Object.fromEntries(months.map((month, i) => [`${month}Pct`, monthly[i]]))
@@ -244,16 +210,8 @@ export function testData(request: APIRequestContext, token: string) {
 
 		// Heating costs of the building, distributed by area
 		async heatingInvoice(buildingTitle: string, amount: string, year: number) {
-			const heating = (await get('categories?limit=100')).categories.find(
-				(c: { name: string }) => c.name === 'Heating'
-			);
-			await invoice(
-				buildingTitle,
-				{ categoryId: heating.id },
-				`Heizöl ${year}`,
-				amount,
-				`${year}-06-30`
-			);
+			const heating = (await get('categories?limit=100')).categories.find((c: { name: string }) => c.name === 'Heating');
+			await invoice(buildingTitle, { categoryId: heating.id }, `Heizöl ${year}`, amount, `${year}-06-30`);
 		},
 
 		async category(title: string, isAllowedUtilityCost: boolean) {
@@ -264,33 +222,15 @@ export function testData(request: APIRequestContext, token: string) {
 		},
 
 		async invoiceInCategory(buildingTitle: string, categoryTitle: string) {
-			await invoice(
-				buildingTitle,
-				{ categoryId: ids.get(categoryTitle) },
-				'Reinigung Q1',
-				'450.00',
-				'2026-03-31'
-			);
+			await invoice(buildingTitle, { categoryId: ids.get(categoryTitle) }, 'Reinigung Q1', '450.00', '2026-03-31');
 		},
 
 		// Invoice of a supplier, in a predefined category given by its German name, dated today
-		async supplierInvoice(
-			supplier: string,
-			buildingTitle: string,
-			amount: string,
-			description: string,
-			categoryName: string
-		) {
-			const category = (await get('categories?limit=100')).categories.find(
-				(c: { nameDE: string }) => c.nameDE === categoryName
-			);
+		async supplierInvoice(supplier: string, buildingTitle: string, amount: string, description: string, categoryName: string) {
+			const category = (await get('categories?limit=100')).categories.find((c: { nameDE: string }) => c.nameDE === categoryName);
 			const id = await invoice(
 				buildingTitle,
-				{
-					categoryId: category.id,
-					billingEntityName: unique(supplier),
-					isValidUtilityCost: category.isAllowedUtilityCost
-				},
+				{ categoryId: category.id, billingEntityName: unique(supplier), isValidUtilityCost: category.isAllowedUtilityCost },
 				description,
 				amount,
 				new Date().toISOString().split('T')[0]
@@ -313,13 +253,7 @@ export function testData(request: APIRequestContext, token: string) {
 		},
 
 		async invoiceByKey(buildingTitle: string, keyTitle: string) {
-			await invoice(
-				buildingTitle,
-				{ distributionKeyId: ids.get(keyTitle) },
-				'Hauswart Q1',
-				'900.00',
-				'2026-03-31'
-			);
+			await invoice(buildingTitle, { distributionKeyId: ids.get(keyTitle) }, 'Hauswart Q1', '900.00', '2026-03-31');
 		},
 
 		async cleanUp() {

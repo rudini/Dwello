@@ -88,7 +88,10 @@ describe('Client API Helper', () => {
 
 			await apiCall('/buildings', { params: { page: '1', limit: '10' } });
 
-			expect(fetchSpy).toHaveBeenCalledWith('/api/buildings?page=1&limit=10', expect.anything());
+			expect(fetchSpy).toHaveBeenCalledWith(
+				'/api/buildings?page=1&limit=10',
+				expect.anything()
+			);
 		});
 
 		it('should include XSRF token for POST requests', async () => {

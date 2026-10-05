@@ -57,20 +57,7 @@ describe('Apartment Edit - Room Count Format', () => {
 
 	it('DB decimal values map to room options after normalization', () => {
 		// PostgreSQL decimal(3,1) returns these formats
-		const dbValues = [
-			'1.0',
-			'1.5',
-			'2.0',
-			'2.5',
-			'3.0',
-			'3.5',
-			'4.0',
-			'4.5',
-			'5.0',
-			'5.5',
-			'6.0',
-			'6.5'
-		];
+		const dbValues = ['1.0', '1.5', '2.0', '2.5', '3.0', '3.5', '4.0', '4.5', '5.0', '5.5', '6.0', '6.5'];
 		for (const dbVal of dbValues) {
 			const normalized = String(parseFloat(dbVal));
 			expect(ROOM_OPTIONS).toContain(normalized);

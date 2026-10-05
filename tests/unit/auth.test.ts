@@ -227,7 +227,10 @@ describe('Cookie Management', () => {
 
 			clearAuthCookies(cookies);
 
-			expect(cookies.delete).toHaveBeenCalledWith('dwello_session', expect.any(Object));
+			expect(cookies.delete).toHaveBeenCalledWith(
+				'dwello_session',
+				expect.any(Object)
+			);
 		});
 
 		it('should delete XSRF cookie', () => {
@@ -235,7 +238,10 @@ describe('Cookie Management', () => {
 
 			clearAuthCookies(cookies);
 
-			expect(cookies.delete).toHaveBeenCalledWith('dwello_xsrf', expect.any(Object));
+			expect(cookies.delete).toHaveBeenCalledWith(
+				'dwello_xsrf',
+				expect.any(Object)
+			);
 		});
 
 		it('should delete OAuth state cookie', () => {
@@ -243,7 +249,10 @@ describe('Cookie Management', () => {
 
 			clearAuthCookies(cookies);
 
-			expect(cookies.delete).toHaveBeenCalledWith('dwello_oauth_state', expect.any(Object));
+			expect(cookies.delete).toHaveBeenCalledWith(
+				'dwello_oauth_state',
+				expect.any(Object)
+			);
 		});
 	});
 });

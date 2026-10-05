@@ -88,7 +88,12 @@ export function calculateProrationDays(
 	const effectiveContractEnd = contractEnd || periodEnd;
 
 	// Calculate overlap
-	const overlap = calculateOverlap(contractStart, effectiveContractEnd, periodStart, periodEnd);
+	const overlap = calculateOverlap(
+		contractStart,
+		effectiveContractEnd,
+		periodStart,
+		periodEnd
+	);
 
 	if (!overlap) {
 		return null;
@@ -154,7 +159,12 @@ export async function handleMultipleContracts(
 		const contractStart = new Date(contract.startDate);
 		const contractEnd = contract.endDate ? new Date(contract.endDate) : null;
 
-		const proration = calculateProrationDays(contractStart, contractEnd, periodStart, periodEnd);
+		const proration = calculateProrationDays(
+			contractStart,
+			contractEnd,
+			periodStart,
+			periodEnd
+		);
 
 		if (proration) {
 			overlaps.push({
@@ -189,7 +199,12 @@ export async function handleMidYearMoves(
 
 	if (!profile) {
 		// Fallback to simple day-based prorating
-		const proration = calculateProrationDays(contractStart, contractEnd, periodStart, periodEnd);
+		const proration = calculateProrationDays(
+			contractStart,
+			contractEnd,
+			periodStart,
+			periodEnd
+		);
 
 		if (!proration) {
 			return { share: 0, percentage: 0, monthBreakdown: [] };

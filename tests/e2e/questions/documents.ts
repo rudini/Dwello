@@ -11,6 +11,4 @@ export const documentFor = (actor: Actor, title: string, tenantName: string) =>
 
 // Mail received by the mail catcher the backend sends to in E2E runs (playwright.config.ts)
 export const mailsTo = async (request: APIRequestContext, address: string) =>
-	((await (await request.get('http://localhost:2526/messages')).json()) as Mail[]).filter(
-		(m) => m.to === address
-	);
+	((await (await request.get('http://localhost:2526/messages')).json()) as Mail[]).filter((m) => m.to === address);

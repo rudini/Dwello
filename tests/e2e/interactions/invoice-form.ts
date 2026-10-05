@@ -5,9 +5,7 @@ export const amountInput = (page: Page) => page.getByTestId('invoice-amount-inpu
 export const supplierInput = (page: Page) => page.getByTestId('invoice-billing-entity-input');
 export const descriptionInput = (page: Page) => page.getByTestId('invoice-description-input');
 export const categorySelect = (page: Page) => page.getByTestId('invoice-category-select');
-export const utilityCostCheckbox = (page: Page) =>
-	page.getByTestId('invoice-utility-cost-checkbox');
+export const utilityCostCheckbox = (page: Page) => page.getByTestId('invoice-utility-cost-checkbox');
 export const categoryWarning = (page: Page) => page.getByTestId('invoice-category-warning');
-export const overrideReasonInput = (page: Page) =>
-	page.getByTestId('invoice-override-reason-input');
+export const overrideReasonInput = (page: Page) => page.getByTestId('invoice-override-reason-input');
 export const invoiceSubmitButton = (page: Page) => page.getByTestId('submit-button');

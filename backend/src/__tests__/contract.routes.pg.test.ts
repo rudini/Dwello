@@ -42,12 +42,7 @@ describe('GET /api/v1/contracts/:id', () => {
 		expect(await get(`/${rental.contract}`)).toMatchObject({
 			tenant: { id: rental.tenant, firstName: 'Anna', lastName: `Keller ${token}` },
 			apartment: { id: rental.apartment, number: '2.01', floor: 2 },
-			building: {
-				id: rental.building,
-				name: `Ahornhof ${token}`,
-				postalCode: '8400',
-				city: 'Winterthur'
-			}
+			building: { id: rental.building, name: `Ahornhof ${token}`, postalCode: '8400', city: 'Winterthur' }
 		});
 	});
 });

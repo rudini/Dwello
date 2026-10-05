@@ -21,66 +21,38 @@ Given('der Liegenschaftsverwalter ist auf der Seite "Neue Rechnung"', async ({ v
 	await visit(verwalter.page, '/invoices/new');
 });
 
-Given(
-	'die KI hat die Kategorie der Rechnung von {string} vorgeschlagen',
-	async ({ seed }, supplier: string) => {
-		await seed.kiSuggestion(supplier);
-	}
-);
+Given('die KI hat die Kategorie der Rechnung von {string} vorgeschlagen', async ({ seed }, supplier: string) => {
+	await seed.kiSuggestion(supplier);
+});
 
-Given(
-	'der Liegenschaftsverwalter bearbeitet die Rechnung von {string}',
-	async ({ verwalter, seed }, supplier: string) => {
-		await visit(verwalter.page, `/invoices/${seed.idOf(`Rechnung ${supplier}`)}/edit`);
-	}
-);
+Given('der Liegenschaftsverwalter bearbeitet die Rechnung von {string}', async ({ verwalter, seed }, supplier: string) => {
+	await visit(verwalter.page, `/invoices/${seed.idOf(`Rechnung ${supplier}`)}/edit`);
+});
 
 When(
 	'der Liegenschaftsverwalter die Rechnung von {string} über {string} Franken für {string} im Gebäude {string} in der Kategorie {string} erfasst',
-	async (
-		{ verwalter, seed },
-		supplier: string,
-		amount: string,
-		description: string,
-		building: string,
-		category: string
-	) => {
+	async ({ verwalter, seed }, supplier: string, amount: string, description: string, building: string, category: string) => {
 		await verwalter.perform(
-			registerInvoice({
-				buildingId: seed.idOf(building)!,
-				supplier: seed.unique(supplier),
-				amount,
-				description,
-				category
-			})
+			registerInvoice({ buildingId: seed.idOf(building)!, supplier: seed.unique(supplier), amount, description, category })
 		);
 	}
 );
 
-When(
-	'der Liegenschaftsverwalter die Kategorie {string} wählt',
-	async ({ verwalter }, category: string) => {
-		await verwalter.perform(chooseCategory(category));
-	}
-);
+When('der Liegenschaftsverwalter die Kategorie {string} wählt', async ({ verwalter }, category: string) => {
+	await verwalter.perform(chooseCategory(category));
+});
 
 When('der Liegenschaftsverwalter die Rechnung ohne Angaben speichert', async ({ verwalter }) => {
 	await verwalter.perform(saveInvoice);
 });
 
-When(
-	'der Liegenschaftsverwalter den Betrag auf {string} Franken korrigiert',
-	async ({ verwalter }, amount: string) => {
-		await verwalter.perform(correctAmount(amount));
-	}
-);
+When('der Liegenschaftsverwalter den Betrag auf {string} Franken korrigiert', async ({ verwalter }, amount: string) => {
+	await verwalter.perform(correctAmount(amount));
+});
 
-When(
-	'der Liegenschaftsverwalter die Rechnung der Kategorie {string} zuordnet',
-	async ({ verwalter }, category: string) => {
-		await verwalter.perform(recategorize(category));
-	}
-);
+When('der Liegenschaftsverwalter die Rechnung der Kategorie {string} zuordnet', async ({ verwalter }, category: string) => {
+	await verwalter.perform(recategorize(category));
+});
 
 When(
 	'der Liegenschaftsverwalter die Rechnung mit dem Grund {string} der Kategorie {string} zuordnet',
@@ -89,12 +61,9 @@ When(
 	}
 );
 
-When(
-	'der Liegenschaftsverwalter die Rechnung ohne Rechnungssteller speichert',
-	async ({ verwalter }) => {
-		await verwalter.perform(clearSupplier);
-	}
-);
+When('der Liegenschaftsverwalter die Rechnung ohne Rechnungssteller speichert', async ({ verwalter }) => {
+	await verwalter.perform(clearSupplier);
+});
 
 Then(
 	'die Rechnung von {string} über {string} in der Kategorie {string} ist auffindbar',
@@ -113,8 +82,6 @@ Then('ist die Rechnung nicht als umlagefähig markiert', async ({ verwalter }) =
 Then(
 	'weist ein Hinweis darauf hin, dass die Kosten nicht auf die Mieter umgelegt werden können',
 	async ({ verwalter }) => {
-		await expect(nonAllocableCategoryWarning(verwalter)).toContainText(
-			'nicht auf Mieter übertragen'
-		);
+		await expect(nonAllocableCategoryWarning(verwalter)).toContainText('nicht auf Mieter übertragen');
 	}
 );

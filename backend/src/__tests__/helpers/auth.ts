@@ -1,9 +1,7 @@
 import * as jose from 'jose';
 import { app } from '../../app';
 
-const devSecret = new TextEncoder().encode(
-	process.env.JWT_SECRET || 'development-secret-key-change-in-production'
-);
+const devSecret = new TextEncoder().encode(process.env.JWT_SECRET || 'development-secret-key-change-in-production');
 
 /** JWT for the signed-in property manager, signed like the BFF does */
 export const signToken = (key = devSecret) =>
@@ -25,8 +23,4 @@ export const callApi = async (path: string, init: RequestInit = {}) =>
 
 // JSON request to an authenticated endpoint, e.g. sendJson('POST', '/api/v1/categories', { name })
 export const sendJson = (method: string, path: string, body?: object) =>
-	callApi(path, {
-		method,
-		headers: { 'content-type': 'application/json' },
-		body: body && JSON.stringify(body)
-	});
+	callApi(path, { method, headers: { 'content-type': 'application/json' }, body: body && JSON.stringify(body) });

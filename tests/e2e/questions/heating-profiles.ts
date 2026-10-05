@@ -1,11 +1,5 @@
 import type { Actor } from '../fixtures/actor';
-import {
-	deleteButton,
-	editButton,
-	monthShare,
-	profileCard,
-	profileTotal
-} from '../interactions/heating-profiles';
+import { deleteButton, editButton, monthShare, profileCard, profileTotal } from '../interactions/heating-profiles';
 
 export const shareOf = (actor: Actor, month: string) => monthShare(actor.page, month);
 export const totalShare = (actor: Actor) => profileTotal(actor.page);

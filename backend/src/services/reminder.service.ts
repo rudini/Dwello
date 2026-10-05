@@ -7,12 +7,7 @@
 
 import { createMailTransport, MailConfigError } from '../mail';
 import { getTypedConfig } from './config.service';
-import {
-	countReminders,
-	createDocument,
-	markDocumentSent,
-	recordDeliveryError
-} from './document.service';
+import { countReminders, createDocument, markDocumentSent, recordDeliveryError } from './document.service';
 import { reminderLetter } from './reminder-letter';
 import { renderReminderPdf, type PostalAddress } from './reminder-pdf';
 import { getStatement, updateStatement } from './statement.service';
@@ -50,17 +45,11 @@ async function nextLevel(statementId: string, status: string) {
 		throw new ReminderError('Nur versendete Abrechnungen können gemahnt werden.');
 	}
 	const level = (await countReminders(statementId)) + 1;
-	if (level > MAX_REMINDER_LEVEL)
-		throw new ReminderError('Es wurden bereits 3 Mahnungen versendet.');
+	if (level > MAX_REMINDER_LEVEL) throw new ReminderError('Es wurden bereits 3 Mahnungen versendet.');
 	return level;
 }
 
-async function deliverByEmail(
-	document: Document,
-	to: string | null,
-	letter: ReturnType<typeof reminderLetter>,
-	pdf: Buffer
-) {
+async function deliverByEmail(document: Document, to: string | null, letter: ReturnType<typeof reminderLetter>, pdf: Buffer) {
 	try {
 		if (!to) throw new Error('Der Mieter hat keine E-Mail-Adresse.');
 		await createMailTransport().send({

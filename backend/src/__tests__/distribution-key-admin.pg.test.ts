@@ -4,13 +4,7 @@
 
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import { deleteConfig, getConfig, setConfig } from '../services/config.service';
-import {
-	apiRecords,
-	expectRejection,
-	firstPredefined,
-	idOf,
-	invoicedBuilding
-} from './helpers/records';
+import { apiRecords, expectRejection, firstPredefined, idOf, invoicedBuilding } from './helpers/records';
 
 const token = crypto.randomUUID();
 const keys = apiRecords('distribution-keys');
@@ -39,28 +33,16 @@ describe('Eigene Verteilschlüssel', () => {
 
 		const response = await create('Fläche und Zimmer');
 
-		await expectRejection(
-			response,
-			409,
-			`Ein Verteilschlüssel mit dem Namen "Fläche und Zimmer ${token}" existiert bereits.`
-		);
+		await expectRejection(response, 409, `Ein Verteilschlüssel mit dem Namen "Fläche und Zimmer ${token}" existiert bereits.`);
 	});
 
 	it('lehnt beim Umbenennen einen vergebenen deutschen Namen ab', async () => {
-		await keys.create({
-			name: `Stairs ${token}`,
-			nameDE: `Treppenhaus ${token}`,
-			formula: '{units}'
-		});
+		await keys.create({ name: `Stairs ${token}`, nameDE: `Treppenhaus ${token}`, formula: '{units}' });
 		const id = await idOf(await create('Lift'));
 
 		const response = await keys.send('PUT', `/${id}`, { nameDE: `Treppenhaus ${token}` });
 
-		await expectRejection(
-			response,
-			409,
-			`Ein Verteilschlüssel mit dem Namen "Treppenhaus ${token}" existiert bereits.`
-		);
+		await expectRejection(response, 409, `Ein Verteilschlüssel mit dem Namen "Treppenhaus ${token}" existiert bereits.`);
 	});
 
 	it('erklärt, warum eine Formel ungültig ist', async () => {
@@ -72,11 +54,7 @@ describe('Eigene Verteilschlüssel', () => {
 	});
 
 	it('findet Verteilschlüssel über den deutschen Namen', async () => {
-		await keys.create({
-			name: `Mixed ${token}`,
-			nameDE: `Gemischt ${token}`,
-			formula: '{area} + {rooms}'
-		});
+		await keys.create({ name: `Mixed ${token}`, nameDE: `Gemischt ${token}`, formula: '{area} + {rooms}' });
 
 		const response = await keys.send('GET', `?search=${encodeURIComponent(`Gemischt ${token}`)}`);
 		const { data } = (await response.json()) as { data: { name: string }[] };
@@ -92,11 +70,7 @@ describe('Eigene Verteilschlüssel', () => {
 		const response = await keys.send('DELETE', `/${id}`);
 
 		expect(Number(key.invoiceCount)).toBe(1);
-		await expectRejection(
-			response,
-			409,
-			'Nach dem Verteilschlüssel wird 1 Rechnung verteilt, er kann nicht gelöscht werden.'
-		);
+		await expectRejection(response, 409, 'Nach dem Verteilschlüssel wird 1 Rechnung verteilt, er kann nicht gelöscht werden.');
 	});
 
 	it('behält den Standard-Verteilschlüssel der Einstellungen', async () => {
@@ -105,20 +79,12 @@ describe('Eigene Verteilschlüssel', () => {
 
 		const response = await keys.send('DELETE', `/${id}`);
 
-		await expectRejection(
-			response,
-			409,
-			'Der Verteilschlüssel ist in den Einstellungen als Standard hinterlegt.'
-		);
+		await expectRejection(response, 409, 'Der Verteilschlüssel ist in den Einstellungen als Standard hinterlegt.');
 	});
 
 	it('behält vordefinierte Verteilschlüssel', async () => {
 		const response = await keys.send('DELETE', `/${await firstPredefined('distribution-keys')}`);
 
-		await expectRejection(
-			response,
-			400,
-			'Vordefinierte Verteilschlüssel können nicht gelöscht werden.'
-		);
+		await expectRejection(response, 400, 'Vordefinierte Verteilschlüssel können nicht gelöscht werden.');
 	});
 });

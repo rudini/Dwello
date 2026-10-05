@@ -2,12 +2,7 @@ import { expect } from '@playwright/test';
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { visit } from '../interactions/navigation';
-import {
-	occupancyOf,
-	rentedApartmentsOf,
-	statusFilter,
-	statusFilterFor
-} from '../questions/dashboard';
+import { occupancyOf, rentedApartmentsOf, statusFilter, statusFilterFor } from '../questions/dashboard';
 import {
 	chooseHeaderAction,
 	chooseQuickAction,
@@ -33,40 +28,25 @@ When(
 	}
 );
 
-When(
-	'der Liegenschaftsverwalter die Kennzahl {string} öffnet',
-	async ({ verwalter }, label: string) => {
-		await verwalter.perform(openTile(label));
-	}
-);
+When('der Liegenschaftsverwalter die Kennzahl {string} öffnet', async ({ verwalter }, label: string) => {
+	await verwalter.perform(openTile(label));
+});
 
-When(
-	'der Liegenschaftsverwalter die Abrechnungen {string} öffnet',
-	async ({ verwalter }, label: string) => {
-		await verwalter.perform(openStatementsWithStatus(label));
-	}
-);
+When('der Liegenschaftsverwalter die Abrechnungen {string} öffnet', async ({ verwalter }, label: string) => {
+	await verwalter.perform(openStatementsWithStatus(label));
+});
 
-When(
-	'der Liegenschaftsverwalter die Schnellaktion {string} wählt',
-	async ({ verwalter }, label: string) => {
-		await verwalter.perform(chooseQuickAction(label));
-	}
-);
+When('der Liegenschaftsverwalter die Schnellaktion {string} wählt', async ({ verwalter }, label: string) => {
+	await verwalter.perform(chooseQuickAction(label));
+});
 
-When(
-	'der Liegenschaftsverwalter oben die Aktion {string} wählt',
-	async ({ verwalter }, label: string) => {
-		await verwalter.perform(chooseHeaderAction(label));
-	}
-);
+When('der Liegenschaftsverwalter oben die Aktion {string} wählt', async ({ verwalter }, label: string) => {
+	await verwalter.perform(chooseHeaderAction(label));
+});
 
-Then(
-	'ist das Gebäude {string} zu {string} belegt',
-	async ({ verwalter, names }, building: string, rate: string) => {
-		await expect(occupancyOf(verwalter, names.get(building)!)).toHaveText(rate);
-	}
-);
+Then('ist das Gebäude {string} zu {string} belegt', async ({ verwalter, names }, building: string, rate: string) => {
+	await expect(occupancyOf(verwalter, names.get(building)!)).toHaveText(rate);
+});
 
 Then(
 	'sind im Gebäude {string} {string} Wohnungen vermietet',

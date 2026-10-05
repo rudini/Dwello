@@ -1,1 +1,4 @@
+# Prettier checks and formats only src/
+/*
+!/src
 *.md
