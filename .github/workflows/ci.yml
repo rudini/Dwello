@@ -203,7 +203,7 @@ jobs:
             const marker = '<!-- ui-screenshots -->';
             const shots = fs.readFileSync('ui-routes.txt', 'utf8').split('\n').filter(Boolean)
               .map((route) => `### \`${route}\`\n![${route}](${base}/${route.split(/[/[\]]+/).filter(Boolean).join('_') || 'home'}.png?raw=true)`);
-            const body = `${marker}\n## UI-Screenshots\nGeänderte Seiten auf Stand ${pr.head.sha.slice(0, 7)}:\n\n${shots.join('\n\n')}`;
+            const body = `${marker}\n## UI screenshots\nChanged pages as of ${pr.head.sha.slice(0, 7)}:\n\n${shots.join('\n\n')}`;
             const comments = await github.paginate(github.rest.issues.listComments, { ...context.repo, issue_number: pr.number });
             const existing = comments.find((comment) => comment.body?.startsWith(marker));
             if (existing) await github.rest.issues.updateComment({ ...context.repo, comment_id: existing.id, body });
