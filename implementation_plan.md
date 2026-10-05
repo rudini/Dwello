@@ -3758,6 +3758,8 @@ After completing each task, add a note here:
 | Tooltip.svelte | Hover tooltip |
 | index.ts | Barrel export file |
 
+**Note (Session 5):** All of these except Modal, Pagination and Badge were never imported by a page and are deleted.
+
 ### OpenPLZ Integration (10.6) ✅
 
 **What Was Done:**
@@ -3977,6 +3979,32 @@ unit or database tests.
     (`src/lib/early-choice.ts`, also used by `FilterSelect`) hands the choice on once the page is live
   - Unit tests `src/__tests__/form-selects.dom.test.ts` (hydration helper now resolves `$lib` imports); E2E scenario
     "Mieter wählen, bevor die Seite fertig geladen ist" in `contract-new.feature`: failed before, pass now
+
+## Session 5 - October 2026: fallow Dead-Code Cleanup
+
+Branch `claude/lucid-carson-nzi602`. Static analysis with `npx fallow` (3.31.0); findings it reported as unused were
+checked with grep before deleting.
+
+### Removed ✅
+- [x] 25 unreachable files: 21 components in `src/lib/components/` (Avatar, Breadcrumb, CategoryBadge, Checkbox,
+  DataTable, EmptyState, Error, Form, FormErrorSummary, Input, InvoiceCategorization, Loading, PageLoading,
+  PaymentStatus, PostalCodeInput, ReminderPanel, SearchInput, Select, StatementPreview, Textarea, Tooltip), the barrel
+  `components/index.ts`, `src/lib/hooks/useUnsavedChanges.ts`, `src/lib/schemas.ts`, `src/lib/services/index.ts`
+- [x] Unused stores and type aliases in `src/lib/stores.ts` (`isAuthenticated`, `buildings`, `selectedBuilding`,
+  `apartments`, `tenants`, `statements`, `isLoading`, `errorMessage`, `Building`/`Apartment`/`Tenant`/`Statement`);
+  `clearStores` now only resets `user`
+- [x] Dependencies `date-fns`, `tslib` and `zod` (only `schemas.ts` used it); `@eslint/js` and `svelte-eslint-parser`
+  (used by `eslint.config.js`, came in transitively) added as devDependencies
+
+### Verification
+- Lint 0 problems, tsc 0 errors, svelte-check 0 errors, 468 frontend unit tests pass, production build passes
+- E2E not run in this environment (no database); the change only deletes files no page imports
+
+### Open
+- [ ] fallow still reports: unused backend exports (e.g. `getOverdueStatements`, `checkContractOverlap`, helpers in
+  `qr-bill.service.ts`), unused exports in `src/lib/server/error-handler.ts` and `src/lib/i18n`, 22 duplicate code
+  groups (largest: the 8 identical `src/routes/api/*/[id]/+server.ts` proxies) and complexity hotspots
+  (`src/routes/contracts/[id]/+page.server.ts` `load`, cyclomatic 53)
 
 ---
 
