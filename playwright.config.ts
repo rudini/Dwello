@@ -54,13 +54,16 @@ export default defineConfig({
 			}
 		},
 		{
-			// Frontend dev server (SvelteKit) talking to the E2E backend. Sessions are real JWTs signed with the
-			// same secret (fixtures/session.ts); Google sign-in is configured with test credentials and never completes.
-			command: 'npm run dev -- --port 3100 --strictPort',
+			// Frontend (SvelteKit) built and started like in production (adapter-node), talking to the E2E backend, so the
+			// acceptance tests check what is shipped. Sessions are real JWTs signed with the same secret (fixtures/session.ts);
+			// Google sign-in is configured with test credentials and never completes.
+			command: 'npm run build && node build',
 			port: 3100,
 			reuseExistingServer: !process.env.CI,
-			timeout: 30000,
+			timeout: 180000,
 			env: {
+				PORT: '3100',
+				ORIGIN: 'http://localhost:3100',
 				BACKEND_URL: E2E_BACKEND_URL,
 				BACKEND_API_URL: E2E_BACKEND_URL,
 				JWT_SECRET: E2E_JWT_SECRET,
