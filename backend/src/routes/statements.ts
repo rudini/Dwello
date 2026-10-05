@@ -30,7 +30,8 @@ const calculationBody = t.Object({
 	periodStart: t.String(),
 	periodEnd: t.String(),
 	heatingProfileId: t.Optional(t.String()),
-	managementFeePercent: t.Optional(t.Number({ minimum: 0 }))
+	managementFeePercent: t.Optional(t.Number({ minimum: 0 })),
+	managementFeeDistributionKeyId: t.Optional(t.String())
 });
 
 const calculate = (body: typeof calculationBody.static) =>
@@ -39,7 +40,8 @@ const calculate = (body: typeof calculationBody.static) =>
 		new Date(body.periodStart),
 		new Date(body.periodEnd),
 		body.heatingProfileId,
-		body.managementFeePercent
+		body.managementFeePercent,
+		body.managementFeeDistributionKeyId
 	);
 
 export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
@@ -159,6 +161,7 @@ export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 						totalCosts: String(calculation.totalCosts),
 						totalAdvancePayments: String(calculation.totalAdvancePayments),
 						managementFee: String(calculation.managementFee),
+						managementFeePercent: String(calculation.managementFeePercent),
 						balance: String(calculation.balance),
 						status: 'draft',
 						paymentDeadline: paymentDeadline.toISOString().split('T')[0]
@@ -391,7 +394,10 @@ export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 					subtotal:
 						parseFloat(statement.totalCosts) - parseFloat(statement.managementFee || '0'),
 					managementFee: parseFloat(statement.managementFee || '0'),
-					managementFeePercent: parseFloat(statement.managementFee || '0') > 0
+					// Older statements have no stored rate; their fee was a percentage of the tenant's own costs
+					managementFeePercent: statement.managementFeePercent
+						? parseFloat(statement.managementFeePercent)
+						: parseFloat(statement.managementFee || '0') > 0
 						? (parseFloat(statement.managementFee || '0') / (parseFloat(statement.totalCosts) - parseFloat(statement.managementFee || '0'))) * 100
 						: 0,
 					totalCosts: parseFloat(statement.totalCosts),
