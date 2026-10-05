@@ -88,6 +88,7 @@ export default [
 	{
 		ignores: [
 			'.svelte-kit/**',
+			'.features-gen/**',
 			'build/**',
 			'dist/**',
 			'node_modules/**',

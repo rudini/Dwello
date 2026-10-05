@@ -50,7 +50,7 @@ mock.module('../db/connection', () => ({
 }));
 
 // Import for type testing
-import type { HeatingProfile, NewHeatingProfile } from '../db/schema';
+import type { HeatingProfile } from '../db/schema';
 import {
 	PREDEFINED_HEATING_PROFILES,
 	validatePercentages,

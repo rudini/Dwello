@@ -3,7 +3,7 @@
  * Tests for bug fix: Overdue status calculation and display
  */
 
-import { describe, it, expect, mock, beforeEach, afterEach } from 'bun:test';
+import { describe, it, expect } from 'bun:test';
 
 // Helper to compute effective status (mirrors the logic in statement.service.ts)
 function computeEffectiveStatus(

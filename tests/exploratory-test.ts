@@ -1,4 +1,4 @@
-import { chromium, Page, Browser, BrowserContext } from 'playwright';
+import { chromium, Page, BrowserContext } from 'playwright';
 import * as jose from 'jose';
 
 interface TestResult {
@@ -160,7 +160,7 @@ async function testLinks(page: Page, pageName: string) {
 				message: `${text?.trim().substring(0, 40) || 'No text'} → ${href}`
 			});
 
-		} catch (error) {
+		} catch {
 			// Link might have been removed from DOM
 		}
 	}
@@ -195,7 +195,7 @@ async function testButtons(page: Page, pageName: string) {
 				message: `${text?.trim().substring(0, 30) || 'No text'} (type: ${type || 'button'})`
 			});
 
-		} catch (error) {
+		} catch {
 			// Button might have been removed from DOM
 		}
 	}
@@ -216,7 +216,7 @@ async function testForms(page: Page, pageName: string) {
 				message: `Found form with ${inputs.length} input(s)`
 			});
 
-		} catch (error) {
+		} catch {
 			// Form might have been removed
 		}
 	}
@@ -247,7 +247,7 @@ async function testSelectOptions(page: Page, pageName: string) {
 				message: `${options.length} options (${disabledCount} disabled)`
 			});
 
-		} catch (error) {
+		} catch {
 			// Select might have been removed
 		}
 	}
@@ -316,7 +316,6 @@ async function testNavigation(page: Page, context: BrowserContext, baseUrl: stri
 			await page.waitForLoadState('networkidle');
 
 			const link = page.locator('a[href^="/config/heating-profiles/hp-"]').nth(i);
-			const href = await link.getAttribute('href');
 
 			await link.click();
 			await page.waitForLoadState('networkidle');
@@ -444,7 +443,6 @@ async function testConfigPage(page: Page, baseUrl: string) {
 		let disabledCount = 0;
 
 		for (const option of options) {
-			const value = await option.getAttribute('value');
 			const text = await option.textContent();
 			const disabled = await option.getAttribute('disabled');
 
