@@ -25,19 +25,25 @@ describe('Mahnschreiben', () => {
 		const { text } = reminderLetter(input);
 
 		expect(text).toContain('Guten Tag Anna Keller');
-		expect(text).toContain('Nebenkostenabrechnung NK-2024-0007 für die Periode 01.01.2024 – 31.12.2024');
-		expect(text).toContain("Offener Betrag: CHF 245.50");
+		expect(text).toContain(
+			'Nebenkostenabrechnung NK-2024-0007 für die Periode 01.01.2024 – 31.12.2024'
+		);
+		expect(text).toContain('Offener Betrag: CHF 245.50');
 		expect(text).toContain('bis 31.03.2025 auf folgendes Konto:\nIBAN CH93 0076 2011 6238 5295 7');
 		expect(text).toContain('Freundliche Grüsse\nVerwaltung Muster AG');
 	});
 
 	it('wird mit jeder Stufe deutlicher', () => {
 		expect(reminderLetter({ ...input, level: 1 }).text).toContain('übersehen');
-		expect(reminderLetter({ ...input, level: 2 }).text).toContain('Trotz unserer Zahlungserinnerung');
+		expect(reminderLetter({ ...input, level: 2 }).text).toContain(
+			'Trotz unserer Zahlungserinnerung'
+		);
 		expect(reminderLetter({ ...input, level: 3 }).text).toContain('weitere Schritte');
 	});
 
 	it('trägt Stufe und Abrechnung im Betreff', () => {
-		expect(reminderLetter({ ...input, level: 2 }).subject).toBe('2. Mahnung – Nebenkostenabrechnung NK-2024-0007');
+		expect(reminderLetter({ ...input, level: 2 }).subject).toBe(
+			'2. Mahnung – Nebenkostenabrechnung NK-2024-0007'
+		);
 	});
 });

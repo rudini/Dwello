@@ -3,8 +3,18 @@ import { balanceClass, statusLabels, statusVariants } from '../lib/statement';
 
 describe('statement status', () => {
 	it('labels every status in German with its badge colour', () => {
-		expect(statusLabels).toEqual({ draft: 'Entwurf', sent: 'Versendet', paid: 'Bezahlt', overdue: 'Überfällig' });
-		expect(statusVariants).toEqual({ draft: 'default', sent: 'info', paid: 'success', overdue: 'danger' });
+		expect(statusLabels).toEqual({
+			draft: 'Entwurf',
+			sent: 'Versendet',
+			paid: 'Bezahlt',
+			overdue: 'Überfällig'
+		});
+		expect(statusVariants).toEqual({
+			draft: 'default',
+			sent: 'info',
+			paid: 'success',
+			overdue: 'danger'
+		});
 	});
 });
 

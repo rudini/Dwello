@@ -6,5 +6,6 @@ export const deleteButton = (page: Page) => page.getByTestId('building-delete-bu
 export const confirmDeleteButton = (page: Page) => page.getByTestId('building-delete-confirm');
 export const editButton = (page: Page) => page.getByTestId('building-edit-button');
 export const addApartmentButton = (page: Page) => page.getByTestId('apartment-add-button');
-export const firstApartmentButton = (page: Page) => page.getByTestId('apartment-first-create-button');
+export const firstApartmentButton = (page: Page) =>
+	page.getByTestId('apartment-first-create-button');
 export const yearBuiltValue = (page: Page) => page.getByTestId('building-year-built');

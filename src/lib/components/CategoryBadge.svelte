@@ -47,7 +47,5 @@
 		{/if}
 	</span>
 {:else}
-	<span class="{baseClasses} {categoryClasses}">
-		Nicht kategorisiert
-	</span>
+	<span class="{baseClasses} {categoryClasses}"> Nicht kategorisiert </span>
 {/if}

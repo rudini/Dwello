@@ -208,13 +208,8 @@ export async function checkContractOverlap(
 	// - Its end date is after the new contract's start date (or existing has no end)
 	const conditions = [
 		eq(rentalContracts.apartmentId, apartmentId),
-		or(
-			isNull(rentalContracts.endDate),
-			gte(rentalContracts.endDate, startDate)
-		),
-		endDate
-			? lte(rentalContracts.startDate, endDate)
-			: sql`1=1` // If no end date, any future contract overlaps
+		or(isNull(rentalContracts.endDate), gte(rentalContracts.endDate, startDate)),
+		endDate ? lte(rentalContracts.startDate, endDate) : sql`1=1` // If no end date, any future contract overlaps
 	];
 
 	if (excludeContractId) {
@@ -283,7 +278,6 @@ export async function createContract(data: NewRentalContract): Promise<RentalCon
 
 	const [contract] = await db.insert(rentalContracts).values(data).returning();
 
-
 	return contract;
 }
 
@@ -321,7 +315,6 @@ export async function updateContract(
 		.where(eq(rentalContracts.id, id))
 		.returning();
 
-
 	return contract || null;
 }
 
@@ -355,7 +348,6 @@ export async function deleteContract(id: string): Promise<{ success: boolean; er
 	if (result.length === 0) {
 		return { success: false, error: 'Contract not found' };
 	}
-
 
 	return { success: true };
 }

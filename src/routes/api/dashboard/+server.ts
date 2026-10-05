@@ -4,11 +4,7 @@
  */
 
 import type { RequestHandler } from './$types';
-import {
-	forwardRequest,
-	createProxyResponse,
-	handleProxyError
-} from '$lib/server/api-proxy';
+import { forwardRequest, createProxyResponse, handleProxyError } from '$lib/server/api-proxy';
 
 export const GET: RequestHandler = async ({ cookies }) => {
 	try {

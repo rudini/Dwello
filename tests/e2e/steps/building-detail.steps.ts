@@ -45,9 +45,12 @@ When('der Liegenschaftsverwalter die erste Wohnung erstellen will', async ({ ver
 	await verwalter.perform(startFirstApartment);
 });
 
-When('der Liegenschaftsverwalter die Wohnung {string} öffnet', async ({ verwalter }, number: string) => {
-	await verwalter.perform(openApartment(number));
-});
+When(
+	'der Liegenschaftsverwalter die Wohnung {string} öffnet',
+	async ({ verwalter }, number: string) => {
+		await verwalter.perform(openApartment(number));
+	}
+);
 
 Then(
 	'sieht der Liegenschaftsverwalter die Wohnung {string} mit dem Status {string}',
@@ -56,12 +59,18 @@ Then(
 	}
 );
 
-Then('das Gebäude {string} ist nicht mehr in der Liste', async ({ verwalter, names }, title: string) => {
-	const name = names.get(title) ?? title;
-	await verwalter.perform(searchBuildings(name));
-	await expect(listedBuilding(verwalter, name)).toHaveCount(0);
-});
+Then(
+	'das Gebäude {string} ist nicht mehr in der Liste',
+	async ({ verwalter, names }, title: string) => {
+		const name = names.get(title) ?? title;
+		await verwalter.perform(searchBuildings(name));
+		await expect(listedBuilding(verwalter, name)).toHaveCount(0);
+	}
+);
 
-Then('sieht der Liegenschaftsverwalter das Baujahr {string}', async ({ verwalter }, year: string) => {
-	await expect(yearBuilt(verwalter)).toHaveText(year);
-});
+Then(
+	'sieht der Liegenschaftsverwalter das Baujahr {string}',
+	async ({ verwalter }, year: string) => {
+		await expect(yearBuilt(verwalter)).toHaveText(year);
+	}
+);

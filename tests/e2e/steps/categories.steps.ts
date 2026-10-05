@@ -4,7 +4,12 @@ import { test } from '../fixtures/test';
 import { visit } from '../interactions/navigation';
 import { errorMessage } from '../questions/form';
 import { deletion, invoicesOf, isAllowed, listedCategory } from '../questions/categories';
-import { createCategory, deleteCategory, saveAsNotAllowed, showAllowedCategories } from '../tasks/categories';
+import {
+	createCategory,
+	deleteCategory,
+	saveAsNotAllowed,
+	showAllowedCategories
+} from '../tasks/categories';
 
 const { Given, When, Then } = createBdd(test);
 
@@ -38,9 +43,12 @@ Given(
 	}
 );
 
-When('der Liegenschaftsverwalter nur die umlagefähigen Kategorien anzeigt', async ({ verwalter }) => {
-	await verwalter.perform(showAllowedCategories);
-});
+When(
+	'der Liegenschaftsverwalter nur die umlagefähigen Kategorien anzeigt',
+	async ({ verwalter }) => {
+		await verwalter.perform(showAllowedCategories);
+	}
+);
 
 When(
 	'der Liegenschaftsverwalter die umlagefähige Kategorie {string} erfasst',
@@ -63,25 +71,37 @@ When(
 	}
 );
 
-When('der Liegenschaftsverwalter die Kategorie {string} löscht', async ({ verwalter, names }, title: string) => {
-	await verwalter.perform(deleteCategory(names.get(title)!));
-});
+When(
+	'der Liegenschaftsverwalter die Kategorie {string} löscht',
+	async ({ verwalter, names }, title: string) => {
+		await verwalter.perform(deleteCategory(names.get(title)!));
+	}
+);
 
-Then('sieht der Liegenschaftsverwalter die Kategorie {string}', async ({ verwalter, names }, title: string) => {
-	await expect(listedCategory(verwalter, names.get(title)!)).toBeVisible();
-});
+Then(
+	'sieht der Liegenschaftsverwalter die Kategorie {string}',
+	async ({ verwalter, names }, title: string) => {
+		await expect(listedCategory(verwalter, names.get(title)!)).toBeVisible();
+	}
+);
 
 Then('nicht die Kategorie {string}', async ({ verwalter, names }, title: string) => {
 	await expect(listedCategory(verwalter, names.get(title)!)).toHaveCount(0);
 });
 
-Then('sieht der Liegenschaftsverwalter die Kategorie {string} nicht mehr', async ({ verwalter, names }, title: string) => {
-	await expect(listedCategory(verwalter, names.get(title)!)).toHaveCount(0);
-});
+Then(
+	'sieht der Liegenschaftsverwalter die Kategorie {string} nicht mehr',
+	async ({ verwalter, names }, title: string) => {
+		await expect(listedCategory(verwalter, names.get(title)!)).toHaveCount(0);
+	}
+);
 
-Then('ist die Kategorie {string} nicht umlagefähig', async ({ verwalter, names }, title: string) => {
-	await expect(isAllowed(verwalter, names.get(title)!)).toHaveText('Nein');
-});
+Then(
+	'ist die Kategorie {string} nicht umlagefähig',
+	async ({ verwalter, names }, title: string) => {
+		await expect(isAllowed(verwalter, names.get(title)!)).toHaveText('Nein');
+	}
+);
 
 Then(
 	'erfährt der Liegenschaftsverwalter, dass es die Kategorie {string} schon gibt',

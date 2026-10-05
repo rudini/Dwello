@@ -2,7 +2,12 @@ import { expect } from '@playwright/test';
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { visit } from '../interactions/navigation';
-import { allListedStatements, listedStatement, statementOfYear, statementPath } from '../questions/statements';
+import {
+	allListedStatements,
+	listedStatement,
+	statementOfYear,
+	statementPath
+} from '../questions/statements';
 import {
 	downloadStatementPdfFromList,
 	openStatement,
@@ -18,7 +23,14 @@ const { Given, When, Then } = createBdd(test);
 
 Given(
 	'{string} mietet die Wohnung {string} seit {string} für {string} Franken mit {string} Franken Akonto',
-	async ({ seed }, tenant: string, apartment: string, startDate: string, baseRent: string, advance: string) => {
+	async (
+		{ seed },
+		tenant: string,
+		apartment: string,
+		startDate: string,
+		baseRent: string,
+		advance: string
+	) => {
 		await seed.contract(tenant, apartment, { startDate, baseRent, monthlyAdvancePayment: advance });
 	}
 );
@@ -48,9 +60,12 @@ Given(
 	}
 );
 
-When('der Liegenschaftsverwalter die Abrechnungen von {string} sucht', async ({ verwalter, names }, tenant: string) => {
-	await verwalter.perform(searchStatements(names.get(tenant) ?? tenant));
-});
+When(
+	'der Liegenschaftsverwalter die Abrechnungen von {string} sucht',
+	async ({ verwalter, names }, tenant: string) => {
+		await verwalter.perform(searchStatements(names.get(tenant) ?? tenant));
+	}
+);
 
 When('der Liegenschaftsverwalter zur nächsten Seite blättert', async ({ verwalter }) => {
 	await verwalter.perform(turnToNextPage);
@@ -81,9 +96,12 @@ Then(
 	}
 );
 
-Then('die Abrechnungsliste enthält genau {int} Abrechnung', async ({ verwalter }, count: number) => {
-	await expect(allListedStatements(verwalter)).toHaveCount(count);
-});
+Then(
+	'die Abrechnungsliste enthält genau {int} Abrechnung',
+	async ({ verwalter }, count: number) => {
+		await expect(allListedStatements(verwalter)).toHaveCount(count);
+	}
+);
 
 Then(
 	'ist der Liegenschaftsverwalter auf der Detailseite der Abrechnung {int} von {string}',
@@ -117,9 +135,12 @@ Given('die Verwaltung hat die IBAN {string} hinterlegt', async ({ seed }, iban: 
 	await seed.iban(iban);
 });
 
-Given('für die Abrechnung {int} von {string} gibt es ein PDF', async ({ seed }, year: number, tenant: string) => {
-	await seed.statementPdf(tenant, year);
-});
+Given(
+	'für die Abrechnung {int} von {string} gibt es ein PDF',
+	async ({ seed }, year: number, tenant: string) => {
+		await seed.statementPdf(tenant, year);
+	}
+);
 
 When(
 	'der Liegenschaftsverwalter das PDF der Abrechnung {int} von {string} herunterlädt',

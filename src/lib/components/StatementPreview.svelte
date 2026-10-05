@@ -92,7 +92,9 @@
 						<td class="py-3 text-gray-900">{item.categoryName}</td>
 						<td class="py-3 text-right text-gray-600">{formatCurrency(item.totalAmount)}</td>
 						<td class="py-3 text-right text-gray-600">{item.percentage}%</td>
-						<td class="py-3 text-right font-medium text-gray-900">{formatCurrency(item.tenantShare)}</td>
+						<td class="py-3 text-right font-medium text-gray-900"
+							>{formatCurrency(item.tenantShare)}</td
+						>
 					</tr>
 				{/each}
 			</tbody>
@@ -153,8 +155,8 @@
 				<div>
 					<p class="font-medium text-gray-900">Rückerstattung</p>
 					<p class="text-gray-600 text-sm mt-1">
-						Der Betrag von {formatCurrency(Math.abs(balance))} wird Ihnen innerhalb von 30 Tagen
-						auf Ihr Konto überwiesen.
+						Der Betrag von {formatCurrency(Math.abs(balance))} wird Ihnen innerhalb von 30 Tagen auf Ihr
+						Konto überwiesen.
 					</p>
 				</div>
 			</div>
@@ -184,6 +186,7 @@
 
 	<!-- Footer -->
 	<div class="p-4 bg-gray-100 text-center text-xs text-gray-500">
-		Dieses Dokument wurde automatisch generiert. Bei Fragen wenden Sie sich bitte an Ihre Hausverwaltung.
+		Dieses Dokument wurde automatisch generiert. Bei Fragen wenden Sie sich bitte an Ihre
+		Hausverwaltung.
 	</div>
 </div>

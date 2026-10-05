@@ -64,7 +64,10 @@ export const configRoutes = new Elysia({ prefix: '/api/v1/config' })
 			}
 
 			try {
-				const period = getAccountingPeriodDates(periodType as 'calendar' | 'july-june' | 'november-october', year);
+				const period = getAccountingPeriodDates(
+					periodType as 'calendar' | 'july-june' | 'november-october',
+					year
+				);
 				return {
 					start: period.start.toISOString().split('T')[0],
 					end: period.end.toISOString().split('T')[0],

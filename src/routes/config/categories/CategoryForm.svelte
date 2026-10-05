@@ -9,7 +9,8 @@
 		submitLabel
 	}: { category?: Category; errors?: Record<string, string>; submitLabel: string } = $props();
 
-	const inputClass = 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary';
+	const inputClass =
+		'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary';
 	const translations = [
 		{ key: 'nameFR', label: 'Französisch' },
 		{ key: 'nameIT', label: 'Italienisch' },
@@ -23,8 +24,12 @@
 	});
 </script>
 
-<RecordForm error={errors.form} cancelHref="/config/categories" {submitLabel} submitTestid="category-submit">
-
+<RecordForm
+	error={errors.form}
+	cancelHref="/config/categories"
+	{submitLabel}
+	submitTestid="category-submit"
+>
 	<div class="grid gap-4 sm:grid-cols-2">
 		<TextField
 			label="Name"
@@ -36,8 +41,16 @@
 			testid="category-name-input"
 		/>
 		<div>
-			<label for="sortOrder" class="block text-sm font-medium text-gray-700 mb-1">Reihenfolge</label>
-			<input id="sortOrder" name="sortOrder" type="number" min="0" value={values.sortOrder} class={inputClass} />
+			<label for="sortOrder" class="block text-sm font-medium text-gray-700 mb-1">Reihenfolge</label
+			>
+			<input
+				id="sortOrder"
+				name="sortOrder"
+				type="number"
+				min="0"
+				value={values.sortOrder}
+				class={inputClass}
+			/>
 		</div>
 	</div>
 	<TextField label="Beschreibung" name="description" value={values.description} />
@@ -53,8 +66,8 @@
 		<span>
 			<span class="font-medium text-gray-900">Umlagefähige Nebenkosten</span>
 			<span class="block text-sm text-gray-500">
-				Nur umlagefähige Kosten (Art. 257a–257b OR) fliessen in die Nebenkostenabrechnung, z.B. Heizung, Wasser,
-				Hauswart. Reparaturen, Versicherungen und Steuern sind nicht umlagefähig.
+				Nur umlagefähige Kosten (Art. 257a–257b OR) fliessen in die Nebenkostenabrechnung, z.B.
+				Heizung, Wasser, Hauswart. Reparaturen, Versicherungen und Steuern sind nicht umlagefähig.
 			</span>
 		</span>
 	</label>

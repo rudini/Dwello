@@ -27,7 +27,12 @@
 						<Icon name={tile.icon} size={24} />
 					</div>
 					<div>
-						<p class="text-2xl font-bold text-gray-900" data-testid="statements-{tile.status}-count">{counts[tile.status]}</p>
+						<p
+							class="text-2xl font-bold text-gray-900"
+							data-testid="statements-{tile.status}-count"
+						>
+							{counts[tile.status]}
+						</p>
 						<p class="text-sm text-gray-500">{tile.label}</p>
 					</div>
 				</div>

@@ -22,17 +22,28 @@
 	</div>
 
 	<div class="mb-6">
-		<p class="text-base font-bold text-text-dark" data-testid="current-tenant-name">{contract.tenantName}</p>
+		<p class="text-base font-bold text-text-dark" data-testid="current-tenant-name">
+			{contract.tenantName}
+		</p>
 		<p class="text-xs text-text-secondary">Vertrag seit: {formatDate(contract.startDate)}</p>
 		{#if contract.tenantEmail}
 			<p class="flex items-center gap-2 mt-3">
 				<Icon name="email" size={18} class="text-text-secondary" />
-				<a href="mailto:{contract.tenantEmail}" class="text-sm text-primary hover:underline" data-testid="tenant-email-link">{contract.tenantEmail}</a>
+				<a
+					href="mailto:{contract.tenantEmail}"
+					class="text-sm text-primary hover:underline"
+					data-testid="tenant-email-link">{contract.tenantEmail}</a
+				>
 			</p>
 		{/if}
 	</div>
 
-	<Button variant="secondary" class="w-full" href="/tenants/{contract.tenantId}" testid="current-tenant-profile">
+	<Button
+		variant="secondary"
+		class="w-full"
+		href="/tenants/{contract.tenantId}"
+		testid="current-tenant-profile"
+	>
 		Mieterprofil ansehen
 	</Button>
 </Card>

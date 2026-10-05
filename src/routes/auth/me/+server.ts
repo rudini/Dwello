@@ -7,11 +7,7 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { getJwtFromCookie, verifyJwt } from '$lib/server/auth';
-import {
-	JWTError,
-	handleRequestError,
-	logger
-} from '$lib/server/error-handler';
+import { JWTError, handleRequestError, logger } from '$lib/server/error-handler';
 
 /**
  * User response structure (safe to expose to client)

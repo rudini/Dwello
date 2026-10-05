@@ -19,7 +19,11 @@
 
 	const displayedActivities = $derived(activities.slice(0, maxItems));
 
-	function getActivityIcon(type: Activity['type']): { icon: string; color: string; bgColor: string } {
+	function getActivityIcon(type: Activity['type']): {
+		icon: string;
+		color: string;
+		bgColor: string;
+	} {
 		switch (type) {
 			case 'statement_created':
 				return { icon: 'receipt_long', color: 'text-blue-600', bgColor: 'bg-blue-100' };
@@ -28,7 +32,11 @@
 			case 'payment_received':
 				return { icon: 'paid', color: 'text-green-600', bgColor: 'bg-green-100' };
 			case 'reminder_sent':
-				return { icon: 'notification_important', color: 'text-orange-600', bgColor: 'bg-orange-100' };
+				return {
+					icon: 'notification_important',
+					color: 'text-orange-600',
+					bgColor: 'bg-orange-100'
+				};
 			default:
 				return { icon: 'info', color: 'text-gray-600', bgColor: 'bg-gray-100' };
 		}

@@ -9,7 +9,8 @@
 		preset,
 		error,
 		onselect
-	}: { buildings: Building[]; preset?: Building; error?: string; onselect: (id: string) => void } = $props();
+	}: { buildings: Building[]; preset?: Building; error?: string; onselect: (id: string) => void } =
+		$props();
 </script>
 
 <div>
@@ -18,7 +19,10 @@
 	</label>
 	{#if preset}
 		<input type="hidden" name="buildingId" value={preset.id} />
-		<p class="px-4 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-700" data-testid="apartment-building">
+		<p
+			class="px-4 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-700"
+			data-testid="apartment-building"
+		>
 			{preset.name}
 			<span class="block text-sm text-gray-500">{preset.address}</span>
 		</p>

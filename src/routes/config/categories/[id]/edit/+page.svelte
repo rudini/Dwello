@@ -12,7 +12,13 @@
 </svelte:head>
 
 <div class="max-w-3xl mx-auto space-y-6">
-	<PageTrail links={[{ href: '/config', label: 'Einstellungen' }, { href: '/config/categories', label: 'Kategorien' }]} current={data.category.name} />
+	<PageTrail
+		links={[
+			{ href: '/config', label: 'Einstellungen' },
+			{ href: '/config/categories', label: 'Kategorien' }
+		]}
+		current={data.category.name}
+	/>
 
 	<h1 class="text-2xl font-bold text-gray-900">Kategorie bearbeiten</h1>
 

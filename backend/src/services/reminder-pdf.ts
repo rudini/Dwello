@@ -21,7 +21,10 @@ export async function renderReminderPdf(
 	recipient: PostalAddress,
 	date: string
 ) {
-	const doc = new PDFDocument({ size: 'A4', margins: { top: 50, bottom: 50, left: 70, right: 60 } });
+	const doc = new PDFDocument({
+		size: 'A4',
+		margins: { top: 50, bottom: 50, left: 70, right: 60 }
+	});
 	const finished = once(doc, 'end');
 	const pages: Buffer[] = [];
 	doc.on('data', (page: Buffer) => pages.push(page));

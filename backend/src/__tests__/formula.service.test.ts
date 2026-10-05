@@ -43,25 +43,27 @@ describe('Formula Service', () => {
 		it('should reject formula without variables', () => {
 			const result = parseFormula('100 + 50');
 			expect(result.isValid).toBe(false);
-			expect(result.errors.some(e => e.includes('braucht mindestens eine Variable'))).toBe(true);
+			expect(result.errors.some((e) => e.includes('braucht mindestens eine Variable'))).toBe(true);
 		});
 
 		it('should reject unknown variables', () => {
 			const result = parseFormula('{area} + {unknown}');
 			expect(result.isValid).toBe(false);
-			expect(result.errors.some(e => e.includes('Unbekannte Variable'))).toBe(true);
+			expect(result.errors.some((e) => e.includes('Unbekannte Variable'))).toBe(true);
 		});
 
 		it('should detect unbalanced parentheses', () => {
 			const result = parseFormula('({area} + {rooms}');
 			expect(result.isValid).toBe(false);
-			expect(result.errors.some(e => e.includes('Klammer'))).toBe(true);
+			expect(result.errors.some((e) => e.includes('Klammer'))).toBe(true);
 		});
 
 		it('should detect consecutive operators', () => {
 			const result = parseFormula('{area} ++ {rooms}');
 			expect(result.isValid).toBe(false);
-			expect(result.errors.some(e => e.includes('Zwei Rechenzeichen folgen direkt aufeinander'))).toBe(true);
+			expect(
+				result.errors.some((e) => e.includes('Zwei Rechenzeichen folgen direkt aufeinander'))
+			).toBe(true);
 		});
 
 		it('should normalize variable names to lowercase', () => {
@@ -142,9 +144,9 @@ describe('Formula Service', () => {
 			expect(result.distributions).toHaveLength(3);
 
 			// Total area = 250
-			expect(result.distributions[0].share).toBeCloseTo(50/250, 4);
-			expect(result.distributions[1].share).toBeCloseTo(80/250, 4);
-			expect(result.distributions[2].share).toBeCloseTo(120/250, 4);
+			expect(result.distributions[0].share).toBeCloseTo(50 / 250, 4);
+			expect(result.distributions[1].share).toBeCloseTo(80 / 250, 4);
+			expect(result.distributions[2].share).toBeCloseTo(120 / 250, 4);
 		});
 
 		it('should distribute by rooms', () => {
@@ -152,7 +154,7 @@ describe('Formula Service', () => {
 			expect(result.isValid).toBe(true);
 
 			// Total rooms = 10.5
-			expect(result.distributions[0].share).toBeCloseTo(2/10.5, 4);
+			expect(result.distributions[0].share).toBeCloseTo(2 / 10.5, 4);
 		});
 
 		it('should distribute equally by units', () => {
@@ -244,17 +246,17 @@ describe('Formula Service', () => {
 		it('should detect unexpected closing parenthesis', () => {
 			const result = parseFormula('{area}) + {rooms}');
 			expect(result.isValid).toBe(false);
-			expect(result.errors.some(e => e.includes('nicht geöffnet'))).toBe(true);
+			expect(result.errors.some((e) => e.includes('nicht geöffnet'))).toBe(true);
 		});
 
 		it('should warn about division by zero', () => {
 			const result = parseFormula('{area} / 0');
-			expect(result.errors.some(e => e.includes('teilt durch null'))).toBe(true);
+			expect(result.errors.some((e) => e.includes('teilt durch null'))).toBe(true);
 		});
 
 		it('should not warn about division by 0.5', () => {
 			const result = parseFormula('{area} / 0.5');
-			expect(result.errors.some(e => e.includes('teilt durch null'))).toBe(false);
+			expect(result.errors.some((e) => e.includes('teilt durch null'))).toBe(false);
 		});
 
 		it('should handle whitespace-only formula', () => {
@@ -326,7 +328,9 @@ describe('Formula Service', () => {
 		});
 
 		it('should handle many apartments', () => {
-			const apartments = Array(10).fill(null).map((_, i) => ({ area: 50 + i * 10, rooms: 2 + i * 0.5 }));
+			const apartments = Array(10)
+				.fill(null)
+				.map((_, i) => ({ area: 50 + i * 10, rooms: 2 + i * 0.5 }));
 			const result = calculateDistribution('{area}', apartments, 10000);
 			expect(result.isValid).toBe(true);
 			expect(result.distributions).toHaveLength(10);
@@ -365,7 +369,9 @@ describe('Formula Service', () => {
 		});
 
 		it('should validate complex mixed formula', () => {
-			const result = validateFormulaForDistribution('({area} * 0.5) + ({rooms} * 20) + ({units} * 10)');
+			const result = validateFormulaForDistribution(
+				'({area} * 0.5) + ({rooms} * 20) + ({units} * 10)'
+			);
 			expect(result.isValid).toBe(true);
 		});
 

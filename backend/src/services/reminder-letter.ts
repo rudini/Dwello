@@ -29,7 +29,8 @@ function opening(level: number, statement: string) {
 	if (level === 1) {
 		return `gemäss unseren Unterlagen ist die ${statement} noch offen. Möglicherweise haben Sie die Zahlung übersehen.`;
 	}
-	if (level === 2) return `Trotz unserer Zahlungserinnerung ist die ${statement} noch nicht bezahlt.`;
+	if (level === 2)
+		return `Trotz unserer Zahlungserinnerung ist die ${statement} noch nicht bezahlt.`;
 	return `Trotz zweimaliger Mahnung ist die ${statement} noch immer nicht bezahlt. Begleichen Sie den Betrag bitte umgehend, andernfalls müssen wir weitere Schritte einleiten.`;
 }
 

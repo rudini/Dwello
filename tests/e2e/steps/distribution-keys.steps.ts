@@ -2,8 +2,20 @@ import { expect } from '@playwright/test';
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { visit } from '../interactions/navigation';
-import { deletion, formulaOf, invoicesBy, keyActions, listedKey, sampleShare } from '../questions/distribution-keys';
-import { changeFormula, createDistributionKey, deleteDistributionKey, testFormula } from '../tasks/distribution-keys';
+import {
+	deletion,
+	formulaOf,
+	invoicesBy,
+	keyActions,
+	listedKey,
+	sampleShare
+} from '../questions/distribution-keys';
+import {
+	changeFormula,
+	createDistributionKey,
+	deleteDistributionKey,
+	testFormula
+} from '../tasks/distribution-keys';
 
 const { Given, When, Then } = createBdd(test);
 
@@ -25,9 +37,12 @@ Given('der Liegenschaftsverwalter ist auf der Seite "Verteilschlüssel"', async 
 	await visit(verwalter.page, '/config/distribution-keys');
 });
 
-Given('der Liegenschaftsverwalter ist auf der Seite "Neuer Verteilschlüssel"', async ({ verwalter }) => {
-	await visit(verwalter.page, '/config/distribution-keys/new');
-});
+Given(
+	'der Liegenschaftsverwalter ist auf der Seite "Neuer Verteilschlüssel"',
+	async ({ verwalter }) => {
+		await visit(verwalter.page, '/config/distribution-keys/new');
+	}
+);
 
 Given(
 	'der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Verteilschlüssels {string}',
@@ -36,9 +51,12 @@ Given(
 	}
 );
 
-When('der Liegenschaftsverwalter die Formel {string} testet', async ({ verwalter }, formula: string) => {
-	await verwalter.perform(testFormula(formula));
-});
+When(
+	'der Liegenschaftsverwalter die Formel {string} testet',
+	async ({ verwalter }, formula: string) => {
+		await verwalter.perform(testFormula(formula));
+	}
+);
 
 When(
 	'der Liegenschaftsverwalter den Verteilschlüssel {string} mit der Formel {string} erfasst',
@@ -54,9 +72,12 @@ When(
 	}
 );
 
-When('der Liegenschaftsverwalter den Verteilschlüssel {string} löscht', async ({ verwalter, names }, title: string) => {
-	await verwalter.perform(deleteDistributionKey(names.get(title)!));
-});
+When(
+	'der Liegenschaftsverwalter den Verteilschlüssel {string} löscht',
+	async ({ verwalter, names }, title: string) => {
+		await verwalter.perform(deleteDistributionKey(names.get(title)!));
+	}
+);
 
 Then(
 	'trägt die Beispielwohnung mit {string} {string} der Kosten',

@@ -166,7 +166,9 @@
 				>
 					<option value="" selected={!buildingFilter}>Alle Gebäude</option>
 					{#each data.buildings as building}
-						<option value={building.id} selected={building.id === buildingFilter}>{building.name}</option>
+						<option value={building.id} selected={building.id === buildingFilter}
+							>{building.name}</option
+						>
 					{/each}
 				</select>
 			</div>
@@ -244,7 +246,10 @@
 					</thead>
 					<tbody class="divide-y divide-gray-200">
 						{#each data.statements as statement}
-							<tr class="hover:bg-gray-50 transition-colors" data-testid="statement-row-{statement.id}">
+							<tr
+								class="hover:bg-gray-50 transition-colors"
+								data-testid="statement-row-{statement.id}"
+							>
 								<td class="px-6 py-4">
 									<div>
 										<p class="font-mono text-sm text-gray-500">{statement.statementNumber}</p>
@@ -328,13 +333,23 @@
 				<p class="text-sm text-gray-600">Seite {data.page} von {totalPages}</p>
 				<div class="flex gap-2">
 					{#if data.page > 1}
-						<Button href={linkWith({ page: String(data.page - 1) })} variant="secondary" size="sm" testid="pagination-previous">
+						<Button
+							href={linkWith({ page: String(data.page - 1) })}
+							variant="secondary"
+							size="sm"
+							testid="pagination-previous"
+						>
 							<Icon name="chevron_left" size={16} />
 							Zurück
 						</Button>
 					{/if}
 					{#if data.page < totalPages}
-						<Button href={linkWith({ page: String(data.page + 1) })} variant="secondary" size="sm" testid="pagination-next">
+						<Button
+							href={linkWith({ page: String(data.page + 1) })}
+							variant="secondary"
+							size="sm"
+							testid="pagination-next"
+						>
 							Weiter
 							<Icon name="chevron_right" size={16} />
 						</Button>

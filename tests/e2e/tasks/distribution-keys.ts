@@ -1,6 +1,13 @@
 import type { Actor } from '../fixtures/actor';
 import { deleteConfirmButton } from '../interactions/form';
-import { deleteButton, editButton, formulaInput, nameInput, submitButton, testButton } from '../interactions/distribution-keys';
+import {
+	deleteButton,
+	editButton,
+	formulaInput,
+	nameInput,
+	submitButton,
+	testButton
+} from '../interactions/distribution-keys';
 
 export const testFormula = (formula: string) => async (actor: Actor) => {
 	await formulaInput(actor.page).fill(formula);

@@ -10,8 +10,15 @@
 		placeholder,
 		error,
 		testid
-	}: { label: string; name: string; value?: string; required?: boolean; placeholder?: string; error?: string; testid?: string } =
-		$props();
+	}: {
+		label: string;
+		name: string;
+		value?: string;
+		required?: boolean;
+		placeholder?: string;
+		error?: string;
+		testid?: string;
+	} = $props();
 </script>
 
 <div>

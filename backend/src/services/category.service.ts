@@ -32,7 +32,9 @@ export async function listCategories(filters: CategoryFilters = {}): Promise<{
 	const conditions = [];
 
 	if (search) {
-		conditions.push(or(ilike(categories.name, `%${search}%`), ilike(categories.nameDE, `%${search}%`)));
+		conditions.push(
+			or(ilike(categories.name, `%${search}%`), ilike(categories.nameDE, `%${search}%`))
+		);
 	}
 
 	if (isAllowedUtilityCost !== undefined) {
@@ -53,9 +55,10 @@ export async function listCategories(filters: CategoryFilters = {}): Promise<{
 			sortOrder: categories.sortOrder,
 			createdAt: categories.createdAt,
 			updatedAt: categories.updatedAt,
-			invoiceCount: sql<number>`(SELECT COUNT(*) FROM invoices WHERE invoices.category_id = "categories"."id")`.as(
-				'invoice_count'
-			)
+			invoiceCount:
+				sql<number>`(SELECT COUNT(*) FROM invoices WHERE invoices.category_id = "categories"."id")`.as(
+					'invoice_count'
+				)
 		})
 		.from(categories)
 		.orderBy(asc(categories.sortOrder), asc(categories.name))
@@ -64,16 +67,12 @@ export async function listCategories(filters: CategoryFilters = {}): Promise<{
 
 	// Apply conditions if any
 	const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
-	const results = whereClause
-		? await categoriesQuery.where(whereClause)
-		: await categoriesQuery;
+	const results = whereClause ? await categoriesQuery.where(whereClause) : await categoriesQuery;
 
 	// Get total count
 	const countQuery = db.select({ count: sql<number>`count(*)` }).from(categories);
 
-	const [{ count: total }] = whereClause
-		? await countQuery.where(whereClause)
-		: await countQuery;
+	const [{ count: total }] = whereClause ? await countQuery.where(whereClause) : await countQuery;
 
 	return {
 		categories: results as CategoryWithUsage[],
@@ -98,9 +97,10 @@ export async function getCategory(id: string): Promise<CategoryWithUsage | null>
 			sortOrder: categories.sortOrder,
 			createdAt: categories.createdAt,
 			updatedAt: categories.updatedAt,
-			invoiceCount: sql<number>`(SELECT COUNT(*) FROM invoices WHERE invoices.category_id = "categories"."id")`.as(
-				'invoice_count'
-			)
+			invoiceCount:
+				sql<number>`(SELECT COUNT(*) FROM invoices WHERE invoices.category_id = "categories"."id")`.as(
+					'invoice_count'
+				)
 		})
 		.from(categories)
 		.where(eq(categories.id, id))
@@ -166,7 +166,10 @@ export async function createCategory(data: NewCategory): Promise<Category> {
 /**
  * Update an existing category
  */
-export async function updateCategory(id: string, data: Partial<NewCategory>): Promise<Category | null> {
+export async function updateCategory(
+	id: string,
+	data: Partial<NewCategory>
+): Promise<Category | null> {
 	if (data.name) await ensureNameIsFree(data.name, id);
 	if (data.nameDE) await ensureNameIsFree(data.nameDE, id);
 
@@ -183,7 +186,9 @@ export async function updateCategory(id: string, data: Partial<NewCategory>): Pr
  * Delete a category
  * Returns false if category is used by invoices
  */
-export async function deleteCategory(id: string): Promise<{ success: boolean; conflict?: boolean; error?: string }> {
+export async function deleteCategory(
+	id: string
+): Promise<{ success: boolean; conflict?: boolean; error?: string }> {
 	// Check for invoices using this category
 	const [invoiceCount] = await db
 		.select({ count: sql<number>`count(*)` })

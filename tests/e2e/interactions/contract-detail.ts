@@ -6,7 +6,8 @@ export const contractStatus = (page: Page) => page.getByTestId('contract-status'
 export const endContractButton = (page: Page) => page.getByTestId('contract-end-button');
 export const confirmEndContractButton = (page: Page) => page.getByTestId('contract-end-confirm');
 export const deleteContractButton = (page: Page) => page.getByTestId('contract-delete-button');
-export const confirmDeleteContractButton = (page: Page) => page.getByTestId('contract-delete-confirm');
+export const confirmDeleteContractButton = (page: Page) =>
+	page.getByTestId('contract-delete-confirm');
 export const contractEditButton = (page: Page) => page.getByTestId('contract-edit-button');
 export const contractTenantLink = (page: Page) => page.getByTestId('contract-tenant-link');
 export const contractApartmentLink = (page: Page) => page.getByTestId('contract-apartment-link');

@@ -3,8 +3,14 @@
 	import { FORMULA_VARIABLES } from '$lib/distribution-key';
 
 	const examples = [
-		{ formula: '{area}', text: 'Nach Wohnfläche: eine 100 m² Wohnung zahlt doppelt so viel wie eine 50 m² Wohnung.' },
-		{ formula: '{area} * 0.7 + {rooms} * 0.3', text: '70 % nach Fläche, 30 % nach Zimmerzahl, z.B. für Heizkosten.' },
+		{
+			formula: '{area}',
+			text: 'Nach Wohnfläche: eine 100 m² Wohnung zahlt doppelt so viel wie eine 50 m² Wohnung.'
+		},
+		{
+			formula: '{area} * 0.7 + {rooms} * 0.3',
+			text: '70 % nach Fläche, 30 % nach Zimmerzahl, z.B. für Heizkosten.'
+		},
 		{ formula: '{units}', text: 'Gleiche Anteile für alle Wohnungen, z.B. für Kabel-TV.' }
 	];
 </script>

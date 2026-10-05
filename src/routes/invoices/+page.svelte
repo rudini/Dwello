@@ -19,7 +19,9 @@
 	let categoryFilter = $state($page.url.searchParams.get('categoryId') || '');
 	let validityFilter = $state($page.url.searchParams.get('validity') || '');
 
-	const buildingOptions = $derived(data.buildings.map((b) => ({ value: b.id, label: b.name || b.address })));
+	const buildingOptions = $derived(
+		data.buildings.map((b) => ({ value: b.id, label: b.name || b.address }))
+	);
 	const categoryOptions = $derived(data.categories.map((c) => ({ value: c.id, label: c.name })));
 	const validityOptions = [
 		{ value: 'valid', label: 'Umlagefähig' },
@@ -47,7 +49,6 @@
 		validityFilter = '';
 		goto('/invoices');
 	}
-
 </script>
 
 <svelte:head>
@@ -71,7 +72,11 @@
 	<Card>
 		<form onsubmit={handleSearch} class="space-y-4">
 			<div class="flex flex-col sm:flex-row gap-4">
-				<SearchField bind:value={searchTerm} placeholder="Lieferant, Beschreibung..." testid="invoice-search-input" />
+				<SearchField
+					bind:value={searchTerm}
+					placeholder="Lieferant, Beschreibung..."
+					testid="invoice-search-input"
+				/>
 				<FilterSelect
 					id="building"
 					label="Gebäude"
@@ -100,11 +105,7 @@
 					onchange={(value) => (validityFilter = value)}
 				/>
 			</div>
-			<FilterActions
-				{filtered}
-				onclear={clearFilters}
-				testid="invoice-search-submit"
-			/>
+			<FilterActions {filtered} onclear={clearFilters} testid="invoice-search-submit" />
 		</form>
 	</Card>
 
@@ -131,25 +132,39 @@
 				<table class="w-full">
 					<thead class="bg-gray-50 border-b border-gray-200">
 						<tr>
-							<th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+							<th
+								class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider"
+							>
 								Datum
 							</th>
-							<th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+							<th
+								class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider"
+							>
 								Lieferant / Beschreibung
 							</th>
-							<th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+							<th
+								class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider"
+							>
 								Kategorie
 							</th>
-							<th class="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
+							<th
+								class="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider"
+							>
 								Betrag
 							</th>
-							<th class="px-6 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">
+							<th
+								class="px-6 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider"
+							>
 								Umlagefähig
 							</th>
-							<th class="px-6 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">
+							<th
+								class="px-6 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider"
+							>
 								Status
 							</th>
-							<th class="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
+							<th
+								class="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider"
+							>
 								Aktionen
 							</th>
 						</tr>

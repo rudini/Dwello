@@ -29,14 +29,27 @@ describe('Kategorien anzeigen', () => {
 	it('zeigt den deutschen Namen der Kategorie', async () => {
 		const fetch = (async () =>
 			Response.json({
-				categories: [{ id: 'c1', name: 'Heating', nameDE: 'Heizung', isAllowedUtilityCost: true, invoiceCount: '3' }],
+				categories: [
+					{
+						id: 'c1',
+						name: 'Heating',
+						nameDE: 'Heizung',
+						isAllowedUtilityCost: true,
+						invoiceCount: '3'
+					}
+				],
 				total: 1
 			})) as typeof globalThis.fetch;
 
 		const data = (await load({ fetch } as never)) as { categories: unknown[] };
 
 		expect(data.categories).toEqual([
-			expect.objectContaining({ id: 'c1', name: 'Heizung', isAllowedUtilityCost: true, usageCount: 3 })
+			expect.objectContaining({
+				id: 'c1',
+				name: 'Heizung',
+				isAllowedUtilityCost: true,
+				usageCount: 3
+			})
 		]);
 	});
 });
@@ -66,7 +79,10 @@ describe('Neue Kategorie', () => {
 	it('verlangt einen Namen', async () => {
 		const { calls, result } = runAction(newActions.default, '', 201, { ...form, name: ' ' });
 
-		expect(await result).toMatchObject({ status: 400, data: { errors: { name: 'Name ist erforderlich' } } });
+		expect(await result).toMatchObject({
+			status: 400,
+			data: { errors: { name: 'Name ist erforderlich' } }
+		});
 		expect(calls).toEqual([]);
 	});
 

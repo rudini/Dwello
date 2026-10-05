@@ -164,8 +164,8 @@
 				<div>
 					<p class="font-medium text-amber-800">KI-Vorschlag wird überschrieben</p>
 					<p class="text-sm text-amber-700">
-						Die ursprüngliche Kategorie war "{suggestedCategory?.name}".
-						Bitte geben Sie einen Grund für die Änderung an.
+						Die ursprüngliche Kategorie war "{suggestedCategory?.name}". Bitte geben Sie einen Grund
+						für die Änderung an.
 					</p>
 				</div>
 			</div>

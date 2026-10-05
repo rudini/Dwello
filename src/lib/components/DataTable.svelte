@@ -22,7 +22,9 @@
 		class?: string;
 		rowClass?: string;
 		row?: Snippet<[Record<string, unknown>, number]>;
-		cell?: Snippet<[{ column: Column; value: unknown; row: Record<string, unknown>; index: number }]>;
+		cell?: Snippet<
+			[{ column: Column; value: unknown; row: Record<string, unknown>; index: number }]
+		>;
 	}
 
 	let {
@@ -76,7 +78,8 @@
 			<tr class="border-b border-gray-200">
 				{#each columns as column}
 					<th
-						class="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider py-3 px-4 {column.headerClass || ''}"
+						class="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider py-3 px-4 {column.headerClass ||
+							''}"
 					>
 						{#if column.sortable}
 							<button
@@ -86,7 +89,12 @@
 								aria-label={getSortLabel(column)}
 							>
 								{column.label}
-								<Icon name={getSortIcon(column)} size={16} class="text-gray-400" aria-hidden="true" />
+								<Icon
+									name={getSortIcon(column)}
+									size={16}
+									class="text-gray-400"
+									aria-hidden="true"
+								/>
 							</button>
 						{:else}
 							{column.label}

@@ -18,7 +18,7 @@ register('en', () => import('./locales/en.json'));
 export function initI18n(): void {
 	init({
 		fallbackLocale: 'de',
-		initialLocale: browser ? getLocaleFromNavigator()?.split('-')[0] ?? 'de' : 'de'
+		initialLocale: browser ? (getLocaleFromNavigator()?.split('-')[0] ?? 'de') : 'de'
 	});
 }
 

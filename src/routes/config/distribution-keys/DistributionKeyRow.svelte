@@ -7,7 +7,9 @@
 
 	const custom = $derived(key.type === 'custom');
 	const used = $derived(key.usageCount > 0);
-	const deleteTitle = $derived(used ? 'Verteilschlüssel mit Rechnungen können nicht gelöscht werden' : 'Löschen');
+	const deleteTitle = $derived(
+		used ? 'Verteilschlüssel mit Rechnungen können nicht gelöscht werden' : 'Löschen'
+	);
 </script>
 
 <tr class="hover:bg-gray-50 transition-colors" data-testid="distribution-key-row">
@@ -16,10 +18,15 @@
 		<div class="text-sm text-gray-500">{key.description}</div>
 	</td>
 	<td class="px-6 py-4">
-		<code class="px-2 py-1 bg-gray-100 rounded text-sm font-mono text-purple-700" data-testid="distribution-key-formula">{key.formula}</code>
+		<code
+			class="px-2 py-1 bg-gray-100 rounded text-sm font-mono text-purple-700"
+			data-testid="distribution-key-formula">{key.formula}</code
+		>
 	</td>
 	<td class="px-6 py-4">
-		<Badge variant={custom ? 'primary' : 'info'} size="sm">{custom ? 'Eigener' : 'Vordefiniert'}</Badge>
+		<Badge variant={custom ? 'primary' : 'info'} size="sm"
+			>{custom ? 'Eigener' : 'Vordefiniert'}</Badge
+		>
 	</td>
 	<td class="px-6 py-4 text-center text-sm text-gray-500" data-testid="distribution-key-usage">
 		<span class="font-medium text-gray-900">{key.usageCount}</span> Rechnungen

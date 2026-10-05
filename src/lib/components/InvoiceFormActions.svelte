@@ -9,7 +9,13 @@
 		busyLabel,
 		busy,
 		disabled = false
-	}: { cancelHref: string; label: string; busyLabel: string; busy: boolean; disabled?: boolean } = $props();
+	}: {
+		cancelHref: string;
+		label: string;
+		busyLabel: string;
+		busy: boolean;
+		disabled?: boolean;
+	} = $props();
 </script>
 
 <div class="flex items-center gap-3">

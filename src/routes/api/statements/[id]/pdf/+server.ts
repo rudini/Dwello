@@ -4,11 +4,7 @@
  */
 
 import type { RequestHandler } from './$types';
-import {
-	forwardRequest,
-	createBinaryResponse,
-	handleProxyError
-} from '$lib/server/api-proxy';
+import { forwardRequest, createBinaryResponse, handleProxyError } from '$lib/server/api-proxy';
 
 export const GET: RequestHandler = async ({ params, cookies }) => {
 	try {
@@ -19,11 +15,7 @@ export const GET: RequestHandler = async ({ params, cookies }) => {
 		);
 
 		// Return PDF as binary response
-		return createBinaryResponse(
-			response.data,
-			'application/pdf',
-			`statement-${params.id}.pdf`
-		);
+		return createBinaryResponse(response.data, 'application/pdf', `statement-${params.id}.pdf`);
 	} catch (error) {
 		return handleProxyError(error, `GET /statements/${params.id}/pdf`);
 	}

@@ -13,11 +13,7 @@
 import { getInvoicesForStatement } from './invoice.service';
 import { calculateBuildingDistribution } from './distribution-key.service';
 import { getTypedConfig } from './config.service';
-import {
-	calculateApartmentProrating,
-	prorateCosts,
-	handleMidYearMoves
-} from './prorating.service';
+import { calculateApartmentProrating, prorateCosts, handleMidYearMoves } from './prorating.service';
 import { getApartment, listApartments } from './apartment.service';
 import { getContract } from './contract.service';
 
@@ -158,7 +154,7 @@ export function calculateManagementFee(
 	totalCosts: number,
 	feePercentage: number
 ): { fee: number; actualPercentage: number } {
-	const fee = Math.round((totalCosts * feePercentage) / 100 * 100) / 100;
+	const fee = Math.round(((totalCosts * feePercentage) / 100) * 100) / 100;
 
 	return { fee, actualPercentage: feePercentage };
 }
@@ -179,7 +175,10 @@ export function calculateTotalAdvancePayments(
 		const month = cursor.getUTCMonth();
 		const daysInMonth = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
 		const firstDay = rentalStart > cursor ? rentalStart.getUTCDate() : 1;
-		const lastDay = rentalEnd < new Date(Date.UTC(year, month, daysInMonth)) ? rentalEnd.getUTCDate() : daysInMonth;
+		const lastDay =
+			rentalEnd < new Date(Date.UTC(year, month, daysInMonth))
+				? rentalEnd.getUTCDate()
+				: daysInMonth;
 		months += (lastDay - firstDay + 1) / daysInMonth;
 		cursor.setUTCMonth(month + 1);
 	}
@@ -219,11 +218,7 @@ export async function calculateStatementForContract(
 	const buildingId = apartment.buildingId;
 
 	// Calculate proration for this contract
-	const prorating = await calculateApartmentProrating(
-		contract.apartmentId,
-		periodStart,
-		periodEnd
-	);
+	const prorating = await calculateApartmentProrating(contract.apartmentId, periodStart, periodEnd);
 
 	// Find this contract's overlap in the prorating result
 	const contractOverlap = prorating.contracts.find((c) => c.contract.id === contractId);
@@ -282,11 +277,7 @@ export async function calculateStatementForContract(
 			sharePercentage = heatingResult.percentage / 100;
 		} else {
 			// Standard day-based prorating
-			const prorated = prorateCosts(
-				apartmentShareResult.share,
-				rentalDays,
-				totalPeriodDays
-			);
+			const prorated = prorateCosts(apartmentShareResult.share, rentalDays, totalPeriodDays);
 			tenantShare = prorated.proratedAmount;
 			sharePercentage = prorated.sharePercentage;
 		}

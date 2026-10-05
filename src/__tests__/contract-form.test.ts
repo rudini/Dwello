@@ -34,11 +34,13 @@ const freeFrom = (date: string): AvailabilityInfo => ({
 
 describe('initialContractValues', () => {
 	it('starts a new unlimited contract for the tenant and apartment in the URL', () => {
-		expect(initialContractValues(undefined, new URLSearchParams('tenant=t1&apartment=a1'))).toEqual({
-			...filled,
-			startDate: '',
-			baseRent: ''
-		});
+		expect(initialContractValues(undefined, new URLSearchParams('tenant=t1&apartment=a1'))).toEqual(
+			{
+				...filled,
+				startDate: '',
+				baseRent: ''
+			}
+		);
 	});
 
 	it('takes the values of the contract being edited', () => {
@@ -71,7 +73,9 @@ describe('validateContract', () => {
 	});
 
 	it('requires tenant, apartment, start and base rent', () => {
-		expect(validateContract({ ...filled, tenantId: '', apartmentId: '', startDate: '', baseRent: '' })).toEqual({
+		expect(
+			validateContract({ ...filled, tenantId: '', apartmentId: '', startDate: '', baseRent: '' })
+		).toEqual({
 			tenantId: 'Bitte wählen Sie einen Mieter aus',
 			apartmentId: 'Bitte wählen Sie eine Wohnung aus',
 			startDate: 'Vertragsbeginn ist erforderlich',
@@ -89,7 +93,9 @@ describe('validateContract', () => {
 	});
 
 	it('rejects a base rent of zero and negative optional amounts', () => {
-		expect(validateContract({ ...filled, baseRent: '0', additionalRent: '-1', advancePayment: 'x' })).toEqual({
+		expect(
+			validateContract({ ...filled, baseRent: '0', additionalRent: '-1', advancePayment: 'x' })
+		).toEqual({
 			baseRent: 'Bitte geben Sie eine gültige Miete ein',
 			additionalRent: 'Bitte geben Sie einen gültigen Betrag ein',
 			advancePayment: 'Bitte geben Sie einen gültigen Betrag ein'
@@ -129,8 +135,14 @@ describe('apartmentOption', () => {
 	const rented = { ...freeFrom('2025-01-01'), hasOngoingContract: true };
 
 	it('blocks rented apartments except the one of the contract being edited', () => {
-		expect(apartmentOption(apartment, rented, false)).toEqual({ label: 'Wohnung 2.01 - Ahornhof (nicht verfügbar)', disabled: true });
-		expect(apartmentOption(apartment, rented, true)).toEqual({ label: 'Wohnung 2.01 - Ahornhof (aktuell)', disabled: false });
+		expect(apartmentOption(apartment, rented, false)).toEqual({
+			label: 'Wohnung 2.01 - Ahornhof (nicht verfügbar)',
+			disabled: true
+		});
+		expect(apartmentOption(apartment, rented, true)).toEqual({
+			label: 'Wohnung 2.01 - Ahornhof (aktuell)',
+			disabled: false
+		});
 	});
 
 	it('names the day an apartment becomes free', () => {
@@ -143,7 +155,10 @@ describe('apartmentOption', () => {
 
 describe('availableFrom', () => {
 	it('limits the start to the day the chosen apartment becomes free', () => {
-		expect(availableFrom(freeFrom('2025-04-01'), true)).toEqual({ min: '2025-04-01', notice: 'Verfügbar ab 2025-04-01' });
+		expect(availableFrom(freeFrom('2025-04-01'), true)).toEqual({
+			min: '2025-04-01',
+			notice: 'Verfügbar ab 2025-04-01'
+		});
 	});
 
 	it('does not limit the edited contract on its own apartment', () => {
@@ -168,7 +183,9 @@ describe('fieldBorder', () => {
 
 describe('saveErrorMessage', () => {
 	it('shows the reason of a failed save, or a general message', () => {
-		expect(saveErrorMessage(new Error('Wohnung ist bereits vermietet'))).toBe('Wohnung ist bereits vermietet');
+		expect(saveErrorMessage(new Error('Wohnung ist bereits vermietet'))).toBe(
+			'Wohnung ist bereits vermietet'
+		);
 		expect(saveErrorMessage(new Error(''))).toBe('Ein Fehler ist aufgetreten');
 		expect(saveErrorMessage('offline')).toBe('Ein Fehler ist aufgetreten');
 	});

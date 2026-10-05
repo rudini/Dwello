@@ -15,7 +15,9 @@ const apartmentOf = (c: BackendContract) => `Wohnung ${c.apartmentNumber}`;
 function currentRental(contracts: BackendContract[]) {
 	const contract =
 		contracts.find((c) => contractStatus(c) === 'active') ??
-		contracts.filter((c) => contractStatus(c) === 'future').sort((a, b) => (a.startDate < b.startDate ? -1 : 1))[0];
+		contracts
+			.filter((c) => contractStatus(c) === 'future')
+			.sort((a, b) => (a.startDate < b.startDate ? -1 : 1))[0];
 	if (!contract) return null;
 	return {
 		contractId: contract.id as string,
@@ -30,7 +32,9 @@ function currentRental(contracts: BackendContract[]) {
 
 export const load: PageServerLoad = async ({ params, fetch }) => {
 	const tenant = toTenant(await fetchTenant(fetch, params.id));
-	const { contracts } = await (await fetch(`${API}/contracts?tenantId=${params.id}&limit=100`)).json();
+	const { contracts } = await (
+		await fetch(`${API}/contracts?tenantId=${params.id}&limit=100`)
+	).json();
 	const name = `${tenant.firstName} ${tenant.lastName}`;
 
 	return {
@@ -48,7 +52,10 @@ export const actions: Actions = {
 	delete: async ({ params, fetch }) => {
 		const response = await fetch(`${API}/tenants/${params.id}`, { method: 'DELETE' });
 		// The backend keeps tenants with rental contracts: statements and documents refer to them
-		if (!response.ok) return fail(response.status, { error: 'Mieter mit Mietverträgen können nicht gelöscht werden.' });
+		if (!response.ok)
+			return fail(response.status, {
+				error: 'Mieter mit Mietverträgen können nicht gelöscht werden.'
+			});
 		throw redirect(303, '/tenants');
 	}
 };

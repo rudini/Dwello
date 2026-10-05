@@ -8,17 +8,32 @@ import {
 	submitButton
 } from '../interactions/heating-profiles';
 
-const MONTHS = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
+const MONTHS = [
+	'january',
+	'february',
+	'march',
+	'april',
+	'may',
+	'june',
+	'july',
+	'august',
+	'september',
+	'october',
+	'november',
+	'december'
+];
 
 export const createHeatingProfile =
 	(name: string, january: string, otherMonths: string) => async (actor: Actor) => {
-		for (const month of MONTHS) await monthInput(actor.page, month).fill(month === 'january' ? january : otherMonths);
+		for (const month of MONTHS)
+			await monthInput(actor.page, month).fill(month === 'january' ? january : otherMonths);
 		await nameInput(actor.page).fill(name);
 		await submitButton(actor.page).click();
 	};
 
 export const changeShares = (shares: Record<string, string>) => async (actor: Actor) => {
-	for (const [month, share] of Object.entries(shares)) await monthInput(actor.page, month).fill(share);
+	for (const [month, share] of Object.entries(shares))
+		await monthInput(actor.page, month).fill(share);
 	await submitButton(actor.page).click();
 };
 

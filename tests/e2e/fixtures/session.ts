@@ -2,7 +2,8 @@ import { randomUUID } from 'crypto';
 import { SignJWT } from 'jose';
 
 // Frontend and backend of the E2E stack get this secret (playwright.config.ts), so they accept the sessions below
-export const E2E_JWT_SECRET = process.env.JWT_SECRET || 'development-secret-key-change-in-production';
+export const E2E_JWT_SECRET =
+	process.env.JWT_SECRET || 'development-secret-key-change-in-production';
 
 // Session JWT of the signed-in Liegenschaftsverwalter, as /auth/callback issues it; `expires` lets it run out
 export const sessionToken = (expires: string | number = '1h') =>

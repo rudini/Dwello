@@ -107,48 +107,28 @@ describe('Contract Service - Date Overlap Checking', () => {
 				'2026-01-01', // existing start
 				'2026-12-31', // existing end
 				'2026-06-01', // new start
-				'2026-06-30'  // new end
+				'2026-06-30' // new end
 			);
 			expect(result).toBe(true);
 		});
 
 		it('should detect overlap when new contract starts before and ends during existing', () => {
-			const result = checkDateOverlap(
-				'2026-06-01',
-				'2026-12-31',
-				'2026-01-01',
-				'2026-08-31'
-			);
+			const result = checkDateOverlap('2026-06-01', '2026-12-31', '2026-01-01', '2026-08-31');
 			expect(result).toBe(true);
 		});
 
 		it('should detect overlap when new contract starts during and ends after existing', () => {
-			const result = checkDateOverlap(
-				'2026-01-01',
-				'2026-06-30',
-				'2026-04-01',
-				'2026-12-31'
-			);
+			const result = checkDateOverlap('2026-01-01', '2026-06-30', '2026-04-01', '2026-12-31');
 			expect(result).toBe(true);
 		});
 
 		it('should NOT detect overlap when new contract is completely after existing', () => {
-			const result = checkDateOverlap(
-				'2026-01-01',
-				'2026-06-30',
-				'2026-07-01',
-				'2026-12-31'
-			);
+			const result = checkDateOverlap('2026-01-01', '2026-06-30', '2026-07-01', '2026-12-31');
 			expect(result).toBe(false);
 		});
 
 		it('should NOT detect overlap when new contract is completely before existing', () => {
-			const result = checkDateOverlap(
-				'2026-07-01',
-				'2026-12-31',
-				'2026-01-01',
-				'2026-06-30'
-			);
+			const result = checkDateOverlap('2026-07-01', '2026-12-31', '2026-01-01', '2026-06-30');
 			expect(result).toBe(false);
 		});
 
@@ -184,23 +164,13 @@ describe('Contract Service - Date Overlap Checking', () => {
 
 		it('should handle same-day boundary (adjacent contracts)', () => {
 			// Contract ends on June 30, new starts July 1 - no overlap
-			const result = checkDateOverlap(
-				'2026-01-01',
-				'2026-06-30',
-				'2026-07-01',
-				'2026-12-31'
-			);
+			const result = checkDateOverlap('2026-01-01', '2026-06-30', '2026-07-01', '2026-12-31');
 			expect(result).toBe(false);
 		});
 
 		it('should detect overlap when contracts share a single day', () => {
 			// Contract ends June 30, new starts June 30 - overlap on June 30
-			const result = checkDateOverlap(
-				'2026-01-01',
-				'2026-06-30',
-				'2026-06-30',
-				'2026-12-31'
-			);
+			const result = checkDateOverlap('2026-01-01', '2026-06-30', '2026-06-30', '2026-12-31');
 			expect(result).toBe(true);
 		});
 	});
@@ -414,12 +384,12 @@ describe('Contract Service - Field Mapping', () => {
 			};
 
 			// Check that correct fields exist
-			correctFieldNames.forEach(field => {
+			correctFieldNames.forEach((field) => {
 				expect(field in frontendPayload).toBe(true);
 			});
 
 			// Check that incorrect fields don't exist
-			incorrectFieldNames.forEach(field => {
+			incorrectFieldNames.forEach((field) => {
 				expect(field in frontendPayload).toBe(false);
 			});
 		});
@@ -457,7 +427,7 @@ describe('Contract Service - Field Mapping', () => {
 			// HTML number inputs return numbers, but backend expects strings
 			// The fix: String(baseRent), String(additionalRent || 0), etc.
 			const numericBaseRent = 1500;
-			const numericAdditionalRent = 200.50;
+			const numericAdditionalRent = 200.5;
 			const numericAdvancePayment = 0;
 
 			const convertedPayload = {

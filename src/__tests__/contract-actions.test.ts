@@ -19,7 +19,9 @@ describe('Mietvertrag löschen', () => {
 		const { calls, result } = runAction(actions.delete, 'c1', 204);
 
 		await expect(result).rejects.toMatchObject({ status: 303, location: '/contracts' });
-		expect(calls).toEqual([{ method: 'DELETE', url: 'http://localhost:3001/api/v1/contracts/c1', body: undefined }]);
+		expect(calls).toEqual([
+			{ method: 'DELETE', url: 'http://localhost:3001/api/v1/contracts/c1', body: undefined }
+		]);
 	});
 
 	it('meldet einen Fehler, wenn das Backend das Löschen ablehnt', async () => {

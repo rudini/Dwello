@@ -5,7 +5,8 @@ import { cookieConfig } from '$lib/server/jwt-config';
 const BACKEND_ORIGIN = new URL(process.env.BACKEND_URL || 'http://localhost:3001').origin;
 
 // Reachable without signing in: the login page, the OAuth round trip and the health check
-const isPublic = (path: string) => path === '/login' || path.startsWith('/auth/') || path === '/health';
+const isPublic = (path: string) =>
+	path === '/login' || path.startsWith('/auth/') || path === '/health';
 
 async function sessionUser(cookies: Parameters<typeof getJwtFromCookie>[0]) {
 	const jwt = getJwtFromCookie(cookies);
@@ -27,7 +28,8 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 	if (event.locals.user) return pathname === '/login' ? redirectTo('/dashboard') : resolve(event);
 	if (isPublic(pathname)) return resolve(event);
-	if (pathname.startsWith('/api/')) return json({ error: { code: 'JWT_ERROR', message: 'Nicht angemeldet' } }, { status: 401 });
+	if (pathname.startsWith('/api/'))
+		return json({ error: { code: 'JWT_ERROR', message: 'Nicht angemeldet' } }, { status: 401 });
 	return redirectTo(`/login?redirectTo=${encodeURIComponent(pathname + search)}`);
 };
 

@@ -69,18 +69,19 @@ export async function listBuildings(filters: BuildingFilters = {}): Promise<{
 	// Get apartment counts for all buildings
 	const buildingIds = buildingResults.map((b) => b.id);
 
-	const apartmentCounts = buildingIds.length > 0
-		? await db
-				.select({
-					buildingId: apartments.buildingId,
-					total: sql<number>`count(*)`,
-					occupied: sql<number>`count(*) filter (where ${apartmentStatus} = 'occupied')`,
-					vacant: sql<number>`count(*) filter (where ${apartmentStatus} = 'vacant')`
-				})
-				.from(apartments)
-				.where(inArray(apartments.buildingId, buildingIds))
-				.groupBy(apartments.buildingId)
-		: [];
+	const apartmentCounts =
+		buildingIds.length > 0
+			? await db
+					.select({
+						buildingId: apartments.buildingId,
+						total: sql<number>`count(*)`,
+						occupied: sql<number>`count(*) filter (where ${apartmentStatus} = 'occupied')`,
+						vacant: sql<number>`count(*) filter (where ${apartmentStatus} = 'vacant')`
+					})
+					.from(apartments)
+					.where(inArray(apartments.buildingId, buildingIds))
+					.groupBy(apartments.buildingId)
+			: [];
 
 	// Create a map for quick lookup
 	const countsMap = new Map(
@@ -104,9 +105,7 @@ export async function listBuildings(filters: BuildingFilters = {}): Promise<{
 	// Get total count
 	const countQuery = db.select({ count: sql<number>`count(*)` }).from(buildings);
 
-	const [{ count: total }] = whereClause
-		? await countQuery.where(whereClause)
-		: await countQuery;
+	const [{ count: total }] = whereClause ? await countQuery.where(whereClause) : await countQuery;
 
 	return {
 		buildings: results,
@@ -119,11 +118,7 @@ export async function listBuildings(filters: BuildingFilters = {}): Promise<{
  */
 export async function getBuilding(id: string): Promise<BuildingWithStats | null> {
 	// First get the building
-	const [building] = await db
-		.select()
-		.from(buildings)
-		.where(eq(buildings.id, id))
-		.limit(1);
+	const [building] = await db.select().from(buildings).where(eq(buildings.id, id)).limit(1);
 
 	if (!building) return null;
 
@@ -150,7 +145,7 @@ export async function getBuilding(id: string): Promise<BuildingWithStats | null>
  */
 export async function getBuildingWithApartments(id: string): Promise<{
 	building: BuildingWithStats;
-	apartments: typeof apartments.$inferSelect[];
+	apartments: (typeof apartments.$inferSelect)[];
 } | null> {
 	const building = await getBuilding(id);
 	if (!building) return null;

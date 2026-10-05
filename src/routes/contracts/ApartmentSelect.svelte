@@ -29,7 +29,9 @@
 		Wohnung <span class="text-red-500">*</span>
 	</label>
 	{#if loading}
-		<div class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 flex items-center gap-2 text-gray-500">
+		<div
+			class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 flex items-center gap-2 text-gray-500"
+		>
 			<span class="animate-spin">
 				<Icon name="refresh" size={16} />
 			</span>
@@ -40,11 +42,17 @@
 			id="apartment"
 			bind:value
 			data-testid="apartment-select"
-			class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary bg-white {fieldBorder(error)}"
+			class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary bg-white {fieldBorder(
+				error
+			)}"
 		>
 			<option value="">Wohnung auswählen...</option>
 			{#each apartments as apt (apt.id)}
-				{@const option = apartmentOption(apt, availability.get(apt.id), apt.id === currentApartmentId)}
+				{@const option = apartmentOption(
+					apt,
+					availability.get(apt.id),
+					apt.id === currentApartmentId
+				)}
 				<option value={apt.id} disabled={option.disabled}>{option.label}</option>
 			{/each}
 		</select>

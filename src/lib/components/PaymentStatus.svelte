@@ -10,7 +10,13 @@
 		class?: string;
 	}
 
-	let { status, paymentDeadline, paidDate, lastReminderDate, class: className = '' }: Props = $props();
+	let {
+		status,
+		paymentDeadline,
+		paidDate,
+		lastReminderDate,
+		class: className = ''
+	}: Props = $props();
 
 	function formatDate(dateString?: string): string {
 		if (!dateString) return '-';

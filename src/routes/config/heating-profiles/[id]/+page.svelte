@@ -25,23 +25,39 @@
 </svelte:head>
 
 <div class="space-y-6" data-testid="heating-profile-detail-page">
-	<PageTrail links={[{ href: '/config', label: 'Einstellungen' }, { href: '/config/heating-profiles', label: 'Heizprofile' }]} current={profile.name} />
+	<PageTrail
+		links={[
+			{ href: '/config', label: 'Einstellungen' },
+			{ href: '/config/heating-profiles', label: 'Heizprofile' }
+		]}
+		current={profile.name}
+	/>
 
 	<div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
 		<div>
 			<h1 class="text-2xl font-bold text-gray-900 flex items-center gap-3">
 				{profile.name}
-				<Badge variant={custom ? 'primary' : 'info'} size="sm">{custom ? 'Eigenes Profil' : 'Vordefiniert'}</Badge>
+				<Badge variant={custom ? 'primary' : 'info'} size="sm"
+					>{custom ? 'Eigenes Profil' : 'Vordefiniert'}</Badge
+				>
 			</h1>
 			<p class="text-gray-500 mt-1">{profile.description}</p>
 		</div>
 		{#if custom}
 			<div class="flex gap-2">
-				<Button href="/config/heating-profiles/{profile.id}/edit" variant="secondary" testid="heating-profile-edit-button">
+				<Button
+					href="/config/heating-profiles/{profile.id}/edit"
+					variant="secondary"
+					testid="heating-profile-edit-button"
+				>
 					<Icon name="edit" size={18} />
 					Bearbeiten
 				</Button>
-				<Button variant="danger" onclick={() => (deleting = true)} testid="heating-profile-delete-button">
+				<Button
+					variant="danger"
+					onclick={() => (deleting = true)}
+					testid="heating-profile-delete-button"
+				>
 					<Icon name="delete" size={18} />
 					Löschen
 				</Button>
@@ -55,7 +71,9 @@
 			{#each MONTHS as month (month.key)}
 				<div class="text-center p-2 bg-gray-50 rounded-lg">
 					<dt class="text-xs text-gray-500">{month.label}</dt>
-					<dd class="font-semibold text-gray-900" data-testid="heating-profile-share-{month.key}">{profile.monthlyPercentages[month.key]} %</dd>
+					<dd class="font-semibold text-gray-900" data-testid="heating-profile-share-{month.key}">
+						{profile.monthlyPercentages[month.key]} %
+					</dd>
 				</div>
 			{/each}
 		</dl>

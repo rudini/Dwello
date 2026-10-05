@@ -21,7 +21,10 @@
 			<h2 class="mb-6 text-center text-xl font-semibold text-gray-900">{$_('auth.signIn')}</h2>
 
 			{#if data.error}
-				<p class="mb-4 p-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-600" data-testid="login-error">
+				<p
+					class="mb-4 p-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-600"
+					data-testid="login-error"
+				>
 					{data.error}
 				</p>
 			{/if}
@@ -39,7 +42,8 @@
 					</a>
 				{:else}
 					<p class="text-sm text-gray-600 text-center" data-testid="login-unavailable">
-						Es ist keine Anmeldung eingerichtet. Bitte hinterlegen Sie die OAuth-Zugangsdaten für Google oder Microsoft.
+						Es ist keine Anmeldung eingerichtet. Bitte hinterlegen Sie die OAuth-Zugangsdaten für
+						Google oder Microsoft.
 					</p>
 				{/each}
 			</div>

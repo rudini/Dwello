@@ -18,10 +18,16 @@ type Dashboard = {
 	financial: Record<string, number>;
 	statements: Record<string, number>;
 	recentActivity: { title: string; description: string; timestamp: string }[];
-	buildingOccupancy: { buildingId: string; totalApartments: number; occupiedApartments: number; occupancyRate: number }[];
+	buildingOccupancy: {
+		buildingId: string;
+		totalApartments: number;
+		occupiedApartments: number;
+		occupancyRate: number;
+	}[];
 };
 
-const day = (offset: number) => new Date(Date.now() + offset * 86_400_000).toISOString().split('T')[0];
+const day = (offset: number) =>
+	new Date(Date.now() + offset * 86_400_000).toISOString().split('T')[0];
 const token = crypto.randomUUID();
 const dashboard = async () => (await (await callApi('/api/v1/dashboard')).json()) as Dashboard;
 
@@ -60,12 +66,30 @@ beforeAll(async () => {
 	before = await dashboard();
 
 	rental = await createRental(token, { startDate: day(-1), monthlyAdvancePayment: '150' });
-	const relet = await createApartment({ buildingId: rental.building, number: '2.02', floor: 2, area: '50', rooms: '2.5' });
-	const vacant = await createApartment({ buildingId: rental.building, number: '2.03', floor: 2, area: '40', rooms: '1.5' });
+	const relet = await createApartment({
+		buildingId: rental.building,
+		number: '2.02',
+		floor: 2,
+		area: '50',
+		rooms: '2.5'
+	});
+	const vacant = await createApartment({
+		buildingId: rental.building,
+		number: '2.03',
+		floor: 2,
+		area: '40',
+		rooms: '1.5'
+	});
 	apartments.push(relet.id, vacant.id);
 	nextTenant = (await createTenant({ firstName: 'Ben', lastName: `Frei ${token}` })).id;
 	nextContract = (
-		await createContract({ apartmentId: relet.id, tenantId: nextTenant, startDate: day(30), baseRent: '800', monthlyAdvancePayment: '100' })
+		await createContract({
+			apartmentId: relet.id,
+			tenantId: nextTenant,
+			startDate: day(30),
+			baseRent: '800',
+			monthlyAdvancePayment: '100'
+		})
 	).id;
 
 	await statement(1, { status: 'draft', balance: '50' });
@@ -87,7 +111,9 @@ afterAll(async () => {
 });
 
 const added = (section: 'portfolio' | 'financial' | 'statements') =>
-	Object.fromEntries(Object.keys(after[section]).map((key) => [key, after[section][key] - before[section][key]]));
+	Object.fromEntries(
+		Object.keys(after[section]).map((key) => [key, after[section][key] - before[section][key]])
+	);
 
 describe('Dashboard', () => {
 	it('zählt Gebäude und Wohnungen nach Mietstatus', () => {
@@ -110,7 +136,11 @@ describe('Dashboard', () => {
 	});
 
 	it('summiert ausstehende Nachzahlungen der Mieter ohne Guthaben', () => {
-		expect(added('financial')).toMatchObject({ totalPending: 500, overdueAmount: 300, paidThisMonth: 230 });
+		expect(added('financial')).toMatchObject({
+			totalPending: 500,
+			overdueAmount: 300,
+			paidThisMonth: 230
+		});
 	});
 
 	it('zeigt die Belegung des Gebäudes', () => {
@@ -123,7 +153,10 @@ describe('Dashboard', () => {
 
 	it('meldet Zahlungen älterer Abrechnungen unter den letzten Aktivitäten', () => {
 		expect(after.recentActivity).toContainEqual(
-			expect.objectContaining({ title: 'Zahlung eingegangen', description: `Abrechnung NK-${token}-6` })
+			expect.objectContaining({
+				title: 'Zahlung eingegangen',
+				description: `Abrechnung NK-${token}-6`
+			})
 		);
 	});
 });

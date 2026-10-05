@@ -61,7 +61,11 @@
 	<Card>
 		<form onsubmit={handleSearch} class="space-y-4">
 			<div class="flex flex-col sm:flex-row gap-4">
-				<SearchField bind:value={searchTerm} placeholder="Name, E-Mail oder Gebäude..." testid="tenants-search-input" />
+				<SearchField
+					bind:value={searchTerm}
+					placeholder="Name, E-Mail oder Gebäude..."
+					testid="tenants-search-input"
+				/>
 				<FilterSelect
 					id="status"
 					label="Status"
@@ -117,10 +121,13 @@
 							<div class="flex-1 min-w-0">
 								<div class="flex items-center justify-between gap-2">
 									<h3 class="font-semibold text-gray-900 truncate">
-										{tenant.firstName} {tenant.lastName}
+										{tenant.firstName}
+										{tenant.lastName}
 									</h3>
 									{#if tenant.isActive}
-										<span data-testid="tenant-active"><StatusBadge status="AKTIV" variant="success" /></span>
+										<span data-testid="tenant-active"
+											><StatusBadge status="AKTIV" variant="success" /></span
+										>
 									{/if}
 								</div>
 								<p class="text-sm text-gray-500 truncate">{tenant.email}</p>

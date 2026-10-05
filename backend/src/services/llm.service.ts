@@ -13,7 +13,10 @@ import { getCategoryByName } from './category.service';
 import type { Category } from '../db/schema';
 
 // Simple in-memory cache for categorization results
-const categorizationCache = new Map<string, { result: LLMCategorizationResult; timestamp: number }>();
+const categorizationCache = new Map<
+	string,
+	{ result: LLMCategorizationResult; timestamp: number }
+>();
 
 /**
  * Generate a cache key for invoice data

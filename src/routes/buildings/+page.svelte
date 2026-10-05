@@ -63,7 +63,11 @@
 	<Card>
 		<form onsubmit={handleSearch} class="space-y-4">
 			<div class="flex flex-col sm:flex-row gap-4">
-				<SearchField bind:value={searchTerm} placeholder="Name, Adresse oder Stadt..." testid="building-search-input" />
+				<SearchField
+					bind:value={searchTerm}
+					placeholder="Name, Adresse oder Stadt..."
+					testid="building-search-input"
+				/>
 				<div class="w-full sm:w-48">
 					<label for="city" class="block text-sm font-medium text-gray-700 mb-1">Stadt</label>
 					<input
@@ -135,7 +139,11 @@
 								<span class="ml-1 text-gray-400">({building.canton})</span>
 							{/if}
 							<a
-								href={getGoogleMapsDirectionsUrl(building.address, building.city, building.postalCode)}
+								href={getGoogleMapsDirectionsUrl(
+									building.address,
+									building.city,
+									building.postalCode
+								)}
 								data-testid="building-route-link"
 								target="_blank"
 								rel="noopener noreferrer"

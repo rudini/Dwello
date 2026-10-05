@@ -21,7 +21,9 @@ afterAll(async () => {
 
 describe('Korrespondenzkanal des Mieters', () => {
 	it('schreibt neuen Mietern per Brief, solange nichts anderes gewählt ist', async () => {
-		const tenant = (await (await send('POST', '', { firstName: 'Anna', lastName: crypto.randomUUID() })).json()) as {
+		const tenant = (await (
+			await send('POST', '', { firstName: 'Anna', lastName: crypto.randomUUID() })
+		).json()) as {
 			id: string;
 			correspondenceChannel: string;
 		};
@@ -41,14 +43,20 @@ describe('Korrespondenzkanal des Mieters', () => {
 		).json()) as { id: string };
 		created.push(tenant.id);
 
-		const updated = (await (await send('PUT', `/${tenant.id}`, { correspondenceChannel: 'letter' })).json()) as {
+		const updated = (await (
+			await send('PUT', `/${tenant.id}`, { correspondenceChannel: 'letter' })
+		).json()) as {
 			correspondenceChannel: string;
 		};
 		expect(updated.correspondenceChannel).toBe('letter');
 	});
 
 	it('lehnt unbekannte Kanäle ab', async () => {
-		const response = await send('POST', '', { firstName: 'Carla', lastName: 'Test', correspondenceChannel: 'fax' });
+		const response = await send('POST', '', {
+			firstName: 'Carla',
+			lastName: 'Test',
+			correspondenceChannel: 'fax'
+		});
 
 		expect(response.status).toBe(422);
 	});

@@ -92,7 +92,9 @@ export const tenants = pgTable('tenants', {
 	address: varchar('address', { length: 500 }),
 	postalCode: varchar('postal_code', { length: 10 }),
 	city: varchar('city', { length: 100 }),
-	correspondenceChannel: varchar('correspondence_channel', { length: 10 }).notNull().default('letter'), // email, letter
+	correspondenceChannel: varchar('correspondence_channel', { length: 10 })
+		.notNull()
+		.default('letter'), // email, letter
 	createdAt: timestamp('created_at').defaultNow().notNull(),
 	updatedAt: timestamp('updated_at').defaultNow().notNull()
 });
@@ -119,7 +121,10 @@ export const rentalContracts = pgTable(
 		endDate: date('end_date'), // null = ongoing
 		baseRent: decimal('base_rent', { precision: 10, scale: 2 }).notNull(), // CHF
 		additionalRent: decimal('additional_rent', { precision: 10, scale: 2 }).default('0'), // garage, parking
-		monthlyAdvancePayment: decimal('monthly_advance_payment', { precision: 10, scale: 2 }).notNull(), // Akonto
+		monthlyAdvancePayment: decimal('monthly_advance_payment', {
+			precision: 10,
+			scale: 2
+		}).notNull(), // Akonto
 		referenceIndex: decimal('reference_index', { precision: 6, scale: 4 }), // Swiss rental index
 		contractPdf: text('contract_pdf'), // Base64 or URL
 		notes: text('notes'),
@@ -396,7 +401,9 @@ export const documents = pgTable(
 		tenantId: uuid('tenant_id')
 			.notNull()
 			.references(() => tenants.id, { onDelete: 'restrict' }),
-		statementId: uuid('statement_id').references(() => utilityStatements.id, { onDelete: 'restrict' }),
+		statementId: uuid('statement_id').references(() => utilityStatements.id, {
+			onDelete: 'restrict'
+		}),
 		type: varchar('type', { length: 30 }).notNull(), // reminder
 		reminderLevel: integer('reminder_level'), // 1 = Zahlungserinnerung, 2 and 3 = Mahnung
 		title: varchar('title', { length: 255 }).notNull(),

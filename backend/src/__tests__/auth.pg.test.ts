@@ -21,8 +21,11 @@ const endpoints = [
 ];
 
 const status = async (path: string, authorization?: string) =>
-	(await app.handle(new Request(`http://localhost${path}`, { headers: authorization ? { authorization } : {} })))
-		.status;
+	(
+		await app.handle(
+			new Request(`http://localhost${path}`, { headers: authorization ? { authorization } : {} })
+		)
+	).status;
 
 describe('API-Zugriff', () => {
 	it('lässt den Health-Check ohne Anmeldung zu', async () => {

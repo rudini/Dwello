@@ -17,7 +17,9 @@ export function show<P extends Record<string, unknown>>(component: Component<P>,
 
 export const byTestId = <E extends HTMLElement = HTMLElement>(testid: string) =>
 	document.querySelector<E>(`[data-testid="${testid}"]`);
-export const allByTestId = (testid: string) => [...document.querySelectorAll<HTMLElement>(`[data-testid="${testid}"]`)];
+export const allByTestId = (testid: string) => [
+	...document.querySelectorAll<HTMLElement>(`[data-testid="${testid}"]`)
+];
 
 export function click(target: string | HTMLElement) {
 	(typeof target === 'string' ? byTestId(target)! : target).click();
@@ -25,7 +27,11 @@ export function click(target: string | HTMLElement) {
 }
 
 /** Types a value into a field the way a user does, so `oninput` and `bind:value` see it */
-export function fireEvent(field: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement, type: 'input' | 'change', value: string) {
+export function fireEvent(
+	field: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement,
+	type: 'input' | 'change',
+	value: string
+) {
 	field.value = value;
 	field.dispatchEvent(new Event(type, { bubbles: true }));
 	flushSync();
@@ -60,6 +66,8 @@ export async function settle() {
 
 /** Submits the form around a submit button, as pressing it does in a browser (jsdom does not) */
 export function submit(testid: string) {
-	byTestId(testid)!.closest('form')!.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+	byTestId(testid)!
+		.closest('form')!
+		.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
 	flushSync();
 }

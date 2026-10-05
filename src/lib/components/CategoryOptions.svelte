@@ -6,7 +6,10 @@
 
 	const groups = $derived([
 		{ label: 'Umlagefähige Kosten', categories: categories.filter((c) => c.isAllowedUtilityCost) },
-		{ label: 'Nicht umlagefähige Kosten', categories: categories.filter((c) => !c.isAllowedUtilityCost) }
+		{
+			label: 'Nicht umlagefähige Kosten',
+			categories: categories.filter((c) => !c.isAllowedUtilityCost)
+		}
 	]);
 </script>
 

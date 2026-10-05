@@ -17,15 +17,21 @@ import { createContract, deleteContract } from '../services/contract.service';
 import { callApi } from './helpers/auth';
 import { insertInvoice } from './helpers/records';
 
-type LineItem = { isHeatingCost: boolean; apartmentShare: number; tenantShare: number; sharePercentage: number };
+type LineItem = {
+	isHeatingCost: boolean;
+	apartmentShare: number;
+	tenantShare: number;
+	sharePercentage: number;
+};
 
 const token = crypto.randomUUID();
-const created: { building: string; apartments: string[]; tenants: string[]; contracts: string[] } = {
-	building: '',
-	apartments: [],
-	tenants: [],
-	contracts: []
-};
+const created: { building: string; apartments: string[]; tenants: string[]; contracts: string[] } =
+	{
+		building: '',
+		apartments: [],
+		tenants: [],
+		contracts: []
+	};
 let heatingProfileId: string;
 
 async function rent(firstName: string, apartmentId: string, startDate: string, endDate?: string) {
@@ -47,7 +53,12 @@ async function heatingLine(contractId: string): Promise<LineItem> {
 	const response = await callApi('/api/v1/statements/preview', {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify({ contractId, periodStart: '2024-01-01', periodEnd: '2024-12-31', heatingProfileId })
+		body: JSON.stringify({
+			contractId,
+			periodStart: '2024-01-01',
+			periodEnd: '2024-12-31',
+			heatingProfileId
+		})
 	});
 	const preview = (await response.json()) as { lineItems: LineItem[] };
 	return preview.lineItems.find((item) => item.isHeatingCost)!;
@@ -65,12 +76,29 @@ beforeAll(async () => {
 		canton: 'ZH'
 	});
 	created.building = building.id;
-	const large = await createApartment({ buildingId: building.id, number: '2.01', floor: 2, area: '70', rooms: '3.5' });
-	const small = await createApartment({ buildingId: building.id, number: '2.02', floor: 2, area: '30', rooms: '1.5' });
+	const large = await createApartment({
+		buildingId: building.id,
+		number: '2.01',
+		floor: 2,
+		area: '70',
+		rooms: '3.5'
+	});
+	const small = await createApartment({
+		buildingId: building.id,
+		number: '2.02',
+		floor: 2,
+		area: '30',
+		rooms: '1.5'
+	});
 	created.apartments.push(large.id, small.id);
 
 	const [heating] = await db.select().from(categories).where(eq(categories.name, 'Heating'));
-	await insertInvoice(building.id, { categoryId: heating.id, description: 'Heizöl 2024', amount: '1000.00', invoiceDate: '2024-06-30' });
+	await insertInvoice(building.id, {
+		categoryId: heating.id,
+		description: 'Heizöl 2024',
+		amount: '1000.00',
+		invoiceDate: '2024-06-30'
+	});
 	const [profile] = await db
 		.insert(heatingProfiles)
 		.values({
@@ -125,7 +153,8 @@ describe('Heizkostenverteilung bei Mieterwechsel und Leerstand', () => {
 	});
 
 	it('lässt den Leerstand im April beim Vermieter', async () => {
-		const shares = (await heatingLine(tenant1)).tenantShare + (await heatingLine(tenant2)).tenantShare;
+		const shares =
+			(await heatingLine(tenant1)).tenantShare + (await heatingLine(tenant2)).tenantShare;
 
 		expect(700 - shares).toBe(35);
 	});

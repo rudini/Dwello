@@ -106,7 +106,7 @@ describe('Heating Profile Service - Database Functions (Mocked)', () => {
 
 	describe('validatePercentages with various distributions', () => {
 		it('should validate standard Mittelland distribution', () => {
-			const mittelland = PREDEFINED_HEATING_PROFILES.find(p => p.name.includes('Mittelland'));
+			const mittelland = PREDEFINED_HEATING_PROFILES.find((p) => p.name.includes('Mittelland'));
 			const percentages: MonthlyPercentages = {
 				january: parseFloat(mittelland!.januaryPct),
 				february: parseFloat(mittelland!.februaryPct),
@@ -127,7 +127,7 @@ describe('Heating Profile Service - Database Functions (Mocked)', () => {
 		});
 
 		it('should validate Bergregion distribution', () => {
-			const bergregion = PREDEFINED_HEATING_PROFILES.find(p => p.name === 'Bergregion');
+			const bergregion = PREDEFINED_HEATING_PROFILES.find((p) => p.name === 'Bergregion');
 			const percentages: MonthlyPercentages = {
 				january: parseFloat(bergregion!.januaryPct),
 				february: parseFloat(bergregion!.februaryPct),
@@ -148,7 +148,7 @@ describe('Heating Profile Service - Database Functions (Mocked)', () => {
 		});
 
 		it('should validate Tessin distribution', () => {
-			const tessin = PREDEFINED_HEATING_PROFILES.find(p => p.name === 'Tessin');
+			const tessin = PREDEFINED_HEATING_PROFILES.find((p) => p.name === 'Tessin');
 			const percentages: MonthlyPercentages = {
 				january: parseFloat(tessin!.januaryPct),
 				february: parseFloat(tessin!.februaryPct),
@@ -169,7 +169,7 @@ describe('Heating Profile Service - Database Functions (Mocked)', () => {
 		});
 
 		it('should validate Warmwasser distribution', () => {
-			const warmwasser = PREDEFINED_HEATING_PROFILES.find(p => p.name.includes('Warmwasser'));
+			const warmwasser = PREDEFINED_HEATING_PROFILES.find((p) => p.name.includes('Warmwasser'));
 			const percentages: MonthlyPercentages = {
 				january: parseFloat(warmwasser!.januaryPct),
 				february: parseFloat(warmwasser!.februaryPct),
@@ -193,7 +193,7 @@ describe('Heating Profile Service - Database Functions (Mocked)', () => {
 	describe('calculateHeatingShare with predefined profiles', () => {
 		// Create a mock profile from Mittelland data
 		const createMittellandProfile = (): HeatingProfile => {
-			const mittelland = PREDEFINED_HEATING_PROFILES.find(p => p.name.includes('Mittelland'))!;
+			const mittelland = PREDEFINED_HEATING_PROFILES.find((p) => p.name.includes('Mittelland'))!;
 			return {
 				id: 'mittelland-1',
 				name: mittelland.name,

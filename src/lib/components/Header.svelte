@@ -19,7 +19,10 @@
 	async function logout() {
 		try {
 			const xsrfToken = getXsrfTokenFromCookie();
-			await fetch('/auth/logout', { method: 'POST', headers: xsrfToken ? { 'X-XSRF-TOKEN': xsrfToken } : {} });
+			await fetch('/auth/logout', {
+				method: 'POST',
+				headers: xsrfToken ? { 'X-XSRF-TOKEN': xsrfToken } : {}
+			});
 			clearStores();
 			await goto('/login');
 		} catch (error) {
@@ -81,7 +84,9 @@
 								{(user.name || user.email || '?').charAt(0).toUpperCase()}
 							</div>
 						{/if}
-						<span class="hidden md:block text-gray-700" data-testid="user-name">{user.name || user.email}</span>
+						<span class="hidden md:block text-gray-700" data-testid="user-name"
+							>{user.name || user.email}</span
+						>
 						<svg class="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
 							<path
 								fill-rule="evenodd"

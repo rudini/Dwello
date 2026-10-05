@@ -60,7 +60,9 @@ export async function getDocumentPdf(id: string) {
 		.select({ pdf: documents.pdf, fileName: documents.fileName })
 		.from(documents)
 		.where(eq(documents.id, id));
-	return document ? { fileName: document.fileName, content: Buffer.from(document.pdf, 'base64') } : null;
+	return document
+		? { fileName: document.fileName, content: Buffer.from(document.pdf, 'base64') }
+		: null;
 }
 
 export async function createDocument(document: NewDocument) {

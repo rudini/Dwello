@@ -39,8 +39,18 @@ export interface MonthlyPercentages {
 
 /** Columns holding a profile's monthly shares, January to December */
 const percentageFields = [
-	'januaryPct', 'februaryPct', 'marchPct', 'aprilPct', 'mayPct', 'junePct',
-	'julyPct', 'augustPct', 'septemberPct', 'octoberPct', 'novemberPct', 'decemberPct'
+	'januaryPct',
+	'februaryPct',
+	'marchPct',
+	'aprilPct',
+	'mayPct',
+	'junePct',
+	'julyPct',
+	'augustPct',
+	'septemberPct',
+	'octoberPct',
+	'novemberPct',
+	'decemberPct'
 ] as const;
 
 type MonthlyShares = Pick<HeatingProfile, (typeof percentageFields)[number]>;
@@ -49,7 +59,10 @@ type MonthlyShares = Pick<HeatingProfile, (typeof percentageFields)[number]>;
  * Predefined heating profiles for Swiss regions
  * All percentages sum to 100%
  */
-export const PREDEFINED_HEATING_PROFILES: Omit<NewHeatingProfile, 'id' | 'createdAt' | 'updatedAt'>[] = [
+export const PREDEFINED_HEATING_PROFILES: Omit<
+	NewHeatingProfile,
+	'id' | 'createdAt' | 'updatedAt'
+>[] = [
 	{
 		name: 'Standard (Mittelland)',
 		nameDE: 'Standard (Mittelland)',
@@ -166,16 +179,12 @@ export async function listHeatingProfiles(filters: HeatingProfileFilters = {}): 
 
 	// Apply conditions if any
 	const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
-	const results = whereClause
-		? await profilesQuery.where(whereClause)
-		: await profilesQuery;
+	const results = whereClause ? await profilesQuery.where(whereClause) : await profilesQuery;
 
 	// Get total count
 	const countQuery = db.select({ count: sql<number>`count(*)` }).from(heatingProfiles);
 
-	const [{ count: total }] = whereClause
-		? await countQuery.where(whereClause)
-		: await countQuery;
+	const [{ count: total }] = whereClause ? await countQuery.where(whereClause) : await countQuery;
 
 	return {
 		heatingProfiles: results,
@@ -208,7 +217,6 @@ export async function getHeatingProfileByName(name: string): Promise<HeatingProf
 
 	return profile || null;
 }
-
 
 /**
  * Validate that monthly percentages sum to approximately 100%
@@ -295,7 +303,10 @@ export async function updateHeatingProfile(
 	}
 
 	// Don't allow modifying predefined profiles' percentages
-	if (existing.type === 'predefined' && percentageFields.some((field) => data[field] !== undefined)) {
+	if (
+		existing.type === 'predefined' &&
+		percentageFields.some((field) => data[field] !== undefined)
+	) {
 		throw new Error('Cannot modify percentages of predefined heating profile');
 	}
 
@@ -346,7 +357,11 @@ export async function deleteHeatingProfile(
 
 	// New statements propose the default profile of the settings
 	if (await isDefaultSetting('default_heating_profile_id', id)) {
-		return { success: false, conflict: true, error: 'Das Heizprofil ist in den Einstellungen als Standard hinterlegt.' };
+		return {
+			success: false,
+			conflict: true,
+			error: 'Das Heizprofil ist in den Einstellungen als Standard hinterlegt.'
+		};
 	}
 
 	await db.delete(heatingProfiles).where(eq(heatingProfiles.id, id));
@@ -441,7 +456,8 @@ export function calculateHeatingShare(
 		const periodEnd = endDate < monthEnd ? endDate : monthEnd;
 
 		const daysInMonth = monthEnd.getDate();
-		const daysInPeriod = Math.ceil((periodEnd.getTime() - periodStart.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+		const daysInPeriod =
+			Math.ceil((periodEnd.getTime() - periodStart.getTime()) / (1000 * 60 * 60 * 24)) + 1;
 
 		// Prorate the monthly percentage based on days
 		const proratedPct = (monthPct * daysInPeriod) / daysInMonth;
@@ -463,7 +479,10 @@ export function calculateHeatingShare(
 /**
  * Initialize predefined heating profiles if they don't exist
  */
-export async function initializePredefinedHeatingProfiles(): Promise<{ created: number; existing: number }> {
+export async function initializePredefinedHeatingProfiles(): Promise<{
+	created: number;
+	existing: number;
+}> {
 	let created = 0;
 	let existing = 0;
 

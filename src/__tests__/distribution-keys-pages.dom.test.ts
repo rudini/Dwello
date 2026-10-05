@@ -15,7 +15,11 @@ const key = (id: string, name: string, type: 'predefined' | 'custom', usageCount
 
 describe('Verteilschlüssel', () => {
 	it('lässt nur eigene Verteilschlüssel bearbeiten und löschen, und nur ohne Rechnungen', () => {
-		const keys = [key('k1', 'Nach Fläche', 'predefined'), key('k2', 'Eigener', 'custom', 2), key('k3', 'Leer', 'custom')];
+		const keys = [
+			key('k1', 'Nach Fläche', 'predefined'),
+			key('k2', 'Eigener', 'custom', 2),
+			key('k3', 'Leer', 'custom')
+		];
 		show(KeysPage, { data: { keys }, form: null } as never);
 
 		expect(allByTestId('distribution-key-edit-button')).toHaveLength(2);
@@ -25,7 +29,10 @@ describe('Verteilschlüssel', () => {
 	});
 
 	it('fragt vor dem Löschen nach', () => {
-		show(KeysPage, { data: { keys: [key('k3', 'Leer', 'custom')] }, form: { error: 'Löschen fehlgeschlagen' } } as never);
+		show(KeysPage, {
+			data: { keys: [key('k3', 'Leer', 'custom')] },
+			form: { error: 'Löschen fehlgeschlagen' }
+		} as never);
 
 		click('distribution-key-delete-button');
 		expect(document.body.textContent).toContain('«Leer»');
@@ -39,12 +46,17 @@ describe('Verteilschlüssel erfassen', () => {
 		const formula = byTestId<HTMLInputElement>('distribution-key-formula-input')!;
 		expect(formula.value).toBe('{area}');
 
-		click([...document.querySelectorAll('button')].find((b) => b.textContent?.includes('{rooms}'))!);
+		click(
+			[...document.querySelectorAll('button')].find((b) => b.textContent?.includes('{rooms}'))!
+		);
 		expect(formula.value).toBe('{area}{rooms}');
 	});
 
 	it('zeigt das Ergebnis des Formeltests mit Fehlern und Anteilen', () => {
-		const test = { errors: ['Unbekannte Variable {persons}'], results: [{ apartment: 'Wohnung 1.01', share: '42.5%' }] };
+		const test = {
+			errors: ['Unbekannte Variable {persons}'],
+			results: [{ apartment: 'Wohnung 1.01', share: '42.5%' }]
+		};
 		show(NewKeyPage, { form: { test } } as never);
 
 		expect(byTestId('formula-test-error')!.textContent).toBe('Unbekannte Variable {persons}');

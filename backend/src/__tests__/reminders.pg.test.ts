@@ -14,7 +14,13 @@ import { updateTenant } from '../services/tenant.service';
 import { callApi } from './helpers/auth';
 import { createRental } from './helpers/rental';
 
-type Document = { id: string; reminderLevel: number; channel: string; status: string; title: string };
+type Document = {
+	id: string;
+	reminderLevel: number;
+	channel: string;
+	status: string;
+	title: string;
+};
 type ReminderResult = { document: Document; deliveryError?: string; error?: string };
 
 const token = crypto.randomUUID();
@@ -40,7 +46,8 @@ async function statement(status: 'draft' | 'sent') {
 		})
 	).json()) as { id: string };
 	statementIds.push(created.id);
-	if (status === 'sent') await api('PUT', `/api/v1/statements/${created.id}/status`, { status: 'sent' });
+	if (status === 'sent')
+		await api('PUT', `/api/v1/statements/${created.id}/status`, { status: 'sent' });
 	return created.id;
 }
 
@@ -77,7 +84,9 @@ afterAll(async () => {
 	delete process.env.MAIL_TRANSPORT;
 	await db.delete(documents).where(eq(documents.tenantId, rental.tenant));
 	if (statementIds.length) {
-		await db.delete(utilityStatementLineItems).where(inArray(utilityStatementLineItems.statementId, statementIds));
+		await db
+			.delete(utilityStatementLineItems)
+			.where(inArray(utilityStatementLineItems.statementId, statementIds));
 		await db.delete(utilityStatements).where(inArray(utilityStatements.id, statementIds));
 	}
 	await rental.remove();
@@ -86,7 +95,10 @@ afterAll(async () => {
 
 describe('Mahnung per E-Mail', () => {
 	it('sendet die Zahlungserinnerung mit PDF und legt sie als versendet in den Dokumenten ab', async () => {
-		await updateTenant(rental.tenant, { email: 'anna.keller@example.com', correspondenceChannel: 'email' });
+		await updateTenant(rental.tenant, {
+			email: 'anna.keller@example.com',
+			correspondenceChannel: 'email'
+		});
 		const result = await remind(await statement('sent'));
 
 		expect(result.status).toBe(201);
@@ -104,7 +116,10 @@ describe('Mahnung per E-Mail', () => {
 	});
 
 	it('legt die Mahnung zum Versand bereit, wenn die E-Mail nicht versendet werden kann', async () => {
-		await updateTenant(rental.tenant, { email: 'anna.keller@example.com', correspondenceChannel: 'email' });
+		await updateTenant(rental.tenant, {
+			email: 'anna.keller@example.com',
+			correspondenceChannel: 'email'
+		});
 		delete process.env.MAIL_TRANSPORT;
 		const before = mails.length;
 
@@ -134,7 +149,9 @@ describe('Mahnung per Brief', () => {
 	});
 
 	it('führt die Mahnung in der Liste der zu versendenden Dokumente', async () => {
-		const list = (await (await api('GET', `/api/v1/documents?tenantId=${rental.tenant}&status=to_send`)).json()) as {
+		const list = (await (
+			await api('GET', `/api/v1/documents?tenantId=${rental.tenant}&status=to_send`)
+		).json()) as {
 			data: Document[];
 		};
 
@@ -145,18 +162,30 @@ describe('Mahnung per Brief', () => {
 		const response = await api('GET', `/api/v1/documents/${letter.id}/pdf`);
 
 		expect(response.headers.get('content-type')).toBe('application/pdf');
-		expect(Buffer.from(await response.arrayBuffer()).subarray(0, 4).toString()).toBe('%PDF');
+		expect(
+			Buffer.from(await response.arrayBuffer())
+				.subarray(0, 4)
+				.toString()
+		).toBe('%PDF');
 	});
 
 	it('hält fest, dass der Brief versendet wurde', async () => {
-		const sent = (await (await api('PUT', `/api/v1/documents/${letter.id}/sent`)).json()) as Document;
+		const sent = (await (
+			await api('PUT', `/api/v1/documents/${letter.id}/sent`)
+		).json()) as Document;
 
 		expect(sent.status).toBe('sent');
 	});
 
 	it('steigert die Mahnstufe bis zur 3. Mahnung', async () => {
-		expect((await remind(statementId)).document).toMatchObject({ reminderLevel: 2, title: '2. Mahnung' });
-		expect((await remind(statementId)).document).toMatchObject({ reminderLevel: 3, title: '3. Mahnung' });
+		expect((await remind(statementId)).document).toMatchObject({
+			reminderLevel: 2,
+			title: '2. Mahnung'
+		});
+		expect((await remind(statementId)).document).toMatchObject({
+			reminderLevel: 3,
+			title: '3. Mahnung'
+		});
 	});
 
 	it('lehnt eine 4. Mahnung ab', async () => {

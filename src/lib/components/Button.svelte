@@ -39,8 +39,7 @@
 
 	const variantClasses: Record<Variant, string> = {
 		primary: 'bg-primary text-white hover:bg-blue-700 rounded-lg shadow-sm',
-		secondary:
-			'bg-slate-100 border border-slate-300 text-slate-600 hover:bg-slate-200 rounded-lg',
+		secondary: 'bg-slate-100 border border-slate-300 text-slate-600 hover:bg-slate-200 rounded-lg',
 		danger: 'bg-red-600 text-white hover:bg-red-700 rounded-lg shadow-sm focus:ring-red-500',
 		icon: 'bg-slate-100 rounded-lg hover:text-primary hover:bg-primary/10'
 	};
@@ -62,13 +61,27 @@
 </script>
 
 {#if href && !disabled}
-	<a {href} class={classes} aria-label={ariaLabel} data-testid={testid} data-sveltekit-reload={reload || undefined}>
+	<a
+		{href}
+		class={classes}
+		aria-label={ariaLabel}
+		data-testid={testid}
+		data-sveltekit-reload={reload || undefined}
+	>
 		{#if children}
 			{@render children()}
 		{/if}
 	</a>
 {:else}
-	<button {type} {formaction} {disabled} onclick={onclick} class={classes} aria-label={ariaLabel} data-testid={testid}>
+	<button
+		{type}
+		{formaction}
+		{disabled}
+		{onclick}
+		class={classes}
+		aria-label={ariaLabel}
+		data-testid={testid}
+	>
 		{#if children}
 			{@render children()}
 		{/if}

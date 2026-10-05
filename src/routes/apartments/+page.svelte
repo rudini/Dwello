@@ -11,7 +11,9 @@
 
 	let { data }: { data: ApartmentsListData } = $props();
 
-	const filtered = $derived(['search', 'building', 'status'].some((key) => $page.url.searchParams.get(key)));
+	const filtered = $derived(
+		['search', 'building', 'status'].some((key) => $page.url.searchParams.get(key))
+	);
 
 	function changePage(newPage: number) {
 		const params = new URLSearchParams($page.url.searchParams);
@@ -60,6 +62,11 @@
 				<ApartmentCard {apartment} />
 			{/each}
 		</div>
-		<Pagination page={data.page} pageSize={data.pageSize} total={data.total} onchange={changePage} />
+		<Pagination
+			page={data.page}
+			pageSize={data.pageSize}
+			total={data.total}
+			onchange={changePage}
+		/>
 	{/if}
 </div>

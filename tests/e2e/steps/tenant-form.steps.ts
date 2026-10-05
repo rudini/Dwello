@@ -28,6 +28,9 @@ When(
 	}
 );
 
-Then('{string} erhält Korrespondenz {string}', async ({ verwalter }, _tenant: string, channel: string) => {
-	await expect(correspondenceOf(verwalter)).toHaveText(channel);
-});
+Then(
+	'{string} erhält Korrespondenz {string}',
+	async ({ verwalter }, _tenant: string, channel: string) => {
+		await expect(correspondenceOf(verwalter)).toHaveText(channel);
+	}
+);

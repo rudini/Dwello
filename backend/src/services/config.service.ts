@@ -71,7 +71,8 @@ export const CONFIG_KEYS = {
 	},
 	iban: {
 		type: 'string',
-		validator: (v: string) => /^CH\d{2}\s?\d{4}\s?\d{4}\s?\d{4}\s?\d{4}\s?\d{1}$/.test(v.replace(/\s/g, '')),
+		validator: (v: string) =>
+			/^CH\d{2}\s?\d{4}\s?\d{4}\s?\d{4}\s?\d{4}\s?\d{1}$/.test(v.replace(/\s/g, '')),
 		default: ''
 	},
 	payment_deadline_days: {
@@ -97,11 +98,7 @@ export type ConfigKey = keyof typeof CONFIG_KEYS;
  * Get a single configuration value
  */
 export async function getConfig(key: ConfigKey): Promise<string | null> {
-	const [config] = await db
-		.select()
-		.from(configuration)
-		.where(eq(configuration.key, key))
-		.limit(1);
+	const [config] = await db.select().from(configuration).where(eq(configuration.key, key)).limit(1);
 
 	if (!config) {
 		const defaultValue = CONFIG_KEYS[key].default;
@@ -116,20 +113,20 @@ export async function getConfig(key: ConfigKey): Promise<string | null> {
  */
 export async function getTypedConfig<K extends ConfigKey>(
 	key: K
-): Promise<typeof CONFIG_KEYS[K]['default']> {
+): Promise<(typeof CONFIG_KEYS)[K]['default']> {
 	const value = await getConfig(key);
 
 	if (value === null) {
-		return CONFIG_KEYS[key].default as typeof CONFIG_KEYS[K]['default'];
+		return CONFIG_KEYS[key].default as (typeof CONFIG_KEYS)[K]['default'];
 	}
 
 	const configDef = CONFIG_KEYS[key];
 
 	if (configDef.type === 'number') {
-		return parseFloat(value) as typeof CONFIG_KEYS[K]['default'];
+		return parseFloat(value) as (typeof CONFIG_KEYS)[K]['default'];
 	}
 
-	return value as typeof CONFIG_KEYS[K]['default'];
+	return value as (typeof CONFIG_KEYS)[K]['default'];
 }
 
 /**
@@ -202,10 +199,7 @@ export async function setConfig(key: ConfigKey, value: string): Promise<Configur
 		return updated;
 	} else {
 		// Insert new
-		const [created] = await db
-			.insert(configuration)
-			.values({ key, value })
-			.returning();
+		const [created] = await db.insert(configuration).values({ key, value }).returning();
 		return created;
 	}
 }
@@ -238,10 +232,7 @@ export async function setMultipleConfig(
  * Delete a configuration value (reset to default)
  */
 export async function deleteConfig(key: ConfigKey): Promise<boolean> {
-	const result = await db
-		.delete(configuration)
-		.where(eq(configuration.key, key))
-		.returning();
+	const result = await db.delete(configuration).where(eq(configuration.key, key)).returning();
 
 	return result.length > 0;
 }
@@ -277,7 +268,11 @@ export function getAccountingPeriodDates(
 /**
  * Get the current accounting period based on config and current date
  */
-export async function getCurrentAccountingPeriod(): Promise<{ start: Date; end: Date; year: number }> {
+export async function getCurrentAccountingPeriod(): Promise<{
+	start: Date;
+	end: Date;
+	year: number;
+}> {
 	const periodType = (await getTypedConfig('accounting_period')) as AccountingPeriod;
 	const now = new Date();
 	const currentYear = now.getFullYear();

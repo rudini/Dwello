@@ -41,10 +41,16 @@ Given(
 	}
 );
 
-When('der Liegenschaftsverwalter das Baujahr auf {string} ändert', async ({ verwalter }, year: string) => {
-	await verwalter.perform(changeYearBuilt(year));
-});
+When(
+	'der Liegenschaftsverwalter das Baujahr auf {string} ändert',
+	async ({ verwalter }, year: string) => {
+		await verwalter.perform(changeYearBuilt(year));
+	}
+);
 
-When('der Liegenschaftsverwalter die PLZ auf {string} ändert', async ({ verwalter }, postalCode: string) => {
-	await verwalter.perform(changePostalCode(postalCode));
-});
+When(
+	'der Liegenschaftsverwalter die PLZ auf {string} ändert',
+	async ({ verwalter }, postalCode: string) => {
+		await verwalter.perform(changePostalCode(postalCode));
+	}
+);

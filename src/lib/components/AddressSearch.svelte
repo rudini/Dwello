@@ -1,5 +1,11 @@
 <script lang="ts">
-	import { searchAddress, streetToAddress, formatAddress, type OpenPlzStreet, type Address } from '$lib/services/openplz';
+	import {
+		searchAddress,
+		streetToAddress,
+		formatAddress,
+		type OpenPlzStreet,
+		type Address
+	} from '$lib/services/openplz';
 	import Icon from './Icon.svelte';
 
 	interface Props {
@@ -131,7 +137,11 @@
 	{/if}
 
 	<div class="relative">
-		<Icon name="search" size={20} class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+		<Icon
+			name="search"
+			size={20}
+			class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+		/>
 
 		<input
 			{id}
@@ -198,7 +208,8 @@
 						<div class="flex-1 min-w-0">
 							<p class="font-medium text-gray-900 truncate">{street.name}</p>
 							<p class="text-sm text-gray-500">
-								{street.postalCode} {street.locality}
+								{street.postalCode}
+								{street.locality}
 								<span class="text-gray-400">({street.canton.shortName})</span>
 							</p>
 						</div>

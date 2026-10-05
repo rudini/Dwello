@@ -1,5 +1,11 @@
 import type { Actor } from '../fixtures/actor';
-import { headerAction, occupancyBuilding, quickAction, statementsTile, statTile } from '../interactions/dashboard';
+import {
+	headerAction,
+	occupancyBuilding,
+	quickAction,
+	statementsTile,
+	statTile
+} from '../interactions/dashboard';
 
 // Labels contain each other ("Vermietet" / "Wiedervermietet"), so tiles are found by their test id
 const tiles: Record<string, string> = {
@@ -11,7 +17,12 @@ const tiles: Record<string, string> = {
 	Gesperrt: 'stat-reserved',
 	'Davon überfällig': 'stat-overdue-amount'
 };
-const statementStatuses: Record<string, string> = { Entwürfe: 'draft', Versendet: 'sent', Bezahlt: 'paid', Überfällig: 'overdue' };
+const statementStatuses: Record<string, string> = {
+	Entwürfe: 'draft',
+	Versendet: 'sent',
+	Bezahlt: 'paid',
+	Überfällig: 'overdue'
+};
 
 export const openBuildingFromOccupancy = (building: string) => async (actor: Actor) => {
 	await occupancyBuilding(actor.page, building).click();

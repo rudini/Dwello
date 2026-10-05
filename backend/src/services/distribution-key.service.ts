@@ -28,7 +28,10 @@ export interface DistributionKeyWithUsage extends DistributionKey {
 /**
  * Predefined distribution keys (initialized at first run)
  */
-export const PREDEFINED_DISTRIBUTION_KEYS: Omit<NewDistributionKey, 'id' | 'createdAt' | 'updatedAt'>[] = [
+export const PREDEFINED_DISTRIBUTION_KEYS: Omit<
+	NewDistributionKey,
+	'id' | 'createdAt' | 'updatedAt'
+>[] = [
 	{
 		name: 'Per Unit',
 		nameDE: 'Pro Einheit',
@@ -99,7 +102,9 @@ export async function listDistributionKeys(filters: DistributionKeyFilters = {})
 	const conditions = [];
 
 	if (search) {
-		conditions.push(or(ilike(distributionKeys.name, `%${search}%`), ilike(distributionKeys.nameDE, `%${search}%`)));
+		conditions.push(
+			or(ilike(distributionKeys.name, `%${search}%`), ilike(distributionKeys.nameDE, `%${search}%`))
+		);
 	}
 
 	if (type) {
@@ -121,9 +126,10 @@ export async function listDistributionKeys(filters: DistributionKeyFilters = {})
 			sortOrder: distributionKeys.sortOrder,
 			createdAt: distributionKeys.createdAt,
 			updatedAt: distributionKeys.updatedAt,
-			invoiceCount: sql<number>`(SELECT COUNT(*) FROM invoices WHERE invoices.distribution_key_id = "distribution_keys"."id")`.as(
-				'invoice_count'
-			)
+			invoiceCount:
+				sql<number>`(SELECT COUNT(*) FROM invoices WHERE invoices.distribution_key_id = "distribution_keys"."id")`.as(
+					'invoice_count'
+				)
 		})
 		.from(distributionKeys)
 		.orderBy(asc(distributionKeys.sortOrder), asc(distributionKeys.name))
@@ -132,16 +138,12 @@ export async function listDistributionKeys(filters: DistributionKeyFilters = {})
 
 	// Apply conditions if any
 	const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
-	const results = whereClause
-		? await keysQuery.where(whereClause)
-		: await keysQuery;
+	const results = whereClause ? await keysQuery.where(whereClause) : await keysQuery;
 
 	// Get total count
 	const countQuery = db.select({ count: sql<number>`count(*)` }).from(distributionKeys);
 
-	const [{ count: total }] = whereClause
-		? await countQuery.where(whereClause)
-		: await countQuery;
+	const [{ count: total }] = whereClause ? await countQuery.where(whereClause) : await countQuery;
 
 	return {
 		distributionKeys: results as DistributionKeyWithUsage[],
@@ -167,9 +169,10 @@ export async function getDistributionKey(id: string): Promise<DistributionKeyWit
 			sortOrder: distributionKeys.sortOrder,
 			createdAt: distributionKeys.createdAt,
 			updatedAt: distributionKeys.updatedAt,
-			invoiceCount: sql<number>`(SELECT COUNT(*) FROM invoices WHERE invoices.distribution_key_id = "distribution_keys"."id")`.as(
-				'invoice_count'
-			)
+			invoiceCount:
+				sql<number>`(SELECT COUNT(*) FROM invoices WHERE invoices.distribution_key_id = "distribution_keys"."id")`.as(
+					'invoice_count'
+				)
 		})
 		.from(distributionKeys)
 		.where(eq(distributionKeys.id, id))
@@ -201,7 +204,8 @@ async function ensureNameIsFree(name: string, id?: string) {
 
 function ensureValidFormula(formula: string) {
 	const validation = validateFormulaForDistribution(formula);
-	if (!validation.isValid) throw new Error(`Die Formel ist ungültig: ${validation.errors.join(' ')}`);
+	if (!validation.isValid)
+		throw new Error(`Die Formel ist ungültig: ${validation.errors.join(' ')}`);
 }
 
 /**
@@ -261,7 +265,9 @@ export async function updateDistributionKey(
  * Delete a distribution key
  * Returns false if key is used by invoices
  */
-export async function deleteDistributionKey(id: string): Promise<{ success: boolean; conflict?: boolean; error?: string }> {
+export async function deleteDistributionKey(
+	id: string
+): Promise<{ success: boolean; conflict?: boolean; error?: string }> {
 	// Check if key exists
 	const existing = await getDistributionKey(id);
 	if (!existing) {
@@ -270,7 +276,10 @@ export async function deleteDistributionKey(id: string): Promise<{ success: bool
 
 	// Don't allow deleting predefined keys
 	if (existing.type === 'predefined') {
-		return { success: false, error: 'Vordefinierte Verteilschlüssel können nicht gelöscht werden.' };
+		return {
+			success: false,
+			error: 'Vordefinierte Verteilschlüssel können nicht gelöscht werden.'
+		};
 	}
 
 	const count = Number(existing.invoiceCount);
@@ -284,7 +293,11 @@ export async function deleteDistributionKey(id: string): Promise<{ success: bool
 
 	// New invoices propose the default key of the settings
 	if (await isDefaultSetting('default_distribution_key_id', id)) {
-		return { success: false, conflict: true, error: 'Der Verteilschlüssel ist in den Einstellungen als Standard hinterlegt.' };
+		return {
+			success: false,
+			conflict: true,
+			error: 'Der Verteilschlüssel ist in den Einstellungen als Standard hinterlegt.'
+		};
 	}
 
 	await db.delete(distributionKeys).where(eq(distributionKeys.id, id));

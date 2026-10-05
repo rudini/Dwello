@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test';
 
-export const apartmentBuildingFilter = (page: Page) => page.getByTestId('apartments-building-filter');
+export const apartmentBuildingFilter = (page: Page) =>
+	page.getByTestId('apartments-building-filter');
 export const apartmentStatusFilter = (page: Page) => page.getByTestId('apartments-status-filter');
 export const apartmentSearchButton = (page: Page) => page.getByTestId('apartments-search-submit');
 export const newApartmentButton = (page: Page) => page.getByTestId('apartments-new-button');

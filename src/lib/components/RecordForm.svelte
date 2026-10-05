@@ -23,7 +23,14 @@
 	} = $props();
 </script>
 
-<form method="POST" {action} use:enhance={() => ({ update }) => update({ reset: false })} class="space-y-6">
+<form
+	method="POST"
+	{action}
+	use:enhance={() =>
+		({ update }) =>
+			update({ reset: false })}
+	class="space-y-6"
+>
 	<FieldError message={error} />
 
 	{@render children()}

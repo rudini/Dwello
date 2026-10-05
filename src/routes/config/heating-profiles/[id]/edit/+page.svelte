@@ -14,7 +14,13 @@
 </svelte:head>
 
 <div class="max-w-3xl mx-auto space-y-6">
-	<PageTrail links={[{ href: '/config/heating-profiles', label: 'Heizprofile' }, { href: `/config/heating-profiles/${profile.id}`, label: profile.name }]} current="Bearbeiten" />
+	<PageTrail
+		links={[
+			{ href: '/config/heating-profiles', label: 'Heizprofile' },
+			{ href: `/config/heating-profiles/${profile.id}`, label: profile.name }
+		]}
+		current="Bearbeiten"
+	/>
 
 	<h1 class="text-2xl font-bold text-gray-900">{profile.name} bearbeiten</h1>
 

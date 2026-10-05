@@ -76,7 +76,7 @@ const translations: Record<Language, Record<string, string>> = {
 		rentalDays: 'Durée de location (jours)',
 		costBreakdown: 'Aperçu des coûts',
 		category: 'Catégorie',
-		totalAmount: 'Coûts de l\'immeuble',
+		totalAmount: "Coûts de l'immeuble",
 		yourShare: 'Votre part',
 		sharePercent: 'Part %',
 		subtotal: 'Sous-total',
@@ -110,7 +110,7 @@ const translations: Record<Language, Record<string, string>> = {
 		address: 'Indirizzo',
 		floor: 'Piano',
 		area: 'Superficie',
-		rentalDays: 'Durata dell\'affitto (giorni)',
+		rentalDays: "Durata dell'affitto (giorni)",
 		costBreakdown: 'Riepilogo costi',
 		category: 'Categoria',
 		totalAmount: 'Costi edificio',
@@ -154,7 +154,7 @@ const translations: Record<Language, Record<string, string>> = {
 		yourShare: 'Vossa part',
 		sharePercent: 'Part %',
 		subtotal: 'Subtotal',
-		managementFee: 'Custs d\'administraziun',
+		managementFee: "Custs d'administraziun",
 		totalCosts: 'Custs totals',
 		advancePayments: 'Pajaments anticips',
 		balance: 'Saldo',
@@ -170,7 +170,7 @@ const translations: Record<Language, Record<string, string>> = {
 		reference: 'Referenza',
 		payableTo: 'Pajabel a',
 		payableBy: 'Pajabel da',
-		acceptancePoint: 'Lieu d\'acceptaziun',
+		acceptancePoint: "Lieu d'acceptaziun",
 		statementNumber: 'Nr. rendaquint',
 		statementDate: 'Data dal rendaquint',
 		sqm: 'm²'
@@ -305,7 +305,13 @@ function formatPercentage(value: number): string {
  */
 function formatFloor(floor: number, lang: Language): string {
 	if (floor === 0) {
-		return lang === 'de' || lang === 'rm' ? 'EG' : lang === 'fr' ? 'RDC' : lang === 'it' ? 'PT' : 'GF';
+		return lang === 'de' || lang === 'rm'
+			? 'EG'
+			: lang === 'fr'
+				? 'RDC'
+				: lang === 'it'
+					? 'PT'
+					: 'GF';
 	}
 	if (floor < 0) {
 		return `UG${Math.abs(floor)}`;
@@ -378,11 +384,7 @@ export async function generateStatementPDF(
 				.text(`${config.postalCode} ${config.city}`, 350, 80, { width: 195, align: 'right' });
 
 			// Title
-			doc
-				.fontSize(24)
-				.fillColor(textDark)
-				.font('Helvetica-Bold')
-				.text(t.title, 50, 50);
+			doc.fontSize(24).fillColor(textDark).font('Helvetica-Bold').text(t.title, 50, 50);
 
 			// Statement info
 			doc
@@ -393,22 +395,13 @@ export async function generateStatementPDF(
 				.text(`${t.statementDate}: ${formatDate(data.statementDate)}`, 50, 100);
 
 			// Horizontal line
-			doc
-				.strokeColor(borderColor)
-				.lineWidth(1)
-				.moveTo(50, 125)
-				.lineTo(545, 125)
-				.stroke();
+			doc.strokeColor(borderColor).lineWidth(1).moveTo(50, 125).lineTo(545, 125).stroke();
 
 			// ============= TENANT & APARTMENT INFO =============
 			let yPos = 145;
 
 			// Tenant section
-			doc
-				.fontSize(12)
-				.fillColor(primaryColor)
-				.font('Helvetica-Bold')
-				.text(t.tenant, 50, yPos);
+			doc.fontSize(12).fillColor(primaryColor).font('Helvetica-Bold').text(t.tenant, 50, yPos);
 
 			yPos += 20;
 			doc
@@ -453,11 +446,7 @@ export async function generateStatementPDF(
 			// ============= PERIOD INFO =============
 			yPos = Math.max(yPos, yPosRight) + 50;
 
-			doc
-				.fontSize(12)
-				.fillColor(primaryColor)
-				.font('Helvetica-Bold')
-				.text(t.period, 50, yPos);
+			doc.fontSize(12).fillColor(primaryColor).font('Helvetica-Bold').text(t.period, 50, yPos);
 
 			yPos += 20;
 			doc
@@ -495,11 +484,7 @@ export async function generateStatementPDF(
 
 			// Header line
 			yPos += 15;
-			doc
-				.strokeColor(borderColor)
-				.moveTo(50, yPos)
-				.lineTo(545, yPos)
-				.stroke();
+			doc.strokeColor(borderColor).moveTo(50, yPos).lineTo(545, yPos).stroke();
 
 			yPos += 10;
 
@@ -523,11 +508,7 @@ export async function generateStatementPDF(
 			}
 
 			// Subtotal line
-			doc
-				.strokeColor(borderColor)
-				.moveTo(50, yPos)
-				.lineTo(545, yPos)
-				.stroke();
+			doc.strokeColor(borderColor).moveTo(50, yPos).lineTo(545, yPos).stroke();
 
 			yPos += 10;
 			doc
@@ -546,12 +527,7 @@ export async function generateStatementPDF(
 
 			// Total costs
 			yPos += 25;
-			doc
-				.strokeColor(textDark)
-				.lineWidth(2)
-				.moveTo(350, yPos)
-				.lineTo(545, yPos)
-				.stroke();
+			doc.strokeColor(textDark).lineWidth(2).moveTo(350, yPos).lineTo(545, yPos).stroke();
 
 			yPos += 10;
 			doc
@@ -568,15 +544,13 @@ export async function generateStatementPDF(
 				.font('Helvetica')
 				.fillColor(textDark)
 				.text(t.advancePayments, col1, yPos)
-				.text(`- ${formatCurrency(data.totalAdvancePayments)}`, col4, yPos, { width: 95, align: 'right' });
+				.text(`- ${formatCurrency(data.totalAdvancePayments)}`, col4, yPos, {
+					width: 95,
+					align: 'right'
+				});
 
 			yPos += 25;
-			doc
-				.strokeColor(primaryColor)
-				.lineWidth(2)
-				.moveTo(350, yPos)
-				.lineTo(545, yPos)
-				.stroke();
+			doc.strokeColor(primaryColor).lineWidth(2).moveTo(350, yPos).lineTo(545, yPos).stroke();
 
 			yPos += 10;
 
@@ -624,7 +598,11 @@ export async function generateStatementPDF(
 					const receiptX = 20;
 					const receiptWidth = 176; // 62mm in points
 
-					doc.fontSize(11).font('Helvetica-Bold').fillColor(textDark).text(t.receiptSection, receiptX, qrBillY + 15);
+					doc
+						.fontSize(11)
+						.font('Helvetica-Bold')
+						.fillColor(textDark)
+						.text(t.receiptSection, receiptX, qrBillY + 15);
 
 					doc
 						.fontSize(6)
@@ -661,7 +639,11 @@ export async function generateStatementPDF(
 						.fontSize(8)
 						.text(`${data.tenant.firstName} ${data.tenant.lastName}`, receiptX, qrBillY + 130);
 
-					doc.fontSize(6).font('Helvetica-Bold').text(t.currency, receiptX, qrBillY + 150).text(t.amount, receiptX + 40, qrBillY + 150);
+					doc
+						.fontSize(6)
+						.font('Helvetica-Bold')
+						.text(t.currency, receiptX, qrBillY + 150)
+						.text(t.amount, receiptX + 40, qrBillY + 150);
 
 					doc
 						.fontSize(10)
@@ -669,7 +651,10 @@ export async function generateStatementPDF(
 						.text('CHF', receiptX, qrBillY + 160)
 						.text(data.balance.toFixed(2), receiptX + 40, qrBillY + 160);
 
-					doc.fontSize(6).font('Helvetica-Bold').text(t.acceptancePoint, receiptX + 80, qrBillY + 180);
+					doc
+						.fontSize(6)
+						.font('Helvetica-Bold')
+						.text(t.acceptancePoint, receiptX + 80, qrBillY + 180);
 
 					// Vertical separator
 					doc
@@ -684,7 +669,11 @@ export async function generateStatementPDF(
 					// Payment section (right side)
 					const paymentX = receiptX + receiptWidth + 20;
 
-					doc.fontSize(11).font('Helvetica-Bold').fillColor(textDark).text(t.qrBillSection, paymentX, qrBillY + 15);
+					doc
+						.fontSize(11)
+						.font('Helvetica-Bold')
+						.fillColor(textDark)
+						.text(t.qrBillSection, paymentX, qrBillY + 15);
 
 					// QR code (46x46mm = ~130x130 points)
 					doc.image(qrResult.qrCodeImage, paymentX, qrBillY + 35, { width: 130, height: 130 });

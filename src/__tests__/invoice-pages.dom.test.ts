@@ -3,21 +3,34 @@ import { readable } from 'svelte/store';
 
 vi.mock('$app/environment', () => ({ browser: true }));
 vi.mock('$app/navigation', () => ({ goto: vi.fn(), invalidateAll: vi.fn() }));
-vi.mock('$app/stores', () => ({ page: readable({ url: new URL('http://localhost/invoices?search=Hauswart') }) }));
+vi.mock('$app/stores', () => ({
+	page: readable({ url: new URL('http://localhost/invoices?search=Hauswart') })
+}));
 
 import { goto, invalidateAll } from '$app/navigation';
 import InvoicesPage from '../routes/invoices/+page.svelte';
 import InvoicePage from '../routes/invoices/[id]/+page.svelte';
 import NewInvoicePage from '../routes/invoices/new/+page.svelte';
 import EditInvoicePage from '../routes/invoices/[id]/edit/+page.svelte';
-import { allByTestId, byTestId, click, fakeBff, fireEvent, settle, show, submit } from './helpers/dom';
+import {
+	allByTestId,
+	byTestId,
+	click,
+	fakeBff,
+	fireEvent,
+	settle,
+	show,
+	submit
+} from './helpers/dom';
 
 const buildings = [{ id: 'b1', name: 'Seeblick', address: 'Seeweg 1, 8400 Winterthur' }];
 const categories = [
 	{ id: 'c1', name: 'Hauswartung', isAllowedUtilityCost: true },
 	{ id: 'c2', name: 'Reparaturen', isAllowedUtilityCost: false }
 ];
-const distributionKeys = [{ id: 'k1', name: 'Nach Fläche', type: 'predefined', formula: '{area}', usageCount: 0 }];
+const distributionKeys = [
+	{ id: 'k1', name: 'Nach Fläche', type: 'predefined', formula: '{area}', usageCount: 0 }
+];
 const invoice = (overrides = {}) => ({
 	id: 'i1',
 	buildingId: 'b1',
@@ -38,7 +51,8 @@ const invoice = (overrides = {}) => ({
 	...overrides
 });
 const text = () => document.body.textContent ?? '';
-const button = (label: string) => [...document.querySelectorAll('button')].find((b) => b.textContent?.includes(label))!;
+const button = (label: string) =>
+	[...document.querySelectorAll('button')].find((b) => b.textContent?.includes(label))!;
 
 beforeEach(() => {
 	vi.mocked(goto).mockClear();
@@ -47,10 +61,20 @@ beforeEach(() => {
 
 describe('Rechnungsliste', () => {
 	const list = (invoices: ReturnType<typeof invoice>[]) =>
-		show(InvoicesPage, { data: { invoices, total: invoices.length, page: 1, pageSize: 20, buildings, categories } } as never);
+		show(InvoicesPage, {
+			data: { invoices, total: invoices.length, page: 1, pageSize: 20, buildings, categories }
+		} as never);
 
 	it('zeigt Rechnungen mit Kategorie, Betrag und Status', () => {
-		list([invoice(), invoice({ id: 'i2', category: undefined, categorizationStatus: 'pending', isValidUtilityCost: false })]);
+		list([
+			invoice(),
+			invoice({
+				id: 'i2',
+				category: undefined,
+				categorizationStatus: 'pending',
+				isValidUtilityCost: false
+			})
+		]);
 
 		expect(byTestId('invoice-row-i1')!.textContent).toContain('Hauswartung');
 		expect(byTestId('invoice-row-i1')!.textContent).toContain('Manuell');
@@ -106,7 +130,15 @@ describe('Rechnungsdetail', () => {
 
 	it('meldet einen Fehler beim Neu-Kategorisieren', async () => {
 		fakeBff(() => [503, { error: { code: 'LLM', message: 'KI nicht erreichbar' } }]);
-		show(InvoicePage, { data: { invoice: invoice({ category: undefined, distributionKey: undefined, categorizationStatus: 'pending' }) } });
+		show(InvoicePage, {
+			data: {
+				invoice: invoice({
+					category: undefined,
+					distributionKey: undefined,
+					categorizationStatus: 'pending'
+				})
+			}
+		});
 
 		click(button('Neu kategorisieren'));
 		await settle();
@@ -117,7 +149,10 @@ describe('Rechnungsdetail', () => {
 	});
 
 	it('nennt den Grund, wenn die KI nicht kategorisieren konnte', async () => {
-		fakeBff(() => [503, { error: 'Die KI ist nicht erreichbar oder hat keine passende Kategorie geliefert.' }]);
+		fakeBff(() => [
+			503,
+			{ error: 'Die KI ist nicht erreichbar oder hat keine passende Kategorie geliefert.' }
+		]);
 		show(InvoicePage, { data: { invoice: invoice() } });
 
 		click(button('Neu kategorisieren'));
@@ -129,7 +164,9 @@ describe('Rechnungsdetail', () => {
 	});
 
 	it('zeigt den gespeicherten Grund, warum die Kategorie der KI überschrieben wurde', () => {
-		show(InvoicePage, { data: { invoice: invoice({ manualOverrideReason: 'Reparatur, keine Wartung' }) } });
+		show(InvoicePage, {
+			data: { invoice: invoice({ manualOverrideReason: 'Reparatur, keine Wartung' }) }
+		});
 
 		expect(byTestId('invoice-override-reason')!.textContent).toContain('Reparatur, keine Wartung');
 	});
@@ -146,11 +183,25 @@ describe('Rechnungsdetail', () => {
 });
 
 describe('Rechnung erfassen', () => {
-	const data = (llmAvailable: boolean) => ({ buildings, categories, distributionKeys, llmAvailable, defaultDistributionKeyId: 'k1' });
+	const data = (llmAvailable: boolean) => ({
+		buildings,
+		categories,
+		distributionKeys,
+		llmAvailable,
+		defaultDistributionKeyId: 'k1'
+	});
 	const fill = () => {
 		fireEvent(byTestId<HTMLSelectElement>('invoice-building-select')!, 'change', 'b1');
-		fireEvent(byTestId<HTMLInputElement>('invoice-billing-entity-input')!, 'input', 'Hauswart Meier');
-		fireEvent(byTestId<HTMLInputElement>('invoice-description-input')!, 'input', 'Hauswartung März');
+		fireEvent(
+			byTestId<HTMLInputElement>('invoice-billing-entity-input')!,
+			'input',
+			'Hauswart Meier'
+		);
+		fireEvent(
+			byTestId<HTMLInputElement>('invoice-description-input')!,
+			'input',
+			'Hauswartung März'
+		);
 		fireEvent(byTestId<HTMLInputElement>('invoice-amount-input')!, 'input', '450');
 	};
 
@@ -168,7 +219,16 @@ describe('Rechnung erfassen', () => {
 	it('übernimmt einen sicheren KI-Vorschlag und speichert ihn mit der Rechnung', async () => {
 		const calls = fakeBff(({ path }) =>
 			path === '/invoices/categorize'
-				? [200, { category: categories[0], confidence: 0.9, isAllowedUtilityCost: true, reasoning: 'Hauswart', source: 'llm' }]
+				? [
+						200,
+						{
+							category: categories[0],
+							confidence: 0.9,
+							isAllowedUtilityCost: true,
+							reasoning: 'Hauswart',
+							source: 'llm'
+						}
+					]
 				: [201, { id: 'i9' }]
 		);
 		show(NewInvoicePage, { data: data(true) } as never);
@@ -185,13 +245,23 @@ describe('Rechnung erfassen', () => {
 		expect(calls.at(-1)).toMatchObject({
 			method: 'POST',
 			path: '/invoices',
-			body: { buildingId: 'b1', amount: '450', categoryId: 'c1', distributionKeyId: 'k1', llmCategoryId: 'c1', llmConfidence: '0.9' }
+			body: {
+				buildingId: 'b1',
+				amount: '450',
+				categoryId: 'c1',
+				distributionKeyId: 'k1',
+				llmCategoryId: 'c1',
+				llmConfidence: '0.9'
+			}
 		});
 		expect(goto).toHaveBeenCalledWith('/invoices');
 	});
 
 	it('lässt einen unsicheren KI-Vorschlag übernehmen', async () => {
-		fakeBff(() => [200, { category: categories[1], confidence: 0.4, isAllowedUtilityCost: false, source: 'llm' }]);
+		fakeBff(() => [
+			200,
+			{ category: categories[1], confidence: 0.4, isAllowedUtilityCost: false, source: 'llm' }
+		]);
 		show(NewInvoicePage, { data: data(true) } as never);
 
 		fill();
@@ -218,7 +288,9 @@ describe('Rechnung erfassen', () => {
 
 describe('Rechnung bearbeiten', () => {
 	const edit = (overrides = {}) =>
-		show(EditInvoicePage, { data: { invoice: invoice(overrides), buildings, categories, distributionKeys } } as never);
+		show(EditInvoicePage, {
+			data: { invoice: invoice(overrides), buildings, categories, distributionKeys }
+		} as never);
 
 	it('speichert erst nach einer Änderung', async () => {
 		const calls = fakeBff(() => [200, {}]);
@@ -230,23 +302,40 @@ describe('Rechnung bearbeiten', () => {
 		submit('submit-button');
 		await settle();
 
-		expect(calls).toEqual([expect.objectContaining({ method: 'PUT', path: '/invoices/i1', body: expect.objectContaining({ amount: '480' }) })]);
+		expect(calls).toEqual([
+			expect.objectContaining({
+				method: 'PUT',
+				path: '/invoices/i1',
+				body: expect.objectContaining({ amount: '480' })
+			})
+		]);
 		expect(goto).toHaveBeenCalledWith('/invoices/i1');
 	});
 
 	it('verlangt einen Grund, wenn die Kategorie der KI geändert wird', async () => {
 		const calls = fakeBff(() => [200, {}]);
-		edit({ llmConfidence: 0.9, llmCategory: categories[0], categorizationStatus: 'auto-categorized' });
+		edit({
+			llmConfidence: 0.9,
+			llmCategory: categories[0],
+			categorizationStatus: 'auto-categorized'
+		});
 
 		fireEvent(byTestId<HTMLSelectElement>('invoice-category-select')!, 'change', 'c2');
 		submit('submit-button');
 		expect(text()).toContain('Bitte geben Sie einen Grund für die Änderung an');
 		expect(calls).toEqual([]);
 
-		fireEvent(document.querySelector<HTMLTextAreaElement>('#overrideReason')!, 'input', 'Reparatur, keine Wartung');
+		fireEvent(
+			document.querySelector<HTMLTextAreaElement>('#overrideReason')!,
+			'input',
+			'Reparatur, keine Wartung'
+		);
 		submit('submit-button');
 		await settle();
-		expect(calls[0].body).toMatchObject({ categoryId: 'c2', manualOverrideReason: 'Reparatur, keine Wartung' });
+		expect(calls[0].body).toMatchObject({
+			categoryId: 'c2',
+			manualOverrideReason: 'Reparatur, keine Wartung'
+		});
 	});
 
 	it('zeigt einen Fehler beim Speichern', async () => {

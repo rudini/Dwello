@@ -21,13 +21,13 @@ Leitentscheidungen:
 
 Die Architektur wird an diesen Szenarien gemessen. Die Liste ist ein Vorschlag und muss vor Schritt 2 bestätigt oder ersetzt werden.
 
-| Nr. | Szenario                                                                 | Messgröße                                                         |
-| --- | ------------------------------------------------------------------------ | ----------------------------------------------------------------- |
-| Q1  | Ein neuer Verteilschlüssel-Typ wird eingeführt.                          | Änderungen nur im Modul Nebenkostenabrechnung.                    |
-| Q2  | Ollama wird durch einen anderen LLM-Anbieter ersetzt.                    | Änderungen nur in `llm.service` und `config/llm.ts`.              |
-| Q3  | Eine Gesetzesänderung betrifft die Berechnung der Nebenkostenabrechnung. | Änderungen nur im Modul Nebenkostenabrechnung, ohne Routen.       |
-| Q4  | Das PDF-Layout der Abrechnung ändert sich.                               | Änderungen nur im Rendering, keine Änderung an der Berechnung.    |
-| Q5  | Die Berechnung wird ohne HTTP und ohne PDF-Erzeugung getestet.           | Ein Unit-Test ruft die Abrechnungserstellung als Funktion auf.    |
+| Nr. | Szenario                                                                 | Messgröße                                                      |
+| --- | ------------------------------------------------------------------------ | -------------------------------------------------------------- |
+| Q1  | Ein neuer Verteilschlüssel-Typ wird eingeführt.                          | Änderungen nur im Modul Nebenkostenabrechnung.                 |
+| Q2  | Ollama wird durch einen anderen LLM-Anbieter ersetzt.                    | Änderungen nur in `llm.service` und `config/llm.ts`.           |
+| Q3  | Eine Gesetzesänderung betrifft die Berechnung der Nebenkostenabrechnung. | Änderungen nur im Modul Nebenkostenabrechnung, ohne Routen.    |
+| Q4  | Das PDF-Layout der Abrechnung ändert sich.                               | Änderungen nur im Rendering, keine Änderung an der Berechnung. |
+| Q5  | Die Berechnung wird ohne HTTP und ohne PDF-Erzeugung getestet.           | Ein Unit-Test ruft die Abrechnungserstellung als Funktion auf. |
 
 Q5 ist heute nicht erfüllt: Die Abrechnungserstellung liegt in `backend/src/routes/statements.ts`.
 
@@ -148,15 +148,15 @@ Der Umbau endet hier. Weitere Maßnahmen nur, wenn ein Szenario nicht erfüllt i
 
 ## Bewusst nicht umgesetzt
 
-| Maßnahme                                            | Einführen, wenn                                                                           |
-| --------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| In-Process Domain Events                            | ein zweiter Abnehmer für dasselbe Ereignis existiert oder Verarbeitung asynchron sein muss |
-| Value Objects (`Money`, `DateRange`), typisierte IDs | ein Rundungs- oder Verwechslungsfehler auftritt, den Typen verhindert hätten              |
-| Read-Models / Denormalisierung                      | eine Leseabfrage messbar zu langsam ist                                                   |
-| Anti-Corruption Layer                               | ein externes System mit eigenem Modell angebunden wird (z. B. Bank, Buchhaltung)          |
-| Repository-Schicht je Modul                         | die Datenbank oder das ORM gewechselt wird                                                |
-| Getrennte Bounded Contexts                          | ein zweites Team oder ein abweichendes Modell entsteht                                    |
-| Umbau des BFF (`src/lib/server`)                    | das BFF mehr als Proxy, Cookies und XSRF übernimmt                                        |
+| Maßnahme                                             | Einführen, wenn                                                                            |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| In-Process Domain Events                             | ein zweiter Abnehmer für dasselbe Ereignis existiert oder Verarbeitung asynchron sein muss |
+| Value Objects (`Money`, `DateRange`), typisierte IDs | ein Rundungs- oder Verwechslungsfehler auftritt, den Typen verhindert hätten               |
+| Read-Models / Denormalisierung                       | eine Leseabfrage messbar zu langsam ist                                                    |
+| Anti-Corruption Layer                                | ein externes System mit eigenem Modell angebunden wird (z. B. Bank, Buchhaltung)           |
+| Repository-Schicht je Modul                          | die Datenbank oder das ORM gewechselt wird                                                 |
+| Getrennte Bounded Contexts                           | ein zweites Team oder ein abweichendes Modell entsteht                                     |
+| Umbau des BFF (`src/lib/server`)                     | das BFF mehr als Proxy, Cookies und XSRF übernimmt                                         |
 
 ## Verifikation pro Schritt
 

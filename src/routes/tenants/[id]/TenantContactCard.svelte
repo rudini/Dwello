@@ -20,7 +20,11 @@
 				<dt class="text-sm text-gray-500">E-Mail</dt>
 				<dd>
 					{#if tenant.email}
-						<a href="mailto:{tenant.email}" class="text-primary hover:underline" data-testid="tenant-email-link">{tenant.email}</a>
+						<a
+							href="mailto:{tenant.email}"
+							class="text-primary hover:underline"
+							data-testid="tenant-email-link">{tenant.email}</a
+						>
 					{:else}
 						<span class="text-gray-900">–</span>
 					{/if}

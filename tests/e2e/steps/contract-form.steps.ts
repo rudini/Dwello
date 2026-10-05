@@ -29,15 +29,28 @@ When(
 When(
 	'der Liegenschaftsverwalter die Wohnung {string} ab {string} für {string} Franken vermietet',
 	async ({ verwalter, seed }, apartment: string, startDate: string, baseRent: string) => {
-		await verwalter.perform(rentApartment({ apartmentId: seed.idOf(apartment)!, startDate, baseRent }));
+		await verwalter.perform(
+			rentApartment({ apartmentId: seed.idOf(apartment)!, startDate, baseRent })
+		);
 	}
 );
 
 When(
 	'der Liegenschaftsverwalter {string} die Wohnung {string} ab {string} für {string} Franken vermietet',
-	async ({ verwalter, seed }, tenant: string, apartment: string, startDate: string, baseRent: string) => {
+	async (
+		{ verwalter, seed },
+		tenant: string,
+		apartment: string,
+		startDate: string,
+		baseRent: string
+	) => {
 		await verwalter.perform(
-			registerContract({ tenantId: seed.idOf(tenant)!, apartmentId: seed.idOf(apartment)!, startDate, baseRent })
+			registerContract({
+				tenantId: seed.idOf(tenant)!,
+				apartmentId: seed.idOf(apartment)!,
+				startDate,
+				baseRent
+			})
 		);
 	}
 );
@@ -46,11 +59,14 @@ When('der Liegenschaftsverwalter den Mietvertrag ohne Angaben speichert', async 
 	await verwalter.perform(saveContract);
 });
 
-Then('der Mietvertrag von {string} ist in der Liste auffindbar', async ({ verwalter, names }, tenant: string) => {
-	const name = names.get(tenant) ?? tenant;
-	await verwalter.perform(searchContracts(name));
-	await expect(listedContract(verwalter, name)).toBeVisible();
-});
+Then(
+	'der Mietvertrag von {string} ist in der Liste auffindbar',
+	async ({ verwalter, names }, tenant: string) => {
+		const name = names.get(tenant) ?? tenant;
+		await verwalter.perform(searchContracts(name));
+		await expect(listedContract(verwalter, name)).toBeVisible();
+	}
+);
 
 Then(
 	'kann der Liegenschaftsverwalter die Wohnung {string} nicht auswählen',
@@ -66,9 +82,12 @@ Given(
 	}
 );
 
-When('der Liegenschaftsverwalter den Mietzins auf {string} Franken ändert', async ({ verwalter }, baseRent: string) => {
-	await verwalter.perform(changeBaseRent(baseRent));
-});
+When(
+	'der Liegenschaftsverwalter den Mietzins auf {string} Franken ändert',
+	async ({ verwalter }, baseRent: string) => {
+		await verwalter.perform(changeBaseRent(baseRent));
+	}
+);
 
 When('der Liegenschaftsverwalter den Mietzins leert', async ({ verwalter }) => {
 	await verwalter.perform(changeBaseRent(''));

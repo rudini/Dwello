@@ -77,7 +77,9 @@
 
 	<div class="relative">
 		{#if prefix}
-			<span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" aria-hidden="true">{prefix}</span>
+			<span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" aria-hidden="true"
+				>{prefix}</span
+			>
 		{/if}
 
 		<input
@@ -99,7 +101,9 @@
 		/>
 
 		{#if suffix}
-			<span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400" aria-hidden="true">{suffix}</span>
+			<span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400" aria-hidden="true"
+				>{suffix}</span
+			>
 		{/if}
 	</div>
 

@@ -22,8 +22,16 @@
 	const shown = $derived(data.categories.filter(matches[filter]));
 	const tabs = $derived([
 		{ key: 'all' as const, label: 'Alle', count: data.categories.length },
-		{ key: 'allowed' as const, label: 'Umlagefähig', count: data.categories.filter(matches.allowed).length },
-		{ key: 'disallowed' as const, label: 'Nicht umlagefähig', count: data.categories.filter(matches.disallowed).length }
+		{
+			key: 'allowed' as const,
+			label: 'Umlagefähig',
+			count: data.categories.filter(matches.allowed).length
+		},
+		{
+			key: 'disallowed' as const,
+			label: 'Nicht umlagefähig',
+			count: data.categories.filter(matches.disallowed).length
+		}
 	]);
 	const deleteError = $derived(form?.error);
 	const tabClass = (key: Filter) =>
@@ -60,7 +68,14 @@
 		{/each}
 	</div>
 
-	<RecordTable columns={[{ label: 'Kategorie' }, { label: 'Beschreibung' }, { label: 'Umlagefähig', align: 'center' }, { label: 'Verwendung', align: 'center' }]}>
+	<RecordTable
+		columns={[
+			{ label: 'Kategorie' },
+			{ label: 'Beschreibung' },
+			{ label: 'Umlagefähig', align: 'center' },
+			{ label: 'Verwendung', align: 'center' }
+		]}
+	>
 		{#each shown as category (category.id)}
 			<CategoryRow {category} ondelete={() => (toDelete = category)} />
 		{/each}

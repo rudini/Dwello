@@ -12,10 +12,16 @@
 
 <div class="mb-8">
 	<nav class="flex items-center text-sm text-gray-500 mb-4">
-		<a href="/apartments" data-testid="breadcrumb-link" class="hover:text-blue-600 transition-colors">Wohnungen</a>
+		<a
+			href="/apartments"
+			data-testid="breadcrumb-link"
+			class="hover:text-blue-600 transition-colors">Wohnungen</a
+		>
 		<Icon name="chevron_right" size={16} class="mx-2" />
-		<a href="/buildings/{building.id}" data-testid="breadcrumb-link" class="hover:text-blue-600 transition-colors"
-			>{building.name}</a
+		<a
+			href="/buildings/{building.id}"
+			data-testid="breadcrumb-link"
+			class="hover:text-blue-600 transition-colors">{building.name}</a
 		>
 		<Icon name="chevron_right" size={16} class="mx-2" />
 		<span class="text-gray-900 font-medium">Wohnung {apartment.number}</span>
@@ -26,10 +32,15 @@
 			<h1 class="text-4xl font-bold text-text-dark mb-2">Wohnung {apartment.number}</h1>
 			<p class="text-sm text-text-secondary flex items-center gap-1">
 				<Icon name="location_on" size={16} />
-				{building.address}, {building.postalCode} {building.city}
+				{building.address}, {building.postalCode}
+				{building.city}
 			</p>
 		</div>
-		<Button variant="secondary" href="/apartments/{apartment.id}/edit" testid="apartment-edit-button">
+		<Button
+			variant="secondary"
+			href="/apartments/{apartment.id}/edit"
+			testid="apartment-edit-button"
+		>
 			<Icon name="edit" size={16} />Bearbeiten
 		</Button>
 	</div>

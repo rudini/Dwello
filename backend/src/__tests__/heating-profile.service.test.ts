@@ -17,9 +17,18 @@ import type { HeatingProfile } from '../db/schema';
 // Mock heating profile for testing
 const createMockProfile = (percentages: Partial<MonthlyPercentages> = {}): HeatingProfile => {
 	const defaults: MonthlyPercentages = {
-		january: 17, february: 14, march: 12, april: 7, may: 2,
-		june: 0, july: 0, august: 0, september: 2,
-		october: 8, november: 14, december: 24
+		january: 17,
+		february: 14,
+		march: 12,
+		april: 7,
+		may: 2,
+		june: 0,
+		july: 0,
+		august: 0,
+		september: 2,
+		october: 8,
+		november: 14,
+		december: 24
 	};
 	const merged = { ...defaults, ...percentages };
 	return {
@@ -55,28 +64,29 @@ describe('Heating Profile Service', () => {
 		});
 
 		it('should include Standard (Mittelland) profile', () => {
-			const profile = PREDEFINED_HEATING_PROFILES.find(p => p.name.includes('Mittelland'));
+			const profile = PREDEFINED_HEATING_PROFILES.find((p) => p.name.includes('Mittelland'));
 			expect(profile).toBeDefined();
 		});
 
 		it('should include Bergregion profile', () => {
-			const profile = PREDEFINED_HEATING_PROFILES.find(p => p.name === 'Bergregion');
+			const profile = PREDEFINED_HEATING_PROFILES.find((p) => p.name === 'Bergregion');
 			expect(profile).toBeDefined();
 		});
 
 		it('should include Tessin profile', () => {
-			const profile = PREDEFINED_HEATING_PROFILES.find(p => p.name === 'Tessin');
+			const profile = PREDEFINED_HEATING_PROFILES.find((p) => p.name === 'Tessin');
 			expect(profile).toBeDefined();
 		});
 
 		it('should include Warmwasser profile', () => {
-			const profile = PREDEFINED_HEATING_PROFILES.find(p => p.name.includes('Warmwasser'));
+			const profile = PREDEFINED_HEATING_PROFILES.find((p) => p.name.includes('Warmwasser'));
 			expect(profile).toBeDefined();
 		});
 
 		it('all profiles should sum to approximately 100%', () => {
 			for (const profile of PREDEFINED_HEATING_PROFILES) {
-				const sum = parseFloat(profile.januaryPct!) +
+				const sum =
+					parseFloat(profile.januaryPct!) +
 					parseFloat(profile.februaryPct!) +
 					parseFloat(profile.marchPct!) +
 					parseFloat(profile.aprilPct!) +
@@ -96,9 +106,18 @@ describe('Heating Profile Service', () => {
 	describe('validatePercentages', () => {
 		it('should accept percentages summing to 100', () => {
 			const percentages: MonthlyPercentages = {
-				january: 17, february: 14, march: 12, april: 7, may: 2,
-				june: 0, july: 0, august: 0, september: 2,
-				october: 8, november: 14, december: 24
+				january: 17,
+				february: 14,
+				march: 12,
+				april: 7,
+				may: 2,
+				june: 0,
+				july: 0,
+				august: 0,
+				september: 2,
+				october: 8,
+				november: 14,
+				december: 24
 			};
 			const result = validatePercentages(percentages);
 			expect(result.isValid).toBe(true);
@@ -107,9 +126,18 @@ describe('Heating Profile Service', () => {
 
 		it('should accept percentages within tolerance', () => {
 			const percentages: MonthlyPercentages = {
-				january: 8.33, february: 8.33, march: 8.33, april: 8.33, may: 8.33,
-				june: 8.33, july: 8.33, august: 8.33, september: 8.33,
-				october: 8.33, november: 8.33, december: 8.37
+				january: 8.33,
+				february: 8.33,
+				march: 8.33,
+				april: 8.33,
+				may: 8.33,
+				june: 8.33,
+				july: 8.33,
+				august: 8.33,
+				september: 8.33,
+				october: 8.33,
+				november: 8.33,
+				december: 8.37
 			};
 			const result = validatePercentages(percentages);
 			expect(result.isValid).toBe(true);
@@ -117,9 +145,18 @@ describe('Heating Profile Service', () => {
 
 		it('should reject percentages not summing to 100', () => {
 			const percentages: MonthlyPercentages = {
-				january: 20, february: 20, march: 20, april: 20, may: 0,
-				june: 0, july: 0, august: 0, september: 0,
-				october: 0, november: 0, december: 0
+				january: 20,
+				february: 20,
+				march: 20,
+				april: 20,
+				may: 0,
+				june: 0,
+				july: 0,
+				august: 0,
+				september: 0,
+				october: 0,
+				november: 0,
+				december: 0
 			};
 			const result = validatePercentages(percentages);
 			expect(result.isValid).toBe(false);
@@ -128,9 +165,18 @@ describe('Heating Profile Service', () => {
 
 		it('should reject negative percentages', () => {
 			const percentages: MonthlyPercentages = {
-				january: -5, february: 20, march: 20, april: 20, may: 15,
-				june: 10, july: 5, august: 5, september: 5,
-				october: 5, november: 0, december: 0
+				january: -5,
+				february: 20,
+				march: 20,
+				april: 20,
+				may: 15,
+				june: 10,
+				july: 5,
+				august: 5,
+				september: 5,
+				october: 5,
+				november: 0,
+				december: 0
 			};
 			const result = validatePercentages(percentages);
 			expect(result.isValid).toBe(false);
@@ -274,9 +320,18 @@ describe('Heating Profile Service', () => {
 	describe('validatePercentages - edge cases', () => {
 		it('should accept exactly 100%', () => {
 			const percentages: MonthlyPercentages = {
-				january: 100, february: 0, march: 0, april: 0, may: 0,
-				june: 0, july: 0, august: 0, september: 0,
-				october: 0, november: 0, december: 0
+				january: 100,
+				february: 0,
+				march: 0,
+				april: 0,
+				may: 0,
+				june: 0,
+				july: 0,
+				august: 0,
+				september: 0,
+				october: 0,
+				november: 0,
+				december: 0
 			};
 			const result = validatePercentages(percentages);
 			expect(result.isValid).toBe(true);
@@ -284,9 +339,18 @@ describe('Heating Profile Service', () => {
 
 		it('should accept 99.95% (within tolerance)', () => {
 			const percentages: MonthlyPercentages = {
-				january: 8.33, february: 8.33, march: 8.33, april: 8.33, may: 8.33,
-				june: 8.33, july: 8.33, august: 8.33, september: 8.33,
-				october: 8.33, november: 8.33, december: 8.32
+				january: 8.33,
+				february: 8.33,
+				march: 8.33,
+				april: 8.33,
+				may: 8.33,
+				june: 8.33,
+				july: 8.33,
+				august: 8.33,
+				september: 8.33,
+				october: 8.33,
+				november: 8.33,
+				december: 8.32
 			};
 			const result = validatePercentages(percentages);
 			expect(result.isValid).toBe(true);
@@ -294,9 +358,18 @@ describe('Heating Profile Service', () => {
 
 		it('should reject 99.5% (outside tolerance)', () => {
 			const percentages: MonthlyPercentages = {
-				january: 8, february: 8, march: 8, april: 8, may: 8,
-				june: 8, july: 8, august: 8, september: 8,
-				october: 8, november: 8, december: 11.5
+				january: 8,
+				february: 8,
+				march: 8,
+				april: 8,
+				may: 8,
+				june: 8,
+				july: 8,
+				august: 8,
+				september: 8,
+				october: 8,
+				november: 8,
+				december: 11.5
 			};
 			const result = validatePercentages(percentages);
 			expect(result.isValid).toBe(false);
@@ -304,9 +377,18 @@ describe('Heating Profile Service', () => {
 
 		it('should reject all zeros', () => {
 			const percentages: MonthlyPercentages = {
-				january: 0, february: 0, march: 0, april: 0, may: 0,
-				june: 0, july: 0, august: 0, september: 0,
-				october: 0, november: 0, december: 0
+				january: 0,
+				february: 0,
+				march: 0,
+				april: 0,
+				may: 0,
+				june: 0,
+				july: 0,
+				august: 0,
+				september: 0,
+				october: 0,
+				november: 0,
+				december: 0
 			};
 			const result = validatePercentages(percentages);
 			expect(result.isValid).toBe(false);
@@ -317,16 +399,16 @@ describe('Heating Profile Service', () => {
 		const profile = createMockProfile();
 
 		it('should return correct values for all months', () => {
-			expect(getMonthlyPercentage(profile, 1)).toBe(17);  // Jan
-			expect(getMonthlyPercentage(profile, 2)).toBe(14);  // Feb
-			expect(getMonthlyPercentage(profile, 3)).toBe(12);  // Mar
-			expect(getMonthlyPercentage(profile, 4)).toBe(7);   // Apr
-			expect(getMonthlyPercentage(profile, 5)).toBe(2);   // May
-			expect(getMonthlyPercentage(profile, 6)).toBe(0);   // Jun
-			expect(getMonthlyPercentage(profile, 7)).toBe(0);   // Jul
-			expect(getMonthlyPercentage(profile, 8)).toBe(0);   // Aug
-			expect(getMonthlyPercentage(profile, 9)).toBe(2);   // Sep
-			expect(getMonthlyPercentage(profile, 10)).toBe(8);  // Oct
+			expect(getMonthlyPercentage(profile, 1)).toBe(17); // Jan
+			expect(getMonthlyPercentage(profile, 2)).toBe(14); // Feb
+			expect(getMonthlyPercentage(profile, 3)).toBe(12); // Mar
+			expect(getMonthlyPercentage(profile, 4)).toBe(7); // Apr
+			expect(getMonthlyPercentage(profile, 5)).toBe(2); // May
+			expect(getMonthlyPercentage(profile, 6)).toBe(0); // Jun
+			expect(getMonthlyPercentage(profile, 7)).toBe(0); // Jul
+			expect(getMonthlyPercentage(profile, 8)).toBe(0); // Aug
+			expect(getMonthlyPercentage(profile, 9)).toBe(2); // Sep
+			expect(getMonthlyPercentage(profile, 10)).toBe(8); // Oct
 			expect(getMonthlyPercentage(profile, 11)).toBe(14); // Nov
 			expect(getMonthlyPercentage(profile, 12)).toBe(24); // Dec
 		});
@@ -334,26 +416,26 @@ describe('Heating Profile Service', () => {
 
 	describe('PREDEFINED_HEATING_PROFILES - detailed checks', () => {
 		it('Standard profile should have no heating in summer', () => {
-			const profile = PREDEFINED_HEATING_PROFILES.find(p => p.name.includes('Mittelland'));
+			const profile = PREDEFINED_HEATING_PROFILES.find((p) => p.name.includes('Mittelland'));
 			expect(parseFloat(profile!.junePct!)).toBe(0);
 			expect(parseFloat(profile!.julyPct!)).toBe(0);
 			expect(parseFloat(profile!.augustPct!)).toBe(0);
 		});
 
 		it('Bergregion should have some heating in summer', () => {
-			const profile = PREDEFINED_HEATING_PROFILES.find(p => p.name === 'Bergregion');
+			const profile = PREDEFINED_HEATING_PROFILES.find((p) => p.name === 'Bergregion');
 			expect(parseFloat(profile!.junePct!)).toBeGreaterThan(0);
 		});
 
 		it('Warmwasser should have equal distribution', () => {
-			const profile = PREDEFINED_HEATING_PROFILES.find(p => p.name.includes('Warmwasser'));
+			const profile = PREDEFINED_HEATING_PROFILES.find((p) => p.name.includes('Warmwasser'));
 			const jan = parseFloat(profile!.januaryPct!);
 			const jul = parseFloat(profile!.julyPct!);
 			expect(Math.abs(jan - jul)).toBeLessThan(0.5);
 		});
 
 		it('Tessin should have higher winter percentages', () => {
-			const profile = PREDEFINED_HEATING_PROFILES.find(p => p.name === 'Tessin');
+			const profile = PREDEFINED_HEATING_PROFILES.find((p) => p.name === 'Tessin');
 			const dec = parseFloat(profile!.decemberPct!);
 			const jun = parseFloat(profile!.junePct!);
 			expect(dec).toBeGreaterThan(jun);
@@ -461,9 +543,18 @@ describe('Heating Profile Service', () => {
 	describe('validatePercentages - rounding tolerance', () => {
 		it('should accept 100.05% (within tolerance)', () => {
 			const percentages: MonthlyPercentages = {
-				january: 8.34, february: 8.34, march: 8.33, april: 8.33, may: 8.33,
-				june: 8.33, july: 8.33, august: 8.33, september: 8.33,
-				october: 8.33, november: 8.33, december: 8.38 // Sum = 100.03
+				january: 8.34,
+				february: 8.34,
+				march: 8.33,
+				april: 8.33,
+				may: 8.33,
+				june: 8.33,
+				july: 8.33,
+				august: 8.33,
+				september: 8.33,
+				october: 8.33,
+				november: 8.33,
+				december: 8.38 // Sum = 100.03
 			};
 			const result = validatePercentages(percentages);
 			expect(result.isValid).toBe(true);
@@ -471,9 +562,18 @@ describe('Heating Profile Service', () => {
 
 		it('should reject 100.5% (outside tolerance)', () => {
 			const percentages: MonthlyPercentages = {
-				january: 9, february: 9, march: 9, april: 9, may: 9,
-				june: 9, july: 9, august: 9, september: 9,
-				october: 9, november: 9, december: 9.5
+				january: 9,
+				february: 9,
+				march: 9,
+				april: 9,
+				may: 9,
+				june: 9,
+				july: 9,
+				august: 9,
+				september: 9,
+				october: 9,
+				november: 9,
+				december: 9.5
 			};
 			const result = validatePercentages(percentages);
 			expect(result.isValid).toBe(false);
@@ -481,9 +581,18 @@ describe('Heating Profile Service', () => {
 
 		it('should include sum in result', () => {
 			const percentages: MonthlyPercentages = {
-				january: 17, february: 14, march: 12, april: 7, may: 2,
-				june: 0, july: 0, august: 0, september: 2,
-				october: 8, november: 14, december: 24
+				january: 17,
+				february: 14,
+				march: 12,
+				april: 7,
+				may: 2,
+				june: 0,
+				july: 0,
+				august: 0,
+				september: 2,
+				october: 8,
+				november: 14,
+				december: 24
 			};
 			const result = validatePercentages(percentages);
 			expect(result.sum).toBe(100);
@@ -491,9 +600,18 @@ describe('Heating Profile Service', () => {
 
 		it('should reject multiple negative values', () => {
 			const percentages: MonthlyPercentages = {
-				january: -5, february: -3, march: 30, april: 30, may: 24,
-				june: 8, july: 6, august: 5, september: 5,
-				october: 0, november: 0, december: 0
+				january: -5,
+				february: -3,
+				march: 30,
+				april: 30,
+				may: 24,
+				june: 8,
+				july: 6,
+				august: 5,
+				september: 5,
+				october: 0,
+				november: 0,
+				december: 0
 			};
 			const result = validatePercentages(percentages);
 			expect(result.isValid).toBe(false);

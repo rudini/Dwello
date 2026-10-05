@@ -6,7 +6,10 @@ import { createContract, deleteContract } from '../../services/contract.service'
 /**
  * Building "Ahornhof <token>" with apartment 2.01 rented to "Anna Keller <token>" in the real database
  */
-export async function createRental(token: string, contract: { startDate: string; monthlyAdvancePayment: string }) {
+export async function createRental(
+	token: string,
+	contract: { startDate: string; monthlyAdvancePayment: string }
+) {
 	const building = await createBuilding({
 		name: `Ahornhof ${token}`,
 		address: 'Testweg 1',
@@ -14,9 +17,20 @@ export async function createRental(token: string, contract: { startDate: string;
 		city: 'Winterthur',
 		canton: 'ZH'
 	});
-	const apartment = await createApartment({ buildingId: building.id, number: '2.01', floor: 2, area: '70', rooms: '3.5' });
+	const apartment = await createApartment({
+		buildingId: building.id,
+		number: '2.01',
+		floor: 2,
+		area: '70',
+		rooms: '3.5'
+	});
 	const tenant = await createTenant({ firstName: 'Anna', lastName: `Keller ${token}` });
-	const rental = await createContract({ apartmentId: apartment.id, tenantId: tenant.id, baseRent: '950', ...contract });
+	const rental = await createContract({
+		apartmentId: apartment.id,
+		tenantId: tenant.id,
+		baseRent: '950',
+		...contract
+	});
 
 	return {
 		building: building.id,

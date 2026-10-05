@@ -103,7 +103,7 @@ describe('Utility Validation Service - Async Functions', () => {
 			});
 
 			expect(result.isValid).toBe(false);
-			expect(result.errors.some(e => e.includes('nicht umlagefähig'))).toBe(true);
+			expect(result.errors.some((e) => e.includes('nicht umlagefähig'))).toBe(true);
 		});
 
 		it('should return error for zero amount', async () => {
@@ -120,7 +120,7 @@ describe('Utility Validation Service - Async Functions', () => {
 			});
 
 			expect(result.isValid).toBe(false);
-			expect(result.errors.some(e => e.includes('grösser als 0'))).toBe(true);
+			expect(result.errors.some((e) => e.includes('grösser als 0'))).toBe(true);
 		});
 
 		it('should return error for negative amount', async () => {
@@ -201,7 +201,7 @@ describe('Utility Validation Service - Async Functions', () => {
 				description: 'Reparatur der Heizung'
 			});
 
-			expect(result.warnings.some(w => w.includes('reparatur'))).toBe(true);
+			expect(result.warnings.some((w) => w.includes('reparatur'))).toBe(true);
 		});
 
 		it('should warn for suspicious keyword: renovation', async () => {
@@ -217,7 +217,7 @@ describe('Utility Validation Service - Async Functions', () => {
 				description: 'Renovation des Badezimmers'
 			});
 
-			expect(result.warnings.some(w => w.includes('renovation'))).toBe(true);
+			expect(result.warnings.some((w) => w.includes('renovation'))).toBe(true);
 		});
 
 		it('should warn for suspicious keyword: steuer', async () => {
@@ -233,7 +233,7 @@ describe('Utility Validation Service - Async Functions', () => {
 				description: 'Grundsteuer 2024'
 			});
 
-			expect(result.warnings.some(w => w.includes('steuer'))).toBe(true);
+			expect(result.warnings.some((w) => w.includes('steuer'))).toBe(true);
 		});
 
 		it('should warn for suspicious keyword: hypothek', async () => {
@@ -249,7 +249,7 @@ describe('Utility Validation Service - Async Functions', () => {
 				description: 'Hypothekarzins Q1'
 			});
 
-			expect(result.warnings.some(w => w.includes('hypothek'))).toBe(true);
+			expect(result.warnings.some((w) => w.includes('hypothek'))).toBe(true);
 		});
 
 		it('should accumulate multiple warnings', async () => {
@@ -305,7 +305,7 @@ describe('Utility Validation Service - Async Functions', () => {
 			const result = await validateInvoicesForStatement(invoices);
 
 			expect(result.validInvoices).toContain('inv-1');
-			expect(result.invalidInvoices.some(i => i.id === 'inv-2')).toBe(true);
+			expect(result.invalidInvoices.some((i) => i.id === 'inv-2')).toBe(true);
 		});
 
 		it('should calculate total valid amount', async () => {
@@ -325,7 +325,7 @@ describe('Utility Validation Service - Async Functions', () => {
 				{
 					id: 'inv-2',
 					categoryId: 'cat-1',
-					amount: 250.50,
+					amount: 250.5,
 					isValidUtilityCost: true,
 					description: 'Invoice 2'
 				}
@@ -333,7 +333,7 @@ describe('Utility Validation Service - Async Functions', () => {
 
 			const result = await validateInvoicesForStatement(invoices);
 
-			expect(result.totalValidAmount).toBe(350.50);
+			expect(result.totalValidAmount).toBe(350.5);
 		});
 
 		it('should handle string amounts', async () => {
@@ -383,8 +383,8 @@ describe('Utility Validation Service - Async Functions', () => {
 			const result = await validateInvoicesForStatement(invoices);
 
 			expect(result.warnings.length).toBe(2);
-			expect(result.warnings.some(w => w.id === 'inv-1')).toBe(true);
-			expect(result.warnings.some(w => w.id === 'inv-2')).toBe(true);
+			expect(result.warnings.some((w) => w.id === 'inv-1')).toBe(true);
+			expect(result.warnings.some((w) => w.id === 'inv-2')).toBe(true);
 		});
 
 		it('should include error details for invalid invoices', async () => {
@@ -441,8 +441,8 @@ describe('Utility Validation Service - Async Functions', () => {
 
 			expect(result.validInvoices).toContain('inv-1');
 			expect(result.validInvoices).toContain('inv-3');
-			expect(result.invalidInvoices.some(i => i.id === 'inv-2')).toBe(true);
-			expect(result.warnings.some(w => w.id === 'inv-3')).toBe(true);
+			expect(result.invalidInvoices.some((i) => i.id === 'inv-2')).toBe(true);
+			expect(result.warnings.some((w) => w.id === 'inv-3')).toBe(true);
 			expect(result.totalValidAmount).toBe(400); // inv-1 + inv-3
 		});
 	});

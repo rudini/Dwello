@@ -5,7 +5,8 @@ import type { Actions, PageServerLoad } from './$types';
 export const load: PageServerLoad = async ({ params, fetch }) => {
 	const profile = await fetchHeatingProfile(fetch, params.id);
 	// The predefined profiles follow common Swiss practice and stay as they are
-	if (profile.type === 'predefined') throw error(403, 'Vordefinierte Heizprofile können nicht bearbeitet werden');
+	if (profile.type === 'predefined')
+		throw error(403, 'Vordefinierte Heizprofile können nicht bearbeitet werden');
 	return { profile };
 };
 

@@ -92,11 +92,7 @@ let toastId = 0;
 /**
  * Add a toast notification
  */
-export function addToast(
-	type: Toast['type'],
-	message: string,
-	duration = 5000
-): void {
+export function addToast(type: Toast['type'], message: string, duration = 5000): void {
 	const id = ++toastId;
 	toasts.update((all) => [...all, { id, type, message, duration }]);
 

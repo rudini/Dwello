@@ -16,13 +16,18 @@
 
 <div class="max-w-3xl mx-auto space-y-6">
 	<PageTrail
-		links={[{ href: '/config', label: 'Einstellungen' }, { href: '/config/distribution-keys', label: 'Verteilschlüssel' }]}
+		links={[
+			{ href: '/config', label: 'Einstellungen' },
+			{ href: '/config/distribution-keys', label: 'Verteilschlüssel' }
+		]}
 		current="Neuer Verteilschlüssel"
 	/>
 
 	<div>
 		<h1 class="text-2xl font-bold text-gray-900">Neuer Verteilschlüssel</h1>
-		<p class="text-gray-500 mt-1">Formel, nach der Kosten auf die Wohnungen eines Gebäudes verteilt werden.</p>
+		<p class="text-gray-500 mt-1">
+			Formel, nach der Kosten auf die Wohnungen eines Gebäudes verteilt werden.
+		</p>
 	</div>
 
 	<Card>

@@ -36,9 +36,12 @@ When('der Liegenschaftsverwalter den Mieter bearbeiten will', async ({ verwalter
 	await verwalter.perform(editTenant);
 });
 
-When('der Liegenschaftsverwalter einen Mietvertrag für den Mieter erfassen will', async ({ verwalter }) => {
-	await verwalter.perform(startContractForTenant);
-});
+When(
+	'der Liegenschaftsverwalter einen Mietvertrag für den Mieter erfassen will',
+	async ({ verwalter }) => {
+		await verwalter.perform(startContractForTenant);
+	}
+);
 
 When('der Liegenschaftsverwalter die Wohnung des Mieters öffnet', async ({ verwalter }) => {
 	await verwalter.perform(openTenantApartment);

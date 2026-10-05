@@ -110,7 +110,10 @@ async function fetchApi<T>(endpoint: string, params: Record<string, string> = {}
  * const results = await searchAddress('8001');
  * const results = await searchAddress('Musterstrasse 12 Bern');
  */
-export async function searchAddress(query: string, pageSize = DEFAULT_PAGE_SIZE): Promise<OpenPlzStreet[]> {
+export async function searchAddress(
+	query: string,
+	pageSize = DEFAULT_PAGE_SIZE
+): Promise<OpenPlzStreet[]> {
 	if (!query || query.trim().length < 2) {
 		return [];
 	}

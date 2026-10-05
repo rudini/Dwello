@@ -48,13 +48,19 @@ When('der Liegenschaftsverwalter eine neue Wohnung erfassen will', async ({ verw
 	await verwalter.perform(startNewApartment);
 });
 
-When('der Liegenschaftsverwalter die Wohnung {string} aus der Liste öffnet', async ({ verwalter }, number: string) => {
-	await verwalter.perform(openApartment(number));
-});
+When(
+	'der Liegenschaftsverwalter die Wohnung {string} aus der Liste öffnet',
+	async ({ verwalter }, number: string) => {
+		await verwalter.perform(openApartment(number));
+	}
+);
 
-Then('ist die Wohnung {string} {string}', async ({ verwalter }, number: string, occupancy: string) => {
-	await expect(occupancyOf(verwalter, number)).toHaveText(occupancy);
-});
+Then(
+	'ist die Wohnung {string} {string}',
+	async ({ verwalter }, number: string, occupancy: string) => {
+		await expect(occupancyOf(verwalter, number)).toHaveText(occupancy);
+	}
+);
 
 Then('die Wohnungsliste enthält genau {int} Wohnung(en)', async ({ verwalter }, count: number) => {
 	await expect(allListedApartments(verwalter)).toHaveCount(count);

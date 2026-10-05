@@ -20,9 +20,15 @@
 
 <div class="max-w-2xl mx-auto space-y-6">
 	<nav class="flex items-center text-sm text-gray-500">
-		<a href="/apartments" data-testid="breadcrumb-link" class="hover:text-primary transition-colors">Wohnungen</a>
+		<a href="/apartments" data-testid="breadcrumb-link" class="hover:text-primary transition-colors"
+			>Wohnungen</a
+		>
 		<Icon name="chevron_right" size={16} class="mx-2" />
-		<a href="/apartments/{apartment.id}" data-testid="breadcrumb-link" class="hover:text-primary transition-colors">
+		<a
+			href="/apartments/{apartment.id}"
+			data-testid="breadcrumb-link"
+			class="hover:text-primary transition-colors"
+		>
 			Wohnung {apartment.number}
 		</a>
 		<Icon name="chevron_right" size={16} class="mx-2" />
@@ -35,7 +41,13 @@
 	</div>
 
 	<Card>
-		<form method="POST" use:enhance={() => ({ update }) => update({ reset: false })} class="space-y-6">
+		<form
+			method="POST"
+			use:enhance={() =>
+				({ update }) =>
+					update({ reset: false })}
+			class="space-y-6"
+		>
 			<FieldError message={errors.form} />
 
 			<ApartmentFormFields buildingId={apartment.buildingId} {apartment} {errors} />
@@ -43,7 +55,9 @@
 			<StatusField {apartment} />
 
 			<div class="flex gap-3 pt-4 border-t border-gray-200">
-				<Button href="/apartments/{apartment.id}" variant="secondary" testid="form-cancel">Abbrechen</Button>
+				<Button href="/apartments/{apartment.id}" variant="secondary" testid="form-cancel"
+					>Abbrechen</Button
+				>
 				<Button type="submit" variant="primary" testid="apartment-submit">
 					<Icon name="save" size={18} />
 					Speichern

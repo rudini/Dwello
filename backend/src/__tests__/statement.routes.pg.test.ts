@@ -12,7 +12,8 @@ const token = crypto.randomUUID();
 let rental: Awaited<ReturnType<typeof createRental>>;
 let statementId: string;
 
-const call = async (path: string, init?: RequestInit) => (await callApi(`/api/v1/statements${path}`, init)).json();
+const call = async (path: string, init?: RequestInit) =>
+	(await callApi(`/api/v1/statements${path}`, init)).json();
 
 beforeAll(async () => {
 	rental = await createRental(token, { startDate: '2024-01-01', monthlyAdvancePayment: '150' });
@@ -36,7 +37,9 @@ afterAll(async () => {
 
 describe('GET /api/v1/statements?search', () => {
 	it('findet Abrechnungen über den vollen Namen des Mieters', async () => {
-		const result = (await call(`?search=${encodeURIComponent(`Anna Keller ${token}`)}`)) as { data: { id: string }[] };
+		const result = (await call(`?search=${encodeURIComponent(`Anna Keller ${token}`)}`)) as {
+			data: { id: string }[];
+		};
 
 		expect(result.data.map((s) => s.id)).toEqual([statementId]);
 	});
@@ -60,7 +63,8 @@ const json = (method: string, body: object) => ({
 	body: JSON.stringify(body)
 });
 const generatePdf = () => call(`/${statementId}/generate-pdf`, json('POST', {}));
-const pdfGeneratedAt = async () => ((await call(`/${statementId}`)) as { pdfGeneratedAt: string | null }).pdfGeneratedAt;
+const pdfGeneratedAt = async () =>
+	((await call(`/${statementId}`)) as { pdfGeneratedAt: string | null }).pdfGeneratedAt;
 
 describe('POST /api/v1/statements/:id/generate-pdf', () => {
 	it('hält fest, wann das PDF erstellt wurde, damit Liste und Detail es zum Herunterladen anbieten', () =>
@@ -109,8 +113,8 @@ describe('GET /api/v1/statements ohne PDF-Inhalt', () => {
 				expect(statement.pdfGeneratedAt).not.toBeNull();
 				expect(statement).not.toHaveProperty('pdfBlob');
 			}
-			expect((await callApi(`/api/v1/statements/${statementId}/pdf`)).headers.get('content-type')).toBe(
-				'application/pdf'
-			);
+			expect(
+				(await callApi(`/api/v1/statements/${statementId}/pdf`)).headers.get('content-type')
+			).toBe('application/pdf');
 		}));
 });

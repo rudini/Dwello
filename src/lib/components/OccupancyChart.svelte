@@ -45,14 +45,19 @@
 					>
 						{building.buildingName}
 					</a>
-					<span class="text-sm font-semibold {getOccupancyTextColor(building.occupancyRate)}" data-testid="occupancy-rate">
+					<span
+						class="text-sm font-semibold {getOccupancyTextColor(building.occupancyRate)}"
+						data-testid="occupancy-rate"
+					>
 						{building.occupancyRate.toFixed(1)}%
 					</span>
 				</div>
 				<div class="flex items-center gap-3">
 					<div class="flex-1 h-3 bg-gray-100 rounded-full overflow-hidden">
 						<div
-							class="h-full rounded-full transition-all duration-500 {getOccupancyColor(building.occupancyRate)}"
+							class="h-full rounded-full transition-all duration-500 {getOccupancyColor(
+								building.occupancyRate
+							)}"
 							style="width: {building.occupancyRate}%"
 						></div>
 					</div>

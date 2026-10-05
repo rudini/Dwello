@@ -17,7 +17,12 @@ const { Given, When, Then } = createBdd(test);
 
 const apartmentFrom = (table: DataTable) => {
 	const fields = table.rowsHash();
-	return { number: fields.Nummer, floor: fields.Stockwerk, area: fields.Fläche, rooms: fields.Zimmer };
+	return {
+		number: fields.Nummer,
+		floor: fields.Stockwerk,
+		area: fields.Fläche,
+		rooms: fields.Zimmer
+	};
 };
 
 Given('der Liegenschaftsverwalter ist auf der Seite "Neue Wohnung"', async ({ verwalter }) => {
@@ -46,25 +51,37 @@ When(
 	}
 );
 
-When('der Liegenschaftsverwalter folgende Wohnung erfasst:', async ({ verwalter }, table: DataTable) => {
-	await verwalter.perform(registerApartment(apartmentFrom(table)));
-});
+When(
+	'der Liegenschaftsverwalter folgende Wohnung erfasst:',
+	async ({ verwalter }, table: DataTable) => {
+		await verwalter.perform(registerApartment(apartmentFrom(table)));
+	}
+);
 
 When('der Liegenschaftsverwalter die Wohnung ohne Angaben speichert', async ({ verwalter }) => {
 	await verwalter.perform(saveApartment);
 });
 
-When('der Liegenschaftsverwalter die Wohnungsnummer {string} eingibt', async ({ verwalter }, number: string) => {
-	await verwalter.perform(enterNumber(number));
-});
+When(
+	'der Liegenschaftsverwalter die Wohnungsnummer {string} eingibt',
+	async ({ verwalter }, number: string) => {
+		await verwalter.perform(enterNumber(number));
+	}
+);
 
-When('der Liegenschaftsverwalter die Wohnungsnummer auf {string} ändert', async ({ verwalter }, number: string) => {
-	await verwalter.perform(changeNumber(number));
-});
+When(
+	'der Liegenschaftsverwalter die Wohnungsnummer auf {string} ändert',
+	async ({ verwalter }, number: string) => {
+		await verwalter.perform(changeNumber(number));
+	}
+);
 
-When('der Liegenschaftsverwalter die Fläche auf {string} ändert', async ({ verwalter }, area: string) => {
-	await verwalter.perform(changeArea(area));
-});
+When(
+	'der Liegenschaftsverwalter die Fläche auf {string} ändert',
+	async ({ verwalter }, area: string) => {
+		await verwalter.perform(changeArea(area));
+	}
+);
 
 When('der Liegenschaftsverwalter die Wohnung sperrt', async ({ verwalter }) => {
 	await verwalter.perform(blockApartment);

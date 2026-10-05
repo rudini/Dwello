@@ -94,13 +94,17 @@ export function parseFormula(formula: string): ParseResult {
 				foundVariables.push(varName as FormulaVariable);
 			}
 		} else {
-			errors.push(`Unbekannte Variable {${varName}}. Erlaubt sind {area}, {rooms}, {volume} und {units}.`);
+			errors.push(
+				`Unbekannte Variable {${varName}}. Erlaubt sind {area}, {rooms}, {volume} und {units}.`
+			);
 		}
 	}
 
 	// Check that formula contains at least one variable
 	if (foundVariableNames.length === 0) {
-		errors.push('Die Formel braucht mindestens eine Variable: {area}, {rooms}, {volume} oder {units}.');
+		errors.push(
+			'Die Formel braucht mindestens eine Variable: {area}, {rooms}, {volume} oder {units}.'
+		);
 	}
 
 	// Check for invalid characters (only allow numbers, operators, parentheses, and variables)

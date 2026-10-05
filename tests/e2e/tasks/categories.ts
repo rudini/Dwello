@@ -1,6 +1,13 @@
 import type { Actor } from '../fixtures/actor';
 import { deleteConfirmButton } from '../interactions/form';
-import { allowedCheckbox, allowedFilter, deleteButton, editButton, nameInput, submitButton } from '../interactions/categories';
+import {
+	allowedCheckbox,
+	allowedFilter,
+	deleteButton,
+	editButton,
+	nameInput,
+	submitButton
+} from '../interactions/categories';
 
 export const showAllowedCategories = async (actor: Actor) => {
 	await allowedFilter(actor.page).click();

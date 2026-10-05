@@ -141,7 +141,10 @@ describe('Auth Routes Integration Tests', () => {
 
 			await GET(event as never).catch(() => {});
 
-			expect(JSON.parse(cookies._store.get('dwello_login')!)).toEqual({ provider: 'google', redirectTo: '/buildings?search=See' });
+			expect(JSON.parse(cookies._store.get('dwello_login')!)).toEqual({
+				provider: 'google',
+				redirectTo: '/buildings?search=See'
+			});
 		});
 
 		it.each(['//evil.example/phish', 'https://evil.example', '/\\evil.example'])(
@@ -164,9 +167,11 @@ describe('Auth Routes Integration Tests', () => {
 			vi.mocked(oauthModule.validateProviderConfig).mockReturnValueOnce(false);
 			const { GET } = await import('$lib/../routes/auth/login/+server');
 
-			const redirect = await GET(createMockRequestEvent({ url: 'http://localhost:3000/auth/login?provider=microsoft' }) as never).catch(
-				(r) => r
-			);
+			const redirect = await GET(
+				createMockRequestEvent({
+					url: 'http://localhost:3000/auth/login?provider=microsoft'
+				}) as never
+			).catch((r) => r);
 
 			expect(redirect).toMatchObject({ status: 303, location: '/login?error=unavailable' });
 		});
@@ -215,7 +220,9 @@ describe('Auth Routes Integration Tests', () => {
 
 	describe('GET /auth/callback', () => {
 		// The login flow cookie remembers the provider and the page to return to
-		const flowCookies = (flow: object = { provider: 'microsoft', redirectTo: '/statements?status=overdue' }) => {
+		const flowCookies = (
+			flow: object = { provider: 'microsoft', redirectTo: '/statements?status=overdue' }
+		) => {
 			const cookies = createMockCookies();
 			cookies._store.set('dwello_oauth_state', 'mock-state-abc123');
 			cookies._store.set('dwello_login', JSON.stringify(flow));
@@ -223,7 +230,10 @@ describe('Auth Routes Integration Tests', () => {
 		};
 		const callback = async (query: string, cookies = flowCookies()) => {
 			const { GET } = await import('$lib/../routes/auth/callback/+server');
-			const event = createMockRequestEvent({ url: `http://localhost:3000/auth/callback?${query}`, cookies });
+			const event = createMockRequestEvent({
+				url: `http://localhost:3000/auth/callback?${query}`,
+				cookies
+			});
 			return GET(event as never).then(
 				() => expect.fail('Should have thrown redirect'),
 				(redirect) => redirect
@@ -246,7 +256,9 @@ describe('Auth Routes Integration Tests', () => {
 		});
 
 		it('zeigt die Anmeldeseite mit Hinweis, wenn die Anmeldung beim Anbieter abgebrochen wurde', async () => {
-			const redirect = await callback('error=access_denied&error_description=User%20denied%20access');
+			const redirect = await callback(
+				'error=access_denied&error_description=User%20denied%20access'
+			);
 
 			expect(redirect).toMatchObject({ status: 303, location: '/login?error=cancelled' });
 		});
@@ -256,7 +268,9 @@ describe('Auth Routes Integration Tests', () => {
 			['ohne State', 'code=auth-code'],
 			['mit fremdem State', 'code=auth-code&state=wrong-state']
 		])('lehnt den Rückruf %s ab und zeigt die Anmeldeseite', async (_case, query) => {
-			vi.mocked(authModule.validateOAuthState).mockImplementation((_cookies, state) => state === 'mock-state-abc123');
+			vi.mocked(authModule.validateOAuthState).mockImplementation(
+				(_cookies, state) => state === 'mock-state-abc123'
+			);
 
 			const redirect = await callback(query);
 

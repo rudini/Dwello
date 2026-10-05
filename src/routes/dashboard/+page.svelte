@@ -10,23 +10,104 @@
 
 	let { data }: { data: PageData } = $props();
 
-	const chf = (amount: number) => new Intl.NumberFormat('de-CH', { style: 'currency', currency: 'CHF' }).format(amount);
+	const chf = (amount: number) =>
+		new Intl.NumberFormat('de-CH', { style: 'currency', currency: 'CHF' }).format(amount);
 
-	type Tile = { label: string; value: string | number; icon: string; iconColor: string; href?: string; testId: string };
+	type Tile = {
+		label: string;
+		value: string | number;
+		icon: string;
+		iconColor: string;
+		href?: string;
+		testId: string;
+	};
 	const portfolio: Tile[] = $derived([
-		{ label: 'Gebäude', value: data.portfolio.totalBuildings, icon: 'apartment', iconColor: 'text-blue-600', href: '/buildings', testId: 'stat-buildings' },
-		{ label: 'Wohnungen', value: data.portfolio.totalApartments, icon: 'home', iconColor: 'text-purple-600', href: '/apartments', testId: 'stat-apartments' },
-		{ label: 'Vermietet', value: data.portfolio.occupiedApartments, icon: 'groups', iconColor: 'text-green-600', href: '/apartments?status=occupied', testId: 'stat-occupied' },
-		{ label: 'Wiedervermietet', value: data.portfolio.reletApartments, icon: 'event_available', iconColor: 'text-sky-600', href: '/apartments?status=relet', testId: 'stat-relet' },
-		{ label: 'Leer', value: data.portfolio.vacantApartments, icon: 'door_open', iconColor: 'text-amber-600', href: '/apartments?status=vacant', testId: 'stat-vacant' },
-		{ label: 'Gesperrt', value: data.portfolio.reservedApartments, icon: 'block', iconColor: 'text-red-600', href: '/apartments?status=reserved', testId: 'stat-reserved' },
-		{ label: 'Belegungsrate', value: `${data.portfolio.occupancyRate.toFixed(1)}%`, icon: 'pie_chart', iconColor: 'text-orange-600', testId: 'stat-occupancy-rate' }
+		{
+			label: 'Gebäude',
+			value: data.portfolio.totalBuildings,
+			icon: 'apartment',
+			iconColor: 'text-blue-600',
+			href: '/buildings',
+			testId: 'stat-buildings'
+		},
+		{
+			label: 'Wohnungen',
+			value: data.portfolio.totalApartments,
+			icon: 'home',
+			iconColor: 'text-purple-600',
+			href: '/apartments',
+			testId: 'stat-apartments'
+		},
+		{
+			label: 'Vermietet',
+			value: data.portfolio.occupiedApartments,
+			icon: 'groups',
+			iconColor: 'text-green-600',
+			href: '/apartments?status=occupied',
+			testId: 'stat-occupied'
+		},
+		{
+			label: 'Wiedervermietet',
+			value: data.portfolio.reletApartments,
+			icon: 'event_available',
+			iconColor: 'text-sky-600',
+			href: '/apartments?status=relet',
+			testId: 'stat-relet'
+		},
+		{
+			label: 'Leer',
+			value: data.portfolio.vacantApartments,
+			icon: 'door_open',
+			iconColor: 'text-amber-600',
+			href: '/apartments?status=vacant',
+			testId: 'stat-vacant'
+		},
+		{
+			label: 'Gesperrt',
+			value: data.portfolio.reservedApartments,
+			icon: 'block',
+			iconColor: 'text-red-600',
+			href: '/apartments?status=reserved',
+			testId: 'stat-reserved'
+		},
+		{
+			label: 'Belegungsrate',
+			value: `${data.portfolio.occupancyRate.toFixed(1)}%`,
+			icon: 'pie_chart',
+			iconColor: 'text-orange-600',
+			testId: 'stat-occupancy-rate'
+		}
 	]);
 	const financial: Tile[] = $derived([
-		{ label: 'Offene Abrechnungen', value: data.financial.outstandingStatements, icon: 'pending_actions', iconColor: 'text-yellow-600', testId: 'stat-open-statements' },
-		{ label: 'Ausstehende Nachzahlungen', value: chf(data.financial.totalPending), icon: 'account_balance_wallet', iconColor: 'text-blue-600', testId: 'stat-pending' },
-		{ label: 'Davon überfällig', value: chf(data.financial.overdueAmount), icon: 'warning', iconColor: 'text-red-600', href: '/statements?status=overdue', testId: 'stat-overdue-amount' },
-		{ label: 'Bezahlt (Monat)', value: chf(data.financial.paidThisMonth), icon: 'payments', iconColor: 'text-green-600', testId: 'stat-paid-month' }
+		{
+			label: 'Offene Abrechnungen',
+			value: data.financial.outstandingStatements,
+			icon: 'pending_actions',
+			iconColor: 'text-yellow-600',
+			testId: 'stat-open-statements'
+		},
+		{
+			label: 'Ausstehende Nachzahlungen',
+			value: chf(data.financial.totalPending),
+			icon: 'account_balance_wallet',
+			iconColor: 'text-blue-600',
+			testId: 'stat-pending'
+		},
+		{
+			label: 'Davon überfällig',
+			value: chf(data.financial.overdueAmount),
+			icon: 'warning',
+			iconColor: 'text-red-600',
+			href: '/statements?status=overdue',
+			testId: 'stat-overdue-amount'
+		},
+		{
+			label: 'Bezahlt (Monat)',
+			value: chf(data.financial.paidThisMonth),
+			icon: 'payments',
+			iconColor: 'text-green-600',
+			testId: 'stat-paid-month'
+		}
 	]);
 </script>
 

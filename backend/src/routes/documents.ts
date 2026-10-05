@@ -4,7 +4,12 @@
 
 import { Elysia, t } from 'elysia';
 import { authMiddleware } from '../middleware/auth';
-import { getDocument, getDocumentPdf, listDocuments, markDocumentSent } from '../services/document.service';
+import {
+	getDocument,
+	getDocumentPdf,
+	listDocuments,
+	markDocumentSent
+} from '../services/document.service';
 import { ReminderError, sendReminder } from '../services/reminder.service';
 
 export const documentRoutes = new Elysia({ prefix: '/api/v1' })

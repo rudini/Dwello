@@ -142,8 +142,14 @@ async function failure(response: Response): Promise<ApiError> {
 		error: { code: 'UNKNOWN_ERROR', message: 'An unexpected error occurred' }
 	}));
 	// The backend names its error as text, e.g. { error: 'Invoice not found' }
-	if (typeof errorData.error === 'string') return { code: `HTTP_${response.status}`, message: errorData.error };
-	return errorData.error || { code: `HTTP_${response.status}`, message: response.statusText || 'Request failed' };
+	if (typeof errorData.error === 'string')
+		return { code: `HTTP_${response.status}`, message: errorData.error };
+	return (
+		errorData.error || {
+			code: `HTTP_${response.status}`,
+			message: response.statusText || 'Request failed'
+		}
+	);
 }
 
 /**
@@ -168,9 +174,14 @@ async function request<T>(
 /**
  * Main API call helper
  */
-export async function apiCall<T>(path: string, options: ApiCallOptions = {}): Promise<ApiResponse<T>> {
+export async function apiCall<T>(
+	path: string,
+	options: ApiCallOptions = {}
+): Promise<ApiResponse<T>> {
 	// A response without content has no body
-	return request(path, options, async (response) => (response.status === 204 ? undefined : response.json()));
+	return request(path, options, async (response) =>
+		response.status === 204 ? undefined : response.json()
+	);
 }
 
 /**

@@ -28,7 +28,8 @@ function parseApartmentForm(formData: FormData, isNew: boolean) {
 export async function saveApartment(fetch: typeof globalThis.fetch, request: Request, id?: string) {
 	return saveRecord(fetch, API, parseApartmentForm(await request.formData(), !id), id, {
 		// 409: the apartment number is taken, the backend says which one
-		failure: (status, saved) => (status === 409 ? saved.error! : 'Wohnung konnte nicht gespeichert werden.'),
+		failure: (status, saved) =>
+			status === 409 ? saved.error! : 'Wohnung konnte nicht gespeichert werden.',
 		location: (saved) => `/apartments/${saved}`
 	});
 }

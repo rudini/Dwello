@@ -35,7 +35,9 @@
 				bind:value={startDate}
 				{min}
 				data-testid="start-date-input"
-				class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary {fieldBorder(errors.startDate)}"
+				class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary {fieldBorder(
+					errors.startDate
+				)}"
 			/>
 			<FieldError message={errors.startDate} />
 		</div>
@@ -48,7 +50,9 @@
 				type="date"
 				bind:value={endDate}
 				disabled={isUnlimited}
-				class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary {fieldBorder(errors.endDate)}"
+				class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary {fieldBorder(
+					errors.endDate
+				)}"
 				class:bg-gray-50={isUnlimited}
 				class:text-gray-400={isUnlimited}
 			/>

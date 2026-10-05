@@ -63,10 +63,12 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<StatementsLi
 			};
 		});
 
-		const buildings = (buildingsData.buildings || buildingsData.data || []).map((b: Record<string, unknown>) => ({
-			id: b.id,
-			name: b.name
-		}));
+		const buildings = (buildingsData.buildings || buildingsData.data || []).map(
+			(b: Record<string, unknown>) => ({
+				id: b.id,
+				name: b.name
+			})
+		);
 
 		return {
 			statements,

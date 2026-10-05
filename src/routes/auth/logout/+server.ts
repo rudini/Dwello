@@ -6,16 +6,8 @@
 
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import {
-	clearAuthCookies,
-	getJwtFromCookie,
-	verifyJwt,
-	validateXsrfToken
-} from '$lib/server/auth';
-import {
-	handleRequestError,
-	logger
-} from '$lib/server/error-handler';
+import { clearAuthCookies, getJwtFromCookie, verifyJwt, validateXsrfToken } from '$lib/server/auth';
+import { handleRequestError, logger } from '$lib/server/error-handler';
 
 export const POST: RequestHandler = async ({ request, cookies }) => {
 	try {

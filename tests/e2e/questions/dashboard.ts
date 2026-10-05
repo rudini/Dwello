@@ -14,6 +14,7 @@ const statuses: Record<string, string> = {
 };
 
 export const occupancyOf = (actor: Actor, building: string) => occupancyRate(actor.page, building);
-export const rentedApartmentsOf = (actor: Actor, building: string) => occupancyCount(actor.page, building);
+export const rentedApartmentsOf = (actor: Actor, building: string) =>
+	occupancyCount(actor.page, building);
 export const statusFilter = (actor: Actor) => listFilter(actor.page, 'status');
 export const statusFilterFor = (label: string) => statuses[label];

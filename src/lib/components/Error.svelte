@@ -22,7 +22,17 @@
 		class: className = ''
 	}: Props = $props();
 
-	const variantConfig: Record<Variant, { icon: string; bg: string; border: string; iconColor: string; titleColor: string; textColor: string }> = {
+	const variantConfig: Record<
+		Variant,
+		{
+			icon: string;
+			bg: string;
+			border: string;
+			iconColor: string;
+			titleColor: string;
+			textColor: string;
+		}
+	> = {
 		error: {
 			icon: 'error',
 			bg: 'bg-red-50',

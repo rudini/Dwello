@@ -11,10 +11,12 @@
 Dwello is a comprehensive web application for managing residential properties in Switzerland, specifically designed for property managers (Liegenschaftsverwalter). The system handles building management, tenant relationships, rental contracts, invoice management, and most importantly, complex utility cost statement generation (Nebenkostenabrechnungen) with Swiss legal compliance.
 
 ### Target Users
+
 - Property managers managing 1-5 buildings with <50 apartments
 - Single user initially (no multi-user support in MVP)
 
 ### Key Features
+
 1. Building & Apartment Management
 2. Tenant & Contract Management
 3. Invoice Management with LLM-powered categorization
@@ -48,17 +50,20 @@ Dwello is a comprehensive web application for managing residential properties in
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone <repository-url>
    cd dwello
    ```
 
 2. **Install frontend dependencies**
+
    ```bash
    npm install
    ```
 
 3. **Install backend dependencies**
+
    ```bash
    cd backend
    npm install
@@ -66,6 +71,7 @@ Dwello is a comprehensive web application for managing residential properties in
    ```
 
 4. **Set up environment variables**
+
    ```bash
    cp .env.example .env.local
    # Edit .env.local with your configuration
@@ -74,12 +80,14 @@ Dwello is a comprehensive web application for managing residential properties in
 5. **Start the development servers**
 
    **Frontend (SvelteKit):**
+
    ```bash
    npm run dev
    # Runs on http://localhost:3000
    ```
 
    **Backend (ElysiaJS):**
+
    ```bash
    cd backend
    bun run dev
@@ -90,10 +98,12 @@ Dwello is a comprehensive web application for managing residential properties in
 
    `bun run dev` (and the Docker image on start) applies the SQL files in `backend/migrations` that the
    database does not have yet; `schema_migrations` records what is applied. To run them alone:
+
    ```bash
    cd backend
    bun run db:migrate   # uses DATABASE_URL, default postgresql://dwello:dwello@localhost:5432/dwello
    ```
+
    A schema change is a new numbered SQL file (e.g. `0007_<what>.sql`), never an edit of an applied one.
 
 ---
@@ -103,6 +113,7 @@ Dwello is a comprehensive web application for managing residential properties in
 ### Available Scripts
 
 **Frontend:**
+
 - `npm run dev` - Start development server
 - `npm run build` - Build for production
 - `npm run preview` - Preview production build
@@ -114,6 +125,7 @@ Dwello is a comprehensive web application for managing residential properties in
 - `npm run format` - Format code with Prettier
 
 **Backend:**
+
 - `bun run dev` - Start backend dev server (hot reload)
 - `bun run build` - Build backend
 - `bun run start` - Start production server
@@ -161,11 +173,13 @@ dwello/
 ## Testing
 
 ### Unit Tests (Vitest)
+
 ```bash
 npm run test
 ```
 
 ### E2E Tests (Playwright)
+
 ```bash
 npm run test:e2e
 ```
@@ -176,6 +190,7 @@ servers and database are never touched; only PostgreSQL on 5432 is required. Ove
 `E2E_DATABASE_URL`.
 
 ### Coverage
+
 ```bash
 npm run test -- --coverage
 ```
@@ -187,11 +202,13 @@ npm run test -- --coverage
 ### Docker Compose
 
 **Development:**
+
 ```bash
 docker-compose -f docker-compose.dev.yml up
 ```
 
 **Production:**
+
 ```bash
 docker-compose -f docker-compose.prod.yml up
 ```

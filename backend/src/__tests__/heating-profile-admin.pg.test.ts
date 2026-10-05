@@ -9,15 +9,30 @@ import { sendJson } from './helpers/auth';
 import { expectRejection, firstPredefined, idOf } from './helpers/records';
 
 const token = crypto.randomUUID();
-const months = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
+const months = [
+	'january',
+	'february',
+	'march',
+	'april',
+	'may',
+	'june',
+	'july',
+	'august',
+	'september',
+	'october',
+	'november',
+	'december'
+];
 
 // 12 monthly shares, the first one adjusted so they sum to `total`
 const shares = (total = 100) =>
 	Object.fromEntries(months.map((month, i) => [`${month}Pct`, i === 0 ? total - 88 : 8]));
 
-const send = (method: string, path: string, body?: object) => sendJson(method, `/api/v1/heating-profiles${path}`, body);
+const send = (method: string, path: string, body?: object) =>
+	sendJson(method, `/api/v1/heating-profiles${path}`, body);
 
-const create = (name: string, total = 100) => send('POST', '', { name: `${name} ${token}`, ...shares(total) });
+const create = (name: string, total = 100) =>
+	send('POST', '', { name: `${name} ${token}`, ...shares(total) });
 
 // The test sets the default profile; the database keeps the one it had before
 let previousDefault: string | null;

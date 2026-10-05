@@ -73,7 +73,8 @@
 		if (!invoiceDate) newErrors.invoiceDate = 'Bitte geben Sie ein Datum ein';
 		if (!billingEntity.trim()) newErrors.billingEntity = 'Bitte geben Sie einen Lieferanten ein';
 		if (!description.trim()) newErrors.description = 'Bitte geben Sie eine Beschreibung ein';
-		if (!amount || parseFloat(amount) <= 0) newErrors.amount = 'Bitte geben Sie einen gültigen Betrag ein';
+		if (!amount || parseFloat(amount) <= 0)
+			newErrors.amount = 'Bitte geben Sie einen gültigen Betrag ein';
 
 		// If category changed from LLM suggestion, require reason
 		if (needsReason && !overrideReason.trim()) {

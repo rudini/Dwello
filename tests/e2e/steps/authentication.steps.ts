@@ -3,7 +3,12 @@ import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { sessionCookies } from '../fixtures/session';
 import { visit } from '../interactions/navigation';
-import { googleSignInRequest, loginHint, shownUserName, signInOption } from '../questions/authentication';
+import {
+	googleSignInRequest,
+	loginHint,
+	shownUserName,
+	signInOption
+} from '../questions/authentication';
 import { signInWith, signOut } from '../tasks/authentication';
 
 const { Given, When, Then } = createBdd(test);
@@ -20,12 +25,20 @@ Given('ein Besucher hat die überfälligen Abrechnungen aufgerufen', async ({ be
 	await visit(besucher.page, '/statements?status=overdue');
 });
 
-When('Google den Besucher nach einer abgebrochenen Anmeldung zurückschickt', async ({ besucher }) => {
-	await visit(besucher.page, '/auth/callback?error=access_denied&error_description=The+user+denied+access');
-});
+When(
+	'Google den Besucher nach einer abgebrochenen Anmeldung zurückschickt',
+	async ({ besucher }) => {
+		await visit(
+			besucher.page,
+			'/auth/callback?error=access_denied&error_description=The+user+denied+access'
+		);
+	}
+);
 
 Given('die Sitzung des Liegenschaftsverwalters ist abgelaufen', async ({ verwalter, baseURL }) => {
-	await verwalter.page.context().addCookies(await sessionCookies(baseURL!, Math.floor(Date.now() / 1000) - 60));
+	await verwalter.page
+		.context()
+		.addCookies(await sessionCookies(baseURL!, Math.floor(Date.now() / 1000) - 60));
 });
 
 When('der Liegenschaftsverwalter die Anmeldeseite öffnet', async ({ verwalter }) => {
@@ -70,7 +83,10 @@ Then(
 	}
 );
 
-Then('führt das Dashboard den Liegenschaftsverwalter wieder zur Anmeldung', async ({ verwalter }) => {
-	await visit(verwalter.page, '/dashboard');
-	await expect(verwalter.page).toHaveTitle('Anmelden - Dwello');
-});
+Then(
+	'führt das Dashboard den Liegenschaftsverwalter wieder zur Anmeldung',
+	async ({ verwalter }) => {
+		await visit(verwalter.page, '/dashboard');
+		await expect(verwalter.page).toHaveTitle('Anmelden - Dwello');
+	}
+);

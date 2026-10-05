@@ -19,22 +19,22 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<TenantsListD
 		const response = await fetch(`${BACKEND_URL}/api/v1/tenants?${params}`);
 		const data = await response.json();
 
-		const tenants: TenantWithOccupancy[] = (data.tenants || data.data || []).map((t: Record<string, unknown>) => ({
-			id: t.id as string,
-			firstName: (t.firstName as string) || '',
-			lastName: (t.lastName as string) || '',
-			email: (t.email as string) || null,
-			phone: (t.phone as string) || null,
-			language: (t.language as 'de' | 'fr' | 'it' | 'rm' | 'en') || 'de',
-			address: (t.address as string) || null,
-			postalCode: (t.postalCode as string) || null,
-			city: (t.city as string) || null,
-			currentApartment: t.currentApartment
-				? `Wohnung ${t.currentApartment}`
-				: null,
-			currentBuilding: (t.currentBuilding as string) || null,
-			isActive: t.isActive === true
-		}));
+		const tenants: TenantWithOccupancy[] = (data.tenants || data.data || []).map(
+			(t: Record<string, unknown>) => ({
+				id: t.id as string,
+				firstName: (t.firstName as string) || '',
+				lastName: (t.lastName as string) || '',
+				email: (t.email as string) || null,
+				phone: (t.phone as string) || null,
+				language: (t.language as 'de' | 'fr' | 'it' | 'rm' | 'en') || 'de',
+				address: (t.address as string) || null,
+				postalCode: (t.postalCode as string) || null,
+				city: (t.city as string) || null,
+				currentApartment: t.currentApartment ? `Wohnung ${t.currentApartment}` : null,
+				currentBuilding: (t.currentBuilding as string) || null,
+				isActive: t.isActive === true
+			})
+		);
 
 		return {
 			tenants,

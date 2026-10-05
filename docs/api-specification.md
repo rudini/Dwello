@@ -9,6 +9,7 @@
 ## Overview
 
 Dwello uses a **Backend for Frontend (BFF)** architecture:
+
 - **SvelteKit Server Routes** (`/auth/*`, `/api/*`) handle OAuth, cookies, and XSRF protection
 - **ElysiaJS Backend** (`/api/v1/*`) handles all business logic
 - **Cookie-Based Sessions** using HTTPOnly cookies for security
@@ -30,12 +31,14 @@ Dwello uses a **Backend for Frontend (BFF)** architecture:
 ### Request/Response Pattern
 
 **Standard Request:**
+
 ```
 GET /api/v1/buildings
 Authorization: Bearer {access_token}
 ```
 
 **Standard Response (Success):**
+
 ```json
 {
   "success": true,
@@ -45,30 +48,29 @@ Authorization: Bearer {access_token}
 ```
 
 **Standard Response (Error):**
+
 ```json
 {
-  "success": false,
-  "error": "VALIDATION_ERROR",
-  "message": "Invalid input",
-  "details": [
-    {"field": "postal_code", "message": "Must be 4 digits"}
-  ]
+	"success": false,
+	"error": "VALIDATION_ERROR",
+	"message": "Invalid input",
+	"details": [{ "field": "postal_code", "message": "Must be 4 digits" }]
 }
 ```
 
 ### Status Codes
 
-| Code | Usage |
-|------|-------|
-| 200 | Successful GET, PUT, DELETE |
-| 201 | Successful POST (resource created) |
-| 204 | Successful DELETE (no content) |
-| 400 | Bad request (validation error) |
-| 401 | Unauthorized (missing/invalid token) |
-| 403 | Forbidden (insufficient permissions) |
-| 404 | Resource not found |
-| 409 | Conflict (duplicate, constraint violation) |
-| 500 | Server error |
+| Code | Usage                                      |
+| ---- | ------------------------------------------ |
+| 200  | Successful GET, PUT, DELETE                |
+| 201  | Successful POST (resource created)         |
+| 204  | Successful DELETE (no content)             |
+| 400  | Bad request (validation error)             |
+| 401  | Unauthorized (missing/invalid token)       |
+| 403  | Forbidden (insufficient permissions)       |
+| 404  | Resource not found                         |
+| 409  | Conflict (duplicate, constraint violation) |
+| 500  | Server error                               |
 
 ---
 
@@ -77,6 +79,7 @@ Authorization: Bearer {access_token}
 ### OAuth 2.0 Flow with HTTPOnly Cookies
 
 **Architecture:**
+
 - OAuth providers: Google, Microsoft Azure AD, Swiss eID (future)
 - Session storage: HTTPOnly cookies (not client-side)
 - XSRF protection: Double-submit cookie pattern
@@ -85,6 +88,7 @@ Authorization: Bearer {access_token}
 ### Login Endpoint
 
 **Initiates OAuth flow:**
+
 ```
 GET /auth/login?provider=google|microsoft|swiss-eid
 
@@ -97,6 +101,7 @@ Sets-Cookie: oauth_state={uuid}; HttpOnly; SameSite=Lax; Max-Age=600
 ```
 
 **Example:**
+
 ```bash
 curl http://localhost:5173/auth/login?provider=google
 # Redirects to Google OAuth login page
@@ -105,6 +110,7 @@ curl http://localhost:5173/auth/login?provider=google
 ### OAuth Callback Endpoint
 
 **Handles OAuth provider callback:**
+
 ```
 GET /auth/callback?code={code}&state={state}
 
@@ -122,6 +128,7 @@ Sets-Cookie Headers:
 ```
 
 **Flow:**
+
 1. BFF validates state parameter (CSRF protection)
 2. BFF exchanges authorization code for access token with OAuth provider
 3. BFF fetches user profile from OAuth provider
@@ -133,6 +140,7 @@ Sets-Cookie Headers:
 ### Get Current User Endpoint
 
 **Returns authenticated user info:**
+
 ```
 GET /auth/me
 
@@ -158,6 +166,7 @@ Response: 401 Unauthorized (if no valid session cookie)
 ### Token Refresh Endpoint
 
 **Refreshes session before expiration:**
+
 ```
 POST /auth/refresh
 
@@ -179,6 +188,7 @@ Sets-Cookie Headers:
 ### Logout Endpoint
 
 **Clears session:**
+
 ```
 POST /auth/logout
 
@@ -199,6 +209,7 @@ Sets-Cookie Headers (delete):
 ### Cookie Specification
 
 **Session Cookie (`session`):**
+
 ```
 Name: session
 Value: {JWT}
@@ -211,6 +222,7 @@ Domain: (not set, same-origin only)
 ```
 
 **XSRF Token Cookie (`xsrf-token`):**
+
 ```
 Name: xsrf-token
 Value: {UUID}
@@ -232,6 +244,7 @@ Domain: (not set, same-origin only)
 4. If mismatch → 403 Forbidden
 
 **Example Request:**
+
 ```
 POST /api/buildings
 Cookie: session={jwt}; xsrf-token=550e8400-e29b-41d4-a716-446655440000
@@ -246,6 +259,7 @@ Content-Type: application/json
 ```
 
 **Why This Prevents CSRF:**
+
 - Attacker site cannot read the `xsrf-token` cookie (cross-origin)
 - Attacker site cannot set the `X-XSRF-TOKEN` header (cross-origin)
 - `SameSite=Lax` prevents cookie being sent on cross-site POST
@@ -254,17 +268,19 @@ Content-Type: application/json
 ### JWT Token Format
 
 Stored in HTTPOnly cookie, never exposed to JavaScript:
+
 ```json
 {
-  "sub": "google-oauth-user-id",
-  "email": "user@example.com",
-  "name": "User Name",
-  "iat": 1705953000,
-  "exp": 1705956600
+	"sub": "google-oauth-user-id",
+	"email": "user@example.com",
+	"name": "User Name",
+	"iat": 1705953000,
+	"exp": 1705956600
 }
 ```
 
 **Claims:**
+
 - `sub`: Subject (unique user ID from OAuth provider)
 - `email`: User email address
 - `name`: User full name
@@ -280,6 +296,7 @@ Stored in HTTPOnly cookie, never exposed to JavaScript:
 **All frontend API calls go through SvelteKit server routes** (`/api/*`), which proxy to the ElysiaJS backend.
 
 **Frontend Request:**
+
 ```
 POST /api/buildings
 Cookie: session={jwt}; xsrf-token={token}
@@ -296,6 +313,7 @@ Content-Type: application/json
 ```
 
 **BFF Processing (SvelteKit Server Route):**
+
 1. Extract JWT from `session` cookie
 2. Validate XSRF token (for POST/PUT/DELETE/PATCH):
    - `cookie[xsrf-token] === header[X-XSRF-TOKEN]`
@@ -314,52 +332,54 @@ Content-Type: application/json
 5. Return response to client
 
 **Backend Response:**
+
 ```json
 {
-  "success": true,
-  "data": {
-    "id": "550e8400-e29b-41d4-a716-446655440000",
-    "address": "Hauptstrasse 123",
-    "postal_code": "8000",
-    "city": "Zurich",
-    "created_at": "2024-01-23T15:30:00Z"
-  }
+	"success": true,
+	"data": {
+		"id": "550e8400-e29b-41d4-a716-446655440000",
+		"address": "Hauptstrasse 123",
+		"postal_code": "8000",
+		"city": "Zurich",
+		"created_at": "2024-01-23T15:30:00Z"
+	}
 }
 ```
 
 ### Frontend Client Code
 
 **Using BFF API:**
+
 ```typescript
 // src/lib/api.ts
 export async function apiCall(path: string, options: RequestInit = {}) {
-  // Read XSRF token from cookie
-  const xsrfToken = getXsrfTokenFromCookie()
+	// Read XSRF token from cookie
+	const xsrfToken = getXsrfTokenFromCookie();
 
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-    ...options.headers as Record<string, string>
-  }
+	const headers: Record<string, string> = {
+		'Content-Type': 'application/json',
+		...(options.headers as Record<string, string>)
+	};
 
-  // Add XSRF token for state-changing requests
-  if (options.method && ['POST', 'PUT', 'DELETE', 'PATCH'].includes(options.method)) {
-    if (xsrfToken) {
-      headers['X-XSRF-TOKEN'] = xsrfToken
-    }
-  }
+	// Add XSRF token for state-changing requests
+	if (options.method && ['POST', 'PUT', 'DELETE', 'PATCH'].includes(options.method)) {
+		if (xsrfToken) {
+			headers['X-XSRF-TOKEN'] = xsrfToken;
+		}
+	}
 
-  const response = await fetch(`/api${path}`, {
-    ...options,
-    headers,
-    credentials: 'same-origin' // Include cookies
-  })
+	const response = await fetch(`/api${path}`, {
+		...options,
+		headers,
+		credentials: 'same-origin' // Include cookies
+	});
 
-  if (response.status === 401) {
-    window.location.href = '/auth/login'
-    throw new Error('Unauthorized')
-  }
+	if (response.status === 401) {
+		window.location.href = '/auth/login';
+		throw new Error('Unauthorized');
+	}
 
-  return response.json()
+	return response.json();
 }
 
 // Usage examples:
@@ -374,6 +394,7 @@ export async function apiCall(path: string, options: RequestInit = {}) {
 All BFF routes follow the pattern: `GET|POST|PUT|DELETE /api/{endpoint}`
 
 **Examples:**
+
 - `GET /api/buildings` → proxies to `GET /api/v1/buildings`
 - `POST /api/buildings` → proxies to `POST /api/v1/buildings`
 - `GET /api/buildings/123` → proxies to `GET /api/v1/buildings/123`
@@ -388,6 +409,7 @@ All BFF routes follow the pattern: `GET|POST|PUT|DELETE /api/{endpoint}`
 ### 1. Buildings
 
 #### List Buildings
+
 ```
 GET /api/v1/buildings
 Query Parameters:
@@ -425,6 +447,7 @@ Response:
 ```
 
 #### Create Building
+
 ```
 POST /api/v1/buildings
 Content-Type: application/json
@@ -450,6 +473,7 @@ Response: 201 Created
 ```
 
 #### Get Building Detail
+
 ```
 GET /api/v1/buildings/{id}
 
@@ -470,6 +494,7 @@ Response: 200 OK
 ```
 
 #### Update Building
+
 ```
 PUT /api/v1/buildings/{id}
 Content-Type: application/json
@@ -482,6 +507,7 @@ Response: 200 OK
 ```
 
 #### Delete Building
+
 ```
 DELETE /api/v1/buildings/{id}
 
@@ -493,6 +519,7 @@ Response: 204 No Content
 ### 2. Apartments
 
 #### List Apartments (for Building)
+
 ```
 GET /api/v1/buildings/{building_id}/apartments
 
@@ -519,6 +546,7 @@ Response:
 ```
 
 #### Create Apartment
+
 ```
 POST /api/v1/buildings/{building_id}/apartments
 {
@@ -533,6 +561,7 @@ Response: 201 Created
 ```
 
 #### Update Apartment
+
 ```
 PUT /api/v1/apartments/{id}
 {
@@ -544,6 +573,7 @@ Response: 200 OK
 ```
 
 #### Delete Apartment
+
 ```
 DELETE /api/v1/apartments/{id}
 
@@ -555,6 +585,7 @@ Response: 204 No Content
 ### 3. Tenants
 
 #### List Tenants
+
 ```
 GET /api/v1/tenants
 Query Parameters:
@@ -591,6 +622,7 @@ Response:
 ```
 
 #### Create Tenant
+
 ```
 POST /api/v1/tenants
 {
@@ -609,6 +641,7 @@ Response: 201 Created
 ```
 
 #### Get Tenant Detail
+
 ```
 GET /api/v1/tenants/{id}
 
@@ -632,6 +665,7 @@ Response:
 ```
 
 #### Update Tenant
+
 ```
 PUT /api/v1/tenants/{id}
 {
@@ -642,6 +676,7 @@ Response: 200 OK
 ```
 
 #### Delete Tenant
+
 ```
 DELETE /api/v1/tenants/{id}
 
@@ -654,6 +689,7 @@ Response: 204 No Content
 ### 4. Rental Contracts
 
 #### Create Contract
+
 ```
 POST /api/v1/contracts
 Content-Type: multipart/form-data
@@ -686,6 +722,7 @@ Response: 201 Created
 ```
 
 #### List Contracts
+
 ```
 GET /api/v1/contracts
 Query Parameters:
@@ -705,6 +742,7 @@ Response:
 ```
 
 #### Get Contract Detail
+
 ```
 GET /api/v1/contracts/{id}
 
@@ -729,6 +767,7 @@ Response:
 ```
 
 #### Update Contract
+
 ```
 PUT /api/v1/contracts/{id}
 {
@@ -740,6 +779,7 @@ Response: 200 OK
 ```
 
 #### Add Contract Modification
+
 ```
 POST /api/v1/contracts/{id}/modifications
 {
@@ -754,6 +794,7 @@ Response: 201 Created
 ```
 
 #### Download Contract PDF
+
 ```
 GET /api/v1/contracts/{id}/pdf
 
@@ -763,6 +804,7 @@ Content-Type: application/pdf
 ```
 
 #### Delete Contract
+
 ```
 DELETE /api/v1/contracts/{id}
 
@@ -774,6 +816,7 @@ Response: 204 No Content
 ### 5. Invoices
 
 #### List Invoices
+
 ```
 GET /api/v1/invoices
 Query Parameters:
@@ -816,6 +859,7 @@ Response:
 ```
 
 #### Create Invoice
+
 ```
 POST /api/v1/invoices
 {
@@ -846,6 +890,7 @@ Response: 201 Created
 **Note:** `category_id`, `is_valid_utility_cost`, and `category_name` are auto-populated by LLM.
 
 #### LLM Categorization (Manual)
+
 ```
 POST /api/v1/invoices/{id}/recategorize
 {
@@ -857,6 +902,7 @@ Response: 200 OK
 ```
 
 #### Update Invoice
+
 ```
 PUT /api/v1/invoices/{id}
 {
@@ -869,6 +915,7 @@ Response: 200 OK
 ```
 
 #### Delete Invoice
+
 ```
 DELETE /api/v1/invoices/{id}
 
@@ -880,6 +927,7 @@ Response: 204 No Content
 ### 6. Categories
 
 #### List Categories
+
 ```
 GET /api/v1/categories
 Query Parameters:
@@ -906,6 +954,7 @@ Response:
 ```
 
 #### Create Category
+
 ```
 POST /api/v1/categories
 {
@@ -920,6 +969,7 @@ Response: 201 Created
 ```
 
 #### Update Category
+
 ```
 PUT /api/v1/categories/{id}
 {
@@ -932,6 +982,7 @@ Response: 200 OK
 ```
 
 #### Delete Category
+
 ```
 DELETE /api/v1/categories/{id}
 
@@ -944,6 +995,7 @@ Response: 204 No Content
 ### 7. Distribution Keys
 
 #### List Distribution Keys
+
 ```
 GET /api/v1/distribution-keys
 
@@ -965,6 +1017,7 @@ Response:
 ```
 
 #### Create Custom Distribution Key
+
 ```
 POST /api/v1/distribution-keys
 {
@@ -977,6 +1030,7 @@ Response: 201 Created
 ```
 
 #### Test Formula
+
 ```
 POST /api/v1/distribution-keys/test-formula
 {
@@ -1006,6 +1060,7 @@ Response: 200 OK
 ```
 
 #### Update Distribution Key
+
 ```
 PUT /api/v1/distribution-keys/{id}
 {
@@ -1017,6 +1072,7 @@ Response: 200 OK
 ```
 
 #### Delete Distribution Key
+
 ```
 DELETE /api/v1/distribution-keys/{id}
 
@@ -1029,6 +1085,7 @@ Response: 204 No Content
 ### 8. Heating Distribution Profiles
 
 #### List Profiles
+
 ```
 GET /api/v1/heating-profiles
 
@@ -1054,6 +1111,7 @@ Response:
 ```
 
 #### Create Custom Profile
+
 ```
 POST /api/v1/heating-profiles
 {
@@ -1074,6 +1132,7 @@ Response: 201 Created
 ### 9. Configuration
 
 #### Get Configuration
+
 ```
 GET /api/v1/config
 
@@ -1094,6 +1153,7 @@ Response:
 ```
 
 #### Update Configuration
+
 ```
 PUT /api/v1/config
 {
@@ -1107,6 +1167,7 @@ Response: 200 OK
 ```
 
 #### Validate IBAN
+
 ```
 POST /api/v1/config/validate-iban
 {
@@ -1129,6 +1190,7 @@ Response:
 ### 10. Utility Statements
 
 #### Generate Statements
+
 ```
 POST /api/v1/statements/generate
 Content-Type: application/json
@@ -1153,6 +1215,7 @@ Response: 201 Created (Async)
 ```
 
 #### Check Generation Progress
+
 ```
 GET /api/v1/statements/generate/{job_id}
 
@@ -1179,6 +1242,7 @@ Response:
 ```
 
 #### List Statements
+
 ```
 GET /api/v1/statements
 Query Parameters:
@@ -1218,6 +1282,7 @@ Response:
 ```
 
 #### Get Statement Detail
+
 ```
 GET /api/v1/statements/{id}
 
@@ -1257,6 +1322,7 @@ Response:
 ```
 
 #### Download Statement PDF
+
 ```
 GET /api/v1/statements/{id}/pdf
 
@@ -1266,6 +1332,7 @@ Content-Type: application/pdf
 ```
 
 #### Download Multiple Statements (ZIP)
+
 ```
 POST /api/v1/statements/download-batch
 {
@@ -1278,6 +1345,7 @@ Content-Type: application/zip
 ```
 
 #### Mark Statement as Paid
+
 ```
 PUT /api/v1/statements/{id}/mark-paid
 {
@@ -1289,6 +1357,7 @@ Response: 200 OK
 ```
 
 #### Mark Statement as Unpaid
+
 ```
 PUT /api/v1/statements/{id}/mark-unpaid
 
@@ -1296,6 +1365,7 @@ Response: 200 OK
 ```
 
 #### Send Payment Reminder
+
 ```
 POST /api/v1/statements/{id}/send-reminder
 
@@ -1311,6 +1381,7 @@ Response: 200 OK
 ```
 
 #### Regenerate Statement
+
 ```
 POST /api/v1/statements/{id}/regenerate
 
@@ -1318,6 +1389,7 @@ Response: 200 OK
 ```
 
 #### Delete Statement
+
 ```
 DELETE /api/v1/statements/{id}
 
@@ -1329,6 +1401,7 @@ Response: 204 No Content
 ### 11. Dashboard & Analytics
 
 #### Get Dashboard Data
+
 ```
 GET /api/v1/dashboard
 
@@ -1370,6 +1443,7 @@ Response:
 ```
 
 #### Get Financial Analytics
+
 ```
 GET /api/v1/analytics/financial
 Query Parameters:
@@ -1396,32 +1470,33 @@ Response:
 ## Error Handling
 
 ### Error Response Format
+
 ```json
 {
-  "success": false,
-  "error": "ERROR_CODE",
-  "message": "Human-readable error message",
-  "details": [
-    {
-      "field": "postal_code",
-      "message": "Must be exactly 4 digits"
-    }
-  ]
+	"success": false,
+	"error": "ERROR_CODE",
+	"message": "Human-readable error message",
+	"details": [
+		{
+			"field": "postal_code",
+			"message": "Must be exactly 4 digits"
+		}
+	]
 }
 ```
 
 ### Common Error Codes
 
-| Code | Meaning | HTTP Status |
-|------|---------|-------------|
-| VALIDATION_ERROR | Input validation failed | 400 |
-| UNAUTHORIZED | Missing or invalid token | 401 |
-| FORBIDDEN | Insufficient permissions | 403 |
-| NOT_FOUND | Resource not found | 404 |
-| CONFLICT | Constraint violation (duplicate) | 409 |
-| INVALID_STATE | Operation not allowed in current state | 409 |
-| PROCESSING_ERROR | Server processing error | 500 |
-| EXTERNAL_API_ERROR | Error from external API | 502 |
+| Code               | Meaning                                | HTTP Status |
+| ------------------ | -------------------------------------- | ----------- |
+| VALIDATION_ERROR   | Input validation failed                | 400         |
+| UNAUTHORIZED       | Missing or invalid token               | 401         |
+| FORBIDDEN          | Insufficient permissions               | 403         |
+| NOT_FOUND          | Resource not found                     | 404         |
+| CONFLICT           | Constraint violation (duplicate)       | 409         |
+| INVALID_STATE      | Operation not allowed in current state | 409         |
+| PROCESSING_ERROR   | Server processing error                | 500         |
+| EXTERNAL_API_ERROR | Error from external API                | 502         |
 
 ---
 
@@ -1454,17 +1529,20 @@ Response includes:
 ## Filtering & Searching
 
 ### Date Range Filtering
+
 ```
 date_from: ISO 8601 date (inclusive)
 date_to: ISO 8601 date (inclusive)
 ```
 
 ### Multi-Select Filtering
+
 ```
 category_id=uuid1&category_id=uuid2&category_id=uuid3
 ```
 
 ### Full-Text Search
+
 ```
 search: string (searches across relevant fields)
 ```
@@ -1476,6 +1554,7 @@ search: string (searches across relevant fields)
 Default: `-created_at` (newest first)
 
 Supported sort fields:
+
 - `+/-created_at`
 - `+/-updated_at`
 - `+/-amount_chf`
@@ -1511,35 +1590,35 @@ Webhook Payload (delivered as POST to registered URL):
 ## Implementation Notes
 
 ### Database Connection
+
 ```typescript
 // ElysiaJS setup
-const app = new Elysia()
-  .connect(pgPool)
-  .use(authMiddleware)
-  .use(errorHandler)
+const app = new Elysia().connect(pgPool).use(authMiddleware).use(errorHandler);
 ```
 
 ### Request Validation
+
 ```typescript
 // TypeScript types for validation
 interface CreateBuildingRequest {
-  address: string
-  postal_code: string
-  city: string
-  latitude: number
-  longitude: number
-  building_type?: string
+	address: string;
+	postal_code: string;
+	city: string;
+	latitude: number;
+	longitude: number;
+	building_type?: string;
 }
 ```
 
 ### Authentication Middleware
+
 ```typescript
 app.derive(({ headers }) => {
-  const token = headers.authorization?.split(' ')[1]
-  if (!token) throw new UnauthorizedError()
-  const user = verifyToken(token)
-  return { user }
-})
+	const token = headers.authorization?.split(' ')[1];
+	if (!token) throw new UnauthorizedError();
+	const user = verifyToken(token);
+	return { user };
+});
 ```
 
 ---

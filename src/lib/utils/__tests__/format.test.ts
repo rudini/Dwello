@@ -37,9 +37,35 @@ describe('normalizeDecimal', () => {
 
 	it('handles all common room count values from DB', () => {
 		// These are the values the room select options expect
-		const expectedOptions = ['1', '1.5', '2', '2.5', '3', '3.5', '4', '4.5', '5', '5.5', '6', '6.5'];
+		const expectedOptions = [
+			'1',
+			'1.5',
+			'2',
+			'2.5',
+			'3',
+			'3.5',
+			'4',
+			'4.5',
+			'5',
+			'5.5',
+			'6',
+			'6.5'
+		];
 		// These are the values PostgreSQL decimal(3,1) returns
-		const dbValues = ['1.0', '1.5', '2.0', '2.5', '3.0', '3.5', '4.0', '4.5', '5.0', '5.5', '6.0', '6.5'];
+		const dbValues = [
+			'1.0',
+			'1.5',
+			'2.0',
+			'2.5',
+			'3.0',
+			'3.5',
+			'4.0',
+			'4.5',
+			'5.0',
+			'5.5',
+			'6.0',
+			'6.5'
+		];
 
 		dbValues.forEach((dbVal, i) => {
 			expect(normalizeDecimal(dbVal)).toBe(expectedOptions[i]);

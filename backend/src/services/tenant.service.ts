@@ -57,9 +57,10 @@ const tenantFields = {
 	correspondenceChannel: tenants.correspondenceChannel,
 	createdAt: tenants.createdAt,
 	updatedAt: tenants.updatedAt,
-	contractCount: sql<number>`(SELECT COUNT(*) FROM rental_contracts WHERE rental_contracts.tenant_id = "tenants"."id")`.as(
-		'contract_count'
-	)
+	contractCount:
+		sql<number>`(SELECT COUNT(*) FROM rental_contracts WHERE rental_contracts.tenant_id = "tenants"."id")`.as(
+			'contract_count'
+		)
 };
 
 /**
@@ -158,11 +159,7 @@ export async function listTenants(filters: TenantFilters = {}): Promise<{
  * Get a single tenant by ID
  */
 export async function getTenant(id: string): Promise<TenantWithOccupancy | null> {
-	const [tenant] = await db
-		.select(tenantFields)
-		.from(tenants)
-		.where(eq(tenants.id, id))
-		.limit(1);
+	const [tenant] = await db.select(tenantFields).from(tenants).where(eq(tenants.id, id)).limit(1);
 
 	if (!tenant) return null;
 
@@ -233,8 +230,7 @@ export async function getTenantWithHistory(id: string): Promise<{
 			...c,
 			apartmentNumber: c.apartmentNumber || '',
 			buildingName: c.buildingName || '',
-			isActive:
-				c.startDate <= today && (c.endDate === null || c.endDate >= today)
+			isActive: c.startDate <= today && (c.endDate === null || c.endDate >= today)
 		})) as Array<{
 			id: string;
 			apartmentNumber: string;

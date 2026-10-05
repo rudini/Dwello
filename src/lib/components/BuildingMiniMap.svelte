@@ -87,11 +87,7 @@
 	onDestroy(() => map?.remove());
 </script>
 
-<div
-	bind:this={mapContainer}
-	class="map-container"
-	data-testid="building-mini-map"
-></div>
+<div bind:this={mapContainer} class="map-container" data-testid="building-mini-map"></div>
 
 <style>
 	.map-container {

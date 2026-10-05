@@ -20,9 +20,12 @@
 			<div class="inline-flex items-center justify-center w-20 h-20 bg-blue-100 rounded-full mb-6">
 				<Icon name="analytics" size={40} class="text-blue-600" />
 			</div>
-			<h2 class="text-xl font-semibold text-gray-900 mb-2" data-testid="coming-soon-title">Analytics kommt in Phase 2</h2>
+			<h2 class="text-xl font-semibold text-gray-900 mb-2" data-testid="coming-soon-title">
+				Analytics kommt in Phase 2
+			</h2>
 			<p class="text-gray-500 max-w-md mx-auto mb-8">
-				Detaillierte Auswertungen, Trends und Prognosen werden in der nächsten Version verfügbar sein.
+				Detaillierte Auswertungen, Trends und Prognosen werden in der nächsten Version verfügbar
+				sein.
 			</p>
 
 			<div class="grid gap-4 sm:grid-cols-3 max-w-2xl mx-auto">

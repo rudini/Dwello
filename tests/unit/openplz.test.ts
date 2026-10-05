@@ -172,10 +172,7 @@ describe('OpenPLZ Service', () => {
 
 			const cantons = await getCantons();
 
-			expect(fetchSpy).toHaveBeenCalledWith(
-				'https://openplzapi.org/ch/Cantons',
-				expect.anything()
-			);
+			expect(fetchSpy).toHaveBeenCalledWith('https://openplzapi.org/ch/Cantons', expect.anything());
 			expect(cantons).toHaveLength(2);
 		});
 
@@ -189,9 +186,7 @@ describe('OpenPLZ Service', () => {
 
 	describe('getDistricts', () => {
 		it('should return districts for a canton', async () => {
-			const mockDistricts = [
-				{ key: 'd1', name: 'Zürich', shortName: 'ZH' }
-			];
+			const mockDistricts = [{ key: 'd1', name: 'Zürich', shortName: 'ZH' }];
 
 			fetchSpy.mockResolvedValue({
 				ok: true,

@@ -18,7 +18,10 @@ export function resendTransport(env: MailEnv, from: string): MailTransport {
 					to: [to],
 					subject,
 					text,
-					attachments: attachments.map((a) => ({ filename: a.filename, content: a.content.toString('base64') }))
+					attachments: attachments.map((a) => ({
+						filename: a.filename,
+						content: a.content.toString('base64')
+					}))
 				})
 			});
 			const result = (await response.json()) as { id?: string; message?: string };

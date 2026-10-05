@@ -22,6 +22,7 @@
 This is a comprehensive implementation plan for the entire Dwello property management system. The system includes:
 
 **11 Core Features:**
+
 1. Building Management
 2. Apartment Management
 3. Tenant Management
@@ -35,6 +36,7 @@ This is a comprehensive implementation plan for the entire Dwello property manag
 11. Payment Tracking & Reminders
 
 **Architecture:**
+
 - Backend for Frontend (BFF) pattern with SvelteKit server routes
 - ElysiaJS backend for business logic
 - PostgreSQL for data storage
@@ -45,31 +47,31 @@ This is a comprehensive implementation plan for the entire Dwello property manag
 
 ## Implementation Phases
 
-| # | Phase | Duration | Status | Completion |
-|---|-------|----------|--------|-----------|
-| 0 | Project Initialization | 1 week | ✅ Complete | 100% |
-| 1 | SvelteKit Auth Routes (BFF) | 1 week | 🔄 In Progress | 95% |
-| 2 | API Proxy Routes (BFF) | 1 week | 🔄 In Progress | 92% |
-| 3 | Client-Side Auth & Layout | 3 days | ✅ Complete | 100% |
-| 4 | Database Schema & Migrations | 3 days | ✅ Complete | 100% |
-| 5 | Backend - Core Entities | 2 weeks | ✅ Complete | 100% |
-| 6 | Backend - Invoices & LLM | 2 weeks | 🔄 In Progress | 56% |
-| 7 | Backend - Distribution Keys | 1 week | 🔄 In Progress | 94% |
-| 8 | Backend - Statements & Prorating | 3 weeks | 🔄 In Progress | 94% |
-| 9 | PDF & QR Bill Generation | 2 weeks | 🔄 In Progress | 57% |
-| 10 | Frontend - Core Management Pages | 2 weeks | 🔄 In Progress | 98% |
-| 11 | Frontend - Invoice Management | 1.5 weeks | 🔄 In Progress | 79% |
-| 12 | Frontend - Configuration Pages | 1.5 weeks | 🔄 In Progress | 87% |
-| 13 | Frontend - Statement Generation | 2 weeks | 🔄 In Progress | 94% |
-| 14 | Frontend - Dashboard & Analytics | 1 week | 🔄 In Progress | 91% |
-| 15 | Integration Testing | 1.5 weeks | 🔄 In Progress | 14% |
-| 16 | Environment & Config | 3 days | 🔄 In Progress | 67% |
-| 17 | Docker & Deployment | 1 week | 🔄 In Progress | 47% |
-| 18 | Documentation & Tests | 1 week | ⏳ Pending | 0% |
-| 19 | Manual Testing & QA | 1 week | ⏳ Pending | 0% |
-| 20 | Optimization & Cleanup | 3 days | 🔄 In Progress | 10% |
-| 21 | Go-Live Preparation | 3 days | ⏳ Pending | 0% |
-| 22 | MVA Migration (Modular Monolith) | 2 weeks | 🔄 In Progress | 4% |
+| #   | Phase                            | Duration  | Status         | Completion |
+| --- | -------------------------------- | --------- | -------------- | ---------- |
+| 0   | Project Initialization           | 1 week    | ✅ Complete    | 100%       |
+| 1   | SvelteKit Auth Routes (BFF)      | 1 week    | 🔄 In Progress | 95%        |
+| 2   | API Proxy Routes (BFF)           | 1 week    | 🔄 In Progress | 92%        |
+| 3   | Client-Side Auth & Layout        | 3 days    | ✅ Complete    | 100%       |
+| 4   | Database Schema & Migrations     | 3 days    | ✅ Complete    | 100%       |
+| 5   | Backend - Core Entities          | 2 weeks   | ✅ Complete    | 100%       |
+| 6   | Backend - Invoices & LLM         | 2 weeks   | 🔄 In Progress | 56%        |
+| 7   | Backend - Distribution Keys      | 1 week    | 🔄 In Progress | 94%        |
+| 8   | Backend - Statements & Prorating | 3 weeks   | 🔄 In Progress | 94%        |
+| 9   | PDF & QR Bill Generation         | 2 weeks   | 🔄 In Progress | 57%        |
+| 10  | Frontend - Core Management Pages | 2 weeks   | 🔄 In Progress | 98%        |
+| 11  | Frontend - Invoice Management    | 1.5 weeks | 🔄 In Progress | 79%        |
+| 12  | Frontend - Configuration Pages   | 1.5 weeks | 🔄 In Progress | 87%        |
+| 13  | Frontend - Statement Generation  | 2 weeks   | 🔄 In Progress | 94%        |
+| 14  | Frontend - Dashboard & Analytics | 1 week    | 🔄 In Progress | 91%        |
+| 15  | Integration Testing              | 1.5 weeks | 🔄 In Progress | 14%        |
+| 16  | Environment & Config             | 3 days    | 🔄 In Progress | 67%        |
+| 17  | Docker & Deployment              | 1 week    | 🔄 In Progress | 47%        |
+| 18  | Documentation & Tests            | 1 week    | ⏳ Pending     | 0%         |
+| 19  | Manual Testing & QA              | 1 week    | ⏳ Pending     | 0%         |
+| 20  | Optimization & Cleanup           | 3 days    | 🔄 In Progress | 10%        |
+| 21  | Go-Live Preparation              | 3 days    | ⏳ Pending     | 0%         |
+| 22  | MVA Migration (Modular Monolith) | 2 weeks   | 🔄 In Progress | 4%         |
 
 **Total Duration:** ~22 weeks for full MVP
 
@@ -247,6 +249,7 @@ phases 1–14 are mostly manual tests (bundled in Phase 19), and tests that need
 
 **Status:** Complete
 **Commits:**
+
 - 868fe0a feat(auth): implement BFF authentication layer with OAuth support
 - 9b69e3b test(auth): add integration and E2E tests for auth routes
 
@@ -261,7 +264,7 @@ phases 1–14 are mostly manual tests (bundled in Phase 19), and tests that need
   - [x] `validateXsrfToken(request, cookies)` - Validate XSRF protection
   - [x] `clearAuthCookies(cookies)` - Clear auth cookies on logout
   - [x] Add unit tests (test coverage >85%)
-  **Note:** Implemented in `src/lib/server/auth.ts` (175 lines). All 7 functions plus 3 additional helpers (setOAuthStateCookie, validateOAuthState, generateOAuthState). Unit tests: 33 tests passing in `tests/unit/auth.test.ts`.
+        **Note:** Implemented in `src/lib/server/auth.ts` (175 lines). All 7 functions plus 3 additional helpers (setOAuthStateCookie, validateOAuthState, generateOAuthState). Unit tests: 33 tests passing in `tests/unit/auth.test.ts`.
 
 - [x] Create `src/lib/server/oauth.ts`
   - [x] `generateOAuthUrl(provider, state)` - Generate OAuth URL
@@ -271,12 +274,12 @@ phases 1–14 are mostly manual tests (bundled in Phase 19), and tests that need
   - [x] Support Microsoft Azure AD OAuth
   - [x] Support future: Swiss eID (placeholder)
   - [x] Add unit tests (test coverage >85%)
-  **Note:** Implemented in `src/lib/server/oauth.ts` (198 lines). Includes provider config, validation helpers, and error handling. Unit tests: 23 tests passing in `tests/unit/oauth.test.ts`.
+        **Note:** Implemented in `src/lib/server/oauth.ts` (198 lines). Includes provider config, validation helpers, and error handling. Unit tests: 23 tests passing in `tests/unit/oauth.test.ts`.
 
 - [x] Create `src/lib/server/jwt-config.ts`
   - [x] Export JWT secret and configuration
   - [x] Validate secret length (min 32 chars)
-  **Note:** Implemented in `src/lib/server/jwt-config.ts` (71 lines). Includes jwtConfig and cookieConfig objects with getters for environment variables.
+        **Note:** Implemented in `src/lib/server/jwt-config.ts` (71 lines). Includes jwtConfig and cookieConfig objects with getters for environment variables.
 
 ### 1.2 Auth Routes - Login
 
@@ -290,7 +293,7 @@ phases 1–14 are mostly manual tests (bundled in Phase 19), and tests that need
   - [x] Error handling (return 400 on invalid provider)
   - [x] Add unit tests
   - [x] Add integration tests
-  **Note:** Implemented in `src/routes/auth/login/+server.ts` (65 lines). Uses validation and error handling from error-handler.ts. Integration tests in tests/unit/auth-routes.test.ts.
+        **Note:** Implemented in `src/routes/auth/login/+server.ts` (65 lines). Uses validation and error handling from error-handler.ts. Integration tests in tests/unit/auth-routes.test.ts.
 
 ### 1.3 Auth Routes - Callback
 
@@ -310,7 +313,7 @@ phases 1–14 are mostly manual tests (bundled in Phase 19), and tests that need
   - [x] Log errors appropriately
   - [x] Add unit tests
   - [x] Add integration tests
-  **Note:** Implemented in `src/routes/auth/callback/+server.ts` (126 lines). Handles both Google and Microsoft OAuth callbacks with fallback logic. Integration tests in tests/unit/auth-routes.test.ts.
+        **Note:** Implemented in `src/routes/auth/callback/+server.ts` (126 lines). Handles both Google and Microsoft OAuth callbacks with fallback logic. Integration tests in tests/unit/auth-routes.test.ts.
 
 ### 1.4 Auth Routes - Current User
 
@@ -323,7 +326,7 @@ phases 1–14 are mostly manual tests (bundled in Phase 19), and tests that need
   - [x] Return user object (sub, email, name)
   - [x] Add unit tests
   - [x] Add integration tests
-  **Note:** Implemented in `src/routes/auth/me/+server.ts` (51 lines). Returns sanitized user info from JWT. Integration tests in tests/unit/auth-routes.test.ts.
+        **Note:** Implemented in `src/routes/auth/me/+server.ts` (51 lines). Returns sanitized user info from JWT. Integration tests in tests/unit/auth-routes.test.ts.
 
 ### 1.5 Auth Routes - Token Refresh
 
@@ -339,7 +342,7 @@ phases 1–14 are mostly manual tests (bundled in Phase 19), and tests that need
   - [x] Return `{ success: true }`
   - [x] Add unit tests
   - [x] Add integration tests
-  **Note:** Implemented in `src/routes/auth/refresh/+server.ts` (65 lines). Validates XSRF token before refresh. Integration tests in tests/unit/auth-routes.test.ts.
+        **Note:** Implemented in `src/routes/auth/refresh/+server.ts` (65 lines). Validates XSRF token before refresh. Integration tests in tests/unit/auth-routes.test.ts.
 
 ### 1.6 Auth Routes - Logout
 
@@ -350,7 +353,7 @@ phases 1–14 are mostly manual tests (bundled in Phase 19), and tests that need
   - [x] Return `{ success: true }`
   - [x] Add unit tests
   - [x] Add integration tests
-  **Note:** Implemented in `src/routes/auth/logout/+server.ts` (65 lines). Lenient XSRF validation to prevent users being stuck. Integration tests in tests/unit/auth-routes.test.ts.
+        **Note:** Implemented in `src/routes/auth/logout/+server.ts` (65 lines). Lenient XSRF validation to prevent users being stuck. Integration tests in tests/unit/auth-routes.test.ts.
 
 ### 1.7 Error Handling & Logging
 
@@ -359,14 +362,14 @@ phases 1–14 are mostly manual tests (bundled in Phase 19), and tests that need
   - [x] OAuthError, JWTError, ValidationError
   - [x] Standardized error responses
   - [x] Logging configuration
-  **Note:** Implemented in `src/lib/server/error-handler.ts` (262 lines). Includes AppError, OAuthError, JWTError, ValidationError, AuthorizationError, RateLimitError classes plus logger utilities.
+        **Note:** Implemented in `src/lib/server/error-handler.ts` (262 lines). Includes AppError, OAuthError, JWTError, ValidationError, AuthorizationError, RateLimitError classes plus logger utilities.
 
 - [x] Implement error logging
   - [x] Log all OAuth failures
   - [x] Log JWT validation failures
   - [x] Log invalid state parameters
   - [x] Include context (provider, timestamp, etc.)
-  **Note:** logOAuthEvent() and logAuthError() functions implemented with structured JSON logging.
+        **Note:** logOAuthEvent() and logAuthError() functions implemented with structured JSON logging.
 
 ### 1.8 Testing Auth Routes
 
@@ -377,7 +380,7 @@ phases 1–14 are mostly manual tests (bundled in Phase 19), and tests that need
   - [x] XSRF token validation matching/non-matching (5 tests)
   - [x] Cookie deletion (3 tests)
   - [x] **Coverage Target:** >85% ✅
-  **Note:** 33 unit tests in tests/unit/auth.test.ts - all passing
+        **Note:** 33 unit tests in tests/unit/auth.test.ts - all passing
 
 - [x] Unit tests for `src/lib/server/oauth.ts`
   - [x] OAuth URL generation (5 tests)
@@ -385,7 +388,7 @@ phases 1–14 are mostly manual tests (bundled in Phase 19), and tests that need
   - [x] User profile fetch (5 tests)
   - [x] Error handling (3 tests)
   - [x] **Coverage Target:** >85% ✅
-  **Note:** 23 unit tests in tests/unit/oauth.test.ts - all passing
+        **Note:** 23 unit tests in tests/unit/oauth.test.ts - all passing
 
 - [x] Integration tests for auth routes
   - [x] Login initiation → OAuth redirect (5 tests)
@@ -395,14 +398,14 @@ phases 1–14 are mostly manual tests (bundled in Phase 19), and tests that need
   - [x] Logout → Cookies cleared (2 tests)
   - [x] State validation failure → 400 error
   - [x] Expired token → 401 error
-  **Note:** Implemented in `tests/unit/auth-routes.test.ts` - 18 tests with mocked OAuth providers
+        **Note:** Implemented in `tests/unit/auth-routes.test.ts` - 18 tests with mocked OAuth providers
 
 - [ ] Manual testing
   - [ ] Test with Google OAuth (dev credentials)
   - [ ] Test with Microsoft OAuth (dev credentials)
   - [ ] Verify cookies set correctly in browser
   - [ ] Verify redirect to dashboard
-  **Note:** Deferred - requires OAuth credentials setup
+        **Note:** Deferred - requires OAuth credentials setup
 
 ### 1.X Verification: Unit Tests & E2E Tests
 
@@ -433,7 +436,7 @@ phases 1–14 are mostly manual tests (bundled in Phase 19), and tests that need
   - [x] Test logout endpoint clears cookies
   - [x] Test me endpoint returns current user
   - [x] All tests pass: `npm run test` ✅
-  **Note:** 18 integration tests in tests/unit/auth-routes.test.ts
+        **Note:** 18 integration tests in tests/unit/auth-routes.test.ts
 
 - [x] E2E Tests for Auth Flow
   - [x] Create `tests/e2e/auth.spec.ts`
@@ -443,7 +446,7 @@ phases 1–14 are mostly manual tests (bundled in Phase 19), and tests that need
   - [x] Test token refresh on page reload
   - [x] Test logout clears session and redirects
   - [ ] All tests pass: `npm run test:e2e`
-  **Note:** E2E tests created in tests/e2e/auth.spec.ts - requires dev server running
+        **Note:** E2E tests created in tests/e2e/auth.spec.ts - requires dev server running
 
 - [x] Manual Testing
   - [x] Run dev server: `npm run dev` - Works
@@ -456,6 +459,7 @@ phases 1–14 are mostly manual tests (bundled in Phase 19), and tests that need
 **Status: Phase 1 In Progress** 🔄 (95%, open items above)
 
 **Phase 1 Summary:**
+
 - **Files Created:** 5 server-side auth utilities + 5 auth route handlers
 - **Tests:** 76 tests passing (33 auth + 23 oauth + 18 integration + 2 example)
 - **E2E Tests:** Created - tests/e2e/auth.spec.ts (requires dev server)
@@ -688,7 +692,7 @@ phases 1–14 are mostly manual tests (bundled in Phase 19), and tests that need
   - [x] Test with GET/POST/PUT/DELETE
   - [x] Test XSRF token inclusion
   - [x] Test 401 error handling
-  **Note:** 21 tests in tests/unit/api.test.ts - all passing
+        **Note:** 21 tests in tests/unit/api.test.ts - all passing
 
 ### 3.2 Login Page
 
@@ -774,7 +778,7 @@ phases 1–14 are mostly manual tests (bundled in Phase 19), and tests that need
 ### 3.7 Loading & Auth Testing
 
 - [x] E2E tests for auth flow (in tests/e2e/auth.spec.ts from Phase 1)
-  **Note:** Additional E2E tests to be added in Phase 5
+      **Note:** Additional E2E tests to be added in Phase 5
 
 ### 3.X Verification: Unit Tests & E2E Tests
 
@@ -787,14 +791,14 @@ phases 1–14 are mostly manual tests (bundled in Phase 19), and tests that need
   - [x] Test request/response serialization
   - [x] Target >80% code coverage
   - [x] All tests pass: `npm run test` ✅
-  **Note:** 21 tests in tests/unit/api.test.ts - all passing
+        **Note:** 21 tests in tests/unit/api.test.ts - all passing
 
 - [x] Component Tests for Auth Components
-  **Note:** `src/__tests__/login-page.test.ts`, `src/__tests__/auth-guard.test.ts`, `hooks.server.test.ts`
+      **Note:** `src/__tests__/login-page.test.ts`, `src/__tests__/auth-guard.test.ts`, `hooks.server.test.ts`
 
 - [x] E2E Tests for Full Auth & Layout
-  **Note (Session 3/4):** `authentication.feature` (login, expired session, logout), `navigation.feature`
-  (sidebar, header, user menu, footer)
+      **Note (Session 3/4):** `authentication.feature` (login, expired session, logout), `navigation.feature`
+      (sidebar, header, user menu, footer)
 
 - [x] Verification
   - [x] No linting errors: `npm run lint` ✅
@@ -881,6 +885,7 @@ phases 1–14 are mostly manual tests (bundled in Phase 19), and tests that need
     - [ ] Index on invoices.invoice_date
     - [ ] Index on utility_statements.tenant_id
     - [ ] Index on utility_statements.period_start
+
 ### 4.3 Database Migrations
 
 - [x] Create `backend/migrations/0001_initial_schema.sql`
@@ -909,9 +914,9 @@ phases 1–14 are mostly manual tests (bundled in Phase 19), and tests that need
 - [x] Create migration scripts in `package.json`
   - [x] `npm run db:generate` - Generate migrations from schema
   - [x] `npm run db:migrate` - Run migrations
-    **Note (Session 3):** `bun run db:migrate` now runs `backend/scripts/migrate.ts` (`src/db/migrate.ts`): applies the
-    SQL files a database does not have yet, recorded in `schema_migrations`; databases migrated by hand are recognised
-    once. `bun run dev`, the Docker image and the E2E database use it. Test: `migrations.pg.test.ts`.
+        **Note (Session 3):** `bun run db:migrate` now runs `backend/scripts/migrate.ts` (`src/db/migrate.ts`): applies the
+        SQL files a database does not have yet, recorded in `schema_migrations`; databases migrated by hand are recognised
+        once. `bun run dev`, the Docker image and the E2E database use it. Test: `migrations.pg.test.ts`.
   - [x] `npm run db:push` - Push schema directly
   - [x] `npm run db:studio` - Open Drizzle Studio GUI
 
@@ -922,8 +927,8 @@ phases 1–14 are mostly manual tests (bundled in Phase 19), and tests that need
   - [x] Warning logged if connection fails
 
 - [x] Integration tests for schema
-  **Note:** `migrations.pg.test.ts` applies all migrations to empty and hand-migrated databases; every
-  `*.pg.test.ts` runs against the migrated schema
+      **Note:** `migrations.pg.test.ts` applies all migrations to empty and hand-migrated databases; every
+      `*.pg.test.ts` runs against the migrated schema
 
 ### 4.X Verification
 
@@ -939,7 +944,7 @@ phases 1–14 are mostly manual tests (bundled in Phase 19), and tests that need
 ### 5.1 Building CRUD Routes ✅
 
 - [x] Create `backend/src/routes/buildings.ts`
-  **Files:** backend/src/routes/buildings.ts (106 lines)
+      **Files:** backend/src/routes/buildings.ts (106 lines)
   - [x] GET `/api/v1/buildings` (list with pagination)
     - [x] Query params: search, limit, offset
     - [x] Return: buildings list, total count
@@ -966,7 +971,7 @@ phases 1–14 are mostly manual tests (bundled in Phase 19), and tests that need
 ### 5.2 Apartment CRUD Routes ✅
 
 - [x] Create `backend/src/routes/apartments.ts`
-  **Files:** backend/src/routes/apartments.ts (110 lines)
+      **Files:** backend/src/routes/apartments.ts (110 lines)
   - [x] GET `/api/v1/apartments` (list with filtering)
     - [x] Query params: buildingId, floor, status
     - [x] Return: apartments list with building name
@@ -992,7 +997,7 @@ phases 1–14 are mostly manual tests (bundled in Phase 19), and tests that need
 ### 5.3 Tenant CRUD Routes ✅
 
 - [x] Create `backend/src/routes/tenants.ts`
-  **Files:** backend/src/routes/tenants.ts (96 lines)
+      **Files:** backend/src/routes/tenants.ts (96 lines)
   - [x] GET `/api/v1/tenants` (list)
     - [x] Query params: search, language, limit, offset
     - [x] Return: tenants list with current occupancy
@@ -1019,7 +1024,7 @@ phases 1–14 are mostly manual tests (bundled in Phase 19), and tests that need
 ### 5.4 Rental Contract CRUD Routes ✅
 
 - [x] Create `backend/src/routes/contracts.ts`
-  **Files:** backend/src/routes/contracts.ts (157 lines)
+      **Files:** backend/src/routes/contracts.ts (157 lines)
   - [x] GET `/api/v1/contracts` (list)
     - [x] Query params: apartmentId, tenantId, buildingId, status
     - [x] Return: contracts with tenant and apartment info
@@ -1053,7 +1058,7 @@ phases 1–14 are mostly manual tests (bundled in Phase 19), and tests that need
 ### 5.5 Business Logic Services ✅
 
 - [x] Create `backend/src/services/building.service.ts`
-  **Files:** backend/src/services/building.service.ts (226 lines)
+      **Files:** backend/src/services/building.service.ts (226 lines)
   - [x] `listBuildings(filters)` - With search, city, canton filters and pagination
   - [x] `getBuilding(id)` - With apartment count stats
   - [x] `getBuildingWithApartments(id)` - With full apartment list
@@ -1063,7 +1068,7 @@ phases 1–14 are mostly manual tests (bundled in Phase 19), and tests that need
   - [x] `buildingExists(id)` - Quick existence check
 
 - [x] Create `backend/src/services/apartment.service.ts`
-  **Files:** backend/src/services/apartment.service.ts (278 lines)
+      **Files:** backend/src/services/apartment.service.ts (278 lines)
   - [x] `listApartments(filters)` - Filter by building, status, floor
   - [x] `getApartment(id)` - With current tenant and contract
   - [x] `getApartmentWithHistory(id)` - With contract history
@@ -1074,7 +1079,7 @@ phases 1–14 are mostly manual tests (bundled in Phase 19), and tests that need
   - [x] `apartmentExists(id)` - Quick existence check
 
 - [x] Create `backend/src/services/tenant.service.ts`
-  **Files:** backend/src/services/tenant.service.ts (313 lines)
+      **Files:** backend/src/services/tenant.service.ts (313 lines)
   - [x] `listTenants(filters)` - With search, language filter
   - [x] `getTenant(id)` - With current occupancy
   - [x] `getTenantWithHistory(id)` - With all contracts
@@ -1084,7 +1089,7 @@ phases 1–14 are mostly manual tests (bundled in Phase 19), and tests that need
   - [x] `tenantExists(id)` - Quick existence check
 
 - [x] Create `backend/src/services/contract.service.ts`
-  **Files:** backend/src/services/contract.service.ts (404 lines)
+      **Files:** backend/src/services/contract.service.ts (404 lines)
   - [x] `listContracts(filters)` - Filter by apartment, tenant, building, status
   - [x] `getContract(id)` - With tenant, apartment, building details
   - [x] `checkContractOverlap(apartmentId, startDate, endDate, excludeId)` - Overlap detection
@@ -1098,7 +1103,7 @@ phases 1–14 are mostly manual tests (bundled in Phase 19), and tests that need
 ### 5.6 Authentication Middleware ✅
 
 - [x] Create `backend/src/middleware/auth.ts`
-  **Files:** backend/src/middleware/auth.ts (90 lines)
+      **Files:** backend/src/middleware/auth.ts (90 lines)
   - [x] `verifyJwt(token)` - Decode and verify JWT
   - [x] `authMiddleware` - Elysia plugin for protected routes
   - [x] `optionalAuthMiddleware` - For routes that work with or without auth
@@ -1116,7 +1121,7 @@ Validation is defined inline in route handlers for type safety.
 ### 5.8 Main Server Integration ✅
 
 - [x] Update `backend/src/index.ts`
-  **Files:** backend/src/index.ts (59 lines)
+      **Files:** backend/src/index.ts (59 lines)
   - [x] Import all route modules
   - [x] Register routes with .use()
   - [x] Display available routes on startup
@@ -1286,7 +1291,7 @@ Validation is defined inline in route handlers for type safety.
   - [ ] Response parsing (2)
 
 - [x] Unit tests for utility validation (6 tests) — `utility-validation.service.test.ts` (53),
-  `utility-validation.service.integration.test.ts` (23)
+      `utility-validation.service.integration.test.ts` (23)
   - [x] Allowed/disallowed categories (4)
   - [x] Management fee limits (2)
 
@@ -1424,13 +1429,13 @@ Validation is defined inline in route handlers for type safety.
   **Tests:** `distribution-key.pg.test.ts`: 3 pass (`bun run test:pg`).
 
 - [x] Fix `getUtilityCostRules` returning `{ en, de }` objects instead of the declared `string[]`
-  **Note:** Now returns the German category names. Fixes 6 failing tests in `utility-validation.service.test.ts` and 2 tsc errors.
-  **Files:** `backend/src/services/utility-validation.service.ts`
-  **Tests:** 6 tests in `utility-validation.service.test.ts` pass again; backend tsc errors 50 → 48.
+      **Note:** Now returns the German category names. Fixes 6 failing tests in `utility-validation.service.test.ts` and 2 tsc errors.
+      **Files:** `backend/src/services/utility-validation.service.ts`
+      **Tests:** 6 tests in `utility-validation.service.test.ts` pass again; backend tsc errors 50 → 48.
 
 - [x] Run backend unit tests with `bun test --isolate`
-  **Note:** `mock.module` in some test files leaked into other files in the shared process (15 failures). With `--isolate` the unit run has 351 pass, 1 fail (`deleteHeatingProfile` predefined profile, also failing on main); `bun run test:pg`: 103 pass.
-  **Files:** `backend/package.json`
+      **Note:** `mock.module` in some test files leaked into other files in the shared process (15 failures). With `--isolate` the unit run has 351 pass, 1 fail (`deleteHeatingProfile` predefined profile, also failing on main); `bun run test:pg`: 103 pass.
+      **Files:** `backend/package.json`
 
 ### 7.5 Validation Schemas
 
@@ -1445,7 +1450,7 @@ Validation is defined inline in route handlers for type safety.
 ### 7.6 Testing Distribution Keys
 
 - [x] Unit tests for distribution key service (12 tests) — `distribution-key-admin.pg.test.ts` (7),
-  `distribution-key.pg.test.ts` (3), formula validation and evaluation in `formula.service.test.ts`
+      `distribution-key.pg.test.ts` (3), formula validation and evaluation in `formula.service.test.ts`
   - [x] Create, read, update, delete (4)
   - [x] Formula validation (4)
   - [x] Formula evaluation (2)
@@ -1681,12 +1686,12 @@ Validation is defined inline in route handlers for type safety.
 
 - [x] Unit tests for prorating service (20 tests) — `prorating.service.test.ts` (61)
 - [ ] Unit tests for calculation service (16 tests) — so far 7: `advance-payments.test.ts` (5),
-  `management-fee.test.ts` (2)
+      `management-fee.test.ts` (2)
 - [x] Unit tests for statement service (10 tests) — `statement.service.test.ts` (18)
 - [x] Integration tests for statement generation (20+ tests)
-  **Note (Session 4 cleanup):** `statement.routes.pg.test.ts` (4), `heating-distribution.pg.test.ts` (4),
-  `management-fee.pg.test.ts` (2), `reminders.pg.test.ts` (9), `prorating.service.integration.test.ts` (13),
-  plus the E2E features `statement-generate` and `statement-detail`
+      **Note (Session 4 cleanup):** `statement.routes.pg.test.ts` (4), `heating-distribution.pg.test.ts` (4),
+      `management-fee.pg.test.ts` (2), `reminders.pg.test.ts` (9), `prorating.service.integration.test.ts` (13),
+      plus the E2E features `statement-generate` and `statement-detail`
 
 ### 8.X Verification
 
@@ -1722,8 +1727,8 @@ Validation is defined inline in route handlers for type safety.
     - [x] Include total calculations
     - [x] Include payment details and deadline
     - [x] Return: PDF buffer or stream
-  **Note:** Implemented with PDFKit, full A4 layout with cost breakdown table, tenant/apartment info, and Swiss QR-bill section.
-  Files: `backend/src/services/pdf.service.ts` (800+ lines)
+          **Note:** Implemented with PDFKit, full A4 layout with cost breakdown table, tenant/apartment info, and Swiss QR-bill section.
+          Files: `backend/src/services/pdf.service.ts` (800+ lines)
 
   - [x] `generateQRBill(statementData)` function
     - [x] Generate Swiss QR-bill section
@@ -1731,7 +1736,7 @@ Validation is defined inline in route handlers for type safety.
     - [x] Include IBAN, creditor, amount
     - [x] Include reference number
     - [x] Return: QR-bill as image/PDF section
-  **Note:** Integrated into PDF with receipt and payment sections per Swiss standard.
+          **Note:** Integrated into PDF with receipt and payment sections per Swiss standard.
 
 ### 9.2 Swiss QR-Bill Implementation
 
@@ -1741,19 +1746,19 @@ Validation is defined inline in route handlers for type safety.
     - [x] Include: version, amount, currency, creditor, debtor
     - [x] Include: IBAN, reference number
     - [x] Include: structured data format
-  **Note:** Full SPC (Swiss Payments Code) v2.0 implementation with structured address format.
-  Files: `backend/src/services/qr-bill.service.ts` (350+ lines)
+          **Note:** Full SPC (Swiss Payments Code) v2.0 implementation with structured address format.
+          Files: `backend/src/services/qr-bill.service.ts` (350+ lines)
 
   - [x] `encodeQRCode(qrData)` function
     - [x] Encode QR data to image
     - [x] Use QR code library
     - [x] Return: QR code image
-  **Note:** Uses `qrcode` npm package with Swiss standard 46mm size and medium error correction.
+          **Note:** Uses `qrcode` npm package with Swiss standard 46mm size and medium error correction.
 
   - [x] `validateIBAN(iban)` function
     - [x] Validate Swiss IBAN format
     - [x] Return: valid/invalid
-  **Note:** Full MOD-97 checksum validation, Swiss/LI IBAN support, QR-IBAN detection.
+          **Note:** Full MOD-97 checksum validation, Swiss/LI IBAN support, QR-IBAN detection.
 
 ### 9.3 Multi-Language PDF Templates
 
@@ -1763,13 +1768,13 @@ Validation is defined inline in route handlers for type safety.
   - [x] Italian template (it)
   - [x] Romansh template (rm)
   - [x] English template (en)
-  **Note:** All 5 Swiss languages + English implemented as translation dictionaries.
+        **Note:** All 5 Swiss languages + English implemented as translation dictionaries.
 
 - [x] Each template includes
   - [x] Translated labels
   - [x] Translated descriptions
   - [x] Correct date/currency formatting
-  **Note:** Swiss formatting: CHF 1'234.56, DD.MM.YYYY dates, floor notation (2.OG).
+        **Note:** Swiss formatting: CHF 1'234.56, DD.MM.YYYY dates, floor notation (2.OG).
 
 ### 9.4 PDF Storage
 
@@ -1784,13 +1789,13 @@ Validation is defined inline in route handlers for type safety.
     - [x] Get PDF from database
     - [x] Set content-type: application/pdf
     - [x] Return: PDF file
-  **Note:** Added 3 endpoints: generate-pdf (POST), pdf (GET binary), pdf/base64 (GET for preview).
-  Files: `backend/src/routes/statements.ts` (updated with ~150 new lines)
+          **Note:** Added 3 endpoints: generate-pdf (POST), pdf (GET binary), pdf/base64 (GET for preview).
+          Files: `backend/src/routes/statements.ts` (updated with ~150 new lines)
 
 ### 9.5 Async PDF Generation
 
 - [x] ~~Create background job for PDF generation~~ **Dropped:** PDFs are generated synchronously on request;
-  sufficient for the MVP scale (<50 apartments)
+      sufficient for the MVP scale (<50 apartments)
 
 ### 9.6 Testing PDF & QR
 
@@ -1816,7 +1821,7 @@ Validation is defined inline in route handlers for type safety.
   - [ ] Verify formatting
   - [ ] Verify QR code readability
   - [ ] Verify all data accurate
-  **Note:** Tests deferred to Phase 15 (Testing & Quality Assurance).
+        **Note:** Tests deferred to Phase 15 (Testing & Quality Assurance).
 
 ### 9.X Verification: Unit Tests & E2E Tests
 
@@ -1840,7 +1845,7 @@ Validation is defined inline in route handlers for type safety.
   - [ ] Run all tests: `npm run test`
   - [ ] Generate PDFs for all scenarios
   - [ ] Verify QR codes scan correctly
-  **Note:** Tests deferred to Phase 15. Code implementation verified with TypeScript compilation and lint.
+        **Note:** Tests deferred to Phase 15. Code implementation verified with TypeScript compilation and lint.
 
 **Status: Phase 9 In Progress** 🔄 (57%, open items above)
 **Completed:** January 27, 2026
@@ -1860,8 +1865,8 @@ Validation is defined inline in route handlers for type safety.
   - [x] Link to building details
   - [x] Add empty state for no buildings
   - [x] Add pagination support
-  **Note:** Implemented with card-based layout, search filters, and pagination.
-  Files: `src/routes/buildings/+page.svelte`, `src/routes/buildings/+page.server.ts`
+        **Note:** Implemented with card-based layout, search filters, and pagination.
+        Files: `src/routes/buildings/+page.svelte`, `src/routes/buildings/+page.server.ts`
 
 - [x] Create `src/routes/buildings/[id]/+page.svelte` (detail view)
   - [x] Display building details (address, canton, type, year built, coordinates)
@@ -1870,8 +1875,8 @@ Validation is defined inline in route handlers for type safety.
   - [x] Add "Delete" button (with confirmation modal)
   - [x] Add "Add Apartment" button
   - [x] Show occupancy statistics with InfoCard components
-  **Note:** Implemented with floor-grouped apartments, delete confirmation modal.
-  Files: `src/routes/buildings/[id]/+page.svelte`, `src/routes/buildings/[id]/+page.server.ts`
+        **Note:** Implemented with floor-grouped apartments, delete confirmation modal.
+        Files: `src/routes/buildings/[id]/+page.svelte`, `src/routes/buildings/[id]/+page.server.ts`
 
 - [x] Create `src/routes/buildings/new/+page.svelte` (create form)
   - [x] Form with fields: address, postal code, city
@@ -1879,18 +1884,19 @@ Validation is defined inline in route handlers for type safety.
   - [x] Add optional fields: building_name, building_type, year_built
   - [x] Add "Create" and "Cancel" buttons
   - [x] Validation and error display
-  **Note:** OpenPLZ integration deferred to later phase.
-  Files: `src/routes/buildings/new/+page.svelte`
+        **Note:** OpenPLZ integration deferred to later phase.
+        Files: `src/routes/buildings/new/+page.svelte`
 
 - [x] Create `src/routes/buildings/[id]/edit/+page.svelte` (edit form)
   - [x] Pre-fill form with current data
   - [x] Allow editing all fields
   - [x] Add "Save" and "Cancel" buttons
   - [x] Same validation as create form
-  **Note:** Form pre-populates with existing building data.
-  Files: `src/routes/buildings/[id]/edit/+page.svelte`, `src/routes/buildings/[id]/edit/+page.server.ts`
+        **Note:** Form pre-populates with existing building data.
+        Files: `src/routes/buildings/[id]/edit/+page.svelte`, `src/routes/buildings/[id]/edit/+page.server.ts`
 
 **Component Updates:**
+
 - Updated `Button.svelte`: Added danger variant, href support, size prop
 - Updated `InfoCard.svelte`: Improved styling with icon background, valueClass prop
 - Updated `types.ts`: Added BuildingWithStats, BuildingsListData types
@@ -1905,8 +1911,8 @@ Validation is defined inline in route handlers for type safety.
   - [x] Link to apartment details
   - [x] Search functionality
   - [x] Pagination support
-  **Note:** Implemented with card-based layout, search, building/status filters, pagination.
-  Files: `src/routes/apartments/+page.svelte`, `src/routes/apartments/+page.server.ts`
+        **Note:** Implemented with card-based layout, search, building/status filters, pagination.
+        Files: `src/routes/apartments/+page.svelte`, `src/routes/apartments/+page.server.ts`
 
 - [x] Create `src/routes/apartments/[id]/+page.svelte` (detail view)
   - [x] Display apartment details
@@ -1914,7 +1920,7 @@ Validation is defined inline in route handlers for type safety.
   - [x] Display current contract
   - [x] Display contract history
   - [x] Add buttons: Edit, Delete, View Tenant
-  **Note:** Implemented based on design mock. Created reusable components:
+        **Note:** Implemented based on design mock. Created reusable components:
   - `src/lib/components/Icon.svelte` - Material Symbols wrapper
   - `src/lib/components/StatusBadge.svelte` - AKTIV/Beendet badges
   - `src/lib/components/Button.svelte` - Primary/secondary/icon buttons
@@ -1936,16 +1942,16 @@ Validation is defined inline in route handlers for type safety.
   - [x] Form with: building_id (dropdown), floor (dropdown), size_m2, room_count
   - [x] Add "Create" and "Cancel" buttons
   - [x] Form validation with error display
-  **Note:** Implemented with building dropdown, floor/room options, validation.
-  Files: `src/routes/apartments/new/+page.svelte`
+        **Note:** Implemented with building dropdown, floor/room options, validation.
+        Files: `src/routes/apartments/new/+page.svelte`
 
 - [x] Create `src/routes/apartments/[id]/edit/+page.svelte` (edit form)
   - [x] Pre-fill form with current apartment data
   - [x] Allow editing all fields including occupancy status
   - [x] Warning when changing status of rented apartment
   - [x] Form validation
-  **Note:** Implemented with IIFE pattern for Svelte 5 state initialization.
-  Files: `src/routes/apartments/[id]/edit/+page.svelte`, `src/routes/apartments/[id]/edit/+page.server.ts`
+        **Note:** Implemented with IIFE pattern for Svelte 5 state initialization.
+        Files: `src/routes/apartments/[id]/edit/+page.svelte`, `src/routes/apartments/[id]/edit/+page.server.ts`
 
 ### 10.3 Tenant Pages
 
@@ -1957,8 +1963,8 @@ Validation is defined inline in route handlers for type safety.
   - [x] Search by name/email
   - [x] Status filter (all/active/inactive)
   - [x] Pagination support
-  **Note:** Implemented with card-based layout, avatar initials, contact info display.
-  Files: `src/routes/tenants/+page.svelte`, `src/routes/tenants/+page.server.ts`
+        **Note:** Implemented with card-based layout, avatar initials, contact info display.
+        Files: `src/routes/tenants/+page.svelte`, `src/routes/tenants/+page.server.ts`
 
 - [x] Create `src/routes/tenants/[id]/+page.svelte` (detail view)
   - [x] Display tenant contact info
@@ -1966,23 +1972,23 @@ Validation is defined inline in route handlers for type safety.
   - [x] Display contract history with status badges
   - [x] Add buttons: Edit, Delete (with confirmation modal)
   - [x] Link to current apartment
-  **Note:** Implemented with contact section, occupancy card, contract history table.
-  Files: `src/routes/tenants/[id]/+page.svelte`, `src/routes/tenants/[id]/+page.server.ts`
+        **Note:** Implemented with contact section, occupancy card, contract history table.
+        Files: `src/routes/tenants/[id]/+page.svelte`, `src/routes/tenants/[id]/+page.server.ts`
 
 - [x] Create `src/routes/tenants/new/+page.svelte` (create form)
   - [x] Form with: first_name, last_name, email, phone
   - [x] Optional address fields: address, postal_code, city
   - [x] Validation for email format, phone format, postal code
   - [x] Add "Create" and "Cancel" buttons
-  **Note:** Implemented with Swiss formatting validation.
-  Files: `src/routes/tenants/new/+page.svelte`
+        **Note:** Implemented with Swiss formatting validation.
+        Files: `src/routes/tenants/new/+page.svelte`
 
 - [x] Create `src/routes/tenants/[id]/edit/+page.svelte` (edit form)
   - [x] Pre-fill form with current tenant data
   - [x] Same validation as create form
   - [x] Add "Save" and "Cancel" buttons
-  **Note:** Implemented with IIFE pattern for Svelte 5 state initialization.
-  Files: `src/routes/tenants/[id]/edit/+page.svelte`, `src/routes/tenants/[id]/edit/+page.server.ts`
+        **Note:** Implemented with IIFE pattern for Svelte 5 state initialization.
+        Files: `src/routes/tenants/[id]/edit/+page.svelte`, `src/routes/tenants/[id]/edit/+page.server.ts`
 
 ### 10.4 Contract Pages
 
@@ -1993,8 +1999,8 @@ Validation is defined inline in route handlers for type safety.
   - [x] Add "Create Contract" button
   - [x] Link to contract details
   - [x] Pagination support
-  **Note:** Implemented with table layout, filters, Swiss date/currency formatting.
-  Files: `src/routes/contracts/+page.svelte`, `src/routes/contracts/+page.server.ts`
+        **Note:** Implemented with table layout, filters, Swiss date/currency formatting.
+        Files: `src/routes/contracts/+page.svelte`, `src/routes/contracts/+page.server.ts`
 
 - [x] Create `src/routes/contracts/[id]/+page.svelte` (detail view)
   - [x] Display full contract info with tenant card
@@ -2002,8 +2008,8 @@ Validation is defined inline in route handlers for type safety.
   - [x] Display rent breakdown (Nettomiete, Nebenkosten, Parkplatz, Total)
   - [x] Add buttons: Edit, Delete (with confirmation), Terminate contract
   - [x] Warning about impact on apartment status
-  **Note:** Implemented with tenant/apartment info cards, rent breakdown section.
-  Files: `src/routes/contracts/[id]/+page.svelte`, `src/routes/contracts/[id]/+page.server.ts`
+        **Note:** Implemented with tenant/apartment info cards, rent breakdown section.
+        Files: `src/routes/contracts/[id]/+page.svelte`, `src/routes/contracts/[id]/+page.server.ts`
 
 - [x] Create `src/routes/contracts/new/+page.svelte` (create form)
   - [x] Form with: tenant_id, apartment_id (dropdowns)
@@ -2012,58 +2018,59 @@ Validation is defined inline in route handlers for type safety.
   - [x] Live total rent calculation
   - [x] Disabled rented apartments in dropdown
   - [x] Pre-fill from URL params (tenant, apartment)
-  **Note:** Implemented with Swiss currency formatting, live total calculation.
-  Files: `src/routes/contracts/new/+page.svelte`
+        **Note:** Implemented with Swiss currency formatting, live total calculation.
+        Files: `src/routes/contracts/new/+page.svelte`
 
 - [x] Create `src/routes/contracts/[id]/edit/+page.svelte` (edit form)
   - [x] Pre-fill form with current contract data
   - [x] Warning for active contracts
   - [x] Allow changing tenant, apartment, dates, rent amounts
   - [x] Live total rent calculation
-  **Note:** Implemented with IIFE pattern for Svelte 5 state initialization.
-  Files: `src/routes/contracts/[id]/edit/+page.svelte`, `src/routes/contracts/[id]/edit/+page.server.ts`
+        **Note:** Implemented with IIFE pattern for Svelte 5 state initialization.
+        Files: `src/routes/contracts/[id]/edit/+page.svelte`, `src/routes/contracts/[id]/edit/+page.server.ts`
 
 ### 10.5 Shared Components
 
 - [x] Create `src/lib/components/Form.svelte`
   - [x] Reusable form wrapper with validation display
-  **Note:** Form wrapper with Card, error display, and children slot.
+        **Note:** Form wrapper with Card, error display, and children slot.
 
 - [x] Create `src/lib/components/Input.svelte`
   - [x] Text input component with label and error
   - [x] Supports: text, email, password, tel, number, date types
   - [x] Features: prefix/suffix, hint text, disabled state
-  **Note:** Full-featured input with all input types and prefix/suffix support.
+        **Note:** Full-featured input with all input types and prefix/suffix support.
 
 - [x] Create `src/lib/components/Select.svelte`
   - [x] Dropdown select component
   - [x] Supports: placeholder, disabled options
-  **Note:** Select with option disabled support for unavailable items.
+        **Note:** Select with option disabled support for unavailable items.
 
 - [x] Create `src/lib/components/DataTable.svelte`
   - [x] Reusable table component with sorting/filtering
   - [x] Supports: sortable columns, custom cell rendering, empty state
-  **Note:** Flexible table with snippet-based row/cell customization.
+        **Note:** Flexible table with snippet-based row/cell customization.
 
 - [x] Create `src/lib/components/Modal.svelte`
   - [x] Reusable modal for confirmations
   - [x] Variants: default, danger, warning
   - [x] Features: keyboard close, backdrop click, loading state
-  **Note:** Accessible modal with ESC key support and variant styling.
+        **Note:** Accessible modal with ESC key support and variant styling.
 
 - [x] Create `src/lib/components/Loading.svelte`
   - [x] Loading spinner component
   - [x] Sizes: sm, md, lg
   - [x] Optional: text label, full-page overlay mode
-  **Note:** Flexible spinner with size options and fullPage mode.
+        **Note:** Flexible spinner with size options and fullPage mode.
 
 - [x] Create `src/lib/components/Error.svelte`
   - [x] Error message display component
   - [x] Variants: error, warning, info
   - [x] Optional: retry button
-  **Note:** Alert component with retry callback support.
+        **Note:** Alert component with retry callback support.
 
 **Additional Components Created:**
+
 - [x] `Textarea.svelte` - Multi-line text input with character count
 - [x] `Checkbox.svelte` - Checkbox with label and description
 - [x] `SearchInput.svelte` - Search input with clear button
@@ -2076,6 +2083,7 @@ Validation is defined inline in route handlers for type safety.
 - [x] `index.ts` - Component barrel export file
 
 **ESLint Config Updated:**
+
 - Added `@typescript-eslint/no-unused-vars` rule to Svelte files
 - Configured underscore prefix ignore pattern for callback type parameters
 
@@ -2097,8 +2105,8 @@ Validation is defined inline in route handlers for type safety.
     - [x] Get city, canton, district from postal code
     - [x] Return: Address object or null
   - [x] Helper functions: `streetToAddress()`, `formatAddress()`, `formatAddressWithCanton()`
-  **Note:** Full OpenPLZ API integration with TypeScript types.
-  Files: `src/lib/services/openplz.ts`, `src/lib/services/index.ts`
+        **Note:** Full OpenPLZ API integration with TypeScript types.
+        Files: `src/lib/services/openplz.ts`, `src/lib/services/index.ts`
 
 - [x] Create UI Components for Address Search
   - [x] `AddressSearch.svelte` - Autocomplete search with debouncing
@@ -2108,14 +2116,14 @@ Validation is defined inline in route handlers for type safety.
   - [x] `PostalCodeInput.svelte` - PLZ input with auto-fill
     - Auto-lookup city and canton when 4 digits entered
     - Combined PLZ/City input with canton badge
-  **Note:** Components integrated into building create page.
-  Files: `src/lib/components/AddressSearch.svelte`, `src/lib/components/PostalCodeInput.svelte`
+      **Note:** Components integrated into building create page.
+      Files: `src/lib/components/AddressSearch.svelte`, `src/lib/components/PostalCodeInput.svelte`
 
 - [x] Integrate into Building Create Page
   - [x] Added AddressSearch component with OpenPLZ lookup
   - [x] Auto-fills street, postal code, city, and canton
   - [x] Falls back to manual input if needed
-  **Note:** Updated `/routes/buildings/new/+page.svelte` with search integration.
+        **Note:** Updated `/routes/buildings/new/+page.svelte` with search integration.
 
 ### 10.7 Testing Frontend Pages
 
@@ -2129,7 +2137,7 @@ Validation is defined inline in route handlers for type safety.
   - [x] OpenPLZ formatAddress tests (2)
   - [x] OpenPLZ formatAddressWithCanton tests (2)
   - [x] OpenPlzError tests (2)
-  **Note:** Created `tests/unit/openplz.test.ts` with 24 comprehensive tests for OpenPLZ service. All tests pass.
+        **Note:** Created `tests/unit/openplz.test.ts` with 24 comprehensive tests for OpenPLZ service. All tests pass.
 
 - [x] E2E tests for user flows (50+ tests created)
   - [x] Create building flow
@@ -2147,7 +2155,7 @@ Validation is defined inline in route handlers for type safety.
   - [x] Edit contract flow
   - [x] View contract details
   - [x] Filter contracts
-  **Note:** Created comprehensive E2E test suites for all CRUD operations:
+        **Note:** Created comprehensive E2E test suites for all CRUD operations:
   - `tests/e2e/buildings.spec.ts` - 12 tests for building CRUD
   - `tests/e2e/apartments.spec.ts` - 14 tests for apartment CRUD
   - `tests/e2e/tenants.spec.ts` - 14 tests for tenant CRUD
@@ -2161,7 +2169,7 @@ Validation is defined inline in route handlers for type safety.
   - [x] Test validation messages (via E2E tests)
   - [x] Target >80% code coverage
   - [x] All tests pass: `npm run test` - 156 tests pass
-  **Note:** Unit tests pass (156 total). E2E tests serve as specifications - some will pass once pages are fully implemented.
+        **Note:** Unit tests pass (156 total). E2E tests serve as specifications - some will pass once pages are fully implemented.
 
 - [x] E2E Tests for Management Workflows
   - [x] Test building CRUD workflows
@@ -2169,7 +2177,7 @@ Validation is defined inline in route handlers for type safety.
   - [x] Test tenant management workflows
   - [x] Test contract management workflows
   - [ ] All tests pass: `npm run test:e2e` - 53 pass, 50 test UI structure
-  **Note:** Auth E2E tests (53) all pass. CRUD E2E tests serve as specifications for expected page behavior.
+        **Note:** Auth E2E tests (53) all pass. CRUD E2E tests serve as specifications for expected page behavior.
 
 - [ ] Manual Testing
   - [x] Run all tests: `npm run test` - All 156 unit tests pass
@@ -2191,8 +2199,8 @@ Validation is defined inline in route handlers for type safety.
   - [x] Add "Create Invoice" button
   - [x] Link to invoice details
   - [x] Show categorization status (pending, auto-categorized, manual)
-  **Note:** Implemented with DataTable layout, 4 filter dropdowns (search, building, category, validity), pagination.
-  Files: `src/routes/invoices/+page.svelte`, `src/routes/invoices/+page.server.ts`
+        **Note:** Implemented with DataTable layout, 4 filter dropdowns (search, building, category, validity), pagination.
+        Files: `src/routes/invoices/+page.svelte`, `src/routes/invoices/+page.server.ts`
 
 ### 11.2 Invoice Create/Edit Pages
 
@@ -2204,8 +2212,8 @@ Validation is defined inline in route handlers for type safety.
   - [x] Select distribution key
   - [x] Auto-check "is_valid_utility_cost" based on category
   - [x] Add "Create" and "Cancel" buttons
-  **Note:** Implemented with simulated LLM categorization, confidence bars, category suggestions.
-  Files: `src/routes/invoices/new/+page.svelte`
+        **Note:** Implemented with simulated LLM categorization, confidence bars, category suggestions.
+        Files: `src/routes/invoices/new/+page.svelte`
 
 - [x] Create `src/routes/invoices/[id]/+page.svelte` (detail view)
   - [x] Display invoice info
@@ -2213,15 +2221,15 @@ Validation is defined inline in route handlers for type safety.
   - [x] Show distribution key
   - [x] Show validity flag
   - [x] Add buttons: Edit, Delete, Re-categorize
-  **Note:** Implemented with 2-column layout, LLM info section, delete confirmation modal.
-  Files: `src/routes/invoices/[id]/+page.svelte`, `src/routes/invoices/[id]/+page.server.ts`
+        **Note:** Implemented with 2-column layout, LLM info section, delete confirmation modal.
+        Files: `src/routes/invoices/[id]/+page.svelte`, `src/routes/invoices/[id]/+page.server.ts`
 
 - [x] Create `src/routes/invoices/[id]/edit/+page.svelte`
   - [x] Pre-fill form
   - [x] Allow category override
   - [x] Log override reason (optional)
-  **Note:** Implemented with change detection, override reason requirement when modifying LLM suggestion.
-  Files: `src/routes/invoices/[id]/edit/+page.svelte`, `src/routes/invoices/[id]/edit/+page.server.ts`
+        **Note:** Implemented with change detection, override reason requirement when modifying LLM suggestion.
+        Files: `src/routes/invoices/[id]/edit/+page.svelte`, `src/routes/invoices/[id]/edit/+page.server.ts`
 
 ### 11.3 Category Management Page
 
@@ -2231,22 +2239,22 @@ Validation is defined inline in route handlers for type safety.
   - [x] Filter: show only allowed or only disallowed
   - [x] Add "Create Category" button
   - [x] Link to category details or inline edit
-  **Note:** Implemented category list with filter tabs, table view, delete modal, Swiss law info card.
-  Files: `src/routes/config/categories/+page.svelte`, `src/routes/config/categories/+page.server.ts`
+        **Note:** Implemented category list with filter tabs, table view, delete modal, Swiss law info card.
+        Files: `src/routes/config/categories/+page.svelte`, `src/routes/config/categories/+page.server.ts`
 
 - [x] Create `src/routes/config/categories/new/+page.svelte`
   - [x] Form with: category name, is_allowed_utility_cost checkbox
   - [x] Explain Swiss law rules
   - [x] Add "Create" and "Cancel" buttons
-  **Note:** Implemented create form with multi-language translation support, Swiss law info panel, validation.
-  Files: `src/routes/config/categories/new/+page.svelte`
+        **Note:** Implemented create form with multi-language translation support, Swiss law info panel, validation.
+        Files: `src/routes/config/categories/new/+page.svelte`
 
 - [x] Rebuild against the real API (Session 3; create and delete were simulated with setTimeout)
   - [x] Create, edit (`[id]/edit`) and delete via form actions; German name shown and edited, English key kept
   - [x] Backend: German messages, 409 for duplicate names and categories with invoices, search by German name
   - [x] Fix invoice count always 0 (unqualified column in drizzle subquery)
-  **Note:** Files: `src/lib/server/category.ts`, `src/routes/config/categories/**`, `backend/src/services/category.service.ts`.
-  Tests: `src/__tests__/categories.test.ts`, `category-admin.pg.test.ts`, E2E `categories.feature` (7 scenarios).
+        **Note:** Files: `src/lib/server/category.ts`, `src/routes/config/categories/**`, `backend/src/services/category.service.ts`.
+        Tests: `src/__tests__/categories.test.ts`, `category-admin.pg.test.ts`, E2E `categories.feature` (7 scenarios).
 
 ### 11.4 LLM Categorization UI
 
@@ -2256,14 +2264,14 @@ Validation is defined inline in route handlers for type safety.
   - [x] Show confidence score
   - [x] Allow manual override
   - [x] Show reason for override (if applicable)
-  **Note:** Implemented reusable component with loading state, confidence bar, category selection, override warning.
-  Files: `src/lib/components/InvoiceCategorization.svelte`
+        **Note:** Implemented reusable component with loading state, confidence bar, category selection, override warning.
+        Files: `src/lib/components/InvoiceCategorization.svelte`
 
 - [x] Create `src/lib/components/CategoryBadge.svelte`
   - [x] Show category name with color coding
   - [x] Show validity indicator (allowed/not allowed)
-  **Note:** Implemented badge component with utility cost indicator icons, size variants.
-  Files: `src/lib/components/CategoryBadge.svelte`
+        **Note:** Implemented badge component with utility cost indicator icons, size variants.
+        Files: `src/lib/components/CategoryBadge.svelte`
 
 ### 11.5 Testing Invoice Pages
 
@@ -2324,10 +2332,10 @@ Validation is defined inline in route handlers for type safety.
   - [x] Editable form with: accounting_period, management_fee_pct, default_heating_profile
   - [x] Show validation rules (management_fee_pct 0-3%)
   - [x] Add "Save" button
-  **Note:** Implemented with quick links to sub-pages, company info, accounting settings, Swiss law info.
-  Files: `src/routes/config/+page.svelte`, `src/routes/config/+page.server.ts`
-  **Rebuilt (Session 3):** Settings are saved for real (`src/lib/server/settings.ts`) with validation of PLZ, Swiss IBAN
-  and fee; the statement wizard and new invoices use the defaults. E2E: `settings.feature`.
+        **Note:** Implemented with quick links to sub-pages, company info, accounting settings, Swiss law info.
+        Files: `src/routes/config/+page.svelte`, `src/routes/config/+page.server.ts`
+        **Rebuilt (Session 3):** Settings are saved for real (`src/lib/server/settings.ts`) with validation of PLZ, Swiss IBAN
+        and fee; the statement wizard and new invoices use the defaults. E2E: `settings.feature`.
 
 ### 12.2 Heating Profile Pages
 
@@ -2336,24 +2344,24 @@ Validation is defined inline in route handlers for type safety.
   - [x] Show monthly percentages
   - [x] Show total percentage (should be ~100%)
   - [x] Add "Create Custom Profile" button
-  **Note:** Implemented with visual bar charts, profile cards, percentage totals.
-  Files: `src/routes/config/heating-profiles/+page.svelte`, `src/routes/config/heating-profiles/+page.server.ts`
+        **Note:** Implemented with visual bar charts, profile cards, percentage totals.
+        Files: `src/routes/config/heating-profiles/+page.svelte`, `src/routes/config/heating-profiles/+page.server.ts`
 
 - [x] Create `src/routes/config/heating-profiles/new/+page.svelte`
   - [x] Form with 12 monthly percentage inputs
   - [x] Real-time validation: sum should be ~100%
   - [x] Name field
   - [x] Add "Create" and "Cancel" buttons
-  **Note:** Implemented with preset templates, visual chart preview, real-time total calculation.
-  Files: `src/routes/config/heating-profiles/new/+page.svelte`
+        **Note:** Implemented with preset templates, visual chart preview, real-time total calculation.
+        Files: `src/routes/config/heating-profiles/new/+page.svelte`
 
 - [x] Create `src/routes/config/heating-profiles/[id]/+page.svelte` (detail/edit)
   - [x] Display profile details
   - [x] Allow editing (if custom) — `[id]/edit`, predefined profiles answer 403
   - [x] Show usage in configuration — the default profile of the settings cannot be deleted (409 with reason)
-  **Note (Session 3):** Create, edit and delete via form actions against the real API, German validation messages.
-  Files: `src/lib/server/heating-profile.ts`, `src/routes/config/heating-profiles/**`, `HeatingProfileForm.svelte`.
-  Tests: `src/__tests__/heating-profiles.test.ts`, `heating-profile-admin.pg.test.ts`, E2E `heating-profiles.feature`.
+        **Note (Session 3):** Create, edit and delete via form actions against the real API, German validation messages.
+        Files: `src/lib/server/heating-profile.ts`, `src/routes/config/heating-profiles/**`, `HeatingProfileForm.svelte`.
+        Tests: `src/__tests__/heating-profiles.test.ts`, `heating-profile-admin.pg.test.ts`, E2E `heating-profiles.feature`.
 
 ### 12.3 Distribution Key Management Pages
 
@@ -2361,8 +2369,8 @@ Validation is defined inline in route handlers for type safety.
   - [x] Display all distribution keys (predefined + custom)
   - [x] Show formula for custom keys
   - [x] Add "Create Custom Key" button
-  **Note:** Implemented with formula display, variable reference, formula examples.
-  Files: `src/routes/config/distribution-keys/+page.svelte`, `src/routes/config/distribution-keys/+page.server.ts`
+        **Note:** Implemented with formula display, variable reference, formula examples.
+        Files: `src/routes/config/distribution-keys/+page.svelte`, `src/routes/config/distribution-keys/+page.server.ts`
 
 - [x] Create `src/routes/config/distribution-keys/new/+page.svelte`
   - [x] Form with: name, formula
@@ -2370,39 +2378,39 @@ Validation is defined inline in route handlers for type safety.
   - [x] Show formula test interface
   - [x] Test with sample apartment data
   - [x] Add "Create" and "Cancel" buttons
-  **Note:** Implemented with formula builder, variable buttons, live test results with sample apartments.
-  Files: `src/routes/config/distribution-keys/new/+page.svelte`
-  **Rebuilt (Session 3):** Saves via the real API (was simulated); the formula test runs in the backend
-  (`?/test` action) instead of `eval` in the browser; only the variables the backend knows are offered
-  (`{persons}` was offered but always rejected); formula messages in German.
+        **Note:** Implemented with formula builder, variable buttons, live test results with sample apartments.
+        Files: `src/routes/config/distribution-keys/new/+page.svelte`
+        **Rebuilt (Session 3):** Saves via the real API (was simulated); the formula test runs in the backend
+        (`?/test` action) instead of `eval` in the browser; only the variables the backend knows are offered
+        (`{persons}` was offered but always rejected); formula messages in German.
 
 - [x] Create `src/routes/config/distribution-keys/[id]/edit/+page.svelte` (edit; no separate detail page)
   - [x] Display key details — in the list (formula, kind, invoices distributed by it)
   - [x] Allow editing formula (if custom) — predefined keys answer 403
   - [x] Show formula test results
-  **Note (Session 3):** Delete from the list; keys with invoices or set as default in the settings stay (409 with reason).
-  Files: `src/lib/server/distribution-key.ts`, `src/routes/config/distribution-keys/**`.
-  Tests: `src/__tests__/distribution-keys.test.ts`, `distribution-key-admin.pg.test.ts`, E2E `distribution-keys.feature`.
-  **Open:** predefined keys "Per Person" (`{persons}`) and "By Consumption" (`{consumption}`) use variables the formula
-  engine does not know.
+        **Note (Session 3):** Delete from the list; keys with invoices or set as default in the settings stay (409 with reason).
+        Files: `src/lib/server/distribution-key.ts`, `src/routes/config/distribution-keys/**`.
+        Tests: `src/__tests__/distribution-keys.test.ts`, `distribution-key-admin.pg.test.ts`, E2E `distribution-keys.feature`.
+        **Open:** predefined keys "Per Person" (`{persons}`) and "By Consumption" (`{consumption}`) use variables the formula
+        engine does not know.
 
 ### 12.4 Configuration Components
 
 - [x] Create `src/lib/components/PercentageInput.svelte`
   - [x] Input for percentage values (0-100)
   - [x] Validation display
-  **Note:** Integrated directly into heating profile form.
+        **Note:** Integrated directly into heating profile form.
 
 - [x] Create `src/lib/components/FormulaBuilder.svelte`
   - [x] Help text for formula syntax
   - [x] Variable selector buttons
   - [x] Example formulas
   - [x] Test interface
-  **Note:** Integrated directly into distribution key form with variable buttons and test functionality.
+        **Note:** Integrated directly into distribution key form with variable buttons and test functionality.
 
 - [x] Create `src/lib/components/ConfigurationForm.svelte`
   - [x] Reusable form for configuration updates
-  **Note:** Pattern used directly in config page with form state management.
+        **Note:** Pattern used directly in config page with form state management.
 
 ### 12.5 Testing Configuration Pages
 
@@ -2413,7 +2421,7 @@ Validation is defined inline in route handlers for type safety.
   - [x] Heating profile create (1)
   - [x] Distribution key list (1)
   - [x] Distribution key create (1)
-  **Note (Session 3):** `src/__tests__/settings.test.ts`, `heating-profiles.test.ts`, `categories.test.ts`, `distribution-keys.test.ts`.
+        **Note (Session 3):** `src/__tests__/settings.test.ts`, `heating-profiles.test.ts`, `categories.test.ts`, `distribution-keys.test.ts`.
 
 - [ ] E2E tests for configuration flows (8+ tests)
   - [ ] Update accounting period (1) — unit tests only
@@ -2424,8 +2432,8 @@ Validation is defined inline in route handlers for type safety.
   - [x] Test formula (1)
   - [x] Edit custom profile (1)
   - [x] Edit custom key (1)
-  **Note (Session 3):** German features `settings.feature`, `heating-profiles.feature`, `categories.feature`,
-  `distribution-keys.feature`.
+        **Note (Session 3):** German features `settings.feature`, `heating-profiles.feature`, `categories.feature`,
+        `distribution-keys.feature`.
 
 ### 12.X Verification: Unit Tests & E2E Tests
 
@@ -2433,7 +2441,7 @@ Validation is defined inline in route handlers for type safety.
   - [x] Test form validation
   - [x] Test formula editor
   - [x] Target >75% code coverage — 98% of `src/routes/config` (Session 4: `config-pages.test.ts`,
-    `categories-page`, `distribution-keys-pages`, `heating-profiles-pages` `.dom.test.ts`)
+        `categories-page`, `distribution-keys-pages`, `heating-profiles-pages` `.dom.test.ts`)
   - [x] All tests pass: `npm run test`
 
 - [x] E2E Tests for Configuration Workflows
@@ -2460,10 +2468,10 @@ Validation is defined inline in route handlers for type safety.
   - [x] Step 3: Review generated statements
   - [x] Step 4: Generate PDFs and save
   - [x] Progress indicator showing current step
-  **Note:** Implemented with 4-step wizard including period selection with heating profile, building selection with apartment counts, preview with cost breakdown table, and generation progress bar. Files: `src/routes/statements/generate/+page.svelte` (~450 lines), `src/routes/statements/generate/+page.server.ts` (~100 lines).
+        **Note:** Implemented with 4-step wizard including period selection with heating profile, building selection with apartment counts, preview with cost breakdown table, and generation progress bar. Files: `src/routes/statements/generate/+page.svelte` (~450 lines), `src/routes/statements/generate/+page.server.ts` (~100 lines).
 
 - [x] ~~Create `src/lib/components/StatementWizard.svelte`~~ **Dropped:** the wizard lives in
-  `src/routes/statements/generate/` (`WizardStep`, `WizardNavigation`, `WizardProgress`, one component per step)
+      `src/routes/statements/generate/` (`WizardStep`, `WizardNavigation`, `WizardProgress`, one component per step)
 
 ### 13.2 Statement List Page
 
@@ -2474,7 +2482,7 @@ Validation is defined inline in route handlers for type safety.
   - [x] Add "Generate Statements" button
   - [x] Link to statement details
   - [x] Bulk actions: mark as paid, send reminders
-  **Note:** Implemented with status overview cards (draft/sent/paid/overdue counts), searchable table with filters, balance display with color coding. Files: `src/routes/statements/+page.svelte` (~350 lines), `src/routes/statements/+page.server.ts` (~150 lines).
+        **Note:** Implemented with status overview cards (draft/sent/paid/overdue counts), searchable table with filters, balance display with color coding. Files: `src/routes/statements/+page.svelte` (~350 lines), `src/routes/statements/+page.server.ts` (~150 lines).
 
 ### 13.3 Statement Detail Pages
 
@@ -2485,12 +2493,12 @@ Validation is defined inline in route handlers for type safety.
   - [x] Show total costs, advance payments, balance
   - [x] Show payment status and deadline
   - [x] Add buttons: Edit, Delete, Download PDF, Mark as Paid, Send Reminder
-  **Note:** Implemented with full cost breakdown table, payment info sidebar, action modals for mark-paid/send-reminder/delete. Files: `src/routes/statements/[id]/+page.svelte` (~400 lines), `src/routes/statements/[id]/+page.server.ts` (~90 lines).
+        **Note:** Implemented with full cost breakdown table, payment info sidebar, action modals for mark-paid/send-reminder/delete. Files: `src/routes/statements/[id]/+page.svelte` (~400 lines), `src/routes/statements/[id]/+page.server.ts` (~90 lines).
 
 - [x] Create `src/routes/statements/[id]/pdf/+server.ts`
   - [x] Server route to download PDF
   - [x] Set correct content-type and headers
-  **Note:** Implemented as placeholder route, will proxy to backend PDF generation in production. File: `src/routes/statements/[id]/pdf/+server.ts` (~25 lines).
+        **Note:** Implemented as placeholder route, will proxy to backend PDF generation in production. File: `src/routes/statements/[id]/pdf/+server.ts` (~25 lines).
 
 ### 13.4 Payment Status Management
 
@@ -2499,12 +2507,12 @@ Validation is defined inline in route handlers for type safety.
   - [x] Show payment deadline
   - [x] Show days overdue (if applicable)
   - [x] Button to mark as paid
-  **Note:** Implemented with status-specific colors and icons, deadline display, overdue calculation. File: `src/lib/components/PaymentStatus.svelte` (~90 lines).
+        **Note:** Implemented with status-specific colors and icons, deadline display, overdue calculation. File: `src/lib/components/PaymentStatus.svelte` (~90 lines).
 
 - [x] Create `src/routes/statements/[id]/mark-paid/+server.ts`
   - [x] Server route to update statement status
   - [x] Update payment date
-  **Note:** Implemented POST handler with mock response. File: `src/routes/statements/[id]/mark-paid/+server.ts` (~40 lines).
+        **Note:** Implemented POST handler with mock response. File: `src/routes/statements/[id]/mark-paid/+server.ts` (~40 lines).
 
 ### 13.5 Reminder Management
 
@@ -2512,12 +2520,12 @@ Validation is defined inline in route handlers for type safety.
   - [x] Show last reminder date (if any)
   - [x] Show reminder deadline
   - [x] Button to send reminder
-  **Note:** Implemented with multi-level reminder support (1st/2nd/3rd Mahnung), email preview modal, payment marking integration. File: `src/lib/components/ReminderPanel.svelte` (~220 lines).
+        **Note:** Implemented with multi-level reminder support (1st/2nd/3rd Mahnung), email preview modal, payment marking integration. File: `src/lib/components/ReminderPanel.svelte` (~220 lines).
 
 - [x] Create `src/routes/statements/[id]/send-reminder/+server.ts`
   - [x] Server route to send reminder (placeholder for Phase 2 email)
   - [x] Log reminder sent
-  **Note:** Implemented POST handler with reminder level validation. File: `src/routes/statements/[id]/send-reminder/+server.ts` (~55 lines).
+        **Note:** Implemented POST handler with reminder level validation. File: `src/routes/statements/[id]/send-reminder/+server.ts` (~55 lines).
 
 ### 13.6 Statement Preview
 
@@ -2525,7 +2533,7 @@ Validation is defined inline in route handlers for type safety.
   - [x] Display statement formatted for PDF
   - [x] Multi-language support
   - [x] Professional formatting
-  **Note:** Implemented with Swiss QR-bill style layout, cost breakdown table, payment info section with IBAN. File: `src/lib/components/StatementPreview.svelte` (~180 lines).
+        **Note:** Implemented with Swiss QR-bill style layout, cost breakdown table, payment info section with IBAN. File: `src/lib/components/StatementPreview.svelte` (~180 lines).
 
 ### 13.7 Statement Review/Edit
 
@@ -2533,7 +2541,7 @@ Validation is defined inline in route handlers for type safety.
   - [x] Allow editing: status, line items (in advanced mode)
   - [x] Recalculate totals when editing
   - [x] Add "Save" and "Cancel" buttons
-  **Note:** Implemented with editable line items modal, real-time cost recalculation, Swiss law management fee validation (max 3%). Files: `src/routes/statements/[id]/edit/+page.svelte` (~450 lines), `src/routes/statements/[id]/edit/+page.server.ts` (~90 lines).
+        **Note:** Implemented with editable line items modal, real-time cost recalculation, Swiss law management fee validation (max 3%). Files: `src/routes/statements/[id]/edit/+page.svelte` (~450 lines), `src/routes/statements/[id]/edit/+page.server.ts` (~90 lines).
 
 ### 13.8 Testing Statement Pages
 
@@ -2591,10 +2599,10 @@ Validation is defined inline in route handlers for type safety.
   - [x] Financial overview: outstanding statements, total pending, overdue amount
   - [x] Recent activity: latest invoices, recent statements
   - [x] Quick actions: generate statements, create invoice
-  **Note:** Implemented comprehensive dashboard with portfolio stats, financial overview, statement status cards, activity feed, occupancy chart, and quick actions grid. Files: `src/routes/dashboard/+page.svelte` (~250 lines), `src/routes/dashboard/+page.server.ts` (~110 lines).
-  **Rebuilt (Session 3):** Fixed figures: open statements include overdue ones, pending amount excludes refunds,
-  payments appear when recorded, occupancy rounded and without NaN, "Vermietet" opens rented apartments; load errors
-  show an error page instead of zeros. Apartment status (incl. "Wiedervermietet") is computed from rental contracts.
+        **Note:** Implemented comprehensive dashboard with portfolio stats, financial overview, statement status cards, activity feed, occupancy chart, and quick actions grid. Files: `src/routes/dashboard/+page.svelte` (~250 lines), `src/routes/dashboard/+page.server.ts` (~110 lines).
+        **Rebuilt (Session 3):** Fixed figures: open statements include overdue ones, pending amount excludes refunds,
+        payments appear when recorded, occupancy rounded and without NaN, "Vermietet" opens rented apartments; load errors
+        show an error page instead of zeros. Apartment status (incl. "Wiedervermietet") is computed from rental contracts.
 
 ### 14.2 Dashboard Statistics Components
 
@@ -2602,32 +2610,32 @@ Validation is defined inline in route handlers for type safety.
   - [x] Display statistic with label and value
   - [x] Optional: trend indicator (up/down)
   - [x] Optional: link to detailed view
-  **Note:** Implemented with icon support, trend badges (up/down/neutral), optional href for navigation. File: `src/lib/components/StatCard.svelte` (~100 lines).
+        **Note:** Implemented with icon support, trend badges (up/down/neutral), optional href for navigation. File: `src/lib/components/StatCard.svelte` (~100 lines).
 
 - [x] Create `src/lib/components/ActivityFeed.svelte`
   - [x] Display recent activities in list
   - [x] Activities: statements created, invoices added, payments received
-  **Note:** Implemented with activity type icons, relative timestamps (vor X Min./Std./Tagen), max items limit. File: `src/lib/components/ActivityFeed.svelte` (~95 lines).
+        **Note:** Implemented with activity type icons, relative timestamps (vor X Min./Std./Tagen), max items limit. File: `src/lib/components/ActivityFeed.svelte` (~95 lines).
 
 - [x] Create `src/lib/components/OccupancyChart.svelte`
   - [x] Show occupancy rates per building
   - [x] Bar chart or donut chart
   - [x] Include building names
-  **Note:** Implemented horizontal bar chart with color-coded occupancy rates (green/blue/yellow/red), links to building details, average calculation. File: `src/lib/components/OccupancyChart.svelte` (~75 lines).
+        **Note:** Implemented horizontal bar chart with color-coded occupancy rates (green/blue/yellow/red), links to building details, average calculation. File: `src/lib/components/OccupancyChart.svelte` (~75 lines).
 
 ### 14.3 Analytics Pages (Future Phase 2, but setup structure)
 
 - [x] Create `src/routes/analytics/+page.svelte` (placeholder)
   - [x] Layout for future analytics pages
   - [x] Show message: "Analytics coming in Phase 2"
-  **Note:** Implemented placeholder with preview of upcoming features (trends, cost analysis, forecasts). File: `src/routes/analytics/+page.svelte` (~55 lines).
+        **Note:** Implemented placeholder with preview of upcoming features (trends, cost analysis, forecasts). File: `src/routes/analytics/+page.svelte` (~55 lines).
 
 ### 14.4 Reports (Future Phase 2, but setup structure)
 
 - [x] Create `src/routes/reports/+page.svelte` (placeholder)
   - [x] Layout for future reports
   - [x] Show message: "Reports coming in Phase 2"
-  **Note:** Implemented placeholder with preview of upcoming features (annual reports, export, automation). File: `src/routes/reports/+page.svelte` (~55 lines).
+        **Note:** Implemented placeholder with preview of upcoming features (annual reports, export, automation). File: `src/routes/reports/+page.svelte` (~55 lines).
 
 ### 14.5 Testing Dashboard
 
@@ -2642,8 +2650,8 @@ Validation is defined inline in route handlers for type safety.
   - [x] Activity feed shows recent items (1) — `dashboard.pg.test.ts`, `dashboard-activity.test.ts`
   - [x] Occupancy chart displays (1)
   - [x] Quick action buttons work (1)
-  **Note (Session 4):** `dashboard.feature` has 19 scenarios: every figure tile, statement status tile, quick action
-  and header action.
+        **Note (Session 4):** `dashboard.feature` has 19 scenarios: every figure tile, statement status tile, quick action
+        and header action.
 
 ### 14.X Verification: Unit Tests & E2E Tests
 
@@ -2656,7 +2664,7 @@ Validation is defined inline in route handlers for type safety.
 - [x] E2E Tests for Dashboard
   - [x] Test dashboard loads
   - [x] Test all widgets display — figures and activity in `dashboard.pg.test.ts` (global counts change with
-    parallel E2E scenarios); every tile and action is a navigation scenario in `dashboard.feature`
+        parallel E2E scenarios); every tile and action is a navigation scenario in `dashboard.feature`
   - [x] Test navigation from dashboard
   - [x] All tests pass: `npm run test:e2e`
 
@@ -2797,7 +2805,7 @@ Validation is defined inline in route handlers for type safety.
   - [x] OAuth credentials (template)
   - [x] LLM configuration
   - [x] Deployment URLs
-  **Note:** Comprehensive `.env.example` with all 30+ variables including JWT, OAuth, database, LLM, QR-bill, and feature flags. File: `.env.example` (~70 lines).
+        **Note:** Comprehensive `.env.example` with all 30+ variables including JWT, OAuth, database, LLM, QR-bill, and feature flags. File: `.env.example` (~70 lines).
 
 - [x] Create environment-specific configs
   - [x] `.env.development` (local) - Using `.env.local`
@@ -2842,7 +2850,7 @@ Validation is defined inline in route handlers for type safety.
 
 - [x] Setup test database
   - [x] ~~Create database `dwello_test`~~ replaced: `*.pg.test.ts` run against the development database with
-    UUID-namespaced data; E2E recreates `dwello_e2e` from the migrations before every run
+        UUID-namespaced data; E2E recreates `dwello_e2e` from the migrations before every run
   - [x] Used for integration tests
 
 ### 16.5 LLM Configuration
@@ -2887,7 +2895,7 @@ Validation is defined inline in route handlers for type safety.
   - [x] Stage 3: Runtime (minimal image, non-root user)
   - [x] Expose port 3000
   - [x] Health check
-  **Note:** Production-ready multi-stage Dockerfile with security best practices. File: `Dockerfile` (~50 lines).
+        **Note:** Production-ready multi-stage Dockerfile with security best practices. File: `Dockerfile` (~50 lines).
 
 - [ ] Verify Dockerfile builds
   - [ ] `docker build -t dwello-frontend .`
@@ -2902,7 +2910,7 @@ Validation is defined inline in route handlers for type safety.
   - [x] Expose port 3001
   - [x] Health check
   - [x] Non-root user for security
-  **Note:** Optimized Bun-based Dockerfile for ElysiaJS backend. File: `backend/Dockerfile` (~40 lines).
+        **Note:** Optimized Bun-based Dockerfile for ElysiaJS backend. File: `backend/Dockerfile` (~40 lines).
 
 - [ ] Verify Dockerfile builds
   - [ ] `docker build -t dwello-backend ./backend`
@@ -2918,14 +2926,14 @@ Validation is defined inline in route handlers for type safety.
   - [x] Volumes: postgres-data, ollama-models
   - [x] Networks: single network for all services
   - [x] Health checks on all services
-  **Note:** Full production Docker Compose with all services. File: `docker-compose.prod.yml` (~110 lines).
+        **Note:** Full production Docker Compose with all services. File: `docker-compose.prod.yml` (~110 lines).
 
 - [x] Create `docker-compose.dev.yml` (development)
   - [x] PostgreSQL with migrations
   - [x] Ollama for LLM
   - [x] Test database on separate port (5433)
   - [x] Development environment variables
-  **Note:** Development-focused compose for local services. File: `docker-compose.dev.yml` (~70 lines).
+        **Note:** Development-focused compose for local services. File: `docker-compose.dev.yml` (~70 lines).
 
 ### 17.4 Docker Compose Testing
 
@@ -2953,24 +2961,24 @@ Validation is defined inline in route handlers for type safety.
   - [ ] Database initialization
   - [ ] Health checks
   - [ ] Backup strategy
-  **Note (Session 4 cleanup):** README "Deployment" only lists the two compose commands and points to `.env.example`
+        **Note (Session 4 cleanup):** README "Deployment" only lists the two compose commands and points to `.env.example`
 
 - [x] Create `.dockerignore` (frontend)
   - [x] Exclude: node_modules, .git, .svelte-kit, dist, tests, docs
-  **Note:** Comprehensive .dockerignore for optimized build context. File: `.dockerignore` (~60 lines).
+        **Note:** Comprehensive .dockerignore for optimized build context. File: `.dockerignore` (~60 lines).
 
 - [x] Create `backend/.dockerignore`
   - [x] Exclude: node_modules, .git, dist, tests
-  **Note:** Backend-specific .dockerignore. File: `backend/.dockerignore` (~35 lines).
+        **Note:** Backend-specific .dockerignore. File: `backend/.dockerignore` (~35 lines).
 
 - [x] Create health check endpoint
   - [x] Frontend: `GET /health` returns service status
-  **Note:** Health endpoint for Docker healthchecks and load balancers. File: `src/routes/health/+server.ts` (~12 lines).
+        **Note:** Health endpoint for Docker healthchecks and load balancers. File: `src/routes/health/+server.ts` (~12 lines).
 
 ### 17.6 Database Initialization
 
 - [x] ~~Create `init-db.sh` script~~ **Dropped:** the backend container applies the migrations on start
-  (`backend/Dockerfile`: `bun scripts/migrate.ts && bun run src/index.ts`); `schema_migrations` tracks them
+      (`backend/Dockerfile`: `bun scripts/migrate.ts && bun run src/index.ts`); `schema_migrations` tracks them
 
 - [ ] Document database setup
   - [ ] Connection strings
@@ -3143,8 +3151,8 @@ Validation is defined inline in route handlers for type safety.
   - [ ] Delete contract (1)
   - [ ] View contract with PDF (1)
   - [x] Contract overlap prevention (1)
-    **Note:** Implemented client-side availability checking when apartment is selected. Shows availability info (green/blue/red boxes), sets min date on start date input, disables form when blocked. Files: `src/lib/utils/contract-availability.ts` (NEW), `src/lib/utils/__tests__/contract-availability.test.ts` (NEW - 14 tests), `src/routes/contracts/new/+page.svelte`, `src/routes/contracts/[id]/edit/+page.svelte`
-    **Status:** ✅ Verified - all 170 tests pass
+        **Note:** Implemented client-side availability checking when apartment is selected. Shows availability info (green/blue/red boxes), sets min date on start date input, disables form when blocked. Files: `src/lib/utils/contract-availability.ts` (NEW), `src/lib/utils/__tests__/contract-availability.test.ts` (NEW - 14 tests), `src/routes/contracts/new/+page.svelte`, `src/routes/contracts/[id]/edit/+page.svelte`
+        **Status:** ✅ Verified - all 170 tests pass
 
 - [ ] Invoice Management
   - [ ] Create invoice (1)
@@ -3331,10 +3339,10 @@ Validation is defined inline in route handlers for type safety.
 - [x] Check for outdated dependencies
   - [x] `npm outdated`
   - [x] Update minor versions (1)
-  **Note (Session 3, commit bb7721b):** npm audit 32 → 3 low (cookie inside SvelteKit 2, fixed by SvelteKit 3);
-  bun audit 9 → 0 (drizzle-orm 0.45 fixes SQL injection). vitest 5, playwright-bdd 9, overrides for transitive
-  esbuild/file-type/nanoid. Open majors without security reason: SvelteKit 3/Vite 8, Tailwind 4, Zod 4, TypeScript 7,
-  ESLint 10, jose 6.
+        **Note (Session 3, commit bb7721b):** npm audit 32 → 3 low (cookie inside SvelteKit 2, fixed by SvelteKit 3);
+        bun audit 9 → 0 (drizzle-orm 0.45 fixes SQL injection). vitest 5, playwright-bdd 9, overrides for transitive
+        esbuild/file-type/nanoid. Open majors without security reason: SvelteKit 3/Vite 8, Tailwind 4, Zod 4, TypeScript 7,
+        ESLint 10, jose 6.
 
 ### 20.4 Final Code Review
 
@@ -3514,7 +3522,7 @@ Validation is defined inline in route handlers for type safety.
 Behavior-preserving restructuring of the backend into three modules (`rental`, `costs`, `settlement`) plus infrastructure. Events, value objects, read models, ACLs and repositories are deliberately out of scope (see "Bewusst nicht umgesetzt" in the plan).
 
 - [x] Review and rewrite the migration plan
-  **Note:** Rewrote `docs/migration-mva.md` (modules instead of bounded contexts, five steps, glossary terms from `UBIQUITOUS_LANGUAGE.md`). No code changed. **Status:** ✅ Complete
+      **Note:** Rewrote `docs/migration-mva.md` (modules instead of bounded contexts, five steps, glossary terms from `UBIQUITOUS_LANGUAGE.md`). No code changed. **Status:** ✅ Complete
 
 ### 22.1 ADR, Quality Scenarios, Glossary
 
@@ -3530,13 +3538,13 @@ Behavior-preserving restructuring of the backend into three modules (`rental`, `
 ### 22.2 Characterization Tests for the Core Domain
 
 - [x] Review existing tests for `calculation`, `prorating`, `heating-profile`, `distribution-key`
-  **Note:** Pure functions are well covered by unit tests (`prorating.service.test.ts`, `heating-profile.service.test.ts`, `formula.service.test.ts`, `advance-payments.test.ts`, `management-fee.test.ts`). The async parts are tested only against mocks (`prorating.service.integration.test.ts`, `heating-profile.service.db/integration.test.ts`). Real-DB coverage: `distribution-key.pg.test.ts` (keys evaluate, sums match), `heating-distribution.pg.test.ts` (heating line via `/preview`), `management-fee.pg.test.ts` (fee via `/preview`). Gap: `calculateStatementForContract` and the stored result of `/generate` (line items, totals, Akonto, Saldo) were not pinned.
+      **Note:** Pure functions are well covered by unit tests (`prorating.service.test.ts`, `heating-profile.service.test.ts`, `formula.service.test.ts`, `advance-payments.test.ts`, `management-fee.test.ts`). The async parts are tested only against mocks (`prorating.service.integration.test.ts`, `heating-profile.service.db/integration.test.ts`). Real-DB coverage: `distribution-key.pg.test.ts` (keys evaluate, sums match), `heating-distribution.pg.test.ts` (heating line via `/preview`), `management-fee.pg.test.ts` (fee via `/preview`). Gap: `calculateStatementForContract` and the stored result of `/generate` (line items, totals, Akonto, Saldo) were not pinned.
 - [x] Add tests that pin today's statement results (real PostgreSQL, no mocks)
   - [x] Tenant change within the Abrechnungsperiode
   - [x] Empty apartment
   - [x] Heizprofil
   - [x] Multiple Verteilschlüssel
-  **Note:** `backend/src/__tests__/statement-generation.pg.test.ts` (7 tests). Interface: `POST /api/v1/statements/generate`, then `GET /api/v1/statements/:id`; both stay stable through 22.3/22.4 while the internals move. Test data is also created and deleted through the API only, so the file imports no service or schema. One building (80/40/30 m², one apartment empty), 2024, five Kostenarten with four keys plus an invoice without key; excluded: not umlagefähig, previous year. Values observed and checked by hand; mutations of day count, rounding, heating proration, Akonto and management fee each turn tests red. Observed today: heating-profile shares depend on the server time zone (correct in UTC/Swiss time, different behind UTC, e.g. America/New_York); apartment share is rounded to cents before prorating, so landlord remainders can be off by 1 Rappen; `generateStatementNumber` still uses a random placeholder sequence. **Status:** ✅ Complete
+        **Note:** `backend/src/__tests__/statement-generation.pg.test.ts` (7 tests). Interface: `POST /api/v1/statements/generate`, then `GET /api/v1/statements/:id`; both stay stable through 22.3/22.4 while the internals move. Test data is also created and deleted through the API only, so the file imports no service or schema. One building (80/40/30 m², one apartment empty), 2024, five Kostenarten with four keys plus an invoice without key; excluded: not umlagefähig, previous year. Values observed and checked by hand; mutations of day count, rounding, heating proration, Akonto and management fee each turn tests red. Observed today: heating-profile shares depend on the server time zone (correct in UTC/Swiss time, different behind UTC, e.g. America/New_York); apartment share is rounded to cents before prorating, so landlord remainders can be off by 1 Rappen; `generateStatementNumber` still uses a random placeholder sequence. **Status:** ✅ Complete
 
 ### 22.3 Module Folders and Boundary Rule
 
@@ -3580,31 +3588,31 @@ covered by unit, PostgreSQL and E2E tests; deployment, documentation, QA and go-
 > **Note (Session 4):** Recounted from the checklists below after verifying every open item of phases 0–17
 > against the code and tests. Items replaced by a different solution are struck through and marked **Dropped**.
 
-| Phase | Status | Completion | Tasks | Done |
-|-------|--------|-----------|-------|------|
-| Phase 0 | ✅ Complete | 100% | 23 | 23 |
-| Phase 1 | 🔄 In Progress | 95% | 19 | 18 |
-| Phase 2 | 🔄 In Progress | 92% | 25 | 23 |
-| Phase 3 | ✅ Complete | 100% | 15 | 15 |
-| Phase 4 | ✅ Complete | 100% | 10 | 10 |
-| Phase 5 | ✅ Complete | 100% | 17 | 17 |
-| Phase 6 | 🔄 In Progress | 56% | 18 | 10 |
-| Phase 7 | 🔄 In Progress | 94% | 16 | 15 |
-| Phase 8 | 🔄 In Progress | 94% | 18 | 17 |
-| Phase 9 | 🔄 In Progress | 57% | 14 | 8 |
-| Phase 10 | 🔄 In Progress | 98% | 41 | 40 |
-| Phase 11 | 🔄 In Progress | 79% | 14 | 11 |
-| Phase 12 | 🔄 In Progress | 87% | 15 | 13 |
-| Phase 13 | 🔄 In Progress | 94% | 16 | 15 |
-| Phase 14 | 🔄 In Progress | 91% | 11 | 10 |
-| Phase 15 | 🔄 In Progress | 14% | 14 | 2 |
-| Phase 16 | 🔄 In Progress | 67% | 12 | 8 |
-| Phase 17 | 🔄 In Progress | 47% | 17 | 8 |
-| Phase 18 | ⏳ Pending | 0% | 14 | 0 |
-| Phase 19 | ⏳ Pending | 0% | 25 | 0 |
-| Phase 20 | 🔄 In Progress | 10% | 21 | 2 |
-| Phase 21 | ⏳ Pending | 0% | 22 | 0 |
-| Phase 22 | 🔄 In Progress | 4% | 24 | 1 |
+| Phase    | Status         | Completion | Tasks | Done |
+| -------- | -------------- | ---------- | ----- | ---- |
+| Phase 0  | ✅ Complete    | 100%       | 23    | 23   |
+| Phase 1  | 🔄 In Progress | 95%        | 19    | 18   |
+| Phase 2  | 🔄 In Progress | 92%        | 25    | 23   |
+| Phase 3  | ✅ Complete    | 100%       | 15    | 15   |
+| Phase 4  | ✅ Complete    | 100%       | 10    | 10   |
+| Phase 5  | ✅ Complete    | 100%       | 17    | 17   |
+| Phase 6  | 🔄 In Progress | 56%        | 18    | 10   |
+| Phase 7  | 🔄 In Progress | 94%        | 16    | 15   |
+| Phase 8  | 🔄 In Progress | 94%        | 18    | 17   |
+| Phase 9  | 🔄 In Progress | 57%        | 14    | 8    |
+| Phase 10 | 🔄 In Progress | 98%        | 41    | 40   |
+| Phase 11 | 🔄 In Progress | 79%        | 14    | 11   |
+| Phase 12 | 🔄 In Progress | 87%        | 15    | 13   |
+| Phase 13 | 🔄 In Progress | 94%        | 16    | 15   |
+| Phase 14 | 🔄 In Progress | 91%        | 11    | 10   |
+| Phase 15 | 🔄 In Progress | 14%        | 14    | 2    |
+| Phase 16 | 🔄 In Progress | 67%        | 12    | 8    |
+| Phase 17 | 🔄 In Progress | 47%        | 17    | 8    |
+| Phase 18 | ⏳ Pending     | 0%         | 14    | 0    |
+| Phase 19 | ⏳ Pending     | 0%         | 25    | 0    |
+| Phase 20 | 🔄 In Progress | 10%        | 21    | 2    |
+| Phase 21 | ⏳ Pending     | 0%         | 22    | 0    |
+| Phase 22 | 🔄 In Progress | 4%         | 24    | 1    |
 
 **Total Tasks: 421** | **Completed: 266** | **Overall: ~63%**
 
@@ -3622,6 +3630,7 @@ After completing each task, add a note here:
 **Commit:** 2301baa - "feat(init): complete Phase 0 project initialization"
 
 **What Was Done:**
+
 - ✅ Initialized SvelteKit project with TypeScript (manually created, not using deprecated create-svelte)
 - ✅ Created backend ElysiaJS project structure with Bun runtime support
 - ✅ Installed all frontend dependencies (SvelteKit, TailwindCSS, Zod, Jose, Leaflet, svelte-i18n, date-fns)
@@ -3652,6 +3661,7 @@ After completing each task, add a note here:
 - ✅ Created basic SvelteKit pages (+layout.svelte, +page.svelte)
 
 **Files Created:**
+
 - Configuration: 14 files
 - Source code: 5 files
 - Tests: 2 files
@@ -3661,12 +3671,14 @@ After completing each task, add a note here:
 **Status:** ✅ Complete and committed
 
 **Issues Encountered:**
+
 1. `create-svelte` deprecated - Manually created project structure instead
 2. `svelte-leaflet@0.8.0` doesn't exist - Removed from dependencies (will add when needed)
 3. Vite plugin version conflict - Updated `@sveltejs/vite-plugin-svelte` to v5.0.4
 4. `.svelte-kit` directory not generated initially - Will be created on first dev server run
 
 **Next Steps:**
+
 - Phase 1: SvelteKit Auth Routes (BFF Layer)
   - Implement server-side auth utilities (JWT, cookies, XSRF)
   - Create OAuth login flow
@@ -3681,6 +3693,7 @@ After completing each task, add a note here:
 **Completed:** January 26, 2026
 
 **What Was Done:**
+
 - ✅ Created Apartments list page with search, building/status filters, pagination
 - ✅ Created Apartments create form with building dropdown, floor/room selection
 - ✅ Created Apartments edit form with status change warning
@@ -3696,6 +3709,7 @@ After completing each task, add a note here:
 - ✅ Fixed Svelte 5 lint errors using IIFE pattern for edit form state initialization
 
 **Files Created:**
+
 - `src/routes/apartments/+page.svelte` - List view with cards
 - `src/routes/apartments/+page.server.ts` - Mock data loader
 - `src/routes/apartments/new/+page.svelte` - Create form
@@ -3717,6 +3731,7 @@ After completing each task, add a note here:
 - `src/routes/contracts/[id]/edit/+page.server.ts` - Edit data loader
 
 **Types Extended in `src/lib/types.ts`:**
+
 - `ApartmentWithBuilding` - Apartment with building info for list view
 - `ApartmentsListData` - List response with pagination
 - `TenantWithOccupancy` - Tenant with current apartment/contract status
@@ -3725,6 +3740,7 @@ After completing each task, add a note here:
 - `ContractsListData` - List response with pagination and filter options
 
 **Technical Notes:**
+
 - Used IIFE pattern `$state((() => data.value)())` to fix Svelte 5 `state_referenced_locally` lint errors
 - Swiss formatting: CHF with apostrophe separator, DD.MM.YYYY dates, +41 phone prefix
 - Mock data matches database schema for realistic development
@@ -3734,33 +3750,36 @@ After completing each task, add a note here:
 ### Shared Components (10.5) ✅
 
 **What Was Done:**
+
 - ✅ Created 17 reusable UI components
 - ✅ Updated ESLint config for Svelte file callback parameter handling
 
 **Components Created:**
-| Component | Description |
-|-----------|-------------|
-| Form.svelte | Form wrapper with error display |
-| Input.svelte | Text input with label, prefix/suffix, validation |
-| Select.svelte | Dropdown with disabled option support |
-| Textarea.svelte | Multi-line input with character count |
-| Checkbox.svelte | Checkbox with label and description |
-| SearchInput.svelte | Search with clear button |
-| DataTable.svelte | Sortable table with custom cell rendering |
-| Modal.svelte | Confirmation dialog with variants |
-| Loading.svelte | Spinner with text and fullPage mode |
-| Error.svelte | Alert with retry button |
-| Pagination.svelte | Page navigation with item count |
-| EmptyState.svelte | Placeholder with action button |
-| Breadcrumb.svelte | Navigation trail |
-| Badge.svelte | Colored tag component |
-| Avatar.svelte | User avatar with initials |
-| Tooltip.svelte | Hover tooltip |
-| index.ts | Barrel export file |
+
+| Component          | Description                                      |
+| ------------------ | ------------------------------------------------ |
+| Form.svelte        | Form wrapper with error display                  |
+| Input.svelte       | Text input with label, prefix/suffix, validation |
+| Select.svelte      | Dropdown with disabled option support            |
+| Textarea.svelte    | Multi-line input with character count            |
+| Checkbox.svelte    | Checkbox with label and description              |
+| SearchInput.svelte | Search with clear button                         |
+| DataTable.svelte   | Sortable table with custom cell rendering        |
+| Modal.svelte       | Confirmation dialog with variants                |
+| Loading.svelte     | Spinner with text and fullPage mode              |
+| Error.svelte       | Alert with retry button                          |
+| Pagination.svelte  | Page navigation with item count                  |
+| EmptyState.svelte  | Placeholder with action button                   |
+| Breadcrumb.svelte  | Navigation trail                                 |
+| Badge.svelte       | Colored tag component                            |
+| Avatar.svelte      | User avatar with initials                        |
+| Tooltip.svelte     | Hover tooltip                                    |
+| index.ts           | Barrel export file                               |
 
 ### OpenPLZ Integration (10.6) ✅
 
 **What Was Done:**
+
 - ✅ Created OpenPLZ API service with full TypeScript types
 - ✅ Implemented functions: searchAddress, searchLocality, getCantons, getDistricts, getAddressFromPostalCode
 - ✅ Created AddressSearch component with autocomplete and keyboard navigation
@@ -3768,33 +3787,39 @@ After completing each task, add a note here:
 - ✅ Integrated into building create page
 
 **API Features:**
+
 - Full-text search across streets, postal codes, localities
 - Debounced search (300ms) to limit API calls
 - Error handling with graceful fallbacks
 - Swiss address formatting helpers
 
 **Files Created:**
+
 - `src/lib/services/openplz.ts` - API service
 - `src/lib/services/index.ts` - Barrel exports
 - `src/lib/components/AddressSearch.svelte` - Autocomplete component
 - `src/lib/components/PostalCodeInput.svelte` - PLZ input with auto-fill
 
 **Files Updated:**
+
 - `src/routes/buildings/new/+page.svelte` - Added address search integration
 - `src/lib/components/index.ts` - Added new component exports
 
 **Remaining Phase 10 Tasks:**
+
 - ✅ All tasks complete
 
 ### Frontend Tests (10.7) ✅
 
 **What Was Done:**
+
 - ✅ Created comprehensive unit tests for OpenPLZ service (24 tests)
 - ✅ Created E2E test suites for all CRUD operations (56 tests)
 - ✅ All 156 unit tests pass
 - ✅ Auth E2E tests (53) all pass
 
 **Files Created:**
+
 - `tests/unit/openplz.test.ts` - 24 unit tests for OpenPLZ service
 - `tests/e2e/buildings.spec.ts` - 12 E2E tests for building CRUD
 - `tests/e2e/apartments.spec.ts` - 14 E2E tests for apartment CRUD
@@ -3802,11 +3827,13 @@ After completing each task, add a note here:
 - `tests/e2e/contracts.spec.ts` - 16 E2E tests for contract CRUD
 
 **Test Coverage:**
+
 - OpenPLZ service: Full coverage of all exported functions
 - E2E specs: Complete CRUD workflow coverage for all entities
 - Auth specs: Existing 53 tests all passing
 
 **Session 3 Notes:**
+
 - Fixed unit tests to match actual OpenPLZ API implementation
 - Tests use nested objects for canton/commune/district (not flat strings)
 - searchAddress catches errors and returns empty array (doesn't throw)
@@ -3822,20 +3849,21 @@ Every bug fix has a unit or database test.
 
 ### Areas rebuilt ✅
 
-| Area | Commits | E2E features |
-|------|---------|--------------|
-| Buildings (list, new, detail with real delete, edit; name and canton required) | b16cbb3, 41574d6, 61e2dd7 | `buildings`, `building-new`, `building-detail`, `building-edit` |
-| Contracts (list, new, detail, edit; end and delete for real, active contract warning) | 70adcd1 … d5fc272 | `contracts`, `contract-new`, `contract-detail`, `contract-edit` |
-| Statements (list filtered on the server, generation via backend, send/pay/delete, edit, fee per run, reminders by e-mail or letter) | fd326c3 … 8cf4cdb | `statements`, `statement-generate`, `statement-detail`, `statement-edit`, `statement-reminder`, `documents` |
-| Apartments (new, detail, edit; status computed from contracts incl. "Wiedervermietet") | 12a697d, 38f2225, 8a603cd | `apartments`, `apartment-new`, `apartment-detail`, `apartment-edit` |
-| Tenants (detail with rental and history, delete, active/former filter) | e02f678 | `tenants`, `tenant-new`, `tenant-detail`, `tenant-edit` |
-| Settings (save for real, defaults used by wizard and invoices) | cc68626 | `settings` |
-| Heating profiles, cost categories, distribution keys (create/edit/delete via real API) | 2c04a8d, 18255fe, ddeb381 | `heating-profiles`, `categories`, `distribution-keys` |
-| Dashboard (correct figures, error page instead of zeros) | 1e4cdd1 | `dashboard` |
-| Authentication (server-side guard, no E2E bypass, provider-bound callback, login page) | 59640d3 | `authentication` |
-| Invoices (list with working filters, new, detail with real delete, edit; German category and key names) | see Phase 11.X | `invoices`, `invoice-new`, `invoice-detail`, `invoice-edit` |
+| Area                                                                                                                                | Commits                   | E2E features                                                                                                |
+| ----------------------------------------------------------------------------------------------------------------------------------- | ------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| Buildings (list, new, detail with real delete, edit; name and canton required)                                                      | b16cbb3, 41574d6, 61e2dd7 | `buildings`, `building-new`, `building-detail`, `building-edit`                                             |
+| Contracts (list, new, detail, edit; end and delete for real, active contract warning)                                               | 70adcd1 … d5fc272         | `contracts`, `contract-new`, `contract-detail`, `contract-edit`                                             |
+| Statements (list filtered on the server, generation via backend, send/pay/delete, edit, fee per run, reminders by e-mail or letter) | fd326c3 … 8cf4cdb         | `statements`, `statement-generate`, `statement-detail`, `statement-edit`, `statement-reminder`, `documents` |
+| Apartments (new, detail, edit; status computed from contracts incl. "Wiedervermietet")                                              | 12a697d, 38f2225, 8a603cd | `apartments`, `apartment-new`, `apartment-detail`, `apartment-edit`                                         |
+| Tenants (detail with rental and history, delete, active/former filter)                                                              | e02f678                   | `tenants`, `tenant-new`, `tenant-detail`, `tenant-edit`                                                     |
+| Settings (save for real, defaults used by wizard and invoices)                                                                      | cc68626                   | `settings`                                                                                                  |
+| Heating profiles, cost categories, distribution keys (create/edit/delete via real API)                                              | 2c04a8d, 18255fe, ddeb381 | `heating-profiles`, `categories`, `distribution-keys`                                                       |
+| Dashboard (correct figures, error page instead of zeros)                                                                            | 1e4cdd1                   | `dashboard`                                                                                                 |
+| Authentication (server-side guard, no E2E bypass, provider-bound callback, login page)                                              | 59640d3                   | `authentication`                                                                                            |
+| Invoices (list with working filters, new, detail with real delete, edit; German category and key names)                             | see Phase 11.X            | `invoices`, `invoice-new`, `invoice-detail`, `invoice-edit`                                                 |
 
 ### Infrastructure ✅
+
 - E2E runs against its own database `dwello_e2e`, recreated before every run; backend 3101, frontend 3100 (9a077ae)
 - Migrations applied automatically (`bun run db:migrate`, `bun run dev`, Docker) with `schema_migrations` (85f925c)
 - `bun run dev` and `bun run db:migrate` in `backend/` read the shared `.env`/`.env.local` of the project root (then
@@ -3846,7 +3874,7 @@ Every bug fix has a unit or database test.
 - Dependencies upgraded, vulnerabilities fixed (bb7721b)
 - GitHub Actions CI (`.github/workflows/ci.yml`): build, unit tests (frontend + backend on PostgreSQL), E2E (Playwright, all browsers), fallow audit; on pushes to main and pull requests
 - [x] UI screenshots on pull requests (CI job `ui-screenshots`): the pages a pull request changes are photographed and
-  posted as one comment on the pull request, updated on every push
+      posted as one comment on the pull request, updated on every push
   - `tests/ui-screenshots/affected-routes.ts` maps changed files to pages: changed page, every page below a changed
     layout, every page importing a changed component/module (transitively), every page for `src/app.*`/`src/hooks.*`
   - `tests/ui-screenshots/screenshots.spec.ts` (config `playwright.screenshots.config.ts`, Chromium 1440×900) runs on the
@@ -3854,13 +3882,13 @@ Every bug fix has a unit or database test.
   - Images live on the branch `ui-screenshots` (`pr-<nr>/<sha>/`), linked with `?raw=true` (private repository)
   - Tests: `tests/unit/ui-screenshot-routes.test.ts`
   - [x] Changes are framed in red: the base branch's frontend (checkout in `UI_BASE_DIR`) runs on 3200 against the same
-    backend and data; both renderings are compared cell by cell (`tests/ui-screenshots/changed-areas.ts`), the
-    comment shows the framed page and the page before in a collapsible section; tests:
-    `tests/unit/ui-screenshot-changed-areas.test.ts`
+        backend and data; both renderings are compared cell by cell (`tests/ui-screenshots/changed-areas.ts`), the
+        comment shows the framed page and the page before in a collapsible section; tests:
+        `tests/unit/ui-screenshot-changed-areas.test.ts`
 - [x] Faster CI on pull requests (job `changes` decides what runs; pushes to main still run everything):
-  frontend unit tests only for files importing a change (`vitest --changed`, all when `package.json`/Vitest config
-  change), backend unit tests only when `backend/` changed, E2E on Chromium only and skipped when only documentation
-  (`docs/`, `screens/`, `.claude/`, `*.md`) changed
+      frontend unit tests only for files importing a change (`vitest --changed`, all when `package.json`/Vitest config
+      change), backend unit tests only when `backend/` changed, E2E on Chromium only and skipped when only documentation
+      (`docs/`, `screens/`, `.claude/`, `*.md`) changed
 - Duplicated code removed so `fallow audit` passes against main:
   - List pages buildings/contracts/invoices/tenants use `SearchField`, `FilterSelect`, `FilterActions` and `ListPagination` (`src/lib/list-url.ts`)
   - New and edit contract share `src/routes/contracts/ContractForm.svelte` (logic in `src/lib/contract-form.ts`)
@@ -3869,38 +3897,41 @@ Every bug fix has a unit or database test.
   - Tests: `list-url`, `statement-status`, `contract-form` (unit); E2E 173 scenarios pass on Chromium
 
 ### Security fixes ✅
+
 - Backend required no valid JWT on every API route (1d7ea32); BFF now forwards the session JWT (dcbb15a)
 - Pages were rendered without a session (only the browser redirected); now enforced in `src/hooks.server.ts`
 - OAuth code was sent to both providers; redirect target after login limited to app pages
 - drizzle-orm SQL injection (GHSA-gpj5-g38j-94v9) fixed by the upgrade to 0.45
 
 ### Verification (state after the invoices rebuild, on main 04675a4)
+
 - E2E: 196 scenarios pass (`npx playwright test`), 32 German features
 - Frontend unit tests: 347 pass; svelte-check: 5 errors (pre-existing, down from 13)
 - Backend: all `*.pg.test.ts` pass; other tests 337 pass / 15 fail (heating profile service, failing on main as well); tsc 48 errors (pre-existing)
 - fallow audit: pass (no introduced dead code, duplication or complexity)
 
 ### Open
+
 - [x] Backend tests failing since before Session 3 (heating profile service, formatting)
-  **Note:** `heating-profile.service.db.test.ts` expected the English error, the service returns the German one; `format.test.ts` expected a straight apostrophe, de-CH formats with ’.
+      **Note:** `heating-profile.service.db.test.ts` expected the English error, the service returns the German one; `format.test.ts` expected a straight apostrophe, de-CH formats with ’.
 - [x] Predefined distribution keys "Per Person" and "By Consumption" removed on main (migration 0007)
 - [x] Invoices pages rebuilt with German E2E (Phase 11.X)
 - [x] "Neu kategorisieren" without a running KI changes nothing and says nothing (backend answers success without category)
-  **Note:** The backend now answers 503 "Die KI ist nicht erreichbar oder hat keine passende Kategorie geliefert." when the
-  KI names no category (`KI_UNAVAILABLE` in `backend/src/services/invoice.service.ts`, `backend/src/routes/invoices.ts`).
-  `src/lib/api.ts` read backend errors as `{ error: { message } }`, the backend sends `{ error: 'text' }`, so the detail
-  page showed nothing; it now takes the text. Tests: `backend/src/__tests__/invoice-categorization.pg.test.ts`,
-  `src/__tests__/invoice-pages.dom.test.ts`, E2E "Neu kategorisieren ohne laufende KI" (`invoice-detail.feature`)
+      **Note:** The backend now answers 503 "Die KI ist nicht erreichbar oder hat keine passende Kategorie geliefert." when the
+      KI names no category (`KI_UNAVAILABLE` in `backend/src/services/invoice.service.ts`, `backend/src/routes/invoices.ts`).
+      `src/lib/api.ts` read backend errors as `{ error: { message } }`, the backend sends `{ error: 'text' }`, so the detail
+      page showed nothing; it now takes the text. Tests: `backend/src/__tests__/invoice-categorization.pg.test.ts`,
+      `src/__tests__/invoice-pages.dom.test.ts`, E2E "Neu kategorisieren ohne laufende KI" (`invoice-detail.feature`)
 - [x] The reason for overriding the KI category is required in the edit form but not stored (no column; `manualOverrideReason` is dropped)
-  **Note:** PRD asks for the override justification to be logged. Column `invoices.manual_override_reason`
-  (migration `0009_invoice_override_reason.sql`, marker in `backend/src/db/migrate.ts`, `backend/src/db/schema.ts`),
-  accepted by the invoice body schema; the detail page shows the reason without `manualOverrideBy` (never set).
-  Tests: `invoice-categorization.pg.test.ts`, `migrations.pg.test.ts`, `invoice-pages.dom.test.ts`, E2E
-  "Kategorie der KI mit Begründung überschreiben" (`invoice-edit.feature`)
+      **Note:** PRD asks for the override justification to be logged. Column `invoices.manual_override_reason`
+      (migration `0009_invoice_override_reason.sql`, marker in `backend/src/db/migrate.ts`, `backend/src/db/schema.ts`),
+      accepted by the invoice body schema; the detail page shows the reason without `manualOverrideBy` (never set).
+      Tests: `invoice-categorization.pg.test.ts`, `migrations.pg.test.ts`, `invoice-pages.dom.test.ts`, E2E
+      "Kategorie der KI mit Begründung überschreiben" (`invoice-edit.feature`)
 - [ ] Login page and header follow the browser language (English browsers see them in English, the rest is German)
 - [ ] Majors without security reason: SvelteKit 3/Vite 8, Tailwind 4, Zod 4, TypeScript 7, ESLint 10, jose 6
 - [x] Phase 8 status in the table above was not re-evaluated; the progress task counts are outdated
-  **Note:** Recounted in Session 4 (plan cleanup)
+      **Note:** Recounted in Session 4 (plan cleanup)
 - [x] MVA migration plan documented in `docs/migration-mva.md` (modular monolith with three modules, boundary rule, five steps; tracked as Phase 22)
 
 ## Session 4 - October 2026: BDD Coverage Audit
@@ -3910,10 +3941,11 @@ feature, every exit from a page has a navigation scenario. Gaps closed test-firs
 unit or database tests.
 
 ### Coverage gaps closed ✅
+
 - [x] Global navigation: sidebar (9 areas + help), logo, settings in the user menu, footer links (`navigation.feature`)
 - [x] New pages `/help`, `/privacy`, `/terms` (were dead links in sidebar and footer); footer labels now German
-  (`help.feature`, `privacy.feature`, `terms.feature`). The privacy and terms texts describe what the code does
-  (OAuth data, local Ollama, SMTP/Resend, Google Fonts, cookies) and still need a legal review
+      (`help.feature`, `privacy.feature`, `terms.feature`). The privacy and terms texts describe what the code does
+      (OAuth data, local Ollama, SMTP/Resend, Google Fonts, cookies) and still need a legal review
 - [x] Dashboard: all figure tiles, statement status tiles, quick actions and header actions (`dashboard.feature`)
 - [x] Breadcrumbs on new/edit tenant (`tenant-new.feature`, `tenant-edit.feature`)
 - [x] Statement PDF download from list and detail; "Weitere erstellen" in the wizard
@@ -3921,50 +3953,55 @@ unit or database tests.
 - [x] Placeholder pages `/analytics`, `/reports` (`analytics.feature`, `reports.feature`)
 
 ### Bugs fixed ✅
+
 - [x] "PDF generieren" always failed: the BFF proxy posted without a body, the backend answered 422
-  (`src/routes/api/statements/[id]/generate-pdf/+server.ts`; test `statement-endpoints.test.ts`)
+      (`src/routes/api/statements/[id]/generate-pdf/+server.ts`; test `statement-endpoints.test.ts`)
 - [x] The PDF was never offered for download after a reload: the backend had no `pdf_generated_at`
-  (migration `0008_statement_pdf_generated_at.sql`, set by `generate-pdf`; tests `statement.routes.pg.test.ts`,
-  `migrations.pg.test.ts`); a changed payment deadline discards the stored PDF so it can be generated again
-  (`updateStatement`; test `statement.routes.pg.test.ts`)
+      (migration `0008_statement_pdf_generated_at.sql`, set by `generate-pdf`; tests `statement.routes.pg.test.ts`,
+      `migrations.pg.test.ts`); a changed payment deadline discards the stored PDF so it can be generated again
+      (`updateStatement`; test `statement.routes.pg.test.ts`)
 - [x] "Weitere erstellen" kept the wizard on step 4: same-URL navigation keeps the page state; the link now reloads
-  (`Button` prop `reload`; test `generation-step.test.ts`)
+      (`Button` prop `reload`; test `generation-step.test.ts`)
 - [x] Tenant without e-mail address got a `mailto:null` link on tenant and contract detail (test `tenant-email-link.test.ts`)
 
 ### Verification
+
 - E2E: 251 scenarios pass on Chromium, 38 German features (Firefox and WebKit not run in this environment; CI runs them)
 - Frontend unit tests: 376 pass; svelte-check: 5 errors, tsc 3 errors (pre-existing, none in changed files)
 - Backend: 354 tests + 108 PostgreSQL tests pass; tsc 48 errors (unchanged from main)
 
 ### Plan cleanup ✅
+
 - [x] Every open item of phases 0–17 checked against code and tests: 47 checklist blocks updated with the test
-  or feature that covers them, or with what is still missing; four tasks replaced by another solution marked
-  **Dropped** (`init-db.sh`, PDF background job, `StatementWizard.svelte`, bulk mark as paid)
+      or feature that covers them, or with what is still missing; four tasks replaced by another solution marked
+      **Dropped** (`init-db.sh`, PDF background job, `StatementWizard.svelte`, bulk mark as paid)
 - [x] Both progress tables and the per-phase status lines recounted from the top-level checklist items
-  (266 of 421 done, ~63%, after the coverage provider and the page unit tests); before, they contradicted each other (e.g. Phase 8 "0%", Phase 15 "Complete")
+      (266 of 421 done, ~63%, after the coverage provider and the page unit tests); before, they contradicted each other (e.g. Phase 8 "0%", Phase 15 "Complete")
 
 ### Test coverage ✅
+
 - [x] Coverage provider `@vitest/coverage-v8` installed (matching Vitest 5.0.3), script `npm run test:coverage`;
-  the report now includes every source file, also those no test loads (`coverage.include` in `vitest.config.ts`)
+      the report now includes every source file, also those no test loads (`coverage.include` in `vitest.config.ts`)
 - [x] Unit tests for the pages of dashboard, configuration, invoices and statements; a second Vitest project `dom`
-  (`*.dom.test.ts`, jsdom) mounts components so their event handlers run; helpers in `src/__tests__/helpers/dom.ts`
+      (`*.dom.test.ts`, jsdom) mounts components so their event handlers run; helpers in `src/__tests__/helpers/dom.ts`
 - Frontend unit-test coverage: 28% → 65% of statements (448 tests); dashboard 100%, configuration 98%,
   invoices 92%, statements 94%, `src/lib/server` 91%; buildings, apartments, tenants and contracts pages are not
   unit-tested yet (covered by E2E)
 
 ### Open
+
 - [x] The statement list returns the whole base64 PDF of every row (`statement: utilityStatements` in the list select)
   - List and detail select every column but `pdfBlob` (`statementColumns` in `backend/src/services/statement.service.ts`);
     the PDF is only served by `/:id/pdf` and `/:id/pdf/base64`; pg test in `backend/src/__tests__/statement.routes.pg.test.ts`
 - [x] Flaky E2E on WebKit ("Wohnungen eines Gebäudes mit Belegung" landed on `/apartments?page=1`): `visit()` took
-  network idle for hydrated, and hydration resets a field changed before it. The root layout now sets
-  `body[data-hydrated]` in `onMount` (runs after every component below), and `visit()` waits for it
-  (`src/routes/+layout.svelte`, `tests/e2e/interactions/navigation.ts`). Reproduced with 40× CPU throttling:
-  old `visit` 3/3 failed, new 3/3 passed
+      network idle for hydrated, and hydration resets a field changed before it. The root layout now sets
+      `body[data-hydrated]` in `onMount` (runs after every component below), and `visit()` waits for it
+      (`src/routes/+layout.svelte`, `tests/e2e/interactions/navigation.ts`). Reproduced with 40× CPU throttling:
+      old `visit` 3/3 failed, new 3/3 passed
 - [ ] "Alle Aktivitäten anzeigen" links to `/activity`, which does not exist; unreachable today (backend returns at most 5)
 - [ ] Mobile navigation drawer has no scenarios (same targets as the sidebar)
 - [x] Filters chosen before hydration were lost: Svelte resets a one-way `value` (and `<select bind:value>`) to the
-  server value when it hydrates, so a search after it ran without the filter (`/apartments?page=1`)
+      server value when it hydrates, so a search after it ran without the filter (`/apartments?page=1`)
   - `FilterSelect` renders the choice as `selected` options and hands a choice made before hydration on in `onMount`;
     `SearchField` and the statement search use `bind:value` (Svelte keeps a typed value there); statement building
     filter as `selected` options (`src/lib/components/{FilterSelect,SearchField}.svelte`, `src/routes/statements/+page.svelte`)
@@ -3972,7 +4009,7 @@ unit or database tests.
     `src/__tests__/helpers/hydrate.ts`); E2E scenarios "Gebäude wählen, bevor die Liste fertig geladen ist" in
     `apartments.feature` and `statements.feature` hold the client JS back (`visitWhileLoading`): failed before, pass now
 - [x] Same for the selects of the entry forms: new apartment (building), apartment status, settings defaults, contract
-  tenant, heating profile of the statement wizard (the contract apartment select only renders once its availability is loaded)
+      tenant, heating profile of the statement wizard (the contract apartment select only renders once its availability is loaded)
   - `selected` options everywhere; where a component keeps the choice in state, the action `keepEarlyChoice`
     (`src/lib/early-choice.ts`, also used by `FilterSelect`) hands the choice on once the page is live
   - Unit tests `src/__tests__/form-selects.dom.test.ts` (hydration helper now resolves `$lib` imports); E2E scenario
@@ -4007,6 +4044,7 @@ unit or database tests.
 4. 📊 Update Phase status indicator
 
 **Example note:**
+
 ```
 - [x] Create `src/lib/server/auth.ts`
   **Note:** JWT generation, verification, cookie management. 7 functions, 280 lines.

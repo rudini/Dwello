@@ -86,18 +86,27 @@ When(
 	'der Liegenschaftsverwalter die Vorschau der Abrechnungen {int} für das Gebäude {string} mit dem Heizprofil {string} und {float} % Verwaltungspauschale öffnet',
 	async ({ verwalter, seed }, year: number, building: string, profile: string, fee: number) => {
 		await verwalter.perform(
-			openPreview(year, seed.idOf(building)!, { heatingProfileId: seed.idOf(profile), managementFeePercent: fee })
+			openPreview(year, seed.idOf(building)!, {
+				heatingProfileId: seed.idOf(profile),
+				managementFeePercent: fee
+			})
 		);
 	}
 );
 
-When('der Liegenschaftsverwalter die Verwaltungspauschale auf {float} % setzt', async ({ verwalter }, fee: number) => {
-	await verwalter.perform(setManagementFee(fee));
-});
+When(
+	'der Liegenschaftsverwalter die Verwaltungspauschale auf {float} % setzt',
+	async ({ verwalter }, fee: number) => {
+		await verwalter.perform(setManagementFee(fee));
+	}
+);
 
-Then('kostet die Abrechnung von {string} {string}', async ({ verwalter, names }, tenant: string, amount: string) => {
-	await expect(previewRow(verwalter, names.get(tenant) ?? tenant)).toContainText(amount);
-});
+Then(
+	'kostet die Abrechnung von {string} {string}',
+	async ({ verwalter, names }, tenant: string, amount: string) => {
+		await expect(previewRow(verwalter, names.get(tenant) ?? tenant)).toContainText(amount);
+	}
+);
 
 Then(
 	'sieht der Liegenschaftsverwalter den Hinweis, dass die Verwaltungspauschale über dem üblichen Richtwert liegt',
@@ -110,7 +119,10 @@ When('der Liegenschaftsverwalter weitere Abrechnungen erstellen will', async ({ 
 	await verwalter.perform(generateMore);
 });
 
-Then('beginnt der Liegenschaftsverwalter wieder mit der Wahl der Periode', async ({ verwalter }) => {
-	await expect(periodChoice(verwalter)).toBeVisible();
-	await expect(generationOutcome(verwalter)).toHaveCount(0);
-});
+Then(
+	'beginnt der Liegenschaftsverwalter wieder mit der Wahl der Periode',
+	async ({ verwalter }) => {
+		await expect(periodChoice(verwalter)).toBeVisible();
+		await expect(generationOutcome(verwalter)).toHaveCount(0);
+	}
+);

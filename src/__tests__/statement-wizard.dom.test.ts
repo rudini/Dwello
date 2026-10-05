@@ -7,7 +7,20 @@ import EditStatementPage from '../routes/statements/[id]/edit/+page.svelte';
 import { byTestId, click, fireEvent, show } from './helpers/dom';
 import { statement } from './helpers/statement';
 
-const MONTHS = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
+const MONTHS = [
+	'january',
+	'february',
+	'march',
+	'april',
+	'may',
+	'june',
+	'july',
+	'august',
+	'september',
+	'october',
+	'november',
+	'december'
+];
 const profile = (id: string, name: string, pct: number) => ({
 	id,
 	name,
@@ -18,10 +31,30 @@ const profile = (id: string, name: string, pct: number) => ({
 });
 const data = {
 	buildings: [
-		{ id: 'b1', name: 'Ahornhof', address: 'Ahornweg 3', postalCode: '8400', city: 'Winterthur', apartmentCount: 4 },
-		{ id: 'b2', name: 'Lindenhof', address: 'Lindenweg 1', postalCode: '8400', city: 'Winterthur', apartmentCount: 2 }
+		{
+			id: 'b1',
+			name: 'Ahornhof',
+			address: 'Ahornweg 3',
+			postalCode: '8400',
+			city: 'Winterthur',
+			apartmentCount: 4
+		},
+		{
+			id: 'b2',
+			name: 'Lindenhof',
+			address: 'Lindenweg 1',
+			postalCode: '8400',
+			city: 'Winterthur',
+			apartmentCount: 2
+		}
 	],
-	heatingProfiles: [profile('hp0', 'Unvollständig', 5), { ...profile('hp1', 'Gleichmässig', 0), monthlyPercentages: { ...profile('', '', 8).monthlyPercentages, january: 12 } }],
+	heatingProfiles: [
+		profile('hp0', 'Unvollständig', 5),
+		{
+			...profile('hp1', 'Gleichmässig', 0),
+			monthlyPercentages: { ...profile('', '', 8).monthlyPercentages, january: 12 }
+		}
+	],
 	defaultManagementFeePercent: 3,
 	defaultHeatingProfileId: '',
 	defaultPeriod: { start: '2024-01-01', end: '2024-12-31' }
@@ -58,7 +91,9 @@ describe('Abrechnungen erstellen', () => {
 		show(GeneratePage, { data, form: null } as never);
 		click('wizard-next');
 
-		const all = document.querySelector<HTMLInputElement>('input[type="checkbox"]:not([data-testid])')!;
+		const all = document.querySelector<HTMLInputElement>(
+			'input[type="checkbox"]:not([data-testid])'
+		)!;
 		click(all);
 		expect(text()).toContain('2 von 2 ausgewählt');
 		click(all);
@@ -67,8 +102,20 @@ describe('Abrechnungen erstellen', () => {
 
 	it('zeigt die Vorschau des Servers mit Summe pro Mietvertrag', () => {
 		const preview = [
-			{ contractId: 'c1', tenantName: 'Anna Keller', apartmentNumber: '2.01', totalCosts: 1200, balance: 150 },
-			{ contractId: 'c2', tenantName: 'Marc Huber', apartmentNumber: '2.02', totalCosts: 800, balance: -50 }
+			{
+				contractId: 'c1',
+				tenantName: 'Anna Keller',
+				apartmentNumber: '2.01',
+				totalCosts: 1200,
+				balance: 150
+			},
+			{
+				contractId: 'c2',
+				tenantName: 'Marc Huber',
+				apartmentNumber: '2.02',
+				totalCosts: 800,
+				balance: -50
+			}
 		];
 		show(GeneratePage, { data, form: { preview } } as never);
 
@@ -89,7 +136,15 @@ describe('Abrechnungen erstellen', () => {
 	});
 
 	it('geht von der Vorschau zum Erstellen, wo die Abrechnungen erzeugt werden', () => {
-		const preview = [{ contractId: 'c1', tenantName: 'Anna Keller', apartmentNumber: '2.01', totalCosts: 1200, balance: 150 }];
+		const preview = [
+			{
+				contractId: 'c1',
+				tenantName: 'Anna Keller',
+				apartmentNumber: '2.01',
+				totalCosts: 1200,
+				balance: 150
+			}
+		];
 		show(GeneratePage, { data, form: { preview } } as never);
 
 		click('wizard-next');
@@ -101,7 +156,10 @@ describe('Abrechnungen erstellen', () => {
 
 describe('Abrechnung bearbeiten', () => {
 	it('füllt Zahlungsfrist und Bemerkung und zeigt die berechneten Kosten nur an', () => {
-		show(EditStatementPage, { data: { statement: statement({ notes: 'Ratenzahlung' }) }, form: null } as never);
+		show(EditStatementPage, {
+			data: { statement: statement({ notes: 'Ratenzahlung' }) },
+			form: null
+		} as never);
 
 		expect(byTestId<HTMLInputElement>('payment-deadline-input')!.value).toBe('2025-02-28');
 		expect(byTestId<HTMLTextAreaElement>('statement-notes-input')!.value).toBe('Ratenzahlung');
@@ -110,7 +168,10 @@ describe('Abrechnung bearbeiten', () => {
 	});
 
 	it('meldet einen Fehler beim Speichern', () => {
-		show(EditStatementPage, { data: { statement: statement() }, form: { errors: { form: 'Speichern fehlgeschlagen' } } } as never);
+		show(EditStatementPage, {
+			data: { statement: statement() },
+			form: { errors: { form: 'Speichern fehlgeschlagen' } }
+		} as never);
 		expect(text()).toContain('Speichern fehlgeschlagen');
 	});
 });

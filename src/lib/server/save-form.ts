@@ -29,7 +29,12 @@ export async function saveRecord(
 }
 
 /** Form action body: deletes the record and opens `location`, or reports why the backend keeps it */
-export async function deleteRecord(fetch: typeof globalThis.fetch, url: string, failure: string, location: string) {
+export async function deleteRecord(
+	fetch: typeof globalThis.fetch,
+	url: string,
+	failure: string,
+	location: string
+) {
 	const response = await fetch(url, { method: 'DELETE' });
 	if (!response.ok) {
 		const { error: message } = await response.json().catch(() => ({}));

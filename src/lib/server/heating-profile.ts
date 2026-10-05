@@ -41,7 +41,11 @@ function parseHeatingProfile(formData: FormData) {
 }
 
 /** Form action body shared by "Neues Heizprofil" (POST) and "Heizprofil bearbeiten" (PUT) */
-export async function saveHeatingProfile(fetch: typeof globalThis.fetch, request: Request, id?: string) {
+export async function saveHeatingProfile(
+	fetch: typeof globalThis.fetch,
+	request: Request,
+	id?: string
+) {
 	return saveRecord(fetch, API, parseHeatingProfile(await request.formData()), id, {
 		failure: (_status, saved) => saved.error ?? 'Heizprofil konnte nicht gespeichert werden.',
 		location: (saved) => `/config/heating-profiles/${saved}`
@@ -49,4 +53,9 @@ export async function saveHeatingProfile(fetch: typeof globalThis.fetch, request
 }
 
 export const deleteHeatingProfile = (fetch: typeof globalThis.fetch, id: string) =>
-	deleteRecord(fetch, `${API}/${id}`, 'Heizprofil konnte nicht gelöscht werden.', '/config/heating-profiles');
+	deleteRecord(
+		fetch,
+		`${API}/${id}`,
+		'Heizprofil konnte nicht gelöscht werden.',
+		'/config/heating-profiles'
+	);

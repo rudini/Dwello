@@ -7,7 +7,9 @@ import { join } from 'path';
 import pg from 'pg';
 import { migrate } from '../src/db/migrate';
 
-const url = new URL(process.env.DATABASE_URL || 'postgresql://dwello:dwello@localhost:5432/dwello_e2e');
+const url = new URL(
+	process.env.DATABASE_URL || 'postgresql://dwello:dwello@localhost:5432/dwello_e2e'
+);
 const database = url.pathname.slice(1);
 const migrations = join(import.meta.dir, '..', 'migrations');
 
@@ -23,7 +25,11 @@ async function run(connectionString: string, ...statements: string[]) {
 
 const maintenance = new URL(url);
 maintenance.pathname = '/postgres';
-await run(maintenance.href, `DROP DATABASE IF EXISTS "${database}" WITH (FORCE)`, `CREATE DATABASE "${database}"`);
+await run(
+	maintenance.href,
+	`DROP DATABASE IF EXISTS "${database}" WITH (FORCE)`,
+	`CREATE DATABASE "${database}"`
+);
 
 const applied = await migrate(url.href, migrations);
 
