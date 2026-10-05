@@ -14,6 +14,7 @@ Web app for Swiss property managers (Liegenschaftsverwalter): building/tenant/co
 - **`docs/data-model.md`** - PostgreSQL schema (12 tables), relationships, indexes
 - **`docs/api-specification.md`** - REST API spec, endpoints, auth, errors
 - **`docs/tech-stack.md`** - Architecture, justifications, performance targets
+- **`docs/test-pyramid.md`** - Test pyramid and ATDD workflow (layers, runners, rules)
 - **`docs/claude-reference.md`** - Project structure, BFF detail, business logic, deployment, troubleshooting
 - **`implementation_plan.md`** - Living progress tracker (UPDATE AFTER EACH TASK)
 - **`requirements-prosa.md`** - Original German requirements
