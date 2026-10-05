@@ -55,6 +55,7 @@ const data = {
 			monthlyPercentages: { ...profile('', '', 8).monthlyPercentages, january: 12 }
 		}
 	],
+	distributionKeys: [{ id: 'k-area', name: 'Pro Fläche (m²)' }],
 	defaultManagementFeePercent: 3,
 	defaultHeatingProfileId: '',
 	defaultPeriod: { start: '2024-01-01', end: '2024-12-31' }
@@ -70,6 +71,21 @@ describe('Abrechnungen erstellen', () => {
 		expect(byTestId<HTMLOptionElement>('heating-profile-option-hp0')!.disabled).toBe(true);
 		expect(byTestId('heating-profile-option-hp0')!.textContent).toContain('(60%) - nicht wählbar');
 		expect(text()).toContain('Gleichmässig Verteilung');
+	});
+
+	it('verteilt die Verwaltungspauschale gleichmässig oder nach einem Verteilschlüssel', () => {
+		show(GeneratePage, { data, form: null } as never);
+		const key = byTestId<HTMLSelectElement>('management-fee-key-select')!;
+
+		expect([...key.options].map((o) => [o.value, o.textContent?.trim()])).toEqual([
+			['', 'Gleichmässig pro Wohnung'],
+			['k-area', 'Pro Fläche (m²)']
+		]);
+		fireEvent(key, 'change', 'k-area');
+		expect(
+			document.querySelector<HTMLInputElement>('input[name="managementFeeDistributionKeyId"]')!
+				.value
+		).toBe('k-area');
 	});
 
 	it('verlangt eine Periode und mindestens ein Gebäude, bevor es weitergeht', () => {

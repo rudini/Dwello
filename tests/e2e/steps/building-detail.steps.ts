@@ -16,6 +16,13 @@ import { searchBuildings } from '../tasks/buildings';
 const { Given, When, Then } = createBdd(test);
 
 Given(
+	'im Gebäude {string} gibt es die leere Wohnung {string} mit {int} m²',
+	async ({ seed }, buildingTitle: string, number: string, area: number) => {
+		await seed.apartment(buildingTitle, number, 'vacant', String(area));
+	}
+);
+
+Given(
 	'im Gebäude {string} gibt es die leere Wohnung {string}',
 	async ({ seed }, buildingTitle: string, number: string) => {
 		await seed.apartment(buildingTitle, number, 'vacant');
