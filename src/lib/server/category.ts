@@ -41,14 +41,21 @@ function parseCategory(formData: FormData) {
 }
 
 const options = {
-	failure: (_status: number, saved: { error?: string }) => saved.error ?? 'Kategorie konnte nicht gespeichert werden.',
+	failure: (_status: number, saved: { error?: string }) =>
+		saved.error ?? 'Kategorie konnte nicht gespeichert werden.',
 	location: () => LIST
 };
 
 /** "Neue Kategorie": the German name also becomes the category's key */
 export async function createCategory(fetch: typeof globalThis.fetch, request: Request) {
 	const { body, errors } = parseCategory(await request.formData());
-	return saveRecord(fetch, API, { body: { name: body.nameDE, ...body }, errors }, undefined, options);
+	return saveRecord(
+		fetch,
+		API,
+		{ body: { name: body.nameDE, ...body }, errors },
+		undefined,
+		options
+	);
 }
 
 /** "Kategorie bearbeiten": renames only the German name, the key stays */

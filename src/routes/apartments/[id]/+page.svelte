@@ -43,7 +43,9 @@
 				<MonthlyCostsCard costs={data.monthlyCosts} />
 			{:else}
 				<div class={cardClass}>
-					<p class="text-slate-600" data-testid="apartment-vacant">Diese Wohnung ist derzeit nicht vermietet.</p>
+					<p class="text-slate-600" data-testid="apartment-vacant">
+						Diese Wohnung ist derzeit nicht vermietet.
+					</p>
 				</div>
 			{/if}
 		</div>

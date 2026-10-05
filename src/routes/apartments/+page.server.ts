@@ -26,7 +26,11 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<ApartmentsLi
 		const apartmentsData = await apartmentsRes.json();
 		const buildingsData = await buildingsRes.json();
 
-		const apartments: ApartmentWithBuilding[] = (apartmentsData.apartments || apartmentsData.data || []).map((a: Record<string, unknown>) => {
+		const apartments: ApartmentWithBuilding[] = (
+			apartmentsData.apartments ||
+			apartmentsData.data ||
+			[]
+		).map((a: Record<string, unknown>) => {
 			const aptStatus: ApartmentStatus = (a.status as ApartmentStatus) || 'vacant';
 			return {
 				id: a.id as string,
@@ -43,11 +47,13 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<ApartmentsLi
 			};
 		});
 
-		const buildings = (buildingsData.buildings || buildingsData.data || []).map((b: Record<string, unknown>) => ({
-			id: b.id,
-			name: b.name || '',
-			address: b.address || ''
-		}));
+		const buildings = (buildingsData.buildings || buildingsData.data || []).map(
+			(b: Record<string, unknown>) => ({
+				id: b.id,
+				name: b.name || '',
+				address: b.address || ''
+			})
+		);
 
 		return {
 			apartments,

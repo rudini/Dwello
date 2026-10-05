@@ -27,7 +27,11 @@
 	}
 </script>
 
-<label class="flex items-start gap-3 cursor-pointer {disabled ? 'opacity-50 cursor-not-allowed' : ''} {className}">
+<label
+	class="flex items-start gap-3 cursor-pointer {disabled
+		? 'opacity-50 cursor-not-allowed'
+		: ''} {className}"
+>
 	<input
 		type="checkbox"
 		{id}

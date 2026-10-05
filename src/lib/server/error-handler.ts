@@ -36,10 +36,7 @@ export class OAuthError extends AppError {
  * JWT-related errors
  */
 export class JWTError extends AppError {
-	constructor(
-		message: string,
-		statusCode: number = 401
-	) {
+	constructor(message: string, statusCode: number = 401) {
 		super(message, statusCode, 'JWT_ERROR');
 	}
 }
@@ -216,7 +213,13 @@ export const logger = {
  * Log OAuth flow events
  */
 export function logOAuthEvent(
-	event: 'login_initiated' | 'callback_received' | 'token_exchanged' | 'profile_fetched' | 'login_complete' | 'login_failed',
+	event:
+		| 'login_initiated'
+		| 'callback_received'
+		| 'token_exchanged'
+		| 'profile_fetched'
+		| 'login_complete'
+		| 'login_failed',
 	provider: string,
 	details?: Record<string, unknown>
 ): void {
@@ -245,10 +248,7 @@ export function logAuthError(
  * Handle errors in request handlers
  * Returns a JSON response with appropriate status code
  */
-export function handleRequestError(
-	error: unknown,
-	operation: string
-): Response {
+export function handleRequestError(error: unknown, operation: string): Response {
 	if (error instanceof AppError) {
 		logAuthError(error, { operation });
 		return errorResponse(error);
@@ -256,12 +256,12 @@ export function handleRequestError(
 
 	if (error instanceof Error) {
 		logAuthError(error, { operation });
-		return errorResponse(new AppError(
-			process.env.NODE_ENV === 'production'
-				? 'An unexpected error occurred'
-				: error.message,
-			500
-		));
+		return errorResponse(
+			new AppError(
+				process.env.NODE_ENV === 'production' ? 'An unexpected error occurred' : error.message,
+				500
+			)
+		);
 	}
 
 	logger.error(`Unknown error type in ${operation}`, undefined, { error: String(error) });

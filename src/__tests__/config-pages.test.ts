@@ -19,9 +19,20 @@ const settings: Settings = {
 
 const months = (pct: number) =>
 	Object.fromEntries(
-		['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'].map(
-			(m) => [m, pct]
-		)
+		[
+			'january',
+			'february',
+			'march',
+			'april',
+			'may',
+			'june',
+			'july',
+			'august',
+			'september',
+			'october',
+			'november',
+			'december'
+		].map((m) => [m, pct])
 	);
 
 const settingsPage = (form: object | null = null) =>
@@ -62,9 +73,9 @@ describe('Einstellungen', () => {
 	});
 
 	it('meldet Fehler pro Feld', () => {
-		expect(settingsPage({ errors: { iban: 'Bitte geben Sie eine gültige Schweizer IBAN ein' } })).toContain(
-			'Bitte geben Sie eine gültige Schweizer IBAN ein'
-		);
+		expect(
+			settingsPage({ errors: { iban: 'Bitte geben Sie eine gültige Schweizer IBAN ein' } })
+		).toContain('Bitte geben Sie eine gültige Schweizer IBAN ein');
 	});
 
 	it('bestätigt das Speichern', () => {
@@ -74,7 +85,8 @@ describe('Einstellungen', () => {
 });
 
 // The whole <input> tag of the checkbox, whatever the order of its attributes
-const checkbox = (body: string) => body.match(/<input[^>]*data-testid="category-allowed-checkbox"[^>]*>/)![0];
+const checkbox = (body: string) =>
+	body.match(/<input[^>]*data-testid="category-allowed-checkbox"[^>]*>/)![0];
 
 describe('Kategorie erfassen und bearbeiten', () => {
 	it('beginnt eine neue Kategorie als umlagefähig', () => {
@@ -93,7 +105,9 @@ describe('Kategorie erfassen und bearbeiten', () => {
 			sortOrder: 4,
 			isAllowedUtilityCost: false
 		};
-		const body = render(EditCategoryPage, { props: { data: { category }, form: { errors: { name: 'Name ist schon vergeben' } } } as never }).body;
+		const body = render(EditCategoryPage, {
+			props: { data: { category }, form: { errors: { name: 'Name ist schon vergeben' } } } as never
+		}).body;
 
 		expect(body).toContain('value="Hauswartung"');
 		expect(body).toContain('value="Conciergerie"');

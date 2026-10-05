@@ -2,10 +2,34 @@
 	import Icon from '$lib/components/Icon.svelte';
 
 	const actions = [
-		{ href: '/buildings/new', label: 'Gebäude hinzufügen', hint: 'Neues Gebäude erfassen', icon: 'add_business', tone: 'bg-blue-100 text-blue-600' },
-		{ href: '/tenants/new', label: 'Mieter hinzufügen', hint: 'Neuen Mieter erfassen', icon: 'person_add', tone: 'bg-green-100 text-green-600' },
-		{ href: '/invoices/new', label: 'Rechnung erfassen', hint: 'Neue Rechnung hinzufügen', icon: 'receipt', tone: 'bg-purple-100 text-purple-600' },
-		{ href: '/statements/generate', label: 'Abrechnungen erstellen', hint: 'Neue NK-Abrechnungen', icon: 'calculate', tone: 'bg-orange-100 text-orange-600' }
+		{
+			href: '/buildings/new',
+			label: 'Gebäude hinzufügen',
+			hint: 'Neues Gebäude erfassen',
+			icon: 'add_business',
+			tone: 'bg-blue-100 text-blue-600'
+		},
+		{
+			href: '/tenants/new',
+			label: 'Mieter hinzufügen',
+			hint: 'Neuen Mieter erfassen',
+			icon: 'person_add',
+			tone: 'bg-green-100 text-green-600'
+		},
+		{
+			href: '/invoices/new',
+			label: 'Rechnung erfassen',
+			hint: 'Neue Rechnung hinzufügen',
+			icon: 'receipt',
+			tone: 'bg-purple-100 text-purple-600'
+		},
+		{
+			href: '/statements/generate',
+			label: 'Abrechnungen erstellen',
+			hint: 'Neue NK-Abrechnungen',
+			icon: 'calculate',
+			tone: 'bg-orange-100 text-orange-600'
+		}
 	];
 </script>
 

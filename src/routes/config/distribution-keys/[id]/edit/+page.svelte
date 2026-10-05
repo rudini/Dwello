@@ -16,7 +16,10 @@
 
 <div class="max-w-3xl mx-auto space-y-6">
 	<PageTrail
-		links={[{ href: '/config', label: 'Einstellungen' }, { href: '/config/distribution-keys', label: 'Verteilschlüssel' }]}
+		links={[
+			{ href: '/config', label: 'Einstellungen' },
+			{ href: '/config/distribution-keys', label: 'Verteilschlüssel' }
+		]}
 		current={data.key.name}
 	/>
 

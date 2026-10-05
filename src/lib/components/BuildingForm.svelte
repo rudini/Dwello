@@ -139,7 +139,9 @@
 
 {#snippet heading(text: string, hint = '')}
 	{#if text}
-		<h3 class="text-sm font-medium text-gray-700">{text} <span class="text-gray-400">{hint}</span></h3>
+		<h3 class="text-sm font-medium text-gray-700">
+			{text} <span class="text-gray-400">{hint}</span>
+		</h3>
 	{/if}
 {/snippet}
 
@@ -164,9 +166,7 @@
 			placeholder="z.B. Musterhaus Zentrum"
 			class="{inputClass} border-gray-300"
 		/>
-		<p class="mt-1 text-sm text-gray-500">
-			Ein Name zur besseren Identifikation des Gebäudes.
-		</p>
+		<p class="mt-1 text-sm text-gray-500">Ein Name zur besseren Identifikation des Gebäudes.</p>
 		<FieldError message={errors.name} />
 	</div>
 
@@ -245,7 +245,9 @@
 						class="{inputClass} {borderFor('city')}"
 					/>
 					{#if showCantonBadge}
-						<span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium">
+						<span
+							class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium"
+						>
 							{canton}
 						</span>
 					{/if}
@@ -257,7 +259,8 @@
 		<!-- Canton -->
 		<div>
 			<label for="canton" class="block text-sm font-medium text-gray-700 mb-1">
-				Kanton <span class="text-red-500">*</span> <span class="text-gray-400">{copy.cantonHint}</span>
+				Kanton <span class="text-red-500">*</span>
+				<span class="text-gray-400">{copy.cantonHint}</span>
 			</label>
 			<select
 				id="canton"

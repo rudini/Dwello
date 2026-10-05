@@ -14,11 +14,13 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		fetch(`${BACKEND_URL}/api/v1/distribution-keys?limit=100`).then((r) => r.json())
 	]);
 
-	const buildings = (buildingsData.buildings || buildingsData.data || []).map((b: Record<string, unknown>) => ({
-		id: b.id as string,
-		name: (b.name || '') as string,
-		address: `${b.address}, ${b.postalCode} ${b.city}`
-	}));
+	const buildings = (buildingsData.buildings || buildingsData.data || []).map(
+		(b: Record<string, unknown>) => ({
+			id: b.id as string,
+			name: (b.name || '') as string,
+			address: `${b.address}, ${b.postalCode} ${b.city}`
+		})
+	);
 
 	return {
 		invoice: toInvoice(invoice),

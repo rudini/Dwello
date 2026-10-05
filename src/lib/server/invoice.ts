@@ -5,9 +5,13 @@ import { toDistributionKey } from './distribution-key';
 type Related = Record<string, unknown> | null | undefined;
 
 // Who chose the category: nobody yet, the KI (its suggestion kept), or the Liegenschaftsverwalter
-function categorizationStatus(r: Record<string, unknown>): InvoiceWithDetails['categorizationStatus'] {
+function categorizationStatus(
+	r: Record<string, unknown>
+): InvoiceWithDetails['categorizationStatus'] {
 	if (!r.categoryId) return 'pending';
-	return r.categoryId === r.llmCategoryId && !r.wasManuallyOverridden ? 'auto-categorized' : 'manual';
+	return r.categoryId === r.llmCategoryId && !r.wasManuallyOverridden
+		? 'auto-categorized'
+		: 'manual';
 }
 
 /** Backend invoice as shown in the German interface */
@@ -36,7 +40,9 @@ export function toInvoice(r: Record<string, unknown>): InvoiceWithDetails {
 		buildingAddress: building?.address || '',
 		category: category ? toCategory(category) : undefined,
 		distributionKey: key ? { id: key.id as string, name: toDistributionKey(key).name } : undefined,
-		llmCategory: suggested ? { id: suggested.id as string, name: toCategory(suggested).name } : undefined,
+		llmCategory: suggested
+			? { id: suggested.id as string, name: toCategory(suggested).name }
+			: undefined,
 		categorizationStatus: categorizationStatus(r)
 	};
 }

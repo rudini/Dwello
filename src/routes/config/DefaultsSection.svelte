@@ -19,7 +19,10 @@
 	// Only profiles summing to 100 % distribute all heating costs
 	const profiles = $derived(
 		heatingProfiles.map((profile) => {
-			const total = Math.round(Object.values(profile.monthlyPercentages).reduce((sum, pct) => sum + pct, 0) * 100) / 100;
+			const total =
+				Math.round(
+					Object.values(profile.monthlyPercentages).reduce((sum, pct) => sum + pct, 0) * 100
+				) / 100;
 			return { id: profile.id, label: `${profile.name} (${total}%)`, selectable: total === 100 };
 		})
 	);
@@ -31,22 +34,38 @@
 </script>
 
 <Card>
-	<h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2" data-testid="default-values-section">
+	<h2
+		class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2"
+		data-testid="default-values-section"
+	>
 		<Icon name="tune" size={20} class="text-gray-400" />
 		Standardwerte für Abrechnungen und Rechnungen
 	</h2>
 	<div class="grid gap-4 sm:grid-cols-2">
 		<div>
-			<label for="accountingPeriod" class="block text-sm font-medium text-gray-700 mb-1">Abrechnungsperiode</label>
-			<select id="accountingPeriod" name="accountingPeriod" data-testid="setting-accountingPeriod" class={selectClass}>
+			<label for="accountingPeriod" class="block text-sm font-medium text-gray-700 mb-1"
+				>Abrechnungsperiode</label
+			>
+			<select
+				id="accountingPeriod"
+				name="accountingPeriod"
+				data-testid="setting-accountingPeriod"
+				class={selectClass}
+			>
 				{#each periods as period (period.value)}
-					<option value={period.value} selected={period.value === settings.accountingPeriod}>{period.label}</option>
+					<option value={period.value} selected={period.value === settings.accountingPeriod}
+						>{period.label}</option
+					>
 				{/each}
 			</select>
-			<p class="mt-1 text-xs text-gray-500">Vorschlag für die Periode beim Erstellen der Abrechnungen</p>
+			<p class="mt-1 text-xs text-gray-500">
+				Vorschlag für die Periode beim Erstellen der Abrechnungen
+			</p>
 		</div>
 		<div>
-			<label for="defaultHeatingProfileId" class="block text-sm font-medium text-gray-700 mb-1">Standard-Heizprofil</label>
+			<label for="defaultHeatingProfileId" class="block text-sm font-medium text-gray-700 mb-1"
+				>Standard-Heizprofil</label
+			>
 			<select
 				id="defaultHeatingProfileId"
 				name="defaultHeatingProfileId"
@@ -58,14 +77,16 @@
 					<option
 						value={profile.id}
 						disabled={!profile.selectable}
-						selected={profile.id === settings.defaultHeatingProfileId}
-					>{profile.label}</option>
+						selected={profile.id === settings.defaultHeatingProfileId}>{profile.label}</option
+					>
 				{/each}
 			</select>
 			<p class="mt-1 text-xs text-gray-500">Nur Profile mit genau 100% Summe sind wählbar.</p>
 		</div>
 		<div>
-			<label for="defaultDistributionKeyId" class="block text-sm font-medium text-gray-700 mb-1">Standard-Verteilschlüssel</label>
+			<label for="defaultDistributionKeyId" class="block text-sm font-medium text-gray-700 mb-1"
+				>Standard-Verteilschlüssel</label
+			>
 			<select
 				id="defaultDistributionKeyId"
 				name="defaultDistributionKeyId"
@@ -74,7 +95,9 @@
 			>
 				<option value="" selected={!settings.defaultDistributionKeyId}>Kein Standard</option>
 				{#each distributionKeys as key (key.id)}
-					<option value={key.id} selected={key.id === settings.defaultDistributionKeyId}>{key.name}</option>
+					<option value={key.id} selected={key.id === settings.defaultDistributionKeyId}
+						>{key.name}</option
+					>
 				{/each}
 			</select>
 			<p class="mt-1 text-xs text-gray-500">Vorschlag beim Erfassen neuer Rechnungen</p>

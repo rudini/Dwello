@@ -106,7 +106,7 @@
 		<div class="col-span-1">
 			<div class="relative">
 				<input
-					id={id}
+					{id}
 					type="text"
 					inputmode="numeric"
 					maxlength="4"
@@ -151,7 +151,5 @@
 		</div>
 	</div>
 
-	<p class="mt-1 text-xs text-gray-400">
-		PLZ eingeben für automatische Ortserkennung
-	</p>
+	<p class="mt-1 text-xs text-gray-400">PLZ eingeben für automatische Ortserkennung</p>
 </div>

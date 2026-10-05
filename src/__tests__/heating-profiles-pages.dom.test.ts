@@ -5,7 +5,20 @@ import NewProfilePage from '../routes/config/heating-profiles/new/+page.svelte';
 import EditProfilePage from '../routes/config/heating-profiles/[id]/edit/+page.svelte';
 import { allByTestId, byTestId, click, fireEvent, show } from './helpers/dom';
 
-const MONTHS = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
+const MONTHS = [
+	'january',
+	'february',
+	'march',
+	'april',
+	'may',
+	'june',
+	'july',
+	'august',
+	'september',
+	'october',
+	'november',
+	'december'
+];
 const shares = (values: number[]) => Object.fromEntries(MONTHS.map((m, i) => [m, values[i]]));
 const winter = shares([18, 14, 11, 5, 2, 0, 0, 0, 2, 8, 14, 26]);
 const profile = (type: 'predefined' | 'custom') => ({
@@ -19,7 +32,9 @@ const profile = (type: 'predefined' | 'custom') => ({
 
 describe('Heizprofile', () => {
 	it('zeigt eigene und vordefinierte Profile', () => {
-		show(ProfilesPage, { data: { profiles: [profile('predefined'), { ...profile('custom'), id: 'hp2', name: 'Berg' }] } } as never);
+		show(ProfilesPage, {
+			data: { profiles: [profile('predefined'), { ...profile('custom'), id: 'hp2', name: 'Berg' }] }
+		} as never);
 
 		const cards = allByTestId('heating-profile-card');
 		expect(cards.map((card) => card.textContent)).toEqual([
@@ -53,7 +68,10 @@ describe('Heizprofil', () => {
 	});
 
 	it('zeigt einen Fehler beim Löschen direkt in der Nachfrage', () => {
-		show(ProfilePage, { data: { profile: profile('custom') }, form: { error: 'Heizprofil wird noch verwendet' } } as never);
+		show(ProfilePage, {
+			data: { profile: profile('custom') },
+			form: { error: 'Heizprofil wird noch verwendet' }
+		} as never);
 
 		expect(document.body.textContent).toContain('Heizprofil wird noch verwendet');
 	});

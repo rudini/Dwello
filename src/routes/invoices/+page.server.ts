@@ -34,11 +34,13 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<InvoicesList
 
 		const invoices = (invoicesData.invoices || invoicesData.data || []).map(toInvoice);
 
-		const buildings = (buildingsData.buildings || buildingsData.data || []).map((b: Record<string, unknown>) => ({
-			id: b.id,
-			name: b.name || '',
-			address: `${b.address}, ${b.postalCode} ${b.city}`
-		}));
+		const buildings = (buildingsData.buildings || buildingsData.data || []).map(
+			(b: Record<string, unknown>) => ({
+				id: b.id,
+				name: b.name || '',
+				address: `${b.address}, ${b.postalCode} ${b.city}`
+			})
+		);
 
 		const categories = (categoriesData.categories || categoriesData.data || []).map(toCategory);
 

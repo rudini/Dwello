@@ -36,41 +36,42 @@ export const load: PageServerLoad = async ({ params, fetch }): Promise<ContractD
 		const advancePayment = Number(data.monthlyAdvancePayment || data.advancePayment) || 0;
 
 		const apartmentStatus: ApartmentStatus = data.apartment?.status || 'occupied';
-		const contract: RentalContract & { tenant: Tenant; apartment: Apartment; building: Building } = {
-			id: data.id,
-			apartmentId: data.apartmentId,
-			tenantId: data.tenantId,
-			startDate: data.startDate,
-			endDate: data.endDate || null,
-			baseRent: data.baseRent || '0',
-			additionalRent: data.additionalRent || null,
-			monthlyAdvancePayment: data.monthlyAdvancePayment || '0',
-			tenant: {
-				id: data.tenant?.id || data.tenantId,
-				firstName: data.tenant?.firstName || '',
-				lastName: data.tenant?.lastName || '',
-				email: data.tenant?.email || null,
-				phone: data.tenant?.phone || null,
-				language: data.tenant?.language || 'de'
-			},
-			apartment: {
-				id: data.apartment?.id || data.apartmentId,
-				buildingId: data.apartment?.buildingId || '',
-				number: data.apartment?.number || '',
-				floor: data.apartment?.floor || 0,
-				area: data.apartment?.area || '0',
-				rooms: data.apartment?.rooms || '0',
-				status: apartmentStatus
-			},
-			building: {
-				id: data.building?.id || '',
-				name: data.building?.name || '',
-				address: data.building?.address || '',
-				postalCode: data.building?.postalCode || '',
-				city: data.building?.city || '',
-				canton: data.building?.canton || ''
-			}
-		};
+		const contract: RentalContract & { tenant: Tenant; apartment: Apartment; building: Building } =
+			{
+				id: data.id,
+				apartmentId: data.apartmentId,
+				tenantId: data.tenantId,
+				startDate: data.startDate,
+				endDate: data.endDate || null,
+				baseRent: data.baseRent || '0',
+				additionalRent: data.additionalRent || null,
+				monthlyAdvancePayment: data.monthlyAdvancePayment || '0',
+				tenant: {
+					id: data.tenant?.id || data.tenantId,
+					firstName: data.tenant?.firstName || '',
+					lastName: data.tenant?.lastName || '',
+					email: data.tenant?.email || null,
+					phone: data.tenant?.phone || null,
+					language: data.tenant?.language || 'de'
+				},
+				apartment: {
+					id: data.apartment?.id || data.apartmentId,
+					buildingId: data.apartment?.buildingId || '',
+					number: data.apartment?.number || '',
+					floor: data.apartment?.floor || 0,
+					area: data.apartment?.area || '0',
+					rooms: data.apartment?.rooms || '0',
+					status: apartmentStatus
+				},
+				building: {
+					id: data.building?.id || '',
+					name: data.building?.name || '',
+					address: data.building?.address || '',
+					postalCode: data.building?.postalCode || '',
+					city: data.building?.city || '',
+					canton: data.building?.canton || ''
+				}
+			};
 
 		return {
 			contract,
@@ -102,7 +103,9 @@ export const actions: Actions = {
 		}
 	},
 	delete: async ({ params, fetch }) => {
-		const response = await fetch(`${BACKEND_URL}/api/v1/contracts/${params.id}`, { method: 'DELETE' });
+		const response = await fetch(`${BACKEND_URL}/api/v1/contracts/${params.id}`, {
+			method: 'DELETE'
+		});
 		if (!response.ok) {
 			return fail(response.status, { deleteError: 'Mietvertrag konnte nicht gelöscht werden.' });
 		}

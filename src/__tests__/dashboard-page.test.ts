@@ -13,11 +13,22 @@ const data: DashboardData = {
 		reservedApartments: 0,
 		occupancyRate: 75
 	},
-	financial: { outstandingStatements: 3, totalPending: 1250.5, overdueAmount: 400, paidThisMonth: 900 },
+	financial: {
+		outstandingStatements: 3,
+		totalPending: 1250.5,
+		overdueAmount: 400,
+		paidThisMonth: 900
+	},
 	statements: { draft: 4, sent: 2, paid: 7, overdue: 1 },
 	recentActivity: [],
 	buildingOccupancy: [
-		{ buildingId: 'b1', buildingName: 'Seeblick', totalApartments: 4, occupiedApartments: 3, occupancyRate: 75 }
+		{
+			buildingId: 'b1',
+			buildingName: 'Seeblick',
+			totalApartments: 4,
+			occupiedApartments: 3,
+			occupancyRate: 75
+		}
 	]
 };
 
@@ -48,7 +59,12 @@ describe('Dashboard', () => {
 	it('bietet die Schnellaktionen an', () => {
 		const body = page();
 
-		for (const href of ['/buildings/new', '/tenants/new', '/invoices/new', '/statements/generate']) {
+		for (const href of [
+			'/buildings/new',
+			'/tenants/new',
+			'/invoices/new',
+			'/statements/generate'
+		]) {
 			expect(body).toContain(`href="${href}"`);
 		}
 	});

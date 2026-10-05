@@ -9,7 +9,13 @@ const API = 'http://localhost:3001/api/v1';
 
 const caretaker = { id: 'c1', name: 'Caretaker', nameDE: 'Hauswart', isAllowedUtilityCost: true };
 const repairs = { id: 'c2', name: 'Repairs', nameDE: 'Reparaturen', isAllowedUtilityCost: false };
-const perArea = { id: 'k1', name: 'Per Area (m²)', nameDE: 'Pro Fläche (m²)', type: 'predefined', formula: '{area}' };
+const perArea = {
+	id: 'k1',
+	name: 'Per Area (m²)',
+	nameDE: 'Pro Fläche (m²)',
+	type: 'predefined',
+	formula: '{area}'
+};
 
 const invoice = (values: Record<string, unknown> = {}) => ({
 	id: 'i1',
@@ -55,9 +61,15 @@ describe('Rechnungsliste', () => {
 	});
 
 	it('zeigt Kategorien deutsch, in der Rechnung und im Filter', async () => {
-		const { fetch } = backend({ '/invoices': { invoices: [invoice()], total: 1 }, '/categories': { categories: [caretaker] } });
+		const { fetch } = backend({
+			'/invoices': { invoices: [invoice()], total: 1 },
+			'/categories': { categories: [caretaker] }
+		});
 
-		const data = (await listLoad({ url: new URL('http://localhost/invoices'), fetch } as never)) as {
+		const data = (await listLoad({
+			url: new URL('http://localhost/invoices'),
+			fetch
+		} as never)) as {
 			invoices: { category: { name: string } }[];
 			categories: { name: string }[];
 		};
@@ -75,7 +87,9 @@ describe('Rechnungsliste', () => {
 	});
 
 	it('nennt eine Rechnung ohne Kategorie ausstehend', async () => {
-		expect((await listed({ categoryId: null, category: null })).categorizationStatus).toBe('pending');
+		expect((await listed({ categoryId: null, category: null })).categorizationStatus).toBe(
+			'pending'
+		);
 	});
 });
 
@@ -94,7 +108,13 @@ describe('Rechnungsdetail', () => {
 
 describe('Ursprüngliche KI-Kategorisierung', () => {
 	it('zeigt die Kategorie der KI deutsch, auch wenn die Rechnung inzwischen anders eingeordnet ist', async () => {
-		const values = { categoryId: 'c2', category: repairs, llmCategoryId: 'c1', llmCategory: caretaker, wasManuallyOverridden: true };
+		const values = {
+			categoryId: 'c2',
+			category: repairs,
+			llmCategoryId: 'c1',
+			llmCategory: caretaker,
+			wasManuallyOverridden: true
+		};
 		const { fetch } = backend({ '/invoices/i1': invoice(values) });
 
 		const { invoice: shown } = (await detailLoad({ params: { id: 'i1' }, fetch } as never)) as {
@@ -106,9 +126,16 @@ describe('Ursprüngliche KI-Kategorisierung', () => {
 	});
 
 	it('hält beim Erfassen fest, welche Kategorie die KI vorgeschlagen hat', () => {
-		const suggestion = { category: { id: 'c1', name: 'Hauswart', isAllowedUtilityCost: true }, confidence: 0.92, isAllowedUtilityCost: true };
+		const suggestion = {
+			category: { id: 'c1', name: 'Hauswart', isAllowedUtilityCost: true },
+			confidence: 0.92,
+			isAllowedUtilityCost: true
+		};
 
-		expect(suggestionProvenance(suggestion)).toEqual({ llmCategoryId: 'c1', llmConfidence: '0.92' });
+		expect(suggestionProvenance(suggestion)).toEqual({
+			llmCategoryId: 'c1',
+			llmConfidence: '0.92'
+		});
 		expect(suggestionProvenance({ ...suggestion, category: null })).toEqual({});
 		expect(suggestionProvenance(null)).toEqual({});
 	});
@@ -126,7 +153,10 @@ describe('Rechnung erfassen und bearbeiten', () => {
 
 	it('bietet Kategorien und Verteilschlüssel deutsch zur Auswahl an', async () => {
 		for (const load of [newLoad, editLoad]) {
-			const data = (await load({ params: { id: 'i1' }, fetch: backend(answers).fetch } as never)) as {
+			const data = (await load({
+				params: { id: 'i1' },
+				fetch: backend(answers).fetch
+			} as never)) as {
 				categories: { name: string; isAllowedUtilityCost: boolean }[];
 				distributionKeys: { name: string }[];
 			};

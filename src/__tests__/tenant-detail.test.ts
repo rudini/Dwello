@@ -4,11 +4,17 @@ import { toContractHistory } from '../lib/server/contract-history';
 import { runAction } from './helpers/action';
 
 const API = 'http://localhost:3001/api/v1';
-const day = (offset: number) => new Date(Date.now() + offset * 86_400_000).toISOString().split('T')[0];
+const day = (offset: number) =>
+	new Date(Date.now() + offset * 86_400_000).toISOString().split('T')[0];
 
 const tenant = { id: 't1', firstName: 'Anna', lastName: 'Keller', email: 'anna@example.com' };
 
-const contract = (id: string, startDate: string, endDate: string | null, apartmentNumber: string) => ({
+const contract = (
+	id: string,
+	startDate: string,
+	endDate: string | null,
+	apartmentNumber: string
+) => ({
 	id,
 	apartmentId: `a-${id}`,
 	apartmentNumber,
@@ -32,7 +38,10 @@ function backend(contracts: unknown[]) {
 }
 
 const loadTenant = async (contracts: unknown[]) =>
-	(await load({ params: { id: 't1' }, fetch: backend(contracts).fetch } as never)) as Record<string, unknown>;
+	(await load({ params: { id: 't1' }, fetch: backend(contracts).fetch } as never)) as Record<
+		string,
+		unknown
+	>;
 
 describe('Mieterdetail', () => {
 	it('lädt die Mietverträge des Mieters', async () => {
@@ -78,7 +87,12 @@ describe('Mieterdetail', () => {
 
 		expect(data.contractHistory).toEqual([
 			expect.objectContaining({ id: 'c2', apartment: 'Wohnung 3.01', status: 'future' }),
-			expect.objectContaining({ id: 'c1', apartment: 'Wohnung 2.01', status: 'active', rentBrutto: 1050 }),
+			expect.objectContaining({
+				id: 'c1',
+				apartment: 'Wohnung 2.01',
+				status: 'active',
+				rentBrutto: 1050
+			}),
 			expect.objectContaining({ id: 'c0', apartment: 'Wohnung 1.01', status: 'ended' })
 		]);
 	});

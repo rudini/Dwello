@@ -2,7 +2,8 @@
 	import Button from './Button.svelte';
 	import Icon from './Icon.svelte';
 
-	let { filtered, onclear, testid }: { filtered: boolean; onclear: () => void; testid: string } = $props();
+	let { filtered, onclear, testid }: { filtered: boolean; onclear: () => void; testid: string } =
+		$props();
 </script>
 
 <div class="flex gap-2">

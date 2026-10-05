@@ -10,7 +10,11 @@
 		buildingId,
 		apartment = {},
 		errors = {}
-	}: { buildingId: string; apartment?: Partial<Apartment>; errors?: Record<string, string> } = $props();
+	}: {
+		buildingId: string;
+		apartment?: Partial<Apartment>;
+		errors?: Record<string, string>;
+	} = $props();
 
 	const inputClass =
 		'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary bg-white';
@@ -28,7 +32,11 @@
 	// Warn while typing when another apartment of the building already has this number
 	$effect(() => {
 		const candidate = number.trim();
-		const params = new URLSearchParams({ buildingId, number: candidate, excludeId: apartment.id ?? '' });
+		const params = new URLSearchParams({
+			buildingId,
+			number: candidate,
+			excludeId: apartment.id ?? ''
+		});
 		if (!buildingId || !candidate) {
 			numberTaken = false;
 			return;
@@ -59,7 +67,8 @@
 		<FieldError message={errors.floor} />
 	</div>
 	<div>
-		<label for="number" class={labelClass}>Wohnungsnummer <span class="text-red-500">*</span></label>
+		<label for="number" class={labelClass}>Wohnungsnummer <span class="text-red-500">*</span></label
+		>
 		<input
 			id="number"
 			name="number"

@@ -27,13 +27,24 @@
 			<h1 class="text-2xl font-bold text-gray-900">Verteilschlüssel</h1>
 			<p class="text-gray-500 mt-1">Wie Kosten auf die Wohnungen eines Gebäudes verteilt werden</p>
 		</div>
-		<Button href="/config/distribution-keys/new" variant="primary" testid="new-distribution-key-button">
+		<Button
+			href="/config/distribution-keys/new"
+			variant="primary"
+			testid="new-distribution-key-button"
+		>
 			<Icon name="add" size={20} />
 			Neuer Verteilschlüssel
 		</Button>
 	</div>
 
-	<RecordTable columns={[{ label: 'Name' }, { label: 'Formel' }, { label: 'Art' }, { label: 'Verwendung', align: 'center' }]}>
+	<RecordTable
+		columns={[
+			{ label: 'Name' },
+			{ label: 'Formel' },
+			{ label: 'Art' },
+			{ label: 'Verwendung', align: 'center' }
+		]}
+	>
 		{#each data.keys as key (key.id)}
 			<DistributionKeyRow {key} ondelete={() => (toDelete = key)} />
 		{/each}

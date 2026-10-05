@@ -12,7 +12,9 @@
 	const paddingClass = $derived(padding ? 'p-6' : '');
 </script>
 
-<div class="bg-white border border-slate-200 rounded-xl shadow-sm hover:shadow-md transition-all {paddingClass} {className}">
+<div
+	class="bg-white border border-slate-200 rounded-xl shadow-sm hover:shadow-md transition-all {paddingClass} {className}"
+>
 	{#if children}
 		{@render children()}
 	{/if}

@@ -9,7 +9,8 @@
 		icon,
 		label,
 		busyLabel
-	}: { cancelHref: string; submitting: boolean; icon: string; label: string; busyLabel: string } = $props();
+	}: { cancelHref: string; submitting: boolean; icon: string; label: string; busyLabel: string } =
+		$props();
 </script>
 
 <div class="flex gap-3 pt-4 border-t border-gray-200">

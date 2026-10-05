@@ -18,7 +18,9 @@
 	let buildingFilter = $state($page.url.searchParams.get('building') || '');
 	let statusFilter = $state($page.url.searchParams.get('status') || '');
 
-	const buildingOptions = $derived(data.buildings.map((b) => ({ value: b.id, label: b.name || b.address })));
+	const buildingOptions = $derived(
+		data.buildings.map((b) => ({ value: b.id, label: b.name || b.address }))
+	);
 	const statusOptions = [
 		{ value: 'active', label: 'Aktive Verträge' },
 		{ value: 'ended', label: 'Beendete Verträge' }
@@ -28,7 +30,13 @@
 
 	function handleSearch(event: SubmitEvent) {
 		event.preventDefault();
-		goto(listSearchUrl('/contracts', { search: searchTerm, building: buildingFilter, status: statusFilter }));
+		goto(
+			listSearchUrl('/contracts', {
+				search: searchTerm,
+				building: buildingFilter,
+				status: statusFilter
+			})
+		);
 	}
 
 	function clearFilters() {
@@ -82,7 +90,11 @@
 	<Card>
 		<form onsubmit={handleSearch} class="space-y-4">
 			<div class="flex flex-col sm:flex-row gap-4">
-				<SearchField bind:value={searchTerm} placeholder="Mieter, Wohnung oder Gebäude..." testid="contract-search-input" />
+				<SearchField
+					bind:value={searchTerm}
+					placeholder="Mieter, Wohnung oder Gebäude..."
+					testid="contract-search-input"
+				/>
 				<FilterSelect
 					id="building"
 					label="Gebäude"
@@ -102,11 +114,7 @@
 					onchange={(value) => (statusFilter = value)}
 				/>
 			</div>
-			<FilterActions
-				{filtered}
-				onclear={clearFilters}
-				testid="contract-search-submit"
-			/>
+			<FilterActions {filtered} onclear={clearFilters} testid="contract-search-submit" />
 		</form>
 	</Card>
 
@@ -167,7 +175,10 @@
 					</thead>
 					<tbody class="divide-y divide-gray-100">
 						{#each data.contracts as contract}
-							<tr class="hover:bg-gray-50 transition-colors" data-testid="contract-row-{contract.id}">
+							<tr
+								class="hover:bg-gray-50 transition-colors"
+								data-testid="contract-row-{contract.id}"
+							>
 								<!-- Tenant -->
 								<td class="py-4 px-4">
 									<div class="flex items-center gap-3">
@@ -212,10 +223,20 @@
 								<!-- Actions -->
 								<td class="py-4 px-4 text-right">
 									<div class="flex items-center justify-end gap-2">
-										<Button href="/contracts/{contract.id}" variant="secondary" size="sm" testid="contract-view-button">
+										<Button
+											href="/contracts/{contract.id}"
+											variant="secondary"
+											size="sm"
+											testid="contract-view-button"
+										>
 											<Icon name="visibility" size={16} />
 										</Button>
-										<Button href="/contracts/{contract.id}/edit" variant="secondary" size="sm" testid="contract-edit-button">
+										<Button
+											href="/contracts/{contract.id}/edit"
+											variant="secondary"
+											size="sm"
+											testid="contract-edit-button"
+										>
 											<Icon name="edit" size={16} />
 										</Button>
 									</div>

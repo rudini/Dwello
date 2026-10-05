@@ -12,13 +12,14 @@ const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 export const load: PageServerLoad = async ({ fetch }) => {
 	try {
 		// Fetch all required data in parallel
-		const [buildingsRes, categoriesRes, distributionKeysRes, llmStatusRes, defaultKeyRes] = await Promise.all([
-			fetch(`${BACKEND_URL}/api/v1/buildings?limit=100`),
-			fetch(`${BACKEND_URL}/api/v1/categories`),
-			fetch(`${BACKEND_URL}/api/v1/distribution-keys`),
-			fetch(`${BACKEND_URL}/api/v1/invoices/llm-status`),
-			fetch(`${BACKEND_URL}/api/v1/config/default_distribution_key_id`)
-		]);
+		const [buildingsRes, categoriesRes, distributionKeysRes, llmStatusRes, defaultKeyRes] =
+			await Promise.all([
+				fetch(`${BACKEND_URL}/api/v1/buildings?limit=100`),
+				fetch(`${BACKEND_URL}/api/v1/categories`),
+				fetch(`${BACKEND_URL}/api/v1/distribution-keys`),
+				fetch(`${BACKEND_URL}/api/v1/invoices/llm-status`),
+				fetch(`${BACKEND_URL}/api/v1/config/default_distribution_key_id`)
+			]);
 
 		if (!buildingsRes.ok || !categoriesRes.ok || !distributionKeysRes.ok) {
 			console.error('Failed to fetch invoice form data');

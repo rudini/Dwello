@@ -16,7 +16,13 @@ const apartment = {
 	area: '82.50',
 	rooms: '3.5',
 	status: 'occupied',
-	building: { id: 'b1', name: 'Lindenhof', address: 'Lindenweg 4', postalCode: '8400', city: 'Winterthur' },
+	building: {
+		id: 'b1',
+		name: 'Lindenhof',
+		address: 'Lindenweg 4',
+		postalCode: '8400',
+		city: 'Winterthur'
+	},
 	currentContractId: 'c2'
 };
 
@@ -84,7 +90,12 @@ describe('Wohnungsdetail', () => {
 		const data = await loadApartment({ 'apartments/a1': apartment, contracts: { contracts } });
 
 		expect(data.contractHistory).toEqual([
-			expect.objectContaining({ id: 'c2', tenantName: 'Beat Huber', rentBrutto: 1430, status: 'active' }),
+			expect.objectContaining({
+				id: 'c2',
+				tenantName: 'Beat Huber',
+				rentBrutto: 1430,
+				status: 'active'
+			}),
 			expect.objectContaining({
 				id: 'c1',
 				tenantName: 'Eva Graf',
@@ -100,7 +111,12 @@ describe('Wohnungsdetail', () => {
 		const data = await loadApartment({ 'apartments/a1': vacant, contracts: { contracts: [] } });
 
 		expect(data.currentContract).toBeNull();
-		expect(data.monthlyCosts).toEqual({ baseRent: 0, additionalRent: 0, advancePayment: 0, totalBrutto: 0 });
+		expect(data.monthlyCosts).toEqual({
+			baseRent: 0,
+			additionalRent: 0,
+			advancePayment: 0,
+			totalBrutto: 0
+		});
 	});
 
 	it('lädt die Verträge der Wohnung', async () => {
@@ -118,9 +134,9 @@ describe('Wohnungsdetail', () => {
 
 describe('Bruttomiete', () => {
 	it('zählt Nettomiete, Zusatzmiete und Akontozahlung zusammen', () => {
-		expect(grossRent({ baseRent: '1200.00', additionalRent: '50.00', monthlyAdvancePayment: '180.00' })).toBe(
-			1430
-		);
+		expect(
+			grossRent({ baseRent: '1200.00', additionalRent: '50.00', monthlyAdvancePayment: '180.00' })
+		).toBe(1430);
 	});
 });
 
@@ -156,7 +172,14 @@ describe('Neue Wohnung', () => {
 			{
 				method: 'POST',
 				url: `${API}/apartments`,
-				body: { buildingId: 'b1', number: '4.01', floor: 4, area: '68', rooms: '2.5', status: 'vacant' }
+				body: {
+					buildingId: 'b1',
+					number: '4.01',
+					floor: 4,
+					area: '68',
+					rooms: '2.5',
+					status: 'vacant'
+				}
 			}
 		]);
 	});
@@ -189,7 +212,10 @@ describe('Neue Wohnung', () => {
 
 describe('Wohnung bearbeiten', () => {
 	it('speichert Nummer, Stockwerk, Fläche, Zimmer und Status und öffnet die Wohnung', async () => {
-		const { calls, result } = runAction(editActions.default, 'a1', 200, { ...fields, status: 'reserved' });
+		const { calls, result } = runAction(editActions.default, 'a1', 200, {
+			...fields,
+			status: 'reserved'
+		});
 
 		await expect(result).rejects.toMatchObject({ status: 303, location: '/apartments/a1' });
 		expect(calls).toEqual([

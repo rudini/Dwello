@@ -12,5 +12,6 @@ export const load: PageServerLoad = async ({ fetch }) => {
 };
 
 export const actions: Actions = {
-	delete: async ({ request, fetch }) => deleteCategory(fetch, String((await request.formData()).get('id')))
+	delete: async ({ request, fetch }) =>
+		deleteCategory(fetch, String((await request.formData()).get('id')))
 };

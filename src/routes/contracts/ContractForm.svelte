@@ -48,7 +48,9 @@
 
 	const currentApartmentId = $derived(contract?.apartmentId);
 	const selectedAvailability = $derived(apartmentAvailability.get(form.apartmentId));
-	const startLimit = $derived(availableFrom(selectedAvailability, form.apartmentId !== currentApartmentId));
+	const startLimit = $derived(
+		availableFrom(selectedAvailability, form.apartmentId !== currentApartmentId)
+	);
 	const overlap = $derived(overlapWarning(form, apartmentContracts, contract?.id));
 	const isRunning = $derived(!!contract && !contract.endDate);
 	// Where the form saves to and returns to, and how its submit button reads
@@ -73,7 +75,9 @@
 	);
 
 	async function contractsOf(apartmentId: string) {
-		const response = await apiCall<{ contracts: ContractForAvailability[] }>(`/contracts?apartmentId=${apartmentId}`);
+		const response = await apiCall<{ contracts: ContractForAvailability[] }>(
+			`/contracts?apartmentId=${apartmentId}`
+		);
 		return response.data?.contracts || [];
 	}
 
@@ -117,7 +121,10 @@
 
 		isSubmitting = true;
 		try {
-			const response = await apiCall(target.path, { method: target.method, body: contractBody(form) });
+			const response = await apiCall(target.path, {
+				method: target.method,
+				body: contractBody(form)
+			});
 			if (response.error) throw new Error(response.error.message);
 			await goto(target.back);
 		} catch (error) {
@@ -144,8 +151,8 @@
 					<div class="text-sm text-amber-800">
 						<p class="font-medium">Aktiver Vertrag</p>
 						<p class="mt-1">
-							Änderungen an einem aktiven Vertrag werden sofort wirksam. Bei Mietanpassungen
-							sollten Sie die gesetzlichen Kündigungsfristen beachten.
+							Änderungen an einem aktiven Vertrag werden sofort wirksam. Bei Mietanpassungen sollten
+							Sie die gesetzlichen Kündigungsfristen beachten.
 						</p>
 					</div>
 				</div>
@@ -161,7 +168,9 @@
 				data-testid="contract-tenant-select"
 				onchange={(e) => (form.tenantId = e.currentTarget.value)}
 				use:keepEarlyChoice={(id) => (form.tenantId = id)}
-				class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary bg-white {fieldBorder(errors.tenantId)}"
+				class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary bg-white {fieldBorder(
+					errors.tenantId
+				)}"
 			>
 				<option value="" selected={!form.tenantId}>Mieter auswählen...</option>
 				{#each tenants as tenant (tenant.id)}

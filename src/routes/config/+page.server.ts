@@ -16,7 +16,10 @@ export const load: PageServerLoad = async ({ fetch }) => {
 	return {
 		settings: toSettings(config.data),
 		heatingProfiles: heatingProfiles.data.map(toHeatingProfile),
-		distributionKeys: distributionKeys.data.map((key: DistributionKey) => ({ id: key.id, name: key.name }))
+		distributionKeys: distributionKeys.data.map((key: DistributionKey) => ({
+			id: key.id,
+			name: key.name
+		}))
 	};
 };
 

@@ -17,12 +17,17 @@
 	<!-- Coming Soon Card -->
 	<Card>
 		<div class="text-center py-16">
-			<div class="inline-flex items-center justify-center w-20 h-20 bg-purple-100 rounded-full mb-6">
+			<div
+				class="inline-flex items-center justify-center w-20 h-20 bg-purple-100 rounded-full mb-6"
+			>
 				<Icon name="summarize" size={40} class="text-purple-600" />
 			</div>
-			<h2 class="text-xl font-semibold text-gray-900 mb-2" data-testid="coming-soon-title">Berichte kommen in Phase 2</h2>
+			<h2 class="text-xl font-semibold text-gray-900 mb-2" data-testid="coming-soon-title">
+				Berichte kommen in Phase 2
+			</h2>
 			<p class="text-gray-500 max-w-md mx-auto mb-8">
-				Automatische Berichterstellung und Export-Funktionen werden in der nächsten Version verfügbar sein.
+				Automatische Berichterstellung und Export-Funktionen werden in der nächsten Version
+				verfügbar sein.
 			</p>
 
 			<div class="grid gap-4 sm:grid-cols-3 max-w-2xl mx-auto">

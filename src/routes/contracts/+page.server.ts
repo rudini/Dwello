@@ -29,7 +29,11 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<ContractsLis
 		const buildingsData = await buildingsRes.json();
 		const apartmentsData = await apartmentsRes.json();
 
-		const contracts: ContractWithDetails[] = (contractsData.contracts || contractsData.data || []).map((c: Record<string, unknown>) => ({
+		const contracts: ContractWithDetails[] = (
+			contractsData.contracts ||
+			contractsData.data ||
+			[]
+		).map((c: Record<string, unknown>) => ({
 			id: c.id as string,
 			apartmentId: c.apartmentId as string,
 			tenantId: c.tenantId as string,
@@ -44,20 +48,27 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<ContractsLis
 			apartmentNumber: (c.apartmentNumber as string) || '',
 			buildingName: (c.buildingName as string) || '',
 			buildingAddress: (c.buildingAddress as string) || '',
-			totalRent: Number(c.baseRent || 0) + Number(c.additionalRent || 0) + Number(c.monthlyAdvancePayment || 0)
+			totalRent:
+				Number(c.baseRent || 0) +
+				Number(c.additionalRent || 0) +
+				Number(c.monthlyAdvancePayment || 0)
 		}));
 
-		const buildings = (buildingsData.buildings || buildingsData.data || []).map((b: Record<string, unknown>) => ({
-			id: b.id,
-			name: b.name || '',
-			address: b.address || ''
-		}));
+		const buildings = (buildingsData.buildings || buildingsData.data || []).map(
+			(b: Record<string, unknown>) => ({
+				id: b.id,
+				name: b.name || '',
+				address: b.address || ''
+			})
+		);
 
-		const apartments = (apartmentsData.apartments || apartmentsData.data || []).map((a: Record<string, unknown>) => ({
-			id: a.id,
-			number: a.number || '',
-			buildingId: a.buildingId
-		}));
+		const apartments = (apartmentsData.apartments || apartmentsData.data || []).map(
+			(a: Record<string, unknown>) => ({
+				id: a.id,
+				number: a.number || '',
+				buildingId: a.buildingId
+			})
+		);
 
 		return {
 			contracts,

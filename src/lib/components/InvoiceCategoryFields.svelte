@@ -49,7 +49,9 @@
 	</div>
 
 	<div>
-		<label for="distributionKey" class="block text-sm font-medium text-gray-700 mb-1">Verteilschlüssel</label>
+		<label for="distributionKey" class="block text-sm font-medium text-gray-700 mb-1"
+			>Verteilschlüssel</label
+		>
 		<select
 			id="distributionKey"
 			data-testid="invoice-distribution-key-select"
@@ -75,8 +77,12 @@
 				class="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
 			/>
 			<div>
-				<label for="isValidUtilityCost" class="font-medium text-gray-900">Umlagefähige Nebenkosten</label>
-				<p class="text-sm text-gray-500">Gemäss schweizerischem Mietrecht auf Mieter umlegbare Kosten</p>
+				<label for="isValidUtilityCost" class="font-medium text-gray-900"
+					>Umlagefähige Nebenkosten</label
+				>
+				<p class="text-sm text-gray-500">
+					Gemäss schweizerischem Mietrecht auf Mieter umlegbare Kosten
+				</p>
 			</div>
 		</div>
 
@@ -87,8 +93,8 @@
 			>
 				<Icon name="warning" size={18} class="text-amber-500 flex-shrink-0 mt-0.5" />
 				<div class="text-sm text-amber-700">
-					<strong>Hinweis:</strong> Diese Kategorie enthält typischerweise nicht umlagefähige Kosten (z.B. Reparaturen,
-					Versicherungen). Diese können nicht auf Mieter übertragen werden.
+					<strong>Hinweis:</strong> Diese Kategorie enthält typischerweise nicht umlagefähige Kosten (z.B.
+					Reparaturen, Versicherungen). Diese können nicht auf Mieter übertragen werden.
 				</div>
 			</div>
 		{/if}

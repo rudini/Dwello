@@ -20,11 +20,15 @@
 		<div>
 			<h1 class="text-2xl font-bold text-gray-900">Heizprofile</h1>
 			<p class="text-gray-500 mt-1">
-				Wie sich die Heizkosten eines Jahres auf die Monate verteilen. Bei einem Mieterwechsel trägt jeder Mieter die Monate
-				seiner Mietdauer.
+				Wie sich die Heizkosten eines Jahres auf die Monate verteilen. Bei einem Mieterwechsel trägt
+				jeder Mieter die Monate seiner Mietdauer.
 			</p>
 		</div>
-		<Button href="/config/heating-profiles/new" variant="primary" testid="heating-profiles-new-button">
+		<Button
+			href="/config/heating-profiles/new"
+			variant="primary"
+			testid="heating-profiles-new-button"
+		>
 			<Icon name="add" size={20} />
 			Neues Heizprofil
 		</Button>

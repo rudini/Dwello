@@ -31,7 +31,9 @@ export const load = async ({ fetch }: { fetch: typeof globalThis.fetch }) => {
 		buildings: (buildings.buildings ?? []) as (Building & { apartmentCount: number })[],
 		heatingProfiles: ((heatingProfiles.data ?? []) as Row[]).map(toHeatingProfile),
 		defaultManagementFeePercent: Number(settings.management_fee_pct ?? 3),
-		defaultPeriod: lastCompletedPeriod((settings.accounting_period ?? 'calendar') as AccountingPeriodType),
+		defaultPeriod: lastCompletedPeriod(
+			(settings.accounting_period ?? 'calendar') as AccountingPeriodType
+		),
 		defaultHeatingProfileId: settings.default_heating_profile_id ?? ''
 	};
 };

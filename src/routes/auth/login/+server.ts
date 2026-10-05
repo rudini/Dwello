@@ -7,11 +7,7 @@
 import { redirect } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { generateOAuthState, setOAuthStateCookie } from '$lib/server/auth';
-import {
-	generateOAuthUrl,
-	isValidProvider,
-	validateProviderConfig
-} from '$lib/server/oauth';
+import { generateOAuthUrl, isValidProvider, validateProviderConfig } from '$lib/server/oauth';
 import { ValidationError, handleRequestError, logOAuthEvent } from '$lib/server/error-handler';
 import { loginPage, rememberLoginFlow } from '$lib/server/login-flow';
 
@@ -26,10 +22,7 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
 		}
 
 		if (!isValidProvider(provider)) {
-			throw new ValidationError(
-				'Invalid provider. Must be "google" or "microsoft"',
-				'provider'
-			);
+			throw new ValidationError('Invalid provider. Must be "google" or "microsoft"', 'provider');
 		}
 
 		// The login page offers configured providers only; anything else leads back to it

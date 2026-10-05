@@ -43,18 +43,20 @@ export const load: PageServerLoad = async ({ params, fetch }): Promise<BuildingD
 			vacantCount: Number(buildingData.vacantCount) || 0
 		};
 
-		const apartments: Apartment[] = (apartmentsData.apartments || apartmentsData.data || []).map((a: Record<string, unknown>) => {
-			const status: ApartmentStatus = (a.status as ApartmentStatus) || 'vacant';
-			return {
-				id: a.id as string,
-				buildingId: a.buildingId as string,
-				number: (a.number as string) || '',
-				floor: (a.floor as number) || 0,
-				rooms: a.rooms || '0',
-				area: a.area || '0',
-				status
-			};
-		});
+		const apartments: Apartment[] = (apartmentsData.apartments || apartmentsData.data || []).map(
+			(a: Record<string, unknown>) => {
+				const status: ApartmentStatus = (a.status as ApartmentStatus) || 'vacant';
+				return {
+					id: a.id as string,
+					buildingId: a.buildingId as string,
+					number: (a.number as string) || '',
+					floor: (a.floor as number) || 0,
+					rooms: a.rooms || '0',
+					area: a.area || '0',
+					status
+				};
+			}
+		);
 
 		return { building, apartments };
 	} catch (err) {
@@ -68,7 +70,9 @@ export const load: PageServerLoad = async ({ params, fetch }): Promise<BuildingD
 
 export const actions: Actions = {
 	delete: async ({ params, fetch }) => {
-		const response = await fetch(`${BACKEND_URL}/api/v1/buildings/${params.id}`, { method: 'DELETE' });
+		const response = await fetch(`${BACKEND_URL}/api/v1/buildings/${params.id}`, {
+			method: 'DELETE'
+		});
 		if (!response.ok) {
 			return fail(response.status, { deleteError: 'Gebäude konnte nicht gelöscht werden.' });
 		}

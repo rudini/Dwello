@@ -16,7 +16,9 @@
 	<div class="p-4 bg-gray-50 rounded-lg">
 		<div class="flex items-center gap-2 mb-2" hidden={!invoice.llmCategory}>
 			<span class="text-sm text-gray-600">Kategorie:</span>
-			<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+			<span
+				class="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-blue-100 text-blue-800"
+			>
 				{invoice.llmCategory?.name}
 			</span>
 		</div>

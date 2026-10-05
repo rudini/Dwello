@@ -1,5 +1,9 @@
 import type { RentalContract } from './types';
-import { checkDateRangeOverlap, type AvailabilityInfo, type ContractForAvailability } from './utils/contract-availability';
+import {
+	checkDateRangeOverlap,
+	type AvailabilityInfo,
+	type ContractForAvailability
+} from './utils/contract-availability';
 
 /** Input of the contract form; amounts stay as typed, the backend takes decimals as strings */
 export interface ContractFormValues {
@@ -13,10 +17,14 @@ export interface ContractFormValues {
 	advancePayment: string;
 }
 
-const dateForInput = (date: string | null | undefined) => (date ? new Date(date).toISOString().split('T')[0] : '');
+const dateForInput = (date: string | null | undefined) =>
+	date ? new Date(date).toISOString().split('T')[0] : '';
 
 /** Values of the contract being edited, or of a new contract for the tenant and apartment given in the URL */
-export function initialContractValues(contract: RentalContract | undefined, params: URLSearchParams): ContractFormValues {
+export function initialContractValues(
+	contract: RentalContract | undefined,
+	params: URLSearchParams
+): ContractFormValues {
 	if (!contract) {
 		return {
 			tenantId: params.get('tenant') || '',
@@ -44,17 +52,21 @@ export function initialContractValues(contract: RentalContract | undefined, para
 function endDateError({ isUnlimited, startDate, endDate }: ContractFormValues) {
 	if (isUnlimited) return undefined;
 	if (!endDate) return 'Vertragsende ist erforderlich bei befristetem Vertrag';
-	if (startDate && new Date(endDate) <= new Date(startDate)) return 'Vertragsende muss nach Vertragsbeginn liegen';
+	if (startDate && new Date(endDate) <= new Date(startDate))
+		return 'Vertragsende muss nach Vertragsbeginn liegen';
 }
 
 function baseRentError(baseRent: string) {
 	if (!baseRent) return 'Nettomiete ist erforderlich';
-	if (isNaN(parseFloat(baseRent)) || parseFloat(baseRent) <= 0) return 'Bitte geben Sie eine gültige Miete ein';
+	if (isNaN(parseFloat(baseRent)) || parseFloat(baseRent) <= 0)
+		return 'Bitte geben Sie eine gültige Miete ein';
 }
 
 // Optional amounts may be left empty, but not negative
 const amountError = (amount: string) =>
-	amount && (isNaN(parseFloat(amount)) || parseFloat(amount) < 0) ? 'Bitte geben Sie einen gültigen Betrag ein' : undefined;
+	amount && (isNaN(parseFloat(amount)) || parseFloat(amount) < 0)
+		? 'Bitte geben Sie einen gültigen Betrag ein'
+		: undefined;
 
 /** Error message per field; empty when the contract can be saved */
 export function validateContract(values: ContractFormValues): Record<string, string> {
@@ -67,7 +79,10 @@ export function validateContract(values: ContractFormValues): Record<string, str
 		additionalRent: amountError(values.additionalRent),
 		advancePayment: amountError(values.advancePayment)
 	};
-	return Object.fromEntries(Object.entries(errors).filter(([, message]) => message)) as Record<string, string>;
+	return Object.fromEntries(Object.entries(errors).filter(([, message]) => message)) as Record<
+		string,
+		string
+	>;
 }
 
 /** Request body of the contract API */
@@ -101,13 +116,18 @@ export function apartmentOption(
 ): { label: string; disabled: boolean } {
 	const name = `Wohnung ${apartment.unit} - ${apartment.building}`;
 	if (isCurrent) return { label: `${name} (aktuell)`, disabled: false };
-	if (availability?.hasOngoingContract) return { label: `${name} (nicht verfügbar)`, disabled: true };
-	if (availability?.availableFrom) return { label: `${name} (verfügbar ab ${availability.availableFrom})`, disabled: false };
+	if (availability?.hasOngoingContract)
+		return { label: `${name} (nicht verfügbar)`, disabled: true };
+	if (availability?.availableFrom)
+		return { label: `${name} (verfügbar ab ${availability.availableFrom})`, disabled: false };
 	return { label: name, disabled: false };
 }
 
 /** Earliest start and its notice for an apartment that becomes free later; not for the edited contract's own apartment */
-export function availableFrom(availability: AvailabilityInfo | null | undefined, apartmentChanged: boolean) {
+export function availableFrom(
+	availability: AvailabilityInfo | null | undefined,
+	apartmentChanged: boolean
+) {
 	if (!availability || !apartmentChanged) return { min: undefined, notice: null };
 	return {
 		min: availability.availableFrom || undefined,
@@ -116,13 +136,19 @@ export function availableFrom(availability: AvailabilityInfo | null | undefined,
 }
 
 /** Start date a new contract gets once its apartment is chosen: the day the apartment becomes free */
-export function suggestedStartDate(isNew: boolean, startDate: string, availability: AvailabilityInfo | null | undefined) {
+export function suggestedStartDate(
+	isNew: boolean,
+	startDate: string,
+	availability: AvailabilityInfo | null | undefined
+) {
 	if (!isNew || startDate) return null;
 	return availability?.availableFrom || null;
 }
 
 /** Border of a form field, red when it has an error */
-export const fieldBorder = (error: string | undefined) => (error ? 'border-red-500' : 'border-gray-300');
+export const fieldBorder = (error: string | undefined) =>
+	error ? 'border-red-500' : 'border-gray-300';
 
 /** Message shown when saving fails */
-export const saveErrorMessage = (error: unknown) => (error instanceof Error && error.message) || 'Ein Fehler ist aufgetreten';
+export const saveErrorMessage = (error: unknown) =>
+	(error instanceof Error && error.message) || 'Ein Fehler ist aufgetreten';

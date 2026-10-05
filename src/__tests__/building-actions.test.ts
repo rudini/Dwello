@@ -75,7 +75,9 @@ describe('Gebäude bearbeiten', () => {
 	});
 
 	it('sendet null, damit ein leerer Gebäudetyp den gespeicherten Wert löscht', async () => {
-		expect(await sentBody(editActions.default as Action, { id: 'b1' })).toMatchObject({ buildingType: null });
+		expect(await sentBody(editActions.default as Action, { id: 'b1' })).toMatchObject({
+			buildingType: null
+		});
 	});
 });
 
@@ -95,11 +97,18 @@ describe('Gebäude löschen', () => {
 	});
 
 	it('meldet einen Fehler, wenn das Backend das Löschen ablehnt', async () => {
-		const result = await run(detailActions.delete as Action, () => Response.json({}, { status: 400 }), {
-			id: 'b1'
-		});
+		const result = await run(
+			detailActions.delete as Action,
+			() => Response.json({}, { status: 400 }),
+			{
+				id: 'b1'
+			}
+		);
 
-		expect(result).toMatchObject({ status: 400, data: { deleteError: 'Gebäude konnte nicht gelöscht werden.' } });
+		expect(result).toMatchObject({
+			status: 400,
+			data: { deleteError: 'Gebäude konnte nicht gelöscht werden.' }
+		});
 	});
 });
 
@@ -108,7 +117,12 @@ describe.each([
 	['Gebäude bearbeiten', editActions.default]
 ])('%s', (_page, action) => {
 	it('verlangt Gebäudename und Kanton', async () => {
-		const result = await run(action as Action, rejected, { id: 'b1' }, { ...validBuilding, name: '', canton: '' });
+		const result = await run(
+			action as Action,
+			rejected,
+			{ id: 'b1' },
+			{ ...validBuilding, name: '', canton: '' }
+		);
 
 		expect(result).toMatchObject({
 			errors: { name: 'Gebäudename ist erforderlich', canton: 'Kanton ist erforderlich' }

@@ -19,20 +19,31 @@
 			</div>
 			<div>
 				<dt class="text-sm text-gray-500">Monatliche Miete (brutto)</dt>
-				<dd class="text-lg font-semibold text-primary" data-testid="tenant-rental-rent">{formatCurrency(rental.rent)}</dd>
+				<dd class="text-lg font-semibold text-primary" data-testid="tenant-rental-rent">
+					{formatCurrency(rental.rent)}
+				</dd>
 			</div>
 			<div>
 				<dt class="text-sm text-gray-500">{rental.upcoming ? 'Einzug am' : 'Mietbeginn'}</dt>
-				<dd class="text-gray-900" data-testid="tenant-rental-start">{formatDate(rental.startDate)}</dd>
+				<dd class="text-gray-900" data-testid="tenant-rental-start">
+					{formatDate(rental.startDate)}
+				</dd>
 			</div>
 		</dl>
 		<div class="mt-4 pt-4 border-t border-gray-100">
-			<Button href="/apartments/{rental.apartmentId}" variant="secondary" size="sm" testid="tenant-rental-apartment-link">
+			<Button
+				href="/apartments/{rental.apartmentId}"
+				variant="secondary"
+				size="sm"
+				testid="tenant-rental-apartment-link"
+			>
 				<Icon name="visibility" size={16} />
 				Wohnung ansehen
 			</Button>
 		</div>
 	{:else}
-		<p class="text-gray-500 text-sm" data-testid="tenant-no-rental">Dieser Mieter hat keinen laufenden Mietvertrag.</p>
+		<p class="text-gray-500 text-sm" data-testid="tenant-no-rental">
+			Dieser Mieter hat keinen laufenden Mietvertrag.
+		</p>
 	{/if}
 </Card>

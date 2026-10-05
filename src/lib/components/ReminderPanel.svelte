@@ -89,7 +89,9 @@
 					<div>
 						<p class="font-medium text-gray-900">Als bezahlt markieren</p>
 						<p class="text-sm text-gray-500 mt-1">
-							Ausstehender Betrag: <span class="font-semibold">{formatCurrency(Math.abs(balance))}</span>
+							Ausstehender Betrag: <span class="font-semibold"
+								>{formatCurrency(Math.abs(balance))}</span
+							>
 						</p>
 					</div>
 					<Button variant="primary" size="sm" onclick={handleMarkPaid}>
@@ -173,7 +175,12 @@
 {#if showPreview}
 	<div class="fixed inset-0 z-50 overflow-y-auto">
 		<div class="flex min-h-full items-center justify-center p-4">
-			<button type="button" class="fixed inset-0 bg-black/50 cursor-default" onclick={() => (showPreview = false)} aria-label="Schliessen"></button>
+			<button
+				type="button"
+				class="fixed inset-0 bg-black/50 cursor-default"
+				onclick={() => (showPreview = false)}
+				aria-label="Schliessen"
+			></button>
 			<div class="relative bg-white rounded-xl shadow-xl max-w-lg w-full p-6">
 				<div class="flex items-center justify-between mb-4">
 					<h3 class="text-lg font-semibold text-gray-900">
@@ -190,24 +197,32 @@
 				<div class="bg-gray-50 rounded-lg p-4 text-sm space-y-4">
 					<p><strong>An:</strong> {tenantName} ({tenantEmail || 'Keine E-Mail'})</p>
 
-					<p><strong>Betreff:</strong> {getReminderLevelLabel(reminderLevel)} - Nebenkostenabrechnung</p>
+					<p>
+						<strong>Betreff:</strong>
+						{getReminderLevelLabel(reminderLevel)} - Nebenkostenabrechnung
+					</p>
 
 					<div class="border-t border-gray-200 pt-4">
 						<p>Sehr geehrte/r {tenantName},</p>
 						<p class="mt-3">
 							{#if reminderLevel === 1}
-								wir möchten Sie freundlich daran erinnern, dass die Zahlung für Ihre Nebenkostenabrechnung noch aussteht.
+								wir möchten Sie freundlich daran erinnern, dass die Zahlung für Ihre
+								Nebenkostenabrechnung noch aussteht.
 							{:else if reminderLevel === 2}
-								trotz unserer ersten Mahnung ist die Zahlung für Ihre Nebenkostenabrechnung noch nicht bei uns eingegangen.
+								trotz unserer ersten Mahnung ist die Zahlung für Ihre Nebenkostenabrechnung noch
+								nicht bei uns eingegangen.
 							{:else}
-								dies ist unsere letzte Mahnung. Sollte die Zahlung nicht innerhalb von 10 Tagen eingehen, behalten wir uns weitere Schritte vor.
+								dies ist unsere letzte Mahnung. Sollte die Zahlung nicht innerhalb von 10 Tagen
+								eingehen, behalten wir uns weitere Schritte vor.
 							{/if}
 						</p>
 						<p class="mt-3">
-							<strong>Ausstehender Betrag:</strong> {formatCurrency(Math.abs(balance))}
+							<strong>Ausstehender Betrag:</strong>
+							{formatCurrency(Math.abs(balance))}
 						</p>
 						<p class="mt-3">
-							Bitte überweisen Sie den Betrag auf unser Konto. Bei Fragen stehen wir Ihnen gerne zur Verfügung.
+							Bitte überweisen Sie den Betrag auf unser Konto. Bei Fragen stehen wir Ihnen gerne zur
+							Verfügung.
 						</p>
 						<p class="mt-4">Freundliche Grüsse</p>
 					</div>

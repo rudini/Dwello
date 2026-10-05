@@ -7,7 +7,9 @@
 
 <nav class="flex items-center text-sm text-gray-500">
 	{#each links as link (link.href)}
-		<a href={link.href} data-testid="breadcrumb-link" class="hover:text-primary transition-colors">{link.label}</a>
+		<a href={link.href} data-testid="breadcrumb-link" class="hover:text-primary transition-colors"
+			>{link.label}</a
+		>
 		<Icon name="chevron_right" size={16} class="mx-2" />
 	{/each}
 	<span class="text-gray-900 font-medium">{current}</span>

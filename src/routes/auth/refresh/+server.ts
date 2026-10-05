@@ -14,12 +14,7 @@ import {
 	setXsrfToken,
 	validateXsrfToken
 } from '$lib/server/auth';
-import {
-	JWTError,
-	ValidationError,
-	handleRequestError,
-	logger
-} from '$lib/server/error-handler';
+import { JWTError, ValidationError, handleRequestError, logger } from '$lib/server/error-handler';
 
 export const POST: RequestHandler = async ({ request, cookies }) => {
 	try {

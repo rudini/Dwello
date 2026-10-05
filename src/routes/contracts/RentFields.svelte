@@ -8,10 +8,17 @@
 		additionalRent = $bindable(),
 		advancePayment = $bindable(),
 		errors
-	}: { baseRent: string; additionalRent: string; advancePayment: string; errors: Record<string, string> } = $props();
+	}: {
+		baseRent: string;
+		additionalRent: string;
+		advancePayment: string;
+		errors: Record<string, string>;
+	} = $props();
 
 	const total = $derived(
-		(parseFloat(baseRent) || 0) + (parseFloat(additionalRent) || 0) + (parseFloat(advancePayment) || 0)
+		(parseFloat(baseRent) || 0) +
+			(parseFloat(additionalRent) || 0) +
+			(parseFloat(advancePayment) || 0)
 	);
 </script>
 

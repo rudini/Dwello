@@ -30,7 +30,12 @@
 <div class="grid gap-4 sm:grid-cols-2">
 	<div class="sm:col-span-2">
 		<label for="building" class={labelClass}>Gebäude <span class="text-red-500">*</span></label>
-		<select id="building" data-testid="invoice-building-select" bind:value={buildingId} class={inputClass('buildingId')}>
+		<select
+			id="building"
+			data-testid="invoice-building-select"
+			bind:value={buildingId}
+			class={inputClass('buildingId')}
+		>
 			<option value="">Gebäude auswählen...</option>
 			{#each buildings as building (building.id)}
 				<option value={building.id}>{building.name} - {building.address}</option>
@@ -40,7 +45,9 @@
 	</div>
 
 	<div>
-		<label for="invoiceDate" class={labelClass}>Rechnungsdatum <span class="text-red-500">*</span></label>
+		<label for="invoiceDate" class={labelClass}
+			>Rechnungsdatum <span class="text-red-500">*</span></label
+		>
 		<input
 			id="invoiceDate"
 			data-testid="invoice-date-input"
@@ -67,7 +74,9 @@
 	</div>
 
 	<div class="sm:col-span-2">
-		<label for="billingEntity" class={labelClass}>Lieferant / Rechnungssteller <span class="text-red-500">*</span></label>
+		<label for="billingEntity" class={labelClass}
+			>Lieferant / Rechnungssteller <span class="text-red-500">*</span></label
+		>
 		<input
 			id="billingEntity"
 			data-testid="invoice-billing-entity-input"
@@ -81,7 +90,9 @@
 	</div>
 
 	<div class="sm:col-span-2">
-		<label for="description" class={labelClass}>Beschreibung <span class="text-red-500">*</span></label>
+		<label for="description" class={labelClass}
+			>Beschreibung <span class="text-red-500">*</span></label
+		>
 		<textarea
 			id="description"
 			data-testid="invoice-description-input"

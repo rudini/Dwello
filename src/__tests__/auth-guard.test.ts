@@ -4,7 +4,12 @@ import { env } from '../../tests/mocks/env'; // what vitest provides as $env/dyn
 import { generateJwt } from '$lib/server/auth';
 import { handle } from '../hooks.server';
 
-const user = { sub: 'user-1', email: 'verwalter@example.com', name: 'Vera Verwalter', provider: 'google' as const };
+const user = {
+	sub: 'user-1',
+	email: 'verwalter@example.com',
+	name: 'Vera Verwalter',
+	provider: 'google' as const
+};
 const token = () => generateJwt(user);
 // Signed like a session, but expired a minute ago
 const expiredToken = () =>
@@ -34,14 +39,20 @@ describe('Zugang nur mit Anmeldung', () => {
 		const { response, locals } = await request('/buildings', await token());
 
 		expect(await response.text()).toBe('Seite');
-		expect(locals.user).toMatchObject({ sub: 'user-1', name: 'Vera Verwalter', email: 'verwalter@example.com' });
+		expect(locals.user).toMatchObject({
+			sub: 'user-1',
+			name: 'Vera Verwalter',
+			email: 'verwalter@example.com'
+		});
 	});
 
 	it('schickt ohne Anmeldung zur Anmeldeseite und merkt sich die verlangte Seite', async () => {
 		const { response, resolve } = await request('/statements?status=overdue');
 
 		expect(response.status).toBe(303);
-		expect(response.headers.get('location')).toBe('/login?redirectTo=%2Fstatements%3Fstatus%3Doverdue');
+		expect(response.headers.get('location')).toBe(
+			'/login?redirectTo=%2Fstatements%3Fstatus%3Doverdue'
+		);
 		expect(resolve).not.toHaveBeenCalled();
 	});
 

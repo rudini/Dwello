@@ -32,7 +32,9 @@
 
 <div class="space-y-6">
 	<nav class="flex items-center text-sm text-gray-500">
-		<a href="/tenants" data-testid="breadcrumb-link" class="hover:text-primary transition-colors">Mieter</a>
+		<a href="/tenants" data-testid="breadcrumb-link" class="hover:text-primary transition-colors"
+			>Mieter</a
+		>
 		<Icon name="chevron_right" size={16} class="mx-2" />
 		<span class="text-gray-900 font-medium">{name}</span>
 	</nav>
@@ -47,7 +49,11 @@
 				<Icon name="edit" size={18} />
 				Bearbeiten
 			</Button>
-			<Button href="/contracts/new?tenant={tenant.id}" variant="secondary" testid="tenant-new-contract-button">
+			<Button
+				href="/contracts/new?tenant={tenant.id}"
+				variant="secondary"
+				testid="tenant-new-contract-button"
+			>
 				<Icon name="add" size={18} />
 				Neuer Mietvertrag
 			</Button>

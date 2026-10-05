@@ -4,7 +4,9 @@ import { handleFetch } from '../hooks.server';
 async function forwarded(url: string, session?: string) {
 	let sent: Request | undefined;
 	await handleFetch({
-		event: { cookies: { get: (name: string) => (name === 'dwello_session' ? session : undefined) } },
+		event: {
+			cookies: { get: (name: string) => (name === 'dwello_session' ? session : undefined) }
+		},
 		request: new Request(url),
 		fetch: async (request: Request) => {
 			sent = request;
@@ -16,7 +18,9 @@ async function forwarded(url: string, session?: string) {
 
 describe('Server-seitige Backend-Aufrufe', () => {
 	it('senden das Sitzungs-Token an das Backend', async () => {
-		expect(await forwarded('http://localhost:3001/api/v1/buildings', 'jwt-123')).toBe('Bearer jwt-123');
+		expect(await forwarded('http://localhost:3001/api/v1/buildings', 'jwt-123')).toBe(
+			'Bearer jwt-123'
+		);
 	});
 
 	it('senden das Sitzungs-Token nie an andere Server', async () => {

@@ -17,7 +17,11 @@ export const loginPage = (error: keyof typeof LOGIN_ERRORS) => `/login?error=${e
 const safeTarget = (target: string | null) =>
 	target && /^\/(?![/\\])/.test(target) ? target : '/dashboard';
 
-export function rememberLoginFlow(cookies: Cookies, provider: OAuthProvider, redirectTo: string | null) {
+export function rememberLoginFlow(
+	cookies: Cookies,
+	provider: OAuthProvider,
+	redirectTo: string | null
+) {
 	cookies.set(COOKIE, JSON.stringify({ provider, redirectTo: safeTarget(redirectTo) }), {
 		path: '/',
 		httpOnly: true,
@@ -28,7 +32,9 @@ export function rememberLoginFlow(cookies: Cookies, provider: OAuthProvider, red
 }
 
 /** The flow started by /auth/login, read once; null if none was started */
-export function takeLoginFlow(cookies: Cookies): { provider: OAuthProvider; redirectTo: string } | null {
+export function takeLoginFlow(
+	cookies: Cookies
+): { provider: OAuthProvider; redirectTo: string } | null {
 	const stored = cookies.get(COOKIE);
 	cookies.delete(COOKIE, { path: '/' });
 	try {

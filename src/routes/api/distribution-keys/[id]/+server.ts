@@ -27,7 +27,9 @@ export const PUT: RequestHandler = async ({ params, request, cookies }) => {
 	try {
 		validateXsrfForMutation(request, cookies, 'PUT');
 		const body = await parseRequestBody(request);
-		const response = await forwardRequest(`/distribution-keys/${params.id}`, 'PUT', cookies, { body });
+		const response = await forwardRequest(`/distribution-keys/${params.id}`, 'PUT', cookies, {
+			body
+		});
 		return createProxyResponse(response);
 	} catch (error) {
 		return handleProxyError(error, `PUT /distribution-keys/${params.id}`);

@@ -5,7 +5,11 @@
 	import RecordForm from '$lib/components/RecordForm.svelte';
 	import Icon from '$lib/components/Icon.svelte';
 	import TextField from '$lib/components/TextField.svelte';
-	import { FORMULA_VARIABLES, type DistributionKeyRow, type FormulaTest } from '$lib/distribution-key';
+	import {
+		FORMULA_VARIABLES,
+		type DistributionKeyRow,
+		type FormulaTest
+	} from '$lib/distribution-key';
 	import FormulaTestResult from './FormulaTestResult.svelte';
 
 	let {
@@ -13,16 +17,27 @@
 		errors = {},
 		test,
 		submitLabel
-	}: { key?: DistributionKeyRow; errors?: Record<string, string>; test?: FormulaTest; submitLabel: string } = $props();
+	}: {
+		key?: DistributionKeyRow;
+		errors?: Record<string, string>;
+		test?: FormulaTest;
+		submitLabel: string;
+	} = $props();
 
-	const inputClass = 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary';
+	const inputClass =
+		'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary';
 	let formula = $state(untrack(() => key?.formula ?? '{area}'));
 	const name = $derived(key?.name ?? '');
 	const description = $derived(key?.description ?? '');
 </script>
 
-<RecordForm action="?/save" error={errors.form} cancelHref="/config/distribution-keys" {submitLabel} submitTestid="distribution-key-submit">
-
+<RecordForm
+	action="?/save"
+	error={errors.form}
+	cancelHref="/config/distribution-keys"
+	{submitLabel}
+	submitTestid="distribution-key-submit"
+>
 	<div class="grid gap-4 sm:grid-cols-2">
 		<TextField
 			label="Name"
@@ -37,7 +52,9 @@
 	</div>
 
 	<div>
-		<label for="formula" class="block text-sm font-medium text-gray-700 mb-1">Formel <span class="text-red-500">*</span></label>
+		<label for="formula" class="block text-sm font-medium text-gray-700 mb-1"
+			>Formel <span class="text-red-500">*</span></label
+		>
 		<div class="flex flex-wrap gap-2 mb-2">
 			{#each FORMULA_VARIABLES as variable (variable.name)}
 				<button
@@ -51,13 +68,26 @@
 				</button>
 			{/each}
 		</div>
-		<input id="formula" name="formula" bind:value={formula} data-testid="distribution-key-formula-input" class="{inputClass} font-mono" />
+		<input
+			id="formula"
+			name="formula"
+			bind:value={formula}
+			data-testid="distribution-key-formula-input"
+			class="{inputClass} font-mono"
+		/>
 		<FieldError message={errors.formula} />
-		<p class="mt-1 text-xs text-gray-500">Rechnen Sie mit +, -, *, / und Klammern, z.B. {'{area} * 0.7 + {rooms} * 0.3'}</p>
+		<p class="mt-1 text-xs text-gray-500">
+			Rechnen Sie mit +, -, *, / und Klammern, z.B. {'{area} * 0.7 + {rooms} * 0.3'}
+		</p>
 	</div>
 
 	<div>
-		<Button type="submit" variant="secondary" formaction="?/test" testid="distribution-key-test-button">
+		<Button
+			type="submit"
+			variant="secondary"
+			formaction="?/test"
+			testid="distribution-key-test-button"
+		>
 			<Icon name="science" size={18} />
 			Formel testen
 		</Button>

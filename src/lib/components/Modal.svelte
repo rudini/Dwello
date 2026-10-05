@@ -31,7 +31,10 @@
 		children
 	}: Props = $props();
 
-	const variantConfig: Record<Variant, { icon: string; iconClass: string; buttonVariant: 'primary' | 'danger' }> = {
+	const variantConfig: Record<
+		Variant,
+		{ icon: string; iconClass: string; buttonVariant: 'primary' | 'danger' }
+	> = {
 		default: { icon: 'info', iconClass: 'text-primary bg-primary/10', buttonVariant: 'primary' },
 		danger: { icon: 'warning', iconClass: 'text-red-600 bg-red-100', buttonVariant: 'danger' },
 		warning: { icon: 'warning', iconClass: 'text-amber-600 bg-amber-100', buttonVariant: 'primary' }
@@ -130,7 +133,11 @@
 		>
 			<!-- Header -->
 			<div class="flex items-start gap-4 p-6 pb-4">
-				<div class="flex-shrink-0 size-12 rounded-full flex items-center justify-center {variantConfig[variant].iconClass}">
+				<div
+					class="flex-shrink-0 size-12 rounded-full flex items-center justify-center {variantConfig[
+						variant
+					].iconClass}"
+				>
 					<Icon name={variantConfig[variant].icon} size={24} />
 				</div>
 				<div class="flex-1 min-w-0">
@@ -155,7 +162,12 @@
 				<Button variant="secondary" onclick={handleCancel} class="flex-1">
 					{cancelText}
 				</Button>
-				<Button variant={variantConfig[variant].buttonVariant} onclick={handleConfirm} disabled={loading} class="flex-1">
+				<Button
+					variant={variantConfig[variant].buttonVariant}
+					onclick={handleConfirm}
+					disabled={loading}
+					class="flex-1"
+				>
 					{#if loading}
 						<span class="animate-spin">
 							<Icon name="refresh" size={18} />

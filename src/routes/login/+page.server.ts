@@ -14,6 +14,9 @@ export const load: PageServerLoad = ({ url }) => {
 			name: NAMES[id],
 			href: `/auth/login?provider=${id}${redirectTo ? `&redirectTo=${encodeURIComponent(redirectTo)}` : ''}`
 		})),
-		error: error && Object.hasOwn(LOGIN_ERRORS, error) ? LOGIN_ERRORS[error as keyof typeof LOGIN_ERRORS] : null
+		error:
+			error && Object.hasOwn(LOGIN_ERRORS, error)
+				? LOGIN_ERRORS[error as keyof typeof LOGIN_ERRORS]
+				: null
 	};
 };

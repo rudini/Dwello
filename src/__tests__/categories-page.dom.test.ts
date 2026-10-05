@@ -34,7 +34,10 @@ describe('Kategorien', () => {
 	});
 
 	it('fragt vor dem Löschen nach und zeigt den Fehler des Backends', () => {
-		show(CategoriesPage, { data: { categories }, form: { error: 'Kategorie konnte nicht gelöscht werden' } } as never);
+		show(CategoriesPage, {
+			data: { categories },
+			form: { error: 'Kategorie konnte nicht gelöscht werden' }
+		} as never);
 
 		click(allByTestId('category-delete-button')[1]);
 		expect(document.body.textContent).toContain('«Reparaturen»');

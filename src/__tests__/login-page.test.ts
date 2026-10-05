@@ -2,14 +2,23 @@ import { describe, it, expect } from 'vitest';
 import { env } from '../../tests/mocks/env'; // what vitest provides as $env/dynamic/private
 import { load } from '../routes/login/+page.server';
 
-const open = (query = '') => load({ url: new URL(`http://localhost:3000/login${query}`) } as never) as Record<string, unknown>;
+const open = (query = '') =>
+	load({ url: new URL(`http://localhost:3000/login${query}`) } as never) as Record<string, unknown>;
 
 describe('Anmeldeseite', () => {
 	it('bietet die eingerichteten Anbieter an und führt danach zur verlangten Seite', () => {
 		expect(open('?redirectTo=%2Fbuildings')).toEqual({
 			providers: [
-				{ id: 'google', name: 'Google', href: '/auth/login?provider=google&redirectTo=%2Fbuildings' },
-				{ id: 'microsoft', name: 'Microsoft', href: '/auth/login?provider=microsoft&redirectTo=%2Fbuildings' }
+				{
+					id: 'google',
+					name: 'Google',
+					href: '/auth/login?provider=google&redirectTo=%2Fbuildings'
+				},
+				{
+					id: 'microsoft',
+					name: 'Microsoft',
+					href: '/auth/login?provider=microsoft&redirectTo=%2Fbuildings'
+				}
 			],
 			error: null
 		});

@@ -13,7 +13,9 @@
 			{#each test.results as result (result.apartment)}
 				<tr data-testid="formula-test-row">
 					<td class="py-2 text-gray-900">{result.apartment}</td>
-					<td class="py-2 text-right font-medium text-blue-600" data-testid="formula-test-share">{result.share}</td>
+					<td class="py-2 text-right font-medium text-blue-600" data-testid="formula-test-share"
+						>{result.share}</td
+					>
 				</tr>
 			{/each}
 		</tbody>

@@ -54,7 +54,9 @@
 {#if total > 0}
 	<div class="flex items-center justify-between {className}">
 		<p class="text-sm text-gray-600">
-			Zeige <span class="font-medium">{startItem}</span> bis <span class="font-medium">{endItem}</span> von
+			Zeige <span class="font-medium">{startItem}</span> bis
+			<span class="font-medium">{endItem}</span>
+			von
 			<span class="font-medium">{total}</span> Einträgen
 		</p>
 
@@ -77,7 +79,8 @@
 						<button
 							type="button"
 							onclick={() => goToPage(pageNum)}
-							class="min-w-[36px] h-9 px-3 rounded-lg font-medium transition-colors {page === pageNum
+							class="min-w-[36px] h-9 px-3 rounded-lg font-medium transition-colors {page ===
+							pageNum
 								? 'bg-primary text-white'
 								: 'hover:bg-gray-100 text-gray-700'}"
 						>

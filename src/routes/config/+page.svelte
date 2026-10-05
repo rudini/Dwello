@@ -24,22 +24,57 @@
 <div class="space-y-6" data-testid="config-page">
 	<div>
 		<h1 class="text-2xl font-bold text-gray-900" data-testid="page-title">Einstellungen</h1>
-		<p class="text-gray-500 mt-1">Absender für Abrechnungen und Mahnungen, Standardwerte und Stammdaten</p>
+		<p class="text-gray-500 mt-1">
+			Absender für Abrechnungen und Mahnungen, Standardwerte und Stammdaten
+		</p>
 	</div>
 
 	<ConfigLinks />
 
-	<form method="POST" use:enhance={() => ({ update }) => update({ reset: false })} class="space-y-6">
+	<form
+		method="POST"
+		use:enhance={() =>
+			({ update }) =>
+				update({ reset: false })}
+		class="space-y-6"
+	>
 		<Card>
-			<h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2" data-testid="company-info-section">
+			<h2
+				class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2"
+				data-testid="company-info-section"
+			>
 				<Icon name="business" size={20} class="text-gray-400" />
 				Verwaltung (Absender)
 			</h2>
 			<div class="grid gap-4 sm:grid-cols-3">
-				<SettingField class="sm:col-span-3" name="companyName" label="Firmenname" value={settings.companyName} placeholder="z.B. Muster Immobilien AG" />
-				<SettingField class="sm:col-span-3" name="companyAddress" label="Strasse und Hausnummer" value={settings.companyAddress} placeholder="z.B. Bahnhofstrasse 1" />
-				<SettingField name="companyPostalCode" label="PLZ" value={settings.companyPostalCode} error={errors.companyPostalCode} placeholder="8001" />
-				<SettingField class="sm:col-span-2" name="companyCity" label="Ort" value={settings.companyCity} placeholder="Zürich" />
+				<SettingField
+					class="sm:col-span-3"
+					name="companyName"
+					label="Firmenname"
+					value={settings.companyName}
+					placeholder="z.B. Muster Immobilien AG"
+				/>
+				<SettingField
+					class="sm:col-span-3"
+					name="companyAddress"
+					label="Strasse und Hausnummer"
+					value={settings.companyAddress}
+					placeholder="z.B. Bahnhofstrasse 1"
+				/>
+				<SettingField
+					name="companyPostalCode"
+					label="PLZ"
+					value={settings.companyPostalCode}
+					error={errors.companyPostalCode}
+					placeholder="8001"
+				/>
+				<SettingField
+					class="sm:col-span-2"
+					name="companyCity"
+					label="Ort"
+					value={settings.companyCity}
+					placeholder="Zürich"
+				/>
 				<SettingField
 					class="sm:col-span-3"
 					name="iban"
@@ -52,7 +87,10 @@
 		</Card>
 
 		<Card>
-			<h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2" data-testid="accounting-settings-section">
+			<h2
+				class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2"
+				data-testid="accounting-settings-section"
+			>
 				<Icon name="calendar_month" size={20} class="text-gray-400" />
 				Verwaltungspauschale
 			</h2>
@@ -66,7 +104,11 @@
 			/>
 		</Card>
 
-		<DefaultsSection {settings} heatingProfiles={data.heatingProfiles} distributionKeys={data.distributionKeys} />
+		<DefaultsSection
+			{settings}
+			heatingProfiles={data.heatingProfiles}
+			distributionKeys={data.distributionKeys}
+		/>
 
 		<div class="flex items-center justify-end gap-4">
 			<FieldError message={errors.form} />

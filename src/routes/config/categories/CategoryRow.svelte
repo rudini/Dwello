@@ -10,14 +10,18 @@
 			? { label: 'Ja', icon: 'check_circle', class: 'bg-green-100 text-green-700' }
 			: { label: 'Nein', icon: 'warning', class: 'bg-amber-100 text-amber-700' }
 	);
-	const deleteTitle = $derived(used ? 'Kategorien mit Rechnungen können nicht gelöscht werden' : 'Löschen');
+	const deleteTitle = $derived(
+		used ? 'Kategorien mit Rechnungen können nicht gelöscht werden' : 'Löschen'
+	);
 </script>
 
 <tr class="hover:bg-gray-50 transition-colors" data-testid="category-row">
 	<td class="px-6 py-4 font-medium text-gray-900" data-testid="category-name">{category.name}</td>
 	<td class="px-6 py-4 text-sm text-gray-600 max-w-xs">{category.description || '-'}</td>
 	<td class="px-6 py-4 text-center">
-		<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium {allowed.class}">
+		<span
+			class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium {allowed.class}"
+		>
 			<Icon name={allowed.icon} size={14} />
 			<span data-testid="category-allowed">{allowed.label}</span>
 		</span>

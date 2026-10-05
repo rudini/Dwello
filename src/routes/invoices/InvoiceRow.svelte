@@ -10,7 +10,10 @@
 		'auto-categorized': { variant: 'success', label: 'Auto' },
 		manual: { variant: 'info', label: 'Manuell' },
 		pending: { variant: 'warning', label: 'Ausstehend' }
-	} as const satisfies Record<InvoiceWithDetails['categorizationStatus'], { variant: string; label: string }>;
+	} as const satisfies Record<
+		InvoiceWithDetails['categorizationStatus'],
+		{ variant: string; label: string }
+	>;
 	const status = $derived(statusBadges[invoice.categorizationStatus]);
 </script>
 
@@ -25,14 +28,20 @@
 	</td>
 	<td class="px-6 py-4 whitespace-nowrap">
 		{#if invoice.category}
-			<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800" data-testid="invoice-category">
+			<span
+				class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+				data-testid="invoice-category"
+			>
 				{invoice.category.name}
 			</span>
 		{:else}
 			<span class="text-sm text-gray-400">-</span>
 		{/if}
 	</td>
-	<td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-right" data-testid="invoice-amount">
+	<td
+		class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-right"
+		data-testid="invoice-amount"
+	>
 		{formatCurrency(invoice.amount)}
 	</td>
 	<td class="px-6 py-4 whitespace-nowrap text-center">

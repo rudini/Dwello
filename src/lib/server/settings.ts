@@ -62,11 +62,18 @@ export async function saveSettings(fetch: typeof globalThis.fetch, request: Requ
 			body: JSON.stringify(filled)
 		}),
 		...(await Promise.all(
-			entries.filter(([, value]) => !value).map(([key]) => fetch(`${API}/${key}`, { method: 'DELETE' }))
+			entries
+				.filter(([, value]) => !value)
+				.map(([key]) => fetch(`${API}/${key}`, { method: 'DELETE' }))
 		))
 	];
 	if (responses.some((response) => !response.ok)) {
-		return fail(400, { errors: { form: 'Die Einstellungen konnten nicht gespeichert werden.' } as Record<string, string> });
+		return fail(400, {
+			errors: { form: 'Die Einstellungen konnten nicht gespeichert werden.' } as Record<
+				string,
+				string
+			>
+		});
 	}
 	return { saved: true };
 }

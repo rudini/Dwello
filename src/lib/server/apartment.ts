@@ -20,7 +20,13 @@ export async function fetchApartment(fetch: typeof globalThis.fetch, id: string)
 		status: a.status as ApartmentStatus,
 		currentContractId: (a.currentContractId ?? null) as string | null,
 		nextContractStart: (a.nextContractStart ?? null) as string | null,
-		building: a.building as { id: string; name: string; address: string; postalCode: string; city: string }
+		building: a.building as {
+			id: string;
+			name: string;
+			address: string;
+			postalCode: string;
+			city: string;
+		}
 	};
 }
 

@@ -53,7 +53,10 @@
 </svelte:head>
 
 <div class="space-y-6">
-	<PageTrail links={[{ href: '/invoices', label: 'Rechnungen' }]} current={data.invoice.billingEntity} />
+	<PageTrail
+		links={[{ href: '/invoices', label: 'Rechnungen' }]}
+		current={data.invoice.billingEntity}
+	/>
 
 	<!-- Header -->
 	<div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
@@ -86,11 +89,19 @@
 				{/if}
 				Neu kategorisieren
 			</Button>
-			<Button href="/invoices/{data.invoice.id}/edit" variant="secondary" testid="invoice-edit-button">
+			<Button
+				href="/invoices/{data.invoice.id}/edit"
+				variant="secondary"
+				testid="invoice-edit-button"
+			>
 				<Icon name="edit" size={20} />
 				Bearbeiten
 			</Button>
-			<Button variant="secondary" onclick={() => showDeleteModal = true} testid="invoice-delete-button">
+			<Button
+				variant="secondary"
+				onclick={() => (showDeleteModal = true)}
+				testid="invoice-delete-button"
+			>
 				<Icon name="delete" size={20} />
 				Löschen
 			</Button>
@@ -98,7 +109,10 @@
 	</div>
 
 	{#if recategorizeError}
-		<div data-testid="invoice-recategorize-error" class="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+		<div
+			data-testid="invoice-recategorize-error"
+			class="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700"
+		>
 			Kategorisierung fehlgeschlagen: {recategorizeError}
 		</div>
 	{/if}
@@ -116,12 +130,18 @@
 					</div>
 					<div>
 						<dt class="text-sm font-medium text-gray-500">Betrag</dt>
-						<dd class="mt-1 text-xl font-semibold text-gray-900" data-testid="invoice-amount">{formatCurrency(data.invoice.amount)}</dd>
+						<dd class="mt-1 text-xl font-semibold text-gray-900" data-testid="invoice-amount">
+							{formatCurrency(data.invoice.amount)}
+						</dd>
 					</div>
 					<div class="sm:col-span-2">
 						<dt class="text-sm font-medium text-gray-500">Gebäude</dt>
 						<dd class="mt-1">
-							<a href="/buildings/{data.invoice.buildingId}" class="text-blue-600 hover:text-blue-700" data-testid="invoice-building-link">
+							<a
+								href="/buildings/{data.invoice.buildingId}"
+								class="text-blue-600 hover:text-blue-700"
+								data-testid="invoice-building-link"
+							>
 								{data.invoice.buildingName}
 							</a>
 							<p class="text-sm text-gray-500">{data.invoice.buildingAddress}</p>
@@ -142,7 +162,10 @@
 						<dt class="text-sm font-medium text-gray-500">Kategorie</dt>
 						<dd class="mt-1">
 							{#if data.invoice.category}
-								<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-blue-100 text-blue-800" data-testid="invoice-category">
+								<span
+									class="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-blue-100 text-blue-800"
+									data-testid="invoice-category"
+								>
 									{data.invoice.category.name}
 								</span>
 							{:else}
@@ -154,7 +177,9 @@
 						<dt class="text-sm font-medium text-gray-500">Verteilschlüssel</dt>
 						<dd class="mt-1">
 							{#if data.invoice.distributionKey}
-								<span class="text-gray-900" data-testid="invoice-distribution-key">{data.invoice.distributionKey.name}</span>
+								<span class="text-gray-900" data-testid="invoice-distribution-key"
+									>{data.invoice.distributionKey.name}</span
+								>
 							{:else}
 								<span class="text-gray-400">Nicht zugewiesen</span>
 							{/if}
@@ -204,7 +229,9 @@
 							Manuell überschrieben
 						</h3>
 						{#if data.invoice.manualOverrideReason}
-							<p data-testid="invoice-override-reason" class="text-sm text-amber-700">{data.invoice.manualOverrideReason}</p>
+							<p data-testid="invoice-override-reason" class="text-sm text-amber-700">
+								{data.invoice.manualOverrideReason}
+							</p>
 						{/if}
 						{#if data.invoice.manualOverrideBy}
 							<p class="text-xs text-amber-600 mt-1">von {data.invoice.manualOverrideBy}</p>
@@ -220,7 +247,11 @@
 			<Card>
 				<h2 class="text-lg font-semibold text-gray-900 mb-4">Aktionen</h2>
 				<div class="space-y-2">
-					<Button href="/invoices/{data.invoice.id}/edit" variant="secondary" class="w-full justify-start">
+					<Button
+						href="/invoices/{data.invoice.id}/edit"
+						variant="secondary"
+						class="w-full justify-start"
+					>
 						<Icon name="edit" size={18} />
 						Bearbeiten
 					</Button>
@@ -240,7 +271,7 @@
 					<Button
 						variant="secondary"
 						class="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
-						onclick={() => showDeleteModal = true}
+						onclick={() => (showDeleteModal = true)}
 					>
 						<Icon name="delete" size={18} />
 						Löschen
@@ -279,8 +310,8 @@
 						<div>
 							<h3 class="font-medium text-gray-900 mb-1">Schweizer Mietrecht</h3>
 							<p class="text-sm text-gray-600">
-								Diese Kosten sind gemäss Art. 257a-257b OR nicht auf Mieter umlegbar.
-								Typische nicht umlagefähige Kosten: Reparaturen, Versicherungen, Steuern, Hypothekenzinsen.
+								Diese Kosten sind gemäss Art. 257a-257b OR nicht auf Mieter umlegbar. Typische nicht
+								umlagefähige Kosten: Reparaturen, Versicherungen, Steuern, Hypothekenzinsen.
 							</p>
 						</div>
 					</div>
@@ -291,11 +322,7 @@
 </div>
 
 <!-- Delete Modal -->
-<Modal
-	open={showDeleteModal}
-	title="Rechnung löschen"
-	onclose={() => showDeleteModal = false}
->
+<Modal open={showDeleteModal} title="Rechnung löschen" onclose={() => (showDeleteModal = false)}>
 	<p class="text-gray-600 mb-4">
 		Möchten Sie diese Rechnung wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.
 	</p>
@@ -310,7 +337,11 @@
 		</div>
 	{/if}
 	<div class="flex justify-end gap-3">
-		<Button variant="secondary" onclick={() => showDeleteModal = false} testid="invoice-delete-cancel">
+		<Button
+			variant="secondary"
+			onclick={() => (showDeleteModal = false)}
+			testid="invoice-delete-cancel"
+		>
 			Abbrechen
 		</Button>
 		<Button

@@ -12,11 +12,20 @@
 		errors = {},
 		cancelHref,
 		submitLabel
-	}: { profile?: HeatingProfile; errors?: Record<string, string>; cancelHref: string; submitLabel: string } = $props();
+	}: {
+		profile?: HeatingProfile;
+		errors?: Record<string, string>;
+		cancelHref: string;
+		submitLabel: string;
+	} = $props();
 
-	const inputClass = 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary';
+	const inputClass =
+		'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary';
 	let shares = $state<Record<string, number>>(
-		untrack(() => ({ ...Object.fromEntries(MONTHS.map(({ key }) => [key, 0])), ...profile?.monthlyPercentages }))
+		untrack(() => ({
+			...Object.fromEntries(MONTHS.map(({ key }) => [key, 0])),
+			...profile?.monthlyPercentages
+		}))
 	);
 	const total = $derived(profileTotal(shares));
 	const totalClass = $derived(Math.abs(total - 100) <= 0.1 ? 'text-green-600' : 'text-red-600');
@@ -25,8 +34,14 @@
 </script>
 
 <RecordForm error={errors.form} {cancelHref} {submitLabel} submitTestid="heating-profile-submit">
-
-	<TextField label="Name" name="name" value={name} required error={errors.name} testid="heating-profile-name-input" />
+	<TextField
+		label="Name"
+		name="name"
+		value={name}
+		required
+		error={errors.name}
+		testid="heating-profile-name-input"
+	/>
 	<TextField label="Beschreibung" name="description" value={description} />
 
 	<div>
@@ -39,7 +54,9 @@
 		<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
 			{#each MONTHS as month (month.key)}
 				<div>
-					<label for={month.key} class="block text-xs font-medium text-gray-600 mb-1">{month.label}</label>
+					<label for={month.key} class="block text-xs font-medium text-gray-600 mb-1"
+						>{month.label}</label
+					>
 					<input
 						id={month.key}
 						name={month.key}
@@ -56,7 +73,9 @@
 			{/each}
 		</div>
 		<FieldError message={errors.total} />
-		<p class="mt-2 text-xs text-gray-500">Die Monatsanteile verteilen die Heizkosten eines Jahres und ergeben zusammen 100 %.</p>
+		<p class="mt-2 text-xs text-gray-500">
+			Die Monatsanteile verteilen die Heizkosten eines Jahres und ergeben zusammen 100 %.
+		</p>
 	</div>
 
 	<HeatingProfileChart {shares} />

@@ -67,11 +67,7 @@ export function buildBackendUrl(path: string, params?: Record<string, string>): 
  * @param method HTTP method
  * @throws ValidationError if XSRF token is invalid for mutation requests
  */
-export function validateXsrfForMutation(
-	request: Request,
-	cookies: Cookies,
-	method: string
-): void {
+export function validateXsrfForMutation(request: Request, cookies: Cookies, method: string): void {
 	if (MUTATION_METHODS.includes(method.toUpperCase())) {
 		if (!validateXsrfToken(request, cookies)) {
 			throw new ValidationError('Invalid XSRF token');
@@ -180,12 +176,7 @@ export function createProxyResponse<T>(proxyResponse: ProxyResponse<T>): Respons
 	responseHeaders.set('Content-Type', 'application/json');
 
 	// Copy pagination headers if present
-	const paginationHeaders = [
-		'X-Total-Count',
-		'X-Page',
-		'X-Page-Size',
-		'X-Total-Pages'
-	];
+	const paginationHeaders = ['X-Total-Count', 'X-Page', 'X-Page-Size', 'X-Total-Pages'];
 
 	for (const header of paginationHeaders) {
 		const value = backendHeaders.get(header);

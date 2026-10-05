@@ -8,7 +8,8 @@ afterEach(() => {
 	document.body.innerHTML = '';
 });
 
-const button = (testid: string) => document.querySelector<HTMLButtonElement>(`[data-testid="${testid}"]`);
+const button = (testid: string) =>
+	document.querySelector<HTMLButtonElement>(`[data-testid="${testid}"]`);
 
 describe('WizardNavigation', () => {
 	it('geht mit Weiter einen Schritt vor und mit Zurück wieder zurück', () => {

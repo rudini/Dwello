@@ -33,7 +33,9 @@ const valid = {
 describe('Einstellungen laden', () => {
 	it('zeigt die gespeicherten Einstellungen', async () => {
 		const fetch = (async (url: string) =>
-			Response.json(url.startsWith(`${API}/config`) ? { data: stored } : { data: [] })) as typeof globalThis.fetch;
+			Response.json(
+				url.startsWith(`${API}/config`) ? { data: stored } : { data: [] }
+			)) as typeof globalThis.fetch;
 
 		const data = (await load({ fetch } as never)) as { settings: Record<string, string> };
 
@@ -113,15 +115,20 @@ describe('Standardwerte im Abrechnungs-Assistenten', () => {
 		['july-june', '2026-03-15', { start: '2024-07-01', end: '2025-06-30' }],
 		['november-october', '2026-11-05', { start: '2025-11-01', end: '2026-10-31' }],
 		['november-october', '2026-10-02', { start: '2024-11-01', end: '2025-10-31' }]
-	] as const)('schlägt bei %s am %s die letzte abgeschlossene Periode vor', (type, today, period) => {
-		expect(lastCompletedPeriod(type, new Date(`${today}T12:00:00`))).toEqual(period);
-	});
+	] as const)(
+		'schlägt bei %s am %s die letzte abgeschlossene Periode vor',
+		(type, today, period) => {
+			expect(lastCompletedPeriod(type, new Date(`${today}T12:00:00`))).toEqual(period);
+		}
+	);
 
 	it('wählt Periode und Heizprofil aus den Einstellungen vor', async () => {
 		const fetch = (async (url: string) =>
 			Response.json(
 				url === `${API}/config`
-					? { data: { ...stored, accounting_period: 'july-june', default_heating_profile_id: 'hp1' } }
+					? {
+							data: { ...stored, accounting_period: 'july-june', default_heating_profile_id: 'hp1' }
+						}
 					: { data: [], buildings: [] }
 			)) as typeof globalThis.fetch;
 
@@ -137,7 +144,9 @@ describe('Standard-Verteilschlüssel bei neuen Rechnungen', () => {
 	it('schlägt den Verteilschlüssel aus den Einstellungen vor', async () => {
 		const { load: loadInvoiceForm } = await import('../routes/invoices/new/+page.server');
 		const fetch = async (url: string) =>
-			Response.json(url === `${API}/config/default_distribution_key_id` ? { value: 'dk1' } : { data: [] });
+			Response.json(
+				url === `${API}/config/default_distribution_key_id` ? { value: 'dk1' } : { data: [] }
+			);
 
 		const data = (await loadInvoiceForm({ fetch } as never)) as Record<string, unknown>;
 

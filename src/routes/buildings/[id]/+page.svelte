@@ -61,7 +61,9 @@
 <div class="space-y-6">
 	<!-- Breadcrumb -->
 	<nav class="flex items-center text-sm text-gray-500">
-		<a href="/buildings" data-testid="breadcrumb-link" class="hover:text-blue-600 transition-colors">Gebäude</a>
+		<a href="/buildings" data-testid="breadcrumb-link" class="hover:text-blue-600 transition-colors"
+			>Gebäude</a
+		>
 		<Icon name="chevron_right" size={16} class="mx-2" />
 		<span class="text-gray-900 font-medium">{building.name || building.address}</span>
 	</nav>
@@ -72,15 +74,26 @@
 			<h1 class="text-2xl font-bold text-gray-900">{building.name || building.address}</h1>
 			<p class="text-sm text-gray-500 flex items-center gap-1 mt-2">
 				<Icon name="location_on" size={16} />
-				{[building.address, [building.postalCode, building.city].filter(Boolean).join(' ')].filter(Boolean).join(', ')}{#if building.canton} ({building.canton}){/if}
+				{[building.address, [building.postalCode, building.city].filter(Boolean).join(' ')]
+					.filter(Boolean)
+					.join(', ')}{#if building.canton}
+					({building.canton}){/if}
 			</p>
 		</div>
 		<div class="flex gap-2">
-			<Button href="/buildings/{building.id}/edit" variant="secondary" testid="building-edit-button">
+			<Button
+				href="/buildings/{building.id}/edit"
+				variant="secondary"
+				testid="building-edit-button"
+			>
 				<Icon name="edit" size={18} />
 				Bearbeiten
 			</Button>
-			<Button variant="danger" onclick={() => (showDeleteConfirm = true)} testid="building-delete-button">
+			<Button
+				variant="danger"
+				onclick={() => (showDeleteConfirm = true)}
+				testid="building-delete-button"
+			>
 				<Icon name="delete" size={18} />
 				Löschen
 			</Button>
@@ -151,7 +164,12 @@
 	<div class="space-y-4">
 		<div class="flex items-center justify-between">
 			<h2 class="text-lg font-semibold text-gray-900">Wohnungen</h2>
-			<Button href="/apartments/new?building={building.id}" variant="secondary" size="sm" testid="apartment-add-button">
+			<Button
+				href="/apartments/new?building={building.id}"
+				variant="secondary"
+				size="sm"
+				testid="apartment-add-button"
+			>
 				<Icon name="add" size={16} />
 				Wohnung hinzufügen
 			</Button>
@@ -162,10 +180,12 @@
 				<div class="text-center py-8">
 					<Icon name="door_front" size={48} class="mx-auto text-gray-300 mb-4" />
 					<h3 class="text-lg font-medium text-gray-900 mb-2">Keine Wohnungen</h3>
-					<p class="text-gray-500 mb-4">
-						Fügen Sie Wohnungen zu diesem Gebäude hinzu.
-					</p>
-					<Button href="/apartments/new?building={building.id}" variant="primary" testid="apartment-first-create-button">
+					<p class="text-gray-500 mb-4">Fügen Sie Wohnungen zu diesem Gebäude hinzu.</p>
+					<Button
+						href="/apartments/new?building={building.id}"
+						variant="primary"
+						testid="apartment-first-create-button"
+					>
 						<Icon name="add" size={20} />
 						Erste Wohnung erstellen
 					</Button>
@@ -196,9 +216,7 @@
 									</div>
 								</div>
 								<div class="flex items-center gap-3">
-									<Badge
-										variant={statusVariants[apartment.status]}
-									>
+									<Badge variant={statusVariants[apartment.status]}>
 										{statusLabels[apartment.status]}
 									</Badge>
 									<Icon name="chevron_right" size={18} class="text-gray-400" />
@@ -230,11 +248,18 @@
 
 			{#if deleteError || form?.deleteError}
 				<div class="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
-					<p class="text-sm text-red-700" data-testid="form-error">{deleteError || form?.deleteError}</p>
+					<p class="text-sm text-red-700" data-testid="form-error">
+						{deleteError || form?.deleteError}
+					</p>
 				</div>
 			{/if}
 
-			<form method="POST" action="?/delete" use:enhance={handleDelete} class="flex gap-3 justify-end">
+			<form
+				method="POST"
+				action="?/delete"
+				use:enhance={handleDelete}
+				class="flex gap-3 justify-end"
+			>
 				<Button
 					variant="secondary"
 					onclick={() => {
@@ -244,7 +269,12 @@
 				>
 					Abbrechen
 				</Button>
-				<Button type="submit" variant="danger" disabled={!!deleteError} testid="building-delete-confirm">
+				<Button
+					type="submit"
+					variant="danger"
+					disabled={!!deleteError}
+					testid="building-delete-confirm"
+				>
 					Ja, löschen
 				</Button>
 			</form>
