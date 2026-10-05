@@ -249,6 +249,7 @@ export const invoices = pgTable(
 		}),
 		llmConfidence: decimal('llm_confidence', { precision: 5, scale: 4 }), // 0.0000 to 1.0000
 		wasManuallyOverridden: boolean('was_manually_overridden').default(false),
+		manualOverrideReason: text('manual_override_reason'), // why the KI category was overridden
 		invoicePdf: text('invoice_pdf'), // Base64 or URL
 		notes: text('notes'),
 		createdAt: timestamp('created_at').defaultNow().notNull(),

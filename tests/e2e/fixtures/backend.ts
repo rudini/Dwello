@@ -238,6 +238,13 @@ export function testData(request: APIRequestContext, token: string) {
 			ids.set(`Rechnung ${supplier}`, id);
 		},
 
+		// The KI suggested the category the supplier's invoice has
+		async kiSuggestion(supplier: string) {
+			const id = ids.get(`Rechnung ${supplier}`);
+			const { categoryId } = await get(`invoices/${id}`);
+			await put(`invoices/${id}`, { llmCategoryId: categoryId, llmConfidence: '0.9' });
+		},
+
 		async distributionKey(title: string, formula: string) {
 			const name = unique(title);
 			const key = await post('distribution-keys', { name, nameDE: name, type: 'custom', formula });

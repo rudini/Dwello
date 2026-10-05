@@ -5,6 +5,7 @@ import {
 	categorySelect,
 	descriptionInput,
 	invoiceSubmitButton,
+	overrideReasonInput,
 	supplierInput
 } from '../interactions/invoice-form';
 
@@ -34,6 +35,12 @@ export const correctAmount = (amount: string) => async (actor: Actor) => {
 
 export const recategorize = (category: string) => async (actor: Actor) => {
 	await actor.perform(chooseCategory(category));
+	await actor.perform(saveInvoice);
+};
+
+export const overrideCategory = (category: string, reason: string) => async (actor: Actor) => {
+	await actor.perform(chooseCategory(category));
+	await overrideReasonInput(actor.page).fill(reason);
 	await actor.perform(saveInvoice);
 };
 

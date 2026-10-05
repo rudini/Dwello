@@ -116,6 +116,24 @@ describe('Rechnungsdetail', () => {
 		expect(invalidateAll).not.toHaveBeenCalled();
 	});
 
+	it('nennt den Grund, wenn die KI nicht kategorisieren konnte', async () => {
+		fakeBff(() => [503, { error: 'Die KI ist nicht erreichbar oder hat keine passende Kategorie geliefert.' }]);
+		show(InvoicePage, { data: { invoice: invoice() } });
+
+		click(button('Neu kategorisieren'));
+		await settle();
+
+		expect(byTestId('invoice-recategorize-error')!.textContent).toContain(
+			'Die KI ist nicht erreichbar oder hat keine passende Kategorie geliefert.'
+		);
+	});
+
+	it('zeigt den gespeicherten Grund, warum die Kategorie der KI überschrieben wurde', () => {
+		show(InvoicePage, { data: { invoice: invoice({ manualOverrideReason: 'Reparatur, keine Wartung' }) } });
+
+		expect(byTestId('invoice-override-reason')!.textContent).toContain('Reparatur, keine Wartung');
+	});
+
 	it('lädt die Rechnung nach dem Neu-Kategorisieren neu', async () => {
 		fakeBff(() => [200, { category: categories[0] }]);
 		show(InvoicePage, { data: { invoice: invoice() } });
