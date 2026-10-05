@@ -3,9 +3,6 @@
  */
 
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
-import { eq } from 'drizzle-orm';
-import { db } from '../db/connection';
-import { categories, invoices } from '../db/schema';
 import { llmConfig } from '../config/llm';
 import { callApi, sendJson } from './helpers/auth';
 import { expectRejection, invoicedBuilding } from './helpers/records';
@@ -48,22 +45,23 @@ describe('Neu kategorisieren', () => {
 			503,
 			'Die KI ist nicht erreichbar oder hat keine passende Kategorie geliefert.'
 		);
-		const [stored] = await db.select().from(invoices).where(eq(invoices.id, invoice.id));
-		expect(stored.llmCategoryId).toBeNull();
-		expect(stored.categoryId).toBe(invoice.categoryId);
+		const detail = (await (await callApi(`/api/v1/invoices/${invoice.id}`)).json()) as Invoice;
+		expect(detail).toMatchObject({ categoryId: invoice.categoryId, llmCategoryId: null });
 	});
 });
 
 describe('Kategorie der KI überschreiben', () => {
 	it('speichert den Grund und gibt ihn mit der Rechnung zurück', async () => {
-		const [repairs] = await db.select().from(categories).where(eq(categories.name, 'Repairs'));
-		await db
-			.update(invoices)
-			.set({ llmCategoryId: invoice.categoryId })
-			.where(eq(invoices.id, invoice.id));
+		const { categories } = (await (await callApi('/api/v1/categories?search=Repairs')).json()) as {
+			categories: { id: string }[];
+		};
+		await sendJson('PUT', `/api/v1/invoices/${invoice.id}`, {
+			llmCategoryId: invoice.categoryId,
+			llmConfidence: '0.9'
+		});
 
 		const response = await sendJson('PUT', `/api/v1/invoices/${invoice.id}`, {
-			categoryId: repairs.id,
+			categoryId: categories[0].id,
 			manualOverrideReason: 'Reparatur, keine Wartung'
 		});
 

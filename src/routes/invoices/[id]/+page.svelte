@@ -197,7 +197,7 @@
 					</div>
 				{/if}
 
-				{#if data.invoice.manualOverrideBy || data.invoice.manualOverrideReason}
+				{#if data.invoice.manualOverrideReason}
 					<div class="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-lg">
 						<h3 class="text-sm font-medium text-amber-800 mb-1 flex items-center gap-2">
 							<Icon name="edit_note" size={16} />
