@@ -6,8 +6,8 @@
 import { describe, it, expect, mock, beforeEach } from 'bun:test';
 
 // Create mock query builders that handle chaining properly
-const createChainedMock = (returnValue: any = []) => {
-	const chainMock: any = {
+const createChainedMock = (returnValue: unknown = []) => {
+	const chainMock: Record<string, unknown> = {
 		from: mock(() => chainMock),
 		where: mock(() => chainMock),
 		orderBy: mock(() => chainMock),
@@ -17,7 +17,7 @@ const createChainedMock = (returnValue: any = []) => {
 		values: mock(() => chainMock),
 		returning: mock(() => Promise.resolve(returnValue)),
 		// Make the mock thenable for async/await
-		then: (resolve: any, reject?: any) => {
+		then: (resolve: (value: unknown) => unknown, reject?: (reason: unknown) => unknown) => {
 			return Promise.resolve(returnValue).then(resolve, reject);
 		}
 	};
@@ -25,7 +25,7 @@ const createChainedMock = (returnValue: any = []) => {
 };
 
 // Track select call results
-let selectResults: any[] = [];
+let selectResults: unknown[] = [];
 let selectCallCount = 0;
 
 const mockSelect = mock(() => {

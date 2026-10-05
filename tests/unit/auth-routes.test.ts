@@ -4,6 +4,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import type { Redirect } from '@sveltejs/kit';
 
 // Mock fetch globally before imports
 const mockFetch = vi.fn();
@@ -64,7 +65,7 @@ function createMockCookies() {
 	};
 }
 
-// Helper to create mock request event
+// Helper to create mock request event; `never` because each route handler expects its own RequestEvent type
 function createMockRequestEvent(options: {
 	url: string;
 	method?: string;
@@ -89,7 +90,7 @@ function createMockRequestEvent(options: {
 		isDataRequest: false,
 		isSubRequest: false,
 		fetch: vi.fn()
-	};
+	} as never;
 }
 
 describe('Auth Routes Integration Tests', () => {
@@ -106,12 +107,12 @@ describe('Auth Routes Integration Tests', () => {
 			});
 
 			try {
-				await GET(event as any);
+				await GET(event);
 				expect.fail('Should have thrown redirect');
-			} catch (error: any) {
-				expect(error.status).toBe(302);
-				expect(error.location).toContain('mock-oauth.com');
-				expect(error.location).toContain('google');
+			} catch (error) {
+				expect((error as Redirect).status).toBe(302);
+				expect((error as Redirect).location).toContain('mock-oauth.com');
+				expect((error as Redirect).location).toContain('google');
 			}
 		});
 
@@ -122,7 +123,7 @@ describe('Auth Routes Integration Tests', () => {
 			});
 
 			try {
-				await GET(event as any);
+				await GET(event);
 			} catch {
 				// Expected redirect
 			}
@@ -176,7 +177,7 @@ describe('Auth Routes Integration Tests', () => {
 				url: 'http://localhost:3000/auth/login'
 			});
 
-			const response = await GET(event as any);
+			const response = await GET(event);
 			expect(response.status).toBe(400);
 
 			const data = await response.json();
@@ -189,7 +190,7 @@ describe('Auth Routes Integration Tests', () => {
 				url: 'http://localhost:3000/auth/login?provider=facebook'
 			});
 
-			const response = await GET(event as any);
+			const response = await GET(event);
 			expect(response.status).toBe(400);
 
 			const data = await response.json();
@@ -203,11 +204,11 @@ describe('Auth Routes Integration Tests', () => {
 			});
 
 			try {
-				await GET(event as any);
+				await GET(event);
 				expect.fail('Should have thrown redirect');
-			} catch (error: any) {
-				expect(error.status).toBe(302);
-				expect(error.location).toContain('microsoft');
+			} catch (error) {
+				expect((error as Redirect).status).toBe(302);
+				expect((error as Redirect).location).toContain('microsoft');
 			}
 		});
 	});
@@ -298,7 +299,7 @@ describe('Auth Routes Integration Tests', () => {
 				url: 'http://localhost:3000/auth/me'
 			});
 
-			const response = await GET(event as any);
+			const response = await GET(event);
 			expect(response.status).toBe(200);
 
 			const data = await response.json();
@@ -315,7 +316,7 @@ describe('Auth Routes Integration Tests', () => {
 				url: 'http://localhost:3000/auth/me'
 			});
 
-			const response = await GET(event as any);
+			const response = await GET(event);
 			expect(response.status).toBe(401);
 		});
 
@@ -330,7 +331,7 @@ describe('Auth Routes Integration Tests', () => {
 				url: 'http://localhost:3000/auth/me'
 			});
 
-			const response = await GET(event as any);
+			const response = await GET(event);
 			expect(response.status).toBe(401);
 		});
 	});
@@ -362,7 +363,7 @@ describe('Auth Routes Integration Tests', () => {
 				headers: { 'X-XSRF-TOKEN': 'valid-xsrf-token' }
 			});
 
-			const response = await POST(event as any);
+			const response = await POST(event);
 			expect(response.status).toBe(200);
 
 			const data = await response.json();
@@ -380,7 +381,7 @@ describe('Auth Routes Integration Tests', () => {
 				method: 'POST'
 			});
 
-			const response = await POST(event as any);
+			const response = await POST(event);
 			expect(response.status).toBe(400);
 		});
 
@@ -394,7 +395,7 @@ describe('Auth Routes Integration Tests', () => {
 				method: 'POST'
 			});
 
-			const response = await POST(event as any);
+			const response = await POST(event);
 			expect(response.status).toBe(401);
 		});
 	});
@@ -423,7 +424,7 @@ describe('Auth Routes Integration Tests', () => {
 				headers: { 'X-XSRF-TOKEN': 'valid-xsrf-token' }
 			});
 
-			const response = await POST(event as any);
+			const response = await POST(event);
 			expect(response.status).toBe(200);
 
 			const data = await response.json();
@@ -441,7 +442,7 @@ describe('Auth Routes Integration Tests', () => {
 				method: 'POST'
 			});
 
-			const response = await POST(event as any);
+			const response = await POST(event);
 			expect(response.status).toBe(200);
 
 			const data = await response.json();

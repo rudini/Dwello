@@ -147,7 +147,7 @@ describe('Utility Validation Service - Async Functions', () => {
 
 			const result = await validateInvoiceForUtilityStatement({
 				categoryId: 'cat-1',
-				amount: 'invalid' as any,
+				amount: 'invalid',
 				isValidUtilityCost: true,
 				description: 'Test invoice'
 			});
