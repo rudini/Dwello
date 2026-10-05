@@ -304,6 +304,7 @@ export const utilityStatements = pgTable(
 		rentalDays: integer('rental_days').notNull(),
 		totalCosts: decimal('total_costs', { precision: 12, scale: 2 }).notNull(),
 		totalAdvancePayments: decimal('total_advance_payments', { precision: 12, scale: 2 }).notNull(),
+		managementFeePercent: decimal('management_fee_percent', { precision: 5, scale: 2 }),
 		managementFee: decimal('management_fee', { precision: 12, scale: 2 }).default('0'),
 		balance: decimal('balance', { precision: 12, scale: 2 }).notNull(), // positive = tenant owes, negative = refund
 		status: varchar('status', { length: 20 }).notNull().default('draft'), // draft, sent, paid, overdue

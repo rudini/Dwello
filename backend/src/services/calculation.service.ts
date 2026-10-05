@@ -202,7 +202,8 @@ export async function calculateStatementForContract(
 	periodStart: Date,
 	periodEnd: Date,
 	heatingProfileId?: string,
-	managementFeePercent?: number
+	managementFeePercent?: number,
+	managementFeeDistributionKeyId?: string
 ): Promise<StatementCalculation> {
 	// Get contract details
 	const contract = await getContract(contractId);
@@ -309,11 +310,18 @@ export async function calculateStatementForContract(
 
 	subtotal = Math.round(subtotal * 100) / 100;
 
-	// Management fee: chosen per generation run, otherwise the configured default
+	// Management fee: a percentage (chosen per generation run, otherwise the configured default) of the building's
+	// utility costs, distributed to the apartments by its distribution key (none: equally) and to the tenant by days
 	const feePercent = managementFeePercent ?? (await getTypedConfig('management_fee_pct'));
-	const managementFeeResult = calculateManagementFee(subtotal, feePercent);
-
-	const managementFee = managementFeeResult.fee;
+	const buildingCosts = invoiceGroups.reduce((sum, group) => sum + group.totalAmount, 0);
+	const buildingFee = calculateManagementFee(buildingCosts, feePercent).fee;
+	const apartmentFee = await calculateApartmentShare(
+		buildingApartments,
+		apartment.id,
+		buildingFee,
+		managementFeeDistributionKeyId ?? null
+	);
+	const managementFee = prorateCosts(apartmentFee.share, rentalDays, totalPeriodDays).proratedAmount;
 	const totalCosts = Math.round((subtotal + managementFee) * 100) / 100;
 
 	// Calculate total advance payments
@@ -338,7 +346,7 @@ export async function calculateStatementForContract(
 		lineItems,
 		subtotal,
 		managementFee,
-		managementFeePercent: managementFeeResult.actualPercentage,
+		managementFeePercent: feePercent,
 		totalCosts,
 		totalAdvancePayments,
 		balance
