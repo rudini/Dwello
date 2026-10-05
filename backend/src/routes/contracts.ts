@@ -35,7 +35,7 @@ const contractBodySchema = t.Object({
 	endDate: t.Optional(t.Nullable(t.String({ format: 'date' }))),
 	baseRent: t.String(),
 	additionalRent: t.Optional(t.Nullable(t.String())),
-	monthlyAdvancePayment: t.Optional(t.Nullable(t.String())),
+	monthlyAdvancePayment: t.String(),
 	referenceIndex: t.Optional(t.Nullable(t.String())),
 	contractPdf: t.Optional(t.Nullable(t.String())),
 	notes: t.Optional(t.Nullable(t.String()))
@@ -47,7 +47,7 @@ const contractUpdateSchema = t.Partial(
 		endDate: t.Optional(t.Nullable(t.String({ format: 'date' }))),
 		baseRent: t.String(),
 		additionalRent: t.Optional(t.Nullable(t.String())),
-		monthlyAdvancePayment: t.Optional(t.Nullable(t.String())),
+		monthlyAdvancePayment: t.String(),
 		referenceIndex: t.Optional(t.Nullable(t.String())),
 		contractPdf: t.Optional(t.Nullable(t.String())),
 		notes: t.Optional(t.Nullable(t.String()))

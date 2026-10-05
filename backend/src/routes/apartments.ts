@@ -42,8 +42,8 @@ const apartmentBodySchema = t.Object({
 	buildingId: t.String({ format: 'uuid' }),
 	number: t.String({ minLength: 1 }),
 	floor: t.Number(),
-	area: t.Optional(t.Nullable(t.String())),
-	rooms: t.Optional(t.Nullable(t.String())),
+	area: t.String(),
+	rooms: t.String(),
 	status: t.Optional(manualStatus)
 });
 
@@ -51,8 +51,8 @@ const apartmentUpdateSchema = t.Partial(
 	t.Object({
 		number: t.String({ minLength: 1 }),
 		floor: t.Number(),
-		area: t.Optional(t.Nullable(t.String())),
-		rooms: t.Optional(t.Nullable(t.String())),
+		area: t.String(),
+		rooms: t.String(),
 		status: t.Optional(manualStatus)
 	})
 );
