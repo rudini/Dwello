@@ -49,7 +49,7 @@
 
 <div class="space-y-6 max-w-3xl">
 	<div>
-		<h1 class="text-2xl font-bold text-gray-900" data-testid="page-title">Hilfe</h1>
+		<h1 class="text-2xl font-bold text-gray-900" data-testid="page-title">Hilfe &amp; Support</h1>
 		<p class="text-gray-500 mt-1">Die wichtigsten Abläufe in Dwello Schritt für Schritt</p>
 	</div>
 
