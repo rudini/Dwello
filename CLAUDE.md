@@ -68,6 +68,10 @@ Transform tasks into verifiable goals. For multi-step tasks, state a brief plan 
 
 # WORKFLOW RULES
 
+## Run /tdd and /ponytail for Every Implementation
+
+Every implementation (feature or fix) runs both skills: `/tdd` (red-green, one behavior at a time, tests through public interfaces) and `/ponytail` (shortest working diff). Check the finished change against both before committing.
+
 ## Update implementation_plan.md After Every Task
 
 After completing ANY task: mark `- [ ]` to `- [x]` for task AND sub-items, add note with files created/modified, update Progress Summary table.
