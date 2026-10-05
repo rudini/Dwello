@@ -6,10 +6,12 @@ import {
 	amountOfInvoice,
 	categoryOfInvoice,
 	distributionKeyOfInvoice,
+	reasonForOverride,
+	recategorizationFailure,
 	tenancyLawNote,
 	utilityCostOfInvoice
 } from '../questions/invoice-detail';
-import { deleteInvoice, openBuildingOfInvoice, startEditingInvoice } from '../tasks/invoice-detail';
+import { deleteInvoice, openBuildingOfInvoice, recategorizeInvoice, startEditingInvoice } from '../tasks/invoice-detail';
 
 const { Given, When, Then } = createBdd(test);
 
@@ -22,6 +24,10 @@ Given(
 
 When('der Liegenschaftsverwalter die Rechnung löscht', async ({ verwalter }) => {
 	await verwalter.perform(deleteInvoice);
+});
+
+When('der Liegenschaftsverwalter die Rechnung neu kategorisieren lässt', async ({ verwalter }) => {
+	await verwalter.perform(recategorizeInvoice);
 });
 
 When('der Liegenschaftsverwalter die Rechnung bearbeiten will', async ({ verwalter }) => {
@@ -56,5 +62,21 @@ Then(
 	'erklärt ein Hinweis, dass die Kosten nach Mietrecht nicht auf die Mieter umlegbar sind',
 	async ({ verwalter }) => {
 		await expect(tenancyLawNote(verwalter)).toContainText('nicht auf Mieter umlegbar');
+	}
+);
+
+Then(
+	'erfährt der Liegenschaftsverwalter, dass die KI nicht erreichbar ist oder keine passende Kategorie geliefert hat',
+	async ({ verwalter }) => {
+		await expect(recategorizationFailure(verwalter)).toContainText(
+			'Die KI ist nicht erreichbar oder hat keine passende Kategorie geliefert.'
+		);
+	}
+);
+
+Then(
+	'sieht der Liegenschaftsverwalter den Grund {string} für die Änderung der KI-Kategorie',
+	async ({ verwalter }, reason: string) => {
+		await expect(reasonForOverride(verwalter)).toHaveText(reason);
 	}
 );

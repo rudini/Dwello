@@ -12,6 +12,7 @@ import {
 	updateInvoice,
 	deleteInvoice,
 	recategorizeInvoiceById,
+	KI_UNAVAILABLE,
 	validateInvoice,
 	getInvoicesForStatement
 } from '../services/invoice.service';
@@ -41,6 +42,8 @@ const invoiceBodySchema = t.Object({
 	// Category the KI suggested in the form, and how sure it was (0 to 1)
 	llmCategoryId: t.Optional(t.Nullable(t.String())),
 	llmConfidence: t.Optional(t.Nullable(t.String())),
+	// Why the category the KI suggested was overridden
+	manualOverrideReason: t.Optional(t.Nullable(t.String())),
 	distributionKeyId: t.Optional(t.Nullable(t.String())),
 	amount: t.String(), // Decimal as string
 	isValidUtilityCost: t.Optional(t.Boolean()),
@@ -167,7 +170,7 @@ export const invoiceRoutes = new Elysia({ prefix: '/api/v1/invoices' })
 	.post('/:id/recategorize', async ({ params, set }) => {
 		const result = await recategorizeInvoiceById(params.id);
 		if (!result.success) {
-			set.status = result.error === 'Invoice not found' ? 404 : 500;
+			set.status = result.error === 'Invoice not found' ? 404 : result.error === KI_UNAVAILABLE ? 503 : 500;
 			return { error: result.error };
 		}
 		return result;

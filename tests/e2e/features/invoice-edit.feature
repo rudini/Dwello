@@ -21,6 +21,13 @@ Funktionalität: Rechnung bearbeiten
     Und sieht der Liegenschaftsverwalter die Kategorie "Reparaturen" und den Verteilschlüssel "Pro Fläche (m²)"
     Und ist die Rechnung nicht umlagefähig
 
+  Szenario: Kategorie der KI mit Begründung überschreiben
+    Angenommen die KI hat die Kategorie der Rechnung von "Hauswart Huber" vorgeschlagen
+    Und der Liegenschaftsverwalter bearbeitet die Rechnung von "Hauswart Huber"
+    Wenn der Liegenschaftsverwalter die Rechnung mit dem Grund "Reparatur, keine Wartung" der Kategorie "Reparaturen" zuordnet
+    Dann ist der Liegenschaftsverwalter auf der Detailseite der Rechnung von "Hauswart Huber"
+    Und sieht der Liegenschaftsverwalter den Grund "Reparatur, keine Wartung" für die Änderung der KI-Kategorie
+
   Szenario: Rechnungssteller fehlt
     Wenn der Liegenschaftsverwalter die Rechnung ohne Rechnungssteller speichert
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Bitte geben Sie einen Lieferanten ein"

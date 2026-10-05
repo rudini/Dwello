@@ -9,3 +9,6 @@ export const editButton = (page: Page) => page.getByTestId('invoice-edit-button'
 export const deleteButton = (page: Page) => page.getByTestId('invoice-delete-button');
 export const deleteConfirm = (page: Page) => page.getByTestId('invoice-delete-confirm');
 export const buildingLink = (page: Page) => page.getByTestId('invoice-building-link');
+export const recategorizeButton = (page: Page) => page.getByTestId('invoice-recategorize-button');
+export const recategorizeError = (page: Page) => page.getByTestId('invoice-recategorize-error');
+export const overrideReason = (page: Page) => page.getByTestId('invoice-override-reason');
