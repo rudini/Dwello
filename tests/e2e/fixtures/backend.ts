@@ -111,12 +111,12 @@ export function testData(request: APIRequestContext, token: string) {
 			ids.set(title, building.id);
 		},
 
-		async apartment(buildingTitle: string, number: string, status: string) {
+		async apartment(buildingTitle: string, number: string, status: string, area = '70') {
 			const apartment = await post('apartments', {
 				buildingId: ids.get(buildingTitle),
 				number,
 				floor: 1,
-				area: '70',
+				area,
 				rooms: '3.5',
 				status
 			});

@@ -6,6 +6,7 @@ import {
 	generateMoreButton,
 	heatingProfileSelect,
 	managementFeeInput,
+	managementFeeKeySelect,
 	nextButton,
 	periodEndInput,
 	periodStartInput,
@@ -13,7 +14,7 @@ import {
 	showStatementsButton
 } from '../interactions/statement-generate';
 
-type RunOptions = { heatingProfileId?: string; managementFeePercent?: number };
+type RunOptions = { heatingProfileId?: string; managementFeePercent?: number; managementFeeKey?: string };
 
 export const setManagementFee = (percent: number) => async (actor: Actor) => {
 	await managementFeeInput(actor.page).fill(String(percent));
@@ -26,6 +27,7 @@ export const openPreview =
 		await periodEndInput(actor.page).fill(`${year}-12-31`);
 		if (options.heatingProfileId) await heatingProfileSelect(actor.page).selectOption(options.heatingProfileId);
 		if (options.managementFeePercent !== undefined) await setManagementFee(options.managementFeePercent)(actor);
+		if (options.managementFeeKey) await managementFeeKeySelect(actor.page).selectOption({ label: options.managementFeeKey });
 		await nextButton(actor.page).click();
 		await buildingCheckbox(actor.page, buildingId).check();
 		await nextButton(actor.page).click();

@@ -12,6 +12,7 @@
 		currentStep,
 		buildings,
 		heatingProfiles,
+		distributionKeys,
 		previewRows,
 		isGenerating,
 		createdCount,
@@ -20,6 +21,7 @@
 		currentStep: number;
 		buildings: (Building & { apartmentCount: number })[];
 		heatingProfiles: HeatingProfile[];
+		distributionKeys: { id: string; name: string }[];
 		previewRows: PreviewRow[];
 		isGenerating: boolean;
 		createdCount: number | null;
@@ -39,7 +41,11 @@
 		bind:heatingProfileId={selection.heatingProfileId}
 	/>
 	<div class="mt-6">
-		<ManagementFeeField bind:value={selection.managementFeePercent} />
+		<ManagementFeeField
+			bind:value={selection.managementFeePercent}
+			bind:distributionKeyId={selection.managementFeeDistributionKeyId}
+			{distributionKeys}
+		/>
 	</div>
 {:else if currentStep === 2}
 	<BuildingStep {buildings} bind:selectedBuildingIds={selection.buildingIds} />

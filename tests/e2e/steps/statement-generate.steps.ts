@@ -91,6 +91,13 @@ When(
 	}
 );
 
+When(
+	'der Liegenschaftsverwalter die Vorschau der Abrechnungen {int} für das Gebäude {string} mit {float} % Verwaltungspauschale nach dem Verteilschlüssel {string} öffnet',
+	async ({ verwalter, seed }, year: number, building: string, fee: number, key: string) => {
+		await verwalter.perform(openPreview(year, seed.idOf(building)!, { managementFeePercent: fee, managementFeeKey: key }));
+	}
+);
+
 When('der Liegenschaftsverwalter die Verwaltungspauschale auf {float} % setzt', async ({ verwalter }, fee: number) => {
 	await verwalter.perform(setManagementFee(fee));
 });

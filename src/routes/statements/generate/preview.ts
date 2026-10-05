@@ -13,5 +13,6 @@ export interface WizardSelection {
 	periodEnd: string;
 	heatingProfileId: string;
 	managementFeePercent: number;
+	managementFeeDistributionKeyId: string;
 	buildingIds: string[];
 }

@@ -1,5 +1,13 @@
 <script lang="ts">
-	let { value = $bindable() }: { value: number } = $props();
+	let {
+		value = $bindable(),
+		distributionKeyId = $bindable(),
+		distributionKeys
+	}: {
+		value: number;
+		distributionKeyId: string;
+		distributionKeys: { id: string; name: string }[];
+	} = $props();
 
 	// 3 % is the usual guideline for Swiss utility statements, not a limit
 	const USUAL_MAXIMUM = 3;
@@ -28,4 +36,25 @@
 			Gilt für alle Abrechnungen dieses Laufs. Üblich sind bis {USUAL_MAXIMUM} %.
 		</p>
 	{/if}
+	<label
+		for="managementFeeDistributionKeyId"
+		class="block text-sm font-medium text-gray-700 mt-4 mb-2"
+	>
+		Verteilung der Pauschale
+	</label>
+	<select
+		id="managementFeeDistributionKeyId"
+		data-testid="management-fee-key-select"
+		bind:value={distributionKeyId}
+		class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+	>
+		<option value="">Gleichmässig pro Wohnung</option>
+		{#each distributionKeys as key (key.id)}
+			<option value={key.id}>{key.name}</option>
+		{/each}
+	</select>
+	<p class="text-xs text-gray-500 mt-1">
+		Die Pauschale ist ein Prozentsatz der Nebenkosten der Liegenschaft und wird so auf die Wohnungen
+		verteilt, je Mieter nach Mietstagen.
+	</p>
 </div>
