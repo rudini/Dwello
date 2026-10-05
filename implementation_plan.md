@@ -4085,8 +4085,23 @@ acceptance scenario first, unit TDD as the inner loop, integration tests only ag
 - Verification: backend 244 unit + 156 PostgreSQL, frontend 452, E2E (Chromium) 256 passed; the three E2E mutations
   that passed before (delete without backend call, wrong address stored, crashing tenant page) now fail
 
+### Management fee by distribution key ✅
+- [x] Acceptance first: `tests/e2e/features/statement-management-fee.feature` (written with `@wip`, red until the
+  wizard offered the key), new step for apartments with an area
+- [x] Backend: the management fee is a percentage of the building's utility costs, distributed to the apartments
+  by a distribution key (none: equally per apartment) and to each tenant by rental days
+  (`calculation.service.ts`, `routes/statements.ts`); the chosen rate is stored with the statement
+  (`migrations/0010_statement_management_fee_percent.sql`, marker in `db/migrate.ts`) and used for the PDF; new
+  `management-fee-distribution.pg.test.ts` (4); amounts in `statement-generation.pg.test.ts` recalculated by hand
+- [x] Frontend: wizard step 1 offers the distribution key of the fee (`ManagementFeeField.svelte`), passed through
+  the BFF (`statement-generation.ts`); "Erhöhte Verwaltungspauschale" scenario amounts recalculated
+- [x] `UBIQUITOUS_LANGUAGE.md` brought in line with schema, data and UI (status values, categories, keys, heating
+  profiles, reminders, documents, configuration keys, Verwaltungspauschale)
+- Verification: backend 244 unit + 160 PostgreSQL, frontend 454, E2E (Chromium) 258 passed
+
 ### Open
-- [ ] Second protocol driver (backend API) so business scenarios can run without a browser
+- [ ] Second protocol driver (backend API)
+- [ ] Statement PDF in the tenant's language (the PDF supports de/fr/it/rm/en, the tenant's language is not used) so business scenarios can run without a browser
 - [ ] Coverage threshold in Vitest and bun, enforced in CI
 
 ---
