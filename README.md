@@ -165,12 +165,21 @@ dwello/
 npm run test
 ```
 
+### Backend Tests (bun)
+```bash
+cd backend && bun run test     # unit tests, then the PostgreSQL tests
+cd backend && bun run test:pg  # PostgreSQL tests only
+```
+
+The PostgreSQL tests (`*.pg.test.ts`) run against their own database `dwello_test`, recreated from
+`backend/migrations` before every run; the development database is never touched. Override it with `TEST_DATABASE_URL`.
+
 ### E2E Tests (Playwright)
 ```bash
 npm run test:e2e
 ```
 
-The E2E run starts its own stack (backend on 3101, frontend on 3100) against its own database `dwello_e2e`,
+The E2E run starts its own stack (backend on 3101, production build of the frontend on 3100) against its own database `dwello_e2e`,
 recreated from `backend/migrations` before every run (`cd backend && bun run e2e-db`). The development
 servers and database are never touched; only PostgreSQL on 5432 is required. Override the database with
 `E2E_DATABASE_URL`.
