@@ -6,6 +6,7 @@ import {
 	allListedInvoices,
 	amountOfListedInvoice,
 	categoryOfListedInvoice,
+	emptyInvoiceList,
 	listedInvoice,
 	statusOfListedInvoice
 } from '../questions/invoices';
@@ -93,6 +94,7 @@ Then(
 	async ({ verwalter, names }, supplier: string) => {
 		const name = names.get(supplier) ?? supplier;
 		await verwalter.perform(searchInvoices(name));
+		await expect(emptyInvoiceList(verwalter)).toBeVisible();
 		await expect(listedInvoice(verwalter, name)).toHaveCount(0);
 	}
 );

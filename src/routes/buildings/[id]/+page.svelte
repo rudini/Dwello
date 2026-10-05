@@ -72,7 +72,7 @@
 	<div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
 		<div>
 			<h1 class="text-2xl font-bold text-gray-900">{building.name || building.address}</h1>
-			<p class="text-sm text-gray-500 flex items-center gap-1 mt-2">
+			<p class="text-sm text-gray-500 flex items-center gap-1 mt-2" data-testid="building-address">
 				<Icon name="location_on" size={16} />
 				{[building.address, [building.postalCode, building.city].filter(Boolean).join(' ')]
 					.filter(Boolean)

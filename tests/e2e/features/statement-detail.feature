@@ -57,6 +57,7 @@ Funktionalität: Abrechnungsdetail
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
     Wenn der Liegenschaftsverwalter die Abrechnung löscht
     Dann ist der Liegenschaftsverwalter auf der Seite "Nebenkostenabrechnungen"
+    Und die Abrechnung 2024 von "Eva Frei" ist nicht mehr auffindbar
 
   Szenario: Versendete Abrechnung kann nicht gelöscht werden
     Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"

@@ -16,6 +16,7 @@ Funktionalität: Neues Gebäude erfassen
       | Ort     | Winterthur  |
       | Kanton  | ZH          |
     Dann ist der Liegenschaftsverwalter auf der Detailseite von "Rosengarten"
+    Und sieht der Liegenschaftsverwalter die Adresse "Rosenweg 5, 8400 Winterthur"
 
   Szenario: Pflichtangaben fehlen
     Wenn der Liegenschaftsverwalter das Gebäude ohne Angaben speichert

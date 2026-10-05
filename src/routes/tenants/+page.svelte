@@ -83,7 +83,7 @@
 	<!-- Tenants List -->
 	{#if data.tenants.length === 0}
 		<Card>
-			<div class="text-center py-12">
+			<div class="text-center py-12" data-testid="tenants-empty">
 				<Icon name="person" size={48} class="mx-auto text-gray-300 mb-4" />
 				<h3 class="text-lg font-medium text-gray-900 mb-2">Keine Mieter gefunden</h3>
 				<p class="text-gray-500 mb-6">

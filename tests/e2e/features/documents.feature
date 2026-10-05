@@ -22,3 +22,4 @@ Funktionalität: Dokumente
   Szenario: Brief als versendet markieren
     Wenn der Liegenschaftsverwalter die "Zahlungserinnerung" an "Anna Keller" als versendet markiert
     Dann ist die "Zahlungserinnerung" an "Anna Keller" nicht mehr zu versenden
+    Und ist die "Zahlungserinnerung" an "Anna Keller" als versendet festgehalten

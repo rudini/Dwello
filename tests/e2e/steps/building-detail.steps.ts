@@ -2,8 +2,8 @@ import { expect } from '@playwright/test';
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { visit } from '../interactions/navigation';
-import { listedApartment, yearBuilt } from '../questions/building-detail';
-import { listedBuilding } from '../questions/buildings';
+import { buildingAddress, listedApartment, yearBuilt } from '../questions/building-detail';
+import { emptyList, listedBuilding } from '../questions/buildings';
 import {
 	deleteBuilding,
 	openApartment,
@@ -59,9 +59,15 @@ Then(
 Then('das Gebäude {string} ist nicht mehr in der Liste', async ({ verwalter, names }, title: string) => {
 	const name = names.get(title) ?? title;
 	await verwalter.perform(searchBuildings(name));
+	await expect(emptyList(verwalter)).toBeVisible();
 	await expect(listedBuilding(verwalter, name)).toHaveCount(0);
 });
 
 Then('sieht der Liegenschaftsverwalter das Baujahr {string}', async ({ verwalter }, year: string) => {
 	await expect(yearBuilt(verwalter)).toHaveText(year);
+});
+
+
+Then('sieht der Liegenschaftsverwalter die Adresse {string}', async ({ verwalter }, address: string) => {
+	await expect(buildingAddress(verwalter)).toContainText(address);
 });

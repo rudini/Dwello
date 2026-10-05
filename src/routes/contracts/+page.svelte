@@ -121,7 +121,7 @@
 	<!-- Contracts List -->
 	{#if data.contracts.length === 0}
 		<Card>
-			<div class="text-center py-12">
+			<div class="text-center py-12" data-testid="contracts-empty">
 				<Icon name="description" size={48} class="mx-auto text-gray-300 mb-4" />
 				<h3 class="text-lg font-medium text-gray-900 mb-2">Keine Verträge gefunden</h3>
 				<p class="text-gray-500 mb-6">

@@ -4,7 +4,8 @@ import { test } from '../fixtures/test';
 import { visit } from '../interactions/navigation';
 import { downloadedFile } from '../questions/download';
 import { heatingCosts, statusOfStatement } from '../questions/statement-detail';
-import { statementPath } from '../questions/statements';
+import { emptyStatementList, statementOfYear, statementPath } from '../questions/statements';
+import { searchStatements } from '../tasks/statements';
 import {
 	deleteStatement,
 	downloadStatementPdf,
@@ -103,3 +104,13 @@ Then('erhält der Liegenschaftsverwalter die Abrechnung als PDF', async ({ verwa
 	expect(file.name).toMatch(/\.pdf$/);
 	expect(file.header).toBe('%PDF-');
 });
+
+Then(
+	'die Abrechnung {int} von {string} ist nicht mehr auffindbar',
+	async ({ verwalter, names }, year: number, tenant: string) => {
+		const name = names.get(tenant) ?? tenant;
+		await verwalter.perform(searchStatements(name));
+		await expect(emptyStatementList(verwalter)).toBeVisible();
+		await expect(statementOfYear(verwalter, name, year)).toHaveCount(0);
+	}
+);

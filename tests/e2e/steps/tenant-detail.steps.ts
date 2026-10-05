@@ -4,7 +4,7 @@ import { test } from '../fixtures/test';
 import { visit } from '../interactions/navigation';
 import { contractHistory } from '../questions/apartment-detail';
 import { monthlyRent, rentalStartDate, rentedApartment } from '../questions/tenant-detail';
-import { listedTenant } from '../questions/tenants';
+import { emptyTenantList, listedTenant } from '../questions/tenants';
 import {
 	deleteTenant,
 	editTenant,
@@ -81,6 +81,7 @@ Then(
 	'findet der Liegenschaftsverwalter den Mieter {string} nicht mehr',
 	async ({ verwalter, names }, tenant: string) => {
 		await verwalter.perform(searchTenant(names.get(tenant)!));
+		await expect(emptyTenantList(verwalter)).toBeVisible();
 		await expect(listedTenant(verwalter, names.get(tenant)!)).toHaveCount(0);
 	}
 );

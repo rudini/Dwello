@@ -1,5 +1,6 @@
 import type { Actor } from '../fixtures/actor';
-import { apartmentRow, yearBuiltValue } from '../interactions/building-detail';
+import { addressLine, apartmentRow, yearBuiltValue } from '../interactions/building-detail';
 
 export const listedApartment = (actor: Actor, number: string) => apartmentRow(actor.page, number);
 export const yearBuilt = (actor: Actor) => yearBuiltValue(actor.page);
+export const buildingAddress = (actor: Actor) => addressLine(actor.page);

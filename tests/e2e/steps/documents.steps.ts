@@ -63,3 +63,11 @@ Then(
 		await expect(documentFor(verwalter, title, names.get(tenant) ?? tenant)).toHaveCount(0);
 	}
 );
+
+Then(
+	'ist die {string} an {string} als versendet festgehalten',
+	async ({ verwalter, names }, title: string, tenant: string) => {
+		await visit(verwalter.page, '/documents');
+		await expect(documentFor(verwalter, title, names.get(tenant) ?? tenant)).toContainText('Versendet');
+	}
+);
