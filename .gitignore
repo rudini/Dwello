@@ -41,6 +41,8 @@ coverage/
 playwright-report/
 test-results/
 cucumber-report/
+/ui-screenshots/
+/ui-routes.txt
 .features-gen/
 
 # Temporary files

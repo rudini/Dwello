@@ -129,3 +129,82 @@ jobs:
       - name: Fallow audit
         # Pull requests: changes against the target branch; pushes: changes of the pushed commits
         run: npx fallow audit --base "${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || github.event.before }}"
+
+  ui-screenshots:
+    name: UI screenshots
+    # Screenshots of every page a pull request changes, posted as a comment on the pull request
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+      pull-requests: write
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: dwello
+          POSTGRES_PASSWORD: dwello
+          POSTGRES_DB: dwello
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U dwello"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - uses: oven-sh/setup-bun@v2
+      - name: Find changed pages
+        id: routes
+        run: |
+          git diff --name-only "origin/${{ github.base_ref }}...HEAD" | bun tests/ui-screenshots/affected-routes.ts > ui-routes.txt
+          cat ui-routes.txt
+          echo "any=$(grep -q . ui-routes.txt && echo true || echo false)" >> "$GITHUB_OUTPUT"
+      - uses: actions/setup-node@v4
+        if: steps.routes.outputs.any == 'true'
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - if: steps.routes.outputs.any == 'true'
+        run: npm ci
+      - if: steps.routes.outputs.any == 'true'
+        run: bun install --frozen-lockfile
+        working-directory: backend
+      - name: Install Playwright browser
+        if: steps.routes.outputs.any == 'true'
+        run: npx playwright install --with-deps chromium
+      - name: Take screenshots
+        if: steps.routes.outputs.any == 'true'
+        run: npx playwright test -c playwright.screenshots.config.ts
+      - name: Publish screenshots to branch ui-screenshots
+        if: steps.routes.outputs.any == 'true'
+        env:
+          DIR: pr-${{ github.event.pull_request.number }}/${{ github.event.pull_request.head.sha }}
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git fetch origin ui-screenshots; then git worktree add -B ui-screenshots ../shots FETCH_HEAD; else git worktree add --orphan -b ui-screenshots ../shots; fi
+          mkdir -p "../shots/$DIR" && cp ui-screenshots/*.png "../shots/$DIR/"
+          cd ../shots && git add . && git commit -m "chore(ci): screenshots for $DIR"
+          for attempt in 1 2 3; do git push origin ui-screenshots && break; git pull --rebase origin ui-screenshots; done
+      - name: Comment on pull request
+        if: steps.routes.outputs.any == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const pr = context.payload.pull_request;
+            const base = `https://github.com/${context.repo.owner}/${context.repo.repo}/blob/ui-screenshots/pr-${pr.number}/${pr.head.sha}`;
+            const marker = '<!-- ui-screenshots -->';
+            const shots = fs.readFileSync('ui-routes.txt', 'utf8').split('\n').filter(Boolean)
+              .map((route) => `### \`${route}\`\n![${route}](${base}/${route.split(/[/[\]]+/).filter(Boolean).join('_') || 'home'}.png?raw=true)`);
+            const body = `${marker}\n## UI screenshots\nChanged pages as of ${pr.head.sha.slice(0, 7)}:\n\n${shots.join('\n\n')}`;
+            const comments = await github.paginate(github.rest.issues.listComments, { ...context.repo, issue_number: pr.number });
+            const existing = comments.find((comment) => comment.body?.startsWith(marker));
+            if (existing) await github.rest.issues.updateComment({ ...context.repo, comment_id: existing.id, body });
+            else await github.rest.issues.createComment({ ...context.repo, issue_number: pr.number, body });
