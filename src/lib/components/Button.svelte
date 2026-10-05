@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 
-	type Variant = 'primary' | 'secondary' | 'danger' | 'icon';
+	type Variant = 'primary' | 'secondary' | 'danger' | 'danger-ghost' | 'icon';
 	type Size = 'sm' | 'md' | 'lg';
 
 	interface Props {
@@ -41,6 +41,7 @@
 		primary: 'bg-primary text-white hover:bg-blue-700 rounded-lg shadow-sm',
 		secondary: 'bg-slate-100 border border-slate-300 text-slate-600 hover:bg-slate-200 rounded-lg',
 		danger: 'bg-red-600 text-white hover:bg-red-700 rounded-lg shadow-sm focus:ring-red-500',
+		'danger-ghost': 'text-red-600 hover:bg-red-50 rounded-lg focus:ring-red-500',
 		icon: 'bg-slate-100 rounded-lg hover:text-primary hover:bg-primary/10'
 	};
 

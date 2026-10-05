@@ -61,22 +61,22 @@
 
 	<!-- Search and Filters -->
 	<Card>
-		<form onsubmit={handleSearch} class="space-y-4">
-			<div class="flex flex-col sm:flex-row gap-4">
+		<form onsubmit={handleSearch} class="flex flex-col lg:flex-row lg:items-center gap-4">
+			<div class="flex-1 flex flex-col sm:flex-row gap-4">
 				<SearchField
 					bind:value={searchTerm}
 					placeholder="Name, Adresse oder Stadt..."
 					testid="building-search-input"
 				/>
 				<div class="w-full sm:w-48">
-					<label for="city" class="block text-sm font-medium text-gray-700 mb-1">Stadt</label>
+					<label for="city" class="sr-only">Stadt</label>
 					<input
 						id="city"
 						name="city"
 						data-testid="building-city-filter"
 						type="text"
 						bind:value={cityFilter}
-						placeholder="z.B. Zürich"
+						placeholder="Stadt, z.B. Zürich"
 						class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 					/>
 				</div>
@@ -109,26 +109,19 @@
 	{:else}
 		<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 			{#each data.buildings as building}
-				<div
-					role="button"
-					tabindex="0"
-					data-testid="building-card-{building.id}"
-					onclick={() => goto(`/buildings/${building.id}`)}
-					onkeydown={(e) => e.key === 'Enter' && goto(`/buildings/${building.id}`)}
-					class="block bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-blue-300 transition-all duration-200 cursor-pointer"
-				>
-					<div class="p-5">
+				<div class="relative" data-testid="building-card-{building.id}">
+					<a
+						href="/buildings/{building.id}"
+						class="block bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-primary/40 transition-all duration-200 p-5"
+					>
 						<!-- Building Name & Address -->
-						<div class="flex items-start justify-between mb-3">
-							<div class="flex-1 min-w-0">
-								<h3 class="font-semibold text-gray-900 truncate">
-									{building.name || building.address}
-								</h3>
-								{#if building.name}
-									<p class="text-sm text-gray-500 truncate">{building.address}</p>
-								{/if}
-							</div>
-							<Icon name="chevron_right" size={20} class="text-gray-400 flex-shrink-0 ml-2" />
+						<div class="min-w-0 pr-10 mb-3">
+							<h3 class="font-semibold text-gray-900 truncate">
+								{building.name || building.address}
+							</h3>
+							{#if building.name}
+								<p class="text-sm text-gray-500 truncate">{building.address}</p>
+							{/if}
 						</div>
 
 						<!-- Location -->
@@ -138,21 +131,6 @@
 							{#if building.canton}
 								<span class="ml-1 text-gray-400">({building.canton})</span>
 							{/if}
-							<a
-								href={getGoogleMapsDirectionsUrl(
-									building.address,
-									building.city,
-									building.postalCode
-								)}
-								data-testid="building-route-link"
-								target="_blank"
-								rel="noopener noreferrer"
-								class="ml-auto text-gray-400 hover:text-primary transition-colors"
-								title="Route in Google Maps öffnen"
-								onclick={(e) => e.stopPropagation()}
-							>
-								<Icon name="directions" size={18} />
-							</a>
 						</div>
 
 						<!-- Stats -->
@@ -191,7 +169,18 @@
 								{/if}
 							</div>
 						{/if}
-					</div>
+					</a>
+					<a
+						href={getGoogleMapsDirectionsUrl(building.address, building.city, building.postalCode)}
+						data-testid="building-route-link"
+						target="_blank"
+						rel="noopener noreferrer"
+						class="absolute right-4 top-4 p-1.5 rounded-lg text-gray-400 hover:text-primary hover:bg-primary/10 transition-colors"
+						title="Route in Google Maps öffnen"
+						aria-label="Route in Google Maps öffnen"
+					>
+						<Icon name="directions" size={18} />
+					</a>
 				</div>
 			{/each}
 		</div>

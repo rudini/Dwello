@@ -105,7 +105,7 @@
 				</Button>
 			{/if}
 			<Button
-				variant="danger"
+				variant="danger-ghost"
 				onclick={() => (showDeleteModal = true)}
 				testid="contract-delete-button"
 			>

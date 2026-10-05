@@ -4,5 +4,5 @@
 </script>
 
 <div class="flex items-center justify-center min-h-[50vh]">
-	<p class="text-gray-500">Redirecting to dashboard...</p>
+	<p class="text-gray-500">Weiterleitung zum Dashboard …</p>
 </div>

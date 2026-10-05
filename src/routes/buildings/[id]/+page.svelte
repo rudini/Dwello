@@ -90,7 +90,7 @@
 				Bearbeiten
 			</Button>
 			<Button
-				variant="danger"
+				variant="danger-ghost"
 				onclick={() => (showDeleteConfirm = true)}
 				testid="building-delete-button"
 			>

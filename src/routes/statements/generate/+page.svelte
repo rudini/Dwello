@@ -86,6 +86,7 @@
 		<a
 			href="/statements"
 			data-testid="back-link"
+			aria-label="Zurück zu den Abrechnungen"
 			class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
 		>
 			<Icon name="arrow_back" size={24} />

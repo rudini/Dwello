@@ -4008,6 +4008,39 @@ checked with grep before deleting.
 
 ---
 
+## Session 6 - October 2026: UX/UI Design Review
+
+Branch `claude/clever-mendel-q1itt3`. Review of every page against the design mockups in `screens/` and the
+manager's workflow (Gebäude → Wohnungen → Mieter/Vertrag → Rechnungen → Abrechnung); test ids and page titles unchanged.
+
+### Findings fixed ✅
+- [x] **Navigation:** nine flat items in a dark sidebar, no grouping; sidebar `min-h-screen` below the header made every
+  page scroll. Now a light sidebar grouped by workflow (Liegenschaften, Nebenkosten, System), sticky under a sticky
+  header, `aria-current` on the active item; mobile drawer shares the groups. Files: `src/lib/navigation.ts`,
+  `src/lib/components/NavLinks.svelte` (new), `Navigation.svelte`, `MobileNav.svelte`, `Header.svelte`, `+layout.svelte`
+- [x] **Dashboard:** no guidance for a new manager, quick actions buried below the charts. Now `GettingStarted.svelte`
+  (new) shows the four setup steps with their state and the next action until the first statements exist; quick
+  actions sit under the page header; stat tiles compacted
+- [x] **List filters:** labels above every field and the buttons on a second row. Now one row (labels for screen readers
+  only), primary-sized "Suchen". Files: `SearchField`, `FilterSelect`, `FilterActions`, the five list pages
+- [x] **Building cards** were `div role="button"` (no open-in-new-tab, no address on hover): now links, the route
+  link sits outside the card link
+- [x] **Delete buttons** had the same weight as "Bearbeiten": new `danger-ghost` Button variant on the building, tenant,
+  contract and heating-profile pages; the confirm dialogs keep the filled red button
+- [x] **Accessibility:** `Icon` is `aria-hidden` by default (Material Symbols are ligatures, screen readers read
+  "receipt_long"); icon-only contract row buttons and the statement back links got labels
+- [x] **Consistency and copy:** apartment header matched the other page headers (2xl instead of 4xl), `Card` no longer
+  hints at clickability with a hover shadow, footer/error/redirect pages translated into German, logo got a mark
+- [x] **Tests:** `src/__tests__/app-frame.dom.test.ts` (new: Icon aria-hidden, nav groups, active item),
+  `dashboard-page.test.ts` (getting-started states)
+
+### Open
+- [ ] Rename "Konfiguration" (sidebar) to "Einstellungen" (page title, user menu) once the E2E feature tables are updated
+- [ ] Contracts and invoices lists: rows could open the record on click like the cards do
+- [ ] Filters still need "Suchen"; applying a select on change would be quicker (the E2E tasks click the button)
+
+---
+
 # Success Criteria
 
 ✅ **MVP Complete When:**
@@ -4043,7 +4076,7 @@ checked with grep before deleting.
 
 ---
 
-**Last Updated:** October 5, 2026
+**Last Updated:** October 5, 2026 (Session 6)
 **Total Duration:** ~22 weeks
 **Target:** Full MVP production-ready system
 

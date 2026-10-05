@@ -1,12 +1,7 @@
 <script lang="ts">
-	import { page } from '$app/stores';
-	import { isActive, navItems } from '$lib/navigation';
 	import { mobileNavOpen, closeMobileNav } from '$lib/stores/navigation';
 	import Icon from './Icon.svelte';
-
-	function handleNavClick() {
-		closeMobileNav();
-	}
+	import NavLinks from './NavLinks.svelte';
 
 	function handleBackdropClick() {
 		closeMobileNav();
@@ -69,55 +64,25 @@
 	<!-- Drawer -->
 	<div
 		bind:this={drawerElement}
-		class="fixed inset-y-0 left-0 w-72 bg-gray-800 z-50 md:hidden animate-in slide-in-from-left duration-200 flex flex-col"
+		class="fixed inset-y-0 left-0 w-72 bg-white z-50 md:hidden animate-in slide-in-from-left duration-200 flex flex-col"
 		role="dialog"
 		aria-modal="true"
 		aria-label="Hauptnavigation"
 	>
-		<!-- Header -->
-		<div class="flex items-center justify-between p-4 border-b border-gray-700">
-			<span class="text-xl font-bold text-white">Dwello</span>
+		<div class="flex items-center justify-between h-16 px-4 border-b border-gray-200">
+			<span class="text-xl font-bold text-gray-900">Dwello</span>
 			<button
 				type="button"
 				onclick={closeMobileNav}
-				class="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
+				class="p-2 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
 				aria-label="Menü schliessen"
 			>
 				<Icon name="close" size={24} />
 			</button>
 		</div>
 
-		<!-- Navigation Items -->
-		<div class="flex-1 overflow-y-auto p-4">
-			<div class="space-y-1">
-				{#each navItems as item}
-					{@const active = isActive(item.href, $page.url.pathname)}
-					<a
-						href={item.href}
-						onclick={handleNavClick}
-						class="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-colors duration-150 {active
-							? 'bg-gray-900 text-white'
-							: 'text-gray-300 hover:bg-gray-700 hover:text-white'}"
-					>
-						<span class="material-symbols-outlined text-xl" aria-hidden="true">
-							{item.icon}
-						</span>
-						<span>{item.name}</span>
-					</a>
-				{/each}
-			</div>
-		</div>
-
-		<!-- Help Section -->
-		<div class="p-4 border-t border-gray-700">
-			<a
-				href="/help"
-				onclick={handleNavClick}
-				class="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-300 rounded-lg hover:bg-gray-700 hover:text-white transition-colors duration-150"
-			>
-				<span class="material-symbols-outlined text-xl" aria-hidden="true">help</span>
-				<span>Hilfe & Support</span>
-			</a>
+		<div class="flex-1 overflow-y-auto p-3">
+			<NavLinks onnavigate={closeMobileNav} />
 		</div>
 	</div>
 {/if}

@@ -41,8 +41,8 @@
 	}
 </script>
 
-<header class="bg-white shadow-sm border-b border-gray-200">
-	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<header class="bg-white border-b border-gray-200 sticky top-0 z-30">
+	<div class="px-4 sm:px-6">
 		<div class="flex justify-between items-center h-16">
 			<!-- Mobile menu button and Logo -->
 			<div class="flex items-center gap-2">
@@ -55,7 +55,13 @@
 				>
 					<Icon name="menu" size={24} />
 				</button>
-				<a href="/" class="flex items-center gap-2" data-testid="header-logo">
+				<a href="/" class="flex items-center gap-2.5" data-testid="header-logo">
+					<span
+						class="flex items-center justify-center size-9 rounded-lg bg-primary text-white"
+						aria-hidden="true"
+					>
+						<Icon name="home_work" size={22} />
+					</span>
 					<span class="text-xl font-bold text-gray-900">Dwello</span>
 				</a>
 			</div>

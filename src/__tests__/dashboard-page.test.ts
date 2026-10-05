@@ -69,3 +69,44 @@ describe('Dashboard', () => {
 		}
 	});
 });
+
+describe('Erste Schritte', () => {
+	const withPortfolio = (
+		portfolio: Partial<DashboardData['portfolio']>,
+		statements = data.statements
+	) =>
+		render(DashboardPage, {
+			props: {
+				data: { ...data, portfolio: { ...data.portfolio, ...portfolio }, statements }
+			} as never
+		}).body;
+
+	it('führt einen leeren Betrieb zum ersten Gebäude', () => {
+		const body = withPortfolio(
+			{ totalBuildings: 0, totalApartments: 0, occupiedApartments: 0, reletApartments: 0 },
+			{ draft: 0, sent: 0, paid: 0, overdue: 0 }
+		);
+
+		const steps = body.match(/data-testid="getting-started-step"[\s\S]*?<\/li>/g)!;
+		expect(steps).toHaveLength(4);
+		expect(steps[0]).toContain('href="/buildings/new"');
+		expect(body).toMatch(/<a href="\/buildings\/new"[^>]*data-testid="getting-started-next"/);
+	});
+
+	it('hakt erledigte Schritte ab und zeigt den nächsten', () => {
+		const body = withPortfolio(
+			{ occupiedApartments: 0, reletApartments: 0 },
+			{ draft: 0, sent: 0, paid: 0, overdue: 0 }
+		);
+
+		const steps = body.match(/data-testid="getting-started-step"[\s\S]*?<\/li>/g)!;
+		expect(steps[0]).toContain('data-done="true"');
+		expect(steps[1]).toContain('data-done="true"');
+		expect(steps[2]).toContain('data-done="false"');
+		expect(body).toMatch(/<a href="\/tenants\/new"[^>]*data-testid="getting-started-next"/);
+	});
+
+	it('verschwindet, sobald alle Schritte erledigt sind', () => {
+		expect(page()).not.toContain('getting-started');
+	});
+});

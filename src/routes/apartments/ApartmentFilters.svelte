@@ -34,8 +34,8 @@
 </script>
 
 <Card>
-	<form onsubmit={search} class="space-y-4">
-		<div class="flex flex-col sm:flex-row gap-4">
+	<form onsubmit={search} class="flex flex-col lg:flex-row lg:items-center gap-4">
+		<div class="flex-1 flex flex-col sm:flex-row gap-4">
 			<SearchField
 				bind:value={filters.search}
 				placeholder="Wohnungsnummer, Gebäude oder Mieter..."

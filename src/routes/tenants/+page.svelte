@@ -59,8 +59,8 @@
 
 	<!-- Search and Filters -->
 	<Card>
-		<form onsubmit={handleSearch} class="space-y-4">
-			<div class="flex flex-col sm:flex-row gap-4">
+		<form onsubmit={handleSearch} class="flex flex-col lg:flex-row lg:items-center gap-4">
+			<div class="flex-1 flex flex-col sm:flex-row gap-4">
 				<SearchField
 					bind:value={searchTerm}
 					placeholder="Name, E-Mail oder Gebäude..."

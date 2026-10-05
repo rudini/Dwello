@@ -9,7 +9,7 @@
 </script>
 
 <div class="flex-1">
-	<label for="search" class="block text-sm font-medium text-gray-700 mb-1">Suche</label>
+	<label for="search" class="sr-only">Suche</label>
 	<div class="relative">
 		<Icon name="search" size={20} class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
 		<input

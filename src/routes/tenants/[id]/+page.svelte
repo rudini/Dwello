@@ -57,7 +57,11 @@
 				<Icon name="add" size={18} />
 				Neuer Mietvertrag
 			</Button>
-			<Button variant="danger" onclick={() => (deleting = true)} testid="tenant-delete-button">
+			<Button
+				variant="danger-ghost"
+				onclick={() => (deleting = true)}
+				testid="tenant-delete-button"
+			>
 				<Icon name="delete" size={18} />
 				Löschen
 			</Button>

@@ -88,8 +88,8 @@
 
 	<!-- Search and Filters -->
 	<Card>
-		<form onsubmit={handleSearch} class="space-y-4">
-			<div class="flex flex-col sm:flex-row gap-4">
+		<form onsubmit={handleSearch} class="flex flex-col lg:flex-row lg:items-center gap-4">
+			<div class="flex-1 flex flex-col sm:flex-row gap-4">
 				<SearchField
 					bind:value={searchTerm}
 					placeholder="Mieter, Wohnung oder Gebäude..."
@@ -227,6 +227,7 @@
 											href="/contracts/{contract.id}"
 											variant="secondary"
 											size="sm"
+											ariaLabel="Ansehen"
 											testid="contract-view-button"
 										>
 											<Icon name="visibility" size={16} />
@@ -235,6 +236,7 @@
 											href="/contracts/{contract.id}/edit"
 											variant="secondary"
 											size="sm"
+											ariaLabel="Bearbeiten"
 											testid="contract-edit-button"
 										>
 											<Icon name="edit" size={16} />
