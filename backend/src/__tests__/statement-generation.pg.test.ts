@@ -13,25 +13,32 @@
  */
 
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
-import { eq } from 'drizzle-orm';
-import { db } from '../db/connection';
-import { categories, distributionKeys, heatingProfiles, invoices } from '../db/schema';
-import { createBuilding, deleteBuilding } from '../services/building.service';
-import { createApartment, deleteApartment } from '../services/apartment.service';
-import { createTenant, deleteTenant } from '../services/tenant.service';
-import { createContract, deleteContract } from '../services/contract.service';
-import { deleteStatement } from '../services/statement.service';
 import { sendJson } from './helpers/auth';
 
+// Test data goes through the API only, so moving services into modules (phase 22.3) leaves this file untouched
 const token = crypto.randomUUID();
-const created = {
-	building: '',
-	apartments: [] as string[],
-	tenants: [] as string[]
-};
-const statements: string[] = [];
-let heatingProfileId: string;
+const created: string[] = [];
 const contracts = { a: '', b: '', c: '' };
+let buildingId: string;
+let heatingProfileId: string;
+
+/** Creates a record through the API (posted to `post`); afterAll deletes it under `resource`, newest first */
+async function create(resource: string, body: object, post = resource) {
+	const response = await sendJson('POST', `/api/v1/${post}`, body);
+	const record = (await response.json()) as { id: string; error?: string };
+	// The resource and error message say which record the API refused
+	expect({ resource, status: response.status, error: record.error }).toEqual({
+		resource,
+		status: 201,
+		error: undefined
+	});
+	const { id } = record;
+	created.push(`${resource}/${id}`);
+	return id;
+}
+
+const get = async <T>(path: string) =>
+	(await (await sendJson('GET', `/api/v1/${path}`)).json()) as T;
 
 type StoredStatement = {
 	rentalDays: number;
@@ -49,22 +56,21 @@ type StoredStatement = {
 
 /** Generates the statement for 2024 like the UI does and reads back what was stored */
 async function generate(contractId: string, heatingProfile?: string) {
-	const response = await sendJson('POST', '/api/v1/statements/generate', {
-		contractId,
-		buildingId: created.building,
-		periodStart: '2024-01-01',
-		periodEnd: '2024-12-31',
-		heatingProfileId: heatingProfile,
-		// Explicit, so a changed default in the configuration does not change the pinned amounts
-		managementFeePercent: 3
-	});
-	expect(response.status).toBe(201);
-	const { id } = (await response.json()) as { id: string };
-	statements.push(id);
+	const id = await create(
+		'statements',
+		{
+			contractId,
+			buildingId,
+			periodStart: '2024-01-01',
+			periodEnd: '2024-12-31',
+			heatingProfileId: heatingProfile,
+			// Explicit, so a changed default in the configuration does not change the pinned amounts
+			managementFeePercent: 3
+		},
+		'statements/generate'
+	);
 
-	const stored = (await (
-		await sendJson('GET', `/api/v1/statements/${id}`)
-	).json()) as StoredStatement;
+	const stored = await get<StoredStatement>(`statements/${id}`);
 	return {
 		rentalDays: stored.rentalDays,
 		totalCosts: stored.totalCosts,
@@ -87,105 +93,100 @@ async function rent(
 	startDate: string,
 	endDate?: string
 ) {
-	const tenant = await createTenant({ firstName, lastName: `Lindenhof ${token}` });
-	const contract = await createContract({
+	const tenantId = await create('tenants', { firstName, lastName: `Lindenhof ${token}` });
+	return create('contracts', {
 		apartmentId,
-		tenantId: tenant.id,
+		tenantId,
 		startDate,
 		endDate,
 		baseRent: '1500',
 		monthlyAdvancePayment
 	});
-	created.tenants.push(tenant.id);
-	return contract.id;
 }
 
 beforeAll(async () => {
-	const building = await createBuilding({
+	buildingId = await create('buildings', {
 		name: `Lindenhof ${token}`,
 		address: 'Lindenweg 3',
 		postalCode: '3000',
 		city: 'Bern',
 		canton: 'BE'
 	});
-	created.building = building.id;
 	const apartment = (number: string, area: string, rooms: string) =>
-		createApartment({ buildingId: building.id, number, floor: 1, area, rooms });
+		create('apartments', { buildingId, number, floor: 1, area, rooms });
 	const large = await apartment('1.01', '80', '3.5');
 	const small = await apartment('1.02', '40', '1.5');
-	const empty = await apartment('1.03', '30', '2.5');
-	created.apartments.push(large.id, small.id, empty.id);
+	await apartment('1.03', '30', '2.5');
 
-	contracts.a = await rent('Mieterin A', large.id, '200', '2024-01-01', '2024-04-30');
-	contracts.b = await rent('Mieter B', large.id, '180', '2024-06-16');
-	contracts.c = await rent('Mieterin C', small.id, '120', '2023-04-01');
+	contracts.a = await rent('Mieterin A', large, '200', '2024-01-01', '2024-04-30');
+	contracts.b = await rent('Mieter B', large, '180', '2024-06-16');
+	contracts.c = await rent('Mieterin C', small, '120', '2023-04-01');
 
-	const categoryId = Object.fromEntries(
-		(await db.select().from(categories)).map((c) => [c.name, c.id])
+	const idByName = (records: { id: string; name: string }[]) =>
+		Object.fromEntries(records.map((r) => [r.name, r.id]));
+	const category = idByName(
+		(await get<{ categories: { id: string; name: string }[] }>('categories')).categories
 	);
-	const key = async (name: string) =>
-		(await db.select().from(distributionKeys).where(eq(distributionKeys.name, name)))[0].id;
+	const key = idByName(
+		(await get<{ data: { id: string; name: string }[] }>('distribution-keys')).data
+	);
 	const invoice = (
 		categoryName: string,
 		distributionKeyId: string | null,
 		amount: string,
 		invoiceDate: string,
 		isValidUtilityCost = true
-	) => ({
-		buildingId: building.id,
-		categoryId: categoryId[categoryName],
-		distributionKeyId,
-		billingEntityName: 'Muster AG',
-		description: `${categoryName} ${invoiceDate}`,
-		amount,
-		invoiceDate,
-		isValidUtilityCost
-	});
-	const heatingKey = await key('Heating (Area 70% / Unit 30%)');
-	const perArea = await key('Per Area (m²)');
-	await db.insert(invoices).values([
-		invoice('Heating', heatingKey, '3000.00', '2024-02-15'),
-		invoice('Caretaker', perArea, '1200.00', '2024-03-31'),
-		invoice('Cold Water', await key('Per Unit'), '600.00', '2024-05-31'),
-		invoice('Waste Disposal', await key('Per Rooms'), '450.00', '2024-07-31'),
-		invoice('Elevator', null, '330.00', '2024-08-31'),
-		// Same category and key as the March invoice: both form one line item
-		invoice('Caretaker', perArea, '300.00', '2024-09-30'),
-		// Not umlagefähig and outside the period: neither appears in the statement
-		invoice('Mortgage Interest', perArea, '5000.00', '2024-10-31', false),
-		invoice('Caretaker', perArea, '999.00', '2023-12-31')
-	]);
+	) =>
+		// With the category given, the KI does not run; skipLlm keeps it that way
+		create(
+			'invoices',
+			{
+				buildingId,
+				categoryId: category[categoryName],
+				distributionKeyId,
+				billingEntityName: 'Muster AG',
+				description: `${categoryName} ${invoiceDate}`,
+				amount,
+				invoiceDate,
+				isValidUtilityCost
+			},
+			'invoices?skipLlm=true'
+		);
+	const heatingKey = key['Heating (Area 70% / Unit 30%)'];
+	const perArea = key['Per Area (m²)'];
+	await invoice('Heating', heatingKey, '3000.00', '2024-02-15');
+	await invoice('Caretaker', perArea, '1200.00', '2024-03-31');
+	await invoice('Cold Water', key['Per Unit'], '600.00', '2024-05-31');
+	await invoice('Waste Disposal', key['Per Rooms'], '450.00', '2024-07-31');
+	await invoice('Elevator', null, '330.00', '2024-08-31');
+	// Same category and key as the March invoice: both form one line item
+	await invoice('Caretaker', perArea, '300.00', '2024-09-30');
+	// Not umlagefähig and outside the period: neither appears in the statement
+	await invoice('Mortgage Interest', perArea, '5000.00', '2024-10-31', false);
+	await invoice('Caretaker', perArea, '999.00', '2023-12-31');
 
-	const [profile] = await db
-		.insert(heatingProfiles)
-		.values({
-			name: `Lindenhof ${token}`,
-			type: 'custom',
-			januaryPct: '18',
-			februaryPct: '14',
-			marchPct: '11',
-			aprilPct: '5',
-			mayPct: '1',
-			junePct: '1',
-			julyPct: '0',
-			augustPct: '0',
-			septemberPct: '2',
-			octoberPct: '8',
-			novemberPct: '14',
-			decemberPct: '26'
-		})
-		.returning();
-	heatingProfileId = profile.id;
+	heatingProfileId = await create('heating-profiles', {
+		name: `Lindenhof ${token}`,
+		januaryPct: 18,
+		februaryPct: 14,
+		marchPct: 11,
+		aprilPct: 5,
+		mayPct: 1,
+		junePct: 1,
+		julyPct: 0,
+		augustPct: 0,
+		septemberPct: 2,
+		octoberPct: 8,
+		novemberPct: 14,
+		decemberPct: 26
+	});
 });
 
 afterAll(async () => {
-	for (const id of statements) await deleteStatement(id);
-	for (const id of Object.values(contracts)) await deleteContract(id);
-	for (const id of created.tenants) await deleteTenant(id);
-	await db.delete(invoices).where(eq(invoices.buildingId, created.building));
-	for (const id of created.apartments) await deleteApartment(id);
-	await deleteBuilding(created.building);
-	await db.delete(heatingProfiles).where(eq(heatingProfiles.id, heatingProfileId));
+	for (const path of created.reverse()) {
+		const response = await sendJson('DELETE', `/api/v1/${path}`);
+		expect({ path, ok: response.ok }).toEqual({ path, ok: true });
+	}
 });
 
 // Line items: [category, building total, tenant share, share of the apartment's costs in %]
