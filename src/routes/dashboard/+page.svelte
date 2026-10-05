@@ -7,6 +7,7 @@
 	import OccupancyChart from '$lib/components/OccupancyChart.svelte';
 	import StatementTiles from './StatementTiles.svelte';
 	import QuickActions from './QuickActions.svelte';
+	import GettingStarted from './GettingStarted.svelte';
 
 	let { data }: { data: PageData } = $props();
 
@@ -119,7 +120,7 @@
 	<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
 		<div>
 			<h1 class="text-2xl font-bold text-gray-900">Dashboard</h1>
-			<p class="text-gray-500 mt-1">Willkommen bei Dwello</p>
+			<p class="text-gray-500 mt-1">Ihr Portfolio auf einen Blick</p>
 		</div>
 		<div class="flex items-center gap-3">
 			<Button href="/invoices/new" variant="secondary" testid="dashboard-action">
@@ -132,6 +133,10 @@
 			</Button>
 		</div>
 	</div>
+
+	<GettingStarted portfolio={data.portfolio} statements={data.statements} />
+
+	<QuickActions />
 
 	<div data-testid="portfolio-section">
 		<h2 class="text-lg font-semibold text-gray-900 mb-4">Portfolio</h2>
@@ -157,6 +162,4 @@
 		<ActivityFeed activities={data.recentActivity} maxItems={5} />
 		<OccupancyChart buildings={data.buildingOccupancy} />
 	</div>
-
-	<QuickActions />
 </div>

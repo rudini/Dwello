@@ -6,13 +6,13 @@
 		$props();
 </script>
 
-<div class="flex gap-2">
-	<Button type="submit" variant="primary" size="sm" {testid}>
+<div class="flex gap-2 shrink-0">
+	<Button type="submit" variant="primary" {testid}>
 		<Icon name="search" size={16} />
 		Suchen
 	</Button>
 	{#if filtered}
-		<Button type="button" variant="secondary" size="sm" onclick={onclear}>
+		<Button type="button" variant="secondary" onclick={onclear}>
 			<Icon name="close" size={16} />
 			Filter löschen
 		</Button>

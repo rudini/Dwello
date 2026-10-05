@@ -54,7 +54,7 @@
 					Bearbeiten
 				</Button>
 				<Button
-					variant="danger"
+					variant="danger-ghost"
 					onclick={() => (deleting = true)}
 					testid="heating-profile-delete-button"
 				>

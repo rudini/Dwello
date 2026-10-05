@@ -33,14 +33,14 @@
 	];
 </script>
 
-<div class="bg-white border border-gray-200 rounded-xl p-6">
-	<h3 class="text-lg font-semibold text-gray-900 mb-4">Schnellaktionen</h3>
+<div data-testid="quick-actions">
+	<h2 class="text-lg font-semibold text-gray-900 mb-4">Schnellaktionen</h2>
 	<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
 		{#each actions as action (action.href)}
 			<a
 				href={action.href}
 				data-testid="quick-action"
-				class="flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all"
+				class="flex items-center gap-3 p-4 bg-white border border-gray-200 rounded-xl hover:border-primary/40 hover:shadow-md transition-all"
 			>
 				<div class="p-2 rounded-lg {action.tone}">
 					<Icon name={action.icon} size={24} />

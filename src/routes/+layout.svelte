@@ -87,8 +87,10 @@
 		<Header user={data.user} />
 		<div class="flex flex-1">
 			<Navigation class="hidden md:block" />
-			<main id="main-content" class="flex-1 p-4 md:p-6" tabindex="-1">
-				{@render children()}
+			<main id="main-content" class="flex-1 min-w-0 p-4 md:p-8" tabindex="-1">
+				<div class="max-w-7xl mx-auto">
+					{@render children()}
+				</div>
 			</main>
 		</div>
 		<Footer />

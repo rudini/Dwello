@@ -21,7 +21,7 @@
 </script>
 
 <div class="w-full sm:w-48">
-	<label for={id} class="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+	<label for={id} class="sr-only">{label}</label>
 	<select
 		use:keepEarlyChoice={onchange}
 		{id}

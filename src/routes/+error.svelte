@@ -1,38 +1,35 @@
 <script lang="ts">
 	import { page } from '$app/stores';
+	import Button from '$lib/components/Button.svelte';
+	import Icon from '$lib/components/Icon.svelte';
+
+	const messages: Record<number, string> = {
+		404: 'Diese Seite gibt es nicht.',
+		403: 'Sie haben keinen Zugriff auf diese Seite.'
+	};
+	const message = $derived(
+		messages[$page.status] ?? $page.error?.message ?? 'Ein unerwarteter Fehler ist aufgetreten.'
+	);
 </script>
 
 <svelte:head>
-	<title>Error - Dwello</title>
+	<title>Fehler - Dwello</title>
 </svelte:head>
 
-<div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+<div class="min-h-[60vh] flex items-center justify-center py-12 px-4">
 	<div class="max-w-md w-full text-center">
-		<div class="mb-8">
-			<span class="material-symbols-outlined text-6xl text-red-500">error</span>
-		</div>
-		<h1 class="text-4xl font-bold text-gray-900 mb-2">
-			{$page.status}
-		</h1>
-		<p class="text-lg text-gray-600 mb-8">
-			{$page.error?.message || 'An unexpected error occurred'}
-		</p>
-		<div class="space-x-4">
-			<a
-				href="/"
-				class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
-			>
-				<span class="material-symbols-outlined text-sm mr-2">home</span>
-				Go Home
-			</a>
-			<button
-				type="button"
-				onclick={() => history.back()}
-				class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
-			>
-				<span class="material-symbols-outlined text-sm mr-2">arrow_back</span>
-				Go Back
-			</button>
+		<Icon name="error" size={56} class="text-red-500 mb-6" />
+		<h1 class="text-4xl font-bold text-gray-900 mb-2">{$page.status}</h1>
+		<p class="text-lg text-gray-600 mb-8">{message}</p>
+		<div class="flex justify-center gap-3">
+			<Button variant="secondary" onclick={() => history.back()}>
+				<Icon name="arrow_back" size={18} />
+				Zurück
+			</Button>
+			<Button href="/dashboard" variant="primary">
+				<Icon name="dashboard" size={18} />
+				Zum Dashboard
+			</Button>
 		</div>
 	</div>
 </div>

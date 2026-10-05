@@ -10,8 +10,8 @@
 	let { apartment, building }: Props = $props();
 </script>
 
-<div class="mb-8">
-	<nav class="flex items-center text-sm text-gray-500 mb-4">
+<div class="space-y-6">
+	<nav class="flex items-center text-sm text-gray-500">
 		<a
 			href="/apartments"
 			data-testid="breadcrumb-link"
@@ -29,7 +29,7 @@
 
 	<div class="flex justify-between items-start">
 		<div>
-			<h1 class="text-4xl font-bold text-text-dark mb-2">Wohnung {apartment.number}</h1>
+			<h1 class="text-2xl font-bold text-gray-900 mb-1">Wohnung {apartment.number}</h1>
 			<p class="text-sm text-text-secondary flex items-center gap-1">
 				<Icon name="location_on" size={16} />
 				{building.address}, {building.postalCode}

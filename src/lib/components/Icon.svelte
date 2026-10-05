@@ -6,7 +6,13 @@
 		'aria-hidden'?: boolean | 'true' | 'false';
 	}
 
-	let { name, size = 24, class: className = '', 'aria-hidden': ariaHidden }: Props = $props();
+	// The symbol is a ligature (its name as text), so screen readers skip it unless told otherwise
+	let {
+		name,
+		size = 24,
+		class: className = '',
+		'aria-hidden': ariaHidden = true
+	}: Props = $props();
 </script>
 
 <span
