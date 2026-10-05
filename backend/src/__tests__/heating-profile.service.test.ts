@@ -49,7 +49,7 @@ const createMockProfile = (percentages: Partial<MonthlyPercentages> = {}): Heati
 };
 
 describe('Heating Profile Service', () => {
-	describe('PREDEFINED_HEATING_PROFILES', () => {
+	describe('Profile von POST /heating-profiles/initialize (PREDEFINED_HEATING_PROFILES, nicht die migrierten Profile)', () => {
 		it('should have 4 predefined profiles', () => {
 			expect(PREDEFINED_HEATING_PROFILES).toHaveLength(4);
 		});
@@ -197,7 +197,7 @@ describe('Heating Profile Service', () => {
 				totalCost
 			);
 			expect(result.percentage).toBeCloseTo(46, 1);
-			expect(result.share).toBeCloseTo(4600, 100);
+			expect(result.share).toBeCloseTo(4600, 2);
 		});
 
 		it('should calculate summer months share (lower or zero)', () => {
@@ -209,7 +209,7 @@ describe('Heating Profile Service', () => {
 				totalCost
 			);
 			expect(result.percentage).toBeCloseTo(0, 1);
-			expect(result.share).toBeCloseTo(0, 100);
+			expect(result.share).toBeCloseTo(0, 2);
 		});
 
 		it('should handle mid-month start', () => {
@@ -236,9 +236,7 @@ describe('Heating Profile Service', () => {
 			expect(result.monthBreakdown[0].month).toBe(10); // October
 		});
 
-		it('should handle Tessin profile (PRD example)', () => {
-			// PRD scenario: Tenant moved Oct 1 - Dec 31, Mittelland profile
-			// Oct 8%, Nov 10%, Dec 12% = 30% (but let's test with our mock)
+		it('should charge Oct - Dec with the shares of these months (PRD move-in example)', () => {
 			const result = calculateHeatingShare(
 				profile,
 				new Date('2024-10-01'),
@@ -246,7 +244,7 @@ describe('Heating Profile Service', () => {
 				10000
 			);
 			// With our mock profile: Oct 8% + Nov 14% + Dec 24% = 46%
-			expect(result.share).toBeCloseTo(4600, 100);
+			expect(result.share).toBeCloseTo(4600, 2);
 		});
 
 		it('should handle single day period', () => {
@@ -332,7 +330,7 @@ describe('Heating Profile Service', () => {
 		});
 	});
 
-	describe('PREDEFINED_HEATING_PROFILES - detailed checks', () => {
+	describe('Profile von POST /heating-profiles/initialize (PREDEFINED_HEATING_PROFILES, nicht die migrierten Profile) - detailed checks', () => {
 		it('Standard profile should have no heating in summer', () => {
 			const profile = PREDEFINED_HEATING_PROFILES.find(p => p.name.includes('Mittelland'));
 			expect(parseFloat(profile!.junePct!)).toBe(0);
@@ -371,7 +369,7 @@ describe('Heating Profile Service', () => {
 				10000
 			);
 			expect(result.percentage).toBeCloseTo(17, 1);
-			expect(result.share).toBeCloseTo(1700, 50);
+			expect(result.share).toBeCloseTo(1700, 2);
 		});
 
 		it('should calculate Q1 share correctly', () => {
@@ -383,7 +381,7 @@ describe('Heating Profile Service', () => {
 				10000
 			);
 			expect(result.percentage).toBeCloseTo(43, 1);
-			expect(result.share).toBeCloseTo(4300, 100);
+			expect(result.share).toBeCloseTo(4300, 2);
 		});
 
 		it('should calculate Q4 share correctly', () => {
@@ -395,7 +393,7 @@ describe('Heating Profile Service', () => {
 				10000
 			);
 			expect(result.percentage).toBeCloseTo(46, 1);
-			expect(result.share).toBeCloseTo(4600, 100);
+			expect(result.share).toBeCloseTo(4600, 2);
 		});
 
 		it('should return zero share for summer months only', () => {
@@ -407,7 +405,7 @@ describe('Heating Profile Service', () => {
 				10000
 			);
 			expect(result.percentage).toBeCloseTo(0, 1);
-			expect(result.share).toBeCloseTo(0, 10);
+			expect(result.share).toBeCloseTo(0, 2);
 		});
 
 		it('should calculate mid-month to mid-month correctly', () => {
@@ -454,7 +452,7 @@ describe('Heating Profile Service', () => {
 				10000
 			);
 			expect(result.percentage).toBeCloseTo(100, 1);
-			expect(result.share).toBeCloseTo(10000, 100);
+			expect(result.share).toBeCloseTo(10000, 2);
 		});
 	});
 
@@ -522,7 +520,7 @@ describe('Heating Profile Service', () => {
 		});
 	});
 
-	describe('PREDEFINED_HEATING_PROFILES - percentage distribution', () => {
+	describe('Profile von POST /heating-profiles/initialize (PREDEFINED_HEATING_PROFILES, nicht die migrierten Profile) - percentage distribution', () => {
 		it('all profiles should have valid monthly values', () => {
 			for (const profile of PREDEFINED_HEATING_PROFILES) {
 				expect(parseFloat(profile.januaryPct!)).toBeGreaterThanOrEqual(0);

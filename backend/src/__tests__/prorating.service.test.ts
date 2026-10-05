@@ -172,7 +172,7 @@ describe('Prorating Service', () => {
 			expect(result.sharePercentage).toBe(0);
 		});
 
-		it('should handle scenario: Tenant A Jan-Mar, Tenant B Apr-Dec', () => {
+		it('should handle scenario: Tenant A Jan 1 - Mar 15 (74 of 365 days)', () => {
 			// From PRD: Tenant A: Jan 1 - Mar 15 (74 days), Total CHF 12,000
 			const resultA = prorateCosts(12000, 74, 365);
 			expect(resultA.proratedAmount).toBeCloseTo(2432.88, 2);
@@ -558,8 +558,8 @@ describe('Prorating Service', () => {
 
 			const result = handleVacancy(contracts, periodStart, periodEnd);
 			// Gap: Jan 1-31 (31 days), Apr 1 - May 31 (61 days), Sep 1 - Dec 31 (122 days)
-			expect(result.vacantPeriods.length).toBeGreaterThan(0);
-			expect(result.totalVacantDays).toBeGreaterThan(0);
+			expect(result.vacantPeriods).toHaveLength(3);
+			expect(result.totalVacantDays).toBe(31 + 61 + 122);
 		});
 
 		it('should handle contract starting after period start with exact day precision', () => {

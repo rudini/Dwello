@@ -109,11 +109,10 @@ describe('Formula Service', () => {
 			expect(result.error).toContain('fehlt');
 		});
 
-		it('should use default volume calculation when volume not provided', () => {
-			// Volume defaults to area * 2.5 (default ceiling height) when not explicitly set
-			const result = evaluateFormula('{volume}', { area: 80, rooms: 3.5, volume: 200 });
-			expect(result.isValid).toBe(true);
-			expect(result.value).toBe(200);
+		it('should fail when volume is missing instead of deriving it from the area', () => {
+			const result = evaluateFormula('{volume}', { area: 80, rooms: 3.5 });
+			expect(result.isValid).toBe(false);
+			expect(result.error).toBe('Der Wert für {volume} fehlt.');
 		});
 
 		it('should handle division', () => {
@@ -222,8 +221,8 @@ describe('Formula Service', () => {
 		it('should warn about zero results', () => {
 			// A formula that could give zero for some apartments
 			const result = validateFormulaForDistribution('{rooms} - 2');
-			// This might give zero or negative for 2-room apartments
-			expect(result.warnings.length > 0 || result.errors.length > 0).toBe(true);
+			expect(result.errors).toEqual([]);
+			expect(result.warnings).toEqual(['Die Formel ergibt für die Kleine Wohnung (50 m², 2 Zimmer) null.']);
 		});
 	});
 
@@ -247,7 +246,7 @@ describe('Formula Service', () => {
 			expect(result.errors.some(e => e.includes('nicht geöffnet'))).toBe(true);
 		});
 
-		it('should warn about division by zero', () => {
+		it('should report division by zero as error', () => {
 			const result = parseFormula('{area} / 0');
 			expect(result.errors.some(e => e.includes('teilt durch null'))).toBe(true);
 		});
