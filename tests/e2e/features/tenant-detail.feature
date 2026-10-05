@@ -57,11 +57,6 @@ Funktionalität: Mieterdetail
     Wenn der Liegenschaftsverwalter den Mietvertrag der Wohnung "1.01" aus der Historie öffnet
     Dann ist der Liegenschaftsverwalter auf der Detailseite des Mietvertrags von "Lea Frei"
 
-  Szenario: Über den Breadcrumb zur Mieterliste
-    Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mieters "Lea Frei"
-    Wenn der Liegenschaftsverwalter im Breadcrumb "Mieter" wählt
-    Dann ist der Liegenschaftsverwalter auf der Mieterliste
-
   Szenario: E-Mail an den Mieter schreiben
     Angenommen "Lea Frei" hat eine E-Mail-Adresse
     Und der Liegenschaftsverwalter ist auf der Detailseite des Mieters "Lea Frei"

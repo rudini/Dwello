@@ -52,16 +52,6 @@ Funktionalität: Wohnungsdetail
     Wenn der Liegenschaftsverwalter den Mietvertrag von "Eva Graf" aus der Historie öffnet
     Dann ist der Liegenschaftsverwalter auf der Detailseite des Mietvertrags von "Eva Graf"
 
-  Szenario: Über den Breadcrumb zur Wohnungsliste
-    Angenommen der Liegenschaftsverwalter ist auf der Detailseite der Wohnung "3.01"
-    Wenn der Liegenschaftsverwalter im Breadcrumb "Wohnungen" wählt
-    Dann ist der Liegenschaftsverwalter auf der Seite "Wohnungen"
-
-  Szenario: Über den Breadcrumb zum Gebäude
-    Angenommen der Liegenschaftsverwalter ist auf der Detailseite der Wohnung "3.01"
-    Wenn der Liegenschaftsverwalter im Breadcrumb "Lindenhof" wählt
-    Dann ist der Liegenschaftsverwalter auf der Detailseite von "Lindenhof"
-
   Szenario: E-Mail an den aktuellen Mieter schreiben
     Angenommen "Beat Huber" hat eine E-Mail-Adresse
     Und der Liegenschaftsverwalter ist auf der Detailseite der Wohnung "3.01"

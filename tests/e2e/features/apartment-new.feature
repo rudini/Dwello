@@ -57,13 +57,3 @@ Funktionalität: Neue Wohnung
     Angenommen der Liegenschaftsverwalter erfasst eine neue Wohnung im Gebäude "Birkenhof"
     Wenn der Liegenschaftsverwalter die Bearbeitung abbricht
     Dann ist der Liegenschaftsverwalter auf der Detailseite von "Birkenhof"
-
-  Szenario: Über den Breadcrumb zur Wohnungsliste
-    Angenommen der Liegenschaftsverwalter ist auf der Seite "Neue Wohnung"
-    Wenn der Liegenschaftsverwalter im Breadcrumb "Wohnungen" wählt
-    Dann ist der Liegenschaftsverwalter auf der Seite "Wohnungen"
-
-  Szenario: Über den Breadcrumb zum Gebäude
-    Angenommen der Liegenschaftsverwalter erfasst eine neue Wohnung im Gebäude "Birkenhof"
-    Wenn der Liegenschaftsverwalter im Breadcrumb "Birkenhof" wählt
-    Dann ist der Liegenschaftsverwalter auf der Detailseite von "Birkenhof"

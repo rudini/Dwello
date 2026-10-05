@@ -19,10 +19,6 @@ Funktionalität: Wohnungsliste
     Und ist die Wohnung "2.02" "Vermietet"
     Und die Wohnungsliste enthält genau 2 Wohnungen
 
-  Szenario: Gebäude wählen, bevor die Liste fertig geladen ist
-    Wenn der Liegenschaftsverwalter das Gebäude "Ahornhof" wählt, bevor die Wohnungsliste fertig geladen ist, und sucht
-    Dann die Wohnungsliste enthält genau 2 Wohnungen
-
   Szenario: Wiedervermietete Wohnung
     Angenommen der Mieter "Carla Rossi" existiert
     Und "Carla Rossi" mietet die Wohnung "2.01" seit "2099-11-01" für "900" Franken

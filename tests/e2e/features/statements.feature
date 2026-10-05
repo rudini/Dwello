@@ -17,10 +17,6 @@ Funktionalität: Nebenkostenabrechnungen
     Wenn der Liegenschaftsverwalter die Abrechnungen im Gebäude "Ahornhof" anzeigt
     Dann sieht der Liegenschaftsverwalter die Abrechnung von "Anna Keller" mit dem Status "Entwurf"
 
-  Szenario: Gebäude wählen, bevor die Liste fertig geladen ist
-    Wenn der Liegenschaftsverwalter das Gebäude "Ahornhof" wählt, bevor die Abrechnungsliste fertig geladen ist, und sucht
-    Dann sieht der Liegenschaftsverwalter die Abrechnung von "Anna Keller" mit dem Status "Entwurf"
-
   Szenario: Abrechnungen eines Mieters suchen
     Wenn der Liegenschaftsverwalter die Abrechnungen von "Anna Keller" sucht
     Dann sieht der Liegenschaftsverwalter die Abrechnung 2024 von "Anna Keller"

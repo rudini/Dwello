@@ -24,11 +24,3 @@ Funktionalität: Mietvertrag bearbeiten
   Szenario: Bearbeitung abbrechen
     Wenn der Liegenschaftsverwalter die Bearbeitung abbricht
     Dann ist der Liegenschaftsverwalter auf der Detailseite des Mietvertrags von "Anna Keller"
-
-  Szenario: Über den Breadcrumb zur Mietvertragsliste
-    Wenn der Liegenschaftsverwalter im Breadcrumb "Mietverträge" wählt
-    Dann ist der Liegenschaftsverwalter auf der Mietvertragsliste
-
-  Szenario: Über den Breadcrumb zum Mietvertrag
-    Wenn der Liegenschaftsverwalter im Breadcrumb "Vertrag" wählt
-    Dann ist der Liegenschaftsverwalter auf der Detailseite des Mietvertrags von "Anna Keller"

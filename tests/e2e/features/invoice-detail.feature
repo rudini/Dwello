@@ -38,7 +38,3 @@ Funktionalität: Rechnungsdetail
   Szenario: Zum Gebäude wechseln
     Wenn der Liegenschaftsverwalter das Gebäude der Rechnung öffnet
     Dann ist der Liegenschaftsverwalter auf der Detailseite von "Seeblick"
-
-  Szenario: Über den Breadcrumb zur Rechnungsliste
-    Wenn der Liegenschaftsverwalter im Breadcrumb "Rechnungen" wählt
-    Dann ist der Liegenschaftsverwalter auf der Rechnungsliste

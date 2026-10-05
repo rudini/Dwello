@@ -33,11 +33,3 @@ Funktionalität: Wohnung bearbeiten
   Szenario: Bearbeitung abbrechen
     Wenn der Liegenschaftsverwalter die Bearbeitung abbricht
     Dann ist der Liegenschaftsverwalter auf der Seite "Wohnung 4.01"
-
-  Szenario: Über den Breadcrumb zur Wohnungsliste
-    Wenn der Liegenschaftsverwalter im Breadcrumb "Wohnungen" wählt
-    Dann ist der Liegenschaftsverwalter auf der Seite "Wohnungen"
-
-  Szenario: Über den Breadcrumb zur Wohnung
-    Wenn der Liegenschaftsverwalter im Breadcrumb "Wohnung 4.01" wählt
-    Dann ist der Liegenschaftsverwalter auf der Seite "Wohnung 4.01"

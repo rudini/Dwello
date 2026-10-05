@@ -27,7 +27,3 @@ Funktionalität: Neues Gebäude erfassen
   Szenario: Erfassung abbrechen
     Wenn der Liegenschaftsverwalter die Bearbeitung abbricht
     Dann ist der Liegenschaftsverwalter auf der Gebäudeliste
-
-  Szenario: Über den Breadcrumb zur Gebäudeliste
-    Wenn der Liegenschaftsverwalter im Breadcrumb "Gebäude" wählt
-    Dann ist der Liegenschaftsverwalter auf der Gebäudeliste

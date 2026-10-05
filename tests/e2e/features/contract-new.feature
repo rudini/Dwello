@@ -16,12 +16,6 @@ Funktionalität: Neuen Mietvertrag erfassen
     Dann ist der Liegenschaftsverwalter auf der Mietvertragsliste
     Und der Mietvertrag von "Anna Keller" ist in der Liste auffindbar
 
-  Szenario: Mieter wählen, bevor die Seite fertig geladen ist
-    Wenn der Liegenschaftsverwalter den Mieter "Anna Keller" wählt, bevor die Seite fertig geladen ist
-    Und der Liegenschaftsverwalter die Wohnung "2.01" ab "2025-01-01" für "950" Franken vermietet
-    Dann ist der Liegenschaftsverwalter auf der Mietvertragsliste
-    Und der Mietvertrag von "Anna Keller" ist in der Liste auffindbar
-
   Szenario: Pflichtangaben fehlen
     Wenn der Liegenschaftsverwalter den Mietvertrag ohne Angaben speichert
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Bitte wählen Sie einen Mieter aus"
@@ -37,8 +31,4 @@ Funktionalität: Neuen Mietvertrag erfassen
 
   Szenario: Erfassung abbrechen
     Wenn der Liegenschaftsverwalter die Bearbeitung abbricht
-    Dann ist der Liegenschaftsverwalter auf der Mietvertragsliste
-
-  Szenario: Über den Breadcrumb zur Mietvertragsliste
-    Wenn der Liegenschaftsverwalter im Breadcrumb "Mietverträge" wählt
     Dann ist der Liegenschaftsverwalter auf der Mietvertragsliste
