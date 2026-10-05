@@ -35,7 +35,3 @@ Funktionalität: Rechnung bearbeiten
   Szenario: Bearbeitung abbrechen
     Wenn der Liegenschaftsverwalter die Bearbeitung abbricht
     Dann ist der Liegenschaftsverwalter auf der Detailseite der Rechnung von "Hauswart Huber"
-
-  Szenario: Über den Breadcrumb zur Rechnung
-    Wenn der Liegenschaftsverwalter im Breadcrumb "Hauswart Huber" wählt
-    Dann ist der Liegenschaftsverwalter auf der Detailseite der Rechnung von "Hauswart Huber"

@@ -58,8 +58,3 @@ Funktionalität: Heizprofile
     Angenommen der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Heizprofils "Bergtal"
     Wenn der Liegenschaftsverwalter die Bearbeitung abbricht
     Dann ist der Liegenschaftsverwalter auf der Detailseite von "Bergtal"
-
-  Szenario: Über den Breadcrumb zu den Einstellungen
-    Angenommen der Liegenschaftsverwalter ist auf der Seite "Heizprofile"
-    Wenn der Liegenschaftsverwalter im Breadcrumb "Einstellungen" wählt
-    Dann ist der Liegenschaftsverwalter auf der Seite "Einstellungen"

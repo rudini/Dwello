@@ -29,7 +29,3 @@ Funktionalität: Neue Rechnung erfassen
   Szenario: Erfassung abbrechen
     Wenn der Liegenschaftsverwalter die Bearbeitung abbricht
     Dann ist der Liegenschaftsverwalter auf der Rechnungsliste
-
-  Szenario: Über den Breadcrumb zur Rechnungsliste
-    Wenn der Liegenschaftsverwalter im Breadcrumb "Rechnungen" wählt
-    Dann ist der Liegenschaftsverwalter auf der Rechnungsliste

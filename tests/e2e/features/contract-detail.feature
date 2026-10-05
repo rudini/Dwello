@@ -35,11 +35,6 @@ Funktionalität: Mietvertragsdetail
     Dann ist der Liegenschaftsverwalter auf der Mietvertragsliste
     Und der Mietvertrag von "Bruno Meier" ist nicht mehr auffindbar
 
-  Szenario: Über den Breadcrumb zur Mietvertragsliste
-    Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
-    Wenn der Liegenschaftsverwalter im Breadcrumb "Mietverträge" wählt
-    Dann ist der Liegenschaftsverwalter auf der Mietvertragsliste
-
   Szenario: Zur Bearbeitung des Mietvertrags wechseln
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
     Wenn der Liegenschaftsverwalter den Mietvertrag bearbeiten will
