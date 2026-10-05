@@ -350,7 +350,8 @@ export async function generateStatementPDF(
 			// Create PDF document (A4 size)
 			const doc = new PDFDocument({
 				size: 'A4',
-				margins: { top: 50, bottom: 50, left: 50, right: 50 }
+				margins: { top: 50, bottom: 50, left: 50, right: 50 },
+				info: { Title: `${t.title} ${data.statementNumber}` }
 			});
 
 			const chunks: Buffer[] = [];

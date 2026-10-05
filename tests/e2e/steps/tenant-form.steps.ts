@@ -2,8 +2,8 @@ import { expect } from '@playwright/test';
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { visit } from '../interactions/navigation';
-import { correspondenceOf } from '../questions/tenant-form';
-import { correspondByEmailWithoutAddress, correspondByLetter } from '../tasks/tenant-form';
+import { correspondenceOf, languageOf } from '../questions/tenant-form';
+import { chooseLanguage, correspondByEmailWithoutAddress, correspondByLetter } from '../tasks/tenant-form';
 
 const { Given, When, Then } = createBdd(test);
 
@@ -30,4 +30,18 @@ When(
 
 Then('{string} erhält Korrespondenz {string}', async ({ verwalter }, _tenant: string, channel: string) => {
 	await expect(correspondenceOf(verwalter)).toHaveText(channel);
+});
+
+const LANGUAGES: Record<string, string> = { Deutsch: 'de', Französisch: 'fr', Italienisch: 'it', Rätoromanisch: 'rm', Englisch: 'en' };
+
+Given('die Korrespondenz an {string} ist auf {string}', async ({ seed }, tenant: string, language: string) => {
+	await seed.language(tenant, LANGUAGES[language]);
+});
+
+When('der Liegenschaftsverwalter die Sprache {string} festlegt', async ({ verwalter }, language: string) => {
+	await verwalter.perform(chooseLanguage(language));
+});
+
+Then('{string} erhält Korrespondenz auf {string}', async ({ verwalter }, _tenant: string, language: string) => {
+	await expect(languageOf(verwalter)).toHaveText(language);
 });

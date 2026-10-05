@@ -18,11 +18,12 @@ const anna = {
 	address: 'Ahornweg 3',
 	postalCode: '8400',
 	city: 'Winterthur',
-	correspondenceChannel: 'email'
+	correspondenceChannel: 'email',
+	language: 'fr'
 };
 
 describe('Mieterformular', () => {
-	it('übernimmt Kontaktdaten und Korrespondenzkanal', () => {
+	it('übernimmt Kontaktdaten, Korrespondenzkanal und Sprache', () => {
 		const { tenant, errors } = parseTenantForm(form(anna));
 
 		expect(errors).toEqual({});
@@ -34,8 +35,13 @@ describe('Mieterformular', () => {
 			address: 'Ahornweg 3',
 			postalCode: '8400',
 			city: 'Winterthur',
-			correspondenceChannel: 'email'
+			correspondenceChannel: 'email',
+			language: 'fr'
 		});
+	});
+
+	it('schreibt Deutsch, wenn keine bekannte Sprache gewählt ist', () => {
+		expect(parseTenantForm(form({ ...anna, language: 'xx' })).tenant.language).toBe('de');
 	});
 
 	it('verlangt eine E-Mail-Adresse, wenn per E-Mail korrespondiert wird', () => {

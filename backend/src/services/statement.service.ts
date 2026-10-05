@@ -33,7 +33,7 @@ export interface StatementFilters {
 const { pdfBlob: _pdfBlob, ...statementColumns } = getTableColumns(utilityStatements);
 
 export interface StatementWithDetails extends Omit<UtilityStatement, 'pdfBlob'> {
-	tenant: { id: string; firstName: string; lastName: string; email: string | null } | null;
+	tenant: { id: string; firstName: string; lastName: string; email: string | null; language?: string } | null;
 	apartment: { id: string; number: string; floor: number; area: string } | null;
 	building: { id: string; name: string; address: string } | null;
 	lineItems: UtilityStatementLineItem[];
@@ -189,7 +189,8 @@ export async function getStatement(id: string): Promise<StatementWithDetails | n
 				firstName: tenants.firstName,
 				lastName: tenants.lastName,
 				email: tenants.email,
-				correspondenceChannel: tenants.correspondenceChannel
+				correspondenceChannel: tenants.correspondenceChannel,
+				language: tenants.language
 			},
 			apartment: {
 				id: apartments.id,

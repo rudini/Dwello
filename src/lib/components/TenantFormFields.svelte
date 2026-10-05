@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { Tenant } from '$lib/types';
+	import { languageLabels } from '$lib/tenant';
 	import FieldError from './FieldError.svelte';
 
 	let { tenant = {}, errors = {} }: { tenant?: Partial<Tenant>; errors?: Record<string, string> } =
@@ -83,6 +84,24 @@
 	<p class="mt-1 text-xs text-gray-500">
 		So erhält der Mieter Mahnungen und andere Dokumente. Per E-Mail braucht eine E-Mail-Adresse, per
 		Brief eine Adresse.
+	</p>
+</div>
+
+<div>
+	<label for="language" class={labelClass}>Sprache</label>
+	<select
+		id="language"
+		name="language"
+		value={tenant.language ?? 'de'}
+		data-testid="tenant-language-select"
+		class={inputClass}
+	>
+		{#each Object.entries(languageLabels) as [code, label] (code)}
+			<option value={code}>{label}</option>
+		{/each}
+	</select>
+	<p class="mt-1 text-xs text-gray-500">
+		In dieser Sprache wird die Nebenkostenabrechnung erstellt.
 	</p>
 </div>
 

@@ -2,7 +2,7 @@ import { expect } from '@playwright/test';
 import { createBdd, type DataTable } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { visit } from '../interactions/navigation';
-import { downloadedFile } from '../questions/download';
+import { downloadedFile, downloadedPdfTitle } from '../questions/download';
 import { heatingCosts, statusOfStatement } from '../questions/statement-detail';
 import { emptyStatementList, statementOfYear, statementPath } from '../questions/statements';
 import { searchStatements } from '../tasks/statements';
@@ -114,3 +114,7 @@ Then(
 		await expect(statementOfYear(verwalter, name, year)).toHaveCount(0);
 	}
 );
+
+Then('trägt das PDF den Titel {string}', async ({ verwalter }, title: string) => {
+	expect(await downloadedPdfTitle(verwalter)).toContain(title);
+});

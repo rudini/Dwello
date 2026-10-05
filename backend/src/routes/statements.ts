@@ -406,8 +406,8 @@ export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 					paymentDeadline: statement.paymentDeadline || undefined
 				};
 
-				// Determine language from tenant preference or use default
-				const language: Language = (body.language as Language) || 'de';
+				// The language asked for, otherwise the tenant's
+				const language = (body.language || statement.tenant?.language || 'de') as Language;
 
 				// Generate PDF
 				const pdfBase64 = await generateStatementPDFBase64(pdfData, qrConfig, language);

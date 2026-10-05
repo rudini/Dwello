@@ -56,6 +56,12 @@ describe('Korrespondenzkanal des Mieters', () => {
 		expect(updated.correspondenceChannel).toBe('email');
 	});
 
+	it('lehnt unbekannte Sprachen ab', async () => {
+		const response = await send('POST', '', { firstName: 'Dora', lastName: 'Test', language: 'xx' });
+
+		expect(response.status).toBe(422);
+	});
+
 	it('lehnt unbekannte Kanäle ab', async () => {
 		const response = await send('POST', '', { firstName: 'Carla', lastName: 'Test', correspondenceChannel: 'fax' });
 

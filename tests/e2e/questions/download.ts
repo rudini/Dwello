@@ -8,3 +8,12 @@ export const downloadedFile = async (actor: Actor) => {
 	const content = await readFile(await download.path());
 	return { name: download.suggestedFilename(), header: content.subarray(0, 5).toString() };
 };
+
+// Title in the document information of the downloaded PDF (PDFKit keeps it in an object of its own)
+export const downloadedPdfTitle = async (actor: Actor) => {
+	const pdf = (await readFile(await actor.recall<Download>('download').path())).toString('latin1');
+	const [, ref] = pdf.match(/\/Title (\d+) 0 R/) ?? [];
+	const [, raw = ''] = pdf.match(new RegExp(`\\n${ref} 0 obj\\n\\((.*?)\\)\\nendobj`, 's')) ?? [];
+	// PDFKit writes non-ASCII text as UTF-16BE behind a byte order mark
+	return raw.startsWith('\xfe\xff') ? Buffer.from(raw.slice(2), 'latin1').swap16().toString('utf16le') : raw;
+};
