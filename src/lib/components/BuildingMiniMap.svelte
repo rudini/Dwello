@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import type { Map, Marker } from 'leaflet';
 
 	interface Props {
@@ -25,8 +25,7 @@
 			doubleClickZoom: false,
 			boxZoom: false,
 			keyboard: false,
-			touchZoom: false,
-			tap: false
+			touchZoom: false
 		}).setView([latitude, longitude], 16);
 
 		L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
@@ -82,14 +81,10 @@
 		}
 
 		map.invalidateSize();
-
-		return () => {
-			if (map) {
-				map.remove();
-				map = null;
-			}
-		};
 	});
+
+	// An async onMount cannot return its cleanup, so the map is removed here
+	onDestroy(() => map?.remove());
 </script>
 
 <div
