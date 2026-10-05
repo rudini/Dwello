@@ -24,6 +24,7 @@ Funktionalität: Gebäudedetail
     Und der Liegenschaftsverwalter ist auf der Detailseite von "Birkenhof"
     Wenn der Liegenschaftsverwalter das Gebäude löscht
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Dieses Gebäude kann nicht gelöscht werden"
+    Und kann der Liegenschaftsverwalter das Löschen nicht bestätigen
 
   Szenario: Über den Breadcrumb zur Gebäudeliste
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite von "Birkenhof"

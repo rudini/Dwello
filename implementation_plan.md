@@ -4068,6 +4068,23 @@ acceptance scenario first, unit TDD as the inner loop, integration tests only ag
 - Frontend: 466 unit tests pass; lint 0 problems, tsc 0 errors (frontend and backend)
 - E2E (Chromium): 256 passed against the production build (dev server before: 256 passed)
 
+### Test review: false positives and outdated descriptions ✅
+- [x] Backend: `tenant-channel.pg.test.ts` checks that the e-mail channel is stored on create and update (it passed
+  with the channel ignored); tautologies in `utility-validation.service.test.ts` (lift, caretaker) assert the rules;
+  `formula.service.test.ts` tests the missing-volume error instead of a non-existent default, exact warning for zero
+  results; `prorating.service.test.ts` exact vacant days, scenario name fixed; `heating-profile.service.test.ts`
+  names the profiles of `POST /heating-profiles/initialize` (not the migrated ones), `toBeCloseTo` precision fixed
+- [x] Frontend: `invoice-mapping.test.ts` tests `toInvoice`; removed the mirror tests `building-delete.test.ts` and
+  `apartment-edit.test.ts` (covered by `apartment.test.ts`, `format.test.ts`, `form-selects.dom.test.ts` and the E2E
+  scenario below); `contract-availability.test.ts` name fixed
+- [x] E2E: "Entwurf löschen" checks the statement is gone, "Gebäude erfassen" checks the address, "Mieter ohne
+  E-Mail-Adresse" first checks the tenant's page, "Brief als versendet markieren" checks it is recorded as sent,
+  "Gebäude mit Wohnungen" checks the disabled confirmation; negative list steps wait for the empty-list notice or the
+  page title first. `data-testid` added: `invoices-empty`, `contracts-empty`, `tenants-empty`, `statements-empty`,
+  `building-address`
+- Verification: backend 244 unit + 156 PostgreSQL, frontend 452, E2E (Chromium) 256 passed; the three E2E mutations
+  that passed before (delete without backend call, wrong address stored, crashing tenant page) now fail
+
 ### Open
 - [ ] Second protocol driver (backend API) so business scenarios can run without a browser
 - [ ] Coverage threshold in Vitest and bun, enforced in CI

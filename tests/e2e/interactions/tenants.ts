@@ -7,3 +7,4 @@ export const tenantCards = (page: Page) => page.getByTestId(/^tenant-card-/);
 export const tenantCard = (page: Page, name: string) => tenantCards(page).filter({ hasText: name });
 export const tenantStatusFilter = (page: Page) => page.getByTestId('tenants-status-filter');
 export const tenantActiveBadge = (page: Page, name: string) => tenantCard(page, name).getByTestId('tenant-active');
+export const tenantsEmptyNotice = (page: Page) => page.getByTestId('tenants-empty');

@@ -12,3 +12,4 @@ export const viewContractButton = (page: Page, tenantName: string) =>
 	contractRow(page, tenantName).getByTestId('contract-view-button');
 export const editContractButton = (page: Page, tenantName: string) =>
 	contractRow(page, tenantName).getByTestId('contract-edit-button');
+export const contractsEmptyNotice = (page: Page) => page.getByTestId('contracts-empty');

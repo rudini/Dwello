@@ -60,6 +60,7 @@ Then('ergeben die Monatsanteile zusammen {string}', async ({ verwalter }, total:
 });
 
 Then('fehlt das Heizprofil {string} in der Liste', async ({ verwalter, names }, profile: string) => {
+	await expect(verwalter.page).toHaveTitle('Heizprofile - Dwello');
 	await expect(listedProfile(verwalter, names.get(profile)!)).toHaveCount(0);
 });
 

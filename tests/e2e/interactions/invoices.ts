@@ -12,3 +12,4 @@ export const editInvoiceButton = (page: Page, supplier: string) => invoiceRow(pa
 export const rowAmount = (page: Page, supplier: string) => invoiceRow(page, supplier).getByTestId('invoice-amount');
 export const rowCategory = (page: Page, supplier: string) => invoiceRow(page, supplier).getByTestId('invoice-category');
 export const rowStatus = (page: Page, supplier: string) => invoiceRow(page, supplier).getByTestId('invoice-status');
+export const invoicesEmptyNotice = (page: Page) => page.getByTestId('invoices-empty');

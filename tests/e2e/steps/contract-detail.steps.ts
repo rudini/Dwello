@@ -3,7 +3,7 @@ import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { visit } from '../interactions/navigation';
 import { apartmentOfContract, statusOfContract, totalRent } from '../questions/contract-detail';
-import { listedContract } from '../questions/contracts';
+import { emptyContractList, listedContract } from '../questions/contracts';
 import {
 	deleteContract,
 	editContractFromDetail,
@@ -72,5 +72,6 @@ Then('hat der Mietvertrag den Status {string}', async ({ verwalter }, status: st
 Then('der Mietvertrag von {string} ist nicht mehr auffindbar', async ({ verwalter, names }, tenant: string) => {
 	const name = names.get(tenant) ?? tenant;
 	await verwalter.perform(searchContracts(name));
+	await expect(emptyContractList(verwalter)).toBeVisible();
 	await expect(listedContract(verwalter, name)).toHaveCount(0);
 });

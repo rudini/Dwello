@@ -29,7 +29,8 @@ Then(
 
 Then(
 	'kann der Liegenschaftsverwalter {string} keine E-Mail schreiben',
-	async ({ verwalter }, _tenant: string) => {
+	async ({ verwalter, names }, tenant: string) => {
+		await expect(verwalter.page).toHaveTitle(new RegExp(names.get(tenant) ?? tenant));
 		await expect(emailLink(verwalter)).toHaveCount(0);
 	}
 );

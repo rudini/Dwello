@@ -75,6 +75,7 @@ Then(
 Then(
 	'sieht der Liegenschaftsverwalter den Verteilschlüssel {string} nicht mehr',
 	async ({ verwalter, names }, title: string) => {
+		await expect(verwalter.page).toHaveTitle('Verteilschlüssel - Dwello');
 		await expect(listedKey(verwalter, names.get(title)!)).toHaveCount(0);
 	}
 );

@@ -18,3 +18,4 @@ export const filteredBy = (page: Page, filters: Record<string, string>) =>
 	page.waitForURL((url) => Object.entries(filters).every(([key, value]) => url.searchParams.get(key) === value));
 export const statementPdfLink = (page: Page, tenantName: string, year: number) =>
 	statementRowForYear(page, tenantName, year).getByTestId('statement-pdf-link');
+export const statementsEmptyNotice = (page: Page) => page.getByTestId('statements-empty');

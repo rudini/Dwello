@@ -76,6 +76,7 @@ Then('nicht die Kategorie {string}', async ({ verwalter, names }, title: string)
 });
 
 Then('sieht der Liegenschaftsverwalter die Kategorie {string} nicht mehr', async ({ verwalter, names }, title: string) => {
+	await expect(verwalter.page).toHaveTitle('Kategorien - Dwello');
 	await expect(listedCategory(verwalter, names.get(title)!)).toHaveCount(0);
 });
 

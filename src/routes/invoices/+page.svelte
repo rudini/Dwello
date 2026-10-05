@@ -112,7 +112,7 @@
 	<!-- Invoices List -->
 	{#if data.invoices.length === 0}
 		<Card>
-			<div class="text-center py-12">
+			<div class="text-center py-12" data-testid="invoices-empty">
 				<Icon name="receipt_long" size={48} class="mx-auto text-gray-300 mb-4" />
 				<h3 class="text-lg font-medium text-gray-900 mb-2">Keine Rechnungen gefunden</h3>
 				{#if filtered}
