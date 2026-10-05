@@ -30,7 +30,7 @@ describe('Korrespondenzkanal des Mieters', () => {
 		expect(tenant.correspondenceChannel).toBe('letter');
 	});
 
-	it('speichert den Kanal E-Mail', async () => {
+	it('speichert den Kanal E-Mail beim Erfassen', async () => {
 		const tenant = (await (
 			await send('POST', '', {
 				firstName: 'Bruno',
@@ -38,13 +38,22 @@ describe('Korrespondenzkanal des Mieters', () => {
 				email: 'bruno@example.com',
 				correspondenceChannel: 'email'
 			})
+		).json()) as { id: string; correspondenceChannel: string };
+		created.push(tenant.id);
+
+		expect(tenant.correspondenceChannel).toBe('email');
+	});
+
+	it('wechselt den Kanal beim Bearbeiten auf E-Mail', async () => {
+		const tenant = (await (
+			await send('POST', '', { firstName: 'Cora', lastName: crypto.randomUUID(), email: 'cora@example.com' })
 		).json()) as { id: string };
 		created.push(tenant.id);
 
-		const updated = (await (await send('PUT', `/${tenant.id}`, { correspondenceChannel: 'letter' })).json()) as {
+		const updated = (await (await send('PUT', `/${tenant.id}`, { correspondenceChannel: 'email' })).json()) as {
 			correspondenceChannel: string;
 		};
-		expect(updated.correspondenceChannel).toBe('letter');
+		expect(updated.correspondenceChannel).toBe('email');
 	});
 
 	it('lehnt unbekannte Kanäle ab', async () => {

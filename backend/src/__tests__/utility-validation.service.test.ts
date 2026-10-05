@@ -260,13 +260,12 @@ describe('Utility Validation Service', () => {
 			expect(rules.notAllowedCategories.length).toBeGreaterThan(0);
 		});
 
-		it('should include elevator in allowed (if applicable)', () => {
+		it('should include elevator in allowed', () => {
 			const rules = getUtilityCostRules();
 			const hasElevator = rules.allowedCategories.some(c =>
 				c.toLowerCase().includes('aufzug') || c.toLowerCase().includes('lift')
 			);
-			// Either has elevator or doesn't - just verify structure works
-			expect(typeof hasElevator).toBe('boolean');
+			expect(hasElevator).toBe(true);
 		});
 
 		it('should include caretaker/Hauswart in allowed', () => {
@@ -274,7 +273,7 @@ describe('Utility Validation Service', () => {
 			const hasCaretaker = rules.allowedCategories.some(c =>
 				c.toLowerCase().includes('hauswart') || c.toLowerCase().includes('concierge')
 			);
-			expect(typeof hasCaretaker).toBe('boolean');
+			expect(hasCaretaker).toBe(true);
 		});
 
 		it('notes should be in German', () => {
