@@ -38,9 +38,9 @@
 	<div class="grid gap-4 sm:grid-cols-2">
 		<div>
 			<label for="accountingPeriod" class="block text-sm font-medium text-gray-700 mb-1">Abrechnungsperiode</label>
-			<select id="accountingPeriod" name="accountingPeriod" value={settings.accountingPeriod} data-testid="setting-accountingPeriod" class={selectClass}>
+			<select id="accountingPeriod" name="accountingPeriod" data-testid="setting-accountingPeriod" class={selectClass}>
 				{#each periods as period (period.value)}
-					<option value={period.value}>{period.label}</option>
+					<option value={period.value} selected={period.value === settings.accountingPeriod}>{period.label}</option>
 				{/each}
 			</select>
 			<p class="mt-1 text-xs text-gray-500">Vorschlag für die Periode beim Erstellen der Abrechnungen</p>
@@ -50,13 +50,16 @@
 			<select
 				id="defaultHeatingProfileId"
 				name="defaultHeatingProfileId"
-				value={settings.defaultHeatingProfileId}
 				data-testid="setting-defaultHeatingProfileId"
 				class={selectClass}
 			>
-				<option value="">Kein Standard</option>
+				<option value="" selected={!settings.defaultHeatingProfileId}>Kein Standard</option>
 				{#each profiles as profile (profile.id)}
-					<option value={profile.id} disabled={!profile.selectable}>{profile.label}</option>
+					<option
+						value={profile.id}
+						disabled={!profile.selectable}
+						selected={profile.id === settings.defaultHeatingProfileId}
+					>{profile.label}</option>
 				{/each}
 			</select>
 			<p class="mt-1 text-xs text-gray-500">Nur Profile mit genau 100% Summe sind wählbar.</p>
@@ -66,13 +69,12 @@
 			<select
 				id="defaultDistributionKeyId"
 				name="defaultDistributionKeyId"
-				value={settings.defaultDistributionKeyId}
 				data-testid="setting-defaultDistributionKeyId"
 				class={selectClass}
 			>
-				<option value="">Kein Standard</option>
+				<option value="" selected={!settings.defaultDistributionKeyId}>Kein Standard</option>
 				{#each distributionKeys as key (key.id)}
-					<option value={key.id}>{key.name}</option>
+					<option value={key.id} selected={key.id === settings.defaultDistributionKeyId}>{key.name}</option>
 				{/each}
 			</select>
 			<p class="mt-1 text-xs text-gray-500">Vorschlag beim Erfassen neuer Rechnungen</p>

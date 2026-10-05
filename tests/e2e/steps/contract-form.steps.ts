@@ -4,7 +4,13 @@ import { test } from '../fixtures/test';
 import { visit } from '../interactions/navigation';
 import { apartmentChoice } from '../questions/contract-form';
 import { listedContract } from '../questions/contracts';
-import { changeBaseRent, registerContract, saveContract } from '../tasks/contract-form';
+import {
+	changeBaseRent,
+	chooseTenantWhileLoading,
+	registerContract,
+	rentApartment,
+	saveContract
+} from '../tasks/contract-form';
 import { searchContracts } from '../tasks/contracts';
 
 const { Given, When, Then } = createBdd(test);
@@ -12,6 +18,20 @@ const { Given, When, Then } = createBdd(test);
 Given('der Liegenschaftsverwalter ist auf der Seite "Neuer Mietvertrag"', async ({ verwalter }) => {
 	await visit(verwalter.page, '/contracts/new');
 });
+
+When(
+	'der Liegenschaftsverwalter den Mieter {string} wählt, bevor die Seite fertig geladen ist',
+	async ({ verwalter, seed }, tenant: string) => {
+		await verwalter.perform(chooseTenantWhileLoading(seed.idOf(tenant)!));
+	}
+);
+
+When(
+	'der Liegenschaftsverwalter die Wohnung {string} ab {string} für {string} Franken vermietet',
+	async ({ verwalter, seed }, apartment: string, startDate: string, baseRent: string) => {
+		await verwalter.perform(rentApartment({ apartmentId: seed.idOf(apartment)!, startDate, baseRent }));
+	}
+);
 
 When(
 	'der Liegenschaftsverwalter {string} die Wohnung {string} ab {string} für {string} Franken vermietet',

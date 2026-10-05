@@ -18,12 +18,11 @@
 		<select
 			id="status"
 			name="status"
-			value={apartment.status}
 			data-testid="apartment-status-select"
 			class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary bg-white"
 		>
-			<option value="vacant">Leer</option>
-			<option value="reserved">Gesperrt</option>
+			<option value="vacant" selected={apartment.status === 'vacant'}>Leer</option>
+			<option value="reserved" selected={apartment.status === 'reserved'}>Gesperrt</option>
 		</select>
 		<p class="mt-1 text-sm text-gray-500">
 			Vermietet wird die Wohnung mit einem Mietvertrag. Gesperrt bleibt sie z.B. während einer Renovation.

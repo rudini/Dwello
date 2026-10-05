@@ -3935,6 +3935,20 @@ unit or database tests.
   old `visit` 3/3 failed, new 3/3 passed
 - [ ] "Alle Aktivitäten anzeigen" links to `/activity`, which does not exist; unreachable today (backend returns at most 5)
 - [ ] Mobile navigation drawer has no scenarios (same targets as the sidebar)
+- [x] Filters chosen before hydration were lost: Svelte resets a one-way `value` (and `<select bind:value>`) to the
+  server value when it hydrates, so a search after it ran without the filter (`/apartments?page=1`)
+  - `FilterSelect` renders the choice as `selected` options and hands a choice made before hydration on in `onMount`;
+    `SearchField` and the statement search use `bind:value` (Svelte keeps a typed value there); statement building
+    filter as `selected` options (`src/lib/components/{FilterSelect,SearchField}.svelte`, `src/routes/statements/+page.svelte`)
+  - Unit tests hydrate real server-rendered HTML (`src/__tests__/filter-fields.dom.test.ts`, helper
+    `src/__tests__/helpers/hydrate.ts`); E2E scenarios "Gebäude wählen, bevor die Liste fertig geladen ist" in
+    `apartments.feature` and `statements.feature` hold the client JS back (`visitWhileLoading`): failed before, pass now
+- [x] Same for the selects of the entry forms: new apartment (building), apartment status, settings defaults, contract
+  tenant, heating profile of the statement wizard (the contract apartment select only renders once its availability is loaded)
+  - `selected` options everywhere; where a component keeps the choice in state, the action `keepEarlyChoice`
+    (`src/lib/early-choice.ts`, also used by `FilterSelect`) hands the choice on once the page is live
+  - Unit tests `src/__tests__/form-selects.dom.test.ts` (hydration helper now resolves `$lib` imports); E2E scenario
+    "Mieter wählen, bevor die Seite fertig geladen ist" in `contract-new.feature`: failed before, pass now
 
 ---
 

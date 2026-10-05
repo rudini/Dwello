@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { HeatingProfile } from '$lib/types';
 	import HeatingProfileChart from '$lib/components/HeatingProfileChart.svelte';
+	import { keepEarlyChoice } from '$lib/early-choice';
 
 	let {
 		heatingProfiles,
@@ -85,13 +86,15 @@
 		<select
 			id="heatingProfile"
 			data-testid="heating-profile-select"
-			bind:value={heatingProfileId}
+			onchange={(e) => (heatingProfileId = e.currentTarget.value)}
+			use:keepEarlyChoice={(id) => (heatingProfileId = id)}
 			class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 		>
 			{#each profileOptions as option (option.id)}
 				<option
 					value={option.id}
 					disabled={!option.valid}
+					selected={option.id === heatingProfileId}
 					class:text-gray-400={!option.valid}
 					data-testid="heating-profile-option-{option.id}"
 				>

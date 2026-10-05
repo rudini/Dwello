@@ -20,6 +20,8 @@
 	const searchTerm = $derived($page.url.searchParams.get('search') || '');
 	const buildingFilter = $derived($page.url.searchParams.get('building') || '');
 	const statusFilter = $derived($page.url.searchParams.get('status') || '');
+	// Bound, so text typed before hydration is kept (Svelte resets a one-way value when it hydrates)
+	let search = $derived(searchTerm);
 	const totalPages = $derived(Math.ceil(data.total / data.pageSize));
 
 	// Filters and paging live in the URL so the server filters across all statements
@@ -148,7 +150,7 @@
 						name="search"
 						data-testid="statement-search-input"
 						type="text"
-						value={searchTerm}
+						bind:value={search}
 						placeholder="Suche nach Mieter, Nr. oder Wohnung..."
 						class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 					/>
@@ -160,12 +162,11 @@
 					id="building"
 					name="building"
 					data-testid="statement-building-filter"
-					value={buildingFilter}
 					class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 				>
-					<option value="">Alle Gebäude</option>
+					<option value="" selected={!buildingFilter}>Alle Gebäude</option>
 					{#each data.buildings as building}
-						<option value={building.id}>{building.name}</option>
+						<option value={building.id} selected={building.id === buildingFilter}>{building.name}</option>
 					{/each}
 				</select>
 			</div>

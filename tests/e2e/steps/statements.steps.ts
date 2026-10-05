@@ -9,6 +9,7 @@ import {
 	searchStatements,
 	showDraftsOfBuilding,
 	showStatementsOfBuilding,
+	showStatementsOfBuildingWhileLoading,
 	startGeneratingStatements,
 	turnToNextPage
 } from '../tasks/statements';
@@ -95,6 +96,13 @@ When(
 	'der Liegenschaftsverwalter die Abrechnungen im Gebäude {string} anzeigt',
 	async ({ verwalter, seed }, building: string) => {
 		await verwalter.perform(showStatementsOfBuilding(seed.idOf(building)!));
+	}
+);
+
+When(
+	'der Liegenschaftsverwalter das Gebäude {string} wählt, bevor die Abrechnungsliste fertig geladen ist, und sucht',
+	async ({ verwalter, seed }, building: string) => {
+		await verwalter.perform(showStatementsOfBuildingWhileLoading(seed.idOf(building)!));
 	}
 );
 
