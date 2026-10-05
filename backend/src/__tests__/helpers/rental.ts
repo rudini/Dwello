@@ -6,7 +6,7 @@ import { createContract, deleteContract } from '../../services/contract.service'
 /**
  * Building "Ahornhof <token>" with apartment 2.01 rented to "Anna Keller <token>" in the real database
  */
-export async function createRental(token: string, contract: { startDate: string; monthlyAdvancePayment: string }) {
+export async function createRental(token: string, contract: { startDate: string; endDate?: string; monthlyAdvancePayment: string }) {
 	const building = await createBuilding({
 		name: `Ahornhof ${token}`,
 		address: 'Testweg 1',
