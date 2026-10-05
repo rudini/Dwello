@@ -178,9 +178,16 @@ jobs:
       - name: Install Playwright browser
         if: steps.routes.outputs.any == 'true'
         run: npx playwright install --with-deps chromium
+      - name: Check out the base branch to mark changes against
+        if: steps.routes.outputs.any == 'true'
+        run: |
+          git worktree add ../base "origin/${{ github.base_ref }}"
+          cd ../base && npm ci
       - name: Take screenshots
         if: steps.routes.outputs.any == 'true'
         run: npx playwright test -c playwright.screenshots.config.ts
+        env:
+          UI_BASE_DIR: ${{ github.workspace }}/../base
       - name: Publish screenshots to branch ui-screenshots
         if: steps.routes.outputs.any == 'true'
         env:
@@ -201,9 +208,14 @@ jobs:
             const pr = context.payload.pull_request;
             const base = `https://github.com/${context.repo.owner}/${context.repo.repo}/blob/ui-screenshots/pr-${pr.number}/${pr.head.sha}`;
             const marker = '<!-- ui-screenshots -->';
-            const shots = fs.readFileSync('ui-routes.txt', 'utf8').split('\n').filter(Boolean)
-              .map((route) => `### \`${route}\`\n![${route}](${base}/${route.split(/[/[\]]+/).filter(Boolean).join('_') || 'home'}.png?raw=true)`);
-            const body = `${marker}\n## UI screenshots\nChanged pages as of ${pr.head.sha.slice(0, 7)}:\n\n${shots.join('\n\n')}`;
+            const shots = fs.readFileSync('ui-routes.txt', 'utf8').split('\n').filter(Boolean).map((route) => {
+              const name = route.split(/[/[\]]+/).filter(Boolean).join('_') || 'home';
+              const before = fs.existsSync(`ui-screenshots/${name}.before.png`)
+                ? `\n<details><summary>Before</summary>\n\n![${route} before](${base}/${name}.before.png?raw=true)\n</details>`
+                : '\n_New page, nothing to compare with._';
+              return `### \`${route}\`\n![${route}](${base}/${name}.png?raw=true)${before}`;
+            });
+            const body = `${marker}\n## UI screenshots\nChanged pages as of ${pr.head.sha.slice(0, 7)}; changes against ${pr.base.ref} are framed in red:\n\n${shots.join('\n\n')}`;
             const comments = await github.paginate(github.rest.issues.listComments, { ...context.repo, issue_number: pr.number });
             const existing = comments.find((comment) => comment.body?.startsWith(marker));
             if (existing) await github.rest.issues.updateComment({ ...context.repo, comment_id: existing.id, body });

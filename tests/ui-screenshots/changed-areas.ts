@@ -1,0 +1,66 @@
+import { PNG } from 'pngjs';
+
+export type Area = { x: number; y: number; width: number; height: number };
+
+// Index (row * columns + column) of every cell with a pixel that differs, or that lies beyond the end of `a`
+function changedCells(a: PNG, b: PNG, cell: number, columns: number) {
+	const cells = new Set<number>();
+	for (let y = 0; y < b.height; y++) {
+		for (let x = 0; x < b.width; x++) {
+			const i = (y * b.width + x) * 4;
+			const j = (y * a.width + x) * 4;
+			const outside = x >= a.width || y >= a.height;
+			if (outside || a.data.readUInt32BE(j) !== b.data.readUInt32BE(i)) {
+				cells.add(Math.floor(y / cell) * columns + Math.floor(x / cell));
+			}
+		}
+	}
+	return cells;
+}
+
+// Removes the cells touching `start` (also diagonally, transitively) from `cells` and returns their bounds in cells
+function takeGroup(cells: Set<number>, start: number, columns: number) {
+	const stack = [start];
+	cells.delete(start);
+	const bounds = { left: Infinity, top: Infinity, right: 0, bottom: 0 };
+	while (stack.length) {
+		const index = stack.pop()!;
+		const column = index % columns;
+		const row = Math.floor(index / columns);
+		bounds.left = Math.min(bounds.left, column);
+		bounds.top = Math.min(bounds.top, row);
+		bounds.right = Math.max(bounds.right, column);
+		bounds.bottom = Math.max(bounds.bottom, row);
+		const neighbours = [-1, 0, 1].flatMap((dy) =>
+			[-1, 0, 1]
+				.filter((dx) => column + dx >= 0 && column + dx < columns)
+				.map((dx) => (row + dy) * columns + column + dx)
+		);
+		stack.push(...neighbours.filter((next) => cells.delete(next)));
+	}
+	return bounds;
+}
+
+/**
+ * Areas where two screenshots differ, in pixels of `after`: the page is split into square cells,
+ * every cell with a differing pixel (or beyond the end of `before`) is changed, and touching cells form one area.
+ */
+export function changedAreas(before: Buffer, after: Buffer, cell = 16): Area[] {
+	const a = PNG.sync.read(before);
+	const b = PNG.sync.read(after);
+	const columns = Math.ceil(b.width / cell);
+	const cells = changedCells(a, b, cell, columns);
+	const areas: Area[] = [];
+	for (const start of cells) {
+		const { left, top, right, bottom } = takeGroup(cells, start, columns);
+		const x = left * cell;
+		const y = top * cell;
+		areas.push({
+			x,
+			y,
+			width: Math.min((right + 1) * cell, b.width) - x,
+			height: Math.min((bottom + 1) * cell, b.height) - y
+		});
+	}
+	return areas;
+}
