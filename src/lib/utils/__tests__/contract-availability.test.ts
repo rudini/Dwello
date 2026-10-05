@@ -46,7 +46,7 @@ describe('computeAvailability', () => {
 		expect(result.message).toContain('unbefristeter Vertrag');
 	});
 
-	it('returns available from date when contract has ended', () => {
+	it('returns available now when the last contract has ended', () => {
 		const contracts: ContractForAvailability[] = [
 			{
 				id: 'contract-1',
