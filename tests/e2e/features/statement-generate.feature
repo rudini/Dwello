@@ -14,16 +14,19 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Und "Marc Huber" mietet die Wohnung "3.01" seit "2024-05-01" für "980" Franken
     Und der Liegenschaftsverwalter ist auf der Seite zum Erstellen von Abrechnungen
 
+  @api
   Szenario: Vorschau bei Mieterwechsel mit Leerstand
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
     Dann enthält die Vorschau die Abrechnung von "Eva Frei"
     Und enthält die Vorschau die Abrechnung von "Marc Huber"
     Und die Vorschau enthält genau 2 Abrechnungen
 
+  @api
   Szenario: Abrechnungen bei Mieterwechsel mit Leerstand erstellen
     Wenn der Liegenschaftsverwalter die Abrechnungen 2024 für das Gebäude "Lindenhof" erstellt
     Dann wurden 2 Nebenkostenabrechnungen erstellt
 
+  @api
   Szenario: Erhöhte Verwaltungspauschale gilt für alle Mieter der Liegenschaft
     Angenommen das Heizprofil "Winter" verteilt die Heizkosten so:
       | Monat     | Anteil |
@@ -49,6 +52,7 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Wenn der Liegenschaftsverwalter die Verwaltungspauschale auf 4.5 % setzt
     Dann sieht der Liegenschaftsverwalter den Hinweis, dass die Verwaltungspauschale über dem üblichen Richtwert liegt
 
+  @api
   Szenario: Mietverträge ausserhalb der Periode werden nicht abgerechnet
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2023 für das Gebäude "Lindenhof" öffnet
     Dann meldet die Vorschau, dass es in der Periode keine Mietverträge gibt

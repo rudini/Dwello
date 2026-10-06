@@ -29,6 +29,7 @@ Funktionalität: Abrechnungsdetail
     Und "Marc Huber" mietet die Wohnung "3.01" seit "2024-05-01" für "980" Franken
 
   # Leerstand im April: die 5 % des Heizprofils trägt der Vermieter
+  @api
   Szenariogrundriss: Heizkosten bei Mieterwechsel mit Leerstand
     Angenommen für "<Mieter>" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "<Mieter>"

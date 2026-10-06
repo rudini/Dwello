@@ -19,12 +19,15 @@ import {
 	showCreatedStatements
 } from '../tasks/statement-generate';
 
-import { openPreviewViaApi, previewTotalOf } from '../tasks/statement-generate-api';
+import {
+	createdStatements,
+	francs,
+	generateStatementsViaApi,
+	openPreviewViaApi,
+	previewTotals
+} from '../tasks/statement-generate-api';
 
 const { Given, When, Then } = createBdd(test);
-
-// "CHF 1’250.50" → 1250.5
-const francs = (amount: string) => Number(amount.replace(/[^\d.]/g, ''));
 
 Given(
 	'der Liegenschaftsverwalter ist auf der Seite zum Erstellen von Abrechnungen',
@@ -35,15 +38,21 @@ Given(
 
 When(
 	'der Liegenschaftsverwalter die Vorschau der Abrechnungen {int} für das Gebäude {string} öffnet',
-	async ({ verwalter, seed }, year: number, building: string) => {
-		await verwalter.perform(openPreview(year, seed.idOf(building)!));
+	async ({ verwalter, seed, driver }, year: number, building: string) => {
+		const buildingId = seed.idOf(building)!;
+		await verwalter.perform(
+			driver === 'api' ? openPreviewViaApi(seed, year, buildingId) : openPreview(year, buildingId)
+		);
 	}
 );
 
 When(
 	'der Liegenschaftsverwalter die Abrechnungen {int} für das Gebäude {string} erstellt',
-	async ({ verwalter, seed }, year: number, building: string) => {
-		await verwalter.perform(generateStatements(year, seed.idOf(building)!));
+	async ({ verwalter, seed, driver }, year: number, building: string) => {
+		const buildingId = seed.idOf(building)!;
+		await verwalter.perform(
+			driver === 'api' ? generateStatementsViaApi(seed, year, buildingId) : generateStatements(year, buildingId)
+		);
 	}
 );
 
@@ -65,33 +74,38 @@ When('der Liegenschaftsverwalter zur Abrechnungsliste zurückkehrt', async ({ ve
 
 Then(
 	'enthält die Vorschau die Abrechnung von {string}',
-	async ({ verwalter, names }, tenant: string) => {
-		await expect(previewRow(verwalter, names.get(tenant) ?? tenant)).toBeVisible();
+	async ({ verwalter, names, driver }, tenant: string) => {
+		const name = names.get(tenant) ?? tenant;
+		if (driver === 'api') expect([...previewTotals(verwalter).keys()]).toContain(name);
+		else await expect(previewRow(verwalter, name)).toBeVisible();
 	}
 );
 
-Then('die Vorschau enthält genau {int} Abrechnungen', async ({ verwalter }, count: number) => {
-	await expect(allPreviewRows(verwalter)).toHaveCount(count);
+Then('die Vorschau enthält genau {int} Abrechnungen', async ({ verwalter, driver }, count: number) => {
+	if (driver === 'api') expect(previewTotals(verwalter).size).toBe(count);
+	else await expect(allPreviewRows(verwalter)).toHaveCount(count);
 });
 
 Then(
 	'meldet die Vorschau, dass es in der Periode keine Mietverträge gibt',
-	async ({ verwalter }) => {
-		await expect(noContractsInPeriod(verwalter)).toBeVisible();
+	async ({ verwalter, driver }) => {
+		if (driver === 'api') expect(previewTotals(verwalter).size).toBe(0);
+		else await expect(noContractsInPeriod(verwalter)).toBeVisible();
 	}
 );
 
-Then('wurden {int} Nebenkostenabrechnungen erstellt', async ({ verwalter }, count: number) => {
-	await expect(generationOutcome(verwalter)).toHaveText(
-		`${count} Nebenkostenabrechnungen wurden erfolgreich erstellt.`
-	);
+Then('wurden {int} Nebenkostenabrechnungen erstellt', async ({ verwalter, driver }, count: number) => {
+	if (driver === 'api') expect(createdStatements(verwalter)).toBe(count);
+	else await expect(generationOutcome(verwalter)).toHaveText(`${count} Nebenkostenabrechnungen wurden erfolgreich erstellt.`);
 });
 
 When(
 	'der Liegenschaftsverwalter die Vorschau der Abrechnungen {int} für das Gebäude {string} mit dem Heizprofil {string} und {float} % Verwaltungspauschale öffnet',
-	async ({ verwalter, seed }, year: number, building: string, profile: string, fee: number) => {
+	async ({ verwalter, seed, driver }, year: number, building: string, profile: string, fee: number) => {
+		const options = { heatingProfileId: seed.idOf(profile), managementFeePercent: fee };
+		const buildingId = seed.idOf(building)!;
 		await verwalter.perform(
-			openPreview(year, seed.idOf(building)!, { heatingProfileId: seed.idOf(profile), managementFeePercent: fee })
+			driver === 'api' ? openPreviewViaApi(seed, year, buildingId, options) : openPreview(year, buildingId, options)
 		);
 	}
 );
@@ -99,10 +113,10 @@ When(
 When(
 	'der Liegenschaftsverwalter die Vorschau der Abrechnungen {int} für das Gebäude {string} mit {float} % Verwaltungspauschale nach dem Verteilschlüssel {string} öffnet',
 	async ({ verwalter, seed, driver }, year: number, building: string, fee: number, key: string) => {
+		const options = { managementFeePercent: fee, managementFeeKey: key };
+		const buildingId = seed.idOf(building)!;
 		await verwalter.perform(
-			driver === 'api'
-				? openPreviewViaApi(seed, year, seed.idOf(building)!, fee, key)
-				: openPreview(year, seed.idOf(building)!, { managementFeePercent: fee, managementFeeKey: key })
+			driver === 'api' ? openPreviewViaApi(seed, year, buildingId, options) : openPreview(year, buildingId, options)
 		);
 	}
 );
@@ -114,7 +128,7 @@ When('der Liegenschaftsverwalter die Verwaltungspauschale auf {float} % setzt', 
 Then(
 	'kostet die Abrechnung von {string} {string}',
 	async ({ verwalter, names, driver }, tenant: string, amount: string) => {
-		if (driver === 'api') expect(previewTotalOf(verwalter, names.get(tenant) ?? tenant)).toBe(francs(amount));
+		if (driver === 'api') expect(previewTotals(verwalter).get(names.get(tenant) ?? tenant)).toBe(francs(amount));
 		else await expect(previewRow(verwalter, names.get(tenant) ?? tenant)).toContainText(amount);
 	}
 );
