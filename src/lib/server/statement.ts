@@ -17,7 +17,7 @@ const toLineItem = (item: BackendStatement): StatementLineItem => ({
 	percentage: Number(item.sharePercentage) || 0
 });
 
-// The statement stores the fee in francs; the rate follows from fee / costs before the fee
+// Before the rate was stored, the fee was a percentage of the tenant's costs before the fee
 function feePercent(totalCosts: number, fee: number) {
 	const subtotal = totalCosts - fee;
 	return subtotal > 0 ? Math.round((fee / subtotal) * 10000) / 100 : 0;
@@ -39,7 +39,11 @@ export function toStatement(data: BackendStatement): StatementWithDetails {
 		totalCosts: Number(data.totalCosts),
 		totalAdvancePayments: Number(data.totalAdvancePayments),
 		managementFee: Number(data.managementFee),
-		managementFeePercent: feePercent(Number(data.totalCosts), Number(data.managementFee)),
+		// Rate chosen for the generation run; statements from before it was stored derive it from fee / costs
+		managementFeePercent:
+			data.managementFeePercent != null
+				? Number(data.managementFeePercent)
+				: feePercent(Number(data.totalCosts), Number(data.managementFee)),
 		balance: Number(data.balance),
 		status: data.status,
 		paymentDeadline: data.paymentDeadline,

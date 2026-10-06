@@ -1,38 +1,23 @@
 import { describe, it, expect } from 'vitest';
 import { toStatement } from '../lib/server/statement';
-
-const backendStatement = {
-	id: 's1',
-	statementNumber: 'NK-2024-1',
-	tenantId: 't1',
-	apartmentId: 'a1',
-	totalCosts: '1045.00',
-	managementFee: '45.00',
-	totalAdvancePayments: '0.00',
-	balance: '1045.00',
-	tenant: { firstName: 'Eva', lastName: 'Frei', email: 'eva@example.com' },
-	apartment: { number: '3.01', floor: 3 },
-	building: { name: 'Lindenhof', address: 'Testweg 1' },
-	notes: 'Hauswart neu',
-	lineItems: [
-		{
-			id: 'l1',
-			description: 'Heating',
-			totalAmount: '1000.00',
-			tenantShare: '1000.00',
-			sharePercentage: '100'
-		}
-	]
-};
+// What GET /api/v1/statements/:id answers, checked against the real API (backend/src/__tests__/api-contracts.pg.test.ts)
+import backendStatement from '../../tests/contracts/statement.json';
 
 describe('Abrechnung aus dem Backend', () => {
-	it('berechnet den verwendeten Satz der Verwaltungspauschale aus Pauschale und Nebenkosten', () => {
-		expect(toStatement(backendStatement).managementFeePercent).toBe(4.5);
+	it('zeigt den Satz der Verwaltungspauschale, mit dem die Abrechnung erstellt wurde', () => {
+		expect(toStatement(backendStatement).managementFeePercent).toBe(3);
+	});
+
+	it('berechnet den Satz älterer Abrechnungen ohne gespeicherten Satz aus Pauschale und Nebenkosten', () => {
+		expect(
+			toStatement({ ...backendStatement, managementFeePercent: null }).managementFeePercent
+		).toBe(4.5);
 	});
 
 	it('zeigt 0 %, wenn keine Nebenkosten angefallen sind', () => {
 		const statement = toStatement({
 			...backendStatement,
+			managementFeePercent: null,
 			totalCosts: '0.00',
 			managementFee: '0.00'
 		});
