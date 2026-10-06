@@ -1,0 +1,11 @@
+{
+	"contracts": [
+		{
+			"id": "c1",
+			"startDate": "2020-01-01",
+			"endDate": null,
+			"tenantName": "Eva Frei",
+			"apartmentNumber": "3.01"
+		}
+	]
+}

@@ -1,5 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { generateStatements, previewStatements } from '../lib/server/statement-generation';
+// Backend answers as checked against the real API (backend/src/__tests__/api-contracts.pg.test.ts)
+import buildingContracts from '../../tests/contracts/building-contracts.json';
+import statementPreview from '../../tests/contracts/statement-preview.json';
 
 const API = 'http://localhost:3001/api/v1';
 const period = {
@@ -11,6 +14,7 @@ const period = {
 };
 
 const contract = (id: string, startDate: string, endDate: string | null) => ({
+	...buildingContracts.contracts[0],
 	id,
 	startDate,
 	endDate,
@@ -34,7 +38,11 @@ function backend() {
 		const body = JSON.parse(String(init?.body));
 		posts.push({ url, body });
 		if (url === `${API}/statements/preview`) {
-			return Response.json({ totalCosts: body.contractId === 'auszug' ? 300 : 400, balance: -50 });
+			return Response.json({
+				...statementPreview,
+				totalCosts: body.contractId === 'auszug' ? 300 : 400,
+				balance: -50
+			});
 		}
 		return Response.json({ id: `s-${body.contractId}` }, { status: 201 });
 	};

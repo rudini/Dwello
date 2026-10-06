@@ -93,7 +93,9 @@ export default [
 			'dist/**',
 			'node_modules/**',
 			'backend/node_modules/**',
-			'backend/dist/**'
+			'backend/dist/**',
+			'coverage/**',
+			'backend/coverage/**'
 		]
 	}
 ];
