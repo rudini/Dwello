@@ -6,6 +6,7 @@ import { downloadedFile, downloadedPdfTitle } from '../questions/download';
 import { heatingCosts, statusOfStatement } from '../questions/statement-detail';
 import { emptyStatementList, statementOfYear, statementPath } from '../questions/statements';
 import { searchStatements } from '../tasks/statements';
+import { francs } from '../tasks/statement-generate-api';
 import {
 	deleteStatement,
 	downloadStatementPdf,
@@ -43,8 +44,9 @@ Given('die Abrechnung {int} von {string} ist versendet', async ({ seed }, year: 
 
 Given(
 	'der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung {int} von {string}',
-	async ({ verwalter, seed }, year: number, tenant: string) => {
-		await visit(verwalter.page, statementPath(seed, tenant, year));
+	async ({ verwalter, seed, driver }, year: number, tenant: string) => {
+		if (driver === 'api') verwalter.remember('statement', await seed.backend.get(statementPath(seed, tenant, year).slice(1)));
+		else await visit(verwalter.page, statementPath(seed, tenant, year));
 	}
 );
 
@@ -74,7 +76,13 @@ When('der Liegenschaftsverwalter die Wohnung der Abrechnung öffnet', async ({ v
 
 Then(
 	'trägt {string} {int} % der Heizkosten, also {string}',
-	async ({ verwalter }, _tenant: string, share: number, amount: string) => {
+	async ({ verwalter, driver }, _tenant: string, share: number, amount: string) => {
+		if (driver === 'api') {
+			const { lineItems } = verwalter.recall<{ lineItems: { description: string; sharePercentage: string; tenantShare: string }[] }>('statement');
+			const heating = lineItems.find((item) => item.description === 'Heating')!;
+			expect([Number(heating.sharePercentage), Number(heating.tenantShare)]).toEqual([share, francs(amount)]);
+			return;
+		}
 		await expect(heatingCosts(verwalter)).toContainText(`${share}%`);
 		await expect(heatingCosts(verwalter)).toContainText(amount);
 	}
