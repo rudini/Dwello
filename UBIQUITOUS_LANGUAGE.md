@@ -20,7 +20,7 @@ Die Ubiquitous Language (nach Eric Evans, Domain-Driven Design) definiert ein ge
 | **Fläche** | Nettowohnfläche in Quadratmetern (m²). Grundlage für flächenbasierte Verteilschlüssel. | `area` Feld |
 | **Zimmeranzahl** | Anzahl Zimmer (z.B. 3.5 Zimmer). Schweizer Konvention mit halben Zimmern. | `rooms` Feld |
 | **Mietstatus** | Status einer Wohnung: Vermietet (`occupied`, ein Vertrag läuft), Wiedervermietet (`relet`, ein künftiger Vertrag ist abgeschlossen), Leer (`vacant`), Gesperrt (`reserved`). Vermietet und Wiedervermietet ergeben sich aus den Mietverträgen; von Hand setzbar sind nur Leer und Gesperrt. | `status` Feld |
-| **Mieter** | Person, die eine Wohnung mietet. Enthält Name, Kontaktdaten, Adresse und Korrespondenzkanal. Aktiv mit laufendem oder künftigem Mietvertrag, sonst ehemalig. | `tenants` Tabelle |
+| **Mieter** | Person, die eine Wohnung mietet. Enthält Name, Kontaktdaten, Adresse, Korrespondenzkanal und Sprache. Aktiv mit laufendem oder künftigem Mietvertrag, sonst ehemalig. | `tenants` Tabelle |
 | **Korrespondenzkanal** | Wie der Mieter Post erhält: Brief (`letter`, Standard) oder E-Mail (`email`, verlangt eine E-Mail-Adresse). | `correspondence_channel` Feld |
 | **Vermieter** | Eigentümer oder Liegenschaftsverwalter, der die Wohnung vermietet. Trägt die Kosten des Leerstands. | — |
 | **Liegenschaftsverwalter** | Person oder Firma, die Gebäude im Auftrag des Eigentümers verwaltet. Primärer Benutzer von Dwello. | — |
@@ -188,7 +188,7 @@ Verwaltung, Reparaturen, Renovation, Liegenschaftssteuer, Hypothekarzinsen, Geb�
 
 ## Mehrsprachigkeit
 
-Die Oberfläche ist deutsch. Das PDF der Nebenkostenabrechnung kann in den vier Landessprachen der Schweiz plus Englisch erstellt werden; jeder Mieter hat ein Sprachfeld (`language`). Heute wird die Sprache des Mieters weder im Mieterformular erfasst noch für die Abrechnung verwendet: Abrechnungen entstehen auf Deutsch.
+Die Oberfläche ist deutsch. Jeder Mieter hat eine **Sprache** (`language`, Standard Deutsch), festgelegt im Mieterformular und auf der Mieterseite angezeigt. Die Nebenkostenabrechnung (PDF) wird in dieser Sprache erstellt.
 
 | Kürzel | Sprache |
 |--------|---------|
