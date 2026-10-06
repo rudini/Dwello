@@ -1,6 +1,6 @@
 # Testpyramide Dwello (ATDD nach Dave Farley)
 
-**Stand:** 5. Oktober 2026, gezählt aus ausgeführten Läufen (`bun test`, Vitest, Playwright Chromium)
+**Stand:** 6. Oktober 2026, gezählt aus ausgeführten Läufen (`bun test`, Vitest, Playwright Chromium und `api`)
 
 Dwello entwickelt nach **Acceptance Test Driven Development**: Jede Änderung beginnt mit einem fachlichen Akzeptanzszenario, Unit-TDD ist die innere Schleife. Farley unterscheidet zwei Perspektiven, die sich ergänzen:
 
@@ -11,14 +11,14 @@ Dwello entwickelt nach **Acceptance Test Driven Development**: Jede Änderung be
 
 ```
                     ┌──────────────────────┐
-                    │  Akzeptanztests (E2E) │   258   Gherkin, Playwright-BDD, Produktions-Build
+                    │  Akzeptanztests (E2E) │   260   Gherkin, Playwright-BDD, Produktions-Build (+8 über die API)
                     │  "Was das Business    │         ← äussere Schleife: zuerst geschrieben,
                     │   will"               │           grün = Feature fertig
                 ┌───┴──────────────────────┴───┐
-                │  Integration (echte DB)       │   160   bun test *.pg.test.ts, dwello_test
+                │  Integration (echte DB)       │   166   bun test *.pg.test.ts, dwello_test, API-Verträge
                 │  technische Verträge          │         nur wo Unit-Tests nicht reichen
            ┌────┴───────────────────────────────┴────┐
-           │  Unit-TDD                                │   698   Vitest (Frontend 454), bun test (Backend 244)
+           │  Unit-TDD                                │   706   Vitest (Frontend 462), bun test (Backend 244)
            │  "Was der Entwickler denkt"              │         ← innere Schleife: Sekunden
            └──────────────────────────────────────────┘
 ```
@@ -29,10 +29,10 @@ Die Menge bleibt eine Pyramide, viele schnelle Unit-Tests unten. Die **Reihenfol
 
 | Ebene | Tests | Ort | Runner | Gegen was | Test-Doubles |
 |---|---|---|---|---|---|
-| Akzeptanz (E2E) | 258 Testfälle aus 40 Features (+2 über den API-Driver) | `tests/e2e/features/*.feature` | Playwright + playwright-bdd | Browser → SvelteKit-Build (`node build`) → Elysia → PostgreSQL `dwello_e2e` (vor jedem Lauf neu migriert) | keine API-Mocks; SMTP-Mail-Catcher statt Mail-Provider, signiertes Session-JWT statt Google-OAuth |
-| Integration | 160 in 27 Dateien | `backend/src/__tests__/*.pg.test.ts` | `bun test` | Elysia-App in-process (`app.handle`) → PostgreSQL `dwello_test` (vor jedem Lauf neu migriert) | keine; lokaler SMTP-Server für Mails |
-| Unit Backend | 244 in 10 Dateien | `backend/src/__tests__/*.test.ts` | `bun test --isolate` | reine Funktionen der Services | keine |
-| Unit Frontend | 454 in 53 Dateien | `src/__tests__`, `src/lib/utils/__tests__`, `tests/unit` | Vitest (`server`: node, `dom`: jsdom) | Load-Funktionen, Actions, BFF, Komponenten | Fake-Backend per `fetch`-Stub / `fakeBff`, `vi.mock` für `$app/*` |
+| Akzeptanz (E2E) | 260 Testfälle aus 40 Features (+8 über den API-Driver) | `tests/e2e/features/*.feature` | Playwright + playwright-bdd | Browser → SvelteKit-Build (`node build`) → Elysia → PostgreSQL `dwello_e2e` (vor jedem Lauf neu migriert) | keine API-Mocks; SMTP-Mail-Catcher statt Mail-Provider, signiertes Session-JWT statt Google-OAuth |
+| Integration | 166 in 28 Dateien | `backend/src/__tests__/*.pg.test.ts` | `bun test` | Elysia-App in-process (`app.handle`) → PostgreSQL `dwello_test` (vor jedem Lauf neu migriert) | keine; lokaler SMTP-Server für Mails |
+| Unit Backend | 244 in 10 Dateien | `backend/src/__tests__/*.test.ts` | `bun test` (ein Lauf mit den pg-Tests) | reine Funktionen der Services | keine |
+| Unit Frontend | 462 in 53 Dateien | `src/__tests__`, `src/lib/utils/__tests__`, `tests/unit` | Vitest (`server`: node, `dom`: jsdom) | Load-Funktionen, Actions, BFF, Komponenten | Fake-Backend per `fetch`-Stub / `fakeBff` (für Abrechnungen aus den API-Verträgen in `tests/contracts`), `vi.mock` für `$app/*` |
 
 Regeln:
 
@@ -40,6 +40,16 @@ Regeln:
 - Kein Mock der Datenbank: Was SQL braucht, ist ein `*.pg.test.ts`.
 - Negative E2E-Prüfungen (etwas fehlt) brauchen zuerst einen positiven Anker (Leer-Hinweis, Seitentitel), sonst bestehen sie auch auf einer Fehlerseite.
 - Selektoren: `data-testid` (siehe `CLAUDE.md`).
+- Fake-Antworten des Backends in Frontend-Tests kommen aus `tests/contracts/*.json`, wo es einen Vertrag gibt; `backend/src/__tests__/api-contracts.pg.test.ts` prüft jedes Feld gegen die echte API (siehe `tests/contracts/README.md`).
+
+## Coverage
+
+Die heutige Abdeckung ist die Untergrenze; sinkt sie, scheitert der Lauf lokal und in CI. Ziel sind 80 %; die Grenzen werden angehoben, sobald die Abdeckung wächst.
+
+| Bereich | Messung | Untergrenze | Ort |
+|---|---|---|---|
+| Frontend | `npm run test:coverage` (Vitest, v8, alle `src/**/*.{ts,svelte}`) | 71 % Statements, 59 % Branches, 76 % Funktionen, 66 % Zeilen | `vitest.config.ts` |
+| Backend | `bun run test` (alle Backend-Tests, lcov) | 76 % Zeilen, 81 % Funktionen | `backend/scripts/coverage-check.ts` (Bun prüft eigene Schwellen pro Datei) |
 
 ## Farleys vier Schichten in den Akzeptanztests
 
@@ -54,7 +64,7 @@ Regeln:
 
 Dasselbe Szenario kann über den Browser oder direkt über die Backend-API laufen. Die Fixture-Option `driver` (`ui` | `api`, `fixtures/test.ts`) wählt den Weg; nur Steps, die mit dem System sprechen, verzweigen danach. Szenarien mit dem Tag `@api` laufen zusätzlich im Playwright-Projekt `api` ohne Seitenaufrufe.
 
-- Wofür `@api`: fachliche Regeln und Berechnungen, die nicht von der Bedienung abhängen (Beispiel: `statement-management-fee.feature`).
+- Wofür `@api`: fachliche Regeln und Berechnungen, die nicht von der Bedienung abhängen. Heute: Verwaltungspauschale (`statement-management-fee.feature`), Vorschau, Erstellen und Periode ohne Mietverträge (`statement-generate.feature`), Heizkosten bei Mieterwechsel (`statement-detail.feature`).
 - Wofür nur UI: Bedienabläufe, Navigation, Formulare.
 - Ein neuer `@api`-Step braucht beide Wege; der API-Weg lebt in `tasks/<bereich>-api.ts`.
 
@@ -80,14 +90,13 @@ Bedienung, die kein Fachverhalten ist, steht in eigenen Features: `breadcrumb.fe
 
 | Ebene | Lokal | CI (`.github/workflows/ci.yml`) |
 |---|---|---|
-| Unit Frontend | `npm run test` | Job „Unit tests“; in PRs nur Tests geänderter Dateien |
-| Unit + Integration Backend | `cd backend && bun run test` (nur DB: `bun run test:pg`) | Job „Unit tests“, wenn `backend/` geändert |
+| Unit Frontend | `npm run test` (mit Coverage: `npm run test:coverage`) | Job „Unit tests“: alle Tests mit Coverage-Untergrenze |
+| Unit + Integration Backend | `cd backend && bun run test` (nur DB: `bun run test:pg`) | Job „Unit tests“, wenn `backend/` geändert; mit Coverage-Untergrenze |
 | Akzeptanz | `npm run test:e2e` (nur API-Driver: `-- --project=api`) | Job „E2E tests“; PRs Chromium und `api`, `main` alle Browser und `api` |
 
 Voraussetzung lokal: PostgreSQL auf Port 5432 mit Benutzer `dwello`. Die Testdatenbanken `dwello_test` und `dwello_e2e` werden automatisch neu aufgesetzt; die Entwicklungsdatenbank bleibt unberührt.
 
 ## Offen
 
-- [ ] API-Driver auf weitere fachliche Features ausdehnen (heute nur `statement-management-fee.feature`); der Zeitgewinn ist klein, solange das Anlegen der Testdaten dominiert
-- [ ] Coverage-Schwelle in Vitest und bun, in CI erzwungen
-- [ ] Vertrag BFF ↔ Backend: Frontend-Fakes können abdriften, geprüft wird er nur in E2E
+- [ ] Coverage auf 80 % anheben (Backend-Zeilen, Frontend), dann die Untergrenzen nachziehen
+- [ ] Weitere API-Verträge für die übrigen Bereiche (Gebäude, Mieter, Rechnungen); heute nur die Abrechnungen

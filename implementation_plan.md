@@ -4111,9 +4111,44 @@ acceptance scenario first, unit TDD as the inner loop, integration tests only ag
 - Verification: E2E Chromium 258 + api 2 passed after the rebase onto main (3232703)
 
 ### Open
-- [ ] Extend the API driver to further business features (the gain stays small while seeding dominates)
-- [ ] Statement PDF in the tenant's language (the PDF supports de/fr/it/rm/en, the tenant's language is not used)
-- [ ] Coverage threshold in Vitest and bun, enforced in CI
+- [x] Extend the API driver to further business features — Session 8
+- [x] Statement PDF in the tenant's language — Session 8
+- [x] Coverage threshold in Vitest and bun, enforced in CI — Session 8
+
+---
+
+## Session 8 - October 2026: Open Points of the Test Pyramid
+
+Branch `claude/open-points` (from main 9067217).
+
+### Done ✅
+- [x] **Coverage floors:** `vitest.config.ts` thresholds at today's coverage (71 % statements, 59 % branches, 76 %
+  functions, 66 % lines); CI runs all frontend tests with coverage (`npm run test:coverage`, no more `--changed`).
+  Backend: one `bun test` run for unit and PostgreSQL tests (`mock.module` is gone, `--isolate` no longer needed),
+  `backend/scripts/coverage-check.ts` fails it below 76 % lines / 81 % functions over all files (bun's own
+  `coverageThreshold` applies per file); `test:coverage` script removed; `coverage/` ignored by ESLint
+- [x] **Statement PDF in the tenant's language** (ATDD: `tenant-edit.feature` "Sprache der Korrespondenz
+  festlegen", `statement-detail.feature` "PDF in der Sprache des Mieters"): language select in
+  `TenantFormFields.svelte`, shown on the tenant page (`TenantContactCard.svelte`), `src/lib/tenant.ts` (labels),
+  `tenant-form.ts` accepts only known languages; backend validates the five languages (`routes/tenants.ts`),
+  `getStatement` returns the tenant's language, the PDF uses it unless the request names one, PDF title
+  "<Titel> <Nummer>" in that language (`pdf.service.ts`); tests in `statement.routes.pg.test.ts`,
+  `tenant-channel.pg.test.ts`, `tenant-form.test.ts`
+- [x] **API driver extended:** preview, generation and empty period (`statement-generate.feature`) and heating costs
+  (`statement-detail.feature`) run as `@api` as well (`tasks/statement-generate-api.ts`): 8 scenarios
+- [x] **API contracts BFF ↔ backend:** `tests/contracts/*.json` (statement detail, contracts of a building,
+  preview) used as backend answers in `statement-mapping.test.ts` and `statement-generation.test.ts`, checked
+  against the real API by `backend/src/__tests__/api-contracts.pg.test.ts`
+- [x] **Fix:** the statement page derived the management fee rate from the tenant's costs instead of the stored
+  rate (`src/lib/server/statement.ts`), found while writing the statement contract
+- Docs: `docs/test-pyramid.md` (coverage, contracts, API scenarios), `CLAUDE.md`, `UBIQUITOUS_LANGUAGE.md`
+  (Mehrsprachigkeit), README
+- Verification: backend 410 (244 unit + 166 PostgreSQL), coverage 77.0 % lines / 81.8 % functions; frontend 462,
+  coverage above the floors; E2E 260 Chromium + 8 api passed; lint, tsc, svelte-check clean
+
+### Open
+- [ ] Raise coverage to 80 % (backend lines, frontend) and move the floors up
+- [ ] API contracts for the other areas (buildings, tenants, invoices)
 
 ---
 
