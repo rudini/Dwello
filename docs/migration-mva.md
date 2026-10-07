@@ -29,7 +29,7 @@ Die Architektur wird an diesen Szenarien gemessen. Die Liste ist ein Vorschlag u
 | Q4  | Das PDF-Layout der Abrechnung ändert sich.                               | Änderungen nur im Rendering, keine Änderung an der Berechnung.    |
 | Q5  | Die Berechnung wird ohne HTTP und ohne PDF-Erzeugung getestet.           | Ein Unit-Test ruft die Abrechnungserstellung als Funktion auf.    |
 
-Q5 ist heute nicht erfüllt: Die Abrechnungserstellung liegt in `backend/src/routes/statements.ts`.
+Q5 ist seit Schritt 4 erfüllt: `generateStatement` (`backend/src/services/statement.service.ts`) erstellt die Abrechnung als Funktion, getestet in `backend/src/__tests__/statement-creation.pg.test.ts`.
 
 ## Strategisches Design
 
@@ -141,6 +141,8 @@ Fertig, wenn: Boundary-Check meldet null Verstöße, alle Tests grün.
 - Prüfen, ob Nebenkostenabrechnung und Abrechnungspositionen atomar geschrieben werden. Im Backend findet sich derzeit kein `db.transaction(`. Falls nicht atomar: Transaktion ergänzen, mit Test.
 
 Fertig, wenn: Szenario Q5 erfüllt, Route enthält nur noch Validierung, Aufruf und Antwort.
+
+Umgesetzt: Die Use-Case-Funktionen liegen vorerst in `statement.service.ts` und `statement-pdf.service.ts` und ziehen mit Schritt 3 nach `modules/settlement/`. Abrechnung und Abrechnungspositionen wurden nicht atomar geschrieben; `createStatement` nutzt jetzt `db.transaction`.
 
 ### Schritt 5 — Stopp und Neubewertung
 

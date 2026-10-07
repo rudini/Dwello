@@ -3551,10 +3551,19 @@ Behavior-preserving restructuring of the backend into three modules (`rental`, `
 
 ### 22.4 Move Statement Generation out of the Route
 
-- [ ] Move orchestration from `backend/src/routes/statements.ts` into `settlement` use-case functions
-- [ ] Remove direct database access from the route
-- [ ] Verify statement and line items are written atomically; add transaction with test if not
-- [ ] Unit test calls statement generation without HTTP and without PDF rendering (scenario Q5)
+- [x] Move orchestration from `backend/src/routes/statements.ts` into `settlement` use-case functions
+- [x] Remove direct database access from the route
+- [x] Verify statement and line items are written atomically; add transaction with test if not
+- [x] Unit test calls statement generation without HTTP and without PDF rendering (scenario Q5)
+  **Note:** Use cases `calculateStatement` and `generateStatement` in `backend/src/services/statement.service.ts`,
+  `generateStatementPdf` and `getStatementPdf` in the new `backend/src/services/statement-pdf.service.ts`; they move
+  into `modules/settlement/` with 22.3 (module folders do not exist yet). `backend/src/routes/statements.ts` now only
+  validates, calls and answers, no `db` import. Atomicity: `createStatement` wrote the statement and its line items
+  in two separate inserts; a failing line item left a statement without positions (test red: 1 statement instead of 0).
+  Now one `db.transaction`. Tests: `backend/src/__tests__/statement-creation.pg.test.ts` (Q5: `generateStatement` as
+  a function, rollback when a line item fails), `statement.routes.pg.test.ts` (PDF routes without IBAN, unknown
+  statement, PDF not generated yet, Base64 preview; pinned before the move). Backend 416 tests pass (77.5 % lines,
+  82.4 % functions), E2E 268 pass (Chromium + `api`), tsc, ESLint and fallow audit clean. **Status:** ✅ Complete
 
 ### 22.5 Stop and Reassess
 
@@ -3604,9 +3613,9 @@ covered by unit, PostgreSQL and E2E tests; deployment, documentation, QA and go-
 | Phase 19 | ⏳ Pending | 0% | 25 | 0 |
 | Phase 20 | 🔄 In Progress | 10% | 21 | 2 |
 | Phase 21 | ⏳ Pending | 0% | 22 | 0 |
-| Phase 22 | 🔄 In Progress | 4% | 24 | 1 |
+| Phase 22 | 🔄 In Progress | 21% | 24 | 5 |
 
-**Total Tasks: 421** | **Completed: 266** | **Overall: ~63%**
+**Total Tasks: 421** | **Completed: 270** | **Overall: ~64%**
 
 ---
 
