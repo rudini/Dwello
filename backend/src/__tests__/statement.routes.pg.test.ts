@@ -143,3 +143,60 @@ describe('GET /api/v1/statements ohne PDF-Inhalt', () => {
 			);
 		}));
 });
+
+describe('PDF einer Abrechnung, die es nicht gibt oder die noch kein PDF hat', () => {
+	const unknown = crypto.randomUUID();
+
+	it('erstellt ohne IBAN kein PDF, weil der QR-Einzahlungsschein sie braucht', async () => {
+		const response = await callApi(
+			`/api/v1/statements/${statementId}/generate-pdf`,
+			json('POST', {})
+		);
+
+		expect(response.status).toBe(400);
+		expect(await response.json()).toEqual({
+			error: 'IBAN not configured. Please set up company configuration first.'
+		});
+	});
+
+	it('meldet eine unbekannte Abrechnung beim Erstellen und Herunterladen', async () => {
+		for (const [path, init] of [
+			['generate-pdf', json('POST', {})],
+			['pdf', undefined],
+			['pdf/base64', undefined]
+		] as const) {
+			const response = await callApi(`/api/v1/statements/${unknown}/${path}`, init);
+			expect({ path, status: response.status, body: await response.json() }).toEqual({
+				path,
+				status: 404,
+				body: { error: 'Statement not found' }
+			});
+		}
+	});
+
+	it('meldet ein PDF, das noch nicht erstellt wurde', async () => {
+		// A new payment deadline discards the PDF
+		await call(`/${statementId}`, json('PUT', { paymentDeadline: '2025-04-30' }));
+
+		for (const path of ['pdf', 'pdf/base64']) {
+			const response = await callApi(`/api/v1/statements/${statementId}/${path}`);
+			expect({ path, status: response.status, body: await response.json() }).toEqual({
+				path,
+				status: 404,
+				body: { error: 'PDF not generated yet. Call POST /:id/generate-pdf first.' }
+			});
+		}
+	});
+
+	it('liefert ein erstelltes PDF auch als Base64 für die Vorschau', () =>
+		withIban(async () => {
+			await generatePdf();
+
+			const preview = (await call(`/${statementId}/pdf/base64`)) as {
+				pdfBase64: string;
+				mimeType: string;
+			};
+			expect(preview.mimeType).toBe('application/pdf');
+			expect(Buffer.from(preview.pdfBase64, 'base64').toString('latin1')).toStartWith('%PDF');
+		}));
+});

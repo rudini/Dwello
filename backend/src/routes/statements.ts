@@ -5,24 +5,19 @@
 
 import { Elysia, t } from 'elysia';
 import { deleteResponse } from './delete-response';
-import { eq } from 'drizzle-orm';
-import { db } from '../db/connection';
-import { utilityStatements } from '../db/schema';
 import {
 	listStatements,
 	getStatement,
-	createStatement,
 	updateStatement,
 	updateStatementStatus,
 	deleteStatement,
 	addLineItems,
 	getStatementCountsByStatus,
-	markOverdueStatements
+	markOverdueStatements,
+	calculateStatement,
+	generateStatement
 } from '../services/statement.service';
-import { calculateStatementForContract, generateStatementNumber } from '../services/calculation.service';
-import { getTypedConfig } from '../services/config.service';
-import { generateStatementPDFBase64, type StatementPDFData, type Language } from '../services/pdf.service';
-import { generateQRReference, type QRBillConfig } from '../services/qr-bill.service';
+import { generateStatementPdf, getStatementPdf } from '../services/statement-pdf.service';
 
 // Calculation parameters shared by preview and generate; the management fee overrides the configured default
 const calculationBody = t.Object({
@@ -33,16 +28,6 @@ const calculationBody = t.Object({
 	managementFeePercent: t.Optional(t.Number({ minimum: 0 })),
 	managementFeeDistributionKeyId: t.Optional(t.String())
 });
-
-const calculate = (body: typeof calculationBody.static) =>
-	calculateStatementForContract(
-		body.contractId,
-		new Date(body.periodStart),
-		new Date(body.periodEnd),
-		body.heatingProfileId,
-		body.managementFeePercent,
-		body.managementFeeDistributionKeyId
-	);
 
 export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 	// List all statements
@@ -111,7 +96,7 @@ export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 		'/preview',
 		async ({ body, set }) => {
 			try {
-				const calculation = await calculate(body);
+				const calculation = await calculateStatement(body);
 
 				return {
 					preview: true,
@@ -132,50 +117,7 @@ export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 		'/generate',
 		async ({ body, set }) => {
 			try {
-				// Calculate the statement
-				const calculation = await calculate(body);
-
-				// Generate statement number
-				const statementNumber = await generateStatementNumber(
-					body.buildingId,
-					new Date(body.periodEnd)
-				);
-
-				// Calculate payment deadline
-				const paymentDeadlineDays = await getTypedConfig('payment_deadline_days');
-				const statementDate = new Date();
-				const paymentDeadline = new Date(statementDate);
-				paymentDeadline.setDate(paymentDeadline.getDate() + paymentDeadlineDays);
-
-				// Create the statement
-				const statement = await createStatement(
-					{
-						tenantId: calculation.tenantId,
-						apartmentId: calculation.apartmentId,
-						contractId: body.contractId,
-						statementNumber,
-						periodStart: body.periodStart,
-						periodEnd: body.periodEnd,
-						statementDate: statementDate.toISOString().split('T')[0],
-						rentalDays: calculation.rentalDays,
-						totalCosts: String(calculation.totalCosts),
-						totalAdvancePayments: String(calculation.totalAdvancePayments),
-						managementFee: String(calculation.managementFee),
-						managementFeePercent: String(calculation.managementFeePercent),
-						balance: String(calculation.balance),
-						status: 'draft',
-						paymentDeadline: paymentDeadline.toISOString().split('T')[0]
-					},
-					calculation.lineItems.map((item, index) => ({
-						categoryId: item.categoryId,
-						distributionKeyId: item.distributionKeyId,
-						description: item.description,
-						totalAmount: String(item.totalBuildingAmount),
-						tenantShare: String(item.tenantShare),
-						sharePercentage: String(item.sharePercentage * 100),
-						sortOrder: index
-					}))
-				);
+				const statement = await generateStatement(body);
 
 				set.status = 201;
 				return statement;
@@ -333,104 +275,20 @@ export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 		'/:id/generate-pdf',
 		async ({ params, body, set }) => {
 			try {
-				// Get the statement with all details
-				const statement = await getStatement(params.id);
-				if (!statement) {
+				const result = await generateStatementPdf(params.id, body.language);
+				if (result === 'not-found') {
 					set.status = 404;
 					return { error: 'Statement not found' };
 				}
-
-				// Get company config for QR-bill
-				const companyName = await getTypedConfig('company_name');
-				const companyAddress = await getTypedConfig('company_address');
-				const companyPostalCode = await getTypedConfig('company_postal_code');
-				const companyCity = await getTypedConfig('company_city');
-				const iban = await getTypedConfig('iban');
-
-				if (!iban) {
+				if (result === 'no-iban') {
 					set.status = 400;
 					return { error: 'IBAN not configured. Please set up company configuration first.' };
 				}
 
-				const qrConfig: QRBillConfig = {
-					iban,
-					companyName: companyName || 'Dwello Property Management',
-					address: companyAddress || '',
-					postalCode: companyPostalCode || '8000',
-					city: companyCity || 'Zürich'
-				};
-
-				// Build PDF data from statement
-				const pdfData: StatementPDFData = {
-					id: statement.id,
-					statementNumber: statement.statementNumber,
-					statementDate: statement.statementDate,
-					periodStart: statement.periodStart,
-					periodEnd: statement.periodEnd,
-					rentalDays: statement.rentalDays,
-					tenant: {
-						firstName: statement.tenant?.firstName || 'Unknown',
-						lastName: statement.tenant?.lastName || 'Tenant',
-						email: statement.tenant?.email || undefined,
-						address: undefined, // Would need to get from tenant record
-						postalCode: undefined,
-						city: undefined
-					},
-					apartment: {
-						number: statement.apartment?.number || 'N/A',
-						floor: statement.apartment?.floor || 0,
-						area: statement.apartment?.area || '0'
-					},
-					building: {
-						name: statement.building?.name || 'Building',
-						address: statement.building?.address || ''
-					},
-					lineItems: statement.lineItems.map((item) => ({
-						category: item.description,
-						totalAmount: parseFloat(item.totalAmount),
-						tenantShare: parseFloat(item.tenantShare),
-						sharePercentage: item.sharePercentage ? parseFloat(item.sharePercentage) / 100 : 0
-					})),
-					subtotal:
-						parseFloat(statement.totalCosts) - parseFloat(statement.managementFee || '0'),
-					managementFee: parseFloat(statement.managementFee || '0'),
-					// Older statements have no stored rate; their fee was a percentage of the tenant's own costs
-					managementFeePercent: statement.managementFeePercent
-						? parseFloat(statement.managementFeePercent)
-						: parseFloat(statement.managementFee || '0') > 0
-						? (parseFloat(statement.managementFee || '0') / (parseFloat(statement.totalCosts) - parseFloat(statement.managementFee || '0'))) * 100
-						: 0,
-					totalCosts: parseFloat(statement.totalCosts),
-					totalAdvancePayments: parseFloat(statement.totalAdvancePayments),
-					balance: parseFloat(statement.balance),
-					paymentDeadline: statement.paymentDeadline || undefined
-				};
-
-				// The language asked for, otherwise the tenant's
-				const language = (body.language || statement.tenant?.language || 'de') as Language;
-
-				// Generate PDF
-				const pdfBase64 = await generateStatementPDFBase64(pdfData, qrConfig, language);
-
-				// Generate QR reference
-				const qrReference = generateQRReference(statement.id.replace(/-/g, '').slice(0, 20));
-
-				// Store PDF in database
-				await db
-					.update(utilityStatements)
-					.set({
-						pdfBlob: pdfBase64,
-						pdfGeneratedAt: new Date(),
-						qrBillReference: qrReference,
-						updatedAt: new Date()
-					})
-					.where(eq(utilityStatements.id, params.id));
-
 				return {
 					success: true,
 					message: 'PDF generated and stored successfully',
-					qrReference,
-					pdfSize: pdfBase64.length
+					...result
 				};
 			} catch (error) {
 				console.error('PDF generation error:', error);
@@ -453,24 +311,10 @@ export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 		'/:id/pdf',
 		async ({ params, set }) => {
 			try {
-				// Get the statement
-				const [result] = await db
-					.select({
-						pdfBlob: utilityStatements.pdfBlob,
-						statementNumber: utilityStatements.statementNumber
-					})
-					.from(utilityStatements)
-					.where(eq(utilityStatements.id, params.id))
-					.limit(1);
-
-				if (!result) {
+				const result = await getStatementPdf(params.id);
+				if ('error' in result) {
 					set.status = 404;
-					return { error: 'Statement not found' };
-				}
-
-				if (!result.pdfBlob) {
-					set.status = 404;
-					return { error: 'PDF not generated yet. Call POST /:id/generate-pdf first.' };
+					return result;
 				}
 
 				// Convert Base64 to Buffer
@@ -498,22 +342,10 @@ export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 		'/:id/pdf/base64',
 		async ({ params, set }) => {
 			try {
-				const [result] = await db
-					.select({
-						pdfBlob: utilityStatements.pdfBlob
-					})
-					.from(utilityStatements)
-					.where(eq(utilityStatements.id, params.id))
-					.limit(1);
-
-				if (!result) {
+				const result = await getStatementPdf(params.id);
+				if ('error' in result) {
 					set.status = 404;
-					return { error: 'Statement not found' };
-				}
-
-				if (!result.pdfBlob) {
-					set.status = 404;
-					return { error: 'PDF not generated yet. Call POST /:id/generate-pdf first.' };
+					return result;
 				}
 
 				return {
