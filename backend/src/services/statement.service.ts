@@ -16,6 +16,8 @@ import {
 	type UtilityStatementLineItem,
 	type NewUtilityStatementLineItem
 } from '../db/schema';
+import { calculateStatementForContract, generateStatementNumber } from './calculation.service';
+import { getTypedConfig } from './config.service';
 
 export interface StatementFilters {
 	search?: string;
@@ -239,6 +241,72 @@ export async function getStatement(id: string): Promise<StatementWithDetails | n
 	};
 }
 
+/** Parameters of a statement calculation; the management fee overrides the configured default */
+export interface StatementInput {
+	contractId: string;
+	periodStart: string;
+	periodEnd: string;
+	heatingProfileId?: string;
+	managementFeePercent?: number;
+	managementFeeDistributionKeyId?: string;
+}
+
+/** Calculate a contract's statement for a period without storing it */
+export const calculateStatement = (input: StatementInput) =>
+	calculateStatementForContract(
+		input.contractId,
+		new Date(input.periodStart),
+		new Date(input.periodEnd),
+		input.heatingProfileId,
+		input.managementFeePercent,
+		input.managementFeeDistributionKeyId
+	);
+
+/** Calculate a contract's statement and store it as a draft with its line items */
+export async function generateStatement(
+	input: StatementInput & { buildingId: string }
+): Promise<StatementWithDetails> {
+	const calculation = await calculateStatement(input);
+	const statementNumber = await generateStatementNumber(
+		input.buildingId,
+		new Date(input.periodEnd)
+	);
+
+	const paymentDeadlineDays = await getTypedConfig('payment_deadline_days');
+	const statementDate = new Date();
+	const paymentDeadline = new Date(statementDate);
+	paymentDeadline.setDate(paymentDeadline.getDate() + paymentDeadlineDays);
+
+	return createStatement(
+		{
+			tenantId: calculation.tenantId,
+			apartmentId: calculation.apartmentId,
+			contractId: input.contractId,
+			statementNumber,
+			periodStart: input.periodStart,
+			periodEnd: input.periodEnd,
+			statementDate: statementDate.toISOString().split('T')[0],
+			rentalDays: calculation.rentalDays,
+			totalCosts: String(calculation.totalCosts),
+			totalAdvancePayments: String(calculation.totalAdvancePayments),
+			managementFee: String(calculation.managementFee),
+			managementFeePercent: String(calculation.managementFeePercent),
+			balance: String(calculation.balance),
+			status: 'draft',
+			paymentDeadline: paymentDeadline.toISOString().split('T')[0]
+		},
+		calculation.lineItems.map((item, index) => ({
+			categoryId: item.categoryId,
+			distributionKeyId: item.distributionKeyId,
+			description: item.description,
+			totalAmount: String(item.totalBuildingAmount),
+			tenantShare: String(item.tenantShare),
+			sharePercentage: String(item.sharePercentage * 100),
+			sortOrder: index
+		}))
+	);
+}
+
 /**
  * Create a new statement
  */
@@ -246,22 +314,20 @@ export async function createStatement(
 	data: NewUtilityStatement,
 	lineItems: Omit<NewUtilityStatementLineItem, 'statementId'>[] = []
 ): Promise<StatementWithDetails> {
-	// Insert the statement
-	const [statement] = await db
-		.insert(utilityStatements)
-		.values(data)
-		.returning();
-
-	// Insert line items if provided
-	if (lineItems.length > 0) {
-		await db.insert(utilityStatementLineItems).values(
-			lineItems.map((item, index) => ({
-				...item,
-				statementId: statement.id,
-				sortOrder: item.sortOrder ?? index
-			}))
-		);
-	}
+	// Statement and line items are written together or not at all
+	const statement = await db.transaction(async (tx) => {
+		const [statement] = await tx.insert(utilityStatements).values(data).returning();
+		if (lineItems.length > 0) {
+			await tx.insert(utilityStatementLineItems).values(
+				lineItems.map((item, index) => ({
+					...item,
+					statementId: statement.id,
+					sortOrder: item.sortOrder ?? index
+				}))
+			);
+		}
+		return statement;
+	});
 
 	// Fetch and return with details
 	const result = await getStatement(statement.id);
