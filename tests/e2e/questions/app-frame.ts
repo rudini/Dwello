@@ -6,3 +6,7 @@ export const sectionTitled = (actor: Actor, heading: string) => pageSection(acto
 /** Who receives invoice data for the KI categorization, as the privacy statement names it */
 export const llmRecipientNotice = (actor: Actor, heading: string) =>
 	pageSection(actor.page, heading).getByTestId('llm-recipient');
+
+/** Who runs this installation, as the terms of use name them */
+export const operatorNotice = (actor: Actor, heading: string) =>
+	pageSection(actor.page, heading).getByTestId('operator');

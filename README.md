@@ -252,6 +252,8 @@ docker-compose -f docker-compose.prod.yml up
 
 See [.env.example](./.env.example) for all required environment variables.
 
+The terms of use name the operator of the installation (who runs it and backs up its data) from `OPERATOR_NAME`, `OPERATOR_ADDRESS` and `OPERATOR_CONTACT`, set for the frontend. Without `OPERATOR_NAME` they speak of "the operator" only.
+
 ### External LLM provider
 
 By default invoices are categorized by the local Ollama and invoice data stays on the server. With an external provider (`LLM_BASE_URL`, `LLM_API_KEY`), the billing entity, description and amount of each invoice go to that provider, and a description may contain a tenant's name. The privacy statement then names the provider and its country from `LLM_PROVIDER` and `LLM_PROVIDER_COUNTRY`; the backend refuses to start without them. Only `localhost`, `127.0.0.1`, `[::1]` and the compose service `ollama` count as the operator's server; any other host counts as external, including `host.docker.internal`, LAN addresses and a self-hosted model on another server (e.g. `LLM_PROVIDER="eigener Server des Betreibers"`, `LLM_PROVIDER_COUNTRY=Schweiz`). With `LLM_ENABLED=false` nothing is sent and no provider is named.

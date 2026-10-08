@@ -2,7 +2,7 @@ import { expect } from '@playwright/test';
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { visit } from '../interactions/navigation';
-import { llmRecipientNotice, sectionTitled } from '../questions/app-frame';
+import { llmRecipientNotice, operatorNotice, sectionTitled } from '../questions/app-frame';
 import {
 	chooseInFooter,
 	chooseInMainNav,
@@ -60,5 +60,13 @@ Then(
 	'erfährt der Liegenschaftsverwalter unter {string}, dass Rechnungsdaten für die KI-Kategorisierung den Server nicht verlassen',
 	async ({ verwalter }, heading: string) => {
 		await expect(llmRecipientNotice(verwalter, heading)).toContainText('verlassen dafür den Server nicht');
+	}
+);
+
+Then(
+	'erfährt der Liegenschaftsverwalter unter {string}, dass {string} die Installation betreibt und unter {string} erreichbar ist',
+	async ({ verwalter }, heading: string, operator: string, contact: string) => {
+		await expect(operatorNotice(verwalter, heading)).toContainText(operator);
+		await expect(operatorNotice(verwalter, heading)).toContainText(contact);
 	}
 );

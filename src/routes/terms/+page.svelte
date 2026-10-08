@@ -1,4 +1,14 @@
 <script lang="ts">
+	import type { PageData } from './$types';
+
+	let { data }: { data: PageData } = $props();
+
+	const operator = $derived(
+		data.operator &&
+			`Betreiber dieser Dwello-Installation ist ${[data.operator.name, data.operator.address].filter(Boolean).join(', ')}.` +
+				(data.operator.contact ? ` Kontakt: ${data.operator.contact}` : '')
+	);
+
 	const sections = [
 		{
 			title: 'Zweck',
@@ -38,6 +48,9 @@
 			class="bg-white border border-slate-200 rounded-xl shadow-sm p-6 space-y-3"
 		>
 			<h2 class="text-lg font-semibold text-gray-900">{section.title}</h2>
+			{#if section.title === 'Verfügbarkeit' && operator}
+				<p class="text-gray-700" data-testid="operator">{operator}</p>
+			{/if}
 			{#each section.paragraphs as paragraph (paragraph)}
 				<p class="text-gray-700">{paragraph}</p>
 			{/each}
