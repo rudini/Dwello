@@ -1,129 +1,129 @@
-# Architektur: Minimum Viable Architecture für Dwello
+# Architecture: Minimum Viable Architecture for Dwello
 
-## Ziel
+## Goal
 
-Dwello soll eine **Minimum Viable Architecture (MVA)** im Sinne von _Continuous Architecture in Practice_ (Erder, Pureur, Woods) haben: die kleinste Architektur, die die Qualitätsanforderungen erfüllt, und nicht mehr.
+Dwello should have a **Minimum Viable Architecture (MVA)** in the sense of _Continuous Architecture in Practice_ (Erder, Pureur, Woods): the smallest architecture that meets the quality requirements, and no more.
 
-Daraus folgt das Vorgehen:
+This gives the approach:
 
-1. **Qualitätsmerkmale vor Funktionen** (Prinzip 2): Die Architektur wird an den Qualitätsszenarien unten gemessen, nicht an einem Zielbild.
-2. **Entscheidungen verzögern** (Prinzip 3): Eine Architekturänderung braucht ein Szenario, das heute nicht erfüllt ist. Ohne ein solches Szenario bleibt die Struktur, wie sie ist.
-3. **Entscheidungen festhalten:** Jede getroffene oder bewusst verschobene Entscheidung steht als eigenes ADR in `docs/adr/`.
-4. **Kleine Schritte:** Umbauten erhalten das Verhalten, sind durch Tests abgesichert, und Verschieben und Verhaltensänderung landen in getrennten Commits.
+1. **Quality attributes before functions** (principle 2): the architecture is measured against the quality scenarios below, not against a target picture.
+2. **Delay decisions** (principle 3): an architecture change needs a scenario that is not met today. Without such a scenario the structure stays as it is.
+3. **Record decisions:** every decision taken or deliberately deferred is its own ADR in `docs/adr/`.
+4. **Small steps:** refactorings preserve behavior, are covered by tests, and moves and behavior changes land in separate commits.
 
-Rahmenbedingungen: ein Entwickler, ein Benutzer, weniger als 50 Wohnungen, eine PostgreSQL-Datenbank, kein verteiltes System. Das Backend hat rund 10'000 Zeilen ohne Tests. Die Fachlogik liegt in zwei Schichten: `backend/src/routes` (HTTP) und `backend/src/services` (Fachlogik und Datenzugriff); daneben `db/`, `config/`, `mail/` und `middleware/`.
+Constraints: one developer, one user, fewer than 50 apartments, one PostgreSQL database, no distributed system. The backend has about 10,000 lines without tests. The business logic sits in two layers: `backend/src/routes` (HTTP) and `backend/src/services` (business logic and data access); next to them are `db/`, `config/`, `mail/` and `middleware/`.
 
-## Qualitätsszenarien
+## Quality scenarios
 
-Szenario und Messgrösse setzen keinen Entwurf voraus; die Dateien in der Spalte „Stand und Nachweis“ zeigen, wo das Szenario heute erfüllt wird. Gemessen am Code vom Oktober 2026.
+Scenario and measure presuppose no design; the files in the column "Status and evidence" show where the scenario is met today. Measured against the code of October 2026.
 
-| Nr. | Merkmal | Szenario | Messgrösse | Stand und Nachweis |
+| No. | Attribute | Scenario | Measure | Status and evidence |
 | --- | --- | --- | --- | --- |
-| Q1 | Änderbarkeit | Der Liegenschaftsverwalter braucht einen neuen Verteilschlüssel aus Fläche und Zimmerzahl. | Ohne Code-Änderung. | ✅ Eigene Formeln (`formula.service.ts`); `distribution-keys.feature` |
-| Q2 | Änderbarkeit | Ollama wird durch einen anderen LLM-Anbieter mit OpenAI-kompatibler API ersetzt. | Ohne Code-Änderung, nur über die Konfiguration (`.env`); die Datenschutzerklärung deckt beide Fälle ab. | ✅ Jede OpenAI-kompatible API über `LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL` (`config/llm.ts`); `invoice-categorization.pg.test.ts`. Die Datenschutzerklärung nennt einen externen Anbieter mit Land aus `LLM_PROVIDER`, `LLM_PROVIDER_COUNTRY` (`llm-recipient.test.ts`, `privacy.feature`) |
-| Q3 | Änderbarkeit | Eine Gesetzesänderung betrifft die Berechnung der Nebenkostenabrechnung. | Keine Änderung an Routen, UI oder Rendering. | ✅ Berechnung in `calculation`, `prorating`, `distribution-key`, `formula`, `heating-profile` |
-| Q4 | Änderbarkeit | Das PDF-Layout der Abrechnung ändert sich. | Keine Änderung an der Berechnung. | ✅ `pdf.service.ts`; neue Felder zusätzlich in `statement-pdf.service.ts` |
-| Q5 | Testbarkeit | Die Berechnung einer Abrechnung wird geprüft. | In einem automatisierten Test ohne Webserver und ohne PDF. | ✅ `generateStatement`; `statement-creation.pg.test.ts` |
-| D1 | Datenintegrität | Eine versendete, überfällige oder bezahlte Abrechnung soll geändert oder gelöscht werden. | Abgelehnt; Beträge und Positionen bleiben unverändert. Ein Test belegt es. | ✅ Nur ein Entwurf lässt sich löschen, ergänzen oder in den Beträgen ändern (`statement.service.ts`); `statement-lock.pg.test.ts`. Ein Mietvertrag mit Abrechnung lässt sich nicht löschen |
-| D2 | Datenintegrität | Die Abrechnungserstellung bricht mitten im Schreiben ab. | Keine Abrechnung ohne ihre Positionen. | ✅ `db.transaction` in `createStatement`; `statement-creation.pg.test.ts` („speichert keine Abrechnung, wenn …“) |
-| S1 | Sicherheit | Ein Aufruf ohne gültige Sitzung erreicht das BFF oder das Backend. | Antwort 401 oder Umleitung zur Anmeldung. | ✅ `auth-guard.test.ts`, `auth.pg.test.ts` |
-| S2 | Sicherheit | Ein Skript im Browser versucht, die Sitzung zu lesen. | Der Browser hat keinen Zugriff auf ein Token (HttpOnly-Cookie). | ❓ So gebaut (BFF), aber kein Test |
-| P1 | Performance | Der Liegenschaftsverwalter erstellt im Assistenten die Abrechnungen einer Liegenschaft mit 50 Wohnungen, inklusive PDF. | Vom Start bis zur letzten Abrechnung unter 60 s auf der Zielhardware. | ❓ Nicht gemessen; die Schleife über die Mietverträge liegt im BFF (`src/lib/server/statement-generation.ts`). Die PRD nennt einmal 60 s und einmal 10 s; Schritt 1 legt den Wert fest |
-| P2 | Performance | Der Liegenschaftsverwalter öffnet eine Liste oder das Dashboard. | API-Antwort unter 500 ms (p95), Ziel aus `docs/tech-stack.md`. | ❓ Nicht gemessen |
-| R1 | Resilienz | Der LLM-Anbieter ist nicht erreichbar. | Rechnungen lassen sich trotzdem erfassen und von Hand kategorisieren. | ⚠️ Neu kategorisieren getestet (`invoice-detail.feature`); Erfassen fängt den Fehler ab (`categorizeWithKi`), aber ohne Test |
-| R2 | Resilienz | Die Datenbank geht verloren. | Höchstens ein Tag Datenverlust, Wiederherstellung in unter einer Stunde, Probe monatlich (PRD). | ❌ Kein Backup eingerichtet |
+| Q1 | Modifiability | The property manager needs a new allocation key from floor area and number of rooms. | Without a code change. | ✅ Custom formulas (`formula.service.ts`); `distribution-keys.feature` |
+| Q2 | Modifiability | Ollama is replaced by another LLM provider with an OpenAI-compatible API. | Without a code change, only through configuration (`.env`); the privacy statement covers both cases. | ✅ Any OpenAI-compatible API via `LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL` (`config/llm.ts`); `invoice-categorization.pg.test.ts`. The privacy statement names an external provider and its country from `LLM_PROVIDER`, `LLM_PROVIDER_COUNTRY` (`llm-recipient.test.ts`, `privacy.feature`) |
+| Q3 | Modifiability | A change in the law affects how the utility cost statement is calculated. | No change to routes, UI or rendering. | ✅ Calculation in `calculation`, `prorating`, `distribution-key`, `formula`, `heating-profile` |
+| Q4 | Modifiability | The PDF layout of the statement changes. | No change to the calculation. | ✅ `pdf.service.ts`; new fields also in `statement-pdf.service.ts` |
+| Q5 | Testability | The calculation of a statement is checked. | In an automated test without a web server and without a PDF. | ✅ `generateStatement`; `statement-creation.pg.test.ts` |
+| D1 | Data integrity | Someone tries to change or delete a sent, overdue or paid statement. | Rejected; amounts and line items stay unchanged. A test proves it. | ✅ Only a draft can be deleted, extended or have its amounts changed (`statement.service.ts`); `statement-lock.pg.test.ts`. A rental contract with a statement cannot be deleted |
+| D2 | Data integrity | Statement generation aborts in the middle of writing. | No statement without its line items. | ✅ `db.transaction` in `createStatement`; `statement-creation.pg.test.ts` ("speichert keine Abrechnung, wenn …") |
+| S1 | Security | A request without a valid session reaches the BFF or the backend. | Response 401 or redirect to login. | ✅ `auth-guard.test.ts`, `auth.pg.test.ts` |
+| S2 | Security | A script in the browser tries to read the session. | The browser has no access to any token (HttpOnly cookie). | ❓ Built that way (BFF), but no test |
+| P1 | Performance | In the wizard, the property manager generates the statements of a building with 50 apartments, including PDFs. | From start to the last statement under 60 s on the target hardware. | ❓ Not measured; the loop over the rental contracts runs in the BFF (`src/lib/server/statement-generation.ts`). The PRD states 60 s once and 10 s once; step 1 fixes the value |
+| P2 | Performance | The property manager opens a list or the dashboard. | API response under 500 ms (p95), target from `docs/tech-stack.md`. | ❓ Not measured |
+| R1 | Resilience | The LLM provider is unreachable. | Invoices can still be entered and categorized by hand. | ⚠️ Re-categorizing is tested (`invoice-detail.feature`); entering catches the error (`categorizeWithKi`), but without a test |
+| R2 | Resilience | The database is lost. | At most one day of data loss, restore in under an hour, monthly restore drill (PRD). | ❌ No backup set up |
 
-Die Liste ist ein Vorschlag. Sie gilt, sobald sie im ADR bestätigt ist (Schritt 1).
+The list is a proposal. It applies once it is confirmed in an ADR (step 1).
 
-## Strukturelle Mängel
+## Structural flaws
 
-Diese Punkte machen die Schichtung unsauber, ohne selbst ein Szenario zu verletzen. Sie werden behoben, wenn der betroffene Code ohnehin angefasst wird.
+These points blur the layering without violating a scenario themselves. They are fixed when the affected code is touched anyway.
 
-- `config.service.ts` (Konfiguration) importiert `heatingProfileExists` und `distributionKeyExists` aus den Fachservices.
-- `db/demo-data.ts` importiert `statement.service` und `statement-pdf.service`. Das ist für die Demodaten gewollt, gehört aber nicht unter `db/`, sondern zu den Skripten.
-- `routes/dashboard.ts` fragt die Datenbank selbst ab statt über einen Service.
-- `reminder-pdf.ts` (Rendering) importiert den Typ von `reminder-letter.ts` (Fachlogik der Mahnung).
-- `config/llm.ts` führt die Kategorien für den Prompt (`SWISS_UTILITY_CATEGORIES`) als zweite Liste neben der Tabelle `categories`; `utility-validation.service.ts` nutzt sie ebenfalls.
+- `config.service.ts` (configuration) imports `heatingProfileExists` and `distributionKeyExists` from the business services.
+- `db/demo-data.ts` imports `statement.service` and `statement-pdf.service`. That is intended for the demo data, but it belongs with the scripts, not under `db/`.
+- `routes/dashboard.ts` queries the database itself instead of going through a service.
+- `reminder-pdf.ts` (rendering) imports its type from `reminder-letter.ts` (business logic of the payment reminder).
+- `config/llm.ts` keeps the categories for the prompt (`SWISS_UTILITY_CATEGORIES`) as a second list next to the table `categories`; `utility-validation.service.ts` uses it as well.
 
-## Umsetzung
+## Implementation
 
-Bereits erledigt: Die Abrechnungserstellung ist aus `routes/statements.ts` in `statement.service.ts` und `statement-pdf.service.ts` gewandert, mit Transaktion (Q5, D2). Jede Abrechnung ausser dem Entwurf ist gesperrt, auch eine überfällige (D1).
+Already done: statement generation moved from `routes/statements.ts` into `statement.service.ts` and `statement-pdf.service.ts`, with a transaction (Q5, D2). Every statement except a draft is locked, including an overdue one (D1).
 
-### Schritt 1: Szenarien bestätigen, Entscheidungen festhalten
+### Step 1: confirm the scenarios, record the decisions
 
-- Qualitätsszenarien bestätigen, ergänzen oder streichen; den Zielwert für P1 festlegen.
-- Klären, ob eine Rechnung, die in einer Abrechnung steckt, gelöscht werden darf. `deleteInvoice` prüft es nicht, und Abrechnungspositionen verweisen nicht auf Rechnungen. Wenn nicht: als Szenario aufnehmen.
-- Je Entscheidung ein kurzes ADR in `docs/adr/`. Startbestand:
-  - Zwei Schichten (Routen, Services) statt Modulordner, solange alle Änderbarkeits-Szenarien erfüllt sind.
-  - Ein Modell und eine Sprache (`UBIQUITOUS_LANGUAGE.md`), keine Bounded Contexts.
-  - Lese-Joins über Fachbereiche sind erlaubt; die Datenbank ist eine einzige mit Foreign Keys.
-  - Die bewusst verschobenen Massnahmen (siehe unten).
+- Confirm, extend or drop quality scenarios; fix the target value for P1.
+- Decide whether an invoice that is part of a statement may be deleted. `deleteInvoice` does not check it, and statement line items do not reference invoices. If not: add it as a scenario.
+- One short ADR per decision in `docs/adr/`. Initial set:
+  - Two layers (routes, services) instead of module folders, as long as all modifiability scenarios are met.
+  - One model and one language (`UBIQUITOUS_LANGUAGE.md`), no bounded contexts.
+  - Read joins across business areas are allowed; there is a single database with foreign keys.
+  - The deliberately deferred measures (see below).
 
-Fertig, wenn: Die Szenarien sind bestätigt und die ADRs liegen vor.
+Done when: the scenarios are confirmed and the ADRs exist.
 
-### Schritt 2: Offene Szenarien schliessen
+### Step 2: close the open scenarios
 
-Nur für Szenarien, die nicht erfüllt sind, je mit einem Test, der vorher fehlschlägt:
+Only for scenarios that are not met, each with a test that fails first:
 
-- **R2:** tägliches Backup der Datenbank in `docker-compose.prod.yml`, dokumentierte Wiederherstellung, erste Probe.
-- **R1, S2:** fehlende Tests ergänzen.
-- **P1, P2:** einmal messen. Wenn ein Ziel verfehlt wird, ein eigenes Szenario mit Massnahme.
+- **R2:** daily database backup in `docker-compose.prod.yml`, documented restore, first drill.
+- **R1, S2:** add the missing tests.
+- **P1, P2:** measure once. If a target is missed, a scenario of its own with a measure.
 
-Fertig, wenn: Alle bestätigten Szenarien sind erfüllt und belegt.
+Done when: all confirmed scenarios are met and proven.
 
-### Schritt 3: Stopp
+### Step 3: stop
 
-Der Umbau endet hier. Weitere Massnahmen nur, wenn ein Szenario nicht mehr erfüllt ist oder ein neues hinzukommt. Die Szenarien werden bei jeder grösseren Änderung neu bewertet.
+The refactoring ends here. Further measures only when a scenario is no longer met or a new one is added. The scenarios are re-evaluated with every larger change.
 
-## Wenn ein Szenario einen Schnitt verlangt
+## When a scenario calls for a cut
 
-Falls ein Änderbarkeits-Szenario später nicht mehr erfüllt ist, weil Änderungen über zu viele Services streuen, bildet dieser Abschnitt den Ausgangspunkt. Er ist eine Entscheidungshilfe, kein Auftrag.
+If a modifiability scenario is no longer met later because changes scatter across too many services, this section is the starting point. It is a decision aid, not an assignment.
 
-**Wo sich Aufwand lohnt** (Distillation nach Evans):
+**Where effort pays off** (distillation after Evans):
 
-- **Kern: Nebenkostenabrechnung.** Verteilschlüssel, Proration, Heizprofile, Saldo. Hier stecken die fachliche Komplexität und der Wert des Produkts.
-- **Unterstützend: Liegenschaften und Rechnungen.** Stammdaten, Erfassung, Kategorisierung.
-- **Generisch: Rendering (PDF, QR-Rechnung), Mail, Authentifizierung, Konfiguration.** Austauschbare Technik.
+- **Core: utility cost statement.** Allocation keys, proration, heating profiles, balance. This is where the business complexity and the value of the product sit.
+- **Supporting: properties and invoices.** Master data, entry, categorization.
+- **Generic: rendering (PDF, QR-bill), mail, authentication, configuration.** Replaceable technology.
 
-**Mögliche Module** entlang der Abschnitte von `UBIQUITOUS_LANGUAGE.md`:
+**Possible modules** along the sections of `UBIQUITOUS_LANGUAGE.md`:
 
-| Modul | Services und weitere Dateien |
+| Module | Services and other files |
 | --- | --- |
-| Liegenschaftsverwaltung (`rental`) | `building`, `apartment`, `tenant`, `contract` |
-| Rechnungswesen (`costs`) | `invoice`, `category`, `llm`, `utility-validation`, `config/llm.ts` |
-| Nebenkostenabrechnung (`settlement`) | `distribution-key`, `formula`, `heating-profile`, `calculation`, `prorating`, `statement`, `statement-pdf`, `reminder`, `reminder-letter`, `document` |
-| Infrastruktur | `pdf`, `qr-bill`, `reminder-pdf`, `config`, `conflict`, `default-setting`, `mail/`, `middleware/`, `db/` |
+| Property management (`rental`) | `building`, `apartment`, `tenant`, `contract` |
+| Cost accounting (`costs`) | `invoice`, `category`, `llm`, `utility-validation`, `config/llm.ts` |
+| Utility cost statement (`settlement`) | `distribution-key`, `formula`, `heating-profile`, `calculation`, `prorating`, `statement`, `statement-pdf`, `reminder`, `reminder-letter`, `document` |
+| Infrastructure | `pdf`, `qr-bill`, `reminder-pdf`, `config`, `conflict`, `default-setting`, `mail/`, `middleware/`, `db/` |
 
-Jede Route gehört zum Modul ihres Services; `routes/dashboard.ts` liest über alle Module und bleibt ausserhalb.
+Every route belongs to the module of its service; `routes/dashboard.ts` reads across all modules and stays outside.
 
-**Abhängigkeitsrichtung:** `settlement` importiert `costs` und `rental`, `costs` importiert `rental`; Infrastruktur importiert kein Fachmodul. Heutige Abweichungen:
+**Dependency direction:** `settlement` imports `costs` and `rental`, `costs` imports `rental`; infrastructure imports no business module. Current deviations:
 
-- `contract.service.ts` liest `utility_statements` (Löschschutz, D1). Als Lese-Zugriff zulässig oder als Funktion aus `settlement` zu exportieren.
-- `invoices.distribution_key_id` verweist auf `distribution_keys`, und `invoice.service.ts` joint die Tabelle. Damit hängt `costs` an `settlement`. Vor einem Schnitt ist zu entscheiden, ob der Verteilschlüssel zu `costs` gehört oder der Lese-Join erlaubt bleibt.
-- `config.service.ts`, `db/demo-data.ts` und `reminder-pdf.ts` (siehe Strukturelle Mängel).
+- `contract.service.ts` reads `utility_statements` (deletion guard, D1). Acceptable as a read access, or to be exported as a function from `settlement`.
+- `invoices.distribution_key_id` references `distribution_keys`, and `invoice.service.ts` joins the table. This makes `costs` depend on `settlement`. Before a cut, decide whether the allocation key belongs to `costs` or the read join stays allowed.
+- `config.service.ts`, `db/demo-data.ts` and `reminder-pdf.ts` (see structural flaws).
 
-`fallow` kann Architekturgrenzen prüfen (Zonen und Regeln in `.fallowrc.json`, Anzeige mit `npx fallow list --boundaries`); das wäre die Prüfung in CI. Heute sind keine Grenzen konfiguriert.
+`fallow` can check architecture boundaries (zones and rules in `.fallowrc.json`, shown with `npx fallow list --boundaries`); that would be the check in CI. No boundaries are configured today.
 
-## Bewusst nicht umgesetzt
+## Deliberately not implemented
 
-| Massnahme | Einführen, wenn |
+| Measure | Introduce when |
 | --- | --- |
-| Modulordner mit `index.ts` und Boundary-Check | ein Änderbarkeits-Szenario wegen gestreuter Änderungen nicht erfüllt ist |
-| In-Process Domain Events | ein zweiter Abnehmer für dasselbe Ereignis existiert oder Verarbeitung asynchron sein muss |
-| Value Objects (`Money`, `DateRange`), typisierte IDs | ein Rundungs- oder Verwechslungsfehler auftritt, den Typen verhindert hätten |
-| Read-Models / Denormalisierung | P2 nicht erfüllt ist |
-| Anti-Corruption Layer | ein externes System mit eigenem Modell angebunden wird (z. B. Bank, Buchhaltung); dann mit eigenem Änderbarkeits-Szenario |
-| Repository-Schicht | ein Szenario den Wechsel der Datenbank oder des ORM verlangt |
-| Getrennte Bounded Contexts | ein zweites Team oder ein abweichendes Modell entsteht |
-| Umbau des BFF (`src/lib/server`) | ein Szenario Logik im BFF verlangt, die über Proxy, Cookies, XSRF und das Zusammenstellen von Seiten hinausgeht |
+| Module folders with `index.ts` and a boundary check | a modifiability scenario is not met because changes scatter |
+| In-process domain events | a second consumer of the same event exists or processing must be asynchronous |
+| Value objects (`Money`, `DateRange`), typed IDs | a rounding or mix-up bug occurs that types would have prevented |
+| Read models / denormalization | P2 is not met |
+| Anti-corruption layer | an external system with its own model is connected (e.g. bank, accounting); then with its own modifiability scenario |
+| Repository layer | a scenario calls for switching the database or the ORM |
+| Separate bounded contexts | a second team or a diverging model appears |
+| Rebuilding the BFF (`src/lib/server`) | a scenario calls for logic in the BFF beyond proxying, cookies, XSRF and composing pages |
 
-## Verifikation
+## Verification
 
-- Die Checkliste aus `CLAUDE.md` ist grün (`npm run test:coverage`, `npm run lint`, `npm run check`, `cd backend && bun run test && bun run type-check`, betroffene E2E-Szenarien).
-- Die Spalte „Stand und Nachweis“ ist nachgeführt.
-- `implementation_plan.md` ist nachgeführt.
+- The checklist from `CLAUDE.md` is green (`npm run test:coverage`, `npm run lint`, `npm run check`, `cd backend && bun run test && bun run type-check`, affected E2E scenarios).
+- The column "Status and evidence" is up to date.
+- `implementation_plan.md` is up to date.
 
-## Risiken
+## Risks
 
-- **Der Plan wächst wieder.** Jede Ergänzung braucht ein Szenario, das ohne sie nicht erfüllt ist.
-- **Szenarien veralten unbemerkt.** Nur Szenarien mit einem Test bleiben verlässlich belegt. Heute fehlt er für Q3 und Q4 (statische Abhängigkeiten, prüfbar mit fallow-Grenzen), S2, P1, P2, R1 (Erfassen) und R2.
+- **The plan grows again.** Every addition needs a scenario that is not met without it.
+- **Scenarios go stale unnoticed.** Only scenarios with a test stay reliably proven. Today the test is missing for Q3 and Q4 (static dependencies, checkable with fallow boundaries), S2, P1, P2, R1 (entering) and R2.

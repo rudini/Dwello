@@ -1,109 +1,109 @@
-# Testpyramide Dwello (ATDD nach Dave Farley)
+# Dwello Test Pyramid (ATDD after Dave Farley)
 
-Dwello entwickelt nach **Acceptance Test Driven Development**: Jede Änderung beginnt mit einem fachlichen Akzeptanzszenario, Unit-TDD ist die innere Schleife. Farley unterscheidet zwei Perspektiven, die sich ergänzen:
+Dwello is developed with **Acceptance Test Driven Development**: every change starts with a business acceptance scenario, and unit TDD is the inner loop. Farley distinguishes two complementary perspectives:
 
-- **Akzeptanztests** prüfen, ob der Code tut, *was das Business will*.
-- **Unit-Tests (TDD)** prüfen, ob der Code tut, *was der Entwickler denkt*.
+- **Acceptance tests** check that the code does *what the business wants*.
+- **Unit tests (TDD)** check that the code does *what the developer thinks*.
 
-## Die Pyramide
+## The pyramid
 
 ```
                     ┌──────────────────────┐
-                    │  Akzeptanztests (E2E) │   wenige   Gherkin, Playwright-BDD, Produktions-Build
-                    │  "Was das Business    │            ← äussere Schleife: zuerst geschrieben,
-                    │   will"               │              grün = Feature fertig
+                    │ Acceptance tests (E2E)│   few      Gherkin, Playwright-BDD, production build
+                    │  "What the business   │            ← outer loop: written first,
+                    │   wants"              │              green = feature done
                 ┌───┴──────────────────────┴───┐
-                │  Integration (echte DB)       │   mehr     bun test *.pg.test.ts, dwello_test, API-Verträge
-                │  technische Verträge          │            nur wo Unit-Tests nicht reichen
+                │  Integration (real DB)        │   more     bun test *.pg.test.ts, dwello_test, API contracts
+                │  technical contracts          │            only where unit tests are not enough
            ┌────┴───────────────────────────────┴────┐
-           │  Unit-TDD                                │   viele    Vitest (Frontend), bun test (Backend)
-           │  "Was der Entwickler denkt"              │            ← innere Schleife: Sekunden
+           │  Unit TDD                                │   many     Vitest (frontend), bun test (backend)
+           │  "What the developer thinks"             │            ← inner loop: seconds
            └──────────────────────────────────────────┘
 ```
 
-Die Menge bleibt eine Pyramide, viele schnelle Unit-Tests unten. Die **Reihenfolge** ist umgekehrt: Das Szenario oben steht am Anfang und entscheidet, wann ein Feature fertig ist.
+The quantities still form a pyramid, with many fast unit tests at the bottom. The **order** is reversed: the scenario at the top comes first and decides when a feature is done.
 
-## Ebenen
+## Layers
 
-| Ebene | Ort | Runner | Gegen was | Test-Doubles |
+| Layer | Location | Runner | Against | Test doubles |
 |---|---|---|---|---|
-| Akzeptanz (E2E) | `tests/e2e/features/*.feature` | Playwright + playwright-bdd | Browser → SvelteKit-Build (`node build`) → Elysia → PostgreSQL `dwello_e2e` (vor jedem Lauf neu migriert) | keine API-Mocks; SMTP-Mail-Catcher statt Mail-Provider, signiertes Session-JWT statt Google-OAuth |
-| Integration | `backend/src/__tests__/*.pg.test.ts` | `bun run test` oder `bun run test:pg` (Preload `scripts/test-db.ts`) | Elysia-App in-process (`app.handle`) → PostgreSQL `dwello_test` (vor jedem Lauf neu migriert) | keine; lokaler SMTP-Server für Mails |
-| Unit Backend | `backend/src/__tests__/*.test.ts` | `bun run test` (ein Lauf mit den pg-Tests) | reine Funktionen der Services | keine; Resend-Ersatz per `Bun.serve` in `mail.test.ts` |
-| Unit Frontend | `src/__tests__`, `src/lib/utils/__tests__`, `tests/unit` | Vitest (`server`: node, `dom`: jsdom) | Load-Funktionen, Actions, BFF, Komponenten | Fake-Backend per `fetch`-Stub / `fakeBff` (aus den API-Verträgen in `tests/contracts`, wo es einen gibt), `vi.mock` für `$app/*` |
+| Acceptance (E2E) | `tests/e2e/features/*.feature` | Playwright + playwright-bdd | Browser → SvelteKit build (`node build`) → Elysia → PostgreSQL `dwello_e2e` (migrated fresh before each run) | no API mocks; SMTP mail catcher instead of a mail provider, signed session JWT instead of Google OAuth |
+| Integration | `backend/src/__tests__/*.pg.test.ts` | `bun run test` or `bun run test:pg` (preload `scripts/test-db.ts`) | Elysia app in process (`app.handle`) → PostgreSQL `dwello_test` (migrated fresh before each run) | none; local SMTP server for mail |
+| Unit backend | `backend/src/__tests__/*.test.ts` | `bun run test` (one run together with the pg tests) | pure functions of the services | none; Resend stand-in via `Bun.serve` in `mail.test.ts` |
+| Unit frontend | `src/__tests__`, `src/lib/utils/__tests__`, `tests/unit` | Vitest (`server`: node, `dom`: jsdom) | load functions, actions, BFF, components | fake backend via `fetch` stub / `fakeBff` (from the API contracts in `tests/contracts` where one exists), `vi.mock` for `$app/*` |
 
-Regeln:
+Rules:
 
-- Kein Test kopiert Produktionslogik („Spiegel-Test“), jeder Test importiert den echten Code.
-- Kein Mock der Datenbank: Was SQL braucht, ist ein `*.pg.test.ts`.
-- Negative E2E-Prüfungen (etwas fehlt) brauchen zuerst einen positiven Anker (Leer-Hinweis, Seitentitel), sonst bestehen sie auch auf einer Fehlerseite.
-- Selektoren: `data-testid` (siehe `CLAUDE.md`).
-- Fake-Antworten des Backends in Frontend-Tests kommen aus `tests/contracts/*.json`, wo es einen Vertrag gibt; `backend/src/__tests__/api-contracts.pg.test.ts` prüft jedes Feld gegen die echte API (siehe `tests/contracts/README.md`).
+- No test copies production logic ("mirror test"); every test imports the real code.
+- No mocked database: whatever needs SQL is a `*.pg.test.ts`.
+- Negative E2E checks (something is absent) need a positive anchor first (empty-state notice, page title); otherwise they also pass on an error page.
+- Selectors: `data-testid` (see `CLAUDE.md`).
+- Fake backend responses in frontend tests come from `tests/contracts/*.json` where a contract exists; `backend/src/__tests__/api-contracts.pg.test.ts` checks every field against the real API (see `tests/contracts/README.md`).
 
 ## Coverage
 
-Gewünschte Abdeckung:
+Target coverage:
 
-| Bereich | Statements | Branches | Funktionen | Zeilen |
+| Area | Statements | Branches | Functions | Lines |
 |---|---|---|---|---|
 | Frontend | 80 % | 80 % | 80 % | 80 % |
 | Backend | – | – | 80 % | 80 % |
 
-Bun misst im Backend nur Zeilen und Funktionen.
+Bun measures only lines and functions in the backend.
 
-Bis das Ziel erreicht ist, gilt eine Untergrenze: die heutige Abdeckung, auf ganze Prozent abgerundet. Sinkt sie, scheitert der Lauf lokal und in CI. Wächst die Abdeckung, wird die Untergrenze angehoben, bis sie beim Ziel liegt.
+Until the target is reached, a floor applies: today's coverage, rounded down to whole percent. If coverage drops below it, the run fails locally and in CI. As coverage grows, the floor is raised until it reaches the target.
 
-| Bereich | Messung | Untergrenze hinterlegt in |
+| Area | Measured by | Floor stored in |
 |---|---|---|
-| Frontend | `npm run test:coverage` (Vitest, v8, alle `src/**/*.{ts,svelte}`) | `vitest.config.ts` |
-| Backend | `bun run test` (alle Backend-Tests, lcov) | `backend/scripts/coverage-check.ts` (Bun prüft eigene Schwellen pro Datei) |
+| Frontend | `npm run test:coverage` (Vitest, v8, all `src/**/*.{ts,svelte}`) | `vitest.config.ts` |
+| Backend | `bun run test` (all backend tests, lcov) | `backend/scripts/coverage-check.ts` (Bun would check its own thresholds per file) |
 
-## Farleys vier Schichten in den Akzeptanztests
+## Farley's four layers in the acceptance tests
 
-| Schicht | Zweck | In Dwello |
+| Layer | Purpose | In Dwello |
 |---|---|---|
-| Test Cases (Executable Specifications) | *Was* das Business will, in Fachsprache | `tests/e2e/features/*.feature` (Deutsch, Rolle „Liegenschaftsverwalter“, Begriffe aus `UBIQUITOUS_LANGUAGE.md`) |
-| Domain Specific Language | Wiederverwendbare fachliche Sprache | `tests/e2e/steps/`, Screenplay: `fixtures/actor.ts`, `tasks/`, `questions/` |
-| Protocol Drivers | Übersetzen die DSL in Interaktionen | UI-Driver: `tests/e2e/interactions/` (Browser über Playwright). API-Driver: `tasks/*-api.ts` über `seed.backend` (Backend-API). Vorbedingungen immer über die API (`fixtures/backend.ts`) |
-| System under Test | Produktionsähnlich deployt | `npm run build && node build` + Backend + eigene Datenbank (`playwright.config.ts`) |
+| Test cases (executable specifications) | *What* the business wants, in domain language | `tests/e2e/features/*.feature` (German, role "Liegenschaftsverwalter", terms from `UBIQUITOUS_LANGUAGE.md`) |
+| Domain-specific language | Reusable domain language | `tests/e2e/steps/`, Screenplay: `fixtures/actor.ts`, `tasks/`, `questions/` |
+| Protocol drivers | Translate the DSL into interactions | UI driver: `tests/e2e/interactions/` (browser via Playwright). API driver: `tasks/*-api.ts` via `seed.backend` (backend API). Preconditions always go through the API (`fixtures/backend.ts`) |
+| System under test | Deployed like production | `npm run build && node build` + backend + its own database (`playwright.config.ts`) |
 
-### Zwei Protocol Drivers
+### Two protocol drivers
 
-Dasselbe Szenario kann über den Browser oder direkt über die Backend-API laufen. Die Fixture-Option `driver` (`ui` | `api`, `fixtures/test.ts`) wählt den Weg; nur Steps, die mit dem System sprechen, verzweigen danach. Szenarien mit dem Tag `@api` laufen zusätzlich im Playwright-Projekt `api` ohne Seitenaufrufe.
+The same scenario can run through the browser or directly against the backend API. The fixture option `driver` (`ui` | `api`, `fixtures/test.ts`) chooses the path; only steps that talk to the system branch on it. Scenarios tagged `@api` additionally run in the Playwright project `api`, without page visits.
 
-- Wofür `@api`: fachliche Regeln und Berechnungen, die nicht von der Bedienung abhängen. Heute: Verwaltungspauschale (`statement-management-fee.feature`), Vorschau, Erstellen und Periode ohne Mietverträge (`statement-generate.feature`), Heizkosten bei Mieterwechsel (`statement-detail.feature`).
-- Wofür nur UI: Bedienabläufe, Navigation, Formulare.
-- Ein neuer `@api`-Step braucht beide Wege; der API-Weg lebt in `tasks/<bereich>-api.ts`.
+- What `@api` is for: business rules and calculations that do not depend on the UI. Today: management fee (`statement-management-fee.feature`), preview, generation and a period without rental contracts (`statement-generate.feature`), heating costs on a tenant change (`statement-detail.feature`).
+- UI only: interaction flows, navigation, forms.
+- A new `@api` step needs both paths; the API path lives in `tasks/<area>-api.ts`.
 
-Isolation wie bei Farley:
+Isolation as Farley describes it:
 
-- **Funktional:** `seed.names` hängt an jeden fachlichen Namen eine UUID („Lindenhof“ → „Lindenhof 3f2a…“), Szenarien laufen parallel.
-- **Zeitlich:** Jedes Szenario legt seine Daten selbst an und räumt sie weg.
-- **System:** Externe Systeme sind an der Grenze ersetzt (Mail-Catcher, Session-JWT; lokale Ersätze per `Bun.serve` für den OpenAI-kompatiblen LLM-Anbieter in `invoice-categorization.pg.test.ts` und Resend in `mail.test.ts`).
+- **Functional:** `seed.names` appends a UUID to every business name ("Lindenhof" → "Lindenhof 3f2a…"), so scenarios run in parallel.
+- **Temporal:** every scenario creates its own data and cleans it up.
+- **System:** external systems are replaced at the boundary (mail catcher, session JWT; local stand-ins via `Bun.serve` for the OpenAI-compatible LLM provider in `invoice-categorization.pg.test.ts` and for Resend in `mail.test.ts`).
 
-## Workflow: ein Feature nach ATDD
+## Workflow: one feature with ATDD
 
-1. **Beispiele klären:** Akzeptanzkriterien als konkrete Beispiele in der Sprache des Liegenschaftsverwalters formulieren.
-2. **Szenario zuerst:** In die passende `.feature`-Datei schreiben, mit `@wip` markieren (von `playwright.config.ts` ausgeschlossen, die Pipeline bleibt grün).
-3. **Rot sehen:** `npx bddgen --tags "@wip"` und `npx playwright test`; fehlende Steps über die bestehende DSL ergänzen, bis das Szenario aus dem richtigen Grund fehlschlägt.
-4. **Innere Schleife:** Verhalten per TDD herbeiführen (Unit-Tests, pg-Tests nur für SQL, Routing, Mail).
-5. **Grün:** `@wip` entfernen. Ab jetzt ist das Szenario Regressionstest und Gate in der Pipeline.
+1. **Clarify examples:** phrase the acceptance criteria as concrete examples in the property manager's language.
+2. **Scenario first:** write it into the matching `.feature` file and tag it `@wip` (excluded by `playwright.config.ts`, so the pipeline stays green).
+3. **See red:** `npx bddgen --tags "@wip"` and `npx playwright test`; add missing steps through the existing DSL until the scenario fails for the right reason.
+4. **Inner loop:** drive the behavior with TDD (unit tests; pg tests only for SQL, routing, mail).
+5. **Green:** remove `@wip`. From now on the scenario is a regression test and a gate in the pipeline.
 
-Beispiel: `tests/e2e/features/statement-management-fee.feature` (Verwaltungspauschale nach Verteilschlüssel).
+Example: `tests/e2e/features/statement-management-fee.feature` (management fee by allocation key).
 
-Bedienung, die kein Fachverhalten ist, steht in eigenen Features: `breadcrumb.feature` (Breadcrumb aller Seiten als ein Szenariogrundriss) und `hydration.feature` (Auswahl, bevor eine Seite fertig geladen ist).
+UI behavior that is not business behavior lives in its own features: `breadcrumb.feature` (the breadcrumb of every page as one scenario outline) and `hydration.feature` (selecting before a page has finished loading).
 
-## Ausführen
+## Running
 
-| Ebene | Lokal | CI (`.github/workflows/ci.yml`) |
+| Layer | Local | CI (`.github/workflows/ci.yml`) |
 |---|---|---|
-| Lint und Typen | `npm run lint` (Warnungen scheitern), `npm run check` (auch `tests/` und `*.config.ts`), `cd backend && bun run type-check` | Job „Lint and types“ |
-| Unit Frontend | `npm run test` (mit Coverage: `npm run test:coverage`) | Job „Unit tests“: alle Tests mit Coverage-Untergrenze |
-| Unit + Integration Backend | `cd backend && bun run test` (nur DB: `bun run test:pg`) | Job „Unit tests“, in PRs wenn `backend/` oder `tests/contracts/` geändert, auf `main` immer; mit Coverage-Untergrenze |
-| Akzeptanz | `npm run test:e2e` (nur API-Driver: `-- --project=api`) | Job „E2E tests“; PRs Chromium und `api`, `main` alle Browser und `api` |
+| Lint and types | `npm run lint` (warnings fail), `npm run check` (also `tests/` and `*.config.ts`), `cd backend && bun run type-check` | job "Lint and types" |
+| Unit frontend | `npx vitest run` (with coverage: `npm run test:coverage`) | job "Unit tests": all tests with the coverage floor |
+| Unit + integration backend | `cd backend && bun run test` (DB only: `bun run test:pg`) | job "Unit tests", in PRs when `backend/` or `tests/contracts/` changed, always on `main`; with the coverage floor |
+| Acceptance | `npm run test:e2e` (API driver only: `-- --project=api`) | job "E2E tests"; PRs Chromium and `api`, `main` all browsers and `api` |
 
-Voraussetzung lokal: PostgreSQL auf Port 5432 mit Benutzer `dwello`. Die Testdatenbanken `dwello_test` und `dwello_e2e` werden automatisch neu aufgesetzt; die Entwicklungsdatenbank bleibt unberührt, solange die Backend-Tests mit dem Preload laufen (`bun run test`, `bun run test:pg`; ein nacktes `bun test` schriebe in sie).
+Local prerequisite: PostgreSQL on port 5432 with user `dwello`. The test databases `dwello_test` and `dwello_e2e` are set up fresh automatically; the development database stays untouched as long as the backend tests run with the preload (`bun run test`, `bun run test:pg`; a bare `bun test` would write into it).
 
-## Offen
+## Open
 
-- [ ] Abdeckung auf das Ziel anheben, dann die Untergrenzen nachziehen
+- [ ] Raise coverage to the target, then raise the floors with it
