@@ -4156,8 +4156,8 @@ Branch `claude/open-points` (from main 9067217).
   coverage above the floors; E2E 260 Chromium + 8 api passed; lint, tsc, svelte-check clean
 
 ### Open
-- [ ] Raise coverage to 80 % (backend lines, frontend) and move the floors up
-- [ ] API contracts for the other areas (buildings, tenants, invoices)
+- [ ] Raise frontend coverage to 80 % and move the floors up (backend above 80 % since session 9)
+- [x] API contracts for the other areas (buildings, tenants, invoices): done in session 9
 
 ---
 
@@ -4204,6 +4204,7 @@ reviewed independently afterwards.
 - [ ] Endpoints no page calls, untested: `/config/initialize`, `/config/accounting-period/*`,
   `/heating-profiles/initialize`, `/validate-percentages`, `/calculate-share` (delete or test?)
 - [ ] Backend does not derive „umlagefähig“ from a category chosen by hand (relies on the form)
+- [ ] API contracts for the building and tenant lists
 - [ ] Type check `tests/` and the root `*.config.ts` (tsconfig includes only `src/`)
 
 ---

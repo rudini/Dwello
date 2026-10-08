@@ -31,7 +31,7 @@ Die Menge bleibt eine Pyramide, viele schnelle Unit-Tests unten. Die **Reihenfol
 |---|---|---|---|---|---|
 | Akzeptanz (E2E) | 260 Testfälle aus 41 Features (+8 über den API-Driver) | `tests/e2e/features/*.feature` | Playwright + playwright-bdd | Browser → SvelteKit-Build (`node build`) → Elysia → PostgreSQL `dwello_e2e` (vor jedem Lauf neu migriert) | keine API-Mocks; SMTP-Mail-Catcher statt Mail-Provider, signiertes Session-JWT statt Google-OAuth |
 | Integration | 181 in 30 Dateien | `backend/src/__tests__/*.pg.test.ts` | `bun test` | Elysia-App in-process (`app.handle`) → PostgreSQL `dwello_test` (vor jedem Lauf neu migriert) | keine; lokaler SMTP-Server für Mails |
-| Unit Backend | 249 in 11 Dateien | `backend/src/__tests__/*.test.ts` | `bun test` (ein Lauf mit den pg-Tests) | reine Funktionen der Services | keine |
+| Unit Backend | 249 in 11 Dateien | `backend/src/__tests__/*.test.ts` | `bun test` (ein Lauf mit den pg-Tests) | reine Funktionen der Services | keine; Resend-Ersatz per `Bun.serve` in `mail.test.ts` |
 | Unit Frontend | 465 in 53 Dateien | `src/__tests__`, `src/lib/utils/__tests__`, `tests/unit` | Vitest (`server`: node, `dom`: jsdom) | Load-Funktionen, Actions, BFF, Komponenten | Fake-Backend per `fetch`-Stub / `fakeBff` (aus den API-Verträgen in `tests/contracts`, wo es einen gibt), `vi.mock` für `$app/*` |
 
 Regeln:
@@ -44,7 +44,7 @@ Regeln:
 
 ## Coverage
 
-Die heutige Abdeckung ist die Untergrenze; sinkt sie, scheitert der Lauf lokal und in CI. Ziel sind 80 %; die Grenzen werden angehoben, sobald die Abdeckung wächst.
+Die heutige Abdeckung ist die Untergrenze (auf ganze Prozent abgerundet, also mit wenig Spielraum); sinkt sie, scheitert der Lauf lokal und in CI. Ziel sind 80 %; die Grenzen werden angehoben, sobald die Abdeckung wächst.
 
 | Bereich | Messung | Untergrenze | Ort |
 |---|---|---|---|
@@ -72,7 +72,7 @@ Isolation wie bei Farley:
 
 - **Funktional:** `seed.names` hängt an jeden fachlichen Namen eine UUID („Lindenhof“ → „Lindenhof 3f2a…“), Szenarien laufen parallel.
 - **Zeitlich:** Jedes Szenario legt seine Daten selbst an und räumt sie weg.
-- **System:** Externe Systeme sind an der Grenze ersetzt (Mail-Catcher, Session-JWT; in pg-Tests ein lokaler Ollama-Ersatz per `Bun.serve`).
+- **System:** Externe Systeme sind an der Grenze ersetzt (Mail-Catcher, Session-JWT; lokale Ersätze per `Bun.serve` für Ollama in `invoice-categorization.pg.test.ts` und Resend in `mail.test.ts`).
 
 ## Workflow: ein Feature nach ATDD
 
@@ -92,13 +92,13 @@ Bedienung, die kein Fachverhalten ist, steht in eigenen Features: `breadcrumb.fe
 |---|---|---|
 | Lint und Typen | `npm run lint` (Warnungen scheitern), `npm run check`, `cd backend && bun run type-check` | Job „Lint and types“ |
 | Unit Frontend | `npm run test` (mit Coverage: `npm run test:coverage`) | Job „Unit tests“: alle Tests mit Coverage-Untergrenze |
-| Unit + Integration Backend | `cd backend && bun run test` (nur DB: `bun run test:pg`) | Job „Unit tests“, wenn `backend/` oder `tests/contracts/` geändert; mit Coverage-Untergrenze |
+| Unit + Integration Backend | `cd backend && bun run test` (nur DB: `bun run test:pg`) | Job „Unit tests“, in PRs wenn `backend/` oder `tests/contracts/` geändert, auf `main` immer; mit Coverage-Untergrenze |
 | Akzeptanz | `npm run test:e2e` (nur API-Driver: `-- --project=api`) | Job „E2E tests“; PRs Chromium und `api`, `main` alle Browser und `api` |
 
 Voraussetzung lokal: PostgreSQL auf Port 5432 mit Benutzer `dwello`. Die Testdatenbanken `dwello_test` und `dwello_e2e` werden automatisch neu aufgesetzt; die Entwicklungsdatenbank bleibt unberührt.
 
 ## Offen
 
-- [ ] Coverage auf 80 % anheben (Backend-Zeilen, Frontend), dann die Untergrenzen nachziehen
-- [ ] API-Verträge für die Listen von Gebäuden und Mietern (heute: Abrechnungen, Rechnungen, Gebäude- und Mieterdetail)
+- [ ] Frontend-Coverage auf 80 % anheben, dann die Untergrenzen nachziehen (Backend seit Oktober 2026 darüber)
+- [ ] API-Verträge für die Listen von Gebäuden und Mietern (heute: Abrechnungen, Verträge eines Gebäudes, Rechnungen, Gebäude- und Mieterdetail)
 - [ ] Typprüfung für `tests/` und die `*.config.ts` im Wurzelverzeichnis (`tsconfig.json` umfasst nur `src/`)
