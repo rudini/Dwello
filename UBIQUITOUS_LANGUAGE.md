@@ -78,7 +78,7 @@ Verwaltung, Reparaturen, Renovation, Liegenschaftssteuer, Hypothekarzinsen, Geb�
 
 | Begriff | Definition | Code / Schema |
 |---------|-----------|---------------|
-| **Kategorisierung** | Automatischer Vorschlag einer Kategorie f체r eine Rechnung mittels LLM (Ollama/Mistral). | `/api/v1/invoices/categorize` |
+| **Kategorisierung** | Automatischer Vorschlag einer Kategorie f체r eine Rechnung mittels LLM (OpenAI-kompatible API, standardm채ssig lokales Ollama). | `/api/v1/invoices/categorize` |
 | **KI-Kategorie** | Von der KI vorgeschlagene Kategorie. | `llm_category_id` Feld |
 | **Konfidenz** | Vertrauenswert der KI f체r die vorgeschlagene Kategorie (0-1). | `llm_confidence` Feld |
 | **Manuell 체berschrieben** | Der Liegenschaftsverwalter hat die KI-Kategorie ge채ndert. | `was_manually_overridden` Feld |

@@ -74,9 +74,8 @@ async function callLlm(prompt: string): Promise<string> {
 			headers: llmHeaders(),
 			body: JSON.stringify({
 				model: llmConfig.model,
-				messages: [{ role: 'user', content: prompt }],
-				temperature: 0.3, // Lower temperature for more consistent categorization
-				max_tokens: 200 // Limit response length
+				// No max_tokens or temperature: reasoning models reject both; the prompt asks for short JSON
+				messages: [{ role: 'user', content: prompt }]
 			}),
 			signal: controller.signal
 		});

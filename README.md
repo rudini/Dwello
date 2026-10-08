@@ -29,7 +29,7 @@ Dwello is a comprehensive web application for managing residential properties in
 - **Frontend:** SvelteKit + TypeScript + TailwindCSS
 - **Backend:** ElysiaJS on Bun + PostgreSQL + Drizzle ORM
 - **Authentication:** BFF Pattern with OAuth 2.0 / SSO
-- **LLM:** Ollama (self-hosted Mistral/Llama)
+- **LLM:** any OpenAI-compatible API, by default a self-hosted Ollama (`qwen2.5:3b`)
 - **Deployment:** Docker Compose
 - **Maps:** OpenStreetMap + Leaflet
 - **Internationalization:** svelte-i18n
@@ -244,6 +244,8 @@ docker-compose -f docker-compose.prod.yml up
 ### Environment Variables
 
 See [.env.example](./.env.example) for all required environment variables.
+
+**Upgrading from `OLLAMA_*` variables:** the LLM is now any OpenAI-compatible API. Rename `OLLAMA_API_URL` to `LLM_BASE_URL` and append `/v1` (`http://ollama:11434/v1`), `OLLAMA_MODEL` to `LLM_MODEL`. The default model is `qwen2.5:3b`; pull it (`docker exec dwello-ollama ollama pull qwen2.5:3b`) or set `LLM_MODEL` to the model you have. The old variables are ignored.
 
 ---
 

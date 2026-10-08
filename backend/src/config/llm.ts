@@ -4,8 +4,8 @@
  */
 
 export const llmConfig = {
-	// OpenAI-compatible API base URL, e.g. https://api.openai.com/v1
-	baseUrl: process.env.LLM_BASE_URL || 'http://localhost:11434/v1',
+	// OpenAI-compatible API base URL, e.g. https://api.openai.com/v1 (a trailing slash is dropped)
+	baseUrl: (process.env.LLM_BASE_URL || 'http://localhost:11434/v1').replace(/\/$/, ''),
 
 	// Sent as a Bearer token; the local Ollama needs none
 	apiKey: process.env.LLM_API_KEY || '',
@@ -18,9 +18,6 @@ export const llmConfig = {
 
 	// Enable/disable LLM categorization
 	enabled: process.env.LLM_ENABLED !== 'false',
-
-	// Minimum confidence threshold for automatic categorization
-	minConfidence: parseFloat(process.env.LLM_MIN_CONFIDENCE || '0.7'),
 
 	// Cache TTL in seconds (default: 1 hour)
 	cacheTtl: parseInt(process.env.LLM_CACHE_TTL || '3600', 10)

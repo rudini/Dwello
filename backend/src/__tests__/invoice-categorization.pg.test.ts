@@ -19,15 +19,18 @@ type Invoice = {
 const token = crypto.randomUUID();
 const configured = { ...llmConfig };
 
-// A provider with an OpenAI-compatible API that only answers with the configured key
+// A provider with an OpenAI-compatible API that only answers with the configured key; like OpenAI's
+// reasoning models it rejects max_tokens and a temperature other than the default
 function openAiCompatible(answer: object) {
 	const server = Bun.serve({
 		port: 0,
-		fetch: (request) => {
+		fetch: async (request) => {
 			if (request.headers.get('authorization') !== 'Bearer test-key') return new Response(null, { status: 401 });
 			const path = new URL(request.url).pathname;
 			if (path === '/v1/models') return Response.json({ data: [{ id: 'test-model' }] });
 			if (path !== '/v1/chat/completions') return new Response(null, { status: 404 });
+			const body = (await request.json()) as object;
+			if ('max_tokens' in body || 'temperature' in body) return new Response(null, { status: 400 });
 			return Response.json({ choices: [{ message: { role: 'assistant', content: JSON.stringify(answer) } }] });
 		}
 	});

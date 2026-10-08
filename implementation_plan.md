@@ -4324,6 +4324,11 @@ reviewed independently afterwards.
   `docker-compose.prod.yml`); `isOllamaAvailable` became `isLlmAvailable`. The privacy statement no longer claims
   invoice data never leaves the server. Test: `invoice-categorization.pg.test.ts` (provider stand-in that only
   answers with the key, red first)
+- [x] **Review follow-up:** requests send no `max_tokens` or `temperature`, which OpenAI's reasoning models reject
+  (the provider stand-in now rejects them too, red first); a trailing slash in `LLM_BASE_URL` is dropped; unused
+  `minConfidence` removed; `.env.example` leaves the `LLM_*` lines commented, so a copied file no longer points the
+  Docker backend at `localhost`; README upgrade note for the renamed `OLLAMA_*` variables; the lock test checks the
+  statement really is overdue
 
 ### Open
 - [ ] Raise coverage to the target in `docs/test-pyramid.md` and move the floors up
