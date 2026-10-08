@@ -227,6 +227,7 @@ docker exec dwello-ollama ollama pull mistral
 **Database migration failed / "column ... does not exist":**
 ```bash
 cd backend && bun run db:migrate   # applies missing files from backend/migrations, records them in schema_migrations
+cd backend && bun run db:reset     # "Migrationen, die es nicht mehr gibt": database from before the October 2026 baseline
 docker-compose logs postgres
 ```
 

@@ -27,7 +27,7 @@ function environmentOf(command: string) {
 }
 
 describe('Konfiguration des Backends', () => {
-	for (const script of ['dev', 'db:migrate'] as const) {
+	for (const script of ['dev', 'db:migrate', 'db:reset', 'db:demo'] as const) {
 		it(`"bun run ${script}" liest die gemeinsame .env des Projekts`, () => {
 			for (const command of packageJson.scripts[script].split('&&')) {
 				expect(environmentOf(command)).toEqual(['root-secret', 'backend-db']);

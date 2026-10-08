@@ -4233,10 +4233,18 @@ reviewed independently afterwards.
   `import type` too, so a change of `src/lib/types.ts` put all 44 pages into this PR; type imports are ignored now
   (`ui-screenshot-routes.test.ts`), this PR shows 5 pages
 
+- [x] **Migrations reset to a baseline** (no production database yet): `0001_schema.sql` (schema) and
+  `0002_stammdaten.sql` (categories, distribution keys, heating profiles) replace 0001-0011; a database set up from
+  them has the same columns, constraints, indexes, triggers and master data as one from the old files (compared). The
+  configuration rows went away: the app reads none of their keys except `company_name`, whose code default covers it.
+  Demo data moved from the migrations to `backend/demo/demo-data.sql` (`bun run db:demo`, `bun run dev:demo`;
+  `src/db/demo-data.ts`, `demo-data.pg.test.ts`), so production starts without it. docker-compose no longer runs
+  the migrations as `docker-entrypoint-initdb.d`, only `migrate.ts` does, so its detection of hand-applied
+  migrations is gone; it rejects a database that knows migrations no longer there (`bun run db:reset` sets it up
+  anew). `distribution-key.pg.test.ts` builds its own building instead of the demo data
+
 ### Open
 - [ ] Raise frontend coverage to 80 % and move the floors up
-- [ ] `db/migrate.ts`: databases without `schema_migrations` predate the runner (0007 at most), so the detection of
-  hand-applied migrations could stop at 0007 and new migrations would need no marker
 
 ---
 

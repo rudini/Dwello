@@ -89,12 +89,18 @@ Dwello is a comprehensive web application for managing residential properties in
 6. **Database migrations**
 
    `bun run dev` (and the Docker image on start) applies the SQL files in `backend/migrations` that the
-   database does not have yet; `schema_migrations` records what is applied. To run them alone:
+   database does not have yet; `schema_migrations` records what is applied. `0001_schema.sql` creates the
+   schema, `0002_stammdaten.sql` the master data every database needs (cost categories, distribution keys,
+   predefined heating profiles). To run them alone:
    ```bash
    cd backend
    bun run db:migrate   # uses DATABASE_URL, default postgresql://dwello:dwello@localhost:5432/dwello
+   bun run db:reset     # drops and recreates that database from the migrations
+   bun run db:demo      # loads demo data (backend/demo/demo-data.sql) for trying and showing the app
+   bun run dev:demo     # demo data, then bun run dev
    ```
-   A schema change is a new numbered SQL file (e.g. `0007_<what>.sql`), never an edit of an applied one.
+   A schema change is a new numbered SQL file (e.g. `0003_<what>.sql`), never an edit of an applied one.
+   Demo data never goes into a migration, so production starts without it.
 
 ---
 
