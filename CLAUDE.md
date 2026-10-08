@@ -20,7 +20,7 @@ npm run test:e2e                    # acceptance tests, see tests/e2e/CLAUDE.md
 
 Backend (`cd backend`): see `backend/CLAUDE.md`. Short form: `bun run dev:demo` (app with demo data), `bun run test`, `bun run type-check`.
 
-PostgreSQL on localhost:5432 (user and password `dwello`) is required for backend tests and E2E. The test databases `dwello_test` and `dwello_e2e` are recreated automatically; the development database `dwello` stays untouched as long as backend tests run through `bun run test`, `bun run test:pg` or with `--preload ./scripts/test-db.ts`.
+PostgreSQL on localhost:5432 (user and password `dwello`) is required for backend tests and E2E. The test databases `dwello_test` and `dwello_e2e` are recreated automatically; the development database `dwello` stays untouched only through the test preload (see `backend/CLAUDE.md`).
 
 ## Architecture (BFF)
 
@@ -41,7 +41,7 @@ PostgreSQL on localhost:5432 (user and password `dwello`) is required for backen
 ## Workflow
 
 1. **Acceptance test first (ATDD):** every feature or behavior change starts with a German scenario in `tests/e2e/features/*.feature`, tagged `@wip` (excluded from runs). Watch it fail for the right reason.
-2. **`/tdd`:** drive the implementation red-green, one behavior at a time, through public interfaces. A unit test must fail before the code changes. Every bug fix gets a test that reproduces it first, at the lowest layer that can show it (unit, `*.pg.test.ts` or scenario).
+2. **`/tdd`:** drive the implementation red-green, one behavior at a time, through public interfaces. A test must fail before the code changes. Every bug fix gets a test that reproduces it first, at the lowest layer that can show it (unit, `*.pg.test.ts` or scenario).
 3. **`/ponytail`:** keep the shortest diff that works; check the finished change against it.
 4. **Done:** remove `@wip` once the scenario is green. A feature is done when its scenario passes, not when unit tests pass.
 5. **Plan:** log the task in `implementation_plan.md` (check the items, note the files changed). The file is long: read only its latest `## Session` section (`grep -n '^## Session' implementation_plan.md`) and add new work there. The phase table at the top is no longer maintained.

@@ -16,7 +16,7 @@ The run starts its own stack: mail catcher, backend on 3101 and a production bui
 
 ## Layers (Screenplay, after Dave Farley)
 
-- `features/*.feature`: executable specifications, one file per area. New scenario: tag `@wip` (excluded from runs) until it passes.
+- `features/*.feature`: executable specifications, one file per area.
 - `steps/`: step definitions; reuse existing steps before writing new ones.
 - `tasks/` (actions) and `questions/` (what the actor reads), `fixtures/actor.ts`: the domain language the steps call.
 - `interactions/`: the UI protocol driver (Playwright on the page).
