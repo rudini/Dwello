@@ -188,9 +188,17 @@ async function validateConfig(key: ConfigKey, value: string) {
  */
 export async function setConfig(key: ConfigKey, value: string): Promise<Configuration> {
 	await validateConfig(key, value);
+	return saveConfig(db, key, value);
+}
 
+/** Writes a validated value, inside a transaction when one is given */
+async function saveConfig(
+	tx: Pick<typeof db, 'select' | 'update' | 'insert'>,
+	key: ConfigKey,
+	value: string
+): Promise<Configuration> {
 	// Check if config exists
-	const [existing] = await db
+	const [existing] = await tx
 		.select()
 		.from(configuration)
 		.where(eq(configuration.key, key))
@@ -198,7 +206,7 @@ export async function setConfig(key: ConfigKey, value: string): Promise<Configur
 
 	if (existing) {
 		// Update existing
-		const [updated] = await db
+		const [updated] = await tx
 			.update(configuration)
 			.set({ value, updatedAt: new Date() })
 			.where(eq(configuration.key, key))
@@ -206,7 +214,7 @@ export async function setConfig(key: ConfigKey, value: string): Promise<Configur
 		return updated;
 	} else {
 		// Insert new
-		const [created] = await db
+		const [created] = await tx
 			.insert(configuration)
 			.values({ key, value })
 			.returning();
@@ -232,11 +240,13 @@ export async function setMultipleConfig(
 		}
 	}
 
-	// All or nothing: one invalid value keeps the others unsaved
+	// All or nothing: one invalid value, or a write that fails, keeps the others unsaved
 	if (Object.keys(errors).length === 0) {
-		for (const [key, value] of Object.entries(configs)) {
-			if (value !== undefined) await setConfig(key as ConfigKey, value);
-		}
+		await db.transaction(async (tx) => {
+			for (const [key, value] of Object.entries(configs)) {
+				if (value !== undefined) await saveConfig(tx, key as ConfigKey, value);
+			}
+		});
 	}
 
 	return {

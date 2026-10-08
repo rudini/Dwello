@@ -171,7 +171,7 @@ Keys use snake_case (they are stored keys, not JSON fields). All values are sent
 |---|---|---|
 | GET | `/` | → `{ data: { <key>: value }, keys: [...] }` (defaults filled in) |
 | GET | `/:key` | → `{ key, value, type, default }`. 404 unknown key |
-| PUT | `/` | Body: any of the keys above. → `{ message, data }`. 400 `{ error, errors: { <key>: message } }`; then nothing is saved |
+| PUT | `/` | Body: any of the keys above. → `{ message, data }`. 400 `{ error, errors: { <key>: message } }`; then nothing is saved. Valid values are written in one transaction, so a failing write saves none (500) |
 | PUT | `/:key` | Body: `{ value }`. → `{ message, key, value }`. 404 unknown key; 400 invalid value |
 | DELETE | `/:key` | Resets to default. → `{ message, key, value }` (the default). 404 unknown key |
 
