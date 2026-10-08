@@ -11,12 +11,13 @@ const sources: Record<string, string> = {
 	'src/routes/buildings/[id]/+page.server.ts': '',
 	'src/routes/tenants/+layout.svelte': '',
 	'src/routes/tenants/+page.svelte': "import { formatName } from '$lib/stores';",
-	'src/routes/tenants/new/+page.svelte': '',
+	'src/routes/tenants/new/+page.svelte': "import type { Tenant } from '$lib/types';",
 	'src/lib/components/Card.svelte': '',
 	'src/lib/components/BuildingForm.svelte':
 		"import Card from './Card.svelte'; import { label } from '$lib/building';",
 	'src/lib/building.ts': '',
 	'src/lib/stores/index.ts': '',
+	'src/lib/types.ts': '',
 	'src/styles/app.css': '',
 	'src/__tests__/card.test.ts': "import Card from '$lib/components/Card.svelte';"
 };
@@ -47,6 +48,11 @@ describe('affectedRoutes', () => {
 	it('captures every page when the app shell or global styles change', () => {
 		expect(routes('src/app.html')).toEqual(all);
 		expect(routes('src/styles/app.css')).toEqual(all);
+	});
+
+	// Type imports vanish when compiled, so a changed type cannot change how a page looks
+	it('ignores pages that import a changed module only for its types', () => {
+		expect(routes('src/lib/types.ts')).toEqual([]);
 	});
 
 	it('ignores tests and files outside the frontend', () => {

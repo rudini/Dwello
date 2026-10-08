@@ -11,6 +11,8 @@ export function sourceFiles(root = '.') {
 const isTest = (file: string) => file.includes('__tests__') || /\.(test|spec)\.ts$/.test(file);
 const routeOf = (dir: string) => dir.replace(/^src\/routes/, '') || '/';
 const escape = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+// `import type` vanishes when compiled: a changed type cannot change how a page looks
+const withoutTypeImports = (source: string) => source.replace(/import\s+type\b[^;]*?from\s*['"][^'"]*['"]/g, '');
 
 // Module specifier ending a file is imported by: `Button.svelte`, `navigation` (.ts/.js), `stores` for stores/index.ts
 function importName(file: string) {
@@ -31,7 +33,9 @@ export function affectedRoutes(changed: string[], files: string[], read: (file: 
 	const queue = changed.filter((file) => file.startsWith('src/') && !isTest(file));
 	const importers = (file: string) => {
 		const specifier = new RegExp(`['"][^'"]*/${escape(importName(file))}(\\.(ts|js))?['"]`);
-		return files.filter((other) => other !== file && !isTest(other) && specifier.test(read(other)));
+		return files.filter(
+			(other) => other !== file && !isTest(other) && specifier.test(withoutTypeImports(read(other)))
+		);
 	};
 
 	while (queue.length) {
