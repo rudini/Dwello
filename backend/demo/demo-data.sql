@@ -106,17 +106,17 @@ INSERT INTO invoices (id, building_id, invoice_number, billing_entity_name, desc
 ('c0000001-0001-0001-0001-000000000099', '11111111-1111-1111-1111-111111111111', 'INV-2024-REP', 'Sanitär Keller AG', 'Reparatur Boiler Wohnung 2.01', (SELECT id FROM categories WHERE name_de = 'Reparaturen' LIMIT 1), NULL, 2350.00, false, '2024-02-20', '2024-03-20') ON CONFLICT (id) DO NOTHING;
 
 -- ============================================================================
--- Sample Utility Statements
+-- Sample Utility Statements (total costs include the 3 % management fee; balance = total costs - advance payments)
 -- ============================================================================
 
 -- Statement for Hans Müller (Building 1, Apt 1.01) - Year 2024
 INSERT INTO utility_statements (id, tenant_id, apartment_id, contract_id, statement_number, period_start, period_end, statement_date, rental_days, total_costs, total_advance_payments, management_fee, balance, status, payment_deadline) VALUES
-('d0000001-0001-0001-0001-000000000001', 'a0000001-0001-0001-0001-000000000001', 'aaaa1111-1111-1111-1111-111111111111', 'b0000001-0001-0001-0001-000000000001', 'NK-2024-001', '2024-01-01', '2024-12-31', '2025-01-15', 366, 2850.50, 2400.00, 85.52, 535.02, 'sent', '2025-02-15') ON CONFLICT (id) DO NOTHING;
+('d0000001-0001-0001-0001-000000000001', 'a0000001-0001-0001-0001-000000000001', 'aaaa1111-1111-1111-1111-111111111111', 'b0000001-0001-0001-0001-000000000001', 'NK-2024-001', '2024-01-01', '2024-12-31', '2025-01-15', 366, 2936.02, 2400.00, 85.52, 536.02, 'sent', '2025-02-15') ON CONFLICT (id) DO NOTHING;
 
 -- Statement for Anna Schmidt (Building 1, Apt 1.02) - Year 2024
 INSERT INTO utility_statements (id, tenant_id, apartment_id, contract_id, statement_number, period_start, period_end, statement_date, rental_days, total_costs, total_advance_payments, management_fee, balance, status, payment_deadline) VALUES
-('d0000001-0001-0001-0001-000000000002', 'a0000001-0001-0001-0001-000000000002', 'aaaa1111-1111-1111-1111-222222222222', 'b0000001-0001-0001-0001-000000000002', 'NK-2024-002', '2024-01-01', '2024-12-31', '2025-01-15', 366, 3250.75, 3000.00, 97.52, 348.27, 'draft', NULL) ON CONFLICT (id) DO NOTHING;
+('d0000001-0001-0001-0001-000000000002', 'a0000001-0001-0001-0001-000000000002', 'aaaa1111-1111-1111-1111-222222222222', 'b0000001-0001-0001-0001-000000000002', 'NK-2024-002', '2024-01-01', '2024-12-31', '2025-01-15', 366, 3348.27, 3000.00, 97.52, 348.27, 'draft', NULL) ON CONFLICT (id) DO NOTHING;
 
 -- Statement for Thomas Weber (Building 2, Apt A1) - Year 2024 (Paid)
 INSERT INTO utility_statements (id, tenant_id, apartment_id, contract_id, statement_number, period_start, period_end, statement_date, rental_days, total_costs, total_advance_payments, management_fee, balance, status, payment_deadline, paid_date, paid_amount) VALUES
-('d0000002-0002-0002-0002-000000000001', 'a0000001-0001-0001-0001-000000000005', 'aaaa2222-2222-2222-2222-111111111111', 'b0000002-0002-0002-0002-000000000001', 'NK-2024-003', '2024-01-01', '2024-12-31', '2025-01-10', 366, 1650.00, 1800.00, 49.50, -100.50, 'paid', '2025-02-10', '2025-01-25', -100.50) ON CONFLICT (id) DO NOTHING;
+('d0000002-0002-0002-0002-000000000001', 'a0000001-0001-0001-0001-000000000005', 'aaaa2222-2222-2222-2222-111111111111', 'b0000002-0002-0002-0002-000000000001', 'NK-2024-003', '2024-01-01', '2024-12-31', '2025-01-10', 366, 1699.50, 1800.00, 49.50, -100.50, 'paid', '2025-02-10', '2025-01-25', -100.50) ON CONFLICT (id) DO NOTHING;

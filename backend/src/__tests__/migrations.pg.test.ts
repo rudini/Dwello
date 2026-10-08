@@ -54,4 +54,14 @@ describe('Migrationen anwenden', () => {
 			'Die Datenbank stammt von Migrationen, die es nicht mehr gibt (0001_initial_schema.sql). Bitte neu aufsetzen: bun run db:reset'
 		);
 	});
+
+	// Eine früher von docker-compose (initdb) eingerichtete Datenbank hat Tabellen, aber keine Buchführung
+	it('lehnt eine Datenbank mit Tabellen, aber ohne Buchführung der Migrationen ab', async () => {
+		const name = await database();
+		await query(name, 'CREATE TABLE buildings (id uuid PRIMARY KEY)');
+
+		await expect(migrate(`${server}/${name}`, migrations)).rejects.toThrow(
+			'Die Datenbank wurde ohne diese Migrationen eingerichtet. Bitte neu aufsetzen: bun run db:reset'
+		);
+	});
 });

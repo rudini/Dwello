@@ -16,7 +16,7 @@
     "format": "prettier --write .",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "bun --env-file=../.env --env-file=../.env.local --env-file=.env --env-file=.env.local scripts/migrate.ts",
-    "db:reset": "bun --env-file=../.env --env-file=../.env.local --env-file=.env --env-file=.env.local scripts/e2e-db.ts",
+    "db:reset": "bun --env-file=../.env --env-file=../.env.local --env-file=.env --env-file=.env.local scripts/db-reset.ts",
     "db:demo": "bun --env-file=../.env --env-file=../.env.local --env-file=.env --env-file=.env.local scripts/demo-data.ts",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
