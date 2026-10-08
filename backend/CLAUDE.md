@@ -20,7 +20,7 @@ Never run `bun test` without the preload: `*.pg.test.ts` would write into the de
 
 - `src/routes/*.ts`: HTTP only (validation, status codes); logic goes into `src/services/*.service.ts`.
 - `src/db/schema.ts`: Drizzle schema. Only the pg tests catch drift from `migrations/`, and only in the columns they use; keep both in sync by hand.
-- `migrations/`: plain SQL, applied in file order by `src/db/migrate.ts` and recorded in `schema_migrations`. `0001_schema.sql` is the schema, `0002_stammdaten.sql` the master data (cost categories, distribution keys, heating profiles). Schema changes go into a new numbered SQL file written by hand (`db:generate` has no snapshots and would emit the whole schema again; `db:push` bypasses `schema_migrations`); also update `src/db/schema.ts` and `docs/data-model.md`.
+- `migrations/`: plain SQL, applied in file order by `src/db/migrate.ts` and recorded in `schema_migrations`. `0001_schema.sql` is the schema, `0002_stammdaten.sql` the master data (cost categories, distribution keys, heating profiles). Schema changes go into a new numbered SQL file written by hand (`db:generate` has no snapshots and would emit the whole schema again; `db:push` bypasses `schema_migrations`); also update `src/db/schema.ts` and `docs/data-model.md`. Until the first installation, `0001_schema.sql` may still be edited instead; local databases then need `bun run db:reset`.
 - `demo/demo-data.sql` and `src/db/demo-data.ts`: demo data, never part of the migrations. Demo statements are generated through the real statement service.
 
 ## Tests
