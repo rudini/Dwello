@@ -4201,7 +4201,8 @@ reviewed independently afterwards.
   `/validate-percentages`, `/calculate-share` (`routes/config.ts`, `routes/heating-profiles.ts`), with the code only
   they used (`initializeDefaultConfig`, `getCurrentAccountingPeriod`, `getAccountingPeriodDates`,
   `AccountingPeriod`, `initializePredefinedHeatingProfiles`, `PREDEFINED_HEATING_PROFILES` and its tests; the
-  predefined profiles come from the migrations, tested in `heating-profiles.pg.test.ts`)
+  predefined profiles come from the migrations, tested in `heating-profiles.pg.test.ts`); backend 414 tests
+  (233 unit + 181 PostgreSQL), coverage 83.7 % lines / 86.8 % functions
 
 ### Verification
 - Backend 430 (249 unit + 181 PostgreSQL), coverage 82.3 % lines / 85.3 % functions; frontend 465, coverage
