@@ -362,7 +362,7 @@ Dwello provides:
   - **Gebäudeinfrastruktur** (Building infrastructure - elevator, caretaker)
   - **Entsorgung** (Disposal - garbage, recycling)
   - **Kommunikation** (Communication - cable TV, radio)
-  - **Verwaltung** (Management - admin costs, capped at 3% of total)
+  - **Verwaltung** (Management - admin costs; customary guideline up to 3% of total, not a cap)
   - **Sonstiges** (Other)
 
 **Automatic Validity Checking:**
@@ -378,7 +378,7 @@ Dwello provides:
   - Caretaker wages
   - Garbage collection
   - Basic cable TV or radio fees
-  - Management fee (if contractually agreed, max 3%)
+  - Management fee (if contractually agreed; customary guideline up to 3%)
 
 - **Not Allowed (nicht zulässig):**
   - Maintenance and repair costs (except service contracts)
@@ -509,18 +509,17 @@ Users can create custom formulas using apartment variables:
 
 ### 5.8 Management Costs Configuration
 
-**Overview:** Configure the property manager's fee, capped at 3% of total utility costs per Swiss regulations.
+**Overview:** Configure the property manager's fee as a percentage of total utility costs. Up to 3% is the customary guideline in Switzerland, not a legal cap; a higher agreed percentage is applied as set.
 
 **Features:**
-- Global management cost percentage (0-3%)
+- Global management cost percentage (0% or more; default suggestion for new statements, adjustable per building and period)
 - Automatic calculation and inclusion in statements
 - Formula: `Total Utility Costs × (Management Cost % / 100)`
 - Optional: Can be disabled (set to 0%)
 
 **Configuration:**
 - Simple percentage input field
-- Visual indicator showing current % and max allowed (3%)
-- Help text explaining the 3% limitation
+- Help text naming the customary guideline (up to 3%)
 - Audit trail showing when percentage was last changed
 
 **Statement Impact:**
@@ -531,7 +530,7 @@ Users can create custom formulas using apartment variables:
 **Use Cases:**
 1. Initial setup: Set management fee to agreed percentage (e.g., 2%)
 2. Annual review: Adjust percentage if contract changes
-3. Compliance validation: System prevents exceeding 3% limit
+3. Validation: the percentage may not be negative
 
 ---
 
@@ -768,7 +767,7 @@ BALANCE (refund): CHF 30
 | **Building Infrastructure** | Elevator maintenance and electricity, caretaker wages/services, stairwell maintenance, intercom systems |
 | **Waste Disposal** | Garbage collection, recycling services, composting services, hazardous waste disposal |
 | **Communication** | Basic cable TV fees, radio reception fees, common antenna maintenance |
-| **Management** | Administration and management fees (capped at 3% of total utility costs, only if contractually agreed) |
+| **Management** | Administration and management fees (customary guideline up to 3% of total utility costs, only if contractually agreed) |
 
 **Not Allowed Costs (nicht zulässig):**
 
@@ -1068,10 +1067,9 @@ BALANCE (refund): CHF 30
 - Warning if current date is past accounting period
 
 **Tab 2: Management Costs**
-- Percentage input (0-3%)
+- Percentage input (0% or more)
 - Label: "Verwaltungsgebühr"
-- Visual indicator: Slider or percentage bar showing 0/3%
-- Help text: "Max 3% of total utility costs allowed per Swiss regulations"
+- Help text: "Vorschlag beim Erstellen der Abrechnungen, pro Liegenschaft und Periode anpassbar. Üblicher Richtwert: bis 3%."
 - Checkbox: "Include management costs in statements"
 
 **Tab 3: Heating Distribution**
@@ -2063,7 +2061,7 @@ This PRD complies with the following Swiss regulations:
 
 Key Legal Requirements Implemented:
 - Allowed/disallowed utility cost validation
-- Management fee capped at 3% of total costs
+- Management fee: customary guideline up to 3% of total costs, not a cap
 - Detailed statement requirements
 - Multi-language support for tenant communications
 - Data retention (10 years for financial records)
