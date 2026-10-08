@@ -14,7 +14,7 @@ Browser -> SvelteKit BFF (port 3000: /auth/*, /api/*, page loads/actions) -> Ely
 
 - The **BFF** does the OAuth login, keeps the session JWT in an HTTPOnly cookie, checks the XSRF token on mutations and forwards calls to the backend with `Authorization: Bearer <jwt>`. The browser never sees the JWT.
 - The **backend** validates the JWT and holds all business logic. It is not meant to be called from the browser directly.
-- Backend port: `PORT` (default 3001). The BFF reaches it via `BACKEND_API_URL` (`/api/*` proxy routes) or `BACKEND_URL` (`hooks.server.ts`, `src/lib/server/*.ts`); both default to `http://localhost:3001`.
+- Backend port: `PORT` (default 3001). The BFF reaches it via `BACKEND_URL` (default `http://localhost:3001`).
 
 ---
 
@@ -107,7 +107,7 @@ There is no "predefined" flag on categories.
 | GET | `/for-statement/:buildingId` | Query: `periodStart`, `periodEnd` (required). → array of the building's invoices with `isValidUtilityCost = true` dated in the period |
 | GET | `/:id` | → invoice with `building`, `category`, `distributionKey`, `llmCategory` (see `tests/contracts/invoice.json`). 404 |
 | GET | `/:id/validate` | → `{ isValid, errors, warnings }`; 404 with the same shape if not found |
-| POST | `/:id/recategorize` | No body. Asks the LLM again and stores `llmCategoryId`/`llmConfidence` (does not change `categoryId`). → `{ success: true, invoice, categorization: { category (name), confidence, isAllowedUtilityCost, reasoning } }`. 404; **503** LLM unreachable or no matching category; 500 other errors |
+| POST | `/:id/recategorize` | No body. Asks the LLM again and stores `llmCategoryId`/`llmConfidence`; from confidence 0.85 the suggestion also becomes `categoryId` (as on create; the category decides `isValidUtilityCost`, manual override cleared). → `{ success: true, invoice, categorization: { category (name), confidence, isAllowedUtilityCost, reasoning } }`. 404; **503** LLM unreachable or no matching category; 500 other errors |
 | POST | `/` | Query: `skipLlm=true` disables categorization. Body below. → 201 invoice. 400 building or category not found |
 | PUT | `/:id` | Body: any subset of the POST fields. → invoice. 404; 400 category not found |
 | DELETE | `/:id` | 204. 404 |
@@ -171,7 +171,7 @@ Keys use snake_case (they are stored keys, not JSON fields). All values are sent
 |---|---|---|
 | GET | `/` | → `{ data: { <key>: value }, keys: [...] }` (defaults filled in) |
 | GET | `/:key` | → `{ key, value, type, default }`. 404 unknown key |
-| PUT | `/` | Body: any of the keys above. → `{ message, data }`. 400 `{ error, errors: { <key>: message } }`; valid keys in the same request are still saved |
+| PUT | `/` | Body: any of the keys above. → `{ message, data }`. 400 `{ error, errors: { <key>: message } }`; then nothing is saved |
 | PUT | `/:key` | Body: `{ value }`. → `{ message, key, value }`. 404 unknown key; 400 invalid value |
 | DELETE | `/:key` | Resets to default. → `{ message, key, value }` (the default). 404 unknown key |
 
@@ -179,9 +179,9 @@ Keys use snake_case (they are stored keys, not JSON fields). All values are sent
 
 ### Status
 
-Stored status is `draft`, `sent`, `paid` or `overdue`. Responses report an **effective status**: a `sent` statement whose `paymentDeadline` is past is returned as `overdue`.
+Stored status is `draft`, `sent` or `paid`; `overdue` is never stored. Responses report an **effective status**: a `sent` statement whose `paymentDeadline` is past is returned as `overdue`.
 
-Transitions (`PUT /:id/status`, checked against the effective status): `draft → sent`, `sent → paid | overdue`, `overdue → paid`; `paid` is final. Anything else is 400 `Invalid status transition from X to Y`.
+Transitions (`PUT /:id/status`, checked against the effective status): `draft → sent`, `sent → paid`, `overdue → paid`; `paid` is final. Anything else is 400 `Invalid status transition from X to Y`.
 
 Only **drafts** can be deleted or get line items; amounts (`totalCosts`, `totalAdvancePayments`, `managementFee`, `balance`) of non-drafts cannot change (400 with message).
 
@@ -193,7 +193,6 @@ Filter `status` in `GET /` and `/counts`: `draft`, `paid`, `sent` (sent, deadlin
 |---|---|---|
 | GET | `/` | Query: `search`, `buildingId`, `apartmentId`, `tenantId`, `status`, `periodStart`, `periodEnd`, `limit` (default 20), `offset`. → `{ data, total, limit, offset }`; items include `tenant`, `apartment`, `building`, `lineItems` (no PDF) |
 | GET | `/counts` | Query: `buildingId`. → `{ draft, sent, paid, overdue, total }` |
-| POST | `/mark-overdue` | → `{ message, count }` |
 | POST | `/preview` | Body: calculation input (below). Stores nothing. → `{ preview: true, contractId, apartmentId, tenantId, periodStart, periodEnd, rentalDays, totalPeriodDays, lineItems, subtotal, managementFee, managementFeePercent, totalCosts, totalAdvancePayments, balance }` (numbers; positive balance = tenant owes). 400 |
 | POST | `/generate` | Body: calculation input + `buildingId`. Synchronous, one contract: calculates and stores a **draft** with line items and a payment deadline of `payment_deadline_days`. → **201** statement. 400 (e.g. contract not found, contract outside the period) |
 | GET | `/:id` | → statement with `tenant`, `apartment`, `building`, `lineItems` (see `tests/contracts/statement.json`). 404 |
@@ -263,7 +262,7 @@ All on path `/`; `Secure` from `COOKIE_SECURE`, `SameSite` from `COOKIE_SAME_SIT
 
 ### JWT
 
-HS256 signed with `JWT_SECRET` (≥ 32 chars). Claims: `sub`, `email`, `name`, `provider`, `picture?`, `iat`, `exp`, `iss: "dwello"`, `aud: "dwello-app"`. Lifetime `JWT_EXPIRY` (`<n>s|m|h|d`, default `7d`). The BFF verifies issuer and audience; the backend verifies signature, expiry and the claim shape.
+HS256 signed with `JWT_SECRET` (≥ 32 chars). Claims: `sub`, `email`, `name`, `provider`, `picture?`, `iat`, `exp`, `iss: "dwello"`, `aud: "dwello-app"`. Lifetime `JWT_EXPIRY` (`<n>s|m|h|d`, default `7d`). The BFF and the backend both verify signature, expiry, issuer and audience; the backend also checks the claim shape.
 
 ### XSRF and proxy
 
