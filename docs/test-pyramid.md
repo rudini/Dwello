@@ -1,6 +1,6 @@
 # Testpyramide Dwello (ATDD nach Dave Farley)
 
-**Stand:** 6. Oktober 2026, gezählt aus ausgeführten Läufen (`bun test`, Vitest, Playwright Chromium und `api`)
+**Stand:** 8. Oktober 2026, gezählt aus ausgeführten Läufen (`bun test`, Vitest, Playwright Chromium und `api`)
 
 Dwello entwickelt nach **Acceptance Test Driven Development**: Jede Änderung beginnt mit einem fachlichen Akzeptanzszenario, Unit-TDD ist die innere Schleife. Farley unterscheidet zwei Perspektiven, die sich ergänzen:
 
@@ -15,10 +15,10 @@ Dwello entwickelt nach **Acceptance Test Driven Development**: Jede Änderung be
                     │  "Was das Business    │         ← äussere Schleife: zuerst geschrieben,
                     │   will"               │           grün = Feature fertig
                 ┌───┴──────────────────────┴───┐
-                │  Integration (echte DB)       │   166   bun test *.pg.test.ts, dwello_test, API-Verträge
+                │  Integration (echte DB)       │   181   bun test *.pg.test.ts, dwello_test, API-Verträge
                 │  technische Verträge          │         nur wo Unit-Tests nicht reichen
            ┌────┴───────────────────────────────┴────┐
-           │  Unit-TDD                                │   706   Vitest (Frontend 462), bun test (Backend 244)
+           │  Unit-TDD                                │   714   Vitest (Frontend 465), bun test (Backend 249)
            │  "Was der Entwickler denkt"              │         ← innere Schleife: Sekunden
            └──────────────────────────────────────────┘
 ```
@@ -29,10 +29,10 @@ Die Menge bleibt eine Pyramide, viele schnelle Unit-Tests unten. Die **Reihenfol
 
 | Ebene | Tests | Ort | Runner | Gegen was | Test-Doubles |
 |---|---|---|---|---|---|
-| Akzeptanz (E2E) | 260 Testfälle aus 40 Features (+8 über den API-Driver) | `tests/e2e/features/*.feature` | Playwright + playwright-bdd | Browser → SvelteKit-Build (`node build`) → Elysia → PostgreSQL `dwello_e2e` (vor jedem Lauf neu migriert) | keine API-Mocks; SMTP-Mail-Catcher statt Mail-Provider, signiertes Session-JWT statt Google-OAuth |
-| Integration | 166 in 28 Dateien | `backend/src/__tests__/*.pg.test.ts` | `bun test` | Elysia-App in-process (`app.handle`) → PostgreSQL `dwello_test` (vor jedem Lauf neu migriert) | keine; lokaler SMTP-Server für Mails |
-| Unit Backend | 244 in 10 Dateien | `backend/src/__tests__/*.test.ts` | `bun test` (ein Lauf mit den pg-Tests) | reine Funktionen der Services | keine |
-| Unit Frontend | 462 in 53 Dateien | `src/__tests__`, `src/lib/utils/__tests__`, `tests/unit` | Vitest (`server`: node, `dom`: jsdom) | Load-Funktionen, Actions, BFF, Komponenten | Fake-Backend per `fetch`-Stub / `fakeBff` (für Abrechnungen aus den API-Verträgen in `tests/contracts`), `vi.mock` für `$app/*` |
+| Akzeptanz (E2E) | 260 Testfälle aus 41 Features (+8 über den API-Driver) | `tests/e2e/features/*.feature` | Playwright + playwright-bdd | Browser → SvelteKit-Build (`node build`) → Elysia → PostgreSQL `dwello_e2e` (vor jedem Lauf neu migriert) | keine API-Mocks; SMTP-Mail-Catcher statt Mail-Provider, signiertes Session-JWT statt Google-OAuth |
+| Integration | 181 in 30 Dateien | `backend/src/__tests__/*.pg.test.ts` | `bun test` | Elysia-App in-process (`app.handle`) → PostgreSQL `dwello_test` (vor jedem Lauf neu migriert) | keine; lokaler SMTP-Server für Mails |
+| Unit Backend | 249 in 11 Dateien | `backend/src/__tests__/*.test.ts` | `bun test` (ein Lauf mit den pg-Tests) | reine Funktionen der Services | keine |
+| Unit Frontend | 465 in 53 Dateien | `src/__tests__`, `src/lib/utils/__tests__`, `tests/unit` | Vitest (`server`: node, `dom`: jsdom) | Load-Funktionen, Actions, BFF, Komponenten | Fake-Backend per `fetch`-Stub / `fakeBff` (aus den API-Verträgen in `tests/contracts`, wo es einen gibt), `vi.mock` für `$app/*` |
 
 Regeln:
 
@@ -48,8 +48,8 @@ Die heutige Abdeckung ist die Untergrenze; sinkt sie, scheitert der Lauf lokal u
 
 | Bereich | Messung | Untergrenze | Ort |
 |---|---|---|---|
-| Frontend | `npm run test:coverage` (Vitest, v8, alle `src/**/*.{ts,svelte}`) | 71 % Statements, 59 % Branches, 76 % Funktionen, 66 % Zeilen | `vitest.config.ts` |
-| Backend | `bun run test` (alle Backend-Tests, lcov) | 76 % Zeilen, 81 % Funktionen | `backend/scripts/coverage-check.ts` (Bun prüft eigene Schwellen pro Datei) |
+| Frontend | `npm run test:coverage` (Vitest, v8, alle `src/**/*.{ts,svelte}`) | 71 % Statements, 60 % Branches, 76 % Funktionen, 66 % Zeilen | `vitest.config.ts` |
+| Backend | `bun run test` (alle Backend-Tests, lcov) | 82 % Zeilen, 85 % Funktionen | `backend/scripts/coverage-check.ts` (Bun prüft eigene Schwellen pro Datei) |
 
 ## Farleys vier Schichten in den Akzeptanztests
 
@@ -72,7 +72,7 @@ Isolation wie bei Farley:
 
 - **Funktional:** `seed.names` hängt an jeden fachlichen Namen eine UUID („Lindenhof“ → „Lindenhof 3f2a…“), Szenarien laufen parallel.
 - **Zeitlich:** Jedes Szenario legt seine Daten selbst an und räumt sie weg.
-- **System:** Externe Systeme sind an der Grenze ersetzt (Mail-Catcher, Session-JWT).
+- **System:** Externe Systeme sind an der Grenze ersetzt (Mail-Catcher, Session-JWT; in pg-Tests ein lokaler Ollama-Ersatz per `Bun.serve`).
 
 ## Workflow: ein Feature nach ATDD
 
@@ -90,8 +90,9 @@ Bedienung, die kein Fachverhalten ist, steht in eigenen Features: `breadcrumb.fe
 
 | Ebene | Lokal | CI (`.github/workflows/ci.yml`) |
 |---|---|---|
+| Lint und Typen | `npm run lint` (Warnungen scheitern), `npm run check`, `cd backend && bun run type-check` | Job „Lint and types“ |
 | Unit Frontend | `npm run test` (mit Coverage: `npm run test:coverage`) | Job „Unit tests“: alle Tests mit Coverage-Untergrenze |
-| Unit + Integration Backend | `cd backend && bun run test` (nur DB: `bun run test:pg`) | Job „Unit tests“, wenn `backend/` geändert; mit Coverage-Untergrenze |
+| Unit + Integration Backend | `cd backend && bun run test` (nur DB: `bun run test:pg`) | Job „Unit tests“, wenn `backend/` oder `tests/contracts/` geändert; mit Coverage-Untergrenze |
 | Akzeptanz | `npm run test:e2e` (nur API-Driver: `-- --project=api`) | Job „E2E tests“; PRs Chromium und `api`, `main` alle Browser und `api` |
 
 Voraussetzung lokal: PostgreSQL auf Port 5432 mit Benutzer `dwello`. Die Testdatenbanken `dwello_test` und `dwello_e2e` werden automatisch neu aufgesetzt; die Entwicklungsdatenbank bleibt unberührt.
@@ -99,4 +100,5 @@ Voraussetzung lokal: PostgreSQL auf Port 5432 mit Benutzer `dwello`. Die Testdat
 ## Offen
 
 - [ ] Coverage auf 80 % anheben (Backend-Zeilen, Frontend), dann die Untergrenzen nachziehen
-- [ ] Weitere API-Verträge für die übrigen Bereiche (Gebäude, Mieter, Rechnungen); heute nur die Abrechnungen
+- [ ] API-Verträge für die Listen von Gebäuden und Mietern (heute: Abrechnungen, Rechnungen, Gebäude- und Mieterdetail)
+- [ ] Typprüfung für `tests/` und die `*.config.ts` im Wurzelverzeichnis (`tsconfig.json` umfasst nur `src/`)

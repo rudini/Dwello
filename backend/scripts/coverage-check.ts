@@ -3,7 +3,7 @@
  * (bun's own coverageThreshold applies to every single file). Raise the minimums as coverage grows; the goal is 80 %.
  */
 
-const MINIMUM = { lines: 76, functions: 81 };
+const MINIMUM = { lines: 82, functions: 85 };
 const lcov = await Bun.file(`${import.meta.dir}/../coverage/lcov.info`).text();
 const total = (key: string) =>
 	[...lcov.matchAll(new RegExp(`^${key}:(\\d+)$`, 'gm'))].reduce((sum, [, n]) => sum + Number(n), 0);
