@@ -4266,8 +4266,13 @@ reviewed independently afterwards.
   as "Anteil" between building costs and tenant share in the PDF and on the statement page; they now store the
   tenant's share of the building total (`statement.service.ts`, `statement-generation.pg.test.ts`). The heating
   scenario in `statement-detail.feature` (one apartment, 43 %) stays the same
+- [x] **Review follow-up:** scenario „Anteil an den Heizkosten des Gebäudes“ (two equal apartments, 50 %; red on the old
+  code), the statement page shows the share with two decimals like the PDF (`src/lib/server/statement.ts`); statement
+  numbers read the year in UTC, the test shows a new year starting at 0001
 
 ### Open
+- [ ] `sharePercentage` of the calculation (and the preview API) is still the share of the period, while stored line
+  items mean the share of the building total; rename it to `periodShare`
 - [ ] Raise frontend coverage to 80 % and move the floors up
 
 ---

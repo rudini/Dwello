@@ -40,6 +40,16 @@ Funktionalität: Abrechnungsdetail
       | Eva Frei   | 43     | CHF 430.00 |
       | Marc Huber | 52     | CHF 520.00 |
 
+  # Der Anteil ist der Teil der Gebäudekosten, den der Mieter trägt: zwei gleich grosse Wohnungen, ein ganzes Jahr
+  @api
+  Szenario: Anteil an den Heizkosten des Gebäudes
+    Angenommen im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
+    Und der Mieter "Lea Graf" existiert
+    Und "Lea Graf" mietet die Wohnung "3.02" seit "2024-01-01" für "900" Franken
+    Und für "Lea Graf" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Lea Graf"
+    Dann trägt "Lea Graf" 50 % der Heizkosten, also "CHF 500.00"
+
   Szenario: Abrechnung versenden
     Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"

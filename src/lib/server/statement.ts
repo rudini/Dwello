@@ -14,7 +14,7 @@ const toLineItem = (item: BackendStatement): StatementLineItem => ({
 	distributionKeyName: item.distributionKeyName || '',
 	totalAmount: Number(item.totalAmount),
 	tenantShare: Number(item.tenantShare),
-	percentage: Number(item.sharePercentage) || 0
+	percentage: Math.round(Number(item.sharePercentage) * 100) / 100 || 0
 });
 
 // Before the rate was stored, the fee was a percentage of the tenant's costs before the fee

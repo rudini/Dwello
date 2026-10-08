@@ -34,4 +34,15 @@ describe('Abrechnung aus dem Backend', () => {
 			lineItems: [{ categoryName: 'Heating', tenantShare: 1000, percentage: 100 }]
 		});
 	});
+
+	// Wie im PDF auf zwei Stellen: der Anteil an den Gebäudekosten ist selten rund
+	it('zeigt den Anteil an den Gebäudekosten auf zwei Stellen', () => {
+		const [line] = backendStatement.lineItems;
+		const statement = toStatement({
+			...backendStatement,
+			lineItems: [{ ...line, sharePercentage: '26.7233' }]
+		});
+
+		expect(statement.lineItems[0].percentage).toBe(26.72);
+	});
 });
