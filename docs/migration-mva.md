@@ -24,7 +24,7 @@ Szenario und Messgrösse setzen keinen Entwurf voraus; die Dateien in der Spalte
 | Q3 | Änderbarkeit | Eine Gesetzesänderung betrifft die Berechnung der Nebenkostenabrechnung. | Keine Änderung an Routen, UI oder Rendering. | ✅ Berechnung in `calculation`, `prorating`, `distribution-key`, `formula`, `heating-profile` |
 | Q4 | Änderbarkeit | Das PDF-Layout der Abrechnung ändert sich. | Keine Änderung an der Berechnung. | ✅ `pdf.service.ts`; neue Felder zusätzlich in `statement-pdf.service.ts` |
 | Q5 | Testbarkeit | Die Berechnung einer Abrechnung wird geprüft. | In einem automatisierten Test ohne Webserver und ohne PDF. | ✅ `generateStatement`; `statement-creation.pg.test.ts` |
-| D1 | Datenintegrität | Eine versendete, überfällige oder bezahlte Abrechnung soll geändert oder gelöscht werden. | Abgelehnt; Beträge und Positionen bleiben unverändert. Ein Test belegt es. | ❌ Die Sperren in `statement.service.ts` (`updateStatement`, `deleteStatement`, `addLineItems`) prüfen nur `sent` und `paid`; `overdue` wird aber gespeichert (`markOverdueStatements`, Statuswechsel). Kein Test. Gesperrt ist dagegen das Löschen eines Mietvertrags mit Abrechnung |
+| D1 | Datenintegrität | Eine versendete, überfällige oder bezahlte Abrechnung soll geändert oder gelöscht werden. | Abgelehnt; Beträge und Positionen bleiben unverändert. Ein Test belegt es. | ✅ Nur ein Entwurf lässt sich löschen, ergänzen oder in den Beträgen ändern (`statement.service.ts`); `statement-lock.pg.test.ts`. Ein Mietvertrag mit Abrechnung lässt sich nicht löschen |
 | D2 | Datenintegrität | Die Abrechnungserstellung bricht mitten im Schreiben ab. | Keine Abrechnung ohne ihre Positionen. | ✅ `db.transaction` in `createStatement`; `statement-creation.pg.test.ts` („speichert keine Abrechnung, wenn …“) |
 | S1 | Sicherheit | Ein Aufruf ohne gültige Sitzung erreicht das BFF oder das Backend. | Antwort 401 oder Umleitung zur Anmeldung. | ✅ `auth-guard.test.ts`, `auth.pg.test.ts` |
 | S2 | Sicherheit | Ein Skript im Browser versucht, die Sitzung zu lesen. | Der Browser hat keinen Zugriff auf ein Token (HttpOnly-Cookie). | ❓ So gebaut (BFF), aber kein Test |
@@ -46,7 +46,7 @@ Diese Punkte machen die Schichtung unsauber, ohne selbst ein Szenario zu verletz
 
 ## Umsetzung
 
-Bereits erledigt: Die Abrechnungserstellung ist aus `routes/statements.ts` in `statement.service.ts` und `statement-pdf.service.ts` gewandert, mit Transaktion (Q5, D2).
+Bereits erledigt: Die Abrechnungserstellung ist aus `routes/statements.ts` in `statement.service.ts` und `statement-pdf.service.ts` gewandert, mit Transaktion (Q5, D2). Jede Abrechnung ausser dem Entwurf ist gesperrt, auch eine überfällige (D1).
 
 ### Schritt 1: Szenarien bestätigen, Entscheidungen festhalten
 
@@ -64,7 +64,6 @@ Fertig, wenn: Die Szenarien sind bestätigt und die ADRs liegen vor.
 
 Nur für Szenarien, die nicht erfüllt sind, je mit einem Test, der vorher fehlschlägt:
 
-- **D1:** `overdue` nur noch berechnen statt speichern (so beschreibt es `UBIQUITOUS_LANGUAGE.md`) oder in die Sperren aufnehmen; Test für Ändern, Löschen und neue Positionen.
 - **R2:** tägliches Backup der Datenbank in `docker-compose.prod.yml`, dokumentierte Wiederherstellung, erste Probe.
 - **Q2:** `isOllamaAvailable` anbieterneutral benennen und `SWISS_UTILITY_CATEGORIES` aus `config/llm.ts` herauslösen.
 - **R1, S2:** fehlende Tests ergänzen.
@@ -127,4 +126,4 @@ Jede Route gehört zum Modul ihres Services; `routes/dashboard.ts` liest über a
 ## Risiken
 
 - **Der Plan wächst wieder.** Jede Ergänzung braucht ein Szenario, das ohne sie nicht erfüllt ist.
-- **Szenarien veralten unbemerkt.** Nur Szenarien mit einem Test bleiben verlässlich belegt. Heute fehlt er für Q2 bis Q4 (statische Abhängigkeiten, prüfbar mit fallow-Grenzen), D1, S2, P1, P2, R1 (Erfassen) und R2.
+- **Szenarien veralten unbemerkt.** Nur Szenarien mit einem Test bleiben verlässlich belegt. Heute fehlt er für Q2 bis Q4 (statische Abhängigkeiten, prüfbar mit fallow-Grenzen), S2, P1, P2, R1 (Erfassen) und R2.
