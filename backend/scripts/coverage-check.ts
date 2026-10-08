@@ -1,6 +1,6 @@
 /**
  * Fails `bun run test` when the backend tests together cover fewer lines or functions than today
- * (bun's own coverageThreshold applies to every single file). Raise the minimums as coverage grows; the goal is 80 %.
+ * (bun's own coverageThreshold applies to every single file). Raise the minimums as coverage grows.
  */
 
 const MINIMUM = { lines: 82, functions: 85 };
