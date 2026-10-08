@@ -4340,9 +4340,19 @@ reviewed independently afterwards.
   error no longer prints the URL; the notice mentions billing entities that are individuals; README names which hosts
   count as the operator's server. No API contract for `llm-recipient`: the contract check skips `null`, the default answer
 
+- [x] **Docs in English and consistent with the code:** translated `docs/test-pyramid.md` and `docs/migration-mva.md`;
+  rewrote `docs/data-model.md` from the migrations and `docs/api-specification.md` from the routes; aligned
+  `docs/tech-stack.md`, `docs/design_system.md` and `docs/PRD-Dwello.md` (PRD marked as product vision, unbuilt items
+  "planned, not implemented"); fixed README, `UBIQUITOUS_LANGUAGE.md` (config keys, overdue, building types) and the
+  dead `requirements-prosa.md` link in `CLAUDE.md`. A second review cross-checked the docs against each other
+
 ### Open
-- [ ] Raise coverage to the target in `docs/test-pyramid.md` and move the floors up
+- [ ] Raise frontend coverage to the target in `docs/test-pyramid.md` and move the floor up
 - [ ] MVA: confirm the scenarios and record ADRs in `docs/adr/`; close R2 (database backup), measure P1 and P2
+- [ ] Code bugs found while aligning the docs: a stored `overdue` statement drops out of filters and counts, and
+  `POST /statements/mark-overdue` never marks one; BFF `POST /api/statements` proxies to a missing backend route;
+  `management_fee_percent` is not locked after draft; recategorize never sets `categoryId`; `PUT /config` saves
+  partially on 400; the backend does not check JWT issuer/audience; `BACKEND_API_URL` vs `BACKEND_URL`
 
 ---
 
