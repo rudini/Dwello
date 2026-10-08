@@ -162,7 +162,7 @@ Keys use snake_case (they are stored keys, not JSON fields). All values are sent
 | `company_address` | ≤ 500 chars | `""` |
 | `company_postal_code` | 4 digits | `""` |
 | `company_city` | ≤ 100 chars | `""` |
-| `iban` | valid IBAN incl. checksum | `""` |
+| `iban` | CH or LI IBAN, 21 characters, MOD-97 checksum | `""` |
 | `payment_deadline_days` | 7–90 | `30` |
 | `reminder_after_days` | 7–60 | `14` |
 | `default_language` | `de` \| `fr` \| `it` \| `rm` \| `en` | `de` |

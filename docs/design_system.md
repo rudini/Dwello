@@ -570,9 +570,9 @@ flex items-center gap-3
 
 | Element | Colors | Ratio |
 |---------|--------|-------|
-| Primary text on white | #111318 on #ffffff | 12.6:1 |
-| White text on primary | #ffffff on #135bec | 7.8:1 |
-| Secondary text | #616f89 on #ffffff | 6.5:1 |
+| Primary text on white | #111318 on #ffffff | 18.6:1 |
+| White text on primary | #ffffff on #135bec | 5.6:1 |
+| Secondary text | #616f89 on #ffffff | 5.1:1 |
 
 ### Touch Targets
 
