@@ -244,7 +244,7 @@ const allBuildings = await db.select().from(buildings)
 3. Provider → GET /auth/callback?code=xxx&state=yyy
 
 4. BFF validates state, exchanges the code, fetches the profile,
-   signs a JWT {sub, email, name, provider, picture},
+   signs a JWT {sub, email, name, provider, picture, iss, aud},
    sets dwello_session and dwello_xsrf, redirects into the app
 
 5. Client calls /api/* with X-XSRF-TOKEN on mutations;
@@ -253,7 +253,7 @@ const allBuildings = await db.select().from(buildings)
 6. BFF compares cookie dwello_xsrf with header X-XSRF-TOKEN
    (constant-time), forwards with Authorization: Bearer {jwt}
 
-7. ElysiaJS verifies signature and expiry, processes the request
+7. ElysiaJS verifies signature, expiry, issuer and audience, processes the request
 ```
 
 **Code locations:**
