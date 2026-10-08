@@ -170,13 +170,18 @@ export async function updateCategory(id: string, data: Partial<NewCategory>): Pr
 	if (data.name) await ensureNameIsFree(data.name, id);
 	if (data.nameDE) await ensureNameIsFree(data.nameDE, id);
 
-	const [category] = await db
-		.update(categories)
-		.set({ ...data, updatedAt: new Date() })
-		.where(eq(categories.id, id))
-		.returning();
-
-	return category || null;
+	return db.transaction(async (tx) => {
+		const [category] = await tx
+			.update(categories)
+			.set({ ...data, updatedAt: new Date() })
+			.where(eq(categories.id, id))
+			.returning();
+		// Costs no longer allocable leave its invoices too, else statements would still pass them on (OR 257a)
+		if (category && data.isAllowedUtilityCost === false) {
+			await tx.update(invoices).set({ isValidUtilityCost: false, updatedAt: new Date() }).where(eq(invoices.categoryId, id));
+		}
+		return category || null;
+	});
 }
 
 /**
@@ -206,17 +211,4 @@ export async function deleteCategory(id: string): Promise<{ success: boolean; co
 	}
 
 	return { success: true };
-}
-
-/**
- * Check if a category exists
- */
-export async function categoryExists(id: string): Promise<boolean> {
-	const [result] = await db
-		.select({ id: categories.id })
-		.from(categories)
-		.where(eq(categories.id, id))
-		.limit(1);
-
-	return !!result;
 }

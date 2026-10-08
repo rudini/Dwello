@@ -3,11 +3,13 @@
  */
 
 import { afterAll, describe, expect, it } from 'bun:test';
+import { callApi } from './helpers/auth';
 import { apiRecords, expectRejection, idOf, invoicedBuilding } from './helpers/records';
 
 const token = crypto.randomUUID();
 const categories = apiRecords('categories');
 let removeBuilding = async () => {};
+let removeRepairedBuilding = async () => {};
 
 // German and English name alike, as "Neue Kategorie" creates them
 const create = (name: string) =>
@@ -15,6 +17,7 @@ const create = (name: string) =>
 
 afterAll(async () => {
 	await removeBuilding();
+	await removeRepairedBuilding();
 	await categories.removeAll();
 });
 
@@ -52,5 +55,19 @@ describe('Kostenkategorien', () => {
 
 		expect(Number(category.invoiceCount)).toBe(1);
 		await expectRejection(response, 409, 'Die Kategorie wird von 1 Rechnung verwendet und kann nicht gelöscht werden.');
+	});
+});
+
+describe('Kategorie wird nicht umlagefähig', () => {
+	// Sonst kämen ihre Rechnungen weiter in die Nebenkostenabrechnung (OR 257a)
+	it('nimmt ihre Rechnungen aus den umlagefähigen Kosten', async () => {
+		const id = await idOf(await create('Unterhalt'));
+		removeRepairedBuilding = await invoicedBuilding(`Unterhaltshaus ${token}`, { categoryId: id, description: `Unterhalt ${token}` });
+
+		await categories.send('PUT', `/${id}`, { isAllowedUtilityCost: false });
+
+		const response = await callApi(`/api/v1/invoices?search=${encodeURIComponent(`Unterhalt ${token}`)}`);
+		const { invoices } = (await response.json()) as { invoices: { isValidUtilityCost: boolean }[] };
+		expect(invoices.map((invoice) => invoice.isValidUtilityCost)).toEqual([false]);
 	});
 });

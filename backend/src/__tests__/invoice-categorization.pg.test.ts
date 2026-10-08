@@ -134,6 +134,14 @@ describe('Kategorie von Hand', () => {
 		expect(await response.json()).toMatchObject({ isValidUtilityCost: false });
 	});
 
+	it('lässt eine Rechnung einer nicht umlagefähigen Kategorie nicht umlagefähig werden, wenn nur das Häkchen ändert', async () => {
+		await sendJson('PUT', `/api/v1/invoices/${invoice.id}`, { categoryId: await repairs() });
+
+		const response = await sendJson('PUT', `/api/v1/invoices/${invoice.id}`, { isValidUtilityCost: true });
+
+		expect(await response.json()).toMatchObject({ isValidUtilityCost: false });
+	});
+
 	it('erfasst eine Rechnung einer nicht umlagefähigen Kategorie als nicht umlagefähig', async () => {
 		const { buildingId } = (await (await callApi(`/api/v1/invoices/${invoice.id}`)).json()) as { buildingId: string };
 		const response = await sendJson('POST', '/api/v1/invoices', {

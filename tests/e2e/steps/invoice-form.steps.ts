@@ -10,7 +10,6 @@ import {
 	correctAmount,
 	overrideCategory,
 	recategorize,
-	recategorizeAsAllocable,
 	registerInvoice,
 	saveInvoice
 } from '../tasks/invoice-form';
@@ -56,13 +55,6 @@ When('der Liegenschaftsverwalter die Rechnung der Kategorie {string} zuordnet', 
 });
 
 When(
-	'der Liegenschaftsverwalter die Rechnung der Kategorie {string} zuordnet und trotzdem als umlagefähig markiert',
-	async ({ verwalter }, category: string) => {
-		await verwalter.perform(recategorizeAsAllocable(category));
-	}
-);
-
-When(
 	'der Liegenschaftsverwalter die Rechnung mit dem Grund {string} der Kategorie {string} zuordnet',
 	async ({ verwalter }, reason: string, category: string) => {
 		await verwalter.perform(overrideCategory(category, reason));
@@ -85,6 +77,10 @@ Then(
 
 Then('ist die Rechnung nicht als umlagefähig markiert', async ({ verwalter }) => {
 	await expect(utilityCostChoice(verwalter)).not.toBeChecked();
+});
+
+Then('lässt sich die Rechnung nicht als umlagefähig markieren', async ({ verwalter }) => {
+	await expect(utilityCostChoice(verwalter)).toBeDisabled();
 });
 
 Then(
