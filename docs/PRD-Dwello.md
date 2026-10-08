@@ -1561,7 +1561,7 @@ The authoritative schema is `docs/data-model.md`, written from the SQL migration
 - **Distribution key** (`distribution_keys`)
 - **Heating profile** (`heating_profiles`)
 - **Invoice** (`invoices`)
-- **Utility statement** (`utility_statements`, status `draft`, `sent`, `paid`, `overdue`) and its **line items** (`utility_statement_line_items`)
+- **Utility statement** (`utility_statements`, status `draft`, `sent`, `paid`; `overdue` is computed) and its **line items** (`utility_statement_line_items`)
 - **Document** (`documents`)
 - **Configuration** (`configuration`, key/value; keys and defaults in `backend/src/services/config.service.ts`: `accounting_period`, `management_fee_pct`, `default_heating_profile_id`, `default_distribution_key_id`, `company_name`, `company_address`, `company_postal_code`, `company_city`, `iban`, `payment_deadline_days` (default 30), `reminder_after_days` (default 14), `default_language`)
 
