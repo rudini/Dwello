@@ -16,6 +16,7 @@ import {
 } from '../../src/lib/server/api-proxy';
 import { cookieConfig } from '../../src/lib/server/jwt-config';
 import { AppError, JWTError, ValidationError } from '../../src/lib/server/error-handler';
+import { env } from '../mocks/env';
 
 describe('API Proxy Helper Functions', () => {
 	// The request's cookies; the proxy only reads them
@@ -41,6 +42,16 @@ describe('API Proxy Helper Functions', () => {
 		it('should handle special characters in params', () => {
 			const url = buildBackendUrl('/tenants', { search: 'John Doe' });
 			expect(url).toBe('http://localhost:3001/api/v1/tenants?search=John+Doe');
+		});
+
+		// Dieselbe Variable wie die Seiten (src/lib/server, hooks.server.ts); in Docker heisst der Host "backend"
+		it('nimmt das Backend aus BACKEND_URL', () => {
+			env.BACKEND_URL = 'http://backend:3001';
+			try {
+				expect(buildBackendUrl('/buildings')).toBe('http://backend:3001/api/v1/buildings');
+			} finally {
+				delete env.BACKEND_URL;
+			}
 		});
 	});
 

@@ -17,7 +17,7 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=production
-      - BACKEND_API_URL=http://backend:3001
+      - BACKEND_URL=http://backend:3001
       - PUBLIC_APP_NAME=Dwello
       - PUBLIC_APP_URL=${PUBLIC_APP_URL:-http://localhost:3000}
       - JWT_SECRET=${JWT_SECRET}

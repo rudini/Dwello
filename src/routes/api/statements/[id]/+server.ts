@@ -1,7 +1,7 @@
 /**
  * Statement Detail API Proxy
  * GET /api/statements/[id] - Fetch single statement
- * PUT /api/statements/[id] - Update statement status
+ * PUT /api/statements/[id] - Update notes and payment deadline
  * DELETE /api/statements/[id] - Delete statement
  */
 

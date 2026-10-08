@@ -35,7 +35,7 @@ interface ProxyResponse<T = unknown> {
  * Get the backend API URL from environment
  */
 function getBackendUrl(): string {
-	return env.BACKEND_API_URL || 'http://localhost:3001';
+	return env.BACKEND_URL || 'http://localhost:3001';
 }
 
 /**
