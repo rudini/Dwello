@@ -4203,13 +4203,17 @@ reviewed independently afterwards.
   `AccountingPeriod`, `initializePredefinedHeatingProfiles`, `PREDEFINED_HEATING_PROFILES` and its tests; the
   predefined profiles come from the migrations, tested in `heating-profiles.pg.test.ts`); backend 414 tests
   (233 unit + 181 PostgreSQL), coverage 83.7 % lines / 86.8 % functions
+- [x] **Non-allocable category enforced by the backend** (ATDD: `invoice-edit.feature` „Kosten einer nicht
+  umlagefähigen Kategorie bleiben bei den Eigentümern“): the form let a repair be marked umlagefähig and the backend
+  stored it; `createInvoice`/`updateInvoice` now set `isValidUtilityCost = false` for such a category
+  (`applyCategory` in `invoice.service.ts`, tests in `invoice-categorization.pg.test.ts`, step and task in
+  `invoice-form.steps.ts`, `tasks/invoice-form.ts`)
 
 ### Verification
 - Backend 430 (249 unit + 181 PostgreSQL), coverage 82.3 % lines / 85.3 % functions; frontend 465, coverage
   above the floors; E2E 260 Chromium + 8 api passed; lint (no warnings), svelte-check, backend tsc clean
 
 ### Open
-- [ ] Backend does not derive „umlagefähig“ from a category chosen by hand (relies on the form)
 - [ ] API contracts for the building and tenant lists
 - [ ] Type check `tests/` and the root `*.config.ts` (tsconfig includes only `src/`)
 
