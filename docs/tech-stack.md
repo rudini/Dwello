@@ -714,7 +714,7 @@ Client automatic refresh (src/routes/+layout.svelte)
 docker exec dwello-ollama ollama pull qwen2.5:3b
 ```
 
-**Integration:** `backend/src/services/llm.service.ts` talks to any OpenAI-compatible API (`/chat/completions`, `/models`). The provider is set by environment variables: `LLM_BASE_URL` (default: the local Ollama at `http://localhost:11434/v1`), `LLM_API_KEY` (Bearer token, empty for Ollama) and `LLM_MODEL` (default `qwen2.5:3b`). With an external provider, the invoice's billing entity, description and amount leave the server.
+**Integration:** `backend/src/services/llm.service.ts` talks to any OpenAI-compatible API (`/chat/completions`, `/models`). The provider is set by environment variables: `LLM_BASE_URL` (default: the local Ollama at `http://localhost:11434/v1`), `LLM_API_KEY` (Bearer token, empty for Ollama) and `LLM_MODEL` (default `qwen2.5:3b`). With an external provider, the invoice's billing entity, description and amount leave the server; `LLM_PROVIDER` and `LLM_PROVIDER_COUNTRY` name it in the privacy statement (`GET /api/v1/invoices/llm-recipient`), and the backend refuses to start without them (README, "External LLM provider").
 
 **Model Selection:** `qwen2.5:3b` by default (small, accurate for German). With an external provider, use a chat model; requests send no `max_tokens` or `temperature`, so reasoning models work too.
 

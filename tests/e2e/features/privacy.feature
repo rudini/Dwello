@@ -17,3 +17,6 @@ Funktionalität: Datenschutz
       | Anmeldung                   |
       | Weitergabe an Dritte        |
       | Cookies                     |
+
+  Szenario: KI-Kategorisierung auf dem Server des Betreibers
+    Dann erfährt der Liegenschaftsverwalter unter "Weitergabe an Dritte", dass Rechnungsdaten für die KI-Kategorisierung den Server nicht verlassen

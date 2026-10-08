@@ -4,7 +4,11 @@
  */
 
 import { app } from './app';
+import { llmRecipient } from './config/llm';
 import { testConnection } from './db/connection';
+
+// Refuse to start with an external LLM the privacy statement could not name
+llmRecipient();
 
 // Test database connection on startup
 testConnection().then((connected) => {

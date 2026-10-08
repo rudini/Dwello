@@ -245,6 +245,18 @@ docker-compose -f docker-compose.prod.yml up
 
 See [.env.example](./.env.example) for all required environment variables.
 
+### External LLM provider
+
+By default invoices are categorized by the local Ollama and invoice data stays on the server. With an external provider (`LLM_BASE_URL`, `LLM_API_KEY`), the billing entity, description and amount of each invoice go to that provider, and a description may contain a tenant's name. The privacy statement then names the provider and its country from `LLM_PROVIDER` and `LLM_PROVIDER_COUNTRY`; the backend refuses to start without them. A self-hosted model on another server counts as external too (e.g. `LLM_PROVIDER="eigener Server des Betreibers"`, `LLM_PROVIDER_COUNTRY=Schweiz`).
+
+Before switching, the operator (not Dwello) makes sure that, under the Swiss Data Protection Act (DSG):
+
+- a data processing agreement with the provider exists (Art. 9 DSG), and the provider does not use the data for training;
+- the provider's country has adequate data protection, or safeguards such as standard contractual clauses are in place (Art. 16 DSG); in the USA only providers certified under the Swiss-U.S. Data Privacy Framework count as adequate;
+- data is kept no longer than needed (prefer providers with zero or short retention, and data centers in Switzerland or the EU).
+
+This is a checklist, not legal advice.
+
 **Upgrading from `OLLAMA_*` variables:** the LLM is now any OpenAI-compatible API. Rename `OLLAMA_API_URL` to `LLM_BASE_URL` and append `/v1` (`http://ollama:11434/v1`), `OLLAMA_MODEL` to `LLM_MODEL`. The default model is `qwen2.5:3b`; pull it (`docker exec dwello-ollama ollama pull qwen2.5:3b`) or set `LLM_MODEL` to the model you have. The old variables are ignored.
 
 ---
