@@ -10,9 +10,6 @@ import {
 	setConfig,
 	setMultipleConfig,
 	deleteConfig,
-	getCurrentAccountingPeriod,
-	getAccountingPeriodDates,
-	initializeDefaultConfig,
 	CONFIG_KEYS,
 	type ConfigKey
 } from '../services/config.service';
@@ -26,65 +23,6 @@ export const configRoutes = new Elysia({ prefix: '/api/v1/config' })
 			keys: Object.keys(CONFIG_KEYS)
 		};
 	})
-
-	// Initialize default configuration
-	.post('/initialize', async () => {
-		const result = await initializeDefaultConfig();
-		return {
-			message: 'Default configuration initialized',
-			created: result.created,
-			existing: result.existing
-		};
-	})
-
-	// Get current accounting period
-	.get('/accounting-period/current', async () => {
-		const period = await getCurrentAccountingPeriod();
-		return {
-			start: period.start.toISOString().split('T')[0],
-			end: period.end.toISOString().split('T')[0],
-			year: period.year
-		};
-	})
-
-	// Calculate accounting period for a specific year
-	.get(
-		'/accounting-period/:year',
-		async ({ params, query, set }) => {
-			const year = parseInt(params.year);
-			if (isNaN(year) || year < 2000 || year > 2100) {
-				set.status = 400;
-				return { error: 'Invalid year' };
-			}
-
-			const periodType = query.type || 'calendar';
-			if (!['calendar', 'july-june', 'november-october'].includes(periodType)) {
-				set.status = 400;
-				return { error: 'Invalid period type' };
-			}
-
-			try {
-				const period = getAccountingPeriodDates(periodType as 'calendar' | 'july-june' | 'november-october', year);
-				return {
-					start: period.start.toISOString().split('T')[0],
-					end: period.end.toISOString().split('T')[0],
-					year,
-					type: periodType
-				};
-			} catch (error) {
-				set.status = 400;
-				return { error: error instanceof Error ? error.message : 'Unknown error' };
-			}
-		},
-		{
-			params: t.Object({
-				year: t.String()
-			}),
-			query: t.Object({
-				type: t.Optional(t.String())
-			})
-		}
-	)
 
 	// Get a single configuration value
 	.get(
