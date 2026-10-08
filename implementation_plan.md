@@ -4183,11 +4183,12 @@ reviewed independently afterwards.
   was English (`heating-profile.service.ts`, `heating-profile-admin.pg.test.ts`)
 - [x] **Review follow-up:** the settings form checks the IBAN check digits too and reports them at the field
   (`src/lib/server/settings.ts`, `settings.test.ts`); before, the backend rejected it with a general error
+- [x] **`api-proxy.test.ts` without mocking own code:** XSRF and session through real cookies and headers
+  instead of a mocked `auth` module; an XSRF check that accepts every token now fails the test
 
 ### Open
 - [ ] Endpoints no page calls, untested: `/config/initialize`, `/config/accounting-period/*`,
   `/heating-profiles/initialize`, `/validate-percentages`, `/calculate-share` (delete or test?)
-- [ ] `api-proxy.test.ts` without mocking own code
 - [ ] API contracts for buildings, tenants, invoices
 - [ ] Numbers in `docs/test-pyramid.md`
 - [ ] Backend does not derive „umlagefähig“ from a category chosen by hand (relies on the form)

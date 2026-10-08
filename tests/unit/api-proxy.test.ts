@@ -12,12 +12,6 @@ vi.mock('$env/dynamic/private', () => ({
 	}
 }));
 
-// Mock the auth module
-vi.mock('../../src/lib/server/auth', () => ({
-	getJwtFromCookie: vi.fn(),
-	validateXsrfToken: vi.fn()
-}));
-
 // Import after mocks are set up
 import {
 	buildBackendUrl,
@@ -29,7 +23,7 @@ import {
 	extractQueryParams,
 	parseRequestBody
 } from '../../src/lib/server/api-proxy';
-import { getJwtFromCookie, validateXsrfToken } from '../../src/lib/server/auth';
+import { cookieConfig } from '../../src/lib/server/jwt-config';
 import { AppError, JWTError, ValidationError } from '../../src/lib/server/error-handler';
 
 describe('API Proxy Helper Functions', () => {
@@ -71,67 +65,24 @@ describe('API Proxy Helper Functions', () => {
 	});
 
 	describe('validateXsrfForMutation', () => {
-		it('should validate XSRF for POST request', () => {
-			const mockRequest = new Request('http://localhost');
-			const mockCookies = createMockCookies();
-			vi.mocked(validateXsrfToken).mockReturnValue(true);
+		// The XSRF cookie and the header the page sends with it
+		const xsrfCookies = () => createMockCookies({ [cookieConfig.xsrfName]: 'xsrf-token' });
+		const withHeader = (token: string) => new Request('http://localhost', { headers: { 'X-XSRF-TOKEN': token } });
 
-			expect(() => {
-				validateXsrfForMutation(mockRequest, mockCookies, 'POST');
-			}).not.toThrow();
-
-			expect(validateXsrfToken).toHaveBeenCalledWith(mockRequest, mockCookies);
-		});
-
-		it('should validate XSRF for PUT request', () => {
-			const mockRequest = new Request('http://localhost');
-			const mockCookies = createMockCookies();
-			vi.mocked(validateXsrfToken).mockReturnValue(true);
-
-			expect(() => {
-				validateXsrfForMutation(mockRequest, mockCookies, 'PUT');
-			}).not.toThrow();
-		});
-
-		it('should validate XSRF for DELETE request', () => {
-			const mockRequest = new Request('http://localhost');
-			const mockCookies = createMockCookies();
-			vi.mocked(validateXsrfToken).mockReturnValue(true);
-
-			expect(() => {
-				validateXsrfForMutation(mockRequest, mockCookies, 'DELETE');
-			}).not.toThrow();
-		});
-
-		it('should validate XSRF for PATCH request', () => {
-			const mockRequest = new Request('http://localhost');
-			const mockCookies = createMockCookies();
-			vi.mocked(validateXsrfToken).mockReturnValue(true);
-
-			expect(() => {
-				validateXsrfForMutation(mockRequest, mockCookies, 'PATCH');
-			}).not.toThrow();
+		it.each(['POST', 'PUT', 'DELETE', 'PATCH'])('should accept %s with the XSRF token of the cookie', (method) => {
+			expect(() => validateXsrfForMutation(withHeader('xsrf-token'), xsrfCookies(), method)).not.toThrow();
 		});
 
 		it('should skip XSRF validation for GET request', () => {
-			const mockRequest = new Request('http://localhost');
-			const mockCookies = createMockCookies();
-
-			expect(() => {
-				validateXsrfForMutation(mockRequest, mockCookies, 'GET');
-			}).not.toThrow();
-
-			expect(validateXsrfToken).not.toHaveBeenCalled();
+			expect(() => validateXsrfForMutation(new Request('http://localhost'), createMockCookies(), 'GET')).not.toThrow();
 		});
 
-		it('should throw ValidationError for invalid XSRF token', () => {
-			const mockRequest = new Request('http://localhost');
-			const mockCookies = createMockCookies();
-			vi.mocked(validateXsrfToken).mockReturnValue(false);
+		it('should throw ValidationError for a token other than the cookie', () => {
+			expect(() => validateXsrfForMutation(withHeader('evil-token'), xsrfCookies(), 'POST')).toThrow(ValidationError);
+		});
 
-			expect(() => {
-				validateXsrfForMutation(mockRequest, mockCookies, 'POST');
-			}).toThrow(ValidationError);
+		it('should throw ValidationError without a token', () => {
+			expect(() => validateXsrfForMutation(new Request('http://localhost'), xsrfCookies(), 'POST')).toThrow(ValidationError);
 		});
 	});
 
@@ -148,14 +99,12 @@ describe('API Proxy Helper Functions', () => {
 
 		it('should throw JWTError when not authenticated', async () => {
 			const mockCookies = createMockCookies();
-			vi.mocked(getJwtFromCookie).mockReturnValue(null);
 
 			await expect(forwardRequest('/buildings', 'GET', mockCookies)).rejects.toThrow(JWTError);
 		});
 
 		it('should forward GET request with JWT', async () => {
-			const mockCookies = createMockCookies();
-			vi.mocked(getJwtFromCookie).mockReturnValue('valid-jwt-token');
+			const mockCookies = createMockCookies({ [cookieConfig.sessionName]: 'valid-jwt-token' });
 
 			const mockResponse = {
 				status: 200,
@@ -180,8 +129,7 @@ describe('API Proxy Helper Functions', () => {
 		});
 
 		it('should forward POST request with body', async () => {
-			const mockCookies = createMockCookies();
-			vi.mocked(getJwtFromCookie).mockReturnValue('valid-jwt-token');
+			const mockCookies = createMockCookies({ [cookieConfig.sessionName]: 'valid-jwt-token' });
 
 			const mockResponse = {
 				status: 201,
@@ -204,8 +152,7 @@ describe('API Proxy Helper Functions', () => {
 		});
 
 		it('should handle query params', async () => {
-			const mockCookies = createMockCookies();
-			vi.mocked(getJwtFromCookie).mockReturnValue('valid-jwt-token');
+			const mockCookies = createMockCookies({ [cookieConfig.sessionName]: 'valid-jwt-token' });
 
 			const mockResponse = {
 				status: 200,
@@ -225,8 +172,7 @@ describe('API Proxy Helper Functions', () => {
 		});
 
 		it('should handle binary response (PDF)', async () => {
-			const mockCookies = createMockCookies();
-			vi.mocked(getJwtFromCookie).mockReturnValue('valid-jwt-token');
+			const mockCookies = createMockCookies({ [cookieConfig.sessionName]: 'valid-jwt-token' });
 
 			const mockArrayBuffer = new ArrayBuffer(8);
 			const mockResponse = {
@@ -243,8 +189,7 @@ describe('API Proxy Helper Functions', () => {
 		});
 
 		it('should handle text response', async () => {
-			const mockCookies = createMockCookies();
-			vi.mocked(getJwtFromCookie).mockReturnValue('valid-jwt-token');
+			const mockCookies = createMockCookies({ [cookieConfig.sessionName]: 'valid-jwt-token' });
 
 			const mockResponse = {
 				status: 200,
@@ -260,8 +205,7 @@ describe('API Proxy Helper Functions', () => {
 		});
 
 		it('should throw AppError on timeout', async () => {
-			const mockCookies = createMockCookies();
-			vi.mocked(getJwtFromCookie).mockReturnValue('valid-jwt-token');
+			const mockCookies = createMockCookies({ [cookieConfig.sessionName]: 'valid-jwt-token' });
 
 			const timeoutError = new Error('Timeout');
 			timeoutError.name = 'TimeoutError';
@@ -271,8 +215,7 @@ describe('API Proxy Helper Functions', () => {
 		});
 
 		it('should throw AppError on connection error', async () => {
-			const mockCookies = createMockCookies();
-			vi.mocked(getJwtFromCookie).mockReturnValue('valid-jwt-token');
+			const mockCookies = createMockCookies({ [cookieConfig.sessionName]: 'valid-jwt-token' });
 
 			const connectionError = new TypeError('fetch failed');
 			fetchSpy.mockRejectedValue(connectionError);
