@@ -301,7 +301,8 @@ export async function generateStatement(
 			description: item.description,
 			totalAmount: String(item.totalBuildingAmount),
 			tenantShare: String(item.tenantShare),
-			sharePercentage: String(item.sharePercentage * 100),
+			// Share column next to building total and tenant share: the tenant's share of the building total
+			sharePercentage: item.totalBuildingAmount ? String((item.tenantShare / item.totalBuildingAmount) * 100) : '0',
 			sortOrder: index
 		}))
 	);
