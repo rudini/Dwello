@@ -10,7 +10,9 @@ const sources: Record<string, string> = {
 		"import BuildingForm from '$lib/components/BuildingForm.svelte';",
 	'src/routes/buildings/[id]/+page.server.ts': '',
 	'src/routes/tenants/+layout.svelte': '',
-	'src/routes/tenants/+page.svelte': "import { formatName } from '$lib/stores';",
+	// A type import over several lines right before a value import: only the type import is dropped
+	'src/routes/tenants/+page.svelte':
+		"import type {\n\tTenant\n} from '$lib/types'\nimport { formatName } from '$lib/stores';",
 	'src/routes/tenants/new/+page.svelte': "import type { Tenant } from '$lib/types';",
 	'src/lib/components/Card.svelte': '',
 	'src/lib/components/BuildingForm.svelte':
