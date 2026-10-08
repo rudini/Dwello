@@ -9,4 +9,4 @@ export const llmRecipientNotice = (actor: Actor, heading: string) =>
 
 /** Who runs this installation, as the terms of use name them */
 export const operatorNotice = (actor: Actor, heading: string) =>
-	pageSection(actor.page, heading).getByTestId('operator');
+	pageSection(actor.page, heading).getByTestId('terms-operator');

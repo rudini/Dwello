@@ -4367,7 +4367,8 @@ reviewed independently afterwards.
 - [x] **Operator in the terms of use:** „Verfügbarkeit“ names who runs the installation from `OPERATOR_NAME`,
   `OPERATOR_ADDRESS`, `OPERATOR_CONTACT` (BFF environment, like the installation's other settings); without
   `OPERATOR_NAME` the generic text stays. Files: `src/routes/terms/+page.server.ts`, `+page.svelte`, `.env.example`,
-  `docker-compose.prod.yml`, `playwright.config.ts`. Tests: `terms.feature`, `terms.test.ts`, `terms-page.dom.test.ts`
+  `docker-compose.prod.yml`, `playwright.config.ts`, README, `tests/e2e/questions/app-frame.ts`,
+  `tests/e2e/steps/app-frame.steps.ts`. Tests: `terms.feature`, `terms.test.ts`, `terms-page.dom.test.ts`
 
 ### Open
 - [ ] Raise frontend coverage to the target in `docs/test-pyramid.md` and move the floor up

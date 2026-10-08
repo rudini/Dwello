@@ -6,7 +6,7 @@
 	const operator = $derived(
 		data.operator &&
 			`Betreiber dieser Dwello-Installation ist ${[data.operator.name, data.operator.address].filter(Boolean).join(', ')}.` +
-				(data.operator.contact ? ` Kontakt: ${data.operator.contact}` : '')
+				(data.operator.contact ? ` Kontakt: ${data.operator.contact}.` : '')
 	);
 
 	const sections = [
@@ -49,7 +49,7 @@
 		>
 			<h2 class="text-lg font-semibold text-gray-900">{section.title}</h2>
 			{#if section.title === 'Verfügbarkeit' && operator}
-				<p class="text-gray-700" data-testid="operator">{operator}</p>
+				<p class="text-gray-700" data-testid="terms-operator">{operator}</p>
 			{/if}
 			{#each section.paragraphs as paragraph (paragraph)}
 				<p class="text-gray-700">{paragraph}</p>
