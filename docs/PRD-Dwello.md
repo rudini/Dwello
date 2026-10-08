@@ -46,7 +46,7 @@ Dwello provides:
 - Centralized property, tenant, and contract management
 - LLM-powered invoice categorization with validation
 - Professional PDF statement and QR invoice generation
-- Multi-language support (German, French, Italian, Romansh, English)
+- German user interface; tenant-facing statement PDFs in five languages (German, French, Italian, Romansh, English)
 - Secure data storage with automated backups
 
 ### 2.4 Target Market
@@ -100,10 +100,10 @@ Dwello provides:
 | **Backend** | ElysiaJS on Bun | High performance, modern TypeScript framework, Bun's speed |
 | **Database** | PostgreSQL | Robust, ACID transactions, JSON support, proven reliability |
 | **Authentication** | BFF + OAuth 2.0 / SSO | Backend for Frontend pattern with OAuth 2.0, HTTPOnly cookies, XSRF protection |
-| **LLM** | Open source (Llama/Mistral) | Privacy-focused, self-hosted, no vendor lock-in |
+| **LLM** | Any OpenAI-compatible API (default: local Ollama with `qwen2.5:3b`) | Self-hosted by default, no vendor lock-in; configured through `.env` |
 | **Deployment** | Docker / Docker Compose | Containerized, portable, easy to run anywhere |
 | **Maps** | OpenStreetMap + Leaflet | Open source, no licensing, complete privacy |
-| **Internationalization** | i18n library | Multi-language support |
+| **Internationalization** | i18n library | German UI; statement PDFs in five languages |
 | **PDF Generation** | PDFKit or LibreOffice | Professional PDFs, QR code support |
 | **QR Bills** | Swiss QR-bill library | Standards-compliant Swiss invoices |
 
@@ -115,7 +115,7 @@ Dwello provides:
 │  SvelteKit - Responsive Web Application                 │
 │  - Dashboard, Property Management, Invoice Management   │
 │  - Statement Configuration & Generation                 │
-│  - Multi-language UI                                    │
+│  - German UI                                            │
 │  Cookies: session={jwt}; xsrf-token={token}            │
 └──────────────────────┬──────────────────────────────────┘
                        │ HTTPS/TLS
@@ -138,7 +138,6 @@ Dwello provides:
 │  - Business logic (prorating, calculations)              │
 │  - PDF generation service                                │
 │  - LLM integration for categorization                    │
-│  - External API integrations (OpenPLZ)                   │
 │  - No OAuth handling (moved to BFF)                      │
 │  - No cookie management (BFF layer)                      │
 └──────────────────────┬──────────────────────────────────┘
@@ -149,14 +148,14 @@ Dwello provides:
 │  - Contracts, Invoices, Statements                       │
 │  - Configuration, Categories, Distribution Keys          │
 │  - Blob storage for PDFs and contracts                   │
-│  - Audit logs                                            │
+│  - Audit logs (planned)                                  │
 └──────────────────────────────────────────────────────────┘
 
 ┌──────────────────────────────────────────────────────────┐
 │        External Services (async, non-blocking)           │
-│  - OpenPLZ API: Address search & validation              │
+│  - OpenPLZ API: Address search (called from frontend)    │
 │  - OAuth Provider: Authentication (via BFF)              │
-│  - Local LLM (Ollama): Invoice categorization            │
+│  - LLM (default local Ollama): Invoice categorization    │
 │  - Backup Service: Daily snapshots                       │
 └──────────────────────────────────────────────────────────┘
 ```
@@ -285,7 +284,7 @@ Dwello provides:
 **Features:**
 - Contract attributes:
   - Start date (Vertragsbeginn)
-  - End date (Vertragsablauf) - nullable for ongoing contracts
+  - End date (Vertragsende) - nullable for ongoing contracts
   - Link to tenant
   - Link to apartment
   - Base rent in CHF (Mietzins)
@@ -352,18 +351,10 @@ Dwello provides:
 
 **LLM-Powered Auto-Categorization:**
 - Automatically analyzes invoice description and categorizes
-- Categories available:
-  - **Heizkosten** (Heating costs)
-  - **Warmwasser** (Hot water)
-  - **Stromkosten** (Electricity)
-  - **Wasser** (Water)
-  - **Abwasser** (Wastewater)
-  - **Grundstückspflege** (Property maintenance - gardens, landscaping)
-  - **Gebäudeinfrastruktur** (Building infrastructure - elevator, caretaker)
-  - **Entsorgung** (Disposal - garbage, recycling)
-  - **Kommunikation** (Communication - cable TV, radio)
-  - **Verwaltung** (Management - admin costs; customary guideline up to 3% of total, not a cap)
-  - **Sonstiges** (Other)
+- Predefined categories (seeded by `backend/migrations/0002_stammdaten.sql`):
+  - Allowed: **Heizung**, **Warmwasser**, **Kaltwasser**, **Abwasser**, **Allgemeinstrom**, **Lift**, **Hauswart**, **Gartenpflege**, **Schneeräumung**, **Kehricht**, **TV/Kabelanschluss**, **Schädlingsbekämpfung**, **Feuerlöscher-Wartung**, **Kaminfeger**
+  - Not allowed: **Reparaturen**, **Gebäudeversicherung**, **Liegenschaftssteuer**, **Hypothekarzinsen**, **Verwaltung**, **Renovation**, **Wertvermehrende Investitionen**
+- **Verwaltung** (general administration costs) is not allowable; the manager's administrative effort for the utility costs is charged through the separate **Verwaltungspauschale** (see section 5.8), not as an invoice
 
 **Automatic Validity Checking:**
 - **Allowed (zulässig):**
@@ -378,7 +369,7 @@ Dwello provides:
   - Caretaker wages
   - Garbage collection
   - Basic cable TV or radio fees
-  - Management fee (if contractually agreed; customary guideline up to 3%)
+  - (The management fee is not an invoice category; it is the separate Verwaltungspauschale, see section 5.8)
 
 - **Not Allowed (nicht zulässig):**
   - Maintenance and repair costs (except service contracts)
@@ -427,20 +418,24 @@ Dwello provides:
 
 **Predefined Distribution Keys:**
 
-1. **Heizkosten** (Heating Costs)
-   - Distributed based on monthly heating distribution profile (see section 5.7)
-   - Adjusted for occupancy periods
-   - Uses metered heating data where available
+Seeded by `backend/migrations/0002_stammdaten.sql`. The divisor is always all apartments of the building, occupied or not: the owner (Vermieter) bears the share of vacant apartments.
 
-2. **Pro Einheit** (Per Unit)
-   - Equal distribution among all occupied apartments
-   - Formula: `Total Cost / Number of Occupied Apartments`
-   - Useful for caretaker wages, management fees
+1. **Pro Einheit** (Per Unit), formula `{units}`
+   - Equal share per apartment
+   - Formula: `Total Cost / Number of Apartments in the Building`
+   - Useful for caretaker wages
 
-3. **Pro Fläche** (Per Area)
+2. **Pro Fläche (m²)** (Per Area), formula `{area}`
    - Distribution by apartment size (Wohnfläche)
    - Formula: `Total Cost × (Apartment Size / Total Building Size)`
    - Used for water, wastewater, electricity, maintenance
+
+3. **Pro Zimmer** (Per Rooms), formula `{rooms}`
+   - Distribution by number of rooms
+
+4. **Heizung (Fläche 70% / Einheit 30%)** (Heating Split), formula `0.7 * {area} + 0.3 * {units}`
+   - Swiss standard heating distribution
+   - The time-based split for tenants who moved mid-period uses the heating profile (see section 5.7)
 
 **Custom Distribution Keys:**
 
@@ -470,24 +465,13 @@ Users can create custom formulas using apartment variables:
 
 **Predefined Profiles:**
 
-1. **Profile 1: Heizkosten mit Warmwasser** (Heating + Hot Water)
-   - Distribution: January 12%, February 10%, March 8%, ... (peaks in winter)
-   - Used when hot water is included in heating costs
-   - Standard for most Swiss buildings
+Five flat profiles, seeded by `backend/migrations/0002_stammdaten.sql`; each distributes exactly 100%:
 
-2. **Profile 2: Heizkosten ohne Warmwasser** (Heating Only)
-
-   **Sub-profile: Mittelland** (Swiss Plateau - moderate climate)
-   - Distribution: January 12%, February 11%, March 7%, ...
-   - For low-altitude regions with moderate winters
-
-   **Sub-profile: Bergregion** (Mountain Region - cold climate)
-   - Distribution: January 15%, February 13%, March 9%, ...
-   - For Alpine regions with longer, colder winters
-
-   **Sub-profile: Tessin** (Southern Switzerland - mild climate)
-   - Distribution: January 8%, February 6%, March 4%, ...
-   - For warmer southern regions with shorter heating season
+1. **Heizung + Warmwasser** (Heating + Hot Water): standard profile for combined heating and hot water systems
+2. **Heizung Mittelland** (Heating Only, Swiss Plateau): for Bern, Zürich, Basel, etc.
+3. **Heizung Bergregion** (Heating Only, Mountain Region): for Alpine and pre-Alpine regions
+4. **Heizung Tessin** (Heating Only, Southern Switzerland): for Ticino and southern regions
+5. **Nur Warmwasser** (Hot Water Only): nearly even distribution across the year
 
 **Manual Configuration:**
 - Option to input custom monthly percentages manually
@@ -520,11 +504,11 @@ Users can create custom formulas using apartment variables:
 **Configuration:**
 - Simple percentage input field
 - Help text naming the customary guideline (up to 3%)
-- Audit trail showing when percentage was last changed
+- Audit trail showing when percentage was last changed (planned, not implemented)
 
 **Statement Impact:**
 - Automatically calculated per apartment
-- Shown as separate line item on statement (Verwaltungsgebühr)
+- Shown as separate line item on statement (Verwaltungspauschale)
 - Included in total balance calculation
 
 **Use Cases:**
@@ -550,7 +534,7 @@ Users can create custom formulas using apartment variables:
 - Management cost percentage (see section 5.8)
 - Heating distribution profile (see section 5.7)
 - Payment deadline from statement date (e.g., 30 days)
-- Reminder deadline after payment deadline (e.g., 10 days)
+- Reminder deadline after payment deadline (default 14 days)
 - Currency (CHF - Swiss Francs)
 
 **Statement Generation Workflow:**
@@ -573,14 +557,14 @@ Users can create custom formulas using apartment variables:
   - Costs by category
   - Total costs and advance payments
   - Balance (refund or additional payment)
-- Ability to adjust individual statement amounts if needed
+- Ability to adjust individual statement amounts if needed (drafts only)
 - Ability to regenerate if invoices/contracts change
 
 **Step 4: Generate PDFs**
 - Generate statement PDF for each apartment
 - Append Swiss QR-bill to each statement
 - Store PDFs in database
-- Option to download all as ZIP
+- Option to download all as ZIP (planned, not implemented)
 
 **Statement Details:**
 
@@ -645,9 +629,11 @@ BALANCE (refund): CHF 30
 **Statement Status Tracking:**
 
 **Status Workflow:**
-1. **Open** - Statement generated, awaiting payment
-2. **Paid** - Tenant paid the balance
-3. **Partial** (future) - If multiple transactions needed
+1. **Entwurf** (`draft`) - Statement generated, not yet sent; the only status in which it can be edited (amounts, line items) or deleted
+2. **Versendet** (`sent`) - Statement delivered to the tenant, awaiting payment
+3. **Überfällig** (`overdue`) - Sent and past the payment deadline (computed from the deadline)
+4. **Bezahlt** (`paid`) - Settled; final, cannot be reverted
+5. **Partial** (future) - If multiple transactions needed
 
 **Status Management:**
 - Mark statement as paid when tenant pays
@@ -659,7 +645,7 @@ BALANCE (refund): CHF 30
 
 **Automatic Reminders:**
 - Generate reminders for overdue statements
-- Reminder trigger: X days after payment deadline (configurable, default 10 days)
+- Reminder trigger: X days after payment deadline (configurable, default 14 days)
 - Show reminder status on statement detail view
 - Log of all reminders sent (for audit trail)
 
@@ -681,7 +667,7 @@ BALANCE (refund): CHF 30
 - By accounting period
 - By building
 - By tenant name
-- By status (open, paid)
+- By status (draft, sent, overdue, paid)
 - By balance amount
 
 **Columns:**
@@ -709,8 +695,8 @@ BALANCE (refund): CHF 30
 - Mark as paid (date picker for payment date)
 - Send payment reminder
 - View calculation details (breakdown of how costs were prorated)
-- Edit statement (if no payment yet)
-- Delete statement (with confirmation)
+- Edit statement (draft only)
+- Delete statement (draft only, with confirmation)
 - Regenerate statement (if invoices/contracts updated)
 
 ---
@@ -729,7 +715,7 @@ BALANCE (refund): CHF 30
 **QR-Bill Content:**
 - Recipient: Property manager details
 - IBAN: Configured in settings
-- Reference number: Statement number
+- Reference number: QR reference (QRR) only when the configured IBAN is a QR-IBAN; with a normal IBAN no reference
 - Amount: Total balance due (CHF)
 - Debtor: Tenant name and address
 - Payment description: Statement number and period reference
@@ -738,7 +724,7 @@ BALANCE (refund): CHF 30
 - Global IBAN setting (Swiss bank account details)
 - Stored securely in configuration
 - Multiple IBANs per building (future feature)
-- Validation that IBAN is valid Swiss format (starts with CH)
+- Validation that the IBAN is Swiss or Liechtenstein (starts with CH or LI) with a valid MOD-97 checksum
 
 **QR Code Generation:**
 - Encodes all necessary payment information
@@ -767,7 +753,6 @@ BALANCE (refund): CHF 30
 | **Building Infrastructure** | Elevator maintenance and electricity, caretaker wages/services, stairwell maintenance, intercom systems |
 | **Waste Disposal** | Garbage collection, recycling services, composting services, hazardous waste disposal |
 | **Communication** | Basic cable TV fees, radio reception fees, common antenna maintenance |
-| **Management** | Administration and management fees (customary guideline up to 3% of total utility costs, only if contractually agreed) |
 
 **Not Allowed Costs (nicht zulässig):**
 
@@ -779,6 +764,7 @@ BALANCE (refund): CHF 30
 | **Insurance** | Building insurance, liability insurance (except insurance specifically for utility systems) |
 | **Connection Fees** | Cable/internet connection activation fees, network setup fees |
 | **Financing Costs** | Interest on loans, mortgage payments |
+| **Administration (Verwaltung)** | General administration costs; the manager's effort for the utility costs is charged only through the separate Verwaltungspauschale (section 5.8) |
 
 **Validation System:**
 
@@ -791,7 +777,7 @@ BALANCE (refund): CHF 30
 **Manual Override:**
 - User can manually override validity flag (with reason logged)
 - Useful for edge cases or special contractual agreements
-- Override creates audit log entry
+- Override creates audit log entry (planned, not implemented)
 
 **Reporting:**
 - Statistics on % of invalid costs by category
@@ -1036,7 +1022,7 @@ BALANCE (refund): CHF 30
 - Submit/Cancel/Delete
 
 **LLM Categorization:**
-- When adding invoice, system automatically calls local LLM
+- When adding invoice, system automatically calls the configured LLM (default: local Ollama)
 - Shows suggested category with confidence indicator
 - User can accept or manually select different category
 - Feedback mechanism to improve model accuracy (future)
@@ -1050,7 +1036,7 @@ BALANCE (refund): CHF 30
 - Invalid invoices highlighted in list
 - When added to statement, system warns user
 - Option to exclude from statement distribution
-- Audit log shows which invalid costs were excluded
+- Audit log shows which invalid costs were excluded (planned, not implemented)
 
 ---
 
@@ -1068,16 +1054,17 @@ BALANCE (refund): CHF 30
 
 **Tab 2: Management Costs**
 - Percentage input (0% or more)
-- Label: "Verwaltungsgebühr"
+- Label: "Verwaltungspauschale"
 - Help text: "Vorschlag beim Erstellen der Abrechnungen, pro Liegenschaft und Periode anpassbar. Üblicher Richtwert: bis 3%."
 - Checkbox: "Include management costs in statements"
 
 **Tab 3: Heating Distribution**
 - Section 1: Select predefined profile
-  - Profile 1: "Heizkosten mit Warmwasser" (recommended)
-  - Profile 2a: "Heizkosten ohne Warmwasser - Mittelland"
-  - Profile 2b: "Heizkosten ohne Warmwasser - Bergregion"
-  - Profile 2c: "Heizkosten ohne Warmwasser - Tessin"
+  - "Heizung + Warmwasser"
+  - "Heizung Mittelland"
+  - "Heizung Bergregion"
+  - "Heizung Tessin"
+  - "Nur Warmwasser"
 - Section 2: Monthly percentages table
   - Months: Jan, Feb, Mar, ..., Dec
   - Percentage inputs (read-only if predefined profile selected)
@@ -1086,14 +1073,15 @@ BALANCE (refund): CHF 30
 
 **Tab 4: Payment Settings**
 - Payment deadline (X days from statement date, default 30)
-- Reminder deadline (Y days after payment deadline, default 10)
+- Reminder deadline (Y days after payment deadline, default 14)
 - Default currency (CHF)
 
 **Tab 5: Distribution Keys Management**
 - Section 1: Predefined keys (read-only)
-  - Heizkosten
   - Pro Einheit
-  - Pro Fläche
+  - Pro Fläche (m²)
+  - Pro Zimmer
+  - Heizung (Fläche 70% / Einheit 30%)
   - (show description and formula)
 
 - Section 2: Custom keys
@@ -1129,9 +1117,10 @@ BALANCE (refund): CHF 30
 
 **Tab 7: IBAN Setting**
 - IBAN input field (for QR-bill generation)
-- Format validation (must start with CH)
+- Format validation (must start with CH or LI, MOD-97 checksum)
 - Test QR-bill preview
-- Help text: "Swiss account required for QR-bill generation"
+- Help text: "Swiss or Liechtenstein account required for QR-bill generation"
+- A QR reference is printed only when the IBAN is a QR-IBAN; with a normal IBAN the QR-bill carries no reference
 
 ---
 
@@ -1165,7 +1154,7 @@ BALANCE (refund): CHF 30
   - Balance (CHF)
   - Expand row to see detailed breakdown
 - Ability to:
-  - Adjust individual amounts if errors discovered
+  - Adjust individual amounts if errors discovered (drafts only)
   - Remove specific statements from batch
   - Recalculate if invoices changed
 - Warning indicators for unusual amounts (very high/low)
@@ -1179,7 +1168,7 @@ BALANCE (refund): CHF 30
 - "Save but don't generate" (for review later)
 - Progress bar showing generation status
 - Result: "Successfully generated X statements"
-  - Button: "Download all as ZIP"
+  - Button: "Download all as ZIP" (planned, not implemented)
   - Button: "View statements list"
 
 **Statement List View:**
@@ -1189,7 +1178,7 @@ BALANCE (refund): CHF 30
   - Apartment
   - Period
   - Amount Due (CHF)
-  - Status (Open/Paid)
+  - Status (Entwurf/Versendet/Überfällig/Bezahlt)
   - Days Until Due
   - Actions
 
@@ -1197,7 +1186,7 @@ BALANCE (refund): CHF 30
 - Period (dropdown of generated periods)
 - Building (multi-select)
 - Tenant name (search)
-- Status (Open, Paid, All)
+- Status (Entwurf, Versendet, Überfällig, Bezahlt, All)
 - Date range (generated date)
 
 **Statement Detail View:**
@@ -1215,7 +1204,7 @@ BALANCE (refund): CHF 30
 - Print button
 
 **Payment Section:**
-- Current status (Open/Paid)
+- Current status (Entwurf/Versendet/Überfällig/Bezahlt)
 - Payment deadline
 - Days until due (color-coded: green/yellow/red)
 - If unpaid:
@@ -1225,7 +1214,7 @@ BALANCE (refund): CHF 30
 - If paid:
   - Payment date
   - Payment amount (should match statement balance)
-  - "Mark as Unpaid" button (undo)
+  - No undo: Bezahlt (paid) is final
 
 **Associated Data:**
 - List of invoices included in this statement
@@ -1235,10 +1224,11 @@ BALANCE (refund): CHF 30
 **Statement Actions:**
 - Download as PDF
 - Print
-- Mark as paid/unpaid
+- Mark as paid (final, no undo)
 - Send payment reminder
 - Regenerate (if invoices/contracts changed)
-- Delete (with confirmation)
+- Edit amounts and line items (draft only)
+- Delete (draft only, with confirmation)
 
 ---
 
@@ -1252,7 +1242,7 @@ BALANCE (refund): CHF 30
 | API response time | <500ms (95th percentile) |
 | PDF generation per statement | <5 seconds |
 | Invoice bulk entry | 10 invoices in <30 seconds |
-| Statement generation | <10 seconds for 50 apartments |
+| Statement generation | <10 seconds for 50 apartments (open, see docs/migration-mva.md P1) |
 | Dashboard load | <1.5 seconds |
 | Search response | <300ms |
 
@@ -1275,8 +1265,8 @@ BALANCE (refund): CHF 30
 **Authorization:**
 - Role-based access control (future: multi-user support)
 - Single user in MVP has full access
-- Session timeout after 30 minutes of inactivity
-- Login audit logging
+- Session: the session JWT expires after `JWT_EXPIRY` (default 7 days); the open app refreshes it periodically (every 50 minutes). No inactivity timeout is implemented
+- Login audit logging (planned, not implemented)
 
 **Data Protection:**
 - SQL injection prevention (parameterized queries, ORM)
@@ -1291,7 +1281,7 @@ BALANCE (refund): CHF 30
 - Sensitive fields encrypted (passwords, OAuth tokens)
 - Secure key management for encryption keys
 
-**Audit Logging:**
+**Audit Logging (planned, not implemented):**
 - Log all sensitive operations (invoice changes, statement generation)
 - Log invalid access attempts
 - Retention: 1 year of logs
@@ -1304,6 +1294,7 @@ BALANCE (refund): CHF 30
 **Swiss Data Protection:**
 - Compliance with Swiss Data Protection Act (SDPA)
 - No data transfer outside Switzerland (unless explicitly configured)
+- With an external LLM provider, invoice data goes to that provider; the privacy statement then names the provider and its country from `LLM_PROVIDER` and `LLM_PROVIDER_COUNTRY` (Swiss DSG Art. 19), see README section "External LLM provider"
 - Personal data minimization (only collect necessary data)
 
 **GDPR Compliance:**
@@ -1377,8 +1368,8 @@ BALANCE (refund): CHF 30
 - Alt text for all images
 
 **Internationalization:**
-- Full support for: German, French, Italian, Romansh, English
-- Language selection in user settings
+- User interface in German
+- Tenant-facing statement PDFs in German, French, Italian, Romansh, English
 - Consistent translations across application
 - Date/time formatting per locale
 - Currency formatting (CHF with appropriate symbols)
@@ -1478,7 +1469,7 @@ BALANCE (refund): CHF 30
 **OpenPLZ API**
 - **URL:** https://www.openplzapi.org/de/
 - **Purpose:** Swiss address search and postal code validation
-- **Integration:** Called when user enters address in building form
+- **Integration:** Called from the frontend when user enters address in building form
 - **Fallback:** Manual address entry if API unavailable
 - **Rate limit:** Check API documentation (likely generous)
 - **Cost:** Free (open source)
@@ -1494,21 +1485,14 @@ BALANCE (refund): CHF 30
 
 **LLM for Invoice Categorization**
 
-**Provider Options:**
-- **Ollama** (self-hosted, recommended)
-  - Models: Llama 3.1, Mistral 7B, Mixtral
-  - Installation: Docker container or binary
-  - API: OpenAI-compatible REST API
-  - Cost: Free (self-hosted)
-  - Privacy: All data stays on-premises
-
-- **LM Studio** (alternative)
-  - Similar to Ollama
-  - Cross-platform support
-  - Cost: Free
+**Provider:** any OpenAI-compatible API, configured through `.env`:
+- `LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL`
+- Default: local **Ollama** with `qwen2.5:3b` (Docker container); invoice data stays on the server
+- External provider (e.g. OpenAI): `LLM_PROVIDER` and `LLM_PROVIDER_COUNTRY` are required and named in the privacy statement (Swiss DSG Art. 19); see README section "External LLM provider"
+- `LLM_ENABLED=false` turns categorization off
 
 **Integration:**
-- Call local LLM endpoint when invoice added
+- Call the configured LLM endpoint when invoice added
 - Prompt: Analyze invoice description and categorize
 - Response: Suggested category + confidence
 - Fallback: Manual categorization if LLM unavailable
@@ -1554,10 +1538,9 @@ BALANCE (refund): CHF 30
 **Internationalization (i18n)**
 
 **Library:** `sveltekit-i18n` or `svelte-i18n`
-- **Purpose:** Multi-language support
-- **Languages:** German, French, Italian, Romansh, English
+- **Purpose:** UI texts (German) and tenant-facing statement PDFs
+- **Languages:** UI in German; statement PDFs in German, French, Italian, Romansh, English
 - **Format:** JSON translation files per language
-- **Implementation:** Language selection in user settings
 - **Cost:** Free
 
 **Date/Time Handling**
@@ -1571,196 +1554,21 @@ BALANCE (refund): CHF 30
 
 ## 9. Data Model
 
-### 9.1 Core Entities
+The authoritative schema is `docs/data-model.md`, written from the SQL migrations in `backend/migrations/` (`0001_schema.sql` for the schema, `0002_stammdaten.sql` for the seeded categories, distribution keys and heating profiles). This section only lists the entities:
 
-**Building**
-```
-id (UUID, primary key)
-address (string) - full address
-postal_code (string)
-city (string)
-latitude (decimal) - GPS coordinate
-longitude (decimal) - GPS coordinate
-country (string) - always "Switzerland"
-building_name (string, nullable)
-building_type (enum) - single-family, multi-family, mixed
-year_built (integer, nullable)
-created_at (timestamp)
-updated_at (timestamp)
-```
+- **Building** (`buildings`)
+- **Apartment** (`apartments`)
+- **Tenant** (`tenants`)
+- **Rental contract** (`rental_contracts`)
+- **Category** (`categories`)
+- **Distribution key** (`distribution_keys`)
+- **Heating profile** (`heating_profiles`)
+- **Invoice** (`invoices`)
+- **Utility statement** (`utility_statements`, status `draft`, `sent`, `paid`, `overdue`) and its **line items** (`utility_statement_line_items`)
+- **Document** (`documents`)
+- **Configuration** (`configuration`, key/value; keys and defaults in `backend/src/services/config.service.ts`: `accounting_period`, `management_fee_pct`, `default_heating_profile_id`, `default_distribution_key_id`, `company_name`, `company_address`, `company_postal_code`, `company_city`, `iban`, `payment_deadline_days` (default 30), `reminder_after_days` (default 14), `default_language`)
 
-**Apartment**
-```
-id (UUID, primary key)
-building_id (UUID, foreign key → Building)
-floor (string) - e.g., "Parterre", "1. Stock", "Attika"
-address_unit (string, nullable) - e.g., "Wohnung 3"
-size_m2 (decimal) - Wohnfläche
-room_count (string) - e.g., "3.5"
-room_breakdown (string, nullable) - e.g., "2 Zimmer, Küche, Bad"
-utility_meter_ids (JSON, nullable) - {heating: "ID1", water: "ID2"}
-created_at (timestamp)
-updated_at (timestamp)
-```
-
-**Tenant**
-```
-id (UUID, primary key)
-first_name (string)
-last_name (string)
-date_of_birth (date, nullable)
-email (string, unique)
-phone (string, nullable)
-street (string)
-postal_code (string)
-city (string)
-nationality (string, nullable)
-created_at (timestamp)
-updated_at (timestamp)
-```
-
-**RentalContract**
-```
-id (UUID, primary key)
-apartment_id (UUID, foreign key → Apartment)
-tenant_id (UUID, foreign key → Tenant)
-start_date (date)
-end_date (date, nullable) - NULL if ongoing
-base_rent_chf (decimal)
-additional_rent_chf (decimal) - sum of all additional items
-additional_rent_breakdown (JSON) - {garage: 50, parking: 30, storage: 20}
-rent_index_reference (string, nullable) - e.g., "2023-08 Index=110.5"
-monthly_advance_payment_chf (decimal) - Akonto
-agreed_utility_categories (JSON) - array of category IDs
-contract_pdf_blob (bytea, nullable) - scanned contract PDF
-notes (text, nullable)
-created_at (timestamp)
-updated_at (timestamp)
-```
-
-**Invoice**
-```
-id (UUID, primary key)
-building_id (UUID, foreign key → Building)
-invoice_date (date)
-billing_entity_name (string)
-billing_entity_address (string, nullable)
-work_description (text)
-category_id (UUID, foreign key → Category)
-amount_chf (decimal)
-distribution_key_id (UUID, foreign key → DistributionKey)
-is_valid_utility_cost (boolean)
-validity_reason (text, nullable) - explanation if invalid
-created_at (timestamp)
-updated_at (timestamp)
-```
-
-**Category**
-```
-id (UUID, primary key)
-name (string) - e.g., "Heizkosten"
-name_de (string)
-name_fr (string)
-name_it (string)
-name_rm (string) - Romansh
-is_allowed_utility_cost (boolean) - per Swiss regulations
-description (text, nullable)
-is_predefined (boolean) - system-provided categories
-created_at (timestamp)
-updated_at (timestamp)
-```
-
-**DistributionKey**
-```
-id (UUID, primary key)
-name (string) - e.g., "Pro Fläche"
-description (text, nullable)
-formula (string, nullable) - e.g., "{area} * 1.5" for custom keys
-is_predefined (boolean) - predefined: Heizkosten, Pro Einheit, Pro Fläche
-created_at (timestamp)
-updated_at (timestamp)
-```
-
-**HeatingDistributionProfile**
-```
-id (UUID, primary key)
-name (string) - e.g., "Heizkosten mit Warmwasser"
-name_de (string)
-name_fr (string)
-name_it (string)
-name_rm (string)
-january_pct (decimal)
-february_pct (decimal)
-... (months through december)
-is_predefined (boolean)
-created_at (timestamp)
-updated_at (timestamp)
-```
-
-**UtilityStatement**
-```
-id (UUID, primary key)
-apartment_id (UUID, foreign key → Apartment)
-tenant_id (UUID, foreign key → Tenant)
-rental_contract_id (UUID, foreign key → RentalContract)
-period_start (date) - e.g., 2024-07-01
-period_end (date) - e.g., 2025-06-30
-statement_number (string, unique) - e.g., "RdJ-2024-001"
-statement_date (date) - date statement was generated
-rental_days (integer) - days tenant occupied apartment in period
-total_costs_chf (decimal)
-total_advance_payments_chf (decimal)
-balance_chf (decimal) - positive = tenant owes, negative = refund
-status (enum) - "open" or "paid"
-payment_deadline (date)
-payment_date (date, nullable)
-pdf_blob (bytea) - generated PDF including QR-bill
-created_at (timestamp)
-updated_at (timestamp)
-```
-
-**UtilityStatementLineItem**
-```
-id (UUID, primary key)
-utility_statement_id (UUID, foreign key → UtilityStatement)
-category_id (UUID, foreign key → Category)
-distribution_key_id (UUID, foreign key → DistributionKey)
-total_building_cost_chf (decimal)
-tenant_percentage (decimal) - 0-1
-tenant_amount_chf (decimal) - total_building_cost * tenant_percentage
-created_at (timestamp)
-```
-
-**Configuration**
-```
-id (UUID, primary key)
-key (string, unique) - e.g., "accounting_period"
-value (string) - JSON-encoded value
-created_at (timestamp)
-updated_at (timestamp)
-
-Key/Value Pairs:
-- accounting_period: "2024-07-01_2025-06-30" | "2024-11-01_2025-10-31" | "2024-01-01_2024-12-31"
-- management_cost_percentage: "2.5"
-- heating_profile_id: "UUID"
-- payment_deadline_days: "30"
-- reminder_deadline_days: "10"
-- iban: "CHxxxxxxxxxxxxxxxxxxxxxxxx"
-- company_name: "Property Management Company Name"
-- company_address: "Street, City"
-```
-
-**AuditLog**
-```
-id (UUID, primary key)
-user_id (UUID, nullable)
-action (enum) - "CREATE", "UPDATE", "DELETE", "PAYMENT_MARKED"
-entity_type (string) - "Invoice", "Statement", "Contract"
-entity_id (UUID)
-details (JSON) - {before: {...}, after: {...}}
-ip_address (string, nullable)
-created_at (timestamp)
-```
+An audit log is planned, not implemented.
 
 ---
 
@@ -1859,7 +1667,7 @@ created_at (timestamp)
 - PDF embedding in database
 - Multi-language PDF templates (German, French, Italian, Romansh, English)
 - Statement number generation
-- PDF download and batch download (ZIP)
+- PDF download and batch download (ZIP; planned, not implemented)
 - QR-bill validation and testing
 - PDF preview in browser
 
@@ -1869,7 +1677,7 @@ created_at (timestamp)
 **Objective:** Payment status, reminders, and final refinements
 
 **Deliverables:**
-- Payment status tracking (open/paid)
+- Payment status tracking (draft, sent, overdue, paid)
 - Payment deadline and reminder dates
 - Mark statement as paid workflow
 - Reminder generation and sending (generate documents)
@@ -2038,9 +1846,9 @@ created_at (timestamp)
 | **Leerstandskosten** | Vacancy costs; allocated when apartment is unoccupied |
 | **Liegenschaftsverwalter** | Property manager |
 | **Liegenschaft** | Property; building or real estate |
-| **Vertragsablauf** | Contract end date |
+| **Vertragsende** | Contract end date |
 | **Vertragsbeginn** | Contract start date |
-| **Verwaltungsgebühr** | Management fee |
+| **Verwaltungspauschale** | Management fee: a percentage of the building's utility costs for the administrative effort, a separate statement line, not an invoice category |
 | **zulässig** | Allowed (utility costs) |
 | **nicht zulässig** | Not allowed (utility costs) |
 | **QR-bill** | Swiss QR invoice standard for payments |
@@ -2059,20 +1867,20 @@ This PRD complies with the following Swiss regulations:
 - **Swiss Data Protection Act (SDPA)** - Data privacy requirements
 - **GDPR** - For EU tenants and data processing
 
-Key Legal Requirements Implemented:
+Key Legal Requirements Addressed (see the status note below for what is implemented):
 - Allowed/disallowed utility cost validation
 - Management fee: customary guideline up to 3% of total costs, not a cap
 - Detailed statement requirements
-- Multi-language support for tenant communications
+- Tenant-facing statement PDFs in five languages
 - Data retention (10 years for financial records)
 - Annual statement generation requirement
 
 ---
 
-**Document Status:** APPROVED & READY FOR IMPLEMENTATION
+**Document Status:** Original product vision (requirements baseline), not an implementation status
 **Version:** 1.0
 **Last Updated:** January 23, 2026
 
 ---
 
-*This PRD represents the complete specification for Dwello v1.0 MVP. All features listed are required for the initial release. Future enhancements are documented in Section 12.*
+*This PRD is the original product vision for the Dwello MVP. It describes intended features, not what is built: items marked "planned, not implemented" do not exist, and other features may not be implemented either. The implementation status lives in `implementation_plan.md` and `docs/migration-mva.md`. Future enhancements are documented in Section 12.*
