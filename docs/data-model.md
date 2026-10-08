@@ -1,678 +1,381 @@
 # Dwello Data Model & Database Schema
 
-**Version:** 1.0
-**Date:** January 23, 2026
+Describes the PostgreSQL schema as created by `backend/migrations/0001_schema.sql` and seeded by
+`backend/migrations/0002_stammdaten.sql`. The Drizzle mapping is `backend/src/db/schema.ts`; it is kept in
+sync with the migrations by hand. Domain terms follow `UBIQUITOUS_LANGUAGE.md`.
 
 ---
 
 ## Overview
 
-This document provides detailed specification of the PostgreSQL database schema for Dwello, including all tables, relationships, indexes, and constraints.
+- **PostgreSQL:** >= 15 (Docker Compose and CI use `postgres:16-alpine`).
+- **Extension:** `uuid-ossp`. Primary keys are `UUID DEFAULT uuid_generate_v4()`, except `documents`
+  (`gen_random_uuid()`).
+- **Timestamps:** `TIMESTAMP` without time zone, `NOT NULL DEFAULT NOW()`. A trigger
+  (`update_updated_at_column()`) sets `updated_at` on every update for all tables that have the column.
+- **Money:** `DECIMAL(10,2)` (contract rents) or `DECIMAL(12,2)` (invoices, statements), always CHF; no
+  currency column and no `_chf` suffix.
+- **Enums:** plain `VARCHAR` columns; some have a `CHECK` constraint (listed per table), others are checked
+  only in the application.
+- **Files:** PDFs are stored in `TEXT` columns (Base64).
 
-**Core Principles:**
-- ACID compliance for financial data integrity
-- Comprehensive audit trails for regulatory compliance
-- Efficient querying for reporting and statement generation
-- Data normalization to minimize redundancy
+## Relationships
+
+```
+buildings 1─n apartments 1─n rental_contracts n─1 tenants
+buildings 1─n invoices ──> categories (category_id, llm_category_id), distribution_keys
+
+utility_statements ──> tenants, apartments, rental_contracts (contract_id)
+utility_statements 1─n utility_statement_line_items ──> categories, distribution_keys
+documents ──> tenants, utility_statements (optional)
+
+heating_profiles, configuration: no foreign keys
+```
+
+| Foreign key | On delete |
+|---|---|
+| `apartments.building_id` → `buildings` | CASCADE |
+| `rental_contracts.apartment_id` → `apartments` | CASCADE |
+| `rental_contracts.tenant_id` → `tenants` | RESTRICT |
+| `invoices.building_id` → `buildings` | CASCADE |
+| `invoices.category_id`, `invoices.llm_category_id` → `categories` | SET NULL |
+| `invoices.distribution_key_id` → `distribution_keys` | SET NULL |
+| `utility_statements.tenant_id` / `apartment_id` / `contract_id` | RESTRICT |
+| `utility_statement_line_items.statement_id` → `utility_statements` | CASCADE |
+| `utility_statement_line_items.category_id` / `distribution_key_id` | SET NULL |
+| `documents.tenant_id` → `tenants`, `documents.statement_id` → `utility_statements` | RESTRICT |
+
+Because statements reference their apartment and contract with RESTRICT, a building, apartment or contract
+that has statements cannot be deleted (the cascade from `buildings`/`apartments` stops there).
 
 ---
 
-## Database Setup
+## Tables
 
-### PostgreSQL Version
-- **Minimum:** PostgreSQL 13
-- **Recommended:** PostgreSQL 15+
+Every table below also has `id`, `created_at` and (unless noted) `updated_at`; they are omitted from the
+listings.
 
-### Extensions
+### buildings (Gebäude)
+
 ```sql
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+name          VARCHAR(255) NOT NULL
+address       VARCHAR(500) NOT NULL
+postal_code   VARCHAR(10)  NOT NULL
+city          VARCHAR(100) NOT NULL
+canton        VARCHAR(2)   NOT NULL
+country       VARCHAR(2)   NOT NULL DEFAULT 'CH'
+latitude      DECIMAL(10,7)
+longitude     DECIMAL(10,7)
+building_type VARCHAR(50)            -- Gebäudetyp
+year_built    INTEGER                -- Baujahr
 ```
 
-### Initial Configuration
-```sql
--- Set timezone to UTC (all timestamps stored in UTC)
-SET TIMEZONE = 'UTC';
+Index: `buildings_city_idx (city)`.
 
--- Enable JSON support
--- (Built-in, no extension needed)
+### apartments (Wohnung)
+
+```sql
+building_id UUID NOT NULL REFERENCES buildings ON DELETE CASCADE
+number      VARCHAR(20)  NOT NULL          -- Wohnungsnummer
+floor       INTEGER      NOT NULL DEFAULT 0 -- Stockwerk: -1 = UG, 0 = EG
+area        DECIMAL(8,2) NOT NULL           -- Fläche in m²
+rooms       DECIMAL(3,1) NOT NULL           -- Zimmeranzahl, e.g. 3.5
+status      VARCHAR(20)  NOT NULL DEFAULT 'vacant'
+CHECK (status IN ('vacant', 'reserved'))
 ```
+
+Indexes: `apartments_building_id_idx (building_id)`, unique `apartments_building_number_idx (building_id, number)`.
+
+Only the manually set Mietstatus is stored (`vacant` = Leer, `reserved` = Gesperrt). `occupied` and `relet`
+are derived from the rental contracts and never stored.
+
+### tenants (Mieter)
+
+```sql
+first_name             VARCHAR(100) NOT NULL
+last_name              VARCHAR(100) NOT NULL
+email                  VARCHAR(255)
+phone                  VARCHAR(30)
+language               VARCHAR(5)   NOT NULL DEFAULT 'de'
+address                VARCHAR(500)
+postal_code            VARCHAR(10)
+city                   VARCHAR(100)
+correspondence_channel VARCHAR(10)  NOT NULL DEFAULT 'letter'  -- Korrespondenzkanal: email | letter
+CHECK (language IN ('de', 'fr', 'it', 'rm', 'en'))
+```
+
+No indexes besides the primary key; `email` is not unique. `correspondence_channel` has no CHECK.
+
+### rental_contracts (Mietvertrag)
+
+```sql
+apartment_id            UUID NOT NULL REFERENCES apartments ON DELETE CASCADE
+tenant_id               UUID NOT NULL REFERENCES tenants ON DELETE RESTRICT
+start_date              DATE NOT NULL           -- Vertragsbeginn
+end_date                DATE                    -- Vertragsende, NULL = unbefristet
+base_rent               DECIMAL(10,2) NOT NULL  -- Nettomiete
+additional_rent         DECIMAL(10,2) DEFAULT 0 -- Zusatzmiete (garage, parking)
+monthly_advance_payment DECIMAL(10,2) NOT NULL  -- Akonto
+reference_index         DECIMAL(6,4)            -- Referenzindex
+contract_pdf            TEXT
+notes                   TEXT
+CONSTRAINT contracts_dates_check CHECK (end_date IS NULL OR end_date >= start_date)
+```
+
+Indexes: `contracts_apartment_id_idx`, `contracts_tenant_id_idx`, `contracts_end_date_idx (end_date)`,
+`contracts_dates_idx (start_date, end_date)`.
+
+That contracts of one apartment must not overlap is enforced in the application, not in the database.
+
+### categories (Kategorie)
+
+```sql
+name                    VARCHAR(100) NOT NULL   -- internal English name
+name_de, name_fr, name_it, name_en VARCHAR(100) -- display names
+is_allowed_utility_cost BOOLEAN NOT NULL DEFAULT true  -- umlagefähig (OR 257a)
+description             TEXT
+sort_order              INTEGER DEFAULT 0
+```
+
+A category that is not allocable always makes its invoices non-allocable (enforced in the service).
+
+### distribution_keys (Verteilschlüssel)
+
+```sql
+name                               VARCHAR(100) NOT NULL
+name_de, name_fr, name_it, name_en VARCHAR(100)
+type        VARCHAR(20) NOT NULL DEFAULT 'predefined'
+formula     TEXT        -- variables {area}, {rooms}, {units} (custom keys also {volume})
+description TEXT
+sort_order  INTEGER DEFAULT 0
+CHECK (type IN ('predefined', 'custom'))
+```
+
+### heating_profiles (Heizprofil)
+
+```sql
+name                               VARCHAR(100) NOT NULL
+name_de, name_fr, name_it, name_en VARCHAR(100)
+type         VARCHAR(20)  NOT NULL DEFAULT 'predefined'
+january_pct … december_pct  DECIMAL(5,2) NOT NULL   -- 12 columns, one per month
+description  TEXT
+CHECK (type IN ('predefined', 'custom'))
+```
+
+The twelve percentages should sum to 100; this is not a database constraint (the seeded profiles all do).
+
+### invoices (Rechnung)
+
+```sql
+building_id             UUID NOT NULL REFERENCES buildings ON DELETE CASCADE
+invoice_number          VARCHAR(50)            -- Rechnungsnummer
+billing_entity_name     VARCHAR(255) NOT NULL  -- Lieferant / Rechnungssteller
+billing_entity_address  VARCHAR(500)
+description             TEXT NOT NULL          -- Beschreibung
+category_id             UUID REFERENCES categories ON DELETE SET NULL
+distribution_key_id     UUID REFERENCES distribution_keys ON DELETE SET NULL
+amount                  DECIMAL(12,2) NOT NULL -- Betrag
+is_valid_utility_cost   BOOLEAN NOT NULL DEFAULT true  -- umlagefähige Rechnung
+invoice_date            DATE NOT NULL          -- Rechnungsdatum, decides the Abrechnungsperiode
+due_date                DATE                   -- Fälligkeitsdatum
+paid_date               DATE                   -- Zahlungsdatum
+llm_category_id         UUID REFERENCES categories ON DELETE SET NULL  -- KI-Kategorie
+llm_confidence          DECIMAL(5,4)           -- Konfidenz 0–1
+was_manually_overridden BOOLEAN DEFAULT false  -- Manuell überschrieben
+manual_override_reason  TEXT                   -- Grund der Änderung
+invoice_pdf             TEXT
+notes                   TEXT
+```
+
+Indexes: `invoices_building_id_idx`, `invoices_invoice_date_idx`, `invoices_category_id_idx`.
+No CHECK on `amount`.
+
+### utility_statements (Nebenkostenabrechnung)
+
+```sql
+tenant_id              UUID NOT NULL REFERENCES tenants ON DELETE RESTRICT
+apartment_id           UUID NOT NULL REFERENCES apartments ON DELETE RESTRICT
+contract_id            UUID NOT NULL REFERENCES rental_contracts ON DELETE RESTRICT
+statement_number       VARCHAR(50)   NOT NULL
+period_start           DATE          NOT NULL  -- Abrechnungsperiode
+period_end             DATE          NOT NULL
+statement_date         DATE          NOT NULL
+rental_days            INTEGER       NOT NULL  -- Mietstage
+total_costs            DECIMAL(12,2) NOT NULL
+total_advance_payments DECIMAL(12,2) NOT NULL  -- Geleistete Akontobeiträge
+management_fee         DECIMAL(12,2) DEFAULT 0 -- Verwaltungspauschale
+management_fee_percent DECIMAL(5,2)            -- rate chosen in the Abrechnungslauf
+balance                DECIMAL(12,2) NOT NULL  -- Saldo: positive = Nachzahlung, negative = Rückerstattung
+status                 VARCHAR(20)   NOT NULL DEFAULT 'draft'
+payment_deadline       DATE                    -- Zahlungsfrist
+paid_date              DATE
+paid_amount            DECIMAL(12,2)
+reminder_sent_date     DATE
+pdf_blob               TEXT                    -- Base64 PDF with QR-bill
+pdf_generated_at       TIMESTAMP
+qr_bill_reference      VARCHAR(27)             -- QR reference (only with a QR-IBAN)
+notes                  TEXT
+CONSTRAINT statements_status_check CHECK (status IN ('draft', 'sent', 'paid', 'overdue'))
+CONSTRAINT statements_period_check CHECK (period_end >= period_start)
+```
+
+Indexes: `statements_tenant_id_idx`, `statements_apartment_id_idx`, `statements_period_start_idx`,
+`statements_status_idx`, `statements_tenant_period_idx (tenant_id, period_start)`, unique
+`statements_number_idx (statement_number)`.
+
+**Status (Abrechnungsstatus)** — transitions allowed by `updateStatementStatus` in
+`backend/src/services/statement.service.ts`:
+
+| From | To |
+|---|---|
+| `draft` (Entwurf) | `sent` |
+| `sent` (Versendet) | `paid`, `overdue` |
+| `overdue` (Überfällig) | `paid` |
+| `paid` (Bezahlt) | — |
+
+**Lock rule:** only a `draft` can be deleted (`deleteStatement`), get line items (`addLineItems`) or have its
+amounts changed (`updateStatement` rejects `total_costs`, `total_advance_payments`, `management_fee` and
+`balance` once the status is not `draft`). Other fields, such as `payment_deadline` or `notes`, stay
+editable; a changed `payment_deadline` clears `pdf_blob` and `pdf_generated_at`.
+
+**Overdue:** reads, filters and counts treat a `sent` statement whose `payment_deadline` has passed as
+`overdue` (computed). `overdue` can also be stored: the CHECK allows it and `POST /statements/mark-overdue`
+(`markOverdueStatements`) writes it for all such statements.
+
+### utility_statement_line_items (Abrechnungsposition)
+
+```sql
+statement_id        UUID NOT NULL REFERENCES utility_statements ON DELETE CASCADE
+category_id         UUID REFERENCES categories ON DELETE SET NULL
+distribution_key_id UUID REFERENCES distribution_keys ON DELETE SET NULL
+description         VARCHAR(255)  NOT NULL
+total_amount        DECIMAL(12,2) NOT NULL  -- building total
+tenant_share        DECIMAL(12,2) NOT NULL  -- tenant's portion
+share_percentage    DECIMAL(8,4)
+sort_order          INTEGER DEFAULT 0
+```
+
+No `updated_at`. Index: `line_items_statement_id_idx`.
+
+### documents (Dokument)
+
+Letters and e-mails to a tenant with a PDF; currently payment reminders (Mahnungen).
+
+```sql
+tenant_id      UUID NOT NULL REFERENCES tenants ON DELETE RESTRICT
+statement_id   UUID REFERENCES utility_statements ON DELETE RESTRICT
+type           VARCHAR(30)  NOT NULL   -- reminder
+reminder_level INTEGER                 -- Mahnstufe: 1 = Zahlungserinnerung, 2 and 3 = Mahnung
+title          VARCHAR(255) NOT NULL
+file_name      VARCHAR(255) NOT NULL
+pdf            TEXT         NOT NULL   -- Base64
+channel        VARCHAR(10)  NOT NULL   -- email | letter
+status         VARCHAR(20)  NOT NULL   -- Versandstatus: sent | to_send
+sent_at        TIMESTAMP
+delivery_error TEXT                    -- why an e-mail could not be sent
+```
+
+No `updated_at`, no CHECK constraints. Indexes: `documents_tenant_id_idx`, `documents_statement_id_idx`,
+`documents_status_idx`.
+
+### configuration
+
+```sql
+key         VARCHAR(100) NOT NULL   -- unique index config_key_idx
+value       TEXT NOT NULL
+description TEXT
+```
+
+Key-value store. The migrations insert no rows; a missing key falls back to its default in
+`CONFIG_KEYS` (`backend/src/services/config.service.ts`), and only known keys are accepted.
+
+| Key | Default | Validation |
+|---|---|---|
+| `accounting_period` | `calendar` | `calendar` \| `july-june` \| `november-october` |
+| `management_fee_pct` | `3` | number >= 0 (3 % is the guideline, not a cap) |
+| `default_heating_profile_id` | none | an existing heating profile |
+| `default_distribution_key_id` | none | an existing distribution key |
+| `company_name` | `''` | <= 255 characters |
+| `company_address` | `''` | <= 500 characters |
+| `company_postal_code` | `''` | four digits |
+| `company_city` | `''` | <= 100 characters |
+| `iban` | `''` | valid IBAN incl. MOD-97 checksum |
+| `payment_deadline_days` | `30` | 7–90 |
+| `reminder_after_days` | `14` | 7–60 |
+| `default_language` | `de` | `de` \| `fr` \| `it` \| `rm` \| `en` |
+
+The IBAN is stored in plain text.
 
 ---
 
-## Table Specifications
+## Seed data (`0002_stammdaten.sql`)
 
-### 1. Building
+### Categories
 
-Represents a residential building property managed by the user.
+Allocable (`is_allowed_utility_cost = true`, sort order 1–14): Heizung, Warmwasser, Kaltwasser, Abwasser,
+Allgemeinstrom, Lift, Hauswart, Gartenpflege, Schneeräumung, Kehricht, TV/Kabelanschluss,
+Schädlingsbekämpfung, Feuerlöscher-Wartung, Kaminfeger.
 
-```sql
-CREATE TABLE buildings (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  address VARCHAR(255) NOT NULL,
-  postal_code VARCHAR(10) NOT NULL,
-  city VARCHAR(100) NOT NULL,
-  latitude DECIMAL(10, 8) NOT NULL,
-  longitude DECIMAL(11, 8) NOT NULL,
-  country VARCHAR(50) DEFAULT 'Switzerland',
-  building_name VARCHAR(255),
-  building_type VARCHAR(50),
-    -- enum: 'single-family', 'multi-family', 'mixed'
-  year_built INTEGER,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+Not allocable (`false`, sort order 100–106): Reparaturen, Gebäudeversicherung, Liegenschaftssteuer,
+Hypothekarzinsen, Verwaltung, Renovation, Wertvermehrende Investitionen. The management effort is billed
+through the Verwaltungspauschale, not through invoices in Verwaltung.
 
-  CONSTRAINT valid_coordinates CHECK (
-    latitude BETWEEN -90 AND 90
-    AND longitude BETWEEN -180 AND 180
-  )
-);
+### Distribution keys (all `predefined`)
 
-CREATE INDEX idx_buildings_postal_code ON buildings(postal_code);
-CREATE INDEX idx_buildings_city ON buildings(city);
-CREATE INDEX idx_buildings_updated_at ON buildings(updated_at DESC);
-```
+| name_de | formula | sort_order |
+|---|---|---|
+| Pro Einheit | `{units}` | 1 |
+| Pro Fläche (m²) | `{area}` | 2 |
+| Pro Zimmer | `{rooms}` | 3 |
+| Heizung (Fläche 70% / Einheit 30%) | `0.7 * {area} + 0.3 * {units}` | 6 |
 
-### 2. Apartment
+### Heating profiles (all `predefined`, table `heating_profiles`)
 
-Individual apartment within a building.
+| name_de | Jan | Feb | Mar | Apr | May | Jun | Jul | Aug | Sep | Oct | Nov | Dec |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| Heizung + Warmwasser | 14 | 12 | 10 | 6 | 3 | 2 | 2 | 2 | 4 | 8 | 12 | 25 |
+| Heizung Mittelland | 28 | 14 | 11 | 5 | 0 | 0 | 0 | 0 | 2 | 8 | 14 | 18 |
+| Heizung Bergregion | 16 | 14 | 12 | 8 | 4 | 1 | 0 | 1 | 4 | 10 | 14 | 16 |
+| Heizung Tessin | 30 | 16 | 12 | 4 | 0 | 0 | 0 | 0 | 0 | 6 | 14 | 18 |
+| Nur Warmwasser | 8.5 | 8.5 | 8.5 | 8 | 8.5 | 8 | 8.5 | 8.5 | 8 | 8.5 | 8 | 8.5 |
 
-```sql
-CREATE TABLE apartments (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  building_id UUID NOT NULL REFERENCES buildings(id) ON DELETE CASCADE,
-  floor VARCHAR(50) NOT NULL,
-    -- Values: 'Parterre', '1. Stock', '2. Stock', 'Attika', 'Untergeschoss', etc.
-  address_unit VARCHAR(50),
-    -- e.g., 'Wohnung 3', 'Unit 3A'
-  size_m2 DECIMAL(8, 2) NOT NULL,
-    -- Wohnfläche in square meters
-  room_count VARCHAR(10) NOT NULL,
-    -- e.g., '3.5', '2', '1.5'
-  room_breakdown VARCHAR(255),
-    -- Optional: e.g., '2 Zimmer, Küche, Bad'
-  utility_meter_ids JSONB DEFAULT '{}'::jsonb,
-    -- e.g., {"heating": "ID1", "water": "ID2", "electricity": "ID3"}
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-
-  CONSTRAINT positive_size CHECK (size_m2 > 0),
-  CONSTRAINT valid_room_count CHECK (room_count ~ '^\d+(\.\d)?$')
-);
-
-CREATE INDEX idx_apartments_building_id ON apartments(building_id);
-CREATE INDEX idx_apartments_updated_at ON apartments(updated_at DESC);
-CREATE INDEX idx_apartments_floor ON apartments(floor);
-```
-
-### 3. Tenant
-
-Tenant/occupant information.
-
-```sql
-CREATE TABLE tenants (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  first_name VARCHAR(100) NOT NULL,
-  last_name VARCHAR(100) NOT NULL,
-  date_of_birth DATE,
-  email VARCHAR(255) NOT NULL UNIQUE,
-  phone VARCHAR(20),
-  street VARCHAR(255) NOT NULL,
-  postal_code VARCHAR(10) NOT NULL,
-  city VARCHAR(100) NOT NULL,
-  nationality VARCHAR(100),
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE INDEX idx_tenants_email ON tenants(email);
-CREATE INDEX idx_tenants_last_name ON tenants(last_name);
-CREATE INDEX idx_tenants_updated_at ON tenants(updated_at DESC);
-```
-
-### 4. RentalContract
-
-Rental agreement between tenant and building owner.
-
-```sql
-CREATE TABLE rental_contracts (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  apartment_id UUID NOT NULL REFERENCES apartments(id) ON DELETE CASCADE,
-  tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE RESTRICT,
-  start_date DATE NOT NULL,
-  end_date DATE,
-    -- NULL for ongoing contracts
-  base_rent_chf DECIMAL(10, 2) NOT NULL,
-  additional_rent_chf DECIMAL(10, 2) DEFAULT 0,
-    -- Sum of garage, parking, storage, etc.
-  additional_rent_breakdown JSONB DEFAULT '{}'::jsonb,
-    -- e.g., {"garage": 50, "parking": 30, "storage": 20}
-  rent_index_reference VARCHAR(100),
-    -- e.g., "2023-08 Index=110.5"
-  monthly_advance_payment_chf DECIMAL(10, 2) NOT NULL,
-    -- Akonto for utility costs
-  agreed_utility_categories JSONB DEFAULT '[]'::jsonb,
-    -- Array of category IDs the tenant is charged for
-  contract_pdf_blob BYTEA,
-    -- Scanned/uploaded contract PDF
-  notes TEXT,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-
-  CONSTRAINT valid_dates CHECK (
-    start_date IS NULL OR end_date IS NULL OR start_date <= end_date
-  ),
-  CONSTRAINT positive_rent CHECK (base_rent_chf > 0),
-  CONSTRAINT non_negative_additional CHECK (additional_rent_chf >= 0),
-  CONSTRAINT positive_advance CHECK (monthly_advance_payment_chf > 0)
-);
-
-CREATE INDEX idx_rental_contracts_apartment_id ON rental_contracts(apartment_id);
-CREATE INDEX idx_rental_contracts_tenant_id ON rental_contracts(tenant_id);
-CREATE INDEX idx_rental_contracts_start_date ON rental_contracts(start_date);
-CREATE INDEX idx_rental_contracts_end_date ON rental_contracts(end_date);
-CREATE INDEX idx_rental_contracts_updated_at ON rental_contracts(updated_at DESC);
-
--- Composite index for finding active contracts for an apartment in a date range
-CREATE INDEX idx_rental_contracts_apartment_dates
-  ON rental_contracts(apartment_id, start_date, end_date);
-```
-
-### 5. Category
-
-Utility cost categories (heating, water, electricity, etc.).
-
-```sql
-CREATE TABLE categories (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name VARCHAR(100) NOT NULL,
-  -- English name
-  name_de VARCHAR(100),
-  -- German
-  name_fr VARCHAR(100),
-  -- French
-  name_it VARCHAR(100),
-  -- Italian
-  name_rm VARCHAR(100),
-  -- Romansh
-  is_allowed_utility_cost BOOLEAN NOT NULL DEFAULT true,
-  -- Per Swiss regulations
-  description TEXT,
-  is_predefined BOOLEAN NOT NULL DEFAULT false,
-  -- System-provided categories
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE INDEX idx_categories_is_allowed ON categories(is_allowed_utility_cost);
-CREATE INDEX idx_categories_is_predefined ON categories(is_predefined);
-
--- Insert predefined categories
-INSERT INTO categories (
-  name, name_de, name_fr, name_it, name_rm,
-  is_allowed_utility_cost, is_predefined
-) VALUES
-  ('Heating', 'Heizkosten', 'Frais de chauffage', 'Costi di riscaldamento', 'Custs da riscaldament', true, true),
-  ('Hot Water', 'Warmwasser', 'Eau chaude', 'Acqua calda', 'Aua chaudia', true, true),
-  ('Electricity', 'Stromkosten', 'Frais d''électricité', 'Costi di elettricità', 'Custs da corrent', true, true),
-  ('Water', 'Wasser', 'Eau', 'Acqua', 'Aua', true, true),
-  ('Wastewater', 'Abwasser', 'Eaux usées', 'Acque reflue', 'Aua desfatta', true, true),
-  ('Property Maintenance', 'Grundstückspflege', 'Entretien de la propriété', 'Manutenzione della proprietà', 'Manutentgia dal terraplain', true, true),
-  ('Building Infrastructure', 'Gebäudeinfrastruktur', 'Infrastructure du bâtiment', 'Infrastruttura dell''edificio', 'Infrastructura da l''edifici', true, true),
-  ('Disposal', 'Entsorgung', 'Élimination des déchets', 'Smaltimento', 'Eliminaziun', true, true),
-  ('Communication', 'Kommunikation', 'Communication', 'Comunicazione', 'Communicaziun', true, true),
-  ('Management', 'Verwaltung', 'Gestion', 'Gestione', 'Administraziun', true, true),
-  ('Other', 'Sonstiges', 'Autre', 'Altro', 'Auter', true, true);
-```
-
-### 6. DistributionKey
-
-Method for allocating costs among apartments.
-
-```sql
-CREATE TABLE distribution_keys (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name VARCHAR(100) NOT NULL,
-  description TEXT,
-  formula VARCHAR(255),
-    -- e.g., '{area} * 1.5' for custom keys
-  is_predefined BOOLEAN NOT NULL DEFAULT false,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
-
--- Insert predefined keys
-INSERT INTO distribution_keys (name, description, is_predefined) VALUES
-  ('Heating Costs', 'Based on monthly heating distribution profile', true),
-  ('Per Unit', 'Equal distribution among all apartments', true),
-  ('Per Area', 'Distribution based on apartment size (Wohnfläche)', true);
-```
-
-### 7. HeatingDistributionProfile
-
-Monthly percentage-based distribution for heating costs.
-
-```sql
-CREATE TABLE heating_distribution_profiles (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name VARCHAR(100) NOT NULL,
-  name_de VARCHAR(100),
-  name_fr VARCHAR(100),
-  name_it VARCHAR(100),
-  name_rm VARCHAR(100),
-  january_pct DECIMAL(5, 2) NOT NULL,
-  february_pct DECIMAL(5, 2) NOT NULL,
-  march_pct DECIMAL(5, 2) NOT NULL,
-  april_pct DECIMAL(5, 2) NOT NULL,
-  may_pct DECIMAL(5, 2) NOT NULL,
-  june_pct DECIMAL(5, 2) NOT NULL,
-  july_pct DECIMAL(5, 2) NOT NULL,
-  august_pct DECIMAL(5, 2) NOT NULL,
-  september_pct DECIMAL(5, 2) NOT NULL,
-  october_pct DECIMAL(5, 2) NOT NULL,
-  november_pct DECIMAL(5, 2) NOT NULL,
-  december_pct DECIMAL(5, 2) NOT NULL,
-  is_predefined BOOLEAN NOT NULL DEFAULT false,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-
-  CONSTRAINT percentages_sum_to_100 CHECK (
-    (january_pct + february_pct + march_pct + april_pct + may_pct + june_pct +
-     july_pct + august_pct + september_pct + october_pct + november_pct + december_pct)
-    BETWEEN 99.99 AND 100.01
-  )
-);
-
--- Insert predefined profiles
-INSERT INTO heating_distribution_profiles (
-  name, name_de, name_fr, name_it, name_rm,
-  january_pct, february_pct, march_pct, april_pct, may_pct, june_pct,
-  july_pct, august_pct, september_pct, october_pct, november_pct, december_pct,
-  is_predefined
-) VALUES
-  (
-    'Heating + Hot Water',
-    'Heizkosten mit Warmwasser',
-    'Frais de chauffage et eau chaude',
-    'Costi di riscaldamento e acqua calda',
-    'Custs da riscaldament e aua chaudia',
-    12, 10, 8, 4, 2, 1,
-    1, 2, 4, 8, 10, 12, -- sums to 92.something, need to adjust...
-    true
-  );
-
--- After populating, ensure sum = 100 per profile
-```
-
-### 8. Invoice
-
-Invoices for building utilities and services.
-
-```sql
-CREATE TABLE invoices (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  building_id UUID NOT NULL REFERENCES buildings(id) ON DELETE CASCADE,
-  invoice_date DATE NOT NULL,
-  billing_entity_name VARCHAR(255) NOT NULL,
-  billing_entity_address VARCHAR(255),
-  work_description TEXT NOT NULL,
-  category_id UUID NOT NULL REFERENCES categories(id),
-  amount_chf DECIMAL(10, 2) NOT NULL,
-  distribution_key_id UUID NOT NULL REFERENCES distribution_keys(id),
-  is_valid_utility_cost BOOLEAN NOT NULL DEFAULT true,
-  validity_reason TEXT,
-    -- Explanation if cost is invalid
-  notes TEXT,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-
-  CONSTRAINT positive_amount CHECK (amount_chf > 0)
-);
-
-CREATE INDEX idx_invoices_building_id ON invoices(building_id);
-CREATE INDEX idx_invoices_invoice_date ON invoices(invoice_date);
-CREATE INDEX idx_invoices_category_id ON invoices(category_id);
-CREATE INDEX idx_invoices_is_valid ON invoices(is_valid_utility_cost);
-CREATE INDEX idx_invoices_updated_at ON invoices(updated_at DESC);
-
--- Composite index for efficient statement generation queries
-CREATE INDEX idx_invoices_building_date
-  ON invoices(building_id, invoice_date);
-```
-
-### 9. UtilityStatement
-
-Generated utility cost statements for tenants.
-
-```sql
-CREATE TABLE utility_statements (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  apartment_id UUID NOT NULL REFERENCES apartments(id) ON DELETE RESTRICT,
-  tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE RESTRICT,
-  rental_contract_id UUID NOT NULL REFERENCES rental_contracts(id) ON DELETE RESTRICT,
-  period_start DATE NOT NULL,
-  period_end DATE NOT NULL,
-  statement_number VARCHAR(50) NOT NULL UNIQUE,
-    -- e.g., 'RdJ-2024-001'
-  statement_date DATE NOT NULL,
-  rental_days INTEGER NOT NULL,
-    -- Days tenant occupied in period
-  total_costs_chf DECIMAL(12, 2) NOT NULL,
-  total_advance_payments_chf DECIMAL(12, 2) NOT NULL,
-  balance_chf DECIMAL(12, 2) NOT NULL,
-    -- Positive = tenant owes, negative = refund
-  status VARCHAR(20) NOT NULL DEFAULT 'open',
-    -- Enum: 'open', 'paid'
-  payment_deadline DATE NOT NULL,
-  payment_date DATE,
-  pdf_blob BYTEA NOT NULL,
-    -- Generated PDF with QR-bill
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-
-  CONSTRAINT valid_period CHECK (period_start < period_end),
-  CONSTRAINT valid_dates CHECK (
-    period_start IS NULL OR period_end IS NULL OR statement_date BETWEEN period_start AND period_end
-  )
-);
-
-CREATE INDEX idx_utility_statements_apartment_id ON utility_statements(apartment_id);
-CREATE INDEX idx_utility_statements_tenant_id ON utility_statements(tenant_id);
-CREATE INDEX idx_utility_statements_period ON utility_statements(period_start, period_end);
-CREATE INDEX idx_utility_statements_statement_number ON utility_statements(statement_number);
-CREATE INDEX idx_utility_statements_status ON utility_statements(status);
-CREATE INDEX idx_utility_statements_payment_deadline ON utility_statements(payment_deadline);
-CREATE INDEX idx_utility_statements_updated_at ON utility_statements(updated_at DESC);
-```
-
-### 10. UtilityStatementLineItem
-
-Individual line items in a utility statement.
-
-```sql
-CREATE TABLE utility_statement_line_items (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  utility_statement_id UUID NOT NULL REFERENCES utility_statements(id) ON DELETE CASCADE,
-  category_id UUID NOT NULL REFERENCES categories(id),
-  distribution_key_id UUID NOT NULL REFERENCES distribution_keys(id),
-  total_building_cost_chf DECIMAL(12, 2) NOT NULL,
-  tenant_percentage DECIMAL(5, 4) NOT NULL,
-    -- 0.0000 to 1.0000
-  tenant_amount_chf DECIMAL(12, 2) NOT NULL,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-
-  CONSTRAINT valid_percentage CHECK (
-    tenant_percentage >= 0 AND tenant_percentage <= 1
-  ),
-  CONSTRAINT positive_amounts CHECK (
-    total_building_cost_chf > 0 AND tenant_amount_chf >= 0
-  )
-);
-
-CREATE INDEX idx_line_items_statement_id ON utility_statement_line_items(utility_statement_id);
-CREATE INDEX idx_line_items_category_id ON utility_statement_line_items(category_id);
-```
-
-### 11. Configuration
-
-System configuration key-value store.
-
-```sql
-CREATE TABLE configuration (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  key VARCHAR(100) NOT NULL UNIQUE,
-  value TEXT NOT NULL,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
-
--- Expected keys:
--- accounting_period: '2024-07-01_2025-06-30' | '2024-11-01_2025-10-31' | '2024-01-01_2024-12-31'
--- management_cost_percentage: '2.5'
--- heating_profile_id: '{UUID}'
--- payment_deadline_days: '30'
--- reminder_deadline_days: '10'
--- iban: 'CHxxxxxxxxxxxxxxxxxxxxxxxx'
--- company_name: 'Property Management Company Name'
--- company_address: 'Street, City'
-```
-
-### 12. AuditLog
-
-Audit trail for compliance and accountability.
-
-```sql
-CREATE TABLE audit_logs (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID,
-    -- Reference to user (once multi-user added)
-  action VARCHAR(50) NOT NULL,
-    -- Enum: 'CREATE', 'UPDATE', 'DELETE', 'PAYMENT_MARKED', 'CATEGORIZATION', etc.
-  entity_type VARCHAR(100) NOT NULL,
-    -- e.g., 'Invoice', 'Statement', 'Contract'
-  entity_id UUID NOT NULL,
-  details JSONB,
-    -- {before: {...}, after: {...}, reason: '...'}
-  ip_address INET,
-  user_agent TEXT,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE INDEX idx_audit_logs_entity ON audit_logs(entity_type, entity_id);
-CREATE INDEX idx_audit_logs_action ON audit_logs(action);
-CREATE INDEX idx_audit_logs_created_at ON audit_logs(created_at DESC);
-CREATE INDEX idx_audit_logs_user_id ON audit_logs(user_id);
-```
+Demo data (`backend/demo/`, `bun run db:demo`) is never part of the migrations.
 
 ---
 
-## Views (For Common Queries)
+## Migrations
 
-### Active Contracts View
-
-```sql
-CREATE VIEW active_contracts AS
-SELECT rc.*
-FROM rental_contracts rc
-WHERE rc.start_date <= CURRENT_DATE
-  AND (rc.end_date IS NULL OR rc.end_date >= CURRENT_DATE);
+```
+backend/migrations/
+  0001_schema.sql       -- schema (baseline of October 2026, replaces the earlier 0001–0011)
+  0002_stammdaten.sql   -- master data: categories, distribution keys, heating profiles
 ```
 
-### Apartment Occupancy View
+`src/db/migrate.ts` applies the `.sql` files in file order, each in its own transaction, and records them in
+`schema_migrations`. It refuses a database that was set up without this table, or one that has records of
+migrations that no longer exist (pre-baseline databases); recreate those with `bun run db:reset`.
 
-```sql
-CREATE VIEW apartment_occupancy AS
-SELECT
-  a.id,
-  a.building_id,
-  a.floor,
-  a.address_unit,
-  CASE
-    WHEN rc.end_date IS NULL OR rc.end_date >= CURRENT_DATE THEN true
-    ELSE false
-  END AS is_occupied,
-  COALESCE(t.first_name || ' ' || t.last_name, 'Vacant') AS current_tenant,
-  rc.id AS current_contract_id
-FROM apartments a
-LEFT JOIN active_contracts rc ON a.id = rc.apartment_id
-LEFT JOIN tenants t ON rc.tenant_id = t.id;
-```
+Commands (in `backend/`):
 
-### Invoice Statistics View
+| Command | Effect |
+|---|---|
+| `bun run dev` | applies missing migrations, then starts the backend |
+| `bun run db:migrate` | applies missing migrations |
+| `bun run db:reset` | recreates the local dev database from the migrations (refuses non-local hosts) |
+| `bun run db:demo` | loads the demo data; running it twice adds nothing |
 
-```sql
-CREATE VIEW invoice_statistics AS
-SELECT
-  category_id,
-  COUNT(*) AS total_invoices,
-  SUM(amount_chf) AS total_amount,
-  AVG(amount_chf) AS avg_amount,
-  SUM(CASE WHEN is_valid_utility_cost = true THEN 1 ELSE 0 END) AS valid_count,
-  SUM(CASE WHEN is_valid_utility_cost = false THEN 1 ELSE 0 END) AS invalid_count
-FROM invoices
-GROUP BY category_id;
-```
+The Docker image also applies missing migrations on start; the test databases `dwello_test` and
+`dwello_e2e` are recreated from the migrations before each run.
+
+A schema change goes into a new numbered SQL file written by hand; also update `src/db/schema.ts` and this
+document. Do not use `db:generate` (Drizzle Kit has no snapshots and would emit the whole schema again) or
+`db:push` (bypasses `schema_migrations`).
 
 ---
 
-## Relationship Diagram
+## Not implemented
 
-```
-buildings (1)
-  ├─ apartments (many) ─── apartment_id
-  │   ├─ rental_contracts (many) ─── apartment_id, tenant_id
-  │   │   ├─ categories
-  │   │   └─ tenants
-  │   └─ utility_statements (many) ─── apartment_id, tenant_id, rental_contract_id
-  │       └─ utility_statement_line_items (many) ─── category_id, distribution_key_id
-  │
-  ├─ invoices (many) ─── building_id
-  │   ├─ categories
-  │   └─ distribution_keys
-  │
-  └─ tenants
-      └─ rental_contracts
-          └─ apartments
-```
-
----
-
-## Migration Strategy
-
-### Schema Creation Order
-
-1. Create base tables: buildings, apartments, tenants, categories, distribution_keys, heating_distribution_profiles
-2. Create relationship tables: rental_contracts, invoices
-3. Create derived tables: utility_statements, utility_statement_line_items
-4. Create system tables: configuration, audit_logs
-5. Create indexes and views
-
-### Version Control
-
-All migrations tracked in version-controlled SQL files:
-```
-migrations/
-  ├── 001_initial_schema.sql
-  ├── 002_indexes.sql
-  ├── 003_views.sql
-  └── 004_initial_data.sql
-```
-
----
-
-## Performance Considerations
-
-### Indexing Strategy
-
-- **Frequently filtered fields:** building_id, apartment_id, tenant_id, category_id, status, dates
-- **Frequently sorted fields:** created_at, updated_at, invoice_date, period dates
-- **Composite indexes:** For common WHERE + ORDER BY combinations
-- **Partial indexes:** For boolean flags (is_valid_utility_cost, is_predefined)
-
-### Query Optimization
-
-**Statement Generation Query Example:**
-```sql
--- Get all invoices for a building in a period
-SELECT i.*, c.name, dk.name, dk.formula
-FROM invoices i
-JOIN categories c ON i.category_id = c.id
-JOIN distribution_keys dk ON i.distribution_key_id = dk.id
-WHERE i.building_id = $1
-  AND i.invoice_date >= $2
-  AND i.invoice_date <= $3
-ORDER BY i.invoice_date DESC;
-```
-
-**Active Tenant Query:**
-```sql
--- Get current tenant for an apartment
-SELECT t.*, rc.*
-FROM rental_contracts rc
-JOIN tenants t ON rc.tenant_id = t.id
-WHERE rc.apartment_id = $1
-  AND rc.start_date <= CURRENT_DATE
-  AND (rc.end_date IS NULL OR rc.end_date >= CURRENT_DATE)
-LIMIT 1;
-```
-
-### Archival Strategy (Future)
-
-For tables with many historical records (statements, audit logs):
-- Archive records older than 2 years to separate tables
-- Keep hot data in main tables
-- Use table partitioning for very large tables (>10M records)
-
----
-
-## Data Validation Rules
-
-### Business Rules Enforced at DB Level
-
-1. **Rental Contracts:** start_date < end_date (if end_date provided)
-2. **Invoices:** amount_chf > 0
-3. **Apartments:** size_m2 > 0
-4. **Utility Statements:** period_start < period_end
-5. **Percentages:** Sum of monthly heating percentages = 100%
-6. **Tenant Percentage:** 0 ≤ tenant_percentage ≤ 1
-
-### Business Rules Enforced at Application Level
-
-1. Valid accounting period configuration
-2. No duplicate contracts for same apartment in overlapping date ranges
-3. Invoice categorization validation
-4. Statement prorating calculations
-5. IBAN format validation (Swiss format starting with CH)
-
----
-
-## Backup & Recovery
-
-### Backup Strategy
-
-- **Frequency:** Daily at 2 AM UTC
-- **Retention:** 30 days rolling
-- **Location:** Encrypted encrypted offsite storage
-- **Verification:** Automated restore test weekly
-
-### Recovery Procedures
-
-**Full Database Recovery:**
-```bash
-# Restore from backup
-pg_restore -d dwello backup_file.dump
-```
-
-**Point-in-Time Recovery:**
-```bash
-# WAL archiving configured to enable PITR
-```
-
----
-
-## Compliance & Security
-
-### Data Encryption
-
-- **In Transit:** TLS 1.2+ for all connections
-- **At Rest:** Database connection requires SSL
-- **Sensitive Fields:** OAuth tokens, IBAN encrypted with application key
-
-### Audit Trail
-
-All data modifications logged to `audit_logs` table with:
-- Before/after values
-- User/action information
-- Timestamp in UTC
-- IP address for compliance
-
-### Data Retention
-
-- Financial records (statements, invoices): 10 years per Swiss law
-- Contracts: Duration + 10 years
-- Audit logs: 1 year
-- Personal data: Up to 10 years (GDPR/SDPA compliance)
-
----
-
-**Database Schema Status:** APPROVED
-**Last Updated:** January 23, 2026
+- Audit log (no `audit_logs` table; only invoices record a manual category override).
+- Database views.
+- Backups (scenario R2 in `docs/migration-mva.md`).
+- Encryption of individual columns (e.g. the IBAN).
