@@ -1,9 +1,9 @@
 # Dwello Design System
 
-**Version:** 1.0
-**Date:** January 23, 2026
-**Status:** Extracted from UX Wireframes
-**Framework:** Tailwind CSS + Material Design Icons
+**Version:** 1.1
+**Date:** January 23, 2026 (corrected against the code: October 2026)
+**Status:** Extracted from UX wireframes, colors checked against `tailwind.config.js` and `src/styles/globals.css`
+**Framework:** Tailwind CSS 3 + Material Symbols
 
 ---
 
@@ -17,75 +17,60 @@
 6. [Border Radius](#border-radius)
 7. [Icons](#icons)
 8. [Accessibility](#accessibility)
-9. [Dark Mode](#dark-mode)
+9. [Not Implemented](#not-implemented)
 
 ---
 
 ## Color Palette
 
-### Primary Colors
+### Design Tokens (source of truth)
 
-| Name | Hex Code | Usage | Light Mode | Dark Mode |
-|------|----------|-------|-----------|-----------|
-| **Primary Blue** | `#135bec` | CTAs, active states, primary actions, accents | ✅ Primary | ✅ Primary |
-| **Primary Blue Tint** | `#135bec/10` | Background highlight for primary elements | Light background | Dark transparent |
+Custom colors in `tailwind.config.js` (`theme.extend.colors`), usable as Tailwind classes (`bg-primary`, `text-text-dark`, ...):
 
-### Background Colors
+| Token | Hex Code | Usage |
+|-------|----------|-------|
+| `primary` | `#135bec` | CTAs, active states, primary actions, accents (tint: `bg-primary/10`) |
+| `success` | `#10b981` | Positive status |
+| `text-dark` | `#111318` | Primary text |
+| `text-secondary` | `#616f89` | Secondary text, subtitles |
+| `border-light` | `#dbdfe6` | Borders, dividers |
 
-| Name | Hex Code | Usage |
-|------|----------|-------|
-| **Background Light** | `#f6f6f8` | Page background (light mode) |
-| **Background Dark** | `#101622` | Page background (dark mode) |
+CSS custom properties in `src/styles/globals.css` (`:root`):
 
-### Surface Colors
+| Variable | Hex Code |
+|----------|----------|
+| `--color-primary` | `#135bec` |
+| `--color-secondary` | `#616f89` |
+| `--color-success` | `#10b981` |
+| `--color-warning` | `#f59e0b` |
+| `--color-error` | `#ef4444` |
+| `--color-text-dark` | `#111318` |
+| `--color-border-light` | `#dbdfe6` |
 
-| Name | Hex Code | Usage | Light Mode | Dark Mode |
-|------|----------|-------|-----------|-----------|
-| **Surface Light** | `#ffffff` | Cards, panels, surfaces (light mode) | ✅ White | ✅ Surfaces |
-| **Surface Dark** | `#1a2230` / `#1a202c` | Cards, panels, surfaces (dark mode) | - | ✅ Dark surfaces |
+There are no custom tokens for backgrounds or surfaces; components use Tailwind defaults (`bg-white`, `bg-gray-50`). Neutral colors come mostly from the Tailwind `gray` palette (`slate` appears in a few places).
 
-### Text Colors
+### Status Colors (as used in `Badge.svelte` / `StatusBadge.svelte`)
 
-| Name | Hex Code | Usage |
-|------|----------|-------|
-| **Text Dark** | `#111318` | Primary text (light mode) |
-| **Text Light** | `#ffffff` | Primary text (dark mode), white text on dark backgrounds |
-| **Text Secondary** | `#616f89` | Secondary text, subtitles (light mode) |
-| **Text Secondary Dark** | `#9ca3af` / `#9ca3af` | Secondary text (dark mode) |
-| **Text Muted** | `#616f89` | Disabled text, hints, placeholders |
+Status badges use Tailwind default colors rather than the tokens above:
 
-### Border Colors
-
-| Name | Hex Code | Usage |
-|------|----------|-------|
-| **Border Light** | `#dbdfe6` | Borders, dividers (light mode) |
-| **Border Slate** | `#f0f2f4` | Light borders, backgrounds (light mode) |
-| **Border Dark** | `#2a3441` | Borders (dark mode) |
-| **Border Darker** | `#e5e7eb` | Borders |
-
-### Status Colors
-
-| Name | Hex Code | Usage | Component |
-|------|----------|-------|-----------|
-| **Success/Green** | `#07883b` | Positive status, success indicators | Status badges |
-| **Success Light** | `green-100` / `green-50` | Success backgrounds | Light backgrounds |
-| **Success Dark** | `green-900/30` | Success backgrounds (dark) | Dark backgrounds |
-| **Warning/Amber** | `#fbbf24` / `#f59e0b` | Warnings, pending status | Status badges |
-| **Warning Light** | `amber-100` | Warning backgrounds | Light backgrounds |
-| **Error/Red** | `#e73908` / `#ef4444` | Errors, danger indicators | Status badges |
-| **Error Light** | `red-100` / `red-50` | Error backgrounds | Light backgrounds |
-| **Error Dark** | `red-900/20` | Error backgrounds (dark) | Dark backgrounds |
-| **Info/Blue** | `#3b82f6` | Information, alerts | Status badges |
+| Status | Background | Text | Dot |
+|--------|-----------|------|-----|
+| Success | `bg-green-100` | `text-green-700` | `bg-green-500` |
+| Warning | `bg-amber-100` | `text-amber-700` | `bg-amber-500` |
+| Error / Danger | `bg-red-100` | `text-red-700` | `bg-red-500` |
+| Info | `bg-blue-100` | `text-blue-700` | `bg-blue-500` |
+| Neutral | `bg-gray-100` / `bg-slate-100` | `text-gray-700` / `text-slate-600` | `bg-slate-400` |
+| Primary | `bg-primary/10` | `text-primary` | - |
 
 ### Semantic Color Usage
 
 ```
-✅ Active/Selected:     Primary Blue (#135bec)
-⚠️  Warning:           Amber (#fbbf24)
-❌ Error:              Red (#e73908)
-✔️  Success:           Green (#07883b)
-ℹ️  Info:              Blue (#3b82f6)
-○  Inactive/Disabled:  Gray (#616f89, #9ca3af)
+Active/Selected:     Primary Blue (#135bec)
+Warning:             Amber (#f59e0b, amber-*)
+Error:               Red (#ef4444, red-*)
+Success:             Green (#10b981, green-*)
+Info:                Blue (blue-*)
+Inactive/Disabled:   Gray (#616f89, gray-*)
 ```
 
 ---
@@ -108,7 +93,7 @@
 | 700 | Bold | Headings, card titles, emphasis |
 | 800 | Black | Page titles, major headings |
 
-### Text Styles - Light Mode
+### Text Styles
 
 | Component | Size | Weight | Color | Line Height | Letter Spacing | Usage |
 |-----------|------|--------|-------|-------------|----------------|-------|
@@ -121,15 +106,6 @@
 | **Body - Small** | 0.75rem (12px) | 400 (Regular) | `#616f89` | 1.5 (normal) | normal | Secondary text, captions |
 | **Label** | 0.75rem (12px) | 500 (Medium) | `#616f89` | normal | 0.05em (wider) | Form labels, UI labels |
 | **Caption/XS** | 0.625rem (10px) | 400 (Regular) | `#616f89` | 1.25 (tight) | normal | Timestamps, helper text |
-
-### Text Styles - Dark Mode
-
-| Component | Color |
-|-----------|-------|
-| Headings | `#ffffff` (white) |
-| Body | `#ffffff` (white) |
-| Secondary | `#9ca3af` (gray) |
-| Muted | `#616f89` (dimmed) |
 
 ### Visual Hierarchy
 
@@ -177,7 +153,7 @@ Captions/Timestamps
 ### 1. Sidebar Navigation
 
 **Structure:**
-- Fixed left sidebar, 256px width (`w-64`)
+- Left sidebar, 240px width (`w-60`), `sticky top-16` below the header
 - Sticky to viewport
 - Scrollable for long navigation lists
 - Bottom section separated with border-top
@@ -187,8 +163,8 @@ Captions/Timestamps
 | State | Styling | Usage |
 |-------|---------|-------|
 | **Active** | `bg-primary text-white` (or `bg-primary/10 border-l-4 border-primary`) | Currently selected nav item |
-| **Hover** | `hover:bg-slate-100 dark:hover:bg-slate-800` | Mouse over inactive item |
-| **Inactive** | `text-slate-600 dark:text-slate-400` | Default navigation item |
+| **Hover** | `hover:bg-slate-100` | Mouse over inactive item |
+| **Inactive** | `text-slate-600` | Default navigation item |
 | **Disabled** | `text-slate-400 opacity-50 cursor-not-allowed` | Unavailable item |
 
 **Spacing:**
@@ -199,7 +175,7 @@ Captions/Timestamps
 
 **Example Structure:**
 ```
-Sidebar (w-64)
+Sidebar (w-60)
 ├─ Header (p-4, border-b)
 │  ├─ Logo icon (size-10)
 │  └─ Brand name (text-base font-bold)
@@ -223,33 +199,33 @@ Sidebar (w-64)
 - Size: `h-10` (40px) to `h-12` (48px)
 
 **Secondary Button**
-- Background: `bg-slate-100 dark:bg-slate-800`
-- Text: `text-slate-600 dark:text-slate-300`
-- Hover: `hover:bg-slate-200 dark:hover:bg-slate-700`
-- Border: `border border-slate-300 dark:border-slate-600`
+- Background: `bg-slate-100`
+- Text: `text-slate-600`
+- Hover: `hover:bg-slate-200`
+- Border: `border border-slate-300`
 - Padding: `py-2 px-4`
 
 **Icon Button**
 - Size: `size-10` (40px x 40px)
-- Background: `bg-slate-100 dark:bg-slate-800`
-- Icon color: `text-slate-600 dark:text-slate-300`
+- Background: `bg-slate-100`
+- Icon color: `text-slate-600`
 - Hover: `hover:text-primary hover:bg-primary/10`
 - Border radius: `rounded-lg`
 
 **Button States**
 
-| State | Light Mode | Dark Mode |
-|-------|-----------|-----------|
-| **Default** | `bg-primary text-white` | `bg-primary text-white` |
-| **Hover** | `bg-blue-700` | `bg-blue-600` |
-| **Active** | `bg-blue-800 shadow-md` | `bg-blue-700 shadow-md` |
-| **Disabled** | `bg-slate-300 text-slate-500 cursor-not-allowed` | `bg-slate-600 text-slate-400` |
+| State | Classes |
+|-------|---------|
+| **Default** | `bg-primary text-white` |
+| **Hover** | `bg-blue-700` |
+| **Active** | `bg-blue-800 shadow-md` |
+| **Disabled** | `bg-slate-300 text-slate-500 cursor-not-allowed` |
 
 ### 3. Cards
 
 **Standard Card**
-- Background: `bg-white dark:bg-surface-dark` (`#ffffff` / `#1a2230`)
-- Border: `border border-slate-200 dark:border-slate-700` (1px)
+- Background: `bg-white` (`#ffffff`)
+- Border: `border border-slate-200` (1px)
 - Border radius: `rounded-xl` (12px)
 - Padding: `p-5` or `p-6`
 - Shadow: `shadow-sm`
@@ -288,20 +264,20 @@ Card
 ### 4. Status Badges
 
 **Active/Success Badge**
-- Background: `bg-green-100 dark:bg-green-900/30`
-- Text: `text-green-600`
+- Background: `bg-green-100`
+- Text: `text-green-700`
 - Padding: `px-2 py-0.5`
 - Border radius: `rounded`
 - Indicator dot: `w-2 h-2 rounded-full bg-green-500`
 
 **Warning/Pending Badge**
-- Background: `bg-amber-100 dark:bg-amber-900/30`
-- Text: `text-amber-600`
-- Indicator dot: `bg-yellow-500` or `bg-amber-400`
+- Background: `bg-amber-100`
+- Text: `text-amber-700`
+- Indicator dot: `bg-amber-500`
 
 **Error/Vacant Badge**
-- Background: `bg-red-100 dark:bg-red-900/30`
-- Text: `text-red-600`
+- Background: `bg-red-100`
+- Text: `text-red-700`
 - Indicator dot: `bg-red-500`
 
 **Structure:**
@@ -314,7 +290,7 @@ Badge
 ### 5. Input Fields
 
 **Text Input**
-- Background: `bg-slate-100 dark:bg-slate-800`
+- Background: `bg-slate-100`
 - Border: `border-none` with `ring-1 ring-slate-300`
 - Height: `h-10` or `h-11`
 - Padding: `px-3 py-2.5` (12px left/right)
@@ -335,9 +311,9 @@ Badge
 - Padding: `px-3 py-1.5`
 
 **Inactive Chip**
-- Background: `bg-slate-100 dark:bg-slate-800`
-- Text: `text-slate-600 dark:text-slate-300`
-- Hover: `hover:bg-slate-200 dark:hover:bg-slate-700`
+- Background: `bg-slate-100`
+- Text: `text-slate-600`
+- Hover: `hover:bg-slate-200`
 
 **Chip with Icon**
 - Gap between icon and text: `gap-2`
@@ -355,7 +331,7 @@ Badge
 **Data Row**
 - Padding: `py-4 px-2`
 - Border: `border-b border-slate-200`
-- Hover: `hover:bg-slate-50 dark:hover:bg-slate-800/50`
+- Hover: `hover:bg-slate-50`
 
 ### 8. Activity Feed Items
 
@@ -367,20 +343,20 @@ Badge
   - Title: `text-sm font-bold`
   - Description: `text-xs text-slate-500`
   - Timestamp: `text-[10px] text-slate-400 font-medium`
-- Hover: `hover:bg-slate-50 dark:hover:bg-slate-800/50`
-- Divider: `divide-y divide-slate-100 dark:divide-slate-800`
+- Hover: `hover:bg-slate-50`
+- Divider: `divide-y divide-slate-100`
 
 **Icon Background Colors:**
-- Success: `bg-green-100 dark:bg-green-900/20` with `text-green-600`
-- Error: `bg-red-100 dark:bg-red-900/20` with `text-red-600`
-- Info: `bg-blue-100 dark:bg-blue-900/20` with `text-blue-600`
-- Warning: `bg-amber-100 dark:bg-amber-900/20` with `text-amber-600`
+- Success: `bg-green-100` with `text-green-600`
+- Error: `bg-red-100` with `text-red-600`
+- Info: `bg-blue-100` with `text-blue-600`
+- Warning: `bg-amber-100` with `text-amber-600`
 
 ### 9. Modal/Overlay Patterns
 
 **Modal Header**
 - Padding: `px-6 py-4` or `p-6`
-- Border bottom: `border-b border-slate-100 dark:border-slate-800`
+- Border bottom: `border-b border-slate-100`
 - Title: `text-lg font-bold`
 - Close button: Top right corner
 
@@ -389,7 +365,7 @@ Badge
 - Scrollable if needed: `overflow-y-auto`
 
 **Modal Actions**
-- Footer border: `border-t border-slate-100 dark:border-slate-800`
+- Footer border: `border-t border-slate-100`
 - Button layout: `flex justify-end gap-2 p-4`
 
 ---
@@ -519,39 +495,30 @@ Body
 
 **Material Symbols Outlined** (Google Fonts)
 - Stylesheet: `https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap`
-- Class: `material-symbols-outlined`
+- Loaded in `src/styles/globals.css`
+- Component: `src/lib/components/Icon.svelte` (`<Icon name="edit" size={20} />`), renders a `material-symbols-outlined` span, `aria-hidden` by default
 - Default settings: `'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24`
 
 ### Icon Sizes
 
+Set with the `size` prop of `Icon.svelte` (pixels, default 24):
+
 | Size | Value | Usage |
 |------|-------|-------|
-| Small | `text-[16px]` | 16px icons (badges, side icons) |
-| Standard | `text-[20px]` | 20px icons (nav items) |
-| Large | `text-[24px]` | 24px icons (feature icons) |
-| XL | `text-[28px]` | 28px icons (hero icons) |
-| XXL | `text-3xl` (30px) | 30px icons (large features) |
+| Small | `16` | Badges, side icons |
+| Standard | `20` | Nav items |
+| Large | `24` (default) | Feature icons |
+| XL | `28` | Hero icons |
 
 ### Icon States
 
-**Normal Icon:**
-- Class: `material-symbols-outlined`
-- Default fill: 0 (outline)
-
-**Filled Icon:**
-- Class: `material-symbols-outlined icon-filled`
-- Variation: `'FILL' 1` (solid)
-
-**Icon Weight Variations:**
-- Light: `'wght' 200`
-- Regular: `'wght' 400` (default)
-- Bold: `'wght' 600`
+Only the outlined style (`'FILL' 0`, `'wght' 400`) is used; there is no filled or weight variant class.
 
 ### Icon + Text Layout
 
 ```
 flex items-center gap-3
-├─ Icon (text-[20px])
+├─ Icon (size 20)
 └─ Text (text-sm font-medium)
 ```
 
@@ -601,12 +568,11 @@ flex items-center gap-3
 
 ### Color Contrast
 
-| Element | Light Mode | Dark Mode | Ratio |
-|---------|-----------|-----------|-------|
-| Primary text on white | #111318 on #ffffff | #ffffff on #1a2230 | 12.6:1 |
-| Primary text on primary | #ffffff on #135bec | #ffffff on #135bec | 7.8:1 |
-| Secondary text | #616f89 on #ffffff | #9ca3af on #1a2230 | 6.5:1 |
-| Placeholder text | #9ca3af on #f6f6f8 | #616f89 on #101622 | 5.2:1 |
+| Element | Colors | Ratio |
+|---------|--------|-------|
+| Primary text on white | #111318 on #ffffff | 12.6:1 |
+| White text on primary | #ffffff on #135bec | 7.8:1 |
+| Secondary text | #616f89 on #ffffff | 6.5:1 |
 
 ### Touch Targets
 
@@ -619,51 +585,9 @@ flex items-center gap-3
 
 ---
 
-## Dark Mode
+## Not Implemented
 
-### Implementation
-
-**Method:** CSS Class-based (`darkMode: "class"`)
-- Applied to `<html>` element: `class="light"` or `class="dark"`
-- User can toggle between modes
-- Preference persists in localStorage
-
-### Dark Mode Colors
-
-**Backgrounds:**
-- Page: `dark:bg-background-dark` (#101622)
-- Surfaces: `dark:bg-surface-dark` (#1a2230)
-- UI elements: `dark:bg-slate-800`
-
-**Text:**
-- Primary: `dark:text-white`
-- Secondary: `dark:text-slate-400` / `dark:text-gray-400`
-- Muted: `dark:text-slate-500` / `dark:text-gray-500`
-
-**Borders:**
-- Primary: `dark:border-slate-700` / `dark:border-gray-700`
-- Secondary: `dark:border-slate-800` / `dark:border-gray-800`
-
-**Shadows:**
-- Reduced opacity: `dark:shadow-lg dark:shadow-black/20`
-
-### Component Overrides
-
-```html
-<!-- Example: Card that adapts to dark mode -->
-<div class="bg-white dark:bg-surface-dark
-            text-slate-900 dark:text-white
-            border border-slate-200 dark:border-slate-700
-            shadow-sm dark:shadow-md">
-  Content
-</div>
-```
-
-### Transition Effects
-
-- Add smooth transitions: `transition-colors`
-- Applies to: Backgrounds, text colors, borders
-- Duration: `duration-200` (default)
+- **Dark mode:** not implemented. `tailwind.config.js` sets no `darkMode`, and no component uses `dark:` classes. The earlier wireframe colors for dark mode (`#101622`, `#1a2230`, `#2a3441`) are not part of the code.
 
 ---
 
@@ -679,12 +603,12 @@ flex items-center gap-3
 </button>
 
 <!-- Secondary elements -->
-<div class="text-slate-600 dark:text-slate-400">
+<div class="text-slate-600">
   Secondary text
 </div>
 
 <!-- Status indicators -->
-<span class="text-green-600 bg-green-100 dark:bg-green-900/30 px-2 py-0.5 rounded">
+<span class="text-green-700 bg-green-100 px-2 py-0.5 rounded">
   Active
 </span>
 ```
@@ -692,25 +616,25 @@ flex items-center gap-3
 #### 2. Typography
 ```html
 <!-- Page title -->
-<h1 class="text-4xl font-black text-slate-900 dark:text-white leading-tight tracking-tight">
+<h1 class="text-4xl font-black text-slate-900 leading-tight tracking-tight">
   Page Title
 </h1>
 
 <!-- Card title -->
-<h3 class="text-lg font-bold text-slate-900 dark:text-white">
+<h3 class="text-lg font-bold text-slate-900">
   Card Title
 </h3>
 
 <!-- Body text -->
-<p class="text-sm font-normal text-slate-600 dark:text-slate-400">
+<p class="text-sm font-normal text-slate-600">
   Description text
 </p>
 ```
 
 #### 3. Cards
 ```html
-<div class="bg-white dark:bg-surface-dark
-            rounded-xl border border-slate-200 dark:border-slate-700
+<div class="bg-white
+            rounded-xl border border-slate-200
             shadow-sm hover:shadow-md transition-all
             p-6 flex flex-col gap-4">
   <!-- Card content -->
@@ -728,33 +652,32 @@ flex items-center gap-3
 
 <!-- Secondary button -->
 <button class="bg-slate-100 hover:bg-slate-200
-               dark:bg-slate-800 dark:hover:bg-slate-700
-               text-slate-900 dark:text-white
-               border border-slate-300 dark:border-slate-600
+               text-slate-900
+               border border-slate-300
                py-2 px-4 rounded-lg transition-colors">
   Secondary Action
 </button>
 
 <!-- Icon button -->
 <button class="size-10 rounded-lg
-               bg-slate-100 dark:bg-slate-800
-               text-slate-600 dark:text-slate-300
+               bg-slate-100
+               text-slate-600
                hover:text-primary hover:bg-primary/10
                transition-colors">
-  <span class="material-symbols-outlined">edit</span>
+  <Icon name="edit" />
 </button>
 ```
 
 #### 5. Inputs
 ```html
 <label class="flex items-center w-full h-10
-              bg-slate-100 dark:bg-slate-800
+              bg-slate-100
               rounded-lg px-3 gap-3
               focus-within:ring-2 focus-within:ring-primary/50
               transition-all">
   <span class="material-symbols-outlined text-slate-600">search</span>
   <input class="w-full bg-transparent border-none
-                text-sm text-slate-900 dark:text-white
+                text-sm text-slate-900
                 placeholder:text-slate-500 focus:ring-0"
          placeholder="Search..." />
 </label>
@@ -774,7 +697,7 @@ flex items-center gap-3
 - [x] Spacing (Padding, Gap, Layout)
 - [x] Shadows (Elevation levels)
 - [x] Border Radius (Scale)
-- [x] Dark Mode (Implementation, colors)
+- [ ] Dark Mode (not implemented)
 - [x] Accessibility (Focus, contrast, ARIA)
 
 ---
@@ -787,7 +710,7 @@ flex items-center gap-3
 
 ### CSS Framework
 - **Tailwind CSS:** https://tailwindcss.com
-- **Version Used:** Latest (from CDN)
+- **Version Used:** Tailwind CSS 3 (npm, `tailwind.config.js`)
 
 ### Color References
 - **Material Design Colors:** https://material.io/design/color/
@@ -799,6 +722,5 @@ flex items-center gap-3
 
 ---
 
-**Last Updated:** January 23, 2026
-**Design System Version:** 1.0
-**Status:** Ready for Implementation
+**Last Updated:** October 2026
+**Design System Version:** 1.1

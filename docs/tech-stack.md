@@ -1,22 +1,23 @@
 # Dwello Technology Stack & Architecture
 
-**Version:** 1.0
-**Date:** January 23, 2026
+**Version:** 1.1
+**Date:** January 23, 2026 (corrected against the code: October 2026)
 
 ---
 
 ## Executive Summary
 
-Dwello uses a modern, full-stack TypeScript architecture optimized for performance, developer experience, and deployment simplicity. All components are containerized with Docker for easy deployment anywhere.
+Dwello is a full-stack TypeScript application: a SvelteKit frontend that doubles as Backend for Frontend (BFF), an ElysiaJS API on Bun, and PostgreSQL. All parts run in Docker containers.
 
 **Stack Overview:**
-- **Frontend:** SvelteKit (React-free, lightweight, reactive)
-- **Backend:** ElysiaJS on Bun (ultra-fast, modern framework)
-- **Database:** PostgreSQL (proven, ACID-compliant)
-- **LLM:** Open source (Ollama with Llama/Mistral)
+- **Frontend + BFF:** SvelteKit (Svelte 5) + TypeScript + Tailwind CSS
+- **Backend:** ElysiaJS on Bun, Drizzle ORM
+- **Database:** PostgreSQL
+- **LLM:** any OpenAI-compatible API; by default a local Ollama with `qwen2.5:3b`
 - **Deployment:** Docker Compose
-- **Maps:** OpenStreetMap + Leaflet
-- **Auth:** OAuth 2.0 / SSO
+- **Maps:** Leaflet (CARTO basemap on OpenStreetMap data)
+- **Auth:** OAuth 2.0 (Google, Microsoft), session JWT in HTTPOnly cookies
+- **E-mail:** nodemailer (SMTP) or Resend
 
 ---
 
@@ -26,93 +27,77 @@ Dwello uses a modern, full-stack TypeScript architecture optimized for performan
 ┌─────────────────────────────────────────────┐
 │         Client (Web Browser)                 │
 │  SvelteKit + TypeScript + TailwindCSS       │
-│  ├─ Building Management UI                   │
-│  ├─ Invoice Management                       │
-│  ├─ Statement Generation Wizard              │
-│  ├─ Map Visualization                        │
-│  └─ Analytics Dashboard                      │
+│  ├─ Buildings, apartments, tenants          │
+│  ├─ Contracts, invoices                     │
+│  ├─ Statement generation wizard             │
+│  ├─ Building mini map (Leaflet)             │
+│  └─ Address lookup (OpenPLZ, from browser)  │
 │                                              │
-│  Cookies: session={jwt}; xsrf-token={token} │
-│  Headers: X-XSRF-TOKEN={token}              │
+│  Cookies: dwello_session (HTTPOnly),        │
+│           dwello_xsrf (readable)            │
+│  Header:  X-XSRF-TOKEN={token}              │
 └──────────────────┬──────────────────────────┘
                    │
                    │ HTTPS/TLS (Cookies + Headers)
                    │
 ┌──────────────────▼──────────────────────────┐
-│   SvelteKit BFF Layer (Port 5173)           │
-│  ├─ Auth Routes:                            │
+│   SvelteKit BFF (Port 3000)                 │
+│  ├─ Auth Routes (src/routes/auth):          │
 │  │  ├─ GET  /auth/login (OAuth initiation) │
 │  │  ├─ GET  /auth/callback (OAuth callback)│
-│  │  ├─ POST /auth/refresh (Token refresh)  │
+│  │  ├─ POST /auth/refresh (session refresh)│
 │  │  ├─ POST /auth/logout (Logout)          │
 │  │  └─ GET  /auth/me (Current user)        │
-│  ├─ Cookie Management:                      │
-│  │  ├─ HTTPOnly session cookie              │
-│  │  └─ XSRF token cookie                    │
-│  ├─ XSRF Validation (double-submit)        │
-│  └─ API Proxy Routes:                       │
-│     ├─ GET/POST/PUT/DELETE /api/*          │
-│     └─ Forwards to ElysiaJS with JWT       │
+│  ├─ Cookie management (src/lib/server/auth)│
+│  ├─ XSRF validation (double-submit)        │
+│  ├─ Page loads (+page.server.ts) and form  │
+│  │  handling (src/lib/server/*.ts)          │
+│  └─ API proxy routes (src/routes/api/*):   │
+│     └─ Forward to ElysiaJS with the JWT    │
+│        (src/lib/server/api-proxy.ts)        │
 └──────────────────┬──────────────────────────┘
                    │
-                   │ Internal network
+                   │ Internal network (BACKEND_API_URL)
                    │ Authorization: Bearer {jwt}
                    │
 ┌──────────────────▼──────────────────────────┐
 │  Backend API (ElysiaJS on Bun, Port 3001)   │
-│  ├─ JWT Validation Middleware               │
-│  ├─ Building CRUD                           │
-│  ├─ Apartment CRUD                          │
-│  ├─ Tenant CRUD                             │
-│  ├─ Contract Management                     │
-│  ├─ Invoice Management                      │
-│  ├─ Statement Generation                    │
-│  ├─ PDF/QR Generation                       │
-│  ├─ LLM Integration                         │
-│  └─ External API Integration                │
-│      (OpenPLZ)                              │
+│  ├─ JWT validation middleware               │
+│  ├─ Routes (backend/src/routes, /api/v1)    │
+│  ├─ Services (backend/src/services):        │
+│  │  buildings, apartments, tenants,         │
+│  │  contracts, invoices, statements,        │
+│  │  PDF + Swiss QR-bill, reminders, LLM     │
+│  └─ Mail (backend/src/mail: SMTP, Resend)   │
 └──────────────────┬──────────────────────────┘
                    │
         ┌──────────┴──────────────┐
         │                         │
         ▼                         ▼
-┌───────────────┐    ┌─────────────────────┐
-│ PostgreSQL    │    │ Ollama (LLM)        │
-│ Database      │    │ - Llama 3.1         │
-│               │    │ - Mistral 7B        │
-│ ├─ Buildings  │    │ - Mixtral           │
-│ ├─ Apartments │    │                     │
-│ ├─ Tenants    │    │ Local deployment    │
-│ ├─ Contracts  │    │ Port: 11434         │
-│ ├─ Invoices   │    └─────────────────────┘
-│ ├─ Statements │
-│ └─ Config     │
-└───────────────┘
+┌───────────────┐    ┌──────────────────────────┐
+│ PostgreSQL    │    │ LLM (OpenAI-compatible)  │
+│ Database      │    │ Default: local Ollama    │
+│               │    │ - qwen2.5:3b             │
+│ Schema:       │    │ - Port 11434             │
+│ backend/src/  │    │ Or an external provider  │
+│ db/schema.ts  │    │ via LLM_BASE_URL         │
+└───────────────┘    └──────────────────────────┘
 
 ┌─────────────────────────────────────────────┐
-│    External Services (API Calls)            │
-│  ├─ OpenPLZ: Address search & validation    │
-│  ├─ OAuth Providers: Authentication         │
-│  │  ├─ Google OAuth                         │
-│  │  ├─ Microsoft Azure AD                   │
-│  │  └─ Swiss eID (future)                   │
-│  └─ SMTP (future): Email notifications      │
+│    External Services                        │
+│  ├─ OpenPLZ: postal code / street lookup    │
+│  │  (called from the browser)               │
+│  ├─ OAuth providers: Google, Microsoft      │
+│  └─ SMTP or Resend: reminder e-mails        │
 └─────────────────────────────────────────────┘
 ```
 
-### Key Architectural Improvements (BFF Pattern)
+### Key Architectural Properties (BFF Pattern)
 
-**Before:** Bearer tokens stored in localStorage/memory
-- ❌ JWT exposed to JavaScript (XSS vulnerability)
-- ❌ Client manages token lifecycle
-- ❌ No built-in XSRF protection
-
-**After:** HTTPOnly cookies + BFF layer
-- ✅ JWT hidden from JavaScript (XSS protected)
-- ✅ BFF manages token lifecycle and OAuth flow
-- ✅ XSRF protection via double-submit cookie pattern
-- ✅ Centralized security logic on server
-- ✅ Simplified client code (no token management)
+- JWT hidden from JavaScript (HTTPOnly cookie)
+- BFF handles the OAuth flow and sets the cookies
+- XSRF protection via double-submit cookie pattern
+- Security logic centralized on the server; the client only reads the XSRF cookie and calls `/auth/refresh` periodically
 
 ---
 
@@ -122,248 +107,73 @@ Dwello uses a modern, full-stack TypeScript architecture optimized for performan
 
 **Why SvelteKit?**
 - **Compilation:** Svelte compiles to vanilla JavaScript, resulting in smaller bundles
-- **Reactivity:** Fine-grained reactivity without VDOM overhead
-- **DX:** Excellent developer experience with hot module reloading
-- **Performance:** Faster than React/Vue alternatives
-- **Full-Stack:** Integrated backend API routes for simple use cases
-- **Ecosystem:** Growing, but stable and mature
+- **Reactivity:** Fine-grained reactivity (Svelte 5 runes) without VDOM overhead
+- **Full-Stack:** Server routes serve as the BFF
+- **Adapter:** `@sveltejs/adapter-node`
 
-**Version:** 2.0+ (latest stable)
+**Version:** SvelteKit 2, Svelte 5
 
-**Alternatives Considered:**
-- React (Vue): Heavier, more verbose, larger bundle sizes
-- Astro: Better for static sites, less dynamic UI needed
-- Qwik: Promising but less mature
+### UI Framework: Tailwind CSS
 
-**Selected: SvelteKit ✓**
-
-### UI Framework: TailwindCSS
-
-**Why TailwindCSS?**
-- **Utility-First:** Rapid UI development with utility classes
-- **Responsive:** Built-in responsive design utilities
-- **Customization:** Easy theming and dark mode
-- **Bundle Size:** Purges unused styles
-- **Multi-Language:** Works perfectly with i18n
-
-**Features:**
-- Tailwind CSS 3+
-- Custom Dwello design tokens
-- Dark mode support (future)
-- Accessibility plugins
-
-### Styling Architecture
-
-```
-styles/
-├─ tailwind.config.js (theme configuration)
-├─ globals.css (global utilities)
-└─ components/
-   ├─ Button.svelte
-   ├─ Form.svelte
-   ├─ Card.svelte
-   └─ ...
-```
+- Tailwind CSS 3 (`tailwind.config.js` at the repo root)
+- Custom design tokens (colors, Manrope font), see `docs/design_system.md`
+- Global styles and utilities in `src/styles/globals.css`
+- Dark mode: not implemented
 
 ### Type Safety: TypeScript
 
-**Configuration:**
-- Strict mode enabled
-- Target: ES2020
-- Module: ESNext
+- Strict mode enabled (`tsconfig.json` extends `.svelte-kit/tsconfig.json`)
+- `npm run check` (svelte-check) covers `src`, `tests/` and `*.config.ts`
 
-### State Management: SvelteKit Stores + Context
+### State Management: Svelte Stores
 
-**Why Not Redux/Pinia?**
-- SvelteKit's built-in stores are sufficient for single-user application
-- Simpler than Redux, less boilerplate than Pinia
-- Context API for component-level state
+Svelte's built-in stores are sufficient for a single-user application. Page data comes from `+page.server.ts` loads; `src/lib/stores.ts` holds only cross-page client state (current user, toasts).
 
-**Store Structure:**
-```typescript
-// src/lib/stores.ts
-export const user = writable(null)
-export const buildings = writable([])
-export const selectedBuilding = writable(null)
-export const statements = writable([])
-```
+### Validation
 
-### Form Validation: Zod + SvelteKit Forms
-
-**Why Zod?**
-- TypeScript-native schema validation
-- Works server-side and client-side
-- Excellent error messages
-- Small bundle size
-
-**Example:**
-```typescript
-import { z } from 'zod'
-
-const BuildingSchema = z.object({
-  address: z.string().min(5),
-  postal_code: z.string().regex(/^\d{4}$/),
-  city: z.string().min(2),
-  latitude: z.number().min(-90).max(90),
-  longitude: z.number().min(-180).max(180)
-})
-```
+- **Backend:** Elysia's `t` schemas on the routes (`backend/src/routes`); zod is used only for the JWT payload in `backend/src/middleware/auth.ts`
+- **Frontend:** form handling and mapping in `src/lib/server/*-form.ts`; there are no shared schemas between frontend and backend
 
 ### HTTP Client: Fetch API + Custom Wrapper (BFF Pattern)
 
-**Why Not Axios/SWR?**
-- Fetch API is now standard and sufficient
-- Smaller bundle size
-- Custom wrapper for cookie + XSRF token handling
-- Automatic credential forwarding
+`src/lib/api.ts` provides `apiCall()`, a thin `fetch` wrapper that calls `/api/*` on the BFF, reads the `dwello_xsrf` cookie and sends it as `X-XSRF-TOKEN` on POST, PUT, DELETE and PATCH. No token is stored client-side.
 
-**Wrapper (Cookie-Based, XSRF-Protected):**
-```typescript
-// src/lib/api.ts - No token management, BFF handles all auth
-import { browser } from '$app/environment'
-
-function getXsrfToken(): string | null {
-  if (!browser) return null
-  // Read xsrf-token from cookie (JavaScript readable)
-  const cookies = document.cookie.split('; ')
-  const xsrfCookie = cookies.find(c => c.startsWith('xsrf-token='))
-  return xsrfCookie ? xsrfCookie.split('=')[1] : null
-}
-
-export async function apiCall(path: string, options: RequestInit = {}) {
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-    ...options.headers as Record<string, string>
-  }
-
-  // Add XSRF token for state-changing requests (POST, PUT, DELETE, PATCH)
-  if (options.method && ['POST', 'PUT', 'DELETE', 'PATCH'].includes(options.method)) {
-    const xsrfToken = getXsrfToken()
-    if (xsrfToken) {
-      headers['X-XSRF-TOKEN'] = xsrfToken
-    }
-  }
-
-  const response = await fetch(`/api${path}`, {
-    ...options,
-    headers,
-    credentials: 'same-origin' // Include cookies automatically
-  })
-
-  if (!response.ok) {
-    if (response.status === 401) {
-      // Unauthorized - redirect to login
-      window.location.href = '/auth/login'
-      throw new Error('Unauthorized')
-    }
-    throw new Error(`API error: ${response.status}`)
-  }
-
-  return response.json()
-}
-
-// Usage examples:
-// Read: const buildings = await apiCall('/buildings')
-// Create: await apiCall('/buildings', { method: 'POST', body: JSON.stringify(data) })
-// Update: await apiCall('/buildings/123', { method: 'PUT', body: JSON.stringify(data) })
-// Delete: await apiCall('/buildings/123', { method: 'DELETE' })
-```
-
-**No Client-Side Token Storage:**
-- ✅ JWT never touched by JavaScript (stored in HTTPOnly cookie only)
-- ✅ No localStorage/sessionStorage tokens to manage
-- ✅ No token refresh logic in client
-- ✅ Automatic cookie handling by browser
-- ✅ Simplified component code
+**Session refresh:** `src/routes/+layout.svelte` calls `POST /auth/refresh` every 50 minutes while a user is signed in; if the refresh fails, the stores are cleared and the user is sent to `/login`.
 
 ### Internationalization: svelte-i18n
 
-**Languages:** German, French, Italian, Romansh, English
+- The UI is in German.
+- Locales: `src/lib/i18n/locales/de.json` and `en.json` only.
+- Statement PDFs are generated by the backend in five languages (de, fr, it, rm, en; `backend/src/services/pdf.service.ts`).
 
-**Structure:**
-```
-locales/
-├─ de.json (German)
-├─ fr.json (French)
-├─ it.json (Italian)
-├─ rm.json (Romansh)
-└─ en.json (English)
-```
+### Dates and Numbers
 
-**Usage:**
-```svelte
-<h1>{$_('buildings.title')}</h1>
-```
+No date library; formatting uses the built-in `Intl` APIs / `Date`.
 
-### Date/Time: date-fns
+### Map Library: Leaflet
 
-**Why date-fns?**
-- Tree-shakeable (smaller bundle than Moment.js)
-- Excellent locale support
-- FP-style API
-- No timezone issues
+- `leaflet` (no Svelte wrapper), used in `src/lib/components/BuildingMiniMap.svelte`
+- Tiles: CARTO `light_all` basemap (OpenStreetMap data), no API key
 
-```typescript
-import { format } from 'date-fns'
-import { de } from 'date-fns/locale'
+### Address Lookup: OpenPLZ
 
-format(new Date(), 'PPPP', { locale: de })
-```
-
-### Map Library: Leaflet + OpenStreetMap
-
-**Why Leaflet?**
-- Lightweight (39 KB)
-- Open source
-- No API key required
-- Excellent mobile support
-
-**Installation:**
-```
-npm install leaflet svelte-leaflet
-```
-
-**Usage:**
-```svelte
-<Map center={[51.505, -0.09]} zoom={13}>
-  <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-  <Marker latLng={[51.5, -0.09]} />
-</Map>
-```
-
-### PDF Generation (Client-Side): PDFKit or Puppeteer
-
-**For Statements:** Server-side generation (see Backend)
-
-**For Simple Docs:** Client-side optional
-```javascript
-import PDFDocument from 'pdfkit'
-const doc = new PDFDocument()
-```
+`src/lib/services/openplz.ts` calls `https://openplzapi.org/ch` directly from the browser (postal codes, localities, streets).
 
 ### Build & Tooling
 
-**Package Manager:** npm or pnpm (recommended for monorepo-like structure)
+**Package Manager:** npm (frontend), Bun (backend)
 
 **Build Command:**
 ```bash
-npm run build
-# Output: .svelte-kit/build/
+npm run build   # adapter-node output in build/
 ```
 
 **Dev Server:**
 ```bash
-npm run dev
-# Runs on http://localhost:5173
+npm run dev     # http://localhost:3000 (vite.config.ts); needs the backend on 3001
 ```
 
-**Environment Variables:**
-```
-# .env.local
-VITE_API_BASE_URL=http://localhost:3000/api/v1
-VITE_OAUTH_CLIENT_ID=xxx
-VITE_OAUTH_PROVIDER=google
-```
+**Environment Variables:** see `.env.example` (e.g. `BACKEND_API_URL`, `JWT_SECRET`, `JWT_EXPIRY`, `OAUTH_GOOGLE_*`, `OAUTH_MICROSOFT_*`, `COOKIE_*`).
 
 ---
 
@@ -372,43 +182,29 @@ VITE_OAUTH_PROVIDER=google
 ### Framework: ElysiaJS on Bun
 
 **Why ElysiaJS + Bun?**
-- **Performance:** Bun is 2-3x faster than Node.js
-- **TypeScript Native:** First-class TypeScript support
-- **DX:** ElysiaJS is lightweight and fast to develop with
-- **Ecosystem:** Excellent compatibility with Bun's built-in APIs
-- **Modern:** Built with modern JS features (no legacy baggage)
+- **Performance:** Bun is fast to start and run
+- **TypeScript Native:** First-class TypeScript support, no build step in development
+- **DX:** ElysiaJS is lightweight; route schemas with `t` give validation and types
+- **API docs:** `@elysiajs/swagger` at `/swagger`
 
-**Alternatives Considered:**
-- Express.js: Mature but slow, lots of middleware
-- Fastify: Fast but complex, more ceremony
-- NestJS: Powerful but overkill for simple API
-- Go/Rust: Different language, learning curve
-
-**Selected: ElysiaJS on Bun ✓**
+Business logic lives in `backend/src/services`; routes in `backend/src/routes` under `/api/v1`.
 
 ### Database: PostgreSQL 15+
 
 **Why PostgreSQL?**
 - **Reliability:** ACID compliance for financial data
-- **JSON Support:** JSONB type for flexible schemas
-- **Proven:** 25+ years of production use
-- **Performance:** Excellent for complex queries
-- **Extensions:** uuid, full-text search, etc.
+- **Proven:** decades of production use
+- **Extensions:** `uuid-ossp`
 
-**Connection Pool:** pgBouncer or node-postgres pooling
+**Connection Pool:** `pg` Pool in `backend/src/db/connection.ts` (`DB_POOL_SIZE`, default 20)
 
-**Migrations:** Bun's native migration support or custom SQL files
+**Migrations:** plain SQL files in `backend/migrations/`, applied by `backend/scripts/migrate.ts` (`bun run db:migrate`; `bun run dev` runs it first)
 
 ### ORM / Query Builder: Drizzle ORM
 
-**Why Drizzle ORM?**
 - **Type-Safe:** TypeScript-first, fully typed queries
-- **Lightweight:** 6 KB package, no runtime overhead
-- **Modern:** ESM-only, works perfectly with Bun
-- **Flexible:** Raw SQL when needed
-- **Performance:** No abstraction overhead
-
-**Alternative:** Using raw node-postgres with typed results
+- **Lightweight:** thin layer over SQL
+- Schema: `backend/src/db/schema.ts`
 
 **Example:**
 ```typescript
@@ -416,305 +212,72 @@ import { db } from './db'
 import { buildings } from './schema'
 
 const allBuildings = await db.select().from(buildings)
-
-const zurichBuildings = await db
-  .select()
-  .from(buildings)
-  .where(eq(buildings.city, 'Zurich'))
 ```
 
 ### Authentication: BFF Pattern with OAuth 2.0 + HTTPOnly Cookies
 
-**Architecture Pattern:** Backend for Frontend (BFF) with SvelteKit server routes
+**OAuth Providers** (`src/lib/server/oauth.ts`):
+1. **Google OAuth**
+2. **Microsoft Azure AD** (`OAUTH_MICROSOFT_TENANT_ID`, default `common`)
 
-**OAuth Providers:**
-1. **Google OAuth** (primary, widely used)
-2. **Microsoft Azure AD** (enterprise option)
-3. **Swiss eID** (future, government standard)
+**Token Storage:** stateless JWT (HS256, `jose`) in an HTTPOnly cookie
 
-**Token Storage:** Stateless JWT stored in HTTPOnly cookies (not client-side)
-
-**Session Management:**
-- **HTTPOnly Cookie:** `session={jwt}`
-  - HttpOnly: true (prevents JavaScript access, XSS protection)
-  - Secure: true (HTTPS only in production)
-  - SameSite: Lax (CSRF protection + usability)
-  - MaxAge: 3600 seconds (1 hour)
-
-- **XSRF Token Cookie:** `xsrf-token={uuid}`
-  - HttpOnly: false (client must read for header)
-  - Secure: true (HTTPS only in production)
-  - SameSite: Lax (CSRF protection)
+**Cookies** (`src/lib/server/jwt-config.ts`):
+- **`dwello_session`** = JWT
+  - HttpOnly: true
+  - Secure: `COOKIE_SECURE`
+  - SameSite: `COOKIE_SAME_SITE` (default Lax)
+  - MaxAge: `JWT_EXPIRY` (default 7d)
+- **`dwello_xsrf`** = random token
+  - HttpOnly: false (client reads it for the header)
+  - Secure / SameSite / MaxAge as above
+- **`dwello_oauth_state`** = OAuth state parameter during login
 
 **Security Flow:**
 ```
 1. User clicks "Login with Google"
    Browser → GET /auth/login?provider=google
 
-2. SvelteKit BFF generates OAuth request
-   - Creates state parameter (CSRF protection)
-   - Redirects to Google OAuth
+2. BFF creates a state parameter, stores it in dwello_oauth_state,
+   redirects to the provider
 
-3. User authorizes on Google
-   Google → GET /auth/callback?code=xxx&state=yyy
+3. Provider → GET /auth/callback?code=xxx&state=yyy
 
-4. SvelteKit validates state & exchanges code for token
-   - Validates state parameter
-   - Exchanges authorization code for access_token
-   - Fetches user profile from Google
-   - Generates JWT: {sub, email, name, iat, exp}
-   - Sets HTTPOnly cookie: session={jwt}
-   - Sets XSRF cookie: xsrf-token={uuid}
-   - Redirects to /dashboard
+4. BFF validates state, exchanges the code, fetches the profile,
+   signs a JWT {sub, email, name, provider, picture},
+   sets dwello_session and dwello_xsrf, redirects into the app
 
-5. Client makes API calls
-   Browser → POST /api/buildings
-   - Reads xsrf-token from cookie (JavaScript readable)
-   - Sends X-XSRF-TOKEN header
-   - Browser auto-sends cookies (credentials: 'same-origin')
+5. Client calls /api/* with X-XSRF-TOKEN on mutations;
+   the browser sends the cookies
 
-6. SvelteKit BFF validates request
-   - Validates: cookie[xsrf-token] === header[X-XSRF-TOKEN]
-   - Extracts JWT from session cookie
-   - Forwards to ElysiaJS: Authorization: Bearer {jwt}
+6. BFF compares cookie dwello_xsrf with header X-XSRF-TOKEN
+   (constant-time), forwards with Authorization: Bearer {jwt}
 
-7. ElysiaJS validates JWT
-   - Verifies JWT signature and expiration
-   - Processes request with authenticated user
+7. ElysiaJS verifies signature and expiry, processes the request
 ```
 
-**BFF Implementation:**
+**Code locations:**
+- `src/routes/auth/*/+server.ts`: login, callback, refresh, logout, me
+- `src/lib/server/auth.ts`: cookies, JWT, XSRF validation
+- `src/lib/server/api-proxy.ts`: forwarding to the backend
+- `backend/src/middleware/auth.ts`: JWT validation in the backend
 
-Server routes (src/routes/auth/)
-```typescript
-// src/routes/auth/login/+server.ts
-export async function GET({ url, cookies }) {
-  const provider = url.searchParams.get('provider') || 'google'
-  const state = crypto.randomUUID()
+**Session refresh:** `POST /auth/refresh` (XSRF-checked) re-signs the JWT and sets new cookies; the layout calls it every 50 minutes.
 
-  // Store state in secure cookie (short-lived)
-  cookies.set('oauth_state', state, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    maxAge: 600 // 10 minutes
-  })
+### LLM Integration
 
-  const oauthUrl = generateOAuthUrl(provider, state)
-  return redirect(302, oauthUrl)
-}
-
-// src/routes/auth/callback/+server.ts
-export async function GET({ url, cookies }) {
-  const code = url.searchParams.get('code')
-  const state = url.searchParams.get('state')
-  const storedState = cookies.get('oauth_state')
-
-  if (state !== storedState) throw new Error('Invalid state')
-
-  const tokenResponse = await exchangeCodeForToken(code)
-  const user = await fetchUserProfile(tokenResponse.access_token)
-
-  const jwt = await generateJwt({
-    sub: user.id,
-    email: user.email,
-    name: user.name
-  })
-
-  const xsrfToken = crypto.randomUUID()
-
-  // Set session cookie (HTTPOnly)
-  cookies.set('session', jwt, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    path: '/',
-    maxAge: 3600
-  })
-
-  // Set XSRF cookie (readable by JS)
-  cookies.set('xsrf-token', xsrfToken, {
-    httpOnly: false,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    path: '/',
-    maxAge: 3600
-  })
-
-  return redirect(302, '/dashboard')
-}
-
-// src/routes/auth/me/+server.ts
-export async function GET({ cookies }) {
-  const jwt = cookies.get('session')
-  if (!jwt) return json({ error: 'Unauthorized' }, { status: 401 })
-
-  const user = await verifyJwt(jwt)
-  return json(user)
-}
-```
-
-API proxy routes (src/routes/api/)
-```typescript
-// src/routes/api/buildings/+server.ts
-import { validateXsrfToken, getJwtFromCookie } from '$lib/server/auth'
-
-export async function GET({ request, cookies }) {
-  const jwt = getJwtFromCookie(cookies)
-  if (!jwt) return json({ error: 'Unauthorized' }, { status: 401 })
-
-  const response = await fetch('http://localhost:3001/api/v1/buildings', {
-    headers: {
-      'Authorization': `Bearer ${jwt}`,
-      'Content-Type': 'application/json'
-    }
-  })
-
-  return json(await response.json(), { status: response.status })
-}
-
-export async function POST({ request, cookies }) {
-  // Validate XSRF for state-changing requests
-  const xsrfValid = await validateXsrfToken(request, cookies)
-  if (!xsrfValid) return json({ error: 'Invalid XSRF token' }, { status: 403 })
-
-  const jwt = getJwtFromCookie(cookies)
-  if (!jwt) return json({ error: 'Unauthorized' }, { status: 401 })
-
-  const body = await request.json()
-  const response = await fetch('http://localhost:3001/api/v1/buildings', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${jwt}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(body)
-  })
-
-  return json(await response.json(), { status: response.status })
-}
-```
-
-Client-side API helper (src/lib/api.ts)
-```typescript
-// No token management needed - cookies handled automatically
-import { browser } from '$app/environment'
-
-function getXsrfToken(): string | null {
-  if (!browser) return null
-  const cookies = document.cookie.split('; ')
-  const xsrfCookie = cookies.find(c => c.startsWith('xsrf-token='))
-  return xsrfCookie ? xsrfCookie.split('=')[1] : null
-}
-
-export async function apiCall(path: string, options: RequestInit = {}) {
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-    ...options.headers as Record<string, string>
-  }
-
-  // Add XSRF token for state-changing requests
-  if (options.method && ['POST', 'PUT', 'DELETE', 'PATCH'].includes(options.method)) {
-    const xsrfToken = getXsrfToken()
-    if (xsrfToken) {
-      headers['X-XSRF-TOKEN'] = xsrfToken
-    }
-  }
-
-  const response = await fetch(`/api${path}`, {
-    ...options,
-    headers,
-    credentials: 'same-origin' // Include cookies
-  })
-
-  if (!response.ok) {
-    if (response.status === 401) {
-      window.location.href = '/login'
-      throw new Error('Unauthorized')
-    }
-    throw new Error(`API error: ${response.status}`)
-  }
-
-  return response.json()
-}
-
-// Usage:
-// const buildings = await apiCall('/buildings')
-// await apiCall('/buildings', { method: 'POST', body: JSON.stringify(data) })
-```
-
-**XSRF Protection (Double-Submit Cookie Pattern):**
-1. On login, BFF sets two cookies with identical tokens
-2. One cookie is readable by JavaScript (`xsrf-token`)
-3. One cookie is HTTPOnly (`session`, but includes XSRF data)
-4. Client reads `xsrf-token` and sends as `X-XSRF-TOKEN` header
-5. BFF validates: `cookie[xsrf-token] === header[X-XSRF-TOKEN]`
-6. Attacker cannot read cross-origin cookie → cannot set header → CSRF fails
-
-**Token Refresh:**
-```typescript
-// src/routes/auth/refresh/+server.ts
-export async function POST({ cookies }) {
-  const jwt = cookies.get('session')
-  if (!jwt) return json({ error: 'Unauthorized' }, { status: 401 })
-
-  const user = await verifyJwt(jwt)
-  if (!user) return json({ error: 'Unauthorized' }, { status: 401 })
-
-  const newJwt = await generateJwt(user)
-  const newXsrfToken = crypto.randomUUID()
-
-  cookies.set('session', newJwt, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    maxAge: 3600
-  })
-
-  cookies.set('xsrf-token', newXsrfToken, {
-    httpOnly: false,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    maxAge: 3600
-  })
-
-  return json({ success: true })
-}
-```
-
-Client automatic refresh (src/routes/+layout.svelte)
-```svelte
-<script>
-  import { onMount } from 'svelte'
-
-  onMount(() => {
-    // Refresh token every 50 minutes (before 1-hour expiry)
-    setInterval(async () => {
-      await fetch('/auth/refresh', {
-        method: 'POST',
-        credentials: 'same-origin'
-      })
-    }, 50 * 60 * 1000)
-  })
-</script>
-```
-
-### LLM Integration: Ollama
-
-**Why Ollama?**
-- **Self-Hosted:** No vendor lock-in, complete privacy
-- **Free:** No API costs
-- **Offline:** Works without internet
-- **Models:** Llama, Mistral, Mixtral available
-- **Performance:** Reasonable speed on modern hardware
+**Why a local model by default?**
+- **Self-Hosted:** no vendor lock-in, invoice data stays on the server
+- **Free:** no API costs
+- **Offline:** works without internet
 
 **Deployment:**
 ```bash
-# Docker Compose includes the Ollama service
+# docker-compose.prod.yml includes the Ollama service
 docker exec dwello-ollama ollama pull qwen2.5:3b
 ```
 
-**Integration:** `backend/src/services/llm.service.ts` talks to any OpenAI-compatible API (`/chat/completions`, `/models`). The provider is set by environment variables: `LLM_BASE_URL` (default: the local Ollama at `http://localhost:11434/v1`), `LLM_API_KEY` (Bearer token, empty for Ollama) and `LLM_MODEL` (default `qwen2.5:3b`). With an external provider, the invoice's billing entity, description and amount leave the server; `LLM_PROVIDER` and `LLM_PROVIDER_COUNTRY` name it in the privacy statement (`GET /api/v1/invoices/llm-recipient`), and the backend refuses to start without them (README, "External LLM provider").
+**Integration:** `backend/src/services/llm.service.ts` talks to any OpenAI-compatible API (`/chat/completions`, `/models`); configuration in `backend/src/config/llm.ts`. The provider is set by environment variables: `LLM_BASE_URL` (default: the local Ollama at `http://localhost:11434/v1`), `LLM_API_KEY` (Bearer token, empty for Ollama) and `LLM_MODEL` (default `qwen2.5:3b`). Further: `LLM_TIMEOUT` (ms, default 30000), `LLM_ENABLED` (`false` turns categorization off), `LLM_CACHE_TTL` (s, default 3600; in-memory cache of categorization results). With an external provider, the invoice's billing entity, description and amount leave the server; `LLM_PROVIDER` and `LLM_PROVIDER_COUNTRY` name it in the privacy statement (`GET /api/v1/invoices/llm-recipient`), and the backend refuses to start without them (README, "External LLM provider").
 
 **Model Selection:** `qwen2.5:3b` by default (small, accurate for German). With an external provider, use a chat model; requests send no `max_tokens` or `temperature`, so reasoning models work too.
 
@@ -722,190 +285,23 @@ docker exec dwello-ollama ollama pull qwen2.5:3b
 
 **Why PDFKit?**
 - Pure JavaScript, no external dependencies
-- Swiss QR-bill support (custom code)
-- Fast, good performance
+- Swiss QR-bill drawn with custom code
 - Works in containers without extra libraries
 
-**Alternative:** Puppeteer for HTML → PDF (more flexible, slower)
+**Swiss QR-Bill** (`backend/src/services/qr-bill.service.ts`):
+- Creditor IBAN must be Swiss (CH) or Liechtenstein (LI), checked with MOD-97
+- QR reference (QRR, MOD10) only with a QR-IBAN (IID 30000–31999); with a normal IBAN no reference (`NON`)
+- Debtor block only when name, postal code and town are all present
+- QR code rendered with `qrcode`, embedded in the PDF
 
-**Swiss QR-Bill Generation:**
-```typescript
-import QRCode from 'qrcode'
+### E-Mail
 
-async function generateQRBill(statement: UtilityStatement) {
-  const qrData = {
-    version: '004',
-    coding: '1',
-    amount: statement.balance_chf,
-    currency: 'CHF',
-    creditor: {
-      name: 'Property Manager Ltd',
-      address: '...',
-      country: 'CH'
-    },
-    creditorAccount: config.iban,
-    reference: statement.statement_number,
-    debtor: {
-      name: statement.tenant.name,
-      address: statement.tenant.address,
-      country: 'CH'
-    }
-  }
-
-  const qrCode = await QRCode.toDataURL(JSON.stringify(qrData))
-  // Embed in PDF
-}
-```
-
-### External API Integration
-
-**OpenPLZ API:**
-```typescript
-async function searchAddress(query: string) {
-  const response = await fetch(
-    `https://api.openplz.org/v1/autocomplete?q=${query}`,
-    { headers: { 'Accept': 'application/json' } }
-  )
-  return response.json()
-}
-```
-
-**Caching:**
-```typescript
-const cache = new Map()
-
-export async function searchAddressWithCache(query: string) {
-  if (cache.has(query)) return cache.get(query)
-
-  const result = await searchAddress(query)
-  cache.set(query, result)
-  return result
-}
-```
-
-### Validation: Zod
-
-Same as frontend, shared schemas across client and server:
-
-```typescript
-// src/lib/schemas.ts (shared)
-export const BuildingSchema = z.object({...})
-
-// Backend uses for validation
-export async function createBuilding(body: unknown) {
-  const data = BuildingSchema.parse(body)
-  // Process validated data
-}
-```
+`backend/src/mail/`: transport chosen by `MAIL_TRANSPORT` (`smtp` via nodemailer, or `resend`). Used for payment reminders (Mahnungen). Without `MAIL_TRANSPORT`, reminders for tenants with e-mail correspondence are filed as "to be sent" instead.
 
 ### Error Handling & Logging
 
-**Custom Error Classes:**
-```typescript
-export class APIError extends Error {
-  constructor(
-    public code: string,
-    public status: number,
-    message: string,
-    public details?: any
-  ) {
-    super(message)
-  }
-}
-
-export class ValidationError extends APIError {
-  constructor(message: string, details: any) {
-    super('VALIDATION_ERROR', 400, message, details)
-  }
-}
-```
-
-**Logging:**
-```typescript
-// Development: Console
-// Production: Structured JSON logging
-
-interface LogEntry {
-  timestamp: string
-  level: 'debug' | 'info' | 'warn' | 'error'
-  message: string
-  context: any
-}
-
-function log(level: string, message: string, context?: any) {
-  const entry: LogEntry = {
-    timestamp: new Date().toISOString(),
-    level: level as any,
-    message,
-    context
-  }
-
-  if (process.env.NODE_ENV === 'production') {
-    // Send to logging service or write to file
-    console.log(JSON.stringify(entry))
-  } else {
-    console.log(entry)
-  }
-}
-```
-
-### Performance Optimization
-
-**Database Connection Pool:**
-```typescript
-import pg from 'pg'
-
-const pool = new pg.Pool({
-  max: 20,
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000,
-})
-
-export const db = drizzle(pool)
-```
-
-**Caching:**
-```typescript
-// Simple in-memory cache
-const cache = new Map()
-
-function memoize(fn: Function, ttl: number = 60000) {
-  return async function(...args: any[]) {
-    const key = JSON.stringify(args)
-    if (cache.has(key)) {
-      return cache.get(key)
-    }
-
-    const result = await fn(...args)
-    cache.set(key, result)
-    setTimeout(() => cache.delete(key), ttl)
-    return result
-  }
-}
-```
-
-**Async Processing:**
-```typescript
-// Statement generation runs in background
-import { Queue } from 'queue'
-
-const statementQueue = new Queue({
-  concurrency: 2
-})
-
-export async function generateStatements(params: any) {
-  return new Promise((resolve, reject) => {
-    statementQueue.push(async () => {
-      try {
-        const result = await generateStatementsInternal(params)
-        resolve(result)
-      } catch (err) {
-        reject(err)
-      }
-    })
-  })
-}
-```
+- Backend: Elysia error handling in the routes; service-specific error classes (e.g. `ReminderError`, `MailConfigError`)
+- BFF: `src/lib/server/error-handler.ts` (`AppError`, `JWTError`, `ValidationError`, `logger`)
 
 ---
 
@@ -913,35 +309,14 @@ export async function generateStatements(params: any) {
 
 ### PostgreSQL Configuration
 
-**Version:** 15+ (tested on 15, 16)
-
-**Key Settings:**
-```postgresql
--- Performance
-shared_buffers = 256MB
-effective_cache_size = 1GB
-work_mem = 16MB
-maintenance_work_mem = 64MB
-
--- Query planning
-random_page_cost = 1.1
-effective_io_concurrency = 200
-
--- Logging
-log_min_duration_statement = 1000
-log_statement = 'all'
-
--- Connections
-max_connections = 200
-```
+**Version:** 15+; 16 (`postgres:16-alpine`) used in Docker Compose and CI
 
 **Extensions:**
 ```sql
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-CREATE EXTENSION IF NOT EXISTS "unaccent";  -- For search
 ```
 
-**Indexes:** See data-model.md
+**Schema and indexes:** `backend/src/db/schema.ts`, `backend/migrations/`, see `docs/data-model.md`
 
 ---
 
@@ -949,102 +324,41 @@ CREATE EXTENSION IF NOT EXISTS "unaccent";  -- For search
 
 ### Docker Compose
 
-**Services:**
-1. **app** (SvelteKit + ElysiaJS)
-2. **postgres** (Database)
-3. **ollama** (LLM service)
-4. **nginx** (Reverse proxy, TLS termination)
+- `docker-compose.yml`: PostgreSQL only (Ollama commented out), for local development
+- `docker-compose.dev.yml`: PostgreSQL and Ollama for development
+- `docker-compose.prod.yml`: production
 
-**docker-compose.yml:**
-```yaml
-version: '3.8'
+**Services in `docker-compose.prod.yml`:**
+1. **frontend** (SvelteKit BFF, Node 20, port 3000, root `Dockerfile`)
+2. **backend** (ElysiaJS on Bun, port 3001, `backend/Dockerfile`)
+3. **postgres** (`postgres:16-alpine`)
+4. **ollama** (LLM service; not needed with an external provider)
+5. **nginx** (reverse proxy, TLS termination): commented out, optional
 
-services:
-  app:
-    build: .
-    ports:
-      - "3000:3000"
-    environment:
-      DATABASE_URL: postgresql://user:pass@postgres:5432/dwello
-      LLM_BASE_URL: http://ollama:11434/v1
-      NODE_ENV: production
-    depends_on:
-      - postgres
-      - ollama
-    volumes:
-      - app-logs:/var/log/app
-
-  postgres:
-    image: postgres:16-alpine
-    environment:
-      POSTGRES_DB: dwello
-      POSTGRES_USER: dwello
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-
-  ollama:
-    image: ollama/ollama:latest
-    volumes:
-      - ollama-models:/root/.ollama
-    ports:
-      - "11434:11434"
-
-  nginx:
-    image: nginx:alpine
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf
-      - ./certs:/etc/nginx/certs
-    depends_on:
-      - app
-
-volumes:
-  postgres-data:
-  ollama-models:
-  app-logs:
-```
-
-### Deployment Methods
-
-**Local Development:**
 ```bash
-docker-compose up
-# Runs on http://localhost:80
+docker-compose -f docker-compose.prod.yml up -d
+docker exec dwello-ollama ollama pull qwen2.5:3b
 ```
-
-**Cloud Deployment:**
-- **Docker Hub:** Push image to Docker Hub
-- **AWS ECS/Fargate:** Container orchestration
-- **DigitalOcean App Platform:** Simple deployment
-- **Render:** Easy deployment with CLI
-- **Heroku:** (Limited free tier, but possible)
-- **Self-hosted VPS:** Ubuntu + Docker + Docker Compose
 
 ### Environment Configuration
 
-**Development (.env.development):**
-```
-NODE_ENV=development
-DATABASE_URL=postgresql://user:password@localhost:5432/dwello
-OAUTH_CLIENT_ID=google_dev_client_id
-OAUTH_CLIENT_SECRET=google_dev_secret
-LLM_BASE_URL=http://localhost:11434/v1
-```
+See `.env.example`. Main variables:
 
-**Production (.env.production):**
 ```
-NODE_ENV=production
-DATABASE_URL=postgresql://dwello:password@postgres.prod:5432/dwello
-OAUTH_CLIENT_ID=google_prod_client_id
-OAUTH_CLIENT_SECRET=google_prod_secret
-LLM_BASE_URL=http://ollama:11434/v1
-JWT_SECRET=long-random-secret-key
-HTTPS=true
+# Frontend / BFF
+PUBLIC_APP_URL=http://localhost:3000
+BACKEND_API_URL=http://localhost:3001
+JWT_SECRET=...            # min 32 characters, same value in backend
+JWT_EXPIRY=7d
+OAUTH_GOOGLE_CLIENT_ID / OAUTH_GOOGLE_CLIENT_SECRET / OAUTH_GOOGLE_REDIRECT_URI
+OAUTH_MICROSOFT_CLIENT_ID / OAUTH_MICROSOFT_CLIENT_SECRET / OAUTH_MICROSOFT_TENANT_ID / OAUTH_MICROSOFT_REDIRECT_URI
+COOKIE_DOMAIN / COOKIE_SECURE / COOKIE_SAME_SITE
+
+# Backend
+DATABASE_URL=postgresql://dwello:dwello@localhost:5432/dwello
+CORS_ORIGIN=http://localhost:3000
+LLM_BASE_URL / LLM_API_KEY / LLM_MODEL / LLM_PROVIDER / LLM_PROVIDER_COUNTRY
+MAIL_TRANSPORT / MAIL_FROM / SMTP_* / RESEND_API_KEY
 ```
 
 ---
@@ -1054,63 +368,54 @@ HTTPS=true
 ### Local Setup
 
 **Requirements:**
-- Node.js 18+ (or Bun 1.0+)
-- Docker & Docker Compose
-- Git
+- Node.js >= 20 (`package.json` engines; CI uses 22)
+- Bun >= 1.0 (backend)
+- Docker & Docker Compose (PostgreSQL)
 
 **Installation:**
 ```bash
-# Clone repository
-git clone https://github.com/user/dwello.git
-cd dwello
-
-# Install dependencies
 npm install
-
-# Setup environment
+(cd backend && bun install)
 cp .env.example .env.local
 
-# Start dev environment
-docker-compose -f docker-compose.dev.yml up
-npm run dev
-
-# Backend dev: npm run dev:api
-# Frontend dev: npm run dev:web
+docker-compose up -d          # PostgreSQL on 5432
+(cd backend && bun run dev:demo)   # backend on 3001 with demo data
+npm run dev                   # frontend/BFF on 3000
 ```
+
+See `README.md` for details.
 
 ### Project Structure
 
 ```
 dwello/
 ├── src/
-│   ├── routes/              # SvelteKit routes
-│   │   ├── +page.svelte
-│   │   ├── api/            # ElysiaJS backend
-│   │   │   ├── buildings.ts
-│   │   │   ├── apartments.ts
-│   │   │   └── ...
-│   │   └── auth/
+│   ├── routes/              # SvelteKit pages
+│   │   ├── api/             # BFF proxy routes to the backend
+│   │   └── auth/            # OAuth login, callback, refresh, logout, me
 │   ├── lib/
-│   │   ├── components/     # Svelte components
-│   │   ├── stores.ts       # State management
-│   │   ├── api.ts          # HTTP wrapper
-│   │   ├── schemas.ts      # Zod schemas
-│   │   └── utils/
-│   └── styles/
-│       ├── globals.css
-│       └── tailwind.config.js
-├── migrations/             # Database migrations
-│   ├── 001_initial.sql
-│   └── ...
-├── docs/                   # Documentation
-│   ├── PRD-Dwello.md
-│   ├── data-model.md
-│   ├── api-specification.md
-│   └── tech-stack.md
-├── docker-compose.yml
+│   │   ├── components/      # Svelte components
+│   │   ├── server/          # BFF: auth, api-proxy, form handling, mapping
+│   │   ├── services/        # e.g. openplz.ts
+│   │   ├── i18n/locales/    # de.json, en.json
+│   │   ├── stores.ts
+│   │   └── api.ts           # apiCall() wrapper
+│   └── styles/globals.css
+├── backend/
+│   ├── src/
+│   │   ├── routes/          # Elysia routes (/api/v1)
+│   │   ├── services/        # business logic
+│   │   ├── db/schema.ts     # Drizzle schema
+│   │   ├── mail/            # SMTP / Resend
+│   │   └── middleware/auth.ts
+│   ├── migrations/          # SQL migrations
+│   └── Dockerfile
+├── tests/                   # e2e (playwright-bdd), contracts, unit, ui-screenshots
+├── docs/
+├── docker-compose.yml / .dev.yml / .prod.yml
 ├── Dockerfile
 ├── svelte.config.js
-├── vite.config.js
+├── vite.config.ts
 ├── tailwind.config.js
 ├── tsconfig.json
 └── package.json
@@ -1118,58 +423,31 @@ dwello/
 
 ### Code Quality
 
-**Linting:**
 ```bash
-npm run lint  # ESLint
-```
-
-**Formatting:**
-```bash
-npm run format  # Prettier
-```
-
-**Type Checking:**
-```bash
-npm run type-check  # TypeScript
-```
-
-**Testing:**
-```bash
-npm run test      # Unit tests
-npm run test:e2e  # End-to-end tests
+npm run lint             # ESLint, fails on warnings
+npm run format           # Prettier
+npm run check            # svelte-check
+npx vitest run           # frontend unit tests
+npm run test:coverage    # with coverage floor
+npm run test:e2e         # acceptance tests (playwright-bdd)
+cd backend && bun run test && bun run type-check
 ```
 
 ### CI/CD Pipeline
 
-**GitHub Actions (.github/workflows/ci.yml):**
-```yaml
-name: CI
+**GitHub Actions (`.github/workflows/ci.yml`)**, on push to `main` and on pull requests (Node 22, Bun, PostgreSQL 16 service):
 
-on: [push, pull_request]
+| Job | What it does |
+|-----|--------------|
+| Changes | On PRs, detects whether backend/contracts or app code changed, so untouched parts are skipped |
+| Build | `npm run build` and `bun run build` (backend) |
+| Lint and types | `npm run lint`, `npm run check`, backend `bun run type-check` |
+| Unit tests | `npm run test:coverage`; backend `bun run test` if backend changed |
+| E2E tests | `npm run test:e2e` (PRs: Chromium + API driver; main: all browsers); skipped for docs-only changes |
+| Fallow audit | `npx fallow audit` against the base |
+| UI screenshots | On PRs: screenshots of changed pages, posted as a PR comment |
 
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: oven-sh/setup-bun@v1
-      - run: bun install
-      - run: bun run lint
-      - run: bun run type-check
-      - run: bun run test
-
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: oven-sh/setup-bun@v1
-      - run: bun install
-      - run: bun run build
-      - uses: docker/build-push-action@v5
-        with:
-          push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/dwello:${{ github.sha }}
-```
+No Docker image is built or pushed in CI.
 
 ---
 
@@ -1189,9 +467,9 @@ jobs:
 | Metric | Target | Optimization |
 |--------|--------|--------------|
 | API Response Time | <500ms (p95) | Query optimization, caching |
-| PDF Generation | <5s | Async processing, pre-generation |
-| Statement Generation (50 apts) | <60s | Batch processing, parallel queries |
-| LLM Categorization | <2s | Caching, batching |
+| PDF Generation | <5s | |
+| Statement Generation (50 apts) | <60s (open: PRD states 10 s, see docs/migration-mva.md P1) | |
+| LLM Categorization | <2s | In-memory result cache |
 
 ### Database Performance
 
@@ -1199,7 +477,8 @@ jobs:
 |--------|--------|--------------|
 | Query Latency | <100ms (p95) | Indexing, connection pooling |
 | Statement Generation Query | <5s | Composite indexes, query optimization |
-| Concurrent Connections | 20+ | Connection pooling, load balancing |
+
+None of these targets is measured yet (see `docs/migration-mva.md`).
 
 ---
 
@@ -1208,139 +487,61 @@ jobs:
 ### Authentication & Session Security (BFF Pattern)
 
 **HTTPOnly Cookies:**
-- ✅ JWT stored in HTTPOnly cookie (not client-side)
-- ✅ Prevents XSS attacks from stealing tokens
-- ✅ Browser automatically includes in requests
-- ✅ 1-hour expiration with automatic refresh
+- JWT stored in the HTTPOnly cookie `dwello_session` (not client-side)
+- Prevents XSS attacks from stealing tokens
+- Lifetime `JWT_EXPIRY` (default 7 days), refreshed by the client every 50 minutes
 
 **XSRF Protection (Double-Submit Cookie Pattern):**
-- ✅ XSRF token in readable cookie
-- ✅ Same token validated in X-XSRF-TOKEN header
-- ✅ Attacker cannot read cross-origin cookies
-- ✅ Attacker cannot set cross-origin headers
-- ✅ SameSite=Lax provides additional protection
-
-**Cookie Attributes:**
-```
-session cookie:
-  ├─ HttpOnly: true (prevents JS access)
-  ├─ Secure: true (HTTPS only)
-  ├─ SameSite: Lax (CSRF + usability)
-  ├─ Path: /
-  └─ MaxAge: 3600 (1 hour)
-
-xsrf-token cookie:
-  ├─ HttpOnly: false (JS must read)
-  ├─ Secure: true (HTTPS only)
-  ├─ SameSite: Lax (CSRF protection)
-  ├─ Path: /
-  └─ MaxAge: 3600 (1 hour)
-```
+- XSRF token in the readable cookie `dwello_xsrf`
+- Same token required in the `X-XSRF-TOKEN` header on mutations, compared in constant time
+- SameSite=Lax (default) provides additional protection
 
 **OAuth Security:**
-- ✅ State parameter validates OAuth callback (CSRF protection)
-- ✅ All OAuth handling on server-side (BFF layer)
-- ✅ PKCE support for enhanced security
-- ✅ No client-side OAuth token exposure
-
-### Code Security
-- **Dependency Scanning:** npm audit, Dependabot
-- **SAST:** SonarCloud for code quality
-- **DAST:** OWASP ZAP for runtime security
+- State parameter (cookie `dwello_oauth_state`) validates the callback
+- All OAuth handling on the server (BFF)
+- No client-side OAuth token exposure
 
 ### Deployment Security
-- **TLS 1.2+:** All communications encrypted
-- **Secret Management:** Environment variables, not in git
-- **CORS:** Configured to specific origins (only BFF layer can call backend)
-- **Rate Limiting:** Prevent abuse
-- **SQL Injection:** Parameterized queries via Drizzle ORM
-- **XSS:** Input validation, output encoding, HTTPOnly cookies
-
-### Compliance
-- **PCI DSS:** Not needed (no credit card processing)
-- **GDPR:** Data privacy by design
-- **Swiss SDPA:** Data residency, encryption
-- **SOC 2:** Audit logging, access controls
-
-### Attack Mitigation
-
-**Cross-Site Request Forgery (CSRF):**
-- Prevented by double-submit cookie pattern
-- SameSite=Lax cookies don't send on cross-site POST
-- XSRF token mismatch detected by BFF layer
-
-**Cross-Site Scripting (XSS):**
-- HTTPOnly cookies prevent token theft
-- Input validation on all form inputs
-- Output encoding in templates
-
-**Session Hijacking:**
-- Short expiration (1 hour)
-- HTTPS only (Secure flag)
-- SameSite cookies prevent cross-origin use
-
-**Token Exposure:**
-- JWT never stored in localStorage
-- JWT never appears in HTTP headers (XSS cannot steal)
-- Automatic refresh before expiration
+- **Secret Management:** environment variables, not in git
+- **CORS:** backend allows `CORS_ORIGIN` only
+- **SQL Injection:** parameterized queries via Drizzle ORM
+- **XSS:** Svelte output encoding, HTTPOnly cookies
+- **TLS:** to be terminated by a reverse proxy (nginx in `docker-compose.prod.yml` is commented out)
 
 ---
 
-## Monitoring & Observability (Future)
+## Not Implemented / Planned
 
-**Monitoring Stack:**
-- **Metrics:** Prometheus
-- **Logging:** ELK Stack or Datadog
-- **APM:** New Relic or similar
-- **Uptime:** Uptime Robot or Pingdom
-
-**Key Metrics:**
-- API endpoint latencies
-- Database query performance
-- PDF generation times
-- LLM categorization accuracy
-- Backup success rates
-- Error rates and types
-
----
-
-## Scaling Strategy
-
-### Horizontal Scaling
-
-**Phase 1 (Current):** Single container, all services
-
-**Phase 2:** Separate services
-```
-- Frontend (SvelteKit) → CDN (Vercel, Netlify)
-- Backend (ElysiaJS) → Multiple instances + Load Balancer
-- Database → Managed PostgreSQL (AWS RDS)
-- LLM → Dedicated instance or cloud service
-```
-
-**Phase 3:** Advanced scaling
-- Read replicas for database
-- Redis caching layer
-- Job queue (Bull, Temporal) for async processing
-- Kubernetes orchestration
+- PKCE in the OAuth flow
+- Rate limiting
+- Swiss eID login
+- Dark mode
+- Further UI languages (fr, it, rm); only de and en locales exist
+- Shared validation schemas between frontend and backend
+- Background job queue for statement generation (generation loops over the contracts in the BFF, `src/lib/server/statement-generation.ts`)
+- Monitoring stack (metrics, APM, uptime checks)
+- Dependency/SAST/DAST scanning in CI
+- Container image build/push in CI
+- Scaling beyond one instance per service (read replicas, Redis, load balancer)
 
 ---
 
 ## Technology Decisions Summary
 
-| Component | Choice | Why | Confidence |
-|-----------|--------|-----|------------|
-| Framework | ElysiaJS + Bun | Performance, DX, modern | 95% |
-| Frontend | SvelteKit | Lightweight, reactive, fast | 90% |
-| Database | PostgreSQL | Reliable, ACID, JSON support | 98% |
-| LLM | Ollama (Mistral) | Self-hosted, privacy, cost | 85% |
-| Auth | OAuth 2.0 | Secure, standard, flexible | 99% |
-| Maps | Leaflet + OSM | Lightweight, open-source | 90% |
-| Deployment | Docker Compose | Simple, portable, standard | 95% |
-| i18n | svelte-i18n | Lightweight, easy | 90% |
-| ORM | Drizzle | Type-safe, lightweight | 85% |
+| Component | Choice | Why |
+|-----------|--------|-----|
+| Backend | ElysiaJS + Bun | Performance, DX, modern |
+| Frontend + BFF | SvelteKit | Lightweight, reactive, server routes |
+| Database | PostgreSQL | Reliable, ACID |
+| ORM | Drizzle | Type-safe, lightweight |
+| LLM | OpenAI-compatible API, default local Ollama (`qwen2.5:3b`) | Self-hosted by default, privacy, cost; external provider possible |
+| Auth | OAuth 2.0 (Google, Microsoft) + HTTPOnly cookie JWT | Standard, no token in the browser |
+| Maps | Leaflet + CARTO/OSM tiles | Lightweight, no API key |
+| PDF | PDFKit + qrcode | Pure JS, Swiss QR-bill |
+| Mail | nodemailer (SMTP) / Resend | Either own mail server or hosted |
+| Deployment | Docker Compose | Simple, portable |
+| i18n | svelte-i18n | Lightweight |
 
 ---
 
-**Tech Stack Document Status:** APPROVED
-**Last Updated:** January 23, 2026
+**Last Updated:** October 2026
