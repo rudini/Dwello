@@ -18,7 +18,7 @@ Dwello entwickelt nach **Acceptance Test Driven Development**: Jede Änderung be
                 │  Integration (echte DB)       │   181   bun test *.pg.test.ts, dwello_test, API-Verträge
                 │  technische Verträge          │         nur wo Unit-Tests nicht reichen
            ┌────┴───────────────────────────────┴────┐
-           │  Unit-TDD                                │   714   Vitest (Frontend 465), bun test (Backend 249)
+           │  Unit-TDD                                │   698   Vitest (Frontend 465), bun test (Backend 233)
            │  "Was der Entwickler denkt"              │         ← innere Schleife: Sekunden
            └──────────────────────────────────────────┘
 ```
@@ -31,7 +31,7 @@ Die Menge bleibt eine Pyramide, viele schnelle Unit-Tests unten. Die **Reihenfol
 |---|---|---|---|---|---|
 | Akzeptanz (E2E) | 260 Testfälle aus 41 Features (+8 über den API-Driver) | `tests/e2e/features/*.feature` | Playwright + playwright-bdd | Browser → SvelteKit-Build (`node build`) → Elysia → PostgreSQL `dwello_e2e` (vor jedem Lauf neu migriert) | keine API-Mocks; SMTP-Mail-Catcher statt Mail-Provider, signiertes Session-JWT statt Google-OAuth |
 | Integration | 181 in 30 Dateien | `backend/src/__tests__/*.pg.test.ts` | `bun test` | Elysia-App in-process (`app.handle`) → PostgreSQL `dwello_test` (vor jedem Lauf neu migriert) | keine; lokaler SMTP-Server für Mails |
-| Unit Backend | 249 in 11 Dateien | `backend/src/__tests__/*.test.ts` | `bun test` (ein Lauf mit den pg-Tests) | reine Funktionen der Services | keine; Resend-Ersatz per `Bun.serve` in `mail.test.ts` |
+| Unit Backend | 233 in 11 Dateien | `backend/src/__tests__/*.test.ts` | `bun test` (ein Lauf mit den pg-Tests) | reine Funktionen der Services | keine; Resend-Ersatz per `Bun.serve` in `mail.test.ts` |
 | Unit Frontend | 465 in 53 Dateien | `src/__tests__`, `src/lib/utils/__tests__`, `tests/unit` | Vitest (`server`: node, `dom`: jsdom) | Load-Funktionen, Actions, BFF, Komponenten | Fake-Backend per `fetch`-Stub / `fakeBff` (aus den API-Verträgen in `tests/contracts`, wo es einen gibt), `vi.mock` für `$app/*` |
 
 Regeln:

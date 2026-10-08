@@ -2,11 +2,7 @@
  * Heating Profile Service
  * Business logic for heating distribution profiles
  *
- * Predefined profiles for Swiss regional heating patterns:
- * - Standard (Mittelland / Plateau)
- * - Mountain Region (Bergregion)
- * - Tessin (Southern Switzerland)
- * - Hot Water Only (Warmwasser)
+ * The predefined profiles (Standard, Bergregion, Tessin, Warmwasser) come from migrations/0002_seed_data.sql
  */
 
 import { eq, sql, asc, ilike, and } from 'drizzle-orm';
