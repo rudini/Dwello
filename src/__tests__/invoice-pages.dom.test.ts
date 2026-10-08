@@ -271,6 +271,18 @@ describe('Rechnung erfassen', () => {
 		expect(byTestId<HTMLInputElement>('invoice-utility-cost-checkbox')!.checked).toBe(false);
 	});
 
+	// Kosten einer nicht umlagefähigen Kategorie bleiben bei den Eigentümern (OR 257a)
+	it('sperrt „Umlagefähig“ für eine nicht umlagefähige Kategorie', async () => {
+		show(NewInvoicePage, { data: data(false) } as never);
+		const category = byTestId<HTMLSelectElement>('invoice-category-select')!;
+
+		category.value = 'c2';
+		category.dispatchEvent(new Event('change'));
+		await settle();
+
+		expect(byTestId<HTMLInputElement>('invoice-utility-cost-checkbox')!.disabled).toBe(true);
+	});
+
 	it('bleibt bei einem Fehler des Backends auf der Seite', async () => {
 		fakeBff(() => [400, { error: { code: 'VALIDATION', message: 'Ungültiger Betrag' } }]);
 		show(NewInvoicePage, { data: data(false) } as never);

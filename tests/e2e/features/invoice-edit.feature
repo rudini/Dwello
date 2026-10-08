@@ -22,9 +22,8 @@ Funktionalität: Rechnung bearbeiten
     Und ist die Rechnung nicht umlagefähig
 
   Szenario: Kosten einer nicht umlagefähigen Kategorie bleiben bei den Eigentümern
-    Wenn der Liegenschaftsverwalter die Rechnung der Kategorie "Reparaturen" zuordnet und trotzdem als umlagefähig markiert
-    Dann ist der Liegenschaftsverwalter auf der Detailseite der Rechnung von "Hauswart Huber"
-    Und ist die Rechnung nicht umlagefähig
+    Wenn der Liegenschaftsverwalter die Kategorie "Reparaturen" wählt
+    Dann lässt sich die Rechnung nicht als umlagefähig markieren
 
   Szenario: Kategorie der KI mit Begründung überschreiben
     Angenommen die KI hat die Kategorie der Rechnung von "Hauswart Huber" vorgeschlagen

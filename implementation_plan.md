@@ -4208,6 +4208,10 @@ reviewed independently afterwards.
   stored it; `createInvoice`/`updateInvoice` now set `isValidUtilityCost = false` for such a category
   (`applyCategory` in `invoice.service.ts`, tests in `invoice-categorization.pg.test.ts`, step and task in
   `invoice-form.steps.ts`, `tasks/invoice-form.ts`)
+- [x] **Review follow-up:** the form locks „Umlagefähige Nebenkosten“ for a non-allocable category
+  (`InvoiceCategoryFields.svelte`, `invoice-pages.dom.test.ts`; the scenario now checks the locked field); a
+  category set to non-allocable takes its invoices out of the allocable costs, else statements kept passing them
+  on (`updateCategory` in `category.service.ts`, `category-admin.pg.test.ts`); `categoryExists` removed (unused)
 
 ### Verification
 - Backend 430 (249 unit + 181 PostgreSQL), coverage 82.3 % lines / 85.3 % functions; frontend 465, coverage

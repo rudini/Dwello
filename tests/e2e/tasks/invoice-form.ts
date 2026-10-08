@@ -6,8 +6,7 @@ import {
 	descriptionInput,
 	invoiceSubmitButton,
 	overrideReasonInput,
-	supplierInput,
-	utilityCostCheckbox
+	supplierInput
 } from '../interactions/invoice-form';
 
 export type InvoiceData = { buildingId: string; supplier: string; amount: string; description: string; category: string };
@@ -47,11 +46,5 @@ export const overrideCategory = (category: string, reason: string) => async (act
 
 export const clearSupplier = async (actor: Actor) => {
 	await supplierInput(actor.page).fill('');
-	await actor.perform(saveInvoice);
-};
-
-export const recategorizeAsAllocable = (category: string) => async (actor: Actor) => {
-	await actor.perform(chooseCategory(category));
-	await utilityCostCheckbox(actor.page).check();
 	await actor.perform(saveInvoice);
 };
