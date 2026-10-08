@@ -4329,6 +4329,12 @@ reviewed independently afterwards.
   `minConfidence` removed; `.env.example` leaves the `LLM_*` lines commented, so a copied file no longer points the
   Docker backend at `localhost`; README upgrade note for the renamed `OLLAMA_*` variables; the lock test checks the
   statement really is overdue
+- [x] **Privacy statement names the LLM provider (DSG Art. 19):** ATDD `privacy.feature` „KI-Kategorisierung auf
+  dem Server des Betreibers“ (red first). `llmRecipient` (`config/llm.ts`) is null for the operator's hosts
+  (`localhost`, `ollama`), else provider and country from `LLM_PROVIDER` / `LLM_PROVIDER_COUNTRY`; the backend refuses
+  to start without them (`index.ts`). `GET /api/v1/invoices/llm-recipient` → `src/routes/privacy/+page.server.ts`
+  → notice under „Weitergabe an Dritte“. Operator checklist (Art. 9, 16 DSG) in the README. Tests:
+  `llm-recipient.test.ts`, `invoice-categorization.pg.test.ts`, `privacy.test.ts`, `privacy-page.dom.test.ts`
 
 ### Open
 - [ ] Raise coverage to the target in `docs/test-pyramid.md` and move the floors up

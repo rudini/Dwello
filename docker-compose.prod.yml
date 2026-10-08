@@ -55,6 +55,8 @@ services:
       - JWT_SECRET=${JWT_SECRET}
       - LLM_BASE_URL=${LLM_BASE_URL:-http://ollama:11434/v1}
       - LLM_API_KEY=${LLM_API_KEY:-}
+      - LLM_PROVIDER=${LLM_PROVIDER:-}
+      - LLM_PROVIDER_COUNTRY=${LLM_PROVIDER_COUNTRY:-}
       - LLM_MODEL=${LLM_MODEL:-qwen2.5:3b}
       - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:3000}
     depends_on:

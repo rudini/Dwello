@@ -2,7 +2,7 @@ import { expect } from '@playwright/test';
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { visit } from '../interactions/navigation';
-import { sectionTitled } from '../questions/app-frame';
+import { llmRecipientNotice, sectionTitled } from '../questions/app-frame';
 import {
 	chooseInFooter,
 	chooseInMainNav,
@@ -53,5 +53,12 @@ Then(
 	'sieht der Liegenschaftsverwalter den Abschnitt {string}',
 	async ({ verwalter }, heading: string) => {
 		await expect(sectionTitled(verwalter, heading)).toBeVisible();
+	}
+);
+
+Then(
+	'erfährt der Liegenschaftsverwalter unter {string}, dass Rechnungsdaten für die KI-Kategorisierung den Server nicht verlassen',
+	async ({ verwalter }, heading: string) => {
+		await expect(llmRecipientNotice(verwalter, heading)).toContainText('verlassen dafür den Server nicht');
 	}
 );

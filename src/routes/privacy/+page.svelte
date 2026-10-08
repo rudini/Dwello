@@ -1,10 +1,21 @@
 <script lang="ts">
+	import type { PageData } from './$types';
+
+	let { data }: { data: PageData } = $props();
+
+	// Who receives invoice data for the KI categorization (DSG Art. 19: recipient and country)
+	const llmNotice = $derived(
+		data.recipient
+			? `Rechnungen werden von ${data.recipient.provider} (${data.recipient.country}) mit einem Sprachmodell kategorisiert. Dafür werden Rechnungssteller, Beschreibung und Betrag der Rechnung übermittelt; steht in der Beschreibung ein Name, wird auch er übermittelt.`
+			: 'Rechnungen werden mit einem Sprachmodell kategorisiert, das auf dem Server des Betreibers läuft; Rechnungsdaten verlassen dafür den Server nicht.'
+	);
+
 	const sections = [
 		{
 			title: 'Welche Daten Dwello speichert',
 			paragraphs: [
 				'Dwello speichert die Daten, die für die Verwaltung der Liegenschaften und die Nebenkostenabrechnung nötig sind: Gebäude und Wohnungen, Mieter mit Kontaktdaten und Korrespondenzadresse, Mietverträge, Rechnungen sowie die erstellten Abrechnungen, Zahlungen und Mahnungen.',
-				'Die Daten liegen in der PostgreSQL-Datenbank des Betreibers dieser Dwello-Installation. Rechnungen werden mit einem Sprachmodell kategorisiert. Läuft es auf dem Server des Betreibers (Standard: Ollama), verlassen Rechnungsdaten dafür den Server nicht; nutzt der Betreiber einen externen Anbieter, erhält dieser Rechnungssteller, Beschreibung und Betrag der Rechnung.'
+				'Die Daten liegen in der PostgreSQL-Datenbank des Betreibers dieser Dwello-Installation.'
 			]
 		},
 		{
@@ -46,6 +57,9 @@
 			class="bg-white border border-slate-200 rounded-xl shadow-sm p-6 space-y-3"
 		>
 			<h2 class="text-lg font-semibold text-gray-900">{section.title}</h2>
+			{#if section.title === 'Weitergabe an Dritte'}
+				<p class="text-gray-700" data-testid="llm-recipient">{llmNotice}</p>
+			{/if}
 			{#each section.paragraphs as paragraph (paragraph)}
 				<p class="text-gray-700">{paragraph}</p>
 			{/each}

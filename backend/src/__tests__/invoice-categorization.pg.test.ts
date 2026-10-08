@@ -145,6 +145,30 @@ describe('KI-Anbieter', () => {
 	});
 });
 
+describe('Empfänger der Rechnungsdaten für die Datenschutzerklärung', () => {
+	it('nennt keinen, solange das Modell auf dem Server des Betreibers läuft', async () => {
+		const response = await callApi('/api/v1/invoices/llm-recipient');
+
+		expect(await response.json()).toEqual({ recipient: null });
+	});
+
+	it('nennt Anbieter und Land eines externen Anbieters, nie den API-Key', async () => {
+		Object.assign(llmConfig, {
+			baseUrl: 'https://llm.example.com/v1',
+			apiKey: 'geheim',
+			provider: 'Beispiel AG',
+			providerCountry: 'Schweiz'
+		});
+		try {
+			const response = await callApi('/api/v1/invoices/llm-recipient');
+
+			expect(await response.json()).toEqual({ recipient: { provider: 'Beispiel AG', country: 'Schweiz' } });
+		} finally {
+			Object.assign(llmConfig, { baseUrl: 'http://127.0.0.1:9', apiKey: '', provider: '', providerCountry: '' });
+		}
+	});
+});
+
 describe('Kategorie von Hand', () => {
 	// Nicht umlagefähige Kosten (OR 257a) bleiben bei den Eigentümern, auch wenn das Formular anderes schickt
 	const repairs = async () =>

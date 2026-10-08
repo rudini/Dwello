@@ -10,6 +10,10 @@ export const llmConfig = {
 	// Sent as a Bearer token; the local Ollama needs none
 	apiKey: process.env.LLM_API_KEY || '',
 
+	// Who receives invoice data with an external provider, named in the privacy statement (e.g. OpenAI, USA)
+	provider: process.env.LLM_PROVIDER || '',
+	providerCountry: process.env.LLM_PROVIDER_COUNTRY || '',
+
 	// Model to use for categorization (qwen2.5:3b is small but accurate for German)
 	model: process.env.LLM_MODEL || 'qwen2.5:3b',
 
@@ -22,6 +26,22 @@ export const llmConfig = {
 	// Cache TTL in seconds (default: 1 hour)
 	cacheTtl: parseInt(process.env.LLM_CACHE_TTL || '3600', 10)
 };
+
+// Hosts on the operator's server: the local Ollama, or its container in docker-compose
+const OPERATOR_HOSTS = ['localhost', '127.0.0.1', '[::1]', 'ollama'];
+
+/** Who receives invoice data for categorization; null while the model runs on the operator's server */
+export function llmRecipient(
+	config: Pick<typeof llmConfig, 'baseUrl' | 'provider' | 'providerCountry'> = llmConfig
+): { provider: string; country: string } | null {
+	if (OPERATOR_HOSTS.includes(new URL(config.baseUrl).hostname)) return null;
+	if (!config.provider || !config.providerCountry) {
+		throw new Error(
+			`LLM_BASE_URL ${config.baseUrl} is an external provider: set LLM_PROVIDER and LLM_PROVIDER_COUNTRY for the privacy statement`
+		);
+	}
+	return { provider: config.provider, country: config.providerCountry };
+}
 
 // Swiss utility cost categories for the prompt (English names match database)
 export const SWISS_UTILITY_CATEGORIES = {
