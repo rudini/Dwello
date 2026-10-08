@@ -1,194 +1,123 @@
-# MVA-Umbauplan: Modularer Monolith für Dwello
+# Architektur: Minimum Viable Architecture für Dwello
 
-## Problem & Zielbild
+## Ziel
 
-Dwello erfüllt die funktionalen Anforderungen, ist aber entlang technischer Schichten gewachsen (`backend/src/routes`, `backend/src/services`). Ziel ist eine **Minimum Viable Architecture (MVA)** im Sinne von _Continuous Architecture in Practice_ (Erder, Pureur, Woods): die kleinste Architektur, die die bekannten Qualitätsanforderungen erfüllt, und nicht mehr.
+Dwello soll eine **Minimum Viable Architecture (MVA)** im Sinne von _Continuous Architecture in Practice_ (Erder, Pureur, Woods) haben: die kleinste Architektur, die die Qualitätsanforderungen erfüllt, und nicht mehr.
 
-Rahmenbedingungen, die den Umfang begrenzen:
+Daraus folgt das Vorgehen:
 
-- Ein Entwickler, ein Benutzer, weniger als 50 Wohnungen.
-- Backend rund 10'000 Zeilen, eine PostgreSQL-Datenbank mit Foreign Keys über alle Fachbereiche.
-- Kein verteiltes System, keine zweite Team- oder Modellgrenze.
+1. **Qualitätsmerkmale vor Funktionen** (Prinzip 2): Die Architektur wird an den Qualitätsszenarien unten gemessen, nicht an einem Zielbild.
+2. **Entscheidungen verzögern** (Prinzip 3): Eine Architekturänderung braucht ein Szenario, das heute nicht erfüllt ist. Ohne ein solches Szenario bleibt die Struktur, wie sie ist.
+3. **Entscheidungen festhalten:** Jede getroffene oder bewusst verschobene Entscheidung steht als eigenes ADR in `docs/adr/`.
+4. **Kleine Schritte** (Prinzip 4): Umbauten erhalten das Verhalten, sind durch Tests abgesichert und trennen Verschieben und Verhaltensänderung in getrennte Commits.
 
-Leitentscheidungen:
-
-1. **Module statt Bounded Contexts.** Bounded Contexts setzen voneinander abweichende Modelle voraus. Dwello hat ein Modell und eine Sprache. Die Grenzen unten sind Modulgrenzen innerhalb eines Bounded Context.
-2. **Entscheidungen verzögern** (Prinzip 3 des Buchs). Events, Value Objects, Read-Models und Anti-Corruption Layer werden erst eingeführt, wenn ein Qualitätsszenario sie verlangt.
-3. **Tiefe Module.** Die Schnittstelle eines Moduls ist sein `index.ts`. Keine Facades, die nur an Services weiterreichen.
-4. **Verhaltenserhaltender Umbau** in kleinen Schritten, abgesichert durch Tests.
+Rahmenbedingungen: ein Entwickler, ein Benutzer, weniger als 50 Wohnungen, eine PostgreSQL-Datenbank, kein verteiltes System. Das Backend hat rund 10'000 Zeilen in zwei Schichten: `backend/src/routes` (HTTP) und `backend/src/services` (Fachlogik und Datenzugriff).
 
 ## Qualitätsszenarien
 
-Die Architektur wird an diesen Szenarien gemessen. Die Liste ist ein Vorschlag und muss vor Schritt 2 bestätigt oder ersetzt werden.
+Die Szenarien beschreiben Auslöser und Messgrösse, ohne einen Entwurf vorauszusetzen. Der Stand ist am Code vom Oktober 2026 gemessen.
 
-| Nr. | Szenario                                                                 | Messgröße                                                         |
-| --- | ------------------------------------------------------------------------ | ----------------------------------------------------------------- |
-| Q1  | Ein neuer Verteilschlüssel-Typ wird eingeführt.                          | Änderungen nur im Modul Nebenkostenabrechnung.                    |
-| Q2  | Ollama wird durch einen anderen LLM-Anbieter ersetzt.                    | Änderungen nur in `llm.service` und `config/llm.ts`.              |
-| Q3  | Eine Gesetzesänderung betrifft die Berechnung der Nebenkostenabrechnung. | Änderungen nur im Modul Nebenkostenabrechnung, ohne Routen.       |
-| Q4  | Das PDF-Layout der Abrechnung ändert sich.                               | Änderungen nur im Rendering, keine Änderung an der Berechnung.    |
-| Q5  | Die Berechnung wird ohne HTTP und ohne PDF-Erzeugung getestet.           | Ein Unit-Test ruft die Abrechnungserstellung als Funktion auf.    |
+| Nr. | Merkmal | Szenario | Messgrösse | Stand |
+| --- | --- | --- | --- | --- |
+| Q1 | Änderbarkeit | Der Liegenschaftsverwalter braucht einen neuen Verteilschlüssel aus Fläche und Zimmerzahl. | Ohne Code-Änderung. | ✅ Eigene Verteilschlüssel mit Formel (`formula.service.ts`) |
+| Q2 | Änderbarkeit | Ollama wird durch einen anderen LLM-Anbieter ersetzt. | Änderungen nur in `llm.service.ts` und `config/llm.ts`. | ⚠️ Fast: `routes/invoices.ts` importiert `isOllamaAvailable` |
+| Q3 | Änderbarkeit | Eine Gesetzesänderung betrifft die Berechnung der Nebenkostenabrechnung. | Änderungen nur in den Berechnungsservices (`calculation`, `prorating`, `distribution-key`, `formula`, `heating-profile`); keine Route, kein Rendering. | ✅ Die Berechnung liegt in diesen Services |
+| Q4 | Änderbarkeit | Das PDF-Layout der Abrechnung ändert sich. | Änderungen nur im Rendering (`pdf.service.ts`), keine an der Berechnung. | ✅ |
+| Q5 | Testbarkeit | Die Abrechnung wird ohne HTTP und ohne PDF berechnet und getestet. | Ein Test ruft die Abrechnungserstellung als Funktion auf. | ✅ `generateStatement`, getestet in `statement-creation.pg.test.ts` |
+| D1 | Datenintegrität | Eine versendete oder bezahlte Abrechnung wird bearbeitet. | Beträge und Positionen bleiben unverändert. | ✅ `updateStatement` lehnt ab; Mietvertrag mit Abrechnung nicht löschbar |
+| D2 | Datenintegrität | Die Abrechnungserstellung bricht mitten im Schreiben ab. | Keine Abrechnung ohne ihre Positionen. | ✅ `db.transaction` in `statement.service.ts` |
+| S1 | Sicherheit | Ein Aufruf ohne gültige Sitzung erreicht das BFF oder das Backend. | Antwort 401 oder Umleitung zur Anmeldung; der Browser sieht nie ein Token. | ✅ `auth-guard.test.ts`, `auth.pg.test.ts` |
+| P1 | Performance | Der Verwalter erstellt die Abrechnungen einer Liegenschaft mit 50 Wohnungen. | Unter 60 s (Ziel aus `docs/tech-stack.md`). | ❓ Nicht gemessen |
+| R1 | Resilienz | Ollama ist nicht erreichbar. | Rechnungen lassen sich trotzdem erfassen und von Hand kategorisieren. | ✅ Szenario „Neu kategorisieren ohne laufende KI“ |
+| R2 | Resilienz | Die Datenbank geht verloren. | Wiederherstellung mit höchstens einem Tag Datenverlust (PRD: tägliches Backup). | ❌ Kein Backup eingerichtet |
 
-Q5 ist seit Schritt 4 erfüllt: `generateStatement` (`backend/src/services/statement.service.ts`) erstellt die Abrechnung als Funktion, getestet in `backend/src/__tests__/statement-creation.pg.test.ts`.
+Die Liste ist ein Vorschlag. Sie gilt, sobald sie im ADR bestätigt ist (Schritt 1).
 
-## Strategisches Design
+## Strukturelle Mängel
 
-### Subdomains (Distillation)
+Diese Punkte verletzen keine Messgrösse, machen aber die bestehende Schichtung unsauber. Sie werden behoben, wenn der betroffene Code ohnehin angefasst wird.
 
-- **Core Domain: Nebenkostenabrechnung.** Verteilung über Verteilschlüssel, Proration und Heizprofile. Hier steckt die fachliche Komplexität und der Wert des Produkts. Hier lohnt sich Modellierungsaufwand.
-- **Supporting: Liegenschaftsverwaltung und Rechnungswesen.** Notwendig, aber fachlich einfach (Stammdaten, Erfassung, Kategorisierung).
-- **Generic: Rendering (PDF, QR-Rechnung), Mail, Authentifizierung, Konfiguration.** Austauschbare Technik ohne eigenes Fachmodell.
-
-### Module
-
-Die Module folgen den Abschnitten von `UBIQUITOUS_LANGUAGE.md`. Deutsch ist die kanonische Domänensprache, die englischen Namen sind Code-Bezeichner.
-
-1. **Liegenschaftsverwaltung** (`rental`)
-   Glossar-Abschnitte: Liegenschaftsverwaltung, Mietvertrag.
-   Gebäude, Wohnung, Mieter, Mietvertrag.
-   Services: `building`, `apartment`, `tenant`, `contract`.
-   Begründung der Zusammenlegung: Der Belegungsstatus einer Wohnung leitet sich aus den Mietverträgen ab. `apartment.service` liest Mietverträge und Mieter, `building.service` und `contract.service` importieren `apartmentStatus`. Eine Trennung in Portfolio und Tenancy ergäbe einen Zyklus.
-
-2. **Rechnungswesen** (`costs`)
-   Glossar-Abschnitte: Rechnungswesen, Nebenkostenkategorien, LLM-Kategorisierung.
-   Rechnung, Nebenkostenkategorie, Umlagefähigkeit, Rechnungsklassifizierung.
-   Services: `invoice`, `category`, `llm`, `utility-validation`.
-   Der frühere Name „Billing“ war irreführend: Eine Rechnung ist laut Glossar der Beleg eines Dienstleisters, nicht eine Forderung an den Mieter.
-
-3. **Nebenkostenabrechnung** (`settlement`, Core)
-   Glossar-Abschnitte: Verteilschlüssel, Heizprofil, Nebenkostenabrechnung, Zahlungsverkehr.
-   Verteilschlüssel, Heizprofil, Mieteranteil, Proration, Abrechnungsposition, Saldo, Mahnung.
-   Services: `distribution-key`, `formula`, `heating-profile`, `calculation`, `prorating`, `statement`, `reminder`, `reminder-letter`, `document`.
-   Verteilschlüssel und Heizprofile gehören zusammen, weil beide Regeln der Kostenverteilung sind und beide von `calculation`/`prorating` verwendet werden.
-   Die Tabelle `documents` gehört hierher: Sie referenziert Mieter und Nebenkostenabrechnung und enthält Mahnungen. Der PDF-Blob der Abrechnung liegt ohnehin auf `utility_statements`.
-
-4. **Infrastruktur (kein Fachmodul)**
-   `pdf.service`, `qr-bill.service`, `reminder-pdf` (reine Renderer ohne Tabellenzugriff), `mail/`, `config.service`, `middleware/auth.ts`, `db/`.
-   Jedes Fachmodul darf Infrastruktur importieren, Infrastruktur importiert kein Fachmodul.
-   Offener Punkt: `config.service` importiert heute `heatingProfileExists` und `distributionKeyExists` und verletzt damit diese Regel. Auflösung in Schritt 3.
-
-### Abhängigkeiten zwischen Modulen
-
-Pfeil bedeutet „importiert von“; das Ziel des Pfeils ist Upstream.
-
-```
-settlement  ──▶  costs  ──▶  rental
-     │                          ▲
-     └──────────────────────────┘
-```
-
-- **`costs` → `rental`:** Eine Rechnung gehört zu einem Gebäude (`buildingExists`).
-- **`settlement` → `costs`:** klassifizierte Rechnungen als Eingang der Berechnung (`getInvoicesForStatement`).
-- **`settlement` → `rental`:** Wohnungen und Mietverträge als Grundlage der Verteilung.
-
-Die Gegenrichtung ist verboten. Bekannte Verstöße, die in Schritt 3 zu klären sind: `tenant.service`, `contract.service`, `invoice.service` und `utility-validation.service` greifen auf Abrechnungstabellen zu (vermutlich Löschschutz und Sperre bereits abgerechneter Daten).
-
-### Regeln
-
-- Import über Modulgrenzen nur über das `index.ts` des Zielmoduls.
-- **Schreiben** auf Tabellen eines anderen Moduls ist verboten.
-- **Lesen** per Join über Modulgrenzen bleibt erlaubt. Die Datenbank ist eine einzige, mit Foreign Keys und Cascades über alle Module. Ein Verbot würde Joins durch N+1-Abfragen ersetzen, ohne ein Szenario zu verbessern.
-- `routes/dashboard.ts` ist eine reine Leseabfrage über mehrere Module und von der Modulregel ausgenommen.
-- Routen enthalten keine Fachlogik und keinen direkten Datenbankzugriff (Ausnahme: Dashboard).
-
-### Ubiquitous Language
-
-Das verbindliche Glossar ist `UBIQUITOUS_LANGUAGE.md` im Projektwurzelverzeichnis. Dieser Plan führt kein zweites Glossar. Das Glossar deckt alle drei Module ab; ein Begriff mit abweichender Bedeutung zwischen Modulen ist nicht bekannt, was die Entscheidung für Module statt Bounded Contexts stützt.
-
-In Schritt 1 am Glossar zu klären:
-
-- **Belegungsstatus:** Glossar nennt ein Feld `occupancy_status` mit den Werten belegt, leer, reserviert. Im Code wird der Status über `apartmentStatus` aus den Mietverträgen abgeleitet. Glossar und Code abgleichen.
-- **Mahnung / Zahlungserinnerung:** Beide Begriffe stehen im Glossar, „Mahnung“ ohne eigenen Eintrag. Einen Begriff festlegen.
-- **Abrechnungsperiode:** zweimal definiert (Nebenkostenabrechnung und Konfiguration). Zusammenführen oder Unterschied benennen.
-- **Dokument:** Die Tabelle `documents` hat keinen Glossareintrag.
-- **Modulzuordnung:** Je Glossar-Abschnitt das besitzende Modul vermerken.
+- `config.service.ts` (Konfiguration) importiert `heatingProfileExists` und `distributionKeyExists` aus den Fachservices.
+- `db/demo-data.ts` importiert `statement.service` und `statement-pdf.service`. Das ist für die Demodaten gewollt, gehört aber nicht unter `db/`, sondern zu den Skripten.
+- `routes/invoices.ts` nennt Ollama beim Namen (siehe Q2).
+- `invoice.service.ts` (`deleteInvoice`) prüft nicht, ob eine Rechnung in einer Abrechnung steckt. Rechnungen und Abrechnungspositionen sind nicht verknüpft; ob eine Verknüpfung nötig ist, entscheidet ein Szenario, nicht dieser Plan.
 
 ## Umsetzung
 
-### Schritt 1 — ADR, Szenarien, Glossar
+### Schritt 1: Szenarien bestätigen, Entscheidungen festhalten
 
-- Qualitätsszenarien bestätigen.
-- Ein ADR unter `docs/adr/` mit Subdomains, Modulen und Abhängigkeitsregeln; Verweis auf `UBIQUITOUS_LANGUAGE.md`.
-- Offene Glossarpunkte (siehe „Ubiquitous Language“) in `UBIQUITOUS_LANGUAGE.md` bereinigen.
-- Liste der bekannten technischen Schulden im selben ADR (Startbestand siehe „Bekannte technische Schulden“).
+- Qualitätsszenarien bestätigen, ergänzen oder streichen.
+- Je Entscheidung ein kurzes ADR in `docs/adr/`. Startbestand:
+  - Zwei Schichten (Routen, Services) statt Modulordner, solange alle Szenarien erfüllt sind.
+  - Ein Modell und eine Sprache (`UBIQUITOUS_LANGUAGE.md`), keine Bounded Contexts.
+  - Lese-Joins über Fachbereiche sind erlaubt; die Datenbank ist eine einzige mit Foreign Keys.
+  - Die bewusst verschobenen Massnahmen (siehe unten).
 
-Fertig, wenn: ADR liegt vor, Szenarien sind bestätigt, Glossarpunkte sind bereinigt.
+Fertig, wenn: Die Szenarien sind bestätigt und die ADRs liegen vor.
 
-### Schritt 2 — Characterization-Tests für die Core Domain
+### Schritt 2: Offene Szenarien schliessen
 
-- Bestehende Tests für `calculation`, `prorating`, `heating-profile` und `distribution-key` sichten.
-- Lücken mit Tests schließen, die das heutige Ergebnis der Abrechnungserstellung für repräsentative Fälle festhalten (Mieterwechsel in der Abrechnungsperiode, leere Wohnung, Heizprofil, mehrere Verteilschlüssel).
-- Tests laufen gegen die echte PostgreSQL-Datenbank, ohne Mocks.
+Nur für Szenarien, die nicht erfüllt sind:
 
-Fertig, wenn: Die Abrechnungserstellung ist durch Tests abgedeckt, die bei geänderten Beträgen fehlschlagen.
+- **R2:** tägliches Backup der Datenbank in `docker-compose.prod.yml` und eine dokumentierte, einmal geprobte Wiederherstellung.
+- **P1:** Abrechnungserstellung für 50 Wohnungen einmal messen. Wenn das Ziel verfehlt wird, ein eigenes Szenario mit Massnahme.
+- **Q2:** `isOllamaAvailable` in einen anbieterneutralen Namen umbenennen.
 
-### Schritt 3 — Modulordner und Boundary-Regel
+Fertig, wenn: Alle bestätigten Szenarien sind erfüllt.
 
-- Services nach `backend/src/modules/{rental,costs,settlement}/` verschieben, je Modul ein `index.ts` mit den öffentlich verwendeten Funktionen.
-- Infrastruktur nach `backend/src/infrastructure/` (oder am bisherigen Ort belassen, falls der Diff dadurch kleiner bleibt).
-- Boundary-Regel mit `fallow` (bereits installiert) einrichten und in `npm run lint` bzw. CI aufnehmen.
-- Verbotene Rückbezüge auflösen: je Fall entscheiden, ob die Abfrage in das besitzende Modul wandert und als Funktion exportiert wird (z. B. `hasStatementsForContract`), oder ob ein Lese-Join genügt.
-- Abhängigkeit `config.service` → `settlement` auflösen.
+### Schritt 3: Stopp
 
-Reihenfolge: `settlement` zuerst (Core Domain, größter Nutzen), dann `costs`, dann `rental`. Je Modul ein eigener Commit.
+Der Umbau endet hier. Weitere Massnahmen nur, wenn ein Szenario nicht mehr erfüllt ist oder ein neues hinzukommt. Die Szenarien werden bei jeder grösseren Änderung neu bewertet.
 
-Fertig, wenn: Boundary-Check meldet null Verstöße, alle Tests grün.
+Bereits erledigt (vor diesem Plan): Die Abrechnungserstellung ist aus `routes/statements.ts` in `statement.service.ts` und `statement-pdf.service.ts` gewandert (Q5, D2).
 
-### Schritt 4 — Abrechnungserstellung aus der Route lösen
+## Wenn ein Szenario einen Schnitt verlangt
 
-- Orchestrierung aus `backend/src/routes/statements.ts` (Berechnung, Nummernvergabe, QR-Referenz, PDF, Speichern) als Use-Case-Funktionen in das Modul `settlement` verschieben.
-- Direkten Datenbankzugriff aus der Route entfernen.
-- Prüfen, ob Nebenkostenabrechnung und Abrechnungspositionen atomar geschrieben werden. Im Backend findet sich derzeit kein `db.transaction(`. Falls nicht atomar: Transaktion ergänzen, mit Test.
+Falls ein Änderbarkeits-Szenario später nicht mehr erfüllt ist, weil Änderungen über zu viele Services streuen, bildet dieser Abschnitt den Ausgangspunkt. Er ist eine Entscheidungshilfe, kein Auftrag.
 
-Fertig, wenn: Szenario Q5 erfüllt, Route enthält nur noch Validierung, Aufruf und Antwort.
+**Wo sich Aufwand lohnt** (Distillation nach Evans):
 
-Umgesetzt: Die Use-Case-Funktionen liegen vorerst in `statement.service.ts` und `statement-pdf.service.ts` und ziehen mit Schritt 3 nach `modules/settlement/`. Abrechnung und Abrechnungspositionen wurden nicht atomar geschrieben; `createStatement` nutzt jetzt `db.transaction`.
+- **Kern: Nebenkostenabrechnung.** Verteilschlüssel, Proration, Heizprofile, Saldo. Hier stecken die fachliche Komplexität und der Wert des Produkts.
+- **Unterstützend: Liegenschaften und Rechnungen.** Stammdaten, Erfassung, Kategorisierung.
+- **Generisch: Rendering (PDF, QR-Rechnung), Mail, Authentifizierung, Konfiguration.** Austauschbare Technik.
 
-### Schritt 5 — Stopp und Neubewertung
+**Mögliche Module** entlang der Abschnitte von `UBIQUITOUS_LANGUAGE.md`:
 
-Der Umbau endet hier. Weitere Maßnahmen nur, wenn ein Szenario nicht erfüllt ist oder ein neues hinzukommt.
+| Modul | Services |
+| --- | --- |
+| Liegenschaftsverwaltung (`rental`) | `building`, `apartment`, `tenant`, `contract` |
+| Rechnungswesen (`costs`) | `invoice`, `category`, `llm`, `utility-validation` |
+| Nebenkostenabrechnung (`settlement`) | `distribution-key`, `formula`, `heating-profile`, `calculation`, `prorating`, `statement`, `statement-pdf`, `reminder`, `reminder-letter`, `document` |
+| Infrastruktur | `pdf`, `qr-bill`, `reminder-pdf`, `config`, `conflict`, `default-setting`, `mail/`, `middleware/`, `db/` |
+
+**Abhängigkeitsrichtung:** `settlement` importiert `costs` und `rental`, `costs` importiert `rental`; Infrastruktur importiert kein Fachmodul. Heutige Abweichungen:
+
+- `contract.service.ts` liest `utility_statements` (Löschschutz, D1). Als Lese-Zugriff zulässig oder als Funktion aus `settlement` zu exportieren.
+- `invoices.distribution_key_id` verweist auf `distribution_keys`, und `invoice.service.ts` joint die Tabelle. Damit hängt `costs` an `settlement`. Vor einem Schnitt ist zu entscheiden, ob der Verteilschlüssel zu `costs` gehört oder der Lese-Join erlaubt bleibt.
+- `config.service.ts` und `db/demo-data.ts` (siehe Strukturelle Mängel).
+
+`fallow` kann Architekturgrenzen prüfen (Zonen und Regeln in `.fallowrc.json`, Anzeige mit `npx fallow list --boundaries`); das wäre die Prüfung in CI.
 
 ## Bewusst nicht umgesetzt
 
-| Maßnahme                                            | Einführen, wenn                                                                           |
-| --------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| In-Process Domain Events                            | ein zweiter Abnehmer für dasselbe Ereignis existiert oder Verarbeitung asynchron sein muss |
-| Value Objects (`Money`, `DateRange`), typisierte IDs | ein Rundungs- oder Verwechslungsfehler auftritt, den Typen verhindert hätten              |
-| Read-Models / Denormalisierung                      | eine Leseabfrage messbar zu langsam ist                                                   |
-| Anti-Corruption Layer                               | ein externes System mit eigenem Modell angebunden wird (z. B. Bank, Buchhaltung)          |
-| Repository-Schicht je Modul                         | die Datenbank oder das ORM gewechselt wird                                                |
-| Getrennte Bounded Contexts                          | ein zweites Team oder ein abweichendes Modell entsteht                                    |
-| Umbau des BFF (`src/lib/server`)                    | das BFF mehr als Proxy, Cookies und XSRF übernimmt                                        |
+| Massnahme | Einführen, wenn |
+| --- | --- |
+| Modulordner mit `index.ts` und Boundary-Check | ein Änderbarkeits-Szenario wegen gestreuter Änderungen nicht erfüllt ist |
+| In-Process Domain Events | ein zweiter Abnehmer für dasselbe Ereignis existiert oder Verarbeitung asynchron sein muss |
+| Value Objects (`Money`, `DateRange`), typisierte IDs | ein Rundungs- oder Verwechslungsfehler auftritt, den Typen verhindert hätten |
+| Read-Models / Denormalisierung | eine Leseabfrage messbar zu langsam ist (P1) |
+| Anti-Corruption Layer | ein externes System mit eigenem Modell angebunden wird (z. B. Bank, Buchhaltung) |
+| Repository-Schicht | die Datenbank oder das ORM gewechselt wird |
+| Getrennte Bounded Contexts | ein zweites Team oder ein abweichendes Modell entsteht |
+| Umbau des BFF (`src/lib/server`) | das BFF mehr als Proxy, Cookies und XSRF übernimmt |
 
-## Verifikation pro Schritt
+## Verifikation
 
-- Unit-Tests, E2E-Tests, `npm run type-check` und `npm run lint` grün.
-- Boundary-Check ohne Verstöße (ab Schritt 3).
-- API- und UI-Verhalten unverändert.
-- `implementation_plan.md` nachgeführt.
+- Die Checkliste aus `CLAUDE.md` ist grün (`npm run test:coverage`, `npm run lint`, `npm run check`, `cd backend && bun run test && bun run type-check`, betroffene E2E-Szenarien).
+- Die Stand-Spalte der Qualitätsszenarien ist nachgeführt.
+- `implementation_plan.md` ist nachgeführt.
 
-## Bekannte technische Schulden (Startbestand)
+## Risiken
 
-- Fachlogik und Datenbankzugriff in `backend/src/routes/statements.ts` (526 Zeilen).
-- Kein `db.transaction(` im Backend; Atomarität beim Schreiben von Nebenkostenabrechnung und Abrechnungspositionen ungeprüft.
-- Rückbezüge von `rental` und `costs` auf Abrechnungstabellen.
-- `config.service` importiert Fachservices.
-- `pdf.service` mit 786 Zeilen; Aufteilung erst prüfen, wenn Q4 nicht erfüllt ist.
-
-## Risiken & Gegenmaßnahmen
-
-- **Risiko:** Regression in der Berechnung beim Verschieben.
-  **Gegenmaßnahme:** Schritt 2 vor Schritt 3 und 4; reine Verschiebungen und Verhaltensänderungen nie im selben Commit.
-
-- **Risiko:** Versteckte Kopplung über SQL, die der Import-Check nicht sieht.
-  **Gegenmaßnahme:** Schreibzugriffe auf fremde Tabellen einmalig per Suche inventarisieren (Schritt 3) und in der Review-Checkliste halten.
-
-- **Risiko:** Umbau kollidiert mit laufender Feature-Arbeit.
-  **Gegenmaßnahme:** Ein Modul pro Commit, keine langlebigen Branches.
-
-- **Risiko:** Der Plan wächst wieder.
-  **Gegenmaßnahme:** Jede Ergänzung braucht ein Qualitätsszenario, das ohne sie nicht erfüllt ist.
-
-## Hinweise zur Analyse
-
-Die Aussagen zu Abhängigkeiten stammen aus einer Import- und Stichwortsuche, nicht aus einer vollständigen Durchsicht des Codes. Die Rückbezüge auf Abrechnungstabellen und die fehlende Transaktion sind vor Schritt 3 bzw. 4 am Code zu bestätigen.
+- **Der Plan wächst wieder.** Jede Ergänzung braucht ein Szenario, das ohne sie nicht erfüllt ist.
+- **Szenarien veralten unbemerkt.** Die Stand-Spalte nennt, wo möglich, den Test, der das Szenario belegt. P1 und R2 haben noch keinen.
