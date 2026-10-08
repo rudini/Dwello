@@ -4310,6 +4310,8 @@ reviewed independently afterwards.
   fallow gate, contracts, language conventions); backend and E2E details moved into `backend/CLAUDE.md` and
   `tests/e2e/CLAUDE.md`, loaded only there; the stale `docs/claude-reference.md` removed (tree, features and decisions
   were duplicates of `docs/PRD-Dwello.md` and `docs/tech-stack.md`)
+- [x] **PRD management fee:** `docs/PRD-Dwello.md` called 3 % a legal cap; it is the customary guideline, as the
+  settings hint and `management-fee*.test.ts` already say (validation only rejects negative values)
 
 ### Open
 - [ ] Raise coverage to the target in `docs/test-pyramid.md` and move the floors up
