@@ -1,27 +1,29 @@
 /**
  * LLM Configuration
- * Configuration for Ollama-based invoice categorization
+ * Any provider with an OpenAI-compatible API (/chat/completions, /models); by default the local Ollama
  */
 
-// Ollama configuration
 export const llmConfig = {
-	// Ollama API endpoint
-	baseUrl: process.env.OLLAMA_API_URL || 'http://localhost:11434',
+	// OpenAI-compatible API base URL, e.g. https://api.openai.com/v1
+	baseUrl: process.env.LLM_BASE_URL || 'http://localhost:11434/v1',
+
+	// Sent as a Bearer token; the local Ollama needs none
+	apiKey: process.env.LLM_API_KEY || '',
 
 	// Model to use for categorization (qwen2.5:3b is small but accurate for German)
-	model: process.env.OLLAMA_MODEL || 'qwen2.5:3b',
+	model: process.env.LLM_MODEL || 'qwen2.5:3b',
 
 	// Request timeout in milliseconds
-	timeout: parseInt(process.env.OLLAMA_TIMEOUT || '30000', 10),
+	timeout: parseInt(process.env.LLM_TIMEOUT || '30000', 10),
 
 	// Enable/disable LLM categorization
-	enabled: process.env.OLLAMA_ENABLED !== 'false',
+	enabled: process.env.LLM_ENABLED !== 'false',
 
 	// Minimum confidence threshold for automatic categorization
-	minConfidence: parseFloat(process.env.OLLAMA_MIN_CONFIDENCE || '0.7'),
+	minConfidence: parseFloat(process.env.LLM_MIN_CONFIDENCE || '0.7'),
 
 	// Cache TTL in seconds (default: 1 hour)
-	cacheTtl: parseInt(process.env.OLLAMA_CACHE_TTL || '3600', 10)
+	cacheTtl: parseInt(process.env.LLM_CACHE_TTL || '3600', 10)
 };
 
 // Swiss utility cost categories for the prompt (English names match database)

@@ -20,7 +20,7 @@ Szenario und Messgrösse setzen keinen Entwurf voraus; die Dateien in der Spalte
 | Nr. | Merkmal | Szenario | Messgrösse | Stand und Nachweis |
 | --- | --- | --- | --- | --- |
 | Q1 | Änderbarkeit | Der Liegenschaftsverwalter braucht einen neuen Verteilschlüssel aus Fläche und Zimmerzahl. | Ohne Code-Änderung. | ✅ Eigene Formeln (`formula.service.ts`); `distribution-keys.feature` |
-| Q2 | Änderbarkeit | Ollama wird durch einen anderen LLM-Anbieter ersetzt. | Im Code kennt genau eine Stelle den Anbieter; Deployment-Konfiguration und Datenschutzerklärung werden mitgeändert. | ⚠️ `llm.service.ts` und `config/llm.ts`, aber `routes/invoices.ts` importiert `isOllamaAvailable`, und `config/llm.ts` enthält auch die Kategorien `SWISS_UTILITY_CATEGORIES`, die `utility-validation.service.ts` nutzt |
+| Q2 | Änderbarkeit | Ollama wird durch einen anderen LLM-Anbieter ersetzt. | Ohne Code-Änderung, nur über die Konfiguration; die Datenschutzerklärung deckt beide Fälle ab. | ✅ Jede OpenAI-kompatible API über `LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL` (`config/llm.ts`); `invoice-categorization.pg.test.ts` |
 | Q3 | Änderbarkeit | Eine Gesetzesänderung betrifft die Berechnung der Nebenkostenabrechnung. | Keine Änderung an Routen, UI oder Rendering. | ✅ Berechnung in `calculation`, `prorating`, `distribution-key`, `formula`, `heating-profile` |
 | Q4 | Änderbarkeit | Das PDF-Layout der Abrechnung ändert sich. | Keine Änderung an der Berechnung. | ✅ `pdf.service.ts`; neue Felder zusätzlich in `statement-pdf.service.ts` |
 | Q5 | Testbarkeit | Die Berechnung einer Abrechnung wird geprüft. | In einem automatisierten Test ohne Webserver und ohne PDF. | ✅ `generateStatement`; `statement-creation.pg.test.ts` |
@@ -43,6 +43,7 @@ Diese Punkte machen die Schichtung unsauber, ohne selbst ein Szenario zu verletz
 - `db/demo-data.ts` importiert `statement.service` und `statement-pdf.service`. Das ist für die Demodaten gewollt, gehört aber nicht unter `db/`, sondern zu den Skripten.
 - `routes/dashboard.ts` fragt die Datenbank selbst ab statt über einen Service.
 - `reminder-pdf.ts` (Rendering) importiert den Typ von `reminder-letter.ts` (Fachlogik der Mahnung).
+- `config/llm.ts` führt die Kategorien für den Prompt (`SWISS_UTILITY_CATEGORIES`) als zweite Liste neben der Tabelle `categories`; `utility-validation.service.ts` nutzt sie ebenfalls.
 
 ## Umsetzung
 
@@ -65,7 +66,6 @@ Fertig, wenn: Die Szenarien sind bestätigt und die ADRs liegen vor.
 Nur für Szenarien, die nicht erfüllt sind, je mit einem Test, der vorher fehlschlägt:
 
 - **R2:** tägliches Backup der Datenbank in `docker-compose.prod.yml`, dokumentierte Wiederherstellung, erste Probe.
-- **Q2:** `isOllamaAvailable` anbieterneutral benennen und `SWISS_UTILITY_CATEGORIES` aus `config/llm.ts` herauslösen.
 - **R1, S2:** fehlende Tests ergänzen.
 - **P1, P2:** einmal messen. Wenn ein Ziel verfehlt wird, ein eigenes Szenario mit Massnahme.
 
@@ -126,4 +126,4 @@ Jede Route gehört zum Modul ihres Services; `routes/dashboard.ts` liest über a
 ## Risiken
 
 - **Der Plan wächst wieder.** Jede Ergänzung braucht ein Szenario, das ohne sie nicht erfüllt ist.
-- **Szenarien veralten unbemerkt.** Nur Szenarien mit einem Test bleiben verlässlich belegt. Heute fehlt er für Q2 bis Q4 (statische Abhängigkeiten, prüfbar mit fallow-Grenzen), S2, P1, P2, R1 (Erfassen) und R2.
+- **Szenarien veralten unbemerkt.** Nur Szenarien mit einem Test bleiben verlässlich belegt. Heute fehlt er für Q3 und Q4 (statische Abhängigkeiten, prüfbar mit fallow-Grenzen), S2, P1, P2, R1 (Erfassen) und R2.
