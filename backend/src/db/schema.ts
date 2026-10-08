@@ -307,7 +307,7 @@ export const utilityStatements = pgTable(
 		managementFeePercent: decimal('management_fee_percent', { precision: 5, scale: 2 }),
 		managementFee: decimal('management_fee', { precision: 12, scale: 2 }).default('0'),
 		balance: decimal('balance', { precision: 12, scale: 2 }).notNull(), // positive = tenant owes, negative = refund
-		status: varchar('status', { length: 20 }).notNull().default('draft'), // draft, sent, paid, overdue
+		status: varchar('status', { length: 20 }).notNull().default('draft'), // draft, sent, paid; overdue is computed from the payment deadline
 		paymentDeadline: date('payment_deadline'),
 		paidDate: date('paid_date'),
 		paidAmount: decimal('paid_amount', { precision: 12, scale: 2 }),

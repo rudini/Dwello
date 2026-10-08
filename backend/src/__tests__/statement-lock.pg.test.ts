@@ -3,7 +3,7 @@
  */
 
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
-import { eq } from 'drizzle-orm';
+import { inArray } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { utilityStatements } from '../db/schema';
 import { updateStatement } from '../services/statement.service';
@@ -13,26 +13,44 @@ import { createRental } from './helpers/rental';
 
 let rental: Awaited<ReturnType<typeof createRental>>;
 let statementId: string;
+let sentId: string;
 
-beforeAll(async () => {
-	rental = await createRental(crypto.randomUUID(), { startDate: '2024-01-01', monthlyAdvancePayment: '100' });
-	statementId = await idOf(
+// A statement of the rental for one year, sent to the tenant
+async function sentStatement(year: number) {
+	const id = await idOf(
 		await sendJson('POST', '/api/v1/statements/generate', {
 			contractId: rental.contract,
 			buildingId: rental.building,
-			periodStart: '2024-01-01',
-			periodEnd: '2024-12-31'
+			periodStart: `${year}-01-01`,
+			periodEnd: `${year}-12-31`
 		})
 	);
-	await sendJson('PUT', `/api/v1/statements/${statementId}/status`, { status: 'sent' });
-	const overdue = await sendJson('PUT', `/api/v1/statements/${statementId}/status`, { status: 'overdue' });
+	await sendJson('PUT', `/api/v1/statements/${id}/status`, { status: 'sent' });
+	return id;
+}
+
+beforeAll(async () => {
+	rental = await createRental(crypto.randomUUID(), { startDate: '2023-01-01', monthlyAdvancePayment: '100' });
+	sentId = await sentStatement(2023);
+	// Overdue is not set by hand: the payment deadline has passed
+	statementId = await sentStatement(2024);
+	const overdue = await sendJson('PUT', `/api/v1/statements/${statementId}`, { paymentDeadline: '2025-01-31' });
 	expect(await overdue.json()).toMatchObject({ status: 'overdue' });
 });
 
 afterAll(async () => {
 	// Locked statements cannot be deleted through the API
-	await db.delete(utilityStatements).where(eq(utilityStatements.id, statementId));
+	await db.delete(utilityStatements).where(inArray(utilityStatements.id, [statementId, sentId]));
 	await rental.remove();
+});
+
+describe('Versendete Abrechnung', () => {
+	// Überfällig ist sie erst, wenn die Zahlungsfrist abgelaufen ist; sonst fehlte sie in den Filtern und Zahlen
+	it('lässt sich nicht von Hand auf überfällig setzen', async () => {
+		const response = await sendJson('PUT', `/api/v1/statements/${sentId}/status`, { status: 'overdue' });
+
+		await expectRejection(response, 400, 'Invalid status transition from sent to overdue');
+	});
 });
 
 describe('Überfällige Abrechnung', () => {
@@ -58,6 +76,9 @@ describe('Überfällige Abrechnung', () => {
 	it('behält ihre Beträge', async () => {
 		await expect(updateStatement(statementId, { balance: '0.00' })).rejects.toThrow(
 			'Cannot modify balance for a statement that is no longer a draft'
+		);
+		await expect(updateStatement(statementId, { managementFeePercent: '5.00' })).rejects.toThrow(
+			'Cannot modify managementFeePercent for a statement that is no longer a draft'
 		);
 	});
 });

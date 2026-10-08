@@ -13,7 +13,6 @@ import {
 	deleteStatement,
 	addLineItems,
 	getStatementCountsByStatus,
-	markOverdueStatements,
 	calculateStatement,
 	generateStatement
 } from '../services/statement.service';
@@ -81,15 +80,6 @@ export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 			})
 		}
 	)
-
-	// Mark overdue statements
-	.post('/mark-overdue', async () => {
-		const marked = await markOverdueStatements();
-		return {
-			message: 'Overdue statements marked',
-			count: marked
-		};
-	})
 
 	// Preview statement calculation for a contract
 	.post(

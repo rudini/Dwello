@@ -352,7 +352,7 @@ export async function updateStatement(
 
 	// Once sent, the amounts stay as the tenant received them
 	if (existing.status !== 'draft') {
-		const protectedFields = ['totalCosts', 'totalAdvancePayments', 'managementFee', 'balance'];
+		const protectedFields = ['totalCosts', 'totalAdvancePayments', 'managementFeePercent', 'managementFee', 'balance'];
 		for (const field of protectedFields) {
 			if (field in data) {
 				throw new Error(`Cannot modify ${field} for a statement that is no longer a draft`);
@@ -390,10 +390,10 @@ export async function updateStatementStatus(
 	const existing = await getStatement(id);
 	if (!existing) return null;
 
-	// Validate status transitions
+	// Validate status transitions; overdue is not set, it follows from the passed payment deadline
 	const validTransitions: Record<string, string[]> = {
 		draft: ['sent'],
-		sent: ['paid', 'overdue'],
+		sent: ['paid'],
 		overdue: ['paid'],
 		paid: []
 	};
@@ -599,37 +599,3 @@ export async function getStatementCountsByStatus(buildingId?: string): Promise<{
 	return counts;
 }
 
-/**
- * Get overdue statements
- */
-export async function getOverdueStatements(): Promise<StatementWithDetails[]> {
-	const today = new Date().toISOString().split('T')[0];
-
-	const { statements } = await listStatements({
-		status: 'sent',
-		limit: 1000
-	});
-
-	return statements.filter(
-		(s) => s.paymentDeadline && s.paymentDeadline < today
-	);
-}
-
-/**
- * Mark overdue statements
- */
-export async function markOverdueStatements(): Promise<number> {
-	const overdueStatements = await getOverdueStatements();
-	let marked = 0;
-
-	for (const statement of overdueStatements) {
-		try {
-			await updateStatementStatus(statement.id, 'overdue');
-			marked++;
-		} catch {
-			// Skip if status transition not valid
-		}
-	}
-
-	return marked;
-}
