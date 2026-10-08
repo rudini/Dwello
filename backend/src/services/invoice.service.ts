@@ -345,10 +345,17 @@ export async function recategorizeInvoiceById(id: string): Promise<{
 			return { success: false, error: KI_UNAVAILABLE };
 		}
 
-		// Update invoice with new categorization
+		// As when entering an invoice, a sure suggestion becomes its category; the category decides what is allocable
+		const sure = result.confidence >= 0.85 && {
+			categoryId: result.category.id,
+			isValidUtilityCost: result.category.isAllowedUtilityCost,
+			wasManuallyOverridden: false,
+			manualOverrideReason: null
+		};
 		await db
 			.update(invoices)
 			.set({
+				...sure,
 				llmCategoryId: result.category.id,
 				llmConfidence: String(result.confidence),
 				updatedAt: new Date()
