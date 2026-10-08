@@ -16,6 +16,7 @@
 
 import { eq } from 'drizzle-orm';
 import { db } from '../db/connection';
+import { validateIBAN } from './qr-bill.service';
 import { configuration, type Configuration } from '../db/schema';
 import { heatingProfileExists } from './heating-profile.service';
 import { distributionKeyExists } from './distribution-key.service';
@@ -71,7 +72,8 @@ export const CONFIG_KEYS = {
 	},
 	iban: {
 		type: 'string',
-		validator: (v: string) => /^CH\d{2}\s?\d{4}\s?\d{4}\s?\d{4}\s?\d{4}\s?\d{1}$/.test(v.replace(/\s/g, '')),
+		// Checksum too: the QR-bill cannot be created with a wrong IBAN
+		validator: (v: string) => validateIBAN(v).valid,
 		default: ''
 	},
 	payment_deadline_days: {

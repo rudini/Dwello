@@ -4,6 +4,8 @@
 
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import { llmConfig } from '../config/llm';
+import { createBuilding, deleteBuilding } from '../services/building.service';
+import { createInvoice, deleteInvoice } from '../services/invoice.service';
 import { callApi, sendJson } from './helpers/auth';
 import { expectRejection, invoicedBuilding } from './helpers/records';
 
@@ -72,5 +74,48 @@ describe('Kategorie der KI überschreiben', () => {
 		});
 		const detail = (await (await callApi(`/api/v1/invoices/${invoice.id}`)).json()) as Invoice;
 		expect(detail.manualOverrideReason).toBe('Reparatur, keine Wartung');
+	});
+});
+
+describe('Kategorie der KI für eine neue Rechnung', () => {
+	// Ob Kosten umlagefähig sind, entscheidet die Kategorie (OR 257a), nicht die Einschätzung der KI
+	it('legt eine Reparatur nicht auf die Mieter um, auch wenn die KI sie für umlagefähig hält', async () => {
+		// Ollama an der Systemgrenze ersetzt: antwortet sicher mit "Repairs", aber umlagefähig
+		const ollama = Bun.serve({
+			port: 0,
+			fetch: () =>
+				Response.json({
+					response: JSON.stringify({
+						category: 'Repairs',
+						confidence: 0.95,
+						isAllowedUtilityCost: true
+					})
+				})
+		});
+		llmConfig.baseUrl = `http://127.0.0.1:${ollama.port}`;
+		const building = await createBuilding({
+			name: `KI-Haus ${token}`,
+			address: 'Testweg 1',
+			postalCode: '8400',
+			city: 'Winterthur',
+			canton: 'ZH'
+		});
+		try {
+			const invoice = await createInvoice({
+				buildingId: building.id,
+				billingEntityName: 'Sanitär Meier',
+				description: `Leck Steigleitung ${token}`,
+				amount: '800.00',
+				invoiceDate: '2025-05-12'
+			});
+			await deleteInvoice(invoice.id);
+
+			expect(invoice.category?.name).toBe('Repairs');
+			expect(invoice.isValidUtilityCost).toBe(false);
+		} finally {
+			ollama.stop();
+			llmConfig.baseUrl = 'http://127.0.0.1:9';
+			await deleteBuilding(building.id);
+		}
 	});
 });

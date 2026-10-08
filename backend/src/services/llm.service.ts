@@ -147,7 +147,7 @@ export async function categorizeInvoice(invoice: {
 		return {
 			category,
 			confidence: cached.confidence,
-			isAllowedUtilityCost: cached.isAllowedUtilityCost,
+			isAllowedUtilityCost: category?.isAllowedUtilityCost ?? cached.isAllowedUtilityCost,
 			reasoning: cached.reasoning,
 			source: 'cache'
 		};
@@ -180,7 +180,8 @@ export async function categorizeInvoice(invoice: {
 		return {
 			category,
 			confidence: result.confidence,
-			isAllowedUtilityCost: result.isAllowedUtilityCost,
+			// Whether costs may be passed on is the category's, not the KI's judgement
+			isAllowedUtilityCost: category?.isAllowedUtilityCost ?? result.isAllowedUtilityCost,
 			reasoning: result.reasoning,
 			source: 'llm'
 		};
