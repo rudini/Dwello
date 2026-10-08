@@ -3,7 +3,7 @@
  */
 import { describe, it, expect } from 'vitest';
 import { rmSync, writeFileSync } from 'node:fs';
-import config from '../../vite.config';
+import { resolveConfig } from 'vite';
 
 const envFile = '.env.envcheck.local';
 
@@ -12,10 +12,7 @@ describe('Dev-Server', () => {
 	it('übernimmt BACKEND_URL aus der .env', async () => {
 		writeFileSync(envFile, 'BACKEND_URL=http://backend-aus-env:3001\n');
 		try {
-			await (config as unknown as (env: { mode: string; command: string }) => unknown)({
-				mode: 'envcheck',
-				command: 'serve'
-			});
+			await resolveConfig({ configFile: 'vite.config.ts', mode: 'envcheck' }, 'serve');
 
 			expect(process.env.BACKEND_URL).toBe('http://backend-aus-env:3001');
 		} finally {
