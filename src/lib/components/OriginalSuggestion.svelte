@@ -22,6 +22,6 @@
 				{invoice.llmCategory?.name}
 			</span>
 		</div>
-		<KiAssessment confidence={invoice.llmConfidence ?? 0} reasoning={invoice.llmReasoning} />
+		<KiAssessment confidence={invoice.llmConfidence ?? 0} />
 	</div>
 </Card>

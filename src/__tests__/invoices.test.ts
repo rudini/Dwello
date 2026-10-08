@@ -4,6 +4,7 @@ import { load as detailLoad } from '../routes/invoices/[id]/+page.server';
 import { load as editLoad } from '../routes/invoices/[id]/edit/+page.server';
 import { load as newLoad } from '../routes/invoices/new/+page.server';
 import { suggestionProvenance } from '../lib/invoice';
+import backendInvoice from '../../tests/contracts/invoice.json';
 
 const API = 'http://localhost:3001/api/v1';
 
@@ -17,22 +18,8 @@ const perArea = {
 	formula: '{area}'
 };
 
-const invoice = (values: Record<string, unknown> = {}) => ({
-	id: 'i1',
-	buildingId: 'b1',
-	billingEntityName: 'Hauswart Huber',
-	description: 'Treppenhausreinigung Q1',
-	amount: '450.00',
-	invoiceDate: '2026-03-31',
-	isValidUtilityCost: true,
-	categoryId: 'c1',
-	llmCategoryId: null,
-	wasManuallyOverridden: false,
-	building: { id: 'b1', name: 'Seeblick', address: 'Testweg 1' },
-	category: caretaker,
-	distributionKey: perArea,
-	...values
-});
+// Backend invoice from the API contract (tests/contracts/invoice.json)
+const invoice = (values: Record<string, unknown> = {}) => ({ ...backendInvoice, ...values });
 
 // Fake backend: answers each path (without query) with its JSON, and records the requested URLs
 function backend(answers: Record<string, unknown>) {

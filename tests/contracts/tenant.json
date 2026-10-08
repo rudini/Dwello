@@ -1,0 +1,12 @@
+{
+	"id": "t1",
+	"firstName": "Anna",
+	"lastName": "Keller",
+	"email": "anna.keller@example.ch",
+	"phone": null,
+	"language": "de",
+	"address": null,
+	"postalCode": null,
+	"city": null,
+	"correspondenceChannel": "email"
+}

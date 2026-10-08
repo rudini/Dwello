@@ -4185,11 +4185,15 @@ reviewed independently afterwards.
   (`src/lib/server/settings.ts`, `settings.test.ts`); before, the backend rejected it with a general error
 - [x] **`api-proxy.test.ts` without mocking own code:** XSRF and session through real cookies and headers
   instead of a mocked `auth` module; an XSRF check that accepts every token now fails the test
+- [x] **API contracts for invoices, buildings, tenants** (`tests/contracts/invoice.json`, `building.json`,
+  `tenant.json`, checked in `api-contracts.pg.test.ts`; used in `invoices.test.ts`, `building-actions.test.ts`,
+  `tenant-detail.test.ts`). The invoice contract showed that the frontend read `llmReasoning` and
+  `manualOverrideBy`, which the backend never delivers: the blocks on the invoice page were never shown and are
+  removed (`invoice.ts`, `types.ts`, `invoices/[id]/+page.svelte`, `OriginalSuggestion.svelte`)
 
 ### Open
 - [ ] Endpoints no page calls, untested: `/config/initialize`, `/config/accounting-period/*`,
   `/heating-profiles/initialize`, `/validate-percentages`, `/calculate-share` (delete or test?)
-- [ ] API contracts for buildings, tenants, invoices
 - [ ] Numbers in `docs/test-pyramid.md`
 - [ ] Backend does not derive „umlagefähig“ from a category chosen by hand (relies on the form)
 - [ ] Type check `tests/` and the root `*.config.ts` (tsconfig includes only `src/`)

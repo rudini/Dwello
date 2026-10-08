@@ -73,4 +73,20 @@ describe('API-Verträge des Frontends', () => {
 		const actual = await (await sendJson('POST', '/api/v1/statements/preview', { ...period, contractId: rental.contract })).json();
 		expect(drift(await sample('statement-preview'), actual)).toEqual([]);
 	});
+
+	it('GET /invoices/:id liefert die Felder von invoice.json', async () => {
+		const listed = (await (await callApi(`/api/v1/invoices?buildingId=${rental.building}`)).json()) as { invoices: { id: string }[] };
+		const actual = await (await callApi(`/api/v1/invoices/${listed.invoices[0].id}`)).json();
+		expect(drift(await sample('invoice'), actual)).toEqual([]);
+	});
+
+	it('GET /buildings/:id liefert die Felder von building.json', async () => {
+		const actual = await (await callApi(`/api/v1/buildings/${rental.building}`)).json();
+		expect(drift(await sample('building'), actual)).toEqual([]);
+	});
+
+	it('GET /tenants/:id liefert die Felder von tenant.json', async () => {
+		const actual = await (await callApi(`/api/v1/tenants/${rental.tenant}`)).json();
+		expect(drift(await sample('tenant'), actual)).toEqual([]);
+	});
 });
