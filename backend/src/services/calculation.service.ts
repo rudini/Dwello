@@ -36,7 +36,7 @@ export interface CalculatedLineItem {
 	totalBuildingAmount: number;
 	apartmentShare: number;
 	tenantShare: number;
-	sharePercentage: number;
+	periodShare: number; // share of the period: days rented, or the months of the heating profile (0-1)
 	isHeatingCost: boolean;
 }
 
@@ -270,7 +270,7 @@ export async function calculateStatementForContract(
 		);
 
 		let tenantShare: number;
-		let sharePercentage: number;
+		let periodShare: number;
 
 		// For heating costs, use heating profile if available
 		if (group.isHeatingCost && heatingProfileId) {
@@ -283,7 +283,7 @@ export async function calculateStatementForContract(
 				apartmentShareResult.share
 			);
 			tenantShare = heatingResult.share;
-			sharePercentage = heatingResult.percentage / 100;
+			periodShare = heatingResult.percentage / 100;
 		} else {
 			// Standard day-based prorating
 			const prorated = prorateCosts(
@@ -292,7 +292,7 @@ export async function calculateStatementForContract(
 				totalPeriodDays
 			);
 			tenantShare = prorated.proratedAmount;
-			sharePercentage = prorated.sharePercentage;
+			periodShare = prorated.periodShare;
 		}
 
 		lineItems.push({
@@ -304,7 +304,7 @@ export async function calculateStatementForContract(
 			totalBuildingAmount: group.totalAmount,
 			apartmentShare: apartmentShareResult.share,
 			tenantShare: Math.round(tenantShare * 100) / 100,
-			sharePercentage: Math.round(sharePercentage * 10000) / 10000,
+			periodShare: Math.round(periodShare * 10000) / 10000,
 			isHeatingCost: group.isHeatingCost
 		});
 

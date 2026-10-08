@@ -17,7 +17,7 @@ import { createContract, deleteContract } from '../services/contract.service';
 import { callApi } from './helpers/auth';
 import { insertInvoice } from './helpers/records';
 
-type LineItem = { isHeatingCost: boolean; apartmentShare: number; tenantShare: number; sharePercentage: number };
+type LineItem = { isHeatingCost: boolean; apartmentShare: number; tenantShare: number; periodShare: number };
 
 const token = crypto.randomUUID();
 const created: { building: string; apartments: string[]; tenants: string[]; contracts: string[] } = {
@@ -113,14 +113,14 @@ describe('Heizkostenverteilung bei Mieterwechsel und Leerstand', () => {
 	it('belastet den ersten Mieter mit Januar bis März gemäss Heizprofil', async () => {
 		const line = await heatingLine(tenant1);
 
-		expect(line.sharePercentage).toBe(0.43);
+		expect(line.periodShare).toBe(0.43);
 		expect(line.tenantShare).toBe(301);
 	});
 
 	it('belastet den zweiten Mieter mit Mai bis Dezember gemäss Heizprofil', async () => {
 		const line = await heatingLine(tenant2);
 
-		expect(line.sharePercentage).toBe(0.52);
+		expect(line.periodShare).toBe(0.52);
 		expect(line.tenantShare).toBe(364);
 	});
 

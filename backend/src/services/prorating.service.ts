@@ -39,7 +39,7 @@ export interface ProratedCost {
 	proratedAmount: number;
 	prorationDays: number;
 	totalDays: number;
-	sharePercentage: number;
+	periodShare: number;
 }
 
 /**
@@ -120,19 +120,19 @@ export function prorateCosts(
 			proratedAmount: 0,
 			prorationDays,
 			totalDays,
-			sharePercentage: 0
+			periodShare: 0
 		};
 	}
 
-	const sharePercentage = prorationDays / totalDays;
-	const proratedAmount = totalAmount * sharePercentage;
+	const periodShare = prorationDays / totalDays;
+	const proratedAmount = totalAmount * periodShare;
 
 	return {
 		totalAmount,
 		proratedAmount: Math.round(proratedAmount * 100) / 100, // Round to 2 decimals
 		prorationDays,
 		totalDays,
-		sharePercentage: Math.round(sharePercentage * 10000) / 10000 // 4 decimal precision
+		periodShare: Math.round(periodShare * 10000) / 10000 // 4 decimal precision
 	};
 }
 
