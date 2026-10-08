@@ -100,5 +100,4 @@ Voraussetzung lokal: PostgreSQL auf Port 5432 mit Benutzer `dwello`. Die Testdat
 ## Offen
 
 - [ ] Frontend-Coverage auf 80 % anheben, dann die Untergrenzen nachziehen (Backend seit Oktober 2026 darüber)
-- [ ] API-Verträge für die Listen von Gebäuden und Mietern (heute: Abrechnungen, Verträge eines Gebäudes, Rechnungen, Gebäude- und Mieterdetail)
 - [ ] Typprüfung für `tests/` und die `*.config.ts` im Wurzelverzeichnis (`tsconfig.json` umfasst nur `src/`)

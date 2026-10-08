@@ -103,4 +103,14 @@ describe('API-Verträge des Frontends', () => {
 		const actual = await (await callApi(`/api/v1/tenants/${rental.tenant}`)).json();
 		expect(drift(await sample('tenant'), actual)).toEqual([]);
 	});
+
+	it('GET /buildings liefert die Felder von buildings.json', async () => {
+		const actual = await (await callApi(`/api/v1/buildings?search=${encodeURIComponent(`Ahornhof ${token}`)}`)).json();
+		expect(drift(await sample('buildings'), actual)).toEqual([]);
+	});
+
+	it('GET /tenants liefert die Felder von tenants.json', async () => {
+		const actual = await (await callApi(`/api/v1/tenants?search=${encodeURIComponent(`Keller ${token}`)}`)).json();
+		expect(drift(await sample('tenants'), actual)).toEqual([]);
+	});
 });
