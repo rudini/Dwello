@@ -36,7 +36,7 @@ export interface CalculatedLineItem {
 	totalBuildingAmount: number;
 	apartmentShare: number;
 	tenantShare: number;
-	periodShare: number; // share of the period: days rented, or the months of the heating profile (0-1)
+	periodShare: number; // share of the period (0-1): days rented / period days, or the heating profile's shares of the months rented
 	isHeatingCost: boolean;
 }
 
