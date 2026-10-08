@@ -4172,7 +4172,7 @@ reviewed independently afterwards.
   (`statementQRReference` in `qr-bill.service.ts`, used for bill and stored reference); the debtor was written
   without postal code and town, which SIX rejects; with an ordinary IBAN the statement stored a QR reference the
   bill does not carry (`statement-pdf.service.ts`, test in `statement.routes.pg.test.ts`)
-- [x] **Lint and types in CI:** job „Lint and types“ (`npm run lint`, `npm run check`, backend `type-check`) in
+- [x] **Lint and types in CI:** job „Lint and types“ (`npm run lint`, warnings fail it too, `npm run check`, backend `type-check`) in
   `.github/workflows/ci.yml`; `npm run check` runs `svelte-kit sync` first, it failed on a fresh checkout
 - [x] **Contract test on contract changes:** a change under `tests/contracts/` runs the backend tests in CI too
 
@@ -4181,6 +4181,7 @@ reviewed independently afterwards.
 - [ ] `api-proxy.test.ts` without mocking own code
 - [ ] API contracts for buildings, tenants, invoices
 - [ ] Numbers in `docs/test-pyramid.md`
+- [ ] Type check `tests/` and the root `*.config.ts` (tsconfig includes only `src/`)
 
 ---
 
