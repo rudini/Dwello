@@ -4196,6 +4196,11 @@ Branch `claude/open-points` (from main 9067217).
   - BFF reads the backend address only from `BACKEND_URL` (`api-proxy.ts`, `.env.example`,
     `docker-compose.prod.yml`, `playwright.config.ts`, README upgrade note; `api-proxy.test.ts`); removed the BFF
     `POST /api/statements`, which proxied to a missing backend route
+- [x] **Per-fix reviews** (one reviewer per fix; findings applied): recategorize test keeps off the LLM cache;
+  settings are written in one transaction, so a failing write saves none (`config.service.ts`, trigger test in
+  `config.pg.test.ts`); `vite.config.ts` loads `.env` into `process.env` in dev and `api-proxy.ts` reads
+  `process.env.BACKEND_URL` like every other reader (`vite-config.test.ts`, `api-proxy.test.ts`). Each of these
+  two was reviewed in a separate session
 
 ### Open
 - [ ] Raise frontend coverage to 80 % and move the floors up (backend above 80 % since session 9)
