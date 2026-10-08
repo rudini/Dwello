@@ -66,7 +66,7 @@ describe('Rechnungsliste', () => {
 	});
 
 	it('nennt eine selbst gewählte Kategorie manuell', async () => {
-		expect((await listed({})).categorizationStatus).toBe('manual');
+		expect((await listed({ llmCategoryId: null })).categorizationStatus).toBe('manual');
 	});
 
 	it('nennt eine von der KI übernommene Kategorie automatisch', async () => {

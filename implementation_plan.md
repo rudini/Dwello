@@ -4190,6 +4190,8 @@ reviewed independently afterwards.
   `tenant-detail.test.ts`). The invoice contract showed that the frontend read `llmReasoning` and
   `manualOverrideBy`, which the backend never delivers: the blocks on the invoice page were never shown and are
   removed (`invoice.ts`, `types.ts`, `invoices/[id]/+page.svelte`, `OriginalSuggestion.svelte`)
+- [x] **Review follow-up:** the contract test fills the optional fields (coordinates, year built, tenant contact,
+  KI category and confidence), since a `null` answer skips the type check; the invoice list is checked too
 
 ### Open
 - [ ] Endpoints no page calls, untested: `/config/initialize`, `/config/accounting-period/*`,

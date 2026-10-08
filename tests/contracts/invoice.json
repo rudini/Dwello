@@ -8,14 +8,31 @@
 	"isValidUtilityCost": true,
 	"categoryId": "c1",
 	"distributionKeyId": "k1",
-	"llmCategoryId": null,
-	"llmConfidence": null,
+	"llmCategoryId": "c1",
+	"llmConfidence": "0.8600",
 	"wasManuallyOverridden": false,
-	"manualOverrideReason": null,
+	"manualOverrideReason": "Vertrag geprüft",
 	"createdAt": "2026-04-01T08:00:00.000Z",
 	"updatedAt": "2026-04-01T08:00:00.000Z",
-	"building": { "id": "b1", "name": "Seeblick", "address": "Testweg 1" },
-	"category": { "id": "c1", "name": "Caretaker", "nameDE": "Hauswart", "isAllowedUtilityCost": true },
-	"distributionKey": { "id": "k1", "name": "Per Area (m²)", "nameDE": "Pro Fläche (m²)" },
-	"llmCategory": null
+	"building": {
+		"id": "b1",
+		"name": "Seeblick",
+		"address": "Testweg 1"
+	},
+	"category": {
+		"id": "c1",
+		"name": "Caretaker",
+		"nameDE": "Hauswart",
+		"isAllowedUtilityCost": true
+	},
+	"distributionKey": {
+		"id": "k1",
+		"name": "Per Area (m²)",
+		"nameDE": "Pro Fläche (m²)"
+	},
+	"llmCategory": {
+		"id": "c1",
+		"name": "Caretaker",
+		"nameDE": "Hauswart"
+	}
 }

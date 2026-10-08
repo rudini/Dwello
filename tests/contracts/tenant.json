@@ -3,10 +3,10 @@
 	"firstName": "Anna",
 	"lastName": "Keller",
 	"email": "anna.keller@example.ch",
-	"phone": null,
+	"phone": "+41 44 123 45 67",
 	"language": "de",
-	"address": null,
-	"postalCode": null,
-	"city": null,
+	"address": "Seestrasse 12",
+	"postalCode": "8002",
+	"city": "Zürich",
 	"correspondenceChannel": "email"
 }
