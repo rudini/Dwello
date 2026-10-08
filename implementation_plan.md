@@ -4270,9 +4270,11 @@ reviewed independently afterwards.
   code), the statement page shows the share with two decimals like the PDF (`src/lib/server/statement.ts`); statement
   numbers read the year in UTC, the test shows a new year starting at 0001
 
+- [x] **`periodShare`:** the calculation's share of the period (days rented, or the heating profile's months) was called
+  `sharePercentage` like the stored share of the building total; renamed in `calculation.service.ts`,
+  `prorating.service.ts` and their tests, so the preview API answers `periodShare` too
+
 ### Open
-- [ ] `sharePercentage` of the calculation (and the preview API) is still the share of the period, while stored line
-  items mean the share of the building total; rename it to `periodShare`
 - [ ] Raise frontend coverage to 80 % and move the floors up
 
 ---

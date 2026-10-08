@@ -151,25 +151,25 @@ describe('Prorating Service', () => {
 		it('should calculate correct proration for full period', () => {
 			const result = prorateCosts(12000, 365, 365);
 			expect(result.proratedAmount).toBe(12000);
-			expect(result.sharePercentage).toBe(1);
+			expect(result.periodShare).toBe(1);
 		});
 
 		it('should calculate correct proration for half period', () => {
 			const result = prorateCosts(12000, 183, 366);
 			expect(result.proratedAmount).toBe(6000); // Exactly half
-			expect(result.sharePercentage).toBeCloseTo(0.5, 2);
+			expect(result.periodShare).toBeCloseTo(0.5, 2);
 		});
 
 		it('should calculate correct proration for quarter period', () => {
 			const result = prorateCosts(12000, 91, 365);
 			expect(result.proratedAmount).toBeCloseTo(2991.78, 2);
-			expect(result.sharePercentage).toBeCloseTo(0.2493, 3);
+			expect(result.periodShare).toBeCloseTo(0.2493, 3);
 		});
 
 		it('should return 0 for zero total days', () => {
 			const result = prorateCosts(12000, 100, 0);
 			expect(result.proratedAmount).toBe(0);
-			expect(result.sharePercentage).toBe(0);
+			expect(result.periodShare).toBe(0);
 		});
 
 		it('should handle scenario: Tenant A Jan 1 - Mar 15 (74 of 365 days)', () => {
@@ -417,13 +417,13 @@ describe('Prorating Service', () => {
 		it('should handle negative total days', () => {
 			const result = prorateCosts(12000, 100, -1);
 			expect(result.proratedAmount).toBe(0);
-			expect(result.sharePercentage).toBe(0);
+			expect(result.periodShare).toBe(0);
 		});
 
 		it('should handle zero proration days', () => {
 			const result = prorateCosts(12000, 0, 365);
 			expect(result.proratedAmount).toBe(0);
-			expect(result.sharePercentage).toBe(0);
+			expect(result.periodShare).toBe(0);
 		});
 
 		it('should round to 2 decimal places', () => {
@@ -606,13 +606,13 @@ describe('Prorating Service', () => {
 		it('should handle PRD scenario: Tenant A Jan-Mar 15 (74 days)', () => {
 			const result = prorateCosts(12000, 74, 365);
 			expect(result.proratedAmount).toBeCloseTo(2432.88, 2);
-			expect(result.sharePercentage).toBeCloseTo(0.2027, 3);
+			expect(result.periodShare).toBeCloseTo(0.2027, 3);
 		});
 
 		it('should handle PRD scenario: Tenant B Mar 16-Dec 31 (291 days)', () => {
 			const result = prorateCosts(12000, 291, 365);
 			expect(result.proratedAmount).toBeCloseTo(9567.12, 2);
-			expect(result.sharePercentage).toBeCloseTo(0.7973, 3);
+			expect(result.periodShare).toBeCloseTo(0.7973, 3);
 		});
 
 		it('should sum to total for both tenants', () => {
