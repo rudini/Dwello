@@ -37,7 +37,7 @@ export default defineConfig({
 			include: ['src/**/*.{ts,svelte}'],
 			reporter: ['text', 'html', 'lcov'],
 			// Coverage of today as the floor (`npm run test:coverage`, CI); raise as it grows, the goal is 80 %
-			thresholds: { statements: 71, branches: 59, functions: 76, lines: 66 },
+			thresholds: { statements: 71, branches: 60, functions: 76, lines: 66 },
 			exclude: [
 				'node_modules/',
 				'src/**/*.spec.ts',

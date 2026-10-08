@@ -4192,11 +4192,17 @@ reviewed independently afterwards.
   removed (`invoice.ts`, `types.ts`, `invoices/[id]/+page.svelte`, `OriginalSuggestion.svelte`)
 - [x] **Review follow-up:** the contract test fills the optional fields (coordinates, year built, tenant contact,
   KI category and confidence), since a `null` answer skips the type check; the invoice list is checked too
+- [x] **Numbers and floors:** `docs/test-pyramid.md` counted anew (E2E 260 + 8 api, integration 181 in 30 files,
+  backend unit 249 in 11, frontend 465 in 53); coverage floors raised to backend 82 % lines / 85 % functions
+  (`backend/scripts/coverage-check.ts`), frontend 60 % branches (`vitest.config.ts`)
+
+### Verification
+- Backend 430 (249 unit + 181 PostgreSQL), coverage 82.3 % lines / 85.3 % functions; frontend 465, coverage
+  above the floors; E2E 260 Chromium + 8 api passed; lint (no warnings), svelte-check, backend tsc clean
 
 ### Open
 - [ ] Endpoints no page calls, untested: `/config/initialize`, `/config/accounting-period/*`,
   `/heating-profiles/initialize`, `/validate-percentages`, `/calculate-share` (delete or test?)
-- [ ] Numbers in `docs/test-pyramid.md`
 - [ ] Backend does not derive „umlagefähig“ from a category chosen by hand (relies on the form)
 - [ ] Type check `tests/` and the root `*.config.ts` (tsconfig includes only `src/`)
 
