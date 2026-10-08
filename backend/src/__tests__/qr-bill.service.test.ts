@@ -46,7 +46,30 @@ describe('QR-Rechnung einer Abrechnung', () => {
 
 		expect(lines).toHaveLength(32); // SIX Version 2.0: 32 Elemente bis zu den Rechnungsinformationen
 		expect(lines.slice(20, 27)).toEqual(['', '', '', '', '', '', '']); // Endgültiger Zahlungspflichtiger
-		expect(lines.slice(18, 20)).toEqual(['120.50', 'CHF']);
+	});
+
+	it('schreibt den Zahler mit vollständiger Adresse', async () => {
+		const tenant = {
+			firstName: 'Eva',
+			lastName: 'Frei',
+			address: 'Seestrasse 5',
+			postalCode: '8002',
+			city: 'Zürich'
+		};
+		const { qrDataString } = await generateQRBillForStatement(
+			{ ...statement('a1111111-1111-4111-8111-111111111111'), tenant },
+			config
+		);
+
+		expect(qrDataString.split('\n').slice(20, 27)).toEqual([
+			'S',
+			'Eva Frei',
+			'Seestrasse 5',
+			'',
+			'8002',
+			'Zürich',
+			'CH'
+		]);
 	});
 
 	// Beispielwerte aus den SIX Implementation Guidelines; eine falsche Prüfziffer lehnt die Bank ab

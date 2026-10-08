@@ -4161,6 +4161,28 @@ Branch `claude/open-points` (from main 9067217).
 
 ---
 
+## Session 9 - October 2026: Quality Review of the Test Pyramid
+
+Branch `ccr-eb4fa0fe-yxdvkf`. Findings of the QM review of `docs/test-pyramid.md`, each one test-first and
+reviewed independently afterwards.
+
+### Done ✅
+- [x] **QR-bill tested** (`backend/src/__tests__/qr-bill.service.test.ts`, coverage 15 % → 86 % lines). Fixed:
+  the QR reference dropped the letters of the statement UUID, so statements could share one
+  (`statementQRReference` in `qr-bill.service.ts`, used for bill and stored reference); the debtor was written
+  without postal code and town, which SIX rejects; with an ordinary IBAN the statement stored a QR reference the
+  bill does not carry (`statement-pdf.service.ts`, test in `statement.routes.pg.test.ts`)
+
+### Open
+- [ ] Lint and type check in CI
+- [ ] Contract test also when only `tests/contracts/` changes
+- [ ] Tests for LLM categorization, config and heating profiles
+- [ ] `api-proxy.test.ts` without mocking own code
+- [ ] API contracts for buildings, tenants, invoices
+- [ ] Numbers in `docs/test-pyramid.md`
+
+---
+
 # Success Criteria
 
 ✅ **MVP Complete When:**
