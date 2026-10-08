@@ -1,7 +1,6 @@
 # Dwello Data Model & Database Schema
 
-Describes the PostgreSQL schema as created by `backend/migrations/0001_schema.sql` (changed by later
-migrations such as `0003_overdue_computed.sql`) and seeded by `backend/migrations/0002_stammdaten.sql`. The Drizzle mapping is `backend/src/db/schema.ts`; it is kept in
+Describes the PostgreSQL schema as created by `backend/migrations/0001_schema.sql` and seeded by `backend/migrations/0002_stammdaten.sql`. The Drizzle mapping is `backend/src/db/schema.ts`; it is kept in
 sync with the migrations by hand. Domain terms follow `UBIQUITOUS_LANGUAGE.md`.
 
 ---
@@ -215,7 +214,7 @@ pdf_blob               TEXT                    -- Base64 PDF with QR-bill
 pdf_generated_at       TIMESTAMP
 qr_bill_reference      VARCHAR(27)             -- QR reference (only with a QR-IBAN)
 notes                  TEXT
-CONSTRAINT statements_status_check CHECK (status IN ('draft', 'sent', 'paid'))   -- since 0003
+CONSTRAINT statements_status_check CHECK (status IN ('draft', 'sent', 'paid'))
 CONSTRAINT statements_period_check CHECK (period_end >= period_start)
 ```
 
@@ -239,8 +238,7 @@ amounts changed (`updateStatement` rejects `total_costs`, `total_advance_payment
 editable; a changed `payment_deadline` clears `pdf_blob` and `pdf_generated_at`.
 
 **Overdue:** never stored. Reads, filters and counts treat a `sent` statement whose `payment_deadline` has
-passed as `overdue`; `0003_overdue_computed.sql` turned statements stored as `overdue` back into `sent` and
-removed the value from the CHECK.
+passed as `overdue`; the CHECK does not allow it as a stored value.
 
 ### utility_statement_line_items (Abrechnungsposition)
 
@@ -349,7 +347,6 @@ Demo data (`backend/demo/`, `bun run db:demo`) is never part of the migrations.
 backend/migrations/
   0001_schema.sql       -- schema (baseline of October 2026, replaces the earlier 0001–0011)
   0002_stammdaten.sql   -- master data: categories, distribution keys, heating profiles
-  0003_overdue_computed.sql -- overdue is computed, no longer stored
 ```
 
 `src/db/migrate.ts` applies the `.sql` files in file order, each in its own transaction, and records them in
