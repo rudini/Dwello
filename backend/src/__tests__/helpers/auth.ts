@@ -4,10 +4,12 @@ import { app } from '../../app';
 const devSecret = new TextEncoder().encode(process.env.JWT_SECRET || 'development-secret-key-change-in-production');
 
 /** JWT for the signed-in property manager, signed like the BFF does */
-export const signToken = (key = devSecret) =>
+export const signToken = (key = devSecret, audience = 'dwello-app') =>
 	new jose.SignJWT({ email: 'verwalter@example.com', name: 'Verwalter', provider: 'google' })
 		.setProtectedHeader({ alg: 'HS256' })
 		.setSubject('verwalter')
+		.setIssuer('dwello')
+		.setAudience(audience)
 		.setIssuedAt()
 		.setExpirationTime('1h')
 		.sign(key);
