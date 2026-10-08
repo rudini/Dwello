@@ -11,10 +11,7 @@ import {
 	createHeatingProfile,
 	updateHeatingProfile,
 	deleteHeatingProfile,
-	initializePredefinedHeatingProfiles,
-	validatePercentages,
-	getMonthlyPercentages,
-	calculateHeatingShare
+	getMonthlyPercentages
 } from '../services/heating-profile.service';
 import { Conflict } from '../services/conflict';
 
@@ -43,83 +40,6 @@ export const heatingProfileRoutes = new Elysia({ prefix: '/api/v1/heating-profil
 				type: t.Optional(t.String()),
 				limit: t.Optional(t.String()),
 				offset: t.Optional(t.String())
-			})
-		}
-	)
-
-	// Initialize predefined heating profiles
-	.post('/initialize', async () => {
-		const result = await initializePredefinedHeatingProfiles();
-		return {
-			message: 'Predefined heating profiles initialized',
-			created: result.created,
-			existing: result.existing
-		};
-	})
-
-	// Validate percentages
-	.post(
-		'/validate-percentages',
-		async ({ body }) => {
-			const result = validatePercentages({
-				january: body.januaryPct,
-				february: body.februaryPct,
-				march: body.marchPct,
-				april: body.aprilPct,
-				may: body.mayPct,
-				june: body.junePct,
-				july: body.julyPct,
-				august: body.augustPct,
-				september: body.septemberPct,
-				october: body.octoberPct,
-				november: body.novemberPct,
-				december: body.decemberPct
-			});
-			return result;
-		},
-		{
-			body: t.Object({
-				januaryPct: t.Number(),
-				februaryPct: t.Number(),
-				marchPct: t.Number(),
-				aprilPct: t.Number(),
-				mayPct: t.Number(),
-				junePct: t.Number(),
-				julyPct: t.Number(),
-				augustPct: t.Number(),
-				septemberPct: t.Number(),
-				octoberPct: t.Number(),
-				novemberPct: t.Number(),
-				decemberPct: t.Number()
-			})
-		}
-	)
-
-	// Calculate heating share for a period
-	.post(
-		'/calculate-share',
-		async ({ body, set }) => {
-			const profile = await getHeatingProfile(body.profileId);
-			if (!profile) {
-				set.status = 404;
-				return { error: 'Heating profile not found' };
-			}
-
-			const result = calculateHeatingShare(
-				profile,
-				new Date(body.startDate),
-				new Date(body.endDate),
-				body.totalCost
-			);
-
-			return result;
-		},
-		{
-			body: t.Object({
-				profileId: t.String(),
-				startDate: t.String(),
-				endDate: t.String(),
-				totalCost: t.Number()
 			})
 		}
 	)

@@ -9,7 +9,6 @@ import {
 	getMonthlyPercentage,
 	getMonthlyPercentages,
 	calculateHeatingShare,
-	PREDEFINED_HEATING_PROFILES,
 	type MonthlyPercentages
 } from '../services/heating-profile.service';
 import type { HeatingProfile } from '../db/schema';
@@ -49,50 +48,6 @@ const createMockProfile = (percentages: Partial<MonthlyPercentages> = {}): Heati
 };
 
 describe('Heating Profile Service', () => {
-	describe('Profile von POST /heating-profiles/initialize (PREDEFINED_HEATING_PROFILES, nicht die migrierten Profile)', () => {
-		it('should have 4 predefined profiles', () => {
-			expect(PREDEFINED_HEATING_PROFILES).toHaveLength(4);
-		});
-
-		it('should include Standard (Mittelland) profile', () => {
-			const profile = PREDEFINED_HEATING_PROFILES.find(p => p.name.includes('Mittelland'));
-			expect(profile).toBeDefined();
-		});
-
-		it('should include Bergregion profile', () => {
-			const profile = PREDEFINED_HEATING_PROFILES.find(p => p.name === 'Bergregion');
-			expect(profile).toBeDefined();
-		});
-
-		it('should include Tessin profile', () => {
-			const profile = PREDEFINED_HEATING_PROFILES.find(p => p.name === 'Tessin');
-			expect(profile).toBeDefined();
-		});
-
-		it('should include Warmwasser profile', () => {
-			const profile = PREDEFINED_HEATING_PROFILES.find(p => p.name.includes('Warmwasser'));
-			expect(profile).toBeDefined();
-		});
-
-		it('all profiles should sum to approximately 100%', () => {
-			for (const profile of PREDEFINED_HEATING_PROFILES) {
-				const sum = parseFloat(profile.januaryPct!) +
-					parseFloat(profile.februaryPct!) +
-					parseFloat(profile.marchPct!) +
-					parseFloat(profile.aprilPct!) +
-					parseFloat(profile.mayPct!) +
-					parseFloat(profile.junePct!) +
-					parseFloat(profile.julyPct!) +
-					parseFloat(profile.augustPct!) +
-					parseFloat(profile.septemberPct!) +
-					parseFloat(profile.octoberPct!) +
-					parseFloat(profile.novemberPct!) +
-					parseFloat(profile.decemberPct!);
-				expect(sum).toBeCloseTo(100, 0);
-			}
-		});
-	});
-
 	describe('validatePercentages', () => {
 		it('should accept percentages summing to 100', () => {
 			const percentages: MonthlyPercentages = {
@@ -330,34 +285,6 @@ describe('Heating Profile Service', () => {
 		});
 	});
 
-	describe('Profile von POST /heating-profiles/initialize (PREDEFINED_HEATING_PROFILES, nicht die migrierten Profile) - detailed checks', () => {
-		it('Standard profile should have no heating in summer', () => {
-			const profile = PREDEFINED_HEATING_PROFILES.find(p => p.name.includes('Mittelland'));
-			expect(parseFloat(profile!.junePct!)).toBe(0);
-			expect(parseFloat(profile!.julyPct!)).toBe(0);
-			expect(parseFloat(profile!.augustPct!)).toBe(0);
-		});
-
-		it('Bergregion should have some heating in summer', () => {
-			const profile = PREDEFINED_HEATING_PROFILES.find(p => p.name === 'Bergregion');
-			expect(parseFloat(profile!.junePct!)).toBeGreaterThan(0);
-		});
-
-		it('Warmwasser should have equal distribution', () => {
-			const profile = PREDEFINED_HEATING_PROFILES.find(p => p.name.includes('Warmwasser'));
-			const jan = parseFloat(profile!.januaryPct!);
-			const jul = parseFloat(profile!.julyPct!);
-			expect(Math.abs(jan - jul)).toBeLessThan(0.5);
-		});
-
-		it('Tessin should have higher winter percentages', () => {
-			const profile = PREDEFINED_HEATING_PROFILES.find(p => p.name === 'Tessin');
-			const dec = parseFloat(profile!.decemberPct!);
-			const jun = parseFloat(profile!.junePct!);
-			expect(dec).toBeGreaterThan(jun);
-		});
-	});
-
 	describe('calculateHeatingShare - additional scenarios', () => {
 		const profile = createMockProfile();
 
@@ -517,59 +444,6 @@ describe('Heating Profile Service', () => {
 			// index 1.5 accesses index 1 in JavaScript arrays
 			const result = getMonthlyPercentage(profile, 2);
 			expect(result).toBe(14); // February
-		});
-	});
-
-	describe('Profile von POST /heating-profiles/initialize (PREDEFINED_HEATING_PROFILES, nicht die migrierten Profile) - percentage distribution', () => {
-		it('all profiles should have valid monthly values', () => {
-			for (const profile of PREDEFINED_HEATING_PROFILES) {
-				expect(parseFloat(profile.januaryPct!)).toBeGreaterThanOrEqual(0);
-				expect(parseFloat(profile.februaryPct!)).toBeGreaterThanOrEqual(0);
-				expect(parseFloat(profile.marchPct!)).toBeGreaterThanOrEqual(0);
-				expect(parseFloat(profile.aprilPct!)).toBeGreaterThanOrEqual(0);
-				expect(parseFloat(profile.mayPct!)).toBeGreaterThanOrEqual(0);
-				expect(parseFloat(profile.junePct!)).toBeGreaterThanOrEqual(0);
-				expect(parseFloat(profile.julyPct!)).toBeGreaterThanOrEqual(0);
-				expect(parseFloat(profile.augustPct!)).toBeGreaterThanOrEqual(0);
-				expect(parseFloat(profile.septemberPct!)).toBeGreaterThanOrEqual(0);
-				expect(parseFloat(profile.octoberPct!)).toBeGreaterThanOrEqual(0);
-				expect(parseFloat(profile.novemberPct!)).toBeGreaterThanOrEqual(0);
-				expect(parseFloat(profile.decemberPct!)).toBeGreaterThanOrEqual(0);
-			}
-		});
-
-		it('all profiles should have type predefined', () => {
-			for (const profile of PREDEFINED_HEATING_PROFILES) {
-				expect(profile.type).toBe('predefined');
-			}
-		});
-
-		it('all profiles should have German names', () => {
-			for (const profile of PREDEFINED_HEATING_PROFILES) {
-				expect(profile.nameDE).toBeDefined();
-				expect(profile.nameDE!.length).toBeGreaterThan(0);
-			}
-		});
-
-		it('all profiles should have French names', () => {
-			for (const profile of PREDEFINED_HEATING_PROFILES) {
-				expect(profile.nameFR).toBeDefined();
-				expect(profile.nameFR!.length).toBeGreaterThan(0);
-			}
-		});
-
-		it('all profiles should have Italian names', () => {
-			for (const profile of PREDEFINED_HEATING_PROFILES) {
-				expect(profile.nameIT).toBeDefined();
-				expect(profile.nameIT!.length).toBeGreaterThan(0);
-			}
-		});
-
-		it('all profiles should have English names', () => {
-			for (const profile of PREDEFINED_HEATING_PROFILES) {
-				expect(profile.nameEN).toBeDefined();
-				expect(profile.nameEN!.length).toBeGreaterThan(0);
-			}
 		});
 	});
 

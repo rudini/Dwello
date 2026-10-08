@@ -4196,13 +4196,18 @@ reviewed independently afterwards.
   backend unit 249 in 11, frontend 465 in 53); coverage floors raised to backend 82 % lines / 85 % functions
   (`backend/scripts/coverage-check.ts`), frontend 60 % branches (`vitest.config.ts`)
 
+- [x] **Unused endpoints deleted** (no page, test, script or doc called them): `/config/initialize`,
+  `/config/accounting-period/current`, `/config/accounting-period/:year`, `/heating-profiles/initialize`,
+  `/validate-percentages`, `/calculate-share` (`routes/config.ts`, `routes/heating-profiles.ts`), with the code only
+  they used (`initializeDefaultConfig`, `getCurrentAccountingPeriod`, `getAccountingPeriodDates`,
+  `AccountingPeriod`, `initializePredefinedHeatingProfiles`, `PREDEFINED_HEATING_PROFILES` and its tests; the
+  predefined profiles come from the migrations, tested in `heating-profiles.pg.test.ts`)
+
 ### Verification
 - Backend 430 (249 unit + 181 PostgreSQL), coverage 82.3 % lines / 85.3 % functions; frontend 465, coverage
   above the floors; E2E 260 Chromium + 8 api passed; lint (no warnings), svelte-check, backend tsc clean
 
 ### Open
-- [ ] Endpoints no page calls, untested: `/config/initialize`, `/config/accounting-period/*`,
-  `/heating-profiles/initialize`, `/validate-percentages`, `/calculate-share` (delete or test?)
 - [ ] Backend does not derive „umlagefähig“ from a category chosen by hand (relies on the form)
 - [ ] API contracts for the building and tenant lists
 - [ ] Type check `tests/` and the root `*.config.ts` (tsconfig includes only `src/`)

@@ -22,11 +22,6 @@ import { heatingProfileExists } from './heating-profile.service';
 import { distributionKeyExists } from './distribution-key.service';
 
 /**
- * Accounting period types
- */
-export type AccountingPeriod = 'calendar' | 'july-june' | 'november-october';
-
-/**
  * Configuration keys with their types and validators
  */
 export const CONFIG_KEYS = {
@@ -246,80 +241,4 @@ export async function deleteConfig(key: ConfigKey): Promise<boolean> {
 		.returning();
 
 	return result.length > 0;
-}
-
-/**
- * Get accounting period dates for a year
- */
-export function getAccountingPeriodDates(
-	period: AccountingPeriod,
-	year: number
-): { start: Date; end: Date } {
-	switch (period) {
-		case 'calendar':
-			return {
-				start: new Date(year, 0, 1), // January 1
-				end: new Date(year, 11, 31) // December 31
-			};
-		case 'july-june':
-			return {
-				start: new Date(year, 6, 1), // July 1
-				end: new Date(year + 1, 5, 30) // June 30 next year
-			};
-		case 'november-october':
-			return {
-				start: new Date(year, 10, 1), // November 1
-				end: new Date(year + 1, 9, 31) // October 31 next year
-			};
-		default:
-			throw new Error(`Unknown accounting period: ${period}`);
-	}
-}
-
-/**
- * Get the current accounting period based on config and current date
- */
-export async function getCurrentAccountingPeriod(): Promise<{ start: Date; end: Date; year: number }> {
-	const periodType = (await getTypedConfig('accounting_period')) as AccountingPeriod;
-	const now = new Date();
-	const currentYear = now.getFullYear();
-
-	// Determine which year's period we're in
-	let year = currentYear;
-
-	if (periodType === 'july-june') {
-		// If we're in Jan-June, we're in the previous year's July-June period
-		if (now.getMonth() < 6) {
-			year = currentYear - 1;
-		}
-	} else if (periodType === 'november-october') {
-		// If we're in Jan-October, we're in the previous year's Nov-Oct period
-		if (now.getMonth() < 10) {
-			year = currentYear - 1;
-		}
-	}
-
-	const dates = getAccountingPeriodDates(periodType, year);
-	return { ...dates, year };
-}
-
-/**
- * Initialize default configuration values
- */
-export async function initializeDefaultConfig(): Promise<{ created: number; existing: number }> {
-	let created = 0;
-	let existing = 0;
-
-	for (const [key, config] of Object.entries(CONFIG_KEYS)) {
-		const existingConfig = await getConfig(key as ConfigKey);
-
-		if (existingConfig === null && config.default !== null) {
-			await setConfig(key as ConfigKey, String(config.default));
-			created++;
-		} else {
-			existing++;
-		}
-	}
-
-	return { created, existing };
 }
