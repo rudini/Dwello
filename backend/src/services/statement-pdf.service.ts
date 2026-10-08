@@ -8,7 +8,7 @@ import { db } from '../db/connection';
 import { utilityStatements } from '../db/schema';
 import { getTypedConfig } from './config.service';
 import { generateStatementPDFBase64, type StatementPDFData, type Language } from './pdf.service';
-import { generateQRReference, type QRBillConfig } from './qr-bill.service';
+import { statementQRReference, type QRBillConfig } from './qr-bill.service';
 import { getStatement, type StatementWithDetails } from './statement.service';
 
 // Creditor of the QR-bill from the company configuration; null without IBAN
@@ -93,7 +93,7 @@ export async function generateStatementPdf(id: string, language?: string) {
 
 	const pdfLanguage = (language || statement.tenant?.language || 'de') as Language;
 	const pdfBase64 = await generateStatementPDFBase64(toPdfData(statement), qrConfig, pdfLanguage);
-	const qrReference = generateQRReference(statement.id.replace(/-/g, '').slice(0, 20));
+	const qrReference = statementQRReference(statement.id);
 
 	await db
 		.update(utilityStatements)
