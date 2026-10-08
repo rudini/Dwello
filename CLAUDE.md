@@ -105,7 +105,7 @@ NEVER use mock data, mock API responses, or hardcoded/fake data in components du
 |------|-----------|-------|
 | Acceptance (outer loop, written first) | Playwright + playwright-bdd | What the business wants: Gherkin scenarios against the built app and a fresh database |
 | Integration | `bun test` (`backend/src/__tests__/*.pg.test.ts`) | API routes, SQL, mail against a real PostgreSQL test database (`dwello_test`), no mocks |
-| Unit (inner loop, TDD) | Vitest (frontend), `bun test` (backend) | What the developer intends: business logic through public exports; coverage may not drop below today's floor (goal 80%, see `docs/test-pyramid.md`) |
+| Unit (inner loop, TDD) | Vitest (frontend), `bun test` (backend) | What the developer intends: business logic through public exports; coverage may not drop below the floor; target coverage in `docs/test-pyramid.md` |
 
 ### Test Selectors: data-testid First
 

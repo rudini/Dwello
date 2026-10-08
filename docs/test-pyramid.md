@@ -1,7 +1,5 @@
 # Testpyramide Dwello (ATDD nach Dave Farley)
 
-**Stand:** 8. Oktober 2026, gezählt aus ausgeführten Läufen (`bun test`, Vitest, Playwright Chromium und `api`)
-
 Dwello entwickelt nach **Acceptance Test Driven Development**: Jede Änderung beginnt mit einem fachlichen Akzeptanzszenario, Unit-TDD ist die innere Schleife. Farley unterscheidet zwei Perspektiven, die sich ergänzen:
 
 - **Akzeptanztests** prüfen, ob der Code tut, *was das Business will*.
@@ -11,15 +9,15 @@ Dwello entwickelt nach **Acceptance Test Driven Development**: Jede Änderung be
 
 ```
                     ┌──────────────────────┐
-                    │  Akzeptanztests (E2E) │   261   Gherkin, Playwright-BDD, Produktions-Build (+8 über die API)
-                    │  "Was das Business    │         ← äussere Schleife: zuerst geschrieben,
-                    │   will"               │           grün = Feature fertig
+                    │  Akzeptanztests (E2E) │   wenige   Gherkin, Playwright-BDD, Produktions-Build
+                    │  "Was das Business    │            ← äussere Schleife: zuerst geschrieben,
+                    │   will"               │              grün = Feature fertig
                 ┌───┴──────────────────────┴───┐
-                │  Integration (echte DB)       │   184   bun test *.pg.test.ts, dwello_test, API-Verträge
-                │  technische Verträge          │         nur wo Unit-Tests nicht reichen
+                │  Integration (echte DB)       │   mehr     bun test *.pg.test.ts, dwello_test, API-Verträge
+                │  technische Verträge          │            nur wo Unit-Tests nicht reichen
            ┌────┴───────────────────────────────┴────┐
-           │  Unit-TDD                                │   704   Vitest (Frontend 468), bun test (Backend 236)
-           │  "Was der Entwickler denkt"              │         ← innere Schleife: Sekunden
+           │  Unit-TDD                                │   viele    Vitest (Frontend), bun test (Backend)
+           │  "Was der Entwickler denkt"              │            ← innere Schleife: Sekunden
            └──────────────────────────────────────────┘
 ```
 
@@ -27,12 +25,12 @@ Die Menge bleibt eine Pyramide, viele schnelle Unit-Tests unten. Die **Reihenfol
 
 ## Ebenen
 
-| Ebene | Tests | Ort | Runner | Gegen was | Test-Doubles |
-|---|---|---|---|---|---|
-| Akzeptanz (E2E) | 261 Testfälle aus 41 Features (+8 über den API-Driver) | `tests/e2e/features/*.feature` | Playwright + playwright-bdd | Browser → SvelteKit-Build (`node build`) → Elysia → PostgreSQL `dwello_e2e` (vor jedem Lauf neu migriert) | keine API-Mocks; SMTP-Mail-Catcher statt Mail-Provider, signiertes Session-JWT statt Google-OAuth |
-| Integration | 184 in 31 Dateien | `backend/src/__tests__/*.pg.test.ts` | `bun test` | Elysia-App in-process (`app.handle`) → PostgreSQL `dwello_test` (vor jedem Lauf neu migriert) | keine; lokaler SMTP-Server für Mails |
-| Unit Backend | 236 in 12 Dateien | `backend/src/__tests__/*.test.ts` | `bun test` (ein Lauf mit den pg-Tests) | reine Funktionen der Services | keine; Resend-Ersatz per `Bun.serve` in `mail.test.ts` |
-| Unit Frontend | 468 in 53 Dateien | `src/__tests__`, `src/lib/utils/__tests__`, `tests/unit` | Vitest (`server`: node, `dom`: jsdom) | Load-Funktionen, Actions, BFF, Komponenten | Fake-Backend per `fetch`-Stub / `fakeBff` (aus den API-Verträgen in `tests/contracts`, wo es einen gibt), `vi.mock` für `$app/*` |
+| Ebene | Ort | Runner | Gegen was | Test-Doubles |
+|---|---|---|---|---|
+| Akzeptanz (E2E) | `tests/e2e/features/*.feature` | Playwright + playwright-bdd | Browser → SvelteKit-Build (`node build`) → Elysia → PostgreSQL `dwello_e2e` (vor jedem Lauf neu migriert) | keine API-Mocks; SMTP-Mail-Catcher statt Mail-Provider, signiertes Session-JWT statt Google-OAuth |
+| Integration | `backend/src/__tests__/*.pg.test.ts` | `bun test` | Elysia-App in-process (`app.handle`) → PostgreSQL `dwello_test` (vor jedem Lauf neu migriert) | keine; lokaler SMTP-Server für Mails |
+| Unit Backend | `backend/src/__tests__/*.test.ts` | `bun test` (ein Lauf mit den pg-Tests) | reine Funktionen der Services | keine; Resend-Ersatz per `Bun.serve` in `mail.test.ts` |
+| Unit Frontend | `src/__tests__`, `src/lib/utils/__tests__`, `tests/unit` | Vitest (`server`: node, `dom`: jsdom) | Load-Funktionen, Actions, BFF, Komponenten | Fake-Backend per `fetch`-Stub / `fakeBff` (aus den API-Verträgen in `tests/contracts`, wo es einen gibt), `vi.mock` für `$app/*` |
 
 Regeln:
 
@@ -44,12 +42,21 @@ Regeln:
 
 ## Coverage
 
-Die heutige Abdeckung ist die Untergrenze (auf ganze Prozent abgerundet, also mit wenig Spielraum); sinkt sie, scheitert der Lauf lokal und in CI. Ziel sind 80 %; die Grenzen werden angehoben, sobald die Abdeckung wächst.
+Gewünschte Abdeckung:
 
-| Bereich | Messung | Untergrenze | Ort |
-|---|---|---|---|
-| Frontend | `npm run test:coverage` (Vitest, v8, alle `src/**/*.{ts,svelte}`) | 71 % Statements, 60 % Branches, 76 % Funktionen, 66 % Zeilen | `vitest.config.ts` |
-| Backend | `bun run test` (alle Backend-Tests, lcov) | 82 % Zeilen, 85 % Funktionen | `backend/scripts/coverage-check.ts` (Bun prüft eigene Schwellen pro Datei) |
+| Bereich | Statements | Branches | Funktionen | Zeilen |
+|---|---|---|---|---|
+| Frontend | 80 % | 80 % | 80 % | 80 % |
+| Backend | – | – | 80 % | 80 % |
+
+Bun misst im Backend nur Zeilen und Funktionen.
+
+Bis das Ziel erreicht ist, gilt eine Untergrenze: die heutige Abdeckung, auf ganze Prozent abgerundet. Sinkt sie, scheitert der Lauf lokal und in CI. Wächst die Abdeckung, wird die Untergrenze angehoben, bis sie beim Ziel liegt.
+
+| Bereich | Messung | Untergrenze hinterlegt in |
+|---|---|---|
+| Frontend | `npm run test:coverage` (Vitest, v8, alle `src/**/*.{ts,svelte}`) | `vitest.config.ts` |
+| Backend | `bun run test` (alle Backend-Tests, lcov) | `backend/scripts/coverage-check.ts` (Bun prüft eigene Schwellen pro Datei) |
 
 ## Farleys vier Schichten in den Akzeptanztests
 
@@ -99,4 +106,4 @@ Voraussetzung lokal: PostgreSQL auf Port 5432 mit Benutzer `dwello`. Die Testdat
 
 ## Offen
 
-- [ ] Frontend-Coverage auf 80 % anheben, dann die Untergrenzen nachziehen (Backend seit Oktober 2026 darüber)
+- [ ] Abdeckung auf das Ziel anheben, dann die Untergrenzen nachziehen
