@@ -183,7 +183,7 @@ Stored status is `draft`, `sent` or `paid`; `overdue` is never stored. Responses
 
 Transitions (`PUT /:id/status`, checked against the effective status): `draft → sent`, `sent → paid`, `overdue → paid`; `paid` is final. Anything else is 400 `Invalid status transition from X to Y`.
 
-Only **drafts** can be deleted or get line items; amounts (`totalCosts`, `totalAdvancePayments`, `managementFeePercent`, `managementFee`, `balance`) of non-drafts cannot change (400 with message).
+Only **drafts** can be deleted or get line items; amounts (`totalCosts`, `totalAdvancePayments`, `managementFeePercent`, `managementFee`, `balance`) of non-drafts cannot change; no route accepts them, `updateStatement` rejects them in the service.
 
 Filter `status` in `GET /` and `/counts`: `draft`, `paid`, `sent` (sent, deadline not past or none), `overdue` (sent, deadline past), `open` (all `sent`, overdue included).
 
