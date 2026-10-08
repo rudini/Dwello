@@ -10,6 +10,9 @@ const envFile = '.env.envcheck.local';
 describe('Dev-Server', () => {
 	// Die Seiten lesen BACKEND_URL aus process.env; Vite lädt die .env sonst nur für $env/dynamic/private
 	it('übernimmt BACKEND_URL aus der .env', async () => {
+		// A value exported in the shell would win over .env, as intended; the test needs it unset
+		const shell = process.env.BACKEND_URL;
+		delete process.env.BACKEND_URL;
 		writeFileSync(envFile, 'BACKEND_URL=http://backend-aus-env:3001\n');
 		try {
 			await resolveConfig({ configFile: 'vite.config.ts', mode: 'envcheck' }, 'serve');
@@ -17,7 +20,8 @@ describe('Dev-Server', () => {
 			expect(process.env.BACKEND_URL).toBe('http://backend-aus-env:3001');
 		} finally {
 			rmSync(envFile);
-			delete process.env.BACKEND_URL;
+			if (shell === undefined) delete process.env.BACKEND_URL;
+			else process.env.BACKEND_URL = shell;
 		}
 	});
 });
