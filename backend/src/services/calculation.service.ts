@@ -10,6 +10,9 @@
  * - Balance calculation
  */
 
+import { like, max } from 'drizzle-orm';
+import { db } from '../db/connection';
+import { utilityStatements } from '../db/schema';
 import { getInvoicesForStatement } from './invoice.service';
 import { calculateBuildingDistribution } from './distribution-key.service';
 import { getTypedConfig } from './config.service';
@@ -354,18 +357,16 @@ export async function calculateStatementForContract(
 }
 
 /**
- * Generate statement number
+ * Next statement number of a building and year: NK-<building>-<year>-0001, 0002, …
+ * Counts on from the highest one, so a deleted statement's number does not come back while later ones exist
  */
-export async function generateStatementNumber(
-	buildingId: string,
-	periodEnd: Date
-): Promise<string> {
-	const year = periodEnd.getFullYear();
-	const shortBuildingId = buildingId.substring(0, 8).toUpperCase();
+export async function generateStatementNumber(buildingId: string, periodEnd: Date): Promise<string> {
+	const prefix = `NK-${buildingId.substring(0, 8).toUpperCase()}-${periodEnd.getFullYear()}-`;
+	const [{ highest }] = await db
+		.select({ highest: max(utilityStatements.statementNumber) })
+		.from(utilityStatements)
+		.where(like(utilityStatements.statementNumber, `${prefix}%`));
+	const sequence = highest ? Number(highest.slice(prefix.length)) + 1 : 1;
 
-	// Get count of existing statements for this building and year
-	// In production, you'd query the database
-	const sequence = Math.floor(Math.random() * 9000) + 1000; // Placeholder
-
-	return `NK-${shortBuildingId}-${year}-${String(sequence).padStart(4, '0')}`;
+	return `${prefix}${String(sequence).padStart(4, '0')}`;
 }
