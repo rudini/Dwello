@@ -13,6 +13,10 @@ export async function migrate(connectionString: string, directory: string) {
 	await client.connect();
 	try {
 		const files = (await readdir(directory)).filter((file) => file.endsWith('.sql')).sort();
+		const tracked = (await client.query(`SELECT to_regclass('schema_migrations') AS name`)).rows[0].name;
+		if (!tracked && (await client.query(`SELECT to_regclass('buildings') AS name`)).rows[0].name) {
+			throw new Error('Die Datenbank wurde ohne diese Migrationen eingerichtet. Bitte neu aufsetzen: bun run db:reset');
+		}
 		await client.query(
 			'CREATE TABLE IF NOT EXISTS schema_migrations (name text PRIMARY KEY, applied_at timestamptz NOT NULL DEFAULT now())'
 		);

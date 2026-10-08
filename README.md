@@ -95,7 +95,7 @@ Dwello is a comprehensive web application for managing residential properties in
    ```bash
    cd backend
    bun run db:migrate   # uses DATABASE_URL, default postgresql://dwello:dwello@localhost:5432/dwello
-   bun run db:reset     # drops and recreates that database from the migrations
+   bun run db:reset     # drops and recreates that database from the migrations (local databases only)
    bun run db:demo      # loads demo data (backend/demo/demo-data.sql) for trying and showing the app
    bun run dev:demo     # demo data, then bun run dev
    ```

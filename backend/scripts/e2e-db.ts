@@ -1,6 +1,5 @@
 /**
- * Recreates the database in DATABASE_URL (default: the E2E database) from the migrations (bun run db:reset for the
- * development database), so every E2E or
+ * Recreates the database in DATABASE_URL (default: the E2E database) from the migrations, so every E2E or
  * PostgreSQL test run starts from the same data
  * and test data that cannot be deleted (sent statements, reminders) never reaches the development database.
  */

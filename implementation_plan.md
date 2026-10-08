@@ -4243,6 +4243,11 @@ reviewed independently afterwards.
   migrations is gone; it rejects a database that knows migrations no longer there (`bun run db:reset` sets it up
   anew). `distribution-key.pg.test.ts` builds its own building instead of the demo data
 
+- [x] **Review follow-up:** `bun run db:reset` has its own script (`scripts/db-reset.ts`) with the development database
+  as default (it reset the E2E database without `.env`) and refuses a database not on this machine
+  (`db-reset.test.ts`); `migrate.ts` also names `db:reset` for a filled database without `schema_migrations`
+  (`migrations.pg.test.ts`); the demo statements' total costs include the management fee, as the app computes them
+
 ### Open
 - [ ] Raise frontend coverage to 80 % and move the floors up
 
