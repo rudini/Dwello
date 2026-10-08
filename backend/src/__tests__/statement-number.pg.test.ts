@@ -36,4 +36,10 @@ describe('Abrechnungsnummer', () => {
 
 		expect([first, second, third].map((s) => s.statementNumber)).toEqual([`${prefix}0001`, `${prefix}0002`, `${prefix}0003`]);
 	});
+
+	it('beginnt im neuen Jahr wieder bei 1', async () => {
+		const statement = await generate('2025-01-01', '2025-12-31');
+
+		expect(statement.statementNumber).toBe(`NK-${rental.building.substring(0, 8).toUpperCase()}-2025-0001`);
+	});
 });

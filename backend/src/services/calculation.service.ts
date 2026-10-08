@@ -361,7 +361,7 @@ export async function calculateStatementForContract(
  * Counts on from the highest one, so a deleted statement's number does not come back while later ones exist
  */
 export async function generateStatementNumber(buildingId: string, periodEnd: Date): Promise<string> {
-	const prefix = `NK-${buildingId.substring(0, 8).toUpperCase()}-${periodEnd.getFullYear()}-`;
+	const prefix = `NK-${buildingId.substring(0, 8).toUpperCase()}-${periodEnd.getUTCFullYear()}-`;
 	const [{ highest }] = await db
 		.select({ highest: max(utilityStatements.statementNumber) })
 		.from(utilityStatements)
