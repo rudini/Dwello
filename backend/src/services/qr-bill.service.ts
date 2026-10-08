@@ -162,13 +162,18 @@ export function isQRIBAN(iban: string): boolean {
  * Generate QR-Reference (QRR) - 27 digits
  * Format: Reference number (26 digits) + check digit (1 digit using MOD 10 recursive)
  */
-export function generateQRReference(baseNumber: string): string {
+function generateQRReference(baseNumber: string): string {
 	// Pad or truncate to 26 digits
 	let reference = baseNumber.replace(/\D/g, '').slice(0, 26).padStart(26, '0');
 
 	// Calculate MOD 10 recursive check digit
 	const checkDigit = calculateMod10Recursive(reference);
 	return reference + checkDigit;
+}
+
+/** QR-Reference of a statement: the first 80 bits of its UUID as a decimal number (at most 25 digits) */
+export function statementQRReference(statementId: string): string {
+	return generateQRReference(BigInt('0x' + statementId.replace(/-/g, '').slice(0, 20)).toString());
 }
 
 /**
@@ -253,14 +258,18 @@ export function generateQRDataString(data: QRBillData): string {
 		data.amount || '',
 		data.currency,
 
-		// Ultimate Debtor Address (type S = structured)
-		data.debtorName ? 'S' : '',
-		data.debtorName?.slice(0, 70) || '',
-		data.debtorStreet?.slice(0, 70) || '',
-		data.debtorHouseNumber?.slice(0, 16) || '',
-		data.debtorPostalCode?.slice(0, 16) || '',
-		data.debtorCity?.slice(0, 35) || '',
-		data.debtorCountry?.slice(0, 2) || '',
+		// Ultimate Debtor Address (type S = structured), only complete: SIX requires postal code and town with a name
+		...(data.debtorName && data.debtorPostalCode && data.debtorCity
+			? [
+					'S',
+					data.debtorName.slice(0, 70),
+					data.debtorStreet?.slice(0, 70) || '',
+					data.debtorHouseNumber?.slice(0, 16) || '',
+					data.debtorPostalCode.slice(0, 16),
+					data.debtorCity.slice(0, 35),
+					data.debtorCountry?.slice(0, 2) || ''
+				]
+			: ['', '', '', '', '', '', '']),
 
 		// Reference
 		data.referenceType,
@@ -324,10 +333,7 @@ export async function generateQRBillForStatement(
 	// Determine reference type based on IBAN type
 	const useQRReference = isQRIBAN(config.iban);
 
-	// Generate reference from statement number
-	// Use statement number + timestamp for uniqueness
-	const baseRef = statement.id.replace(/-/g, '').slice(0, 20);
-	const reference = useQRReference ? generateQRReference(baseRef) : undefined;
+	const reference = useQRReference ? statementQRReference(statement.id) : undefined;
 
 	// Parse balance amount (positive = tenant owes money)
 	const balanceAmount = parseFloat(statement.balance);
