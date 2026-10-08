@@ -4212,6 +4212,10 @@ reviewed independently afterwards.
   (`InvoiceCategoryFields.svelte`, `invoice-pages.dom.test.ts`; the scenario now checks the locked field); a
   category set to non-allocable takes its invoices out of the allocable costs, else statements kept passing them
   on (`updateCategory` in `category.service.ts`, `category-admin.pg.test.ts`); `categoryExists` removed (unused)
+- [x] **Review follow-up:** migration `0011_non_allocable_invoices.sql` corrects invoices saved as allocable in a
+  non-allocable category before the backend checked it (`migrations.pg.test.ts`; may run again like 0004,
+  `db/migrate.ts`); the category cascade touches only invoices still marked allocable; the locked checkbox names its
+  reason for screen readers (`aria-describedby`)
 
 ### Verification
 - Backend 430 (249 unit + 181 PostgreSQL), coverage 82.3 % lines / 85.3 % functions; frontend 465, coverage
