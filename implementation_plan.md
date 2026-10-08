@@ -4229,6 +4229,10 @@ reviewed independently afterwards.
   72 % statements / 61 % branches / 76 % functions / 67 % lines; E2E 261 Chromium + 8 api passed; lint (no
   warnings), svelte-check (incl. tests/), tsc, backend tsc clean
 
+- [x] **UI screenshots only for pages a change can alter:** `tests/ui-screenshots/affected-routes.ts` followed
+  `import type` too, so a change of `src/lib/types.ts` put all 44 pages into this PR; type imports are ignored now
+  (`ui-screenshot-routes.test.ts`), this PR shows 5 pages
+
 ### Open
 - [ ] Raise frontend coverage to 80 % and move the floors up
 - [ ] `db/migrate.ts`: databases without `schema_migrations` predate the runner (0007 at most), so the detection of
