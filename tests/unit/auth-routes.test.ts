@@ -164,9 +164,8 @@ describe('Auth Routes Integration Tests', () => {
 			vi.mocked(oauthModule.validateProviderConfig).mockReturnValueOnce(false);
 			const { GET } = await import('$lib/../routes/auth/login/+server');
 
-			const redirect = await Promise.resolve(GET(createMockRequestEvent({ url: 'http://localhost:3000/auth/login?provider=microsoft' }) as never)).catch(
-				(r) => r
-			);
+			const event = createMockRequestEvent({ url: 'http://localhost:3000/auth/login?provider=microsoft' });
+			const redirect = await Promise.resolve(GET(event as never)).catch((r) => r);
 
 			expect(redirect).toMatchObject({ status: 303, location: '/login?error=unavailable' });
 		});
