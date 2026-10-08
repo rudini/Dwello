@@ -29,4 +29,10 @@ describe('Nutzungsbedingungen laden', () => {
 
 		expect(load({} as never)).toEqual({ operator: null });
 	});
+
+	it('nennt keinen Betreiber, wenn der Name nur aus Leerzeichen besteht', () => {
+		process.env.OPERATOR_NAME = ' ';
+
+		expect(load({} as never)).toEqual({ operator: null });
+	});
 });

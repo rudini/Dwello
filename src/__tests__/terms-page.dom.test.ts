@@ -10,21 +10,21 @@ describe('Nutzungsbedingungen zur Verfügbarkeit', () => {
 			}
 		} as never);
 
-		expect(byTestId('operator')?.textContent).toBe(
-			'Betreiber dieser Dwello-Installation ist Muster Hosting AG, Bahnhofstrasse 1, 8001 Zürich. Kontakt: betrieb@muster-hosting.ch'
+		expect(byTestId('terms-operator')?.textContent).toBe(
+			'Betreiber dieser Dwello-Installation ist Muster Hosting AG, Bahnhofstrasse 1, 8001 Zürich. Kontakt: betrieb@muster-hosting.ch.'
 		);
 	});
 
 	it('lässt Adresse und Kontakt weg, die nicht konfiguriert sind', () => {
 		show(TermsPage, { data: { operator: { name: 'Muster Hosting AG', address: '', contact: '' } } } as never);
 
-		expect(byTestId('operator')?.textContent).toBe('Betreiber dieser Dwello-Installation ist Muster Hosting AG.');
+		expect(byTestId('terms-operator')?.textContent).toBe('Betreiber dieser Dwello-Installation ist Muster Hosting AG.');
 	});
 
 	it('nennt keinen Betreiber, solange keiner konfiguriert ist', () => {
 		show(TermsPage, { data: { operator: null } } as never);
 
 		expect(byTestId('page-title')).not.toBeNull();
-		expect(byTestId('operator')).toBeNull();
+		expect(byTestId('terms-operator')).toBeNull();
 	});
 });

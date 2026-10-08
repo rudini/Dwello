@@ -75,6 +75,7 @@ export default defineConfig<{ driver: Driver }>({
 				OAUTH_MICROSOFT_CLIENT_ID: '',
 				OAUTH_MICROSOFT_CLIENT_SECRET: '',
 				OAUTH_MICROSOFT_REDIRECT_URI: '',
+				// The operator that terms.feature expects under „Verfügbarkeit“
 				OPERATOR_NAME: 'Muster Hosting AG',
 				OPERATOR_ADDRESS: 'Bahnhofstrasse 1, 8001 Zürich',
 				OPERATOR_CONTACT: 'betrieb@muster-hosting.ch'
