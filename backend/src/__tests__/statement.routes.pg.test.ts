@@ -87,6 +87,12 @@ describe('POST /api/v1/statements/:id/generate-pdf', () => {
 			expect(await pdfGeneratedAt()).not.toBeNull();
 		}));
 
+	// Die gewöhnliche IBAN erlaubt keine QR-Referenz; der Einzahlungsschein trägt keine, also auch die Abrechnung nicht
+	it('hält ohne QR-IBAN keine QR-Referenz fest', () =>
+		withIban(async () => {
+			expect(((await generatePdf()) as { qrReference: string | null }).qrReference).toBeNull();
+		}));
+
 	it('behält das PDF, wenn nur die Bemerkung ändert', () =>
 		withIban(async () => {
 			await generatePdf();
