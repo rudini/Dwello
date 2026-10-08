@@ -4306,6 +4306,11 @@ reviewed independently afterwards.
   lines and functions) instead of measured counts and floors; the floors stay in `vitest.config.ts` and
   `backend/scripts/coverage-check.ts` (`CLAUDE.md` points there)
 
+- [x] **Claude instructions:** `CLAUDE.md` rewritten (exact commands incl. single tests, verification commands,
+  fallow gate, contracts, language conventions); backend and E2E details moved into `backend/CLAUDE.md` and
+  `tests/e2e/CLAUDE.md`, loaded only there; the stale `docs/claude-reference.md` removed (tree, features and decisions
+  were duplicates of `docs/PRD-Dwello.md` and `docs/tech-stack.md`)
+
 ### Open
 - [ ] Raise coverage to the target in `docs/test-pyramid.md` and move the floors up
 
@@ -4354,7 +4359,7 @@ reviewed independently afterwards.
 
 # Quick Links
 
-- 📋 [CLAUDE.md Workflow Rules](./CLAUDE.md#-workflow---strict-rules-for-implementation)
+- 📋 [CLAUDE.md Workflow Rules](./CLAUDE.md#workflow)
 - 🏗️ [Architecture](./docs/tech-stack.md)
 - 📖 [PRD](./docs/PRD-Dwello.md)
 - 🗄️ [Database Schema](./docs/data-model.md)
