@@ -59,19 +59,20 @@ export async function saveSettings(fetch: typeof globalThis.fetch, request: Requ
 		([field, value]) => [KEYS[field as keyof Settings], value] as const
 	);
 	const filled = Object.fromEntries(entries.filter(([, value]) => value));
-	const responses = [
-		await fetch(API, {
-			method: 'PUT',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify(filled)
-		}),
-		...(await Promise.all(
-			entries
-				.filter(([, value]) => !value)
-				.map(([key]) => fetch(`${API}/${key}`, { method: 'DELETE' }))
-		))
-	];
-	if (responses.some((response) => !response.ok)) {
+	const saved = await fetch(API, {
+		method: 'PUT',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify(filled)
+	});
+	// Emptied fields are reset only once the others are saved, so a rejected form changes nothing
+	const resets = saved.ok
+		? await Promise.all(
+				entries
+					.filter(([, value]) => !value)
+					.map(([key]) => fetch(`${API}/${key}`, { method: 'DELETE' }))
+			)
+		: [];
+	if (![saved, ...resets].every((response) => response.ok)) {
 		return fail(400, {
 			errors: { form: 'Die Einstellungen konnten nicht gespeichert werden.' } as Record<
 				string,

@@ -345,10 +345,11 @@ export async function recategorizeInvoiceById(id: string): Promise<{
 			return { success: false, error: KI_UNAVAILABLE };
 		}
 
-		// As when entering an invoice, a sure suggestion becomes its category; the category decides what is allocable
+		// As when entering an invoice, a sure suggestion becomes its category; a non-allocable one makes the invoice
+		// non-allocable (OR 257a), while an exclusion by the property manager stays
 		const sure = result.confidence >= 0.85 && {
 			categoryId: result.category.id,
-			isValidUtilityCost: result.category.isAllowedUtilityCost,
+			...(!result.category.isAllowedUtilityCost && { isValidUtilityCost: false }),
 			wasManuallyOverridden: false,
 			manualOverrideReason: null
 		};

@@ -59,7 +59,7 @@ export const configRoutes = new Elysia({ prefix: '/api/v1/config' })
 			if (!result.success) {
 				set.status = 400;
 				return {
-					error: 'Some configuration values failed to update',
+					error: 'Configuration not saved: invalid values',
 					errors: result.errors
 				};
 			}
