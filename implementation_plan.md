@@ -3769,6 +3769,10 @@ After completing each task, add a note here:
 
 **Note (Session 5):** All of these except Modal, Pagination and Badge were never imported by a page and are deleted.
 
+- [x] **Target coverage:** `docs/test-pyramid.md` defines the wanted coverage (80 %, frontend all four measures, backend
+  lines and functions) instead of measured counts and floors; the floors stay in `vitest.config.ts` and
+  `backend/scripts/coverage-check.ts` (`CLAUDE.md` points there)
+
 ### OpenPLZ Integration (10.6) ✅
 
 **What Was Done:**
@@ -3891,6 +3895,10 @@ Every bug fix has a unit or database test.
 - Backend: all `*.pg.test.ts` pass; other tests 337 pass / 15 fail (heating profile service, failing on main as well); tsc 48 errors (pre-existing)
 - fallow audit: pass (no introduced dead code, duplication or complexity)
 
+- [x] **Target coverage:** `docs/test-pyramid.md` defines the wanted coverage (80 %, frontend all four measures, backend
+  lines and functions) instead of measured counts and floors; the floors stay in `vitest.config.ts` and
+  `backend/scripts/coverage-check.ts` (`CLAUDE.md` points there)
+
 ### Open
 - [x] Backend tests failing since before Session 3 (heating profile service, formatting)
   **Note:** `heating-profile.service.db.test.ts` expected the English error, the service returns the German one; `format.test.ts` expected a straight apostrophe, de-CH formats with ’.
@@ -3963,6 +3971,10 @@ unit or database tests.
   invoices 92%, statements 94%, `src/lib/server` 91%; buildings, apartments, tenants and contracts pages are not
   unit-tested yet (covered by E2E)
 
+- [x] **Target coverage:** `docs/test-pyramid.md` defines the wanted coverage (80 %, frontend all four measures, backend
+  lines and functions) instead of measured counts and floors; the floors stay in `vitest.config.ts` and
+  `backend/scripts/coverage-check.ts` (`CLAUDE.md` points there)
+
 ### Open
 - [x] The statement list returns the whole base64 PDF of every row (`statement: utilityStatements` in the list select)
   - List and detail select every column but `pdfBlob` (`statementColumns` in `backend/src/services/statement.service.ts`);
@@ -4009,6 +4021,10 @@ checked with grep before deleting.
 - Lint 0 problems, tsc 0 errors, svelte-check 0 errors, 468 frontend unit tests pass, production build passes
 - E2E not run in this environment (no database); the change only deletes files no page imports
 
+- [x] **Target coverage:** `docs/test-pyramid.md` defines the wanted coverage (80 %, frontend all four measures, backend
+  lines and functions) instead of measured counts and floors; the floors stay in `vitest.config.ts` and
+  `backend/scripts/coverage-check.ts` (`CLAUDE.md` points there)
+
 ### Open
 - [ ] fallow still reports: unused backend exports (e.g. `getOverdueStatements`, `checkContractOverlap`, helpers in
   `qr-bill.service.ts`), unused exports in `src/lib/server/error-handler.ts` and `src/lib/i18n`, 22 duplicate code
@@ -4042,6 +4058,10 @@ manager's workflow (Gebäude → Wohnungen → Mieter/Vertrag → Rechnungen →
   hints at clickability with a hover shadow, footer/error/redirect pages translated into German, logo got a mark
 - [x] **Tests:** `src/__tests__/app-frame.dom.test.ts` (new: Icon aria-hidden, nav groups, active item),
   `dashboard-page.test.ts` (getting-started states)
+
+- [x] **Target coverage:** `docs/test-pyramid.md` defines the wanted coverage (80 %, frontend all four measures, backend
+  lines and functions) instead of measured counts and floors; the floors stay in `vitest.config.ts` and
+  `backend/scripts/coverage-check.ts` (`CLAUDE.md` points there)
 
 ### Open
 - [ ] Rename "Konfiguration" (sidebar) to "Einstellungen" (page title, user menu) once the E2E feature tables are updated
@@ -4119,6 +4139,10 @@ acceptance scenario first, unit TDD as the inner loop, integration tests only ag
   API run
 - Verification: E2E Chromium 258 + api 2 passed after the rebase onto main (3232703)
 
+- [x] **Target coverage:** `docs/test-pyramid.md` defines the wanted coverage (80 %, frontend all four measures, backend
+  lines and functions) instead of measured counts and floors; the floors stay in `vitest.config.ts` and
+  `backend/scripts/coverage-check.ts` (`CLAUDE.md` points there)
+
 ### Open
 - [x] Extend the API driver to further business features — Session 8
 - [x] Statement PDF in the tenant's language — Session 8
@@ -4154,6 +4178,10 @@ Branch `claude/open-points` (from main 9067217).
   (Mehrsprachigkeit), README
 - Verification: backend 410 (244 unit + 166 PostgreSQL), coverage 77.0 % lines / 81.8 % functions; frontend 462,
   coverage above the floors; E2E 260 Chromium + 8 api passed; lint, tsc, svelte-check clean
+
+- [x] **Target coverage:** `docs/test-pyramid.md` defines the wanted coverage (80 %, frontend all four measures, backend
+  lines and functions) instead of measured counts and floors; the floors stay in `vitest.config.ts` and
+  `backend/scripts/coverage-check.ts` (`CLAUDE.md` points there)
 
 ### Open
 - [ ] Raise frontend coverage to 80 % and move the floors up (backend above 80 % since session 9)
@@ -4274,8 +4302,12 @@ reviewed independently afterwards.
   `sharePercentage` like the stored share of the building total; renamed in `calculation.service.ts`,
   `prorating.service.ts` and their tests, so the preview API answers `periodShare` too
 
+- [x] **Target coverage:** `docs/test-pyramid.md` defines the wanted coverage (80 %, frontend all four measures, backend
+  lines and functions) instead of measured counts and floors; the floors stay in `vitest.config.ts` and
+  `backend/scripts/coverage-check.ts` (`CLAUDE.md` points there)
+
 ### Open
-- [ ] Raise frontend coverage to 80 % and move the floors up
+- [ ] Raise coverage to the target in `docs/test-pyramid.md` and move the floors up
 
 ---
 
