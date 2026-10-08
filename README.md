@@ -20,7 +20,7 @@ Dwello is a comprehensive web application for managing residential properties in
 3. Invoice Management with LLM-powered categorization
 4. Utility Cost Statement Generation with complex prorating
 5. Swiss QR-bill Generation
-6. Multi-language Support (German, French, Italian, Romansh, English)
+6. Statements for tenants in five languages (German, French, Italian, Romansh, English); the app itself is in German
 
 ---
 
@@ -61,7 +61,7 @@ Dwello is a comprehensive web application for managing residential properties in
 3. **Install backend dependencies**
    ```bash
    cd backend
-   npm install
+   bun install
    cd ..
    ```
 
@@ -151,8 +151,8 @@ Dwello is a comprehensive web application for managing residential properties in
 - `bun run mail-catcher` - Local SMTP server that keeps sent e-mails (used by the E2E run)
 - `bun run lint` / `bun run format` - ESLint / Prettier for the backend only
 - `bun run db:studio` - Drizzle Studio, a browser view of the database
-- `bun run db:generate` - Drizzle Kit drafts a migration from `src/db/schema.ts` into `backend/migrations`; check it and
-  name it like the others (`000N_<what>.sql`) before committing
+- `bun run db:generate` - do not use: Drizzle Kit keeps no snapshots and would emit the whole schema again; write a new
+  numbered SQL file in `backend/migrations` by hand (see `backend/CLAUDE.md`)
 - `bun run db:push` - Drizzle Kit changes the database directly, without a migration; only for throwaway databases
 
 ### Project Structure
@@ -170,13 +170,14 @@ dwello/
 │   │   └── utils/        # Utility functions
 │   └── styles/           # Global styles
 ├── backend/               # Backend (ElysiaJS)
-│   └── src/
-│       ├── routes/       # API endpoints
-│       ├── middleware/   # Middleware
-│       ├── schema/       # Database schema
-│       └── services/     # Business logic
+│   ├── src/
+│   │   ├── routes/       # API endpoints
+│   │   ├── middleware/   # Middleware
+│   │   ├── db/           # Database schema (schema.ts), connection, migrate
+│   │   └── services/     # Business logic
+│   └── migrations/       # SQL migrations
+├── tests/                # E2E (playwright-bdd), API contracts
 ├── docs/                 # Documentation
-├── migrations/           # Database migrations
 └── docker-compose.yml    # Docker setup
 ```
 
@@ -188,6 +189,10 @@ dwello/
 - **Data Model:** [docs/data-model.md](./docs/data-model.md)
 - **API Specification:** [docs/api-specification.md](./docs/api-specification.md)
 - **Tech Stack:** [docs/tech-stack.md](./docs/tech-stack.md)
+- **Design System:** [docs/design_system.md](./docs/design_system.md)
+- **Test Pyramid:** [docs/test-pyramid.md](./docs/test-pyramid.md)
+- **Architecture (MVA):** [docs/migration-mva.md](./docs/migration-mva.md)
+- **Domain Language:** [UBIQUITOUS_LANGUAGE.md](./UBIQUITOUS_LANGUAGE.md)
 - **Implementation Plan:** [implementation_plan.md](./implementation_plan.md)
 - **Project Context:** [CLAUDE.md](./CLAUDE.md)
 
@@ -280,5 +285,4 @@ Proprietary - All rights reserved
 
 ---
 
-**Last Updated:** January 23, 2026
-**Status:** Phase 0 - Project Initialization Complete
+**Last Updated:** October 8, 2026

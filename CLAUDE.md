@@ -71,4 +71,3 @@ Before marking anything complete, all of these pass: `npm run test:coverage`, `n
 - `docs/test-pyramid.md`: test layers, runners, rules, coverage target
 - `docs/migration-mva.md`: Minimum Viable Architecture: quality scenarios, their status, deferred decisions
 - `docs/design_system.md`: colors, typography, components
-- `requirements-prosa.md`: original requirements (German)

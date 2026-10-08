@@ -51,7 +51,7 @@ Target coverage:
 
 Bun measures only lines and functions in the backend.
 
-Until the target is reached, a floor applies: today's coverage, rounded down to whole percent. If coverage drops below it, the run fails locally and in CI. As coverage grows, the floor is raised until it reaches the target.
+A floor applies: today's coverage, rounded down to whole percent. If coverage drops below it, the run fails locally and in CI. As coverage grows, the floor is raised. The backend floor (82 % lines, 85 % functions) is already above the target; the frontend floor is still below it.
 
 | Area | Measured by | Floor stored in |
 |---|---|---|
@@ -106,4 +106,4 @@ Local prerequisite: PostgreSQL on port 5432 with user `dwello`. The test databas
 
 ## Open
 
-- [ ] Raise coverage to the target, then raise the floors with it
+- [ ] Raise frontend coverage to the target, then raise the floor with it

@@ -12,7 +12,7 @@ Die Ubiquitous Language (nach Eric Evans, Domain-Driven Design) definiert ein ge
 |---------|-----------|---------------|
 | **Gebäude** | Wohn- oder Mischgebäude mit Adresse, PLZ, Ort, Kanton, Baujahr und Gebäudetyp. Zentrale Entität, der alle Wohnungen zugeordnet sind. | `buildings` Tabelle |
 | **Liegenschaft** | Synonym für Gebäude im Verwaltungskontext. | — |
-| **Gebäudetyp** | Klassifikation: Einfamilienhaus, Mehrfamilienhaus, Mischnutzung. | `building_type` Feld |
+| **Gebäudetyp** | Klassifikation: Mehrfamilienhaus, Einfamilienhaus, Geschäftshaus, Gewerbegebäude, Mischnutzung. | `building_type` Feld |
 | **Baujahr** | Jahr der Erstellung des Gebäudes. | `year_built` Feld |
 | **Wohnung** | Einzelne Mieteinheit innerhalb eines Gebäudes. Besitzt Wohnungsnummer, Stockwerk, Fläche (m²) und Zimmeranzahl. | `apartments` Tabelle |
 | **Wohnungsnummer** | Bezeichnung der Wohnung im Gebäude (z.B. 3.01), pro Gebäude eindeutig. | `number` Feld |
@@ -132,7 +132,7 @@ Verwaltung, Reparaturen, Renovation, Liegenschaftssteuer, Hypothekarzinsen, Geb�
 | **Entwurf** | Abrechnung erstellt, noch nicht versendet. (`draft`) |
 | **Versendet** | Abrechnung dem Mieter zugestellt. (`sent`) |
 | **Bezahlt** | Nachzahlung/Rückerstattung abgeschlossen. (`paid`) |
-| **Überfällig** | Versendet und Zahlungsfrist überschritten; wird berechnet, nicht gespeichert. (`overdue`) |
+| **Überfällig** | Versendet und Zahlungsfrist überschritten. Wird beim Lesen aus Status und Zahlungsfrist berechnet; die Statusänderung und `POST /statements/mark-overdue` können ihn auch speichern. (`overdue`) |
 
 ---
 
@@ -143,7 +143,7 @@ Verwaltung, Reparaturen, Renovation, Liegenschaftssteuer, Hypothekarzinsen, Geb�
 | **Zahlungsfrist** | Datum, bis zu dem die Abrechnung bezahlt sein muss. Vorgabe: Anzahl Tage nach Erstellung. | `payment_deadline` Feld, `payment_deadline_days` Config |
 | **Mahnung** | Vom Liegenschaftsverwalter ausgelöste Zahlungsaufforderung zu einer versendeten Abrechnung, als PDF in den Dokumenten, per E-Mail oder Brief gemäss Korrespondenzkanal. | `documents` Tabelle |
 | **Mahnstufe** | Zahlungserinnerung (1. Stufe), 2. Mahnung, 3. Mahnung. Mehr als 3 Mahnungen sind nicht möglich. | `reminder_level` Feld |
-| **Mahnfrist** | Anzahl Tage nach Ablauf der Zahlungsfrist bis zur Mahnung. | `reminder_days` Config |
+| **Mahnfrist** | Anzahl Tage nach Ablauf der Zahlungsfrist bis zur Mahnung. | `reminder_after_days` Config (Standard 14) |
 | **Dokument** | Brief oder E-Mail an einen Mieter (z.B. Mahnung) mit PDF. | `documents` Tabelle |
 | **Versandstatus** | Zu versenden (`to_send`, Brief noch zu verschicken) oder Versendet (`sent`). | `status` Feld |
 
@@ -156,7 +156,7 @@ Verwaltung, Reparaturen, Renovation, Liegenschaftssteuer, Hypothekarzinsen, Geb�
 | **QR-Rechnung** | Schweizer Standard-Zahlungsbeleg gemäss ISO 20022. Enthält QR-Code mit allen Zahlungsinformationen. | PDF-Generierung |
 | **Zahlteil** | Abtrennbarer Teil der QR-Rechnung mit QR-Code und Zahlungsinformationen. | PDF-Komponente |
 | **QR-Referenz** | Eindeutige Referenznummer auf der QR-Rechnung zur Zahlungszuordnung. | `qr_bill_reference` |
-| **IBAN** | Internationale Bankkontonummer des Vermieters/Verwalters (muss mit "CH" beginnen). | `company_iban` Config |
+| **IBAN** | Internationale Bankkontonummer des Vermieters/Verwalters (Schweiz oder Liechtenstein, beginnt mit "CH" oder "LI"). | `iban` Config |
 
 ---
 
@@ -177,7 +177,7 @@ Verwaltung, Reparaturen, Renovation, Liegenschaftssteuer, Hypothekarzinsen, Geb�
 
 | Begriff | Definition | Code / Schema |
 |---------|-----------|---------------|
-| **Abrechnungsperiode** | Jährliche Abrechnungsperiode (Kalenderjahr, Juli – Juni, November – Oktober). | `accounting_period_type`, `accounting_period_start` Config |
+| **Abrechnungsperiode** | Jährliche Abrechnungsperiode (Kalenderjahr, Juli – Juni, November – Oktober). | `accounting_period` Config (`calendar`, `july-june`, `november-october`) |
 | **Verwaltungspauschale** | Vorgeschlagener Satz für den Abrechnungslauf. | `management_fee_pct` Config |
 | **Standard-Heizprofil** | Vorgeschlagenes Heizprofil für den Abrechnungslauf. | `default_heating_profile_id` Config |
 | **Standard-Verteilschlüssel** | Vorgeschlagener Verteilschlüssel für neue Rechnungen. | `default_distribution_key_id` Config |

@@ -8,7 +8,7 @@ This gives the approach:
 
 1. **Quality attributes before functions** (principle 2): the architecture is measured against the quality scenarios below, not against a target picture.
 2. **Delay decisions** (principle 3): an architecture change needs a scenario that is not met today. Without such a scenario the structure stays as it is.
-3. **Record decisions:** every decision taken or deliberately deferred is its own ADR in `docs/adr/`.
+3. **Record decisions:** every decision taken or deliberately deferred becomes its own ADR in `docs/adr/` (created in step 1).
 4. **Small steps:** refactorings preserve behavior, are covered by tests, and moves and behavior changes land in separate commits.
 
 Constraints: one developer, one user, fewer than 50 apartments, one PostgreSQL database, no distributed system. The backend has about 10,000 lines without tests. The business logic sits in two layers: `backend/src/routes` (HTTP) and `backend/src/services` (business logic and data access); next to them are `db/`, `config/`, `mail/` and `middleware/`.
