@@ -6,7 +6,7 @@
 	// Who receives invoice data for the KI categorization (DSG Art. 19: recipient and country)
 	const llmNotice = $derived(
 		data.recipient
-			? `Rechnungen werden von ${data.recipient.provider} (${data.recipient.country}) mit einem Sprachmodell kategorisiert. Dafür werden Rechnungssteller, Beschreibung und Betrag der Rechnung übermittelt; steht in der Beschreibung ein Name, wird auch er übermittelt.`
+			? `Rechnungen werden von ${data.recipient.provider} (${data.recipient.country}) mit einem Sprachmodell kategorisiert. Dafür werden Rechnungssteller (auch Einzelpersonen), Beschreibung und Betrag der Rechnung übermittelt; steht in der Beschreibung ein Name, wird auch er übermittelt.`
 			: 'Rechnungen werden mit einem Sprachmodell kategorisiert, das auf dem Server des Betreibers läuft; Rechnungsdaten verlassen dafür den Server nicht.'
 	);
 
