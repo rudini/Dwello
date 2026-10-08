@@ -83,12 +83,13 @@ describe('Heizprofil bearbeiten', () => {
 	it('verlangt auch beim Bearbeiten, dass die Monatsanteile 100 % ergeben', async () => {
 		const id = await idOf(await create('Winterhalbjahr'));
 
+		// Januar von 12 auf 2 %, die übrigen elf Monate je 8 %
 		const response = await send('PUT', `/${id}`, { januaryPct: 2 });
 
 		await expectRejection(response, 400, 'Die Monatsanteile müssen zusammen 100 % ergeben (aktuell 90 %).');
 	});
 
-	// Die Fehlermeldung erscheint im Formular
+	// Die Oberfläche bietet das Bearbeiten nicht an; die API lehnt es verständlich ab
 	it('behält die Monatsanteile vordefinierter Heizprofile', async () => {
 		const response = await send('PUT', `/${await firstPredefined('heating-profiles')}`, shares());
 
