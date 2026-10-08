@@ -19,6 +19,9 @@ export type Settings = Record<keyof typeof KEYS, string>;
 
 const compact = (iban: string) => iban.replace(/\s/g, '').toUpperCase();
 /** "CH93 0076 2011 6238 5295 7" */
+/** ISO 13616 check digits: country (CH = 1217) and check digits moved to the end, the number leaves 1 divided by 97 */
+const ibanChecksumValid = (iban: string) =>
+	BigInt(iban.slice(4) + '1217' + iban.slice(2, 4)) % 97n === 1n;
 const groupIban = (iban: string) => compact(iban).replace(/(.{4})(?=.)/g, '$1 ');
 
 export function toSettings(stored: Record<string, string | null>): Settings {
@@ -33,7 +36,7 @@ function settingsErrors(s: Settings) {
 	if (s.companyPostalCode && !/^\d{4}$/.test(s.companyPostalCode)) {
 		errors.companyPostalCode = 'PLZ muss 4 Ziffern haben';
 	}
-	if (s.iban && !/^CH\d{19}$/.test(compact(s.iban))) {
+	if (s.iban && !(/^CH\d{19}$/.test(compact(s.iban)) && ibanChecksumValid(compact(s.iban)))) {
 		errors.iban = 'Bitte geben Sie eine gültige Schweizer IBAN ein';
 	}
 	if (!(Number(s.managementFeePercent) >= 0)) {

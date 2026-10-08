@@ -98,6 +98,20 @@ describe('Einstellungen speichern', () => {
 		expect(calls).toEqual([]);
 	});
 
+	// Ein Tippfehler in der IBAN zeigt sich an der Prüfziffer; ohne sie entstünde kein Einzahlungsschein
+	it('meldet eine IBAN mit falscher Prüfziffer am Feld und speichert nichts', async () => {
+		const { calls, result } = runAction(actions.default, '', 200, {
+			...valid,
+			iban: 'CH93 0076 2011 6238 5295 8'
+		});
+
+		expect(await result).toMatchObject({
+			status: 400,
+			data: { errors: { iban: 'Bitte geben Sie eine gültige Schweizer IBAN ein' } }
+		});
+		expect(calls).toEqual([]);
+	});
+
 	it('meldet, wenn das Backend die Einstellungen ablehnt', async () => {
 		const { result } = runAction(actions.default, '', 400, valid);
 

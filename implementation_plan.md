@@ -4181,6 +4181,8 @@ reviewed independently afterwards.
   `invoice-categorization.pg.test.ts`); the settings took an IBAN with a wrong check digit, the PDF then lacked
   the payment part (`config.service.ts`, `config.pg.test.ts`); the error for changing a predefined heating profile
   was English (`heating-profile.service.ts`, `heating-profile-admin.pg.test.ts`)
+- [x] **Review follow-up:** the settings form checks the IBAN check digits too and reports them at the field
+  (`src/lib/server/settings.ts`, `settings.test.ts`); before, the backend rejected it with a general error
 
 ### Open
 - [ ] Endpoints no page calls, untested: `/config/initialize`, `/config/accounting-period/*`,
@@ -4188,6 +4190,7 @@ reviewed independently afterwards.
 - [ ] `api-proxy.test.ts` without mocking own code
 - [ ] API contracts for buildings, tenants, invoices
 - [ ] Numbers in `docs/test-pyramid.md`
+- [ ] Backend does not derive „umlagefähig“ from a category chosen by hand (relies on the form)
 - [ ] Type check `tests/` and the root `*.config.ts` (tsconfig includes only `src/`)
 
 ---

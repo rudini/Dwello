@@ -13,7 +13,7 @@ afterAll(async () => {
 	else await deleteConfig('iban');
 });
 
-describe('PUT /api/v1/config', () => {
+describe('Einstellungen speichern', () => {
 	// Mit falscher Prüfziffer entstünde der Einzahlungsschein nicht, das PDF käme ohne Zahlteil
 	it('lehnt eine IBAN mit falscher Prüfziffer ab', async () => {
 		const response = await sendJson('PUT', '/api/v1/config', {
