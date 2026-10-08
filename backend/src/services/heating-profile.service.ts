@@ -296,7 +296,7 @@ export async function updateHeatingProfile(
 
 	// Don't allow modifying predefined profiles' percentages
 	if (existing.type === 'predefined' && percentageFields.some((field) => data[field] !== undefined)) {
-		throw new Error('Cannot modify percentages of predefined heating profile');
+		throw new Error('Die Monatsanteile vordefinierter Heizprofile können nicht geändert werden.');
 	}
 
 	// Check for duplicate name if name is being changed

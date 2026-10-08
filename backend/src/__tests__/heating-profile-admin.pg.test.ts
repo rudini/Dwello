@@ -28,7 +28,7 @@ beforeAll(async () => {
 afterAll(async () => {
 	if (previousDefault) await setConfig('default_heating_profile_id', previousDefault);
 	else await deleteConfig('default_heating_profile_id');
-	for (const name of ['Bergtal', 'Standard']) {
+	for (const name of ['Bergtal', 'Standard', 'Winterhalbjahr']) {
 		const profile = await getHeatingProfileByName(`${name} ${token}`);
 		if (profile) await deleteHeatingProfile(profile.id);
 	}
@@ -76,5 +76,22 @@ describe('Eigene Heizprofile', () => {
 		const response = await send('DELETE', `/${await firstPredefined('heating-profiles')}`);
 
 		await expectRejection(response, 400, 'Vordefinierte Heizprofile können nicht gelöscht werden.');
+	});
+});
+
+describe('Heizprofil bearbeiten', () => {
+	it('verlangt auch beim Bearbeiten, dass die Monatsanteile 100 % ergeben', async () => {
+		const id = await idOf(await create('Winterhalbjahr'));
+
+		const response = await send('PUT', `/${id}`, { januaryPct: 2 });
+
+		await expectRejection(response, 400, 'Die Monatsanteile müssen zusammen 100 % ergeben (aktuell 90 %).');
+	});
+
+	// Die Fehlermeldung erscheint im Formular
+	it('behält die Monatsanteile vordefinierter Heizprofile', async () => {
+		const response = await send('PUT', `/${await firstPredefined('heating-profiles')}`, shares());
+
+		await expectRejection(response, 400, 'Die Monatsanteile vordefinierter Heizprofile können nicht geändert werden.');
 	});
 });

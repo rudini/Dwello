@@ -4175,9 +4175,16 @@ reviewed independently afterwards.
 - [x] **Lint and types in CI:** job „Lint and types“ (`npm run lint`, warnings fail it too, `npm run check`, backend `type-check`) in
   `.github/workflows/ci.yml`; `npm run check` runs `svelte-kit sync` first, it failed on a fresh checkout
 - [x] **Contract test on contract changes:** a change under `tests/contracts/` runs the backend tests in CI too
+- [x] **KI categorization, configuration, heating profiles tested** (backend coverage 77.5 % → 82.2 % lines).
+  Fixed: whether a KI-categorized invoice may be passed on came from the KI, not from its category, so a
+  repair could land in a statement (`categorizeInvoice` in `llm.service.ts`; test with a local Ollama stand-in in
+  `invoice-categorization.pg.test.ts`); the settings took an IBAN with a wrong check digit, the PDF then lacked
+  the payment part (`config.service.ts`, `config.pg.test.ts`); the error for changing a predefined heating profile
+  was English (`heating-profile.service.ts`, `heating-profile-admin.pg.test.ts`)
 
 ### Open
-- [ ] Tests for LLM categorization, config and heating profiles
+- [ ] Endpoints no page calls, untested: `/config/initialize`, `/config/accounting-period/*`,
+  `/heating-profiles/initialize`, `/validate-percentages`, `/calculate-share` (delete or test?)
 - [ ] `api-proxy.test.ts` without mocking own code
 - [ ] API contracts for buildings, tenants, invoices
 - [ ] Numbers in `docs/test-pyramid.md`
