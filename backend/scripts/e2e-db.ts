@@ -1,5 +1,6 @@
 /**
- * Recreates the database in DATABASE_URL (default: the E2E database) from the migrations, so every E2E or
+ * Recreates the database in DATABASE_URL (default: the E2E database) from the migrations (bun run db:reset for the
+ * development database), so every E2E or
  * PostgreSQL test run starts from the same data
  * and test data that cannot be deleted (sent statements, reminders) never reaches the development database.
  */
@@ -28,4 +29,4 @@ await run(maintenance.href, `DROP DATABASE IF EXISTS "${database}" WITH (FORCE)`
 
 const applied = await migrate(url.href, migrations);
 
-console.log(`Testdatenbank ${database} neu aufgesetzt (${applied.length} Migrationen)`);
+console.log(`Datenbank ${database} neu aufgesetzt (${applied.length} Migrationen)`);

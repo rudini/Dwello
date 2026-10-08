@@ -1,6 +1,8 @@
--- Migration: 0002_seed_data
--- Description: Initial seed data for Dwello Property Management System
--- Created: 2026-01-24
+-- ============================================================================
+-- Master data every database needs: cost categories (whether costs may be passed on),
+-- distribution keys and predefined heating profiles. Configuration needs no rows:
+-- its defaults are in backend/src/services/config.service.ts. Demo data: backend/demo/.
+-- ============================================================================
 
 -- ============================================================================
 -- Categories (Swiss Utility Cost Categories)
@@ -41,13 +43,11 @@ INSERT INTO distribution_keys (name, name_de, name_fr, name_it, name_en, type, f
 ('Per Unit', 'Pro Einheit', 'Par unité', 'Per unità', 'Per Unit', 'predefined', '{units}', 'Equal distribution per apartment', 1),
 ('Per Area (m²)', 'Pro Fläche (m²)', 'Par surface (m²)', 'Per superficie (m²)', 'Per Area', 'predefined', '{area}', 'Distribution based on apartment area', 2),
 ('Per Rooms', 'Pro Zimmer', 'Par pièces', 'Per locali', 'Per Rooms', 'predefined', '{rooms}', 'Distribution based on number of rooms', 3),
-('Per Person', 'Pro Person', 'Par personne', 'Per persona', 'Per Person', 'predefined', '{persons}', 'Distribution based on number of occupants', 4),
-('By Consumption', 'Nach Verbrauch', 'Selon consommation', 'Secondo consumo', 'By Consumption', 'predefined', '{consumption}', 'Distribution based on individual meters', 5),
 ('Heating (Area 70% / Unit 30%)', 'Heizung (Fläche 70% / Einheit 30%)', 'Chauffage (surface 70% / unité 30%)', 'Riscaldamento (superficie 70% / unità 30%)', 'Heating Split', 'predefined', '0.7 * {area} + 0.3 * {units}', 'Swiss standard heating distribution', 6);
 
 -- ============================================================================
 -- Heating Distribution Profiles
--- Based on Swiss regional heating patterns
+-- Based on Swiss regional heating patterns; every profile distributes exactly 100 %
 -- ============================================================================
 
 -- Heating + Hot Water (Standard profile for combined systems)
@@ -99,20 +99,3 @@ INSERT INTO heating_profiles (name, name_de, name_fr, name_it, name_en, type,
     8.50, 8.50, 8.50, 8.00, 8.50, 8.00,
     8.50, 8.50, 8.00, 8.50, 8.00, 8.50,
     'Even distribution for hot water only systems');
-
--- ============================================================================
--- Default Configuration
--- ============================================================================
-INSERT INTO configuration (key, value, description) VALUES
-('accounting_period_type', 'calendar', 'Accounting period type: calendar, july_june, november_october'),
-('accounting_period_start', '01-01', 'Start of accounting period (MM-DD)'),
-('management_fee_percentage', '3.00', 'Management fee percentage (max 3% per Swiss law)'),
-('payment_deadline_days', '30', 'Default payment deadline in days'),
-('reminder_days', '14', 'Days after deadline before sending reminder'),
-('company_name', 'Dwello Property Management', 'Company name for statements'),
-('company_address', '', 'Company address for statements'),
-('company_postal_code', '', 'Company postal code'),
-('company_city', '', 'Company city'),
-('company_iban', '', 'IBAN for QR-bill generation'),
-('default_language', 'de', 'Default language for new tenants'),
-('currency', 'CHF', 'Currency for all financial values');

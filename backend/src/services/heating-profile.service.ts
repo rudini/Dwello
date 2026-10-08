@@ -2,7 +2,7 @@
  * Heating Profile Service
  * Business logic for heating distribution profiles
  *
- * The predefined profiles (Standard, Bergregion, Tessin, Warmwasser) come from migrations/0002_seed_data.sql
+ * The predefined profiles (Standard, Bergregion, Tessin, Warmwasser) come from migrations/0002_stammdaten.sql
  */
 
 import { eq, sql, asc, ilike, and } from 'drizzle-orm';

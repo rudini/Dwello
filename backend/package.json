@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "bun --env-file=../.env --env-file=../.env.local --env-file=.env --env-file=.env.local scripts/migrate.ts && bun --env-file=../.env --env-file=../.env.local --env-file=.env --env-file=.env.local run --hot src/index.ts",
+    "dev:demo": "bun run db:demo && bun run dev",
     "build": "bun build src/index.ts --outdir dist --target bun",
     "start": "bun run dist/index.js",
     "test": "bun test --preload ./scripts/test-db.ts --coverage && bun scripts/coverage-check.ts",
@@ -15,6 +16,8 @@
     "format": "prettier --write .",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "bun --env-file=../.env --env-file=../.env.local --env-file=.env --env-file=.env.local scripts/migrate.ts",
+    "db:reset": "bun --env-file=../.env --env-file=../.env.local --env-file=.env --env-file=.env.local scripts/e2e-db.ts",
+    "db:demo": "bun --env-file=../.env --env-file=../.env.local --env-file=.env --env-file=.env.local scripts/demo-data.ts",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "mail-catcher": "bun scripts/mail-catcher.ts",

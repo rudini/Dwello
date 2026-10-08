@@ -1,6 +1,7 @@
--- Migration: 0001_initial_schema
--- Description: Initial database schema for Dwello Property Management System
--- Created: 2026-01-24
+-- ============================================================================
+-- Schema of Dwello (baseline of October 2026, replaces migrations 0001-0011)
+-- Master data (categories, distribution keys, heating profiles) follows in 0002.
+-- ============================================================================
 
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
@@ -8,7 +9,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- ============================================================================
 -- Buildings Table
 -- ============================================================================
-CREATE TABLE IF NOT EXISTS buildings (
+CREATE TABLE buildings (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name VARCHAR(255) NOT NULL,
     address VARCHAR(500) NOT NULL,
@@ -24,31 +25,32 @@ CREATE TABLE IF NOT EXISTS buildings (
     updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS buildings_city_idx ON buildings(city);
+CREATE INDEX buildings_city_idx ON buildings(city);
 
 -- ============================================================================
 -- Apartments Table
 -- ============================================================================
-CREATE TABLE IF NOT EXISTS apartments (
+CREATE TABLE apartments (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     building_id UUID NOT NULL REFERENCES buildings(id) ON DELETE CASCADE,
     number VARCHAR(20) NOT NULL,
     floor INTEGER NOT NULL DEFAULT 0,
     area DECIMAL(8, 2) NOT NULL,
     rooms DECIMAL(3, 1) NOT NULL,
+    -- "occupied" is computed from the running rental contracts; the stored status is what the manager sets
     status VARCHAR(20) NOT NULL DEFAULT 'vacant',
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    CONSTRAINT apartments_status_check CHECK (status IN ('occupied', 'vacant', 'reserved'))
+    CONSTRAINT apartments_status_check CHECK (status IN ('vacant', 'reserved'))
 );
 
-CREATE INDEX IF NOT EXISTS apartments_building_id_idx ON apartments(building_id);
-CREATE UNIQUE INDEX IF NOT EXISTS apartments_building_number_idx ON apartments(building_id, number);
+CREATE INDEX apartments_building_id_idx ON apartments(building_id);
+CREATE UNIQUE INDEX apartments_building_number_idx ON apartments(building_id, number);
 
 -- ============================================================================
 -- Tenants Table
 -- ============================================================================
-CREATE TABLE IF NOT EXISTS tenants (
+CREATE TABLE tenants (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     first_name VARCHAR(100) NOT NULL,
     last_name VARCHAR(100) NOT NULL,
@@ -58,6 +60,7 @@ CREATE TABLE IF NOT EXISTS tenants (
     address VARCHAR(500),
     postal_code VARCHAR(10),
     city VARCHAR(100),
+    correspondence_channel VARCHAR(10) NOT NULL DEFAULT 'letter', -- email | letter
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
     CONSTRAINT tenants_language_check CHECK (language IN ('de', 'fr', 'it', 'rm', 'en'))
@@ -66,7 +69,7 @@ CREATE TABLE IF NOT EXISTS tenants (
 -- ============================================================================
 -- Rental Contracts Table
 -- ============================================================================
-CREATE TABLE IF NOT EXISTS rental_contracts (
+CREATE TABLE rental_contracts (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     apartment_id UUID NOT NULL REFERENCES apartments(id) ON DELETE CASCADE,
     tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE RESTRICT,
@@ -83,15 +86,15 @@ CREATE TABLE IF NOT EXISTS rental_contracts (
     CONSTRAINT contracts_dates_check CHECK (end_date IS NULL OR end_date >= start_date)
 );
 
-CREATE INDEX IF NOT EXISTS contracts_apartment_id_idx ON rental_contracts(apartment_id);
-CREATE INDEX IF NOT EXISTS contracts_tenant_id_idx ON rental_contracts(tenant_id);
-CREATE INDEX IF NOT EXISTS contracts_end_date_idx ON rental_contracts(end_date);
-CREATE INDEX IF NOT EXISTS contracts_dates_idx ON rental_contracts(start_date, end_date);
+CREATE INDEX contracts_apartment_id_idx ON rental_contracts(apartment_id);
+CREATE INDEX contracts_tenant_id_idx ON rental_contracts(tenant_id);
+CREATE INDEX contracts_end_date_idx ON rental_contracts(end_date);
+CREATE INDEX contracts_dates_idx ON rental_contracts(start_date, end_date);
 
 -- ============================================================================
 -- Categories Table (Utility Cost Categories)
 -- ============================================================================
-CREATE TABLE IF NOT EXISTS categories (
+CREATE TABLE categories (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name VARCHAR(100) NOT NULL,
     name_de VARCHAR(100),
@@ -108,7 +111,7 @@ CREATE TABLE IF NOT EXISTS categories (
 -- ============================================================================
 -- Distribution Keys Table
 -- ============================================================================
-CREATE TABLE IF NOT EXISTS distribution_keys (
+CREATE TABLE distribution_keys (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name VARCHAR(100) NOT NULL,
     name_de VARCHAR(100),
@@ -127,7 +130,7 @@ CREATE TABLE IF NOT EXISTS distribution_keys (
 -- ============================================================================
 -- Heating Distribution Profiles Table
 -- ============================================================================
-CREATE TABLE IF NOT EXISTS heating_profiles (
+CREATE TABLE heating_profiles (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name VARCHAR(100) NOT NULL,
     name_de VARCHAR(100),
@@ -156,7 +159,7 @@ CREATE TABLE IF NOT EXISTS heating_profiles (
 -- ============================================================================
 -- Invoices Table
 -- ============================================================================
-CREATE TABLE IF NOT EXISTS invoices (
+CREATE TABLE invoices (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     building_id UUID NOT NULL REFERENCES buildings(id) ON DELETE CASCADE,
     invoice_number VARCHAR(50),
@@ -173,20 +176,21 @@ CREATE TABLE IF NOT EXISTS invoices (
     llm_category_id UUID REFERENCES categories(id) ON DELETE SET NULL,
     llm_confidence DECIMAL(5, 4),
     was_manually_overridden BOOLEAN DEFAULT false,
+    manual_override_reason TEXT, -- why the category the KI suggested was overridden
     invoice_pdf TEXT,
     notes TEXT,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS invoices_building_id_idx ON invoices(building_id);
-CREATE INDEX IF NOT EXISTS invoices_invoice_date_idx ON invoices(invoice_date);
-CREATE INDEX IF NOT EXISTS invoices_category_id_idx ON invoices(category_id);
+CREATE INDEX invoices_building_id_idx ON invoices(building_id);
+CREATE INDEX invoices_invoice_date_idx ON invoices(invoice_date);
+CREATE INDEX invoices_category_id_idx ON invoices(category_id);
 
 -- ============================================================================
 -- Utility Statements Table
 -- ============================================================================
-CREATE TABLE IF NOT EXISTS utility_statements (
+CREATE TABLE utility_statements (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE RESTRICT,
     apartment_id UUID NOT NULL REFERENCES apartments(id) ON DELETE RESTRICT,
@@ -199,6 +203,7 @@ CREATE TABLE IF NOT EXISTS utility_statements (
     total_costs DECIMAL(12, 2) NOT NULL,
     total_advance_payments DECIMAL(12, 2) NOT NULL,
     management_fee DECIMAL(12, 2) DEFAULT 0,
+    management_fee_percent DECIMAL(5, 2), -- rate chosen when the statement was generated
     balance DECIMAL(12, 2) NOT NULL,
     status VARCHAR(20) NOT NULL DEFAULT 'draft',
     payment_deadline DATE,
@@ -206,6 +211,7 @@ CREATE TABLE IF NOT EXISTS utility_statements (
     paid_amount DECIMAL(12, 2),
     reminder_sent_date DATE,
     pdf_blob TEXT,
+    pdf_generated_at TIMESTAMP,
     qr_bill_reference VARCHAR(27),
     notes TEXT,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
@@ -214,17 +220,17 @@ CREATE TABLE IF NOT EXISTS utility_statements (
     CONSTRAINT statements_period_check CHECK (period_end >= period_start)
 );
 
-CREATE INDEX IF NOT EXISTS statements_tenant_id_idx ON utility_statements(tenant_id);
-CREATE INDEX IF NOT EXISTS statements_apartment_id_idx ON utility_statements(apartment_id);
-CREATE INDEX IF NOT EXISTS statements_period_start_idx ON utility_statements(period_start);
-CREATE INDEX IF NOT EXISTS statements_status_idx ON utility_statements(status);
-CREATE INDEX IF NOT EXISTS statements_tenant_period_idx ON utility_statements(tenant_id, period_start);
-CREATE UNIQUE INDEX IF NOT EXISTS statements_number_idx ON utility_statements(statement_number);
+CREATE INDEX statements_tenant_id_idx ON utility_statements(tenant_id);
+CREATE INDEX statements_apartment_id_idx ON utility_statements(apartment_id);
+CREATE INDEX statements_period_start_idx ON utility_statements(period_start);
+CREATE INDEX statements_status_idx ON utility_statements(status);
+CREATE INDEX statements_tenant_period_idx ON utility_statements(tenant_id, period_start);
+CREATE UNIQUE INDEX statements_number_idx ON utility_statements(statement_number);
 
 -- ============================================================================
 -- Utility Statement Line Items Table
 -- ============================================================================
-CREATE TABLE IF NOT EXISTS utility_statement_line_items (
+CREATE TABLE utility_statement_line_items (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     statement_id UUID NOT NULL REFERENCES utility_statements(id) ON DELETE CASCADE,
     category_id UUID REFERENCES categories(id) ON DELETE SET NULL,
@@ -237,12 +243,35 @@ CREATE TABLE IF NOT EXISTS utility_statement_line_items (
     created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS line_items_statement_id_idx ON utility_statement_line_items(statement_id);
+CREATE INDEX line_items_statement_id_idx ON utility_statement_line_items(statement_id);
 
 -- ============================================================================
--- Configuration Table (Key-Value Store)
+-- Documents Table (payment reminders sent or to send)
 -- ============================================================================
-CREATE TABLE IF NOT EXISTS configuration (
+CREATE TABLE documents (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE RESTRICT,
+    statement_id UUID REFERENCES utility_statements(id) ON DELETE RESTRICT,
+    type VARCHAR(30) NOT NULL,                -- reminder
+    reminder_level INTEGER,                   -- 1 = Zahlungserinnerung, 2 and 3 = Mahnung
+    title VARCHAR(255) NOT NULL,
+    file_name VARCHAR(255) NOT NULL,
+    pdf TEXT NOT NULL,                        -- Base64 encoded PDF
+    channel VARCHAR(10) NOT NULL,             -- email | letter
+    status VARCHAR(20) NOT NULL,              -- sent | to_send
+    sent_at TIMESTAMP,
+    delivery_error TEXT,                      -- why an e-mail could not be sent
+    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX documents_tenant_id_idx ON documents(tenant_id);
+CREATE INDEX documents_statement_id_idx ON documents(statement_id);
+CREATE INDEX documents_status_idx ON documents(status);
+
+-- ============================================================================
+-- Configuration Table (Key-Value Store, defaults in backend/src/services/config.service.ts)
+-- ============================================================================
+CREATE TABLE configuration (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     key VARCHAR(100) NOT NULL,
     value TEXT NOT NULL,
@@ -251,7 +280,7 @@ CREATE TABLE IF NOT EXISTS configuration (
     updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-CREATE UNIQUE INDEX IF NOT EXISTS config_key_idx ON configuration(key);
+CREATE UNIQUE INDEX config_key_idx ON configuration(key);
 
 -- ============================================================================
 -- Trigger Function for updated_at
