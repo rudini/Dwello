@@ -4262,8 +4262,12 @@ reviewed independently afterwards.
 - [x] **Statement numbers count up per building and year** (`NK-<building>-<year>-0001`, `generateStatementNumber` in
   `calculation.service.ts`, `statement-number.pg.test.ts`); the random ending collided about once in 9000
 
+- [x] **Share column of a statement:** line items stored the share of the period rented (100 % for a whole year), shown
+  as "Anteil" between building costs and tenant share in the PDF and on the statement page; they now store the
+  tenant's share of the building total (`statement.service.ts`, `statement-generation.pg.test.ts`). The heating
+  scenario in `statement-detail.feature` (one apartment, 43 %) stays the same
+
 ### Open
-- [ ] Line items store `share_percentage` 100 (the share of the period rented), the PDF column "Anteil" shows it
 - [ ] Raise frontend coverage to 80 % and move the floors up
 
 ---

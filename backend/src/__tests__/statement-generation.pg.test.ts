@@ -189,18 +189,18 @@ afterAll(async () => {
 	}
 });
 
-// Line items: [category, building total, tenant share, share of the apartment's costs in %]
+// Line items: [category, building total, tenant share, tenant share of the building total in %]
 const lineC = [
 	// Heating key 0.7 × area + 0.3 × units: (0.7 × 40 + 0.3) / (0.7 × 150 + 0.9) × 3000 = 801.70
-	['Heating', '3000.00', '801.70', '100.0000'],
+	['Heating', '3000.00', '801.70', '26.7233'],
 	// Both caretaker invoices (1200 + 300) by area: 40 / 150 × 1500
-	['Caretaker', '1500.00', '400.00', '100.0000'],
+	['Caretaker', '1500.00', '400.00', '26.6667'],
 	// Per unit: 600 / 3
-	['Cold Water', '600.00', '200.00', '100.0000'],
+	['Cold Water', '600.00', '200.00', '33.3333'],
 	// Per rooms: 1.5 / 7.5 × 450
-	['Waste Disposal', '450.00', '90.00', '100.0000'],
+	['Waste Disposal', '450.00', '90.00', '20.0000'],
 	// Invoice without distribution key: split equally, 330 / 3
-	['Elevator', '330.00', '110.00', '100.0000']
+	['Elevator', '330.00', '110.00', '33.3333']
 ];
 
 describe('Mehrere Verteilschlüssel', () => {
@@ -225,13 +225,13 @@ describe('Mieterwechsel in der Abrechnungsperiode', () => {
 			rentalDays: 121,
 			lines: [
 				// Apartment share 56.3 / 105.9 × 3000 = 1594.90, × 121 / 366
-				['Heating', '3000.00', '527.28', '33.0600'],
+				['Heating', '3000.00', '527.28', '17.5760'],
 				// 80 / 150 × 1500 = 800, × 121 / 366
-				['Caretaker', '1500.00', '264.48', '33.0600'],
-				['Cold Water', '600.00', '66.12', '33.0600'],
+				['Caretaker', '1500.00', '264.48', '17.6320'],
+				['Cold Water', '600.00', '66.12', '11.0200'],
 				// 3.5 / 7.5 × 450 = 210, × 121 / 366
-				['Waste Disposal', '450.00', '69.43', '33.0600'],
-				['Elevator', '330.00', '36.37', '33.0600']
+				['Waste Disposal', '450.00', '69.43', '15.4289'],
+				['Elevator', '330.00', '36.37', '11.0212']
 			],
 			// Subtotal 963.68 + management fee 58.80 for 121 of 366 days
 			managementFee: '19.44',
@@ -246,11 +246,11 @@ describe('Mieterwechsel in der Abrechnungsperiode', () => {
 		expect(await generate(contracts.b)).toEqual({
 			rentalDays: 199,
 			lines: [
-				['Heating', '3000.00', '867.17', '54.3700'],
-				['Caretaker', '1500.00', '434.97', '54.3700'],
-				['Cold Water', '600.00', '108.74', '54.3700'],
-				['Waste Disposal', '450.00', '114.18', '54.3700'],
-				['Elevator', '330.00', '59.81', '54.3700']
+				['Heating', '3000.00', '867.17', '28.9057'],
+				['Caretaker', '1500.00', '434.97', '28.9980'],
+				['Cold Water', '600.00', '108.74', '18.1233'],
+				['Waste Disposal', '450.00', '114.18', '25.3733'],
+				['Elevator', '330.00', '59.81', '18.1242']
 			],
 			// Subtotal 1584.87 + management fee 58.80 for 199 of 366 days
 			managementFee: '31.97',
@@ -297,11 +297,11 @@ describe('Heizprofil', () => {
 			rentalDays: 121,
 			lines: [
 				// 18 + 14 + 11 + 5 = 48 % of 1594.90
-				['Heating', '3000.00', '765.55', '48.0000'],
-				['Caretaker', '1500.00', '264.48', '33.0600'],
-				['Cold Water', '600.00', '66.12', '33.0600'],
-				['Waste Disposal', '450.00', '69.43', '33.0600'],
-				['Elevator', '330.00', '36.37', '33.0600']
+				['Heating', '3000.00', '765.55', '25.5183'],
+				['Caretaker', '1500.00', '264.48', '17.6320'],
+				['Cold Water', '600.00', '66.12', '11.0200'],
+				['Waste Disposal', '450.00', '69.43', '15.4289'],
+				['Elevator', '330.00', '36.37', '11.0212']
 			],
 			managementFee: '19.44',
 			totalCosts: '1221.39',
@@ -315,11 +315,11 @@ describe('Heizprofil', () => {
 			rentalDays: 199,
 			lines: [
 				// June 1 % × 15 / 30 days + September to December 2 + 8 + 14 + 26 = 50.5 % of 1594.90
-				['Heating', '3000.00', '805.42', '50.5000'],
-				['Caretaker', '1500.00', '434.97', '54.3700'],
-				['Cold Water', '600.00', '108.74', '54.3700'],
-				['Waste Disposal', '450.00', '114.18', '54.3700'],
-				['Elevator', '330.00', '59.81', '54.3700']
+				['Heating', '3000.00', '805.42', '26.8473'],
+				['Caretaker', '1500.00', '434.97', '28.9980'],
+				['Cold Water', '600.00', '108.74', '18.1233'],
+				['Waste Disposal', '450.00', '114.18', '25.3733'],
+				['Elevator', '330.00', '59.81', '18.1242']
 			],
 			managementFee: '31.97',
 			totalCosts: '1555.09',
