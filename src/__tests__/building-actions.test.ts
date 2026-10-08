@@ -7,6 +7,8 @@ import {
 	type BuildingDetailsData
 } from '../routes/buildings/[id]/+page.server';
 import backendBuilding from '../../tests/contracts/building.json';
+import buildingList from '../../tests/contracts/buildings.json';
+import { load as listLoad } from '../routes/buildings/+page.server';
 
 type Action = (event: never) => Promise<unknown>;
 
@@ -154,5 +156,23 @@ describe('Gebäudedetail', () => {
 			occupiedCount: 1,
 			vacantCount: 1
 		});
+	});
+});
+
+describe('Gebäudeliste', () => {
+	// Backend-Antwort aus dem API-Vertrag (tests/contracts/buildings.json)
+	it('zeigt die Gebäude mit der Belegung ihrer Wohnungen', async () => {
+		const fetch = (async () => Response.json(buildingList)) as unknown as typeof globalThis.fetch;
+
+		const data = (await listLoad({
+			url: new URL('http://localhost/buildings'),
+			fetch
+		} as never)) as {
+			buildings: { name: string; occupiedCount: number; vacantCount: number }[];
+			total: number;
+		};
+
+		expect(data.total).toBe(1);
+		expect(data.buildings[0]).toMatchObject({ name: 'Seeblick', occupiedCount: 1, vacantCount: 1 });
 	});
 });

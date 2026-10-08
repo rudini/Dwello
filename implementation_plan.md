@@ -4216,13 +4216,15 @@ reviewed independently afterwards.
   non-allocable category before the backend checked it (`migrations.pg.test.ts`; may run again like 0004,
   `db/migrate.ts`); the category cascade touches only invoices still marked allocable; the locked checkbox names its
   reason for screen readers (`aria-describedby`)
+- [x] **API contracts for the building and tenant lists** (`tests/contracts/buildings.json`, `tenants.json`, checked
+  in `api-contracts.pg.test.ts`; used in `building-actions.test.ts` „Gebäudeliste“ and `tenant-detail.test.ts`
+  „Mieterliste“); the API delivered every field, no drift
 
 ### Verification
 - Backend 430 (249 unit + 181 PostgreSQL), coverage 82.3 % lines / 85.3 % functions; frontend 465, coverage
   above the floors; E2E 260 Chromium + 8 api passed; lint (no warnings), svelte-check, backend tsc clean
 
 ### Open
-- [ ] API contracts for the building and tenant lists
 - [ ] Type check `tests/` and the root `*.config.ts` (tsconfig includes only `src/`)
 
 ---

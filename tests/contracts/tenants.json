@@ -1,0 +1,19 @@
+{
+	"tenants": [
+		{
+			"id": "t1",
+			"firstName": "Anna",
+			"lastName": "Keller",
+			"email": "anna.keller@example.ch",
+			"phone": "+41 44 123 45 67",
+			"language": "de",
+			"address": "Seestrasse 12",
+			"postalCode": "8002",
+			"city": "Zürich",
+			"currentApartment": "2.01",
+			"currentBuilding": "Seeblick",
+			"isActive": true
+		}
+	],
+	"total": 1
+}

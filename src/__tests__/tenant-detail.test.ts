@@ -3,6 +3,7 @@ import { actions, load } from '../routes/tenants/[id]/+page.server';
 import { toContractHistory } from '../lib/server/contract-history';
 import { runAction } from './helpers/action';
 import tenant from '../../tests/contracts/tenant.json';
+import tenantList from '../../tests/contracts/tenants.json';
 
 const API = 'http://localhost:3001/api/v1';
 const day = (offset: number) =>
@@ -131,10 +132,7 @@ describe('Mieterliste', () => {
 		const { load: loadList } = await import('../routes/tenants/+page.server');
 		const fetch = (async () =>
 			Response.json({
-				tenants: [
-					{ id: 't1', firstName: 'Anna', lastName: 'Keller', isActive: true },
-					{ id: 't2', firstName: 'Eva', lastName: 'Graf', isActive: false }
-				],
+				tenants: [tenantList.tenants[0], { ...tenantList.tenants[0], id: 't2', isActive: false }],
 				total: 2
 			})) as unknown as typeof globalThis.fetch;
 
