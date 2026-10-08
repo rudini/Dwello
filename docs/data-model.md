@@ -299,7 +299,7 @@ Key-value store. The migrations insert no rows; a missing key falls back to its 
 | `company_address` | `''` | <= 500 characters |
 | `company_postal_code` | `''` | four digits |
 | `company_city` | `''` | <= 100 characters |
-| `iban` | `''` | valid IBAN incl. MOD-97 checksum |
+| `iban` | `''` | CH or LI IBAN, 21 characters, MOD-97 checksum |
 | `payment_deadline_days` | `30` | 7–90 |
 | `reminder_after_days` | `14` | 7–60 |
 | `default_language` | `de` | `de` \| `fr` \| `it` \| `rm` \| `en` |

@@ -3,7 +3,7 @@
 
 **Version:** 1.0
 **Date:** January 23, 2026
-**Status:** Final
+**Status:** Original product vision (not an implementation status)
 
 ---
 
@@ -104,8 +104,8 @@ Dwello provides:
 | **Deployment** | Docker / Docker Compose | Containerized, portable, easy to run anywhere |
 | **Maps** | OpenStreetMap + Leaflet | Open source, no licensing, complete privacy |
 | **Internationalization** | i18n library | German UI; statement PDFs in five languages |
-| **PDF Generation** | PDFKit or LibreOffice | Professional PDFs, QR code support |
-| **QR Bills** | Swiss QR-bill library | Standards-compliant Swiss invoices |
+| **PDF Generation** | PDFKit | Professional PDFs |
+| **QR Bills** | Own code + `qrcode` (npm) | Standards-compliant Swiss QR-bills |
 
 ### 4.2 System Architecture (BFF Pattern)
 
@@ -116,7 +116,7 @@ Dwello provides:
 │  - Dashboard, Property Management, Invoice Management   │
 │  - Statement Configuration & Generation                 │
 │  - German UI                                            │
-│  Cookies: session={jwt}; xsrf-token={token}            │
+│  Cookies: dwello_session={jwt}; dwello_xsrf={token}    │
 └──────────────────────┬──────────────────────────────────┘
                        │ HTTPS/TLS
 ┌──────────────────────▼──────────────────────────────────┐
@@ -234,7 +234,7 @@ Dwello provides:
   - Utility meter IDs (optional) - for tracking metered utilities
 
 **Occupancy Tracking:**
-- Current occupant status (occupied/vacant)
+- Current occupancy status (occupied, relet, vacant, reserved)
 - Occupancy duration
 - Historical occupancy records
 
@@ -383,9 +383,9 @@ Dwello provides:
 - **Flag System:** Auto-flag invalid costs with explanation, manual override option
 
 **Category Management:**
-- View all predefined categories
-- Add custom categories (with allowed/not allowed designation)
-- Edit/delete custom categories
+- View all categories (seeded ones and own ones are treated alike)
+- Add categories (with allowed/not allowed designation)
+- Edit any category; delete it while no invoice uses it
 - Category usage statistics
 
 **Bulk Operations:**
@@ -643,9 +643,9 @@ BALANCE (refund): CHF 30
 
 **Reminder System:**
 
-**Automatic Reminders:**
-- Generate reminders for overdue statements
-- Reminder trigger: X days after payment deadline (configurable, default 14 days)
+**Reminders (manual, levels 1–3):**
+- The property manager creates a reminder for an overdue statement
+- Reminder period: X days after payment deadline (configurable, default 14 days); automatic reminders are planned, not implemented
 - Show reminder status on statement detail view
 - Log of all reminders sent (for audit trail)
 
@@ -847,7 +847,7 @@ BALANCE (refund): CHF 30
 - Clean, minimal design
 - Color-coded status indicators (green=good, yellow=caution, red=urgent)
 - Mobile-responsive
-- Internationalized (German, French, Italian, Romansh, English)
+- German UI; statement PDFs in five languages
 
 ---
 
@@ -920,7 +920,7 @@ BALANCE (refund): CHF 30
   - Size (m²)
   - Rooms
   - Current Tenant
-  - Status (Occupied/Vacant)
+  - Status (Occupied/Relet/Vacant/Reserved)
   - Monthly Rent
   - Actions
 
@@ -1101,8 +1101,7 @@ BALANCE (refund): CHF 30
 **Tab 6: Category Management**
 - Table listing all categories
 - Columns: Name, Allowed/Not Allowed, Usage count, Actions
-- Predefined categories (read-only, marked with lock icon)
-- Custom categories (editable)
+- All categories editable; delete only while unused
 
 - Add Category Form (Modal):
   - Name (text field)
@@ -1112,7 +1111,7 @@ BALANCE (refund): CHF 30
   - Submit/Cancel
 
 - Edit Category Form:
-  - Name, Description, Allowed/Not Allowed (can't change predefined)
+  - Name, Description, Allowed/Not Allowed
   - Delete button
 
 **Tab 7: IBAN Setting**
@@ -1252,12 +1251,12 @@ BALANCE (refund): CHF 30
 - Async PDF generation (background processing)
 - Frontend code splitting and lazy loading
 - Responsive images and asset optimization
-- API rate limiting to prevent abuse
+- API rate limiting to prevent abuse (planned, not implemented)
 
 ### 7.2 Security
 
 **Authentication:**
-- OAuth 2.0 / SSO integration (Google, Microsoft, Swiss eID)
+- OAuth 2.0 / SSO integration (Google, Microsoft; Swiss eID planned, not implemented)
 - No direct password storage
 - Secure session tokens with expiration
 - HTTPS/TLS 1.2+ for all communication
@@ -1273,13 +1272,11 @@ BALANCE (refund): CHF 30
 - XSS protection (input sanitization, output encoding)
 - CSRF protection (token validation)
 - File upload validation (only PDFs accepted)
-- Rate limiting on API endpoints
+- Rate limiting on API endpoints (planned, not implemented)
 
 **Data at Rest:**
-- PostgreSQL connection requires SSL
-- Database encryption (optional, depends on deployment)
-- Sensitive fields encrypted (passwords, OAuth tokens)
-- Secure key management for encryption keys
+- No passwords or OAuth tokens are stored
+- PostgreSQL SSL, database encryption and field encryption (e.g. IBAN): planned, not implemented; depends on deployment
 
 **Audit Logging (planned, not implemented):**
 - Log all sensitive operations (invoice changes, statement generation)
@@ -1512,7 +1509,7 @@ BALANCE (refund): CHF 30
   - Pros: Maximum control, supports complex layouts
   - Cons: Slower, more resource intensive
 
-**Recommendation:** PDFKit for Swiss compliance, Puppeteer for complex layouts
+**Chosen:** PDFKit; the QR-bill section is drawn by own code with `qrcode` (see docs/tech-stack.md)
 
 **Swiss QR-bill Generation**
 
@@ -1537,7 +1534,7 @@ BALANCE (refund): CHF 30
 
 **Internationalization (i18n)**
 
-**Library:** `sveltekit-i18n` or `svelte-i18n`
+**Library:** `svelte-i18n`
 - **Purpose:** UI texts (German) and tenant-facing statement PDFs
 - **Languages:** UI in German; statement PDFs in German, French, Italian, Romansh, English
 - **Format:** JSON translation files per language
@@ -1545,7 +1542,7 @@ BALANCE (refund): CHF 30
 
 **Date/Time Handling**
 
-**Library:** `date-fns` or `Day.js`
+**Library:** none; built-in `Date` and `Intl`
 - **Purpose:** Date calculations, formatting per locale
 - **Use:** Contract dates, statement periods, prorating calculations
 - **Cost:** Free
@@ -1586,7 +1583,7 @@ An audit log is planned, not implemented.
 - Docker Compose setup (services: app, PostgreSQL, Ollama)
 - OAuth/SSO integration framework
 - Base UI layout and navigation
-- i18n setup (German, French, Italian, Romansh, English)
+- i18n setup (German UI; statement PDFs in five languages)
 - Basic authentication flow
 
 **Tests:** Authentication, environment setup, database connectivity
@@ -1707,7 +1704,7 @@ An audit log is planned, not implemented.
 - Page load time <2 seconds (95th percentile)
 - API response time <500ms (95th percentile)
 - PDF generation <5 seconds per statement
-- Statement batch generation (50 statements) <60 seconds
+- Statement batch generation (50 statements) <60 seconds (open, see docs/migration-mva.md P1)
 - No performance degradation with 200+ tenants
 
 ### Reliability Metrics
