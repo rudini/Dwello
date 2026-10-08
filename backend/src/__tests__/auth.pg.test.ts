@@ -38,6 +38,11 @@ describe('API-Zugriff', () => {
 		expect(await status(path, `Bearer ${forged}`)).toBe(401);
 	});
 
+	// Mit demselben Schlüssel signiert, aber für eine andere Anwendung ausgestellt
+	it.each(endpoints)('verweigert %s mit Token für eine andere Anwendung', async (path) => {
+		expect(await status(path, `Bearer ${await token(undefined, 'andere-app')}`)).toBe(401);
+	});
+
 	it.each(endpoints)('erlaubt %s mit gültigem Token', async (path) => {
 		expect(await status(path, `Bearer ${await token()}`)).toBe(200);
 	});

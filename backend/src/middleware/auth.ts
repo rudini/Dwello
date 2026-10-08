@@ -29,7 +29,8 @@ export type JwtPayload = z.infer<typeof JwtPayloadSchema>;
 export async function verifyJwt(token: string): Promise<JwtPayload | null> {
 	try {
 		const secret = new TextEncoder().encode(JWT_SECRET);
-		const { payload } = await jose.jwtVerify(token, secret);
+		// Issued by the BFF for this app (src/lib/server/jwt-config.ts)
+		const { payload } = await jose.jwtVerify(token, secret, { issuer: 'dwello', audience: 'dwello-app' });
 
 		// Validate payload structure with Zod
 		const result = JwtPayloadSchema.safeParse(payload);
