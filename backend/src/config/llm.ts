@@ -32,12 +32,12 @@ const OPERATOR_HOSTS = ['localhost', '127.0.0.1', '[::1]', 'ollama'];
 
 /** Who receives invoice data for categorization; null while the model runs on the operator's server */
 export function llmRecipient(
-	config: Pick<typeof llmConfig, 'baseUrl' | 'provider' | 'providerCountry'> = llmConfig
+	config: Pick<typeof llmConfig, 'baseUrl' | 'provider' | 'providerCountry' | 'enabled'> = llmConfig
 ): { provider: string; country: string } | null {
-	if (OPERATOR_HOSTS.includes(new URL(config.baseUrl).hostname)) return null;
+	if (!config.enabled || OPERATOR_HOSTS.includes(new URL(config.baseUrl).hostname)) return null;
 	if (!config.provider || !config.providerCountry) {
 		throw new Error(
-			`LLM_BASE_URL ${config.baseUrl} is an external provider: set LLM_PROVIDER and LLM_PROVIDER_COUNTRY for the privacy statement`
+			'LLM_BASE_URL is an external provider: set LLM_PROVIDER and LLM_PROVIDER_COUNTRY for the privacy statement'
 		);
 	}
 	return { provider: config.provider, country: config.providerCountry };

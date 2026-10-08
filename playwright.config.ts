@@ -51,7 +51,9 @@ export default defineConfig<{ driver: Driver }>({
 				MAIL_TRANSPORT: 'smtp',
 				MAIL_FROM: 'verwaltung@dwello.test',
 				SMTP_HOST: '127.0.0.1',
-				SMTP_PORT: '2525'
+				SMTP_PORT: '2525',
+				// No KI, as in CI, whatever the developer's .env sets: nothing listens on port 9
+				LLM_BASE_URL: 'http://127.0.0.1:9/v1'
 			}
 		},
 		{

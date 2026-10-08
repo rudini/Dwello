@@ -5,7 +5,12 @@
 import { describe, expect, it } from 'bun:test';
 import { llmRecipient } from '../config/llm';
 
-const config = (baseUrl: string, provider = '', providerCountry = '') => ({ baseUrl, provider, providerCountry });
+const config = (baseUrl: string, provider = '', providerCountry = '', enabled = true) => ({
+	baseUrl,
+	provider,
+	providerCountry,
+	enabled
+});
 
 describe('Empfänger der Rechnungsdaten', () => {
 	it('gibt niemanden an, wenn das Modell auf dem Server des Betreibers läuft', () => {
@@ -25,5 +30,9 @@ describe('Empfänger der Rechnungsdaten', () => {
 		expect(() => llmRecipient(config('https://api.openai.com/v1', 'OpenAI'))).toThrow(
 			'LLM_PROVIDER and LLM_PROVIDER_COUNTRY'
 		);
+	});
+
+	it('gibt niemanden an, wenn die KI-Kategorisierung ausgeschaltet ist', () => {
+		expect(llmRecipient(config('https://api.openai.com/v1', '', '', false))).toBeNull();
 	});
 });

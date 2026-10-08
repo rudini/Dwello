@@ -14,7 +14,7 @@ describe('Datenschutzerklärung zur KI-Kategorisierung', () => {
 
 		const notice = byTestId('llm-recipient')?.textContent;
 		expect(notice).toContain('Beispiel AG (Schweiz)');
-		expect(notice).toContain('Rechnungssteller, Beschreibung und Betrag');
+		expect(notice).toContain('Rechnungssteller (auch Einzelpersonen), Beschreibung und Betrag');
 		expect(notice).not.toContain('verlassen dafür den Server nicht');
 	});
 });

@@ -4335,6 +4335,10 @@ reviewed independently afterwards.
   to start without them (`index.ts`). `GET /api/v1/invoices/llm-recipient` → `src/routes/privacy/+page.server.ts`
   → notice under „Weitergabe an Dritte“. Operator checklist (Art. 9, 16 DSG) in the README. Tests:
   `llm-recipient.test.ts`, `invoice-categorization.pg.test.ts`, `privacy.test.ts`, `privacy-page.dom.test.ts`
+- [x] **Review follow-up:** with `LLM_ENABLED=false` no provider is named or required (red first); the E2E backend
+  pins `LLM_BASE_URL` to an unreachable local port, so a developer's `.env` cannot change the scenarios; the startup
+  error no longer prints the URL; the notice mentions billing entities that are individuals; README names which hosts
+  count as the operator's server. No API contract for `llm-recipient`: the contract check skips `null`, the default answer
 
 ### Open
 - [ ] Raise coverage to the target in `docs/test-pyramid.md` and move the floors up
