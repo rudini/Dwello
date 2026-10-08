@@ -74,6 +74,40 @@ describe('Neu kategorisieren', () => {
 		const detail = (await (await callApi(`/api/v1/invoices/${invoice.id}`)).json()) as Invoice;
 		expect(detail).toMatchObject({ categoryId: invoice.categoryId, llmCategoryId: null });
 	});
+
+	it('übernimmt eine sichere Kategorie der KI, wie beim Erfassen', async () => {
+		const building = await createBuilding({
+			name: `Neu-kategorisiert-Haus ${token}`,
+			address: 'Testweg 2',
+			postalCode: '8400',
+			city: 'Winterthur',
+			canton: 'ZH'
+		});
+		// Erfasst, während die KI nicht läuft: ohne Kategorie
+		const uncategorized = await createInvoice({
+			buildingId: building.id,
+			billingEntityName: 'Sanitär Meier',
+			description: `Leck Steigleitung ${token}`,
+			amount: '800.00',
+			invoiceDate: '2025-05-12'
+		});
+		const llm = openAiCompatible({ category: 'Repairs', confidence: 0.95, isAllowedUtilityCost: true });
+		try {
+			const response = await callApi(`/api/v1/invoices/${uncategorized.id}/recategorize`, { method: 'POST' });
+
+			expect(response.status).toBe(200);
+			const detail = (await (await callApi(`/api/v1/invoices/${uncategorized.id}`)).json()) as {
+				category: { name: string };
+				isValidUtilityCost: boolean;
+			};
+			expect(detail.category.name).toBe('Repairs');
+			expect(detail.isValidUtilityCost).toBe(false);
+		} finally {
+			llm.stop();
+			await deleteInvoice(uncategorized.id);
+			await deleteBuilding(building.id);
+		}
+	});
 });
 
 describe('Kategorie der KI überschreiben', () => {
