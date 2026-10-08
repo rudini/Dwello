@@ -75,6 +75,7 @@
 				type="checkbox"
 				bind:checked={isValidUtilityCost}
 				disabled={nonAllocable}
+				aria-describedby={nonAllocable ? 'invoice-category-warning-text' : undefined}
 				class="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
 			/>
 			<div>
@@ -93,9 +94,9 @@
 				data-testid="invoice-category-warning"
 			>
 				<Icon name="warning" size={18} class="text-amber-500 flex-shrink-0 mt-0.5" />
-				<div class="text-sm text-amber-700">
-					<strong>Hinweis:</strong> Diese Kategorie enthält typischerweise nicht umlagefähige Kosten (z.B.
-					Reparaturen, Versicherungen). Diese können nicht auf Mieter übertragen werden.
+				<div id="invoice-category-warning-text" class="text-sm text-amber-700">
+					<strong>Hinweis:</strong> Diese Kategorie enthält nicht umlagefähige Kosten (z.B. Reparaturen,
+					Versicherungen). Diese können nicht auf Mieter übertragen werden.
 				</div>
 			</div>
 		{/if}

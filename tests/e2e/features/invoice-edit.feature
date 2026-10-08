@@ -21,7 +21,7 @@ Funktionalität: Rechnung bearbeiten
     Und sieht der Liegenschaftsverwalter die Kategorie "Reparaturen" und den Verteilschlüssel "Pro Fläche (m²)"
     Und ist die Rechnung nicht umlagefähig
 
-  Szenario: Kosten einer nicht umlagefähigen Kategorie bleiben bei den Eigentümern
+  Szenario: Rechnung einer nicht umlagefähigen Kategorie lässt sich nicht als umlagefähig markieren
     Wenn der Liegenschaftsverwalter die Kategorie "Reparaturen" wählt
     Dann lässt sich die Rechnung nicht als umlagefähig markieren
 

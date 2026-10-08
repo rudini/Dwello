@@ -14,7 +14,8 @@ import pg from 'pg';
  * 0007 deleted the "Per Person" and "By Consumption" keys,
  * 0006 changed the apartment status check,
  * 0005 created the documents table, 0001-0003 created and filled the schema
- * (0004 only corrects rows that still have the wrong total, so it may run again).
+ * (0004 only corrects rows that still have the wrong total, 0011 only invoices still marked allocable in a
+ * non-allocable category, so both may run again).
  */
 const ALREADY_APPLIED = `
 	SELECT CASE

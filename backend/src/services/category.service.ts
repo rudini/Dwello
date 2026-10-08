@@ -178,7 +178,7 @@ export async function updateCategory(id: string, data: Partial<NewCategory>): Pr
 			.returning();
 		// Costs no longer allocable leave its invoices too, else statements would still pass them on (OR 257a)
 		if (category && data.isAllowedUtilityCost === false) {
-			await tx.update(invoices).set({ isValidUtilityCost: false, updatedAt: new Date() }).where(eq(invoices.categoryId, id));
+			await tx.update(invoices).set({ isValidUtilityCost: false, updatedAt: new Date() }).where(and(eq(invoices.categoryId, id), eq(invoices.isValidUtilityCost, true)));
 		}
 		return category || null;
 	});

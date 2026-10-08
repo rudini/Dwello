@@ -94,9 +94,22 @@ describe('Migrationen anwenden', () => {
 		expect(columns).toEqual([{ column_name: 'manual_override_reason' }]);
 	});
 
+	// Vor der Prüfung im Backend konnte eine Rechnung einer nicht umlagefähigen Kategorie umlagefähig gespeichert werden
+	it('nimmt bei einer bis 0010 migrierten Datenbank Rechnungen nicht umlagefähiger Kategorien aus den umlagefähigen Kosten', async () => {
+		const name = await database(upTo('0010'));
+		const wronglyAllocable = `SELECT COUNT(*)::int AS invoices FROM invoices i JOIN categories c ON c.id = i.category_id
+			WHERE NOT c.is_allowed_utility_cost AND i.is_valid_utility_cost`;
+		await query(name, `UPDATE invoices SET is_valid_utility_cost = true`);
+		expect((await query(name, wronglyAllocable))[0].invoices).toBeGreaterThan(0);
+
+		expect(await migrate(`${server}/${name}`, migrations)).toEqual(files.filter((file) => file > '0010~'));
+		expect(await query(name, wronglyAllocable)).toEqual([{ invoices: 0 }]);
+	});
+
 	it('erkennt eine von Hand vollständig migrierte Datenbank', async () => {
 		const name = await database(files);
 
-		expect(await migrate(`${server}/${name}`, migrations)).toEqual([]);
+		// 0011 only corrects data and cannot be told apart, so it runs again (changing nothing)
+		expect(await migrate(`${server}/${name}`, migrations)).toEqual(files.filter((file) => file > '0010~'));
 	});
 });
