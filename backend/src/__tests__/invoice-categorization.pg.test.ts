@@ -17,7 +17,28 @@ type Invoice = {
 };
 
 const token = crypto.randomUUID();
-const ollamaUrl = llmConfig.baseUrl;
+const configured = { ...llmConfig };
+
+// A provider with an OpenAI-compatible API that only answers with the configured key
+function openAiCompatible(answer: object) {
+	const server = Bun.serve({
+		port: 0,
+		fetch: (request) => {
+			if (request.headers.get('authorization') !== 'Bearer test-key') return new Response(null, { status: 401 });
+			const path = new URL(request.url).pathname;
+			if (path === '/v1/models') return Response.json({ data: [{ id: 'test-model' }] });
+			if (path !== '/v1/chat/completions') return new Response(null, { status: 404 });
+			return Response.json({ choices: [{ message: { role: 'assistant', content: JSON.stringify(answer) } }] });
+		}
+	});
+	Object.assign(llmConfig, { baseUrl: `http://127.0.0.1:${server.port}/v1`, apiKey: 'test-key' });
+	return {
+		stop: () => {
+			server.stop();
+			Object.assign(llmConfig, { baseUrl: 'http://127.0.0.1:9', apiKey: '' });
+		}
+	};
+}
 let removeBuilding = async () => {};
 let invoice: Invoice;
 
@@ -32,7 +53,7 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-	llmConfig.baseUrl = ollamaUrl;
+	Object.assign(llmConfig, configured);
 	await removeBuilding();
 });
 
@@ -80,19 +101,8 @@ describe('Kategorie der KI überschreiben', () => {
 describe('Kategorie der KI für eine neue Rechnung', () => {
 	// Ob Kosten umlagefähig sind, entscheidet die Kategorie (OR 257a), nicht die Einschätzung der KI
 	it('legt eine Reparatur nicht auf die Mieter um, auch wenn die KI sie für umlagefähig hält', async () => {
-		// Ollama an der Systemgrenze ersetzt: antwortet sicher mit "Repairs", aber umlagefähig
-		const ollama = Bun.serve({
-			port: 0,
-			fetch: () =>
-				Response.json({
-					response: JSON.stringify({
-						category: 'Repairs',
-						confidence: 0.95,
-						isAllowedUtilityCost: true
-					})
-				})
-		});
-		llmConfig.baseUrl = `http://127.0.0.1:${ollama.port}`;
+		// OpenAI-kompatibler Anbieter an der Systemgrenze ersetzt: antwortet sicher mit "Repairs", aber umlagefähig
+		const llm = openAiCompatible({ category: 'Repairs', confidence: 0.95, isAllowedUtilityCost: true });
 		const building = await createBuilding({
 			name: `KI-Haus ${token}`,
 			address: 'Testweg 1',
@@ -113,9 +123,21 @@ describe('Kategorie der KI für eine neue Rechnung', () => {
 			expect(invoice.category?.name).toBe('Repairs');
 			expect(invoice.isValidUtilityCost).toBe(false);
 		} finally {
-			ollama.stop();
-			llmConfig.baseUrl = 'http://127.0.0.1:9';
+			llm.stop();
 			await deleteBuilding(building.id);
+		}
+	});
+});
+
+describe('KI-Anbieter', () => {
+	it('gilt als erreichbar, wenn der konfigurierte Anbieter mit dem API-Key antwortet', async () => {
+		const llm = openAiCompatible({});
+		try {
+			const status = await (await callApi('/api/v1/invoices/llm-status')).json();
+
+			expect(status).toMatchObject({ llmAvailable: true });
+		} finally {
+			llm.stop();
 		}
 	});
 });

@@ -40,4 +40,4 @@ Never run `bun test` without the preload: `*.pg.test.ts` would write into the de
 ## Troubleshooting
 
 - `bun run dev` refuses with "Migrationen, die es nicht mehr gibt" or "ohne diese Migrationen": the dev database predates the current migrations; run `bun run db:reset`.
-- Invoice categorization fails: Ollama is not running or the model in `OLLAMA_MODEL` (default in `src/config/llm.ts`) is missing; with Docker: `docker exec dwello-ollama-dev ollama pull <model>`.
+- Invoice categorization fails: the provider in `LLM_BASE_URL` (any OpenAI-compatible API, default the local Ollama, see `src/config/llm.ts`) is not running, `LLM_API_KEY` is wrong, or the model in `LLM_MODEL` is missing; for Ollama with Docker: `docker exec dwello-ollama-dev ollama pull <model>`.

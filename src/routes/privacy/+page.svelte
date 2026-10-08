@@ -4,7 +4,7 @@
 			title: 'Welche Daten Dwello speichert',
 			paragraphs: [
 				'Dwello speichert die Daten, die für die Verwaltung der Liegenschaften und die Nebenkostenabrechnung nötig sind: Gebäude und Wohnungen, Mieter mit Kontaktdaten und Korrespondenzadresse, Mietverträge, Rechnungen sowie die erstellten Abrechnungen, Zahlungen und Mahnungen.',
-				'Die Daten liegen in der PostgreSQL-Datenbank des Betreibers dieser Dwello-Installation. Rechnungen werden mit einem Sprachmodell kategorisiert, das auf dem Server des Betreibers läuft (Ollama); Rechnungsdaten verlassen dafür den Server nicht.'
+				'Die Daten liegen in der PostgreSQL-Datenbank des Betreibers dieser Dwello-Installation. Rechnungen werden mit einem Sprachmodell kategorisiert. Läuft es auf dem Server des Betreibers (Standard: Ollama), verlassen Rechnungsdaten dafür den Server nicht; nutzt der Betreiber einen externen Anbieter, erhält dieser Rechnungssteller, Beschreibung und Betrag der Rechnung.'
 			]
 		},
 		{

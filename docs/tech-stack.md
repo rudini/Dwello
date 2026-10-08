@@ -715,26 +715,7 @@ ollama run llama2
 ollama run mistral
 ```
 
-**Integration:**
-```typescript
-async function categorizeInvoice(description: string): Promise<{
-  category: string
-  confidence: number
-}> {
-  const response = await fetch('http://ollama:11434/api/generate', {
-    method: 'POST',
-    body: JSON.stringify({
-      model: 'mistral',
-      prompt: `Categorize this invoice: ${description}.
-               Categories: Heating, Water, Electricity, Maintenance...`,
-      stream: false
-    })
-  })
-
-  const result = await response.json()
-  return parseResponse(result.response)
-}
-```
+**Integration:** `backend/src/services/llm.service.ts` talks to any OpenAI-compatible API (`/chat/completions`, `/models`). The provider is set by environment variables: `LLM_BASE_URL` (default: the local Ollama at `http://localhost:11434/v1`), `LLM_API_KEY` (Bearer token, empty for Ollama) and `LLM_MODEL` (default `qwen2.5:3b`). With an external provider, the invoice's billing entity, description and amount leave the server.
 
 **Model Selection:**
 - **Mistral 7B:** Balanced, good for categorization
@@ -991,7 +972,7 @@ services:
       - "3000:3000"
     environment:
       DATABASE_URL: postgresql://user:pass@postgres:5432/dwello
-      OLLAMA_API_URL: http://ollama:11434
+      LLM_BASE_URL: http://ollama:11434/v1
       NODE_ENV: production
     depends_on:
       - postgres
@@ -1060,7 +1041,7 @@ NODE_ENV=development
 DATABASE_URL=postgresql://user:password@localhost:5432/dwello
 OAUTH_CLIENT_ID=google_dev_client_id
 OAUTH_CLIENT_SECRET=google_dev_secret
-OLLAMA_API_URL=http://localhost:11434
+LLM_BASE_URL=http://localhost:11434/v1
 ```
 
 **Production (.env.production):**
@@ -1069,7 +1050,7 @@ NODE_ENV=production
 DATABASE_URL=postgresql://dwello:password@postgres.prod:5432/dwello
 OAUTH_CLIENT_ID=google_prod_client_id
 OAUTH_CLIENT_SECRET=google_prod_secret
-OLLAMA_API_URL=http://ollama:11434
+LLM_BASE_URL=http://ollama:11434/v1
 JWT_SECRET=long-random-secret-key
 HTTPS=true
 ```

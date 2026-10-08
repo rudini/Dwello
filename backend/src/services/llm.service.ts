@@ -1,6 +1,6 @@
 /**
  * LLM Service
- * Invoice categorization using Ollama (local LLM)
+ * Invoice categorization through an LLM with an OpenAI-compatible API (by default the local Ollama)
  */
 
 import {
@@ -53,27 +53,30 @@ function cacheResult(key: string, result: LLMCategorizationResult): void {
 	}
 }
 
+/** Headers for the configured provider; the key only when one is set */
+function llmHeaders(): Record<string, string> {
+	return {
+		'Content-Type': 'application/json',
+		...(llmConfig.apiKey && { Authorization: `Bearer ${llmConfig.apiKey}` })
+	};
+}
+
 /**
- * Call Ollama API for text generation
+ * Call the OpenAI-compatible chat completions API
  */
-async function callOllama(prompt: string): Promise<string> {
+async function callLlm(prompt: string): Promise<string> {
 	const controller = new AbortController();
 	const timeoutId = setTimeout(() => controller.abort(), llmConfig.timeout);
 
 	try {
-		const response = await fetch(`${llmConfig.baseUrl}/api/generate`, {
+		const response = await fetch(`${llmConfig.baseUrl}/chat/completions`, {
 			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json'
-			},
+			headers: llmHeaders(),
 			body: JSON.stringify({
 				model: llmConfig.model,
-				prompt,
-				stream: false,
-				options: {
-					temperature: 0.3, // Lower temperature for more consistent categorization
-					num_predict: 200 // Limit response length
-				}
+				messages: [{ role: 'user', content: prompt }],
+				temperature: 0.3, // Lower temperature for more consistent categorization
+				max_tokens: 200 // Limit response length
 			}),
 			signal: controller.signal
 		});
@@ -81,11 +84,11 @@ async function callOllama(prompt: string): Promise<string> {
 		clearTimeout(timeoutId);
 
 		if (!response.ok) {
-			throw new Error(`Ollama API error: ${response.status} ${response.statusText}`);
+			throw new Error(`LLM API error: ${response.status} ${response.statusText}`);
 		}
 
-		const data = (await response.json()) as { response?: string };
-		return data.response || '';
+		const data = (await response.json()) as { choices?: { message?: { content?: string } }[] };
+		return data.choices?.[0]?.message?.content || '';
 	} catch (error) {
 		clearTimeout(timeoutId);
 
@@ -98,14 +101,15 @@ async function callOllama(prompt: string): Promise<string> {
 }
 
 /**
- * Check if Ollama is available
+ * Check if the configured LLM provider answers
  */
-export async function isOllamaAvailable(): Promise<boolean> {
+export async function isLlmAvailable(): Promise<boolean> {
 	if (!llmConfig.enabled) return false;
 
 	try {
-		const response = await fetch(`${llmConfig.baseUrl}/api/tags`, {
+		const response = await fetch(`${llmConfig.baseUrl}/models`, {
 			method: 'GET',
+			headers: llmHeaders(),
 			signal: AbortSignal.timeout(5000)
 		});
 		return response.ok;
@@ -154,9 +158,9 @@ export async function categorizeInvoice(invoice: {
 	}
 
 	try {
-		// Build prompt and call Ollama
+		// Build prompt and call the LLM
 		const prompt = buildCategorizationPrompt(invoice);
-		const response = await callOllama(prompt);
+		const response = await callLlm(prompt);
 
 		// Parse the response
 		const result = parseLLMResponse(response);

@@ -53,8 +53,9 @@ services:
       - PORT=3001
       - DATABASE_URL=postgresql://dwello:${POSTGRES_PASSWORD:-dwello}@postgres:5432/dwello
       - JWT_SECRET=${JWT_SECRET}
-      - OLLAMA_API_URL=http://ollama:11434
-      - OLLAMA_MODEL=${OLLAMA_MODEL:-mistral:latest}
+      - LLM_BASE_URL=${LLM_BASE_URL:-http://ollama:11434/v1}
+      - LLM_API_KEY=${LLM_API_KEY:-}
+      - LLM_MODEL=${LLM_MODEL:-qwen2.5:3b}
       - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:3000}
     depends_on:
       postgres:
@@ -103,7 +104,8 @@ services:
       - ollama_data:/root/.ollama
     networks:
       - dwello-network
-    # Note: After first start, run: docker exec dwello-ollama ollama pull mistral
+    # Note: After first start, run: docker exec dwello-ollama ollama pull qwen2.5:3b
+    # Not needed when LLM_BASE_URL points to an external provider
 
   # ============================================
   # Nginx Reverse Proxy (Optional)

@@ -16,7 +16,7 @@ import {
 	validateInvoice,
 	getInvoicesForStatement
 } from '../services/invoice.service';
-import { isOllamaAvailable, getCacheStats, categorizeInvoice } from '../services/llm.service';
+import { isLlmAvailable, getCacheStats, categorizeInvoice } from '../services/llm.service';
 import { getUtilityCostRules } from '../services/utility-validation.service';
 
 // Validation schemas
@@ -92,7 +92,7 @@ export const invoiceRoutes = new Elysia({ prefix: '/api/v1/invoices' })
 	)
 	// Get LLM/categorization status
 	.get('/llm-status', async () => {
-		const available = await isOllamaAvailable();
+		const available = await isLlmAvailable();
 		const cacheStats = getCacheStats();
 		return {
 			llmAvailable: available,

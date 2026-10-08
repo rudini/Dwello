@@ -4318,11 +4318,16 @@ reviewed independently afterwards.
 - [x] **D1 overdue statements locked:** delete, new line items and amount changes were only blocked for `sent`
   and `paid`; a stored `overdue` statement could be deleted or extended. Every status but `draft` is locked now
   (`statement.service.ts`; test `statement-lock.pg.test.ts`, red first for each of the three)
+- [x] **LLM provider by configuration (Q2):** `llm.service.ts` talks to any OpenAI-compatible API
+  (`/chat/completions`, `/models`) instead of Ollama's own `/api/generate`; `LLM_BASE_URL` (default the local Ollama
+  at `/v1`), `LLM_API_KEY`, `LLM_MODEL` replace the `OLLAMA_*` variables (`config/llm.ts`, `.env.example`,
+  `docker-compose.prod.yml`); `isOllamaAvailable` became `isLlmAvailable`. The privacy statement no longer claims
+  invoice data never leaves the server. Test: `invoice-categorization.pg.test.ts` (provider stand-in that only
+  answers with the key, red first)
 
 ### Open
 - [ ] Raise coverage to the target in `docs/test-pyramid.md` and move the floors up
-- [ ] MVA: confirm the scenarios and record ADRs in `docs/adr/`; close R2 (database backup), measure P1,
-  Q2 provider leaks
+- [ ] MVA: confirm the scenarios and record ADRs in `docs/adr/`; close R2 (database backup), measure P1 and P2
 
 ---
 
