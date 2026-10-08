@@ -1,4 +1,4 @@
-import { chromium, Page, BrowserContext } from 'playwright';
+import { chromium, type Page, type BrowserContext } from 'playwright';
 import * as jose from 'jose';
 
 interface TestResult {

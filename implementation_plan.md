@@ -4219,13 +4219,16 @@ reviewed independently afterwards.
 - [x] **API contracts for the building and tenant lists** (`tests/contracts/buildings.json`, `tenants.json`, checked
   in `api-contracts.pg.test.ts`; used in `building-actions.test.ts` „Gebäudeliste“ and `tenant-detail.test.ts`
   „Mieterliste“); the API delivered every field, no drift
+- [x] **Type check of `tests/` and the root `*.config.ts`** (`tsconfig.json`, so `npm run check` and CI cover them);
+  it found 9 errors: a `beforeEach` used without import in `api-proxy.test.ts` (left by this session, ran only
+  through Vitest globals), `MaybePromise` chained without `Promise.resolve` in `auth-routes.test.ts`, value imports
+  of types in `exploratory-test.ts`
 
 ### Verification
 - Backend 430 (249 unit + 181 PostgreSQL), coverage 82.3 % lines / 85.3 % functions; frontend 465, coverage
   above the floors; E2E 260 Chromium + 8 api passed; lint (no warnings), svelte-check, backend tsc clean
 
 ### Open
-- [ ] Type check `tests/` and the root `*.config.ts` (tsconfig includes only `src/`)
 
 ---
 

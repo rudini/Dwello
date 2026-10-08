@@ -90,7 +90,7 @@ Bedienung, die kein Fachverhalten ist, steht in eigenen Features: `breadcrumb.fe
 
 | Ebene | Lokal | CI (`.github/workflows/ci.yml`) |
 |---|---|---|
-| Lint und Typen | `npm run lint` (Warnungen scheitern), `npm run check`, `cd backend && bun run type-check` | Job „Lint and types“ |
+| Lint und Typen | `npm run lint` (Warnungen scheitern), `npm run check` (auch `tests/` und `*.config.ts`), `cd backend && bun run type-check` | Job „Lint and types“ |
 | Unit Frontend | `npm run test` (mit Coverage: `npm run test:coverage`) | Job „Unit tests“: alle Tests mit Coverage-Untergrenze |
 | Unit + Integration Backend | `cd backend && bun run test` (nur DB: `bun run test:pg`) | Job „Unit tests“, in PRs wenn `backend/` oder `tests/contracts/` geändert, auf `main` immer; mit Coverage-Untergrenze |
 | Akzeptanz | `npm run test:e2e` (nur API-Driver: `-- --project=api`) | Job „E2E tests“; PRs Chromium und `api`, `main` alle Browser und `api` |
@@ -100,4 +100,3 @@ Voraussetzung lokal: PostgreSQL auf Port 5432 mit Benutzer `dwello`. Die Testdat
 ## Offen
 
 - [ ] Frontend-Coverage auf 80 % anheben, dann die Untergrenzen nachziehen (Backend seit Oktober 2026 darüber)
-- [ ] Typprüfung für `tests/` und die `*.config.ts` im Wurzelverzeichnis (`tsconfig.json` umfasst nur `src/`)

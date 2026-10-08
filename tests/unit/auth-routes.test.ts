@@ -139,7 +139,7 @@ describe('Auth Routes Integration Tests', () => {
 				cookies
 			});
 
-			await GET(event as never).catch(() => {});
+			await Promise.resolve(GET(event as never)).catch(() => {});
 
 			expect(JSON.parse(cookies._store.get('dwello_login')!)).toEqual({ provider: 'google', redirectTo: '/buildings?search=See' });
 		});
@@ -154,7 +154,7 @@ describe('Auth Routes Integration Tests', () => {
 					cookies
 				});
 
-				await GET(event as never).catch(() => {});
+				await Promise.resolve(GET(event as never)).catch(() => {});
 
 				expect(JSON.parse(cookies._store.get('dwello_login')!).redirectTo).toBe('/dashboard');
 			}
@@ -164,7 +164,7 @@ describe('Auth Routes Integration Tests', () => {
 			vi.mocked(oauthModule.validateProviderConfig).mockReturnValueOnce(false);
 			const { GET } = await import('$lib/../routes/auth/login/+server');
 
-			const redirect = await GET(createMockRequestEvent({ url: 'http://localhost:3000/auth/login?provider=microsoft' }) as never).catch(
+			const redirect = await Promise.resolve(GET(createMockRequestEvent({ url: 'http://localhost:3000/auth/login?provider=microsoft' }) as never)).catch(
 				(r) => r
 			);
 
@@ -224,7 +224,7 @@ describe('Auth Routes Integration Tests', () => {
 		const callback = async (query: string, cookies = flowCookies()) => {
 			const { GET } = await import('$lib/../routes/auth/callback/+server');
 			const event = createMockRequestEvent({ url: `http://localhost:3000/auth/callback?${query}`, cookies });
-			return GET(event as never).then(
+			return Promise.resolve(GET(event as never)).then(
 				() => expect.fail('Should have thrown redirect'),
 				(redirect) => redirect
 			);
