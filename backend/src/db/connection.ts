@@ -8,7 +8,7 @@ import { Pool } from 'pg';
 import * as schema from './schema';
 
 // Database configuration from environment
-const DATABASE_URL = process.env.DATABASE_URL || 'postgresql://dwello:dwello@localhost:5432/dwello';
+export const DATABASE_URL = process.env.DATABASE_URL || 'postgresql://dwello:dwello@localhost:5432/dwello';
 const POOL_SIZE = parseInt(process.env.DB_POOL_SIZE || '20', 10);
 
 // Create PostgreSQL connection pool

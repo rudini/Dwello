@@ -5,6 +5,6 @@
 import { closeConnection } from '../src/db/connection';
 import { loadDemoData } from '../src/db/demo-data';
 
-await loadDemoData(process.env.DATABASE_URL || 'postgresql://dwello:dwello@localhost:5432/dwello');
+await loadDemoData();
 await closeConnection();
 console.log('Demodaten geladen');
