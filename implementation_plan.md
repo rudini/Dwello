@@ -4315,11 +4315,14 @@ reviewed independently afterwards.
 - [x] **MVA plan scenario-first:** `docs/migration-mva.md` measures design-neutral quality scenarios (changeability,
   testability, data integrity, security, performance, resilience) against the code; the module folders became a
   deferred decision, since every changeability scenario is met by the current two layers
+- [x] **D1 overdue statements locked:** delete, new line items and amount changes were only blocked for `sent`
+  and `paid`; a stored `overdue` statement could be deleted or extended. Every status but `draft` is locked now
+  (`statement.service.ts`; test `statement-lock.pg.test.ts`, red first for each of the three)
 
 ### Open
 - [ ] Raise coverage to the target in `docs/test-pyramid.md` and move the floors up
 - [ ] MVA: confirm the scenarios and record ADRs in `docs/adr/`; close R2 (database backup), measure P1,
-  fix D1 (overdue statements can be deleted or extended), Q2 provider leaks
+  Q2 provider leaks
 
 ---
 

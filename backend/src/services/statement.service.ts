@@ -350,12 +350,12 @@ export async function updateStatement(
 	const existing = await getStatement(id);
 	if (!existing) return null;
 
-	// Don't allow editing certain fields if statement is sent or paid
-	if (['sent', 'paid'].includes(existing.status)) {
+	// Once sent, the amounts stay as the tenant received them
+	if (existing.status !== 'draft') {
 		const protectedFields = ['totalCosts', 'totalAdvancePayments', 'managementFee', 'balance'];
 		for (const field of protectedFields) {
 			if (field in data) {
-				throw new Error(`Cannot modify ${field} for sent or paid statements`);
+				throw new Error(`Cannot modify ${field} for a statement that is no longer a draft`);
 			}
 		}
 	}
@@ -419,9 +419,9 @@ export async function deleteStatement(id: string): Promise<{ success: boolean; e
 		return { success: false, error: 'Statement not found' };
 	}
 
-	// Don't allow deleting sent or paid statements
-	if (['sent', 'paid'].includes(existing.status)) {
-		return { success: false, error: 'Cannot delete sent or paid statements' };
+	// Only a draft may be deleted; once sent, the statement stays as the tenant received it
+	if (existing.status !== 'draft') {
+		return { success: false, error: 'Cannot delete a statement that is no longer a draft' };
 	}
 
 	// Delete line items first (cascade should handle this, but be explicit)
@@ -445,8 +445,8 @@ export async function addLineItems(
 		throw new Error('Statement not found');
 	}
 
-	if (['sent', 'paid'].includes(statement.status)) {
-		throw new Error('Cannot add line items to sent or paid statements');
+	if (statement.status !== 'draft') {
+		throw new Error('Cannot add line items to a statement that is no longer a draft');
 	}
 
 	// Get current max sort order
