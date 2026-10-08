@@ -68,7 +68,6 @@ export default defineConfig<{ driver: Driver }>({
 				PORT: '3100',
 				ORIGIN: 'http://localhost:3100',
 				BACKEND_URL: E2E_BACKEND_URL,
-				BACKEND_API_URL: E2E_BACKEND_URL,
 				JWT_SECRET: E2E_JWT_SECRET,
 				OAUTH_GOOGLE_CLIENT_ID: 'e2e-google-client',
 				OAUTH_GOOGLE_CLIENT_SECRET: 'e2e-google-secret',

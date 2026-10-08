@@ -57,7 +57,7 @@ Dwello is a full-stack TypeScript application: a SvelteKit frontend that doubles
 │        (src/lib/server/api-proxy.ts)        │
 └──────────────────┬──────────────────────────┘
                    │
-                   │ Internal network (BACKEND_API_URL)
+                   │ Internal network (BACKEND_URL)  
                    │ Authorization: Bearer {jwt}
                    │
 ┌──────────────────▼──────────────────────────┐
@@ -173,7 +173,7 @@ npm run build   # adapter-node output in build/
 npm run dev     # http://localhost:3000 (vite.config.ts); needs the backend on 3001
 ```
 
-**Environment Variables:** see `.env.example` (e.g. `BACKEND_API_URL`, `JWT_SECRET`, `JWT_EXPIRY`, `OAUTH_GOOGLE_*`, `OAUTH_MICROSOFT_*`, `COOKIE_*`).
+**Environment Variables:** see `.env.example` (e.g. `BACKEND_URL`, `JWT_SECRET`, `JWT_EXPIRY`, `OAUTH_GOOGLE_*`, `OAUTH_MICROSOFT_*`, `COOKIE_*`).
 
 ---
 
@@ -347,7 +347,7 @@ See `.env.example`. Main variables:
 ```
 # Frontend / BFF
 PUBLIC_APP_URL=http://localhost:3000
-BACKEND_API_URL=http://localhost:3001
+BACKEND_URL=http://localhost:3001
 JWT_SECRET=...            # min 32 characters, same value in backend
 JWT_EXPIRY=7d
 OAUTH_GOOGLE_CLIENT_ID / OAUTH_GOOGLE_CLIENT_SECRET / OAUTH_GOOGLE_REDIRECT_URI

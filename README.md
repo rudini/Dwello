@@ -264,6 +264,8 @@ This is a checklist, not legal advice.
 
 **Upgrading from `OLLAMA_*` variables:** the LLM is now any OpenAI-compatible API. Rename `OLLAMA_API_URL` to `LLM_BASE_URL` and append `/v1` (`http://ollama:11434/v1`), `OLLAMA_MODEL` to `LLM_MODEL`. The default model is `qwen2.5:3b`; pull it (`docker exec dwello-ollama ollama pull qwen2.5:3b`) or set `LLM_MODEL` to the model you have. The old variables are ignored.
 
+**Upgrading from `BACKEND_API_URL`:** the frontend reads the backend address only from `BACKEND_URL` now. Rename the variable in your `.env`; `docker-compose.prod.yml` sets it already.
+
 ---
 
 ## Contributing
