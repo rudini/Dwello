@@ -45,16 +45,17 @@ describe('Einstellungen speichern', () => {
 
 	// Gültige Werte, aber die Datenbank bricht beim zweiten ab: der erste darf dann nicht gespeichert bleiben
 	it('speichert nichts, wenn das Schreiben mittendrin scheitert', async () => {
-		await db.execute(sql`
-			CREATE FUNCTION reject_test_city() RETURNS trigger AS $$
-			BEGIN
-				IF NEW.key = 'company_city' AND NEW.value = 'Abbruchhausen' THEN RAISE EXCEPTION 'Testabbruch'; END IF;
-				RETURN NEW;
-			END $$ LANGUAGE plpgsql`);
-		await db.execute(sql`
-			CREATE TRIGGER reject_test_city BEFORE INSERT OR UPDATE ON configuration
-			FOR EACH ROW EXECUTE FUNCTION reject_test_city()`);
 		try {
+			await db.execute(sql`
+				CREATE FUNCTION reject_test_city() RETURNS trigger AS $$
+				BEGIN
+					IF NEW.key = 'company_city' AND NEW.value = 'Abbruchhausen' THEN RAISE EXCEPTION 'Testabbruch'; END IF;
+					RETURN NEW;
+				END $$ LANGUAGE plpgsql`);
+			await db.execute(sql`
+				CREATE TRIGGER reject_test_city BEFORE INSERT OR UPDATE ON configuration
+				FOR EACH ROW EXECUTE FUNCTION reject_test_city()`);
+
 			const response = await sendJson('PUT', '/api/v1/config', {
 				company_name: `Verwaltung ${crypto.randomUUID()}`,
 				company_city: 'Abbruchhausen'
@@ -63,8 +64,8 @@ describe('Einstellungen speichern', () => {
 			expect(response.status).toBe(500);
 			expect(await getConfig('company_name')).toBe(companyName);
 		} finally {
-			await db.execute(sql`DROP TRIGGER reject_test_city ON configuration`);
-			await db.execute(sql`DROP FUNCTION reject_test_city()`);
+			await db.execute(sql`DROP TRIGGER IF EXISTS reject_test_city ON configuration`);
+			await db.execute(sql`DROP FUNCTION IF EXISTS reject_test_city()`);
 		}
 	});
 
