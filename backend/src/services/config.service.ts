@@ -154,9 +154,9 @@ export async function getAllConfig(): Promise<Record<ConfigKey, string | null>> 
 }
 
 /**
- * Set a configuration value
+ * Throws when the key is unknown or the value invalid
  */
-export async function setConfig(key: ConfigKey, value: string): Promise<Configuration> {
+async function validateConfig(key: ConfigKey, value: string) {
 	// Validate the key exists
 	if (!(key in CONFIG_KEYS)) {
 		throw new Error(`Unknown configuration key: ${key}`);
@@ -181,6 +181,13 @@ export async function setConfig(key: ConfigKey, value: string): Promise<Configur
 	if (!isValid) {
 		throw new Error(`Invalid value for ${key}: ${value}`);
 	}
+}
+
+/**
+ * Set a configuration value
+ */
+export async function setConfig(key: ConfigKey, value: string): Promise<Configuration> {
+	await validateConfig(key, value);
 
 	// Check if config exists
 	const [existing] = await db
@@ -219,9 +226,16 @@ export async function setMultipleConfig(
 		if (value === undefined) continue;
 
 		try {
-			await setConfig(key as ConfigKey, value);
+			await validateConfig(key as ConfigKey, value);
 		} catch (error) {
 			errors[key] = error instanceof Error ? error.message : 'Unknown error';
+		}
+	}
+
+	// All or nothing: one invalid value keeps the others unsaved
+	if (Object.keys(errors).length === 0) {
+		for (const [key, value] of Object.entries(configs)) {
+			if (value !== undefined) await setConfig(key as ConfigKey, value);
 		}
 	}
 
