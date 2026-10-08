@@ -4225,10 +4225,14 @@ reviewed independently afterwards.
   of types in `exploratory-test.ts`
 
 ### Verification
-- Backend 430 (249 unit + 181 PostgreSQL), coverage 82.3 % lines / 85.3 % functions; frontend 465, coverage
-  above the floors; E2E 260 Chromium + 8 api passed; lint (no warnings), svelte-check, backend tsc clean
+- Backend 421 (233 unit + 188 PostgreSQL), coverage 83.9 % lines / 86.8 % functions; frontend 467, coverage
+  72 % statements / 61 % branches / 76 % functions / 67 % lines; E2E 261 Chromium + 8 api passed; lint (no
+  warnings), svelte-check (incl. tests/), tsc, backend tsc clean
 
 ### Open
+- [ ] Raise frontend coverage to 80 % and move the floors up
+- [ ] `db/migrate.ts`: databases without `schema_migrations` predate the runner (0007 at most), so the detection of
+  hand-applied migrations could stop at 0007 and new migrations would need no marker
 
 ---
 
