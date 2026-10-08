@@ -4,10 +4,10 @@
  */
 
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { join } from 'path';
 import { db } from '../db/connection';
-import { invoices } from '../db/schema';
+import { buildings, invoices, tenants } from '../db/schema';
 import { deleteStatement } from '../services/statement.service';
 import { callApi, sendJson } from './helpers/auth';
 import { insertInvoice } from './helpers/records';
@@ -43,6 +43,19 @@ const period = { periodStart: '2024-01-01', periodEnd: '2024-12-31' };
 beforeAll(async () => {
 	rental = await createRental(token, { startDate: '2024-01-01', monthlyAdvancePayment: '150' });
 	await insertInvoice(rental.building, { amount: '1000.00', invoiceDate: '2024-06-30' });
+	// Optional fields filled, so the contract checks their JSON type too (null is not checked)
+	await db
+		.update(buildings)
+		.set({ latitude: '47.3769', longitude: '8.5417', yearBuilt: 1965, buildingType: 'residential' })
+		.where(eq(buildings.id, rental.building));
+	await db
+		.update(tenants)
+		.set({ email: 'anna.keller@example.ch', phone: '+41 44 123 45 67', address: 'Seestrasse 12', postalCode: '8002', city: 'Zürich' })
+		.where(eq(tenants.id, rental.tenant));
+	await db
+		.update(invoices)
+		.set({ llmCategoryId: sql`${invoices.categoryId}`, llmConfidence: '0.86', manualOverrideReason: 'Vertrag geprüft' })
+		.where(eq(invoices.buildingId, rental.building));
 	const response = await sendJson('POST', '/api/v1/statements/generate', {
 		...period,
 		contractId: rental.contract,
@@ -74,9 +87,10 @@ describe('API-Verträge des Frontends', () => {
 		expect(drift(await sample('statement-preview'), actual)).toEqual([]);
 	});
 
-	it('GET /invoices/:id liefert die Felder von invoice.json', async () => {
+	it('GET /invoices und /invoices/:id liefern die Felder von invoice.json', async () => {
 		const listed = (await (await callApi(`/api/v1/invoices?buildingId=${rental.building}`)).json()) as { invoices: { id: string }[] };
 		const actual = await (await callApi(`/api/v1/invoices/${listed.invoices[0].id}`)).json();
+		expect(drift(await sample('invoice'), listed.invoices[0])).toEqual([]);
 		expect(drift(await sample('invoice'), actual)).toEqual([]);
 	});
 
