@@ -18,6 +18,9 @@ services:
     environment:
       - NODE_ENV=production
       - BACKEND_URL=http://backend:3001
+      - OPERATOR_NAME=${OPERATOR_NAME:-}
+      - OPERATOR_ADDRESS=${OPERATOR_ADDRESS:-}
+      - OPERATOR_CONTACT=${OPERATOR_CONTACT:-}
       - PUBLIC_APP_NAME=Dwello
       - PUBLIC_APP_URL=${PUBLIC_APP_URL:-http://localhost:3000}
       - JWT_SECRET=${JWT_SECRET}

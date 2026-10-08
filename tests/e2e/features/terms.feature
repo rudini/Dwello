@@ -16,3 +16,6 @@ Funktionalität: Nutzungsbedingungen
       | Zweck                         |
       | Verantwortung für Abrechnungen |
       | Verfügbarkeit                 |
+
+  Szenario: Betreiber der Installation
+    Dann erfährt der Liegenschaftsverwalter unter "Verfügbarkeit", dass "Muster Hosting AG, Bahnhofstrasse 1, 8001 Zürich" die Installation betreibt und unter "betrieb@muster-hosting.ch" erreichbar ist

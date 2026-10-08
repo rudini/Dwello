@@ -74,7 +74,10 @@ export default defineConfig<{ driver: Driver }>({
 				OAUTH_GOOGLE_REDIRECT_URI: 'http://localhost:3100/auth/callback',
 				OAUTH_MICROSOFT_CLIENT_ID: '',
 				OAUTH_MICROSOFT_CLIENT_SECRET: '',
-				OAUTH_MICROSOFT_REDIRECT_URI: ''
+				OAUTH_MICROSOFT_REDIRECT_URI: '',
+				OPERATOR_NAME: 'Muster Hosting AG',
+				OPERATOR_ADDRESS: 'Bahnhofstrasse 1, 8001 Zürich',
+				OPERATOR_CONTACT: 'betrieb@muster-hosting.ch'
 			}
 		}
 	],

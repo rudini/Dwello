@@ -4364,6 +4364,10 @@ reviewed independently afterwards.
   `docs/tech-stack.md`, `docs/design_system.md` and `docs/PRD-Dwello.md` (PRD marked as product vision, unbuilt items
   "planned, not implemented"); fixed README, `UBIQUITOUS_LANGUAGE.md` (config keys, overdue, building types) and the
   dead `requirements-prosa.md` link in `CLAUDE.md`. A second review cross-checked the docs against each other
+- [x] **Operator in the terms of use:** „Verfügbarkeit“ names who runs the installation from `OPERATOR_NAME`,
+  `OPERATOR_ADDRESS`, `OPERATOR_CONTACT` (BFF environment, like the installation's other settings); without
+  `OPERATOR_NAME` the generic text stays. Files: `src/routes/terms/+page.server.ts`, `+page.svelte`, `.env.example`,
+  `docker-compose.prod.yml`, `playwright.config.ts`. Tests: `terms.feature`, `terms.test.ts`, `terms-page.dom.test.ts`
 
 ### Open
 - [ ] Raise frontend coverage to the target in `docs/test-pyramid.md` and move the floor up
