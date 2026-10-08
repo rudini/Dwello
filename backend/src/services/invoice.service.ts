@@ -16,7 +16,7 @@ import {
 import { categorizeInvoice, recategorizeInvoice } from './llm.service';
 import { validateInvoiceForUtilityStatement } from './utility-validation.service';
 import { buildingExists } from './building.service';
-import { categoryExists } from './category.service';
+import { getCategory } from './category.service';
 
 export interface InvoiceFilters {
 	search?: string;
@@ -204,6 +204,14 @@ async function categorizeWithKi(data: NewInvoice): Promise<Pick<NewInvoice, 'llm
 	}
 }
 
+/** Checks the invoice's category; costs of a non-allocable one stay with the owners (OR 257a), whatever the form sends */
+async function applyCategory(data: Partial<NewInvoice>, categoryId: string | null | undefined) {
+	if (!categoryId) return;
+	const category = await getCategory(categoryId);
+	if (!category) throw new Error('Category not found');
+	if (!category.isAllowedUtilityCost) data.isValidUtilityCost = false;
+}
+
 /**
  * Create a new invoice with optional LLM categorization
  */
@@ -216,10 +224,7 @@ export async function createInvoice(
 		throw new Error('Building not found');
 	}
 
-	// Validate category if provided
-	if (data.categoryId && !(await categoryExists(data.categoryId))) {
-		throw new Error('Category not found');
-	}
+	await applyCategory(data, data.categoryId);
 
 	// Without a category the KI categorizes the invoice; a suggestion taken in the form arrives in data
 	const suggestion = !data.categoryId && !options.skipLlmCategorization ? await categorizeWithKi(data) : {};
@@ -255,10 +260,7 @@ export async function updateInvoice(
 	const existing = await getInvoice(id);
 	if (!existing) return null;
 
-	// Validate category if being changed
-	if (data.categoryId && !(await categoryExists(data.categoryId))) {
-		throw new Error('Category not found');
-	}
+	await applyCategory(data, 'categoryId' in data ? data.categoryId : existing.categoryId);
 
 	// Check if category is being manually overridden
 	let wasManuallyOverridden = existing.wasManuallyOverridden;

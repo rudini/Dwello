@@ -119,3 +119,33 @@ describe('Kategorie der KI für eine neue Rechnung', () => {
 		}
 	});
 });
+
+describe('Kategorie von Hand', () => {
+	// Nicht umlagefähige Kosten (OR 257a) bleiben bei den Eigentümern, auch wenn das Formular anderes schickt
+	const repairs = async () =>
+		((await (await callApi('/api/v1/categories?search=Repairs')).json()) as { categories: { id: string }[] }).categories[0].id;
+
+	it('lässt eine Rechnung beim Ändern in einer nicht umlagefähigen Kategorie nicht umlagefähig werden', async () => {
+		const response = await sendJson('PUT', `/api/v1/invoices/${invoice.id}`, {
+			categoryId: await repairs(),
+			isValidUtilityCost: true
+		});
+
+		expect(await response.json()).toMatchObject({ isValidUtilityCost: false });
+	});
+
+	it('erfasst eine Rechnung einer nicht umlagefähigen Kategorie als nicht umlagefähig', async () => {
+		const { buildingId } = (await (await callApi(`/api/v1/invoices/${invoice.id}`)).json()) as { buildingId: string };
+		const response = await sendJson('POST', '/api/v1/invoices', {
+			buildingId,
+			billingEntityName: `Sanitär ${token}`,
+			description: 'Leck Steigleitung',
+			amount: '800.00',
+			invoiceDate: '2025-05-12',
+			categoryId: await repairs(),
+			isValidUtilityCost: true
+		});
+
+		expect(await response.json()).toMatchObject({ isValidUtilityCost: false });
+	});
+});
