@@ -132,7 +132,7 @@ Verwaltung, Reparaturen, Renovation, Liegenschaftssteuer, Hypothekarzinsen, Geb�
 | **Entwurf** | Abrechnung erstellt, noch nicht versendet. (`draft`) |
 | **Versendet** | Abrechnung dem Mieter zugestellt. (`sent`) |
 | **Bezahlt** | Nachzahlung/Rückerstattung abgeschlossen. (`paid`) |
-| **Überfällig** | Versendet und Zahlungsfrist überschritten. Wird beim Lesen aus Status und Zahlungsfrist berechnet; die Statusänderung und `POST /statements/mark-overdue` können ihn auch speichern. (`overdue`) |
+| **Überfällig** | Versendet und Zahlungsfrist überschritten; wird berechnet, nicht gespeichert. (`overdue`) |
 
 ---
 
