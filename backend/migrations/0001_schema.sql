@@ -216,7 +216,8 @@ CREATE TABLE utility_statements (
     notes TEXT,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    CONSTRAINT statements_status_check CHECK (status IN ('draft', 'sent', 'paid', 'overdue')),
+    -- overdue is not stored: a sent statement is overdue once its payment deadline has passed
+    CONSTRAINT statements_status_check CHECK (status IN ('draft', 'sent', 'paid')),
     CONSTRAINT statements_period_check CHECK (period_end >= period_start)
 );
 

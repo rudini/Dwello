@@ -4184,7 +4184,7 @@ Branch `claude/open-points` (from main 9067217).
   `backend/scripts/coverage-check.ts` (`CLAUDE.md` points there)
 - [x] **Bugs found while aligning the docs** (each with a test that failed first):
   - Overdue is computed, never stored: `sent → overdue` rejected, `POST /statements/mark-overdue` removed,
-    `migrations/0003_overdue_computed.sql` turns stored overdue back into sent and tightens the CHECK
+    the CHECK in `migrations/0001_schema.sql` no longer allows it (no installation existed yet)
     (`statement.service.ts`, `routes/statements.ts`, `db/schema.ts`; `statement-lock.pg.test.ts`)
   - `managementFeePercent` locked after the draft like the amounts (`statement-lock.pg.test.ts`)
   - Recategorize takes a sure suggestion (≥ 0.85) as the category, as on create; a non-allocable category makes the
