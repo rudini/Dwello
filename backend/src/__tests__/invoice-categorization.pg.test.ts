@@ -87,7 +87,7 @@ describe('Neu kategorisieren', () => {
 		const uncategorized = await createInvoice({
 			buildingId: building.id,
 			billingEntityName: 'Sanitär Meier',
-			description: `Leck Steigleitung ${token}`,
+			description: `Leck Hauptleitung ${token}`,
 			amount: '800.00',
 			invoiceDate: '2025-05-12'
 		});
