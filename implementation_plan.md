@@ -4319,7 +4319,7 @@ reviewed independently afterwards.
 ### Open
 - [ ] Raise coverage to the target in `docs/test-pyramid.md` and move the floors up
 - [ ] MVA: confirm the scenarios and record ADRs in `docs/adr/`; close R2 (database backup), measure P1,
-  rename `isOllamaAvailable` (Q2)
+  fix D1 (overdue statements can be deleted or extended), Q2 provider leaks
 
 ---
 
