@@ -1,7 +1,7 @@
 /**
  * API Proxy Helper Unit Tests
  */
-import { describe, it, expect, vi, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import type { Cookies } from '@sveltejs/kit';
 
 import {
