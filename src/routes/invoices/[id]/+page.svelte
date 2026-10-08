@@ -213,12 +213,6 @@
 							</div>
 							<span class="font-medium">{Math.round(data.invoice.llmConfidence * 100)}%</span>
 						</div>
-						{#if data.invoice.llmReasoning}
-							<p class="text-sm text-gray-500">
-								<Icon name="lightbulb" size={14} class="inline mr-1" />
-								{data.invoice.llmReasoning}
-							</p>
-						{/if}
 					</div>
 				{/if}
 
@@ -232,9 +226,6 @@
 							<p data-testid="invoice-override-reason" class="text-sm text-amber-700">
 								{data.invoice.manualOverrideReason}
 							</p>
-						{/if}
-						{#if data.invoice.manualOverrideBy}
-							<p class="text-xs text-amber-600 mt-1">von {data.invoice.manualOverrideBy}</p>
 						{/if}
 					</div>
 				{/if}

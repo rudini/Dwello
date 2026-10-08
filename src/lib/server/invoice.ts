@@ -31,8 +31,6 @@ export function toInvoice(r: Record<string, unknown>): InvoiceWithDetails {
 		distributionKeyId: r.distributionKeyId as string | undefined,
 		isValidUtilityCost: (r.isValidUtilityCost ?? true) as boolean,
 		llmConfidence: r.llmConfidence ? Number(r.llmConfidence) : undefined,
-		llmReasoning: r.llmReasoning as string | undefined,
-		manualOverrideBy: r.manualOverrideBy as string | undefined,
 		manualOverrideReason: r.manualOverrideReason as string | undefined,
 		createdAt: r.createdAt as string | undefined,
 		updatedAt: r.updatedAt as string | undefined,

@@ -103,8 +103,6 @@ describe('Rechnungsdetail', () => {
 				invoice: invoice({
 					categorizationStatus: 'auto-categorized',
 					llmConfidence: 0.86,
-					llmReasoning: 'Hauswart erbringt Reinigung',
-					manualOverrideBy: 'Verwalter',
 					manualOverrideReason: 'Vertrag geprüft'
 				})
 			}
@@ -112,7 +110,6 @@ describe('Rechnungsdetail', () => {
 
 		expect(text()).toContain('Automatisch kategorisiert');
 		expect(text()).toContain('86%');
-		expect(text()).toContain('Hauswart erbringt Reinigung');
 		expect(text()).toContain('Vertrag geprüft');
 	});
 

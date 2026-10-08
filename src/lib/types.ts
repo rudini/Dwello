@@ -196,8 +196,6 @@ export interface Invoice {
 	distributionKeyId?: string;
 	isValidUtilityCost: boolean;
 	llmConfidence?: number;
-	llmReasoning?: string;
-	manualOverrideBy?: string;
 	manualOverrideReason?: string;
 	createdAt?: string;
 	updatedAt?: string;

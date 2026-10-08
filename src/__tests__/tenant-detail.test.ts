@@ -2,12 +2,11 @@ import { describe, it, expect } from 'vitest';
 import { actions, load } from '../routes/tenants/[id]/+page.server';
 import { toContractHistory } from '../lib/server/contract-history';
 import { runAction } from './helpers/action';
+import tenant from '../../tests/contracts/tenant.json';
 
 const API = 'http://localhost:3001/api/v1';
 const day = (offset: number) =>
 	new Date(Date.now() + offset * 86_400_000).toISOString().split('T')[0];
-
-const tenant = { id: 't1', firstName: 'Anna', lastName: 'Keller', email: 'anna@example.com' };
 
 const contract = (
 	id: string,

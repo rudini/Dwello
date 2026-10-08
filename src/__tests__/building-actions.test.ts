@@ -1,7 +1,12 @@
 import { describe, it, expect } from 'vitest';
 import { actions as newActions } from '../routes/buildings/new/+page.server';
 import { actions as editActions } from '../routes/buildings/[id]/edit/+page.server';
-import { actions as detailActions } from '../routes/buildings/[id]/+page.server';
+import {
+	actions as detailActions,
+	load as detailLoad,
+	type BuildingDetailsData
+} from '../routes/buildings/[id]/+page.server';
+import backendBuilding from '../../tests/contracts/building.json';
 
 type Action = (event: never) => Promise<unknown>;
 
@@ -126,6 +131,28 @@ describe.each([
 
 		expect(result).toMatchObject({
 			errors: { name: 'Gebäudename ist erforderlich', canton: 'Kanton ist erforderlich' }
+		});
+	});
+});
+
+describe('Gebäudedetail', () => {
+	// Backend-Antwort aus dem API-Vertrag (tests/contracts/building.json)
+	it('zeigt die Belegung der Wohnungen', async () => {
+		const fetch = (async (url: string) =>
+			Response.json(
+				url.includes('/apartments') ? { apartments: [] } : backendBuilding
+			)) as typeof globalThis.fetch;
+
+		const { building } = (await detailLoad({
+			params: { id: 'b1' },
+			fetch
+		} as never)) as BuildingDetailsData;
+
+		expect(building).toMatchObject({
+			name: 'Seeblick',
+			apartmentCount: 2,
+			occupiedCount: 1,
+			vacantCount: 1
 		});
 	});
 });

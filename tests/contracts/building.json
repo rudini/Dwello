@@ -1,0 +1,16 @@
+{
+	"id": "b1",
+	"name": "Seeblick",
+	"address": "Seestrasse 12",
+	"postalCode": "8002",
+	"city": "Zürich",
+	"canton": "ZH",
+	"country": "CH",
+	"latitude": null,
+	"longitude": null,
+	"yearBuilt": null,
+	"buildingType": null,
+	"apartmentCount": 2,
+	"occupiedCount": 1,
+	"vacantCount": 1
+}
