@@ -7,7 +7,7 @@ import { and, eq } from 'drizzle-orm';
 import { join } from 'path';
 import { generateStatementPdf } from '../services/statement-pdf.service';
 import { generateStatement, updateStatementStatus } from '../services/statement.service';
-import { db, pool } from './connection';
+import { DATABASE_URL, db, pool } from './connection';
 import { migrate } from './migrate';
 import { utilityStatements } from './schema';
 
@@ -28,12 +28,12 @@ async function generateDemoStatement({ contractId, buildingId, status }: (typeof
 	if (status === 'draft') return;
 	await updateStatementStatus(statement.id, 'sent');
 	if (status === 'paid') {
-		await updateStatementStatus(statement.id, 'paid', { paidDate: statement.statementDate, paidAmount: statement.balance });
+		await updateStatementStatus(statement.id, 'paid', { paidDate: statement.statementDate });
 	}
 }
 
-export async function loadDemoData(databaseUrl: string) {
-	await migrate(databaseUrl, join(backend, 'migrations'));
+export async function loadDemoData() {
+	await migrate(DATABASE_URL, join(backend, 'migrations'));
 	await pool.query(await Bun.file(join(backend, 'demo', 'demo-data.sql')).text());
 
 	for (const demo of statements) {

@@ -4255,7 +4255,14 @@ reviewed independently afterwards.
   (`demo-data.pg.test.ts` runs the command itself on its own database). README documents all frontend and backend
   commands, the database commands and what the demo data contains
 
+- [x] **Review follow-up:** the paid demo statement gets a date only, like "Als bezahlt markieren" (its negative
+  amount showed as paid on the dashboard); `loadDemoData` uses the database of `DATABASE_URL` for everything; the demo
+  test loads once in `beforeAll` and shows the script's output on failure; README names every backend script
+
 ### Open
+- [ ] Statement numbers end in a random 4-digit number (`calculation.service.ts`), unique per database: two statements
+  of a building and year collide about once in 9000 (`db:demo` makes two); a sequence per building and year
+- [ ] Line items store `share_percentage` 100 (the share of the period rented), the PDF column "Anteil" shows it
 - [ ] Raise frontend coverage to 80 % and move the floors up
 
 ---
