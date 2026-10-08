@@ -1,18 +1,9 @@
 /**
  * API Proxy Helper Unit Tests
  */
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import type { Cookies } from '@sveltejs/kit';
 
-// Mock the environment variables
-vi.mock('$env/dynamic/private', () => ({
-	env: {
-		BACKEND_API_URL: 'http://localhost:3001',
-		BACKEND_API_TIMEOUT: '5000'
-	}
-}));
-
-// Import after mocks are set up
 import {
 	buildBackendUrl,
 	validateXsrfForMutation,
@@ -27,20 +18,9 @@ import { cookieConfig } from '../../src/lib/server/jwt-config';
 import { AppError, JWTError, ValidationError } from '../../src/lib/server/error-handler';
 
 describe('API Proxy Helper Functions', () => {
-	// Mock cookies helper
-	const createMockCookies = (cookieValues: Record<string, string | undefined> = {}): Cookies => {
-		return {
-			get: vi.fn((name: string) => cookieValues[name]),
-			getAll: vi.fn(() => []),
-			set: vi.fn(),
-			delete: vi.fn(),
-			serialize: vi.fn()
-		} as unknown as Cookies;
-	};
-
-	beforeEach(() => {
-		vi.clearAllMocks();
-	});
+	// The request's cookies; the proxy only reads them
+	const createMockCookies = (cookieValues: Record<string, string> = {}) =>
+		({ get: (name: string) => cookieValues[name] }) as unknown as Cookies;
 
 	describe('buildBackendUrl', () => {
 		it('should build URL without params', () => {
