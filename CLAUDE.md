@@ -11,7 +11,7 @@ Frontend (repo root):
 ```bash
 npm run dev                         # dev server; needs the backend running
 npx vitest run                      # all unit tests once (npm run test starts watch mode)
-npx vitest run src/__tests__/x.test.ts   # one file
+npx vitest run src/__tests__/x.test.ts   # one file; *.dom.test.ts run in jsdom (mounting, clicking), all others in node
 npm run test:coverage               # with coverage floor, as in CI
 npm run lint                        # ESLint, fails on warnings
 npm run check                       # svelte-check incl. tests/ and *.config.ts
@@ -20,7 +20,7 @@ npm run test:e2e                    # acceptance tests, see tests/e2e/CLAUDE.md
 
 Backend (`cd backend`): see `backend/CLAUDE.md`. Short form: `bun run dev:demo` (app with demo data), `bun run test`, `bun run type-check`.
 
-PostgreSQL on localhost:5432 (user and password `dwello`) is required for backend tests and E2E. The test databases `dwello_test` and `dwello_e2e` are recreated automatically; the development database `dwello` is never touched by tests.
+PostgreSQL on localhost:5432 (user and password `dwello`) is required for backend tests and E2E. The test databases `dwello_test` and `dwello_e2e` are recreated automatically; the development database `dwello` stays untouched as long as backend tests run through `bun run test`, `bun run test:pg` or with `--preload ./scripts/test-db.ts`.
 
 ## Architecture (BFF)
 
@@ -41,16 +41,16 @@ PostgreSQL on localhost:5432 (user and password `dwello`) is required for backen
 ## Workflow
 
 1. **Acceptance test first (ATDD):** every feature or behavior change starts with a German scenario in `tests/e2e/features/*.feature`, tagged `@wip` (excluded from runs). Watch it fail for the right reason.
-2. **`/tdd`:** drive the implementation red-green, one behavior at a time, through public interfaces. A unit test must fail before the code changes. Every bug fix gets a unit test that reproduces it.
+2. **`/tdd`:** drive the implementation red-green, one behavior at a time, through public interfaces. A unit test must fail before the code changes. Every bug fix gets a test that reproduces it first, at the lowest layer that can show it (unit, `*.pg.test.ts` or scenario).
 3. **`/ponytail`:** keep the shortest diff that works; check the finished change against it.
 4. **Done:** remove `@wip` once the scenario is green. A feature is done when its scenario passes, not when unit tests pass.
-5. **Plan:** log the task in `implementation_plan.md` (check the items, note the files changed). The file is long: find open items with `grep -n -- '- \[ \]' implementation_plan.md` instead of reading it whole; new work goes into the latest `## Session` section.
+5. **Plan:** log the task in `implementation_plan.md` (check the items, note the files changed). The file is long: read only its latest `## Session` section (`grep -n '^## Session' implementation_plan.md`) and add new work there. The phase table at the top is no longer maintained.
 
-Before marking anything complete, all of these pass: `npx vitest run`, `npm run lint`, `npm run check`, `cd backend && bun run test && bun run type-check`, and the affected E2E scenarios.
+Before marking anything complete, all of these pass: `npm run test:coverage`, `npm run lint`, `npm run check`, `cd backend && bun run test && bun run type-check`, and the affected E2E scenarios.
 
 ## Gotchas
 
-- **Fallow gate:** a hook runs `fallow audit` before every `git commit` and `git push` and blocks the whole Bash command on new unused exports or files, duplication, or complexity/CRAP findings. Run git commands on their own, not chained after edits, and fix the reported finding (un-export, delete, split the function) rather than working around it.
+- **Fallow gate:** a hook runs `fallow audit` before every `git commit` and `git push` and blocks the whole Bash command on new unused exports or files, duplication, or complexity/CRAP findings. Run git commands on their own, not chained after edits, and fix the reported finding (un-export, delete, split the function) rather than working around it. `npx fallow audit` shows the findings before committing; CI runs the same audit.
 - **API contracts:** frontend tests take backend responses from `tests/contracts/*.json`; `backend/src/__tests__/api-contracts.pg.test.ts` checks them against the real API. Changing an API response means updating its contract.
 - **Coverage floors** in `vitest.config.ts` and `backend/scripts/coverage-check.ts` may not drop; the target is in `docs/test-pyramid.md`.
 
@@ -69,5 +69,6 @@ Before marking anything complete, all of these pass: `npx vitest run`, `npm run 
 - `docs/tech-stack.md`: architecture decisions, performance targets
 - `README.md`: setup, Docker deployment, database and demo data commands
 - `docs/test-pyramid.md`: test layers, runners, rules, coverage target
+- `docs/migration-mva.md`: planned restructuring of the backend into modules
 - `docs/design_system.md`: colors, typography, components
 - `requirements-prosa.md`: original requirements (German)
