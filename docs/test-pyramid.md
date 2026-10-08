@@ -79,7 +79,7 @@ Isolation wie bei Farley:
 
 - **Funktional:** `seed.names` hängt an jeden fachlichen Namen eine UUID („Lindenhof“ → „Lindenhof 3f2a…“), Szenarien laufen parallel.
 - **Zeitlich:** Jedes Szenario legt seine Daten selbst an und räumt sie weg.
-- **System:** Externe Systeme sind an der Grenze ersetzt (Mail-Catcher, Session-JWT; lokale Ersätze per `Bun.serve` für Ollama in `invoice-categorization.pg.test.ts` und Resend in `mail.test.ts`).
+- **System:** Externe Systeme sind an der Grenze ersetzt (Mail-Catcher, Session-JWT; lokale Ersätze per `Bun.serve` für den OpenAI-kompatiblen LLM-Anbieter in `invoice-categorization.pg.test.ts` und Resend in `mail.test.ts`).
 
 ## Workflow: ein Feature nach ATDD
 

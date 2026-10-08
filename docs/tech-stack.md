@@ -710,19 +710,13 @@ Client automatic refresh (src/routes/+layout.svelte)
 
 **Deployment:**
 ```bash
-# Docker Compose includes Ollama service
-ollama run llama2
-ollama run mistral
+# Docker Compose includes the Ollama service
+docker exec dwello-ollama ollama pull qwen2.5:3b
 ```
 
 **Integration:** `backend/src/services/llm.service.ts` talks to any OpenAI-compatible API (`/chat/completions`, `/models`). The provider is set by environment variables: `LLM_BASE_URL` (default: the local Ollama at `http://localhost:11434/v1`), `LLM_API_KEY` (Bearer token, empty for Ollama) and `LLM_MODEL` (default `qwen2.5:3b`). With an external provider, the invoice's billing entity, description and amount leave the server.
 
-**Model Selection:**
-- **Mistral 7B:** Balanced, good for categorization
-- **Llama 3.1 8B:** Slightly better quality
-- **Mixtral 8x7B:** Higher quality, more compute needed
-
-**Selected: Mistral 7B (default) with Llama option**
+**Model Selection:** `qwen2.5:3b` by default (small, accurate for German). With an external provider, use a chat model; requests send no `max_tokens` or `temperature`, so reasoning models work too.
 
 ### PDF Generation: PDFKit + qrcode
 
@@ -997,8 +991,6 @@ services:
       - ollama-models:/root/.ollama
     ports:
       - "11434:11434"
-    environment:
-      OLLAMA_MODELS: mistral,llama2
 
   nginx:
     image: nginx:alpine

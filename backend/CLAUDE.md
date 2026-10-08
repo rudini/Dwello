@@ -28,7 +28,7 @@ Never run `bun test` without the preload: `*.pg.test.ts` would write into the de
 - `src/__tests__/*.test.ts`: unit tests of pure service functions.
 - `src/__tests__/*.pg.test.ts`: against a real PostgreSQL database `dwello_test`, which the preload (`scripts/test-db.ts`) recreates from the migrations. The app runs in-process; reuse the helpers in `src/__tests__/helpers/` (`auth.ts`: `callApi`, `sendJson`; `records.ts`, `rental.ts`: test data). Never mock the database.
 - Each test creates its own data with unique names (`crypto.randomUUID()`) and removes it in `afterAll`; tests run against a shared database.
-- External systems are replaced at the boundary: a local `Bun.serve` stands in for Ollama and Resend, a local SMTP server for mail.
+- External systems are replaced at the boundary: a local `Bun.serve` stands in for the OpenAI-compatible LLM provider and Resend, a local SMTP server for mail.
 
 ## Swiss domain rules
 

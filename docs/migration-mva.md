@@ -20,7 +20,7 @@ Szenario und Messgrösse setzen keinen Entwurf voraus; die Dateien in der Spalte
 | Nr. | Merkmal | Szenario | Messgrösse | Stand und Nachweis |
 | --- | --- | --- | --- | --- |
 | Q1 | Änderbarkeit | Der Liegenschaftsverwalter braucht einen neuen Verteilschlüssel aus Fläche und Zimmerzahl. | Ohne Code-Änderung. | ✅ Eigene Formeln (`formula.service.ts`); `distribution-keys.feature` |
-| Q2 | Änderbarkeit | Ollama wird durch einen anderen LLM-Anbieter ersetzt. | Ohne Code-Änderung, nur über die Konfiguration; die Datenschutzerklärung deckt beide Fälle ab. | ✅ Jede OpenAI-kompatible API über `LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL` (`config/llm.ts`); `invoice-categorization.pg.test.ts` |
+| Q2 | Änderbarkeit | Ollama wird durch einen anderen LLM-Anbieter mit OpenAI-kompatibler API ersetzt. | Ohne Code-Änderung, nur über die Konfiguration (`.env`); die Datenschutzerklärung deckt beide Fälle ab. | ✅ Jede OpenAI-kompatible API über `LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL` (`config/llm.ts`); `invoice-categorization.pg.test.ts` |
 | Q3 | Änderbarkeit | Eine Gesetzesänderung betrifft die Berechnung der Nebenkostenabrechnung. | Keine Änderung an Routen, UI oder Rendering. | ✅ Berechnung in `calculation`, `prorating`, `distribution-key`, `formula`, `heating-profile` |
 | Q4 | Änderbarkeit | Das PDF-Layout der Abrechnung ändert sich. | Keine Änderung an der Berechnung. | ✅ `pdf.service.ts`; neue Felder zusätzlich in `statement-pdf.service.ts` |
 | Q5 | Testbarkeit | Die Berechnung einer Abrechnung wird geprüft. | In einem automatisierten Test ohne Webserver und ohne PDF. | ✅ `generateStatement`; `statement-creation.pg.test.ts` |
@@ -30,7 +30,7 @@ Szenario und Messgrösse setzen keinen Entwurf voraus; die Dateien in der Spalte
 | S2 | Sicherheit | Ein Skript im Browser versucht, die Sitzung zu lesen. | Der Browser hat keinen Zugriff auf ein Token (HttpOnly-Cookie). | ❓ So gebaut (BFF), aber kein Test |
 | P1 | Performance | Der Liegenschaftsverwalter erstellt im Assistenten die Abrechnungen einer Liegenschaft mit 50 Wohnungen, inklusive PDF. | Vom Start bis zur letzten Abrechnung unter 60 s auf der Zielhardware. | ❓ Nicht gemessen; die Schleife über die Mietverträge liegt im BFF (`src/lib/server/statement-generation.ts`). Die PRD nennt einmal 60 s und einmal 10 s; Schritt 1 legt den Wert fest |
 | P2 | Performance | Der Liegenschaftsverwalter öffnet eine Liste oder das Dashboard. | API-Antwort unter 500 ms (p95), Ziel aus `docs/tech-stack.md`. | ❓ Nicht gemessen |
-| R1 | Resilienz | Ollama ist nicht erreichbar. | Rechnungen lassen sich trotzdem erfassen und von Hand kategorisieren. | ⚠️ Neu kategorisieren getestet (`invoice-detail.feature`); Erfassen fängt den Fehler ab (`categorizeWithKi`), aber ohne Test |
+| R1 | Resilienz | Der LLM-Anbieter ist nicht erreichbar. | Rechnungen lassen sich trotzdem erfassen und von Hand kategorisieren. | ⚠️ Neu kategorisieren getestet (`invoice-detail.feature`); Erfassen fängt den Fehler ab (`categorizeWithKi`), aber ohne Test |
 | R2 | Resilienz | Die Datenbank geht verloren. | Höchstens ein Tag Datenverlust, Wiederherstellung in unter einer Stunde, Probe monatlich (PRD). | ❌ Kein Backup eingerichtet |
 
 Die Liste ist ein Vorschlag. Sie gilt, sobald sie im ADR bestätigt ist (Schritt 1).

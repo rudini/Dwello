@@ -25,7 +25,8 @@ beforeAll(async () => {
 		})
 	);
 	await sendJson('PUT', `/api/v1/statements/${statementId}/status`, { status: 'sent' });
-	await sendJson('PUT', `/api/v1/statements/${statementId}/status`, { status: 'overdue' });
+	const overdue = await sendJson('PUT', `/api/v1/statements/${statementId}/status`, { status: 'overdue' });
+	expect(await overdue.json()).toMatchObject({ status: 'overdue' });
 });
 
 afterAll(async () => {
