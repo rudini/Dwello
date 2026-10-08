@@ -110,6 +110,44 @@ describe('Neu kategorisieren', () => {
 	});
 });
 
+describe('Neu kategorisieren einer ausgeschlossenen Rechnung', () => {
+	// Auch in einer umlagefähigen Kategorie kann der Verwalter eine Rechnung ausschliessen; die KI hebt das nicht auf
+	it('lässt den Ausschluss des Verwalters bestehen', async () => {
+		const { categories } = (await (await callApi('/api/v1/categories?search=Caretaker')).json()) as {
+			categories: { id: string }[];
+		};
+		const building = await createBuilding({
+			name: `Ausgeschlossen-Haus ${token}`,
+			address: 'Testweg 3',
+			postalCode: '8400',
+			city: 'Winterthur',
+			canton: 'ZH'
+		});
+		const excluded = await createInvoice({
+			buildingId: building.id,
+			billingEntityName: 'Hauswart Huber',
+			description: `Sonderreinigung nach Umbau ${token}`,
+			amount: '300.00',
+			invoiceDate: '2025-05-12',
+			categoryId: categories[0].id,
+			isValidUtilityCost: false
+		});
+		const llm = openAiCompatible({ category: 'Caretaker', confidence: 0.95, isAllowedUtilityCost: true });
+		try {
+			await callApi(`/api/v1/invoices/${excluded.id}/recategorize`, { method: 'POST' });
+
+			const detail = (await (await callApi(`/api/v1/invoices/${excluded.id}`)).json()) as {
+				isValidUtilityCost: boolean;
+			};
+			expect(detail.isValidUtilityCost).toBe(false);
+		} finally {
+			llm.stop();
+			await deleteInvoice(excluded.id);
+			await deleteBuilding(building.id);
+		}
+	});
+});
+
 describe('Kategorie der KI überschreiben', () => {
 	it('speichert den Grund und gibt ihn mit der Rechnung zurück', async () => {
 		const { categories } = (await (await callApi('/api/v1/categories?search=Repairs')).json()) as {

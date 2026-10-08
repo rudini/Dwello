@@ -107,7 +107,7 @@ There is no "predefined" flag on categories.
 | GET | `/for-statement/:buildingId` | Query: `periodStart`, `periodEnd` (required). → array of the building's invoices with `isValidUtilityCost = true` dated in the period |
 | GET | `/:id` | → invoice with `building`, `category`, `distributionKey`, `llmCategory` (see `tests/contracts/invoice.json`). 404 |
 | GET | `/:id/validate` | → `{ isValid, errors, warnings }`; 404 with the same shape if not found |
-| POST | `/:id/recategorize` | No body. Asks the LLM again and stores `llmCategoryId`/`llmConfidence`; from confidence 0.85 the suggestion also becomes `categoryId` (as on create; the category decides `isValidUtilityCost`, manual override cleared). → `{ success: true, invoice, categorization: { category (name), confidence, isAllowedUtilityCost, reasoning } }`. 404; **503** LLM unreachable or no matching category; 500 other errors |
+| POST | `/:id/recategorize` | No body. Asks the LLM again and stores `llmCategoryId`/`llmConfidence`; from confidence 0.85 the suggestion also becomes `categoryId` (as on create; a non-allocable category makes the invoice non-allocable, an exclusion stays; manual override cleared). → `{ success: true, invoice, categorization: { category (name), confidence, isAllowedUtilityCost, reasoning } }`. 404; **503** LLM unreachable or no matching category; 500 other errors |
 | POST | `/` | Query: `skipLlm=true` disables categorization. Body below. → 201 invoice. 400 building or category not found |
 | PUT | `/:id` | Body: any subset of the POST fields. → invoice. 404; 400 category not found |
 | DELETE | `/:id` | 204. 404 |
@@ -183,7 +183,7 @@ Stored status is `draft`, `sent` or `paid`; `overdue` is never stored. Responses
 
 Transitions (`PUT /:id/status`, checked against the effective status): `draft → sent`, `sent → paid`, `overdue → paid`; `paid` is final. Anything else is 400 `Invalid status transition from X to Y`.
 
-Only **drafts** can be deleted or get line items; amounts (`totalCosts`, `totalAdvancePayments`, `managementFee`, `balance`) of non-drafts cannot change (400 with message).
+Only **drafts** can be deleted or get line items; amounts (`totalCosts`, `totalAdvancePayments`, `managementFeePercent`, `managementFee`, `balance`) of non-drafts cannot change (400 with message).
 
 Filter `status` in `GET /` and `/counts`: `draft`, `paid`, `sent` (sent, deadline not past or none), `overdue` (sent, deadline past), `open` (all `sent`, overdue included).
 

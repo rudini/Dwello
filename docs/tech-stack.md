@@ -57,7 +57,7 @@ Dwello is a full-stack TypeScript application: a SvelteKit frontend that doubles
 │        (src/lib/server/api-proxy.ts)        │
 └──────────────────┬──────────────────────────┘
                    │
-                   │ Internal network (BACKEND_URL)  
+                   │ Internal network (BACKEND_URL)
                    │ Authorization: Bearer {jwt}
                    │
 ┌──────────────────▼──────────────────────────┐

@@ -112,13 +112,14 @@ describe('Einstellungen speichern', () => {
 		expect(calls).toEqual([]);
 	});
 
-	it('meldet, wenn das Backend die Einstellungen ablehnt', async () => {
-		const { result } = runAction(actions.default, '', 400, valid);
+	it('meldet, wenn das Backend die Einstellungen ablehnt, und setzt dann auch nichts zurück', async () => {
+		const { calls, result } = runAction(actions.default, '', 400, valid);
 
 		expect(await result).toMatchObject({
 			status: 400,
 			data: { errors: { form: 'Die Einstellungen konnten nicht gespeichert werden.' } }
 		});
+		expect(calls.map((call) => call.method)).toEqual(['PUT']);
 	});
 });
 

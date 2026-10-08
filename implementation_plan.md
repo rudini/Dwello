@@ -4182,6 +4182,20 @@ Branch `claude/open-points` (from main 9067217).
 - [x] **Target coverage:** `docs/test-pyramid.md` defines the wanted coverage (80 %, frontend all four measures, backend
   lines and functions) instead of measured counts and floors; the floors stay in `vitest.config.ts` and
   `backend/scripts/coverage-check.ts` (`CLAUDE.md` points there)
+- [x] **Bugs found while aligning the docs** (each with a test that failed first):
+  - Overdue is computed, never stored: `sent → overdue` rejected, `POST /statements/mark-overdue` removed,
+    `migrations/0003_overdue_computed.sql` turns stored overdue back into sent and tightens the CHECK
+    (`statement.service.ts`, `routes/statements.ts`, `db/schema.ts`; `statement-lock.pg.test.ts`)
+  - `managementFeePercent` locked after the draft like the amounts (`statement-lock.pg.test.ts`)
+  - Recategorize takes a sure suggestion (≥ 0.85) as the category, as on create; a non-allocable category makes the
+    invoice non-allocable, the manager's exclusion stays (`invoice.service.ts`; `invoice-categorization.pg.test.ts`)
+  - Settings are saved all or nothing: `PUT /config` validates every key first (`config.service.ts`;
+    `config.pg.test.ts`), the settings page resets emptied fields only after a successful save (`settings.ts`;
+    `settings.test.ts`)
+  - Backend checks JWT issuer and audience (`middleware/auth.ts`; `auth.pg.test.ts`)
+  - BFF reads the backend address only from `BACKEND_URL` (`api-proxy.ts`, `.env.example`,
+    `docker-compose.prod.yml`, `playwright.config.ts`, README upgrade note; `api-proxy.test.ts`); removed the BFF
+    `POST /api/statements`, which proxied to a missing backend route
 
 ### Open
 - [ ] Raise frontend coverage to 80 % and move the floors up (backend above 80 % since session 9)
@@ -4349,10 +4363,6 @@ reviewed independently afterwards.
 ### Open
 - [ ] Raise frontend coverage to the target in `docs/test-pyramid.md` and move the floor up
 - [ ] MVA: confirm the scenarios and record ADRs in `docs/adr/`; close R2 (database backup), measure P1 and P2
-- [ ] Code bugs found while aligning the docs: a stored `overdue` statement drops out of filters and counts, and
-  `POST /statements/mark-overdue` never marks one; BFF `POST /api/statements` proxies to a missing backend route;
-  `management_fee_percent` is not locked after draft; recategorize never sets `categoryId`; `PUT /config` saves
-  partially on 400; the backend does not check JWT issuer/audience; `BACKEND_API_URL` vs `BACKEND_URL`
 
 ---
 
