@@ -104,12 +104,19 @@ describe('Migrationen anwenden', () => {
 
 		expect(await migrate(`${server}/${name}`, migrations)).toEqual(files.filter((file) => file > '0010~'));
 		expect(await query(name, wronglyAllocable)).toEqual([{ invoices: 0 }]);
+		// Invoices of allocable categories stay allocable
+		const allocableExcluded = await query(
+			name,
+			`SELECT COUNT(*)::int AS invoices FROM invoices i JOIN categories c ON c.id = i.category_id
+			WHERE c.is_allowed_utility_cost AND NOT i.is_valid_utility_cost`
+		);
+		expect(allocableExcluded).toEqual([{ invoices: 0 }]);
 	});
 
 	it('erkennt eine von Hand vollständig migrierte Datenbank', async () => {
 		const name = await database(files);
 
 		// 0011 only corrects data and cannot be told apart, so it runs again (changing nothing)
-		expect(await migrate(`${server}/${name}`, migrations)).toEqual(files.filter((file) => file > '0010~'));
+		expect(await migrate(`${server}/${name}`, migrations)).toEqual(['0011_non_allocable_invoices.sql']);
 	});
 });
