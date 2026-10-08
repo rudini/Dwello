@@ -30,7 +30,8 @@ jobs:
             echo "backend=true" >> "$GITHUB_OUTPUT" && echo "app=true" >> "$GITHUB_OUTPUT" && exit 0
           fi
           git diff --name-only "origin/${{ github.base_ref }}...HEAD" | tee changed.txt
-          echo "backend=$(grep -q '^backend/' changed.txt && echo true || echo false)" >> "$GITHUB_OUTPUT"
+          # The API contracts are checked against the backend (api-contracts.pg.test.ts)
+          echo "backend=$(grep -qE '^(backend|tests/contracts)/' changed.txt && echo true || echo false)" >> "$GITHUB_OUTPUT"
           # Anything but documentation can change what the app does
           echo "app=$(grep -qvE '^(docs/|screens/|\.claude/)|\.md$' changed.txt && echo true || echo false)" >> "$GITHUB_OUTPUT"
 
@@ -51,6 +52,25 @@ jobs:
         run: npm run build
       - name: Build backend
         run: bun run build
+        working-directory: backend
+
+  static-checks:
+    name: Lint and types
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - uses: oven-sh/setup-bun@v2
+      - run: npm ci
+      - run: bun install --frozen-lockfile
+        working-directory: backend
+      # ESLint covers frontend and backend; svelte-check the frontend types, tsc the backend types
+      - run: npm run lint
+      - run: npm run check
+      - run: bun run type-check
         working-directory: backend
 
   unit-tests:
