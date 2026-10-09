@@ -34,7 +34,7 @@ All routes under `src/routes` with a `+page.svelte`. "States" lists what the pag
 | Info | `/help`, `/privacy`, `/terms` | Help text, privacy, terms | – |
 | Placeholder | `/analytics`, `/reports` | "kommt in Phase 2" pages, not linked from the navigation | coming soon |
 
-In total 43 pages (incl. login and redirect), 55 shared or route-local Svelte components.
+In total 44 pages (incl. login and redirect), 55 shared or route-local Svelte components.
 
 ## 3. Component inventory (functional requirements to carry over)
 
@@ -63,7 +63,7 @@ In total 43 pages (incl. login and redirect), 55 shared or route-local Svelte co
 ## 5. The five biggest comprehension barriers (target group: private landlords, rare use)
 
 1. **No answer to "what do I do now?"** The dashboard shows eleven KPI tiles, four status tiles, quick actions and charts with equal weight. Deadlines (Zahlungsfrist, overdue statements, letters still to send) are not listed as tasks; a returning user must interpret numbers.
-2. **Wrong and unexplained terms in the rental contract form.** The field labelled "Nebenkosten Akonto" writes the *Zusatzmiete* and "Parkplatz / Sonstiges" writes the *Akonto* (labels swapped relative to the data model and the glossary). No field explains what Nettomiete, Akonto or Zusatzmiete mean; "Total Bruttomiete" is not a glossary term.
+2. **Wrong and unexplained terms around the rent.** In the rental contract form the field labelled "Nebenkosten Akonto" writes the *Zusatzmiete* and "Parkplatz / Sonstiges" writes the *Akonto* (labels swapped relative to the data model and the glossary); the contract detail page repeats the swap ("Nebenkosten (Akonto)" shows `additionalRent`, "Parkplatz / Sonstiges" shows the Akonto), while the apartment page (`MonthlyCostsCard`) maps them correctly – the same contract reads differently on two pages. No field explains what Nettomiete, Akonto or Zusatzmiete mean; "Total Bruttomiete" is not a glossary term.
 3. **The statement run asks for expert inputs without explanation.** "Heizungsprofil", "Verwaltungspauschale", "Verteilung der Pauschale" appear without plain-language help; the preview only shows totals per contract, the warnings ("Verteilschlüssel müssen konfiguriert sein") are generic and not actionable.
 4. **Small, low-contrast text and many equal-weight actions.** Body text 14 px, captions 10–12 px in `gray-400/500`; detail pages show up to six buttons side by side (PDF, Mahnung, bezahlt, versenden, bearbeiten, löschen) with no single primary action.
 5. **Irreversible actions without clear consequences.** "Versenden" on a statement submits immediately without a confirmation or a preview of the document; deleting asks for confirmation but does not say what happens to related data.
@@ -89,8 +89,22 @@ Deviations found in the current UI; the new UI uses the glossary term.
 | "Dashboard" | navigation, page title | – (not a domain term) | "Übersicht" (plain German) |
 | "Konfiguration" / "Einstellungen" (both) | navigation vs. page title | glossary section "Konfiguration" | one label: "Einstellungen" (page) – TODO(fachlich prüfen) whether the glossary heading is meant as UI label |
 | "AKTIV" (tenant badge, upper case) | tenant list | **Mieter** aktiv / ehemalig | "Aktiv" |
+| "Nebenkosten (Akonto)" on `additionalRent`, "Parkplatz / Sonstiges" on the Akonto, "Total Bruttomiete" | `contracts/[id]/+page.svelte` (rent breakdown) | **Zusatzmiete**, **Akonto**, gap | relabel when the detail page is migrated (stage 7) |
+| "Nebenkosten (Aconto)" (spelling) | `lib/components/MonthlyCostsCard.svelte` | **Akonto** | fix spelling |
+| "Mietzins (brutto)" | `lib/components/ContractHistoryTable.svelte` | gap (same as "Total Bruttomiete") | "Monatlich total", TODO(fachlich prüfen) |
+| "Periode" alone, "Periode: …" | wizard step label, statement list column, statement detail, settings hint | **Abrechnungsperiode** | rename |
+| "Akontozahlungen", "Akontobeiträge" | `statements/[id]/+page.svelte`, `statements/[id]/edit/+page.svelte` | **Geleistete Akontobeiträge** | rename |
+| "Liegenschaft" (entity sense) | getting started, settings, statement edit, privacy | **Gebäude** | rename (except the fixed term "Nebenkosten der Liegenschaft") |
+| "Mietbeginn", "Einzug am" | `tenants/[id]/TenantRentalCard.svelte` | **Vertragsbeginn** | rename |
+| "Geschoss", "Wohnfläche" | help, `FormulaHelp.svelte` | **Stockwerk**, **Fläche** | rename |
+| "Zimmer" as field label | apartment form and detail | **Zimmeranzahl** (values like "3.5 Zimmer" stay) | rename label |
+| "Belegt", "Leerstand" (KPI labels) | `buildings/[id]/+page.svelte` | **Vermietet**, **Leer** (Mietstatus) | rename |
+| "Aktive Verträge", "Beendete Verträge" | contract and tenant filters | **Vertragsstatus** laufend / beendet | "Laufend", "Beendet" |
+| "Ausstehende Nachzahlungen", "Offene Abrechnungen" | dashboard | gap (Saldo > 0 of versendet/überfällig statements) | wording from Saldo/Abrechnungsstatus, TODO(fachlich prüfen) |
 
-Terms used correctly today and kept: Gebäude, Wohnung, Wohnungsnummer, Stockwerk, Fläche, Zimmeranzahl, Mietstatus values (Vermietet, Wiedervermietet, Leer, Gesperrt), Mieter, Korrespondenzkanal, Mietvertrag, Vertragsbeginn, Vertragsende, Nettomiete, Akonto, Rechnung, Lieferant, Rechnungsnummer, Rechnungsdatum, Betrag, Fälligkeitsdatum, Kategorie, Umlagefähig, Verteilschlüssel, Heizprofil (config pages), Nebenkostenabrechnung, Abrechnungsperiode, Abrechnungsposition, Verwaltungspauschale (wizard), Saldo, Entwurf/Versendet/Bezahlt/Überfällig, Zahlungsfrist, Mahnung, Mahnstufe, Dokument, Versandstatus, QR-Rechnung, IBAN.
+Navigation labels come from `src/lib/i18n/locales/de.json` ("Dashboard", "Verträge", "Konfiguration") and from `src/lib/navigation.ts`.
+
+Terms used correctly in most places and kept (apart from the rows above): Gebäude, Wohnung, Wohnungsnummer, Stockwerk, Fläche, Zimmeranzahl, Mietstatus values (Vermietet, Wiedervermietet, Leer, Gesperrt), Mieter, Korrespondenzkanal, Mietvertrag, Vertragsbeginn, Vertragsende, Nettomiete (as a field label), Akonto (where bound to the right field), Rechnung, Lieferant, Rechnungsnummer, Rechnungsdatum, Betrag, Fälligkeitsdatum, Kategorie, Umlagefähig, Verteilschlüssel, Heizprofil (config pages), Nebenkostenabrechnung, Abrechnungsperiode, Abrechnungsposition, Verwaltungspauschale (wizard), Saldo, Entwurf/Versendet/Bezahlt/Überfällig, Zahlungsfrist, Mahnung, Mahnstufe, Dokument, Versandstatus, QR-Rechnung, IBAN.
 
 Gaps (terms the UI needs that the glossary does not define) are listed in `offene-punkte.md` as glossary proposals.
 
@@ -101,7 +115,9 @@ Gaps (terms the UI needs that the glossary does not define) are listed in `offen
 - **What it captures:** `tests/ui-screenshots/affected-routes.ts` maps the changed files of the PR (`git diff origin/main...HEAD`) to the routes whose page, layout or (transitively) imported modules changed. A change to `src/app.html`/`hooks` or the root layout captures every page. `screenshots.spec.ts` seeds one building, apartment, tenant, contract, invoices, heating profile, statement, category and distribution key through the backend API and shoots each route full-page at 1440×900 (desktop only), signed in.
 - **Baseline and comparison:** the base branch is checked out into `../base` and served on port 3200 against the same backend and data; `changed-areas.ts` frames changed regions in red on the new screenshot; the "before" image is kept.
 - **Result:** PNGs are pushed to the orphan branch `ui-screenshots` under `pr-<n>/<sha>/`, and a single PR comment (marker `<!-- ui-screenshots -->`) is created or updated with after/before images per route. The job fails only if seeding, servers or the browser fail, not on visual differences.
-- **Consequences for the redesign:** every redesign commit touches the layout, so every page is captured. Mobile viewport and dark mode are not captured; the axe check covers them instead (suggestion recorded in `offene-punkte.md`). Pages without `+page.svelte` states (dialogs open, wizard steps) are not captured; the axe screen list covers them.
+- **Skips and cancels:** when no changed file maps to a route (documentation-only pushes such as stages 0 and 1), every step after "Find changed pages" is skipped: the job passes without screenshots and without a comment. The workflow has `concurrency: cancel-in-progress`, so a new push cancels a running job – wait for the run before pushing again.
+- **Seed data:** the job seeds its own records through the API (building "Seeblick", tenant "Anna" …), not the demo data.
+- **Consequences for the redesign:** every code commit of the redesign touches the root layout or shared components, so every page is captured. Mobile viewport and dark mode are not captured; the axe check covers them instead (suggestion recorded in `offene-punkte.md`). Pages without `+page.svelte` states (dialogs open, wizard steps) are not captured; the axe screen list covers them.
 
 ## 8. Other observations
 
@@ -111,4 +127,4 @@ Gaps (terms the UI needs that the glossary does not define) are listed in `offen
 
 ## 9. Screen list for the axe check
 
-Kept in `tests/a11y/screens.json` (routes, the states to open, the viewports). Stage 2 adds the Playwright test that reads it.
+See `tests/a11y/screens.json` (single source: routes, the states to open and what each state means, viewports, colour schemes). Stage 2 adds the Playwright test that reads it.
