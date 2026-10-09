@@ -25,13 +25,13 @@
 	<label for={id} class="block text-sm font-medium text-gray-700 mb-1">
 		{label} (CHF)
 		{#if required}
-			<span class="text-red-500">*</span>
+			<span class="text-critical">*</span>
 		{:else}
-			<span class="text-gray-400">(optional)</span>
+			<span class="text-ink-muted">(optional)</span>
 		{/if}
 	</label>
 	<div class="relative">
-		<span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">CHF</span>
+		<span class="absolute left-4 top-1/2 -translate-y-1/2 text-ink-muted">CHF</span>
 		<input
 			{id}
 			data-testid={testid}

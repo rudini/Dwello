@@ -16,7 +16,7 @@
 
 <div class="max-w-2xl mx-auto space-y-6">
 	<!-- Breadcrumb -->
-	<nav class="flex items-center text-sm text-gray-500">
+	<nav class="flex items-center text-sm text-ink-muted">
 		<a href="/buildings" data-testid="breadcrumb-link" class="hover:text-primary transition-colors"
 			>Gebäude</a
 		>
@@ -27,7 +27,7 @@
 	<!-- Header -->
 	<div>
 		<h1 class="text-2xl font-bold text-gray-900">Neues Gebäude erstellen</h1>
-		<p class="text-gray-500 mt-1">Fügen Sie ein neues Gebäude zu Ihrem Portfolio hinzu.</p>
+		<p class="text-ink-muted mt-1">Fügen Sie ein neues Gebäude zu Ihrem Portfolio hinzu.</p>
 	</div>
 
 	<!-- Form -->

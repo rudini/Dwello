@@ -65,7 +65,7 @@
 		/>
 		<span>
 			<span class="font-medium text-gray-900">Umlagefähige Nebenkosten</span>
-			<span class="block text-sm text-gray-500">
+			<span class="block text-sm text-ink-muted">
 				Nur umlagefähige Kosten (Art. 257a–257b OR) fliessen in die Nebenkostenabrechnung, z.B.
 				Heizung, Wasser, Hauswart. Reparaturen, Versicherungen und Steuern sind nicht umlagefähig.
 			</span>

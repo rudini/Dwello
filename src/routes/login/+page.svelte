@@ -22,7 +22,7 @@
 
 			{#if data.error}
 				<p
-					class="mb-4 p-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-600"
+					class="mb-4 p-3 bg-red-50 border border-red-200 rounded-md text-sm text-critical"
 					data-testid="login-error"
 				>
 					{data.error}
@@ -53,16 +53,16 @@
 					<div class="w-full border-t border-gray-300"></div>
 				</div>
 				<div class="relative flex justify-center text-sm">
-					<span class="px-2 bg-white text-gray-500">{$_('auth.secureAuth')}</span>
+					<span class="px-2 bg-white text-ink-muted">{$_('auth.secureAuth')}</span>
 				</div>
 			</div>
 
-			<div class="mt-6 text-center text-xs text-gray-500">
+			<div class="mt-6 text-center text-xs text-ink-muted">
 				<p>{$_('auth.termsAgreement')}</p>
 				<p class="mt-1">{$_('auth.dataLocation')}</p>
 			</div>
 		</div>
 
-		<p class="text-center text-xs text-gray-400">Dwello v0.1.0</p>
+		<p class="text-center text-xs text-ink-muted">Dwello v0.1.0</p>
 	</div>
 </div>

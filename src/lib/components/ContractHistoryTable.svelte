@@ -23,7 +23,9 @@
 			Noch keine Mietverträge.
 		</p>
 	{:else}
-		<div class="overflow-x-auto">
+		<!-- A scrollable region must be reachable by keyboard (WCAG 2.1.1) -->
+		<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+		<div class="overflow-x-auto" role="region" aria-label="Mietverträge der Wohnung" tabindex="0">
 			<table class="w-full">
 				<thead>
 					<tr class="border-b border-slate-200">

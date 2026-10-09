@@ -38,7 +38,7 @@
 		class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2"
 		data-testid="default-values-section"
 	>
-		<Icon name="tune" size={20} class="text-gray-400" />
+		<Icon name="tune" size={20} class="text-ink-muted" />
 		Standardwerte für Abrechnungen und Rechnungen
 	</h2>
 	<div class="grid gap-4 sm:grid-cols-2">
@@ -58,7 +58,7 @@
 					>
 				{/each}
 			</select>
-			<p class="mt-1 text-xs text-gray-500">
+			<p class="mt-1 text-xs text-ink-muted">
 				Vorschlag für die Periode beim Erstellen der Abrechnungen
 			</p>
 		</div>
@@ -81,7 +81,7 @@
 					>
 				{/each}
 			</select>
-			<p class="mt-1 text-xs text-gray-500">Nur Profile mit genau 100% Summe sind wählbar.</p>
+			<p class="mt-1 text-xs text-ink-muted">Nur Profile mit genau 100% Summe sind wählbar.</p>
 		</div>
 		<div>
 			<label for="defaultDistributionKeyId" class="block text-sm font-medium text-gray-700 mb-1"
@@ -100,7 +100,7 @@
 					>
 				{/each}
 			</select>
-			<p class="mt-1 text-xs text-gray-500">Vorschlag beim Erfassen neuer Rechnungen</p>
+			<p class="mt-1 text-xs text-ink-muted">Vorschlag beim Erfassen neuer Rechnungen</p>
 		</div>
 	</div>
 </Card>

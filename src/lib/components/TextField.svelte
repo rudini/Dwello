@@ -24,7 +24,7 @@
 <div>
 	<label for={name} class="block text-sm font-medium text-gray-700 mb-1">
 		{label}
-		{#if required}<span class="text-red-500">*</span>{/if}
+		{#if required}<span class="text-critical">*</span>{/if}
 	</label>
 	<input
 		id={name}

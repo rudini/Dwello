@@ -14,10 +14,10 @@
 <div class="text-center py-8">
 	{#if createdCount !== null}
 		<div class="{badgeClass} bg-green-100">
-			<Icon name="check_circle" size={32} class="text-green-600" />
+			<Icon name="check_circle" size={32} class="text-positive" />
 		</div>
 		<h2 class="text-lg font-semibold text-gray-900 mb-2">Abrechnungen erstellt!</h2>
-		<p class="text-gray-500 mb-6" data-testid="generation-result">
+		<p class="text-ink-muted mb-6" data-testid="generation-result">
 			{createdCount} Nebenkostenabrechnungen wurden erfolgreich erstellt.
 		</p>
 		<div class="flex items-center justify-center gap-4">
@@ -32,16 +32,16 @@
 		</div>
 	{:else if isGenerating}
 		<div class="{badgeClass} bg-blue-100">
-			<Icon name="sync" size={32} class="text-blue-600 animate-spin" />
+			<Icon name="sync" size={32} class="text-accent animate-spin" />
 		</div>
 		<h2 class="text-lg font-semibold text-gray-900 mb-2">Abrechnungen werden erstellt...</h2>
-		<p class="text-gray-500 mb-6">Bitte warten Sie, bis der Vorgang abgeschlossen ist.</p>
+		<p class="text-ink-muted mb-6">Bitte warten Sie, bis der Vorgang abgeschlossen ist.</p>
 	{:else}
 		<div class="{badgeClass} bg-blue-100">
-			<Icon name="receipt_long" size={32} class="text-blue-600" />
+			<Icon name="receipt_long" size={32} class="text-accent" />
 		</div>
 		<h2 class="text-lg font-semibold text-gray-900 mb-2">Bereit zum Erstellen</h2>
-		<p class="text-gray-500 mb-6">
+		<p class="text-ink-muted mb-6">
 			Klicken Sie auf "Abrechnungen erstellen", um {count} Abrechnungen zu generieren.
 		</p>
 		<Button type="submit" variant="primary" testid="generate-statements-button">

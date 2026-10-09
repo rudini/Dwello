@@ -13,18 +13,18 @@
 	{#if rental}
 		<dl class="space-y-4" data-testid="tenant-rental">
 			<div>
-				<dt class="text-sm text-gray-500">Wohnung</dt>
+				<dt class="text-sm text-ink-muted">Wohnung</dt>
 				<dd class="text-gray-900" data-testid="tenant-rental-apartment">{rental.apartment}</dd>
-				<dd class="text-sm text-gray-500">{rental.building}</dd>
+				<dd class="text-sm text-ink-muted">{rental.building}</dd>
 			</div>
 			<div>
-				<dt class="text-sm text-gray-500">Monatliche Miete (brutto)</dt>
+				<dt class="text-sm text-ink-muted">Monatliche Miete (brutto)</dt>
 				<dd class="text-lg font-semibold text-primary" data-testid="tenant-rental-rent">
 					{formatCurrency(rental.rent)}
 				</dd>
 			</div>
 			<div>
-				<dt class="text-sm text-gray-500">{rental.upcoming ? 'Einzug am' : 'Mietbeginn'}</dt>
+				<dt class="text-sm text-ink-muted">{rental.upcoming ? 'Einzug am' : 'Mietbeginn'}</dt>
 				<dd class="text-gray-900" data-testid="tenant-rental-start">
 					{formatDate(rental.startDate)}
 				</dd>
@@ -42,7 +42,7 @@
 			</Button>
 		</div>
 	{:else}
-		<p class="text-gray-500 text-sm" data-testid="tenant-no-rental">
+		<p class="text-ink-muted text-sm" data-testid="tenant-no-rental">
 			Dieser Mieter hat keinen laufenden Mietvertrag.
 		</p>
 	{/if}

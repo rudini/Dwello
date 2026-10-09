@@ -1,27 +1,26 @@
 {
-	"$comment": "Screens and states the axe check (tests/a11y) visits in every viewport and colour scheme. {building} etc. are replaced by the ids of records the check seeds itself. Every new or changed screen is added here; every state name must be one of stateMeanings. Dark mode is added to colorSchemes in stage 8 (docs/design/01-plan.md D4).",
+	"$comment": "Screens and states the axe check visits (tests/e2e/features/accessibility.feature, one example per screen and state). {building} etc. are ids of records the check seeds itself. Every new or changed screen is added here; every state must be one of stateMeanings. 'empty' and 'first-use' are covered by DOM tests (see docs/design/offene-punkte.md). Dark mode joins colorSchemes in stage 8 (docs/design/01-plan.md D4).",
 	"stateMeanings": {
-		"default": "The page as loaded with the seeded records (always checked).",
-		"empty": "A list with no records at all. The shared E2E database is never empty, so this state is covered by DOM tests of the empty branch plus the browser check of the same EmptyState component in 'filtered-empty' (see docs/design/offene-punkte.md).",
-		"filtered-empty": "A list whose filter or search matches nothing.",
-		"submit-empty": "A form submitted without input: all validation errors visible.",
+		"default": "The page as loaded with the seeded records.",
+		"empty": "A list with no records at all. Not producible in the shared E2E database; covered by DOM tests of the empty branch and by 'filtered-empty', which shows the same EmptyState component.",
+		"first-use": "Overview without any building. Covered like 'empty' by a DOM test of the first-use branch.",
+		"filtered-empty": "A list whose search matches nothing (?search=…).",
+		"submit-empty": "A new-record form submitted without input: all validation errors visible.",
 		"delete-dialog": "The delete confirmation dialog open.",
 		"end-dialog": "The dialog that ends a rental contract open.",
-		"send-dialog": "The confirmation before sending a statement open.",
-		"reminder-dialog": "The Mahnung dialog of a statement open.",
+		"send-dialog": "The confirmation before marking a statement as sent open.",
+		"reminder-dialog": "The Mahnung dialog of a sent statement open.",
 		"mark-paid-dialog": "The dialog that marks a statement as paid open.",
-		"every-wizard-step": "Each step of the wizard in turn, including its result step.",
+		"action-error": "A server action failed (deleting a sent statement is refused): the error alert visible.",
+		"every-wizard-step": "Each step of the wizard in turn, up to the step before saving.",
 		"preview-empty": "Statement wizard preview for a period without rental contracts.",
 		"overlap-warning": "Rental contract wizard with a start date that overlaps another contract of the apartment.",
-		"ai-unavailable": "Invoice form while the categorisation service is not reachable (always the case in the test stack).",
-		"profile-sum-invalid": "Heating profile form whose monthly shares do not add up to 100 %.",
+		"draft-restored": "A wizard reopened with a draft saved in the browser: restore notice and save status visible.",
 		"formula-tested": "Distribution key form after testing a formula.",
-		"login-error": "Login page showing a sign-in error (?error=…).",
-		"first-use": "Overview without any building (getting-started tasks). Covered like 'empty' by a DOM test of the overview's first-use branch; the browser check sees the same task list component with seeded data.",
-		"mobile-menu-open": "Mobile navigation drawer open (mobile viewport only).",
-		"user-menu-open": "User menu in the header open.",
-		"draft-restored": "A wizard reopened with a draft saved in the browser: the restore notice and save status visible.",
-		"action-error": "A server action failed (e.g. delete refused): the error alert visible."
+		"profile-sum-invalid": "Heating profile form whose monthly shares do not add up to 100 %.",
+		"login-error": "Login page showing a sign-in error (?error=failed).",
+		"mobile-menu-open": "Navigation drawer open (mobile and tablet viewport).",
+		"user-menu-open": "User menu in the header open."
 	},
 	"screens": [
 		{
@@ -29,17 +28,22 @@
 			"path": "/login",
 			"public": true,
 			"states": [
+				"default",
 				"login-error"
 			]
 		},
 		{
 			"name": "error-404",
-			"path": "/gibt-es-nicht"
+			"path": "/gibt-es-nicht",
+			"states": [
+				"default"
+			]
 		},
 		{
 			"name": "dashboard",
 			"path": "/dashboard",
 			"states": [
+				"default",
 				"first-use",
 				"mobile-menu-open",
 				"user-menu-open"
@@ -49,6 +53,7 @@
 			"name": "buildings",
 			"path": "/buildings",
 			"states": [
+				"default",
 				"empty",
 				"filtered-empty"
 			]
@@ -57,6 +62,7 @@
 			"name": "building-new",
 			"path": "/buildings/new",
 			"states": [
+				"default",
 				"submit-empty"
 			]
 		},
@@ -64,6 +70,7 @@
 			"name": "building-detail",
 			"path": "/buildings/{building}",
 			"states": [
+				"default",
 				"delete-dialog"
 			]
 		},
@@ -71,13 +78,14 @@
 			"name": "building-edit",
 			"path": "/buildings/{building}/edit",
 			"states": [
-				"submit-empty"
+				"default"
 			]
 		},
 		{
 			"name": "apartments",
 			"path": "/apartments",
 			"states": [
+				"default",
 				"empty",
 				"filtered-empty"
 			]
@@ -86,24 +94,29 @@
 			"name": "apartment-new",
 			"path": "/apartments/new",
 			"states": [
+				"default",
 				"submit-empty"
 			]
 		},
 		{
 			"name": "apartment-detail",
-			"path": "/apartments/{apartment}"
+			"path": "/apartments/{apartment}",
+			"states": [
+				"default"
+			]
 		},
 		{
 			"name": "apartment-edit",
 			"path": "/apartments/{apartment}/edit",
 			"states": [
-				"submit-empty"
+				"default"
 			]
 		},
 		{
 			"name": "tenants",
 			"path": "/tenants",
 			"states": [
+				"default",
 				"empty",
 				"filtered-empty"
 			]
@@ -112,6 +125,7 @@
 			"name": "tenant-new",
 			"path": "/tenants/new",
 			"states": [
+				"default",
 				"submit-empty"
 			]
 		},
@@ -119,6 +133,7 @@
 			"name": "tenant-detail",
 			"path": "/tenants/{tenant}",
 			"states": [
+				"default",
 				"delete-dialog"
 			]
 		},
@@ -126,13 +141,14 @@
 			"name": "tenant-edit",
 			"path": "/tenants/{tenant}/edit",
 			"states": [
-				"submit-empty"
+				"default"
 			]
 		},
 		{
 			"name": "contracts",
 			"path": "/contracts",
 			"states": [
+				"default",
 				"empty",
 				"filtered-empty"
 			]
@@ -141,8 +157,9 @@
 			"name": "contract-new",
 			"path": "/contracts/new",
 			"states": [
-				"every-wizard-step",
+				"default",
 				"submit-empty",
+				"every-wizard-step",
 				"overlap-warning",
 				"draft-restored"
 			]
@@ -151,6 +168,7 @@
 			"name": "contract-detail",
 			"path": "/contracts/{contract}",
 			"states": [
+				"default",
 				"end-dialog",
 				"delete-dialog"
 			]
@@ -159,13 +177,14 @@
 			"name": "contract-edit",
 			"path": "/contracts/{contract}/edit",
 			"states": [
-				"submit-empty"
+				"default"
 			]
 		},
 		{
 			"name": "invoices",
 			"path": "/invoices",
 			"states": [
+				"default",
 				"empty",
 				"filtered-empty"
 			]
@@ -174,14 +193,15 @@
 			"name": "invoice-new",
 			"path": "/invoices/new",
 			"states": [
-				"submit-empty",
-				"ai-unavailable"
+				"default",
+				"submit-empty"
 			]
 		},
 		{
 			"name": "invoice-detail",
 			"path": "/invoices/{invoice}",
 			"states": [
+				"default",
 				"delete-dialog"
 			]
 		},
@@ -189,13 +209,14 @@
 			"name": "invoice-edit",
 			"path": "/invoices/{invoice}/edit",
 			"states": [
-				"submit-empty"
+				"default"
 			]
 		},
 		{
 			"name": "statements",
 			"path": "/statements",
 			"states": [
+				"default",
 				"empty",
 				"filtered-empty"
 			]
@@ -204,6 +225,7 @@
 			"name": "statement-generate",
 			"path": "/statements/generate",
 			"states": [
+				"default",
 				"every-wizard-step",
 				"preview-empty",
 				"draft-restored"
@@ -213,27 +235,33 @@
 			"name": "statement-detail",
 			"path": "/statements/{statement}",
 			"states": [
+				"default",
 				"send-dialog",
-				"delete-dialog",
-				"action-error"
+				"delete-dialog"
 			]
 		},
 		{
 			"name": "statement-sent-detail",
 			"path": "/statements/{sentStatement}",
 			"states": [
+				"default",
 				"reminder-dialog",
-				"mark-paid-dialog"
+				"mark-paid-dialog",
+				"action-error"
 			]
 		},
 		{
 			"name": "statement-edit",
-			"path": "/statements/{statement}/edit"
+			"path": "/statements/{statement}/edit",
+			"states": [
+				"default"
+			]
 		},
 		{
 			"name": "documents",
 			"path": "/documents",
 			"states": [
+				"default",
 				"empty"
 			]
 		},
@@ -241,13 +269,14 @@
 			"name": "config",
 			"path": "/config",
 			"states": [
-				"submit-empty"
+				"default"
 			]
 		},
 		{
 			"name": "categories",
 			"path": "/config/categories",
 			"states": [
+				"default",
 				"delete-dialog"
 			]
 		},
@@ -255,17 +284,22 @@
 			"name": "category-new",
 			"path": "/config/categories/new",
 			"states": [
+				"default",
 				"submit-empty"
 			]
 		},
 		{
 			"name": "category-edit",
-			"path": "/config/categories/{category}/edit"
+			"path": "/config/categories/{category}/edit",
+			"states": [
+				"default"
+			]
 		},
 		{
 			"name": "distribution-keys",
 			"path": "/config/distribution-keys",
 			"states": [
+				"default",
 				"delete-dialog"
 			]
 		},
@@ -273,22 +307,30 @@
 			"name": "distribution-key-new",
 			"path": "/config/distribution-keys/new",
 			"states": [
+				"default",
 				"submit-empty",
 				"formula-tested"
 			]
 		},
 		{
 			"name": "distribution-key-edit",
-			"path": "/config/distribution-keys/{distributionKey}/edit"
+			"path": "/config/distribution-keys/{distributionKey}/edit",
+			"states": [
+				"default"
+			]
 		},
 		{
 			"name": "heating-profiles",
-			"path": "/config/heating-profiles"
+			"path": "/config/heating-profiles",
+			"states": [
+				"default"
+			]
 		},
 		{
 			"name": "heating-profile-new",
 			"path": "/config/heating-profiles/new",
 			"states": [
+				"default",
 				"profile-sum-invalid"
 			]
 		},
@@ -296,32 +338,51 @@
 			"name": "heating-profile-detail",
 			"path": "/config/heating-profiles/{heatingProfile}",
 			"states": [
+				"default",
 				"delete-dialog"
 			]
 		},
 		{
 			"name": "heating-profile-edit",
-			"path": "/config/heating-profiles/{heatingProfile}/edit"
+			"path": "/config/heating-profiles/{heatingProfile}/edit",
+			"states": [
+				"default"
+			]
 		},
 		{
 			"name": "help",
-			"path": "/help"
+			"path": "/help",
+			"states": [
+				"default"
+			]
 		},
 		{
 			"name": "privacy",
-			"path": "/privacy"
+			"path": "/privacy",
+			"states": [
+				"default"
+			]
 		},
 		{
 			"name": "terms",
-			"path": "/terms"
+			"path": "/terms",
+			"states": [
+				"default"
+			]
 		},
 		{
 			"name": "analytics",
-			"path": "/analytics"
+			"path": "/analytics",
+			"states": [
+				"default"
+			]
 		},
 		{
 			"name": "reports",
-			"path": "/reports"
+			"path": "/reports",
+			"states": [
+				"default"
+			]
 		}
 	],
 	"viewports": {
@@ -329,13 +390,13 @@
 			"width": 1440,
 			"height": 900
 		},
-		"mobile": {
-			"width": 390,
-			"height": 844
-		},
 		"tablet": {
 			"width": 820,
 			"height": 1180
+		},
+		"mobile": {
+			"width": 390,
+			"height": 844
 		}
 	},
 	"colorSchemes": [

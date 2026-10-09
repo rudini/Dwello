@@ -11,17 +11,17 @@
 </script>
 
 <div class="space-y-6">
-	<nav class="flex items-center text-sm text-gray-500">
+	<nav class="flex items-center text-sm text-ink-muted">
 		<a
 			href="/apartments"
 			data-testid="breadcrumb-link"
-			class="hover:text-blue-600 transition-colors">Wohnungen</a
+			class="hover:text-accent transition-colors">Wohnungen</a
 		>
 		<Icon name="chevron_right" size={16} class="mx-2" />
 		<a
 			href="/buildings/{building.id}"
 			data-testid="breadcrumb-link"
-			class="hover:text-blue-600 transition-colors">{building.name}</a
+			class="hover:text-accent transition-colors">{building.name}</a
 		>
 		<Icon name="chevron_right" size={16} class="mx-2" />
 		<span class="text-gray-900 font-medium">Wohnung {apartment.number}</span>

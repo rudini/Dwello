@@ -36,7 +36,7 @@
 
 	<div>
 		<h1 class="text-2xl font-bold text-gray-900">Neue Wohnung erstellen</h1>
-		<p class="text-gray-500 mt-1">
+		<p class="text-ink-muted mt-1">
 			Die Wohnung ist zunächst leer. Mit einem Mietvertrag weisen Sie ihr einen Mieter zu.
 		</p>
 	</div>

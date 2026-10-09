@@ -72,7 +72,7 @@
 						<Badge variant="warning">Kategorisierung ausstehend</Badge>
 					{/if}
 				</div>
-				<p class="text-gray-500">{data.invoice.description}</p>
+				<p class="text-ink-muted">{data.invoice.description}</p>
 			</div>
 		</div>
 		<div class="flex items-center gap-2">
@@ -111,7 +111,7 @@
 	{#if recategorizeError}
 		<div
 			data-testid="invoice-recategorize-error"
-			class="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700"
+			class="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-critical"
 		>
 			Kategorisierung fehlgeschlagen: {recategorizeError}
 		</div>
@@ -125,30 +125,30 @@
 				<h2 class="text-lg font-semibold text-gray-900 mb-4">Rechnungsdetails</h2>
 				<dl class="grid gap-4 sm:grid-cols-2">
 					<div>
-						<dt class="text-sm font-medium text-gray-500">Rechnungsdatum</dt>
+						<dt class="text-sm font-medium text-ink-muted">Rechnungsdatum</dt>
 						<dd class="mt-1 text-gray-900">{formatDate(data.invoice.invoiceDate)}</dd>
 					</div>
 					<div>
-						<dt class="text-sm font-medium text-gray-500">Betrag</dt>
+						<dt class="text-sm font-medium text-ink-muted">Betrag</dt>
 						<dd class="mt-1 text-xl font-semibold text-gray-900" data-testid="invoice-amount">
 							{formatCurrency(data.invoice.amount)}
 						</dd>
 					</div>
 					<div class="sm:col-span-2">
-						<dt class="text-sm font-medium text-gray-500">Gebäude</dt>
+						<dt class="text-sm font-medium text-ink-muted">Gebäude</dt>
 						<dd class="mt-1">
 							<a
 								href="/buildings/{data.invoice.buildingId}"
-								class="text-blue-600 hover:text-blue-700"
+								class="text-accent hover:text-accent"
 								data-testid="invoice-building-link"
 							>
 								{data.invoice.buildingName}
 							</a>
-							<p class="text-sm text-gray-500">{data.invoice.buildingAddress}</p>
+							<p class="text-sm text-ink-muted">{data.invoice.buildingAddress}</p>
 						</dd>
 					</div>
 					<div class="sm:col-span-2">
-						<dt class="text-sm font-medium text-gray-500">Beschreibung</dt>
+						<dt class="text-sm font-medium text-ink-muted">Beschreibung</dt>
 						<dd class="mt-1 text-gray-900">{data.invoice.description}</dd>
 					</div>
 				</dl>
@@ -159,7 +159,7 @@
 				<h2 class="text-lg font-semibold text-gray-900 mb-4">Kategorisierung</h2>
 				<dl class="grid gap-4 sm:grid-cols-2">
 					<div>
-						<dt class="text-sm font-medium text-gray-500">Kategorie</dt>
+						<dt class="text-sm font-medium text-ink-muted">Kategorie</dt>
 						<dd class="mt-1">
 							{#if data.invoice.category}
 								<span
@@ -169,24 +169,24 @@
 									{data.invoice.category.name}
 								</span>
 							{:else}
-								<span class="text-gray-400">Nicht kategorisiert</span>
+								<span class="text-ink-muted">Nicht kategorisiert</span>
 							{/if}
 						</dd>
 					</div>
 					<div>
-						<dt class="text-sm font-medium text-gray-500">Verteilschlüssel</dt>
+						<dt class="text-sm font-medium text-ink-muted">Verteilschlüssel</dt>
 						<dd class="mt-1">
 							{#if data.invoice.distributionKey}
 								<span class="text-gray-900" data-testid="invoice-distribution-key"
 									>{data.invoice.distributionKey.name}</span
 								>
 							{:else}
-								<span class="text-gray-400">Nicht zugewiesen</span>
+								<span class="text-ink-muted">Nicht zugewiesen</span>
 							{/if}
 						</dd>
 					</div>
 					<div>
-						<dt class="text-sm font-medium text-gray-500">Umlagefähigkeit</dt>
+						<dt class="text-sm font-medium text-ink-muted">Umlagefähigkeit</dt>
 						<dd class="mt-1" data-testid="invoice-utility-cost">
 							{#if data.invoice.isValidUtilityCost}
 								<Badge variant="success">Umlagefähig</Badge>
@@ -200,7 +200,7 @@
 				{#if data.invoice.llmConfidence}
 					<div class="mt-6 p-4 bg-gray-50 rounded-lg">
 						<h3 class="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-							<Icon name="auto_awesome" size={16} class="text-blue-500" />
+							<Icon name="auto_awesome" size={16} class="text-accent" />
 							KI-Kategorisierung
 						</h3>
 						<div class="flex items-center gap-2 text-sm text-gray-600 mb-2">
@@ -218,12 +218,12 @@
 
 				{#if data.invoice.manualOverrideReason}
 					<div class="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-lg">
-						<h3 class="text-sm font-medium text-amber-800 mb-1 flex items-center gap-2">
+						<h3 class="text-sm font-medium text-caution mb-1 flex items-center gap-2">
 							<Icon name="edit_note" size={16} />
 							Manuell überschrieben
 						</h3>
 						{#if data.invoice.manualOverrideReason}
-							<p data-testid="invoice-override-reason" class="text-sm text-amber-700">
+							<p data-testid="invoice-override-reason" class="text-sm text-caution">
 								{data.invoice.manualOverrideReason}
 							</p>
 						{/if}
@@ -261,7 +261,7 @@
 					</Button>
 					<Button
 						variant="secondary"
-						class="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
+						class="w-full justify-start text-critical hover:text-critical hover:bg-red-50"
 						onclick={() => (showDeleteModal = true)}
 					>
 						<Icon name="delete" size={18} />
@@ -275,19 +275,19 @@
 				<h2 class="text-lg font-semibold text-gray-900 mb-4">Metadaten</h2>
 				<dl class="space-y-3 text-sm">
 					<div>
-						<dt class="text-gray-500">Erstellt</dt>
+						<dt class="text-ink-muted">Erstellt</dt>
 						<dd class="text-gray-900">
 							{data.invoice.createdAt ? formatDateTime(data.invoice.createdAt) : '-'}
 						</dd>
 					</div>
 					<div>
-						<dt class="text-gray-500">Zuletzt geändert</dt>
+						<dt class="text-ink-muted">Zuletzt geändert</dt>
 						<dd class="text-gray-900">
 							{data.invoice.updatedAt ? formatDateTime(data.invoice.updatedAt) : '-'}
 						</dd>
 					</div>
 					<div>
-						<dt class="text-gray-500">ID</dt>
+						<dt class="text-ink-muted">ID</dt>
 						<dd class="text-gray-900 font-mono text-xs">{data.invoice.id}</dd>
 					</div>
 				</dl>
@@ -297,7 +297,7 @@
 			{#if !data.invoice.isValidUtilityCost}
 				<Card>
 					<div class="flex items-start gap-3" data-testid="invoice-legal-note">
-						<Icon name="gavel" size={20} class="text-amber-500 flex-shrink-0 mt-0.5" />
+						<Icon name="gavel" size={20} class="text-caution flex-shrink-0 mt-0.5" />
 						<div>
 							<h3 class="font-medium text-gray-900 mb-1">Schweizer Mietrecht</h3>
 							<p class="text-sm text-gray-600">
@@ -319,11 +319,11 @@
 	</p>
 	<div class="p-3 bg-gray-50 rounded-lg mb-4">
 		<p class="font-medium text-gray-900">{data.invoice.billingEntity}</p>
-		<p class="text-sm text-gray-500">{data.invoice.description}</p>
+		<p class="text-sm text-ink-muted">{data.invoice.description}</p>
 		<p class="text-sm font-medium text-gray-900 mt-1">{formatCurrency(data.invoice.amount)}</p>
 	</div>
 	{#if deleteError}
-		<div class="p-3 bg-red-50 border border-red-200 rounded-lg mb-4 text-sm text-red-700">
+		<div class="p-3 bg-red-50 border border-red-200 rounded-lg mb-4 text-sm text-critical">
 			{deleteError}
 		</div>
 	{/if}

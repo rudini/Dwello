@@ -15,7 +15,7 @@
 
 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 	<div>
-		<label for="firstName" class={labelClass}>Vorname <span class="text-red-500">*</span></label>
+		<label for="firstName" class={labelClass}>Vorname <span class="text-critical">*</span></label>
 		<input
 			id="firstName"
 			name="firstName"
@@ -27,7 +27,7 @@
 		<FieldError message={errors.firstName} />
 	</div>
 	<div>
-		<label for="lastName" class={labelClass}>Nachname <span class="text-red-500">*</span></label>
+		<label for="lastName" class={labelClass}>Nachname <span class="text-critical">*</span></label>
 		<input
 			id="lastName"
 			name="lastName"
@@ -56,7 +56,7 @@
 	</div>
 	<div>
 		<label for="phone" class={labelClass}
-			>Telefon <span class="text-gray-400">(optional)</span></label
+			>Telefon <span class="text-ink-muted">(optional)</span></label
 		>
 		<input
 			id="phone"
@@ -81,7 +81,7 @@
 		<option value="email">Per E-Mail</option>
 		<option value="letter">Per Brief</option>
 	</select>
-	<p class="mt-1 text-xs text-gray-500">
+	<p class="mt-1 text-xs text-ink-muted">
 		So erhält der Mieter Mahnungen und andere Dokumente. Per E-Mail braucht eine E-Mail-Adresse, per
 		Brief eine Adresse.
 	</p>
@@ -100,7 +100,7 @@
 			<option value={code}>{label}</option>
 		{/each}
 	</select>
-	<p class="mt-1 text-xs text-gray-500">
+	<p class="mt-1 text-xs text-ink-muted">
 		In dieser Sprache wird die Nebenkostenabrechnung erstellt.
 	</p>
 </div>

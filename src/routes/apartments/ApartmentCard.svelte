@@ -19,7 +19,7 @@
 				<h3 class="font-semibold text-gray-900 text-lg">
 					Wohnung {apartment.number}
 				</h3>
-				<p class="text-sm text-gray-500">{floorLabel(apartment.floor)}</p>
+				<p class="text-sm text-ink-muted">{floorLabel(apartment.floor)}</p>
 			</div>
 			<span data-testid="apartment-status">
 				<Badge variant={statusVariants[apartment.status]}>
@@ -30,18 +30,18 @@
 
 		<!-- Building Info -->
 		<div class="flex items-center text-sm text-gray-600 mb-4">
-			<Icon name="apartment" size={16} class="mr-1 text-gray-400" />
+			<Icon name="apartment" size={16} class="mr-1 text-ink-muted" />
 			<span class="truncate">{apartment.buildingName}</span>
 		</div>
 
 		<!-- Apartment Details -->
 		<div class="grid grid-cols-2 gap-3 mb-4">
 			<div class="flex items-center text-sm">
-				<Icon name="straighten" size={16} class="mr-1 text-gray-400" />
+				<Icon name="straighten" size={16} class="mr-1 text-ink-muted" />
 				<span>{apartment.area} m²</span>
 			</div>
 			<div class="flex items-center text-sm">
-				<Icon name="meeting_room" size={16} class="mr-1 text-gray-400" />
+				<Icon name="meeting_room" size={16} class="mr-1 text-ink-muted" />
 				<span>{apartment.rooms} Zimmer</span>
 			</div>
 		</div>

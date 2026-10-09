@@ -57,7 +57,7 @@
 
 <div class="space-y-6">
 	<!-- Breadcrumb -->
-	<nav class="flex items-center text-sm text-gray-500">
+	<nav class="flex items-center text-sm text-ink-muted">
 		<a href="/contracts" data-testid="breadcrumb-link" class="hover:text-primary transition-colors"
 			>Mietverträge</a
 		>
@@ -80,7 +80,7 @@
 					/>
 				</span>
 			</div>
-			<p class="text-gray-500 mt-1" data-testid="contract-apartment">
+			<p class="text-ink-muted mt-1" data-testid="contract-apartment">
 				Wohnung {data.contract.apartment.number} - {data.contract.building.name ||
 					data.contract.building.address}
 			</p>
@@ -146,7 +146,7 @@
 				</div>
 				{#if data.contract.tenant.phone}
 					<div class="flex items-center text-sm text-gray-600 mb-4">
-						<Icon name="phone" size={16} class="mr-2 text-gray-400" />
+						<Icon name="phone" size={16} class="mr-2 text-ink-muted" />
 						<a
 							href="tel:{data.contract.tenant.phone}"
 							class="hover:text-primary"
@@ -172,19 +172,19 @@
 				<h2 class="text-lg font-semibold text-gray-900 mb-4">Wohnung</h2>
 				<div class="space-y-3">
 					<div class="flex items-start gap-3">
-						<Icon name="door_front" size={20} class="text-gray-400 mt-0.5" />
+						<Icon name="door_front" size={20} class="text-ink-muted mt-0.5" />
 						<div>
 							<p class="font-medium text-gray-900">Wohnung {data.contract.apartment.number}</p>
-							<p class="text-sm text-gray-500">{data.contract.apartment.floor}</p>
+							<p class="text-sm text-ink-muted">{data.contract.apartment.floor}</p>
 						</div>
 					</div>
 					<div class="flex items-start gap-3">
-						<Icon name="apartment" size={20} class="text-gray-400 mt-0.5" />
+						<Icon name="apartment" size={20} class="text-ink-muted mt-0.5" />
 						<div>
 							<p class="text-gray-900">
 								{data.contract.building.name || data.contract.building.address}
 							</p>
-							<p class="text-sm text-gray-500">
+							<p class="text-sm text-ink-muted">
 								{data.contract.building.address}, {data.contract.building.postalCode}
 								{data.contract.building.city}
 							</p>
@@ -192,11 +192,11 @@
 					</div>
 					<div class="flex items-center gap-6 text-sm text-gray-600 pt-2">
 						<span class="flex items-center gap-1">
-							<Icon name="straighten" size={16} class="text-gray-400" />
+							<Icon name="straighten" size={16} class="text-ink-muted" />
 							{data.contract.apartment.area} m²
 						</span>
 						<span class="flex items-center gap-1">
-							<Icon name="meeting_room" size={16} class="text-gray-400" />
+							<Icon name="meeting_room" size={16} class="text-ink-muted" />
 							{data.contract.apartment.rooms} Zimmer
 						</span>
 					</div>
@@ -222,19 +222,19 @@
 				<h2 class="text-lg font-semibold text-gray-900 mb-4">Vertragszeitraum</h2>
 				<div class="grid grid-cols-2 gap-6">
 					<div>
-						<p class="text-sm text-gray-500 mb-1">Vertragsbeginn</p>
+						<p class="text-sm text-ink-muted mb-1">Vertragsbeginn</p>
 						<p class="text-lg font-semibold text-gray-900">
 							{formatDate(data.contract.startDate)}
 						</p>
 					</div>
 					<div>
-						<p class="text-sm text-gray-500 mb-1">Vertragsende</p>
+						<p class="text-sm text-ink-muted mb-1">Vertragsende</p>
 						{#if data.contract.endDate}
 							<p class="text-lg font-semibold text-gray-900">
 								{formatDate(data.contract.endDate)}
 							</p>
 						{:else}
-							<p class="text-lg font-semibold text-green-600">Unbefristet</p>
+							<p class="text-lg font-semibold text-positive">Unbefristet</p>
 						{/if}
 					</div>
 				</div>
@@ -305,11 +305,11 @@
 		<div class="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
 			<div class="flex items-center gap-4 mb-4">
 				<div class="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center">
-					<Icon name="event_busy" size={24} class="text-amber-600" />
+					<Icon name="event_busy" size={24} class="text-caution" />
 				</div>
 				<div>
 					<h3 class="text-lg font-semibold text-gray-900">Vertrag beenden</h3>
-					<p class="text-sm text-gray-500">
+					<p class="text-sm text-ink-muted">
 						{data.contract.tenant.firstName}
 						{data.contract.tenant.lastName}
 					</p>
@@ -347,11 +347,11 @@
 		<div class="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
 			<div class="flex items-center gap-4 mb-4">
 				<div class="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
-					<Icon name="warning" size={24} class="text-red-600" />
+					<Icon name="warning" size={24} class="text-critical" />
 				</div>
 				<div>
 					<h3 class="text-lg font-semibold text-gray-900">Vertrag löschen</h3>
-					<p class="text-sm text-gray-500">Diese Aktion kann nicht rückgängig gemacht werden</p>
+					<p class="text-sm text-ink-muted">Diese Aktion kann nicht rückgängig gemacht werden</p>
 				</div>
 			</div>
 			<p class="text-gray-600 mb-6">
@@ -361,8 +361,8 @@
 			{#if !data.contract.endDate}
 				<div class="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-6">
 					<div class="flex items-start gap-2">
-						<Icon name="warning" size={18} class="text-amber-600 mt-0.5" />
-						<p class="text-sm text-amber-800">
+						<Icon name="warning" size={18} class="text-caution mt-0.5" />
+						<p class="text-sm text-caution">
 							Dieser Vertrag ist noch aktiv. Beenden Sie den Vertrag zuerst, bevor Sie ihn löschen.
 						</p>
 					</div>

@@ -5,7 +5,7 @@
 	let { links, current }: { links: { href: string; label: string }[]; current: string } = $props();
 </script>
 
-<nav class="flex items-center text-sm text-gray-500">
+<nav class="flex items-center text-sm text-ink-muted">
 	{#each links as link (link.href)}
 		<a href={link.href} data-testid="breadcrumb-link" class="hover:text-primary transition-colors"
 			>{link.label}</a

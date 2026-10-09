@@ -10,7 +10,7 @@
 			? 'bg-green-500 text-white'
 			: currentStep === num
 				? 'bg-blue-600 text-white'
-				: 'bg-gray-200 text-gray-500';
+				: 'bg-gray-200 text-ink-muted';
 </script>
 
 <div class="flex items-center justify-between max-w-3xl mx-auto">
@@ -31,7 +31,7 @@
 			<span
 				class="ml-2 text-sm font-medium"
 				class:text-gray-900={currentStep >= num}
-				class:text-gray-400={currentStep < num}
+				class:text-ink-muted={currentStep < num}
 			>
 				{label}
 			</span>

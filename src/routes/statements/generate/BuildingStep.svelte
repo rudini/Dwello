@@ -25,7 +25,7 @@
 <div class="space-y-6">
 	<div>
 		<h2 class="text-lg font-semibold text-gray-900 mb-4">Gebäude auswählen</h2>
-		<p class="text-gray-500 mb-6">
+		<p class="text-ink-muted mb-6">
 			Wählen Sie die Gebäude aus, für die Abrechnungen erstellt werden sollen.
 		</p>
 	</div>
@@ -36,11 +36,11 @@
 				type="checkbox"
 				checked={allSelected}
 				onchange={toggleAllBuildings}
-				class="w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+				class="w-5 h-5 text-accent rounded border-gray-300 focus:ring-blue-500"
 			/>
 			<span class="font-medium text-gray-900">Alle Gebäude auswählen</span>
 		</label>
-		<span class="text-sm text-gray-500">
+		<span class="text-sm text-ink-muted">
 			{selectedBuildingIds.length} von {buildings.length} ausgewählt
 		</span>
 	</div>
@@ -57,20 +57,20 @@
 					data-testid="generate-building-{building.id}"
 					checked={selected}
 					onchange={() => toggleBuilding(building.id)}
-					class="w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+					class="w-5 h-5 text-accent rounded border-gray-300 focus:ring-blue-500"
 				/>
 				<div class="flex-1">
 					<p class="font-medium text-gray-900">
 						{building.name || `${building.address}, ${building.city}`}
 					</p>
-					<p class="text-sm text-gray-500">
+					<p class="text-sm text-ink-muted">
 						{building.address}, {building.postalCode}
 						{building.city}
 					</p>
 				</div>
 				<div class="text-right">
 					<p class="font-medium text-gray-900">{building.apartmentCount}</p>
-					<p class="text-sm text-gray-500">Wohnungen</p>
+					<p class="text-sm text-ink-muted">Wohnungen</p>
 				</div>
 			</label>
 		{/each}

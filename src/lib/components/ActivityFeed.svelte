@@ -26,15 +26,15 @@
 	} {
 		switch (type) {
 			case 'statement_created':
-				return { icon: 'receipt_long', color: 'text-blue-600', bgColor: 'bg-blue-100' };
+				return { icon: 'receipt_long', color: 'text-accent', bgColor: 'bg-blue-100' };
 			case 'invoice_added':
 				return { icon: 'description', color: 'text-purple-600', bgColor: 'bg-purple-100' };
 			case 'payment_received':
-				return { icon: 'paid', color: 'text-green-600', bgColor: 'bg-green-100' };
+				return { icon: 'paid', color: 'text-positive', bgColor: 'bg-green-100' };
 			case 'reminder_sent':
 				return {
 					icon: 'notification_important',
-					color: 'text-orange-600',
+					color: 'text-caution',
 					bgColor: 'bg-orange-100'
 				};
 			default:
@@ -68,7 +68,7 @@
 	</div>
 
 	{#if displayedActivities.length === 0}
-		<div class="p-6 text-center text-gray-500">
+		<div class="p-6 text-center text-ink-muted">
 			<Icon name="history" size={32} class="mx-auto text-gray-300 mb-2" />
 			<p>Keine Aktivitäten vorhanden</p>
 		</div>
@@ -85,10 +85,10 @@
 						</div>
 						<div class="flex-1 min-w-0">
 							<p class="font-medium text-gray-900">{activity.title}</p>
-							<p class="text-sm text-gray-500 mt-0.5">{activity.description}</p>
+							<p class="text-sm text-ink-muted mt-0.5">{activity.description}</p>
 						</div>
 						<div class="flex-shrink-0">
-							<span class="text-xs text-gray-400">{formatTimestamp(activity.timestamp)}</span>
+							<span class="text-xs text-ink-muted">{formatTimestamp(activity.timestamp)}</span>
 						</div>
 					</div>
 				</div>
@@ -97,7 +97,7 @@
 
 		{#if activities.length > maxItems}
 			<div class="px-6 py-3 border-t border-gray-200 text-center">
-				<a href="/activity" class="text-sm font-medium text-blue-600 hover:text-blue-700">
+				<a href="/activity" class="text-sm font-medium text-accent hover:text-accent">
 					Alle Aktivitäten anzeigen
 				</a>
 			</div>

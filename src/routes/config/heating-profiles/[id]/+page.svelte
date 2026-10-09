@@ -41,7 +41,7 @@
 					>{custom ? 'Eigenes Profil' : 'Vordefiniert'}</Badge
 				>
 			</h1>
-			<p class="text-gray-500 mt-1">{profile.description}</p>
+			<p class="text-ink-muted mt-1">{profile.description}</p>
 		</div>
 		{#if custom}
 			<div class="flex gap-2">
@@ -70,7 +70,7 @@
 		<dl class="grid grid-cols-3 sm:grid-cols-6 gap-3 mt-6">
 			{#each MONTHS as month (month.key)}
 				<div class="text-center p-2 bg-gray-50 rounded-lg">
-					<dt class="text-xs text-gray-500">{month.label}</dt>
+					<dt class="text-xs text-ink-muted">{month.label}</dt>
 					<dd class="font-semibold text-gray-900" data-testid="heating-profile-share-{month.key}">
 						{profile.monthlyPercentages[month.key]} %
 					</dd>

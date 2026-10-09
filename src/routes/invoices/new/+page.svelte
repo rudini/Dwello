@@ -145,7 +145,7 @@
 	<div class="flex items-center gap-4">
 		<div>
 			<h1 class="text-2xl font-bold text-gray-900">Neue Rechnung</h1>
-			<p class="text-gray-500 mt-1">
+			<p class="text-ink-muted mt-1">
 				Erfassen Sie eine neue Rechnung für die Nebenkostenabrechnung
 			</p>
 		</div>
@@ -154,7 +154,7 @@
 	<!-- LLM Status Banner -->
 	{#if data.llmAvailable}
 		<div
-			class="flex items-center gap-2 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700"
+			class="flex items-center gap-2 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-accent"
 		>
 			<Icon name="auto_awesome" size={18} />
 			<span>KI-Kategorisierung ist aktiv. Die Rechnung wird automatisch analysiert.</span>

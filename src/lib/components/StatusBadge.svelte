@@ -11,7 +11,7 @@
 	const variantClasses: Record<Variant, { container: string; text: string; dot: string }> = {
 		success: {
 			container: 'bg-green-100',
-			text: 'text-green-700',
+			text: 'text-positive',
 			dot: 'bg-green-500'
 		},
 		gray: {
@@ -21,17 +21,17 @@
 		},
 		info: {
 			container: 'bg-blue-100',
-			text: 'text-blue-700',
+			text: 'text-accent',
 			dot: 'bg-blue-500'
 		},
 		warning: {
 			container: 'bg-amber-100',
-			text: 'text-amber-700',
+			text: 'text-caution',
 			dot: 'bg-amber-500'
 		},
 		error: {
 			container: 'bg-red-100',
-			text: 'text-red-700',
+			text: 'text-critical',
 			dot: 'bg-red-500'
 		}
 	};

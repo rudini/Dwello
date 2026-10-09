@@ -53,7 +53,7 @@
 
 	<div>
 		<label for="formula" class="block text-sm font-medium text-gray-700 mb-1"
-			>Formel <span class="text-red-500">*</span></label
+			>Formel <span class="text-critical">*</span></label
 		>
 		<div class="flex flex-wrap gap-2 mb-2">
 			{#each FORMULA_VARIABLES as variable (variable.name)}
@@ -76,7 +76,7 @@
 			class="{inputClass} font-mono"
 		/>
 		<FieldError message={errors.formula} />
-		<p class="mt-1 text-xs text-gray-500">
+		<p class="mt-1 text-xs text-ink-muted">
 			Rechnen Sie mit +, -, *, / und Klammern, z.B. {'{area} * 0.7 + {rooms} * 0.3'}
 		</p>
 	</div>

@@ -15,10 +15,8 @@
 <Card>
 	<h2 class="text-lg font-semibold text-gray-900 mb-4">Kontaktdaten</h2>
 	<dl class="space-y-4">
-		<div class="flex items-start gap-3">
-			<Icon name="email" size={20} class="text-gray-400 mt-0.5" />
-			<div>
-				<dt class="text-sm text-gray-500">E-Mail</dt>
+		<div>
+			<dt class="flex items-center gap-2 text-sm text-ink-muted"><Icon name="email" size={20} />E-Mail</dt>
 				<dd>
 					{#if tenant.email}
 						<a
@@ -31,36 +29,23 @@
 					{/if}
 				</dd>
 			</div>
-		</div>
-		<div class="flex items-start gap-3">
-			<Icon name="forward_to_inbox" size={20} class="text-gray-400 mt-0.5" />
-			<div>
-				<dt class="text-sm text-gray-500">Korrespondenz</dt>
+		<div>
+			<dt class="flex items-center gap-2 text-sm text-ink-muted"><Icon name="forward_to_inbox" size={20} />Korrespondenz</dt>
 				<dd class="text-gray-900" data-testid="tenant-channel">{channel}</dd>
 			</div>
-		</div>
-		<div class="flex items-start gap-3">
-			<Icon name="translate" size={20} class="text-gray-400 mt-0.5" />
-			<div>
-				<dt class="text-sm text-gray-500">Sprache</dt>
+		<div>
+			<dt class="flex items-center gap-2 text-sm text-ink-muted"><Icon name="translate" size={20} />Sprache</dt>
 				<dd class="text-gray-900" data-testid="tenant-language">
 					{languageLabels[tenant.language] ?? languageLabels.de}
 				</dd>
 			</div>
-		</div>
-		<div class="flex items-start gap-3">
-			<Icon name="phone" size={20} class="text-gray-400 mt-0.5" />
-			<div>
-				<dt class="text-sm text-gray-500">Telefon</dt>
+		<div>
+			<dt class="flex items-center gap-2 text-sm text-ink-muted"><Icon name="phone" size={20} />Telefon</dt>
 				<dd class="text-gray-900">{tenant.phone ?? '–'}</dd>
 			</div>
-		</div>
-		<div class="flex items-start gap-3">
-			<Icon name="location_on" size={20} class="text-gray-400 mt-0.5" />
-			<div>
-				<dt class="text-sm text-gray-500">Adresse</dt>
+		<div>
+			<dt class="flex items-center gap-2 text-sm text-ink-muted"><Icon name="location_on" size={20} />Adresse</dt>
 				<dd class="text-gray-900 whitespace-pre-line">{address.join('\n') || '–'}</dd>
 			</div>
-		</div>
 	</dl>
 </Card>

@@ -74,7 +74,7 @@
 			<button
 				type="button"
 				onclick={closeMobileNav}
-				class="p-2 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+				class="p-2 text-ink-muted hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
 				aria-label="Menü schliessen"
 			>
 				<Icon name="close" size={24} />

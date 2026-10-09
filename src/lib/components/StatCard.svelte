@@ -19,7 +19,7 @@
 		label,
 		value,
 		icon,
-		iconColor = 'text-blue-600',
+		iconColor = 'text-accent',
 		trend,
 		href,
 		class: className = '',
@@ -35,13 +35,13 @@
 			case 'up':
 				return {
 					icon: 'trending_up',
-					color: 'text-green-600',
+					color: 'text-positive',
 					bgColor: 'bg-green-50'
 				};
 			case 'down':
 				return {
 					icon: 'trending_down',
-					color: 'text-red-600',
+					color: 'text-critical',
 					bgColor: 'bg-red-50'
 				};
 			default:
@@ -65,7 +65,7 @@
 >
 	<div class="flex items-start justify-between">
 		<div>
-			<p class="text-sm font-medium text-gray-500">{label}</p>
+			<p class="text-sm font-medium text-ink-muted">{label}</p>
 			<p class="text-2xl font-bold text-gray-900 mt-1">{value}</p>
 			{#if trend && trendConfig()}
 				<div class="flex items-center gap-1 mt-2">

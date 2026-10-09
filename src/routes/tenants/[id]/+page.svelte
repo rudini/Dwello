@@ -31,7 +31,7 @@
 </svelte:head>
 
 <div class="space-y-6">
-	<nav class="flex items-center text-sm text-gray-500">
+	<nav class="flex items-center text-sm text-ink-muted">
 		<a href="/tenants" data-testid="breadcrumb-link" class="hover:text-primary transition-colors"
 			>Mieter</a
 		>
@@ -42,7 +42,7 @@
 	<div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
 		<div>
 			<h1 class="text-2xl font-bold text-gray-900">{name}</h1>
-			<p class="text-gray-500 mt-1">{contact}</p>
+			<p class="text-ink-muted mt-1">{contact}</p>
 		</div>
 		<div class="flex gap-2">
 			<Button href="/tenants/{tenant.id}/edit" variant="secondary" testid="tenant-edit-button">

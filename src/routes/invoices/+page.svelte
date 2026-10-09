@@ -60,7 +60,7 @@
 	<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
 		<div>
 			<h1 class="text-2xl font-bold text-gray-900">Rechnungen</h1>
-			<p class="text-gray-500 mt-1">{data.total} Rechnungen insgesamt</p>
+			<p class="text-ink-muted mt-1">{data.total} Rechnungen insgesamt</p>
 		</div>
 		<Button href="/invoices/new" variant="primary" testid="invoice-new-button">
 			<Icon name="add" size={20} />
@@ -116,9 +116,9 @@
 				<Icon name="receipt_long" size={48} class="mx-auto text-gray-300 mb-4" />
 				<h3 class="text-lg font-medium text-gray-900 mb-2">Keine Rechnungen gefunden</h3>
 				{#if filtered}
-					<p class="text-gray-500 mb-6">Versuchen Sie es mit anderen Filtern.</p>
+					<p class="text-ink-muted mb-6">Versuchen Sie es mit anderen Filtern.</p>
 				{:else}
-					<p class="text-gray-500 mb-6">Erstellen Sie Ihre erste Rechnung, um loszulegen.</p>
+					<p class="text-ink-muted mb-6">Erstellen Sie Ihre erste Rechnung, um loszulegen.</p>
 					<Button href="/invoices/new" variant="primary">
 						<Icon name="add" size={20} />
 						Erste Rechnung erstellen
@@ -128,42 +128,44 @@
 		</Card>
 	{:else}
 		<Card padding={false}>
-			<div class="overflow-x-auto">
+			<!-- A scrollable region must be reachable by keyboard (WCAG 2.1.1) -->
+			<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+			<div class="overflow-x-auto" role="region" aria-label="Rechnungen" tabindex="0">
 				<table class="w-full">
 					<thead class="bg-gray-50 border-b border-gray-200">
 						<tr>
 							<th
-								class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider"
+								class="px-6 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider"
 							>
 								Datum
 							</th>
 							<th
-								class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider"
+								class="px-6 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider"
 							>
 								Lieferant / Beschreibung
 							</th>
 							<th
-								class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider"
+								class="px-6 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider"
 							>
 								Kategorie
 							</th>
 							<th
-								class="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider"
+								class="px-6 py-3 text-right text-xs font-semibold text-ink-muted uppercase tracking-wider"
 							>
 								Betrag
 							</th>
 							<th
-								class="px-6 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider"
+								class="px-6 py-3 text-center text-xs font-semibold text-ink-muted uppercase tracking-wider"
 							>
 								Umlagefähig
 							</th>
 							<th
-								class="px-6 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider"
+								class="px-6 py-3 text-center text-xs font-semibold text-ink-muted uppercase tracking-wider"
 							>
 								Status
 							</th>
 							<th
-								class="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider"
+								class="px-6 py-3 text-right text-xs font-semibold text-ink-muted uppercase tracking-wider"
 							>
 								Aktionen
 							</th>

@@ -76,13 +76,13 @@
 				bind:checked={isValidUtilityCost}
 				disabled={nonAllocable}
 				aria-describedby={nonAllocable ? 'invoice-category-warning-text' : undefined}
-				class="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+				class="w-5 h-5 text-accent border-gray-300 rounded focus:ring-blue-500"
 			/>
 			<div>
 				<label for="isValidUtilityCost" class="font-medium text-gray-900"
 					>Umlagefähige Nebenkosten</label
 				>
-				<p class="text-sm text-gray-500">
+				<p class="text-sm text-ink-muted">
 					Gemäss schweizerischem Mietrecht auf Mieter umlegbare Kosten
 				</p>
 			</div>
@@ -93,8 +93,8 @@
 				class="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg flex items-start gap-2"
 				data-testid="invoice-category-warning"
 			>
-				<Icon name="warning" size={18} class="text-amber-500 flex-shrink-0 mt-0.5" />
-				<div id="invoice-category-warning-text" class="text-sm text-amber-700">
+				<Icon name="warning" size={18} class="text-caution flex-shrink-0 mt-0.5" />
+				<div id="invoice-category-warning-text" class="text-sm text-caution">
 					<strong>Hinweis:</strong> Diese Kategorie enthält nicht umlagefähige Kosten (z.B. Reparaturen,
 					Versicherungen). Diese können nicht auf Mieter übertragen werden.
 				</div>

@@ -30,7 +30,7 @@
 	<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
 		<div>
 			<h1 class="text-2xl font-bold text-gray-900">Wohnungen</h1>
-			<p class="text-gray-500 mt-1">{data.total} Wohnungen insgesamt</p>
+			<p class="text-ink-muted mt-1">{data.total} Wohnungen insgesamt</p>
 		</div>
 		<Button href="/apartments/new" variant="primary" testid="apartments-new-button">
 			<Icon name="add" size={20} />
@@ -45,7 +45,7 @@
 			<div class="text-center py-12">
 				<Icon name="door_front" size={48} class="mx-auto text-gray-300 mb-4" />
 				<h3 class="text-lg font-medium text-gray-900 mb-2">Keine Wohnungen gefunden</h3>
-				<p class="text-gray-500 mb-6">
+				<p class="text-ink-muted mb-6">
 					{filtered
 						? 'Versuchen Sie es mit anderen Suchbegriffen oder Filtern.'
 						: 'Erstellen Sie Ihre erste Wohnung, um loszulegen.'}

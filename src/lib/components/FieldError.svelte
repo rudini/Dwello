@@ -3,5 +3,5 @@
 </script>
 
 {#if message}
-	<p class="mt-1 text-sm text-red-600" data-testid="form-error">{message}</p>
+	<p class="mt-1 text-sm text-critical" data-testid="form-error">{message}</p>
 {/if}

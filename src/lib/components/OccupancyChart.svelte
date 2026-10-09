@@ -22,10 +22,10 @@
 	}
 
 	function getOccupancyTextColor(rate: number): string {
-		if (rate >= 90) return 'text-green-600';
-		if (rate >= 75) return 'text-blue-600';
-		if (rate >= 50) return 'text-yellow-600';
-		return 'text-red-600';
+		if (rate >= 90) return 'text-positive';
+		if (rate >= 75) return 'text-accent';
+		if (rate >= 50) return 'text-caution';
+		return 'text-critical';
 	}
 </script>
 
@@ -41,7 +41,7 @@
 					<a
 						href="/buildings/{building.buildingId}"
 						data-testid="occupancy-building"
-						class="text-sm font-medium text-gray-900 hover:text-blue-600 transition-colors"
+						class="text-sm font-medium text-gray-900 hover:text-accent transition-colors"
 					>
 						{building.buildingName}
 					</a>
@@ -61,13 +61,13 @@
 							style="width: {building.occupancyRate}%"
 						></div>
 					</div>
-					<span class="text-xs text-gray-500 w-16 text-right" data-testid="occupancy-count">
+					<span class="text-xs text-ink-muted w-16 text-right" data-testid="occupancy-count">
 						{building.occupiedApartments}/{building.totalApartments}
 					</span>
 				</div>
 			</div>
 		{:else}
-			<p class="text-sm text-gray-500">Noch keine Gebäude erfasst.</p>
+			<p class="text-sm text-ink-muted">Noch keine Gebäude erfasst.</p>
 		{/each}
 	</div>
 </div>

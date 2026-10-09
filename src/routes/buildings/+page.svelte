@@ -51,7 +51,7 @@
 	<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
 		<div>
 			<h1 class="text-2xl font-bold text-gray-900">Gebäude</h1>
-			<p class="text-gray-500 mt-1">{data.total} Gebäude insgesamt</p>
+			<p class="text-ink-muted mt-1">{data.total} Gebäude insgesamt</p>
 		</div>
 		<Button href="/buildings/new" variant="primary" testid="building-new-button">
 			<Icon name="add" size={20} />
@@ -91,7 +91,7 @@
 			<div class="text-center py-12" data-testid="buildings-empty">
 				<Icon name="apartment" size={48} class="mx-auto text-gray-300 mb-4" />
 				<h3 class="text-lg font-medium text-gray-900 mb-2">Keine Gebäude gefunden</h3>
-				<p class="text-gray-500 mb-6">
+				<p class="text-ink-muted mb-6">
 					{#if filtered}
 						Versuchen Sie es mit anderen Suchbegriffen.
 					{:else}
@@ -120,16 +120,16 @@
 								{building.name || building.address}
 							</h3>
 							{#if building.name}
-								<p class="text-sm text-gray-500 truncate">{building.address}</p>
+								<p class="text-sm text-ink-muted truncate">{building.address}</p>
 							{/if}
 						</div>
 
 						<!-- Location -->
 						<div class="flex items-center text-sm text-gray-600 mb-4">
-							<Icon name="location_on" size={16} class="mr-1 text-gray-400" />
+							<Icon name="location_on" size={16} class="mr-1 text-ink-muted" />
 							<span>{building.postalCode} {building.city}</span>
 							{#if building.canton}
-								<span class="ml-1 text-gray-400">({building.canton})</span>
+								<span class="ml-1 text-ink-muted">({building.canton})</span>
 							{/if}
 						</div>
 
@@ -138,9 +138,9 @@
 							<div class="flex items-center gap-4">
 								<!-- Apartment Count -->
 								<div class="flex items-center text-sm">
-									<Icon name="door_front" size={16} class="mr-1 text-gray-400" />
+									<Icon name="door_front" size={16} class="mr-1 text-ink-muted" />
 									<span class="font-medium">{building.apartmentCount}</span>
-									<span class="text-gray-500 ml-1">Wohnungen</span>
+									<span class="text-ink-muted ml-1">Wohnungen</span>
 								</div>
 							</div>
 
@@ -160,7 +160,7 @@
 
 						<!-- Building Type & Year -->
 						{#if building.buildingType || building.yearBuilt}
-							<div class="flex items-center gap-3 mt-3 text-xs text-gray-500">
+							<div class="flex items-center gap-3 mt-3 text-xs text-ink-muted">
 								{#if building.buildingType}
 									<span class="bg-gray-100 px-2 py-1 rounded">{building.buildingType}</span>
 								{/if}
@@ -175,7 +175,7 @@
 						data-testid="building-route-link"
 						target="_blank"
 						rel="noopener noreferrer"
-						class="absolute right-4 top-4 p-1.5 rounded-lg text-gray-400 hover:text-primary hover:bg-primary/10 transition-colors"
+						class="absolute right-4 top-4 p-1.5 rounded-lg text-ink-muted hover:text-primary hover:bg-primary/10 transition-colors"
 						title="Route in Google Maps öffnen"
 						aria-label="Route in Google Maps öffnen"
 					>

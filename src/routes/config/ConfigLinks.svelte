@@ -9,11 +9,11 @@
 		data-testid="quick-link-categories"
 	>
 		<div class="p-3 bg-blue-100 rounded-lg">
-			<Icon name="category" size={24} class="text-blue-600" />
+			<Icon name="category" size={24} class="text-accent" />
 		</div>
 		<div>
 			<h3 class="font-medium text-gray-900">Kategorien</h3>
-			<p class="text-sm text-gray-500">Kostenkategorien verwalten</p>
+			<p class="text-sm text-ink-muted">Kostenkategorien verwalten</p>
 		</div>
 	</a>
 	<a
@@ -22,11 +22,11 @@
 		data-testid="quick-link-heating-profiles"
 	>
 		<div class="p-3 bg-orange-100 rounded-lg">
-			<Icon name="local_fire_department" size={24} class="text-orange-600" />
+			<Icon name="local_fire_department" size={24} class="text-caution" />
 		</div>
 		<div>
 			<h3 class="font-medium text-gray-900">Heizprofile</h3>
-			<p class="text-sm text-gray-500">Heizverteilung konfigurieren</p>
+			<p class="text-sm text-ink-muted">Heizverteilung konfigurieren</p>
 		</div>
 	</a>
 	<a
@@ -39,7 +39,7 @@
 		</div>
 		<div>
 			<h3 class="font-medium text-gray-900">Verteilschlüssel</h3>
-			<p class="text-sm text-gray-500">Kostenverteilung definieren</p>
+			<p class="text-sm text-ink-muted">Kostenverteilung definieren</p>
 		</div>
 	</a>
 </div>

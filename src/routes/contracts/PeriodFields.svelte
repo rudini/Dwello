@@ -27,7 +27,7 @@
 	<div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
 		<div>
 			<label for="startDate" class="block text-sm font-medium text-gray-700 mb-1">
-				Vertragsbeginn <span class="text-red-500">*</span>
+				Vertragsbeginn <span class="text-critical">*</span>
 			</label>
 			<input
 				id="startDate"
@@ -43,7 +43,7 @@
 		</div>
 		<div>
 			<label for="endDate" class="block text-sm font-medium text-gray-700 mb-1">
-				Vertragsende {#if !isUnlimited}<span class="text-red-500">*</span>{/if}
+				Vertragsende {#if !isUnlimited}<span class="text-critical">*</span>{/if}
 			</label>
 			<input
 				id="endDate"
@@ -54,7 +54,7 @@
 					errors.endDate
 				)}"
 				class:bg-gray-50={isUnlimited}
-				class:text-gray-400={isUnlimited}
+				class:text-ink-muted={isUnlimited}
 			/>
 			<FieldError message={errors.endDate} />
 		</div>
@@ -74,8 +74,8 @@
 			class="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg flex items-start gap-2"
 			data-testid="overlap-warning"
 		>
-			<Icon name="warning" size={18} class="text-amber-600 mt-0.5" />
-			<span class="text-sm text-amber-700">{overlap}</span>
+			<Icon name="warning" size={18} class="text-caution mt-0.5" />
+			<span class="text-sm text-caution">{overlap}</span>
 		</div>
 	{/if}
 </div>

@@ -140,15 +140,15 @@
 	<form onsubmit={save} class="space-y-6">
 		{#if errors.form}
 			<div class="bg-red-50 border border-red-200 rounded-lg p-4">
-				<p class="text-sm text-red-700" data-testid="form-error">{errors.form}</p>
+				<p class="text-sm text-critical" data-testid="form-error">{errors.form}</p>
 			</div>
 		{/if}
 
 		{#if isRunning}
 			<div class="bg-amber-50 border border-amber-200 rounded-lg p-4">
 				<div class="flex items-start gap-3">
-					<Icon name="warning" size={20} class="text-amber-600 mt-0.5" />
-					<div class="text-sm text-amber-800">
+					<Icon name="warning" size={20} class="text-caution mt-0.5" />
+					<div class="text-sm text-caution">
 						<p class="font-medium">Aktiver Vertrag</p>
 						<p class="mt-1">
 							Änderungen an einem aktiven Vertrag werden sofort wirksam. Bei Mietanpassungen sollten
@@ -161,7 +161,7 @@
 
 		<div>
 			<label for="tenant" class="block text-sm font-medium text-gray-700 mb-1">
-				Mieter <span class="text-red-500">*</span>
+				Mieter <span class="text-critical">*</span>
 			</label>
 			<select
 				id="tenant"

@@ -36,8 +36,8 @@
 		{ icon: string; iconClass: string; buttonVariant: 'primary' | 'danger' }
 	> = {
 		default: { icon: 'info', iconClass: 'text-primary bg-primary/10', buttonVariant: 'primary' },
-		danger: { icon: 'warning', iconClass: 'text-red-600 bg-red-100', buttonVariant: 'danger' },
-		warning: { icon: 'warning', iconClass: 'text-amber-600 bg-amber-100', buttonVariant: 'primary' }
+		danger: { icon: 'warning', iconClass: 'text-critical bg-red-100', buttonVariant: 'danger' },
+		warning: { icon: 'warning', iconClass: 'text-caution bg-amber-100', buttonVariant: 'primary' }
 	};
 
 	function handleClose() {
@@ -153,7 +153,7 @@
 					class="flex-shrink-0 p-1 rounded-lg hover:bg-gray-100 transition-colors"
 					aria-label="Schliessen"
 				>
-					<Icon name="close" size={20} class="text-gray-400" />
+					<Icon name="close" size={20} class="text-ink-muted" />
 				</button>
 			</div>
 

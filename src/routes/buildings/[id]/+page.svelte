@@ -60,8 +60,8 @@
 
 <div class="space-y-6">
 	<!-- Breadcrumb -->
-	<nav class="flex items-center text-sm text-gray-500">
-		<a href="/buildings" data-testid="breadcrumb-link" class="hover:text-blue-600 transition-colors"
+	<nav class="flex items-center text-sm text-ink-muted">
+		<a href="/buildings" data-testid="breadcrumb-link" class="hover:text-accent transition-colors"
 			>Gebäude</a
 		>
 		<Icon name="chevron_right" size={16} class="mx-2" />
@@ -72,7 +72,7 @@
 	<div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
 		<div>
 			<h1 class="text-2xl font-bold text-gray-900">{building.name || building.address}</h1>
-			<p class="text-sm text-gray-500 flex items-center gap-1 mt-2" data-testid="building-address">
+			<p class="text-sm text-ink-muted flex items-center gap-1 mt-2" data-testid="building-address">
 				<Icon name="location_on" size={16} />
 				{[building.address, [building.postalCode, building.city].filter(Boolean).join(' ')]
 					.filter(Boolean)
@@ -112,7 +112,7 @@
 			icon="home"
 			label="Leerstand"
 			value={building.vacantCount.toString()}
-			valueClass={building.vacantCount > 0 ? 'text-orange-600' : 'text-green-600'}
+			valueClass={building.vacantCount > 0 ? 'text-caution' : 'text-positive'}
 		/>
 		{#if building.yearBuilt}
 			<InfoCard icon="calendar_today" label="Baujahr" value={building.yearBuilt.toString()} />
@@ -124,34 +124,34 @@
 		<h2 class="text-lg font-semibold text-gray-900 mb-4">Gebäudedetails</h2>
 		<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 			<div>
-				<p class="text-sm text-gray-500">Adresse</p>
+				<p class="text-sm text-ink-muted">Adresse</p>
 				<p class="font-medium">{building.address}</p>
 			</div>
 			<div>
-				<p class="text-sm text-gray-500">PLZ / Ort</p>
+				<p class="text-sm text-ink-muted">PLZ / Ort</p>
 				<p class="font-medium">{building.postalCode} {building.city}</p>
 			</div>
 			{#if building.canton}
 				<div>
-					<p class="text-sm text-gray-500">Kanton</p>
+					<p class="text-sm text-ink-muted">Kanton</p>
 					<p class="font-medium">{building.canton}</p>
 				</div>
 			{/if}
 			{#if building.buildingType}
 				<div>
-					<p class="text-sm text-gray-500">Gebäudetyp</p>
+					<p class="text-sm text-ink-muted">Gebäudetyp</p>
 					<p class="font-medium">{building.buildingType}</p>
 				</div>
 			{/if}
 			{#if building.yearBuilt}
 				<div>
-					<p class="text-sm text-gray-500">Baujahr</p>
+					<p class="text-sm text-ink-muted">Baujahr</p>
 					<p class="font-medium" data-testid="building-year-built">{building.yearBuilt}</p>
 				</div>
 			{/if}
 			{#if building.latitude && building.longitude}
 				<div>
-					<p class="text-sm text-gray-500">Koordinaten</p>
+					<p class="text-sm text-ink-muted">Koordinaten</p>
 					<p class="font-medium text-sm">
 						{Number(building.latitude).toFixed(4)}, {Number(building.longitude).toFixed(4)}
 					</p>
@@ -180,7 +180,7 @@
 				<div class="text-center py-8">
 					<Icon name="door_front" size={48} class="mx-auto text-gray-300 mb-4" />
 					<h3 class="text-lg font-medium text-gray-900 mb-2">Keine Wohnungen</h3>
-					<p class="text-gray-500 mb-4">Fügen Sie Wohnungen zu diesem Gebäude hinzu.</p>
+					<p class="text-ink-muted mb-4">Fügen Sie Wohnungen zu diesem Gebäude hinzu.</p>
 					<Button
 						href="/apartments/new?building={building.id}"
 						variant="primary"
@@ -196,7 +196,7 @@
 			{#each floors as floor}
 				<Card>
 					<h3 class="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-						<Icon name="stairs" size={18} class="text-gray-400" />
+						<Icon name="stairs" size={18} class="text-ink-muted" />
 						{floor}
 					</h3>
 					<div class="space-y-2">
@@ -208,10 +208,10 @@
 							>
 								<div class="flex items-center gap-4">
 									<div class="flex items-center gap-2">
-										<Icon name="door_front" size={18} class="text-gray-400" />
+										<Icon name="door_front" size={18} class="text-ink-muted" />
 										<span class="font-medium">{apartment.number}</span>
 									</div>
-									<div class="text-sm text-gray-500">
+									<div class="text-sm text-ink-muted">
 										{apartment.rooms} Zimmer &middot; {apartment.area} m²
 									</div>
 								</div>
@@ -219,7 +219,7 @@
 									<Badge variant={statusVariants[apartment.status]}>
 										{statusLabels[apartment.status]}
 									</Badge>
-									<Icon name="chevron_right" size={18} class="text-gray-400" />
+									<Icon name="chevron_right" size={18} class="text-ink-muted" />
 								</div>
 							</a>
 						{/each}
@@ -236,7 +236,7 @@
 		<div class="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
 			<div class="flex items-center gap-3 mb-4">
 				<div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
-					<Icon name="warning" size={24} class="text-red-600" />
+					<Icon name="warning" size={24} class="text-critical" />
 				</div>
 				<h3 class="text-lg font-semibold text-gray-900">Gebäude löschen?</h3>
 			</div>
@@ -248,7 +248,7 @@
 
 			{#if deleteError || form?.deleteError}
 				<div class="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
-					<p class="text-sm text-red-700" data-testid="form-error">
+					<p class="text-sm text-critical" data-testid="form-error">
 						{deleteError || form?.deleteError}
 					</p>
 				</div>

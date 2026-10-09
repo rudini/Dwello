@@ -11,10 +11,12 @@
 </script>
 
 <Card padding={false}>
-	<div class="overflow-x-auto">
+	<!-- A scrollable region must be reachable by keyboard (WCAG 2.1.1) -->
+	<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+	<div class="overflow-x-auto" role="region" aria-label="Liste" tabindex="0">
 		<table class="w-full">
 			<thead
-				class="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase tracking-wider"
+				class="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-ink-muted uppercase tracking-wider"
 			>
 				<tr>
 					{#each columns as column (column.label)}

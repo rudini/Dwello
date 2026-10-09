@@ -93,7 +93,7 @@
 						<span class="hidden md:block text-gray-700" data-testid="user-name"
 							>{user.name || user.email}</span
 						>
-						<svg class="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+						<svg class="h-5 w-5 text-ink-muted" fill="currentColor" viewBox="0 0 20 20">
 							<path
 								fill-rule="evenodd"
 								d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
@@ -119,7 +119,7 @@
 							<div class="py-1">
 								<div class="px-4 py-2 text-sm text-gray-700 border-b border-gray-100">
 									<p class="font-medium">{user.name || 'User'}</p>
-									<p class="text-gray-500 truncate">{user.email}</p>
+									<p class="text-ink-muted truncate">{user.email}</p>
 								</div>
 								<a
 									href="/config"
@@ -133,7 +133,7 @@
 									type="button"
 									onclick={logout}
 									data-testid="logout-button"
-									class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+									class="block w-full text-left px-4 py-2 text-sm text-critical hover:bg-gray-100"
 								>
 									{$_('auth.signOut')}
 								</button>

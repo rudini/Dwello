@@ -10,7 +10,7 @@
 
 <Card>
 	<h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-		<Icon name="auto_awesome" size={20} class="text-blue-500" />
+		<Icon name="auto_awesome" size={20} class="text-accent" />
 		Ursprüngliche KI-Kategorisierung
 	</h2>
 	<div class="p-4 bg-gray-50 rounded-lg">

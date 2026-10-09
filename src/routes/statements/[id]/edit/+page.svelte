@@ -25,7 +25,7 @@
 	<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
 		<div>
 			<h1 class="text-2xl font-bold text-gray-900">{statement.statementNumber}</h1>
-			<p class="text-gray-500 mt-1">
+			<p class="text-ink-muted mt-1">
 				{statement.tenantName} · {statement.buildingName} · Wohnung {statement.apartmentUnit}
 			</p>
 		</div>
@@ -79,7 +79,7 @@
 			<Card>
 				<h2 class="text-lg font-semibold text-gray-900 mb-4">Kostenpositionen</h2>
 				<table class="w-full text-sm">
-					<thead class="border-b border-gray-200 text-gray-500">
+					<thead class="border-b border-gray-200 text-ink-muted">
 						<tr>
 							<th class="pb-3 text-left font-medium">Kategorie</th>
 							<th class="pb-3 text-right font-medium">Gesamtkosten</th>
@@ -98,7 +98,7 @@
 						{/each}
 					</tbody>
 				</table>
-				<p class="mt-4 text-sm text-gray-500" data-testid="statement-recalculate-hint">
+				<p class="mt-4 text-sm text-ink-muted" data-testid="statement-recalculate-hint">
 					Kosten und Verwaltungspauschale werden beim Erstellen der Abrechnungen berechnet. Für eine
 					Korrektur den Entwurf löschen und die Abrechnungen der Liegenschaft neu erstellen.
 				</p>
@@ -108,15 +108,15 @@
 		<!-- Sidebar -->
 		<div class="space-y-6">
 			<Card>
-				<h3 class="text-sm font-medium text-gray-500 mb-3">Abrechnungsperiode</h3>
+				<h3 class="text-sm font-medium text-ink-muted mb-3">Abrechnungsperiode</h3>
 				<p class="font-medium text-gray-900">
 					{formatDate(statement.periodStart)} - {formatDate(statement.periodEnd)}
 				</p>
-				<p class="text-sm text-gray-500 mt-1">{statement.rentalDays} Tage</p>
+				<p class="text-sm text-ink-muted mt-1">{statement.rentalDays} Tage</p>
 			</Card>
 
 			<Card>
-				<h3 class="text-sm font-medium text-gray-500 mb-4">Kostenübersicht</h3>
+				<h3 class="text-sm font-medium text-ink-muted mb-4">Kostenübersicht</h3>
 				<dl class="space-y-3 text-sm">
 					<div class="flex justify-between">
 						<dt class="text-gray-600">Nebenkosten</dt>

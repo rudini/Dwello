@@ -51,7 +51,7 @@
 
 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 	<div>
-		<label for="floor" class={labelClass}>Stockwerk <span class="text-red-500">*</span></label>
+		<label for="floor" class={labelClass}>Stockwerk <span class="text-critical">*</span></label>
 		<select
 			id="floor"
 			name="floor"
@@ -67,7 +67,7 @@
 		<FieldError message={errors.floor} />
 	</div>
 	<div>
-		<label for="number" class={labelClass}>Wohnungsnummer <span class="text-red-500">*</span></label
+		<label for="number" class={labelClass}>Wohnungsnummer <span class="text-critical">*</span></label
 		>
 		<input
 			id="number"
@@ -80,10 +80,10 @@
 		/>
 		{#if numberTaken}
 			<p
-				class="mt-2 flex items-start gap-2 text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-lg p-3"
+				class="mt-2 flex items-start gap-2 text-sm text-caution bg-amber-50 border border-amber-200 rounded-lg p-3"
 				data-testid="apartment-number-taken"
 			>
-				<Icon name="warning" size={18} class="text-amber-600" />
+				<Icon name="warning" size={18} class="text-caution" />
 				Die Wohnungsnummer "{number.trim()}" existiert bereits in diesem Gebäude.
 			</p>
 		{/if}
@@ -93,7 +93,7 @@
 
 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 	<div>
-		<label for="area" class={labelClass}>Fläche (m²) <span class="text-red-500">*</span></label>
+		<label for="area" class={labelClass}>Fläche (m²) <span class="text-critical">*</span></label>
 		<input
 			id="area"
 			name="area"
@@ -108,7 +108,7 @@
 		<FieldError message={errors.area} />
 	</div>
 	<div>
-		<label for="rooms" class={labelClass}>Zimmeranzahl <span class="text-red-500">*</span></label>
+		<label for="rooms" class={labelClass}>Zimmeranzahl <span class="text-critical">*</span></label>
 		<select
 			id="rooms"
 			name="rooms"

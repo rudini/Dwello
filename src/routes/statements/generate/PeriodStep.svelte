@@ -47,7 +47,7 @@
 <div class="space-y-6">
 	<div>
 		<h2 class="text-lg font-semibold text-gray-900 mb-4">Abrechnungsperiode wählen</h2>
-		<p class="text-gray-500 mb-6">
+		<p class="text-ink-muted mb-6">
 			Wählen Sie den Zeitraum für die Nebenkostenabrechnung und das Heizungsprofil.
 		</p>
 	</div>
@@ -95,7 +95,7 @@
 					value={option.id}
 					disabled={!option.valid}
 					selected={option.id === heatingProfileId}
-					class:text-gray-400={!option.valid}
+					class:text-ink-muted={!option.valid}
 					data-testid="heating-profile-option-{option.id}"
 				>
 					{option.label}
@@ -103,7 +103,7 @@
 			{/each}
 		</select>
 		{#if selectedHeatingProfile?.description}
-			<p class="text-sm text-gray-500 mt-2">{selectedHeatingProfile.description}</p>
+			<p class="text-sm text-ink-muted mt-2">{selectedHeatingProfile.description}</p>
 		{/if}
 	</div>
 

@@ -28,7 +28,7 @@
 		</p>
 		<div class="p-3 bg-gray-50 rounded-lg mb-4">
 			<p class="font-medium text-gray-900">{statement.tenantName}</p>
-			<p class="text-lg font-bold text-red-600 mt-2">
+			<p class="text-lg font-bold text-critical mt-2">
 				Offen: {formatCurrency(Math.abs(statement.balance))}
 			</p>
 		</div>

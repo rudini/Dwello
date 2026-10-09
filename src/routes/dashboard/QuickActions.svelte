@@ -7,14 +7,14 @@
 			label: 'Gebäude hinzufügen',
 			hint: 'Neues Gebäude erfassen',
 			icon: 'add_business',
-			tone: 'bg-blue-100 text-blue-600'
+			tone: 'bg-blue-100 text-accent'
 		},
 		{
 			href: '/tenants/new',
 			label: 'Mieter hinzufügen',
 			hint: 'Neuen Mieter erfassen',
 			icon: 'person_add',
-			tone: 'bg-green-100 text-green-600'
+			tone: 'bg-green-100 text-positive'
 		},
 		{
 			href: '/invoices/new',
@@ -28,7 +28,7 @@
 			label: 'Abrechnungen erstellen',
 			hint: 'Neue NK-Abrechnungen',
 			icon: 'calculate',
-			tone: 'bg-orange-100 text-orange-600'
+			tone: 'bg-orange-100 text-caution'
 		}
 	];
 </script>
@@ -47,7 +47,7 @@
 				</div>
 				<div>
 					<p class="font-medium text-gray-900">{action.label}</p>
-					<p class="text-sm text-gray-500">{action.hint}</p>
+					<p class="text-sm text-ink-muted">{action.hint}</p>
 				</div>
 			</a>
 		{/each}

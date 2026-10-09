@@ -28,7 +28,7 @@
 		}))
 	);
 	const total = $derived(profileTotal(shares));
-	const totalClass = $derived(Math.abs(total - 100) <= 0.1 ? 'text-green-600' : 'text-red-600');
+	const totalClass = $derived(Math.abs(total - 100) <= 0.1 ? 'text-positive' : 'text-critical');
 	const name = $derived(profile?.name ?? '');
 	const description = $derived(profile?.description ?? '');
 </script>
@@ -73,7 +73,7 @@
 			{/each}
 		</div>
 		<FieldError message={errors.total} />
-		<p class="mt-2 text-xs text-gray-500">
+		<p class="mt-2 text-xs text-ink-muted">
 			Die Monatsanteile verteilen die Heizkosten eines Jahres und ergeben zusammen 100 %.
 		</p>
 	</div>

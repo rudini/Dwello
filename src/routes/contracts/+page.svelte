@@ -78,7 +78,7 @@
 	<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
 		<div>
 			<h1 class="text-2xl font-bold text-gray-900">Mietverträge</h1>
-			<p class="text-gray-500 mt-1">{data.total} Verträge insgesamt</p>
+			<p class="text-ink-muted mt-1">{data.total} Verträge insgesamt</p>
 		</div>
 		<Button href="/contracts/new" variant="primary" testid="contract-new-button">
 			<Icon name="add" size={20} />
@@ -124,7 +124,7 @@
 			<div class="text-center py-12" data-testid="contracts-empty">
 				<Icon name="description" size={48} class="mx-auto text-gray-300 mb-4" />
 				<h3 class="text-lg font-medium text-gray-900 mb-2">Keine Verträge gefunden</h3>
-				<p class="text-gray-500 mb-6">
+				<p class="text-ink-muted mb-6">
 					{#if filtered}
 						Versuchen Sie es mit anderen Suchbegriffen oder Filtern.
 					{:else}
@@ -141,32 +141,34 @@
 		</Card>
 	{:else}
 		<Card>
-			<div class="overflow-x-auto">
+			<!-- A scrollable region must be reachable by keyboard (WCAG 2.1.1) -->
+			<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+			<div class="overflow-x-auto" role="region" aria-label="Mietverträge" tabindex="0">
 				<table class="w-full">
 					<thead>
 						<tr class="border-b border-gray-200">
 							<th
-								class="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider py-3 px-4"
+								class="text-left text-xs font-semibold text-ink-muted uppercase tracking-wider py-3 px-4"
 							>
 								Mieter
 							</th>
 							<th
-								class="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider py-3 px-4"
+								class="text-left text-xs font-semibold text-ink-muted uppercase tracking-wider py-3 px-4"
 							>
 								Wohnung
 							</th>
 							<th
-								class="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider py-3 px-4"
+								class="text-left text-xs font-semibold text-ink-muted uppercase tracking-wider py-3 px-4"
 							>
 								Zeitraum
 							</th>
 							<th
-								class="text-right text-xs font-semibold text-gray-500 uppercase tracking-wider py-3 px-4"
+								class="text-right text-xs font-semibold text-ink-muted uppercase tracking-wider py-3 px-4"
 							>
 								Mietzins
 							</th>
 							<th
-								class="text-center text-xs font-semibold text-gray-500 uppercase tracking-wider py-3 px-4"
+								class="text-center text-xs font-semibold text-ink-muted uppercase tracking-wider py-3 px-4"
 							>
 								Status
 							</th>
@@ -195,7 +197,7 @@
 								<!-- Apartment -->
 								<td class="py-4 px-4">
 									<p class="font-medium text-gray-900">Wohnung {contract.apartmentNumber}</p>
-									<p class="text-sm text-gray-500">{contract.buildingName}</p>
+									<p class="text-sm text-ink-muted">{contract.buildingName}</p>
 								</td>
 								<!-- Period -->
 								<td class="py-4 px-4 text-gray-600">
@@ -211,7 +213,7 @@
 									<span class="font-semibold text-gray-900">
 										{formatCurrency(contract.totalRent)}
 									</span>
-									<span class="text-sm text-gray-500">/Mt.</span>
+									<span class="text-sm text-ink-muted">/Mt.</span>
 								</td>
 								<!-- Status -->
 								<td class="py-4 px-4 text-center">

@@ -17,7 +17,7 @@
 		>
 			{statusText(apartment)}
 		</p>
-		<p class="mt-1 text-sm text-gray-500">
+		<p class="mt-1 text-sm text-ink-muted">
 			Der Status ergibt sich aus den Mietverträgen der Wohnung.
 		</p>
 	{:else}
@@ -30,7 +30,7 @@
 			<option value="vacant" selected={apartment.status === 'vacant'}>Leer</option>
 			<option value="reserved" selected={apartment.status === 'reserved'}>Gesperrt</option>
 		</select>
-		<p class="mt-1 text-sm text-gray-500">
+		<p class="mt-1 text-sm text-ink-muted">
 			Vermietet wird die Wohnung mit einem Mietvertrag. Gesperrt bleibt sie z.B. während einer
 			Renovation.
 		</p>

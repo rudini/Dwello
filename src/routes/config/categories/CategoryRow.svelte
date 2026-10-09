@@ -7,8 +7,8 @@
 	const used = $derived(category.usageCount > 0);
 	const allowed = $derived(
 		category.isAllowedUtilityCost
-			? { label: 'Ja', icon: 'check_circle', class: 'bg-green-100 text-green-700' }
-			: { label: 'Nein', icon: 'warning', class: 'bg-amber-100 text-amber-700' }
+			? { label: 'Ja', icon: 'check_circle', class: 'bg-green-100 text-positive' }
+			: { label: 'Nein', icon: 'warning', class: 'bg-amber-100 text-caution' }
 	);
 	const deleteTitle = $derived(
 		used ? 'Kategorien mit Rechnungen können nicht gelöscht werden' : 'Löschen'
@@ -26,7 +26,7 @@
 			<span data-testid="category-allowed">{allowed.label}</span>
 		</span>
 	</td>
-	<td class="px-6 py-4 text-center text-sm text-gray-500" data-testid="category-usage">
+	<td class="px-6 py-4 text-center text-sm text-ink-muted" data-testid="category-usage">
 		<span class="font-medium text-gray-900">{category.usageCount}</span> Rechnungen
 	</td>
 	<td class="px-6 py-4">
@@ -35,7 +35,7 @@
 				href="/config/categories/{category.id}/edit"
 				title="Bearbeiten"
 				data-testid="category-edit-button"
-				class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+				class="p-1.5 text-ink-muted hover:text-accent hover:bg-blue-50 rounded-lg transition-colors"
 			>
 				<Icon name="edit" size={18} />
 			</a>
@@ -44,7 +44,7 @@
 				title={deleteTitle}
 				disabled={used}
 				data-testid="category-delete-button"
-				class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-40 disabled:pointer-events-none"
+				class="p-1.5 text-ink-muted hover:text-critical hover:bg-red-50 rounded-lg transition-colors disabled:opacity-40 disabled:pointer-events-none"
 			>
 				<Icon name="delete" size={18} />
 			</button>

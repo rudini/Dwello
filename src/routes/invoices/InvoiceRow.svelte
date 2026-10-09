@@ -23,8 +23,8 @@
 	</td>
 	<td class="px-6 py-4">
 		<div class="text-sm font-medium text-gray-900">{invoice.billingEntity}</div>
-		<div class="text-sm text-gray-500 truncate max-w-xs">{invoice.description}</div>
-		<div class="text-xs text-gray-400 mt-1">{invoice.buildingName}</div>
+		<div class="text-sm text-ink-muted truncate max-w-xs">{invoice.description}</div>
+		<div class="text-xs text-ink-muted mt-1">{invoice.buildingName}</div>
 	</td>
 	<td class="px-6 py-4 whitespace-nowrap">
 		{#if invoice.category}
@@ -35,7 +35,7 @@
 				{invoice.category.name}
 			</span>
 		{:else}
-			<span class="text-sm text-gray-400">-</span>
+			<span class="text-sm text-ink-muted">-</span>
 		{/if}
 	</td>
 	<td
@@ -58,7 +58,7 @@
 		<div class="flex items-center justify-end gap-2">
 			<a
 				href="/invoices/{invoice.id}"
-				class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+				class="p-1.5 text-ink-muted hover:text-accent hover:bg-blue-50 rounded-lg transition-colors"
 				title="Ansehen"
 				data-testid="invoice-view-button"
 			>
@@ -66,7 +66,7 @@
 			</a>
 			<a
 				href="/invoices/{invoice.id}/edit"
-				class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+				class="p-1.5 text-ink-muted hover:text-accent hover:bg-blue-50 rounded-lg transition-colors"
 				title="Bearbeiten"
 				data-testid="invoice-edit-button"
 			>

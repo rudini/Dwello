@@ -27,12 +27,12 @@
 		class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 	/>
 	{#if value > USUAL_MAXIMUM}
-		<p class="text-sm text-amber-700 mt-2" data-testid="management-fee-hint">
+		<p class="text-sm text-caution mt-2" data-testid="management-fee-hint">
 			Höher als der übliche Richtwert von {USUAL_MAXIMUM} %. Prüfen Sie, ob der Mehraufwand begründet
 			ist.
 		</p>
 	{:else}
-		<p class="text-xs text-gray-500 mt-1">
+		<p class="text-xs text-ink-muted mt-1">
 			Gilt für alle Abrechnungen dieses Laufs. Üblich sind bis {USUAL_MAXIMUM} %.
 		</p>
 	{/if}
@@ -53,7 +53,7 @@
 			<option value={key.id}>{key.name}</option>
 		{/each}
 	</select>
-	<p class="text-xs text-gray-500 mt-1">
+	<p class="text-xs text-ink-muted mt-1">
 		Die Pauschale ist ein Prozentsatz der Nebenkosten der Liegenschaft und wird so auf die Wohnungen
 		verteilt, je Mieter nach Mietstagen.
 	</p>

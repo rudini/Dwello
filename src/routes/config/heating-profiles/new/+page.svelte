@@ -22,7 +22,7 @@
 
 	<div>
 		<h1 class="text-2xl font-bold text-gray-900">Neues Heizprofil</h1>
-		<p class="text-gray-500 mt-1">
+		<p class="text-ink-muted mt-1">
 			Wie sich die Heizkosten eines Jahres auf die Monate verteilen, z.B. für ein Gebäude in den
 			Bergen.
 		</p>

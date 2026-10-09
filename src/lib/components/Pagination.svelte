@@ -74,7 +74,7 @@
 
 				{#each pageNumbers as pageNum}
 					{#if pageNum === 'ellipsis'}
-						<span class="px-2 text-gray-400">...</span>
+						<span class="px-2 text-ink-muted">...</span>
 					{:else}
 						<button
 							type="button"

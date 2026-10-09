@@ -29,7 +29,7 @@
 
 <div class="grid gap-4 sm:grid-cols-2">
 	<div class="sm:col-span-2">
-		<label for="building" class={labelClass}>Gebäude <span class="text-red-500">*</span></label>
+		<label for="building" class={labelClass}>Gebäude <span class="text-critical">*</span></label>
 		<select
 			id="building"
 			data-testid="invoice-building-select"
@@ -46,7 +46,7 @@
 
 	<div>
 		<label for="invoiceDate" class={labelClass}
-			>Rechnungsdatum <span class="text-red-500">*</span></label
+			>Rechnungsdatum <span class="text-critical">*</span></label
 		>
 		<input
 			id="invoiceDate"
@@ -59,7 +59,7 @@
 	</div>
 
 	<div>
-		<label for="amount" class={labelClass}>Betrag (CHF) <span class="text-red-500">*</span></label>
+		<label for="amount" class={labelClass}>Betrag (CHF) <span class="text-critical">*</span></label>
 		<input
 			id="amount"
 			data-testid="invoice-amount-input"
@@ -75,7 +75,7 @@
 
 	<div class="sm:col-span-2">
 		<label for="billingEntity" class={labelClass}
-			>Lieferant / Rechnungssteller <span class="text-red-500">*</span></label
+			>Lieferant / Rechnungssteller <span class="text-critical">*</span></label
 		>
 		<input
 			id="billingEntity"
@@ -91,7 +91,7 @@
 
 	<div class="sm:col-span-2">
 		<label for="description" class={labelClass}
-			>Beschreibung <span class="text-red-500">*</span></label
+			>Beschreibung <span class="text-critical">*</span></label
 		>
 		<textarea
 			id="description"

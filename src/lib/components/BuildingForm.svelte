@@ -140,7 +140,7 @@
 {#snippet heading(text: string, hint = '')}
 	{#if text}
 		<h3 class="text-sm font-medium text-gray-700">
-			{text} <span class="text-gray-400">{hint}</span>
+			{text} <span class="text-ink-muted">{hint}</span>
 		</h3>
 	{/if}
 {/snippet}
@@ -148,14 +148,14 @@
 <form method="POST" use:enhance={submit} class="space-y-6">
 	{#if errors.form}
 		<div class="bg-red-50 border border-red-200 rounded-lg p-4">
-			<p class="text-sm text-red-700" data-testid="form-error">{errors.form}</p>
+			<p class="text-sm text-critical" data-testid="form-error">{errors.form}</p>
 		</div>
 	{/if}
 
 	<!-- Name -->
 	<div>
 		<label for="name" class="block text-sm font-medium text-gray-700 mb-1">
-			Gebäudename <span class="text-red-500">*</span>
+			Gebäudename <span class="text-critical">*</span>
 		</label>
 		<input
 			id="name"
@@ -166,7 +166,7 @@
 			placeholder="z.B. Musterhaus Zentrum"
 			class="{inputClass} border-gray-300"
 		/>
-		<p class="mt-1 text-sm text-gray-500">Ein Name zur besseren Identifikation des Gebäudes.</p>
+		<p class="mt-1 text-sm text-ink-muted">Ein Name zur besseren Identifikation des Gebäudes.</p>
 		<FieldError message={errors.name} />
 	</div>
 
@@ -174,10 +174,10 @@
 		<!-- Address Search with OpenPLZ -->
 		<div class="p-4 bg-blue-50 border border-blue-200 rounded-lg">
 			<div class="flex items-start gap-3 mb-3">
-				<Icon name="search" size={20} class="text-blue-600 mt-0.5" />
+				<Icon name="search" size={20} class="text-accent mt-0.5" />
 				<div>
 					<p class="font-medium text-blue-800">Adresse suchen</p>
-					<p class="text-sm text-blue-600">
+					<p class="text-sm text-accent">
 						Geben Sie Strasse, PLZ oder Ort ein - die Felder werden automatisch ausgefüllt.
 					</p>
 				</div>
@@ -198,7 +198,7 @@
 		<!-- Address -->
 		<div>
 			<label for="address" class="block text-sm font-medium text-gray-700 mb-1">
-				{copy.addressLabel} <span class="text-red-500">*</span>
+				{copy.addressLabel} <span class="text-critical">*</span>
 			</label>
 			<input
 				id="address"
@@ -216,7 +216,7 @@
 		<div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
 			<div>
 				<label for="postalCode" class="block text-sm font-medium text-gray-700 mb-1">
-					PLZ <span class="text-red-500">*</span>
+					PLZ <span class="text-critical">*</span>
 				</label>
 				<input
 					id="postalCode"
@@ -232,7 +232,7 @@
 			</div>
 			<div class="sm:col-span-2">
 				<label for="city" class="block text-sm font-medium text-gray-700 mb-1">
-					Stadt <span class="text-red-500">*</span>
+					Stadt <span class="text-critical">*</span>
 				</label>
 				<div class="relative">
 					<input
@@ -246,7 +246,7 @@
 					/>
 					{#if showCantonBadge}
 						<span
-							class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium"
+							class="absolute right-3 top-1/2 -translate-y-1/2 text-ink-muted text-sm font-medium"
 						>
 							{canton}
 						</span>
@@ -259,8 +259,8 @@
 		<!-- Canton -->
 		<div>
 			<label for="canton" class="block text-sm font-medium text-gray-700 mb-1">
-				Kanton <span class="text-red-500">*</span>
-				<span class="text-gray-400">{copy.cantonHint}</span>
+				Kanton <span class="text-critical">*</span>
+				<span class="text-ink-muted">{copy.cantonHint}</span>
 			</label>
 			<select
 				id="canton"
@@ -285,7 +285,7 @@
 		<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 			<div>
 				<label for="buildingType" class="block text-sm font-medium text-gray-700 mb-1">
-					Gebäudetyp <span class="text-gray-400">{copy.fieldHint}</span>
+					Gebäudetyp <span class="text-ink-muted">{copy.fieldHint}</span>
 				</label>
 				<select id="buildingType" name="buildingType" bind:value={buildingType} class={selectClass}>
 					<option value="">Typ auswählen...</option>
@@ -296,7 +296,7 @@
 			</div>
 			<div>
 				<label for="yearBuilt" class="block text-sm font-medium text-gray-700 mb-1">
-					Baujahr <span class="text-gray-400">{copy.fieldHint}</span>
+					Baujahr <span class="text-ink-muted">{copy.fieldHint}</span>
 				</label>
 				<input
 					id="yearBuilt"

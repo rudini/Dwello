@@ -89,13 +89,13 @@
 			href="/statements"
 			data-testid="back-link"
 			aria-label="Zurück zu den Abrechnungen"
-			class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+			class="p-2 text-ink-muted hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
 		>
 			<Icon name="arrow_back" size={24} />
 		</a>
 		<div>
 			<h1 class="text-2xl font-bold text-gray-900">Nebenkostenabrechnungen erstellen</h1>
-			<p class="text-gray-500 mt-1">Schritt {currentStep} von {totalSteps}</p>
+			<p class="text-ink-muted mt-1">Schritt {currentStep} von {totalSteps}</p>
 		</div>
 	</div>
 

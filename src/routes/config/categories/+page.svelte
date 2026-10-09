@@ -48,7 +48,7 @@
 	<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
 		<div>
 			<h1 class="text-2xl font-bold text-gray-900">Kategorien</h1>
-			<p class="text-gray-500 mt-1">Kostenkategorien, nach denen Rechnungen eingeordnet werden</p>
+			<p class="text-ink-muted mt-1">Kostenkategorien, nach denen Rechnungen eingeordnet werden</p>
 		</div>
 		<Button href="/config/categories/new" variant="primary" testid="new-category-button">
 			<Icon name="add" size={20} />

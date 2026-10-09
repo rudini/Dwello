@@ -20,8 +20,8 @@ describe('statement status', () => {
 
 describe('balanceClass', () => {
 	it('shows additional payments red, refunds green and a settled balance grey', () => {
-		expect(balanceClass(120)).toBe('text-red-600');
-		expect(balanceClass(-80)).toBe('text-green-600');
-		expect(balanceClass(0)).toBe('text-gray-600');
+		expect(balanceClass(120)).toBe('text-critical');
+		expect(balanceClass(-80)).toBe('text-positive');
+		expect(balanceClass(0)).toBe('text-ink-muted');
 	});
 });

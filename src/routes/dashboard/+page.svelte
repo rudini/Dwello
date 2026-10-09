@@ -27,7 +27,7 @@
 			label: 'Gebäude',
 			value: data.portfolio.totalBuildings,
 			icon: 'apartment',
-			iconColor: 'text-blue-600',
+			iconColor: 'text-accent',
 			href: '/buildings',
 			testId: 'stat-buildings'
 		},
@@ -43,7 +43,7 @@
 			label: 'Vermietet',
 			value: data.portfolio.occupiedApartments,
 			icon: 'groups',
-			iconColor: 'text-green-600',
+			iconColor: 'text-positive',
 			href: '/apartments?status=occupied',
 			testId: 'stat-occupied'
 		},
@@ -51,7 +51,7 @@
 			label: 'Wiedervermietet',
 			value: data.portfolio.reletApartments,
 			icon: 'event_available',
-			iconColor: 'text-sky-600',
+			iconColor: 'text-accent',
 			href: '/apartments?status=relet',
 			testId: 'stat-relet'
 		},
@@ -59,7 +59,7 @@
 			label: 'Leer',
 			value: data.portfolio.vacantApartments,
 			icon: 'door_open',
-			iconColor: 'text-amber-600',
+			iconColor: 'text-caution',
 			href: '/apartments?status=vacant',
 			testId: 'stat-vacant'
 		},
@@ -67,7 +67,7 @@
 			label: 'Gesperrt',
 			value: data.portfolio.reservedApartments,
 			icon: 'block',
-			iconColor: 'text-red-600',
+			iconColor: 'text-critical',
 			href: '/apartments?status=reserved',
 			testId: 'stat-reserved'
 		},
@@ -75,7 +75,7 @@
 			label: 'Belegungsrate',
 			value: `${data.portfolio.occupancyRate.toFixed(1)}%`,
 			icon: 'pie_chart',
-			iconColor: 'text-orange-600',
+			iconColor: 'text-caution',
 			testId: 'stat-occupancy-rate'
 		}
 	]);
@@ -84,21 +84,21 @@
 			label: 'Offene Abrechnungen',
 			value: data.financial.outstandingStatements,
 			icon: 'pending_actions',
-			iconColor: 'text-yellow-600',
+			iconColor: 'text-caution',
 			testId: 'stat-open-statements'
 		},
 		{
 			label: 'Ausstehende Nachzahlungen',
 			value: chf(data.financial.totalPending),
 			icon: 'account_balance_wallet',
-			iconColor: 'text-blue-600',
+			iconColor: 'text-accent',
 			testId: 'stat-pending'
 		},
 		{
 			label: 'Davon überfällig',
 			value: chf(data.financial.overdueAmount),
 			icon: 'warning',
-			iconColor: 'text-red-600',
+			iconColor: 'text-critical',
 			href: '/statements?status=overdue',
 			testId: 'stat-overdue-amount'
 		},
@@ -106,7 +106,7 @@
 			label: 'Bezahlt (Monat)',
 			value: chf(data.financial.paidThisMonth),
 			icon: 'payments',
-			iconColor: 'text-green-600',
+			iconColor: 'text-positive',
 			testId: 'stat-paid-month'
 		}
 	]);
@@ -120,7 +120,7 @@
 	<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
 		<div>
 			<h1 class="text-2xl font-bold text-gray-900">Dashboard</h1>
-			<p class="text-gray-500 mt-1">Ihr Portfolio auf einen Blick</p>
+			<p class="text-ink-muted mt-1">Ihr Portfolio auf einen Blick</p>
 		</div>
 		<div class="flex items-center gap-3">
 			<Button href="/invoices/new" variant="secondary" testid="dashboard-action">

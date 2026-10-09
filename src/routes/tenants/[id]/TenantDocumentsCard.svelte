@@ -12,7 +12,7 @@
 		{#each documents as document (document.id)}
 			<DocumentRow {document} />
 		{:else}
-			<li class="text-gray-500">Noch keine Dokumente.</li>
+			<li class="text-ink-muted">Noch keine Dokumente.</li>
 		{/each}
 	</ul>
 </Card>

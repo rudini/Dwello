@@ -81,7 +81,7 @@
 				href="/statements"
 				data-testid="back-link"
 				aria-label="Zurück zu den Abrechnungen"
-				class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+				class="p-2 text-ink-muted hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
 			>
 				<Icon name="arrow_back" size={20} />
 			</a>
@@ -94,7 +94,7 @@
 						</Badge>
 					</span>
 				</div>
-				<p class="text-gray-500">
+				<p class="text-ink-muted">
 					Periode: {formatDate(data.statement.periodStart)} - {formatDate(data.statement.periodEnd)}
 				</p>
 			</div>
@@ -157,24 +157,26 @@
 			<!-- Line Items -->
 			<Card>
 				<h2 class="text-lg font-semibold text-gray-900 mb-4">Kostenaufstellung</h2>
-				<div class="overflow-x-auto">
+				<!-- A scrollable region must be reachable by keyboard (WCAG 2.1.1) -->
+				<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+				<div class="overflow-x-auto" role="region" aria-label="Abrechnungspositionen" tabindex="0">
 					<table class="w-full">
 						<thead class="border-b border-gray-200">
 							<tr>
-								<th class="pb-3 text-left text-sm font-medium text-gray-500">Kategorie</th>
-								<th class="pb-3 text-left text-sm font-medium text-gray-500">Verteilschlüssel</th>
-								<th class="pb-3 text-right text-sm font-medium text-gray-500">Gesamtkosten</th>
-								<th class="pb-3 text-right text-sm font-medium text-gray-500">Anteil</th>
-								<th class="pb-3 text-right text-sm font-medium text-gray-500">Betrag</th>
+								<th class="pb-3 text-left text-sm font-medium text-ink-muted">Kategorie</th>
+								<th class="pb-3 text-left text-sm font-medium text-ink-muted">Verteilschlüssel</th>
+								<th class="pb-3 text-right text-sm font-medium text-ink-muted">Gesamtkosten</th>
+								<th class="pb-3 text-right text-sm font-medium text-ink-muted">Anteil</th>
+								<th class="pb-3 text-right text-sm font-medium text-ink-muted">Betrag</th>
 							</tr>
 						</thead>
 						<tbody class="divide-y divide-gray-100">
 							{#each data.statement.lineItems as item}
 								<tr data-testid="statement-line-item">
 									<td class="py-3 text-gray-900">{item.categoryName}</td>
-									<td class="py-3 text-gray-500 text-sm">{item.distributionKeyName}</td>
-									<td class="py-3 text-right text-gray-500">{formatCurrency(item.totalAmount)}</td>
-									<td class="py-3 text-right text-gray-500">{item.percentage}%</td>
+									<td class="py-3 text-ink-muted text-sm">{item.distributionKeyName}</td>
+									<td class="py-3 text-right text-ink-muted">{formatCurrency(item.totalAmount)}</td>
+									<td class="py-3 text-right text-ink-muted">{item.percentage}%</td>
 									<td class="py-3 text-right font-medium text-gray-900">
 										{formatCurrency(item.tenantShare)}
 									</td>
@@ -188,7 +190,7 @@
 								>
 							</tr>
 							<tr>
-								<td colspan="4" class="py-1 text-right text-sm text-gray-500">
+								<td colspan="4" class="py-1 text-right text-sm text-ink-muted">
 									Verwaltungsgebühr ({data.statement.managementFeePercent}%)
 								</td>
 								<td class="py-1 text-right text-gray-700">
@@ -202,8 +204,8 @@
 								</td>
 							</tr>
 							<tr>
-								<td colspan="4" class="py-1 text-right text-gray-500">Akontozahlungen</td>
-								<td class="py-1 text-right text-green-600">
+								<td colspan="4" class="py-1 text-right text-ink-muted">Akontozahlungen</td>
+								<td class="py-1 text-right text-positive">
 									- {formatCurrency(data.statement.totalAdvancePayments)}
 								</td>
 							</tr>
@@ -227,35 +229,35 @@
 				<h2 class="text-lg font-semibold text-gray-900 mb-4">Zahlungsinformationen</h2>
 				<div class="grid gap-4 sm:grid-cols-2">
 					<div>
-						<p class="text-sm text-gray-500">Zahlungsfrist</p>
+						<p class="text-sm text-ink-muted">Zahlungsfrist</p>
 						<p class="font-medium text-gray-900" data-testid="statement-payment-deadline">
 							{formatDate(data.statement.paymentDeadline)}
 						</p>
 					</div>
 					{#if data.statement.paidDate}
 						<div>
-							<p class="text-sm text-gray-500">Bezahlt am</p>
-							<p class="font-medium text-green-600" data-testid="statement-paid-date">
+							<p class="text-sm text-ink-muted">Bezahlt am</p>
+							<p class="font-medium text-positive" data-testid="statement-paid-date">
 								{formatDate(data.statement.paidDate)}
 							</p>
 						</div>
 					{/if}
 					{#if data.statement.lastReminderDate}
 						<div>
-							<p class="text-sm text-gray-500">Letzte Mahnung</p>
-							<p class="font-medium text-amber-600">
+							<p class="text-sm text-ink-muted">Letzte Mahnung</p>
+							<p class="font-medium text-caution">
 								{formatDate(data.statement.lastReminderDate)}
 							</p>
 						</div>
 					{/if}
 					<div>
-						<p class="text-sm text-gray-500">Abrechnungsdatum</p>
+						<p class="text-sm text-ink-muted">Abrechnungsdatum</p>
 						<p class="font-medium text-gray-900">{formatDate(data.statement.statementDate)}</p>
 					</div>
 				</div>
 				{#if data.statement.notes}
 					<div class="mt-4">
-						<p class="text-sm text-gray-500">Bemerkungen</p>
+						<p class="text-sm text-ink-muted">Bemerkungen</p>
 						<p class="text-gray-900 whitespace-pre-line" data-testid="statement-notes">
 							{data.statement.notes}
 						</p>
@@ -271,7 +273,7 @@
 				<h2 class="text-lg font-semibold text-gray-900 mb-4">Mieter</h2>
 				<div class="flex items-center gap-3 mb-4">
 					<div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
-						<span class="text-blue-600 font-semibold">
+						<span class="text-accent font-semibold">
 							{data.statement.tenantName
 								.split(' ')
 								.map((n) => n[0])
@@ -281,7 +283,7 @@
 					<div>
 						<p class="font-medium text-gray-900">{data.statement.tenantName}</p>
 						{#if data.statement.tenantEmail}
-							<p class="text-sm text-gray-500">{data.statement.tenantEmail}</p>
+							<p class="text-sm text-ink-muted">{data.statement.tenantEmail}</p>
 						{/if}
 					</div>
 				</div>
@@ -301,18 +303,18 @@
 				<h2 class="text-lg font-semibold text-gray-900 mb-4">Wohnung</h2>
 				<div class="space-y-3">
 					<div>
-						<p class="text-sm text-gray-500">Gebäude</p>
+						<p class="text-sm text-ink-muted">Gebäude</p>
 						<p class="font-medium text-gray-900">{data.statement.buildingName}</p>
-						<p class="text-sm text-gray-500">{data.statement.buildingAddress}</p>
+						<p class="text-sm text-ink-muted">{data.statement.buildingAddress}</p>
 					</div>
 					<div>
-						<p class="text-sm text-gray-500">Wohnung</p>
+						<p class="text-sm text-ink-muted">Wohnung</p>
 						<p class="font-medium text-gray-900">
 							{data.statement.apartmentUnit} · {data.statement.apartmentFloor}
 						</p>
 					</div>
 					<div>
-						<p class="text-sm text-gray-500">Miettage im Zeitraum</p>
+						<p class="text-sm text-ink-muted">Miettage im Zeitraum</p>
 						<p class="font-medium text-gray-900">{data.statement.rentalDays} Tage</p>
 					</div>
 				</div>
@@ -344,7 +346,7 @@
 					</Button>
 					<Button
 						variant="secondary"
-						class="w-full text-red-600 hover:bg-red-50"
+						class="w-full text-critical hover:bg-red-50"
 						onclick={() => (showDeleteModal = true)}
 						testid="statement-delete-button"
 					>
@@ -357,17 +359,17 @@
 			<!-- Metadata -->
 			{#if data.statement.createdAt || pdfGeneratedAt}
 				<Card>
-					<h2 class="text-sm font-semibold text-gray-500 mb-3">Metadaten</h2>
+					<h2 class="text-sm font-semibold text-ink-muted mb-3">Metadaten</h2>
 					<div class="space-y-2 text-sm">
 						{#if data.statement.createdAt}
 							<div class="flex justify-between">
-								<span class="text-gray-500">Erstellt</span>
+								<span class="text-ink-muted">Erstellt</span>
 								<span class="text-gray-700">{formatDateTime(data.statement.createdAt)}</span>
 							</div>
 						{/if}
 						{#if pdfGeneratedAt}
 							<div class="flex justify-between">
-								<span class="text-gray-500">PDF generiert</span>
+								<span class="text-ink-muted">PDF generiert</span>
 								<span class="text-gray-700">{formatDateTime(pdfGeneratedAt)}</span>
 							</div>
 						{/if}
@@ -390,7 +392,7 @@
 	</p>
 	<div class="p-3 bg-gray-50 rounded-lg mb-4">
 		<p class="font-medium text-gray-900">{data.statement.statementNumber}</p>
-		<p class="text-sm text-gray-500">{data.statement.tenantName}</p>
+		<p class="text-sm text-ink-muted">{data.statement.tenantName}</p>
 		<p class="text-lg font-bold {balanceClass(data.statement.balance)} mt-2">
 			{formatCurrency(Math.abs(data.statement.balance))}
 		</p>
@@ -427,7 +429,7 @@
 	</p>
 	<div class="p-3 bg-gray-50 rounded-lg mb-4">
 		<p class="font-medium text-gray-900">{data.statement.statementNumber}</p>
-		<p class="text-sm text-gray-500">
+		<p class="text-sm text-ink-muted">
 			{data.statement.tenantName} · {data.statement.buildingName}
 		</p>
 	</div>

@@ -104,12 +104,14 @@ export default defineConfig<{ driver: Driver }>({
 		},
 		{
 			name: 'firefox',
+			grepInvert: /@a11y/, // the axe check runs in Chromium only
 			use: {
 				browserName: 'firefox'
 			}
 		},
 		{
 			name: 'webkit',
+			grepInvert: /@a11y/,
 			use: {
 				browserName: 'webkit'
 			}

@@ -23,7 +23,7 @@
 <div class="space-y-6">
 	<div>
 		<h1 class="text-2xl font-bold text-gray-900">Dokumente</h1>
-		<p class="text-gray-500 mt-1">
+		<p class="text-ink-muted mt-1">
 			Mahnungen und andere Schreiben an Mieter. Briefe „zu versenden“ ausdrucken, verschicken und
 			als versendet markieren.
 		</p>
@@ -49,7 +49,7 @@
 					<MarkSentButton {document} />
 				</DocumentRow>
 			{:else}
-				<li class="text-gray-500" data-testid="documents-empty">Keine Dokumente vorhanden.</li>
+				<li class="text-ink-muted" data-testid="documents-empty">Keine Dokumente vorhanden.</li>
 			{/each}
 		</ul>
 	</Card>

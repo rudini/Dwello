@@ -10,7 +10,7 @@
 {#each navGroups as group (group.label)}
 	<div class="mb-5">
 		{#if group.label}
-			<p class="px-3 mb-1.5 text-xs font-semibold uppercase tracking-wider text-gray-400">
+			<p class="px-3 mb-1.5 text-xs font-semibold uppercase tracking-wider text-ink-muted">
 				{group.label}
 			</p>
 		{/if}

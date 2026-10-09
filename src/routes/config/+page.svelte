@@ -24,7 +24,7 @@
 <div class="space-y-6" data-testid="config-page">
 	<div>
 		<h1 class="text-2xl font-bold text-gray-900" data-testid="page-title">Einstellungen</h1>
-		<p class="text-gray-500 mt-1">
+		<p class="text-ink-muted mt-1">
 			Absender für Abrechnungen und Mahnungen, Standardwerte und Stammdaten
 		</p>
 	</div>
@@ -43,7 +43,7 @@
 				class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2"
 				data-testid="company-info-section"
 			>
-				<Icon name="business" size={20} class="text-gray-400" />
+				<Icon name="business" size={20} class="text-ink-muted" />
 				Verwaltung (Absender)
 			</h2>
 			<div class="grid gap-4 sm:grid-cols-3">
@@ -91,7 +91,7 @@
 				class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2"
 				data-testid="accounting-settings-section"
 			>
-				<Icon name="calendar_month" size={20} class="text-gray-400" />
+				<Icon name="calendar_month" size={20} class="text-ink-muted" />
 				Verwaltungspauschale
 			</h2>
 			<SettingField
@@ -113,7 +113,7 @@
 		<div class="flex items-center justify-end gap-4">
 			<FieldError message={errors.form} />
 			{#if saved}
-				<p class="text-sm text-green-700 flex items-center gap-1" data-testid="settings-saved">
+				<p class="text-sm text-positive flex items-center gap-1" data-testid="settings-saved">
 					<Icon name="check_circle" size={16} />
 					Einstellungen gespeichert
 				</p>

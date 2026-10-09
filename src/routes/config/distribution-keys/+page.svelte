@@ -25,7 +25,7 @@
 	<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
 		<div>
 			<h1 class="text-2xl font-bold text-gray-900">Verteilschlüssel</h1>
-			<p class="text-gray-500 mt-1">Wie Kosten auf die Wohnungen eines Gebäudes verteilt werden</p>
+			<p class="text-ink-muted mt-1">Wie Kosten auf die Wohnungen eines Gebäudes verteilt werden</p>
 		</div>
 		<Button
 			href="/config/distribution-keys/new"

@@ -15,7 +15,7 @@
 
 <div>
 	<label for="building" class="block text-sm font-medium text-gray-700 mb-1">
-		Gebäude <span class="text-red-500">*</span>
+		Gebäude <span class="text-critical">*</span>
 	</label>
 	{#if preset}
 		<input type="hidden" name="buildingId" value={preset.id} />
@@ -24,7 +24,7 @@
 			data-testid="apartment-building"
 		>
 			{preset.name}
-			<span class="block text-sm text-gray-500">{preset.address}</span>
+			<span class="block text-sm text-ink-muted">{preset.address}</span>
 		</p>
 	{:else}
 		<select

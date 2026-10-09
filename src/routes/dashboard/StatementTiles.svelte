@@ -7,9 +7,9 @@
 	// Each tile opens the statement list with its status filter
 	const tiles = [
 		{ status: 'draft', label: 'Entwürfe', icon: 'edit_note', tone: 'bg-gray-100 text-gray-600' },
-		{ status: 'sent', label: 'Versendet', icon: 'send', tone: 'bg-blue-100 text-blue-600' },
-		{ status: 'paid', label: 'Bezahlt', icon: 'check_circle', tone: 'bg-green-100 text-green-600' },
-		{ status: 'overdue', label: 'Überfällig', icon: 'warning', tone: 'bg-red-100 text-red-600' }
+		{ status: 'sent', label: 'Versendet', icon: 'send', tone: 'bg-blue-100 text-accent' },
+		{ status: 'paid', label: 'Bezahlt', icon: 'check_circle', tone: 'bg-green-100 text-positive' },
+		{ status: 'overdue', label: 'Überfällig', icon: 'warning', tone: 'bg-red-100 text-critical' }
 	] as const;
 </script>
 
@@ -33,7 +33,7 @@
 						>
 							{counts[tile.status]}
 						</p>
-						<p class="text-sm text-gray-500">{tile.label}</p>
+						<p class="text-sm text-ink-muted">{tile.label}</p>
 					</div>
 				</div>
 			</a>

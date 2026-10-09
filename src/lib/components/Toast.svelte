@@ -18,19 +18,19 @@
 	const variantClasses: Record<Toast['type'], { container: string; icon: string }> = {
 		success: {
 			container: 'bg-green-50 border-green-200 text-green-800',
-			icon: 'text-green-500'
+			icon: 'text-positive'
 		},
 		error: {
 			container: 'bg-red-50 border-red-200 text-red-800',
-			icon: 'text-red-500'
+			icon: 'text-critical'
 		},
 		warning: {
-			container: 'bg-amber-50 border-amber-200 text-amber-800',
-			icon: 'text-amber-500'
+			container: 'bg-amber-50 border-amber-200 text-caution',
+			icon: 'text-caution'
 		},
 		info: {
 			container: 'bg-blue-50 border-blue-200 text-blue-800',
-			icon: 'text-blue-500'
+			icon: 'text-accent'
 		}
 	};
 

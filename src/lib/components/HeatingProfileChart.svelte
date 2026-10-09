@@ -25,7 +25,7 @@
 						></div>
 					</div>
 					<span
-						class="text-xs text-gray-500 mt-1 flex-shrink-0"
+						class="text-xs text-ink-muted mt-1 flex-shrink-0"
 						data-testid="chart-label-{month.key}">{month.label.slice(0, 1)}</span
 					>
 				</div>

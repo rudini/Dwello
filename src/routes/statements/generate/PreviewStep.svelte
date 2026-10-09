@@ -6,13 +6,13 @@
 	let { previewRows, periodLabel }: { previewRows: PreviewRow[]; periodLabel: string } = $props();
 
 	const previewTotal = $derived(previewRows.reduce((sum, row) => sum + row.totalCosts, 0));
-	const headerClass = 'px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider';
+	const headerClass = 'px-4 py-3 text-xs font-semibold text-ink-muted uppercase tracking-wider';
 </script>
 
 <div class="space-y-6">
 	<div>
 		<h2 class="text-lg font-semibold text-gray-900 mb-4">Vorschau</h2>
-		<p class="text-gray-500 mb-6">
+		<p class="text-ink-muted mb-6">
 			Überprüfen Sie die Zusammenfassung vor dem Erstellen der Abrechnungen.
 		</p>
 	</div>
@@ -20,17 +20,17 @@
 	<!-- Summary Cards -->
 	<div class="grid gap-4 sm:grid-cols-3">
 		<div class="bg-gray-50 rounded-lg p-4">
-			<p class="text-sm text-gray-500">Abrechnungsperiode</p>
+			<p class="text-sm text-ink-muted">Abrechnungsperiode</p>
 			<p class="text-lg font-semibold text-gray-900 mt-1">{periodLabel}</p>
 		</div>
 		<div class="bg-gray-50 rounded-lg p-4">
-			<p class="text-sm text-gray-500">Anzahl Abrechnungen</p>
+			<p class="text-sm text-ink-muted">Anzahl Abrechnungen</p>
 			<p class="text-lg font-semibold text-gray-900 mt-1" data-testid="preview-count">
 				{previewRows.length}
 			</p>
 		</div>
 		<div class="bg-gray-50 rounded-lg p-4">
-			<p class="text-sm text-gray-500">Gesamtkosten</p>
+			<p class="text-sm text-ink-muted">Gesamtkosten</p>
 			<p class="text-lg font-semibold text-gray-900 mt-1">{formatCurrency(previewTotal)}</p>
 		</div>
 	</div>
@@ -39,7 +39,7 @@
 	<div>
 		<h3 class="text-sm font-medium text-gray-700 mb-3">Aufschlüsselung nach Mietvertrag</h3>
 		{#if previewRows.length === 0}
-			<p class="text-gray-500" data-testid="preview-empty">
+			<p class="text-ink-muted" data-testid="preview-empty">
 				In dieser Periode gibt es keine Mietverträge.
 			</p>
 		{:else}
@@ -71,10 +71,10 @@
 	<!-- Configuration Summary -->
 	<div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
 		<div class="flex items-start gap-3">
-			<Icon name="warning" size={24} class="text-yellow-600 flex-shrink-0" />
+			<Icon name="warning" size={24} class="text-caution flex-shrink-0" />
 			<div>
-				<p class="font-medium text-yellow-800">Vor dem Erstellen beachten</p>
-				<ul class="mt-2 text-sm text-yellow-700 space-y-1">
+				<p class="font-medium text-caution">Vor dem Erstellen beachten</p>
+				<ul class="mt-2 text-sm text-caution space-y-1">
 					<li>• Alle Rechnungen für die Periode sollten erfasst sein</li>
 					<li>• Mieterwechsel sollten korrekt eingetragen sein</li>
 					<li>• Verteilschlüssel müssen konfiguriert sein</li>

@@ -15,7 +15,7 @@
 <tr class="hover:bg-gray-50 transition-colors" data-testid="distribution-key-row">
 	<td class="px-6 py-4">
 		<div class="font-medium text-gray-900" data-testid="distribution-key-name">{key.name}</div>
-		<div class="text-sm text-gray-500">{key.description}</div>
+		<div class="text-sm text-ink-muted">{key.description}</div>
 	</td>
 	<td class="px-6 py-4">
 		<code
@@ -28,7 +28,7 @@
 			>{custom ? 'Eigener' : 'Vordefiniert'}</Badge
 		>
 	</td>
-	<td class="px-6 py-4 text-center text-sm text-gray-500" data-testid="distribution-key-usage">
+	<td class="px-6 py-4 text-center text-sm text-ink-muted" data-testid="distribution-key-usage">
 		<span class="font-medium text-gray-900">{key.usageCount}</span> Rechnungen
 	</td>
 	<td class="px-6 py-4">
@@ -38,7 +38,7 @@
 					href="/config/distribution-keys/{key.id}/edit"
 					title="Bearbeiten"
 					data-testid="distribution-key-edit-button"
-					class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+					class="p-1.5 text-ink-muted hover:text-accent hover:bg-blue-50 rounded-lg transition-colors"
 				>
 					<Icon name="edit" size={18} />
 				</a>
@@ -47,7 +47,7 @@
 					title={deleteTitle}
 					disabled={used}
 					data-testid="distribution-key-delete-button"
-					class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-40 disabled:pointer-events-none"
+					class="p-1.5 text-ink-muted hover:text-critical hover:bg-red-50 rounded-lg transition-colors disabled:opacity-40 disabled:pointer-events-none"
 				>
 					<Icon name="delete" size={18} />
 				</button>

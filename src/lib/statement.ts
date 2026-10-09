@@ -16,7 +16,7 @@ export const statusVariants = {
 
 /** Text colour of a balance: red when the tenant pays, green when the tenant gets money back */
 export function balanceClass(balance: number): string {
-	if (balance > 0) return 'text-red-600';
-	if (balance < 0) return 'text-green-600';
-	return 'text-gray-600';
+	if (balance > 0) return 'text-critical';
+	if (balance < 0) return 'text-positive';
+	return 'text-ink-muted';
 }

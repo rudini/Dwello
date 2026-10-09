@@ -49,7 +49,7 @@
 	<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
 		<div>
 			<h1 class="text-2xl font-bold text-gray-900">Mieter</h1>
-			<p class="text-gray-500 mt-1">{data.total} Mieter insgesamt</p>
+			<p class="text-ink-muted mt-1">{data.total} Mieter insgesamt</p>
 		</div>
 		<Button href="/tenants/new" variant="primary" testid="tenants-new-button">
 			<Icon name="person_add" size={20} />
@@ -86,7 +86,7 @@
 			<div class="text-center py-12" data-testid="tenants-empty">
 				<Icon name="person" size={48} class="mx-auto text-gray-300 mb-4" />
 				<h3 class="text-lg font-medium text-gray-900 mb-2">Keine Mieter gefunden</h3>
-				<p class="text-gray-500 mb-6">
+				<p class="text-ink-muted mb-6">
 					{#if filtered}
 						Versuchen Sie es mit anderen Suchbegriffen oder Filtern.
 					{:else}
@@ -130,14 +130,14 @@
 										>
 									{/if}
 								</div>
-								<p class="text-sm text-gray-500 truncate">{tenant.email}</p>
+								<p class="text-sm text-ink-muted truncate">{tenant.email}</p>
 							</div>
 						</div>
 
 						<!-- Contact Info -->
 						{#if tenant.phone}
 							<div class="flex items-center text-sm text-gray-600 mb-3">
-								<Icon name="phone" size={16} class="mr-2 text-gray-400" />
+								<Icon name="phone" size={16} class="mr-2 text-ink-muted" />
 								<span>{tenant.phone}</span>
 							</div>
 						{/if}
@@ -146,11 +146,11 @@
 						<div class="pt-3 border-t border-gray-100">
 							{#if tenant.currentApartment && tenant.currentBuilding}
 								<div class="flex items-center text-sm text-gray-600">
-									<Icon name="home" size={16} class="mr-2 text-gray-400" />
+									<Icon name="home" size={16} class="mr-2 text-ink-muted" />
 									<span class="truncate">{tenant.currentApartment} - {tenant.currentBuilding}</span>
 								</div>
 							{:else}
-								<div class="flex items-center text-sm text-gray-400">
+								<div class="flex items-center text-sm text-ink-muted">
 									<Icon name="home" size={16} class="mr-2" />
 									<span>Keine aktive Miete</span>
 								</div>

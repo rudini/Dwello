@@ -38,11 +38,11 @@
 	const styles = {
 		done: {
 			item: 'border-gray-100',
-			number: 'bg-green-100 text-green-700',
-			label: 'line-through text-gray-500'
+			number: 'bg-green-100 text-positive',
+			label: 'line-through text-ink-muted'
 		},
 		next: { item: 'border-primary bg-primary/5', number: 'bg-primary text-white', label: '' },
-		ahead: { item: 'border-gray-100', number: 'bg-gray-100 text-gray-500', label: '' }
+		ahead: { item: 'border-gray-100', number: 'bg-gray-100 text-ink-muted', label: '' }
 	};
 	const styleOf = (step: (typeof steps)[number]) =>
 		styles[step.done ? 'done' : step === next ? 'next' : 'ahead'];
@@ -53,7 +53,7 @@
 		<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-5">
 			<div>
 				<h2 class="text-lg font-semibold text-gray-900">Erste Schritte</h2>
-				<p class="text-sm text-gray-500">So richten Sie Dwello in vier Schritten ein.</p>
+				<p class="text-sm text-ink-muted">So richten Sie Dwello in vier Schritten ein.</p>
 			</div>
 			<Button href={next.href} variant="primary" testid="getting-started-next">
 				{next.label}
@@ -77,7 +77,7 @@
 						<a href={step.href} class="font-medium text-gray-900 hover:text-primary {style.label}"
 							>{step.label}</a
 						>
-						<p class="text-xs text-gray-500 mt-0.5">{step.hint}</p>
+						<p class="text-xs text-ink-muted mt-0.5">{step.hint}</p>
 					</div>
 				</li>
 			{/each}

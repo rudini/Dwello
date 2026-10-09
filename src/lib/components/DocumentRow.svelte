@@ -25,10 +25,10 @@
 <li class="py-3 flex items-center justify-between gap-4" data-testid="document-row">
 	<div>
 		<p class="font-medium text-gray-900">{heading}</p>
-		<p class="text-sm text-gray-500">
+		<p class="text-sm text-ink-muted">
 			{details} · <span data-testid="document-status">{delivery}</span>
 		</p>
-		<p class="text-sm text-amber-700">{document.deliveryError ?? ''}</p>
+		<p class="text-sm text-caution">{document.deliveryError ?? ''}</p>
 	</div>
 	<div class="flex items-center gap-3">
 		{@render children?.()}

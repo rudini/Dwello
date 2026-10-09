@@ -14,7 +14,7 @@
 	</div>
 	<span class="font-medium">{percent}%</span>
 </div>
-<p class="text-sm text-gray-500" hidden={!reasoning}>
+<p class="text-sm text-ink-muted" hidden={!reasoning}>
 	<Icon name="lightbulb" size={16} class="inline mr-1" />
 	{reasoning}
 </p>

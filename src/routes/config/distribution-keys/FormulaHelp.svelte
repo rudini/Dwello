@@ -21,7 +21,7 @@
 		{#each FORMULA_VARIABLES as variable (variable.name)}
 			<span class="inline-flex items-center px-2 py-1 bg-gray-100 rounded text-xs font-mono">
 				{`{${variable.name}}`}
-				<span class="ml-1 text-gray-500 font-sans">= {variable.description}</span>
+				<span class="ml-1 text-ink-muted font-sans">= {variable.description}</span>
 			</span>
 		{/each}
 	</div>

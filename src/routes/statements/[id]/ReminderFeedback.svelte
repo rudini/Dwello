@@ -6,7 +6,7 @@
 
 	const tone = $derived(
 		reminder?.deliveryError
-			? 'bg-amber-50 border-amber-200 text-amber-800'
+			? 'bg-amber-50 border-amber-200 text-caution'
 			: 'bg-green-50 border-green-200 text-green-800'
 	);
 

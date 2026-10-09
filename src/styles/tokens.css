@@ -1,0 +1,83 @@
+/*
+ * Design tokens of Dwello: the only place colours, type, shape, depth and motion are defined.
+ * Components use them through the Tailwind names in tailwind.config.js. Reference: docs/design/token-referenz.md
+ */
+:root {
+	--color-canvas: #f5f7f8;
+	--color-surface: #ffffff;
+	--color-sunken: #ebeff2;
+	--color-line: #d3dae0;
+	--color-line-strong: #68747f;
+	--color-ink: #161c21;
+	--color-ink-muted: #3f4a54;
+	--color-accent: #1b5873;
+	--color-accent-strong: #123f54;
+	--color-accent-soft: #e3eef3;
+	--color-on-accent: #ffffff;
+	--color-positive: #17542e;
+	--color-positive-soft: #e3f1e7;
+	--color-caution: #663e00;
+	--color-caution-soft: #fbf0dc;
+	--color-critical: #8a1c24;
+	--color-critical-soft: #fae6e7;
+	--color-focus: #1b5873;
+	--color-scrim: rgb(22 28 33 / 0.6); /* behind dialogs and the mobile menu */
+
+	--font-sans: 'Inter Variable', system-ui, sans-serif;
+	--leading-text: 1.5;
+	--leading-heading: 1.25;
+
+	--radius-control: 6px;
+	--radius-panel: 12px;
+	--shadow-raised: 0 2px 8px rgb(0 0 0 / 0.12);
+	--shadow-overlay: 0 12px 32px rgb(0 0 0 / 0.24);
+
+	--size-control: 3rem;
+	--duration-fast: 150ms;
+
+	--illu-line: var(--color-ink-muted);
+	--illu-fill: var(--color-sunken);
+	--illu-accent: var(--color-accent);
+
+	color-scheme: light;
+}
+
+/* Dark mode follows the system; switched on (data-dark-ready on <html>) once every screen uses tokens */
+@media (prefers-color-scheme: dark) {
+	:root[data-dark-ready] {
+		--color-canvas: #111518;
+		--color-surface: #1a1f23;
+		--color-sunken: #242b30;
+		--color-line: #3a444c;
+		--color-line-strong: #8693a0;
+		--color-ink: #eceff2;
+		--color-ink-muted: #b4bec7;
+		--color-accent: #86bfda;
+		--color-accent-strong: #b3d8ea;
+		--color-accent-soft: #1c3542;
+		--color-on-accent: #0d1a20;
+		--color-positive: #8fd1a5;
+		--color-positive-soft: #1c3326;
+		--color-caution: #f0c27a;
+		--color-caution-soft: #3a2c14;
+		--color-critical: #f4a3a8;
+		--color-critical-soft: #3d1d20;
+		--color-focus: #f0c27a;
+
+		--shadow-raised: 0 2px 8px rgb(0 0 0 / 0.5);
+		--shadow-overlay: 0 12px 32px rgb(0 0 0 / 0.6);
+
+		color-scheme: dark;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+		scroll-behavior: auto !important;
+	}
+}
