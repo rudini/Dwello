@@ -71,5 +71,9 @@ describe('Registerkarten', () => {
 		expect(document.activeElement).toBe(second);
 		press('ArrowRight');
 		expect(document.activeElement).toBe(first);
+		press('End');
+		expect(document.activeElement).toBe(second);
+		press('Home');
+		expect(selected).toBe('current');
 	});
 });

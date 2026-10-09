@@ -13,7 +13,8 @@ Then(
 		if (screen.public) await page.context().clearCookies();
 		const path = await seedFor(seed, screen.path, state);
 		for (const { viewport, scheme } of variants) {
-			expect(await check(page, path, state, viewport, scheme), `${viewport}, ${scheme}`).toEqual([]);
+			const found = await check(page, path, state, viewport, scheme, screen.queries);
+			expect(found, `${viewport}, ${scheme}`).toEqual([]);
 		}
 	}
 );

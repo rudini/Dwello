@@ -85,6 +85,8 @@ describe('Auswahlgruppe', () => {
 			error: 'Bitte wählen Sie die Dauer.'
 		});
 		const fieldset = document.querySelector('fieldset')!;
+		expect(fieldset.getAttribute('role')).toBe('radiogroup');
+		expect(fieldset.getAttribute('aria-invalid')).toBe('true');
 		expect(
 			document.getElementById(fieldset.getAttribute('aria-describedby')!)!.textContent
 		).toContain('Bitte wählen Sie die Dauer.');

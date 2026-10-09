@@ -69,6 +69,7 @@
 	</div>
 
 	<RecordTable
+		label="Kategorien"
 		columns={[
 			{ label: 'Kategorie' },
 			{ label: 'Beschreibung' },

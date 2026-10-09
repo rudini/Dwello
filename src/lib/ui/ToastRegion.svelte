@@ -4,7 +4,7 @@
 	import Icon from './Icon.svelte';
 	import { toneStyle } from './tone';
 
-	// Short confirmations after an action; errors interrupt, the rest is read when there is a pause
+	// Short confirmations after an action; errors interrupt (alert), the rest is read when there is a pause (status)
 	const tones = {
 		success: 'positive',
 		error: 'critical',
@@ -13,10 +13,7 @@
 	} as const;
 </script>
 
-<div
-	aria-live="polite"
-	class="fixed bottom-4 right-4 z-50 flex w-full max-w-sm flex-col gap-2 px-4 sm:px-0"
->
+<div class="fixed inset-x-4 bottom-4 z-50 flex flex-col gap-2 sm:left-auto sm:w-96">
 	{#each $toasts as toast (toast.id)}
 		{@const style = toneStyle[tones[toast.type]]}
 		<div

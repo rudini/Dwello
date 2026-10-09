@@ -25,7 +25,7 @@
 	const helpId = $derived(`${id}-help`);
 	const errorId = $derived(`${id}-error`);
 	const describedBy = $derived(
-		[help && helpId, error && errorId].filter(Boolean).join(' ') || undefined
+		[(help || example) && helpId, error && errorId].filter(Boolean).join(' ') || undefined
 	);
 </script>
 
@@ -34,9 +34,9 @@
 		{label}
 		{#if optional}<span class="font-normal text-ink-muted">(optional)</span>{/if}
 	</label>
-	{#if help}
+	{#if help || example}
 		<p id={helpId} class="text-ink-muted">
-			{help}
+			{help ?? ''}
 			{#if example}<span class="whitespace-nowrap">Beispiel: {example}</span>{/if}
 		</p>
 	{/if}

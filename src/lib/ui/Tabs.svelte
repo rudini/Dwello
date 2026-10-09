@@ -15,6 +15,7 @@
 	} = $props();
 
 	let list = $state<HTMLElement>();
+	const uid = $props.id();
 
 	function keydown(event: KeyboardEvent) {
 		const index = tabs.findIndex((tab) => tab.id === selected);
@@ -42,9 +43,9 @@
 			<button
 				type="button"
 				role="tab"
-				id="tab-{tab.id}"
+				id="{uid}-tab-{tab.id}"
 				aria-selected={tab.id === selected}
-				aria-controls={tab.id === selected ? `tabpanel-${tab.id}` : undefined}
+				aria-controls={tab.id === selected ? `${uid}-panel` : undefined}
 				tabindex={tab.id === selected ? 0 : -1}
 				onclick={() => (selected = tab.id)}
 				class="min-h-12 border-b-4 px-4 font-semibold {tab.id === selected
@@ -55,7 +56,7 @@
 			</button>
 		{/each}
 	</div>
-	<div role="tabpanel" id="tabpanel-{selected}" aria-labelledby="tab-{selected}" tabindex="0">
+	<div role="tabpanel" id="{uid}-panel" aria-labelledby="{uid}-tab-{selected}" tabindex="0">
 		{@render children()}
 	</div>
 </div>

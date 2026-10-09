@@ -33,3 +33,7 @@ Items the redesign could not or deliberately did not resolve. Each with reason a
 ## Overview task rules
 
 - Time windows for deadlines on the overview (Zahlungsfrist within 14 days, Vertragsende within 60 days) and the suggestion to create the statements for the last Abrechnungsperiode are UX choices without glossary or legal basis – TODO(fachlich prüfen).
+
+## Bugs found outside the UI scope (not changed: backend)
+
+- The apartment list's search box has no effect: the BFF passes `search`, but `backend/src/routes/apartments.ts` does not accept a `search` query parameter. Either implement the search in the backend or remove the box from the UI. The axe check uses the building filter for the apartment list's "filtered-empty" state.

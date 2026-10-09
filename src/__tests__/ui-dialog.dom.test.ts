@@ -71,6 +71,23 @@ describe('Dialog', () => {
 		expect(onconfirm).toHaveBeenCalledOnce();
 	});
 
+	it('lässt sich während der Arbeit nicht schliessen und behält den Fokus', () => {
+		const { onclose } = openDialog({ busy: true, busyLabel: 'Wird versendet …' });
+		const panel = document.querySelector<HTMLElement>('[role=dialog]')!;
+		expect(document.activeElement).toBe(panel);
+		press('Tab');
+		expect(document.activeElement).toBe(panel);
+		press('Escape');
+		expect(onclose).not.toHaveBeenCalled();
+	});
+
+	it('schliesst mit Escape auch, wenn der Fokus nicht im Dialog liegt', () => {
+		const { onclose } = openDialog();
+		window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+		flushSync();
+		expect(onclose).toHaveBeenCalledOnce();
+	});
+
 	it('zeigt nichts, solange er geschlossen ist', () => {
 		openDialog({ open: false });
 		expect(document.querySelector('[role=dialog]')).toBeNull();

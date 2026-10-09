@@ -16,7 +16,7 @@
 	</p>
 	<ProgressBar value={current} max={steps.length} label="Schritt {current} von {steps.length}" />
 	<ol class="hidden gap-2 md:flex">
-		{#each steps as step, i (step)}
+		{#each steps as step, i (i)}
 			{@const number = i + 1}
 			<li class="flex flex-1 items-center gap-2">
 				{#if number < current}

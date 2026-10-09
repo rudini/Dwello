@@ -53,7 +53,7 @@ Defined in `src/styles/tokens.css` (`:root` light, `@media (prefers-color-scheme
 | `--color-ink-muted` | `ink-muted` | `#3F4A54` | `#B4BEC7` | secondary text (≥ 7:1) |
 | `--color-accent` | `accent` | `#1B5873` | `#86BFDA` | primary buttons, links, active nav |
 | `--color-accent-strong` | `accent-strong` | `#123F54` | `#B3D8EA` | hover/pressed |
-| `--color-accent-soft` | `accent-soft` | `#E3EEF3` | `#1C3542` | selected/active background, info alert |
+| `--color-accent-soft` | `accent-soft` | `#E3EEF3` | `#172C37` | selected/active background, info alert |
 | `--color-on-accent` | `on-accent` | `#FFFFFF` | `#0D1A20` | text on accent |
 | `--color-positive` / `-soft` | `positive`, `positive-soft` | `#17542E` / `#E3F1E7` | `#8FD1A5` / `#1C3326` | success |
 | `--color-caution` / `-soft` | `caution`, `caution-soft` | `#663E00` / `#FBF0DC` | `#F0C27A` / `#3A2C14` | warnings, plausibility |

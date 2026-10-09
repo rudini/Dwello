@@ -1,5 +1,5 @@
 {
-	"$comment": "Screens and states the axe check visits (tests/e2e/features/accessibility.feature, one example per screen and state). {building} etc. are ids of records the check seeds itself. Every new or changed screen is added here; every state must be one of stateMeanings. 'empty' and 'first-use' are covered by DOM tests (see docs/design/offene-punkte.md). Dark mode joins colorSchemes in stage 8 (docs/design/01-plan.md D4).",
+	"$comment": "Screens and states the axe check visits (tests/e2e/features/accessibility.feature, one example per screen and state). {building} etc. are ids of records the check seeds itself. Every new or changed screen is added here; every state must be one of stateMeanings. 'empty' and 'first-use' are covered by DOM tests (see docs/design/offene-punkte.md). Dark mode joins colorSchemes in stage 8 (docs/design/01-plan.md D4). A screen may override the query string of a state in 'queries' (the apartment list ignores ?search=, see docs/design/offene-punkte.md).",
 	"stateMeanings": {
 		"default": "The page as loaded with the seeded records.",
 		"empty": "A list with no records at all. Not producible in the shared E2E database; covered by DOM tests of the empty branch and by 'filtered-empty', which shows the same EmptyState component.",
@@ -20,9 +20,20 @@
 		"profile-sum-invalid": "Heating profile form whose monthly shares do not add up to 100 %.",
 		"login-error": "Login page showing a sign-in error (?error=failed).",
 		"mobile-menu-open": "Navigation drawer open (mobile and tablet viewport).",
-		"user-menu-open": "User menu in the header open."
+		"user-menu-open": "User menu in the header open.",
+		"dialog-open": "A confirmation dialog of the page open.",
+		"busy-dialog-open": "A confirmation dialog open while its action is running."
 	},
 	"screens": [
+		{
+			"name": "gallery",
+			"path": "/gallery",
+			"states": [
+				"default",
+				"dialog-open",
+				"busy-dialog-open"
+			]
+		},
 		{
 			"name": "login",
 			"path": "/login",
@@ -88,7 +99,10 @@
 				"default",
 				"empty",
 				"filtered-empty"
-			]
+			],
+			"queries": {
+				"filtered-empty": "?building=00000000-0000-4000-8000-000000000000"
+			}
 		},
 		{
 			"name": "apartment-new",

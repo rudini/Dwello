@@ -33,7 +33,7 @@
 		>
 		<thead class="bg-sunken">
 			<tr>
-				{#each columns as column (column.label)}
+				{#each columns as column, i (i)}
 					<th
 						scope="col"
 						class="px-4 py-4 font-semibold text-ink {column.numeric ? 'text-right' : ''}"

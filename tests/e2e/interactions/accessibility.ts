@@ -50,18 +50,31 @@ export async function seedFor(seed: TestData, path: string, state: string) {
 }
 
 const press = (page: Page, testid: string) => page.getByTestId(testid).click();
+// Proves the state is reached before axe looks, so a state that never appears fails instead of passing silently
+const shows = (page: Page, selector: string) => page.locator(selector).first().waitFor();
 // Confirmation dialogs end with a button whose test id ends in -confirm
-const dialog = (page: Page) => page.locator('[data-testid$="-confirm"]').first().waitFor();
+const dialog = (page: Page) => shows(page, '[data-testid$="-confirm"]');
 
 // What a user does to reach each state
 const states: Record<string, (page: Page) => Promise<unknown>> = {
 	default: async () => {},
-	'filtered-empty': async () => {},
-	'login-error': async () => {},
-	'submit-empty': async (page) => page.locator('main [type=submit]').first().click(),
+	'filtered-empty': async (page) => shows(page, '[data-testid$="-empty"]'),
+	'login-error': async (page) => shows(page, '[data-testid="login-error"]'),
+	'submit-empty': async (page) => {
+		await page.locator('main [type=submit]').last().click(); // the save button closes a form
+		await shows(page, '[data-testid="form-error"], [aria-invalid="true"]');
+	},
 	'delete-dialog': async (page) => {
 		await page.locator('[data-testid$="-delete-button"]').first().click();
 		await dialog(page);
+	},
+	'dialog-open': async (page) => {
+		await press(page, 'gallery-open-dialog');
+		await shows(page, '[role="dialog"]');
+	},
+	'busy-dialog-open': async (page) => {
+		await press(page, 'gallery-open-busy-dialog');
+		await shows(page, '[role="dialog"][aria-labelledby]');
 	},
 	'end-dialog': async (page) => {
 		await press(page, 'contract-end-button');
@@ -83,9 +96,14 @@ const states: Record<string, (page: Page) => Promise<unknown>> = {
 	'profile-sum-invalid': async (page) => page.getByTestId('heating-profile-month-january').fill('50'),
 	'mobile-menu-open': async (page) => {
 		const menu = page.getByTestId('mobile-menu-button');
-		if (await menu.isVisible()) await menu.click(); // only where the sidebar is folded away
+		if (!(await menu.isVisible())) return; // desktop shows the sidebar instead: its default view is checked
+		await menu.click();
+		await shows(page, '[role="dialog"][aria-label="Hauptnavigation"]');
 	},
-	'user-menu-open': async (page) => press(page, 'user-menu-button'),
+	'user-menu-open': async (page) => {
+		await press(page, 'user-menu-button');
+		await shows(page, '[data-testid="user-menu-settings"]');
+	},
 	'preview-empty': async (page) => {
 		await page.getByTestId('period-start-input').fill('2000-01-01');
 		await page.getByTestId('period-end-input').fill('2000-12-31');
@@ -111,10 +129,17 @@ async function violations(page: Page) {
 }
 
 /** Opens the screen in the state for one viewport and colour scheme and returns what axe finds */
-export async function check(page: Page, path: string, state: string, viewport: Viewport, scheme: 'light' | 'dark') {
+export async function check(
+	page: Page,
+	path: string,
+	state: string,
+	viewport: Viewport,
+	scheme: 'light' | 'dark',
+	queries: Record<string, string> = {}
+) {
 	await page.setViewportSize(screenList.viewports[viewport]);
 	await page.emulateMedia({ colorScheme: scheme, reducedMotion: 'reduce' });
-	await visit(page, path + (query[state] ?? ''));
+	await visit(page, path + (queries[state] ?? query[state] ?? ''));
 	if (state === 'every-wizard-step') return wizardSteps(page);
 	await states[state](page);
 	return violations(page);

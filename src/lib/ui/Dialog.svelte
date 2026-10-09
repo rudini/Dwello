@@ -29,7 +29,7 @@
 		children: Snippet;
 	} = $props();
 
-	const id = `dialog-${Math.random().toString(36).slice(2, 8)}`;
+	const id = $props.id();
 	let panel = $state<HTMLElement>();
 
 	function close() {
@@ -46,24 +46,34 @@
 		return () => opener?.focus();
 	});
 
+	// While busy both buttons are disabled: the panel itself holds the focus
+	$effect(() => {
+		if (open && busy) panel?.focus();
+	});
+
 	function keydown(event: KeyboardEvent) {
-		if (event.key === 'Escape') return close();
-		if (event.key !== 'Tab' || !panel) return;
+		if (!open) return;
+		if (event.key === 'Escape') close();
+		if (event.key === 'Tab') trapFocus(event);
+	}
+
+	// Tab from the last control wraps to the first and back; while busy nothing inside can take focus
+	function trapFocus(event: KeyboardEvent) {
 		const focusable = [
-			...panel.querySelectorAll<HTMLElement>(
+			...(panel?.querySelectorAll<HTMLElement>(
 				'button:not([disabled]), [href], input, select, textarea'
-			)
+			) ?? [])
 		];
-		const [first, last] = [focusable[0], focusable[focusable.length - 1]];
-		if (event.shiftKey && document.activeElement === first) {
-			event.preventDefault();
-			last.focus();
-		} else if (!event.shiftKey && document.activeElement === last) {
-			event.preventDefault();
-			first.focus();
-		}
+		const [first, last] = [focusable[0], focusable.at(-1)];
+		const wrapTo = event.shiftKey
+			? document.activeElement === first && last
+			: document.activeElement === last && first;
+		if (busy || wrapTo) event.preventDefault();
+		if (wrapTo) wrapTo.focus();
 	}
 </script>
+
+<svelte:window onkeydown={keydown} />
 
 {#if open}
 	<div
@@ -77,7 +87,6 @@
 			aria-labelledby="{id}-title"
 			aria-describedby="{id}-body"
 			tabindex="-1"
-			onkeydown={keydown}
 			class="flex w-full max-w-lg flex-col gap-6 rounded-panel bg-surface p-6 text-ink shadow-overlay"
 		>
 			<h2 id="{id}-title" class="text-xl font-bold leading-tight">{title}</h2>

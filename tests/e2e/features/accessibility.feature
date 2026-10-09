@@ -13,6 +13,9 @@ Funktionalität: Barrierefreiheit
 
     Beispiele:
       | Bildschirm             | Zustand             |
+      | gallery                | default             |
+      | gallery                | dialog-open         |
+      | gallery                | busy-dialog-open    |
       | login                  | default             |
       | login                  | login-error         |
       | error-404              | default             |

@@ -38,6 +38,7 @@
 	</div>
 
 	<RecordTable
+		label="Verteilschlüssel"
 		columns={[
 			{ label: 'Name' },
 			{ label: 'Formel' },

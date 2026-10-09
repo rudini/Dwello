@@ -15,7 +15,7 @@ All design values live in `src/styles/tokens.css` and reach components through t
 | `ink-muted` | `--color-ink-muted` | `#3F4A54` | `#B4BEC7` | secondary text, help texts (≥ 7:1) |
 | `accent` | `--color-accent` | `#1B5873` | `#86BFDA` | primary buttons, links, active navigation |
 | `accent-strong` | `--color-accent-strong` | `#123F54` | `#B3D8EA` | hover, text on `accent-soft` |
-| `accent-soft` | `--color-accent-soft` | `#E3EEF3` | `#1C3542` | selected and info backgrounds |
+| `accent-soft` | `--color-accent-soft` | `#E3EEF3` | `#172C37` | selected and info backgrounds |
 | `on-accent` | `--color-on-accent` | `#FFFFFF` | `#0D1A20` | text on `accent`/`critical` |
 | `positive`, `positive-soft` | `--color-positive(-soft)` | `#17542E` / `#E3F1E7` | `#8FD1A5` / `#1C3326` | success |
 | `caution`, `caution-soft` | `--color-caution(-soft)` | `#663E00` / `#FBF0DC` | `#F0C27A` / `#3A2C14` | warnings, plausibility checks |

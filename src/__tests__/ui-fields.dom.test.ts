@@ -32,6 +32,11 @@ describe('Eingabefeld', () => {
 		expect(describedBy(input())).toEqual(['Bezeichnung der Wohnung im Gebäude. Beispiel: 3.01']);
 	});
 
+	it('zeigt ein Beispiel auch ohne Hilfetext', () => {
+		show(TextInput, { id: 'zip', label: 'PLZ', example: '8400', value: '' });
+		expect(describedBy(input())).toEqual(['Beispiel: 8400']);
+	});
+
 	it('meldet einen Fehler am Feld und kennzeichnet es als ungültig', () => {
 		show(TextInput, {
 			id: 'lastName',

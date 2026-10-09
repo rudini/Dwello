@@ -78,7 +78,9 @@ export default defineConfig<{ driver: Driver }>({
 				// The operator that terms.feature expects under „Verfügbarkeit“
 				OPERATOR_NAME: 'Muster Hosting AG',
 				OPERATOR_ADDRESS: 'Bahnhofstrasse 1, 8001 Zürich',
-				OPERATOR_CONTACT: 'betrieb@muster-hosting.ch'
+				OPERATOR_CONTACT: 'betrieb@muster-hosting.ch',
+				// The component gallery the axe check visits (src/routes/gallery)
+				UI_GALLERY: 'on'
 			}
 		}
 	],

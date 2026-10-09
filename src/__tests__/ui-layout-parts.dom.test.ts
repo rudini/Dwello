@@ -5,6 +5,7 @@ import Table from '$lib/ui/Table.svelte';
 import ToastRegion from '$lib/ui/ToastRegion.svelte';
 import PageHeader from '$lib/ui/PageHeader.svelte';
 import Panel from '$lib/ui/Panel.svelte';
+import IconButton from '$lib/ui/IconButton.svelte';
 import NavList from '$lib/ui/NavList.svelte';
 import { addToast, toasts } from '$lib/stores';
 import { byTestId, click, show } from './helpers/dom';
@@ -25,6 +26,17 @@ describe('Tabelle', () => {
 		const heads = [...document.querySelectorAll('th')];
 		expect(heads.map((th) => th.getAttribute('scope'))).toEqual(['col', 'col']);
 		expect(heads[1].className).toContain('text-right');
+	});
+
+	it('benennt Spalten ohne sichtbaren Kopf für Screenreader', () => {
+		show(Table, {
+			caption: 'Mieter',
+			columns: [{ label: 'Name' }, { label: 'Aktionen', hidden: true }],
+			children: markup('<tr><td>Anna</td><td></td></tr>')
+		});
+		const actions = document.querySelectorAll('th')[1];
+		expect(actions.textContent).toBe('Aktionen');
+		expect(actions.querySelector('.sr-only')).not.toBeNull();
 	});
 
 	it('lässt sich auf schmalen Bildschirmen mit der Tastatur seitlich scrollen', () => {
@@ -55,7 +67,7 @@ describe('Meldungen', () => {
 		addToast('error', 'Speichern fehlgeschlagen');
 		flushSync();
 		expect(byTestId('toast-error')!.getAttribute('role')).toBe('alert');
-		expect(document.querySelector('[aria-live=polite]')).not.toBeNull();
+		expect(byTestId('toast-error')!.closest('[aria-live]')).toBeNull(); // announced once, by its own role
 	});
 });
 
@@ -72,6 +84,18 @@ describe('Seitenkopf', () => {
 		expect(trail.querySelector('a')!.getAttribute('href')).toBe('/tenants');
 		expect(trail.querySelector('[aria-current=page]')!.textContent).toBe('Anna Keller');
 		expect(document.body.textContent).toContain('Kontaktdaten und Mietverhältnis.');
+	});
+});
+
+describe('Symbolschaltfläche', () => {
+	it('wird mit ihrem Namen vorgelesen und handelt beim Klicken', () => {
+		const onclick = vi.fn();
+		show(IconButton, { icon: 'close', label: 'Menü schliessen', onclick, expanded: true });
+		const button = document.querySelector('button')!;
+		expect(button.getAttribute('aria-label')).toBe('Menü schliessen');
+		expect(button.getAttribute('aria-expanded')).toBe('true');
+		click(button);
+		expect(onclick).toHaveBeenCalledOnce();
 	});
 });
 
