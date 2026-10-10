@@ -391,3 +391,13 @@ class TddStepTest(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(repo.git("rev-list", "--count", "HEAD"), "1")
         self.assertEqual(repo.trailer("TDD-Exit-Code"), "5")
+
+    def test_a_staged_rename_of_production_code_is_refused_as_red(self):
+        repo = Repo(self, {"calc.py": WRONG_ADD, "lib/__init__.py": "", "lib/tool.py": "X = 1\n"})
+        repo.write("test_calc.py", ADD_TEST)
+        repo.git("mv", "lib/tool.py", "lib/renamed.py")
+
+        result = repo.run("tdd-step", "red", "adds two numbers")
+
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn("production code changed: lib/renamed.py, lib/tool.py", result.stderr)
