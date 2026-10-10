@@ -80,6 +80,13 @@ describe('Verteilschlüssel', () => {
 		expect(text()).toContain('* mal');
 	});
 
+	it('erklärt die Summen des Gebäudes an einem gemischten Schlüssel 70/30', () => {
+		show(KeysPage, { data: { keys }, form: null } as never);
+
+		expect(text()).toContain('0.7 * {area} / {area_total} + 0.3 * {units} / {units_total}');
+		expect(text()).toContain('{area_total} Summe der Wohnflächen aller Wohnungen');
+	});
+
 	it('fragt vor dem Löschen nach', () => {
 		show(KeysPage, {
 			data: { keys: [key('k3', 'Leer', 'custom')] },

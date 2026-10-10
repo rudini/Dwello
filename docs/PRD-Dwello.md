@@ -433,7 +433,7 @@ Seeded by `backend/migrations/0002_stammdaten.sql`. The divisor is always all ap
 3. **Pro Zimmer** (Per Rooms), formula `{rooms}`
    - Distribution by number of rooms
 
-4. **Heizung (Fläche 70% / Einheit 30%)** (Heating Split), formula `0.7 * {area} + 0.3 * {units}`
+4. **Heizung (Fläche 70% / Einheit 30%)** (Heating Split), formula `0.7 * {area} / {area_total} + 0.3 * {units} / {units_total}`
    - Swiss standard heating distribution
    - The time-based split for tenants who moved mid-period uses the heating profile (see section 5.7)
 
@@ -444,6 +444,7 @@ Users can create custom formulas using apartment variables:
 - **{volume}** - Apartment volume in m³ (estimated as area × ceiling height)
 - **{rooms}** - Number of rooms in apartment
 - **{units}** - Always 1 (for per-unit calculations)
+- **{area_total}**, **{rooms_total}**, **{volume_total}**, **{units_total}** - Sums over all apartments of the building (for keys with fixed parts such as 70/30)
 
 **Custom Formula Examples:**
 - `{area} * 1.5` - Area with 1.5x weighting

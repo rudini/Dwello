@@ -122,7 +122,7 @@ There is no "predefined" flag on categories.
 
 ## 9. Distribution keys `/api/v1/distribution-keys`
 
-`type` is `predefined` or `custom`. Formulas use the variables `{area}`, `{rooms}`, `{volume}`, `{units}`.
+`type` is `predefined` or `custom`. Formulas use the variables `{area}`, `{rooms}`, `{volume}`, `{units}` and their building sums `{area_total}`, `{rooms_total}`, `{volume_total}`, `{units_total}`.
 
 | Method | Path | Notes |
 |---|---|---|

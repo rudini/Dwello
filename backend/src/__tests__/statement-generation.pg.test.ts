@@ -191,8 +191,8 @@ afterAll(async () => {
 
 // Line items: [category, building total, tenant share, tenant share of the building total in %]
 const lineC = [
-	// Heating key 0.7 × area + 0.3 × units: (0.7 × 40 + 0.3) / (0.7 × 150 + 0.9) × 3000 = 801.70
-	['Heating', '3000.00', '801.70', '26.7233'],
+	// Heating key 70 % by area, 30 % per apartment: (0.7 × 40 / 150 + 0.3 / 3) × 3000 = 860.00
+	['Heating', '3000.00', '860.00', '28.6667'],
 	// Both caretaker invoices (1200 + 300) by area: 40 / 150 × 1500
 	['Caretaker', '1500.00', '400.00', '26.6667'],
 	// Per unit: 600 / 3
@@ -209,12 +209,12 @@ describe('Mehrere Verteilschlüssel', () => {
 			// Contract started 2023, counted from the start of the period
 			rentalDays: 366,
 			lines: lineC,
-			// Subtotal 1601.70 + management fee: 3 % of the building's 5880.00 = 176.40, equally per apartment 58.80
+			// Subtotal 1660.00 + management fee: 3 % of the building's 5880.00 = 176.40, equally per apartment 58.80
 			managementFee: '58.80',
-			totalCosts: '1660.50',
+			totalCosts: '1718.80',
 			// 12 × 120
 			totalAdvancePayments: '1440.00',
-			balance: '220.50'
+			balance: '278.80'
 		});
 	});
 });
@@ -224,8 +224,8 @@ describe('Mieterwechsel in der Abrechnungsperiode', () => {
 		expect(await generate(contracts.a)).toEqual({
 			rentalDays: 121,
 			lines: [
-				// Apartment share 56.3 / 105.9 × 3000 = 1594.90, × 121 / 366
-				['Heating', '3000.00', '527.28', '17.5760'],
+				// Apartment share (0.7 × 80 / 150 + 0.3 / 3) × 3000 = 1420.00, × 121 / 366
+				['Heating', '3000.00', '469.45', '15.6483'],
 				// 80 / 150 × 1500 = 800, × 121 / 366
 				['Caretaker', '1500.00', '264.48', '17.6320'],
 				['Cold Water', '600.00', '66.12', '11.0200'],
@@ -233,12 +233,12 @@ describe('Mieterwechsel in der Abrechnungsperiode', () => {
 				['Waste Disposal', '450.00', '69.43', '15.4289'],
 				['Elevator', '330.00', '36.37', '11.0212']
 			],
-			// Subtotal 963.68 + management fee 58.80 for 121 of 366 days
+			// Subtotal 905.85 + management fee 58.80 for 121 of 366 days
 			managementFee: '19.44',
-			totalCosts: '983.12',
+			totalCosts: '925.29',
 			// January to April, 4 × 200
 			totalAdvancePayments: '800.00',
-			balance: '183.12'
+			balance: '125.29'
 		});
 	});
 
@@ -246,18 +246,19 @@ describe('Mieterwechsel in der Abrechnungsperiode', () => {
 		expect(await generate(contracts.b)).toEqual({
 			rentalDays: 199,
 			lines: [
-				['Heating', '3000.00', '867.17', '28.9057'],
+				// 1420.00 × 199 / 366
+				['Heating', '3000.00', '772.08', '25.7360'],
 				['Caretaker', '1500.00', '434.97', '28.9980'],
 				['Cold Water', '600.00', '108.74', '18.1233'],
 				['Waste Disposal', '450.00', '114.18', '25.3733'],
 				['Elevator', '330.00', '59.81', '18.1242']
 			],
-			// Subtotal 1584.87 + management fee 58.80 for 199 of 366 days
+			// Subtotal 1489.78 + management fee 58.80 for 199 of 366 days
 			managementFee: '31.97',
-			totalCosts: '1616.84',
+			totalCosts: '1521.75',
 			// 16.–30. June = 15 / 30 × 180, plus July to December 6 × 180
 			totalAdvancePayments: '1170.00',
-			balance: '446.84'
+			balance: '351.75'
 		});
 	});
 });
@@ -276,8 +277,8 @@ describe('Leerstand', () => {
 
 		// Empty apartment 1.03 all year plus apartment 1.01 from 1.5. to 15.6. (46 days)
 		expect(landlord).toEqual([
-			// 603.40 + 46 / 366 × 1594.90
-			['Heating', '803.85'],
+			// 720.00 + 46 / 366 × 1420.00
+			['Heating', '898.47'],
 			// 300 + 46 / 366 × 800
 			['Caretaker', '400.55'],
 			['Cold Water', '225.14'],
@@ -290,23 +291,23 @@ describe('Leerstand', () => {
 });
 
 // Runs in UTC or Swiss time. In time zones behind UTC (e.g. America/New_York) the heating profile shifts by a day
-// and the heating shares change (A: 778.93 instead of 765.55); that is today's behavior, not pinned here.
+// and the heating shares change (A: the shares of one day more or less); that is today's behavior, not pinned here.
 describe('Heizprofil', () => {
 	it('belastet die ausziehende Mieterin mit Januar bis April gemäss Heizprofil, die übrigen Kosten nach Tagen', async () => {
 		expect(await generate(contracts.a, heatingProfileId)).toEqual({
 			rentalDays: 121,
 			lines: [
-				// 18 + 14 + 11 + 5 = 48 % of 1594.90
-				['Heating', '3000.00', '765.55', '25.5183'],
+				// 18 + 14 + 11 + 5 = 48 % of 1420.00
+				['Heating', '3000.00', '681.60', '22.7200'],
 				['Caretaker', '1500.00', '264.48', '17.6320'],
 				['Cold Water', '600.00', '66.12', '11.0200'],
 				['Waste Disposal', '450.00', '69.43', '15.4289'],
 				['Elevator', '330.00', '36.37', '11.0212']
 			],
 			managementFee: '19.44',
-			totalCosts: '1221.39',
+			totalCosts: '1137.44',
 			totalAdvancePayments: '800.00',
-			balance: '421.39'
+			balance: '337.44'
 		});
 	});
 
@@ -314,17 +315,17 @@ describe('Heizprofil', () => {
 		expect(await generate(contracts.b, heatingProfileId)).toEqual({
 			rentalDays: 199,
 			lines: [
-				// June 1 % × 15 / 30 days + September to December 2 + 8 + 14 + 26 = 50.5 % of 1594.90
-				['Heating', '3000.00', '805.42', '26.8473'],
+				// June 1 % × 15 / 30 days + September to December 2 + 8 + 14 + 26 = 50.5 % of 1420.00
+				['Heating', '3000.00', '717.10', '23.9033'],
 				['Caretaker', '1500.00', '434.97', '28.9980'],
 				['Cold Water', '600.00', '108.74', '18.1233'],
 				['Waste Disposal', '450.00', '114.18', '25.3733'],
 				['Elevator', '330.00', '59.81', '18.1242']
 			],
 			managementFee: '31.97',
-			totalCosts: '1555.09',
+			totalCosts: '1466.77',
 			totalAdvancePayments: '1170.00',
-			balance: '385.09'
+			balance: '296.77'
 		});
 	});
 

@@ -46,7 +46,7 @@ describe('Demodaten', () => {
 				(SELECT COUNT(*) FROM tenants)::int AS tenants, (SELECT COUNT(*) FROM rental_contracts)::int AS contracts,
 				(SELECT COUNT(*) FROM invoices)::int AS invoices, (SELECT COUNT(*) FROM utility_statements)::int AS statements`
 			)
-		).toEqual([{ buildings: 3, apartments: 13, tenants: 9, contracts: 10, invoices: 14, statements: 3 }]);
+		).toEqual([{ buildings: 3, apartments: 13, tenants: 10, contracts: 11, invoices: 83, statements: 6 }]);
 	});
 
 	// Wie eine echte Abrechnung: mit Positionen und PDF samt QR-Rechnung, in den Status, die die App kennt
@@ -58,24 +58,56 @@ describe('Demodaten', () => {
 			FROM utility_statements s ORDER BY s.status`
 		);
 
-		expect(statements).toEqual([
-			{ status: 'draft', pdf: true, qr: true, items: true },
-			{ status: 'paid', pdf: true, qr: true, items: true },
-			{ status: 'sent', pdf: true, qr: true, items: true }
-		]);
+		const draft = { status: 'draft', pdf: true, qr: true, items: true };
+		const paid = { ...draft, status: 'paid' };
+		expect(statements).toEqual([draft, draft, draft, paid, paid, { ...draft, status: 'sent' }]);
 	});
 
 	// Wie "Als bezahlt markieren" der App: nur das Datum; der Betrag zählte sonst im Dashboard als bezahlt
 	it('markiert die bezahlte Abrechnung wie die App, mit Datum und ohne Betrag', async () => {
-		const [paid] = await query(name, `SELECT paid_date IS NOT NULL AS dated, paid_amount FROM utility_statements WHERE status = 'paid'`);
+		const paid = await query(name, `SELECT paid_date IS NOT NULL AS dated, paid_amount FROM utility_statements WHERE status = 'paid'`);
 
-		expect(paid).toEqual({ dated: true, paid_amount: null });
+		expect(paid).toEqual([
+			{ dated: true, paid_amount: null },
+			{ dated: true, paid_amount: null }
+		]);
 	});
 
 	// Nur bei einer Nachzahlung trägt das PDF einen Einzahlungsschein
 	it('zeigt eine Nachzahlung und eine Rückzahlung', async () => {
 		const balances = await query(name, `SELECT balance::float > 0 AS owes FROM utility_statements`);
 
-		expect(balances.map((row) => row.owes).sort()).toEqual([false, false, true]);
+		expect(balances.map((row) => row.owes).sort()).toEqual([false, false, false, true, true, true]);
+	});
+
+	// Eine Abrechnung entsteht nach dem Ende ihrer Periode, mit 30 Tagen Zahlungsfrist
+	it('datiert die Abrechnungen nach dem Ende ihrer Abrechnungsperiode', async () => {
+		const rows = await query(
+			name,
+			`SELECT bool_and(statement_date > period_end) AS after, bool_and(payment_deadline = statement_date + 30) AS deadline FROM utility_statements`
+		);
+
+		expect(rows).toEqual([{ after: true, deadline: true }]);
+	});
+
+	// Ohne Adresse fehlte im PDF und auf der QR-Rechnung der Empfänger
+	it('gibt jedem Mieter eine Postadresse', async () => {
+		const [row] = await query(name, `SELECT COUNT(*)::int AS missing FROM tenants WHERE address IS NULL OR postal_code IS NULL OR city IS NULL`);
+
+		expect(row).toEqual({ missing: 0 });
+	});
+
+	// Bei einem Mieterwechsel erhält jeder Mietvertrag eine eigene Abrechnung über seine Mietstage
+	it('rechnet den Mieterwechsel in Seepark A2 mit zwei Abrechnungen ab', async () => {
+		const rows = await query(
+			name,
+			`SELECT t.last_name, s.rental_days FROM utility_statements s JOIN tenants t ON t.id = s.tenant_id
+			WHERE s.apartment_id = 'aaaa2222-2222-2222-2222-222222222222' ORDER BY s.rental_days`
+		);
+
+		expect(rows).toEqual([
+			{ last_name: 'Meier', rental_days: 181 },
+			{ last_name: 'Brunner', rental_days: 184 }
+		]);
 	});
 });

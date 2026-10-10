@@ -35,7 +35,16 @@ export interface StatementFilters {
 const { pdfBlob: _pdfBlob, ...statementColumns } = getTableColumns(utilityStatements);
 
 export interface StatementWithDetails extends Omit<UtilityStatement, 'pdfBlob'> {
-	tenant: { id: string; firstName: string; lastName: string; email: string | null; language?: string } | null;
+	tenant: {
+		id: string;
+		firstName: string;
+		lastName: string;
+		email: string | null;
+		language?: string;
+		address?: string | null;
+		postalCode?: string | null;
+		city?: string | null;
+	} | null;
 	apartment: { id: string; number: string; floor: number; area: string } | null;
 	building: { id: string; name: string; address: string } | null;
 	lineItems: UtilityStatementLineItem[];
@@ -192,7 +201,10 @@ export async function getStatement(id: string): Promise<StatementWithDetails | n
 				lastName: tenants.lastName,
 				email: tenants.email,
 				correspondenceChannel: tenants.correspondenceChannel,
-				language: tenants.language
+				language: tenants.language,
+				address: tenants.address,
+				postalCode: tenants.postalCode,
+				city: tenants.city
 			},
 			apartment: {
 				id: apartments.id,
@@ -469,37 +481,6 @@ export async function addLineItems(
 		.returning();
 
 	return lineItems;
-}
-
-/**
- * Get statements for a building in a period
- */
-export async function getStatementsForBuilding(
-	buildingId: string,
-	periodStart: string,
-	periodEnd: string
-): Promise<StatementWithDetails[]> {
-	const { statements } = await listStatements({
-		buildingId,
-		periodStart,
-		periodEnd,
-		limit: 1000
-	});
-
-	return statements;
-}
-
-/**
- * Check if a statement exists
- */
-export async function statementExists(id: string): Promise<boolean> {
-	const [result] = await db
-		.select({ id: utilityStatements.id })
-		.from(utilityStatements)
-		.where(eq(utilityStatements.id, id))
-		.limit(1);
-
-	return !!result;
 }
 
 /**

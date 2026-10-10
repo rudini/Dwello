@@ -67,9 +67,9 @@ export interface StatementForQRBill {
 	tenant: {
 		firstName: string;
 		lastName: string;
-		address?: string;
-		postalCode?: string;
-		city?: string;
+		address?: string | null;
+		postalCode?: string | null;
+		city?: string | null;
 	};
 }
 
@@ -355,9 +355,9 @@ export async function generateQRBillForStatement(
 		currency: 'CHF',
 
 		debtorName: `${statement.tenant.firstName} ${statement.tenant.lastName}`,
-		debtorStreet: statement.tenant.address,
-		debtorPostalCode: statement.tenant.postalCode,
-		debtorCity: statement.tenant.city,
+		debtorStreet: statement.tenant.address ?? undefined,
+		debtorPostalCode: statement.tenant.postalCode ?? undefined,
+		debtorCity: statement.tenant.city ?? undefined,
 		debtorCountry: 'CH',
 
 		referenceType: useQRReference ? 'QRR' : 'NON',

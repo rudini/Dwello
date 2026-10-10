@@ -17,6 +17,7 @@ import {
 	type QRBillConfig,
 	type StatementForQRBill
 } from './qr-bill.service';
+import { formatCHF, formatSwissDate } from './pdf-format';
 
 /**
  * Supported languages
@@ -36,16 +37,16 @@ const translations: Record<Language, Record<string, string>> = {
 		address: 'Adresse',
 		floor: 'Stockwerk',
 		area: 'Fläche',
-		rentalDays: 'Mietdauer (Tage)',
+		rentalDays: 'Mietstage',
 		costBreakdown: 'Kostenübersicht',
 		category: 'Kategorie',
-		totalAmount: 'Gebäudekosten',
+		totalAmount: 'Kosten Liegenschaft',
 		yourShare: 'Ihr Anteil',
 		sharePercent: 'Anteil %',
 		subtotal: 'Zwischensumme',
-		managementFee: 'Verwaltungskosten',
+		managementFee: 'Verwaltungspauschale',
 		totalCosts: 'Gesamtkosten',
-		advancePayments: 'Geleistete Akonto-Zahlungen',
+		advancePayments: 'Geleistete Akontobeiträge',
 		balance: 'Saldo',
 		amountDue: 'Nachzahlung',
 		refund: 'Rückerstattung',
@@ -239,11 +240,9 @@ export interface StatementPDFData {
 	tenant: {
 		firstName: string;
 		lastName: string;
-		email?: string;
-		phone?: string;
-		address?: string;
-		postalCode?: string;
-		city?: string;
+		address?: string | null;
+		postalCode?: string | null;
+		city?: string | null;
 	};
 
 	// Apartment info
@@ -274,24 +273,10 @@ export interface StatementPDFData {
 	paymentDeadline?: string;
 }
 
-/**
- * Format currency in Swiss format (CHF 1'234.56)
- */
-function formatCurrency(amount: number): string {
-	const formatted = Math.abs(amount).toLocaleString('de-CH', {
-		minimumFractionDigits: 2,
-		maximumFractionDigits: 2
-	});
-	return `CHF ${formatted}`;
-}
+/** CHF 1'234.56 */
+const formatCurrency = (amount: number) => `CHF ${formatCHF(Math.abs(amount))}`;
 
-/**
- * Format date in Swiss format (01.03.2025)
- */
-function formatDate(dateString: string): string {
-	const date = new Date(dateString);
-	return date.toLocaleDateString('de-CH');
-}
+const formatDate = formatSwissDate;
 
 /**
  * Format percentage (12.50%)
@@ -316,7 +301,7 @@ function formatFloor(floor: number, lang: Language): string {
 /**
  * Generate utility statement PDF
  */
-export async function generateStatementPDF(
+async function generateStatementPDF(
 	data: StatementPDFData,
 	config: QRBillConfig,
 	language: Language = 'de'
@@ -331,13 +316,7 @@ export async function generateStatementPDF(
 				id: data.id,
 				statementNumber: data.statementNumber,
 				balance: data.balance.toString(),
-				tenant: {
-					firstName: data.tenant.firstName,
-					lastName: data.tenant.lastName,
-					address: data.tenant.address,
-					postalCode: data.tenant.postalCode,
-					city: data.tenant.city
-				}
+				tenant: data.tenant
 			};
 			qrResult = await generateQRBillForStatement(statementForQR, config);
 		} catch (qrError) {
@@ -611,6 +590,9 @@ export async function generateStatementPDF(
 				const qrBillY = 650;
 
 				if (qrResult) {
+					// The payment part fills the bottom of the page: no bottom margin, or pdfkit breaks every line onto a new page
+					doc.page.margins.bottom = 0;
+
 					// Perforation line
 					doc
 						.strokeColor(borderColor)

@@ -4405,6 +4405,21 @@ Brief: `docs/design/REDESIGN_BRIEF.md`; log and decisions: `docs/design/progress
 - [x] **Axe as its own CI check:** the `@a11y` scenarios run in the job "Accessibility (axe)", the job "E2E tests"
   runs the rest, so the axe check can be required on `main` (`.github/workflows/ci.yml`, `docs/test-pyramid.md`)
 
+## Session 11 - October 2026: Open Points, Missing-Invoice Check, Swiss Date Field, Statement PDF
+
+Order A → B → C → D1 → D2, each step reviewed by an independent agent until no finding of severity
+critical/high/medium is open; reviews in `docs/reviews/`.
+
+### Done ✅
+- [x] **A: seed and master data, PDF content** (`docs/seed-daten-aenderungen.md`): demo data with two complete billing
+  years, tenant addresses, a tenant change, realistic Akonto and statement dates (`backend/demo/demo-data.sql`,
+  `backend/src/db/demo-data.ts`); migration `0003_stammdaten_korrektur.sql` (Swiss monthly heating shares, 70/30 key
+  with the new building sums `{area_total}` … in `formula.service.ts`, formula help in the settings); PDF with tenant
+  address, category names in the tenant's language, TT.MM.JJJJ, CHF 1'234.50, glossary terms, no page break storm
+  (`pdf-format.ts`, `statement-pdf.service.ts`, `pdf.service.ts`). Tests: `formula.service.test.ts`,
+  `statement-pdf-data.test.ts`, `heating-profiles.pg.test.ts`, `demo-data.pg.test.ts`, expectations in
+  `statement-generation.pg.test.ts` and `prorating.pg.test.ts` recalculated by hand.
+
 
 ---
 

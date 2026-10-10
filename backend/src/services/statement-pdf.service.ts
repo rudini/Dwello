@@ -3,9 +3,9 @@
  * Renders a statement with its QR-bill and stores the PDF with the statement
  */
 
-import { eq } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { utilityStatements } from '../db/schema';
+import { categories, utilityStatements } from '../db/schema';
 import { getTypedConfig } from './config.service';
 import { generateStatementPDFBase64, type StatementPDFData, type Language } from './pdf.service';
 import { isQRIBAN, statementQRReference, type QRBillConfig } from './qr-bill.service';
@@ -29,27 +29,32 @@ async function qrBillConfig(): Promise<QRBillConfig | null> {
 	};
 }
 
-const tenantOf = (tenant: StatementWithDetails['tenant']) => ({
-	firstName: tenant?.firstName || 'Unknown',
-	lastName: tenant?.lastName || 'Tenant',
-	email: tenant?.email || undefined,
-	address: undefined, // Would need to get from tenant record
-	postalCode: undefined,
-	city: undefined
-});
+// Name and postal address as stored; a statement without tenant prints no recipient
+const tenantOf = (tenant: StatementWithDetails['tenant']) => tenant ?? { firstName: '', lastName: '' };
 
 const apartmentOf = (apartment: StatementWithDetails['apartment']) => ({
-	number: apartment?.number || 'N/A',
+	number: apartment?.number || '',
 	floor: apartment?.floor || 0,
 	area: apartment?.area || '0'
 });
 
 const buildingOf = (building: StatementWithDetails['building']) => ({
-	name: building?.name || 'Building',
+	name: building?.name || '',
 	address: building?.address || ''
 });
 
-function toPdfData(statement: StatementWithDetails): StatementPDFData {
+type CategoryNames = { name: string; nameDE: string | null; nameFR: string | null; nameIT: string | null; nameEN: string | null };
+
+// The category in the PDF's language; Romansh and missing translations fall back to German
+const categoryName = (names: CategoryNames, language: Language) =>
+	({ fr: names.nameFR, it: names.nameIT, en: names.nameEN })[language as 'fr' | 'it' | 'en'] || names.nameDE || names.name;
+
+/** The statement as the PDF prints it, with the category names in the given language */
+export function toPdfData(
+	statement: StatementWithDetails,
+	categoryNames: Map<string, CategoryNames>,
+	language: Language
+): StatementPDFData {
 	const managementFee = parseFloat(statement.managementFee || '0');
 	const subtotal = parseFloat(statement.totalCosts) - managementFee;
 	return {
@@ -62,12 +67,15 @@ function toPdfData(statement: StatementWithDetails): StatementPDFData {
 		tenant: tenantOf(statement.tenant),
 		apartment: apartmentOf(statement.apartment),
 		building: buildingOf(statement.building),
-		lineItems: statement.lineItems.map((item) => ({
-			category: item.description,
-			totalAmount: parseFloat(item.totalAmount),
-			tenantShare: parseFloat(item.tenantShare),
-			sharePercentage: item.sharePercentage ? parseFloat(item.sharePercentage) / 100 : 0
-		})),
+		lineItems: statement.lineItems.map((item) => {
+			const names = item.categoryId ? categoryNames.get(item.categoryId) : undefined;
+			return {
+				category: names ? categoryName(names, language) : item.description,
+				totalAmount: parseFloat(item.totalAmount),
+				tenantShare: parseFloat(item.tenantShare),
+				sharePercentage: item.sharePercentage ? parseFloat(item.sharePercentage) / 100 : 0
+			};
+		}),
 		subtotal,
 		managementFee,
 		// Older statements have no stored rate; their fee was a percentage of the tenant's own costs
@@ -83,6 +91,24 @@ function toPdfData(statement: StatementWithDetails): StatementPDFData {
 	};
 }
 
+async function categoryNamesOf(statement: StatementWithDetails) {
+	const ids = statement.lineItems.map((item) => item.categoryId).filter((id): id is string => !!id);
+	const rows = ids.length
+		? await db
+				.select({
+					id: categories.id,
+					name: categories.name,
+					nameDE: categories.nameDE,
+					nameFR: categories.nameFR,
+					nameIT: categories.nameIT,
+					nameEN: categories.nameEN
+				})
+				.from(categories)
+				.where(inArray(categories.id, ids))
+		: [];
+	return new Map(rows.map(({ id, ...names }) => [id, names]));
+}
+
 /** Render and store the PDF in the language asked for, otherwise the tenant's */
 export async function generateStatementPdf(id: string, language?: string) {
 	const statement = await getStatement(id);
@@ -92,7 +118,8 @@ export async function generateStatementPdf(id: string, language?: string) {
 	if (!qrConfig) return 'no-iban';
 
 	const pdfLanguage = (language || statement.tenant?.language || 'de') as Language;
-	const pdfBase64 = await generateStatementPDFBase64(toPdfData(statement), qrConfig, pdfLanguage);
+	const pdfData = toPdfData(statement, await categoryNamesOf(statement), pdfLanguage);
+	const pdfBase64 = await generateStatementPDFBase64(pdfData, qrConfig, pdfLanguage);
 	// Only a QR-IBAN carries a QR reference on the bill
 	const qrReference = isQRIBAN(qrConfig.iban) ? statementQRReference(statement.id) : null;
 

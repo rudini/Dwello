@@ -7,12 +7,23 @@
  * - {rooms} - Number of rooms
  * - {volume} - Apartment volume (area * height estimate)
  * - {units} - Equal share per unit (1 for each apartment)
+ * - {area_total}, {rooms_total}, {volume_total}, {units_total} - the sums over all apartments of the building,
+ *   so a mixed key such as 0.7 * {area} / {area_total} + 0.3 * {units} / {units_total} splits exactly 70/30
  */
 
 /**
  * Supported formula variables
  */
-export const FORMULA_VARIABLES = ['area', 'rooms', 'volume', 'units'] as const;
+export const FORMULA_VARIABLES = [
+	'area',
+	'rooms',
+	'volume',
+	'units',
+	'area_total',
+	'rooms_total',
+	'volume_total',
+	'units_total'
+] as const;
 export type FormulaVariable = (typeof FORMULA_VARIABLES)[number];
 
 /**
@@ -23,6 +34,10 @@ export interface FormulaVariables {
 	rooms: number;
 	volume?: number;
 	units?: number;
+	area_total?: number;
+	rooms_total?: number;
+	volume_total?: number;
+	units_total?: number;
 }
 
 /**
@@ -47,7 +62,7 @@ export interface EvaluationResult {
 /**
  * Test case for formula testing
  */
-export interface FormulaTestCase {
+interface FormulaTestCase {
 	label: string;
 	variables: FormulaVariables;
 }
@@ -55,7 +70,7 @@ export interface FormulaTestCase {
 /**
  * Result of formula test
  */
-export interface FormulaTestResult {
+interface FormulaTestResult {
 	testCase: FormulaTestCase;
 	result: EvaluationResult;
 }
@@ -94,7 +109,7 @@ export function parseFormula(formula: string): ParseResult {
 				foundVariables.push(varName as FormulaVariable);
 			}
 		} else {
-			errors.push(`Unbekannte Variable {${varName}}. Erlaubt sind {area}, {rooms}, {volume} und {units}.`);
+			errors.push(`Unbekannte Variable {${varName}}. Erlaubt sind {area}, {rooms}, {volume}, {units} und ihre Summen wie {area_total}.`);
 		}
 	}
 
@@ -176,10 +191,7 @@ export function evaluateFormula(formula: string, variables: FormulaVariables): E
 
 	// Replace variables with values
 	let expression = parseResult.normalizedFormula;
-	expression = expression.replace(/\{area\}/gi, String(variables.area));
-	expression = expression.replace(/\{rooms\}/gi, String(variables.rooms));
-	expression = expression.replace(/\{volume\}/gi, String(variables.volume ?? variables.area * 2.5)); // Default ceiling height
-	expression = expression.replace(/\{units\}/gi, String(variables.units ?? 1));
+	expression = expression.replace(/\{(\w+)\}/g, (_, name: FormulaVariable) => String(variables[name]));
 
 	// Evaluate the expression safely
 	try {
@@ -216,7 +228,7 @@ export function evaluateFormula(formula: string, variables: FormulaVariables): E
 /**
  * Test a formula against multiple test cases
  */
-export function testFormula(formula: string, testCases: FormulaTestCase[]): FormulaTestResult[] {
+function testFormula(formula: string, testCases: FormulaTestCase[]): FormulaTestResult[] {
 	return testCases.map((testCase) => ({
 		testCase,
 		result: evaluateFormula(formula, testCase.variables)
@@ -226,7 +238,7 @@ export function testFormula(formula: string, testCases: FormulaTestCase[]): Form
 /**
  * Default test cases for formula validation
  */
-export function getDefaultTestCases(): FormulaTestCase[] {
+function getDefaultTestCases(): FormulaTestCase[] {
 	return [
 		{
 			label: 'Kleine Wohnung (50 m², 2 Zimmer)',
@@ -241,6 +253,19 @@ export function getDefaultTestCases(): FormulaTestCase[] {
 			variables: { area: 120, rooms: 5, volume: 300, units: 1 }
 		}
 	];
+}
+
+/** Each apartment with the building's sums of every variable (volume estimated from the area, 1 unit per apartment) */
+function withTotals(apartments: FormulaVariables[]): FormulaVariables[] {
+	const complete = apartments.map((apt) => ({ ...apt, volume: apt.volume ?? apt.area * 2.5, units: apt.units ?? 1 }));
+	const sum = (pick: (apt: (typeof complete)[number]) => number) => complete.reduce((total, apt) => total + pick(apt), 0);
+	const totals = {
+		area_total: sum((apt) => apt.area),
+		rooms_total: sum((apt) => apt.rooms),
+		volume_total: sum((apt) => apt.volume),
+		units_total: sum((apt) => apt.units)
+	};
+	return complete.map((apt) => ({ ...apt, ...totals }));
 }
 
 /**
@@ -259,7 +284,7 @@ export function calculateDistribution(
 	const evaluations: { variables: FormulaVariables; value: number }[] = [];
 	let totalValue = 0;
 
-	for (const apt of apartments) {
+	for (const apt of withTotals(apartments)) {
 		const result = evaluateFormula(formula, apt);
 		if (!result.isValid) {
 			return {
@@ -323,8 +348,12 @@ export function validateFormulaForDistribution(formula: string): {
 		return { isValid: false, errors: parseResult.errors, warnings };
 	}
 
-	// Test with default cases
-	const testResults = testFormula(formula, getDefaultTestCases());
+	// Test with default cases, which together stand for a building
+	const cases = getDefaultTestCases();
+	const testResults = testFormula(
+		formula,
+		withTotals(cases.map((tc) => tc.variables)).map((variables, i) => ({ ...cases[i], variables }))
+	);
 
 	for (const testResult of testResults) {
 		if (!testResult.result.isValid) {

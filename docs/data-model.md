@@ -144,7 +144,7 @@ A category that is not allocable always makes its invoices non-allocable (enforc
 name                               VARCHAR(100) NOT NULL
 name_de, name_fr, name_it, name_en VARCHAR(100)
 type        VARCHAR(20) NOT NULL DEFAULT 'predefined'
-formula     TEXT        -- variables {area}, {rooms}, {units} (custom keys also {volume})
+formula     TEXT        -- variables {area}, {rooms}, {units}, {volume} and the building sums {area_total}, {rooms_total}, {units_total}, {volume_total}
 description TEXT
 sort_order  INTEGER DEFAULT 0
 CHECK (type IN ('predefined', 'custom'))
@@ -325,7 +325,7 @@ through the Verwaltungspauschale, not through invoices in Verwaltung.
 | Pro Einheit | `{units}` | 1 |
 | Pro Fläche (m²) | `{area}` | 2 |
 | Pro Zimmer | `{rooms}` | 3 |
-| Heizung (Fläche 70% / Einheit 30%) | `0.7 * {area} + 0.3 * {units}` | 6 |
+| Heizung (Fläche 70% / Einheit 30%) | `0.7 * {area} / {area_total} + 0.3 * {units} / {units_total}` (migration 0003) | 6 |
 
 ### Heating profiles (all `predefined`, table `heating_profiles`)
 
