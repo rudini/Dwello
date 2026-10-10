@@ -307,3 +307,16 @@ class TddStepTest(unittest.TestCase):
         self.assertEqual(result.returncode, 2, result.stderr)
         self.assertIn("no supported test framework", result.stderr)
         self.assertIn("jest", result.stderr)
+
+    def test_broken_or_uninstalled_javascript_setups_exit_2(self):
+        cases = {"package.json is not valid JSON": "{",
+                 "vitest is not installed": '{"devDependencies": {"vitest": "*"}}'}
+        for message, manifest in cases.items():
+            with self.subTest(message):
+                repo = Repo(self, {"package.json": manifest})
+                repo.write("TESTLIST.md", "- [ ] something\n")
+
+                result = repo.run("tdd-step", "test", "plan")
+
+                self.assertEqual(result.returncode, 2, result.stderr)
+                self.assertIn(message, result.stderr)
