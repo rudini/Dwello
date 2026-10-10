@@ -22,4 +22,9 @@ describe('README', () => {
 		expect(readme()).toMatch(/not a verdict on design quality/);
 		expect(readme()).toMatch(/## Known false positives/);
 	});
+
+	it('documents the changed scope, the gates and the baseline', () => {
+		for (const term of ['G1', 'G2', 'G3', 'G4', 'G5', 'G6', '--changed-since', '--agent', '--scope', '--use-baseline', '.deepcheck-baseline.json', 'deepcheck:audit', 'deepcheck:ci', 'deepcheck:baseline'])
+			expect(readme()).toContain(term);
+	});
 });

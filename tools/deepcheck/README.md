@@ -33,6 +33,32 @@ The JSON report follows `schema/report.schema.json`; the TypeScript types are in
 
 For SvelteKit, run `svelte-kit sync` first: the root tsconfig extends `.svelte-kit/tsconfig.json`, which defines `$lib`. Without it deepcheck warns and fan-in/fan-out are too low.
 
+## Gate on changed code
+
+```bash
+npm run deepcheck:audit                         # changed vs HEAD (working tree, staged, untracked), agent mode
+npm run deepcheck:ci -- origin/main             # changed since the merge-base with the PR base, GitHub annotations
+npm run deepcheck:baseline                      # (re)write .deepcheck-baseline.json from the current state
+node tools/deepcheck/src/cli.ts check --format json
+node tools/deepcheck/src/cli.ts --scope changed # same as check; --scope all is the same as scan
+node tools/deepcheck/src/cli.ts scan --use-baseline   # hide baselined modules that did not worsen
+```
+
+`check` builds the whole-project analysis and import graph, then judges only changed modules (`--changed-since <ref>`: everything changed since `git merge-base <ref> HEAD`, including uncommitted work; without it: working tree and staged changes against HEAD plus untracked files). Renames are followed (`git diff -M`). These are the only rules that fail a run:
+
+- **G1 new shallow module:** a changed module that is not in the baseline and is flagged (eligible, score >= `failThreshold`). This also covers an existing module that crosses the threshold for the first time.
+- **G2 regression:** a changed module in the baseline (looked up under its old path after a rename) that is flagged and whose score rose by more than `tolerance`.
+- **G3 legacy:** unchanged modules, and baselined modules that did not worsen beyond `tolerance`, never fail `check`; they only show up in `scan`.
+- **G4 suppressions:** an invalid inline suppression (no reason, unknown or missing rule) in a changed file fails.
+- **G5 errors:** tool, git, config and baseline errors exit 2, never 1 (JSON envelope with `--format json`).
+- **G6 Fallow independence:** the gate gives the same result with `--fallow off`; Fallow data only changes score inputs (complexity, unused exports), never adds a failure of its own.
+
+`--agent` (used by `deepcheck:audit`): prints nothing when the changed modules pass; otherwise at most the top 3 failures, highest score first, each with its fix. The `github` format prints `::error` annotations (G4 on the comment's line) and writes a markdown summary to `$GITHUB_STEP_SUMMARY`.
+
+### Baseline
+
+`.deepcheck-baseline.json` is committed. It holds one entry per flagged module: a stable fingerprint `<path>#shallow-module` (no line numbers), the path, the rule and the score at baseline time (`schema/baseline.schema.json`). `deepcheck baseline` rewrites it from the current state, so deleted modules drop out and renamed ones appear under their new path. A missing baseline means every flagged changed module counts as new; a corrupt one is an error (exit 2). Regenerate the baseline after changing scoring, weights or `failThreshold`.
+
 ## What is a module
 
 A module is one source file (`.ts`, `.tsx`, `.mts`, `.cts`); exported classes are also reported on their own (`classes` in the JSON, `--explain`). Svelte components are not measured, but their `<script>` imports count in the import graph.
