@@ -81,7 +81,7 @@ Then('sieht der Liegenschaftsverwalter die Kategorie {string} nicht mehr', async
 });
 
 Then('ist die Kategorie {string} nicht umlagefähig', async ({ verwalter, names }, title: string) => {
-	await expect(isAllowed(verwalter, names.get(title)!)).toHaveText('Nein');
+	await expect(isAllowed(verwalter, names.get(title)!)).toHaveText('Nicht umlagefähig');
 });
 
 Then(
@@ -93,9 +93,9 @@ Then(
 );
 
 Then(
-	'wird die Kategorie {string} von {int} Rechnungen verwendet',
+	'wird die Kategorie {string} von {int} Rechnung(en) verwendet',
 	async ({ verwalter, names }, title: string, count: number) => {
-		await expect(invoicesOf(verwalter, names.get(title)!)).toHaveText(`${count} Rechnungen`);
+		await expect(invoicesOf(verwalter, names.get(title)!)).toHaveText(`${count} ${count === 1 ? 'Rechnung' : 'Rechnungen'}`);
 	}
 );
 

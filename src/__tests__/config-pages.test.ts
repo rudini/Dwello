@@ -93,7 +93,7 @@ describe('Kategorie erfassen und bearbeiten', () => {
 		const body = render(NewCategoryPage, { props: { form: null } as never }).body;
 
 		expect(checkbox(body)).toContain('checked');
-		expect(body).toContain('Kategorie erstellen');
+		expect(body).toContain('Kategorie speichern');
 	});
 
 	it('füllt beim Bearbeiten alle Felder samt Übersetzungen', () => {
