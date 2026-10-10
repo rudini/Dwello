@@ -102,7 +102,7 @@ Every route belongs to the module of its service; `routes/dashboard.ts` reads ac
 - `invoices.distribution_key_id` references `distribution_keys`, and `invoice.service.ts` joins the table. This makes `costs` depend on `settlement`. Before a cut, decide whether the allocation key belongs to `costs` or the read join stays allowed.
 - `config.service.ts`, `db/demo-data.ts` and `reminder-pdf.ts` (see structural flaws).
 
-`fallow` can check architecture boundaries (zones and rules in `.fallowrc.json`, shown with `npx fallow list --boundaries`); that would be the check in CI. No boundaries are configured today.
+`fallow` can check architecture boundaries (zones and rules in `.fallowrc.json`, shown with `bunx fallow list --boundaries`); that would be the check in CI. No boundaries are configured today.
 
 ## Deliberately not implemented
 
@@ -119,7 +119,7 @@ Every route belongs to the module of its service; `routes/dashboard.ts` reads ac
 
 ## Verification
 
-- The checklist from `CLAUDE.md` is green (`npm run test:coverage`, `npm run lint`, `npm run check`, `cd backend && bun run test && bun run type-check`, affected E2E scenarios).
+- The checklist from `CLAUDE.md` is green (`bun run test:coverage`, `bun run lint`, `bun run check`, `cd backend && bun run test && bun run type-check`, affected E2E scenarios).
 - The column "Status and evidence" is up to date.
 - `implementation_plan.md` is up to date.
 

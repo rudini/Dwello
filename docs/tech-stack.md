@@ -123,7 +123,7 @@ Dwello is a full-stack TypeScript application: a SvelteKit frontend that doubles
 ### Type Safety: TypeScript
 
 - Strict mode enabled (`tsconfig.json` extends `.svelte-kit/tsconfig.json`)
-- `npm run check` (svelte-check) covers `src`, `tests/` and `*.config.ts`
+- `bun run check` (svelte-check) covers `src`, `tests/` and `*.config.ts`
 
 ### State Management: Svelte Stores
 
@@ -160,16 +160,16 @@ No date library; formatting uses the built-in `Intl` APIs / `Date`.
 
 ### Build & Tooling
 
-**Package Manager:** npm (frontend), Bun (backend)
+**Package Manager:** Bun (frontend and backend). The frontend still runs on Node: `bun run` starts its tools (Vite, Vitest, Playwright) with Node, and the production image runs `node build`.
 
 **Build Command:**
 ```bash
-npm run build   # adapter-node output in build/
+bun run build   # adapter-node output in build/
 ```
 
 **Dev Server:**
 ```bash
-npm run dev     # http://localhost:3000 (vite.config.ts); needs the backend on 3001
+bun run dev     # http://localhost:3000 (vite.config.ts); needs the backend on 3001
 ```
 
 **Environment Variables:** see `.env.example` (e.g. `BACKEND_URL`, `JWT_SECRET`, `JWT_EXPIRY`, `OAUTH_GOOGLE_*`, `OAUTH_MICROSOFT_*`, `COOKIE_*`).
@@ -368,19 +368,19 @@ MAIL_TRANSPORT / MAIL_FROM / SMTP_* / RESEND_API_KEY
 ### Local Setup
 
 **Requirements:**
-- Node.js >= 20 (`package.json` engines; CI uses 22)
-- Bun >= 1.0 (backend)
+- Node.js >= 20 (frontend runtime; `package.json` engines; CI uses 22)
+- Bun >= 1.0 (package manager; backend runtime)
 - Docker & Docker Compose (PostgreSQL)
 
 **Installation:**
 ```bash
-npm install
+bun install
 (cd backend && bun install)
 cp .env.example .env.local
 
 docker-compose up -d          # PostgreSQL on 5432
 (cd backend && bun run dev:demo)   # backend on 3001 with demo data
-npm run dev                   # frontend/BFF on 3000
+bun run dev                   # frontend/BFF on 3000
 ```
 
 See `README.md` for details.
@@ -423,12 +423,12 @@ dwello/
 ### Code Quality
 
 ```bash
-npm run lint             # ESLint, fails on warnings
-npm run format           # Prettier
-npm run check            # svelte-check
-npx vitest run           # frontend unit tests
-npm run test:coverage    # with coverage floor
-npm run test:e2e         # acceptance tests (playwright-bdd)
+bun run lint             # ESLint, fails on warnings
+bun run format           # Prettier
+bun run check            # svelte-check
+bunx vitest run           # frontend unit tests
+bun run test:coverage    # with coverage floor
+bun run test:e2e         # acceptance tests (playwright-bdd)
 cd backend && bun run test && bun run type-check
 ```
 
@@ -439,11 +439,11 @@ cd backend && bun run test && bun run type-check
 | Job | What it does |
 |-----|--------------|
 | Changes | On PRs, detects whether backend/contracts or app code changed, so untouched parts are skipped |
-| Build | `npm run build` and `bun run build` (backend) |
-| Lint and types | `npm run lint`, `npm run check`, backend `bun run type-check` |
-| Unit tests | `npm run test:coverage`; backend `bun run test` if backend changed |
-| E2E tests | `npm run test:e2e` (PRs: Chromium + API driver; main: all browsers); skipped for docs-only changes |
-| Fallow audit | `npx fallow audit` against the base |
+| Build | `bun run build` and `bun run build` (backend) |
+| Lint and types | `bun run lint`, `bun run check`, backend `bun run type-check` |
+| Unit tests | `bun run test:coverage`; backend `bun run test` if backend changed |
+| E2E tests | `bun run test:e2e` (PRs: Chromium + API driver; main: all browsers); skipped for docs-only changes |
+| Fallow audit | `bunx fallow audit` against the base |
 | UI screenshots | On PRs: screenshots of changed pages, posted as a PR comment |
 
 No Docker image is built or pushed in CI.

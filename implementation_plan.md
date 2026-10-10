@@ -4407,6 +4407,10 @@ Brief: `docs/design/REDESIGN_BRIEF.md`; log and decisions: `docs/design/progress
 - [x] **Map tiles need a CARTO key:** `PUBLIC_CARTO_API_KEY` goes to the tile URL
   (`src/routes/buildings/BuildingMiniMap.svelte`, `src/__tests__/building-mini-map.dom.test.ts`, `vitest.config.ts`,
   `.env.example`, `docker-compose.prod.yml`, `docs/tech-stack.md`)
+- [x] **Bun as the only package manager:** the frontend installs with Bun (`bun.lock` migrated from
+  `package-lock.json`, same versions) and keeps Node as its runtime; stale `backend/package-lock.json` removed
+  (`.github/workflows/ci.yml`, `Dockerfile`, `playwright.config.ts`, `playwright.screenshots.config.ts`, README, CLAUDE.md
+  and docs with `bun run`/`bunx`)
 
 
 ---

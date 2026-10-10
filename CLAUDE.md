@@ -9,13 +9,13 @@ Stack: SvelteKit + TypeScript + Tailwind (frontend and BFF) | ElysiaJS on Bun + 
 Frontend (repo root):
 
 ```bash
-npm run dev                         # dev server; needs the backend running
-npx vitest run                      # all unit tests once (npm run test starts watch mode)
-npx vitest run src/__tests__/x.test.ts   # one file; *.dom.test.ts run in jsdom (mounting, clicking), all others in node
-npm run test:coverage               # with coverage floor, as in CI
-npm run lint                        # ESLint, fails on warnings
-npm run check                       # svelte-check incl. tests/ and *.config.ts
-npm run test:e2e                    # acceptance tests, see tests/e2e/CLAUDE.md
+bun run dev                         # dev server; needs the backend running
+bunx vitest run                      # all unit tests once (bun run test starts watch mode)
+bunx vitest run src/__tests__/x.test.ts   # one file; *.dom.test.ts run in jsdom (mounting, clicking), all others in node
+bun run test:coverage               # with coverage floor, as in CI
+bun run lint                        # ESLint, fails on warnings
+bun run check                       # svelte-check incl. tests/ and *.config.ts
+bun run test:e2e                    # acceptance tests, see tests/e2e/CLAUDE.md
 ```
 
 Backend (`cd backend`): see `backend/CLAUDE.md`. Short form: `bun run dev:demo` (app with demo data), `bun run test`, `bun run type-check`.
@@ -55,11 +55,12 @@ PostgreSQL on localhost:5432 (user and password `dwello`) is required for backen
 4. **Done:** remove `@wip` once the scenario is green. A feature is done when its scenario passes, not when unit tests pass.
 5. **Plan:** log the task in `implementation_plan.md` (check the items, note the files changed). The file is long: read only its latest `## Session` section (`grep -n '^## Session' implementation_plan.md`) and add new work there. The phase table at the top is no longer maintained.
 
-Before marking anything complete, all of these pass: `npm run test:coverage`, `npm run lint`, `npm run check`, `cd backend && bun run test && bun run type-check`, and the affected E2E scenarios.
+Before marking anything complete, all of these pass: `bun run test:coverage`, `bun run lint`, `bun run check`, `cd backend && bun run test && bun run type-check`, and the affected E2E scenarios.
 
 ## Gotchas
 
-- **Fallow gate:** a hook runs `fallow audit` before every `git commit` and `git push` and blocks the whole Bash command on new unused exports or files, duplication, or complexity/CRAP findings. Run git commands on their own, not chained after edits, and fix the reported finding (un-export, delete, split the function) rather than working around it. `npx fallow audit` shows the findings before committing; CI runs the same audit.
+- **`bun run test`, not `bun test`:** Bun is the package manager everywhere, but the frontend runs on Node. In the repo root `bun test` starts Bun's own test runner instead of Vitest, without `vitest.config.ts` (no jsdom, no coverage floor).
+- **Fallow gate:** a hook runs `fallow audit` before every `git commit` and `git push` and blocks the whole Bash command on new unused exports or files, duplication, or complexity/CRAP findings. Run git commands on their own, not chained after edits, and fix the reported finding (un-export, delete, split the function) rather than working around it. `bunx fallow audit` shows the findings before committing; CI runs the same audit.
 - **API contracts:** frontend tests take backend responses from `tests/contracts/*.json`; `backend/src/__tests__/api-contracts.pg.test.ts` checks them against the real API. Changing an API response means updating its contract.
 - **Coverage floors** in `vitest.config.ts` and `backend/scripts/coverage-check.ts` may not drop; the target is in `docs/test-pyramid.md`.
 

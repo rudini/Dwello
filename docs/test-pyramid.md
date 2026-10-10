@@ -55,7 +55,7 @@ A floor applies: today's coverage, rounded down to whole percent. If coverage dr
 
 | Area | Measured by | Floor stored in |
 |---|---|---|
-| Frontend | `npm run test:coverage` (Vitest, v8, all `src/**/*.{ts,svelte}`) | `vitest.config.ts` |
+| Frontend | `bun run test:coverage` (Vitest, v8, all `src/**/*.{ts,svelte}`) | `vitest.config.ts` |
 | Backend | `bun run test` (all backend tests, lcov) | `backend/scripts/coverage-check.ts` (Bun would check its own thresholds per file) |
 
 ## Farley's four layers in the acceptance tests
@@ -65,7 +65,7 @@ A floor applies: today's coverage, rounded down to whole percent. If coverage dr
 | Test cases (executable specifications) | *What* the business wants, in domain language | `tests/e2e/features/*.feature` (German, role "Liegenschaftsverwalter", terms from `UBIQUITOUS_LANGUAGE.md`) |
 | Domain-specific language | Reusable domain language | `tests/e2e/steps/`, Screenplay: `fixtures/actor.ts`, `tasks/`, `questions/` |
 | Protocol drivers | Translate the DSL into interactions | UI driver: `tests/e2e/interactions/` (browser via Playwright). API driver: `tasks/*-api.ts` via `seed.backend` (backend API). Preconditions always go through the API (`fixtures/backend.ts`) |
-| System under test | Deployed like production | `npm run build && node build` + backend + its own database (`playwright.config.ts`) |
+| System under test | Deployed like production | `bun run build && node build` + backend + its own database (`playwright.config.ts`) |
 
 ### Two protocol drivers
 
@@ -85,7 +85,7 @@ Isolation as Farley describes it:
 
 1. **Clarify examples:** phrase the acceptance criteria as concrete examples in the property manager's language.
 2. **Scenario first:** write it into the matching `.feature` file and tag it `@wip` (excluded by `playwright.config.ts`, so the pipeline stays green).
-3. **See red:** `npx bddgen --tags "@wip"` and `npx playwright test`; add missing steps through the existing DSL until the scenario fails for the right reason.
+3. **See red:** `bunx bddgen --tags "@wip"` and `bunx playwright test`; add missing steps through the existing DSL until the scenario fails for the right reason.
 4. **Inner loop:** drive the behavior with TDD (unit tests; pg tests only for SQL, routing, mail).
 5. **Green:** remove `@wip`. From now on the scenario is a regression test and a gate in the pipeline.
 
@@ -97,11 +97,11 @@ UI behavior that is not business behavior lives in its own features: `breadcrumb
 
 | Layer | Local | CI (`.github/workflows/ci.yml`) |
 |---|---|---|
-| Lint and types | `npm run lint` (warnings fail), `npm run check` (also `tests/` and `*.config.ts`), `cd backend && bun run type-check` | job "Lint and types" |
-| Unit frontend | `npx vitest run` (with coverage: `npm run test:coverage`) | job "Unit tests": all tests with the coverage floor |
+| Lint and types | `bun run lint` (warnings fail), `bun run check` (also `tests/` and `*.config.ts`), `cd backend && bun run type-check` | job "Lint and types" |
+| Unit frontend | `bunx vitest run` (with coverage: `bun run test:coverage`) | job "Unit tests": all tests with the coverage floor |
 | Unit + integration backend | `cd backend && bun run test` (DB only: `bun run test:pg`) | job "Unit tests", in PRs when `backend/` or `tests/contracts/` changed, always on `main`; with the coverage floor |
-| Acceptance | `npm run test:e2e` (API driver only: `-- --project=api`) | job "E2E tests" (without `@a11y`); PRs Chromium and `api`, `main` all browsers and `api` |
-| Accessibility | `npm run test:e2e -- --project=chromium --grep @a11y` | job "Accessibility (axe)": every screen and state of `tests/a11y/screens.json` with axe-core in Chromium, light and dark; its own check so it can be required |
+| Acceptance | `bun run test:e2e` (API driver only: `-- --project=api`) | job "E2E tests" (without `@a11y`); PRs Chromium and `api`, `main` all browsers and `api` |
+| Accessibility | `bun run test:e2e -- --project=chromium --grep @a11y` | job "Accessibility (axe)": every screen and state of `tests/a11y/screens.json` with axe-core in Chromium, light and dark; its own check so it can be required |
 
 Local prerequisite: PostgreSQL on port 5432 with user `dwello`. The test databases `dwello_test` and `dwello_e2e` are set up fresh automatically; the development database stays untouched as long as the backend tests run with the preload (`bun run test`, `bun run test:pg`; a bare `bun test` would write into it).
 

@@ -6,18 +6,23 @@
 # ============================================
 FROM node:20-alpine AS deps
 
+# Bun is the package manager; Node stays the runtime
+COPY --from=oven/bun:1-alpine /usr/local/bin/bun /usr/local/bin/bun
+
 WORKDIR /app
 
 # Copy package files
-COPY package.json package-lock.json* ./
+COPY package.json bun.lock ./
 
 # Install dependencies
-RUN npm ci --only=production=false
+RUN bun install --frozen-lockfile
 
 # ============================================
 # Stage 2: Build
 # ============================================
 FROM node:20-alpine AS builder
+
+COPY --from=oven/bun:1-alpine /usr/local/bin/bun /usr/local/bin/bun
 
 WORKDIR /app
 
@@ -27,7 +32,7 @@ COPY . .
 
 # Build the application
 ENV NODE_ENV=production
-RUN npm run build
+RUN bun run build
 
 # ============================================
 # Stage 3: Production Runtime

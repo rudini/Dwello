@@ -43,13 +43,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: npm
       - uses: oven-sh/setup-bun@v2
-      - run: npm ci
+      - run: bun install --frozen-lockfile
       - run: bun install --frozen-lockfile
         working-directory: backend
       - name: Build frontend
-        run: npm run build
+        run: bun run build
       - name: Build backend
         run: bun run build
         working-directory: backend
@@ -62,14 +61,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: npm
       - uses: oven-sh/setup-bun@v2
-      - run: npm ci
+      - run: bun install --frozen-lockfile
       - run: bun install --frozen-lockfile
         working-directory: backend
       # ESLint covers frontend and backend; svelte-check the frontend types, tsc the backend types
-      - run: npm run lint
-      - run: npm run check
+      - run: bun run lint
+      - run: bun run check
       - run: bun run type-check
         working-directory: backend
 
@@ -96,14 +94,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: npm
       - uses: oven-sh/setup-bun@v2
-      - run: npm ci
+      - run: bun install --frozen-lockfile
       - run: bun install --frozen-lockfile
         working-directory: backend
       - name: Frontend unit tests
         # All tests, so the coverage thresholds in vitest.config.ts apply to the whole frontend
-        run: npm run test:coverage
+        run: bun run test:coverage
       - name: Backend unit tests
         if: ${{ !cancelled() && needs.changes.outputs.backend == 'true' }}
         run: bun run test
@@ -145,16 +142,15 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: npm
       - uses: oven-sh/setup-bun@v2
-      - run: npm ci
+      - run: bun install --frozen-lockfile
       - run: bun install --frozen-lockfile
         working-directory: backend
       # Pull requests: Chromium and the API driver only; pushes to main: every browser and the API driver
       - name: Install Playwright browsers
-        run: npx playwright install --with-deps ${{ (github.event_name == 'pull_request' || matrix.reports == 'a11y-reports') && 'chromium' || '' }}
+        run: bunx playwright install --with-deps ${{ (github.event_name == 'pull_request' || matrix.reports == 'a11y-reports') && 'chromium' || '' }}
       - name: ${{ matrix.name }}
-        run: npm run test:e2e -- ${{ matrix.filter }} ${{ github.event_name == 'pull_request' && matrix.reports == 'e2e-reports' && '--project=chromium --project=api' || '' }}
+        run: bun run test:e2e -- ${{ matrix.filter }} ${{ github.event_name == 'pull_request' && matrix.reports == 'e2e-reports' && '--project=chromium --project=api' || '' }}
       - name: Upload reports
         if: ${{ failure() }}
         uses: actions/upload-artifact@v4
@@ -176,11 +172,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-      - run: npm ci
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
       - name: Fallow audit
         # Pull requests: changes against the target branch; pushes: changes of the pushed commits
-        run: npx fallow audit --base "${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || github.event.before }}"
+        run: bunx fallow audit --base "${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || github.event.before }}"
 
   ui-screenshots:
     name: UI screenshots
@@ -221,23 +217,22 @@ jobs:
         if: steps.routes.outputs.any == 'true'
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: npm
       - if: steps.routes.outputs.any == 'true'
-        run: npm ci
+        run: bun install --frozen-lockfile
       - if: steps.routes.outputs.any == 'true'
         run: bun install --frozen-lockfile
         working-directory: backend
       - name: Install Playwright browser
         if: steps.routes.outputs.any == 'true'
-        run: npx playwright install --with-deps chromium
+        run: bunx playwright install --with-deps chromium
       - name: Check out the base branch to mark changes against
         if: steps.routes.outputs.any == 'true'
         run: |
           git worktree add ../base "origin/${{ github.base_ref }}"
-          cd ../base && npm ci
+          cd ../base && bun install --frozen-lockfile
       - name: Take screenshots
         if: steps.routes.outputs.any == 'true'
-        run: npx playwright test -c playwright.screenshots.config.ts
+        run: bunx playwright test -c playwright.screenshots.config.ts
         env:
           UI_BASE_DIR: ${{ github.workspace }}/../base
       - name: Publish screenshots to branch ui-screenshots

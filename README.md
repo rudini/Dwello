@@ -40,8 +40,8 @@ Dwello is a comprehensive web application for managing residential properties in
 
 ### Prerequisites
 
-- Node.js >= 20.0.0
-- Bun >= 1.0.0 (for backend)
+- Node.js >= 20.0.0 (frontend runtime)
+- Bun >= 1.0.0 (package manager; backend runtime)
 - PostgreSQL >= 15
 - Docker & Docker Compose (optional, for containerized deployment)
 
@@ -55,7 +55,7 @@ Dwello is a comprehensive web application for managing residential properties in
 
 2. **Install frontend dependencies**
    ```bash
-   npm install
+   bun install
    ```
 
 3. **Install backend dependencies**
@@ -75,7 +75,7 @@ Dwello is a comprehensive web application for managing residential properties in
 
    **Frontend (SvelteKit):**
    ```bash
-   npm run dev
+   bun run dev
    # Runs on http://localhost:3000
    ```
 
@@ -128,17 +128,17 @@ Dwello is a comprehensive web application for managing residential properties in
 ### Available Scripts
 
 **Frontend** (project root):
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build
-- `npm run test` - Run unit tests (Vitest, watch mode)
-- `npm run test:coverage` - Run all unit tests once, fails below the coverage floors
-- `npm run test:e2e` - Run E2E tests (`-- --project=api` for the API driver only)
-- `npm run test:e2e:ui` - Run E2E tests in the Playwright UI
-- `npm run check` - Type check (svelte-check, also `tests/` and `*.config.ts`)
-- `npm run type-check` - TypeScript type checking (tsc)
-- `npm run lint` - Lint frontend and backend (fails on warnings)
-- `npm run format` - Format code with Prettier
+- `bun run dev` - Start development server
+- `bun run build` - Build for production
+- `bun run preview` - Preview production build
+- `bun run test` - Run unit tests (Vitest, watch mode)
+- `bun run test:coverage` - Run all unit tests once, fails below the coverage floors
+- `bun run test:e2e` - Run E2E tests (`-- --project=api` for the API driver only)
+- `bun run test:e2e:ui` - Run E2E tests in the Playwright UI
+- `bun run check` - Type check (svelte-check, also `tests/` and `*.config.ts`)
+- `bun run type-check` - TypeScript type checking (tsc)
+- `bun run lint` - Lint frontend and backend (fails on warnings)
+- `bun run format` - Format code with Prettier
 
 **Backend** (`backend/`):
 - `bun run dev` - Apply missing migrations, start backend dev server (hot reload)
@@ -204,7 +204,7 @@ dwello/
 
 ### Unit Tests (Vitest)
 ```bash
-npm run test
+bun run test
 ```
 
 ### Backend Tests (bun)
@@ -218,7 +218,7 @@ The PostgreSQL tests (`*.pg.test.ts`) run against their own database `dwello_tes
 
 ### E2E Tests (Playwright)
 ```bash
-npm run test:e2e
+bun run test:e2e
 ```
 
 The E2E run starts its own stack (backend on 3101, production build of the frontend on 3100) against its own database `dwello_e2e`,
@@ -228,7 +228,7 @@ servers and database are never touched; only PostgreSQL on 5432 is required. Ove
 
 ### Coverage
 ```bash
-npm run test:coverage          # frontend
+bun run test:coverage          # frontend
 cd backend && bun run test     # backend
 ```
 

@@ -87,7 +87,7 @@ export default defineConfig<{ driver: Driver }>({
 			// Frontend (SvelteKit) built and started like in production (adapter-node), talking to the E2E backend, so the
 			// acceptance tests check what is shipped. Sessions are real JWTs signed with the same secret (fixtures/session.ts);
 			// Google sign-in is configured with test credentials and never completes.
-			command: 'npm run build && node build',
+			command: 'bun run build && node build',
 			port: 3100,
 			reuseExistingServer: !process.env.CI,
 			timeout: 180000,
