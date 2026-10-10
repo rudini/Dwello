@@ -4391,7 +4391,10 @@ Brief: `docs/design/REDESIGN_BRIEF.md`; log and decisions: `docs/design/progress
   `src/lib/server/statement-generation.ts`) and the send confirmation on the statement detail
 - [x] **Stage 7:** remaining screens migrated in five packages (help/legal/coming-soon; settings; tenants and
   contracts; buildings and apartments; invoices, statements and documents), one `Pagination`, unused legacy
-  components removed, German master data names (`src/lib/names.ts`)
+  components removed, German master data names (`src/lib/names.ts`); review round 1 and persona fixes: row layouts
+  without sideways scrolling, shared `focusFirstError` (`src/lib/ui/focus-error.ts`), announced toasts
+  (`ToastRegion`), consistent Mietstatus for relet apartments (`src/lib/apartment.ts`, BFF loaders), invoice period
+  notice (`docs/design/reviews/7-review-1.md`)
 - [ ] **Stage 8:** remove the old design system, dark mode
 - [ ] **Stage 9:** final docs, review and persona runs
 
