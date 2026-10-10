@@ -68,6 +68,8 @@ const translations: Record<Language, Record<string, string>> = {
 		feeBase: '{percent} % von CHF {base}',
 		feeKey: 'verteilt nach {key}',
 		feeEqual: 'gleichmässig pro Wohnung',
+		daysUnit: 'Mietstage',
+		feeDays: ', für Ihre {days} von {total} Tagen',
 		sqm: 'm²'
 	},
 	fr: {
@@ -110,6 +112,8 @@ const translations: Record<Language, Record<string, string>> = {
 		feeBase: '{percent} % de CHF {base}',
 		feeKey: 'réparti selon {key}',
 		feeEqual: 'réparti à parts égales par logement',
+		daysUnit: 'jours',
+		feeDays: ', pour vos {days} jours sur {total}',
 		sqm: 'm²'
 	},
 	it: {
@@ -152,6 +156,8 @@ const translations: Record<Language, Record<string, string>> = {
 		feeBase: '{percent} % di CHF {base}',
 		feeKey: 'ripartito secondo {key}',
 		feeEqual: 'ripartito in parti uguali per appartamento',
+		daysUnit: 'giorni',
+		feeDays: ', per i suoi {days} giorni su {total}',
 		sqm: 'm²'
 	},
 	rm: {
@@ -194,6 +200,8 @@ const translations: Record<Language, Record<string, string>> = {
 		feeBase: '{percent} % da CHF {base}',
 		feeKey: 'repartì tenor {key}',
 		feeEqual: 'repartì en parts eguals per abitaziun',
+		daysUnit: 'dis',
+		feeDays: ', per Voss {days} da {total} dis',
 		sqm: 'm²'
 	},
 	en: {
@@ -236,6 +244,8 @@ const translations: Record<Language, Record<string, string>> = {
 		feeBase: '{percent}% of CHF {base}',
 		feeKey: 'split by {key}',
 		feeEqual: 'split equally per apartment',
+		daysUnit: 'days',
+		feeDays: ', for your {days} of {total} days',
 		sqm: 'm²'
 	}
 };
@@ -290,6 +300,7 @@ export interface StatementPDFData {
 	// The tenant's part of the period and what the generation run used
 	rentalStart: string;
 	rentalEnd: string;
+	periodDays: number; // days of the Abrechnungsperiode, the base of the Mietstage
 	heating?: { profile: string; percent: number };
 	managementFeeKey?: string;
 
@@ -480,7 +491,7 @@ async function generateStatementPDF(
 				.font('Helvetica')
 				.text(`${formatDate(data.periodStart)} – ${formatDate(data.periodEnd)}`, 50, yPos)
 				.text(
-					`${t.rentalPeriod}: ${formatDate(data.rentalStart)} – ${formatDate(data.rentalEnd)} (${data.rentalDays} ${t.rentalDays})`,
+					`${t.rentalPeriod}: ${formatDate(data.rentalStart)} – ${formatDate(data.rentalEnd)} (${data.rentalDays} ${t.daysUnit})`,
 					50,
 					yPos + 15
 				);
@@ -576,6 +587,11 @@ async function generateStatementPDF(
 							.replace('{percent}', String(data.managementFeePercent))
 							.replace('{base}', formatCHF(data.managementFeeBase))}, ${
 							data.managementFeeKey ? t.feeKey.replace('{key}', data.managementFeeKey) : t.feeEqual
+						}${
+							// Part of the period: the fee of the apartment counts for the tenant's days only
+							data.rentalDays < data.periodDays
+								? t.feeDays.replace('{days}', String(data.rentalDays)).replace('{total}', String(data.periodDays))
+								: ''
 						}`,
 						col1,
 						yPos,

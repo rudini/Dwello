@@ -79,6 +79,7 @@ export function toPdfData(
 		apartment: apartmentOf(statement.apartment),
 		building: buildingOf(statement.building),
 		...run,
+		periodDays: Math.round((Date.parse(statement.periodEnd) - Date.parse(statement.periodStart)) / 86_400_000) + 1,
 		lineItems: statement.lineItems.map((item) => {
 			const names = item.categoryId ? categoryNames.get(item.categoryId) : undefined;
 			return {

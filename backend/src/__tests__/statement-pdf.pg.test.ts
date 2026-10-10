@@ -86,4 +86,9 @@ describe('PDF der Nebenkostenabrechnung', () => {
 		expect(pdf.text).toContain("3 % von CHF 3'600.00");
 		expect(pdf.text).toContain('Pro Fläche (m²)');
 	});
+
+	// Eingezogen am 1. Juli: der Mieter trägt die Pauschale seiner Wohnung für 184 von 365 Tagen
+	it('nennt bei einem Teil des Jahres die Mietstage, für die die Verwaltungspauschale gilt', () => {
+		expect(pdf.flowing).toContain('für Ihre 184 von 365 Tagen');
+	});
 });

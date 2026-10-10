@@ -21,5 +21,6 @@ export function readPdf(pdf: Buffer) {
 				.join('')
 		)
 		.join('\n');
-	return { pages, text };
+	// flowing: wrapped lines joined, for sentences the PDF breaks over two lines
+	return { pages, text, flowing: text.replace(/\s*\n\s*/g, ' ') };
 }

@@ -50,9 +50,11 @@ Alle Profile ergeben weiterhin genau 100 % (`heating-profiles.pg.test.ts`).
 | P6 | Ein PDF mit Nachzahlung hatte 11 Seiten: jede Zeile des Zahlteils landete auf einer neuen Seite | 2 Seiten (Test `statement-pdf.pg.test.ts`) | Der Zahlteil liegt im unteren Seitenrand; pdfkit brach deshalb jede Zeile um. Das ganze Layout wird in Schritt D2 neu gestaltet. |
 | P7 | Empfangsschein und Zahlteil: «Zahlbar an» ohne Strasse, «Zahlbar durch» nur mit Namen | «Konto / Zahlbar an» mit IBAN, Name, Strasse, PLZ Ort; «Zahlbar durch» mit Name, Strasse, PLZ Ort; Betrag unter dem QR-Code | Die lesbaren Angaben der QR-Rechnung müssen denen im QR-Code entsprechen (SIX Style Guide). |
 | P8 | «Verwaltungspauschale (3.0%)» unter der Zwischensumme des Mieters | «Verwaltungspauschale: 3 % von CHF 18'835.20, gleichmässig pro Wohnung» bzw. «verteilt nach …» | Der Mieter las 3 % seiner eigenen Kosten; die Pauschale ist ein Prozentsatz der Nebenkosten der Liegenschaft (Glossar). |
-| P9 | Nur «Mietstage: 181» | «Ihre Mietdauer: 01.01.2025 – 30.06.2025 (181 Mietstage)» und «Heizkosten nach Heizprofil «Heizung Mittelland»: 58.5 % der Jahreskosten Ihrer Wohnung» | Beim Mieterwechsel kann der Mieter seinen Anteil sonst nicht nachvollziehen. |
+| P9 | Nur «Mietstage: 181» | «Ihre Mietdauer: 01.01.2025 – 30.06.2025 (181 Mietstage)» und «Heizkosten nach Heizprofil «Heizung + Warmwasser»: 55.8 % der Jahreskosten Ihrer Wohnung» (Sarah Meier 2025) | Beim Mieterwechsel kann der Mieter seinen Anteil sonst nicht nachvollziehen. |
 | P10 | Die Abrechnung speicherte weder Heizprofil noch Verteilschlüssel der Verwaltungspauschale | Gespeichert (Migration 0004: `heating_profile_id`, `management_fee_distribution_key_id`) | Grundlage für P8 und P9; ältere Abrechnungen haben die Angaben nicht und drucken «gleichmässig pro Wohnung» bzw. keinen Heizhinweis. |
 | P11 | Liegenschaft im PDF ohne PLZ und Ort | Mit PLZ und Ort | Vollständige Objektangabe. |
+| P12 | Teiljahr: «Verwaltungspauschale: 3 % von CHF 10'646.30 …» ohne Hinweis, dass nur die Mietstage zählen | «…, für Ihre 181 von 365 Tagen» | Sonst lässt sich der Betrag (39.60 statt 79.85) nicht nachrechnen. |
+| P13 | FR/IT/EN: «(365 Durée de location (jours))» | «(365 jours)», «(365 giorni)», «(365 days)» | Lesbare Einheit statt wiederholter Feldbezeichnung. |
 
 ## Nachgerechnet (Musterhaus Zentrum 2024, Hans Müller, Wohnung 1.01, 75.5 m², ganzes Jahr)
 

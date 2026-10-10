@@ -68,7 +68,7 @@ Every place in the code is marked `TODO(fachlich prüfen)` (`grep -rn "TODO(fach
 - Statements can be generated for a period without any invoices (CHF 0.00 costs, full Akonto refund) without a warning (Anna, Marco: Blocker) – plausibility check in the stage 6 wizard (plan D16).
 - Invoices covering only part of the period (e.g. only Q1) produce a full-year statement without a hint (Dr. Weber: Blocker) – stage 6 plausibility check if it can be derived from existing data; otherwise TODO(fachlich prüfen).
 - "Verwaltungsgebühr (3 %)" shows the tenant's share of 3 % of the building total, which cannot be traced from the label (Dr. Weber) – the PDF now names the base and the key ("3 % von CHF 18'835.20, gleichmässig pro Wohnung"); the statement detail in the UI does not yet.
-- ~~The PDF has no tenant address~~ (step A). The reference to the right to inspect receipts and the refund method are part of the PDF redesign (step D2, `docs/nebenkostenabrechnung-anforderungen.md`).
+- ~~The PDF has no tenant address~~ (step A). The reference to the right to inspect receipts and the refund method are part of the PDF redesign (step D2; requirements will be collected in step D1).
 - ~~Category names in English in the PDF~~ – the PDF names categories in the tenant's language (`docs/seed-daten-aenderungen.md` P2); the UI already shows the German names.
 - An invoice's date defaults to today, so last year's invoices land in the wrong year (Marco) – stage 7 invoice form hint.
 
