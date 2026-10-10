@@ -60,6 +60,9 @@ def _run_vitest(root):
         report = Path(tmp) / "report.json"
         done = subprocess.run(["npx", "--no-install", "vitest", "run", "--reporter=json",
                                f"--outputFile={report}"], cwd=root, capture_output=True, text=True)
+        if not report.exists():
+            last = (done.stderr.strip() or done.stdout.strip() or "no output").splitlines()[-1]
+            return Run(done.returncode, "error", f"vitest wrote no report: {last}")
         data = json.loads(report.read_text())
     summary = f"{data['numFailedTests']} of {data['numTotalTests']} tests failed"
     return Run(done.returncode, _vitest_outcome(done.returncode, data), summary)
