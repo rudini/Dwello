@@ -17,22 +17,24 @@
 		error?: string;
 	} = $props();
 
-	// Utility invoices of each building in the Abrechnungsperiode, so a missing one shows before the preview
+	// Utility invoices of each building in the Abrechnungsperiode, so a missing one shows before the preview:
+	// one request for the period, counted per building (fewer than 50 apartments, see CLAUDE.md)
 	let invoiceCounts = $state<Record<string, number>>({});
 	$effect(() => {
-		const { start, end } = period;
-		for (const building of buildings)
-			api
-				.get<{ total: number }>('/invoices', {
-					buildingId: building.id,
-					dateFrom: start,
-					dateTo: end,
-					isValidUtilityCost: 'true',
-					limit: '1'
-				})
-				.then(({ data }) => {
-					if (data) invoiceCounts = { ...invoiceCounts, [building.id]: data.total };
-				});
+		const ids = buildings.map((b) => b.id);
+		api
+			.get<{ invoices: { buildingId: string }[] }>('/invoices', {
+				dateFrom: period.start,
+				dateTo: period.end,
+				isValidUtilityCost: 'true',
+				limit: '1000'
+			})
+			.then(({ data }) => {
+				if (!data) return;
+				const counts = Object.fromEntries(ids.map((id) => [id, 0]));
+				for (const { buildingId } of data.invoices) if (buildingId in counts) counts[buildingId]++;
+				invoiceCounts = counts;
+			});
 	});
 
 	const allSelected = $derived(
@@ -45,7 +47,10 @@
 			: [...selectedBuildingIds, id]);
 </script>
 
-<fieldset class="flex flex-col gap-4" aria-describedby={error ? 'buildings-error' : undefined}>
+<fieldset
+	class="flex min-w-0 flex-col gap-4"
+	aria-describedby={error ? 'buildings-error' : undefined}
+>
 	<legend class="sr-only">Gebäude</legend>
 	<div class="flex flex-wrap items-center justify-between gap-4 border-b border-line pb-4">
 		<label class="flex min-h-12 cursor-pointer items-center gap-4 font-semibold text-ink">

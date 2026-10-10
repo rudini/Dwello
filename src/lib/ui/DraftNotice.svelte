@@ -8,22 +8,25 @@
 		savedAt,
 		ondiscard,
 		children
-	}: { savedAt: Date; ondiscard: () => void; children?: Snippet } = $props();
+	}: { savedAt: Date | null; ondiscard: () => void; children?: Snippet } = $props(); // null: no draft, no notice
 
 	const when = $derived(
-		`am ${savedAt.toLocaleDateString('de-CH')} um ${savedAt.toLocaleTimeString('de-CH', {
-			hour: '2-digit',
-			minute: '2-digit'
-		})}`
+		savedAt &&
+			`am ${savedAt.toLocaleDateString('de-CH')} um ${savedAt.toLocaleTimeString('de-CH', {
+				hour: '2-digit',
+				minute: '2-digit'
+			})}`
 	);
 </script>
 
-<Alert title="Entwurf wiederhergestellt" testid="draft-restored">
-	<p>Ihre Angaben, zuletzt {when} bearbeitet, sind wieder da.</p>
-	{@render children?.()}
-	{#snippet action()}
-		<Button variant="secondary" icon="delete" onclick={ondiscard} testid="draft-discard"
-			>Entwurf verwerfen</Button
-		>
-	{/snippet}
-</Alert>
+{#if savedAt}
+	<Alert title="Entwurf wiederhergestellt" testid="draft-restored">
+		<p>Ihre Angaben, zuletzt {when} bearbeitet, sind wieder da.</p>
+		{@render children?.()}
+		{#snippet action()}
+			<Button variant="secondary" icon="delete" onclick={ondiscard} testid="draft-discard"
+				>Entwurf verwerfen</Button
+			>
+		{/snippet}
+	</Alert>
+{/if}

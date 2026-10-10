@@ -164,6 +164,14 @@ describe('Rechnungsliste', () => {
 		expect(goto).toHaveBeenCalledWith('/invoices?year=2025&page=1');
 	});
 
+	it('sagt bei einem Jahr ohne Rechnungen, dass noch keine erfasst sind, statt einen Filterfehler zu vermuten', () => {
+		url = new URL('http://localhost/invoices?year=2025');
+		list([]);
+		expect(text()).toContain('Für 2025 sind noch keine Rechnungen erfasst');
+		expect(text()).not.toContain('Versuchen Sie es mit anderen Filtern.');
+		expect(byTestId('invoices-empty')!.querySelector('a[href="/invoices/new"]')).not.toBeNull();
+	});
+
 	it('meldet eine leere Suche anders als eine leere Liste', () => {
 		list([]);
 		expect(text()).toContain('Versuchen Sie es mit anderen Filtern.');

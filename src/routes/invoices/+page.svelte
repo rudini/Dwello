@@ -10,6 +10,12 @@
 
 	let { data }: { data: InvoicesListData } = $props();
 
+	// Only the year is chosen: an empty list means nothing is recorded yet, not a filter mistake
+	const onlyYear = $derived(
+		['search', 'building', 'categoryId', 'validity'].some((key) => $page.url.searchParams.get(key))
+			? ''
+			: ($page.url.searchParams.get('year') ?? '')
+	);
 	const filtered = $derived(
 		['search', 'building', 'categoryId', 'validity', 'year'].some((key) =>
 			$page.url.searchParams.get(key)
@@ -42,7 +48,15 @@
 
 	{#if data.invoices.length === 0}
 		<div data-testid="invoices-empty">
-			{#if filtered}
+			{#if onlyYear}
+				<EmptyState
+					illustration="receipts"
+					title="Für {onlyYear} sind noch keine Rechnungen erfasst"
+					text="Erfassen Sie die Rechnungen dieses Jahres, damit sie in die Nebenkostenabrechnung einfliessen."
+					actionLabel="Rechnung erfassen"
+					actionHref="/invoices/new"
+				/>
+			{:else if filtered}
 				<EmptyState
 					illustration="no-results"
 					title="Keine Rechnungen gefunden"

@@ -382,6 +382,10 @@ describe('Zurück vom Erfassen einer Rechnung', () => {
 		history.replaceState(null, '', '/');
 
 		expect(heading()).toBe('Heizprofil und Verwaltungspauschale');
+		// says why this step, so the way back does not look like a mistake
+		expect(byTestId('resume-notice')!.textContent).toContain(
+			'Mit «Weiter» berechnet Dwello die Vorschau mit der neuen Rechnung.'
+		);
 	});
 });
 
@@ -423,9 +427,10 @@ describe('Verwaltungspauschale', () => {
 
 describe('Rechnungen schon bei der Wahl der Gebäude', () => {
 	it('sagt bei jedem Gebäude, ob für die Abrechnungsperiode Rechnungen erfasst sind', async () => {
-		const calls = fakeBff((call) => [
+		// one request for the whole period, counted per building in the browser
+		const calls = fakeBff(() => [
 			200,
-			call.path.includes('buildingId=b2') ? { invoices: [], total: 0 } : { invoices: [], total: 3 }
+			{ invoices: [{ buildingId: 'b1' }, { buildingId: 'b1' }, { buildingId: 'b1' }], total: 3 }
 		]);
 		open();
 		await settle();
@@ -438,6 +443,10 @@ describe('Rechnungen schon bei der Wahl der Gebäude', () => {
 		expect(byTestId('generate-building-invoices-b2')!.textContent).toContain(
 			'Keine Rechnungen in der Abrechnungsperiode erfasst'
 		);
+		expect(calls).toHaveLength(1);
 		expect(calls[0].path).toMatch(/dateFrom=\d{4}-\d{2}-\d{2}&dateTo=\d{4}-\d{2}-\d{2}/);
+		expect(calls[0].path).not.toContain('buildingId');
+		// the list stays inside its panel on phones (a fieldset is as wide as its content by default)
+		expect(document.querySelector('fieldset')!.className).toMatch(/(^| )min-w-0( |$)/);
 	});
 });

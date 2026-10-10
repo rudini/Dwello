@@ -64,6 +64,7 @@
 	let touched = $state(false); // a draft is kept only once the user has chosen something
 	let savedAt = $state<Date | null>(null);
 	let restoredAt = $state<Date | null>(null);
+	let resumed = $state(false); // back from "Rechnung erfassen", on the step before the preview
 	let section = $state<HTMLElement>();
 
 	// The last preview stays when creating the drafts fails
@@ -90,7 +91,10 @@
 		restoredAt = draft.savedAt;
 		// Back from "Rechnung erfassen": the step before the preview, so "Weiter" calculates it anew
 		const complete = [1, 2].every((n) => !Object.keys(selectionErrors(selection, n)).length);
-		if (new URL(location.href).searchParams.get('schritt') === '3' && complete) step = 3;
+		if (new URL(location.href).searchParams.get('schritt') === '3' && complete) {
+			step = 3;
+			resumed = true;
+		}
 	});
 
 	$effect(() => {
@@ -198,9 +202,12 @@
 	/>
 	<input type="hidden" name="buildingIds" value={selection.buildingIds.join(',')} />
 
-	{#if restoredAt}
-		<DraftNotice savedAt={restoredAt} ondiscard={discardDraft} />
-	{/if}
+	<DraftNotice savedAt={restoredAt} ondiscard={discardDraft}>
+		<!-- Back from "Rechnung erfassen": why the wizard shows the step before the preview -->
+		<p class:hidden={!resumed || step !== 3} data-testid="resume-notice">
+			Mit «Weiter» berechnet Dwello die Vorschau mit der neuen Rechnung.
+		</p>
+	</DraftNotice>
 
 	<!-- read out while the server works: the busy button itself cannot keep the focus -->
 	<p role="status" class="sr-only" data-testid="wizard-status">{statusText}</p>
