@@ -4411,8 +4411,7 @@ Brief: `docs/design/REDESIGN_BRIEF.md`; log and decisions: `docs/design/progress
   rule, missing `/codebase-design` skill, `CONTEXT.md` instead of `UBIQUITOUS_LANGUAGE.md`, plugin-only setup notes,
   the generic playwright-bdd bootstrap, all-caps pressure) (`.claude/skills/tdd/SKILL.md`,
   `.claude/skills/ponytail/SKILL.md`, `.claude/skills/ponytail-gain/SKILL.md`, `.claude/skills/ponytail-help/SKILL.md`,
-  `.claude/skills/bdd-acceptance/SKILL.md`); the cloud-session `session-start-hook` skill added as a project skill
-  with its template made synchronous to match its own rules (`.claude/skills/session-start-hook/SKILL.md`)
+  `.claude/skills/bdd-acceptance/SKILL.md`)
 
 
 ---
