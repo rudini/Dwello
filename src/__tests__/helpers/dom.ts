@@ -10,8 +10,12 @@ afterEach(() => {
 });
 
 /** Mounts a component into the document, removed again after the test */
-export function show<P extends Record<string, unknown>>(component: Component<P>, props: P) {
-	mounted.push(mount(component, { target: document.body, props }));
+export function show<P extends Record<string, unknown>>(
+	component: Component<P>,
+	props: P,
+	target: Element = document.body
+) {
+	mounted.push(mount(component, { target, props }));
 	flushSync();
 }
 

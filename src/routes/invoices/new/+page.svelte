@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { untrack } from 'svelte';
+	import { localToday } from '$lib/contract-status';
 	import { api } from '$lib/api';
 	import {
 		plainAmount,
@@ -41,7 +42,7 @@
 	let buildingId = $state(untrack(() => data.buildingId));
 	// From the statement wizard the date stays empty: today would fall outside the period being completed
 	let invoiceDate = $state(
-		untrack(() => (data.period ? '' : new Date().toISOString().split('T')[0]))
+		untrack(() => (data.period ? '' : localToday()))
 	);
 	let servicePeriodStart = $state('');
 	let servicePeriodEnd = $state('');

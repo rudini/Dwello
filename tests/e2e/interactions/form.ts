@@ -9,6 +9,7 @@ import type { Locator } from '@playwright/test';
 /** Types a date the Swiss way (TT.MM.JJJJ) into a date field; scenarios keep JJJJ-MM-TT, or '' to empty the field */
 export async function typeDate(field: Locator, isoDate: string) {
 	const [year, month, day] = isoDate.split('-');
-	await field.fill(isoDate ? `${day}.${month}.${year}` : '');
+	await field.fill('');
+	if (isoDate) await field.pressSequentially(`${day}.${month}.${year}`); // key by key, as a user types it
 	await field.blur();
 }

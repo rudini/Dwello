@@ -1,3 +1,4 @@
+import { localToday } from '$lib/contract-status';
 const API = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1/statements`;
 
 type Fetch = typeof globalThis.fetch;
@@ -9,7 +10,7 @@ export const markStatementPaid = (fetch: Fetch, id: string) =>
 	fetch(`${API}/${id}/status`, {
 		method: 'PUT',
 		headers: json,
-		body: JSON.stringify({ status: 'paid', paidDate: new Date().toISOString().split('T')[0] })
+		body: JSON.stringify({ status: 'paid', paidDate: localToday() })
 	});
 
 /** Next reminder (1 to 3), stored as document and sent by e-mail or kept for the letter post */

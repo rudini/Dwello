@@ -15,7 +15,6 @@
 		error,
 		optional = false,
 		min,
-		max,
 		testid
 	}: {
 		id: string;
@@ -26,16 +25,31 @@
 		error?: string;
 		optional?: boolean;
 		min?: string; // limits the calendar only; the page checks the date
-		max?: string;
-		testid?: string;
+		testid: string;
 	} = $props();
 
-	const FORMAT = 'Format TT.MM.JJJJ, zum Beispiel 31.12.2025.';
+	const FORMAT = 'Format TT.MM.JJJJ.';
+	const NOT_A_DATE =
+		'Dieses Datum gibt es nicht. Bitte geben Sie es als TT.MM.JJJJ ein, zum Beispiel 31.12.2025.';
 	const toText = (iso: string) => (iso ? formatDate(iso) : '');
 
 	let text = $state(toText(value));
 	let left = $state(false); // left the field once: only then a half-typed date is wrong
 	let calendar = $state<HTMLInputElement>();
+	let frame = $state<HTMLElement>();
+
+	// the form emptied (after saving): the date it sends and its words go too; sent (also by Enter): check the date
+	$effect(() => {
+		const form = frame?.closest('form');
+		const reset = () => ((text = ''), (value = ''));
+		const sent = () => (left = true);
+		form?.addEventListener('reset', reset);
+		form?.addEventListener('submit', sent, true);
+		return () => {
+			form?.removeEventListener('reset', reset);
+			form?.removeEventListener('submit', sent, true);
+		};
+	});
 
 	// a value set from outside (a draft, the calendar) shows in the field
 	$effect(() => {
@@ -43,16 +57,14 @@
 	});
 
 	const invalid = $derived(!!text.trim() && !parseSwissDate(text));
-	const shownError = $derived(
-		invalid && (left || error)
-			? 'Dieses Datum gibt es nicht. Bitte geben Sie es als TT.MM.JJJJ ein, zum Beispiel 31.12.2025.'
-			: error
-	);
+	// checked when leaving the field; a half-typed date is no error yet
+	const shownError = $derived(invalid && left ? NOT_A_DATE : error);
+	const wordsId = $derived(`${id}-words`);
 
 	function oninput(event: Event & { currentTarget: HTMLInputElement; inputType?: string }) {
 		left = false;
 		// the dots come by themselves after day and month, so the number keypad is enough
-		const typed = event.currentTarget.value;
+		const typed = event.currentTarget.value.replace(/\.{2,}/g, '.'); // a dot typed after the automatic one
 		text =
 			/^\d{2}$|^\d{1,2}\.\d{2}$/.test(typed) && event.inputType !== 'deleteContentBackward'
 				? `${typed}.`
@@ -67,8 +79,15 @@
 	}
 </script>
 
-<div class="flex flex-col gap-2">
-	<Field {id} {label} help={help ? `${help} ${FORMAT}` : FORMAT} error={shownError} {optional}>
+<div bind:this={frame} class="flex flex-col gap-2">
+	<Field
+		{id}
+		{label}
+		help={help ? `${help} ${FORMAT}` : FORMAT}
+		example="31.12.2025"
+		error={shownError}
+		{optional}
+	>
 		{#snippet children(control)}
 			<div class="flex gap-2">
 				<input
@@ -80,7 +99,7 @@
 					{oninput}
 					{onblur}
 					aria-required={!optional}
-					aria-describedby={control.describedBy}
+					aria-describedby={[control.describedBy, value && wordsId].filter(Boolean).join(' ')}
 					aria-invalid={control.invalid || undefined}
 					class="{controlClass(control.invalid)} tabular-nums"
 					data-testid={testid}
@@ -100,7 +119,6 @@
 					class="sr-only"
 					{value}
 					{min}
-					{max}
 					onchange={(event) => {
 						value = event.currentTarget.value;
 						text = toText(value);
@@ -110,9 +128,15 @@
 		{/snippet}
 	</Field>
 	{#if name}<input type="hidden" {name} {value} />{/if}
-	{#if value}
-		<p class="font-semibold text-ink" aria-live="polite" data-testid="{testid}-words">
-			{formatDateLong(value)}
-		</p>
-	{/if}
+	<!-- always there, so screen readers hear the first date too -->
+	<p
+		id={wordsId}
+		class="font-semibold text-ink empty:hidden"
+		aria-live="polite"
+		data-testid="{testid}-words"
+	>
+		{value ? formatDateLong(value) : ''}
+	</p>
+	<!-- the focus is in the next field when the check on leaving fails: say it -->
+	<p class="sr-only" aria-live="assertive">{invalid && left ? NOT_A_DATE : ''}</p>
 </div>
