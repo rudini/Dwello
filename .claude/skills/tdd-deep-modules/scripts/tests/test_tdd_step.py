@@ -1,6 +1,9 @@
+import subprocess
+import sys
+import tempfile
 import unittest
 
-from tests.fixture import ADD_TEST, PYTEST_MARKERS, PYTEST_TEST, RIGHT_ADD, VITEST_TEST, WRONG_ADD, Repo, vitest_repo
+from tests.fixture import ADD_TEST, SCRIPTS, PYTEST_MARKERS, PYTEST_TEST, RIGHT_ADD, VITEST_TEST, WRONG_ADD, Repo, vitest_repo
 
 
 class TddStepTest(unittest.TestCase):
@@ -448,3 +451,12 @@ class TddStepTest(unittest.TestCase):
         self.assertIn("hook says no", result.stderr)
         self.assertNotIn("Traceback", result.stderr)
         self.assertEqual(repo.git("diff", "--cached", "--name-only"), "")
+
+    def test_outside_a_git_repository_it_exits_2(self):
+        with tempfile.TemporaryDirectory() as plain:
+            result = subprocess.run([sys.executable, str(SCRIPTS / "tdd-step"), "red", "x"],
+                                    cwd=plain, capture_output=True, text=True)
+
+        self.assertEqual(result.returncode, 2, result.stderr)
+        self.assertIn("not inside a git repository", result.stderr)
+        self.assertNotIn("Traceback", result.stderr)
