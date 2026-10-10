@@ -112,7 +112,16 @@ export function analyze({ root, fallow, config = loadConfig(root) }: AnalyzeOpti
 		const score = shallowScore(parts, config.weights);
 		const { failThreshold, minInterfaceSize } = settingsFor(path, config);
 		const eligible = metrics.interfaceSize >= minInterfaceSize || metrics.passThroughs.length > 0 || parts.classitis > 0;
-		const report: ModuleReport = { path, score, flagged: eligible && score >= failThreshold, metrics, classes: file.classes, components: parts, reasons: [] };
+		const report: ModuleReport = {
+			path,
+			score,
+			eligible,
+			flagged: eligible && score >= failThreshold,
+			metrics,
+			classes: file.classes,
+			components: parts,
+			reasons: []
+		};
 		report.reasons = reasons(report);
 		return report;
 	});

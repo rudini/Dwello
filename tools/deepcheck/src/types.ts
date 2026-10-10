@@ -38,6 +38,9 @@ export interface ClassReport {
 export interface ModuleReport {
 	path: string;
 	score: number;
+	/** Large enough to judge: interfaceSize >= minInterfaceSize, or a pass-through or classitis case. */
+	eligible: boolean;
+	/** eligible and score >= failThreshold (after per-path overrides). */
 	flagged: boolean;
 	metrics: ModuleMetrics;
 	classes: ClassReport[];
@@ -72,4 +75,32 @@ export interface Report {
 	excluded: ExcludedModule[];
 	suppressionFindings: SuppressionFinding[];
 	suppressions: ListedSuppression[];
+}
+
+export interface Group {
+	key: string;
+	count: number;
+	maxScore: number;
+}
+
+/** `deepcheck scan --format json`; see schema/report.schema.json. */
+export interface ScanOutput {
+	schemaVersion: 1;
+	tool: 'deepcheck';
+	command: 'scan';
+	scope: 'all';
+	path: string | null;
+	failThreshold: number;
+	minScore: number | null;
+	summary: {
+		analyzed: number;
+		/** Modules selected (shallow, or at least --min-score) before --top. */
+		shallow: number;
+		shown: number;
+		excluded: number;
+		invalidSuppressions: number;
+	};
+	findings: ModuleReport[];
+	groups?: Group[];
+	suppressionFindings: SuppressionFinding[];
 }
