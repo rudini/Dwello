@@ -95,6 +95,14 @@ describe('Dialog', () => {
 		expect(onclose).toHaveBeenCalledOnce();
 	});
 
+	it('lässt nicht bestätigen, was nicht möglich ist, aber abbrechen', () => {
+		const { onconfirm, onclose } = openDialog({ confirmDisabled: true });
+		expect(byTestId<HTMLButtonElement>('dialog-confirm')!.disabled).toBe(true);
+		click('dialog-cancel');
+		expect(onconfirm).not.toHaveBeenCalled();
+		expect(onclose).toHaveBeenCalledOnce();
+	});
+
 	it('zeigt nichts, solange er geschlossen ist', () => {
 		openDialog({ open: false });
 		expect(document.querySelector('[role=dialog]')).toBeNull();
