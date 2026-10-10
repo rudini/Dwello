@@ -17,7 +17,9 @@
 				<a href="/tenants/{statement.tenantId}" class={link} data-testid="statement-tenant-link"
 					>{statement.tenantName}</a
 				>
-				{#if statement.tenantEmail}<p class="text-ink-muted">{statement.tenantEmail}</p>{/if}
+				{#if statement.tenantEmail}<p class="min-w-0 break-all text-ink-muted">
+						{statement.tenantEmail}
+					</p>{/if}
 			</dd>
 		</div>
 		<div class="flex flex-col">
