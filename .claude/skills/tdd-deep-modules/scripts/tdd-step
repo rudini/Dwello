@@ -37,6 +37,9 @@ def last_phase():
     return prefix if prefix in ("test", "red", "green", "refactor") else "start"
 
 
+if len(sys.argv) < 2 or sys.argv[1] not in FOLLOWS:
+    print("usage: tdd-step <test|red|green|refactor> [message]", file=sys.stderr)
+    sys.exit(2)
 phase = sys.argv[1]
 previous = last_phase()
 if previous not in FOLLOWS[phase]:
