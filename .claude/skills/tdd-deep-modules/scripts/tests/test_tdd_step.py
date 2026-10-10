@@ -468,3 +468,14 @@ class TddStepTest(unittest.TestCase):
         repo.write("calc.js", "// add\n" + RIGHT_ADD_JS)
 
         self.assert_refused(repo, "green", "green needs all tests passing", head="red: seed")
+
+    def test_a_framework_that_finds_no_tests_is_left_out_when_another_one_has_tests(self):
+        repo = vitest_repo(self)
+        repo.commit_all("red: seed", {"calc.js": RIGHT_ADD_JS, "calc.test.js": VITEST_TEST,
+                                      "tool.py": "X = 1\n"})
+        repo.write("calc.js", "// add\n" + RIGHT_ADD_JS)
+
+        result = repo.run("tdd-step", "green", "adds two numbers")
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(repo.trailer("TDD-Exit-Code"), "0")
