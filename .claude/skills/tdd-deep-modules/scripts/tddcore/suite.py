@@ -10,6 +10,9 @@ from dataclasses import dataclass
 from pathlib import Path
 
 
+_PYTHON_ENV = {**os.environ, "PYTHONDONTWRITEBYTECODE": "1"}
+
+
 class NoFramework(Exception):
     pass
 
@@ -28,15 +31,9 @@ def run(root):
         return _run_vitest(root)
     if _uses_pytest(root):
         return _run_pytest(root)
-    if not _has_python(root):
-        raise NoFramework("no supported test framework detected (looked for Python unittest)")
-    env = {**os.environ, "PYTHONDONTWRITEBYTECODE": "1"}
-    done = subprocess.run([sys.executable, "-m", "unittest", "discover"], cwd=root, env=env,
-                          capture_output=True, text=True)
-    verdicts = [line for line in done.stderr.splitlines() if line.startswith(("OK", "FAILED (", "NO TESTS RAN"))]
-    summary = verdicts[-1] if verdicts else f"exit code {done.returncode}, no unittest summary"
-    failed = re.search(r"failures=(\d+)", summary)
-    return Run(done.returncode, _outcome(done.returncode, summary), summary, int(failed[1]) if failed else 0)
+    if _has_python(root):
+        return _run_unittest(root)
+    raise NoFramework("no supported test framework detected (looked for vitest, pytest, unittest)")
 
 
 def _has_python(root):
@@ -45,7 +42,18 @@ def _has_python(root):
     return any(f.endswith(".py") for f in files)
 
 
-def _outcome(exit_code, summary):
+def _run_unittest(root):
+    done = subprocess.run([sys.executable, "-m", "unittest", "discover"], cwd=root, env=_PYTHON_ENV,
+                          capture_output=True, text=True)
+    verdicts = [line for line in done.stderr.splitlines()
+                if line.startswith(("OK", "FAILED (", "NO TESTS RAN"))]
+    summary = verdicts[-1] if verdicts else f"exit code {done.returncode}, no unittest summary"
+    failed = re.search(r"failures=(\d+)", summary)
+    return Run(done.returncode, _unittest_outcome(done.returncode, summary), summary,
+               int(failed[1]) if failed else 0)
+
+
+def _unittest_outcome(exit_code, summary):
     if exit_code == 0:
         return "pass"
     if summary.startswith("FAILED (failures=") and "errors=" not in summary:
@@ -82,7 +90,8 @@ def _run_vitest(root):
             return Run(done.returncode, "error", f"vitest wrote no report: {last}", 0)
         data = json.loads(report.read_text())
     summary = f"{data['numFailedTests']} of {data['numTotalTests']} tests failed"
-    return Run(done.returncode, _vitest_outcome(done.returncode, data), summary, data["numFailedTests"])
+    return Run(done.returncode, _vitest_outcome(done.returncode, data), summary,
+               data["numFailedTests"])
 
 
 def _vitest_outcome(exit_code, data):
@@ -104,11 +113,10 @@ def _uses_pytest(root):
 
 
 def _run_pytest(root):
-    env = {**os.environ, "PYTHONDONTWRITEBYTECODE": "1"}
     with tempfile.TemporaryDirectory() as tmp:
         report = Path(tmp) / "report.xml"
         done = subprocess.run([sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider",
-                               f"--junitxml={report}"], cwd=root, env=env,
+                               f"--junitxml={report}"], cwd=root, env=_PYTHON_ENV,
                               capture_output=True, text=True)
         cases = list(ElementTree.parse(report).iter("testcase")) if report.exists() else []
     lines = done.stdout.strip().splitlines()
@@ -122,6 +130,7 @@ def _pytest_outcome(exit_code, cases):
         return "pass"
     failures = [f.get("message", "") for case in cases for f in case.iter("failure")]
     errors = [e for case in cases for e in case.iter("error")]
-    if exit_code == 1 and failures and not errors and all(m.startswith(("assert", "AssertionError")) for m in failures):
+    asserted = all(m.startswith(("assert", "AssertionError")) for m in failures)
+    if exit_code == 1 and failures and not errors and asserted:
         return "fail"
     return "error"

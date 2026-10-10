@@ -14,7 +14,7 @@ def git(*args):
 
 
 def changed_files():
-    """Paths changed against HEAD, relative to the repository root; also works before the first commit."""
+    """Paths changed against HEAD, relative to the repository root, even before the first commit."""
     entries = iter(git("status", "--porcelain=v1", "-z", "-uall").split("\0"))
     paths = []
     for entry in entries:
@@ -31,7 +31,7 @@ def head_subject():
 
 
 def main(args):
-    if not args or args[0] not in protocol.FOLLOWS:
+    if not args or args[0] not in protocol.PHASES:
         print("usage: tdd-step <test|red|green|refactor> [message]", file=sys.stderr)
         return 2
     phase, message = args[0], " ".join(" ".join(args[1:]).split()) or args[0]

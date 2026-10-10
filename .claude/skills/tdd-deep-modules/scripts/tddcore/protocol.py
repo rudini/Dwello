@@ -2,24 +2,24 @@
 from pathlib import PurePosixPath
 
 # Phase -> phases it may follow. A red cycle must close with green before anything else.
-FOLLOWS = {
+_FOLLOWS = {
     "test": {"start", "test", "green", "refactor"},
     "red": {"start", "test", "green", "refactor"},
     "green": {"red"},
     "refactor": {"green", "refactor"},
 }
+PHASES = tuple(_FOLLOWS)
 
 
 def phase_of(subject):
     """The phase a commit subject claims, or "start" for a commit outside the protocol."""
     prefix = subject.partition(":")[0]
-    return prefix if prefix in FOLLOWS else "start"
+    return prefix if prefix in _FOLLOWS else "start"
 
 
-CODE_SUFFIXES = {".py", ".js", ".jsx", ".mjs", ".cjs", ".ts", ".tsx", ".mts", ".cts", ".svelte", ".vue"}
-
-
-TEST_DIRS = {"tests", "test", "__tests__"}
+_CODE_SUFFIXES = {".py", ".js", ".jsx", ".mjs", ".cjs", ".ts", ".tsx", ".mts", ".cts",
+                  ".svelte", ".vue"}
+_TEST_DIRS = {"tests", "test", "__tests__"}
 
 
 def is_production(path):
@@ -30,7 +30,7 @@ def _is_test(path):
     name = path.name
     return (name.startswith("test_") or name.endswith("_test.py")
             or ".test." in name or ".spec." in name
-            or not TEST_DIRS.isdisjoint(path.parts[:-1]))
+            or not _TEST_DIRS.isdisjoint(path.parts[:-1]))
 
 
 def violations(previous, phase, run, changed):
@@ -38,7 +38,7 @@ def violations(previous, phase, run, changed):
     found = []
     if not changed:
         found.append(f"nothing changed: a {phase} commit needs a change")
-    if previous not in FOLLOWS[phase]:
+    if previous not in _FOLLOWS[phase]:
         found.append(f"{phase} cannot follow {previous}")
     if phase == "red" and run.outcome != "fail":
         found.append(f"red needs a failing assertion, but the suite says: {run.summary}")
@@ -59,4 +59,4 @@ def violations(previous, phase, run, changed):
 
 
 def _is_code(path):
-    return PurePosixPath(path).suffix in CODE_SUFFIXES
+    return PurePosixPath(path).suffix in _CODE_SUFFIXES
