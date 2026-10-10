@@ -199,3 +199,14 @@ class TddStepTest(unittest.TestCase):
         self.assertEqual(result.returncode, 1, result.stderr)
         self.assertIn("red needs a failing assertion", result.stderr)
         self.assertEqual(repo.subject(), "init")
+
+    def test_vitest_red_is_refused_when_production_code_changed(self):
+        repo = vitest_repo(self)
+        repo.write("calc.test.js", VITEST_TEST)
+        repo.write("calc.js", "export const add = (a, b) => -1;\n")
+
+        result = repo.run("tdd-step", "red", "adds two numbers")
+
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn("production code changed: calc.js", result.stderr)
+        self.assertNotIn("calc.test.js", result.stderr)
