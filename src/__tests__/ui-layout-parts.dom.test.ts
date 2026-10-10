@@ -1,6 +1,7 @@
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { flushSync } from 'svelte';
-import { readable } from 'svelte/store';
+import type { Writable } from 'svelte/store';
+import { navigating as navigatingStore } from '$app/stores';
 import Table from '$lib/ui/Table.svelte';
 import ToastRegion from '$lib/ui/ToastRegion.svelte';
 import PageHeader from '$lib/ui/PageHeader.svelte';
@@ -11,9 +12,13 @@ import { addToast, toasts } from '$lib/stores';
 import { byTestId, click, show } from './helpers/dom';
 import { markup } from './helpers/snippet';
 
-vi.mock('$app/stores', () => ({
-	page: readable({ url: new URL('http://localhost/tenants/42') })
-}));
+vi.mock('$app/stores', async () => {
+	const { readable, writable } = await import('svelte/store');
+	return {
+		page: readable({ url: new URL('http://localhost/tenants/42') }),
+		navigating: writable(null)
+	};
+});
 
 describe('Tabelle', () => {
 	it('hat eine Beschriftung und Spaltenköpfe, Beträge rechtsbündig', () => {
@@ -52,13 +57,74 @@ describe('Tabelle', () => {
 });
 
 describe('Meldungen', () => {
+	const navigating = navigatingStore as unknown as Writable<object | null>;
+	const status = () => document.querySelector('[role="status"]')!;
+	afterEach(() => {
+		vi.useRealTimers();
+		navigating.set(null);
+	});
+
 	it('liest Erfolge höflich vor und lässt sie schliessen', () => {
+		vi.useFakeTimers();
 		toasts.set([]);
 		show(ToastRegion, {});
 		addToast('success', 'Mieter gespeichert');
 		flushSync();
+		vi.advanceTimersByTime(1000);
+		flushSync();
 		click(document.querySelector<HTMLElement>('[aria-label="Meldung schliessen"]')!);
 		expect(document.body.textContent).not.toContain('Mieter gespeichert');
+	});
+
+	it('hat die Live-Region schon leer auf der Seite und füllt sie nach der neuen Seite', () => {
+		vi.useFakeTimers();
+		toasts.set([]);
+		show(ToastRegion, {});
+		const region = status();
+		expect(region.textContent!.trim()).toBe('');
+
+		navigating.set({}); // the save opens the saved record: its title is announced first
+		addToast('success', 'Mieter gespeichert');
+		flushSync();
+		vi.advanceTimersByTime(2000);
+		flushSync();
+		expect(region.textContent).not.toContain('Mieter gespeichert');
+
+		navigating.set(null);
+		flushSync();
+		vi.advanceTimersByTime(1000);
+		flushSync();
+		expect(status()).toBe(region);
+		expect(region.textContent).toContain('Mieter gespeichert');
+	});
+
+	it('zeigt Erfolge lange genug zum Lesen, Fehler bis sie geschlossen werden', () => {
+		vi.useFakeTimers();
+		toasts.set([]);
+		show(ToastRegion, {});
+		addToast('success', 'Mieter gespeichert');
+		addToast('error', 'Speichern fehlgeschlagen');
+		flushSync();
+		vi.advanceTimersByTime(7000);
+		flushSync();
+		expect(document.body.textContent).toContain('Mieter gespeichert');
+
+		vi.advanceTimersByTime(60_000);
+		flushSync();
+		expect(document.body.textContent).not.toContain('Mieter gespeichert');
+		expect(byTestId('toast-error')!.textContent).toContain('Speichern fehlgeschlagen');
+	});
+
+	it('setzt den Fokus auf den Seitentitel, wenn er nach der Aktion verloren ist', () => {
+		vi.useFakeTimers();
+		toasts.set([]);
+		document.body.insertAdjacentHTML('beforeend', '<h1 tabindex="-1">Kategorien</h1>');
+		show(ToastRegion, {});
+		addToast('success', 'Kategorie «Lift» gelöscht');
+		flushSync();
+		vi.advanceTimersByTime(1000);
+		flushSync();
+		expect(document.activeElement!.textContent).toBe('Kategorien');
 	});
 
 	it('liest Fehler sofort vor', () => {
@@ -67,7 +133,7 @@ describe('Meldungen', () => {
 		addToast('error', 'Speichern fehlgeschlagen');
 		flushSync();
 		expect(byTestId('toast-error')!.getAttribute('role')).toBe('alert');
-		expect(byTestId('toast-error')!.closest('[aria-live]')).toBeNull(); // announced once, by its own role
+		expect(byTestId('toast-error')!.closest('[aria-live], [role="status"]')).toBeNull(); // announced once, by its own role
 	});
 });
 
