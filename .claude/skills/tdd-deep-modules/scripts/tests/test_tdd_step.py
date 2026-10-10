@@ -285,3 +285,15 @@ class TddStepTest(unittest.TestCase):
 
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(repo.subject(), "red: adds two numbers")
+
+    def test_pytest_fixture_error_next_to_an_assertion_failure_is_refused_as_red(self):
+        broken_fixture = ("import pytest\n\n\n@pytest.fixture\ndef broken():\n    raise OSError('db down')\n\n\n"
+                          "def test_uses_db(broken):\n    assert broken\n")
+        repo = Repo(self, {"calc.py": WRONG_ADD, "pytest.ini": "[pytest]\n"})
+        repo.write("test_calc.py", PYTEST_TEST + "\n\n" + broken_fixture)
+
+        result = repo.run("tdd-step", "red", "adds two numbers")
+
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn("red needs a failing assertion", result.stderr)
+        self.assertEqual(repo.subject(), "init")
