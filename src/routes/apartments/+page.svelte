@@ -57,11 +57,16 @@
 			{/if}
 		</section>
 	{:else}
-		<ul class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-			{#each data.apartments as apartment (apartment.id)}
-				<ApartmentCard {apartment} />
-			{/each}
-		</ul>
+		<section aria-labelledby="apartments-count" class="flex flex-col gap-4">
+			<h2 id="apartments-count" tabindex="-1" data-results class="text-xl font-bold text-ink">
+				{data.total === 1 ? '1 Wohnung' : `${data.total} Wohnungen`}
+			</h2>
+			<ul class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+				{#each data.apartments as apartment (apartment.id)}
+					<ApartmentCard {apartment} />
+				{/each}
+			</ul>
+		</section>
 		<Pagination url={$page.url} page={data.page} pageSize={data.pageSize} total={data.total} />
 		<StatusLegend />
 	{/if}

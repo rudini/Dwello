@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto, invalidateAll } from '$app/navigation';
 	import { api } from '$lib/api';
+	import { addToast } from '$lib/stores';
 	import type { InvoiceWithDetails } from '$lib/types';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Badge from '$lib/ui/Badge.svelte';
@@ -38,6 +39,7 @@
 			deleteError = result.error.message;
 			return;
 		}
+		addToast('success', `Rechnung von ${invoice.billingEntity} gelöscht`);
 		goto('/invoices');
 	}
 

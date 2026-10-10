@@ -22,14 +22,26 @@
 		children: Snippet<[FieldControl]>;
 	} = $props();
 
+	// The error belongs to what was sent: changing the field takes it away, the next submit checks again
+	let frame = $state<HTMLElement>();
+	let corrected = $state<string>(); // the error the field was changed after
+	const shown = $derived(error === corrected ? undefined : error);
+	const change = () => (corrected = error);
+	$effect(() => {
+		const form = frame?.closest('form');
+		const check = () => (corrected = undefined);
+		form?.addEventListener('submit', check, true);
+		return () => form?.removeEventListener('submit', check, true);
+	});
+
 	const helpId = $derived(`${id}-help`);
 	const errorId = $derived(`${id}-error`);
 	const describedBy = $derived(
-		[(help || example) && helpId, error && errorId].filter(Boolean).join(' ') || undefined
+		[(help || example) && helpId, shown && errorId].filter(Boolean).join(' ') || undefined
 	);
 </script>
 
-<div class="flex flex-col gap-2">
+<div bind:this={frame} class="flex flex-col gap-2" oninput={change} onchange={change}>
 	<label for={id} class="font-semibold text-ink">
 		{label}
 		{#if optional}<span class="font-normal text-ink-muted">(optional)</span>{/if}
@@ -40,15 +52,15 @@
 			{#if example}<span class="whitespace-nowrap">Beispiel: {example}</span>{/if}
 		</p>
 	{/if}
-	{@render children({ id, describedBy, invalid: !!error })}
-	{#if error}
+	{@render children({ id, describedBy, invalid: !!shown })}
+	{#if shown}
 		<p
 			id={errorId}
 			class="flex items-start gap-2 font-semibold text-critical"
 			data-testid="form-error"
 		>
 			<Icon name="error" />
-			{error}
+			{shown}
 		</p>
 	{/if}
 </div>

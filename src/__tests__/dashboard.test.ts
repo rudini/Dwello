@@ -50,6 +50,15 @@ function backend(dashboardStatus = 200, statementsOfLastPeriod: unknown[] = both
 					{ id: 'c2', tenantName: 'Ueli Graf', endDate: null }
 				]
 			});
+		if (path === '/apartments?limit=1000')
+			return Response.json({
+				apartments: [
+					{ buildingId: 'b1', status: 'relet', nextContractStart: '2026-12-01' },
+					{ buildingId: 'b1', status: 'relet', nextContractStart: '2026-11-01' },
+					{ buildingId: 'b1', status: 'occupied', nextContractStart: null },
+					{ buildingId: 'b2', status: 'vacant', nextContractStart: null }
+				]
+			});
 		throw new Error(`unexpected ${url}`);
 	}) as typeof globalThis.fetch;
 }
@@ -93,6 +102,17 @@ describe('Übersicht laden', () => {
 		expect(task.text).toContain('Lindenhof');
 		expect(task.text).not.toContain('Seeblick');
 		expect(task.text).not.toContain('Leerbau');
+	});
+
+	// The building cards count them too; the overview names when they will be rented
+	it('nennt pro Gebäude den Vertragsbeginn der wiedervermieteten Wohnungen', async () => {
+		const data = await load({ fetch: backend() } as never);
+
+		expect(data.buildingOccupancy.map((b) => b.reletStarts)).toEqual([
+			['2026-11-01', '2026-12-01'],
+			[],
+			[]
+		]);
 	});
 
 	it('zeigt die Kennzahlen auch, wenn eine Liste nicht erreichbar ist', async () => {

@@ -35,7 +35,8 @@ export const toasts = writable<Toast[]>([]);
 let toastId = 0;
 
 /**
- * Add a toast notification: long enough to read (WCAG 2.2.1); an error stays until it is closed
+ * Add a toast notification: long enough to read (WCAG 2.2.1); an error stays until it is closed.
+ * The reading time starts when the toast region shows it.
  */
 export function addToast(
 	type: Toast['type'],
@@ -44,12 +45,6 @@ export function addToast(
 ): void {
 	const id = ++toastId;
 	toasts.update((all) => [...all, { id, type, message, duration }]);
-
-	if (duration > 0) {
-		setTimeout(() => {
-			dismissToast(id);
-		}, duration);
-	}
 }
 
 /**

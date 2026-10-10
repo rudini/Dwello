@@ -12,6 +12,10 @@
 	const value = (key: keyof Tenant) => String(tenant[key] ?? '');
 	let channel = $state(untrack(() => tenant.correspondenceChannel ?? 'letter')); // Brief is the glossary's default
 	const byEmail = $derived(channel === 'email');
+	// The errors of the fields the channel decides on no longer apply once it changes
+	let channelChangedFor = $state.raw<Record<string, string>>();
+	const channelError = (key: 'email' | 'address' | 'city') =>
+		channelChangedFor === errors ? undefined : errors[key];
 	const channels = [
 		{ value: 'letter', label: 'Per Brief' },
 		{ value: 'email', label: 'Per E-Mail' }
@@ -47,6 +51,7 @@
 	help="Wie der Mieter Post erhält, zum Beispiel Mahnungen. Per E-Mail braucht eine E-Mail-Adresse, per Brief eine Adresse."
 	options={channels}
 	bind:value={channel}
+	onchange={() => (channelChangedFor = errors)}
 	testid="tenant-channel-select"
 />
 
@@ -58,7 +63,7 @@
 	value={value('email')}
 	optional={!byEmail}
 	example="anna.keller@example.ch"
-	error={errors.email}
+	error={channelError('email')}
 	testid="tenant-email-input"
 />
 
@@ -91,7 +96,7 @@
 		value={value('address')}
 		optional={byEmail}
 		example="Musterstrasse 12"
-		error={errors.address}
+		error={channelError('address')}
 		testid="tenant-address-input"
 	/>
 	<div class="grid grid-cols-1 gap-6 sm:grid-cols-3">
@@ -113,7 +118,7 @@
 				value={value('city')}
 				optional={byEmail}
 				example="Winterthur"
-				error={errors.city}
+				error={channelError('city')}
 				testid="tenant-city-input"
 			/>
 		</div>

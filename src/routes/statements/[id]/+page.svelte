@@ -166,6 +166,7 @@
 	confirmLabel="Abrechnung löschen"
 	confirmTestid="statement-delete-confirm"
 	danger
+	ondone={() => addToast('success', `Abrechnung ${statement.statementNumber} gelöscht`)}
 >
 	<p>
 		Die Abrechnung {statement.statementNumber} von {statement.tenantName} wird gelöscht. Das lässt sich

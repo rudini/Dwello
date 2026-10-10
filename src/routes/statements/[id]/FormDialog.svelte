@@ -11,6 +11,7 @@
 		confirmLabel,
 		confirmTestid,
 		danger = false,
+		ondone,
 		children
 	}: {
 		open: boolean;
@@ -19,6 +20,7 @@
 		confirmLabel: string;
 		confirmTestid: string;
 		danger?: boolean;
+		ondone?: () => void; // the action led to another page
 		children: Snippet;
 	} = $props();
 
@@ -32,7 +34,8 @@
 	{action}
 	use:enhance={() => {
 		busy = true;
-		return async ({ update }) => {
+		return async ({ result, update }) => {
+			if (result.type === 'redirect') ondone?.();
 			await update();
 			busy = false;
 			open = false;

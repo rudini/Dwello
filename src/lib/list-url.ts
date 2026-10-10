@@ -11,3 +11,11 @@ export function listPageUrl(url: URL, page: number): string {
 	params.set('page', String(page));
 	return `${url.pathname}?${params}`;
 }
+
+type Navigation = { type: string; from: { url: URL } | null; to: { url: URL } | null };
+
+/** The list was searched or filtered on its own page (a GET form, or a filter changing the URL) */
+export function isListSearch({ type, from, to }: Navigation): boolean {
+	if (!from || !to || from.url.pathname !== to.url.pathname) return false;
+	return type === 'form' || (type === 'goto' && from.url.search !== to.url.search);
+}

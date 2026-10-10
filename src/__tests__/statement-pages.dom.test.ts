@@ -4,7 +4,14 @@ import { readable } from 'svelte/store';
 let url = new URL('http://localhost/statements');
 vi.mock('$app/environment', () => ({ browser: true }));
 vi.mock('$app/navigation', () => ({ goto: vi.fn(), invalidateAll: vi.fn() }));
-vi.mock('$app/forms', () => ({ enhance: () => ({ destroy() {} }) }));
+// enhance as SvelteKit wires it: the test plays the server's answer to an action of the page
+const actions = vi.hoisted(() => new Map<string, () => unknown>());
+vi.mock('$app/forms', () => ({
+	enhance: (form: HTMLFormElement, submit?: () => unknown) => {
+		if (submit) actions.set(form.getAttribute('action')!, submit);
+		return { destroy() {} };
+	}
+}));
 vi.mock('$app/stores', () => ({
 	page: { subscribe: (run: (value: unknown) => void) => readable({ url }).subscribe(run) }
 }));
@@ -38,6 +45,19 @@ describe('Abrechnungsliste', () => {
 				statusCounts: counts
 			}
 		} as never);
+
+	// After a search the focus moves here, so the number of results is read out
+	it('nennt die Treffer in einer Überschrift, die den Fokus nach der Suche nimmt', () => {
+		list([statement()]);
+		const results = document.querySelector<HTMLElement>('[data-results]')!;
+		expect(results.textContent!.replace(/\s+/g, ' ').trim()).toBe('1 Abrechnung');
+		expect(results.tabIndex).toBe(-1);
+	});
+
+	it('setzt den Fokus nach einer Suche ohne Treffer auf die Meldung', () => {
+		list([]);
+		expect(document.querySelector<HTMLElement>('[data-results]')!.tabIndex).toBe(-1);
+	});
 
 	it('zeigt Status, Saldo und die passenden Aktionen pro Abrechnung', () => {
 		list([
@@ -279,6 +299,15 @@ describe('Abrechnungsdetail', () => {
 		expect(byTestId('statement-mark-paid-button')).toBeNull();
 		click('statement-delete-button');
 		expect(byTestId('statement-delete-confirm')).not.toBeNull();
+	});
+
+	it('bestätigt das Löschen mit der Nummer der Abrechnung', async () => {
+		toasts.set([]);
+		detail();
+		click('statement-delete-button');
+		const after = actions.get('?/delete')!() as (input: unknown) => Promise<void>;
+		await after({ update: async () => {}, result: { type: 'redirect' } });
+		expect(get(toasts).map((toast) => toast.message)).toEqual(['Abrechnung NK-2024-0001 gelöscht']);
 	});
 
 	it('fragt vor dem Versenden nach und nennt Empfänger, Korrespondenzweg und PDF', () => {

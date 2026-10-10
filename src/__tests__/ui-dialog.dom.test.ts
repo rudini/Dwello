@@ -54,6 +54,15 @@ describe('Dialog', () => {
 		expect(document.activeElement).toBe(opener);
 	});
 
+	// A toast raised while the dialog is open is still read out and can be closed
+	it('lässt die Meldungen erreichbar', () => {
+		const toastRegion = document.createElement('div');
+		toastRegion.setAttribute('data-toast-region', '');
+		document.body.append(toastRegion);
+		openDialog();
+		expect(toastRegion.hasAttribute('inert')).toBe(false);
+	});
+
 	it('setzt den Fokus auf "Abbrechen", damit nichts aus Versehen bestätigt wird', () => {
 		openDialog();
 		expect(document.activeElement).toBe(byTestId('dialog-cancel'));

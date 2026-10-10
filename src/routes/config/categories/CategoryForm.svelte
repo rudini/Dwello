@@ -9,7 +9,11 @@
 		category,
 		errors = {},
 		submitLabel
-	}: { category?: Category; errors?: Record<string, string>; submitLabel: string } = $props();
+	}: {
+		category?: Category & { predefined?: boolean };
+		errors?: Record<string, string>;
+		submitLabel: string;
+	} = $props();
 
 	const translations = [
 		{ key: 'nameFR', label: 'Französisch' },
@@ -47,6 +51,9 @@
 		id="description"
 		name="description"
 		label="Beschreibung"
+		help={category?.predefined
+			? 'Die Liste zeigt die Beschreibung vordefinierter Kategorien nicht.'
+			: undefined}
 		optional
 		bind:value={values.description}
 	/>

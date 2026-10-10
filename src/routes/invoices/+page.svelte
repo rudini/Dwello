@@ -57,7 +57,7 @@
 		</div>
 	{:else}
 		<section class="flex flex-col gap-4" aria-labelledby="invoices-count">
-			<h2 id="invoices-count" class="text-xl font-bold text-ink">
+			<h2 id="invoices-count" tabindex="-1" data-results class="text-xl font-bold text-ink">
 				{data.total === 1 ? '1 Rechnung' : `${data.total} Rechnungen`}
 			</h2>
 			<ul class="divide-y divide-line rounded-panel border border-line bg-surface">

@@ -59,7 +59,9 @@
 		</div>
 	{:else}
 		<section aria-labelledby="tenants-count" class="flex flex-col gap-4">
-			<h2 id="tenants-count" class="text-xl font-bold text-ink">{data.total} Mieter</h2>
+			<h2 id="tenants-count" tabindex="-1" data-results class="text-xl font-bold text-ink">
+				{data.total} Mieter
+			</h2>
 			<ul class="flex flex-col divide-y divide-line rounded-panel border border-line bg-surface">
 				{#each data.tenants as tenant (tenant.id)}
 					<TenantRow {tenant} />

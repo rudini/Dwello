@@ -23,6 +23,10 @@
 			// the action removed the focused button, or the page changed: go on from the page title
 			if (document.activeElement === document.body)
 				document.querySelector<HTMLElement>('h1[tabindex="-1"]')?.focus();
+			// the reading time starts now that the confirmation is shown
+			for (const toast of $toasts)
+				if (toast.type !== 'error' && toast.id > shownUpTo && toast.duration)
+					setTimeout(() => dismissToast(toast.id), toast.duration);
 			shownUpTo = newest;
 		}, 500);
 		return () => clearTimeout(timer);
@@ -46,7 +50,11 @@
 	</div>
 {/snippet}
 
-<div class="fixed inset-x-4 bottom-4 z-40 flex flex-col gap-2 sm:left-auto sm:w-96">
+<!-- Above an open dialog (same layer, later on the page), which leaves it reachable -->
+<div
+	class="fixed inset-x-4 bottom-4 z-50 flex flex-col gap-2 sm:left-auto sm:w-96"
+	data-toast-region
+>
 	{#each errors as toast (toast.id)}{@render message(toast, 'alert')}{/each}
 	<div role="status" aria-atomic="false" class="flex flex-col gap-2">
 		{#each confirmations as toast (toast.id)}{@render message(toast)}{/each}

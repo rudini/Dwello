@@ -232,4 +232,19 @@ describe('Gebäudeliste', () => {
 		expect(urls).toContain('http://localhost:3001/api/v1/apartments?limit=1000');
 		expect(data.buildings[0]).toMatchObject({ reletCount: 1, reservedCount: 0 });
 	});
+
+	// The counts are an addition: without them the buildings still show
+	it('zeigt die Gebäude auch, wenn die Wohnungen nicht geladen werden können', async () => {
+		const fetch = (async (url: string) =>
+			url.includes('/apartments')
+				? new Response('Internal Server Error', { status: 500 })
+				: Response.json(buildingList)) as unknown as typeof globalThis.fetch;
+
+		const data = (await listLoad({
+			url: new URL('http://localhost/buildings'),
+			fetch
+		} as never)) as { buildings: { name: string; reletCount: number }[] };
+
+		expect(data.buildings).toMatchObject([{ name: 'Seeblick', reletCount: 0 }]);
+	});
 });

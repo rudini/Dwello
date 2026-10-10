@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { flushSync, mount, unmount } from 'svelte';
 import TextInput from '$lib/ui/TextInput.svelte';
 import MoneyInput from '$lib/ui/MoneyInput.svelte';
 import Select from '$lib/ui/Select.svelte';
@@ -49,6 +50,26 @@ describe('Eingabefeld', () => {
 		expect(document.querySelector('[data-testid="form-error"]')?.textContent).toContain(
 			'Bitte geben Sie den Nachnamen ein.'
 		);
+	});
+
+	// The error belongs to what was sent: once corrected it is gone, the next submit checks again
+	it('nimmt den Fehler weg, sobald das Feld geändert wird, und zeigt ihn beim Senden wieder', () => {
+		const form = document.body.appendChild(document.createElement('form'));
+		form.addEventListener('submit', (event) => event.preventDefault());
+		const field = mount(TextInput, {
+			target: form,
+			props: { id: 'firstName', label: 'Vorname', error: 'Vorname ist erforderlich', value: '' }
+		});
+		flushSync();
+
+		fireEvent(input(), 'input', 'Anna');
+		expect(input().getAttribute('aria-invalid')).toBeNull();
+		expect(document.body.textContent).not.toContain('Vorname ist erforderlich');
+
+		form.dispatchEvent(new Event('submit', { cancelable: true }));
+		flushSync();
+		expect(input().getAttribute('aria-invalid')).toBe('true');
+		unmount(field);
 	});
 
 	it('nennt freiwillige Felder in Worten', () => {

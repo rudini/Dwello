@@ -2,7 +2,7 @@
 	import '../styles/globals.css';
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
-	import { goto } from '$app/navigation';
+	import { afterNavigate, goto } from '$app/navigation';
 	import { user, clearStores } from '$lib/stores';
 	import { getXsrfTokenFromCookie } from '$lib/api';
 	import Header from '$lib/components/Header.svelte';
@@ -10,6 +10,7 @@
 	import MobileNav from '$lib/components/MobileNav.svelte';
 	import Footer from '$lib/components/Footer.svelte';
 	import ToastRegion from '$lib/ui/ToastRegion.svelte';
+	import { isListSearch } from '$lib/list-url';
 	import type { LayoutData } from './$types';
 	import type { Snippet } from 'svelte';
 
@@ -61,6 +62,12 @@
 	// Runs after every component below is mounted: the page now reacts to input (E2E tests wait for it)
 	onMount(() => {
 		document.body.dataset.hydrated = 'true';
+	});
+
+	// After a search on a list the focus goes to its results, so their number is read out
+	afterNavigate((navigation) => {
+		if (isListSearch(navigation))
+			document.querySelector<HTMLElement>('main [data-results]')?.focus();
 	});
 
 	// Derived state for showing authenticated layout

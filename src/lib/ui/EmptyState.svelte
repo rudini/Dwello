@@ -25,7 +25,8 @@
 
 <div class="flex flex-col items-center gap-4 px-4 py-12 text-center" data-testid={testid}>
 	{#if illustration}<Illustration name={illustration} />{/if}
-	<h2 class="text-xl font-bold text-ink">{title}</h2>
+	<!-- After a search without results the focus moves here (afterNavigate in the root layout) -->
+	<h2 tabindex="-1" data-results class="text-xl font-bold text-ink">{title}</h2>
 	<p class="max-w-prose text-ink-muted">{text}</p>
 	{#if actionLabel && actionHref}
 		<Button variant="primary" href={actionHref} testid={actionTestid}>{actionLabel}</Button>
