@@ -1,6 +1,7 @@
 """Run a project's test suite and say how it ended: pass, assertion failure, or error."""
 import json
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -18,6 +19,7 @@ class Run:
     exit_code: int
     outcome: str  # "pass", "fail" (assertion failures only) or "error" (anything else)
     summary: str
+    failed: int  # number of failing tests
 
 
 def run(root):
@@ -33,7 +35,8 @@ def run(root):
                           capture_output=True, text=True)
     verdicts = [line for line in done.stderr.splitlines() if line.startswith(("OK", "FAILED (", "NO TESTS RAN"))]
     summary = verdicts[-1] if verdicts else f"exit code {done.returncode}, no unittest summary"
-    return Run(done.returncode, _outcome(done.returncode, summary), summary)
+    failed = re.search(r"failures=(\d+)", summary)
+    return Run(done.returncode, _outcome(done.returncode, summary), summary, int(failed[1]) if failed else 0)
 
 
 def _has_python(root):
@@ -76,10 +79,10 @@ def _run_vitest(root):
                                f"--outputFile={report}"], cwd=root, capture_output=True, text=True)
         if not report.exists():
             last = (done.stderr.strip() or done.stdout.strip() or "no output").splitlines()[-1]
-            return Run(done.returncode, "error", f"vitest wrote no report: {last}")
+            return Run(done.returncode, "error", f"vitest wrote no report: {last}", 0)
         data = json.loads(report.read_text())
     summary = f"{data['numFailedTests']} of {data['numTotalTests']} tests failed"
-    return Run(done.returncode, _vitest_outcome(done.returncode, data), summary)
+    return Run(done.returncode, _vitest_outcome(done.returncode, data), summary, data["numFailedTests"])
 
 
 def _vitest_outcome(exit_code, data):
@@ -110,7 +113,8 @@ def _run_pytest(root):
         cases = list(ElementTree.parse(report).iter("testcase")) if report.exists() else []
     lines = done.stdout.strip().splitlines()
     summary = lines[-1] if lines else f"exit code {done.returncode}, no output"
-    return Run(done.returncode, _pytest_outcome(done.returncode, cases), summary)
+    failed = sum(1 for case in cases for _ in case.iter("failure"))
+    return Run(done.returncode, _pytest_outcome(done.returncode, cases), summary, failed)
 
 
 def _pytest_outcome(exit_code, cases):

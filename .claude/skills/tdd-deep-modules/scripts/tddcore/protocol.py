@@ -42,6 +42,8 @@ def violations(previous, phase, run, changed):
         found.append(f"{phase} cannot follow {previous}")
     if phase == "red" and run.outcome != "fail":
         found.append(f"red needs a failing assertion, but the suite says: {run.summary}")
+    if phase == "red" and run.outcome == "fail" and run.failed != 1:
+        found.append(f"red needs exactly one failing test, but {run.failed} fail")
     if phase in ("green", "refactor") and run.outcome != "pass":
         found.append(f"{phase} needs all tests passing, but the suite says: {run.summary}")
     code = [f for f in changed if _is_code(f)]
