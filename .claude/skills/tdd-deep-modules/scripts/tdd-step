@@ -9,8 +9,14 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from tddcore import protocol, suite  # noqa: E402
 
 
+def run_git(*args, check=False):
+    # surrogateescape keeps file names that are not UTF-8 round-trippable
+    return subprocess.run(["git", *args], check=check, capture_output=True, text=True,
+                          errors="surrogateescape")
+
+
 def git(*args):
-    return subprocess.run(["git", *args], check=True, capture_output=True, text=True, errors="surrogateescape").stdout
+    return run_git(*args, check=True).stdout
 
 
 def changed_files():
@@ -26,7 +32,7 @@ def changed_files():
 
 
 def head_subject():
-    done = subprocess.run(["git", "log", "-1", "--format=%s"], capture_output=True, text=True, errors="surrogateescape")
+    done = run_git("log", "-1", "--format=%s")
     return done.stdout.strip() if done.returncode == 0 else ""
 
 
@@ -35,7 +41,7 @@ def main(args):
         print("usage: tdd-step <test|red|green|refactor> [message]", file=sys.stderr)
         return 2
     phase, message = args[0], " ".join(" ".join(args[1:]).split()) or args[0]
-    root = subprocess.run(["git", "rev-parse", "--show-toplevel"], capture_output=True, text=True, errors="surrogateescape")
+    root = run_git("rev-parse", "--show-toplevel")
     if root.returncode != 0:
         print("tdd-step: not inside a git repository", file=sys.stderr)
         return 2
@@ -52,10 +58,8 @@ def main(args):
         return 1
     index = git("write-tree").strip()
     git("add", "-A")
-    done = subprocess.run(["git", "commit", "-q", "-m", f"{phase}: {message}",
-                           "--trailer", f"TDD-Phase: {phase}",
-                           "--trailer", f"TDD-Exit-Code: {run.exit_code}"],
-                          capture_output=True, text=True, errors="surrogateescape")
+    done = run_git("commit", "-q", "-m", f"{phase}: {message}", "--trailer", f"TDD-Phase: {phase}",
+                   "--trailer", f"TDD-Exit-Code: {run.exit_code}")
     if done.returncode != 0:
         git("read-tree", index)
         print(f"tdd-step: git commit failed:\n{done.stderr}{done.stdout}", file=sys.stderr)

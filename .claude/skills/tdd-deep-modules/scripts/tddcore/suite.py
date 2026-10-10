@@ -36,7 +36,8 @@ def run(root):
     elif _has_python(root):
         runners.append(_run_unittest)
     if not runners:
-        raise NoFramework("no supported test framework detected (looked for vitest, pytest, unittest)")
+        raise NoFramework("no supported test framework detected"
+                          " (looked for vitest, pytest, unittest)")
     return _combine([runner(root) for runner in runners])
 
 
@@ -52,8 +53,8 @@ def _combine(runs):
 
 
 def _has_python(root):
-    files = subprocess.run(["git", "ls-files", "-co", "--exclude-standard"], cwd=root,
-                           capture_output=True, text=True, errors="replace", check=True).stdout.splitlines()
+    files = subprocess.run(["git", "ls-files", "-co", "--exclude-standard"], cwd=root, check=True,
+                           capture_output=True, text=True, errors="replace").stdout.splitlines()
     return any(f.endswith(".py") for f in files)
 
 
@@ -122,7 +123,8 @@ def _vitest_outcome(exit_code, data, unhandled):
     files = data["testResults"]
     messages = [m for f in files for a in f["assertionResults"] for m in a["failureMessages"]]
     load_errors = [f for f in files if f["message"]]
-    if messages and not load_errors and not unhandled and all(m.startswith("AssertionError") for m in messages):
+    asserted = all(m.startswith("AssertionError") for m in messages)
+    if messages and not load_errors and not unhandled and asserted:
         return "fail"
     return "error"
 
