@@ -34,7 +34,9 @@ function loadModules(root: string, paths: string[]): Map<string, SourceFile> {
 
 /** Files in directories of at least `minFiles` analyzed modules, most of which are tiny single-export files. */
 function classitisFiles(candidates: Candidate[], minFiles: number): Set<string> {
-	const tiny = (c: Candidate) => c.file.exportCount === 1 && c.file.implementationSize <= 3;
+	// Only behaviour counts as a tiny piece: one-constant files (a table per language, an icon per file) are data.
+	const tiny = (c: Candidate) =>
+		c.file.exportCount === 1 && c.file.implementationSize <= 3 && (c.file.functionCount > 0 || c.file.classes.length > 0);
 	const byDir = Map.groupBy(candidates, (c) => dirname(c.path));
 	const result = new Set<string>();
 	for (const group of byDir.values()) {

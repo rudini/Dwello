@@ -97,4 +97,13 @@ export function useIt(pad: number, o: { pad: number }) {
 		// useIt: declaration, const, return = 3; the dead pad() and its 3 statements are left out
 		expect(m.metrics.implementationSize).toBe(3);
 	});
+
+	it('is not fooled by a type-only use of a dead function (typeof; review 3)', () => {
+		const plain = analyze({ root: writeProject({ 'src/store.ts': STORE, 'src/shallow.ts': SHALLOW_MODULE }), fallow: 'off' }).modules.find((m) => m.path === 'src/shallow.ts')!;
+		const padded = analyze({
+			root: writeProject({ 'src/store.ts': STORE, 'src/shallow.ts': `${SHALLOW_MODULE}${DEAD_PADDING}export type P = typeof unusedA;\n` }),
+			fallow: 'off'
+		}).modules.find((m) => m.path === 'src/shallow.ts')!;
+		expect(padded.metrics.implementationSize).toBe(plain.metrics.implementationSize);
+	});
 });

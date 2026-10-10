@@ -429,3 +429,19 @@ The full report is `docs/deepcheck-validation.md`.
   - the 5-point margin below the threshold;
   - both final review rounds called it "usable as scan only" until their findings were fixed. The last fixes were verified by regression tests, the realistic-module check and a re-run of X2.2, not by a third independent review: the brief caps reviews at two rounds.
 - Correction: my first end-of-run summary in the session said "every exit gate ... was verified". The precise statement is the list above: X3.2 and X3.3 are verified locally, not on GitHub, and the Phase 4 gates are done with the logged caveats.
+
+### 2026-10-10, third independent check of the Phase 4 verdict
+
+The last Phase 4 fixes had only been verified by me. A fresh independent reviewer re-checked them and the verdict with about 30 realistic probe modules.
+
+- **Round-2 fixes:** they hold.
+- **New false positive:** a directory of five or more one-constant files (one translation table per language, one icon per file) scored 70 through classitis.
+  - Fixed with a regression test first: only function or class exports count as tiny classitis pieces.
+  - Also fixed, test first: a `typeof` use in a type position kept dead padding alive.
+- **Known evasions, documented in `docs/deepcheck-validation.md`:**
+  - a forwarder with a constant extra argument;
+  - a forwarder through a closure or a destructured parameter object;
+  - a factory of forwarders;
+  - plain aliases.
+- **The reviewer's call:** "usable as scan only" until the classitis false positive was fixed, then "ready to gate (narrow) is defensible". With the fix in, the verdict "ready to gate on changed code (narrow)" stands with the logged caveats.
+- **After the fix:** 166 deepcheck tests pass. The repo ranking is unchanged (precision@25 12/25, nothing flagged), no OSS module is flagged, and the baseline is regenerated with 0 flagged of 124.

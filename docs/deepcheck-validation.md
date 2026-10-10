@@ -49,6 +49,23 @@ The second reviewer probed these and found none of them flagged:
 
 All of these are now fixed, each with a regression test seen failing first. The round-2 reviewer judged "ready to gate (narrow)" defensible once they were fixed. No third review round was allowed (the brief caps at two). The fixes were therefore verified by the tests above and by the adversarial check, not by a further independent review.
 
+**Third independent check (after the two final review rounds).** The last fixes had not been independently reviewed, so a fresh reviewer probed about 30 realistic modules.
+- **Confirmed:**
+  - The round-2 fixes hold: export-list, shorthand and default-object facades are flagged at 67–73, and the copy module is not flagged.
+  - Decorators, adapters with defaults, caches, form-action factories, formatter collections, and Drizzle or zod definitions per file score 30–57, not flagged.
+  - A class with an injected repository and four forwarding methods is flagged at 69–74 (a true positive).
+- **Found and fixed (regression tests first):**
+  - A directory of five or more one-constant files (one translation table per language, one icon per file) was flagged at 70 through classitis. Only files whose single export is a function or class now count as tiny pieces.
+  - `export type P = typeof deadFn` kept dead padding alive. Uses in type positions no longer count.
+- **Known evasions, documented, not fixed:**
+  - a forwarder with one constant extra argument (65, not flagged);
+  - a parameter fixed through a closure, a destructured parameter object, or a factory returning forwarders (53–57);
+  - plain aliases (`export const load = getTenant`), which are not eligible.
+
+  The gate's narrow class is therefore narrower than "all thin facades".
+- **The reviewer's call:** "usable as scan only" until the classitis false positive was fixed, then "ready to gate (narrow) is defensible". It is fixed.
+- A typed EventEmitter wrapper is flagged at 73, which the reviewer called debatable. Typed emit/on/off forwarders are thin wrappers whose value is the type, so `// deepcheck-ignore-file -- reason` is the intended way out.
+
 **The after-step hook is a commit/push gate.** The brief asks to run the audit "through the same mechanism Fallow uses". Here that is the Claude Code `PreToolUse` hook on `git commit`/`git push`, not a hook after every edit. At 4.7–5.3 s with Fallow (3.7 s without) it fits that gate.
 
 ## Method

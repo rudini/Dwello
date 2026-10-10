@@ -123,4 +123,12 @@ function find2(id: string) {
 		expect(m.metrics.leakyExports.length).toBeGreaterThan(0);
 		expect(m.flagged).toBe(false);
 	});
+
+	it('does not call a directory of one-constant files classitis (translations per language; review 3)', () => {
+		const files = Object.fromEntries(
+			['de', 'fr', 'it', 'en', 'rm'].map((lang) => [`src/pdf/i18n/${lang}.ts`, `export const ${lang} = { title: 'Nebenkosten ${lang}', total: 'Total', due: 'Fällig' };\n`])
+		);
+		const report = analyze({ root: writeProject(files), fallow: 'off' });
+		expect(report.modules.filter((m) => m.flagged || m.metrics.classitis).map((m) => m.path)).toEqual([]);
+	});
 });

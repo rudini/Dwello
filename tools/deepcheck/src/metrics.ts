@@ -190,7 +190,7 @@ function deadDeclarations(sf: SourceFile): Set<Node> {
 	const names = new Set(candidates.flatMap((s) => declaredNameNodes(s).map((n) => n.getText())));
 	const uses = sf
 		.getDescendantsOfKind(SyntaxKind.Identifier)
-		.filter((id) => names.has(id.getText()))
+		.filter((id) => names.has(id.getText()) && !id.getFirstAncestor((a) => Node.isTypeNode(a)))
 		.map((id) => ({ id, owner: topLevel(id) }));
 	const dead = new Set<Node>();
 	// Symbols are resolved only for uses in other live statements, and only until the first real use is found.
