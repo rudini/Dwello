@@ -42,7 +42,7 @@ const rules: [string, RegExp][] = [
 		'Schatten ausserhalb der zwei Tokens',
 		new RegExp(`\\bshadow(?:-(?:sm|md|lg|xl|2xl|inner))?${end}`)
 	],
-	['Verlauf, Unschärfe oder Glühen', /gradient|\bblur\b|backdrop-blur|drop-shadow|glow/],
+	['Verlauf, Unschärfe oder Glühen', /gradient|(?<![:\w-])blur\b|backdrop-blur|drop-shadow|glow/],
 	['Material Symbols oder externe Schrift', /material-symbols|fonts\.googleapis|fonts\.gstatic/],
 	['Emoji als Symbol', /(?![©®™])\p{Extended_Pictographic}/u],
 	[
@@ -95,7 +95,8 @@ describe('Wächter des Designsystems', () => {
 		'class="bg-surface text-ink border-line-strong rounded-control shadow-raised p-4 gap-6"',
 		'<Button variant="primary">',
 		'class="text-ink-muted min-h-12 size-12 rounded-panel shadow-overlay"',
-		'href="#main-content"'
+		'href="#main-content"',
+		'<input on:blur={check} onblur={check} />'
 	])('lässt %s zu', (sample) => {
 		expect(findingsIn(sample)).toEqual([]);
 	});

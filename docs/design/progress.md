@@ -8,8 +8,8 @@ Brief: `docs/REDESIGN_BRIEF.md`. Resume rules: `docs/design/arbeitsregeln.md`.
 |---|---|---|---|---|
 | 0 Analysis | done | 1 round, 3 Majors fixed (`reviews/0-review-1.md`) | n/a (test from stage 2) | docs-only push: job skips its steps (no routes) |
 | 1 Plan | done | 1 round, 6 Majors fixed (`reviews/1-review-1.md`) | n/a | docs-only push: job skips its steps |
-| 2 Tokens + base components + axe | review 1 fixed | | | |
-| 3 Icons + illustrations | open | | | |
+| 2 Tokens + base components + axe | done | 2 rounds (`reviews/2-review-1.md`, `2-review-2.md`), all Majors fixed | 79 examples, 0 violations | passed (afcda10, e62b6cf) | | | |
+| 3 Icons + illustrations | in progress | | | |
 | 4 Shell, navigation, dashboard | open | | | |
 | 5 Rental contract wizard | open | | | |
 | 6 Statement wizard | open | | | |
@@ -17,7 +17,7 @@ Brief: `docs/REDESIGN_BRIEF.md`. Resume rules: `docs/design/arbeitsregeln.md`.
 | 8 Remove old design system | open | | | |
 | 9 Final | open | | | |
 
-**Next step:** push review-1 fixes, wait for CI, follow-up review of stage 2, then stage 3 (icons, illustrations).
+**Next step:** stage 3 – icon map (Lucide) for all icons the UI needs, ≥ 8 illustrations, both in the gallery and the axe check.
 
 ## Log
 
@@ -50,3 +50,4 @@ Brief: `docs/REDESIGN_BRIEF.md`. Resume rules: `docs/design/arbeitsregeln.md`.
 - First axe run on the old UI: 304 violations on all 76 examples (contrast of `gray-400/500`, `green-600` …; `dt`/`dd` outside `dl`; a scrollable table not reachable by keyboard). Fixed by mapping low-contrast text colours to tokens across the legacy files, restructuring the tenant contact list, and making scroll regions focusable (with a targeted `svelte-ignore a11y_no_noninteractive_tabindex`, because Svelte's lint and WCAG 2.1.1 disagree here). Result: 0 violations.
 - Found: several old confirmation dialogs (building, contract end/delete) have no `role="dialog"`; fixed when they move to the new `Dialog` in stage 7.
 - Review round 1: 3 Majors (axe states not proven, no browser check of the new components) fixed: states now wait for proof, new `/gallery` page in the axe check; 9 Minors fixed or justified (`reviews/2-review-1.md`). Axe: 79 examples, 0 violations. E2E 352 passed, unit 760 passed.
+- Review round 2: 1 Major (old and new toast regions both rendered) fixed by switching the layout to `ToastRegion` and deleting the old toast components; 7 Minors fixed. The session worker restarted once; PostgreSQL restarted, no work lost.

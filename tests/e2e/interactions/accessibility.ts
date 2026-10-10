@@ -56,7 +56,7 @@ const shows = (page: Page, selector: string) => page.locator(selector).first().w
 const dialog = (page: Page) => shows(page, '[data-testid$="-confirm"]');
 
 // What a user does to reach each state
-const states: Record<string, (page: Page) => Promise<unknown>> = {
+const states: Record<string, (page: Page, viewport: Viewport) => Promise<unknown>> = {
 	default: async () => {},
 	'filtered-empty': async (page) => shows(page, '[data-testid$="-empty"]'),
 	'login-error': async (page) => shows(page, '[data-testid="login-error"]'),
@@ -69,11 +69,11 @@ const states: Record<string, (page: Page) => Promise<unknown>> = {
 		await dialog(page);
 	},
 	'dialog-open': async (page) => {
-		await press(page, 'gallery-open-dialog');
+		await page.getByTestId('gallery-open-dialog').press('Enter'); // by keyboard: the gallery's toasts cover the page
 		await shows(page, '[role="dialog"]');
 	},
 	'busy-dialog-open': async (page) => {
-		await press(page, 'gallery-open-busy-dialog');
+		await page.getByTestId('gallery-open-busy-dialog').press('Enter');
 		await shows(page, '[role="dialog"][aria-labelledby]');
 	},
 	'end-dialog': async (page) => {
@@ -93,11 +93,14 @@ const states: Record<string, (page: Page) => Promise<unknown>> = {
 		await press(page, 'distribution-key-test-button');
 		await page.getByTestId('formula-test-result').or(page.getByTestId('formula-test-error')).first().waitFor();
 	},
-	'profile-sum-invalid': async (page) => page.getByTestId('heating-profile-month-january').fill('50'),
-	'mobile-menu-open': async (page) => {
-		const menu = page.getByTestId('mobile-menu-button');
-		if (!(await menu.isVisible())) return; // desktop shows the sidebar instead: its default view is checked
-		await menu.click();
+	'profile-sum-invalid': async (page) => {
+		await page.getByTestId('heating-profile-month-january').fill('50');
+		await shows(page, '[data-testid="heating-profile-form-total"].text-critical');
+	},
+	'mobile-menu-open': async (page, viewport) => {
+		// Only where the sidebar folds away (below md); tablet joins when the shell folds below 1024 px (stage 4)
+		if (viewport !== 'mobile') return;
+		await press(page, 'mobile-menu-button');
 		await shows(page, '[role="dialog"][aria-label="Hauptnavigation"]');
 	},
 	'user-menu-open': async (page) => {
@@ -141,7 +144,7 @@ export async function check(
 	await page.emulateMedia({ colorScheme: scheme, reducedMotion: 'reduce' });
 	await visit(page, path + (queries[state] ?? query[state] ?? ''));
 	if (state === 'every-wizard-step') return wizardSteps(page);
-	await states[state](page);
+	await states[state](page, viewport);
 	return violations(page);
 }
 
@@ -149,8 +152,10 @@ export async function check(
 async function wizardSteps(page: Page) {
 	const found = await violations(page);
 	await page.getByTestId('wizard-next').click();
+	const building = page.locator('[data-testid^="generate-building-"]').first();
+	await building.waitFor(); // step 2 is shown
 	found.push(...(await violations(page)));
-	await page.locator('[data-testid^="generate-building-"]').first().check();
+	await building.check();
 	await page.getByTestId('wizard-next').click();
 	await page.getByTestId('preview-count').waitFor();
 	found.push(...(await violations(page)));

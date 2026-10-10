@@ -13,7 +13,7 @@
 	} as const;
 </script>
 
-<div class="fixed inset-x-4 bottom-4 z-50 flex flex-col gap-2 sm:left-auto sm:w-96">
+<div class="fixed inset-x-4 bottom-4 z-40 flex flex-col gap-2 sm:left-auto sm:w-96">
 	{#each $toasts as toast (toast.id)}
 		{@const style = toneStyle[tones[toast.type]]}
 		<div

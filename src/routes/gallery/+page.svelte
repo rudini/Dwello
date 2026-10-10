@@ -21,7 +21,6 @@
 	import Tabs from '$lib/ui/Tabs.svelte';
 	import TextInput from '$lib/ui/TextInput.svelte';
 	import Textarea from '$lib/ui/Textarea.svelte';
-	import ToastRegion from '$lib/ui/ToastRegion.svelte';
 
 	// Every component of the design system in every state, so the axe check sees them in a real browser
 	let dialogOpen = $state(false);
@@ -36,6 +35,8 @@
 			'Die Abrechnung konnte nicht gespeichert werden. Bitte versuchen Sie es erneut.',
 			0
 		);
+		addToast('warning', 'Die Verwaltungspauschale liegt über dem üblichen Richtwert von 3 %.', 0);
+		addToast('info', 'Entwurf gespeichert.', 0);
 	});
 </script>
 
@@ -72,6 +73,7 @@
 			<Button variant="primary" busy busyLabel="Wird gespeichert …">Speichern</Button>
 			<Button href="/tenants/new" icon="check">Mieter erfassen</Button>
 			<IconButton icon="close" label="Schliessen" onclick={() => {}} />
+			<IconButton icon="close" label="Menü schliessen" expanded onclick={() => {}} />
 		</div>
 	</Panel>
 
@@ -131,6 +133,19 @@
 				value=""
 			/>
 			<Textarea id="g-notes" label="Bemerkungen" optional value="" />
+			<Textarea
+				id="g-reason"
+				label="Grund der Änderung"
+				error="Bitte nennen Sie den Grund der Änderung."
+				value=""
+			/>
+			<Select
+				id="g-language"
+				label="Sprache"
+				options={[{ value: 'de', label: 'Deutsch' }]}
+				value="de"
+				disabled
+			/>
 			<div class="flex flex-col gap-4">
 				<Checkbox
 					id="g-allocable"
@@ -139,6 +154,7 @@
 					checked
 				/>
 				<Checkbox id="g-unchecked" label="Unbefristeter Mietvertrag" />
+				<Checkbox id="g-disabled-box" label="Vordefiniert" checked disabled />
 			</div>
 			<RadioGroup
 				name="g-duration"
@@ -216,11 +232,18 @@
 		columns={[
 			{ label: 'Kategorie' },
 			{ label: 'Verteilschlüssel' },
-			{ label: 'Betrag', numeric: true }
+			{ label: 'Betrag', numeric: true },
+			{ label: 'Aktionen', hidden: true }
 		]}
 	>
-		<tr><td>Wasser</td><td>Pro Fläche (m²)</td><td class="text-right">CHF 412.50</td></tr>
-		<tr><td>Kehricht</td><td>Pro Einheit</td><td class="text-right">CHF 96.00</td></tr>
+		<tr>
+			<td>Wasser</td><td>Pro Fläche (m²)</td><td class="text-right">CHF 412.50</td>
+			<td><a href="/invoices" class="text-accent underline">Rechnungen ansehen</a></td>
+		</tr>
+		<tr>
+			<td>Kehricht</td><td>Pro Einheit</td><td class="text-right">CHF 96.00</td>
+			<td><a href="/invoices" class="text-accent underline">Rechnungen ansehen</a></td>
+		</tr>
 	</Table>
 
 	<Panel title="Leerer Zustand">
@@ -266,4 +289,3 @@
 >
 	<p>Danach können Sie die Abrechnung nicht mehr bearbeiten oder löschen.</p>
 </Dialog>
-<ToastRegion />

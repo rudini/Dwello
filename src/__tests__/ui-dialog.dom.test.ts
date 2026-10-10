@@ -57,6 +57,13 @@ describe('Dialog', () => {
 		expect(document.activeElement).toBe(byTestId('dialog-confirm'));
 	});
 
+	it('holt den Fokus mit Tab in den Dialog zurück, wenn er draussen liegt', () => {
+		const { opener } = openDialog();
+		opener.focus();
+		press('Tab');
+		expect(document.activeElement).toBe(byTestId('dialog-cancel'));
+	});
+
 	it('schliesst mit Escape und gibt den Fokus zurück', () => {
 		const { opener, onclose } = openDialog();
 		press('Escape');

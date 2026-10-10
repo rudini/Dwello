@@ -53,23 +53,31 @@
 
 	function keydown(event: KeyboardEvent) {
 		if (!open) return;
-		if (event.key === 'Escape') close();
+		if (event.key === 'Escape') {
+			event.stopPropagation();
+			close();
+		}
 		if (event.key === 'Tab') trapFocus(event);
 	}
 
-	// Tab from the last control wraps to the first and back; while busy nothing inside can take focus
+	// Tab moves through the dialog's controls only, wrapping at both ends; while busy it stays on the panel
 	function trapFocus(event: KeyboardEvent) {
+		event.preventDefault();
+		if (busy) return;
 		const focusable = [
 			...(panel?.querySelectorAll<HTMLElement>(
 				'button:not([disabled]), [href], input, select, textarea'
 			) ?? [])
 		];
-		const [first, last] = [focusable[0], focusable.at(-1)];
-		const wrapTo = event.shiftKey
-			? document.activeElement === first && last
-			: document.activeElement === last && first;
-		if (busy || wrapTo) event.preventDefault();
-		if (wrapTo) wrapTo.focus();
+		const at = focusable.indexOf(document.activeElement as HTMLElement);
+		const step = event.shiftKey ? -1 : 1;
+		const target =
+			at === -1
+				? event.shiftKey
+					? focusable.at(-1)
+					: focusable[0]
+				: focusable.at((at + step) % focusable.length);
+		target?.focus();
 	}
 </script>
 

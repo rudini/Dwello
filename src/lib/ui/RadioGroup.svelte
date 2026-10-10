@@ -30,11 +30,12 @@
 <fieldset
 	class="flex flex-col gap-2"
 	role="radiogroup"
+	aria-labelledby="{name}-legend"
 	aria-describedby={describedBy}
 	aria-invalid={error ? true : undefined}
 	data-testid={testid}
 >
-	<legend class="mb-2 font-semibold text-ink">{legend}</legend>
+	<legend id="{name}-legend" class="mb-2 font-semibold text-ink">{legend}</legend>
 	{#if help}<p id="{name}-help" class="text-ink-muted">{help}</p>{/if}
 	{#each options as option, i (option.value)}
 		{@const id = `${name}-${i}`}

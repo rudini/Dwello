@@ -9,7 +9,7 @@
 	import Navigation from '$lib/components/Navigation.svelte';
 	import MobileNav from '$lib/components/MobileNav.svelte';
 	import Footer from '$lib/components/Footer.svelte';
-	import ToastContainer from '$lib/components/ToastContainer.svelte';
+	import ToastRegion from '$lib/ui/ToastRegion.svelte';
 	import type { LayoutData } from './$types';
 	import type { Snippet } from 'svelte';
 
@@ -107,4 +107,4 @@
 {/if}
 
 <!-- Toast notifications -->
-<ToastContainer />
+<ToastRegion />

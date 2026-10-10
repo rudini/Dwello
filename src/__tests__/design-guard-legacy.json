@@ -42,7 +42,6 @@
 	"src/lib/components/SuggestedCategory.svelte",
 	"src/lib/components/TenantFormFields.svelte",
 	"src/lib/components/TextField.svelte",
-	"src/lib/components/Toast.svelte",
 	"src/lib/contract-form.ts",
 	"src/routes/+error.svelte",
 	"src/routes/+layout.svelte",
