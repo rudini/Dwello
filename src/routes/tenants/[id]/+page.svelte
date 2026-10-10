@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
+	import { addToast } from '$lib/stores';
 	import ActionDialog from '$lib/ui/ActionDialog.svelte';
 	import Button from '$lib/ui/Button.svelte';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
@@ -68,6 +69,7 @@
 	disabled={hasContracts}
 	confirmTestid="tenant-delete-confirm"
 	error={form?.error}
+	onsuccess={() => addToast('success', `Mieter «${name}» gelöscht`)}
 >
 	<p data-testid="delete-dialog-message">
 		{hasContracts

@@ -115,6 +115,7 @@
 	disabled={!contract.endDate}
 	confirmTestid="contract-delete-confirm"
 	error={form?.deleteError}
+	onsuccess={() => addToast('success', `Mietvertrag von ${name} gelöscht`)}
 >
 	{#if contract.endDate}
 		<p>

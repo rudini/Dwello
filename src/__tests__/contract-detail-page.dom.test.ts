@@ -1,8 +1,21 @@
 import { describe, it, expect, vi } from 'vitest';
 
-vi.mock('$app/forms', () => ({ enhance: () => ({ destroy() {} }) }));
+// enhance as SvelteKit wires it: the test plays the server's answer to an action of the page
+const actions = vi.hoisted(() => new Map<string, () => unknown>());
+vi.mock('$app/forms', () => ({
+	enhance: (form: HTMLFormElement, submit: () => unknown) => {
+		actions.set(form.getAttribute('action')!, submit);
+		return { destroy() {} };
+	}
+}));
+async function redirectAfter(action: string) {
+	const after = actions.get(action)!() as (input: unknown) => Promise<void>;
+	await after({ update: async () => {}, result: { type: 'redirect' } });
+}
 
 import ContractPage from '../routes/contracts/[id]/+page.svelte';
+import { get } from 'svelte/store';
+import { toasts } from '$lib/stores';
 import { byTestId, click, show } from './helpers/dom';
 
 const contract = (startDate: string, endDate: string | null) => ({
@@ -118,6 +131,16 @@ describe('Mietvertragsdetail', () => {
 			'Ein Mietvertrag mit Nebenkostenabrechnungen kann nicht gelöscht werden.'
 		);
 		expect(words).not.toContain('bleiben erhalten');
+	});
+
+	it('bestätigt das Löschen mit dem Namen des Mieters', async () => {
+		toasts.set([]);
+		open('2024-01-01', '2024-12-31');
+		click('contract-delete-button');
+		await redirectAfter('?/delete');
+		expect(get(toasts).map((toast) => toast.message)).toEqual([
+			'Mietvertrag von Anna Keller gelöscht'
+		]);
 	});
 
 	it('zeigt im Löschdialog, warum das Backend das Löschen ablehnt', () => {

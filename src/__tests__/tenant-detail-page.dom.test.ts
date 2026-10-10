@@ -1,8 +1,21 @@
 import { describe, it, expect, vi } from 'vitest';
 
-vi.mock('$app/forms', () => ({ enhance: () => ({ destroy() {} }) }));
+// enhance as SvelteKit wires it: the test plays the server's answer to an action of the page
+const actions = vi.hoisted(() => new Map<string, () => unknown>());
+vi.mock('$app/forms', () => ({
+	enhance: (form: HTMLFormElement, submit: () => unknown) => {
+		actions.set(form.getAttribute('action')!, submit);
+		return { destroy() {} };
+	}
+}));
+async function redirectAfter(action: string) {
+	const after = actions.get(action)!() as (input: unknown) => Promise<void>;
+	await after({ update: async () => {}, result: { type: 'redirect' } });
+}
 
 import TenantPage from '../routes/tenants/[id]/+page.svelte';
+import { get } from 'svelte/store';
+import { toasts } from '$lib/stores';
 import { allByTestId, byTestId, click, show } from './helpers/dom';
 
 const tenant = {
@@ -112,6 +125,14 @@ describe('Mieterdetail', () => {
 		expect(document.querySelector('[role=dialog]')!.textContent).toContain(
 			'Abrechnungen und Dokumente auf sie verweisen'
 		);
+	});
+
+	it('bestätigt das Löschen mit dem Namen des Mieters', async () => {
+		toasts.set([]);
+		open();
+		click('tenant-delete-button');
+		await redirectAfter('?/delete');
+		expect(get(toasts).map((toast) => toast.message)).toEqual(['Mieter «Lea Frei» gelöscht']);
 	});
 
 	it('zeigt den Grund, wenn das Löschen abgelehnt wurde', () => {

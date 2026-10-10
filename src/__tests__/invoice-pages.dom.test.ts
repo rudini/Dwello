@@ -170,6 +170,7 @@ describe('Rechnungsdetail', () => {
 
 		expect(calls).toEqual([{ method: 'DELETE', path: '/invoices/i1', body: undefined }]);
 		expect(goto).toHaveBeenCalledWith('/invoices');
+		expect(get(toasts).at(-1)!.message).toBe('Rechnung von Hauswart Meier gelöscht');
 	});
 
 	it('meldet einen Fehler beim Neu-Kategorisieren', async () => {

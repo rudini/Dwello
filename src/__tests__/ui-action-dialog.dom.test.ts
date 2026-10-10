@@ -54,6 +54,13 @@ describe('Bestätigung einer Seitenaktion', () => {
 		expect(onsuccess).toHaveBeenCalledOnce();
 	});
 
+	// a delete leads to the list: it confirms there
+	it('meldet den Erfolg auch, wenn die Aktion zu einer anderen Seite führt', async () => {
+		const onsuccess = open();
+		await answer('redirect');
+		expect(onsuccess).toHaveBeenCalledOnce();
+	});
+
 	it('bleibt bei einer Ablehnung offen und nennt den Grund', async () => {
 		const onsuccess = open({ error: 'Mieter mit Mietverträgen können nicht gelöscht werden.' });
 		await answer('failure');

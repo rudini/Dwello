@@ -40,6 +40,8 @@
 	use:enhance={() => {
 		busy = true;
 		return async ({ result, update }) => {
+			// a delete leads to another page, which confirms it
+			if (result.type === 'redirect') onsuccess?.();
 			await update();
 			busy = false;
 			if (result.type !== 'success') return;
