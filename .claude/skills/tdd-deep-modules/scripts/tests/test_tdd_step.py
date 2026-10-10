@@ -266,3 +266,13 @@ class TddStepTest(unittest.TestCase):
                 self.assertEqual(result.returncode, 0, result.stderr)
                 self.assertEqual(repo.subject(), "red: adds two numbers")
                 self.assertEqual(repo.trailer("TDD-Exit-Code"), "1")
+
+    def test_pytest_non_assertion_exception_is_refused_as_red(self):
+        repo = Repo(self, {"calc.py": "def add(a):\n    return a\n", "pytest.ini": "[pytest]\n"})
+        repo.write("test_calc.py", PYTEST_TEST)
+
+        result = repo.run("tdd-step", "red", "adds two numbers")
+
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn("red needs a failing assertion", result.stderr)
+        self.assertEqual(repo.subject(), "init")
