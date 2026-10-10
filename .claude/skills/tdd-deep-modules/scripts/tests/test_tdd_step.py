@@ -505,3 +505,17 @@ class TddStepTest(unittest.TestCase):
                 for rel, text in skipping.items():
                     repo.write(rel, text)
                 self.assert_refused(repo, "refactor", "refactor needs all tests passing", head="green: seed")
+
+    def test_test_configuration_is_test_code(self):
+        projects = {
+            "vitest.config.js": (vitest_repo(self), {"calc.test.js": VITEST_TEST},
+                                 {"calc.js": RIGHT_ADD_JS, "vitest.config.js": "export default {};\n"}),
+            "conftest.py": (Repo(self, {"calc.py": WRONG_ADD, "pytest.ini": "[pytest]\n"}),
+                            {"test_calc.py": PYTEST_TEST}, {"calc.py": RIGHT_ADD, "conftest.py": "X = 1\n"}),
+        }
+        for config, (repo, red, green) in projects.items():
+            with self.subTest(config):
+                repo.commit_all("red: adds", red)
+                for rel, text in green.items():
+                    repo.write(rel, text)
+                self.assert_refused(repo, "green", f"not tests: {config}", head="red: adds")
