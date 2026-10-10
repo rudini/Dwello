@@ -39,6 +39,13 @@ beforeEach(() => {
 });
 
 describe('Gebäudeliste', () => {
+	// After a search the focus moves here, so the number of results is read out
+	it('nennt die Treffer in einer Überschrift, die den Fokus nach der Suche nimmt', () => {
+		list([building()]);
+		const results = document.querySelector<HTMLElement>('[data-results]')!;
+		expect(results.textContent!.replace(/\s+/g, ' ').trim()).toBe('1 Gebäude');
+		expect(results.tabIndex).toBe(-1);
+	});
 	it('nennt Seite, Anzahl und den einen Hauptschritt', () => {
 		list([building()]);
 		expect(document.querySelector('h1')!.textContent).toBe('Gebäude');

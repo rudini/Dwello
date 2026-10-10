@@ -36,6 +36,12 @@ const row = (body: string, id: string) =>
 	body.match(new RegExp(`<li[^>]*data-testid="tenant-card-${id}"[\\s\\S]*?</li>`))![0];
 
 describe('Mieterliste', () => {
+	// After a search the focus moves to the count, so it is read out
+	it('nennt die Treffer in einer Überschrift, die den Fokus nehmen kann', () => {
+		expect(list([tenant('t1', true)])).toMatch(
+			/<h2[^>]*tabindex="-1"[^>]*data-results[^>]*> ?1 Mieter ?<\/h2>/
+		);
+	});
 	it('öffnet den Mieter über seinen Namen', () => {
 		const body = row(list([tenant('t1', true, 'Wohnung 2.01')]), 't1');
 

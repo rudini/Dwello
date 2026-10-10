@@ -60,7 +60,7 @@
 		</div>
 	{:else}
 		<section aria-labelledby="contracts-count" class="flex flex-col gap-4">
-			<h2 id="contracts-count" class="text-xl font-bold text-ink">
+			<h2 id="contracts-count" tabindex="-1" data-results class="text-xl font-bold text-ink">
 				{data.total}
 				{data.total === 1 ? 'Mietvertrag' : 'Mietverträge'}
 			</h2>

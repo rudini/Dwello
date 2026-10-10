@@ -46,6 +46,19 @@ describe('Abrechnungsliste', () => {
 			}
 		} as never);
 
+	// After a search the focus moves here, so the number of results is read out
+	it('nennt die Treffer in einer Überschrift, die den Fokus nach der Suche nimmt', () => {
+		list([statement()]);
+		const results = document.querySelector<HTMLElement>('[data-results]')!;
+		expect(results.textContent!.replace(/\s+/g, ' ').trim()).toBe('1 Abrechnung');
+		expect(results.tabIndex).toBe(-1);
+	});
+
+	it('setzt den Fokus nach einer Suche ohne Treffer auf die Meldung', () => {
+		list([]);
+		expect(document.querySelector<HTMLElement>('[data-results]')!.tabIndex).toBe(-1);
+	});
+
 	it('zeigt Status, Saldo und die passenden Aktionen pro Abrechnung', () => {
 		list([
 			statement(),

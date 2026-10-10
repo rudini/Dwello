@@ -95,11 +95,16 @@
 			{/if}
 		</section>
 	{:else}
-		<ul class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-			{#each data.buildings as building (building.id)}
-				<BuildingCard {building} />
-			{/each}
-		</ul>
+		<section aria-labelledby="buildings-count" class="flex flex-col gap-4">
+			<h2 id="buildings-count" tabindex="-1" data-results class="text-xl font-bold text-ink">
+				{data.total} Gebäude
+			</h2>
+			<ul class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+				{#each data.buildings as building (building.id)}
+					<BuildingCard {building} />
+				{/each}
+			</ul>
+		</section>
 		<Pagination url={$page.url} page={data.page} pageSize={data.pageSize} total={data.total} />
 	{/if}
 </div>

@@ -69,6 +69,14 @@ describe('Rechnungsliste', () => {
 			data: { invoices, total: invoices.length, page: 1, pageSize: 20, buildings, categories }
 		} as never);
 
+	// After a search the focus moves here, so the number of results is read out
+	it('nennt die Treffer in einer Überschrift, die den Fokus nach der Suche nimmt', () => {
+		list([invoice()]);
+		const results = document.querySelector<HTMLElement>('[data-results]')!;
+		expect(results.textContent!.replace(/\s+/g, ' ').trim()).toBe('1 Rechnung');
+		expect(results.tabIndex).toBe(-1);
+	});
+
 	it('zeigt Rechnungen mit Kategorie, Betrag und Status', () => {
 		list([
 			invoice(),

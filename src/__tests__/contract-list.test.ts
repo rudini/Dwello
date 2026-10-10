@@ -48,6 +48,14 @@ const list = (
 const empty = (body: string) =>
 	body.match(/data-testid="contracts-empty"[\s\S]*?<\/a>/)![0].replace(/<!--[^>]*-->/g, '');
 
+describe('Treffer der Suche', () => {
+	// After a search the focus moves to the count, so it is read out
+	it('nennt die Treffer in einer Überschrift, die den Fokus nehmen kann', () => {
+		const body = list([contract('c1', 'Anna Keller', '2024-01-01', null)]);
+		expect(body).toMatch(/<h2[^>]*tabindex="-1"[^>]*data-results[^>]*>\s*1 Mietvertrag\s*<\/h2>/);
+	});
+});
+
 const row = (body: string, id: string) =>
 	body.match(new RegExp(`<li[^>]*data-testid="contract-row-${id}"[\\s\\S]*?</li>`))![0];
 
