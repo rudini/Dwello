@@ -168,9 +168,8 @@ describe('availableFrom', () => {
 
 describe('suggestedStartDate', () => {
 	it('suggests the day the apartment becomes free for a new contract without start', () => {
-		expect(suggestedStartDate(true, '', freeFrom('2025-04-01'))).toBe('2025-04-01');
-		expect(suggestedStartDate(true, '2025-05-01', freeFrom('2025-04-01'))).toBeNull();
-		expect(suggestedStartDate(false, '', freeFrom('2025-04-01'))).toBeNull();
+		expect(suggestedStartDate('', freeFrom('2025-04-01'))).toBe('2025-04-01');
+		expect(suggestedStartDate('2025-05-01', freeFrom('2025-04-01'))).toBeNull();
 	});
 });
 

@@ -8,7 +8,7 @@
 	);
 </script>
 
-<p role="status" class="flex items-center gap-2 text-ink-muted">
+<p role="status" class="flex items-center gap-2 text-ink-muted" data-testid="save-status">
 	{#if savedAt}
 		<Icon name="success" />
 		Entwurf gespeichert, {time}

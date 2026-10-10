@@ -60,6 +60,7 @@ describe('Speicherstatus', () => {
 		show(SaveStatus, { savedAt: new Date('2026-10-09T14:32:00') });
 		const status = document.querySelector('[role=status]')!;
 		expect(status.textContent).toContain('Entwurf gespeichert, 14:32');
+		expect(status.getAttribute('data-testid')).toBe('save-status');
 	});
 
 	it('schweigt, solange nichts gespeichert ist', () => {

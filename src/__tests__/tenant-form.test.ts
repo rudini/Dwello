@@ -86,6 +86,22 @@ describe('Mieter speichern', () => {
 		expect(calls[0].body).toMatchObject({ lastName: 'Keller', correspondenceChannel: 'email' });
 	});
 
+	it('kehrt zum angefangenen Mietvertrag zurück, wenn der Mieter dort erfasst wurde', async () => {
+		const { calls, result } = runAction(
+			newActions.default,
+			'',
+			201,
+			{ ...anna, for: 'contract' },
+			{ id: 't9' }
+		);
+
+		await expect(result).rejects.toMatchObject({
+			status: 303,
+			location: '/contracts/new?tenant=t9&created=1'
+		});
+		expect(calls[0].body).not.toHaveProperty('for');
+	});
+
 	it('speichert Änderungen und kehrt zur Detailseite zurück', async () => {
 		const { calls, result } = runAction(editActions.default, 't1', 200, anna);
 

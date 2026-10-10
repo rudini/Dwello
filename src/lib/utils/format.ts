@@ -27,6 +27,17 @@ export function formatCurrency(amount: number): string {
 		.replace(/'/g, '’');
 }
 
+/** Date in words, so a wrong pick shows, e.g. "Mittwoch, 1. Januar 2025" */
+export function formatDateLong(isoDate: string): string {
+	return new Date(isoDate).toLocaleDateString('de-CH', {
+		weekday: 'long',
+		day: 'numeric',
+		month: 'long',
+		year: 'numeric',
+		timeZone: 'UTC' // a YYYY-MM-DD date is midnight UTC
+	});
+}
+
 /** Swiss date, e.g. "31.12.2024" */
 export function formatDate(dateString: string): string {
 	return new Date(dateString).toLocaleDateString('de-CH');

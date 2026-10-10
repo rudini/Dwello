@@ -36,18 +36,18 @@
 			testid="contract-base-rent-input"
 		/>
 		<MoneyField
-			id="additionalRent"
-			label="Nebenkosten Akonto"
-			bind:value={additionalRent}
-			placeholder="250.00"
-			error={errors.additionalRent}
+			id="advancePayment"
+			label="Akonto"
+			bind:value={advancePayment}
+			placeholder="180.00"
+			error={errors.advancePayment}
 		/>
 		<MoneyField
-			id="advancePayment"
-			label="Parkplatz / Sonstiges"
-			bind:value={advancePayment}
+			id="additionalRent"
+			label="Zusatzmiete"
+			bind:value={additionalRent}
 			placeholder="120.00"
-			error={errors.advancePayment}
+			error={errors.additionalRent}
 		/>
 	</div>
 

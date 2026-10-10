@@ -1,18 +1,50 @@
 import type { Actor } from '../fixtures/actor';
 import {
+	advancePaymentInput,
 	apartmentSelect,
 	baseRentInput,
 	contractSubmitButton,
+	discardDraftButton,
+	finishedStep,
+	newTenantLink,
+	nextButton,
+	saveStatus,
 	startDateInput,
 	tenantSelect
 } from '../interactions/contract-form';
-import { visitWhileLoading } from '../interactions/navigation';
+import { visit, visitWhileLoading } from '../interactions/navigation';
+import { createTenantByEmail } from './tenants';
 
 export type ContractData = {
 	tenantId: string;
 	apartmentId: string;
 	startDate: string;
 	baseRent: string;
+	advancePayment?: string;
+};
+
+// Step "Mieter"
+export const chooseTenant = (tenantId: string) => async (actor: Actor) => {
+	await tenantSelect(actor.page).selectOption(tenantId);
+	await nextButton(actor.page).click();
+};
+
+// From step "Wohnung" to "Prüfen", the tenant chosen before
+export const fillContract = (contract: Omit<ContractData, 'tenantId'>) => async (actor: Actor) => {
+	await apartmentSelect(actor.page).selectOption(contract.apartmentId);
+	await nextButton(actor.page).click();
+	await startDateInput(actor.page).fill(contract.startDate);
+	await nextButton(actor.page).click();
+	await baseRentInput(actor.page).fill(contract.baseRent);
+	if (contract.advancePayment) await advancePaymentInput(actor.page).fill(contract.advancePayment);
+	await nextButton(actor.page).click();
+};
+
+// The tenant chosen before, still on step "Mieter"
+export const rentApartment = (contract: Omit<ContractData, 'tenantId'>) => async (actor: Actor) => {
+	await nextButton(actor.page).click();
+	await fillContract(contract)(actor);
+	await contractSubmitButton(actor.page).click();
 };
 
 export const registerContract = (contract: ContractData) => async (actor: Actor) => {
@@ -20,12 +52,38 @@ export const registerContract = (contract: ContractData) => async (actor: Actor)
 	await rentApartment(contract)(actor);
 };
 
-// The tenant chosen before
-export const rentApartment = (contract: Omit<ContractData, 'tenantId'>) => async (actor: Actor) => {
-	await apartmentSelect(actor.page).selectOption(contract.apartmentId);
-	await startDateInput(actor.page).fill(contract.startDate);
-	await baseRentInput(actor.page).fill(contract.baseRent);
-	await contractSubmitButton(actor.page).click();
+export const reviewContract = (contract: ContractData) => async (actor: Actor) => {
+	await chooseTenant(contract.tenantId)(actor);
+	await fillContract(contract)(actor);
+};
+
+export const chooseTenantAndApartment = (tenantId: string, apartmentId: string) => async (actor: Actor) => {
+	await chooseTenant(tenantId)(actor);
+	await apartmentSelect(actor.page).selectOption(apartmentId);
+	await nextButton(actor.page).click();
+};
+
+export const goBackToStep = (label: string) => async (actor: Actor) => {
+	await finishedStep(actor.page, label).click();
+};
+
+// The draft is kept in the browser; the wizard says when it is saved
+export const reopenNewContract = async (actor: Actor) => {
+	await saveStatus(actor.page).getByText('Entwurf gespeichert').waitFor();
+	await visit(actor.page, '/contracts/new');
+};
+
+export const discardDraft = async (actor: Actor) => {
+	await discardDraftButton(actor.page).click();
+};
+
+export const createTenantForContract = (fullName: string) => async (actor: Actor) => {
+	await newTenantLink(actor.page).click();
+	await createTenantByEmail(fullName)(actor);
+};
+
+export const goToNextStep = async (actor: Actor) => {
+	await nextButton(actor.page).click();
 };
 
 // The tenant is chosen before the page is hydrated
@@ -33,10 +91,6 @@ export const chooseTenantWhileLoading = (tenantId: string) => async (actor: Acto
 	const loaded = await visitWhileLoading(actor.page, '/contracts/new');
 	await tenantSelect(actor.page).selectOption(tenantId);
 	await loaded();
-};
-
-export const saveContract = async (actor: Actor) => {
-	await contractSubmitButton(actor.page).click();
 };
 
 export const changeBaseRent = (baseRent: string) => async (actor: Actor) => {

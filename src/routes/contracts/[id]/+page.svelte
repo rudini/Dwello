@@ -251,16 +251,16 @@
 						</span>
 					</div>
 					<div class="flex justify-between items-center py-2">
-						<span class="text-gray-600">Nebenkosten (Akonto)</span>
+						<span class="text-gray-600">Akonto</span>
 						<span class="font-medium text-gray-900">
-							{formatCurrency(data.rentBreakdown.additionalRent)}
+							{formatCurrency(data.rentBreakdown.advancePayment)}
 						</span>
 					</div>
-					{#if data.rentBreakdown.advancePayment > 0}
+					{#if data.rentBreakdown.additionalRent > 0}
 						<div class="flex justify-between items-center py-2">
-							<span class="text-gray-600">Parkplatz / Sonstiges</span>
+							<span class="text-gray-600">Zusatzmiete</span>
 							<span class="font-medium text-gray-900">
-								{formatCurrency(data.rentBreakdown.advancePayment)}
+								{formatCurrency(data.rentBreakdown.additionalRent)}
 							</span>
 						</div>
 					{/if}

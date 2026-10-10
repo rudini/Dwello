@@ -10,14 +10,14 @@ Brief: `docs/REDESIGN_BRIEF.md`. Resume rules: `docs/design/arbeitsregeln.md`.
 | 1 Plan | done | 1 round, 6 Majors fixed (`reviews/1-review-1.md`) | n/a | docs-only push: job skips its steps |
 | 2 Tokens + base components + axe | done | 2 rounds (`reviews/2-review-1.md`, `2-review-2.md`), all Majors fixed | 79 examples, 0 violations | passed (afcda10, e62b6cf) | | | |
 | 3 Icons + illustrations | done | 1 round, 2 Majors fixed (`reviews/3-review-1.md`) | 79 examples, 0 violations | passed (9886b28) | | | |
-| 4 Shell, navigation, dashboard | review fixes | 1 round, 3 Majors + persona Blocker fixed (`reviews/4-review-1.md`) | 0 violations (955733a) | passed (955733a) |
-| 5 Rental contract wizard | open | | | |
+| 4 Shell, navigation, dashboard | done | 1 round, 3 Majors + persona Blocker fixed (`reviews/4-review-1.md`) | 0 violations (955733a) | passed (955733a, edf1dc4) |
+| 5 Rental contract wizard | in progress | | | |
 | 6 Statement wizard | open | | | |
 | 7 Remaining screens | open | | | |
 | 8 Remove old design system | open | | | |
 | 9 Final | open | | | |
 
-**Next step:** commit the stage 4 review fixes, CI, then stage 5 (rental contract wizard).
+**Next step:** stage 5 – rental contract wizard (scenarios in `contract-new.feature` are `@wip`).
 
 ## Log
 
@@ -81,3 +81,15 @@ Brief: `docs/REDESIGN_BRIEF.md`. Resume rules: `docs/design/arbeitsregeln.md`.
 - Stage 5 (rental contract wizard): Swiss date format and the date repeated in words (Helga); confirmation after saving tenant and contract with the key data (Helga); explain Akonto in plain words, Unbefristet hint, examples that look like examples (Helga); free apartments first / explain "nicht verfügbar" (Helga).
 - Stage 6 (statement wizard / detail): confirmation before «Versenden» with recipient and PDF preview; Verteilschlüssel per line and the share explained ("62 m² von 340 m²"); refund wording for Zahlungsfrist (Anna).
 - Stage 7 (remaining screens): a future contract must not show "Aktiv … – heute" (Helga); whole list rows clickable, text labels for eye/pencil icons (Anna, Helga); English category and heating-profile names in German (Anna); help-page names matching the menu (Anna); "1 Abrechnungen", "Mietstagen", stray "·" (Anna); one name for the management fee (Anna); Bruttomiete label in the contract list (Helga); Anrede field is a data-model change – listed in `offene-punkte.md` instead.
+- Review fixes committed as edf1dc4; CI green incl. ui-screenshots.
+
+### Stage 5 – Rental contract wizard
+
+- ATDD: `contract-new.feature` rewritten for the wizard (`@wip`): save with confirmation, review step, step validation, back without loss, rented apartment not selectable, draft restore and discard, inline tenant creation. Watched them fail (no wizard yet).
+- Decision: the sum per month is labelled "Monatlich total" (no glossary term for "Bruttomiete", see `offene-punkte.md`).
+- Logic (TDD): `src/lib/contract-wizard.ts` (steps and their fields, step validation, first step with an error, Akonto plausibility notice, summary in words, start values from address and draft with dropped ids, apartment choices free first), `src/lib/wizard-draft.ts` (versioned `localStorage` draft, tolerant of blocked storage, cleared on save, discard and logout), `formatDateLong` ("Mittwoch, 1. Januar 2025").
+- UI: `/contracts/new` is a wizard (Mieter → Wohnung → Vertragsdauer → Miete → Prüfen) with `Stepper`, new `WizardNav` (Weiter submits the step, so Enter works; last step "Mietvertrag speichern"), `SaveStatus`, restore notice with "Entwurf verwerfen", focus moves to the step heading. Dates repeated in words (Helga), Unbefristet/Befristet as explained choices, glossary help texts for Nettomiete, Akonto, Zusatzmiete, "Monatlich total", confirmation toast "Mietvertrag von … gespeichert" (Helga).
+- Inline tenant creation: "Neuen Mieter erfassen" opens `/tenants/new?for=contract`; after saving, the tenant form returns to `/contracts/new?tenant=…&created=1`, the wizard confirms the new tenant and keeps the draft.
+- Bug fix (UI mapping, no logic change): the contract list returns `startDate`/`endDate`, the availability check reads `start_date`/`end_date`, so every apartment with any contract – even one ended years ago – showed as "nicht verfügbar" and the overlap check never fired. The wizard and the edit form now map the fields (`forAvailability`). Explains Helga's confusion about "(nicht verfügbar)".
+- Bug fix (labels): the edit form and the contract detail called `additional_rent` "Nebenkosten Akonto" and `monthly_advance_payment` "Parkplatz / Sonstiges" (found in stage 0). Now "Akonto" and "Zusatzmiete" as in the glossary; the wizard writes Akonto to `monthlyAdvancePayment`. Existing data is not touched. The edit form lost its unused "new contract" branch.
+- Axe: contract-new states `every-wizard-step` (all five steps incl. limited contract), `overlap-warning`, `draft-restored` out of `@wip`; screens may put `{ids}` in their state queries. The axe check clears browser storage per viewport.

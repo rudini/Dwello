@@ -43,3 +43,9 @@ Items the redesign could not or deliberately did not resolve. Each with reason a
 ## Persona wishes that need data-model changes (not done)
 
 - Anrede (Herr/Frau) for tenants, for letters (Helga, stage 4). Needs a new tenant field – data models must not change in the redesign.
+
+## Rental contract wizard (stage 5)
+
+- Contracts saved before this redesign with the old form may have the Akonto in `additional_rent` and the parking fee in `monthly_advance_payment` (the old labels were swapped). The redesign does not migrate data; worth checking existing contracts once – TODO(fachlich prüfen).
+- The Akonto notice ("Ohne Akonto bezahlt der Mieter alle Nebenkosten erst mit der Nebenkostenabrechnung.") follows the glossary definition; whether a contract without Akonto needs further hints (e.g. on legal requirements) is TODO(fachlich prüfen).
+- The native date field shows the browser's date format; the wizard repeats each date in words. A Swiss text date field (TT.MM.JJJJ) would need its own parsing and is not built.

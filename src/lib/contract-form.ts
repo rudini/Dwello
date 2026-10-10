@@ -96,6 +96,12 @@ export const contractBody = (values: ContractFormValues) => ({
 	monthlyAdvancePayment: String(values.advancePayment || 0)
 });
 
+/** Contracts as the contract list returns them, in the shape the availability check reads */
+export const forAvailability = (
+	contracts: { id: string; startDate: string; endDate: string | null }[]
+): ContractForAvailability[] =>
+	contracts.map((c) => ({ id: c.id, start_date: c.startDate, end_date: c.endDate }));
+
 /** Warning when the contract overlaps another contract of the apartment */
 export function overlapWarning(
 	values: ContractFormValues,
@@ -137,11 +143,10 @@ export function availableFrom(
 
 /** Start date a new contract gets once its apartment is chosen: the day the apartment becomes free */
 export function suggestedStartDate(
-	isNew: boolean,
 	startDate: string,
 	availability: AvailabilityInfo | null | undefined
 ) {
-	if (!isNew || startDate) return null;
+	if (startDate) return null;
 	return availability?.availableFrom || null;
 }
 

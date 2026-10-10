@@ -23,6 +23,7 @@
 					<button
 						type="button"
 						onclick={() => onselect(number)}
+						data-testid="wizard-step"
 						class="flex min-h-12 items-center gap-2 rounded-control px-2 font-semibold text-accent hover:bg-accent-soft"
 					>
 						<span

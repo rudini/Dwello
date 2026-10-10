@@ -46,6 +46,9 @@ Funktionalität: Barrierefreiheit
       | contracts              | filtered-empty      |
       | contract-new           | default             |
       | contract-new           | submit-empty        |
+      | contract-new           | every-wizard-step   |
+      | contract-new           | overlap-warning     |
+      | contract-new           | draft-restored      |
       | contract-detail        | default             |
       | contract-detail        | end-dialog          |
       | contract-detail        | delete-dialog       |
@@ -97,9 +100,6 @@ Funktionalität: Barrierefreiheit
     @wip
     Beispiele:
       | Bildschirm             | Zustand             |
-      | contract-new           | every-wizard-step   |
-      | contract-new           | overlap-warning     |
-      | contract-new           | draft-restored      |
       | statement-generate     | draft-restored      |
       | statement-detail       | send-dialog         |
       | statement-sent-detail  | action-error        |

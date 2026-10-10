@@ -6,6 +6,7 @@
 	import Icon from '$lib/ui/Icon.svelte';
 	import IconButton from '$lib/ui/IconButton.svelte';
 	import type { User } from '$lib/stores';
+	import { clearAllDrafts } from '$lib/wizard-draft';
 
 	let { user }: { user: User | null } = $props();
 
@@ -19,6 +20,7 @@
 	}
 
 	async function logout() {
+		clearAllDrafts(localStorage); // no personal data stays in the browser
 		try {
 			const xsrfToken = getXsrfTokenFromCookie();
 			await fetch('/auth/logout', {

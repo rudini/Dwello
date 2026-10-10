@@ -76,7 +76,6 @@
 	"src/routes/contracts/RentFields.svelte",
 	"src/routes/contracts/[id]/+page.svelte",
 	"src/routes/contracts/[id]/edit/+page.svelte",
-	"src/routes/contracts/new/+page.svelte",
 	"src/routes/documents/+page.svelte",
 	"src/routes/documents/MarkSentButton.svelte",
 	"src/routes/help/+page.svelte",

@@ -5,7 +5,8 @@ import Header from '$lib/components/Header.svelte';
 import MobileNav from '$lib/components/MobileNav.svelte';
 import Footer from '$lib/components/Footer.svelte';
 import { closeMobileNav, mobileNavOpen } from '$lib/stores/navigation';
-import { byTestId, click, show } from './helpers/dom';
+import { writeDraft } from '$lib/wizard-draft';
+import { byTestId, click, fakeBff, settle, show } from './helpers/dom';
 
 vi.mock('$app/stores', () => ({
 	page: readable({ url: new URL('http://localhost/tenants') })
@@ -65,6 +66,16 @@ describe('Kopfzeile', () => {
 		flushSync();
 		expect(byTestId('user-menu-settings')).toBeNull();
 		expect(button.getAttribute('aria-expanded')).toBe('false');
+	});
+
+	it('löscht beim Abmelden die Entwürfe in diesem Browser', async () => {
+		writeDraft(localStorage, 'contract', { tenantId: 't1' }, new Date());
+		fakeBff();
+		show(Header, { user });
+		click('user-menu-button');
+		click('logout-button');
+		await settle();
+		expect(localStorage.length).toBe(0);
 	});
 
 	it('führt über das Logo zur Übersicht', () => {

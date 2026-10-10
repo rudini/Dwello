@@ -16,16 +16,30 @@ export const variants = Object.keys(screenList.viewports).flatMap((viewport) =>
 	screenList.colorSchemes.map((scheme) => ({ viewport: viewport as Viewport, scheme: scheme as 'light' | 'dark' }))
 );
 
-/** Records every screen with an id in its path needs; returns the path with the ids filled in */
+// Query strings that put a screen into a state before it loads; a screen may override them in screens.json
+const query: Record<string, string> = {
+	'filtered-empty': '?search=keine-treffer-a11y',
+	'login-error': '?error=failed'
+};
+
+/** Path and query string of a screen in a state, ids still as {placeholders} */
+export const address = (screen: { path: string; queries?: object }, state: string) =>
+	screen.path + ((screen.queries as Record<string, string> | undefined)?.[state] ?? query[state] ?? '');
+
+/** Records every screen with an id in its address needs; returns the address with the ids filled in */
 export async function seedFor(seed: TestData, path: string, state: string) {
 	if (!path.includes('{') && state !== 'delete-dialog') return path;
 	await seed.building('Seeblick', 'Winterthur');
 	await seed.apartment('Seeblick', '1.01', 'vacant');
 	await seed.apartment('Seeblick', '1.02', 'vacant');
+	await seed.apartment('Seeblick', '1.03', 'vacant'); // free: never rented
+	await seed.apartment('Seeblick', '1.04', 'vacant'); // free only from 2100
 	await seed.tenant('Anna');
 	await seed.tenant('Bruno');
+	await seed.tenant('Carla');
 	await seed.contract('Anna', '1.01', { startDate: '2015-01-01', baseRent: '1800.00', monthlyAdvancePayment: '200.00' });
 	await seed.contract('Bruno', '1.02', { startDate: '2015-01-01', baseRent: '1500.00', monthlyAdvancePayment: '150.00' });
+	await seed.contract('Carla', '1.04', { startDate: '2015-01-01', endDate: '2099-12-31', baseRent: '1400.00' });
 	await seed.heatingProfile('Standard', [18, 16, 13, 8, 4, 1, 0, 0, 3, 9, 13, 15]);
 	await seed.heatingInvoice('Seeblick', '3600.00', 2025);
 	await seed.supplierInvoice('Hauswart Huber', 'Seeblick', '450.00', 'Treppenhausreinigung Q1', 'Hauswart');
@@ -42,6 +56,8 @@ export async function seedFor(seed: TestData, path: string, state: string) {
 		invoice: seed.idOf('Rechnung Hauswart Huber'),
 		statement: seed.idOf('Abrechnung Anna 2025'),
 		sentStatement: seed.idOf('Abrechnung Bruno 2025'),
+		freeApartment: seed.idOf('1.03'),
+		limitedApartment: seed.idOf('1.04'),
 		heatingProfile: seed.idOf('Standard'),
 		category: seed.idOf('Gartenpflege'),
 		distributionKey: seed.idOf('Nach Wohnungen')
@@ -106,6 +122,17 @@ const states: Record<string, (page: Page, viewport: Viewport) => Promise<unknown
 		await press(page, 'user-menu-button');
 		await shows(page, '[data-testid="user-menu-settings"]');
 	},
+	'overlap-warning': async (page) => {
+		await page.getByTestId('wizard-next').click(); // tenant and apartment come from the address
+		await page.getByTestId('wizard-next').click();
+		await page.getByTestId('start-date-input').fill('2020-01-01'); // the apartment is rented until 2099
+		await shows(page, '[data-testid="overlap-warning"]');
+	},
+	'draft-restored': async (page) => {
+		await page.getByTestId('save-status').getByText('Entwurf gespeichert').waitFor();
+		await page.reload();
+		await shows(page, '[data-testid="draft-restored"]');
+	},
 	'preview-empty': async (page) => {
 		await page.getByTestId('period-start-input').fill('2000-01-01');
 		await page.getByTestId('period-end-input').fill('2000-12-31');
@@ -114,12 +141,6 @@ const states: Record<string, (page: Page, viewport: Viewport) => Promise<unknown
 		await press(page, 'wizard-next');
 		await page.getByTestId('preview-empty').waitFor();
 	}
-};
-
-// Query strings that put a screen into a state before it loads
-const query: Record<string, string> = {
-	'filtered-empty': '?search=keine-treffer-a11y',
-	'login-error': '?error=failed'
 };
 
 /** Rule violations axe finds on the page as it is now, as readable lines */
@@ -136,19 +157,41 @@ export async function check(
 	path: string,
 	state: string,
 	viewport: Viewport,
-	scheme: 'light' | 'dark',
-	queries: Record<string, string> = {}
+	scheme: 'light' | 'dark'
 ) {
 	await page.setViewportSize(screenList.viewports[viewport]);
 	await page.emulateMedia({ colorScheme: scheme, reducedMotion: 'reduce' });
-	await visit(page, path + (queries[state] ?? query[state] ?? ''));
-	if (state === 'every-wizard-step') return wizardSteps(page);
+	await page.evaluate(() => localStorage.clear()).catch(() => {}); // no draft from the previous viewport
+	await visit(page, path);
+	if (state === 'every-wizard-step') return wizards[new URL(path, 'http://x').pathname](page);
 	await states[state](page, viewport);
 	return violations(page);
 }
 
+// Rental contract wizard, tenant and a free apartment from the address: every step up to "Prüfen"
+async function contractWizardSteps(page: Page) {
+	const found = await violations(page); // "Mieter"
+	const nextStep = async (shown: string) => {
+		await press(page, 'wizard-next');
+		await page.getByTestId(shown).first().waitFor();
+	};
+	await nextStep('apartment-select'); // "Wohnung", once the apartments are checked
+	found.push(...(await violations(page)));
+	await nextStep('start-date-input'); // "Vertragsdauer", limited: end date and both dates in words
+	await page.getByTestId('contract-duration').getByText('Befristet', { exact: true }).click();
+	await page.getByTestId('start-date-input').fill('2030-01-01');
+	await page.getByTestId('end-date-input').fill('2031-12-31');
+	found.push(...(await violations(page)));
+	await nextStep('contract-base-rent-input'); // "Miete"
+	await page.getByTestId('contract-base-rent-input').fill('1500');
+	found.push(...(await violations(page)));
+	await nextStep('contract-review-item'); // "Prüfen"
+	found.push(...(await violations(page)));
+	return found;
+}
+
 // Statement wizard: period, buildings, preview; every step is checked before going on
-async function wizardSteps(page: Page) {
+async function statementWizardSteps(page: Page) {
 	const found = await violations(page);
 	await page.getByTestId('wizard-next').click();
 	const building = page.locator('[data-testid^="generate-building-"]').first();
@@ -160,3 +203,8 @@ async function wizardSteps(page: Page) {
 	found.push(...(await violations(page)));
 	return found;
 }
+
+const wizards: Record<string, (page: Page) => Promise<string[]>> = {
+	'/contracts/new': contractWizardSteps,
+	'/statements/generate': statementWizardSteps
+};

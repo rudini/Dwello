@@ -12,10 +12,10 @@
 		availableFrom,
 		contractBody,
 		fieldBorder,
+		forAvailability,
 		initialContractValues,
 		overlapWarning,
 		saveErrorMessage,
-		suggestedStartDate,
 		validateContract
 	} from '$lib/contract-form';
 	import type { RentalContract } from '$lib/types';
@@ -28,13 +28,13 @@
 	import PeriodFields from './PeriodFields.svelte';
 	import RentFields from './RentFields.svelte';
 
-	// Form of a new contract or, given one, of a contract being edited
+	// Form of a contract being edited; new contracts are made with the wizard in ./new
 	let {
 		contract,
 		tenants,
 		apartments
 	}: {
-		contract?: RentalContract;
+		contract: RentalContract;
 		tenants: { id: string; name: string }[];
 		apartments: { id: string; unit: string; building: string }[];
 	} = $props();
@@ -46,44 +46,25 @@
 	let apartmentAvailability = $state(new Map<string, AvailabilityInfo>());
 	let apartmentContracts = $state<ContractForAvailability[]>([]);
 
-	const currentApartmentId = $derived(contract?.apartmentId);
+	const currentApartmentId = $derived(contract.apartmentId);
 	const selectedAvailability = $derived(apartmentAvailability.get(form.apartmentId));
 	const startLimit = $derived(
 		availableFrom(selectedAvailability, form.apartmentId !== currentApartmentId)
 	);
-	const overlap = $derived(overlapWarning(form, apartmentContracts, contract?.id));
-	const isRunning = $derived(!!contract && !contract.endDate);
-	// Where the form saves to and returns to, and how its submit button reads
-	const target = $derived(
-		contract
-			? {
-					path: `/contracts/${contract.id}`,
-					method: 'PUT' as const,
-					back: `/contracts/${contract.id}`,
-					icon: 'save',
-					label: 'Änderungen speichern',
-					busyLabel: 'Wird gespeichert...'
-				}
-			: {
-					path: '/contracts',
-					method: 'POST' as const,
-					back: '/contracts',
-					icon: 'add',
-					label: 'Vertrag erstellen',
-					busyLabel: 'Wird erstellt...'
-				}
-	);
+	const overlap = $derived(overlapWarning(form, apartmentContracts, contract.id));
+	const isRunning = $derived(!contract.endDate);
+	const back = $derived(`/contracts/${contract.id}`);
 
 	async function contractsOf(apartmentId: string) {
-		const response = await apiCall<{ contracts: ContractForAvailability[] }>(
+		const response = await apiCall<{ contracts: Parameters<typeof forAvailability>[0] }>(
 			`/contracts?apartmentId=${apartmentId}`
 		);
-		return response.data?.contracts || [];
+		return forAvailability(response.data?.contracts || []);
 	}
 
 	// The contract being edited does not block its own apartment
 	async function availabilityOf(apartmentId: string) {
-		const ownContract = apartmentId === contract?.apartmentId ? contract.id : undefined;
+		const ownContract = apartmentId === contract.apartmentId ? contract.id : undefined;
 		return [apartmentId, computeAvailability(await contractsOf(apartmentId), ownContract)] as const;
 	}
 
@@ -109,11 +90,6 @@
 			});
 	});
 
-	$effect(() => {
-		const start = suggestedStartDate(!contract, form.startDate, selectedAvailability);
-		if (start) form.startDate = start;
-	});
-
 	async function save(event: SubmitEvent) {
 		event.preventDefault();
 		errors = validateContract(form);
@@ -121,12 +97,12 @@
 
 		isSubmitting = true;
 		try {
-			const response = await apiCall(target.path, {
-				method: target.method,
+			const response = await apiCall(`/contracts/${contract.id}`, {
+				method: 'PUT',
 				body: contractBody(form)
 			});
 			if (response.error) throw new Error(response.error.message);
-			await goto(target.back);
+			await goto(back);
 		} catch (error) {
 			console.error('Error saving contract:', error);
 			errors = { form: saveErrorMessage(error) };
@@ -207,11 +183,11 @@
 		/>
 
 		<FormActions
-			cancelHref={target.back}
+			cancelHref={back}
 			submitting={isSubmitting}
-			icon={target.icon}
-			label={target.label}
-			busyLabel={target.busyLabel}
+			icon="save"
+			label="Änderungen speichern"
+			busyLabel="Wird gespeichert..."
 		/>
 	</form>
 </Card>

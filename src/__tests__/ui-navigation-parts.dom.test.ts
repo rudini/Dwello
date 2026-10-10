@@ -1,8 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
 import { flushSync } from 'svelte';
 import Stepper from '$lib/ui/Stepper.svelte';
+import WizardNav from '$lib/ui/WizardNav.svelte';
 import Tabs from '$lib/ui/Tabs.svelte';
-import { click, show } from './helpers/dom';
+import { byTestId, click, show } from './helpers/dom';
 import { markup } from './helpers/snippet';
 
 const steps = ['Mieter', 'Wohnung', 'Vertragsdauer', 'Miete', 'Prüfen'];
@@ -30,6 +31,35 @@ describe('Schrittanzeige', () => {
 		expect(onselect).toHaveBeenCalledWith(1);
 		expect(items[0].textContent).toContain('erledigt');
 		expect(items[3].querySelector('button')).toBeNull();
+		expect(items[0].querySelector('[data-testid="wizard-step"]')).not.toBeNull();
+	});
+});
+
+describe('Wizard-Navigation', () => {
+	it('geht weiter und zurück; der erste Schritt bietet stattdessen Abbrechen', () => {
+		const onback = vi.fn();
+		show(WizardNav, { step: 1, last: 5, onback, finalLabel: 'Speichern', cancelHref: '/contracts' });
+		expect(byTestId('wizard-back')).toBeNull();
+		expect(byTestId('form-cancel')!.getAttribute('href')).toBe('/contracts');
+		const next = byTestId('wizard-next')!;
+		expect(next.getAttribute('type')).toBe('submit'); // Enter in a field goes on, too
+		expect(next.textContent).toContain('Weiter');
+	});
+
+	it('nennt im letzten Schritt die Aktion und zeigt, dass gespeichert wird', () => {
+		const onback = vi.fn();
+		show(WizardNav, {
+			step: 5,
+			last: 5,
+			onback,
+			finalLabel: 'Mietvertrag speichern',
+			busy: true,
+			cancelHref: '/contracts'
+		});
+		expect(byTestId('wizard-next')).toBeNull();
+		expect(byTestId('submit-button')!.textContent).toContain('Wird gespeichert');
+		click('wizard-back');
+		expect(onback).toHaveBeenCalled();
 	});
 });
 

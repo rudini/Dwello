@@ -2,14 +2,28 @@ import { expect } from '@playwright/test';
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { visit } from '../interactions/navigation';
-import { apartmentChoice } from '../questions/contract-form';
+import {
+	apartmentChoice,
+	chosenTenant,
+	chosenTenantName,
+	confirmation,
+	restoredDraft,
+	reviewed
+} from '../questions/contract-form';
 import { listedContract } from '../questions/contracts';
 import {
 	changeBaseRent,
+	chooseTenant,
+	chooseTenantAndApartment,
 	chooseTenantWhileLoading,
+	createTenantForContract,
+	discardDraft,
+	goBackToStep,
+	goToNextStep,
 	registerContract,
 	rentApartment,
-	saveContract
+	reopenNewContract,
+	reviewContract
 } from '../tasks/contract-form';
 import { searchContracts } from '../tasks/contracts';
 
@@ -42,8 +56,79 @@ When(
 	}
 );
 
-When('der Liegenschaftsverwalter den Mietvertrag ohne Angaben speichert', async ({ verwalter }) => {
-	await verwalter.perform(saveContract);
+When(
+	'der Liegenschaftsverwalter {string} die Wohnung {string} ab {string} für {string} Franken mit {string} Franken Akonto bis zur Prüfung erfasst',
+	async ({ verwalter, seed }, tenant: string, apartment: string, startDate: string, baseRent: string, advancePayment: string) => {
+		await verwalter.perform(
+			reviewContract({ tenantId: seed.idOf(tenant)!, apartmentId: seed.idOf(apartment)!, startDate, baseRent, advancePayment })
+		);
+	}
+);
+
+When(
+	'der Liegenschaftsverwalter {string} die Wohnung {string} ab {string} ohne Nettomiete vermieten will',
+	async ({ verwalter, seed }, tenant: string, apartment: string, startDate: string) => {
+		await verwalter.perform(
+			reviewContract({ tenantId: seed.idOf(tenant)!, apartmentId: seed.idOf(apartment)!, startDate, baseRent: '' })
+		);
+	}
+);
+
+When('der Liegenschaftsverwalter ohne Angaben weitergeht', async ({ verwalter }) => {
+	await verwalter.perform(goToNextStep);
+});
+
+When('der Liegenschaftsverwalter den Mieter {string} wählt', async ({ verwalter, seed }, tenant: string) => {
+	await verwalter.perform(chooseTenant(seed.idOf(tenant)!));
+});
+
+When(
+	'der Liegenschaftsverwalter den Mieter {string} und die Wohnung {string} wählt',
+	async ({ verwalter, seed }, tenant: string, apartment: string) => {
+		await verwalter.perform(chooseTenantAndApartment(seed.idOf(tenant)!, seed.idOf(apartment)!));
+	}
+);
+
+When('der Liegenschaftsverwalter zum Schritt {string} zurückgeht', async ({ verwalter }, step: string) => {
+	await verwalter.perform(goBackToStep(step));
+});
+
+When('der Liegenschaftsverwalter die Seite "Neuer Mietvertrag" später wieder öffnet', async ({ verwalter }) => {
+	await verwalter.perform(reopenNewContract);
+});
+
+When('der Liegenschaftsverwalter den Entwurf verwirft', async ({ verwalter }) => {
+	await verwalter.perform(discardDraft);
+});
+
+When(
+	'der Liegenschaftsverwalter im Mietvertrag den neuen Mieter {string} erfasst',
+	async ({ verwalter, seed }, tenant: string) => {
+		await verwalter.perform(createTenantForContract(seed.unique(tenant)));
+	}
+);
+
+Then(
+	'sieht der Liegenschaftsverwalter die Bestätigung, dass der Mietvertrag von {string} gespeichert ist',
+	async ({ verwalter, names }, tenant: string) => {
+		await expect(confirmation(verwalter)).toContainText(`Mietvertrag von ${names.get(tenant) ?? tenant} gespeichert`);
+	}
+);
+
+Then('zeigt die Prüfung {string} mit {string}', async ({ verwalter, names }, label: string, value: string) => {
+	await expect(reviewed(verwalter, label)).toContainText(names.get(value) ?? value);
+});
+
+Then('ist im Mietvertrag der Mieter {string} gewählt', async ({ verwalter, names }, tenant: string) => {
+	await expect.poll(() => chosenTenantName(verwalter)).toBe(names.get(tenant) ?? tenant);
+});
+
+Then('ist im Mietvertrag kein Mieter gewählt', async ({ verwalter }) => {
+	await expect(chosenTenant(verwalter)).toHaveValue('');
+});
+
+Then('sieht der Liegenschaftsverwalter, dass sein Entwurf wiederhergestellt ist', async ({ verwalter }) => {
+	await expect(restoredDraft(verwalter)).toBeVisible();
 });
 
 Then('der Mietvertrag von {string} ist in der Liste auffindbar', async ({ verwalter, names }, tenant: string) => {

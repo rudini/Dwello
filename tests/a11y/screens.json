@@ -1,5 +1,5 @@
 {
-	"$comment": "Screens and states the axe check visits (tests/e2e/features/accessibility.feature, one example per screen and state). {building} etc. are ids of records the check seeds itself. Every new or changed screen is added here; every state must be one of stateMeanings. 'empty' and 'first-use' are covered by DOM tests (see docs/design/offene-punkte.md). Dark mode joins colorSchemes in stage 8 (docs/design/01-plan.md D4). A screen may override the query string of a state in 'queries' (the apartment list ignores ?search=, see docs/design/offene-punkte.md).",
+	"$comment": "Screens and states the axe check visits (tests/e2e/features/accessibility.feature, one example per screen and state). {building} etc. (also in 'queries') are ids of records the check seeds itself. Every new or changed screen is added here; every state must be one of stateMeanings. 'empty' and 'first-use' are covered by DOM tests (see docs/design/offene-punkte.md). Dark mode joins colorSchemes in stage 8 (docs/design/01-plan.md D4). A screen may override the query string of a state in 'queries' (the apartment list ignores ?search=, see docs/design/offene-punkte.md).",
 	"stateMeanings": {
 		"default": "The page as loaded with the seeded records.",
 		"empty": "A list with no records at all. Not producible in the shared E2E database; covered by DOM tests of the empty branch and by 'filtered-empty', which shows the same EmptyState component.",
@@ -176,7 +176,12 @@
 				"every-wizard-step",
 				"overlap-warning",
 				"draft-restored"
-			]
+			],
+			"queries": {
+				"every-wizard-step": "?tenant={tenant}&apartment={freeApartment}",
+				"overlap-warning": "?tenant={tenant}&apartment={limitedApartment}",
+				"draft-restored": "?tenant={tenant}"
+			}
 		},
 		{
 			"name": "contract-detail",

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { page } from '$app/stores';
 	import Button from '$lib/components/Button.svelte';
 	import Icon from '$lib/components/Icon.svelte';
 	import Card from '$lib/components/Card.svelte';
@@ -8,6 +9,8 @@
 	import type { ActionData } from './$types';
 
 	let { form }: { form: ActionData } = $props();
+	// Opened from the rental contract wizard, which continues with the new tenant
+	const forContract = $derived($page.url.searchParams.get('for') === 'contract');
 </script>
 
 <svelte:head>
@@ -26,16 +29,24 @@
 
 	<div>
 		<h1 class="text-2xl font-bold text-gray-900">Neuen Mieter erstellen</h1>
-		<p class="text-ink-muted mt-1">Erfassen Sie die Kontaktdaten eines neuen Mieters.</p>
+		<p class="text-ink-muted mt-1">
+			Erfassen Sie die Kontaktdaten eines neuen Mieters.
+			{#if forContract}Danach geht es mit dem Mietvertrag weiter.{/if}
+		</p>
 	</div>
 
 	<Card>
 		<form method="POST" use:enhance class="space-y-6">
+			{#if forContract}<input type="hidden" name="for" value="contract" />{/if}
 			<FieldError message={form?.errors?.form} />
 			<TenantFormFields errors={form?.errors} />
 
 			<div class="flex gap-3 pt-4 border-t border-gray-200">
-				<Button href="/tenants" variant="secondary" testid="form-cancel">Abbrechen</Button>
+				<Button
+					href={forContract ? '/contracts/new' : '/tenants'}
+					variant="secondary"
+					testid="form-cancel">Abbrechen</Button
+				>
 				<Button type="submit" variant="primary" testid="tenant-submit">
 					<Icon name="person_add" size={18} />
 					Mieter erstellen
