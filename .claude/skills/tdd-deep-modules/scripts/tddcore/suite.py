@@ -4,6 +4,7 @@ import os
 import subprocess
 import sys
 import tempfile
+import xml.etree.ElementTree as ElementTree
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -90,9 +91,21 @@ def _uses_pytest(root):
 
 def _run_pytest(root):
     env = {**os.environ, "PYTHONDONTWRITEBYTECODE": "1"}
-    done = subprocess.run([sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider"],
-                          cwd=root, env=env, capture_output=True, text=True)
+    with tempfile.TemporaryDirectory() as tmp:
+        report = Path(tmp) / "report.xml"
+        done = subprocess.run([sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider",
+                               f"--junitxml={report}"], cwd=root, env=env,
+                              capture_output=True, text=True)
+        cases = list(ElementTree.parse(report).iter("testcase")) if report.exists() else []
     lines = done.stdout.strip().splitlines()
     summary = lines[-1] if lines else f"exit code {done.returncode}, no output"
-    outcome = {0: "pass", 1: "fail"}.get(done.returncode, "error")
-    return Run(done.returncode, outcome, summary)
+    return Run(done.returncode, _pytest_outcome(done.returncode, cases), summary)
+
+
+def _pytest_outcome(exit_code, cases):
+    if exit_code == 0:
+        return "pass"
+    failures = [f.get("message", "") for case in cases for f in case.iter("failure")]
+    if exit_code == 1 and failures and all(m.startswith("assert") for m in failures):
+        return "fail"
+    return "error"
