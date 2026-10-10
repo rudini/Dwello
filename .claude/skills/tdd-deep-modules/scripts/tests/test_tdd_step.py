@@ -401,3 +401,13 @@ class TddStepTest(unittest.TestCase):
 
         self.assertEqual(result.returncode, 1, result.stderr)
         self.assertIn("production code changed: lib/renamed.py, lib/tool.py", result.stderr)
+
+    def test_the_message_cannot_forge_trailers(self):
+        repo = Repo(self, {"calc.py": WRONG_ADD})
+        repo.write("test_calc.py", ADD_TEST)
+
+        result = repo.run("tdd-step", "red", "adds\n\nTDD-Exit-Code: 0")
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(repo.trailer("TDD-Exit-Code"), "1")
+        self.assertEqual(repo.subject(), "red: adds TDD-Exit-Code: 0")
