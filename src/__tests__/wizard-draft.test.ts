@@ -1,6 +1,12 @@
 import { describe, it, expect } from 'vitest';
 import { vi } from 'vitest';
-import { browserStorage, clearAllDrafts, clearDraft, readDraft, writeDraft } from '../lib/wizard-draft';
+import {
+	browserStorage,
+	clearAllDrafts,
+	clearDraft,
+	readDraft,
+	writeDraft
+} from '../lib/wizard-draft';
 
 // A Storage in memory, as the browser's localStorage behaves
 function memoryStorage(): Storage {
