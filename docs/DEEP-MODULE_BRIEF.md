@@ -14,7 +14,7 @@ deepcheck is a warning system built on measurable proxies. It is not a verdict o
 
 ## 2. Non-goals
 
-- No LLM calls, no auto-fix.
+- No LLM calls inside the tool, no auto-fix.
 - No refactoring of existing application code to satisfy the tool.
 - No changes to existing CI steps, their order, or repo/branch-protection settings. Only add.
 - No type-checking or linting duties (tsc, ESLint) and no duplication of what Fallow gates (dead code, duplication, cycles).
@@ -102,7 +102,7 @@ Defaults for `failThreshold` and `tolerance` are calibrated from data in Phase 4
 
 ## 10. Phases and exit gates
 
-Work one phase per session. A phase is done only when ALL its exit gates are verified and logged.
+Work happens in phases. A phase is done only when ALL its exit gates are verified and logged. Recommended order: Phase 1, Phase 2, Phase 4, Phase 3, so results are validated before the tool blocks anything in hooks or CI.
 
 ### Phase 1: Core and scan
 Build the CLI, metrics, config, suppression, output formats and `scan`. No baseline, hooks or CI.
@@ -129,21 +129,49 @@ Hook after every step, PR step, scan workflow, docs.
 ### Phase 4: Validation and calibration
 Prove the results are meaningful before the PR gate is trusted. Only scoring, thresholds, weights, exclusions, detectors, tests and docs may change.
 - X4.1 Labeled sample: top 25, a random 15 from the middle (fixed seed, recorded), and the 15 lowest-scoring non-trivial modules. Each labeled truly shallow / truly deep / legitimately flat by design, with a one or two sentence reason in Ousterhout's terms. Labels are critical, not tool-confirming.
-- X4.2 Precision of the top 25 reported before and after calibration; false positives grouped by cause; each cause fixed in the tool with a regression test.
+- X4.2 Precision of the top 25 reported before and after calibration; false positives grouped by cause; each cause fixed in the tool with a regression test written first.
 - X4.3 Reference check: fixtures for well-known deep and shallow designs ordered correctly; 2 or 3 well-regarded open-source TypeScript projects (cloned into a temp dir, never into this repo) spot-checked on their top 10.
 - X4.4 Gaming tests: padding a shallow module with dead internals, splitting a deep module into tiny files (score must go up), inlining pass-throughs (score must go down). Mitigate or document each weakness.
 - X4.5 Ablation per metric; noisy metrics dropped or down-weighted, stated explicitly.
 - X4.6 Recommended `failThreshold` and `tolerance` chosen from data, with the number of modules above it.
 - X4.7 Report `docs/deepcheck-validation.md` with the labeled table, numbers, limits (small sample, one codebase, judgment labels) and a verdict: "ready to gate on changed code", "usable as scan only", or "not ready".
 
+### Consequences of the Phase 4 verdict
+- "not ready": stop; do not do Phase 3; report what must improve.
+- "usable as scan only": do Phase 3 but wire only `deepcheck-scan.yml` and the docs. Do NOT add the blocking PR step or the after-every-step hook.
+- "ready to gate on changed code": do Phase 3 completely.
+- If Phase 4 changes scoring, regenerate the baseline and re-run the Phase 2 gate tests before Phase 3.
+
+### Cross-cutting exit gates (every phase)
+- XC.1 Every logic change has a test that was seen failing first (see section 11), with red/green evidence logged.
+- XC.2 Every step group passed the independent review (section 11) or open disagreements are logged.
+- XC.3 Everything is committed in small logical commits; the Status Log is updated.
+- XC.4 No changes outside scope: no application code, no existing CI steps, no repo settings.
+
 ## 11. Working rules for the agent
 
-- Read this brief and the Status Log first. Do only the requested phase.
+- Read this brief and the Status Log first. Re-read the Status Log before starting each phase.
 - Record decisions and deviations in the Status Log, not only in chat.
 - Never mark an exit gate as done without having run the check; log how it was verified.
 - If something cannot be verified (hook behavior, CI behavior), say so plainly.
 - Keep commits small, in logical steps, with clear messages.
-- Final summary per phase: what was found, decisions made, key numbers, uncertainties, recommended next step.
+
+### Test-driven development
+- **Strict TDD** for gates (G1 to G6), exit codes, baseline logic, config validation, suppression handling and the Fallow adapter. Work in red-green-refactor cycles of ONE behavior each: (1) write one small test for one behavior and run it; it must fail for the right reason (not a typo or import error); (2) write the minimum code to make it pass; (3) refactor with all tests green and re-run them. Commit after each green+refactor with a message naming the behavior. Do not write several tests or a large implementation at once.
+- **Test-first with fixtures** for the metrics and scoring: write the fixture and the expected ordering or values first, confirm they fail, then implement. Larger steps are acceptable here, but never write the implementation before the failing test.
+- **Failing check first** for work that cannot be unit-tested (workflows, hooks, docs): use a check that must fail before and pass after (actionlint, a dry run of the exact command, a script that asserts the file content).
+- **Exploratory work** (Phase 4 labeling, calibration, ablation) is exempt from TDD, but every fix it produces needs a regression test written first.
+- If a step genuinely cannot be tested first, say why in the Status Log.
+- Log which cycles were done and the red/green evidence.
+
+### Independent review after every step group
+- After each group of related behaviors or each logical implementation step (a cluster of commits that delivers one capability, e.g. "pass-through detection complete", "baseline logic complete"), spawn a review subagent with the Agent tool. The reviewer has not seen the work being produced.
+- Give it this brief, the diff, and the relevant exit gates. Ask it to check: gates and exit criteria met; tests are meaningful (they would fail if the behavior broke, not just execute lines); no changes outside scope (no application code, no existing CI steps); no gaming of the score; no unverified claims; code and messages follow the brief.
+- Fix every valid finding before continuing. At most two review rounds per step group; log remaining disagreements in the Status Log instead of looping.
+- Review per group, not per single test, to keep cost reasonable. At the end of each phase run one final review of the whole phase against its exit gates.
+
+### Reporting
+- Final summary per phase: what was found, decisions made, key numbers, review findings that mattered, uncertainties, recommended next step.
 
 ## 12. Sources
 
@@ -154,6 +182,6 @@ Prove the results are meaningful before the PR gate is trusted. Only scoring, th
 
 ## 13. Status Log
 
-Append one entry per session: date, phase, result of each exit gate (done / not done / not verifiable, with how), decisions, numbers (baseline count, thresholds, runtimes, precision).
+Append one entry per session: date, phase, result of each exit gate (done / not done / not verifiable, with how), decisions, numbers (baseline count, thresholds, runtimes, precision), review findings that mattered.
 
 _No entries yet._
