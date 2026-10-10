@@ -10,7 +10,7 @@
 | Forged trailer via message | minor | 5aa1a93 -> 871ae41 message collapsed to one line |
 | Phase read from subject | minor | kept: the spec asks for the phase prefix; documented in DESIGN.md, replay re-verifies |
 | Green weakens tests / several failing tests in red | minor | 1ccb48d -> 3837354 green may not change tests; 07df552 -> 3f9b334 red needs exactly one failing test (unittest, pytest, vitest) |
-| Refactor 6b479b3 changed behaviour | minor | acknowledged; history not rewritten. The changes are now covered by tests (multi-word messages, all violations listed, no-output fallback). |
+| Refactor 6b479b3 changed behaviour | minor | acknowledged; history not rewritten. Multi-word messages are now covered (5aa1a93); listing all violations and the no-summary fallback are not pinned by a test. |
 | Leaks | minor | 3344ab9 `PHASES` replaces CLI access to the table; constants private. `is_production` stays public for the PreToolUse hook (step 3). Uninstalled vitest is now `NoFramework`. |
 | Weak trailer assertions | nit | df53306 exact trailer values |
 | Snapshot / expect.assertions refused | minor | deliberate strictness, documented in DESIGN.md |
