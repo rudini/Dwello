@@ -94,7 +94,7 @@
 		});
 		saving = false;
 		if (response.error) {
-			addToast('error', response.error.message || 'Die Rechnung konnte nicht gespeichert werden.');
+			addToast('error', 'Die Rechnung konnte nicht gespeichert werden. Versuchen Sie es erneut.');
 			return;
 		}
 		addToast('success', `Rechnung von ${billingEntity.trim()} gespeichert`);

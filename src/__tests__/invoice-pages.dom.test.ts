@@ -181,6 +181,30 @@ describe('Rechnungsdetail', () => {
 		expect(get(toasts).at(-1)!.message).toBe('Rechnung von Hauswart Meier gelöscht');
 	});
 
+	it('meldet ein misslungenes Löschen auf Deutsch, auch wenn der Server Englisch antwortet', async () => {
+		fakeBff(() => [404, { error: 'Invoice not found' }]);
+		show(InvoicePage, { data: { invoice: invoice() } });
+
+		click('invoice-delete-button');
+		click('invoice-delete-confirm');
+		await settle();
+
+		expect(text()).toContain('Die Rechnung konnte nicht gelöscht werden.');
+		expect(text()).not.toContain('Invoice not found');
+	});
+
+	it('meldet eine nicht lesbare Serverantwort auf Deutsch', async () => {
+		globalThis.fetch = vi.fn(async () => new Response('<html>Bad Gateway</html>', { status: 502 }));
+		show(InvoicePage, { data: { invoice: invoice() } });
+
+		click(button('Neu kategorisieren'));
+		await settle();
+
+		expect(byTestId('invoice-recategorize-error')!.textContent).toContain(
+			'Ein unerwarteter Fehler ist aufgetreten. Versuchen Sie es erneut.'
+		);
+	});
+
 	// TODO(fachlich prüfen): the glossary names the equal split only for the Verwaltungspauschale
 	it('erklärt eine Rechnung ohne Verteilschlüssel, statt einen Fehler anzudeuten', () => {
 		show(InvoicePage, { data: { invoice: invoice({ distributionKey: undefined }) } });

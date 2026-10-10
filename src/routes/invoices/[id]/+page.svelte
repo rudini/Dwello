@@ -36,7 +36,7 @@
 		const result = await api.delete(`/invoices/${invoice.id}`);
 		deleting = false;
 		if (result.error) {
-			deleteError = result.error.message;
+			deleteError = 'Die Rechnung konnte nicht gelöscht werden. Versuchen Sie es erneut.';
 			return;
 		}
 		addToast('success', `Rechnung von ${invoice.billingEntity} gelöscht`);
