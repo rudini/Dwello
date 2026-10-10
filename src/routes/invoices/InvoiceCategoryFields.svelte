@@ -64,10 +64,12 @@
 	{/snippet}
 </Field>
 
+<!-- TODO(fachlich prüfen): the equal split without a key is what the statement calculation does;
+     the glossary states it only for the Verwaltungspauschale -->
 <Select
 	id="distributionKey"
 	label="Verteilschlüssel"
-	help="Wie die Kosten auf die Wohnungen des Gebäudes verteilt werden."
+	help="Wie die Kosten auf die Wohnungen des Gebäudes verteilt werden. Ohne Verteilschlüssel werden die Kosten gleichmässig pro Wohnung verteilt."
 	placeholder="Verteilschlüssel auswählen"
 	optional
 	options={distributionKeys.map((key) => ({ value: key.id, label: key.name }))}

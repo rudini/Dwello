@@ -39,6 +39,8 @@
 	});
 
 	const selected = $derived(heatingProfiles.find((p) => p.id === heatingProfileId));
+	// The predefined profiles' descriptions are English; only an own profile's is shown
+	const ownDescription = $derived(selected?.type === 'custom' ? selected.description : '');
 	const fee = $derived(String(managementFeePercent ?? ''));
 </script>
 
@@ -75,7 +77,7 @@
 		</select>
 	{/snippet}
 </Field>
-{#if selected?.description}<p class="text-ink-muted">{selected.description}</p>{/if}
+{#if ownDescription}<p class="text-ink-muted">{ownDescription}</p>{/if}
 <HeatingProfileChart shares={selected?.monthlyPercentages} />
 
 <TextInput

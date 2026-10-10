@@ -9,6 +9,8 @@ vi.mock('$app/stores', () => ({
 }));
 
 import { goto, invalidateAll } from '$app/navigation';
+import { get } from 'svelte/store';
+import { toasts } from '$lib/stores';
 import InvoicesPage from '../routes/invoices/+page.svelte';
 import InvoicePage from '../routes/invoices/[id]/+page.svelte';
 import NewInvoicePage from '../routes/invoices/new/+page.svelte';
@@ -80,7 +82,7 @@ describe('Rechnungsliste', () => {
 
 		expect(byTestId('invoice-row-i1')!.textContent).toContain('Hauswartung');
 		expect(byTestId('invoice-row-i1')!.textContent).toContain('Manuell');
-		expect(byTestId('invoice-row-i2')!.textContent).toContain('Ausstehend');
+		expect(byTestId('invoice-row-i2')!.textContent).toContain('Kategorie fehlt');
 		expect(byTestId('invoice-row-i2')!.textContent).toContain('Nicht umlagefähig');
 	});
 
@@ -109,6 +111,15 @@ describe('Rechnungsliste', () => {
 			'Manuell'
 		);
 		expect(row.querySelector('[role="status"], [aria-live]')).toBeNull();
+	});
+
+	it('hält „Bearbeiten“ innerhalb der Zeile, statt die Seite zu verbreitern', () => {
+		list([invoice()]);
+		const row = byTestId('invoice-row-i1')!;
+		const action = row.querySelector('[data-testid="invoice-edit-button"]')!.parentElement!;
+
+		expect(row.className).not.toMatch(/col-span|grid-cols/);
+		expect(action.className).toMatch(/(^| )xl:shrink-0( |$)/);
 	});
 
 	it('zählt die Rechnungen in Einzahl und Mehrzahl richtig', () => {
@@ -181,6 +192,16 @@ describe('Rechnungsdetail', () => {
 		expect(invalidateAll).not.toHaveBeenCalled();
 	});
 
+	// The KI runs while saving: an invoice without category is not waiting for anything
+	it('sagt bei einer Rechnung ohne Kategorie nicht, dass noch etwas läuft', () => {
+		show(InvoicePage, {
+			data: { invoice: invoice({ category: undefined, categorizationStatus: 'pending' }) }
+		});
+
+		expect(text()).toContain('Nicht kategorisiert – bitte Kategorie wählen');
+		expect(text()).not.toMatch(/ausstehend/i);
+	});
+
 	it('nennt den Grund, wenn die KI nicht kategorisieren konnte', async () => {
 		fakeBff(() => [
 			503,
@@ -241,13 +262,14 @@ describe('Rechnung erfassen', () => {
 		fireEvent(byTestId<HTMLInputElement>('invoice-amount-input')!, 'input', '450');
 	};
 
-	it('verlangt Gebäude, Lieferant, Beschreibung und Betrag', () => {
+	it('verlangt Gebäude, Rechnungssteller, Beschreibung und Betrag', () => {
 		const calls = fakeBff();
 		show(NewInvoicePage, { data: data(false) } as never);
 
 		submit('submit-button');
 
 		expect(text()).toContain('Bitte wählen Sie ein Gebäude');
+		expect(text()).toContain('Bitte geben Sie einen Rechnungssteller ein');
 		expect(text()).toContain('Bitte geben Sie einen gültigen Betrag ein');
 		expect(calls).toEqual([]);
 	});
@@ -344,6 +366,37 @@ describe('Rechnung erfassen', () => {
 		expect(goto).toHaveBeenCalledWith('/statements/generate');
 	});
 
+	// TODO(fachlich prüfen): the glossary names the equal split only for the Verwaltungspauschale
+	it('sagt, wie eine Rechnung ohne Verteilschlüssel verteilt wird', () => {
+		show(NewInvoicePage, { data: data(false) } as never);
+		expect(document.querySelector('#distributionKey-help')!.textContent).toContain(
+			'Ohne Verteilschlüssel werden die Kosten gleichmässig pro Wohnung verteilt.'
+		);
+	});
+
+	it('warnt, wenn das Rechnungsdatum nicht in der Abrechnungsperiode des Assistenten liegt', () => {
+		show(NewInvoicePage, {
+			data: data(false, {
+				returnTo: '/statements/generate',
+				period: { start: '2025-01-01', end: '2025-12-31' }
+			})
+		} as never);
+		const date = byTestId<HTMLInputElement>('invoice-date-input')!;
+
+		fireEvent(date, 'input', '2026-10-10');
+		expect(byTestId('invoice-period-warning')!.textContent).toContain(
+			'Das Rechnungsdatum liegt nicht in der Abrechnungsperiode 1.1.2025 – 31.12.2025'
+		);
+
+		fireEvent(date, 'input', '2025-11-15');
+		expect(byTestId('invoice-period-warning')).toBeNull();
+	});
+
+	it('warnt ohne Abrechnungsperiode nicht', () => {
+		show(NewInvoicePage, { data: data(false, { period: null }) } as never);
+		expect(byTestId('invoice-period-warning')).toBeNull();
+	});
+
 	it('bietet die Kategorien nach Umlagefähigkeit gruppiert an', () => {
 		show(NewInvoicePage, { data: data(false) } as never);
 		const groups = [...byTestId('invoice-category-select')!.querySelectorAll('optgroup')];
@@ -370,6 +423,30 @@ describe('Rechnung bearbeiten', () => {
 		show(EditInvoicePage, {
 			data: { invoice: invoice(overrides), buildings, categories, distributionKeys }
 		} as never);
+
+	it('zeigt den Betrag mit zwei Nachkommastellen', () => {
+		edit({ amount: 480 });
+		expect(byTestId<HTMLInputElement>('invoice-amount-input')!.value).toBe('480.00');
+	});
+
+	it('speichert den Rechnungssteller ohne Leerzeichen am Rand und bestätigt das Speichern', async () => {
+		toasts.set([]);
+		const calls = fakeBff(() => [200, {}]);
+		edit();
+
+		fireEvent(
+			byTestId<HTMLInputElement>('invoice-billing-entity-input')!,
+			'input',
+			'  Hauswart Huber  '
+		);
+		submit('submit-button');
+		await settle();
+
+		expect(calls[0].body).toMatchObject({ billingEntityName: 'Hauswart Huber' });
+		expect(get(toasts).map((toast) => toast.message)).toContain(
+			'Rechnung von Hauswart Huber gespeichert'
+		);
+	});
 
 	it('speichert erst nach einer Änderung', async () => {
 		const calls = fakeBff(() => [200, {}]);

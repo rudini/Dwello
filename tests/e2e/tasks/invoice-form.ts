@@ -4,6 +4,7 @@ import {
 	buildingSelect,
 	categorySelect,
 	descriptionInput,
+	invoiceDateInput,
 	invoiceSubmitButton,
 	overrideReasonInput,
 	supplierInput
@@ -47,4 +48,8 @@ export const overrideCategory = (category: string, reason: string) => async (act
 export const clearSupplier = async (actor: Actor) => {
 	await supplierInput(actor.page).fill('');
 	await actor.perform(saveInvoice);
+};
+
+export const enterInvoiceDate = (date: string) => async (actor: Actor) => {
+	await invoiceDateInput(actor.page).fill(date);
 };

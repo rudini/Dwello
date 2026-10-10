@@ -63,6 +63,14 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Wenn der Liegenschaftsverwalter ohne Bestätigung zum Erstellen weitergehen will
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Bestätigen Sie, dass die Abrechnungen trotzdem erstellt werden sollen."
 
+  Szenario: Eine Rechnung aus der Warnung ausserhalb der Abrechnungsperiode fällt auf
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
+    Und der Liegenschaftsverwalter aus der Warnung eine Rechnung erfassen will
+    Und der Liegenschaftsverwalter das Rechnungsdatum "2025-01-10" einträgt
+    Dann warnt das Rechnungsformular, dass das Rechnungsdatum nicht in der Abrechnungsperiode "1.1.2024 – 31.12.2024" liegt
+    Wenn der Liegenschaftsverwalter das Rechnungsdatum "2024-11-15" einträgt
+    Dann warnt das Rechnungsformular nicht vor dem Rechnungsdatum
+
   Szenario: Eine Bestätigung gilt nur für ihre Vorschau
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
     Und der Liegenschaftsverwalter bestätigt, dass die Abrechnungen trotzdem erstellt werden sollen

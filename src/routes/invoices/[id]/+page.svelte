@@ -24,7 +24,8 @@
 	const statusBadge = {
 		'auto-categorized': { tone: 'info', label: 'Automatisch kategorisiert' },
 		manual: { tone: 'neutral', label: 'Manuell kategorisiert' },
-		pending: { tone: 'caution', label: 'Kategorisierung ausstehend' }
+		// The KI runs while the invoice is saved: without a category nothing is running any more
+		pending: { tone: 'caution', label: 'Nicht kategorisiert – bitte Kategorie wählen' }
 	} as const;
 	const status = $derived(statusBadge[invoice.categorizationStatus]);
 
