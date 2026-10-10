@@ -152,7 +152,7 @@ No date library; formatting uses the built-in `Intl` APIs / `Date`.
 ### Map Library: Leaflet
 
 - `leaflet` (no Svelte wrapper), used in `src/routes/buildings/BuildingMiniMap.svelte`
-- Tiles: CARTO `light_all` basemap (OpenStreetMap data), no API key
+- Tiles: CARTO `light_all` / `dark_all` basemap (OpenStreetMap data), API key in `PUBLIC_CARTO_API_KEY`
 
 ### Address Lookup: OpenPLZ
 
@@ -346,6 +346,7 @@ See `.env.example`. Main variables:
 ```
 # Frontend / BFF
 PUBLIC_APP_URL=http://localhost:3000
+PUBLIC_CARTO_API_KEY=...  # map tiles, from carto.com/basemaps/apikey; visible to the browser
 BACKEND_URL=http://localhost:3001
 JWT_SECRET=...            # min 32 characters, same value in backend
 JWT_EXPIRY=7d
@@ -533,7 +534,7 @@ None of these targets is measured yet (see `docs/migration-mva.md`).
 | ORM | Drizzle | Type-safe, lightweight |
 | LLM | OpenAI-compatible API, default local Ollama (`qwen2.5:3b`) | Self-hosted by default, privacy, cost; external provider possible |
 | Auth | OAuth 2.0 (Google, Microsoft) + HTTPOnly cookie JWT | Standard, no token in the browser |
-| Maps | Leaflet + CARTO/OSM tiles | Lightweight, no API key |
+| Maps | Leaflet + CARTO/OSM tiles | Lightweight, free CARTO API key |
 | PDF | PDFKit + qrcode | Pure JS, Swiss QR-bill |
 | Mail | nodemailer (SMTP) / Resend | Either own mail server or hosted |
 | Deployment | Docker Compose | Simple, portable |

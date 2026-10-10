@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onDestroy, onMount } from 'svelte';
+	import { env } from '$env/dynamic/public';
 	import type { Map } from 'leaflet';
 	import 'leaflet/dist/leaflet.css';
 
@@ -35,7 +36,9 @@
 		const style = window.matchMedia('(prefers-color-scheme: dark)').matches
 			? 'dark_all'
 			: 'light_all';
-		L.tileLayer(`https://{s}.basemaps.cartocdn.com/${style}/{z}/{x}/{y}{r}.png`, {
+		// CARTO serves tiles to browsers only with a key; it is public by nature, as it travels in the tile URL
+		const key = env.PUBLIC_CARTO_API_KEY;
+		L.tileLayer(`https://{s}.basemaps.cartocdn.com/${style}/{z}/{x}/{y}{r}.png?key=${key}`, {
 			maxZoom: 19,
 			subdomains: 'abcd'
 		}).addTo(map);
