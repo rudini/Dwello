@@ -86,3 +86,15 @@ class TddStepTest(unittest.TestCase):
         self.assertEqual(result.returncode, 1, result.stderr)
         self.assertIn("green needs all tests passing", result.stderr)
         self.assertEqual(repo.subject(), "red: adds two numbers")
+
+    def test_refactor_is_refused_while_a_test_fails(self):
+        repo = Repo(self, {"calc.py": WRONG_ADD})
+        repo.commit_all("red: adds two numbers", {"test_calc.py": ADD_TEST})
+        repo.commit_all("green: adds two numbers", {"calc.py": RIGHT_ADD})
+        repo.write("calc.py", "def add(a, b):\n    return a * b\n")
+
+        result = repo.run("tdd-step", "refactor", "tidy add")
+
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn("refactor needs all tests passing", result.stderr)
+        self.assertEqual(repo.subject(), "green: adds two numbers")
