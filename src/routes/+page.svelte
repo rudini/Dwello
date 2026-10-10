@@ -4,5 +4,5 @@
 </script>
 
 <div class="flex items-center justify-center py-24">
-	<p class="text-ink-muted">Weiterleitung zum Dashboard …</p>
+	<p class="text-ink-muted">Weiterleitung zur Übersicht …</p>
 </div>

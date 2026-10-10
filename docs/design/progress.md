@@ -17,7 +17,7 @@ Brief: `docs/REDESIGN_BRIEF.md`. Resume rules: `docs/design/arbeitsregeln.md`.
 | 8 Remove old design system | open | | | |
 | 9 Final | open | | | |
 
-**Next step:** stage 4 – app shell, navigation (one level, settings sub-pages as items, drawer below 1024 px), Übersicht with task list and deadlines; illustrations on the overview; personas Anna and Helga.
+**Next step:** commit stage 4, CI, stage 4 review, personas Anna and Helga.
 
 ## Log
 
@@ -61,3 +61,14 @@ Brief: `docs/REDESIGN_BRIEF.md`. Resume rules: `docs/design/arbeitsregeln.md`.
 - Test helper `src/__tests__/helpers/hydrate.ts`: compiled server modules are now named by their path below `src/` (two components called `Icon.svelte` overwrote each other) and relative TypeScript imports are resolved.
 - Checks: unit 798, lint/check/build/fallow clean, E2E 352 passed incl. 79 axe examples, 0 violations.
 - Review round 1: 2 Majors (room count drawn as "vacant", invoice icon with a dollar sign) fixed with meaning tests; 6 Minors fixed, 2 moved to the stage 7 icon pass.
+
+### Stage 4 – Shell, navigation, Übersicht
+
+- ATDD: `dashboard.feature` (now "Übersicht") gets scenarios for overdue statements, drafts, payment deadlines and contract ends as tasks/deadlines; quick actions changed to the four common jobs; header actions removed (one primary action per screen). `navigation.feature`: new labels, settings sub-pages as items, "only the current area is marked". Step phrase "das Dashboard öffnet" renamed to "die Übersicht öffnet". New seeding helpers `paymentDeadline`, `contractEnd` (through the API).
+- `src/lib/overview.ts` (TDD, 9 tests): set-up tasks (first building → apartments → first contract), work tasks (overdue → letters to send → drafts) with singular/plural, deadlines (Zahlungsfrist ≤ 14 days or passed, Vertragsende ≤ 60 days; TODO(fachlich prüfen) on the windows), relative wording ("seit 5 Tagen abgelaufen", "heute", "morgen", "in 10 Tagen"). Loader reads only existing endpoints (dashboard, statements overdue/sent, documents to send, active contracts); "today" is the server's local date.
+- Shell: header (logo → Übersicht, user menu with Escape/outside close and focus return, menu button below 1024 px), sidebar `w-80` from 1024 px with one-level NavList (`activeHref` picks the most specific item), mobile drawer as modal dialog with focus trap, footer, skip link "Zum Inhalt springen". `NavLinks`, the old dashboard parts (GettingStarted, QuickActions, StatementTiles, ActivityFeed, StatCard, OccupancyChart) and `ProviderIcon` deleted.
+- Decision: the login page shows no third-party logos (brand colours would be hard-coded colours outside the tokens); buttons say "Mit Google anmelden".
+- Decision: the header shows a user icon instead of the Google profile picture (no external image request).
+- Error page with the "Fehler" illustration and "Zur Übersicht". Copy that promised "Ihre Daten sind davon nicht betroffen" removed – not verifiable for every error.
+- Legacy list: 111 files left.
+- Checks: unit 839, lint/check/build/fallow clean, E2E 359 passed incl. axe (drawer state now also on tablet).

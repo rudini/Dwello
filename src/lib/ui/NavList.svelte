@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { isActive } from '$lib/navigation';
+	import { activeHref } from '$lib/navigation';
 	import Icon from './Icon.svelte';
 	import type { IconName } from './icons';
 
@@ -19,7 +19,7 @@
 			{#if group.label}<p class="px-4 text-sm font-semibold text-ink-muted">{group.label}</p>{/if}
 			<ul class="flex flex-col gap-1">
 				{#each group.items as item (item.href)}
-					{@const active = isActive(item.href, $page.url.pathname)}
+					{@const active = item.href === activeHref($page.url.pathname)}
 					<li>
 						<a
 							href={item.href}

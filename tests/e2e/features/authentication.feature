@@ -26,19 +26,19 @@ Funktionalität: Anmeldung
 
   Szenario: Abgelaufene Sitzung
     Angenommen die Sitzung des Liegenschaftsverwalters ist abgelaufen
-    Wenn der Liegenschaftsverwalter das Dashboard öffnet
+    Wenn der Liegenschaftsverwalter die Übersicht öffnet
     Dann ist der Liegenschaftsverwalter auf der Seite "Anmelden"
 
   Szenario: Angemeldet mit eigenem Namen
-    Wenn der Liegenschaftsverwalter das Dashboard öffnet
+    Wenn der Liegenschaftsverwalter die Übersicht öffnet
     Dann sieht der Liegenschaftsverwalter seinen Namen "Vera Verwalter" in der Kopfzeile
 
   Szenario: Angemeldete brauchen die Anmeldeseite nicht
     Wenn der Liegenschaftsverwalter die Anmeldeseite öffnet
-    Dann ist der Liegenschaftsverwalter auf der Seite "Dashboard"
+    Dann ist der Liegenschaftsverwalter auf der Seite "Übersicht"
 
   Szenario: Abmelden
-    Angenommen der Liegenschaftsverwalter öffnet das Dashboard
+    Angenommen der Liegenschaftsverwalter öffnet die Übersicht
     Wenn der Liegenschaftsverwalter sich abmeldet
     Dann ist der Liegenschaftsverwalter auf der Seite "Anmelden"
-    Und führt das Dashboard den Liegenschaftsverwalter wieder zur Anmeldung
+    Und führt die Übersicht den Liegenschaftsverwalter wieder zur Anmeldung

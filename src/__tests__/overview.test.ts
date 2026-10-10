@@ -1,0 +1,113 @@
+import { describe, expect, it } from 'vitest';
+import { overviewDeadlines, overviewTasks, type OverviewInput } from '$lib/overview';
+
+const portfolio = {
+	totalBuildings: 1,
+	totalApartments: 2,
+	occupiedApartments: 1,
+	reletApartments: 0,
+	vacantApartments: 1,
+	reservedApartments: 0,
+	occupancyRate: 50
+};
+const input = (overrides: Partial<OverviewInput> = {}): OverviewInput => ({
+	today: '2026-10-10',
+	portfolio,
+	statementCounts: { draft: 0, sent: 0, paid: 0, overdue: 0 },
+	dueStatements: [],
+	lettersToSend: 0,
+	endingContracts: [],
+	...overrides
+});
+
+describe('Aufgaben der Übersicht', () => {
+	it('beginnt ohne Gebäude mit dem ersten Gebäude', () => {
+		const [first] = overviewTasks(
+			input({
+				portfolio: { ...portfolio, totalBuildings: 0, totalApartments: 0, occupiedApartments: 0 }
+			})
+		);
+		expect(first).toMatchObject({ title: 'Erstes Gebäude erfassen', href: '/buildings/new' });
+	});
+
+	it('fragt nach den Wohnungen, sobald ein Gebäude da ist', () => {
+		const [first] = overviewTasks(
+			input({ portfolio: { ...portfolio, totalApartments: 0, occupiedApartments: 0 } })
+		);
+		expect(first).toMatchObject({ title: 'Wohnungen erfassen', href: '/apartments/new' });
+	});
+
+	it('führt danach zum ersten Mietvertrag', () => {
+		const [first] = overviewTasks(input({ portfolio: { ...portfolio, occupiedApartments: 0 } }));
+		expect(first).toMatchObject({ title: 'Ersten Mietvertrag erfassen', href: '/contracts/new' });
+	});
+
+	it('hat nichts zu tun, wenn alles eingerichtet und erledigt ist', () => {
+		expect(overviewTasks(input())).toEqual([]);
+	});
+
+	it('nennt überfällige Abrechnungen zuerst, dann Briefe und Entwürfe', () => {
+		const tasks = overviewTasks(
+			input({ statementCounts: { draft: 2, sent: 0, paid: 0, overdue: 1 }, lettersToSend: 3 })
+		);
+		expect(tasks.map((task) => [task.title, task.href])).toEqual([
+			['Überfällige Abrechnungen mahnen', '/statements?status=overdue'],
+			['Briefe verschicken', '/documents?status=to_send'],
+			['Abrechnungen prüfen und versenden', '/statements?status=draft']
+		]);
+	});
+
+	it('sagt, wie viele es sind, in der Einzahl und Mehrzahl', () => {
+		const [overdue, letters, drafts] = overviewTasks(
+			input({ statementCounts: { draft: 1, sent: 0, paid: 0, overdue: 2 }, lettersToSend: 1 })
+		);
+		expect(overdue.text).toContain('2 Nebenkostenabrechnungen sind');
+		expect(letters.text).toContain('1 Brief ist');
+		expect(drafts.text).toContain('1 Nebenkostenabrechnung ist');
+	});
+});
+
+describe('Fristen der Übersicht', () => {
+	it('nennt Zahlungsfristen und Vertragsenden nach Datum, mit Abstand in Worten', () => {
+		const deadlines = overviewDeadlines(
+			input({
+				dueStatements: [
+					{ id: 's1', tenantName: 'Anna Keller', paymentDeadline: '2026-10-20' },
+					{ id: 's2', tenantName: 'Bruno Meier', paymentDeadline: '2026-10-05' }
+				],
+				endingContracts: [{ id: 'c1', tenantName: 'Eva Frei', endDate: '2026-10-11' }]
+			})
+		);
+		expect(deadlines.map((d) => [d.kind, d.name, d.when, d.href])).toEqual([
+			['Zahlungsfrist', 'Bruno Meier', 'seit 5 Tagen abgelaufen', '/statements/s2'],
+			['Vertragsende', 'Eva Frei', 'morgen', '/contracts/c1'],
+			['Zahlungsfrist', 'Anna Keller', 'in 10 Tagen', '/statements/s1']
+		]);
+	});
+
+	it('lässt ferne Termine weg: Zahlungsfrist nach 14, Vertragsende nach 60 Tagen', () => {
+		const deadlines = overviewDeadlines(
+			input({
+				dueStatements: [{ id: 's1', tenantName: 'Anna Keller', paymentDeadline: '2026-10-25' }],
+				endingContracts: [
+					{ id: 'c1', tenantName: 'Eva Frei', endDate: '2026-12-10' },
+					{ id: 'c2', tenantName: 'Ueli Graf', endDate: '2026-12-09' },
+					{ id: 'c3', tenantName: 'Lea Roth', endDate: '2026-10-01' }
+				]
+			})
+		);
+		expect(deadlines.map((d) => d.name)).toEqual(['Ueli Graf']);
+	});
+
+	it('sagt heute und ein Tag in der Einzahl', () => {
+		const deadlines = overviewDeadlines(
+			input({
+				dueStatements: [
+					{ id: 's1', tenantName: 'Anna Keller', paymentDeadline: '2026-10-10' },
+					{ id: 's2', tenantName: 'Bruno Meier', paymentDeadline: '2026-10-09' }
+				]
+			})
+		);
+		expect(deadlines.map((d) => d.when)).toEqual(['seit 1 Tag abgelaufen', 'heute']);
+	});
+});

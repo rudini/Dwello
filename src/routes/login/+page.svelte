@@ -1,6 +1,7 @@
 <script lang="ts">
-	import { _ } from 'svelte-i18n';
-	import ProviderIcon from './ProviderIcon.svelte';
+	import Alert from '$lib/ui/Alert.svelte';
+	import Icon from '$lib/ui/Icon.svelte';
+	import Illustration from '$lib/ui/Illustration.svelte';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -10,59 +11,43 @@
 	<title>Anmelden - Dwello</title>
 </svelte:head>
 
-<div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-	<div class="max-w-md w-full space-y-8">
-		<div class="text-center">
-			<h1 class="text-4xl font-bold text-gray-900">{$_('app.name')}</h1>
-			<p class="mt-2 text-sm text-gray-600">{$_('app.tagline')}</p>
+<div class="flex min-h-screen items-center justify-center px-4 py-12">
+	<div class="flex w-full max-w-md flex-col gap-6 rounded-panel border border-line bg-surface p-8">
+		<div class="flex flex-col items-center gap-4 text-center">
+			<Illustration name="building" />
+			<p class="text-xl font-bold text-accent">Dwello</p>
+			<h1 class="text-3xl font-bold text-ink">Anmelden</h1>
+			<p class="text-ink-muted">
+				Melden Sie sich mit Ihrem bestehenden Google- oder Microsoft-Konto an. Ein eigenes Passwort
+				für Dwello brauchen Sie nicht.
+			</p>
 		</div>
 
-		<div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-			<h2 class="mb-6 text-center text-xl font-semibold text-gray-900">{$_('auth.signIn')}</h2>
+		{#if data.error}
+			<Alert tone="critical" title={data.error} testid="login-error" />
+		{/if}
 
-			{#if data.error}
-				<p
-					class="mb-4 p-3 bg-red-50 border border-red-200 rounded-md text-sm text-critical"
-					data-testid="login-error"
+		<div class="flex flex-col gap-4">
+			{#each data.providers as provider (provider.id)}
+				<a
+					href={provider.href}
+					data-sveltekit-reload
+					data-testid="login-{provider.id}"
+					class="flex min-h-12 items-center justify-center gap-2 rounded-control border-2 border-line-strong bg-surface px-6 font-semibold text-accent hover:bg-accent-soft"
 				>
-					{data.error}
-				</p>
-			{/if}
-
-			<div class="space-y-4">
-				{#each data.providers as provider (provider.id)}
-					<a
-						href={provider.href}
-						data-sveltekit-reload
-						data-testid="login-{provider.id}"
-						class="w-full flex justify-center items-center gap-3 px-4 py-3 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-					>
-						<ProviderIcon provider={provider.id} />
-						<span>{$_('auth.signInWith', { values: { provider: provider.name } })}</span>
-					</a>
-				{:else}
-					<p class="text-sm text-gray-600 text-center" data-testid="login-unavailable">
-						Es ist keine Anmeldung eingerichtet. Bitte hinterlegen Sie die OAuth-Zugangsdaten für
-						Google oder Microsoft.
-					</p>
-				{/each}
-			</div>
-
-			<div class="mt-6 relative">
-				<div class="absolute inset-0 flex items-center">
-					<div class="w-full border-t border-gray-300"></div>
-				</div>
-				<div class="relative flex justify-center text-sm">
-					<span class="px-2 bg-white text-ink-muted">{$_('auth.secureAuth')}</span>
-				</div>
-			</div>
-
-			<div class="mt-6 text-center text-xs text-ink-muted">
-				<p>{$_('auth.termsAgreement')}</p>
-				<p class="mt-1">{$_('auth.dataLocation')}</p>
-			</div>
+					<Icon name="user" />
+					Mit {provider.name} anmelden
+				</a>
+			{:else}
+				<Alert tone="caution" title="Keine Anmeldung eingerichtet" testid="login-unavailable">
+					<p>Bitte hinterlegen Sie die OAuth-Zugangsdaten für Google oder Microsoft.</p>
+				</Alert>
+			{/each}
 		</div>
 
-		<p class="text-center text-xs text-ink-muted">Dwello v0.1.0</p>
+		<p class="text-center text-ink-muted">
+			Mit der Anmeldung akzeptieren Sie die
+			<a href="/terms" class="text-accent underline underline-offset-4">Nutzungsbedingungen</a>.
+		</p>
 	</div>
 </div>

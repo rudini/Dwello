@@ -98,8 +98,7 @@ const states: Record<string, (page: Page, viewport: Viewport) => Promise<unknown
 		await shows(page, '[data-testid="heating-profile-form-total"].text-critical');
 	},
 	'mobile-menu-open': async (page, viewport) => {
-		// Only where the sidebar folds away (below md); tablet joins when the shell folds below 1024 px (stage 4)
-		if (viewport !== 'mobile') return;
+		if (viewport === 'desktop') return; // the sidebar is always open from 1024 px
 		await press(page, 'mobile-menu-button');
 		await shows(page, '[role="dialog"][aria-label="Hauptnavigation"]');
 	},

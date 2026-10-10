@@ -11,3 +11,7 @@ export const headerAction = (page: Page, label: string) => page.getByTestId('das
 export const quickAction = (page: Page, label: string) => page.getByTestId('quick-action').filter({ hasText: label });
 // The filter a list page was opened with
 export const listFilter = (page: Page, name: string) => new URL(page.url()).searchParams.get(name);
+export const overviewTask = (page: Page, title: string) => page.getByTestId('overview-task').filter({ hasText: title });
+export const overviewDeadline = (page: Page, kind: string, name: string) =>
+	page.getByTestId('overview-deadline').filter({ hasText: kind }).filter({ hasText: name });
+export const currentNavItem = (page: Page) => page.locator('nav [aria-current="page"]');

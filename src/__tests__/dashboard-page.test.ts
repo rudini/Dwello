@@ -1,9 +1,26 @@
 import { describe, it, expect } from 'vitest';
 import { render } from 'svelte/server';
 import DashboardPage from '../routes/dashboard/+page.svelte';
-import type { DashboardData } from '../routes/dashboard/+page.server';
+import type { Deadline, Task } from '$lib/overview';
 
-const data: DashboardData = {
+const task = (id: string, title: string, href: string): Task => ({
+	id,
+	title,
+	text: `${title} – Erklärung`,
+	href,
+	action: `${title} öffnen`,
+	icon: 'statement'
+});
+const deadline: Deadline = {
+	id: 's1',
+	kind: 'Zahlungsfrist',
+	name: 'Anna Keller',
+	date: '2026-10-05',
+	days: -5,
+	when: 'seit 5 Tagen abgelaufen',
+	href: '/statements/s1'
+};
+const data = {
 	portfolio: {
 		totalBuildings: 2,
 		totalApartments: 8,
@@ -29,84 +46,95 @@ const data: DashboardData = {
 			occupiedApartments: 3,
 			occupancyRate: 75
 		}
-	]
+	],
+	tasks: [
+		task('overdue', 'Überfällige Abrechnungen mahnen', '/statements?status=overdue'),
+		task('drafts', 'Abrechnungen prüfen und versenden', '/statements?status=draft')
+	],
+	deadlines: [deadline]
 };
 
-const page = () => render(DashboardPage, { props: { data } as never }).body;
+const page = (overrides = {}) =>
+	render(DashboardPage, { props: { data: { ...data, ...overrides } } as never }).body;
+const tasksOf = (body: string) => body.match(/data-testid="overview-task"[\s\S]*?<\/li>/g) ?? [];
 
-describe('Dashboard', () => {
-	it('zeigt die Kennzahlen des Portfolios mit Belegungsrate', () => {
+describe('Übersicht', () => {
+	it('heisst Übersicht und beginnt mit dem, was jetzt zu tun ist', () => {
 		const body = page();
-
-		const vacant = body.match(/<a[^>]*data-testid="stat-vacant"[\s\S]*?<\/a>/)![0];
-		expect(vacant).toMatch(/>2</);
-		expect(body).toContain('75.0%');
+		expect(body).toMatch(/<h1[^>]*>Übersicht<\/h1>/);
+		expect(body.indexOf('>Als Nächstes zu tun<')).toBeLessThan(body.indexOf('>Fristen<'));
 	});
 
-	it('zeigt Beträge in Franken', () => {
-		expect(page()).toMatch(/CHF[\s ]1[’']?250\.50/);
+	it('zeigt jede Aufgabe mit Erklärung und einem Weg dorthin; die erste ist die Hauptaktion', () => {
+		const [first, second] = tasksOf(page());
+		expect(first).toContain('Überfällige Abrechnungen mahnen');
+		expect(first).toContain('Erklärung');
+		expect(first).toContain('href="/statements?status=overdue"');
+		const primary = /(?<![\w:-])bg-accent(?![\w-])/; // the primary button's fill
+		expect(first).toMatch(primary);
+		expect(second).not.toMatch(primary);
 	});
 
-	it('führt jede Abrechnungs-Kachel zur Liste mit ihrem Status', () => {
-		const body = page();
+	it('begrüsst neue Liegenschaftsverwalter mit einem Bild zum ersten Schritt', () => {
+		const first = {
+			...task('first-building', 'Erstes Gebäude erfassen', '/buildings/new'),
+			illustration: 'building'
+		};
+		const [card] = tasksOf(page({ tasks: [first] }));
+		expect(card).toContain('href="/buildings/new"');
+		expect(card).toMatch(/<svg[^>]*viewBox="0 0 160 120"[^>]*aria-hidden="true"/);
+	});
 
+	it('meldet, wenn nichts zu tun ist', () => {
+		const body = page({ tasks: [] });
+		expect(tasksOf(body)).toHaveLength(0);
+		expect(body).toContain('Alles erledigt');
+	});
+
+	it('nennt Fristen mit Datum, Art, Name und Abstand', () => {
+		const row = page().match(/data-testid="overview-deadline"[\s\S]*?<\/li>/)![0];
+		expect(row).toContain('5.10.2026');
+		expect(row).toContain('Zahlungsfrist');
+		expect(row).toContain('Anna Keller');
+		expect(row).toContain('seit 5 Tagen abgelaufen');
+		expect(row).toContain('href="/statements/s1"');
+	});
+
+	it('sagt, wenn keine Fristen anstehen', () => {
+		expect(page({ deadlines: [] })).toContain('In den nächsten Wochen stehen keine Fristen an.');
+	});
+
+	it('führt Kennzahlen und Abrechnungsstatus zu den gefilterten Listen', () => {
+		const body = page();
+		expect(body).toMatch(/<a[^>]*href="\/apartments\?status=vacant"[^>]*data-testid="stat-vacant"/);
+		expect(body.match(/data-testid="stat-buildings"/g)).toHaveLength(1);
+		expect(body).toMatch(
+			/<a[^>]*href="\/statements\?status=overdue"[^>]*data-testid="stat-overdue-amount"/
+		);
 		for (const status of ['draft', 'sent', 'paid', 'overdue']) {
 			expect(body).toContain(`href="/statements?status=${status}"`);
 		}
-		expect(body).toMatch(/data-testid="statements-draft-count">4</);
+		expect(body).toMatch(/data-testid="statements-draft-count"[^>]*>4</);
 	});
 
-	it('bietet die Schnellaktionen an', () => {
-		const body = page();
+	it('zeigt die Belegung pro Gebäude', () => {
+		const row = page().match(/data-testid="occupancy-row"[\s\S]*?<\/li>/)![0];
+		expect(row).toContain('href="/buildings/b1"');
+		expect(row).toMatch(/data-testid="occupancy-rate"[^>]*>75.0%</);
+		expect(row).toMatch(/data-testid="occupancy-count"[^>]*>3\/4</);
+	});
 
+	it('bietet die häufigen Arbeiten direkt an', () => {
+		const body = page();
 		for (const href of [
-			'/buildings/new',
 			'/tenants/new',
+			'/contracts/new',
 			'/invoices/new',
 			'/statements/generate'
 		]) {
-			expect(body).toContain(`href="${href}"`);
+			expect(body).toMatch(
+				new RegExp(`href="${href.replace('/', '\\/')}"[^>]*data-testid="quick-action"`)
+			);
 		}
-	});
-});
-
-describe('Erste Schritte', () => {
-	const withPortfolio = (
-		portfolio: Partial<DashboardData['portfolio']>,
-		statements = data.statements
-	) =>
-		render(DashboardPage, {
-			props: {
-				data: { ...data, portfolio: { ...data.portfolio, ...portfolio }, statements }
-			} as never
-		}).body;
-
-	it('führt einen leeren Betrieb zum ersten Gebäude', () => {
-		const body = withPortfolio(
-			{ totalBuildings: 0, totalApartments: 0, occupiedApartments: 0, reletApartments: 0 },
-			{ draft: 0, sent: 0, paid: 0, overdue: 0 }
-		);
-
-		const steps = body.match(/data-testid="getting-started-step"[\s\S]*?<\/li>/g)!;
-		expect(steps).toHaveLength(4);
-		expect(steps[0]).toContain('href="/buildings/new"');
-		expect(body).toMatch(/<a href="\/buildings\/new"[^>]*data-testid="getting-started-next"/);
-	});
-
-	it('hakt erledigte Schritte ab und zeigt den nächsten', () => {
-		const body = withPortfolio(
-			{ occupiedApartments: 0, reletApartments: 0 },
-			{ draft: 0, sent: 0, paid: 0, overdue: 0 }
-		);
-
-		const steps = body.match(/data-testid="getting-started-step"[\s\S]*?<\/li>/g)!;
-		expect(steps[0]).toContain('data-done="true"');
-		expect(steps[1]).toContain('data-done="true"');
-		expect(steps[2]).toContain('data-done="false"');
-		expect(body).toMatch(/<a href="\/tenants\/new"[^>]*data-testid="getting-started-next"/);
-	});
-
-	it('verschwindet, sobald alle Schritte erledigt sind', () => {
-		expect(page()).not.toContain('getting-started');
 	});
 });

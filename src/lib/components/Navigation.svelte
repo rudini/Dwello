@@ -1,16 +1,11 @@
 <script lang="ts">
-	import NavLinks from './NavLinks.svelte';
-
-	interface Props {
-		class?: string;
-	}
-
-	let { class: className = '' }: Props = $props();
+	import { navGroups } from '$lib/navigation';
+	import NavList from '$lib/ui/NavList.svelte';
 </script>
 
-<nav
-	class="w-60 shrink-0 bg-white border-r border-gray-200 p-3 sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto {className}"
-	aria-label="Hauptnavigation"
->
-	<NavLinks />
-</nav>
+<!-- Sidebar from 1024 px; below, the same menu opens from the header (MobileNav) -->
+<div class="hidden w-80 shrink-0 border-r border-line bg-surface lg:block">
+	<nav class="sticky top-16 max-h-screen overflow-y-auto px-4 py-6" aria-label="Hauptnavigation">
+		<NavList groups={navGroups} />
+	</nav>
+</div>
