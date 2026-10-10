@@ -184,4 +184,66 @@ Prove the results are meaningful before the PR gate is trusted. Only scoring, th
 
 Append one entry per session: date, phase, result of each exit gate (done / not done / not verifiable, with how), decisions, numbers (baseline count, thresholds, runtimes, precision), review findings that mattered.
 
-_No entries yet._
+### 2026-10-10, Phase 1 (core and scan): done
+
+**Discovery.** npm (root) + Bun (`backend/`), no workspaces, so the tool lives in `tools/deepcheck/` as plain TypeScript run by Node's type stripping (Node 22.22 here, CI uses Node 22): no build step and no workspace package. TypeScript 5.9.3, `ts-morph@27.0.2` pinned exactly (bundles TS 5.9). Tests use the repo's Vitest (`tools/**/*.test.ts` added to the `server` project); ESLint and svelte-check cover `tools/**` (added to the root `tsconfig.json` include). Fallow 2.104.0 is a devDependency, run through the PreToolUse hook `.claude/hooks/fallow-gate.sh` (blocks `git commit`/`git push` on a `fail` verdict) and the CI job `fallow` (`fallow audit --base`). Real Fallow JSON recorded in `tools/deepcheck/test/fallow/` (`health --file-scores` schema_version 7, `dead-code`, the exit-2 error envelope).
+
+**Exit gates**
+- X1.1 done. Ran `npm run lint` (0 problems), `npm run check` (0 errors), `npm run test:coverage` (109 files, 1388 tests, thresholds held), backend `bun run type-check` and `bun run test` (462 pass, coverage 85.4 % lines / 88.4 % functions), `npx fallow audit --base 9dafc39` (verdict pass). The deepcheck suite has 88 tests. PostgreSQL 16 had to be started locally for the backend tests.
+- X1.2 done. `test/metrics.test.ts` covers the deep, shallow, barrel, DTO and tiny-utility fixtures: deep < shallow, 4 pass-throughs with lines, `clamp` not flagged, exclusions for test, declaration, generated, entry, type-only and barrel. `test/detectors.test.ts` covers the minimum interface size with a threshold that `clamp` would cross.
+- X1.3 done. All CLI and metric tests run with `--fallow off`. `test/fallow.test.ts` drives the adapter through a stand-in binary that prints the recorded real JSON (exit 0/1 success, exit-2 envelope becomes a tool error, `auto` falls back with a warning).
+- X1.4 done. `npm run deepcheck:scan` runs on this repo in about 3.4 s with Fallow (121 modules analyzed, 382 excluded). Two hand inspections of the top 25 (`--min-score 0`) found these false-positive causes, each fixed in the tool with a regression test written first:
+  - SvelteKit route modules (6 of the top 6): new `entries` exclusion; entries still count as importers.
+  - `extends Error` classes reported as data-only.
+  - Local aliases (`type Fetch = typeof fetch`) reported as leaky.
+  - Test helpers under `test/`.
+  
+  The remaining top modules are deferred to the Phase 4 labels because they need judgement, not an obvious fix: `db/schema.ts` (Drizzle declarations), `mail/types.ts` (mostly types), `utils/format.ts` and `stores.ts` (utility collections), `contract-history.ts` and `statement-actions.ts` (thin mappers and fetch wrappers). They are listed under known false positives in the README.
+  
+  Note: with the conservative `failThreshold` 70 no module is flagged; eligible scores range from 46 to 58.
+- X1.5 done. `tools/deepcheck/README.md` has the formulas, weights, config, exclusions, suppressions, Fallow use and known false positives. `test/readme.test.ts` fails if a metric, a config key or a default weight is missing or wrong.
+- XC.1 done. Red/green per cycle:
+  - Config: 7 cycles.
+  - Suppressions: 6.
+  - Fallow adapter: 6.
+  - CLI and exit codes: 8.
+  - Each review fix: a failing regression test first, with the red message recorded in the session log.
+  
+  Tests that passed on the first run are characterization tests of existing logic: coupling, classitis, own complexity, class interface, GitHub escaping. Each was checked by mutation: disabling tsconfig parsing, the eligibility rule, the public-member filter or the classitis minimum makes them fail. The Svelte `<script>` extraction mutation was not caught, because `preProcessFile` also finds imports in raw markup; the extraction is defensive only.
+- XC.2 done. Two reviews by independent subagents.
+  - Round 1 (metrics, config, suppressions, adapter): 15 findings. Fixed with tests:
+    - Suppressions without `--` silently ignored.
+    - Suppression text in strings applied.
+    - Exported object-literal facades had interface 1 (a gaming path).
+    - Leaks through `export { x }`.
+    - Fan-in collapsed behind barrels.
+    - Silent coupling loss when `.svelte-kit/tsconfig.json` is missing (now a warning).
+    - Silent Fallow fallback (now a warning).
+    - `exclude` replaced the defaults.
+    - Callbacks counted as pass-throughs.
+    - Empty files counted as type-only.
+    - Missing report schema.
+    - Test gaps.
+  - Round 2 (final, CLI and outputs): 11 findings. Fixed:
+    - Path argument not normalized; a typo exited 0.
+    - Markdown ignored groups and min score and did not escape `|` or HTML.
+    - Suppression count ignored the path.
+    - `--fail-on-score` not range-checked.
+    - Test gaps for escaping and relative `--output`.
+    - README wording.
+  - Open disagreements and deferrals:
+    - The pass-through weight cap (15/105) and the double interface normalisation of depth and complexity (60 % of the weight) are left to Phase 4 calibration.
+    - Annotations use `line=1` for a module-level finding.
+    - `--explain` prints human text for the markdown and github formats.
+- XC.3 done. Nine commits in Phase 1 plus this log, one per step group or review round, not one per behaviour; the cycles are listed above.
+- XC.4 done, with one recorded deviation. There are no changes in `src/`, `backend/`, CI or repo settings. Wiring changes:
+  - Root `tsconfig.json`: `tools/**/*.ts` include and `allowImportingTsExtensions: true`. Type stripping needs `.ts` import specifiers, and a separate tsconfig would need its own check step in CI. The flag only allows `.ts` specifiers; svelte-check and the app build pass.
+  - `vitest.config.ts`: include for the tool's tests.
+  - `package.json`: the `ts-morph` devDependency and the `deepcheck:scan` script.
+
+**Decisions.**
+- Module = `.ts` file; Svelte components are not measured but count in the import graph.
+- Object literals: only function members count toward the interface, so lookup tables stay flat.
+- `--fallow auto` uses only `node_modules/.bin/fallow`.
+- The weight sum is fixed, so scores without Fallow are at most about 95.
+- Conservative defaults until Phase 4: `failThreshold` 70, `tolerance` 5, `minInterfaceSize` 5.
