@@ -54,8 +54,13 @@ def _uses_vitest(root):
     manifest = Path(root) / "package.json"
     if not manifest.exists():
         return False
-    data = json.loads(manifest.read_text())
+    try:
+        data = json.loads(manifest.read_text())
+    except json.JSONDecodeError as error:
+        raise NoFramework(f"package.json is not valid JSON: {error}") from None
     if "vitest" in {**data.get("dependencies", {}), **data.get("devDependencies", {})}:
+        if not (Path(root) / "node_modules" / ".bin" / "vitest").exists():
+            raise NoFramework("vitest is not installed: run npm install first")
         return True
     command = data.get("scripts", {}).get("test")
     if command:
