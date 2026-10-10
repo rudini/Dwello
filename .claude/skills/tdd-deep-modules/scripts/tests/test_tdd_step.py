@@ -24,3 +24,13 @@ class TddStepTest(unittest.TestCase):
         self.assertEqual(result.returncode, 1, result.stderr)
         self.assertIn("red needs a failing assertion", result.stderr)
         self.assertEqual(repo.subject(), "init")
+
+    def test_red_is_refused_when_the_failure_is_an_import_error(self):
+        repo = Repo(self, {"calc.py": WRONG_ADD})
+        repo.write("test_calc.py", ADD_TEST.replace("import add", "import multiply as add"))
+
+        result = repo.run("tdd-step", "red", "multiplies")
+
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn("red needs a failing assertion", result.stderr)
+        self.assertEqual(repo.subject(), "init")
