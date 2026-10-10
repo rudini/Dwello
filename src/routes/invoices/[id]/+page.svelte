@@ -7,6 +7,7 @@
 	import Badge from '$lib/ui/Badge.svelte';
 	import Button from '$lib/ui/Button.svelte';
 	import BilledWarning from '../BilledWarning.svelte';
+	import MissedWarning from '../MissedWarning.svelte';
 	import Dialog from '$lib/ui/Dialog.svelte';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import Panel from '$lib/ui/Panel.svelte';
@@ -16,8 +17,13 @@
 
 	let {
 		data
-	}: { data: { invoice: InvoiceWithDetails; billedIn?: { start: string; end: string }[] } } =
-		$props();
+	}: {
+		data: {
+			invoice: InvoiceWithDetails;
+			billedIn?: { start: string; end: string }[];
+			missedIn?: { start: string; end: string }[];
+		};
+	} = $props();
 
 	const invoice = $derived(data.invoice);
 	let showDelete = $state(false);
@@ -79,6 +85,8 @@
 
 	<p><Badge tone={status.tone} label={status.label} /></p>
 
+	{#if data.missedIn?.length}<MissedWarning periods={data.missedIn} />{/if}
+
 	<div class="grid gap-8 lg:grid-cols-3">
 		<div class="flex flex-col gap-8 lg:col-span-2">
 			<InvoiceFacts {invoice} />
@@ -128,7 +136,11 @@
 	</p>
 	{#if data.billedIn?.length}
 		<BilledWarning periods={data.billedIn}>
-			<p>Bewahren Sie den Beleg auf: Der Mieter kann Einsicht verlangen.</p>
+			<p>
+				Löschen Sie nur falsch erfasste Rechnungen. Versendete oder bezahlte Abrechnungen
+				berichtigen Sie gegenüber dem Mieter. Bewahren Sie den Beleg auf: Der Mieter kann Einsicht
+				verlangen.
+			</p>
 		</BilledWarning>
 	{/if}
 	{#if deleteError}

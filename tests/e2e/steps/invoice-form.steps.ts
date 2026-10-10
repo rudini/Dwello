@@ -4,6 +4,7 @@ import { test } from '../fixtures/test';
 import { visit } from '../interactions/navigation';
 import {
 	dateOutsidePeriodWarning,
+	billedWarning,
 	invoiceDate,
 	invoiceDateInWords,
 	nonAllocableCategoryWarning,
@@ -121,6 +122,14 @@ Then('zeigt das Feld Rechnungsdatum {string}', async ({ verwalter }, text: strin
 
 Then('steht unter dem Rechnungsdatum {string}', async ({ verwalter }, words: string) => {
 	await expect(invoiceDateInWords(verwalter)).toHaveText(words);
+});
+
+When('der Liegenschaftsverwalter die Rechnung von {string} bearbeitet', async ({ verwalter, seed }, supplier: string) => {
+	await visit(verwalter.page, `/invoices/${seed.idOf(`Rechnung ${supplier}`)}/edit`);
+});
+
+Then('warnt das Formular, dass es mit dieser Rechnung schon Abrechnungen gibt', async ({ verwalter }) => {
+	await expect(billedWarning(verwalter)).toContainText('gibt es schon Abrechnungen mit dieser Rechnung');
 });
 
 Then('ist das Rechnungsdatum leer, damit es bewusst gewählt wird', async ({ verwalter }) => {

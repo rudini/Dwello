@@ -181,7 +181,7 @@ INSERT INTO invoices (id, building_id, invoice_number, billing_entity_name, desc
 INSERT INTO invoices (id, building_id, invoice_number, billing_entity_name, description, category_id, distribution_key_id, amount, is_valid_utility_cost, invoice_date, due_date) VALUES
 ('c0000001-0001-0001-0001-000000000099', '11111111-1111-1111-1111-111111111111', 'SK-2024-118', 'Sanitär Keller AG', 'Reparatur Boiler Wohnung 2.01', (SELECT id FROM categories WHERE name_de = 'Reparaturen' LIMIT 1), NULL, 2350.00, false, '2024-02-20', '2024-03-21') ON CONFLICT (id) DO NOTHING;
 
--- Heating oil in the tank (CHF value at the end of the reading day, litres × price per litre; for 31.12.2023, before
+-- Heating oil in the tank (CHF value at the end of the reading day, litres × price per litre rounded to 0.1 Rappen; for 31.12.2023, before
 -- the first delivery recorded in Dwello, the price of the 2024 delivery is assumed): heating costs are the consumption.
 -- Musterhaus Zentrum: 2024: 2'120.00 + 6'890.00 − 2'650.00 = 6'360.00; 2025: 2'650.00 + 6'565.00 − 2'257.20 = 6'957.80
 -- Alpenblick: 1'500 l, 1'750 l, 1'500 l; 2024: 1'536.00 + 5'120.00 − 1'792.00 = 4'864.00; 2025: 1'792.00 + 4'880.00 − 1'494.00 = 5'178.00

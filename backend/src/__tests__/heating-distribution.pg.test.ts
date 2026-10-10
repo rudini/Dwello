@@ -162,6 +162,18 @@ describe('Heizkostenverteilung bei Mieterwechsel und Leerstand', () => {
 		expect(heating).toMatchObject({ periodShare: 1, tenantShare: heating.apartmentShare });
 	});
 
+	// Sommerperiode: das Profil hat in diesen Monaten 0 %, die Heizkosten der Periode trägt trotzdem jemand
+	it('verteilt die Heizkosten einer Periode ohne Profilanteil nach Tagen', async () => {
+		const response = await callApi('/api/v1/statements/preview', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ contractId: tenant2, periodStart: '2024-06-01', periodEnd: '2024-08-31', heatingProfileId })
+		});
+		const heating = ((await response.json()) as { lineItems: LineItem[] }).lineItems.find((line) => line.categoryName === 'Heating')!;
+
+		expect(heating).toMatchObject({ periodShare: 1, tenantShare: heating.apartmentShare });
+	});
+
 	// Warmwasser wird das ganze Jahr etwa gleich verbraucht: nach Tagen, nicht nach dem Heizprofil
 	it('verteilt separat abgerechnetes Warmwasser nach Tagen', async () => {
 		const hotWater = (await lines(tenant1)).find((line) => line.categoryName === 'Hot Water')!;
