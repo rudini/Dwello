@@ -5,13 +5,18 @@ type Saved = { id?: string; error?: string };
 /**
  * Form action body: reports the form's errors, or sends the record to the backend
  * (POST creates it, PUT with an id updates it) and opens the saved record.
+ * A refusal is shown for the whole form, or for `options.conflict` when the backend answers 409 (e.g. a name taken).
  */
 export async function saveRecord(
 	fetch: typeof globalThis.fetch,
 	url: string,
 	{ body, errors }: { body: object; errors: Record<string, string> },
 	id: string | undefined,
-	options: { failure: (status: number, saved: Saved) => string; location: (id: string) => string }
+	options: {
+		failure: (status: number, saved: Saved) => string;
+		location: (id: string) => string;
+		conflict?: string;
+	}
 ) {
 	if (Object.keys(errors).length > 0) return fail(400, { errors });
 
@@ -22,8 +27,9 @@ export async function saveRecord(
 	});
 	const saved: Saved = await response.json().catch(() => ({}));
 	if (!response.ok) {
-		const form = options.failure(response.status, saved);
-		return fail(response.status, { errors: { form } as Record<string, string> });
+		const key = (response.status === 409 && options.conflict) || 'form';
+		const message = options.failure(response.status, saved);
+		return fail(response.status, { errors: { [key]: message } as Record<string, string> });
 	}
 	throw redirect(303, options.location(id ?? saved.id!));
 }

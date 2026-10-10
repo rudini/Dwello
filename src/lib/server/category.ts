@@ -43,7 +43,8 @@ function parseCategory(formData: FormData) {
 const options = {
 	failure: (_status: number, saved: { error?: string }) =>
 		saved.error ?? 'Kategorie konnte nicht gespeichert werden.',
-	location: () => LIST
+	location: () => LIST,
+	conflict: 'name' // the backend refuses only a name another category has
 };
 
 /** "Neue Kategorie": the German name also becomes the category's key */

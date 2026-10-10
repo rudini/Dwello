@@ -86,11 +86,22 @@ describe('Neue Kategorie', () => {
 		expect(calls).toEqual([]);
 	});
 
-	it('zeigt die Meldung des Backends, wenn der Name vergeben ist', async () => {
+	it('zeigt die Meldung des Backends beim Namen, wenn der Name vergeben ist', async () => {
 		const message = 'Eine Kategorie mit dem Namen "Treppenhausreinigung" existiert bereits.';
 		const { result } = runAction(newActions.default, '', 409, form, { error: message });
 
-		expect(await result).toMatchObject({ status: 409, data: { errors: { form: message } } });
+		expect(await result).toEqual(
+			expect.objectContaining({ status: 409, data: { errors: { name: message } } })
+		);
+	});
+
+	it('meldet andere Fehler des Backends für das ganze Formular', async () => {
+		const { result } = runAction(newActions.default, '', 500, form, {});
+
+		expect(await result).toMatchObject({
+			status: 500,
+			data: { errors: { form: 'Kategorie konnte nicht gespeichert werden.' } }
+		});
 	});
 });
 
