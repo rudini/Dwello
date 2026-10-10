@@ -115,6 +115,28 @@ describe('Meldungen', () => {
 		expect(byTestId('toast-error')!.textContent).toContain('Speichern fehlgeschlagen');
 	});
 
+	// The reading time starts when the confirmation appears, not while the next page loads
+	it('zählt die Lesezeit erst ab dem Erscheinen der Meldung', () => {
+		vi.useFakeTimers();
+		toasts.set([]);
+		show(ToastRegion, {});
+		navigating.set({});
+		addToast('success', 'Mieter gespeichert');
+		flushSync();
+		vi.advanceTimersByTime(6000);
+		navigating.set(null);
+		flushSync();
+		vi.advanceTimersByTime(500); // shown now
+		flushSync();
+		vi.advanceTimersByTime(7000);
+		flushSync();
+		expect(status().textContent).toContain('Mieter gespeichert');
+
+		vi.advanceTimersByTime(1000);
+		flushSync();
+		expect(status().textContent).not.toContain('Mieter gespeichert');
+	});
+
 	it('setzt den Fokus auf den Seitentitel, wenn er nach der Aktion verloren ist', () => {
 		vi.useFakeTimers();
 		toasts.set([]);

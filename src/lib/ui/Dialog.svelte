@@ -40,12 +40,14 @@
 		onclose?.();
 	}
 
-	// Everything around the dialog is inert while it is open, so a screen reader's browse mode stays inside too
+	// Everything around the dialog is inert while it is open, so a screen reader's browse mode stays inside too;
+	// only the toasts stay reachable, so one raised meanwhile is still read out and can be closed
 	function makeInert(dialog: HTMLElement) {
 		const around: Element[] = [];
 		for (let node = dialog; node.parentElement && node !== document.body; node = node.parentElement)
 			for (const sibling of node.parentElement.children)
-				if (sibling !== node && !sibling.hasAttribute('inert')) around.push(sibling);
+				if (sibling !== node && !sibling.matches('[inert], [data-toast-region]'))
+					around.push(sibling);
 		around.forEach((element) => element.setAttribute('inert', ''));
 		return () => around.forEach((element) => element.removeAttribute('inert'));
 	}
