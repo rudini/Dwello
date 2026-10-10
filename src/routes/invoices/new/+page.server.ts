@@ -16,6 +16,8 @@ async function get(fetch: typeof globalThis.fetch, path: string) {
 	return response?.ok ? response.json().catch(() => ({})) : {};
 }
 
+const isoDate = (value: string | null) => (value && /^\d{4}-\d{2}-\d{2}$/.test(value) ? value : '');
+
 export const load: PageServerLoad = async ({ fetch, url }) => {
 	const [buildingsData, categoriesData, keysData, llmStatus, defaultKey] = await Promise.all([
 		get(fetch, 'buildings?limit=100'),
@@ -26,6 +28,8 @@ export const load: PageServerLoad = async ({ fetch, url }) => {
 	]);
 	const buildings: { id: string }[] = buildingsData.buildings || buildingsData.data || [];
 	const building = url.searchParams.get('building');
+	const start = isoDate(url.searchParams.get('periodStart'));
+	const end = isoDate(url.searchParams.get('periodEnd'));
 
 	return {
 		buildings,
@@ -36,6 +40,8 @@ export const load: PageServerLoad = async ({ fetch, url }) => {
 		defaultDistributionKeyId: (defaultKey.value as string) ?? '',
 		// Opened from a building or from the statement wizard
 		buildingId: buildings.some((b) => b.id === building) ? building! : '',
-		returnTo: localPath(url.searchParams.get('returnTo'))
+		returnTo: localPath(url.searchParams.get('returnTo')),
+		// The statement wizard's Abrechnungsperiode: the form warns about a date outside it
+		period: start && end ? { start, end } : null
 	};
 };

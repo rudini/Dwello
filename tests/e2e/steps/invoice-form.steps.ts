@@ -2,12 +2,18 @@ import { expect } from '@playwright/test';
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { visit } from '../interactions/navigation';
-import { nonAllocableCategoryWarning, utilityCostChoice } from '../questions/invoice-form';
+import {
+	dateOutsidePeriodWarning,
+	invoiceDate,
+	nonAllocableCategoryWarning,
+	utilityCostChoice
+} from '../questions/invoice-form';
 import { amountOfListedInvoice, categoryOfListedInvoice } from '../questions/invoices';
 import {
 	chooseCategory,
 	clearSupplier,
 	correctAmount,
+	enterInvoiceDate,
 	overrideCategory,
 	recategorize,
 	registerInvoice,
@@ -89,3 +95,21 @@ Then(
 		await expect(nonAllocableCategoryWarning(verwalter)).toContainText('nicht auf Mieter übertragen');
 	}
 );
+
+When('der Liegenschaftsverwalter das Rechnungsdatum {string} einträgt', async ({ verwalter }, date: string) => {
+	await verwalter.perform(enterInvoiceDate(date));
+});
+
+Then(
+	'warnt das Rechnungsformular, dass das Rechnungsdatum nicht in der Abrechnungsperiode {string} liegt',
+	async ({ verwalter }, period: string) => {
+		await expect(dateOutsidePeriodWarning(verwalter)).toContainText(
+			`Das Rechnungsdatum liegt nicht in der Abrechnungsperiode ${period}`
+		);
+	}
+);
+
+Then('warnt das Rechnungsformular nicht vor dem Rechnungsdatum', async ({ verwalter }) => {
+	await expect(invoiceDate(verwalter)).toBeVisible(); // the form is shown
+	await expect(dateOutsidePeriodWarning(verwalter)).toHaveCount(0);
+});

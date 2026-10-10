@@ -64,7 +64,7 @@
 </section>
 
 {#if previewRows.length}
-	<PreviewChecks {rows} bind:confirmed error={errors.confirm} />
+	<PreviewChecks {rows} {period} bind:confirmed error={errors.confirm} />
 {/if}
 
 <section aria-labelledby="statements-heading" class="flex flex-col gap-2">

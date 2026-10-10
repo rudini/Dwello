@@ -23,6 +23,8 @@ export const backLink = (page: Page) =>
 		.last();
 export const generateMoreButton = (page: Page) => page.getByTestId('generate-more-button');
 export const missingInvoices = (page: Page) => page.getByTestId('missing-invoices');
+export const newInvoiceFromWarning = (page: Page) =>
+	missingInvoices(page).getByRole('link', { name: 'Rechnung erfassen' });
 export const confirmMissingInvoices = (page: Page) => page.getByTestId('confirm-missing-invoices');
 export const buildingInvoices = (page: Page, buildingName: string) =>
 	page.getByTestId('preview-invoices').filter({ hasText: buildingName });

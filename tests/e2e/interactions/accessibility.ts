@@ -28,7 +28,7 @@ export const address = (screen: { path: string; queries?: object }, state: strin
 
 /** Records every screen with an id in its address needs; returns the address with the ids filled in */
 export async function seedFor(seed: TestData, path: string, state: string) {
-	if (!path.includes('{') && state !== 'delete-dialog') return path;
+	if (!path.includes('{') && !['delete-dialog', 'mark-paid-dialog'].includes(state)) return path;
 	await seed.building('Seeblick', 'Winterthur');
 	await seed.apartment('Seeblick', '1.01', 'vacant');
 	await seed.apartment('Seeblick', '1.02', 'vacant');
@@ -101,8 +101,12 @@ const states: Record<string, (page: Page, viewport: Viewport) => Promise<unknown
 		await dialog(page);
 	},
 	'action-error': async (page) => {
-		await press(page, 'statement-delete-button'); // a sent statement cannot be deleted: the server refuses
-		await press(page, 'statement-delete-confirm');
+		// As from a tab that still shows the draft: deleting the sent statement is refused by the server
+		await page.evaluate(() => {
+			const form = Object.assign(document.createElement('form'), { method: 'POST', action: '?/delete' });
+			document.body.append(form);
+			form.submit();
+		});
 		await shows(page, '[data-testid="form-error"]');
 	},
 	'reminder-dialog': async (page) => {
@@ -110,7 +114,8 @@ const states: Record<string, (page: Page, viewport: Viewport) => Promise<unknown
 		await dialog(page);
 	},
 	'mark-paid-dialog': async (page) => {
-		await press(page, 'statement-mark-paid-button');
+		// the detail page's button, or the first one in the list
+		await page.locator('[data-testid="statement-mark-paid-button"], [data-testid="statement-row-mark-paid"]').first().click();
 		await dialog(page);
 	},
 	'formula-tested': async (page) => {

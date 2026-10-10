@@ -62,6 +62,7 @@ Funktionalität: Barrierefreiheit
       | invoice-edit           | default             |
       | statements             | default             |
       | statements             | filtered-empty      |
+      | statements             | mark-paid-dialog    |
       | statement-generate     | default             |
       | statement-generate     | every-wizard-step   |
       | statement-generate     | preview-empty       |

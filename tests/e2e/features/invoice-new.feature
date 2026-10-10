@@ -22,7 +22,7 @@ Funktionalität: Neue Rechnung erfassen
   Szenario: Pflichtangaben fehlen
     Wenn der Liegenschaftsverwalter die Rechnung ohne Angaben speichert
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Bitte wählen Sie ein Gebäude"
-    Und sieht der Liegenschaftsverwalter die Fehlermeldung "Bitte geben Sie einen Lieferanten ein"
+    Und sieht der Liegenschaftsverwalter die Fehlermeldung "Bitte geben Sie einen Rechnungssteller ein"
     Und sieht der Liegenschaftsverwalter die Fehlermeldung "Bitte geben Sie eine Beschreibung ein"
     Und sieht der Liegenschaftsverwalter die Fehlermeldung "Bitte geben Sie einen gültigen Betrag ein"
 

@@ -4,6 +4,7 @@
 	import { api } from '$lib/api';
 	import type { DistributionKeyRow } from '$lib/distribution-key';
 	import { plainAmount, validateInvoice } from '$lib/invoice';
+	import { addToast } from '$lib/stores';
 	import type { Category, InvoiceWithDetails } from '$lib/types';
 	import Alert from '$lib/ui/Alert.svelte';
 	import { focusFirstError } from '$lib/ui/focus-error';
@@ -32,7 +33,7 @@
 		invoiceDate: data.invoice.invoiceDate,
 		billingEntity: data.invoice.billingEntity,
 		description: data.invoice.description,
-		amount: data.invoice.amount.toString(),
+		amount: data.invoice.amount.toFixed(2),
 		categoryId: data.invoice.categoryId || '',
 		distributionKeyId: data.invoice.distributionKeyId || '',
 		isValidUtilityCost: data.invoice.isValidUtilityCost
@@ -62,7 +63,7 @@
 		const result = await api.put(`/invoices/${invoice.id}`, {
 			buildingId: values.buildingId,
 			invoiceDate: values.invoiceDate,
-			billingEntityName: values.billingEntity,
+			billingEntityName: values.billingEntity.trim(),
 			description: values.description,
 			amount: plainAmount(values.amount),
 			categoryId: values.categoryId || null,
@@ -74,7 +75,10 @@
 		if (result.error) {
 			saveError = result.error.message;
 			focusFirstError(event.target as Element);
-		} else goto(`/invoices/${invoice.id}`);
+			return;
+		}
+		addToast('success', `Rechnung von ${values.billingEntity.trim()} gespeichert`);
+		goto(`/invoices/${invoice.id}`);
 	}
 </script>
 

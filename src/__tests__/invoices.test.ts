@@ -171,14 +171,20 @@ describe('Rechnung erfassen und bearbeiten', () => {
 			...answers,
 			'/buildings': { buildings: [{ id: 'b1', name: 'Seepark' }] }
 		});
-		const url = new URL('http://localhost/invoices/new?building=b1&returnTo=/statements/generate');
+		const url = new URL(
+			'http://localhost/invoices/new?building=b1&returnTo=/statements/generate&periodStart=2025-01-01&periodEnd=2025-12-31'
+		);
 
 		const data = (await newLoad({ url, fetch } as never)) as {
 			buildingId: string;
 			returnTo: string;
 		};
 
-		expect(data).toMatchObject({ buildingId: 'b1', returnTo: '/statements/generate' });
+		expect(data).toMatchObject({
+			buildingId: 'b1',
+			returnTo: '/statements/generate',
+			period: { start: '2025-01-01', end: '2025-12-31' }
+		});
 	});
 
 	it('übergeht ein unbekanntes Gebäude und eine fremde Rücksprung-Adresse', async () => {
@@ -189,7 +195,7 @@ describe('Rechnung erfassen und bearbeiten', () => {
 			returnTo: string | null;
 		};
 
-		expect(data).toMatchObject({ buildingId: '', returnTo: null });
+		expect(data).toMatchObject({ buildingId: '', returnTo: null, period: null });
 	});
 
 	// Die Kategorien kamen bei einer Persona erst beim zweiten Besuch: sie hängen nicht an der KI

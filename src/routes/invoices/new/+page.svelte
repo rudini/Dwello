@@ -30,6 +30,7 @@
 			defaultDistributionKeyId: string;
 			buildingId: string;
 			returnTo: string | null;
+			period?: { start: string; end: string } | null;
 		};
 	} = $props();
 
@@ -129,6 +130,7 @@
 			bind:description
 			buildings={data.buildings}
 			{errors}
+			period={data.period}
 			onblur={categorize}
 		/>
 	</Panel>

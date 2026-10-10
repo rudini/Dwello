@@ -149,7 +149,8 @@ describe('Abrechnungen erstellen', () => {
 		expect(byTestId<HTMLSelectElement>('heating-profile-select')!.value).toBe('hp1');
 		expect(byTestId<HTMLOptionElement>('heating-profile-option-hp0')!.disabled).toBe(true);
 		expect(byTestId('heating-profile-option-hp0')!.textContent).toContain('(60%) - nicht wählbar');
-		expect(text()).toContain('Gleichmässig Verteilung');
+		// The predefined profiles' descriptions are English; only an own profile's is shown
+		expect(text()).not.toContain('Gleichmässig Verteilung');
 	});
 
 	it('verteilt die Verwaltungspauschale gleichmässig oder nach einem Verteilschlüssel und warnt über 3 %', async () => {
@@ -190,7 +191,7 @@ describe('Abrechnungen erstellen', () => {
 		expect(warning.textContent).toContain('Lindenhof');
 		// The invoice form preselects the building and returns to the wizard after saving
 		expect(warning.querySelector('a')!.getAttribute('href')).toBe(
-			'/invoices/new?building=b2&returnTo=/statements/generate'
+			'/invoices/new?building=b2&returnTo=/statements/generate&periodStart=2024-01-01&periodEnd=2024-12-31'
 		);
 		next();
 		await settle();

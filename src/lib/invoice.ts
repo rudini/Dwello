@@ -26,7 +26,8 @@ export function validateInvoice(invoice: {
 	const errors: Record<string, string> = {};
 	if (!invoice.buildingId) errors.buildingId = 'Bitte wählen Sie ein Gebäude';
 	if (!invoice.invoiceDate) errors.invoiceDate = 'Bitte geben Sie ein Datum ein';
-	if (!invoice.billingEntity.trim()) errors.billingEntity = 'Bitte geben Sie einen Lieferanten ein';
+	if (!invoice.billingEntity.trim())
+		errors.billingEntity = 'Bitte geben Sie einen Rechnungssteller ein';
 	if (!invoice.description.trim()) errors.description = 'Bitte geben Sie eine Beschreibung ein';
 	if (!(parseFloat(plainAmount(invoice.amount)) > 0))
 		errors.amount = 'Bitte geben Sie einen gültigen Betrag ein';

@@ -11,7 +11,7 @@
 	const statusBadges = {
 		'auto-categorized': { tone: 'info', label: 'Automatisch' },
 		manual: { tone: 'neutral', label: 'Manuell' },
-		pending: { tone: 'caution', label: 'Ausstehend' }
+		pending: { tone: 'caution', label: 'Kategorie fehlt' }
 	} as const satisfies Record<
 		InvoiceWithDetails['categorizationStatus'],
 		{ tone: Tone; label: string }
@@ -19,13 +19,14 @@
 	const status = $derived(statusBadges[invoice.categorizationStatus]);
 </script>
 
+<!-- Stacked up to xl; side by side only where all columns fit, "Bearbeiten" never shrinks -->
 <li
-	class="relative flex flex-col gap-2 p-4 hover:bg-sunken md:grid md:grid-cols-12 md:items-center md:gap-4"
+	class="relative flex flex-col gap-2 p-4 hover:bg-sunken xl:flex-row xl:items-center xl:gap-4"
 	data-testid="invoice-row-{invoice.id}"
 >
 	<a
 		href="/invoices/{invoice.id}"
-		class="flex min-w-0 flex-col after:absolute after:inset-0 md:col-span-4"
+		class="flex min-w-0 flex-col break-words after:absolute after:inset-0 xl:flex-1"
 		data-testid="invoice-view-button"
 	>
 		<span class="font-semibold text-accent underline underline-offset-4"
@@ -34,7 +35,7 @@
 		<span class="truncate text-ink">{invoice.description}</span>
 		<span class="text-ink-muted">{invoice.buildingName}, {formatDate(invoice.invoiceDate)}</span>
 	</a>
-	<p class="text-ink md:col-span-2">
+	<p class="break-words text-ink xl:w-40 xl:shrink-0">
 		<span class="sr-only">Kategorie:</span>
 		{#if invoice.category}
 			<span data-testid="invoice-category">{invoice.category.name}</span>
@@ -42,10 +43,10 @@
 			<span class="text-ink-muted">Ohne Kategorie</span>
 		{/if}
 	</p>
-	<p class="font-semibold tabular-nums text-ink md:col-span-2 md:text-right">
+	<p class="font-semibold tabular-nums text-ink xl:w-32 xl:shrink-0 xl:text-right">
 		<span data-testid="invoice-amount">{formatCurrency(invoice.amount)}</span>
 	</p>
-	<div class="flex flex-wrap gap-2 md:col-span-3">
+	<div class="flex flex-wrap gap-2 xl:w-40 xl:shrink-0">
 		<Badge
 			tone={invoice.isValidUtilityCost ? 'positive' : 'caution'}
 			label={invoice.isValidUtilityCost ? 'Umlagefähig' : 'Nicht umlagefähig'}
@@ -53,7 +54,7 @@
 		<Badge tone={status.tone} label={status.label} testid="invoice-status" />
 	</div>
 	<!-- Above the row link, so it stays a button of its own -->
-	<div class="relative md:col-span-1">
+	<div class="relative xl:shrink-0">
 		<Button
 			href="/invoices/{invoice.id}/edit"
 			variant="ghost"

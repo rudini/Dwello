@@ -10,6 +10,7 @@ import {
 	heatingProfileSelect,
 	managementFeeInput,
 	managementFeeKeySelect,
+	newInvoiceFromWarning,
 	nextButton,
 	periodEndInput,
 	periodStartInput,
@@ -89,4 +90,10 @@ export const recalculatePreview = async (actor: Actor) => {
 	await finishedStep(actor.page, 'Heizprofil').click();
 	await nextButton(actor.page).click();
 	await previewCount(actor.page).waitFor();
+};
+
+// "Rechnung erfassen" in the preview's warning about missing invoices
+export const recordInvoiceFromWarning = async (actor: Actor) => {
+	await newInvoiceFromWarning(actor.page).click();
+	await actor.page.waitForURL(/\/invoices\/new/);
 };

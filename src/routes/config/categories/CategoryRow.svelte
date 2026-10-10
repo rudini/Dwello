@@ -20,7 +20,10 @@
 			class="font-semibold text-accent underline underline-offset-4 after:absolute after:inset-0"
 			data-testid="category-edit-button"><span data-testid="category-name">{category.name}</span></a
 		>
-		{#if category.description}<p class="text-ink-muted">{category.description}</p>{/if}
+		<!-- The predefined categories' descriptions are English; only own ones are shown -->
+		{#if category.description && !category.predefined}
+			<p class="text-ink-muted">{category.description}</p>
+		{/if}
 	</div>
 	<div class="flex flex-wrap items-center gap-4">
 		<Badge
