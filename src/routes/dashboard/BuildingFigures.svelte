@@ -129,8 +129,8 @@
 							vermietet{reletParts(building.reletStarts)}</span
 						>
 						<span
-							class="w-16 text-right font-semibold tabular-nums text-ink"
-							data-testid="occupancy-rate">{building.occupancyRate.toFixed(1)}%</span
+							class="w-20 whitespace-nowrap text-right font-semibold tabular-nums text-ink"
+							data-testid="occupancy-rate">{building.occupancyRate.toFixed(1)} %</span
 						>
 					</li>
 				{/each}

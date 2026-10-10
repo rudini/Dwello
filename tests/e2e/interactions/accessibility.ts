@@ -46,6 +46,7 @@ export async function seedFor(seed: TestData, path: string, state: string) {
 	await seed.statement('Anna', 'Seeblick', 2025, 'Standard');
 	await seed.statement('Bruno', 'Seeblick', 2025, 'Standard');
 	await seed.sendStatement('Bruno', 2025);
+	await seed.statement('Carla', 'Seeblick', 2023, 'Standard'); // no invoices in 2023: no positions
 	await seed.category('Gartenpflege', true);
 	await seed.distributionKey('Nach Wohnungen', '{units}');
 	const ids: Record<string, string | undefined> = {
@@ -56,6 +57,7 @@ export async function seedFor(seed: TestData, path: string, state: string) {
 		invoice: seed.idOf('Rechnung Hauswart Huber'),
 		statement: seed.idOf('Abrechnung Anna 2025'),
 		sentStatement: seed.idOf('Abrechnung Bruno 2025'),
+		emptyStatement: seed.idOf('Abrechnung Carla 2023'),
 		freeApartment: seed.idOf('1.03'),
 		limitedApartment: seed.idOf('1.04'),
 		heatingProfile: seed.idOf('Standard'),
@@ -80,6 +82,17 @@ const states: Record<string, (page: Page, viewport: Viewport) => Promise<unknown
 		await page.locator('main [type=submit]').last().click(); // the save button closes a form
 		await shows(page, '[data-testid="form-error"], [aria-invalid="true"]');
 	},
+	'submit-cleared': async (page) => {
+		const required = 'main :is(input, textarea)[aria-required="true"]:not([type=radio], [type=checkbox])';
+		for (const field of await page.locator(required).all()) await field.fill('');
+		await page.locator('main [type=submit]').last().click();
+		await shows(page, '[data-testid="form-error"], [aria-invalid="true"]');
+	},
+	'saved-toast': async (page) => {
+		await page.locator('main [type=submit]').last().click(); // saved as loaded
+		await shows(page, '[data-testid="toast-success"]');
+	},
+	'server-error': async (page) => page.getByText('Versuchen Sie es später erneut.').waitFor(),
 	'delete-dialog': async (page) => {
 		await page.locator('[data-testid$="-delete-button"]').first().click();
 		await dialog(page);

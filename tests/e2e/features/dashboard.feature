@@ -14,7 +14,7 @@ Funktionalität: Übersicht
 
   Szenario: Belegung pro Gebäude
     Wenn der Liegenschaftsverwalter die Übersicht öffnet
-    Dann ist das Gebäude "Seeblick" zu "50.0%" belegt
+    Dann ist das Gebäude "Seeblick" zu "50.0 %" belegt
     Und sind im Gebäude "Seeblick" "1/2" Wohnungen vermietet
 
   Szenario: Gebäude aus der Belegung öffnen

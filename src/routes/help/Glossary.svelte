@@ -36,8 +36,12 @@
 			text: 'Die Anzahl Tage, die ein Mietvertrag in der Abrechnungsperiode läuft. Zieht ein Mieter während des Jahres ein oder aus, bezahlt er nur den Anteil seiner Mietstage; Leerstand trägt der Vermieter.'
 		},
 		{
+			term: 'Umlagefähig',
+			text: 'Eine umlagefähige Rechnung fliesst in die Nebenkostenabrechnung ein, zum Beispiel Heizung, Wasser, Hauswart oder Kehricht. Ob eine Rechnung umlagefähig ist, folgt ihrer Kategorie und lässt sich pro Rechnung anpassen.'
+		},
+		{
 			term: 'Saldo',
-			text: 'Der Kostenanteil des Mieters samt Verwaltungspauschale minus seine geleisteten Akontobeiträge. Ist der Saldo positiv, zahlt der Mieter nach; ist er negativ, erhält er Geld zurück.'
+			text: 'Der Kostenanteil des Mieters samt Verwaltungspauschale minus seine geleisteten Akontobeiträge. Ist der Saldo positiv, zahlt der Mieter nach (Nachzahlung); ist er negativ, erhält er Geld zurück (Rückerstattung).'
 		},
 		{
 			term: 'Zahlungsfrist',
@@ -50,6 +54,10 @@
 		{
 			term: 'Korrespondenzkanal',
 			text: 'Wie ein Mieter Post von Ihnen erhält: per Brief (Standard) oder per E-Mail. Für E-Mail braucht es eine E-Mail-Adresse.'
+		},
+		{
+			term: 'Mietstatus',
+			text: 'Zeigt, ob eine Wohnung vermietet ist: Vermietet (ein Mietvertrag läuft), Wiedervermietet (ein künftiger Mietvertrag ist abgeschlossen), Leer oder Gesperrt. Vermietet und Wiedervermietet ergeben sich aus den Mietverträgen; Leer und Gesperrt setzen Sie beim Bearbeiten der Wohnung.'
 		}
 	];
 </script>

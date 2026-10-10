@@ -32,12 +32,16 @@ describe('Hilfe', () => {
 			'Heizprofil',
 			'Verwaltungspauschale',
 			'Mietstage',
+			'Umlagefähig',
 			'Saldo',
 			'Zahlungsfrist',
 			'Mahnung',
-			'Korrespondenzkanal'
+			'Korrespondenzkanal',
+			'Mietstatus'
 		]);
 		expect(glossary?.textContent).toContain('Ist der Saldo positiv, zahlt der Mieter nach');
+		for (const word of ['Nachzahlung', 'Rückerstattung', 'Wiedervermietet', 'Gesperrt'])
+			expect(glossary?.textContent).toContain(word);
 	});
 
 	it('erklärt die beiden geführten Abläufe Schritt für Schritt', () => {

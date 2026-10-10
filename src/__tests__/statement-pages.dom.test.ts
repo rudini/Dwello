@@ -175,6 +175,8 @@ describe('Abrechnungsliste', () => {
 
 		expect(row.className).not.toMatch(/col-span|grid-cols/);
 		expect(actions.className).toMatch(/(^| )xl:shrink-0( |$)/);
+		// the same width in every row, with or without "PDF", so amount and status line up
+		expect(actions.className).toMatch(/(^| )xl:w-64( |$)/);
 	});
 
 	it('schaltet einen Statusfilter ein und wieder aus, und behält die übrigen Filter', () => {

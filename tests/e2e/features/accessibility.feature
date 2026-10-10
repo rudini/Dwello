@@ -6,7 +6,7 @@ Funktionalität: Barrierefreiheit
   damit ich meine Mietverträge und Abrechnungen ohne fremde Hilfe erledige
 
   # Bildschirme und Zustände: tests/a11y/screens.json (die Liste muss mit den Beispielen übereinstimmen).
-  # Geprüft mit axe-core nach WCAG 2.2 AA in allen Ansichten (Desktop, Tablet, Handy).
+  # Geprüft mit axe-core nach WCAG 2.2 AA in allen Ansichten (Desktop, Tablet, Handy), hell und dunkel.
 
   Szenariogrundriss: Bildschirm ohne Barrieren
     Dann ist der Bildschirm "<Bildschirm>" im Zustand "<Zustand>" in allen Ansichten barrierefrei
@@ -19,6 +19,8 @@ Funktionalität: Barrierefreiheit
       | login                  | default             |
       | login                  | login-error         |
       | error-404              | default             |
+      | error-server           | default             |
+      | error-server           | server-error        |
       | dashboard              | default             |
       | dashboard              | mobile-menu-open    |
       | dashboard              | user-menu-open      |
@@ -29,12 +31,15 @@ Funktionalität: Barrierefreiheit
       | building-detail        | default             |
       | building-detail        | delete-dialog       |
       | building-edit          | default             |
+      | building-edit          | submit-cleared      |
+      | building-edit          | saved-toast         |
       | apartments             | default             |
       | apartments             | filtered-empty      |
       | apartment-new          | default             |
       | apartment-new          | submit-empty        |
       | apartment-detail       | default             |
       | apartment-edit         | default             |
+      | apartment-edit         | submit-cleared      |
       | tenants                | default             |
       | tenants                | filtered-empty      |
       | tenant-new             | default             |
@@ -42,6 +47,7 @@ Funktionalität: Barrierefreiheit
       | tenant-detail          | default             |
       | tenant-detail          | delete-dialog       |
       | tenant-edit            | default             |
+      | tenant-edit            | submit-cleared      |
       | contracts              | default             |
       | contracts              | filtered-empty      |
       | contract-new           | default             |
@@ -53,6 +59,7 @@ Funktionalität: Barrierefreiheit
       | contract-detail        | end-dialog          |
       | contract-detail        | delete-dialog       |
       | contract-edit          | default             |
+      | contract-edit          | submit-cleared      |
       | invoices               | default             |
       | invoices               | filtered-empty      |
       | invoice-new            | default             |
@@ -60,6 +67,7 @@ Funktionalität: Barrierefreiheit
       | invoice-detail         | default             |
       | invoice-detail         | delete-dialog       |
       | invoice-edit           | default             |
+      | invoice-edit           | submit-cleared      |
       | statements             | default             |
       | statements             | filtered-empty      |
       | statements             | mark-paid-dialog    |
@@ -74,19 +82,24 @@ Funktionalität: Barrierefreiheit
       | statement-sent-detail  | reminder-dialog     |
       | statement-sent-detail  | mark-paid-dialog    |
       | statement-sent-detail  | action-error        |
+      | statement-empty-detail | default             |
       | statement-edit         | default             |
+      | statement-edit         | submit-cleared      |
       | documents              | default             |
       | config                 | default             |
       | categories             | default             |
       | category-new           | default             |
       | category-new           | submit-empty        |
       | category-edit          | default             |
+      | category-edit          | submit-cleared      |
+      | category-edit          | saved-toast         |
       | categories             | delete-dialog       |
       | distribution-keys      | default             |
       | distribution-key-new   | default             |
       | distribution-key-new   | submit-empty        |
       | distribution-key-new   | formula-tested      |
       | distribution-key-edit  | default             |
+      | distribution-key-edit  | submit-cleared      |
       | distribution-keys      | delete-dialog       |
       | heating-profiles       | default             |
       | heating-profile-new    | default             |
@@ -94,6 +107,7 @@ Funktionalität: Barrierefreiheit
       | heating-profile-detail | default             |
       | heating-profile-detail | delete-dialog       |
       | heating-profile-edit   | default             |
+      | heating-profile-edit   | submit-cleared      |
       | help                   | default             |
       | privacy                | default             |
       | terms                  | default             |

@@ -22,7 +22,10 @@
 		"mobile-menu-open": "Navigation drawer open (mobile and tablet viewport).",
 		"user-menu-open": "User menu in the header open.",
 		"dialog-open": "A confirmation dialog of the page open.",
-		"busy-dialog-open": "A confirmation dialog open while its action is running."
+		"busy-dialog-open": "A confirmation dialog open while its action is running.",
+		"submit-cleared": "An edit form with its required fields emptied and submitted: all validation errors visible.",
+		"saved-toast": "An edit form saved unchanged: the success message (toast) visible on the page it leads to.",
+		"server-error": "The error page for a failed load (not 404): message and the hint to try again."
 	},
 	"screens": [
 		{
@@ -48,6 +51,14 @@
 			"path": "/gibt-es-nicht",
 			"states": [
 				"default"
+			]
+		},
+		{
+			"name": "error-server",
+			"path": "/buildings/kein-gebaeude",
+			"states": [
+				"default",
+				"server-error"
 			]
 		},
 		{
@@ -89,7 +100,9 @@
 			"name": "building-edit",
 			"path": "/buildings/{building}/edit",
 			"states": [
-				"default"
+				"default",
+				"submit-cleared",
+				"saved-toast"
 			]
 		},
 		{
@@ -123,7 +136,8 @@
 			"name": "apartment-edit",
 			"path": "/apartments/{apartment}/edit",
 			"states": [
-				"default"
+				"default",
+				"submit-cleared"
 			]
 		},
 		{
@@ -155,7 +169,8 @@
 			"name": "tenant-edit",
 			"path": "/tenants/{tenant}/edit",
 			"states": [
-				"default"
+				"default",
+				"submit-cleared"
 			]
 		},
 		{
@@ -196,7 +211,8 @@
 			"name": "contract-edit",
 			"path": "/contracts/{contract}/edit",
 			"states": [
-				"default"
+				"default",
+				"submit-cleared"
 			]
 		},
 		{
@@ -228,7 +244,8 @@
 			"name": "invoice-edit",
 			"path": "/invoices/{invoice}/edit",
 			"states": [
-				"default"
+				"default",
+				"submit-cleared"
 			]
 		},
 		{
@@ -274,10 +291,18 @@
 			]
 		},
 		{
+			"name": "statement-empty-detail",
+			"path": "/statements/{emptyStatement}",
+			"states": [
+				"default"
+			]
+		},
+		{
 			"name": "statement-edit",
 			"path": "/statements/{statement}/edit",
 			"states": [
-				"default"
+				"default",
+				"submit-cleared"
 			]
 		},
 		{
@@ -315,7 +340,9 @@
 			"name": "category-edit",
 			"path": "/config/categories/{category}/edit",
 			"states": [
-				"default"
+				"default",
+				"submit-cleared",
+				"saved-toast"
 			]
 		},
 		{
@@ -339,7 +366,8 @@
 			"name": "distribution-key-edit",
 			"path": "/config/distribution-keys/{distributionKey}/edit",
 			"states": [
-				"default"
+				"default",
+				"submit-cleared"
 			]
 		},
 		{
@@ -369,7 +397,8 @@
 			"name": "heating-profile-edit",
 			"path": "/config/heating-profiles/{heatingProfile}/edit",
 			"states": [
-				"default"
+				"default",
+				"submit-cleared"
 			]
 		},
 		{

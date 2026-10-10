@@ -50,7 +50,7 @@
 		{/if}
 	</div>
 	<!-- Above the row link, so these stay their own buttons -->
-	<div class="relative flex flex-wrap gap-2 xl:shrink-0 xl:flex-col xl:items-end">
+	<div class="relative flex flex-wrap gap-2 xl:w-64 xl:shrink-0 xl:flex-col xl:items-end">
 		{#if statement.pdfGeneratedAt}
 			<Button
 				href="/api/statements/{statement.id}/pdf"
