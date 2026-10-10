@@ -8,6 +8,7 @@ import { ToolError } from './errors.ts';
 import { inScope, scanOutput, within } from './scan.ts';
 import { createBaseline, readBaseline, writeBaseline } from './baseline.ts';
 import { runGate } from './gate.ts';
+import { projectRoot } from './git.ts';
 import { renderCheck, renderCheckGithub, renderCheckMarkdown, renderExplain, renderGithub, renderHuman, renderMarkdown } from './render.ts';
 import type { Report, ScanOutput } from './types.ts';
 
@@ -162,7 +163,7 @@ function suppressions(options: Options, io: Io): number {
 const AGENT_LIMIT = 3;
 
 function check(options: Options, io: Io): number {
-	const output = runGate(io.cwd, options.fallow, options.changedSince);
+	const output = runGate(projectRoot(io.cwd), options.fallow, options.changedSince);
 	if (options.agent && output.passed) return 0;
 	if (options.format !== 'json' && !options.agent) output.warnings.forEach((w) => io.stderr(`deepcheck: warning: ${w}\n`));
 	const render: Record<Options['format'], () => string> = {

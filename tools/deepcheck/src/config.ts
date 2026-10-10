@@ -62,12 +62,17 @@ export const DEFAULT_CONFIG: Config = {
 	overrides: []
 };
 
-const CONFIG_FILE = 'deepcheck.config.json';
+export const CONFIG_FILE = 'deepcheck.config.json';
 
-export function loadConfig(root: string): Config {
+export const configText = (root: string): string | null => {
 	const path = join(root, CONFIG_FILE);
-	if (!existsSync(path)) return DEFAULT_CONFIG;
-	const file = parseJson(readFileSync(path, 'utf8'), CONFIG_FILE);
+	return existsSync(path) ? readFileSync(path, 'utf8') : null;
+};
+
+/** A config from the content of deepcheck.config.json (null: no file, defaults). */
+export function parseConfig(text: string | null): Config {
+	if (text === null) return DEFAULT_CONFIG;
+	const file = parseJson(text, CONFIG_FILE);
 	const problems = validate(file, loadSchema('config.schema.json'));
 	if (problems.length) throw new ToolError(`${CONFIG_FILE}: ${problems.join('; ')}`);
 	return {
@@ -77,6 +82,8 @@ export function loadConfig(root: string): Config {
 		weights: { ...DEFAULT_CONFIG.weights, ...file.weights }
 	};
 }
+
+export const loadConfig = (root: string): Config => parseConfig(configText(root));
 
 export function parseJson(text: string, name: string) {
 	try {

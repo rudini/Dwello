@@ -241,6 +241,40 @@ describe('review 3 regressions, subdirectory', () => {
 	});
 });
 
+describe('review 4 regressions', () => {
+	it('reads the config at the base, so editing it in the change cannot switch the gate off', () => {
+		const root = writeRepo({ 'src/store.ts': STORE });
+		writeFiles(root, {
+			'src/shallow.ts': SHALLOW_MODULE,
+			'deepcheck.config.json': JSON.stringify({ overrides: [{ files: ['src/shallow.ts'], failThreshold: 100 }], exclude: ['src/shallow.ts'] })
+		});
+		const out = JSON.parse(cli(root, 'check', '--fallow', 'off', '--format', 'json').stdout);
+		expect(out.passed).toBe(false);
+		expect(out.warnings).toContain('deepcheck.config.json differs from the base; the gate uses the config at the base until the change is merged');
+	});
+
+	it('finds the project root from a subdirectory, so the baseline still applies', () => {
+		const root = writeRepo({ 'package.json': '{}', 'src/store.ts': STORE, 'src/legacy.ts': SHALLOW_MODULE });
+		cli(root, 'baseline', '--fallow', 'off');
+		commitAll(root, 'baseline');
+		writeFiles(root, { 'src/legacy.ts': `${SHALLOW_MODULE}// touched\n` });
+		expect(cli(`${root}/src`, 'check', '--fallow', 'off')).toMatchObject({ code: 0 });
+	});
+
+	it('ignores an untracked nested repository without commits', () => {
+		const root = writeRepo({ 'src/store.ts': STORE });
+		git(root, 'init', '-q', 'vendor/nested');
+		writeFiles(root, { 'vendor/nested/a.ts': 'export const a = 1;\n', 'src/shallow.ts': SHALLOW_MODULE });
+		expect(cli(root, 'check', '--fallow', 'off').code).toBe(1);
+	});
+
+	it('says what to do in a repository without commits', () => {
+		const root = writeProject({ 'src/store.ts': STORE });
+		git(root, 'init', '-q');
+		expect(cli(root, 'check', '--fallow', 'off').stderr).toContain('commit once before running deepcheck check');
+	});
+});
+
 describe('scopes and baseline in scan', () => {
 	it('--scope changed runs the gate and --scope all the scan', () => {
 		const root = writeRepo({ 'src/store.ts': STORE });

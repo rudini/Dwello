@@ -1,6 +1,6 @@
 import { analyze } from './analyze.ts';
 import { BASELINE_FILE, parseBaseline, type Baseline } from './baseline.ts';
-import { loadConfig, type Config } from './config.ts';
+import { CONFIG_FILE, configText, parseConfig, type Config } from './config.ts';
 import { baseRevision, changedFiles, fileAtRevision, type ChangedFile } from './git.ts';
 import type { CheckOutput, GateFinding, ModuleReport, Report, SuppressionFinding } from './types.ts';
 
@@ -80,11 +80,16 @@ function checkOutput(base: string, config: Config, report: Report, changed: Chan
 export function runGate(root: string, fallow: string, since?: string): CheckOutput {
 	const changed = changedFiles(root, since);
 	// The baseline as it was at the base, so a change cannot regenerate its own way past the gate.
-	const text = fileAtRevision(root, baseRevision(root, since), BASELINE_FILE);
+	const base = baseRevision(root, since);
+	const text = fileAtRevision(root, base, BASELINE_FILE);
 	const baseline = text === null ? null : parseBaseline(text);
-	const adjusted = withBaselineThreshold(loadConfig(root), baseline);
+	// The config at the base too: editing it cannot exclude, override or reweight a module past the gate.
+	const baseConfig = fileAtRevision(root, base, CONFIG_FILE);
+	const configWarning =
+		baseConfig === configText(root) ? [] : [`${CONFIG_FILE} differs from the base; the gate uses the config at the base until the change is merged`];
+	const adjusted = withBaselineThreshold(parseConfig(baseConfig), baseline);
 	const report = analyze({ root, fallow, config: adjusted.config });
-	report.warnings.push(...adjusted.warnings, ...fallowWarning(baseline, report));
+	report.warnings.push(...configWarning, ...adjusted.warnings, ...fallowWarning(baseline, report));
 	const result = evaluateGate(report, changed, baseline ?? parseBaseline(null), adjusted.config);
 	return checkOutput(since ?? 'HEAD', adjusted.config, report, changed, result);
 }
