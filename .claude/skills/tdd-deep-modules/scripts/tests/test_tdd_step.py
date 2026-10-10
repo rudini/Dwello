@@ -1,6 +1,6 @@
 import unittest
 
-from tests.fixture import ADD_TEST, RIGHT_ADD, WRONG_ADD, Repo
+from tests.fixture import ADD_TEST, RIGHT_ADD, VITEST_TEST, WRONG_ADD, Repo, vitest_repo
 
 
 class TddStepTest(unittest.TestCase):
@@ -179,3 +179,13 @@ class TddStepTest(unittest.TestCase):
 
             self.assertEqual(result.returncode, 2, result.stderr)
             self.assertIn("usage: tdd-step <test|red|green|refactor> [message]", result.stderr)
+
+    def test_vitest_assertion_failure_is_committed_as_red(self):
+        repo = vitest_repo(self)
+        repo.write("calc.test.js", VITEST_TEST)
+
+        result = repo.run("tdd-step", "red", "adds two numbers")
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(repo.subject(), "red: adds two numbers")
+        self.assertIn("TDD-Exit-Code: 1", repo.trailers())

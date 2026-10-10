@@ -55,3 +55,23 @@ class Repo:
 
     def trailers(self):
         return self.git("log", "-1", "--format=%(trailers)")
+
+VITEST_FILES = {"package.json": '{"devDependencies": {"vitest": "*"}}\n',
+                ".gitignore": "node_modules\n",
+                "calc.js": "export const add = (a, b) => 0;\n"}
+VITEST_TEST = """import { test, expect } from "vitest";
+import { add } from "./calc.js";
+
+test("adds", () => {
+  expect(add(1, 2)).toBe(3);
+});
+"""
+
+
+def vitest_repo(case):
+    """A vitest project borrowing this checkout's node_modules (run `npm ci` at the repo root)."""
+    node_modules = SCRIPTS.parents[3] / "node_modules"
+    case.assertTrue((node_modules / ".bin" / "vitest").exists(), f"missing {node_modules}; run npm ci")
+    repo = Repo(case, VITEST_FILES)
+    (repo.path / "node_modules").symlink_to(node_modules)
+    return repo
