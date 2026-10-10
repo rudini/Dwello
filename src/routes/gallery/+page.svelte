@@ -8,6 +8,8 @@
 	import Dialog from '$lib/ui/Dialog.svelte';
 	import EmptyState from '$lib/ui/EmptyState.svelte';
 	import IconButton from '$lib/ui/IconButton.svelte';
+	import Illustration from '$lib/ui/Illustration.svelte';
+	import type { IllustrationName } from '$lib/ui/illustrations';
 	import MoneyInput from '$lib/ui/MoneyInput.svelte';
 	import NavList from '$lib/ui/NavList.svelte';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
@@ -23,6 +25,18 @@
 	import Textarea from '$lib/ui/Textarea.svelte';
 
 	// Every component of the design system in every state, so the axe check sees them in a real browser
+	const motifs: Record<IllustrationName, string> = {
+		building: 'Gebäude',
+		apartment: 'Wohnung',
+		contract: 'Mietvertrag',
+		meter: 'Zähler',
+		receipts: 'Rechnungen',
+		statement: 'Nebenkostenabrechnung',
+		envelope: 'Versand',
+		done: 'Erledigt',
+		'no-results': 'Keine Treffer',
+		problem: 'Fehler'
+	};
 	let dialogOpen = $state(false);
 	let busyDialogOpen = $state(false);
 	let tab = $state('laufend');
@@ -252,7 +266,19 @@
 			text="Erfassen Sie Ihren ersten Mieter. Danach können Sie einen Mietvertrag erstellen."
 			actionLabel="Mieter erfassen"
 			actionHref="/tenants/new"
+			illustration="contract"
 		/>
+	</Panel>
+
+	<Panel title="Illustrationen">
+		<ul class="grid grid-cols-2 gap-6 md:grid-cols-5">
+			{#each Object.entries(motifs) as [name, label] (name)}
+				<li class="flex flex-col items-center gap-2">
+					<Illustration name={name as IllustrationName} title={label} />
+					<span class="text-ink-muted">{label}</span>
+				</li>
+			{/each}
+		</ul>
 	</Panel>
 
 	<Panel title="Navigation">

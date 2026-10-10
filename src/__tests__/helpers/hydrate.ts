@@ -1,6 +1,6 @@
 import { afterEach } from 'vitest';
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'fs';
-import { basename, dirname, join, resolve } from 'path';
+import { dirname, join, relative, resolve } from 'path';
 import { compile } from 'svelte/compiler';
 import { flushSync, hydrate, unmount, type Component } from 'svelte';
 
@@ -42,8 +42,19 @@ function compileForServer(filename: string, dir: string): string {
 				: resolve(dirname(filename), child);
 			return `from '${compileForServer(path, dir)}'`;
 		})
-		.replace(/from '\$lib\//g, `from '${resolve('src/lib')}/`);
-	const module = join(dir, `${basename(filename, '.svelte')}.js`);
+		.replace(/from '\$lib\//g, `from '${resolve('src/lib')}/`)
+		// Other relative imports (TypeScript modules) from where the component lives
+		.replace(
+			/from '(\.[^']+)'/g,
+			(_, path: string) => `from '${resolve(dirname(filename), path)}'`
+		);
+	// Named by the path below src, so components with the same file name (lib/ui/Icon, lib/components/Icon) stay apart
+	const module = join(
+		dir,
+		`${relative(resolve('src'), filename)
+			.replace(/\.svelte$/, '')
+			.replaceAll('/', '_')}.js`
+	);
 	writeFileSync(module, code);
 	return module;
 }

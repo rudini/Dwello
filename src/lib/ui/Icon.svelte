@@ -1,20 +1,26 @@
 <script lang="ts">
 	import { icons, type IconName } from './icons';
 
-	// Decorative unless labelled; same stroke everywhere so the set stays consistent
-	let {
-		name,
-		size = 20,
-		label
-	}: { name: IconName; size?: 16 | 20 | 24 | 32; label?: string } = $props();
-	const Glyph = $derived(icons[name]);
+	// Decorative unless labelled; Lucide shapes with one stroke width everywhere, so the set stays consistent
+	let { name, size = 20, label }: { name: IconName; size?: number; label?: string } = $props();
 </script>
 
-<Glyph
-	{size}
-	strokeWidth={1.75}
+<svg
+	xmlns="http://www.w3.org/2000/svg"
+	width={size}
+	height={size}
+	viewBox="0 0 24 24"
+	fill="none"
+	stroke="currentColor"
+	stroke-width="1.75"
+	stroke-linecap="round"
+	stroke-linejoin="round"
+	class="shrink-0"
 	aria-hidden={label ? undefined : 'true'}
 	role={label ? 'img' : undefined}
 	aria-label={label}
-	class="shrink-0"
-/>
+>
+	{#each icons[name] as [tag, attributes], i (i)}
+		<svelte:element this={tag} {...attributes} />
+	{/each}
+</svg>

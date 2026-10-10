@@ -1,34 +1,20 @@
 <script lang="ts">
-	interface Props {
+	import Glyph from '$lib/ui/Icon.svelte';
+	import { materialIcons } from '$lib/components/material-icons';
+
+	// Old screens name Material Symbols; they are drawn from the one Lucide set until the screens are migrated
+	let {
+		name,
+		size = 24,
+		class: className = ''
+	}: {
 		name: string;
 		size?: number;
 		class?: string;
 		'aria-hidden'?: boolean | 'true' | 'false';
-	}
-
-	// The symbol is a ligature (its name as text), so screen readers skip it unless told otherwise
-	let {
-		name,
-		size = 24,
-		class: className = '',
-		'aria-hidden': ariaHidden = true
-	}: Props = $props();
+	} = $props();
 </script>
 
-<span
-	class="material-symbols-outlined {className}"
-	style="font-size: {size}px; line-height: {size}px; width: {size}px; height: {size}px;"
-	aria-hidden={ariaHidden}
->
-	{name}
+<span class="inline-flex shrink-0 {className}" aria-hidden="true">
+	<Glyph name={materialIcons[name] ?? 'info'} {size} />
 </span>
-
-<style>
-	:global(.material-symbols-outlined) {
-		font-variation-settings:
-			'FILL' 0,
-			'wght' 400,
-			'GRAD' 0,
-			'opsz' 24;
-	}
-</style>

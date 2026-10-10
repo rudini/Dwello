@@ -17,7 +17,7 @@ Brief: `docs/REDESIGN_BRIEF.md`. Resume rules: `docs/design/arbeitsregeln.md`.
 | 8 Remove old design system | open | | | |
 | 9 Final | open | | | |
 
-**Next step:** stage 3 – icon map (Lucide) for all icons the UI needs, ≥ 8 illustrations, both in the gallery and the axe check.
+**Next step:** commit stage 3, CI, stage 3 review (design + code).
 
 ## Log
 
@@ -51,3 +51,12 @@ Brief: `docs/REDESIGN_BRIEF.md`. Resume rules: `docs/design/arbeitsregeln.md`.
 - Found: several old confirmation dialogs (building, contract end/delete) have no `role="dialog"`; fixed when they move to the new `Dialog` in stage 7.
 - Review round 1: 3 Majors (axe states not proven, no browser check of the new components) fixed: states now wait for proof, new `/gallery` page in the axe check; 9 Minors fixed or justified (`reviews/2-review-1.md`). Axe: 79 examples, 0 violations. E2E 352 passed, unit 760 passed.
 - Review round 2: 1 Major (old and new toast regions both rendered) fixed by switching the layout to `ToastRegion` and deleting the old toast components; 7 Minors fixed. The session worker restarted once; PostgreSQL restarted, no work lost.
+
+### Stage 3 – Icons and illustrations
+
+- Icon set: Lucide, 75 icons named by meaning in `src/lib/ui/icons.ts`, drawn by `src/lib/ui/Icon.svelte` (stroke 1.75, decorative unless labelled).
+- Decision: the plain `lucide` package (shape data) instead of `@lucide/svelte` – no third-party components, works with the project's server-render test helper, smaller. `@lucide/svelte` removed again.
+- The old `Icon` component is now an adapter: Material Symbols names of the not yet migrated screens map to the new set (`src/lib/components/material-icons.ts`, test checks every name used in the sources). The Google Material Symbols font is no longer loaded – from this stage on the whole app uses one icon set, served locally.
+- Illustrations: 10 line motifs in `src/lib/ui/illustrations/` (Gebäude, Wohnung, Mietvertrag, Zähler, Rechnungen, Nebenkostenabrechnung, Versand, Erledigt, Keine Treffer, Fehler), viewBox 160×120, 2 px stroke, colours only from tokens (`--illu-*`, surface, caution); decorative by default, `title` makes them an image with a name. `EmptyState` takes an illustration by name. All shown in the gallery and checked by axe.
+- Test helper `src/__tests__/helpers/hydrate.ts`: compiled server modules are now named by their path below `src/` (two components called `Icon.svelte` overwrote each other) and relative TypeScript imports are resolved.
+- Checks: unit 798, lint/check/build/fallow clean, E2E 352 passed incl. 79 axe examples, 0 violations.

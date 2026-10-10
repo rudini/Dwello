@@ -18,7 +18,6 @@
 	"src/lib/components/FormActions.svelte",
 	"src/lib/components/Header.svelte",
 	"src/lib/components/HeatingProfileChart.svelte",
-	"src/lib/components/Icon.svelte",
 	"src/lib/components/InfoCard.svelte",
 	"src/lib/components/InvoiceCategoryFields.svelte",
 	"src/lib/components/InvoiceDataFields.svelte",

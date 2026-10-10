@@ -45,9 +45,11 @@ describe('Leerer Zustand', () => {
 			text: 'Erfassen Sie Ihren ersten Mieter.',
 			actionLabel: 'Mieter erfassen',
 			actionHref: '/tenants/new',
+			illustration: 'contract',
 			testid: 'tenants-empty'
 		});
 		const empty = byTestId('tenants-empty')!;
+		expect(empty.querySelector('svg[aria-hidden="true"]')).not.toBeNull();
 		expect(empty.querySelector('h2')!.textContent).toBe('Noch keine Mieter');
 		expect(empty.querySelector('a')!.getAttribute('href')).toBe('/tenants/new');
 	});
