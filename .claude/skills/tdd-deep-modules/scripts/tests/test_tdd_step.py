@@ -411,3 +411,10 @@ class TddStepTest(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(repo.trailer("TDD-Exit-Code"), "1")
         self.assertEqual(repo.subject(), "red: adds TDD-Exit-Code: 0")
+
+    def test_green_is_refused_when_it_changes_tests(self):
+        repo = Repo(self, {"calc.py": WRONG_ADD})
+        repo.commit_all("red: adds two numbers", {"test_calc.py": ADD_TEST})
+        repo.write("test_calc.py", ADD_TEST.replace("3)", "0)"))
+        self.assert_refused(repo, "green", "green may only change production code, not tests: test_calc.py",
+                            head="red: adds two numbers")
