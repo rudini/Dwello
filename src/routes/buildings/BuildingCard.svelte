@@ -16,19 +16,21 @@
 </script>
 
 <li
-	class="relative flex flex-col gap-4 rounded-panel border border-line bg-surface p-6 hover:border-line-strong"
+	class="relative flex min-w-0 flex-col gap-4 rounded-panel border border-line bg-surface p-6 hover:border-line-strong"
 	data-testid="building-card-{building.id}"
 >
 	<div class="flex flex-col gap-2">
-		<h2 class="text-lg font-semibold text-ink">
+		<h2 class="break-words text-lg font-semibold text-ink">
 			<a
 				href="/buildings/{building.id}"
 				class="text-accent underline underline-offset-4 after:absolute after:inset-0 hover:text-accent-strong"
 				>{building.name || building.address}</a
 			>
 		</h2>
-		<p class="flex items-center gap-2 text-ink-muted">
-			<Icon name="location" />{place}{building.canton ? ` (${building.canton})` : ''}
+		<p class="flex min-w-0 items-center gap-2 break-words text-ink-muted">
+			<Icon name="location" /><span class="min-w-0"
+				>{place}{building.canton ? ` (${building.canton})` : ''}</span
+			>
 		</p>
 		{#if details.length}<p class="text-ink-muted">{details.join(', ')}</p>{/if}
 	</div>

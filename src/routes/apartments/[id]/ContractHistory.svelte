@@ -28,7 +28,7 @@
 					<div class="flex flex-col gap-2">
 						<a
 							href="/contracts/{contract.id}"
-							class="font-semibold text-accent underline underline-offset-4 after:absolute after:inset-0 hover:text-accent-strong"
+							class="break-words font-semibold text-accent underline underline-offset-4 after:absolute after:inset-0 hover:text-accent-strong"
 							data-testid="contract-history-link">{contract.tenantName}</a
 						>
 						<span class="text-ink-muted">{contract.period}</span>
