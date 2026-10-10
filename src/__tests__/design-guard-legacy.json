@@ -1,5 +1,4 @@
 [
-	"src/lib/components/ApartmentFormFields.svelte",
 	"src/lib/components/ApartmentHeader.svelte",
 	"src/lib/components/Badge.svelte",
 	"src/lib/components/Button.svelte",
@@ -33,10 +32,6 @@
 	"src/lib/contract-form.ts",
 	"src/routes/analytics/+page.svelte",
 	"src/routes/apartments/[id]/+page.svelte",
-	"src/routes/apartments/[id]/edit/+page.svelte",
-	"src/routes/apartments/[id]/edit/StatusField.svelte",
-	"src/routes/apartments/new/+page.svelte",
-	"src/routes/apartments/new/BuildingField.svelte",
 	"src/routes/config/+page.svelte",
 	"src/routes/config/ConfigLinks.svelte",
 	"src/routes/config/DefaultsSection.svelte",

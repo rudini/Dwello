@@ -1,9 +1,9 @@
 <script lang="ts">
-	import FieldError from '$lib/components/FieldError.svelte';
-	import { keepEarlyChoice } from '$lib/early-choice';
+	import EarlySelect from '../EarlySelect.svelte';
 
 	type Building = { id: string; name: string; address: string };
 
+	// Coming from a building page the building is fixed; otherwise the user picks it
 	let {
 		buildings,
 		preset,
@@ -13,33 +13,25 @@
 		$props();
 </script>
 
-<div>
-	<label for="building" class="block text-sm font-medium text-gray-700 mb-1">
-		Gebäude <span class="text-critical">*</span>
-	</label>
-	{#if preset}
-		<input type="hidden" name="buildingId" value={preset.id} />
-		<p
-			class="px-4 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-700"
-			data-testid="apartment-building"
-		>
+{#if preset}
+	<input type="hidden" name="buildingId" value={preset.id} />
+	<div class="flex flex-col gap-2">
+		<p class="font-semibold text-ink">Gebäude</p>
+		<p class="rounded-control bg-sunken px-4 py-2 text-ink" data-testid="apartment-building">
 			{preset.name}
-			<span class="block text-sm text-ink-muted">{preset.address}</span>
+			<span class="block text-ink-muted">{preset.address}</span>
 		</p>
-	{:else}
-		<select
-			id="building"
-			name="buildingId"
-			onchange={(e) => onselect(e.currentTarget.value)}
-			use:keepEarlyChoice={onselect}
-			data-testid="apartment-building-select"
-			class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary bg-white"
-		>
-			<option value="">Gebäude auswählen...</option>
-			{#each buildings as building (building.id)}
-				<option value={building.id}>{building.name}</option>
-			{/each}
-		</select>
-	{/if}
-	<FieldError message={error} />
-</div>
+	</div>
+{:else}
+	<EarlySelect
+		id="building"
+		name="buildingId"
+		label="Gebäude"
+		help="Das Gebäude, zu dem die Wohnung gehört."
+		placeholder="Gebäude wählen"
+		options={buildings.map((b) => ({ value: b.id, label: b.name }))}
+		{error}
+		testid="apartment-building-select"
+		onchange={onselect}
+	/>
+{/if}
