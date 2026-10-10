@@ -216,7 +216,12 @@ describe('Rechnungsdetail', () => {
 		expect(hint).toContain(
 			'Für die Abrechnungsperiode 01.01.2024 – 31.12.2024 gibt es schon Abrechnungen ohne diese Rechnung.'
 		);
-		expect(hint).toContain('Entwürfe erstellen Sie neu, dann ist sie dabei.');
+		expect(hint).toContain(
+			'Löschen Sie die Entwürfe dieser Periode und erstellen Sie die Abrechnungen erneut, dann ist sie dabei.'
+		);
+		expect(hint).toContain(
+			'Für versendete Abrechnungen schicken Sie dem Mieter eine berichtigte Abrechnung mit dem Beleg. Nehmen Sie die Kosten nicht in die Abrechnung der nächsten Periode.'
+		);
 	});
 
 	// Der Mieter kann Einsicht in die Belege einer versendeten Abrechnung verlangen
@@ -230,7 +235,7 @@ describe('Rechnungsdetail', () => {
 		const dialog = document.querySelector('[role=dialog]')!.textContent!.replace(/\s+/g, ' ');
 		expect(dialog).toContain('Abrechnungsperiode 01.01.2024 – 31.12.2024');
 		expect(dialog).toContain(
-			'Löschen Sie nur falsch erfasste Rechnungen. Versendete oder bezahlte Abrechnungen berichtigen Sie gegenüber dem Mieter. Bewahren Sie den Beleg auf: Der Mieter kann Einsicht verlangen.'
+			'Löschen Sie nur falsch erfasste Rechnungen. Die Entwürfe enthalten sie weiter: Löschen Sie danach die Entwürfe und erstellen Sie die Abrechnungen erneut. Versendete oder bezahlte Abrechnungen berichtigen Sie gegenüber dem Mieter. Bewahren Sie den Beleg auf: Der Mieter kann Einsicht verlangen.'
 		);
 	});
 
@@ -635,7 +640,7 @@ describe('Rechnung bearbeiten', () => {
 		expect(warning).toContain('Abrechnungsperiode 01.01.2024 – 31.12.2024');
 		expect(warning).toContain('Abrechnungsperiode 01.01.2024 – 30.06.2024');
 		expect(warning).toContain(
-			'Ändern Sie diese Rechnung, stimmen diese Abrechnungen nicht mehr. Entwürfe erstellen Sie neu; versendete oder bezahlte Abrechnungen berichtigen Sie gegenüber dem Mieter.'
+			'Ändern Sie diese Rechnung, stimmen diese Abrechnungen nicht mehr. Löschen Sie danach die Entwürfe und erstellen Sie die Abrechnungen erneut. Versendete oder bezahlte Abrechnungen berichtigen Sie gegenüber dem Mieter.'
 		);
 	});
 

@@ -76,7 +76,8 @@
 	<h3 id="statements-heading" class="text-xl font-bold text-ink">Abrechnungen pro Mietvertrag</h3>
 	{#if previewRows.length === 0}
 		<p class="text-ink-muted" data-testid="preview-empty">
-			In dieser Abrechnungsperiode gibt es keine Mietverträge in den gewählten Gebäuden.
+			In dieser Abrechnungsperiode gibt es keine Mietverträge ohne Abrechnung in den gewählten
+			Gebäuden.
 		</p>
 		{#if errors.preview}
 			<p class="font-semibold text-critical" role="alert" data-testid="form-error">

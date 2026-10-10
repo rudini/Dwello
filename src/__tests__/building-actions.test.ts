@@ -362,9 +362,26 @@ describe('Tankbestand', () => {
 		} as never)) as BuildingDetailsData;
 
 		expect(data.fuelStocks).toEqual([
-			{ id: 'f1', readingDate: '2024-12-31', amount: 2650, categoryId: 'c1' }
+			{
+				id: 'f1',
+				readingDate: '2024-12-31',
+				amount: 2650,
+				categoryId: 'c1',
+				categoryName: 'Heizung'
+			}
 		]);
 		expect(data.heatingCategories).toEqual([{ id: 'c1', name: 'Heizung' }]);
+	});
+
+	// die Kategorie eines Stands bleibt lesbar, auch wenn sie nicht mehr zur Auswahl steht
+	it('nennt die Kategorie eines Stands auch, wenn sie nicht mehr umlagefähig ist', async () => {
+		const stock = { ...fuelStocks[0], categoryId: 'c4' };
+		const data = (await detailLoad({
+			params: { id: 'b1' },
+			fetch: answer(() => Response.json([stock]))
+		} as never)) as BuildingDetailsData;
+
+		expect(data.fuelStocks![0].categoryName).toBe('Heizung Eigentümer');
 	});
 
 	it('zeigt die Gebäudeseite auch, wenn die Kategorien nicht geladen werden können', async () => {

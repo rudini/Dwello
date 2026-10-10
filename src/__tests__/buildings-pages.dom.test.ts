@@ -244,9 +244,20 @@ describe('Tankbestand', () => {
 	const section = () => byTestId('fuel-stocks')!.textContent!.replace(/\s+/g, ' ');
 
 	it('listet die Stichtage mit Wert und Kategorie und erklärt, wozu sie dienen und wie man bewertet', () => {
-		detail([{ id: 'f1', readingDate: '2024-12-31', amount: 2650, categoryId: 'c1' }]);
+		detail([
+			{
+				id: 'f1',
+				readingDate: '2024-12-31',
+				amount: 2650,
+				categoryId: 'c1',
+				categoryName: 'Heizung'
+			}
+		]);
 
-		expect(section()).toContain('Heizöl oder Pellets im Tank');
+		expect(section()).toContain('Brennstoff im Tank oder Lager');
+		expect(section()).toContain(
+			'Nur für Gebäude, die mit Öl, Flüssiggas, Pellets oder Holz heizen.'
+		);
 		expect(section()).toContain('Anfangsbestand + Einkauf − Endbestand');
 		expect(section()).toContain('Liter im Tank mal Preis pro Liter der letzten Lieferung');
 		expect(section()).toContain(
@@ -281,7 +292,15 @@ describe('Tankbestand', () => {
 	});
 
 	it('wählt die Kategorie der bisherigen Stände vor', () => {
-		detail([{ id: 'f1', readingDate: '2024-12-31', amount: 900, categoryId: 'c3' }]);
+		detail([
+			{
+				id: 'f1',
+				readingDate: '2024-12-31',
+				amount: 900,
+				categoryId: 'c3',
+				categoryName: 'Pellets'
+			}
+		]);
 
 		expect(byTestId<HTMLSelectElement>('fuel-stock-category-select')!.value).toBe('c3');
 	});
@@ -311,9 +330,20 @@ describe('Tankbestand', () => {
 	});
 
 	it('meldet ein misslungenes Löschen beim Bestand, nicht beim Formular zum Speichern', () => {
-		detail([{ id: 'f1', readingDate: '2024-12-31', amount: 2650, categoryId: 'c1' }], {
-			fuelStockDeleteError: 'Der Bestand konnte nicht gelöscht werden. Laden Sie die Seite neu.'
-		});
+		detail(
+			[
+				{
+					id: 'f1',
+					readingDate: '2024-12-31',
+					amount: 2650,
+					categoryId: 'c1',
+					categoryName: 'Heizung'
+				}
+			],
+			{
+				fuelStockDeleteError: 'Der Bestand konnte nicht gelöscht werden. Laden Sie die Seite neu.'
+			}
+		);
 
 		expect(byTestId('fuel-stock-delete-error')!.textContent).toContain('Nicht gelöscht');
 		expect(byTestId('fuel-stock-error')).toBeNull();
@@ -334,7 +364,15 @@ describe('Tankbestand', () => {
 	});
 
 	it('löscht einen Stichtag erst nach Bestätigung mit der Folge', () => {
-		detail([{ id: 'f1', readingDate: '2024-12-31', amount: 2650, categoryId: 'c1' }]);
+		detail([
+			{
+				id: 'f1',
+				readingDate: '2024-12-31',
+				amount: 2650,
+				categoryId: 'c1',
+				categoryName: 'Heizung'
+			}
+		]);
 
 		click('fuel-stock-delete-f1');
 

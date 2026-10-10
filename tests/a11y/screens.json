@@ -17,6 +17,7 @@
 		"preview-empty": "Statement wizard preview for a period without rental contracts.",
 		"category-check": "Statement wizard preview whose check per category reports invoices missing against the year before.",
 		"period-not-over": "Statement wizard with a period that has not ended yet: the warning in step 1 visible.",
+		"tank-question": "Statement wizard preview with a building that has heating costs but never had a Tankbestand: the question about a tank visible.",
 		"overlap-warning": "Rental contract wizard with a start date that overlaps another contract of the apartment.",
 		"draft-restored": "A wizard reopened with a draft saved in the browser: restore notice and save status visible.",
 		"formula-tested": "Distribution key form after testing a formula.",
@@ -253,6 +254,28 @@
 			]
 		},
 		{
+			"name": "invoice-billed-detail",
+			"path": "/invoices/{billedInvoice}",
+			"states": [
+				"default",
+				"delete-dialog"
+			]
+		},
+		{
+			"name": "invoice-billed-edit",
+			"path": "/invoices/{billedInvoice}/edit",
+			"states": [
+				"default"
+			]
+		},
+		{
+			"name": "invoice-late-detail",
+			"path": "/invoices/{lateInvoice}",
+			"states": [
+				"default"
+			]
+		},
+		{
 			"name": "statements",
 			"path": "/statements",
 			"queries": {
@@ -274,6 +297,7 @@
 				"preview-empty",
 				"category-check",
 				"period-not-over",
+				"tank-question",
 				"draft-restored"
 			]
 		},

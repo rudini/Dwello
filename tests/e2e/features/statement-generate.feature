@@ -37,6 +37,13 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Wenn der Liegenschaftsverwalter die Abrechnungen 2024 für das Gebäude "Lindenhof" erstellt
     Dann wurden 2 Nebenkostenabrechnungen erstellt
 
+  # Erneut erstellen ergänzt nur: ein Mietvertrag mit einer Abrechnung dieser Periode erhält keine zweite
+  @api
+  Szenario: Abrechnungen erneut erstellen ergänzt nur die fehlenden
+    Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024
+    Wenn der Liegenschaftsverwalter die Abrechnungen 2024 für das Gebäude "Lindenhof" erstellt
+    Dann wurde 1 Nebenkostenabrechnung erstellt
+
   @api
   Szenario: Erhöhte Verwaltungspauschale gilt für alle Mieter der Liegenschaft
     Angenommen das Heizprofil "Winter" verteilt die Heizkosten so:

@@ -137,9 +137,10 @@
 	{#if data.billedIn?.length}
 		<BilledWarning periods={data.billedIn}>
 			<p>
-				Löschen Sie nur falsch erfasste Rechnungen. Versendete oder bezahlte Abrechnungen
-				berichtigen Sie gegenüber dem Mieter. Bewahren Sie den Beleg auf: Der Mieter kann Einsicht
-				verlangen.
+				Löschen Sie nur falsch erfasste Rechnungen. Die Entwürfe enthalten sie weiter: Löschen Sie
+				danach die Entwürfe und erstellen Sie die Abrechnungen erneut. Versendete oder bezahlte
+				Abrechnungen berichtigen Sie gegenüber dem Mieter. Bewahren Sie den Beleg auf: Der Mieter
+				kann Einsicht verlangen.
 			</p>
 		</BilledWarning>
 	{/if}

@@ -113,8 +113,6 @@ export function findingText({
 	changePercent
 }: CategoryFinding): string {
 	if (kind === 'stock') return stockText(missingParts, current.total);
-	if (kind === 'tank')
-		return 'Heizen Sie mit Öl, Pellets oder Holz? Dann erfassen Sie den Tankbestand am Anfang und am Ende der Periode, sonst rechnet Dwello den Einkauf ab statt den Verbrauch. Bei Fernwärme, Gas oder Wärmepumpe ist nichts zu tun.';
 	if (kind === 'missing')
 		return `Keine Rechnung in dieser Kategorie erfasst. Im Vorjahr: Kosten von ${formatCurrency(previous.total)}.`;
 	if (kind === 'new')
@@ -130,7 +128,7 @@ export function findingText({
 }
 
 // TODO(fachlich prüfen): costs 15 % above the Akonto suggest raising it, 30 % below suggest missing invoices;
-// a fixed-term contract has no termination date before its end (review B, MR4-4)
+// a fixed-term contract has no termination date before its end, for the Akonto and new costs alike (review B, MR4-4, MR5-2)
 const AKONTO_ABOVE = 0.15;
 const AKONTO_BELOW = 0.3;
 

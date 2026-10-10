@@ -19,6 +19,7 @@ export interface FuelStock {
 	readingDate: string;
 	amount: number;
 	categoryId: string;
+	categoryName: string;
 }
 
 type Fetch = typeof globalThis.fetch;
@@ -45,20 +46,26 @@ async function fuelStockData(fetch: Fetch, buildingId: string) {
 	const categories: Record<string, string | boolean>[] | null = categoriesRes.ok
 		? ((await categoriesRes.json()).categories ?? [])
 		: null;
+	const name = (c: Record<string, string | boolean>) => String(c.nameDE || c.name);
 	return {
 		fuelStocks: Array.isArray(stocks)
-			? stocks.map((s: Record<string, string>) => ({
-					id: s.id,
-					readingDate: s.readingDate,
-					amount: Number(s.amount),
-					categoryId: s.categoryId
-				}))
+			? stocks.map((s: Record<string, string>) => {
+					// named from all categories: one no longer allocable is not in the choice
+					const category = categories?.find((c) => c.id === s.categoryId);
+					return {
+						id: s.id,
+						readingDate: s.readingDate,
+						amount: Number(s.amount),
+						categoryId: s.categoryId,
+						categoryName: category ? name(category) : ''
+					};
+				})
 			: null,
 		// allocable fuel only: the chimney sweep is shared like heating but is no fuel (the API refuses it too)
 		heatingCategories:
 			categories
 				?.filter((c) => c.isHeatingCost && c.isAllowedUtilityCost && c.name !== 'Chimney Sweep')
-				.map((c) => ({ id: String(c.id), name: String(c.nameDE || c.name) })) ?? null
+				.map((c) => ({ id: String(c.id), name: name(c) })) ?? null
 	};
 }
 

@@ -237,7 +237,7 @@ export function testData(request: APIRequestContext, token: string) {
 		async invoiceOn(buildingTitle: string, categoryName: string, amount: string, date: string, service?: [string, string]) {
 			const category = (await get('categories?limit=100')).categories.find((c: { nameDE: string }) => c.nameDE === categoryName);
 			const period = service && { servicePeriodStart: service[0], servicePeriodEnd: service[1] };
-			await invoice(buildingTitle, { categoryId: category.id, ...period }, `${categoryName} ${date}`, amount, date);
+			return invoice(buildingTitle, { categoryId: category.id, ...period }, `${categoryName} ${date}`, amount, date);
 		},
 
 		async category(title: string, isAllowedUtilityCost: boolean) {

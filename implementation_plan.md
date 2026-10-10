@@ -4464,6 +4464,12 @@ critical/high/medium is open; reviews in `docs/reviews/`.
   period's statements (`MissedWarning.svelte`, `statementPeriods`); tank question as its own hint
   (`TankQuestion.svelte`); running-period warning also in the preview; texts (meters in the flats, delete dialog, new
   costs, Holz); scenario «Warnung beim Bearbeiten einer schon abgerechneten Rechnung».
+- [x] **B, review round 5** (`docs/reviews/B-review-5.md`): the wizard skips contracts that already have a statement in
+  the period (`statement-generation.ts`, API driver; scenario «Abrechnungen erneut erstellen ergänzt nur die
+  fehlenden»); a draft names invoices recorded after it (`statements/[id]`), statement `buildingId` from `building.id`;
+  `statementPeriods` lists a period in both lists; Tankbestand named from all categories; texts (Flüssiggas,
+  Heizkostenverteiler, delete and late-invoice instructions); summer period with `calculateDaysBetween`; axe screens
+  for billed and late invoices, state `tank-question`.
 
 
 ---

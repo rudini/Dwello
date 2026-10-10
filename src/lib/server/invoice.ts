@@ -72,8 +72,10 @@ export async function statementPeriods(
 	const start = (invoice.servicePeriodStart ?? invoice.invoiceDate) as string;
 	const end = (invoice.servicePeriodEnd ?? invoice.invoiceDate) as string;
 	const overlapping = statements.filter((s) => s.periodStart <= end && s.periodEnd >= start);
-	const billedIn = periodsOf(overlapping.filter((s) => s.createdAt >= String(invoice.createdAt)));
-	const billed = new Set(billedIn.map((p) => `${p.start}/${p.end}`));
-	const missedIn = periodsOf(overlapping).filter((p) => !billed.has(`${p.start}/${p.end}`));
-	return { billedIn, missedIn };
+	// a period can be in both: drafts created again do not replace the older ones
+	const recordedAt = String(invoice.createdAt);
+	return {
+		billedIn: periodsOf(overlapping.filter((s) => s.createdAt >= recordedAt)),
+		missedIn: periodsOf(overlapping.filter((s) => s.createdAt < recordedAt))
+	};
 }
