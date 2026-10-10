@@ -1,0 +1,46 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "deepcheck.config.schema.json",
+	"title": "deepcheck configuration (deepcheck.config.json)",
+	"type": "object",
+	"additionalProperties": false,
+	"properties": {
+		"$schema": { "type": "string" },
+		"include": { "type": "array", "items": { "type": "string" }, "description": "Globs of analyzed source files" },
+		"exclude": { "type": "array", "items": { "type": "string" }, "description": "Globs never walked or analyzed" },
+		"tests": { "type": "array", "items": { "type": "string" }, "description": "Globs of test files (excluded, reason test)" },
+		"generated": { "type": "array", "items": { "type": "string" }, "description": "Globs of generated files (excluded, reason generated)" },
+		"failThreshold": { "type": "number", "minimum": 0, "maximum": 100, "description": "shallowScore at or above which a module is flagged and can fail the gate" },
+		"tolerance": { "type": "number", "minimum": 0, "description": "Score points a baselined module may worsen before G2 fails it" },
+		"minInterfaceSize": { "type": "number", "minimum": 0, "description": "Modules with a smaller interface are never flagged, unless pass-through or classitis" },
+		"depthTarget": { "type": "number", "exclusiveMinimum": 1, "description": "depthRatio at which the depth component reaches 0" },
+		"complexityTarget": { "type": "number", "exclusiveMinimum": 1, "description": "Cyclomatic complexity per interface unit at which the complexity component reaches 0" },
+		"classitisMinFiles": { "type": "number", "minimum": 1, "description": "Minimum modules in a directory before classitis is considered" },
+		"weights": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"depth": { "type": "number", "minimum": 0 },
+				"complexity": { "type": "number", "minimum": 0 },
+				"passThrough": { "type": "number", "minimum": 0 },
+				"leaky": { "type": "number", "minimum": 0 },
+				"classitis": { "type": "number", "minimum": 0 },
+				"coupling": { "type": "number", "minimum": 0 },
+				"unusedExports": { "type": "number", "minimum": 0 }
+			}
+		},
+		"overrides": {
+			"type": "array",
+			"items": {
+				"type": "object",
+				"additionalProperties": false,
+				"required": ["files"],
+				"properties": {
+					"files": { "type": "array", "items": { "type": "string" } },
+					"failThreshold": { "type": "number", "minimum": 0, "maximum": 100 },
+					"minInterfaceSize": { "type": "number", "minimum": 0 }
+				}
+			}
+		}
+	}
+}

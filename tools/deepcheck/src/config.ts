@@ -1,3 +1,8 @@
+import { existsSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { ToolError } from './errors.ts';
+import { loadSchema, validate } from './schema.ts';
+
 export interface Weights {
 	depth: number;
 	complexity: number;
@@ -53,3 +58,22 @@ export const DEFAULT_CONFIG: Config = {
 	},
 	overrides: []
 };
+
+const CONFIG_FILE = 'deepcheck.config.json';
+
+export function loadConfig(root: string): Config {
+	const path = join(root, CONFIG_FILE);
+	if (!existsSync(path)) return DEFAULT_CONFIG;
+	const file = parseJson(readFileSync(path, 'utf8'), CONFIG_FILE);
+	const problems = validate(file, loadSchema('config.schema.json'));
+	if (problems.length) throw new ToolError(`${CONFIG_FILE}: ${problems.join('; ')}`);
+	return { ...DEFAULT_CONFIG, ...file, weights: { ...DEFAULT_CONFIG.weights, ...file.weights } };
+}
+
+function parseJson(text: string, name: string) {
+	try {
+		return JSON.parse(text);
+	} catch (error) {
+		throw new ToolError(`${name} is not valid JSON: ${(error as Error).message}`);
+	}
+}

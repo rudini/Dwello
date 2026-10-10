@@ -1,8 +1,9 @@
 import { dirname } from 'node:path';
 import { Project, type SourceFile } from 'ts-morph';
 import { reasons } from './advice.ts';
-import { DEFAULT_CONFIG, type Config } from './config.ts';
+import { loadConfig, type Config } from './config.ts';
 import { excludeByPath, isModuleCandidate, isSource, matchesAny, walk } from './discover.ts';
+import { fallowIgnorePatterns } from './fallow.ts';
 import { coupling } from './graph.ts';
 import { contentExclusion, fileMetrics, type FileMetrics } from './metrics.ts';
 import { components, shallowScore } from './score.ts';
@@ -47,12 +48,13 @@ function settingsFor(path: string, config: Config) {
 	return Object.assign({ failThreshold: config.failThreshold, minInterfaceSize: config.minInterfaceSize }, ...override);
 }
 
-export function analyze({ root, config = DEFAULT_CONFIG }: AnalyzeOptions): Report {
+export function analyze({ root, config = loadConfig(root) }: AnalyzeOptions): Report {
 	const sources = walk(root, config).filter(isSource);
 	const excluded: ExcludedModule[] = [];
 	const modulePaths: string[] = [];
+	const fallowIgnores = fallowIgnorePatterns(root);
 	for (const path of sources.filter((p) => isModuleCandidate(p, config))) {
-		const reason = excludeByPath(root, path, config, []);
+		const reason = excludeByPath(root, path, config, fallowIgnores);
 		if (reason) excluded.push({ path, reason });
 		else modulePaths.push(path);
 	}
