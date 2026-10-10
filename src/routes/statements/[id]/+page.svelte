@@ -111,27 +111,31 @@
 	{/if}
 	<ReminderFeedback reminder={form?.reminder} />
 
+	<!-- min-w-0: a wide cost table scrolls inside its box instead of widening the page -->
 	<div class="grid gap-8 lg:grid-cols-3">
-		<div class="flex flex-col gap-8 lg:col-span-2">
+		<div class="flex min-w-0 flex-col gap-8 lg:col-span-2">
 			<Panel title="Kostenaufstellung">
 				<CostTable {statement} />
 			</Panel>
 			<PaymentPanel {statement} />
 			<ReminderHistory reminders={data.reminders} />
 		</div>
-		<div class="flex flex-col gap-8">
+		<div class="flex min-w-0 flex-col gap-8">
 			<PartiesPanel {statement} />
 			<Panel title="Weitere Aktionen">
 				<div class="flex flex-col gap-4">
 					<Button href="/statements/{statement.id}/edit" icon="edit" testid="statement-edit-button"
 						>Frist und Bemerkungen bearbeiten</Button
 					>
-					<Button
-						variant="danger-ghost"
-						icon="delete"
-						onclick={() => (showDelete = true)}
-						testid="statement-delete-button">Abrechnung löschen</Button
-					>
+					<!-- Only a draft can be deleted; once sent, the statement stays as the tenant received it -->
+					{#if statement.status === 'draft'}
+						<Button
+							variant="danger-ghost"
+							icon="delete"
+							onclick={() => (showDelete = true)}
+							testid="statement-delete-button">Abrechnung löschen</Button
+						>
+					{/if}
 				</div>
 			</Panel>
 			<MetadataCard createdAt={statement.createdAt} {pdfGeneratedAt} />
@@ -165,7 +169,7 @@
 >
 	<p>
 		Die Abrechnung {statement.statementNumber} von {statement.tenantName} wird gelöscht. Das lässt sich
-		nicht rückgängig machen. Nur Entwürfe können gelöscht werden.
+		nicht rückgängig machen.
 	</p>
 </FormDialog>
 

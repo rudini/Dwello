@@ -82,8 +82,8 @@ Funktionalität: Abrechnungsdetail
     Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
     Und die Abrechnung 2024 von "Eva Frei" ist versendet
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
-    Wenn der Liegenschaftsverwalter die Abrechnung löscht
-    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Abrechnung konnte nicht gelöscht werden."
+    Dann hat die Abrechnung den Status "Versendet"
+    Und bietet die Detailseite das Löschen der Abrechnung nicht an
 
   Szenario: Zur Bearbeitung der Abrechnung wechseln
     Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"

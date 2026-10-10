@@ -3,6 +3,8 @@
 	import { page } from '$app/stores';
 	import type { StatementsListData, StatementWithDetails } from '$lib/types';
 	import { balanceLabel } from '$lib/statement';
+	import { addToast } from '$lib/stores';
+	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';
 	import Dialog from '$lib/ui/Dialog.svelte';
 	import EmptyState from '$lib/ui/EmptyState.svelte';
@@ -35,12 +37,21 @@
 	// Payment received today, after a confirmation; the endpoint stores it in the database
 	let paying = $state<StatementWithDetails | null>(null);
 	let saving = $state(false);
+	let payError = $state('');
 	async function markPaid() {
 		saving = true;
-		await fetch(`/statements/${paying!.id}/mark-paid`, { method: 'POST' });
-		await invalidateAll();
-		saving = false;
-		paying = null;
+		payError = '';
+		try {
+			const response = await fetch(`/statements/${paying!.id}/mark-paid`, { method: 'POST' });
+			if (!response.ok) throw new Error(String(response.status));
+			addToast('success', `Abrechnung ${paying!.statementNumber} als bezahlt markiert`);
+			paying = null;
+			await invalidateAll();
+		} catch {
+			payError = 'Abrechnung konnte nicht als bezahlt markiert werden. Versuchen Sie es erneut.';
+		} finally {
+			saving = false;
+		}
 	}
 </script>
 
@@ -113,7 +124,10 @@
 	busyLabel="Wird gespeichert …"
 	confirmTestid="statement-list-mark-paid-confirm"
 	onconfirm={markPaid}
-	onclose={() => (paying = null)}
+	onclose={() => {
+		paying = null;
+		payError = '';
+	}}
 >
 	{#if paying}
 		<p>Das heutige Datum wird als Zahlungsdatum eingetragen.</p>
@@ -121,5 +135,8 @@
 			{paying.statementNumber}, {paying.tenantName}: {balanceLabel(paying.balance)}
 			{formatCurrency(Math.abs(paying.balance))}
 		</p>
+		{#if payError}
+			<Alert tone="critical" title="Nicht gespeichert"><p>{payError}</p></Alert>
+		{/if}
 	{/if}
 </Dialog>

@@ -10,6 +10,8 @@ vi.mock('$app/stores', () => ({
 }));
 
 import { invalidateAll } from '$app/navigation';
+import { get } from 'svelte/store';
+import { toasts } from '$lib/stores';
 import StatementsPage from '../routes/statements/+page.svelte';
 import StatementPage from '../routes/statements/[id]/+page.svelte';
 import EditStatementPage from '../routes/statements/[id]/edit/+page.svelte';
@@ -99,6 +101,62 @@ describe('Abrechnungsliste', () => {
 		expect(invalidateAll).toHaveBeenCalled();
 	});
 
+	it('nennt die Zahlungsaktion so, dass sie nicht wie ein Status aussieht', () => {
+		list([statement({ status: 'sent' })]);
+		expect(byTestId('statement-row-mark-paid')!.textContent).toContain('Als bezahlt markieren');
+	});
+
+	it('bestätigt den Zahlungseingang mit einer Meldung', async () => {
+		toasts.set([]);
+		fakeBff();
+		list([statement({ status: 'sent' })]);
+
+		click('statement-row-mark-paid');
+		click('statement-list-mark-paid-confirm');
+		await settle();
+
+		expect(get(toasts).map((toast) => toast.message)).toContain(
+			'Abrechnung NK-2024-0001 als bezahlt markiert'
+		);
+		expect(document.querySelector('[role="dialog"]')).toBeNull();
+	});
+
+	it('meldet im Dialog, wenn der Zahlungseingang nicht gespeichert wird', async () => {
+		fakeBff(() => [400, { error: 'Invalid status transition' }]);
+		list([statement({ status: 'sent' })]);
+
+		click('statement-row-mark-paid');
+		click('statement-list-mark-paid-confirm');
+		await settle();
+
+		const dialog = document.querySelector('[role="dialog"]')!;
+		expect(dialog.textContent).toContain('Abrechnung konnte nicht als bezahlt markiert werden.');
+		expect(byTestId<HTMLButtonElement>('statement-list-mark-paid-confirm')!.disabled).toBe(false);
+	});
+
+	it('bleibt nicht beschäftigt, wenn die Verbindung abbricht', async () => {
+		globalThis.fetch = (() => Promise.reject(new TypeError('offline'))) as typeof fetch;
+		list([statement({ status: 'sent' })]);
+
+		click('statement-row-mark-paid');
+		click('statement-list-mark-paid-confirm');
+		await settle();
+
+		expect(document.querySelector('[role="dialog"]')!.textContent).toContain(
+			'Abrechnung konnte nicht als bezahlt markiert werden.'
+		);
+		expect(byTestId<HTMLButtonElement>('statement-list-mark-paid-confirm')!.disabled).toBe(false);
+	});
+
+	it('hält die Aktionen innerhalb der Zeile, statt die Seite zu verbreitern', () => {
+		list([statement({ status: 'sent', pdfGeneratedAt: '2025-01-16T08:00:00Z' })]);
+		const row = byTestId('statement-row-s1')!;
+		const actions = row.querySelector('[data-testid="statement-row-mark-paid"]')!.parentElement!;
+
+		expect(row.className).not.toMatch(/col-span|grid-cols/);
+		expect(actions.className).toMatch(/(^| )xl:shrink-0( |$)/);
+	});
+
 	it('schaltet einen Statusfilter ein und wieder aus, und behält die übrigen Filter', () => {
 		url = new URL('http://localhost/statements?search=Keller&status=draft&page=2');
 		list([statement()]);
@@ -145,6 +203,15 @@ describe('Abrechnungsdetail', () => {
 		]);
 		expect(byTestId('statement-balance')!.textContent).toMatch(/Nachzahlung.*CHF\s363.00/);
 		expect(text()).toContain('366 Mietstage');
+	});
+
+	it('lässt die Kostenaufstellung in ihrer Spalte scrollen, statt die Seite zu verbreitern', () => {
+		detail();
+		const table = document.querySelector('table')!;
+		const column = table.closest('.lg\\:col-span-2')!;
+
+		expect(column.className).toMatch(/(^| )min-w-0( |$)/);
+		expect(column.nextElementSibling!.className).toMatch(/(^| )min-w-0( |$)/);
 	});
 
 	it('nennt die Verwaltungspauschale mit ihrer Grundlage', () => {
@@ -204,10 +271,11 @@ describe('Abrechnungsdetail', () => {
 		expect(recipient).toContain('Ahornweg 3, 8400 Winterthur');
 	});
 
-	it('bietet eine versendete Abrechnung zum Mahnen und Bezahlen an', () => {
+	it('bietet eine versendete Abrechnung zum Mahnen und Bezahlen an, aber nicht zum Löschen', () => {
 		detail({ status: 'sent' });
 
 		expect(byTestId('statement-send-button')).toBeNull();
+		expect(byTestId('statement-delete-button')).toBeNull();
 		click('statement-mark-paid-button');
 		expect(byTestId('statement-mark-paid-confirm')).not.toBeNull();
 	});
