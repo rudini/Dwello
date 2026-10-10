@@ -43,6 +43,17 @@ describe('Dialog', () => {
 		).toContain('als versendet markiert');
 	});
 
+	it('macht die Seite dahinter unerreichbar, solange er offen ist', () => {
+		const { opener } = openDialog();
+		const dialog = document.querySelector('[role=dialog]')!;
+		expect(opener.hasAttribute('inert')).toBe(true);
+		expect(dialog.closest('[inert]')).toBeNull();
+
+		press('Escape');
+		expect(document.querySelector('[inert]')).toBeNull();
+		expect(document.activeElement).toBe(opener);
+	});
+
 	it('setzt den Fokus auf "Abbrechen", damit nichts aus Versehen bestätigt wird', () => {
 		openDialog();
 		expect(document.activeElement).toBe(byTestId('dialog-cancel'));

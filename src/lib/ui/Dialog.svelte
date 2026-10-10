@@ -40,12 +40,26 @@
 		onclose?.();
 	}
 
+	// Everything around the dialog is inert while it is open, so a screen reader's browse mode stays inside too
+	function makeInert(dialog: HTMLElement) {
+		const around: Element[] = [];
+		for (let node = dialog; node.parentElement && node !== document.body; node = node.parentElement)
+			for (const sibling of node.parentElement.children)
+				if (sibling !== node && !sibling.hasAttribute('inert')) around.push(sibling);
+		around.forEach((element) => element.setAttribute('inert', ''));
+		return () => around.forEach((element) => element.removeAttribute('inert'));
+	}
+
 	// Focus starts on "Abbrechen", stays inside while open and returns to the opener afterwards
 	$effect(() => {
 		if (!open || !panel) return;
 		const opener = document.activeElement as HTMLElement | null;
+		const restore = makeInert(panel);
 		panel.querySelector<HTMLElement>('[data-testid="dialog-cancel"]')?.focus();
-		return () => opener?.focus();
+		return () => {
+			restore();
+			opener?.focus();
+		};
 	});
 
 	// While busy both buttons are disabled: the panel itself holds the focus
