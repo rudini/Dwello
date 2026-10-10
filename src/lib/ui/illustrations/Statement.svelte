@@ -10,5 +10,5 @@
 <line x1="56" y1="66" x2="86" y2="66" fill="none" />
 <line x1="96" y1="66" x2="104" y2="66" fill="none" />
 <line x1="56" y1="80" x2="104" y2="80" fill="none" />
-<line x1="84" y1="92" x2="104" y2="92" fill="none" stroke="var(--illu-accent)" />
-<line x1="84" y1="97" x2="104" y2="97" fill="none" stroke="var(--illu-accent)" />
+<line x1="84" y1="92" x2="104" y2="92" fill="none" stroke="var(--illu-accent)" stroke-width="3" />
+<line x1="84" y1="97" x2="104" y2="97" fill="none" stroke="var(--illu-accent)" stroke-width="3" />

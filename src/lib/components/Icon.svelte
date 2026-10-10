@@ -11,7 +11,6 @@
 		name: string;
 		size?: number;
 		class?: string;
-		'aria-hidden'?: boolean | 'true' | 'false';
 	} = $props();
 </script>
 

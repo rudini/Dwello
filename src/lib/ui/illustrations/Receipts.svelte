@@ -9,4 +9,4 @@
 <line x1="80" y1="42" x2="112" y2="42" fill="none" />
 <line x1="80" y1="54" x2="104" y2="54" fill="none" />
 <line x1="80" y1="66" x2="108" y2="66" fill="none" />
-<line x1="96" y1="84" x2="112" y2="84" fill="none" stroke="var(--illu-accent)" />
+<line x1="96" y1="84" x2="112" y2="84" fill="none" stroke="var(--illu-accent)" stroke-width="3" />

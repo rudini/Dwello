@@ -27,6 +27,20 @@ describe('Symbole der alten Bildschirme', () => {
 		expect(usedNames.filter((name) => !(name in materialIcons) && !(name in icons))).toEqual([]);
 	});
 
+	it.each([
+		['meeting_room', 'rooms'], // Zimmeranzahl, not a vacant apartment
+		['door_open', 'apartment-free'],
+		['receipt', 'invoice'],
+		['receipt_long', 'invoice-lines']
+	])('%s behält seine Bedeutung (%s)', (material, meaning) => {
+		expect(materialIcons[material]).toBe(meaning);
+	});
+
+	it('zeigt Rechnungen ohne Dollarzeichen', () => {
+		const dollar = 'M16 8h-6a2 2 0 0 0 0 4h4';
+		expect(JSON.stringify(icons.invoice)).not.toContain(dollar);
+	});
+
 	it('zeichnen ein Linien-Symbol statt einer Google-Schrift', () => {
 		show(Icon, { name: 'delete', size: 20 });
 		const svg = document.querySelector('svg')!;

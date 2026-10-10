@@ -11,5 +11,6 @@
 	height="12"
 	fill="var(--color-surface)"
 	stroke="var(--illu-accent)"
+	stroke-width="3"
 />
-<circle cx="94" cy="68" r="3" fill="none" stroke="var(--illu-accent)" />
+<circle cx="94" cy="68" r="3" fill="none" stroke="var(--illu-accent)" stroke-width="3" />

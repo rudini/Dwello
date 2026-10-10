@@ -261,6 +261,7 @@
 	</Table>
 
 	<Panel title="Leerer Zustand">
+		<Illustration name="done" title="Alles erledigt" />
 		<EmptyState
 			title="Noch keine Mieter"
 			text="Erfassen Sie Ihren ersten Mieter. Danach können Sie einen Mietvertrag erstellen."
@@ -274,7 +275,7 @@
 		<ul class="grid grid-cols-2 gap-6 md:grid-cols-5">
 			{#each Object.entries(motifs) as [name, label] (name)}
 				<li class="flex flex-col items-center gap-2">
-					<Illustration name={name as IllustrationName} title={label} />
+					<Illustration name={name as IllustrationName} />
 					<span class="text-ink-muted">{label}</span>
 				</li>
 			{/each}

@@ -49,7 +49,7 @@ export const materialIcons: Record<string, IconName> = {
 	local_fire_department: 'heating',
 	location_on: 'location',
 	mail: 'mail',
-	meeting_room: 'apartment-free',
+	meeting_room: 'rooms',
 	menu: 'menu',
 	notification_important: 'reminder',
 	paid: 'success',

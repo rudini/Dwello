@@ -13,4 +13,5 @@
 	height="26"
 	fill="var(--color-surface)"
 	stroke="var(--illu-accent)"
+	stroke-width="3"
 />
