@@ -519,3 +519,9 @@ class TddStepTest(unittest.TestCase):
                 for rel, text in green.items():
                     repo.write(rel, text)
                 self.assert_refused(repo, "green", f"not tests: {config}", head="red: adds")
+
+    def test_vitest_unhandled_errors_are_refused_as_red(self):
+        repo = vitest_repo(self)
+        repo.write("calc.test.js", VITEST_TEST.replace(
+            "  expect(", "  setTimeout(() => null.x, 0);\n  expect(") + 'test("waits", () => new Promise((r) => setTimeout(r, 50)));\n')
+        self.assert_refused(repo, "red", "red needs a failing assertion")
