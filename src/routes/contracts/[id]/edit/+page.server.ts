@@ -14,8 +14,8 @@ export const load: PageServerLoad = async ({ params, fetch }): Promise<ContractE
 	try {
 		const [contractRes, tenantsRes, apartmentsRes] = await Promise.all([
 			fetch(`${BACKEND_URL}/api/v1/contracts/${params.id}`),
-			fetch(`${BACKEND_URL}/api/v1/tenants?limit=100`),
-			fetch(`${BACKEND_URL}/api/v1/apartments?limit=100`)
+			fetch(`${BACKEND_URL}/api/v1/tenants?limit=1000`), // far more than a small portfolio has, as in the wizard
+			fetch(`${BACKEND_URL}/api/v1/apartments?limit=1000`)
 		]);
 
 		if (!contractRes.ok) {
