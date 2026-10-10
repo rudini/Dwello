@@ -2,7 +2,7 @@ import { expect } from '@playwright/test';
 import { createBdd, type DataTable } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { visit } from '../interactions/navigation';
-import { downloadedFile, downloadedPdfTitle } from '../questions/download';
+import { downloadedFile, downloadedPdfText, downloadedPdfTitle } from '../questions/download';
 import { deleteOffer, heatingCosts, pdfToView, recipient, sendConfirmation, statusOfStatement } from '../questions/statement-detail';
 import { emptyStatementList, statementOfYear, statementPath } from '../questions/statements';
 import { searchStatements } from '../tasks/statements';
@@ -164,4 +164,12 @@ Then(
 
 Then('trägt das PDF den Titel {string}', async ({ verwalter }, title: string) => {
 	expect(await downloadedPdfTitle(verwalter)).toContain(title);
+});
+
+Given('im Gebäude {string} war am {string} Heizöl für {string} Franken im Tank', async ({ seed }, building: string, date: string, amount: string) => {
+	await seed.fuelStock(building, date, amount);
+});
+
+Then('steht im PDF {string}', async ({ verwalter }, text: string) => {
+	expect(await downloadedPdfText(verwalter)).toContain(text);
 });

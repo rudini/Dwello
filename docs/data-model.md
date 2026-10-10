@@ -285,8 +285,13 @@ description         VARCHAR(255)  NOT NULL
 total_amount        DECIMAL(12,2) NOT NULL  -- building total
 tenant_share        DECIMAL(12,2) NOT NULL  -- tenant's portion
 share_percentage    DECIMAL(8,4)
+apartment_share     DECIMAL(12,2)           -- the apartment's part of the total by the key (migration 0011)
+period_share        DECIMAL(8,4)            -- 0-1: days rented, or the heating profile's share (migration 0011)
 sort_order          INTEGER DEFAULT 0
 ```
+
+`apartment_share` and `period_share` are kept when a statement is created so the PDF can explain each position;
+statements created before migration 0011 have NULL, their PDF leaves those columns empty.
 
 No `updated_at`. Index: `line_items_statement_id_idx`.
 

@@ -562,8 +562,14 @@ Five flat profiles, seeded by `backend/migrations/0002_stammdaten.sql`; each dis
 - Ability to regenerate if invoices/contracts change
 
 **Step 4: Generate PDFs**
-- Generate statement PDF for each apartment
-- Append Swiss QR-bill to each statement
+- Generate statement PDF for each apartment (requirements and sources: `docs/nebenkostenabrechnung-anforderungen.md`):
+  A4, sender and «Seite x von y» on every page, property and period in the footer; recipient in the address field;
+  the balance first (Nachzahlung with payment deadline or Rückerstattung); per category the distribution key, the
+  building's costs, the Wohnungsanteil, the Zeitanteil (days rented or heating profile) and the tenant's share;
+  heating costs with the heating profile and, for a tank, opening stock + invoices – closing stock; notes on the
+  receipts (Art. 257b Abs. 2 OR) and the detailed heating statement (Art. 8 VMWG)
+- Append Swiss QR-bill to each statement with an amount due (SIX layout: receipt 62 mm, payment part, 105 mm high at
+  the bottom of the last page)
 - Store PDFs in database
 - Option to download all as ZIP (planned, not implemented)
 

@@ -1,6 +1,7 @@
 import type { Download } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
 import type { Actor } from '../fixtures/actor';
+import { readPdf } from '../../../backend/src/__tests__/helpers/pdf-text';
 
 // The file the actor downloaded last: its name and its first bytes
 export const downloadedFile = async (actor: Actor) => {
@@ -17,3 +18,7 @@ export const downloadedPdfTitle = async (actor: Actor) => {
 	// PDFKit writes non-ASCII text as UTF-16BE behind a byte order mark
 	return raw.startsWith('\xfe\xff') ? Buffer.from(raw.slice(2), 'latin1').swap16().toString('utf16le') : raw;
 };
+
+// Text of the downloaded PDF, lines joined: what the tenant reads
+export const downloadedPdfText = async (actor: Actor) =>
+	readPdf(await readFile(await actor.recall<Download>('download').path())).flowing;

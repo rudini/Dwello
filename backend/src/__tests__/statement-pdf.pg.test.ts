@@ -5,8 +5,9 @@
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import { eq } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { categories, distributionKeys, tenants } from '../db/schema';
+import { categories, distributionKeys, fuelStocks, tenants } from '../db/schema';
 import { deleteConfig, getConfig, setConfig } from '../services/config.service';
+import { createFuelStock } from '../services/fuel-stock.service';
 import { getHeatingProfileByName } from '../services/heating-profile.service';
 import { generateStatementPdf, getStatementPdf } from '../services/statement-pdf.service';
 import { deleteStatement, generateStatement } from '../services/statement.service';
@@ -109,6 +110,70 @@ describe('PDF der Nebenkostenabrechnung', () => {
 	// Eingezogen am 1. Juli: der Mieter trägt die Pauschale seiner Wohnung für 184 von 365 Tagen
 	it('nennt bei einem Teil des Jahres die Mietstage, für die die Verwaltungspauschale gilt', () => {
 		expect(pdf.flowing).toContain('für Ihre 184 von 365 Tagen');
+	});
+
+	// Einzige Wohnung des Gebäudes: Wohnungsanteil = Kosten der Liegenschaft; Hauswart nach Tagen 184 / 365
+	it('nennt je Position den Verteilschlüssel, den Wohnungsanteil und den Zeitanteil', () => {
+		expect(pdf.flowing).toContain('Verteilschlüssel');
+		expect(pdf.flowing).toMatch(/Hauswart Pro Fläche \(m²\) 1'200.00 1'200.00 50.41 % 604.93/);
+	});
+
+	it('nummeriert die Seiten und nennt in der Kopfzeile Absender und Abrechnung', () => {
+		expect(pdf.flowing).toContain('Seite 1 von 2');
+		expect(pdf.flowing).toContain('Seite 2 von 2');
+		expect(occurrences('Muster Immobilien AG · Firmenweg 9 · 8001 Zürich')).toBe(2);
+	});
+
+	// Der Mieter sieht zuerst, was er bezahlt, dann wie es zustande kommt
+	it('zeigt die Nachzahlung vor der Kostenübersicht', () => {
+		expect(pdf.flowing.indexOf('Nachzahlung')).toBeLessThan(pdf.flowing.indexOf('Kostenübersicht'));
+	});
+
+	it('nennt das Recht auf Belegeinsicht und auf die detaillierte Heizkostenabrechnung', () => {
+		expect(pdf.flowing).toContain('Sie können die Belege einsehen. Melden Sie sich dafür bei Muster Immobilien AG, Firmenweg 9, 8001 Zürich');
+		expect(pdf.flowing).toContain('detaillierte Abrechnung der Heizkosten');
+	});
+
+	it('nennt im Zahlteil die Abrechnung als zusätzliche Information', () => {
+		expect(pdf.flowing).toContain('Zusätzliche Informationen');
+	});
+});
+
+// Heizöl im Tank: abgerechnet wird der Verbrauch, das PDF zeigt, wie er zustande kommt (Art. 5 und 8 VMWG)
+describe('Tankbestand im PDF', () => {
+	let tank: Awaited<ReturnType<typeof createRental>>;
+	let text: string;
+	let id: string;
+
+	beforeAll(async () => {
+		tank = await createRental(crypto.randomUUID(), { startDate: '2024-01-01', monthlyAdvancePayment: '200' });
+		const [heating] = await db.select().from(categories).where(eq(categories.name, 'Heating'));
+		await insertInvoice(tank.building, { categoryId: heating.id, amount: '1000.00', description: 'Heizöl', invoiceDate: '2025-06-15' });
+		await createFuelStock(tank.building, { readingDate: '2024-12-31', amount: '600.00', categoryId: heating.id });
+		await createFuelStock(tank.building, { readingDate: '2025-12-31', amount: '100.00', categoryId: heating.id });
+		const statement = await generateStatement({
+			contractId: tank.contract,
+			buildingId: tank.building,
+			periodStart: '2025-01-01',
+			periodEnd: '2025-12-31',
+			managementFeePercent: 0
+		});
+		id = statement.id;
+		await generateStatementPdf(id, 'de');
+		text = readPdf(Buffer.from((await getStatementPdf(id)).pdfBlob!, 'base64')).flowing;
+	});
+
+	afterAll(async () => {
+		await deleteStatement(id);
+		await db.delete(fuelStocks).where(eq(fuelStocks.buildingId, tank.building));
+		await tank.remove();
+	});
+
+	it('leitet die Heizkosten aus Anfangsbestand, Rechnungen und Endbestand her', () => {
+		expect(text).toContain('Anfangsbestand am 31.12.2024 CHF 600.00');
+		expect(text).toContain("Rechnungen Heizung in der Abrechnungsperiode CHF 1'000.00");
+		expect(text).toContain('Endbestand am 31.12.2025 CHF 100.00');
+		expect(text).toContain("Heizkosten nach Verbrauch CHF 1'500.00");
 	});
 });
 

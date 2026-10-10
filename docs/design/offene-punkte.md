@@ -200,3 +200,14 @@ Every place in the code is marked `TODO(fachlich prüfen)` (`grep -rn "TODO(fach
 - Check for missing invoices: a supplier changing from monthly to quarterly invoices is reported as gaps (IV2-10); a deviation caused by a Leistungszeitraum spanning two periods is not explained (IV2-9). Both are hints with a confirmation, refinement is a follow-up.
 - Akonto as "paid" instead of "agreed" (IV-H3): the glossary defines Geleistete Akontobeiträge as the sum of the monthly amounts; recording payments and a history of Akonto changes are new features – open product decision.
 - Agreed categories per contract (IV-H4): a new category in a period is flagged with the question whether it is agreed in the lease; a full model of agreed Nebenkosten per contract is not built.
+
+## Session 11 – step D2 (statement PDF)
+
+- The PDF follows `docs/nebenkostenabrechnung-anforderungen.md`; no legal text was read on Fedlex (all sources «unsicher»). Before the first installation: read Art. 257a/257b, 269d, 270b OR and Art. 4–8 VMWG on Fedlex – TODO(fachlich prüfen).
+- Glossary proposals: "Zeitanteil" (share of the period: days rented or heating profile), "Anfangsbestand"/"Endbestand"/"Heizmaterial" (Art. 8 Abs. 2 VMWG: Vorrat), "Empfangsschein"/"Zahlteil" (SIX) – TODO(fachlich prüfen).
+- New PDF texts have no Romansh translation; a Romansh PDF prints them in German, and the payment part is not provided in Romansh by SIX (D1R-01) – TODO(fachlich prüfen).
+- The tank block is computed when the PDF is made, from the current readings and the statement's line total (Rechnungen = total – opening + closing): a reading changed after the statement was created changes the derivation, not the total.
+- Statements created before migration 0011 print "–" for Wohnungsanteil and Zeitanteil.
+- Not in the PDF yet (D1 proposals): several tenants of one contract as recipients, Akonto per month when it changed in the period (only the total is printed), a list of receipts, the previous year per category.
+- QR-bill v2.4 (from 14.11.2026): no change needed for CHF bills according to the research (D1R-07); to check with the SIX guidelines – TODO(fachlich prüfen).
+

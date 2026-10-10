@@ -392,6 +392,8 @@ export const utilityStatementLineItems = pgTable(
 		totalAmount: decimal('total_amount', { precision: 12, scale: 2 }).notNull(), // Building total
 		tenantShare: decimal('tenant_share', { precision: 12, scale: 2 }).notNull(), // Tenant's portion
 		sharePercentage: decimal('share_percentage', { precision: 8, scale: 4 }), // e.g., 12.5000%
+		apartmentShare: decimal('apartment_share', { precision: 12, scale: 2 }), // the apartment's part of the total by the key
+		periodShare: decimal('period_share', { precision: 8, scale: 4 }), // 0-1: days rented, or the heating profile's share
 		sortOrder: integer('sort_order').default(0),
 		createdAt: timestamp('created_at').defaultNow().notNull()
 	},

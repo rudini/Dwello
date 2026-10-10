@@ -7,6 +7,8 @@ import { eq, inArray } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { categories, distributionKeys, rentalContracts, utilityStatements } from '../db/schema';
 import { getHeatingProfile } from './heating-profile.service';
+import { periodReadings } from './fuel-stock.service';
+import { roundToRappen } from './pdf-format';
 import { handleMidYearMoves } from './prorating.service';
 import { getTypedConfig } from './config.service';
 import { generateStatementPDFBase64, type StatementPDFData, type Language } from './pdf.service';
@@ -57,6 +59,7 @@ export interface RunDetails {
 	rentalStart: string;
 	rentalEnd: string;
 	heating?: { profile: string; percent: number };
+	fuel?: StatementPDFData['fuel'];
 	managementFeeKey?: string;
 }
 
@@ -65,8 +68,10 @@ export function toPdfData(
 	statement: StatementWithDetails,
 	categoryNames: Map<string, Names>,
 	language: Language,
-	run: RunDetails = { rentalStart: statement.periodStart, rentalEnd: statement.periodEnd }
+	run: RunDetails = { rentalStart: statement.periodStart, rentalEnd: statement.periodEnd },
+	keyNames = new Map<string, Names>()
 ): StatementPDFData {
+	const share = (value: string | null) => (value == null ? null : parseFloat(value));
 	const managementFee = parseFloat(statement.managementFee || '0');
 	const subtotal = parseFloat(statement.totalCosts) - managementFee;
 	return {
@@ -83,9 +88,13 @@ export function toPdfData(
 		periodDays: Math.round((Date.parse(statement.periodEnd) - Date.parse(statement.periodStart)) / 86_400_000) + 1,
 		lineItems: statement.lineItems.map((item) => {
 			const names = item.categoryId ? categoryNames.get(item.categoryId) : undefined;
+			const key = item.distributionKeyId ? keyNames.get(item.distributionKeyId) : undefined;
 			return {
 				category: names ? localName(names, language) : item.description,
+				key: key && localName(key, language),
 				totalAmount: parseFloat(item.totalAmount),
+				apartmentShare: share(item.apartmentShare),
+				periodShare: share(item.periodShare),
 				tenantShare: parseFloat(item.tenantShare),
 				sharePercentage: item.sharePercentage ? parseFloat(item.sharePercentage) / 100 : 0
 			};
@@ -140,6 +149,26 @@ async function heatingOf(statement: StatementWithDetails, period: { rentalStart:
 	return { heating: { profile: localName(profile, language), percent: percentage } };
 }
 
+// A tank in the period: its category's costs are opening stock + the invoices – closing stock (Art. 5 Abs. 2 lit. a VMWG)
+async function fuelOf(statement: StatementWithDetails, names: Map<string, Names>, language: Language) {
+	const readings = statement.building ? await periodReadings(statement.building.id, statement.periodStart, statement.periodEnd) : null;
+	const line = statement.lineItems.find((item) => item.categoryId === readings?.categoryId);
+	const category = line?.categoryId ? names.get(line.categoryId) : undefined;
+	if (!readings?.opening || !readings.closing || !line || !category) return {};
+	const [opening, closing, total] = [readings.opening.amount, readings.closing.amount, line.totalAmount].map(parseFloat);
+	return {
+		fuel: {
+			category: localName(category, language),
+			openingDate: readings.opening.readingDate,
+			opening,
+			invoices: roundToRappen(total - opening + closing),
+			closingDate: readings.closing.readingDate,
+			closing,
+			total
+		}
+	};
+}
+
 async function feeKeyOf(statement: StatementWithDetails, language: Language) {
 	if (!statement.managementFeeDistributionKeyId) return {};
 	const [key] = await db.select().from(distributionKeys).where(eq(distributionKeys.id, statement.managementFeeDistributionKeyId));
@@ -147,11 +176,12 @@ async function feeKeyOf(statement: StatementWithDetails, language: Language) {
 }
 
 // What the generation run used, for the PDF: the tenant's dates, the heating profile and the fee's key
-async function runDetailsOf(statement: StatementWithDetails, language: Language, hasHeating: boolean): Promise<RunDetails> {
+async function runDetailsOf(statement: StatementWithDetails, names: Map<string, Names>, language: Language, hasHeating: boolean): Promise<RunDetails> {
 	const rental = await rentalDatesOf(statement);
 	return {
 		...rental,
 		...(await heatingOf(statement, rental, language, hasHeating)),
+		...(await fuelOf(statement, names, language)),
 		...(await feeKeyOf(statement, language))
 	};
 }
@@ -175,6 +205,12 @@ async function categoryNamesOf(statement: StatementWithDetails) {
 	return new Map(rows.map(({ id, ...names }) => [id, names]));
 }
 
+async function keyNamesOf(statement: StatementWithDetails) {
+	const ids = statement.lineItems.map((item) => item.distributionKeyId).filter((id): id is string => !!id);
+	const rows = ids.length ? await db.select().from(distributionKeys).where(inArray(distributionKeys.id, ids)) : [];
+	return new Map(rows.map((key) => [key.id, key as Names]));
+}
+
 /** Render and store the PDF in the language asked for, otherwise the tenant's */
 export async function generateStatementPdf(id: string, language?: string) {
 	const statement = await getStatement(id);
@@ -186,7 +222,8 @@ export async function generateStatementPdf(id: string, language?: string) {
 	const pdfLanguage = (language || statement.tenant?.language || 'de') as Language;
 	const names = await categoryNamesOf(statement);
 	const hasHeating = [...names.values()].some((category) => category.isHeatingCost);
-	const pdfData = toPdfData(statement, names, pdfLanguage, await runDetailsOf(statement, pdfLanguage, hasHeating));
+	const run = await runDetailsOf(statement, names, pdfLanguage, hasHeating);
+	const pdfData = toPdfData(statement, names, pdfLanguage, run, await keyNamesOf(statement));
 	const pdfBase64 = await generateStatementPDFBase64(pdfData, qrConfig, pdfLanguage);
 	// Only a QR-IBAN carries a QR reference on the bill
 	const qrReference = isQRIBAN(qrConfig.iban) ? statementQRReference(statement.id) : null;
