@@ -232,3 +232,14 @@ class TddStepTest(unittest.TestCase):
         self.assertEqual(result.returncode, 1, result.stderr)
         self.assertIn("red needs a failing assertion", result.stderr)
         self.assertEqual(repo.subject(), "init")
+
+    def test_vitest_green_commits_when_all_tests_pass(self):
+        repo = vitest_repo(self)
+        repo.commit_all("red: adds two numbers", {"calc.test.js": VITEST_TEST})
+        repo.write("calc.js", "export const add = (a, b) => a + b;\n")
+
+        result = repo.run("tdd-step", "green", "adds two numbers")
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(repo.subject(), "green: adds two numbers")
+        self.assertIn("TDD-Exit-Code: 0", repo.trailers())
