@@ -297,3 +297,13 @@ class TddStepTest(unittest.TestCase):
         self.assertEqual(result.returncode, 1, result.stderr)
         self.assertIn("red needs a failing assertion", result.stderr)
         self.assertEqual(repo.subject(), "init")
+
+    def test_an_unsupported_package_json_test_command_exits_2(self):
+        repo = Repo(self, {"package.json": '{"scripts": {"test": "jest"}}\n', "tool.py": "X = 1\n"})
+        repo.write("TESTLIST.md", "- [ ] something\n")
+
+        result = repo.run("tdd-step", "test", "plan")
+
+        self.assertEqual(result.returncode, 2, result.stderr)
+        self.assertIn("no supported test framework", result.stderr)
+        self.assertIn("jest", result.stderr)
