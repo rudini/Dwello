@@ -2,6 +2,7 @@
 	import { enhance } from '$app/forms';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';
+	import { focusFirstError } from '$lib/ui/focus-error';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import Panel from '$lib/ui/Panel.svelte';
 	import ConfigLinks from './ConfigLinks.svelte';
@@ -35,9 +36,10 @@
 		method="POST"
 		use:enhance={() => {
 			saving = true;
-			return async ({ update }) => {
+			return async ({ update, formElement }) => {
 				await update({ reset: false });
 				saving = false;
+				focusFirstError(formElement);
 			};
 		}}
 		class="flex flex-col gap-8"

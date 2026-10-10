@@ -5,6 +5,7 @@
 	import type { Tenant } from '$lib/types';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';
+	import { focusFirstError } from '$lib/ui/focus-error';
 	import type { IconName } from '$lib/ui/icons';
 
 	// Form of "Neuer Mieter" and "Mieter bearbeiten"; the server action checks and saves it
@@ -36,6 +37,7 @@
 		return async (output) => {
 			await after(output);
 			saving = false;
+			focusFirstError(output.formElement);
 		};
 	}}
 	class="flex flex-col gap-6 rounded-panel border border-line bg-surface p-6"

@@ -23,6 +23,7 @@
 	} from '$lib/contract-wizard';
 	import { addToast } from '$lib/stores';
 	import Alert from '$lib/ui/Alert.svelte';
+	import { focusFirstError } from '$lib/ui/focus-error';
 	import DraftNotice from '$lib/ui/DraftNotice.svelte';
 	import SaveStatus from '$lib/ui/SaveStatus.svelte';
 	import Stepper from '$lib/ui/Stepper.svelte';
@@ -130,8 +131,7 @@
 	// After a failed step the first field with an error gets the focus, so its error is read out
 	async function showErrors(target: number) {
 		if (target !== step) await goTo(target);
-		await tick();
-		section?.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
+		await focusFirstError(section);
 	}
 
 	function discardDraft() {

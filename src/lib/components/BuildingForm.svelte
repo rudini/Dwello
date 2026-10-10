@@ -7,6 +7,7 @@
 	import type { Address } from '$lib/services/openplz';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';
+	import { focusFirstError } from '$lib/ui/focus-error';
 	import Select from '$lib/ui/Select.svelte';
 	import TextInput from '$lib/ui/TextInput.svelte';
 
@@ -45,10 +46,11 @@
 	// The server opens the saved building; the toast says which one was saved
 	const submit: SubmitFunction = () => {
 		isSubmitting = true;
-		return async ({ result, update }) => {
+		return async ({ result, update, formElement }) => {
 			if (result.type === 'redirect') addToast('success', `Gebäude ${name} gespeichert`);
 			await update({ reset: false });
 			isSubmitting = false;
+			focusFirstError(formElement);
 		};
 	};
 

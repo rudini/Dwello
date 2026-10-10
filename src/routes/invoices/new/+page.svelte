@@ -11,6 +11,7 @@
 	import { addToast } from '$lib/stores';
 	import type { Category } from '$lib/types';
 	import Alert from '$lib/ui/Alert.svelte';
+	import { focusFirstError } from '$lib/ui/focus-error';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import Panel from '$lib/ui/Panel.svelte';
 	import InvoiceCategoryFields from '../InvoiceCategoryFields.svelte';
@@ -76,7 +77,7 @@
 	async function save(event: Event) {
 		event.preventDefault();
 		errors = validateInvoice({ buildingId, invoiceDate, billingEntity, description, amount });
-		if (Object.keys(errors).length) return;
+		if (Object.keys(errors).length) return focusFirstError(event.target as Element);
 
 		saving = true;
 		const response = await api.post('/invoices', {

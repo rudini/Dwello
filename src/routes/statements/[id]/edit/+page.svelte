@@ -3,6 +3,7 @@
 	import type { StatementWithDetails } from '$lib/types';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';
+	import { focusFirstError } from '$lib/ui/focus-error';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import Panel from '$lib/ui/Panel.svelte';
 	import Textarea from '$lib/ui/Textarea.svelte';
@@ -29,9 +30,10 @@
 	method="POST"
 	use:enhance={() => {
 		saving = true;
-		return async ({ update }) => {
+		return async ({ update, formElement }) => {
 			await update();
 			saving = false;
+			focusFirstError(formElement);
 		};
 	}}
 	class="mx-auto flex max-w-3xl flex-col gap-8"

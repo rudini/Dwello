@@ -4,6 +4,7 @@
 	import { addToast } from '$lib/stores';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';
+	import { focusFirstError } from '$lib/ui/focus-error';
 
 	// Form of a master data record: the reason it was not saved on top, cancel and save at the bottom;
 	// once saved, a message names the record (`record`, e.g. "Kategorie") and the name the user gave it
@@ -34,10 +35,11 @@
 	use:enhance={({ formData, submitter }) => {
 		saving = !submitter?.hasAttribute('formaction'); // another action, e.g. "Formel testen", saves nothing
 		const name = String(formData.get('name') ?? '').trim();
-		return async ({ result, update }) => {
+		return async ({ result, update, formElement }) => {
 			if (result.type === 'redirect') addToast('success', `${record} «${name}» gespeichert`);
 			await update({ reset: false });
 			saving = false;
+			focusFirstError(formElement);
 		};
 	}}
 	class="flex flex-col gap-8"

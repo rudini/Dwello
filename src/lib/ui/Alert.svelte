@@ -23,6 +23,7 @@
 <div
 	class="flex gap-4 rounded-control border-l-4 p-4 text-ink {style.box}"
 	role={tone === 'critical' ? 'alert' : undefined}
+	tabindex="-1"
 	data-testid={testid}
 >
 	<span class={style.text}><Icon name={style.icon} size={24} /></span>

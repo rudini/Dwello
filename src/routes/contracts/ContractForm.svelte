@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import { tick, untrack } from 'svelte';
+	import { untrack } from 'svelte';
 	import { apiCall } from '$lib/api';
 	import {
 		availableFrom,
@@ -17,6 +17,7 @@
 	import type { RentalContract } from '$lib/types';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';
+	import { focusFirstError } from '$lib/ui/focus-error';
 	import Panel from '$lib/ui/Panel.svelte';
 	import Select from '$lib/ui/Select.svelte';
 	import {
@@ -98,10 +99,7 @@
 		event.preventDefault();
 		Object.assign(values, normalizeAmounts(values)); // "1'450" as typed in Switzerland
 		errors = { ...validateContract(values), ...stepErrors(values, 3) };
-		if (Object.keys(errors).length > 0) {
-			await tick();
-			return form?.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
-		}
+		if (Object.keys(errors).length > 0) return focusFirstError(form);
 		saving = true;
 		const response = await apiCall(back, { method: 'PUT', body: contractBody(values) });
 		saving = false;
@@ -112,7 +110,7 @@
 					? 'Der Zeitraum überschneidet sich mit einem anderen Mietvertrag dieser Wohnung.'
 					: 'Beim Speichern ist ein Fehler aufgetreten. Versuchen Sie es später erneut.'
 			};
-			return;
+			return focusFirstError(form);
 		}
 		addToast('success', `Mietvertrag von ${tenantName} gespeichert`, 10_000);
 		await goto(back);

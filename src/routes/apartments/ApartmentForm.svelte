@@ -8,6 +8,7 @@
 	import { normalizeDecimal } from '$lib/utils/format';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';
+	import { focusFirstError } from '$lib/ui/focus-error';
 	import Field from '$lib/ui/Field.svelte';
 	import Select from '$lib/ui/Select.svelte';
 	import TextInput from '$lib/ui/TextInput.svelte';
@@ -63,10 +64,11 @@
 	method="POST"
 	use:enhance={() => {
 		saving = true;
-		return async ({ result, update }) => {
+		return async ({ result, update, formElement }) => {
 			if (result.type === 'redirect') addToast('success', `Wohnung ${number.trim()} gespeichert`);
 			await update({ reset: false });
 			saving = false;
+			focusFirstError(formElement);
 		};
 	}}
 	class="flex flex-col gap-6"

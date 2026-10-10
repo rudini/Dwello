@@ -6,6 +6,7 @@
 	import { plainAmount, validateInvoice } from '$lib/invoice';
 	import type { Category, InvoiceWithDetails } from '$lib/types';
 	import Alert from '$lib/ui/Alert.svelte';
+	import { focusFirstError } from '$lib/ui/focus-error';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import Panel from '$lib/ui/Panel.svelte';
 	import Textarea from '$lib/ui/Textarea.svelte';
@@ -54,7 +55,7 @@
 		errors = validateInvoice(values);
 		if (needsReason && !overrideReason.trim())
 			errors.overrideReason = 'Bitte geben Sie einen Grund für die Änderung an';
-		if (Object.keys(errors).length) return;
+		if (Object.keys(errors).length) return focusFirstError(event.target as Element);
 
 		saving = true;
 		saveError = '';
@@ -70,8 +71,10 @@
 			...(overrideReason.trim() && { manualOverrideReason: overrideReason.trim() })
 		});
 		saving = false;
-		if (result.error) saveError = result.error.message;
-		else goto(`/invoices/${invoice.id}`);
+		if (result.error) {
+			saveError = result.error.message;
+			focusFirstError(event.target as Element);
+		} else goto(`/invoices/${invoice.id}`);
 	}
 </script>
 
