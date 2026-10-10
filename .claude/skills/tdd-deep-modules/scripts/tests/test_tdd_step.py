@@ -320,3 +320,48 @@ class TddStepTest(unittest.TestCase):
 
                 self.assertEqual(result.returncode, 2, result.stderr)
                 self.assertIn(message, result.stderr)
+
+    def assert_refused(self, repo, phase, reason, *, head="init"):
+        result = repo.run("tdd-step", phase, "x")
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn(reason, result.stderr)
+        self.assertEqual(repo.subject(), head)
+
+    def test_vitest_type_error_is_refused_as_red(self):
+        repo = vitest_repo(self)
+        repo.write("calc.test.js", VITEST_TEST.replace("add(1, 2)", "add.nope(1, 2)"))
+        self.assert_refused(repo, "red", "red needs a failing assertion")
+
+    def test_vitest_without_test_files_is_refused_as_red(self):
+        repo = vitest_repo(self)
+        repo.write("notes.md", "nothing yet\n")
+        self.assert_refused(repo, "red", "red needs a failing assertion")
+
+    def test_unittest_failure_next_to_an_error_is_refused_as_red(self):
+        repo = Repo(self, {"calc.py": WRONG_ADD})
+        repo.write("test_calc.py", ADD_TEST + "\n    def test_breaks(self):\n        add(1)\n")
+        self.assert_refused(repo, "red", "red needs a failing assertion")
+
+    def test_files_named_like_tests_are_test_code(self):
+        for name in ("calc_test.py", "test_calc.py"):
+            with self.subTest(name):
+                repo = Repo(self, {"calc.py": WRONG_ADD, "pytest.ini": "[pytest]\n"})
+                repo.write(name, PYTEST_TEST)
+
+                result = repo.run("tdd-step", "red", "adds two numbers")
+
+                self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_only_green_may_follow_red(self):
+        repo = Repo(self, {"calc.py": WRONG_ADD})
+        repo.commit_all("red: adds two numbers", {"test_calc.py": ADD_TEST})
+        repo.write("TESTLIST.md", "- [ ] more\n")
+        self.assert_refused(repo, "test", "test cannot follow red", head="red: adds two numbers")
+
+    def test_refactor_must_follow_green_or_refactor(self):
+        for previous in ("init", "test: plan"):
+            with self.subTest(previous):
+                repo = Repo(self, {"calc.py": RIGHT_ADD, "test_calc.py": ADD_TEST})
+                repo.commit_all(previous, {"TESTLIST.md": "- [ ] adds\n"})
+                repo.write("calc.py", "def add(a, b):\n    return sum((a, b))\n")
+                self.assert_refused(repo, "refactor", "refactor cannot follow", head=previous)

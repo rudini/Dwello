@@ -1,0 +1,6 @@
+KILLED   tddcore/suite.py: ' and all(m.startswith("AssertionError") for m in messages)' -> '' [test_vitest_type_error_is_refused_as_red]
+KILLED   tddcore/suite.py: 'if messages and not load_errors' -> 'if not load_errors' [test_vitest_without_test_files_is_refused_as_red]
+KILLED   tddcore/suite.py: ' and "errors=" not in summary' -> '' [test_unittest_failure_next_to_an_error_is_refused_as_red]
+KILLED   tddcore/protocol.py: 'name.endswith("_test.py")' -> 'False' [test_files_named_like_tests_are_test_code]
+KILLED   tddcore/protocol.py: '"green": {"red"},' -> '"green": {"red"}, "test": {"red"} | {"start", "test", "green", "refactor"},' [test_only_green_may_follow_red]
+KILLED   tddcore/protocol.py: '"refactor": {"green", "refactor"},' -> '"refactor": {"green", "refactor", "start", "test"},' [test_refactor_must_follow_green_or_refactor]
