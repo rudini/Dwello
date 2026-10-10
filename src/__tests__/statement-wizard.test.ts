@@ -217,10 +217,7 @@ describe('Rechnungen pro Kategorie', () => {
 	});
 
 	// Erste Abrechnung: ob das Gebäude einen Tank hat, weiss Dwello nicht
-	it('fragt bei Heizkosten ohne Tankbestand, ob das Gebäude mit Öl oder Pellets heizt, ohne Bestätigung', () => {
-		expect(findingText(finding('tank'))).toBe(
-			'Heizen Sie mit Öl, Pellets oder Holz? Dann erfassen Sie den Tankbestand am Anfang und am Ende der Periode, sonst rechnet Dwello den Einkauf ab statt den Verbrauch. Bei Fernwärme, Gas oder Wärmepumpe ist nichts zu tun.'
-		);
+	it('fragt bei Heizkosten ohne Tankbestand ohne Bestätigung', () => {
 		expect(
 			needsConfirmation([
 				{

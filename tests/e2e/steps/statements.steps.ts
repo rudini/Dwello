@@ -26,7 +26,7 @@ Given(
 Given(
 	'für {string} im Gebäude {string} gibt es die Nebenkostenabrechnung des laufenden Jahres',
 	async ({ seed }, tenant: string, building: string) => {
-		await seed.statement(tenant, building, new Date().getFullYear());
+		await seed.statement(tenant, building, Number(new Date().toISOString().slice(0, 4))); // the year of the invoice dated today (UTC)
 	}
 );
 

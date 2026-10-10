@@ -227,6 +227,33 @@ describe('Abrechnungsdetail', () => {
 		expect(text()).toContain('366 Mietstage');
 	});
 
+	// Nachzügler: der Entwurf würde ohne die später erfassten Rechnungen versendet
+	const later = (laterInvoices: number) =>
+		show(StatementPage, {
+			data: { statement: statement(), reminders: [], laterInvoices },
+			form: null
+		} as never);
+
+	it('weist beim Entwurf auf Rechnungen hin, die nach seinem Erstellen erfasst wurden', () => {
+		later(2);
+		expect(byTestId('statement-later-invoices')!.textContent!.replace(/\s+/g, ' ')).toContain(
+			'Seit dem Erstellen dieses Entwurfs wurden 2 Rechnungen für die Abrechnungsperiode erfasst, sie fehlen darin. Löschen Sie ihn und erstellen Sie die Abrechnung erneut.'
+		);
+	});
+
+	it('spricht bei einer später erfassten Rechnung in der Einzahl', () => {
+		later(1);
+		expect(byTestId('statement-later-invoices')!.textContent).toContain(
+			'wurde 1 Rechnung für die Abrechnungsperiode erfasst, sie fehlt darin'
+		);
+	});
+
+	it('zeigt keinen Hinweis ohne später erfasste Rechnungen', () => {
+		detail();
+		expect(byTestId('statement-status')).not.toBeNull();
+		expect(byTestId('statement-later-invoices')).toBeNull();
+	});
+
 	it('sagt, wenn eine Abrechnung keine Positionen hat, statt eine leere Tabelle zu zeigen', () => {
 		detail({ lineItems: [] });
 		expect(text()).toContain(

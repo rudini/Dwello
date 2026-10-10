@@ -115,6 +115,11 @@ Then(
 	}
 );
 
+Then('wurde 1 Nebenkostenabrechnung erstellt', async ({ verwalter, driver }) => {
+	if (driver === 'api') expect(createdStatements(verwalter)).toBe(1);
+	else await expect(generationOutcome(verwalter)).toContainText('1 Nebenkostenabrechnung ist als Entwurf erstellt');
+});
+
 Then('wurden {int} Nebenkostenabrechnungen erstellt', async ({ verwalter, driver }, count: number) => {
 	if (driver === 'api') expect(createdStatements(verwalter)).toBe(count);
 	else await expect(generationOutcome(verwalter)).toContainText(`${count} Nebenkostenabrechnungen sind als Entwurf erstellt`);

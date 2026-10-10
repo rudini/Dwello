@@ -32,7 +32,7 @@ export function toStatement(data: BackendStatement): StatementWithDetails {
 		statementNumber: data.statementNumber,
 		tenantId: data.tenantId,
 		apartmentId: data.apartmentId,
-		buildingId: apartment.buildingId || '',
+		buildingId: building.id || '',
 		periodStart: data.periodStart,
 		periodEnd: data.periodEnd,
 		statementDate: data.statementDate,

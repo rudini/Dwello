@@ -132,8 +132,11 @@ describe('Abrechnungen erstellen', () => {
 			confirmed: false
 		});
 
-		expect(byTestId('preview-period-warning')!.textContent).toContain(
+		expect(byTestId('preview-period-warning')!.textContent!.replace(/\s+/g, ' ')).toContain(
 			'Die Abrechnungsperiode ist noch nicht zu Ende.'
+		);
+		expect(byTestId('preview-period-warning')!.textContent!.replace(/\s+/g, ' ')).toContain(
+			'Erstellen Sie die Abrechnungen erst nach dem Ende der Periode.'
 		);
 	});
 
@@ -187,11 +190,11 @@ describe('Abrechnungen erstellen', () => {
 		await toSettings();
 		// Dwello kennt keine Zwischenablesung: das sagt der Text, statt sie zu versprechen
 		expect(text()).toContain(
-			'Dwello verteilt nach dem Heizprofil und kann Zählerstände nicht berücksichtigen. Wurden beim Mieterwechsel die Zähler abgelesen, gelten diese Werte: Erstellen Sie die Abrechnung dieser Wohnung dann ausserhalb von Dwello und löschen Sie ihren Entwurf.'
+			'Dwello verteilt nach dem Heizprofil und kann Zählerstände nicht berücksichtigen. Wurden beim Mieterwechsel die Zähler abgelesen, gelten diese Werte: Erstellen Sie die Abrechnung dieser Wohnung dann ausserhalb von Dwello und löschen Sie die Entwürfe aller Mietverträge dieser Wohnung, auch wenn Sie die Abrechnungen später neu erstellen.'
 		);
 		// Zähler in den Wohnungen: meist ist das ganze Gebäude nach Verbrauch abzurechnen
 		expect(text()).toContain(
-			'Hat Ihr Gebäude Zähler für Heizung oder Warmwasser in den Wohnungen, müssen Sie meist nach Verbrauch abrechnen. Das kann Dwello nicht: Erstellen Sie die Abrechnungen dann ausserhalb von Dwello.'
+			'Hat Ihr Gebäude Zähler oder Heizkostenverteiler (kleine Geräte an den Heizkörpern) in den Wohnungen, müssen Sie meist nach Verbrauch abrechnen. Das kann Dwello nicht: Erstellen Sie die Abrechnungen dann ausserhalb von Dwello.'
 		);
 		expect(text()).toContain(
 			'Verlangen Sie eine Verwaltungspauschale nur, wenn sie im Mietvertrag vereinbart ist.'
@@ -333,7 +336,9 @@ describe('Abrechnungen erstellen', () => {
 
 	it('meldet eine Periode ohne Mietverträge und geht dann nicht weiter', async () => {
 		open({ preview: [], invoices: [invoices[0]] });
-		expect(byTestId('preview-empty')).not.toBeNull();
+		expect(byTestId('preview-empty')!.textContent!.replace(/\s+/g, ' ')).toContain(
+			'In dieser Abrechnungsperiode gibt es keine Mietverträge ohne Abrechnung in den gewählten Gebäuden.'
+		);
 		next();
 		await settle();
 		expect(heading()).toBe('Vorschau');
@@ -452,7 +457,7 @@ describe('Abrechnungen erstellen', () => {
 		// its own hint, not a comparison with the year before
 		expect(byTestId('category-check')).toBeNull();
 		const question = byTestId('tank-question')!;
-		expect(question.textContent).toContain('Heizen Sie mit Öl, Pellets oder Holz?');
+		expect(question.textContent).toContain('Heizen Sie mit Öl, Flüssiggas, Pellets oder Holz?');
 		expect(question.querySelector('a')!.getAttribute('href')).toBe('/buildings/b1');
 		expect(question.querySelector('a')!.textContent).toContain('Tankbestand erfassen');
 	});
@@ -615,6 +620,9 @@ describe('Abrechnungen erstellen', () => {
 		});
 		expect(byTestId('existing-statements')!.textContent).toContain('Ahornhof');
 		expect(byTestId('existing-statements')!.textContent).toContain('2 Nebenkostenabrechnungen');
+		expect(byTestId('existing-statements')!.textContent!.replace(/\s+/g, ' ')).toContain(
+			'Mietverträge mit einer Abrechnung in dieser Periode erhalten keine neue. Um einen Entwurf neu zu berechnen, löschen Sie ihn und erstellen Sie die Abrechnungen erneut.'
+		);
 		expect(
 			byTestId('existing-statements')!.querySelector('a[href="/statements?building=b1"]')
 		).not.toBeNull();

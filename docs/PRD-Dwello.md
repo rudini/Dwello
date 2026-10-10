@@ -559,7 +559,7 @@ Five flat profiles, seeded by `backend/migrations/0002_stammdaten.sql`; each dis
   - Total costs and advance payments
   - Balance (refund or additional payment)
 - Ability to adjust individual statement amounts if needed (drafts only)
-- Ability to regenerate if invoices/contracts change
+- Ability to regenerate if invoices/contracts change: delete the draft and run the wizard again; a run creates drafts only for contracts without a statement in the period, and a draft names invoices recorded after it was created
 
 **Step 4: Generate PDFs**
 - Generate statement PDF for each apartment

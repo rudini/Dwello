@@ -108,8 +108,9 @@
 	{#if data.billedIn?.length}
 		<BilledWarning periods={data.billedIn}>
 			<p>
-				Ändern Sie diese Rechnung, stimmen diese Abrechnungen nicht mehr. Entwürfe erstellen Sie
-				neu; versendete oder bezahlte Abrechnungen berichtigen Sie gegenüber dem Mieter.
+				Ändern Sie diese Rechnung, stimmen diese Abrechnungen nicht mehr. Löschen Sie danach die
+				Entwürfe und erstellen Sie die Abrechnungen erneut. Versendete oder bezahlte Abrechnungen
+				berichtigen Sie gegenüber dem Mieter.
 			</p>
 		</BilledWarning>
 	{/if}
