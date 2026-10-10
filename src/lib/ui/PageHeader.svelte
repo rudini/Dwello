@@ -36,7 +36,8 @@
 	{/if}
 	<div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
 		<div class="flex flex-col gap-2">
-			<h1 class="text-3xl font-bold leading-tight text-ink">{title}</h1>
+			<!-- Focusable from script: after an action removes the focused button, focus returns here -->
+			<h1 tabindex="-1" class="text-3xl font-bold leading-tight text-ink">{title}</h1>
 			{#if purpose}<p class="max-w-prose text-lg text-ink-muted">{purpose}</p>{/if}
 		</div>
 		{#if action}<div class="flex shrink-0 flex-wrap gap-4">{@render action()}</div>{/if}

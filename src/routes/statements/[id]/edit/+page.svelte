@@ -1,149 +1,95 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import type { StatementWithDetails } from '$lib/types';
-	import Button from '$lib/components/Button.svelte';
-	import Icon from '$lib/components/Icon.svelte';
-	import Card from '$lib/components/Card.svelte';
-	import FieldError from '$lib/components/FieldError.svelte';
-	import { formatCurrency, formatDate } from '$lib/utils/format';
+	import Alert from '$lib/ui/Alert.svelte';
+	import Button from '$lib/ui/Button.svelte';
+	import PageHeader from '$lib/ui/PageHeader.svelte';
+	import Panel from '$lib/ui/Panel.svelte';
+	import Textarea from '$lib/ui/Textarea.svelte';
+	import TextInput from '$lib/ui/TextInput.svelte';
+	import CostTable from '../CostTable.svelte';
 	import type { ActionData } from './$types';
 
+	// Only the deadline and the notes can change; the costs come from the generation run
 	let { data, form }: { data: { statement: StatementWithDetails }; form: ActionData } = $props();
 
 	const statement = $derived(data.statement);
-	const subtotal = $derived(statement.totalCosts - statement.managementFee);
-	const inputClass =
-		'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500';
+	const refund = $derived(statement.balance < 0);
+	let saving = $state(false);
 </script>
 
 <svelte:head>
 	<title>Abrechnung bearbeiten - {statement.statementNumber} - Dwello</title>
 </svelte:head>
 
-<form method="POST" use:enhance class="space-y-6">
-	<!-- Header -->
-	<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-		<div>
-			<h1 class="text-2xl font-bold text-gray-900">{statement.statementNumber}</h1>
-			<p class="text-ink-muted mt-1">
-				{statement.tenantName} · {statement.buildingName} · Wohnung {statement.apartmentUnit}
-			</p>
-		</div>
-		<div class="flex items-center gap-3">
-			<Button href="/statements/{statement.id}" variant="secondary" testid="form-cancel">
-				Abbrechen
-			</Button>
-			<Button type="submit" variant="primary" testid="statement-save-button">
-				<Icon name="save" size={20} />
-				Speichern
-			</Button>
-		</div>
-	</div>
-	<FieldError message={form?.errors?.form} />
+<form
+	method="POST"
+	use:enhance={() => {
+		saving = true;
+		return async ({ update }) => {
+			await update();
+			saving = false;
+		};
+	}}
+	class="mx-auto flex max-w-3xl flex-col gap-8"
+>
+	<PageHeader
+		title="Abrechnung bearbeiten"
+		purpose="{statement.statementNumber}: {statement.tenantName}, {statement.buildingName}, Wohnung {statement.apartmentUnit}"
+		trail={[
+			{ href: '/statements', label: 'Nebenkostenabrechnungen' },
+			{ href: `/statements/${statement.id}`, label: `Abrechnung ${statement.statementNumber}` }
+		]}
+	/>
 
-	<div class="grid gap-6 lg:grid-cols-3">
-		<div class="lg:col-span-2 space-y-6">
-			<Card>
-				<h2 class="text-lg font-semibold text-gray-900 mb-4">Zahlung und Bemerkungen</h2>
-				<div class="space-y-4">
-					<div>
-						<label for="paymentDeadline" class="block text-sm font-medium text-gray-700 mb-2">
-							Zahlungsfrist
-						</label>
-						<input
-							id="paymentDeadline"
-							name="paymentDeadline"
-							type="date"
-							value={statement.paymentDeadline}
-							data-testid="payment-deadline-input"
-							class={inputClass}
-						/>
-					</div>
-					<div>
-						<label for="notes" class="block text-sm font-medium text-gray-700 mb-2"
-							>Bemerkungen</label
-						>
-						<textarea
-							id="notes"
-							name="notes"
-							rows="4"
-							value={statement.notes ?? ''}
-							data-testid="statement-notes-input"
-							class={inputClass}
-						></textarea>
-					</div>
-				</div>
-			</Card>
+	{#if form?.errors?.form}
+		<Alert tone="critical" title="Nicht gespeichert">
+			<p data-testid="form-error">{form.errors.form}</p>
+		</Alert>
+	{/if}
 
-			<!-- Calculated costs are read-only: they follow from the invoices and the generation run -->
-			<Card>
-				<h2 class="text-lg font-semibold text-gray-900 mb-4">Kostenpositionen</h2>
-				<table class="w-full text-sm">
-					<thead class="border-b border-gray-200 text-ink-muted">
-						<tr>
-							<th class="pb-3 text-left font-medium">Kategorie</th>
-							<th class="pb-3 text-right font-medium">Gesamtkosten</th>
-							<th class="pb-3 text-right font-medium">Anteil</th>
-							<th class="pb-3 text-right font-medium">Mieteranteil</th>
-						</tr>
-					</thead>
-					<tbody class="divide-y divide-gray-100 text-gray-900">
-						{#each statement.lineItems as item (item.id)}
-							<tr>
-								<td class="py-3">{item.categoryName}</td>
-								<td class="py-3 text-right">{formatCurrency(item.totalAmount)}</td>
-								<td class="py-3 text-right">{item.percentage}%</td>
-								<td class="py-3 text-right font-medium">{formatCurrency(item.tenantShare)}</td>
-							</tr>
-						{/each}
-					</tbody>
-				</table>
-				<p class="mt-4 text-sm text-ink-muted" data-testid="statement-recalculate-hint">
-					Kosten und Verwaltungspauschale werden beim Erstellen der Abrechnungen berechnet. Für eine
-					Korrektur den Entwurf löschen und die Abrechnungen der Liegenschaft neu erstellen.
-				</p>
-			</Card>
-		</div>
+	<Panel title="Frist und Bemerkungen">
+		<!-- TODO(fachlich prüfen): the glossary has no term for the date by which a refund is paid out -->
+		<TextInput
+			id="paymentDeadline"
+			name="paymentDeadline"
+			type="date"
+			label={refund ? 'Rückerstattung bis' : 'Zahlungsfrist'}
+			help={refund
+				? 'Bis zu diesem Datum erstatten Sie dem Mieter den Betrag zurück.'
+				: 'Bis zu diesem Datum bezahlt der Mieter die Nachzahlung.'}
+			value={statement.paymentDeadline}
+			testid="payment-deadline-input"
+		/>
+		<Textarea
+			id="notes"
+			name="notes"
+			label="Bemerkungen"
+			help="Zum Beispiel eine Absprache mit dem Mieter."
+			optional
+			value={statement.notes ?? ''}
+			testid="statement-notes-input"
+		/>
+	</Panel>
 
-		<!-- Sidebar -->
-		<div class="space-y-6">
-			<Card>
-				<h3 class="text-sm font-medium text-ink-muted mb-3">Abrechnungsperiode</h3>
-				<p class="font-medium text-gray-900">
-					{formatDate(statement.periodStart)} - {formatDate(statement.periodEnd)}
-				</p>
-				<p class="text-sm text-ink-muted mt-1">{statement.rentalDays} Tage</p>
-			</Card>
+	<Panel title="Kostenaufstellung">
+		<p class="text-ink-muted" data-testid="statement-recalculate-hint">
+			Kosten und Verwaltungspauschale werden beim Erstellen der Abrechnungen berechnet und lassen
+			sich hier nicht ändern. Für eine Korrektur löschen Sie den Entwurf und erstellen die
+			Abrechnungen des Gebäudes neu.
+		</p>
+		<CostTable {statement} />
+	</Panel>
 
-			<Card>
-				<h3 class="text-sm font-medium text-ink-muted mb-4">Kostenübersicht</h3>
-				<dl class="space-y-3 text-sm">
-					<div class="flex justify-between">
-						<dt class="text-gray-600">Nebenkosten</dt>
-						<dd class="font-medium text-gray-900">{formatCurrency(subtotal)}</dd>
-					</div>
-					<div class="flex justify-between">
-						<dt class="text-gray-600">Verwaltungspauschale ({statement.managementFeePercent}%)</dt>
-						<dd class="font-medium text-gray-900" data-testid="statement-management-fee">
-							{formatCurrency(statement.managementFee)}
-						</dd>
-					</div>
-					<div class="border-t border-gray-200 pt-3 flex justify-between">
-						<dt class="text-gray-600">Gesamtkosten</dt>
-						<dd class="font-semibold text-gray-900">{formatCurrency(statement.totalCosts)}</dd>
-					</div>
-					<div class="flex justify-between">
-						<dt class="text-gray-600">Akontobeiträge</dt>
-						<dd class="font-medium text-gray-900">
-							- {formatCurrency(statement.totalAdvancePayments)}
-						</dd>
-					</div>
-					<div class="border-t border-gray-200 pt-3 flex justify-between">
-						<dt class="font-semibold text-gray-900">Saldo</dt>
-						<dd class="font-bold text-gray-900">{formatCurrency(statement.balance)}</dd>
-					</div>
-				</dl>
-			</Card>
-		</div>
+	<div class="flex flex-col-reverse gap-4 sm:flex-row sm:justify-end">
+		<Button href="/statements/{statement.id}" testid="form-cancel">Abbrechen</Button>
+		<Button
+			type="submit"
+			variant="primary"
+			icon="save"
+			busy={saving}
+			busyLabel="Wird gespeichert …"
+			testid="statement-save-button">Änderungen speichern</Button
+		>
 	</div>
 </form>

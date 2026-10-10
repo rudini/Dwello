@@ -1,27 +1,27 @@
 import { describe, it, expect } from 'vitest';
-import { balanceClass, statusLabels, statusVariants } from '../lib/statement';
+import { balanceLabel, statusLabels, statusTones } from '../lib/statement';
 
 describe('statement status', () => {
-	it('labels every status in German with its badge colour', () => {
+	it('labels every status in German with its badge tone', () => {
 		expect(statusLabels).toEqual({
 			draft: 'Entwurf',
 			sent: 'Versendet',
 			paid: 'Bezahlt',
 			overdue: 'Überfällig'
 		});
-		expect(statusVariants).toEqual({
-			draft: 'default',
+		expect(statusTones).toEqual({
+			draft: 'neutral',
 			sent: 'info',
-			paid: 'success',
-			overdue: 'danger'
+			paid: 'positive',
+			overdue: 'critical'
 		});
 	});
 });
 
-describe('balanceClass', () => {
-	it('shows additional payments red, refunds green and a settled balance grey', () => {
-		expect(balanceClass(120)).toBe('text-critical');
-		expect(balanceClass(-80)).toBe('text-positive');
-		expect(balanceClass(0)).toBe('text-ink-muted');
+describe('balanceLabel', () => {
+	it('names the balance in words: the tenant pays, gets money back, or nothing is due', () => {
+		expect(balanceLabel(120)).toBe('Nachzahlung');
+		expect(balanceLabel(-80)).toBe('Rückerstattung');
+		expect(balanceLabel(0)).toBe('Ausgeglichen');
 	});
 });

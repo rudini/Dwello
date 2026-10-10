@@ -1,11 +1,10 @@
 <script lang="ts">
-	import { enhance } from '$app/forms';
-	import Button from '$lib/components/Button.svelte';
-	import Icon from '$lib/components/Icon.svelte';
-	import Modal from '$lib/components/Modal.svelte';
 	import type { StatementWithDetails } from '$lib/types';
+	import Dialog from '$lib/ui/Dialog.svelte';
 	import { formatCurrency } from '$lib/utils/format';
+	import FormDialog from './FormDialog.svelte';
 
+	// Before a Mahnung: which one comes next, how it reaches the tenant, and the amount still open
 	let {
 		open = $bindable(),
 		statement,
@@ -17,38 +16,39 @@
 	const byEmail = $derived(statement.tenantCorrespondenceChannel === 'email');
 </script>
 
-<Modal {open} title="Mahnung senden" onclose={() => (open = false)}>
-	{#if next}
-		<p class="text-gray-600 mb-4" data-testid="reminder-delivery-info">
+{#if next}
+	<FormDialog
+		bind:open
+		action="?/remind"
+		title="Mahnung senden"
+		confirmLabel="{next} senden"
+		confirmTestid="statement-reminder-confirm"
+	>
+		<p data-testid="reminder-delivery-info">
 			{#if byEmail}
-				Die {next} wird als PDF erstellt und per E-Mail an {statement.tenantEmail} gesendet.
+				Dwello erstellt die {next} als PDF und schickt sie per E-Mail an {statement.tenantEmail}.
 			{:else}
-				Die {next} wird als PDF erstellt und als Brief zum Ausdrucken in den Dokumenten abgelegt.
+				Dwello erstellt die {next} als PDF und legt sie unter «Dokumente» bereit. Drucken Sie den Brief
+				aus und schicken Sie ihn per Post.
 			{/if}
 		</p>
-		<div class="p-3 bg-gray-50 rounded-lg mb-4">
-			<p class="font-medium text-gray-900">{statement.tenantName}</p>
-			<p class="text-lg font-bold text-critical mt-2">
-				Offen: {formatCurrency(Math.abs(statement.balance))}
-			</p>
-		</div>
-	{:else}
-		<p class="text-gray-600 mb-4">Es wurden bereits 3 Mahnungen versendet.</p>
-	{/if}
-	<form
-		method="POST"
-		action="?/remind"
-		use:enhance={() =>
-			async ({ update }) => {
-				await update();
-				open = false;
-			}}
-		class="flex justify-end gap-3"
+		<p class="rounded-panel bg-sunken p-4 text-ink">
+			{statement.tenantName} schuldet noch
+			<strong class="tabular-nums">{formatCurrency(Math.abs(statement.balance))}</strong>.
+		</p>
+	</FormDialog>
+{:else}
+	<!-- TODO(fachlich prüfen): what follows after the 3rd Mahnung (e.g. Betreibung) is not part of Dwello -->
+	<Dialog
+		bind:open
+		title="Keine weitere Mahnung möglich"
+		confirmLabel="Verstanden"
+		confirmTestid="statement-reminder-confirm"
+		onconfirm={() => (open = false)}
 	>
-		<Button variant="secondary" onclick={() => (open = false)}>Abbrechen</Button>
-		<Button type="submit" variant="primary" disabled={!next} testid="statement-reminder-confirm">
-			<Icon name="send" size={20} />
-			{next ?? 'Mahnung'} senden
-		</Button>
-	</form>
-</Modal>
+		<p>
+			Es wurden bereits 3 Mahnungen versendet. Dwello erstellt keine weitere. Klären Sie das weitere
+			Vorgehen direkt mit dem Mieter.
+		</p>
+	</Dialog>
+{/if}

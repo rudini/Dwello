@@ -1,4 +1,5 @@
 import { error } from '@sveltejs/kit';
+import { germanName } from '$lib/names';
 import type { StatementLineItem, StatementWithDetails } from '$lib/types';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
@@ -63,9 +64,31 @@ export function toStatement(data: BackendStatement): StatementWithDetails {
 	};
 }
 
+// German names of categories or distribution keys by id; the line items only carry ids and the English name
+async function namesById(fetch: typeof globalThis.fetch, list: string) {
+	const response = await fetch(`${BACKEND_URL}/api/v1/${list}?limit=100`).catch(() => null);
+	const body = response?.ok ? await response.json() : {};
+	const records: { id: string; name: string; nameDE?: string | null }[] =
+		body.categories ?? body.data ?? [];
+	return new Map(records.map((record) => [record.id, germanName(record)]));
+}
+
 export async function loadStatement(fetch: typeof globalThis.fetch, id: string) {
-	const response = await fetch(`${BACKEND_URL}/api/v1/statements/${id}`);
+	const [response, categories, keys] = await Promise.all([
+		fetch(`${BACKEND_URL}/api/v1/statements/${id}`),
+		namesById(fetch, 'categories'),
+		namesById(fetch, 'distribution-keys')
+	]);
 	if (response.status === 404) throw error(404, 'Abrechnung nicht gefunden');
 	if (!response.ok) throw error(response.status, 'Fehler beim Laden der Abrechnung');
-	return toStatement(await response.json());
+	const statement = toStatement(await response.json());
+	// Without a key the calculation shares the costs equally among the apartments
+	const lineItems = statement.lineItems.map((item) => ({
+		...item,
+		categoryName: categories.get(item.categoryId) ?? item.categoryName,
+		distributionKeyName: item.distributionKeyId
+			? (keys.get(item.distributionKeyId) ?? '')
+			: 'Gleichmässig pro Wohnung'
+	}));
+	return { ...statement, lineItems };
 }

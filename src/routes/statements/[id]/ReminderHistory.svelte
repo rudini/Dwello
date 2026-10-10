@@ -1,18 +1,17 @@
 <script lang="ts">
-	import Card from '$lib/components/Card.svelte';
-	import DocumentRow from '$lib/components/DocumentRow.svelte';
 	import type { StatementDocument } from '$lib/types';
+	import Panel from '$lib/ui/Panel.svelte';
+	import DocumentItem from '../../documents/DocumentItem.svelte';
 
 	let { reminders }: { reminders: StatementDocument[] } = $props();
 </script>
 
 {#if reminders.length > 0}
-	<Card>
-		<h2 class="text-lg font-semibold text-gray-900 mb-4">Mahnungen</h2>
-		<ul class="divide-y divide-gray-100">
+	<Panel title="Mahnungen">
+		<ul class="divide-y divide-line">
 			{#each reminders as reminder (reminder.id)}
-				<DocumentRow document={reminder} />
+				<DocumentItem document={reminder} />
 			{/each}
 		</ul>
-	</Card>
+	</Panel>
 {/if}

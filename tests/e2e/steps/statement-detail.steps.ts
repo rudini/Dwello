@@ -104,7 +104,7 @@ Then(
 			expect([Number(heating.sharePercentage), Number(heating.tenantShare)]).toEqual([share, francs(amount)]);
 			return;
 		}
-		await expect(heatingCosts(verwalter)).toContainText(`${share}%`);
+		await expect(heatingCosts(verwalter)).toContainText(`${share} %`);
 		await expect(heatingCosts(verwalter)).toContainText(amount);
 	}
 );

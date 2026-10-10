@@ -15,8 +15,12 @@ export const previewRows = (page: Page) => page.getByTestId('preview-row');
 export const previewEmpty = (page: Page) => page.getByTestId('preview-empty');
 export const generationResult = (page: Page) => page.getByTestId('generation-result');
 export const showStatementsButton = (page: Page) => page.getByTestId('show-statements-button');
-// The statement page's back link, or "Abbrechen" in the wizard's first step
-export const backLink = (page: Page) => page.getByTestId('back-link').or(page.getByTestId('form-cancel'));
+// "Abbrechen" in the wizard's first step (after its breadcrumb), or the statement page's breadcrumb to the list
+export const backLink = (page: Page) =>
+	page
+		.getByTestId('form-cancel')
+		.or(page.getByTestId('breadcrumb-link').filter({ hasText: 'Nebenkostenabrechnungen' }))
+		.last();
 export const generateMoreButton = (page: Page) => page.getByTestId('generate-more-button');
 export const missingInvoices = (page: Page) => page.getByTestId('missing-invoices');
 export const confirmMissingInvoices = (page: Page) => page.getByTestId('confirm-missing-invoices');

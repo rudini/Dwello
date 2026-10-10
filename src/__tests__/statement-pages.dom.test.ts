@@ -12,6 +12,7 @@ vi.mock('$app/stores', () => ({
 import { invalidateAll } from '$app/navigation';
 import StatementsPage from '../routes/statements/+page.svelte';
 import StatementPage from '../routes/statements/[id]/+page.svelte';
+import EditStatementPage from '../routes/statements/[id]/edit/+page.svelte';
 import { allByTestId, byTestId, click, fakeBff, settle, show } from './helpers/dom';
 import { statement } from './helpers/statement';
 
@@ -60,11 +61,38 @@ describe('Abrechnungsliste', () => {
 		);
 	});
 
-	it('hält den Zahlungseingang direkt aus der Liste fest', async () => {
+	it('nennt in jeder Zeile die Abrechnung im Link, ohne Statusmeldungen vorzulesen', () => {
+		list([statement()]);
+
+		const row = byTestId('statement-row-s1')!;
+		const link = row.querySelector('[data-testid="statement-view-link"]')!;
+		expect(link.getAttribute('href')).toBe('/statements/s1');
+		expect(link.textContent).toMatch(/Anna Keller.*NK-2024-0001/);
+		expect(row.querySelector('[role="status"], [aria-live]')).toBeNull();
+		expect(row.textContent).toContain('31.12.2024');
+	});
+
+	it('zählt die Abrechnungen in Einzahl und Mehrzahl richtig', () => {
+		list([statement()]);
+		expect(text()).toContain('1 Abrechnung');
+		expect(text()).not.toContain('1 Abrechnungen');
+	});
+
+	it('behält Gebäude und Status aus der Adresse in der Suche', () => {
+		url = new URL('http://localhost/statements?building=b1&status=sent');
+		list([statement()]);
+
+		expect(byTestId<HTMLSelectElement>('statement-building-filter')!.value).toBe('b1');
+		expect(document.querySelector<HTMLInputElement>('input[name="status"]')!.value).toBe('sent');
+	});
+
+	it('hält den Zahlungseingang nach einer Bestätigung direkt aus der Liste fest', async () => {
 		const calls = fakeBff();
 		list([statement({ status: 'sent' })]);
 
 		click('statement-row-mark-paid');
+		expect(calls).toEqual([]);
+		click('statement-list-mark-paid-confirm');
 		await settle();
 
 		expect(calls).toEqual([{ method: 'POST', path: '/statements/s1/mark-paid', body: undefined }]);
@@ -108,14 +136,33 @@ describe('Abrechnungsdetail', () => {
 	const detail = (overrides = {}, form: object | null = null, reminders: unknown[] = []) =>
 		show(StatementPage, { data: { statement: statement(overrides), reminders }, form } as never);
 
-	it('zeigt die Kostenpositionen und den Saldo', () => {
+	it('zeigt die Kostenpositionen mit ihrem Verteilschlüssel und den Saldo in Worten', () => {
 		detail();
 
 		expect(allByTestId('statement-line-item').map((row) => row.textContent)).toEqual([
-			expect.stringContaining('Heizung'),
-			expect.stringContaining('Hauswartung')
+			expect.stringMatching(/Heizung.*Nach Fläche/),
+			expect.stringMatching(/Hauswartung.*Pro Wohnung/)
 		]);
-		expect(text()).toContain('Nachzahlung durch Mieter');
+		expect(byTestId('statement-balance')!.textContent).toMatch(/Nachzahlung.*CHF\s363.00/);
+		expect(text()).toContain('366 Mietstage');
+	});
+
+	it('nennt die Verwaltungspauschale mit ihrer Grundlage', () => {
+		detail();
+
+		expect(byTestId('statement-management-fee')!.textContent).toContain(
+			'3 % der Nebenkosten der Liegenschaft, Anteil dieser Wohnung'
+		);
+		expect(text()).not.toMatch(/Verwaltungsgebühr|Verwaltungskosten/);
+	});
+
+	it('nennt eine Rückerstattung ohne Minuszeichen und ohne Zahlungsfrist für den Mieter', () => {
+		detail({ balance: -83.43 });
+
+		expect(byTestId('statement-balance')!.textContent).toMatch(/Rückerstattung.*CHF\s83.43/);
+		expect(text()).not.toContain('CHF-83.43');
+		expect(text()).not.toContain('Zahlungsfrist');
+		expect(byTestId('statement-payment-deadline')!.textContent).toBe('28.2.2025');
 	});
 
 	it('bietet einen Entwurf zum Versenden, Bearbeiten und Löschen an', () => {
@@ -192,6 +239,7 @@ describe('Abrechnungsdetail', () => {
 	it('kündigt die nächste Mahnung mit ihrem Versandweg an', () => {
 		detail({ status: 'overdue' });
 		click('statement-reminder-button');
+		expect(document.querySelector('[role="dialog"]')!.textContent).toContain('Mahnung senden');
 		expect(byTestId('reminder-delivery-info')!.textContent).toContain('Zahlungserinnerung');
 		expect(byTestId('reminder-delivery-info')!.textContent).toContain(
 			'per E-Mail an anna@example.ch'
@@ -223,7 +271,8 @@ describe('Abrechnungsdetail', () => {
 
 		click('statement-reminder-button');
 		expect(text()).toContain('Es wurden bereits 3 Mahnungen versendet.');
-		expect(byTestId<HTMLButtonElement>('statement-reminder-confirm')!.disabled).toBe(true);
+		click('statement-reminder-confirm');
+		expect(document.querySelector('[role="dialog"]')).toBeNull();
 	});
 
 	it('meldet, wenn eine Mahnung nicht per E-Mail zugestellt werden konnte', () => {
@@ -245,6 +294,36 @@ describe('Abrechnungsdetail', () => {
 		);
 		expect(byTestId('reminder-feedback')!.textContent).toContain(
 			'2. Mahnung liegt als Brief zum Ausdrucken in den Dokumenten bereit.'
+		);
+	});
+});
+
+describe('Abrechnung bearbeiten', () => {
+	const edit = (overrides = {}, form: object | null = null) =>
+		show(EditStatementPage, { data: { statement: statement(overrides) }, form } as never);
+
+	it('ändert nur Frist und Bemerkungen, die Kosten bleiben wie berechnet', () => {
+		edit({ notes: 'Ratenzahlung' });
+
+		expect(byTestId<HTMLInputElement>('payment-deadline-input')!.value).toBe('2025-02-28');
+		expect(byTestId<HTMLTextAreaElement>('statement-notes-input')!.value).toBe('Ratenzahlung');
+		expect(allByTestId('statement-line-item')).toHaveLength(2);
+		expect(byTestId('statement-recalculate-hint')).not.toBeNull();
+	});
+
+	it('nennt die Frist einer Rückerstattung nicht Zahlungsfrist', () => {
+		edit({ balance: -83.43 });
+
+		expect(document.querySelector('label[for="paymentDeadline"]')!.textContent).toContain(
+			'Rückerstattung bis'
+		);
+	});
+
+	it('meldet, wenn das Speichern scheitert', () => {
+		edit({}, { errors: { form: 'Abrechnung konnte nicht gespeichert werden.' } });
+
+		expect(byTestId('form-error')!.textContent).toContain(
+			'Abrechnung konnte nicht gespeichert werden.'
 		);
 	});
 });
