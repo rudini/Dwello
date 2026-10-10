@@ -9,6 +9,7 @@ vi.mock('$app/stores', () => ({
 
 import { goto } from '$app/navigation';
 import ApartmentsPage from '../routes/apartments/+page.svelte';
+import ApartmentPage from '../routes/apartments/[id]/+page.svelte';
 import { byTestId, click, fireEvent, show } from './helpers/dom';
 
 const text = () => document.body.textContent?.replace(/\s+/g, ' ') ?? '';
@@ -126,5 +127,127 @@ describe('Wohnungsliste', () => {
 		expect(byTestId('pagination-next')!.getAttribute('href')).toBe(
 			'/apartments?building=b1&page=2'
 		);
+	});
+});
+
+describe('Wohnungsdetail', () => {
+	const history = [
+		{
+			id: 'c2',
+			tenantName: 'Beat Huber',
+			period: '1.4.2022 - heute',
+			rentBrutto: 1430,
+			status: 'active',
+			startDate: '2022-04-01',
+			endDate: null
+		},
+		{
+			id: 'c1',
+			tenantName: 'Eva Graf',
+			period: '1.1.2018 - 31.3.2022',
+			rentBrutto: 750,
+			status: 'ended',
+			startDate: '2018-01-01',
+			endDate: '2022-03-31'
+		}
+	];
+	const details = (rented = true) => ({
+		apartment: {
+			id: 'a1',
+			buildingId: 'b1',
+			number: '3.01',
+			floor: 3,
+			area: '82.50',
+			rooms: '3.5',
+			status: rented ? 'occupied' : 'vacant',
+			currentContractId: rented ? 'c2' : null,
+			nextContractStart: null,
+			building: {
+				id: 'b1',
+				name: 'Lindenhof',
+				address: 'Lindenweg 4',
+				postalCode: '8400',
+				city: 'Winterthur'
+			}
+		},
+		currentContract: rented
+			? {
+					id: 'c2',
+					tenantId: 't2',
+					tenantName: 'Beat Huber',
+					tenantEmail: 'beat.huber@example.com',
+					startDate: '2022-04-01'
+				}
+			: null,
+		monthlyCosts: rented
+			? { baseRent: 1200, additionalRent: 50, advancePayment: 180, totalBrutto: 1430 }
+			: { baseRent: 0, additionalRent: 0, advancePayment: 0, totalBrutto: 0 },
+		contractHistory: rented ? history : []
+	});
+	const open = (rented = true) => show(ApartmentPage, { data: details(rented) } as never);
+	const trail = () =>
+		[...document.querySelectorAll('[data-testid="breadcrumb-link"]')].map((link) => [
+			link.textContent,
+			link.getAttribute('href')
+		]);
+
+	it('nennt Wohnung, Gebäude und Adresse', () => {
+		open();
+		expect(document.querySelector('h1')!.textContent).toBe('Wohnung 3.01');
+		expect(trail()).toEqual([
+			['Wohnungen', '/apartments'],
+			['Lindenhof', '/buildings/b1']
+		]);
+		expect(text()).toContain('Lindenweg 4, 8400 Winterthur');
+		expect(byTestId('apartment-edit-button')!.getAttribute('href')).toBe('/apartments/a1/edit');
+	});
+
+	it('zeigt die Angaben und erklärt den Mietstatus', () => {
+		open();
+		expect(byTestId('apartment-info-status')!.textContent).toContain('Vermietet');
+		expect(byTestId('apartment-info-status')!.textContent).toContain('Ein Mietvertrag läuft.');
+		expect(byTestId('apartment-info-rooms')!.textContent).toContain('3.5');
+		expect(byTestId('apartment-info-floor')!.textContent).toContain('3. OG');
+		expect(byTestId('apartment-info-area')!.textContent).toContain('82.5 m²');
+	});
+
+	it('zeigt den Mieter und die Miete mit den Begriffen des Glossars', () => {
+		open();
+		expect(byTestId('current-tenant-name')!.textContent!.trim()).toBe('Beat Huber');
+		expect(byTestId('tenant-email-link')!.getAttribute('href')).toBe(
+			'mailto:beat.huber@example.com'
+		);
+		const profile = byTestId('current-tenant-profile')!;
+		expect(profile.getAttribute('href')).toBe('/tenants/t2');
+		expect(profile.textContent).toContain('Beat Huber');
+		const words = text();
+		for (const term of ['Nettomiete', 'Akonto', 'Zusatzmiete', 'Monatlich total']) {
+			expect(words).toContain(term);
+		}
+		expect(byTestId('monthly-costs-total')!.textContent!.replace(/\s+/g, ' ').trim()).toBe(
+			'CHF 1’430.00'
+		);
+	});
+
+	it('listet alle Mietverträge mit dem Mieter als Link', () => {
+		open();
+		const rows = [...document.querySelectorAll('[data-testid="contract-history-row"]')];
+		expect(rows).toHaveLength(2);
+		const link = rows[1].querySelector('[data-testid="contract-history-link"]')!;
+		expect(link.textContent!.trim()).toBe('Eva Graf');
+		expect(link.getAttribute('href')).toBe('/contracts/c1');
+		expect(rows[0].textContent).toContain('Laufend');
+		expect(rows[1].textContent).toContain('Beendet');
+		expect(rows[1].textContent!.replace(/\s+/g, ' ')).toContain('CHF 750.00');
+	});
+
+	it('bietet bei einer leeren Wohnung den Mietvertrag als nächsten Schritt an', () => {
+		open(false);
+		expect(byTestId('apartment-vacant')).not.toBeNull();
+		expect(byTestId('current-tenant-name')).toBeNull();
+		expect(byTestId('contract-history-empty')).not.toBeNull();
+		const contract = byTestId('apartment-new-contract')!;
+		expect(contract.getAttribute('href')).toBe('/contracts/new?apartment=a1');
+		expect(contract.textContent).toContain('Mietvertrag erfassen');
 	});
 });
