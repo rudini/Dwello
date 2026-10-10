@@ -61,4 +61,14 @@ describe('config', () => {
 		});
 		expect(analyze({ root, fallow: 'off' }).excluded).toEqual([{ path: 'src/vendor/lib.ts', reason: 'generated' }]);
 	});
+
+	it('adds a project exclude to the default excludes instead of replacing them', () => {
+		const root = writeProject({ 'deepcheck.config.json': JSON.stringify({ exclude: ['src/skip/**'] }) });
+		expect(loadConfig(root).exclude).toEqual([...DEFAULT_CONFIG.exclude, 'src/skip/**']);
+	});
+
+	it('turns an unreadable Fallow config into a tool error', () => {
+		const root = writeProject({ '.fallowrc.json': '{ // comment\n "ignorePatterns": [] }', 'src/a.ts': SHALLOW_MODULE });
+		expect(() => analyze({ root, fallow: 'off' })).toThrow(ToolError);
+	});
 });

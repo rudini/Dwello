@@ -67,10 +67,15 @@ export function loadConfig(root: string): Config {
 	const file = parseJson(readFileSync(path, 'utf8'), CONFIG_FILE);
 	const problems = validate(file, loadSchema('config.schema.json'));
 	if (problems.length) throw new ToolError(`${CONFIG_FILE}: ${problems.join('; ')}`);
-	return { ...DEFAULT_CONFIG, ...file, weights: { ...DEFAULT_CONFIG.weights, ...file.weights } };
+	return {
+		...DEFAULT_CONFIG,
+		...file,
+		exclude: [...DEFAULT_CONFIG.exclude, ...(file.exclude ?? [])],
+		weights: { ...DEFAULT_CONFIG.weights, ...file.weights }
+	};
 }
 
-function parseJson(text: string, name: string) {
+export function parseJson(text: string, name: string) {
 	try {
 		return JSON.parse(text);
 	} catch (error) {

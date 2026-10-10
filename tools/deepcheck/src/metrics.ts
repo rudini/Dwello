@@ -69,19 +69,39 @@ const LOGICAL_OPERATORS = new Set([
 	SyntaxKind.QuestionQuestionEqualsToken
 ]);
 
+/** Function declarations, methods, accessors, constructors, arrows and function expressions. */
+const isFunction = (node: Node | undefined) => Node.isFunctionLikeDeclaration(node) || Node.isFunctionExpression(node);
+
 const hasExportKeyword = (node: Node) =>
 	Node.isModifierable(node) && node.hasModifier(SyntaxKind.ExportKeyword);
 
 const isAmbient = (node: Node) =>
 	node.getAncestors().some((a) => Node.isModifierable(a) && a.hasModifier(SyntaxKind.DeclareKeyword));
 
-/** Parameter count of a function-like node, or of the function a variable or export is initialised with. */
-function paramCount(node: Node | undefined): number {
-	if (!node) return 0;
-	if (Node.isVariableDeclaration(node)) return paramCount(node.getInitializer());
+/** The expression a declaration holds, without parentheses and type assertions. */
+function valueOf(node: Node | undefined): Node | undefined {
+	if (Node.isVariableDeclaration(node) || Node.isPropertyDeclaration(node) || Node.isPropertyAssignment(node))
+		return valueOf(node.getInitializer());
 	if (Node.isParenthesizedExpression(node) || Node.isAsExpression(node) || Node.isSatisfiesExpression(node))
-		return paramCount(node.getExpression());
-	return Node.isFunctionLikeDeclaration(node) ? node.getParameters().length : 0;
+		return valueOf(node.getExpression());
+	return node;
+}
+
+/**
+ * Interface units behind an exported value besides its name: the parameters of a function, or for an
+ * object literal 1 + parameters per function member (data keys of lookup tables are not counted).
+ */
+function paramCount(node: Node | undefined): number {
+	node = valueOf(node);
+	if (Node.isObjectLiteralExpression(node))
+		return node.getProperties().reduce((sum, p) => sum + (isFunctionMember(p) ? 1 + paramCount(p) : 0), 0);
+	return isFunction(node) ? node.getParameters().length : 0;
+}
+
+function isFunctionMember(p: Node): boolean {
+	if (Node.isMethodDeclaration(p)) return true;
+	const init = Node.isPropertyAssignment(p) ? p.getInitializer() : undefined;
+	return Node.isArrowFunction(init) || Node.isFunctionExpression(init);
 }
 
 const isPublicMember = (member: Node) =>
@@ -150,18 +170,26 @@ function implementationSize(sf: SourceFile): number {
 function complexity(sf: SourceFile): number {
 	let total = 0;
 	sf.forEachDescendant((node) => {
-		if (DECISION_KINDS.has(node.getKind()) || Node.isFunctionLikeDeclaration(node)) total++;
+		if (DECISION_KINDS.has(node.getKind()) || isFunction(node)) total++;
 		else if (Node.isBinaryExpression(node) && LOGICAL_OPERATORS.has(node.getOperatorToken().getKind())) total++;
 	});
 	return total;
+}
+
+/** An object literal that is a module's value (variable or default export), not an argument or nested value. */
+function isModuleLevelObject(node: Node | undefined): boolean {
+	let parent = node?.getParent();
+	while (Node.isAsExpression(parent) || Node.isSatisfiesExpression(parent) || Node.isParenthesizedExpression(parent))
+		parent = parent.getParent();
+	return Node.isVariableDeclaration(parent) || Node.isExportAssignment(parent);
 }
 
 /** The name a function-like node is declared or assigned under; undefined for anonymous callbacks. */
 function functionName(node: Node): string | undefined {
 	if (Node.isFunctionDeclaration(node) || Node.isMethodDeclaration(node)) return node.getName();
 	const parent = node.getParent();
-	if (Node.isVariableDeclaration(parent) || Node.isPropertyAssignment(parent) || Node.isPropertyDeclaration(parent))
-		return parent.getName();
+	if (Node.isVariableDeclaration(parent) || Node.isPropertyDeclaration(parent)) return parent.getName();
+	if (Node.isPropertyAssignment(parent) && isModuleLevelObject(parent.getParent())) return parent.getName();
 	return undefined;
 }
 
@@ -194,7 +222,7 @@ function soleCall(node: Node) {
 
 /** A function that only forwards all its parameters, in order, to another call. */
 function isPassThrough(node: Node, name: string): boolean {
-	const params = Node.isFunctionLikeDeclaration(node) ? node.getParameters() : [];
+	const params = isFunction(node) ? node.getParameters() : [];
 	const call = soleCall(node);
 	if (!call || params.length === 0) return false;
 	const args = call.getArguments();
@@ -207,7 +235,7 @@ function isPassThrough(node: Node, name: string): boolean {
 function namedFunctions(sf: SourceFile): { node: Node; name: string }[] {
 	const found: { node: Node; name: string }[] = [];
 	sf.forEachDescendant((node) => {
-		const name = Node.isFunctionLikeDeclaration(node) && !isOverload(node) ? functionName(node) : undefined;
+		const name = isFunction(node) && !isOverload(node) ? functionName(node) : undefined;
 		if (name) found.push({ node, name });
 	});
 	return found;
@@ -234,7 +262,7 @@ function typeNodesOf(node: Node): Node[] {
 	if (Node.isParametered(node)) node.getParameters().forEach((p) => nodes.push(...typeNodesOf(p)));
 	if (Node.isVariableDeclaration(node)) {
 		const init = node.getInitializer();
-		if (init && Node.isFunctionLikeDeclaration(init)) nodes.push(...typeNodesOf(init));
+		if (init && isFunction(init)) nodes.push(...typeNodesOf(init));
 	}
 	return nodes;
 }
@@ -242,7 +270,28 @@ function typeNodesOf(node: Node): Node[] {
 function exportedStatementName(stmt: Statement): string | undefined {
 	if (!hasExportKeyword(stmt)) return undefined;
 	if (Node.isVariableStatement(stmt)) return stmt.getDeclarations()[0].getName();
-	return Node.hasName(stmt) ? stmt.getName() : undefined;
+	if (Node.hasName(stmt)) return stmt.getName();
+	return Node.isModifierable(stmt) && stmt.hasModifier(SyntaxKind.DefaultKeyword) ? 'default' : undefined;
+}
+
+/** The top-level statement declaring a local name (for `export { name }`). */
+function localStatement(sf: SourceFile, name: string): Statement | undefined {
+	return sf.getStatements().find((s) =>
+		Node.isVariableStatement(s) ? s.getDeclarations().some((d) => d.getName() === name) : Node.hasName(s) && s.getName() === name
+	);
+}
+
+/** Every exported declaration with the name callers see and the line of its export. */
+function exportedDeclarations(sf: SourceFile): { name: string; line: number; stmt: Statement }[] {
+	return sf.getStatements().flatMap((stmt) => {
+		const name = exportedStatementName(stmt);
+		if (name) return [{ name, line: stmt.getStartLineNumber(), stmt }];
+		if (!Node.isExportDeclaration(stmt) || stmt.hasModuleSpecifier()) return [];
+		return stmt.getNamedExports().flatMap((spec) => {
+			const local = localStatement(sf, spec.getNameNode().getText());
+			return local ? [{ name: spec.getAliasNode()?.getText() ?? spec.getName(), line: stmt.getStartLineNumber(), stmt: local }] : [];
+		});
+	});
 }
 
 /** Internal type names referenced by one exported declaration's signature, deduplicated. */
@@ -258,12 +307,9 @@ function internalTypesOf(sf: SourceFile, stmt: Statement, exported: Set<string>)
 /** Exported signatures that reference a type declared in this module but not exported (resolved by symbol). */
 function leakyExports(sf: SourceFile): LeakyExport[] {
 	const exported = exportedNames(sf);
-	return sf.getStatements().flatMap((stmt) => {
-		const name = exportedStatementName(stmt);
-		if (!name) return [];
-		const line = stmt.getStartLineNumber();
-		return internalTypesOf(sf, stmt, exported).map((type) => ({ name, line, type }));
-	});
+	return exportedDeclarations(sf).flatMap(({ name, line, stmt }) =>
+		internalTypesOf(sf, stmt, exported).map((type) => ({ name, line, type }))
+	);
 }
 
 /** Interfaces, classes, enums and object-literal type aliases; an alias of another type is nameable by callers. */
@@ -355,7 +401,8 @@ export function contentExclusion(sf: SourceFile): 'type-only' | 'barrel' | null 
 	const isTypeOnly = (s: Statement) =>
 		TYPE_ONLY_KINDS.has(s.getKind()) || (Node.isExportDeclaration(s) && s.isTypeOnly()) || isAmbient(s) ||
 		(Node.isModifierable(s) && s.hasModifier(SyntaxKind.DeclareKeyword));
-	if (statements.every(isTypeOnly)) return 'type-only';
+	const declaresTypes = statements.some((s) => !Node.isImportDeclaration(s));
+	if (declaresTypes && statements.every(isTypeOnly)) return 'type-only';
 	const isReExport = (s: Statement) => Node.isExportDeclaration(s) || Node.isImportDeclaration(s);
-	return statements.every(isReExport) ? 'barrel' : null;
+	return statements.some(Node.isExportDeclaration) && statements.every(isReExport) ? 'barrel' : null;
 }

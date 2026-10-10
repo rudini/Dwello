@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { main } from '../src/cli.ts';
+import { loadSchema, validate } from '../src/schema.ts';
 import { DEEP_MODULE, SHALLOW_MODULE, writeProject } from './helpers.ts';
 
 const STORE = 'export const store = new Map<string, string>();\n';
@@ -40,6 +41,17 @@ describe('deepcheck scan output', () => {
 		expect(out.findings.map((f: { path: string }) => f.path)).toEqual(['src/shallow.ts']);
 		expect(out.summary).toEqual({ analyzed: 3, shallow: 1, shown: 1, excluded: 0, invalidSuppressions: 0 });
 		expect(out.findings[0].reasons.at(-1)).toBe('Fix the design; do not pad the implementation to game the ratio.');
+	});
+
+	it('matches the shipped report schema, also with groups, warnings and invalid suppressions', () => {
+		const root = writeProject({
+			'tsconfig.json': '{ "extends": "./missing.json" }',
+			'src/store.ts': STORE,
+			'src/shallow.ts': '// deepcheck-ignore-next-line pass-through\n' + SHALLOW_MODULE
+		});
+		const out = scanJson(root, '--group-by', 'directory');
+		expect(out.groups.length + out.warnings.length + out.suppressionFindings.length).toBe(3);
+		expect(validate(out, loadSchema('report.schema.json'))).toEqual([]);
 	});
 
 	it('limits the list with --top and --min-score and to a path argument', () => {
@@ -110,6 +122,14 @@ describe('deepcheck scan formats', () => {
 		const result = cli(shallowProject(), 'scan', '--fallow', 'off', '--format', 'json', '--output', file);
 		expect(result.stdout).toBe('');
 		expect(JSON.parse(readFileSync(file, 'utf8')).summary.shallow).toBe(1);
+	});
+});
+
+describe('deepcheck warnings', () => {
+	it('prints accuracy warnings to stderr and includes them in JSON', () => {
+		const root = writeProject({ 'tsconfig.json': '{ "extends": "./.svelte-kit/tsconfig.json" }', 'src/deep.ts': DEEP_MODULE });
+		expect(cli(root, 'scan', '--fallow', 'off').stderr).toMatch(/^deepcheck: warning: tsconfig\.json: /);
+		expect(scanJson(root).warnings).toEqual([expect.stringContaining('The extended config was not found')]);
 	});
 });
 

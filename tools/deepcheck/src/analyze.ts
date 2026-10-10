@@ -69,7 +69,8 @@ function settingsFor(path: string, config: Config) {
 }
 
 export function analyze({ root, fallow, config = loadConfig(root) }: AnalyzeOptions): Report {
-	const fallowData = loadFallow(root, fallow);
+	const warnings: string[] = [];
+	const fallowData = loadFallow(root, fallow, warnings);
 	const sources = walk(root, config).filter(isSource);
 	const excluded: ExcludedModule[] = [];
 	const modulePaths: string[] = [];
@@ -83,7 +84,7 @@ export function analyze({ root, fallow, config = loadConfig(root) }: AnalyzeOpti
 	const suppressionFindings: SuppressionFinding[] = [];
 	const listed: ListedSuppression[] = [];
 	for (const [path, sf] of loadModules(root, modulePaths)) {
-		const suppressions = parseSuppressions(sf.getFullText());
+		const suppressions = parseSuppressions(sf);
 		suppressionFindings.push(...suppressionProblems(suppressions).map((p) => ({ path, ...p })));
 		listed.push(...suppressions.map((s) => ({ path, ...s, valid: !suppressionProblems([s]).length })));
 		const reason = suppressesFile(suppressions) ? 'suppressed' : contentExclusion(sf);
@@ -91,7 +92,8 @@ export function analyze({ root, fallow, config = loadConfig(root) }: AnalyzeOpti
 		else candidates.push({ path, file: withoutSuppressed(fileMetrics(sf), suppressions) });
 	}
 	const notCounted = new Set(excluded.filter((e) => e.reason !== 'barrel' && e.reason !== 'type-only').map((e) => e.path));
-	const graph = coupling(root, sources, new Set(sources.filter((s) => !notCounted.has(s))));
+	const barrels = new Set(excluded.filter((e) => e.reason === 'barrel').map((e) => e.path));
+	const graph = coupling(root, sources, new Set(sources.filter((s) => !notCounted.has(s))), barrels, warnings);
 	const classitis = classitisFiles(candidates, config.classitisMinFiles);
 	const modules = candidates.map(({ path, file }) => {
 		const { fanIn, fanOut } = graph.get(path)!;
@@ -126,5 +128,5 @@ export function analyze({ root, fallow, config = loadConfig(root) }: AnalyzeOpti
 		return report;
 	});
 	modules.sort((a, b) => b.score - a.score || byPath(a, b));
-	return { modules, excluded: excluded.sort(byPath), suppressionFindings, suppressions: listed };
+	return { modules, excluded: excluded.sort(byPath), suppressionFindings, suppressions: listed, warnings };
 }

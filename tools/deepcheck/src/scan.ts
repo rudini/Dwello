@@ -50,6 +50,7 @@ export function scanOutput(root: string, report: Report, config: Config, s: Scan
 		},
 		findings,
 		...(s.groupBy && { groups: groups(root, selected, s.groupBy) }),
-		suppressionFindings: report.suppressionFindings.filter((f) => within(f.path, s.path))
+		suppressionFindings: report.suppressionFindings.filter((f) => within(f.path, s.path)),
+		warnings: report.warnings
 	};
 }

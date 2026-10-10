@@ -7,7 +7,7 @@
 	"properties": {
 		"$schema": { "type": "string" },
 		"include": { "type": "array", "items": { "type": "string" }, "description": "Globs of analyzed source files" },
-		"exclude": { "type": "array", "items": { "type": "string" }, "description": "Globs never walked or analyzed" },
+		"exclude": { "type": "array", "items": { "type": "string" }, "description": "Globs never walked or analyzed; added to the defaults (node_modules, dist, build, coverage)" },
 		"tests": { "type": "array", "items": { "type": "string" }, "description": "Globs of test files (excluded, reason test)" },
 		"generated": { "type": "array", "items": { "type": "string" }, "description": "Globs of generated files (excluded, reason generated)" },
 		"failThreshold": { "type": "number", "minimum": 0, "maximum": 100, "description": "shallowScore at or above which a module is flagged and can fail the gate" },

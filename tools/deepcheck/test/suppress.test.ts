@@ -69,4 +69,17 @@ describe('suppressions', () => {
 			{ path: 'src/shallow.ts', line: 2, kind: 'next-line', rule: 'pass-through', reason: null, valid: false }
 		]);
 	});
+
+	it('reports suppressions whose reason is not written as "-- reason"', () => {
+		const code = '// deepcheck-ignore-file: legacy\n// deepcheck-ignore-next-line pass-through because API\nexport const x = 1;\n';
+		const report = analyze({ root: writeProject({ 'src/m.ts': code }), fallow: 'off' });
+		expect(report.modules.map((m) => m.path)).toEqual(['src/m.ts']);
+		expect(report.suppressionFindings.map((f) => f.line)).toEqual([1, 2]);
+	});
+
+	it('ignores suppression text that is not in a comment', () => {
+		const report = analyzeShallow('export const hint = "// deepcheck-ignore-file -- x";\nconst t = `\n// deepcheck-ignore-file -- y\n`;\n');
+		expect(report.modules.map((m) => m.path)).toContain('src/shallow.ts');
+		expect(report.suppressions).toEqual([]);
+	});
 });

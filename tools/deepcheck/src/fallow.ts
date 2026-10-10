@@ -1,13 +1,14 @@
 import { spawnSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { parseJson } from './config.ts';
 import { ToolError } from './errors.ts';
 
 /** Globs the project's Fallow config ignores (`ignorePatterns` in .fallowrc.json); deepcheck treats them as generated. */
 export function fallowIgnorePatterns(root: string): string[] {
 	const path = join(root, '.fallowrc.json');
 	if (!existsSync(path)) return [];
-	return JSON.parse(readFileSync(path, 'utf8')).ignorePatterns ?? [];
+	return parseJson(readFileSync(path, 'utf8'), '.fallowrc.json').ignorePatterns ?? [];
 }
 
 export interface FallowData {
@@ -55,14 +56,15 @@ function run(bin: string, root: string, args: string[]) {
  * Fallow data for score inputs. `off`: none. `auto`: the project's own Fallow (node_modules/.bin/fallow)
  * if installed. Any other value is the path of a Fallow binary that must work.
  */
-export function loadFallow(root: string, mode: string): FallowData | null {
+export function loadFallow(root: string, mode: string, warnings: string[] = []): FallowData | null {
 	if (mode === 'off') return null;
 	const bin = mode === 'auto' ? join(root, 'node_modules', '.bin', 'fallow') : mode;
 	if (mode === 'auto' && !existsSync(bin)) return null;
 	try {
 		return parseFallow(run(bin, root, ['health', '--file-scores']), run(bin, root, ['dead-code']));
 	} catch (error) {
-		if (mode === 'auto') return null;
-		throw error;
+		if (mode !== 'auto') throw error;
+		warnings.push(`${(error as Error).message}; using own complexity and no unused-export data.`);
+		return null;
 	}
 }

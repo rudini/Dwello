@@ -75,6 +75,8 @@ export interface Report {
 	excluded: ExcludedModule[];
 	suppressionFindings: SuppressionFinding[];
 	suppressions: ListedSuppression[];
+	/** Conditions that make results less accurate, e.g. unresolved tsconfig extends or Fallow unavailable. */
+	warnings: string[];
 }
 
 export interface Group {
@@ -103,4 +105,5 @@ export interface ScanOutput {
 	findings: ModuleReport[];
 	groups?: Group[];
 	suppressionFindings: SuppressionFinding[];
+	warnings: string[];
 }

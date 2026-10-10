@@ -89,6 +89,7 @@ function scan(options: Options, io: Io, [path]: string[]): number {
 	const config = loadConfig(io.cwd);
 	const report = analyze({ root: io.cwd, fallow: options.fallow, config });
 	const output = scanOutput(io.cwd, report, config, { ...options, path });
+	if (options.format !== 'json') report.warnings.forEach((w) => io.stderr(`deepcheck: warning: ${w}\n`));
 	emit(options, io, RENDER[options.format](output), options.format === 'github' ? renderMarkdown(output) : undefined);
 	const failOn = options.failOnScore;
 	return failOn !== undefined && inScope(report, path).some((m) => m.score >= failOn) ? 1 : 0;

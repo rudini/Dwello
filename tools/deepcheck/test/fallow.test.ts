@@ -46,10 +46,14 @@ describe('Fallow adapter', () => {
 		expect(loadFallow(writeProject({}), 'auto')).toBeNull();
 	});
 
-	it('falls back to no data with auto when the local Fallow fails', () => {
+	it('falls back to no data with auto when the local Fallow fails, and says so', () => {
 		const root = writeProject({ 'node_modules/.bin/fallow': readFileSync(fakeFallow(2, 'error.json', 'error.json'), 'utf8') });
 		chmodSync(`${root}/node_modules/.bin/fallow`, 0o755);
-		expect(loadFallow(root, 'auto')).toBeNull();
+		const warnings: string[] = [];
+		expect(loadFallow(root, 'auto', warnings)).toBeNull();
+		expect(warnings).toEqual([
+			"Fallow failed: invalid root path '/nonexistent-dir': No such file or directory (os error 2); using own complexity and no unused-export data."
+		]);
 	});
 
 	it('uses the local Fallow with auto', () => {
