@@ -5,7 +5,7 @@
 	import MoneyInput from '$lib/ui/MoneyInput.svelte';
 	import Panel from '$lib/ui/Panel.svelte';
 	import Select from '$lib/ui/Select.svelte';
-	import TextInput from '$lib/ui/TextInput.svelte';
+	import DateInput from '$lib/ui/DateInput.svelte';
 	import type { FuelStock } from './+page.server';
 	import FuelStockList from './FuelStockList.svelte';
 
@@ -30,14 +30,15 @@
 </script>
 
 <!-- TODO(fachlich prüfen): "Tankbestand", "Stichtag" and the valuation are not in the glossary -->
-<Panel title="Heizöl oder Pellets im Tank" testid="fuel-stocks">
+<Panel title="Brennstoff im Tank oder Lager" testid="fuel-stocks">
 	<p class="text-ink-muted">
-		Nur für Gebäude mit Öl- oder Pellettank. Abgerechnet wird, was verbraucht wurde: Anfangsbestand
-		+ Einkauf − Endbestand. Erfassen Sie dafür am letzten Tag jeder Abrechnungsperiode, zum Beispiel
-		am 31.12., den Wert im Tank in Franken. Der Wert vom 31.12.2024 ist der Endbestand 2024 und der
-		Anfangsbestand 2025. Den Wert berechnen Sie so: Liter im Tank mal Preis pro Liter der letzten
-		Lieferung. Ist mehr im Tank als die letzte Lieferung, rechnen Sie den Rest zum Preis der
-		Lieferung davor. Lesen Sie erst Anfang Januar ab, erfassen Sie den Wert trotzdem per 31.12.
+		Nur für Gebäude, die mit Öl, Flüssiggas, Pellets oder Holz heizen. Abgerechnet wird, was
+		verbraucht wurde: Anfangsbestand + Einkauf − Endbestand. Erfassen Sie dafür am letzten Tag jeder
+		Abrechnungsperiode, zum Beispiel am 31.12., den Wert im Tank in Franken. Der Wert vom 31.12.2024
+		ist der Endbestand 2024 und der Anfangsbestand 2025. Den Wert berechnen Sie so: Menge im Tank
+		oder Lager mal Preis pro Einheit (Liter, kg oder Ster) der letzten Lieferung. Ist mehr im Tank als die letzte Lieferung, rechnen
+		Sie den Rest zum Preis der Lieferung davor. Lesen Sie erst Anfang Januar ab, erfassen Sie den
+		Wert trotzdem per 31.12.
 	</p>
 
 	{#if stocks === null}
@@ -45,15 +46,14 @@
 			<p>Die Tankbestände konnten nicht geladen werden. Laden Sie die Seite neu.</p>
 		</Alert>
 	{:else if stocks.length}
-		<FuelStockList {stocks} categories={choice} {deleteError} />
+		<FuelStockList {stocks} {deleteError} />
 	{/if}
 
 	<form method="POST" action="?/addFuelStock" use:enhance class="flex flex-col gap-4">
 		<div class="grid gap-4 sm:grid-cols-2">
-			<TextInput
+			<DateInput
 				id="fuelStockDate"
 				name="readingDate"
-				type="date"
 				label="Stichtag"
 				error={errors.readingDate}
 				testid="fuel-stock-date-input"

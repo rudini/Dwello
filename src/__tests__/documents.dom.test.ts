@@ -31,7 +31,7 @@ describe('Dokumente', () => {
 
 		const [toSend, sent] = allByTestId('document-row');
 		expect(toSend.textContent).toContain('An Anna Keller');
-		expect(toSend.textContent).toContain('1.3.2025');
+		expect(toSend.textContent).toContain('01.03.2025');
 		expect(toSend.querySelector('[data-testid="document-status"]')!.textContent!.trim()).toBe(
 			'Zu versenden'
 		);

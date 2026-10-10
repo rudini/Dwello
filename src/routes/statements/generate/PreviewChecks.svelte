@@ -57,7 +57,8 @@
 	<Alert tone="caution" title="Periode läuft noch" testid="preview-period-warning">
 		<p>
 			Die Abrechnungsperiode ist noch nicht zu Ende. Das Akonto zählt für alle Monate, auch die noch
-			nicht bezahlten, und Rechnungen bis zum Ende der Periode fehlen noch.
+			nicht bezahlten, und Rechnungen bis zum Ende der Periode fehlen noch. Erstellen Sie die
+			Abrechnungen erst nach dem Ende der Periode.
 		</p>
 	</Alert>
 {/if}
@@ -96,7 +97,8 @@
 				</p>
 			{/each}
 			<p>
-				Wenn Sie weitergehen, entstehen zusätzliche Entwürfe. Prüfen Sie zuerst die bestehenden.
+				Mietverträge mit einer Abrechnung in dieser Periode erhalten keine neue. Um einen Entwurf
+				neu zu berechnen, löschen Sie ihn und erstellen Sie die Abrechnungen erneut.
 			</p>
 		</div>
 	</Alert>

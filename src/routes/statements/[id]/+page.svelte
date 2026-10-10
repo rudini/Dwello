@@ -26,11 +26,21 @@
 		data,
 		form
 	}: {
-		data: { statement: StatementWithDetails; reminders: StatementDocument[] };
+		data: {
+			statement: StatementWithDetails;
+			reminders: StatementDocument[];
+			laterInvoices?: number;
+		};
 		form: ActionData;
 	} = $props();
 
 	const statement = $derived(data.statement);
+	// invoices of the period recorded after the draft was created: it lacks them
+	const laterInvoices = $derived(
+		data.laterInvoices === 1
+			? 'wurde 1 Rechnung für die Abrechnungsperiode erfasst, sie fehlt darin'
+			: `wurden ${data.laterInvoices} Rechnungen für die Abrechnungsperiode erfasst, sie fehlen darin`
+	);
 	let showMarkPaid = $state(false);
 	let showReminder = $state(false);
 	let showDelete = $state(false);
@@ -103,6 +113,23 @@
 			testid="statement-status"
 		/>
 	</p>
+
+	{#if data.laterInvoices}
+		<!-- a draft is created again; a sent statement is corrected outside Dwello (it cannot be deleted) -->
+		<Alert tone="caution" title="Rechnungen fehlen in der Abrechnung" testid="statement-later-invoices">
+			{#if statement.status === 'draft'}
+				<p>
+					Seit dem Erstellen dieses Entwurfs {laterInvoices}. Löschen Sie ihn und erstellen Sie die
+					Abrechnung erneut.
+				</p>
+			{:else}
+				<p>
+					Seit dem Erstellen dieser Abrechnung {laterInvoices}. Berichtigen Sie die Abrechnung
+					ausserhalb von Dwello gegenüber dem Mieter.
+				</p>
+			{/if}
+		</Alert>
+	{/if}
 
 	{#if form?.actionError}
 		<Alert tone="critical" title="Das hat nicht geklappt">

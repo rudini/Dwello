@@ -37,6 +37,13 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Wenn der Liegenschaftsverwalter die Abrechnungen 2024 für das Gebäude "Lindenhof" erstellt
     Dann wurden 2 Nebenkostenabrechnungen erstellt
 
+  # Erneut erstellen ergänzt nur: ein Mietvertrag mit einer Abrechnung dieser Periode erhält keine zweite
+  @api
+  Szenario: Abrechnungen erneut erstellen ergänzt nur die fehlenden
+    Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024
+    Wenn der Liegenschaftsverwalter die Abrechnungen 2024 für das Gebäude "Lindenhof" erstellt
+    Dann wurde 1 Nebenkostenabrechnung erstellt
+
   @api
   Szenario: Erhöhte Verwaltungspauschale gilt für alle Mieter der Liegenschaft
     Angenommen das Heizprofil "Winter" verteilt die Heizkosten so:
@@ -98,7 +105,7 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Und der Liegenschaftsverwalter aus der Warnung eine Rechnung erfassen will
     Dann ist das Rechnungsdatum leer, damit es bewusst gewählt wird
     Wenn der Liegenschaftsverwalter das Rechnungsdatum "2025-01-10" einträgt
-    Dann warnt das Rechnungsformular, dass das Rechnungsdatum nicht in der Abrechnungsperiode "1.1.2024 – 31.12.2024" liegt
+    Dann warnt das Rechnungsformular, dass das Rechnungsdatum nicht in der Abrechnungsperiode "01.01.2024 – 31.12.2024" liegt
     Wenn der Liegenschaftsverwalter das Rechnungsdatum "2024-11-15" einträgt
     Dann warnt das Rechnungsformular nicht vor dem Rechnungsdatum
 

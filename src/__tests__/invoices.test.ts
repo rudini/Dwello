@@ -173,11 +173,15 @@ describe('Rechnung erfassen und bearbeiten', () => {
 			{ periodStart: '2025-07-01', periodEnd: '2026-06-30', createdAt: '2026-03-01T08:00:00.000Z' }, // before the invoice
 			{ periodStart: '2025-01-01', periodEnd: '2025-12-31', createdAt: '2026-05-01T08:00:00.000Z' } // other period
 		];
-		const billed = async (load: typeof editLoad | typeof detailLoad, values = {}) => {
+		const billed = async (
+			load: typeof editLoad | typeof detailLoad,
+			values = {},
+			rows = statements
+		) => {
 			const { fetch, urls } = backend({
 				...answers,
 				'/invoices/i1': invoice(values),
-				'/statements': { data: statements }
+				'/statements': { data: rows }
 			});
 			const data = (await load({ params: { id: 'i1' }, fetch } as never)) as {
 				billedIn: unknown;
@@ -207,6 +211,18 @@ describe('Rechnung erfassen und bearbeiten', () => {
 			for (const load of [editLoad, detailLoad]) {
 				expect((await billed(load)).missedIn).toEqual([{ start: '2025-07-01', end: '2026-06-30' }]);
 			}
+		});
+
+		// Neu erstellte Entwürfe ersetzen die alten nicht: die alten ohne die Rechnung bleiben
+		it('nennt eine Periode auch dann, wenn es dort neben neuen noch alte Abrechnungen ohne die Rechnung gibt', async () => {
+			const older = {
+				periodStart: '2026-01-01',
+				periodEnd: '2026-12-31',
+				createdAt: '2026-03-01T08:00:00.000Z'
+			};
+			const { billedIn, missedIn } = await billed(detailLoad, {}, [...statements, older]);
+			expect(billedIn).toContainEqual({ start: '2026-01-01', end: '2026-12-31' });
+			expect(missedIn).toContainEqual({ start: '2026-01-01', end: '2026-12-31' });
 		});
 	});
 

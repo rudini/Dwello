@@ -35,16 +35,26 @@ async function call(fetch: Fetch, path: string, body?: object) {
 	return data;
 }
 
-// Every contract of the selected buildings that overlaps the period gets its own statement (tenant change = two statements)
+// Every contract of the selected buildings that overlaps the period gets its own statement (tenant change = two
+// statements); a contract that already has one in the period gets none, so a deleted draft can be created again
 async function contractsInPeriod(
 	fetch: Fetch,
 	{ buildingIds, periodStart, periodEnd }: GenerationRequest
 ) {
 	const perBuilding = await Promise.all(
 		buildingIds.map(async (buildingId) => {
-			const { contracts } = await call(fetch, `contracts?buildingId=${buildingId}&limit=1000`);
+			const [{ contracts }, { data: statements }] = await Promise.all([
+				call(fetch, `contracts?buildingId=${buildingId}&limit=1000`),
+				call(fetch, `statements?buildingId=${buildingId}&limit=1000`)
+			]);
+			const billed = new Set(
+				(statements as (Period & { contractId: string })[])
+					.filter((s) => s.periodStart <= periodEnd && s.periodEnd >= periodStart)
+					.map((s) => s.contractId)
+			);
 			return (contracts as Contract[])
 				.filter((c) => c.startDate <= periodEnd && (!c.endDate || c.endDate >= periodStart))
+				.filter((c) => !billed.has(c.id))
 				.map((contract) => ({ buildingId, contract }));
 		})
 	);
@@ -72,7 +82,8 @@ export async function previewStatements(fetch: Fetch, request: GenerationRequest
 			totalAdvancePayments: Number(preview.totalAdvancePayments),
 			balance: Number(preview.balance),
 			rentalDays: Number(preview.rentalDays),
-			totalPeriodDays: Number(preview.totalPeriodDays)
+			totalPeriodDays: Number(preview.totalPeriodDays),
+			movedOut: !!contract.endDate && contract.endDate <= periodEnd
 		});
 	}
 	return rows;

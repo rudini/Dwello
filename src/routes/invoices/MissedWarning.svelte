@@ -15,7 +15,9 @@
 		</p>
 	{/each}
 	<p>
-		Entwürfe erstellen Sie neu, dann ist sie dabei. Ob Sie die Kosten bei versendeten Abrechnungen
-		noch nachverlangen können, ist nicht in jedem Fall sicher.
+		Löschen Sie die Entwürfe dieser Periode und erstellen Sie die Abrechnungen erneut, dann ist sie
+		dabei. Versendete Abrechnungen berichtigen Sie ausserhalb von Dwello: Schicken Sie dem Mieter
+		eine berichtigte Abrechnung mit dem Beleg. Nehmen Sie die Kosten nicht in die Abrechnung der nächsten Periode. Ob Sie die Kosten
+		noch nachverlangen können, ist nicht in jedem Fall sicher: Lassen Sie sich im Zweifel beraten.
 	</p>
 </Alert>

@@ -7,14 +7,7 @@
 	import type { FuelStock } from './+page.server';
 
 	// The Tankbestand readings of a building; deleting one asks first, it changes how heating costs are billed
-	let {
-		stocks,
-		categories,
-		deleteError
-	}: { stocks: FuelStock[]; categories: { id: string; name: string }[]; deleteError?: string } =
-		$props();
-
-	const categoryName = (id: string) => categories.find((c) => c.id === id)?.name ?? '';
+	let { stocks, deleteError }: { stocks: FuelStock[]; deleteError?: string } = $props();
 
 	let deleting = $state<FuelStock | null>(null);
 	let deleteForm = $state<HTMLFormElement>();
@@ -27,7 +20,7 @@
 			data-testid="fuel-stock-{stock.id}"
 		>
 			<span class="text-ink">{formatDate(stock.readingDate)}</span>
-			<span class="text-ink-muted">{categoryName(stock.categoryId)}</span>
+			<span class="text-ink-muted">{stock.categoryName}</span>
 			<span class="tabular-nums text-ink">{formatCurrency(stock.amount)}</span>
 			<Button
 				variant="danger-ghost"
@@ -64,6 +57,7 @@
 >
 	<p>
 		Abrechnungen, die am Tag danach beginnen oder an diesem Tag enden, rechnen dann den Einkauf ab,
-		nicht den Verbrauch. Bestehende Abrechnungen ändern sich nicht.
+		nicht den Verbrauch. Bestehende Abrechnungen ändern sich nicht: Löschen Sie danach die Entwürfe
+		dieser Periode und erstellen Sie die Abrechnungen erneut.
 	</p>
 </Dialog>

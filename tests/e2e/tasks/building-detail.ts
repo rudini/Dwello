@@ -1,4 +1,5 @@
 import type { Actor } from '../fixtures/actor';
+import { typeDate } from '../interactions/form';
 import {
 	addApartmentButton,
 	apartmentRow,
@@ -41,7 +42,7 @@ export const openApartment = (number: string) => async (actor: Actor) => {
 // Value of the heating oil in the tank on a reading day; waits until the page lists it
 export const recordFuelStock = (date: string, amount: string) => async (actor: Actor) => {
 	const listed = await fuelStockRows(actor.page).count();
-	await fuelStockDate(actor.page).fill(date);
+	await typeDate(fuelStockDate(actor.page), date);
 	await fuelStockAmount(actor.page).fill(amount);
 	await saveFuelStockButton(actor.page).click();
 	await expect(fuelStockRows(actor.page)).toHaveCount(listed + 1);

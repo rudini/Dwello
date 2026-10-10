@@ -227,6 +227,41 @@ describe('Abrechnungsdetail', () => {
 		expect(text()).toContain('366 Mietstage');
 	});
 
+	// Nachzügler: der Entwurf würde ohne die später erfassten Rechnungen versendet
+	const later = (laterInvoices: number, status: 'draft' | 'sent' = 'draft') =>
+		show(StatementPage, {
+			data: { statement: statement({ status }), reminders: [], laterInvoices },
+			form: null
+		} as never);
+
+	it('weist beim Entwurf auf Rechnungen hin, die nach seinem Erstellen erfasst wurden', () => {
+		later(2);
+		expect(byTestId('statement-later-invoices')!.textContent!.replace(/\s+/g, ' ')).toContain(
+			'Seit dem Erstellen dieses Entwurfs wurden 2 Rechnungen für die Abrechnungsperiode erfasst, sie fehlen darin. Löschen Sie ihn und erstellen Sie die Abrechnung erneut.'
+		);
+	});
+
+	it('spricht bei einer später erfassten Rechnung in der Einzahl', () => {
+		later(1);
+		expect(byTestId('statement-later-invoices')!.textContent).toContain(
+			'wurde 1 Rechnung für die Abrechnungsperiode erfasst, sie fehlt darin'
+		);
+	});
+
+	// Versendet: der Mieter hat die Abrechnung ohne die Rechnung erhalten
+	it('weist bei einer versendeten Abrechnung auf später erfasste Rechnungen hin und sagt, wie man berichtigt', () => {
+		later(1, 'sent');
+		expect(byTestId('statement-later-invoices')!.textContent!.replace(/\s+/g, ' ')).toContain(
+			'Seit dem Erstellen dieser Abrechnung wurde 1 Rechnung für die Abrechnungsperiode erfasst, sie fehlt darin. Berichtigen Sie die Abrechnung ausserhalb von Dwello gegenüber dem Mieter.'
+		);
+	});
+
+	it('zeigt keinen Hinweis ohne später erfasste Rechnungen', () => {
+		detail();
+		expect(byTestId('statement-status')).not.toBeNull();
+		expect(byTestId('statement-later-invoices')).toBeNull();
+	});
+
 	it('sagt, wenn eine Abrechnung keine Positionen hat, statt eine leere Tabelle zu zeigen', () => {
 		detail({ lineItems: [] });
 		expect(text()).toContain(
@@ -298,7 +333,7 @@ describe('Abrechnungsdetail', () => {
 		expect(byTestId('statement-balance')!.textContent).toMatch(/Rückerstattung.*CHF\s83.43/);
 		expect(text()).not.toContain('CHF-83.43');
 		expect(text()).not.toContain('Zahlungsfrist');
-		expect(byTestId('statement-payment-deadline')!.textContent).toBe('28.2.2025');
+		expect(byTestId('statement-payment-deadline')!.textContent).toBe('28.02.2025');
 	});
 
 	it('bietet einen Entwurf zum Versenden, Bearbeiten und Löschen an', () => {
@@ -451,7 +486,7 @@ describe('Abrechnung bearbeiten', () => {
 	it('ändert nur Frist und Bemerkungen, die Kosten bleiben wie berechnet', () => {
 		edit({ notes: 'Ratenzahlung' });
 
-		expect(byTestId<HTMLInputElement>('payment-deadline-input')!.value).toBe('2025-02-28');
+		expect(byTestId<HTMLInputElement>('payment-deadline-input')!.value).toBe('28.02.2025');
 		expect(text()).toContain('Freitag, 28. Februar 2025');
 		expect(byTestId<HTMLTextAreaElement>('statement-notes-input')!.value).toBe('Ratenzahlung');
 		expect(allByTestId('statement-line-item')).toHaveLength(2);

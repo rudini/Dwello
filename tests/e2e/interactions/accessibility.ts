@@ -1,4 +1,5 @@
 import AxeBuilder from '@axe-core/playwright';
+import { typeDate } from './form';
 import type { Page } from '@playwright/test';
 import { readFileSync } from 'fs';
 import type { TestData } from '../fixtures/backend';
@@ -28,10 +29,11 @@ export const address = (screen: { path: string; queries?: object }, state: strin
 
 // The building of the example being checked (one example at a time per worker); the statement wizard checks it
 let exampleBuilding = '';
+let tankBuilding = '';
 
 /** Records every screen with an id in its address needs; returns the address with the ids filled in */
 export async function seedFor(seed: TestData, path: string, state: string) {
-	if (!path.includes('{') && !['delete-dialog', 'mark-paid-dialog', 'category-check', 'preview-empty', 'fuel-stock-dialog'].includes(state)) return path;
+	if (!path.includes('{') && !['delete-dialog', 'mark-paid-dialog', 'category-check', 'preview-empty', 'fuel-stock-dialog', 'tank-question', 'every-wizard-step', 'preview-all-billed'].includes(state)) return path;
 	await seed.building('Seeblick', 'Winterthur');
 	await seed.apartment('Seeblick', '1.01', 'vacant');
 	await seed.apartment('Seeblick', '1.02', 'vacant');
@@ -46,12 +48,21 @@ export async function seedFor(seed: TestData, path: string, state: string) {
 	await seed.heatingProfile('Standard', [18, 16, 13, 8, 4, 1, 0, 0, 3, 9, 13, 15]);
 	await seed.heatingInvoice('Seeblick', '3600.00', 2025);
 	await seed.fuelStock('Seeblick', '2025-12-31', '800.00'); // a Tankbestand to list and to delete
-	await seed.invoiceOn('Seeblick', 'Hauswart', '300.00', '2025-01-31'); // 2025 recorded from its start: a year to compare 2026 with
+	// 2025 recorded from its start: a year to compare 2026 with; the 2025 statements take it
+	const billedInvoice = await seed.invoiceOn('Seeblick', 'Hauswart', '300.00', '2025-01-31');
 	await seed.supplierInvoice('Hauswart Huber', 'Seeblick', '450.00', 'Treppenhausreinigung Q1', 'Hauswart');
 	await seed.statement('Anna', 'Seeblick', 2025, 'Standard');
 	await seed.statement('Bruno', 'Seeblick', 2025, 'Standard');
 	await seed.sendStatement('Bruno', 2025);
 	await seed.statement('Carla', 'Seeblick', 2023, 'Standard'); // no invoices in 2023: no positions
+	for (const tenant of ['Anna', 'Bruno', 'Carla']) await seed.statement(tenant, 'Seeblick', 2024, 'Standard'); // 2024 all billed
+	const lateInvoice = await seed.invoiceOn('Seeblick', 'Lift', '200.00', '2025-06-30'); // recorded after the 2025 statements
+	// heating costs without any Tankbestand: the wizard asks about a tank; rented, so its preview has a row too
+	await seed.building('Bergsicht', 'Winterthur');
+	await seed.apartment('Bergsicht', '2.01', 'vacant');
+	await seed.tenant('Dora');
+	await seed.contract('Dora', '2.01', { startDate: '2015-01-01', baseRent: '1600.00' });
+	await seed.heatingInvoice('Bergsicht', '1200.00', 2025);
 	await seed.category('Gartenpflege', true);
 	await seed.distributionKey('Nach Wohnungen', '{units}');
 	const ids: Record<string, string | undefined> = {
@@ -60,6 +71,8 @@ export async function seedFor(seed: TestData, path: string, state: string) {
 		tenant: seed.idOf('Anna'),
 		contract: seed.idOf('Mietvertrag Anna'),
 		invoice: seed.idOf('Rechnung Hauswart Huber'),
+		billedInvoice,
+		lateInvoice,
 		statement: seed.idOf('Abrechnung Anna 2025'),
 		sentStatement: seed.idOf('Abrechnung Bruno 2025'),
 		emptyStatement: seed.idOf('Abrechnung Carla 2023'),
@@ -70,6 +83,7 @@ export async function seedFor(seed: TestData, path: string, state: string) {
 		distributionKey: seed.idOf('Nach Wohnungen')
 	};
 	exampleBuilding = ids.building!;
+	tankBuilding = seed.idOf('Bergsicht')!;
 	return path.replace(/\{(\w+)\}/g, (_, key: string) => ids[key]!);
 }
 
@@ -83,12 +97,13 @@ const shows = (page: Page, selector: string) => page.locator(selector).first().w
 // Confirmation dialogs end with a button whose test id ends in -confirm
 const dialog = (page: Page) => shows(page, '[data-testid$="-confirm"]');
 
-// The statement wizard's preview of a calendar year for this example's building, heating profile and fee as proposed
-async function previewOf(page: Page, year: string, shown: string) {
-	await page.getByTestId('period-start-input').fill(`${year}-01-01`);
-	await page.getByTestId('period-end-input').fill(`${year}-12-31`);
+// The statement wizard's preview of a calendar year for this example's building (and others), heating profile and fee
+// as proposed
+async function previewOf(page: Page, year: string, shown: string, ...others: string[]) {
+	await typeDate(page.getByTestId('period-start-input'), `${year}-01-01`);
+	await typeDate(page.getByTestId('period-end-input'), `${year}-12-31`);
 	await press(page, 'wizard-next');
-	await page.getByTestId(`generate-building-${exampleBuilding}`).check();
+	for (const building of [exampleBuilding, ...others]) await page.getByTestId(`generate-building-${building}`).check();
 	await press(page, 'wizard-next');
 	await press(page, 'wizard-next');
 	await page.getByTestId(shown).waitFor();
@@ -179,7 +194,7 @@ const states: Record<string, (page: Page, viewport: Viewport) => Promise<unknown
 	'overlap-warning': async (page) => {
 		await page.getByTestId('wizard-next').click(); // tenant and apartment come from the address
 		await page.getByTestId('wizard-next').click();
-		await page.getByTestId('start-date-input').fill('2020-01-01'); // the apartment is rented until 2099
+		await typeDate(page.getByTestId('start-date-input'), '2020-01-01'); // the apartment is rented until 2099
 		await shows(page, '[data-testid="overlap-warning"]');
 	},
 	'draft-restored': async (page) => {
@@ -191,8 +206,11 @@ const states: Record<string, (page: Page, viewport: Viewport) => Promise<unknown
 	// 2026 against 2025: the heating invoice of 2025 has no successor yet
 	'category-check': (page) => previewOf(page, '2026', 'category-check'),
 	'preview-empty': (page) => previewOf(page, '2000', 'preview-empty'),
+	'preview-all-billed': (page) => previewOf(page, '2024', 'preview-all-billed'),
+	// 2025 with a second building that has heating costs but never had a Tankbestand
+	'tank-question': (page) => previewOf(page, '2025', 'tank-question', tankBuilding),
 	'period-not-over': async (page) => {
-		await page.getByTestId('period-end-input').fill('2099-12-31');
+		await typeDate(page.getByTestId('period-end-input'), '2099-12-31');
 		await shows(page, '[data-testid="period-future-warning"]');
 	}
 };
@@ -236,8 +254,8 @@ async function contractWizardSteps(page: Page) {
 	found.push(...(await violations(page)));
 	await nextStep('start-date-input'); // "Vertragsdauer", limited: end date and both dates in words
 	await page.getByTestId('contract-duration').getByText('Befristet', { exact: true }).click();
-	await page.getByTestId('start-date-input').fill('2030-01-01');
-	await page.getByTestId('end-date-input').fill('2031-12-31');
+	await typeDate(page.getByTestId('start-date-input'), '2030-01-01');
+	await typeDate(page.getByTestId('end-date-input'), '2031-12-31');
 	found.push(...(await violations(page)));
 	await nextStep('contract-base-rent-input'); // "Miete"
 	await page.getByTestId('contract-base-rent-input').fill('1500');
@@ -250,7 +268,8 @@ async function contractWizardSteps(page: Page) {
 // Statement wizard: period, buildings, preview; every step is checked before going on
 async function statementWizardSteps(page: Page) {
 	const found = await violations(page); // "Abrechnungsperiode"
-	const building = page.locator('[data-testid^="generate-building-"]').first();
+	// this example's building: another example's may still be seeding, without a contract to preview
+	const building = page.getByTestId(`generate-building-${exampleBuilding}`);
 	const nextStep = async (shown: string) => {
 		await press(page, 'wizard-next');
 		await page.getByTestId(shown).first().waitFor();

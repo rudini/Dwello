@@ -47,7 +47,8 @@
 		3: 'Vorschau wird berechnet …',
 		5: 'Entwürfe werden erstellt …'
 	};
-	const NOTHING = 'Wählen Sie eine andere Abrechnungsperiode oder andere Gebäude.';
+	const NOTHING =
+		'Wählen Sie eine andere Abrechnungsperiode oder andere Gebäude, oder löschen Sie zuerst die Entwürfe, die Sie neu berechnen wollen.';
 	const fresh = (): WizardSelection => ({
 		periodStart: data.defaultPeriod.start,
 		periodEnd: data.defaultPeriod.end,

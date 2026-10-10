@@ -113,8 +113,6 @@ export function findingText({
 	changePercent
 }: CategoryFinding): string {
 	if (kind === 'stock') return stockText(missingParts, current.total);
-	if (kind === 'tank')
-		return 'Heizen Sie mit Öl, Pellets oder Holz? Dann erfassen Sie den Tankbestand am Anfang und am Ende der Periode, sonst rechnet Dwello den Einkauf ab statt den Verbrauch. Bei Fernwärme, Gas oder Wärmepumpe ist nichts zu tun.';
 	if (kind === 'missing')
 		return `Keine Rechnung in dieser Kategorie erfasst. Im Vorjahr: Kosten von ${formatCurrency(previous.total)}.`;
 	if (kind === 'new')
@@ -130,7 +128,7 @@ export function findingText({
 }
 
 // TODO(fachlich prüfen): costs 15 % above the Akonto suggest raising it, 30 % below suggest missing invoices;
-// a fixed-term contract has no termination date before its end (review B, MR4-4)
+// a fixed-term contract has no termination date before its end, for the Akonto and new costs alike (review B, MR4-4, MR5-2)
 const AKONTO_ABOVE = 0.15;
 const AKONTO_BELOW = 0.3;
 
@@ -139,6 +137,7 @@ type AkontoRow = {
 	totalAdvancePayments: number;
 	rentalDays?: number;
 	totalPeriodDays?: number;
+	movedOut?: boolean; // the contract ends in the period: no Akonto left to raise
 };
 
 /** A statement whose costs are far from the Akonto paid: missing invoices, or an Akonto to raise */
@@ -146,12 +145,14 @@ export function akontoHint({
 	totalCosts,
 	totalAdvancePayments,
 	rentalDays,
-	totalPeriodDays
+	totalPeriodDays,
+	movedOut
 }: AkontoRow) {
 	if (!(totalAdvancePayments > 0)) return null;
 	const change = (totalCosts - totalAdvancePayments) / totalAdvancePayments;
 	const amount = formatCurrency(Math.abs(totalCosts - totalAdvancePayments));
 	const percent = Math.round(Math.abs(change) * 100);
+	if (change > AKONTO_ABOVE && movedOut) return `Kosten ${amount} (${percent} %) über dem Akonto.`;
 	if (change > AKONTO_ABOVE)
 		return `Kosten ${amount} (${percent} %) über dem Akonto. Prüfen Sie, ob Sie das Akonto erhöhen. Eine Erhöhung gilt frühestens auf den nächsten Kündigungstermin: begründet, mit dem amtlichen Formular, beim Mieter mindestens 10 Tage vor Beginn der Kündigungsfrist. Ohne Formular oder Begründung ist sie nichtig.`;
 	// part of the period: the months rented may carry little heating, low costs are no sign of missing invoices

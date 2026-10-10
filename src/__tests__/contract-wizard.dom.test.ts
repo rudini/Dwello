@@ -58,7 +58,7 @@ async function untilReview() {
 	next();
 	select('apartment-select', 'a1');
 	next();
-	type('start-date-input', '2027-01-01');
+	type('start-date-input', '01.01.2027');
 	next();
 	type('contract-base-rent-input', '950');
 	type('contract-advance-payment-input', '180');
@@ -124,7 +124,7 @@ describe('Mietvertrag erfassen', () => {
 		next();
 		select('apartment-select', 'a1');
 		next();
-		type('start-date-input', '2026-11-01');
+		type('start-date-input', '01.11.2026');
 		expect(document.body.textContent).toContain('Sonntag, 1. November 2026');
 	});
 
@@ -134,7 +134,7 @@ describe('Mietvertrag erfassen', () => {
 		next();
 		select('apartment-select', 'a1');
 		next();
-		type('start-date-input', '2027-01-01');
+		type('start-date-input', '01.01.2027');
 		next();
 		expect(document.body.textContent).toContain(
 			'Monatlicher Vorschuss des Mieters für Nebenkosten'
@@ -208,7 +208,7 @@ describe('Prüfungen im Mietvertrag', () => {
 		next();
 		select('apartment-select', 'a1');
 		next();
-		type('start-date-input', '2027-01-01');
+		type('start-date-input', '01.01.2027');
 		next();
 		type('contract-base-rent-input', "1'450");
 		expect(byTestId('contract-monthly-total')!.textContent).toContain('1’450.00');
@@ -231,7 +231,7 @@ describe('Prüfungen im Mietvertrag', () => {
 
 	it('fragt nach, wenn der Vertragsbeginn in der Vergangenheit liegt, und geht erst beim zweiten Mal weiter', async () => {
 		await toPeriod();
-		type('start-date-input', '2020-01-11');
+		type('start-date-input', '11.01.2020');
 		expect(byTestId('start-date-notice')!.getAttribute('role')).toBe('status'); // read out while typing
 		next();
 		await settle();
@@ -245,15 +245,15 @@ describe('Prüfungen im Mietvertrag', () => {
 
 	it('lehnt ein unmögliches Datum ab', async () => {
 		await toPeriod();
-		type('start-date-input', '12026-01-12');
+		type('start-date-input', '31.02.2026');
 		next();
 		await settle();
-		expect(byTestId('form-error')!.textContent).toContain('Bitte prüfen Sie das Datum');
+		expect(byTestId('form-error')!.textContent).toContain('Dieses Datum gibt es nicht.');
 	});
 
 	it('füllt einen geleerten Vertragsbeginn nicht wieder aus', async () => {
 		await toPeriod('a3');
-		expect(byTestId<HTMLInputElement>('start-date-input')!.value).toBe('2100-01-01'); // suggested
+		expect(byTestId<HTMLInputElement>('start-date-input')!.value).toBe('01.01.2100'); // suggested
 		type('start-date-input', '');
 		next();
 		await settle();
@@ -269,14 +269,14 @@ describe('Prüfungen im Mietvertrag', () => {
 		select('apartment-select', 'a1'); // its last contract ran 2015–2019
 		next();
 		await settle();
-		type('start-date-input', '2016-01-01');
+		type('start-date-input', '01.01.2016');
 		next();
 		expect(byTestId('overlap-warning')).not.toBeNull();
 		expect(heading()).toBe('Vertragsdauer');
 		// fixed by a limited contract that ends before the old one began: the error goes
 		click(byTestId('contract-duration')!.querySelectorAll('input')[1]);
-		type('end-date-input', '2014-12-31');
-		type('start-date-input', '2014-01-01');
+		type('end-date-input', '31.12.2014');
+		type('start-date-input', '01.01.2014');
 		await settle();
 		expect(byTestId('overlap-warning')).toBeNull();
 		expect(byTestId('form-error')).toBeNull();

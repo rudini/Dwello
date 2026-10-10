@@ -232,8 +232,8 @@ export async function handleMidYearMoves(
 	const period = calculateHeatingShare(profile, periodStart, periodEnd, totalHeatingCosts);
 	// a period of months without heating in the profile (summer): its heating costs are shared by days
 	if (period.percentage <= 0) {
-		const days = (from: Date, to: Date) => (to.getTime() - from.getTime()) / 86_400_000 + 1;
-		const percentage = (days(effectiveStart, effectiveEnd) / days(periodStart, periodEnd)) * 100;
+		const percentage =
+			(calculateDaysBetween(effectiveStart, effectiveEnd) / calculateDaysBetween(periodStart, periodEnd)) * 100;
 		return { ...tenant, share: totalHeatingCosts * (percentage / 100), percentage };
 	}
 	const percentage = (tenant.percentage / period.percentage) * 100;

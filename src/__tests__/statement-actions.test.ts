@@ -3,7 +3,7 @@ import { runAction } from './helpers/action';
 import { actions } from '../routes/statements/[id]/+page.server';
 
 const API = 'http://localhost:3001/api/v1/statements/s1';
-const today = new Date().toISOString().split('T')[0];
+const today = new Date().toLocaleDateString('sv-SE'); // the day in Switzerland, as the app takes it
 
 describe('Abrechnung versenden', () => {
 	it('setzt den Status im Backend auf versendet', async () => {
@@ -80,6 +80,7 @@ describe('Abrechnung laden', () => {
 			if (url.endsWith('/statements/s1'))
 				return Response.json({ ...statementJson, tenantId: 't1' });
 			if (url.endsWith('/tenants/t1')) return Response.json(tenantJson);
+			if (url.includes('/invoices/for-statement/')) return Response.json([]);
 			return Response.json({ data: [] });
 		}) as typeof globalThis.fetch;
 
@@ -87,5 +88,35 @@ describe('Abrechnung laden', () => {
 			statement: { tenantAddress: string };
 		};
 		expect(data.statement.tenantAddress).toBe('Seestrasse 12, 8002 Zürich');
+	});
+
+	// Nachzügler: ein Entwurf ohne die Rechnungen, die nach seinem Erstellen erfasst wurden
+	it('zählt die Rechnungen der Periode, die nach dem Erstellen der Abrechnung erfasst wurden', async () => {
+		const { load } = await import('../routes/statements/[id]/+page.server');
+		const statementJson = (await import('../../tests/contracts/statement.json')).default;
+		const later = (status: string) => {
+			const urls: string[] = [];
+			const fetch = (async (url: string) => {
+				urls.push(url);
+				if (url.endsWith('/statements/s1')) return Response.json({ ...statementJson, status });
+				if (url.includes('/invoices/for-statement/b1'))
+					return Response.json([
+						{ createdAt: '2025-01-10T08:00:00.000Z' }, // before the draft (2025-01-15)
+						{ createdAt: '2025-02-01T08:00:00.000Z' }
+					]);
+				return Response.json({ data: [] });
+			}) as typeof globalThis.fetch;
+			return {
+				urls,
+				data: load({ params: { id: 's1' }, fetch } as never) as Promise<{ laterInvoices: number }>
+			};
+		};
+
+		const draft = later('draft');
+		expect((await draft.data).laterInvoices).toBe(1);
+		expect(draft.urls).toContain(
+			'http://localhost:3001/api/v1/invoices/for-statement/b1?periodStart=2024-01-01&periodEnd=2024-12-31'
+		);
+		expect((await later('sent').data).laterInvoices).toBe(1);
 	});
 });

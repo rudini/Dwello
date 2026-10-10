@@ -174,6 +174,19 @@ describe('Heizkostenverteilung bei Mieterwechsel und Leerstand', () => {
 		expect(heating).toMatchObject({ periodShare: 1, tenantShare: heating.apartmentShare });
 	});
 
+	// Einzug mitten in der Sommerperiode: 62 von 92 Tagen, Wohnungsanteil 30 % von CHF 1000
+	it('verteilt die Heizkosten einer Periode ohne Profilanteil bei einem Einzug nach Tagen', async () => {
+		const contractId = await rent('Mieter Drei', created.apartments[1], '2024-07-01');
+		const response = await callApi('/api/v1/statements/preview', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ contractId, periodStart: '2024-06-01', periodEnd: '2024-08-31', heatingProfileId })
+		});
+		const heating = ((await response.json()) as { lineItems: LineItem[] }).lineItems.find((line) => line.categoryName === 'Heating')!;
+
+		expect(heating).toMatchObject({ apartmentShare: 300, periodShare: 0.6739, tenantShare: 202.17 });
+	});
+
 	// Warmwasser wird das ganze Jahr etwa gleich verbraucht: nach Tagen, nicht nach dem Heizprofil
 	it('verteilt separat abgerechnetes Warmwasser nach Tagen', async () => {
 		const hotWater = (await lines(tenant1)).find((line) => line.categoryName === 'Hot Water')!;

@@ -42,6 +42,7 @@ Target users: private landlords with little experience who use Dwello a few time
 | Stage 7 | Vertragsstatus and Mietstatus derived with the backend's boundary (a contract still runs on its last day); "Wiedervermietet ab <Datum>" everywhere, counts that add up. | Three personas found contradictory statuses. |
 | Stage 7 | `EarlySelect` for filters and forms that work before hydration; one `Pagination`; focus on the result count after a filter search. | Choices made while the page loads were lost; keyboard users lost their place. |
 | Stage 8 | svelte-i18n and `docs/design_system.md` removed; the design guard has no exception list. | Dead code with old wording; the old system cannot come back unnoticed. |
+| Session 11 | Every date field is `DateInput`: text TT.MM.JJJJ independent of the browser language, dots set by themselves, TT.MM.JJ and pasted JJJJ-MM-TT accepted, checked on leaving and on sending, the date in words below, a calendar button with the browser's picker; the form sends JJJJ-MM-TT. | The native date field showed the browser's format (MM/DD/YYYY in English browsers); Swiss users type 31.12.2025. |
 | Stage 8 | Axe analyses from the top of the page. | A scrolled page slid a 48 px link under the sticky header and `target-size` judged the visible remainder. |
 
 ## Anti-patterns (not used; most are caught by `design-guard.test.ts`)

@@ -81,7 +81,7 @@ describe('Rechnungen pro Gebäude', () => {
 			{
 				buildingId: 'b1',
 				name: 'Ahornhof',
-				text: '3 Rechnungen vom 15.1.2024 bis 30.6.2024',
+				text: '3 Rechnungen vom 15.01.2024 bis 30.06.2024',
 				missing: false,
 				partial: true, // nothing after June
 				existing: 0,
@@ -107,7 +107,7 @@ describe('Rechnungen pro Gebäude', () => {
 				buildings,
 				period
 			)[0].text
-		).toBe('1 Rechnung vom 15.3.2024');
+		).toBe('1 Rechnung vom 15.03.2024');
 	});
 });
 
@@ -161,12 +161,10 @@ describe('Rechnungen pro Kategorie', () => {
 				})
 			)
 		).toBe('Rechnungen für das 1. Quartal und das 3. Quartal fehlen. Im Vorjahr: 4 Rechnungen.');
-		expect(
-			findingText(finding('gap', { missingParts: [part('2025-03-01', '2025-03-31')] }))
-		).toContain('für den März fehlt');
-		expect(
-			findingText(finding('gap', { missingParts: [part('2026-01-14', '2026-07-15')] }))
-		).toContain('für die Zeit vom 14.1.2026 bis 15.7.2026 fehlt');
+		expect(findingText(finding('gap', { missingParts: [part('2025-03-01', '2025-03-31')] }))).toContain('für den März fehlt');
+		expect(findingText(finding('gap', { missingParts: [part('2026-01-14', '2026-07-15')] }))).toContain(
+			'für die Zeit vom 14.01.2026 bis 15.07.2026 fehlt'
+		);
 	});
 
 	it('nennt Kosten, die deutlich vom Vorjahr abweichen, mit dem nächsten Schritt', () => {
@@ -217,10 +215,7 @@ describe('Rechnungen pro Kategorie', () => {
 	});
 
 	// Erste Abrechnung: ob das Gebäude einen Tank hat, weiss Dwello nicht
-	it('fragt bei Heizkosten ohne Tankbestand, ob das Gebäude mit Öl oder Pellets heizt, ohne Bestätigung', () => {
-		expect(findingText(finding('tank'))).toBe(
-			'Heizen Sie mit Öl, Pellets oder Holz? Dann erfassen Sie den Tankbestand am Anfang und am Ende der Periode, sonst rechnet Dwello den Einkauf ab statt den Verbrauch. Bei Fernwärme, Gas oder Wärmepumpe ist nichts zu tun.'
-		);
+	it('fragt bei Heizkosten ohne Tankbestand ohne Bestätigung', () => {
 		expect(
 			needsConfirmation([
 				{
@@ -336,6 +331,13 @@ describe('Abweichung zum Akonto', () => {
 		expect(akontoHint(row(2700, 2400))).toBeNull(); // 12.5 % darüber
 		expect(akontoHint(row(1700, 2400))).toBeNull(); // 29 % darunter
 		expect(akontoHint(row(500, 0))).toBeNull();
+	});
+
+	// Ausgezogen: es gibt kein Akonto mehr zu erhöhen
+	it('schlägt bei einem beendeten Mietvertrag keine Erhöhung vor', () => {
+		expect(akontoHint({ ...row(2800, 2400), movedOut: true })).toBe(
+			'Kosten CHF\u00a0400.00 (17 %) über dem Akonto.'
+		);
 	});
 
 	// Randfall Mieterwechsel und Teilperiode: wer nur im Sommer mietet, trägt kaum Heizkosten

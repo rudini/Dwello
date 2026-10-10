@@ -48,7 +48,7 @@
 <Field
 	id="heatingProfile"
 	label="Heizprofil"
-	help="Verteilt die Heizkosten bei einem Mieterwechsel auf die Monate; wählen Sie das Profil, das Ihre Mietverträge vorsehen. Dwello verteilt nach dem Heizprofil und kann Zählerstände nicht berücksichtigen. Wurden beim Mieterwechsel die Zähler abgelesen, gelten diese Werte: Erstellen Sie die Abrechnung dieser Wohnung dann ausserhalb von Dwello und löschen Sie ihren Entwurf. Hat Ihr Gebäude Zähler für Heizung oder Warmwasser in den Wohnungen, müssen Sie meist nach Verbrauch abrechnen. Das kann Dwello nicht: Erstellen Sie die Abrechnungen dann ausserhalb von Dwello. Nur Heizprofile mit zusammen 100 % lassen sich wählen."
+	help="Verteilt die Heizkosten bei einem Mieterwechsel auf die Monate; wählen Sie das Profil, das Ihre Mietverträge vorsehen. Dwello verteilt nach dem Heizprofil und kann Zählerstände nicht berücksichtigen. Wurden beim Mieterwechsel die Zähler für Heizung oder Warmwasser in der Wohnung abgelesen, gelten diese Werte: Erstellen Sie die Abrechnung dieser Wohnung dann ausserhalb von Dwello und löschen Sie die Entwürfe aller Mietverträge dieser Wohnung, auch wenn Sie die Abrechnungen später neu erstellen. Hat Ihr Gebäude Zähler für Heizung oder Warmwasser oder Heizkostenverteiler (kleine Geräte an den Heizkörpern) in den Wohnungen, müssen Sie meist nach Verbrauch abrechnen. Das kann Dwello nicht: Erstellen Sie die Abrechnungen dann ausserhalb von Dwello. Nur Heizprofile mit zusammen 100 % lassen sich wählen."
 	error={errors.heatingProfileId}
 >
 	{#snippet children(control)}

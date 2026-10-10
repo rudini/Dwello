@@ -108,7 +108,7 @@ describe('Abrechnungen erstellen', () => {
 		open();
 		expect(heading()).toBe('Abrechnungsperiode');
 		expect(document.querySelector('h2')!.textContent).toMatch(/Schritt 1 von 5/);
-		expect(byTestId<HTMLInputElement>('period-start-input')!.value).toBe('2024-01-01');
+		expect(byTestId<HTMLInputElement>('period-start-input')!.value).toBe('01.01.2024');
 		expect(text()).toContain('Montag, 1. Januar 2024');
 	});
 
@@ -117,7 +117,7 @@ describe('Abrechnungen erstellen', () => {
 		open();
 		expect(byTestId('period-future-warning')).toBeNull();
 
-		fireEvent(byTestId<HTMLInputElement>('period-end-input')!, 'input', '2099-12-31');
+		fireEvent(byTestId<HTMLInputElement>('period-end-input')!, 'input', '31.12.2099');
 
 		expect(byTestId('period-future-warning')!.textContent!.replace(/\s+/g, ' ')).toContain(
 			'Die Abrechnungsperiode ist noch nicht zu Ende.'
@@ -132,8 +132,11 @@ describe('Abrechnungen erstellen', () => {
 			confirmed: false
 		});
 
-		expect(byTestId('preview-period-warning')!.textContent).toContain(
+		expect(byTestId('preview-period-warning')!.textContent!.replace(/\s+/g, ' ')).toContain(
 			'Die Abrechnungsperiode ist noch nicht zu Ende.'
+		);
+		expect(byTestId('preview-period-warning')!.textContent!.replace(/\s+/g, ' ')).toContain(
+			'Erstellen Sie die Abrechnungen erst nach dem Ende der Periode.'
 		);
 	});
 
@@ -187,11 +190,11 @@ describe('Abrechnungen erstellen', () => {
 		await toSettings();
 		// Dwello kennt keine Zwischenablesung: das sagt der Text, statt sie zu versprechen
 		expect(text()).toContain(
-			'Dwello verteilt nach dem Heizprofil und kann Zählerstände nicht berücksichtigen. Wurden beim Mieterwechsel die Zähler abgelesen, gelten diese Werte: Erstellen Sie die Abrechnung dieser Wohnung dann ausserhalb von Dwello und löschen Sie ihren Entwurf.'
+			'Dwello verteilt nach dem Heizprofil und kann Zählerstände nicht berücksichtigen. Wurden beim Mieterwechsel die Zähler für Heizung oder Warmwasser in der Wohnung abgelesen, gelten diese Werte: Erstellen Sie die Abrechnung dieser Wohnung dann ausserhalb von Dwello und löschen Sie die Entwürfe aller Mietverträge dieser Wohnung, auch wenn Sie die Abrechnungen später neu erstellen.'
 		);
 		// Zähler in den Wohnungen: meist ist das ganze Gebäude nach Verbrauch abzurechnen
 		expect(text()).toContain(
-			'Hat Ihr Gebäude Zähler für Heizung oder Warmwasser in den Wohnungen, müssen Sie meist nach Verbrauch abrechnen. Das kann Dwello nicht: Erstellen Sie die Abrechnungen dann ausserhalb von Dwello.'
+			'Hat Ihr Gebäude Zähler für Heizung oder Warmwasser oder Heizkostenverteiler (kleine Geräte an den Heizkörpern) in den Wohnungen, müssen Sie meist nach Verbrauch abrechnen. Das kann Dwello nicht: Erstellen Sie die Abrechnungen dann ausserhalb von Dwello.'
 		);
 		expect(text()).toContain(
 			'Verlangen Sie eine Verwaltungspauschale nur, wenn sie im Mietvertrag vereinbart ist.'
@@ -236,7 +239,7 @@ describe('Abrechnungen erstellen', () => {
 		const rows = [...document.querySelectorAll('[data-testid="preview-invoices"]')].map((r) =>
 			r.textContent!.replace(/\s+/g, ' ')
 		);
-		expect(rows[0]).toContain('3 Rechnungen vom 15.1.2024 bis 30.6.2024');
+		expect(rows[0]).toContain('3 Rechnungen vom 15.01.2024 bis 30.06.2024');
 		expect(rows[1]).toContain('Keine Rechnungen erfasst');
 	});
 
@@ -333,11 +336,26 @@ describe('Abrechnungen erstellen', () => {
 
 	it('meldet eine Periode ohne Mietverträge und geht dann nicht weiter', async () => {
 		open({ preview: [], invoices: [invoices[0]] });
-		expect(byTestId('preview-empty')).not.toBeNull();
+		expect(byTestId('preview-empty')!.textContent!.replace(/\s+/g, ' ')).toContain(
+			'In dieser Abrechnungsperiode gibt es keine Mietverträge ohne Abrechnung in den gewählten Gebäuden.'
+		);
 		next();
 		await settle();
 		expect(heading()).toBe('Vorschau');
-		expect(text()).toContain('Wählen Sie eine andere Abrechnungsperiode oder andere Gebäude.');
+		expect(text()).toContain(
+			'Wählen Sie eine andere Abrechnungsperiode oder andere Gebäude, oder löschen Sie zuerst die Entwürfe, die Sie neu berechnen wollen.'
+		);
+	});
+
+	// Nachzügler: alle Mietverträge haben schon eine Abrechnung, der Verwalter will einen Entwurf neu berechnen
+	it('sagt bei einer leeren Vorschau, dass alle Mietverträge schon eine Abrechnung haben, und wo sie stehen', () => {
+		open({ preview: [], invoices: [{ ...invoices[0], buildingId: 'b1', statements: 2 }] });
+
+		const empty = byTestId('preview-empty')!.parentElement!.textContent!.replace(/\s+/g, ' ');
+		expect(empty).toContain(
+			'Alle Mietverträge haben in dieser Periode schon eine Abrechnung. Um einen Entwurf neu zu berechnen, löschen Sie ihn und erstellen Sie die Abrechnungen erneut.'
+		);
+		expect(document.querySelector('a[href="/statements?building=b1"]')).not.toBeNull();
 	});
 
 	it('nennt Gebäude, deren Rechnungen nur einen Teil der Periode abdecken', () => {
@@ -452,7 +470,7 @@ describe('Abrechnungen erstellen', () => {
 		// its own hint, not a comparison with the year before
 		expect(byTestId('category-check')).toBeNull();
 		const question = byTestId('tank-question')!;
-		expect(question.textContent).toContain('Heizen Sie mit Öl, Pellets oder Holz?');
+		expect(question.textContent).toContain('Heizen Sie mit Öl, Flüssiggas, Pellets oder Holz?');
 		expect(question.querySelector('a')!.getAttribute('href')).toBe('/buildings/b1');
 		expect(question.querySelector('a')!.textContent).toContain('Tankbestand erfassen');
 	});
@@ -503,7 +521,7 @@ describe('Abrechnungen erstellen', () => {
 		});
 		const check = byTestId('category-check')!;
 		expect(check.textContent).toContain('Ahornhof');
-		expect(check.textContent).toContain('gleichen Zeitraum im Vorjahr (1.1.2023 – 31.12.2023)');
+		expect(check.textContent).toContain('gleichen Zeitraum im Vorjahr (01.01.2023 – 31.12.2023)');
 		const findings = [...document.querySelectorAll('[data-testid="category-finding"]')].map((f) =>
 			f.textContent!.replace(/\s+/g, ' ').trim()
 		);
@@ -615,6 +633,9 @@ describe('Abrechnungen erstellen', () => {
 		});
 		expect(byTestId('existing-statements')!.textContent).toContain('Ahornhof');
 		expect(byTestId('existing-statements')!.textContent).toContain('2 Nebenkostenabrechnungen');
+		expect(byTestId('existing-statements')!.textContent!.replace(/\s+/g, ' ')).toContain(
+			'Mietverträge mit einer Abrechnung in dieser Periode erhalten keine neue. Um einen Entwurf neu zu berechnen, löschen Sie ihn und erstellen Sie die Abrechnungen erneut.'
+		);
 		expect(
 			byTestId('existing-statements')!.querySelector('a[href="/statements?building=b1"]')
 		).not.toBeNull();
@@ -748,7 +769,7 @@ describe('Abrechnung bearbeiten', () => {
 			form: null
 		} as never);
 
-		expect(byTestId<HTMLInputElement>('payment-deadline-input')!.value).toBe('2025-02-28');
+		expect(byTestId<HTMLInputElement>('payment-deadline-input')!.value).toBe('28.02.2025');
 		expect(byTestId<HTMLTextAreaElement>('statement-notes-input')!.value).toBe('Ratenzahlung');
 		expect(text()).toContain('Heizung');
 		expect(byTestId('form-cancel')!.getAttribute('href')).toBe('/statements/s1');

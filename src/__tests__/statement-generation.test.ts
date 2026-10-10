@@ -27,9 +27,10 @@ const contract = (id: string, startDate: string, endDate: string | null) => ({
 	apartmentNumber: '2.01'
 });
 
-function backend() {
+function backend(statements: { contractId: string; periodStart: string; periodEnd: string }[] = []) {
 	const posts: { url: string; body: Record<string, string> }[] = [];
 	const fetch = async (url: string, init?: RequestInit) => {
+		if (url === `${API}/statements?buildingId=b1&limit=1000`) return Response.json({ data: statements });
 		if (url === `${API}/contracts?buildingId=b1&limit=1000`) {
 			return Response.json({
 				contracts: [
@@ -67,7 +68,8 @@ describe('Abrechnungen erstellen', () => {
 				totalAdvancePayments: 1800,
 				balance: -50,
 				rentalDays: 366,
-				totalPeriodDays: 366
+				totalPeriodDays: 366,
+				movedOut: true
 			},
 			{
 				contractId: 'einzug',
@@ -77,7 +79,8 @@ describe('Abrechnungen erstellen', () => {
 				totalAdvancePayments: 1800,
 				balance: -50,
 				rentalDays: 366,
-				totalPeriodDays: 366
+				totalPeriodDays: 366,
+				movedOut: false
 			}
 		]);
 	});
@@ -114,6 +117,20 @@ describe('Abrechnungen erstellen', () => {
 			heatingProfileId: 'hp1',
 			managementFeePercent: 4.5
 		});
+	});
+
+	// Erneut erstellen ergänzt nur: die Abrechnung eines Mietvertrags wird nicht verdoppelt
+	it('übergeht Mietverträge, die in der Periode schon eine Abrechnung haben', async () => {
+		const { fetch, posts } = backend([
+			{ contractId: 'auszug', periodStart: '2024-01-01', periodEnd: '2024-12-31' },
+			{ contractId: 'einzug', periodStart: '2023-01-01', periodEnd: '2023-12-31' } // other period
+		]);
+
+		expect((await previewStatements(fetch, period)).map((row) => row.contractId)).toEqual([
+			'einzug'
+		]);
+		expect(await generateStatements(fetch, period)).toBe(1);
+		expect(posts.map((post) => post.body.contractId)).toEqual(['einzug', 'einzug']);
 	});
 
 	it('verteilt die Verwaltungspauschale nach dem gewählten Verteilschlüssel', async () => {

@@ -6,6 +6,7 @@ import {
 	dateOutsidePeriodWarning,
 	billedWarning,
 	invoiceDate,
+	invoiceDateInWords,
 	nonAllocableCategoryWarning,
 	utilityCostChoice
 } from '../questions/invoice-form';
@@ -18,7 +19,8 @@ import {
 	overrideCategory,
 	recategorize,
 	registerInvoice,
-	saveInvoice
+	saveInvoice,
+	typeInvoiceDate
 } from '../tasks/invoice-form';
 import { searchInvoices } from '../tasks/invoices';
 
@@ -109,6 +111,18 @@ Then(
 		);
 	}
 );
+
+When('der Liegenschaftsverwalter als Rechnungsdatum {string} eintippt', async ({ verwalter }, text: string) => {
+	await verwalter.perform(typeInvoiceDate(text));
+});
+
+Then('zeigt das Feld Rechnungsdatum {string}', async ({ verwalter }, text: string) => {
+	await expect(invoiceDate(verwalter)).toHaveValue(text);
+});
+
+Then('steht unter dem Rechnungsdatum {string}', async ({ verwalter }, words: string) => {
+	await expect(invoiceDateInWords(verwalter)).toHaveText(words);
+});
 
 When('der Liegenschaftsverwalter die Rechnung von {string} bearbeitet', async ({ verwalter, seed }, supplier: string) => {
 	await visit(verwalter.page, `/invoices/${seed.idOf(`Rechnung ${supplier}`)}/edit`);

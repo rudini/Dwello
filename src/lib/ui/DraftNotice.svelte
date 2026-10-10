@@ -12,10 +12,13 @@
 
 	const when = $derived(
 		savedAt &&
-			`am ${savedAt.toLocaleDateString('de-CH')} um ${savedAt.toLocaleTimeString('de-CH', {
-				hour: '2-digit',
-				minute: '2-digit'
-			})}`
+			`am ${savedAt.toLocaleDateString('de-CH', { day: '2-digit', month: '2-digit', year: 'numeric' })} um ${savedAt.toLocaleTimeString(
+				'de-CH',
+				{
+					hour: '2-digit',
+					minute: '2-digit'
+				}
+			)}`
 	);
 </script>
 

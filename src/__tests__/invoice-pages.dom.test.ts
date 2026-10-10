@@ -202,7 +202,7 @@ describe('Rechnungsdetail', () => {
 			}
 		});
 
-		expect(text()).toContain('Leistungszeitraum 1.10.2024 – 31.12.2024');
+		expect(text()).toContain('Leistungszeitraum 01.10.2024 – 31.12.2024');
 		expect(text()).not.toContain('Bestimmt, in welche Abrechnungsperiode');
 	});
 
@@ -214,9 +214,14 @@ describe('Rechnungsdetail', () => {
 
 		const hint = byTestId('invoice-missed-warning')!.textContent!.replace(/\s+/g, ' ');
 		expect(hint).toContain(
-			'Für die Abrechnungsperiode 1.1.2024 – 31.12.2024 gibt es schon Abrechnungen ohne diese Rechnung.'
+			'Für die Abrechnungsperiode 01.01.2024 – 31.12.2024 gibt es schon Abrechnungen ohne diese Rechnung.'
 		);
-		expect(hint).toContain('Entwürfe erstellen Sie neu, dann ist sie dabei.');
+		expect(hint).toContain(
+			'Löschen Sie die Entwürfe dieser Periode und erstellen Sie die Abrechnungen erneut, dann ist sie dabei.'
+		);
+		expect(hint).toContain(
+			'Versendete Abrechnungen berichtigen Sie ausserhalb von Dwello: Schicken Sie dem Mieter eine berichtigte Abrechnung mit dem Beleg. Nehmen Sie die Kosten nicht in die Abrechnung der nächsten Periode.'
+		);
 	});
 
 	// Der Mieter kann Einsicht in die Belege einer versendeten Abrechnung verlangen
@@ -228,9 +233,9 @@ describe('Rechnungsdetail', () => {
 		click('invoice-delete-button');
 
 		const dialog = document.querySelector('[role=dialog]')!.textContent!.replace(/\s+/g, ' ');
-		expect(dialog).toContain('Abrechnungsperiode 1.1.2024 – 31.12.2024');
+		expect(dialog).toContain('Abrechnungsperiode 01.01.2024 – 31.12.2024');
 		expect(dialog).toContain(
-			'Löschen Sie nur falsch erfasste Rechnungen. Versendete oder bezahlte Abrechnungen berichtigen Sie gegenüber dem Mieter. Bewahren Sie den Beleg auf: Der Mieter kann Einsicht verlangen.'
+			'Löschen Sie nur falsch erfasste Rechnungen. Die Entwürfe enthalten sie weiter: Löschen Sie danach die Entwürfe und erstellen Sie die Abrechnungen erneut. Versendete oder bezahlte Abrechnungen berichtigen Sie ausserhalb von Dwello gegenüber dem Mieter und zahlen zu viel Bezahltes zurück. Bewahren Sie den Beleg auf: Der Mieter kann Einsicht verlangen.'
 		);
 	});
 
@@ -409,8 +414,8 @@ describe('Rechnung erfassen', () => {
 		show(NewInvoicePage, { data: data(false) } as never);
 		fill();
 		expect(text()).toContain('Leistungszeitraum');
-		fireEvent(byTestId<HTMLInputElement>('invoice-service-start-input')!, 'input', '2024-10-01');
-		fireEvent(byTestId<HTMLInputElement>('invoice-service-end-input')!, 'input', '2024-12-31');
+		fireEvent(byTestId<HTMLInputElement>('invoice-service-start-input')!, 'input', '01.10.2024');
+		fireEvent(byTestId<HTMLInputElement>('invoice-service-end-input')!, 'input', '31.12.2024');
 
 		submit('submit-button');
 		await settle();
@@ -426,7 +431,7 @@ describe('Rechnung erfassen', () => {
 		const calls = fakeBff();
 		show(NewInvoicePage, { data: data(false) } as never);
 		fill();
-		fireEvent(byTestId<HTMLInputElement>('invoice-service-start-input')!, 'input', '2024-10-01');
+		fireEvent(byTestId<HTMLInputElement>('invoice-service-start-input')!, 'input', '01.10.2024');
 
 		submit('submit-button');
 
@@ -546,12 +551,12 @@ describe('Rechnung erfassen', () => {
 		expect(date.value).toBe('');
 		expect(byTestId('invoice-period-warning')).toBeNull();
 
-		fireEvent(date, 'input', '2026-10-10');
+		fireEvent(date, 'input', '10.10.2026');
 		expect(byTestId('invoice-period-warning')!.textContent!.replace(/\s+/g, ' ')).toContain(
-			'Das Rechnungsdatum liegt nicht in der Abrechnungsperiode 1.1.2025 – 31.12.2025'
+			'Das Rechnungsdatum liegt nicht in der Abrechnungsperiode 01.01.2025 – 31.12.2025'
 		);
 
-		fireEvent(date, 'input', '2025-11-15');
+		fireEvent(date, 'input', '15.11.2025');
 		expect(byTestId('invoice-period-warning')).toBeNull();
 	});
 
@@ -562,9 +567,9 @@ describe('Rechnung erfassen', () => {
 				period: { start: '2025-01-01', end: '2025-12-31' }
 			})
 		} as never);
-		fireEvent(byTestId<HTMLInputElement>('invoice-date-input')!, 'input', '2025-01-15');
-		fireEvent(byTestId<HTMLInputElement>('invoice-service-start-input')!, 'input', '2024-10-01');
-		fireEvent(byTestId<HTMLInputElement>('invoice-service-end-input')!, 'input', '2024-12-31');
+		fireEvent(byTestId<HTMLInputElement>('invoice-date-input')!, 'input', '15.01.2025');
+		fireEvent(byTestId<HTMLInputElement>('invoice-service-start-input')!, 'input', '01.10.2024');
+		fireEvent(byTestId<HTMLInputElement>('invoice-service-end-input')!, 'input', '31.12.2024');
 
 		expect(byTestId('invoice-period-warning')!.textContent).toContain(
 			'Der Leistungszeitraum liegt nicht in der Abrechnungsperiode'
@@ -580,7 +585,7 @@ describe('Rechnung erfassen', () => {
 			'Geben Sie ihn bei Rechnungen für einen Zeitraum an, zum Beispiel ein Quartal oder ein Jahr.'
 		);
 		expect(help).toContain(
-			'Nicht für Heizöl- oder Pelletlieferungen: Deren Verbrauch zählt über den Tankbestand des Gebäudes.'
+			'Nicht für Lieferungen von Heizöl, Flüssiggas, Pellets oder Holz: Deren Verbrauch zählt über den Tankbestand des Gebäudes.'
 		);
 	});
 
@@ -632,10 +637,10 @@ describe('Rechnung bearbeiten', () => {
 		} as never);
 
 		const warning = byTestId('invoice-billed-warning')!.textContent!.replace(/\s+/g, ' ');
-		expect(warning).toContain('Abrechnungsperiode 1.1.2024 – 31.12.2024');
-		expect(warning).toContain('Abrechnungsperiode 1.1.2024 – 30.6.2024');
+		expect(warning).toContain('Abrechnungsperiode 01.01.2024 – 31.12.2024');
+		expect(warning).toContain('Abrechnungsperiode 01.01.2024 – 30.06.2024');
 		expect(warning).toContain(
-			'Ändern Sie diese Rechnung, stimmen diese Abrechnungen nicht mehr. Entwürfe erstellen Sie neu; versendete oder bezahlte Abrechnungen berichtigen Sie gegenüber dem Mieter.'
+			'Ändern Sie diese Rechnung, stimmen diese Abrechnungen nicht mehr. Löschen Sie danach die Entwürfe und erstellen Sie die Abrechnungen erneut. Versendete oder bezahlte Abrechnungen berichtigen Sie ausserhalb von Dwello gegenüber dem Mieter.'
 		);
 	});
 
