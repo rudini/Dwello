@@ -1,0 +1,13 @@
+import { tick } from 'svelte';
+
+/**
+ * After a refused save, once the errors are on screen: focus the first invalid field, so its error is
+ * read out, or else the form's error message. Without it the focus falls back to the page.
+ */
+export async function focusFirstError(form: Element | null | undefined): Promise<void> {
+	await tick();
+	const target =
+		form?.querySelector<HTMLElement>(':is(input, select, textarea)[aria-invalid="true"]') ??
+		form?.querySelector<HTMLElement>('[role="alert"]');
+	target?.focus();
+}

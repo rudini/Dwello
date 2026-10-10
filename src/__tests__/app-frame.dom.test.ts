@@ -1,48 +1,51 @@
 import { describe, it, expect, vi } from 'vitest';
 import { readable } from 'svelte/store';
-import Icon from '$lib/components/Icon.svelte';
-import Navigation from '$lib/components/Navigation.svelte';
-import { navGroups } from '$lib/navigation';
+import Navigation from '$lib/ui/Navigation.svelte';
+import { activeHref, navGroups } from '$lib/navigation';
 import { show } from './helpers/dom';
 
 vi.mock('$app/stores', () => ({
-	page: readable({ url: new URL('http://localhost/tenants/42') })
+	page: readable({ url: new URL('http://localhost/config/heating-profiles/42/edit') })
 }));
 
-describe('Icon', () => {
-	it('versteckt den Ligatur-Namen des Symbols vor Screenreadern', () => {
-		show(Icon, { name: 'add' });
-		expect(document.querySelector('.material-symbols-outlined')?.getAttribute('aria-hidden')).toBe(
-			'true'
-		);
-	});
-});
-
 describe('Hauptnavigation', () => {
-	it('gruppiert die Bereiche nach Arbeitsablauf', () => {
+	it('gruppiert die Bereiche nach Arbeitsablauf, in einer Ebene', () => {
 		expect(navGroups.map((group) => group.label)).toEqual([
 			'',
-			'Liegenschaften',
+			'Verwalten',
 			'Nebenkosten',
-			'System'
+			'Einstellungen und Hilfe'
 		]);
-		expect(navGroups.flatMap((group) => group.items.map((item) => item.href))).toEqual([
-			'/dashboard',
-			'/buildings',
-			'/apartments',
-			'/tenants',
-			'/contracts',
-			'/invoices',
-			'/statements',
-			'/documents',
-			'/config',
-			'/help'
+		expect(
+			navGroups.flatMap((group) => group.items.map((item) => [item.label, item.href]))
+		).toEqual([
+			['Übersicht', '/dashboard'],
+			['Gebäude', '/buildings'],
+			['Wohnungen', '/apartments'],
+			['Mieter', '/tenants'],
+			['Mietverträge', '/contracts'],
+			['Rechnungen', '/invoices'],
+			['Nebenkostenabrechnungen', '/statements'],
+			['Dokumente', '/documents'],
+			['Einstellungen', '/config'],
+			['Kategorien', '/config/categories'],
+			['Verteilschlüssel', '/config/distribution-keys'],
+			['Heizprofile', '/config/heating-profiles'],
+			['Hilfe', '/help']
 		]);
 	});
 
-	it('markiert nur den Bereich der aktuellen Seite als aktiv', () => {
+	it('wählt den genauesten Bereich der Seite', () => {
+		expect(activeHref('/')).toBe('/dashboard');
+		expect(activeHref('/config')).toBe('/config');
+		expect(activeHref('/config/categories/new')).toBe('/config/categories');
+		expect(activeHref('/statements/generate')).toBe('/statements');
+		expect(activeHref('/buildingsX')).toBeUndefined();
+	});
+
+	it('markiert nur diesen Bereich als aktuelle Seite', () => {
 		show(Navigation, {});
 		const active = [...document.querySelectorAll('a[aria-current="page"]')];
-		expect(active.map((link) => link.getAttribute('href'))).toEqual(['/tenants']);
+		expect(active.map((link) => link.getAttribute('href'))).toEqual(['/config/heating-profiles']);
 	});
 });

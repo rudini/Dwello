@@ -51,6 +51,26 @@ describe('Einstellungen laden', () => {
 			defaultDistributionKeyId: ''
 		});
 	});
+
+	it('bietet die Verteilschlüssel unter ihrem deutschen Namen an', async () => {
+		const keys = [
+			{ id: 'dk1', name: 'Per Area (m²)', nameDE: 'Pro Fläche (m²)' },
+			{ id: 'dk2', name: 'Eigener' }
+		];
+		const fetch = (async (url: string) =>
+			Response.json(
+				url.startsWith(`${API}/config`)
+					? { data: stored }
+					: { data: url.includes('distribution-keys') ? keys : [] }
+			)) as typeof globalThis.fetch;
+
+		const data = (await load({ fetch } as never)) as { distributionKeys: unknown };
+
+		expect(data.distributionKeys).toEqual([
+			{ id: 'dk1', name: 'Pro Fläche (m²)' },
+			{ id: 'dk2', name: 'Eigener' }
+		]);
+	});
 });
 
 describe('Einstellungen speichern', () => {
@@ -163,7 +183,10 @@ describe('Standard-Verteilschlüssel bei neuen Rechnungen', () => {
 				url === `${API}/config/default_distribution_key_id` ? { value: 'dk1' } : { data: [] }
 			);
 
-		const data = (await loadInvoiceForm({ fetch } as never)) as Record<string, unknown>;
+		const data = (await loadInvoiceForm({
+			fetch,
+			url: new URL('http://localhost/invoices/new')
+		} as never)) as Record<string, unknown>;
 
 		expect(data.defaultDistributionKeyId).toBe('dk1');
 	});

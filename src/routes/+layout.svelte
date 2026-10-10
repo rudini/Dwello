@@ -2,14 +2,15 @@
 	import '../styles/globals.css';
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
-	import { goto } from '$app/navigation';
+	import { afterNavigate, goto } from '$app/navigation';
 	import { user, clearStores } from '$lib/stores';
 	import { getXsrfTokenFromCookie } from '$lib/api';
-	import Header from '$lib/components/Header.svelte';
-	import Navigation from '$lib/components/Navigation.svelte';
-	import MobileNav from '$lib/components/MobileNav.svelte';
-	import Footer from '$lib/components/Footer.svelte';
-	import ToastContainer from '$lib/components/ToastContainer.svelte';
+	import Header from '$lib/ui/Header.svelte';
+	import Navigation from '$lib/ui/Navigation.svelte';
+	import MobileNav from '$lib/ui/MobileNav.svelte';
+	import Footer from '$lib/ui/Footer.svelte';
+	import ToastRegion from '$lib/ui/ToastRegion.svelte';
+	import { isListSearch } from '$lib/list-url';
 	import type { LayoutData } from './$types';
 	import type { Snippet } from 'svelte';
 
@@ -63,48 +64,47 @@
 		document.body.dataset.hydrated = 'true';
 	});
 
+	// After a search on a list the focus goes to its results, so their number is read out
+	afterNavigate((navigation) => {
+		if (isListSearch(navigation))
+			document.querySelector<HTMLElement>('main [data-results]')?.focus();
+	});
+
 	// Derived state for showing authenticated layout
 	const showAuthenticatedLayout = $derived(!isPublicPath($page.url.pathname) && data.user !== null);
 </script>
 
 <svelte:head>
-	<meta charset="utf-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1" />
-	<title>Dwello - Property Management</title>
+	<title>Dwello</title>
 </svelte:head>
 
-<!-- Skip to main content link for accessibility -->
 <a
 	href="#main-content"
-	class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary focus:text-white focus:rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+	class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-control focus:bg-accent focus:px-4 focus:py-2 focus:text-on-accent"
 >
-	Zum Hauptinhalt springen
+	Zum Inhalt springen
 </a>
 
 {#if showAuthenticatedLayout}
-	<!-- Authenticated Layout -->
-	<div class="min-h-screen flex flex-col bg-slate-50">
+	<div class="flex min-h-screen flex-col bg-canvas">
 		<Header user={data.user} />
 		<div class="flex flex-1">
-			<Navigation class="hidden md:block" />
-			<main id="main-content" class="flex-1 min-w-0 p-4 md:p-8" tabindex="-1">
-				<div class="max-w-7xl mx-auto">
+			<Navigation />
+			<main id="main-content" class="min-w-0 flex-1 px-4 py-8 lg:px-10" tabindex="-1">
+				<div class="mx-auto max-w-6xl">
 					{@render children()}
 				</div>
 			</main>
 		</div>
 		<Footer />
 	</div>
-	<!-- Mobile navigation drawer -->
 	<MobileNav />
 {:else}
-	<!-- Public Layout (Login, Error pages) -->
-	<div class="min-h-screen bg-slate-50">
+	<div class="min-h-screen bg-canvas">
 		<main id="main-content" tabindex="-1">
 			{@render children()}
 		</main>
 	</div>
 {/if}
 
-<!-- Toast notifications -->
-<ToastContainer />
+<ToastRegion />

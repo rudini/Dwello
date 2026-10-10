@@ -14,6 +14,17 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Und "Marc Huber" mietet die Wohnung "3.01" seit "2024-05-01" für "980" Franken
     Und der Liegenschaftsverwalter ist auf der Seite zum Erstellen von Abrechnungen
 
+  # Alle fünf Schritte des Assistenten passen auch auf Tablet und kleinen Laptop
+  Szenariogrundriss: Schritte des Assistenten in einem schmalen Fenster
+    Angenommen das Browserfenster ist <Breite> Pixel breit
+    Dann ist der Seitentitel lesbar
+    Und scrollt die Seite nicht seitwärts
+
+    Beispiele:
+      | Breite |
+      | 768    |
+      | 1024   |
+
   @api
   Szenario: Vorschau bei Mieterwechsel mit Leerstand
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
@@ -49,13 +60,54 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Und kostet die Abrechnung von "Marc Huber" "CHF 550.12"
 
   Szenario: Hinweis bei Verwaltungspauschale über dem Richtwert
-    Wenn der Liegenschaftsverwalter die Verwaltungspauschale auf 4.5 % setzt
+    Wenn der Liegenschaftsverwalter für das Gebäude "Lindenhof" die Verwaltungspauschale auf 4.5 % setzt
     Dann sieht der Liegenschaftsverwalter den Hinweis, dass die Verwaltungspauschale über dem üblichen Richtwert liegt
 
   @api
   Szenario: Mietverträge ausserhalb der Periode werden nicht abgerechnet
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2023 für das Gebäude "Lindenhof" öffnet
     Dann meldet die Vorschau, dass es in der Periode keine Mietverträge gibt
+
+  Szenario: Warnung, wenn für ein Gebäude keine Rechnungen erfasst sind
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
+    Dann warnt die Vorschau, dass für "Lindenhof" in der Abrechnungsperiode keine Rechnungen erfasst sind
+    Wenn der Liegenschaftsverwalter ohne Bestätigung zum Erstellen weitergehen will
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Bestätigen Sie, dass die Abrechnungen trotzdem erstellt werden sollen."
+
+  Szenario: Eine Rechnung aus der Warnung ausserhalb der Abrechnungsperiode fällt auf
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
+    Und der Liegenschaftsverwalter aus der Warnung eine Rechnung erfassen will
+    Dann ist das Rechnungsdatum leer, damit es bewusst gewählt wird
+    Wenn der Liegenschaftsverwalter das Rechnungsdatum "2025-01-10" einträgt
+    Dann warnt das Rechnungsformular, dass das Rechnungsdatum nicht in der Abrechnungsperiode "1.1.2024 – 31.12.2024" liegt
+    Wenn der Liegenschaftsverwalter das Rechnungsdatum "2024-11-15" einträgt
+    Dann warnt das Rechnungsformular nicht vor dem Rechnungsdatum
+
+  Szenario: Eine Bestätigung gilt nur für ihre Vorschau
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
+    Und der Liegenschaftsverwalter bestätigt, dass die Abrechnungen trotzdem erstellt werden sollen
+    Und der Liegenschaftsverwalter die Vorschau neu berechnen lässt
+    Und der Liegenschaftsverwalter ohne Bestätigung zum Erstellen weitergehen will
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Bestätigen Sie, dass die Abrechnungen trotzdem erstellt werden sollen."
+
+  Szenario: Vorschau nennt die erfassten Rechnungen
+    Angenommen im Gebäude "Lindenhof" gibt es eine Heizkostenrechnung über "1000" Franken für 2024
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
+    Dann nennt die Vorschau für "Lindenhof" 1 erfasste Rechnung
+    Und warnt die Vorschau nicht vor fehlenden Rechnungen
+
+  Szenario: Vor dem Erstellen ist klar, dass nichts verschickt wird
+    Angenommen im Gebäude "Lindenhof" gibt es eine Heizkostenrechnung über "1000" Franken für 2024
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
+    Und der Liegenschaftsverwalter zum Erstellen weitergeht
+    Dann erfährt der Liegenschaftsverwalter, dass die Abrechnungen als Entwurf entstehen und nichts verschickt wird
+
+  Szenario: Angefangene Abrechnungen später fortsetzen
+    Wenn der Liegenschaftsverwalter das Gebäude "Lindenhof" für die Abrechnungen wählt
+    Und der Liegenschaftsverwalter die Seite zum Erstellen von Abrechnungen später wieder öffnet
+    Dann sieht der Liegenschaftsverwalter, dass sein Entwurf wiederhergestellt ist
+    Wenn der Liegenschaftsverwalter weitergeht
+    Dann ist für die Abrechnungen das Gebäude "Lindenhof" gewählt
 
   Szenario: Erstellte Abrechnungen anzeigen
     Angenommen der Liegenschaftsverwalter hat die Abrechnungen 2024 für das Gebäude "Lindenhof" erstellt

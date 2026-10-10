@@ -12,7 +12,7 @@ npx bddgen && npx playwright test --project=api    # only the @api scenarios thr
 npx bddgen --tags "@wip" && npx playwright test --project=chromium      # a new @wip scenario, to see it fail
 ```
 
-The run starts its own stack: mail catcher, backend on 3101 and a production build of the frontend on 3100, against `dwello_e2e`, recreated from `backend/migrations` before every run. Only PostgreSQL on 5432 must be running. `E2E_DATABASE_URL` overrides the database. Locally a frontend already listening on 3100 is reused, so stop it after code changes or the tests run an old build; 3101 must be free.
+The run starts its own stack: mail catcher, backend on 3101 and a production build of the frontend on 3100, against `dwello_e2e`, recreated from `backend/migrations` before every run. Only PostgreSQL on 5432 must be running. `E2E_DATABASE_URL` overrides the database. Locally a frontend already listening on 3100 is reused, so stop it after code changes or the tests run an old build; 3101 must be free. A second, empty instance (backend 3103 on `dwello_e2e_empty`, the same build on 3102) serves the axe check's `empty` and `first-use` states; 3102 and 3103 must be free as well.
 
 ## Layers (Screenplay, after Dave Farley)
 

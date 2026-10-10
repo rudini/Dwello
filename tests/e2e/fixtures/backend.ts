@@ -198,6 +198,14 @@ export function testData(request: APIRequestContext, token: string) {
 			await post(`statements/${ids.get(`Abrechnung ${tenantTitle} ${year}`)}/generate-pdf`, {});
 		},
 
+		async paymentDeadline(tenantTitle: string, year: number, date: string) {
+			await put(`statements/${ids.get(`Abrechnung ${tenantTitle} ${year}`)}`, { paymentDeadline: date });
+		},
+
+		async contractEnd(tenantTitle: string, endDate: string) {
+			await put(`contracts/${ids.get(`Mietvertrag ${tenantTitle}`)}`, { endDate });
+		},
+
 		async sendStatement(tenantTitle: string, year: number) {
 			await put(`statements/${ids.get(`Abrechnung ${tenantTitle} ${year}`)}/status`, { status: 'sent' });
 		},

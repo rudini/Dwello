@@ -1,43 +1,51 @@
 <script lang="ts">
+	import PageHeader from '$lib/ui/PageHeader.svelte';
+	import Panel from '$lib/ui/Panel.svelte';
+	import Glossary from './Glossary.svelte';
+
+	// Area names as in the main navigation (src/lib/navigation.ts), so the help leads to the right place
 	const sections = [
 		{
 			title: 'Gebäude und Wohnungen erfassen',
 			steps: [
-				'Unter «Gebäude» ein neues Gebäude mit Adresse, PLZ, Ort und Baujahr erfassen.',
-				'In der Detailansicht des Gebäudes die Wohnungen mit Wohnungsnummer, Geschoss, Wohnfläche und Zimmeranzahl hinzufügen.',
-				'Die Wohnfläche ist die Grundlage für flächenbasierte Verteilschlüssel und sollte deshalb genau sein.'
+				'Unter «Gebäude» erfassen Sie ein Gebäude mit Adresse, PLZ, Ort und Baujahr.',
+				'Unter «Wohnungen» oder in der Detailansicht des Gebäudes fügen Sie die Wohnungen mit Wohnungsnummer, Stockwerk, Fläche und Zimmeranzahl hinzu.',
+				'Die Fläche ist die Grundlage für Verteilschlüssel nach Fläche. Erfassen Sie sie deshalb genau.'
 			]
 		},
 		{
 			title: 'Mieter und Mietverträge verwalten',
 			steps: [
-				'Unter «Mieter» die Mieter mit Kontaktdaten erfassen und festlegen, ob sie Korrespondenz per E-Mail oder per Brief erhalten.',
-				'Unter «Verträge» einen Mietvertrag mit Wohnung, Vertragsbeginn, Mietzins und Akontobeitrag erfassen.',
-				'Endet ein Mietverhältnis, im Mietvertrag das Vertragsende eintragen. Die Wohnung gilt danach wieder als leer.'
+				'Unter «Mieter» erfassen Sie die Mieter mit Kontaktdaten und Korrespondenzkanal (Brief oder E-Mail).',
+				'Unter «Mietverträge» führt Sie «Mietvertrag erfassen» in fünf Schritten durch den Vertrag: Mieter, Wohnung, Vertragsdauer, Miete und Prüfen. Mit «Zurück» und «Weiter» wechseln Sie die Schritte, ohne Eingaben zu verlieren.',
+				'Erst «Mietvertrag speichern» im letzten Schritt legt den Mietvertrag an. Bis dahin bleiben Ihre Eingaben als Entwurf in diesem Browser, bis Sie speichern, den Entwurf verwerfen oder sich abmelden.',
+				'Endet ein Mietverhältnis, tragen Sie im Mietvertrag das Vertragsende ein. Danach gilt die Wohnung wieder als leer.'
 			]
 		},
 		{
 			title: 'Rechnungen erfassen',
 			steps: [
-				'Unter «Rechnungen» jede Rechnung eines Dienstleisters mit Rechnungssteller, Datum, Betrag und Gebäude erfassen.',
-				'Jede Rechnung einer Nebenkostenkategorie zuordnen. Nur Rechnungen umlagefähiger Kategorien fliessen in die Abrechnungen ein.',
-				'Kategorien, Verteilschlüssel und Heizprofile werden unter «Konfiguration» gepflegt.'
+				'Unter «Rechnungen» erfassen Sie jede Rechnung eines Rechnungsstellers mit Datum, Betrag und Gebäude.',
+				'Jede Rechnung gehört zu einer Kategorie. Nur Rechnungen umlagefähiger Kategorien fliessen in die Nebenkostenabrechnungen ein.',
+				'Kategorien, Verteilschlüssel und Heizprofile pflegen Sie unter «Kategorien», «Verteilschlüssel» und «Heizprofile», Vorgaben wie die Abrechnungsperiode unter «Einstellungen».'
 			]
 		},
 		{
 			title: 'Nebenkostenabrechnungen erstellen',
 			steps: [
-				'Unter «Abrechnungen» → «Abrechnungen erstellen» Gebäude und Abrechnungsperiode wählen.',
-				'Die Vorschau prüfen: Dwello verteilt die Kosten nach Verteilschlüssel und rechnet bei Mieterwechseln und Leerstand anteilig ab.',
-				'Die erstellten Abrechnungen liegen als Entwurf vor. Vor dem Versand prüfen; Zahlungsfrist und Bemerkung lassen sich anpassen, falsche Kosten werden durch Neuerstellen korrigiert.'
+				'Unter «Nebenkostenabrechnungen» führt Sie «Abrechnungen erstellen» in fünf Schritten: Abrechnungsperiode, Gebäude, Heizprofil und Verwaltungspauschale, Vorschau und Erstellen.',
+				'In der Vorschau prüfen Sie die Kosten: Dwello verteilt sie nach Verteilschlüssel und rechnet bei Mieterwechsel und Leerstand nach Mietstagen ab. Erst «Entwürfe erstellen» legt die Abrechnungen an.',
+				'Die Abrechnungen liegen danach als Entwurf vor. Zahlungsfrist und Bemerkung können Sie anpassen; falsche Kosten korrigieren Sie, indem Sie die Abrechnungen neu erstellen.',
+				'Dwello verschickt die Abrechnungen nicht selbst. Stellen Sie dem Mieter das PDF per Brief oder E-Mail zu und wählen Sie danach «Versenden». Dwello hält damit fest, dass die Abrechnung versendet ist.'
 			]
 		},
 		{
 			title: 'Zahlungen und Mahnungen',
 			steps: [
-				'Nach dem Versand den Zahlungseingang in der Abrechnung festhalten.',
-				'Für überfällige Abrechnungen eine Zahlungserinnerung oder Mahnung auslösen. Sie geht je nach Einstellung des Mieters per E-Mail oder als Brief.',
-				'Briefe erscheinen unter «Dokumente» und werden dort nach dem Versand als versendet markiert.'
+				'Überfällige Abrechnungen und anstehende Fristen zeigt Ihnen die «Übersicht».',
+				'Geht eine Zahlung ein, wählen Sie in der Abrechnung «Als bezahlt markieren».',
+				'Ist die Zahlungsfrist überschritten, lösen Sie mit «Mahnung senden» eine Zahlungserinnerung oder Mahnung aus. Sie geht je nach Korrespondenzkanal des Mieters per E-Mail oder als Brief.',
+				'Briefe erscheinen unter «Dokumente». Dort markieren Sie sie nach dem Versand als versendet.'
 			]
 		}
 	];
@@ -47,23 +55,18 @@
 	<title>Hilfe - Dwello</title>
 </svelte:head>
 
-<div class="space-y-6 max-w-3xl">
-	<div>
-		<h1 class="text-2xl font-bold text-gray-900" data-testid="page-title">Hilfe</h1>
-		<p class="text-gray-500 mt-1">Die wichtigsten Abläufe in Dwello Schritt für Schritt</p>
-	</div>
+<div class="flex max-w-3xl flex-col gap-8">
+	<PageHeader title="Hilfe" purpose="Die wichtigsten Abläufe in Dwello Schritt für Schritt." />
 
 	{#each sections as section (section.title)}
-		<section
-			data-testid="page-section"
-			class="bg-white border border-slate-200 rounded-xl shadow-sm p-6"
-		>
-			<h2 class="text-lg font-semibold text-gray-900 mb-3">{section.title}</h2>
-			<ol class="list-decimal pl-5 space-y-2 text-gray-700">
+		<Panel title={section.title} testid="page-section">
+			<ol class="flex list-decimal flex-col gap-2 pl-6 text-ink">
 				{#each section.steps as step (step)}
 					<li>{step}</li>
 				{/each}
 			</ol>
-		</section>
+		</Panel>
 	{/each}
+
+	<Glossary />
 </div>

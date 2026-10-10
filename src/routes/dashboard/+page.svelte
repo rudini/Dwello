@@ -1,165 +1,49 @@
 <script lang="ts">
-	import type { PageData } from './$types';
-	import Button from '$lib/components/Button.svelte';
-	import Icon from '$lib/components/Icon.svelte';
-	import StatCard from '$lib/components/StatCard.svelte';
-	import ActivityFeed from '$lib/components/ActivityFeed.svelte';
-	import OccupancyChart from '$lib/components/OccupancyChart.svelte';
-	import StatementTiles from './StatementTiles.svelte';
-	import QuickActions from './QuickActions.svelte';
-	import GettingStarted from './GettingStarted.svelte';
+	import Icon from '$lib/ui/Icon.svelte';
+	import PageHeader from '$lib/ui/PageHeader.svelte';
+	import type { IconName } from '$lib/ui/icons';
+	import BuildingFigures from './BuildingFigures.svelte';
+	import DeadlineList from './DeadlineList.svelte';
+	import TaskList from './TaskList.svelte';
+	import type { OverviewData } from './+page.server';
 
-	let { data }: { data: PageData } = $props();
+	// What to do now first, then the dates ahead, then the state of the buildings
+	let { data }: { data: OverviewData } = $props();
 
-	const chf = (amount: number) =>
-		new Intl.NumberFormat('de-CH', { style: 'currency', currency: 'CHF' }).format(amount);
-
-	type Tile = {
-		label: string;
-		value: string | number;
-		icon: string;
-		iconColor: string;
-		href?: string;
-		testId: string;
-	};
-	const portfolio: Tile[] = $derived([
-		{
-			label: 'Gebäude',
-			value: data.portfolio.totalBuildings,
-			icon: 'apartment',
-			iconColor: 'text-blue-600',
-			href: '/buildings',
-			testId: 'stat-buildings'
-		},
-		{
-			label: 'Wohnungen',
-			value: data.portfolio.totalApartments,
-			icon: 'home',
-			iconColor: 'text-purple-600',
-			href: '/apartments',
-			testId: 'stat-apartments'
-		},
-		{
-			label: 'Vermietet',
-			value: data.portfolio.occupiedApartments,
-			icon: 'groups',
-			iconColor: 'text-green-600',
-			href: '/apartments?status=occupied',
-			testId: 'stat-occupied'
-		},
-		{
-			label: 'Wiedervermietet',
-			value: data.portfolio.reletApartments,
-			icon: 'event_available',
-			iconColor: 'text-sky-600',
-			href: '/apartments?status=relet',
-			testId: 'stat-relet'
-		},
-		{
-			label: 'Leer',
-			value: data.portfolio.vacantApartments,
-			icon: 'door_open',
-			iconColor: 'text-amber-600',
-			href: '/apartments?status=vacant',
-			testId: 'stat-vacant'
-		},
-		{
-			label: 'Gesperrt',
-			value: data.portfolio.reservedApartments,
-			icon: 'block',
-			iconColor: 'text-red-600',
-			href: '/apartments?status=reserved',
-			testId: 'stat-reserved'
-		},
-		{
-			label: 'Belegungsrate',
-			value: `${data.portfolio.occupancyRate.toFixed(1)}%`,
-			icon: 'pie_chart',
-			iconColor: 'text-orange-600',
-			testId: 'stat-occupancy-rate'
-		}
-	]);
-	const financial: Tile[] = $derived([
-		{
-			label: 'Offene Abrechnungen',
-			value: data.financial.outstandingStatements,
-			icon: 'pending_actions',
-			iconColor: 'text-yellow-600',
-			testId: 'stat-open-statements'
-		},
-		{
-			label: 'Ausstehende Nachzahlungen',
-			value: chf(data.financial.totalPending),
-			icon: 'account_balance_wallet',
-			iconColor: 'text-blue-600',
-			testId: 'stat-pending'
-		},
-		{
-			label: 'Davon überfällig',
-			value: chf(data.financial.overdueAmount),
-			icon: 'warning',
-			iconColor: 'text-red-600',
-			href: '/statements?status=overdue',
-			testId: 'stat-overdue-amount'
-		},
-		{
-			label: 'Bezahlt (Monat)',
-			value: chf(data.financial.paidThisMonth),
-			icon: 'payments',
-			iconColor: 'text-green-600',
-			testId: 'stat-paid-month'
-		}
-	]);
+	const quickActions: { label: string; href: string; icon: IconName }[] = [
+		{ label: 'Mieter erfassen', href: '/tenants/new', icon: 'user-add' },
+		{ label: 'Mietvertrag erfassen', href: '/contracts/new', icon: 'contract' },
+		{ label: 'Rechnung erfassen', href: '/invoices/new', icon: 'invoice' },
+		{ label: 'Abrechnungen erstellen', href: '/statements/generate', icon: 'statement' }
+	];
 </script>
 
 <svelte:head>
-	<title>Dashboard - Dwello</title>
+	<title>Übersicht - Dwello</title>
 </svelte:head>
 
-<div class="space-y-6">
-	<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-		<div>
-			<h1 class="text-2xl font-bold text-gray-900">Dashboard</h1>
-			<p class="text-gray-500 mt-1">Ihr Portfolio auf einen Blick</p>
-		</div>
-		<div class="flex items-center gap-3">
-			<Button href="/invoices/new" variant="secondary" testid="dashboard-action">
-				<Icon name="receipt" size={20} />
-				Rechnung erfassen
-			</Button>
-			<Button href="/statements/generate" variant="primary" testid="dashboard-action">
-				<Icon name="receipt_long" size={20} />
-				Abrechnungen erstellen
-			</Button>
-		</div>
-	</div>
+<div class="flex flex-col gap-10">
+	<PageHeader title="Übersicht" purpose="Was jetzt zu tun ist und welche Fristen anstehen." />
+	<TaskList tasks={data.tasks} />
+	<DeadlineList deadlines={data.deadlines} />
 
-	<GettingStarted portfolio={data.portfolio} statements={data.statements} />
-
-	<QuickActions />
-
-	<div data-testid="portfolio-section">
-		<h2 class="text-lg font-semibold text-gray-900 mb-4">Portfolio</h2>
-		<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-			{#each portfolio as tile (tile.testId)}
-				<StatCard {...tile} />
+	<section aria-labelledby="quick-heading" class="flex flex-col gap-4">
+		<h2 id="quick-heading" class="text-2xl font-bold text-ink">Häufige Arbeiten</h2>
+		<ul class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+			{#each quickActions as action (action.href)}
+				<li>
+					<a
+						href={action.href}
+						data-testid="quick-action"
+						class="flex h-full min-h-12 items-center gap-4 rounded-panel border border-line bg-surface p-4 font-semibold text-accent hover:bg-accent-soft"
+					>
+						<Icon name={action.icon} size={24} />
+						{action.label}
+					</a>
+				</li>
 			{/each}
-		</div>
-	</div>
+		</ul>
+	</section>
 
-	<div data-testid="financial-section">
-		<h2 class="text-lg font-semibold text-gray-900 mb-4">Finanzen</h2>
-		<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-			{#each financial as tile (tile.testId)}
-				<StatCard {...tile} />
-			{/each}
-		</div>
-	</div>
-
-	<StatementTiles counts={data.statements} />
-
-	<div class="grid gap-6 lg:grid-cols-2">
-		<ActivityFeed activities={data.recentActivity} maxItems={5} />
-		<OccupancyChart buildings={data.buildingOccupancy} />
-	</div>
+	<BuildingFigures {data} />
 </div>

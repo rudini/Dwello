@@ -1,6 +1,6 @@
 <script lang="ts">
-	import Icon from '$lib/components/Icon.svelte';
 	import type { RentalContract } from '$lib/types';
+	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import ContractForm from '../../ContractForm.svelte';
 
 	interface PageData {
@@ -10,35 +10,25 @@
 	}
 
 	let { data }: { data: PageData } = $props();
+
+	const tenant = $derived(data.tenants.find((t) => t.id === data.contract.tenantId)?.name);
 </script>
 
 <svelte:head>
 	<title>Mietvertrag bearbeiten - Dwello</title>
 </svelte:head>
 
-<div class="max-w-2xl mx-auto space-y-6">
-	<!-- Breadcrumb -->
-	<nav class="flex items-center text-sm text-gray-500">
-		<a href="/contracts" data-testid="breadcrumb-link" class="hover:text-primary transition-colors"
-			>Mietverträge</a
-		>
-		<Icon name="chevron_right" size={16} class="mx-2" />
-		<a
-			href="/contracts/{data.contract.id}"
-			data-testid="breadcrumb-link"
-			class="hover:text-primary transition-colors"
-		>
-			Vertrag
-		</a>
-		<Icon name="chevron_right" size={16} class="mx-2" />
-		<span class="text-gray-900 font-medium">Bearbeiten</span>
-	</nav>
-
-	<!-- Header -->
-	<div>
-		<h1 class="text-2xl font-bold text-gray-900">Mietvertrag bearbeiten</h1>
-		<p class="text-gray-500 mt-1">Ändern Sie die Vertragsdaten.</p>
-	</div>
-
+<div class="mx-auto flex max-w-3xl flex-col gap-8">
+	<PageHeader
+		title="Mietvertrag bearbeiten"
+		purpose="Ändern Sie Mieter, Wohnung, Vertragsdauer oder Miete dieses Mietvertrags."
+		trail={[
+			{ href: '/contracts', label: 'Mietverträge' },
+			{
+				href: `/contracts/${data.contract.id}`,
+				label: tenant ? `Mietvertrag von ${tenant}` : 'Mietvertrag'
+			}
+		]}
+	/>
 	<ContractForm contract={data.contract} tenants={data.tenants} apartments={data.apartments} />
 </div>

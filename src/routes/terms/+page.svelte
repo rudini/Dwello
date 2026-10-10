@@ -1,4 +1,6 @@
 <script lang="ts">
+	import PageHeader from '$lib/ui/PageHeader.svelte';
+	import Panel from '$lib/ui/Panel.svelte';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -36,24 +38,20 @@
 	<title>Nutzungsbedingungen - Dwello</title>
 </svelte:head>
 
-<div class="space-y-6 max-w-3xl">
-	<div>
-		<h1 class="text-2xl font-bold text-gray-900" data-testid="page-title">Nutzungsbedingungen</h1>
-		<p class="text-gray-500 mt-1">Was Dwello leistet und wofür die Verwaltung verantwortlich ist</p>
-	</div>
+<div class="flex max-w-3xl flex-col gap-8">
+	<PageHeader
+		title="Nutzungsbedingungen"
+		purpose="Was Dwello leistet und wofür die Verwaltung verantwortlich ist."
+	/>
 
 	{#each sections as section (section.title)}
-		<section
-			data-testid="page-section"
-			class="bg-white border border-slate-200 rounded-xl shadow-sm p-6 space-y-3"
-		>
-			<h2 class="text-lg font-semibold text-gray-900">{section.title}</h2>
+		<Panel title={section.title} testid="page-section">
 			{#if section.title === 'Verfügbarkeit' && operator}
-				<p class="text-gray-700" data-testid="terms-operator">{operator}</p>
+				<p class="text-ink" data-testid="terms-operator">{operator}</p>
 			{/if}
 			{#each section.paragraphs as paragraph (paragraph)}
-				<p class="text-gray-700">{paragraph}</p>
+				<p class="text-ink">{paragraph}</p>
 			{/each}
-		</section>
+		</Panel>
 	{/each}
 </div>

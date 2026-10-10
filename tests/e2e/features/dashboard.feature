@@ -1,9 +1,9 @@
 # language: de
 @dashboard
-Funktionalität: Dashboard
+Funktionalität: Übersicht
   Als Liegenschaftsverwalter
-  möchte ich auf einen Blick sehen, wie es um meine Liegenschaften steht
-  damit ich weiss, wo ich handeln muss
+  möchte ich auf einen Blick sehen, was jetzt zu tun ist und welche Fristen anstehen
+  damit ich nichts verpasse, auch wenn ich die App nur selten öffne
 
   Grundlage:
     Angenommen das Gebäude "Seeblick" in "Winterthur" existiert
@@ -13,17 +13,17 @@ Funktionalität: Dashboard
     Und "Anna Keller" mietet die Wohnung "1.01" seit "2020-01-01" für "900" Franken
 
   Szenario: Belegung pro Gebäude
-    Wenn der Liegenschaftsverwalter das Dashboard öffnet
-    Dann ist das Gebäude "Seeblick" zu "50.0%" belegt
+    Wenn der Liegenschaftsverwalter die Übersicht öffnet
+    Dann ist das Gebäude "Seeblick" zu "50.0 %" belegt
     Und sind im Gebäude "Seeblick" "1/2" Wohnungen vermietet
 
   Szenario: Gebäude aus der Belegung öffnen
-    Angenommen der Liegenschaftsverwalter öffnet das Dashboard
+    Angenommen der Liegenschaftsverwalter öffnet die Übersicht
     Wenn der Liegenschaftsverwalter in der Belegung das Gebäude "Seeblick" öffnet
     Dann ist der Liegenschaftsverwalter auf der Detailseite von "Seeblick"
 
   Szenariogrundriss: Kennzahl öffnen
-    Angenommen der Liegenschaftsverwalter öffnet das Dashboard
+    Angenommen der Liegenschaftsverwalter öffnet die Übersicht
     Wenn der Liegenschaftsverwalter die Kennzahl "<Kennzahl>" öffnet
     Dann ist der Liegenschaftsverwalter auf der Seite "<Seite>"
 
@@ -33,21 +33,21 @@ Funktionalität: Dashboard
       | Wohnungen | Wohnungen |
 
   Szenariogrundriss: Gefilterte Kennzahl öffnen
-    Angenommen der Liegenschaftsverwalter öffnet das Dashboard
+    Angenommen der Liegenschaftsverwalter öffnet die Übersicht
     Wenn der Liegenschaftsverwalter die Kennzahl "<Kennzahl>" öffnet
     Dann ist der Liegenschaftsverwalter auf der Seite "<Seite>"
     Und die Liste zeigt nur "<Status>"
 
     Beispiele:
-      | Kennzahl         | Seite                   | Status          |
-      | Vermietet        | Wohnungen               | Vermietet       |
-      | Wiedervermietet  | Wohnungen               | Wiedervermietet |
-      | Leer             | Wohnungen               | Leer            |
-      | Gesperrt         | Wohnungen               | Gesperrt        |
-      | Davon überfällig | Nebenkostenabrechnungen | Überfällig      |
+      | Kennzahl            | Seite                   | Status          |
+      | Vermietet           | Wohnungen               | Vermietet       |
+      | Wiedervermietet     | Wohnungen               | Wiedervermietet |
+      | Leer                | Wohnungen               | Leer            |
+      | Gesperrt            | Wohnungen               | Gesperrt        |
+      | Überfällige Beträge | Nebenkostenabrechnungen | Überfällig      |
 
   Szenariogrundriss: Abrechnungen nach Status öffnen
-    Angenommen der Liegenschaftsverwalter öffnet das Dashboard
+    Angenommen der Liegenschaftsverwalter öffnet die Übersicht
     Wenn der Liegenschaftsverwalter die Abrechnungen "<Status>" öffnet
     Dann ist der Liegenschaftsverwalter auf der Seite "Nebenkostenabrechnungen"
     Und die Liste zeigt nur "<Status>"
@@ -59,24 +59,42 @@ Funktionalität: Dashboard
       | Bezahlt    |
       | Überfällig |
 
-  Szenariogrundriss: Schnellaktion wählen
-    Angenommen der Liegenschaftsverwalter öffnet das Dashboard
+  Szenariogrundriss: Häufige Arbeit direkt beginnen
+    Angenommen der Liegenschaftsverwalter öffnet die Übersicht
     Wenn der Liegenschaftsverwalter die Schnellaktion "<Schnellaktion>" wählt
     Dann ist der Liegenschaftsverwalter auf der Seite "<Seite>"
 
     Beispiele:
       | Schnellaktion          | Seite                  |
-      | Gebäude hinzufügen     | Neues Gebäude          |
-      | Mieter hinzufügen      | Neuer Mieter           |
+      | Mieter erfassen        | Neuer Mieter           |
+      | Mietvertrag erfassen   | Neuer Mietvertrag      |
       | Rechnung erfassen      | Neue Rechnung          |
       | Abrechnungen erstellen | Abrechnungen erstellen |
 
-  Szenariogrundriss: Aktion in der Kopfzeile wählen
-    Angenommen der Liegenschaftsverwalter öffnet das Dashboard
-    Wenn der Liegenschaftsverwalter oben die Aktion "<Aktion>" wählt
-    Dann ist der Liegenschaftsverwalter auf der Seite "<Seite>"
+  Szenario: Überfällige Abrechnung als nächste Aufgabe
+    Angenommen "Anna Keller" hat eine versendete Abrechnung, deren Zahlungsfrist seit 5 Tagen abgelaufen ist
+    Wenn der Liegenschaftsverwalter die Übersicht öffnet
+    Dann nennt die Übersicht die Aufgabe "Überfällige Abrechnungen prüfen"
+    Und die Frist "Zahlungsfrist Anna Keller" ist "seit 5 Tagen abgelaufen"
 
-    Beispiele:
-      | Aktion                 | Seite                  |
-      | Rechnung erfassen      | Neue Rechnung          |
-      | Abrechnungen erstellen | Abrechnungen erstellen |
+  Szenario: Aufgabe führt zu den betroffenen Abrechnungen
+    Angenommen "Anna Keller" hat eine versendete Abrechnung, deren Zahlungsfrist seit 5 Tagen abgelaufen ist
+    Und der Liegenschaftsverwalter öffnet die Übersicht
+    Wenn der Liegenschaftsverwalter die Aufgabe "Überfällige Abrechnungen prüfen" beginnt
+    Dann ist der Liegenschaftsverwalter auf der Seite "Nebenkostenabrechnungen"
+    Und die Liste zeigt nur "Überfällig"
+
+  Szenario: Entwürfe als Aufgabe
+    Angenommen "Anna Keller" hat eine Abrechnung im Entwurf
+    Wenn der Liegenschaftsverwalter die Übersicht öffnet
+    Dann nennt die Übersicht die Aufgabe "Abrechnungen prüfen und versenden"
+
+  Szenario: Bevorstehende Zahlungsfrist
+    Angenommen "Anna Keller" hat eine versendete Abrechnung, deren Zahlungsfrist in 10 Tagen abläuft
+    Wenn der Liegenschaftsverwalter die Übersicht öffnet
+    Dann ist die Frist "Zahlungsfrist Anna Keller" "in 10 Tagen"
+
+  Szenario: Bevorstehendes Vertragsende
+    Angenommen der Mietvertrag von "Anna Keller" endet in 30 Tagen
+    Wenn der Liegenschaftsverwalter die Übersicht öffnet
+    Dann ist die Frist "Vertragsende Anna Keller" "in 30 Tagen"

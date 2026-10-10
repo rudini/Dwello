@@ -24,6 +24,8 @@ export interface BuildingWithStats extends Building {
 	apartmentCount: number;
 	occupiedCount: number;
 	vacantCount: number;
+	reletCount?: number; // counted in the BFF: the backend counts only occupied and vacant
+	reservedCount?: number;
 }
 
 // Buildings list response
@@ -47,6 +49,7 @@ export interface Apartment {
 	area: string | number; // decimal from DB
 	rooms: string | number; // decimal from DB (e.g., 3.5)
 	status: ApartmentStatus;
+	nextContractStart?: string | null;
 	createdAt?: Date | string;
 	updatedAt?: Date | string;
 }
@@ -88,7 +91,6 @@ export interface RentalContract {
 export interface ContractHistory {
 	id: string;
 	tenantName: string;
-	period: string; // "DD.MM.YYYY - DD.MM.YYYY"
 	rentBrutto: number; // in CHF
 	status: 'active' | 'ended' | 'future';
 	apartment?: string;
@@ -125,6 +127,7 @@ export interface ApartmentsListData {
 export interface TenantWithOccupancy extends Tenant {
 	currentApartment?: string | null;
 	currentBuilding?: string | null;
+	nextContractStart?: string | null; // Vertragsbeginn of a future contract
 	isActive: boolean; // a contract runs today or is signed for later
 }
 
@@ -149,6 +152,7 @@ export interface ContractWithDetails extends RentalContract {
 
 // Contracts list response
 export interface ContractsListData {
+	today: string; // the server's day, so that every Vertragsstatus is computed from the same one
 	contracts: ContractWithDetails[];
 	total: number;
 	page: number;
@@ -219,18 +223,14 @@ export interface InvoicesListData {
 	pageSize: number;
 	buildings: { id: string; name: string; address: string }[];
 	categories: Category[];
-}
-
-// Categories list response
-export interface CategoriesListData {
-	categories: Category[];
-	total: number;
+	years: string[]; // Rechnungsdatum years offered in the filter
 }
 
 // Heating Profile types
 export interface HeatingProfile {
 	id: string;
 	name: string;
+	nameDE?: string;
 	type: 'predefined' | 'custom';
 	description?: string;
 	isActive: boolean;
@@ -293,6 +293,7 @@ export interface StatementWithDetails extends Statement {
 	tenantName: string;
 	tenantEmail?: string;
 	tenantCorrespondenceChannel?: 'email' | 'letter';
+	tenantAddress?: string;
 	apartmentUnit: string;
 	apartmentFloor: string;
 	buildingName: string;

@@ -60,7 +60,8 @@ export function parseTenantForm(formData: FormData) {
 
 /** Form action body shared by "Neuer Mieter" (POST) and "Mieter bearbeiten" (PUT) */
 export async function saveTenant(fetch: typeof globalThis.fetch, request: Request, id?: string) {
-	const { tenant, errors } = parseTenantForm(await request.formData());
+	const formData = await request.formData();
+	const { tenant, errors } = parseTenantForm(formData);
 	if (Object.keys(errors).length > 0) return fail(400, { errors });
 
 	const response = await fetch(`${BACKEND_URL}/api/v1/tenants${id ? `/${id}` : ''}`, {
@@ -72,5 +73,8 @@ export async function saveTenant(fetch: typeof globalThis.fetch, request: Reques
 		return fail(response.status, { errors: { form: 'Mieter konnte nicht gespeichert werden.' } });
 	}
 	const saved = await response.json();
+	// Created from the rental contract wizard: back there, with the new tenant chosen
+	if (formData.get('for') === 'contract')
+		throw redirect(303, `/contracts/new?tenant=${saved.id}&created=1`);
 	throw redirect(303, `/tenants/${id ?? saved.id}`);
 }

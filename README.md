@@ -32,7 +32,7 @@ Dwello is a comprehensive web application for managing residential properties in
 - **LLM:** any OpenAI-compatible API, by default a self-hosted Ollama (`qwen2.5:3b`)
 - **Deployment:** Docker Compose
 - **Maps:** OpenStreetMap + Leaflet
-- **Internationalization:** svelte-i18n
+- **Language:** German UI (de-CH)
 
 ---
 
@@ -168,7 +168,7 @@ dwello/
 │   │   └── [pages]/      # UI pages
 │   ├── lib/              # Shared libraries
 │   │   ├── server/       # Server-only utilities
-│   │   ├── components/   # Svelte components
+│   │   ├── ui/           # Design system: components, icons, illustrations
 │   │   └── utils/        # Utility functions
 │   └── styles/           # Global styles
 ├── backend/               # Backend (ElysiaJS)
@@ -191,7 +191,7 @@ dwello/
 - **Data Model:** [docs/data-model.md](./docs/data-model.md)
 - **API Specification:** [docs/api-specification.md](./docs/api-specification.md)
 - **Tech Stack:** [docs/tech-stack.md](./docs/tech-stack.md)
-- **Design System:** [docs/design_system.md](./docs/design_system.md)
+- **Design System:** [docs/design/token-referenz.md](./docs/design/token-referenz.md)
 - **Test Pyramid:** [docs/test-pyramid.md](./docs/test-pyramid.md)
 - **Architecture (MVA):** [docs/migration-mva.md](./docs/migration-mva.md)
 - **Domain Language:** [UBIQUITOUS_LANGUAGE.md](./UBIQUITOUS_LANGUAGE.md)

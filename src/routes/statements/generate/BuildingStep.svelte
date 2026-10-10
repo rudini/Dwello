@@ -1,78 +1,91 @@
 <script lang="ts">
+	import { api } from '$lib/api';
+	import Icon from '$lib/ui/Icon.svelte';
+	import BuildingChoice from './BuildingChoice.svelte';
 	import type { Building } from '$lib/types';
 
+	// Step 2: the buildings whose rental contracts get a Nebenkostenabrechnung
 	let {
 		buildings,
-		selectedBuildingIds = $bindable()
-	}: { buildings: (Building & { apartmentCount: number })[]; selectedBuildingIds: string[] } =
-		$props();
+		selectedBuildingIds = $bindable(),
+		period,
+		error
+	}: {
+		buildings: (Building & { apartmentCount: number })[];
+		selectedBuildingIds: string[];
+		period: { start: string; end: string };
+		error?: string;
+	} = $props();
+
+	// Utility invoices of each building in the Abrechnungsperiode, so a missing one shows before the preview:
+	// one request for the period, counted per building (fewer than 50 apartments, see CLAUDE.md)
+	let invoiceCounts = $state<Record<string, number>>({});
+	$effect(() => {
+		const ids = buildings.map((b) => b.id);
+		api
+			.get<{ invoices: { buildingId: string }[] }>('/invoices', {
+				dateFrom: period.start,
+				dateTo: period.end,
+				isValidUtilityCost: 'true',
+				limit: '1000'
+			})
+			.then(({ data }) => {
+				if (!data) return;
+				const counts = Object.fromEntries(ids.map((id) => [id, 0]));
+				for (const { buildingId } of data.invoices) if (buildingId in counts) counts[buildingId]++;
+				invoiceCounts = counts;
+			});
+	});
 
 	const allSelected = $derived(
 		buildings.length > 0 && selectedBuildingIds.length === buildings.length
 	);
 
-	function toggleBuilding(buildingId: string) {
-		selectedBuildingIds = selectedBuildingIds.includes(buildingId)
-			? selectedBuildingIds.filter((id) => id !== buildingId)
-			: [...selectedBuildingIds, buildingId];
-	}
-
-	function toggleAllBuildings() {
-		selectedBuildingIds = allSelected ? [] : buildings.map((b) => b.id);
-	}
+	const toggle = (id: string) =>
+		(selectedBuildingIds = selectedBuildingIds.includes(id)
+			? selectedBuildingIds.filter((other) => other !== id)
+			: [...selectedBuildingIds, id]);
 </script>
 
-<div class="space-y-6">
-	<div>
-		<h2 class="text-lg font-semibold text-gray-900 mb-4">Gebäude auswählen</h2>
-		<p class="text-gray-500 mb-6">
-			Wählen Sie die Gebäude aus, für die Abrechnungen erstellt werden sollen.
-		</p>
-	</div>
-
-	<div class="flex items-center justify-between pb-4 border-b border-gray-200">
-		<label class="flex items-center gap-3 cursor-pointer">
+<fieldset
+	class="flex min-w-0 flex-col gap-4"
+	aria-describedby={error ? 'buildings-error' : undefined}
+>
+	<legend class="sr-only">Gebäude</legend>
+	<div class="flex flex-wrap items-center justify-between gap-4 border-b border-line pb-4">
+		<label class="flex min-h-12 cursor-pointer items-center gap-4 font-semibold text-ink">
 			<input
 				type="checkbox"
 				checked={allSelected}
-				onchange={toggleAllBuildings}
-				class="w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+				onchange={() => (selectedBuildingIds = allSelected ? [] : buildings.map((b) => b.id))}
+				class="size-6 shrink-0 cursor-pointer accent-accent"
+				data-testid="generate-all-buildings"
 			/>
-			<span class="font-medium text-gray-900">Alle Gebäude auswählen</span>
+			Alle Gebäude
 		</label>
-		<span class="text-sm text-gray-500">
-			{selectedBuildingIds.length} von {buildings.length} ausgewählt
+		<span class="text-ink-muted" aria-live="polite">
+			{selectedBuildingIds.length} von {buildings.length} gewählt
 		</span>
 	</div>
 
-	<div class="space-y-3">
-		{#each buildings as building}
-			{@const selected = selectedBuildingIds.includes(building.id)}
-			<label
-				class="flex items-center gap-4 p-4 border rounded-lg cursor-pointer transition-colors
-				{selected ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'}"
-			>
-				<input
-					type="checkbox"
-					data-testid="generate-building-{building.id}"
-					checked={selected}
-					onchange={() => toggleBuilding(building.id)}
-					class="w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
-				/>
-				<div class="flex-1">
-					<p class="font-medium text-gray-900">
-						{building.name || `${building.address}, ${building.city}`}
-					</p>
-					<p class="text-sm text-gray-500">
-						{building.address}, {building.postalCode}
-						{building.city}
-					</p>
-				</div>
-				<div class="text-right">
-					<p class="font-medium text-gray-900">{building.apartmentCount}</p>
-					<p class="text-sm text-gray-500">Wohnungen</p>
-				</div>
-			</label>
-		{/each}
-	</div>
-</div>
+	{#each buildings as building (building.id)}
+		<BuildingChoice
+			{building}
+			selected={selectedBuildingIds.includes(building.id)}
+			invoices={invoiceCounts[building.id]}
+			{error}
+			ontoggle={() => toggle(building.id)}
+		/>
+	{/each}
+
+	{#if error}
+		<p
+			id="buildings-error"
+			class="flex items-start gap-2 font-semibold text-critical"
+			data-testid="form-error"
+		>
+			<Icon name="error" />
+			{error}
+		</p>
+	{/if}
+</fieldset>

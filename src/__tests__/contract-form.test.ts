@@ -3,10 +3,8 @@ import {
 	apartmentOption,
 	availableFrom,
 	contractBody,
-	fieldBorder,
 	initialContractValues,
 	overlapWarning,
-	saveErrorMessage,
 	suggestedStartDate,
 	validateContract,
 	type ContractFormValues
@@ -31,6 +29,8 @@ const freeFrom = (date: string): AvailabilityInfo => ({
 	message: `Verfügbar ab ${date}`,
 	statusType: 'available-from'
 });
+
+const AMOUNT_HINT = "Bitte geben Sie einen gültigen Betrag ein, zum Beispiel 1450.00 oder 1'450.";
 
 describe('initialContractValues', () => {
 	it('starts a new unlimited contract for the tenant and apartment in the URL', () => {
@@ -97,9 +97,19 @@ describe('validateContract', () => {
 			validateContract({ ...filled, baseRent: '0', additionalRent: '-1', advancePayment: 'x' })
 		).toEqual({
 			baseRent: 'Bitte geben Sie eine gültige Miete ein',
-			additionalRent: 'Bitte geben Sie einen gültigen Betrag ein',
-			advancePayment: 'Bitte geben Sie einen gültigen Betrag ein'
+			additionalRent: AMOUNT_HINT,
+			advancePayment: AMOUNT_HINT
 		});
+	});
+
+	// "1.450" or "1,450.00" must not silently become CHF 1.45
+	it('nimmt nur Beträge in Franken und Rappen an', () => {
+		for (const amount of ['1.450', '1,450.00', '1.450,50', '12.345', '1e3']) {
+			expect(validateContract({ ...filled, baseRent: amount }).baseRent, amount).toBe(AMOUNT_HINT);
+		}
+		for (const amount of ['1450', '1450.5', '1450.50']) {
+			expect(validateContract({ ...filled, baseRent: amount }).baseRent, amount).toBeUndefined();
+		}
 	});
 });
 
@@ -147,7 +157,7 @@ describe('apartmentOption', () => {
 
 	it('names the day an apartment becomes free', () => {
 		expect(apartmentOption(apartment, freeFrom('2025-04-01'), false).label).toBe(
-			'Wohnung 2.01 - Ahornhof (verfügbar ab 2025-04-01)'
+			'Wohnung 2.01 - Ahornhof (verfügbar ab 1.4.2025)'
 		);
 		expect(apartmentOption(apartment, undefined, false).label).toBe('Wohnung 2.01 - Ahornhof');
 	});
@@ -168,25 +178,7 @@ describe('availableFrom', () => {
 
 describe('suggestedStartDate', () => {
 	it('suggests the day the apartment becomes free for a new contract without start', () => {
-		expect(suggestedStartDate(true, '', freeFrom('2025-04-01'))).toBe('2025-04-01');
-		expect(suggestedStartDate(true, '2025-05-01', freeFrom('2025-04-01'))).toBeNull();
-		expect(suggestedStartDate(false, '', freeFrom('2025-04-01'))).toBeNull();
-	});
-});
-
-describe('fieldBorder', () => {
-	it('marks fields with an error red', () => {
-		expect(fieldBorder('Pflichtfeld')).toBe('border-red-500');
-		expect(fieldBorder(undefined)).toBe('border-gray-300');
-	});
-});
-
-describe('saveErrorMessage', () => {
-	it('shows the reason of a failed save, or a general message', () => {
-		expect(saveErrorMessage(new Error('Wohnung ist bereits vermietet'))).toBe(
-			'Wohnung ist bereits vermietet'
-		);
-		expect(saveErrorMessage(new Error(''))).toBe('Ein Fehler ist aufgetreten');
-		expect(saveErrorMessage('offline')).toBe('Ein Fehler ist aufgetreten');
+		expect(suggestedStartDate('', freeFrom('2025-04-01'))).toBe('2025-04-01');
+		expect(suggestedStartDate('2025-05-01', freeFrom('2025-04-01'))).toBeNull();
 	});
 });

@@ -1,15 +1,16 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
-	import FieldError from '$lib/components/FieldError.svelte';
-	import Button from '$lib/components/Button.svelte';
-	import RecordForm from '$lib/components/RecordForm.svelte';
-	import Icon from '$lib/components/Icon.svelte';
-	import TextField from '$lib/components/TextField.svelte';
 	import {
 		FORMULA_VARIABLES,
 		type DistributionKeyRow,
 		type FormulaTest
 	} from '$lib/distribution-key';
+	import Button from '$lib/ui/Button.svelte';
+	import Field from '$lib/ui/Field.svelte';
+	import TextInput from '$lib/ui/TextInput.svelte';
+	import { controlClass } from '$lib/ui/field';
+	import SaveForm from '../SaveForm.svelte';
+	import FormulaHelp from './FormulaHelp.svelte';
 	import FormulaTestResult from './FormulaTestResult.svelte';
 
 	let {
@@ -24,75 +25,79 @@
 		submitLabel: string;
 	} = $props();
 
-	const inputClass =
-		'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary';
+	let name = $state(untrack(() => key?.name ?? ''));
+	let description = $state(untrack(() => key?.description ?? ''));
 	let formula = $state(untrack(() => key?.formula ?? '{area}'));
-	const name = $derived(key?.name ?? '');
-	const description = $derived(key?.description ?? '');
 </script>
 
-<RecordForm
+<SaveForm
 	action="?/save"
+	record="Verteilschlüssel"
 	error={errors.form}
 	cancelHref="/config/distribution-keys"
 	{submitLabel}
 	submitTestid="distribution-key-submit"
 >
-	<div class="grid gap-4 sm:grid-cols-2">
-		<TextField
-			label="Name"
-			name="name"
-			value={name}
-			required
-			placeholder="z.B. Fläche und Zimmer"
-			error={errors.name}
-			testid="distribution-key-name-input"
-		/>
-		<TextField label="Beschreibung" name="description" value={description} />
-	</div>
+	<TextInput
+		id="name"
+		name="name"
+		label="Name"
+		example="Fläche und Zimmer"
+		bind:value={name}
+		error={errors.name}
+		testid="distribution-key-name-input"
+	/>
+	<TextInput
+		id="description"
+		name="description"
+		label="Beschreibung"
+		optional
+		bind:value={description}
+	/>
 
-	<div>
-		<label for="formula" class="block text-sm font-medium text-gray-700 mb-1"
-			>Formel <span class="text-red-500">*</span></label
-		>
-		<div class="flex flex-wrap gap-2 mb-2">
+	<Field
+		id="formula"
+		label="Formel"
+		help="Bestimmt den Anteil jeder Wohnung an den Kosten. Fügen Sie Bausteine mit den Knöpfen ein und rechnen Sie mit + - * / und Klammern."
+		error={errors.formula}
+	>
+		{#snippet children(control)}
+			<input
+				id={control.id}
+				name="formula"
+				bind:value={formula}
+				autocomplete="off"
+				spellcheck="false"
+				aria-required="true"
+				aria-describedby={control.describedBy}
+				aria-invalid={control.invalid || undefined}
+				class="{controlClass(control.invalid)} font-mono"
+				data-testid="distribution-key-formula-input"
+			/>
+		{/snippet}
+	</Field>
+	<div class="flex flex-col gap-2">
+		<p class="font-semibold text-ink">Baustein einfügen</p>
+		<div class="flex flex-wrap gap-2">
 			{#each FORMULA_VARIABLES as variable (variable.name)}
-				<button
-					type="button"
-					title={variable.description}
-					onclick={() => (formula += `{${variable.name}}`)}
-					class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-50 border border-purple-200 rounded-lg text-sm font-mono text-purple-700 hover:bg-purple-100 transition-colors"
-				>
-					<Icon name={variable.icon} size={16} />
-					{`{${variable.name}}`}
-				</button>
+				<Button onclick={() => (formula += `{${variable.name}}`)}>
+					<span class="font-mono">{`{${variable.name}}`}</span>
+					<span class="font-normal">{variable.description}</span>
+				</Button>
 			{/each}
 		</div>
-		<input
-			id="formula"
-			name="formula"
-			bind:value={formula}
-			data-testid="distribution-key-formula-input"
-			class="{inputClass} font-mono"
-		/>
-		<FieldError message={errors.formula} />
-		<p class="mt-1 text-xs text-gray-500">
-			Rechnen Sie mit +, -, *, / und Klammern, z.B. {'{area} * 0.7 + {rooms} * 0.3'}
-		</p>
 	</div>
 
-	<div>
-		<Button
-			type="submit"
-			variant="secondary"
-			formaction="?/test"
-			testid="distribution-key-test-button"
-		>
-			<Icon name="science" size={18} />
-			Formel testen
-		</Button>
+	<div class="flex flex-col gap-4">
+		<div>
+			<Button type="submit" formaction="?/test" icon="test" testid="distribution-key-test-button"
+				>Formel testen</Button
+			>
+		</div>
 		{#if test}
 			<FormulaTestResult {test} />
 		{/if}
 	</div>
-</RecordForm>
+
+	<FormulaHelp />
+</SaveForm>

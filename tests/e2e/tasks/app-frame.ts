@@ -23,3 +23,7 @@ export const openSettingsFromUserMenu = async (actor: Actor) => {
 export const chooseInFooter = (label: string) => async (actor: Actor) => {
 	await footerLink(actor.page, label).click();
 };
+
+export const useWindowWidth = (width: number) => async (actor: Actor) => {
+	await actor.page.setViewportSize({ width, height: 768 });
+};

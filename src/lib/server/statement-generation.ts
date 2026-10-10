@@ -90,3 +90,33 @@ export async function generateStatements(fetch: Fetch, request: GenerationReques
 	}
 	return contracts.length;
 }
+
+type Period = { periodStart: string; periodEnd: string };
+
+/** Per building: the utility invoices dated in the period and the statements whose period overlaps it */
+export async function invoicesInPeriod(
+	fetch: Fetch,
+	{ buildingIds, periodStart, periodEnd }: GenerationRequest
+) {
+	const overlaps = (s: Period) => s.periodStart <= periodEnd && s.periodEnd >= periodStart;
+	return Promise.all(
+		buildingIds.map(async (buildingId) => {
+			const building = encodeURIComponent(buildingId);
+			const [{ invoices }, { data: statements }] = await Promise.all([
+				call(
+					fetch,
+					`invoices?buildingId=${building}&dateFrom=${periodStart}&dateTo=${periodEnd}&isValidUtilityCost=true&limit=1000`
+				),
+				call(fetch, `statements?buildingId=${building}&limit=1000`)
+			]);
+			const dates = (invoices as { invoiceDate: string }[]).map((i) => i.invoiceDate).sort();
+			return {
+				buildingId,
+				count: dates.length,
+				first: dates[0] ?? null,
+				last: dates.at(-1) ?? null,
+				statements: (statements as Period[]).filter(overlaps).length
+			};
+		})
+	);
+}

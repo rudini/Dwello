@@ -13,16 +13,16 @@ Funktionalität: Mietvertragsliste
     Und der Liegenschaftsverwalter ist auf der Mietvertragsliste
 
   Szenario: Mietvertrag wird in der Liste angezeigt
-    Dann sieht der Liegenschaftsverwalter den Mietvertrag von "Anna Keller" mit dem Status "AKTIV"
+    Dann sieht der Liegenschaftsverwalter den Mietvertrag von "Anna Keller" mit dem Status "Laufend"
 
   Szenario: Mietverträge nach Mieter suchen
     Wenn der Liegenschaftsverwalter nach dem Mieter "Anna Keller" sucht
-    Dann sieht der Liegenschaftsverwalter den Mietvertrag von "Anna Keller" mit dem Status "AKTIV"
+    Dann sieht der Liegenschaftsverwalter den Mietvertrag von "Anna Keller" mit dem Status "Laufend"
     Und die Mietvertragsliste enthält genau 1 Mietvertrag
 
   Szenario: Mietverträge nach Gebäude filtern
     Wenn der Liegenschaftsverwalter die Mietverträge nach dem Gebäude "Ahornhof" filtert
-    Dann sieht der Liegenschaftsverwalter den Mietvertrag von "Anna Keller" mit dem Status "AKTIV"
+    Dann sieht der Liegenschaftsverwalter den Mietvertrag von "Anna Keller" mit dem Status "Laufend"
     Und die Mietvertragsliste enthält genau 1 Mietvertrag
 
   Szenario: Beendete Mietverträge anzeigen
@@ -32,6 +32,21 @@ Funktionalität: Mietvertragsliste
     Wenn der Liegenschaftsverwalter die beendeten Mietverträge im Gebäude "Ahornhof" anzeigt
     Dann sieht der Liegenschaftsverwalter den Mietvertrag von "Bruno Meier" mit dem Status "Beendet"
     Und die Mietvertragsliste enthält genau 1 Mietvertrag
+
+  Szenario: Künftiger Mietvertrag beginnt an seinem Vertragsbeginn
+    Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
+    Und der Mieter "Bruno Meier" existiert
+    Und "Bruno Meier" mietet die Wohnung "2.02" seit "2099-11-01" für "900" Franken
+    Wenn der Liegenschaftsverwalter nach dem Mieter "Bruno Meier" sucht
+    Dann sieht der Liegenschaftsverwalter den Mietvertrag von "Bruno Meier" mit dem Status "Künftig"
+    Und beginnt der Mietvertrag von "Bruno Meier" laut Liste am "1.11.2099"
+
+  Szenario: Nettomiete und monatliches Total getrennt
+    Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
+    Und der Mieter "Bruno Meier" existiert
+    Und "Bruno Meier" mietet die Wohnung "2.02" seit "2024-01-01" für "900" Franken mit "150" Franken Akonto
+    Wenn der Liegenschaftsverwalter nach dem Mieter "Bruno Meier" sucht
+    Dann nennt die Mietvertragsliste für "Bruno Meier" die Nettomiete "CHF 900.00" und monatlich total "CHF 1’050.00"
 
   Szenario: Zur Erfassung eines neuen Mietvertrags wechseln
     Wenn der Liegenschaftsverwalter einen neuen Mietvertrag erfassen will

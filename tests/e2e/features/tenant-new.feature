@@ -11,6 +11,7 @@ Funktionalität: Neuer Mieter
   Szenario: Mieter mit Korrespondenz per E-Mail erfassen
     Wenn der Liegenschaftsverwalter den Mieter "Lea Graf" mit Korrespondenz per E-Mail erfasst
     Dann ist der Liegenschaftsverwalter auf der Detailseite von "Lea Graf"
+    Und sieht der Liegenschaftsverwalter die Bestätigung, dass "Lea Graf" gespeichert ist
     Und "Lea Graf" erhält Korrespondenz "Per E-Mail"
 
   Szenario: Name ist erforderlich

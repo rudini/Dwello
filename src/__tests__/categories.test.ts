@@ -52,6 +52,32 @@ describe('Kategorien anzeigen', () => {
 			})
 		]);
 	});
+
+	// Dwello's own categories keep their English key; one recorded here is keyed by its German name
+	it('erkennt die vordefinierten Kategorien an ihrem Schlüssel', async () => {
+		const fetch = (async () =>
+			Response.json({
+				categories: [
+					{ id: 'c1', name: 'Heating', nameDE: 'Heizung', nameEN: 'Heating' },
+					{ id: 'c2', name: 'Gartenpflege', nameDE: 'Gartenpflege' },
+					// German and English name are the same word
+					{ id: 'c3', name: 'Renovation', nameDE: 'Renovation', nameEN: 'Renovation' },
+					// English name differs from the key
+					{
+						id: 'c4',
+						name: 'Electricity Common Areas',
+						nameDE: 'Allgemeinstrom',
+						nameEN: 'Common Area Electricity'
+					},
+					{ id: 'c5', name: 'Treppenhaus', nameDE: 'Treppenhaus', nameEN: 'Stairwell' }
+				],
+				total: 5
+			})) as typeof globalThis.fetch;
+
+		const data = (await load({ fetch } as never)) as { categories: { predefined: boolean }[] };
+
+		expect(data.categories.map((c) => c.predefined)).toEqual([true, false, true, true, false]);
+	});
 });
 
 describe('Neue Kategorie', () => {
@@ -86,11 +112,22 @@ describe('Neue Kategorie', () => {
 		expect(calls).toEqual([]);
 	});
 
-	it('zeigt die Meldung des Backends, wenn der Name vergeben ist', async () => {
+	it('zeigt die Meldung des Backends beim Namen, wenn der Name vergeben ist', async () => {
 		const message = 'Eine Kategorie mit dem Namen "Treppenhausreinigung" existiert bereits.';
 		const { result } = runAction(newActions.default, '', 409, form, { error: message });
 
-		expect(await result).toMatchObject({ status: 409, data: { errors: { form: message } } });
+		expect(await result).toEqual(
+			expect.objectContaining({ status: 409, data: { errors: { name: message } } })
+		);
+	});
+
+	it('meldet andere Fehler des Backends für das ganze Formular', async () => {
+		const { result } = runAction(newActions.default, '', 500, form, {});
+
+		expect(await result).toMatchObject({
+			status: 500,
+			data: { errors: { form: 'Kategorie konnte nicht gespeichert werden.' } }
+		});
 	});
 });
 

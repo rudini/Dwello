@@ -1,95 +1,82 @@
 <script lang="ts">
-	import PageTrail from '$lib/components/PageTrail.svelte';
-	import Badge from '$lib/components/Badge.svelte';
-	import Button from '$lib/components/Button.svelte';
-	import Card from '$lib/components/Card.svelte';
-	import HeatingProfileChart from '$lib/components/HeatingProfileChart.svelte';
-	import Icon from '$lib/components/Icon.svelte';
-	import { MONTHS, profileTotal } from '$lib/heating-profile';
-	import ConfirmDeleteDialog from '$lib/components/ConfirmDeleteDialog.svelte';
+	import { untrack } from 'svelte';
+	import HeatingProfileChart from '$lib/ui/HeatingProfileChart.svelte';
+	import { profileTotal } from '$lib/heating-profile';
+	import { germanName } from '$lib/names';
+	import Badge from '$lib/ui/Badge.svelte';
+	import Button from '$lib/ui/Button.svelte';
+	import PageHeader from '$lib/ui/PageHeader.svelte';
+	import Panel from '$lib/ui/Panel.svelte';
+	import DeleteDialog from '../../DeleteDialog.svelte';
 	import type { ActionData, PageData } from './$types';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 
 	const profile = $derived(data.profile);
+	const name = $derived(germanName(profile));
 	const total = $derived(profileTotal(profile.monthlyPercentages));
-	// Predefined profiles follow common Swiss practice and stay as they are
+	// Predefined profiles follow common Swiss practice and stay as they are; their descriptions are English
 	const custom = $derived(profile.type === 'custom');
-	const deleteError = $derived(form?.error);
-	let deleting = $state(false);
-	const dialogOpen = $derived(deleting || Boolean(deleteError));
+	// Without JavaScript the refusal comes with a new page: the question stays open to show it
+	let deleting = $state(untrack(() => Boolean(form?.error)));
 </script>
 
 <svelte:head>
-	<title>{profile.name} - Dwello</title>
+	<title>{name} - Dwello</title>
 </svelte:head>
 
-<div class="space-y-6" data-testid="heating-profile-detail-page">
-	<PageTrail
-		links={[
+<div class="flex flex-col gap-8" data-testid="heating-profile-detail-page">
+	<PageHeader
+		title={name}
+		purpose={(custom && profile.description) || undefined}
+		trail={[
 			{ href: '/config', label: 'Einstellungen' },
 			{ href: '/config/heating-profiles', label: 'Heizprofile' }
 		]}
-		current={profile.name}
-	/>
-
-	<div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-		<div>
-			<h1 class="text-2xl font-bold text-gray-900 flex items-center gap-3">
-				{profile.name}
-				<Badge variant={custom ? 'primary' : 'info'} size="sm"
-					>{custom ? 'Eigenes Profil' : 'Vordefiniert'}</Badge
-				>
-			</h1>
-			<p class="text-gray-500 mt-1">{profile.description}</p>
-		</div>
-		{#if custom}
-			<div class="flex gap-2">
+	>
+		{#snippet action()}
+			{#if custom}
 				<Button
 					href="/config/heating-profiles/{profile.id}/edit"
-					variant="secondary"
-					testid="heating-profile-edit-button"
+					icon="edit"
+					testid="heating-profile-edit-button">Bearbeiten</Button
 				>
-					<Icon name="edit" size={18} />
-					Bearbeiten
-				</Button>
 				<Button
 					variant="danger-ghost"
+					icon="delete"
 					onclick={() => (deleting = true)}
-					testid="heating-profile-delete-button"
+					testid="heating-profile-delete-button">Löschen</Button
 				>
-					<Icon name="delete" size={18} />
-					Löschen
-				</Button>
-			</div>
-		{/if}
-	</div>
+			{/if}
+		{/snippet}
+	</PageHeader>
 
-	<Card>
+	<Panel title="Monatsanteile">
+		<div class="flex flex-wrap items-center gap-4">
+			<Badge
+				tone={custom ? 'info' : 'neutral'}
+				label={custom ? 'Eigenes Heizprofil' : 'Vordefiniert'}
+			/>
+			{#if !custom}
+				<p class="text-ink-muted">Folgt der üblichen Praxis und lässt sich nicht ändern.</p>
+			{/if}
+		</div>
 		<HeatingProfileChart shares={profile.monthlyPercentages} />
-		<dl class="grid grid-cols-3 sm:grid-cols-6 gap-3 mt-6">
-			{#each MONTHS as month (month.key)}
-				<div class="text-center p-2 bg-gray-50 rounded-lg">
-					<dt class="text-xs text-gray-500">{month.label}</dt>
-					<dd class="font-semibold text-gray-900" data-testid="heating-profile-share-{month.key}">
-						{profile.monthlyPercentages[month.key]} %
-					</dd>
-				</div>
-			{/each}
-		</dl>
-		<p class="mt-4 pt-4 border-t border-gray-100 flex justify-between">
-			<span class="font-medium text-gray-700">Summe</span>
-			<span class="font-bold" data-testid="heating-profile-total">{total} %</span>
+		<p class="flex justify-between border-t border-line pt-4 text-lg">
+			<span class="font-semibold text-ink">Summe</span>
+			<span class="font-bold text-ink tabular-nums" data-testid="heating-profile-total"
+				>{total} %</span
+			>
 		</p>
-	</Card>
+	</Panel>
 </div>
 
-{#if dialogOpen}
-	<ConfirmDeleteDialog
-		title="Heizprofil «{profile.name}» löschen?"
-		message="Bereits erstellte Abrechnungen behalten ihre Heizkostenverteilung."
-		error={deleteError}
-		testid="heating-profile-delete-confirm"
-		onclose={() => (deleting = false)}
-	/>
-{/if}
+<DeleteDialog
+	bind:open={deleting}
+	record="Heizprofil"
+	{name}
+	error={form?.error}
+	confirmTestid="heating-profile-delete-confirm"
+>
+	<p>Bereits erstellte Abrechnungen behalten ihre Heizkostenverteilung.</p>
+</DeleteDialog>

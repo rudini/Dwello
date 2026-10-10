@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import Button from '$lib/components/Button.svelte';
-	import Icon from '$lib/components/Icon.svelte';
+	import Button from '$lib/ui/Button.svelte';
+	import Illustration from '$lib/ui/Illustration.svelte';
 
 	const messages: Record<number, string> = {
 		404: 'Diese Seite gibt es nicht.',
@@ -10,26 +10,23 @@
 	const message = $derived(
 		messages[$page.status] ?? $page.error?.message ?? 'Ein unerwarteter Fehler ist aufgetreten.'
 	);
+	const hint = $derived(
+		$page.status === 404
+			? 'Prüfen Sie die Adresse oder gehen Sie zur Übersicht.'
+			: 'Versuchen Sie es später erneut.'
+	);
 </script>
 
 <svelte:head>
 	<title>Fehler - Dwello</title>
 </svelte:head>
 
-<div class="min-h-[60vh] flex items-center justify-center py-12 px-4">
-	<div class="max-w-md w-full text-center">
-		<Icon name="error" size={56} class="text-red-500 mb-6" />
-		<h1 class="text-4xl font-bold text-gray-900 mb-2">{$page.status}</h1>
-		<p class="text-lg text-gray-600 mb-8">{message}</p>
-		<div class="flex justify-center gap-3">
-			<Button variant="secondary" onclick={() => history.back()}>
-				<Icon name="arrow_back" size={18} />
-				Zurück
-			</Button>
-			<Button href="/dashboard" variant="primary">
-				<Icon name="dashboard" size={18} />
-				Zum Dashboard
-			</Button>
-		</div>
+<div class="flex flex-col items-center gap-6 px-4 py-16 text-center">
+	<Illustration name="problem" />
+	<h1 class="text-3xl font-bold text-ink">{message}</h1>
+	<p class="max-w-prose text-lg text-ink-muted">{hint}</p>
+	<div class="flex flex-wrap justify-center gap-4">
+		<Button onclick={() => history.back()} icon="arrow-back">Zurück</Button>
+		<Button variant="primary" href="/dashboard" icon="overview">Zur Übersicht</Button>
 	</div>
 </div>

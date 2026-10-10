@@ -16,8 +16,21 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<TenantsListD
 		if (search) params.set('search', search);
 		if (status) params.set('status', status);
 
-		const response = await fetch(`${BACKEND_URL}/api/v1/tenants?${params}`);
+		const [response, futureData] = await Promise.all([
+			fetch(`${BACKEND_URL}/api/v1/tenants?${params}`),
+			// only for the contract start: failing, it leaves it out instead of emptying the list
+			fetch(`${BACKEND_URL}/api/v1/contracts?status=future&limit=100`)
+				.then((res) => (res.ok ? res.json() : { contracts: [] }))
+				.catch(() => ({ contracts: [] }))
+		]);
 		const data = await response.json();
+		// a tenant without a running contract may already have signed one for later
+		const future: { tenantId: string; startDate: string }[] = futureData.contracts ?? [];
+		const nextStart = (id: unknown) =>
+			future
+				.filter((c) => c.tenantId === id)
+				.map((c) => c.startDate)
+				.sort()[0] ?? null;
 
 		const tenants: TenantWithOccupancy[] = (data.tenants || data.data || []).map(
 			(t: Record<string, unknown>) => ({
@@ -32,6 +45,7 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<TenantsListD
 				city: (t.city as string) || null,
 				currentApartment: t.currentApartment ? `Wohnung ${t.currentApartment}` : null,
 				currentBuilding: (t.currentBuilding as string) || null,
+				nextContractStart: nextStart(t.id),
 				isActive: t.isActive === true
 			})
 		);

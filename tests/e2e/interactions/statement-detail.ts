@@ -13,3 +13,7 @@ export const statementTenantLink = (page: Page) => page.getByTestId('statement-t
 export const statementApartmentLink = (page: Page) => page.getByTestId('statement-apartment-link');
 export const generatePdfButton = (page: Page) => page.getByTestId('statement-generate-pdf-button');
 export const downloadPdfLink = (page: Page) => page.getByTestId('statement-pdf-download');
+export const sendDialog = (page: Page) => page.getByRole('dialog');
+export const confirmSendButton = (page: Page) => page.getByTestId('statement-send-confirm');
+export const sendRecipient = (page: Page) => page.getByTestId('send-recipient');
+export const sendPdfLink = (page: Page) => page.getByTestId('send-pdf-view');

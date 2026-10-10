@@ -1,11 +1,13 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
-	import FieldError from '$lib/components/FieldError.svelte';
-	import RecordForm from '$lib/components/RecordForm.svelte';
-	import HeatingProfileChart from '$lib/components/HeatingProfileChart.svelte';
-	import TextField from '$lib/components/TextField.svelte';
+	import HeatingProfileChart from '$lib/ui/HeatingProfileChart.svelte';
 	import { MONTHS, profileTotal } from '$lib/heating-profile';
 	import type { HeatingProfile } from '$lib/types';
+	import Field from '$lib/ui/Field.svelte';
+	import Icon from '$lib/ui/Icon.svelte';
+	import TextInput from '$lib/ui/TextInput.svelte';
+	import { controlClass } from '$lib/ui/field';
+	import SaveForm from '../SaveForm.svelte';
 
 	let {
 		profile,
@@ -19,8 +21,8 @@
 		submitLabel: string;
 	} = $props();
 
-	const inputClass =
-		'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary';
+	let name = $state(untrack(() => profile?.name ?? ''));
+	let description = $state(untrack(() => profile?.description ?? ''));
 	let shares = $state<Record<string, number>>(
 		untrack(() => ({
 			...Object.fromEntries(MONTHS.map(({ key }) => [key, 0])),
@@ -28,55 +30,83 @@
 		}))
 	);
 	const total = $derived(profileTotal(shares));
-	const totalClass = $derived(Math.abs(total - 100) <= 0.1 ? 'text-green-600' : 'text-red-600');
-	const name = $derived(profile?.name ?? '');
-	const description = $derived(profile?.description ?? '');
+	const complete = $derived(Math.abs(total - 100) <= 0.1);
+	// What is still missing to 100 %, in words, so the sum does not speak by colour alone
+	const remainder = $derived(
+		complete
+			? 'stimmt'
+			: total < 100
+				? `es fehlen noch ${+(100 - total).toFixed(2)} %`
+				: `${+(total - 100).toFixed(2)} % zu viel`
+	);
 </script>
 
-<RecordForm error={errors.form} {cancelHref} {submitLabel} submitTestid="heating-profile-submit">
-	<TextField
-		label="Name"
+<SaveForm
+	record="Heizprofil"
+	error={errors.form}
+	{cancelHref}
+	{submitLabel}
+	submitTestid="heating-profile-submit"
+>
+	<TextInput
+		id="name"
 		name="name"
-		value={name}
-		required
+		label="Name"
+		example="Heizung Altbau"
+		bind:value={name}
 		error={errors.name}
 		testid="heating-profile-name-input"
 	/>
-	<TextField label="Beschreibung" name="description" value={description} />
+	<TextInput
+		id="description"
+		name="description"
+		label="Beschreibung"
+		optional
+		bind:value={description}
+	/>
 
-	<div>
-		<div class="flex items-center justify-between mb-3">
-			<h3 class="text-sm font-medium text-gray-700">Anteil der Heizkosten pro Monat (%)</h3>
-			<p class="text-sm font-semibold {totalClass}" data-testid="heating-profile-form-total">
-				Summe: {total} %
-			</p>
-		</div>
-		<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+	<fieldset class="flex flex-col gap-4" aria-describedby="shares-help">
+		<legend class="text-lg font-semibold text-ink">Anteil der Heizkosten pro Monat in %</legend>
+		<p id="shares-help" class="text-ink-muted">
+			Die Monatsanteile verteilen die Heizkosten eines Jahres und ergeben zusammen 100 %. Im Winter
+			wird mehr geheizt als im Sommer.
+		</p>
+		<div class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
 			{#each MONTHS as month (month.key)}
-				<div>
-					<label for={month.key} class="block text-xs font-medium text-gray-600 mb-1"
-						>{month.label}</label
-					>
-					<input
-						id={month.key}
-						name={month.key}
-						type="number"
-						min="0"
-						max="100"
-						step="0.01"
-						value={shares[month.key]}
-						oninput={(e) => (shares[month.key] = Number(e.currentTarget.value) || 0)}
-						data-testid="heating-profile-month-{month.key}"
-						class={inputClass}
-					/>
-				</div>
+				<Field id={month.key} label={month.label}>
+					{#snippet children(control)}
+						<input
+							id={control.id}
+							name={month.key}
+							type="number"
+							inputmode="decimal"
+							min="0"
+							max="100"
+							step="0.01"
+							value={shares[month.key]}
+							oninput={(e) => (shares[month.key] = Number(e.currentTarget.value) || 0)}
+							class={controlClass(!!errors.total)}
+							data-testid="heating-profile-month-{month.key}"
+						/>
+					{/snippet}
+				</Field>
 			{/each}
 		</div>
-		<FieldError message={errors.total} />
-		<p class="mt-2 text-xs text-gray-500">
-			Die Monatsanteile verteilen die Heizkosten eines Jahres und ergeben zusammen 100 %.
+		<p
+			class="flex items-center gap-2 font-semibold {complete ? 'text-positive' : 'text-critical'}"
+			role="status"
+			data-testid="heating-profile-form-total"
+		>
+			<Icon name={complete ? 'success' : 'warning'} />
+			Summe: {total} % – {remainder}
 		</p>
-	</div>
+		{#if errors.total}
+			<p class="flex items-start gap-2 font-semibold text-critical" data-testid="form-error">
+				<Icon name="error" />
+				{errors.total}
+			</p>
+		{/if}
+	</fieldset>
 
 	<HeatingProfileChart {shares} />
-</RecordForm>
+</SaveForm>

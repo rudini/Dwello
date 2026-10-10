@@ -1,0 +1,458 @@
+{
+	"$comment": "Screens and states the axe check visits (tests/e2e/features/accessibility.feature, one example per screen and state). {building} etc. (also in 'queries') are ids of records the check seeds itself. Every new or changed screen is added here; every state must be one of stateMeanings. 'empty' and 'first-use' run on the empty instance of the E2E stack (playwright.config.ts). Every state is checked light and dark (docs/design/01-plan.md D4). A screen may override the query string of a state in 'queries' (the apartment list ignores ?search=, see docs/design/offene-punkte.md).",
+	"stateMeanings": {
+		"default": "The page as loaded with the seeded records.",
+		"empty": "A list with no records at all, on the empty instance of the E2E stack (second backend on an empty database).",
+		"first-use": "Overview without any building, on the empty instance of the E2E stack.",
+		"filtered-empty": "A list whose search matches nothing (?search=…).",
+		"submit-empty": "A new-record form submitted without input: all validation errors visible.",
+		"delete-dialog": "The delete confirmation dialog open.",
+		"end-dialog": "The dialog that ends a rental contract open.",
+		"send-dialog": "The confirmation before marking a statement as sent open.",
+		"reminder-dialog": "The Mahnung dialog of a sent statement open.",
+		"mark-paid-dialog": "The dialog that marks a statement as paid open.",
+		"action-error": "A server action failed (deleting a sent statement, posted as from a stale tab, is refused): the error alert visible.",
+		"every-wizard-step": "Each step of the wizard in turn, up to the step before saving.",
+		"preview-empty": "Statement wizard preview for a period without rental contracts.",
+		"overlap-warning": "Rental contract wizard with a start date that overlaps another contract of the apartment.",
+		"draft-restored": "A wizard reopened with a draft saved in the browser: restore notice and save status visible.",
+		"formula-tested": "Distribution key form after testing a formula.",
+		"profile-sum-invalid": "Heating profile form whose monthly shares do not add up to 100 %.",
+		"login-error": "Login page showing a sign-in error (?error=failed).",
+		"mobile-menu-open": "Navigation drawer open (mobile and tablet viewport).",
+		"user-menu-open": "User menu in the header open.",
+		"dialog-open": "A confirmation dialog of the page open.",
+		"busy-dialog-open": "A confirmation dialog open while its action is running.",
+		"submit-cleared": "An edit form with its required fields emptied and submitted: all validation errors visible.",
+		"saved-toast": "An edit form saved unchanged: the success message (toast) visible on the page it leads to.",
+		"server-error": "The error page for a failed load (not 404): message and the hint to try again."
+	},
+	"screens": [
+		{
+			"name": "gallery",
+			"path": "/gallery",
+			"states": [
+				"default",
+				"dialog-open",
+				"busy-dialog-open"
+			]
+		},
+		{
+			"name": "login",
+			"path": "/login",
+			"public": true,
+			"states": [
+				"default",
+				"login-error"
+			]
+		},
+		{
+			"name": "error-404",
+			"path": "/gibt-es-nicht",
+			"states": [
+				"default"
+			]
+		},
+		{
+			"name": "error-server",
+			"path": "/buildings/kein-gebaeude",
+			"states": [
+				"default",
+				"server-error"
+			]
+		},
+		{
+			"name": "dashboard",
+			"path": "/dashboard",
+			"states": [
+				"default",
+				"first-use",
+				"mobile-menu-open",
+				"user-menu-open"
+			]
+		},
+		{
+			"name": "buildings",
+			"path": "/buildings",
+			"states": [
+				"default",
+				"empty",
+				"filtered-empty"
+			]
+		},
+		{
+			"name": "building-new",
+			"path": "/buildings/new",
+			"states": [
+				"default",
+				"submit-empty"
+			]
+		},
+		{
+			"name": "building-detail",
+			"path": "/buildings/{building}",
+			"states": [
+				"default",
+				"delete-dialog"
+			]
+		},
+		{
+			"name": "building-edit",
+			"path": "/buildings/{building}/edit",
+			"states": [
+				"default",
+				"submit-cleared",
+				"saved-toast"
+			]
+		},
+		{
+			"name": "apartments",
+			"path": "/apartments",
+			"states": [
+				"default",
+				"empty",
+				"filtered-empty"
+			],
+			"queries": {
+				"filtered-empty": "?building=00000000-0000-4000-8000-000000000000"
+			}
+		},
+		{
+			"name": "apartment-new",
+			"path": "/apartments/new",
+			"states": [
+				"default",
+				"submit-empty"
+			]
+		},
+		{
+			"name": "apartment-detail",
+			"path": "/apartments/{apartment}",
+			"states": [
+				"default"
+			]
+		},
+		{
+			"name": "apartment-edit",
+			"path": "/apartments/{apartment}/edit",
+			"states": [
+				"default",
+				"submit-cleared"
+			]
+		},
+		{
+			"name": "tenants",
+			"path": "/tenants",
+			"states": [
+				"default",
+				"empty",
+				"filtered-empty"
+			]
+		},
+		{
+			"name": "tenant-new",
+			"path": "/tenants/new",
+			"states": [
+				"default",
+				"submit-empty"
+			]
+		},
+		{
+			"name": "tenant-detail",
+			"path": "/tenants/{tenant}",
+			"states": [
+				"default",
+				"delete-dialog"
+			]
+		},
+		{
+			"name": "tenant-edit",
+			"path": "/tenants/{tenant}/edit",
+			"states": [
+				"default",
+				"submit-cleared"
+			]
+		},
+		{
+			"name": "contracts",
+			"path": "/contracts",
+			"states": [
+				"default",
+				"empty",
+				"filtered-empty"
+			]
+		},
+		{
+			"name": "contract-new",
+			"path": "/contracts/new",
+			"states": [
+				"default",
+				"submit-empty",
+				"every-wizard-step",
+				"overlap-warning",
+				"draft-restored"
+			],
+			"queries": {
+				"every-wizard-step": "?tenant={tenant}&apartment={freeApartment}",
+				"overlap-warning": "?tenant={tenant}&apartment={limitedApartment}",
+				"draft-restored": "?tenant={tenant}"
+			}
+		},
+		{
+			"name": "contract-detail",
+			"path": "/contracts/{contract}",
+			"states": [
+				"default",
+				"end-dialog",
+				"delete-dialog"
+			]
+		},
+		{
+			"name": "contract-edit",
+			"path": "/contracts/{contract}/edit",
+			"states": [
+				"default",
+				"submit-cleared"
+			]
+		},
+		{
+			"name": "invoices",
+			"path": "/invoices",
+			"states": [
+				"default",
+				"empty",
+				"filtered-empty"
+			]
+		},
+		{
+			"name": "invoice-new",
+			"path": "/invoices/new",
+			"states": [
+				"default",
+				"submit-empty"
+			]
+		},
+		{
+			"name": "invoice-detail",
+			"path": "/invoices/{invoice}",
+			"states": [
+				"default",
+				"delete-dialog"
+			]
+		},
+		{
+			"name": "invoice-edit",
+			"path": "/invoices/{invoice}/edit",
+			"states": [
+				"default",
+				"submit-cleared"
+			]
+		},
+		{
+			"name": "statements",
+			"path": "/statements",
+			"queries": {
+				"mark-paid-dialog": "?status=sent"
+			},
+			"states": [
+				"default",
+				"empty",
+				"filtered-empty",
+				"mark-paid-dialog"
+			]
+		},
+		{
+			"name": "statement-generate",
+			"path": "/statements/generate",
+			"states": [
+				"default",
+				"every-wizard-step",
+				"preview-empty",
+				"draft-restored"
+			]
+		},
+		{
+			"name": "statement-detail",
+			"path": "/statements/{statement}",
+			"states": [
+				"default",
+				"send-dialog",
+				"delete-dialog"
+			]
+		},
+		{
+			"name": "statement-sent-detail",
+			"path": "/statements/{sentStatement}",
+			"states": [
+				"default",
+				"reminder-dialog",
+				"mark-paid-dialog",
+				"action-error"
+			]
+		},
+		{
+			"name": "statement-empty-detail",
+			"path": "/statements/{emptyStatement}",
+			"states": [
+				"default"
+			]
+		},
+		{
+			"name": "statement-edit",
+			"path": "/statements/{statement}/edit",
+			"states": [
+				"default",
+				"submit-cleared"
+			]
+		},
+		{
+			"name": "documents",
+			"path": "/documents",
+			"states": [
+				"default",
+				"empty"
+			]
+		},
+		{
+			"name": "config",
+			"path": "/config",
+			"states": [
+				"default"
+			]
+		},
+		{
+			"name": "categories",
+			"path": "/config/categories",
+			"states": [
+				"default",
+				"delete-dialog"
+			]
+		},
+		{
+			"name": "category-new",
+			"path": "/config/categories/new",
+			"states": [
+				"default",
+				"submit-empty"
+			]
+		},
+		{
+			"name": "category-edit",
+			"path": "/config/categories/{category}/edit",
+			"states": [
+				"default",
+				"submit-cleared",
+				"saved-toast"
+			]
+		},
+		{
+			"name": "distribution-keys",
+			"path": "/config/distribution-keys",
+			"states": [
+				"default",
+				"delete-dialog"
+			]
+		},
+		{
+			"name": "distribution-key-new",
+			"path": "/config/distribution-keys/new",
+			"states": [
+				"default",
+				"submit-empty",
+				"formula-tested"
+			]
+		},
+		{
+			"name": "distribution-key-edit",
+			"path": "/config/distribution-keys/{distributionKey}/edit",
+			"states": [
+				"default",
+				"submit-cleared"
+			]
+		},
+		{
+			"name": "heating-profiles",
+			"path": "/config/heating-profiles",
+			"states": [
+				"default"
+			]
+		},
+		{
+			"name": "heating-profile-new",
+			"path": "/config/heating-profiles/new",
+			"states": [
+				"default",
+				"profile-sum-invalid"
+			]
+		},
+		{
+			"name": "heating-profile-detail",
+			"path": "/config/heating-profiles/{heatingProfile}",
+			"states": [
+				"default",
+				"delete-dialog"
+			]
+		},
+		{
+			"name": "heating-profile-edit",
+			"path": "/config/heating-profiles/{heatingProfile}/edit",
+			"states": [
+				"default",
+				"submit-cleared"
+			]
+		},
+		{
+			"name": "help",
+			"path": "/help",
+			"states": [
+				"default"
+			]
+		},
+		{
+			"name": "privacy",
+			"path": "/privacy",
+			"states": [
+				"default"
+			]
+		},
+		{
+			"name": "terms",
+			"path": "/terms",
+			"states": [
+				"default"
+			]
+		},
+		{
+			"name": "analytics",
+			"path": "/analytics",
+			"states": [
+				"default"
+			]
+		},
+		{
+			"name": "reports",
+			"path": "/reports",
+			"states": [
+				"default"
+			]
+		}
+	],
+	"viewports": {
+		"desktop": {
+			"width": 1440,
+			"height": 900
+		},
+		"tablet": {
+			"width": 820,
+			"height": 1180
+		},
+		"mobile": {
+			"width": 390,
+			"height": 844
+		}
+	},
+	"colorSchemes": [
+		"light",
+		"dark"
+	]
+}

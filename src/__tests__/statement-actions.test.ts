@@ -69,3 +69,23 @@ describe('Mahnung senden', () => {
 		});
 	});
 });
+
+describe('Abrechnung laden', () => {
+	// The statement carries no tenant address; the send confirmation needs it for a letter
+	it('ergänzt die Postadresse des Mieters aus den Mieterdaten', async () => {
+		const { load } = await import('../routes/statements/[id]/+page.server');
+		const statementJson = (await import('../../tests/contracts/statement.json')).default;
+		const tenantJson = (await import('../../tests/contracts/tenant.json')).default;
+		const fetch = (async (url: string) => {
+			if (url.endsWith('/statements/s1'))
+				return Response.json({ ...statementJson, tenantId: 't1' });
+			if (url.endsWith('/tenants/t1')) return Response.json(tenantJson);
+			return Response.json({ data: [] });
+		}) as typeof globalThis.fetch;
+
+		const data = (await load({ params: { id: 's1' }, fetch } as never)) as {
+			statement: { tenantAddress: string };
+		};
+		expect(data.statement.tenantAddress).toBe('Seestrasse 12, 8002 Zürich');
+	});
+});

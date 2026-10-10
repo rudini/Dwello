@@ -3,7 +3,7 @@ import { createBdd, type DataTable } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { visit } from '../interactions/navigation';
 import { downloadedFile, downloadedPdfTitle } from '../questions/download';
-import { heatingCosts, statusOfStatement } from '../questions/statement-detail';
+import { deleteOffer, heatingCosts, pdfToView, recipient, sendConfirmation, statusOfStatement } from '../questions/statement-detail';
 import { emptyStatementList, statementOfYear, statementPath } from '../questions/statements';
 import { searchStatements } from '../tasks/statements';
 import { francs } from '../tasks/statement-generate-api';
@@ -14,6 +14,7 @@ import {
 	generateStatementPdf,
 	markStatementPaid,
 	openStatementApartment,
+	openSendConfirmation,
 	openStatementTenant,
 	sendStatement
 } from '../tasks/statement-detail';
@@ -54,12 +55,36 @@ When('der Liegenschaftsverwalter die Abrechnung versendet', async ({ verwalter }
 	await verwalter.perform(sendStatement);
 });
 
+When('der Liegenschaftsverwalter die Abrechnung als versendet markieren will', async ({ verwalter }) => {
+	await verwalter.perform(openSendConfirmation);
+});
+
+Then(
+	'nennt die Bestätigung den Empfänger {string} mit dem Korrespondenzkanal {string}',
+	async ({ verwalter, names }, tenant: string, channel: string) => {
+		await expect(recipient(verwalter)).toContainText(names.get(tenant) ?? tenant);
+		await expect(recipient(verwalter)).toContainText(channel);
+	}
+);
+
+Then('sagt die Bestätigung, dass Dwello die Abrechnung nicht selbst verschickt', async ({ verwalter }) => {
+	await expect(sendConfirmation(verwalter)).toContainText('Dwello verschickt die Abrechnung nicht selbst');
+});
+
+Then('bietet die Bestätigung das PDF der Abrechnung zum Ansehen an', async ({ verwalter }) => {
+	await expect(pdfToView(verwalter)).toHaveAttribute('href', /\/pdf\?ansehen$/);
+});
+
 When('der Liegenschaftsverwalter die Abrechnung als bezahlt markiert', async ({ verwalter }) => {
 	await verwalter.perform(markStatementPaid);
 });
 
 When('der Liegenschaftsverwalter die Abrechnung löscht', async ({ verwalter }) => {
 	await verwalter.perform(deleteStatement);
+});
+
+Then('bietet die Detailseite das Löschen der Abrechnung nicht an', async ({ verwalter }) => {
+	await expect(deleteOffer(verwalter)).toHaveCount(0);
 });
 
 When('der Liegenschaftsverwalter die Abrechnung bearbeiten will', async ({ verwalter }) => {
@@ -83,7 +108,7 @@ Then(
 			expect([Number(heating.sharePercentage), Number(heating.tenantShare)]).toEqual([share, francs(amount)]);
 			return;
 		}
-		await expect(heatingCosts(verwalter)).toContainText(`${share}%`);
+		await expect(heatingCosts(verwalter)).toContainText(`${share} %`);
 		await expect(heatingCosts(verwalter)).toContainText(amount);
 	}
 );

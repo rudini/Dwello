@@ -3,215 +3,190 @@
 	import { page } from '$app/stores';
 	import { untrack } from 'svelte';
 	import { apiCall } from '$lib/api';
-	import Card from '$lib/components/Card.svelte';
-	import FieldError from '$lib/components/FieldError.svelte';
-	import FormActions from '$lib/components/FormActions.svelte';
-	import Icon from '$lib/components/Icon.svelte';
-	import { keepEarlyChoice } from '$lib/early-choice';
 	import {
 		availableFrom,
 		contractBody,
-		fieldBorder,
+		forAvailability,
 		initialContractValues,
 		overlapWarning,
-		saveErrorMessage,
-		suggestedStartDate,
 		validateContract
 	} from '$lib/contract-form';
+	import { contractStatusOn, localToday } from '$lib/contract-status';
+	import { normalizeAmounts, stepErrors } from '$lib/contract-wizard';
+	import { addToast } from '$lib/stores';
 	import type { RentalContract } from '$lib/types';
+	import Alert from '$lib/ui/Alert.svelte';
+	import Button from '$lib/ui/Button.svelte';
+	import { focusFirstError } from '$lib/ui/focus-error';
+	import Panel from '$lib/ui/Panel.svelte';
+	import Select from '$lib/ui/Select.svelte';
 	import {
 		computeAvailability,
 		type AvailabilityInfo,
 		type ContractForAvailability
 	} from '$lib/utils/contract-availability';
-	import ApartmentSelect from './ApartmentSelect.svelte';
-	import PeriodFields from './PeriodFields.svelte';
-	import RentFields from './RentFields.svelte';
+	import ApartmentStep from './new/ApartmentStep.svelte';
+	import PeriodStep from './new/PeriodStep.svelte';
+	import RentStep from './new/RentStep.svelte';
 
-	// Form of a new contract or, given one, of a contract being edited
+	// Form of a contract being edited, with the fields, help and checks of the wizard in ./new
 	let {
 		contract,
 		tenants,
 		apartments
 	}: {
-		contract?: RentalContract;
+		contract: RentalContract;
 		tenants: { id: string; name: string }[];
 		apartments: { id: string; unit: string; building: string }[];
 	} = $props();
 
-	let form = $state(untrack(() => initialContractValues(contract, $page.url.searchParams)));
+	const errorKey: Record<string, string> = { tenant: 'tenantId', apartment: 'apartmentId' };
+	let values = $state(untrack(() => initialContractValues(contract, $page.url.searchParams)));
 	let errors = $state<Record<string, string>>({});
-	let isSubmitting = $state(false);
-	let isLoadingAvailability = $state(true);
-	let apartmentAvailability = $state(new Map<string, AvailabilityInfo>());
+	let saving = $state(false);
+	let availability = $state<Map<string, AvailabilityInfo> | null>(null);
 	let apartmentContracts = $state<ContractForAvailability[]>([]);
+	let form = $state<HTMLFormElement>();
 
-	const currentApartmentId = $derived(contract?.apartmentId);
-	const selectedAvailability = $derived(apartmentAvailability.get(form.apartmentId));
+	const today = localToday();
+	// Only a start moved before the saved one and into the past is questioned
+	const pastBefore = untrack(() => [today, values.startDate].sort()[0]);
+	const running = $derived(
+		contractStatusOn(contract.startDate, contract.endDate, today) === 'active'
+	);
 	const startLimit = $derived(
-		availableFrom(selectedAvailability, form.apartmentId !== currentApartmentId)
+		availableFrom(
+			availability?.get(values.apartmentId),
+			values.apartmentId !== contract.apartmentId
+		)
 	);
-	const overlap = $derived(overlapWarning(form, apartmentContracts, contract?.id));
-	const isRunning = $derived(!!contract && !contract.endDate);
-	// Where the form saves to and returns to, and how its submit button reads
-	const target = $derived(
-		contract
-			? {
-					path: `/contracts/${contract.id}`,
-					method: 'PUT' as const,
-					back: `/contracts/${contract.id}`,
-					icon: 'save',
-					label: 'Änderungen speichern',
-					busyLabel: 'Wird gespeichert...'
-				}
-			: {
-					path: '/contracts',
-					method: 'POST' as const,
-					back: '/contracts',
-					icon: 'add',
-					label: 'Vertrag erstellen',
-					busyLabel: 'Wird erstellt...'
-				}
-	);
+	const overlap = $derived(overlapWarning(values, apartmentContracts, contract.id));
+	const back = $derived(`/contracts/${contract.id}`);
+	const tenantName = $derived(tenants.find((t) => t.id === values.tenantId)?.name ?? '');
 
 	async function contractsOf(apartmentId: string) {
-		const response = await apiCall<{ contracts: ContractForAvailability[] }>(
+		const response = await apiCall<{ contracts: Parameters<typeof forAvailability>[0] }>(
 			`/contracts?apartmentId=${apartmentId}`
 		);
-		return response.data?.contracts || [];
+		return forAvailability(response.data?.contracts ?? []);
 	}
 
 	// The contract being edited does not block its own apartment
 	async function availabilityOf(apartmentId: string) {
-		const ownContract = apartmentId === contract?.apartmentId ? contract.id : undefined;
-		return [apartmentId, computeAvailability(await contractsOf(apartmentId), ownContract)] as const;
+		const own = apartmentId === contract.apartmentId ? contract.id : undefined;
+		return [apartmentId, computeAvailability(await contractsOf(apartmentId), own)] as const;
 	}
 
 	$effect(() => {
-		Promise.all(apartments.map((apt) => availabilityOf(apt.id)))
-			.then((entries) => (apartmentAvailability = new Map(entries)))
-			.catch((error) => console.error('Error fetching apartment availability:', error))
-			.finally(() => (isLoadingAvailability = false));
+		Promise.all(apartments.map((a) => availabilityOf(a.id))).then(
+			(entries) => (availability = new Map(entries))
+		);
 	});
 
 	// Contracts of the chosen apartment, for the overlap check
 	$effect(() => {
-		const apartmentId = form.apartmentId;
-		if (!apartmentId) {
-			apartmentContracts = [];
-			return;
-		}
-		contractsOf(apartmentId)
-			.then((contracts) => (apartmentContracts = contracts))
-			.catch((error) => {
-				console.error('Error fetching apartment contracts:', error);
-				apartmentContracts = [];
-			});
+		const apartmentId = values.apartmentId;
+		if (apartmentId) contractsOf(apartmentId).then((list) => (apartmentContracts = list));
+		else apartmentContracts = [];
 	});
 
-	$effect(() => {
-		const start = suggestedStartDate(!contract, form.startDate, selectedAvailability);
-		if (start) form.startDate = start;
-	});
+	function edited(event: Event) {
+		const id = (event.target as HTMLElement).id;
+		delete errors[errorKey[id] ?? id];
+	}
 
 	async function save(event: SubmitEvent) {
 		event.preventDefault();
-		errors = validateContract(form);
-		if (Object.keys(errors).length > 0) return;
-
-		isSubmitting = true;
-		try {
-			const response = await apiCall(target.path, {
-				method: target.method,
-				body: contractBody(form)
-			});
-			if (response.error) throw new Error(response.error.message);
-			await goto(target.back);
-		} catch (error) {
-			console.error('Error saving contract:', error);
-			errors = { form: saveErrorMessage(error) };
-		} finally {
-			isSubmitting = false;
+		Object.assign(values, normalizeAmounts(values)); // "1'450" as typed in Switzerland
+		errors = { ...validateContract(values), ...stepErrors(values, 3) };
+		if (Object.keys(errors).length > 0) return focusFirstError(form);
+		saving = true;
+		const response = await apiCall(back, { method: 'PUT', body: contractBody(values) });
+		saving = false;
+		if (response.error) {
+			// the backend answers in English; a valid form is refused only for an overlap
+			errors = {
+				form: /overlap/i.test(response.error.message)
+					? 'Der Zeitraum überschneidet sich mit einem anderen Mietvertrag dieser Wohnung.'
+					: 'Beim Speichern ist ein Fehler aufgetreten. Versuchen Sie es später erneut.'
+			};
+			return focusFirstError(form);
 		}
+		addToast('success', `Mietvertrag von ${tenantName} gespeichert`, 10_000);
+		await goto(back);
 	}
 </script>
 
-<Card>
-	<form onsubmit={save} class="space-y-6">
-		{#if errors.form}
-			<div class="bg-red-50 border border-red-200 rounded-lg p-4">
-				<p class="text-sm text-red-700" data-testid="form-error">{errors.form}</p>
-			</div>
-		{/if}
+<form
+	bind:this={form}
+	onsubmit={save}
+	oninput={edited}
+	onchange={edited}
+	novalidate
+	class="flex flex-col gap-6"
+>
+	{#if running}
+		<!-- TODO(fachlich prüfen): the hint on legal notice periods is not from the glossary -->
+		<Alert tone="caution" title="Laufender Mietvertrag">
+			<p>
+				Änderungen an einem laufenden Mietvertrag gelten sofort. Bei Mietanpassungen sollten Sie die
+				gesetzlichen Kündigungsfristen beachten.
+			</p>
+		</Alert>
+	{/if}
 
-		{#if isRunning}
-			<div class="bg-amber-50 border border-amber-200 rounded-lg p-4">
-				<div class="flex items-start gap-3">
-					<Icon name="warning" size={20} class="text-amber-600 mt-0.5" />
-					<div class="text-sm text-amber-800">
-						<p class="font-medium">Aktiver Vertrag</p>
-						<p class="mt-1">
-							Änderungen an einem aktiven Vertrag werden sofort wirksam. Bei Mietanpassungen sollten
-							Sie die gesetzlichen Kündigungsfristen beachten.
-						</p>
-					</div>
-				</div>
-			</div>
-		{/if}
-
-		<div>
-			<label for="tenant" class="block text-sm font-medium text-gray-700 mb-1">
-				Mieter <span class="text-red-500">*</span>
-			</label>
-			<select
-				id="tenant"
-				data-testid="contract-tenant-select"
-				onchange={(e) => (form.tenantId = e.currentTarget.value)}
-				use:keepEarlyChoice={(id) => (form.tenantId = id)}
-				class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary bg-white {fieldBorder(
-					errors.tenantId
-				)}"
-			>
-				<option value="" selected={!form.tenantId}>Mieter auswählen...</option>
-				{#each tenants as tenant (tenant.id)}
-					<option value={tenant.id} selected={tenant.id === form.tenantId}>{tenant.name}</option>
-				{/each}
-			</select>
-			<FieldError message={errors.tenantId} />
-		</div>
-
-		<ApartmentSelect
-			bind:value={form.apartmentId}
+	<Panel title="Mieter und Wohnung">
+		<Select
+			id="tenant"
+			label="Mieter"
+			help="Die Person, die die Wohnung mietet."
+			options={tenants.map((t) => ({ value: t.id, label: t.name }))}
+			bind:value={values.tenantId}
+			placeholder="Mieter wählen"
+			error={errors.tenantId}
+			testid="contract-tenant-select"
+		/>
+		<ApartmentStep
+			bind:apartmentId={values.apartmentId}
 			{apartments}
-			availability={apartmentAvailability}
-			loading={isLoadingAvailability}
-			{currentApartmentId}
-			error={errors.apartmentId}
+			availability={availability ?? new Map()}
+			loading={!availability}
 			notice={startLimit.notice}
+			error={errors.apartmentId}
 		/>
+	</Panel>
 
-		<PeriodFields
-			bind:startDate={form.startDate}
-			bind:endDate={form.endDate}
-			bind:isUnlimited={form.isUnlimited}
+	<Panel title="Vertragsdauer">
+		<PeriodStep
+			bind:startDate={values.startDate}
+			bind:endDate={values.endDate}
+			bind:isUnlimited={values.isUnlimited}
 			min={startLimit.min}
-			{errors}
+			today={pastBefore}
 			{overlap}
-		/>
-
-		<RentFields
-			bind:baseRent={form.baseRent}
-			bind:additionalRent={form.additionalRent}
-			bind:advancePayment={form.advancePayment}
 			{errors}
 		/>
+	</Panel>
 
-		<FormActions
-			cancelHref={target.back}
-			submitting={isSubmitting}
-			icon={target.icon}
-			label={target.label}
-			busyLabel={target.busyLabel}
-		/>
-	</form>
-</Card>
+	<Panel title="Miete">
+		<RentStep bind:values {errors} />
+	</Panel>
+
+	{#if errors.form}
+		<Alert tone="critical" title="Der Mietvertrag wurde nicht gespeichert" testid="form-error">
+			<p>{errors.form}</p>
+		</Alert>
+	{/if}
+
+	<div class="flex flex-col-reverse gap-4 sm:flex-row sm:justify-end">
+		<Button href={back} testid="form-cancel">Abbrechen</Button>
+		<Button
+			type="submit"
+			variant="primary"
+			icon="save"
+			busy={saving}
+			busyLabel="Wird gespeichert …"
+			testid="submit-button">Änderungen speichern</Button
+		>
+	</div>
+</form>

@@ -1,6 +1,10 @@
 import type { Actor } from '../fixtures/actor';
 import {
+	buildingCheckbox,
+	buildingInvoices,
+	draftsOnlyNote,
 	generationResult,
+	missingInvoices,
 	managementFeeHint,
 	periodStartInput,
 	previewEmpty,
@@ -14,3 +18,7 @@ export const noContractsInPeriod = (actor: Actor) => previewEmpty(actor.page);
 export const generationOutcome = (actor: Actor) => generationResult(actor.page);
 export const feeAboveGuideline = (actor: Actor) => managementFeeHint(actor.page);
 export const periodChoice = (actor: Actor) => periodStartInput(actor.page);
+export const missingInvoicesWarning = (actor: Actor) => missingInvoices(actor.page);
+export const invoicesOfBuilding = (actor: Actor, buildingName: string) => buildingInvoices(actor.page, buildingName);
+export const draftsOnly = (actor: Actor) => draftsOnlyNote(actor.page);
+export const chosenBuilding = (actor: Actor, buildingId: string) => buildingCheckbox(actor.page, buildingId);

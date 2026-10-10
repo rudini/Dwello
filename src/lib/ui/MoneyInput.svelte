@@ -1,0 +1,53 @@
+<script lang="ts">
+	import Field from './Field.svelte';
+	import { controlClass } from './field';
+
+	// Amount in francs: CHF in front, decimal keyboard on phones, figures aligned
+	let {
+		id,
+		label,
+		value = $bindable(''),
+		name,
+		help,
+		example,
+		error,
+		optional = false,
+		onblur,
+		testid
+	}: {
+		id: string;
+		label: string;
+		value?: string;
+		name?: string;
+		help?: string;
+		example?: string;
+		error?: string;
+		optional?: boolean;
+		onblur?: () => void;
+		testid?: string;
+	} = $props();
+</script>
+
+<Field {id} {label} {help} {example} {error} {optional}>
+	{#snippet children(control)}
+		<div class="relative">
+			<span
+				class="pointer-events-none absolute inset-y-0 left-4 flex items-center text-ink-muted"
+				aria-hidden="true">CHF</span
+			>
+			<input
+				id={control.id}
+				{name}
+				type="text"
+				inputmode="decimal"
+				bind:value
+				{onblur}
+				aria-required={!optional}
+				aria-describedby={control.describedBy}
+				aria-invalid={control.invalid || undefined}
+				class="{controlClass(control.invalid)} pl-16 text-right tabular-nums"
+				data-testid={testid}
+			/>
+		</div>
+	{/snippet}
+</Field>

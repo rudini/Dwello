@@ -1,6 +1,5 @@
 <script lang="ts">
-	import PageTrail from '$lib/components/PageTrail.svelte';
-	import Card from '$lib/components/Card.svelte';
+	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import DistributionKeyForm from '../DistributionKeyForm.svelte';
 	import type { ActionData } from './$types';
 
@@ -14,23 +13,14 @@
 	<title>Neuer Verteilschlüssel - Dwello</title>
 </svelte:head>
 
-<div class="max-w-3xl mx-auto space-y-6">
-	<PageTrail
-		links={[
+<div class="mx-auto flex max-w-3xl flex-col gap-8">
+	<PageHeader
+		title="Neuer Verteilschlüssel"
+		purpose="Eine eigene Formel, nach der Kosten auf die Wohnungen eines Gebäudes verteilt werden."
+		trail={[
 			{ href: '/config', label: 'Einstellungen' },
 			{ href: '/config/distribution-keys', label: 'Verteilschlüssel' }
 		]}
-		current="Neuer Verteilschlüssel"
 	/>
-
-	<div>
-		<h1 class="text-2xl font-bold text-gray-900">Neuer Verteilschlüssel</h1>
-		<p class="text-gray-500 mt-1">
-			Formel, nach der Kosten auf die Wohnungen eines Gebäudes verteilt werden.
-		</p>
-	</div>
-
-	<Card>
-		<DistributionKeyForm {errors} {test} submitLabel="Verteilschlüssel erstellen" />
-	</Card>
+	<DistributionKeyForm {errors} {test} submitLabel="Verteilschlüssel speichern" />
 </div>

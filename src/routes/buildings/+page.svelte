@@ -3,24 +3,18 @@
 	import { page } from '$app/stores';
 	import type { BuildingsListData } from '$lib/types';
 	import { listSearchUrl } from '$lib/list-url';
-	import Button from '$lib/components/Button.svelte';
-	import Icon from '$lib/components/Icon.svelte';
-	import Card from '$lib/components/Card.svelte';
-	import SearchField from '$lib/components/SearchField.svelte';
-	import FilterActions from '$lib/components/FilterActions.svelte';
-	import ListPagination from '$lib/components/ListPagination.svelte';
-
-	function getGoogleMapsDirectionsUrl(address: string, city: string, postalCode: string): string {
-		const destination = encodeURIComponent(`${address}, ${postalCode} ${city}, Switzerland`);
-		return `https://www.google.com/maps/dir/?api=1&destination=${destination}`;
-	}
+	import Button from '$lib/ui/Button.svelte';
+	import EmptyState from '$lib/ui/EmptyState.svelte';
+	import PageHeader from '$lib/ui/PageHeader.svelte';
+	import Pagination from '$lib/ui/Pagination.svelte';
+	import TextInput from '$lib/ui/TextInput.svelte';
+	import BuildingCard from './BuildingCard.svelte';
 
 	let { data }: { data: BuildingsListData } = $props();
 
 	let searchTerm = $state($page.url.searchParams.get('search') || '');
 	let cityFilter = $state($page.url.searchParams.get('city') || '');
-
-	const filtered = $derived(!!(searchTerm || cityFilter));
+	const filtered = $derived(['search', 'city'].some((key) => $page.url.searchParams.get(key)));
 
 	function handleSearch(event: SubmitEvent) {
 		event.preventDefault();
@@ -32,159 +26,85 @@
 		cityFilter = '';
 		goto('/buildings');
 	}
-
-	function getOccupancyColor(occupied: number, total: number): string {
-		const percentage = total > 0 ? (occupied / total) * 100 : 0;
-		if (percentage === 100) return 'bg-green-500';
-		if (percentage >= 80) return 'bg-green-400';
-		if (percentage >= 50) return 'bg-yellow-500';
-		return 'bg-red-500';
-	}
 </script>
 
 <svelte:head>
 	<title>Gebäude - Dwello</title>
 </svelte:head>
 
-<div class="space-y-6" data-testid="buildings-page">
-	<!-- Header -->
-	<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-		<div>
-			<h1 class="text-2xl font-bold text-gray-900">Gebäude</h1>
-			<p class="text-gray-500 mt-1">{data.total} Gebäude insgesamt</p>
+<div class="flex flex-col gap-8" data-testid="buildings-page">
+	<PageHeader title="Gebäude" purpose="Ihre Gebäude mit Adresse und Wohnungen.">
+		{#snippet action()}
+			<Button href="/buildings/new" variant="primary" icon="add" testid="building-new-button"
+				>Gebäude erfassen</Button
+			>
+		{/snippet}
+	</PageHeader>
+
+	<form
+		role="search"
+		onsubmit={handleSearch}
+		class="flex flex-col gap-4 rounded-panel border border-line bg-surface p-6"
+	>
+		<div class="grid gap-4 md:grid-cols-2">
+			<TextInput
+				id="search"
+				label="Suche"
+				bind:value={searchTerm}
+				placeholder="Name oder Adresse"
+				optional
+				testid="building-search-input"
+			/>
+			<TextInput
+				id="city"
+				label="Ort"
+				bind:value={cityFilter}
+				placeholder="Zürich"
+				optional
+				testid="building-city-filter"
+			/>
 		</div>
-		<Button href="/buildings/new" variant="primary" testid="building-new-button">
-			<Icon name="add" size={20} />
-			Neues Gebäude
-		</Button>
-	</div>
+		<div class="flex flex-wrap gap-4">
+			<Button type="submit" icon="search" testid="building-search-submit">Suchen</Button>
+			{#if searchTerm || cityFilter}
+				<Button variant="ghost" icon="close" onclick={clearFilters}>Filter zurücksetzen</Button>
+			{/if}
+		</div>
+	</form>
 
-	<!-- Search and Filters -->
-	<Card>
-		<form onsubmit={handleSearch} class="flex flex-col lg:flex-row lg:items-center gap-4">
-			<div class="flex-1 flex flex-col sm:flex-row gap-4">
-				<SearchField
-					bind:value={searchTerm}
-					placeholder="Name, Adresse oder Stadt..."
-					testid="building-search-input"
-				/>
-				<div class="w-full sm:w-48">
-					<label for="city" class="sr-only">Stadt</label>
-					<input
-						id="city"
-						name="city"
-						data-testid="building-city-filter"
-						type="text"
-						bind:value={cityFilter}
-						placeholder="Stadt, z.B. Zürich"
-						class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-					/>
-				</div>
-			</div>
-			<FilterActions {filtered} onclear={clearFilters} testid="building-search-submit" />
-		</form>
-	</Card>
-
-	<!-- Buildings List -->
 	{#if data.buildings.length === 0}
-		<Card>
-			<div class="text-center py-12" data-testid="buildings-empty">
-				<Icon name="apartment" size={48} class="mx-auto text-gray-300 mb-4" />
-				<h3 class="text-lg font-medium text-gray-900 mb-2">Keine Gebäude gefunden</h3>
-				<p class="text-gray-500 mb-6">
-					{#if filtered}
-						Versuchen Sie es mit anderen Suchbegriffen.
-					{:else}
-						Erstellen Sie Ihr erstes Gebäude, um loszulegen.
-					{/if}
-				</p>
-				{#if !filtered}
-					<Button href="/buildings/new" variant="primary">
-						<Icon name="add" size={20} />
-						Erstes Gebäude erstellen
-					</Button>
-				{/if}
-			</div>
-		</Card>
+		<section class="rounded-panel border border-line bg-surface">
+			{#if filtered}
+				<EmptyState
+					title="Keine Gebäude gefunden"
+					text="Kein Gebäude passt zu Ihrer Suche. Prüfen Sie die Schreibweise oder zeigen Sie alle Gebäude."
+					illustration="no-results"
+					actionLabel="Filter zurücksetzen"
+					actionHref="/buildings"
+					testid="buildings-empty"
+				/>
+			{:else}
+				<EmptyState
+					title="Noch keine Gebäude"
+					text="Erfassen Sie zuerst ein Gebäude. Danach legen Sie seine Wohnungen und Mietverträge an."
+					illustration="building"
+					actionLabel="Gebäude erfassen"
+					actionHref="/buildings/new"
+					testid="buildings-empty"
+				/>
+			{/if}
+		</section>
 	{:else}
-		<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-			{#each data.buildings as building}
-				<div class="relative" data-testid="building-card-{building.id}">
-					<a
-						href="/buildings/{building.id}"
-						class="block bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-primary/40 transition-all duration-200 p-5"
-					>
-						<!-- Building Name & Address -->
-						<div class="min-w-0 pr-10 mb-3">
-							<h3 class="font-semibold text-gray-900 truncate">
-								{building.name || building.address}
-							</h3>
-							{#if building.name}
-								<p class="text-sm text-gray-500 truncate">{building.address}</p>
-							{/if}
-						</div>
-
-						<!-- Location -->
-						<div class="flex items-center text-sm text-gray-600 mb-4">
-							<Icon name="location_on" size={16} class="mr-1 text-gray-400" />
-							<span>{building.postalCode} {building.city}</span>
-							{#if building.canton}
-								<span class="ml-1 text-gray-400">({building.canton})</span>
-							{/if}
-						</div>
-
-						<!-- Stats -->
-						<div class="flex items-center justify-between pt-3 border-t border-gray-100">
-							<div class="flex items-center gap-4">
-								<!-- Apartment Count -->
-								<div class="flex items-center text-sm">
-									<Icon name="door_front" size={16} class="mr-1 text-gray-400" />
-									<span class="font-medium">{building.apartmentCount}</span>
-									<span class="text-gray-500 ml-1">Wohnungen</span>
-								</div>
-							</div>
-
-							<!-- Occupancy Indicator -->
-							<div class="flex items-center gap-2">
-								<div
-									class="w-2 h-2 rounded-full {getOccupancyColor(
-										building.occupiedCount,
-										building.apartmentCount
-									)}"
-								></div>
-								<span class="text-sm text-gray-600">
-									{building.occupiedCount}/{building.apartmentCount}
-								</span>
-							</div>
-						</div>
-
-						<!-- Building Type & Year -->
-						{#if building.buildingType || building.yearBuilt}
-							<div class="flex items-center gap-3 mt-3 text-xs text-gray-500">
-								{#if building.buildingType}
-									<span class="bg-gray-100 px-2 py-1 rounded">{building.buildingType}</span>
-								{/if}
-								{#if building.yearBuilt}
-									<span>Baujahr {building.yearBuilt}</span>
-								{/if}
-							</div>
-						{/if}
-					</a>
-					<a
-						href={getGoogleMapsDirectionsUrl(building.address, building.city, building.postalCode)}
-						data-testid="building-route-link"
-						target="_blank"
-						rel="noopener noreferrer"
-						class="absolute right-4 top-4 p-1.5 rounded-lg text-gray-400 hover:text-primary hover:bg-primary/10 transition-colors"
-						title="Route in Google Maps öffnen"
-						aria-label="Route in Google Maps öffnen"
-					>
-						<Icon name="directions" size={18} />
-					</a>
-				</div>
-			{/each}
-		</div>
-
-		<ListPagination {data} />
+		<section aria-labelledby="buildings-count" class="flex flex-col gap-4">
+			<h2 id="buildings-count" tabindex="-1" data-results class="text-xl font-bold text-ink">
+				{data.total} Gebäude
+			</h2>
+			<ul class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+				{#each data.buildings as building (building.id)}
+					<BuildingCard {building} />
+				{/each}
+			</ul>
+		</section>
+		<Pagination url={$page.url} page={data.page} pageSize={data.pageSize} total={data.total} />
 	{/if}
 </div>

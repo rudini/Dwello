@@ -14,8 +14,12 @@ When('der Liegenschaftsverwalter im Breadcrumb {string} wählt', async ({ verwal
 	await verwalter.perform(chooseBreadcrumb(names.get(label) ?? label));
 });
 
+// The apartment page names its building after the number ("Wohnung 2.01, Lindenhof … - Dwello")
+const escaped = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 Then('ist der Liegenschaftsverwalter auf der Seite {string}', async ({ verwalter }, title: string) => {
-	await expect(verwalter.page).toHaveTitle(`${title} - Dwello`);
+	const building = title.startsWith('Wohnung ') && !title.endsWith(' bearbeiten') ? ', .+' : '';
+	await expect(verwalter.page).toHaveTitle(new RegExp(`^${escaped(title)}${building} - Dwello$`));
 });
 
 Then(

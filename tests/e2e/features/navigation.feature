@@ -13,21 +13,24 @@ Funktionalität: Navigation
     Dann ist der Liegenschaftsverwalter auf der Seite "<Seite>"
 
     Beispiele:
-      | Bereich         | Seite                   |
-      | Dashboard       | Dashboard               |
-      | Gebäude         | Gebäude                 |
-      | Wohnungen       | Wohnungen               |
-      | Mieter          | Mieter                  |
-      | Verträge        | Mietverträge            |
-      | Rechnungen      | Rechnungen              |
-      | Abrechnungen    | Nebenkostenabrechnungen |
-      | Dokumente       | Dokumente               |
-      | Konfiguration   | Einstellungen           |
-      | Hilfe & Support | Hilfe                   |
+      | Bereich                 | Seite                   |
+      | Übersicht               | Übersicht               |
+      | Gebäude                 | Gebäude                 |
+      | Wohnungen               | Wohnungen               |
+      | Mieter                  | Mieter                  |
+      | Mietverträge            | Mietverträge            |
+      | Rechnungen              | Rechnungen              |
+      | Nebenkostenabrechnungen | Nebenkostenabrechnungen |
+      | Dokumente               | Dokumente               |
+      | Einstellungen           | Einstellungen           |
+      | Kategorien              | Kategorien              |
+      | Verteilschlüssel        | Verteilschlüssel        |
+      | Heizprofile             | Heizprofile             |
+      | Hilfe                   | Hilfe                   |
 
-  Szenario: Über das Logo zum Dashboard
+  Szenario: Über das Logo zur Übersicht
     Wenn der Liegenschaftsverwalter das Logo wählt
-    Dann ist der Liegenschaftsverwalter auf der Seite "Dashboard"
+    Dann ist der Liegenschaftsverwalter auf der Seite "Übersicht"
 
   Szenario: Einstellungen über das Benutzermenü öffnen
     Wenn der Liegenschaftsverwalter im Benutzermenü die Einstellungen wählt
@@ -41,3 +44,7 @@ Funktionalität: Navigation
       | Link                |
       | Datenschutz         |
       | Nutzungsbedingungen |
+
+  Szenario: Nur der aktuelle Bereich ist markiert
+    Wenn der Liegenschaftsverwalter in der Hauptnavigation "Heizprofile" wählt
+    Dann ist in der Hauptnavigation nur "Heizprofile" markiert

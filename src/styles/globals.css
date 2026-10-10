@@ -1,86 +1,33 @@
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
+@import '@fontsource-variable/inter';
+@import './tokens.css';
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-	--color-primary: #135bec;
-	--color-secondary: #616f89;
-	--color-success: #10b981;
-	--color-warning: #f59e0b;
-	--color-error: #ef4444;
-	--color-text-dark: #111318;
-	--color-border-light: #dbdfe6;
-}
-
 body {
 	margin: 0;
-	font-family: 'Manrope', system-ui, sans-serif;
+	font-family: var(--font-sans);
+	font-size: 1rem;
+	line-height: var(--leading-text);
+	color: var(--color-ink);
+	background: var(--color-canvas);
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 }
 
-code {
-	font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+/* Visible focus on every interactive element, keyboard only */
+:focus-visible {
+	outline: 3px solid var(--color-focus);
+	outline-offset: 2px;
 }
 
-/* Focus ring utilities for accessibility */
-@layer utilities {
-	.focus-ring {
-		@apply focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2;
-	}
-
-	.focus-ring-inset {
-		@apply focus:outline-none focus:ring-2 focus:ring-primary focus:ring-inset;
-	}
-
-	.focus-visible-ring {
-		@apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2;
-	}
+input::placeholder,
+textarea::placeholder {
+	color: var(--color-ink-muted);
 }
 
-/* Animation utilities for toasts and modals */
-@layer utilities {
-	.animate-in {
-		animation: animateIn 0.2s ease-out;
-	}
-
-	.slide-in-from-right {
-		--tw-enter-translate-x: 100%;
-	}
-
-	.fade-in {
-		--tw-enter-opacity: 0;
-	}
-
-	.zoom-in-95 {
-		--tw-enter-scale: 0.95;
-	}
-
-	@keyframes animateIn {
-		from {
-			opacity: var(--tw-enter-opacity, 1);
-			transform: translate(var(--tw-enter-translate-x, 0), var(--tw-enter-translate-y, 0))
-				scale(var(--tw-enter-scale, 1));
-		}
-		to {
-			opacity: 1;
-			transform: translate(0, 0) scale(1);
-		}
-	}
-}
-
-/* Screen reader only utility */
-.sr-only {
-	position: absolute;
-	width: 1px;
-	height: 1px;
-	padding: 0;
-	margin: -1px;
-	overflow: hidden;
-	clip: rect(0, 0, 0, 0);
-	white-space: nowrap;
-	border-width: 0;
+/* Beats leaflet.css (loaded later with the map): the empty map takes the page's colours */
+:root .leaflet-container {
+	background: var(--color-sunken);
 }

@@ -2,12 +2,20 @@ import { expect } from '@playwright/test';
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { visit } from '../interactions/navigation';
-import { llmRecipientNotice, operatorNotice, sectionTitled } from '../questions/app-frame';
+import {
+	draftNotice,
+	llmRecipientNotice,
+	operatorNotice,
+	pageOverflowsSideways,
+	pageTitleWidth,
+	sectionTitled
+} from '../questions/app-frame';
 import {
 	chooseInFooter,
 	chooseInMainNav,
 	chooseLogo,
-	openSettingsFromUserMenu
+	openSettingsFromUserMenu,
+	useWindowWidth
 } from '../tasks/app-frame';
 
 const { Given, When, Then } = createBdd(test);
@@ -64,9 +72,31 @@ Then(
 );
 
 Then(
+	'erfährt der Liegenschaftsverwalter unter {string}, dass ungespeicherte Eingaben bis zum Speichern, Verwerfen oder Abmelden als Entwurf in diesem Browser bleiben',
+	async ({ verwalter }, heading: string) => {
+		await expect(draftNotice(verwalter, heading)).toContainText(
+			'als Entwurf in diesem Browser auf, bis Sie sie speichern, verwerfen oder sich abmelden'
+		);
+	}
+);
+
+Then(
 	'erfährt der Liegenschaftsverwalter unter {string}, dass {string} die Installation betreibt und unter {string} erreichbar ist',
 	async ({ verwalter }, heading: string, operator: string, contact: string) => {
 		await expect(operatorNotice(verwalter, heading)).toContainText(operator);
 		await expect(operatorNotice(verwalter, heading)).toContainText(contact);
 	}
 );
+
+Given('das Browserfenster ist {int} Pixel breit', async ({ verwalter }, width: number) => {
+	await verwalter.perform(useWindowWidth(width));
+});
+
+// Readable: wide enough for a few words per line, not one letter per line
+Then('ist der Seitentitel lesbar', async ({ verwalter }) => {
+	await expect.poll(() => pageTitleWidth(verwalter)).toBeGreaterThanOrEqual(200);
+});
+
+Then('scrollt die Seite nicht seitwärts', async ({ verwalter }) => {
+	await expect.poll(() => pageOverflowsSideways(verwalter)).toBe(false);
+});

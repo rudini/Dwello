@@ -2,6 +2,7 @@ import { expect } from '@playwright/test';
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { visit } from '../interactions/navigation';
+import { confirmation } from '../questions/contract-form';
 import { activeBadge, allListedTenants, listedTenant } from '../questions/tenants';
 import {
 	createTenantByEmail,
@@ -80,5 +81,12 @@ Then(
 	async ({ verwalter, names }, tenant: string, kind: string) => {
 		await expect(listedTenant(verwalter, names.get(tenant)!)).toBeVisible();
 		await expect(activeBadge(verwalter, names.get(tenant)!)).toHaveCount(kind === 'aktiven' ? 1 : 0);
+	}
+);
+
+Then(
+	'sieht der Liegenschaftsverwalter die Bestätigung, dass {string} gespeichert ist',
+	async ({ verwalter, names }, tenant: string) => {
+		await expect(confirmation(verwalter)).toContainText(`${names.get(tenant) ?? tenant} gespeichert`);
 	}
 );

@@ -30,6 +30,13 @@ When('der Liegenschaftsverwalter nach dem Rechnungssteller {string} sucht', asyn
 });
 
 When(
+	'der Liegenschaftsverwalter die Rechnungen des Jahres {int} im Gebäude {string} anzeigt',
+	async ({ verwalter, seed }, year: number, building: string) => {
+		await verwalter.perform(filterInvoices({ buildingId: seed.idOf(building)!, year: String(year) }));
+	}
+);
+
+When(
 	'der Liegenschaftsverwalter die Rechnungen nach dem Gebäude {string} filtert',
 	async ({ verwalter, seed }, building: string) => {
 		await verwalter.perform(filterInvoices({ buildingId: seed.idOf(building)! }));

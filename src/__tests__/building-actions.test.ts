@@ -135,6 +135,17 @@ describe.each([
 			errors: { name: 'Gebäudename ist erforderlich', canton: 'Kanton ist erforderlich' }
 		});
 	});
+
+	it('nennt den fehlenden Ort wie das Glossar', async () => {
+		const result = await run(
+			action as Action,
+			rejected,
+			{ id: 'b1' },
+			{ ...validBuilding, city: '' }
+		);
+
+		expect(result).toMatchObject({ errors: { city: 'Ort ist erforderlich' } });
+	});
 });
 
 describe('Gebäudedetail', () => {
@@ -156,6 +167,26 @@ describe('Gebäudedetail', () => {
 			occupiedCount: 1,
 			vacantCount: 1
 		});
+	});
+
+	it('zählt wiedervermietete und gesperrte Wohnungen und nennt den Einzugstag', async () => {
+		const apartments = [
+			{ id: 'a1', status: 'relet', nextContractStart: '2099-11-01' },
+			{ id: 'a2', status: 'reserved', nextContractStart: null },
+			{ id: 'a3', status: 'occupied', nextContractStart: null }
+		];
+		const fetch = (async (url: string) =>
+			Response.json(
+				url.includes('/apartments') ? { apartments } : backendBuilding
+			)) as typeof globalThis.fetch;
+
+		const data = (await detailLoad({
+			params: { id: 'b1' },
+			fetch
+		} as never)) as BuildingDetailsData;
+
+		expect(data.building).toMatchObject({ reletCount: 1, reservedCount: 1 });
+		expect(data.apartments[0]).toMatchObject({ status: 'relet', nextContractStart: '2099-11-01' });
 	});
 });
 
@@ -179,5 +210,41 @@ describe('Gebäudeliste', () => {
 			occupiedCount: 1,
 			vacantCount: 1
 		});
+	});
+
+	it('zählt die wiedervermieteten und gesperrten Wohnungen jedes Gebäudes', async () => {
+		const apartments = [
+			{ buildingId: 'b1', status: 'relet' },
+			{ buildingId: 'b1', status: 'occupied' },
+			{ buildingId: 'b2', status: 'reserved' }
+		];
+		const urls: string[] = [];
+		const fetch = (async (url: string) => {
+			urls.push(url);
+			return Response.json(url.includes('/apartments') ? { apartments } : buildingList);
+		}) as unknown as typeof globalThis.fetch;
+
+		const data = (await listLoad({
+			url: new URL('http://localhost/buildings'),
+			fetch
+		} as never)) as { buildings: { reletCount: number; reservedCount: number }[] };
+
+		expect(urls).toContain('http://localhost:3001/api/v1/apartments?limit=1000');
+		expect(data.buildings[0]).toMatchObject({ reletCount: 1, reservedCount: 0 });
+	});
+
+	// The counts are an addition: without them the buildings still show
+	it('zeigt die Gebäude auch, wenn die Wohnungen nicht geladen werden können', async () => {
+		const fetch = (async (url: string) =>
+			url.includes('/apartments')
+				? new Response('Internal Server Error', { status: 500 })
+				: Response.json(buildingList)) as unknown as typeof globalThis.fetch;
+
+		const data = (await listLoad({
+			url: new URL('http://localhost/buildings'),
+			fetch
+		} as never)) as { buildings: { name: string; reletCount: number }[] };
+
+		expect(data.buildings).toMatchObject([{ name: 'Seeblick', reletCount: 0 }]);
 	});
 });

@@ -6,7 +6,7 @@ import { announcement } from '../questions/coming-soon';
 
 const { When, Then } = createBdd(test);
 
-When('der Liegenschaftsverwalter die Analytics öffnet', async ({ verwalter }) => {
+When('der Liegenschaftsverwalter die Auswertungen öffnet', async ({ verwalter }) => {
 	await visit(verwalter.page, '/analytics');
 });
 

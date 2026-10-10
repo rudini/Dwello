@@ -8,6 +8,7 @@ import {
 	contractHistory,
 	currentTenant,
 	grossMonthlyRent,
+	nextTenant,
 	vacancy
 } from '../questions/apartment-detail';
 import { editApartment, openContractFromHistory, openTenantProfile } from '../tasks/apartment-detail';
@@ -64,6 +65,13 @@ Then('gehört die Wohnung zum Gebäude {string}', async ({ verwalter, names }, b
 Then('ist die Wohnung nicht vermietet', async ({ verwalter }) => {
 	await expect(vacancy(verwalter)).toBeVisible();
 });
+
+Then(
+	'zieht {string} am {string} in die Wohnung ein',
+	async ({ verwalter, names }, tenant: string, date: string) => {
+		await expect(nextTenant(verwalter)).toContainText(`Ab ${date} vermietet an ${names.get(tenant)}`);
+	}
+);
 
 Then(
 	'enthält die Vertragshistorie die Mietverträge von {string} und {string}',

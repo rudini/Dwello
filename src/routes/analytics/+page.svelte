@@ -1,50 +1,23 @@
 <script lang="ts">
-	import Card from '$lib/components/Card.svelte';
-	import Icon from '$lib/components/Icon.svelte';
+	import EmptyState from '$lib/ui/EmptyState.svelte';
+	import PageHeader from '$lib/ui/PageHeader.svelte';
+	import Panel from '$lib/ui/Panel.svelte';
 </script>
 
 <svelte:head>
-	<title>Analytics - Dwello</title>
+	<title>Auswertungen - Dwello</title>
 </svelte:head>
 
-<div class="space-y-6">
-	<!-- Header -->
-	<div>
-		<h1 class="text-2xl font-bold text-gray-900">Analytics</h1>
-		<p class="text-gray-500 mt-1">Detaillierte Auswertungen und Statistiken</p>
-	</div>
-
-	<!-- Coming Soon Card -->
-	<Card>
-		<div class="text-center py-16">
-			<div class="inline-flex items-center justify-center w-20 h-20 bg-blue-100 rounded-full mb-6">
-				<Icon name="analytics" size={40} class="text-blue-600" />
-			</div>
-			<h2 class="text-xl font-semibold text-gray-900 mb-2" data-testid="coming-soon-title">
-				Analytics kommt in Phase 2
-			</h2>
-			<p class="text-gray-500 max-w-md mx-auto mb-8">
-				Detaillierte Auswertungen, Trends und Prognosen werden in der nächsten Version verfügbar
-				sein.
-			</p>
-
-			<div class="grid gap-4 sm:grid-cols-3 max-w-2xl mx-auto">
-				<div class="p-4 bg-gray-50 rounded-lg">
-					<Icon name="trending_up" size={24} class="text-gray-400 mb-2" />
-					<p class="font-medium text-gray-700">Einnahmentrends</p>
-					<p class="text-sm text-gray-500">Monatliche Entwicklung</p>
-				</div>
-				<div class="p-4 bg-gray-50 rounded-lg">
-					<Icon name="bar_chart" size={24} class="text-gray-400 mb-2" />
-					<p class="font-medium text-gray-700">Kostenanalyse</p>
-					<p class="text-sm text-gray-500">Nach Kategorie</p>
-				</div>
-				<div class="p-4 bg-gray-50 rounded-lg">
-					<Icon name="timeline" size={24} class="text-gray-400 mb-2" />
-					<p class="font-medium text-gray-700">Prognosen</p>
-					<p class="text-sm text-gray-500">Künftige Einnahmen</p>
-				</div>
-			</div>
-		</div>
-	</Card>
+<div class="flex flex-col gap-8">
+	<PageHeader title="Auswertungen" purpose="Auswertungen zu Einnahmen und Kosten Ihrer Gebäude." />
+	<Panel>
+		<EmptyState
+			testid="coming-soon"
+			illustration="meter"
+			title="Auswertungen sind in Vorbereitung"
+			text="Auswertungen zu Einnahmen, Kosten nach Kategorie und Prognosen sind für eine spätere Version geplant. Fristen und Zahlen zu Ihren Gebäuden finden Sie schon heute in der Übersicht."
+			actionLabel="Zur Übersicht"
+			actionHref="/dashboard"
+		/>
+	</Panel>
 </div>

@@ -1,15 +1,40 @@
 import { describe, it, expect } from 'vitest';
 import { runAction } from './helpers/action';
-import { actions } from '../routes/contracts/[id]/+page.server';
+import { actions, load } from '../routes/contracts/[id]/+page.server';
+import { load as listLoad } from '../routes/contracts/+page.server';
+import { localToday } from '../lib/contract-status';
+
+describe('Vertragsstatus', () => {
+	it('gibt Liste und Detail den Tag des Servers mit', async () => {
+		const urls: string[] = [];
+		const fetch = (async (url: string) => {
+			urls.push(url);
+			return Response.json({ id: 'c1', contracts: [], buildings: [], apartments: [] });
+		}) as typeof globalThis.fetch;
+
+		const list = (await listLoad({
+			url: new URL('http://localhost/contracts?status=future'),
+			fetch
+		} as never)) as { today: string };
+		const detail = (await load({ params: { id: 'c1' }, fetch } as never)) as { today: string };
+
+		expect(list.today).toBe(localToday());
+		expect(detail.today).toBe(localToday());
+		expect(urls[0]).toContain('status=future');
+	});
+});
 
 describe('Mietvertrag beenden', () => {
 	it('setzt das Vertragsende im Backend auf heute', async () => {
 		const { calls, result } = runAction(actions.end, 'c1');
 		await result;
 
-		const today = new Date().toISOString().split('T')[0];
 		expect(calls).toEqual([
-			{ method: 'PUT', url: 'http://localhost:3001/api/v1/contracts/c1', body: { endDate: today } }
+			{
+				method: 'PUT',
+				url: 'http://localhost:3001/api/v1/contracts/c1',
+				body: { endDate: localToday() }
+			}
 		]);
 	});
 });

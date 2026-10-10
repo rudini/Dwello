@@ -34,7 +34,7 @@ Funktionalität: Rechnung bearbeiten
 
   Szenario: Rechnungssteller fehlt
     Wenn der Liegenschaftsverwalter die Rechnung ohne Rechnungssteller speichert
-    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Bitte geben Sie einen Lieferanten ein"
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Bitte geben Sie einen Rechnungssteller ein"
 
   Szenario: Bearbeitung abbrechen
     Wenn der Liegenschaftsverwalter die Bearbeitung abbricht

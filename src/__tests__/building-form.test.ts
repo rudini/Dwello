@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { render } from 'svelte/server';
-import BuildingForm from '$lib/components/BuildingForm.svelte';
+import BuildingForm from '../routes/buildings/BuildingForm.svelte';
 
 describe('BuildingForm', () => {
 	it('renders the create form with address search and create button', () => {
@@ -10,8 +10,32 @@ describe('BuildingForm', () => {
 
 		expect(body).toContain('Adresse suchen');
 		expect(body).toContain('Strasse und Hausnummer');
-		expect(body).toContain('Gebäude erstellen');
+		expect(body).toContain('Gebäude erfassen');
 		expect(body).toContain('href="/buildings"');
+	});
+
+	it('benennt die Felder wie das Glossar und erklärt sie', () => {
+		const { body } = render(BuildingForm, {
+			props: { mode: 'create', errors: {}, cancelHref: '/buildings' }
+		});
+		const labels = [...body.matchAll(/<label[^>]*>([\s\S]*?)<\/label>/g)].map(([, label]) =>
+			label
+				.replace(/<[^>]+>/g, '')
+				.replace(/\s+/g, ' ')
+				.trim()
+		);
+		expect(labels).toEqual([
+			'Gebäudename',
+			'Adresse suchen (optional)',
+			'Strasse und Hausnummer',
+			'PLZ',
+			'Ort',
+			'Kanton',
+			'Gebäudetyp (optional)',
+			'Baujahr (optional)'
+		]);
+		expect(body).toContain('Mehrfamilienhaus, Einfamilienhaus');
+		expect(body).not.toMatch(/text-gray|bg-blue|text-sm/);
 	});
 
 	it('renders the edit form prefilled without address search', () => {

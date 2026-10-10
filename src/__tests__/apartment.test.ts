@@ -3,7 +3,7 @@ import { load } from '../routes/apartments/[id]/+page.server';
 import { actions as newActions } from '../routes/apartments/new/+page.server';
 import { actions as editActions } from '../routes/apartments/[id]/edit/+page.server';
 import { grossRent } from '../lib/server/contract-history';
-import { floorLabel, statusText } from '../lib/apartment';
+import { floorLabel, statusHelp, statusText } from '../lib/apartment';
 import { runAction } from './helpers/action';
 
 const API = 'http://localhost:3001/api/v1';
@@ -99,10 +99,34 @@ describe('Wohnungsdetail', () => {
 			expect.objectContaining({
 				id: 'c1',
 				tenantName: 'Eva Graf',
-				period: '1.1.2018 - 31.3.2022',
 				rentBrutto: 1250,
 				status: 'ended'
 			})
+		]);
+	});
+
+	it('nennt bei einer wiedervermieteten Wohnung den künftigen Mieter', async () => {
+		const relet = {
+			...apartment,
+			status: 'relet',
+			currentContractId: undefined,
+			nextContractStart: '2099-11-01'
+		};
+		const next = { ...contracts[0], id: 'c3', startDate: '2099-11-01', tenantName: 'Ruth Meier' };
+		const data = await loadApartment({
+			'apartments/a1': relet,
+			contracts: { contracts: [next, contracts[1]] }
+		});
+
+		expect(data.currentContract).toBeNull();
+		expect(data.nextContract).toEqual({
+			tenantId: 't2',
+			tenantName: 'Ruth Meier',
+			startDate: '2099-11-01'
+		});
+		expect(data.contractHistory).toEqual([
+			expect.objectContaining({ id: 'c3', status: 'future' }),
+			expect.objectContaining({ id: 'c1', status: 'ended' })
 		]);
 	});
 
@@ -143,11 +167,23 @@ describe('Bruttomiete', () => {
 describe('Wohnungsstatus', () => {
 	it.each([
 		['occupied', null, 'Vermietet'],
-		['relet', '2026-11-01', 'Vermietet ab 1.11.2026'],
+		['relet', '2026-11-01', 'Wiedervermietet ab 1.11.2026'],
 		['vacant', null, 'Leer'],
 		['reserved', null, 'Gesperrt']
 	] as const)('zeigt %s (nächster Vertrag ab %s) als %s', (status, nextContractStart, text) => {
 		expect(statusText({ status, nextContractStart })).toBe(text);
+	});
+
+	it.each([
+		['occupied', 'Ein Mietvertrag läuft.'],
+		[
+			'relet',
+			'Ein künftiger Mietvertrag ist abgeschlossen; die Wohnung ist ab seinem Vertragsbeginn'
+		],
+		['vacant', 'Es läuft kein Mietvertrag'],
+		['reserved', 'von Hand gesperrt']
+	] as const)('erklärt %s in Worten des Glossars', (status, words) => {
+		expect(statusHelp[status]).toContain(words);
 	});
 });
 

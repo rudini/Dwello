@@ -3,11 +3,14 @@ import { readable } from 'svelte/store';
 
 vi.mock('$app/environment', () => ({ browser: true }));
 vi.mock('$app/navigation', () => ({ goto: vi.fn(), invalidateAll: vi.fn() }));
+let url = new URL('http://localhost/invoices?search=Hauswart');
 vi.mock('$app/stores', () => ({
-	page: readable({ url: new URL('http://localhost/invoices?search=Hauswart') })
+	page: { subscribe: (run: (value: unknown) => void) => readable({ url }).subscribe(run) }
 }));
 
 import { goto, invalidateAll } from '$app/navigation';
+import { get } from 'svelte/store';
+import { toasts } from '$lib/stores';
 import InvoicesPage from '../routes/invoices/+page.svelte';
 import InvoicePage from '../routes/invoices/[id]/+page.svelte';
 import NewInvoicePage from '../routes/invoices/new/+page.svelte';
@@ -55,6 +58,7 @@ const button = (label: string) =>
 	[...document.querySelectorAll('button')].find((b) => b.textContent?.includes(label))!;
 
 beforeEach(() => {
+	url = new URL('http://localhost/invoices?search=Hauswart');
 	vi.mocked(goto).mockClear();
 	vi.mocked(invalidateAll).mockClear();
 });
@@ -62,8 +66,24 @@ beforeEach(() => {
 describe('Rechnungsliste', () => {
 	const list = (invoices: ReturnType<typeof invoice>[]) =>
 		show(InvoicesPage, {
-			data: { invoices, total: invoices.length, page: 1, pageSize: 20, buildings, categories }
+			data: {
+				invoices,
+				total: invoices.length,
+				page: 1,
+				pageSize: 20,
+				buildings,
+				categories,
+				years: ['2026', '2025', '2024']
+			}
 		} as never);
+
+	// After a search the focus moves here, so the number of results is read out
+	it('nennt die Treffer in einer Überschrift, die den Fokus nach der Suche nimmt', () => {
+		list([invoice()]);
+		const results = document.querySelector<HTMLElement>('[data-results]')!;
+		expect(results.textContent!.replace(/\s+/g, ' ').trim()).toBe('1 Rechnung');
+		expect(results.tabIndex).toBe(-1);
+	});
 
 	it('zeigt Rechnungen mit Kategorie, Betrag und Status', () => {
 		list([
@@ -78,7 +98,7 @@ describe('Rechnungsliste', () => {
 
 		expect(byTestId('invoice-row-i1')!.textContent).toContain('Hauswartung');
 		expect(byTestId('invoice-row-i1')!.textContent).toContain('Manuell');
-		expect(byTestId('invoice-row-i2')!.textContent).toContain('Ausstehend');
+		expect(byTestId('invoice-row-i2')!.textContent).toContain('Kategorie fehlt');
 		expect(byTestId('invoice-row-i2')!.textContent).toContain('Nicht umlagefähig');
 	});
 
@@ -88,6 +108,68 @@ describe('Rechnungsliste', () => {
 
 		submit('invoice-search-submit');
 		expect(goto).toHaveBeenCalledWith('/invoices?search=Hauswart&page=1');
+	});
+
+	it('öffnet eine Rechnung über eine ganze Zeile, die den Rechnungssteller nennt', () => {
+		list([invoice()]);
+
+		const row = byTestId('invoice-row-i1')!;
+		const link = row.querySelector('[data-testid="invoice-view-button"]')!;
+		expect(link.getAttribute('href')).toBe('/invoices/i1');
+		expect(link.textContent).toContain('Hauswart Meier');
+		expect(
+			row.querySelector('[data-testid="invoice-edit-button"]')!.getAttribute('aria-label')
+		).toContain('Hauswart Meier');
+		expect(row.querySelector('[data-testid="invoice-category"]')!.textContent!.trim()).toBe(
+			'Hauswartung'
+		);
+		expect(row.querySelector('[data-testid="invoice-status"]')!.textContent!.trim()).toBe(
+			'Manuell'
+		);
+		expect(row.querySelector('[role="status"], [aria-live]')).toBeNull();
+	});
+
+	it('hält „Bearbeiten“ innerhalb der Zeile, statt die Seite zu verbreitern', () => {
+		list([invoice()]);
+		const row = byTestId('invoice-row-i1')!;
+		const action = row.querySelector('[data-testid="invoice-edit-button"]')!.parentElement!;
+
+		expect(row.className).not.toMatch(/col-span|grid-cols/);
+		expect(action.className).toMatch(/(^| )xl:shrink-0( |$)/);
+	});
+
+	it('zählt die Rechnungen in Einzahl und Mehrzahl richtig', () => {
+		list([invoice()]);
+		expect(text()).toContain('1 Rechnung');
+		expect(text()).not.toContain('1 Rechnungen');
+	});
+
+	it('filtert nach dem Gebäude aus der Adresse und behält es in der Suche', () => {
+		url = new URL('http://localhost/invoices?building=b1');
+		list([invoice()]);
+		expect(byTestId<HTMLSelectElement>('invoice-building-filter')!.value).toBe('b1');
+
+		submit('invoice-search-submit');
+		expect(goto).toHaveBeenCalledWith('/invoices?building=b1&page=1');
+	});
+
+	it('zeigt die Rechnungen eines Jahres, damit eine Abrechnungsperiode geprüft werden kann', () => {
+		url = new URL('http://localhost/invoices?year=2025');
+		list([invoice()]);
+		const year = byTestId<HTMLSelectElement>('invoice-year-filter')!;
+		expect(year.value).toBe('2025');
+		expect([...year.options].map((o) => o.text)).toEqual(['Alle Jahre', '2026', '2025', '2024']);
+
+		submit('invoice-search-submit');
+		expect(goto).toHaveBeenCalledWith('/invoices?year=2025&page=1');
+	});
+
+	it('sagt bei einem Jahr ohne Rechnungen, dass noch keine erfasst sind, statt einen Filterfehler zu vermuten', () => {
+		url = new URL('http://localhost/invoices?year=2025');
+		list([]);
+		expect(text()).toContain('Für 2025 sind noch keine Rechnungen erfasst');
+		expect(text()).not.toContain('Versuchen Sie es mit anderen Filtern.');
+		expect(byTestId('invoices-empty')!.querySelector('a[href="/invoices/new"]')).not.toBeNull();
 	});
 
 	it('meldet eine leere Suche anders als eine leere Liste', () => {
@@ -109,7 +191,7 @@ describe('Rechnungsdetail', () => {
 		});
 
 		expect(text()).toContain('Automatisch kategorisiert');
-		expect(text()).toContain('86%');
+		expect(text()).toContain('86 %');
 		expect(text()).toContain('Vertrag geprüft');
 	});
 
@@ -123,6 +205,39 @@ describe('Rechnungsdetail', () => {
 
 		expect(calls).toEqual([{ method: 'DELETE', path: '/invoices/i1', body: undefined }]);
 		expect(goto).toHaveBeenCalledWith('/invoices');
+		expect(get(toasts).at(-1)!.message).toBe('Rechnung von Hauswart Meier gelöscht');
+	});
+
+	it('meldet ein misslungenes Löschen auf Deutsch, auch wenn der Server Englisch antwortet', async () => {
+		fakeBff(() => [404, { error: 'Invoice not found' }]);
+		show(InvoicePage, { data: { invoice: invoice() } });
+
+		click('invoice-delete-button');
+		click('invoice-delete-confirm');
+		await settle();
+
+		expect(text()).toContain('Die Rechnung konnte nicht gelöscht werden.');
+		expect(text()).not.toContain('Invoice not found');
+	});
+
+	it('meldet eine nicht lesbare Serverantwort auf Deutsch', async () => {
+		globalThis.fetch = vi.fn(async () => new Response('<html>Bad Gateway</html>', { status: 502 }));
+		show(InvoicePage, { data: { invoice: invoice() } });
+
+		click(button('Neu kategorisieren'));
+		await settle();
+
+		expect(byTestId('invoice-recategorize-error')!.textContent).toContain(
+			'Ein unerwarteter Fehler ist aufgetreten. Versuchen Sie es erneut.'
+		);
+	});
+
+	// TODO(fachlich prüfen): the glossary names the equal split only for the Verwaltungspauschale
+	it('erklärt eine Rechnung ohne Verteilschlüssel, statt einen Fehler anzudeuten', () => {
+		show(InvoicePage, { data: { invoice: invoice({ distributionKey: undefined }) } });
+
+		expect(text()).toContain('Keiner – die Kosten werden gleichmässig pro Wohnung verteilt');
+		expect(text()).not.toContain('Nicht zugewiesen');
 	});
 
 	it('meldet einen Fehler beim Neu-Kategorisieren', async () => {
@@ -145,6 +260,16 @@ describe('Rechnungsdetail', () => {
 		expect(invalidateAll).not.toHaveBeenCalled();
 	});
 
+	// The KI runs while saving: an invoice without category is not waiting for anything
+	it('sagt bei einer Rechnung ohne Kategorie nicht, dass noch etwas läuft', () => {
+		show(InvoicePage, {
+			data: { invoice: invoice({ category: undefined, categorizationStatus: 'pending' }) }
+		});
+
+		expect(text()).toContain('Nicht kategorisiert – bitte Kategorie wählen');
+		expect(text()).not.toMatch(/ausstehend/i);
+	});
+
 	it('nennt den Grund, wenn die KI nicht kategorisieren konnte', async () => {
 		fakeBff(() => [
 			503,
@@ -158,6 +283,28 @@ describe('Rechnungsdetail', () => {
 		expect(byTestId('invoice-recategorize-error')!.textContent).toContain(
 			'Die KI ist nicht erreichbar oder hat keine passende Kategorie geliefert.'
 		);
+	});
+
+	it('zeigt beim Neu-Kategorisieren, dass die KI arbeitet, und den Fehler gleich beim Knopf', async () => {
+		fakeBff(() => [503, { error: 'Die KI ist nicht erreichbar.' }]);
+		show(InvoicePage, { data: { invoice: invoice() } });
+
+		click(button('Neu kategorisieren'));
+		const busyButton = byTestId('invoice-recategorize-button')!;
+		expect(busyButton.textContent).toContain('Wird kategorisiert …');
+		expect(busyButton.getAttribute('aria-busy')).toBe('true');
+		await settle();
+
+		const message = byTestId('invoice-recategorize-error')!.closest(
+			'[role="alert"]'
+		) as HTMLElement;
+		const recategorizeButton = byTestId('invoice-recategorize-button')!;
+		expect(message.closest('section')).toBe(recategorizeButton.closest('section'));
+		expect(
+			recategorizeButton.compareDocumentPosition(message) & Node.DOCUMENT_POSITION_FOLLOWING
+		).toBeTruthy();
+		// focus moves to the message, which also brings it into view on a phone
+		expect(document.activeElement).toBe(message);
 	});
 
 	it('zeigt den gespeicherten Grund, warum die Kategorie der KI überschrieben wurde', () => {
@@ -180,12 +327,15 @@ describe('Rechnungsdetail', () => {
 });
 
 describe('Rechnung erfassen', () => {
-	const data = (llmAvailable: boolean) => ({
+	const data = (llmAvailable: boolean, opened = {}) => ({
 		buildings,
 		categories,
 		distributionKeys,
 		llmAvailable,
-		defaultDistributionKeyId: 'k1'
+		defaultDistributionKeyId: 'k1',
+		buildingId: '',
+		returnTo: null,
+		...opened
 	});
 	const fill = () => {
 		fireEvent(byTestId<HTMLSelectElement>('invoice-building-select')!, 'change', 'b1');
@@ -202,13 +352,14 @@ describe('Rechnung erfassen', () => {
 		fireEvent(byTestId<HTMLInputElement>('invoice-amount-input')!, 'input', '450');
 	};
 
-	it('verlangt Gebäude, Lieferant, Beschreibung und Betrag', () => {
+	it('verlangt Gebäude, Rechnungssteller, Beschreibung und Betrag', () => {
 		const calls = fakeBff();
 		show(NewInvoicePage, { data: data(false) } as never);
 
 		submit('submit-button');
 
 		expect(text()).toContain('Bitte wählen Sie ein Gebäude');
+		expect(text()).toContain('Bitte geben Sie einen Rechnungssteller ein');
 		expect(text()).toContain('Bitte geben Sie einen gültigen Betrag ein');
 		expect(calls).toEqual([]);
 	});
@@ -283,6 +434,71 @@ describe('Rechnung erfassen', () => {
 		expect(byTestId<HTMLInputElement>('invoice-utility-cost-checkbox')!.disabled).toBe(true);
 	});
 
+	it('sagt, dass das Rechnungsdatum die Abrechnungsperiode bestimmt', () => {
+		show(NewInvoicePage, { data: data(false) } as never);
+		expect(document.querySelector('#invoiceDate-help')!.textContent).toContain(
+			'bestimmt, in welche Abrechnungsperiode die Rechnung fällt'
+		);
+	});
+
+	it('wählt das Gebäude vor und kehrt nach dem Speichern zum Assistenten zurück', async () => {
+		fakeBff(() => [201, { id: 'i9' }]);
+		show(NewInvoicePage, {
+			data: data(false, { buildingId: 'b1', returnTo: '/statements/generate' })
+		} as never);
+
+		expect(byTestId<HTMLSelectElement>('invoice-building-select')!.value).toBe('b1');
+		expect(byTestId('form-cancel')!.getAttribute('href')).toBe('/statements/generate');
+		fill();
+		submit('submit-button');
+		await settle();
+
+		expect(goto).toHaveBeenCalledWith('/statements/generate');
+	});
+
+	// TODO(fachlich prüfen): the glossary names the equal split only for the Verwaltungspauschale
+	it('sagt, wie eine Rechnung ohne Verteilschlüssel verteilt wird', () => {
+		show(NewInvoicePage, { data: data(false) } as never);
+		expect(document.querySelector('#distributionKey-help')!.textContent).toContain(
+			'Ohne Verteilschlüssel werden die Kosten gleichmässig pro Wohnung verteilt.'
+		);
+	});
+
+	it('warnt, wenn das Rechnungsdatum nicht in der Abrechnungsperiode des Assistenten liegt', () => {
+		show(NewInvoicePage, {
+			data: data(false, {
+				returnTo: '/statements/generate',
+				period: { start: '2025-01-01', end: '2025-12-31' }
+			})
+		} as never);
+		const date = byTestId<HTMLInputElement>('invoice-date-input')!;
+		// no "today" from the wizard: an invoice for an earlier period gets its date chosen on purpose
+		expect(date.value).toBe('');
+		expect(byTestId('invoice-period-warning')).toBeNull();
+
+		fireEvent(date, 'input', '2026-10-10');
+		expect(byTestId('invoice-period-warning')!.textContent).toContain(
+			'Das Rechnungsdatum liegt nicht in der Abrechnungsperiode 1.1.2025 – 31.12.2025'
+		);
+
+		fireEvent(date, 'input', '2025-11-15');
+		expect(byTestId('invoice-period-warning')).toBeNull();
+	});
+
+	it('warnt ohne Abrechnungsperiode nicht', () => {
+		show(NewInvoicePage, { data: data(false, { period: null }) } as never);
+		expect(byTestId('invoice-period-warning')).toBeNull();
+	});
+
+	it('bietet die Kategorien nach Umlagefähigkeit gruppiert an', () => {
+		show(NewInvoicePage, { data: data(false) } as never);
+		const groups = [...byTestId('invoice-category-select')!.querySelectorAll('optgroup')];
+		expect(groups.map((group) => [group.label, group.textContent])).toEqual([
+			['Umlagefähige Kosten', 'Hauswartung'],
+			['Nicht umlagefähige Kosten', 'Reparaturen']
+		]);
+	});
+
 	it('bleibt bei einem Fehler des Backends auf der Seite', async () => {
 		fakeBff(() => [400, { error: { code: 'VALIDATION', message: 'Ungültiger Betrag' } }]);
 		show(NewInvoicePage, { data: data(false) } as never);
@@ -300,6 +516,30 @@ describe('Rechnung bearbeiten', () => {
 		show(EditInvoicePage, {
 			data: { invoice: invoice(overrides), buildings, categories, distributionKeys }
 		} as never);
+
+	it('zeigt den Betrag mit zwei Nachkommastellen', () => {
+		edit({ amount: 480 });
+		expect(byTestId<HTMLInputElement>('invoice-amount-input')!.value).toBe('480.00');
+	});
+
+	it('speichert den Rechnungssteller ohne Leerzeichen am Rand und bestätigt das Speichern', async () => {
+		toasts.set([]);
+		const calls = fakeBff(() => [200, {}]);
+		edit();
+
+		fireEvent(
+			byTestId<HTMLInputElement>('invoice-billing-entity-input')!,
+			'input',
+			'  Hauswart Huber  '
+		);
+		submit('submit-button');
+		await settle();
+
+		expect(calls[0].body).toMatchObject({ billingEntityName: 'Hauswart Huber' });
+		expect(get(toasts).map((toast) => toast.message)).toContain(
+			'Rechnung von Hauswart Huber gespeichert'
+		);
+	});
 
 	it('speichert erst nach einer Änderung', async () => {
 		const calls = fakeBff(() => [200, {}]);

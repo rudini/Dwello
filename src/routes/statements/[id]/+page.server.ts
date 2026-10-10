@@ -7,10 +7,22 @@ import type { StatementDocument } from '$lib/types';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
-export const load: PageServerLoad = async ({ params, fetch }) => ({
-	statement: await loadStatement(fetch, params.id),
-	reminders: await loadDocuments(fetch, `statementId=${params.id}`)
-});
+// "Ahornweg 3, 8400 Winterthur": the statement carries no address, the tenant does
+async function tenantAddress(fetch: typeof globalThis.fetch, tenantId: string) {
+	const response = await fetch(`${BACKEND_URL}/api/v1/tenants/${tenantId}`).catch(() => null);
+	if (!response?.ok) return '';
+	const { address, postalCode, city } = await response.json();
+	return [address, [postalCode, city].filter(Boolean).join(' ')].filter(Boolean).join(', ');
+}
+
+export const load: PageServerLoad = async ({ params, fetch }) => {
+	const statement = await loadStatement(fetch, params.id);
+	const [address, reminders] = await Promise.all([
+		tenantAddress(fetch, statement.tenantId),
+		loadDocuments(fetch, `statementId=${params.id}`)
+	]);
+	return { statement: { ...statement, tenantAddress: address }, reminders };
+};
 
 type Fetch = typeof globalThis.fetch;
 

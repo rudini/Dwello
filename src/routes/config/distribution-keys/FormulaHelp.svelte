@@ -1,36 +1,50 @@
 <script lang="ts">
-	import Card from '$lib/components/Card.svelte';
 	import { FORMULA_VARIABLES } from '$lib/distribution-key';
+	import Panel from '$lib/ui/Panel.svelte';
 
+	// Examples whose explanation holds for the backend's calculation (share = value / sum of all values)
 	const examples = [
+		{ formula: '{area}', text: 'Nach Wohnfläche: 100 m² tragen doppelt so viel wie 50 m².' },
+		{ formula: '{rooms}', text: 'Nach Zimmerzahl: 4 Zimmer tragen doppelt so viel wie 2 Zimmer.' },
+		{ formula: '{units}', text: 'Zu gleichen Teilen, z. B. für den Kabelanschluss.' },
 		{
-			formula: '{area}',
-			text: 'Nach Wohnfläche: eine 100 m² Wohnung zahlt doppelt so viel wie eine 50 m² Wohnung.'
-		},
-		{
-			formula: '{area} * 0.7 + {rooms} * 0.3',
-			text: '70 % nach Fläche, 30 % nach Zimmerzahl, z.B. für Heizkosten.'
-		},
-		{ formula: '{units}', text: 'Gleiche Anteile für alle Wohnungen, z.B. für Kabel-TV.' }
+			formula: '{area} + {rooms} * 10',
+			text: 'Fläche und Zimmer zusammen: jedes Zimmer zählt wie 10 m² zusätzliche Fläche.'
+		}
 	];
 </script>
 
-<Card>
-	<h2 class="text-lg font-semibold text-gray-900 mb-4">Formeln</h2>
-	<div class="flex flex-wrap gap-2 mb-4">
+<Panel title="So funktioniert eine Formel">
+	<p>
+		Die Formel ergibt für jede Wohnung eine Zahl. Jede Wohnung trägt den Teil der Kosten, den ihre
+		Zahl an der Summe aller Wohnungen ausmacht. Beispiel mit
+		<code class="font-mono">{'{area}'}</code>: Wohnung A hat 50 m², Wohnung B 100 m², zusammen 150
+		m². A trägt einen Drittel der Kosten, B zwei Drittel.
+	</p>
+
+	<h3 class="text-lg font-semibold text-ink">Bausteine</h3>
+	<dl class="flex flex-col gap-2">
 		{#each FORMULA_VARIABLES as variable (variable.name)}
-			<span class="inline-flex items-center px-2 py-1 bg-gray-100 rounded text-xs font-mono">
-				{`{${variable.name}}`}
-				<span class="ml-1 text-gray-500 font-sans">= {variable.description}</span>
-			</span>
-		{/each}
-	</div>
-	<div class="space-y-3">
-		{#each examples as example (example.formula)}
-			<div class="p-3 bg-gray-50 rounded-lg">
-				<code class="text-sm font-mono text-purple-700">{example.formula}</code>
-				<p class="text-sm text-gray-600 mt-1">{example.text}</p>
+			<div class="flex flex-wrap gap-x-4">
+				<dt class="font-mono font-semibold text-ink">{`{${variable.name}}`}</dt>
+				<dd class="text-ink-muted">{variable.description}</dd>
 			</div>
 		{/each}
-	</div>
-</Card>
+	</dl>
+
+	<h3 class="text-lg font-semibold text-ink">Rechnen</h3>
+	<p>
+		+ plus, - minus, * mal, / geteilt durch. Was in Klammern steht, wird zuerst gerechnet.
+		Dezimalzahlen schreiben Sie mit Punkt, z. B. 0.5.
+	</p>
+
+	<h3 class="text-lg font-semibold text-ink">Beispiele</h3>
+	<ul class="flex flex-col gap-4">
+		{#each examples as example (example.formula)}
+			<li class="flex flex-col gap-1 rounded-control bg-sunken p-4">
+				<code class="font-mono font-semibold text-ink">{example.formula}</code>
+				<span class="text-ink-muted">{example.text}</span>
+			</li>
+		{/each}
+	</ul>
+</Panel>

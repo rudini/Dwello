@@ -27,6 +27,6 @@ Funktionalität: Bedienung während die Seite lädt
   Szenario: Mieter im neuen Mietvertrag wählen, bevor die Seite fertig geladen ist
     Angenommen der Liegenschaftsverwalter ist auf der Seite "Neuer Mietvertrag"
     Wenn der Liegenschaftsverwalter den Mieter "Anna Keller" wählt, bevor die Seite fertig geladen ist
-    Und der Liegenschaftsverwalter die Wohnung "2.01" ab "2025-01-01" für "950" Franken vermietet
+    Und der Liegenschaftsverwalter die Wohnung "2.01" ab "2027-01-01" für "950" Franken vermietet
     Dann ist der Liegenschaftsverwalter auf der Mietvertragsliste
     Und der Mietvertrag von "Anna Keller" ist in der Liste auffindbar

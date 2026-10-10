@@ -20,3 +20,6 @@ Funktionalität: Datenschutz
 
   Szenario: KI-Kategorisierung auf dem Server des Betreibers
     Dann erfährt der Liegenschaftsverwalter unter "Weitergabe an Dritte", dass Rechnungsdaten für die KI-Kategorisierung den Server nicht verlassen
+
+  Szenario: Ungespeicherte Eingaben bleiben als Entwurf im Browser
+    Dann erfährt der Liegenschaftsverwalter unter "Welche Daten Dwello speichert", dass ungespeicherte Eingaben bis zum Speichern, Verwerfen oder Abmelden als Entwurf in diesem Browser bleiben

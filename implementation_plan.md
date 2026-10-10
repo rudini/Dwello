@@ -4374,6 +4374,36 @@ reviewed independently afterwards.
 - [ ] Raise frontend coverage to the target in `docs/test-pyramid.md` and move the floor up
 - [ ] MVA: confirm the scenarios and record ADRs in `docs/adr/`; close R2 (database backup), measure P1 and P2
 
+## Session 10 - October 2026: UI Redesign (branch feature/new-design)
+
+Brief: `docs/design/REDESIGN_BRIEF.md`; log and decisions: `docs/design/progress.md`, open points:
+`docs/design/offene-punkte.md`, reviews: `docs/design/reviews/`, persona runs: `docs/design/personas/`.
+
+### Done ✅
+- [x] **Stages 0-3:** analysis, plan, design tokens (`src/styles/tokens.css`, `tailwind.config.js`), base components
+  in `src/lib/ui/`, icons and illustrations, design guard (`src/__tests__/design-guard.test.ts`) and the axe check over
+  all screens and states (`tests/e2e/features/accessibility.feature`, `tests/a11y/screens.json`)
+- [x] **Stage 4:** shell, navigation and the Übersicht with tasks and deadlines (`src/routes/dashboard/`,
+  `src/lib/overview.ts`)
+- [x] **Stage 5:** rental contract wizard (`src/routes/contracts/new/`, `src/lib/contract-wizard.ts`,
+  `src/lib/wizard-draft.ts`)
+- [x] **Stage 6:** statement wizard (`src/routes/statements/generate/`, `src/lib/statement-wizard.ts`,
+  `src/lib/server/statement-generation.ts`) and the send confirmation on the statement detail
+- [x] **Stage 7:** remaining screens migrated in five packages (help/legal/coming-soon; settings; tenants and
+  contracts; buildings and apartments; invoices, statements and documents), one `Pagination`, unused legacy
+  components removed, German master data names (`src/lib/names.ts`); review round 1 and persona fixes: row layouts
+  without sideways scrolling, shared `focusFirstError` (`src/lib/ui/focus-error.ts`), announced toasts
+  (`ToastRegion`), consistent Mietstatus for relet apartments (`src/lib/apartment.ts`, BFF loaders), invoice period
+  notice (`docs/design/reviews/7-review-1.md`); review round 2: header wraps actions, Stepper names from `xl`, cost
+  lines as cards on phones, delete toasts, `Field` hides corrected errors, focus on list results after filtering
+  (`src/lib/list-url.ts` `isListSearch`) (`docs/design/reviews/7-review-2.md`)
+- [x] **Stage 8:** old design system removed (`src/lib/components`, old palette, legacy utilities, svelte-i18n,
+  `docs/design_system.md`), Tailwind theme from tokens only, dark mode on, axe light and dark
+  (`docs/design/reviews/8-review-1.md`)
+- [x] **Stage 9:** `docs/design/design-decisions.md`, token reference, open points with the glossary table, CLAUDE.md
+  "Design-Regeln"; final review and final persona round with fixes (`docs/design/reviews/9-review-1.md`)
+
+
 ---
 
 # Success Criteria

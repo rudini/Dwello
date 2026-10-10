@@ -7,4 +7,4 @@ Funktionalität: Berichte
 
   Szenario: Berichte sind angekündigt
     Wenn der Liegenschaftsverwalter die Berichte öffnet
-    Dann sieht der Liegenschaftsverwalter die Ankündigung "Berichte kommen in Phase 2"
+    Dann sieht der Liegenschaftsverwalter die Ankündigung "Berichte sind in Vorbereitung"

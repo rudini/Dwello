@@ -1,53 +1,47 @@
 <script lang="ts">
-	import Icon from '$lib/components/Icon.svelte';
 	import type { CategoryWithUsage } from '$lib/server/category';
+	import Badge from '$lib/ui/Badge.svelte';
+	import Button from '$lib/ui/Button.svelte';
 
 	let { category, ondelete }: { category: CategoryWithUsage; ondelete: () => void } = $props();
 
-	const used = $derived(category.usageCount > 0);
-	const allowed = $derived(
-		category.isAllowedUtilityCost
-			? { label: 'Ja', icon: 'check_circle', class: 'bg-green-100 text-green-700' }
-			: { label: 'Nein', icon: 'warning', class: 'bg-amber-100 text-amber-700' }
-	);
-	const deleteTitle = $derived(
-		used ? 'Kategorien mit Rechnungen können nicht gelöscht werden' : 'Löschen'
-	);
+	const count = $derived(category.usageCount);
+	const usage = $derived(`${count} ${count === 1 ? 'Rechnung' : 'Rechnungen'}`);
 </script>
 
-<tr class="hover:bg-gray-50 transition-colors" data-testid="category-row">
-	<td class="px-6 py-4 font-medium text-gray-900" data-testid="category-name">{category.name}</td>
-	<td class="px-6 py-4 text-sm text-gray-600 max-w-xs">{category.description || '-'}</td>
-	<td class="px-6 py-4 text-center">
-		<span
-			class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium {allowed.class}"
+<!-- The whole row opens the category; its name is the link -->
+<li
+	class="relative flex flex-col gap-4 rounded-panel border border-line bg-surface p-4 hover:border-line-strong md:flex-row md:items-center"
+	data-testid="category-row"
+>
+	<div class="flex min-w-0 flex-1 flex-col gap-1">
+		<a
+			href="/config/categories/{category.id}/edit"
+			class="font-semibold text-accent underline underline-offset-4 after:absolute after:inset-0"
+			data-testid="category-edit-button"><span data-testid="category-name">{category.name}</span></a
 		>
-			<Icon name={allowed.icon} size={14} />
-			<span data-testid="category-allowed">{allowed.label}</span>
-		</span>
-	</td>
-	<td class="px-6 py-4 text-center text-sm text-gray-500" data-testid="category-usage">
-		<span class="font-medium text-gray-900">{category.usageCount}</span> Rechnungen
-	</td>
-	<td class="px-6 py-4">
-		<div class="flex items-center justify-end gap-2">
-			<a
-				href="/config/categories/{category.id}/edit"
-				title="Bearbeiten"
-				data-testid="category-edit-button"
-				class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-			>
-				<Icon name="edit" size={18} />
-			</a>
-			<button
+		<!-- The predefined categories' descriptions are English; only own ones are shown -->
+		{#if category.description && !category.predefined}
+			<p class="text-ink-muted">{category.description}</p>
+		{/if}
+	</div>
+	<div class="flex flex-wrap items-center gap-4">
+		<Badge
+			tone={category.isAllowedUtilityCost ? 'positive' : 'neutral'}
+			label={category.isAllowedUtilityCost ? 'Umlagefähig' : 'Nicht umlagefähig'}
+			testid="category-allowed"
+		/>
+		<p class="text-ink-muted tabular-nums" data-testid="category-usage">{usage}</p>
+		<!-- Above the row's link -->
+		<div class="relative">
+			<Button
+				variant="danger-ghost"
+				icon="delete"
 				onclick={ondelete}
-				title={deleteTitle}
-				disabled={used}
-				data-testid="category-delete-button"
-				class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-40 disabled:pointer-events-none"
+				disabled={count > 0}
+				ariaLabel="Kategorie «{category.name}» löschen"
+				testid="category-delete-button">Löschen</Button
 			>
-				<Icon name="delete" size={18} />
-			</button>
 		</div>
-	</td>
-</tr>
+	</div>
+</li>

@@ -12,3 +12,7 @@ export const pageSection = (page: Page, heading: string) =>
 	page
 		.getByTestId('page-section')
 		.filter({ has: page.getByRole('heading', { name: heading, exact: true }) });
+export const pageTitle = (page: Page) => page.getByRole('heading', { level: 1 });
+/** How much wider the page is than the window: more than 0 means it scrolls sideways */
+export const sidewaysOverflow = (page: Page) =>
+	page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);

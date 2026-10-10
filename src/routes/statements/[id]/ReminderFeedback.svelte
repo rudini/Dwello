@@ -1,14 +1,10 @@
 <script lang="ts">
 	import type { StatementDocument } from '$lib/types';
+	import Alert from '$lib/ui/Alert.svelte';
 
+	// What became of the Mahnung just sent: e-mailed, or waiting as a letter in the documents
 	let { reminder }: { reminder?: { document: StatementDocument; deliveryError?: string } } =
 		$props();
-
-	const tone = $derived(
-		reminder?.deliveryError
-			? 'bg-amber-50 border-amber-200 text-amber-800'
-			: 'bg-green-50 border-green-200 text-green-800'
-	);
 
 	const message = $derived.by(() => {
 		if (!reminder) return '';
@@ -22,8 +18,13 @@
 	});
 </script>
 
-{#if message}
-	<p class="p-3 rounded-lg border text-sm {tone}" data-testid="reminder-feedback">
-		{message}
-	</p>
-{/if}
+<div role="status">
+	{#if reminder}
+		<Alert
+			tone={reminder.deliveryError ? 'caution' : 'positive'}
+			title={reminder.deliveryError ? 'E-Mail nicht zugestellt' : 'Mahnung erstellt'}
+		>
+			<p data-testid="reminder-feedback">{message}</p>
+		</Alert>
+	{/if}
+</div>

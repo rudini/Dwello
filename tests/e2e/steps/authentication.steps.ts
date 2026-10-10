@@ -70,7 +70,7 @@ Then(
 	}
 );
 
-Then('führt das Dashboard den Liegenschaftsverwalter wieder zur Anmeldung', async ({ verwalter }) => {
+Then('führt die Übersicht den Liegenschaftsverwalter wieder zur Anmeldung', async ({ verwalter }) => {
 	await visit(verwalter.page, '/dashboard');
 	await expect(verwalter.page).toHaveTitle('Anmelden - Dwello');
 });

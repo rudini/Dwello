@@ -15,11 +15,16 @@ Funktionalität: Mietvertrag bearbeiten
   Szenario: Mietzins anpassen
     Wenn der Liegenschaftsverwalter den Mietzins auf "980" Franken ändert
     Dann ist der Liegenschaftsverwalter auf der Detailseite des Mietvertrags von "Anna Keller"
+    Und sieht der Liegenschaftsverwalter die Bestätigung, dass der Mietvertrag von "Anna Keller" gespeichert ist
     Und sieht der Liegenschaftsverwalter den monatlichen Mietzins "CHF 980.00"
 
   Szenario: Mietzins fehlt
     Wenn der Liegenschaftsverwalter den Mietzins leert
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Nettomiete ist erforderlich"
+
+  Szenario: Mietzins in Schweizer Schreibweise
+    Wenn der Liegenschaftsverwalter den Mietzins auf "1'450" Franken ändert
+    Dann sieht der Liegenschaftsverwalter den monatlichen Mietzins "CHF 1’450.00"
 
   Szenario: Bearbeitung abbrechen
     Wenn der Liegenschaftsverwalter die Bearbeitung abbricht

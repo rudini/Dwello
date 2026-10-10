@@ -2,7 +2,7 @@ import { expect } from '@playwright/test';
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { visit } from '../interactions/navigation';
-import { apartmentOfContract, statusOfContract, totalRent } from '../questions/contract-detail';
+import { apartmentOfContract, endOfContract, statusOfContract, totalRent } from '../questions/contract-detail';
 import { emptyContractList, listedContract } from '../questions/contracts';
 import {
 	deleteContract,
@@ -67,6 +67,12 @@ Then('sieht der Liegenschaftsverwalter den monatlichen Mietzins {string}', async
 
 Then('hat der Mietvertrag den Status {string}', async ({ verwalter }, status: string) => {
 	await expect(statusOfContract(verwalter)).toHaveText(status);
+});
+
+// The end action sets today's date as the server sees it (UTC); the page shows it as formatDate does
+Then('endet der Mietvertrag heute', async ({ verwalter }) => {
+	const today = new Date(new Date().toISOString().split('T')[0]).toLocaleDateString('de-CH');
+	await expect(endOfContract(verwalter)).toHaveText(today);
 });
 
 Then('der Mietvertrag von {string} ist nicht mehr auffindbar', async ({ verwalter, names }, tenant: string) => {

@@ -3,7 +3,7 @@ import { load as listLoad } from '../routes/invoices/+page.server';
 import { load as detailLoad } from '../routes/invoices/[id]/+page.server';
 import { load as editLoad } from '../routes/invoices/[id]/edit/+page.server';
 import { load as newLoad } from '../routes/invoices/new/+page.server';
-import { suggestionProvenance } from '../lib/invoice';
+import { localPath, suggestionProvenance, validateInvoice } from '../lib/invoice';
 import backendInvoice from '../../tests/contracts/invoice.json';
 
 const API = 'http://localhost:3001/api/v1';
@@ -45,6 +45,31 @@ describe('Rechnungsliste', () => {
 		await listLoad({ url: new URL('http://localhost/invoices?validity=invalid'), fetch } as never);
 
 		expect(urls).toContainEqual(expect.stringMatching(/\/invoices\?.*isValidUtilityCost=false/));
+	});
+
+	it('zeigt die Rechnungen eines Jahres und bietet die letzten Jahre zur Auswahl an', async () => {
+		const { urls, fetch } = backend({});
+
+		const data = (await listLoad({
+			url: new URL('http://localhost/invoices?year=2024'),
+			fetch
+		} as never)) as { years: string[] };
+
+		expect(urls).toContainEqual(
+			expect.stringMatching(/\/invoices\?.*dateFrom=2024-01-01.*dateTo=2024-12-31/)
+		);
+		const thisYear = new Date().getFullYear();
+		expect(data.years[0]).toBe(String(thisYear));
+		expect(data.years).toContain(String(thisYear - 5));
+	});
+
+	// Wie in den anderen Listen: ?building= kommt z. B. vom Mietvertrag
+	it('filtert nach dem Gebäude aus der Adresse', async () => {
+		const { urls, fetch } = backend({});
+
+		await listLoad({ url: new URL('http://localhost/invoices?building=b1'), fetch } as never);
+
+		expect(urls).toContainEqual(expect.stringMatching(/\/invoices\?.*buildingId=b1/));
 	});
 
 	it('zeigt Kategorien deutsch, in der Rechnung und im Filter', async () => {
@@ -142,6 +167,7 @@ describe('Rechnung erfassen und bearbeiten', () => {
 		for (const load of [newLoad, editLoad]) {
 			const data = (await load({
 				params: { id: 'i1' },
+				url: new URL('http://localhost/invoices/new'),
 				fetch: backend(answers).fetch
 			} as never)) as {
 				categories: { name: string; isAllowedUtilityCost: boolean }[];
@@ -156,13 +182,107 @@ describe('Rechnung erfassen und bearbeiten', () => {
 		}
 	});
 
+	it('wählt das Gebäude aus der Adresse vor und kehrt zum Assistenten zurück', async () => {
+		const { fetch } = backend({
+			...answers,
+			'/buildings': { buildings: [{ id: 'b1', name: 'Seepark' }] }
+		});
+		const url = new URL(
+			'http://localhost/invoices/new?building=b1&returnTo=/statements/generate&periodStart=2025-01-01&periodEnd=2025-12-31'
+		);
+
+		const data = (await newLoad({ url, fetch } as never)) as {
+			buildingId: string;
+			returnTo: string;
+		};
+
+		expect(data).toMatchObject({
+			buildingId: 'b1',
+			returnTo: '/statements/generate',
+			period: { start: '2025-01-01', end: '2025-12-31' }
+		});
+	});
+
+	it('übergeht ein unbekanntes Gebäude und eine fremde Rücksprung-Adresse', async () => {
+		const url = new URL('http://localhost/invoices/new?building=b9&returnTo=https://example.com');
+
+		const data = (await newLoad({ url, fetch: backend(answers).fetch } as never)) as {
+			buildingId: string;
+			returnTo: string | null;
+		};
+
+		expect(data).toMatchObject({ buildingId: '', returnTo: null, period: null });
+	});
+
+	// Die Kategorien kamen bei einer Persona erst beim zweiten Besuch: sie hängen nicht an der KI
+	it('lädt die Kategorien auch, wenn der Status der KI nicht abrufbar ist', async () => {
+		const { fetch: answer } = backend(answers);
+		const fetch = (async (url: string) => {
+			if (url.includes('llm-status') || url.includes('/config/')) throw new Error('timeout');
+			return answer(url);
+		}) as typeof globalThis.fetch;
+		const url = new URL('http://localhost/invoices/new');
+
+		const data = (await newLoad({ url, fetch } as never)) as {
+			categories: unknown[];
+			distributionKeys: unknown[];
+			llmAvailable: boolean;
+		};
+
+		expect(data.categories).toHaveLength(2);
+		expect(data.distributionKeys).toHaveLength(1);
+		expect(data.llmAvailable).toBe(false);
+	});
+
 	it('bietet alle Gebäude an, nicht nur die ersten 20', async () => {
 		for (const load of [newLoad, editLoad]) {
 			const { urls, fetch } = backend(answers);
 
-			await load({ params: { id: 'i1' }, fetch } as never);
+			await load({
+				params: { id: 'i1' },
+				url: new URL('http://localhost/invoices/new'),
+				fetch
+			} as never);
 
 			expect(urls).toContain(`${API}/buildings?limit=100`);
 		}
+	});
+});
+
+describe('Rechnung prüfen', () => {
+	const filled = {
+		buildingId: 'b1',
+		invoiceDate: '2025-06-30',
+		billingEntity: 'Hauswart Huber',
+		description: 'Reinigung',
+		amount: "1'200.50"
+	};
+
+	it('verlangt Gebäude, Datum, Rechnungssteller, Beschreibung und einen Betrag über null', () => {
+		expect(
+			Object.keys(
+				validateInvoice({
+					buildingId: '',
+					invoiceDate: '',
+					billingEntity: ' ',
+					description: '',
+					amount: '0'
+				})
+			)
+		).toEqual(['buildingId', 'invoiceDate', 'billingEntity', 'description', 'amount']);
+	});
+
+	it('nimmt Beträge so, wie man sie in der Schweiz schreibt', () => {
+		expect(validateInvoice(filled)).toEqual({});
+	});
+});
+
+describe('Rücksprung nach dem Erfassen', () => {
+	it('kehrt nur zu einer Seite von Dwello zurück', () => {
+		expect(localPath('/statements/generate')).toBe('/statements/generate');
+		expect(localPath('https://example.com')).toBeNull();
+		expect(localPath('//example.com')).toBeNull();
+		expect(localPath('/\\example.com')).toBeNull();
+		expect(localPath(null)).toBeNull();
 	});
 });

@@ -40,7 +40,7 @@ Then('sieht der Liegenschaftsverwalter den Hinweis {string}', async ({ verwalter
 });
 
 When(
-	'der Liegenschaftsverwalter die Gebäude nach der Stadt {string} filtert',
+	'der Liegenschaftsverwalter die Gebäude nach dem Ort {string} filtert',
 	async ({ verwalter }, city: string) => {
 		await verwalter.perform(filterByCity(city));
 	}

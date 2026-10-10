@@ -1,72 +1,70 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import type { ApartmentsListData } from '$lib/types';
-	import Button from '$lib/components/Button.svelte';
-	import Icon from '$lib/components/Icon.svelte';
-	import Card from '$lib/components/Card.svelte';
-	import Pagination from '$lib/components/Pagination.svelte';
+	import Button from '$lib/ui/Button.svelte';
+	import EmptyState from '$lib/ui/EmptyState.svelte';
+	import PageHeader from '$lib/ui/PageHeader.svelte';
+	import Pagination from '$lib/ui/Pagination.svelte';
 	import ApartmentCard from './ApartmentCard.svelte';
 	import ApartmentFilters from './ApartmentFilters.svelte';
+	import StatusLegend from './StatusLegend.svelte';
 
 	let { data }: { data: ApartmentsListData } = $props();
 
 	const filtered = $derived(
 		['search', 'building', 'status'].some((key) => $page.url.searchParams.get(key))
 	);
-
-	function changePage(newPage: number) {
-		const params = new URLSearchParams($page.url.searchParams);
-		params.set('page', newPage.toString());
-		goto(`/apartments?${params}`);
-	}
 </script>
 
 <svelte:head>
 	<title>Wohnungen - Dwello</title>
 </svelte:head>
 
-<div class="space-y-6" data-testid="apartments-page">
-	<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-		<div>
-			<h1 class="text-2xl font-bold text-gray-900">Wohnungen</h1>
-			<p class="text-gray-500 mt-1">{data.total} Wohnungen insgesamt</p>
-		</div>
-		<Button href="/apartments/new" variant="primary" testid="apartments-new-button">
-			<Icon name="add" size={20} />
-			Neue Wohnung
-		</Button>
-	</div>
+<div class="flex flex-col gap-8" data-testid="apartments-page">
+	<PageHeader title="Wohnungen" purpose="Alle Wohnungen Ihrer Gebäude mit Mietstatus.">
+		{#snippet action()}
+			<Button href="/apartments/new" variant="primary" icon="add" testid="apartments-new-button"
+				>Wohnung erfassen</Button
+			>
+		{/snippet}
+	</PageHeader>
 
 	<ApartmentFilters buildings={data.buildings} />
 
 	{#if data.apartments.length === 0}
-		<Card>
-			<div class="text-center py-12">
-				<Icon name="door_front" size={48} class="mx-auto text-gray-300 mb-4" />
-				<h3 class="text-lg font-medium text-gray-900 mb-2">Keine Wohnungen gefunden</h3>
-				<p class="text-gray-500 mb-6">
-					{filtered
-						? 'Versuchen Sie es mit anderen Suchbegriffen oder Filtern.'
-						: 'Erstellen Sie Ihre erste Wohnung, um loszulegen.'}
-				</p>
-				<Button href="/apartments/new" variant="primary">
-					<Icon name="add" size={20} />
-					Wohnung erstellen
-				</Button>
-			</div>
-		</Card>
+		<section class="rounded-panel border border-line bg-surface">
+			{#if filtered}
+				<EmptyState
+					title="Keine Wohnungen gefunden"
+					text="Keine Wohnung passt zu Ihrer Suche. Wählen Sie andere Filter oder zeigen Sie alle Wohnungen."
+					illustration="no-results"
+					actionLabel="Filter zurücksetzen"
+					actionHref="/apartments"
+					testid="apartments-empty"
+				/>
+			{:else}
+				<EmptyState
+					title="Noch keine Wohnungen"
+					text="Erfassen Sie die Wohnungen Ihrer Gebäude, damit Sie sie vermieten und abrechnen können."
+					illustration="apartment"
+					actionLabel="Wohnung erfassen"
+					actionHref="/apartments/new"
+					testid="apartments-empty"
+				/>
+			{/if}
+		</section>
 	{:else}
-		<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-			{#each data.apartments as apartment (apartment.id)}
-				<ApartmentCard {apartment} />
-			{/each}
-		</div>
-		<Pagination
-			page={data.page}
-			pageSize={data.pageSize}
-			total={data.total}
-			onchange={changePage}
-		/>
+		<section aria-labelledby="apartments-count" class="flex flex-col gap-4">
+			<h2 id="apartments-count" tabindex="-1" data-results class="text-xl font-bold text-ink">
+				{data.total === 1 ? '1 Wohnung' : `${data.total} Wohnungen`}
+			</h2>
+			<ul class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+				{#each data.apartments as apartment (apartment.id)}
+					<ApartmentCard {apartment} />
+				{/each}
+			</ul>
+		</section>
+		<Pagination url={$page.url} page={data.page} pageSize={data.pageSize} total={data.total} />
+		<StatusLegend />
 	{/if}
 </div>

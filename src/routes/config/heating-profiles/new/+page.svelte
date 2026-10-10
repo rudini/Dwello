@@ -1,6 +1,5 @@
 <script lang="ts">
-	import PageTrail from '$lib/components/PageTrail.svelte';
-	import Card from '$lib/components/Card.svelte';
+	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import HeatingProfileForm from '../HeatingProfileForm.svelte';
 	import type { ActionData } from './$types';
 
@@ -11,28 +10,18 @@
 	<title>Neues Heizprofil - Dwello</title>
 </svelte:head>
 
-<div class="max-w-3xl mx-auto space-y-6">
-	<PageTrail
-		links={[
+<div class="mx-auto flex max-w-3xl flex-col gap-8">
+	<PageHeader
+		title="Neues Heizprofil"
+		purpose="Legen Sie fest, wie sich die Heizkosten eines Jahres auf die Monate verteilen, z. B. für ein Gebäude in den Bergen mit langer Heizperiode."
+		trail={[
 			{ href: '/config', label: 'Einstellungen' },
 			{ href: '/config/heating-profiles', label: 'Heizprofile' }
 		]}
-		current="Neues Heizprofil"
 	/>
-
-	<div>
-		<h1 class="text-2xl font-bold text-gray-900">Neues Heizprofil</h1>
-		<p class="text-gray-500 mt-1">
-			Wie sich die Heizkosten eines Jahres auf die Monate verteilen, z.B. für ein Gebäude in den
-			Bergen.
-		</p>
-	</div>
-
-	<Card>
-		<HeatingProfileForm
-			errors={form?.errors}
-			cancelHref="/config/heating-profiles"
-			submitLabel="Heizprofil erstellen"
-		/>
-	</Card>
+	<HeatingProfileForm
+		errors={form?.errors}
+		cancelHref="/config/heating-profiles"
+		submitLabel="Heizprofil speichern"
+	/>
 </div>

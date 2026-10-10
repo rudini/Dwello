@@ -1,4 +1,6 @@
 import type { ApartmentStatus } from './types';
+import type { IconName } from './ui/icons';
+import type { Tone } from './ui/tone';
 import { formatDate } from './utils/format';
 
 export const floorLabel = (floor: number) =>
@@ -18,15 +20,46 @@ export const statusLabels: Record<ApartmentStatus, string> = {
 	reserved: 'Gesperrt'
 };
 
-export const statusVariants = {
-	occupied: 'success',
+export const statusTones = {
+	occupied: 'positive',
 	relet: 'info',
-	vacant: 'warning',
-	reserved: 'danger'
-} as const satisfies Record<ApartmentStatus, string>;
+	vacant: 'caution',
+	reserved: 'neutral'
+} as const satisfies Record<ApartmentStatus, Tone>;
+
+/** An empty apartment is no error: an open door instead of the caution tone's warning triangle */
+export const statusIcons: Partial<Record<ApartmentStatus, IconName>> = { vacant: 'apartment-free' };
+
+/** What each Mietstatus means (UBIQUITOUS_LANGUAGE.md, Mietstatus) */
+export const statusHelp: Record<ApartmentStatus, string> = {
+	occupied: 'Ein Mietvertrag läuft.',
+	relet:
+		'Ein künftiger Mietvertrag ist abgeschlossen; die Wohnung ist ab seinem Vertragsbeginn vermietet, auch wenn sie bis dahin leer ist.',
+	// TODO(fachlich prüfen): the glossary names Leer and Gesperrt without explaining them
+	vacant: 'Es läuft kein Mietvertrag, die Wohnung kann vermietet werden.',
+	reserved: 'Sie haben die Wohnung von Hand gesperrt, zum Beispiel während einer Renovation.'
+};
+
+/** A building's apartments per Mietstatus so that they add up; relet and reserved only when there are any */
+export function occupancyParts(b: {
+	occupiedCount: number;
+	reletCount?: number;
+	vacantCount: number;
+	reservedCount?: number;
+}) {
+	const parts = [`${b.occupiedCount} vermietet`];
+	if (b.reletCount) parts.push(`${b.reletCount} wiedervermietet`);
+	parts.push(`${b.vacantCount} leer`);
+	if (b.reservedCount) parts.push(`${b.reservedCount} gesperrt`);
+	return parts;
+}
+
+/** How many of the apartments have a Mietstatus */
+export const countStatus = (apartments: { status: string }[], status: ApartmentStatus) =>
+	apartments.filter((a) => a.status === status).length;
 
 /** Status with the day a relet apartment's next tenant moves in */
 export const statusText = (a: { status: ApartmentStatus; nextContractStart?: string | null }) =>
 	a.status === 'relet' && a.nextContractStart
-		? `Vermietet ab ${formatDate(a.nextContractStart)}`
+		? `Wiedervermietet ab ${formatDate(a.nextContractStart)}`
 		: statusLabels[a.status];

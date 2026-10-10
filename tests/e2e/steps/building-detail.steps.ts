@@ -7,6 +7,7 @@ import { emptyList, listedBuilding } from '../questions/buildings';
 import {
 	deleteBuilding,
 	openApartment,
+	startDeletingBuilding,
 	startEditing,
 	startFirstApartment,
 	startNewApartment
@@ -38,6 +39,10 @@ Given(
 
 When('der Liegenschaftsverwalter das Gebäude löscht', async ({ verwalter }) => {
 	await verwalter.perform(deleteBuilding);
+});
+
+When('der Liegenschaftsverwalter das Gebäude löschen will', async ({ verwalter }) => {
+	await verwalter.perform(startDeletingBuilding);
 });
 
 When('der Liegenschaftsverwalter das Gebäude bearbeiten will', async ({ verwalter }) => {
