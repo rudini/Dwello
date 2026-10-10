@@ -1,12 +1,17 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';
 	import Dialog from '$lib/ui/Dialog.svelte';
 	import { formatCurrency, formatDate } from '$lib/utils/format';
 	import type { FuelStock } from './+page.server';
 
 	// The Tankbestand readings of a building; deleting one asks first, it changes how heating costs are billed
-	let { stocks, categories }: { stocks: FuelStock[]; categories: { id: string; name: string }[] } =
+	let {
+		stocks,
+		categories,
+		deleteError
+	}: { stocks: FuelStock[]; categories: { id: string; name: string }[]; deleteError?: string } =
 		$props();
 
 	const categoryName = (id: string) => categories.find((c) => c.id === id)?.name ?? '';
@@ -35,6 +40,12 @@
 	{/each}
 </ul>
 
+{#if deleteError}
+	<Alert tone="critical" title="Nicht gelöscht" testid="fuel-stock-delete-error">
+		<p>{deleteError}</p>
+	</Alert>
+{/if}
+
 <form bind:this={deleteForm} method="POST" action="?/deleteFuelStock" use:enhance>
 	<input type="hidden" name="stockId" value={deleting?.id ?? ''} />
 </form>
@@ -52,7 +63,7 @@
 	onclose={() => (deleting = null)}
 >
 	<p>
-		Abrechnungen, die mit diesem Stichtag beginnen oder enden, rechnen dann den Einkauf ab, nicht
-		den Verbrauch. Bestehende Abrechnungen ändern sich nicht.
+		Abrechnungen, die am Tag danach beginnen oder an diesem Tag enden, rechnen dann den Einkauf ab,
+		nicht den Verbrauch. Bestehende Abrechnungen ändern sich nicht.
 	</p>
 </Dialog>

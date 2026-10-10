@@ -194,6 +194,28 @@ describe('Prüfung pro Kategorie', () => {
 		expect(findings).toEqual([]);
 	});
 
+	// Heizöl mit Tankbestand: verglichen wird der Verbrauch, nicht wann eingekauft wurde
+	it('meldet bei einer Kategorie mit Tankbestand keine Lücke im Rhythmus der Einkäufe', () => {
+		const stock = (date: string, amount: number) => ({ ...invoice('Heizung', date, amount), isFuelStock: true });
+		const { findings } = checkCategories(
+			[invoice('Heizung', '2025-03-10', 3000), stock('2025-12-31', 2500)],
+			[invoice('Heizung', '2024-02-10', 2500), invoice('Heizung', '2024-10-10', 2500), stock('2024-12-31', 500)],
+			year2025
+		);
+
+		expect(findings).toEqual([]);
+	});
+
+	it('zählt die Veränderung des Tankbestands nicht als Rechnung', () => {
+		const { findings } = checkCategories(
+			[invoice('Hauswart', '2025-06-30', 900)],
+			[invoice('Hauswart', '2024-06-30', 900), invoice('Heizung', '2024-05-10', 3000), { ...invoice('Heizung', '2024-12-31', 500), isFuelStock: true }],
+			year2025
+		);
+
+		expect(findings).toMatchObject([{ kind: 'missing', previous: { count: 1, total: 3500 } }]);
+	});
+
 	// Randfall: eine Periode, die nicht am Monatsersten beginnt, wird nach Tagen geteilt
 	it('teilt eine Periode ab dem 16. nach Tagen', () => {
 		const odd = { start: '2025-07-16', end: '2026-07-15' };

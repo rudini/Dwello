@@ -8,7 +8,7 @@ import { eq, min } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { categories, invoices } from '../db/schema';
 import { getInvoicesForStatement } from './invoice.service';
-import { fuelStockChange, periodReadings } from './fuel-stock.service';
+import { fuelStockChange, hasFuelStocks, periodReadings } from './fuel-stock.service';
 
 export interface Period {
 	start: string;
@@ -21,6 +21,7 @@ export interface CategoryInvoice {
 	amount: number;
 	invoiceDate: string;
 	isFuelStock?: boolean; // the change of the Tankbestand: consumption, no part of the rhythm
+	isHeatingCost?: boolean;
 }
 
 type Sum = { count: number; total: number };
@@ -30,8 +31,9 @@ export interface CategoryFinding {
 	categoryName: string;
 	// missing: no invoice although the year before had costs; gap: a part of the rhythm has none;
 	// new: costs the year before did not have (agreed in the lease?); deviation: costs differ a lot;
-	// stock: a Tankbestand reading is missing (missingParts: its days) or the consumption is negative
-	kind: 'stock' | 'missing' | 'gap' | 'new' | 'deviation';
+	// stock: a Tankbestand reading is missing (missingParts: its days) or the consumption is negative;
+	// tank: heating costs without any Tankbestand (heated with oil or pellets? then the purchases are billed)
+	kind: 'stock' | 'tank' | 'missing' | 'gap' | 'new' | 'deviation';
 	current: Sum;
 	previous: Sum;
 	missingParts: Period[]; // the slices of the rhythm without invoice (gap), the missing readings (stock), otherwise empty
@@ -88,7 +90,7 @@ function slices(period: Period, parts: number): Period[] {
 const sliceOf = (date: string, parts: Period[]) => parts.findIndex((part) => part.start <= date && date <= part.end);
 
 const sum = (list: CategoryInvoice[]): Sum => ({
-	count: list.length,
+	count: list.filter((invoice) => !invoice.isFuelStock).length, // the change of the Tankbestand is no invoice
 	total: Math.round(list.reduce((total, invoice) => total + invoice.amount, 0) * 100) / 100
 });
 
@@ -104,7 +106,9 @@ function groupByCategory(list: CategoryInvoice[]) {
 // The rhythm of the year before (one slice per invoice, at most one per month) and the slices without invoice now;
 // a credit note is no part of the rhythm, and as many invoices as the year before are complete however they are dated
 function missingParts(current: CategoryInvoice[], previous: CategoryInvoice[], period: Period, before: Period) {
-	const bills = (list: CategoryInvoice[]) => list.filter((invoice) => invoice.amount >= 0 && !invoice.isFuelStock);
+	// with a Tankbestand the consumption counts, not when the oil was bought
+	if ([...current, ...previous].some((invoice) => invoice.isFuelStock)) return [];
+	const bills = (list: CategoryInvoice[]) => list.filter((invoice) => invoice.amount >= 0);
 	[current, previous] = [bills(current), bills(previous)];
 	const parts = Math.min(previous.length, 12);
 	if (parts < 2 || current.length >= previous.length) return [];
@@ -137,7 +141,7 @@ function findingOf(current: CategoryInvoice[], previous: CategoryInvoice[], peri
 	return null;
 }
 
-const ORDER = { stock: 0, missing: 1, gap: 2, new: 3, deviation: 4 };
+const ORDER = { stock: 0, missing: 1, gap: 2, new: 3, deviation: 4, tank: 5 };
 
 /**
  * Findings per category of the period against the same dates one year earlier; most serious first.
@@ -171,7 +175,8 @@ async function categoryInvoices(buildingId: string, { start, end }: Period): Pro
 		categoryId: invoice.categoryId,
 		categoryName: nameOf(invoice.category),
 		amount: invoice.inPeriod.amount,
-		invoiceDate: invoice.servicePeriodEnd ? invoice.inPeriod.end : invoice.invoiceDate
+		invoiceDate: invoice.servicePeriodEnd ? invoice.inPeriod.end : invoice.invoiceDate,
+		isHeatingCost: !!invoice.category?.isHeatingCost
 	}));
 	const stock = (await fuelStockChange(buildingId, start, end)).map((change) => ({
 		categoryId: change.categoryId,
@@ -183,10 +188,25 @@ async function categoryInvoices(buildingId: string, { start, end }: Period): Pro
 	return [...bills, ...stock];
 }
 
+// Heating costs and never a Tankbestand: if the building heats with oil or pellets, the purchases are billed
+function tankQuestion(current: CategoryInvoice[]): CategoryFinding | null {
+	const heating = current.filter((invoice) => invoice.isHeatingCost);
+	if (heating.length === 0) return null;
+	return {
+		categoryId: heating[0].categoryId,
+		categoryName: heating[0].categoryName,
+		kind: 'tank',
+		current: sum(heating),
+		previous: { count: 0, total: 0 },
+		missingParts: [],
+		changePercent: null
+	};
+}
+
 // Without both readings the statement bills the purchases, not the consumption; a negative consumption is a typo
 async function stockFinding(buildingId: string, period: Period, current: CategoryInvoice[]): Promise<CategoryFinding | null> {
 	const readings = await periodReadings(buildingId, period.start, period.end);
-	if (!readings) return null;
+	if (!readings) return (await hasFuelStocks(buildingId)) ? null : tankQuestion(current);
 	const costs = current.filter((invoice) => invoice.categoryId === readings.categoryId);
 	const [category] = await db.select({ name: categories.name, nameDE: categories.nameDE }).from(categories).where(eq(categories.id, readings.categoryId));
 	const finding = {

@@ -163,23 +163,36 @@ describe('Rechnung erfassen und bearbeiten', () => {
 		'/config/default_distribution_key_id': { value: 'k1' }
 	};
 
-	// Wer eine schon abgerechnete Rechnung ändert, verschiebt Kosten zwischen den Perioden
-	it('nennt die Perioden, für die es mit dieser Rechnung schon Abrechnungen gibt', async () => {
-		const { fetch, urls } = backend({
-			...answers,
-			'/statements': {
-				data: [
-					{ periodStart: '2026-01-01', periodEnd: '2026-12-31' },
-					{ periodStart: '2026-01-01', periodEnd: '2026-12-31' }, // second tenant, same period
-					{ periodStart: '2025-01-01', periodEnd: '2025-12-31' }
-				]
+	// Wer eine schon abgerechnete Rechnung ändert oder löscht, verschiebt Kosten zwischen den Perioden
+	describe('Perioden mit Abrechnungen, die diese Rechnung enthalten', () => {
+		// the invoice (contract sample) was recorded on 1.4.2026 and dates from 31.3.2026 (Leistungszeitraum Q1 2026)
+		const statements = [
+			{ periodStart: '2026-01-01', periodEnd: '2026-12-31', createdAt: '2026-05-01T08:00:00.000Z' },
+			{ periodStart: '2026-01-01', periodEnd: '2026-12-31', createdAt: '2026-05-01T08:00:00.000Z' }, // second tenant
+			{ periodStart: '2026-01-01', periodEnd: '2026-06-30', createdAt: '2026-07-01T08:00:00.000Z' }, // same start
+			{ periodStart: '2025-07-01', periodEnd: '2026-06-30', createdAt: '2026-03-01T08:00:00.000Z' }, // before the invoice
+			{ periodStart: '2025-01-01', periodEnd: '2025-12-31', createdAt: '2026-05-01T08:00:00.000Z' } // other period
+		];
+		const billed = async (load: typeof editLoad | typeof detailLoad, values = {}) => {
+			const { fetch, urls } = backend({ ...answers, '/invoices/i1': invoice(values), '/statements': { data: statements } });
+			const data = (await load({ params: { id: 'i1' }, fetch } as never)) as { billedIn: unknown };
+			return { billedIn: data.billedIn, urls };
+		};
+
+		it('nennt die Perioden, deren Abrechnungen nach dem Erfassen der Rechnung erstellt wurden', async () => {
+			for (const load of [editLoad, detailLoad]) {
+				const { billedIn, urls } = await billed(load);
+				expect(billedIn).toEqual([
+					{ start: '2026-01-01', end: '2026-12-31' },
+					{ start: '2026-01-01', end: '2026-06-30' }
+				]);
+				expect(urls).toContain(`${API}/statements?buildingId=b1&limit=1000`);
 			}
 		});
 
-		const data = (await editLoad({ params: { id: 'i1' }, fetch } as never)) as { billedIn: unknown };
-
-		expect(data.billedIn).toEqual([{ start: '2026-01-01', end: '2026-12-31' }]);
-		expect(urls).toContain(`${API}/statements?buildingId=b1&limit=1000`);
+		it('nennt keine Periode für eine Rechnung, die nicht umlagefähig ist', async () => {
+			expect((await billed(editLoad, { isValidUtilityCost: false })).billedIn).toEqual([]);
+		});
 	});
 
 	it('bietet Kategorien und Verteilschlüssel deutsch zur Auswahl an', async () => {

@@ -6,7 +6,8 @@
 import { eq, inArray } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { categories, distributionKeys, rentalContracts, utilityStatements } from '../db/schema';
-import { calculateHeatingShare, getHeatingProfile } from './heating-profile.service';
+import { getHeatingProfile } from './heating-profile.service';
+import { handleMidYearMoves } from './prorating.service';
 import { getTypedConfig } from './config.service';
 import { generateStatementPDFBase64, type StatementPDFData, type Language } from './pdf.service';
 import { isQRIBAN, statementQRReference, type QRBillConfig } from './qr-bill.service';
@@ -127,7 +128,15 @@ async function heatingOf(statement: StatementWithDetails, period: { rentalStart:
 	const { rentalStart, rentalEnd } = period;
 	const profile = hasHeating && statement.heatingProfileId ? await getHeatingProfile(statement.heatingProfileId) : null;
 	if (!profile) return {};
-	const { percentage } = calculateHeatingShare(profile, new Date(rentalStart), new Date(rentalEnd), 100);
+	// the same share the calculation takes: the months rented against the months of the period
+	const { percentage } = await handleMidYearMoves(
+		profile.id,
+		new Date(rentalStart),
+		new Date(rentalEnd),
+		new Date(statement.periodStart),
+		new Date(statement.periodEnd),
+		100
+	);
 	return { heating: { profile: localName(profile, language), percent: percentage } };
 }
 

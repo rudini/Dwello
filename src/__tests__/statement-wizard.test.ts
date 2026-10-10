@@ -122,7 +122,7 @@ describe('Rechnungen über die ganze Periode', () => {
 	});
 });
 
-const finding = (kind: 'stock' | 'missing' | 'gap' | 'new' | 'deviation', extra = {}) => ({
+const finding = (kind: 'stock' | 'tank' | 'missing' | 'gap' | 'new' | 'deviation', extra = {}) => ({
 	categoryId: 'c1',
 	categoryName: 'Kaltwasser',
 	kind,
@@ -177,15 +177,26 @@ describe('Rechnungen pro Kategorie', () => {
 	// Nebenkosten dürfen nur abgerechnet werden, wenn sie im Mietvertrag vereinbart sind
 	it('fragt bei einer neuen Kategorie, ob sie im Mietvertrag vereinbart ist', () => {
 		expect(findingText(finding('new', { current: { count: 1, total: 400 }, previous: { count: 0, total: 0 } }))).toBe(
-			'Neu: CHF\u00a0400.00, im Vorjahr keine Kosten. Ist diese Kategorie im Mietvertrag vereinbart? Nur vereinbarte Nebenkosten dürfen Sie abrechnen. Wenn nicht, markieren Sie die Rechnungen als nicht umlagefähig; neue Nebenkosten führen Sie nur mit dem amtlichen Formular für die Zukunft ein.'
+			'Neu: CHF\u00a0400.00, im Vorjahr keine Kosten. Ist diese Kategorie im Mietvertrag vereinbart? Nur vereinbarte Nebenkosten dürfen Sie abrechnen. Wenn nicht, markieren Sie die Rechnungen als nicht umlagefähig. Neue Nebenkosten führen Sie nur für die Zukunft ein: mit dem amtlichen Formular, begründet, auf den nächsten Kündigungstermin. Waren die Kosten bisher in der Nettomiete enthalten, senken Sie diese entsprechend.'
 		);
 	});
 
 	// Ohne Anfangs- und Endbestand rechnet die Abrechnung das Heizöl nach Einkauf statt nach Verbrauch ab
 	it('nennt den fehlenden Tankbestand mit seinem Stichtag und der Folge', () => {
 		expect(findingText(finding('stock', { missingParts: [{ start: '2025-12-31', end: '2025-12-31' }] }))).toBe(
-			'Tankbestand am 31.12.2025 fehlt. Ohne Anfangs- und Endbestand rechnet Dwello den Einkauf ab, nicht den Verbrauch. Erfassen Sie den Bestand auf der Seite des Gebäudes.'
+			'Tankbestand am 31.12.2025 fehlt. Ohne Anfangs- und Endbestand rechnet Dwello den Einkauf ab, nicht den Verbrauch. Abrechnen dürfen Sie aber nur den Verbrauch: Erfassen Sie den Bestand auf der Seite des Gebäudes. Bestätigen Sie nur, wenn der Tank am Anfang und am Ende gleich voll war.'
 		);
+		expect(
+			findingText(finding('stock', { missingParts: [{ start: '2024-12-31', end: '2024-12-31' }, { start: '2025-12-31', end: '2025-12-31' }] }))
+		).toContain('Tankbestand am 31.12.2024 und am 31.12.2025 fehlen.');
+	});
+
+	// Erste Abrechnung: ob das Gebäude einen Tank hat, weiss Dwello nicht
+	it('fragt bei Heizkosten ohne Tankbestand, ob das Gebäude mit Öl oder Pellets heizt, ohne Bestätigung', () => {
+		expect(findingText(finding('tank'))).toBe(
+			'Heizen Sie mit Öl oder Pellets? Dann erfassen Sie den Tankbestand am Anfang und am Ende der Periode, sonst rechnet Dwello den Einkauf ab statt den Verbrauch. Bei Fernwärme, Gas oder Wärmepumpe ist nichts zu tun.'
+		);
+		expect(needsConfirmation([{ buildingId: 'b1', count: 3, first: '2024-01-01', last: '2024-12-31', check: check([finding('tank')]) }])).toBe(false);
 	});
 
 	it('meldet einen negativen Verbrauch aus dem Tank', () => {
@@ -246,7 +257,7 @@ describe('Abweichung zum Akonto', () => {
 	// Ein höheres Akonto ist eine Vertragsänderung: der Mieter erfährt sie mit dem amtlichen Formular
 	it('schlägt schon ab 15 % darüber vor, das Akonto zu erhöhen, mit dem amtlichen Formular', () => {
 		expect(akontoHint(row(2800, 2400))).toBe(
-			'Kosten CHF\u00a0400.00 (17 %) über dem Akonto. Prüfen Sie, ob Sie das Akonto erhöhen. Eine Erhöhung gilt erst auf den nächsten Kündigungstermin: begründet, mit dem amtlichen Formular, beim Mieter mindestens 10 Tage vor Beginn der Kündigungsfrist.'
+			'Kosten CHF\u00a0400.00 (17 %) über dem Akonto. Prüfen Sie, ob Sie das Akonto erhöhen. Eine Erhöhung gilt frühestens auf den nächsten Kündigungstermin: begründet, mit dem amtlichen Formular, beim Mieter mindestens 10 Tage vor Beginn der Kündigungsfrist. Ohne Formular oder Begründung ist sie nichtig.'
 		);
 	});
 

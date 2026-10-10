@@ -14,7 +14,13 @@ import {
 	deleteBuilding,
 	buildingExists
 } from '../services/building.service';
-import { createFuelStock, deleteFuelStock, isHeatingCategory, listFuelStocks } from '../services/fuel-stock.service';
+import {
+	createFuelStock,
+	deleteFuelStock,
+	isHeatingCategory,
+	listFuelStocks,
+	otherTankCategory
+} from '../services/fuel-stock.service';
 import { isRealDate } from './real-date';
 
 const fuelStockParams = t.Object({ id: t.String({ format: 'uuid' }) });
@@ -133,7 +139,11 @@ export const buildingRoutes = new Elysia({ prefix: '/api/v1/buildings' })
 			}
 			if (!isRealDate(body.readingDate) || !(await isHeatingCategory(body.categoryId))) {
 				set.status = 400;
-				return { error: 'readingDate must exist and categoryId must be a heating cost category' };
+				return { error: 'readingDate must exist and categoryId must be an allocable heating cost category' };
+			}
+			if (await otherTankCategory(params.id, body.categoryId)) {
+				set.status = 409;
+				return { error: 'The building records its fuel stock in another category' };
 			}
 			const stock = await createFuelStock(params.id, body);
 			if (!stock) {

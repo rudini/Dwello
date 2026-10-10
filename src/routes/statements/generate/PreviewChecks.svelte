@@ -21,8 +21,14 @@
 	const missing = $derived(rows.filter((row) => row.missing));
 	const partial = $derived(rows.filter((row) => row.partial));
 	const existing = $derived(rows.filter((row) => row.existing > 0));
-	// a building without any invoice has its own warning above
-	const checked = $derived(rows.filter((row) => row.findings.length > 0 && !row.missing));
+	// a building without any invoice has its own warning above; only its Tankbestand hints are listed
+	const tankOnly = (row: (typeof rows)[number]) => ({
+		...row,
+		findings: row.findings.filter((f) => f.kind === 'stock' || f.kind === 'tank')
+	});
+	const checked = $derived(
+		rows.map((row) => (row.missing ? tankOnly(row) : row)).filter((row) => row.findings.length > 0)
+	);
 	const incomplete = $derived(checked.filter((row) => row.incomplete));
 	const comparedWith = $derived(checked.find((row) => row.comparedWith)?.comparedWith);
 	// The warnings that need the confirmation, read with its checkbox
@@ -47,8 +53,9 @@
 	<Alert tone="caution" title="Rechnungen fehlen" testid="missing-invoices">
 		<p id="missing-invoices-text">
 			Für {missing.map((row) => row.name).join(', ')} sind in der Abrechnungsperiode keine Rechnungen
-			erfasst. Ohne Rechnungen werden CHF 0.00 Nebenkosten verteilt, und jeder Mieter erhält sein Akonto
-			zurück. Erfassen Sie zuerst die Rechnungen – oder bestätigen Sie unten, dass es keine gibt.
+			erfasst. Ohne Rechnungen fehlen deren Kosten in den Abrechnungen, und die Mieter erhalten ihr
+			Akonto weitgehend zurück. Erfassen Sie zuerst die Rechnungen – oder bestätigen Sie unten, dass es
+			keine gibt.
 		</p>
 		{#snippet action()}
 			<Button href={newInvoice} icon="invoice">Rechnung erfassen</Button>

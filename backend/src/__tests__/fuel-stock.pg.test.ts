@@ -7,7 +7,7 @@
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import { eq } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { categories, invoices } from '../db/schema';
+import { categories, distributionKeys, invoices } from '../db/schema';
 import { calculateStatement } from '../services/statement.service';
 import { checkBuildingInvoices } from '../services/invoice-completeness.service';
 import { callApi, sendJson } from './helpers/auth';
@@ -17,6 +17,7 @@ import { createRental } from './helpers/rental';
 const token = crypto.randomUUID();
 let rental: Awaited<ReturnType<typeof createRental>>;
 let tankOnly: Awaited<ReturnType<typeof createRental>>;
+let noTank: Awaited<ReturnType<typeof createRental>>;
 let heating: string;
 let caretaker: string;
 
@@ -27,6 +28,7 @@ const record = (readingDate: string, amount: string, building = rental.building,
 beforeAll(async () => {
 	rental = await createRental(token, { startDate: '2023-01-01', monthlyAdvancePayment: '0' });
 	tankOnly = await createRental(`${token}-tank`, { startDate: '2023-01-01', monthlyAdvancePayment: '0' });
+	noTank = await createRental(`${token}-none`, { startDate: '2023-01-01', monthlyAdvancePayment: '0' });
 	[{ id: heating }] = await db.select().from(categories).where(eq(categories.name, 'Heating'));
 	[{ id: caretaker }] = await db.select().from(categories).where(eq(categories.name, 'Caretaker'));
 	await insertInvoice(rental.building, { categoryId: heating, amount: '3000.00', invoiceDate: '2024-05-10', description: 'Heizöl' });
@@ -39,8 +41,10 @@ beforeAll(async () => {
 
 afterAll(async () => {
 	await db.delete(invoices).where(eq(invoices.buildingId, rental.building));
+	await db.delete(invoices).where(eq(invoices.buildingId, noTank.building));
 	await rental.remove();
 	await tankOnly.remove();
+	await noTank.remove();
 });
 
 const linesOf = async (contractId: string, year: number) =>
@@ -81,7 +85,30 @@ describe('Tankbestand', () => {
 	it('vergleicht in der Prüfung den Verbrauch, nicht den Einkauf', async () => {
 		// 2025 ohne Einkauf: kein «Keine Rechnung in dieser Kategorie»
 		expect((await findings(rental.building, 2025)).filter((f) => f.categoryId === heating)).toEqual([
-			expect.objectContaining({ kind: 'deviation', current: { count: 1, total: 400 }, previous: { count: 2, total: 4500 } })
+			expect.objectContaining({ kind: 'deviation', current: { count: 0, total: 400 }, previous: { count: 1, total: 4500 } })
+		]);
+	});
+
+	// Erste Abrechnung mit Dwello: noch kein Stand erfasst, vielleicht heizt das Gebäude mit Öl
+	it('fragt bei Heizkosten ohne jeden Tankbestand, ob das Gebäude mit Öl oder Pellets heizt', async () => {
+		await insertInvoice(noTank.building, { categoryId: heating, amount: '2000.00', invoiceDate: '2025-05-10' });
+
+		expect(await findings(noTank.building, 2025)).toContainEqual(expect.objectContaining({ kind: 'tank', categoryId: heating }));
+		expect((await findings(tankOnly.building, 2025)).map((f) => f.kind)).not.toContain('tank');
+	});
+
+	// Tank stillgelegt (z.B. Wechsel auf Fernwärme): spätere Perioden brauchen keinen Stand mehr
+	it('verlangt keinen Stand für eine Periode nach dem letzten Stand', async () => {
+		expect((await findings(rental.building, 2029)).map((f) => f.kind)).not.toContain('stock');
+	});
+
+	// Ein Schlüssel, der erst nach der Periode gilt, ändert eine ältere Abrechnung nicht
+	it('verteilt den Verbrauch nach dem Schlüssel der letzten Rechnung bis zum Ende der Periode', async () => {
+		const [perUnit] = await db.select().from(distributionKeys).where(eq(distributionKeys.name, 'Per Unit'));
+		await insertInvoice(rental.building, { categoryId: heating, distributionKeyId: perUnit.id, amount: '100.00', invoiceDate: '2027-02-01' });
+
+		expect((await linesOf(rental.contract, 2025)).filter((line) => line.categoryId === heating)).toMatchObject([
+			{ distributionKeyName: 'Per Area (m²)', totalBuildingAmount: 400 }
 		]);
 	});
 
@@ -89,7 +116,7 @@ describe('Tankbestand', () => {
 		await record('2026-12-31', '5000.00');
 
 		expect(await findings(rental.building, 2026)).toContainEqual(
-			expect.objectContaining({ kind: 'stock', missingParts: [], current: { count: 1, total: -4900 } })
+			expect.objectContaining({ kind: 'stock', missingParts: [], current: { count: 0, total: -4900 } })
 		);
 	});
 });
@@ -121,12 +148,29 @@ describe('Tankbestand über die API', () => {
 		expect((await sendJson('DELETE', `${stocks()}/${id}`)).status).toBe(404);
 	});
 
+	// Ein Tank, eine Kategorie: sonst landet der Verbrauch still in einer anderen Kategorie (z.B. Kaminfeger)
+	it('lehnt einen Stand in einer anderen Kategorie als die übrigen Stände des Gebäudes ab', async () => {
+		const [chimney] = await db.select().from(categories).where(eq(categories.name, 'Chimney Sweep'));
+
+		expect((await record('2028-12-31', '10.00', rental.building, chimney.id)).status).toBe(409);
+	});
+
+	it('lehnt eine Kategorie ab, die nicht umlagefähig ist', async () => {
+		const [owner] = await db
+			.insert(categories)
+			.values({ name: `Heizung Eigentümer ${token}`, isHeatingCost: true, isAllowedUtilityCost: false })
+			.returning();
+
+		expect((await record('2028-12-31', '10.00', noTank.building, owner.id)).status).toBe(400);
+		await db.delete(categories).where(eq(categories.id, owner.id));
+	});
+
 	it('verhindert das Löschen einer Kategorie mit Tankbeständen', async () => {
 		const [own] = await db
 			.insert(categories)
 			.values({ name: `Pellets ${token}`, nameDE: `Pellets ${token}`, isHeatingCost: true })
 			.returning();
-		await record('2027-12-31', '10.00', rental.building, own.id);
+		await record('2027-12-31', '10.00', noTank.building, own.id);
 
 		expect((await sendJson('DELETE', `/api/v1/categories/${own.id}`)).status).toBe(409);
 	});

@@ -204,6 +204,17 @@ describe('Rechnungsdetail', () => {
 		expect(text()).not.toContain('Bestimmt, in welche Abrechnungsperiode');
 	});
 
+	// Der Mieter kann Einsicht in die Belege einer versendeten Abrechnung verlangen
+	it('warnt vor dem Löschen einer schon abgerechneten Rechnung', () => {
+		show(InvoicePage, { data: { invoice: invoice(), billedIn: [{ start: '2024-01-01', end: '2024-12-31' }] } });
+
+		click('invoice-delete-button');
+
+		const dialog = document.querySelector('[role=dialog]')!.textContent!.replace(/\s+/g, ' ');
+		expect(dialog).toContain('Abrechnungsperiode 1.1.2024 – 31.12.2024');
+		expect(dialog).toContain('Bewahren Sie den Beleg auf: Der Mieter kann Einsicht verlangen.');
+	});
+
 	it('löscht die Rechnung nach Bestätigung und kehrt zur Liste zurück', async () => {
 		const calls = fakeBff(() => [204]);
 		show(InvoicePage, { data: { invoice: invoice() } });
@@ -586,12 +597,19 @@ describe('Rechnung bearbeiten', () => {
 				buildings,
 				categories,
 				distributionKeys,
-				billedIn: [{ start: '2024-01-01', end: '2024-12-31' }]
+				// same start, different end: both listed
+				billedIn: [
+					{ start: '2024-01-01', end: '2024-12-31' },
+					{ start: '2024-01-01', end: '2024-06-30' }
+				]
 			}
 		} as never);
 
-		expect(byTestId('invoice-billed-warning')!.textContent!.replace(/\s+/g, ' ')).toContain(
-			'Für die Abrechnungsperiode 1.1.2024 – 31.12.2024 gibt es schon Abrechnungen mit dieser Rechnung.'
+		const warning = byTestId('invoice-billed-warning')!.textContent!.replace(/\s+/g, ' ');
+		expect(warning).toContain('Abrechnungsperiode 1.1.2024 – 31.12.2024');
+		expect(warning).toContain('Abrechnungsperiode 1.1.2024 – 30.6.2024');
+		expect(warning).toContain(
+			'Ändern Sie diese Rechnung, stimmen diese Abrechnungen nicht mehr. Entwürfe erstellen Sie neu; versendete oder bezahlte Abrechnungen berichtigen Sie gegenüber dem Mieter.'
 		);
 	});
 

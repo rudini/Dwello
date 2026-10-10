@@ -46,7 +46,7 @@ Browser -> SvelteKit BFF (port 3000: /auth/*, /api/*, page loads/actions) -> Ely
 | PUT | `/:id` | Body: any subset of the POST fields. → building. 404 |
 | DELETE | `/:id` | 204. 404; 400 if the building still has apartments |
 | GET | `/:id/fuel-stocks` | → array of `{ id, buildingId, readingDate, amount, categoryId, createdAt }` by date (Tankbestand, see `tests/contracts/fuel-stocks.json`). 404 building |
-| POST | `/:id/fuel-stocks` | Body: `readingDate` (date), `amount` (string, CHF ≥ 0, two decimals), `categoryId` (uuid of a heating cost category). → 201 reading. 400 date that does not exist or category without heating costs; 404 building; 409 a reading on that day exists; 422 invalid body |
+| POST | `/:id/fuel-stocks` | Body: `readingDate` (date), `amount` (string, CHF ≥ 0, two decimals), `categoryId` (uuid of an allocable heating cost category). → 201 reading. 400 date that does not exist or category not allowed; 404 building; 409 a reading on that day exists, or the building's readings are in another category; 422 invalid body |
 | DELETE | `/:id/fuel-stocks/:stockId` | 204. 404; 422 ids not uuids |
 
 ## 4. Apartments `/api/v1/apartments`
@@ -108,7 +108,7 @@ There is no "predefined" flag on categories.
 | GET | `/utility-rules` | → `{ maxManagementFeePercent, allowedCategories, notAllowedCategories, notes }` (German texts) |
 | POST | `/categorize` | Preview only, stores nothing. Body: `billingEntityName`, `description`, `amount` (string). → `{ category: { id, name, isAllowedUtilityCost } \| null, confidence, isAllowedUtilityCost, reasoning, source: "llm"\|"cache"\|"fallback" }` |
 | GET | `/for-statement/:buildingId` | Query: `periodStart`, `periodEnd` (required). → array of the building's invoices with `isValidUtilityCost = true` whose Leistungszeitraum overlaps the period, or without one, dated in it; each with `inPeriod: { start, end, amount }` (its days and amount in the period) |
-| GET | `/completeness/:buildingId` | Query: `periodStart`, `periodEnd` (dates, required; end not before start, else 400). Compares the allocable invoices per category with the same dates one year earlier → `{ buildingId, comparedWith: { start, end }, hasComparison, findings: [{ categoryId, categoryName, kind: stock \| missing \| gap \| new \| deviation, current: { count, total }, previous: { count, total }, missingParts, changePercent }] }` |
+| GET | `/completeness/:buildingId` | Query: `periodStart`, `periodEnd` (dates, required; end not before start, else 400). Compares the allocable invoices per category with the same dates one year earlier → `{ buildingId, comparedWith: { start, end }, hasComparison, findings: [{ categoryId, categoryName, kind: stock \| tank \| missing \| gap \| new \| deviation, current: { count, total }, previous: { count, total }, missingParts, changePercent }] }` |
 | GET | `/:id` | → invoice with `building`, `category`, `distributionKey`, `llmCategory` (see `tests/contracts/invoice.json`). 404 |
 | GET | `/:id/validate` | → `{ isValid, errors, warnings }`; 404 with the same shape if not found |
 | POST | `/:id/recategorize` | No body. Asks the LLM again and stores `llmCategoryId`/`llmConfidence`; from confidence 0.85 the suggestion also becomes `categoryId` (as on create; a non-allocable category makes the invoice non-allocable, an exclusion stays; manual override cleared). → `{ success: true, invoice, categorization: { category (name), confidence, isAllowedUtilityCost, reasoning } }`. 404; **503** LLM unreachable or no matching category; 500 other errors |

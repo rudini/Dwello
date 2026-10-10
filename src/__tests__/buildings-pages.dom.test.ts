@@ -249,6 +249,8 @@ describe('Tankbestand', () => {
 		expect(section()).toContain('Heizöl oder Pellets im Tank');
 		expect(section()).toContain('Anfangsbestand + Einkauf − Endbestand');
 		expect(section()).toContain('Liter im Tank mal Preis pro Liter der letzten Lieferung');
+		expect(section()).toContain('Ist mehr im Tank als die letzte Lieferung, rechnen Sie den Rest zum Preis der Lieferung davor.');
+		expect(section()).toContain('Lesen Sie erst Anfang Januar ab, erfassen Sie den Wert trotzdem per 31.12.');
 		expect(byTestId('fuel-stock-f1')!.textContent).toMatch(/31\.12\.2024.*Heizung.*CHF\s2’650\.00/);
 		expect(byTestId('fuel-stock-delete-f1')!.getAttribute('aria-label')).toBe(
 			'Bestand vom 31.12.2024 löschen'
@@ -263,6 +265,7 @@ describe('Tankbestand', () => {
 		const category = byTestId<HTMLSelectElement>('fuel-stock-category-select')!;
 		expect(category.name).toBe('categoryId');
 		expect([...category.options].map((o) => o.textContent)).toEqual(['Heizung', 'Pellets']);
+		expect(category.value).toBe('c1');
 		expect(byTestId('fuel-stock-save-button')!.textContent).toContain('Bestand speichern');
 	});
 
@@ -270,6 +273,31 @@ describe('Tankbestand', () => {
 		detail([], { fuelStockErrors: { readingDate: 'Bitte geben Sie den Stichtag ein.' } });
 
 		expect(section()).toContain('Bitte geben Sie den Stichtag ein.');
+	});
+
+	it('wählt die Kategorie der bisherigen Stände vor', () => {
+		detail([{ id: 'f1', readingDate: '2024-12-31', amount: 900, categoryId: 'c3' }]);
+
+		expect(byTestId<HTMLSelectElement>('fuel-stock-category-select')!.value).toBe('c3');
+	});
+
+	it('sagt ohne Kategorie der Heizkosten, wo man eine anlegt', () => {
+		show(BuildingPage, {
+			data: { building: building(), apartments: [], fuelStocks: [], heatingCategories: [] },
+			form: null
+		} as never);
+
+		expect(section()).toContain('Es gibt keine Kategorie, die Heizkosten nach dem Heizprofil verteilt.');
+		expect(byTestId('fuel-stock-categories-link')!.getAttribute('href')).toBe('/config/categories');
+	});
+
+	it('meldet ein misslungenes Löschen beim Bestand, nicht beim Formular zum Speichern', () => {
+		detail([{ id: 'f1', readingDate: '2024-12-31', amount: 2650, categoryId: 'c1' }], {
+			fuelStockDeleteError: 'Der Bestand konnte nicht gelöscht werden. Laden Sie die Seite neu.'
+		});
+
+		expect(byTestId('fuel-stock-delete-error')!.textContent).toContain('Nicht gelöscht');
+		expect(byTestId('fuel-stock-error')).toBeNull();
 	});
 
 	it('bestätigt das Speichern', () => {
@@ -292,7 +320,7 @@ describe('Tankbestand', () => {
 		const dialog = document.querySelector('[role=dialog]')!;
 		expect(dialog.textContent).toContain('Bestand vom 31.12.2024 löschen?');
 		expect(dialog.textContent!.replace(/\s+/g, ' ')).toContain(
-			'Abrechnungen, die mit diesem Stichtag beginnen oder enden, rechnen dann den Einkauf ab, nicht den Verbrauch.'
+			'Abrechnungen, die am Tag danach beginnen oder an diesem Tag enden, rechnen dann den Einkauf ab, nicht den Verbrauch.'
 		);
 		expect(byTestId('fuel-stock-delete-confirm')!.textContent).toContain('Bestand löschen');
 	});

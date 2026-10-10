@@ -111,6 +111,18 @@ describe('Abrechnungen erstellen', () => {
 		expect(text()).toContain('Montag, 1. Januar 2024');
 	});
 
+	// Akonto zählt für alle Monate der Periode, auch die noch nicht bezahlten
+	it('warnt, wenn die Abrechnungsperiode noch nicht zu Ende ist', () => {
+		open();
+		expect(byTestId('period-future-warning')).toBeNull();
+
+		fireEvent(byTestId<HTMLInputElement>('period-end-input')!, 'input', '2099-12-31');
+
+		expect(byTestId('period-future-warning')!.textContent!.replace(/\s+/g, ' ')).toContain(
+			'Die Abrechnungsperiode ist noch nicht zu Ende.'
+		);
+	});
+
 	it('verlangt mindestens ein Gebäude und setzt den Fokus auf den Fehler', async () => {
 		open();
 		next();
@@ -161,7 +173,7 @@ describe('Abrechnungen erstellen', () => {
 		await toSettings();
 		// Dwello kennt keine Zwischenablesung: das sagt der Text, statt sie zu versprechen
 		expect(text()).toContain(
-			'Dwello verteilt nach dem Heizprofil. Haben Sie beim Mieterwechsel die Zähler abgelesen, passen Sie die Abrechnung von Hand an.'
+			'Dwello verteilt nach dem Heizprofil und kann Zählerstände nicht berücksichtigen. Wurden beim Mieterwechsel die Zähler abgelesen, gelten diese Werte: Erstellen Sie die Abrechnung dieser Wohnung dann ausserhalb von Dwello.'
 		);
 		expect(text()).toContain('Verlangen Sie eine Verwaltungspauschale nur, wenn sie im Mietvertrag vereinbart ist.');
 		expect(text()).toContain('Haben Mietverträge verschiedene Sätze, erstellen Sie die Abrechnungen getrennt.');
@@ -204,6 +216,36 @@ describe('Abrechnungen erstellen', () => {
 		);
 		expect(rows[0]).toContain('3 Rechnungen vom 15.1.2024 bis 30.6.2024');
 		expect(rows[1]).toContain('Keine Rechnungen erfasst');
+	});
+
+	// Ein Jahr ohne Öllieferung: keine Rechnung, aber Verbrauch aus dem Tank
+	it('zeigt beim Gebäude ohne Rechnungen den Hinweis zum Tankbestand und verspricht keine Kosten von CHF 0.00', () => {
+		const sums = (count: number, total: number) => ({ count, total });
+		open({
+			preview,
+			invoices: [
+				invoices[0],
+				{
+					...invoices[1],
+					check: {
+						buildingId: 'b2',
+						comparedWith: { start: '2023-01-01', end: '2023-12-31' },
+						hasComparison: true,
+						findings: [
+							{ categoryId: 'h', categoryName: 'Heizung', kind: 'stock', current: sums(0, 0), previous: sums(0, 0), missingParts: [{ start: '2024-12-31', end: '2024-12-31' }], changePercent: null },
+							{ categoryId: 'w', categoryName: 'Hauswart', kind: 'missing', current: sums(0, 0), previous: sums(1, 900), missingParts: [], changePercent: null }
+						]
+					}
+				}
+			]
+		});
+
+		const findings = [...document.querySelectorAll('[data-testid="category-finding"]')].map((f) => f.textContent!);
+		expect(findings).toHaveLength(1); // the missing invoices are the warning above
+		expect(findings[0]).toContain('Tankbestand am 31.12.2024 fehlt');
+		expect(byTestId('missing-invoices')!.textContent!.replace(/\s+/g, ' ')).toContain(
+			'Ohne Rechnungen fehlen deren Kosten in den Abrechnungen, und die Mieter erhalten ihr Akonto weitgehend zurück.'
+		);
 	});
 
 	it('warnt vor einem Gebäude ohne Rechnungen und geht erst nach Bestätigung weiter', async () => {
@@ -291,7 +333,44 @@ describe('Abrechnungen erstellen', () => {
 		const link = byTestId<HTMLAnchorElement>('category-finding-stock-link')!;
 		expect(link.textContent).toContain('Tankbestand erfassen');
 		expect(link.getAttribute('href')).toBe('/buildings/b1');
+		// the fine print about missing invoices belongs to invoices, not to the tank
+		expect(byTestId('category-check')!.textContent).not.toContain('Fehlt eine Rechnung');
+		expect(byTestId('category-check')!.textContent).toContain('Erfassen oder prüfen Sie die Tankbestände');
 		expect(byTestId('category-check')!.querySelector('p')!.textContent).toBe('Möglicherweise fehlen Rechnungen');
+	});
+
+	it('führt bei negativem Verbrauch zum Prüfen der Tankbestände', () => {
+		const sums = (count: number, total: number) => ({ count, total });
+		const heating = { categoryId: 'h', categoryName: 'Heizung', previous: sums(0, 0), missingParts: [], changePercent: null };
+		const withFindings = (findings: unknown[]) =>
+			open({
+				preview,
+				invoices: [{ ...invoices[0], check: { buildingId: 'b1', comparedWith: { start: '2023-01-01', end: '2023-12-31' }, hasComparison: true, findings } }]
+			});
+
+		withFindings([{ ...heating, kind: 'stock', current: sums(0, -880) }]);
+		expect(byTestId('category-finding-stock-link')!.textContent).toContain('Tankbestände prüfen');
+	});
+
+	it('bietet bei Heizkosten ohne Tankbestand an, ihn zu erfassen', () => {
+		const sums = (count: number, total: number) => ({ count, total });
+		open({
+			preview,
+			invoices: [
+				{
+					...invoices[0],
+					check: {
+						buildingId: 'b1',
+						comparedWith: { start: '2023-01-01', end: '2023-12-31' },
+						hasComparison: true,
+						findings: [{ categoryId: 'h', categoryName: 'Heizung', kind: 'tank', current: sums(1, 2000), previous: sums(0, 0), missingParts: [], changePercent: null }]
+					}
+				}
+			]
+		});
+
+		expect(byTestId('category-finding-stock-link')!.textContent).toContain('Tankbestand erfassen');
+		expect(byTestId('category-check')!.querySelector('p')!.textContent).toBe('Kosten im Vergleich zum Vorjahr');
 	});
 
 	it('nennt pro Kategorie fehlende Rechnungen im Vergleich zum Vorjahr und verlangt eine Bestätigung', async () => {

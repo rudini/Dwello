@@ -6,6 +6,7 @@
 	import Alert from '$lib/ui/Alert.svelte';
 	import Badge from '$lib/ui/Badge.svelte';
 	import Button from '$lib/ui/Button.svelte';
+	import BilledWarning from '../BilledWarning.svelte';
 	import Dialog from '$lib/ui/Dialog.svelte';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import Panel from '$lib/ui/Panel.svelte';
@@ -13,7 +14,10 @@
 	import CategorizationPanel from './CategorizationPanel.svelte';
 	import InvoiceFacts from './InvoiceFacts.svelte';
 
-	let { data }: { data: { invoice: InvoiceWithDetails } } = $props();
+	let {
+		data
+	}: { data: { invoice: InvoiceWithDetails; billedIn?: { start: string; end: string }[] } } =
+		$props();
 
 	const invoice = $derived(data.invoice);
 	let showDelete = $state(false);
@@ -122,6 +126,11 @@
 		Die Rechnung von {invoice.billingEntity} über {formatCurrency(invoice.amount)} wird gelöscht. Sie
 		fliesst dann in keine neue Nebenkostenabrechnung mehr ein. Das lässt sich nicht rückgängig machen.
 	</p>
+	{#if data.billedIn?.length}
+		<BilledWarning periods={data.billedIn}>
+			<p>Bewahren Sie den Beleg auf: Der Mieter kann Einsicht verlangen.</p>
+		</BilledWarning>
+	{/if}
 	{#if deleteError}
 		<Alert tone="critical" title="Nicht gelöscht"><p>{deleteError}</p></Alert>
 	{/if}

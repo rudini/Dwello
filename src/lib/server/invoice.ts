@@ -46,3 +46,24 @@ export function toInvoice(r: Record<string, unknown>): InvoiceWithDetails {
 		categorizationStatus: categorizationStatus(r)
 	};
 }
+
+type StatementPeriod = { periodStart: string; periodEnd: string; createdAt: string };
+
+/**
+ * The periods whose statements took this invoice: it was allocable and recorded before they were created, and its
+ * Leistungszeitraum (else its Rechnungsdatum) overlaps their period
+ */
+export async function billedIn(fetch: typeof globalThis.fetch, backendUrl: string, invoice: Record<string, unknown>) {
+	if (invoice.isValidUtilityCost === false) return [];
+	const response = await fetch(`${backendUrl}/api/v1/statements?buildingId=${invoice.buildingId}&limit=1000`).catch(() => null);
+	const statements: StatementPeriod[] = response?.ok ? ((await response.json()).data ?? []) : [];
+	const start = (invoice.servicePeriodStart ?? invoice.invoiceDate) as string;
+	const end = (invoice.servicePeriodEnd ?? invoice.invoiceDate) as string;
+	const periods = statements
+		.filter((s) => s.periodStart <= end && s.periodEnd >= start && s.createdAt >= String(invoice.createdAt))
+		.map((s) => `${s.periodStart}/${s.periodEnd}`);
+	return [...new Set(periods)].map((period) => {
+		const [periodStart, periodEnd] = period.split('/');
+		return { start: periodStart, end: periodEnd };
+	});
+}

@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { findingText, type invoiceRows } from '$lib/statement-wizard';
+	import type { invoiceRows } from '$lib/statement-wizard';
+	import CategoryFindingItem from './CategoryFindingItem.svelte';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';
 	import { formatDate } from '$lib/utils/format';
@@ -16,6 +17,10 @@
 		confirm: boolean; // missing invoices (not only a deviation) need the confirmation below
 		newInvoice: string;
 	} = $props();
+
+	const invoicesMissing = $derived(
+		checked.some((row) => row.findings.some((f) => f.kind === 'missing' || f.kind === 'gap'))
+	);
 
 	const comparedText = $derived(
 		comparedWith ? ` (${formatDate(comparedWith.start)} – ${formatDate(comparedWith.end)})` : ''
@@ -38,30 +43,26 @@
 			<p class="font-semibold" aria-hidden="true">{row.name}</p>
 			<ul class="flex list-disc flex-col gap-2 pl-6" aria-label={row.name}>
 				{#each row.findings as finding (`${finding.kind}-${finding.categoryId ?? finding.categoryName}`)}
-					<li data-testid="category-finding">
-						<span class="font-semibold">{finding.categoryName}:</span>
-						{findingText(finding)}
-						{#if finding.kind === 'stock'}
-							<a
-								href="/buildings/{row.buildingId}"
-								class="inline-flex min-h-12 items-center font-semibold text-accent underline underline-offset-4"
-								data-testid="category-finding-stock-link">Tankbestand erfassen</a
-							>
-						{/if}
-					</li>
+					<CategoryFindingItem {finding} buildingId={row.buildingId} />
 				{/each}
 			</ul>
 		{/each}
-		{#if confirm}
+		{#if confirm && invoicesMissing}
 			<p>
 				<!-- TODO(fachlich prüfen): whether a paid statement can be corrected later is not settled -->
-				Fehlt eine Rechnung, fehlen ihre Kosten in jeder Abrechnung des Gebäudes. Später können Sie
-				sie nur noch mit einer berichtigten Abrechnung und nicht in jedem Fall nachverlangen.
+				Fehlt eine Rechnung, fehlen ihre Kosten in jeder Abrechnung des Gebäudes. Später können Sie sie
+				nur noch mit einer berichtigten Abrechnung und nicht in jedem Fall nachverlangen.
 			</p>
 			<p>Erfassen Sie fehlende Rechnungen – oder bestätigen Sie unten, dass alles stimmt.</p>
+		{:else if confirm}
+			<p>
+				Erfassen oder prüfen Sie die Tankbestände – oder bestätigen Sie unten, dass alles stimmt.
+			</p>
 		{/if}
 	</div>
 	{#snippet action()}
-		{#if confirm}<Button href={newInvoice} icon="invoice">Rechnung erfassen</Button>{/if}
+		{#if confirm && invoicesMissing}
+			<Button href={newInvoice} icon="invoice">Rechnung erfassen</Button>
+		{/if}
 	{/snippet}
 </Alert>

@@ -76,6 +76,7 @@
 		categories={data.heatingCategories}
 		errors={form?.fuelStockErrors}
 		saved={!!form?.fuelStockSaved}
+		deleteError={form?.fuelStockDeleteError}
 	/>
 </div>
 

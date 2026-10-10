@@ -1,5 +1,7 @@
 <script lang="ts">
+	import Alert from '$lib/ui/Alert.svelte';
 	import TextInput from '$lib/ui/TextInput.svelte';
+	import { localToday } from '$lib/contract-status';
 	import { formatDateLong } from '$lib/utils/format';
 
 	// Step 1: the Abrechnungsperiode, proposed from the settings; both dates repeated in words
@@ -8,6 +10,9 @@
 		periodEnd = $bindable(),
 		errors
 	}: { periodStart: string; periodEnd: string; errors: Record<string, string> } = $props();
+
+	// ISO dates compare as text
+	const notOver = $derived(!!periodEnd && periodEnd >= localToday());
 </script>
 
 {#snippet inWords(date: string)}
@@ -43,3 +48,13 @@
 		{@render inWords(periodEnd)}
 	</div>
 </div>
+
+{#if notOver}
+	<Alert tone="caution" title="Periode läuft noch" testid="period-future-warning">
+		<p>
+			Die Abrechnungsperiode ist noch nicht zu Ende. Die Abrechnungen zählen das Akonto aller Monate,
+			auch der noch nicht bezahlten, und Rechnungen bis zum Ende der Periode fehlen noch. Erstellen Sie
+			die Abrechnungen erst nach dem Ende der Periode.
+		</p>
+	</Alert>
+{/if}

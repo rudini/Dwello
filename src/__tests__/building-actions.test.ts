@@ -288,12 +288,17 @@ describe('Tankbestand', () => {
 	});
 
 	it.each([
-		[409, 'Für diesen Stichtag ist schon ein Bestand erfasst. Löschen Sie ihn zuerst.'],
-		[500, 'Der Bestand konnte nicht gespeichert werden. Versuchen Sie es erneut.']
-	])('meldet eine Ablehnung des Backends (%i) verständlich', async (status, message) => {
+		[409, {}, 'Für diesen Stichtag ist schon ein Bestand erfasst. Löschen Sie ihn zuerst.'],
+		[
+			409,
+			{ error: 'The building records its fuel stock in another category' },
+			'Alle Bestände eines Gebäudes gehören zur selben Kategorie. Wählen Sie die Kategorie der bisherigen Bestände.'
+		],
+		[500, {}, 'Der Bestand konnte nicht gespeichert werden. Versuchen Sie es erneut.']
+	])('meldet eine Ablehnung des Backends (%i) verständlich', async (status, body, message) => {
 		const result = await run(
 			detailActions.addFuelStock as Action,
-			() => Response.json({}, { status }),
+			() => Response.json(body, { status }),
 			{ id: 'b1' },
 			stock
 		);
@@ -318,6 +323,17 @@ describe('Tankbestand', () => {
 
 		expect(data.fuelStocks).toEqual([{ id: 'f1', readingDate: '2024-12-31', amount: 2650, categoryId: 'c1' }]);
 		expect(data.heatingCategories).toEqual([{ id: 'c1', name: 'Heizung' }]);
+	});
+
+	it('zeigt die Gebäudeseite auch, wenn die Kategorien nicht geladen werden können', async () => {
+		const fetch = (async (url: string) =>
+			url.includes('/categories')
+				? new Response('kaputt', { status: 500 })
+				: answer(() => Response.json(fuelStocks))(url)) as typeof globalThis.fetch;
+
+		const data = (await detailLoad({ params: { id: 'b1' }, fetch } as never)) as BuildingDetailsData;
+
+		expect(data.heatingCategories).toEqual([]);
 	});
 
 	it('meldet, wenn die Stichtage nicht geladen werden können, statt eine leere Liste zu zeigen', async () => {
@@ -345,7 +361,7 @@ describe('Tankbestand', () => {
 			calls.push(url);
 			return new Response(null, { status: 404 });
 		};
-		const failed = { status: 400, data: { fuelStockErrors: { form: 'Der Bestand konnte nicht gelöscht werden. Laden Sie die Seite neu.' } } };
+		const failed = { status: 400, data: { fuelStockDeleteError: 'Der Bestand konnte nicht gelöscht werden. Laden Sie die Seite neu.' } };
 
 		expect(await run(detailActions.deleteFuelStock as Action, backend, { id: 'b1' }, { stockId: '../..' })).toMatchObject(failed);
 		expect(calls).toEqual([]);

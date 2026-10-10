@@ -84,7 +84,7 @@ beforeAll(async () => {
 	await insertInvoice(building.id, { categoryId: chimney.id, description: 'Kaminfeger 2024', amount: '200.00', invoiceDate: '2024-10-15' });
 	const [hotWater] = await db.select().from(categories).where(eq(categories.name, 'Hot Water'));
 	await insertInvoice(building.id, { categoryId: hotWater.id, description: 'Warmwasser 2024', amount: '300.00', invoiceDate: '2024-11-30' });
-		const [profile] = await db
+	const [profile] = await db
 		.insert(heatingProfiles)
 		.values({
 			name: `Test ${token}`,

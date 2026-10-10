@@ -190,7 +190,11 @@ const states: Record<string, (page: Page, viewport: Viewport) => Promise<unknown
 	},
 	// 2026 against 2025: the heating invoice of 2025 has no successor yet
 	'category-check': (page) => previewOf(page, '2026', 'category-check'),
-	'preview-empty': (page) => previewOf(page, '2000', 'preview-empty')
+	'preview-empty': (page) => previewOf(page, '2000', 'preview-empty'),
+	'period-not-over': async (page) => {
+		await page.getByTestId('period-end-input').fill('2099-12-31');
+		await shows(page, '[data-testid="period-future-warning"]');
+	}
 };
 
 /** Rule violations axe finds on the page as it is now, as readable lines */

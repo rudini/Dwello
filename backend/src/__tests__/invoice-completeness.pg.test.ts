@@ -56,7 +56,9 @@ describe('Prüfung auf fehlende Rechnungen pro Kategorie', () => {
 	it('meldet für das erste Jahr mit Rechnungen keinen Vergleich', async () => {
 		const { body } = await check('periodStart=2024-01-01&periodEnd=2024-12-31');
 
-		expect(body).toMatchObject({ hasComparison: false, findings: [] });
+		// only the question about a tank remains, it does not compare
+		expect(body.hasComparison).toBe(false);
+		expect(body.findings.map((f: { kind: string }) => f.kind)).toEqual(['tank']);
 	});
 
 	it('verlangt eine gültige Abrechnungsperiode', async () => {

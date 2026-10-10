@@ -7,7 +7,7 @@
 	import { addToast } from '$lib/stores';
 	import type { Category, InvoiceWithDetails } from '$lib/types';
 	import Alert from '$lib/ui/Alert.svelte';
-	import { formatDate } from '$lib/utils/format';
+	import BilledWarning from '../../BilledWarning.svelte';
 	import { focusFirstError } from '$lib/ui/focus-error';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import Panel from '$lib/ui/Panel.svelte';
@@ -102,19 +102,12 @@
 	/>
 
 	{#if data.billedIn?.length}
-		<Alert tone="caution" title="Rechnung schon abgerechnet" testid="invoice-billed-warning">
-			{#each data.billedIn as period (period.start)}
-				<p>
-					Für die Abrechnungsperiode {formatDate(period.start)} – {formatDate(period.end)} gibt es schon
-					Abrechnungen mit dieser Rechnung.
-				</p>
-			{/each}
+		<BilledWarning periods={data.billedIn}>
 			<p>
-				Ändern Sie Datum, Leistungszeitraum oder Betrag, stimmen diese Abrechnungen nicht mehr. Die
-				Kosten können dann doppelt oder gar nicht abgerechnet werden. Entwürfe können Sie neu
-				erstellen.
+				Ändern Sie diese Rechnung, stimmen diese Abrechnungen nicht mehr. Entwürfe erstellen Sie
+				neu; versendete oder bezahlte Abrechnungen berichtigen Sie gegenüber dem Mieter.
 			</p>
-		</Alert>
+		</BilledWarning>
 	{/if}
 
 	<Panel title="Rechnungsdaten">

@@ -51,7 +51,7 @@ export function selectionErrors(selection: WizardSelection, step: number): Recor
 export interface CategoryFinding {
 	categoryId: string | null;
 	categoryName: string;
-	kind: 'stock' | 'missing' | 'gap' | 'new' | 'deviation';
+	kind: 'stock' | 'tank' | 'missing' | 'gap' | 'new' | 'deviation';
 	current: { count: number; total: number };
 	previous: { count: number; total: number };
 	missingParts: { start: string; end: string }[];
@@ -98,16 +98,18 @@ const partLabel = (slice: { start: string; end: string }) =>
 // TODO(fachlich prüfen): "Tankbestand" is not in the glossary
 const stockText = (missingDays: { start: string }[], consumption: number) =>
 	missingDays.length
-		? `Tankbestand am ${missingDays.map((day) => formatDate(day.start)).join(' und am ')} fehlt. Ohne Anfangs- und Endbestand rechnet Dwello den Einkauf ab, nicht den Verbrauch. Erfassen Sie den Bestand auf der Seite des Gebäudes.`
+		? `Tankbestand am ${missingDays.map((day) => formatDate(day.start)).join(' und am ')} ${missingDays.length > 1 ? 'fehlen' : 'fehlt'}. Ohne Anfangs- und Endbestand rechnet Dwello den Einkauf ab, nicht den Verbrauch. Abrechnen dürfen Sie aber nur den Verbrauch: Erfassen Sie den Bestand auf der Seite des Gebäudes. Bestätigen Sie nur, wenn der Tank am Anfang und am Ende gleich voll war.`
 		: `Der Endbestand ist ${formatCurrency(-consumption)} höher als Anfangsbestand und Einkauf zusammen, der Verbrauch wäre negativ. Prüfen Sie die Tankbestände.`;
 
 /** One finding of the check per category in plain words, with what to look at */
 export function findingText({ kind, current, previous, missingParts, changePercent }: CategoryFinding): string {
 	if (kind === 'stock') return stockText(missingParts, current.total);
+	if (kind === 'tank')
+		return 'Heizen Sie mit Öl oder Pellets? Dann erfassen Sie den Tankbestand am Anfang und am Ende der Periode, sonst rechnet Dwello den Einkauf ab statt den Verbrauch. Bei Fernwärme, Gas oder Wärmepumpe ist nichts zu tun.';
 	if (kind === 'missing')
 		return `Keine Rechnung in dieser Kategorie erfasst. Im Vorjahr: ${invoices(previous.count)} über ${formatCurrency(previous.total)}.`;
 	if (kind === 'new')
-		return `Neu: ${formatCurrency(current.total)}, im Vorjahr keine Kosten. Ist diese Kategorie im Mietvertrag vereinbart? Nur vereinbarte Nebenkosten dürfen Sie abrechnen. Wenn nicht, markieren Sie die Rechnungen als nicht umlagefähig; neue Nebenkosten führen Sie nur mit dem amtlichen Formular für die Zukunft ein.`;
+		return `Neu: ${formatCurrency(current.total)}, im Vorjahr keine Kosten. Ist diese Kategorie im Mietvertrag vereinbart? Nur vereinbarte Nebenkosten dürfen Sie abrechnen. Wenn nicht, markieren Sie die Rechnungen als nicht umlagefähig. Neue Nebenkosten führen Sie nur für die Zukunft ein: mit dem amtlichen Formular, begründet, auf den nächsten Kündigungstermin. Waren die Kosten bisher in der Nettomiete enthalten, senken Sie diese entsprechend.`;
 	if (kind === 'gap') {
 		const parts = missingParts.map(partLabel).join(' und ');
 		const what = missingParts.length === 1 ? `Rechnung für ${parts} fehlt` : `Rechnungen für ${parts} fehlen`;
@@ -130,7 +132,7 @@ export function akontoHint({ totalCosts, totalAdvancePayments, rentalDays, total
 	const amount = formatCurrency(Math.abs(totalCosts - totalAdvancePayments));
 	const percent = Math.round(Math.abs(change) * 100);
 	if (change > AKONTO_ABOVE)
-		return `Kosten ${amount} (${percent} %) über dem Akonto. Prüfen Sie, ob Sie das Akonto erhöhen. Eine Erhöhung gilt erst auf den nächsten Kündigungstermin: begründet, mit dem amtlichen Formular, beim Mieter mindestens 10 Tage vor Beginn der Kündigungsfrist.`;
+		return `Kosten ${amount} (${percent} %) über dem Akonto. Prüfen Sie, ob Sie das Akonto erhöhen. Eine Erhöhung gilt frühestens auf den nächsten Kündigungstermin: begründet, mit dem amtlichen Formular, beim Mieter mindestens 10 Tage vor Beginn der Kündigungsfrist. Ohne Formular oder Begründung ist sie nichtig.`;
 	// part of the period: the months rented may carry little heating, low costs are no sign of missing invoices
 	const wholePeriod = !rentalDays || !totalPeriodDays || rentalDays >= totalPeriodDays;
 	if (change < -AKONTO_BELOW && wholePeriod) return `Kosten ${amount} (${percent} %) unter dem Akonto. Fehlen Rechnungen?`;

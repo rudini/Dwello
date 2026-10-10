@@ -209,9 +209,12 @@ UNIQUE (building_id, reading_date)
 With a reading on the day before the period and one on its last day, a statement adds opening − closing stock as one
 more cost of the period in the category of the closing reading, distributed by the key of that category's latest
 allocable invoice in the building (else the configured default key): heating costs are the consumption, not the
-purchases (`fuel-stock.service.ts`). Without both readings the statement bills the purchases; the check for missing
-invoices reports the missing reading day (kind `stock`), and a negative consumption, and compares the consumption
-with the year before.
+purchases (`fuel-stock.service.ts`). All readings of a building are in one allocable heating cost category (the API
+answers 409 otherwise); the key is that of the category's latest allocable invoice up to the period end. Without both
+readings the statement bills the purchases; the check for missing invoices reports the missing reading day (kind
+`stock`) and a negative consumption, compares the consumption with the year before (no purchase rhythm), and asks
+about a tank (kind `tank`, no confirmation) for heating costs of a building that never had a reading. A building whose
+last reading lies before the period (tank retired) needs none.
 
 Rounding in a statement: each invoice's part in the period (Leistungszeitraum) and each apartment's share of a group
 are rounded to the Rappen first, then the tenant's part of the days or of the heating profile; the subtotal is the

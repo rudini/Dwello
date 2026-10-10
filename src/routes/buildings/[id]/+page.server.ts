@@ -22,6 +22,16 @@ export interface FuelStock {
 }
 
 type Fetch = typeof globalThis.fetch;
+
+// Why the backend refused a reading, in words: the day is taken, or the tank's category differs
+async function notSaved(response: Response) {
+	if (response.status !== 409)
+		return 'Der Bestand konnte nicht gespeichert werden. Versuchen Sie es erneut.';
+	const { error = '' } = await response.json().catch(() => ({}));
+	return String(error).includes('category')
+		? 'Alle Bestände eines Gebäudes gehören zur selben Kategorie. Wählen Sie die Kategorie der bisherigen Bestände.'
+		: 'Für diesen Stichtag ist schon ein Bestand erfasst. Löschen Sie ihn zuerst.';
+}
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 // The building's Tankbestand readings and the heating cost categories they can be billed in
@@ -31,8 +41,10 @@ async function fuelStockData(fetch: Fetch, buildingId: string) {
 		fetch(`${BACKEND_URL}/api/v1/categories?limit=100`)
 	]);
 	const stocks = stocksRes.ok ? await stocksRes.json() : null;
-	const categories: Record<string, string | boolean>[] =
-		(await categoriesRes.json()).categories ?? [];
+	// without the categories the page still shows, only the choice is empty
+	const categories: Record<string, string | boolean>[] = categoriesRes.ok
+		? ((await categoriesRes.json()).categories ?? [])
+		: [];
 	return {
 		fuelStocks: Array.isArray(stocks)
 			? stocks.map((s: Record<string, string>) => ({
@@ -139,13 +151,8 @@ export const actions: Actions = {
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({ readingDate, amount, categoryId })
 		});
-		if (!response.ok) {
-			const form =
-				response.status === 409
-					? 'Für diesen Stichtag ist schon ein Bestand erfasst. Löschen Sie ihn zuerst.'
-					: 'Der Bestand konnte nicht gespeichert werden. Versuchen Sie es erneut.';
-			return fail(response.status, { fuelStockErrors: { form } });
-		}
+		if (!response.ok)
+			return fail(response.status, { fuelStockErrors: { form: await notSaved(response) } });
 		return { fuelStockSaved: true };
 	},
 
@@ -153,9 +160,7 @@ export const actions: Actions = {
 		const stockId = String((await request.formData()).get('stockId'));
 		const notDeleted = (status: number) =>
 			fail(status, {
-				fuelStockErrors: {
-					form: 'Der Bestand konnte nicht gelöscht werden. Laden Sie die Seite neu.'
-				}
+				fuelStockDeleteError: 'Der Bestand konnte nicht gelöscht werden. Laden Sie die Seite neu.'
 			});
 		if (!UUID.test(stockId)) return notDeleted(400);
 		const response = await fetch(

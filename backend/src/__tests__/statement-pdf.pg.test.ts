@@ -81,6 +81,25 @@ describe('PDF der Nebenkostenabrechnung', () => {
 		expect(pdf.text).toContain('41.5 %');
 	});
 
+	// Periode Juli bis Dezember, ganz gemietet: das PDF nennt denselben Anteil, den die Abrechnung rechnet
+	it('nennt bei einer Periode unter einem Jahr den Anteil an den Heizkosten der Periode', async () => {
+		const [heating] = await db.select().from(categories).where(eq(categories.name, 'Heating'));
+		await insertInvoice(rental.building, { categoryId: heating.id, amount: '600.00', invoiceDate: '2025-10-15' });
+		const part = await generateStatement({
+			contractId: rental.contract,
+			buildingId: rental.building,
+			periodStart: '2025-07-01',
+			periodEnd: '2025-12-31',
+			heatingProfileId: (await getHeatingProfileByName('Heating Mittelland'))!.id,
+			managementFeePercent: 3
+		});
+		await generateStatementPdf(part.id, 'de');
+		const text = readPdf(Buffer.from((await getStatementPdf(part.id)).pdfBlob!, 'base64')).flowing;
+		await deleteStatement(part.id);
+
+		expect(text).toContain('100 % der Heizkosten Ihrer Wohnung in der Abrechnungsperiode');
+	});
+
 	// Verwaltungspauschale: 3 % der Nebenkosten der Liegenschaft (2400 + 1200), verteilt nach Fläche
 	it('nennt die Grundlage der Verwaltungspauschale', () => {
 		expect(pdf.text).toContain("3 % von CHF 3'600.00");

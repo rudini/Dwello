@@ -4447,6 +4447,15 @@ critical/high/medium is open; reviews in `docs/reviews/`.
   `heating-distribution.pg.test.ts`, `service-period.pg.test.ts`, `invoice-completeness.test.ts`,
   `statement-wizard*.test.ts`, `building-actions.test.ts`, `buildings-pages.dom.test.ts`, `invoices.test.ts`,
   `invoice-pages.dom.test.ts`, `statement-generation.test.ts`, `categories-page.dom.test.ts`.
+- [x] **B, review round 3** (`docs/reviews/B-review-3.md`): PDF heating share as calculated (`statement-pdf.service.ts`);
+  no purchase rhythm with a Tankbestand; one tank category per building (409), allocable only, key up to the period
+  end, retired tank silent; hint `tank` for heating costs without any reading (`CategoryFindingItem.svelte`); stock
+  hints also for buildings without invoices (`PreviewChecks.svelte`); warning for a period not yet over
+  (`PeriodStep.svelte`, axe state `period-not-over`); «already billed» only for allocable invoices recorded before the
+  statements, also in the delete dialog (`BilledWarning.svelte`, `billedIn` in `src/lib/server/invoice.ts`); texts
+  (meter readings, Akonto, new costs, tank valuation). Tests: `fuel-stock.pg.test.ts`, `invoice-completeness*.test.ts`,
+  `statement-pdf.pg.test.ts`, `statement-wizard*.test.ts`, `building-actions.test.ts`, `buildings-pages.dom.test.ts`,
+  `invoices.test.ts`, `invoice-pages.dom.test.ts`.
 
 
 ---
