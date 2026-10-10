@@ -12,7 +12,7 @@ Turn any running system into **living documentation**: Gherkin `.feature` files 
 playwright-bdd is already set up in this repo. **Extend the existing setup; never re-bootstrap it.**
 
 - Config: `playwright.config.ts` — `defineBddConfig({ paths: ['tests/e2e/features/**/*.feature'], require: ['tests/e2e/fixtures/test.ts', 'tests/e2e/steps/**/*.ts'] })`, `tags: 'not @wip'`
-- Layout: `tests/e2e/features/`, `tests/e2e/steps/`, `tests/e2e/fixtures/test.ts`. Put `tasks/`, `questions/`, `interactions/` under `tests/e2e/` too.
+- Layout: `features/`, `steps/`, `tasks/`, `questions/`, `interactions/` and `fixtures/test.ts` all exist under `tests/e2e/`. Name new files like their neighbours (`tasks/apartment-form.ts`, `steps/apartment-form.steps.ts`), not like the `*.task.ts` / `fixtures/index.ts` examples below.
 - Run: `npm run test:e2e` (= `bddgen && playwright test`). The `webServer` config recreates the E2E database `dwello_e2e` from the migrations, then starts the backend (3101) and the frontend (3100), both with the JWT secret from `tests/e2e/fixtures/session.ts` and Google sign-in configured with test credentials. The development servers and database are never touched. PostgreSQL must be running on 5432 (`docker compose -f docker-compose.dev.yml up -d postgres`).
 - Auth: OAuth only (Google/Microsoft), BFF with HTTPOnly cookies. There is no password login and no storageState. `src/hooks.server.ts` requires a valid session JWT for every page except `/login`, `/auth/*` and `/health`; the `page` fixture adds a real session cookie (`fixtures/session.ts`), the `besucher` actor has none. Skip the global-setup login, `.env.test` credentials and per-role projects from Phase 3.
 - Actor: single role **Liegenschaftsverwalter** (see `UBIQUITOUS_LANGUAGE.md`). Use no role tags. Unauthenticated scenarios belong in `authentication.feature`.
@@ -135,7 +135,7 @@ export const test = base.extend<Fixtures>({
 export { expect } from '@playwright/test';
 ```
 
-All step files get `Given/When/Then` from `createBdd(test)`. playwright-bdd v8 has no direct `Given` export, and only `createBdd(test)` exposes the custom fixtures.
+All step files get `Given/When/Then` from `createBdd(test)`: only `createBdd(test)` exposes the custom fixtures.
 
 ### Global setup — storageState per role + DB truncate
 ```typescript
@@ -218,9 +218,9 @@ EXPERT_EMAIL=expert@test.com
 EXPERT_PASSWORD=secret
 ```
 
-**Tracer run**: write a single trivial `.feature` (one scenario, one step) and run `npm run test:bdd`. Fix any config errors before proceeding.
+**Tracer run**: write a single trivial `.feature` (one scenario, one step) and run `npm run test:e2e`. Fix any config errors before proceeding.
 
-**Completion criterion**: `npm run test:bdd` runs without config errors.
+**Completion criterion**: `npm run test:e2e` runs without config errors.
 
 ## Phase 4 — Write Gherkin (page scope, UI systems)
 

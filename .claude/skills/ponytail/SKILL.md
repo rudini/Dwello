@@ -25,8 +25,8 @@ code is the code never written.
 
 ## Persistence
 
-ACTIVE EVERY RESPONSE. No drift back to over-building. Still active if
-unsure. Off only: "stop ponytail" / "normal mode". Default: **full**.
+Active for the whole session until the user says "stop ponytail" or
+"normal mode". Default: **full**.
 Switch: `/ponytail lite|full|ultra`.
 
 ## The ladder
@@ -112,8 +112,9 @@ fixtures, no per-function suites unless asked. Trivial one-liners need no
 test, YAGNI applies to tests too.
 
 The repository's own testing rules win over this section. In Dwello,
-`CLAUDE.md` requires a Vitest unit test for every bug fix, one-liners
-included: write that test in the project's suite, and keep it small.
+`CLAUDE.md` requires a test that reproduces every bug fix first, one-liners
+included, at the lowest layer that can show it (unit test, `*.pg.test.ts` or
+scenario): write it in the project's suite, and keep it small.
 
 ## Boundaries
 
