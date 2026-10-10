@@ -9,6 +9,7 @@
 		text,
 		actionLabel,
 		actionHref,
+		actionTestid,
 		illustration,
 		testid
 	}: {
@@ -16,6 +17,7 @@
 		text: string;
 		actionLabel?: string;
 		actionHref?: string;
+		actionTestid?: string;
 		illustration?: IllustrationName;
 		testid?: string;
 	} = $props();
@@ -26,6 +28,6 @@
 	<h2 class="text-xl font-bold text-ink">{title}</h2>
 	<p class="max-w-prose text-ink-muted">{text}</p>
 	{#if actionLabel && actionHref}
-		<Button variant="primary" href={actionHref}>{actionLabel}</Button>
+		<Button variant="primary" href={actionHref} testid={actionTestid}>{actionLabel}</Button>
 	{/if}
 </div>

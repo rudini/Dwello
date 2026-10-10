@@ -1,11 +1,10 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { listPageUrl } from '$lib/list-url';
 	import type { TenantsListData } from '$lib/types';
 	import Button from '$lib/ui/Button.svelte';
 	import EmptyState from '$lib/ui/EmptyState.svelte';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
-	import Pager from '$lib/ui/Pager.svelte';
+	import Pagination from '$lib/ui/Pagination.svelte';
 	import TenantFilters from './TenantFilters.svelte';
 	import TenantRow from './TenantRow.svelte';
 
@@ -67,11 +66,6 @@
 				{/each}
 			</ul>
 		</section>
-		<Pager
-			page={data.page}
-			pageSize={data.pageSize}
-			total={data.total}
-			href={(to) => listPageUrl($page.url, to)}
-		/>
+		<Pagination url={$page.url} page={data.page} pageSize={data.pageSize} total={data.total} />
 	{/if}
 </div>

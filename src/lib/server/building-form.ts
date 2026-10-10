@@ -21,7 +21,7 @@ export function parseBuildingForm(formData: FormData) {
 	if (!building.address) errors.address = 'Adresse ist erforderlich';
 	if (!building.postalCode) errors.postalCode = 'PLZ ist erforderlich';
 	else if (!/^\d{4}$/.test(building.postalCode)) errors.postalCode = 'PLZ muss 4 Ziffern haben';
-	if (!building.city) errors.city = 'Stadt ist erforderlich';
+	if (!building.city) errors.city = 'Ort ist erforderlich';
 	if (!building.canton) errors.canton = 'Kanton ist erforderlich';
 	const year = building.yearBuilt;
 	if (year !== null && !(year >= 1800 && year <= new Date().getFullYear())) {

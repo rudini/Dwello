@@ -1,49 +1,32 @@
 <script lang="ts">
-	import Card from './Card.svelte';
 	import type { MonthlyCosts } from '../types';
+	import { formatCurrency } from '$lib/utils/format';
+	import Panel from '$lib/ui/Panel.svelte';
 
-	interface Props {
-		costs: MonthlyCosts;
-	}
-
-	let { costs }: Props = $props();
-
-	function formatCurrency(value: number): string {
-		return new Intl.NumberFormat('de-CH', {
-			style: 'currency',
-			currency: 'CHF',
-			minimumFractionDigits: 2,
-			maximumFractionDigits: 2
-		}).format(value);
-	}
+	// What the current tenant pays each month, with the glossary's names
+	let { costs }: { costs: MonthlyCosts } = $props();
 
 	const costItems = $derived([
 		{ label: 'Nettomiete', value: costs.baseRent },
-		...(costs.advancePayment
-			? [{ label: 'Akonto', value: costs.advancePayment }]
-			: []),
+		...(costs.advancePayment ? [{ label: 'Akonto', value: costs.advancePayment }] : []),
 		...(costs.additionalRent ? [{ label: 'Zusatzmiete', value: costs.additionalRent }] : [])
 	]);
 </script>
 
-<Card>
-	<h3 class="text-lg font-bold text-text-dark mb-6">Monatliche Kosten</h3>
-
-	<div class="space-y-4 mb-4">
-		{#each costItems as item}
-			<div class="flex justify-between items-center">
-				<span class="text-sm text-text-secondary">{item.label}</span>
-				<span class="text-sm font-medium text-text-dark">{formatCurrency(item.value)}</span>
+<Panel title="Monatliche Miete">
+	<dl class="flex flex-col gap-2 tabular-nums">
+		{#each costItems as item (item.label)}
+			<div class="flex justify-between gap-4">
+				<dt class="text-ink-muted">{item.label}</dt>
+				<dd class="text-ink">{formatCurrency(item.value)}</dd>
 			</div>
 		{/each}
-	</div>
-
-	<div class="border-t border-slate-200 pt-4">
-		<div class="flex justify-between items-center">
-			<span class="font-bold text-text-dark">Total Brutto</span>
-			<span class="text-2xl font-bold text-primary" data-testid="monthly-costs-total"
-				>{formatCurrency(costs.totalBrutto)}</span
-			>
+		<div class="flex justify-between gap-4 border-t border-line pt-2">
+			<!-- TODO(fachlich prüfen): no glossary term for the monthly total, see docs/design/offene-punkte.md -->
+			<dt class="font-semibold text-ink">Monatlich total</dt>
+			<dd class="font-bold text-ink" data-testid="monthly-costs-total">
+				{formatCurrency(costs.totalBrutto)}
+			</dd>
 		</div>
-	</div>
-</Card>
+	</dl>
+</Panel>

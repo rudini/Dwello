@@ -54,6 +54,17 @@ describe('Leerer Zustand', () => {
 		expect(empty.querySelector('h2')!.textContent).toBe('Noch keine Mieter');
 		expect(empty.querySelector('a')!.getAttribute('href')).toBe('/tenants/new');
 	});
+
+	it('gibt dem nächsten Schritt eine Test-ID', () => {
+		show(EmptyState, {
+			title: 'Noch keine Wohnungen',
+			text: 'Erfassen Sie die erste Wohnung.',
+			actionLabel: 'Wohnung erfassen',
+			actionHref: '/apartments/new',
+			actionTestid: 'apartment-first-create-button'
+		});
+		expect(byTestId('apartment-first-create-button')!.getAttribute('href')).toBe('/apartments/new');
+	});
 });
 
 describe('Speicherstatus', () => {

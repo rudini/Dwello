@@ -1,9 +1,8 @@
 <script lang="ts">
-	import Card from './Card.svelte';
-	import StatusBadge from './StatusBadge.svelte';
-	import Button from './Button.svelte';
-	import Icon from './Icon.svelte';
 	import { formatDate } from '$lib/utils/format';
+	import Button from '$lib/ui/Button.svelte';
+	import Icon from '$lib/ui/Icon.svelte';
+	import Panel from '$lib/ui/Panel.svelte';
 
 	interface CurrentContract {
 		tenantId: string;
@@ -12,38 +11,30 @@
 		startDate: string;
 	}
 
+	// Who lives in the apartment now, and how to reach them
 	let { contract }: { contract: CurrentContract } = $props();
 </script>
 
-<Card>
-	<div class="flex justify-between items-start mb-4">
-		<h3 class="text-lg font-bold text-text-dark">Aktueller Mieter</h3>
-		<StatusBadge status="AKTIV" variant="success" />
-	</div>
-
-	<div class="mb-6">
-		<p class="text-base font-bold text-text-dark" data-testid="current-tenant-name">
+<Panel title="Aktueller Mieter">
+	<div class="flex flex-col gap-2">
+		<p class="text-lg font-semibold text-ink" data-testid="current-tenant-name">
 			{contract.tenantName}
 		</p>
-		<p class="text-xs text-text-secondary">Vertrag seit: {formatDate(contract.startDate)}</p>
+		<p class="text-ink-muted">Mietvertrag seit {formatDate(contract.startDate)}</p>
 		{#if contract.tenantEmail}
-			<p class="flex items-center gap-2 mt-3">
-				<Icon name="email" size={18} class="text-text-secondary" />
+			<p class="flex items-center gap-2">
+				<span class="text-ink-muted"><Icon name="mail" /></span>
 				<a
 					href="mailto:{contract.tenantEmail}"
-					class="text-sm text-primary hover:underline"
+					class="break-all text-accent underline underline-offset-4 hover:text-accent-strong"
 					data-testid="tenant-email-link">{contract.tenantEmail}</a
 				>
 			</p>
 		{/if}
 	</div>
-
-	<Button
-		variant="secondary"
-		class="w-full"
-		href="/tenants/{contract.tenantId}"
-		testid="current-tenant-profile"
-	>
-		Mieterprofil ansehen
-	</Button>
-</Card>
+	<div>
+		<Button href="/tenants/{contract.tenantId}" icon="user" testid="current-tenant-profile"
+			>Mieter {contract.tenantName} öffnen</Button
+		>
+	</div>
+</Panel>
