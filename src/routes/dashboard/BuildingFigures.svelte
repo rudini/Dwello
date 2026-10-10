@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Panel from '$lib/ui/Panel.svelte';
-	import { formatCurrency } from '$lib/utils/format';
+	import { formatCurrency, formatDate } from '$lib/utils/format';
 	import type { DashboardData } from './+page.server';
 
 	// Counts that lead to the filtered lists, and the rented share per building
@@ -44,6 +44,12 @@
 			testid: 'stat-reserved'
 		}
 	]);
+	// The relet apartments as the building cards count them, by the start of their future contract
+	function reletParts(starts: string[] = []) {
+		const counts = new Map<string, number>();
+		for (const start of starts) counts.set(start, (counts.get(start) ?? 0) + 1);
+		return [...counts].map(([start, count]) => `, ${count} ab ${formatDate(start)}`).join('');
+	}
 	const statementFigures = [
 		{ status: 'draft', label: 'Entwurf' },
 		{ status: 'sent', label: 'Versendet' },
@@ -119,7 +125,8 @@
 						<span class="tabular-nums text-ink-muted"
 							><span data-testid="occupancy-count"
 								>{building.occupiedApartments}/{building.totalApartments}</span
-							> vermietet</span
+							>
+							vermietet{reletParts(building.reletStarts)}</span
 						>
 						<span
 							class="w-16 text-right font-semibold tabular-nums text-ink"

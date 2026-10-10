@@ -32,6 +32,7 @@ export interface DashboardData {
 		totalApartments: number;
 		occupiedApartments: number;
 		occupancyRate: number;
+		reletStarts?: string[]; // Vertragsbeginn of each relet apartment, added here
 	}[];
 }
 
@@ -82,14 +83,24 @@ export const load = async ({
 }: {
 	fetch: typeof globalThis.fetch;
 }): Promise<OverviewData> => {
-	const [figures, overdue, sent, letters, contracts, period] = await Promise.all([
+	const [figures, overdue, sent, letters, contracts, period, apartments] = await Promise.all([
 		fetchRecord(fetch, `${BACKEND_URL}/api/v1/dashboard`, 'Übersicht') as Promise<DashboardData>,
 		list(fetch, 'statements?status=overdue&limit=100', 'data'),
 		list(fetch, 'statements?status=sent&limit=100', 'data'),
 		list(fetch, 'documents?status=to_send', 'data'),
 		list(fetch, 'contracts?status=active&limit=100', 'contracts'),
-		lastPeriod(fetch).catch(() => null)
+		lastPeriod(fetch).catch(() => null),
+		list(fetch, 'apartments?limit=1000', 'apartments')
 	]);
+	const reletStarts = (buildingId: string) =>
+		apartments
+			.filter((a) => a.buildingId === buildingId && a.status === 'relet')
+			.map((a) => String(a.nextContractStart))
+			.sort();
+	figures.buildingOccupancy = figures.buildingOccupancy.map((b) => ({
+		...b,
+		reletStarts: reletStarts(b.buildingId)
+	}));
 	const input = {
 		today: new Date().toLocaleDateString('sv-SE'), // local YYYY-MM-DD
 		portfolio: figures.portfolio,

@@ -124,6 +124,18 @@ describe('Übersicht', () => {
 		expect(row).toMatch(/data-testid="occupancy-count"[^>]*>3\/4</);
 	});
 
+	// as the building cards count them, with the start of their future contracts
+	it('nennt die wiedervermieteten Wohnungen mit ihrem Vertragsbeginn', () => {
+		const building = {
+			...data.buildingOccupancy[0],
+			reletStarts: ['2026-11-01', '2026-11-01', '2026-12-01']
+		};
+		const row = page({ buildingOccupancy: [building] }).match(
+			/data-testid="occupancy-row"[\s\S]*?<\/li>/
+		)![0];
+		expect(row.replace(/<[^>]*>/g, '')).toContain('3/4 vermietet, 2 ab 1.11.2026, 1 ab 1.12.2026');
+	});
+
 	it('bietet die häufigen Arbeiten direkt an', () => {
 		const body = page();
 		for (const href of [
