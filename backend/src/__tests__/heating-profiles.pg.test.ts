@@ -33,6 +33,13 @@ describe('Monatsanteile der vordefinierten Heizprofile', () => {
 		expect(shares['Heating Mountain']).toEqual([14, 11.5, 11.5, 9, 7, 4.5, 1, 4, 5.5, 8.5, 10.5, 13]);
 		expect(shares['Heating Tessin']).toEqual([21.5, 17, 15.5, 5, 0, 0, 0, 0, 0, 6, 15, 20]);
 	});
+
+	// Warmwasser wird nach Tagen verteilt; ein Profil «Nur Warmwasser» verteilte als Heizprofil die Heizkosten falsch
+	it('bieten kein Profil «Nur Warmwasser» an', async () => {
+		const result = await db.execute(sql`SELECT name FROM heating_profiles WHERE type = 'predefined' ORDER BY name`);
+
+		expect(result.rows.map((row) => row.name)).toEqual(['Heating + Hot Water', 'Heating Mittelland', 'Heating Mountain', 'Heating Tessin']);
+	});
 });
 
 describe('Vordefinierter Heizschlüssel 70/30', () => {

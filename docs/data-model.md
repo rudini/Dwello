@@ -366,11 +366,14 @@ through the Verwaltungspauschale, not through invoices in Verwaltung.
 
 | name_de | Jan | Feb | Mar | Apr | May | Jun | Jul | Aug | Sep | Oct | Nov | Dec |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Heizung + Warmwasser | 14 | 12 | 10 | 6 | 3 | 2 | 2 | 2 | 4 | 8 | 12 | 25 |
-| Heizung Mittelland | 28 | 14 | 11 | 5 | 0 | 0 | 0 | 0 | 2 | 8 | 14 | 18 |
-| Heizung Bergregion | 16 | 14 | 12 | 8 | 4 | 1 | 0 | 1 | 4 | 10 | 14 | 16 |
-| Heizung Tessin | 30 | 16 | 12 | 4 | 0 | 0 | 0 | 0 | 0 | 6 | 14 | 18 |
-| Nur Warmwasser | 8.5 | 8.5 | 8.5 | 8 | 8.5 | 8 | 8.5 | 8.5 | 8 | 8.5 | 8 | 8.5 |
+| Heizung + Warmwasser | 13.6 | 12.1 | 11.5 | 9.3 | 5.6 | 3.7 | 3.7 | 3.6 | 3.7 | 9.5 | 10.7 | 13 |
+| Heizung Mittelland | 17.5 | 14.5 | 13.5 | 9.5 | 3.5 | 0 | 0 | 0 | 1 | 10 | 13.5 | 17 |
+| Heizung Bergregion | 14 | 11.5 | 11.5 | 9 | 7 | 4.5 | 1 | 4 | 5.5 | 8.5 | 10.5 | 13 |
+| Heizung Tessin | 21.5 | 17 | 15.5 | 5 | 0 | 0 | 0 | 0 | 0 | 6 | 15 | 20 |
+
+Values as corrected by migration 0003 (Swiss table «Mieterwechsel: So werden die Heizkosten verteilt»). «Nur Warmwasser»
+was removed by migration 0010: separate Warmwasser is shared by days (0009), and as the heating profile of a run it
+would have spread the heating costs evenly over the year.
 
 Demo data (`backend/demo/`, `bun run db:demo`) is never part of the migrations.
 
@@ -389,6 +392,7 @@ backend/migrations/
   0007_leistungszeitraum.sql         -- invoices.service_period_start/end
   0008_tankbestand.sql               -- fuel_stocks
   0009_tankbestand_kategorie.sql     -- fuel_stocks.category_id; Hot Water shared by days
+  0010_ohne_nur_warmwasser.sql       -- predefined profile «Nur Warmwasser» removed
 ```
 
 `src/db/migrate.ts` applies the `.sql` files in file order, each in its own transaction, and records them in

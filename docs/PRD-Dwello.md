@@ -472,7 +472,7 @@ Five flat profiles, seeded by `backend/migrations/0002_stammdaten.sql`; each dis
 2. **Heizung Mittelland** (Heating Only, Swiss Plateau): for Bern, Zürich, Basel, etc.
 3. **Heizung Bergregion** (Heating Only, Mountain Region): for Alpine and pre-Alpine regions
 4. **Heizung Tessin** (Heating Only, Southern Switzerland): for Ticino and southern regions
-5. **Nur Warmwasser** (Hot Water Only): nearly even distribution across the year
+5. ~~**Nur Warmwasser** (Hot Water Only)~~: removed (migration 0010); separate hot water costs are shared by days
 
 **Manual Configuration:**
 - Option to input custom monthly percentages manually
@@ -1065,7 +1065,6 @@ BALANCE (refund): CHF 30
   - "Heizung Mittelland"
   - "Heizung Bergregion"
   - "Heizung Tessin"
-  - "Nur Warmwasser"
 - Section 2: Monthly percentages table
   - Months: Jan, Feb, Mar, ..., Dec
   - Percentage inputs (read-only if predefined profile selected)

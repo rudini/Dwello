@@ -34,7 +34,7 @@ Bestätigt behoben aus Runde 2: alle Findings kritisch/hoch; offen blieben einze
 | MR3-N2 | niedrig | Neue Nebenkosten: Frist, Nettomiete | Text ergänzt (Kündigungstermin, Senkung der Nettomiete) |
 | MR3-N6 | niedrig | Bewertung, wenn mehr im Tank als die letzte Lieferung | Hilfetext ergänzt; Liter und Preis im PDF: Schritt D2 |
 | MR3-N7 | niedrig | «fehlt» bei zwei Daten | «fehlen» |
-| MR3-N5 | niedrig | Profil «Nur Warmwasser» wirkt nicht mehr | offener Punkt (Glossar-Vorschlag) |
+| MR3-N5 | niedrig | Profil «Nur Warmwasser» wirkt nicht mehr | Profil entfernt (Migration 0010, Entscheid nach Recherche); Glossar-Abweichung als Vorschlag in `offene-punkte.md` |
 | MR3-N7 (PDF Belegeinsicht) | niedrig | Kein Hinweis auf Belegeinsicht im PDF | Schritt D2 |
 | IV3-6 | niedrig | Stand in der Zukunft | offen, begründet (`offene-punkte.md`) |
 | IV3-9 | niedrig | Negativer Verbrauch über die ganze Kategorie | offen, begründet |

@@ -4456,6 +4456,9 @@ critical/high/medium is open; reviews in `docs/reviews/`.
   (meter readings, Akonto, new costs, tank valuation). Tests: `fuel-stock.pg.test.ts`, `invoice-completeness*.test.ts`,
   `statement-pdf.pg.test.ts`, `statement-wizard*.test.ts`, `building-actions.test.ts`, `buildings-pages.dom.test.ts`,
   `invoices.test.ts`, `invoice-pages.dom.test.ts`.
+- [x] **Heating profile «Nur Warmwasser» removed** (product owner's decision after research): migration
+  `0010_ohne_nur_warmwasser.sql` (a default in the configuration is cleared, statements keep their amounts);
+  `heating-profiles.pg.test.ts`; data model table updated to the values of 0003.
 
 
 ---
