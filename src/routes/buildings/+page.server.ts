@@ -17,13 +17,15 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<BuildingsLis
 		if (search) params.set('search', search);
 		if (city) params.set('city', city);
 
-		const [response, apartmentsRes] = await Promise.all([
+		const [response, apartmentsData] = await Promise.all([
 			fetch(`${BACKEND_URL}/api/v1/buildings?${params}`),
+			// only for the counts: failing, it leaves them at 0 instead of emptying the list
 			fetch(`${BACKEND_URL}/api/v1/apartments?limit=1000`)
+				.then((res) => (res.ok ? res.json() : { apartments: [] }))
+				.catch(() => ({ apartments: [] }))
 		]);
 		const data = await response.json();
-		const apartments: { buildingId: string; status: string }[] =
-			(await apartmentsRes.json()).apartments ?? [];
+		const apartments: { buildingId: string; status: string }[] = apartmentsData.apartments ?? [];
 		const inBuilding = (id: unknown) => apartments.filter((a) => a.buildingId === id);
 
 		const buildings = (data.buildings || data.data || []).map((b: Record<string, unknown>) => ({

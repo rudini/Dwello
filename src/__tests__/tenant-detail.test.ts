@@ -168,4 +168,22 @@ describe('Mieterliste', () => {
 		expect(urls).toContain('http://localhost:3001/api/v1/contracts?status=future&limit=100');
 		expect(data.tenants[0].nextContractStart).toBe('2099-11-01');
 	});
+
+	// The contract start is an addition: without it the tenants still show
+	it('zeigt die Mieter auch, wenn die künftigen Verträge nicht geladen werden können', async () => {
+		const { load: loadList } = await import('../routes/tenants/+page.server');
+		const fetch = (async (url: string) =>
+			url.includes('/contracts')
+				? new Response('Internal Server Error', { status: 500 })
+				: Response.json({
+						tenants: [tenantList.tenants[0]],
+						total: 1
+					})) as unknown as typeof globalThis.fetch;
+
+		const data = (await loadList({ url: new URL('http://localhost/tenants'), fetch } as never)) as {
+			tenants: { nextContractStart: string | null }[];
+		};
+
+		expect(data.tenants).toMatchObject([{ nextContractStart: null }]);
+	});
 });
