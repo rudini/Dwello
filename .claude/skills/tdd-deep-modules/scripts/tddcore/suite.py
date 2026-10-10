@@ -23,7 +23,7 @@ class Run:
     outcome: str  # "pass", "fail" (assertion failures only) or "error" (anything else)
     summary: str
     failed: int  # number of failing tests
-    ran: int  # tests run; a file or config that failed to load counts as one, so it is never dropped
+    ran: int  # tests run, not skipped; a file or config that failed to load counts as one
 
 
 def run(root):
@@ -65,8 +65,10 @@ def _run_unittest(root):
     summary = verdicts[-1] if verdicts else f"exit code {done.returncode}, no unittest summary"
     failed = re.search(r"failures=(\d+)", summary)
     ran = re.search(r"^Ran (\d+) tests? in", done.stderr, re.MULTILINE)
+    skipped = re.search(r"skipped=(\d+)", summary)
     return Run(done.returncode, _unittest_outcome(done.returncode, summary), summary,
-               int(failed[1]) if failed else 0, int(ran[1]) if ran else 0)
+               int(failed[1]) if failed else 0,
+               (int(ran[1]) if ran else 0) - (int(skipped[1]) if skipped else 0))
 
 
 def _unittest_outcome(exit_code, summary):
@@ -107,8 +109,9 @@ def _run_vitest(root):
         data = json.loads(report.read_text())
     summary = f"{data['numFailedTests']} of {data['numTotalTests']} tests failed"
     load_errors = sum(1 for f in data["testResults"] if f["message"])
+    ran = data["numTotalTests"] - data["numPendingTests"] - data["numTodoTests"]
     return Run(done.returncode, _vitest_outcome(done.returncode, data), summary,
-               data["numFailedTests"], data["numTotalTests"] + load_errors)
+               data["numFailedTests"], ran + load_errors)
 
 
 def _vitest_outcome(exit_code, data):
@@ -139,7 +142,8 @@ def _run_pytest(root):
     lines = done.stdout.strip().splitlines()
     summary = lines[-1] if lines else f"exit code {done.returncode}, no output"
     failed = sum(1 for case in cases for _ in case.iter("failure"))
-    return Run(done.returncode, _pytest_outcome(done.returncode, cases), summary, failed, len(cases))
+    ran = sum(1 for case in cases if case.find("skipped") is None)
+    return Run(done.returncode, _pytest_outcome(done.returncode, cases), summary, failed, ran)
 
 
 def _pytest_outcome(exit_code, cases):
