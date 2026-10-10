@@ -42,6 +42,9 @@ previous = last_phase()
 if previous not in FOLLOWS[phase]:
     sys.exit(f"tdd-step: refused: {phase} cannot follow {previous}")
 message = sys.argv[2] if len(sys.argv) > 2 else phase
+if not any(is_code(f) for f in git("ls-files", "-co", "--exclude-standard").splitlines()):
+    print("tdd-step: no supported test framework detected (looked for Python unittest)", file=sys.stderr)
+    sys.exit(2)
 run = subprocess.run([sys.executable, "-m", "unittest", "discover"], capture_output=True, text=True)
 summary = run.stderr.strip().splitlines()[-1]
 assertion_failure = summary.startswith("FAILED (failures=") and "errors=" not in summary
