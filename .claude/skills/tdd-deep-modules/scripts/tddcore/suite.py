@@ -23,6 +23,8 @@ def run(root):
     """Detect the test framework under `root`, run its whole suite and classify the result."""
     if _uses_vitest(root):
         return _run_vitest(root)
+    if _uses_pytest(root):
+        return _run_pytest(root)
     if not _has_python(root):
         raise NoFramework("no supported test framework detected (looked for Python unittest)")
     env = {**os.environ, "PYTHONDONTWRITEBYTECODE": "1"}
@@ -77,3 +79,20 @@ def _vitest_outcome(exit_code, data):
     if messages and not load_errors and all(m.startswith("AssertionError") for m in messages):
         return "fail"
     return "error"
+
+
+def _uses_pytest(root):
+    base = Path(root)
+    pyproject = base / "pyproject.toml"
+    return ((base / "pytest.ini").exists() or (base / "conftest.py").exists()
+            or (pyproject.exists() and "[tool.pytest" in pyproject.read_text()))
+
+
+def _run_pytest(root):
+    env = {**os.environ, "PYTHONDONTWRITEBYTECODE": "1"}
+    done = subprocess.run([sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider"],
+                          cwd=root, env=env, capture_output=True, text=True)
+    lines = done.stdout.strip().splitlines()
+    summary = lines[-1] if lines else f"exit code {done.returncode}, no output"
+    outcome = {0: "pass", 1: "fail"}.get(done.returncode, "error")
+    return Run(done.returncode, outcome, summary)
