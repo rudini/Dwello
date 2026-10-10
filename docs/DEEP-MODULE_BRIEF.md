@@ -299,3 +299,62 @@ Append one entry per session: date, phase, result of each exit gate (done / not 
 - Agent mode shows 3 findings.
 - A threshold or config change takes effect when merged together with a regenerated baseline.
 - CI must run `svelte-kit sync` before `deepcheck:ci`, otherwise `$lib` imports do not resolve (deepcheck warns).
+
+### 2026-10-10, Phase 4 (validation and calibration): done. Verdict: ready to gate on changed code (narrow, conservative gate)
+
+The full report is `docs/deepcheck-validation.md`.
+
+**Exit gates**
+- X4.1 done, with caveats. Sample: the top 25, 15 drawn from the middle (Mulberry32, seed 20261010) and the 15 lowest eligible modules; 3 more were added after calibration. 58 labels in total: 14 shallow, 31 deep, 13 flat by design.
+  - Three blind labeller agents (no scores, no tool docs) labelled them in shuffled order, each with a reason in Ousterhout's terms.
+  - The OSS judgements are mine and not blind.
+  - The labels are inconsistent in one place: error subclasses are shallow in the repo labels but flat in my OSS labels.
+- X4.2 done. Precision@25 went from **10/25 to 12/25**; AUC from 0.794 (55 labels) / 0.783 (58 labels) to **0.827**. The numbers were reproduced by the reviewer. False positives grouped by cause:
+  - Dense code counted as few statements: fixed with the `operations` metric (test first).
+  - Type-heavy files: a mostly-types rule (test first); `mail/types.ts` remains a known false positive.
+  - Declarative data and utility collections: experiments did not help, so they are documented as known false positives.
+- X4.3 done.
+  - Reference fixtures order correctly (`reference.test.ts`): Unix I/O 16 < text area 36 < Java streams 71 / TextDocument 74.
+  - OSS projects (ky 3541888, zustand d7a5583, immer 8848a5b; temp clones): none flagged; the deep cores rank last.
+  - Two OSS causes were fixed test-first: re-exports no longer count in interfaceSize, and mostly-type modules count as type-only.
+- X4.4 done.
+  - Dead-internal padding lowered a score from 74 to 46. Mitigated: unused declarations are dropped, resolved by symbol, also handling destructuring, export lists and shorthand members.
+  - Splitting raises the parts' scores, but the parts are not eligible, so splitting evades the gate (documented).
+  - Inlining pass-throughs lowers the score.
+  - Live padding is not detectable (documented).
+- X4.5 done. Depth and complexity carry the signal (each alone AUC ~0.81).
+  - Leaky was **down-weighted from 10 to 5** (noisy) and removed from the structural flag condition.
+  - passThrough, classitis and unusedExports are sparse and are kept for explanations and textbook cases.
+  - Coupling is weak and kept at 5.
+- X4.6 done. **failThreshold 65, tolerance 5.**
+  - Scores: repo max 60, OSS max 60, labelled deep max 39, textbook pass-through designs 71–75.
+  - Benign one-edit score deltas: p90 4, max 6–7.
+  - **0 modules are flagged** of 71 eligible (124 analyzed); the baseline was regenerated with 0 entries.
+  - Flagging also needs a structural sign (pass-through or classitis), because depth and complexity saturate at 60 for flat modules.
+- X4.7 done. `docs/deepcheck-validation.md` has the labelled table, numbers, limits and verdict.
+- XC.1 done. Each fix had a regression test seen failing first:
+  - `calibration.test.ts`: operations, mostly-types, re-exports, the flat constants and copy false positives, facades through export lists and shorthand.
+  - `gaming.test.ts`: padding, destructuring, shadowing.
+  - `realistic.test.ts`: a characterization test of the final gate.
+  
+  The calibration values themselves (targets, weights, threshold) come from the experiments recorded in the report, not from unit tests. Tests that asserted old default numbers were updated, which is logged: the threshold 70 to 65, and the G2 fixture now uses `failThreshold` 35 because the absolute scores changed.
+- XC.2 done. The final review ran two rounds.
+  - Round 1:
+    - A flat module of constants scored exactly 65 and was flagged.
+    - Dead-code detection dropped destructured code and was fooled by shadowing.
+    - The report overclaimed.
+    - Its verdict call was "usable as scan only" until these were fixed.
+  - Round 2 (last allowed):
+    - My round-1 fix hid facades exported through `export {}` or shorthand objects.
+    - Leaky exports alone flagged a copy module.
+    - Same verdict call, "defensible once fixed".
+  - All of these are fixed with tests. Because the brief caps the review at two rounds, the round-2 fixes were verified by me (regression tests, the realistic-module check and a re-run of X2.2), not by a third independent review.
+- XC.3 done: 8 commits in Phase 4. XC.4 done: only tool, tests and docs changed.
+
+**Re-verification after the scoring changed:**
+- The whole deepcheck suite passes (147 tests).
+- X2.2 was re-run in a scratch worktree: the tenant facade scores 80, `audit` and `ci` exit 1, and both exit 0 after removal.
+- Repo checks: lint, check and 1447 frontend tests pass; the backend type-check passes.
+- `audit` now takes **4.4–4.5 s** with Fallow and **3.4 s** without (the symbol-based dead-code check added ~1 s).
+
+**Consequence for Phase 3:** do it completely. The after-step mechanism mirrors Fallow's commit/push `PreToolUse` gate.
