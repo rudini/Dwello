@@ -1,257 +1,81 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
+	import { listPageUrl } from '$lib/list-url';
 	import type { ContractsListData } from '$lib/types';
-	import { listSearchUrl } from '$lib/list-url';
-	import Button from '$lib/components/Button.svelte';
-	import Icon from '$lib/components/Icon.svelte';
-	import Card from '$lib/components/Card.svelte';
-	import SearchField from '$lib/components/SearchField.svelte';
-	import FilterSelect from '$lib/components/FilterSelect.svelte';
-	import FilterActions from '$lib/components/FilterActions.svelte';
-	import ListPagination from '$lib/components/ListPagination.svelte';
-	import StatusBadge from '$lib/components/StatusBadge.svelte';
+	import Button from '$lib/ui/Button.svelte';
+	import EmptyState from '$lib/ui/EmptyState.svelte';
+	import PageHeader from '$lib/ui/PageHeader.svelte';
+	import Pager from '$lib/ui/Pager.svelte';
+	import ContractFilters from './ContractFilters.svelte';
+	import ContractRow from './ContractRow.svelte';
 
 	let { data }: { data: ContractsListData } = $props();
 
-	let searchTerm = $state($page.url.searchParams.get('search') || '');
-	let buildingFilter = $state($page.url.searchParams.get('building') || '');
-	let statusFilter = $state($page.url.searchParams.get('status') || '');
-
-	const buildingOptions = $derived(
-		data.buildings.map((b) => ({ value: b.id, label: b.name || b.address }))
-	);
-	const statusOptions = [
-		{ value: 'active', label: 'Aktive Verträge' },
-		{ value: 'ended', label: 'Beendete Verträge' }
-	];
-
-	const filtered = $derived(!!(searchTerm || buildingFilter || statusFilter));
-
-	function handleSearch(event: SubmitEvent) {
-		event.preventDefault();
-		goto(
-			listSearchUrl('/contracts', {
-				search: searchTerm,
-				building: buildingFilter,
-				status: statusFilter
-			})
-		);
-	}
-
-	function clearFilters() {
-		searchTerm = '';
-		buildingFilter = '';
-		statusFilter = '';
-		goto('/contracts');
-	}
-
-	function formatCurrency(amount: number): string {
-		return new Intl.NumberFormat('de-CH', {
-			style: 'currency',
-			currency: 'CHF',
-			minimumFractionDigits: 0,
-			maximumFractionDigits: 0
-		}).format(amount);
-	}
-
-	function formatDate(dateStr: string | Date): string {
-		const date = new Date(dateStr);
-		return date.toLocaleDateString('de-CH', {
-			day: '2-digit',
-			month: '2-digit',
-			year: 'numeric'
-		});
-	}
-
-	function getInitials(firstName: string, lastName: string): string {
-		return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
-	}
+	const filters = $derived({
+		search: $page.url.searchParams.get('search') ?? '',
+		building: $page.url.searchParams.get('building') ?? '',
+		status: $page.url.searchParams.get('status') ?? ''
+	});
+	const filtered = $derived(Object.values(filters).some(Boolean));
 </script>
 
 <svelte:head>
 	<title>Mietverträge - Dwello</title>
 </svelte:head>
 
-<div class="space-y-6" data-testid="contracts-page">
-	<!-- Header -->
-	<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-		<div>
-			<h1 class="text-2xl font-bold text-gray-900">Mietverträge</h1>
-			<p class="text-ink-muted mt-1">{data.total} Verträge insgesamt</p>
-		</div>
-		<Button href="/contracts/new" variant="primary" testid="contract-new-button">
-			<Icon name="add" size={20} />
-			Neuer Vertrag
-		</Button>
-	</div>
+<div class="flex flex-col gap-8" data-testid="contracts-page">
+	<PageHeader
+		title="Mietverträge"
+		purpose="Wer mietet welche Wohnung, seit wann und zu welcher Miete."
+	>
+		{#snippet action()}
+			<Button href="/contracts/new" variant="primary" icon="contract" testid="contract-new-button"
+				>Mietvertrag erfassen</Button
+			>
+		{/snippet}
+	</PageHeader>
 
-	<!-- Search and Filters -->
-	<Card>
-		<form onsubmit={handleSearch} class="flex flex-col lg:flex-row lg:items-center gap-4">
-			<div class="flex-1 flex flex-col sm:flex-row gap-4">
-				<SearchField
-					bind:value={searchTerm}
-					placeholder="Mieter, Wohnung oder Gebäude..."
-					testid="contract-search-input"
-				/>
-				<FilterSelect
-					id="building"
-					label="Gebäude"
-					allLabel="Alle Gebäude"
-					options={buildingOptions}
-					value={buildingFilter}
-					testid="contract-building-filter"
-					onchange={(value) => (buildingFilter = value)}
-				/>
-				<FilterSelect
-					id="status"
-					label="Status"
-					allLabel="Alle Verträge"
-					options={statusOptions}
-					value={statusFilter}
-					testid="contract-status-filter"
-					onchange={(value) => (statusFilter = value)}
-				/>
-			</div>
-			<FilterActions {filtered} onclear={clearFilters} testid="contract-search-submit" />
-		</form>
-	</Card>
+	<ContractFilters {filters} buildings={data.buildings} />
 
-	<!-- Contracts List -->
 	{#if data.contracts.length === 0}
-		<Card>
-			<div class="text-center py-12" data-testid="contracts-empty">
-				<Icon name="description" size={48} class="mx-auto text-gray-300 mb-4" />
-				<h3 class="text-lg font-medium text-gray-900 mb-2">Keine Verträge gefunden</h3>
-				<p class="text-ink-muted mb-6">
-					{#if filtered}
-						Versuchen Sie es mit anderen Suchbegriffen oder Filtern.
-					{:else}
-						Erstellen Sie Ihren ersten Mietvertrag, um loszulegen.
-					{/if}
-				</p>
-				{#if !filtered}
-					<Button href="/contracts/new" variant="primary">
-						<Icon name="add" size={20} />
-						Ersten Vertrag erstellen
-					</Button>
-				{/if}
-			</div>
-		</Card>
+		<div class="rounded-panel border border-line bg-surface">
+			{#if filtered}
+				<EmptyState
+					title="Keine Mietverträge gefunden"
+					text="Kein Mietvertrag passt zur Suche und zu den Filtern."
+					illustration="no-results"
+					actionLabel="Filter zurücksetzen"
+					actionHref="/contracts"
+					testid="contracts-empty"
+				/>
+			{:else}
+				<EmptyState
+					title="Noch keine Mietverträge"
+					text="Ein Mietvertrag verbindet einen Mieter mit einer Wohnung, ab einem Vertragsbeginn und zu einer Miete."
+					illustration="contract"
+					actionLabel="Mietvertrag erfassen"
+					actionHref="/contracts/new"
+					testid="contracts-empty"
+				/>
+			{/if}
+		</div>
 	{:else}
-		<Card>
-			<!-- A scrollable region must be reachable by keyboard (WCAG 2.1.1) -->
-			<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
-			<div class="overflow-x-auto" role="region" aria-label="Mietverträge" tabindex="0">
-				<table class="w-full">
-					<thead>
-						<tr class="border-b border-gray-200">
-							<th
-								class="text-left text-xs font-semibold text-ink-muted uppercase tracking-wider py-3 px-4"
-							>
-								Mieter
-							</th>
-							<th
-								class="text-left text-xs font-semibold text-ink-muted uppercase tracking-wider py-3 px-4"
-							>
-								Wohnung
-							</th>
-							<th
-								class="text-left text-xs font-semibold text-ink-muted uppercase tracking-wider py-3 px-4"
-							>
-								Zeitraum
-							</th>
-							<th
-								class="text-right text-xs font-semibold text-ink-muted uppercase tracking-wider py-3 px-4"
-							>
-								Mietzins
-							</th>
-							<th
-								class="text-center text-xs font-semibold text-ink-muted uppercase tracking-wider py-3 px-4"
-							>
-								Status
-							</th>
-							<th class="py-3 px-4"></th>
-						</tr>
-					</thead>
-					<tbody class="divide-y divide-gray-100">
-						{#each data.contracts as contract}
-							<tr
-								class="hover:bg-gray-50 transition-colors"
-								data-testid="contract-row-{contract.id}"
-							>
-								<!-- Tenant -->
-								<td class="py-4 px-4">
-									<div class="flex items-center gap-3">
-										<div
-											class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold text-sm flex-shrink-0"
-										>
-											{getInitials(contract.tenantFirstName, contract.tenantLastName)}
-										</div>
-										<div>
-											<p class="font-medium text-gray-900">{contract.tenantName}</p>
-										</div>
-									</div>
-								</td>
-								<!-- Apartment -->
-								<td class="py-4 px-4">
-									<p class="font-medium text-gray-900">Wohnung {contract.apartmentNumber}</p>
-									<p class="text-sm text-ink-muted">{contract.buildingName}</p>
-								</td>
-								<!-- Period -->
-								<td class="py-4 px-4 text-gray-600">
-									{formatDate(contract.startDate)}
-									{#if contract.endDate}
-										- {formatDate(contract.endDate)}
-									{:else}
-										- heute
-									{/if}
-								</td>
-								<!-- Rent -->
-								<td class="py-4 px-4 text-right">
-									<span class="font-semibold text-gray-900">
-										{formatCurrency(contract.totalRent)}
-									</span>
-									<span class="text-sm text-ink-muted">/Mt.</span>
-								</td>
-								<!-- Status -->
-								<td class="py-4 px-4 text-center">
-									<StatusBadge
-										status={!contract.endDate ? 'AKTIV' : 'Beendet'}
-										variant={!contract.endDate ? 'success' : 'gray'}
-									/>
-								</td>
-								<!-- Actions -->
-								<td class="py-4 px-4 text-right">
-									<div class="flex items-center justify-end gap-2">
-										<Button
-											href="/contracts/{contract.id}"
-											variant="secondary"
-											size="sm"
-											ariaLabel="Ansehen"
-											testid="contract-view-button"
-										>
-											<Icon name="visibility" size={16} />
-										</Button>
-										<Button
-											href="/contracts/{contract.id}/edit"
-											variant="secondary"
-											size="sm"
-											ariaLabel="Bearbeiten"
-											testid="contract-edit-button"
-										>
-											<Icon name="edit" size={16} />
-										</Button>
-									</div>
-								</td>
-							</tr>
-						{/each}
-					</tbody>
-				</table>
-			</div>
-		</Card>
-
-		<ListPagination {data} />
+		<section aria-labelledby="contracts-count" class="flex flex-col gap-4">
+			<h2 id="contracts-count" class="text-xl font-bold text-ink">
+				{data.total}
+				{data.total === 1 ? 'Mietvertrag' : 'Mietverträge'}
+			</h2>
+			<ul class="flex flex-col divide-y divide-line rounded-panel border border-line bg-surface">
+				{#each data.contracts as contract (contract.id)}
+					<ContractRow {contract} />
+				{/each}
+			</ul>
+		</section>
+		<Pager
+			page={data.page}
+			pageSize={data.pageSize}
+			total={data.total}
+			href={(to) => listPageUrl($page.url, to)}
+		/>
 	{/if}
 </div>

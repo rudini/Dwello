@@ -68,7 +68,6 @@
 	"src/routes/config/heating-profiles/[id]/+page.svelte",
 	"src/routes/config/heating-profiles/[id]/edit/+page.svelte",
 	"src/routes/config/heating-profiles/new/+page.svelte",
-	"src/routes/contracts/+page.svelte",
 	"src/routes/contracts/ApartmentSelect.svelte",
 	"src/routes/contracts/ContractForm.svelte",
 	"src/routes/contracts/MoneyField.svelte",
