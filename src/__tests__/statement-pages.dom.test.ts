@@ -142,6 +142,12 @@ describe('Abrechnungsdetail', () => {
 		expect(byTestId('statement-send-confirm')!.textContent).toContain('Als versendet markieren');
 	});
 
+	it('sagt genau, welche Adresse für den Versand fehlt', () => {
+		detail({ tenantCorrespondenceChannel: 'email', tenantEmail: '' });
+		click('statement-send-button');
+		expect(byTestId('send-recipient')!.textContent).toContain('keine E-Mail-Adresse erfasst');
+	});
+
 	it('nennt beim Versand per Brief die Postadresse', () => {
 		detail({ tenantCorrespondenceChannel: 'letter', tenantAddress: 'Ahornweg 3, 8400 Winterthur' });
 		click('statement-send-button');

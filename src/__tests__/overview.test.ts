@@ -61,7 +61,7 @@ describe('Aufgaben der Übersicht', () => {
 		const tasks = overviewTasks(
 			input({
 				statementCounts: { draft: 1, sent: 0, paid: 0, overdue: 1 },
-				missingPeriod: { start: '2025-01-01', end: '2025-12-31' }
+				missingPeriod: { start: '2025-01-01', end: '2025-12-31', buildings: ['Seeblick'] }
 			})
 		);
 		expect(tasks.map((task) => task.id)).toEqual(['overdue', 'missing-period', 'drafts']);
@@ -70,6 +70,7 @@ describe('Aufgaben der Übersicht', () => {
 			href: '/statements/generate'
 		});
 		expect(tasks[1].text).toContain('1.1.2025 – 31.12.2025');
+		expect(tasks[1].text).toContain('Seeblick');
 	});
 
 	it('sagt, wie viele es sind, in der Einzahl und Mehrzahl', () => {

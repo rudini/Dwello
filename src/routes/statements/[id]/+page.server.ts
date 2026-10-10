@@ -17,10 +17,11 @@ async function tenantAddress(fetch: typeof globalThis.fetch, tenantId: string) {
 
 export const load: PageServerLoad = async ({ params, fetch }) => {
 	const statement = await loadStatement(fetch, params.id);
-	return {
-		statement: { ...statement, tenantAddress: await tenantAddress(fetch, statement.tenantId) },
-		reminders: await loadDocuments(fetch, `statementId=${params.id}`)
-	};
+	const [address, reminders] = await Promise.all([
+		tenantAddress(fetch, statement.tenantId),
+		loadDocuments(fetch, `statementId=${params.id}`)
+	]);
+	return { statement: { ...statement, tenantAddress: address }, reminders };
 };
 
 type Fetch = typeof globalThis.fetch;

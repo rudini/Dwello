@@ -17,7 +17,7 @@ Brief: `docs/REDESIGN_BRIEF.md`. Resume rules: `docs/design/arbeitsregeln.md`.
 | 8 Remove old design system | open | | | |
 | 9 Final | open | | | |
 
-**Next step:** stage 6 – commit, CI, review, all personas, checkpoint summary.
+**Next step:** commit stage 6 review round 1, CI; follow-up review if needed; then stage 7.
 
 ## Log
 
@@ -111,3 +111,11 @@ Brief: `docs/REDESIGN_BRIEF.md`. Resume rules: `docs/design/arbeitsregeln.md`.
 - Finding: "Versenden" never sent anything – it only set the status "Versendet". It now opens a confirmation (`SendDialog`): "Dwello verschickt die Abrechnung nicht selbst", recipient with Korrespondenzweg and e-mail/postal address (address loaded from the tenant in the page loader), "PDF ansehen" in a new tab (the BFF creates the PDF if missing and shows it inline), then "Als versendet markieren".
 - Statement detail: action buttons, PDF button and history extracted into new-design components (`StatusActions`, `PdfAction`, `MetadataCard`); the rest of the page follows in stage 7.
 - Axe: statement-generate `every-wizard-step` (all five steps), `preview-empty`, `draft-restored`; statement-detail `send-dialog`; statement-sent-detail `action-error` – no `@wip` examples left.
+- Commit 15c0ec5, CI green incl. ui-screenshots (wizard step 1 checked). Review round 1 and all five personas (`reviews/6-review-1.md`): confirmation per preview, no run without contracts, preview kept after a failed generation, hints for partial periods and existing statements, overview names every building without statements, accessible confirmation error, busy states, toast after "Als versendet markieren".
+
+#### Checkpoint after stage 6 (summary)
+
+- Done: tokens, base components, icons, illustrations, shell, overview, both wizards (Mietvertrag, Abrechnungen) with drafts, plausibility checks and confirmations; axe over all listed screens and states with 0 violations; 6 review rounds, 15 persona runs.
+- Personas at the checkpoint: Helga and Sven complete the contract task; Marco completes the statement run on the phone; Anna is guided to the right next step; Dr. Weber still would not send a statement – his blockers are the statement detail and the PDF (English category names, empty Verteilschlüssel column, fee base, PDF content), stage 7 and backend.
+- Biggest risks left: the remaining 102 legacy files (stage 7/8), the statement detail page, data/content issues that are outside the UI (English master data names, PDF content).
+- Persona backlog for stage 7: statement detail (Verteilschlüssel per line, fee base, one name for the fee, "Mietstagen", refund wording), lists as cards/rows on phones with clickable rows, invoice form (date default, building preselected, back to the wizard), contract list ("AKTIV … – heute", Mietzins column), tenant form, help page names, English master data names (display decision), heating profile chart values for screen readers.

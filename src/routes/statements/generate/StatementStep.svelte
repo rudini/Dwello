@@ -63,8 +63,9 @@
 		{invoices}
 		buildings={data.buildings}
 		{periodLabel}
+		period={selection}
 		bind:confirmed
-		error={errors.confirm}
+		{errors}
 	/>
 {:else}
 	<GenerationStep count={previewRows.length} {createdCount} />

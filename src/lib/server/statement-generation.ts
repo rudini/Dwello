@@ -91,23 +91,29 @@ export async function generateStatements(fetch: Fetch, request: GenerationReques
 	return contracts.length;
 }
 
-/** Per building: the utility invoices dated in the period, which the statements distribute (plausibility check) */
+/** Per building: the utility invoices dated in the period and the statements it already has (plausibility check) */
 export async function invoicesInPeriod(
 	fetch: Fetch,
 	{ buildingIds, periodStart, periodEnd }: GenerationRequest
 ) {
+	const period = `periodStart=${periodStart}&periodEnd=${periodEnd}`;
 	return Promise.all(
 		buildingIds.map(async (buildingId) => {
-			const { invoices } = await call(
-				fetch,
-				`invoices?buildingId=${buildingId}&dateFrom=${periodStart}&dateTo=${periodEnd}&isValidUtilityCost=true&limit=1000`
-			);
+			const building = encodeURIComponent(buildingId);
+			const [{ invoices }, { total }] = await Promise.all([
+				call(
+					fetch,
+					`invoices?buildingId=${building}&dateFrom=${periodStart}&dateTo=${periodEnd}&isValidUtilityCost=true&limit=1000`
+				),
+				call(fetch, `statements?buildingId=${building}&${period}&limit=1`)
+			]);
 			const dates = (invoices as { invoiceDate: string }[]).map((i) => i.invoiceDate).sort();
 			return {
 				buildingId,
 				count: dates.length,
 				first: dates[0] ?? null,
-				last: dates.at(-1) ?? null
+				last: dates.at(-1) ?? null,
+				statements: Number(total)
 			};
 		})
 	);

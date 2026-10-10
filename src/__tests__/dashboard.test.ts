@@ -4,17 +4,23 @@ import { load } from '../routes/dashboard/+page.server';
 const API = 'http://localhost:3001/api/v1';
 const figures = {
 	portfolio: { totalBuildings: 1, totalApartments: 2, occupiedApartments: 1, reletApartments: 0 },
-	statements: { draft: 1, sent: 1, paid: 0, overdue: 1 }
+	statements: { draft: 1, sent: 1, paid: 0, overdue: 1 },
+	buildingOccupancy: [
+		{ buildingId: 'b1', buildingName: 'Seeblick', occupiedApartments: 1 },
+		{ buildingId: 'b2', buildingName: 'Lindenhof', occupiedApartments: 2 },
+		{ buildingId: 'b3', buildingName: 'Leerbau', occupiedApartments: 0 }
+	]
 };
+const both = [{ building: { id: 'b1' } }, { building: { id: 'b2' } }];
 
 // The backend as the overview reads it: counts, plus the lists that carry dates
-function backend(dashboardStatus = 200, statementsOfLastPeriod = 3) {
+function backend(dashboardStatus = 200, statementsOfLastPeriod: unknown[] = both) {
 	return (async (url: string) => {
 		const path = url.replace(API, '');
 		if (path === '/dashboard') return Response.json(figures, { status: dashboardStatus });
 		if (path === '/config') return Response.json({ data: { accounting_period: 'july-june' } });
-		if (path === '/statements?periodStart=2025-07-01&periodEnd=2026-06-30&limit=1')
-			return Response.json({ data: [], total: statementsOfLastPeriod });
+		if (path === '/statements?periodStart=2025-07-01&periodEnd=2026-06-30&limit=1000')
+			return Response.json({ data: statementsOfLastPeriod, total: statementsOfLastPeriod.length });
 		if (path.startsWith('/statements?status=overdue'))
 			return Response.json({
 				data: [
@@ -67,7 +73,7 @@ describe('Übersicht laden', () => {
 
 	it('erinnert an die abgelaufene Abrechnungsperiode, für die es noch keine Abrechnung gibt', async () => {
 		vi.useFakeTimers({ now: new Date('2026-10-10T08:00:00') });
-		const data = await load({ fetch: backend(200, 0) } as never);
+		const data = await load({ fetch: backend(200, []) } as never);
 
 		expect(data.tasks.map((task) => task.id)).toEqual([
 			'overdue',
@@ -76,6 +82,17 @@ describe('Übersicht laden', () => {
 			'drafts'
 		]);
 		expect(data.tasks[2].text).toContain('1.7.2025 – 30.6.2026');
+		expect(data.tasks[2].text).toContain('Seeblick, Lindenhof');
+	});
+
+	// A building without rented apartments gets no statement
+	it('nennt nur die vermieteten Gebäude, deren Abrechnungen noch fehlen', async () => {
+		vi.useFakeTimers({ now: new Date('2026-10-10T08:00:00') });
+		const data = await load({ fetch: backend(200, [{ building: { id: 'b1' } }]) } as never);
+		const task = data.tasks.find((t) => t.id === 'missing-period')!;
+		expect(task.text).toContain('Lindenhof');
+		expect(task.text).not.toContain('Seeblick');
+		expect(task.text).not.toContain('Leerbau');
 	});
 
 	it('zeigt die Kennzahlen auch, wenn eine Liste nicht erreichbar ist', async () => {

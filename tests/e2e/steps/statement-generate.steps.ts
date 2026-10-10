@@ -16,10 +16,12 @@ import {
 } from '../questions/statement-generate';
 import {
 	chooseBuilding,
+	confirmDespiteWarnings,
 	generateMore,
 	generateStatements,
 	goToGeneration,
 	openPreview,
+	recalculatePreview,
 	reopenStatementWizard,
 	tryNextWithoutConfirmation,
 	returnToStatementList,
@@ -147,6 +149,14 @@ When('der Liegenschaftsverwalter das Gebäude {string} für die Abrechnungen wä
 
 When('der Liegenschaftsverwalter die Seite zum Erstellen von Abrechnungen später wieder öffnet', async ({ verwalter }) => {
 	await verwalter.perform(reopenStatementWizard);
+});
+
+When('der Liegenschaftsverwalter bestätigt, dass die Abrechnungen trotzdem erstellt werden sollen', async ({ verwalter }) => {
+	await verwalter.perform(confirmDespiteWarnings);
+});
+
+When('der Liegenschaftsverwalter die Vorschau neu berechnen lässt', async ({ verwalter }) => {
+	await verwalter.perform(recalculatePreview);
 });
 
 When('der Liegenschaftsverwalter zum Erstellen weitergeht', async ({ verwalter }) => {

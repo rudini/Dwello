@@ -13,10 +13,10 @@ const run = {
 describe('Vorschau der Abrechnungen', () => {
 	it('liefert neben der Vorschau die Rechnungen jedes Gebäudes in der Periode', async () => {
 		// a building without contracts and invoices: every list answers empty
-		const { result } = runAction(actions.preview, '', 200, run, { contracts: [], invoices: [] });
+		const { result } = runAction(actions.preview, '', 200, run, { contracts: [], invoices: [], data: [], total: 0 });
 		expect(await result).toEqual({
 			preview: [],
-			invoices: [{ buildingId: 'b1', count: 0, first: null, last: null }]
+			invoices: [{ buildingId: 'b1', count: 0, first: null, last: null, statements: 0 }]
 		});
 	});
 });

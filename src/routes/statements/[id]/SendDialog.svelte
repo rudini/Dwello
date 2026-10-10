@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { addToast } from '$lib/stores';
 	import type { StatementWithDetails } from '$lib/types';
 	import Button from '$lib/ui/Button.svelte';
 	import Dialog from '$lib/ui/Dialog.svelte';
@@ -19,10 +20,14 @@
 	action="?/send"
 	use:enhance={() => {
 		sending = true;
-		return async ({ update }) => {
+		return async ({ update, result }) => {
 			await update();
 			sending = false;
 			open = false;
+			if (result.type === 'success') {
+				addToast('success', 'Abrechnung als versendet markiert');
+				document.querySelector<HTMLElement>('h1')?.focus(); // "Versenden" is gone now
+			}
 		};
 	}}
 ></form>
@@ -49,7 +54,8 @@
 			<dt class="text-ink-muted">Korrespondenzweg:</dt>
 			<dd class="text-ink">
 				{byEmail ? 'Per E-Mail' : 'Per Brief'},
-				{(byEmail ? statement.tenantEmail : statement.tenantAddress) || 'keine Adresse erfasst'}
+				{(byEmail ? statement.tenantEmail : statement.tenantAddress) ||
+					(byEmail ? 'keine E-Mail-Adresse erfasst' : 'keine Postadresse erfasst')}
 			</dd>
 		</div>
 	</dl>

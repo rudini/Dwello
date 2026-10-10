@@ -1,9 +1,7 @@
 <script lang="ts">
 	import { invoiceRows } from '$lib/statement-wizard';
-	import Alert from '$lib/ui/Alert.svelte';
-	import Button from '$lib/ui/Button.svelte';
-	import Checkbox from '$lib/ui/Checkbox.svelte';
 	import { formatCurrency } from '$lib/utils/format';
+	import PreviewChecks from './PreviewChecks.svelte';
 	import type { PreviewRow } from './preview';
 
 	// Step 4: what each rental contract will get, and the invoices behind it; missing invoices are flagged
@@ -12,20 +10,21 @@
 		invoices,
 		buildings,
 		periodLabel,
+		period,
 		confirmed = $bindable(),
-		error
+		errors
 	}: {
 		previewRows: PreviewRow[];
 		invoices: Parameters<typeof invoiceRows>[0];
 		buildings: { id: string; name: string }[];
 		periodLabel: string;
+		period: { periodStart: string; periodEnd: string };
 		confirmed: boolean;
-		error?: string;
+		errors: Record<string, string>;
 	} = $props();
 
 	const total = $derived(previewRows.reduce((sum, row) => sum + row.totalCosts, 0));
-	const rows = $derived(invoiceRows(invoices, buildings));
-	const missing = $derived(rows.filter((row) => row.missing));
+	const rows = $derived(invoiceRows(invoices, buildings, period));
 	// Saldo > 0: the tenant pays the difference, < 0: the tenant gets it back
 	const saldo = (balance: number) =>
 		`${balance >= 0 ? 'Nachzahlung' : 'Rückerstattung'} ${formatCurrency(Math.abs(balance))}`;
@@ -64,30 +63,7 @@
 	</ul>
 </section>
 
-{#if missing.length}
-	<Alert tone="caution" title="Rechnungen fehlen" testid="missing-invoices">
-		<p>
-			Für {missing.map((row) => row.name).join(', ')} sind in der Abrechnungsperiode keine Rechnungen
-			erfasst. Ohne Rechnungen werden CHF 0.00 Nebenkosten verteilt, und jeder Mieter erhält sein Akonto
-			zurück.
-		</p>
-		<p>Erfassen Sie zuerst die Rechnungen – oder bestätigen Sie, dass es keine gibt.</p>
-		{#snippet action()}
-			<div class="flex flex-col gap-2">
-				<Button href="/invoices/new" icon="invoice">Rechnung erfassen</Button>
-				<Checkbox
-					id="confirm-missing"
-					label="Die Abrechnungen trotzdem erstellen"
-					bind:checked={confirmed}
-					testid="confirm-missing-invoices"
-				/>
-				{#if error}
-					<p class="font-semibold text-critical" data-testid="form-error">{error}</p>
-				{/if}
-			</div>
-		{/snippet}
-	</Alert>
-{/if}
+<PreviewChecks {rows} bind:confirmed error={errors.confirm} />
 
 <section aria-labelledby="statements-heading" class="flex flex-col gap-2">
 	<h3 id="statements-heading" class="text-xl font-bold text-ink">Abrechnungen pro Mietvertrag</h3>
@@ -95,6 +71,11 @@
 		<p class="text-ink-muted" data-testid="preview-empty">
 			In dieser Abrechnungsperiode gibt es keine Mietverträge in den gewählten Gebäuden.
 		</p>
+		{#if errors.preview}
+			<p class="font-semibold text-critical" role="alert" data-testid="form-error">
+				{errors.preview}
+			</p>
+		{/if}
 	{:else}
 		<!-- a list instead of a table: readable on phones without scrolling sideways -->
 		<ul class="flex flex-col divide-y divide-line">

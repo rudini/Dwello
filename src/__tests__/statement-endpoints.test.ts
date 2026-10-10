@@ -91,6 +91,14 @@ describe('GET /statements/[id]/pdf', () => {
 	});
 
 	// Before marking a statement as sent, the user looks at the document the tenant gets
+	it('sagt in Worten, wenn das PDF nicht erstellt werden kann', async () => {
+		const fetch = async () => Response.json({ error: 'PDF not generated yet' }, { status: 404 });
+		const response = await get(fetch, '?ansehen');
+		expect(response.status).toBe(404);
+		expect(response.headers.get('Content-Type')).toMatch(/text\/plain/);
+		expect(await response.text()).toContain('Das PDF konnte nicht erstellt werden');
+	});
+
 	it('zeigt das PDF zum Ansehen im Browser und erstellt es, wenn es noch fehlt', async () => {
 		const { calls, fetch } = backend(false);
 		const response = await get(fetch, '?ansehen');

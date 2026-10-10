@@ -47,7 +47,13 @@ export function selectionErrors(selection: WizardSelection, step: number): Recor
 	return {};
 }
 
-type Coverage = { buildingId: string; count: number; first: string | null; last: string | null };
+type Coverage = {
+	buildingId: string;
+	count: number;
+	first: string | null;
+	last: string | null;
+	statements?: number; // already created for this period
+};
 
 const coverageText = ({ count, first, last }: Coverage) => {
 	if (count === 0 || !first || !last) return 'Keine Rechnungen erfasst';
@@ -55,13 +61,32 @@ const coverageText = ({ count, first, last }: Coverage) => {
 	return `${count} Rechnungen vom ${formatDate(first)} bis ${formatDate(last)}`;
 };
 
-/** The invoices each building brings into the statements, in words; a building without any is flagged */
-export const invoiceRows = (coverage: Coverage[], buildings: { id: string; name: string }[]) =>
+// TODO(fachlich prüfen): three months without any invoice at the start or end of the period is a hint, not a rule
+const GAP_DAYS = 90;
+const daysBetween = (from: string, to: string) =>
+	(new Date(to).getTime() - new Date(from).getTime()) / 86_400_000;
+
+const partly = ({ count, first, last }: Coverage, { periodStart, periodEnd }: Period) =>
+	count > 0 &&
+	!!first &&
+	!!last &&
+	(daysBetween(periodStart, first) > GAP_DAYS || daysBetween(last, periodEnd) > GAP_DAYS);
+
+type Period = { periodStart: string; periodEnd: string };
+
+/** The invoices each building brings into the statements, in words; none or only part of the period is flagged */
+export const invoiceRows = (
+	coverage: Coverage[],
+	buildings: { id: string; name: string }[],
+	period: Period
+) =>
 	coverage.map((c) => ({
 		buildingId: c.buildingId,
 		name: buildings.find((b) => b.id === c.buildingId)?.name ?? '',
 		text: coverageText(c),
-		missing: c.count === 0
+		missing: c.count === 0,
+		partial: partly(c, period),
+		existing: c.statements ?? 0
 	}));
 
 /** A draft from this browser, without buildings or heating profiles deleted meanwhile */

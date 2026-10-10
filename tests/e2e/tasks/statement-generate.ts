@@ -1,6 +1,6 @@
 import type { Actor } from '../fixtures/actor';
 import { visit } from '../interactions/navigation';
-import { saveStatus } from '../interactions/contract-form';
+import { finishedStep, saveStatus } from '../interactions/contract-form';
 import {
 	backLink,
 	buildingCheckbox,
@@ -78,4 +78,15 @@ export const showCreatedStatements = async (actor: Actor) => {
 
 export const returnToStatementList = async (actor: Actor) => {
 	await backLink(actor.page).click();
+};
+
+export const confirmDespiteWarnings = async (actor: Actor) => {
+	await confirmMissingInvoices(actor.page).check();
+};
+
+// Back to step "Heizprofil und Verwaltungspauschale" and "Weiter": the server calculates a new preview
+export const recalculatePreview = async (actor: Actor) => {
+	await finishedStep(actor.page, 'Heizprofil').click();
+	await nextButton(actor.page).click();
+	await previewCount(actor.page).waitFor();
 };

@@ -68,3 +68,5 @@ Items the redesign could not or deliberately did not resolve. Each with reason a
 - "Versenden" only records the status "Versendet"; Dwello does not deliver statements by e-mail or post. The confirmation says so. Whether a real e-mail dispatch is wanted is a product decision (backend) – TODO(fachlich prüfen).
 - "PDF ansehen" creates the PDF when it does not exist yet (the backend stores it); viewing therefore has a side effect. Acceptable because a statement cannot be delivered without its PDF.
 - The plausibility check looks at invoices dated in the Abrechnungsperiode (as the calculation does). It flags buildings without any invoice; it does not judge whether a period is covered completely (one oil delivery per year is normal) – the preview names count and date range so the user can judge. TODO(fachlich prüfen) whether stronger checks are wanted.
+- Restoring a statement wizard draft drops buildings or heating profiles deleted meanwhile without a notice (the contract wizard says so). Rare; worth a sentence later.
+- The "partly covered" hint uses a fixed 90-day rule – TODO(fachlich prüfen).

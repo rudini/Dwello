@@ -14,7 +14,8 @@ export interface OverviewInput {
 	statementCounts: { draft: number; sent: number; paid: number; overdue: number };
 	dueStatements: { id: string; tenantName: string; paymentDeadline: string }[];
 	lettersToSend: number;
-	missingPeriod?: { start: string; end: string } | null; // ended Abrechnungsperiode without statements
+	// ended Abrechnungsperiode with rented buildings that have no statements yet
+	missingPeriod?: { start: string; end: string; buildings: string[] } | null;
 	endingContracts: { id: string; tenantName: string; endDate: string }[];
 }
 
@@ -95,7 +96,7 @@ function workTasks({ statementCounts, lettersToSend, missingPeriod }: OverviewIn
 			// TODO(fachlich prüfen): suggestion without legal deadline, see docs/design/offene-punkte.md
 			id: 'missing-period',
 			title: 'Nebenkostenabrechnungen erstellen',
-			text: `Die Abrechnungsperiode ${formatDate(missingPeriod.start)} – ${formatDate(missingPeriod.end)} ist abgelaufen, aber noch nicht abgerechnet. Erfassen Sie die Rechnungen dieser Periode und erstellen Sie dann die Abrechnungen.`,
+			text: `Die Abrechnungsperiode ${formatDate(missingPeriod.start)} – ${formatDate(missingPeriod.end)} ist abgelaufen. Noch nicht abgerechnet: ${missingPeriod.buildings.join(', ')}. Erfassen Sie zuerst alle Rechnungen dieser Periode und erstellen Sie dann die Abrechnungen.`,
 			href: '/statements/generate',
 			action: 'Abrechnungen erstellen',
 			icon: 'calculate'

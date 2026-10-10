@@ -95,6 +95,7 @@ describe('Abrechnungen erstellen', () => {
 		expect(document.activeElement).toBe(byTestId('generate-building-b1'));
 		click('generate-building-b1');
 		expect(text()).toContain('1 von 2 gewählt');
+		expect(byTestId('form-error')).toBeNull(); // the error goes once a building is chosen
 	});
 
 	it('wählt alle Gebäude aus und wieder ab', async () => {
@@ -184,14 +185,64 @@ describe('Abrechnungen erstellen', () => {
 		expect(byTestId('generate-statements-button')!.textContent).toContain('Entwürfe erstellen');
 	});
 
-	it('meldet eine Periode ohne Mietverträge', () => {
-		open({ preview: [], invoices });
+	it('spricht bei einer einzigen Abrechnung in der Einzahl', async () => {
+		open({ preview: [preview[0]], invoices: [invoices[0]] });
+		next();
+		await settle();
+		expect(byTestId('generate-drafts-note')!.textContent).toContain(
+			'Es wird 1 Nebenkostenabrechnung als Entwurf erstellt.'
+		);
+	});
+
+	it('meldet eine Periode ohne Mietverträge und geht dann nicht weiter', async () => {
+		open({ preview: [], invoices: [invoices[0]] });
 		expect(byTestId('preview-empty')).not.toBeNull();
+		next();
+		await settle();
+		expect(heading()).toBe('Vorschau');
+		expect(text()).toContain('Wählen Sie eine andere Abrechnungsperiode oder andere Gebäude.');
+	});
+
+	it('nennt Gebäude, deren Rechnungen nur einen Teil der Periode abdecken', () => {
+		open({
+			preview,
+			invoices: [{ buildingId: 'b1', count: 2, first: '2024-01-15', last: '2024-03-31' }]
+		});
+		expect(byTestId('partial-invoices')!.textContent).toContain('Ahornhof');
+		expect(byTestId('missing-invoices')).toBeNull();
+	});
+
+	it('warnt, wenn es für ein Gebäude in der Periode schon Abrechnungen gibt, und verlangt eine Bestätigung', async () => {
+		open({
+			preview,
+			invoices: [{ buildingId: 'b1', count: 3, first: '2024-01-15', last: '2024-12-15', statements: 2 }]
+		});
+		expect(byTestId('existing-statements')!.textContent).toContain('Ahornhof');
+		expect(byTestId('existing-statements')!.textContent).toContain('2 Nebenkostenabrechnungen');
+		next();
+		await settle();
+		expect(byTestId('form-error')!.textContent).toContain('Bestätigen Sie');
+		click('confirm-missing-invoices');
+		next();
+		await settle();
+		expect(heading()).toBe('Erstellen');
 	});
 
 	it('meldet einen Fehler des Servers', () => {
 		open({ error: 'Periode ungültig' });
 		expect(text()).toContain('Periode ungültig');
+	});
+
+	it('verbindet die fehlende Bestätigung mit dem Kästchen, damit sie vorgelesen wird', async () => {
+		open({ preview, invoices });
+		next();
+		await settle();
+		const box = byTestId('confirm-missing-invoices')!;
+		expect(box.getAttribute('aria-invalid')).toBe('true');
+		const described = box.getAttribute('aria-describedby')!.split(' ');
+		expect(described.map((id) => document.getElementById(id)?.textContent).join(' ')).toContain(
+			'Bestätigen Sie'
+		);
 	});
 
 	it('meldet die erstellten Entwürfe und führt zu ihnen', () => {

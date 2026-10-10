@@ -88,7 +88,9 @@
 			</a>
 			<div>
 				<div class="flex items-center gap-3 mb-1">
-					<h1 class="text-2xl font-bold text-gray-900">{data.statement.statementNumber}</h1>
+					<h1 tabindex="-1" class="text-2xl font-bold text-gray-900">
+						{data.statement.statementNumber}
+					</h1>
 					<span data-testid="statement-status">
 						<Badge variant={statusVariants[data.statement.status]}>
 							{statusLabels[data.statement.status]}

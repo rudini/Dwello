@@ -26,6 +26,13 @@ export const GET: RequestHandler = async ({ params, fetch, url }) => {
 			? await pdfToView(fetch, id)
 			: await fetch(`${BACKEND_URL}/api/v1/statements/${id}/pdf`);
 
+		if (!response.ok && view) {
+			// opened in its own tab: a sentence instead of JSON
+			return new Response(
+				'Das PDF konnte nicht erstellt werden. Schliessen Sie diesen Tab und versuchen Sie es später erneut.',
+				{ status: response.status, headers: { 'Content-Type': 'text/plain; charset=utf-8' } }
+			);
+		}
 		if (!response.ok) {
 			const error = await response.json().catch(() => ({ error: 'PDF not available' }));
 			return new Response(JSON.stringify(error), {

@@ -48,17 +48,28 @@ async function list(fetch: typeof globalThis.fetch, path: string, key: string): 
 	return response?.ok ? ((await response.json())[key] ?? []) : [];
 }
 
-// The last ended Abrechnungsperiode when it has no Nebenkostenabrechnung yet
-async function missingPeriod(fetch: typeof globalThis.fetch) {
+// The last ended Abrechnungsperiode and the buildings that already have Nebenkostenabrechnungen for it
+async function lastPeriod(fetch: typeof globalThis.fetch) {
 	const config = await fetch(`${BACKEND_URL}/api/v1/config`);
 	if (!config.ok) return null;
 	const type = ((await config.json()).data?.accounting_period ??
 		'calendar') as AccountingPeriodType;
 	const period = lastCompletedPeriod(type);
-	const statements = await fetch(
-		`${BACKEND_URL}/api/v1/statements?periodStart=${period.start}&periodEnd=${period.end}&limit=1`
+	const statements = await list(
+		fetch,
+		`statements?periodStart=${period.start}&periodEnd=${period.end}&limit=1000`,
+		'data'
 	);
-	return statements.ok && (await statements.json()).total === 0 ? period : null;
+	return { ...period, done: new Set(statements.map((s) => (s.building as Row | null)?.id)) };
+}
+
+// Rented buildings without a statement for the last period; only rented apartments get one
+function missingPeriod(period: Awaited<ReturnType<typeof lastPeriod>>, figures: DashboardData) {
+	if (!period) return null;
+	const buildings = figures.buildingOccupancy
+		.filter((b) => b.occupiedApartments > 0 && !period.done.has(b.buildingId))
+		.map((b) => b.buildingName);
+	return buildings.length ? { start: period.start, end: period.end, buildings } : null;
 }
 
 const tenantOf = (statement: Row) => {
@@ -77,7 +88,7 @@ export const load = async ({
 		list(fetch, 'statements?status=sent&limit=100', 'data'),
 		list(fetch, 'documents?status=to_send', 'data'),
 		list(fetch, 'contracts?status=active&limit=100', 'contracts'),
-		missingPeriod(fetch).catch(() => null)
+		lastPeriod(fetch).catch(() => null)
 	]);
 	const input = {
 		today: new Date().toLocaleDateString('sv-SE'), // local YYYY-MM-DD
@@ -89,8 +100,7 @@ export const load = async ({
 			paymentDeadline: String(s.paymentDeadline)
 		})),
 		lettersToSend: letters.length,
-		// Only rented apartments get a Nebenkostenabrechnung
-		missingPeriod: figures.portfolio.occupiedApartments > 0 ? period : null,
+		missingPeriod: missingPeriod(period, figures),
 		endingContracts: contracts
 			.filter((c) => c.endDate)
 			.map((c) => ({

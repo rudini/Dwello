@@ -42,6 +42,11 @@
 
 	const DRAFT = 'statements';
 	const CONFIRM = 'Bestätigen Sie, dass die Abrechnungen trotzdem erstellt werden sollen.';
+	const busyLabels: Record<number, string> = {
+		3: 'Vorschau wird berechnet …',
+		5: 'Entwürfe werden erstellt …'
+	};
+	const NOTHING = 'Wählen Sie eine andere Abrechnungsperiode oder andere Gebäude.';
 	const fresh = (): WizardSelection => ({
 		periodStart: data.defaultPeriod.start,
 		periodEnd: data.defaultPeriod.end,
@@ -54,16 +59,21 @@
 	let selection = $state(untrack(fresh));
 	let step = $state(untrack(() => (form?.created != null ? 5 : form?.preview ? 4 : 1)));
 	let errors = $state<Record<string, string>>({});
-	let confirmed = $state(false); // statements despite buildings without invoices
-	let generating = $state(false);
+	let confirmed = $state(false); // statements despite buildings without invoices, for this preview only
+	let busy = $state(false); // the server is calculating the preview or creating the drafts
 	let touched = $state(false); // a draft is kept only once the user has chosen something
 	let savedAt = $state<Date | null>(null);
 	let restoredAt = $state<Date | null>(null);
 	let section = $state<HTMLElement>();
 
-	const previewRows = $derived(form?.preview ?? []);
-	const invoices = $derived(form?.invoices ?? []);
-	const missingInvoices = $derived(invoices.some((i) => i.count === 0));
+	// The last preview stays when creating the drafts fails
+	let previewRows = $state(untrack(() => form?.preview ?? []));
+	let invoices = $state(untrack(() => form?.invoices ?? []));
+	let shownError = $state(untrack(() => form?.error ?? '')); // only until the user moves on
+	// No invoices, or statements that already exist: going on needs a confirmation
+	const needsConfirmation = $derived(
+		invoices.some((i) => i.count === 0 || (i.statements ?? 0) > 0)
+	);
 	const periodLabel = $derived(
 		`${formatDate(selection.periodStart)} – ${formatDate(selection.periodEnd)}`
 	);
@@ -84,14 +94,9 @@
 		if (touched) savedAt = writeDraft(browserStorage(), DRAFT, snapshot, new Date());
 	});
 
-	// A server answer moves on: the preview to step 4, the created drafts to the result
-	$effect(() => {
-		if (form?.preview) untrack(() => goTo(4));
-		if (form?.created != null) untrack(() => clearDraft(browserStorage(), DRAFT));
-	});
-
 	async function goTo(target: number) {
 		step = target;
+		shownError = '';
 		await tick();
 		section?.querySelector<HTMLElement>('h2')?.focus();
 	}
@@ -103,6 +108,12 @@
 				':is(input, select, textarea)[aria-invalid="true"], [data-testid="confirm-missing-invoices"]'
 			)
 			?.focus();
+	}
+
+	// An input counts for the draft and clears the errors of its step
+	function edited() {
+		touched = true;
+		errors = {};
 	}
 
 	function discardDraft() {
@@ -120,15 +131,33 @@
 			event.preventDefault();
 			event.stopImmediatePropagation();
 		};
-		errors = selectionErrors(selection, step);
-		if (step === 4 && missingInvoices && !confirmed) errors = { confirm: CONFIRM };
+		errors = { ...selectionErrors(selection, step), ...(step === 4 ? previewErrors() : {}) };
 		if (Object.keys(errors).length > 0) return (stay(), showErrors());
-		if (step === 3 || step === 5) {
-			generating = step === 5;
-			return;
-		}
+		if (step === 3 || step === 5) return void (busy = true); // to the server through `enhance`
 		stay();
 		goTo(step + 1);
+	}
+
+	function previewErrors(): Record<string, string> {
+		if (previewRows.length === 0) return { preview: NOTHING };
+		return needsConfirmation && !confirmed ? { confirm: CONFIRM } : {};
+	}
+
+	// A server answer: the preview leads to step 4 (a new preview needs a new confirmation), drafts to the result
+	async function answered(result: { type: string; data?: Record<string, unknown> }) {
+		busy = false;
+		if (result.type !== 'success') return void (shownError = form?.error ?? '');
+		const data = result.data ?? {};
+		if ('created' in data) return created();
+		previewRows = data.preview as PreviewRow[];
+		invoices = data.invoices as typeof invoices;
+		confirmed = false;
+		await goTo(4);
+	}
+
+	function created() {
+		clearDraft(browserStorage(), DRAFT);
+		return goTo(5);
 	}
 </script>
 
@@ -136,12 +165,12 @@
 	method="POST"
 	action={step === 5 ? '?/generate' : '?/preview'}
 	onsubmit={submitStep}
-	oninput={() => (touched = true)}
-	onchange={() => (touched = true)}
+	oninput={edited}
+	onchange={edited}
 	use:enhance={() =>
-		async ({ update }) => {
+		async ({ update, result }) => {
 			await update({ reset: false, invalidateAll: false });
-			generating = false;
+			await answered(result as { type: string; data?: Record<string, unknown> });
 		}}
 	novalidate
 	class="flex flex-col gap-8"
@@ -173,9 +202,9 @@
 			<span class="sr-only">Schritt {step} von {statementSteps.length}:</span>
 			<span data-step-label>{statementSteps[step - 1]}</span>
 		</h2>
-		{#if form?.error}
+		{#if shownError}
 			<Alert tone="critical" title="Das hat nicht geklappt" testid="server-error">
-				<p>{form.error}</p>
+				<p>{shownError}</p>
 			</Alert>
 		{/if}
 		<StatementStep
@@ -199,7 +228,8 @@
 			onback={() => goTo(step - 1)}
 			finalLabel="Entwürfe erstellen"
 			finalTestid="generate-statements-button"
-			busy={generating}
+			{busy}
+			busyLabel={busyLabels[step]}
 			cancelHref="/statements"
 		/>
 	{/if}
