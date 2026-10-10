@@ -4402,6 +4402,8 @@ Brief: `docs/design/REDESIGN_BRIEF.md`; log and decisions: `docs/design/progress
   (`docs/design/reviews/8-review-1.md`)
 - [x] **Stage 9:** `docs/design/design-decisions.md`, token reference, open points with the glossary table, CLAUDE.md
   "Design-Regeln"; final review and final persona round with fixes (`docs/design/reviews/9-review-1.md`)
+- [x] **Axe as its own CI check:** the `@a11y` scenarios run in the job "Accessibility (axe)", the job "E2E tests"
+  runs the rest, so the axe check can be required on `main` (`.github/workflows/ci.yml`, `docs/test-pyramid.md`)
 - [x] **Map tiles need a CARTO key:** `PUBLIC_CARTO_API_KEY` goes to the tile URL
   (`src/routes/buildings/BuildingMiniMap.svelte`, `src/__tests__/building-mini-map.dom.test.ts`, `vitest.config.ts`,
   `.env.example`, `docker-compose.prod.yml`, `docs/tech-stack.md`)
