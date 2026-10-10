@@ -7,6 +7,7 @@
 	import Panel from '$lib/ui/Panel.svelte';
 	import Textarea from '$lib/ui/Textarea.svelte';
 	import TextInput from '$lib/ui/TextInput.svelte';
+	import { formatDateLong } from '$lib/utils/format';
 	import CostTable from '../CostTable.svelte';
 	import type { ActionData } from './$types';
 
@@ -16,6 +17,8 @@
 	const statement = $derived(data.statement);
 	const refund = $derived(statement.balance < 0);
 	let saving = $state(false);
+	// Shown in words below the field: the browser may show the date in a foreign format
+	let deadline = $derived(statement.paymentDeadline);
 </script>
 
 <svelte:head>
@@ -58,9 +61,10 @@
 			help={refund
 				? 'Bis zu diesem Datum erstatten Sie dem Mieter den Betrag zurück.'
 				: 'Bis zu diesem Datum bezahlt der Mieter die Nachzahlung.'}
-			value={statement.paymentDeadline}
+			bind:value={deadline}
 			testid="payment-deadline-input"
 		/>
+		{#if deadline}<p class="font-semibold text-ink">{formatDateLong(deadline)}</p>{/if}
 		<Textarea
 			id="notes"
 			name="notes"

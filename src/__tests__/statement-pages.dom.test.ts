@@ -306,6 +306,7 @@ describe('Abrechnung bearbeiten', () => {
 		edit({ notes: 'Ratenzahlung' });
 
 		expect(byTestId<HTMLInputElement>('payment-deadline-input')!.value).toBe('2025-02-28');
+		expect(text()).toContain('Freitag, 28. Februar 2025');
 		expect(byTestId<HTMLTextAreaElement>('statement-notes-input')!.value).toBe('Ratenzahlung');
 		expect(allByTestId('statement-line-item')).toHaveLength(2);
 		expect(byTestId('statement-recalculate-hint')).not.toBeNull();
