@@ -2,6 +2,8 @@ import { describe, it, expect } from 'vitest';
 import {
 	advancePaymentNotice,
 	apartmentChoices,
+	normalizeAmounts,
+	startDateNotice,
 	contractSteps,
 	contractSummary,
 	firstStepWithError,
@@ -144,9 +146,33 @@ describe('Wohnungen zur Auswahl', () => {
 			]) as never
 		);
 		expect(choices).toEqual([
-			{ value: 'a2', label: 'Wohnung 1.02 - Ahornhof (verfügbar ab 2026-12-01)', disabled: false },
+			{ value: 'a2', label: 'Wohnung 1.02 - Ahornhof (verfügbar ab 1.12.2026)', disabled: false },
 			{ value: 'a3', label: 'Wohnung 1.03 - Ahornhof', disabled: false },
 			{ value: 'a1', label: 'Wohnung 1.01 - Ahornhof (nicht verfügbar)', disabled: true }
 		]);
+	});
+});
+
+describe('Beträge und Daten wie in der Schweiz geschrieben', () => {
+	it('versteht Tausendertrennzeichen und Komma in Beträgen', () => {
+		const values = normalizeAmounts({
+			...filled,
+			baseRent: "1'450",
+			advancePayment: '180,50',
+			additionalRent: '1’000 '
+		});
+		expect([values.baseRent, values.advancePayment, values.additionalRent]).toEqual([
+			'1450',
+			'180.50',
+			'1000'
+		]);
+	});
+
+	it('weist auf einen Vertragsbeginn in der Vergangenheit hin', () => {
+		expect(startDateNotice('2026-01-11', '2026-10-10')).toBe(
+			'Der Vertragsbeginn Sonntag, 11. Januar 2026 liegt in der Vergangenheit. Stimmt das Datum?'
+		);
+		expect(startDateNotice('2026-11-01', '2026-10-10')).toBeNull();
+		expect(startDateNotice('', '2026-10-10')).toBeNull();
 	});
 });

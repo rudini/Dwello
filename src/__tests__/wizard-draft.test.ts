@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { clearAllDrafts, clearDraft, readDraft, writeDraft } from '../lib/wizard-draft';
+import { vi } from 'vitest';
+import { browserStorage, clearAllDrafts, clearDraft, readDraft, writeDraft } from '../lib/wizard-draft';
 
 // A Storage in memory, as the browser's localStorage behaves
 function memoryStorage(): Storage {
@@ -56,5 +57,19 @@ describe('Entwurf im Browser', () => {
 		clearAllDrafts(storage);
 		expect(readDraft(storage, 'statements')).toBeNull();
 		expect(storage.getItem('andere-app')).toBe('bleibt');
+	});
+});
+
+describe('Speicher des Browsers', () => {
+	it('fehlt, wenn schon der Zugriff darauf scheitert', () => {
+		vi.stubGlobal('localStorage', undefined);
+		Object.defineProperty(globalThis, 'localStorage', {
+			configurable: true,
+			get: () => {
+				throw new DOMException('blocked', 'SecurityError');
+			}
+		});
+		expect(browserStorage()).toBeUndefined();
+		vi.unstubAllGlobals();
 	});
 });

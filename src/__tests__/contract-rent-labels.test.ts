@@ -5,6 +5,7 @@ vi.mock('$app/forms', () => ({ enhance: () => ({}) }));
 
 import ContractPage from '../routes/contracts/[id]/+page.svelte';
 import RentFields from '../routes/contracts/RentFields.svelte';
+import MonthlyCostsCard from '$lib/components/MonthlyCostsCard.svelte';
 
 // Akonto is monthly_advance_payment, Zusatzmiete is additional_rent (UBIQUITOUS_LANGUAGE.md)
 const labelOf = (body: string, id: string) =>
@@ -42,5 +43,12 @@ describe('Miete im Mietvertrag', () => {
 		);
 		expect(body).toMatch(/>Akonto<\/span> <span[^>]*>\s*CHF\s180\.00/);
 		expect(body).toMatch(/>Zusatzmiete<\/span> <span[^>]*>\s*CHF\s50\.00/);
+	});
+
+	it('nennt das Akonto auf der Wohnungsseite wie im Glossar', () => {
+		const costs = { baseRent: 950, advancePayment: 180, additionalRent: 0, total: 1130 };
+		const body = render(MonthlyCostsCard, { props: { costs } as never }).body;
+		expect(body).toContain('>Akonto<');
+		expect(body).not.toContain('Aconto');
 	});
 });

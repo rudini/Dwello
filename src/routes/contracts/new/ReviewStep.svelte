@@ -23,15 +23,18 @@
 
 <dl class="flex flex-col divide-y divide-line rounded-panel border border-line bg-surface">
 	{#each contractSummary(values, tenants, apartments) as item (item.label)}
+		<!-- phones: label above value, "Ändern" beside; from sm one line -->
 		<div
-			class="flex flex-wrap items-center gap-x-4 gap-y-1 px-4 py-2 sm:flex-nowrap"
+			class="grid grid-cols-value-action items-center gap-x-4 px-4 py-2 sm:grid-cols-label-value-action"
 			data-testid="contract-review-item"
 		>
-			<dt class="w-40 shrink-0 text-ink-muted">{item.label}</dt>
-			<dd class="flex-1 font-semibold tabular-nums text-ink">{item.value}</dd>
+			<dt class="text-ink-muted">{item.label}</dt>
+			<dd class="col-start-1 font-semibold tabular-nums text-ink sm:col-auto sm:row-auto">
+				{item.value}
+			</dd>
 			{#if item.step}
 				{@const step = item.step}
-				<dd>
+				<dd class="col-start-2 row-span-2 row-start-1 sm:col-auto sm:row-auto">
 					<Button variant="ghost" onclick={() => onedit(step)} ariaLabel="{item.label} ändern"
 						>Ändern</Button
 					>

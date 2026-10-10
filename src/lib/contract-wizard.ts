@@ -41,6 +41,24 @@ export function advancePaymentNotice(values: ContractFormValues): string | null 
 
 const amount = (value: string) => parseFloat(value) || 0;
 
+// "1'450", "1’450" and "180,50" as written in Switzerland; parseFloat would stop at the separator
+const plainAmount = (value: string) => value.replace(/['’\s]/g, '').replace(',', '.');
+
+/** The amounts in the form the checks and the backend read */
+export const normalizeAmounts = (values: ContractFormValues): ContractFormValues => ({
+	...values,
+	baseRent: plainAmount(values.baseRent),
+	advancePayment: plainAmount(values.advancePayment),
+	additionalRent: plainAmount(values.additionalRent)
+});
+
+/** Plausibility hint: a start in the past is allowed (recording an old contract) but often a mistyped date */
+export function startDateNotice(startDate: string, today: string): string | null {
+	return startDate && startDate < today
+		? `Der Vertragsbeginn ${formatDateLong(startDate)} liegt in der Vergangenheit. Stimmt das Datum?`
+		: null;
+}
+
 /** The contract in words, one line per fact, each with the step that changes it */
 export function contractSummary(
 	values: ContractFormValues,

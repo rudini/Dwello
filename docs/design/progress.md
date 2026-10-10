@@ -17,7 +17,7 @@ Brief: `docs/REDESIGN_BRIEF.md`. Resume rules: `docs/design/arbeitsregeln.md`.
 | 8 Remove old design system | open | | | |
 | 9 Final | open | | | |
 
-**Next step:** stage 5 – rental contract wizard (scenarios in `contract-new.feature` are `@wip`).
+**Next step:** commit stage 5 review round 1, CI; then stage 6 (statement wizard).
 
 ## Log
 
@@ -93,3 +93,11 @@ Brief: `docs/REDESIGN_BRIEF.md`. Resume rules: `docs/design/arbeitsregeln.md`.
 - Bug fix (UI mapping, no logic change): the contract list returns `startDate`/`endDate`, the availability check reads `start_date`/`end_date`, so every apartment with any contract – even one ended years ago – showed as "nicht verfügbar" and the overlap check never fired. The wizard and the edit form now map the fields (`forAvailability`). Explains Helga's confusion about "(nicht verfügbar)".
 - Bug fix (labels): the edit form and the contract detail called `additional_rent` "Nebenkosten Akonto" and `monthly_advance_payment` "Parkplatz / Sonstiges" (found in stage 0). Now "Akonto" and "Zusatzmiete" as in the glossary; the wizard writes Akonto to `monthlyAdvancePayment`. Existing data is not touched. The edit form lost its unused "new contract" branch.
 - Axe: contract-new states `every-wizard-step` (all five steps incl. limited contract), `overlap-warning`, `draft-restored` out of `@wip`; screens may put `{ids}` in their state queries. The axe check clears browser storage per viewport.
+- Commit bd2ea7c pushed; CI green incl. ui-screenshots (wizard step 1 and the fixed Akonto label on the contract detail checked in the screenshots).
+- Personas (all five, `personas/*-5.md`): Helga yes (after spotting two silent errors), Sven yes, Anna/Marco/Dr. Weber partly (statement screens, stage 6).
+- Review round 1 (`reviews/5-review-1.md`): 6 Majors + Helga's Blocker + Sven's Majors fixed – Swiss amounts ("1'450"), past start date notice, German save errors and blocking overlap, drafts only after user input, correct "Mieter erfasst" name, focus on the first faulty field, mobile review grid, Swiss date in the apartment choice, step position for screen readers, safe browser storage, one contract table for availability and overlap, tenant list limit, Akonto label on the apartment page.
+
+#### Persona backlog (from stage 5 runs)
+
+- Stage 6 (statement wizard): warning when the period has no invoices or invoices only for part of it (Anna, Marco, Dr. Weber – Blockers); step "Erstellen" must say that drafts are made, nothing is sent; confirmation before «Versenden» with recipient and PDF preview; old unsent drafts flagged (Anna); mobile: no horizontal scrolling, 48 px targets (Marco); trace the Verwaltungspauschale base and the Verteilschlüssel per line (Dr. Weber).
+- Stage 7: contract list/detail "AKTIV … – heute" for future contracts (Helga, Sven); English category/heating profile names; "Mietstagen" typo; one name for the management fee and Akonto everywhere; Saldo "CHF-83.43" format and US date on the statement edit page; clickable list rows; tenant form in the new design with "erfassen"; invoice date hint (Marco).

@@ -9,16 +9,18 @@
 	let {
 		tenantId = $bindable(),
 		tenants,
-		created,
+		createdId,
 		error
 	}: {
 		tenantId: string;
 		tenants: { id: string; name: string }[];
-		created: boolean; // back from "Neuen Mieter erfassen"
+		createdId: string | null; // back from "Neuen Mieter erfassen" with this tenant
 		error?: string;
 	} = $props();
 
-	const createdName = $derived(created ? tenants.find((t) => t.id === tenantId)?.name : undefined);
+	const createdName = $derived(
+		createdId && tenantId === createdId ? tenants.find((t) => t.id === createdId)?.name : undefined
+	);
 </script>
 
 {#if createdName}

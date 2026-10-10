@@ -23,8 +23,8 @@ export const load: PageServerLoad = async ({ fetch }) => {
 	try {
 		// Fetch tenants and apartments in parallel
 		const [tenantsRes, apartmentsRes] = await Promise.all([
-			fetch(`${BACKEND_URL}/api/v1/tenants`),
-			fetch(`${BACKEND_URL}/api/v1/apartments`)
+			fetch(`${BACKEND_URL}/api/v1/tenants?limit=1000`), // far more than a small portfolio has
+			fetch(`${BACKEND_URL}/api/v1/apartments?limit=1000`)
 		]);
 
 		const tenantsData = tenantsRes.ok ? await tenantsRes.json() : { tenants: [] };

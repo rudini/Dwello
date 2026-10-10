@@ -4,6 +4,7 @@ import { test } from '../fixtures/test';
 import { visit } from '../interactions/navigation';
 import {
 	apartmentChoice,
+	chosenApartment,
 	chosenTenant,
 	chosenTenantName,
 	confirmation,
@@ -78,6 +79,10 @@ When('der Liegenschaftsverwalter ohne Angaben weitergeht', async ({ verwalter })
 	await verwalter.perform(goToNextStep);
 });
 
+When('der Liegenschaftsverwalter weitergeht', async ({ verwalter }) => {
+	await verwalter.perform(goToNextStep);
+});
+
 When('der Liegenschaftsverwalter den Mieter {string} wählt', async ({ verwalter, seed }, tenant: string) => {
 	await verwalter.perform(chooseTenant(seed.idOf(tenant)!));
 });
@@ -121,6 +126,10 @@ Then('zeigt die Prüfung {string} mit {string}', async ({ verwalter, names }, la
 
 Then('ist im Mietvertrag der Mieter {string} gewählt', async ({ verwalter, names }, tenant: string) => {
 	await expect.poll(() => chosenTenantName(verwalter)).toBe(names.get(tenant) ?? tenant);
+});
+
+Then('ist im Mietvertrag die Wohnung {string} gewählt', async ({ verwalter, seed }, apartment: string) => {
+	await expect(chosenApartment(verwalter)).toHaveValue(seed.idOf(apartment)!);
 });
 
 Then('ist im Mietvertrag kein Mieter gewählt', async ({ verwalter }) => {

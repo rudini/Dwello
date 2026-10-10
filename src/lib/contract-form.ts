@@ -1,4 +1,5 @@
 import type { RentalContract } from './types';
+import { formatDate } from './utils/format';
 import {
 	checkDateRangeOverlap,
 	type AvailabilityInfo,
@@ -125,7 +126,10 @@ export function apartmentOption(
 	if (availability?.hasOngoingContract)
 		return { label: `${name} (nicht verfügbar)`, disabled: true };
 	if (availability?.availableFrom)
-		return { label: `${name} (verfügbar ab ${availability.availableFrom})`, disabled: false };
+		return {
+			label: `${name} (verfügbar ab ${formatDate(availability.availableFrom)})`,
+			disabled: false
+		};
 	return { label: name, disabled: false };
 }
 

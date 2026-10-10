@@ -20,7 +20,7 @@
 	const costItems = $derived([
 		{ label: 'Nettomiete', value: costs.baseRent },
 		...(costs.advancePayment
-			? [{ label: 'Nebenkosten (Aconto)', value: costs.advancePayment }]
+			? [{ label: 'Akonto', value: costs.advancePayment }]
 			: []),
 		...(costs.additionalRent ? [{ label: 'Zusatzmiete', value: costs.additionalRent }] : [])
 	]);

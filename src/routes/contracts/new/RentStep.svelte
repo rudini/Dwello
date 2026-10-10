@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { advancePaymentNotice } from '$lib/contract-wizard';
+	import { advancePaymentNotice, normalizeAmounts } from '$lib/contract-wizard';
 	import type { ContractFormValues } from '$lib/contract-form';
 	import Alert from '$lib/ui/Alert.svelte';
 	import MoneyInput from '$lib/ui/MoneyInput.svelte';
@@ -11,12 +11,13 @@
 		errors
 	}: { values: ContractFormValues; errors: Record<string, string> } = $props();
 
-	const total = $derived(
-		[values.baseRent, values.advancePayment, values.additionalRent].reduce(
+	const total = $derived.by(() => {
+		const plain = normalizeAmounts(values); // "1'450" as typed
+		return [plain.baseRent, plain.advancePayment, plain.additionalRent].reduce(
 			(sum, amount) => sum + (parseFloat(amount) || 0),
 			0
-		)
-	);
+		);
+	});
 	const notice = $derived(advancePaymentNotice(values));
 </script>
 
@@ -30,6 +31,7 @@
 	testid="contract-base-rent-input"
 />
 
+<!-- TODO(fachlich prüfen): the examples "Heizung, Wasser usw." go beyond the glossary definition -->
 <MoneyInput
 	id="advancePayment"
 	label="Akonto pro Monat"

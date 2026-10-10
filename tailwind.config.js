@@ -40,6 +40,8 @@ export default {
 			boxShadow: { raised: 'var(--shadow-raised)', overlay: 'var(--shadow-overlay)' },
 			transitionDuration: { fast: 'var(--duration-fast)' },
 			maxHeight: { 'below-header': 'calc(100vh - var(--size-header))' }, // sticky sidebar
+			// summary rows: label, value, action (phones: value with its action)
+			gridTemplateColumns: { 'value-action': '1fr auto', 'label-value-action': '10rem 1fr auto' },
 			fontFamily: {
 				sans: ['Inter Variable', 'system-ui', 'sans-serif']
 			}

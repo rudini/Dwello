@@ -60,8 +60,12 @@ Funktionalität: Neuen Mietvertrag erfassen
     Dann ist im Mietvertrag kein Mieter gewählt
 
   Szenario: Neuen Mieter direkt im Mietvertrag erfassen
-    Wenn der Liegenschaftsverwalter im Mietvertrag den neuen Mieter "Peter Brunner" erfasst
+    Wenn der Liegenschaftsverwalter den Mieter "Anna Keller" und die Wohnung "2.01" wählt
+    Und der Liegenschaftsverwalter zum Schritt "Mieter" zurückgeht
+    Und der Liegenschaftsverwalter im Mietvertrag den neuen Mieter "Peter Brunner" erfasst
     Dann ist im Mietvertrag der Mieter "Peter Brunner" gewählt
+    Und der Liegenschaftsverwalter weitergeht
+    Und ist im Mietvertrag die Wohnung "2.01" gewählt
 
   Szenario: Erfassung abbrechen
     Wenn der Liegenschaftsverwalter die Bearbeitung abbricht

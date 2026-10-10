@@ -2,6 +2,7 @@
 	import Alert from '$lib/ui/Alert.svelte';
 	import RadioGroup from '$lib/ui/RadioGroup.svelte';
 	import TextInput from '$lib/ui/TextInput.svelte';
+	import { startDateNotice } from '$lib/contract-wizard';
 	import { formatDateLong } from '$lib/utils/format';
 
 	// Step 3: from when, and until when or without end; each date is repeated in words
@@ -10,6 +11,7 @@
 		endDate = $bindable(),
 		isUnlimited = $bindable(),
 		min,
+		today,
 		overlap,
 		errors
 	}: {
@@ -17,10 +19,12 @@
 		endDate: string;
 		isUnlimited: boolean;
 		min?: string;
+		today: string;
 		overlap: string | null;
 		errors: Record<string, string>;
 	} = $props();
 
+	// TODO(fachlich prüfen): explanations of unbefristet/befristet are not from the glossary
 	const durations = [
 		{
 			value: 'unlimited',
@@ -57,6 +61,12 @@
 	{@render inWords(startDate, 'start-date-words')}
 </div>
 
+{#if startDateNotice(startDate, today)}
+	<Alert tone="caution" title="Vertragsbeginn prüfen" testid="start-date-notice">
+		<p>{startDateNotice(startDate, today)}</p>
+	</Alert>
+{/if}
+
 <RadioGroup
 	name="duration"
 	legend="Vertragsdauer"
@@ -85,6 +95,9 @@
 
 {#if overlap}
 	<Alert tone="caution" title="Zeitraum überschneidet sich" testid="overlap-warning">
-		<p>{overlap}. Pro Wohnung darf sich kein Mietvertrag mit einem anderen überschneiden.</p>
+		<p>
+			{overlap}. Pro Wohnung darf sich kein Mietvertrag mit einem anderen überschneiden. Ändern Sie
+			Vertragsbeginn oder Vertragsende.
+		</p>
 	</Alert>
 {/if}

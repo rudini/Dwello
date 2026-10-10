@@ -3,6 +3,15 @@
 const PREFIX = 'dwello.draft.';
 const keyOf = (name: string) => `${PREFIX}v1.${name}`;
 
+/** The browser's localStorage, or undefined where even touching it throws (blocked site data) */
+export function browserStorage(): Storage | undefined {
+	try {
+		return globalThis.localStorage;
+	} catch {
+		return undefined;
+	}
+}
+
 export function readDraft<T>(
 	storage: Storage | undefined,
 	name: string

@@ -37,7 +37,8 @@ function backend() {
 	});
 }
 
-const heading = () => document.querySelector('h2')!.textContent!.trim();
+// The step heading, without the position that only screen readers hear ("Schritt 2 von 5:")
+const heading = () => document.querySelector('h2 [data-step-label]')!.textContent!.trim();
 const select = (testid: string, value: string) =>
 	fireEvent(byTestId<HTMLSelectElement>(testid)!, 'change', value);
 const type = (testid: string, value: string) =>
@@ -74,10 +75,15 @@ describe('Mietvertrag erfassen', () => {
 	it('beginnt beim Mieter und geht ohne Mieter nicht weiter', async () => {
 		await open();
 		expect(heading()).toBe('Mieter');
-		expect(document.body.textContent).toContain('Schritt 1 von 5');
+		expect(document.querySelector('h2')!.textContent).toMatch(/Schritt 1 von 5:\s*Mieter/);
 		next();
+		await settle();
 		expect(byTestId('form-error')!.textContent).toContain('Bitte wählen Sie einen Mieter aus');
 		expect(heading()).toBe('Mieter');
+		// the field with the error gets the focus, so its error is read out
+		expect(document.activeElement).toBe(byTestId('contract-tenant-select'));
+		select('contract-tenant-select', 't1');
+		expect(byTestId('form-error')).toBeNull();
 	});
 
 	it('führt Schritt für Schritt weiter und setzt den Fokus auf den neuen Schritt', async () => {
@@ -168,18 +174,75 @@ describe('Mietvertrag erfassen', () => {
 
 	it('meldet einen Fehler beim Speichern und bleibt bei der Prüfung', async () => {
 		await untilReview();
+		// as the backend answers an overlap: English, with the other contract's id
 		fakeBff(() => [
-			409,
-			{ error: { message: 'Der Mietvertrag überschneidet sich mit einem anderen.' } }
+			400,
+			{ error: 'Contract overlaps with existing contract 3f2a0000-0000-4000-8000-000000000000' }
 		]);
 		submit('submit-button');
 		await settle();
-		expect(byTestId('form-error')!.textContent).toContain('überschneidet sich');
+		const error = byTestId('form-error')!.textContent!;
+		expect(error).toContain('überschneidet sich mit einem anderen Mietvertrag');
+		expect(error).not.toContain('Contract');
 		expect(goto).not.toHaveBeenCalled();
 	});
 });
 
+describe('Prüfungen im Mietvertrag', () => {
+	it('versteht Beträge mit Tausendertrennzeichen', async () => {
+		await open();
+		select('contract-tenant-select', 't1');
+		next();
+		select('apartment-select', 'a1');
+		next();
+		type('start-date-input', '2027-01-01');
+		next();
+		type('contract-base-rent-input', "1'450");
+		expect(byTestId('contract-monthly-total')!.textContent).toContain('1’450.00');
+		next();
+		const rent = [...document.querySelectorAll('[data-testid="contract-review-item"]')].find((i) =>
+			i.textContent!.includes('Nettomiete')
+		)!;
+		expect(rent.textContent).toContain('1’450.00');
+	});
+
+	it('fragt nach, wenn der Vertragsbeginn in der Vergangenheit liegt', async () => {
+		await open();
+		select('contract-tenant-select', 't1');
+		next();
+		select('apartment-select', 'a1');
+		next();
+		type('start-date-input', '2020-01-11');
+		expect(byTestId('start-date-notice')!.textContent).toContain('liegt in der Vergangenheit');
+	});
+
+	it('geht bei einer Überschneidung nicht weiter', async () => {
+		await open();
+		select('contract-tenant-select', 't1');
+		next();
+		await settle();
+		select('apartment-select', 'a1'); // its last contract ran 2015–2019
+		next();
+		await settle();
+		type('start-date-input', '2016-01-01');
+		next();
+		expect(byTestId('overlap-warning')).not.toBeNull();
+		expect(document.body.textContent).toContain('Ändern Sie Vertragsbeginn oder Vertragsende');
+		expect(heading()).toBe('Vertragsdauer');
+	});
+});
+
 describe('Entwurf des Mietvertrags', () => {
+	it('legt erst einen Entwurf an, wenn der Benutzer etwas eingibt', async () => {
+		location.url = new URL('http://localhost/contracts/new?tenant=t2');
+		await open();
+		await settle();
+		expect(localStorage.length).toBe(0);
+		select('contract-tenant-select', 't1');
+		await settle();
+		expect(localStorage.length).toBe(1);
+	});
+
 	it('speichert die Angaben im Browser und sagt es', async () => {
 		await open();
 		select('contract-tenant-select', 't1');
@@ -193,7 +256,9 @@ describe('Entwurf des Mietvertrags', () => {
 		expect(byTestId('draft-restored')).not.toBeNull();
 		expect(byTestId<HTMLSelectElement>('contract-tenant-select')!.value).toBe('t2');
 		click('draft-discard');
+		await settle();
 		expect(byTestId('draft-restored')).toBeNull();
+		expect(document.activeElement).toBe(document.querySelector('h2'));
 		expect(byTestId<HTMLSelectElement>('contract-tenant-select')!.value).toBe('');
 		expect(localStorage.length).toBe(0);
 	});
@@ -204,5 +269,7 @@ describe('Entwurf des Mietvertrags', () => {
 		expect(byTestId<HTMLSelectElement>('contract-tenant-select')!.value).toBe('t2');
 		expect(byTestId('tenant-created')!.textContent).toContain('Bruno Meier');
 		expect(byTestId('contract-new-tenant')!.getAttribute('href')).toBe('/tenants/new?for=contract');
+		select('contract-tenant-select', 't1'); // the confirmation is about Bruno, not the new choice
+		expect(byTestId('tenant-created')).toBeNull();
 	});
 });

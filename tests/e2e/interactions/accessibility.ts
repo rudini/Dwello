@@ -129,6 +129,7 @@ const states: Record<string, (page: Page, viewport: Viewport) => Promise<unknown
 		await shows(page, '[data-testid="overlap-warning"]');
 	},
 	'draft-restored': async (page) => {
+		await page.getByTestId('contract-tenant-select').selectOption({ index: 1 }); // a draft starts with an input
 		await page.getByTestId('save-status').getByText('Entwurf gespeichert').waitFor();
 		await page.reload();
 		await shows(page, '[data-testid="draft-restored"]');
