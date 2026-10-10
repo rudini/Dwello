@@ -210,3 +210,14 @@ class TddStepTest(unittest.TestCase):
         self.assertEqual(result.returncode, 1, result.stderr)
         self.assertIn("production code changed: calc.js", result.stderr)
         self.assertNotIn("calc.test.js", result.stderr)
+
+    def test_files_in_test_directories_are_test_code(self):
+        repo = Repo(self, {"calc.py": WRONG_ADD})
+        repo.write("tests/__init__.py", "")
+        repo.write("tests/helpers.py", "PAIR = (1, 2)\n")
+        repo.write("tests/test_calc.py", ADD_TEST)
+
+        result = repo.run("tdd-step", "red", "adds two numbers")
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(repo.subject(), "red: adds two numbers")
