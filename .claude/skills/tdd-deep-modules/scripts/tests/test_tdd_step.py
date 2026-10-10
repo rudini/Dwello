@@ -64,3 +64,14 @@ class TddStepTest(unittest.TestCase):
         self.assertEqual(result.returncode, 1, result.stderr)
         self.assertIn("red needs a failing assertion", result.stderr)
         self.assertEqual(repo.subject(), "init")
+
+    def test_red_is_refused_when_production_code_changed(self):
+        repo = Repo(self, {"calc.py": WRONG_ADD})
+        repo.write("test_calc.py", ADD_TEST)
+        repo.write("calc.py", WRONG_ADD + "\n\ndef helper():\n    return 1\n")
+
+        result = repo.run("tdd-step", "red", "adds two numbers")
+
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn("production code changed: calc.py", result.stderr)
+        self.assertEqual(repo.subject(), "init")
