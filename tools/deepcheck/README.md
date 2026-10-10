@@ -71,7 +71,7 @@ node tools/deepcheck/src/cli.ts scan --use-baseline   # hide baselined modules t
 The hook matches commands like fallow-gate.sh does (`git commit`, `git push`, also after `&&` or `;`). `git -C <dir> commit` is not matched, by either gate; a command that merely mentions it (`echo git commit`) is.
 
 - **On commit** it judges the working tree against HEAD, so unstaged and untracked TypeScript files count too, even if they are not part of the commit.
-- **On push** it judges everything since the merge-base with the upstream (`@{u}`, else `origin/HEAD`), so committed but unpushed modules are covered.
+- **On push** it judges everything since the merge-base with the upstream (`@{u}`, else `origin/HEAD`, else `origin/main`), so committed but unpushed modules are covered. Uncommitted files count too. With none of these refs it says so and judges against HEAD only.
 - **Baseline and config** are read at that base. Committing a config or baseline change on its own therefore changes what the local hook uses, while CI (merge-base with the PR base) keeps the PR base's versions until they are merged.
 - Only a gate verdict blocks. A crash (e.g. dependencies not installed), a tool error, missing `jq` or `node`, or input that is not JSON fail open with a single notice.
 - The gate takes about 4.5 s with Fallow (3.5 s without) on this repo, so it runs at commit/push, not after every edit.

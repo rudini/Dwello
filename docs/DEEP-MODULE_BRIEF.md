@@ -358,3 +358,52 @@ The full report is `docs/deepcheck-validation.md`.
 - `audit` now takes **4.4–4.5 s** with Fallow and **3.4 s** without (the symbol-based dead-code check added ~1 s).
 
 **Consequence for Phase 3:** do it completely. The after-step mechanism mirrors Fallow's commit/push `PreToolUse` gate.
+
+### 2026-10-10, Phase 3 (integration, complete per the Phase 4 verdict): done
+
+**Exit gates**
+- X3.1 done. `.claude/hooks/deepcheck-gate.sh` is registered as a `PreToolUse` Bash hook (`.claude/settings.json`, timeout 60 s) next to `fallow-gate.sh`. It uses the same mechanism, matcher regex and fail-open policy.
+  - It runs `check --agent` before `git commit` (against HEAD, working tree included) and before `git push` (against the merge-base with `@{u}`, else `origin/HEAD`, else `origin/main`).
+  - It exits 2 with the findings on stderr only on a gate verdict. Crashes, tool errors, missing jq or node and non-JSON input fail open with one notice; a push without any base says so.
+  - Hook semantics were checked against the current hooks docs (code.claude.com/docs/en/hooks): PreToolUse exit 2 blocks the call and shows stderr; the command timeout default is 600 s.
+  - **Verified live in this Claude Code session:** with a temporary forwarding module `src/lib/server/zz-deepcheck-probe.ts`, `git commit --dry-run` was blocked by the hook with "G1 new shallow module 80" and the fixes. After removal the Phase 3 commits went through both gates.
+  - Not matched, by either gate: `git -C <dir> commit`; documented.
+  - The hook runs at commit/push, not after every edit, because the audit takes about 4.5 s. This is "the same mechanism Fallow uses" (section 9).
+  - `test/hook.test.ts` (10 tests) covers block, pass, ignore, tool error, crash, push against the upstream, push of a new branch, push without a base, non-JSON input and registration.
+- X3.2 done. New CI job `deepcheck` ("Deep modules", pull requests only):
+  - Same runner, actions versions, `NODE_VERSION`, npm cache and `fetch-depth: 0` as the `fallow` job.
+  - `npx svelte-kit sync`, then `npm run deepcheck:ci -- "origin/${{ github.base_ref }}"`: annotations, step summary, fails on gate failure.
+  - `.github/workflows/deepcheck-scan.yml`: `workflow_dispatch` with path, top and min_score; markdown to the job summary; JSON and markdown artifact; never blocks; commented weekly schedule; the path input is passed after `--`.
+  - actionlint 1.7.7 (temporary binary outside the repo; shellcheck not installed) is clean on all workflows. `test/workflows.test.ts` asserts the structure, including that the existing jobs are unchanged.
+  - `act` is not available. Dry runs of the exact commands:
+    - The scan step with an empty path, `src/lib`, and an injection attempt `--output=...`: exit 0, 0 and 2 respectively; no file written for the injection.
+    - `npm run deepcheck:ci -- origin/main`: exit 0, 17 changed modules pass, summary written.
+- X3.3 done. The same probe module was caught by the live hook (blocked) and by `npm run deepcheck:ci -- origin/main` (exit 1, `::error` G1, score 80). After removal, ci, audit and the hook all exit 0. The round-1 reviewer reproduced this in a worktree (hook exit 2 / ci exit 1, score 72) and round 2 for push.
+- X3.4 done.
+  - `tools/deepcheck/README.md` has a Wiring section, commit/push semantics and the items not verified.
+  - CLAUDE.md: run `npm run deepcheck:audit` after each implementation step and `npm run deepcheck:scan` only on request, plus a Gotchas entry for the gate. There is no AGENTS.md in this repo.
+  - Not verifiable here: a real GitHub Actions run of both workflows.
+- XC.1 done, failing checks first:
+  - hook tests: script missing, exit 127;
+  - workflow tests: job and file missing;
+  - README/CLAUDE.md tests: wording missing;
+  - each review fix: red first.
+- XC.2 done. Two review rounds.
+  - Round 1:
+    - A node crash blocked the commit silently.
+    - Push checked nothing on a clean tree.
+    - The scan path could be injected as an option.
+    - Non-JSON stdin made the hook exit 5.
+    - Undocumented commit/push semantics.
+  - Round 2:
+    - A push without upstream or origin/HEAD skipped silently (this checkout has no origin/HEAD); now falls back to origin/main, else a notice.
+    - Message wording.
+  - All fixed with tests.
+  - Accepted and documented: uncommitted and untracked files count at commit and push; a command that only mentions `git commit` is matched, as with Fallow's gate.
+- XC.3 done: 4 commits in Phase 3 plus this log.
+- XC.4 done. Only additions: one new CI job, one new workflow, one hook and its settings entry, and CLAUDE.md lines. Existing jobs and application code are unchanged; no repository or branch-protection settings were touched.
+
+**Final state.**
+- `npm run lint` and `npm run check` pass; 1461 frontend tests pass; backend type-check passes with 462 tests; `fallow audit --base 9dafc39` passes.
+- 163 deepcheck tests.
+- Baseline: 0 flagged modules (threshold 65) of 124 analyzed.

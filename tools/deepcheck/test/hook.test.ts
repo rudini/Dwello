@@ -28,9 +28,10 @@ describe('deepcheck Claude Code hook (commit/push gate, like fallow-gate.sh)', (
 		expect(result.stdout).toBe('');
 	});
 
-	it('is silent and lets git push through when the changed code passes', () => {
+	it('is silent and lets git commit through when the changed code passes', () => {
 		const root = writeRepo({ 'src/store.ts': STORE });
-		expect(hook(root, 'git push -u origin main')).toMatchObject({ status: 0, stdout: '', stderr: '' });
+		writeFiles(root, { 'src/more.ts': 'export const more = 1;\n' });
+		expect(hook(root, 'git commit -am x')).toMatchObject({ status: 0, stdout: '', stderr: '' });
 	});
 
 	it('ignores commands that are not git commit or push, without running deepcheck', () => {
@@ -83,5 +84,25 @@ describe('deepcheck Claude Code hook (commit/push gate, like fallow-gate.sh)', (
 		const result = hook(writeRepo({ 'src/store.ts': STORE }), '', HOOK, 'not json');
 		expect(result.status).toBe(0);
 		expect(result.stderr).toBe('deepcheck-gate: hook input is not JSON, skipping deepcheck.\n');
+	});
+
+	it('on the first push of a new branch without upstream or origin/HEAD, judges against origin/main', () => {
+		const root = writeRepo({ 'src/store.ts': STORE });
+		const remote = writeProject({});
+		git(remote, 'init', '-q', '--bare');
+		git(root, 'remote', 'add', 'origin', remote);
+		git(root, 'push', '-q', 'origin', 'main');
+		git(root, 'checkout', '-q', '-b', 'feature');
+		writeFiles(root, { 'src/shallow.ts': SHALLOW_MODULE });
+		commitAll(root, 'shallow on a new branch');
+		const result = hook(root, 'git push -u origin feature');
+		expect(result.status).toBe(2);
+		expect(result.stderr).toContain('before committing or pushing');
+	});
+
+	it('says so when a push has no base to compare with, and judges against HEAD only', () => {
+		const result = hook(writeRepo({ 'src/store.ts': STORE }), 'git push');
+		expect(result.status).toBe(0);
+		expect(result.stderr).toBe('deepcheck-gate: no upstream, origin/HEAD or origin/main; push judged against HEAD only.\n');
 	});
 });

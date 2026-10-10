@@ -29,12 +29,17 @@ fi
 ROOT="${CLAUDE_PROJECT_DIR:-$(pwd)}"
 CLI="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)/tools/deepcheck/src/cli.ts"
 
-# A commit is judged against HEAD (working tree included); a push against the upstream, so commits
-# not pushed yet are covered even when the tree is clean (like fallow audit's merge-base).
+# A commit is judged against HEAD (working tree included); a push against the upstream (else origin/HEAD,
+# else origin/main), so commits not pushed yet are covered even when the tree is clean (like fallow audit).
 ARGS=(check --agent)
 if printf '%s\n' "$CMD" | grep -Eq '(^|[[:space:];|&()])git[[:space:]]+push([[:space:]]|$)'; then
-  BASE="$(cd "$ROOT" && { git merge-base HEAD '@{u}' 2>/dev/null || git merge-base HEAD origin/HEAD 2>/dev/null || true; })"
-  if [ -n "$BASE" ]; then ARGS+=(--changed-since "$BASE"); fi
+  BASE="$(cd "$ROOT" && { git merge-base HEAD '@{u}' 2>/dev/null || git merge-base HEAD origin/HEAD 2>/dev/null ||
+    git merge-base HEAD origin/main 2>/dev/null || true; })"
+  if [ -n "$BASE" ]; then
+    ARGS+=(--changed-since "$BASE")
+  else
+    echo "deepcheck-gate: no upstream, origin/HEAD or origin/main; push judged against HEAD only." >&2
+  fi
 fi
 
 TMP_OUT="$(mktemp)"
@@ -53,7 +58,7 @@ fi
 # Only a gate verdict blocks; a crash (e.g. dependencies not installed) also exits 1 but has no verdict.
 if [ "$STATUS" -eq 1 ] && grep -q 'fail the deep-module gate' "$TMP_OUT"; then
   {
-    echo "deepcheck-gate: blocked: changed modules fail the deep-module gate. Fix the design before committing"
+    echo "deepcheck-gate: blocked: changed modules fail the deep-module gate. Fix the design before committing or pushing"
     echo "deepcheck-gate: (details: npm run deepcheck:audit; deliberate exception: // deepcheck-ignore-file -- reason)."
     cat "$TMP_OUT"
   } >&2
