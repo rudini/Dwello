@@ -34,3 +34,13 @@ class TddStepTest(unittest.TestCase):
         self.assertEqual(result.returncode, 1, result.stderr)
         self.assertIn("red needs a failing assertion", result.stderr)
         self.assertEqual(repo.subject(), "init")
+
+    def test_red_is_refused_when_no_tests_ran(self):
+        repo = Repo(self, {"calc.py": WRONG_ADD})
+        repo.write("notes.txt", "nothing to test yet")
+
+        result = repo.run("tdd-step", "red", "nothing")
+
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn("red needs a failing assertion", result.stderr)
+        self.assertEqual(repo.subject(), "init")
