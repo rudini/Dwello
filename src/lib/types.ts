@@ -151,6 +151,7 @@ export interface ContractWithDetails extends RentalContract {
 
 // Contracts list response
 export interface ContractsListData {
+	today: string; // the server's day, so that every Vertragsstatus is computed from the same one
 	contracts: ContractWithDetails[];
 	total: number;
 	page: number;

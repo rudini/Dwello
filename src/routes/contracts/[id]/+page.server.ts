@@ -1,10 +1,12 @@
 import type { RentalContract, Tenant, Apartment, Building, ApartmentStatus } from '$lib/types';
 import type { Actions, PageServerLoad } from './$types';
 import { error, fail, redirect } from '@sveltejs/kit';
+import { localToday } from '$lib/contract-status';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
 interface ContractDetailsData {
+	today: string; // the server's day, for the Vertragsstatus
 	contract: RentalContract & {
 		tenant: Tenant;
 		apartment: Apartment;
@@ -74,6 +76,7 @@ export const load: PageServerLoad = async ({ params, fetch }): Promise<ContractD
 			};
 
 		return {
+			today: localToday(),
 			contract,
 			rentBreakdown: {
 				baseRent,
@@ -96,7 +99,7 @@ export const actions: Actions = {
 		const response = await fetch(`${BACKEND_URL}/api/v1/contracts/${params.id}`, {
 			method: 'PUT',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ endDate: new Date().toISOString().split('T')[0] })
+			body: JSON.stringify({ endDate: localToday() })
 		});
 		if (!response.ok) {
 			return fail(response.status, { endError: 'Mietvertrag konnte nicht beendet werden.' });

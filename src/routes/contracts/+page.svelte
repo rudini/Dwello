@@ -66,7 +66,7 @@
 			</h2>
 			<ul class="flex flex-col divide-y divide-line rounded-panel border border-line bg-surface">
 				{#each data.contracts as contract (contract.id)}
-					<ContractRow {contract} />
+					<ContractRow {contract} today={data.today} />
 				{/each}
 			</ul>
 		</section>

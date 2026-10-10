@@ -32,9 +32,15 @@ const contract = (startDate: string, endDate: string | null) => ({
 	}
 });
 
-function open(startDate = '2024-04-01', endDate: string | null = null, form: unknown = null) {
+function open(
+	startDate = '2024-04-01',
+	endDate: string | null = null,
+	form: unknown = null,
+	today = '2026-10-10'
+) {
 	show(ContractPage, {
 		data: {
+			today,
 			contract: contract(startDate, endDate),
 			rentBreakdown: { baseRent: 950, additionalRent: 50, advancePayment: 180, total: 1180 }
 		},
@@ -55,6 +61,11 @@ describe('Mietvertragsdetail', () => {
 		expect(text('contract-status')).toBe('Künftig');
 		expect(document.body.textContent).toContain('1.11.2099');
 		expect(document.body.textContent).not.toMatch(/AKTIV|heute/);
+	});
+
+	it('bestimmt den Vertragsstatus mit dem Tag des Servers', () => {
+		open('2099-11-01', null, null, '2099-11-01');
+		expect(text('contract-status')).toBe('Laufend');
 	});
 
 	it('zeigt einen laufenden Mietvertrag ohne Ende als laufend und unbefristet', () => {
@@ -97,6 +108,16 @@ describe('Mietvertragsdetail', () => {
 		expect(document.querySelector('[role=dialog]')!.textContent).toContain(
 			'Beenden Sie ihn zuerst'
 		);
+	});
+
+	it('sagt vor dem Löschen, dass ein Mietvertrag mit Abrechnungen bleibt', () => {
+		open('2024-01-01', '2024-12-31');
+		click('contract-delete-button');
+		const words = document.querySelector('[role=dialog]')!.textContent!.replace(/\s+/g, ' ');
+		expect(words).toContain(
+			'Ein Mietvertrag mit Nebenkostenabrechnungen kann nicht gelöscht werden.'
+		);
+		expect(words).not.toContain('bleiben erhalten');
 	});
 
 	it('zeigt im Löschdialog, warum das Backend das Löschen ablehnt', () => {

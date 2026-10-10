@@ -26,9 +26,14 @@ const contract = (id: string, tenantName: string, startDate: string, endDate: st
 	totalRent: 1100
 });
 
-const list = (contracts: ReturnType<typeof contract>[], url = 'http://localhost/contracts') => {
+const list = (
+	contracts: ReturnType<typeof contract>[],
+	url = 'http://localhost/contracts',
+	today = '2026-10-10'
+) => {
 	location.url = new URL(url);
 	const data = {
+		today,
 		contracts,
 		total: contracts.length,
 		page: 1,
@@ -53,6 +58,21 @@ describe('Mietvertragsliste', () => {
 		expect(body).toContain('Künftig');
 		expect(body).toContain('ab 1.11.2099, unbefristet');
 		expect(body).not.toMatch(/heute|AKTIV|Laufend/);
+	});
+
+	it('bestimmt den Vertragsstatus mit dem Tag des Servers', () => {
+		const body = row(
+			list([contract('c1', 'Anna Keller', '2099-11-01', null)], undefined, '2099-11-01'),
+			'c1'
+		);
+
+		expect(body).toContain('Laufend');
+	});
+
+	it('filtert auch nach künftigen Mietverträgen', () => {
+		const body = list([], 'http://localhost/contracts?status=future');
+
+		expect(body).toMatch(/<option value="future" selected[^>]*>Künftige Mietverträge/);
 	});
 
 	it('zeigt einen laufenden Mietvertrag als laufend', () => {

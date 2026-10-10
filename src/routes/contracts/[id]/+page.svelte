@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
-	import { contractStatusOn, localToday } from '$lib/contract-status';
+	import { contractStatusOn } from '$lib/contract-status';
 	import { addToast } from '$lib/stores';
 	import type { Apartment, Building, RentalContract, Tenant } from '$lib/types';
 	import Button from '$lib/ui/Button.svelte';
@@ -12,6 +12,7 @@
 	import type { ActionData } from './$types';
 
 	interface PageData {
+		today: string;
 		contract: RentalContract & { tenant: Tenant; apartment: Apartment; building: Building };
 		rentBreakdown: {
 			baseRent: number;
@@ -25,7 +26,7 @@
 
 	const contract = $derived(data.contract);
 	const name = $derived(`${contract.tenant.firstName} ${contract.tenant.lastName}`);
-	const status = $derived(contractStatusOn(contract.startDate, contract.endDate, localToday()));
+	const status = $derived(contractStatusOn(contract.startDate, contract.endDate, data.today));
 	let ending = $state(false);
 	// a refused delete (also without JavaScript) shows the dialog with its reason
 	let deleting = $state(untrack(() => !!form?.deleteError));
@@ -117,8 +118,8 @@
 >
 	{#if contract.endDate}
 		<p>
-			Der Mietvertrag von {name} wird endgültig gelöscht. Mietverträge mit Nebenkostenabrechnungen bleiben
-			erhalten.
+			Der Mietvertrag von {name} wird endgültig gelöscht. Ein Mietvertrag mit Nebenkostenabrechnungen
+			kann nicht gelöscht werden.
 		</p>
 	{:else}
 		<p>Ein Mietvertrag ohne Vertragsende kann nicht gelöscht werden. Beenden Sie ihn zuerst.</p>
