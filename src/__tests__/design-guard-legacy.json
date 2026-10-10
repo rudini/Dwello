@@ -31,7 +31,6 @@
 	"src/lib/components/SearchField.svelte",
 	"src/lib/components/StatusBadge.svelte",
 	"src/lib/components/SuggestedCategory.svelte",
-	"src/lib/components/TenantFormFields.svelte",
 	"src/lib/components/TextField.svelte",
 	"src/routes/analytics/+page.svelte",
 	"src/routes/apartments/+page.svelte",
@@ -83,8 +82,6 @@
 	"src/routes/statements/[id]/ReminderHistory.svelte",
 	"src/routes/statements/[id]/ReminderModal.svelte",
 	"src/routes/statements/[id]/edit/+page.svelte",
-	"src/routes/tenants/[id]/edit/+page.svelte",
-	"src/routes/tenants/new/+page.svelte",
 	"src/routes/terms/+page.svelte",
 	"src/styles/globals.css"
 ]
