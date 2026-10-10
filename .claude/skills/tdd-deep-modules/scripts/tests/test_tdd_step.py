@@ -365,3 +365,12 @@ class TddStepTest(unittest.TestCase):
                 repo.commit_all(previous, {"TESTLIST.md": "- [ ] adds\n"})
                 repo.write("calc.py", "def add(a, b):\n    return sum((a, b))\n")
                 self.assert_refused(repo, "refactor", "refactor cannot follow", head=previous)
+
+    def test_output_after_the_unittest_summary_does_not_hide_the_result(self):
+        noisy = "import atexit\nimport sys\natexit.register(lambda: print('bye', file=sys.stderr))\n"
+        repo = Repo(self, {"calc.py": WRONG_ADD})
+        repo.write("test_calc.py", noisy + ADD_TEST)
+
+        result = repo.run("tdd-step", "red", "adds two numbers")
+
+        self.assertEqual(result.returncode, 0, result.stderr)
