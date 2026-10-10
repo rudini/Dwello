@@ -13,7 +13,7 @@ Brief: `docs/REDESIGN_BRIEF.md`. Resume rules: `docs/design/arbeitsregeln.md`.
 | 4 Shell, navigation, dashboard | done | 1 round, 3 Majors + persona Blocker fixed (`reviews/4-review-1.md`) | 0 violations (955733a) | passed (955733a, edf1dc4) |
 | 5 Rental contract wizard | done | 2 rounds (`reviews/5-review-1.md`, `5-review-2.md`), all Blockers/Majors fixed | 0 violations (5 contract-new states) | passed (bd2ea7c, 9d83882) | | | |
 | 6 Statement wizard | done | 2 rounds (`reviews/6-review-1.md`, `6-review-2.md`), all Blockers/Majors fixed | 0 violations (all states, no `@wip`) | passed (15c0ec5, 39eac9f) | | | |
-| 7 Remaining screens | open | | | |
+| 7 Remaining screens | in progress | | | |
 | 8 Remove old design system | open | | | |
 | 9 Final | open | | | |
 
@@ -120,3 +120,8 @@ Brief: `docs/REDESIGN_BRIEF.md`. Resume rules: `docs/design/arbeitsregeln.md`.
 - Biggest risks left: the remaining 102 legacy files (stage 7/8), the statement detail page, data/content issues that are outside the UI (English master data names, PDF content).
 - Persona backlog for stage 7: statement detail (Verteilschlüssel per line, fee base, one name for the fee, "Mietstagen", refund wording), lists as cards/rows on phones with clickable rows, invoice form (date default, building preselected, back to the wizard), contract list ("AKTIV … – heute", Mietzins column), tenant form, help page names, English master data names (display decision), heating profile chart values for screen readers.
 - Review round 2 (`reviews/6-review-2.md`): no Blockers/Majors; minors and the re-runs of Anna and Sven fixed (overlapping statements counted, links per building, status line while the server works, warnings read with their checkbox, warning repeated before creating).
+
+### Stage 7 – Remaining screens
+
+- Plan: 102 legacy files (~9000 lines). Work packages by area in parallel git worktrees (agents run unit/lint/check/fallow; E2E runs centrally after each merge because its ports and database are fixed): A buildings + apartments, B tenants + contracts, C invoices + statements + documents, D settings (config, categories, distribution keys, heating profiles), E help, privacy, terms, analytics, reports. Shared legacy components stay until stage 8. Conventions for all packages: `docs/design/migration-guide.md`.
+- Finding: master data (categories, distribution keys, heating profiles) carry German names (`nameDE`); the old UI showed the English `name` ("Heating", "Caretaker" – persona blocker). New helper `germanName` (`src/lib/names.ts`).
