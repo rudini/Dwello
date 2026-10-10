@@ -31,8 +31,8 @@ def run(root):
     env = {**os.environ, "PYTHONDONTWRITEBYTECODE": "1"}
     done = subprocess.run([sys.executable, "-m", "unittest", "discover"], cwd=root, env=env,
                           capture_output=True, text=True)
-    lines = done.stderr.strip().splitlines()
-    summary = lines[-1] if lines else f"exit code {done.returncode}, no output"
+    verdicts = [line for line in done.stderr.splitlines() if line.startswith(("OK", "FAILED (", "NO TESTS RAN"))]
+    summary = verdicts[-1] if verdicts else f"exit code {done.returncode}, no unittest summary"
     return Run(done.returncode, _outcome(done.returncode, summary), summary)
 
 
