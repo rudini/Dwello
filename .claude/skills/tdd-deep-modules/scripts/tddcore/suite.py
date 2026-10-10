@@ -101,8 +101,9 @@ def _uses_vitest(root):
 def _run_vitest(root):
     with tempfile.TemporaryDirectory() as tmp:
         report = Path(tmp) / "report.json"
-        done = subprocess.run(["npx", "--no-install", "vitest", "run", "--reporter=json",
-                               f"--outputFile={report}"], cwd=root, capture_output=True, text=True)
+        done = subprocess.run(["npx", "--no-install", "vitest", "run", "--reporter=default",
+                               "--reporter=json", f"--outputFile.json={report}"],
+                              cwd=root, capture_output=True, text=True)
         if not report.exists():
             last = (done.stderr.strip() or done.stdout.strip() or "no output").splitlines()[-1]
             return Run(done.returncode, "error", f"vitest wrote no report: {last}", 0, 1)
@@ -110,17 +111,18 @@ def _run_vitest(root):
     summary = f"{data['numFailedTests']} of {data['numTotalTests']} tests failed"
     load_errors = sum(1 for f in data["testResults"] if f["message"])
     ran = data["numTotalTests"] - data["numPendingTests"] - data["numTodoTests"]
-    return Run(done.returncode, _vitest_outcome(done.returncode, data), summary,
+    unhandled = "unhandled error" in done.stderr + done.stdout
+    return Run(done.returncode, _vitest_outcome(done.returncode, data, unhandled), summary,
                data["numFailedTests"], ran + load_errors)
 
 
-def _vitest_outcome(exit_code, data):
+def _vitest_outcome(exit_code, data, unhandled):
     if exit_code == 0:
         return "pass"
     files = data["testResults"]
     messages = [m for f in files for a in f["assertionResults"] for m in a["failureMessages"]]
     load_errors = [f for f in files if f["message"]]
-    if messages and not load_errors and all(m.startswith("AssertionError") for m in messages):
+    if messages and not load_errors and not unhandled and all(m.startswith("AssertionError") for m in messages):
         return "fail"
     return "error"
 
