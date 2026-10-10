@@ -51,7 +51,25 @@ export interface ExcludedModule {
 	reason: 'test' | 'declaration' | 'generated' | 'type-only' | 'barrel' | 'config' | 'suppressed';
 }
 
+/** An invalid inline suppression (G4); it is not applied and counts as a finding. */
+export interface SuppressionFinding {
+	path: string;
+	line: number;
+	message: string;
+}
+
+export interface ListedSuppression {
+	path: string;
+	line: number;
+	kind: 'file' | 'next-line';
+	rule: string | null;
+	reason: string | null;
+	valid: boolean;
+}
+
 export interface Report {
 	modules: ModuleReport[];
 	excluded: ExcludedModule[];
+	suppressionFindings: SuppressionFinding[];
+	suppressions: ListedSuppression[];
 }

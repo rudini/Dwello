@@ -7,7 +7,8 @@ import { fallowIgnorePatterns } from './fallow.ts';
 import { coupling } from './graph.ts';
 import { contentExclusion, fileMetrics, type FileMetrics } from './metrics.ts';
 import { components, shallowScore } from './score.ts';
-import type { ExcludedModule, ModuleReport, Report } from './types.ts';
+import { parseSuppressions, suppressesFile, suppressesLine, suppressionProblems, type Suppression } from './suppress.ts';
+import type { ExcludedModule, ListedSuppression, ModuleReport, Report, SuppressionFinding } from './types.ts';
 
 export interface AnalyzeOptions {
 	root: string;
@@ -43,6 +44,17 @@ function classitisFiles(candidates: Candidate[], minFiles: number): Set<string> 
 	return result;
 }
 
+function withoutSuppressed(file: FileMetrics, suppressions: Suppression[]): FileMetrics {
+	return {
+		...file,
+		passThroughs: file.passThroughs.filter((p) => !suppressesLine(suppressions, 'pass-through', p.line)),
+		leakyExports: file.leakyExports.filter((l) => !suppressesLine(suppressions, 'leaky-export', l.line)),
+		dataOnlyClasses: file.classes
+			.filter((c) => c.dataOnly && !suppressesLine(suppressions, 'data-only-class', c.line))
+			.map((c) => c.name)
+	};
+}
+
 function settingsFor(path: string, config: Config) {
 	const override = config.overrides.filter((o) => matchesAny(path, o.files));
 	return Object.assign({ failThreshold: config.failThreshold, minInterfaceSize: config.minInterfaceSize }, ...override);
@@ -59,10 +71,15 @@ export function analyze({ root, config = loadConfig(root) }: AnalyzeOptions): Re
 		else modulePaths.push(path);
 	}
 	const candidates: Candidate[] = [];
+	const suppressionFindings: SuppressionFinding[] = [];
+	const listed: ListedSuppression[] = [];
 	for (const [path, sf] of loadModules(root, modulePaths)) {
-		const reason = contentExclusion(sf);
+		const suppressions = parseSuppressions(sf.getFullText());
+		suppressionFindings.push(...suppressionProblems(suppressions).map((p) => ({ path, ...p })));
+		listed.push(...suppressions.map((s) => ({ path, ...s, valid: !suppressionProblems([s]).length })));
+		const reason = suppressesFile(suppressions) ? 'suppressed' : contentExclusion(sf);
 		if (reason) excluded.push({ path, reason });
-		else candidates.push({ path, file: fileMetrics(sf) });
+		else candidates.push({ path, file: withoutSuppressed(fileMetrics(sf), suppressions) });
 	}
 	const notCounted = new Set(excluded.filter((e) => e.reason !== 'barrel' && e.reason !== 'type-only').map((e) => e.path));
 	const graph = coupling(root, sources, new Set(sources.filter((s) => !notCounted.has(s))));
@@ -92,5 +109,5 @@ export function analyze({ root, config = loadConfig(root) }: AnalyzeOptions): Re
 		return report;
 	});
 	modules.sort((a, b) => b.score - a.score || byPath(a, b));
-	return { modules, excluded: excluded.sort(byPath) };
+	return { modules, excluded: excluded.sort(byPath), suppressionFindings, suppressions: listed };
 }
