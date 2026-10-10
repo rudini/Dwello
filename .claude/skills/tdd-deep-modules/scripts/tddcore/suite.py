@@ -62,4 +62,15 @@ def _run_vitest(root):
                                f"--outputFile={report}"], cwd=root, capture_output=True, text=True)
         data = json.loads(report.read_text())
     summary = f"{data['numFailedTests']} of {data['numTotalTests']} tests failed"
-    return Run(done.returncode, "pass" if done.returncode == 0 else "fail", summary)
+    return Run(done.returncode, _vitest_outcome(done.returncode, data), summary)
+
+
+def _vitest_outcome(exit_code, data):
+    if exit_code == 0:
+        return "pass"
+    files = data["testResults"]
+    messages = [m for f in files for a in f["assertionResults"] for m in a["failureMessages"]]
+    load_errors = [f for f in files if f["message"]]
+    if messages and not load_errors and all(m.startswith("AssertionError") for m in messages):
+        return "fail"
+    return "error"
