@@ -1,4 +1,4 @@
-import type { ModuleReport, ScanOutput } from './types.ts';
+import type { CheckOutput, GateFinding, ModuleReport, ScanOutput } from './types.ts';
 
 const indent = (lines: string[], by: string) => lines.map((l) => `${by}${l}\n`).join('');
 
@@ -46,8 +46,8 @@ export function renderMarkdown(out: ScanOutput): string {
 const escapeData = (s: string) => s.replace(/%/g, '%25').replace(/\r/g, '%0D').replace(/\n/g, '%0A');
 const escapeProperty = (s: string) => escapeData(s).replace(/:/g, '%3A').replace(/,/g, '%2C');
 
-function annotation(level: 'warning' | 'error', path: string, title: string, message: string): string {
-	return `::${level} file=${escapeProperty(path)},line=1,title=${escapeProperty(title)}::${escapeData(message)}\n`;
+function annotation(level: 'warning' | 'error', path: string, title: string, message: string, line = 1): string {
+	return `::${level} file=${escapeProperty(path)},line=${line},title=${escapeProperty(title)}::${escapeData(message)}\n`;
 }
 
 export function renderGithub(out: ScanOutput): string {
@@ -74,4 +74,46 @@ export function renderExplain(m: ModuleReport, failThreshold: number): string {
 		`components: ${components}`
 	];
 	return `${m.path}: score ${m.score} (${status}, threshold ${failThreshold})\n${indent(lines, '  ')}Why:\n${indent(m.reasons, '  - ')}`;
+}
+
+const gateLabel = (f: GateFinding, tolerance: number) =>
+	f.gate === 'G1'
+		? 'G1 new shallow module'
+		: `G2 worsened from ${f.baselineScore} to ${f.score} (more than the tolerance of ${tolerance})`;
+
+/** Gate result for a terminal; `limit` caps the modules shown (agent mode). */
+export function renderCheck(out: CheckOutput, limit = Infinity): string {
+	const { changed, failed } = out.summary;
+	if (out.passed) return `deepcheck: ${changed} changed module(s) pass the deep-module gate\n`;
+	const shown = out.findings.slice(0, limit);
+	const blocks = shown.map((f) => `  ${gateLabel(f, out.tolerance)}  ${f.score}  ${f.path}\n${indent(f.reasons, '      - ')}`);
+	const more = failed > shown.length ? [`  ... and ${failed - shown.length} more: run deepcheck check for all\n`] : [];
+	const suppressions = out.suppressionFindings.map((f) => `  G4 invalid suppression  ${f.path}:${f.line}\n      - ${f.message}\n`);
+	const total = failed + out.suppressionFindings.length;
+	return `deepcheck: ${total} changed module(s) fail the deep-module gate (threshold ${out.failThreshold}, tolerance ${out.tolerance})\n\n${[...blocks, ...more, ...suppressions].join('\n')}`;
+}
+
+const checkHeadline = (out: CheckOutput) =>
+	out.passed
+		? `${out.summary.changed} changed module(s) pass the deep-module gate`
+		: `${out.summary.failed + out.suppressionFindings.length} changed module(s) fail the deep-module gate`;
+
+export function renderCheckMarkdown(out: CheckOutput): string {
+	const head = `## deepcheck: ${checkHeadline(out)}\n\nThreshold ${out.failThreshold}, tolerance ${out.tolerance}, changes since ${out.base}.\n`;
+	if (out.passed) return head;
+	const rows = out.findings.map((f) => `| ${f.gate} | ${f.score} | ${f.baselineScore ?? 'new'} | ${cell(f.path)} |`);
+	const details = out.findings.map(
+		(f) => `<details><summary><code>${html(f.path)}</code></summary>\n\n${f.reasons.map((r) => `- ${r}`).join('\n')}\n\n</details>`
+	);
+	const g4 = out.suppressionFindings.map((f) => `- G4 ${cell(`${f.path}:${f.line}`)}: ${f.message}`);
+	const table = rows.length ? `\n| Gate | Score | Baseline | Module |\n|---|---:|---:|---|\n${rows.join('\n')}\n\n${details.join('\n')}\n` : '';
+	return `${head}${table}${g4.length ? `\n${g4.join('\n')}\n` : ''}`;
+}
+
+export function renderCheckGithub(out: CheckOutput): string {
+	const modules = out.findings.map((f) =>
+		annotation('error', f.path, `deepcheck ${gateLabel(f, out.tolerance)} (score ${f.score})`, f.reasons.join('\n'))
+	);
+	const suppressions = out.suppressionFindings.map((f) => annotation('error', f.path, 'deepcheck G4 invalid suppression', f.message, f.line));
+	return [...modules, ...suppressions].join('');
 }

@@ -107,3 +107,28 @@ export interface ScanOutput {
 	suppressionFindings: SuppressionFinding[];
 	warnings: string[];
 }
+
+/** A changed module that fails a gate (check). */
+export interface GateFinding extends ModuleReport {
+	gate: 'G1' | 'G2';
+	/** Score in the baseline; null for a module new to the baseline (G1). */
+	baselineScore: number | null;
+}
+
+/** `deepcheck check --format json`; see schema/report.schema.json. */
+export interface CheckOutput {
+	schemaVersion: 1;
+	tool: 'deepcheck';
+	command: 'check';
+	scope: 'changed';
+	/** HEAD (dev loop) or the --changed-since ref. */
+	base: string;
+	failThreshold: number;
+	tolerance: number;
+	passed: boolean;
+	summary: { analyzed: number; changed: number; failed: number; invalidSuppressions: number };
+	findings: GateFinding[];
+	/** G4: invalid suppressions in changed files. */
+	suppressionFindings: SuppressionFinding[];
+	warnings: string[];
+}

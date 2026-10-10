@@ -8,6 +8,8 @@ export interface ScanSelection {
 	top: number;
 	minScore?: number;
 	groupBy?: 'directory' | 'package';
+	/** Paths not to list (--use-baseline). */
+	hidden?: Set<string>;
 }
 
 export const within = (path: string, prefix?: string) =>
@@ -31,7 +33,9 @@ export const inScope = (report: Report, path?: string) =>
 	report.modules.filter((m) => m.eligible && within(m.path, path));
 
 export function scanOutput(root: string, report: Report, config: Config, s: ScanSelection): ScanOutput {
-	const selected = inScope(report, s.path).filter((m) => (s.minScore === undefined ? m.flagged : m.score >= s.minScore));
+	const selected = inScope(report, s.path)
+		.filter((m) => (s.minScore === undefined ? m.flagged : m.score >= s.minScore))
+		.filter((m) => !s.hidden?.has(m.path));
 	const findings = selected.slice(0, s.top);
 	const suppressionFindings = report.suppressionFindings.filter((f) => within(f.path, s.path));
 	return {

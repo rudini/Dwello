@@ -16,7 +16,10 @@
 		"type-check": "tsc --noEmit",
 		"lint": "eslint . --max-warnings 0",
 		"format": "prettier --write .",
-		"deepcheck:scan": "node tools/deepcheck/src/cli.ts scan"
+		"deepcheck:scan": "node tools/deepcheck/src/cli.ts scan",
+		"deepcheck:audit": "node tools/deepcheck/src/cli.ts check --agent",
+		"deepcheck:ci": "node tools/deepcheck/src/cli.ts check --format github --changed-since",
+		"deepcheck:baseline": "node tools/deepcheck/src/cli.ts baseline"
 	},
 	"dependencies": {
 		"@fontsource-variable/inter": "^5.3.0",

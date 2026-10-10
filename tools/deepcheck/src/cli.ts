@@ -3,11 +3,14 @@ import { dirname, relative, resolve, sep } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { parseArgs } from 'node:util';
 import { analyze } from './analyze.ts';
-import { loadConfig } from './config.ts';
+import { loadConfig, type Config } from './config.ts';
 import { ToolError } from './errors.ts';
 import { inScope, scanOutput, within } from './scan.ts';
-import { renderExplain, renderGithub, renderHuman, renderMarkdown } from './render.ts';
-import type { ScanOutput } from './types.ts';
+import { createBaseline, readBaseline, writeBaseline } from './baseline.ts';
+import { evaluateGate } from './gate.ts';
+import { changedFiles } from './git.ts';
+import { renderCheck, renderCheckGithub, renderCheckMarkdown, renderExplain, renderGithub, renderHuman, renderMarkdown } from './render.ts';
+import type { CheckOutput, Report, ScanOutput } from './types.ts';
 
 export interface Io {
 	cwd: string;
@@ -24,11 +27,16 @@ const OPTIONS = {
 	'min-score': { type: 'string' },
 	'group-by': { type: 'string' },
 	output: { type: 'string' },
-	explain: { type: 'string' }
+	explain: { type: 'string' },
+	'changed-since': { type: 'string' },
+	agent: { type: 'boolean', default: false },
+	scope: { type: 'string' },
+	'use-baseline': { type: 'boolean', default: false }
 } as const;
 
 const FORMATS = ['human', 'json', 'markdown', 'github'] as const;
 const GROUPS = ['directory', 'package'] as const;
+const SCOPES = { changed: 'check', all: 'scan' } as const;
 
 export interface Options {
 	fallow: string;
@@ -39,6 +47,10 @@ export interface Options {
 	groupBy?: (typeof GROUPS)[number];
 	output?: string;
 	explain?: string;
+	changedSince?: string;
+	/** Changed scope for an agent loop: top findings only, nothing at all when clean. */
+	agent: boolean;
+	useBaseline: boolean;
 }
 
 function oneOf<T extends string>(name: string, value: string | undefined, allowed: readonly T[]): T | undefined {
@@ -66,9 +78,14 @@ function parseOptions(argv: string[]): { command: string; options: Options; posi
 		minScore: number('min-score', v['min-score'], isScore, 'a number from 0 to 100'),
 		groupBy: oneOf('group-by', v['group-by'], GROUPS),
 		output: v.output,
-		explain: v.explain
+		explain: v.explain,
+		changedSince: v['changed-since'],
+		agent: v.agent,
+		useBaseline: v['use-baseline']
 	};
-	return { command: options.explain ? 'explain' : command, options, positionals: rest };
+	if (options.explain) return { command: 'explain', options, positionals: rest };
+	const scope = oneOf('scope', v.scope, Object.keys(SCOPES) as (keyof typeof SCOPES)[]);
+	return scope ? { command: SCOPES[scope], options, positionals } : { command, options, positionals: rest };
 }
 
 /** Writes the rendered report to --output or stdout; the GitHub format also writes the step summary. */
@@ -96,6 +113,13 @@ function projectPath(io: Io, path: string | undefined): string | undefined {
 	return rel === '' ? undefined : rel;
 }
 
+/** Modules recorded in the baseline that did not worsen beyond the tolerance (hidden by --use-baseline). */
+function baselined(root: string, report: Report, config: Config): Set<string> {
+	const scores = new Map(readBaseline(root).entries.map((e) => [e.path, e.score]));
+	const hidden = report.modules.filter((m) => scores.has(m.path) && m.score - scores.get(m.path)! <= config.tolerance);
+	return new Set(hidden.map((m) => m.path));
+}
+
 function scan(options: Options, io: Io, positionals: string[]): number {
 	if (positionals.length > 1) throw new ToolError(`scan takes at most one path, got ${positionals.join(' ')}`);
 	const path = projectPath(io, positionals[0]);
@@ -103,7 +127,7 @@ function scan(options: Options, io: Io, positionals: string[]): number {
 	const report = analyze({ root: io.cwd, fallow: options.fallow, config });
 	const known = [...report.modules, ...report.excluded].some((m) => within(m.path, path));
 	if (path && !known) throw new ToolError(`${path} matches no source file`);
-	const output = scanOutput(io.cwd, report, config, { ...options, path });
+	const output = scanOutput(io.cwd, report, config, { ...options, path, hidden: options.useBaseline ? baselined(io.cwd, report, config) : undefined });
 	if (options.format !== 'json') report.warnings.forEach((w) => io.stderr(`deepcheck: warning: ${w}\n`));
 	emit(options, io, RENDER[options.format](output), options.format === 'github' ? renderMarkdown(output) : undefined);
 	const failOn = options.failOnScore;
@@ -135,7 +159,63 @@ function suppressions(options: Options, io: Io): number {
 	return 0;
 }
 
-const COMMANDS: Record<string, (options: Options, io: Io, positionals: string[]) => number> = { scan, explain, suppressions };
+/** Failures an agent sees at once; more would bury the first fix. */
+const AGENT_LIMIT = 3;
+
+function check(options: Options, io: Io): number {
+	const config = loadConfig(io.cwd);
+	const changed = changedFiles(io.cwd, options.changedSince);
+	const report = analyze({ root: io.cwd, fallow: options.fallow, config });
+	const result = evaluateGate(report, changed, readBaseline(io.cwd), config);
+	const changedPaths = new Set(changed.map((c) => c.path));
+	const output: CheckOutput = {
+		schemaVersion: 1,
+		tool: 'deepcheck',
+		command: 'check',
+		scope: 'changed',
+		base: options.changedSince ?? 'HEAD',
+		failThreshold: config.failThreshold,
+		tolerance: config.tolerance,
+		passed: result.passed,
+		summary: {
+			analyzed: report.modules.length,
+			changed: report.modules.filter((m) => changedPaths.has(m.path)).length,
+			failed: result.failures.length,
+			invalidSuppressions: result.suppressionFindings.length
+		},
+		findings: result.failures,
+		suppressionFindings: result.suppressionFindings,
+		warnings: report.warnings
+	};
+	if (options.agent && result.passed) return 0;
+	const render: Record<Options['format'], () => string> = {
+		human: () => renderCheck(output, options.agent ? AGENT_LIMIT : Infinity),
+		json: () => `${JSON.stringify(output, null, 2)}\n`,
+		markdown: () => renderCheckMarkdown(output),
+		github: () => renderCheckGithub(output)
+	};
+	emit(options, io, render[options.format](), options.format === 'github' ? renderCheckMarkdown(output) : undefined);
+	return result.passed ? 0 : 1;
+}
+
+function baseline(options: Options, io: Io): number {
+	const config = loadConfig(io.cwd);
+	const report = analyze({ root: io.cwd, fallow: options.fallow, config });
+	const created = createBaseline(report, config);
+	writeBaseline(io.cwd, created);
+	io.stdout(
+		`deepcheck: baseline .deepcheck-baseline.json written: ${created.entries.length} module(s) at or above ${config.failThreshold} of ${report.modules.length} analyzed\n`
+	);
+	return 0;
+}
+
+const COMMANDS: Record<string, (options: Options, io: Io, positionals: string[]) => number> = {
+	scan,
+	check,
+	baseline,
+	explain,
+	suppressions
+};
 
 function run(argv: string[], io: Io): number {
 	const { command: name, options, positionals } = parseOptions(argv);

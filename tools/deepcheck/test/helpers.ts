@@ -1,16 +1,39 @@
-import { mkdtempSync, mkdirSync, writeFileSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
+import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 
 /** Writes a throwaway project (path -> content) into a temp dir and returns its root. */
 export function writeProject(files: Record<string, string>): string {
 	const root = mkdtempSync(join(tmpdir(), 'deepcheck-'));
+	writeFiles(root, files);
+	return root;
+}
+
+export function writeFiles(root: string, files: Record<string, string>): void {
 	for (const [path, content] of Object.entries(files)) {
 		mkdirSync(dirname(join(root, path)), { recursive: true });
 		writeFileSync(join(root, path), content);
 	}
+}
+
+export const git = (root: string, ...args: string[]) =>
+	execFileSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@t', ...args], { cwd: root, encoding: 'utf8' });
+
+/** A project in a fresh git repository on branch main with one commit of `files`. */
+export function writeRepo(files: Record<string, string>): string {
+	const root = writeProject(files);
+	git(root, 'init', '-q', '-b', 'main');
+	commitAll(root, 'initial');
 	return root;
 }
+
+export function commitAll(root: string, message: string): void {
+	git(root, 'add', '-A');
+	git(root, 'commit', '-q', '--allow-empty', '-m', message);
+}
+
+export const removeFile = (root: string, path: string) => rmSync(join(root, path));
 
 /** Many statements behind one small exported function. */
 export const DEEP_MODULE = `
