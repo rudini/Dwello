@@ -159,9 +159,48 @@ function exportedNames(sf: SourceFile): Set<string> {
 	return names;
 }
 
+function declaredNames(s: Statement): string[] {
+	if (Node.isVariableStatement(s)) return s.getDeclarations().map((d) => d.getName());
+	return (Node.isFunctionDeclaration(s) || Node.isClassDeclaration(s)) && s.getName() ? [s.getName()!] : [];
+}
+
+const topLevel = (node: Node): Node => (node.getParent() === node.getSourceFile() || !node.getParent() ? node : topLevel(node.getParent()!));
+
+/**
+ * Non-exported top-level declarations nothing else in the file refers to, also through other dead ones (Phase 4:
+ * padding a shallow module with unused internals must not make it look deeper).
+ */
+function deadDeclarations(sf: SourceFile): Set<Node> {
+	const candidates = sf.getStatements().filter((s) => !hasExportKeyword(s) && declaredNames(s).length > 0);
+	const uses = sf.getDescendantsOfKind(SyntaxKind.Identifier).map((id) => ({ text: id.getText(), owner: topLevel(id) }));
+	const dead = new Set<Node>();
+	for (let changed = true; changed; ) {
+		changed = false;
+		for (const s of candidates.filter((c) => !dead.has(c))) {
+			const names = declaredNames(s);
+			if (uses.some((u) => names.includes(u.text) && u.owner !== s && !dead.has(u.owner))) continue;
+			dead.add(s);
+			changed = true;
+		}
+	}
+	return dead;
+}
+
+const deadCache = new WeakMap<SourceFile, Set<Node>>();
+
+/** Visits every descendant outside dead declarations. */
+function forEachLive(sf: SourceFile, visit: (node: Node) => void): void {
+	if (!deadCache.has(sf)) deadCache.set(sf, deadDeclarations(sf));
+	const dead = deadCache.get(sf)!;
+	sf.forEachDescendant((node, traversal) => {
+		if (dead.has(node)) traversal.skip();
+		else visit(node);
+	});
+}
+
 function implementationSize(sf: SourceFile): number {
 	let size = 0;
-	sf.forEachDescendant((node) => {
+	forEachLive(sf, (node) => {
 		if (STATEMENT_KINDS.has(node.getKind()) && !isOverload(node) && !isAmbient(node)) size++;
 		else if (Node.isArrowFunction(node) && !Node.isBlock(node.getBody())) size++;
 	});
@@ -171,7 +210,7 @@ function implementationSize(sf: SourceFile): number {
 /** Calls, constructions, binary and conditional expressions and template strings: work done inside statements. */
 function operations(sf: SourceFile): number {
 	let total = 0;
-	sf.forEachDescendant((node) => {
+	forEachLive(sf, (node) => {
 		if (OPERATION_KINDS.has(node.getKind()) && !isAmbient(node)) total++;
 	});
 	return total;
@@ -187,7 +226,7 @@ const OPERATION_KINDS = new Set([
 
 function complexity(sf: SourceFile): number {
 	let total = 0;
-	sf.forEachDescendant((node) => {
+	forEachLive(sf, (node) => {
 		if (DECISION_KINDS.has(node.getKind()) || isFunction(node)) total++;
 		else if (Node.isBinaryExpression(node) && LOGICAL_OPERATORS.has(node.getOperatorToken().getKind())) total++;
 	});
@@ -252,7 +291,7 @@ function isPassThrough(node: Node, name: string): boolean {
 
 function namedFunctions(sf: SourceFile): { node: Node; name: string }[] {
 	const found: { node: Node; name: string }[] = [];
-	sf.forEachDescendant((node) => {
+	forEachLive(sf, (node) => {
 		const name = isFunction(node) && !isOverload(node) ? functionName(node) : undefined;
 		if (name) found.push({ node, name });
 	});
