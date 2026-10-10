@@ -119,11 +119,11 @@ export function overlapWarning(
 
 /** Choice of an apartment: rented apartments cannot be chosen, except the one of the contract being edited */
 export function apartmentOption(
-	apartment: { unit: string; building: string },
+	apartment: { unit: string; building: string; size?: string },
 	availability: AvailabilityInfo | undefined,
 	isCurrent: boolean
 ): { label: string; disabled: boolean } {
-	const name = `Wohnung ${apartment.unit} - ${apartment.building}`;
+	const name = `Wohnung ${apartment.unit} - ${apartment.building}${apartment.size ? `, ${apartment.size}` : ''}`;
 	if (isCurrent) return { label: `${name} (aktuell)`, disabled: false };
 	if (availability?.hasOngoingContract)
 		return { label: `${name} (nicht verfügbar)`, disabled: true };

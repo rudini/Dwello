@@ -14,7 +14,7 @@
 		error
 	}: {
 		apartmentId: string;
-		apartments: { id: string; unit: string; building: string }[];
+		apartments: { id: string; unit: string; building: string; size?: string }[];
 		availability: Map<string, AvailabilityInfo>;
 		loading: boolean;
 		notice: string | null; // when the chosen apartment becomes free

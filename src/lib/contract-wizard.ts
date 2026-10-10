@@ -67,12 +67,12 @@ export const normalizeAmounts = (values: ContractFormValues): ContractFormValues
 
 /** Plausibility hint: a start in the past is allowed (recording an old contract) but often a mistyped date */
 export function startDateNotice(startDate: string, today: string): string | null {
-	return startDate && startDate < today
+	return startDate && !impossible(startDate) && startDate < today
 		? `Der Vertragsbeginn ${formatDateLong(startDate)} liegt in der Vergangenheit. Stimmt das Datum?`
 		: null;
 }
 
-/** The contract in words, one line per fact, each with the step that changes it */
+/** The contract in words, one line per fact, each with the step and the field (id or name) that change it */
 export function contractSummary(
 	values: ContractFormValues,
 	tenants: { id: string; name: string }[],
@@ -85,23 +85,46 @@ export function contractSummary(
 		{
 			label: 'Mieter',
 			value: tenants.find((t) => t.id === values.tenantId)?.name ?? '',
-			step: 1 as number | null
+			step: 1 as number | null,
+			field: 'tenant'
 		},
 		{
 			label: 'Wohnung',
 			value: apartment ? `Wohnung ${apartment.unit} - ${apartment.building}` : '',
-			step: 2
+			step: 2,
+			field: 'apartment'
 		},
-		{ label: 'Vertragsbeginn', value: formatDateLong(values.startDate), step: 3 },
+		{
+			label: 'Vertragsbeginn',
+			value: formatDateLong(values.startDate),
+			step: 3,
+			field: 'startDate'
+		},
 		{
 			label: 'Vertragsende',
 			value: values.isUnlimited ? 'Unbefristet' : formatDateLong(values.endDate),
-			step: 3
+			step: 3,
+			field: values.isUnlimited ? 'duration' : 'endDate'
 		},
-		{ label: 'Nettomiete', value: formatCurrency(amount(values.baseRent)), step: 4 },
-		{ label: 'Akonto', value: formatCurrency(amount(values.advancePayment)), step: 4 },
-		{ label: 'Zusatzmiete', value: formatCurrency(amount(values.additionalRent)), step: 4 },
-		{ label: 'Monatlich total', value: formatCurrency(gross), step: null }
+		{
+			label: 'Nettomiete',
+			value: formatCurrency(amount(values.baseRent)),
+			step: 4,
+			field: 'baseRent'
+		},
+		{
+			label: 'Akonto',
+			value: formatCurrency(amount(values.advancePayment)),
+			step: 4,
+			field: 'advancePayment'
+		},
+		{
+			label: 'Zusatzmiete',
+			value: formatCurrency(amount(values.additionalRent)),
+			step: 4,
+			field: 'additionalRent'
+		},
+		{ label: 'Monatlich total', value: formatCurrency(gross), step: null, field: '' }
 	];
 }
 
@@ -128,7 +151,7 @@ export function startValues(
 
 /** Apartments to choose from: free ones first, rented ones shown but not selectable */
 export function apartmentChoices(
-	apartments: { id: string; unit: string; building: string }[],
+	apartments: { id: string; unit: string; building: string; size?: string }[],
 	availability: Map<string, AvailabilityInfo>
 ) {
 	return apartments

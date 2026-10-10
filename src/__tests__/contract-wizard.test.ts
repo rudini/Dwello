@@ -71,14 +71,14 @@ describe('Mietvertrag Schritt für Schritt', () => {
 
 	it('fasst den Mietvertrag vor dem Speichern in Worten zusammen', () => {
 		expect(contractSummary(filled, tenants, apartments)).toEqual([
-			{ label: 'Mieter', value: 'Anna Keller', step: 1 },
-			{ label: 'Wohnung', value: 'Wohnung 2.01 - Ahornhof', step: 2 },
-			{ label: 'Vertragsbeginn', value: 'Mittwoch, 1. Januar 2025', step: 3 },
-			{ label: 'Vertragsende', value: 'Unbefristet', step: 3 },
-			{ label: 'Nettomiete', value: 'CHF\u00a0950.00', step: 4 },
-			{ label: 'Akonto', value: 'CHF\u00a0180.00', step: 4 },
-			{ label: 'Zusatzmiete', value: 'CHF\u00a00.00', step: 4 },
-			{ label: 'Monatlich total', value: 'CHF\u00a01’130.00', step: null } // a sum, changed through its parts
+			{ label: 'Mieter', value: 'Anna Keller', step: 1, field: 'tenant' },
+			{ label: 'Wohnung', value: 'Wohnung 2.01 - Ahornhof', step: 2, field: 'apartment' },
+			{ label: 'Vertragsbeginn', value: 'Mittwoch, 1. Januar 2025', step: 3, field: 'startDate' },
+			{ label: 'Vertragsende', value: 'Unbefristet', step: 3, field: 'duration' },
+			{ label: 'Nettomiete', value: 'CHF\u00a0950.00', step: 4, field: 'baseRent' },
+			{ label: 'Akonto', value: 'CHF\u00a0180.00', step: 4, field: 'advancePayment' },
+			{ label: 'Zusatzmiete', value: 'CHF\u00a00.00', step: 4, field: 'additionalRent' },
+			{ label: 'Monatlich total', value: 'CHF\u00a01’130.00', step: null, field: '' } // a sum, changed through its parts
 		]);
 		const limited = { ...filled, isUnlimited: false, endDate: '2026-12-31' };
 		expect(contractSummary(limited, tenants, apartments)[3].value).toBe(
@@ -122,6 +122,14 @@ describe('Startwerte des Mietvertrags', () => {
 });
 
 describe('Wohnungen zur Auswahl', () => {
+	it('nennt Zimmer und Fläche, damit der Mietzins eingeschätzt werden kann', () => {
+		const [choice] = apartmentChoices(
+			[{ id: 'a1', unit: '2.02', building: 'Musterhaus', size: '2.5 Zimmer, 65 m²' }],
+			new Map()
+		);
+		expect(choice.label).toBe('Wohnung 2.02 - Musterhaus, 2.5 Zimmer, 65 m²');
+	});
+
 	it('nennt freie Wohnungen zuerst und sperrt vermietete', () => {
 		const choices = apartmentChoices(
 			[
@@ -174,5 +182,7 @@ describe('Beträge und Daten wie in der Schweiz geschrieben', () => {
 		);
 		expect(startDateNotice('2026-11-01', '2026-10-10')).toBeNull();
 		expect(startDateNotice('', '2026-10-10')).toBeNull();
+		// an impossible year gets its own error, not a misleading "in the past"
+		expect(startDateNotice('12025-01-01', '2026-10-10')).toBeNull();
 	});
 });

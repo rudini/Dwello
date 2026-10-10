@@ -25,7 +25,7 @@
 	// The invoice form returns here after saving and warns about a date outside the period;
 	// with one building missing invoices it is preselected
 	const newInvoice = $derived(
-		`/invoices/new?${missing.length === 1 ? `building=${missing[0].buildingId}&` : ''}returnTo=/statements/generate&periodStart=${period.periodStart}&periodEnd=${period.periodEnd}`
+		`/invoices/new?${missing.length === 1 ? `building=${missing[0].buildingId}&` : ''}returnTo=${encodeURIComponent('/statements/generate?schritt=3')}&periodStart=${period.periodStart}&periodEnd=${period.periodEnd}`
 	);
 </script>
 

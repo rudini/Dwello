@@ -101,7 +101,7 @@
 <Select
 	id="managementFeeDistributionKeyId"
 	label="Verteilung der Verwaltungspauschale"
-	help="Die Pauschale wird so auf die Wohnungen verteilt, je Mieter nach Mietstagen."
+	help="Nach diesem Verteilschlüssel wird die Pauschale auf die Wohnungen verteilt; jeder Mieter trägt den Teil seiner Mietstage."
 	options={[
 		{ value: '', label: 'Gleichmässig pro Wohnung' },
 		...distributionKeys.map((key) => ({ value: key.id, label: key.name }))

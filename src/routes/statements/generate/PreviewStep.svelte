@@ -44,6 +44,10 @@
 	<div class="flex flex-col gap-1 rounded-panel bg-sunken p-4">
 		<dt class="text-ink-muted">Kosten aller Abrechnungen</dt>
 		<dd class="font-semibold tabular-nums text-ink">{formatCurrency(total)}</dd>
+		<!-- Glossary (Vermieter, Proration): the landlord bears the costs of vacancy -->
+		<dd class="text-ink-muted">
+			Den Anteil leerer Wohnungen trägt der Vermieter; er ist in diesem Betrag nicht enthalten.
+		</dd>
 	</div>
 </dl>
 

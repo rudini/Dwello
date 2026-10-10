@@ -15,4 +15,25 @@ describe('Neuer Mietvertrag laden', () => {
 			'http://localhost:3001/api/v1/apartments?limit=1000'
 		]);
 	});
+
+	it('nennt Zimmer und Fläche jeder Wohnung', async () => {
+		const fetch = (async (url: string) =>
+			Response.json(
+				url.includes('tenants')
+					? { tenants: [] }
+					: {
+							apartments: [
+								{
+									id: 'a1',
+									number: '2.02',
+									buildingName: 'Musterhaus',
+									rooms: '2.5',
+									area: '65.00'
+								}
+							]
+						}
+			)) as typeof globalThis.fetch;
+		const data = (await load({ fetch } as never)) as { apartments: { size: string }[] };
+		expect(data.apartments[0].size).toBe('2.5 Zimmer, 65 m²');
+	});
 });

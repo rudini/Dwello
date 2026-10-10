@@ -175,6 +175,16 @@ describe('Mietvertrag erfassen', () => {
 		expect(heading()).toBe('Miete');
 	});
 
+	it('setzt beim Ändern aus der Prüfung den Fokus auf das Feld, das geändert wird', async () => {
+		await untilReview();
+		const advance = [...document.querySelectorAll('[data-testid="contract-review-item"]')].find(
+			(item) => item.textContent!.includes('Akonto')
+		)!;
+		click(advance.querySelector('button')!);
+		await settle();
+		expect(document.activeElement!.id).toBe('advancePayment');
+	});
+
 	it('meldet einen Fehler beim Speichern und bleibt bei der Prüfung', async () => {
 		await untilReview();
 		// as the backend answers an overlap: English, with the other contract's id
@@ -295,6 +305,8 @@ describe('Entwurf des Mietvertrags', () => {
 		writeDraft(localStorage, 'contract', { tenantId: 't2', baseRent: '900' }, new Date());
 		await open();
 		expect(byTestId('draft-restored')).not.toBeNull();
+		await settle();
+		expect(document.activeElement).toBe(byTestId('draft-restored')); // read out right away
 		expect(byTestId<HTMLSelectElement>('contract-tenant-select')!.value).toBe('t2');
 		click('draft-discard');
 		await settle();
@@ -309,6 +321,8 @@ describe('Entwurf des Mietvertrags', () => {
 		await open();
 		expect(byTestId<HTMLSelectElement>('contract-tenant-select')!.value).toBe('t2');
 		expect(byTestId('tenant-created')!.textContent).toContain('Bruno Meier');
+		await settle();
+		expect(document.activeElement).toBe(byTestId('tenant-created')); // read out right away
 		expect(byTestId('contract-new-tenant')!.getAttribute('href')).toBe('/tenants/new?for=contract');
 		select('contract-tenant-select', 't1'); // the confirmation is about Bruno, not the new choice
 		expect(byTestId('tenant-created')).toBeNull();

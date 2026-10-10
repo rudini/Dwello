@@ -111,12 +111,14 @@
 	{/if}
 	<ReminderFeedback reminder={form?.reminder} />
 
-	<!-- min-w-0: a wide cost table scrolls inside its box instead of widening the page -->
+	<!-- Full width so every amount is visible; min-w-0: if still too wide it scrolls inside, not the page -->
+	<div class="min-w-0">
+		<Panel title="Kostenaufstellung">
+			<CostTable {statement} />
+		</Panel>
+	</div>
 	<div class="grid gap-8 lg:grid-cols-3">
 		<div class="flex min-w-0 flex-col gap-8 lg:col-span-2">
-			<Panel title="Kostenaufstellung">
-				<CostTable {statement} />
-			</Panel>
 			<PaymentPanel {statement} />
 			<ReminderHistory reminders={data.reminders} />
 		</div>

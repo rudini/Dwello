@@ -18,6 +18,7 @@ import GeneratePage from '../routes/statements/generate/+page.svelte';
 import EditStatementPage from '../routes/statements/[id]/edit/+page.svelte';
 import { byTestId, click, fireEvent, settle, show, submit } from './helpers/dom';
 import { statement } from './helpers/statement';
+import { browserStorage, writeDraft } from '$lib/wizard-draft';
 
 const MONTHS = [
 	'january',
@@ -169,6 +170,13 @@ describe('Abrechnungen erstellen', () => {
 		expect(byTestId('management-fee-hint')).not.toBeNull();
 	});
 
+	it('erklärt, warum die Kosten aller Abrechnungen kleiner sein können als die Rechnungen', () => {
+		open({ preview, invoices });
+		expect(document.body.textContent).toContain(
+			'Den Anteil leerer Wohnungen trägt der Vermieter; er ist in diesem Betrag nicht enthalten.'
+		);
+	});
+
 	it('zeigt die Vorschau mit Saldo in Worten und den Rechnungen jedes Gebäudes', () => {
 		open({ preview, invoices });
 		expect(heading()).toBe('Vorschau');
@@ -191,7 +199,7 @@ describe('Abrechnungen erstellen', () => {
 		expect(warning.textContent).toContain('Lindenhof');
 		// The invoice form preselects the building and returns to the wizard after saving
 		expect(warning.querySelector('a')!.getAttribute('href')).toBe(
-			'/invoices/new?building=b2&returnTo=/statements/generate&periodStart=2024-01-01&periodEnd=2024-12-31'
+			'/invoices/new?building=b2&returnTo=%2Fstatements%2Fgenerate%3Fschritt%3D3&periodStart=2024-01-01&periodEnd=2024-12-31'
 		);
 		next();
 		await settle();
@@ -353,6 +361,30 @@ describe('Entwurf der Abrechnungen', () => {
 	});
 });
 
+describe('Zurück vom Erfassen einer Rechnung', () => {
+	it('führt zum Schritt vor der Vorschau, damit diese mit der neuen Rechnung neu berechnet wird', async () => {
+		writeDraft(
+			browserStorage(),
+			'statements',
+			{
+				periodStart: '2024-01-01',
+				periodEnd: '2024-12-31',
+				heatingProfileId: 'hp1',
+				managementFeePercent: 3,
+				managementFeeDistributionKeyId: '',
+				buildingIds: ['b1']
+			},
+			new Date()
+		);
+		history.replaceState(null, '', '/statements/generate?schritt=3');
+		open();
+		await settle();
+		history.replaceState(null, '', '/');
+
+		expect(heading()).toBe('Heizprofil und Verwaltungspauschale');
+	});
+});
+
 describe('Abrechnung bearbeiten', () => {
 	it('füllt Zahlungsfrist und Bemerkung und zeigt die berechneten Kosten nur an', () => {
 		show(EditStatementPage, {
@@ -372,5 +404,19 @@ describe('Abrechnung bearbeiten', () => {
 			form: { errors: { form: 'Speichern fehlgeschlagen' } }
 		} as never);
 		expect(text()).toContain('Speichern fehlgeschlagen');
+	});
+});
+
+describe('Verwaltungspauschale', () => {
+	it('erklärt die Verteilung ohne unklaren Bezug', async () => {
+		open();
+		await settle();
+		next();
+		await settle();
+		click('generate-building-b1');
+		next();
+		await settle();
+		expect(heading()).toBe('Heizprofil und Verwaltungspauschale');
+		expect(document.body.textContent).not.toContain('Die Pauschale wird so');
 	});
 });

@@ -13,7 +13,7 @@
 		values: ContractFormValues;
 		tenants: { id: string; name: string }[];
 		apartments: { id: string; unit: string; building: string }[];
-		onedit: (step: number) => void;
+		onedit: (step: number, field: string) => void;
 	} = $props();
 </script>
 
@@ -35,8 +35,10 @@
 			{#if item.step}
 				{@const step = item.step}
 				<dd class="col-start-2 row-span-2 row-start-1 sm:col-auto sm:row-auto">
-					<Button variant="ghost" onclick={() => onedit(step)} ariaLabel="{item.label} ändern"
-						>Ändern</Button
+					<Button
+						variant="ghost"
+						onclick={() => onedit(step, item.field)}
+						ariaLabel="{item.label} ändern">Ändern</Button
 					>
 				</dd>
 			{/if}

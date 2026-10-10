@@ -45,7 +45,7 @@
 		apartments
 	}: {
 		tenants: { id: string; name: string }[];
-		apartments: { id: string; unit: string; building: string }[];
+		apartments: { id: string; unit: string; building: string; size?: string }[];
 	} = $props();
 
 	const DRAFT = 'contract';
@@ -99,6 +99,14 @@
 		Promise.all(apartments.map((a) => contractsOf(a.id))).then(
 			(entries) => (contracts = new Map(entries))
 		);
+		// A notice shown right after a page change is read out only when it takes the focus
+		tick().then(() =>
+			document
+				.querySelector<HTMLElement>(
+					'[data-testid="tenant-created"], [data-testid="draft-restored"]'
+				)
+				?.focus()
+		);
 	});
 
 	$effect(() => {
@@ -126,6 +134,12 @@
 		step = target;
 		await tick();
 		section?.querySelector<HTMLElement>('h2')?.focus();
+	}
+
+	// "… ändern" in the review: the step, with the focus on the field to change
+	async function editField(target: number, field: string) {
+		await goTo(target);
+		section?.querySelector<HTMLElement>(`[id="${field}"], [name="${field}"]`)?.focus();
 	}
 
 	// After a failed step the first field with an error gets the focus, so its error is read out
@@ -245,7 +259,7 @@
 		{:else if step === 4}
 			<RentStep bind:values {errors} />
 		{:else}
-			<ReviewStep {values} {tenants} {apartments} onedit={goTo} />
+			<ReviewStep {values} {tenants} {apartments} onedit={editField} />
 			{#if errors.form}
 				<Alert tone="critical" title="Der Mietvertrag wurde nicht gespeichert" testid="form-error">
 					<p>{errors.form}</p>

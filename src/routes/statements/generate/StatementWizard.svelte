@@ -88,6 +88,9 @@
 			heatingProfileIds: data.heatingProfiles.map((p) => p.id)
 		});
 		restoredAt = draft.savedAt;
+		// Back from "Rechnung erfassen": the step before the preview, so "Weiter" calculates it anew
+		const complete = [1, 2].every((n) => !Object.keys(selectionErrors(selection, n)).length);
+		if (new URL(location.href).searchParams.get('schritt') === '3' && complete) step = 3;
 	});
 
 	$effect(() => {

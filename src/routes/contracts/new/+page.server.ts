@@ -15,6 +15,8 @@ interface Apartment {
 	number: string;
 	floor: number;
 	buildingId: string;
+	rooms: string | number;
+	area: string | number;
 	buildingName: string;
 	status: ApartmentStatus;
 }
@@ -41,6 +43,7 @@ export const load: PageServerLoad = async ({ fetch }) => {
 			id: a.id,
 			unit: a.number,
 			building: a.buildingName || 'Unbekannt',
+			size: `${Number(a.rooms)} Zimmer, ${Number(a.area)} m²`, // to judge the rent in the wizard
 			status: statusLabels[a.status]
 		}));
 

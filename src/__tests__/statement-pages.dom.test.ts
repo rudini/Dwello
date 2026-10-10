@@ -225,13 +225,20 @@ describe('Abrechnungsdetail', () => {
 		expect(text()).toContain('366 Mietstage');
 	});
 
-	it('lässt die Kostenaufstellung in ihrer Spalte scrollen, statt die Seite zu verbreitern', () => {
+	it('sagt, wenn eine Abrechnung keine Positionen hat, statt eine leere Tabelle zu zeigen', () => {
+		detail({ lineItems: [] });
+		expect(text()).toContain(
+			'Keine Abrechnungspositionen: Für diese Abrechnungsperiode waren keine Rechnungen erfasst.'
+		);
+		expect(document.querySelector('table')).toBeNull();
+	});
+
+	it('gibt der Kostenaufstellung die ganze Breite, damit alle Beträge ohne Scrollen sichtbar sind', () => {
 		detail();
 		const table = document.querySelector('table')!;
-		const column = table.closest('.lg\\:col-span-2')!;
 
-		expect(column.className).toMatch(/(^| )min-w-0( |$)/);
-		expect(column.nextElementSibling!.className).toMatch(/(^| )min-w-0( |$)/);
+		expect(table.closest('.lg\\:col-span-2')).toBeNull();
+		expect(table.closest('.min-w-0')).not.toBeNull(); // too wide anyway: scrolls inside, not the page
 	});
 
 	it('zeigt die Kostenpositionen auf dem Handy untereinander, mit allen Beträgen ohne Wischen', () => {
