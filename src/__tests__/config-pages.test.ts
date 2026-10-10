@@ -41,7 +41,12 @@ const settingsPage = (form: object | null = null) =>
 			data: {
 				settings,
 				heatingProfiles: [
-					{ id: 'hp1', name: 'Gleichmässig', monthlyPercentages: { ...months(8), january: 12 } },
+					{
+						id: 'hp1',
+						name: 'Even',
+						nameDE: 'Gleichmässig',
+						monthlyPercentages: { ...months(8), january: 12 }
+					},
 					{ id: 'hp2', name: 'Unvollständig', monthlyPercentages: months(5) }
 				],
 				distributionKeys: [{ id: 'dk1', name: 'Nach Fläche' }]
@@ -78,9 +83,32 @@ describe('Einstellungen', () => {
 		).toContain('Bitte geben Sie eine gültige Schweizer IBAN ein');
 	});
 
-	it('bestätigt das Speichern', () => {
-		expect(settingsPage({ saved: true })).toContain('data-testid="settings-saved"');
+	it('bestätigt das Speichern und nennt, was gespeichert ist', () => {
+		const saved = settingsPage({ saved: true });
+		expect(saved).toContain('data-testid="settings-saved"');
+		expect(saved).toContain('Absender, Verwaltungspauschale und Vorschläge gespeichert');
 		expect(settingsPage()).not.toContain('data-testid="settings-saved"');
+	});
+
+	it('erklärt die Begriffe in Alltagssprache', () => {
+		const body = settingsPage().replace(/\s+/g, ' ');
+
+		expect(body).toContain('Zeitraum, für den Sie die Nebenkosten abrechnen');
+		expect(body).toContain('Abgeltung Ihres Aufwands für die Nebenkosten');
+		expect(body).toContain('Verteilt die Heizkosten in Prozent auf die 12 Monate');
+		expect(body).toContain('wie die Kosten eines Gebäudes auf die einzelnen Wohnungen');
+	});
+
+	it('führt zu den Stammdaten unter den Namen der Hauptnavigation', () => {
+		const body = settingsPage();
+
+		for (const [href, label] of [
+			['/config/categories', 'Kategorien'],
+			['/config/distribution-keys', 'Verteilschlüssel'],
+			['/config/heating-profiles', 'Heizprofile']
+		]) {
+			expect(body).toMatch(new RegExp(`<a href="${href}"[^>]*>${label}</a>`));
+		}
 	});
 });
 

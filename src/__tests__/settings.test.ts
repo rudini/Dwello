@@ -51,6 +51,26 @@ describe('Einstellungen laden', () => {
 			defaultDistributionKeyId: ''
 		});
 	});
+
+	it('bietet die Verteilschlüssel unter ihrem deutschen Namen an', async () => {
+		const keys = [
+			{ id: 'dk1', name: 'Per Area (m²)', nameDE: 'Pro Fläche (m²)' },
+			{ id: 'dk2', name: 'Eigener' }
+		];
+		const fetch = (async (url: string) =>
+			Response.json(
+				url.startsWith(`${API}/config`)
+					? { data: stored }
+					: { data: url.includes('distribution-keys') ? keys : [] }
+			)) as typeof globalThis.fetch;
+
+		const data = (await load({ fetch } as never)) as { distributionKeys: unknown };
+
+		expect(data.distributionKeys).toEqual([
+			{ id: 'dk1', name: 'Pro Fläche (m²)' },
+			{ id: 'dk2', name: 'Eigener' }
+		]);
+	});
 });
 
 describe('Einstellungen speichern', () => {
