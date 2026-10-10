@@ -46,7 +46,7 @@ describe('Demodaten', () => {
 				(SELECT COUNT(*) FROM tenants)::int AS tenants, (SELECT COUNT(*) FROM rental_contracts)::int AS contracts,
 				(SELECT COUNT(*) FROM invoices)::int AS invoices, (SELECT COUNT(*) FROM utility_statements)::int AS statements`
 			)
-		).toEqual([{ buildings: 3, apartments: 13, tenants: 10, contracts: 11, invoices: 83, statements: 6 }]);
+		).toEqual([{ buildings: 3, apartments: 13, tenants: 10, contracts: 11, invoices: 83, statements: 17 }]);
 	});
 
 	// Wie eine echte Abrechnung: mit Positionen und PDF samt QR-Rechnung, in den Status, die die App kennt
@@ -58,26 +58,24 @@ describe('Demodaten', () => {
 			FROM utility_statements s ORDER BY s.status`
 		);
 
-		const draft = { status: 'draft', pdf: true, qr: true, items: true };
-		const paid = { ...draft, status: 'paid' };
-		expect(statements).toEqual([draft, draft, draft, paid, paid, { ...draft, status: 'sent' }]);
+		expect(statements.every((s) => s.pdf && s.qr && s.items)).toBe(true);
+		const count = (status: string) => statements.filter((s) => s.status === status).length;
+		// 2024 abgeschlossen; 2025 für Musterhaus (eine versendet) und Seepark erstellt
+		expect({ paid: count('paid'), sent: count('sent'), draft: count('draft') }).toEqual({ paid: 9, sent: 1, draft: 7 });
 	});
 
 	// Wie "Als bezahlt markieren" der App: nur das Datum; der Betrag zählte sonst im Dashboard als bezahlt
 	it('markiert die bezahlte Abrechnung wie die App, mit Datum und ohne Betrag', async () => {
 		const paid = await query(name, `SELECT paid_date IS NOT NULL AS dated, paid_amount FROM utility_statements WHERE status = 'paid'`);
 
-		expect(paid).toEqual([
-			{ dated: true, paid_amount: null },
-			{ dated: true, paid_amount: null }
-		]);
+		expect(paid).toEqual(Array(9).fill({ dated: true, paid_amount: null }));
 	});
 
 	// Nur bei einer Nachzahlung trägt das PDF einen Einzahlungsschein
 	it('zeigt eine Nachzahlung und eine Rückzahlung', async () => {
 		const balances = await query(name, `SELECT balance::float > 0 AS owes FROM utility_statements`);
 
-		expect(balances.map((row) => row.owes).sort()).toEqual([false, false, false, true, true, true]);
+		expect(new Set(balances.map((row) => row.owes))).toEqual(new Set([true, false]));
 	});
 
 	// Eine Abrechnung entsteht nach dem Ende ihrer Periode, mit 30 Tagen Zahlungsfrist
@@ -97,12 +95,29 @@ describe('Demodaten', () => {
 		expect(row).toEqual({ missing: 0 });
 	});
 
+	// Ein Abrechnungslauf erstellt die Abrechnungen aller Mietverträge eines Gebäudes in der Periode
+	it('erstellt pro Gebäude und Jahr die Abrechnungen aller Mietverträge', async () => {
+		const rows = await query(
+			name,
+			`SELECT a.building_id, s.period_start::text AS period, COUNT(*)::int AS statements FROM utility_statements s
+			JOIN apartments a ON a.id = s.apartment_id GROUP BY 1, 2 ORDER BY 1, 2`
+		);
+
+		expect(rows.map((row) => `${row.building_id.slice(0, 2)} ${row.period} ${row.statements}`)).toEqual([
+			'11 2024-01-01 4',
+			'11 2025-01-01 4',
+			'22 2024-01-01 3',
+			'22 2025-01-01 4',
+			'33 2024-01-01 2'
+		]);
+	});
+
 	// Bei einem Mieterwechsel erhält jeder Mietvertrag eine eigene Abrechnung über seine Mietstage
 	it('rechnet den Mieterwechsel in Seepark A2 mit zwei Abrechnungen ab', async () => {
 		const rows = await query(
 			name,
 			`SELECT t.last_name, s.rental_days FROM utility_statements s JOIN tenants t ON t.id = s.tenant_id
-			WHERE s.apartment_id = 'aaaa2222-2222-2222-2222-222222222222' ORDER BY s.rental_days`
+			WHERE s.apartment_id = 'aaaa2222-2222-2222-2222-222222222222' AND s.period_start = '2025-01-01' ORDER BY s.rental_days`
 		);
 
 		expect(rows).toEqual([

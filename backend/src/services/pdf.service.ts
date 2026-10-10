@@ -63,6 +63,11 @@ const translations: Record<Language, Record<string, string>> = {
 		acceptancePoint: 'Annahmestelle',
 		statementNumber: 'Abrechnungsnr.',
 		statementDate: 'Abrechnungsdatum',
+		rentalPeriod: 'Ihre Mietdauer',
+		heatingNote: 'Heizkosten nach Heizprofil «{profile}»: {percent} % der Jahreskosten Ihrer Wohnung',
+		feeBase: '{percent} % von CHF {base}',
+		feeKey: 'verteilt nach {key}',
+		feeEqual: 'gleichmässig pro Wohnung',
 		sqm: 'm²'
 	},
 	fr: {
@@ -100,6 +105,11 @@ const translations: Record<Language, Record<string, string>> = {
 		acceptancePoint: 'Point de dépôt',
 		statementNumber: 'N° de décompte',
 		statementDate: 'Date du décompte',
+		rentalPeriod: 'Votre période de location',
+		heatingNote: 'Frais de chauffage selon le profil «{profile}» : {percent} % des frais annuels de votre logement',
+		feeBase: '{percent} % de CHF {base}',
+		feeKey: 'réparti selon {key}',
+		feeEqual: 'réparti à parts égales par logement',
 		sqm: 'm²'
 	},
 	it: {
@@ -137,6 +147,11 @@ const translations: Record<Language, Record<string, string>> = {
 		acceptancePoint: 'Punto di accettazione',
 		statementNumber: 'N. conteggio',
 		statementDate: 'Data del conteggio',
+		rentalPeriod: 'Il suo periodo di locazione',
+		heatingNote: 'Spese di riscaldamento secondo il profilo «{profile}»: {percent} % delle spese annue del suo appartamento',
+		feeBase: '{percent} % di CHF {base}',
+		feeKey: 'ripartito secondo {key}',
+		feeEqual: 'ripartito in parti uguali per appartamento',
 		sqm: 'm²'
 	},
 	rm: {
@@ -174,6 +189,11 @@ const translations: Record<Language, Record<string, string>> = {
 		acceptancePoint: 'Lieu d\'acceptaziun',
 		statementNumber: 'Nr. rendaquint',
 		statementDate: 'Data dal rendaquint',
+		rentalPeriod: 'Vossa durada da locaziun',
+		heatingNote: 'Custs da stgaudament tenor il profil «{profile}»: {percent} % dals custs annuals da Vossa abitaziun',
+		feeBase: '{percent} % da CHF {base}',
+		feeKey: 'repartì tenor {key}',
+		feeEqual: 'repartì en parts eguals per abitaziun',
 		sqm: 'm²'
 	},
 	en: {
@@ -211,6 +231,11 @@ const translations: Record<Language, Record<string, string>> = {
 		acceptancePoint: 'Acceptance point',
 		statementNumber: 'Statement No.',
 		statementDate: 'Statement Date',
+		rentalPeriod: 'Your rental period',
+		heatingNote: 'Heating costs by heating profile «{profile}»: {percent}% of the annual costs of your apartment',
+		feeBase: '{percent}% of CHF {base}',
+		feeKey: 'split by {key}',
+		feeEqual: 'split equally per apartment',
 		sqm: 'm²'
 	}
 };
@@ -256,15 +281,23 @@ export interface StatementPDFData {
 	building: {
 		name: string;
 		address: string;
+		place: string;
 	};
 
 	// Cost breakdown
 	lineItems: LineItem[];
 
+	// The tenant's part of the period and what the generation run used
+	rentalStart: string;
+	rentalEnd: string;
+	heating?: { profile: string; percent: number };
+	managementFeeKey?: string;
+
 	// Totals
 	subtotal: number;
 	managementFee: number;
 	managementFeePercent: number;
+	managementFeeBase: number; // the building's utility costs the percentage applies to
 	totalCosts: number;
 	totalAdvancePayments: number;
 	balance: number; // Positive = tenant owes, negative = refund
@@ -428,10 +461,11 @@ async function generateStatementPDF(
 				.fontSize(10)
 				.fillColor(textSecondary)
 				.text(data.building.name, 300, yPosRight)
-				.text(data.building.address, 300, yPosRight + 15);
+				.text(data.building.address, 300, yPosRight + 15)
+				.text(data.building.place, 300, yPosRight + 30);
 
 			// ============= PERIOD INFO =============
-			yPos = Math.max(yPos, yPosRight) + 50;
+			yPos = Math.max(yPos, yPosRight) + 65;
 
 			doc
 				.fontSize(12)
@@ -444,8 +478,13 @@ async function generateStatementPDF(
 				.fontSize(10)
 				.fillColor(textDark)
 				.font('Helvetica')
-				.text(`${formatDate(data.periodStart)} - ${formatDate(data.periodEnd)}`, 50, yPos)
-				.text(`${t.rentalDays}: ${data.rentalDays}`, 300, yPos);
+				.text(`${formatDate(data.periodStart)} – ${formatDate(data.periodEnd)}`, 50, yPos)
+				.text(
+					`${t.rentalPeriod}: ${formatDate(data.rentalStart)} – ${formatDate(data.rentalEnd)} (${data.rentalDays} ${t.rentalDays})`,
+					50,
+					yPos + 15
+				);
+			yPos += 15;
 
 			// ============= COST BREAKDOWN TABLE =============
 			yPos += 40;
@@ -502,6 +541,17 @@ async function generateStatementPDF(
 				}
 			}
 
+			// The heating profile shares the heating costs by the months rented
+			if (data.heating) {
+				const percent = String(Math.round(data.heating.percent * 100) / 100);
+				doc
+					.fontSize(8)
+					.fillColor(textSecondary)
+					.text(t.heatingNote.replace('{profile}', data.heating.profile).replace('{percent}', percent), col1, yPos, { width: 495 });
+				yPos = doc.y + 8;
+				doc.fontSize(9).fillColor(textDark);
+			}
+
 			// Subtotal line
 			doc
 				.strokeColor(borderColor)
@@ -520,8 +570,18 @@ async function generateStatementPDF(
 				yPos += 20;
 				doc
 					.font('Helvetica')
-					.text(`${t.managementFee} (${data.managementFeePercent.toFixed(1)}%)`, col1, yPos)
-					.text(formatCurrency(data.managementFee), col4, yPos, { width: 95, align: 'right' });
+					.text(formatCurrency(data.managementFee), col4, yPos, { width: 95, align: 'right' })
+					.text(
+						`${t.managementFee}: ${t.feeBase
+							.replace('{percent}', String(data.managementFeePercent))
+							.replace('{base}', formatCHF(data.managementFeeBase))}, ${
+							data.managementFeeKey ? t.feeKey.replace('{key}', data.managementFeeKey) : t.feeEqual
+						}`,
+						col1,
+						yPos,
+						{ width: 390 }
+					);
+				yPos = doc.y - 10;
 			}
 
 			// Total costs
@@ -609,50 +669,44 @@ async function generateStatementPDF(
 
 					doc.fontSize(11).font('Helvetica-Bold').fillColor(textDark).text(t.receiptSection, receiptX, qrBillY + 15);
 
-					doc
-						.fontSize(6)
-						.font('Helvetica-Bold')
-						.text(t.account, receiptX, qrBillY + 35)
-						.font('Helvetica')
-						.fontSize(8)
-						.text(formatIBANForDisplay(config.iban), receiptX, qrBillY + 45);
+					// Headings and lines as in the QR code (SIX): creditor with IBAN, reference, debtor with address
+					const creditor = [formatIBANForDisplay(config.iban), config.companyName, config.address, `${config.postalCode} ${config.city}`];
+					const debtor = [
+						`${data.tenant.firstName} ${data.tenant.lastName}`,
+						data.tenant.address,
+						[data.tenant.postalCode, data.tenant.city].filter(Boolean).join(' ')
+					];
+					const reference = qrResult.reference ? [formatQRReferenceForDisplay(qrResult.reference)] : [];
+					const details = (x: number) => {
+						let y = qrBillY + 35;
+						for (const [heading, lines] of [
+							[`${t.account} / ${t.payableTo}`, creditor],
+							[t.reference, reference],
+							[t.payableBy, debtor]
+						] as const) {
+							const printed = lines.filter(Boolean) as string[];
+							if (printed.length === 0) continue;
+							doc.fontSize(6).font('Helvetica-Bold').text(heading, x, y);
+							y += 9;
+							doc.fontSize(8).font('Helvetica');
+							for (const line of printed) {
+								doc.text(line, x, y, { lineBreak: false });
+								y += 10;
+							}
+							y += 6;
+						}
+					};
+					details(receiptX);
 
-					doc
-						.fontSize(6)
-						.font('Helvetica-Bold')
-						.text(t.payableTo, receiptX, qrBillY + 60)
-						.font('Helvetica')
-						.fontSize(8)
-						.text(config.companyName, receiptX, qrBillY + 70)
-						.text(`${config.postalCode} ${config.city}`, receiptX, qrBillY + 80);
-
-					if (qrResult.reference) {
-						doc
-							.fontSize(6)
-							.font('Helvetica-Bold')
-							.text(t.reference, receiptX, qrBillY + 95)
-							.font('Helvetica')
-							.fontSize(8)
-							.text(formatQRReferenceForDisplay(qrResult.reference), receiptX, qrBillY + 105);
-					}
-
-					doc
-						.fontSize(6)
-						.font('Helvetica-Bold')
-						.text(t.payableBy, receiptX, qrBillY + 120)
-						.font('Helvetica')
-						.fontSize(8)
-						.text(`${data.tenant.firstName} ${data.tenant.lastName}`, receiptX, qrBillY + 130);
-
-					doc.fontSize(6).font('Helvetica-Bold').text(t.currency, receiptX, qrBillY + 150).text(t.amount, receiptX + 40, qrBillY + 150);
+					doc.fontSize(6).font('Helvetica-Bold').text(t.currency, receiptX, qrBillY + 160).text(t.amount, receiptX + 40, qrBillY + 160);
 
 					doc
 						.fontSize(10)
 						.font('Helvetica')
-						.text('CHF', receiptX, qrBillY + 160)
-						.text(data.balance.toFixed(2), receiptX + 40, qrBillY + 160);
+						.text('CHF', receiptX, qrBillY + 170)
+						.text(data.balance.toFixed(2), receiptX + 40, qrBillY + 170);
 
-					doc.fontSize(6).font('Helvetica-Bold').text(t.acceptancePoint, receiptX + 80, qrBillY + 180);
+					doc.fontSize(6).font('Helvetica-Bold').text(t.acceptancePoint, receiptX + 80, qrBillY + 183);
 
 					// Vertical separator
 					doc
@@ -689,54 +743,18 @@ async function generateStatementPDF(
 						.fillColor('white')
 						.fill();
 
-					// Payment details on right of QR
-					const detailsX = paymentX + 145;
-
+					// Amount below the QR code, the details on its right
 					doc
 						.fontSize(8)
 						.fillColor(textDark)
 						.font('Helvetica-Bold')
-						.text(t.currency, detailsX, qrBillY + 35)
-						.text(t.amount, detailsX + 50, qrBillY + 35)
+						.text(t.currency, paymentX, qrBillY + 170)
+						.text(t.amount, paymentX + 50, qrBillY + 170)
 						.font('Helvetica')
 						.fontSize(10)
-						.text('CHF', detailsX, qrBillY + 50)
-						.text(data.balance.toFixed(2), detailsX + 50, qrBillY + 50);
-
-					doc
-						.fontSize(6)
-						.font('Helvetica-Bold')
-						.text(t.account, detailsX, qrBillY + 75)
-						.font('Helvetica')
-						.fontSize(8)
-						.text(formatIBANForDisplay(config.iban), detailsX, qrBillY + 85);
-
-					doc
-						.fontSize(6)
-						.font('Helvetica-Bold')
-						.text(t.payableTo, detailsX, qrBillY + 100)
-						.font('Helvetica')
-						.fontSize(8)
-						.text(config.companyName, detailsX, qrBillY + 110)
-						.text(`${config.postalCode} ${config.city}`, detailsX, qrBillY + 120);
-
-					if (qrResult.reference) {
-						doc
-							.fontSize(6)
-							.font('Helvetica-Bold')
-							.text(t.reference, detailsX, qrBillY + 135)
-							.font('Helvetica')
-							.fontSize(8)
-							.text(formatQRReferenceForDisplay(qrResult.reference), detailsX, qrBillY + 145);
-					}
-
-					doc
-						.fontSize(6)
-						.font('Helvetica-Bold')
-						.text(t.payableBy, detailsX, qrBillY + 160)
-						.font('Helvetica')
-						.fontSize(8)
-						.text(`${data.tenant.firstName} ${data.tenant.lastName}`, detailsX, qrBillY + 170);
+						.text('CHF', paymentX, qrBillY + 180)
+						.text(data.balance.toFixed(2), paymentX + 50, qrBillY + 180);
+					details(paymentX + 145);
 				} else {
 					// QR code generation failed - show basic payment info
 					doc

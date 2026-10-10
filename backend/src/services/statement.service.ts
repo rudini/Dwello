@@ -46,7 +46,7 @@ export interface StatementWithDetails extends Omit<UtilityStatement, 'pdfBlob'> 
 		city?: string | null;
 	} | null;
 	apartment: { id: string; number: string; floor: number; area: string } | null;
-	building: { id: string; name: string; address: string } | null;
+	building: { id: string; name: string; address: string; postalCode?: string; city?: string } | null;
 	lineItems: UtilityStatementLineItem[];
 }
 
@@ -215,7 +215,9 @@ export async function getStatement(id: string): Promise<StatementWithDetails | n
 			building: {
 				id: buildings.id,
 				name: buildings.name,
-				address: buildings.address
+				address: buildings.address,
+				postalCode: buildings.postalCode,
+				city: buildings.city
 			}
 		})
 		.from(utilityStatements)
@@ -303,6 +305,8 @@ export async function generateStatement(
 			totalAdvancePayments: String(calculation.totalAdvancePayments),
 			managementFee: String(calculation.managementFee),
 			managementFeePercent: String(calculation.managementFeePercent),
+			heatingProfileId: input.heatingProfileId || null,
+			managementFeeDistributionKeyId: input.managementFeeDistributionKeyId || null,
 			balance: String(calculation.balance),
 			status: 'draft',
 			paymentDeadline: paymentDeadline.toISOString().split('T')[0]

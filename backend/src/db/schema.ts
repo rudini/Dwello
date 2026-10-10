@@ -306,6 +306,11 @@ export const utilityStatements = pgTable(
 		totalAdvancePayments: decimal('total_advance_payments', { precision: 12, scale: 2 }).notNull(),
 		managementFeePercent: decimal('management_fee_percent', { precision: 5, scale: 2 }),
 		managementFee: decimal('management_fee', { precision: 12, scale: 2 }).default('0'),
+		// Settings of the generation run, printed in the PDF
+		heatingProfileId: uuid('heating_profile_id').references(() => heatingProfiles.id, { onDelete: 'set null' }),
+		managementFeeDistributionKeyId: uuid('management_fee_distribution_key_id').references(() => distributionKeys.id, {
+			onDelete: 'set null'
+		}),
 		balance: decimal('balance', { precision: 12, scale: 2 }).notNull(), // positive = tenant owes, negative = refund
 		status: varchar('status', { length: 20 }).notNull().default('draft'), // draft, sent, paid; overdue is computed from the payment deadline
 		paymentDeadline: date('payment_deadline'),

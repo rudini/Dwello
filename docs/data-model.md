@@ -204,6 +204,8 @@ total_costs            DECIMAL(12,2) NOT NULL
 total_advance_payments DECIMAL(12,2) NOT NULL  -- Geleistete Akontobeiträge
 management_fee         DECIMAL(12,2) DEFAULT 0 -- Verwaltungspauschale
 management_fee_percent DECIMAL(5,2)            -- rate chosen in the Abrechnungslauf
+heating_profile_id     UUID                    -- Heizprofil of the Abrechnungslauf, printed in the PDF (SET NULL)
+management_fee_distribution_key_id UUID        -- Verteilschlüssel of the Verwaltungspauschale (SET NULL; none: equally)
 balance                DECIMAL(12,2) NOT NULL  -- Saldo: positive = Nachzahlung, negative = Rückerstattung
 status                 VARCHAR(20)   NOT NULL DEFAULT 'draft'
 payment_deadline       DATE                    -- Zahlungsfrist

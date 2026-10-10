@@ -5,7 +5,8 @@
 
 import { eq, inArray } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { categories, utilityStatements } from '../db/schema';
+import { categories, distributionKeys, rentalContracts, utilityStatements } from '../db/schema';
+import { calculateHeatingShare, getHeatingProfile } from './heating-profile.service';
 import { getTypedConfig } from './config.service';
 import { generateStatementPDFBase64, type StatementPDFData, type Language } from './pdf.service';
 import { isQRIBAN, statementQRReference, type QRBillConfig } from './qr-bill.service';
@@ -40,20 +41,30 @@ const apartmentOf = (apartment: StatementWithDetails['apartment']) => ({
 
 const buildingOf = (building: StatementWithDetails['building']) => ({
 	name: building?.name || '',
-	address: building?.address || ''
+	address: building?.address || '',
+	place: [building?.postalCode, building?.city].filter(Boolean).join(' ')
 });
 
-type CategoryNames = { name: string; nameDE: string | null; nameFR: string | null; nameIT: string | null; nameEN: string | null };
+type Names = { name: string; nameDE: string | null; nameFR: string | null; nameIT: string | null; nameEN: string | null };
 
-// The category in the PDF's language; Romansh and missing translations fall back to German
-const categoryName = (names: CategoryNames, language: Language) =>
+// A category, key or profile in the PDF's language; Romansh and missing translations fall back to German
+const localName = (names: Names, language: Language) =>
 	({ fr: names.nameFR, it: names.nameIT, en: names.nameEN })[language as 'fr' | 'it' | 'en'] || names.nameDE || names.name;
+
+/** What the generation run used, as the PDF names it: the tenant's dates, the heating profile and the fee's key */
+export interface RunDetails {
+	rentalStart: string;
+	rentalEnd: string;
+	heating?: { profile: string; percent: number };
+	managementFeeKey?: string;
+}
 
 /** The statement as the PDF prints it, with the category names in the given language */
 export function toPdfData(
 	statement: StatementWithDetails,
-	categoryNames: Map<string, CategoryNames>,
-	language: Language
+	categoryNames: Map<string, Names>,
+	language: Language,
+	run: RunDetails = { rentalStart: statement.periodStart, rentalEnd: statement.periodEnd }
 ): StatementPDFData {
 	const managementFee = parseFloat(statement.managementFee || '0');
 	const subtotal = parseFloat(statement.totalCosts) - managementFee;
@@ -67,10 +78,11 @@ export function toPdfData(
 		tenant: tenantOf(statement.tenant),
 		apartment: apartmentOf(statement.apartment),
 		building: buildingOf(statement.building),
+		...run,
 		lineItems: statement.lineItems.map((item) => {
 			const names = item.categoryId ? categoryNames.get(item.categoryId) : undefined;
 			return {
-				category: names ? categoryName(names, language) : item.description,
+				category: names ? localName(names, language) : item.description,
 				totalAmount: parseFloat(item.totalAmount),
 				tenantShare: parseFloat(item.tenantShare),
 				sharePercentage: item.sharePercentage ? parseFloat(item.sharePercentage) / 100 : 0
@@ -78,6 +90,8 @@ export function toPdfData(
 		}),
 		subtotal,
 		managementFee,
+		// The fee is a percentage of the building's utility costs, the sum of the line items' building totals
+		managementFeeBase: statement.lineItems.reduce((sum, item) => sum + parseFloat(item.totalAmount), 0),
 		// Older statements have no stored rate; their fee was a percentage of the tenant's own costs
 		managementFeePercent: statement.managementFeePercent
 			? parseFloat(statement.managementFeePercent)
@@ -88,6 +102,46 @@ export function toPdfData(
 		totalAdvancePayments: parseFloat(statement.totalAdvancePayments),
 		balance: parseFloat(statement.balance),
 		paymentDeadline: statement.paymentDeadline || undefined
+	};
+}
+
+// The tenant's part of the period: from moving in or the period start to moving out or the period end
+async function rentalDatesOf(statement: StatementWithDetails) {
+	const [contract] = await db
+		.select({ startDate: rentalContracts.startDate, endDate: rentalContracts.endDate })
+		.from(rentalContracts)
+		.where(eq(rentalContracts.id, statement.contractId));
+	const later = (a: string, b: string) => (a > b ? a : b);
+	const earlier = (a: string, b: string) => (a < b ? a : b);
+	return {
+		rentalStart: later(contract?.startDate ?? statement.periodStart, statement.periodStart),
+		rentalEnd: earlier(contract?.endDate ?? statement.periodEnd, statement.periodEnd)
+	};
+}
+
+// The heating profile and its share of the months rented; the calculation applies it to heating costs only
+async function heatingOf(statement: StatementWithDetails, rentalStart: string, rentalEnd: string, language: Language) {
+	const hasHeating = statement.lineItems.some((item) => /heiz|wärme|heating/i.test(item.description));
+	const profile = hasHeating && statement.heatingProfileId ? await getHeatingProfile(statement.heatingProfileId) : null;
+	if (!profile) return {};
+	const { percentage } = calculateHeatingShare(profile, new Date(rentalStart), new Date(rentalEnd), 100);
+	return { heating: { profile: localName(profile, language), percent: percentage } };
+}
+
+async function feeKeyOf(statement: StatementWithDetails, language: Language) {
+	if (!statement.managementFeeDistributionKeyId) return {};
+	const [key] = await db.select().from(distributionKeys).where(eq(distributionKeys.id, statement.managementFeeDistributionKeyId));
+	return key ? { managementFeeKey: localName(key, language) } : {};
+}
+
+// What the generation run used, for the PDF: the tenant's dates, the heating profile and the fee's key
+async function runDetailsOf(statement: StatementWithDetails, language: Language): Promise<RunDetails> {
+	const { rentalStart, rentalEnd } = await rentalDatesOf(statement);
+	return {
+		rentalStart,
+		rentalEnd,
+		...(await heatingOf(statement, rentalStart, rentalEnd, language)),
+		...(await feeKeyOf(statement, language))
 	};
 }
 
@@ -118,7 +172,12 @@ export async function generateStatementPdf(id: string, language?: string) {
 	if (!qrConfig) return 'no-iban';
 
 	const pdfLanguage = (language || statement.tenant?.language || 'de') as Language;
-	const pdfData = toPdfData(statement, await categoryNamesOf(statement), pdfLanguage);
+	const pdfData = toPdfData(
+		statement,
+		await categoryNamesOf(statement),
+		pdfLanguage,
+		await runDetailsOf(statement, pdfLanguage)
+	);
 	const pdfBase64 = await generateStatementPDFBase64(pdfData, qrConfig, pdfLanguage);
 	// Only a QR-IBAN carries a QR reference on the bill
 	const qrReference = isQRIBAN(qrConfig.iban) ? statementQRReference(statement.id) : null;

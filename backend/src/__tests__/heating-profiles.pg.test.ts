@@ -42,3 +42,13 @@ describe('Vordefinierter Heizschlüssel 70/30', () => {
 		expect(result.rows).toEqual([{ formula: '0.7 * {area} / {area_total} + 0.3 * {units} / {units_total}' }]);
 	});
 });
+
+describe('Beschreibungen der Stammdaten', () => {
+	it('sind für vordefinierte Kategorien und Verteilschlüssel deutsch', async () => {
+		const result = await db.execute(sql`
+			SELECT (SELECT description FROM categories WHERE name = 'Heating') AS category,
+				(SELECT description FROM distribution_keys WHERE name = 'Per Unit') AS key`);
+
+		expect(result.rows).toEqual([{ category: 'Kosten für das Heizen des Gebäudes', key: 'Gleichmässig pro Wohnung' }]);
+	});
+});
