@@ -10,7 +10,7 @@ from tddcore import protocol, suite  # noqa: E402
 
 
 def git(*args):
-    return subprocess.run(["git", *args], check=True, capture_output=True, text=True).stdout
+    return subprocess.run(["git", *args], check=True, capture_output=True, text=True, errors="surrogateescape").stdout
 
 
 def changed_files():
@@ -26,7 +26,7 @@ def changed_files():
 
 
 def head_subject():
-    done = subprocess.run(["git", "log", "-1", "--format=%s"], capture_output=True, text=True)
+    done = subprocess.run(["git", "log", "-1", "--format=%s"], capture_output=True, text=True, errors="surrogateescape")
     return done.stdout.strip() if done.returncode == 0 else ""
 
 
@@ -35,7 +35,7 @@ def main(args):
         print("usage: tdd-step <test|red|green|refactor> [message]", file=sys.stderr)
         return 2
     phase, message = args[0], " ".join(" ".join(args[1:]).split()) or args[0]
-    root = subprocess.run(["git", "rev-parse", "--show-toplevel"], capture_output=True, text=True)
+    root = subprocess.run(["git", "rev-parse", "--show-toplevel"], capture_output=True, text=True, errors="surrogateescape")
     if root.returncode != 0:
         print("tdd-step: not inside a git repository", file=sys.stderr)
         return 2
@@ -55,7 +55,7 @@ def main(args):
     done = subprocess.run(["git", "commit", "-q", "-m", f"{phase}: {message}",
                            "--trailer", f"TDD-Phase: {phase}",
                            "--trailer", f"TDD-Exit-Code: {run.exit_code}"],
-                          capture_output=True, text=True)
+                          capture_output=True, text=True, errors="surrogateescape")
     if done.returncode != 0:
         git("read-tree", index)
         print(f"tdd-step: git commit failed:\n{done.stderr}{done.stdout}", file=sys.stderr)

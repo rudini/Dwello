@@ -53,13 +53,13 @@ def _combine(runs):
 
 def _has_python(root):
     files = subprocess.run(["git", "ls-files", "-co", "--exclude-standard"], cwd=root,
-                           capture_output=True, text=True, check=True).stdout.splitlines()
+                           capture_output=True, text=True, errors="replace", check=True).stdout.splitlines()
     return any(f.endswith(".py") for f in files)
 
 
 def _run_unittest(root):
     done = subprocess.run([sys.executable, "-m", "unittest", "discover"], cwd=root, env=_PYTHON_ENV,
-                          capture_output=True, text=True)
+                          capture_output=True, text=True, errors="replace")
     verdicts = [line for line in done.stderr.splitlines()
                 if line.startswith(("OK", "FAILED (", "NO TESTS RAN"))]
     summary = verdicts[-1] if verdicts else f"exit code {done.returncode}, no unittest summary"
@@ -103,7 +103,7 @@ def _run_vitest(root):
         report = Path(tmp) / "report.json"
         done = subprocess.run(["npx", "--no-install", "vitest", "run", "--reporter=default",
                                "--reporter=json", f"--outputFile.json={report}"],
-                              cwd=root, capture_output=True, text=True)
+                              cwd=root, capture_output=True, text=True, errors="replace")
         if not report.exists():
             last = (done.stderr.strip() or done.stdout.strip() or "no output").splitlines()[-1]
             return Run(done.returncode, "error", f"vitest wrote no report: {last}", 0, 1)
@@ -139,7 +139,7 @@ def _run_pytest(root):
         report = Path(tmp) / "report.xml"
         done = subprocess.run([sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider",
                                f"--junitxml={report}"], cwd=root, env=_PYTHON_ENV,
-                              capture_output=True, text=True)
+                              capture_output=True, text=True, errors="replace")
         cases = list(ElementTree.parse(report).iter("testcase")) if report.exists() else []
     lines = done.stdout.strip().splitlines()
     summary = lines[-1] if lines else f"exit code {done.returncode}, no output"
