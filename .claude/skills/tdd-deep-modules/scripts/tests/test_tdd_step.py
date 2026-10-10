@@ -12,8 +12,8 @@ class TddStepTest(unittest.TestCase):
 
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(repo.subject(), "red: adds two numbers")
-        self.assertIn("TDD-Phase: red", repo.trailers())
-        self.assertIn("TDD-Exit-Code: 1", repo.trailers())
+        self.assertEqual(repo.trailer("TDD-Phase"), "red")
+        self.assertEqual(repo.trailer("TDD-Exit-Code"), "1")
 
     def test_red_is_refused_when_the_suite_passes(self):
         repo = Repo(self, {"calc.py": RIGHT_ADD})
@@ -158,7 +158,7 @@ class TddStepTest(unittest.TestCase):
 
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertEqual(repo.subject(), f"{phase}: {phase} add")
-            self.assertIn(f"TDD-Exit-Code: {exit_code}", repo.trailers())
+            self.assertEqual(repo.trailer("TDD-Exit-Code"), exit_code)
             self.assertEqual(repo.git("status", "--porcelain"), "")
 
     def test_without_a_supported_test_framework_it_exits_2(self):
@@ -188,7 +188,7 @@ class TddStepTest(unittest.TestCase):
 
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(repo.subject(), "red: adds two numbers")
-        self.assertIn("TDD-Exit-Code: 1", repo.trailers())
+        self.assertEqual(repo.trailer("TDD-Exit-Code"), "1")
 
     def test_vitest_load_error_is_refused_as_red(self):
         repo = vitest_repo(self)
@@ -242,4 +242,15 @@ class TddStepTest(unittest.TestCase):
 
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(repo.subject(), "green: adds two numbers")
-        self.assertIn("TDD-Exit-Code: 0", repo.trailers())
+        self.assertEqual(repo.trailer("TDD-Exit-Code"), "0")
+
+    def test_run_from_a_subdirectory_checks_and_tests_the_whole_repository(self):
+        repo = Repo(self, {"calc.py": WRONG_ADD, "pkg/__init__.py": ""})
+        repo.write("test_calc.py", ADD_TEST)
+        repo.write("pkg/prod.py", "VALUE = 1\n")
+
+        result = repo.run("tdd-step", "red", "adds two numbers", cwd="pkg")
+
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn("production code changed: pkg/prod.py", result.stderr)
+        self.assertEqual(repo.subject(), "init")

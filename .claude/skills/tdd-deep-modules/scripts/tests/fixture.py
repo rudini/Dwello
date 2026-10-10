@@ -45,9 +45,9 @@ class Repo:
         self.git("commit", "-q", "--allow-empty", "-m", message)
         return self.git("rev-parse", "HEAD")
 
-    def run(self, script, *args):
+    def run(self, script, *args, cwd="."):
         env = {**os.environ, "PYTHONDONTWRITEBYTECODE": "1"}
-        return subprocess.run([sys.executable, str(SCRIPTS / script), *args], cwd=self.path,
+        return subprocess.run([sys.executable, str(SCRIPTS / script), *args], cwd=self.path / cwd,
                               capture_output=True, text=True, env=env)
 
     def subject(self):
@@ -55,6 +55,10 @@ class Repo:
 
     def trailers(self):
         return self.git("log", "-1", "--format=%(trailers)")
+
+    def trailer(self, key):
+        """All values of trailer `key` on HEAD, so a forged duplicate shows up."""
+        return self.git("log", "-1", f"--format=%(trailers:key={key},valueonly,separator=%x2C)")
 
 VITEST_FILES = {"package.json": '{"devDependencies": {"vitest": "*"}}\n',
                 ".gitignore": "node_modules\n",
