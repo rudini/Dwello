@@ -21,8 +21,8 @@ Funktionalität: Gebäudeliste
     Wenn der Liegenschaftsverwalter nach "Gibt es nicht" sucht
     Dann sieht der Liegenschaftsverwalter den Hinweis "Keine Gebäude gefunden"
 
-  Szenario: Gebäude nach Stadt filtern
-    Wenn der Liegenschaftsverwalter die Gebäude nach der Stadt "Winterthur" filtert
+  Szenario: Gebäude nach Ort filtern
+    Wenn der Liegenschaftsverwalter die Gebäude nach dem Ort "Winterthur" filtert
     Dann sieht der Liegenschaftsverwalter das Gebäude "Lindenhof" in der Liste
 
   Szenario: Zur Erfassung eines neuen Gebäudes wechseln

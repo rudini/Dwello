@@ -19,13 +19,6 @@ export const statusLabels: Record<ApartmentStatus, string> = {
 	reserved: 'Gesperrt'
 };
 
-export const statusVariants = {
-	occupied: 'success',
-	relet: 'info',
-	vacant: 'warning',
-	reserved: 'danger'
-} as const satisfies Record<ApartmentStatus, string>;
-
 export const statusTones = {
 	occupied: 'positive',
 	relet: 'info',

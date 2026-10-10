@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { onDestroy, onMount } from 'svelte';
-	import type { Map, Marker } from 'leaflet';
+	import type { Map } from 'leaflet';
+	import 'leaflet/dist/leaflet.css';
 
+	// Small, still map of where the building stands; the address next to it says the same in words
 	interface Props {
 		latitude: number;
 		longitude: number;
@@ -12,7 +14,6 @@
 
 	let mapContainer: HTMLDivElement;
 	let map: Map | null = null;
-	let marker: Marker | null = null;
 
 	onMount(async () => {
 		const L = await import('leaflet');
@@ -33,52 +34,14 @@
 			subdomains: 'abcd'
 		}).addTo(map);
 
-		// Inline styled marker for reliability
-		const markerHtml = `
-			<div style="
-				position: relative;
-				width: 32px;
-				height: 42px;
-			">
-				<div style="
-					position: absolute;
-					top: 0;
-					left: 1px;
-					width: 28px;
-					height: 28px;
-					background-color: #135bec;
-					border: 3px solid white;
-					border-radius: 50% 50% 50% 0;
-					transform: rotate(-45deg);
-					box-shadow: 0 3px 8px rgba(0,0,0,0.4);
-				"></div>
-				<div style="
-					position: absolute;
-					top: 9px;
-					left: 11px;
-					width: 10px;
-					height: 10px;
-					background-color: white;
-					border-radius: 50%;
-				"></div>
-			</div>
-		`;
-
-		const customIcon = L.divIcon({
-			className: 'leaflet-marker-custom',
-			html: markerHtml,
-			iconSize: [32, 42],
-			iconAnchor: [16, 42]
+		const pin = L.divIcon({
+			className: '',
+			html: '<span class="block size-6 rounded-control border-2 border-surface bg-accent shadow-raised"></span>',
+			iconSize: [24, 24],
+			iconAnchor: [12, 12]
 		});
-
-		marker = L.marker([latitude, longitude], { icon: customIcon }).addTo(map);
-
-		if (address) {
-			marker.bindPopup(address, {
-				closeButton: false,
-				offset: [0, -32]
-			});
-		}
+		// Not focusable and without popup: the map only shows, it is not operated
+		L.marker([latitude, longitude], { icon: pin, interactive: false, keyboard: false }).addTo(map);
 
 		map.invalidateSize();
 	});
@@ -87,36 +50,10 @@
 	onDestroy(() => map?.remove());
 </script>
 
-<div bind:this={mapContainer} class="map-container" data-testid="building-mini-map"></div>
-
-<style>
-	.map-container {
-		width: 100%;
-		height: 140px;
-		border-radius: 8px;
-		overflow: hidden;
-		background-color: #e8eef5;
-		border: 1px solid #e2e8f0;
-	}
-
-	:global(.leaflet-container) {
-		font-family: inherit;
-		background-color: #e8eef5;
-	}
-
-	:global(.leaflet-marker-custom) {
-		background: none !important;
-		border: none !important;
-	}
-
-	:global(.leaflet-popup-content-wrapper) {
-		border-radius: 8px;
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-	}
-
-	:global(.leaflet-popup-content) {
-		margin: 10px 14px;
-		font-size: 13px;
-		color: #374151;
-	}
-</style>
+<div
+	bind:this={mapContainer}
+	role="img"
+	aria-label={address ? `Karte: ${address}` : 'Karte'}
+	class="h-36 w-full overflow-hidden rounded-control border border-line bg-sunken"
+	data-testid="building-mini-map"
+></div>

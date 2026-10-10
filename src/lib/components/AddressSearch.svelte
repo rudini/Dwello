@@ -6,32 +6,30 @@
 		type OpenPlzStreet,
 		type Address
 	} from '$lib/services/openplz';
-	import Icon from './Icon.svelte';
+	import Field from '$lib/ui/Field.svelte';
+	import Icon from '$lib/ui/Icon.svelte';
+	import { controlClass } from '$lib/ui/field';
 
+	// Looks up Swiss streets (openplz) while typing; choosing one fills the address fields
 	interface Props {
 		id?: string;
 		label?: string;
+		help?: string;
+		example?: string;
 		placeholder?: string;
-		value?: string;
-		required?: boolean;
-		disabled?: boolean;
-		error?: string;
-		class?: string;
 		onselect?: (_address: Address, _street: OpenPlzStreet) => void;
 	}
 
 	let {
 		id = 'address-search',
 		label = 'Adresse suchen',
-		placeholder = 'Strasse, PLZ oder Ort eingeben...',
-		value = $bindable(''),
-		required = false,
-		disabled = false,
-		error = '',
-		class: className = '',
+		help,
+		example,
+		placeholder,
 		onselect
 	}: Props = $props();
 
+	let value = $state('');
 	let results = $state<OpenPlzStreet[]>([]);
 	let isLoading = $state(false);
 	let isOpen = $state(false);
@@ -39,24 +37,15 @@
 	let searchTimeout: ReturnType<typeof setTimeout> | null = null;
 
 	// Debounced search
-	async function handleInput(e: Event) {
-		const target = e.target as HTMLInputElement;
-		value = target.value;
+	function handleInput(e: Event) {
+		value = (e.target as HTMLInputElement).value;
 		selectedIndex = -1;
-
-		// Clear previous timeout
-		if (searchTimeout) {
-			clearTimeout(searchTimeout);
-		}
-
-		// Don't search if too short
+		if (searchTimeout) clearTimeout(searchTimeout);
 		if (value.length < 2) {
 			results = [];
 			isOpen = false;
 			return;
 		}
-
-		// Debounce search
 		searchTimeout = setTimeout(async () => {
 			isLoading = true;
 			try {
@@ -82,138 +71,104 @@
 
 	function handleKeydown(e: KeyboardEvent) {
 		if (!isOpen || results.length === 0) return;
-
-		switch (e.key) {
-			case 'ArrowDown':
-				e.preventDefault();
-				selectedIndex = Math.min(selectedIndex + 1, results.length - 1);
-				break;
-			case 'ArrowUp':
-				e.preventDefault();
-				selectedIndex = Math.max(selectedIndex - 1, 0);
-				break;
-			case 'Enter':
-				e.preventDefault();
-				if (selectedIndex >= 0 && selectedIndex < results.length) {
-					handleSelect(results[selectedIndex]);
-				}
-				break;
-			case 'Escape':
-				isOpen = false;
-				selectedIndex = -1;
-				break;
+		if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+			e.preventDefault();
+			const step = e.key === 'ArrowDown' ? 1 : -1;
+			selectedIndex = Math.min(Math.max(selectedIndex + step, 0), results.length - 1);
+		} else if (e.key === 'Enter') {
+			e.preventDefault();
+			if (selectedIndex >= 0) handleSelect(results[selectedIndex]);
+		} else if (e.key === 'Escape') {
+			isOpen = false;
+			selectedIndex = -1;
 		}
 	}
 
+	function clear() {
+		value = '';
+		results = [];
+		isOpen = false;
+	}
+
+	// Delay closing to allow a click on a result
 	function handleBlur() {
-		// Delay closing to allow click on result
 		setTimeout(() => {
 			isOpen = false;
 			selectedIndex = -1;
 		}, 200);
 	}
-
-	function handleFocus() {
-		if (results.length > 0) {
-			isOpen = true;
-		}
-	}
-
-	const inputClasses = $derived(
-		`w-full pl-10 pr-10 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors ${
-			error ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300'
-		} ${disabled ? 'bg-gray-50 text-ink-muted cursor-not-allowed' : ''} ${className}`
-	);
 </script>
 
 <div class="relative">
-	{#if label}
-		<label for={id} class="block text-sm font-medium text-gray-700 mb-1">
-			{label}
-			{#if required}
-				<span class="text-critical">*</span>
-			{/if}
-		</label>
-	{/if}
+	<Field {id} {label} {help} {example} optional>
+		{#snippet children(control)}
+			<div class="relative">
+				<span class="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-ink-muted">
+					<Icon name="search" />
+				</span>
+				<input
+					id={control.id}
+					type="text"
+					{value}
+					{placeholder}
+					autocomplete="off"
+					oninput={handleInput}
+					onkeydown={handleKeydown}
+					onblur={handleBlur}
+					onfocus={() => (isOpen = results.length > 0)}
+					class="{controlClass(false)} pl-12 pr-16"
+					role="combobox"
+					aria-expanded={isOpen}
+					aria-controls="{id}-results"
+					aria-autocomplete="list"
+					aria-describedby={control.describedBy}
+					aria-activedescendant={selectedIndex >= 0 ? `${id}-result-${selectedIndex}` : undefined}
+				/>
+				<span class="absolute right-0 top-0 flex h-full items-center">
+					{#if isLoading}
+						<span class="flex size-12 items-center justify-center text-ink-muted" role="status">
+							<span class="animate-spin"><Icon name="loading" /></span>
+							<span class="sr-only">Adressen werden gesucht …</span>
+						</span>
+					{:else if value}
+						<button
+							type="button"
+							onclick={clear}
+							class="flex size-12 items-center justify-center rounded-control text-ink-muted hover:text-ink"
+							aria-label="Suche löschen"
+						>
+							<Icon name="close" />
+						</button>
+					{/if}
+				</span>
+			</div>
+		{/snippet}
+	</Field>
 
-	<div class="relative">
-		<Icon
-			name="search"
-			size={20}
-			class="absolute left-3 top-1/2 -translate-y-1/2 text-ink-muted pointer-events-none"
-		/>
-
-		<input
-			{id}
-			type="text"
-			{value}
-			{placeholder}
-			{disabled}
-			autocomplete="off"
-			oninput={handleInput}
-			onkeydown={handleKeydown}
-			onblur={handleBlur}
-			onfocus={handleFocus}
-			class={inputClasses}
-			role="combobox"
-			aria-expanded={isOpen}
-			aria-controls="address-results"
-			aria-autocomplete="list"
-		/>
-
-		{#if isLoading}
-			<span class="absolute right-3 top-1/2 -translate-y-1/2 animate-spin text-ink-muted">
-				<Icon name="refresh" size={18} />
-			</span>
-		{:else if value && !disabled}
-			<button
-				type="button"
-				onclick={() => {
-					value = '';
-					results = [];
-					isOpen = false;
-				}}
-				class="absolute right-3 top-1/2 -translate-y-1/2 text-ink-muted hover:text-gray-600 transition-colors"
-				aria-label="Suche löschen"
-			>
-				<Icon name="close" size={18} />
-			</button>
-		{/if}
-	</div>
-
-	{#if error}
-		<p class="mt-1 text-sm text-critical">{error}</p>
-	{/if}
-
-	<!-- Results dropdown -->
 	{#if isOpen && results.length > 0}
 		<ul
-			id="address-results"
-			class="absolute z-50 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-auto"
+			id="{id}-results"
+			class="absolute z-50 mt-2 max-h-80 w-full overflow-auto rounded-control border border-line-strong bg-surface shadow-raised"
 			role="listbox"
+			aria-label="Gefundene Adressen"
 		>
-			{#each results as street, index}
+			{#each results as street, index (index)}
 				<li
+					id="{id}-result-{index}"
 					role="option"
 					aria-selected={index === selectedIndex}
-					class="px-4 py-3 cursor-pointer transition-colors {index === selectedIndex
-						? 'bg-primary/10 text-primary'
-						: 'hover:bg-gray-50'}"
-					onclick={() => handleSelect(street)}
-					onkeydown={(e) => e.key === 'Enter' && handleSelect(street)}
-					tabindex="-1"
+					class="flex min-h-12 cursor-pointer items-start gap-4 px-4 py-2 {index === selectedIndex
+						? 'bg-accent-soft'
+						: 'hover:bg-sunken'}"
+					onmousedown={() => handleSelect(street)}
 				>
-					<div class="flex items-start gap-3">
-						<Icon name="location_on" size={20} class="text-ink-muted mt-0.5 flex-shrink-0" />
-						<div class="flex-1 min-w-0">
-							<p class="font-medium text-gray-900 truncate">{street.name}</p>
-							<p class="text-sm text-ink-muted">
-								{street.postalCode}
-								{street.locality}
-								<span class="text-ink-muted">({street.canton.shortName})</span>
-							</p>
-						</div>
-					</div>
+					<span class="text-ink-muted"><Icon name="location" /></span>
+					<span class="flex min-w-0 flex-col">
+						<span class="font-semibold text-ink">{street.name}</span>
+						<span class="text-ink-muted"
+							>{street.postalCode} {street.locality} ({street.canton.shortName})</span
+						>
+					</span>
 				</li>
 			{/each}
 		</ul>

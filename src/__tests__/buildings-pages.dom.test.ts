@@ -3,12 +3,16 @@ import { readable } from 'svelte/store';
 
 let url = new URL('http://localhost/buildings');
 vi.mock('$app/navigation', () => ({ goto: vi.fn() }));
+vi.mock('$app/forms', () => ({ enhance: () => ({ destroy() {} }) }));
 vi.mock('$app/stores', () => ({
 	page: { subscribe: (run: (value: unknown) => void) => readable({ url }).subscribe(run) }
 }));
 
 import { goto } from '$app/navigation';
 import BuildingsPage from '../routes/buildings/+page.svelte';
+import BuildingPage from '../routes/buildings/[id]/+page.svelte';
+import NewBuildingPage from '../routes/buildings/new/+page.svelte';
+import EditBuildingPage from '../routes/buildings/[id]/edit/+page.svelte';
 import { byTestId, click, fireEvent, show } from './helpers/dom';
 
 const text = () => document.body.textContent?.replace(/\s+/g, ' ') ?? '';
@@ -102,5 +106,118 @@ describe('Gebäudeliste', () => {
 		expect(byTestId('pagination-next')!.getAttribute('href')).toBe(
 			'/buildings?city=Winterthur&page=2'
 		);
+	});
+});
+
+describe('Gebäudedetail', () => {
+	const flat = (id: string, number: string, floor: number, status = 'vacant') => ({
+		id,
+		buildingId: 'b1',
+		number,
+		floor,
+		area: '70.00',
+		rooms: '3.5',
+		status
+	});
+	const detail = (apartments: ReturnType<typeof flat>[]) =>
+		show(BuildingPage, {
+			data: { building: building({ apartmentCount: apartments.length }), apartments },
+			form: null
+		} as never);
+
+	it('nennt Gebäude, Adresse und Baujahr mit dem Weg zurück zur Liste', () => {
+		detail([]);
+		expect(document.querySelector('h1')!.textContent).toBe('Lindenhof');
+		expect(byTestId('breadcrumb-link')!.getAttribute('href')).toBe('/buildings');
+		expect(byTestId('building-address')!.textContent).toContain('Testweg 1, 8400 Winterthur');
+		expect(byTestId('building-year-built')!.textContent).toBe('1985');
+	});
+
+	it('listet die Wohnungen nach Stockwerk, von unten nach oben', () => {
+		detail([
+			flat('a3', '10.01', 10, 'occupied'),
+			flat('a1', '1.01', 1),
+			flat('a0', '0.01', 0),
+			flat('a2', '2.01', 2)
+		]);
+		const floors = [...document.querySelectorAll('[data-testid="apartment-floor"]')].map(
+			(heading) => heading.textContent!.trim()
+		);
+		expect(floors).toEqual(['EG', '1. OG', '2. OG', '10. OG']);
+	});
+
+	it('macht die ganze Zeile zum Link mit der Wohnung als Linktext', () => {
+		detail([flat('a1', '1.01', 1)]);
+		const row = byTestId('apartment-row-a1')!;
+		const links = row.querySelectorAll('a');
+		expect(links).toHaveLength(1);
+		expect(links[0].textContent!.trim()).toBe('Wohnung 1.01');
+		expect(links[0].getAttribute('href')).toBe('/apartments/a1');
+		const words = row.textContent!.replace(/\s+/g, ' ');
+		expect(words).toContain('Leer');
+		expect(words).toContain('3.5 Zimmer');
+		expect(words).toContain('70 m²');
+		expect(words).not.toContain('·');
+		expect(byTestId('apartment-status-legend')).not.toBeNull();
+	});
+
+	it('erfasst Wohnungen im Gebäude als nächsten Schritt', () => {
+		detail([flat('a1', '1.01', 1)]);
+		const add = byTestId('apartment-add-button')!;
+		expect(add.getAttribute('href')).toBe('/apartments/new?building=b1');
+		expect(add.textContent).toContain('Wohnung erfassen');
+	});
+
+	it('bietet ohne Wohnungen die erste Wohnung an', () => {
+		detail([]);
+		expect(byTestId('apartment-add-button')).toBeNull();
+		expect(byTestId('apartment-first-create-button')!.getAttribute('href')).toBe(
+			'/apartments/new?building=b1'
+		);
+	});
+
+	it('nennt vor dem Löschen die Folgen', () => {
+		detail([]);
+		click('building-delete-button');
+		const dialog = document.querySelector('[role=dialog]')!;
+		expect(dialog.textContent).toContain('Gebäude löschen?');
+		expect(dialog.textContent).toContain('Rechnungen');
+		expect(byTestId('building-delete-confirm')!.textContent).toContain('Gebäude löschen');
+	});
+
+	it('löscht kein Gebäude mit Wohnungen und sagt, was zu tun ist', () => {
+		detail([flat('a1', '1.01', 1)]);
+		click('building-delete-button');
+		click('building-delete-confirm');
+		expect(byTestId('form-error')!.textContent).toContain(
+			'Dieses Gebäude kann nicht gelöscht werden'
+		);
+		expect(byTestId<HTMLButtonElement>('building-delete-confirm')!.disabled).toBe(true);
+	});
+});
+
+describe('Gebäude erfassen und bearbeiten', () => {
+	const trail = () =>
+		[...document.querySelectorAll('[data-testid="breadcrumb-link"]')].map((link) => [
+			link.textContent,
+			link.getAttribute('href')
+		]);
+
+	it('erfasst ein neues Gebäude mit dem Weg zurück zur Liste', () => {
+		show(NewBuildingPage, { form: null } as never);
+		expect(document.querySelector('h1')!.textContent).toBe('Neues Gebäude');
+		expect(trail()).toEqual([['Gebäude', '/buildings']]);
+		expect(byTestId('form-cancel')!.getAttribute('href')).toBe('/buildings');
+	});
+
+	it('bearbeitet das Gebäude mit dem Weg zurück zum Gebäude', () => {
+		show(EditBuildingPage, { data: { building: building() }, form: null } as never);
+		expect(document.querySelector('h1')!.textContent).toBe('Gebäude bearbeiten');
+		expect(trail()).toEqual([
+			['Gebäude', '/buildings'],
+			['Lindenhof', '/buildings/b1']
+		]);
+		expect(byTestId<HTMLInputElement>('building-name-input')!.value).toBe('Lindenhof');
+		expect(byTestId('form-cancel')!.getAttribute('href')).toBe('/buildings/b1');
 	});
 });
