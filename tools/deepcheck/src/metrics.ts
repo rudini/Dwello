@@ -159,26 +159,40 @@ function exportedNames(sf: SourceFile): Set<string> {
 	return names;
 }
 
-function declaredNames(s: Statement): string[] {
-	if (Node.isVariableStatement(s)) return s.getDeclarations().map((d) => d.getName());
-	return (Node.isFunctionDeclaration(s) || Node.isClassDeclaration(s)) && s.getName() ? [s.getName()!] : [];
+/** The identifiers a top-level statement declares, including names bound by destructuring. */
+function declaredNameNodes(s: Statement): Node[] {
+	if (Node.isVariableStatement(s))
+		return s.getDeclarations().flatMap((d) => {
+			const name = d.getNameNode();
+			return Node.isIdentifier(name) ? [name] : name.getDescendantsOfKind(SyntaxKind.BindingElement).map((b) => b.getNameNode());
+		});
+	const name = (Node.isFunctionDeclaration(s) || Node.isClassDeclaration(s)) && s.getNameNode();
+	return name ? [name] : [];
 }
 
 const topLevel = (node: Node): Node => (node.getParent() === node.getSourceFile() || !node.getParent() ? node : topLevel(node.getParent()!));
 
 /**
  * Non-exported top-level declarations nothing else in the file refers to, also through other dead ones (Phase 4:
- * padding a shallow module with unused internals must not make it look deeper).
+ * padding a shallow module with unused internals must not make it look deeper). Uses are resolved by symbol, so a
+ * parameter, local or property with the same name does not keep a dead declaration alive.
  */
 function deadDeclarations(sf: SourceFile): Set<Node> {
-	const candidates = sf.getStatements().filter((s) => !hasExportKeyword(s) && declaredNames(s).length > 0);
-	const uses = sf.getDescendantsOfKind(SyntaxKind.Identifier).map((id) => ({ text: id.getText(), owner: topLevel(id) }));
+	const candidates = sf.getStatements().filter((s) => !hasExportKeyword(s) && declaredNameNodes(s).length > 0);
+	const declared = new Map(candidates.map((s) => [s, new Set(declaredNameNodes(s).map((n) => n.getSymbol()).filter(Boolean))]));
+	const names = new Set(candidates.flatMap((s) => declaredNameNodes(s).map((n) => n.getText())));
+	const uses = sf
+		.getDescendantsOfKind(SyntaxKind.Identifier)
+		.filter((id) => names.has(id.getText()))
+		.map((id) => ({ id, owner: topLevel(id) }));
 	const dead = new Set<Node>();
+	// Symbols are resolved only for uses in other live statements, and only until the first real use is found.
+	const usedBy = (s: Node, symbols: Set<unknown>) =>
+		uses.some((u) => u.owner !== s && !dead.has(u.owner) && symbols.has(u.id.getSymbol()));
 	for (let changed = true; changed; ) {
 		changed = false;
 		for (const s of candidates.filter((c) => !dead.has(c))) {
-			const names = declaredNames(s);
-			if (uses.some((u) => names.includes(u.text) && u.owner !== s && !dead.has(u.owner))) continue;
+			if (usedBy(s, declared.get(s)!)) continue;
 			dead.add(s);
 			changed = true;
 		}

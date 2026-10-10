@@ -2,16 +2,28 @@
 
 How meaningful are deepcheck's results on this codebase, and can it gate changed code? Brief: `docs/DEEP-MODULE_BRIEF.md` (X4.1–X4.7). Tool docs: `tools/deepcheck/README.md`. Date: 2026-10-10; repo state before calibration 8d05b55, after e7ca4fb.
 
-## Verdict: ready to gate on changed code (conservative threshold)
+## Verdict: ready to gate on changed code (narrow, conservative gate)
 
-- The gate uses `failThreshold` 65 and `tolerance` 5.
-- At 65 no module of this repo is flagged: 0 of 71 eligible modules, the highest is 60. No module of the three open-source reference projects reaches it either (highest 60).
-- The textbook shallow designs do reach it, at 71 to 75: pass-through classes, a facade of forwarding functions, Java-style stream wrappers.
-- Labelled deep modules stay at 39 or below, a margin of 26 points. "Flat by design" modules reach 60, a margin of only 5.
-- So the gate blocks a narrow, clear class of shallow modules: pass-through layers and thin facades, which are new code an agent easily writes. It has no observed false positive.
-- It does **not** catch the moderately shallow modules a human reviewer would point out. None of the 14 modules labelled shallow here scores above 47, so recall at the gate is 0/14.
-- For those, `scan` is a ranked review aid: 12 of its top 25 are truly shallow.
-- Treat a gate failure as "look at this design", not as proof.
+**What the gate flags.** It uses `failThreshold` 65 and `tolerance` 5. A module is flagged only when all three hold:
+- it is eligible;
+- it scores at least 65;
+- it shows a **structural** sign of shallowness: a pass-through, a leaky export or classitis.
+
+The structural condition was added after the final review. Depth and complexity alone saturate at 60 for flat-by-design modules (constants, types), and a new module of five label constants without callers reached exactly 65 through coupling. That was a reproducible false positive; it is fixed with a regression test.
+
+**What the evidence shows.**
+- No module of this repo is flagged (0 of 71 eligible, highest 60), and none of the 24 eligible modules of three open-source projects reaches 65 (highest 60).
+- The textbook shallow designs are flagged at 71–75: pass-through classes, a facade of forwarding functions, Java-style stream wrappers. So is the deliberately shallow facade from X2.2.
+- Labelled deep modules stay at 39 or below.
+
+**Limits of that evidence.**
+- **Zero real positives.** Gate precision is measured on no real positive in this repo or the OSS projects; every flagged case was written by the author as a fixture.
+- **No recall for moderately shallow modules.** None of the 14 modules labelled shallow here reaches 65.
+- So the gate blocks a narrow, clear class: new pass-through layers and thin facades, which agents easily write. It is not a general shallowness detector.
+- `scan` is the ranked review aid: 12 of its top 25 are truly shallow.
+- Treat a gate failure as "look at this design", with `// deepcheck-ignore-file -- reason` as the visible way out.
+
+**Why not "usable as scan only".** The final review called it that until findings 1–3 were fixed (the false positive at 65, live destructured code dropped, the dead-code check fooled by shadowing). They are now fixed, each with a regression test written first. What remains is low recall, which costs nothing when gating; the false-positive risk is now covered by the structural requirement.
 
 ## Method
 
@@ -27,6 +39,8 @@ Three modules that entered the top 30 after calibration were labelled later: `wi
 - They were told not to run the tool or read its docs or the baseline, and saw no scores.
 - Each label has a confidence and a one- or two-sentence reason.
 - The labels are judgements: 9 of 58 are low confidence. `tools/deepcheck` modules are part of the sample and were labelled the same way; four of them are among the labelled shallow or flat modules.
+- The OSS judgements below are mine and **not blind**: I had seen the scores.
+- The labels are not fully consistent between sources. The blind labellers called the repo's `error-handler.ts` (Error subclasses differing only in code and status) shallow; I called ky's Error subclasses flat by design.
 
 **Measures.**
 - Precision@25: the share of the 25 highest-scoring eligible modules labelled *shallow*. Flat-by-design counts as a false positive.
@@ -37,7 +51,7 @@ Three modules that entered the top 30 after calibration were labelled later: `wi
 | | Before (8d05b55) | After (e7ca4fb) |
 |---|---:|---:|
 | Precision@25 | 10/25 (40 %) | 12/25 (48 %) |
-| AUC (58 labels) | 0.783 | 0.827 |
+| AUC | 0.794 on the 55 originally labelled; 0.783 on all 58 | 0.827 (58 labels) |
 | Ranks of the 14 shallow modules | 1, 4, 7, 8, 9, 12, 16, 18, 19, 20, 26, 30, 31, 43 | 2, 5, 6, 9, 10, 12, 13, 15, 17, 19, 20, 22, 29, 30 |
 | Modules >= failThreshold | 0 (at 70) | 0 (at 65) |
 | Baseline entries | 0 | 0 (`.deepcheck-baseline.json`, 0 of 124 analyzed) |
@@ -136,12 +150,12 @@ Three modules that entered the top 30 after calibration were labelled later: `wi
 | Facade of four forwarding functions (`tenant-facade.ts`, used in X2.2) | 75 | yes |
 | Thin URL wrappers around fetch (3 one-line functions) | 53 | no |
 
-**Open-source spot check.** Each project was shallow-cloned into `/tmp/claude-0/oss`, never into this repo, and scanned with `--fallow off`. I judged every listed module by reading it. Each project has fewer than 10 eligible modules, so these are complete lists.
+**Open-source spot check.** Each project was shallow-cloned into `/tmp/claude-0/oss`, never into this repo, and scanned with `--fallow off`. I judged the top 10 (or all, if fewer) by reading them; the judgements are not blind.
 
-- **ky** (`sindresorhus/ky` 3541888), 13 eligible:
+- **ky** (`sindresorhus/ky` 3541888), 13 eligible, top 10:
   - NetworkError 51, type-guards 50, ResponseSizeError 49, constants 48, HTTPError 41, is 40, timeout 33, NonError 26, ForceRetryError 15, Ky 5.
   - The top modules are Error subclasses, predicate collections and constants: flat by design, not shallow, and all below 65.
-  - `Ky.ts` (624 statements behind 7 interface units) is correctly last.
+  - `Ky.ts` (624 statements behind 7 interface units) is 10th of 13 at score 5, below every module in the list.
   - Before calibration `source/index.ts` ranked first (62). It re-exports about 38 names; that cause is fixed.
 - **zustand** (`pmndrs/zustand` d7a5583), 4 eligible:
   - traditional 46, react 27, vanilla 20, persist 8.
@@ -159,8 +173,8 @@ None of the 24 eligible OSS modules reaches 65.
 
 | Attempt | Result | Status |
 |---|---|---|
-| Pad a shallow module with dead internals (unused functions and constants) | Before: the score fell from 74 to 46 (gamed). Now unused non-exported top-level declarations, including chains that only feed each other, are left out of statements, operations, complexity and function count, and the score stays at 74 | mitigated, test |
-| Split a deep module (CSV parser) into tiny files | the highest part scores above the whole (classitis and depth) | holds, test |
+| Pad a shallow module with dead internals (unused functions and constants) | Before: the score fell from 74 to 46 (gamed). Now unused non-exported top-level declarations, including chains that only feed each other, are left out of statements, operations, complexity and function count, and the score stays at 74. Uses are resolved by symbol, so a parameter, local or property with the same name does not keep dead code alive, and destructured declarations are tracked per bound name (review findings, tests). An unused `const x = sideEffect()` is treated as dead although it runs | mitigated, tests |
+| Split a deep module (CSV parser) into tiny files | the highest part scores above the whole, so `scan` shows it. But the tiny parts are not **eligible** (interfaceSize < 5, and fewer than 5 files for classitis), so the gate does not see them: splitting a flagged module into several small files evades the gate | **weakness, documented**: `scan --min-score` still ranks the parts |
 | Inline pass-throughs (do the work instead of forwarding) | score goes down | holds, test |
 | Wrap pass-throughs in an exported object literal | function members count as interface and pass-throughs are detected (Phase 1 review fix) | mitigated, test |
 | Pad with *live* but pointless code (statements that are executed but do nothing useful) | lowers the score | **not mitigated**: not detectable statically without judgement; reviewers must catch it, and every finding says "fix the design, do not pad" |
@@ -197,13 +211,16 @@ Pass-through, leaky, classitis and unused exports are sparse indicators: alone t
 - **tolerance 5.** I applied three benign one-step edits to each of the 71 eligible modules: one tiny exported helper, one live internal helper, one exported constant.
   - The score changed by median 1 / -1 / 1, p90 4 / 0 / 3, max 6 / 0 / 4 (min -3 / -7 / -2).
   - 5 lets one small benign edit pass. A baselined module that keeps getting shallower fails G2.
+  - Today the baseline is empty, so G2 and the tolerance do not apply yet; they matter once modules are baselined. The current risk is G1: a benign edit pushing an unbaselined module over 65. The structural requirement covers it, since a module needs a pass-through, leaky export or classitis to fail.
 
 ## Limits
 
 - **Small sample, one codebase.** 58 labelled modules from one SvelteKit and Elysia repo. Precision@25 moves by 4 percentage points per module. The threshold's margin to the highest legitimate module is 5 points.
 - **Judgement labels.** They come from three reviewer agents, not humans, and 9 of 58 are low confidence. "Flat by design" versus "shallow" is the most disputable boundary (utility collections, CRUD services).
 - **Calibration on the same labels it is measured on.** The changes were few and generic (operations, re-exports, mostly-types, dead code, two targets, one weight), and several came from the OSS projects rather than the labels. Even so, precision and AUC "after" are optimistic.
-- **Low recall at the gate.** It catches pass-through layers and thin facades, not moderately shallow modules (0 of 14 labelled shallow modules here reach 65).
+- **Low recall at the gate.** It catches pass-through layers and thin facades, not moderately shallow modules (0 of 14 labelled shallow modules here reach 65). Gate precision rests on author-written fixtures and one scratch module, not on real positives.
+- **Splitting evades the gate.** A shallow module split into small files has parts that are not eligible.
+- **Runtime.** After the symbol-based dead-code check, `npm run deepcheck:audit` takes 4.7–5.3 s with Fallow and about 3.7 s without (the type checker's first symbol resolution). That fits a commit/push gate, not an after-every-edit hook.
 - **Blind spots of the metrics.**
   - Svelte components are not measured.
   - Utility collections and declarative modules look shallow.

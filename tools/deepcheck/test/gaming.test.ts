@@ -75,4 +75,26 @@ export class Names {
 		const after = score({ 'src/names.ts': inlined }, 'src/names.ts');
 		expect(after).toBeLessThan(before);
 	});
+
+	it('keeps live destructured declarations (Phase 4 review)', () => {
+		const code = "const { a, b } = { a: 1, b: 2 };\nexport function sum(x: number) {\n\treturn x + a + b;\n}\n";
+		const m = analyze({ root: writeProject({ 'src/m.ts': code }), fallow: 'off' }).modules[0];
+		expect(m.metrics.implementationSize).toBe(3);
+	});
+
+	it('is not fooled by a parameter, local or property that shares a dead function name (Phase 4 review)', () => {
+		const shadowing = `function pad(n: number) {
+	const doubled = n * 2;
+	const tripled = n * 3;
+	return doubled + tripled;
+}
+export function useIt(pad: number, o: { pad: number }) {
+	const local = pad + o.pad;
+	return local;
+}
+`;
+		const m = analyze({ root: writeProject({ 'src/m.ts': shadowing }), fallow: 'off' }).modules[0];
+		// useIt: declaration, const, return = 3; the dead pad() and its 3 statements are left out
+		expect(m.metrics.implementationSize).toBe(3);
+	});
 });

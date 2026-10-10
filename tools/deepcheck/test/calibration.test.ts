@@ -60,4 +60,21 @@ describe('calibration regressions (Phase 4)', () => {
 		const report = analyze({ root: writeProject({ 'src/types.ts': [...types, code].join('\n') }), fallow: 'off' });
 		expect(report.modules.map((m) => m.path)).toContain('src/types.ts');
 	});
+
+	it('does not flag a new flat module of constants that has no callers yet (Phase 4 review: scored exactly 65)', () => {
+		const labels = [
+			"import type { Currency } from './currency';",
+			"export const PAID = 'Bezahlt';",
+			"export const OPEN = 'Offen';",
+			"export const OVERDUE = 'Überfällig';",
+			"export const REMINDED = 'Gemahnt';",
+			"export const CANCELLED = 'Storniert';",
+			"export type PaymentLabel = { text: string; currency: Currency };",
+			''
+		].join('\n');
+		const report = analyze({ root: writeProject({ 'src/payment-labels.ts': labels, 'src/currency.ts': "export type Currency = 'CHF';\nexport const CHF = 'CHF';\n" }), fallow: 'off' });
+		const m = report.modules.find((x) => x.path === 'src/payment-labels.ts')!;
+		expect(m.score).toBeGreaterThanOrEqual(60);
+		expect(m.flagged).toBe(false);
+	});
 });
