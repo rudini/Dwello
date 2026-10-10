@@ -4408,10 +4408,11 @@ Brief: `docs/design/REDESIGN_BRIEF.md`; log and decisions: `docs/design/progress
   (`src/routes/buildings/BuildingMiniMap.svelte`, `src/__tests__/building-mini-map.dom.test.ts`, `vitest.config.ts`,
   `.env.example`, `docker-compose.prod.yml`, `docs/tech-stack.md`)
 - [x] **Skill prompt audit:** stale facts and dated wording removed from the project skills (wrong bug-fix test
-  rule, missing `/codebase-design` skill, `CONTEXT.md` instead of `UBIQUITOUS_LANGUAGE.md`, plugin-only setup notes,
+  rule, `CONTEXT.md` instead of `UBIQUITOUS_LANGUAGE.md`, plugin-only setup notes,
   the generic playwright-bdd bootstrap, all-caps pressure) (`.claude/skills/tdd/SKILL.md`,
   `.claude/skills/ponytail/SKILL.md`, `.claude/skills/ponytail-gain/SKILL.md`, `.claude/skills/ponytail-help/SKILL.md`,
-  `.claude/skills/bdd-acceptance/SKILL.md`)
+  `.claude/skills/bdd-acceptance/SKILL.md`); Matt Pocock's `codebase-design` skill vendored unchanged (MIT, upstream
+  commit `49dd158`), as `tdd` refers to it (`.claude/skills/codebase-design/`)
 
 
 ---
