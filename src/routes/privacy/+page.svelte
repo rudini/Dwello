@@ -1,4 +1,6 @@
 <script lang="ts">
+	import PageHeader from '$lib/ui/PageHeader.svelte';
+	import Panel from '$lib/ui/Panel.svelte';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -39,30 +41,30 @@
 			]
 		}
 	];
+
+	// TODO(fachlich prüfen): legal wording of the draft notice (docs/design/offene-punkte.md, Privacy)
+	const draftNotice =
+		'Ungespeicherte Eingaben in «Mietvertrag erfassen» und «Abrechnungen erstellen» bewahrt Dwello als Entwurf in diesem Browser auf, bis Sie sie speichern, verwerfen oder sich abmelden. Ein Entwurf kann Namen und Beträge enthalten; er bleibt auf dem Gerät, auf dem Sie arbeiten.';
 </script>
 
 <svelte:head>
 	<title>Datenschutz - Dwello</title>
 </svelte:head>
 
-<div class="space-y-6 max-w-3xl">
-	<div>
-		<h1 class="text-2xl font-bold text-gray-900" data-testid="page-title">Datenschutz</h1>
-		<p class="text-ink-muted mt-1">Welche Daten Dwello bearbeitet und wohin sie gehen</p>
-	</div>
+<div class="flex max-w-3xl flex-col gap-8">
+	<PageHeader title="Datenschutz" purpose="Welche Daten Dwello bearbeitet und wohin sie gehen." />
 
 	{#each sections as section (section.title)}
-		<section
-			data-testid="page-section"
-			class="bg-white border border-slate-200 rounded-xl shadow-sm p-6 space-y-3"
-		>
-			<h2 class="text-lg font-semibold text-gray-900">{section.title}</h2>
+		<Panel title={section.title} testid="page-section">
 			{#if section.title === 'Weitergabe an Dritte'}
-				<p class="text-gray-700" data-testid="llm-recipient">{llmNotice}</p>
+				<p class="text-ink" data-testid="llm-recipient">{llmNotice}</p>
 			{/if}
 			{#each section.paragraphs as paragraph (paragraph)}
-				<p class="text-gray-700">{paragraph}</p>
+				<p class="text-ink">{paragraph}</p>
 			{/each}
-		</section>
+			{#if section.title === 'Welche Daten Dwello speichert'}
+				<p class="text-ink" data-testid="draft-notice">{draftNotice}</p>
+			{/if}
+		</Panel>
 	{/each}
 </div>

@@ -7,6 +7,10 @@ export const sectionTitled = (actor: Actor, heading: string) => pageSection(acto
 export const llmRecipientNotice = (actor: Actor, heading: string) =>
 	pageSection(actor.page, heading).getByTestId('llm-recipient');
 
+/** Where unsaved wizard input stays, as the privacy statement says */
+export const draftNotice = (actor: Actor, heading: string) =>
+	pageSection(actor.page, heading).getByTestId('draft-notice');
+
 /** Who runs this installation, as the terms of use name them */
 export const operatorNotice = (actor: Actor, heading: string) =>
 	pageSection(actor.page, heading).getByTestId('terms-operator');

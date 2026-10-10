@@ -83,7 +83,6 @@
 	"src/routes/invoices/[id]/+page.svelte",
 	"src/routes/invoices/[id]/edit/+page.svelte",
 	"src/routes/invoices/new/+page.svelte",
-	"src/routes/privacy/+page.svelte",
 	"src/routes/statements/+page.svelte",
 	"src/routes/statements/[id]/+page.svelte",
 	"src/routes/statements/[id]/ReminderFeedback.svelte",
@@ -97,6 +96,5 @@
 	"src/routes/tenants/[id]/TenantRentalCard.svelte",
 	"src/routes/tenants/[id]/edit/+page.svelte",
 	"src/routes/tenants/new/+page.svelte",
-	"src/routes/terms/+page.svelte",
 	"src/styles/globals.css"
 ]
