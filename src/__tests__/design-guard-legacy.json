@@ -83,7 +83,6 @@
 	"src/routes/statements/[id]/ReminderHistory.svelte",
 	"src/routes/statements/[id]/ReminderModal.svelte",
 	"src/routes/statements/[id]/edit/+page.svelte",
-	"src/routes/tenants/+page.svelte",
 	"src/routes/tenants/[id]/+page.svelte",
 	"src/routes/tenants/[id]/TenantContactCard.svelte",
 	"src/routes/tenants/[id]/TenantDocumentsCard.svelte",

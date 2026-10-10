@@ -6,7 +6,7 @@
 	import Button from '$lib/ui/Button.svelte';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import Panel from '$lib/ui/Panel.svelte';
-	import ActionDialog from './ActionDialog.svelte';
+	import ActionDialog from '$lib/ui/ActionDialog.svelte';
 	import ContractParties from './ContractParties.svelte';
 	import ContractTerms from './ContractTerms.svelte';
 	import type { ActionData } from './$types';

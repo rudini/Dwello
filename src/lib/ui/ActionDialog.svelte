@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import type { Snippet } from 'svelte';
-	import Alert from '$lib/ui/Alert.svelte';
-	import Dialog from '$lib/ui/Dialog.svelte';
+	import Alert from './Alert.svelte';
+	import Dialog from './Dialog.svelte';
 
 	// Confirmation that posts to a form action of the page; a refusal stays in the dialog with its reason
 	let {
