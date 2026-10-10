@@ -147,13 +147,97 @@ describe('G6 Fallow independence', () => {
 	it('gives the same gate result with --fallow off as with Fallow data, and never fails on Fallow findings alone', () => {
 		const root = writeRepo({ 'src/store.ts': STORE });
 		writeFiles(root, { 'src/shallow.ts': SHALLOW_MODULE, 'src/deep.ts': DEEP_MODULE });
-		const verdict = (fallow: string) => {
-			const out = JSON.parse(cli(root, 'check', '--fallow', fallow, '--format', 'json').stdout);
-			return { passed: out.passed, failing: out.findings.map((f: { path: string; gate: string }) => `${f.gate} ${f.path}`) };
-		};
-		const withFallow = verdict(fallowFor(root));
-		expect(withFallow).toEqual(verdict('off'));
-		expect(withFallow.failing).toEqual(['G1 src/shallow.ts']);
+		const run = (fallow: string) => JSON.parse(cli(root, 'check', '--fallow', fallow, '--format', 'json').stdout);
+		const verdict = (out: { passed: boolean; findings: { path: string; gate: string }[] }) => ({
+			passed: out.passed,
+			failing: out.findings.map((f) => `${f.gate} ${f.path}`)
+		});
+		const withFallow = run(fallowFor(root));
+		const without = run('off');
+		expect(verdict(withFallow)).toEqual(verdict(without));
+		expect(verdict(withFallow).failing).toEqual(['G1 src/shallow.ts']);
+		// The Fallow run really used Fallow's numbers: a different score from different inputs, same verdict.
+		expect(withFallow.findings[0].metrics).toMatchObject({ complexitySource: 'fallow', complexity: 6, unusedExports: 5 });
+		expect(without.findings[0].metrics).toMatchObject({ complexitySource: 'own', unusedExports: null });
+		expect(withFallow.findings[0].score).not.toBe(without.findings[0].score);
+	});
+});
+
+describe('review 3 regressions', () => {
+	it('judges against the baseline at the base, so regenerating it in the change does not silence the gate', () => {
+		const root = writeRepo({ 'src/store.ts': STORE, 'src/deep.ts': DEEP_MODULE });
+		cli(root, 'baseline', '--fallow', 'off');
+		commitAll(root, 'baseline');
+		git(root, 'checkout', '-q', '-b', 'feature');
+		writeFiles(root, { 'src/shallow.ts': SHALLOW_MODULE });
+		cli(root, 'baseline', '--fallow', 'off');
+		expect(cli(root, 'check', '--fallow', 'off', '--agent').code).toBe(1);
+		commitAll(root, 'shallow module with regenerated baseline');
+		expect(cli(root, 'check', '--fallow', 'off', '--changed-since', 'main').code).toBe(1);
+	});
+});
+
+describe('review 3 regressions, threshold', () => {
+	it('judges with the failThreshold of the baseline at the base and warns when the config differs', () => {
+		const root = writeRepo({ 'src/store.ts': STORE, 'src/legacy.ts': SHALLOW_MODULE + DEEP_MODULE });
+		cli(root, 'baseline', '--fallow', 'off');
+		writeFiles(root, { 'deepcheck.config.json': '{ "failThreshold": 50 }' });
+		commitAll(root, 'baseline at 70, config lowered to 50');
+		writeFiles(root, { 'src/legacy.ts': `${SHALLOW_MODULE + DEEP_MODULE}// touched\n` });
+		const result = JSON.parse(cli(root, 'check', '--fallow', 'off', '--format', 'json').stdout);
+		expect(result).toMatchObject({ passed: true, failThreshold: 70 });
+		expect(result.warnings).toContain(
+			'the baseline was written with failThreshold 70 but the config has 50; the gate uses 70 until a regenerated baseline is merged (deepcheck baseline)'
+		);
+	});
+});
+
+describe('review 3 regressions, labels and warnings', () => {
+	it('labels an existing module that crossed the threshold apart from a new file, and prints warnings', () => {
+		const root = writeRepo({ 'tsconfig.json': '{ "extends": "./missing.json" }', 'src/store.ts': STORE, 'src/old.ts': 'export const x = 1;\n' });
+		writeFiles(root, { 'src/old.ts': SHALLOW_MODULE, 'src/new.ts': SHALLOW_MODULE });
+		const result = cli(root, 'check', '--fallow', 'off');
+		expect(result.stdout).toMatch(/G1 new shallow module {2}\d+ {2}src\/new\.ts/);
+		expect(result.stdout).toMatch(/G1 now shallow, not in the baseline {2}\d+ {2}src\/old\.ts/);
+		expect(result.stderr).toMatch(/^deepcheck: warning: tsconfig\.json/);
+	});
+});
+
+describe('review 3 regressions, Fallow mode', () => {
+	it('records whether the baseline used Fallow and warns when the gate runs differently', () => {
+		const root = writeRepo({ 'src/store.ts': STORE, 'src/deep.ts': DEEP_MODULE });
+		cli(root, 'baseline', '--fallow', 'off');
+		expect(JSON.parse(readFileSync(`${root}/.deepcheck-baseline.json`, 'utf8')).fallow).toBe(false);
+		commitAll(root, 'baseline without Fallow');
+		writeFiles(root, { '.bin/f.json': '{}', '.bin/fallow': `#!/bin/sh\ncat '${root}/.bin/f.json'\n` });
+		chmodSync(`${root}/.bin/fallow`, 0o755);
+		const out = JSON.parse(cli(root, 'check', '--fallow', `${root}/.bin/fallow`, '--format', 'json').stdout);
+		expect(out.warnings).toContain('the baseline was written without Fallow data but this run uses it; scores of baselined modules are not fully comparable');
+	});
+});
+
+describe('review 3 regressions, agent order', () => {
+	it('shows the highest scores first and caps modules and invalid suppressions together', () => {
+		const root = writeRepo({ 'src/store.ts': STORE });
+		writeFiles(root, {
+			'src/a-less.ts': SHALLOW_MODULE + 'const pad = [1, 2, 3].map((n) => n * 2);\nexport const total = () => pad.length;\n',
+			'src/b-most.ts': SHALLOW_MODULE,
+			...Object.fromEntries([1, 2, 3].map((i) => [`src/s${i}.ts`, '// deepcheck-ignore-file\nexport const x = 1;\n']))
+		});
+		const { stdout } = cli(root, 'check', '--fallow', 'off', '--agent');
+		expect(stdout.indexOf('src/b-most.ts')).toBeLessThan(stdout.indexOf('src/a-less.ts'));
+		expect(stdout.match(/ {2}G[14] /g)).toHaveLength(3);
+		expect(stdout).toContain('... and 2 more: run deepcheck check for all');
+	});
+});
+
+describe('review 3 regressions, subdirectory', () => {
+	it('sees tracked changes when run from a subdirectory of the repository', () => {
+		const root = writeRepo({ 'pkg/src/store.ts': STORE, 'pkg/src/shallow.ts': 'export const x = 1;\n' });
+		writeFiles(root, { 'pkg/src/shallow.ts': SHALLOW_MODULE });
+		const result = cli(`${root}/pkg`, 'check', '--fallow', 'off');
+		expect(result.code).toBe(1);
+		expect(result.stdout).toContain('src/shallow.ts');
 	});
 });
 

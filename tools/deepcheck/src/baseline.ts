@@ -19,6 +19,8 @@ export interface Baseline {
 	schemaVersion: 1;
 	tool: 'deepcheck';
 	failThreshold: number;
+	/** Fallow data fed the recorded scores. */
+	fallow: boolean;
 	entries: BaselineEntry[];
 }
 
@@ -28,21 +30,26 @@ export function createBaseline(report: Report, config: Config): Baseline {
 		.filter((m) => m.flagged)
 		.map((m) => ({ fingerprint: `${m.path}#${RULE}`, path: m.path, rule: RULE, score: m.score }))
 		.sort((a, b) => (a.path < b.path ? -1 : 1));
-	return { schemaVersion: 1, tool: 'deepcheck', failThreshold: config.failThreshold, entries };
+	return { schemaVersion: 1, tool: 'deepcheck', failThreshold: config.failThreshold, fallow: report.fallow, entries };
 }
 
-const FILE = '.deepcheck-baseline.json';
+export const BASELINE_FILE = '.deepcheck-baseline.json';
 
-/** The committed baseline; none yet means every flagged changed module counts as new. */
-export function readBaseline(root: string): Baseline {
-	const path = join(root, FILE);
-	if (!existsSync(path)) return { schemaVersion: 1, tool: 'deepcheck', failThreshold: 0, entries: [] };
-	const baseline = parseJson(readFileSync(path, 'utf8'), FILE);
+/** A baseline from its file content; null (no baseline yet) means every flagged changed module counts as new. */
+export function parseBaseline(text: string | null): Baseline {
+	if (text === null) return { schemaVersion: 1, tool: 'deepcheck', failThreshold: 0, fallow: false, entries: [] };
+	const baseline = parseJson(text, BASELINE_FILE);
 	const problems = validate(baseline, loadSchema('baseline.schema.json'));
-	if (problems.length) throw new ToolError(`${FILE}: ${problems.join('; ')}; regenerate it with deepcheck baseline`);
+	if (problems.length) throw new ToolError(`${BASELINE_FILE}: ${problems.join('; ')}; regenerate it with deepcheck baseline`);
 	return baseline;
 }
 
+/** The baseline in the working tree (scan --use-baseline). */
+export function readBaseline(root: string): Baseline {
+	const path = join(root, BASELINE_FILE);
+	return parseBaseline(existsSync(path) ? readFileSync(path, 'utf8') : null);
+}
+
 export function writeBaseline(root: string, baseline: Baseline): void {
-	writeFileSync(join(root, FILE), `${JSON.stringify(baseline, null, '\t')}\n`);
+	writeFileSync(join(root, BASELINE_FILE), `${JSON.stringify(baseline, null, '\t')}\n`);
 }

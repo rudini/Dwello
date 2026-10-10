@@ -17,6 +17,7 @@ describe('baseline', () => {
 			schemaVersion: 1,
 			tool: 'deepcheck',
 			failThreshold: 70,
+			fallow: false,
 			entries: [{ fingerprint: 'src/shallow.ts#shallow-module', path: 'src/shallow.ts', rule: 'shallow-module', score }]
 		});
 	});

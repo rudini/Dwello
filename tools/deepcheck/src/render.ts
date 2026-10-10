@@ -78,19 +78,22 @@ export function renderExplain(m: ModuleReport, failThreshold: number): string {
 
 const gateLabel = (f: GateFinding, tolerance: number) =>
 	f.gate === 'G1'
-		? 'G1 new shallow module'
+		? f.newFile
+			? 'G1 new shallow module'
+			: 'G1 now shallow, not in the baseline'
 		: `G2 worsened from ${f.baselineScore} to ${f.score} (more than the tolerance of ${tolerance})`;
 
 /** Gate result for a terminal; `limit` caps the modules shown (agent mode). */
 export function renderCheck(out: CheckOutput, limit = Infinity): string {
 	const { changed, failed } = out.summary;
 	if (out.passed) return `deepcheck: ${changed} changed module(s) pass the deep-module gate\n`;
-	const shown = out.findings.slice(0, limit);
-	const blocks = shown.map((f) => `  ${gateLabel(f, out.tolerance)}  ${f.score}  ${f.path}\n${indent(f.reasons, '      - ')}`);
-	const more = failed > shown.length ? [`  ... and ${failed - shown.length} more: run deepcheck check for all\n`] : [];
+	const modules = out.findings.map((f) => `  ${gateLabel(f, out.tolerance)}  ${f.score}  ${f.path}\n${indent(f.reasons, '      - ')}`);
 	const suppressions = out.suppressionFindings.map((f) => `  G4 invalid suppression  ${f.path}:${f.line}\n      - ${f.message}\n`);
+	const all = [...modules, ...suppressions];
+	const shown = all.slice(0, limit);
+	const more = all.length > shown.length ? [`  ... and ${all.length - shown.length} more: run deepcheck check for all\n`] : [];
 	const total = failed + out.suppressionFindings.length;
-	return `deepcheck: ${total} changed module(s) fail the deep-module gate (threshold ${out.failThreshold}, tolerance ${out.tolerance})\n\n${[...blocks, ...more, ...suppressions].join('\n')}`;
+	return `deepcheck: ${total} changed module(s) fail the deep-module gate (threshold ${out.failThreshold}, tolerance ${out.tolerance})\n\n${[...shown, ...more].join('\n')}`;
 }
 
 const checkHeadline = (out: CheckOutput) =>

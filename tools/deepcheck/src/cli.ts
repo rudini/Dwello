@@ -7,10 +7,9 @@ import { loadConfig, type Config } from './config.ts';
 import { ToolError } from './errors.ts';
 import { inScope, scanOutput, within } from './scan.ts';
 import { createBaseline, readBaseline, writeBaseline } from './baseline.ts';
-import { evaluateGate } from './gate.ts';
-import { changedFiles } from './git.ts';
+import { runGate } from './gate.ts';
 import { renderCheck, renderCheckGithub, renderCheckMarkdown, renderExplain, renderGithub, renderHuman, renderMarkdown } from './render.ts';
-import type { CheckOutput, Report, ScanOutput } from './types.ts';
+import type { Report, ScanOutput } from './types.ts';
 
 export interface Io {
 	cwd: string;
@@ -163,31 +162,9 @@ function suppressions(options: Options, io: Io): number {
 const AGENT_LIMIT = 3;
 
 function check(options: Options, io: Io): number {
-	const config = loadConfig(io.cwd);
-	const changed = changedFiles(io.cwd, options.changedSince);
-	const report = analyze({ root: io.cwd, fallow: options.fallow, config });
-	const result = evaluateGate(report, changed, readBaseline(io.cwd), config);
-	const changedPaths = new Set(changed.map((c) => c.path));
-	const output: CheckOutput = {
-		schemaVersion: 1,
-		tool: 'deepcheck',
-		command: 'check',
-		scope: 'changed',
-		base: options.changedSince ?? 'HEAD',
-		failThreshold: config.failThreshold,
-		tolerance: config.tolerance,
-		passed: result.passed,
-		summary: {
-			analyzed: report.modules.length,
-			changed: report.modules.filter((m) => changedPaths.has(m.path)).length,
-			failed: result.failures.length,
-			invalidSuppressions: result.suppressionFindings.length
-		},
-		findings: result.failures,
-		suppressionFindings: result.suppressionFindings,
-		warnings: report.warnings
-	};
-	if (options.agent && result.passed) return 0;
+	const output = runGate(io.cwd, options.fallow, options.changedSince);
+	if (options.agent && output.passed) return 0;
+	if (options.format !== 'json' && !options.agent) output.warnings.forEach((w) => io.stderr(`deepcheck: warning: ${w}\n`));
 	const render: Record<Options['format'], () => string> = {
 		human: () => renderCheck(output, options.agent ? AGENT_LIMIT : Infinity),
 		json: () => `${JSON.stringify(output, null, 2)}\n`,
@@ -195,7 +172,7 @@ function check(options: Options, io: Io): number {
 		github: () => renderCheckGithub(output)
 	};
 	emit(options, io, render[options.format](), options.format === 'github' ? renderCheckMarkdown(output) : undefined);
-	return result.passed ? 0 : 1;
+	return output.passed ? 0 : 1;
 }
 
 function baseline(options: Options, io: Io): number {

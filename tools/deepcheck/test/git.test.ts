@@ -1,3 +1,4 @@
+import { renameSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { changedFiles } from '../src/git.ts';
 import { ToolError } from '../src/errors.ts';
@@ -37,5 +38,12 @@ describe('changed set', () => {
 	it('turns an unknown base ref or a directory outside git into a tool error', () => {
 		expect(() => changedFiles(writeRepo({ 'a.ts': '' }), 'origin/nope')).toThrow(ToolError);
 		expect(() => changedFiles(writeProject({ 'a.ts': '' }))).toThrow(/git .* failed/);
+	});
+
+	it('detects a rename done with a plain move, without git mv or staging', () => {
+		const root = writeRepo({ 'src/old.ts': 'export const keep = (a: number) => a * 2 + 1;\n'.repeat(3) });
+		renameSync(`${root}/src/old.ts`, `${root}/src/moved.ts`);
+		expect(changedFiles(root)).toEqual([{ path: 'src/moved.ts', previousPath: 'src/old.ts' }]);
+		expect(git(root, 'status', '--porcelain')).toBe(' D src/old.ts\n?? src/moved.ts\n');
 	});
 });

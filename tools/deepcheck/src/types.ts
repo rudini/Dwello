@@ -77,6 +77,8 @@ export interface Report {
 	suppressions: ListedSuppression[];
 	/** Conditions that make results less accurate, e.g. unresolved tsconfig extends or Fallow unavailable. */
 	warnings: string[];
+	/** Fallow data fed the scores. */
+	fallow: boolean;
 }
 
 export interface Group {
@@ -113,6 +115,8 @@ export interface GateFinding extends ModuleReport {
 	gate: 'G1' | 'G2';
 	/** Score in the baseline; null for a module new to the baseline (G1). */
 	baselineScore: number | null;
+	/** The file did not exist at the base (G1 only: a new file rather than an existing module that got shallow). */
+	newFile: boolean;
 }
 
 /** `deepcheck check --format json`; see schema/report.schema.json. */

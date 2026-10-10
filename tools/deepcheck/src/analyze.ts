@@ -131,5 +131,5 @@ export function analyze({ root, fallow, config = loadConfig(root) }: AnalyzeOpti
 		return report;
 	});
 	modules.sort((a, b) => b.score - a.score || byPath(a, b));
-	return { modules, excluded: excluded.sort(byPath), suppressionFindings, suppressions: listed, warnings };
+	return { modules, excluded: excluded.sort(byPath), suppressionFindings, suppressions: listed, warnings, fallow: fallowData !== null };
 }

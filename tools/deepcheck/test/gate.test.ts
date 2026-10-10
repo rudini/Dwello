@@ -6,7 +6,7 @@ import { evaluateGate } from '../src/gate.ts';
 import { DEEP_MODULE, SHALLOW_MODULE, writeProject } from './helpers.ts';
 
 const STORE = 'export const store = new Map<string, string>();\n';
-const EMPTY: Baseline = { schemaVersion: 1, tool: 'deepcheck', failThreshold: 70, entries: [] };
+const EMPTY: Baseline = { schemaVersion: 1, tool: 'deepcheck', failThreshold: 70, fallow: false, entries: [] };
 const project = () =>
 	analyze({ root: writeProject({ 'src/store.ts': STORE, 'src/shallow.ts': SHALLOW_MODULE, 'src/deep.ts': DEEP_MODULE }), fallow: 'off' });
 const changed = (...paths: string[]) => paths.map((path) => ({ path, previousPath: null }));

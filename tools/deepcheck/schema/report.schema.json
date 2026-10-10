@@ -64,6 +64,7 @@
 				"flagged": { "type": "boolean" },
 				"gate": { "type": "string", "enum": ["G1", "G2", "G4"], "description": "check: the gate this module fails" },
 				"baselineScore": { "type": ["number", "null"], "description": "check: score recorded in the baseline" },
+				"newFile": { "type": "boolean", "description": "check: the file did not exist at the base" },
 				"metrics": {
 					"type": "object",
 					"required": ["interfaceSize", "implementationSize", "depthRatio", "passThroughs", "leakyExports", "classitis", "dataOnlyClasses", "fanIn", "fanOut", "complexity", "complexitySource", "unusedExports"],
