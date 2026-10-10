@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { floorLabel, statusHelp, statusText, statusTones } from '$lib/apartment';
+	import { floorLabel, statusHelp, statusText, statusIcons, statusTones } from '$lib/apartment';
 	import type { ApartmentStatus } from '$lib/types';
 	import { normalizeDecimal } from '$lib/utils/format';
 	import Badge from '$lib/ui/Badge.svelte';
@@ -30,7 +30,11 @@
 		<div class="flex flex-col items-start gap-2 sm:col-span-2" data-testid="apartment-info-status">
 			<dt class="text-ink-muted">Mietstatus</dt>
 			<dd class="flex flex-col items-start gap-2">
-				<Badge tone={statusTones[apartment.status]} label={statusText(apartment)} />
+				<Badge
+					tone={statusTones[apartment.status]}
+					icon={statusIcons[apartment.status]}
+					label={statusText(apartment)}
+				/>
 				<span class="text-ink-muted">{statusHelp[apartment.status]}</span>
 			</dd>
 		</div>

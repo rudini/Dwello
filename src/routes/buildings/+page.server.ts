@@ -1,3 +1,4 @@
+import { countStatus } from '$lib/apartment';
 import type { BuildingsListData } from '$lib/types';
 import type { PageServerLoad } from './$types';
 
@@ -16,8 +17,14 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<BuildingsLis
 		if (search) params.set('search', search);
 		if (city) params.set('city', city);
 
-		const response = await fetch(`${BACKEND_URL}/api/v1/buildings?${params}`);
+		const [response, apartmentsRes] = await Promise.all([
+			fetch(`${BACKEND_URL}/api/v1/buildings?${params}`),
+			fetch(`${BACKEND_URL}/api/v1/apartments?limit=1000`)
+		]);
 		const data = await response.json();
+		const apartments: { buildingId: string; status: string }[] =
+			(await apartmentsRes.json()).apartments ?? [];
+		const inBuilding = (id: unknown) => apartments.filter((a) => a.buildingId === id);
 
 		const buildings = (data.buildings || data.data || []).map((b: Record<string, unknown>) => ({
 			id: b.id,
@@ -33,7 +40,9 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<BuildingsLis
 			buildingType: b.buildingType,
 			apartmentCount: Number(b.apartmentCount) || 0,
 			occupiedCount: Number(b.occupiedCount) || 0,
-			vacantCount: Number(b.vacantCount) || 0
+			vacantCount: Number(b.vacantCount) || 0,
+			reletCount: countStatus(inBuilding(b.id), 'relet'),
+			reservedCount: countStatus(inBuilding(b.id), 'reserved')
 		}));
 
 		return {

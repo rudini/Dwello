@@ -20,6 +20,7 @@ const tenant = (id: string, isActive: boolean, currentApartment: string | null =
 	city: null,
 	currentApartment,
 	currentBuilding: currentApartment ? 'Ahornhof' : null,
+	nextContractStart: null as string | null,
 	isActive
 });
 
@@ -47,6 +48,13 @@ describe('Mieterliste', () => {
 		expect(body).toContain('Wohnung 2.01 - Ahornhof');
 		expect(body).toMatch(/data-testid="tenant-active"[^>]*>[^]*Aktiv/);
 		expect(body).not.toContain('role="status"');
+	});
+
+	it('nennt bei einem aktiven Mieter ohne laufende Miete den künftigen Mietvertrag', () => {
+		const body = row(list([{ ...tenant('t1', true), nextContractStart: '2026-11-01' }]), 't1');
+
+		expect(body).toContain('Mietvertrag ab 1.11.2026');
+		expect(body).not.toContain('Keine laufende Miete');
 	});
 
 	it('zeigt bei ehemaligen Mietern weder Wohnung noch Aktiv', () => {

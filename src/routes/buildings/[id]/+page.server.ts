@@ -1,4 +1,5 @@
 import { error, fail, redirect } from '@sveltejs/kit';
+import { countStatus } from '$lib/apartment';
 import type { BuildingWithStats, Apartment, ApartmentStatus } from '$lib/types';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -53,10 +54,13 @@ export const load: PageServerLoad = async ({ params, fetch }): Promise<BuildingD
 					floor: (a.floor as number) || 0,
 					rooms: a.rooms || '0',
 					area: a.area || '0',
-					status
+					status,
+					nextContractStart: (a.nextContractStart as string | null) ?? null
 				};
 			}
 		);
+		building.reletCount = countStatus(apartments, 'relet');
+		building.reservedCount = countStatus(apartments, 'reserved');
 
 		return { building, apartments };
 	} catch (err) {

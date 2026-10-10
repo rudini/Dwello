@@ -1,14 +1,14 @@
 <script lang="ts">
-	import { contractPeriod, contractStatusOn, localToday, statusBadges } from '$lib/contract-status';
+	import { contractPeriod, contractStatusOn, statusBadges } from '$lib/contract-status';
 	import type { ContractWithDetails } from '$lib/types';
 	import Badge from '$lib/ui/Badge.svelte';
 	import Button from '$lib/ui/Button.svelte';
 	import { formatCurrency } from '$lib/utils/format';
 
-	// One contract in the list: the tenant's name opens it, the whole row is its link
-	let { contract }: { contract: ContractWithDetails } = $props();
+	// One contract in the list: the tenant's name opens it, the whole row is its link; today comes from the server
+	let { contract, today }: { contract: ContractWithDetails; today: string } = $props();
 
-	const status = $derived(contractStatusOn(contract.startDate, contract.endDate, localToday()));
+	const status = $derived(contractStatusOn(contract.startDate, contract.endDate, today));
 	const badge = $derived(statusBadges[status]);
 </script>
 

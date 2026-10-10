@@ -168,6 +168,26 @@ describe('Gebäudedetail', () => {
 			vacantCount: 1
 		});
 	});
+
+	it('zählt wiedervermietete und gesperrte Wohnungen und nennt den Einzugstag', async () => {
+		const apartments = [
+			{ id: 'a1', status: 'relet', nextContractStart: '2099-11-01' },
+			{ id: 'a2', status: 'reserved', nextContractStart: null },
+			{ id: 'a3', status: 'occupied', nextContractStart: null }
+		];
+		const fetch = (async (url: string) =>
+			Response.json(
+				url.includes('/apartments') ? { apartments } : backendBuilding
+			)) as typeof globalThis.fetch;
+
+		const data = (await detailLoad({
+			params: { id: 'b1' },
+			fetch
+		} as never)) as BuildingDetailsData;
+
+		expect(data.building).toMatchObject({ reletCount: 1, reservedCount: 1 });
+		expect(data.apartments[0]).toMatchObject({ status: 'relet', nextContractStart: '2099-11-01' });
+	});
 });
 
 describe('Gebäudeliste', () => {
@@ -190,5 +210,26 @@ describe('Gebäudeliste', () => {
 			occupiedCount: 1,
 			vacantCount: 1
 		});
+	});
+
+	it('zählt die wiedervermieteten und gesperrten Wohnungen jedes Gebäudes', async () => {
+		const apartments = [
+			{ buildingId: 'b1', status: 'relet' },
+			{ buildingId: 'b1', status: 'occupied' },
+			{ buildingId: 'b2', status: 'reserved' }
+		];
+		const urls: string[] = [];
+		const fetch = (async (url: string) => {
+			urls.push(url);
+			return Response.json(url.includes('/apartments') ? { apartments } : buildingList);
+		}) as unknown as typeof globalThis.fetch;
+
+		const data = (await listLoad({
+			url: new URL('http://localhost/buildings'),
+			fetch
+		} as never)) as { buildings: { reletCount: number; reservedCount: number }[] };
+
+		expect(urls).toContain('http://localhost:3001/api/v1/apartments?limit=1000');
+		expect(data.buildings[0]).toMatchObject({ reletCount: 1, reservedCount: 0 });
 	});
 });

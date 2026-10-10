@@ -14,6 +14,7 @@
 
 	const statuses = [
 		{ value: 'active', label: 'Laufende Mietverträge' },
+		{ value: 'future', label: 'Künftige Mietverträge' },
 		{ value: 'ended', label: 'Beendete Mietverträge' }
 	];
 	const filtered = $derived(Object.values(filters).some(Boolean));

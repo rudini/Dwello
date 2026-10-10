@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { occupancyParts } from '$lib/apartment';
 	import type { BuildingWithStats } from '$lib/types';
 	import Button from '$lib/ui/Button.svelte';
 	import Icon from '$lib/ui/Icon.svelte';
@@ -40,12 +41,11 @@
 			{building.apartmentCount}
 			{building.apartmentCount === 1 ? 'Wohnung' : 'Wohnungen'}
 		</li>
-		<li>{building.occupiedCount} vermietet</li>
-		<li>{building.vacantCount} leer</li>
+		{#each occupancyParts(building) as part (part)}<li>{part}</li>{/each}
 	</ul>
 	<div class="relative z-10">
 		<Button href={routeUrl} target="_blank" icon="way" testid="building-route-link"
-			>Route planen</Button
+			>Route planen <span class="sr-only">zu {building.name || building.address}</span></Button
 		>
 	</div>
 </li>

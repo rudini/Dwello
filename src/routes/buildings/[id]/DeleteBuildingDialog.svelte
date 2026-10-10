@@ -14,17 +14,11 @@
 
 	let form = $state<HTMLFormElement>();
 	let deleting = $state(false);
-	let blocked = $state('');
-	const error = $derived(blocked || serverError);
-
-	function confirm() {
-		if (hasApartments) {
-			blocked =
-				'Dieses Gebäude kann nicht gelöscht werden, da es noch Wohnungen enthält. Löschen Sie zuerst seine Wohnungen.';
-			return;
-		}
-		form?.requestSubmit();
-	}
+	const error = $derived(
+		hasApartments
+			? 'Dieses Gebäude kann nicht gelöscht werden, da es noch Wohnungen enthält. Löschen Sie zuerst seine Wohnungen.'
+			: serverError
+	);
 </script>
 
 <form
@@ -48,15 +42,16 @@
 	danger
 	busy={deleting}
 	busyLabel="Wird gelöscht …"
-	confirmDisabled={!!blocked}
+	confirmDisabled={hasApartments}
 	confirmTestid="building-delete-confirm"
-	onconfirm={confirm}
-	onclose={() => (blocked = '')}
+	onconfirm={() => form?.requestSubmit()}
 >
-	<p>
-		Das Gebäude <strong>{name}</strong> und alle seine Rechnungen werden endgültig gelöscht. Das lässt
-		sich nicht rückgängig machen.
-	</p>
+	{#if !hasApartments}
+		<p>
+			Das Gebäude <strong>{name}</strong> und alle seine Rechnungen werden endgültig gelöscht. Das lässt
+			sich nicht rückgängig machen.
+		</p>
+	{/if}
 	{#if error}
 		<Alert tone="critical" title="Löschen nicht möglich" testid="form-error">
 			<p>{error}</p>

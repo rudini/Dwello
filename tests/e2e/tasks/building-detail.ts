@@ -8,8 +8,12 @@ import {
 	firstApartmentButton
 } from '../interactions/building-detail';
 
-export const deleteBuilding = async (actor: Actor) => {
+export const startDeletingBuilding = async (actor: Actor) => {
 	await deleteButton(actor.page).click();
+};
+
+export const deleteBuilding = async (actor: Actor) => {
+	await startDeletingBuilding(actor);
 	await confirmDeleteButton(actor.page).click();
 };
 

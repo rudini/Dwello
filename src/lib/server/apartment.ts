@@ -1,6 +1,6 @@
 import { error } from '@sveltejs/kit';
 import type { ApartmentStatus } from '$lib/types';
-import { grossRent, toContractHistory } from './contract-history';
+import { contractStatus, grossRent, toContractHistory } from './contract-history';
 
 const API = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1`;
 
@@ -36,6 +36,9 @@ export async function loadApartmentDetails(fetch: typeof globalThis.fetch, id: s
 	const { contracts } = await (await fetch(`${API}/contracts?apartmentId=${id}&limit=100`)).json();
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- backend JSON
 	const current = contracts.find((c: Record<string, any>) => c.id === apartment.currentContractId);
+	// the contract the next tenant moves in with: the backend lists the latest start first
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- backend JSON
+	const next = contracts.filter((c: Record<string, any>) => contractStatus(c) === 'future').at(-1);
 
 	return {
 		apartment,
@@ -46,6 +49,13 @@ export async function loadApartmentDetails(fetch: typeof globalThis.fetch, id: s
 					tenantName: current.tenantName as string,
 					tenantEmail: current.tenantEmail as string | null,
 					startDate: current.startDate as string
+				}
+			: null,
+		nextContract: next
+			? {
+					tenantId: next.tenantId as string,
+					tenantName: next.tenantName as string,
+					startDate: next.startDate as string
 				}
 			: null,
 		monthlyCosts: {

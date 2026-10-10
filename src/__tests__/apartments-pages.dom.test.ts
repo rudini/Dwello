@@ -11,6 +11,7 @@ import { goto } from '$app/navigation';
 import ApartmentsPage from '../routes/apartments/+page.svelte';
 import ApartmentPage from '../routes/apartments/[id]/+page.svelte';
 import { byTestId, click, fireEvent, show } from './helpers/dom';
+import { icons } from '$lib/ui/icons';
 
 const text = () => document.body.textContent?.replace(/\s+/g, ' ') ?? '';
 const apartment = (overrides: Record<string, unknown> = {}) => ({
@@ -77,7 +78,19 @@ describe('Wohnungsliste', () => {
 				.querySelector('[data-testid="apartment-status"]')!
 				.textContent!.trim();
 		expect(status('a1')).toBe('Leer');
-		expect(status('a2')).toBe('Vermietet ab 1.11.2099');
+		expect(status('a2')).toBe('Wiedervermietet ab 1.11.2099');
+	});
+
+	it('zeigt Leer mit einer offenen Tür statt einem Warndreieck', () => {
+		list([apartment()]);
+		const shape = (svg: Element) => svg.firstElementChild!.getAttribute('d');
+		const door = icons['apartment-free'][0][1].d;
+		const badge = byTestId('apartment-card-a1')!.querySelector('[data-testid="apartment-status"]')!;
+		expect(shape(badge.querySelector('svg')!)).toBe(door);
+		const legend = [...byTestId('apartment-status-legend')!.querySelectorAll('dt')].find((dt) =>
+			dt.textContent!.includes('Leer')
+		)!;
+		expect(shape(legend.querySelector('svg')!)).toBe(door);
 	});
 
 	it('erklärt die vier Mietstatus', () => {
@@ -88,7 +101,7 @@ describe('Wohnungsliste', () => {
 			'Vermietet',
 			'Wiedervermietet',
 			'Gesperrt',
-			'Ein künftiger Mietvertrag ist abgeschlossen.'
+			'Ein künftiger Mietvertrag ist abgeschlossen; die Wohnung ist ab seinem Vertragsbeginn vermietet'
 		]) {
 			expect(legend).toContain(words);
 		}
@@ -135,7 +148,6 @@ describe('Wohnungsdetail', () => {
 		{
 			id: 'c2',
 			tenantName: 'Beat Huber',
-			period: '1.4.2022 - heute',
 			rentBrutto: 1430,
 			status: 'active',
 			startDate: '2022-04-01',
@@ -144,7 +156,6 @@ describe('Wohnungsdetail', () => {
 		{
 			id: 'c1',
 			tenantName: 'Eva Graf',
-			period: '1.1.2018 - 31.3.2022',
 			rentBrutto: 750,
 			status: 'ended',
 			startDate: '2018-01-01',
@@ -182,6 +193,7 @@ describe('Wohnungsdetail', () => {
 		monthlyCosts: rented
 			? { baseRent: 1200, additionalRent: 50, advancePayment: 180, totalBrutto: 1430 }
 			: { baseRent: 0, additionalRent: 0, advancePayment: 0, totalBrutto: 0 },
+		nextContract: null as null | { tenantId: string; tenantName: string; startDate: string },
 		contractHistory: rented ? history : []
 	});
 	const open = (rented = true) => show(ApartmentPage, { data: details(rented) } as never);
@@ -194,6 +206,7 @@ describe('Wohnungsdetail', () => {
 	it('nennt Wohnung, Gebäude und Adresse', () => {
 		open();
 		expect(document.querySelector('h1')!.textContent).toBe('Wohnung 3.01');
+		expect(document.title).toBe('Wohnung 3.01, Lindenhof - Dwello');
 		expect(trail()).toEqual([
 			['Wohnungen', '/apartments'],
 			['Lindenhof', '/buildings/b1']
@@ -229,16 +242,51 @@ describe('Wohnungsdetail', () => {
 		);
 	});
 
-	it('listet alle Mietverträge mit dem Mieter als Link', () => {
+	it('listet alle Mietverträge, jeder Link nennt den Mietvertrag und seinen Mieter', () => {
 		open();
 		const rows = [...document.querySelectorAll('[data-testid="contract-history-row"]')];
 		expect(rows).toHaveLength(2);
 		const link = rows[1].querySelector('[data-testid="contract-history-link"]')!;
-		expect(link.textContent!.trim()).toBe('Eva Graf');
+		expect(link.textContent!.trim()).toBe('Mietvertrag von Eva Graf');
 		expect(link.getAttribute('href')).toBe('/contracts/c1');
-		expect(rows[0].textContent).toContain('Laufend');
-		expect(rows[1].textContent).toContain('Beendet');
-		expect(rows[1].textContent!.replace(/\s+/g, ' ')).toContain('CHF 750.00');
+		const words = rows.map((row) => row.textContent!.replace(/\s+/g, ' '));
+		expect(words[0]).toContain('Laufend');
+		expect(words[0]).toContain('seit 1.4.2022, unbefristet');
+		expect(words[1]).toContain('Beendet');
+		expect(words[1]).toContain('1.1.2018 – 31.3.2022');
+		expect(words[1]).toContain('CHF 750.00 monatlich total');
+		expect(text()).not.toContain('heute');
+	});
+
+	it('nennt bei einer wiedervermieteten Wohnung, wer ab wann einzieht', () => {
+		const data = details(false);
+		data.apartment.status = 'relet';
+		data.apartment.nextContractStart = '2099-11-01' as never;
+		data.nextContract = { tenantId: 't3', tenantName: 'Ruth Meier', startDate: '2099-11-01' };
+		data.contractHistory = [
+			{
+				id: 'c3',
+				tenantName: 'Ruth Meier',
+				rentBrutto: 1630,
+				status: 'future',
+				startDate: '2099-11-01',
+				endDate: null
+			}
+		];
+		show(ApartmentPage, { data } as never);
+
+		expect(byTestId('apartment-info-status')!.textContent).toContain(
+			'Wiedervermietet ab 1.11.2099'
+		);
+		expect(byTestId('apartment-vacant')).toBeNull();
+		const next = byTestId('apartment-next-tenant')!;
+		expect(next.textContent!.replace(/\s+/g, ' ').trim()).toBe(
+			'Ab 1.11.2099 vermietet an Ruth Meier.'
+		);
+		expect(next.querySelector('a')!.getAttribute('href')).toBe('/tenants/t3');
+		expect(byTestId('contract-history-row')!.textContent).toContain('ab 1.11.2099, unbefristet');
+		// a later contract can still be recorded, but it is no longer the next step
+		expect(byTestId('apartment-new-contract')!.className).not.toContain('bg-accent ');
 	});
 
 	it('bietet bei einer leeren Wohnung den Mietvertrag als nächsten Schritt an', () => {
@@ -248,6 +296,7 @@ describe('Wohnungsdetail', () => {
 		expect(byTestId('contract-history-empty')).not.toBeNull();
 		const contract = byTestId('apartment-new-contract')!;
 		expect(contract.getAttribute('href')).toBe('/contracts/new?apartment=a1');
+		expect(contract.className).toContain('bg-accent ');
 		expect(contract.textContent).toContain('Mietvertrag erfassen');
 	});
 });

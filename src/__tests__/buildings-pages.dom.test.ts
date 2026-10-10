@@ -59,8 +59,18 @@ describe('Gebäudeliste', () => {
 		expect(words).toContain('4 Wohnungen');
 		expect(words).toContain('3 vermietet');
 		expect(words).toContain('1 leer');
+		expect(words).not.toContain('wiedervermietet');
 		expect(words).toContain('Baujahr 1985');
 		expect(words).not.toContain('3/4');
+	});
+
+	it('zählt alle Wohnungen, auch wiedervermietete und gesperrte', () => {
+		list([building({ apartmentCount: 6, occupiedCount: 3, reletCount: 1, reservedCount: 1 })]);
+		const words = byTestId('building-card-b1')!.textContent!.replace(/\s+/g, ' ');
+		expect(words).toContain('3 vermietet');
+		expect(words).toContain('1 wiedervermietet');
+		expect(words).toContain('1 leer');
+		expect(words).toContain('1 gesperrt');
 	});
 
 	it('plant die Route in Google Maps mit sichtbarer Beschriftung', () => {
@@ -68,7 +78,9 @@ describe('Gebäudeliste', () => {
 		const route = byTestId('building-card-b1')!.querySelector<HTMLAnchorElement>(
 			'[data-testid="building-route-link"]'
 		)!;
-		expect(route.textContent).toContain('Route planen');
+		expect(route.textContent!.replace(/\s+/g, ' ')).toContain(
+			'Route planen zu Lindenhof (öffnet in neuem Tab)'
+		);
 		expect(route.getAttribute('target')).toBe('_blank');
 		expect(route.getAttribute('href')).toBe(
 			`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent('Testweg 1, 8400 Winterthur, Switzerland')}`
@@ -119,9 +131,9 @@ describe('Gebäudedetail', () => {
 		rooms: '3.5',
 		status
 	});
-	const detail = (apartments: ReturnType<typeof flat>[]) =>
+	const detail = (apartments: ReturnType<typeof flat>[], counts = {}) =>
 		show(BuildingPage, {
-			data: { building: building({ apartmentCount: apartments.length }), apartments },
+			data: { building: building({ apartmentCount: apartments.length, ...counts }), apartments },
 			form: null
 		} as never);
 
@@ -131,6 +143,17 @@ describe('Gebäudedetail', () => {
 		expect(byTestId('breadcrumb-link')!.getAttribute('href')).toBe('/buildings');
 		expect(byTestId('building-address')!.textContent).toContain('Testweg 1, 8400 Winterthur');
 		expect(byTestId('building-year-built')!.textContent).toBe('1985');
+	});
+
+	it('fasst die Belegung so zusammen, dass sie aufgeht', () => {
+		detail([flat('a1', '1.01', 1)], {
+			apartmentCount: 6,
+			occupiedCount: 4,
+			reletCount: 1,
+			vacantCount: 1,
+			reservedCount: 0
+		});
+		expect(text()).toContain('6, davon 4 vermietet, 1 wiedervermietet und 1 leer');
 	});
 
 	it('listet die Wohnungen nach Stockwerk, von unten nach oben', () => {
@@ -185,10 +208,9 @@ describe('Gebäudedetail', () => {
 		expect(byTestId('building-delete-confirm')!.textContent).toContain('Gebäude löschen');
 	});
 
-	it('löscht kein Gebäude mit Wohnungen und sagt, was zu tun ist', () => {
+	it('sagt vor dem Bestätigen, warum ein Gebäude mit Wohnungen nicht gelöscht werden kann', () => {
 		detail([flat('a1', '1.01', 1)]);
 		click('building-delete-button');
-		click('building-delete-confirm');
 		expect(byTestId('form-error')!.textContent).toContain(
 			'Dieses Gebäude kann nicht gelöscht werden'
 		);

@@ -1,3 +1,4 @@
+import { localToday } from '$lib/contract-status';
 import type { ContractsListData, ContractWithDetails } from '$lib/types';
 import type { PageServerLoad } from './$types';
 
@@ -16,8 +17,7 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<ContractsLis
 		params.set('offset', String((page - 1) * pageSize));
 		if (search) params.set('search', search);
 		if (buildingId) params.set('buildingId', buildingId);
-		if (status === 'active') params.set('status', 'active');
-		if (status === 'ended') params.set('status', 'ended');
+		if (['active', 'ended', 'future'].includes(status)) params.set('status', status);
 
 		const [contractsRes, buildingsRes, apartmentsRes] = await Promise.all([
 			fetch(`${BACKEND_URL}/api/v1/contracts?${params}`),
@@ -71,6 +71,7 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<ContractsLis
 		);
 
 		return {
+			today: localToday(),
 			contracts,
 			total: contractsData.total || 0,
 			page,
@@ -81,6 +82,7 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<ContractsLis
 	} catch (err) {
 		console.error('Failed to fetch contracts:', err);
 		return {
+			today: localToday(),
 			contracts: [],
 			total: 0,
 			page,

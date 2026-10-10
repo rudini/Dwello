@@ -142,4 +142,30 @@ describe('Mieterliste', () => {
 
 		expect(data.tenants.map((t) => t.isActive)).toEqual([true, false]);
 	});
+
+	it('nennt bei einem künftigen Mieter den Vertragsbeginn', async () => {
+		const { load: loadList } = await import('../routes/tenants/+page.server');
+		const urls: string[] = [];
+		const future = { ...tenantList.tenants[0], currentApartment: null, currentBuilding: null };
+		const fetch = (async (url: string) => {
+			urls.push(url);
+			return Response.json(
+				url.includes('/contracts')
+					? {
+							contracts: [
+								{ tenantId: 't1', startDate: '2099-12-01' },
+								{ tenantId: 't1', startDate: '2099-11-01' }
+							]
+						}
+					: { tenants: [future], total: 1 }
+			);
+		}) as unknown as typeof globalThis.fetch;
+
+		const data = (await loadList({ url: new URL('http://localhost/tenants'), fetch } as never)) as {
+			tenants: { nextContractStart: string | null }[];
+		};
+
+		expect(urls).toContain('http://localhost:3001/api/v1/contracts?status=future&limit=100');
+		expect(data.tenants[0].nextContractStart).toBe('2099-11-01');
+	});
 });

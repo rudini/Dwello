@@ -6,6 +6,7 @@ export const currentTenantName = (page: Page) => page.getByTestId('current-tenan
 export const tenantProfileButton = (page: Page) => page.getByTestId('current-tenant-profile');
 export const monthlyTotal = (page: Page) => page.getByTestId('monthly-costs-total');
 export const vacancyNote = (page: Page) => page.getByTestId('apartment-vacant');
+export const nextTenantNote = (page: Page) => page.getByTestId('apartment-next-tenant');
 export const editButton = (page: Page) => page.getByTestId('apartment-edit-button');
 export const historyRows = (page: Page) => page.getByTestId('contract-history-row');
 export const historyLink = (page: Page, tenantName: string) =>
