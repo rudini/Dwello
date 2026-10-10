@@ -1,39 +1,34 @@
 <script lang="ts">
-	import FieldError from '$lib/components/FieldError.svelte';
+	import TextInput from '$lib/ui/TextInput.svelte';
 
+	// One setting as a text field: posted under its name, found by tests as setting-{name}
 	let {
 		name,
 		label,
 		value,
 		error,
-		hint = '',
-		placeholder = '',
-		type = 'text',
-		class: className = ''
+		help,
+		example,
+		type = 'text'
 	}: {
 		name: string;
 		label: string;
 		value: string;
 		error?: string;
-		hint?: string;
-		placeholder?: string;
+		help?: string;
+		example?: string;
 		type?: 'text' | 'number';
-		class?: string;
 	} = $props();
 </script>
 
-<div class={className}>
-	<label for={name} class="block text-sm font-medium text-gray-700 mb-1">{label}</label>
-	<input
-		id={name}
-		{name}
-		{type}
-		{value}
-		{placeholder}
-		step={type === 'number' ? '0.1' : undefined}
-		data-testid="setting-{name}"
-		class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-	/>
-	<FieldError message={error} />
-	<p class="mt-1 text-xs text-ink-muted">{hint}</p>
-</div>
+<TextInput
+	id={name}
+	{name}
+	{label}
+	{type}
+	{value}
+	{error}
+	{help}
+	{example}
+	testid="setting-{name}"
+/>

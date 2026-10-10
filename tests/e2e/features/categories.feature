@@ -46,5 +46,5 @@ Funktionalität: Kostenkategorien
     Angenommen das Gebäude "Seeblick" in "Winterthur" existiert
     Und eine Rechnung des Gebäudes "Seeblick" ist der Kategorie "Treppenhausreinigung" zugeordnet
     Und der Liegenschaftsverwalter ist auf der Seite "Kategorien"
-    Dann wird die Kategorie "Treppenhausreinigung" von 1 Rechnungen verwendet
+    Dann wird die Kategorie "Treppenhausreinigung" von 1 Rechnung verwendet
     Und kann der Liegenschaftsverwalter die Kategorie "Treppenhausreinigung" nicht löschen

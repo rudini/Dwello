@@ -65,6 +65,6 @@ Then('fehlt das Heizprofil {string} in der Liste', async ({ verwalter, names }, 
 });
 
 Then('kann der Liegenschaftsverwalter das Heizprofil weder bearbeiten noch löschen', async ({ verwalter }) => {
-	await expect(verwalter.page).toHaveTitle('Heating Mountain - Dwello');
+	await expect(verwalter.page).toHaveTitle('Heizung Bergregion - Dwello');
 	await expect(profileActions(verwalter)).toHaveCount(0);
 });

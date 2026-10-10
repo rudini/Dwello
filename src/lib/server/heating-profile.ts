@@ -9,6 +9,7 @@ export function toHeatingProfile(hp: Record<string, unknown>): HeatingProfile {
 	return {
 		id: hp.id,
 		name: hp.name || '',
+		nameDE: hp.nameDE || '',
 		type: hp.type || 'predefined',
 		description: hp.description || '',
 		isActive: hp.isActive ?? true,

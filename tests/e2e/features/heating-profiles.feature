@@ -51,7 +51,7 @@ Funktionalität: Heizprofile
 
   Szenario: Vordefinierte Heizprofile bleiben unverändert
     Angenommen der Liegenschaftsverwalter ist auf der Seite "Heizprofile"
-    Wenn der Liegenschaftsverwalter das Heizprofil "Heating Mountain" öffnet
+    Wenn der Liegenschaftsverwalter das Heizprofil "Heizung Bergregion" öffnet
     Dann kann der Liegenschaftsverwalter das Heizprofil weder bearbeiten noch löschen
 
   Szenario: Bearbeitung abbrechen
