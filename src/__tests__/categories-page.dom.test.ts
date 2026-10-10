@@ -22,6 +22,7 @@ async function answer(result: { type: string }) {
 
 import CategoriesPage from '../routes/config/categories/+page.svelte';
 import NewCategoryPage from '../routes/config/categories/new/+page.svelte';
+import EditCategoryPage from '../routes/config/categories/[id]/edit/+page.svelte';
 import { toasts } from '$lib/stores';
 import { allByTestId, byTestId, click, fireEvent, settle, show } from './helpers/dom';
 
@@ -171,5 +172,22 @@ describe('Kategorie erfassen', () => {
 		expect(byTestId('form-error')!.textContent).toContain(
 			'Eine Kategorie mit dem Namen "Lift" existiert bereits.'
 		);
+	});
+});
+
+describe('Kategorie bearbeiten', () => {
+	// The list hides the (English) descriptions of the predefined categories
+	it('sagt bei vordefinierten Kategorien, dass die Beschreibung nicht in der Liste steht', () => {
+		const heating = category('c1', 'Heizung', true, 0, { predefined: true });
+		show(EditCategoryPage, { data: { category: heating }, form: null } as never);
+
+		expect(text()).toContain('Die Liste zeigt die Beschreibung vordefinierter Kategorien nicht.');
+	});
+
+	it('zeigt den Hinweis bei eigenen Kategorien nicht', () => {
+		const own = category('c4', 'Treppenhausreinigung', true);
+		show(EditCategoryPage, { data: { category: own }, form: null } as never);
+
+		expect(text()).not.toContain('vordefinierter Kategorien');
 	});
 });

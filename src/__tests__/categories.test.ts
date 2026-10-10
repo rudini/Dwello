@@ -58,15 +58,25 @@ describe('Kategorien anzeigen', () => {
 		const fetch = (async () =>
 			Response.json({
 				categories: [
-					{ id: 'c1', name: 'Heating', nameDE: 'Heizung' },
-					{ id: 'c2', name: 'Gartenpflege', nameDE: 'Gartenpflege' }
+					{ id: 'c1', name: 'Heating', nameDE: 'Heizung', nameEN: 'Heating' },
+					{ id: 'c2', name: 'Gartenpflege', nameDE: 'Gartenpflege' },
+					// German and English name are the same word
+					{ id: 'c3', name: 'Renovation', nameDE: 'Renovation', nameEN: 'Renovation' },
+					// English name differs from the key
+					{
+						id: 'c4',
+						name: 'Electricity Common Areas',
+						nameDE: 'Allgemeinstrom',
+						nameEN: 'Common Area Electricity'
+					},
+					{ id: 'c5', name: 'Treppenhaus', nameDE: 'Treppenhaus', nameEN: 'Stairwell' }
 				],
-				total: 2
+				total: 5
 			})) as typeof globalThis.fetch;
 
 		const data = (await load({ fetch } as never)) as { categories: { predefined: boolean }[] };
 
-		expect(data.categories.map((c) => c.predefined)).toEqual([true, false]);
+		expect(data.categories.map((c) => c.predefined)).toEqual([true, false, true, true, false]);
 	});
 });
 
