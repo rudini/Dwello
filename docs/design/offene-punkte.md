@@ -162,10 +162,10 @@ Every place in the code is marked `TODO(fachlich prüfen)` (`grep -rn "TODO(fach
 ## Stage 9 – final review and final persona round
 
 - Native date fields show the order of the browser's system locale ("mm/dd/yyyy" in the English headless test browser, "dd.mm.yyyy" on Swiss systems). Every date is repeated in words below its field ("Sonntag, 1. November 2026"); a custom date field would replace a well-supported native control and is not planned.
-- The statement wizard counts the invoices per building only with the preview (step 4), which the server calculates; showing them on the building cards in step 2 would need a second request per selection. The overview task already says to record the invoices first.
-- The overview task "Nebenkostenabrechnungen erstellen" has one action (D14); a second link "Rechnungen prüfen" or the invoice count per period would help Anna.
-- The invoice list has no filter by year or Abrechnungsperiode (Anna).
-- The invoice form opened from the statement wizard still defaults to today (product decision; the period notice appears at once).
+- ~~The statement wizard counts the invoices per building only with the preview~~ – step 2 now names the utility invoices of each building in the Abrechnungsperiode (089ecfe).
+- ~~The overview task "Nebenkostenabrechnungen erstellen" offers no way to the invoices~~ – a text link "Rechnungen 2025 ansehen" beside its one action (089ecfe).
+- ~~The invoice list has no filter by year~~ – filter "Jahr" (year of the Rechnungsdatum, 089ecfe). A filter by an Abrechnungsperiode across the turn of the year is not offered; such periods link to all invoices.
+- ~~The invoice form opened from the statement wizard defaults to today~~ – it starts without a date there, so the date is chosen on purpose (089ecfe).
 - ~~The axe list has no states for the server error page, a visible toast, a statement without positions and `submit-empty` on edit forms~~ – added (0c237df): `error-server`, `saved-toast`, `statement-empty-detail`, `submit-cleared` on every edit form; 100 examples, 0 violations.
 - Small layout points from the final review: ~~statement list columns shift when a row has a "PDF" link~~ and ~~"66.7%" without a space~~ fixed (0c237df); open: the Verlauf labels do not align, a success toast can cover list content on phones. The tenant row's "Wohnung … - Gebäude" matches the contract wizard's apartment choice and stays.
 - ~~The help glossary does not explain Umlagefähig, Nachzahlung/Rückerstattung, Wiedervermietet and Gesperrt~~ – added from the glossary definitions (0c237df). "Mietstage" is the glossary term (several personas read "Mietstagen" as a typo).

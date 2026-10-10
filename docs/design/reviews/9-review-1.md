@@ -28,14 +28,14 @@ Final reviewer: independent general-purpose agent, read-only, against the Defini
 | H1 | Helga | Major | Apartment choice in the contract wizard without rooms or area. | "Wohnung 2.02 - Musterhaus Zentrum, 2.5 Zimmer, 65 m²" (unit and loader tests). |
 | H2, A, M | Helga, Anna, Marco | Major/Minor | Native date field shows "mm/dd/yyyy" in the test browser. | Not changed: the browser draws its own date field after the system locale (Swiss systems show dd.mm.yyyy); every date is repeated in words below the field. `offene-punkte.md`. |
 | M1 | Marco, Anna | Major/Minor | Back from "Rechnung erfassen" the statement wizard started at step 1. | Returns to the step before the preview, so one "Weiter" calculates the preview with the new invoice (DOM test). |
-| M2 | Marco | Major | The missing-invoice warning only appears in step 4. | Kept: the invoices are counted with the preview the server calculates; the overview task already says to record the invoices first. `offene-punkte.md`. |
+| M2 | Marco | Major | The missing-invoice warning only appears in step 4. | Step 2 names the utility invoices of each building in the period (DOM test, 089ecfe). |
 | M3 | Marco | Major | "Kosten aller Abrechnungen" smaller than the invoices without explanation. | "Den Anteil leerer Wohnungen trägt der Vermieter; er ist in diesem Betrag nicht enthalten." (glossary: Vermieter, Proration). |
 | S1 | Sven | Major | Year 12025 also announced "liegt in der Vergangenheit". | No past-date notice for an impossible year (unit test). |
 | S2 | Sven | Major | "… ändern" in the review moved focus to the step heading. | Focus goes to the field to change (DOM test). |
 | S3 | Sven | Major | "Mieter erfasst" and "Entwurf wiederhergestellt" were not announced. | The notice takes the focus when the wizard opens (DOM test). |
-| A1 | Anna | Major | Overview task says to record invoices first but offers only "Abrechnungen erstellen". | Kept: one action per task (D14); the wizard's preview lists the invoices per building and links "Rechnung erfassen". `offene-punkte.md`. |
-| A2 | Anna | Major | No year filter on the invoice list. | Feature beyond the redesign; `offene-punkte.md`. |
-| A3 | Anna, Marco | Major/Minor | Invoice form from the wizard defaults to today. | Kept (product decision); the period notice warns at once. `offene-punkte.md`. |
+| A1 | Anna | Major | Overview task says to record invoices first but offers only "Abrechnungen erstellen". | A text link "Rechnungen 2025 ansehen" beside the one action (unit and render test, 089ecfe). |
+| A2 | Anna | Major | No year filter on the invoice list. | Filter "Jahr" (scenario "Rechnungen eines Jahres anzeigen", loader and DOM tests, 089ecfe). |
+| A3 | Anna, Marco | Major/Minor | Invoice form from the wizard defaults to today. | Opened from the wizard, the date starts empty (scenario step and DOM test, 089ecfe). |
 | W1 | Dr. Weber | Major | PDF content, partly covered 2024 invoices, implausible Heizprofile. | Backend and seed data (`offene-punkte.md`); the screens let him trace every number. |
 | R5 | Review, Dr. Weber | Minor | "Die Pauschale wird so … verteilt" had no reference. | "Nach diesem Verteilschlüssel wird die Pauschale auf die Wohnungen verteilt; jeder Mieter trägt den Teil seiner Mietstage." |
 | R6 | Review | Minor | Statement without positions showed an empty table. | "Keine Abrechnungspositionen: Für diese Abrechnungsperiode waren keine Rechnungen erfasst." |
@@ -43,4 +43,4 @@ Final reviewer: independent general-purpose agent, read-only, against the Defini
 | – | Review, Anna | Minor | Statement list columns shift, "66.7%" without space, help glossary without Umlagefähig/Nachzahlung/Rückerstattung/Mietstatus. | Fixed (0c237df). |
 | – | Review, personas | Minor | Verlauf alignment, mobile toast covering content, step-name hyphenation in the test browser, "Mietstagen" read as a typo, tenant row separator. | Listed in `offene-punkte.md` ("Mietstage" is the glossary term; the separator matches the contract wizard). |
 
-Checks after the fixes: unit 1292, coverage 89 % statements / 76 % branches (exit 0), lint, check, fallow clean, E2E 403 passed incl. 100 axe examples light and dark.
+Checks after the fixes: unit 1292, coverage 89 % statements / 76 % branches (exit 0), lint, check, fallow clean, E2E 412 passed incl. 108 axe examples light and dark.
