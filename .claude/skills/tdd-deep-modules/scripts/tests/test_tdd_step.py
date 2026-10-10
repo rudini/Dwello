@@ -108,3 +108,14 @@ class TddStepTest(unittest.TestCase):
         self.assertEqual(result.returncode, 1, result.stderr)
         self.assertIn("green cannot follow start", result.stderr)
         self.assertEqual(repo.subject(), "init")
+
+    def test_refactor_is_refused_right_after_red(self):
+        repo = Repo(self, {"calc.py": WRONG_ADD})
+        repo.commit_all("red: adds two numbers", {"test_calc.py": ADD_TEST})
+        repo.write("calc.py", RIGHT_ADD)
+
+        result = repo.run("tdd-step", "refactor", "adds two numbers")
+
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn("refactor cannot follow red", result.stderr)
+        self.assertEqual(repo.subject(), "red: adds two numbers")
