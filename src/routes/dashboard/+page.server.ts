@@ -55,11 +55,11 @@ async function lastPeriod(fetch: typeof globalThis.fetch) {
 	const type = ((await config.json()).data?.accounting_period ??
 		'calendar') as AccountingPeriodType;
 	const period = lastCompletedPeriod(type);
-	const statements = await list(
-		fetch,
-		`statements?periodStart=${period.start}&periodEnd=${period.end}&limit=1000`,
-		'data'
+	const response = await fetch(
+		`${BACKEND_URL}/api/v1/statements?periodStart=${period.start}&periodEnd=${period.end}&limit=1000`
 	);
+	if (!response.ok) return null; // unknown: better no task than every building
+	const statements: Row[] = (await response.json()).data ?? [];
 	return { ...period, done: new Set(statements.map((s) => (s.building as Row | null)?.id)) };
 }
 

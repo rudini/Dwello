@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { tick } from 'svelte';
 	import { addToast } from '$lib/stores';
 	import type { StatementWithDetails } from '$lib/types';
 	import Button from '$lib/ui/Button.svelte';
@@ -26,6 +27,7 @@
 			open = false;
 			if (result.type === 'success') {
 				addToast('success', 'Abrechnung als versendet markiert');
+				await tick(); // after the dialog has handed the focus back
 				document.querySelector<HTMLElement>('h1')?.focus(); // "Versenden" is gone now
 			}
 		};
@@ -51,7 +53,7 @@
 			<dd class="font-semibold text-ink">{statement.tenantName}</dd>
 		</div>
 		<div class="flex flex-wrap gap-x-2">
-			<dt class="text-ink-muted">Korrespondenzweg:</dt>
+			<dt class="text-ink-muted">Korrespondenzkanal:</dt>
 			<dd class="text-ink">
 				{byEmail ? 'Per E-Mail' : 'Per Brief'},
 				{(byEmail ? statement.tenantEmail : statement.tenantAddress) ||

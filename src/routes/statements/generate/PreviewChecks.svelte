@@ -20,7 +20,7 @@
 
 {#if missing.length}
 	<Alert tone="caution" title="Rechnungen fehlen" testid="missing-invoices">
-		<p>
+		<p id="missing-invoices-text">
 			Für {missing.map((row) => row.name).join(', ')} sind in der Abrechnungsperiode keine Rechnungen
 			erfasst. Ohne Rechnungen werden CHF 0.00 Nebenkosten verteilt, und jeder Mieter erhält sein Akonto
 			zurück. Erfassen Sie zuerst die Rechnungen – oder bestätigen Sie unten, dass es keine gibt.
@@ -33,28 +33,22 @@
 
 {#if existing.length}
 	<Alert tone="caution" title="Es gibt schon Abrechnungen" testid="existing-statements">
-		{#each existing as row (row.buildingId)}
+		<div id="existing-statements-text" class="flex flex-col gap-2">
+			{#each existing as row (row.buildingId)}
+				<p>
+					Für {row.name} gibt es in dieser Abrechnungsperiode schon {statements(row.existing)}.
+					<a
+						href="/statements?building={row.buildingId}"
+						class="inline-flex min-h-12 items-center text-accent underline underline-offset-4"
+						>Abrechnungen von {row.name} ansehen</a
+					>
+				</p>
+			{/each}
 			<p>
-				Für {row.name} gibt es in dieser Abrechnungsperiode schon {statements(row.existing)}.
+				Wenn Sie weitergehen, entstehen zusätzliche Entwürfe. Prüfen Sie zuerst die bestehenden.
 			</p>
-		{/each}
-		<p>Wenn Sie weitergehen, entstehen zusätzliche Entwürfe. Prüfen Sie zuerst die bestehenden.</p>
-		{#snippet action()}
-			<Button href="/statements?status=draft" icon="statement"
-				>Bestehende Abrechnungen ansehen</Button
-			>
-		{/snippet}
+		</div>
 	</Alert>
-{/if}
-
-{#if missing.length || existing.length}
-	<Checkbox
-		id="confirm-missing"
-		label="Die Abrechnungen trotzdem erstellen"
-		bind:checked={confirmed}
-		{error}
-		testid="confirm-missing-invoices"
-	/>
 {/if}
 
 {#if partial.length}
@@ -65,4 +59,21 @@
 			mehr als drei Monate ohne Rechnung. Prüfen Sie, ob noch Rechnungen fehlen.
 		</p>
 	</Alert>
+{/if}
+
+{#if missing.length || existing.length}
+	<!-- the warnings above are read with the checkbox that confirms them -->
+	<Checkbox
+		id="confirm-missing"
+		label="Die Abrechnungen trotzdem erstellen"
+		bind:checked={confirmed}
+		{error}
+		describedby={[
+			missing.length && 'missing-invoices-text',
+			existing.length && 'existing-statements-text'
+		]
+			.filter(Boolean)
+			.join(' ')}
+		testid="confirm-missing-invoices"
+	/>
 {/if}

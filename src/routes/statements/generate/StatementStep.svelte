@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { invoiceRows, WizardSelection } from '$lib/statement-wizard';
+	import { invoiceRows, type WizardSelection } from '$lib/statement-wizard';
 	import type { Building, HeatingProfile } from '$lib/types';
 	import BuildingStep from './BuildingStep.svelte';
 	import GenerationStep from './GenerationStep.svelte';
@@ -68,5 +68,11 @@
 		{errors}
 	/>
 {:else}
-	<GenerationStep count={previewRows.length} {createdCount} />
+	<GenerationStep
+		count={previewRows.length}
+		{createdCount}
+		withoutInvoices={invoiceRows(invoices, data.buildings, selection)
+			.filter((row) => row.missing)
+			.map((row) => row.name)}
+	/>
 {/if}

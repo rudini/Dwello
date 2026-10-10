@@ -60,7 +60,7 @@ When('der Liegenschaftsverwalter die Abrechnung als versendet markieren will', a
 });
 
 Then(
-	'nennt die Bestätigung den Empfänger {string} mit dem Korrespondenzweg {string}',
+	'nennt die Bestätigung den Empfänger {string} mit dem Korrespondenzkanal {string}',
 	async ({ verwalter, names }, tenant: string, channel: string) => {
 		await expect(recipient(verwalter)).toContainText(names.get(tenant) ?? tenant);
 		await expect(recipient(verwalter)).toContainText(channel);

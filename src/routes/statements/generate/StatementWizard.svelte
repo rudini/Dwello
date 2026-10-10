@@ -74,6 +74,7 @@
 	const needsConfirmation = $derived(
 		invoices.some((i) => i.count === 0 || (i.statements ?? 0) > 0)
 	);
+	const statusText = $derived(busy ? busyLabels[step] : '');
 	const periodLabel = $derived(
 		`${formatDate(selection.periodStart)} – ${formatDate(selection.periodEnd)}`
 	);
@@ -97,6 +98,10 @@
 	async function goTo(target: number) {
 		step = target;
 		shownError = '';
+		await focusHeading();
+	}
+
+	async function focusHeading() {
 		await tick();
 		section?.querySelector<HTMLElement>('h2')?.focus();
 	}
@@ -146,7 +151,10 @@
 	// A server answer: the preview leads to step 4 (a new preview needs a new confirmation), drafts to the result
 	async function answered(result: { type: string; data?: Record<string, unknown> }) {
 		busy = false;
-		if (result.type !== 'success') return void (shownError = form?.error ?? '');
+		if (result.type !== 'success') {
+			shownError = form?.error ?? '';
+			return focusHeading(); // the busy button lost the focus
+		}
 		const data = result.data ?? {};
 		if ('created' in data) return created();
 		previewRows = data.preview as PreviewRow[];
@@ -190,6 +198,9 @@
 	{#if restoredAt}
 		<DraftNotice savedAt={restoredAt} ondiscard={discardDraft} />
 	{/if}
+
+	<!-- read out while the server works: the busy button itself cannot keep the focus -->
+	<p role="status" class="sr-only" data-testid="wizard-status">{statusText}</p>
 
 	<Stepper steps={statementSteps} current={step} onselect={goTo} />
 

@@ -12,12 +12,12 @@ Brief: `docs/REDESIGN_BRIEF.md`. Resume rules: `docs/design/arbeitsregeln.md`.
 | 3 Icons + illustrations | done | 1 round, 2 Majors fixed (`reviews/3-review-1.md`) | 79 examples, 0 violations | passed (9886b28) | | | |
 | 4 Shell, navigation, dashboard | done | 1 round, 3 Majors + persona Blocker fixed (`reviews/4-review-1.md`) | 0 violations (955733a) | passed (955733a, edf1dc4) |
 | 5 Rental contract wizard | done | 2 rounds (`reviews/5-review-1.md`, `5-review-2.md`), all Blockers/Majors fixed | 0 violations (5 contract-new states) | passed (bd2ea7c, 9d83882) | | | |
-| 6 Statement wizard | in progress | | | |
+| 6 Statement wizard | done | 2 rounds (`reviews/6-review-1.md`, `6-review-2.md`), all Blockers/Majors fixed | 0 violations (all states, no `@wip`) | passed (15c0ec5, 39eac9f) | | | |
 | 7 Remaining screens | open | | | |
 | 8 Remove old design system | open | | | |
 | 9 Final | open | | | |
 
-**Next step:** commit stage 6 review round 1, CI; follow-up review if needed; then stage 7.
+**Next step:** stage 7 – remaining screens (persona backlog first: statement detail, lists, invoice form, contract list).
 
 ## Log
 
@@ -119,3 +119,4 @@ Brief: `docs/REDESIGN_BRIEF.md`. Resume rules: `docs/design/arbeitsregeln.md`.
 - Personas at the checkpoint: Helga and Sven complete the contract task; Marco completes the statement run on the phone; Anna is guided to the right next step; Dr. Weber still would not send a statement – his blockers are the statement detail and the PDF (English category names, empty Verteilschlüssel column, fee base, PDF content), stage 7 and backend.
 - Biggest risks left: the remaining 102 legacy files (stage 7/8), the statement detail page, data/content issues that are outside the UI (English master data names, PDF content).
 - Persona backlog for stage 7: statement detail (Verteilschlüssel per line, fee base, one name for the fee, "Mietstagen", refund wording), lists as cards/rows on phones with clickable rows, invoice form (date default, building preselected, back to the wizard), contract list ("AKTIV … – heute", Mietzins column), tenant form, help page names, English master data names (display decision), heating profile chart values for screen readers.
+- Review round 2 (`reviews/6-review-2.md`): no Blockers/Majors; minors and the re-runs of Anna and Sven fixed (overlapping statements counted, links per building, status line while the server works, warnings read with their checkbox, warning repeated before creating).

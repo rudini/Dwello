@@ -63,7 +63,9 @@
 	</ul>
 </section>
 
-<PreviewChecks {rows} bind:confirmed error={errors.confirm} />
+{#if previewRows.length}
+	<PreviewChecks {rows} bind:confirmed error={errors.confirm} />
+{/if}
 
 <section aria-labelledby="statements-heading" class="flex flex-col gap-2">
 	<h3 id="statements-heading" class="text-xl font-bold text-ink">Abrechnungen pro Mietvertrag</h3>

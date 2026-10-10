@@ -1,6 +1,18 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-vi.mock('$app/forms', () => ({ enhance: () => ({ destroy() {} }) }));
+// enhance as SvelteKit wires it: the test can play the server's answer to the last submit
+const server = vi.hoisted(() => ({ submit: null as null | ((input: unknown) => unknown) }));
+vi.mock('$app/forms', () => ({
+	enhance: (_form: unknown, submit?: (input: unknown) => unknown) => {
+		if (submit) server.submit = submit;
+		return { destroy() {} };
+	}
+}));
+async function answer(result: { type: string; data?: unknown }) {
+	const after = server.submit!({}) as (input: unknown) => Promise<void>;
+	await after({ update: async () => {}, result });
+	await settle();
+}
 
 import GeneratePage from '../routes/statements/generate/+page.svelte';
 import EditStatementPage from '../routes/statements/[id]/edit/+page.svelte';
@@ -64,8 +76,20 @@ const text = () => document.body.textContent ?? '';
 const heading = () => document.querySelector('h2 [data-step-label]')!.textContent!.trim();
 const next = () => submit('wizard-next');
 const preview = [
-	{ contractId: 'c1', tenantName: 'Anna Keller', apartmentNumber: '2.01', totalCosts: 1200, balance: 150 },
-	{ contractId: 'c2', tenantName: 'Marc Huber', apartmentNumber: '2.02', totalCosts: 800, balance: -50 }
+	{
+		contractId: 'c1',
+		tenantName: 'Anna Keller',
+		apartmentNumber: '2.01',
+		totalCosts: 1200,
+		balance: 150
+	},
+	{
+		contractId: 'c2',
+		tenantName: 'Marc Huber',
+		apartmentNumber: '2.02',
+		totalCosts: 800,
+		balance: -50
+	}
 ];
 const invoices = [
 	{ buildingId: 'b1', count: 3, first: '2024-01-15', last: '2024-06-30' },
@@ -91,7 +115,9 @@ describe('Abrechnungen erstellen', () => {
 		expect(heading()).toBe('Gebäude');
 		next();
 		await settle();
-		expect(byTestId('form-error')!.textContent).toContain('Bitte wählen Sie mindestens ein Gebäude.');
+		expect(byTestId('form-error')!.textContent).toContain(
+			'Bitte wählen Sie mindestens ein Gebäude.'
+		);
 		expect(document.activeElement).toBe(byTestId('generate-building-b1'));
 		click('generate-building-b1');
 		expect(text()).toContain('1 von 2 gewählt');
@@ -135,7 +161,8 @@ describe('Abrechnungen erstellen', () => {
 		]);
 		fireEvent(key, 'change', 'k-area');
 		expect(
-			document.querySelector<HTMLInputElement>('input[name="managementFeeDistributionKeyId"]')!.value
+			document.querySelector<HTMLInputElement>('input[name="managementFeeDistributionKeyId"]')!
+				.value
 		).toBe('k-area');
 		fireEvent(byTestId<HTMLInputElement>('management-fee-input')!, 'input', '4.5');
 		expect(byTestId('management-fee-hint')).not.toBeNull();
@@ -172,6 +199,9 @@ describe('Abrechnungen erstellen', () => {
 		next();
 		await settle();
 		expect(heading()).toBe('Erstellen');
+		// the confirmed warning is repeated right before the final button
+		expect(byTestId('generate-warning')!.textContent).toContain('Lindenhof');
+		expect(byTestId('generate-warning')!.textContent).toContain('ohne Rechnungen');
 	});
 
 	it('sagt vor dem Erstellen, dass nur Entwürfe entstehen und nichts verschickt wird', async () => {
@@ -215,10 +245,15 @@ describe('Abrechnungen erstellen', () => {
 	it('warnt, wenn es für ein Gebäude in der Periode schon Abrechnungen gibt, und verlangt eine Bestätigung', async () => {
 		open({
 			preview,
-			invoices: [{ buildingId: 'b1', count: 3, first: '2024-01-15', last: '2024-12-15', statements: 2 }]
+			invoices: [
+				{ buildingId: 'b1', count: 3, first: '2024-01-15', last: '2024-12-15', statements: 2 }
+			]
 		});
 		expect(byTestId('existing-statements')!.textContent).toContain('Ahornhof');
 		expect(byTestId('existing-statements')!.textContent).toContain('2 Nebenkostenabrechnungen');
+		expect(
+			byTestId('existing-statements')!.querySelector('a[href="/statements?building=b1"]')
+		).not.toBeNull();
 		next();
 		await settle();
 		expect(byTestId('form-error')!.textContent).toContain('Bestätigen Sie');
@@ -226,6 +261,42 @@ describe('Abrechnungen erstellen', () => {
 		next();
 		await settle();
 		expect(heading()).toBe('Erstellen');
+	});
+
+	it('zeigt bei einer leeren Vorschau keine Rechnungsprüfung', () => {
+		open({ preview: [], invoices });
+		expect(byTestId('missing-invoices')).toBeNull();
+		expect(byTestId('confirm-missing-invoices')).toBeNull();
+	});
+
+	it('sagt an, dass die Vorschau berechnet wird, und führt danach zur Vorschau', async () => {
+		await toSettings();
+		next();
+		expect(byTestId('wizard-status')!.textContent).toContain('Vorschau wird berechnet');
+		await answer({ type: 'success', data: { preview, invoices } });
+		expect(heading()).toBe('Vorschau');
+		expect(document.activeElement).toBe(document.querySelector('h2'));
+		expect(byTestId('wizard-status')!.textContent!.trim()).toBe('');
+	});
+
+	it('behält die Vorschau, wenn das Erstellen scheitert', async () => {
+		open({ preview, invoices: [invoices[0]] });
+		next();
+		await settle();
+		submit('generate-statements-button'); // "Entwürfe erstellen"
+		await answer({ type: 'failure', data: { error: 'Backend nicht erreichbar' } });
+		expect(heading()).toBe('Erstellen');
+		expect(byTestId('generate-drafts-note')!.textContent).toContain('2 Nebenkostenabrechnungen');
+		expect(document.activeElement).toBe(document.querySelector('h2'));
+	});
+
+	it('verbindet die Warnungen mit dem Kästchen, das sie bestätigt', () => {
+		open({ preview, invoices });
+		const box = byTestId('confirm-missing-invoices')!;
+		const described = box.getAttribute('aria-describedby')!.split(' ');
+		expect(described.map((id) => document.getElementById(id)?.textContent).join(' ')).toContain(
+			'Lindenhof'
+		);
 	});
 
 	it('meldet einen Fehler des Servers', () => {
@@ -250,7 +321,9 @@ describe('Abrechnungen erstellen', () => {
 		expect(byTestId('generation-result')!.textContent).toContain(
 			'2 Nebenkostenabrechnungen sind als Entwurf erstellt'
 		);
-		expect(byTestId('show-statements-button')!.getAttribute('href')).toBe('/statements?status=draft');
+		expect(byTestId('show-statements-button')!.getAttribute('href')).toBe(
+			'/statements?status=draft'
+		);
 		expect(byTestId('wizard-next')).toBeNull();
 	});
 });

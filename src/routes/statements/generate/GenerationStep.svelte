@@ -1,9 +1,14 @@
 <script lang="ts">
+	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';
 	import Illustration from '$lib/ui/Illustration.svelte';
 
 	// Step 5: before creating, what happens; after, how many drafts there are and where to find them
-	let { count, createdCount }: { count: number; createdCount: number | null } = $props();
+	let {
+		count,
+		createdCount,
+		withoutInvoices = []
+	}: { count: number; createdCount: number | null; withoutInvoices?: string[] } = $props();
 </script>
 
 {#if createdCount === null}
@@ -18,6 +23,15 @@
 			Es wird nichts verschickt. Sie prüfen danach jede Abrechnung und versenden sie einzeln.
 		</p>
 	</div>
+	{#if withoutInvoices.length}
+		<!-- the confirmed warning once more, right before the final button -->
+		<Alert tone="caution" title="Ohne Rechnungen" testid="generate-warning">
+			<p>
+				{withoutInvoices.join(', ')}: Diese Abrechnungen entstehen ohne Rechnungen. Sie verteilen
+				CHF 0.00 Nebenkosten, und jeder Mieter erhält sein Akonto zurück.
+			</p>
+		</Alert>
+	{/if}
 {:else}
 	<div class="flex flex-col items-center gap-4 text-center">
 		<Illustration name="done" />

@@ -143,7 +143,15 @@ describe('Rechnungen der Abrechnungsperiode', () => {
 		const fetch = (async (url: string) => {
 			urls.push(url);
 			if (url.includes('/statements?'))
-				return Response.json({ data: [], total: url.includes('b2') ? 2 : 0 });
+				return Response.json({
+					data: url.includes('b2')
+						? [
+								{ periodStart: '2024-01-01', periodEnd: '2024-12-31' },
+								{ periodStart: '2023-07-01', periodEnd: '2024-06-30' }, // overlaps
+								{ periodStart: '2023-01-01', periodEnd: '2023-12-31' } // before the period
+							]
+						: []
+				});
 			const invoices = url.includes('buildingId=b1')
 				? [{ invoiceDate: '2024-06-30' }, { invoiceDate: '2024-01-15' }]
 				: [];
@@ -154,10 +162,8 @@ describe('Rechnungen der Abrechnungsperiode', () => {
 			{ buildingId: 'b1', count: 2, first: '2024-01-15', last: '2024-06-30', statements: 0 },
 			{ buildingId: 'b2', count: 0, first: null, last: null, statements: 2 }
 		]);
-		// statements of the building that already exist for exactly this period
-		expect(urls).toContain(
-			`${API}/statements?buildingId=b2&periodStart=2024-01-01&periodEnd=2024-12-31&limit=1`
-		);
+		// statements of the building whose period overlaps the chosen one
+		expect(urls).toContain(`${API}/statements?buildingId=b2&limit=1000`);
 		expect(urls[0]).toBe(
 			`${API}/invoices?buildingId=b1&dateFrom=2024-01-01&dateTo=2024-12-31&isValidUtilityCost=true&limit=1000`
 		);

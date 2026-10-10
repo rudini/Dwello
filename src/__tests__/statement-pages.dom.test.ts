@@ -134,6 +134,7 @@ describe('Abrechnungsdetail', () => {
 		expect(dialog.textContent).toContain('Dwello verschickt die Abrechnung nicht selbst');
 		const recipient = byTestId('send-recipient')!.textContent!.replace(/\s+/g, ' ');
 		expect(recipient).toContain('Anna Keller');
+		expect(recipient).toContain('Korrespondenzkanal');
 		expect(recipient).toContain('Per E-Mail');
 		expect(recipient).toContain('anna@example.ch');
 		const pdf = byTestId('send-pdf-view')!;

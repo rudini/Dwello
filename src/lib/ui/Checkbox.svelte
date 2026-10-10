@@ -7,6 +7,7 @@
 		name,
 		help,
 		error,
+		describedby,
 		disabled = false,
 		testid
 	}: {
@@ -16,6 +17,7 @@
 		name?: string;
 		help?: string;
 		error?: string;
+		describedby?: string; // texts elsewhere on the page that this choice answers
 		disabled?: boolean;
 		testid?: string;
 	} = $props();
@@ -29,8 +31,9 @@
 			type="checkbox"
 			bind:checked
 			{disabled}
-			aria-describedby={[help && `${id}-help`, error && `${id}-error`].filter(Boolean).join(' ') ||
-				undefined}
+			aria-describedby={[describedby, help && `${id}-help`, error && `${id}-error`]
+				.filter(Boolean)
+				.join(' ') || undefined}
 			aria-invalid={error ? true : undefined}
 			class="size-6 shrink-0 cursor-pointer rounded-control border-2 border-line-strong accent-accent"
 			data-testid={testid}
