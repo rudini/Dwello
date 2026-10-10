@@ -26,14 +26,24 @@ class Run:
 
 
 def run(root):
-    """Detect the test framework under `root`, run its whole suite and classify the result."""
+    """Detect every test framework under `root`, run each whole suite and classify the result."""
+    runners = []
     if _uses_vitest(root):
-        return _run_vitest(root)
+        runners.append(_run_vitest)
     if _uses_pytest(root):
-        return _run_pytest(root)
-    if _has_python(root):
-        return _run_unittest(root)
-    raise NoFramework("no supported test framework detected (looked for vitest, pytest, unittest)")
+        runners.append(_run_pytest)
+    elif _has_python(root):
+        runners.append(_run_unittest)
+    if not runners:
+        raise NoFramework("no supported test framework detected (looked for vitest, pytest, unittest)")
+    return _combine([runner(root) for runner in runners])
+
+
+def _combine(runs):
+    outcomes = {r.outcome for r in runs}
+    outcome = next(o for o in ("error", "fail", "pass") if o in outcomes)
+    return Run(max(r.exit_code for r in runs), outcome, "; ".join(r.summary for r in runs),
+               sum(r.failed for r in runs))
 
 
 def _has_python(root):
