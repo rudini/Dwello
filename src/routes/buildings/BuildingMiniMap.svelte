@@ -14,9 +14,11 @@
 
 	let mapContainer: HTMLDivElement;
 	let map: Map | null = null;
+	let destroyed = false;
 
 	onMount(async () => {
 		const L = await import('leaflet');
+		if (destroyed) return; // the page was left while Leaflet loaded
 
 		map = L.map(mapContainer, {
 			zoomControl: false,
@@ -51,7 +53,10 @@
 	});
 
 	// An async onMount cannot return its cleanup, so the map is removed here
-	onDestroy(() => map?.remove());
+	onDestroy(() => {
+		destroyed = true;
+		map?.remove();
+	});
 </script>
 
 <!-- isolate: Leaflet's panes (z-index 400–600) stay below the sticky header and dialogs -->
