@@ -4,6 +4,7 @@
 	import Button from '$lib/ui/Button.svelte';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import Panel from '$lib/ui/Panel.svelte';
+	import { formatDate } from '$lib/utils/format';
 	import ApartmentFacts from './ApartmentFacts.svelte';
 	import ContractHistory from './ContractHistory.svelte';
 	import type { PageData } from './$types';
@@ -12,10 +13,11 @@
 
 	const apartment = $derived(data.apartment);
 	const building = $derived(apartment.building);
+	const next = $derived(data.nextContract);
 </script>
 
 <svelte:head>
-	<title>Wohnung {apartment.number} - Dwello</title>
+	<title>Wohnung {apartment.number}, {building.name} - Dwello</title>
 </svelte:head>
 
 <div class="flex flex-col gap-8">
@@ -32,9 +34,10 @@
 				>Bearbeiten</Button
 			>
 			{#if !data.currentContract}
+				<!-- a relet apartment is rented from a date on: another contract is no longer the next step -->
 				<Button
 					href="/contracts/new?apartment={apartment.id}"
-					variant="primary"
+					variant={next ? 'secondary' : 'primary'}
 					icon="contract"
 					testid="apartment-new-contract">Mietvertrag erfassen</Button
 				>
@@ -49,6 +52,18 @@
 			{#if data.currentContract}
 				<CurrentTenantCard contract={data.currentContract} />
 				<MonthlyCostsCard costs={data.monthlyCosts} />
+			{:else if next}
+				<Panel title="Künftiger Mieter">
+					<p class="text-ink" data-testid="apartment-next-tenant">
+						Ab {formatDate(next.startDate)} vermietet an
+						<a
+							href="/tenants/{next.tenantId}"
+							class="font-semibold text-accent underline underline-offset-4 hover:text-accent-strong"
+							>{next.tenantName}</a
+						>.
+					</p>
+					<p class="text-ink-muted">Bis dahin läuft kein Mietvertrag.</p>
+				</Panel>
 			{:else}
 				<Panel title="Aktueller Mieter">
 					<p class="text-ink-muted" data-testid="apartment-vacant">

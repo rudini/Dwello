@@ -29,7 +29,8 @@ export const statusTones = {
 /** What each Mietstatus means (UBIQUITOUS_LANGUAGE.md, Mietstatus) */
 export const statusHelp: Record<ApartmentStatus, string> = {
 	occupied: 'Ein Mietvertrag läuft.',
-	relet: 'Ein künftiger Mietvertrag ist abgeschlossen.',
+	relet:
+		'Ein künftiger Mietvertrag ist abgeschlossen; die Wohnung ist ab seinem Vertragsbeginn vermietet, auch wenn sie bis dahin leer ist.',
 	// TODO(fachlich prüfen): the glossary names Leer and Gesperrt without explaining them
 	vacant: 'Es läuft kein Mietvertrag, die Wohnung kann vermietet werden.',
 	reserved: 'Sie haben die Wohnung von Hand gesperrt, zum Beispiel während einer Renovation.'
@@ -38,5 +39,5 @@ export const statusHelp: Record<ApartmentStatus, string> = {
 /** Status with the day a relet apartment's next tenant moves in */
 export const statusText = (a: { status: ApartmentStatus; nextContractStart?: string | null }) =>
 	a.status === 'relet' && a.nextContractStart
-		? `Vermietet ab ${formatDate(a.nextContractStart)}`
+		? `Wiedervermietet ab ${formatDate(a.nextContractStart)}`
 		: statusLabels[a.status];

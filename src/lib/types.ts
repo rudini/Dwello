@@ -88,7 +88,6 @@ export interface RentalContract {
 export interface ContractHistory {
 	id: string;
 	tenantName: string;
-	period: string; // "DD.MM.YYYY - DD.MM.YYYY"
 	rentBrutto: number; // in CHF
 	status: 'active' | 'ended' | 'future';
 	apartment?: string;

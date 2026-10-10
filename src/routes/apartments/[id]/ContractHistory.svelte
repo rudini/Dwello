@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { contractPeriod, statusBadges } from '$lib/contract-status';
 	import type { ContractHistory } from '$lib/types';
 	import { formatCurrency } from '$lib/utils/format';
 	import Badge from '$lib/ui/Badge.svelte';
@@ -6,13 +7,6 @@
 
 	// Every rental contract of the apartment; a whole row opens the contract, named by its tenant
 	let { contracts }: { contracts: ContractHistory[] } = $props();
-
-	// Vertragsstatus (UBIQUITOUS_LANGUAGE.md)
-	const badges = {
-		active: { label: 'Laufend', tone: 'positive' },
-		future: { label: 'Künftig', tone: 'info' },
-		ended: { label: 'Beendet', tone: 'neutral' }
-	} as const;
 </script>
 
 <Panel title="Mietverträge der Wohnung">
@@ -29,14 +23,18 @@
 						<a
 							href="/contracts/{contract.id}"
 							class="break-words font-semibold text-accent underline underline-offset-4 after:absolute after:inset-0 hover:text-accent-strong"
-							data-testid="contract-history-link">{contract.tenantName}</a
+							data-testid="contract-history-link">Mietvertrag von {contract.tenantName}</a
 						>
-						<span class="text-ink-muted">{contract.period}</span>
+						<span class="text-ink-muted"
+							>{contractPeriod(contract.startDate, contract.endDate, contract.status)}</span
+						>
+						<!-- TODO(fachlich prüfen): no glossary term for the monthly total, as in the contract wizard -->
 						<span class="tabular-nums text-ink"
-							>{formatCurrency(contract.rentBrutto)} pro Monat</span
+							>{formatCurrency(contract.rentBrutto)}
+							<span class="text-ink-muted">monatlich total</span></span
 						>
 					</div>
-					<Badge {...badges[contract.status]} />
+					<Badge {...statusBadges[contract.status]} />
 				</li>
 			{/each}
 		</ul>
