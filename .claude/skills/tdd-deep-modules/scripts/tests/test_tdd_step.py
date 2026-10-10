@@ -3,7 +3,7 @@ import sys
 import tempfile
 import unittest
 
-from tests.fixture import ADD_TEST, SCRIPTS, PYTEST_MARKERS, PYTEST_TEST, RIGHT_ADD, VITEST_TEST, WRONG_ADD, Repo, vitest_repo
+from tests.fixture import ADD_TEST, RIGHT_ADD_JS, SCRIPTS, PYTEST_MARKERS, PYTEST_TEST, RIGHT_ADD, VITEST_TEST, WRONG_ADD, Repo, vitest_repo
 
 
 class TddStepTest(unittest.TestCase):
@@ -460,3 +460,11 @@ class TddStepTest(unittest.TestCase):
         self.assertEqual(result.returncode, 2, result.stderr)
         self.assertIn("not inside a git repository", result.stderr)
         self.assertNotIn("Traceback", result.stderr)
+
+    def test_green_runs_every_framework_in_a_mixed_repository(self):
+        repo = vitest_repo(self)
+        repo.commit_all("red: seed", {"calc.js": RIGHT_ADD_JS, "calc.test.js": VITEST_TEST,
+                                      "calc.py": WRONG_ADD, "test_calc.py": ADD_TEST})
+        repo.write("calc.js", "// add\n" + RIGHT_ADD_JS)
+
+        self.assert_refused(repo, "green", "green needs all tests passing", head="red: seed")

@@ -64,6 +64,7 @@ class Repo:
         """All values of trailer `key` on HEAD, so a forged duplicate shows up."""
         return self.git("log", "-1", f"--format=%(trailers:key={key},valueonly,separator=%x2C)")
 
+RIGHT_ADD_JS = "export const add = (a, b) => a + b;\n"
 VITEST_FILES = {"package.json": '{"devDependencies": {"vitest": "*"}}\n',
                 ".gitignore": "node_modules\n",
                 "calc.js": "export const add = (a, b) => 0;\n"}
