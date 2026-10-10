@@ -77,7 +77,6 @@
 	"src/routes/contracts/[id]/edit/+page.svelte",
 	"src/routes/documents/+page.svelte",
 	"src/routes/documents/MarkSentButton.svelte",
-	"src/routes/help/+page.svelte",
 	"src/routes/invoices/+page.svelte",
 	"src/routes/invoices/InvoiceRow.svelte",
 	"src/routes/invoices/[id]/+page.svelte",
