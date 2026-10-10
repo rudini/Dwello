@@ -166,7 +166,7 @@ Every place in the code is marked `TODO(fachlich prüfen)` (`grep -rn "TODO(fach
 - The overview task "Nebenkostenabrechnungen erstellen" has one action (D14); a second link "Rechnungen prüfen" or the invoice count per period would help Anna.
 - The invoice list has no filter by year or Abrechnungsperiode (Anna).
 - The invoice form opened from the statement wizard still defaults to today (product decision; the period notice appears at once).
-- The axe list has no states for the server error page, a visible toast, a statement without positions and `submit-empty` on edit forms (final review). The screens themselves are covered.
-- Small layout points from the final review: statement list columns shift when a row has a "PDF" link, the Verlauf labels do not align, the dashboard writes "66.7%" without a space, the tenant row uses "Wohnung - Gebäude" with a hyphen, a success toast can cover list content on phones.
-- The help glossary does not explain Umlagefähig, Nachzahlung/Rückerstattung, Wiedervermietet and Gesperrt (Anna); "Mietstage" is the glossary term (several personas read "Mietstagen" as a typo).
+- ~~The axe list has no states for the server error page, a visible toast, a statement without positions and `submit-empty` on edit forms~~ – added (0c237df): `error-server`, `saved-toast`, `statement-empty-detail`, `submit-cleared` on every edit form; 100 examples, 0 violations.
+- Small layout points from the final review: ~~statement list columns shift when a row has a "PDF" link~~ and ~~"66.7%" without a space~~ fixed (0c237df); open: the Verlauf labels do not align, a success toast can cover list content on phones. The tenant row's "Wohnung … - Gebäude" matches the contract wizard's apartment choice and stays.
+- ~~The help glossary does not explain Umlagefähig, Nachzahlung/Rückerstattung, Wiedervermietet and Gesperrt~~ – added from the glossary definitions (0c237df). "Mietstage" is the glossary term (several personas read "Mietstagen" as a typo).
 - The tenant form does not say whether the address is the current one or the address of the rented flat (Helga) – TODO(fachlich prüfen), Korrespondenzadresse.
