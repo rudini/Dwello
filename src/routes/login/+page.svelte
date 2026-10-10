@@ -18,8 +18,8 @@
 			<p class="text-xl font-bold text-accent">Dwello</p>
 			<h1 class="text-3xl font-bold text-ink">Anmelden</h1>
 			<p class="text-ink-muted">
-				Melden Sie sich mit Ihrem bestehenden Google- oder Microsoft-Konto an. Ein eigenes Passwort
-				für Dwello brauchen Sie nicht.
+				Melden Sie sich mit Ihrem bestehenden Konto an. Ein eigenes Passwort für Dwello brauchen Sie
+				nicht.
 			</p>
 		</div>
 

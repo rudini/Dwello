@@ -1,5 +1,6 @@
 import type { IconName } from './ui/icons';
 import type { IllustrationName } from './ui/illustrations';
+import { formatDate } from './utils/format';
 
 /** What the overview knows: the dashboard counts plus the statements, letters and contracts with a date ahead */
 export interface OverviewInput {
@@ -13,6 +14,7 @@ export interface OverviewInput {
 	statementCounts: { draft: number; sent: number; paid: number; overdue: number };
 	dueStatements: { id: string; tenantName: string; paymentDeadline: string }[];
 	lettersToSend: number;
+	missingPeriod?: { start: string; end: string } | null; // ended Abrechnungsperiode without statements
 	endingContracts: { id: string; tenantName: string; endDate: string }[];
 }
 
@@ -70,12 +72,13 @@ const setup: { missing: (portfolio: OverviewInput['portfolio']) => boolean; task
 const count = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
 
 // Recurring work, most urgent first: money already late, letters waiting at home, statements not yet sent
-function workTasks({ statementCounts, lettersToSend }: OverviewInput): Task[] {
+function workTasks({ statementCounts, lettersToSend, missingPeriod }: OverviewInput): Task[] {
 	const tasks: (Task | false)[] = [
 		statementCounts.overdue > 0 && {
 			id: 'overdue',
-			title: 'Überfällige Abrechnungen mahnen',
-			text: `${count(statementCounts.overdue, 'Nebenkostenabrechnung ist', 'Nebenkostenabrechnungen sind')} über der Zahlungsfrist. Senden Sie eine Mahnung oder markieren Sie die Abrechnung als bezahlt, wenn das Geld eingegangen ist.`,
+			// TODO(fachlich prüfen): shown from the Zahlungsfrist on; a Mahnung is customary only after the Mahnfrist
+			title: 'Überfällige Abrechnungen prüfen',
+			text: `${count(statementCounts.overdue, 'Nebenkostenabrechnung ist', 'Nebenkostenabrechnungen sind')} über der Zahlungsfrist. Prüfen Sie, ob das Geld eingegangen ist: Dann markieren Sie die Abrechnung als bezahlt, sonst können Sie eine Mahnung senden.`,
 			href: '/statements?status=overdue',
 			action: 'Überfällige ansehen',
 			icon: 'reminder'
@@ -87,6 +90,15 @@ function workTasks({ statementCounts, lettersToSend }: OverviewInput): Task[] {
 			href: '/documents?status=to_send',
 			action: 'Briefe ansehen',
 			icon: 'mail'
+		},
+		!!missingPeriod && {
+			// TODO(fachlich prüfen): suggestion without legal deadline, see docs/design/offene-punkte.md
+			id: 'missing-period',
+			title: 'Nebenkostenabrechnungen erstellen',
+			text: `Die Abrechnungsperiode ${formatDate(missingPeriod.start)} – ${formatDate(missingPeriod.end)} ist abgelaufen, aber noch nicht abgerechnet. Erfassen Sie die Rechnungen dieser Periode und erstellen Sie dann die Abrechnungen.`,
+			href: '/statements/generate',
+			action: 'Abrechnungen erstellen',
+			icon: 'calculate'
 		},
 		statementCounts.draft > 0 && {
 			id: 'drafts',

@@ -21,9 +21,14 @@ describe('Fehlerseite', () => {
 		expect(body).toMatch(/<svg[^>]*viewBox="0 0 160 120"/);
 	});
 
-	it('zeigt die Meldung des Servers bei anderen Fehlern', async () => {
-		expect(await page(500, 'Übersicht konnte nicht geladen werden')).toContain(
-			'Übersicht konnte nicht geladen werden'
-		);
+	it('zeigt die Meldung des Servers bei anderen Fehlern und rät zum späteren Versuch', async () => {
+		const body = await page(500, 'Übersicht konnte nicht geladen werden');
+		expect(body).toContain('Übersicht konnte nicht geladen werden');
+		expect(body).toContain('Versuchen Sie es später erneut.');
+		expect(body).not.toContain('Prüfen Sie die Adresse');
+	});
+
+	it('verspricht nichts, was die Seite nicht weiss', async () => {
+		expect(await page(404)).not.toContain('nicht betroffen');
 	});
 });

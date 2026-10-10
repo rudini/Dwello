@@ -10,6 +10,11 @@
 	const message = $derived(
 		messages[$page.status] ?? $page.error?.message ?? 'Ein unerwarteter Fehler ist aufgetreten.'
 	);
+	const hint = $derived(
+		$page.status === 404
+			? 'Prüfen Sie die Adresse oder gehen Sie zur Übersicht.'
+			: 'Versuchen Sie es später erneut.'
+	);
 </script>
 
 <svelte:head>
@@ -19,9 +24,7 @@
 <div class="flex flex-col items-center gap-6 px-4 py-16 text-center">
 	<Illustration name="problem" />
 	<h1 class="text-3xl font-bold text-ink">{message}</h1>
-	<p class="max-w-prose text-lg text-ink-muted">
-		Prüfen Sie die Adresse oder gehen Sie zur Übersicht. Ihre Daten sind davon nicht betroffen.
-	</p>
+	<p class="max-w-prose text-lg text-ink-muted">{hint}</p>
 	<div class="flex flex-wrap justify-center gap-4">
 		<Button onclick={() => history.back()} icon="arrow-back">Zurück</Button>
 		<Button variant="primary" href="/dashboard" icon="overview">Zur Übersicht</Button>

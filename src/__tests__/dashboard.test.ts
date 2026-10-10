@@ -8,10 +8,13 @@ const figures = {
 };
 
 // The backend as the overview reads it: counts, plus the lists that carry dates
-function backend(dashboardStatus = 200) {
+function backend(dashboardStatus = 200, statementsOfLastPeriod = 3) {
 	return (async (url: string) => {
 		const path = url.replace(API, '');
 		if (path === '/dashboard') return Response.json(figures, { status: dashboardStatus });
+		if (path === '/config') return Response.json({ data: { accounting_period: 'july-june' } });
+		if (path === '/statements?periodStart=2025-07-01&periodEnd=2026-06-30&limit=1')
+			return Response.json({ data: [], total: statementsOfLastPeriod });
 		if (path.startsWith('/statements?status=overdue'))
 			return Response.json({
 				data: [
@@ -60,6 +63,32 @@ describe('Übersicht laden', () => {
 			['Zahlungsfrist', 'Bruno Meier', 'in 10 Tagen'],
 			['Vertragsende', 'Eva Frei', 'in 22 Tagen']
 		]);
+	});
+
+	it('erinnert an die abgelaufene Abrechnungsperiode, für die es noch keine Abrechnung gibt', async () => {
+		vi.useFakeTimers({ now: new Date('2026-10-10T08:00:00') });
+		const data = await load({ fetch: backend(200, 0) } as never);
+
+		expect(data.tasks.map((task) => task.id)).toEqual([
+			'overdue',
+			'letters',
+			'missing-period',
+			'drafts'
+		]);
+		expect(data.tasks[2].text).toContain('1.7.2025 – 30.6.2026');
+	});
+
+	it('zeigt die Kennzahlen auch, wenn eine Liste nicht erreichbar ist', async () => {
+		const answer = backend();
+		const fetch = (async (url: string) => {
+			if (!url.endsWith('/dashboard')) throw new TypeError('fetch failed');
+			return answer(url);
+		}) as typeof globalThis.fetch;
+		const data = await load({ fetch } as never);
+
+		expect(data.portfolio).toEqual(figures.portfolio);
+		expect(data.tasks.map((task) => task.id)).toEqual(['overdue', 'drafts']);
+		expect(data.deadlines).toEqual([]);
 	});
 
 	// Zeros would look like an empty portfolio

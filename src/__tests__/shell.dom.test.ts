@@ -46,6 +46,27 @@ describe('Kopfzeile', () => {
 		expect(document.activeElement).toBe(button);
 	});
 
+	it('nennt das Benutzermenü und bietet eine Fläche von mindestens 48 Pixeln', () => {
+		show(Header, { user });
+		const button = byTestId('user-menu-button')!;
+		expect(button.textContent).toContain('Benutzermenü');
+		expect(button.className).toMatch(/(^| )min-w-12( |$)/);
+		expect(button.className).toMatch(/(^| )min-h-12( |$)/);
+	});
+
+	it('schliesst das Benutzermenü, wenn der Fokus es verlässt', () => {
+		show(Header, { user });
+		const button = byTestId('user-menu-button')!;
+		click(button);
+		const outside = byTestId('header-logo')!;
+		byTestId('logout-button')!.dispatchEvent(
+			new FocusEvent('focusout', { bubbles: true, relatedTarget: outside })
+		);
+		flushSync();
+		expect(byTestId('user-menu-settings')).toBeNull();
+		expect(button.getAttribute('aria-expanded')).toBe('false');
+	});
+
 	it('führt über das Logo zur Übersicht', () => {
 		show(Header, { user });
 		const logo = byTestId('header-logo')!;

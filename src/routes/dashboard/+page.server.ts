@@ -1,4 +1,5 @@
 import { fetchRecord } from '$lib/server/save-form';
+import { lastCompletedPeriod, type AccountingPeriodType } from '$lib/accounting-period';
 import { overviewDeadlines, overviewTasks, type Deadline, type Task } from '$lib/overview';
 
 export interface DashboardData {
@@ -43,8 +44,21 @@ type Row = Record<string, unknown>;
 
 // A list the overview reads dates from; a list that fails to load only hides its tasks, the counts still show
 async function list(fetch: typeof globalThis.fetch, path: string, key: string): Promise<Row[]> {
-	const response = await fetch(`${BACKEND_URL}/api/v1/${path}`);
-	return response.ok ? ((await response.json())[key] ?? []) : [];
+	const response = await fetch(`${BACKEND_URL}/api/v1/${path}`).catch(() => null);
+	return response?.ok ? ((await response.json())[key] ?? []) : [];
+}
+
+// The last ended Abrechnungsperiode when it has no Nebenkostenabrechnung yet
+async function missingPeriod(fetch: typeof globalThis.fetch) {
+	const config = await fetch(`${BACKEND_URL}/api/v1/config`);
+	if (!config.ok) return null;
+	const type = ((await config.json()).data?.accounting_period ??
+		'calendar') as AccountingPeriodType;
+	const period = lastCompletedPeriod(type);
+	const statements = await fetch(
+		`${BACKEND_URL}/api/v1/statements?periodStart=${period.start}&periodEnd=${period.end}&limit=1`
+	);
+	return statements.ok && (await statements.json()).total === 0 ? period : null;
 }
 
 const tenantOf = (statement: Row) => {
@@ -57,12 +71,13 @@ export const load = async ({
 }: {
 	fetch: typeof globalThis.fetch;
 }): Promise<OverviewData> => {
-	const [figures, overdue, sent, letters, contracts] = await Promise.all([
+	const [figures, overdue, sent, letters, contracts, period] = await Promise.all([
 		fetchRecord(fetch, `${BACKEND_URL}/api/v1/dashboard`, 'Übersicht') as Promise<DashboardData>,
 		list(fetch, 'statements?status=overdue&limit=100', 'data'),
 		list(fetch, 'statements?status=sent&limit=100', 'data'),
 		list(fetch, 'documents?status=to_send', 'data'),
-		list(fetch, 'contracts?status=active&limit=100', 'contracts')
+		list(fetch, 'contracts?status=active&limit=100', 'contracts'),
+		missingPeriod(fetch).catch(() => null)
 	]);
 	const input = {
 		today: new Date().toLocaleDateString('sv-SE'), // local YYYY-MM-DD
@@ -74,6 +89,8 @@ export const load = async ({
 			paymentDeadline: String(s.paymentDeadline)
 		})),
 		lettersToSend: letters.length,
+		// Only rented apartments get a Nebenkostenabrechnung
+		missingPeriod: figures.portfolio.occupiedApartments > 0 ? period : null,
 		endingContracts: contracts
 			.filter((c) => c.endDate)
 			.map((c) => ({

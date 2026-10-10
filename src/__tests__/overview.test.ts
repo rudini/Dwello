@@ -51,10 +51,25 @@ describe('Aufgaben der Übersicht', () => {
 			input({ statementCounts: { draft: 2, sent: 0, paid: 0, overdue: 1 }, lettersToSend: 3 })
 		);
 		expect(tasks.map((task) => [task.title, task.href])).toEqual([
-			['Überfällige Abrechnungen mahnen', '/statements?status=overdue'],
+			['Überfällige Abrechnungen prüfen', '/statements?status=overdue'],
 			['Briefe verschicken', '/documents?status=to_send'],
 			['Abrechnungen prüfen und versenden', '/statements?status=draft']
 		]);
+	});
+
+	it('erinnert an die Abrechnungen einer abgelaufenen Abrechnungsperiode ohne Abrechnung', () => {
+		const tasks = overviewTasks(
+			input({
+				statementCounts: { draft: 1, sent: 0, paid: 0, overdue: 1 },
+				missingPeriod: { start: '2025-01-01', end: '2025-12-31' }
+			})
+		);
+		expect(tasks.map((task) => task.id)).toEqual(['overdue', 'missing-period', 'drafts']);
+		expect(tasks[1]).toMatchObject({
+			title: 'Nebenkostenabrechnungen erstellen',
+			href: '/statements/generate'
+		});
+		expect(tasks[1].text).toContain('1.1.2025 – 31.12.2025');
 	});
 
 	it('sagt, wie viele es sind, in der Einzahl und Mehrzahl', () => {

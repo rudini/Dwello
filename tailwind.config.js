@@ -39,6 +39,7 @@ export default {
 			borderRadius: { control: 'var(--radius-control)', panel: 'var(--radius-panel)' },
 			boxShadow: { raised: 'var(--shadow-raised)', overlay: 'var(--shadow-overlay)' },
 			transitionDuration: { fast: 'var(--duration-fast)' },
+			maxHeight: { 'below-header': 'calc(100vh - var(--size-header))' }, // sticky sidebar
 			fontFamily: {
 				sans: ['Inter Variable', 'system-ui', 'sans-serif']
 			}

@@ -10,14 +10,14 @@ Brief: `docs/REDESIGN_BRIEF.md`. Resume rules: `docs/design/arbeitsregeln.md`.
 | 1 Plan | done | 1 round, 6 Majors fixed (`reviews/1-review-1.md`) | n/a | docs-only push: job skips its steps |
 | 2 Tokens + base components + axe | done | 2 rounds (`reviews/2-review-1.md`, `2-review-2.md`), all Majors fixed | 79 examples, 0 violations | passed (afcda10, e62b6cf) | | | |
 | 3 Icons + illustrations | done | 1 round, 2 Majors fixed (`reviews/3-review-1.md`) | 79 examples, 0 violations | passed (9886b28) | | | |
-| 4 Shell, navigation, dashboard | in progress | | | |
+| 4 Shell, navigation, dashboard | review fixes | 1 round, 3 Majors + persona Blocker fixed (`reviews/4-review-1.md`) | 0 violations (955733a) | passed (955733a) |
 | 5 Rental contract wizard | open | | | |
 | 6 Statement wizard | open | | | |
 | 7 Remaining screens | open | | | |
 | 8 Remove old design system | open | | | |
 | 9 Final | open | | | |
 
-**Next step:** commit stage 4, CI, stage 4 review, personas Anna and Helga.
+**Next step:** commit the stage 4 review fixes, CI, then stage 5 (rental contract wizard).
 
 ## Log
 
@@ -72,3 +72,12 @@ Brief: `docs/REDESIGN_BRIEF.md`. Resume rules: `docs/design/arbeitsregeln.md`.
 - Error page with the "Fehler" illustration and "Zur Übersicht". Copy that promised "Ihre Daten sind davon nicht betroffen" removed – not verifiable for every error.
 - Legacy list: 111 files left.
 - Checks: unit 839, lint/check/build/fallow clean, E2E 359 passed incl. axe (drawer state now also on tablet).
+- Commit 955733a pushed; CI green incl. ui-screenshots.
+- Personas Anna (partly) and Helga (yes) on the persona stack (`docs/design/tools/persona-stack.sh`, `persona-kit.mjs`; zoom emulates browser zoom). Reports in `personas/anna-4.md`, `personas/helga-4.md`.
+- Review round 1 (`reviews/4-review-1.md`): 3 Majors and Anna's Blocker fixed – overview task "Nebenkostenabrechnungen erstellen" for an ended Abrechnungsperiode without statements, status-dependent error hint, user-menu button size and name, "Überfällige Beträge"; Minors fixed (neutral overdue wording, network-tolerant loader, sidebar height via `--size-header`, focusout closes the user menu, generic login text, 48 px links, dead E2E helpers removed, equal quick-action cards).
+
+#### Persona backlog (from stage 4 runs, for stages 5–7)
+
+- Stage 5 (rental contract wizard): Swiss date format and the date repeated in words (Helga); confirmation after saving tenant and contract with the key data (Helga); explain Akonto in plain words, Unbefristet hint, examples that look like examples (Helga); free apartments first / explain "nicht verfügbar" (Helga).
+- Stage 6 (statement wizard / detail): confirmation before «Versenden» with recipient and PDF preview; Verteilschlüssel per line and the share explained ("62 m² von 340 m²"); refund wording for Zahlungsfrist (Anna).
+- Stage 7 (remaining screens): a future contract must not show "Aktiv … – heute" (Helga); whole list rows clickable, text labels for eye/pencil icons (Anna, Helga); English category and heating-profile names in German (Anna); help-page names matching the menu (Anna); "1 Abrechnungen", "Mietstagen", stray "·" (Anna); one name for the management fee (Anna); Bruttomiete label in the contract list (Helga); Anrede field is a data-model change – listed in `offene-punkte.md` instead.

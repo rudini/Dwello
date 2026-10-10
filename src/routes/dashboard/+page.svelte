@@ -35,7 +35,7 @@
 					<a
 						href={action.href}
 						data-testid="quick-action"
-						class="flex min-h-12 items-center gap-4 rounded-panel border border-line bg-surface p-4 font-semibold text-accent hover:bg-accent-soft"
+						class="flex h-full min-h-12 items-center gap-4 rounded-panel border border-line bg-surface p-4 font-semibold text-accent hover:bg-accent-soft"
 					>
 						<Icon name={action.icon} size={24} />
 						{action.label}

@@ -33,6 +33,7 @@
 	--shadow-overlay: 0 12px 32px rgb(0 0 0 / 0.24);
 
 	--size-control: 3rem;
+	--size-header: 4rem;
 	--duration-fast: 150ms;
 
 	--illu-line: var(--color-ink-muted);

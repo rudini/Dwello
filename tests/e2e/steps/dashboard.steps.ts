@@ -5,7 +5,6 @@ import { visit } from '../interactions/navigation';
 import { currentNavItem, overviewDeadline, overviewTask } from '../interactions/dashboard';
 import { occupancyOf, rentedApartmentsOf, statusFilter, statusFilterFor } from '../questions/dashboard';
 import {
-	chooseHeaderAction,
 	chooseQuickAction,
 	openBuildingFromOccupancy,
 	openStatementsWithStatus,
@@ -89,10 +88,6 @@ When('der Liegenschaftsverwalter die Abrechnungen {string} öffnet', async ({ ve
 
 When('der Liegenschaftsverwalter die Schnellaktion {string} wählt', async ({ verwalter }, label: string) => {
 	await verwalter.perform(chooseQuickAction(label));
-});
-
-When('der Liegenschaftsverwalter oben die Aktion {string} wählt', async ({ verwalter }, label: string) => {
-	await verwalter.perform(chooseHeaderAction(label));
 });
 
 Then('ist das Gebäude {string} zu {string} belegt', async ({ verwalter, names }, building: string, rate: string) => {

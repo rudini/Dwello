@@ -39,12 +39,12 @@ Funktionalität: Übersicht
     Und die Liste zeigt nur "<Status>"
 
     Beispiele:
-      | Kennzahl         | Seite                   | Status          |
-      | Vermietet        | Wohnungen               | Vermietet       |
-      | Wiedervermietet  | Wohnungen               | Wiedervermietet |
-      | Leer             | Wohnungen               | Leer            |
-      | Gesperrt         | Wohnungen               | Gesperrt        |
-      | Davon überfällig | Nebenkostenabrechnungen | Überfällig      |
+      | Kennzahl            | Seite                   | Status          |
+      | Vermietet           | Wohnungen               | Vermietet       |
+      | Wiedervermietet     | Wohnungen               | Wiedervermietet |
+      | Leer                | Wohnungen               | Leer            |
+      | Gesperrt            | Wohnungen               | Gesperrt        |
+      | Überfällige Beträge | Nebenkostenabrechnungen | Überfällig      |
 
   Szenariogrundriss: Abrechnungen nach Status öffnen
     Angenommen der Liegenschaftsverwalter öffnet die Übersicht
@@ -74,13 +74,13 @@ Funktionalität: Übersicht
   Szenario: Überfällige Abrechnung als nächste Aufgabe
     Angenommen "Anna Keller" hat eine versendete Abrechnung, deren Zahlungsfrist seit 5 Tagen abgelaufen ist
     Wenn der Liegenschaftsverwalter die Übersicht öffnet
-    Dann nennt die Übersicht die Aufgabe "Überfällige Abrechnungen mahnen"
+    Dann nennt die Übersicht die Aufgabe "Überfällige Abrechnungen prüfen"
     Und die Frist "Zahlungsfrist Anna Keller" ist "seit 5 Tagen abgelaufen"
 
   Szenario: Aufgabe führt zu den betroffenen Abrechnungen
     Angenommen "Anna Keller" hat eine versendete Abrechnung, deren Zahlungsfrist seit 5 Tagen abgelaufen ist
     Und der Liegenschaftsverwalter öffnet die Übersicht
-    Wenn der Liegenschaftsverwalter die Aufgabe "Überfällige Abrechnungen mahnen" beginnt
+    Wenn der Liegenschaftsverwalter die Aufgabe "Überfällige Abrechnungen prüfen" beginnt
     Dann ist der Liegenschaftsverwalter auf der Seite "Nebenkostenabrechnungen"
     Und die Liste zeigt nur "Überfällig"
 

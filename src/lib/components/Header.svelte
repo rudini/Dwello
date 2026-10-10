@@ -58,21 +58,26 @@
 		</div>
 
 		{#if user}
-			<div class="relative">
+			<div
+				class="relative"
+				onfocusout={(event) => {
+					if (!event.currentTarget.contains(event.relatedTarget as Node | null)) menuOpen = false;
+				}}
+			>
 				<button
 					bind:this={menuButton}
 					type="button"
 					onclick={() => (menuOpen = !menuOpen)}
 					aria-expanded={menuOpen}
 					aria-controls="user-menu"
-					class="flex min-h-12 items-center gap-2 rounded-control px-2 text-ink hover:bg-sunken"
+					class="flex min-h-12 min-w-12 items-center justify-center gap-2 rounded-control px-2 text-ink hover:bg-sunken"
 					data-testid="user-menu-button"
 				>
 					<Icon name="user" size={24} />
 					<span class="hidden max-w-64 truncate md:inline" data-testid="user-name"
 						>{displayName}</span
 					>
-					<span class="sr-only md:hidden">Benutzermenü von {displayName}</span>
+					<span class="sr-only">Benutzermenü</span>
 				</button>
 
 				{#if menuOpen}

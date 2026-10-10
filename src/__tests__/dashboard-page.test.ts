@@ -48,7 +48,7 @@ const data = {
 		}
 	],
 	tasks: [
-		task('overdue', 'Überfällige Abrechnungen mahnen', '/statements?status=overdue'),
+		task('overdue', 'Überfällige Abrechnungen prüfen', '/statements?status=overdue'),
 		task('drafts', 'Abrechnungen prüfen und versenden', '/statements?status=draft')
 	],
 	deadlines: [deadline]
@@ -67,7 +67,7 @@ describe('Übersicht', () => {
 
 	it('zeigt jede Aufgabe mit Erklärung und einem Weg dorthin; die erste ist die Hauptaktion', () => {
 		const [first, second] = tasksOf(page());
-		expect(first).toContain('Überfällige Abrechnungen mahnen');
+		expect(first).toContain('Überfällige Abrechnungen prüfen');
 		expect(first).toContain('Erklärung');
 		expect(first).toContain('href="/statements?status=overdue"');
 		const primary = /(?<![\w:-])bg-accent(?![\w-])/; // the primary button's fill
@@ -109,7 +109,7 @@ describe('Übersicht', () => {
 		expect(body).toMatch(/<a[^>]*href="\/apartments\?status=vacant"[^>]*data-testid="stat-vacant"/);
 		expect(body.match(/data-testid="stat-buildings"/g)).toHaveLength(1);
 		expect(body).toMatch(
-			/<a[^>]*href="\/statements\?status=overdue"[^>]*data-testid="stat-overdue-amount"/
+			/<a[^>]*href="\/statements\?status=overdue"[^>]*data-testid="stat-overdue-amount"[\s\S]*?Überfällige Beträge/
 		);
 		for (const status of ['draft', 'sent', 'paid', 'overdue']) {
 			expect(body).toContain(`href="/statements?status=${status}"`);

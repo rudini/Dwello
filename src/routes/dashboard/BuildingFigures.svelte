@@ -55,7 +55,7 @@
 <section aria-labelledby="buildings-heading" class="flex flex-col gap-4">
 	<h2 id="buildings-heading" class="text-2xl font-bold text-ink">Gebäude auf einen Blick</h2>
 	<div class="grid gap-6 lg:grid-cols-2">
-		<Panel title="Wohnungen" level={3}>
+		<Panel title="Gebäude und Wohnungen" level={3}>
 			<ul class="grid grid-cols-2 gap-2 sm:grid-cols-3">
 				{#each figures as figure (figure.testid)}
 					<li>
@@ -96,7 +96,7 @@
 				data-testid="stat-overdue-amount"
 				class="flex min-h-12 items-center justify-between gap-4 rounded-control p-2 hover:bg-sunken"
 			>
-				<span class="text-ink-muted">Davon überfällig</span>
+				<span class="text-ink-muted">Überfällige Beträge</span>
 				<span class="font-bold tabular-nums text-ink"
 					>{formatCurrency(data.financial.overdueAmount)}</span
 				>
@@ -113,7 +113,7 @@
 						<a
 							href="/buildings/{building.buildingId}"
 							data-testid="occupancy-building"
-							class="flex-1 font-semibold text-accent underline underline-offset-4"
+							class="inline-flex min-h-12 flex-1 items-center font-semibold text-accent underline underline-offset-4"
 							>{building.buildingName}</a
 						>
 						<span class="tabular-nums text-ink-muted"

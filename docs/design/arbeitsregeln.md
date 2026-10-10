@@ -74,3 +74,9 @@ Unknown terms are fixed with better help texts, never by renaming the glossary t
 0 analysis · 1 plan · 2 tokens + base components + axe test · 3 icons + illustrations (≥ 8) · 4 shell, navigation, dashboard (+ Anna, Helga) · 5 rental contract wizard (+ all personas) · 6 statement wizard (+ all personas, checkpoint summary in progress.md) · 7 remaining screens (+ personas) · 8 remove old design system (Explore remnant review) · 9 final docs, CLAUDE.md "Design-Regeln", final review, all personas, axe over all screens.
 
 If blocked: note it in `offene-punkte.md`, continue with the next stage. Do not stop early.
+
+## Persona runs: how
+
+- Start the app for personas with `docs/design/tools/persona-stack.sh` (fresh database `dwello_persona` with the demo data, backend on 3301, production build on 3300; `--no-build` reuses the last build).
+- Personas drive a signed-in Chromium through `docs/design/tools/persona-kit.mjs` (`open({ viewport, zoom })`, `shot`, `readOut` for the accessibility tree); copy it to a scratch directory if the session's scratchpad differs. They write their scripts outside the repository and only their report (plus at most 6 screenshots) into `docs/design/personas/`.
+- Persona prompt essentials: character, task, "operate only like a user, no source code, docs, tests or glossary", report structure (completed yes/partly/no, effort, thinking aloud, confusion incl. terms, error risks, suggestions marked Blocker/Major/Minor).

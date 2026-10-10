@@ -44,6 +44,7 @@ Font: Inter Variable (`@fontsource-variable/inter`, bundled). Line height 1.5 fo
 |---|---|---|
 | spacing | 8 px grid: steps 1 (4 px, inside controls only), 2, 4, 6, 8, 10, 12, 16, 20, 24 | `p-4`, `gap-6`, … |
 | `--size-control` | 48 px | `min-h-12`, `size-12` (buttons, inputs, icon buttons, rows) |
+| `--size-header` | 64 px | header height `h-16`; `max-h-below-header` (sticky sidebar) |
 | `--radius-control` | 6 px | `rounded-control` (controls, badges, small surfaces) |
 | `--radius-panel` | 12 px | `rounded-panel` (panels, dialogs, tables) |
 | `--shadow-raised` | `0 2px 8px rgb(0 0 0 / .12)` | `shadow-raised` (menus, toasts) |
