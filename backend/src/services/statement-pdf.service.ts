@@ -91,8 +91,10 @@ export function toPdfData(
 		}),
 		subtotal,
 		managementFee,
-		// The fee is a percentage of the building's utility costs, the sum of the line items' building totals
-		managementFeeBase: statement.lineItems.reduce((sum, item) => sum + parseFloat(item.totalAmount), 0),
+		// The fee is a percentage of the tenant's own costs, or with a key of the building's costs (the line items' totals)
+		managementFeeBase: run.managementFeeKey
+			? statement.lineItems.reduce((sum, item) => sum + parseFloat(item.totalAmount), 0)
+			: subtotal,
 		// Older statements have no stored rate; their fee was a percentage of the tenant's own costs
 		managementFeePercent: statement.managementFeePercent
 			? parseFloat(statement.managementFeePercent)
@@ -120,9 +122,9 @@ async function rentalDatesOf(statement: StatementWithDetails) {
 	};
 }
 
-// The heating profile and its share of the months rented; the calculation applies it to heating costs only
-async function heatingOf(statement: StatementWithDetails, rentalStart: string, rentalEnd: string, language: Language) {
-	const hasHeating = statement.lineItems.some((item) => /heiz|wärme|heating/i.test(item.description));
+// The heating profile and its share of the months rented; the calculation applies it to heating and hot water costs
+async function heatingOf(statement: StatementWithDetails, period: { rentalStart: string; rentalEnd: string }, language: Language, hasHeating: boolean) {
+	const { rentalStart, rentalEnd } = period;
 	const profile = hasHeating && statement.heatingProfileId ? await getHeatingProfile(statement.heatingProfileId) : null;
 	if (!profile) return {};
 	const { percentage } = calculateHeatingShare(profile, new Date(rentalStart), new Date(rentalEnd), 100);
@@ -136,12 +138,11 @@ async function feeKeyOf(statement: StatementWithDetails, language: Language) {
 }
 
 // What the generation run used, for the PDF: the tenant's dates, the heating profile and the fee's key
-async function runDetailsOf(statement: StatementWithDetails, language: Language): Promise<RunDetails> {
-	const { rentalStart, rentalEnd } = await rentalDatesOf(statement);
+async function runDetailsOf(statement: StatementWithDetails, language: Language, hasHeating: boolean): Promise<RunDetails> {
+	const rental = await rentalDatesOf(statement);
 	return {
-		rentalStart,
-		rentalEnd,
-		...(await heatingOf(statement, rentalStart, rentalEnd, language)),
+		...rental,
+		...(await heatingOf(statement, rental, language, hasHeating)),
 		...(await feeKeyOf(statement, language))
 	};
 }
@@ -156,7 +157,8 @@ async function categoryNamesOf(statement: StatementWithDetails) {
 					nameDE: categories.nameDE,
 					nameFR: categories.nameFR,
 					nameIT: categories.nameIT,
-					nameEN: categories.nameEN
+					nameEN: categories.nameEN,
+					isHeatingCost: categories.isHeatingCost
 				})
 				.from(categories)
 				.where(inArray(categories.id, ids))
@@ -173,12 +175,9 @@ export async function generateStatementPdf(id: string, language?: string) {
 	if (!qrConfig) return 'no-iban';
 
 	const pdfLanguage = (language || statement.tenant?.language || 'de') as Language;
-	const pdfData = toPdfData(
-		statement,
-		await categoryNamesOf(statement),
-		pdfLanguage,
-		await runDetailsOf(statement, pdfLanguage)
-	);
+	const names = await categoryNamesOf(statement);
+	const hasHeating = [...names.values()].some((category) => category.isHeatingCost);
+	const pdfData = toPdfData(statement, names, pdfLanguage, await runDetailsOf(statement, pdfLanguage, hasHeating));
 	const pdfBase64 = await generateStatementPDFBase64(pdfData, qrConfig, pdfLanguage);
 	// Only a QR-IBAN carries a QR reference on the bill
 	const qrReference = isQRIBAN(qrConfig.iban) ? statementQRReference(statement.id) : null;

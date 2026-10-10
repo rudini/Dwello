@@ -163,11 +163,11 @@ describe('Abrechnungen erstellen', () => {
 		expect(text()).toContain('Verlangen Sie eine Verwaltungspauschale nur, wenn sie im Mietvertrag vereinbart ist.');
 	});
 
-	it('verteilt die Verwaltungspauschale gleichmässig oder nach einem Verteilschlüssel und warnt über 3 %', async () => {
+	it('berechnet die Verwaltungspauschale aus den eigenen Nebenkosten oder verteilt sie nach einem Verteilschlüssel und warnt über 3 %', async () => {
 		await toSettings();
 		const key = byTestId<HTMLSelectElement>('management-fee-key-select')!;
 		expect([...key.options].map((o) => [o.value, o.textContent?.trim()])).toEqual([
-			['', 'Gleichmässig pro Wohnung'],
+			['', 'Nach den eigenen Nebenkosten jedes Mieters'],
 			['k-area', 'Pro Fläche (m²)']
 		]);
 		fireEvent(key, 'change', 'k-area');

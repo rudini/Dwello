@@ -94,7 +94,7 @@ function groupInvoicesByCategory(
 				distributionKeyName: invoice.distributionKey?.name || 'Gleichmässig',
 				totalAmount: 0,
 				invoices: [],
-				isHeatingCost: /heiz|wärme|heating/i.test(invoice.category?.name ?? '')
+				isHeatingCost: invoice.category?.isHeatingCost ?? false
 			});
 		}
 
@@ -153,6 +153,22 @@ async function calculateApartmentShare(
 		share: roundToRappen(apartmentDist.amount),
 		percentage: apartmentDist.share
 	};
+}
+
+// The apartment's part of the building's fee by the distribution key, for the tenant's days
+async function buildingFeeShare(
+	groups: InvoiceGroup[],
+	feePercent: number,
+	buildingApartments: Array<{ id: string; area: number; rooms: number }>,
+	apartmentId: string,
+	distributionKeyId: string,
+	rentalDays: number,
+	totalPeriodDays: number
+) {
+	const buildingCosts = groups.reduce((sum, group) => sum + group.totalAmount, 0);
+	const buildingFee = calculateManagementFee(buildingCosts, feePercent).fee;
+	const apartmentFee = await calculateApartmentShare(buildingApartments, apartmentId, buildingFee, distributionKeyId);
+	return prorateCosts(apartmentFee.share, rentalDays, totalPeriodDays).proratedAmount;
 }
 
 /**
@@ -314,18 +330,13 @@ export async function calculateStatementForContract(
 
 	subtotal = roundToRappen(subtotal);
 
-	// Management fee: a percentage (chosen per generation run, otherwise the configured default) of the building's
-	// utility costs, distributed to the apartments by its distribution key (none: equally) and to the tenant by days
+	// Management fee: a percentage (chosen per generation run, otherwise the configured default) of the tenant's own
+	// utility costs; with a distribution key chosen, of the building's utility costs, distributed to the apartments by
+	// the key and to the tenant by days
 	const feePercent = managementFeePercent ?? (await getTypedConfig('management_fee_pct'));
-	const buildingCosts = invoiceGroups.reduce((sum, group) => sum + group.totalAmount, 0);
-	const buildingFee = calculateManagementFee(buildingCosts, feePercent).fee;
-	const apartmentFee = await calculateApartmentShare(
-		buildingApartments,
-		apartment.id,
-		buildingFee,
-		managementFeeDistributionKeyId ?? null
-	);
-	const managementFee = prorateCosts(apartmentFee.share, rentalDays, totalPeriodDays).proratedAmount;
+	const managementFee = managementFeeDistributionKeyId
+		? await buildingFeeShare(invoiceGroups, feePercent, buildingApartments, apartment.id, managementFeeDistributionKeyId, rentalDays, totalPeriodDays)
+		: calculateManagementFee(subtotal, feePercent).fee;
 	const totalCosts = roundToRappen(subtotal + managementFee);
 
 	// Calculate total advance payments

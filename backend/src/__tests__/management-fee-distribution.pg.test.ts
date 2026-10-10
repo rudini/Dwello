@@ -1,6 +1,6 @@
 /**
- * The management fee is a percentage of the building's utility costs, distributed to the apartments by a distribution
- * key and to each tenant by rental days (real PostgreSQL database)
+ * The management fee is a percentage of the tenant's own utility costs, or, with a distribution key chosen, of the
+ * building's utility costs distributed by the key and to each tenant by rental days (real PostgreSQL database)
  *
  * Apartment 1.01 (50 m²) and 1.02 (150 m²), caretaker invoice CHF 1000 by area → building fee at 3 %: CHF 30.
  */
@@ -65,8 +65,12 @@ afterAll(async () => {
 });
 
 describe('Verwaltungspauschale der Liegenschaft', () => {
-	it('verteilt die Pauschale ohne Schlüssel gleichmässig auf die Wohnungen', async () => {
-		expect(await fee(small.contract)).toBe(15);
+	// Ohne Schlüssel: Prozentsatz der eigenen Nebenkosten des Mieters, so lässt sie sich direkt nachrechnen
+	it('berechnet die Pauschale ohne Schlüssel als Prozentsatz der eigenen Nebenkosten des Mieters', async () => {
+		// 50 von 200 m² der Hauswartrechnung (250.00) das ganze Jahr: 3 % = 7.50
+		expect(await fee(small.contract)).toBe(7.5);
+		// 150 von 200 m² (750.00) für 184 von 366 Tagen = 377.05: 3 % = 11.31
+		expect(await fee(large.contract)).toBe(11.31);
 	});
 
 	it('verteilt die Pauschale nach dem gewählten Verteilschlüssel', async () => {

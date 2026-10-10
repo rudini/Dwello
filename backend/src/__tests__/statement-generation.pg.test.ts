@@ -209,12 +209,12 @@ describe('Mehrere Verteilschlüssel', () => {
 			// Contract started 2023, counted from the start of the period
 			rentalDays: 366,
 			lines: lineC,
-			// Subtotal 1660.00 + management fee: 3 % of the building's 5880.00 = 176.40, equally per apartment 58.80
-			managementFee: '58.80',
-			totalCosts: '1718.80',
+			// Subtotal 1660.00 + management fee: 3 % of the tenant's own costs = 49.80
+			managementFee: '49.80',
+			totalCosts: '1709.80',
 			// 12 × 120
 			totalAdvancePayments: '1440.00',
-			balance: '278.80'
+			balance: '269.80'
 		});
 	});
 });
@@ -233,12 +233,12 @@ describe('Mieterwechsel in der Abrechnungsperiode', () => {
 				['Waste Disposal', '450.00', '69.43', '15.4289'],
 				['Elevator', '330.00', '36.37', '11.0212']
 			],
-			// Subtotal 905.85 + management fee 58.80 for 121 of 366 days
-			managementFee: '19.44',
-			totalCosts: '925.29',
+			// Subtotal 905.85 + management fee 3 % of it = 27.18
+			managementFee: '27.18',
+			totalCosts: '933.03',
 			// January to April, 4 × 200
 			totalAdvancePayments: '800.00',
-			balance: '125.29'
+			balance: '133.03'
 		});
 	});
 
@@ -253,12 +253,12 @@ describe('Mieterwechsel in der Abrechnungsperiode', () => {
 				['Waste Disposal', '450.00', '114.18', '25.3733'],
 				['Elevator', '330.00', '59.81', '18.1242']
 			],
-			// Subtotal 1489.78 + management fee 58.80 for 199 of 366 days
-			managementFee: '31.97',
-			totalCosts: '1521.75',
+			// Subtotal 1489.78 + management fee 3 % of it = 44.69
+			managementFee: '44.69',
+			totalCosts: '1534.47',
 			// 16.–30. June = 15 / 30 × 180, plus July to December 6 × 180
 			totalAdvancePayments: '1170.00',
-			balance: '351.75'
+			balance: '364.47'
 		});
 	});
 });
@@ -304,10 +304,11 @@ describe('Heizprofil', () => {
 				['Waste Disposal', '450.00', '69.43', '15.4289'],
 				['Elevator', '330.00', '36.37', '11.0212']
 			],
-			managementFee: '19.44',
-			totalCosts: '1137.44',
+			// 3 % of 1118.00
+			managementFee: '33.54',
+			totalCosts: '1151.54',
 			totalAdvancePayments: '800.00',
-			balance: '337.44'
+			balance: '351.54'
 		});
 	});
 
@@ -322,10 +323,11 @@ describe('Heizprofil', () => {
 				['Waste Disposal', '450.00', '114.18', '25.3733'],
 				['Elevator', '330.00', '59.81', '18.1242']
 			],
-			managementFee: '31.97',
-			totalCosts: '1466.77',
+			// 3 % of 1434.80
+			managementFee: '43.04',
+			totalCosts: '1477.84',
 			totalAdvancePayments: '1170.00',
-			balance: '296.77'
+			balance: '307.84'
 		});
 	});
 

@@ -32,7 +32,7 @@ export interface InvoiceFilters {
 
 export interface InvoiceWithDetails extends Invoice {
 	building: { id: string; name: string; address: string } | null;
-	category: { id: string; name: string; nameDE: string | null; isAllowedUtilityCost: boolean } | null;
+	category: { id: string; name: string; nameDE: string | null; isAllowedUtilityCost: boolean; isHeatingCost: boolean } | null;
 	distributionKey: { id: string; name: string; nameDE: string | null } | null;
 	llmCategory: { id: string; name: string; nameDE: string | null } | null;
 }
@@ -53,7 +53,8 @@ function selectWithDetails() {
 				id: categories.id,
 				name: categories.name,
 				nameDE: categories.nameDE,
-				isAllowedUtilityCost: categories.isAllowedUtilityCost
+				isAllowedUtilityCost: categories.isAllowedUtilityCost,
+				isHeatingCost: categories.isHeatingCost
 			},
 			distributionKey: {
 				id: distributionKeys.id,

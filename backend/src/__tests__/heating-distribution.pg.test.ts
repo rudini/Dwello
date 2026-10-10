@@ -17,7 +17,7 @@ import { createContract, deleteContract } from '../services/contract.service';
 import { callApi } from './helpers/auth';
 import { insertInvoice } from './helpers/records';
 
-type LineItem = { isHeatingCost: boolean; apartmentShare: number; tenantShare: number; periodShare: number };
+type LineItem = { categoryName: string; isHeatingCost: boolean; apartmentShare: number; tenantShare: number; periodShare: number };
 
 const token = crypto.randomUUID();
 const created: { building: string; apartments: string[]; tenants: string[]; contracts: string[] } = {
@@ -41,6 +41,15 @@ async function rent(firstName: string, apartmentId: string, startDate: string, e
 	created.tenants.push(tenant.id);
 	created.contracts.push(contract.id);
 	return contract.id;
+}
+
+async function lines(contractId: string): Promise<LineItem[]> {
+	const response = await callApi('/api/v1/statements/preview', {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({ contractId, periodStart: '2024-01-01', periodEnd: '2024-12-31', heatingProfileId })
+	});
+	return ((await response.json()) as { lineItems: LineItem[] }).lineItems;
 }
 
 async function heatingLine(contractId: string): Promise<LineItem> {
@@ -71,6 +80,8 @@ beforeAll(async () => {
 
 	const [heating] = await db.select().from(categories).where(eq(categories.name, 'Heating'));
 	await insertInvoice(building.id, { categoryId: heating.id, description: 'Heizöl 2024', amount: '1000.00', invoiceDate: '2024-06-30' });
+	const [chimney] = await db.select().from(categories).where(eq(categories.name, 'Chimney Sweep'));
+	await insertInvoice(building.id, { categoryId: chimney.id, description: 'Kaminfeger 2024', amount: '200.00', invoiceDate: '2024-10-15' });
 	const [profile] = await db
 		.insert(heatingProfiles)
 		.values({
@@ -128,5 +139,12 @@ describe('Heizkostenverteilung bei Mieterwechsel und Leerstand', () => {
 		const shares = (await heatingLine(tenant1)).tenantShare + (await heatingLine(tenant2)).tenantShare;
 
 		expect(700 - shares).toBe(35);
+	});
+
+	// Kaminfeger und Warmwasser gehören zu den Heiz- und Warmwasserkosten (Art. 5 VMWG): nach Heizprofil, nicht nach Tagen
+	it('verteilt den Kaminfeger als Heiz- und Warmwasserkosten nach dem Heizprofil', async () => {
+		const chimney = (await lines(tenant1)).find((line) => line.categoryName === 'Chimney Sweep')!;
+
+		expect(chimney).toMatchObject({ isHeatingCost: true, apartmentShare: 140, periodShare: 0.43, tenantShare: 60.2 });
 	});
 });

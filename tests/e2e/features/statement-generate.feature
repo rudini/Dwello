@@ -56,8 +56,8 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Und im Gebäude "Lindenhof" gibt es eine Heizkostenrechnung über "1000" Franken für 2024
     Und der Liegenschaftsverwalter ist auf der Seite zum Erstellen von Abrechnungen
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" mit dem Heizprofil "Winter" und 4.5 % Verwaltungspauschale öffnet
-    Dann kostet die Abrechnung von "Eva Frei" "CHF 441.19"
-    Und kostet die Abrechnung von "Marc Huber" "CHF 550.12"
+    Dann kostet die Abrechnung von "Eva Frei" "CHF 449.35"
+    Und kostet die Abrechnung von "Marc Huber" "CHF 543.40"
 
   Szenario: Hinweis bei Verwaltungspauschale über dem Richtwert
     Wenn der Liegenschaftsverwalter für das Gebäude "Lindenhof" die Verwaltungspauschale auf 4.5 % setzt

@@ -170,6 +170,8 @@ export interface Category {
 	nameIT?: string;
 	nameEN?: string;
 	isAllowedUtilityCost: boolean;
+	// Heating and hot water costs (Art. 5 VMWG): shared by the heating profile at a tenant change
+	isHeatingCost?: boolean;
 	description?: string;
 	sortOrder?: number;
 }

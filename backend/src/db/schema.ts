@@ -157,6 +157,8 @@ export const categories = pgTable('categories', {
 	nameIT: varchar('name_it', { length: 100 }),
 	nameEN: varchar('name_en', { length: 100 }),
 	isAllowedUtilityCost: boolean('is_allowed_utility_cost').notNull().default(true),
+	// Heating and hot water costs (Art. 5 VMWG): shared by the heating profile at a tenant change
+	isHeatingCost: boolean('is_heating_cost').notNull().default(false),
 	description: text('description'),
 	sortOrder: integer('sort_order').default(0),
 	createdAt: timestamp('created_at').defaultNow().notNull(),

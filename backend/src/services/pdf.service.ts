@@ -67,9 +67,9 @@ const translations: Record<Language, Record<string, string>> = {
 		heatingNote: 'Heizkosten nach Heizprofil «{profile}»: {percent} % der Jahreskosten Ihrer Wohnung',
 		feeBase: '{percent} % von CHF {base}',
 		feeKey: 'verteilt nach {key}',
-		feeEqual: 'gleichmässig pro Wohnung',
 		daysUnit: 'Mietstage',
 		feeDays: ', für Ihre {days} von {total} Tagen',
+		feeOwn: '{percent} % Ihrer Nebenkosten von CHF {base}',
 		sqm: 'm²'
 	},
 	fr: {
@@ -111,9 +111,9 @@ const translations: Record<Language, Record<string, string>> = {
 		heatingNote: 'Frais de chauffage selon le profil «{profile}» : {percent} % des frais annuels de votre logement',
 		feeBase: '{percent} % de CHF {base}',
 		feeKey: 'réparti selon {key}',
-		feeEqual: 'réparti à parts égales par logement',
 		daysUnit: 'jours',
 		feeDays: ', pour vos {days} jours sur {total}',
+		feeOwn: '{percent} % de vos frais accessoires de CHF {base}',
 		sqm: 'm²'
 	},
 	it: {
@@ -155,9 +155,9 @@ const translations: Record<Language, Record<string, string>> = {
 		heatingNote: 'Spese di riscaldamento secondo il profilo «{profile}»: {percent} % delle spese annue del suo appartamento',
 		feeBase: '{percent} % di CHF {base}',
 		feeKey: 'ripartito secondo {key}',
-		feeEqual: 'ripartito in parti uguali per appartamento',
 		daysUnit: 'giorni',
 		feeDays: ', per i suoi {days} giorni su {total}',
+		feeOwn: '{percent} % delle sue spese accessorie di CHF {base}',
 		sqm: 'm²'
 	},
 	rm: {
@@ -199,9 +199,9 @@ const translations: Record<Language, Record<string, string>> = {
 		heatingNote: 'Custs da stgaudament tenor il profil «{profile}»: {percent} % dals custs annuals da Vossa abitaziun',
 		feeBase: '{percent} % da CHF {base}',
 		feeKey: 'repartì tenor {key}',
-		feeEqual: 'repartì en parts eguals per abitaziun',
 		daysUnit: 'dis',
 		feeDays: ', per Voss {days} da {total} dis',
+		feeOwn: '{percent} % da Voss custs supplementars da CHF {base}',
 		sqm: 'm²'
 	},
 	en: {
@@ -243,9 +243,9 @@ const translations: Record<Language, Record<string, string>> = {
 		heatingNote: 'Heating costs by heating profile «{profile}»: {percent}% of the annual costs of your apartment',
 		feeBase: '{percent}% of CHF {base}',
 		feeKey: 'split by {key}',
-		feeEqual: 'split equally per apartment',
 		daysUnit: 'days',
 		feeDays: ', for your {days} of {total} days',
+		feeOwn: '{percent}% of your utility costs of CHF {base}',
 		sqm: 'm²'
 	}
 };
@@ -340,6 +340,18 @@ function formatFloor(floor: number, lang: Language): string {
 		return `UG${Math.abs(floor)}`;
 	}
 	return `${floor}.${lang === 'de' || lang === 'rm' ? 'OG' : lang === 'en' ? 'F' : 'E'}`;
+}
+
+// The base of the management fee: the tenant's own costs, or the building's costs split by a key for the tenant's days
+function feeBasis(data: StatementPDFData, t: Record<string, string>) {
+	const fill = (text: string) =>
+		text.replace('{percent}', String(data.managementFeePercent)).replace('{base}', formatCHF(data.managementFeeBase));
+	if (!data.managementFeeKey) return fill(t.feeOwn);
+	const days =
+		data.rentalDays < data.periodDays
+			? t.feeDays.replace('{days}', String(data.rentalDays)).replace('{total}', String(data.periodDays))
+			: '';
+	return `${fill(t.feeBase)}, ${t.feeKey.replace('{key}', data.managementFeeKey)}${days}`;
 }
 
 /**
@@ -582,21 +594,7 @@ async function generateStatementPDF(
 				doc
 					.font('Helvetica')
 					.text(formatCurrency(data.managementFee), col4, yPos, { width: 95, align: 'right' })
-					.text(
-						`${t.managementFee}: ${t.feeBase
-							.replace('{percent}', String(data.managementFeePercent))
-							.replace('{base}', formatCHF(data.managementFeeBase))}, ${
-							data.managementFeeKey ? t.feeKey.replace('{key}', data.managementFeeKey) : t.feeEqual
-						}${
-							// Part of the period: the fee of the apartment counts for the tenant's days only
-							data.rentalDays < data.periodDays
-								? t.feeDays.replace('{days}', String(data.rentalDays)).replace('{total}', String(data.periodDays))
-								: ''
-						}`,
-						col1,
-						yPos,
-						{ width: 390 }
-					);
+					.text(`${t.managementFee}: ${feeBasis(data, t)}`, col1, yPos, { width: 390 });
 				yPos = doc.y - 10;
 			}
 

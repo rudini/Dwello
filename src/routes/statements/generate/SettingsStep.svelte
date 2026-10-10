@@ -84,7 +84,7 @@
 	id="managementFeePercent"
 	label="Verwaltungspauschale in %"
 	type="number"
-	help="Prozentsatz der Nebenkosten der Liegenschaft, gilt für alle Abrechnungen dieses Laufs. Üblich sind bis {USUAL_MAXIMUM} %. Verlangen Sie eine Verwaltungspauschale nur, wenn sie im Mietvertrag vereinbart ist. Sonst geben Sie 0 ein."
+	help="Prozentsatz der Nebenkosten, gilt für alle Abrechnungen dieses Laufs. Üblich sind bis {USUAL_MAXIMUM} %. Verlangen Sie eine Verwaltungspauschale nur, wenn sie im Mietvertrag vereinbart ist. Sonst geben Sie 0 ein."
 	bind:value={() => fee, (v) => (managementFeePercent = v === '' ? NaN : Number(v))}
 	error={errors.managementFeePercent}
 	testid="management-fee-input"
@@ -101,9 +101,9 @@
 <Select
 	id="managementFeeDistributionKeyId"
 	label="Verteilung der Verwaltungspauschale"
-	help="Nach diesem Verteilschlüssel wird die Pauschale auf die Wohnungen verteilt; jeder Mieter trägt den Teil seiner Mietstage."
+	help="Üblich ist der Prozentsatz der eigenen Nebenkosten jedes Mieters. Mit einem Verteilschlüssel wird stattdessen der Prozentsatz der Nebenkosten der Liegenschaft auf die Wohnungen verteilt; jeder Mieter trägt den Teil seiner Mietstage."
 	options={[
-		{ value: '', label: 'Gleichmässig pro Wohnung' },
+		{ value: '', label: 'Nach den eigenen Nebenkosten jedes Mieters' },
 		...distributionKeys.map((key) => ({ value: key.id, label: key.name }))
 	]}
 	bind:value={managementFeeDistributionKeyId}

@@ -92,3 +92,28 @@ describe('PDF der Nebenkostenabrechnung', () => {
 		expect(pdf.flowing).toContain('für Ihre 184 von 365 Tagen');
 	});
 });
+
+// Ohne Verteilschlüssel ist die Pauschale ein Prozentsatz der eigenen Nebenkosten
+describe('Verwaltungspauschale ohne Verteilschlüssel im PDF', () => {
+	let ownFee: ReturnType<typeof readPdf>;
+	let id: string;
+
+	beforeAll(async () => {
+		const statement = await generateStatement({
+			contractId: rental.contract,
+			buildingId: rental.building,
+			periodStart: '2025-01-01',
+			periodEnd: '2025-12-31',
+			managementFeePercent: 3
+		});
+		id = statement.id;
+		await generateStatementPdf(id, 'de');
+		ownFee = readPdf(Buffer.from((await getStatementPdf(id)).pdfBlob!, 'base64'));
+	});
+
+	afterAll(() => deleteStatement(id));
+
+	it('nennt die eigenen Nebenkosten als Grundlage', () => {
+		expect(ownFee.flowing).toMatch(/Verwaltungspauschale: 3 % Ihrer Nebenkosten von CHF [\d'.]+/);
+	});
+});
