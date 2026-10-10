@@ -566,3 +566,9 @@ class TddStepTest(unittest.TestCase):
                 self.assertEqual(result.returncode, 2, result.stderr)
                 self.assertIn("package.json", result.stderr)
                 self.assertNotIn("Traceback", result.stderr)
+
+    def test_a_test_run_that_changes_the_working_tree_is_refused(self):
+        repo = Repo(self, {"calc.py": WRONG_ADD})
+        repo.write("test_calc.py", "open('leftover.txt', 'w').write('x')\n" + ADD_TEST)
+
+        self.assert_refused(repo, "red", "the test run changed the working tree: leftover.txt")
