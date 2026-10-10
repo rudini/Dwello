@@ -434,3 +434,17 @@ class TddStepTest(unittest.TestCase):
                 for rel, text in files.items():
                     repo.write(rel, text)
                 self.assert_refused(repo, "red", "red needs exactly one failing test, but 2 fail")
+
+    def test_a_rejected_git_commit_exits_2_and_leaves_the_index_as_it_was(self):
+        repo = Repo(self, {"calc.py": WRONG_ADD})
+        hook = repo.path / ".git" / "hooks" / "pre-commit"
+        hook.write_text("#!/bin/sh\necho 'hook says no' >&2\nexit 1\n")
+        hook.chmod(0o755)
+        repo.write("test_calc.py", ADD_TEST)
+
+        result = repo.run("tdd-step", "red", "adds two numbers")
+
+        self.assertEqual(result.returncode, 2, result.stderr)
+        self.assertIn("hook says no", result.stderr)
+        self.assertNotIn("Traceback", result.stderr)
+        self.assertEqual(repo.git("diff", "--cached", "--name-only"), "")
