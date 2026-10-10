@@ -143,3 +143,20 @@ class TddStepTest(unittest.TestCase):
         self.assertIn("test phase may only change the test list, not code: calc.py, test_calc.py",
                       result.stderr)
         self.assertEqual(repo.subject(), "init")
+
+    def test_a_full_cycle_commits_every_phase_with_the_real_exit_code(self):
+        repo = Repo(self, {"calc.py": WRONG_ADD})
+        steps = [("test", {"TESTLIST.md": "- [ ] adds\n"}, "5"),
+                 ("red", {"test_calc.py": ADD_TEST}, "1"),
+                 ("green", {"calc.py": RIGHT_ADD}, "0"),
+                 ("refactor", {"calc.py": "def add(a, b):\n    return sum((a, b))\n"}, "0")]
+        for phase, files, exit_code in steps:
+            for rel, text in files.items():
+                repo.write(rel, text)
+
+            result = repo.run("tdd-step", phase, f"{phase} add")
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(repo.subject(), f"{phase}: {phase} add")
+            self.assertIn(f"TDD-Exit-Code: {exit_code}", repo.trailers())
+            self.assertEqual(repo.git("status", "--porcelain"), "")
