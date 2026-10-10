@@ -1,3 +1,4 @@
+import os
 import subprocess
 import sys
 import tempfile
@@ -537,3 +538,19 @@ class TddStepTest(unittest.TestCase):
                 result = repo.run("tdd-step", "red", "behaves")
 
                 self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_bytes_that_are_not_utf8_do_not_crash_it(self):
+        with self.subTest("test output"):
+            repo = Repo(self, {"calc.py": WRONG_ADD})
+            repo.write("test_calc.py", "import sys\nsys.stderr.buffer.write(b'\\xff\\n')\n" + ADD_TEST)
+
+            result = repo.run("tdd-step", "red", "adds two numbers")
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+        with self.subTest("file name"):
+            repo = Repo(self, {"calc.py": WRONG_ADD})
+            (repo.path / os.fsdecode(b"notes-\xff.txt")).write_text("plan\n")
+
+            result = repo.run("tdd-step", "test", "plan")
+
+            self.assertEqual(result.returncode, 0, result.stderr)
