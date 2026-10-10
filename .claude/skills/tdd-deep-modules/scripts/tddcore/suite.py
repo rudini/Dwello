@@ -55,7 +55,13 @@ def _uses_vitest(root):
     if not manifest.exists():
         return False
     data = json.loads(manifest.read_text())
-    return "vitest" in {**data.get("dependencies", {}), **data.get("devDependencies", {})}
+    if "vitest" in {**data.get("dependencies", {}), **data.get("devDependencies", {})}:
+        return True
+    command = data.get("scripts", {}).get("test")
+    if command:
+        raise NoFramework(f"no supported test framework for package.json test script {command!r}"
+                          " (supported: vitest, pytest, unittest)")
+    return False
 
 
 def _run_vitest(root):
