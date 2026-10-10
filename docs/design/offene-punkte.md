@@ -113,3 +113,19 @@ Items the redesign could not or deliberately did not resolve. Each with reason a
 - Help texts of the settings live in `src/routes/config/help.ts`; no central help-text registry exists yet.
 - IBAN help ("Konto, auf das Ihre Mieter Nachzahlungen überweisen; es steht auf der QR-Rechnung"), the Reihenfolge help and the "Übersetzungen" section have no glossary basis – TODO(fachlich prüfen).
 - The a11y states `categories delete-dialog` and `distribution-keys delete-dialog` open the first delete button; if that record already has invoices the button is disabled (pre-existing, works with the seed data).
+
+## Stage 7 – review and persona round (fixes F1–F3)
+
+- An invoice without Verteilschlüssel is split equally per apartment (calculation fallback); the invoice form now says so – TODO(fachlich prüfen), the glossary states it only for the Verwaltungspauschale.
+- Categories have no "predefined" flag; the BFF derives it from `name !== nameDE` (seeded categories keep an English key) to hide English seed descriptions. A renamed own category also counts as predefined and loses its description in the list. A real flag (backend) would be cleaner.
+- Invoice and statement rows stack below 1280 px; side-by-side columns at 1024 px (with sidebar) would need a design decision.
+- Mark-paid dialog: the payment date is always today; no "Zahlung zurücksetzen"; payment not listed under "Verlauf" (Marco) – backend/product decisions.
+- "Mahnung senden" is offered before the Zahlungsfrist has passed (Anna) – product decision.
+- Statement detail does not name the Heizprofil used, statement lines do not link their invoices (Dr. Weber) – data not on the statement (backend).
+- Heizprofile values (e.g. "Heizung Tessin" January 30 %) look implausible and name no source (Dr. Weber) – seed data, TODO(fachlich prüfen).
+- A heating-oil delivery is booked as the heating cost of the year without opening/closing stock (Dr. Weber) – calculation/backend, TODO(fachlich prüfen).
+- Name conflicts of heating profiles and distribution keys are shown as a form error, not at the Name field (categories now are).
+- Toast timing for screen readers (500 ms after navigation) needs a manual check with NVDA/VoiceOver; the mobile drawer uses `aria-modal` without `inert`.
+- The PDF file name is a UUID, not the statement number (Dr. Weber) – backend.
+- No invoice filter by period or year (Anna).
+- "Entwurf" names both a statement draft and the browser-saved wizard input ("Entwurf gespeichert") – known glossary gap (see stage 5).
