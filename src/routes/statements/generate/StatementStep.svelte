@@ -75,5 +75,8 @@
 		withoutInvoices={invoiceRows(invoices, data.buildings, selection)
 			.filter((row) => row.missing)
 			.map((row) => row.name)}
+		incomplete={invoiceRows(invoices, data.buildings, selection)
+			.filter((row) => row.incomplete)
+			.map((row) => row.name)}
 	/>
 {/if}

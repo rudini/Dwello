@@ -81,6 +81,7 @@ Funktionalität: Barrierefreiheit
       | statement-generate     | default             |
       | statement-generate     | every-wizard-step   |
       | statement-generate     | preview-empty       |
+      | statement-generate     | category-check      |
       | statement-generate     | draft-restored      |
       | statement-detail       | default             |
       | statement-detail       | send-dialog         |

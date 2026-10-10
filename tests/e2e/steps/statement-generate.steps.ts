@@ -12,7 +12,8 @@ import {
 	generationOutcome,
 	noContractsInPeriod,
 	periodChoice,
-	previewRow
+	previewRow,
+	categoryFinding
 } from '../questions/statement-generate';
 import {
 	chooseBuilding,
@@ -168,6 +169,13 @@ Then(
 	'warnt die Vorschau, dass für {string} in der Abrechnungsperiode keine Rechnungen erfasst sind',
 	async ({ verwalter, names }, building: string) => {
 		await expect(missingInvoicesWarning(verwalter)).toContainText(names.get(building) ?? building);
+	}
+);
+
+Then(
+	'meldet die Prüfung der Kategorien für {string}: {string}',
+	async ({ verwalter }, category: string, finding: string) => {
+		await expect(categoryFinding(verwalter, category)).toContainText(finding);
 	}
 );
 

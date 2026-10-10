@@ -36,7 +36,14 @@ export async function firstPredefined(resource: string) {
 	return ((await response.json()) as { data: { id: string }[] }).data[0].id;
 }
 
-type Invoice = { categoryId?: string; distributionKeyId?: string; description?: string; amount?: string; invoiceDate?: string };
+type Invoice = {
+	categoryId?: string;
+	distributionKeyId?: string;
+	description?: string;
+	amount?: string;
+	invoiceDate?: string;
+	isValidUtilityCost?: boolean;
+};
 
 /** Invoice of the building, by default caretaker costs distributed by area */
 export async function insertInvoice(buildingId: string, invoice: Invoice = {}) {

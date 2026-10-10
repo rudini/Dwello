@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { invoiceRows } from '$lib/statement-wizard';
+	import { akontoHint, invoiceRows } from '$lib/statement-wizard';
+	import Icon from '$lib/ui/Icon.svelte';
 	import { formatCurrency } from '$lib/utils/format';
 	import PreviewChecks from './PreviewChecks.svelte';
 	import type { PreviewRow } from './preview';
@@ -97,6 +98,11 @@
 					<span class="flex flex-col text-right tabular-nums">
 						<span class="text-ink">Kosten {formatCurrency(row.totalCosts)}</span>
 						<span class="font-semibold text-ink">{saldo(row.balance)}</span>
+						{#if akontoHint(row)}
+							<span class="flex items-center justify-end gap-2 text-caution" data-testid="preview-akonto-hint">
+								<Icon name="warning" />{akontoHint(row)}
+							</span>
+						{/if}
 					</span>
 				</li>
 			{/each}

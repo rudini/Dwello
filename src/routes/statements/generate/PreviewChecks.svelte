@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { invoiceRows } from '$lib/statement-wizard';
+	import CategoryCheck from './CategoryCheck.svelte';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';
 	import Checkbox from '$lib/ui/Checkbox.svelte';
@@ -20,12 +21,24 @@
 	const missing = $derived(rows.filter((row) => row.missing));
 	const partial = $derived(rows.filter((row) => row.partial));
 	const existing = $derived(rows.filter((row) => row.existing > 0));
+	const checked = $derived(rows.filter((row) => row.findings.length > 0));
+	const incomplete = $derived(rows.filter((row) => row.incomplete));
+	const comparedWith = $derived(checked.find((row) => row.comparedWith)?.comparedWith);
+	// The warnings that need the confirmation, read with its checkbox
+	const confirming = $derived(
+		[
+			missing.length && 'missing-invoices-text',
+			incomplete.length && 'category-check-text',
+			existing.length && 'existing-statements-text'
+		].filter((id): id is string => !!id)
+	);
 	const statements = (count: number) =>
 		count === 1 ? '1 Nebenkostenabrechnung' : `${count} Nebenkostenabrechnungen`;
 	// The invoice form returns here after saving and warns about a date outside the period;
 	// with one building missing invoices it is preselected
+	const toCapture = $derived([...missing, ...incomplete.filter((row) => !row.missing)]);
 	const newInvoice = $derived(
-		`/invoices/new?${missing.length === 1 ? `building=${missing[0].buildingId}&` : ''}returnTo=${encodeURIComponent('/statements/generate?schritt=3')}&periodStart=${period.periodStart}&periodEnd=${period.periodEnd}`
+		`/invoices/new?${toCapture.length === 1 ? `building=${toCapture[0].buildingId}&` : ''}returnTo=${encodeURIComponent('/statements/generate?schritt=3')}&periodStart=${period.periodStart}&periodEnd=${period.periodEnd}`
 	);
 </script>
 
@@ -40,6 +53,10 @@
 			<Button href={newInvoice} icon="invoice">Rechnung erfassen</Button>
 		{/snippet}
 	</Alert>
+{/if}
+
+{#if checked.length}
+	<CategoryCheck {checked} {comparedWith} confirm={incomplete.length > 0} {newInvoice} />
 {/if}
 
 {#if existing.length}
@@ -72,19 +89,14 @@
 	</Alert>
 {/if}
 
-{#if missing.length || existing.length}
+{#if confirming.length}
 	<!-- the warnings above are read with the checkbox that confirms them -->
 	<Checkbox
 		id="confirm-missing"
 		label="Die Abrechnungen trotzdem erstellen"
 		bind:checked={confirmed}
 		{error}
-		describedby={[
-			missing.length && 'missing-invoices-text',
-			existing.length && 'existing-statements-text'
-		]
-			.filter(Boolean)
-			.join(' ')}
+		describedby={confirming.join(' ')}
 		testid="confirm-missing-invoices"
 	/>
 {/if}

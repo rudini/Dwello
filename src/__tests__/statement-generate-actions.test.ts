@@ -16,7 +16,7 @@ describe('Vorschau der Abrechnungen', () => {
 		const { result } = runAction(actions.preview, '', 200, run, { contracts: [], invoices: [], data: [], total: 0 });
 		expect(await result).toEqual({
 			preview: [],
-			invoices: [{ buildingId: 'b1', count: 0, first: null, last: null, statements: 0 }]
+			invoices: [{ buildingId: 'b1', count: 0, first: null, last: null, statements: 0, check: expect.anything() }]
 		});
 	});
 });

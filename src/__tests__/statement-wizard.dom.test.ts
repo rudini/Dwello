@@ -82,6 +82,7 @@ const preview = [
 		tenantName: 'Anna Keller',
 		apartmentNumber: '2.01',
 		totalCosts: 1200,
+		totalAdvancePayments: 1050,
 		balance: 150
 	},
 	{
@@ -89,6 +90,7 @@ const preview = [
 		tenantName: 'Marc Huber',
 		apartmentNumber: '2.02',
 		totalCosts: 800,
+		totalAdvancePayments: 850,
 		balance: -50
 	}
 ];
@@ -252,6 +254,81 @@ describe('Abrechnungen erstellen', () => {
 		});
 		expect(byTestId('partial-invoices')!.textContent).toContain('Ahornhof');
 		expect(byTestId('missing-invoices')).toBeNull();
+	});
+
+	it('nennt pro Kategorie fehlende Rechnungen im Vergleich zum Vorjahr und verlangt eine Bestätigung', async () => {
+		const sums = (count: number, total: number) => ({ count, total });
+		open({
+			preview,
+			invoices: [
+				{
+					...invoices[0],
+					check: {
+						buildingId: 'b1',
+						comparedWith: { start: '2023-01-01', end: '2023-12-31' },
+						hasComparison: true,
+						findings: [
+							{ categoryId: 'k', categoryName: 'Kaminfeger', kind: 'missing', current: sums(0, 0), previous: sums(1, 290), missingParts: [], changePercent: null },
+							{ categoryId: 'w', categoryName: 'Kaltwasser', kind: 'gap', current: sums(1, 470), previous: sums(2, 935), missingParts: ['das 2. Halbjahr'], changePercent: null },
+							{ categoryId: 'h', categoryName: 'Heizung', kind: 'deviation', current: sums(1, 6565), previous: sums(1, 4800), missingParts: [], changePercent: 37 }
+						]
+					}
+				}
+			]
+		});
+		const check = byTestId('category-check')!;
+		expect(check.textContent).toContain('Ahornhof');
+		expect(check.textContent).toContain('gleichen Zeitraum im Vorjahr (1.1.2023 – 31.12.2023)');
+		const findings = [...document.querySelectorAll('[data-testid="category-finding"]')].map((f) =>
+			f.textContent!.replace(/\s+/g, ' ').trim()
+		);
+		expect(findings).toEqual([
+			'Kaminfeger: Keine Rechnung erfasst. Im Vorjahr: 1 Rechnung über CHF 290.00.',
+			'Kaltwasser: Rechnung für das 2. Halbjahr fehlt. Im Vorjahr: 2 Rechnungen.',
+			'Heizung: CHF 6’565.00, 37 % mehr als im Vorjahr (CHF 4’800.00). Prüfen Sie Betrag und Rechnungsdatum.'
+		]);
+		next();
+		await settle();
+		expect(byTestId('form-error')!.textContent).toContain('Bestätigen Sie');
+		click('confirm-missing-invoices');
+		next();
+		await settle();
+		expect(heading()).toBe('Erstellen');
+		// repeated before the final button
+		expect(byTestId('generate-incomplete')!.textContent).toContain('Ahornhof');
+	});
+
+	it('weist auf eine Abweichung zum Vorjahr hin, ohne eine Bestätigung zu verlangen', async () => {
+		open({
+			preview,
+			invoices: [
+				{
+					...invoices[0],
+					check: {
+						buildingId: 'b1',
+						comparedWith: { start: '2023-01-01', end: '2023-12-31' },
+						hasComparison: true,
+						findings: [
+							{ categoryId: 'h', categoryName: 'Heizung', kind: 'deviation', current: { count: 1, total: 6565 }, previous: { count: 1, total: 4800 }, missingParts: [], changePercent: 37 }
+						]
+					}
+				}
+			]
+		});
+		expect(byTestId('category-finding')!.textContent).toContain('Heizung');
+		expect(byTestId('confirm-missing-invoices')).toBeNull();
+		next();
+		await settle();
+		expect(heading()).toBe('Erstellen');
+	});
+
+	it('vergleicht die Kosten jeder Abrechnung mit dem Akonto', () => {
+		open({
+			preview: [{ ...preview[0], totalCosts: 1200, totalAdvancePayments: 3000 }, preview[1]],
+			invoices: [invoices[0]]
+		});
+		const hints = [...document.querySelectorAll('[data-testid="preview-akonto-hint"]')].map((h) => h.textContent!.trim());
+		expect(hints).toEqual(['Kosten 60 % unter dem Akonto. Fehlen Rechnungen?']);
 	});
 
 	it('warnt, wenn es für ein Gebäude in der Periode schon Abrechnungen gibt, und verlangt eine Bestätigung', async () => {

@@ -28,4 +28,5 @@ export const newInvoiceFromWarning = (page: Page) =>
 export const confirmMissingInvoices = (page: Page) => page.getByTestId('confirm-missing-invoices');
 export const buildingInvoices = (page: Page, buildingName: string) =>
 	page.getByTestId('preview-invoices').filter({ hasText: buildingName });
+export const categoryFindings = (page: Page) => page.getByTestId('category-finding');
 export const draftsOnlyNote = (page: Page) => page.getByTestId('generate-drafts-note');

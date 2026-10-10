@@ -71,9 +71,14 @@
 	let previewRows = $state(untrack(() => form?.preview ?? []));
 	let invoices = $state(untrack(() => form?.invoices ?? []));
 	let shownError = $state(untrack(() => form?.error ?? '')); // only until the user moves on
-	// No invoices, or statements that already exist: going on needs a confirmation
+	// No invoices, invoices missing in a category, or statements that already exist: going on needs a confirmation
 	const needsConfirmation = $derived(
-		invoices.some((i) => i.count === 0 || (i.statements ?? 0) > 0)
+		invoices.some(
+			(i) =>
+				i.count === 0 ||
+				(i.statements ?? 0) > 0 ||
+				!!i.check?.findings.some((f) => f.kind !== 'deviation')
+		)
 	);
 	const statusText = $derived(busy ? busyLabels[step] : '');
 	const periodLabel = $derived(

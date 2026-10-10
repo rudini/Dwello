@@ -14,6 +14,7 @@
 		"action-error": "A server action failed (deleting a sent statement, posted as from a stale tab, is refused): the error alert visible.",
 		"every-wizard-step": "Each step of the wizard in turn, up to the step before saving.",
 		"preview-empty": "Statement wizard preview for a period without rental contracts.",
+		"category-check": "Statement wizard preview whose check per category reports invoices missing against the year before.",
 		"overlap-warning": "Rental contract wizard with a start date that overlaps another contract of the apartment.",
 		"draft-restored": "A wizard reopened with a draft saved in the browser: restore notice and save status visible.",
 		"formula-tested": "Distribution key form after testing a formula.",
@@ -268,6 +269,7 @@
 				"default",
 				"every-wizard-step",
 				"preview-empty",
+				"category-check",
 				"draft-restored"
 			]
 		},

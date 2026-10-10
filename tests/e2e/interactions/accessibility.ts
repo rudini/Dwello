@@ -26,9 +26,12 @@ const query: Record<string, string> = {
 export const address = (screen: { path: string; queries?: object }, state: string) =>
 	screen.path + ((screen.queries as Record<string, string> | undefined)?.[state] ?? query[state] ?? '');
 
+// The building of the example being checked (one example at a time per worker); the statement wizard checks it
+let exampleBuilding = '';
+
 /** Records every screen with an id in its address needs; returns the address with the ids filled in */
 export async function seedFor(seed: TestData, path: string, state: string) {
-	if (!path.includes('{') && !['delete-dialog', 'mark-paid-dialog'].includes(state)) return path;
+	if (!path.includes('{') && !['delete-dialog', 'mark-paid-dialog', 'category-check', 'preview-empty'].includes(state)) return path;
 	await seed.building('Seeblick', 'Winterthur');
 	await seed.apartment('Seeblick', '1.01', 'vacant');
 	await seed.apartment('Seeblick', '1.02', 'vacant');
@@ -64,6 +67,7 @@ export async function seedFor(seed: TestData, path: string, state: string) {
 		category: seed.idOf('Gartenpflege'),
 		distributionKey: seed.idOf('Nach Wohnungen')
 	};
+	exampleBuilding = ids.building!;
 	return path.replace(/\{(\w+)\}/g, (_, key: string) => ids[key]!);
 }
 
@@ -76,6 +80,17 @@ const press = (page: Page, testid: string) => page.getByTestId(testid).click();
 const shows = (page: Page, selector: string) => page.locator(selector).first().waitFor();
 // Confirmation dialogs end with a button whose test id ends in -confirm
 const dialog = (page: Page) => shows(page, '[data-testid$="-confirm"]');
+
+// The statement wizard's preview of a calendar year for this example's building, heating profile and fee as proposed
+async function previewOf(page: Page, year: string, shown: string) {
+	await page.getByTestId('period-start-input').fill(`${year}-01-01`);
+	await page.getByTestId('period-end-input').fill(`${year}-12-31`);
+	await press(page, 'wizard-next');
+	await page.getByTestId(`generate-building-${exampleBuilding}`).check();
+	await press(page, 'wizard-next');
+	await press(page, 'wizard-next');
+	await page.getByTestId(shown).waitFor();
+}
 
 // What a user does to reach each state
 const states: Record<string, (page: Page, viewport: Viewport) => Promise<unknown>> = {
@@ -167,15 +182,9 @@ const states: Record<string, (page: Page, viewport: Viewport) => Promise<unknown
 		await page.reload();
 		await shows(page, '[data-testid="draft-restored"]');
 	},
-	'preview-empty': async (page) => {
-		await page.getByTestId('period-start-input').fill('2000-01-01');
-		await page.getByTestId('period-end-input').fill('2000-12-31');
-		await press(page, 'wizard-next');
-		await page.locator('[data-testid^="generate-building-"]').first().check();
-		await press(page, 'wizard-next');
-		await press(page, 'wizard-next'); // heating profile and fee as proposed
-		await page.getByTestId('preview-empty').waitFor();
-	}
+	// 2026 against 2025: the heating invoice of 2025 has no successor yet
+	'category-check': (page) => previewOf(page, '2026', 'category-check'),
+	'preview-empty': (page) => previewOf(page, '2000', 'preview-empty')
 };
 
 /** Rule violations axe finds on the page as it is now, as readable lines */

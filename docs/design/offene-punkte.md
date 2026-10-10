@@ -66,7 +66,7 @@ Every place in the code is marked `TODO(fachlich prüfen)` (`grep -rn "TODO(fach
 ## Statement findings from the stage 5 personas (for stage 6/7 and outside UI scope)
 
 - Statements can be generated for a period without any invoices (CHF 0.00 costs, full Akonto refund) without a warning (Anna, Marco: Blocker) – plausibility check in the stage 6 wizard (plan D16).
-- Invoices covering only part of the period (e.g. only Q1) produce a full-year statement without a hint (Dr. Weber: Blocker) – stage 6 plausibility check if it can be derived from existing data; otherwise TODO(fachlich prüfen).
+- ~~Invoices covering only part of the period produce a full-year statement without a hint~~ – the check per category (step B) names the missing quarter, half-year or month against the year before. Original note: (Dr. Weber: Blocker) – stage 6 plausibility check if it can be derived from existing data; otherwise TODO(fachlich prüfen).
 - "Verwaltungsgebühr (3 %)" shows the tenant's share of 3 % of the building total, which cannot be traced from the label (Dr. Weber) – the PDF now names the base and the key ("3 % von CHF 18'835.20, gleichmässig pro Wohnung"); the statement detail in the UI does not yet.
 - ~~The PDF has no tenant address~~ (step A). The reference to the right to inspect receipts and the refund method are part of the PDF redesign (step D2; requirements will be collected in step D1).
 - ~~Category names in English in the PDF~~ – the PDF names categories in the tenant's language (`docs/seed-daten-aenderungen.md` P2); the UI already shows the German names.
@@ -76,9 +76,9 @@ Every place in the code is marked `TODO(fachlich prüfen)` (`grep -rn "TODO(fach
 
 - "Versenden" only records the status "Versendet"; Dwello does not deliver statements by e-mail or post. The confirmation says so. Whether a real e-mail dispatch is wanted is a product decision (backend) – TODO(fachlich prüfen).
 - "PDF ansehen" creates the PDF when it does not exist yet (the backend stores it); viewing therefore has a side effect. Acceptable because a statement cannot be delivered without its PDF.
-- The plausibility check looks at invoices dated in the Abrechnungsperiode (as the calculation does). It flags buildings without any invoice; it does not judge whether a period is covered completely (one oil delivery per year is normal) – the preview names count and date range so the user can judge. TODO(fachlich prüfen) whether stronger checks are wanted.
+- The plausibility check looks at invoices dated in the Abrechnungsperiode (as the calculation does). It flags buildings without any invoice; it does not judge whether a period is covered completely (one oil delivery per year is normal) – the preview names count and date range so the user can judge. Since step B the preview compares every category with the same dates one year earlier (missing category, gap in the rhythm, deviation over 25 % and CHF 100) and each statement's costs with its Akonto (over 30 %) – thresholds TODO(fachlich prüfen).
 - Restoring a statement wizard draft drops buildings or heating profiles deleted meanwhile without a notice (the contract wizard says so). Rare; worth a sentence later.
-- The "partly covered" hint uses a fixed 90-day rule – TODO(fachlich prüfen).
+- The "partly covered" hint uses a fixed 90-day rule – TODO(fachlich prüfen). Since step B it only appears when there is no year before to compare with.
 
 ## Stage 7 – help, legal, coming-soon pages
 
@@ -173,7 +173,7 @@ Every place in the code is marked `TODO(fachlich prüfen)` (`grep -rn "TODO(fach
 
 ## Final round b (re-runs of Anna and Marco)
 
-- Which invoices of a period are missing (e.g. by comparing categories with the previous period) is not checked; the wizard counts invoices per building and flags none or a partly covered period. A comparison by category would be new calculation logic – TODO(fachlich prüfen), backend.
+- ~~Which invoices of a period are missing is not checked~~ – step B (`backend/src/services/invoice-completeness.service.ts`). Before: the wizard counts invoices per building and flags none or a partly covered period. A comparison by category would be new calculation logic – TODO(fachlich prüfen), backend.
 - After draft statements exist, the overview's "prüfen und versenden" task does not repeat that a draft rests on few invoices; the warning is in the wizard and the statement detail shows its positions.
 - The warning "Rechnungen nur für einen Teil der Periode" has no "Rechnung erfassen" link of its own; one confirmation covers all warnings of a preview.
 - "Entwürfe ansehen" after creating lists all drafts, not only those of the run; new drafts have no PDF until "PDF ansehen" creates it.

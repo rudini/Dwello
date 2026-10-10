@@ -1,5 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
+	akontoHint,
+	findingText,
 	invoiceRows,
 	restoredSelection,
 	selectionErrors,
@@ -81,7 +83,10 @@ describe('Rechnungen pro Gebäude', () => {
 				text: '3 Rechnungen vom 15.1.2024 bis 30.6.2024',
 				missing: false,
 				partial: true, // nothing after June
-				existing: 0
+				existing: 0,
+				findings: [],
+				incomplete: false,
+				comparedWith: null
 			},
 			{
 				buildingId: 'b2',
@@ -89,7 +94,10 @@ describe('Rechnungen pro Gebäude', () => {
 				text: 'Keine Rechnungen erfasst',
 				missing: true,
 				partial: false,
-				existing: 0
+				existing: 0,
+				findings: [],
+				incomplete: false,
+				comparedWith: null
 			}
 		]);
 		expect(
@@ -110,6 +118,90 @@ describe('Rechnungen über die ganze Periode', () => {
 		expect(rows('2024-01-10', '2024-12-20')).toBe(false);
 		expect(rows('2024-01-10', '2024-03-31')).toBe(true); // only Q1
 		expect(rows('2024-06-01', '2024-12-20')).toBe(true); // nothing in the first five months
+	});
+});
+
+const finding = (kind: 'missing' | 'gap' | 'deviation', extra = {}) => ({
+	categoryId: 'c1',
+	categoryName: 'Kaltwasser',
+	kind,
+	current: { count: 1, total: 470 },
+	previous: { count: 2, total: 935 },
+	missingParts: [],
+	changePercent: null,
+	...extra
+});
+const check = (findings: ReturnType<typeof finding>[], hasComparison = true) => ({
+	buildingId: 'b1',
+	comparedWith: { start: '2023-01-01', end: '2023-12-31' },
+	hasComparison,
+	findings
+});
+
+describe('Rechnungen pro Kategorie', () => {
+	it('beschreibt eine Kategorie ohne Rechnung mit den Kosten des Vorjahres', () => {
+		expect(findingText(finding('missing', { current: { count: 0, total: 0 }, previous: { count: 1, total: 290 } }))).toBe(
+			'Keine Rechnung erfasst. Im Vorjahr: 1 Rechnung über CHF\u00a0290.00.'
+		);
+	});
+
+	it('nennt den Teil des Jahres, für den die Rechnung fehlt', () => {
+		expect(findingText(finding('gap', { missingParts: ['das 2. Halbjahr'] }))).toBe(
+			'Rechnung für das 2. Halbjahr fehlt. Im Vorjahr: 2 Rechnungen.'
+		);
+		expect(findingText(finding('gap', { missingParts: ['das 1. Quartal', 'das 3. Quartal'], previous: { count: 4, total: 3600 } }))).toBe(
+			'Rechnungen für das 1. Quartal und das 3. Quartal fehlen. Im Vorjahr: 4 Rechnungen.'
+		);
+	});
+
+	it('nennt Kosten, die deutlich vom Vorjahr abweichen, mit dem nächsten Schritt', () => {
+		expect(
+			findingText(finding('deviation', { current: { count: 1, total: 6565 }, previous: { count: 1, total: 4800 }, changePercent: 37 }))
+		).toBe('CHF\u00a06’565.00, 37 % mehr als im Vorjahr (CHF\u00a04’800.00). Prüfen Sie Betrag und Rechnungsdatum.');
+		expect(findingText(finding('deviation', { changePercent: -40 }))).toContain('40 % weniger als im Vorjahr');
+	});
+
+	it('verlangt eine Bestätigung bei fehlenden Rechnungen, nicht bei einer Abweichung', () => {
+		const row = (findings: ReturnType<typeof finding>[]) =>
+			invoiceRows([{ buildingId: 'b1', count: 3, first: '2024-01-01', last: '2024-12-31', check: check(findings) }], buildings, period)[0];
+
+		expect(row([finding('gap', { missingParts: ['das 2. Halbjahr'] })]).incomplete).toBe(true);
+		expect(row([finding('missing')]).incomplete).toBe(true);
+		expect(row([finding('deviation', { changePercent: 30 })]).incomplete).toBe(false);
+		expect(row([]).comparedWith).toEqual({ start: '2023-01-01', end: '2023-12-31' });
+	});
+
+	// Mit Vorjahr ersetzt der Vergleich pro Kategorie die grobe Prüfung von Anfang und Ende der Periode
+	it('prüft Anfang und Ende der Periode nur, wenn es kein Vorjahr zum Vergleich gibt', () => {
+		const partial = (hasComparison: boolean) =>
+			invoiceRows([{ buildingId: 'b1', count: 2, first: '2024-01-15', last: '2024-03-31', check: check([], hasComparison) }], buildings, period)[0]
+				.partial;
+
+		expect(partial(true)).toBe(false);
+		expect(partial(false)).toBe(true);
+	});
+});
+
+describe('Abweichung zum Akonto', () => {
+	const row = (totalCosts: number, totalAdvancePayments: number) => ({ totalCosts, totalAdvancePayments });
+
+	it('fragt nach fehlenden Rechnungen, wenn die Kosten weit unter dem Akonto liegen', () => {
+		expect(akontoHint(row(1000, 2400))).toBe('Kosten 58 % unter dem Akonto. Fehlen Rechnungen?');
+	});
+
+	it('schlägt vor, das Akonto zu prüfen, wenn die Kosten weit darüber liegen', () => {
+		expect(akontoHint(row(3500, 2400))).toBe('Kosten 46 % über dem Akonto. Prüfen Sie, ob das Akonto angepasst werden soll.');
+	});
+
+	it('schweigt bei üblichen Abweichungen und ohne Akonto', () => {
+		expect(akontoHint(row(2600, 2400))).toBeNull();
+		expect(akontoHint(row(1700, 2400))).toBeNull(); // 29 % darunter
+		expect(akontoHint(row(500, 0))).toBeNull();
+	});
+
+	// Randfall Mieterwechsel: das Akonto zählt nur für die Mietstage, so wie die Kosten
+	it('vergleicht beim Mieterwechsel die Kosten mit dem Akonto der eigenen Mietdauer', () => {
+		expect(akontoHint(row(1455.11, 1320))).toBeNull(); // Jan–Jun: 6 × 220
 	});
 });
 

@@ -33,6 +33,13 @@ Given(
 );
 
 Given(
+	'im Gebäude {string} gibt es eine Rechnung der Kategorie {string} über {string} Franken vom {string}',
+	async ({ seed }, building: string, category: string, amount: string, date: string) => {
+		await seed.invoiceOn(building, category, amount, date);
+	}
+);
+
+Given(
 	'für {string} im Gebäude {string} gibt es die Nebenkostenabrechnung {int} mit dem Heizprofil {string}',
 	async ({ seed }, tenant: string, building: string, year: number, profile: string) => {
 		await seed.statement(tenant, building, year, profile);

@@ -96,6 +96,18 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Dann nennt die Vorschau für "Lindenhof" 1 erfasste Rechnung
     Und warnt die Vorschau nicht vor fehlenden Rechnungen
 
+  # Jede Kategorie mit Kosten im Vorjahr wird mit dem gleichen Zeitraum im Vorjahr verglichen
+  Szenario: Hinweis auf fehlende Rechnungen einer Kategorie
+    Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Kaminfeger" über "290" Franken vom "2023-10-15"
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Kaltwasser" über "460" Franken vom "2023-06-30"
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Kaltwasser" über "475" Franken vom "2023-12-31"
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Kaltwasser" über "470" Franken vom "2024-06-30"
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
+    Dann meldet die Prüfung der Kategorien für "Kaminfeger": "Keine Rechnung erfasst"
+    Und meldet die Prüfung der Kategorien für "Kaltwasser": "Rechnung für das 2. Halbjahr fehlt"
+    Wenn der Liegenschaftsverwalter ohne Bestätigung zum Erstellen weitergehen will
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Bestätigen Sie, dass die Abrechnungen trotzdem erstellt werden sollen."
+
   Szenario: Vor dem Erstellen ist klar, dass nichts verschickt wird
     Angenommen im Gebäude "Lindenhof" gibt es eine Heizkostenrechnung über "1000" Franken für 2024
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet

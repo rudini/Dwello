@@ -1,3 +1,5 @@
+import type { InvoiceCheck } from '$lib/statement-wizard';
+
 const API = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1`;
 
 type Fetch = typeof globalThis.fetch;
@@ -67,6 +69,7 @@ export async function previewStatements(fetch: Fetch, request: GenerationRequest
 			tenantName: contract.tenantName,
 			apartmentNumber: contract.apartmentNumber,
 			totalCosts: Number(preview.totalCosts),
+			totalAdvancePayments: Number(preview.totalAdvancePayments),
 			balance: Number(preview.balance)
 		});
 	}
@@ -93,7 +96,7 @@ export async function generateStatements(fetch: Fetch, request: GenerationReques
 
 type Period = { periodStart: string; periodEnd: string };
 
-/** Per building: the utility invoices dated in the period and the statements whose period overlaps it */
+/** Per building: the utility invoices dated in the period, the statements whose period overlaps it and the check per category */
 export async function invoicesInPeriod(
 	fetch: Fetch,
 	{ buildingIds, periodStart, periodEnd }: GenerationRequest
@@ -102,12 +105,13 @@ export async function invoicesInPeriod(
 	return Promise.all(
 		buildingIds.map(async (buildingId) => {
 			const building = encodeURIComponent(buildingId);
-			const [{ invoices }, { data: statements }] = await Promise.all([
+			const [{ invoices }, { data: statements }, check] = await Promise.all([
 				call(
 					fetch,
 					`invoices?buildingId=${building}&dateFrom=${periodStart}&dateTo=${periodEnd}&isValidUtilityCost=true&limit=1000`
 				),
-				call(fetch, `statements?buildingId=${building}&limit=1000`)
+				call(fetch, `statements?buildingId=${building}&limit=1000`),
+				call(fetch, `invoices/completeness/${building}?periodStart=${periodStart}&periodEnd=${periodEnd}`)
 			]);
 			const dates = (invoices as { invoiceDate: string }[]).map((i) => i.invoiceDate).sort();
 			return {
@@ -115,7 +119,8 @@ export async function invoicesInPeriod(
 				count: dates.length,
 				first: dates[0] ?? null,
 				last: dates.at(-1) ?? null,
-				statements: (statements as Period[]).filter(overlaps).length
+				statements: (statements as Period[]).filter(overlaps).length,
+				check: check as InvoiceCheck
 			};
 		})
 	);

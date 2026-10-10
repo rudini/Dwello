@@ -19,6 +19,7 @@ import {
 import { llmRecipient } from '../config/llm';
 import { isLlmAvailable, getCacheStats, categorizeInvoice } from '../services/llm.service';
 import { getUtilityCostRules } from '../services/utility-validation.service';
+import { checkBuildingInvoices } from '../services/invoice-completeness.service';
 
 // Validation schemas
 const invoiceQuerySchema = t.Object({
@@ -150,6 +151,21 @@ export const invoiceRoutes = new Elysia({ prefix: '/api/v1/invoices' })
 		},
 		{
 			query: statementPeriodSchema
+		}
+	)
+	// Check for missing invoices per category against the same dates one year earlier
+	.get(
+		'/completeness/:buildingId',
+		async ({ params, query, set }) => {
+			if (query.periodEnd < query.periodStart) {
+				set.status = 400;
+				return { error: 'periodEnd must not be before periodStart' };
+			}
+			return await checkBuildingInvoices(params.buildingId, { start: query.periodStart, end: query.periodEnd });
+		},
+		{
+			params: t.Object({ buildingId: t.String({ format: 'uuid' }) }),
+			query: t.Object({ periodStart: t.String({ format: 'date' }), periodEnd: t.String({ format: 'date' }) })
 		}
 	)
 	// Get single invoice

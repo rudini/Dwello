@@ -7,8 +7,14 @@
 	let {
 		count,
 		createdCount,
-		withoutInvoices = []
-	}: { count: number; createdCount: number | null; withoutInvoices?: string[] } = $props();
+		withoutInvoices = [],
+		incomplete = []
+	}: {
+		count: number;
+		createdCount: number | null;
+		withoutInvoices?: string[];
+		incomplete?: string[];
+	} = $props();
 </script>
 
 {#if createdCount === null}
@@ -29,6 +35,14 @@
 			<p>
 				{withoutInvoices.join(', ')}: Diese Abrechnungen entstehen ohne Rechnungen. Sie verteilen
 				CHF 0.00 Nebenkosten, und jeder Mieter erhält sein Akonto zurück.
+			</p>
+		</Alert>
+	{/if}
+	{#if incomplete.length}
+		<Alert tone="caution" title="Möglicherweise fehlen Rechnungen" testid="generate-incomplete">
+			<p>
+				{incomplete.join(', ')}: Ein Entwurf rechnet nur mit den Rechnungen, die jetzt erfasst sind.
+				Fehlt eine Rechnung, fehlen ihre Kosten in jeder Abrechnung des Gebäudes.
 			</p>
 		</Alert>
 	{/if}

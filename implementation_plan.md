@@ -4419,6 +4419,14 @@ critical/high/medium is open; reviews in `docs/reviews/`.
   (`pdf-format.ts`, `statement-pdf.service.ts`, `pdf.service.ts`). Tests: `formula.service.test.ts`,
   `statement-pdf-data.test.ts`, `heating-profiles.pg.test.ts`, `demo-data.pg.test.ts`, expectations in
   `statement-generation.pg.test.ts` and `prorating.pg.test.ts` recalculated by hand.
+- [x] **B: check for missing invoices per category** (`backend/src/services/invoice-completeness.service.ts`,
+  `GET /api/v1/invoices/completeness/:buildingId`, contract `tests/contracts/invoice-completeness.json`): each category
+  against the same dates one year earlier (missing category, gap in the rhythm by quarter/half-year/month, deviation);
+  Akonto comparison per statement (`akontoHint`, `src/lib/statement-wizard.ts`); shown in the preview of
+  "Abrechnungen erstellen" (`PreviewChecks.svelte`, `PreviewStep.svelte`, `GenerationStep.svelte`), confirmation for
+  missing invoices; scenario "Hinweis auf fehlende Rechnungen einer Kategorie", axe state `category-check`. Tests:
+  `invoice-completeness.test.ts` (incl. part period, category without costs, leap year), `invoice-completeness.pg.test.ts`,
+  `statement-wizard.test.ts` (Akonto with tenant change), `statement-wizard.dom.test.ts`, `statement-generation.test.ts`.
 
 
 ---
