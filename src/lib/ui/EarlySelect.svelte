@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { keepEarlyChoice } from '$lib/early-choice';
-	import Field from '$lib/ui/Field.svelte';
-	import { controlClass } from '$lib/ui/field';
+	import Field from './Field.svelte';
+	import { controlClass } from './field';
 
 	// A select that keeps a choice made before the page was live (see keepEarlyChoice)
 	let {

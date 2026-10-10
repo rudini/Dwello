@@ -3,6 +3,7 @@ import BuildingField from '../routes/apartments/new/BuildingField.svelte';
 import StatusField from '../routes/apartments/[id]/edit/StatusField.svelte';
 import DefaultsSection from '../routes/config/DefaultsSection.svelte';
 import SettingsStep from '../routes/statements/generate/SettingsStep.svelte';
+import StatementSearch from '../routes/statements/StatementSearch.svelte';
 import { byTestId } from './helpers/dom';
 import { hydrateAs, serverRender } from './helpers/hydrate';
 
@@ -86,6 +87,24 @@ describe('Auswahl vor der Hydration in Erfassungsformularen', () => {
 		expect(select('setting-accountingPeriod').value).toBe('july-june');
 		expect(select('setting-defaultHeatingProfileId').value).toBe('h2');
 		expect(select('setting-defaultDistributionKeyId').value).toBe('d1');
+	});
+
+	it('Abrechnungsliste: behält das gewählte Gebäude', async () => {
+		const props = {
+			search: '',
+			building: '',
+			status: '',
+			buildings: [
+				{ id: 'b1', name: 'Ahornhof' },
+				{ id: 'b2', name: 'Birkenhof' }
+			]
+		};
+		await serverRender('routes/statements/StatementSearch.svelte', props);
+		select('statement-building-filter').value = 'b2';
+
+		hydrateAs(StatementSearch, props);
+
+		expect(select('statement-building-filter').value).toBe('b2');
 	});
 
 	it('Abrechnungen erstellen: behält das gewählte Heizprofil', async () => {

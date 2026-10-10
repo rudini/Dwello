@@ -6,7 +6,7 @@
 	import { listSearchUrl } from '$lib/list-url';
 	import Button from '$lib/ui/Button.svelte';
 	import TextInput from '$lib/ui/TextInput.svelte';
-	import EarlySelect from './EarlySelect.svelte';
+	import EarlySelect from '$lib/ui/EarlySelect.svelte';
 
 	let { buildings }: { buildings: { id: string; name: string }[] } = $props();
 

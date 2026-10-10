@@ -16,7 +16,7 @@ How a legacy screen moves to the new design system. Read together with `CLAUDE.m
 
 - Page frame: `PageHeader` (`title`, `purpose`, `trail` breadcrumb with `data-testid="breadcrumb-link"`, `action` snippet), `Panel` (`title`, `level`), `Tabs`.
 - Actions: `Button` (`variant` primary/secondary/ghost/danger/danger-ghost, `icon`, `href`, `busy`, `busyLabel`, `target="_blank"`, `testid`), `IconButton` (needs `label`). One primary action per screen.
-- Forms: `TextInput`, `MoneyInput`, `Select`, `Textarea`, `Checkbox`, `RadioGroup`, `Field` (custom control) – each with `label`, `help`, `example`, `error`, `optional`, `testid`. Errors appear as `data-testid="form-error"` and are tied to the field.
+- Forms: `TextInput`, `MoneyInput`, `Select`, `EarlySelect` (a select whose choice made before hydration is kept, for filters and forms that work without JavaScript), `Textarea`, `Checkbox`, `RadioGroup`, `Field` (custom control) – each with `label`, `help`, `example`, `error`, `optional`, `testid`. Errors appear as `data-testid="form-error"` and are tied to the field.
 - Feedback: `Alert` (tone info/positive/caution/critical, `title`, `action` snippet), `Badge` (tone, `label`), `EmptyState` (`title`, `text`, `actionLabel`, `actionHref`, `illustration`), toasts via `addToast` from `$lib/stores`, `SaveStatus`, `ProgressBar`.
 - Overlays: `Dialog` (confirmation with `confirmLabel`, `danger`, `busy`, `confirmTestid`; focus trap and Escape built in).
 - Lists: `Table` (`caption`, `columns`, rows as children) for wide screens; on phones (below `md`) show the same records as a list of cards/rows without sideways scrolling. A whole row/card is one link (the name is the link text; avoid "Ansehen" links that do not name the record).

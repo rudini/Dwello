@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { ApartmentStatus } from '$lib/types';
 	import { statusHelp, statusText } from '$lib/apartment';
-	import EarlySelect from '../../EarlySelect.svelte';
+	import EarlySelect from '$lib/ui/EarlySelect.svelte';
 
 	let { apartment }: { apartment: { status: ApartmentStatus; nextContractStart: string | null } } =
 		$props();

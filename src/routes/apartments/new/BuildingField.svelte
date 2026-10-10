@@ -1,5 +1,5 @@
 <script lang="ts">
-	import EarlySelect from '../EarlySelect.svelte';
+	import EarlySelect from '$lib/ui/EarlySelect.svelte';
 
 	type Building = { id: string; name: string; address: string };
 

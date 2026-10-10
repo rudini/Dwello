@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Button from '$lib/ui/Button.svelte';
-	import Select from '$lib/ui/Select.svelte';
+	import EarlySelect from '$lib/ui/EarlySelect.svelte';
 	import TextInput from '$lib/ui/TextInput.svelte';
 
 	// Search and building filter as a plain GET form: works before the page is hydrated, keeps the status
@@ -16,9 +16,8 @@
 		buildings: { id: string; name: string }[];
 	} = $props();
 
-	// Bound, so what is typed or chosen before hydration is kept
+	// Bound, so what is typed before hydration is kept; EarlySelect keeps an early building choice
 	let term = $derived(search);
-	let chosen = $derived(building);
 	const filtered = $derived(!!(search || building || status));
 </script>
 
@@ -36,14 +35,14 @@
 		/>
 	</div>
 	<div class="flex-1">
-		<Select
+		<EarlySelect
 			id="building"
 			name="building"
 			label="Gebäude"
 			placeholder="Alle Gebäude"
 			optional
 			options={buildings.map((b) => ({ value: b.id, label: b.name }))}
-			bind:value={chosen}
+			value={building}
 			testid="statement-building-filter"
 		/>
 	</div>

@@ -77,3 +77,39 @@ Items the redesign could not or deliberately did not resolve. Each with reason a
 - Help page wording beyond the glossary: Heizprofil ("teilt die Heizkosten nach Monaten statt nach Tagen auf"), Mietstage ("bezahlt nur den Anteil seiner Mietstage"), Abrechnungsperiode described as "das Jahr …", Mahnung ("höchstens eine 2. und eine 3. Mahnung") – TODO(fachlich prüfen).
 - The Zahlungsfrist cannot be set in the settings; the help does not point there.
 - No central help-text registry yet (plan section 7); the term explanations live in `src/routes/help/Glossary.svelte`.
+
+## Stage 7 – buildings and apartments (package A)
+
+- Explanations of Mietstatus Leer and Gesperrt (`statusHelp` in `src/lib/apartment.ts`) go beyond the glossary, which names them only – TODO(fachlich prüfen). The backend does not prevent a Mietvertrag on a gesperrte Wohnung.
+- The building map never appears: no route stores coordinates (form, address search, demo data). `BuildingMiniMap` shows on the building page once coordinates exist.
+- The search box on the apartment list has no effect (the backend ignores `search`) – existing gap, kept.
+- Scenario names "Wohnung hinzufügen" / "Erste Wohnung erstellen" are unchanged although the buttons read "Wohnung erfassen".
+
+## Stage 7 – tenants and contracts (package B)
+
+- "Monatlich total" (Nettomiete + Zusatzmiete + Akonto) has no glossary term; used in the contract list and detail, the tenant rental panel and the apartment page – TODO(fachlich prüfen).
+- Notice in the contract edit form "Bei Mietanpassungen sollten Sie die gesetzlichen Kündigungsfristen beachten" is existing copy with a legal claim – TODO(fachlich prüfen).
+- The E2E step "sieht den monatlichen Mietzins" reads the monthly total, while the glossary defines Mietzins as Nettomiete. Equal in the scenarios (no Akonto); wording of the step is wrong.
+- A contract that has not started and has no end date offers "Beenden", which would set an end before its start; it also cannot be deleted (deleting needs an end date). Pre-existing behaviour.
+- "Mietvertrag beenden" sets the Vertragsende to today; by the backend's rule a contract still runs on its last day, so the status stays "Laufend" until tomorrow. The scenario now checks the end date instead of the status. Whether "beenden" should mean "today was the last day" is a product question – TODO(fachlich prüfen).
+- When the backend refuses to delete a contract, the BFF shows only the generic "Mietvertrag konnte nicht gelöscht werden."
+- Default Korrespondenzkanal for a new tenant is now Brief (glossary and plan D15a); before, the form preselected E-Mail.
+
+## Stage 7 – invoices, statements, documents (package C)
+
+- "Rückerstattung bis" (date by which a refund is paid) has no glossary term – TODO(fachlich prüfen).
+- After the 3rd Mahnung the dialog says "Klären Sie das weitere Vorgehen direkt mit dem Mieter"; what follows (e.g. Betreibung) is outside Dwello – TODO(fachlich prüfen).
+- Line items without a Verteilschlüssel show "Gleichmässig pro Wohnung" (the calculation's fallback); the glossary states this only for the Verwaltungspauschale – TODO(fachlich prüfen).
+- The statement does not store the Verteilschlüssel of the Verwaltungspauschale, so its base cannot name it (data gap).
+- The contract detail links to `/statements?contract=`, but the statement list ignores that filter (pre-existing).
+- `src/lib/i18n/locales/de.json` still contains "Verwaltungsgebühr" / "Nachzahlung durch Mieter" (unused by the pages; stage 8 cleanup).
+- The Rechnungsdatum still defaults to today (the E2E step does not fill the date); help text and the date in words reduce the risk of booking into the wrong year.
+- The statement cost table still scrolls sideways on phones (shared `Table`).
+
+## Stage 7 – settings (package D)
+
+- The predefined key "Heizung (Fläche 70% / Einheit 30%)" with formula `0.7 * {area} + 0.3 * {units}` does not split 70/30: the backend divides each apartment's value by the sum, so the area dominates. The help no longer claims a 70/30 split – TODO(fachlich prüfen), seed/backend.
+- Descriptions of predefined heating profiles and distribution keys are English seed data; they are hidden for predefined records. German descriptions need a seed or migration change (outside UI scope).
+- Help texts of the settings live in `src/routes/config/help.ts`; no central help-text registry exists yet.
+- IBAN help ("Konto, auf das Ihre Mieter Nachzahlungen überweisen; es steht auf der QR-Rechnung"), the Reihenfolge help and the "Übersetzungen" section have no glossary basis – TODO(fachlich prüfen).
+- The a11y states `categories delete-dialog` and `distribution-keys delete-dialog` open the first delete button; if that record already has invoices the button is disabled (pre-existing, works with the seed data).
