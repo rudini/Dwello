@@ -88,6 +88,9 @@ def _uses_vitest(root):
         data = json.loads(manifest.read_text())
     except json.JSONDecodeError as error:
         raise NoFramework(f"package.json is not valid JSON: {error}") from None
+    sections = ("dependencies", "devDependencies", "scripts")
+    if not isinstance(data, dict) or any(not isinstance(data.get(k, {}), dict) for k in sections):
+        raise NoFramework(f"package.json must be an object whose {', '.join(sections)} are objects")
     if "vitest" in {**data.get("dependencies", {}), **data.get("devDependencies", {})}:
         if not (Path(root) / "node_modules" / ".bin" / "vitest").exists():
             raise NoFramework("vitest is not installed: run npm install first")
