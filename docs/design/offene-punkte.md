@@ -11,6 +11,15 @@ Items the redesign could not or deliberately did not resolve. Each with reason a
 | Sum of Nettomiete + Zusatzmiete + Akonto per month (today "Total Bruttomiete") | rental contract wizard, contract detail | Landlords want to see what the tenant pays per month in total; the glossary has no term. Interim label: "Monatlich total". |
 | Share of rented apartments (today "Belegungsrate") | dashboard | Not defined; interim wording "x von y Wohnungen vermietet". |
 | UI label for the settings area ("Einstellungen" vs. "Konfiguration") | navigation, settings page | The glossary heading is "Konfiguration"; the page title is "Einstellungen". Interim: "Einstellungen". |
+| Date by which a refund is paid out | statement detail and edit ("Rückerstattung bis") | Zahlungsfrist covers what the tenant pays; for a refund the glossary has no word. |
+| Explanations of Mietstatus Leer and Gesperrt | apartment list legend, apartment page, status field | The glossary names both states without explaining them; the UI explains them in plain words (`statusHelp`). |
+| "Wiedervermietet" for a flat that was empty before | apartments, buildings, overview | Personas read "wieder" as "again"; "Vermietet ab …" was asked for. The UI shows "Wiedervermietet ab <Datum>" and explains it. |
+| Equal split per Wohnung for an invoice without Verteilschlüssel | invoice form and detail, statement lines ("Gleichmässig pro Wohnung") | The glossary states the equal split only for the Verwaltungspauschale; the calculation applies it to every line without a key. |
+| "Entwurf" for the browser-saved wizard input | both wizards ("Entwurf gespeichert") | Same word as the Abrechnung status "Entwurf"; "Zwischenstand" would separate them. |
+| Explanations of Unbefristet/Befristet, Akonto examples, Mahnung steps, Heizprofil and Mietstage in plain words | contract wizard, help page | Explanations beyond the glossary definitions, written for first-time landlords. |
+| What follows the 3rd Mahnung | Mahnung dialog | "Klären Sie das weitere Vorgehen direkt mit dem Mieter" – Betreibung etc. are outside Dwello. |
+
+Every place in the code is marked `TODO(fachlich prüfen)` (`grep -rn "TODO(fachlich prüfen)" src`, 25 places at the end of the redesign); the sections below give the context per stage.
 
 ## CI / ui-screenshots
 

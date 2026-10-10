@@ -4,7 +4,7 @@ All design values live in `src/styles/tokens.css` and reach components through t
 
 ## Colour
 
-| Tailwind | CSS variable | Light | Dark (from stage 8) | Use |
+| Tailwind | CSS variable | Light | Dark | Use |
 |---|---|---|---|---|
 | `canvas` | `--color-canvas` | `#F5F7F8` | `#111518` | page background |
 | `surface` | `--color-surface` | `#FFFFFF` | `#1A1F23` | panels, inputs, dialogs |
@@ -23,7 +23,7 @@ All design values live in `src/styles/tokens.css` and reach components through t
 | `focus` | `--color-focus` | `#1B5873` | `#F0C27A` | focus outline |
 | `scrim` | `--color-scrim` | `rgb(22 28 33 / .6)` | same | behind dialogs and the mobile menu |
 
-Tailwind opacity modifiers (`bg-accent/10`) do not work with these variables and are not used.
+Tailwind's colour theme is replaced by these tokens (plus `transparent` and `current`); the default Tailwind palette does not exist. A bare `border` or `divide-y` takes `line`, placeholders take `ink-muted`. Dark mode follows the system setting (`prefers-color-scheme`); the dark values override the same variables. Tailwind opacity modifiers (`bg-accent/10`) do not work with these variables and are not used.
 
 ## Type
 
@@ -51,3 +51,22 @@ Font: Inter Variable (`@fontsource-variable/inter`, bundled). Line height 1.5 fo
 | `--duration-fast` | 150 ms | `duration-fast`; `prefers-reduced-motion` turns all motion off |
 | focus | `3px solid var(--color-focus)`, offset 2 px | global `:focus-visible` |
 | `--illu-line`, `--illu-fill`, `--illu-accent` | ink-muted, sunken, accent | illustrations |
+
+Radii and shadows are replaced as well: only `rounded-control`, `rounded-panel`, `shadow-raised`, `shadow-overlay` (and `shadow-none`) exist.
+
+## Components (`src/lib/ui`)
+
+| Area | Components |
+|---|---|
+| Page frame | `Header`, `Navigation`, `MobileNav`, `NavList`, `Footer`, `PageHeader` (breadcrumb, h1, purpose, actions), `Panel`, `Tabs` |
+| Actions | `Button` (primary, secondary, ghost, danger, danger-ghost; busy), `IconButton` |
+| Forms | `Field` (label, help, example, error, optional), `TextInput`, `MoneyInput`, `Select`, `EarlySelect` (keeps a choice made before hydration), `Textarea`, `Checkbox`, `RadioGroup`; `focus-error.ts` (focus the first faulty field) |
+| Feedback | `Alert`, `Badge`, `EmptyState`, `ToastRegion` (live region, `addToast` in `$lib/stores`), `SaveStatus`, `ProgressBar`, `DraftNotice` |
+| Overlays | `Dialog` (focus trap, Escape, inert background), `ActionDialog` (dialog posting a form action) |
+| Lists | `Table`, `Pagination` |
+| Wizards | `Stepper`, `WizardNav` |
+| Data | `HeatingProfileChart` |
+| Icons and illustrations | `Icon` with the names of `icons.ts` (Lucide), `Illustration` with 10 motifs in `illustrations/` (building, apartment, contract, receipts, meter, statement, envelope, done, no results, problem) |
+
+The components are covered by DOM tests in `src/__tests__` (`ui-*.dom.test.ts`, `shell.dom.test.ts`, `heating-profile-chart.dom.test.ts`, …); the dev gallery `/gallery` shows the base components in their states.
+

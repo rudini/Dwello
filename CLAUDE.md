@@ -38,6 +38,15 @@ PostgreSQL on localhost:5432 (user and password `dwello`) is required for backen
 - **No mock data in the app:** components and pages always use the real backend and database. Test doubles in tests follow `docs/test-pyramid.md`.
 - **Commits:** Conventional Commits `<type>(<scope>): <subject>`, at most 50 characters, imperative, no period. Types: `feat`, `fix`, `docs`, `chore`. Scopes: `auth`, `buildings`, `apartments`, `tenants`, `contracts`, `invoices`, `statements`, `config`, `components`, `stores`, `styles`, `api`, `db`, `middleware`, `services`, `schema`, `docker`, `types`, `i18n`, `tests`, `ci`, `build`.
 
+## Design-Regeln
+
+- **Target users:** private landlords with little experience who use Dwello a few times a year. Prefer guidance, plain words and confirmations over speed for experts.
+- **Copy:** German, formal "Sie", Swiss "ss", short sentences, verbs on buttons; errors say what happened and what to do. Domain terms only from `UBIQUITOUS_LANGUAGE.md` (never edit it); missing terms get `TODO(fachlich prüfen)` and an entry in `docs/design/offene-punkte.md`. Explain terms with visible help text at the field, not tooltips.
+- **Tokens are mandatory:** only the token classes from `docs/design/token-referenz.md` (`bg-surface`, `text-ink`, `border-line-strong`, `rounded-control`, `shadow-raised`, 8 px grid …) and the components in `src/lib/ui`. No raw colours, no arbitrary values (`w-[…]`), no `text-xs`, no other radii or shadows; dark mode comes from the tokens. `src/__tests__/design-guard.test.ts` and `tokens.test.ts` enforce this.
+- **Screens:** one primary action per screen, at most two navigation levels, controls at least 48 px high, labels above fields, list rows whose whole area is one link named by the record, no sideways scrolling at 390 px. Irreversible actions confirm with their real consequence.
+- **Anti-patterns:** gradients, glow, blur/glassmorphism, emoji as icons, shadow cards everywhere, decoration without function, external fonts or icon fonts, lorem ipsum, colour as the only carrier of information.
+- **Process:** every UI change goes through `/tdd` (a failing test first) and `/ponytail`; new screens or states go into `tests/a11y/screens.json` and `accessibility.feature` (axe, light and dark, desktop, tablet and mobile, 0 violations, no rule exceptions); changes get an independent review. Decisions and history: `docs/design/design-decisions.md`, `docs/design/progress.md`.
+
 ## Workflow
 
 1. **Acceptance test first (ATDD):** every feature or behavior change starts with a German scenario in `tests/e2e/features/*.feature`, tagged `@wip` (excluded from runs). Watch it fail for the right reason.
@@ -71,3 +80,4 @@ Before marking anything complete, all of these pass: `npm run test:coverage`, `n
 - `docs/test-pyramid.md`: test layers, runners, rules, coverage target
 - `docs/migration-mva.md`: Minimum Viable Architecture: quality scenarios, their status, deferred decisions
 - `docs/design/token-referenz.md`: design tokens (colors, typography, spacing, radius, shadow) and components
+- `docs/design/design-decisions.md`: design decisions of the 2026 redesign; open points in `docs/design/offene-punkte.md`
