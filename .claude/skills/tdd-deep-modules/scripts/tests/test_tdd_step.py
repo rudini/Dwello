@@ -379,3 +379,15 @@ class TddStepTest(unittest.TestCase):
         repo = Repo(self, {"calc.py": RIGHT_ADD, "test_calc.py": ADD_TEST})
         repo.commit_all("green: adds two numbers", {})
         self.assert_refused(repo, "refactor", "nothing changed", head="green: adds two numbers")
+
+    def test_the_first_commit_of_a_new_repository_can_be_a_phase(self):
+        repo = Repo(self, {})
+        repo.git("update-ref", "-d", "HEAD")
+        repo.write("pytest.ini", "[pytest]\n")
+        repo.write("TESTLIST.md", "- [ ] adds two numbers\n")
+
+        result = repo.run("tdd-step", "test", "plan add")
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(repo.git("rev-list", "--count", "HEAD"), "1")
+        self.assertEqual(repo.trailer("TDD-Exit-Code"), "5")
