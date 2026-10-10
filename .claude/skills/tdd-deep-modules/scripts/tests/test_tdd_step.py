@@ -487,3 +487,21 @@ class TddStepTest(unittest.TestCase):
                    'export default { test: { include: ["nothing/**"], passWithNoTests: true } };\n')
 
         self.assert_refused(repo, "refactor", "refactor needs all tests passing", head="green: seed")
+
+    def test_a_suite_whose_tests_are_all_skipped_does_not_pass(self):
+        skip_all = ("import pytest\n\n\ndef pytest_collection_modifyitems(items):\n"
+                    "    for item in items:\n        item.add_marker(pytest.mark.skip)\n")
+        projects = {
+            "unittest": (Repo(self, {"calc.py": RIGHT_ADD}), {"test_calc.py": ADD_TEST},
+                         {"test_calc.py": ADD_TEST.replace("class AddTest", "@unittest.skip('x')\nclass AddTest")}),
+            "pytest": (Repo(self, {"calc.py": RIGHT_ADD, "pytest.ini": "[pytest]\n"}),
+                       {"test_calc.py": PYTEST_TEST}, {"conftest.py": skip_all}),
+            "vitest": (vitest_repo(self), {"calc.js": RIGHT_ADD_JS, "calc.test.js": VITEST_TEST},
+                       {"calc.test.js": VITEST_TEST.replace('test("adds"', 'test.skip("adds"')}),
+        }
+        for framework, (repo, seed, skipping) in projects.items():
+            with self.subTest(framework):
+                repo.commit_all("green: seed", seed)
+                for rel, text in skipping.items():
+                    repo.write(rel, text)
+                self.assert_refused(repo, "refactor", "refactor needs all tests passing", head="green: seed")
