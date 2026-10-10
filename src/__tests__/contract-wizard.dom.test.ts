@@ -251,6 +251,25 @@ describe('Prüfungen im Mietvertrag', () => {
 		expect(byTestId('form-error')!.textContent).toContain('Dieses Datum gibt es nicht.');
 	});
 
+	// Fehler behoben: kam der Vorschlag an, während man schon tippte, stand «01.01.210001.01.2020» im Feld
+	it('überschreibt einen schon getippten Vertragsbeginn nicht mit dem Vorschlag', async () => {
+		// the contracts of the apartments arrive only after the start date is being typed
+		let release = () => {};
+		const loaded = new Promise<void>((resolve) => (release = resolve));
+		globalThis.fetch = (async (url: string) => {
+			await loaded;
+			return Response.json({ contracts: contractsOf[String(url).split('=')[1]] ?? [] });
+		}) as typeof fetch;
+		location.url = new URL('http://localhost/contracts/new?tenant=t1&apartment=a3'); // from the apartment's page
+		await open();
+		next();
+		next();
+		type('start-date-input', '01');
+		release();
+		await settle(); // a3 is free from 1.1.2100
+		expect(byTestId<HTMLInputElement>('start-date-input')!.value).toBe('01.');
+	});
+
 	it('füllt einen geleerten Vertragsbeginn nicht wieder aus', async () => {
 		await toPeriod('a3');
 		expect(byTestId<HTMLInputElement>('start-date-input')!.value).toBe('01.01.2100'); // suggested
