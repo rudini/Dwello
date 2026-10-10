@@ -35,7 +35,11 @@ def main(args):
         print("usage: tdd-step <test|red|green|refactor> [message]", file=sys.stderr)
         return 2
     phase, message = args[0], " ".join(" ".join(args[1:]).split()) or args[0]
-    os.chdir(git("rev-parse", "--show-toplevel").strip())
+    root = subprocess.run(["git", "rev-parse", "--show-toplevel"], capture_output=True, text=True)
+    if root.returncode != 0:
+        print("tdd-step: not inside a git repository", file=sys.stderr)
+        return 2
+    os.chdir(root.stdout.strip())
     try:
         run = suite.run(".")
     except suite.NoFramework as error:
