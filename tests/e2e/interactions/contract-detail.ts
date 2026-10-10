@@ -3,6 +3,7 @@ import type { Page } from '@playwright/test';
 export const contractApartment = (page: Page) => page.getByTestId('contract-apartment');
 export const contractTotalRent = (page: Page) => page.getByTestId('contract-total-rent');
 export const contractStatus = (page: Page) => page.getByTestId('contract-status');
+export const contractEndDate = (page: Page) => page.getByTestId('contract-end-date');
 export const endContractButton = (page: Page) => page.getByTestId('contract-end-button');
 export const confirmEndContractButton = (page: Page) => page.getByTestId('contract-end-confirm');
 export const deleteContractButton = (page: Page) => page.getByTestId('contract-delete-button');

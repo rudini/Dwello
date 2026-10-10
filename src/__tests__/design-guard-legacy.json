@@ -73,7 +73,6 @@
 	"src/routes/contracts/MoneyField.svelte",
 	"src/routes/contracts/PeriodFields.svelte",
 	"src/routes/contracts/RentFields.svelte",
-	"src/routes/contracts/[id]/+page.svelte",
 	"src/routes/contracts/[id]/edit/+page.svelte",
 	"src/routes/documents/+page.svelte",
 	"src/routes/documents/MarkSentButton.svelte",

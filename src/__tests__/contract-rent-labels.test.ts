@@ -4,21 +4,11 @@ import { render } from 'svelte/server';
 vi.mock('$app/forms', () => ({ enhance: () => ({}) }));
 
 import ContractPage from '../routes/contracts/[id]/+page.svelte';
-import RentFields from '../routes/contracts/RentFields.svelte';
 import MonthlyCostsCard from '$lib/components/MonthlyCostsCard.svelte';
 
-// Akonto is monthly_advance_payment, Zusatzmiete is additional_rent (UBIQUITOUS_LANGUAGE.md)
-const labelOf = (body: string, id: string) =>
-	body.match(new RegExp(`<label[^>]*for="${id}"[^>]*>([\\s\\S]*?)<\\/label>`))![1];
+// Akonto is monthly_advance_payment, Zusatzmiete is additional_rent (UBIQUITOUS_LANGUAGE.md); the edit form: contract-edit.dom.test.ts
 
 describe('Miete im Mietvertrag', () => {
-	it('nennt im Bearbeitungsformular Akonto und Zusatzmiete beim richtigen Feld', () => {
-		const props = { baseRent: '950', additionalRent: '', advancePayment: '', errors: {} };
-		const body = render(RentFields, { props }).body;
-		expect(labelOf(body, 'advancePayment')).toContain('Akonto');
-		expect(labelOf(body, 'additionalRent')).toContain('Zusatzmiete');
-	});
-
 	it('zeigt auf der Detailseite das Akonto als Akonto', () => {
 		const data = {
 			contract: {
@@ -41,8 +31,8 @@ describe('Miete im Mietvertrag', () => {
 			/\s+/g,
 			' '
 		);
-		expect(body).toMatch(/>Akonto<\/span> <span[^>]*>\s*CHF\s180\.00/);
-		expect(body).toMatch(/>Zusatzmiete<\/span> <span[^>]*>\s*CHF\s50\.00/);
+		expect(body).toMatch(/>Akonto<\/dt> <dd[^>]*>\s*CHF\s180\.00/);
+		expect(body).toMatch(/>Zusatzmiete<\/dt> <dd[^>]*>\s*CHF\s50\.00/);
 	});
 
 	it('nennt das Akonto auf der Wohnungsseite wie im Glossar', () => {
