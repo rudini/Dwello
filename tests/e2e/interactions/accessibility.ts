@@ -33,7 +33,7 @@ let tankBuilding = '';
 
 /** Records every screen with an id in its address needs; returns the address with the ids filled in */
 export async function seedFor(seed: TestData, path: string, state: string) {
-	if (!path.includes('{') && !['delete-dialog', 'mark-paid-dialog', 'category-check', 'preview-empty', 'fuel-stock-dialog', 'tank-question', 'every-wizard-step'].includes(state)) return path;
+	if (!path.includes('{') && !['delete-dialog', 'mark-paid-dialog', 'category-check', 'preview-empty', 'fuel-stock-dialog', 'tank-question', 'every-wizard-step', 'preview-all-billed'].includes(state)) return path;
 	await seed.building('Seeblick', 'Winterthur');
 	await seed.apartment('Seeblick', '1.01', 'vacant');
 	await seed.apartment('Seeblick', '1.02', 'vacant');
@@ -55,6 +55,7 @@ export async function seedFor(seed: TestData, path: string, state: string) {
 	await seed.statement('Bruno', 'Seeblick', 2025, 'Standard');
 	await seed.sendStatement('Bruno', 2025);
 	await seed.statement('Carla', 'Seeblick', 2023, 'Standard'); // no invoices in 2023: no positions
+	for (const tenant of ['Anna', 'Bruno', 'Carla']) await seed.statement(tenant, 'Seeblick', 2024, 'Standard'); // 2024 all billed
 	const lateInvoice = await seed.invoiceOn('Seeblick', 'Lift', '200.00', '2025-06-30'); // recorded after the 2025 statements
 	// heating costs without any Tankbestand: the wizard asks about a tank; rented, so its preview has a row too
 	await seed.building('Bergsicht', 'Winterthur');
@@ -205,6 +206,7 @@ const states: Record<string, (page: Page, viewport: Viewport) => Promise<unknown
 	// 2026 against 2025: the heating invoice of 2025 has no successor yet
 	'category-check': (page) => previewOf(page, '2026', 'category-check'),
 	'preview-empty': (page) => previewOf(page, '2000', 'preview-empty'),
+	'preview-all-billed': (page) => previewOf(page, '2024', 'preview-all-billed'),
 	// 2025 with a second building that has heating costs but never had a Tankbestand
 	'tank-question': (page) => previewOf(page, '2025', 'tank-question', tankBuilding),
 	'period-not-over': async (page) => {

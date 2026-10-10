@@ -15,9 +15,8 @@ async function tenantAddress(fetch: typeof globalThis.fetch, tenantId: string) {
 	return [address, [postalCode, city].filter(Boolean).join(' ')].filter(Boolean).join(', ');
 }
 
-// A draft lacks the invoices of its period recorded after it was created (only a hint: 0 if they cannot be loaded)
+// A statement lacks the invoices of its period recorded after it was created (only a hint: 0 if they cannot be loaded)
 async function laterInvoices(fetch: typeof globalThis.fetch, statement: StatementWithDetails) {
-	if (statement.status !== 'draft') return 0;
 	const { buildingId, periodStart, periodEnd, createdAt } = statement;
 	const response = await fetch(
 		`${BACKEND_URL}/api/v1/invoices/for-statement/${buildingId}?periodStart=${periodStart}&periodEnd=${periodEnd}`

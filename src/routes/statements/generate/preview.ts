@@ -8,4 +8,5 @@ export interface PreviewRow {
 	balance: number;
 	rentalDays?: number;
 	totalPeriodDays?: number;
+	movedOut?: boolean;
 }

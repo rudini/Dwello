@@ -220,7 +220,7 @@ describe('Rechnungsdetail', () => {
 			'Löschen Sie die Entwürfe dieser Periode und erstellen Sie die Abrechnungen erneut, dann ist sie dabei.'
 		);
 		expect(hint).toContain(
-			'Für versendete Abrechnungen schicken Sie dem Mieter eine berichtigte Abrechnung mit dem Beleg. Nehmen Sie die Kosten nicht in die Abrechnung der nächsten Periode.'
+			'Versendete Abrechnungen berichtigen Sie ausserhalb von Dwello: Schicken Sie dem Mieter eine berichtigte Abrechnung mit dem Beleg. Nehmen Sie die Kosten nicht in die Abrechnung der nächsten Periode.'
 		);
 	});
 
@@ -235,7 +235,7 @@ describe('Rechnungsdetail', () => {
 		const dialog = document.querySelector('[role=dialog]')!.textContent!.replace(/\s+/g, ' ');
 		expect(dialog).toContain('Abrechnungsperiode 01.01.2024 – 31.12.2024');
 		expect(dialog).toContain(
-			'Löschen Sie nur falsch erfasste Rechnungen. Die Entwürfe enthalten sie weiter: Löschen Sie danach die Entwürfe und erstellen Sie die Abrechnungen erneut. Versendete oder bezahlte Abrechnungen berichtigen Sie gegenüber dem Mieter. Bewahren Sie den Beleg auf: Der Mieter kann Einsicht verlangen.'
+			'Löschen Sie nur falsch erfasste Rechnungen. Die Entwürfe enthalten sie weiter: Löschen Sie danach die Entwürfe und erstellen Sie die Abrechnungen erneut. Versendete oder bezahlte Abrechnungen berichtigen Sie ausserhalb von Dwello gegenüber dem Mieter und zahlen zu viel Bezahltes zurück. Bewahren Sie den Beleg auf: Der Mieter kann Einsicht verlangen.'
 		);
 	});
 
@@ -585,7 +585,7 @@ describe('Rechnung erfassen', () => {
 			'Geben Sie ihn bei Rechnungen für einen Zeitraum an, zum Beispiel ein Quartal oder ein Jahr.'
 		);
 		expect(help).toContain(
-			'Nicht für Heizöl- oder Pelletlieferungen: Deren Verbrauch zählt über den Tankbestand des Gebäudes.'
+			'Nicht für Lieferungen von Heizöl, Flüssiggas, Pellets oder Holz: Deren Verbrauch zählt über den Tankbestand des Gebäudes.'
 		);
 	});
 
@@ -640,7 +640,7 @@ describe('Rechnung bearbeiten', () => {
 		expect(warning).toContain('Abrechnungsperiode 01.01.2024 – 31.12.2024');
 		expect(warning).toContain('Abrechnungsperiode 01.01.2024 – 30.06.2024');
 		expect(warning).toContain(
-			'Ändern Sie diese Rechnung, stimmen diese Abrechnungen nicht mehr. Löschen Sie danach die Entwürfe und erstellen Sie die Abrechnungen erneut. Versendete oder bezahlte Abrechnungen berichtigen Sie gegenüber dem Mieter.'
+			'Ändern Sie diese Rechnung, stimmen diese Abrechnungen nicht mehr. Löschen Sie danach die Entwürfe und erstellen Sie die Abrechnungen erneut. Versendete oder bezahlte Abrechnungen berichtigen Sie ausserhalb von Dwello gegenüber dem Mieter.'
 		);
 	});
 

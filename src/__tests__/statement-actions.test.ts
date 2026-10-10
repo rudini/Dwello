@@ -3,7 +3,7 @@ import { runAction } from './helpers/action';
 import { actions } from '../routes/statements/[id]/+page.server';
 
 const API = 'http://localhost:3001/api/v1/statements/s1';
-const today = new Date().toISOString().split('T')[0];
+const today = new Date().toLocaleDateString('sv-SE'); // the day in Switzerland, as the app takes it
 
 describe('Abrechnung versenden', () => {
 	it('setzt den Status im Backend auf versendet', async () => {
@@ -91,7 +91,7 @@ describe('Abrechnung laden', () => {
 	});
 
 	// Nachzügler: ein Entwurf ohne die Rechnungen, die nach seinem Erstellen erfasst wurden
-	it('zählt beim Entwurf die Rechnungen der Periode, die nach dem Erstellen erfasst wurden', async () => {
+	it('zählt die Rechnungen der Periode, die nach dem Erstellen der Abrechnung erfasst wurden', async () => {
 		const { load } = await import('../routes/statements/[id]/+page.server');
 		const statementJson = (await import('../../tests/contracts/statement.json')).default;
 		const later = (status: string) => {
@@ -117,6 +117,6 @@ describe('Abrechnung laden', () => {
 		expect(draft.urls).toContain(
 			'http://localhost:3001/api/v1/invoices/for-statement/b1?periodStart=2024-01-01&periodEnd=2024-12-31'
 		);
-		expect((await later('sent').data).laterInvoices).toBe(0);
+		expect((await later('sent').data).laterInvoices).toBe(1);
 	});
 });

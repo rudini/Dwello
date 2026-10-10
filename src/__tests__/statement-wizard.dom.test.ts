@@ -190,11 +190,11 @@ describe('Abrechnungen erstellen', () => {
 		await toSettings();
 		// Dwello kennt keine Zwischenablesung: das sagt der Text, statt sie zu versprechen
 		expect(text()).toContain(
-			'Dwello verteilt nach dem Heizprofil und kann Zählerstände nicht berücksichtigen. Wurden beim Mieterwechsel die Zähler abgelesen, gelten diese Werte: Erstellen Sie die Abrechnung dieser Wohnung dann ausserhalb von Dwello und löschen Sie die Entwürfe aller Mietverträge dieser Wohnung, auch wenn Sie die Abrechnungen später neu erstellen.'
+			'Dwello verteilt nach dem Heizprofil und kann Zählerstände nicht berücksichtigen. Wurden beim Mieterwechsel die Zähler für Heizung oder Warmwasser in der Wohnung abgelesen, gelten diese Werte: Erstellen Sie die Abrechnung dieser Wohnung dann ausserhalb von Dwello und löschen Sie die Entwürfe aller Mietverträge dieser Wohnung, auch wenn Sie die Abrechnungen später neu erstellen.'
 		);
 		// Zähler in den Wohnungen: meist ist das ganze Gebäude nach Verbrauch abzurechnen
 		expect(text()).toContain(
-			'Hat Ihr Gebäude Zähler oder Heizkostenverteiler (kleine Geräte an den Heizkörpern) in den Wohnungen, müssen Sie meist nach Verbrauch abrechnen. Das kann Dwello nicht: Erstellen Sie die Abrechnungen dann ausserhalb von Dwello.'
+			'Hat Ihr Gebäude Zähler für Heizung oder Warmwasser oder Heizkostenverteiler (kleine Geräte an den Heizkörpern) in den Wohnungen, müssen Sie meist nach Verbrauch abrechnen. Das kann Dwello nicht: Erstellen Sie die Abrechnungen dann ausserhalb von Dwello.'
 		);
 		expect(text()).toContain(
 			'Verlangen Sie eine Verwaltungspauschale nur, wenn sie im Mietvertrag vereinbart ist.'
@@ -342,7 +342,20 @@ describe('Abrechnungen erstellen', () => {
 		next();
 		await settle();
 		expect(heading()).toBe('Vorschau');
-		expect(text()).toContain('Wählen Sie eine andere Abrechnungsperiode oder andere Gebäude.');
+		expect(text()).toContain(
+			'Wählen Sie eine andere Abrechnungsperiode oder andere Gebäude, oder löschen Sie zuerst die Entwürfe, die Sie neu berechnen wollen.'
+		);
+	});
+
+	// Nachzügler: alle Mietverträge haben schon eine Abrechnung, der Verwalter will einen Entwurf neu berechnen
+	it('sagt bei einer leeren Vorschau, dass alle Mietverträge schon eine Abrechnung haben, und wo sie stehen', () => {
+		open({ preview: [], invoices: [{ ...invoices[0], buildingId: 'b1', statements: 2 }] });
+
+		const empty = byTestId('preview-empty')!.parentElement!.textContent!.replace(/\s+/g, ' ');
+		expect(empty).toContain(
+			'Alle Mietverträge haben in dieser Periode schon eine Abrechnung. Um einen Entwurf neu zu berechnen, löschen Sie ihn und erstellen Sie die Abrechnungen erneut.'
+		);
+		expect(document.querySelector('a[href="/statements?building=b1"]')).not.toBeNull();
 	});
 
 	it('nennt Gebäude, deren Rechnungen nur einen Teil der Periode abdecken', () => {

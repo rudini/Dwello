@@ -333,6 +333,13 @@ describe('Abweichung zum Akonto', () => {
 		expect(akontoHint(row(500, 0))).toBeNull();
 	});
 
+	// Ausgezogen: es gibt kein Akonto mehr zu erhöhen
+	it('schlägt bei einem beendeten Mietvertrag keine Erhöhung vor', () => {
+		expect(akontoHint({ ...row(2800, 2400), movedOut: true })).toBe(
+			'Kosten CHF\u00a0400.00 (17 %) über dem Akonto.'
+		);
+	});
+
 	// Randfall Mieterwechsel und Teilperiode: wer nur im Sommer mietet, trägt kaum Heizkosten
 	it('fragt bei einem Teil der Periode nicht nach fehlenden Rechnungen', () => {
 		expect(akontoHint(row(400, 1200, 92))).toBeNull();

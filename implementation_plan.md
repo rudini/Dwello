@@ -4470,6 +4470,11 @@ critical/high/medium is open; reviews in `docs/reviews/`.
   `statementPeriods` lists a period in both lists; Tankbestand named from all categories; texts (Flüssiggas,
   Heizkostenverteiler, delete and late-invoice instructions); summer period with `calculateDaysBetween`; axe screens
   for billed and late invoices, state `tank-question`.
+- [x] **Swiss date field (step C)** (`src/lib/ui/DateInput.svelte`, `src/lib/swiss-date.ts`, `formatDate` padded):
+  every date field TT.MM.JJJJ with mask, date in words, calendar button; scenarios with padded dates; E2E 428.
+- [x] **B, review round 6** (`docs/reviews/B-review-6.md`): empty preview when every contract is billed explains how
+  to recalculate; sent statements are corrected outside Dwello (texts, hint on sent statements); meter and fuel texts;
+  no Akonto raise after moving out (`movedOut`); `.gitignore` matches links.
 
 
 ---

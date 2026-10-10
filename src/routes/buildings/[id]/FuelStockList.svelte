@@ -57,6 +57,7 @@
 >
 	<p>
 		Abrechnungen, die am Tag danach beginnen oder an diesem Tag enden, rechnen dann den Einkauf ab,
-		nicht den Verbrauch. Bestehende Abrechnungen ändern sich nicht.
+		nicht den Verbrauch. Bestehende Abrechnungen ändern sich nicht: Löschen Sie danach die Entwürfe
+		dieser Periode und erstellen Sie die Abrechnungen erneut.
 	</p>
 </Dialog>

@@ -228,9 +228,9 @@ describe('Abrechnungsdetail', () => {
 	});
 
 	// Nachzügler: der Entwurf würde ohne die später erfassten Rechnungen versendet
-	const later = (laterInvoices: number) =>
+	const later = (laterInvoices: number, status: 'draft' | 'sent' = 'draft') =>
 		show(StatementPage, {
-			data: { statement: statement(), reminders: [], laterInvoices },
+			data: { statement: statement({ status }), reminders: [], laterInvoices },
 			form: null
 		} as never);
 
@@ -245,6 +245,14 @@ describe('Abrechnungsdetail', () => {
 		later(1);
 		expect(byTestId('statement-later-invoices')!.textContent).toContain(
 			'wurde 1 Rechnung für die Abrechnungsperiode erfasst, sie fehlt darin'
+		);
+	});
+
+	// Versendet: der Mieter hat die Abrechnung ohne die Rechnung erhalten
+	it('weist bei einer versendeten Abrechnung auf später erfasste Rechnungen hin und sagt, wie man berichtigt', () => {
+		later(1, 'sent');
+		expect(byTestId('statement-later-invoices')!.textContent!.replace(/\s+/g, ' ')).toContain(
+			'Seit dem Erstellen dieser Abrechnung wurde 1 Rechnung für die Abrechnungsperiode erfasst, sie fehlt darin. Berichtigen Sie die Abrechnung ausserhalb von Dwello gegenüber dem Mieter.'
 		);
 	});
 

@@ -137,6 +137,7 @@ type AkontoRow = {
 	totalAdvancePayments: number;
 	rentalDays?: number;
 	totalPeriodDays?: number;
+	movedOut?: boolean; // the contract ends in the period: no Akonto left to raise
 };
 
 /** A statement whose costs are far from the Akonto paid: missing invoices, or an Akonto to raise */
@@ -144,12 +145,14 @@ export function akontoHint({
 	totalCosts,
 	totalAdvancePayments,
 	rentalDays,
-	totalPeriodDays
+	totalPeriodDays,
+	movedOut
 }: AkontoRow) {
 	if (!(totalAdvancePayments > 0)) return null;
 	const change = (totalCosts - totalAdvancePayments) / totalAdvancePayments;
 	const amount = formatCurrency(Math.abs(totalCosts - totalAdvancePayments));
 	const percent = Math.round(Math.abs(change) * 100);
+	if (change > AKONTO_ABOVE && movedOut) return `Kosten ${amount} (${percent} %) über dem Akonto.`;
 	if (change > AKONTO_ABOVE)
 		return `Kosten ${amount} (${percent} %) über dem Akonto. Prüfen Sie, ob Sie das Akonto erhöhen. Eine Erhöhung gilt frühestens auf den nächsten Kündigungstermin: begründet, mit dem amtlichen Formular, beim Mieter mindestens 10 Tage vor Beginn der Kündigungsfrist. Ohne Formular oder Begründung ist sie nichtig.`;
 	// part of the period: the months rented may carry little heating, low costs are no sign of missing invoices

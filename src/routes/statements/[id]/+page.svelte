@@ -115,11 +115,19 @@
 	</p>
 
 	{#if data.laterInvoices}
-		<Alert tone="caution" title="Rechnungen fehlen im Entwurf" testid="statement-later-invoices">
-			<p>
-				Seit dem Erstellen dieses Entwurfs {laterInvoices}. Löschen Sie ihn und erstellen Sie die
-				Abrechnung erneut.
-			</p>
+		<!-- a draft is created again; a sent statement is corrected outside Dwello (it cannot be deleted) -->
+		<Alert tone="caution" title="Rechnungen fehlen in der Abrechnung" testid="statement-later-invoices">
+			{#if statement.status === 'draft'}
+				<p>
+					Seit dem Erstellen dieses Entwurfs {laterInvoices}. Löschen Sie ihn und erstellen Sie die
+					Abrechnung erneut.
+				</p>
+			{:else}
+				<p>
+					Seit dem Erstellen dieser Abrechnung {laterInvoices}. Berichtigen Sie die Abrechnung
+					ausserhalb von Dwello gegenüber dem Mieter.
+				</p>
+			{/if}
 		</Alert>
 	{/if}
 

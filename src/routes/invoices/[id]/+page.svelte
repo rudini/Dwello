@@ -139,8 +139,8 @@
 			<p>
 				Löschen Sie nur falsch erfasste Rechnungen. Die Entwürfe enthalten sie weiter: Löschen Sie
 				danach die Entwürfe und erstellen Sie die Abrechnungen erneut. Versendete oder bezahlte
-				Abrechnungen berichtigen Sie gegenüber dem Mieter. Bewahren Sie den Beleg auf: Der Mieter
-				kann Einsicht verlangen.
+				Abrechnungen berichtigen Sie ausserhalb von Dwello gegenüber dem Mieter und zahlen zu viel
+				Bezahltes zurück. Bewahren Sie den Beleg auf: Der Mieter kann Einsicht verlangen.
 			</p>
 		</BilledWarning>
 	{/if}

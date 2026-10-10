@@ -68,7 +68,8 @@ describe('Abrechnungen erstellen', () => {
 				totalAdvancePayments: 1800,
 				balance: -50,
 				rentalDays: 366,
-				totalPeriodDays: 366
+				totalPeriodDays: 366,
+				movedOut: true
 			},
 			{
 				contractId: 'einzug',
@@ -78,7 +79,8 @@ describe('Abrechnungen erstellen', () => {
 				totalAdvancePayments: 1800,
 				balance: -50,
 				rentalDays: 366,
-				totalPeriodDays: 366
+				totalPeriodDays: 366,
+				movedOut: false
 			}
 		]);
 	});

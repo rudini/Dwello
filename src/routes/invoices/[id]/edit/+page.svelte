@@ -110,7 +110,7 @@
 			<p>
 				Ändern Sie diese Rechnung, stimmen diese Abrechnungen nicht mehr. Löschen Sie danach die
 				Entwürfe und erstellen Sie die Abrechnungen erneut. Versendete oder bezahlte Abrechnungen
-				berichtigen Sie gegenüber dem Mieter.
+				berichtigen Sie ausserhalb von Dwello gegenüber dem Mieter.
 			</p>
 		</BilledWarning>
 	{/if}

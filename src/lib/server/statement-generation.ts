@@ -82,7 +82,8 @@ export async function previewStatements(fetch: Fetch, request: GenerationRequest
 			totalAdvancePayments: Number(preview.totalAdvancePayments),
 			balance: Number(preview.balance),
 			rentalDays: Number(preview.rentalDays),
-			totalPeriodDays: Number(preview.totalPeriodDays)
+			totalPeriodDays: Number(preview.totalPeriodDays),
+			movedOut: !!contract.endDate && contract.endDate <= periodEnd
 		});
 	}
 	return rows;

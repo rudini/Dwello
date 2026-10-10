@@ -72,8 +72,8 @@
 		Für welche Zeit gilt die Rechnung? Geben Sie ihn bei Rechnungen für einen Zeitraum an, zum
 		Beispiel ein Quartal oder ein Jahr. Für das 4. Quartal also 01.10.2024 bis 31.12.2024, auch wenn
 		die Rechnung erst im Januar kommt. Dann zählen nur die Tage, die in die Abrechnungsperiode
-		fallen. Nicht für Heizöl- oder Pelletlieferungen: Deren Verbrauch zählt über den Tankbestand des
-		Gebäudes.
+		fallen. Nicht für Lieferungen von Heizöl, Flüssiggas, Pellets oder Holz: Deren Verbrauch zählt
+		über den Tankbestand des Gebäudes.
 	</p>
 	<div class="grid gap-4 sm:grid-cols-2">
 		<DateInput

@@ -89,6 +89,7 @@ Funktionalität: Barrierefreiheit
       | statement-generate     | category-check      |
       | statement-generate     | period-not-over     |
       | statement-generate     | tank-question       |
+      | statement-generate     | preview-all-billed  |
       | statement-generate     | draft-restored      |
       | statement-detail       | default             |
       | statement-detail       | send-dialog         |

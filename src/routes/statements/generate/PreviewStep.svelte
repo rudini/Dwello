@@ -3,6 +3,7 @@
 	import Icon from '$lib/ui/Icon.svelte';
 	import { formatCurrency } from '$lib/utils/format';
 	import PreviewChecks from './PreviewChecks.svelte';
+	import PreviewEmpty from './PreviewEmpty.svelte';
 	import type { PreviewRow } from './preview';
 
 	// Step 4: what each rental contract will get, and the invoices behind it; missing invoices are flagged
@@ -26,6 +27,7 @@
 
 	const total = $derived(previewRows.reduce((sum, row) => sum + row.totalCosts, 0));
 	const rows = $derived(invoiceRows(invoices, buildings, period));
+	const billed = $derived(rows.filter((row) => row.existing > 0));
 	// Saldo > 0: the tenant pays the difference, < 0: the tenant gets it back
 	const saldo = (balance: number) =>
 		`${balance >= 0 ? 'Nachzahlung' : 'Rückerstattung'} ${formatCurrency(Math.abs(balance))}`;
@@ -75,15 +77,7 @@
 <section aria-labelledby="statements-heading" class="flex flex-col gap-2">
 	<h3 id="statements-heading" class="text-xl font-bold text-ink">Abrechnungen pro Mietvertrag</h3>
 	{#if previewRows.length === 0}
-		<p class="text-ink-muted" data-testid="preview-empty">
-			In dieser Abrechnungsperiode gibt es keine Mietverträge ohne Abrechnung in den gewählten
-			Gebäuden.
-		</p>
-		{#if errors.preview}
-			<p class="font-semibold text-critical" role="alert" data-testid="form-error">
-				{errors.preview}
-			</p>
-		{/if}
+		<PreviewEmpty {billed} error={errors.preview} />
 	{:else}
 		<!-- a list instead of a table: readable on phones without scrolling sideways -->
 		<ul class="flex flex-col divide-y divide-line">

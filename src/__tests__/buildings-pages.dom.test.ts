@@ -259,7 +259,9 @@ describe('Tankbestand', () => {
 			'Nur für Gebäude, die mit Öl, Flüssiggas, Pellets oder Holz heizen.'
 		);
 		expect(section()).toContain('Anfangsbestand + Einkauf − Endbestand');
-		expect(section()).toContain('Liter im Tank mal Preis pro Liter der letzten Lieferung');
+		expect(section()).toContain(
+			'Menge im Tank oder Lager mal Preis pro Einheit (Liter, kg oder Ster) der letzten Lieferung'
+		);
 		expect(section()).toContain(
 			'Ist mehr im Tank als die letzte Lieferung, rechnen Sie den Rest zum Preis der Lieferung davor.'
 		);
@@ -379,7 +381,7 @@ describe('Tankbestand', () => {
 		const dialog = document.querySelector('[role=dialog]')!;
 		expect(dialog.textContent).toContain('Bestand vom 31.12.2024 löschen?');
 		expect(dialog.textContent!.replace(/\s+/g, ' ')).toContain(
-			'Abrechnungen, die am Tag danach beginnen oder an diesem Tag enden, rechnen dann den Einkauf ab, nicht den Verbrauch.'
+			'Abrechnungen, die am Tag danach beginnen oder an diesem Tag enden, rechnen dann den Einkauf ab, nicht den Verbrauch. Bestehende Abrechnungen ändern sich nicht: Löschen Sie danach die Entwürfe dieser Periode und erstellen Sie die Abrechnungen erneut.'
 		);
 		expect(byTestId('fuel-stock-delete-confirm')!.textContent).toContain('Bestand löschen');
 	});
