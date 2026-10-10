@@ -2,7 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { clearStores } from '$lib/stores';
 	import { getXsrfTokenFromCookie } from '$lib/api';
-	import { openMobileNav } from '$lib/stores/navigation';
+	import { mobileNavOpen, openMobileNav } from '$lib/stores/navigation';
 	import Icon from '$lib/ui/Icon.svelte';
 	import IconButton from '$lib/ui/IconButton.svelte';
 	import type { User } from '$lib/stores';
@@ -46,6 +46,7 @@
 					icon="menu"
 					label="Menü öffnen"
 					onclick={openMobileNav}
+					expanded={$mobileNavOpen}
 					testid="mobile-menu-button"
 				/>
 			</span>

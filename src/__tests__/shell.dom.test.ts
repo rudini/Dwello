@@ -89,10 +89,12 @@ describe('Kopfzeile', () => {
 		show(Header, { user });
 		const menu = byTestId('mobile-menu-button')!;
 		expect(menu.getAttribute('aria-label')).toBe('Menü öffnen');
+		expect(menu.getAttribute('aria-expanded')).toBe('false');
 		click(menu);
 		let open = false;
 		mobileNavOpen.subscribe((value) => (open = value))();
 		expect(open).toBe(true);
+		expect(menu.getAttribute('aria-expanded')).toBe('true');
 		closeMobileNav();
 	});
 });
