@@ -53,8 +53,8 @@
 				onclick={() => (filter = key)}
 				aria-pressed={filter === key}
 				class="min-h-12 rounded-control border-2 px-4 font-semibold {filter === key
-					? 'border-accent bg-accent text-on-accent'
-					: 'border-line-strong bg-surface text-ink hover:bg-sunken'}"
+					? 'border-accent bg-accent-soft text-accent-strong'
+					: 'border-line-strong bg-surface text-accent hover:bg-accent-soft'}"
 				data-testid="category-filter-{key}"
 			>
 				{label} ({data.categories.filter(matches[key]).length})

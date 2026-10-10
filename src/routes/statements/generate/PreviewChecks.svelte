@@ -7,18 +7,25 @@
 	// Plausibility checks of the preview: no invoices or existing statements need a confirmation, a gap is a hint
 	let {
 		rows,
+		period,
 		confirmed = $bindable(),
 		error
-	}: { rows: ReturnType<typeof invoiceRows>; confirmed: boolean; error?: string } = $props();
+	}: {
+		rows: ReturnType<typeof invoiceRows>;
+		period: { periodStart: string; periodEnd: string };
+		confirmed: boolean;
+		error?: string;
+	} = $props();
 
 	const missing = $derived(rows.filter((row) => row.missing));
 	const partial = $derived(rows.filter((row) => row.partial));
 	const existing = $derived(rows.filter((row) => row.existing > 0));
 	const statements = (count: number) =>
 		count === 1 ? '1 Nebenkostenabrechnung' : `${count} Nebenkostenabrechnungen`;
-	// The invoice form returns here after saving; with one building missing invoices it is preselected
+	// The invoice form returns here after saving and warns about a date outside the period;
+	// with one building missing invoices it is preselected
 	const newInvoice = $derived(
-		`/invoices/new?${missing.length === 1 ? `building=${missing[0].buildingId}&` : ''}returnTo=/statements/generate`
+		`/invoices/new?${missing.length === 1 ? `building=${missing[0].buildingId}&` : ''}returnTo=/statements/generate&periodStart=${period.periodStart}&periodEnd=${period.periodEnd}`
 	);
 </script>
 

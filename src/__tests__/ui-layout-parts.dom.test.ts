@@ -85,6 +85,13 @@ describe('Seitenkopf', () => {
 		expect(trail.querySelector('[aria-current=page]')!.textContent).toBe('Anna Keller');
 		expect(document.body.textContent).toContain('Kontaktdaten und Mietverhältnis.');
 	});
+
+	it('trennt einen langen Titel auf schmalen Bildschirmen, statt die Seite zu verbreitern', () => {
+		show(PageHeader, { title: 'Nebenkostenabrechnungen' });
+		const heading = document.querySelector('h1')!;
+		expect(heading.className).toMatch(/(^| )break-words( |$)/);
+		expect(heading.className).toMatch(/(^| )hyphens-auto( |$)/);
+	});
 });
 
 describe('Symbolschaltfläche', () => {

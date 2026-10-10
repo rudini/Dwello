@@ -25,12 +25,20 @@ import NewCategoryPage from '../routes/config/categories/new/+page.svelte';
 import { toasts } from '$lib/stores';
 import { allByTestId, byTestId, click, fireEvent, settle, show } from './helpers/dom';
 
-const category = (id: string, name: string, isAllowedUtilityCost: boolean, usageCount = 0) => ({
+const category = (
+	id: string,
+	name: string,
+	isAllowedUtilityCost: boolean,
+	usageCount = 0,
+	more = {}
+) => ({
 	id,
 	name,
 	description: '',
 	isAllowedUtilityCost,
-	usageCount
+	usageCount,
+	predefined: false,
+	...more
 });
 const categories = [
 	category('c1', 'Heizung', true, 3),
@@ -79,6 +87,33 @@ describe('Kategorien', () => {
 			'0 Rechnungen',
 			'1 Rechnung'
 		]);
+	});
+
+	// The descriptions of the predefined categories are English
+	it('zeigt nur die Beschreibungen eigener Kategorien', () => {
+		show(CategoriesPage, {
+			data: {
+				categories: [
+					category('c1', 'Heizung', true, 0, {
+						predefined: true,
+						description: 'Costs for heating the building'
+					}),
+					category('c4', 'Treppenhausreinigung', true, 0, { description: 'Reinigung im Haus' })
+				]
+			},
+			form: null
+		} as never);
+
+		expect(text()).not.toContain('Costs for heating the building');
+		expect(text()).toContain('Reinigung im Haus');
+	});
+
+	it('hebt den gewählten Filter zurückhaltend hervor, nicht wie eine Hauptaktion', () => {
+		show(CategoriesPage, { data: { categories }, form: null } as never);
+		const active = byTestId('category-filter-all')!;
+
+		expect(active.className).not.toMatch(/(^| )bg-accent( |$)/);
+		expect(active.className).toMatch(/(^| )bg-accent-soft( |$)/);
 	});
 
 	it('erklärt, was eine Kategorie bestimmt', () => {

@@ -1,9 +1,10 @@
 <script lang="ts">
+	import Alert from '$lib/ui/Alert.svelte';
 	import MoneyInput from '$lib/ui/MoneyInput.svelte';
 	import Select from '$lib/ui/Select.svelte';
 	import Textarea from '$lib/ui/Textarea.svelte';
 	import TextInput from '$lib/ui/TextInput.svelte';
-	import { formatDateLong } from '$lib/utils/format';
+	import { formatDate, formatDateLong } from '$lib/utils/format';
 
 	// What the invoice says: building, date, amount, supplier and service; shared by "Neue Rechnung" and "Rechnung bearbeiten"
 	let {
@@ -14,6 +15,7 @@
 		description = $bindable(),
 		buildings,
 		errors,
+		period,
 		onblur
 	}: {
 		buildingId: string;
@@ -23,8 +25,14 @@
 		description: string;
 		buildings: { id: string; name: string; address: string }[];
 		errors: Record<string, string>;
+		period?: { start: string; end: string } | null; // opened from the statement wizard
 		onblur?: () => void;
 	} = $props();
+
+	// ISO dates compare as text
+	const outside = $derived(
+		!!period && !!invoiceDate && (invoiceDate < period.start || invoiceDate > period.end)
+	);
 </script>
 
 <Select
@@ -49,6 +57,17 @@
 	/>
 	{#if invoiceDate}<p class="font-semibold text-ink">{formatDateLong(invoiceDate)}</p>{/if}
 </div>
+
+{#if outside && period}
+	<Alert tone="caution" title="Ausserhalb der Abrechnungsperiode" testid="invoice-period-warning">
+		<p>
+			Das Rechnungsdatum liegt nicht in der Abrechnungsperiode {formatDate(period.start)} – {formatDate(
+				period.end
+			)}. Die Rechnung fliesst dann nicht in diese Nebenkostenabrechnungen ein. Übernehmen Sie das
+			Datum von der Rechnung.
+		</p>
+	</Alert>
+{/if}
 
 <MoneyInput
 	id="amount"

@@ -22,6 +22,7 @@ import {
 	goToGeneration,
 	openPreview,
 	recalculatePreview,
+	recordInvoiceFromWarning,
 	reopenStatementWizard,
 	tryNextWithoutConfirmation,
 	returnToStatementList,
@@ -218,4 +219,8 @@ When('der Liegenschaftsverwalter weitere Abrechnungen erstellen will', async ({ 
 Then('beginnt der Liegenschaftsverwalter wieder mit der Wahl der Periode', async ({ verwalter }) => {
 	await expect(periodChoice(verwalter)).toBeVisible();
 	await expect(generationOutcome(verwalter)).toHaveCount(0);
+});
+
+When('der Liegenschaftsverwalter aus der Warnung eine Rechnung erfassen will', async ({ verwalter }) => {
+	await verwalter.perform(recordInvoiceFromWarning);
 });

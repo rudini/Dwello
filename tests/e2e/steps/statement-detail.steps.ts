@@ -3,7 +3,7 @@ import { createBdd, type DataTable } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { visit } from '../interactions/navigation';
 import { downloadedFile, downloadedPdfTitle } from '../questions/download';
-import { heatingCosts, pdfToView, recipient, sendConfirmation, statusOfStatement } from '../questions/statement-detail';
+import { deleteOffer, heatingCosts, pdfToView, recipient, sendConfirmation, statusOfStatement } from '../questions/statement-detail';
 import { emptyStatementList, statementOfYear, statementPath } from '../questions/statements';
 import { searchStatements } from '../tasks/statements';
 import { francs } from '../tasks/statement-generate-api';
@@ -81,6 +81,10 @@ When('der Liegenschaftsverwalter die Abrechnung als bezahlt markiert', async ({ 
 
 When('der Liegenschaftsverwalter die Abrechnung löscht', async ({ verwalter }) => {
 	await verwalter.perform(deleteStatement);
+});
+
+Then('bietet die Detailseite das Löschen der Abrechnung nicht an', async ({ verwalter }) => {
+	await expect(deleteOffer(verwalter)).toHaveCount(0);
 });
 
 When('der Liegenschaftsverwalter die Abrechnung bearbeiten will', async ({ verwalter }) => {
