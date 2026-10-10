@@ -4400,7 +4400,8 @@ Brief: `docs/design/REDESIGN_BRIEF.md`; log and decisions: `docs/design/progress
 - [x] **Stage 8:** old design system removed (`src/lib/components`, old palette, legacy utilities, svelte-i18n,
   `docs/design_system.md`), Tailwind theme from tokens only, dark mode on, axe light and dark
   (`docs/design/reviews/8-review-1.md`)
-- [ ] **Stage 9:** final docs, review and persona runs
+- [x] **Stage 9:** `docs/design/design-decisions.md`, token reference, open points with the glossary table, CLAUDE.md
+  "Design-Regeln"; final review and final persona round with fixes (`docs/design/reviews/9-review-1.md`)
 
 
 ---

@@ -13,11 +13,11 @@ Brief: `docs/REDESIGN_BRIEF.md`. Resume rules: `docs/design/arbeitsregeln.md`.
 | 4 Shell, navigation, dashboard | done | 1 round, 3 Majors + persona Blocker fixed (`reviews/4-review-1.md`) | 0 violations (955733a) | passed (955733a, edf1dc4) |
 | 5 Rental contract wizard | done | 2 rounds (`reviews/5-review-1.md`, `5-review-2.md`), all Blockers/Majors fixed | 0 violations (5 contract-new states) | passed (bd2ea7c, 9d83882) | | | |
 | 6 Statement wizard | done | 2 rounds (`reviews/6-review-1.md`, `6-review-2.md`), all Blockers/Majors fixed | 0 violations (all states, no `@wip`) | passed (15c0ec5, 39eac9f) | | | |
-| 7 Remaining screens | in progress | | | |
-| 8 Remove old design system | open | | | |
-| 9 Final | open | | | |
+| 7 Remaining screens | done | 2 reviews + 3 fix rounds (`reviews/7-review-1.md`, `7-review-2.md`), all Blockers/Majors fixed or justified | 0 violations (86 examples) | passed (2d20713, 05def10) |
+| 8 Remove old design system | done | remnant search + 1 round (`reviews/8-review-1.md`), Major fixed | 0 violations, light and dark | passed (c3b1da6, 832d9a7) |
+| 9 Final | done | final review + final persona round (`reviews/9-review-1.md`, `personas/*-final.md`) | 0 violations, light and dark, desktop/tablet/mobile | see stage 9 log |
 
-**Next step:** stage 7 – remaining screens (persona backlog first: statement detail, lists, invoice form, contract list).
+**Next step:** none – the redesign is complete; remaining points are in `offene-punkte.md`.
 
 ## Log
 
@@ -149,3 +149,11 @@ Brief: `docs/REDESIGN_BRIEF.md`. Resume rules: `docs/design/arbeitsregeln.md`.
 - Axe harness: the check scrolls to the top before analysing; a scrolled wizard slid the 48 px breadcrumb link under the sticky header and `target-size` judged the visible part (intermittent, 1 in 4).
 - Commit 531a70c. Unit 1279, coverage 89 % statements / 76 % branches, lint, check, fallow, build clean, E2E 388 + axe 86 passed.
 - Remnant search (Explore) and review round 1 (`reviews/8-review-1.md`): 0 Blockers, 1 Major (map over dialogs, pre-existing) and Minors fixed: map isolated and dark in dark mode, border and placeholder colours from tokens, dead `package.json` entries, German error texts, unused tokens and icon keys removed, docs updated. Unit 1284, E2E 389 passed incl. axe light and dark. Stage 8 done.
+
+### Stage 9 – Final
+
+- Docs: `design-decisions.md` (decisions as built, decided during the work, anti-patterns), `token-referenz.md` completed (theme replaced, dark mode, components), `offene-punkte.md` with the complete glossary table (25 `TODO(fachlich prüfen)` places), CLAUDE.md section "Design-Regeln" and links (c4bb7d4).
+- CI on 38d3505 failed in "Unit tests" (all tests passed, 2 unhandled rejections from the map test: map created after the component was gone). Fixed with a test that reproduces it (832d9a7, CI green). Lesson: check the exit code of the coverage run, not only the test count.
+- Final review (`reviews/9-review-1.md`) and final persona round with the brief's tasks: Helga, Marco, Dr. Weber, Sven and Anna all completed their task (`personas/*-final.md`). Dr. Weber would not send the statement yet because of the PDF content and seed data (backend, documented); the screens let him trace every number.
+- Fixes (7c88a89): apartment choice with rooms and area, focus on the field when changing from the review, notices after a page change take the focus, no past-date notice for impossible years, cost table at full width, empty positions explained, vacancy share explained in the preview, back from an invoice to the step before the preview, clearer Verwaltungspauschale help. Remaining Majors justified in `offene-punkte.md` (stage 9 section). TDD slip: the loader test for rooms/area was written after the change.
+- Checks: unit 1292 (exit 0, coverage 89 % statements / 76 % branches), lint, check, fallow clean, E2E 389 passed incl. axe light and dark.

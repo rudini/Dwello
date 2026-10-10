@@ -158,3 +158,15 @@ Every place in the code is marked `TODO(fachlich prüfen)` (`grep -rn "TODO(fach
 - `docs/PRD-Dwello.md` still describes svelte-i18n as the planned translation library (product vision, not changed).
 - `tests/exploratory-test.ts` (manual script, not in CI) uses a CSS class selector for the heating profile sum.
 
+
+## Stage 9 – final review and final persona round
+
+- Native date fields show the order of the browser's system locale ("mm/dd/yyyy" in the English headless test browser, "dd.mm.yyyy" on Swiss systems). Every date is repeated in words below its field ("Sonntag, 1. November 2026"); a custom date field would replace a well-supported native control and is not planned.
+- The statement wizard counts the invoices per building only with the preview (step 4), which the server calculates; showing them on the building cards in step 2 would need a second request per selection. The overview task already says to record the invoices first.
+- The overview task "Nebenkostenabrechnungen erstellen" has one action (D14); a second link "Rechnungen prüfen" or the invoice count per period would help Anna.
+- The invoice list has no filter by year or Abrechnungsperiode (Anna).
+- The invoice form opened from the statement wizard still defaults to today (product decision; the period notice appears at once).
+- The axe list has no states for the server error page, a visible toast, a statement without positions and `submit-empty` on edit forms (final review). The screens themselves are covered.
+- Small layout points from the final review: statement list columns shift when a row has a "PDF" link, the Verlauf labels do not align, the dashboard writes "66.7%" without a space, the tenant row uses "Wohnung - Gebäude" with a hyphen, a success toast can cover list content on phones.
+- The help glossary does not explain Umlagefähig, Nachzahlung/Rückerstattung, Wiedervermietet and Gesperrt (Anna); "Mietstage" is the glossary term (several personas read "Mietstagen" as a typo).
+- The tenant form does not say whether the address is the current one or the address of the rented flat (Helga) – TODO(fachlich prüfen), Korrespondenzadresse.
