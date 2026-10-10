@@ -109,12 +109,23 @@ jobs:
         run: bun run test
         working-directory: backend
 
+  # The axe check (@a11y, every screen and state in tests/a11y/screens.json) runs as its own check, so it can be required on its own
   e2e-tests:
-    name: E2E tests
+    name: ${{ matrix.name }}
     needs: changes
     if: needs.changes.outputs.app == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: E2E tests
+            filter: --grep-invert @a11y
+            reports: e2e-reports
+          - name: Accessibility (axe)
+            filter: --project=chromium --grep @a11y
+            reports: a11y-reports
     services:
       postgres:
         image: postgres:16-alpine
@@ -141,14 +152,14 @@ jobs:
         working-directory: backend
       # Pull requests: Chromium and the API driver only; pushes to main: every browser and the API driver
       - name: Install Playwright browsers
-        run: npx playwright install --with-deps ${{ github.event_name == 'pull_request' && 'chromium' || '' }}
-      - name: E2E tests
-        run: npm run test:e2e ${{ github.event_name == 'pull_request' && '-- --project=chromium --project=api' || '' }}
+        run: npx playwright install --with-deps ${{ (github.event_name == 'pull_request' || matrix.reports == 'a11y-reports') && 'chromium' || '' }}
+      - name: ${{ matrix.name }}
+        run: npm run test:e2e -- ${{ matrix.filter }} ${{ github.event_name == 'pull_request' && matrix.reports == 'e2e-reports' && '--project=chromium --project=api' || '' }}
       - name: Upload reports
         if: ${{ failure() }}
         uses: actions/upload-artifact@v4
         with:
-          name: e2e-reports
+          name: ${{ matrix.reports }}
           path: |
             playwright-report/
             cucumber-report/

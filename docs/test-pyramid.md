@@ -100,7 +100,8 @@ UI behavior that is not business behavior lives in its own features: `breadcrumb
 | Lint and types | `npm run lint` (warnings fail), `npm run check` (also `tests/` and `*.config.ts`), `cd backend && bun run type-check` | job "Lint and types" |
 | Unit frontend | `npx vitest run` (with coverage: `npm run test:coverage`) | job "Unit tests": all tests with the coverage floor |
 | Unit + integration backend | `cd backend && bun run test` (DB only: `bun run test:pg`) | job "Unit tests", in PRs when `backend/` or `tests/contracts/` changed, always on `main`; with the coverage floor |
-| Acceptance | `npm run test:e2e` (API driver only: `-- --project=api`) | job "E2E tests"; PRs Chromium and `api`, `main` all browsers and `api` |
+| Acceptance | `npm run test:e2e` (API driver only: `-- --project=api`) | job "E2E tests" (without `@a11y`); PRs Chromium and `api`, `main` all browsers and `api` |
+| Accessibility | `npm run test:e2e -- --project=chromium --grep @a11y` | job "Accessibility (axe)": every screen and state of `tests/a11y/screens.json` with axe-core in Chromium, light and dark; its own check so it can be required |
 
 Local prerequisite: PostgreSQL on port 5432 with user `dwello`. The test databases `dwello_test` and `dwello_e2e` are set up fresh automatically; the development database stays untouched as long as the backend tests run with the preload (`bun run test`, `bun run test:pg`; a bare `bun test` would write into it).
 
