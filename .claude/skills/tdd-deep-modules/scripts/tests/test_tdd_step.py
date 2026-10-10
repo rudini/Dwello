@@ -160,3 +160,13 @@ class TddStepTest(unittest.TestCase):
             self.assertEqual(repo.subject(), f"{phase}: {phase} add")
             self.assertIn(f"TDD-Exit-Code: {exit_code}", repo.trailers())
             self.assertEqual(repo.git("status", "--porcelain"), "")
+
+    def test_without_a_supported_test_framework_it_exits_2(self):
+        repo = Repo(self, {"README.md": "docs only\n"})
+        repo.write("TESTLIST.md", "- [ ] something\n")
+
+        result = repo.run("tdd-step", "test", "plan")
+
+        self.assertEqual(result.returncode, 2, result.stderr)
+        self.assertIn("no supported test framework", result.stderr)
+        self.assertEqual(repo.subject(), "init")
