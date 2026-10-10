@@ -15,8 +15,14 @@ def git(*args):
 
 def changed_files():
     """Paths changed against HEAD, relative to the repository root; also works before the first commit."""
-    entries = git("status", "--porcelain=v1", "-z", "-uall").split("\0")
-    return sorted(entry[3:] for entry in entries if entry)
+    entries = iter(git("status", "--porcelain=v1", "-z", "-uall").split("\0"))
+    paths = []
+    for entry in entries:
+        if entry:
+            paths.append(entry[3:])
+            if entry[0] in "RC":  # a staged rename or copy is followed by its source path
+                paths.append(next(entries))
+    return sorted(paths)
 
 
 def head_subject():
