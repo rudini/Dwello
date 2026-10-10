@@ -1,6 +1,6 @@
 import unittest
 
-from tests.fixture import ADD_TEST, RIGHT_ADD, VITEST_TEST, WRONG_ADD, Repo, vitest_repo
+from tests.fixture import ADD_TEST, PYTEST_MARKERS, PYTEST_TEST, RIGHT_ADD, VITEST_TEST, WRONG_ADD, Repo, vitest_repo
 
 
 class TddStepTest(unittest.TestCase):
@@ -254,3 +254,15 @@ class TddStepTest(unittest.TestCase):
         self.assertEqual(result.returncode, 1, result.stderr)
         self.assertIn("production code changed: pkg/prod.py", result.stderr)
         self.assertEqual(repo.subject(), "init")
+
+    def test_pytest_assertion_failure_is_committed_as_red(self):
+        for marker, text in PYTEST_MARKERS.items():
+            with self.subTest(marker=marker):
+                repo = Repo(self, {"calc.py": WRONG_ADD, marker: text})
+                repo.write("test_calc.py", PYTEST_TEST)
+
+                result = repo.run("tdd-step", "red", "adds two numbers")
+
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertEqual(repo.subject(), "red: adds two numbers")
+                self.assertEqual(repo.trailer("TDD-Exit-Code"), "1")
