@@ -1,17 +1,39 @@
 <script lang="ts">
+	import { api } from '$lib/api';
 	import Icon from '$lib/ui/Icon.svelte';
+	import BuildingChoice from './BuildingChoice.svelte';
 	import type { Building } from '$lib/types';
 
 	// Step 2: the buildings whose rental contracts get a Nebenkostenabrechnung
 	let {
 		buildings,
 		selectedBuildingIds = $bindable(),
+		period,
 		error
 	}: {
 		buildings: (Building & { apartmentCount: number })[];
 		selectedBuildingIds: string[];
+		period: { start: string; end: string };
 		error?: string;
 	} = $props();
+
+	// Utility invoices of each building in the Abrechnungsperiode, so a missing one shows before the preview
+	let invoiceCounts = $state<Record<string, number>>({});
+	$effect(() => {
+		const { start, end } = period;
+		for (const building of buildings)
+			api
+				.get<{ total: number }>('/invoices', {
+					buildingId: building.id,
+					dateFrom: start,
+					dateTo: end,
+					isValidUtilityCost: 'true',
+					limit: '1'
+				})
+				.then(({ data }) => {
+					if (data) invoiceCounts = { ...invoiceCounts, [building.id]: data.total };
+				});
+	});
 
 	const allSelected = $derived(
 		buildings.length > 0 && selectedBuildingIds.length === buildings.length
@@ -42,30 +64,13 @@
 	</div>
 
 	{#each buildings as building (building.id)}
-		{@const selected = selectedBuildingIds.includes(building.id)}
-		<label
-			class="flex min-h-12 cursor-pointer items-center gap-4 rounded-control border-2 p-4 {selected
-				? 'border-accent bg-accent-soft'
-				: 'border-line-strong bg-surface'}"
-		>
-			<input
-				type="checkbox"
-				checked={selected}
-				onchange={() => toggle(building.id)}
-				aria-invalid={error ? true : undefined}
-				aria-describedby={error ? 'buildings-error' : undefined}
-				class="size-6 shrink-0 cursor-pointer accent-accent"
-				data-testid="generate-building-{building.id}"
-			/>
-			<span class="flex flex-1 flex-col gap-1">
-				<span class="font-semibold text-ink">{building.name}</span>
-				<span class="text-ink-muted">{building.address}, {building.postalCode} {building.city}</span
-				>
-			</span>
-			<span class="text-right text-ink-muted">
-				<span class="font-semibold tabular-nums text-ink">{building.apartmentCount}</span> Wohnungen
-			</span>
-		</label>
+		<BuildingChoice
+			{building}
+			selected={selectedBuildingIds.includes(building.id)}
+			invoices={invoiceCounts[building.id]}
+			{error}
+			ontoggle={() => toggle(building.id)}
+		/>
 	{/each}
 
 	{#if error}

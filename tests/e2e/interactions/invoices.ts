@@ -5,6 +5,7 @@ export const invoiceRows = (page: Page) => page.getByTestId(/^invoice-row-/);
 export const invoiceSearchInput = (page: Page) => page.getByTestId('invoice-search-input');
 export const invoiceSearchButton = (page: Page) => page.getByTestId('invoice-search-submit');
 export const invoiceBuildingFilter = (page: Page) => page.getByTestId('invoice-building-filter');
+export const invoiceYearFilter = (page: Page) => page.getByTestId('invoice-year-filter');
 export const invoiceValidityFilter = (page: Page) => page.getByTestId('invoice-validity-filter');
 export const newInvoiceButton = (page: Page) => page.getByTestId('invoice-new-button');
 export const viewInvoiceButton = (page: Page, supplier: string) => invoiceRow(page, supplier).getByTestId('invoice-view-button');

@@ -28,6 +28,7 @@ export interface Task {
 	action: string;
 	icon: IconName;
 	illustration?: IllustrationName; // set-up steps, where a new landlord starts
+	link?: { href: string; label: string }; // a second way, shown as a text link beside the one action
 }
 
 // Set-up in the order a new landlord needs it; only the first missing step is shown
@@ -72,6 +73,14 @@ const setup: { missing: (portfolio: OverviewInput['portfolio']) => boolean; task
 
 const count = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
 
+// The invoices of a period: one calendar year can be filtered, a period across the turn of the year cannot
+function invoicesOf({ start, end }: { start: string; end: string }) {
+	const year = start.slice(0, 4);
+	return start === `${year}-01-01` && end === `${year}-12-31`
+		? { href: `/invoices?year=${year}`, label: `Rechnungen ${year} ansehen` }
+		: { href: '/invoices', label: 'Rechnungen ansehen' };
+}
+
 // Recurring work, most urgent first: money already late, letters waiting at home, statements not yet sent
 function workTasks({ statementCounts, lettersToSend, missingPeriod }: OverviewInput): Task[] {
 	const tasks: (Task | false)[] = [
@@ -99,7 +108,8 @@ function workTasks({ statementCounts, lettersToSend, missingPeriod }: OverviewIn
 			text: `Die Abrechnungsperiode ${formatDate(missingPeriod.start)} – ${formatDate(missingPeriod.end)} ist abgelaufen. Noch nicht abgerechnet: ${missingPeriod.buildings.join(', ')}. Erfassen Sie zuerst alle Rechnungen dieser Periode und erstellen Sie dann die Abrechnungen.`,
 			href: '/statements/generate',
 			action: 'Abrechnungen erstellen',
-			icon: 'calculate'
+			icon: 'calculate',
+			link: invoicesOf(missingPeriod)
 		},
 		statementCounts.draft > 0 && {
 			id: 'drafts',

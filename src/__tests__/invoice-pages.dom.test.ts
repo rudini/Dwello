@@ -66,7 +66,15 @@ beforeEach(() => {
 describe('Rechnungsliste', () => {
 	const list = (invoices: ReturnType<typeof invoice>[]) =>
 		show(InvoicesPage, {
-			data: { invoices, total: invoices.length, page: 1, pageSize: 20, buildings, categories }
+			data: {
+				invoices,
+				total: invoices.length,
+				page: 1,
+				pageSize: 20,
+				buildings,
+				categories,
+				years: ['2026', '2025', '2024']
+			}
 		} as never);
 
 	// After a search the focus moves here, so the number of results is read out
@@ -143,6 +151,17 @@ describe('Rechnungsliste', () => {
 
 		submit('invoice-search-submit');
 		expect(goto).toHaveBeenCalledWith('/invoices?building=b1&page=1');
+	});
+
+	it('zeigt die Rechnungen eines Jahres, damit eine Abrechnungsperiode geprüft werden kann', () => {
+		url = new URL('http://localhost/invoices?year=2025');
+		list([invoice()]);
+		const year = byTestId<HTMLSelectElement>('invoice-year-filter')!;
+		expect(year.value).toBe('2025');
+		expect([...year.options].map((o) => o.text)).toEqual(['Alle Jahre', '2026', '2025', '2024']);
+
+		submit('invoice-search-submit');
+		expect(goto).toHaveBeenCalledWith('/invoices?year=2025&page=1');
 	});
 
 	it('meldet eine leere Suche anders als eine leere Liste', () => {
@@ -445,6 +464,9 @@ describe('Rechnung erfassen', () => {
 			})
 		} as never);
 		const date = byTestId<HTMLInputElement>('invoice-date-input')!;
+		// no "today" from the wizard: an invoice for an earlier period gets its date chosen on purpose
+		expect(date.value).toBe('');
+		expect(byTestId('invoice-period-warning')).toBeNull();
 
 		fireEvent(date, 'input', '2026-10-10');
 		expect(byTestId('invoice-period-warning')!.textContent).toContain(

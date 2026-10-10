@@ -16,7 +16,7 @@ async function answer(result: { type: string; data?: unknown }) {
 
 import GeneratePage from '../routes/statements/generate/+page.svelte';
 import EditStatementPage from '../routes/statements/[id]/edit/+page.svelte';
-import { byTestId, click, fireEvent, settle, show, submit } from './helpers/dom';
+import { byTestId, click, fakeBff, fireEvent, settle, show, submit } from './helpers/dom';
 import { statement } from './helpers/statement';
 import { browserStorage, writeDraft } from '$lib/wizard-draft';
 
@@ -418,5 +418,26 @@ describe('Verwaltungspauschale', () => {
 		await settle();
 		expect(heading()).toBe('Heizprofil und Verwaltungspauschale');
 		expect(document.body.textContent).not.toContain('Die Pauschale wird so');
+	});
+});
+
+describe('Rechnungen schon bei der Wahl der Gebäude', () => {
+	it('sagt bei jedem Gebäude, ob für die Abrechnungsperiode Rechnungen erfasst sind', async () => {
+		const calls = fakeBff((call) => [
+			200,
+			call.path.includes('buildingId=b2') ? { invoices: [], total: 0 } : { invoices: [], total: 3 }
+		]);
+		open();
+		await settle();
+		next();
+		await settle();
+
+		expect(byTestId('generate-building-invoices-b1')!.textContent).toContain(
+			'3 Rechnungen in der Abrechnungsperiode'
+		);
+		expect(byTestId('generate-building-invoices-b2')!.textContent).toContain(
+			'Keine Rechnungen in der Abrechnungsperiode erfasst'
+		);
+		expect(calls[0].path).toMatch(/dateFrom=\d{4}-\d{2}-\d{2}&dateTo=\d{4}-\d{2}-\d{2}/);
 	});
 });

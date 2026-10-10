@@ -223,6 +223,7 @@ export interface InvoicesListData {
 	pageSize: number;
 	buildings: { id: string; name: string; address: string }[];
 	categories: Category[];
+	years: string[]; // Rechnungsdatum years offered in the filter
 }
 
 // Heating Profile types

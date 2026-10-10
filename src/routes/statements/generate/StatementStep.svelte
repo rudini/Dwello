@@ -46,6 +46,7 @@
 	<BuildingStep
 		buildings={data.buildings}
 		bind:selectedBuildingIds={selection.buildingIds}
+		period={{ start: selection.periodStart, end: selection.periodEnd }}
 		error={errors.buildings}
 	/>
 {:else if step === 3}

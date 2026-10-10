@@ -11,7 +11,9 @@
 	let { data }: { data: InvoicesListData } = $props();
 
 	const filtered = $derived(
-		['search', 'building', 'categoryId', 'validity'].some((key) => $page.url.searchParams.get(key))
+		['search', 'building', 'categoryId', 'validity', 'year'].some((key) =>
+			$page.url.searchParams.get(key)
+		)
 	);
 </script>
 
@@ -35,6 +37,7 @@
 		params={$page.url.searchParams}
 		buildings={data.buildings}
 		categories={data.categories}
+		years={data.years}
 	/>
 
 	{#if data.invoices.length === 0}

@@ -20,6 +20,12 @@ Funktionalität: Rechnungsliste
     Dann sieht der Liegenschaftsverwalter die Rechnung von "Hauswart Huber" über "CHF 450.00" in der Kategorie "Hauswart"
     Und die Rechnungsliste enthält genau 1 Rechnung
 
+  Szenario: Rechnungen eines Jahres anzeigen
+    Angenommen im Gebäude "Seeblick" gibt es eine Heizkostenrechnung über "3600.00" Franken für 2024
+    Und im Gebäude "Seeblick" gibt es eine Heizkostenrechnung über "4100.00" Franken für 2025
+    Wenn der Liegenschaftsverwalter die Rechnungen des Jahres 2024 im Gebäude "Seeblick" anzeigt
+    Dann die Rechnungsliste enthält genau 1 Rechnung
+
   Szenario: Nicht umlagefähige Rechnungen anzeigen
     Angenommen "Dachdecker Meier" stellt dem Gebäude "Seeblick" "3200.00" Franken für "Dachreparatur" in der Kategorie "Reparaturen" in Rechnung
     Wenn der Liegenschaftsverwalter die nicht umlagefähigen Rechnungen im Gebäude "Seeblick" anzeigt

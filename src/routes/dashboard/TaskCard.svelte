@@ -23,6 +23,13 @@
 		{#if next}<p class="font-semibold text-accent">Nächster Schritt</p>{/if}
 		<h3 class="text-xl font-bold text-ink">{task.title}</h3>
 		<p class="text-ink-muted">{task.text}</p>
+		{#if task.link}
+			<a
+				href={task.link.href}
+				class="inline-flex min-h-12 items-center self-start text-accent underline underline-offset-4 hover:text-accent-strong"
+				data-testid="overview-task-link">{task.link.label}</a
+			>
+		{/if}
 	</div>
 	<Button variant={next ? 'primary' : 'secondary'} href={task.href}>{task.action}</Button>
 </li>

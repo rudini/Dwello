@@ -47,6 +47,22 @@ describe('Rechnungsliste', () => {
 		expect(urls).toContainEqual(expect.stringMatching(/\/invoices\?.*isValidUtilityCost=false/));
 	});
 
+	it('zeigt die Rechnungen eines Jahres und bietet die letzten Jahre zur Auswahl an', async () => {
+		const { urls, fetch } = backend({});
+
+		const data = (await listLoad({
+			url: new URL('http://localhost/invoices?year=2024'),
+			fetch
+		} as never)) as { years: string[] };
+
+		expect(urls).toContainEqual(
+			expect.stringMatching(/\/invoices\?.*dateFrom=2024-01-01.*dateTo=2024-12-31/)
+		);
+		const thisYear = new Date().getFullYear();
+		expect(data.years[0]).toBe(String(thisYear));
+		expect(data.years).toContain(String(thisYear - 5));
+	});
+
 	// Wie in den anderen Listen: ?building= kommt z. B. vom Mietvertrag
 	it('filtert nach dem Gebäude aus der Adresse', async () => {
 		const { urls, fetch } = backend({});

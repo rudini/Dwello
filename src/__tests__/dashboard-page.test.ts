@@ -75,6 +75,15 @@ describe('Übersicht', () => {
 		expect(second).not.toMatch(primary);
 	});
 
+	it('zeigt den zweiten Weg einer Aufgabe als Link neben der einen Aktion', () => {
+		const withLink = {
+			...task('missing-period', 'Nebenkostenabrechnungen erstellen', '/statements/generate'),
+			link: { href: '/invoices?year=2025', label: 'Rechnungen 2025 ansehen' }
+		};
+		const [card] = tasksOf(page({ tasks: [withLink] }));
+		expect(card).toMatch(/href="\/invoices\?year=2025"[^>]*>Rechnungen 2025 ansehen/);
+	});
+
 	it('begrüsst neue Liegenschaftsverwalter mit einem Bild zum ersten Schritt', () => {
 		const first = {
 			...task('first-building', 'Erstes Gebäude erfassen', '/buildings/new'),

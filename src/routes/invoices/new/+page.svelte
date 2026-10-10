@@ -38,7 +38,10 @@
 	const back = $derived(data.returnTo ?? '/invoices');
 
 	let buildingId = $state(untrack(() => data.buildingId));
-	let invoiceDate = $state(new Date().toISOString().split('T')[0]);
+	// From the statement wizard the date stays empty: today would fall outside the period being completed
+	let invoiceDate = $state(
+		untrack(() => (data.period ? '' : new Date().toISOString().split('T')[0]))
+	);
 	let billingEntity = $state('');
 	let description = $state('');
 	let amount = $state('');

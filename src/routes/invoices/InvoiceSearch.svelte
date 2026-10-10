@@ -11,11 +11,13 @@
 	let {
 		params,
 		buildings,
-		categories
+		categories,
+		years
 	}: {
 		params: URLSearchParams;
 		buildings: InvoicesListData['buildings'];
 		categories: InvoicesListData['categories'];
+		years: string[];
 	} = $props();
 
 	// Starts from the URL; afterwards the fields hold what the user chooses until "Suchen"
@@ -24,7 +26,8 @@
 			search: params.get('search') || '',
 			building: params.get('building') || '',
 			categoryId: params.get('categoryId') || '',
-			validity: params.get('validity') || ''
+			validity: params.get('validity') || '',
+			year: params.get('year') || ''
 		}))
 	);
 	const filtered = $derived(Object.values(filters).some(Boolean));
@@ -35,7 +38,7 @@
 	}
 
 	function clear() {
-		filters = { search: '', building: '', categoryId: '', validity: '' };
+		filters = { search: '', building: '', categoryId: '', validity: '', year: '' };
 		goto('/invoices');
 	}
 </script>
@@ -78,6 +81,16 @@
 		]}
 		bind:value={filters.validity}
 		testid="invoice-validity-filter"
+	/>
+	<Select
+		id="year"
+		label="Jahr"
+		help="Jahr des Rechnungsdatums"
+		placeholder="Alle Jahre"
+		optional
+		options={years.map((year) => ({ value: year, label: year }))}
+		bind:value={filters.year}
+		testid="invoice-year-filter"
 	/>
 	<div class="flex flex-wrap gap-4 md:col-span-2 xl:col-span-4">
 		<Button type="submit" icon="search" testid="invoice-search-submit">Suchen</Button>

@@ -5,23 +5,37 @@ import type { PageServerLoad } from './$types';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
+/** The backend query of the list: page, search and filters from the address */
+function invoiceQuery(url: URL, page: number, pageSize: number) {
+	const get = (key: string) => url.searchParams.get(key) || '';
+	const params = new URLSearchParams({
+		limit: String(pageSize),
+		offset: String((page - 1) * pageSize)
+	});
+	if (get('search')) params.set('search', get('search'));
+	if (get('building')) params.set('buildingId', get('building'));
+	if (get('categoryId')) params.set('categoryId', get('categoryId'));
+	if (get('validity')) params.set('isValidUtilityCost', String(get('validity') === 'valid'));
+	if (/^\d{4}$/.test(get('year'))) {
+		params.set('dateFrom', `${get('year')}-01-01`);
+		params.set('dateTo', `${get('year')}-12-31`);
+	}
+	return params;
+}
+
+// The Rechnungsdatum's year: this one and the five before (statements look back one period)
+const filterYears = () => {
+	const thisYear = new Date().getFullYear();
+	return Array.from({ length: 6 }, (_, i) => String(thisYear - i));
+};
+
 export const load: PageServerLoad = async ({ url, fetch }): Promise<InvoicesListData> => {
 	const page = parseInt(url.searchParams.get('page') || '1', 10);
 	const pageSize = parseInt(url.searchParams.get('pageSize') || '20', 10);
-	const search = url.searchParams.get('search') || '';
-	const building = url.searchParams.get('building') || '';
-	const categoryId = url.searchParams.get('categoryId') || '';
-	const validity = url.searchParams.get('validity') || '';
+	const years = filterYears();
 
 	try {
-		const params = new URLSearchParams({
-			limit: String(pageSize),
-			offset: String((page - 1) * pageSize)
-		});
-		if (search) params.set('search', search);
-		if (building) params.set('buildingId', building);
-		if (categoryId) params.set('categoryId', categoryId);
-		if (validity) params.set('isValidUtilityCost', String(validity === 'valid'));
+		const params = invoiceQuery(url, page, pageSize);
 
 		const [invoicesRes, buildingsRes, categoriesRes] = await Promise.all([
 			fetch(`${BACKEND_URL}/api/v1/invoices?${params}`),
@@ -51,7 +65,8 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<InvoicesList
 			page,
 			pageSize,
 			buildings,
-			categories
+			categories,
+			years
 		};
 	} catch (err) {
 		console.error('Failed to fetch invoices:', err);
@@ -61,7 +76,8 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<InvoicesList
 			page,
 			pageSize,
 			buildings: [],
-			categories: []
+			categories: [],
+			years
 		};
 	}
 };

@@ -71,6 +71,21 @@ describe('Aufgaben der Übersicht', () => {
 		});
 		expect(tasks[1].text).toContain('1.1.2025 – 31.12.2025');
 		expect(tasks[1].text).toContain('Seeblick');
+		// the invoices come first, so the task leads to them as well
+		expect(tasks[1].link).toEqual({
+			href: '/invoices?year=2025',
+			label: 'Rechnungen 2025 ansehen'
+		});
+	});
+
+	it('führt bei einer Abrechnungsperiode über den Jahreswechsel zu allen Rechnungen', () => {
+		const tasks = overviewTasks(
+			input({ missingPeriod: { start: '2024-07-01', end: '2025-06-30', buildings: ['Seeblick'] } })
+		);
+		expect(tasks.find((task) => task.id === 'missing-period')!.link).toEqual({
+			href: '/invoices',
+			label: 'Rechnungen ansehen'
+		});
 	});
 
 	it('sagt, wie viele es sind, in der Einzahl und Mehrzahl', () => {

@@ -109,6 +109,10 @@ Then(
 	}
 );
 
+Then('ist das Rechnungsdatum leer, damit es bewusst gewählt wird', async ({ verwalter }) => {
+	await expect(invoiceDate(verwalter)).toHaveValue('');
+});
+
 Then('warnt das Rechnungsformular nicht vor dem Rechnungsdatum', async ({ verwalter }) => {
 	await expect(invoiceDate(verwalter)).toBeVisible(); // the form is shown
 	await expect(dateOutsidePeriodWarning(verwalter)).toHaveCount(0);
