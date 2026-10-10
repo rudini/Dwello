@@ -407,3 +407,25 @@ The full report is `docs/deepcheck-validation.md`.
 - `npm run lint` and `npm run check` pass; 1461 frontend tests pass; backend type-check passes with 462 tests; `fallow audit --base 9dafc39` passes.
 - 163 deepcheck tests.
 - Baseline: 0 flagged modules (threshold 65) of 124 analyzed.
+
+### 2026-10-10, verification addendum (after all phases)
+
+**Phase 2 gates re-verified on the final scoring.**
+- After the last scoring change, `npx vitest run` on `test/{gate,check,git,baseline}.test.ts` passes: 4 files, 41 tests. The whole deepcheck suite passes: 164 tests.
+- New test at the calibrated defaults (threshold 65, tolerance 5, no config): a baselined module at 67 that worsens to 74 fails with "G2 worsened from 67 to 74". Disabling G2 in `gate.ts` makes it fail (mutation check).
+- Phase 2 tests were edited during Phase 4 because absolute scores changed:
+  - The G2/G3 fixtures moved from `failThreshold` 50 to 35, and the exact "from 55" became `\d+`. The new default-threshold test restores exact numbers.
+  - The agent-order fixture was changed.
+  - Default-threshold strings went from 70 to 65.
+
+**How each partial or caveated gate stands (precise wording):**
+- X3.2: verified with the method the brief prescribes when `act` is unavailable: actionlint, plus dry runs of the exact commands against a base ref. A real GitHub Actions run of both workflows is **not verifiable** here.
+- X3.3: verified with the hook (live in this session and via `test/hook.test.ts`) and the exact CI command run locally (`npm run deepcheck:ci -- origin/main`, exit 1 with the probe, exit 0 after removal). The CI job itself did not run on GitHub (**not verifiable**).
+- X4.1: done, with recorded caveats. The OSS judgements are not blind, and error subclasses are labelled inconsistently (repo: shallow, OSS: flat).
+- X4.4: done as required ("mitigate or document each weakness"). Dead-code padding is mitigated; two weaknesses are documented, not mitigated: live padding, and splitting into files that are no longer eligible.
+- X4.6 / X4.7: the verdict "ready to gate on changed code" is a judgement call with explicit caveats:
+  - zero real positives in this repo and the OSS projects; gate precision rests on fixtures and probes;
+  - recall 0/14 for the modules labelled shallow;
+  - the 5-point margin below the threshold;
+  - both final review rounds called it "usable as scan only" until their findings were fixed. The last fixes were verified by regression tests, the realistic-module check and a re-run of X2.2, not by a third independent review: the brief caps reviews at two rounds.
+- Correction: my first end-of-run summary in the session said "every exit gate ... was verified". The precise statement is the list above: X3.2 and X3.3 are verified locally, not on GitHub, and the Phase 4 gates are done with the logged caveats.

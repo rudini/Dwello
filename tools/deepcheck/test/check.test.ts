@@ -55,6 +55,17 @@ describe('gates end to end', () => {
 		expect(result.stdout).toMatch(/G2 worsened from \d+ to \d+ \(more than the tolerance of 5\)/);
 	});
 
+	it('G2 at the calibrated defaults (65/5): a baselined module at 67 that worsens to 74 fails, with exact numbers', () => {
+		const normalize = "export function normalize(id: string) {\n\tconst t = id.trim();\n\tif (!t) throw new Error('leer');\n\treturn t.toLowerCase().replace(/\\s+/g, '-');\n}\n";
+		const root = writeRepo({ 'src/store.ts': STORE, 'src/names.ts': SHALLOW_MODULE + normalize });
+		expect(cli(root, 'baseline', '--fallow', 'off').stdout).toContain('1 flagged module(s) (threshold 65)');
+		commitAll(root, 'baseline with names.ts at 67');
+		writeFiles(root, { 'src/names.ts': SHALLOW_MODULE });
+		const result = cli(root, 'check', '--fallow', 'off');
+		expect(result.code).toBe(1);
+		expect(result.stdout).toContain('G2 worsened from 67 to 74 (more than the tolerance of 5)');
+	});
+
 	it('G3: a baselined module that did not worsen and an untouched legacy module pass, and scan still lists them', () => {
 		const root = writeRepo({ 'deepcheck.config.json': LOW_THRESHOLD, 'src/store.ts': STORE, 'src/shallow.ts': SHALLOW_MODULE, 'src/legacy.ts': SHALLOW_MODULE });
 		cli(root, 'baseline', '--fallow', 'off');
