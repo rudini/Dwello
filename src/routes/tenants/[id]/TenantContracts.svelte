@@ -22,7 +22,7 @@
 					<a
 						href="/contracts/{contract.id}"
 						class="font-semibold text-accent underline underline-offset-4 after:absolute after:inset-0 sm:w-1/4"
-						data-testid="contract-history-link">{contract.apartment}</a
+						data-testid="contract-history-link">Mietvertrag {contract.apartment}</a
 					>
 					<span><Badge {...statusBadges[contract.status]} /></span>
 					<span class="tabular-nums text-ink sm:flex-1"

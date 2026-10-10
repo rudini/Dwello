@@ -16,8 +16,19 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<TenantsListD
 		if (search) params.set('search', search);
 		if (status) params.set('status', status);
 
-		const response = await fetch(`${BACKEND_URL}/api/v1/tenants?${params}`);
+		const [response, futureRes] = await Promise.all([
+			fetch(`${BACKEND_URL}/api/v1/tenants?${params}`),
+			fetch(`${BACKEND_URL}/api/v1/contracts?status=future&limit=100`)
+		]);
 		const data = await response.json();
+		// a tenant without a running contract may already have signed one for later
+		const future: { tenantId: string; startDate: string }[] =
+			(await futureRes.json()).contracts ?? [];
+		const nextStart = (id: unknown) =>
+			future
+				.filter((c) => c.tenantId === id)
+				.map((c) => c.startDate)
+				.sort()[0] ?? null;
 
 		const tenants: TenantWithOccupancy[] = (data.tenants || data.data || []).map(
 			(t: Record<string, unknown>) => ({
@@ -32,6 +43,7 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<TenantsListD
 				city: (t.city as string) || null,
 				currentApartment: t.currentApartment ? `Wohnung ${t.currentApartment}` : null,
 				currentBuilding: (t.currentBuilding as string) || null,
+				nextContractStart: nextStart(t.id),
 				isActive: t.isActive === true
 			})
 		);

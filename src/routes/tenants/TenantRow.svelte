@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { TenantWithOccupancy } from '$lib/types';
 	import Badge from '$lib/ui/Badge.svelte';
+	import { formatDate } from '$lib/utils/format';
 
 	// One tenant in the list: the name opens it, the whole row is its link
 	let { tenant }: { tenant: TenantWithOccupancy } = $props();
@@ -23,7 +24,9 @@
 	<span class="text-ink md:flex-1">
 		{tenant.currentApartment && tenant.currentBuilding
 			? `${tenant.currentApartment} - ${tenant.currentBuilding}`
-			: 'Keine laufende Miete'}
+			: tenant.nextContractStart
+				? `Mietvertrag ab ${formatDate(tenant.nextContractStart)}`
+				: 'Keine laufende Miete'}
 	</span>
 	{#if tenant.isActive}
 		<span><Badge tone="positive" label="Aktiv" testid="tenant-active" /></span>

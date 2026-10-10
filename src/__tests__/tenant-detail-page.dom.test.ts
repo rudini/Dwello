@@ -94,6 +94,8 @@ describe('Mieterdetail', () => {
 		expect(rows.join()).not.toContain('heute');
 		const link = allByTestId('contract-history-link')[1];
 		expect(link.getAttribute('href')).toBe('/contracts/c1');
+		// the apartment link above says "Wohnung 1.01" too: this one names the contract
+		expect(link.textContent!.trim()).toBe('Mietvertrag Wohnung 1.01');
 	});
 
 	it('nennt Dokumente mit Versandstatus und einem PDF-Link, der das Dokument nennt', () => {

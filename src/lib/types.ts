@@ -127,6 +127,7 @@ export interface ApartmentsListData {
 export interface TenantWithOccupancy extends Tenant {
 	currentApartment?: string | null;
 	currentBuilding?: string | null;
+	nextContractStart?: string | null; // Vertragsbeginn of a future contract
 	isActive: boolean; // a contract runs today or is signed for later
 }
 
