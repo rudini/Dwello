@@ -3,8 +3,9 @@ import { readable } from 'svelte/store';
 
 vi.mock('$app/environment', () => ({ browser: true }));
 vi.mock('$app/navigation', () => ({ goto: vi.fn(), invalidateAll: vi.fn() }));
+let url = new URL('http://localhost/invoices?search=Hauswart');
 vi.mock('$app/stores', () => ({
-	page: readable({ url: new URL('http://localhost/invoices?search=Hauswart') })
+	page: { subscribe: (run: (value: unknown) => void) => readable({ url }).subscribe(run) }
 }));
 
 import { goto, invalidateAll } from '$app/navigation';
@@ -55,6 +56,7 @@ const button = (label: string) =>
 	[...document.querySelectorAll('button')].find((b) => b.textContent?.includes(label))!;
 
 beforeEach(() => {
+	url = new URL('http://localhost/invoices?search=Hauswart');
 	vi.mocked(goto).mockClear();
 	vi.mocked(invalidateAll).mockClear();
 });
@@ -90,6 +92,40 @@ describe('Rechnungsliste', () => {
 		expect(goto).toHaveBeenCalledWith('/invoices?search=Hauswart&page=1');
 	});
 
+	it('öffnet eine Rechnung über eine ganze Zeile, die den Rechnungssteller nennt', () => {
+		list([invoice()]);
+
+		const row = byTestId('invoice-row-i1')!;
+		const link = row.querySelector('[data-testid="invoice-view-button"]')!;
+		expect(link.getAttribute('href')).toBe('/invoices/i1');
+		expect(link.textContent).toContain('Hauswart Meier');
+		expect(
+			row.querySelector('[data-testid="invoice-edit-button"]')!.getAttribute('aria-label')
+		).toContain('Hauswart Meier');
+		expect(row.querySelector('[data-testid="invoice-category"]')!.textContent!.trim()).toBe(
+			'Hauswartung'
+		);
+		expect(row.querySelector('[data-testid="invoice-status"]')!.textContent!.trim()).toBe(
+			'Manuell'
+		);
+		expect(row.querySelector('[role="status"], [aria-live]')).toBeNull();
+	});
+
+	it('zählt die Rechnungen in Einzahl und Mehrzahl richtig', () => {
+		list([invoice()]);
+		expect(text()).toContain('1 Rechnung');
+		expect(text()).not.toContain('1 Rechnungen');
+	});
+
+	it('filtert nach dem Gebäude aus der Adresse und behält es in der Suche', () => {
+		url = new URL('http://localhost/invoices?building=b1');
+		list([invoice()]);
+		expect(byTestId<HTMLSelectElement>('invoice-building-filter')!.value).toBe('b1');
+
+		submit('invoice-search-submit');
+		expect(goto).toHaveBeenCalledWith('/invoices?building=b1&page=1');
+	});
+
 	it('meldet eine leere Suche anders als eine leere Liste', () => {
 		list([]);
 		expect(text()).toContain('Versuchen Sie es mit anderen Filtern.');
@@ -109,7 +145,7 @@ describe('Rechnungsdetail', () => {
 		});
 
 		expect(text()).toContain('Automatisch kategorisiert');
-		expect(text()).toContain('86%');
+		expect(text()).toContain('86 %');
 		expect(text()).toContain('Vertrag geprüft');
 	});
 
@@ -180,12 +216,15 @@ describe('Rechnungsdetail', () => {
 });
 
 describe('Rechnung erfassen', () => {
-	const data = (llmAvailable: boolean) => ({
+	const data = (llmAvailable: boolean, opened = {}) => ({
 		buildings,
 		categories,
 		distributionKeys,
 		llmAvailable,
-		defaultDistributionKeyId: 'k1'
+		defaultDistributionKeyId: 'k1',
+		buildingId: '',
+		returnTo: null,
+		...opened
 	});
 	const fill = () => {
 		fireEvent(byTestId<HTMLSelectElement>('invoice-building-select')!, 'change', 'b1');
@@ -281,6 +320,37 @@ describe('Rechnung erfassen', () => {
 		await settle();
 
 		expect(byTestId<HTMLInputElement>('invoice-utility-cost-checkbox')!.disabled).toBe(true);
+	});
+
+	it('sagt, dass das Rechnungsdatum die Abrechnungsperiode bestimmt', () => {
+		show(NewInvoicePage, { data: data(false) } as never);
+		expect(document.querySelector('#invoiceDate-help')!.textContent).toContain(
+			'bestimmt, in welche Abrechnungsperiode die Rechnung fällt'
+		);
+	});
+
+	it('wählt das Gebäude vor und kehrt nach dem Speichern zum Assistenten zurück', async () => {
+		fakeBff(() => [201, { id: 'i9' }]);
+		show(NewInvoicePage, {
+			data: data(false, { buildingId: 'b1', returnTo: '/statements/generate' })
+		} as never);
+
+		expect(byTestId<HTMLSelectElement>('invoice-building-select')!.value).toBe('b1');
+		expect(byTestId('form-cancel')!.getAttribute('href')).toBe('/statements/generate');
+		fill();
+		submit('submit-button');
+		await settle();
+
+		expect(goto).toHaveBeenCalledWith('/statements/generate');
+	});
+
+	it('bietet die Kategorien nach Umlagefähigkeit gruppiert an', () => {
+		show(NewInvoicePage, { data: data(false) } as never);
+		const groups = [...byTestId('invoice-category-select')!.querySelectorAll('optgroup')];
+		expect(groups.map((group) => [group.label, group.textContent])).toEqual([
+			['Umlagefähige Kosten', 'Hauswartung'],
+			['Nicht umlagefähige Kosten', 'Reparaturen']
+		]);
 	});
 
 	it('bleibt bei einem Fehler des Backends auf der Seite', async () => {

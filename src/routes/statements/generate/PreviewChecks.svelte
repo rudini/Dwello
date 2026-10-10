@@ -16,6 +16,10 @@
 	const existing = $derived(rows.filter((row) => row.existing > 0));
 	const statements = (count: number) =>
 		count === 1 ? '1 Nebenkostenabrechnung' : `${count} Nebenkostenabrechnungen`;
+	// The invoice form returns here after saving; with one building missing invoices it is preselected
+	const newInvoice = $derived(
+		`/invoices/new?${missing.length === 1 ? `building=${missing[0].buildingId}&` : ''}returnTo=/statements/generate`
+	);
 </script>
 
 {#if missing.length}
@@ -26,7 +30,7 @@
 			zurück. Erfassen Sie zuerst die Rechnungen – oder bestätigen Sie unten, dass es keine gibt.
 		</p>
 		{#snippet action()}
-			<Button href="/invoices/new" icon="invoice">Rechnung erfassen</Button>
+			<Button href={newInvoice} icon="invoice">Rechnung erfassen</Button>
 		{/snippet}
 	</Alert>
 {/if}

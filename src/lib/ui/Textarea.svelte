@@ -12,6 +12,7 @@
 		example,
 		error,
 		optional = false,
+		onblur,
 		testid
 	}: {
 		id: string;
@@ -23,6 +24,7 @@
 		example?: string;
 		error?: string;
 		optional?: boolean;
+		onblur?: () => void;
 		testid?: string;
 	} = $props();
 </script>
@@ -34,6 +36,7 @@
 			{name}
 			{rows}
 			bind:value
+			{onblur}
 			aria-required={!optional}
 			aria-describedby={control.describedBy}
 			aria-invalid={control.invalid || undefined}

@@ -1,77 +1,65 @@
 <script lang="ts">
 	import type { InvoiceWithDetails } from '$lib/types';
-	import Badge from '$lib/components/Badge.svelte';
-	import Icon from '$lib/components/Icon.svelte';
+	import type { Tone } from '$lib/ui/tone';
+	import Badge from '$lib/ui/Badge.svelte';
+	import Button from '$lib/ui/Button.svelte';
 	import { formatCurrency, formatDate } from '$lib/utils/format';
 
+	// One invoice: the whole row opens it, named by its supplier; "Bearbeiten" stays a button of its own
 	let { invoice }: { invoice: InvoiceWithDetails } = $props();
 
 	const statusBadges = {
-		'auto-categorized': { variant: 'success', label: 'Auto' },
-		manual: { variant: 'info', label: 'Manuell' },
-		pending: { variant: 'warning', label: 'Ausstehend' }
+		'auto-categorized': { tone: 'info', label: 'Automatisch' },
+		manual: { tone: 'neutral', label: 'Manuell' },
+		pending: { tone: 'caution', label: 'Ausstehend' }
 	} as const satisfies Record<
 		InvoiceWithDetails['categorizationStatus'],
-		{ variant: string; label: string }
+		{ tone: Tone; label: string }
 	>;
 	const status = $derived(statusBadges[invoice.categorizationStatus]);
 </script>
 
-<tr class="hover:bg-gray-50 transition-colors" data-testid="invoice-row-{invoice.id}">
-	<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-		{formatDate(invoice.invoiceDate)}
-	</td>
-	<td class="px-6 py-4">
-		<div class="text-sm font-medium text-gray-900">{invoice.billingEntity}</div>
-		<div class="text-sm text-ink-muted truncate max-w-xs">{invoice.description}</div>
-		<div class="text-xs text-ink-muted mt-1">{invoice.buildingName}</div>
-	</td>
-	<td class="px-6 py-4 whitespace-nowrap">
-		{#if invoice.category}
-			<span
-				class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
-				data-testid="invoice-category"
-			>
-				{invoice.category.name}
-			</span>
-		{:else}
-			<span class="text-sm text-ink-muted">-</span>
-		{/if}
-	</td>
-	<td
-		class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-right"
-		data-testid="invoice-amount"
+<li
+	class="relative flex flex-col gap-2 p-4 hover:bg-sunken md:grid md:grid-cols-12 md:items-center md:gap-4"
+	data-testid="invoice-row-{invoice.id}"
+>
+	<a
+		href="/invoices/{invoice.id}"
+		class="flex min-w-0 flex-col after:absolute after:inset-0 md:col-span-4"
+		data-testid="invoice-view-button"
 	>
-		{formatCurrency(invoice.amount)}
-	</td>
-	<td class="px-6 py-4 whitespace-nowrap text-center">
-		{#if invoice.isValidUtilityCost}
-			<Badge variant="success">Umlagefähig</Badge>
+		<span class="font-semibold text-accent underline underline-offset-4"
+			>{invoice.billingEntity}</span
+		>
+		<span class="truncate text-ink">{invoice.description}</span>
+		<span class="text-ink-muted">{invoice.buildingName}, {formatDate(invoice.invoiceDate)}</span>
+	</a>
+	<p class="text-ink md:col-span-2">
+		<span class="sr-only">Kategorie:</span>
+		{#if invoice.category}
+			<span data-testid="invoice-category">{invoice.category.name}</span>
 		{:else}
-			<Badge variant="danger">Nicht umlagefähig</Badge>
+			<span class="text-ink-muted">Ohne Kategorie</span>
 		{/if}
-	</td>
-	<td class="px-6 py-4 whitespace-nowrap text-center" data-testid="invoice-status">
-		<Badge variant={status.variant}>{status.label}</Badge>
-	</td>
-	<td class="px-6 py-4 whitespace-nowrap text-right text-sm">
-		<div class="flex items-center justify-end gap-2">
-			<a
-				href="/invoices/{invoice.id}"
-				class="p-1.5 text-ink-muted hover:text-accent hover:bg-blue-50 rounded-lg transition-colors"
-				title="Ansehen"
-				data-testid="invoice-view-button"
-			>
-				<Icon name="visibility" size={18} />
-			</a>
-			<a
-				href="/invoices/{invoice.id}/edit"
-				class="p-1.5 text-ink-muted hover:text-accent hover:bg-blue-50 rounded-lg transition-colors"
-				title="Bearbeiten"
-				data-testid="invoice-edit-button"
-			>
-				<Icon name="edit" size={18} />
-			</a>
-		</div>
-	</td>
-</tr>
+	</p>
+	<p class="font-semibold tabular-nums text-ink md:col-span-2 md:text-right">
+		<span data-testid="invoice-amount">{formatCurrency(invoice.amount)}</span>
+	</p>
+	<div class="flex flex-wrap gap-2 md:col-span-3">
+		<Badge
+			tone={invoice.isValidUtilityCost ? 'positive' : 'caution'}
+			label={invoice.isValidUtilityCost ? 'Umlagefähig' : 'Nicht umlagefähig'}
+		/>
+		<Badge tone={status.tone} label={status.label} testid="invoice-status" />
+	</div>
+	<!-- Above the row link, so it stays a button of its own -->
+	<div class="relative md:col-span-1">
+		<Button
+			href="/invoices/{invoice.id}/edit"
+			variant="ghost"
+			icon="edit"
+			ariaLabel="Bearbeiten: Rechnung von {invoice.billingEntity}"
+			testid="invoice-edit-button">Bearbeiten</Button
+		>
+	</div>
+</li>

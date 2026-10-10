@@ -163,7 +163,10 @@ describe('Standard-Verteilschlüssel bei neuen Rechnungen', () => {
 				url === `${API}/config/default_distribution_key_id` ? { value: 'dk1' } : { data: [] }
 			);
 
-		const data = (await loadInvoiceForm({ fetch } as never)) as Record<string, unknown>;
+		const data = (await loadInvoiceForm({
+			fetch,
+			url: new URL('http://localhost/invoices/new')
+		} as never)) as Record<string, unknown>;
 
 		expect(data.defaultDistributionKeyId).toBe('dk1');
 	});

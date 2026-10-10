@@ -188,7 +188,10 @@ describe('Abrechnungen erstellen', () => {
 		open({ preview, invoices });
 		const warning = byTestId('missing-invoices')!;
 		expect(warning.textContent).toContain('Lindenhof');
-		expect(warning.querySelector('a[href="/invoices/new"]')).not.toBeNull();
+		// The invoice form preselects the building and returns to the wizard after saving
+		expect(warning.querySelector('a')!.getAttribute('href')).toBe(
+			'/invoices/new?building=b2&returnTo=/statements/generate'
+		);
 		next();
 		await settle();
 		expect(byTestId('form-error')!.textContent).toContain(

@@ -9,16 +9,17 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<InvoicesList
 	const page = parseInt(url.searchParams.get('page') || '1', 10);
 	const pageSize = parseInt(url.searchParams.get('pageSize') || '20', 10);
 	const search = url.searchParams.get('search') || '';
-	const buildingId = url.searchParams.get('buildingId') || '';
+	const building = url.searchParams.get('building') || '';
 	const categoryId = url.searchParams.get('categoryId') || '';
 	const validity = url.searchParams.get('validity') || '';
 
 	try {
-		const params = new URLSearchParams();
-		params.set('limit', String(pageSize));
-		params.set('offset', String((page - 1) * pageSize));
+		const params = new URLSearchParams({
+			limit: String(pageSize),
+			offset: String((page - 1) * pageSize)
+		});
 		if (search) params.set('search', search);
-		if (buildingId) params.set('buildingId', buildingId);
+		if (building) params.set('buildingId', building);
 		if (categoryId) params.set('categoryId', categoryId);
 		if (validity) params.set('isValidUtilityCost', String(validity === 'valid'));
 
