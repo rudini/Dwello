@@ -1,6 +1,6 @@
 import unittest
 
-from tests.fixture import ADD_TEST, WRONG_ADD, Repo
+from tests.fixture import ADD_TEST, RIGHT_ADD, WRONG_ADD, Repo
 
 
 class TddStepTest(unittest.TestCase):
@@ -14,3 +14,13 @@ class TddStepTest(unittest.TestCase):
         self.assertEqual(repo.subject(), "red: adds two numbers")
         self.assertIn("TDD-Phase: red", repo.trailers())
         self.assertIn("TDD-Exit-Code: 1", repo.trailers())
+
+    def test_red_is_refused_when_the_suite_passes(self):
+        repo = Repo(self, {"calc.py": RIGHT_ADD})
+        repo.write("test_calc.py", ADD_TEST)
+
+        result = repo.run("tdd-step", "red", "adds two numbers")
+
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn("red needs a failing assertion", result.stderr)
+        self.assertEqual(repo.subject(), "init")
