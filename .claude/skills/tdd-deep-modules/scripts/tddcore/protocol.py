@@ -36,6 +36,8 @@ def _is_test(path):
 def violations(previous, phase, run, changed):
     """Why committing `changed` as `phase` after `previous`, with suite result `run`, breaks TDD."""
     found = []
+    if not changed:
+        found.append(f"nothing changed: a {phase} commit needs a change")
     if previous not in FOLLOWS[phase]:
         found.append(f"{phase} cannot follow {previous}")
     if phase == "red" and run.outcome != "fail":
