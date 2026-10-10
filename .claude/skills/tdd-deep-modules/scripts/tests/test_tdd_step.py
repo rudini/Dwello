@@ -170,3 +170,12 @@ class TddStepTest(unittest.TestCase):
         self.assertEqual(result.returncode, 2, result.stderr)
         self.assertIn("no supported test framework", result.stderr)
         self.assertEqual(repo.subject(), "init")
+
+    def test_an_unknown_phase_exits_2_with_usage(self):
+        repo = Repo(self, {"calc.py": WRONG_ADD})
+
+        for args in (["blue"], []):
+            result = repo.run("tdd-step", *args)
+
+            self.assertEqual(result.returncode, 2, result.stderr)
+            self.assertIn("usage: tdd-step <test|red|green|refactor> [message]", result.stderr)
