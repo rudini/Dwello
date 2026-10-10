@@ -47,6 +47,9 @@ def violations(previous, phase, run, changed):
     code = [f for f in changed if _is_code(f)]
     if phase == "test" and code:
         found.append(f"test phase may only change the test list, not code: {', '.join(code)}")
+    tests = [f for f in code if not is_production(f)]
+    if phase == "green" and tests:
+        found.append(f"green may only change production code, not tests: {', '.join(tests)}")
     production = [f for f in changed if is_production(f)]
     if phase == "red" and production:
         found.append(f"production code changed: {', '.join(production)}")
