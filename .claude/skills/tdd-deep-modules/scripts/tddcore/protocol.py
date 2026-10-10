@@ -16,9 +16,16 @@ def phase_of(subject):
     return prefix if prefix in FOLLOWS else "start"
 
 
+CODE_SUFFIXES = {".py", ".js", ".jsx", ".mjs", ".cjs", ".ts", ".tsx", ".mts", ".cts", ".svelte", ".vue"}
+
+
 def is_production(path):
-    name = PurePosixPath(path).name
-    return _is_code(path) and not (name.startswith("test_") or name.endswith("_test.py"))
+    return _is_code(path) and not _is_test(PurePosixPath(path).name)
+
+
+def _is_test(name):
+    return (name.startswith("test_") or name.endswith("_test.py")
+            or ".test." in name or ".spec." in name)
 
 
 def violations(previous, phase, run, changed):
@@ -40,4 +47,4 @@ def violations(previous, phase, run, changed):
 
 
 def _is_code(path):
-    return path.endswith(".py")
+    return PurePosixPath(path).suffix in CODE_SUFFIXES
