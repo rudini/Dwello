@@ -2,6 +2,22 @@
 """tdd-step <test|red|green|refactor> [message]: run the tests, then commit the phase."""
 import subprocess
 import sys
+from pathlib import PurePosixPath
+
+
+def git(*args):
+    return subprocess.run(["git", *args], check=True, capture_output=True, text=True).stdout
+
+
+def is_production(path):
+    name = PurePosixPath(path).name
+    return name.endswith(".py") and not (name.startswith("test_") or name.endswith("_test.py"))
+
+
+def changed_files():
+    tracked = git("diff", "--name-only", "HEAD").splitlines()
+    return tracked + git("ls-files", "--others", "--exclude-standard").splitlines()
+
 
 phase = sys.argv[1]
 message = sys.argv[2] if len(sys.argv) > 2 else phase
@@ -10,7 +26,10 @@ summary = run.stderr.strip().splitlines()[-1]
 assertion_failure = summary.startswith("FAILED (failures=") and "errors=" not in summary
 if phase == "red" and not assertion_failure:
     sys.exit(f"tdd-step: refused: red needs a failing assertion, but the suite says: {summary}")
-subprocess.run(["git", "add", "-A"], check=True)
-subprocess.run(["git", "commit", "-q", "-m", f"{phase}: {message}",
-                "--trailer", f"TDD-Phase: {phase}",
-                "--trailer", f"TDD-Exit-Code: {run.returncode}"], check=True)
+production = [f for f in changed_files() if is_production(f)]
+if phase == "red" and production:
+    sys.exit(f"tdd-step: refused: production code changed: {', '.join(production)}")
+git("add", "-A")
+git("commit", "-q", "-m", f"{phase}: {message}",
+    "--trailer", f"TDD-Phase: {phase}",
+    "--trailer", f"TDD-Exit-Code: {run.returncode}")
