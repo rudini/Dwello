@@ -260,7 +260,8 @@ describe('Tankbestand', () => {
 	it('erfasst einen Stichtag mit Datum, Wert und Kategorie der Heizkosten', () => {
 		detail([]);
 
-		expect(byTestId<HTMLInputElement>('fuel-stock-date-input')!.name).toBe('readingDate');
+		// typed as TT.MM.JJJJ, sent as JJJJ-MM-TT
+		expect(document.querySelector('input[type="hidden"][name="readingDate"]')).not.toBeNull();
 		expect(byTestId<HTMLInputElement>('fuel-stock-amount-input')!.name).toBe('amount');
 		const category = byTestId<HTMLSelectElement>('fuel-stock-category-select')!;
 		expect(category.name).toBe('categoryId');

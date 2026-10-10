@@ -154,7 +154,7 @@ describe('Wohnungen zur Auswahl', () => {
 			]) as never
 		);
 		expect(choices).toEqual([
-			{ value: 'a2', label: 'Wohnung 1.02 - Ahornhof (verfügbar ab 1.12.2026)', disabled: false },
+			{ value: 'a2', label: 'Wohnung 1.02 - Ahornhof (verfügbar ab 01.12.2026)', disabled: false },
 			{ value: 'a3', label: 'Wohnung 1.03 - Ahornhof', disabled: false },
 			{ value: 'a1', label: 'Wohnung 1.01 - Ahornhof (nicht verfügbar)', disabled: true }
 		]);

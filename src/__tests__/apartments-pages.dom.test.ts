@@ -91,7 +91,7 @@ describe('Wohnungsliste', () => {
 				.querySelector('[data-testid="apartment-status"]')!
 				.textContent!.trim();
 		expect(status('a1')).toBe('Leer');
-		expect(status('a2')).toBe('Wiedervermietet ab 1.11.2099');
+		expect(status('a2')).toBe('Wiedervermietet ab 01.11.2099');
 	});
 
 	it('zeigt Leer mit einer offenen Tür statt einem Warndreieck', () => {
@@ -264,9 +264,9 @@ describe('Wohnungsdetail', () => {
 		expect(link.getAttribute('href')).toBe('/contracts/c1');
 		const words = rows.map((row) => row.textContent!.replace(/\s+/g, ' '));
 		expect(words[0]).toContain('Laufend');
-		expect(words[0]).toContain('seit 1.4.2022, unbefristet');
+		expect(words[0]).toContain('seit 01.04.2022, unbefristet');
 		expect(words[1]).toContain('Beendet');
-		expect(words[1]).toContain('1.1.2018 – 31.3.2022');
+		expect(words[1]).toContain('01.01.2018 – 31.03.2022');
 		expect(words[1]).toContain('CHF 750.00 monatlich total');
 		expect(text()).not.toContain('heute');
 	});
@@ -289,15 +289,15 @@ describe('Wohnungsdetail', () => {
 		show(ApartmentPage, { data } as never);
 
 		expect(byTestId('apartment-info-status')!.textContent).toContain(
-			'Wiedervermietet ab 1.11.2099'
+			'Wiedervermietet ab 01.11.2099'
 		);
 		expect(byTestId('apartment-vacant')).toBeNull();
 		const next = byTestId('apartment-next-tenant')!;
 		expect(next.textContent!.replace(/\s+/g, ' ').trim()).toBe(
-			'Ab 1.11.2099 vermietet an Ruth Meier.'
+			'Ab 01.11.2099 vermietet an Ruth Meier.'
 		);
 		expect(next.querySelector('a')!.getAttribute('href')).toBe('/tenants/t3');
-		expect(byTestId('contract-history-row')!.textContent).toContain('ab 1.11.2099, unbefristet');
+		expect(byTestId('contract-history-row')!.textContent).toContain('ab 01.11.2099, unbefristet');
 		// a later contract can still be recorded, but it is no longer the next step
 		expect(byTestId('apartment-new-contract')!.className).not.toContain('bg-accent ');
 	});

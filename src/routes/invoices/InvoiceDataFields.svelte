@@ -4,7 +4,8 @@
 	import Select from '$lib/ui/Select.svelte';
 	import Textarea from '$lib/ui/Textarea.svelte';
 	import TextInput from '$lib/ui/TextInput.svelte';
-	import { formatDate, formatDateLong } from '$lib/utils/format';
+	import DateInput from '$lib/ui/DateInput.svelte';
+	import { formatDate } from '$lib/utils/format';
 
 	// What the invoice says: building, date, amount, supplier and service; shared by "Neue Rechnung" and "Rechnung bearbeiten"
 	let {
@@ -53,22 +54,20 @@
 	testid="invoice-building-select"
 />
 
-<div class="flex flex-col gap-2">
-	<TextInput
-		id="invoiceDate"
-		type="date"
-		label="Rechnungsdatum"
-		help="Übernehmen Sie das Datum von der Rechnung, nicht das heutige. Ohne Leistungszeitraum bestimmt es, in welche Abrechnungsperiode die Rechnung fällt."
-		bind:value={invoiceDate}
-		error={errors.invoiceDate}
-		testid="invoice-date-input"
-	/>
-	{#if invoiceDate}<p class="font-semibold text-ink">{formatDateLong(invoiceDate)}</p>{/if}
-</div>
+<DateInput
+	id="invoiceDate"
+	label="Rechnungsdatum"
+	help="Übernehmen Sie das Datum von der Rechnung, nicht das heutige. Ohne Leistungszeitraum bestimmt es, in welche Abrechnungsperiode die Rechnung fällt."
+	bind:value={invoiceDate}
+	error={errors.invoiceDate}
+	testid="invoice-date-input"
+/>
 
 <!-- TODO(fachlich prüfen): "Leistungszeitraum" is not in the glossary -->
 <fieldset class="flex flex-col gap-4">
-	<legend class="font-semibold text-ink">Leistungszeitraum (freiwillig)</legend>
+	<legend class="font-semibold text-ink">
+		Leistungszeitraum <span class="font-normal text-ink-muted">(optional)</span>
+	</legend>
 	<p class="text-ink-muted">
 		Für welche Zeit gilt die Rechnung? Geben Sie ihn bei Rechnungen für einen Zeitraum an, zum
 		Beispiel ein Quartal oder ein Jahr. Für das 4. Quartal also 01.10.2024 bis 31.12.2024, auch wenn
@@ -77,18 +76,18 @@
 		Gebäudes.
 	</p>
 	<div class="grid gap-4 sm:grid-cols-2">
-		<TextInput
+		<DateInput
 			id="servicePeriodStart"
-			type="date"
-			label="Von"
+			label="Beginn"
+			optional
 			bind:value={servicePeriodStart}
 			error={errors.servicePeriodStart}
 			testid="invoice-service-start-input"
 		/>
-		<TextInput
+		<DateInput
 			id="servicePeriodEnd"
-			type="date"
-			label="Bis"
+			label="Ende"
+			optional
 			bind:value={servicePeriodEnd}
 			error={errors.servicePeriodEnd}
 			testid="invoice-service-end-input"

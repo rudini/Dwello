@@ -102,7 +102,7 @@ describe('Übersicht', () => {
 
 	it('nennt Fristen mit Datum, Art, Name und Abstand', () => {
 		const row = page().match(/data-testid="overview-deadline"[\s\S]*?<\/li>/)![0];
-		expect(row).toContain('5.10.2026');
+		expect(row).toContain('05.10.2026');
 		expect(row).toContain('Zahlungsfrist');
 		expect(row).toContain('Anna Keller');
 		expect(row).toContain('seit 5 Tagen abgelaufen');
@@ -142,7 +142,7 @@ describe('Übersicht', () => {
 		const row = page({ buildingOccupancy: [building] }).match(
 			/data-testid="occupancy-row"[\s\S]*?<\/li>/
 		)![0];
-		expect(row.replace(/<[^>]*>/g, '')).toContain('3/4 vermietet, 2 ab 1.11.2026, 1 ab 1.12.2026');
+		expect(row.replace(/<[^>]*>/g, '')).toContain('3/4 vermietet, 2 ab 01.11.2026, 1 ab 01.12.2026');
 	});
 
 	it('bietet die häufigen Arbeiten direkt an', () => {

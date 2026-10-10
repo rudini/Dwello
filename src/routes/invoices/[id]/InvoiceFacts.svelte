@@ -1,12 +1,12 @@
 <script lang="ts">
 	import type { InvoiceWithDetails } from '$lib/types';
 	import Panel from '$lib/ui/Panel.svelte';
-	import { formatCurrency, formatDate } from '$lib/utils/format';
+	import { formatCurrency, formatDate, formatDateTime } from '$lib/utils/format';
 
 	// What the invoice says: date, amount, building and service
 	let { invoice }: { invoice: InvoiceWithDetails } = $props();
 
-	const changed = (iso?: string) => (iso ? new Date(iso).toLocaleString('de-CH') : '–');
+	const changed = (iso?: string) => (iso ? formatDateTime(iso) : '–');
 </script>
 
 <Panel title="Rechnung">

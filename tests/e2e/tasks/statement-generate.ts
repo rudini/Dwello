@@ -1,4 +1,5 @@
 import type { Actor } from '../fixtures/actor';
+import { typeDate } from '../interactions/form';
 import { visit } from '../interactions/navigation';
 import { finishedStep, saveStatus } from '../interactions/contract-form';
 import {
@@ -36,8 +37,8 @@ export const setManagementFee = (buildingId: string, percent: number) => async (
 export const openPreview =
 	(year: number, buildingId: string, options: RunOptions = {}) =>
 	async (actor: Actor) => {
-		await periodStartInput(actor.page).fill(`${year}-01-01`);
-		await periodEndInput(actor.page).fill(`${year}-12-31`);
+		await typeDate(periodStartInput(actor.page), `${year}-01-01`);
+		await typeDate(periodEndInput(actor.page), `${year}-12-31`);
 		await chooseBuilding(buildingId)(actor);
 		await nextButton(actor.page).click();
 		if (options.heatingProfileId) await heatingProfileSelect(actor.page).selectOption(options.heatingProfileId);

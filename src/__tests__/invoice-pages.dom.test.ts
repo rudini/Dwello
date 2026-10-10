@@ -200,7 +200,7 @@ describe('Rechnungsdetail', () => {
 			data: { invoice: invoice({ servicePeriodStart: '2024-10-01', servicePeriodEnd: '2024-12-31' }) }
 		});
 
-		expect(text()).toContain('Leistungszeitraum 1.10.2024 – 31.12.2024');
+		expect(text()).toContain('Leistungszeitraum 01.10.2024 – 31.12.2024');
 		expect(text()).not.toContain('Bestimmt, in welche Abrechnungsperiode');
 	});
 
@@ -211,7 +211,7 @@ describe('Rechnungsdetail', () => {
 		click('invoice-delete-button');
 
 		const dialog = document.querySelector('[role=dialog]')!.textContent!.replace(/\s+/g, ' ');
-		expect(dialog).toContain('Abrechnungsperiode 1.1.2024 – 31.12.2024');
+		expect(dialog).toContain('Abrechnungsperiode 01.01.2024 – 31.12.2024');
 		expect(dialog).toContain('Bewahren Sie den Beleg auf: Der Mieter kann Einsicht verlangen.');
 	});
 
@@ -390,8 +390,8 @@ describe('Rechnung erfassen', () => {
 		show(NewInvoicePage, { data: data(false) } as never);
 		fill();
 		expect(text()).toContain('Leistungszeitraum');
-		fireEvent(byTestId<HTMLInputElement>('invoice-service-start-input')!, 'input', '2024-10-01');
-		fireEvent(byTestId<HTMLInputElement>('invoice-service-end-input')!, 'input', '2024-12-31');
+		fireEvent(byTestId<HTMLInputElement>('invoice-service-start-input')!, 'input', '01.10.2024');
+		fireEvent(byTestId<HTMLInputElement>('invoice-service-end-input')!, 'input', '31.12.2024');
 
 		submit('submit-button');
 		await settle();
@@ -407,7 +407,7 @@ describe('Rechnung erfassen', () => {
 		const calls = fakeBff();
 		show(NewInvoicePage, { data: data(false) } as never);
 		fill();
-		fireEvent(byTestId<HTMLInputElement>('invoice-service-start-input')!, 'input', '2024-10-01');
+		fireEvent(byTestId<HTMLInputElement>('invoice-service-start-input')!, 'input', '01.10.2024');
 
 		submit('submit-button');
 
@@ -527,12 +527,12 @@ describe('Rechnung erfassen', () => {
 		expect(date.value).toBe('');
 		expect(byTestId('invoice-period-warning')).toBeNull();
 
-		fireEvent(date, 'input', '2026-10-10');
+		fireEvent(date, 'input', '10.10.2026');
 		expect(byTestId('invoice-period-warning')!.textContent!.replace(/\s+/g, ' ')).toContain(
-			'Das Rechnungsdatum liegt nicht in der Abrechnungsperiode 1.1.2025 – 31.12.2025'
+			'Das Rechnungsdatum liegt nicht in der Abrechnungsperiode 01.01.2025 – 31.12.2025'
 		);
 
-		fireEvent(date, 'input', '2025-11-15');
+		fireEvent(date, 'input', '15.11.2025');
 		expect(byTestId('invoice-period-warning')).toBeNull();
 	});
 
@@ -540,9 +540,9 @@ describe('Rechnung erfassen', () => {
 		show(NewInvoicePage, {
 			data: data(false, { returnTo: '/statements/generate', period: { start: '2025-01-01', end: '2025-12-31' } })
 		} as never);
-		fireEvent(byTestId<HTMLInputElement>('invoice-date-input')!, 'input', '2025-01-15');
-		fireEvent(byTestId<HTMLInputElement>('invoice-service-start-input')!, 'input', '2024-10-01');
-		fireEvent(byTestId<HTMLInputElement>('invoice-service-end-input')!, 'input', '2024-12-31');
+		fireEvent(byTestId<HTMLInputElement>('invoice-date-input')!, 'input', '15.01.2025');
+		fireEvent(byTestId<HTMLInputElement>('invoice-service-start-input')!, 'input', '01.10.2024');
+		fireEvent(byTestId<HTMLInputElement>('invoice-service-end-input')!, 'input', '31.12.2024');
 
 		expect(byTestId('invoice-period-warning')!.textContent).toContain(
 			'Der Leistungszeitraum liegt nicht in der Abrechnungsperiode'
@@ -606,8 +606,8 @@ describe('Rechnung bearbeiten', () => {
 		} as never);
 
 		const warning = byTestId('invoice-billed-warning')!.textContent!.replace(/\s+/g, ' ');
-		expect(warning).toContain('Abrechnungsperiode 1.1.2024 – 31.12.2024');
-		expect(warning).toContain('Abrechnungsperiode 1.1.2024 – 30.6.2024');
+		expect(warning).toContain('Abrechnungsperiode 01.01.2024 – 31.12.2024');
+		expect(warning).toContain('Abrechnungsperiode 01.01.2024 – 30.06.2024');
 		expect(warning).toContain(
 			'Ändern Sie diese Rechnung, stimmen diese Abrechnungen nicht mehr. Entwürfe erstellen Sie neu; versendete oder bezahlte Abrechnungen berichtigen Sie gegenüber dem Mieter.'
 		);

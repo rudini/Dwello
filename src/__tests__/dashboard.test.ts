@@ -90,7 +90,7 @@ describe('Übersicht laden', () => {
 			'missing-period',
 			'drafts'
 		]);
-		expect(data.tasks[2].text).toContain('1.7.2025 – 30.6.2026');
+		expect(data.tasks[2].text).toContain('01.07.2025 – 30.06.2026');
 		expect(data.tasks[2].text).toContain('Seeblick, Lindenhof');
 	});
 

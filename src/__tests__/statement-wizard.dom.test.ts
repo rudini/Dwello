@@ -107,7 +107,7 @@ describe('Abrechnungen erstellen', () => {
 		open();
 		expect(heading()).toBe('Abrechnungsperiode');
 		expect(document.querySelector('h2')!.textContent).toMatch(/Schritt 1 von 5/);
-		expect(byTestId<HTMLInputElement>('period-start-input')!.value).toBe('2024-01-01');
+		expect(byTestId<HTMLInputElement>('period-start-input')!.value).toBe('01.01.2024');
 		expect(text()).toContain('Montag, 1. Januar 2024');
 	});
 
@@ -116,7 +116,7 @@ describe('Abrechnungen erstellen', () => {
 		open();
 		expect(byTestId('period-future-warning')).toBeNull();
 
-		fireEvent(byTestId<HTMLInputElement>('period-end-input')!, 'input', '2099-12-31');
+		fireEvent(byTestId<HTMLInputElement>('period-end-input')!, 'input', '31.12.2099');
 
 		expect(byTestId('period-future-warning')!.textContent!.replace(/\s+/g, ' ')).toContain(
 			'Die Abrechnungsperiode ist noch nicht zu Ende.'
@@ -214,7 +214,7 @@ describe('Abrechnungen erstellen', () => {
 		const rows = [...document.querySelectorAll('[data-testid="preview-invoices"]')].map((r) =>
 			r.textContent!.replace(/\s+/g, ' ')
 		);
-		expect(rows[0]).toContain('3 Rechnungen vom 15.1.2024 bis 30.6.2024');
+		expect(rows[0]).toContain('3 Rechnungen vom 15.01.2024 bis 30.06.2024');
 		expect(rows[1]).toContain('Keine Rechnungen erfasst');
 	});
 
@@ -395,7 +395,7 @@ describe('Abrechnungen erstellen', () => {
 		});
 		const check = byTestId('category-check')!;
 		expect(check.textContent).toContain('Ahornhof');
-		expect(check.textContent).toContain('gleichen Zeitraum im Vorjahr (1.1.2023 – 31.12.2023)');
+		expect(check.textContent).toContain('gleichen Zeitraum im Vorjahr (01.01.2023 – 31.12.2023)');
 		const findings = [...document.querySelectorAll('[data-testid="category-finding"]')].map((f) =>
 			f.textContent!.replace(/\s+/g, ' ').trim()
 		);
@@ -618,7 +618,7 @@ describe('Abrechnung bearbeiten', () => {
 			form: null
 		} as never);
 
-		expect(byTestId<HTMLInputElement>('payment-deadline-input')!.value).toBe('2025-02-28');
+		expect(byTestId<HTMLInputElement>('payment-deadline-input')!.value).toBe('28.02.2025');
 		expect(byTestId<HTMLTextAreaElement>('statement-notes-input')!.value).toBe('Ratenzahlung');
 		expect(text()).toContain('Heizung');
 		expect(byTestId('form-cancel')!.getAttribute('href')).toBe('/statements/s1');

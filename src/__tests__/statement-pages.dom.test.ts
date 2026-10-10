@@ -298,7 +298,7 @@ describe('Abrechnungsdetail', () => {
 		expect(byTestId('statement-balance')!.textContent).toMatch(/Rückerstattung.*CHF\s83.43/);
 		expect(text()).not.toContain('CHF-83.43');
 		expect(text()).not.toContain('Zahlungsfrist');
-		expect(byTestId('statement-payment-deadline')!.textContent).toBe('28.2.2025');
+		expect(byTestId('statement-payment-deadline')!.textContent).toBe('28.02.2025');
 	});
 
 	it('bietet einen Entwurf zum Versenden, Bearbeiten und Löschen an', () => {
@@ -451,7 +451,7 @@ describe('Abrechnung bearbeiten', () => {
 	it('ändert nur Frist und Bemerkungen, die Kosten bleiben wie berechnet', () => {
 		edit({ notes: 'Ratenzahlung' });
 
-		expect(byTestId<HTMLInputElement>('payment-deadline-input')!.value).toBe('2025-02-28');
+		expect(byTestId<HTMLInputElement>('payment-deadline-input')!.value).toBe('28.02.2025');
 		expect(text()).toContain('Freitag, 28. Februar 2025');
 		expect(byTestId<HTMLTextAreaElement>('statement-notes-input')!.value).toBe('Ratenzahlung');
 		expect(allByTestId('statement-line-item')).toHaveLength(2);

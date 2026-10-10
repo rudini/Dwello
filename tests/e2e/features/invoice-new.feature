@@ -26,6 +26,14 @@ Funktionalität: Neue Rechnung erfassen
     Und sieht der Liegenschaftsverwalter die Fehlermeldung "Bitte geben Sie eine Beschreibung ein"
     Und sieht der Liegenschaftsverwalter die Fehlermeldung "Bitte geben Sie einen gültigen Betrag ein"
 
+  # Datum als TT.MM.JJJJ, unabhängig von der Sprache des Browsers; die Punkte setzt das Feld selbst
+  Szenario: Rechnungsdatum als TT.MM.JJJJ eintippen
+    Wenn der Liegenschaftsverwalter als Rechnungsdatum "31122025" eintippt
+    Dann zeigt das Feld Rechnungsdatum "31.12.2025"
+    Und steht unter dem Rechnungsdatum "Mittwoch, 31. Dezember 2025"
+    Wenn der Liegenschaftsverwalter als Rechnungsdatum "30.02.2025" eintippt
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Dieses Datum gibt es nicht"
+
   Szenario: Erfassung abbrechen
     Wenn der Liegenschaftsverwalter die Bearbeitung abbricht
     Dann ist der Liegenschaftsverwalter auf der Rechnungsliste

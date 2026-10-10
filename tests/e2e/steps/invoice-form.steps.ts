@@ -5,6 +5,7 @@ import { visit } from '../interactions/navigation';
 import {
 	dateOutsidePeriodWarning,
 	invoiceDate,
+	invoiceDateInWords,
 	nonAllocableCategoryWarning,
 	utilityCostChoice
 } from '../questions/invoice-form';
@@ -17,7 +18,8 @@ import {
 	overrideCategory,
 	recategorize,
 	registerInvoice,
-	saveInvoice
+	saveInvoice,
+	typeInvoiceDate
 } from '../tasks/invoice-form';
 import { searchInvoices } from '../tasks/invoices';
 
@@ -108,6 +110,18 @@ Then(
 		);
 	}
 );
+
+When('der Liegenschaftsverwalter als Rechnungsdatum {string} eintippt', async ({ verwalter }, text: string) => {
+	await verwalter.perform(typeInvoiceDate(text));
+});
+
+Then('zeigt das Feld Rechnungsdatum {string}', async ({ verwalter }, text: string) => {
+	await expect(invoiceDate(verwalter)).toHaveValue(text);
+});
+
+Then('steht unter dem Rechnungsdatum {string}', async ({ verwalter }, words: string) => {
+	await expect(invoiceDateInWords(verwalter)).toHaveText(words);
+});
 
 Then('ist das Rechnungsdatum leer, damit es bewusst gewählt wird', async ({ verwalter }) => {
 	await expect(invoiceDate(verwalter)).toHaveValue('');

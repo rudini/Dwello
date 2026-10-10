@@ -1,4 +1,5 @@
 import AxeBuilder from '@axe-core/playwright';
+import { typeDate } from './form';
 import type { Page } from '@playwright/test';
 import { readFileSync } from 'fs';
 import type { TestData } from '../fixtures/backend';
@@ -85,8 +86,8 @@ const dialog = (page: Page) => shows(page, '[data-testid$="-confirm"]');
 
 // The statement wizard's preview of a calendar year for this example's building, heating profile and fee as proposed
 async function previewOf(page: Page, year: string, shown: string) {
-	await page.getByTestId('period-start-input').fill(`${year}-01-01`);
-	await page.getByTestId('period-end-input').fill(`${year}-12-31`);
+	await typeDate(page.getByTestId('period-start-input'), `${year}-01-01`);
+	await typeDate(page.getByTestId('period-end-input'), `${year}-12-31`);
 	await press(page, 'wizard-next');
 	await page.getByTestId(`generate-building-${exampleBuilding}`).check();
 	await press(page, 'wizard-next');
@@ -179,7 +180,7 @@ const states: Record<string, (page: Page, viewport: Viewport) => Promise<unknown
 	'overlap-warning': async (page) => {
 		await page.getByTestId('wizard-next').click(); // tenant and apartment come from the address
 		await page.getByTestId('wizard-next').click();
-		await page.getByTestId('start-date-input').fill('2020-01-01'); // the apartment is rented until 2099
+		await typeDate(page.getByTestId('start-date-input'), '2020-01-01'); // the apartment is rented until 2099
 		await shows(page, '[data-testid="overlap-warning"]');
 	},
 	'draft-restored': async (page) => {
@@ -192,7 +193,7 @@ const states: Record<string, (page: Page, viewport: Viewport) => Promise<unknown
 	'category-check': (page) => previewOf(page, '2026', 'category-check'),
 	'preview-empty': (page) => previewOf(page, '2000', 'preview-empty'),
 	'period-not-over': async (page) => {
-		await page.getByTestId('period-end-input').fill('2099-12-31');
+		await typeDate(page.getByTestId('period-end-input'), '2099-12-31');
 		await shows(page, '[data-testid="period-future-warning"]');
 	}
 };
@@ -236,8 +237,8 @@ async function contractWizardSteps(page: Page) {
 	found.push(...(await violations(page)));
 	await nextStep('start-date-input'); // "Vertragsdauer", limited: end date and both dates in words
 	await page.getByTestId('contract-duration').getByText('Befristet', { exact: true }).click();
-	await page.getByTestId('start-date-input').fill('2030-01-01');
-	await page.getByTestId('end-date-input').fill('2031-12-31');
+	await typeDate(page.getByTestId('start-date-input'), '2030-01-01');
+	await typeDate(page.getByTestId('end-date-input'), '2031-12-31');
 	found.push(...(await violations(page)));
 	await nextStep('contract-base-rent-input'); // "Miete"
 	await page.getByTestId('contract-base-rent-input').fill('1500');

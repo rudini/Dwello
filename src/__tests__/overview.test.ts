@@ -69,7 +69,7 @@ describe('Aufgaben der Übersicht', () => {
 			title: 'Nebenkostenabrechnungen erstellen',
 			href: '/statements/generate'
 		});
-		expect(tasks[1].text).toContain('1.1.2025 – 31.12.2025');
+		expect(tasks[1].text).toContain('01.01.2025 – 31.12.2025');
 		expect(tasks[1].text).toContain('Seeblick');
 		// the invoices come first, so the task leads to them as well
 		expect(tasks[1].link).toEqual({

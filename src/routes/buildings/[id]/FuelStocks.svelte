@@ -5,7 +5,7 @@
 	import MoneyInput from '$lib/ui/MoneyInput.svelte';
 	import Panel from '$lib/ui/Panel.svelte';
 	import Select from '$lib/ui/Select.svelte';
-	import TextInput from '$lib/ui/TextInput.svelte';
+	import DateInput from '$lib/ui/DateInput.svelte';
 	import type { FuelStock } from './+page.server';
 	import FuelStockList from './FuelStockList.svelte';
 
@@ -49,10 +49,9 @@
 
 	<form method="POST" action="?/addFuelStock" use:enhance class="flex flex-col gap-4">
 		<div class="grid gap-4 sm:grid-cols-2">
-			<TextInput
+			<DateInput
 				id="fuelStockDate"
 				name="readingDate"
-				type="date"
 				label="Stichtag"
 				error={errors.readingDate}
 				testid="fuel-stock-date-input"

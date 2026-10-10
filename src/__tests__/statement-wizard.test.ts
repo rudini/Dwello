@@ -81,7 +81,7 @@ describe('Rechnungen pro Gebäude', () => {
 			{
 				buildingId: 'b1',
 				name: 'Ahornhof',
-				text: '3 Rechnungen vom 15.1.2024 bis 30.6.2024',
+				text: '3 Rechnungen vom 15.01.2024 bis 30.06.2024',
 				missing: false,
 				partial: true, // nothing after June
 				existing: 0,
@@ -107,7 +107,7 @@ describe('Rechnungen pro Gebäude', () => {
 				buildings,
 				period
 			)[0].text
-		).toBe('1 Rechnung vom 15.3.2024');
+		).toBe('1 Rechnung vom 15.03.2024');
 	});
 });
 
@@ -161,7 +161,7 @@ describe('Rechnungen pro Kategorie', () => {
 		).toBe('Rechnungen für das 1. Quartal und das 3. Quartal fehlen. Im Vorjahr: 4 Rechnungen.');
 		expect(findingText(finding('gap', { missingParts: [part('2025-03-01', '2025-03-31')] }))).toContain('für den März fehlt');
 		expect(findingText(finding('gap', { missingParts: [part('2026-01-14', '2026-07-15')] }))).toContain(
-			'für die Zeit vom 14.1.2026 bis 15.7.2026 fehlt'
+			'für die Zeit vom 14.01.2026 bis 15.07.2026 fehlt'
 		);
 	});
 
