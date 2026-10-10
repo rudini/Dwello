@@ -26,8 +26,19 @@ describe('Heizprofil aus dem Backend', () => {
 		expect(profile).toMatchObject({
 			id: 'hp1',
 			name: 'Mittelland',
+			nameDE: '',
 			description: '',
 			isActive: true
 		});
+	});
+
+	it('übernimmt den deutschen Namen', () => {
+		const profile = toHeatingProfile({
+			id: 'hp1',
+			name: 'Heating Mountain',
+			nameDE: 'Heizung Bergregion'
+		});
+
+		expect(profile.nameDE).toBe('Heizung Bergregion');
 	});
 });
