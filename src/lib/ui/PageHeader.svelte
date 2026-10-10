@@ -24,7 +24,7 @@
 					<li class="flex items-center gap-2">
 						<a
 							href={link.href}
-							class="text-accent underline underline-offset-4 hover:text-accent-strong"
+							class="inline-flex min-h-12 items-center text-accent underline underline-offset-4 hover:text-accent-strong"
 							data-testid="breadcrumb-link">{link.label}</a
 						>
 						<Icon name="chevron-right" size={16} />
@@ -34,8 +34,9 @@
 			</ol>
 		</nav>
 	{/if}
-	<div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-		<div class="flex min-w-0 flex-col gap-2">
+	<div class="flex flex-col gap-4 md:flex-row md:flex-wrap md:items-end md:justify-between">
+		<!-- From md the title keeps at least 18rem and the actions wrap below it instead of squeezing it -->
+		<div class="flex min-w-0 flex-col gap-2 md:grow md:basis-72">
 			<!-- Focusable from script: after an action removes the focused button, focus returns here.
 			     Long German words hyphenate (lang="de" in app.html) instead of widening the page -->
 			<h1 tabindex="-1" class="hyphens-auto break-words text-3xl font-bold leading-tight text-ink">
@@ -43,6 +44,6 @@
 			</h1>
 			{#if purpose}<p class="max-w-prose text-lg text-ink-muted">{purpose}</p>{/if}
 		</div>
-		{#if action}<div class="flex shrink-0 flex-wrap gap-4">{@render action()}</div>{/if}
+		{#if action}<div class="flex flex-wrap gap-4">{@render action()}</div>{/if}
 	</div>
 </header>
