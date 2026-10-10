@@ -14,7 +14,7 @@
 		<EmptyState
 			testid="coming-soon"
 			illustration="statement"
-			title="Berichte kommen in Phase 2"
+			title="Berichte sind in Vorbereitung"
 			text="Jahresberichte und Exporte als Excel oder PDF sind für eine spätere Version geplant. Fristen und Zahlen zu Ihren Gebäuden finden Sie schon heute in der Übersicht."
 			actionLabel="Zur Übersicht"
 			actionHref="/dashboard"

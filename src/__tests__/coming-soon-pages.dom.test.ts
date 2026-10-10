@@ -4,8 +4,8 @@ import ReportsPage from '../routes/reports/+page.svelte';
 import { byTestId, show } from './helpers/dom';
 
 describe.each([
-	[AnalyticsPage, 'Analytics kommt in Phase 2'],
-	[ReportsPage, 'Berichte kommen in Phase 2']
+	[AnalyticsPage, 'Auswertungen sind in Vorbereitung'],
+	[ReportsPage, 'Berichte sind in Vorbereitung']
 ])('Angekündigte Funktion', (page, announcement) => {
 	it(`kündigt «${announcement}» mit Illustration an und führt zurück zur Übersicht`, () => {
 		show(page, {});
