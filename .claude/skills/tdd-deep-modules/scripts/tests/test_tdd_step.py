@@ -276,3 +276,12 @@ class TddStepTest(unittest.TestCase):
         self.assertEqual(result.returncode, 1, result.stderr)
         self.assertIn("red needs a failing assertion", result.stderr)
         self.assertEqual(repo.subject(), "init")
+
+    def test_pytest_running_unittest_assertions_accepts_them_as_red(self):
+        repo = Repo(self, {"calc.py": WRONG_ADD, "pytest.ini": "[pytest]\n"})
+        repo.write("test_calc.py", ADD_TEST)
+
+        result = repo.run("tdd-step", "red", "adds two numbers")
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(repo.subject(), "red: adds two numbers")
