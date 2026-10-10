@@ -46,9 +46,16 @@ def main(args):
     if found:
         print("\n".join(f"tdd-step: refused: {v}" for v in found), file=sys.stderr)
         return 1
+    index = git("write-tree").strip()
     git("add", "-A")
-    git("commit", "-q", "-m", f"{phase}: {message}",
-        "--trailer", f"TDD-Phase: {phase}", "--trailer", f"TDD-Exit-Code: {run.exit_code}")
+    done = subprocess.run(["git", "commit", "-q", "-m", f"{phase}: {message}",
+                           "--trailer", f"TDD-Phase: {phase}",
+                           "--trailer", f"TDD-Exit-Code: {run.exit_code}"],
+                          capture_output=True, text=True)
+    if done.returncode != 0:
+        git("read-tree", index)
+        print(f"tdd-step: git commit failed:\n{done.stderr}{done.stdout}", file=sys.stderr)
+        return 2
     return 0
 
 
