@@ -49,7 +49,8 @@ describe('Gebäudeliste', () => {
 	it('nennt Seite, Anzahl und den einen Hauptschritt', () => {
 		list([building()]);
 		expect(document.querySelector('h1')!.textContent).toBe('Gebäude');
-		expect(text()).toContain('1 Gebäude in Ihrer Verwaltung');
+		expect(text()).not.toContain('1 Gebäude in Ihrer Verwaltung'); // the count is only in the results heading
+		expect(text()).toContain('Ihre Gebäude mit Adresse und Wohnungen');
 		const add = byTestId('building-new-button')!;
 		expect(add.getAttribute('href')).toBe('/buildings/new');
 		expect(add.textContent).toContain('Gebäude erfassen');

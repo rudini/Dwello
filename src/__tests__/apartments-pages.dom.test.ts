@@ -60,7 +60,8 @@ describe('Wohnungsliste', () => {
 	it('nennt Seite, Anzahl und den einen Hauptschritt', () => {
 		list([apartment()]);
 		expect(document.querySelector('h1')!.textContent).toBe('Wohnungen');
-		expect(text()).toContain('1 Wohnung in Ihren Gebäuden');
+		expect(text()).not.toContain('1 Wohnung in Ihren Gebäuden'); // the count is only in the results heading
+		expect(text()).toContain('Alle Wohnungen Ihrer Gebäude mit Mietstatus');
 		const add = byTestId('apartments-new-button')!;
 		expect(add.getAttribute('href')).toBe('/apartments/new');
 		expect(add.textContent).toContain('Wohnung erfassen');

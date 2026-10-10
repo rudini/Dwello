@@ -21,10 +21,7 @@
 </svelte:head>
 
 <div class="flex flex-col gap-8" data-testid="apartments-page">
-	<PageHeader
-		title="Wohnungen"
-		purpose="{data.total} {data.total === 1 ? 'Wohnung' : 'Wohnungen'} in Ihren Gebäuden"
-	>
+	<PageHeader title="Wohnungen" purpose="Alle Wohnungen Ihrer Gebäude mit Mietstatus.">
 		{#snippet action()}
 			<Button href="/apartments/new" variant="primary" icon="add" testid="apartments-new-button"
 				>Wohnung erfassen</Button

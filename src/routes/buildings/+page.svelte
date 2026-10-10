@@ -33,7 +33,7 @@
 </svelte:head>
 
 <div class="flex flex-col gap-8" data-testid="buildings-page">
-	<PageHeader title="Gebäude" purpose="{data.total} Gebäude in Ihrer Verwaltung">
+	<PageHeader title="Gebäude" purpose="Ihre Gebäude mit Adresse und Wohnungen.">
 		{#snippet action()}
 			<Button href="/buildings/new" variant="primary" icon="add" testid="building-new-button"
 				>Gebäude erfassen</Button
