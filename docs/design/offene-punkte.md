@@ -170,3 +170,12 @@ Every place in the code is marked `TODO(fachlich prüfen)` (`grep -rn "TODO(fach
 - Small layout points from the final review: ~~statement list columns shift when a row has a "PDF" link~~ and ~~"66.7%" without a space~~ fixed (0c237df); open: the Verlauf labels do not align, a success toast can cover list content on phones. The tenant row's "Wohnung … - Gebäude" matches the contract wizard's apartment choice and stays.
 - ~~The help glossary does not explain Umlagefähig, Nachzahlung/Rückerstattung, Wiedervermietet and Gesperrt~~ – added from the glossary definitions (0c237df). "Mietstage" is the glossary term (several personas read "Mietstagen" as a typo).
 - The tenant form does not say whether the address is the current one or the address of the rented flat (Helga) – TODO(fachlich prüfen), Korrespondenzadresse.
+
+## Final round b (re-runs of Anna and Marco)
+
+- Which invoices of a period are missing (e.g. by comparing categories with the previous period) is not checked; the wizard counts invoices per building and flags none or a partly covered period. A comparison by category would be new calculation logic – TODO(fachlich prüfen), backend.
+- After draft statements exist, the overview's "prüfen und versenden" task does not repeat that a draft rests on few invoices; the warning is in the wizard and the statement detail shows its positions.
+- The warning "Rechnungen nur für einen Teil der Periode" has no "Rechnung erfassen" link of its own; one confirmation covers all warnings of a preview.
+- "Entwürfe ansehen" after creating lists all drafts, not only those of the run; new drafts have no PDF until "PDF ansehen" creates it.
+- The "Manuell" badge on invoices is not explained in the help; "Entwurf" names both the wizard's saved input and the statement status (glossary table).
+
