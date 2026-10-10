@@ -3,7 +3,7 @@
 	import { enhance } from '$app/forms';
 	import type { SubmitFunction } from '@sveltejs/kit';
 	import { addToast } from '$lib/stores';
-	import AddressSearch from '$lib/components/AddressSearch.svelte';
+	import AddressSearch from './AddressSearch.svelte';
 	import type { Address } from '$lib/services/openplz';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';

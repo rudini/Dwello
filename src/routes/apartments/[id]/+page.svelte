@@ -1,6 +1,6 @@
 <script lang="ts">
-	import CurrentTenantCard from '$lib/components/CurrentTenantCard.svelte';
-	import MonthlyCostsCard from '$lib/components/MonthlyCostsCard.svelte';
+	import CurrentTenantCard from './CurrentTenantCard.svelte';
+	import MonthlyCostsCard from './MonthlyCostsCard.svelte';
 	import Button from '$lib/ui/Button.svelte';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import Panel from '$lib/ui/Panel.svelte';

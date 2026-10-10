@@ -48,7 +48,7 @@ function compileForServer(filename: string, dir: string): string {
 			/from '(\.[^']+)'/g,
 			(_, path: string) => `from '${resolve(dirname(filename), path)}'`
 		);
-	// Named by the path below src, so components with the same file name (lib/ui/Icon, lib/components/Icon) stay apart
+	// Named by the path below src, so components with the same file name (lib/ui/Icon, routes/…/Icon) stay apart
 	const module = join(
 		dir,
 		`${relative(resolve('src'), filename)

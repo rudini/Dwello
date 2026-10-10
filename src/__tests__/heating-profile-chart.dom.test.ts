@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import HeatingProfileChart from '$lib/components/HeatingProfileChart.svelte';
+import HeatingProfileChart from '$lib/ui/HeatingProfileChart.svelte';
 import { MONTHS } from '$lib/heating-profile';
 import { byTestId, show } from './helpers/dom';
 

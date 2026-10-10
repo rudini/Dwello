@@ -1,11 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { existsSync, readdirSync, readFileSync } from 'fs';
-import legacy from './design-guard-legacy.json';
 
-/**
- * Keeps the design system clean: only tokens and the new components, none of the forbidden patterns.
- * Files not yet migrated are listed in design-guard-legacy.json; the list only shrinks and is empty after stage 8.
- */
+/** Keeps the design system clean: only tokens and the new components, none of the forbidden patterns */
 const palette =
 	'gray|slate|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose|black|white';
 const end = `(?=[\\s"'\`}:=]|$)`;
@@ -45,10 +41,7 @@ const rules: [string, RegExp][] = [
 	['Verlauf, Unschärfe oder Glühen', /gradient|(?<![:\w-])blur\b|backdrop-blur|drop-shadow|glow/],
 	['Material Symbols oder externe Schrift', /material-symbols|fonts\.googleapis|fonts\.gstatic/],
 	['Emoji als Symbol', /(?![©®™])\p{Extended_Pictographic}/u],
-	[
-		'altes Basis-Bauteil',
-		/\$lib\/components\/(?:Button|Card|Modal|Badge|StatusBadge|Icon|TextField|FieldError|FormActions|Toast|ToastContainer|InfoCard|StatCard|Pagination|PageTrail)\.svelte/
-	]
+	['Bauteil des alten Designsystems', /\$lib\/components\//]
 ];
 
 // Badges and navigation group labels may use 14 px; nothing a user must read to act does
@@ -86,7 +79,8 @@ describe('Wächter des Designsystems', () => {
 		'class="bg-gradient-to-r"',
 		'class="text-xs"',
 		'class="p-3"',
-		'class="material-symbols-outlined"'
+		'class="material-symbols-outlined"',
+		"import Header from '$lib/components/Header.svelte'"
 	])('meldet %s', (sample) => {
 		expect(findingsIn(sample)).not.toEqual([]);
 	});
@@ -103,15 +97,11 @@ describe('Wächter des Designsystems', () => {
 });
 
 describe('Designsystem', () => {
-	it.each(sources.filter((file) => !legacy.includes(file)))(
-		'%s nutzt nur Tokens und neue Bauteile',
-		(file) => {
-			expect(findings(file)).toEqual([]);
-		}
-	);
+	it.each(sources)('%s nutzt nur Tokens und neue Bauteile', (file) => {
+		expect(findings(file)).toEqual([]);
+	});
 
-	it('führt in der Altlasten-Liste nur Dateien, die noch umzubauen sind', () => {
-		const done = legacy.filter((file) => !existsSync(file) || findings(file).length === 0);
-		expect(done, 'aus design-guard-legacy.json entfernen').toEqual([]);
+	it('hat den Ordner des alten Designsystems entfernt', () => {
+		expect(existsSync('src/lib/components')).toBe(false);
 	});
 });

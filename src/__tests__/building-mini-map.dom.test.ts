@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { flushSync, mount, unmount } from 'svelte';
-import BuildingMiniMap from '../lib/components/BuildingMiniMap.svelte';
+import BuildingMiniMap from '../routes/buildings/BuildingMiniMap.svelte';
 import { byTestId } from './helpers/dom';
 
 describe('BuildingMiniMap', () => {

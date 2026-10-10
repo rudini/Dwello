@@ -70,4 +70,4 @@ Before marking anything complete, all of these pass: `npm run test:coverage`, `n
 - `README.md`: setup, Docker deployment, database and demo data commands
 - `docs/test-pyramid.md`: test layers, runners, rules, coverage target
 - `docs/migration-mva.md`: Minimum Viable Architecture: quality scenarios, their status, deferred decisions
-- `docs/design_system.md`: colors, typography, components
+- `docs/design/token-referenz.md`: design tokens (colors, typography, spacing, radius, shadow) and components

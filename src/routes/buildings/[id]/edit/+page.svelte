@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { BuildingEditData } from './+page.server';
 	import type { ActionData } from './$types';
-	import BuildingForm from '$lib/components/BuildingForm.svelte';
+	import BuildingForm from '../../BuildingForm.svelte';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import Panel from '$lib/ui/Panel.svelte';
 

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import TenantFormFields from '$lib/components/TenantFormFields.svelte';
+	import TenantFormFields from './TenantFormFields.svelte';
 	import { confirmSaved } from '$lib/tenant';
 	import type { Tenant } from '$lib/types';
 	import Alert from '$lib/ui/Alert.svelte';

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
-	import HeatingProfileChart from '$lib/components/HeatingProfileChart.svelte';
+	import HeatingProfileChart from '$lib/ui/HeatingProfileChart.svelte';
 	import { profileTotal } from '$lib/heating-profile';
 	import { germanName } from '$lib/names';
 	import Badge from '$lib/ui/Badge.svelte';

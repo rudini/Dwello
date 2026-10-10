@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { occupancyParts } from '$lib/apartment';
 	import type { BuildingWithStats } from '$lib/types';
-	import BuildingMiniMap from '$lib/components/BuildingMiniMap.svelte';
+	import BuildingMiniMap from '../BuildingMiniMap.svelte';
 	import Panel from '$lib/ui/Panel.svelte';
 
 	// The building's master data and how many of its apartments are rented

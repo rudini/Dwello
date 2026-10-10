@@ -43,9 +43,9 @@
 	color-scheme: light;
 }
 
-/* Dark mode follows the system; switched on (data-dark-ready on <html>) once every screen uses tokens */
+/* Dark mode follows the system setting (no toggle, plan D4) */
 @media (prefers-color-scheme: dark) {
-	:root[data-dark-ready] {
+	:root {
 		--color-canvas: #111518;
 		--color-surface: #1a1f23;
 		--color-sunken: #242b30;

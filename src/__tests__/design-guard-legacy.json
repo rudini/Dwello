@@ -1,6 +1,0 @@
-[
-	"src/lib/components/Card.svelte",
-	"src/lib/components/FilterSelect.svelte",
-	"src/lib/components/SearchField.svelte",
-	"src/styles/globals.css"
-]

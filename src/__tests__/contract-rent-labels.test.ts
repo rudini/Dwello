@@ -4,7 +4,7 @@ import { render } from 'svelte/server';
 vi.mock('$app/forms', () => ({ enhance: () => ({}) }));
 
 import ContractPage from '../routes/contracts/[id]/+page.svelte';
-import MonthlyCostsCard from '$lib/components/MonthlyCostsCard.svelte';
+import MonthlyCostsCard from '../routes/apartments/[id]/MonthlyCostsCard.svelte';
 
 // Akonto is monthly_advance_payment, Zusatzmiete is additional_rent (UBIQUITOUS_LANGUAGE.md); the edit form: contract-edit.dom.test.ts
 

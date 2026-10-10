@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { render } from 'svelte/server';
-import BuildingForm from '$lib/components/BuildingForm.svelte';
+import BuildingForm from '../routes/buildings/BuildingForm.svelte';
 
 describe('BuildingForm', () => {
 	it('renders the create form with address search and create button', () => {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import TenantFormFields from '$lib/components/TenantFormFields.svelte';
+import TenantFormFields from '../routes/tenants/TenantFormFields.svelte';
 import { byTestId, fireEvent, show } from './helpers/dom';
 
 describe('Mieterformular nach einem abgelehnten Speichern', () => {

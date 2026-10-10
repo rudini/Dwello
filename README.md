@@ -191,7 +191,7 @@ dwello/
 - **Data Model:** [docs/data-model.md](./docs/data-model.md)
 - **API Specification:** [docs/api-specification.md](./docs/api-specification.md)
 - **Tech Stack:** [docs/tech-stack.md](./docs/tech-stack.md)
-- **Design System:** [docs/design_system.md](./docs/design_system.md)
+- **Design System:** [docs/design/token-referenz.md](./docs/design/token-referenz.md)
 - **Test Pyramid:** [docs/test-pyramid.md](./docs/test-pyramid.md)
 - **Architecture (MVA):** [docs/migration-mva.md](./docs/migration-mva.md)
 - **Domain Language:** [UBIQUITOUS_LANGUAGE.md](./UBIQUITOUS_LANGUAGE.md)

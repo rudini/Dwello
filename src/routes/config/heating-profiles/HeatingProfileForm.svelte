@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
-	import HeatingProfileChart from '$lib/components/HeatingProfileChart.svelte';
+	import HeatingProfileChart from '$lib/ui/HeatingProfileChart.svelte';
 	import { MONTHS, profileTotal } from '$lib/heating-profile';
 	import type { HeatingProfile } from '$lib/types';
 	import Field from '$lib/ui/Field.svelte';

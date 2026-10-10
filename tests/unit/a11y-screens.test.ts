@@ -25,4 +25,8 @@ describe('Bildschirmliste der Barrierefreiheitsprüfung', () => {
 	it('beginnt jeden Bildschirm mit seinem Grundzustand', () => {
 		expect(screenList.screens.filter((screen) => screen.states[0] !== 'default')).toEqual([]);
 	});
+
+	it('prüft jeden Zustand hell und dunkel', () => {
+		expect(screenList.colorSchemes).toEqual(['light', 'dark']);
+	});
 });

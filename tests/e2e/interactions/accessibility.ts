@@ -161,6 +161,9 @@ const states: Record<string, (page: Page, viewport: Viewport) => Promise<unknown
 
 /** Rule violations axe finds on the page as it is now, as readable lines */
 async function violations(page: Page) {
+	// From the top of the page: a scrolled page slides content under the sticky header, and target-size would
+	// then judge a 48 px link by the part the header leaves visible
+	await page.evaluate(() => window.scrollTo(0, 0));
 	const { violations } = await new AxeBuilder({ page }).withTags(TAGS).analyze();
 	return violations.flatMap((violation) =>
 		violation.nodes.map((node) => `${violation.id}: ${violation.help} – ${node.target.join(' ')}`)

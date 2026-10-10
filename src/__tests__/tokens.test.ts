@@ -12,7 +12,8 @@ const colours = (source: string) =>
 		])
 	);
 const light = colours(block(':root {'));
-const dark = { ...light, ...colours(block('[data-dark-ready]')) };
+const darkBlock = '@media (prefers-color-scheme: dark) {';
+const dark = { ...light, ...colours(block(darkBlock)) };
 
 function luminance(hex: string) {
 	const [r, g, b] = [1, 3, 5].map((i) => {
@@ -61,5 +62,24 @@ describe.each([
 		expect(theme[text], `--color-${text}`).toBeDefined();
 		expect(theme[background], `--color-${background}`).toBeDefined();
 		expect(contrast(theme[text], theme[background])).toBeGreaterThanOrEqual(minimum);
+	});
+});
+
+describe('Dunkelmodus', () => {
+	it('folgt der Einstellung des Systems auf jeder Seite', () => {
+		expect(css).toMatch(/@media \(prefers-color-scheme: dark\) \{\s*:root \{/);
+		expect(css).not.toContain('data-dark-ready');
+	});
+});
+
+describe('Tailwind-Thema', () => {
+	it('kennt nur die Farben, Radien und Schatten der Tokens', async () => {
+		const { default: config } = await import('../../tailwind.config.js');
+		const theme = config.theme as Record<string, object>;
+		const tokens = [...block(':root {').matchAll(/--color-([\w-]+):/g)].map(([, name]) => name);
+		expect(Object.keys(theme.colors).sort()).toEqual(['transparent', 'current', ...tokens].sort());
+		expect(Object.keys(theme.borderRadius).sort()).toEqual(['control', 'panel']);
+		expect(Object.keys(theme.boxShadow).sort()).toEqual(['none', 'overlay', 'raised']);
+		expect(theme.extend).not.toHaveProperty('colors');
 	});
 });

@@ -5,10 +5,10 @@
 	import { afterNavigate, goto } from '$app/navigation';
 	import { user, clearStores } from '$lib/stores';
 	import { getXsrfTokenFromCookie } from '$lib/api';
-	import Header from '$lib/components/Header.svelte';
-	import Navigation from '$lib/components/Navigation.svelte';
-	import MobileNav from '$lib/components/MobileNav.svelte';
-	import Footer from '$lib/components/Footer.svelte';
+	import Header from '$lib/ui/Header.svelte';
+	import Navigation from '$lib/ui/Navigation.svelte';
+	import MobileNav from '$lib/ui/MobileNav.svelte';
+	import Footer from '$lib/ui/Footer.svelte';
 	import ToastRegion from '$lib/ui/ToastRegion.svelte';
 	import { isListSearch } from '$lib/list-url';
 	import type { LayoutData } from './$types';

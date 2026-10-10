@@ -1,5 +1,5 @@
 <script lang="ts">
-	import BuildingForm from '$lib/components/BuildingForm.svelte';
+	import BuildingForm from '../BuildingForm.svelte';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import Panel from '$lib/ui/Panel.svelte';
 	import type { ActionData } from './$types';

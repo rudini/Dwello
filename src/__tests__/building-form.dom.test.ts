@@ -12,7 +12,7 @@ vi.mock('$app/forms', () => ({
 }));
 
 import { toasts } from '$lib/stores';
-import BuildingForm from '$lib/components/BuildingForm.svelte';
+import BuildingForm from '../routes/buildings/BuildingForm.svelte';
 import { byTestId, fireEvent, show } from './helpers/dom';
 
 // What the form does once the server has saved the building and opens it

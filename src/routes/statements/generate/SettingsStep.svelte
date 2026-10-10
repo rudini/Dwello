@@ -1,5 +1,5 @@
 <script lang="ts">
-	import HeatingProfileChart from '$lib/components/HeatingProfileChart.svelte';
+	import HeatingProfileChart from '$lib/ui/HeatingProfileChart.svelte';
 	import type { HeatingProfile } from '$lib/types';
 	import { germanName } from '$lib/names';
 	import Alert from '$lib/ui/Alert.svelte';

@@ -1,9 +1,9 @@
 import { describe, it, expect, vi } from 'vitest';
 import { readable } from 'svelte/store';
 import { flushSync } from 'svelte';
-import Header from '$lib/components/Header.svelte';
-import MobileNav from '$lib/components/MobileNav.svelte';
-import Footer from '$lib/components/Footer.svelte';
+import Header from '$lib/ui/Header.svelte';
+import MobileNav from '$lib/ui/MobileNav.svelte';
+import Footer from '$lib/ui/Footer.svelte';
 import { closeMobileNav, mobileNavOpen } from '$lib/stores/navigation';
 import { writeDraft } from '$lib/wizard-draft';
 import { byTestId, click, fakeBff, settle, show } from './helpers/dom';

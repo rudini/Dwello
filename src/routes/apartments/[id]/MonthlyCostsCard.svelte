@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { MonthlyCosts } from '../types';
+	import type { MonthlyCosts } from '$lib/types';
 	import { formatCurrency } from '$lib/utils/format';
 	import Panel from '$lib/ui/Panel.svelte';
 
