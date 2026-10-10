@@ -3,7 +3,7 @@ import { Project, type SourceFile } from 'ts-morph';
 import { reasons } from './advice.ts';
 import { loadConfig, type Config } from './config.ts';
 import { excludeByPath, isModuleCandidate, isSource, matchesAny, walk } from './discover.ts';
-import { fallowIgnorePatterns } from './fallow.ts';
+import { fallowIgnorePatterns, loadFallow, type FallowData } from './fallow.ts';
 import { coupling } from './graph.ts';
 import { contentExclusion, fileMetrics, type FileMetrics } from './metrics.ts';
 import { components, shallowScore } from './score.ts';
@@ -55,12 +55,21 @@ function withoutSuppressed(file: FileMetrics, suppressions: Suppression[]): File
 	};
 }
 
+/** Fallow's cyclomatic total when it reports the file, else the own count. */
+function complexityOf(path: string, file: FileMetrics, fallow: FallowData | null) {
+	const fromFallow = fallow?.complexity.get(path);
+	return fromFallow === undefined
+		? { complexity: file.complexity, complexitySource: 'own' as const }
+		: { complexity: fromFallow, complexitySource: 'fallow' as const };
+}
+
 function settingsFor(path: string, config: Config) {
 	const override = config.overrides.filter((o) => matchesAny(path, o.files));
 	return Object.assign({ failThreshold: config.failThreshold, minInterfaceSize: config.minInterfaceSize }, ...override);
 }
 
-export function analyze({ root, config = loadConfig(root) }: AnalyzeOptions): Report {
+export function analyze({ root, fallow, config = loadConfig(root) }: AnalyzeOptions): Report {
+	const fallowData = loadFallow(root, fallow);
 	const sources = walk(root, config).filter(isSource);
 	const excluded: ExcludedModule[] = [];
 	const modulePaths: string[] = [];
@@ -96,9 +105,8 @@ export function analyze({ root, config = loadConfig(root) }: AnalyzeOptions): Re
 			dataOnlyClasses: file.dataOnlyClasses,
 			fanIn,
 			fanOut,
-			complexity: file.complexity,
-			complexitySource: 'own' as const,
-			unusedExports: null
+			...complexityOf(path, file, fallowData),
+			unusedExports: fallowData ? (fallowData.unusedExports.get(path) ?? 0) : null
 		};
 		const parts = components(metrics, file.exportCount, file.functionCount, config);
 		const score = shallowScore(parts, config.weights);
