@@ -44,8 +44,11 @@ def _combine(runs):
     runs = [r for r in runs if r.ran] or runs  # a framework that found no tests is not this repo's
     outcomes = {r.outcome for r in runs}
     outcome = next(o for o in ("error", "fail", "pass") if o in outcomes)
-    return Run(max(r.exit_code for r in runs), outcome, "; ".join(r.summary for r in runs),
-               sum(r.failed for r in runs), sum(r.ran for r in runs))
+    ran = sum(r.ran for r in runs)
+    summary = "; ".join(r.summary for r in runs)
+    if outcome == "pass" and not ran:
+        outcome, summary = "error", f"no tests ran ({summary})"
+    return Run(max(r.exit_code for r in runs), outcome, summary, sum(r.failed for r in runs), ran)
 
 
 def _has_python(root):
