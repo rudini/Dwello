@@ -19,6 +19,15 @@ def changed_files():
     return tracked + git("ls-files", "--others", "--exclude-standard").splitlines()
 
 
+# Phase -> phases it may follow. A red cycle must close with green before anything else.
+FOLLOWS = {
+    "test": {"start", "test", "green", "refactor"},
+    "red": {"start", "test", "green", "refactor"},
+    "green": {"red"},
+    "refactor": {"green", "refactor"},
+}
+
+
 def last_phase():
     prefix = git("log", "-1", "--format=%s").partition(":")[0]
     return prefix if prefix in ("test", "red", "green", "refactor") else "start"
@@ -26,7 +35,7 @@ def last_phase():
 
 phase = sys.argv[1]
 previous = last_phase()
-if (phase == "green" and previous != "red") or (phase == "refactor" and previous not in ("green", "refactor")):
+if previous not in FOLLOWS[phase]:
     sys.exit(f"tdd-step: refused: {phase} cannot follow {previous}")
 message = sys.argv[2] if len(sys.argv) > 2 else phase
 run = subprocess.run([sys.executable, "-m", "unittest", "discover"], capture_output=True, text=True)
