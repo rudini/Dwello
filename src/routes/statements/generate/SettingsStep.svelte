@@ -1,6 +1,7 @@
 <script lang="ts">
 	import HeatingProfileChart from '$lib/components/HeatingProfileChart.svelte';
 	import type { HeatingProfile } from '$lib/types';
+	import { germanName } from '$lib/names';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Field from '$lib/ui/Field.svelte';
 	import Select from '$lib/ui/Select.svelte';
@@ -66,7 +67,9 @@
 					selected={profile.id === heatingProfileId}
 					data-testid="heating-profile-option-{profile.id}"
 				>
-					{profile.name} ({+sum(profile).toFixed(1)}%){complete(profile) ? '' : ' - nicht wählbar'}
+					{germanName(profile)} ({+sum(profile).toFixed(1)}%){complete(profile)
+						? ''
+						: ' - nicht wählbar'}
 				</option>
 			{/each}
 		</select>

@@ -3,7 +3,7 @@ import { load } from '../routes/apartments/[id]/+page.server';
 import { actions as newActions } from '../routes/apartments/new/+page.server';
 import { actions as editActions } from '../routes/apartments/[id]/edit/+page.server';
 import { grossRent } from '../lib/server/contract-history';
-import { floorLabel, statusText } from '../lib/apartment';
+import { floorLabel, statusHelp, statusText } from '../lib/apartment';
 import { runAction } from './helpers/action';
 
 const API = 'http://localhost:3001/api/v1';
@@ -148,6 +148,15 @@ describe('Wohnungsstatus', () => {
 		['reserved', null, 'Gesperrt']
 	] as const)('zeigt %s (nächster Vertrag ab %s) als %s', (status, nextContractStart, text) => {
 		expect(statusText({ status, nextContractStart })).toBe(text);
+	});
+
+	it.each([
+		['occupied', 'Ein Mietvertrag läuft.'],
+		['relet', 'Ein künftiger Mietvertrag ist abgeschlossen.'],
+		['vacant', 'Es läuft kein Mietvertrag'],
+		['reserved', 'von Hand gesperrt']
+	] as const)('erklärt %s in Worten des Glossars', (status, words) => {
+		expect(statusHelp[status]).toContain(words);
 	});
 });
 

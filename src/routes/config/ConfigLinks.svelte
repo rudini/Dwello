@@ -1,45 +1,52 @@
 <script lang="ts">
-	import Icon from '$lib/components/Icon.svelte';
+	import Icon from '$lib/ui/Icon.svelte';
+	import type { IconName } from '$lib/ui/icons';
+	import Panel from '$lib/ui/Panel.svelte';
+
+	// The master data pages, named and ordered as in the main navigation
+	const links: { key: string; href: string; label: string; text: string; icon: IconName }[] = [
+		{
+			key: 'categories',
+			href: '/config/categories',
+			label: 'Kategorien',
+			text: 'Kostenarten, nach denen Sie Rechnungen einordnen',
+			icon: 'category'
+		},
+		{
+			key: 'distribution-keys',
+			href: '/config/distribution-keys',
+			label: 'Verteilschlüssel',
+			text: 'Wie die Kosten auf die Wohnungen aufgeteilt werden',
+			icon: 'sliders'
+		},
+		{
+			key: 'heating-profiles',
+			href: '/config/heating-profiles',
+			label: 'Heizprofile',
+			text: 'Wie die Heizkosten auf die Monate verteilt werden',
+			icon: 'heating'
+		}
+	];
 </script>
 
-<div class="grid gap-4 sm:grid-cols-3" data-testid="quick-links">
-	<a
-		href="/config/categories"
-		class="p-4 bg-white border border-gray-200 rounded-xl hover:border-blue-300 hover:shadow-md transition-all flex items-center gap-4"
-		data-testid="quick-link-categories"
-	>
-		<div class="p-3 bg-blue-100 rounded-lg">
-			<Icon name="category" size={24} class="text-accent" />
-		</div>
-		<div>
-			<h3 class="font-medium text-gray-900">Kategorien</h3>
-			<p class="text-sm text-ink-muted">Kostenkategorien verwalten</p>
-		</div>
-	</a>
-	<a
-		href="/config/heating-profiles"
-		class="p-4 bg-white border border-gray-200 rounded-xl hover:border-blue-300 hover:shadow-md transition-all flex items-center gap-4"
-		data-testid="quick-link-heating-profiles"
-	>
-		<div class="p-3 bg-orange-100 rounded-lg">
-			<Icon name="local_fire_department" size={24} class="text-caution" />
-		</div>
-		<div>
-			<h3 class="font-medium text-gray-900">Heizprofile</h3>
-			<p class="text-sm text-ink-muted">Heizverteilung konfigurieren</p>
-		</div>
-	</a>
-	<a
-		href="/config/distribution-keys"
-		class="p-4 bg-white border border-gray-200 rounded-xl hover:border-blue-300 hover:shadow-md transition-all flex items-center gap-4"
-		data-testid="quick-link-distribution-keys"
-	>
-		<div class="p-3 bg-purple-100 rounded-lg">
-			<Icon name="calculate" size={24} class="text-purple-600" />
-		</div>
-		<div>
-			<h3 class="font-medium text-gray-900">Verteilschlüssel</h3>
-			<p class="text-sm text-ink-muted">Kostenverteilung definieren</p>
-		</div>
-	</a>
-</div>
+<Panel title="Stammdaten">
+	<ul class="grid gap-4 md:grid-cols-3" data-testid="quick-links">
+		{#each links as link (link.key)}
+			<!-- The whole card opens the page; its name is the link -->
+			<li
+				class="relative flex items-start gap-4 rounded-panel border border-line p-4 hover:border-line-strong"
+				data-testid="quick-link-{link.key}"
+			>
+				<span class="text-accent"><Icon name={link.icon} size={24} /></span>
+				<div class="flex flex-col gap-1">
+					<a
+						href={link.href}
+						class="font-semibold text-accent underline underline-offset-4 after:absolute after:inset-0"
+						>{link.label}</a
+					>
+					<p class="text-ink-muted">{link.text}</p>
+				</div>
+			</li>
+		{/each}
+	</ul>
+</Panel>

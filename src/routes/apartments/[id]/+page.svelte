@@ -1,56 +1,64 @@
 <script lang="ts">
-	import ApartmentHeader from '$lib/components/ApartmentHeader.svelte';
-	import InfoCard from '$lib/components/InfoCard.svelte';
 	import CurrentTenantCard from '$lib/components/CurrentTenantCard.svelte';
 	import MonthlyCostsCard from '$lib/components/MonthlyCostsCard.svelte';
-	import ContractHistoryTable from '$lib/components/ContractHistoryTable.svelte';
-	import { floorLabel, statusText } from '$lib/apartment';
-	import { normalizeDecimal } from '$lib/utils/format';
+	import Button from '$lib/ui/Button.svelte';
+	import PageHeader from '$lib/ui/PageHeader.svelte';
+	import Panel from '$lib/ui/Panel.svelte';
+	import ApartmentFacts from './ApartmentFacts.svelte';
+	import ContractHistory from './ContractHistory.svelte';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
 
 	const apartment = $derived(data.apartment);
-	const cardClass = 'bg-white border border-slate-200 rounded-xl shadow-sm p-6';
+	const building = $derived(apartment.building);
 </script>
 
 <svelte:head>
 	<title>Wohnung {apartment.number} - Dwello</title>
 </svelte:head>
 
-<div class="space-y-6">
-	<ApartmentHeader {apartment} building={apartment.building} />
+<div class="flex flex-col gap-8">
+	<PageHeader
+		title="Wohnung {apartment.number}"
+		purpose="{building.address}, {building.postalCode} {building.city}"
+		trail={[
+			{ href: '/apartments', label: 'Wohnungen' },
+			{ href: `/buildings/${building.id}`, label: building.name }
+		]}
+	>
+		{#snippet action()}
+			<Button href="/apartments/{apartment.id}/edit" icon="edit" testid="apartment-edit-button"
+				>Bearbeiten</Button
+			>
+			{#if !data.currentContract}
+				<Button
+					href="/contracts/new?apartment={apartment.id}"
+					variant="primary"
+					icon="contract"
+					testid="apartment-new-contract">Mietvertrag erfassen</Button
+				>
+			{/if}
+		{/snippet}
+	</PageHeader>
 
-	<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-		<div class={cardClass} data-testid="apartment-info-status">
-			<InfoCard icon="check_circle" label="Status" value={statusText(apartment)} />
-		</div>
-		<div class={cardClass} data-testid="apartment-info-rooms">
-			<InfoCard icon="home" label="Zimmer" value={normalizeDecimal(apartment.rooms)} />
-		</div>
-		<div class={cardClass} data-testid="apartment-info-floor">
-			<InfoCard icon="apartment" label="Stockwerk" value={floorLabel(apartment.floor)} />
-		</div>
-		<div class={cardClass} data-testid="apartment-info-area">
-			<InfoCard icon="straighten" label="Fläche" value="{normalizeDecimal(apartment.area)} m²" />
-		</div>
-	</div>
+	<ApartmentFacts {apartment} />
 
-	<div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
-		<div class="lg:col-span-2 space-y-6">
+	<div class="grid gap-8 lg:grid-cols-5">
+		<div class="flex flex-col gap-8 lg:col-span-2">
 			{#if data.currentContract}
 				<CurrentTenantCard contract={data.currentContract} />
 				<MonthlyCostsCard costs={data.monthlyCosts} />
 			{:else}
-				<div class={cardClass}>
-					<p class="text-slate-600" data-testid="apartment-vacant">
+				<Panel title="Aktueller Mieter">
+					<p class="text-ink-muted" data-testid="apartment-vacant">
 						Diese Wohnung ist derzeit nicht vermietet.
 					</p>
-				</div>
+				</Panel>
 			{/if}
 		</div>
 		<div class="lg:col-span-3">
-			<ContractHistoryTable contracts={data.contractHistory} />
+			<ContractHistory contracts={data.contractHistory} />
 		</div>
 	</div>
 </div>

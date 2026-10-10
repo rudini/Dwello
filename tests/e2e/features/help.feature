@@ -18,3 +18,4 @@ Funktionalität: Hilfe
       | Rechnungen erfassen                |
       | Nebenkostenabrechnungen erstellen  |
       | Zahlungen und Mahnungen            |
+      | Begriffe kurz erklärt              |

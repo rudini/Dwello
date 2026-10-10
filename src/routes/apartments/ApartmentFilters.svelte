@@ -3,10 +3,10 @@
 	import { page } from '$app/stores';
 	import { untrack } from 'svelte';
 	import { statusLabels } from '$lib/apartment';
-	import Card from '$lib/components/Card.svelte';
-	import FilterActions from '$lib/components/FilterActions.svelte';
-	import FilterSelect from '$lib/components/FilterSelect.svelte';
-	import SearchField from '$lib/components/SearchField.svelte';
+	import { listSearchUrl } from '$lib/list-url';
+	import Button from '$lib/ui/Button.svelte';
+	import TextInput from '$lib/ui/TextInput.svelte';
+	import EarlySelect from './EarlySelect.svelte';
 
 	let { buildings }: { buildings: { id: string; name: string }[] } = $props();
 
@@ -22,9 +22,7 @@
 
 	function search(event: SubmitEvent) {
 		event.preventDefault();
-		const params = new URLSearchParams(Object.entries(filters).filter(([, value]) => value));
-		params.set('page', '1');
-		goto(`/apartments?${params}`);
+		goto(listSearchUrl('/apartments', filters));
 	}
 
 	function clear() {
@@ -33,33 +31,45 @@
 	}
 </script>
 
-<Card>
-	<form onsubmit={search} class="flex flex-col lg:flex-row lg:items-center gap-4">
-		<div class="flex-1 flex flex-col sm:flex-row gap-4">
-			<SearchField
-				bind:value={filters.search}
-				placeholder="Wohnungsnummer, Gebäude oder Mieter..."
-				testid="apartments-search-input"
-			/>
-			<FilterSelect
-				id="building"
-				label="Gebäude"
-				allLabel="Alle Gebäude"
-				options={buildingOptions}
-				value={filters.building}
-				testid="apartments-building-filter"
-				onchange={(value) => (filters.building = value)}
-			/>
-			<FilterSelect
-				id="status"
-				label="Status"
-				allLabel="Alle Status"
-				options={statusOptions}
-				value={filters.status}
-				testid="apartments-status-filter"
-				onchange={(value) => (filters.status = value)}
-			/>
-		</div>
-		<FilterActions {filtered} onclear={clear} testid="apartments-search-submit" />
-	</form>
-</Card>
+<form
+	role="search"
+	onsubmit={search}
+	class="flex flex-col gap-4 rounded-panel border border-line bg-surface p-6"
+>
+	<div class="grid gap-4 md:grid-cols-3">
+		<TextInput
+			id="search"
+			label="Suche"
+			bind:value={filters.search}
+			placeholder="Wohnungsnummer oder Gebäude"
+			optional
+			testid="apartments-search-input"
+		/>
+		<EarlySelect
+			id="building"
+			label="Gebäude"
+			placeholder="Alle Gebäude"
+			options={buildingOptions}
+			value={filters.building}
+			optional
+			testid="apartments-building-filter"
+			onchange={(value) => (filters.building = value)}
+		/>
+		<EarlySelect
+			id="status"
+			label="Mietstatus"
+			placeholder="Alle"
+			options={statusOptions}
+			value={filters.status}
+			optional
+			testid="apartments-status-filter"
+			onchange={(value) => (filters.status = value)}
+		/>
+	</div>
+	<div class="flex flex-wrap gap-4">
+		<Button type="submit" icon="search" testid="apartments-search-submit">Suchen</Button>
+		{#if filtered}
+			<Button variant="ghost" icon="close" onclick={clear}>Filter zurücksetzen</Button>
+		{/if}
+	</div>
+</form>

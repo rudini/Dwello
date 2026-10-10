@@ -3,10 +3,8 @@ import {
 	apartmentOption,
 	availableFrom,
 	contractBody,
-	fieldBorder,
 	initialContractValues,
 	overlapWarning,
-	saveErrorMessage,
 	suggestedStartDate,
 	validateContract,
 	type ContractFormValues
@@ -182,22 +180,5 @@ describe('suggestedStartDate', () => {
 	it('suggests the day the apartment becomes free for a new contract without start', () => {
 		expect(suggestedStartDate('', freeFrom('2025-04-01'))).toBe('2025-04-01');
 		expect(suggestedStartDate('2025-05-01', freeFrom('2025-04-01'))).toBeNull();
-	});
-});
-
-describe('fieldBorder', () => {
-	it('marks fields with an error red', () => {
-		expect(fieldBorder('Pflichtfeld')).toBe('border-red-500');
-		expect(fieldBorder(undefined)).toBe('border-gray-300');
-	});
-});
-
-describe('saveErrorMessage', () => {
-	it('shows the reason of a failed save, or a general message', () => {
-		expect(saveErrorMessage(new Error('Wohnung ist bereits vermietet'))).toBe(
-			'Wohnung ist bereits vermietet'
-		);
-		expect(saveErrorMessage(new Error(''))).toBe('Ein Fehler ist aufgetreten');
-		expect(saveErrorMessage('offline')).toBe('Ein Fehler ist aufgetreten');
 	});
 });

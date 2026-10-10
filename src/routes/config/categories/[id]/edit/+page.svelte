@@ -1,6 +1,5 @@
 <script lang="ts">
-	import PageTrail from '$lib/components/PageTrail.svelte';
-	import Card from '$lib/components/Card.svelte';
+	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import CategoryForm from '../../CategoryForm.svelte';
 	import type { ActionData, PageData } from './$types';
 
@@ -11,18 +10,13 @@
 	<title>{data.category.name} bearbeiten - Dwello</title>
 </svelte:head>
 
-<div class="max-w-3xl mx-auto space-y-6">
-	<PageTrail
-		links={[
+<div class="mx-auto flex max-w-3xl flex-col gap-8">
+	<PageHeader
+		title="{data.category.name} bearbeiten"
+		trail={[
 			{ href: '/config', label: 'Einstellungen' },
 			{ href: '/config/categories', label: 'Kategorien' }
 		]}
-		current={data.category.name}
 	/>
-
-	<h1 class="text-2xl font-bold text-gray-900">Kategorie bearbeiten</h1>
-
-	<Card>
-		<CategoryForm category={data.category} errors={form?.errors} submitLabel="Speichern" />
-	</Card>
+	<CategoryForm category={data.category} errors={form?.errors} submitLabel="Änderungen speichern" />
 </div>

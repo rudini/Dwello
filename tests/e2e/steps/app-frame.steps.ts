@@ -2,7 +2,12 @@ import { expect } from '@playwright/test';
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { visit } from '../interactions/navigation';
-import { llmRecipientNotice, operatorNotice, sectionTitled } from '../questions/app-frame';
+import {
+	draftNotice,
+	llmRecipientNotice,
+	operatorNotice,
+	sectionTitled
+} from '../questions/app-frame';
 import {
 	chooseInFooter,
 	chooseInMainNav,
@@ -60,6 +65,15 @@ Then(
 	'erfährt der Liegenschaftsverwalter unter {string}, dass Rechnungsdaten für die KI-Kategorisierung den Server nicht verlassen',
 	async ({ verwalter }, heading: string) => {
 		await expect(llmRecipientNotice(verwalter, heading)).toContainText('verlassen dafür den Server nicht');
+	}
+);
+
+Then(
+	'erfährt der Liegenschaftsverwalter unter {string}, dass ungespeicherte Eingaben bis zum Speichern, Verwerfen oder Abmelden als Entwurf in diesem Browser bleiben',
+	async ({ verwalter }, heading: string) => {
+		await expect(draftNotice(verwalter, heading)).toContainText(
+			'als Entwurf in diesem Browser auf, bis Sie sie speichern, verwerfen oder sich abmelden'
+		);
 	}
 );
 

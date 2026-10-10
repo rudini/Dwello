@@ -7,7 +7,7 @@
 	import Dialog from '$lib/ui/Dialog.svelte';
 	import EmptyState from '$lib/ui/EmptyState.svelte';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
-	import Pager from '$lib/ui/Pager.svelte';
+	import Pagination from '$lib/ui/Pagination.svelte';
 	import { formatCurrency } from '$lib/utils/format';
 	import StatementRow from './StatementRow.svelte';
 	import StatementSearch from './StatementSearch.svelte';
@@ -101,11 +101,7 @@
 				{/each}
 			</ul>
 		</section>
-		<Pager
-			page={data.page}
-			pageCount={Math.ceil(data.total / data.pageSize)}
-			href={(page) => linkWith({ page: String(page) })}
-		/>
+		<Pagination url={$page.url} page={data.page} pageSize={data.pageSize} total={data.total} />
 	{/if}
 </div>
 

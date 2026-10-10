@@ -135,6 +135,17 @@ describe.each([
 			errors: { name: 'Gebäudename ist erforderlich', canton: 'Kanton ist erforderlich' }
 		});
 	});
+
+	it('nennt den fehlenden Ort wie das Glossar', async () => {
+		const result = await run(
+			action as Action,
+			rejected,
+			{ id: 'b1' },
+			{ ...validBuilding, city: '' }
+		);
+
+		expect(result).toMatchObject({ errors: { city: 'Ort ist erforderlich' } });
+	});
 });
 
 describe('Gebäudedetail', () => {

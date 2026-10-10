@@ -70,3 +70,10 @@ Items the redesign could not or deliberately did not resolve. Each with reason a
 - The plausibility check looks at invoices dated in the Abrechnungsperiode (as the calculation does). It flags buildings without any invoice; it does not judge whether a period is covered completely (one oil delivery per year is normal) – the preview names count and date range so the user can judge. TODO(fachlich prüfen) whether stronger checks are wanted.
 - Restoring a statement wizard draft drops buildings or heating profiles deleted meanwhile without a notice (the contract wizard says so). Rare; worth a sentence later.
 - The "partly covered" hint uses a fixed 90-day rule – TODO(fachlich prüfen).
+
+## Stage 7 – help, legal, coming-soon pages
+
+- Privacy page: the sentence about wizard drafts kept in the browser – legal wording TODO(fachlich prüfen).
+- Help page wording beyond the glossary: Heizprofil ("teilt die Heizkosten nach Monaten statt nach Tagen auf"), Mietstage ("bezahlt nur den Anteil seiner Mietstage"), Abrechnungsperiode described as "das Jahr …", Mahnung ("höchstens eine 2. und eine 3. Mahnung") – TODO(fachlich prüfen).
+- The Zahlungsfrist cannot be set in the settings; the help does not point there.
+- No central help-text registry yet (plan section 7); the term explanations live in `src/routes/help/Glossary.svelte`.

@@ -116,3 +116,19 @@ describe('Auswahl vor der Hydration in Erfassungsformularen', () => {
 		expect(heatingProfileId).toBe('h2');
 	});
 });
+
+describe('Heizprofil in den Abrechnungen', () => {
+	it('zeigt den deutschen Namen des Heizprofils', async () => {
+		await serverRender('routes/statements/generate/SettingsStep.svelte', {
+			heatingProfiles: [{ ...profile('h1', 'Mountain', 100 / 12), nameDE: 'Bergregion' }],
+			distributionKeys: [],
+			heatingProfileId: '',
+			managementFeePercent: 3,
+			managementFeeDistributionKeyId: '',
+			errors: {}
+		} as never);
+
+		expect(select('heating-profile-select').textContent).toContain('Bergregion');
+		expect(select('heating-profile-select').textContent).not.toContain('Mountain');
+	});
+});

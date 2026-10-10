@@ -155,11 +155,3 @@ export function suggestedStartDate(
 	if (startDate) return null;
 	return availability?.availableFrom || null;
 }
-
-/** Border of a form field, red when it has an error */
-export const fieldBorder = (error: string | undefined) =>
-	error ? 'border-red-500' : 'border-gray-300';
-
-/** Message shown when saving fails */
-export const saveErrorMessage = (error: unknown) =>
-	(error instanceof Error && error.message) || 'Ein Fehler ist aufgetreten';

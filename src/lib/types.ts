@@ -225,6 +225,7 @@ export interface InvoicesListData {
 export interface HeatingProfile {
 	id: string;
 	name: string;
+	nameDE?: string;
 	type: 'predefined' | 'custom';
 	description?: string;
 	isActive: boolean;

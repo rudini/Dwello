@@ -44,7 +44,7 @@ Funktionalität: Verteilschlüssel
     Angenommen das Gebäude "Seeblick" in "Winterthur" existiert
     Und eine Rechnung des Gebäudes "Seeblick" wird nach dem Verteilschlüssel "Fläche und Zimmer" verteilt
     Und der Liegenschaftsverwalter ist auf der Seite "Verteilschlüssel"
-    Dann werden 1 Rechnungen nach dem Verteilschlüssel "Fläche und Zimmer" verteilt
+    Dann wird 1 Rechnung nach dem Verteilschlüssel "Fläche und Zimmer" verteilt
     Und kann der Liegenschaftsverwalter den Verteilschlüssel "Fläche und Zimmer" nicht löschen
 
   Szenario: Vordefinierte Verteilschlüssel bleiben unverändert
