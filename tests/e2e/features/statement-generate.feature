@@ -14,6 +14,17 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Und "Marc Huber" mietet die Wohnung "3.01" seit "2024-05-01" für "980" Franken
     Und der Liegenschaftsverwalter ist auf der Seite zum Erstellen von Abrechnungen
 
+  # Alle fünf Schritte des Assistenten passen auch auf Tablet und kleinen Laptop
+  Szenariogrundriss: Schritte des Assistenten in einem schmalen Fenster
+    Angenommen das Browserfenster ist <Breite> Pixel breit
+    Dann ist der Seitentitel lesbar
+    Und scrollt die Seite nicht seitwärts
+
+    Beispiele:
+      | Breite |
+      | 768    |
+      | 1024   |
+
   @api
   Szenario: Vorschau bei Mieterwechsel mit Leerstand
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet

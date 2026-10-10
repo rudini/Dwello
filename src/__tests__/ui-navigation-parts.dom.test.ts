@@ -33,12 +33,33 @@ describe('Schrittanzeige', () => {
 		expect(items[3].querySelector('button')).toBeNull();
 		expect(items[0].querySelector('[data-testid="wizard-step"]')).not.toBeNull();
 	});
+
+	it('zeigt die Namen der Schritte erst ab breiten Fenstern, Screenreadern immer', () => {
+		show(Stepper, { steps, current: 3, onselect: vi.fn() });
+		const labels = [...document.querySelectorAll('[data-testid="wizard-step-label"]')];
+		expect(labels.map((label) => label.textContent)).toEqual(steps);
+		for (const label of labels) {
+			expect(label.className.split(/\s+/)).toEqual(
+				expect.arrayContaining(['sr-only', 'xl:not-sr-only'])
+			);
+		}
+		// the full name of the current step stays visible above
+		expect(document.querySelector('nav p')!.textContent).toContain(
+			'Schritt 3 von 5: Vertragsdauer'
+		);
+	});
 });
 
 describe('Wizard-Navigation', () => {
 	it('geht weiter und zurück; der erste Schritt bietet stattdessen Abbrechen', () => {
 		const onback = vi.fn();
-		show(WizardNav, { step: 1, last: 5, onback, finalLabel: 'Speichern', cancelHref: '/contracts' });
+		show(WizardNav, {
+			step: 1,
+			last: 5,
+			onback,
+			finalLabel: 'Speichern',
+			cancelHref: '/contracts'
+		});
 		expect(byTestId('wizard-back')).toBeNull();
 		expect(byTestId('form-cancel')!.getAttribute('href')).toBe('/contracts');
 		const next = byTestId('wizard-next')!;
