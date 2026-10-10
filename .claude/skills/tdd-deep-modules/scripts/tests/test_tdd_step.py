@@ -554,3 +554,15 @@ class TddStepTest(unittest.TestCase):
             result = repo.run("tdd-step", "test", "plan")
 
             self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_unexpected_package_json_shapes_exit_2(self):
+        for manifest in ('{"devDependencies": null}', "[]", '{"scripts": "jest"}'):
+            with self.subTest(manifest):
+                repo = Repo(self, {"package.json": manifest})
+                repo.write("TESTLIST.md", "- [ ] something\n")
+
+                result = repo.run("tdd-step", "test", "plan")
+
+                self.assertEqual(result.returncode, 2, result.stderr)
+                self.assertIn("package.json", result.stderr)
+                self.assertNotIn("Traceback", result.stderr)
