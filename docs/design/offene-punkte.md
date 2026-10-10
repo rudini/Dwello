@@ -129,3 +129,13 @@ Items the redesign could not or deliberately did not resolve. Each with reason a
 - The PDF file name is a UUID, not the statement number (Dr. Weber) – backend.
 - No invoice filter by period or year (Anna).
 - "Entwurf" names both a statement draft and the browser-saved wizard input ("Entwurf gespeichert") – known glossary gap (see stage 5).
+
+## Stage 7 – review round 2 and persona re-runs
+
+- One future tenancy carries three glossary terms: Vertragsstatus "Künftig", Mietstatus "Wiedervermietet (ab …)", Mieter "Aktiv". Helga and Sven read "Wiedervermietet" as "rented again" for a flat that was empty, and "Aktiv" for someone not yet moved in. All three are glossary terms; renaming needs a glossary decision – TODO(fachlich prüfen).
+- The overview bar says "1 ab 1.11.2026" while building cards say "1 wiedervermietet" – wording check together with the point above.
+- An own category that is renamed, or whose English name equals its German one, counts as predefined; its description is hidden in the list. A predefined flag in the backend would be exact.
+- Errors of `Checkbox` and `RadioGroup` stay until the next submit (fields built on `Field` hide them once changed).
+- "Filter zurücksetzen" links on contracts and tenants do not move focus to the results (they are links, not a search).
+- No error summary at the top of forms; detail-page actions ("Bearbeiten", "Löschen", "Beenden") do not name the record in their accessible name.
+- The invoice form opened from the statement wizard still defaults to today's date (the period notice warns at once).

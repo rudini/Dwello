@@ -4394,7 +4394,9 @@ Brief: `docs/design/REDESIGN_BRIEF.md`; log and decisions: `docs/design/progress
   components removed, German master data names (`src/lib/names.ts`); review round 1 and persona fixes: row layouts
   without sideways scrolling, shared `focusFirstError` (`src/lib/ui/focus-error.ts`), announced toasts
   (`ToastRegion`), consistent Mietstatus for relet apartments (`src/lib/apartment.ts`, BFF loaders), invoice period
-  notice (`docs/design/reviews/7-review-1.md`)
+  notice (`docs/design/reviews/7-review-1.md`); review round 2: header wraps actions, Stepper names from `xl`, cost
+  lines as cards on phones, delete toasts, `Field` hides corrected errors, focus on list results after filtering
+  (`src/lib/list-url.ts` `isListSearch`) (`docs/design/reviews/7-review-2.md`)
 - [ ] **Stage 8:** remove the old design system, dark mode
 - [ ] **Stage 9:** final docs, review and persona runs
 
