@@ -133,6 +133,15 @@ describe('deepcheck warnings', () => {
 	});
 });
 
+describe('scan headline with --min-score', () => {
+	it('does not call modules shallow that are only above the min score', () => {
+		const root = writeProject({ 'src/deep.ts': DEEP_MODULE, 'src/clamp.ts': 'export const clamp = (v: number, lo: number, hi: number, s: number) => Math.min(hi, Math.max(lo, v)) * s;\n' });
+		const md = cli(root, 'scan', '--fallow', 'off', '--format', 'markdown', '--min-score', '0').stdout;
+		expect(md).toMatch(/^## deepcheck: 1 module\(s\) scoring at least 0 of 2 analyzed/);
+		expect(cli(root, 'scan', '--fallow', 'off', '--min-score', '0').stdout).toMatch(/^deepcheck: 1 module\(s\) scoring at least 0 of 2 analyzed/);
+	});
+});
+
 describe('deepcheck --explain', () => {
 	it('shows every metric, the score components and the reasons of one module', () => {
 		const { code, stdout } = cli(shallowProject(), '--explain', 'src/deep.ts', '--fallow', 'off');

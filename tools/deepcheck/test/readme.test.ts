@@ -27,4 +27,16 @@ describe('README', () => {
 		for (const term of ['G1', 'G2', 'G3', 'G4', 'G5', 'G6', '--changed-since', '--agent', '--scope', '--use-baseline', '.deepcheck-baseline.json', 'deepcheck:audit', 'deepcheck:ci', 'deepcheck:baseline'])
 			expect(readme()).toContain(term);
 	});
+
+	it('documents the wiring: commit/push hook, PR job and scan workflow', () => {
+		const wiring = readme().slice(readme().indexOf('## Wiring'));
+		for (const term of ['.claude/hooks/deepcheck-gate.sh', 'PreToolUse', 'Deep modules', 'deepcheck-scan.yml', 'workflow_dispatch', 'git -C'])
+			expect(wiring).toContain(term);
+	});
+
+	it('tells agents in CLAUDE.md to run the audit after each step and the scan only on request', () => {
+		const claude = readFileSync(new URL('../../../CLAUDE.md', import.meta.url), 'utf8');
+		expect(claude).toMatch(/npm run deepcheck:audit/);
+		expect(claude).toMatch(/npm run deepcheck:scan[^\n]*only when/);
+	});
 });

@@ -59,6 +59,17 @@ node tools/deepcheck/src/cli.ts scan --use-baseline   # hide baselined modules t
 
 `.deepcheck-baseline.json` is committed. `check` reads it, and `deepcheck.config.json`, as they were at the base (`HEAD`, or the merge-base with `--changed-since`), never from the working tree, so a change cannot regenerate the baseline or add excludes, overrides or weights to get past its own gate; both take effect once merged, and `check` warns when the config differs. Use `// deepcheck-ignore-file -- reason` for a deliberate exception: it is visible in the review. The gate also uses the baseline's `failThreshold`: after changing `failThreshold`, regenerate the baseline in the same change; until it is merged `check` keeps the old threshold and warns. The baseline records whether Fallow data fed its scores (`fallow`); `check` warns when it runs with a different Fallow mode. It holds one entry per flagged module: a stable fingerprint `<path>#shallow-module` (no line numbers), the path, the rule and the score at baseline time (`schema/baseline.schema.json`). `deepcheck baseline` rewrites it from the current state, so deleted modules drop out and renamed ones appear under their new path. A missing baseline means every flagged changed module counts as new; a corrupt one is an error (exit 2). Regenerate the baseline after changing scoring, weights or `failThreshold`.
 
+## Wiring
+
+| Where | What | Blocks? |
+|---|---|---|
+| Claude Code hook `.claude/hooks/deepcheck-gate.sh`, `PreToolUse` on Bash (`.claude/settings.json`, timeout 60 s) | before every `git commit` / `git push` (same mechanism and fail-open policy as `fallow-gate.sh`): `check --agent`; exit 2 with the findings on stderr when the gate fails, a single notice and exit 0 on a tool error | yes, the Bash call |
+| `CLAUDE.md` | agents run `npm run deepcheck:audit` after each implementation step, `npm run deepcheck:scan` only on request | — |
+| CI job "Deep modules" (`.github/workflows/ci.yml`, pull requests) | `npx svelte-kit sync`, then `npm run deepcheck:ci -- "origin/<base>"`: error annotations and a step summary | yes |
+| `.github/workflows/deepcheck-scan.yml` (`workflow_dispatch`: path, top, min_score; commented weekly `schedule`) | ranked scan to the job summary, JSON and markdown as the `deepcheck-report` artifact | never |
+
+The hook matches commands like fallow-gate.sh does (`git commit`, `git push`, also after `&&` or `;`); `git -C <dir> commit` is not matched, by either gate. The gate takes about 4.5 s with Fallow (3.5 s without) on this repo, so it runs at commit/push, not after every edit.
+
 ## What is a module
 
 A module is one source file (`.ts`, `.tsx`, `.mts`, `.cts`); exported classes are also reported on their own (`classes` in the JSON, `--explain`). Svelte components are not measured, but their `<script>` imports count in the import graph.

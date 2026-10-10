@@ -8,6 +8,9 @@ function moduleBlock(m: ModuleReport): string {
 
 const criterion = (out: ScanOutput) =>
 	out.minScore === null ? `the threshold of ${out.failThreshold}` : `the min score of ${out.minScore}`;
+/** "N shallow module(s)" for flagged modules, "N module(s) scoring at least X" for a --min-score listing. */
+const counted = (out: ScanOutput) =>
+	out.minScore === null ? `${out.summary.shallow} shallow module(s)` : `${out.summary.shallow} module(s) scoring at least ${out.minScore}`;
 const topNote = (out: ScanOutput) => (out.summary.shown < out.summary.shallow ? `, showing the top ${out.summary.shown}` : '');
 
 export function renderHuman(out: ScanOutput): string {
@@ -16,7 +19,7 @@ export function renderHuman(out: ScanOutput): string {
 	if (shallow === 0) return `deepcheck: no shallow modules among ${analyzed} analyzed (${threshold})\n`;
 	const body = out.findings.map(moduleBlock).join('\n');
 	const groups = out.groups ? `\nBy ${out.groups.length} group(s):\n${indent(out.groups.map((g) => `${g.count}  ${g.key} (max ${g.maxScore})`), '  ')}` : '';
-	return `deepcheck: ${shallow} shallow module(s) of ${analyzed} analyzed (${threshold})${topNote(out)}\n\n${body}${groups}`;
+	return `deepcheck: ${counted(out)} of ${analyzed} analyzed (${threshold})${topNote(out)}\n\n${body}${groups}`;
 }
 
 const cell = (s: string) => `\`${s.replace(/\|/g, '\\|')}\``;
@@ -30,7 +33,7 @@ function markdownGroups(out: ScanOutput): string {
 
 export function renderMarkdown(out: ScanOutput): string {
 	const { analyzed, shallow } = out.summary;
-	const head = `## deepcheck: ${shallow} shallow module(s) of ${analyzed} analyzed${topNote(out)}\n\n`;
+	const head = `## deepcheck: ${counted(out)} of ${analyzed} analyzed${topNote(out)}\n\n`;
 	if (shallow === 0) return `${head}No module reaches ${criterion(out)}.\n`;
 	const rows = out.findings.map(
 		(m) =>
