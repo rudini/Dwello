@@ -148,11 +148,32 @@ describe('Tankbestand über die API', () => {
 		expect((await sendJson('DELETE', `${stocks()}/${id}`)).status).toBe(404);
 	});
 
-	// Ein Tank, eine Kategorie: sonst landet der Verbrauch still in einer anderen Kategorie (z.B. Kaminfeger)
-	it('lehnt einen Stand in einer anderen Kategorie als die übrigen Stände des Gebäudes ab', async () => {
+	// Der Kaminfeger wird nach dem Heizprofil verteilt, ist aber kein Brennstoff
+	it('lehnt den Kaminfeger als Kategorie des Tanks ab', async () => {
 		const [chimney] = await db.select().from(categories).where(eq(categories.name, 'Chimney Sweep'));
 
-		expect((await record('2028-12-31', '10.00', rental.building, chimney.id)).status).toBe(409);
+		expect((await record('2028-12-31', '10.00', noTank.building, chimney.id)).status).toBe(400);
+	});
+
+	// OR 257a: wird die Kategorie später nicht umlagefähig, trägt der Mieter auch den Verbrauch aus dem Tank nicht
+	it('rechnet den Tankbestand einer Kategorie nicht ab, die nicht mehr umlagefähig ist', async () => {
+		const [own] = await db.insert(categories).values({ name: `Holz ${token}`, nameDE: `Holz ${token}`, isHeatingCost: true }).returning();
+		const wood = await createRental(`${token}-wood`, { startDate: '2023-01-01', monthlyAdvancePayment: '0' });
+		await record('2024-12-31', '900.00', wood.building, own.id);
+		await record('2025-12-31', '300.00', wood.building, own.id);
+		await db.update(categories).set({ isAllowedUtilityCost: false }).where(eq(categories.id, own.id));
+
+		expect(await linesOf(wood.contract, 2025)).toEqual([]);
+		await wood.remove();
+		await db.delete(categories).where(eq(categories.id, own.id));
+	});
+
+	// Ein Tank, eine Kategorie: sonst landet der Verbrauch still in einer anderen Kategorie (z.B. Kaminfeger)
+	it('lehnt einen Stand in einer anderen Kategorie als die übrigen Stände des Gebäudes ab', async () => {
+		const [pellets] = await db.insert(categories).values({ name: `Pellets B ${token}`, isHeatingCost: true }).returning();
+
+		expect((await record('2028-12-31', '10.00', rental.building, pellets.id)).status).toBe(409);
+		await db.delete(categories).where(eq(categories.id, pellets.id));
 	});
 
 	it('lehnt eine Kategorie ab, die nicht umlagefähig ist', async () => {

@@ -18,14 +18,15 @@
 		deleteError
 	}: {
 		stocks: FuelStock[] | null; // null: could not be loaded
-		categories: { id: string; name: string }[];
+		categories: { id: string; name: string }[] | null; // null: could not be loaded
 		errors?: Record<string, string>;
 		saved?: boolean;
 		deleteError?: string;
 	} = $props();
 
 	// one tank per building: new readings go to the category of the earlier ones
-	const category = $derived(stocks?.at(-1)?.categoryId ?? categories[0]?.id ?? '');
+	const choice = $derived(categories ?? []);
+	const category = $derived(stocks?.at(-1)?.categoryId ?? choice[0]?.id ?? '');
 </script>
 
 <!-- TODO(fachlich prüfen): "Tankbestand", "Stichtag" and the valuation are not in the glossary -->
@@ -44,7 +45,7 @@
 			<p>Die Tankbestände konnten nicht geladen werden. Laden Sie die Seite neu.</p>
 		</Alert>
 	{:else if stocks.length}
-		<FuelStockList {stocks} {categories} {deleteError} />
+		<FuelStockList {stocks} categories={choice} {deleteError} />
 	{/if}
 
 	<form method="POST" action="?/addFuelStock" use:enhance class="flex flex-col gap-4">
@@ -66,7 +67,11 @@
 				testid="fuel-stock-amount-input"
 			/>
 		</div>
-		{#if categories.length === 0}
+		{#if categories === null}
+			<Alert tone="critical" title="Nicht geladen" testid="fuel-stock-categories-error">
+				<p>Die Kategorien konnten nicht geladen werden. Laden Sie die Seite neu.</p>
+			</Alert>
+		{:else if categories.length === 0}
 			<Alert tone="caution" title="Keine Kategorie" testid="fuel-stock-no-category">
 				<p>
 					Es gibt keine Kategorie, die Heizkosten nach dem Heizprofil verteilt.
@@ -83,7 +88,7 @@
 			name="categoryId"
 			label="Kategorie"
 			help="In dieser Kategorie wird der Verbrauch abgerechnet."
-			options={categories.map((c) => ({ value: c.id, label: c.name }))}
+			options={choice.map((c) => ({ value: c.id, label: c.name }))}
 			value={category}
 			testid="fuel-stock-category-select"
 		/>

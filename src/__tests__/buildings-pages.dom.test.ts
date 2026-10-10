@@ -249,8 +249,12 @@ describe('Tankbestand', () => {
 		expect(section()).toContain('Heizöl oder Pellets im Tank');
 		expect(section()).toContain('Anfangsbestand + Einkauf − Endbestand');
 		expect(section()).toContain('Liter im Tank mal Preis pro Liter der letzten Lieferung');
-		expect(section()).toContain('Ist mehr im Tank als die letzte Lieferung, rechnen Sie den Rest zum Preis der Lieferung davor.');
-		expect(section()).toContain('Lesen Sie erst Anfang Januar ab, erfassen Sie den Wert trotzdem per 31.12.');
+		expect(section()).toContain(
+			'Ist mehr im Tank als die letzte Lieferung, rechnen Sie den Rest zum Preis der Lieferung davor.'
+		);
+		expect(section()).toContain(
+			'Lesen Sie erst Anfang Januar ab, erfassen Sie den Wert trotzdem per 31.12.'
+		);
 		expect(byTestId('fuel-stock-f1')!.textContent).toMatch(/31\.12\.2024.*Heizung.*CHF\s2’650\.00/);
 		expect(byTestId('fuel-stock-delete-f1')!.getAttribute('aria-label')).toBe(
 			'Bestand vom 31.12.2024 löschen'
@@ -287,8 +291,22 @@ describe('Tankbestand', () => {
 			form: null
 		} as never);
 
-		expect(section()).toContain('Es gibt keine Kategorie, die Heizkosten nach dem Heizprofil verteilt.');
+		expect(section()).toContain(
+			'Es gibt keine Kategorie, die Heizkosten nach dem Heizprofil verteilt.'
+		);
 		expect(byTestId('fuel-stock-categories-link')!.getAttribute('href')).toBe('/config/categories');
+	});
+
+	it('sagt, wenn die Kategorien nicht geladen werden konnten, statt zu behaupten, es gebe keine', () => {
+		show(BuildingPage, {
+			data: { building: building(), apartments: [], fuelStocks: [], heatingCategories: null },
+			form: null
+		} as never);
+
+		expect(section()).toContain(
+			'Die Kategorien konnten nicht geladen werden. Laden Sie die Seite neu.'
+		);
+		expect(section()).not.toContain('Es gibt keine Kategorie');
 	});
 
 	it('meldet ein misslungenes Löschen beim Bestand, nicht beim Formular zum Speichern', () => {
@@ -309,7 +327,9 @@ describe('Tankbestand', () => {
 	it('sagt, wenn die Stichtage nicht geladen werden konnten', () => {
 		detail(null);
 
-		expect(section()).toContain('Die Tankbestände konnten nicht geladen werden. Laden Sie die Seite neu.');
+		expect(section()).toContain(
+			'Die Tankbestände konnten nicht geladen werden. Laden Sie die Seite neu.'
+		);
 	});
 
 	it('löscht einen Stichtag erst nach Bestätigung mit der Folge', () => {

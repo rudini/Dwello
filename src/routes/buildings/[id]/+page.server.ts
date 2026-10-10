@@ -10,7 +10,7 @@ export interface BuildingDetailsData {
 	building: BuildingWithStats;
 	apartments: Apartment[];
 	fuelStocks: FuelStock[] | null; // null: could not be loaded
-	heatingCategories: { id: string; name: string }[];
+	heatingCategories: { id: string; name: string }[] | null; // null: could not be loaded
 }
 
 /** Heating oil or pellets in the tank at the end of a reading day, in CHF, billed in its category */
@@ -42,9 +42,9 @@ async function fuelStockData(fetch: Fetch, buildingId: string) {
 	]);
 	const stocks = stocksRes.ok ? await stocksRes.json() : null;
 	// without the categories the page still shows, only the choice is empty
-	const categories: Record<string, string | boolean>[] = categoriesRes.ok
+	const categories: Record<string, string | boolean>[] | null = categoriesRes.ok
 		? ((await categoriesRes.json()).categories ?? [])
-		: [];
+		: null;
 	return {
 		fuelStocks: Array.isArray(stocks)
 			? stocks.map((s: Record<string, string>) => ({
@@ -54,9 +54,11 @@ async function fuelStockData(fetch: Fetch, buildingId: string) {
 					categoryId: s.categoryId
 				}))
 			: null,
-		heatingCategories: categories
-			.filter((c) => c.isHeatingCost)
-			.map((c) => ({ id: String(c.id), name: String(c.nameDE || c.name) }))
+		// allocable fuel only: the chimney sweep is shared like heating but is no fuel (the API refuses it too)
+		heatingCategories:
+			categories
+				?.filter((c) => c.isHeatingCost && c.isAllowedUtilityCost && c.name !== 'Chimney Sweep')
+				.map((c) => ({ id: String(c.id), name: String(c.nameDE || c.name) })) ?? null
 	};
 }
 

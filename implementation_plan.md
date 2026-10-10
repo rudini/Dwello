@@ -4459,6 +4459,11 @@ critical/high/medium is open; reviews in `docs/reviews/`.
 - [x] **Heating profile «Nur Warmwasser» removed** (product owner's decision after research): migration
   `0010_ohne_nur_warmwasser.sql` (a default in the configuration is cleared, statements keep their amounts);
   `heating-profiles.pg.test.ts`; data model table updated to the values of 0003.
+- [x] **B, review round 4** (`docs/reviews/B-review-4.md`): tank stock of a non-allocable category not billed, chimney
+  sweep no tank category, summer period by days (`prorating.service.ts`); hint for invoices recorded after their
+  period's statements (`MissedWarning.svelte`, `statementPeriods`); tank question as its own hint
+  (`TankQuestion.svelte`); running-period warning also in the preview; texts (meters in the flats, delete dialog, new
+  costs, Holz); scenario «Warnung beim Bearbeiten einer schon abgerechneten Rechnung».
 
 
 ---

@@ -10,6 +10,15 @@ Funktionalität: Rechnung bearbeiten
     Und "Hauswart Huber" stellt dem Gebäude "Seeblick" "450.00" Franken für "Treppenhausreinigung Q1" in der Kategorie "Hauswart" in Rechnung
     Und der Liegenschaftsverwalter bearbeitet die Rechnung von "Hauswart Huber"
 
+  # Wer eine schon abgerechnete Rechnung ändert, verschiebt Kosten: die Abrechnungen stimmen nicht mehr
+  Szenario: Warnung beim Bearbeiten einer schon abgerechneten Rechnung
+    Angenommen im Gebäude "Seeblick" gibt es die leere Wohnung "1.01"
+    Und der Mieter "Anna Keller" existiert
+    Und "Anna Keller" mietet die Wohnung "1.01" seit "2020-01-01" für "1500" Franken
+    Und für "Anna Keller" im Gebäude "Seeblick" gibt es die Nebenkostenabrechnung des laufenden Jahres
+    Wenn der Liegenschaftsverwalter die Rechnung von "Hauswart Huber" bearbeitet
+    Dann warnt das Formular, dass es mit dieser Rechnung schon Abrechnungen gibt
+
   Szenario: Betrag korrigieren
     Wenn der Liegenschaftsverwalter den Betrag auf "480.00" Franken korrigiert
     Dann ist der Liegenschaftsverwalter auf der Detailseite der Rechnung von "Hauswart Huber"

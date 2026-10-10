@@ -270,11 +270,16 @@ describe('Tankbestand', () => {
 	});
 
 	it('verlangt Stichtag und Betrag, bevor es speichert', async () => {
-		const result = await run(detailActions.addFuelStock as Action, refused, { id: 'b1' }, {
-			readingDate: '',
-			amount: 'viel',
-			categoryId: 'c1'
-		});
+		const result = await run(
+			detailActions.addFuelStock as Action,
+			refused,
+			{ id: 'b1' },
+			{
+				readingDate: '',
+				amount: 'viel',
+				categoryId: 'c1'
+			}
+		);
 
 		expect(result).toMatchObject({
 			status: 400,
@@ -312,16 +317,53 @@ describe('Tankbestand', () => {
 				? stocks()
 				: Response.json(
 						url.includes('/categories')
-							? { categories: [{ id: 'c1', name: 'Heating', nameDE: 'Heizung', isHeatingCost: true }, { id: 'c2', name: 'Caretaker', nameDE: 'Hauswart', isHeatingCost: false }] }
+							? {
+									categories: [
+										{
+											id: 'c1',
+											name: 'Heating',
+											nameDE: 'Heizung',
+											isHeatingCost: true,
+											isAllowedUtilityCost: true
+										},
+										{
+											id: 'c2',
+											name: 'Caretaker',
+											nameDE: 'Hauswart',
+											isHeatingCost: false,
+											isAllowedUtilityCost: true
+										},
+										{
+											id: 'c3',
+											name: 'Chimney Sweep',
+											nameDE: 'Kaminfeger',
+											isHeatingCost: true,
+											isAllowedUtilityCost: true
+										},
+										{
+											id: 'c4',
+											name: 'Owner heating',
+											nameDE: 'Heizung Eigentümer',
+											isHeatingCost: true,
+											isAllowedUtilityCost: false
+										}
+									]
+								}
 							: url.includes('/apartments')
 								? { apartments: [] }
 								: backendBuilding
 					)) as typeof globalThis.fetch;
 
-	it('lädt die Stichtage des Gebäudes und die Kategorien der Heizkosten', async () => {
-		const data = (await detailLoad({ params: { id: 'b1' }, fetch: answer(() => Response.json(fuelStocks)) } as never)) as BuildingDetailsData;
+	// only allocable fuel: the chimney sweep is shared like heating but is no fuel
+	it('lädt die Stichtage des Gebäudes und die umlagefähigen Kategorien für den Brennstoff', async () => {
+		const data = (await detailLoad({
+			params: { id: 'b1' },
+			fetch: answer(() => Response.json(fuelStocks))
+		} as never)) as BuildingDetailsData;
 
-		expect(data.fuelStocks).toEqual([{ id: 'f1', readingDate: '2024-12-31', amount: 2650, categoryId: 'c1' }]);
+		expect(data.fuelStocks).toEqual([
+			{ id: 'f1', readingDate: '2024-12-31', amount: 2650, categoryId: 'c1' }
+		]);
 		expect(data.heatingCategories).toEqual([{ id: 'c1', name: 'Heizung' }]);
 	});
 
@@ -331,13 +373,19 @@ describe('Tankbestand', () => {
 				? new Response('kaputt', { status: 500 })
 				: answer(() => Response.json(fuelStocks))(url)) as typeof globalThis.fetch;
 
-		const data = (await detailLoad({ params: { id: 'b1' }, fetch } as never)) as BuildingDetailsData;
+		const data = (await detailLoad({
+			params: { id: 'b1' },
+			fetch
+		} as never)) as BuildingDetailsData;
 
-		expect(data.heatingCategories).toEqual([]);
+		expect(data.heatingCategories).toBeNull(); // not "no category": they could not be loaded
 	});
 
 	it('meldet, wenn die Stichtage nicht geladen werden können, statt eine leere Liste zu zeigen', async () => {
-		const data = (await detailLoad({ params: { id: 'b1' }, fetch: answer(() => Response.json({}, { status: 500 })) } as never)) as BuildingDetailsData;
+		const data = (await detailLoad({
+			params: { id: 'b1' },
+			fetch: answer(() => Response.json({}, { status: 500 }))
+		} as never)) as BuildingDetailsData;
 
 		expect(data.fuelStocks).toBeNull();
 	});
@@ -349,10 +397,14 @@ describe('Tankbestand', () => {
 			return new Response(null, { status: 204 });
 		};
 
-		expect(await run(detailActions.deleteFuelStock as Action, backend, { id: 'b1' }, { stockId })).toEqual({
+		expect(
+			await run(detailActions.deleteFuelStock as Action, backend, { id: 'b1' }, { stockId })
+		).toEqual({
 			fuelStockDeleted: true
 		});
-		expect(calls).toEqual([`DELETE http://localhost:3001/api/v1/buildings/b1/fuel-stocks/${stockId}`]);
+		expect(calls).toEqual([
+			`DELETE http://localhost:3001/api/v1/buildings/b1/fuel-stocks/${stockId}`
+		]);
 	});
 
 	it('löscht nur einen Stichtag mit gültiger Kennung und meldet eine Ablehnung', async () => {
@@ -361,11 +413,25 @@ describe('Tankbestand', () => {
 			calls.push(url);
 			return new Response(null, { status: 404 });
 		};
-		const failed = { status: 400, data: { fuelStockDeleteError: 'Der Bestand konnte nicht gelöscht werden. Laden Sie die Seite neu.' } };
+		const failed = {
+			status: 400,
+			data: {
+				fuelStockDeleteError: 'Der Bestand konnte nicht gelöscht werden. Laden Sie die Seite neu.'
+			}
+		};
 
-		expect(await run(detailActions.deleteFuelStock as Action, backend, { id: 'b1' }, { stockId: '../..' })).toMatchObject(failed);
+		expect(
+			await run(
+				detailActions.deleteFuelStock as Action,
+				backend,
+				{ id: 'b1' },
+				{ stockId: '../..' }
+			)
+		).toMatchObject(failed);
 		expect(calls).toEqual([]);
-		expect(await run(detailActions.deleteFuelStock as Action, backend, { id: 'b1' }, { stockId })).toMatchObject({
+		expect(
+			await run(detailActions.deleteFuelStock as Action, backend, { id: 'b1' }, { stockId })
+		).toMatchObject({
 			...failed,
 			status: 404
 		});

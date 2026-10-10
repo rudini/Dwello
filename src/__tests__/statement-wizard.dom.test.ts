@@ -1,3 +1,4 @@
+import PreviewChecks from '../routes/statements/generate/PreviewChecks.svelte';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // enhance as SvelteKit wires it: the test can play the server's answer to the last submit
@@ -123,6 +124,19 @@ describe('Abrechnungen erstellen', () => {
 		);
 	});
 
+	// In der Vorschau steht der eigentliche Grund für Kosten weit unter dem Akonto
+	it('wiederholt die Warnung zur laufenden Periode in der Vorschau', () => {
+		show(PreviewChecks, {
+			rows: [],
+			period: { periodStart: '2099-01-01', periodEnd: '2099-12-31' },
+			confirmed: false
+		});
+
+		expect(byTestId('preview-period-warning')!.textContent).toContain(
+			'Die Abrechnungsperiode ist noch nicht zu Ende.'
+		);
+	});
+
 	it('verlangt mindestens ein Gebäude und setzt den Fokus auf den Fehler', async () => {
 		open();
 		next();
@@ -173,10 +187,18 @@ describe('Abrechnungen erstellen', () => {
 		await toSettings();
 		// Dwello kennt keine Zwischenablesung: das sagt der Text, statt sie zu versprechen
 		expect(text()).toContain(
-			'Dwello verteilt nach dem Heizprofil und kann Zählerstände nicht berücksichtigen. Wurden beim Mieterwechsel die Zähler abgelesen, gelten diese Werte: Erstellen Sie die Abrechnung dieser Wohnung dann ausserhalb von Dwello.'
+			'Dwello verteilt nach dem Heizprofil und kann Zählerstände nicht berücksichtigen. Wurden beim Mieterwechsel die Zähler abgelesen, gelten diese Werte: Erstellen Sie die Abrechnung dieser Wohnung dann ausserhalb von Dwello und löschen Sie ihren Entwurf.'
 		);
-		expect(text()).toContain('Verlangen Sie eine Verwaltungspauschale nur, wenn sie im Mietvertrag vereinbart ist.');
-		expect(text()).toContain('Haben Mietverträge verschiedene Sätze, erstellen Sie die Abrechnungen getrennt.');
+		// Zähler in den Wohnungen: meist ist das ganze Gebäude nach Verbrauch abzurechnen
+		expect(text()).toContain(
+			'Hat Ihr Gebäude Zähler für Heizung oder Warmwasser in den Wohnungen, müssen Sie meist nach Verbrauch abrechnen. Das kann Dwello nicht: Erstellen Sie die Abrechnungen dann ausserhalb von Dwello.'
+		);
+		expect(text()).toContain(
+			'Verlangen Sie eine Verwaltungspauschale nur, wenn sie im Mietvertrag vereinbart ist.'
+		);
+		expect(text()).toContain(
+			'Haben Mietverträge verschiedene Sätze, erstellen Sie die Abrechnungen getrennt.'
+		);
 	});
 
 	it('berechnet die Verwaltungspauschale aus den eigenen Nebenkosten oder verteilt sie nach einem Verteilschlüssel und warnt über 3 %', async () => {
@@ -232,15 +254,33 @@ describe('Abrechnungen erstellen', () => {
 						comparedWith: { start: '2023-01-01', end: '2023-12-31' },
 						hasComparison: true,
 						findings: [
-							{ categoryId: 'h', categoryName: 'Heizung', kind: 'stock', current: sums(0, 0), previous: sums(0, 0), missingParts: [{ start: '2024-12-31', end: '2024-12-31' }], changePercent: null },
-							{ categoryId: 'w', categoryName: 'Hauswart', kind: 'missing', current: sums(0, 0), previous: sums(1, 900), missingParts: [], changePercent: null }
+							{
+								categoryId: 'h',
+								categoryName: 'Heizung',
+								kind: 'stock',
+								current: sums(0, 0),
+								previous: sums(0, 0),
+								missingParts: [{ start: '2024-12-31', end: '2024-12-31' }],
+								changePercent: null
+							},
+							{
+								categoryId: 'w',
+								categoryName: 'Hauswart',
+								kind: 'missing',
+								current: sums(0, 0),
+								previous: sums(1, 900),
+								missingParts: [],
+								changePercent: null
+							}
 						]
 					}
 				}
 			]
 		});
 
-		const findings = [...document.querySelectorAll('[data-testid="category-finding"]')].map((f) => f.textContent!);
+		const findings = [...document.querySelectorAll('[data-testid="category-finding"]')].map(
+			(f) => f.textContent!
+		);
 		expect(findings).toHaveLength(1); // the missing invoices are the warning above
 		expect(findings[0]).toContain('Tankbestand am 31.12.2024 fehlt');
 		expect(byTestId('missing-invoices')!.textContent!.replace(/\s+/g, ' ')).toContain(
@@ -311,7 +351,13 @@ describe('Abrechnungen erstellen', () => {
 
 	it('führt bei fehlendem Tankbestand zum Gebäude, auch neben einem Hinweis zur selben Kategorie', () => {
 		const sums = (count: number, total: number) => ({ count, total });
-		const heating = { categoryId: 'h', categoryName: 'Heizung', current: sums(1, 4880), previous: sums(1, 5120), changePercent: null };
+		const heating = {
+			categoryId: 'h',
+			categoryName: 'Heizung',
+			current: sums(1, 4880),
+			previous: sums(1, 5120),
+			changePercent: null
+		};
 		open({
 			preview,
 			invoices: [
@@ -322,7 +368,11 @@ describe('Abrechnungen erstellen', () => {
 						comparedWith: { start: '2023-01-01', end: '2023-12-31' },
 						hasComparison: true,
 						findings: [
-							{ ...heating, kind: 'stock', missingParts: [{ start: '2025-12-31', end: '2025-12-31' }] },
+							{
+								...heating,
+								kind: 'stock',
+								missingParts: [{ start: '2025-12-31', end: '2025-12-31' }]
+							},
 							{ ...heating, kind: 'deviation', missingParts: [], changePercent: -40 }
 						]
 					}
@@ -335,17 +385,37 @@ describe('Abrechnungen erstellen', () => {
 		expect(link.getAttribute('href')).toBe('/buildings/b1');
 		// the fine print about missing invoices belongs to invoices, not to the tank
 		expect(byTestId('category-check')!.textContent).not.toContain('Fehlt eine Rechnung');
-		expect(byTestId('category-check')!.textContent).toContain('Erfassen oder prüfen Sie die Tankbestände');
-		expect(byTestId('category-check')!.querySelector('p')!.textContent).toBe('Möglicherweise fehlen Rechnungen');
+		expect(byTestId('category-check')!.textContent).toContain(
+			'Erfassen oder prüfen Sie die Tankbestände'
+		);
+		expect(byTestId('category-check')!.querySelector('p')!.textContent).toBe(
+			'Möglicherweise fehlen Rechnungen'
+		);
 	});
 
 	it('führt bei negativem Verbrauch zum Prüfen der Tankbestände', () => {
 		const sums = (count: number, total: number) => ({ count, total });
-		const heating = { categoryId: 'h', categoryName: 'Heizung', previous: sums(0, 0), missingParts: [], changePercent: null };
+		const heating = {
+			categoryId: 'h',
+			categoryName: 'Heizung',
+			previous: sums(0, 0),
+			missingParts: [],
+			changePercent: null
+		};
 		const withFindings = (findings: unknown[]) =>
 			open({
 				preview,
-				invoices: [{ ...invoices[0], check: { buildingId: 'b1', comparedWith: { start: '2023-01-01', end: '2023-12-31' }, hasComparison: true, findings } }]
+				invoices: [
+					{
+						...invoices[0],
+						check: {
+							buildingId: 'b1',
+							comparedWith: { start: '2023-01-01', end: '2023-12-31' },
+							hasComparison: true,
+							findings
+						}
+					}
+				]
 			});
 
 		withFindings([{ ...heating, kind: 'stock', current: sums(0, -880) }]);
@@ -363,14 +433,28 @@ describe('Abrechnungen erstellen', () => {
 						buildingId: 'b1',
 						comparedWith: { start: '2023-01-01', end: '2023-12-31' },
 						hasComparison: true,
-						findings: [{ categoryId: 'h', categoryName: 'Heizung', kind: 'tank', current: sums(1, 2000), previous: sums(0, 0), missingParts: [], changePercent: null }]
+						findings: [
+							{
+								categoryId: 'h',
+								categoryName: 'Heizung',
+								kind: 'tank',
+								current: sums(1, 2000),
+								previous: sums(0, 0),
+								missingParts: [],
+								changePercent: null
+							}
+						]
 					}
 				}
 			]
 		});
 
-		expect(byTestId('category-finding-stock-link')!.textContent).toContain('Tankbestand erfassen');
-		expect(byTestId('category-check')!.querySelector('p')!.textContent).toBe('Kosten im Vergleich zum Vorjahr');
+		// its own hint, not a comparison with the year before
+		expect(byTestId('category-check')).toBeNull();
+		const question = byTestId('tank-question')!;
+		expect(question.textContent).toContain('Heizen Sie mit Öl, Pellets oder Holz?');
+		expect(question.querySelector('a')!.getAttribute('href')).toBe('/buildings/b1');
+		expect(question.querySelector('a')!.textContent).toContain('Tankbestand erfassen');
 	});
 
 	it('nennt pro Kategorie fehlende Rechnungen im Vergleich zum Vorjahr und verlangt eine Bestätigung', async () => {
@@ -385,9 +469,33 @@ describe('Abrechnungen erstellen', () => {
 						comparedWith: { start: '2023-01-01', end: '2023-12-31' },
 						hasComparison: true,
 						findings: [
-							{ categoryId: 'k', categoryName: 'Kaminfeger', kind: 'missing', current: sums(0, 0), previous: sums(1, 290), missingParts: [], changePercent: null },
-							{ categoryId: 'w', categoryName: 'Kaltwasser', kind: 'gap', current: sums(1, 470), previous: sums(2, 935), missingParts: [{ start: '2025-07-01', end: '2025-12-31' }], changePercent: null },
-							{ categoryId: 'h', categoryName: 'Heizung', kind: 'deviation', current: sums(1, 6565), previous: sums(1, 4800), missingParts: [], changePercent: 37 }
+							{
+								categoryId: 'k',
+								categoryName: 'Kaminfeger',
+								kind: 'missing',
+								current: sums(0, 0),
+								previous: sums(1, 290),
+								missingParts: [],
+								changePercent: null
+							},
+							{
+								categoryId: 'w',
+								categoryName: 'Kaltwasser',
+								kind: 'gap',
+								current: sums(1, 470),
+								previous: sums(2, 935),
+								missingParts: [{ start: '2025-07-01', end: '2025-12-31' }],
+								changePercent: null
+							},
+							{
+								categoryId: 'h',
+								categoryName: 'Heizung',
+								kind: 'deviation',
+								current: sums(1, 6565),
+								previous: sums(1, 4800),
+								missingParts: [],
+								changePercent: 37
+							}
 						]
 					}
 				}
@@ -400,7 +508,7 @@ describe('Abrechnungen erstellen', () => {
 			f.textContent!.replace(/\s+/g, ' ').trim()
 		);
 		expect(findings).toEqual([
-			'Kaminfeger: Keine Rechnung in dieser Kategorie erfasst. Im Vorjahr: 1 Rechnung über CHF 290.00.',
+			'Kaminfeger: Keine Rechnung in dieser Kategorie erfasst. Im Vorjahr: Kosten von CHF 290.00.',
 			'Kaltwasser: Rechnung für das 2. Halbjahr fehlt. Im Vorjahr: 2 Rechnungen.',
 			'Heizung: CHF 6’565.00, 37 % mehr als im Vorjahr (CHF 4’800.00). Prüfen Sie den Betrag und den Zeitraum, für den die Rechnung gilt.'
 		]);
@@ -433,14 +541,24 @@ describe('Abrechnungen erstellen', () => {
 						comparedWith: { start: '2023-01-01', end: '2023-12-31' },
 						hasComparison: true,
 						findings: [
-							{ categoryId: 'h', categoryName: 'Heizung', kind: 'deviation', current: { count: 1, total: 6565 }, previous: { count: 1, total: 4800 }, missingParts: [], changePercent: 37 }
+							{
+								categoryId: 'h',
+								categoryName: 'Heizung',
+								kind: 'deviation',
+								current: { count: 1, total: 6565 },
+								previous: { count: 1, total: 4800 },
+								missingParts: [],
+								changePercent: 37
+							}
 						]
 					}
 				}
 			]
 		});
 		expect(byTestId('category-finding')!.textContent).toContain('Heizung');
-		expect(byTestId('category-check')!.querySelector('p')!.textContent).toBe('Kosten im Vergleich zum Vorjahr');
+		expect(byTestId('category-check')!.querySelector('p')!.textContent).toBe(
+			'Kosten im Vergleich zum Vorjahr'
+		);
 		expect(byTestId('confirm-missing-invoices')).toBeNull();
 		next();
 		await settle();
@@ -458,7 +576,17 @@ describe('Abrechnungen erstellen', () => {
 						buildingId: 'b2',
 						comparedWith: { start: '2023-01-01', end: '2023-12-31' },
 						hasComparison: true,
-						findings: [{ categoryId: 'k', categoryName: 'Kaminfeger', kind: 'missing', current: { count: 0, total: 0 }, previous: { count: 1, total: 290 }, missingParts: [], changePercent: null }]
+						findings: [
+							{
+								categoryId: 'k',
+								categoryName: 'Kaminfeger',
+								kind: 'missing',
+								current: { count: 0, total: 0 },
+								previous: { count: 1, total: 290 },
+								missingParts: [],
+								changePercent: null
+							}
+						]
 					}
 				}
 			]
@@ -472,7 +600,9 @@ describe('Abrechnungen erstellen', () => {
 			preview: [{ ...preview[0], totalCosts: 1200, totalAdvancePayments: 3000 }, preview[1]],
 			invoices: [invoices[0]]
 		});
-		const hints = [...document.querySelectorAll('[data-testid="preview-akonto-hint"]')].map((h) => h.textContent!.trim());
+		const hints = [...document.querySelectorAll('[data-testid="preview-akonto-hint"]')].map((h) =>
+			h.textContent!.trim()
+		);
 		expect(hints).toEqual(['Kosten CHF\u00a01’800.00 (60 %) unter dem Akonto. Fehlen Rechnungen?']);
 	});
 

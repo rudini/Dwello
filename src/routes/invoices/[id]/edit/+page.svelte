@@ -8,6 +8,7 @@
 	import type { Category, InvoiceWithDetails } from '$lib/types';
 	import Alert from '$lib/ui/Alert.svelte';
 	import BilledWarning from '../../BilledWarning.svelte';
+	import MissedWarning from '../../MissedWarning.svelte';
 	import { focusFirstError } from '$lib/ui/focus-error';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import Panel from '$lib/ui/Panel.svelte';
@@ -26,6 +27,7 @@
 			categories: Category[];
 			distributionKeys: DistributionKeyRow[];
 			billedIn?: { start: string; end: string }[]; // periods with statements that took this invoice
+			missedIn?: { start: string; end: string }[]; // periods with statements made before it was recorded
 		};
 	} = $props();
 
@@ -100,6 +102,8 @@
 			{ href: `/invoices/${invoice.id}`, label: invoice.billingEntity }
 		]}
 	/>
+
+	{#if data.missedIn?.length}<MissedWarning periods={data.missedIn} />{/if}
 
 	{#if data.billedIn?.length}
 		<BilledWarning periods={data.billedIn}>

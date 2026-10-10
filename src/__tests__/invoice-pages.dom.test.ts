@@ -197,22 +197,41 @@ describe('Rechnungsdetail', () => {
 
 	it('zeigt den Leistungszeitraum, der statt des Rechnungsdatums die Periode bestimmt', () => {
 		show(InvoicePage, {
-			data: { invoice: invoice({ servicePeriodStart: '2024-10-01', servicePeriodEnd: '2024-12-31' }) }
+			data: {
+				invoice: invoice({ servicePeriodStart: '2024-10-01', servicePeriodEnd: '2024-12-31' })
+			}
 		});
 
 		expect(text()).toContain('Leistungszeitraum 1.10.2024 – 31.12.2024');
 		expect(text()).not.toContain('Bestimmt, in welche Abrechnungsperiode');
 	});
 
+	// Nachzügler: erfasst, nachdem die Abrechnungen der Periode erstellt wurden
+	it('weist darauf hin, wenn die Abrechnungen der Periode ohne diese Rechnung erstellt wurden', () => {
+		show(InvoicePage, {
+			data: { invoice: invoice(), missedIn: [{ start: '2024-01-01', end: '2024-12-31' }] }
+		});
+
+		const hint = byTestId('invoice-missed-warning')!.textContent!.replace(/\s+/g, ' ');
+		expect(hint).toContain(
+			'Für die Abrechnungsperiode 1.1.2024 – 31.12.2024 gibt es schon Abrechnungen ohne diese Rechnung.'
+		);
+		expect(hint).toContain('Entwürfe erstellen Sie neu, dann ist sie dabei.');
+	});
+
 	// Der Mieter kann Einsicht in die Belege einer versendeten Abrechnung verlangen
 	it('warnt vor dem Löschen einer schon abgerechneten Rechnung', () => {
-		show(InvoicePage, { data: { invoice: invoice(), billedIn: [{ start: '2024-01-01', end: '2024-12-31' }] } });
+		show(InvoicePage, {
+			data: { invoice: invoice(), billedIn: [{ start: '2024-01-01', end: '2024-12-31' }] }
+		});
 
 		click('invoice-delete-button');
 
 		const dialog = document.querySelector('[role=dialog]')!.textContent!.replace(/\s+/g, ' ');
 		expect(dialog).toContain('Abrechnungsperiode 1.1.2024 – 31.12.2024');
-		expect(dialog).toContain('Bewahren Sie den Beleg auf: Der Mieter kann Einsicht verlangen.');
+		expect(dialog).toContain(
+			'Löschen Sie nur falsch erfasste Rechnungen. Versendete oder bezahlte Abrechnungen berichtigen Sie gegenüber dem Mieter. Bewahren Sie den Beleg auf: Der Mieter kann Einsicht verlangen.'
+		);
 	});
 
 	it('löscht die Rechnung nach Bestätigung und kehrt zur Liste zurück', async () => {
@@ -538,7 +557,10 @@ describe('Rechnung erfassen', () => {
 
 	it('nennt den Leistungszeitraum als Grund, wenn er ausserhalb der Abrechnungsperiode liegt', () => {
 		show(NewInvoicePage, {
-			data: data(false, { returnTo: '/statements/generate', period: { start: '2025-01-01', end: '2025-12-31' } })
+			data: data(false, {
+				returnTo: '/statements/generate',
+				period: { start: '2025-01-01', end: '2025-12-31' }
+			})
 		} as never);
 		fireEvent(byTestId<HTMLInputElement>('invoice-date-input')!, 'input', '2025-01-15');
 		fireEvent(byTestId<HTMLInputElement>('invoice-service-start-input')!, 'input', '2024-10-01');
@@ -554,8 +576,12 @@ describe('Rechnung erfassen', () => {
 		show(NewInvoicePage, { data: data(false) } as never);
 		const help = text();
 
-		expect(help).toContain('Geben Sie ihn bei Rechnungen für einen Zeitraum an, zum Beispiel ein Quartal oder ein Jahr.');
-		expect(help).toContain('Nicht für Heizöl- oder Pelletlieferungen: Deren Verbrauch zählt über den Tankbestand des Gebäudes.');
+		expect(help).toContain(
+			'Geben Sie ihn bei Rechnungen für einen Zeitraum an, zum Beispiel ein Quartal oder ein Jahr.'
+		);
+		expect(help).toContain(
+			'Nicht für Heizöl- oder Pelletlieferungen: Deren Verbrauch zählt über den Tankbestand des Gebäudes.'
+		);
 	});
 
 	it('warnt ohne Abrechnungsperiode nicht', () => {
@@ -611,6 +637,20 @@ describe('Rechnung bearbeiten', () => {
 		expect(warning).toContain(
 			'Ändern Sie diese Rechnung, stimmen diese Abrechnungen nicht mehr. Entwürfe erstellen Sie neu; versendete oder bezahlte Abrechnungen berichtigen Sie gegenüber dem Mieter.'
 		);
+	});
+
+	it('weist beim Bearbeiten auf Abrechnungen ohne diese Rechnung hin', () => {
+		show(EditInvoicePage, {
+			data: {
+				invoice: invoice(),
+				buildings,
+				categories,
+				distributionKeys,
+				missedIn: [{ start: '2024-01-01', end: '2024-12-31' }]
+			}
+		} as never);
+
+		expect(byTestId('invoice-missed-warning')).not.toBeNull();
 	});
 
 	it('zeigt den Betrag mit zwei Nachkommastellen', () => {

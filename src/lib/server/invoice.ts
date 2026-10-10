@@ -49,21 +49,31 @@ export function toInvoice(r: Record<string, unknown>): InvoiceWithDetails {
 
 type StatementPeriod = { periodStart: string; periodEnd: string; createdAt: string };
 
+const periodsOf = (statements: StatementPeriod[]) =>
+	[...new Set(statements.map((s) => `${s.periodStart}/${s.periodEnd}`))].map((period) => {
+		const [start, end] = period.split('/');
+		return { start, end };
+	});
+
 /**
- * The periods whose statements took this invoice: it was allocable and recorded before they were created, and its
- * Leistungszeitraum (else its Rechnungsdatum) overlaps their period
+ * The periods with statements for this allocable invoice (its Leistungszeitraum, else its Rechnungsdatum, overlaps
+ * them): billedIn took it (created after it was recorded), missedIn were created before and lack it
  */
-export async function billedIn(fetch: typeof globalThis.fetch, backendUrl: string, invoice: Record<string, unknown>) {
-	if (invoice.isValidUtilityCost === false) return [];
-	const response = await fetch(`${backendUrl}/api/v1/statements?buildingId=${invoice.buildingId}&limit=1000`).catch(() => null);
+export async function statementPeriods(
+	fetch: typeof globalThis.fetch,
+	backendUrl: string,
+	invoice: Record<string, unknown>
+) {
+	if (invoice.isValidUtilityCost === false) return { billedIn: [], missedIn: [] };
+	const response = await fetch(
+		`${backendUrl}/api/v1/statements?buildingId=${invoice.buildingId}&limit=1000`
+	).catch(() => null);
 	const statements: StatementPeriod[] = response?.ok ? ((await response.json()).data ?? []) : [];
 	const start = (invoice.servicePeriodStart ?? invoice.invoiceDate) as string;
 	const end = (invoice.servicePeriodEnd ?? invoice.invoiceDate) as string;
-	const periods = statements
-		.filter((s) => s.periodStart <= end && s.periodEnd >= start && s.createdAt >= String(invoice.createdAt))
-		.map((s) => `${s.periodStart}/${s.periodEnd}`);
-	return [...new Set(periods)].map((period) => {
-		const [periodStart, periodEnd] = period.split('/');
-		return { start: periodStart, end: periodEnd };
-	});
+	const overlapping = statements.filter((s) => s.periodStart <= end && s.periodEnd >= start);
+	const billedIn = periodsOf(overlapping.filter((s) => s.createdAt >= String(invoice.createdAt)));
+	const billed = new Set(billedIn.map((p) => `${p.start}/${p.end}`));
+	const missedIn = periodsOf(overlapping).filter((p) => !billed.has(`${p.start}/${p.end}`));
+	return { billedIn, missedIn };
 }

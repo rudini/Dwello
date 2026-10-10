@@ -141,9 +141,11 @@ const check = (findings: ReturnType<typeof finding>[], hasComparison = true) => 
 
 describe('Rechnungen pro Kategorie', () => {
 	it('beschreibt eine Kategorie ohne Rechnung mit den Kosten des Vorjahres', () => {
-		expect(findingText(finding('missing', { current: { count: 0, total: 0 }, previous: { count: 1, total: 290 } }))).toBe(
-			'Keine Rechnung in dieser Kategorie erfasst. Im Vorjahr: 1 Rechnung über CHF\u00a0290.00.'
-		);
+		expect(
+			findingText(
+				finding('missing', { current: { count: 0, total: 0 }, previous: { count: 1, total: 290 } })
+			)
+		).toBe('Keine Rechnung in dieser Kategorie erfasst. Im Vorjahr: Kosten von CHF\u00a0290.00.');
 	});
 
 	it('nennt den Teil des Jahres, für den die Rechnung fehlt', () => {
@@ -159,44 +161,77 @@ describe('Rechnungen pro Kategorie', () => {
 				})
 			)
 		).toBe('Rechnungen für das 1. Quartal und das 3. Quartal fehlen. Im Vorjahr: 4 Rechnungen.');
-		expect(findingText(finding('gap', { missingParts: [part('2025-03-01', '2025-03-31')] }))).toContain('für den März fehlt');
-		expect(findingText(finding('gap', { missingParts: [part('2026-01-14', '2026-07-15')] }))).toContain(
-			'für die Zeit vom 14.1.2026 bis 15.7.2026 fehlt'
-		);
+		expect(
+			findingText(finding('gap', { missingParts: [part('2025-03-01', '2025-03-31')] }))
+		).toContain('für den März fehlt');
+		expect(
+			findingText(finding('gap', { missingParts: [part('2026-01-14', '2026-07-15')] }))
+		).toContain('für die Zeit vom 14.1.2026 bis 15.7.2026 fehlt');
 	});
 
 	it('nennt Kosten, die deutlich vom Vorjahr abweichen, mit dem nächsten Schritt', () => {
 		expect(
-			findingText(finding('deviation', { current: { count: 1, total: 6565 }, previous: { count: 1, total: 4800 }, changePercent: 37 }))
+			findingText(
+				finding('deviation', {
+					current: { count: 1, total: 6565 },
+					previous: { count: 1, total: 4800 },
+					changePercent: 37
+				})
+			)
 		).toBe(
 			'CHF\u00a06’565.00, 37 % mehr als im Vorjahr (CHF\u00a04’800.00). Prüfen Sie den Betrag und den Zeitraum, für den die Rechnung gilt.'
 		);
-		expect(findingText(finding('deviation', { changePercent: -40 }))).toContain('40 % weniger als im Vorjahr');
+		expect(findingText(finding('deviation', { changePercent: -40 }))).toContain(
+			'40 % weniger als im Vorjahr'
+		);
 	});
 
 	// Nebenkosten dürfen nur abgerechnet werden, wenn sie im Mietvertrag vereinbart sind
 	it('fragt bei einer neuen Kategorie, ob sie im Mietvertrag vereinbart ist', () => {
-		expect(findingText(finding('new', { current: { count: 1, total: 400 }, previous: { count: 0, total: 0 } }))).toBe(
-			'Neu: CHF\u00a0400.00, im Vorjahr keine Kosten. Ist diese Kategorie im Mietvertrag vereinbart? Nur vereinbarte Nebenkosten dürfen Sie abrechnen. Wenn nicht, markieren Sie die Rechnungen als nicht umlagefähig. Neue Nebenkosten führen Sie nur für die Zukunft ein: mit dem amtlichen Formular, begründet, auf den nächsten Kündigungstermin. Waren die Kosten bisher in der Nettomiete enthalten, senken Sie diese entsprechend.'
+		expect(
+			findingText(
+				finding('new', { current: { count: 1, total: 400 }, previous: { count: 0, total: 0 } })
+			)
+		).toBe(
+			'Neu: CHF\u00a0400.00, im Vorjahr keine Kosten. Ist diese Kategorie im Mietvertrag vereinbart? Nur vereinbarte Nebenkosten dürfen Sie abrechnen. Wenn nicht, markieren Sie die Rechnungen als nicht umlagefähig. Neue Nebenkosten führen Sie nur für die Zukunft ein, frühestens auf den nächsten Kündigungstermin: begründet, mit dem amtlichen Formular, beim Mieter mindestens 10 Tage vor Beginn der Kündigungsfrist. Ohne Formular oder Begründung ist die Änderung nichtig. Waren die Kosten bisher in der Nettomiete enthalten, senken Sie diese entsprechend.'
 		);
 	});
 
 	// Ohne Anfangs- und Endbestand rechnet die Abrechnung das Heizöl nach Einkauf statt nach Verbrauch ab
 	it('nennt den fehlenden Tankbestand mit seinem Stichtag und der Folge', () => {
-		expect(findingText(finding('stock', { missingParts: [{ start: '2025-12-31', end: '2025-12-31' }] }))).toBe(
+		expect(
+			findingText(finding('stock', { missingParts: [{ start: '2025-12-31', end: '2025-12-31' }] }))
+		).toBe(
 			'Tankbestand am 31.12.2025 fehlt. Ohne Anfangs- und Endbestand rechnet Dwello den Einkauf ab, nicht den Verbrauch. Abrechnen dürfen Sie aber nur den Verbrauch: Erfassen Sie den Bestand auf der Seite des Gebäudes. Bestätigen Sie nur, wenn der Tank am Anfang und am Ende gleich voll war.'
 		);
 		expect(
-			findingText(finding('stock', { missingParts: [{ start: '2024-12-31', end: '2024-12-31' }, { start: '2025-12-31', end: '2025-12-31' }] }))
+			findingText(
+				finding('stock', {
+					missingParts: [
+						{ start: '2024-12-31', end: '2024-12-31' },
+						{ start: '2025-12-31', end: '2025-12-31' }
+					]
+				})
+			)
 		).toContain('Tankbestand am 31.12.2024 und am 31.12.2025 fehlen.');
 	});
 
 	// Erste Abrechnung: ob das Gebäude einen Tank hat, weiss Dwello nicht
 	it('fragt bei Heizkosten ohne Tankbestand, ob das Gebäude mit Öl oder Pellets heizt, ohne Bestätigung', () => {
 		expect(findingText(finding('tank'))).toBe(
-			'Heizen Sie mit Öl oder Pellets? Dann erfassen Sie den Tankbestand am Anfang und am Ende der Periode, sonst rechnet Dwello den Einkauf ab statt den Verbrauch. Bei Fernwärme, Gas oder Wärmepumpe ist nichts zu tun.'
+			'Heizen Sie mit Öl, Pellets oder Holz? Dann erfassen Sie den Tankbestand am Anfang und am Ende der Periode, sonst rechnet Dwello den Einkauf ab statt den Verbrauch. Bei Fernwärme, Gas oder Wärmepumpe ist nichts zu tun.'
 		);
-		expect(needsConfirmation([{ buildingId: 'b1', count: 3, first: '2024-01-01', last: '2024-12-31', check: check([finding('tank')]) }])).toBe(false);
+		expect(
+			needsConfirmation([
+				{
+					buildingId: 'b1',
+					count: 3,
+					first: '2024-01-01',
+					last: '2024-12-31',
+					check: check([finding('tank')])
+				}
+			])
+		).toBe(false);
 	});
 
 	it('meldet einen negativen Verbrauch aus dem Tank', () => {
@@ -207,9 +242,24 @@ describe('Rechnungen pro Kategorie', () => {
 
 	it('verlangt eine Bestätigung bei fehlenden Rechnungen, nicht bei einer Abweichung', () => {
 		const row = (findings: ReturnType<typeof finding>[]) =>
-			invoiceRows([{ buildingId: 'b1', count: 3, first: '2024-01-01', last: '2024-12-31', check: check(findings) }], buildings, period)[0];
+			invoiceRows(
+				[
+					{
+						buildingId: 'b1',
+						count: 3,
+						first: '2024-01-01',
+						last: '2024-12-31',
+						check: check(findings)
+					}
+				],
+				buildings,
+				period
+			)[0];
 
-		expect(row([finding('gap', { missingParts: [{ start: '2025-07-01', end: '2025-12-31' }] })]).incomplete).toBe(true);
+		expect(
+			row([finding('gap', { missingParts: [{ start: '2025-07-01', end: '2025-12-31' }] })])
+				.incomplete
+		).toBe(true);
 		expect(row([finding('new')]).incomplete).toBe(false);
 		expect(row([finding('missing')]).incomplete).toBe(true);
 		expect(row([finding('deviation', { changePercent: 30 })]).incomplete).toBe(false);
@@ -219,8 +269,19 @@ describe('Rechnungen pro Kategorie', () => {
 	// Mit Vorjahr ersetzt der Vergleich pro Kategorie die grobe Prüfung von Anfang und Ende der Periode
 	it('prüft Anfang und Ende der Periode nur, wenn es kein Vorjahr zum Vergleich gibt', () => {
 		const partial = (hasComparison: boolean) =>
-			invoiceRows([{ buildingId: 'b1', count: 2, first: '2024-01-15', last: '2024-03-31', check: check([], hasComparison) }], buildings, period)[0]
-				.partial;
+			invoiceRows(
+				[
+					{
+						buildingId: 'b1',
+						count: 2,
+						first: '2024-01-15',
+						last: '2024-03-31',
+						check: check([], hasComparison)
+					}
+				],
+				buildings,
+				period
+			)[0].partial;
 
 		expect(partial(true)).toBe(false);
 		expect(partial(false)).toBe(true);
@@ -228,7 +289,13 @@ describe('Rechnungen pro Kategorie', () => {
 });
 
 describe('Bestätigung vor dem Erstellen', () => {
-	const coverage = (extra = {}) => ({ buildingId: 'b1', count: 3, first: '2024-01-01', last: '2024-12-31', ...extra });
+	const coverage = (extra = {}) => ({
+		buildingId: 'b1',
+		count: 3,
+		first: '2024-01-01',
+		last: '2024-12-31',
+		...extra
+	});
 
 	it('verlangt sie ohne Rechnungen, bei bestehenden Abrechnungen und bei fehlenden Rechnungen einer Kategorie', () => {
 		expect(needsConfirmation([coverage({ count: 0 })])).toBe(true);
@@ -238,7 +305,9 @@ describe('Bestätigung vor dem Erstellen', () => {
 	});
 
 	it('verlangt sie nicht für Hinweise auf neue Kategorien oder Abweichungen', () => {
-		expect(needsConfirmation([coverage({ check: check([finding('new'), finding('deviation')]) })])).toBe(false);
+		expect(
+			needsConfirmation([coverage({ check: check([finding('new'), finding('deviation')]) })])
+		).toBe(false);
 	});
 });
 
@@ -251,7 +320,9 @@ describe('Abweichung zum Akonto', () => {
 	});
 
 	it('fragt nach fehlenden Rechnungen, wenn die Kosten weit unter dem Akonto liegen', () => {
-		expect(akontoHint(row(1000, 2400))).toBe('Kosten CHF\u00a01’400.00 (58 %) unter dem Akonto. Fehlen Rechnungen?');
+		expect(akontoHint(row(1000, 2400))).toBe(
+			'Kosten CHF\u00a01’400.00 (58 %) unter dem Akonto. Fehlen Rechnungen?'
+		);
 	});
 
 	// Ein höheres Akonto ist eine Vertragsänderung: der Mieter erfährt sie mit dem amtlichen Formular

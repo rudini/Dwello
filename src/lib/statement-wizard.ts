@@ -80,7 +80,10 @@ const invoices = (count: number) => (count === 1 ? '1 Rechnung' : `${count} Rech
 function calendarName({ start, end }: { start: string; end: string }) {
 	const from = new Date(`${start}T00:00:00Z`);
 	const after = new Date(new Date(`${end}T00:00:00Z`).getTime() + 86_400_000);
-	const months = (after.getUTCFullYear() - from.getUTCFullYear()) * 12 + after.getUTCMonth() - from.getUTCMonth();
+	const months =
+		(after.getUTCFullYear() - from.getUTCFullYear()) * 12 +
+		after.getUTCMonth() -
+		from.getUTCMonth();
 	const month = from.getUTCMonth();
 	if (from.getUTCDate() !== 1 || after.getUTCDate() !== 1 || month % months !== 0) return null;
 	const names: Record<number, string> = {
@@ -102,31 +105,49 @@ const stockText = (missingDays: { start: string }[], consumption: number) =>
 		: `Der Endbestand ist ${formatCurrency(-consumption)} höher als Anfangsbestand und Einkauf zusammen, der Verbrauch wäre negativ. Prüfen Sie die Tankbestände.`;
 
 /** One finding of the check per category in plain words, with what to look at */
-export function findingText({ kind, current, previous, missingParts, changePercent }: CategoryFinding): string {
+export function findingText({
+	kind,
+	current,
+	previous,
+	missingParts,
+	changePercent
+}: CategoryFinding): string {
 	if (kind === 'stock') return stockText(missingParts, current.total);
 	if (kind === 'tank')
-		return 'Heizen Sie mit Öl oder Pellets? Dann erfassen Sie den Tankbestand am Anfang und am Ende der Periode, sonst rechnet Dwello den Einkauf ab statt den Verbrauch. Bei Fernwärme, Gas oder Wärmepumpe ist nichts zu tun.';
+		return 'Heizen Sie mit Öl, Pellets oder Holz? Dann erfassen Sie den Tankbestand am Anfang und am Ende der Periode, sonst rechnet Dwello den Einkauf ab statt den Verbrauch. Bei Fernwärme, Gas oder Wärmepumpe ist nichts zu tun.';
 	if (kind === 'missing')
-		return `Keine Rechnung in dieser Kategorie erfasst. Im Vorjahr: ${invoices(previous.count)} über ${formatCurrency(previous.total)}.`;
+		return `Keine Rechnung in dieser Kategorie erfasst. Im Vorjahr: Kosten von ${formatCurrency(previous.total)}.`;
 	if (kind === 'new')
-		return `Neu: ${formatCurrency(current.total)}, im Vorjahr keine Kosten. Ist diese Kategorie im Mietvertrag vereinbart? Nur vereinbarte Nebenkosten dürfen Sie abrechnen. Wenn nicht, markieren Sie die Rechnungen als nicht umlagefähig. Neue Nebenkosten führen Sie nur für die Zukunft ein: mit dem amtlichen Formular, begründet, auf den nächsten Kündigungstermin. Waren die Kosten bisher in der Nettomiete enthalten, senken Sie diese entsprechend.`;
+		return `Neu: ${formatCurrency(current.total)}, im Vorjahr keine Kosten. Ist diese Kategorie im Mietvertrag vereinbart? Nur vereinbarte Nebenkosten dürfen Sie abrechnen. Wenn nicht, markieren Sie die Rechnungen als nicht umlagefähig. Neue Nebenkosten führen Sie nur für die Zukunft ein, frühestens auf den nächsten Kündigungstermin: begründet, mit dem amtlichen Formular, beim Mieter mindestens 10 Tage vor Beginn der Kündigungsfrist. Ohne Formular oder Begründung ist die Änderung nichtig. Waren die Kosten bisher in der Nettomiete enthalten, senken Sie diese entsprechend.`;
 	if (kind === 'gap') {
 		const parts = missingParts.map(partLabel).join(' und ');
-		const what = missingParts.length === 1 ? `Rechnung für ${parts} fehlt` : `Rechnungen für ${parts} fehlen`;
+		const what =
+			missingParts.length === 1 ? `Rechnung für ${parts} fehlt` : `Rechnungen für ${parts} fehlen`;
 		return `${what}. Im Vorjahr: ${invoices(previous.count)}.`;
 	}
 	const direction = (changePercent ?? 0) > 0 ? 'mehr' : 'weniger';
 	return `${formatCurrency(current.total)}, ${Math.abs(changePercent ?? 0)} % ${direction} als im Vorjahr (${formatCurrency(previous.total)}). Prüfen Sie den Betrag und den Zeitraum, für den die Rechnung gilt.`;
 }
 
-// TODO(fachlich prüfen): costs 15 % above the Akonto suggest raising it, 30 % below suggest missing invoices
+// TODO(fachlich prüfen): costs 15 % above the Akonto suggest raising it, 30 % below suggest missing invoices;
+// a fixed-term contract has no termination date before its end (review B, MR4-4)
 const AKONTO_ABOVE = 0.15;
 const AKONTO_BELOW = 0.3;
 
-type AkontoRow = { totalCosts: number; totalAdvancePayments: number; rentalDays?: number; totalPeriodDays?: number };
+type AkontoRow = {
+	totalCosts: number;
+	totalAdvancePayments: number;
+	rentalDays?: number;
+	totalPeriodDays?: number;
+};
 
 /** A statement whose costs are far from the Akonto paid: missing invoices, or an Akonto to raise */
-export function akontoHint({ totalCosts, totalAdvancePayments, rentalDays, totalPeriodDays }: AkontoRow) {
+export function akontoHint({
+	totalCosts,
+	totalAdvancePayments,
+	rentalDays,
+	totalPeriodDays
+}: AkontoRow) {
 	if (!(totalAdvancePayments > 0)) return null;
 	const change = (totalCosts - totalAdvancePayments) / totalAdvancePayments;
 	const amount = formatCurrency(Math.abs(totalCosts - totalAdvancePayments));
@@ -135,7 +156,8 @@ export function akontoHint({ totalCosts, totalAdvancePayments, rentalDays, total
 		return `Kosten ${amount} (${percent} %) über dem Akonto. Prüfen Sie, ob Sie das Akonto erhöhen. Eine Erhöhung gilt frühestens auf den nächsten Kündigungstermin: begründet, mit dem amtlichen Formular, beim Mieter mindestens 10 Tage vor Beginn der Kündigungsfrist. Ohne Formular oder Begründung ist sie nichtig.`;
 	// part of the period: the months rented may carry little heating, low costs are no sign of missing invoices
 	const wholePeriod = !rentalDays || !totalPeriodDays || rentalDays >= totalPeriodDays;
-	if (change < -AKONTO_BELOW && wholePeriod) return `Kosten ${amount} (${percent} %) unter dem Akonto. Fehlen Rechnungen?`;
+	if (change < -AKONTO_BELOW && wholePeriod)
+		return `Kosten ${amount} (${percent} %) unter dem Akonto. Fehlen Rechnungen?`;
 	return null;
 }
 

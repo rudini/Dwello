@@ -4,9 +4,9 @@
 	// One finding of the check per category; a Tankbestand finding leads to the building
 	let { finding, buildingId }: { finding: CategoryFinding; buildingId: string } = $props();
 
-	const tank = $derived(finding.kind === 'stock' || finding.kind === 'tank');
-	// a missing reading or none at all is captured, a negative consumption checked
-	const capture = $derived(finding.kind === 'tank' || finding.missingParts.length > 0);
+	const tank = $derived(finding.kind === 'stock');
+	// a missing reading is captured, a negative consumption checked
+	const capture = $derived(finding.missingParts.length > 0);
 </script>
 
 <li data-testid="category-finding">

@@ -1,6 +1,8 @@
 <script lang="ts">
 	import type { invoiceRows } from '$lib/statement-wizard';
 	import CategoryCheck from './CategoryCheck.svelte';
+	import TankQuestion from './TankQuestion.svelte';
+	import { localToday } from '$lib/contract-status';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';
 	import Checkbox from '$lib/ui/Checkbox.svelte';
@@ -18,17 +20,19 @@
 		error?: string;
 	} = $props();
 
+	// ISO dates compare as text; repeated from step 1, where it may have been overlooked
+	const notOver = $derived(period.periodEnd >= localToday());
 	const missing = $derived(rows.filter((row) => row.missing));
 	const partial = $derived(rows.filter((row) => row.partial));
 	const existing = $derived(rows.filter((row) => row.existing > 0));
-	// a building without any invoice has its own warning above; only its Tankbestand hints are listed
-	const tankOnly = (row: (typeof rows)[number]) => ({
+	// a building without any invoice has its own warning above, only its Tankbestand hints are listed;
+	// the question about a tank is no comparison with the year before and has its own hint
+	const shown = (row: (typeof rows)[number]) => ({
 		...row,
-		findings: row.findings.filter((f) => f.kind === 'stock' || f.kind === 'tank')
+		findings: row.findings.filter((f) => f.kind !== 'tank' && (!row.missing || f.kind === 'stock'))
 	});
-	const checked = $derived(
-		rows.map((row) => (row.missing ? tankOnly(row) : row)).filter((row) => row.findings.length > 0)
-	);
+	const checked = $derived(rows.map(shown).filter((row) => row.findings.length > 0));
+	const tankQuestions = $derived(rows.filter((row) => row.findings.some((f) => f.kind === 'tank')));
 	const incomplete = $derived(checked.filter((row) => row.incomplete));
 	const comparedWith = $derived(checked.find((row) => row.comparedWith)?.comparedWith);
 	// The warnings that need the confirmation, read with its checkbox
@@ -49,13 +53,22 @@
 	);
 </script>
 
+{#if notOver}
+	<Alert tone="caution" title="Periode läuft noch" testid="preview-period-warning">
+		<p>
+			Die Abrechnungsperiode ist noch nicht zu Ende. Das Akonto zählt für alle Monate, auch die noch
+			nicht bezahlten, und Rechnungen bis zum Ende der Periode fehlen noch.
+		</p>
+	</Alert>
+{/if}
+
 {#if missing.length}
 	<Alert tone="caution" title="Rechnungen fehlen" testid="missing-invoices">
 		<p id="missing-invoices-text">
 			Für {missing.map((row) => row.name).join(', ')} sind in der Abrechnungsperiode keine Rechnungen
-			erfasst. Ohne Rechnungen fehlen deren Kosten in den Abrechnungen, und die Mieter erhalten ihr
-			Akonto weitgehend zurück. Erfassen Sie zuerst die Rechnungen – oder bestätigen Sie unten, dass es
-			keine gibt.
+			erfasst. Ohne Rechnungen fehlen deren Kosten in den Abrechnungen, und die Mieter erhalten ihr Akonto
+			weitgehend zurück. Erfassen Sie zuerst die Rechnungen – oder bestätigen Sie unten, dass es keine
+			gibt.
 		</p>
 		{#snippet action()}
 			<Button href={newInvoice} icon="invoice">Rechnung erfassen</Button>
@@ -66,6 +79,8 @@
 {#if checked.length}
 	<CategoryCheck {checked} {comparedWith} confirm={incomplete.length > 0} {newInvoice} />
 {/if}
+
+{#if tankQuestions.length}<TankQuestion buildings={tankQuestions} />{/if}
 
 {#if existing.length}
 	<Alert tone="caution" title="Es gibt schon Abrechnungen" testid="existing-statements">
