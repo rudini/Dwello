@@ -479,3 +479,11 @@ class TddStepTest(unittest.TestCase):
 
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(repo.trailer("TDD-Exit-Code"), "0")
+
+    def test_a_suite_that_runs_no_tests_does_not_pass(self):
+        repo = vitest_repo(self)
+        repo.commit_all("green: seed", {"calc.js": RIGHT_ADD_JS, "calc.test.js": VITEST_TEST})
+        repo.write("vitest.config.js",
+                   'export default { test: { include: ["nothing/**"], passWithNoTests: true } };\n')
+
+        self.assert_refused(repo, "refactor", "refactor needs all tests passing", head="green: seed")
