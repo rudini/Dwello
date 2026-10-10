@@ -103,6 +103,7 @@ export function analyze({ root, fallow, config = loadConfig(root) }: AnalyzeOpti
 		const metrics = {
 			interfaceSize: file.interfaceSize,
 			implementationSize: file.implementationSize,
+			operations: file.operations,
 			depthRatio: file.implementationSize / Math.max(1, file.interfaceSize),
 			passThroughs: file.passThroughs,
 			leakyExports: file.leakyExports,

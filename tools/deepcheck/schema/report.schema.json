@@ -67,10 +67,11 @@
 				"newFile": { "type": "boolean", "description": "check: the file did not exist at the base" },
 				"metrics": {
 					"type": "object",
-					"required": ["interfaceSize", "implementationSize", "depthRatio", "passThroughs", "leakyExports", "classitis", "dataOnlyClasses", "fanIn", "fanOut", "complexity", "complexitySource", "unusedExports"],
+					"required": ["interfaceSize", "implementationSize", "operations", "depthRatio", "passThroughs", "leakyExports", "classitis", "dataOnlyClasses", "fanIn", "fanOut", "complexity", "complexitySource", "unusedExports"],
 					"properties": {
 						"interfaceSize": { "type": "number" },
 						"implementationSize": { "type": "number" },
+						"operations": { "type": "number" },
 						"depthRatio": { "type": "number" },
 						"passThroughs": { "type": "array", "items": { "$ref": "#/$defs/location" } },
 						"leakyExports": { "type": "array", "items": { "$ref": "#/$defs/location" } },
@@ -93,6 +94,7 @@
 							"line": { "type": "number" },
 							"interfaceSize": { "type": "number" },
 							"implementationSize": { "type": "number" },
+						"operations": { "type": "number" },
 							"depthRatio": { "type": "number" },
 							"dataOnly": { "type": "boolean" }
 						}

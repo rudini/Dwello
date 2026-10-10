@@ -12,7 +12,7 @@ export function components(m: ModuleMetrics, exportCount: number, functionCount:
 	const interfaceSize = Math.max(1, m.interfaceSize);
 	const coupled = m.fanIn + m.fanOut;
 	return {
-		depth: logShallowness(m.depthRatio, config.depthTarget),
+		depth: logShallowness((m.implementationSize + m.operations) / interfaceSize, config.depthTarget),
 		complexity: logShallowness(m.complexity / interfaceSize, config.complexityTarget),
 		passThrough: clamp01((2 * m.passThroughs.length) / Math.max(1, functionCount)),
 		leaky: clamp01(m.leakyExports.length / Math.max(1, exportCount)),

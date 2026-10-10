@@ -83,7 +83,8 @@ Excluded files still take part in the import graph; tests, declarations and gene
 |---|---|
 | `interfaceSize` | Per exported symbol 1, plus: parameters of exported functions (declarations, arrow/function constants, default exports); for exported classes the public members (not `private`, `protected` or `#x`) with their parameters, constructor parameters, one count per overload set; for exported object literals each function member (method, arrow or function property) with its parameters. Data keys of exported objects, members of exported interfaces and types are not counted (an exported type counts 1). `export { a }` counts like the local declaration of `a`; a re-export counts 1 per name, `export *` 1. |
 | `implementationSize` | Statements in the whole module, including non-exported code: variable, expression, control-flow, return, throw, try, function, class and enum statements, class members (methods, properties, accessors, constructors), and expression-bodied arrow functions. Not counted: blocks, imports, re-exports, type declarations (interfaces, type aliases), ambient (`declare`) code, overload signatures. Comments and blank lines never count. |
-| `depthRatio` | `implementationSize / max(1, interfaceSize)` |
+| `operations` | Calls, `new` expressions, binary and conditional expressions and template strings in the module (Phase 4: statements alone undercount dense code such as checksum or mapping expressions). |
+| `depthRatio` | `implementationSize / max(1, interfaceSize)` (reported as defined; the score's depth component also counts `operations`) |
 | `passThroughs` | Named functions and methods (declarations, methods, functions and arrows assigned to variables, class properties or members of module-level objects; not inline callbacks) whose whole body is one call that receives exactly their parameters, in order (`return f(a, b)`, `f(a, b);`, `=> f(a, b)`, optionally awaited). At least one parameter; destructured parameters never match; recursion is excluded. Each location is reported. |
 | `leakyExports` | Exported signatures (parameter, return and property types of exported functions, variables, classes' public members, and exported type bodies) that reference a type declared in this module but not exported, resolved by symbol. Conservative: only interfaces, classes, enums and object-literal type aliases count; a local alias of another type (`type Fetch = typeof fetch`) is nameable by callers and is not a leak. |
 | `classitis` | (a) A directory with at least `classitisMinFiles` analyzed modules where at least 80 % are tiny single-export files (1 export, at most 3 statements): those tiny files are marked. (b) Exported classes made only of fields, simple accessors (at most one statement) and a constructor that only assigns `this.x`, without `extends` (`dataOnlyClasses`). |
@@ -97,7 +98,7 @@ Each component is 0 (deep) to 1 (shallow):
 
 | Component | Formula |
 |---|---|
-| `depth` | `clamp01(1 - log2(max(depthRatio, 1)) / log2(depthTarget))` |
+| `depth` | `clamp01(1 - log2(max((implementationSize + operations) / max(1, interfaceSize), 1)) / log2(depthTarget))` |
 | `complexity` | `clamp01(1 - log2(max(complexity / max(1, interfaceSize), 1)) / log2(complexityTarget))` |
 | `passThrough` | `clamp01(2 * passThroughs / max(1, named functions))` |
 | `leaky` | `clamp01(leakyExports / max(1, exported names))` |
@@ -105,7 +106,7 @@ Each component is 0 (deep) to 1 (shallow):
 | `coupling` | `fanOut / (fanIn + fanOut)`, 0 when both are 0 |
 | `unusedExports` | `clamp01(unusedExports / max(1, exported names))`, 0 without Fallow data |
 
-`shallowScore = round(100 * Σ(weight × component) / Σ weight)`, 0 to 100, higher is more suspicious. The sum of weights never depends on Fallow: without Fallow the `unusedExports` component is 0, so the maximum score is then 100 - 100 × 5/105 ≈ 95.
+`shallowScore = round(100 * Σ(weight × component) / Σ weight)`, 0 to 100, higher is more suspicious. The sum of weights never depends on Fallow: without Fallow the `unusedExports` component is 0, so the maximum score is then 95.
 
 Default weights:
 
@@ -114,7 +115,7 @@ Default weights:
 | `depth` | 40 |
 | `complexity` | 20 |
 | `passThrough` | 15 |
-| `leaky` | 10 |
+| `leaky` | 5 |
 | `classitis` | 10 |
 | `coupling` | 5 |
 | `unusedExports` | 5 |
@@ -141,8 +142,8 @@ Fallow is optional enrichment in one adapter (`src/fallow.ts`): `fallow health -
 | `failThreshold` | 70 | score at which an eligible module is flagged |
 | `tolerance` | 5 | score points a baselined module may worsen |
 | `minInterfaceSize` | 5 | smaller modules are not flagged (unless pass-through or classitis) |
-| `depthTarget` | 16 | depthRatio at which the depth component reaches 0 |
-| `complexityTarget` | 8 | complexity per interface unit at which the complexity component reaches 0 |
+| `depthTarget` | 8 | (statements + operations) per interface unit at which the depth component reaches 0 |
+| `complexityTarget` | 4 | complexity per interface unit at which the complexity component reaches 0 |
 | `classitisMinFiles` | 5 | minimum modules per directory for classitis |
 | `weights` | see above | per component; partial objects are merged |
 | `overrides` | `[]` | `[{ "files": ["glob"], "failThreshold": n, "minInterfaceSize": n }]`, later entries win |

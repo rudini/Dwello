@@ -14,7 +14,7 @@
 		"failThreshold": { "type": "number", "minimum": 0, "maximum": 100, "description": "shallowScore at or above which a module is flagged and can fail the gate" },
 		"tolerance": { "type": "number", "minimum": 0, "description": "Score points a baselined module may worsen before G2 fails it" },
 		"minInterfaceSize": { "type": "number", "minimum": 0, "description": "Modules with a smaller interface are never flagged, unless pass-through or classitis" },
-		"depthTarget": { "type": "number", "exclusiveMinimum": 1, "description": "depthRatio at which the depth component reaches 0" },
+		"depthTarget": { "type": "number", "exclusiveMinimum": 1, "description": "(statements + operations) per interface unit at which the depth component reaches 0" },
 		"complexityTarget": { "type": "number", "exclusiveMinimum": 1, "description": "Cyclomatic complexity per interface unit at which the complexity component reaches 0" },
 		"classitisMinFiles": { "type": "number", "minimum": 1, "description": "Minimum modules in a directory before classitis is considered" },
 		"weights": {

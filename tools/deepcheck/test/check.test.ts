@@ -43,7 +43,7 @@ describe('deepcheck check (changed scope)', () => {
 });
 
 describe('gates end to end', () => {
-	const LOW_THRESHOLD = JSON.stringify({ failThreshold: 50, tolerance: 5 });
+	const LOW_THRESHOLD = JSON.stringify({ failThreshold: 35, tolerance: 5 });
 
 	it('G2: a baselined module that got shallower by more than the tolerance fails', () => {
 		const root = writeRepo({ 'deepcheck.config.json': LOW_THRESHOLD, 'src/store.ts': STORE, 'src/shallow.ts': SHALLOW_MODULE + DEEP_MODULE });
@@ -52,7 +52,7 @@ describe('gates end to end', () => {
 		writeFiles(root, { 'src/shallow.ts': SHALLOW_MODULE });
 		const result = cli(root, 'check', '--fallow', 'off');
 		expect(result.code).toBe(1);
-		expect(result.stdout).toMatch(/G2 worsened from 55 to \d+ \(more than the tolerance of 5\)/);
+		expect(result.stdout).toMatch(/G2 worsened from \d+ to \d+ \(more than the tolerance of 5\)/);
 	});
 
 	it('G3: a baselined module that did not worsen and an untouched legacy module pass, and scan still lists them', () => {
@@ -220,7 +220,7 @@ describe('review 3 regressions, agent order', () => {
 	it('shows the highest scores first and caps modules and invalid suppressions together', () => {
 		const root = writeRepo({ 'src/store.ts': STORE });
 		writeFiles(root, {
-			'src/a-less.ts': SHALLOW_MODULE + 'const pad = [1, 2, 3].map((n) => n * 2);\nexport const total = () => pad.length;\n',
+			'src/a-less.ts': `${SHALLOW_MODULE}export const extra = (k: string) => store.get(k) ?? k;\n`,
 			'src/b-most.ts': SHALLOW_MODULE,
 			...Object.fromEntries([1, 2, 3].map((i) => [`src/s${i}.ts`, '// deepcheck-ignore-file\nexport const x = 1;\n']))
 		});

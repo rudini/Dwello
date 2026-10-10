@@ -12,6 +12,7 @@ export interface FileMetrics {
 	interfaceSize: number;
 	exportCount: number;
 	implementationSize: number;
+	operations: number;
 	passThroughs: Location[];
 	/** Named functions and methods, the candidates for pass-through detection. */
 	functionCount: number;
@@ -166,6 +167,23 @@ function implementationSize(sf: SourceFile): number {
 	});
 	return size;
 }
+
+/** Calls, constructions, binary and conditional expressions and template strings: work done inside statements. */
+function operations(sf: SourceFile): number {
+	let total = 0;
+	sf.forEachDescendant((node) => {
+		if (OPERATION_KINDS.has(node.getKind()) && !isAmbient(node)) total++;
+	});
+	return total;
+}
+
+const OPERATION_KINDS = new Set([
+	SyntaxKind.CallExpression,
+	SyntaxKind.NewExpression,
+	SyntaxKind.BinaryExpression,
+	SyntaxKind.ConditionalExpression,
+	SyntaxKind.TemplateExpression
+]);
 
 function complexity(sf: SourceFile): number {
 	let total = 0;
@@ -378,6 +396,7 @@ export function fileMetrics(sf: SourceFile): FileMetrics {
 		interfaceSize: statements.reduce((sum, s) => sum + exportedStatementSize(sf, s), 0),
 		exportCount: exportedNames(sf).size,
 		implementationSize: implementationSize(sf),
+		operations: operations(sf),
 		passThroughs: functions
 			.filter((f) => isPassThrough(f.node, f.name))
 			.map((f) => ({ name: f.name, line: f.node.getStartLineNumber() })),

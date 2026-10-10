@@ -13,6 +13,8 @@ export interface LeakyExport extends Location {
 export interface ModuleMetrics {
 	interfaceSize: number;
 	implementationSize: number;
+	/** Calls, constructions, binary and conditional expressions, template strings (Phase 4: statements alone undercount dense code). */
+	operations: number;
 	depthRatio: number;
 	passThroughs: Location[];
 	leakyExports: LeakyExport[];

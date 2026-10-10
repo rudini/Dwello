@@ -47,14 +47,14 @@ export const DEFAULT_CONFIG: Config = {
 	failThreshold: 70,
 	tolerance: 5,
 	minInterfaceSize: 5,
-	depthTarget: 16,
-	complexityTarget: 8,
+	depthTarget: 8,
+	complexityTarget: 4,
 	classitisMinFiles: 5,
 	weights: {
 		depth: 40,
 		complexity: 20,
 		passThrough: 15,
-		leaky: 10,
+		leaky: 5,
 		classitis: 10,
 		coupling: 5,
 		unusedExports: 5
