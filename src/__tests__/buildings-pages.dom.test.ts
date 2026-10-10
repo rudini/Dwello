@@ -208,10 +208,9 @@ describe('Gebäudedetail', () => {
 		expect(byTestId('building-delete-confirm')!.textContent).toContain('Gebäude löschen');
 	});
 
-	it('löscht kein Gebäude mit Wohnungen und sagt, was zu tun ist', () => {
+	it('sagt vor dem Bestätigen, warum ein Gebäude mit Wohnungen nicht gelöscht werden kann', () => {
 		detail([flat('a1', '1.01', 1)]);
 		click('building-delete-button');
-		click('building-delete-confirm');
 		expect(byTestId('form-error')!.textContent).toContain(
 			'Dieses Gebäude kann nicht gelöscht werden'
 		);

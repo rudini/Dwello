@@ -22,7 +22,7 @@ Funktionalität: Gebäudedetail
   Szenario: Gebäude mit Wohnungen kann nicht gelöscht werden
     Angenommen im Gebäude "Birkenhof" gibt es die leere Wohnung "1.01"
     Und der Liegenschaftsverwalter ist auf der Detailseite von "Birkenhof"
-    Wenn der Liegenschaftsverwalter das Gebäude löscht
+    Wenn der Liegenschaftsverwalter das Gebäude löschen will
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Dieses Gebäude kann nicht gelöscht werden"
     Und kann der Liegenschaftsverwalter das Löschen nicht bestätigen
 
