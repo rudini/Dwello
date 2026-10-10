@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { floorLabel, statusText, statusTones } from '$lib/apartment';
+	import { floorLabel, statusText, statusIcons, statusTones } from '$lib/apartment';
 	import type { ApartmentWithBuilding } from '$lib/types';
 	import { normalizeDecimal } from '$lib/utils/format';
 	import Badge from '$lib/ui/Badge.svelte';
@@ -29,6 +29,7 @@
 		</h2>
 		<Badge
 			tone={statusTones[apartment.status]}
+			icon={statusIcons[apartment.status]}
 			label={statusText(apartment)}
 			testid="apartment-status"
 		/>

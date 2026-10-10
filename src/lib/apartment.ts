@@ -1,4 +1,5 @@
 import type { ApartmentStatus } from './types';
+import type { IconName } from './ui/icons';
 import type { Tone } from './ui/tone';
 import { formatDate } from './utils/format';
 
@@ -25,6 +26,9 @@ export const statusTones = {
 	vacant: 'caution',
 	reserved: 'neutral'
 } as const satisfies Record<ApartmentStatus, Tone>;
+
+/** An empty apartment is no error: an open door instead of the caution tone's warning triangle */
+export const statusIcons: Partial<Record<ApartmentStatus, IconName>> = { vacant: 'apartment-free' };
 
 /** What each Mietstatus means (UBIQUITOUS_LANGUAGE.md, Mietstatus) */
 export const statusHelp: Record<ApartmentStatus, string> = {

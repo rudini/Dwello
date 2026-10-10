@@ -11,6 +11,7 @@ import { goto } from '$app/navigation';
 import ApartmentsPage from '../routes/apartments/+page.svelte';
 import ApartmentPage from '../routes/apartments/[id]/+page.svelte';
 import { byTestId, click, fireEvent, show } from './helpers/dom';
+import { icons } from '$lib/ui/icons';
 
 const text = () => document.body.textContent?.replace(/\s+/g, ' ') ?? '';
 const apartment = (overrides: Record<string, unknown> = {}) => ({
@@ -78,6 +79,18 @@ describe('Wohnungsliste', () => {
 				.textContent!.trim();
 		expect(status('a1')).toBe('Leer');
 		expect(status('a2')).toBe('Wiedervermietet ab 1.11.2099');
+	});
+
+	it('zeigt Leer mit einer offenen Tür statt einem Warndreieck', () => {
+		list([apartment()]);
+		const shape = (svg: Element) => svg.firstElementChild!.getAttribute('d');
+		const door = icons['apartment-free'][0][1].d;
+		const badge = byTestId('apartment-card-a1')!.querySelector('[data-testid="apartment-status"]')!;
+		expect(shape(badge.querySelector('svg')!)).toBe(door);
+		const legend = [...byTestId('apartment-status-legend')!.querySelectorAll('dt')].find((dt) =>
+			dt.textContent!.includes('Leer')
+		)!;
+		expect(shape(legend.querySelector('svg')!)).toBe(door);
 	});
 
 	it('erklärt die vier Mietstatus', () => {
