@@ -418,3 +418,19 @@ class TddStepTest(unittest.TestCase):
         repo.write("test_calc.py", ADD_TEST.replace("3)", "0)"))
         self.assert_refused(repo, "green", "green may only change production code, not tests: test_calc.py",
                             head="red: adds two numbers")
+
+    def test_red_is_refused_when_more_than_one_test_fails(self):
+        second_vitest = VITEST_TEST.replace('"adds"', '"adds again"').replace(
+            'import { test, expect } from "vitest";\nimport { add } from "./calc.js";\n', "")
+        projects = {
+            "unittest": (Repo(self, {"calc.py": WRONG_ADD}),
+                         {"test_calc.py": ADD_TEST + "\n    def test_again(self):\n        self.assertEqual(add(2, 2), 4)\n"}),
+            "pytest": (Repo(self, {"calc.py": WRONG_ADD, "pytest.ini": "[pytest]\n"}),
+                       {"test_calc.py": PYTEST_TEST + "\n\ndef test_again():\n    assert add(2, 2) == 4\n"}),
+            "vitest": (vitest_repo(self), {"calc.test.js": VITEST_TEST + second_vitest}),
+        }
+        for framework, (repo, files) in projects.items():
+            with self.subTest(framework):
+                for rel, text in files.items():
+                    repo.write(rel, text)
+                self.assert_refused(repo, "red", "red needs exactly one failing test, but 2 fail")
