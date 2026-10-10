@@ -14,8 +14,14 @@ def git(*args):
 
 
 def changed_files():
-    tracked = git("diff", "--name-only", "HEAD").splitlines()
-    return sorted(tracked + git("ls-files", "--others", "--exclude-standard").splitlines())
+    """Paths changed against HEAD, relative to the repository root; also works before the first commit."""
+    entries = git("status", "--porcelain=v1", "-z", "-uall").split("\0")
+    return sorted(entry[3:] for entry in entries if entry)
+
+
+def head_subject():
+    done = subprocess.run(["git", "log", "-1", "--format=%s"], capture_output=True, text=True)
+    return done.stdout.strip() if done.returncode == 0 else ""
 
 
 def main(args):
@@ -29,7 +35,7 @@ def main(args):
     except suite.NoFramework as error:
         print(f"tdd-step: {error}", file=sys.stderr)
         return 2
-    previous = protocol.phase_of(git("log", "-1", "--format=%s"))
+    previous = protocol.phase_of(head_subject())
     found = protocol.violations(previous, phase, run, changed_files())
     if found:
         print("\n".join(f"tdd-step: refused: {v}" for v in found), file=sys.stderr)
