@@ -385,8 +385,8 @@ async function testHeatingProfileEdit(page: Page, baseUrl: string) {
 		const sumSpan = page.locator('.font-semibold').filter({ hasText: '%' }).first();
 		const sumClasses = await sumSpan.getAttribute('class');
 
-		const isRed = sumClasses?.includes('text-red');
-		const isGreen = sumClasses?.includes('text-green');
+		const isRed = sumClasses?.includes('text-critical');
+		const isGreen = sumClasses?.includes('text-positive');
 
 		await logResult({
 			page: 'Heating Profile Edit',

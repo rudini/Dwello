@@ -25,14 +25,12 @@
 
 	--font-sans: 'Inter Variable', system-ui, sans-serif;
 	--leading-text: 1.5;
-	--leading-heading: 1.25;
 
 	--radius-control: 6px;
 	--radius-panel: 12px;
 	--shadow-raised: 0 2px 8px rgb(0 0 0 / 0.12);
 	--shadow-overlay: 0 12px 32px rgb(0 0 0 / 0.24);
 
-	--size-control: 3rem;
 	--size-header: 4rem;
 	--duration-fast: 150ms;
 

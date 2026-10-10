@@ -24,7 +24,7 @@ Items the redesign could not or deliberately did not resolve. Each with reason a
 ## Accessibility check coverage
 
 - The states "empty" (no records at all) and "first-use" (no buildings) cannot be produced in the shared E2E database, which parallel scenarios fill. They are covered by DOM tests of the empty/first-use branches plus the browser axe check of the same `EmptyState`/task components in other states. A dedicated empty database for the axe run would close this gap (needs a second backend in the Playwright stack).
-- Dark mode is only switched on in stage 8 (all screens on tokens); the axe check adds the dark variants then.
+- ~~Dark mode is only switched on in stage 8~~ – done in stage 8 (531a70c): dark mode follows the system; the axe check covers every state light and dark.
 
 ## Privacy
 
@@ -102,7 +102,7 @@ Items the redesign could not or deliberately did not resolve. Each with reason a
 - Line items without a Verteilschlüssel show "Gleichmässig pro Wohnung" (the calculation's fallback); the glossary states this only for the Verwaltungspauschale – TODO(fachlich prüfen).
 - The statement does not store the Verteilschlüssel of the Verwaltungspauschale, so its base cannot name it (data gap).
 - The contract detail links to `/statements?contract=`, but the statement list ignores that filter (pre-existing).
-- `src/lib/i18n/locales/de.json` still contains "Verwaltungsgebühr" / "Nachzahlung durch Mieter" (unused by the pages; stage 8 cleanup).
+- ~~`src/lib/i18n/locales/de.json` still contains "Verwaltungsgebühr"~~ – removed with the unused svelte-i18n setup in stage 8 (531a70c).
 - The Rechnungsdatum still defaults to today (the E2E step does not fill the date); help text and the date in words reduce the risk of booking into the wrong year.
 - The statement cost table still scrolls sideways on phones (shared `Table`).
 
@@ -139,3 +139,13 @@ Items the redesign could not or deliberately did not resolve. Each with reason a
 - "Filter zurücksetzen" links on contracts and tenants do not move focus to the results (they are links, not a search).
 - No error summary at the top of forms; detail-page actions ("Bearbeiten", "Löschen", "Beenden") do not name the record in their accessible name.
 - The invoice form opened from the statement wizard still defaults to today's date (the period notice warns at once).
+
+## Stage 8 – remnant search and review
+
+- Step names in the wizards hyphenate with `hyphens-auto`; Chromium without a German hyphenation dictionary (the headless test browser) breaks long words without a hyphen at `xl` ("Vertragsda/uer"). Real browsers load the dictionary; dropping `break-words` would let "Verwaltungspauschale" widen the page instead.
+- `src/app.html` links `favicon.png`, but the project has no `static/` folder (pre-existing broken link). An icon in the new design is a small follow-up.
+- The invoice edit form shows the backend's reason after a failed save ("Fehler beim Speichern: …"); backend messages can be English. Other screens show a fixed German sentence.
+- Historical material of the old design stays in the repository but is not part of the app: `screens/*/code.html` (original HTML mockups with Material Symbols and Google Fonts) and `CLAUDE.md.backup`. They can be deleted when nobody needs them for reference.
+- `docs/PRD-Dwello.md` still describes svelte-i18n as the planned translation library (product vision, not changed).
+- `tests/exploratory-test.ts` (manual script, not in CI) uses a CSS class selector for the heating profile sum.
+

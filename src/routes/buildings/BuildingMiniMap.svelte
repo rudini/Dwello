@@ -29,7 +29,11 @@
 			touchZoom: false
 		}).setView([latitude, longitude], 16);
 
-		L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+		// The map follows the colour scheme like the rest of the page
+		const style = window.matchMedia('(prefers-color-scheme: dark)').matches
+			? 'dark_all'
+			: 'light_all';
+		L.tileLayer(`https://{s}.basemaps.cartocdn.com/${style}/{z}/{x}/{y}{r}.png`, {
 			maxZoom: 19,
 			subdomains: 'abcd'
 		}).addTo(map);
@@ -50,10 +54,11 @@
 	onDestroy(() => map?.remove());
 </script>
 
+<!-- isolate: Leaflet's panes (z-index 400–600) stay below the sticky header and dialogs -->
 <div
 	bind:this={mapContainer}
 	role="img"
 	aria-label={address ? `Karte: ${address}` : 'Karte'}
-	class="h-36 w-full overflow-hidden rounded-control border border-line bg-sunken"
+	class="isolate h-36 w-full overflow-hidden rounded-control border border-line bg-sunken"
 	data-testid="building-mini-map"
 ></div>

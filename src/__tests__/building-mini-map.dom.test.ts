@@ -18,4 +18,31 @@ describe('BuildingMiniMap', () => {
 
 		expect(container.querySelector('.leaflet-pane')).toBeNull();
 	});
+
+	it('bleibt unter Kopfzeile und Dialogen, weil die Karte ihre Ebenen für sich ordnet', () => {
+		const map = mount(BuildingMiniMap, {
+			target: document.body,
+			props: { latitude: 47.5, longitude: 8.72 }
+		});
+		flushSync();
+
+		expect(byTestId('building-mini-map')!.classList).toContain('isolate');
+		unmount(map);
+	});
+
+	it('zeigt im Dunkelmodus dunkle Kartenkacheln', async () => {
+		window.matchMedia = vi.fn((query: string) => ({
+			matches: query === '(prefers-color-scheme: dark)'
+		})) as unknown as typeof window.matchMedia;
+		const map = mount(BuildingMiniMap, {
+			target: document.body,
+			props: { latitude: 47.5, longitude: 8.72 }
+		});
+		flushSync();
+		const container = byTestId('building-mini-map')!;
+
+		await vi.waitFor(() => expect(container.querySelector('img.leaflet-tile')).not.toBeNull());
+		expect(container.querySelector('img.leaflet-tile')!.getAttribute('src')).toContain('dark_all');
+		unmount(map);
+	});
 });

@@ -83,3 +83,15 @@ describe('Tailwind-Thema', () => {
 		expect(theme.extend).not.toHaveProperty('colors');
 	});
 });
+
+describe('Grundstile', () => {
+	const globals = readFileSync('src/styles/globals.css', 'utf8');
+
+	it('färben Platzhalter, Rahmen ohne Farbangabe und den Kartenhintergrund mit Tokens', async () => {
+		expect(globals).toMatch(/::placeholder[^{]*\{\s*color: var\(--color-ink-muted\)/);
+		expect(globals).toMatch(/\.leaflet-container[^{]*\{\s*background: var\(--color-sunken\)/);
+		const { default: config } = await import('../../tailwind.config.js');
+		const extend = (config.theme as Record<string, Record<string, object>>).extend;
+		expect(extend.borderColor).toEqual({ DEFAULT: 'var(--color-line)' });
+	});
+});

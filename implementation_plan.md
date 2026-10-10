@@ -4397,7 +4397,9 @@ Brief: `docs/design/REDESIGN_BRIEF.md`; log and decisions: `docs/design/progress
   notice (`docs/design/reviews/7-review-1.md`); review round 2: header wraps actions, Stepper names from `xl`, cost
   lines as cards on phones, delete toasts, `Field` hides corrected errors, focus on list results after filtering
   (`src/lib/list-url.ts` `isListSearch`) (`docs/design/reviews/7-review-2.md`)
-- [ ] **Stage 8:** remove the old design system, dark mode
+- [x] **Stage 8:** old design system removed (`src/lib/components`, old palette, legacy utilities, svelte-i18n,
+  `docs/design_system.md`), Tailwind theme from tokens only, dark mode on, axe light and dark
+  (`docs/design/reviews/8-review-1.md`)
 - [ ] **Stage 9:** final docs, review and persona runs
 
 
