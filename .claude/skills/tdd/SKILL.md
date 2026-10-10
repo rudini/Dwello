@@ -44,13 +44,13 @@ RIGHT (vertical):
 
 ### 1. Planning
 
-When exploring the codebase, read `CONTEXT.md` (if it exists) so that test names and interface vocabulary match the project's domain language, and respect ADRs in the area you're touching.
+When exploring the codebase, read `UBIQUITOUS_LANGUAGE.md` so that test names and interface vocabulary match the project's domain language, and respect the recorded decisions (`docs/tech-stack.md`, `docs/design/design-decisions.md`) in the area you're touching.
 
 Before writing any code:
 
 - [ ] Confirm with user what interface changes are needed
 - [ ] Confirm with user which behaviors to test (prioritize)
-- [ ] Identify opportunities for deep modules (small interface, deep implementation) — run the `/codebase-design` skill for the vocabulary and the testability checks
+- [ ] Identify opportunities for deep modules (small interface, deep implementation)
 - [ ] List the behaviors to test (not implementation steps)
 - [ ] Get user approval on the plan
 

@@ -25,8 +25,8 @@ code is the code never written.
 
 ## Persistence
 
-ACTIVE EVERY RESPONSE. No drift back to over-building. Still active if
-unsure. Off only: "stop ponytail" / "normal mode". Default: **full**.
+Once invoked, ponytail stays on for every later response in the session.
+Off only: "stop ponytail" / "normal mode". Default: **full**.
 Switch: `/ponytail lite|full|ultra`.
 
 ## The ladder
@@ -65,7 +65,7 @@ every sibling caller still broken. Fix it once, where all callers route through.
 
 ## Output
 
-Code first. Then at most three short lines: what was skipped, when to add it.
+Code first, then a short note: what was skipped, when to add it.
 No essays, no feature tours, no design notes. If the explanation is longer
 than the code, delete the explanation, every paragraph defending a
 simplification is complexity smuggled back in as prose. Explanation the user
@@ -100,10 +100,6 @@ change touches, the actual flow — before picking a rung. Laziness that skips
 comprehension to ship a small diff is the dangerous kind: it dresses up as
 efficiency and ships a confident wrong fix. Read fully, then be lazy.
 
-Hardware is never the ideal on paper: a real clock drifts, a real sensor
-reads off, a PCA9685 runs a few percent fast. Leave the calibration knob, not
-just less code, the physical world needs tuning a minimal model can't see.
-
 Lazy code without its check is unfinished. Non-trivial logic (a branch, a
 loop, a parser, a money/security path) leaves ONE runnable check behind, the
 smallest thing that fails if the logic breaks: an `assert`-based
@@ -112,8 +108,8 @@ fixtures, no per-function suites unless asked. Trivial one-liners need no
 test, YAGNI applies to tests too.
 
 The repository's own testing rules win over this section. In Dwello,
-`CLAUDE.md` requires a Vitest unit test for every bug fix, one-liners
-included: write that test in the project's suite, and keep it small.
+every bug fix, one-liners included, gets the reproducing test `CLAUDE.md`
+asks for (Workflow, step 2): write it in the project's suite, and keep it small.
 
 ## Boundaries
 
