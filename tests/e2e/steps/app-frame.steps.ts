@@ -6,13 +6,16 @@ import {
 	draftNotice,
 	llmRecipientNotice,
 	operatorNotice,
+	pageOverflowsSideways,
+	pageTitleWidth,
 	sectionTitled
 } from '../questions/app-frame';
 import {
 	chooseInFooter,
 	chooseInMainNav,
 	chooseLogo,
-	openSettingsFromUserMenu
+	openSettingsFromUserMenu,
+	useWindowWidth
 } from '../tasks/app-frame';
 
 const { Given, When, Then } = createBdd(test);
@@ -84,3 +87,16 @@ Then(
 		await expect(operatorNotice(verwalter, heading)).toContainText(contact);
 	}
 );
+
+Given('das Browserfenster ist {int} Pixel breit', async ({ verwalter }, width: number) => {
+	await verwalter.perform(useWindowWidth(width));
+});
+
+// Readable: wide enough for a few words per line, not one letter per line
+Then('ist der Seitentitel lesbar', async ({ verwalter }) => {
+	await expect.poll(() => pageTitleWidth(verwalter)).toBeGreaterThanOrEqual(200);
+});
+
+Then('scrollt die Seite nicht seitwärts', async ({ verwalter }) => {
+	await expect.poll(() => pageOverflowsSideways(verwalter)).toBe(false);
+});

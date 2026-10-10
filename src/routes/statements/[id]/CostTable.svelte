@@ -17,17 +17,43 @@
 	];
 </script>
 
-<Table caption="Abrechnungspositionen" captionHidden {columns}>
+<!-- Phones get the lines one below the other, every amount in view; the table from md -->
+<ul class="flex flex-col gap-4 md:hidden" aria-label="Abrechnungspositionen">
 	{#each statement.lineItems as item (item.id)}
-		<tr data-testid="statement-line-item">
-			<td class="text-ink">{item.categoryName}</td>
-			<td class="text-ink-muted">{item.distributionKeyName}</td>
-			<td class="text-right text-ink-muted">{formatCurrency(item.totalAmount)}</td>
-			<td class="text-right text-ink-muted">{item.percentage} %</td>
-			<td class="text-right font-semibold text-ink">{formatCurrency(item.tenantShare)}</td>
-		</tr>
+		<li class="rounded-panel border border-line p-4" data-testid="statement-line-card">
+			<dl class="grid grid-cols-2 gap-x-4 gap-y-2 tabular-nums">
+				<dt class="text-ink-muted">Kategorie</dt>
+				<dd class="hyphens-auto break-words text-right font-semibold text-ink">
+					{item.categoryName}
+				</dd>
+				<dt class="text-ink-muted">Verteilschlüssel</dt>
+				<dd class="hyphens-auto break-words text-right text-ink">
+					{item.distributionKeyName}
+				</dd>
+				<dt class="text-ink-muted">Kosten des Gebäudes</dt>
+				<dd class="text-right text-ink">{formatCurrency(item.totalAmount)}</dd>
+				<dt class="text-ink-muted">Anteil</dt>
+				<dd class="whitespace-nowrap text-right text-ink">{item.percentage} %</dd>
+				<dt class="text-ink-muted">Betrag</dt>
+				<dd class="text-right font-semibold text-ink">{formatCurrency(item.tenantShare)}</dd>
+			</dl>
+		</li>
 	{/each}
-</Table>
+</ul>
+
+<div class="hidden md:block">
+	<Table caption="Abrechnungspositionen" captionHidden {columns}>
+		{#each statement.lineItems as item (item.id)}
+			<tr data-testid="statement-line-item">
+				<td class="text-ink">{item.categoryName}</td>
+				<td class="text-ink-muted">{item.distributionKeyName}</td>
+				<td class="text-right text-ink-muted">{formatCurrency(item.totalAmount)}</td>
+				<td class="whitespace-nowrap text-right text-ink-muted">{item.percentage} %</td>
+				<td class="text-right font-semibold text-ink">{formatCurrency(item.tenantShare)}</td>
+			</tr>
+		{/each}
+	</Table>
+</div>
 
 <dl class="flex flex-col gap-2 tabular-nums">
 	<div class="flex justify-between gap-4">
@@ -50,7 +76,7 @@
 	</div>
 	<div class="flex justify-between gap-4">
 		<dt class="text-ink-muted">Geleistete Akontobeiträge</dt>
-		<dd class="text-ink">− {formatCurrency(statement.totalAdvancePayments)}</dd>
+		<dd class="whitespace-nowrap text-ink">− {formatCurrency(statement.totalAdvancePayments)}</dd>
 	</div>
 	<div
 		class="flex justify-between gap-4 border-t border-line pt-2 text-lg font-bold"

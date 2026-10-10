@@ -214,6 +214,46 @@ describe('Abrechnungsdetail', () => {
 		expect(column.nextElementSibling!.className).toMatch(/(^| )min-w-0( |$)/);
 	});
 
+	it('zeigt die Kostenpositionen auf dem Handy untereinander, mit allen Beträgen ohne Wischen', () => {
+		detail();
+		const cards = allByTestId('statement-line-card');
+
+		expect(cards.map((card) => card.textContent)).toEqual([
+			expect.stringMatching(
+				/Heizung.*Verteilschlüssel.*Nach Fläche.*Kosten des Gebäudes.*CHF\s6.000.00.*Anteil.*25 %.*Betrag.*CHF\s1.500.00/
+			),
+			expect.stringMatching(/Hauswartung.*Pro Wohnung/)
+		]);
+		// one copy per screen size: the list below md, the table from md
+		expect(cards[0].closest('.md\\:hidden')).not.toBeNull();
+		expect(document.querySelector('[role="region"]')!.closest('.hidden.md\\:block')).not.toBeNull();
+	});
+
+	it('bricht weder Prozente noch ein Minus von seinem Betrag um', () => {
+		detail();
+		const nowrap = (element: Element) =>
+			element.className.split(/\s+/).includes('whitespace-nowrap');
+
+		const percent = [...document.querySelectorAll('td, dd')].filter((cell) =>
+			cell.textContent!.trim().endsWith('%')
+		);
+		expect(percent.length).toBeGreaterThan(0);
+		expect(percent.every(nowrap)).toBe(true);
+		const advance = [...document.querySelectorAll('dd')].find((dd) =>
+			dd.textContent!.startsWith('−')
+		)!;
+		expect(nowrap(advance)).toBe(true);
+	});
+
+	it('bricht eine lange E-Mail-Adresse des Mieters um, statt die Spalte zu verbreitern', () => {
+		detail({ tenantEmail: 'hausverwaltung.sehr.lange.adresse@beispiel-liegenschaften.ch' });
+		const email = [...document.querySelectorAll('p')].find((p) =>
+			p.textContent!.includes('beispiel-liegenschaften.ch')
+		)!;
+
+		expect(email.className.split(/\s+/)).toEqual(expect.arrayContaining(['min-w-0', 'break-all']));
+	});
+
 	it('nennt die Verwaltungspauschale mit ihrer Grundlage', () => {
 		detail();
 

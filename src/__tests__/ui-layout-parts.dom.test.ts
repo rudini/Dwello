@@ -158,6 +158,27 @@ describe('Seitenkopf', () => {
 		expect(heading.className).toMatch(/(^| )break-words( |$)/);
 		expect(heading.className).toMatch(/(^| )hyphens-auto( |$)/);
 	});
+
+	it('lässt die Aktionen unter den Titel umbrechen, statt den Titel zusammenzudrücken', () => {
+		show(PageHeader, {
+			title: 'Anna Keller',
+			action: markup('<a href="/a">Bearbeiten</a><a href="/b">Löschen</a><a href="/c">PDF</a>')
+		});
+		const titleColumn = document.querySelector('h1')!.parentElement!;
+		const row = titleColumn.parentElement!;
+		const actions = row.lastElementChild!;
+		const classes = (element: Element) => element.className.split(/\s+/);
+		expect(classes(row)).toContain('md:flex-wrap');
+		// the title keeps a usable width (18rem) and only the actions give way
+		expect(classes(titleColumn)).toEqual(expect.arrayContaining(['md:grow', 'md:basis-72']));
+		expect(classes(actions)).toContain('flex-wrap');
+		expect(classes(actions)).not.toContain('shrink-0');
+	});
+
+	it('gibt den Brotkrümel-Links eine Trefferfläche von 48 px', () => {
+		show(PageHeader, { title: 'Anna Keller', trail: [{ href: '/tenants', label: 'Mieter' }] });
+		expect(byTestId('breadcrumb-link')!.className.split(/\s+/)).toContain('min-h-12');
+	});
 });
 
 describe('Symbolschaltfläche', () => {
