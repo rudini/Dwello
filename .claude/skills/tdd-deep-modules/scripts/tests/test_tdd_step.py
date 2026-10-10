@@ -189,3 +189,13 @@ class TddStepTest(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(repo.subject(), "red: adds two numbers")
         self.assertIn("TDD-Exit-Code: 1", repo.trailers())
+
+    def test_vitest_load_error_is_refused_as_red(self):
+        repo = vitest_repo(self)
+        repo.write("calc.test.js", VITEST_TEST.replace("./calc.js", "./missing.js"))
+
+        result = repo.run("tdd-step", "red", "adds two numbers")
+
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn("red needs a failing assertion", result.stderr)
+        self.assertEqual(repo.subject(), "init")
