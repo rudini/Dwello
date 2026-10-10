@@ -91,7 +91,10 @@ export function analyze({ root, fallow, config = loadConfig(root) }: AnalyzeOpti
 		if (reason) excluded.push({ path, reason });
 		else candidates.push({ path, file: withoutSuppressed(fileMetrics(sf), suppressions) });
 	}
-	const notCounted = new Set(excluded.filter((e) => e.reason !== 'barrel' && e.reason !== 'type-only').map((e) => e.path));
+	// Tests, declarations and generated code are not real callers; every other module is.
+	const notCounted = new Set(
+		excluded.filter((e) => ['test', 'declaration', 'generated'].includes(e.reason)).map((e) => e.path)
+	);
 	const barrels = new Set(excluded.filter((e) => e.reason === 'barrel').map((e) => e.path));
 	const graph = coupling(root, sources, new Set(sources.filter((s) => !notCounted.has(s))), barrels, warnings);
 	const classitis = classitisFiles(candidates, config.classitisMinFiles);

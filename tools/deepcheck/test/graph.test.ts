@@ -36,6 +36,15 @@ describe('coupling from the import graph', () => {
 		expect(result['src/deep.ts']).toEqual([1, 0]);
 	});
 
+	it('counts framework entries and suppressed modules as importers', () => {
+		const result = coupling({
+			'src/deep.ts': DEEP_MODULE,
+			'src/routes/+page.server.ts': "import { parseCsv } from '../deep';\nexport const load = () => parseCsv('');\n",
+			'src/legacy.ts': "// deepcheck-ignore-file -- legacy\nimport { parseCsv } from './deep';\nexport const l = () => parseCsv('');\n"
+		});
+		expect(result['src/deep.ts']).toEqual([2, 0]);
+	});
+
 	it('gives the importers of a barrel to the modules it re-exports', () => {
 		const result = coupling({
 			'src/lib/deep.ts': DEEP_MODULE,

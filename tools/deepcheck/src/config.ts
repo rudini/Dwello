@@ -24,6 +24,8 @@ export interface Config {
 	exclude: string[];
 	tests: string[];
 	generated: string[];
+	/** Modules whose exports are a framework or tool contract (routes, hooks, tool configs). */
+	entries: string[];
 	failThreshold: number;
 	tolerance: number;
 	minInterfaceSize: number;
@@ -41,6 +43,7 @@ export const DEFAULT_CONFIG: Config = {
 	exclude: ['**/node_modules/**', '**/dist/**', '**/build/**', '**/coverage/**'],
 	tests: ['**/*.test.*', '**/*.spec.*', '**/__tests__/**', '**/__mocks__/**', '**/test/**', 'tests/**'],
 	generated: ['**/generated/**', '**/*.gen.ts', '**/*.generated.ts'],
+	entries: ['**/routes/**/+*.ts', '**/hooks.ts', '**/hooks.server.ts', '**/hooks.client.ts', '**/*.config.ts'],
 	failThreshold: 70,
 	tolerance: 5,
 	minInterfaceSize: 5,

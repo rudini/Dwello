@@ -10,6 +10,7 @@
 		"exclude": { "type": "array", "items": { "type": "string" }, "description": "Globs never walked or analyzed; added to the defaults (node_modules, dist, build, coverage)" },
 		"tests": { "type": "array", "items": { "type": "string" }, "description": "Globs of test files (excluded, reason test)" },
 		"generated": { "type": "array", "items": { "type": "string" }, "description": "Globs of generated files (excluded, reason generated)" },
+		"entries": { "type": "array", "items": { "type": "string" }, "description": "Globs of framework or tool entry modules whose exports are a fixed contract (excluded, reason entry)" },
 		"failThreshold": { "type": "number", "minimum": 0, "maximum": 100, "description": "shallowScore at or above which a module is flagged and can fail the gate" },
 		"tolerance": { "type": "number", "minimum": 0, "description": "Score points a baselined module may worsen before G2 fails it" },
 		"minInterfaceSize": { "type": "number", "minimum": 0, "description": "Modules with a smaller interface are never flagged, unless pass-through or classitis" },
@@ -37,7 +38,8 @@
 				"required": ["files"],
 				"properties": {
 					"files": { "type": "array", "items": { "type": "string" } },
-					"failThreshold": { "type": "number", "minimum": 0, "maximum": 100 },
+					"entries": { "type": "array", "items": { "type": "string" }, "description": "Globs of framework or tool entry modules whose exports are a fixed contract (excluded, reason entry)" },
+		"failThreshold": { "type": "number", "minimum": 0, "maximum": 100 },
 					"minInterfaceSize": { "type": "number", "minimum": 0 }
 				}
 			}

@@ -51,7 +51,7 @@ export interface ModuleReport {
 
 export interface ExcludedModule {
 	path: string;
-	reason: 'test' | 'declaration' | 'generated' | 'type-only' | 'barrel' | 'config' | 'suppressed';
+	reason: 'test' | 'declaration' | 'generated' | 'entry' | 'type-only' | 'barrel' | 'suppressed';
 }
 
 /** An invalid inline suppression (G4); it is not applied and counts as a finding. */

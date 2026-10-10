@@ -35,6 +35,7 @@ export function excludeByPath(
 	if (path.endsWith('.d.ts')) return 'declaration';
 	if (matchesAny(path, config.tests)) return 'test';
 	if (matchesAny(path, [...config.generated, ...fallowIgnores])) return 'generated';
+	if (matchesAny(path, config.entries)) return 'entry';
 	const header = readFileSync(join(root, path), 'utf8').split('\n', 5).join('\n');
 	return GENERATED_MARKER.test(header) ? 'generated' : null;
 }
