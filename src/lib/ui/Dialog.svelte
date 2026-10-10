@@ -11,6 +11,7 @@
 		danger = false,
 		busy = false,
 		busyLabel,
+		confirmDisabled = false,
 		onconfirm,
 		onclose,
 		confirmTestid = 'dialog-confirm',
@@ -23,6 +24,7 @@
 		danger?: boolean;
 		busy?: boolean;
 		busyLabel?: string;
+		confirmDisabled?: boolean; // the action is not possible; the content says why
 		onconfirm: () => void;
 		onclose?: () => void;
 		confirmTestid?: string;
@@ -106,6 +108,7 @@
 					onclick={onconfirm}
 					{busy}
 					{busyLabel}
+					disabled={confirmDisabled}
 					testid={confirmTestid}
 				>
 					{confirmLabel}

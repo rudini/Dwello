@@ -1,49 +1,46 @@
 <script lang="ts">
-	import { floorLabel, statusText, statusVariants } from '$lib/apartment';
+	import { floorLabel, statusText, statusTones } from '$lib/apartment';
 	import type { ApartmentWithBuilding } from '$lib/types';
-	import Badge from '$lib/components/Badge.svelte';
-	import Icon from '$lib/components/Icon.svelte';
+	import { normalizeDecimal } from '$lib/utils/format';
+	import Badge from '$lib/ui/Badge.svelte';
+	import Icon from '$lib/ui/Icon.svelte';
 
+	// The whole card opens the apartment; its number is the link text
 	let { apartment }: { apartment: ApartmentWithBuilding } = $props();
+
+	const facts = $derived([
+		{ icon: 'floor', text: floorLabel(apartment.floor) },
+		{ icon: 'rooms', text: `${normalizeDecimal(String(apartment.rooms))} Zimmer` },
+		{ icon: 'ruler', text: `${normalizeDecimal(String(apartment.area))} m²` }
+	] as const);
 </script>
 
-<a
-	href="/apartments/{apartment.id}"
+<li
+	class="relative flex flex-col gap-4 rounded-panel border border-line bg-surface p-6 hover:border-line-strong"
 	data-testid="apartment-card-{apartment.id}"
-	class="block bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-primary/30 transition-all duration-200"
 >
-	<div class="p-5">
-		<!-- Header with Unit and Status -->
-		<div class="flex items-start justify-between mb-3">
-			<div class="flex-1 min-w-0">
-				<h3 class="font-semibold text-gray-900 text-lg">
-					Wohnung {apartment.number}
-				</h3>
-				<p class="text-sm text-ink-muted">{floorLabel(apartment.floor)}</p>
-			</div>
-			<span data-testid="apartment-status">
-				<Badge variant={statusVariants[apartment.status]}>
-					{statusText(apartment)}
-				</Badge>
-			</span>
-		</div>
-
-		<!-- Building Info -->
-		<div class="flex items-center text-sm text-gray-600 mb-4">
-			<Icon name="apartment" size={16} class="mr-1 text-ink-muted" />
-			<span class="truncate">{apartment.buildingName}</span>
-		</div>
-
-		<!-- Apartment Details -->
-		<div class="grid grid-cols-2 gap-3 mb-4">
-			<div class="flex items-center text-sm">
-				<Icon name="straighten" size={16} class="mr-1 text-ink-muted" />
-				<span>{apartment.area} m²</span>
-			</div>
-			<div class="flex items-center text-sm">
-				<Icon name="meeting_room" size={16} class="mr-1 text-ink-muted" />
-				<span>{apartment.rooms} Zimmer</span>
-			</div>
-		</div>
+	<div class="flex flex-wrap items-start justify-between gap-2">
+		<h2 class="text-lg font-semibold text-ink">
+			<a
+				href="/apartments/{apartment.id}"
+				class="text-accent underline underline-offset-4 after:absolute after:inset-0 hover:text-accent-strong"
+				>Wohnung {apartment.number}</a
+			>
+		</h2>
+		<Badge
+			tone={statusTones[apartment.status]}
+			label={statusText(apartment)}
+			testid="apartment-status"
+		/>
 	</div>
-</a>
+	<p class="flex items-center gap-2 text-ink-muted">
+		<Icon name="building" />{apartment.buildingName}
+	</p>
+	<ul class="flex flex-wrap gap-x-6 gap-y-2 text-ink">
+		{#each facts as fact (fact.icon)}
+			<li class="flex items-center gap-2">
+				<span class="text-ink-muted"><Icon name={fact.icon} /></span>{fact.text}
+			</li>
+		{/each}
+	</ul>
+</li>

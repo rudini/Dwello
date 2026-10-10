@@ -1,4 +1,5 @@
 import type { ApartmentStatus } from './types';
+import type { Tone } from './ui/tone';
 import { formatDate } from './utils/format';
 
 export const floorLabel = (floor: number) =>
@@ -24,6 +25,22 @@ export const statusVariants = {
 	vacant: 'warning',
 	reserved: 'danger'
 } as const satisfies Record<ApartmentStatus, string>;
+
+export const statusTones = {
+	occupied: 'positive',
+	relet: 'info',
+	vacant: 'caution',
+	reserved: 'neutral'
+} as const satisfies Record<ApartmentStatus, Tone>;
+
+/** What each Mietstatus means (UBIQUITOUS_LANGUAGE.md, Mietstatus) */
+export const statusHelp: Record<ApartmentStatus, string> = {
+	occupied: 'Ein Mietvertrag läuft.',
+	relet: 'Ein künftiger Mietvertrag ist abgeschlossen.',
+	// TODO(fachlich prüfen): the glossary names Leer and Gesperrt without explaining them
+	vacant: 'Es läuft kein Mietvertrag, die Wohnung kann vermietet werden.',
+	reserved: 'Sie haben die Wohnung von Hand gesperrt, zum Beispiel während einer Renovation.'
+};
 
 /** Status with the day a relet apartment's next tenant moves in */
 export const statusText = (a: { status: ApartmentStatus; nextContractStart?: string | null }) =>
