@@ -153,7 +153,7 @@ def _pytest_outcome(exit_code, cases):
         return "pass"
     failures = [f.get("message", "") for case in cases for f in case.iter("failure")]
     errors = [e for case in cases for e in case.iter("error")]
-    asserted = all(m.startswith(("assert", "AssertionError")) for m in failures)
+    asserted = all(m.startswith(("assert", "AssertionError", "Failed: ")) for m in failures)
     if exit_code == 1 and failures and not errors and asserted:
         return "fail"
     return "error"
