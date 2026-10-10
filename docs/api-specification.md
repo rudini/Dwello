@@ -45,6 +45,9 @@ Browser -> SvelteKit BFF (port 3000: /auth/*, /api/*, page loads/actions) -> Ely
 | POST | `/` | Body: `name`, `address`, `postalCode` (4–10 chars), `city`, `canton` (2 chars) required; optional `country`, `latitude`, `longitude` (strings), `buildingType`, `yearBuilt` (number). → 201 building. 400 |
 | PUT | `/:id` | Body: any subset of the POST fields. → building. 404 |
 | DELETE | `/:id` | 204. 404; 400 if the building still has apartments |
+| GET | `/:id/fuel-stocks` | → array of `{ id, buildingId, readingDate, amount, createdAt }` by date (Tankbestand, see `tests/contracts/fuel-stocks.json`) |
+| POST | `/:id/fuel-stocks` | Body: `readingDate` (date), `amount` (string, CHF ≥ 0, two decimals). → 201 reading. 404 building; 409 a reading on that day exists; 422 invalid body |
+| DELETE | `/:id/fuel-stocks/:stockId` | 204. 404 |
 
 ## 4. Apartments `/api/v1/apartments`
 
@@ -104,7 +107,7 @@ There is no "predefined" flag on categories.
 | GET | `/llm-recipient` | → `{ recipient: { provider, country } \| null }`; `null` when the LLM runs on the operator's server (or is disabled). Used by the privacy page |
 | GET | `/utility-rules` | → `{ maxManagementFeePercent, allowedCategories, notAllowedCategories, notes }` (German texts) |
 | POST | `/categorize` | Preview only, stores nothing. Body: `billingEntityName`, `description`, `amount` (string). → `{ category: { id, name, isAllowedUtilityCost } \| null, confidence, isAllowedUtilityCost, reasoning, source: "llm"\|"cache"\|"fallback" }` |
-| GET | `/for-statement/:buildingId` | Query: `periodStart`, `periodEnd` (required). → array of the building's invoices with `isValidUtilityCost = true` dated in the period |
+| GET | `/for-statement/:buildingId` | Query: `periodStart`, `periodEnd` (required). → array of the building's invoices with `isValidUtilityCost = true` whose Leistungszeitraum overlaps the period, or without one, dated in it; each with `inPeriod: { start, end, amount }` (its days and amount in the period) |
 | GET | `/completeness/:buildingId` | Query: `periodStart`, `periodEnd` (dates, required; end not before start, else 400). Compares the allocable invoices per category with the same dates one year earlier → `{ buildingId, comparedWith: { start, end }, hasComparison, findings: [{ categoryId, categoryName, kind: missing \| gap \| deviation, current: { count, total }, previous: { count, total }, missingParts, changePercent }] }` |
 | GET | `/:id` | → invoice with `building`, `category`, `distributionKey`, `llmCategory` (see `tests/contracts/invoice.json`). 404 |
 | GET | `/:id/validate` | → `{ isValid, errors, warnings }`; 404 with the same shape if not found |
@@ -113,7 +116,7 @@ There is no "predefined" flag on categories.
 | PUT | `/:id` | Body: any subset of the POST fields. → invoice. 404; 400 category not found |
 | DELETE | `/:id` | 204. 404 |
 
-**Invoice body:** `buildingId` (uuid), `billingEntityName` (1–255), `description`, `amount` (string), `invoiceDate` required; optional `invoiceNumber`, `billingEntityAddress`, `categoryId`, `llmCategoryId`, `llmConfidence` (string, 0–1), `manualOverrideReason`, `distributionKeyId`, `isValidUtilityCost` (boolean), `dueDate`, `paidDate`, `invoicePdf`, `notes`.
+**Invoice body:** `buildingId` (uuid), `billingEntityName` (1–255), `description`, `amount` (string), `invoiceDate` required; optional `invoiceNumber`, `billingEntityAddress`, `categoryId`, `llmCategoryId`, `llmConfidence` (string, 0–1), `manualOverrideReason`, `distributionKeyId`, `isValidUtilityCost` (boolean), `servicePeriodStart` and `servicePeriodEnd` (dates or null, Leistungszeitraum: both or none, end not before start, else 400), `dueDate`, `paidDate`, `invoicePdf`, `notes`.
 
 **Categorization rules** (`invoice.service.ts`):
 - The LLM runs on create only when no `categoryId` is sent and `skipLlm` is not `true`. LLM failures are logged and the invoice is created without a suggestion.

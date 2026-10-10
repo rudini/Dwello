@@ -195,6 +195,15 @@ describe('Rechnungsdetail', () => {
 		expect(text()).toContain('Vertrag geprüft');
 	});
 
+	it('zeigt den Leistungszeitraum, der statt des Rechnungsdatums die Periode bestimmt', () => {
+		show(InvoicePage, {
+			data: { invoice: invoice({ servicePeriodStart: '2024-10-01', servicePeriodEnd: '2024-12-31' }) }
+		});
+
+		expect(text()).toContain('Leistungszeitraum 1.10.2024 – 31.12.2024');
+		expect(text()).not.toContain('Bestimmt, in welche Abrechnungsperiode');
+	});
+
 	it('löscht die Rechnung nach Bestätigung und kehrt zur Liste zurück', async () => {
 		const calls = fakeBff(() => [204]);
 		show(InvoicePage, { data: { invoice: invoice() } });
@@ -364,6 +373,37 @@ describe('Rechnung erfassen', () => {
 		expect(calls).toEqual([]);
 	});
 
+	// Eine Rechnung für das 4. Quartal kommt im Januar: der Leistungszeitraum ordnet sie dem alten Jahr zu
+	it('speichert den Leistungszeitraum der Rechnung', async () => {
+		const calls = fakeBff(() => [201, { id: 'i9' }]);
+		show(NewInvoicePage, { data: data(false) } as never);
+		fill();
+		expect(text()).toContain('Leistungszeitraum');
+		fireEvent(byTestId<HTMLInputElement>('invoice-service-start-input')!, 'input', '2024-10-01');
+		fireEvent(byTestId<HTMLInputElement>('invoice-service-end-input')!, 'input', '2024-12-31');
+
+		submit('submit-button');
+		await settle();
+
+		expect(calls.at(-1)).toMatchObject({
+			method: 'POST',
+			path: '/invoices',
+			body: { servicePeriodStart: '2024-10-01', servicePeriodEnd: '2024-12-31' }
+		});
+	});
+
+	it('verlangt zum Beginn des Leistungszeitraums auch das Ende', () => {
+		const calls = fakeBff();
+		show(NewInvoicePage, { data: data(false) } as never);
+		fill();
+		fireEvent(byTestId<HTMLInputElement>('invoice-service-start-input')!, 'input', '2024-10-01');
+
+		submit('submit-button');
+
+		expect(text()).toContain('Bitte geben Sie auch das Ende des Leistungszeitraums ein.');
+		expect(calls).toEqual([]);
+	});
+
 	it('übernimmt einen sicheren KI-Vorschlag und speichert ihn mit der Rechnung', async () => {
 		const calls = fakeBff(({ path }) =>
 			path === '/invoices/categorize'
@@ -434,10 +474,10 @@ describe('Rechnung erfassen', () => {
 		expect(byTestId<HTMLInputElement>('invoice-utility-cost-checkbox')!.disabled).toBe(true);
 	});
 
-	it('sagt, dass das Rechnungsdatum die Abrechnungsperiode bestimmt', () => {
+	it('sagt, dass ohne Leistungszeitraum das Rechnungsdatum die Abrechnungsperiode bestimmt', () => {
 		show(NewInvoicePage, { data: data(false) } as never);
 		expect(document.querySelector('#invoiceDate-help')!.textContent).toContain(
-			'bestimmt, in welche Abrechnungsperiode die Rechnung fällt'
+			'Ohne Leistungszeitraum bestimmt es, in welche Abrechnungsperiode die Rechnung fällt'
 		);
 	});
 

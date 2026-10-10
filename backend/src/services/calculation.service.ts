@@ -14,6 +14,7 @@ import { like, max } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { utilityStatements } from '../db/schema';
 import { getInvoicesForStatement } from './invoice.service';
+import { fuelStockChange } from './fuel-stock.service';
 import { calculateBuildingDistribution } from './distribution-key.service';
 import { getTypedConfig } from './config.service';
 import {
@@ -70,10 +71,13 @@ interface InvoiceGroup {
 	distributionKeyId: string | null;
 	distributionKeyName: string;
 	totalAmount: number;
+	// each invoice's amount in the period and the days it bills there (the whole period without a Leistungszeitraum)
 	invoices: Array<{
 		id: string;
 		description: string;
 		amount: number;
+		start: string;
+		end: string;
 	}>;
 	isHeatingCost: boolean;
 }
@@ -99,15 +103,28 @@ function groupInvoicesByCategory(
 		}
 
 		const group = groups.get(key)!;
-		group.totalAmount += parseFloat(invoice.amount);
-		group.invoices.push({
-			id: invoice.id,
-			description: invoice.description,
-			amount: parseFloat(invoice.amount)
-		});
+		group.totalAmount += invoice.inPeriod.amount;
+		group.invoices.push({ id: invoice.id, description: invoice.description, ...invoice.inPeriod });
 	}
 
 	return Array.from(groups.values());
+}
+
+const isoDay = (date: Date) => date.toISOString().split('T')[0];
+const days = (start: string, end: string) => Math.max(0, (Date.parse(end) - Date.parse(start)) / 86_400_000 + 1);
+
+/**
+ * The tenant's share (0–1) of a group: each invoice weighs with its amount, and the tenant bears the part of the days it
+ * bills that he rented (without a Leistungszeitraum the whole period: his rental days / the period's days)
+ */
+function rentalShare(group: InvoiceGroup, rentalStart: string, rentalEnd: string) {
+	if (group.totalAmount === 0) return 0;
+	const rented = group.invoices.reduce((sum, invoice) => {
+		const from = invoice.start > rentalStart ? invoice.start : rentalStart;
+		const to = invoice.end < rentalEnd ? invoice.end : rentalEnd;
+		return sum + (invoice.amount * days(from, to)) / days(invoice.start, invoice.end);
+	}, 0);
+	return rented / group.totalAmount;
 }
 
 /**
@@ -256,11 +273,11 @@ export async function calculateStatementForContract(
 	const totalPeriodDays = prorating.totalPeriodDays;
 
 	// Get all valid invoices for the building in the period
-	const invoices = await getInvoicesForStatement(
-		buildingId,
-		periodStart.toISOString().split('T')[0],
-		periodEnd.toISOString().split('T')[0]
-	);
+	const [start, end] = [isoDay(periodStart), isoDay(periodEnd)];
+	const invoices = [
+		...(await getInvoicesForStatement(buildingId, start, end)),
+		...(await fuelStockChange(buildingId, start, end))
+	];
 
 	// Group invoices by category
 	const invoiceGroups = groupInvoicesByCategory(invoices);
@@ -302,14 +319,9 @@ export async function calculateStatementForContract(
 			tenantShare = heatingResult.share;
 			periodShare = heatingResult.percentage / 100;
 		} else {
-			// Standard day-based prorating
-			const prorated = prorateCosts(
-				apartmentShareResult.share,
-				rentalDays,
-				totalPeriodDays
-			);
-			tenantShare = prorated.proratedAmount;
-			periodShare = prorated.periodShare;
+			// By days: the tenant's days within the days each invoice bills in the period
+			periodShare = rentalShare(group, isoDay(contractOverlap.overlapStart), isoDay(contractOverlap.overlapEnd));
+			tenantShare = roundToRappen(apartmentShareResult.share * periodShare);
 		}
 
 		lineItems.push({

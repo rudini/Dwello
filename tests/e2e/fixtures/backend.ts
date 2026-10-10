@@ -227,10 +227,11 @@ export function testData(request: APIRequestContext, token: string) {
 			await invoice(buildingTitle, { categoryId: heating.id }, `Heizöl ${year}`, amount, `${year}-06-30`);
 		},
 
-		// Invoice in a predefined category given by its German name, distributed by area
-		async invoiceOn(buildingTitle: string, categoryName: string, amount: string, date: string) {
+		// Invoice in a predefined category given by its German name, distributed by area; optionally the period it bills
+		async invoiceOn(buildingTitle: string, categoryName: string, amount: string, date: string, service?: [string, string]) {
 			const category = (await get('categories?limit=100')).categories.find((c: { nameDE: string }) => c.nameDE === categoryName);
-			await invoice(buildingTitle, { categoryId: category.id }, `${categoryName} ${date}`, amount, date);
+			const period = service && { servicePeriodStart: service[0], servicePeriodEnd: service[1] };
+			await invoice(buildingTitle, { categoryId: category.id, ...period }, `${categoryName} ${date}`, amount, date);
 		},
 
 		async category(title: string, isAllowedUtilityCost: boolean) {

@@ -195,6 +195,9 @@ export interface Invoice {
 	id: string;
 	buildingId: string;
 	invoiceDate: string;
+	/** Leistungszeitraum: the time the invoice bills, if not its date */
+	servicePeriodStart?: string | null;
+	servicePeriodEnd?: string | null;
 	billingEntity: string;
 	description: string;
 	amount: number;

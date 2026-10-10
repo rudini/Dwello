@@ -3,7 +3,7 @@
 	import { untrack } from 'svelte';
 	import { api } from '$lib/api';
 	import type { DistributionKeyRow } from '$lib/distribution-key';
-	import { plainAmount, validateInvoice } from '$lib/invoice';
+	import { plainAmount, servicePeriodOf, validateInvoice } from '$lib/invoice';
 	import { addToast } from '$lib/stores';
 	import type { Category, InvoiceWithDetails } from '$lib/types';
 	import Alert from '$lib/ui/Alert.svelte';
@@ -31,6 +31,8 @@
 	const initial = untrack(() => ({
 		buildingId: data.invoice.buildingId,
 		invoiceDate: data.invoice.invoiceDate,
+		servicePeriodStart: data.invoice.servicePeriodStart ?? '',
+		servicePeriodEnd: data.invoice.servicePeriodEnd ?? '',
 		billingEntity: data.invoice.billingEntity,
 		description: data.invoice.description,
 		amount: data.invoice.amount.toFixed(2),
@@ -63,6 +65,7 @@
 		const result = await api.put(`/invoices/${invoice.id}`, {
 			buildingId: values.buildingId,
 			invoiceDate: values.invoiceDate,
+			...servicePeriodOf(values),
 			billingEntityName: values.billingEntity.trim(),
 			description: values.description,
 			amount: plainAmount(values.amount),
@@ -100,6 +103,8 @@
 		<InvoiceDataFields
 			bind:buildingId={values.buildingId}
 			bind:invoiceDate={values.invoiceDate}
+			bind:servicePeriodStart={values.servicePeriodStart}
+			bind:servicePeriodEnd={values.servicePeriodEnd}
 			bind:amount={values.amount}
 			bind:billingEntity={values.billingEntity}
 			bind:description={values.description}

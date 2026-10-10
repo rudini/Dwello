@@ -8,6 +8,7 @@
 	import ApartmentsByFloor from './ApartmentsByFloor.svelte';
 	import BuildingFacts from './BuildingFacts.svelte';
 	import DeleteBuildingDialog from './DeleteBuildingDialog.svelte';
+	import FuelStocks from './FuelStocks.svelte';
 
 	let { data, form }: { data: BuildingDetailsData; form: ActionData } = $props();
 
@@ -69,6 +70,8 @@
 	</section>
 
 	{#if data.apartments.length}<StatusLegend />{/if}
+
+	<FuelStocks stocks={data.fuelStocks} errors={form?.fuelStockErrors} />
 </div>
 
 <DeleteBuildingDialog

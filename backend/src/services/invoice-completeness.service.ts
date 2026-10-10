@@ -4,9 +4,10 @@
  * for the property manager, not a rule: a supplier may bill differently from one year to the next.
  */
 
-import { and, eq, gte, lte, min } from 'drizzle-orm';
+import { eq, min } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { categories, invoices } from '../db/schema';
+import { invoices } from '../db/schema';
+import { getInvoicesForStatement } from './invoice.service';
 
 export interface Period {
 	start: string;
@@ -159,31 +160,14 @@ export function checkCategories(
 	return { hasComparison: true, findings };
 }
 
-// The building's allocable invoices of a period, with the category's German name
+// The building's allocable invoices of a period as the statement takes them (Leistungszeitraum, otherwise
+// Rechnungsdatum): the amount of the period and the date that places the invoice in the rhythm
 async function categoryInvoices(buildingId: string, { start, end }: Period): Promise<CategoryInvoice[]> {
-	const rows = await db
-		.select({
-			categoryId: invoices.categoryId,
-			name: categories.name,
-			nameDE: categories.nameDE,
-			amount: invoices.amount,
-			invoiceDate: invoices.invoiceDate
-		})
-		.from(invoices)
-		.leftJoin(categories, eq(invoices.categoryId, categories.id))
-		.where(
-			and(
-				eq(invoices.buildingId, buildingId),
-				eq(invoices.isValidUtilityCost, true),
-				gte(invoices.invoiceDate, start),
-				lte(invoices.invoiceDate, end)
-			)
-		);
-	return rows.map((row) => ({
-		categoryId: row.categoryId,
-		categoryName: row.nameDE || row.name || 'Nicht kategorisiert',
-		amount: parseFloat(row.amount),
-		invoiceDate: row.invoiceDate
+	return (await getInvoicesForStatement(buildingId, start, end)).map((invoice) => ({
+		categoryId: invoice.categoryId,
+		categoryName: invoice.category?.nameDE || invoice.category?.name || 'Nicht kategorisiert',
+		amount: invoice.inPeriod.amount,
+		invoiceDate: invoice.servicePeriodEnd ? invoice.inPeriod.end : invoice.invoiceDate
 	}));
 }
 

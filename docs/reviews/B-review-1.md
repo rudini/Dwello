@@ -25,14 +25,14 @@ Kürzel: CR = Code-Review, IV = Immobilienverwalter, MR = Mietrecht, DP = Datenp
 
 | # | Schwere | Finding | Behandlung |
 |---|---|---|---|
-| IV-K1, MR-H2 | kritisch / hoch | Heizöl nach Einkauf statt Verbrauch | Tankbestand pro Gebäude erfassen; Heizkosten = Anfangsbestand + Einkauf − Endbestand |
-| MR-H1, IV-H1 | hoch | Rechnungsdatum statt Leistungszeitraum | Leistungszeitraum (von–bis) pro Rechnung, Zuteilung nach Tagen; ohne Angabe gilt das Rechnungsdatum |
-| IV-H2, MR-M3 | hoch / mittel | Heizkosten über den Kategorienamen erkannt | Eigenschaft «Heiz- und Warmwasserkosten» an der Kategorie |
-| MR-M1, IV-M3 | mittel | Verwaltungspauschale gleichmässig pro Wohnung | Ohne Verteilschlüssel: Prozentsatz der eigenen Nebenkosten des Mieters |
-| MR-M2 | mittel | Pauschale und Heizprofil nur bei vertraglicher Vereinbarung | Hilfetexte im Assistenten |
+| IV-K1, MR-H2 | kritisch / hoch | Heizöl nach Einkauf statt Verbrauch | behoben: Tankbestand pro Gebäude (Migration 0008, Gebäudeseite «Heizöl im Tank»); Heizkosten = Anfangsbestand + Einkauf − Endbestand; Szenario «Heizöl wird nach Verbrauch abgerechnet» |
+| MR-H1, IV-H1 | hoch | Rechnungsdatum statt Leistungszeitraum | behoben: Leistungszeitraum (von–bis) pro Rechnung (Migration 0007, Rechnungsformular und -detail), Zuteilung nach Tagen; ohne Angabe gilt das Rechnungsdatum; Szenario «Eine Rechnung gilt für ihren Leistungszeitraum» |
+| IV-H2, MR-M3 | hoch / mittel | Heizkosten über den Kategorienamen erkannt | behoben: Eigenschaft «Heiz- und Warmwasserkosten» an der Kategorie (Migration 0006) |
+| MR-M1, IV-M3 | mittel | Verwaltungspauschale gleichmässig pro Wohnung | behoben: ohne Verteilschlüssel Prozentsatz der eigenen Nebenkosten des Mieters |
+| MR-M2 | mittel | Pauschale und Heizprofil nur bei vertraglicher Vereinbarung | behoben: Hilfetexte im Assistenten |
 | IV-H3 | hoch | Akonto als Soll statt bezahlt, ohne Verlauf | offen (Produktentscheid): Glossar definiert «Geleistete Akontobeiträge» als Summe der Monatsbeträge; Zahlungserfassung und Akonto-Verlauf sind neue Funktionen |
 | MR-M4, DP-M1 | mittel | PDF: Verteilschlüssel und Zeitanteil, Belegeinsicht | Schritt D2 (Neugestaltung PDF) |
-| DP-N1 | niedrig | Rundungsrappen (784.125 → 784.12) | kaufmännische Rundung |
+| DP-N1 | niedrig | Rundungsrappen (784.125 → 784.12) | behoben: kaufmännische Rundung (`roundToRappen`) |
 | DP-N2 | niedrig | Datum/Apostroph UI vs. PDF | Schritt C (Datumsformat) |
 | DP-N3 | niedrig | Stockwerk FR/IT | Schritt D2 |
 | DP-N4–N6 | niedrig | paid_amount, Dokument-Kleinigkeiten, Stepper-Umbruch | siehe Runde 2 |

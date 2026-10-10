@@ -275,6 +275,18 @@ describe('Rechnung prüfen', () => {
 	it('nimmt Beträge so, wie man sie in der Schweiz schreibt', () => {
 		expect(validateInvoice(filled)).toEqual({});
 	});
+
+	// Leistungszeitraum: freiwillig, aber vollständig und in der richtigen Reihenfolge
+	it('verlangt zum Beginn des Leistungszeitraums das Ende, und nicht davor', () => {
+		const period = (servicePeriodStart: string, servicePeriodEnd: string) =>
+			validateInvoice({ ...filled, servicePeriodStart, servicePeriodEnd });
+
+		expect(period('', '')).toEqual({});
+		expect(period('2025-01-01', '2025-03-31')).toEqual({});
+		expect(period('2025-01-01', '')).toEqual({ servicePeriodEnd: 'Bitte geben Sie auch das Ende des Leistungszeitraums ein.' });
+		expect(period('', '2025-03-31')).toEqual({ servicePeriodStart: 'Bitte geben Sie auch den Beginn des Leistungszeitraums ein.' });
+		expect(period('2025-03-31', '2025-01-01')).toEqual({ servicePeriodEnd: 'Das Ende darf nicht vor dem Beginn liegen.' });
+	});
 });
 
 describe('Rücksprung nach dem Erfassen', () => {

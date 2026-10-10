@@ -18,6 +18,10 @@ Items the redesign could not or deliberately did not resolve. Each with reason a
 | "Entwurf" for the browser-saved wizard input | both wizards ("Entwurf gespeichert") | Same word as the Abrechnung status "Entwurf"; "Zwischenstand" would separate them. |
 | Explanations of Unbefristet/Befristet, Akonto examples, Mahnung steps, Heizprofil and Mietstage in plain words | contract wizard, help page | Explanations beyond the glossary definitions, written for first-time landlords. |
 | What follows the 3rd Mahnung | Mahnung dialog | "Klären Sie das weitere Vorgehen direkt mit dem Mieter" – Betreibung etc. are outside Dwello. |
+| Leistungszeitraum (period an invoice bills) | invoice form and detail, statement calculation | Glossary: "Das Rechnungsdatum bestimmt, in welche Periode eine Rechnung fällt". Since review B (MR-H1, IV-H1) a Leistungszeitraum, when given, decides instead (Art. 257b OR: costs of the period); without one the Rechnungsdatum still decides. |
+| Tankbestand, Stichtag (heating oil in the tank on a reading day) | building page "Heizöl im Tank", statement calculation | Heating oil counts by consumption: stock at the start + purchases − stock at the end (review B, IV-K1, MR-H2). The glossary has no term. |
+| Verwaltungspauschale without a Verteilschlüssel | statement wizard step 3, calculation | Glossary: percentage of the Nebenkosten der Liegenschaft, equal per Wohnung without a key. Since review B (MR-M1, IV-M3) without a key it is the percentage of the tenant's own Nebenkosten; with a key unchanged. |
+| Heiz- und Warmwasserkosten as a property of a Kategorie | category form, heating profile distribution | Which categories the Heizprofil distributes was read from the category name; now a checkbox at the category (review B, IV-H2). |
 
 Every place in the code is marked `TODO(fachlich prüfen)` (`grep -rn "TODO(fachlich prüfen)" src`, 23 places in the app code at the end of the redesign); the sections below give the context per stage.
 
@@ -179,3 +183,10 @@ Every place in the code is marked `TODO(fachlich prüfen)` (`grep -rn "TODO(fach
 - "Entwürfe ansehen" after creating lists all drafts, not only those of the run; new drafts have no PDF until "PDF ansehen" creates it.
 - The "Manuell" badge on invoices is not explained in the help; "Entwurf" names both the wizard's saved input and the statement status (glossary table).
 
+
+## Session 11 – step B (missing invoices, domain model)
+
+- Tankbestand: without a reading on the day before the period and one on its last day the statement takes the purchases as before, and the wizard does not say so (Alpenblick in the demo data heats with oil and has no readings). A hint in the preview for buildings with heating oil invoices but without readings is a follow-up – TODO(fachlich prüfen). Readings are a value in CHF; litres and the valuation method (average price or FIFO) are not recorded.
+- Deleting a Tankbestand reading needs no confirmation: it only removes one value that can be entered again, nothing else depends on it until a statement is created.
+- Akonto as "paid" instead of "agreed" (IV-H3): the glossary defines Geleistete Akontobeiträge as the sum of the monthly amounts; recording payments and a history of Akonto changes are new features – open product decision.
+- Agreed categories per contract (IV-H4): a new category in a period is flagged with the question whether it is agreed in the lease; a full model of agreed Nebenkosten per contract is not built.

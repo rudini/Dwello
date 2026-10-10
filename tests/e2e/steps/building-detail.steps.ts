@@ -7,6 +7,7 @@ import { emptyList, listedBuilding } from '../questions/buildings';
 import {
 	deleteBuilding,
 	openApartment,
+	recordFuelStock,
 	startDeletingBuilding,
 	startEditing,
 	startFirstApartment,
@@ -83,3 +84,11 @@ Then('sieht der Liegenschaftsverwalter das Baujahr {string}', async ({ verwalter
 Then('sieht der Liegenschaftsverwalter die Adresse {string}', async ({ verwalter }, address: string) => {
 	await expect(buildingAddress(verwalter)).toContainText(address);
 });
+
+When(
+	'der Liegenschaftsverwalter für das Gebäude {string} den Tankbestand vom {string} mit {string} Franken erfasst',
+	async ({ verwalter, seed }, title: string, date: string, amount: string) => {
+		await visit(verwalter.page, `/buildings/${seed.idOf(title)}`);
+		await verwalter.perform(recordFuelStock(date, amount));
+	}
+);

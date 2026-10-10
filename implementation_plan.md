@@ -4427,6 +4427,15 @@ critical/high/medium is open; reviews in `docs/reviews/`.
   missing invoices; scenario "Hinweis auf fehlende Rechnungen einer Kategorie", axe state `category-check`. Tests:
   `invoice-completeness.test.ts` (incl. part period, category without costs, leap year), `invoice-completeness.pg.test.ts`,
   `statement-wizard.test.ts` (Akonto with tenant change), `statement-wizard.dom.test.ts`, `statement-generation.test.ts`.
+- [x] **B, review round 1 – domain model** (`docs/reviews/B-review-1.md`): category flag "Heiz- und Warmwasserkosten"
+  (migration `0006`), Verwaltungspauschale without key on the tenant's own costs (`calculation.service.ts`),
+  Leistungszeitraum per invoice (migration `0007`, `invoice.service.ts` `inPeriod`, form fields in
+  `InvoiceDataFields.svelte`, shown in `InvoiceFacts.svelte`, `servicePeriodOf` in `src/lib/invoice.ts`), Tankbestand
+  per building (migration `0008`, `fuel-stock.service.ts`, `GET/POST/DELETE /api/v1/buildings/:id/fuel-stocks`, contract
+  `tests/contracts/fuel-stocks.json`, `FuelStocks.svelte` on the building page, demo readings for Musterhaus Zentrum).
+  Scenarios "Eine Rechnung gilt für ihren Leistungszeitraum …", "Heizöl wird nach Verbrauch abgerechnet …". Tests:
+  `service-period.pg.test.ts`, `fuel-stock.pg.test.ts`, `building-actions.test.ts`, `buildings-pages.dom.test.ts`,
+  `invoice-pages.dom.test.ts`; demo recalculation in `docs/seed-daten-aenderungen.md`.
 
 
 ---

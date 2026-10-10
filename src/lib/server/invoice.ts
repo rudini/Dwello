@@ -24,6 +24,8 @@ export function toInvoice(r: Record<string, unknown>): InvoiceWithDetails {
 		id: r.id as string,
 		buildingId: r.buildingId as string,
 		invoiceDate: r.invoiceDate as string,
+		servicePeriodStart: r.servicePeriodStart as string | undefined,
+		servicePeriodEnd: r.servicePeriodEnd as string | undefined,
 		billingEntity: (r.billingEntityName || r.billingEntity || '') as string,
 		description: (r.description || '') as string,
 		amount: Number(r.amount) || 0,

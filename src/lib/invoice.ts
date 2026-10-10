@@ -13,15 +13,31 @@ export function suggestionProvenance(suggestion: Suggestion | null) {
 }
 
 /** An amount as typed in Switzerland ("1'200.50", "1’200,50") in the form the backend reads */
+/** The Leistungszeitraum as the backend stores it: both dates, or null without one */
+export const servicePeriodOf = (values: { servicePeriodStart: string; servicePeriodEnd: string }) => ({
+	servicePeriodStart: values.servicePeriodStart || null,
+	servicePeriodEnd: values.servicePeriodEnd || null
+});
+
 export const plainAmount = (value: string) => value.replace(/['’\s]/g, '').replace(',', '.');
 
 /** What a new or changed invoice still lacks, by field */
+// The Leistungszeitraum is optional, but with both dates and the end not before the start (ISO dates compare as text)
+function servicePeriodErrors(start = '', end = ''): Record<string, string> {
+	if (start && !end) return { servicePeriodEnd: 'Bitte geben Sie auch das Ende des Leistungszeitraums ein.' };
+	if (end && !start) return { servicePeriodStart: 'Bitte geben Sie auch den Beginn des Leistungszeitraums ein.' };
+	if (end < start) return { servicePeriodEnd: 'Das Ende darf nicht vor dem Beginn liegen.' };
+	return {};
+}
+
 export function validateInvoice(invoice: {
 	buildingId: string;
 	invoiceDate: string;
 	billingEntity: string;
 	description: string;
 	amount: string;
+	servicePeriodStart?: string;
+	servicePeriodEnd?: string;
 }): Record<string, string> {
 	const errors: Record<string, string> = {};
 	if (!invoice.buildingId) errors.buildingId = 'Bitte wählen Sie ein Gebäude';
@@ -31,7 +47,7 @@ export function validateInvoice(invoice: {
 	if (!invoice.description.trim()) errors.description = 'Bitte geben Sie eine Beschreibung ein';
 	if (!(parseFloat(plainAmount(invoice.amount)) > 0))
 		errors.amount = 'Bitte geben Sie einen gültigen Betrag ein';
-	return errors;
+	return { ...errors, ...servicePeriodErrors(invoice.servicePeriodStart, invoice.servicePeriodEnd) };
 }
 
 /** A path within Dwello to return to (e.g. the statement wizard), never another site */

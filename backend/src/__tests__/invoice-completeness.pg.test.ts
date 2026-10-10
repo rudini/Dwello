@@ -64,4 +64,19 @@ describe('Prüfung auf fehlende Rechnungen pro Kategorie', () => {
 		expect((await check('periodStart=2025-12-31&periodEnd=2025-01-01')).status).toBe(400);
 		expect((await check('periodStart=2025-02-30&periodEnd=2025-12-31')).status).toBe(400);
 	});
+
+	// Die Rechnung für das 2. Halbjahr kommt im Januar: mit Leistungszeitraum fehlt sie dem Jahr nicht
+	it('ordnet eine Rechnung nach ihrem Leistungszeitraum zu', async () => {
+		const [water] = await db.select().from(categories).where(eq(categories.name, 'Cold Water'));
+		await insertInvoice(rental.building, {
+			categoryId: water.id,
+			amount: '480.00',
+			invoiceDate: '2026-01-20',
+			servicePeriodStart: '2025-07-01',
+			servicePeriodEnd: '2025-12-31'
+		});
+		const { body } = await check('periodStart=2025-01-01&periodEnd=2025-12-31');
+
+		expect(body.findings).toMatchObject([{ categoryName: 'Kaminfeger', kind: 'missing' }]);
+	});
 });

@@ -11,8 +11,10 @@ import {
 	getBuildingWithApartments,
 	createBuilding,
 	updateBuilding,
-	deleteBuilding
+	deleteBuilding,
+	buildingExists
 } from '../services/building.service';
+import { createFuelStock, deleteFuelStock, listFuelStocks } from '../services/fuel-stock.service';
 
 // Validation schemas
 const buildingQuerySchema = t.Object({
@@ -107,6 +109,36 @@ export const buildingRoutes = new Elysia({ prefix: '/api/v1/buildings' })
 			body: buildingUpdateSchema
 		}
 	)
+	// Heating oil in the tank on reading days (Tankbestand)
+	.get('/:id/fuel-stocks', ({ params }) => listFuelStocks(params.id), { params: t.Object({ id: t.String({ format: 'uuid' }) }) })
+	.post(
+		'/:id/fuel-stocks',
+		async ({ params, body, set }) => {
+			if (!(await buildingExists(params.id))) {
+				set.status = 404;
+				return { error: 'Building not found' };
+			}
+			const stock = await createFuelStock(params.id, body);
+			if (!stock) {
+				set.status = 409;
+				return { error: 'Fuel stock for this day already recorded' };
+			}
+			set.status = 201;
+			return stock;
+		},
+		{
+			params: t.Object({ id: t.String({ format: 'uuid' }) }),
+			body: t.Object({ readingDate: t.String({ format: 'date' }), amount: t.String({ pattern: '^\\d+(\\.\\d{1,2})?$' }) })
+		}
+	)
+	.delete('/:id/fuel-stocks/:stockId', async ({ params, set }) => {
+		if (!(await deleteFuelStock(params.id, params.stockId))) {
+			set.status = 404;
+			return { error: 'Fuel stock not found' };
+		}
+		set.status = 204;
+		return null;
+	})
 	// Delete building
 	.delete('/:id', async ({ params, set }) => {
 		const result = await deleteBuilding(params.id);

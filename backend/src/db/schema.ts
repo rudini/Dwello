@@ -243,6 +243,9 @@ export const invoices = pgTable(
 		amount: decimal('amount', { precision: 12, scale: 2 }).notNull(), // CHF
 		isValidUtilityCost: boolean('is_valid_utility_cost').notNull().default(true),
 		invoiceDate: date('invoice_date').notNull(),
+		// Leistungszeitraum: the period the invoice bills; without it the Rechnungsdatum decides the Abrechnungsperiode
+		servicePeriodStart: date('service_period_start'),
+		servicePeriodEnd: date('service_period_end'),
 		dueDate: date('due_date'),
 		paidDate: date('paid_date'),
 		// LLM categorization tracking
@@ -262,6 +265,21 @@ export const invoices = pgTable(
 		index('invoices_invoice_date_idx').on(table.invoiceDate),
 		index('invoices_category_id_idx').on(table.categoryId)
 	]
+);
+
+// Heating oil in the tank on a reading day, in CHF; heating costs are stock at the start + purchases − stock at the end
+export const fuelStocks = pgTable(
+	'fuel_stocks',
+	{
+		id: uuid('id').defaultRandom().primaryKey(),
+		buildingId: uuid('building_id')
+			.notNull()
+			.references(() => buildings.id, { onDelete: 'cascade' }),
+		readingDate: date('reading_date').notNull(),
+		amount: decimal('amount', { precision: 12, scale: 2 }).notNull(), // CHF
+		createdAt: timestamp('created_at').defaultNow().notNull()
+	},
+	(table) => [uniqueIndex('fuel_stocks_building_id_reading_date_key').on(table.buildingId, table.readingDate)]
 );
 
 export const invoicesRelations = relations(invoices, ({ one }) => ({

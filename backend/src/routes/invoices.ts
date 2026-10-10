@@ -50,6 +50,9 @@ const invoiceBodySchema = t.Object({
 	amount: t.String(), // Decimal as string
 	isValidUtilityCost: t.Optional(t.Boolean()),
 	invoiceDate: t.String(), // YYYY-MM-DD
+	// Leistungszeitraum: both or none, the end not before the start (database constraint)
+	servicePeriodStart: t.Optional(t.Nullable(t.String({ format: 'date' }))),
+	servicePeriodEnd: t.Optional(t.Nullable(t.String({ format: 'date' }))),
 	dueDate: t.Optional(t.Nullable(t.String())),
 	paidDate: t.Optional(t.Nullable(t.String())),
 	invoicePdf: t.Optional(t.Nullable(t.String())),

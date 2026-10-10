@@ -8,6 +8,7 @@ import {
 } from '../routes/buildings/[id]/+page.server';
 import backendBuilding from '../../tests/contracts/building.json';
 import buildingList from '../../tests/contracts/buildings.json';
+import fuelStocks from '../../tests/contracts/fuel-stocks.json';
 import { load as listLoad } from '../routes/buildings/+page.server';
 
 type Action = (event: never) => Promise<unknown>;
@@ -246,5 +247,82 @@ describe('Gebäudeliste', () => {
 		} as never)) as { buildings: { name: string; reletCount: number }[] };
 
 		expect(data.buildings).toMatchObject([{ name: 'Seeblick', reletCount: 0 }]);
+	});
+});
+
+describe('Tankbestand', () => {
+	const stock = { readingDate: '2024-12-31', amount: "2'650.00" };
+
+	it('erfasst den Wert des Heizöls im Tank an einem Stichtag', async () => {
+		const calls: string[] = [];
+		const backend = (url: string, init?: RequestInit) => {
+			calls.push(`${init?.method} ${url} ${init?.body}`);
+			return Response.json({ id: 's1' }, { status: 201 });
+		};
+
+		expect(await run(detailActions.addFuelStock as Action, backend, { id: 'b1' }, stock)).toEqual({
+			fuelStockSaved: true
+		});
+		expect(calls).toEqual([
+			'POST http://localhost:3001/api/v1/buildings/b1/fuel-stocks {"readingDate":"2024-12-31","amount":"2650.00"}'
+		]);
+	});
+
+	it('verlangt Stichtag und Betrag, bevor es speichert', async () => {
+		const result = await run(detailActions.addFuelStock as Action, refused, { id: 'b1' }, {
+			readingDate: '',
+			amount: 'viel'
+		});
+
+		expect(result).toMatchObject({
+			status: 400,
+			data: {
+				fuelStockErrors: {
+					readingDate: 'Bitte geben Sie den Stichtag ein.',
+					amount: 'Bitte geben Sie den Wert in Franken ein, zum Beispiel 2650.00.'
+				}
+			}
+		});
+	});
+
+	it.each([
+		[409, 'Für diesen Stichtag ist schon ein Bestand erfasst. Löschen Sie ihn zuerst.'],
+		[500, 'Der Bestand konnte nicht gespeichert werden. Versuchen Sie es erneut.']
+	])('meldet eine Ablehnung des Backends (%i) verständlich', async (status, message) => {
+		const result = await run(
+			detailActions.addFuelStock as Action,
+			() => Response.json({}, { status }),
+			{ id: 'b1' },
+			stock
+		);
+
+		expect(result).toMatchObject({ status, data: { fuelStockErrors: { form: message } } });
+	});
+
+	it('lädt die Stichtage des Gebäudes mit dem Wert in Franken', async () => {
+		const fetch = (async (url: string) =>
+			Response.json(
+				url.endsWith('/fuel-stocks')
+					? fuelStocks
+					: url.includes('/apartments')
+						? { apartments: [] }
+						: backendBuilding
+			)) as typeof globalThis.fetch;
+
+		const data = (await detailLoad({ params: { id: 'b1' }, fetch } as never)) as BuildingDetailsData;
+
+		expect(data.fuelStocks).toEqual([{ id: 'f1', readingDate: '2024-12-31', amount: 2650 }]);
+	});
+
+	it('löscht einen Stichtag', async () => {
+		const calls: string[] = [];
+		const backend = (url: string, init?: RequestInit) => {
+			calls.push(`${init?.method} ${url}`);
+			return new Response(null, { status: 204 });
+		};
+
+		await run(detailActions.deleteFuelStock as Action, backend, { id: 'b1' }, { stockId: 's1' });
+
+		expect(calls).toEqual(['DELETE http://localhost:3001/api/v1/buildings/b1/fuel-stocks/s1']);
 	});
 });

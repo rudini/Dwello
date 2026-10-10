@@ -14,8 +14,19 @@
 		<div class="flex flex-col gap-1">
 			<dt class="text-ink-muted">Rechnungsdatum</dt>
 			<dd class="text-ink">{formatDate(invoice.invoiceDate)}</dd>
-			<dd class="text-ink-muted">Bestimmt, in welche Abrechnungsperiode die Rechnung fällt.</dd>
+			{#if !invoice.servicePeriodStart}
+				<dd class="text-ink-muted">Bestimmt, in welche Abrechnungsperiode die Rechnung fällt.</dd>
+			{/if}
 		</div>
+		{#if invoice.servicePeriodStart && invoice.servicePeriodEnd}
+			<div class="flex flex-col gap-1">
+				<dt class="text-ink-muted">Leistungszeitraum</dt>
+				<dd class="text-ink">
+					{formatDate(invoice.servicePeriodStart)} – {formatDate(invoice.servicePeriodEnd)}
+				</dd>
+				<dd class="text-ink-muted">Nur die Tage in der Abrechnungsperiode zählen.</dd>
+			</div>
+		{/if}
 		<div class="flex flex-col gap-1">
 			<dt class="text-ink-muted">Betrag</dt>
 			<dd class="text-xl font-semibold tabular-nums text-ink" data-testid="invoice-amount">

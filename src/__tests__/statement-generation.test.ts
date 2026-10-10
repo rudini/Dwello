@@ -161,10 +161,10 @@ describe('Rechnungen der Abrechnungsperiode', () => {
 				});
 			if (url.includes('/invoices/completeness/'))
 				return Response.json({ ...invoiceCompleteness, buildingId: url.includes('b1') ? 'b1' : 'b2' });
-			const invoices = url.includes('buildingId=b1')
+			const invoices = url.includes('/for-statement/b1')
 				? [{ invoiceDate: '2024-06-30' }, { invoiceDate: '2024-01-15' }]
 				: [];
-			return Response.json({ invoices, total: invoices.length });
+			return Response.json(invoices);
 		}) as typeof globalThis.fetch;
 
 		expect(await invoicesInPeriod(fetch, { ...period, buildingIds: ['b1', 'b2'] })).toEqual([
@@ -175,9 +175,8 @@ describe('Rechnungen der Abrechnungsperiode', () => {
 		expect(urls).toContain(`${API}/invoices/completeness/b1?periodStart=2024-01-01&periodEnd=2024-12-31`);
 		// statements of the building whose period overlaps the chosen one
 		expect(urls).toContain(`${API}/statements?buildingId=b2&limit=1000`);
-		expect(urls[0]).toBe(
-			`${API}/invoices?buildingId=b1&dateFrom=2024-01-01&dateTo=2024-12-31&isValidUtilityCost=true&limit=1000`
-		);
+		// the invoices the statement takes: by Leistungszeitraum, otherwise by Rechnungsdatum
+		expect(urls[0]).toBe(`${API}/invoices/for-statement/b1?periodStart=2024-01-01&periodEnd=2024-12-31`);
 	});
 
 	// Without the check per category the preview still shows; the look at start and end of the period stays
@@ -185,7 +184,9 @@ describe('Rechnungen der Abrechnungsperiode', () => {
 		const fetch = (async (url: string) =>
 			url.includes('/invoices/completeness/')
 				? Response.json({ error: 'kaputt' }, { status: 500 })
-				: Response.json({ invoices: [], data: [], total: 0 })) as typeof globalThis.fetch;
+				: url.includes('/for-statement/')
+					? Response.json([])
+					: Response.json({ data: [], total: 0 })) as typeof globalThis.fetch;
 
 		expect(await invoicesInPeriod(fetch, period)).toEqual([
 			{ buildingId: 'b1', count: 0, first: null, last: null, statements: 0, check: undefined }

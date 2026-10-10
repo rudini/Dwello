@@ -58,9 +58,14 @@ Alle Profile ergeben weiterhin genau 100 % (`heating-profiles.pg.test.ts`).
 
 ## Nachgerechnet (Musterhaus Zentrum 2024, Hans Müller, Wohnung 1.01, 75.5 m², ganzes Jahr)
 
-- Nebenkosten der Liegenschaft: 6'890.00 + 320.00 + 3'760.00 + 755.20 + 3'600.00 + 1'650.00 + 900.00 + 960.00 = 18'835.20
-- Heizung 70/30: 6'890 × (0.7 × 75.5 / 492.5 + 0.3 / 6) = 1'083.86
+Stand nach Schritt B (Heizöl nach Verbrauch, Verwaltungspauschale auf den eigenen Nebenkosten):
+
+- Heizöl nach Verbrauch: Anfangsbestand 31.12.2023 2'120.00 + Einkauf 6'890.00 − Endbestand 31.12.2024 2'650.00 = 6'360.00
+- Nebenkosten der Liegenschaft: 6'360.00 + 320.00 + 3'760.00 + 755.20 + 3'600.00 + 1'650.00 + 900.00 + 960.00 = 18'305.20
+- Heizung 70/30: 6'360 × (0.7 × 75.5 / 492.5 + 0.3 / 6) = 1'000.49
 - Nach Fläche (Kaminfeger, Wasser, Strom, Hauswart, Garten = 9'335.20): × 75.5 / 492.5 = 49.06 + 576.41 + 115.77 + 551.88 + 137.97 = 1'431.09 (je Position einzeln auf Rappen gerundet)
 - Pro Einheit (Lift, Kehricht = 2'610.00): ÷ 6 = 435.00
-- Verwaltungspauschale 3 % von 18'835.20 = 565.06, ÷ 6 Wohnungen = 94.18
-- Total 1'083.86 + 1'431.09 + 435.00 + 94.18 = 3'044.13, Akonto 12 × 240 = 2'880.00, Nachzahlung 164.13 (entspricht der erzeugten Abrechnung)
+- Zwischensumme 1'000.49 + 1'431.09 + 435.00 = 2'866.58; Verwaltungspauschale 3 % davon = 86.00
+- Total 2'952.58, Akonto 12 × 240 = 2'880.00, Nachzahlung 72.58 (entspricht der erzeugten Abrechnung)
+
+Vorher (Schritt A): Heizöl nach Einkauf 6'890.00 und Verwaltungspauschale 3 % der Liegenschaftskosten ÷ 6 Wohnungen = 94.18, Total 3'044.13, Nachzahlung 164.13. Gründe: Findings IV-K1/MR-H2 und MR-M1/IV-M3 in `docs/reviews/B-review-1.md`.

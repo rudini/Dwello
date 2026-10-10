@@ -10,6 +10,8 @@
 	let {
 		buildingId = $bindable(),
 		invoiceDate = $bindable(),
+		servicePeriodStart = $bindable(),
+		servicePeriodEnd = $bindable(),
 		amount = $bindable(),
 		billingEntity = $bindable(),
 		description = $bindable(),
@@ -20,6 +22,8 @@
 	}: {
 		buildingId: string;
 		invoiceDate: string;
+		servicePeriodStart: string;
+		servicePeriodEnd: string;
 		amount: string;
 		billingEntity: string;
 		description: string;
@@ -29,9 +33,12 @@
 		onblur?: () => void;
 	} = $props();
 
-	// ISO dates compare as text
+	// ISO dates compare as text; a Leistungszeitraum decides over the Rechnungsdatum
 	const outside = $derived(
-		!!period && !!invoiceDate && (invoiceDate < period.start || invoiceDate > period.end)
+		!!period &&
+			(servicePeriodStart && servicePeriodEnd
+				? servicePeriodEnd < period.start || servicePeriodStart > period.end
+				: !!invoiceDate && (invoiceDate < period.start || invoiceDate > period.end))
 	);
 </script>
 
@@ -50,7 +57,7 @@
 		id="invoiceDate"
 		type="date"
 		label="Rechnungsdatum"
-		help="Das Rechnungsdatum bestimmt, in welche Abrechnungsperiode die Rechnung fällt. Übernehmen Sie das Datum von der Rechnung, nicht das heutige."
+		help="Übernehmen Sie das Datum von der Rechnung, nicht das heutige. Ohne Leistungszeitraum bestimmt es, in welche Abrechnungsperiode die Rechnung fällt."
 		bind:value={invoiceDate}
 		error={errors.invoiceDate}
 		testid="invoice-date-input"
@@ -58,13 +65,41 @@
 	{#if invoiceDate}<p class="font-semibold text-ink">{formatDateLong(invoiceDate)}</p>{/if}
 </div>
 
+<!-- TODO(fachlich prüfen): "Leistungszeitraum" is not in the glossary -->
+<fieldset class="flex flex-col gap-4">
+	<legend class="font-semibold text-ink">Leistungszeitraum (freiwillig)</legend>
+	<p class="text-ink-muted">
+		Für welche Zeit gilt die Rechnung? Zum Beispiel 01.10.2024 bis 31.12.2024 für das 4. Quartal,
+		auch wenn die Rechnung erst im Januar kommt. Dann zählen nur die Tage, die in die
+		Abrechnungsperiode fallen.
+	</p>
+	<div class="grid gap-4 sm:grid-cols-2">
+		<TextInput
+			id="servicePeriodStart"
+			type="date"
+			label="Von"
+			bind:value={servicePeriodStart}
+			error={errors.servicePeriodStart}
+			testid="invoice-service-start-input"
+		/>
+		<TextInput
+			id="servicePeriodEnd"
+			type="date"
+			label="Bis"
+			bind:value={servicePeriodEnd}
+			error={errors.servicePeriodEnd}
+			testid="invoice-service-end-input"
+		/>
+	</div>
+</fieldset>
+
 {#if outside && period}
 	<Alert tone="caution" title="Ausserhalb der Abrechnungsperiode" testid="invoice-period-warning">
 		<p>
 			Das Rechnungsdatum liegt nicht in der Abrechnungsperiode {formatDate(period.start)} – {formatDate(
 				period.end
-			)}. Die Rechnung fliesst dann nicht in diese Nebenkostenabrechnungen ein. Übernehmen Sie das
-			Datum von der Rechnung.
+			)}. Die Rechnung fliesst dann nicht in diese Nebenkostenabrechnungen ein. Prüfen Sie das
+			Rechnungsdatum und den Leistungszeitraum.
 		</p>
 	</Alert>
 {/if}

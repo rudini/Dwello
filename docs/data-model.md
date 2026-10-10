@@ -23,6 +23,7 @@ sync with the migrations by hand. Domain terms follow `UBIQUITOUS_LANGUAGE.md`.
 ```
 buildings 1─n apartments 1─n rental_contracts n─1 tenants
 buildings 1─n invoices ──> categories (category_id, llm_category_id), distribution_keys
+buildings 1─n fuel_stocks
 
 utility_statements ──> tenants, apartments, rental_contracts (contract_id)
 utility_statements 1─n utility_statement_line_items ──> categories, distribution_keys
@@ -39,6 +40,7 @@ heating_profiles, configuration: no foreign keys
 | `invoices.building_id` → `buildings` | CASCADE |
 | `invoices.category_id`, `invoices.llm_category_id` → `categories` | SET NULL |
 | `invoices.distribution_key_id` → `distribution_keys` | SET NULL |
+| `fuel_stocks.building_id` → `buildings` | CASCADE |
 | `utility_statements.tenant_id` / `apartment_id` / `contract_id` | RESTRICT |
 | `utility_statement_line_items.statement_id` → `utility_statements` | CASCADE |
 | `utility_statement_line_items.category_id` / `distribution_key_id` | SET NULL |
@@ -132,6 +134,7 @@ That contracts of one apartment must not overlap is enforced in the application,
 name                    VARCHAR(100) NOT NULL   -- internal English name
 name_de, name_fr, name_it, name_en VARCHAR(100) -- display names
 is_allowed_utility_cost BOOLEAN NOT NULL DEFAULT true  -- umlagefähig (OR 257a)
+is_heating_cost         BOOLEAN NOT NULL DEFAULT false -- Heiz- und Warmwasserkosten: distributed by the heating profile (0006)
 description             TEXT
 sort_order              INTEGER DEFAULT 0
 ```
@@ -175,7 +178,9 @@ category_id             UUID REFERENCES categories ON DELETE SET NULL
 distribution_key_id     UUID REFERENCES distribution_keys ON DELETE SET NULL
 amount                  DECIMAL(12,2) NOT NULL -- Betrag
 is_valid_utility_cost   BOOLEAN NOT NULL DEFAULT true  -- umlagefähige Rechnung
-invoice_date            DATE NOT NULL          -- Rechnungsdatum, decides the Abrechnungsperiode
+invoice_date            DATE NOT NULL          -- Rechnungsdatum, decides the Abrechnungsperiode without a Leistungszeitraum
+service_period_start    DATE                   -- Leistungszeitraum (0007): both or none, end >= start (CHECK);
+service_period_end      DATE                   --   a statement takes the share of its days that falls into the period
 due_date                DATE                   -- Fälligkeitsdatum
 paid_date               DATE                   -- Zahlungsdatum
 llm_category_id         UUID REFERENCES categories ON DELETE SET NULL  -- KI-Kategorie
@@ -188,6 +193,19 @@ notes                   TEXT
 
 Indexes: `invoices_building_id_idx`, `invoices_invoice_date_idx`, `invoices_category_id_idx`.
 No CHECK on `amount`.
+
+### fuel_stocks (Tankbestand, migration 0008)
+
+```sql
+building_id   UUID NOT NULL REFERENCES buildings ON DELETE CASCADE
+reading_date  DATE NOT NULL           -- Stichtag; the stock at the end of that day
+amount        DECIMAL(12,2) NOT NULL  -- value of the heating oil in the tank in CHF, CHECK >= 0
+UNIQUE (building_id, reading_date)
+```
+
+With a reading on the day before the period and one on its last day, a statement adds opening − closing stock to the
+heating costs (category `Heating`, distribution key of the building's last heating invoice): heating costs are the
+consumption, not the purchases (`fuel-stock.service.ts`).
 
 ### utility_statements (Nebenkostenabrechnung)
 
@@ -349,6 +367,12 @@ Demo data (`backend/demo/`, `bun run db:demo`) is never part of the migrations.
 backend/migrations/
   0001_schema.sql       -- schema (baseline of October 2026, replaces the earlier 0001–0011)
   0002_stammdaten.sql   -- master data: categories, distribution keys, heating profiles
+  0003_stammdaten_korrektur.sql      -- Swiss heating shares, 70/30 key with building sums
+  0004_statement_settings.sql        -- heating profile and fee key of a statement
+  0005_stammdaten_beschreibungen.sql -- German descriptions of categories and keys
+  0006_heizkosten_kategorien.sql     -- categories.is_heating_cost
+  0007_leistungszeitraum.sql         -- invoices.service_period_start/end
+  0008_tankbestand.sql               -- fuel_stocks
 ```
 
 `src/db/migrate.ts` applies the `.sql` files in file order, each in its own transaction, and records them in

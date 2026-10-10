@@ -33,6 +33,13 @@ Given(
 );
 
 Given(
+	'im Gebäude {string} gibt es eine Rechnung der Kategorie {string} über {string} Franken vom {string} für die Zeit vom {string} bis {string}',
+	async ({ seed }, building: string, category: string, amount: string, date: string, from: string, to: string) => {
+		await seed.invoiceOn(building, category, amount, date, [from, to]);
+	}
+);
+
+Given(
 	'im Gebäude {string} gibt es eine Rechnung der Kategorie {string} über {string} Franken vom {string}',
 	async ({ seed }, building: string, category: string, amount: string, date: string) => {
 		await seed.invoiceOn(building, category, amount, date);

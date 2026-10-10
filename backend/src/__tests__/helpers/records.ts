@@ -43,6 +43,8 @@ type Invoice = {
 	amount?: string;
 	invoiceDate?: string;
 	isValidUtilityCost?: boolean;
+	servicePeriodStart?: string;
+	servicePeriodEnd?: string;
 };
 
 /** Invoice of the building, by default caretaker costs distributed by area */

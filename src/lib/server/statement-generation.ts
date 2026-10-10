@@ -98,7 +98,7 @@ export async function generateStatements(fetch: Fetch, request: GenerationReques
 
 type Period = { periodStart: string; periodEnd: string };
 
-/** Per building: the utility invoices dated in the period, the statements whose period overlaps it and the check per category */
+/** Per building: the utility invoices of the period, the statements whose period overlaps it and the check per category */
 export async function invoicesInPeriod(
 	fetch: Fetch,
 	{ buildingIds, periodStart, periodEnd }: GenerationRequest
@@ -107,11 +107,9 @@ export async function invoicesInPeriod(
 	return Promise.all(
 		buildingIds.map(async (buildingId) => {
 			const building = encodeURIComponent(buildingId);
-			const [{ invoices }, { data: statements }, check] = await Promise.all([
-				call(
-					fetch,
-					`invoices?buildingId=${building}&dateFrom=${periodStart}&dateTo=${periodEnd}&isValidUtilityCost=true&limit=1000`
-				),
+			const [invoices, { data: statements }, check] = await Promise.all([
+				// the invoices the statement takes: by Leistungszeitraum, otherwise by Rechnungsdatum
+				call(fetch, `invoices/for-statement/${building}?periodStart=${periodStart}&periodEnd=${periodEnd}`),
 				call(fetch, `statements?buildingId=${building}&limit=1000`),
 				// a hint only: without it the preview still shows
 				call(fetch, `invoices/completeness/${building}?periodStart=${periodStart}&periodEnd=${periodEnd}`).catch(

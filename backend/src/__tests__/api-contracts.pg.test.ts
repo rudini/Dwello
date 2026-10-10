@@ -109,6 +109,12 @@ describe('API-Verträge des Frontends', () => {
 		expect(drift(await sample('building'), actual)).toEqual([]);
 	});
 
+	it('GET /buildings/:id/fuel-stocks liefert die Felder von fuel-stocks.json', async () => {
+		await sendJson('POST', `/api/v1/buildings/${rental.building}/fuel-stocks`, { readingDate: '2024-12-31', amount: '2650.00' });
+		const actual = await (await callApi(`/api/v1/buildings/${rental.building}/fuel-stocks`)).json();
+		expect(drift(await sample('fuel-stocks'), actual)).toEqual([]);
+	});
+
 	it('GET /tenants/:id liefert die Felder von tenant.json', async () => {
 		const actual = await (await callApi(`/api/v1/tenants/${rental.tenant}`)).json();
 		expect(drift(await sample('tenant'), actual)).toEqual([]);

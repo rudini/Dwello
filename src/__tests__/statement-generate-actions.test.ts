@@ -1,6 +1,5 @@
 import { describe, it, expect } from 'vitest';
 import { actions } from '../routes/statements/generate/+page.server';
-import { runAction } from './helpers/action';
 
 const run = {
 	buildingIds: 'b1',
@@ -13,7 +12,12 @@ const run = {
 describe('Vorschau der Abrechnungen', () => {
 	it('liefert neben der Vorschau die Rechnungen jedes Gebäudes in der Periode', async () => {
 		// a building without contracts and invoices: every list answers empty
-		const { result } = runAction(actions.preview, '', 200, run, { contracts: [], invoices: [], data: [], total: 0 });
+		const form = new FormData();
+		for (const [name, value] of Object.entries(run)) form.append(name, value);
+		const request = new Request('http://localhost:3000', { method: 'POST', body: form });
+		const fetch = async (url: string) =>
+			Response.json(url.includes('/for-statement/') ? [] : { contracts: [], data: [], total: 0 });
+		const result = (actions.preview as (event: unknown) => Promise<unknown>)({ fetch, request });
 		expect(await result).toEqual({
 			preview: [],
 			invoices: [{ buildingId: 'b1', count: 0, first: null, last: null, statements: 0, check: expect.anything() }]
