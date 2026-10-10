@@ -130,3 +130,16 @@ class TddStepTest(unittest.TestCase):
         self.assertEqual(result.returncode, 1, result.stderr)
         self.assertIn("red cannot follow red", result.stderr)
         self.assertEqual(repo.subject(), "red: adds two numbers")
+
+    def test_test_phase_is_refused_when_code_changed(self):
+        repo = Repo(self, {"calc.py": WRONG_ADD})
+        repo.write("TESTLIST.md", "- [ ] adds two numbers\n")
+        repo.write("test_calc.py", ADD_TEST)
+        repo.write("calc.py", RIGHT_ADD)
+
+        result = repo.run("tdd-step", "test", "plan add")
+
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn("test phase may only change the test list, not code: calc.py, test_calc.py",
+                      result.stderr)
+        self.assertEqual(repo.subject(), "init")
