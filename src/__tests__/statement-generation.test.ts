@@ -179,6 +179,23 @@ describe('Rechnungen der Abrechnungsperiode', () => {
 		expect(urls[0]).toBe(`${API}/invoices/for-statement/b1?periodStart=2024-01-01&periodEnd=2024-12-31`);
 	});
 
+	// Die Rechnung vom Januar 2025 für das 4. Quartal 2024 deckt das Ende der Periode ab, nicht den Januar
+	it('nimmt für den Zeitraum der Rechnungen den Leistungszeitraum in der Periode', async () => {
+		const fetch = (async (url: string) =>
+			Response.json(
+				url.includes('/for-statement/')
+					? [
+							{ invoiceDate: '2024-03-31', servicePeriodEnd: null, inPeriod: { start: '2024-01-01', end: '2024-12-31' } },
+							{ invoiceDate: '2025-01-20', servicePeriodEnd: '2024-12-31', inPeriod: { start: '2024-10-01', end: '2024-12-31' } }
+						]
+					: url.includes('/statements?')
+						? { data: [] }
+						: invoiceCompleteness
+			)) as typeof globalThis.fetch;
+
+		expect(await invoicesInPeriod(fetch, period)).toMatchObject([{ count: 2, first: '2024-03-31', last: '2024-12-31' }]);
+	});
+
 	// Without the check per category the preview still shows; the look at start and end of the period stays
 	it('zeigt die Rechnungen auch, wenn die Prüfung pro Kategorie scheitert', async () => {
 		const fetch = (async (url: string) =>

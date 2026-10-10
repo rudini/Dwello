@@ -82,9 +82,16 @@ interface InvoiceGroup {
 	isHeatingCost: boolean;
 }
 
-function groupInvoicesByCategory(
-	invoices: Awaited<ReturnType<typeof getInvoicesForStatement>>
-): InvoiceGroup[] {
+// An invoice of the period, or the change of the Tankbestand billed like one
+type PeriodCost = Pick<
+	Awaited<ReturnType<typeof getInvoicesForStatement>>[number],
+	'id' | 'description' | 'categoryId' | 'distributionKeyId' | 'inPeriod'
+> & {
+	category: { name: string; isHeatingCost: boolean } | null;
+	distributionKey: { name: string } | null;
+};
+
+function groupInvoicesByCategory(invoices: PeriodCost[]): InvoiceGroup[] {
 	const groups = new Map<string, InvoiceGroup>();
 
 	for (const invoice of invoices) {
@@ -118,6 +125,7 @@ const days = (start: string, end: string) => Math.max(0, (Date.parse(end) - Date
  * bills that he rented (without a Leistungszeitraum the whole period: his rental days / the period's days)
  */
 function rentalShare(group: InvoiceGroup, rentalStart: string, rentalEnd: string) {
+	// ponytail: a group summing to 0 (invoice and credit over different Leistungszeiträume) bills nothing; per-invoice shares if that occurs
 	if (group.totalAmount === 0) return 0;
 	const rented = group.invoices.reduce((sum, invoice) => {
 		const from = invoice.start > rentalStart ? invoice.start : rentalStart;
@@ -316,7 +324,7 @@ export async function calculateStatementForContract(
 				periodEnd,
 				apartmentShareResult.share
 			);
-			tenantShare = heatingResult.share;
+			tenantShare = roundToRappen(heatingResult.share);
 			periodShare = heatingResult.percentage / 100;
 		} else {
 			// By days: the tenant's days within the days each invoice bills in the period

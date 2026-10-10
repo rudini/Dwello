@@ -184,6 +184,16 @@ describe('Prüfung pro Kategorie', () => {
 		]);
 	});
 
+	it('fragt bei einer Gutschrift allein nicht nach einer neuen Kategorie', () => {
+		const { findings } = checkCategories(
+			[invoice('Hauswart', '2025-06-30', 900), invoice('Lift', '2025-05-20', -50)],
+			[invoice('Hauswart', '2024-06-30', 900)],
+			year2025
+		);
+
+		expect(findings).toEqual([]);
+	});
+
 	// Randfall: eine Periode, die nicht am Monatsersten beginnt, wird nach Tagen geteilt
 	it('teilt eine Periode ab dem 16. nach Tagen', () => {
 		const odd = { start: '2025-07-16', end: '2026-07-15' };

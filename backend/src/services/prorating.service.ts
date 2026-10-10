@@ -227,7 +227,12 @@ export async function handleMidYearMoves(
 		? new Date(Math.min(contractEnd.getTime(), periodEnd.getTime()))
 		: periodEnd;
 
-	return calculateHeatingShare(profile, effectiveStart, effectiveEnd, totalHeatingCosts);
+	// The tenant's months against the months of the period: a period under a year carries only its months' shares
+	const tenant = calculateHeatingShare(profile, effectiveStart, effectiveEnd, totalHeatingCosts);
+	const period = calculateHeatingShare(profile, periodStart, periodEnd, totalHeatingCosts);
+	if (period.percentage <= 0) return tenant; // ponytail: a period of months without heating keeps the plain profile share
+	const percentage = (tenant.percentage / period.percentage) * 100;
+	return { ...tenant, share: totalHeatingCosts * (percentage / 100), percentage };
 }
 
 /**

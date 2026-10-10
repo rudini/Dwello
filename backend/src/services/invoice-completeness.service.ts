@@ -6,8 +6,9 @@
 
 import { eq, min } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { invoices } from '../db/schema';
+import { categories, invoices } from '../db/schema';
 import { getInvoicesForStatement } from './invoice.service';
+import { fuelStockChange, periodReadings } from './fuel-stock.service';
 
 export interface Period {
 	start: string;
@@ -19,6 +20,7 @@ export interface CategoryInvoice {
 	categoryName: string;
 	amount: number;
 	invoiceDate: string;
+	isFuelStock?: boolean; // the change of the Tankbestand: consumption, no part of the rhythm
 }
 
 type Sum = { count: number; total: number };
@@ -27,11 +29,12 @@ export interface CategoryFinding {
 	categoryId: string | null;
 	categoryName: string;
 	// missing: no invoice although the year before had costs; gap: a part of the rhythm has none;
-	// new: costs the year before did not have (agreed in the lease?); deviation: costs differ a lot
-	kind: 'missing' | 'gap' | 'new' | 'deviation';
+	// new: costs the year before did not have (agreed in the lease?); deviation: costs differ a lot;
+	// stock: a Tankbestand reading is missing (missingParts: its days) or the consumption is negative
+	kind: 'stock' | 'missing' | 'gap' | 'new' | 'deviation';
 	current: Sum;
 	previous: Sum;
-	missingParts: Period[]; // the slices of the rhythm without invoice (gap), otherwise empty
+	missingParts: Period[]; // the slices of the rhythm without invoice (gap), the missing readings (stock), otherwise empty
 	changePercent: number | null; // change of the costs against the year before (deviation), otherwise null
 }
 
@@ -101,7 +104,7 @@ function groupByCategory(list: CategoryInvoice[]) {
 // The rhythm of the year before (one slice per invoice, at most one per month) and the slices without invoice now;
 // a credit note is no part of the rhythm, and as many invoices as the year before are complete however they are dated
 function missingParts(current: CategoryInvoice[], previous: CategoryInvoice[], period: Period, before: Period) {
-	const bills = (list: CategoryInvoice[]) => list.filter((invoice) => invoice.amount >= 0);
+	const bills = (list: CategoryInvoice[]) => list.filter((invoice) => invoice.amount >= 0 && !invoice.isFuelStock);
 	[current, previous] = [bills(current), bills(previous)];
 	const parts = Math.min(previous.length, 12);
 	if (parts < 2 || current.length >= previous.length) return [];
@@ -122,7 +125,7 @@ function findingOf(current: CategoryInvoice[], previous: CategoryInvoice[], peri
 		missingParts: [] as Period[],
 		changePercent: null
 	};
-	if (previous.length === 0) return base.current.total === 0 ? null : { ...base, kind: 'new' };
+	if (previous.length === 0) return base.current.total > 0 ? { ...base, kind: 'new' } : null;
 	if (base.previous.total === 0) return null;
 	if (current.length === 0) return { ...base, kind: 'missing' };
 	const parts = missingParts(current, previous, period, yearBefore(period));
@@ -134,7 +137,7 @@ function findingOf(current: CategoryInvoice[], previous: CategoryInvoice[], peri
 	return null;
 }
 
-const ORDER = { missing: 0, gap: 1, new: 2, deviation: 3 };
+const ORDER = { stock: 0, missing: 1, gap: 2, new: 3, deviation: 4 };
 
 /**
  * Findings per category of the period against the same dates one year earlier; most serious first.
@@ -163,12 +166,39 @@ export function checkCategories(
 // The building's allocable invoices of a period as the statement takes them (Leistungszeitraum, otherwise
 // Rechnungsdatum): the amount of the period and the date that places the invoice in the rhythm
 async function categoryInvoices(buildingId: string, { start, end }: Period): Promise<CategoryInvoice[]> {
-	return (await getInvoicesForStatement(buildingId, start, end)).map((invoice) => ({
+	const nameOf = (category: { name: string; nameDE: string | null } | null) => category?.nameDE || category?.name || 'Nicht kategorisiert';
+	const bills = (await getInvoicesForStatement(buildingId, start, end)).map((invoice) => ({
 		categoryId: invoice.categoryId,
-		categoryName: invoice.category?.nameDE || invoice.category?.name || 'Nicht kategorisiert',
+		categoryName: nameOf(invoice.category),
 		amount: invoice.inPeriod.amount,
 		invoiceDate: invoice.servicePeriodEnd ? invoice.inPeriod.end : invoice.invoiceDate
 	}));
+	const stock = (await fuelStockChange(buildingId, start, end)).map((change) => ({
+		categoryId: change.categoryId,
+		categoryName: nameOf(change.category),
+		amount: change.inPeriod.amount,
+		invoiceDate: end,
+		isFuelStock: true
+	}));
+	return [...bills, ...stock];
+}
+
+// Without both readings the statement bills the purchases, not the consumption; a negative consumption is a typo
+async function stockFinding(buildingId: string, period: Period, current: CategoryInvoice[]): Promise<CategoryFinding | null> {
+	const readings = await periodReadings(buildingId, period.start, period.end);
+	if (!readings) return null;
+	const costs = current.filter((invoice) => invoice.categoryId === readings.categoryId);
+	const [category] = await db.select({ name: categories.name, nameDE: categories.nameDE }).from(categories).where(eq(categories.id, readings.categoryId));
+	const finding = {
+		categoryId: readings.categoryId,
+		categoryName: category.nameDE || category.name,
+		kind: 'stock' as const,
+		current: sum(costs),
+		previous: { count: 0, total: 0 },
+		missingParts: readings.missing.map((day) => ({ start: day, end: day })),
+		changePercent: null
+	};
+	return readings.missing.length > 0 || finding.current.total < 0 ? finding : null;
 }
 
 /** The check for one building and period, with the period it was compared with */
@@ -179,5 +209,7 @@ export async function checkBuildingInvoices(buildingId: string, period: Period) 
 		categoryInvoices(buildingId, comparedWith),
 		db.select({ first: min(invoices.invoiceDate) }).from(invoices).where(eq(invoices.buildingId, buildingId))
 	]);
-	return { buildingId, comparedWith, ...checkCategories(current, previous, period, first ?? undefined) };
+	const { hasComparison, findings } = checkCategories(current, previous, period, first ?? undefined);
+	const stock = await stockFinding(buildingId, period, current);
+	return { buildingId, comparedWith, hasComparison, findings: stock ? [stock, ...findings] : findings };
 }

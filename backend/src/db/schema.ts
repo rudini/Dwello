@@ -277,6 +277,10 @@ export const fuelStocks = pgTable(
 			.references(() => buildings.id, { onDelete: 'cascade' }),
 		readingDate: date('reading_date').notNull(),
 		amount: decimal('amount', { precision: 12, scale: 2 }).notNull(), // CHF
+		// the heating cost category the consumption is billed in
+		categoryId: uuid('category_id')
+			.notNull()
+			.references(() => categories.id, { onDelete: 'restrict' }),
 		createdAt: timestamp('created_at').defaultNow().notNull()
 	},
 	(table) => [uniqueIndex('fuel_stocks_building_id_reading_date_key').on(table.buildingId, table.readingDate)]

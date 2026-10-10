@@ -7,7 +7,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import { eq, sql } from 'drizzle-orm';
 import { join } from 'path';
 import { db } from '../db/connection';
-import { buildings, invoices, tenants } from '../db/schema';
+import { buildings, categories, invoices, tenants } from '../db/schema';
 import { deleteStatement } from '../services/statement.service';
 import { callApi, sendJson } from './helpers/auth';
 import { insertInvoice } from './helpers/records';
@@ -110,7 +110,8 @@ describe('API-Verträge des Frontends', () => {
 	});
 
 	it('GET /buildings/:id/fuel-stocks liefert die Felder von fuel-stocks.json', async () => {
-		await sendJson('POST', `/api/v1/buildings/${rental.building}/fuel-stocks`, { readingDate: '2024-12-31', amount: '2650.00' });
+		const [heating] = await db.select().from(categories).where(eq(categories.name, 'Heating'));
+		await sendJson('POST', `/api/v1/buildings/${rental.building}/fuel-stocks`, { readingDate: '2024-12-31', amount: '2650.00', categoryId: heating.id });
 		const actual = await (await callApi(`/api/v1/buildings/${rental.building}/fuel-stocks`)).json();
 		expect(drift(await sample('fuel-stocks'), actual)).toEqual([]);
 	});

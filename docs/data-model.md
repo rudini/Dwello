@@ -41,6 +41,7 @@ heating_profiles, configuration: no foreign keys
 | `invoices.category_id`, `invoices.llm_category_id` → `categories` | SET NULL |
 | `invoices.distribution_key_id` → `distribution_keys` | SET NULL |
 | `fuel_stocks.building_id` → `buildings` | CASCADE |
+| `fuel_stocks.category_id` → `categories` | RESTRICT (deleting such a category answers 409) |
 | `utility_statements.tenant_id` / `apartment_id` / `contract_id` | RESTRICT |
 | `utility_statement_line_items.statement_id` → `utility_statements` | CASCADE |
 | `utility_statement_line_items.category_id` / `distribution_key_id` | SET NULL |
@@ -134,7 +135,8 @@ That contracts of one apartment must not overlap is enforced in the application,
 name                    VARCHAR(100) NOT NULL   -- internal English name
 name_de, name_fr, name_it, name_en VARCHAR(100) -- display names
 is_allowed_utility_cost BOOLEAN NOT NULL DEFAULT true  -- umlagefähig (OR 257a)
-is_heating_cost         BOOLEAN NOT NULL DEFAULT false -- Heiz- und Warmwasserkosten: distributed by the heating profile (0006)
+is_heating_cost         BOOLEAN NOT NULL DEFAULT false -- distributed by the heating profile at a tenant change (0006):
+                                                       -- Heating, Chimney Sweep; Hot Water by days since 0009
 description             TEXT
 sort_order              INTEGER DEFAULT 0
 ```
@@ -194,18 +196,28 @@ notes                   TEXT
 Indexes: `invoices_building_id_idx`, `invoices_invoice_date_idx`, `invoices_category_id_idx`.
 No CHECK on `amount`.
 
-### fuel_stocks (Tankbestand, migration 0008)
+### fuel_stocks (Tankbestand, migrations 0008, 0009)
 
 ```sql
 building_id   UUID NOT NULL REFERENCES buildings ON DELETE CASCADE
 reading_date  DATE NOT NULL           -- Stichtag; the stock at the end of that day
-amount        DECIMAL(12,2) NOT NULL  -- value of the heating oil in the tank in CHF, CHECK >= 0
+amount        DECIMAL(12,2) NOT NULL  -- value of the oil or pellets in the tank in CHF, CHECK >= 0
+category_id   UUID NOT NULL REFERENCES categories ON DELETE RESTRICT  -- a heating cost category (checked by the API)
 UNIQUE (building_id, reading_date)
 ```
 
-With a reading on the day before the period and one on its last day, a statement adds opening − closing stock to the
-heating costs (category `Heating`, distribution key of the building's last heating invoice): heating costs are the
-consumption, not the purchases (`fuel-stock.service.ts`).
+With a reading on the day before the period and one on its last day, a statement adds opening − closing stock as one
+more cost of the period in the category of the closing reading, distributed by the key of that category's latest
+allocable invoice in the building (else the configured default key): heating costs are the consumption, not the
+purchases (`fuel-stock.service.ts`). Without both readings the statement bills the purchases; the check for missing
+invoices reports the missing reading day (kind `stock`), and a negative consumption, and compares the consumption
+with the year before.
+
+Rounding in a statement: each invoice's part in the period (Leistungszeitraum) and each apartment's share of a group
+are rounded to the Rappen first, then the tenant's part of the days or of the heating profile; the subtotal is the
+sum of the rounded lines. A heating profile share is the profile percentage of the tenant's months divided by that of
+the period's months (a period under a year). The profile applies to the whole group, also to an invoice with a
+Leistungszeitraum (TODO(fachlich prüfen), review B CR2-N2).
 
 ### utility_statements (Nebenkostenabrechnung)
 
@@ -373,6 +385,7 @@ backend/migrations/
   0006_heizkosten_kategorien.sql     -- categories.is_heating_cost
   0007_leistungszeitraum.sql         -- invoices.service_period_start/end
   0008_tankbestand.sql               -- fuel_stocks
+  0009_tankbestand_kategorie.sql     -- fuel_stocks.category_id; Hot Water shared by days
 ```
 
 `src/db/migrate.ts` applies the `.sql` files in file order, each in its own transaction, and records them in

@@ -191,15 +191,16 @@ describe('Kategorie bearbeiten', () => {
 		expect(text()).not.toContain('vordefinierter Kategorien');
 	});
 
-	// Heiz- und Warmwasserkosten folgen beim Mieterwechsel dem Heizprofil statt den Tagen
-	it('erfasst, ob eine Kategorie Heiz- und Warmwasserkosten sind, und erklärt die Folge', () => {
+	// Heizkosten folgen beim Mieterwechsel dem Heizprofil statt den Tagen; separates Warmwasser nicht
+	it('erfasst, ob eine Kategorie Heizkosten sind, und erklärt die Folge', () => {
 		const pellets = { ...category('c5', 'Pellets', true), isHeatingCost: true };
 		show(EditCategoryPage, { data: { category: pellets }, form: null } as never);
 
 		const box = byTestId<HTMLInputElement>('category-heating-checkbox')!;
 		expect(box.checked).toBe(true);
 		expect(box.name).toBe('isHeatingCost');
-		expect(text()).toContain('Heiz- und Warmwasserkosten');
+		expect(text()).toContain('Heizkosten nach dem Heizprofil verteilen');
 		expect(text()).toContain('nach dem Heizprofil');
+		expect(text()).toContain('Separat abgerechnetes Warmwasser wird das ganze Jahr etwa gleich verbraucht');
 	});
 });

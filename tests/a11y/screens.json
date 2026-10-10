@@ -7,6 +7,7 @@
 		"filtered-empty": "A list whose search matches nothing (?search=…).",
 		"submit-empty": "A new-record form submitted without input: all validation errors visible.",
 		"delete-dialog": "The delete confirmation dialog open.",
+		"fuel-stock-dialog": "Building page with a Tankbestand reading: the confirmation before deleting it open.",
 		"end-dialog": "The dialog that ends a rental contract open.",
 		"send-dialog": "The confirmation before marking a statement as sent open.",
 		"reminder-dialog": "The Mahnung dialog of a sent statement open.",
@@ -94,7 +95,8 @@
 			"path": "/buildings/{building}",
 			"states": [
 				"default",
-				"delete-dialog"
+				"delete-dialog",
+				"fuel-stock-dialog"
 			]
 		},
 		{

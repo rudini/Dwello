@@ -34,9 +34,10 @@
 	} = $props();
 
 	// ISO dates compare as text; a Leistungszeitraum decides over the Rechnungsdatum
+	const byServicePeriod = $derived(!!servicePeriodStart && !!servicePeriodEnd);
 	const outside = $derived(
 		!!period &&
-			(servicePeriodStart && servicePeriodEnd
+			(byServicePeriod
 				? servicePeriodEnd < period.start || servicePeriodStart > period.end
 				: !!invoiceDate && (invoiceDate < period.start || invoiceDate > period.end))
 	);
@@ -69,9 +70,11 @@
 <fieldset class="flex flex-col gap-4">
 	<legend class="font-semibold text-ink">Leistungszeitraum (freiwillig)</legend>
 	<p class="text-ink-muted">
-		Für welche Zeit gilt die Rechnung? Zum Beispiel 01.10.2024 bis 31.12.2024 für das 4. Quartal,
-		auch wenn die Rechnung erst im Januar kommt. Dann zählen nur die Tage, die in die
-		Abrechnungsperiode fallen.
+		Für welche Zeit gilt die Rechnung? Geben Sie ihn bei Rechnungen für einen Zeitraum an, zum
+		Beispiel ein Quartal oder ein Jahr. Für das 4. Quartal also 01.10.2024 bis 31.12.2024, auch wenn
+		die Rechnung erst im Januar kommt. Dann zählen nur die Tage, die in die Abrechnungsperiode
+		fallen. Nicht für Heizöl- oder Pelletlieferungen: Deren Verbrauch zählt über den Tankbestand des
+		Gebäudes.
 	</p>
 	<div class="grid gap-4 sm:grid-cols-2">
 		<TextInput
@@ -96,10 +99,9 @@
 {#if outside && period}
 	<Alert tone="caution" title="Ausserhalb der Abrechnungsperiode" testid="invoice-period-warning">
 		<p>
-			Das Rechnungsdatum liegt nicht in der Abrechnungsperiode {formatDate(period.start)} – {formatDate(
-				period.end
-			)}. Die Rechnung fliesst dann nicht in diese Nebenkostenabrechnungen ein. Prüfen Sie das
-			Rechnungsdatum und den Leistungszeitraum.
+			{byServicePeriod ? 'Der Leistungszeitraum' : 'Das Rechnungsdatum'} liegt nicht in der Abrechnungsperiode
+			{formatDate(period.start)} – {formatDate(period.end)}. Die Rechnung fliesst dann nicht in
+			diese Nebenkostenabrechnungen ein. Prüfen Sie das Rechnungsdatum und den Leistungszeitraum.
 		</p>
 	</Alert>
 {/if}

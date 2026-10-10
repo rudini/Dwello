@@ -26,7 +26,8 @@
 		errors: Record<string, string>;
 	} = $props();
 
-	// 3 % is the usual guideline for Swiss utility statements, not a limit
+	// 3 % is the usual guideline for Swiss utility statements (glossary), not a limit;
+	// TODO(fachlich prüfen): sources name 3 to 5 % depending on the region (review B, MR2-N2)
 	const USUAL_MAXIMUM = 3;
 
 	const sum = (profile: HeatingProfile) =>
@@ -47,7 +48,7 @@
 <Field
 	id="heatingProfile"
 	label="Heizprofil"
-	help="Verteilt die Heizkosten bei einem Mieterwechsel auf die Monate; wählen Sie das Profil, das Ihre Mietverträge vorsehen. Wurden beim Mieterwechsel die Zähler abgelesen, gelten diese Werte. Nur Heizprofile mit zusammen 100 % lassen sich wählen."
+	help="Verteilt die Heizkosten bei einem Mieterwechsel auf die Monate; wählen Sie das Profil, das Ihre Mietverträge vorsehen. Dwello verteilt nach dem Heizprofil. Haben Sie beim Mieterwechsel die Zähler abgelesen, passen Sie die Abrechnung von Hand an. Nur Heizprofile mit zusammen 100 % lassen sich wählen."
 	error={errors.heatingProfileId}
 >
 	{#snippet children(control)}
@@ -84,7 +85,7 @@
 	id="managementFeePercent"
 	label="Verwaltungspauschale in %"
 	type="number"
-	help="Prozentsatz der Nebenkosten, gilt für alle Abrechnungen dieses Laufs. Üblich sind bis {USUAL_MAXIMUM} %. Verlangen Sie eine Verwaltungspauschale nur, wenn sie im Mietvertrag vereinbart ist. Sonst geben Sie 0 ein."
+	help="Prozentsatz der Nebenkosten, gilt für alle Abrechnungen dieses Laufs. Üblich sind bis {USUAL_MAXIMUM} %. Verlangen Sie eine Verwaltungspauschale nur, wenn sie im Mietvertrag vereinbart ist. Sonst geben Sie 0 ein. Haben Mietverträge verschiedene Sätze, erstellen Sie die Abrechnungen getrennt."
 	bind:value={() => fee, (v) => (managementFeePercent = v === '' ? NaN : Number(v))}
 	error={errors.managementFeePercent}
 	testid="management-fee-input"

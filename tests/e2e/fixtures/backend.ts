@@ -227,6 +227,12 @@ export function testData(request: APIRequestContext, token: string) {
 			await invoice(buildingTitle, { categoryId: heating.id }, `Heizöl ${year}`, amount, `${year}-06-30`);
 		},
 
+		// Value of the heating oil in the building's tank on a reading day (removed with the building)
+		async fuelStock(buildingTitle: string, readingDate: string, amount: string) {
+			const heating = (await get('categories?limit=100')).categories.find((c: { name: string }) => c.name === 'Heating');
+			await post(`buildings/${ids.get(buildingTitle)}/fuel-stocks`, { readingDate, amount, categoryId: heating.id });
+		},
+
 		// Invoice in a predefined category given by its German name, distributed by area; optionally the period it bills
 		async invoiceOn(buildingTitle: string, categoryName: string, amount: string, date: string, service?: [string, string]) {
 			const category = (await get('categories?limit=100')).categories.find((c: { nameDE: string }) => c.nameDE === categoryName);

@@ -71,7 +71,12 @@
 
 	{#if data.apartments.length}<StatusLegend />{/if}
 
-	<FuelStocks stocks={data.fuelStocks} errors={form?.fuelStockErrors} />
+	<FuelStocks
+		stocks={data.fuelStocks}
+		categories={data.heatingCategories}
+		errors={form?.fuelStockErrors}
+		saved={!!form?.fuelStockSaved}
+	/>
 </div>
 
 <DeleteBuildingDialog

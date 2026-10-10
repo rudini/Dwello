@@ -163,6 +163,25 @@ describe('Rechnung erfassen und bearbeiten', () => {
 		'/config/default_distribution_key_id': { value: 'k1' }
 	};
 
+	// Wer eine schon abgerechnete Rechnung ändert, verschiebt Kosten zwischen den Perioden
+	it('nennt die Perioden, für die es mit dieser Rechnung schon Abrechnungen gibt', async () => {
+		const { fetch, urls } = backend({
+			...answers,
+			'/statements': {
+				data: [
+					{ periodStart: '2026-01-01', periodEnd: '2026-12-31' },
+					{ periodStart: '2026-01-01', periodEnd: '2026-12-31' }, // second tenant, same period
+					{ periodStart: '2025-01-01', periodEnd: '2025-12-31' }
+				]
+			}
+		});
+
+		const data = (await editLoad({ params: { id: 'i1' }, fetch } as never)) as { billedIn: unknown };
+
+		expect(data.billedIn).toEqual([{ start: '2026-01-01', end: '2026-12-31' }]);
+		expect(urls).toContain(`${API}/statements?buildingId=b1&limit=1000`);
+	});
+
 	it('bietet Kategorien und Verteilschlüssel deutsch zur Auswahl an', async () => {
 		for (const load of [newLoad, editLoad]) {
 			const data = (await load({

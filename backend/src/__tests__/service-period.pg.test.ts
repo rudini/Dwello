@@ -71,7 +71,7 @@ describe('Leistungszeitraum einer Rechnung', () => {
 		const lines = (await statement(next.contract)).lineItems;
 
 		// one line per category: 900 + 1200 × 182/366 = 900 + 596.72; tenant B: all of Q4, May and June of the annual invoice
-		expect(lines[0].totalBuildingAmount).toBeCloseTo(1496.72, 2);
+		expect(lines[0].totalBuildingAmount).toBe(1496.72);
 		expect(lines[0].tenantShare).toBe(roundRappen(900 + (1200 * 61) / 366));
 	});
 });

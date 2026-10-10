@@ -82,7 +82,9 @@ beforeAll(async () => {
 	await insertInvoice(building.id, { categoryId: heating.id, description: 'Heizöl 2024', amount: '1000.00', invoiceDate: '2024-06-30' });
 	const [chimney] = await db.select().from(categories).where(eq(categories.name, 'Chimney Sweep'));
 	await insertInvoice(building.id, { categoryId: chimney.id, description: 'Kaminfeger 2024', amount: '200.00', invoiceDate: '2024-10-15' });
-	const [profile] = await db
+	const [hotWater] = await db.select().from(categories).where(eq(categories.name, 'Hot Water'));
+	await insertInvoice(building.id, { categoryId: hotWater.id, description: 'Warmwasser 2024', amount: '300.00', invoiceDate: '2024-11-30' });
+		const [profile] = await db
 		.insert(heatingProfiles)
 		.values({
 			name: `Test ${token}`,
@@ -141,10 +143,42 @@ describe('Heizkostenverteilung bei Mieterwechsel und Leerstand', () => {
 		expect(700 - shares).toBe(35);
 	});
 
-	// Kaminfeger und Warmwasser gehören zu den Heiz- und Warmwasserkosten (Art. 5 VMWG): nach Heizprofil, nicht nach Tagen
+	// Der Kaminfeger hängt an der Heizung: beim Mieterwechsel nach Heizprofil, nicht nach Tagen
 	it('verteilt den Kaminfeger als Heiz- und Warmwasserkosten nach dem Heizprofil', async () => {
 		const chimney = (await lines(tenant1)).find((line) => line.categoryName === 'Chimney Sweep')!;
 
 		expect(chimney).toMatchObject({ isHeatingCost: true, apartmentShare: 140, periodShare: 0.43, tenantShare: 60.2 });
+	});
+
+	// Teilperiode (z.B. bei Verkauf): wer die ganze Periode mietet, trägt die ganzen Heizkosten der Periode
+	it('belastet in einer Periode unter einem Jahr den Mieter der ganzen Periode mit dem ganzen Wohnungsanteil', async () => {
+		const response = await callApi('/api/v1/statements/preview', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ contractId: tenant2, periodStart: '2024-05-01', periodEnd: '2024-12-31', heatingProfileId })
+		});
+		const heating = ((await response.json()) as { lineItems: LineItem[] }).lineItems.find((line) => line.categoryName === 'Heating')!;
+
+		expect(heating).toMatchObject({ periodShare: 1, tenantShare: heating.apartmentShare });
+	});
+
+	// Warmwasser wird das ganze Jahr etwa gleich verbraucht: nach Tagen, nicht nach dem Heizprofil
+	it('verteilt separat abgerechnetes Warmwasser nach Tagen', async () => {
+		const hotWater = (await lines(tenant1)).find((line) => line.categoryName === 'Hot Water')!;
+
+		expect(hotWater).toMatchObject({ isHeatingCost: false, apartmentShare: 210, tenantShare: 52.21 });
+	});
+
+	// Der Mieter rechnet das Total aus den Positionen nach: die Zwischensumme ist die Summe der gerundeten Positionen
+	it('rechnet die Zwischensumme aus den gerundeten Positionen, auch bei einer Periode bis mitten im Monat', async () => {
+		const response = await callApi('/api/v1/statements/preview', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ contractId: tenant2, periodStart: '2024-01-01', periodEnd: '2024-10-19', heatingProfileId })
+		});
+		const preview = (await response.json()) as { subtotal: number; lineItems: LineItem[] };
+		const sum = preview.lineItems.reduce((total, line) => total + line.tenantShare, 0);
+
+		expect(preview.subtotal).toBe(Math.round(sum * 100) / 100);
 	});
 });

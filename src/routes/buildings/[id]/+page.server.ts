@@ -9,22 +9,51 @@ const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 export interface BuildingDetailsData {
 	building: BuildingWithStats;
 	apartments: Apartment[];
-	fuelStocks: FuelStock[];
+	fuelStocks: FuelStock[] | null; // null: could not be loaded
+	heatingCategories: { id: string; name: string }[];
 }
 
-/** Heating oil in the tank at the end of a reading day, in CHF */
+/** Heating oil or pellets in the tank at the end of a reading day, in CHF, billed in its category */
 export interface FuelStock {
 	id: string;
 	readingDate: string;
 	amount: number;
+	categoryId: string;
+}
+
+type Fetch = typeof globalThis.fetch;
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+// The building's Tankbestand readings and the heating cost categories they can be billed in
+async function fuelStockData(fetch: Fetch, buildingId: string) {
+	const [stocksRes, categoriesRes] = await Promise.all([
+		fetch(`${BACKEND_URL}/api/v1/buildings/${buildingId}/fuel-stocks`),
+		fetch(`${BACKEND_URL}/api/v1/categories?limit=100`)
+	]);
+	const stocks = stocksRes.ok ? await stocksRes.json() : null;
+	const categories: Record<string, string | boolean>[] =
+		(await categoriesRes.json()).categories ?? [];
+	return {
+		fuelStocks: Array.isArray(stocks)
+			? stocks.map((s: Record<string, string>) => ({
+					id: s.id,
+					readingDate: s.readingDate,
+					amount: Number(s.amount),
+					categoryId: s.categoryId
+				}))
+			: null,
+		heatingCategories: categories
+			.filter((c) => c.isHeatingCost)
+			.map((c) => ({ id: String(c.id), name: String(c.nameDE || c.name) }))
+	};
 }
 
 export const load: PageServerLoad = async ({ params, fetch }): Promise<BuildingDetailsData> => {
 	try {
-		const [buildingRes, apartmentsRes, stocksRes] = await Promise.all([
+		const [buildingRes, apartmentsRes, fuel] = await Promise.all([
 			fetch(`${BACKEND_URL}/api/v1/buildings/${params.id}`),
 			fetch(`${BACKEND_URL}/api/v1/apartments?buildingId=${params.id}&limit=100`),
-			fetch(`${BACKEND_URL}/api/v1/buildings/${params.id}/fuel-stocks`)
+			fuelStockData(fetch, params.id)
 		]);
 
 		if (!buildingRes.ok) {
@@ -72,12 +101,7 @@ export const load: PageServerLoad = async ({ params, fetch }): Promise<BuildingD
 		building.reletCount = countStatus(apartments, 'relet');
 		building.reservedCount = countStatus(apartments, 'reserved');
 
-		const stocks = stocksRes.ok ? await stocksRes.json() : [];
-		const fuelStocks: FuelStock[] = (Array.isArray(stocks) ? stocks : []).map(
-			(s: Record<string, string>) => ({ id: s.id, readingDate: s.readingDate, amount: Number(s.amount) })
-		);
-
-		return { building, apartments, fuelStocks };
+		return { building, apartments, ...fuel };
 	} catch (err) {
 		console.error('Failed to fetch building:', err);
 		if (err && typeof err === 'object' && 'status' in err) {
@@ -103,6 +127,7 @@ export const actions: Actions = {
 		const form = await request.formData();
 		const readingDate = String(form.get('readingDate') ?? '');
 		const amount = plainAmount(String(form.get('amount') ?? ''));
+		const categoryId = String(form.get('categoryId') ?? '');
 		const fuelStockErrors: Record<string, string> = {};
 		if (!readingDate) fuelStockErrors.readingDate = 'Bitte geben Sie den Stichtag ein.';
 		if (!/^\d+(\.\d{1,2})?$/.test(amount))
@@ -112,7 +137,7 @@ export const actions: Actions = {
 		const response = await fetch(`${BACKEND_URL}/api/v1/buildings/${params.id}/fuel-stocks`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ readingDate, amount })
+			body: JSON.stringify({ readingDate, amount, categoryId })
 		});
 		if (!response.ok) {
 			const form =
@@ -126,9 +151,19 @@ export const actions: Actions = {
 
 	deleteFuelStock: async ({ request, params, fetch }) => {
 		const stockId = String((await request.formData()).get('stockId'));
-		await fetch(`${BACKEND_URL}/api/v1/buildings/${params.id}/fuel-stocks/${stockId}`, {
-			method: 'DELETE'
-		});
-		return { fuelStockDeleted: true };
+		const notDeleted = (status: number) =>
+			fail(status, {
+				fuelStockErrors: {
+					form: 'Der Bestand konnte nicht gelöscht werden. Laden Sie die Seite neu.'
+				}
+			});
+		if (!UUID.test(stockId)) return notDeleted(400);
+		const response = await fetch(
+			`${BACKEND_URL}/api/v1/buildings/${params.id}/fuel-stocks/${stockId}`,
+			{
+				method: 'DELETE'
+			}
+		);
+		return response.ok ? { fuelStockDeleted: true } : notDeleted(response.status);
 	}
 };

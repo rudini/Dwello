@@ -32,6 +32,7 @@ Funktionalität: Barrierefreiheit
       | building-new           | submit-empty        |
       | building-detail        | default             |
       | building-detail        | delete-dialog       |
+      | building-detail        | fuel-stock-dialog   |
       | building-edit          | default             |
       | building-edit          | submit-cleared      |
       | building-edit          | saved-toast         |

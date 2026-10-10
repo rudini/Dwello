@@ -66,12 +66,12 @@
 		bind:checked={values.allowed}
 		testid="category-allowed-checkbox"
 	/>
-	<!-- TODO(fachlich prüfen): "Heiz- und Warmwasserkosten" is not a glossary term (Art. 5 VMWG) -->
+	<!-- TODO(fachlich prüfen): which costs follow the heating profile is not in the glossary -->
 	<Checkbox
 		id="isHeatingCost"
 		name="isHeatingCost"
-		label="Heiz- und Warmwasserkosten"
-		help="Zum Beispiel Heizöl, Fernwärme, Pellets, Warmwasser oder Kaminfeger. Zieht ein Mieter während der Abrechnungsperiode ein oder aus, verteilt Dwello diese Kosten nach dem Heizprofil auf die Monate, alle anderen nach Tagen."
+		label="Heizkosten nach dem Heizprofil verteilen"
+		help="Zum Beispiel Heizöl, Fernwärme, Pellets oder Kaminfeger. Zieht ein Mieter während der Abrechnungsperiode ein oder aus, verteilt Dwello diese Kosten nach dem Heizprofil auf die Monate, alle anderen nach Tagen. Separat abgerechnetes Warmwasser wird das ganze Jahr etwa gleich verbraucht: Lassen Sie das Häkchen dort weg."
 		bind:checked={values.heating}
 		testid="category-heating-checkbox"
 	/>

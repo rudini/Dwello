@@ -9,20 +9,29 @@ import { eq } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { categories, invoices } from '../db/schema';
 import { calculateStatement } from '../services/statement.service';
+import { checkBuildingInvoices } from '../services/invoice-completeness.service';
 import { callApi, sendJson } from './helpers/auth';
 import { insertInvoice } from './helpers/records';
 import { createRental } from './helpers/rental';
 
 const token = crypto.randomUUID();
 let rental: Awaited<ReturnType<typeof createRental>>;
+let tankOnly: Awaited<ReturnType<typeof createRental>>;
+let heating: string;
+let caretaker: string;
 
-const stocks = () => `/api/v1/buildings/${rental.building}/fuel-stocks`;
-const record = (readingDate: string, amount: string) => sendJson('POST', stocks(), { readingDate, amount });
+const stocks = (building = rental.building) => `/api/v1/buildings/${building}/fuel-stocks`;
+const record = (readingDate: string, amount: string, building = rental.building, categoryId = heating) =>
+	sendJson('POST', stocks(building), { readingDate, amount, categoryId });
 
 beforeAll(async () => {
 	rental = await createRental(token, { startDate: '2023-01-01', monthlyAdvancePayment: '0' });
-	const [heating] = await db.select().from(categories).where(eq(categories.name, 'Heating'));
-	await insertInvoice(rental.building, { categoryId: heating.id, amount: '3000.00', invoiceDate: '2024-05-10', description: 'Heizöl' });
+	tankOnly = await createRental(`${token}-tank`, { startDate: '2023-01-01', monthlyAdvancePayment: '0' });
+	[{ id: heating }] = await db.select().from(categories).where(eq(categories.name, 'Heating'));
+	[{ id: caretaker }] = await db.select().from(categories).where(eq(categories.name, 'Caretaker'));
+	await insertInvoice(rental.building, { categoryId: heating, amount: '3000.00', invoiceDate: '2024-05-10', description: 'Heizöl' });
+	// recorded from the start of 2024, so the check compares 2025 with 2024
+	await insertInvoice(rental.building, { invoiceDate: '2024-01-15' });
 	await record('2023-12-31', '2000.00');
 	await record('2024-12-31', '500.00');
 	await record('2025-12-31', '100.00');
@@ -31,17 +40,16 @@ beforeAll(async () => {
 afterAll(async () => {
 	await db.delete(invoices).where(eq(invoices.buildingId, rental.building));
 	await rental.remove();
+	await tankOnly.remove();
 });
 
-const heatingLine = async (year: number) =>
+const linesOf = async (contractId: string, year: number) =>
 	(
-		await calculateStatement({
-			contractId: rental.contract,
-			periodStart: `${year}-01-01`,
-			periodEnd: `${year}-12-31`,
-			managementFeePercent: 0
-		})
-	).lineItems.find((line) => line.description === 'Heating');
+		await calculateStatement({ contractId, periodStart: `${year}-01-01`, periodEnd: `${year}-12-31`, managementFeePercent: 0 })
+	).lineItems;
+const heatingLine = async (year: number) => (await linesOf(rental.contract, year)).find((line) => line.description === 'Heating');
+const findings = async (building: string, year: number) =>
+	(await checkBuildingInvoices(building, { start: `${year}-01-01`, end: `${year}-12-31` })).findings;
 
 describe('Tankbestand', () => {
 	it('rechnet das verbrauchte Heizöl ab: Anfangsbestand + Einkauf − Endbestand', async () => {
@@ -52,26 +60,74 @@ describe('Tankbestand', () => {
 		expect((await heatingLine(2025))?.totalBuildingAmount).toBe(400);
 	});
 
+	// Öl erst später gekauft: der Verbrauch aus dem Starttank zählt trotzdem
+	it('rechnet den Verbrauch in der Kategorie des Tankbestands ab, auch ohne jede Heizungsrechnung', async () => {
+		await record('2024-12-31', '900.00', tankOnly.building);
+		await record('2025-12-31', '300.00', tankOnly.building);
+
+		expect(await linesOf(tankOnly.contract, 2025)).toMatchObject([{ categoryId: heating, totalBuildingAmount: 600 }]);
+	});
+
 	it('lässt den Tankbestand weg, solange ein Stichtag fehlt', async () => {
 		expect(await heatingLine(2023)).toBeUndefined();
 	});
 
-	it('listet die Stichtage des Gebäudes und lehnt einen negativen Bestand und einen doppelten Stichtag ab', async () => {
-		const list = (await (await callApi(stocks())).json()) as { readingDate: string; amount: string }[];
+	it('meldet in der Prüfung den fehlenden Stichtag, damit die Abrechnung nicht still nach Einkauf rechnet', async () => {
+		expect(await findings(rental.building, 2026)).toContainEqual(
+			expect.objectContaining({ kind: 'stock', categoryId: heating, missingParts: [{ start: '2026-12-31', end: '2026-12-31' }] })
+		);
+	});
 
-		expect(list.map((stock) => [stock.readingDate, stock.amount])).toEqual([
-			['2023-12-31', '2000.00'],
-			['2024-12-31', '500.00'],
-			['2025-12-31', '100.00']
+	it('vergleicht in der Prüfung den Verbrauch, nicht den Einkauf', async () => {
+		// 2025 ohne Einkauf: kein «Keine Rechnung in dieser Kategorie»
+		expect((await findings(rental.building, 2025)).filter((f) => f.categoryId === heating)).toEqual([
+			expect.objectContaining({ kind: 'deviation', current: { count: 1, total: 400 }, previous: { count: 2, total: 4500 } })
 		]);
-		expect((await record('2026-12-31', '-1')).status).toBe(422);
+	});
+
+	it('meldet einen negativen Verbrauch', async () => {
+		await record('2026-12-31', '5000.00');
+
+		expect(await findings(rental.building, 2026)).toContainEqual(
+			expect.objectContaining({ kind: 'stock', missingParts: [], current: { count: 1, total: -4900 } })
+		);
+	});
+});
+
+describe('Tankbestand über die API', () => {
+	it('listet die Stichtage des Gebäudes', async () => {
+		const list = (await (await callApi(stocks())).json()) as { readingDate: string; amount: string; categoryId: string }[];
+
+		expect(list.slice(0, 3).map((stock) => [stock.readingDate, stock.amount, stock.categoryId])).toEqual([
+			['2023-12-31', '2000.00', heating],
+			['2024-12-31', '500.00', heating],
+			['2025-12-31', '100.00', heating]
+		]);
+	});
+
+	it('lehnt ungültige Angaben ab', async () => {
+		expect((await record('2027-12-31', '-1')).status).toBe(422);
+		expect((await record('2027-02-30', '10.00')).status).toBe(400);
+		expect((await record('2027-12-31', '10.00', rental.building, caretaker)).status).toBe(400);
 		expect((await record('2024-12-31', '700.00')).status).toBe(409);
+		expect((await callApi(stocks(crypto.randomUUID()))).status).toBe(404);
+		expect((await sendJson('DELETE', `${stocks()}/not-a-uuid`)).status).toBe(422);
 	});
 
 	it('löscht einen Stichtag', async () => {
-		const id = ((await (await record('2026-06-30', '50.00')).json()) as { id: string }).id;
+		const id = ((await (await record('2027-06-30', '50.00')).json()) as { id: string }).id;
 
 		expect((await sendJson('DELETE', `${stocks()}/${id}`)).status).toBe(204);
-		expect(((await (await callApi(stocks())).json()) as unknown[]).length).toBe(3);
+		expect((await sendJson('DELETE', `${stocks()}/${id}`)).status).toBe(404);
+	});
+
+	it('verhindert das Löschen einer Kategorie mit Tankbeständen', async () => {
+		const [own] = await db
+			.insert(categories)
+			.values({ name: `Pellets ${token}`, nameDE: `Pellets ${token}`, isHeatingCost: true })
+			.returning();
+		await record('2027-12-31', '10.00', rental.building, own.id);
+
+		expect((await sendJson('DELETE', `/api/v1/categories/${own.id}`)).status).toBe(409);
 	});
 });

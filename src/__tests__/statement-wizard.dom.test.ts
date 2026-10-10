@@ -159,8 +159,12 @@ describe('Abrechnungen erstellen', () => {
 	// Nebenkosten, Pauschale und Heizkostentabelle gelten nur, wenn der Mietvertrag sie vorsieht (Art. 257a Abs. 2 OR)
 	it('erinnert daran, dass Heizprofil und Verwaltungspauschale im Mietvertrag vereinbart sein müssen', async () => {
 		await toSettings();
-		expect(text()).toContain('Wurden beim Mieterwechsel die Zähler abgelesen, gelten diese Werte.');
+		// Dwello kennt keine Zwischenablesung: das sagt der Text, statt sie zu versprechen
+		expect(text()).toContain(
+			'Dwello verteilt nach dem Heizprofil. Haben Sie beim Mieterwechsel die Zähler abgelesen, passen Sie die Abrechnung von Hand an.'
+		);
 		expect(text()).toContain('Verlangen Sie eine Verwaltungspauschale nur, wenn sie im Mietvertrag vereinbart ist.');
+		expect(text()).toContain('Haben Mietverträge verschiedene Sätze, erstellen Sie die Abrechnungen getrennt.');
 	});
 
 	it('berechnet die Verwaltungspauschale aus den eigenen Nebenkosten oder verteilt sie nach einem Verteilschlüssel und warnt über 3 %', async () => {
@@ -263,6 +267,33 @@ describe('Abrechnungen erstellen', () => {
 		expect(byTestId('missing-invoices')).toBeNull();
 	});
 
+	it('führt bei fehlendem Tankbestand zum Gebäude, auch neben einem Hinweis zur selben Kategorie', () => {
+		const sums = (count: number, total: number) => ({ count, total });
+		const heating = { categoryId: 'h', categoryName: 'Heizung', current: sums(1, 4880), previous: sums(1, 5120), changePercent: null };
+		open({
+			preview,
+			invoices: [
+				{
+					...invoices[0],
+					check: {
+						buildingId: 'b1',
+						comparedWith: { start: '2023-01-01', end: '2023-12-31' },
+						hasComparison: true,
+						findings: [
+							{ ...heating, kind: 'stock', missingParts: [{ start: '2025-12-31', end: '2025-12-31' }] },
+							{ ...heating, kind: 'deviation', missingParts: [], changePercent: -40 }
+						]
+					}
+				}
+			]
+		});
+
+		const link = byTestId<HTMLAnchorElement>('category-finding-stock-link')!;
+		expect(link.textContent).toContain('Tankbestand erfassen');
+		expect(link.getAttribute('href')).toBe('/buildings/b1');
+		expect(byTestId('category-check')!.querySelector('p')!.textContent).toBe('Möglicherweise fehlen Rechnungen');
+	});
+
 	it('nennt pro Kategorie fehlende Rechnungen im Vergleich zum Vorjahr und verlangt eine Bestätigung', async () => {
 		const sums = (count: number, total: number) => ({ count, total });
 		open({
@@ -298,7 +329,9 @@ describe('Abrechnungen erstellen', () => {
 		// the findings of a building form one list named by the building
 		expect(check.querySelector('ul')!.getAttribute('aria-label')).toBe('Ahornhof');
 		// what a missing invoice means for the tenants
-		expect(check.textContent!.replace(/\s+/g, ' ')).toContain('Später können Sie sie nur mit einer berichtigten Abrechnung nachverlangen.');
+		expect(check.textContent!.replace(/\s+/g, ' ')).toContain(
+			'Später können Sie sie nur noch mit einer berichtigten Abrechnung und nicht in jedem Fall nachverlangen.'
+		);
 		next();
 		await settle();
 		expect(byTestId('form-error')!.textContent).toContain('Bestätigen Sie');

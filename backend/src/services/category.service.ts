@@ -7,6 +7,7 @@ import { eq, sql, asc, ilike, and, or } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { categories, invoices, type Category, type NewCategory } from '../db/schema';
 import { Conflict } from './conflict';
+import { categoryHasFuelStocks } from './fuel-stock.service';
 
 export interface CategoryFilters {
 	search?: string;
@@ -198,6 +199,9 @@ export async function deleteCategory(id: string): Promise<{ success: boolean; co
 		.where(eq(invoices.categoryId, id));
 
 	const count = Number(invoiceCount.count);
+	if (count === 0 && (await categoryHasFuelStocks(id))) {
+		return { success: false, conflict: true, error: 'Die Kategorie hat Tankbestände und kann nicht gelöscht werden.' };
+	}
 	if (count > 0) {
 		return {
 			success: false,

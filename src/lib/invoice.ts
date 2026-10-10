@@ -12,16 +12,15 @@ export function suggestionProvenance(suggestion: Suggestion | null) {
 	return { llmCategoryId: suggestion.category.id, llmConfidence: String(suggestion.confidence) };
 }
 
-/** An amount as typed in Switzerland ("1'200.50", "1’200,50") in the form the backend reads */
 /** The Leistungszeitraum as the backend stores it: both dates, or null without one */
 export const servicePeriodOf = (values: { servicePeriodStart: string; servicePeriodEnd: string }) => ({
 	servicePeriodStart: values.servicePeriodStart || null,
 	servicePeriodEnd: values.servicePeriodEnd || null
 });
 
+/** An amount as typed in Switzerland ("1'200.50", "1’200,50") in the form the backend reads */
 export const plainAmount = (value: string) => value.replace(/['’\s]/g, '').replace(',', '.');
 
-/** What a new or changed invoice still lacks, by field */
 // The Leistungszeitraum is optional, but with both dates and the end not before the start (ISO dates compare as text)
 function servicePeriodErrors(start = '', end = ''): Record<string, string> {
 	if (start && !end) return { servicePeriodEnd: 'Bitte geben Sie auch das Ende des Leistungszeitraums ein.' };
@@ -30,6 +29,7 @@ function servicePeriodErrors(start = '', end = ''): Record<string, string> {
 	return {};
 }
 
+/** What a new or changed invoice still lacks, by field */
 export function validateInvoice(invoice: {
 	buildingId: string;
 	invoiceDate: string;

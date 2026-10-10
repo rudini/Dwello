@@ -116,10 +116,14 @@ export async function invoicesInPeriod(
 					() => undefined
 				)
 			]);
-			const dates = (invoices as { invoiceDate: string }[]).map((i) => i.invoiceDate).sort();
+			// an invoice with a Leistungszeitraum covers its days in the period, not its date
+			type Bill = { invoiceDate: string; servicePeriodEnd?: string | null; inPeriod?: { start: string; end: string } };
+			const dates = (invoices as Bill[])
+				.flatMap((i) => (i.servicePeriodEnd && i.inPeriod ? [i.inPeriod.start, i.inPeriod.end] : [i.invoiceDate]))
+				.sort();
 			return {
 				buildingId,
-				count: dates.length,
+				count: invoices.length,
 				first: dates[0] ?? null,
 				last: dates.at(-1) ?? null,
 				statements: (statements as Period[]).filter(overlaps).length,

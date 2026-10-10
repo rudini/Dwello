@@ -144,7 +144,8 @@ describe('Gebäudedetail', () => {
 			data: {
 				building: building({ apartmentCount: apartments.length, ...counts }),
 				apartments,
-				fuelStocks: []
+				fuelStocks: [],
+				heatingCategories: []
 			},
 			form: null
 		} as never);
@@ -231,33 +232,69 @@ describe('Gebäudedetail', () => {
 });
 
 describe('Tankbestand', () => {
-	const detail = (fuelStocks: unknown[], form: unknown = null) =>
-		show(BuildingPage, { data: { building: building(), apartments: [], fuelStocks }, form } as never);
+	const heatingCategories = [
+		{ id: 'c1', name: 'Heizung' },
+		{ id: 'c3', name: 'Pellets' }
+	];
+	const detail = (fuelStocks: unknown[] | null, form: unknown = null) =>
+		show(BuildingPage, {
+			data: { building: building(), apartments: [], fuelStocks, heatingCategories },
+			form
+		} as never);
+	const section = () => byTestId('fuel-stocks')!.textContent!.replace(/\s+/g, ' ');
 
-	it('listet die Stichtage mit dem Wert in Franken und erklärt, wozu sie dienen', () => {
-		detail([{ id: 'f1', readingDate: '2024-12-31', amount: 2650 }]);
+	it('listet die Stichtage mit Wert und Kategorie und erklärt, wozu sie dienen und wie man bewertet', () => {
+		detail([{ id: 'f1', readingDate: '2024-12-31', amount: 2650, categoryId: 'c1' }]);
 
-		const section = byTestId('fuel-stocks')!;
-		expect(section.textContent).toContain('Heizöl im Tank');
-		expect(section.textContent).toContain('Anfangsbestand + Einkauf − Endbestand');
-		expect(byTestId('fuel-stock-f1')!.textContent).toMatch(/31\.12\.2024.*CHF\s2’650\.00/);
+		expect(section()).toContain('Heizöl oder Pellets im Tank');
+		expect(section()).toContain('Anfangsbestand + Einkauf − Endbestand');
+		expect(section()).toContain('Liter im Tank mal Preis pro Liter der letzten Lieferung');
+		expect(byTestId('fuel-stock-f1')!.textContent).toMatch(/31\.12\.2024.*Heizung.*CHF\s2’650\.00/);
 		expect(byTestId('fuel-stock-delete-f1')!.getAttribute('aria-label')).toBe(
 			'Bestand vom 31.12.2024 löschen'
 		);
 	});
 
-	it('erfasst einen Stichtag mit Datum und Wert', () => {
+	it('erfasst einen Stichtag mit Datum, Wert und Kategorie der Heizkosten', () => {
 		detail([]);
 
 		expect(byTestId<HTMLInputElement>('fuel-stock-date-input')!.name).toBe('readingDate');
 		expect(byTestId<HTMLInputElement>('fuel-stock-amount-input')!.name).toBe('amount');
+		const category = byTestId<HTMLSelectElement>('fuel-stock-category-select')!;
+		expect(category.name).toBe('categoryId');
+		expect([...category.options].map((o) => o.textContent)).toEqual(['Heizung', 'Pellets']);
 		expect(byTestId('fuel-stock-save-button')!.textContent).toContain('Bestand speichern');
 	});
 
 	it('zeigt die Fehler beim Erfassen am Feld', () => {
 		detail([], { fuelStockErrors: { readingDate: 'Bitte geben Sie den Stichtag ein.' } });
 
-		expect(byTestId('fuel-stocks')!.textContent).toContain('Bitte geben Sie den Stichtag ein.');
+		expect(section()).toContain('Bitte geben Sie den Stichtag ein.');
+	});
+
+	it('bestätigt das Speichern', () => {
+		detail([], { fuelStockSaved: true });
+
+		expect(byTestId('fuel-stock-status')!.textContent).toContain('Bestand gespeichert.');
+	});
+
+	it('sagt, wenn die Stichtage nicht geladen werden konnten', () => {
+		detail(null);
+
+		expect(section()).toContain('Die Tankbestände konnten nicht geladen werden. Laden Sie die Seite neu.');
+	});
+
+	it('löscht einen Stichtag erst nach Bestätigung mit der Folge', () => {
+		detail([{ id: 'f1', readingDate: '2024-12-31', amount: 2650, categoryId: 'c1' }]);
+
+		click('fuel-stock-delete-f1');
+
+		const dialog = document.querySelector('[role=dialog]')!;
+		expect(dialog.textContent).toContain('Bestand vom 31.12.2024 löschen?');
+		expect(dialog.textContent!.replace(/\s+/g, ' ')).toContain(
+			'Abrechnungen, die mit diesem Stichtag beginnen oder enden, rechnen dann den Einkauf ab, nicht den Verbrauch.'
+		);
+		expect(byTestId('fuel-stock-delete-confirm')!.textContent).toContain('Bestand löschen');
 	});
 });
 

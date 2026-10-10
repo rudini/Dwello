@@ -53,7 +53,7 @@ const invoice = (overrides = {}) => ({
 	updatedAt: '2024-03-16T10:00:00Z',
 	...overrides
 });
-const text = () => document.body.textContent ?? '';
+const text = () => document.body.textContent?.replace(/\s+/g, ' ') ?? '';
 const button = (label: string) =>
 	[...document.querySelectorAll('button')].find((b) => b.textContent?.includes(label))!;
 
@@ -517,12 +517,34 @@ describe('Rechnung erfassen', () => {
 		expect(byTestId('invoice-period-warning')).toBeNull();
 
 		fireEvent(date, 'input', '2026-10-10');
-		expect(byTestId('invoice-period-warning')!.textContent).toContain(
+		expect(byTestId('invoice-period-warning')!.textContent!.replace(/\s+/g, ' ')).toContain(
 			'Das Rechnungsdatum liegt nicht in der Abrechnungsperiode 1.1.2025 – 31.12.2025'
 		);
 
 		fireEvent(date, 'input', '2025-11-15');
 		expect(byTestId('invoice-period-warning')).toBeNull();
+	});
+
+	it('nennt den Leistungszeitraum als Grund, wenn er ausserhalb der Abrechnungsperiode liegt', () => {
+		show(NewInvoicePage, {
+			data: data(false, { returnTo: '/statements/generate', period: { start: '2025-01-01', end: '2025-12-31' } })
+		} as never);
+		fireEvent(byTestId<HTMLInputElement>('invoice-date-input')!, 'input', '2025-01-15');
+		fireEvent(byTestId<HTMLInputElement>('invoice-service-start-input')!, 'input', '2024-10-01');
+		fireEvent(byTestId<HTMLInputElement>('invoice-service-end-input')!, 'input', '2024-12-31');
+
+		expect(byTestId('invoice-period-warning')!.textContent).toContain(
+			'Der Leistungszeitraum liegt nicht in der Abrechnungsperiode'
+		);
+	});
+
+	// Eine Öllieferung ist Vorrat: ihr Verbrauch zählt über den Tankbestand, nicht über einen Leistungszeitraum
+	it('erklärt, wann ein Leistungszeitraum hingehört und wann nicht', () => {
+		show(NewInvoicePage, { data: data(false) } as never);
+		const help = text();
+
+		expect(help).toContain('Geben Sie ihn bei Rechnungen für einen Zeitraum an, zum Beispiel ein Quartal oder ein Jahr.');
+		expect(help).toContain('Nicht für Heizöl- oder Pelletlieferungen: Deren Verbrauch zählt über den Tankbestand des Gebäudes.');
 	});
 
 	it('warnt ohne Abrechnungsperiode nicht', () => {
@@ -556,6 +578,22 @@ describe('Rechnung bearbeiten', () => {
 		show(EditInvoicePage, {
 			data: { invoice: invoice(overrides), buildings, categories, distributionKeys }
 		} as never);
+
+	it('warnt, wenn die Rechnung schon in Abrechnungen steckt, und nennt die Folge', () => {
+		show(EditInvoicePage, {
+			data: {
+				invoice: invoice(),
+				buildings,
+				categories,
+				distributionKeys,
+				billedIn: [{ start: '2024-01-01', end: '2024-12-31' }]
+			}
+		} as never);
+
+		expect(byTestId('invoice-billed-warning')!.textContent!.replace(/\s+/g, ' ')).toContain(
+			'Für die Abrechnungsperiode 1.1.2024 – 31.12.2024 gibt es schon Abrechnungen mit dieser Rechnung.'
+		);
+	});
 
 	it('zeigt den Betrag mit zwei Nachkommastellen', () => {
 		edit({ amount: 480 });

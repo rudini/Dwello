@@ -51,7 +51,7 @@ export function selectionErrors(selection: WizardSelection, step: number): Recor
 export interface CategoryFinding {
 	categoryId: string | null;
 	categoryName: string;
-	kind: 'missing' | 'gap' | 'new' | 'deviation';
+	kind: 'stock' | 'missing' | 'gap' | 'new' | 'deviation';
 	current: { count: number; total: number };
 	previous: { count: number; total: number };
 	missingParts: { start: string; end: string }[];
@@ -95,12 +95,19 @@ function calendarName({ start, end }: { start: string; end: string }) {
 const partLabel = (slice: { start: string; end: string }) =>
 	calendarName(slice) ?? `die Zeit vom ${formatDate(slice.start)} bis ${formatDate(slice.end)}`;
 
+// TODO(fachlich prüfen): "Tankbestand" is not in the glossary
+const stockText = (missingDays: { start: string }[], consumption: number) =>
+	missingDays.length
+		? `Tankbestand am ${missingDays.map((day) => formatDate(day.start)).join(' und am ')} fehlt. Ohne Anfangs- und Endbestand rechnet Dwello den Einkauf ab, nicht den Verbrauch. Erfassen Sie den Bestand auf der Seite des Gebäudes.`
+		: `Der Endbestand ist ${formatCurrency(-consumption)} höher als Anfangsbestand und Einkauf zusammen, der Verbrauch wäre negativ. Prüfen Sie die Tankbestände.`;
+
 /** One finding of the check per category in plain words, with what to look at */
 export function findingText({ kind, current, previous, missingParts, changePercent }: CategoryFinding): string {
+	if (kind === 'stock') return stockText(missingParts, current.total);
 	if (kind === 'missing')
 		return `Keine Rechnung in dieser Kategorie erfasst. Im Vorjahr: ${invoices(previous.count)} über ${formatCurrency(previous.total)}.`;
 	if (kind === 'new')
-		return `Neu: ${formatCurrency(current.total)}, im Vorjahr keine Kosten. Ist diese Kategorie im Mietvertrag vereinbart? Nur vereinbarte Nebenkosten dürfen Sie abrechnen.`;
+		return `Neu: ${formatCurrency(current.total)}, im Vorjahr keine Kosten. Ist diese Kategorie im Mietvertrag vereinbart? Nur vereinbarte Nebenkosten dürfen Sie abrechnen. Wenn nicht, markieren Sie die Rechnungen als nicht umlagefähig; neue Nebenkosten führen Sie nur mit dem amtlichen Formular für die Zukunft ein.`;
 	if (kind === 'gap') {
 		const parts = missingParts.map(partLabel).join(' und ');
 		const what = missingParts.length === 1 ? `Rechnung für ${parts} fehlt` : `Rechnungen für ${parts} fehlen`;
@@ -123,7 +130,7 @@ export function akontoHint({ totalCosts, totalAdvancePayments, rentalDays, total
 	const amount = formatCurrency(Math.abs(totalCosts - totalAdvancePayments));
 	const percent = Math.round(Math.abs(change) * 100);
 	if (change > AKONTO_ABOVE)
-		return `Kosten ${amount} (${percent} %) über dem Akonto. Prüfen Sie, ob Sie das Akonto erhöhen; eine Erhöhung teilen Sie dem Mieter mit dem amtlichen Formular mit.`;
+		return `Kosten ${amount} (${percent} %) über dem Akonto. Prüfen Sie, ob Sie das Akonto erhöhen. Eine Erhöhung gilt erst auf den nächsten Kündigungstermin: begründet, mit dem amtlichen Formular, beim Mieter mindestens 10 Tage vor Beginn der Kündigungsfrist.`;
 	// part of the period: the months rented may carry little heating, low costs are no sign of missing invoices
 	const wholePeriod = !rentalDays || !totalPeriodDays || rentalDays >= totalPeriodDays;
 	if (change < -AKONTO_BELOW && wholePeriod) return `Kosten ${amount} (${percent} %) unter dem Akonto. Fehlen Rechnungen?`;
@@ -150,7 +157,7 @@ const partly = ({ count, first, last }: Coverage, { periodStart, periodEnd }: Pe
 type Period = { periodStart: string; periodEnd: string };
 
 const lacksInvoices = (check?: InvoiceCheck) =>
-	!!check?.findings.some((f) => f.kind === 'missing' || f.kind === 'gap');
+	!!check?.findings.some((f) => f.kind === 'missing' || f.kind === 'gap' || f.kind === 'stock');
 
 /** No invoices, invoices missing in a category or statements that exist already: going on needs a confirmation */
 export const needsConfirmation = (coverage: Coverage[]) =>

@@ -4436,6 +4436,17 @@ critical/high/medium is open; reviews in `docs/reviews/`.
   Scenarios "Eine Rechnung gilt für ihren Leistungszeitraum …", "Heizöl wird nach Verbrauch abgerechnet …". Tests:
   `service-period.pg.test.ts`, `fuel-stock.pg.test.ts`, `building-actions.test.ts`, `buildings-pages.dom.test.ts`,
   `invoice-pages.dom.test.ts`; demo recalculation in `docs/seed-daten-aenderungen.md`.
+- [x] **B, review round 2** (`docs/reviews/B-review-2.md`): Tankbestand with its heating cost category (migration
+  `0009`, select on the building page), key fallback, reported in the check when a reading day is missing or the
+  consumption is negative (kind `stock`, confirmation in the wizard, link to the building), consumption compared with
+  the year before, validated endpoints (`real-date.ts`), delete with confirmation (`FuelStockList.svelte`); heating
+  share relative to the period's months (`prorating.service.ts`), rounded before the subtotal; Warmwasser by days;
+  Leistungszeitraum rounded and used for the coverage; warning when editing an invoice already in statements
+  (`invoices/[id]/edit`); texts (Akonto increase, new category, meter readings, rate per run, Leistungszeitraum);
+  demo: Alpenblick readings, Fernwärme Q4 with Leistungszeitraum. Tests: `fuel-stock.pg.test.ts`,
+  `heating-distribution.pg.test.ts`, `service-period.pg.test.ts`, `invoice-completeness.test.ts`,
+  `statement-wizard*.test.ts`, `building-actions.test.ts`, `buildings-pages.dom.test.ts`, `invoices.test.ts`,
+  `invoice-pages.dom.test.ts`, `statement-generation.test.ts`, `categories-page.dom.test.ts`.
 
 
 ---

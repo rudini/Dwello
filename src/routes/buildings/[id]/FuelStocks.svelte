@@ -4,48 +4,41 @@
 	import Button from '$lib/ui/Button.svelte';
 	import MoneyInput from '$lib/ui/MoneyInput.svelte';
 	import Panel from '$lib/ui/Panel.svelte';
+	import Select from '$lib/ui/Select.svelte';
 	import TextInput from '$lib/ui/TextInput.svelte';
-	import { formatCurrency, formatDate } from '$lib/utils/format';
 	import type { FuelStock } from './+page.server';
+	import FuelStockList from './FuelStockList.svelte';
 
-	// Heating oil in the tank (Tankbestand): statements take the consumption, not the purchases of the period
+	// Heating oil or pellets in the tank (Tankbestand): statements take the consumption, not the purchases
 	let {
 		stocks,
-		errors = {}
-	}: { stocks: FuelStock[]; errors?: Record<string, string> } = $props();
+		categories,
+		errors = {},
+		saved = false
+	}: {
+		stocks: FuelStock[] | null; // null: could not be loaded
+		categories: { id: string; name: string }[];
+		errors?: Record<string, string>;
+		saved?: boolean;
+	} = $props();
 </script>
 
-<!-- TODO(fachlich prüfen): "Tankbestand" and "Stichtag" are not in the glossary -->
-<Panel title="Heizöl im Tank" testid="fuel-stocks">
+<!-- TODO(fachlich prüfen): "Tankbestand", "Stichtag" and the valuation are not in the glossary -->
+<Panel title="Heizöl oder Pellets im Tank" testid="fuel-stocks">
 	<p class="text-ink-muted">
-		Nur für Gebäude mit Öl- oder Pellettank. Abgerechnet wird, was verbraucht wurde:
-		Anfangsbestand + Einkauf − Endbestand. Erfassen Sie dafür am letzten Tag jeder
-		Abrechnungsperiode, zum Beispiel am 31.12., den Wert des Heizöls im Tank in Franken. Der Wert vom
-		31.12.2024 ist der Endbestand 2024 und der Anfangsbestand 2025.
+		Nur für Gebäude mit Öl- oder Pellettank. Abgerechnet wird, was verbraucht wurde: Anfangsbestand
+		+ Einkauf − Endbestand. Erfassen Sie dafür am letzten Tag jeder Abrechnungsperiode, zum Beispiel
+		am 31.12., den Wert im Tank in Franken. Der Wert vom 31.12.2024 ist der Endbestand 2024 und der
+		Anfangsbestand 2025. Den Wert berechnen Sie so: Liter im Tank mal Preis pro Liter der letzten
+		Lieferung.
 	</p>
 
-	{#if stocks.length}
-		<ul class="flex flex-col divide-y divide-line">
-			{#each stocks as stock (stock.id)}
-				<li
-					class="flex flex-wrap items-center justify-between gap-4 py-2"
-					data-testid="fuel-stock-{stock.id}"
-				>
-					<span class="text-ink">{formatDate(stock.readingDate)}</span>
-					<span class="tabular-nums text-ink">{formatCurrency(stock.amount)}</span>
-					<form method="POST" action="?/deleteFuelStock" use:enhance>
-						<input type="hidden" name="stockId" value={stock.id} />
-						<Button
-							type="submit"
-							variant="danger-ghost"
-							icon="delete"
-							ariaLabel="Bestand vom {formatDate(stock.readingDate)} löschen"
-							testid="fuel-stock-delete-{stock.id}">Löschen</Button
-						>
-					</form>
-				</li>
-			{/each}
-		</ul>
+	{#if stocks === null}
+		<Alert tone="critical" title="Nicht geladen" testid="fuel-stock-load-error">
+			<p>Die Tankbestände konnten nicht geladen werden. Laden Sie die Seite neu.</p>
+		</Alert>
+	{:else if stocks.length}
+		<FuelStockList {stocks} {categories} />
 	{/if}
 
 	<form method="POST" action="?/addFuelStock" use:enhance class="flex flex-col gap-4">
@@ -67,11 +60,25 @@
 				testid="fuel-stock-amount-input"
 			/>
 		</div>
+		<Select
+			id="fuelStockCategory"
+			name="categoryId"
+			label="Kategorie"
+			help="In dieser Kategorie wird der Verbrauch abgerechnet."
+			options={categories.map((c) => ({ value: c.id, label: c.name }))}
+			value={categories[0]?.id ?? ''}
+			testid="fuel-stock-category-select"
+		/>
 		{#if errors.form}
 			<Alert tone="critical" title="Nicht gespeichert" testid="fuel-stock-error">
 				<p>{errors.form}</p>
 			</Alert>
 		{/if}
-		<div><Button type="submit" icon="add" testid="fuel-stock-save-button">Bestand speichern</Button></div>
+		<p role="status" class="text-ink" data-testid="fuel-stock-status">
+			{saved ? 'Bestand gespeichert.' : ''}
+		</p>
+		<div>
+			<Button type="submit" icon="add" testid="fuel-stock-save-button">Bestand speichern</Button>
+		</div>
 	</form>
 </Panel>

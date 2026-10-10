@@ -122,7 +122,7 @@ describe('Rechnungen über die ganze Periode', () => {
 	});
 });
 
-const finding = (kind: 'missing' | 'gap' | 'new' | 'deviation', extra = {}) => ({
+const finding = (kind: 'stock' | 'missing' | 'gap' | 'new' | 'deviation', extra = {}) => ({
 	categoryId: 'c1',
 	categoryName: 'Kaltwasser',
 	kind,
@@ -177,7 +177,20 @@ describe('Rechnungen pro Kategorie', () => {
 	// Nebenkosten dürfen nur abgerechnet werden, wenn sie im Mietvertrag vereinbart sind
 	it('fragt bei einer neuen Kategorie, ob sie im Mietvertrag vereinbart ist', () => {
 		expect(findingText(finding('new', { current: { count: 1, total: 400 }, previous: { count: 0, total: 0 } }))).toBe(
-			'Neu: CHF\u00a0400.00, im Vorjahr keine Kosten. Ist diese Kategorie im Mietvertrag vereinbart? Nur vereinbarte Nebenkosten dürfen Sie abrechnen.'
+			'Neu: CHF\u00a0400.00, im Vorjahr keine Kosten. Ist diese Kategorie im Mietvertrag vereinbart? Nur vereinbarte Nebenkosten dürfen Sie abrechnen. Wenn nicht, markieren Sie die Rechnungen als nicht umlagefähig; neue Nebenkosten führen Sie nur mit dem amtlichen Formular für die Zukunft ein.'
+		);
+	});
+
+	// Ohne Anfangs- und Endbestand rechnet die Abrechnung das Heizöl nach Einkauf statt nach Verbrauch ab
+	it('nennt den fehlenden Tankbestand mit seinem Stichtag und der Folge', () => {
+		expect(findingText(finding('stock', { missingParts: [{ start: '2025-12-31', end: '2025-12-31' }] }))).toBe(
+			'Tankbestand am 31.12.2025 fehlt. Ohne Anfangs- und Endbestand rechnet Dwello den Einkauf ab, nicht den Verbrauch. Erfassen Sie den Bestand auf der Seite des Gebäudes.'
+		);
+	});
+
+	it('meldet einen negativen Verbrauch aus dem Tank', () => {
+		expect(findingText(finding('stock', { current: { count: 1, total: -4900 } }))).toBe(
+			'Der Endbestand ist CHF\u00a04’900.00 höher als Anfangsbestand und Einkauf zusammen, der Verbrauch wäre negativ. Prüfen Sie die Tankbestände.'
 		);
 	});
 
@@ -210,6 +223,7 @@ describe('Bestätigung vor dem Erstellen', () => {
 		expect(needsConfirmation([coverage({ count: 0 })])).toBe(true);
 		expect(needsConfirmation([coverage({ statements: 1 })])).toBe(true);
 		expect(needsConfirmation([coverage({ check: check([finding('gap')]) })])).toBe(true);
+		expect(needsConfirmation([coverage({ check: check([finding('stock')]) })])).toBe(true);
 	});
 
 	it('verlangt sie nicht für Hinweise auf neue Kategorien oder Abweichungen', () => {
@@ -232,7 +246,7 @@ describe('Abweichung zum Akonto', () => {
 	// Ein höheres Akonto ist eine Vertragsänderung: der Mieter erfährt sie mit dem amtlichen Formular
 	it('schlägt schon ab 15 % darüber vor, das Akonto zu erhöhen, mit dem amtlichen Formular', () => {
 		expect(akontoHint(row(2800, 2400))).toBe(
-			'Kosten CHF\u00a0400.00 (17 %) über dem Akonto. Prüfen Sie, ob Sie das Akonto erhöhen; eine Erhöhung teilen Sie dem Mieter mit dem amtlichen Formular mit.'
+			'Kosten CHF\u00a0400.00 (17 %) über dem Akonto. Prüfen Sie, ob Sie das Akonto erhöhen. Eine Erhöhung gilt erst auf den nächsten Kündigungstermin: begründet, mit dem amtlichen Formular, beim Mieter mindestens 10 Tage vor Beginn der Kündigungsfrist.'
 		);
 	});
 

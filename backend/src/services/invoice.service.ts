@@ -17,6 +17,7 @@ import { categorizeInvoice, recategorizeInvoice } from './llm.service';
 import { validateInvoiceForUtilityStatement } from './utility-validation.service';
 import { buildingExists } from './building.service';
 import { getCategory } from './category.service';
+import { roundToRappen } from './pdf-format';
 
 export interface InvoiceFilters {
 	search?: string;
@@ -40,7 +41,7 @@ export interface InvoiceWithDetails extends Invoice {
 /**
  * Invoices with their building, category and distribution key (names in English and German)
  */
-export function selectWithDetails() {
+function selectWithDetails() {
 	return db
 		.select({
 			invoice: invoices,
@@ -425,7 +426,7 @@ function inPeriod(
 	if (!invoice.servicePeriodStart || !invoice.servicePeriodEnd) return { start: periodStart, end: periodEnd, amount };
 	const start = invoice.servicePeriodStart > periodStart ? invoice.servicePeriodStart : periodStart;
 	const end = invoice.servicePeriodEnd < periodEnd ? invoice.servicePeriodEnd : periodEnd;
-	return { start, end, amount: (amount * daysFrom(start, end)) / daysFrom(invoice.servicePeriodStart, invoice.servicePeriodEnd) };
+	return { start, end, amount: roundToRappen((amount * daysFrom(start, end)) / daysFrom(invoice.servicePeriodStart, invoice.servicePeriodEnd)) };
 }
 
 /**
