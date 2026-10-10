@@ -44,3 +44,23 @@ class TddStepTest(unittest.TestCase):
         self.assertEqual(result.returncode, 1, result.stderr)
         self.assertIn("red needs a failing assertion", result.stderr)
         self.assertEqual(repo.subject(), "init")
+
+    def test_red_is_refused_when_the_failure_is_a_syntax_error(self):
+        repo = Repo(self, {"calc.py": WRONG_ADD})
+        repo.write("test_calc.py", ADD_TEST + "\n    def broken(:\n")
+
+        result = repo.run("tdd-step", "red", "adds two numbers")
+
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn("red needs a failing assertion", result.stderr)
+        self.assertEqual(repo.subject(), "init")
+
+    def test_red_is_refused_when_a_test_raises_a_non_assertion_exception(self):
+        repo = Repo(self, {"calc.py": "def add(a):\n    return a\n"})
+        repo.write("test_calc.py", ADD_TEST)
+
+        result = repo.run("tdd-step", "red", "adds two numbers")
+
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn("red needs a failing assertion", result.stderr)
+        self.assertEqual(repo.subject(), "init")
