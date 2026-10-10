@@ -24,6 +24,8 @@ export interface BuildingWithStats extends Building {
 	apartmentCount: number;
 	occupiedCount: number;
 	vacantCount: number;
+	reletCount?: number; // counted in the BFF: the backend counts only occupied and vacant
+	reservedCount?: number;
 }
 
 // Buildings list response
@@ -47,6 +49,7 @@ export interface Apartment {
 	area: string | number; // decimal from DB
 	rooms: string | number; // decimal from DB (e.g., 3.5)
 	status: ApartmentStatus;
+	nextContractStart?: string | null;
 	createdAt?: Date | string;
 	updatedAt?: Date | string;
 }

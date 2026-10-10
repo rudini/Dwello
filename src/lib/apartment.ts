@@ -36,6 +36,24 @@ export const statusHelp: Record<ApartmentStatus, string> = {
 	reserved: 'Sie haben die Wohnung von Hand gesperrt, zum Beispiel während einer Renovation.'
 };
 
+/** A building's apartments per Mietstatus so that they add up; relet and reserved only when there are any */
+export function occupancyParts(b: {
+	occupiedCount: number;
+	reletCount?: number;
+	vacantCount: number;
+	reservedCount?: number;
+}) {
+	const parts = [`${b.occupiedCount} vermietet`];
+	if (b.reletCount) parts.push(`${b.reletCount} wiedervermietet`);
+	parts.push(`${b.vacantCount} leer`);
+	if (b.reservedCount) parts.push(`${b.reservedCount} gesperrt`);
+	return parts;
+}
+
+/** How many of the apartments have a Mietstatus */
+export const countStatus = (apartments: { status: string }[], status: ApartmentStatus) =>
+	apartments.filter((a) => a.status === status).length;
+
 /** Status with the day a relet apartment's next tenant moves in */
 export const statusText = (a: { status: ApartmentStatus; nextContractStart?: string | null }) =>
 	a.status === 'relet' && a.nextContractStart
