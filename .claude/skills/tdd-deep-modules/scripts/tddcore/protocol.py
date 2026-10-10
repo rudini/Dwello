@@ -19,13 +19,18 @@ def phase_of(subject):
 CODE_SUFFIXES = {".py", ".js", ".jsx", ".mjs", ".cjs", ".ts", ".tsx", ".mts", ".cts", ".svelte", ".vue"}
 
 
+TEST_DIRS = {"tests", "test", "__tests__"}
+
+
 def is_production(path):
-    return _is_code(path) and not _is_test(PurePosixPath(path).name)
+    return _is_code(path) and not _is_test(PurePosixPath(path))
 
 
-def _is_test(name):
+def _is_test(path):
+    name = path.name
     return (name.startswith("test_") or name.endswith("_test.py")
-            or ".test." in name or ".spec." in name)
+            or ".test." in name or ".spec." in name
+            or not TEST_DIRS.isdisjoint(path.parts[:-1]))
 
 
 def violations(previous, phase, run, changed):
