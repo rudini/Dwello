@@ -2,20 +2,14 @@
 """tdd-step <test|red|green|refactor> [message]: run the tests, then commit the phase."""
 import subprocess
 import sys
-from pathlib import PurePosixPath
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from tddcore import protocol, suite  # noqa: E402
 
 
 def git(*args):
     return subprocess.run(["git", *args], check=True, capture_output=True, text=True).stdout
-
-
-def is_code(path):
-    return path.endswith(".py")
-
-
-def is_production(path):
-    name = PurePosixPath(path).name
-    return is_code(path) and not (name.startswith("test_") or name.endswith("_test.py"))
 
 
 def changed_files():
@@ -23,45 +17,25 @@ def changed_files():
     return sorted(tracked + git("ls-files", "--others", "--exclude-standard").splitlines())
 
 
-# Phase -> phases it may follow. A red cycle must close with green before anything else.
-FOLLOWS = {
-    "test": {"start", "test", "green", "refactor"},
-    "red": {"start", "test", "green", "refactor"},
-    "green": {"red"},
-    "refactor": {"green", "refactor"},
-}
+def main(args):
+    if not args or args[0] not in protocol.FOLLOWS:
+        print("usage: tdd-step <test|red|green|refactor> [message]", file=sys.stderr)
+        return 2
+    phase, message = args[0], " ".join(args[1:]) or args[0]
+    try:
+        run = suite.run(".")
+    except suite.NoFramework as error:
+        print(f"tdd-step: {error}", file=sys.stderr)
+        return 2
+    previous = protocol.phase_of(git("log", "-1", "--format=%s"))
+    found = protocol.violations(previous, phase, run, changed_files())
+    if found:
+        print("\n".join(f"tdd-step: refused: {v}" for v in found), file=sys.stderr)
+        return 1
+    git("add", "-A")
+    git("commit", "-q", "-m", f"{phase}: {message}",
+        "--trailer", f"TDD-Phase: {phase}", "--trailer", f"TDD-Exit-Code: {run.exit_code}")
+    return 0
 
 
-def last_phase():
-    prefix = git("log", "-1", "--format=%s").partition(":")[0]
-    return prefix if prefix in ("test", "red", "green", "refactor") else "start"
-
-
-if len(sys.argv) < 2 or sys.argv[1] not in FOLLOWS:
-    print("usage: tdd-step <test|red|green|refactor> [message]", file=sys.stderr)
-    sys.exit(2)
-phase = sys.argv[1]
-previous = last_phase()
-if previous not in FOLLOWS[phase]:
-    sys.exit(f"tdd-step: refused: {phase} cannot follow {previous}")
-message = sys.argv[2] if len(sys.argv) > 2 else phase
-if not any(is_code(f) for f in git("ls-files", "-co", "--exclude-standard").splitlines()):
-    print("tdd-step: no supported test framework detected (looked for Python unittest)", file=sys.stderr)
-    sys.exit(2)
-run = subprocess.run([sys.executable, "-m", "unittest", "discover"], capture_output=True, text=True)
-summary = run.stderr.strip().splitlines()[-1]
-assertion_failure = summary.startswith("FAILED (failures=") and "errors=" not in summary
-if phase == "red" and not assertion_failure:
-    sys.exit(f"tdd-step: refused: red needs a failing assertion, but the suite says: {summary}")
-if phase in ("green", "refactor") and run.returncode != 0:
-    sys.exit(f"tdd-step: refused: {phase} needs all tests passing, but the suite says: {summary}")
-code = [f for f in changed_files() if is_code(f)]
-if phase == "test" and code:
-    sys.exit(f"tdd-step: refused: test phase may only change the test list, not code: {', '.join(code)}")
-production = [f for f in changed_files() if is_production(f)]
-if phase == "red" and production:
-    sys.exit(f"tdd-step: refused: production code changed: {', '.join(production)}")
-git("add", "-A")
-git("commit", "-q", "-m", f"{phase}: {message}",
-    "--trailer", f"TDD-Phase: {phase}",
-    "--trailer", f"TDD-Exit-Code: {run.returncode}")
+sys.exit(main(sys.argv[1:]))
