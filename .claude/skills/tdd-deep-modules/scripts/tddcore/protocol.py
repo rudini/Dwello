@@ -30,6 +30,7 @@ def _is_test(path):
     name = path.name
     return (name.startswith("test_") or name.endswith("_test.py")
             or ".test." in name or ".spec." in name
+            or name == "conftest.py" or name.startswith("vitest.config.")
             or not _TEST_DIRS.isdisjoint(path.parts[:-1]))
 
 
