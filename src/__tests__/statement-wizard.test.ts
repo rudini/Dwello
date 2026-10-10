@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
 	akontoHint,
 	findingText,
+	needsConfirmation,
 	invoiceRows,
 	restoredSelection,
 	selectionErrors,
@@ -121,7 +122,7 @@ describe('Rechnungen über die ganze Periode', () => {
 	});
 });
 
-const finding = (kind: 'missing' | 'gap' | 'deviation', extra = {}) => ({
+const finding = (kind: 'missing' | 'gap' | 'new' | 'deviation', extra = {}) => ({
 	categoryId: 'c1',
 	categoryName: 'Kaltwasser',
 	kind,
@@ -141,31 +142,51 @@ const check = (findings: ReturnType<typeof finding>[], hasComparison = true) => 
 describe('Rechnungen pro Kategorie', () => {
 	it('beschreibt eine Kategorie ohne Rechnung mit den Kosten des Vorjahres', () => {
 		expect(findingText(finding('missing', { current: { count: 0, total: 0 }, previous: { count: 1, total: 290 } }))).toBe(
-			'Keine Rechnung erfasst. Im Vorjahr: 1 Rechnung über CHF\u00a0290.00.'
+			'Keine Rechnung in dieser Kategorie erfasst. Im Vorjahr: 1 Rechnung über CHF\u00a0290.00.'
 		);
 	});
 
 	it('nennt den Teil des Jahres, für den die Rechnung fehlt', () => {
-		expect(findingText(finding('gap', { missingParts: ['das 2. Halbjahr'] }))).toBe(
+		const part = (start: string, end: string) => ({ start, end });
+		expect(findingText(finding('gap', { missingParts: [part('2025-07-01', '2025-12-31')] }))).toBe(
 			'Rechnung für das 2. Halbjahr fehlt. Im Vorjahr: 2 Rechnungen.'
 		);
-		expect(findingText(finding('gap', { missingParts: ['das 1. Quartal', 'das 3. Quartal'], previous: { count: 4, total: 3600 } }))).toBe(
-			'Rechnungen für das 1. Quartal und das 3. Quartal fehlen. Im Vorjahr: 4 Rechnungen.'
+		expect(
+			findingText(
+				finding('gap', {
+					missingParts: [part('2025-01-01', '2025-03-31'), part('2025-07-01', '2025-09-30')],
+					previous: { count: 4, total: 3600 }
+				})
+			)
+		).toBe('Rechnungen für das 1. Quartal und das 3. Quartal fehlen. Im Vorjahr: 4 Rechnungen.');
+		expect(findingText(finding('gap', { missingParts: [part('2025-03-01', '2025-03-31')] }))).toContain('für den März fehlt');
+		expect(findingText(finding('gap', { missingParts: [part('2026-01-14', '2026-07-15')] }))).toContain(
+			'für die Zeit vom 14.1.2026 bis 15.7.2026 fehlt'
 		);
 	});
 
 	it('nennt Kosten, die deutlich vom Vorjahr abweichen, mit dem nächsten Schritt', () => {
 		expect(
 			findingText(finding('deviation', { current: { count: 1, total: 6565 }, previous: { count: 1, total: 4800 }, changePercent: 37 }))
-		).toBe('CHF\u00a06’565.00, 37 % mehr als im Vorjahr (CHF\u00a04’800.00). Prüfen Sie Betrag und Rechnungsdatum.');
+		).toBe(
+			'CHF\u00a06’565.00, 37 % mehr als im Vorjahr (CHF\u00a04’800.00). Prüfen Sie den Betrag und den Zeitraum, für den die Rechnung gilt.'
+		);
 		expect(findingText(finding('deviation', { changePercent: -40 }))).toContain('40 % weniger als im Vorjahr');
+	});
+
+	// Nebenkosten dürfen nur abgerechnet werden, wenn sie im Mietvertrag vereinbart sind
+	it('fragt bei einer neuen Kategorie, ob sie im Mietvertrag vereinbart ist', () => {
+		expect(findingText(finding('new', { current: { count: 1, total: 400 }, previous: { count: 0, total: 0 } }))).toBe(
+			'Neu: CHF\u00a0400.00, im Vorjahr keine Kosten. Ist diese Kategorie im Mietvertrag vereinbart? Nur vereinbarte Nebenkosten dürfen Sie abrechnen.'
+		);
 	});
 
 	it('verlangt eine Bestätigung bei fehlenden Rechnungen, nicht bei einer Abweichung', () => {
 		const row = (findings: ReturnType<typeof finding>[]) =>
 			invoiceRows([{ buildingId: 'b1', count: 3, first: '2024-01-01', last: '2024-12-31', check: check(findings) }], buildings, period)[0];
 
-		expect(row([finding('gap', { missingParts: ['das 2. Halbjahr'] })]).incomplete).toBe(true);
+		expect(row([finding('gap', { missingParts: [{ start: '2025-07-01', end: '2025-12-31' }] })]).incomplete).toBe(true);
+		expect(row([finding('new')]).incomplete).toBe(false);
 		expect(row([finding('missing')]).incomplete).toBe(true);
 		expect(row([finding('deviation', { changePercent: 30 })]).incomplete).toBe(false);
 		expect(row([]).comparedWith).toEqual({ start: '2023-01-01', end: '2023-12-31' });
@@ -182,26 +203,49 @@ describe('Rechnungen pro Kategorie', () => {
 	});
 });
 
-describe('Abweichung zum Akonto', () => {
-	const row = (totalCosts: number, totalAdvancePayments: number) => ({ totalCosts, totalAdvancePayments });
+describe('Bestätigung vor dem Erstellen', () => {
+	const coverage = (extra = {}) => ({ buildingId: 'b1', count: 3, first: '2024-01-01', last: '2024-12-31', ...extra });
 
-	it('fragt nach fehlenden Rechnungen, wenn die Kosten weit unter dem Akonto liegen', () => {
-		expect(akontoHint(row(1000, 2400))).toBe('Kosten 58 % unter dem Akonto. Fehlen Rechnungen?');
+	it('verlangt sie ohne Rechnungen, bei bestehenden Abrechnungen und bei fehlenden Rechnungen einer Kategorie', () => {
+		expect(needsConfirmation([coverage({ count: 0 })])).toBe(true);
+		expect(needsConfirmation([coverage({ statements: 1 })])).toBe(true);
+		expect(needsConfirmation([coverage({ check: check([finding('gap')]) })])).toBe(true);
 	});
 
-	it('schlägt vor, das Akonto zu prüfen, wenn die Kosten weit darüber liegen', () => {
-		expect(akontoHint(row(3500, 2400))).toBe('Kosten 46 % über dem Akonto. Prüfen Sie, ob das Akonto angepasst werden soll.');
+	it('verlangt sie nicht für Hinweise auf neue Kategorien oder Abweichungen', () => {
+		expect(needsConfirmation([coverage({ check: check([finding('new'), finding('deviation')]) })])).toBe(false);
+	});
+});
+
+describe('Abweichung zum Akonto', () => {
+	const row = (totalCosts: number, totalAdvancePayments: number, rentalDays = 365) => ({
+		totalCosts,
+		totalAdvancePayments,
+		rentalDays,
+		totalPeriodDays: 365
+	});
+
+	it('fragt nach fehlenden Rechnungen, wenn die Kosten weit unter dem Akonto liegen', () => {
+		expect(akontoHint(row(1000, 2400))).toBe('Kosten CHF\u00a01’400.00 (58 %) unter dem Akonto. Fehlen Rechnungen?');
+	});
+
+	// Ein höheres Akonto ist eine Vertragsänderung: der Mieter erfährt sie mit dem amtlichen Formular
+	it('schlägt schon ab 15 % darüber vor, das Akonto zu erhöhen, mit dem amtlichen Formular', () => {
+		expect(akontoHint(row(2800, 2400))).toBe(
+			'Kosten CHF\u00a0400.00 (17 %) über dem Akonto. Prüfen Sie, ob Sie das Akonto erhöhen; eine Erhöhung teilen Sie dem Mieter mit dem amtlichen Formular mit.'
+		);
 	});
 
 	it('schweigt bei üblichen Abweichungen und ohne Akonto', () => {
-		expect(akontoHint(row(2600, 2400))).toBeNull();
+		expect(akontoHint(row(2700, 2400))).toBeNull(); // 12.5 % darüber
 		expect(akontoHint(row(1700, 2400))).toBeNull(); // 29 % darunter
 		expect(akontoHint(row(500, 0))).toBeNull();
 	});
 
-	// Randfall Mieterwechsel: das Akonto zählt nur für die Mietstage, so wie die Kosten
-	it('vergleicht beim Mieterwechsel die Kosten mit dem Akonto der eigenen Mietdauer', () => {
-		expect(akontoHint(row(1455.11, 1320))).toBeNull(); // Jan–Jun: 6 × 220
+	// Randfall Mieterwechsel und Teilperiode: wer nur im Sommer mietet, trägt kaum Heizkosten
+	it('fragt bei einem Teil der Periode nicht nach fehlenden Rechnungen', () => {
+		expect(akontoHint(row(400, 1200, 92))).toBeNull();
+		expect(akontoHint(row(1600, 1200, 92))).toContain('über dem Akonto');
 	});
 });
 

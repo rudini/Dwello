@@ -47,7 +47,7 @@ describe('Prüfung auf fehlende Rechnungen pro Kategorie', () => {
 			hasComparison: true,
 			findings: [
 				{ categoryName: 'Kaminfeger', kind: 'missing', previous: { count: 1, total: 290 } },
-				{ categoryName: 'Kaltwasser', kind: 'gap', missingParts: ['das 2. Halbjahr'], current: { count: 1, total: 470 } }
+				{ categoryName: 'Kaltwasser', kind: 'gap', missingParts: [{ start: '2025-07-01', end: '2025-12-31' }], current: { count: 1, total: 470 } }
 			]
 		});
 		expect(body.findings).toHaveLength(2);
@@ -62,5 +62,6 @@ describe('Prüfung auf fehlende Rechnungen pro Kategorie', () => {
 	it('verlangt eine gültige Abrechnungsperiode', async () => {
 		expect((await check('periodStart=2025-01-01')).status).toBe(422);
 		expect((await check('periodStart=2025-12-31&periodEnd=2025-01-01')).status).toBe(400);
+		expect((await check('periodStart=2025-02-30&periodEnd=2025-12-31')).status).toBe(400);
 	});
 });

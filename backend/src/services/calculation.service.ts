@@ -23,6 +23,7 @@ import {
 } from './prorating.service';
 import { getApartment, listApartments } from './apartment.service';
 import { getContract } from './contract.service';
+import { roundToRappen } from './pdf-format';
 
 /**
  * Line item for statement
@@ -122,7 +123,7 @@ async function calculateApartmentShare(
 	if (!distributionKeyId) {
 		const equalShare = totalAmount / buildingApartments.length;
 		return {
-			share: Math.round(equalShare * 100) / 100,
+			share: roundToRappen(equalShare),
 			percentage: 1 / buildingApartments.length
 		};
 	}
@@ -137,7 +138,7 @@ async function calculateApartmentShare(
 		// Fallback to equal distribution
 		const equalShare = totalAmount / buildingApartments.length;
 		return {
-			share: Math.round(equalShare * 100) / 100,
+			share: roundToRappen(equalShare),
 			percentage: 1 / buildingApartments.length
 		};
 	}
@@ -149,7 +150,7 @@ async function calculateApartmentShare(
 	}
 
 	return {
-		share: Math.round(apartmentDist.amount * 100) / 100,
+		share: roundToRappen(apartmentDist.amount),
 		percentage: apartmentDist.share
 	};
 }
@@ -161,7 +162,7 @@ export function calculateManagementFee(
 	totalCosts: number,
 	feePercentage: number
 ): { fee: number; actualPercentage: number } {
-	const fee = Math.round((totalCosts * feePercentage) / 100 * 100) / 100;
+	const fee = roundToRappen((totalCosts * feePercentage) / 100);
 
 	return { fee, actualPercentage: feePercentage };
 }
@@ -187,14 +188,14 @@ export function calculateTotalAdvancePayments(
 		cursor.setUTCMonth(month + 1);
 	}
 
-	return Math.round(months * monthlyAdvancePayment * 100) / 100;
+	return roundToRappen(months * monthlyAdvancePayment);
 }
 
 /**
  * Calculate balance (tenant owes vs. refund)
  */
 export function calculateBalance(totalCosts: number, totalAdvancePayments: number): number {
-	return Math.round((totalCosts - totalAdvancePayments) * 100) / 100;
+	return roundToRappen(totalCosts - totalAdvancePayments);
 }
 
 /**
@@ -303,7 +304,7 @@ export async function calculateStatementForContract(
 			description: group.categoryName,
 			totalBuildingAmount: group.totalAmount,
 			apartmentShare: apartmentShareResult.share,
-			tenantShare: Math.round(tenantShare * 100) / 100,
+			tenantShare: roundToRappen(tenantShare),
 			periodShare: Math.round(periodShare * 10000) / 10000,
 			isHeatingCost: group.isHeatingCost
 		});
@@ -311,7 +312,7 @@ export async function calculateStatementForContract(
 		subtotal += tenantShare;
 	}
 
-	subtotal = Math.round(subtotal * 100) / 100;
+	subtotal = roundToRappen(subtotal);
 
 	// Management fee: a percentage (chosen per generation run, otherwise the configured default) of the building's
 	// utility costs, distributed to the apartments by its distribution key (none: equally) and to the tenant by days
@@ -325,7 +326,7 @@ export async function calculateStatementForContract(
 		managementFeeDistributionKeyId ?? null
 	);
 	const managementFee = prorateCosts(apartmentFee.share, rentalDays, totalPeriodDays).proratedAmount;
-	const totalCosts = Math.round((subtotal + managementFee) * 100) / 100;
+	const totalCosts = roundToRappen(subtotal + managementFee);
 
 	// Calculate total advance payments
 	const monthlyAdvance = parseFloat(contract.monthlyAdvancePayment);

@@ -23,7 +23,11 @@
 </script>
 
 <!-- TODO(fachlich prüfen): a hint against the year before; a supplier may bill differently -->
-<Alert tone="caution" title="Möglicherweise fehlen Rechnungen" testid="category-check">
+<Alert
+	tone="caution"
+	title={confirm ? 'Möglicherweise fehlen Rechnungen' : 'Kosten im Vergleich zum Vorjahr'}
+	testid="category-check"
+>
 	<div id="category-check-text" class="flex flex-col gap-2">
 		<p>
 			Dwello vergleicht jede Kategorie mit dem gleichen Zeitraum im Vorjahr{comparedText}. Ein
@@ -31,8 +35,8 @@
 			Lieferant rechnet anders ab.
 		</p>
 		{#each checked as row (row.buildingId)}
-			<p class="font-semibold">{row.name}</p>
-			<ul class="flex list-disc flex-col gap-1 pl-6">
+			<p class="font-semibold" aria-hidden="true">{row.name}</p>
+			<ul class="flex list-disc flex-col gap-2 pl-6" aria-label={row.name}>
 				{#each row.findings as finding (finding.categoryId ?? finding.categoryName)}
 					<li data-testid="category-finding">
 						<span class="font-semibold">{finding.categoryName}:</span>
@@ -42,6 +46,10 @@
 			</ul>
 		{/each}
 		{#if confirm}
+			<p>
+				Fehlt eine Rechnung, fehlen ihre Kosten in jeder Abrechnung des Gebäudes. Später können Sie
+				sie nur mit einer berichtigten Abrechnung nachverlangen.
+			</p>
 			<p>Erfassen Sie fehlende Rechnungen – oder bestätigen Sie unten, dass alles stimmt.</p>
 		{/if}
 	</div>

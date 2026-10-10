@@ -87,6 +87,7 @@
 		<!-- a list instead of a table: readable on phones without scrolling sideways -->
 		<ul class="flex flex-col divide-y divide-line">
 			{#each previewRows as row (row.contractId)}
+				{@const hint = akontoHint(row)}
 				<li
 					class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 py-2"
 					data-testid="preview-row"
@@ -98,9 +99,9 @@
 					<span class="flex flex-col text-right tabular-nums">
 						<span class="text-ink">Kosten {formatCurrency(row.totalCosts)}</span>
 						<span class="font-semibold text-ink">{saldo(row.balance)}</span>
-						{#if akontoHint(row)}
+						{#if hint}
 							<span class="flex items-center justify-end gap-2 text-caution" data-testid="preview-akonto-hint">
-								<Icon name="warning" />{akontoHint(row)}
+								<Icon name="warning" />{hint}
 							</span>
 						{/if}
 					</span>

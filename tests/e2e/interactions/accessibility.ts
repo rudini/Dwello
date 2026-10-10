@@ -45,6 +45,7 @@ export async function seedFor(seed: TestData, path: string, state: string) {
 	await seed.contract('Carla', '1.04', { startDate: '2015-01-01', endDate: '2099-12-31', baseRent: '1400.00' });
 	await seed.heatingProfile('Standard', [18, 16, 13, 8, 4, 1, 0, 0, 3, 9, 13, 15]);
 	await seed.heatingInvoice('Seeblick', '3600.00', 2025);
+	await seed.invoiceOn('Seeblick', 'Hauswart', '300.00', '2025-01-31'); // 2025 recorded from its start: a year to compare 2026 with
 	await seed.supplierInvoice('Hauswart Huber', 'Seeblick', '450.00', 'Treppenhausreinigung Q1', 'Hauswart');
 	await seed.statement('Anna', 'Seeblick', 2025, 'Standard');
 	await seed.statement('Bruno', 'Seeblick', 2025, 'Standard');

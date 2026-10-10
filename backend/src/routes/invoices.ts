@@ -157,9 +157,11 @@ export const invoiceRoutes = new Elysia({ prefix: '/api/v1/invoices' })
 	.get(
 		'/completeness/:buildingId',
 		async ({ params, query, set }) => {
-			if (query.periodEnd < query.periodStart) {
+			// The format allows 2025-02-30; a date that rolls over to another day does not exist
+			const exists = (date: string) => new Date(`${date}T00:00:00Z`).toISOString().startsWith(date);
+			if (!exists(query.periodStart) || !exists(query.periodEnd) || query.periodEnd < query.periodStart) {
 				set.status = 400;
-				return { error: 'periodEnd must not be before periodStart' };
+				return { error: 'periodStart and periodEnd must be existing dates, the end not before the start' };
 			}
 			return await checkBuildingInvoices(params.buildingId, { start: query.periodStart, end: query.periodEnd });
 		},

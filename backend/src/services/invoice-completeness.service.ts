@@ -4,10 +4,9 @@
  * for the property manager, not a rule: a supplier may bill differently from one year to the next.
  */
 
-import { and, eq, gte, lte } from 'drizzle-orm';
+import { and, eq, gte, lte, min } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { categories, invoices } from '../db/schema';
-import { formatSwissDate } from './pdf-format';
 
 export interface Period {
 	start: string;
@@ -26,19 +25,20 @@ type Sum = { count: number; total: number };
 export interface CategoryFinding {
 	categoryId: string | null;
 	categoryName: string;
-	// missing: no invoice although the year before had costs; gap: a part of the rhythm has none; deviation: costs differ a lot
-	kind: 'missing' | 'gap' | 'deviation';
+	// missing: no invoice although the year before had costs; gap: a part of the rhythm has none;
+	// new: costs the year before did not have (agreed in the lease?); deviation: costs differ a lot
+	kind: 'missing' | 'gap' | 'new' | 'deviation';
 	current: Sum;
 	previous: Sum;
-	missingParts: string[]; // the slices of the rhythm without invoice (gap), otherwise empty
+	missingParts: Period[]; // the slices of the rhythm without invoice (gap), otherwise empty
 	changePercent: number | null; // change of the costs against the year before (deviation), otherwise null
 }
 
 // TODO(fachlich prüfen): a change of more than 25 % and at least CHF 100 against the year before is worth a look
 const DEVIATION_SHARE = 0.25;
 const DEVIATION_MINIMUM = 100;
-
-const MONTHS = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+// TODO(fachlich prüfen): the year before counts as recorded when the building's first invoice lies in its first three months
+const RECORDED_FROM_START_DAYS = 92;
 
 const toDate = (iso: string) => new Date(`${iso.slice(0, 10)}T00:00:00Z`);
 const toIso = (date: Date) => date.toISOString().slice(0, 10);
@@ -83,51 +83,45 @@ function slices(period: Period, parts: number): Period[] {
 
 const sliceOf = (date: string, parts: Period[]) => parts.findIndex((part) => part.start <= date && date <= part.end);
 
-// "den März", "das 3. Quartal", "das 2. Halbjahr" for calendar slices, otherwise the dates
-function label({ start, end }: Period): string {
-	const months = wholeMonths({ start, end });
-	const month = toDate(start).getUTCMonth();
-	if (months === 1) return `den ${MONTHS[month]}`;
-	if (months === 3 && month % 3 === 0) return `das ${month / 3 + 1}. Quartal`;
-	if (months === 6 && month % 6 === 0) return `das ${month / 6 + 1}. Halbjahr`;
-	return `die Zeit vom ${formatSwissDate(start)} bis ${formatSwissDate(end)}`;
-}
-
 const sum = (list: CategoryInvoice[]): Sum => ({
 	count: list.length,
 	total: Math.round(list.reduce((total, invoice) => total + invoice.amount, 0) * 100) / 100
 });
 
+// Invoices per category; without a category it cannot be said which invoice is missing
 function groupByCategory(list: CategoryInvoice[]) {
 	const groups = new Map<string, CategoryInvoice[]>();
 	for (const invoice of list) {
-		const key = invoice.categoryId ?? 'none';
-		groups.set(key, [...(groups.get(key) ?? []), invoice]);
+		if (invoice.categoryId) groups.set(invoice.categoryId, [...(groups.get(invoice.categoryId) ?? []), invoice]);
 	}
 	return groups;
 }
 
-// The rhythm of the year before (one slice per invoice, at most one per month) and the slices without invoice now
+// The rhythm of the year before (one slice per invoice, at most one per month) and the slices without invoice now;
+// a credit note is no part of the rhythm, and as many invoices as the year before are complete however they are dated
 function missingParts(current: CategoryInvoice[], previous: CategoryInvoice[], period: Period, before: Period) {
+	const bills = (list: CategoryInvoice[]) => list.filter((invoice) => invoice.amount >= 0);
+	[current, previous] = [bills(current), bills(previous)];
 	const parts = Math.min(previous.length, 12);
-	if (parts < 2) return [];
+	if (parts < 2 || current.length >= previous.length) return [];
 	const now = slices(period, parts);
 	const then = slices(before, parts);
 	const billedThen = new Set(previous.map((invoice) => sliceOf(invoice.invoiceDate, then)));
 	const billedNow = new Set(current.map((invoice) => sliceOf(invoice.invoiceDate, now)));
-	return now.filter((_, k) => billedThen.has(k) && !billedNow.has(k)).map(label);
+	return now.filter((_, k) => billedThen.has(k) && !billedNow.has(k));
 }
 
 function findingOf(current: CategoryInvoice[], previous: CategoryInvoice[], period: Period): CategoryFinding | null {
-	const sample = previous[0];
+	const sample = previous[0] ?? current[0];
 	const base = {
 		categoryId: sample.categoryId,
 		categoryName: sample.categoryName,
 		current: sum(current),
 		previous: sum(previous),
-		missingParts: [] as string[],
+		missingParts: [] as Period[],
 		changePercent: null
 	};
+	if (previous.length === 0) return base.current.total === 0 ? null : { ...base, kind: 'new' };
 	if (base.previous.total === 0) return null;
 	if (current.length === 0) return { ...base, kind: 'missing' };
 	const parts = missingParts(current, previous, period, yearBefore(period));
@@ -139,16 +133,30 @@ function findingOf(current: CategoryInvoice[], previous: CategoryInvoice[], peri
 	return null;
 }
 
-const ORDER = { missing: 0, gap: 1, deviation: 2 };
+const ORDER = { missing: 0, gap: 1, new: 2, deviation: 3 };
 
-/** Findings per category of the period against the same dates one year earlier; most serious first */
-export function checkCategories(current: CategoryInvoice[], previous: CategoryInvoice[], period: Period) {
+/**
+ * Findings per category of the period against the same dates one year earlier; most serious first.
+ * firstInvoiceDate: the building's first invoice in Dwello; a year before recorded only in part is not compared.
+ */
+export function checkCategories(
+	current: CategoryInvoice[],
+	previous: CategoryInvoice[],
+	period: Period,
+	firstInvoiceDate?: string
+) {
+	const before = yearBefore(period);
+	// A period over a year would overlap the same dates one year earlier
+	const overAYear = period.end >= toIso(new Date(toDate(period.start).setUTCFullYear(toDate(period.start).getUTCFullYear() + 1)));
+	const partlyRecorded = !!firstInvoiceDate && firstInvoiceDate > addDays(before.start, RECORDED_FROM_START_DAYS);
+	if (overAYear || partlyRecorded || previous.length === 0) return { hasComparison: false, findings: [] };
 	const now = groupByCategory(current);
-	const findings = [...groupByCategory(previous)]
-		.map(([key, before]) => findingOf(now.get(key) ?? [], before, period))
+	const then = groupByCategory(previous);
+	const findings = [...new Set([...then.keys(), ...now.keys()])]
+		.map((key) => findingOf(now.get(key) ?? [], then.get(key) ?? [], period))
 		.filter((finding): finding is CategoryFinding => finding !== null)
 		.sort((a, b) => ORDER[a.kind] - ORDER[b.kind] || a.categoryName.localeCompare(b.categoryName, 'de'));
-	return { hasComparison: previous.length > 0, findings };
+	return { hasComparison: true, findings };
 }
 
 // The building's allocable invoices of a period, with the category's German name
@@ -182,9 +190,10 @@ async function categoryInvoices(buildingId: string, { start, end }: Period): Pro
 /** The check for one building and period, with the period it was compared with */
 export async function checkBuildingInvoices(buildingId: string, period: Period) {
 	const comparedWith = yearBefore(period);
-	const [current, previous] = await Promise.all([
+	const [current, previous, [{ first }]] = await Promise.all([
 		categoryInvoices(buildingId, period),
-		categoryInvoices(buildingId, comparedWith)
+		categoryInvoices(buildingId, comparedWith),
+		db.select({ first: min(invoices.invoiceDate) }).from(invoices).where(eq(invoices.buildingId, buildingId))
 	]);
-	return { buildingId, comparedWith, ...checkCategories(current, previous, period) };
+	return { buildingId, comparedWith, ...checkCategories(current, previous, period, first ?? undefined) };
 }

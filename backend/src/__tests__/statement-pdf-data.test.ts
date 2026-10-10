@@ -3,7 +3,7 @@
  */
 
 import { describe, expect, it } from 'bun:test';
-import { formatCHF, formatSwissDate } from '../services/pdf-format';
+import { formatCHF, formatSwissDate, roundToRappen } from '../services/pdf-format';
 import { toPdfData } from '../services/statement-pdf.service';
 import type { StatementWithDetails } from '../services/statement.service';
 
@@ -71,5 +71,14 @@ describe('Daten der Abrechnung im PDF', () => {
 		expect(toPdfData(statement, categories, 'fr').lineItems[0].category).toBe('Chauffage');
 		expect(toPdfData(statement, categories, 'rm').lineItems[0].category).toBe('Heizung');
 		expect(toPdfData(statement, categories, 'de').lineItems[1].category).toBe('Nicht kategorisiert');
+	});
+});
+
+describe('Rundung auf Rappen', () => {
+	// 3060 × 82/320 ist genau 784.125; als Fliesskommazahl 784.1249999…, darf aber nicht abgerundet werden
+	it('rundet kaufmännisch, auch wenn die Fliesskommazahl knapp darunter liegt', () => {
+		expect(roundToRappen(3060 * (82 / 320))).toBe(784.13);
+		expect(roundToRappen(1.005)).toBe(1.01);
+		expect(roundToRappen(2.344)).toBe(2.34);
 	});
 });

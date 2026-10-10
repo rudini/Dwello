@@ -21,8 +21,9 @@
 	const missing = $derived(rows.filter((row) => row.missing));
 	const partial = $derived(rows.filter((row) => row.partial));
 	const existing = $derived(rows.filter((row) => row.existing > 0));
-	const checked = $derived(rows.filter((row) => row.findings.length > 0));
-	const incomplete = $derived(rows.filter((row) => row.incomplete));
+	// a building without any invoice has its own warning above
+	const checked = $derived(rows.filter((row) => row.findings.length > 0 && !row.missing));
+	const incomplete = $derived(checked.filter((row) => row.incomplete));
 	const comparedWith = $derived(checked.find((row) => row.comparedWith)?.comparedWith);
 	// The warnings that need the confirmation, read with its checkbox
 	const confirming = $derived(

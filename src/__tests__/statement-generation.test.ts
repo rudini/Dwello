@@ -65,7 +65,9 @@ describe('Abrechnungen erstellen', () => {
 				apartmentNumber: '2.01',
 				totalCosts: 300,
 				totalAdvancePayments: 1800,
-				balance: -50
+				balance: -50,
+				rentalDays: 366,
+				totalPeriodDays: 366
 			},
 			{
 				contractId: 'einzug',
@@ -73,7 +75,9 @@ describe('Abrechnungen erstellen', () => {
 				apartmentNumber: '2.01',
 				totalCosts: 400,
 				totalAdvancePayments: 1800,
-				balance: -50
+				balance: -50,
+				rentalDays: 366,
+				totalPeriodDays: 366
 			}
 		]);
 	});
@@ -174,5 +178,17 @@ describe('Rechnungen der Abrechnungsperiode', () => {
 		expect(urls[0]).toBe(
 			`${API}/invoices?buildingId=b1&dateFrom=2024-01-01&dateTo=2024-12-31&isValidUtilityCost=true&limit=1000`
 		);
+	});
+
+	// Without the check per category the preview still shows; the look at start and end of the period stays
+	it('zeigt die Rechnungen auch, wenn die Prüfung pro Kategorie scheitert', async () => {
+		const fetch = (async (url: string) =>
+			url.includes('/invoices/completeness/')
+				? Response.json({ error: 'kaputt' }, { status: 500 })
+				: Response.json({ invoices: [], data: [], total: 0 })) as typeof globalThis.fetch;
+
+		expect(await invoicesInPeriod(fetch, period)).toEqual([
+			{ buildingId: 'b1', count: 0, first: null, last: null, statements: 0, check: undefined }
+		]);
 	});
 });

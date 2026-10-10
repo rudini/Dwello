@@ -53,14 +53,14 @@ describe('Prüfung pro Kategorie', () => {
 	it('nennt die Lücke im Rhythmus: das fehlende Quartal', () => {
 		const { findings } = checkCategories(quarterly('Kaltwasser', 2025, [1, 2, 4]), quarterly('Kaltwasser', 2024), year2025);
 
-		expect(findings).toMatchObject([{ categoryName: 'Kaltwasser', kind: 'gap', missingParts: ['das 3. Quartal'] }]);
+		expect(findings).toMatchObject([{ categoryName: 'Kaltwasser', kind: 'gap', missingParts: [{ start: '2025-07-01', end: '2025-09-30' }] }]);
 	});
 
 	it('nennt bei halbjährlichen Rechnungen das fehlende Halbjahr', () => {
 		const previous = [invoice('Kaltwasser', '2024-06-30', 460), invoice('Kaltwasser', '2024-12-31', 475)];
 		const { findings } = checkCategories([invoice('Kaltwasser', '2025-06-30', 470)], previous, year2025);
 
-		expect(findings).toMatchObject([{ kind: 'gap', missingParts: ['das 2. Halbjahr'], current: { count: 1, total: 470 } }]);
+		expect(findings).toMatchObject([{ kind: 'gap', missingParts: [{ start: '2025-07-01', end: '2025-12-31' }], current: { count: 1, total: 470 } }]);
 	});
 
 	it('nennt bei monatlichen Rechnungen den fehlenden Monat', () => {
@@ -70,7 +70,7 @@ describe('Prüfung pro Kategorie', () => {
 				.map((m) => invoice('Hauswart', `${year}-${String(m).padStart(2, '0')}-15`));
 		const { findings } = checkCategories(months(2025, 3), months(2024), year2025);
 
-		expect(findings).toMatchObject([{ kind: 'gap', missingParts: ['den März'] }]);
+		expect(findings).toMatchObject([{ kind: 'gap', missingParts: [{ start: '2025-03-01', end: '2025-03-31' }] }]);
 	});
 
 	it('weist auf deutlich höhere oder tiefere Kosten als im Vorjahr hin', () => {
@@ -114,7 +114,7 @@ describe('Prüfung pro Kategorie', () => {
 		const half = { start: '2025-07-01', end: '2025-12-31' };
 		const { findings } = checkCategories(quarterly('Kaltwasser', 2025, [3]), quarterly('Kaltwasser', 2024, [3, 4]), half);
 
-		expect(findings).toMatchObject([{ kind: 'gap', missingParts: ['das 4. Quartal'] }]);
+		expect(findings).toMatchObject([{ kind: 'gap', missingParts: [{ start: '2025-10-01', end: '2025-12-31' }] }]);
 	});
 
 	it('meldet ohne Rechnungen im Vorjahr keinen Vergleich', () => {
@@ -129,5 +129,81 @@ describe('Prüfung pro Kategorie', () => {
 		);
 
 		expect(findings.map((f) => f.kind)).toEqual(['missing', 'gap', 'deviation']);
+	});
+
+	// Ein Vergleich mit dem gleichen Zeitraum ein Jahr früher überlappt bei längeren Perioden mit sich selbst
+	it('vergleicht eine Periode über zwölf Monate nicht', () => {
+		const long = { start: '2024-01-01', end: '2025-06-30' };
+
+		expect(checkCategories([], [invoice('Kaminfeger', '2023-10-15', 290)], long)).toEqual({ hasComparison: false, findings: [] });
+	});
+
+	// Erstes Jahr mit Dwello: das Vorjahr ist nur teilweise erfasst, ein Vergleich ergäbe falsche Abweichungen
+	it('vergleicht nicht, wenn die erste Rechnung des Gebäudes erst mitten im Vergleichszeitraum liegt', () => {
+		const july = { start: '2024-07-01', end: '2025-06-30' };
+		const previous = [invoice('Hauswart', '2024-03-31', 900), invoice('Hauswart', '2024-06-30', 900)];
+
+		expect(checkCategories(quarterly('Hauswart', 2024, [3, 4]), previous, july, '2024-02-12')).toEqual({ hasComparison: false, findings: [] });
+	});
+
+	it('vergleicht, wenn die erste Rechnung in den ersten drei Monaten des Vergleichszeitraums liegt', () => {
+		expect(checkCategories([], [invoice('Lift', '2024-02-12', 1650)], year2025, '2024-02-12').hasComparison).toBe(true);
+	});
+
+	// Lieferanten datieren unterschiedlich: vier Rechnungen wie im Vorjahr sind vollständig
+	it('meldet keine Lücke, wenn gleich viele Rechnungen wie im Vorjahr da sind, auch kurz nach Quartalsende datiert', () => {
+		// the first quarter billed on 2 April: the first quarter seems empty, the second has two invoices
+		const late = ['04-02', '06-30', '09-30', '12-31'].map((day) => invoice('Kaltwasser', `2025-${day}`, 900));
+
+		expect(checkCategories(late, quarterly('Kaltwasser', 2024), year2025).findings).toEqual([]);
+	});
+
+	it('zählt eine Gutschrift nicht als eigene Rechnung im Rhythmus', () => {
+		const previous = [...quarterly('Kaltwasser', 2024), invoice('Kaltwasser', '2024-01-20', -50)];
+
+		expect(checkCategories(quarterly('Kaltwasser', 2025), previous, year2025).findings).toEqual([]);
+	});
+
+	// Ohne Kategorie lässt sich nicht sagen, welche Rechnung fehlt
+	it('vergleicht Rechnungen ohne Kategorie nicht', () => {
+		const uncategorised = { ...invoice('Nicht kategorisiert', '2024-05-31', 300), categoryId: null };
+
+		expect(checkCategories([], [uncategorised], year2025).findings).toEqual([]);
+	});
+
+	// Nebenkosten dürfen nur abgerechnet werden, wenn sie im Mietvertrag vereinbart sind (Art. 257a Abs. 2 OR)
+	it('meldet eine Kategorie, die es im Vorjahr nicht gab', () => {
+		const { findings } = checkCategories(
+			[invoice('Hauswart', '2025-06-30', 900), invoice('Schädlingsbekämpfung', '2025-05-20', 400)],
+			[invoice('Hauswart', '2024-06-30', 900)],
+			year2025
+		);
+
+		expect(findings).toMatchObject([
+			{ categoryName: 'Schädlingsbekämpfung', kind: 'new', current: { count: 1, total: 400 }, previous: { count: 0, total: 0 } }
+		]);
+	});
+
+	// Randfall: eine Periode, die nicht am Monatsersten beginnt, wird nach Tagen geteilt
+	it('teilt eine Periode ab dem 16. nach Tagen', () => {
+		const odd = { start: '2025-07-16', end: '2026-07-15' };
+		const previous = [invoice('Hauswart', '2024-10-01', 900), invoice('Hauswart', '2025-04-01', 900)];
+		const { findings } = checkCategories([invoice('Hauswart', '2025-10-01', 900)], previous, odd);
+
+		expect(findings).toMatchObject([{ kind: 'gap', missingParts: [{ start: '2026-01-14', end: '2026-07-15' }] }]);
+	});
+
+	it('teilt bei mehr als zwölf Rechnungen höchstens in Monate', () => {
+		const monthly = (year: number, count: number) =>
+			Array.from({ length: count }, (_, i) => invoice('Hauswart', `${year}-${String((i % 12) + 1).padStart(2, '0')}-${i < 12 ? '10' : '20'}`));
+		const { findings } = checkCategories(monthly(2025, 11), monthly(2024, 14), year2025);
+
+		expect(findings).toMatchObject([{ kind: 'gap', missingParts: [{ start: '2025-12-01', end: '2025-12-31' }] }]);
+	});
+
+	it('ordnet eine Rechnung am letzten Tag eines Abschnitts diesem Abschnitt zu', () => {
+		const { findings } = checkCategories(quarterly('Kaltwasser', 2025, [1, 2, 3]), quarterly('Kaltwasser', 2024), year2025);
+
+		expect(findings[0].missingParts).toEqual([{ start: '2025-10-01', end: '2025-12-31' }]);
 	});
 });

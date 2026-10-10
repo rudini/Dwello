@@ -156,6 +156,13 @@ describe('Abrechnungen erstellen', () => {
 		expect(text()).not.toContain('Gleichmässig Verteilung');
 	});
 
+	// Nebenkosten, Pauschale und Heizkostentabelle gelten nur, wenn der Mietvertrag sie vorsieht (Art. 257a Abs. 2 OR)
+	it('erinnert daran, dass Heizprofil und Verwaltungspauschale im Mietvertrag vereinbart sein müssen', async () => {
+		await toSettings();
+		expect(text()).toContain('Wurden beim Mieterwechsel die Zähler abgelesen, gelten diese Werte.');
+		expect(text()).toContain('Verlangen Sie eine Verwaltungspauschale nur, wenn sie im Mietvertrag vereinbart ist.');
+	});
+
 	it('verteilt die Verwaltungspauschale gleichmässig oder nach einem Verteilschlüssel und warnt über 3 %', async () => {
 		await toSettings();
 		const key = byTestId<HTMLSelectElement>('management-fee-key-select')!;
@@ -269,7 +276,7 @@ describe('Abrechnungen erstellen', () => {
 						hasComparison: true,
 						findings: [
 							{ categoryId: 'k', categoryName: 'Kaminfeger', kind: 'missing', current: sums(0, 0), previous: sums(1, 290), missingParts: [], changePercent: null },
-							{ categoryId: 'w', categoryName: 'Kaltwasser', kind: 'gap', current: sums(1, 470), previous: sums(2, 935), missingParts: ['das 2. Halbjahr'], changePercent: null },
+							{ categoryId: 'w', categoryName: 'Kaltwasser', kind: 'gap', current: sums(1, 470), previous: sums(2, 935), missingParts: [{ start: '2025-07-01', end: '2025-12-31' }], changePercent: null },
 							{ categoryId: 'h', categoryName: 'Heizung', kind: 'deviation', current: sums(1, 6565), previous: sums(1, 4800), missingParts: [], changePercent: 37 }
 						]
 					}
@@ -283,10 +290,15 @@ describe('Abrechnungen erstellen', () => {
 			f.textContent!.replace(/\s+/g, ' ').trim()
 		);
 		expect(findings).toEqual([
-			'Kaminfeger: Keine Rechnung erfasst. Im Vorjahr: 1 Rechnung über CHF 290.00.',
+			'Kaminfeger: Keine Rechnung in dieser Kategorie erfasst. Im Vorjahr: 1 Rechnung über CHF 290.00.',
 			'Kaltwasser: Rechnung für das 2. Halbjahr fehlt. Im Vorjahr: 2 Rechnungen.',
-			'Heizung: CHF 6’565.00, 37 % mehr als im Vorjahr (CHF 4’800.00). Prüfen Sie Betrag und Rechnungsdatum.'
+			'Heizung: CHF 6’565.00, 37 % mehr als im Vorjahr (CHF 4’800.00). Prüfen Sie den Betrag und den Zeitraum, für den die Rechnung gilt.'
 		]);
+		expect(check.querySelector('p')!.textContent).toBe('Möglicherweise fehlen Rechnungen');
+		// the findings of a building form one list named by the building
+		expect(check.querySelector('ul')!.getAttribute('aria-label')).toBe('Ahornhof');
+		// what a missing invoice means for the tenants
+		expect(check.textContent!.replace(/\s+/g, ' ')).toContain('Später können Sie sie nur mit einer berichtigten Abrechnung nachverlangen.');
 		next();
 		await settle();
 		expect(byTestId('form-error')!.textContent).toContain('Bestätigen Sie');
@@ -316,10 +328,31 @@ describe('Abrechnungen erstellen', () => {
 			]
 		});
 		expect(byTestId('category-finding')!.textContent).toContain('Heizung');
+		expect(byTestId('category-check')!.querySelector('p')!.textContent).toBe('Kosten im Vergleich zum Vorjahr');
 		expect(byTestId('confirm-missing-invoices')).toBeNull();
 		next();
 		await settle();
 		expect(heading()).toBe('Erstellen');
+	});
+
+	// A building without any invoice already has its own warning; its categories are not listed again
+	it('nennt die Kategorien eines Gebäudes ohne Rechnungen nicht noch einmal', () => {
+		open({
+			preview,
+			invoices: [
+				{
+					...invoices[1],
+					check: {
+						buildingId: 'b2',
+						comparedWith: { start: '2023-01-01', end: '2023-12-31' },
+						hasComparison: true,
+						findings: [{ categoryId: 'k', categoryName: 'Kaminfeger', kind: 'missing', current: { count: 0, total: 0 }, previous: { count: 1, total: 290 }, missingParts: [], changePercent: null }]
+					}
+				}
+			]
+		});
+		expect(byTestId('missing-invoices')).not.toBeNull();
+		expect(byTestId('category-check')).toBeNull();
 	});
 
 	it('vergleicht die Kosten jeder Abrechnung mit dem Akonto', () => {
@@ -328,7 +361,7 @@ describe('Abrechnungen erstellen', () => {
 			invoices: [invoices[0]]
 		});
 		const hints = [...document.querySelectorAll('[data-testid="preview-akonto-hint"]')].map((h) => h.textContent!.trim());
-		expect(hints).toEqual(['Kosten 60 % unter dem Akonto. Fehlen Rechnungen?']);
+		expect(hints).toEqual(['Kosten CHF\u00a01’800.00 (60 %) unter dem Akonto. Fehlen Rechnungen?']);
 	});
 
 	it('warnt, wenn es für ein Gebäude in der Periode schon Abrechnungen gibt, und verlangt eine Bestätigung', async () => {

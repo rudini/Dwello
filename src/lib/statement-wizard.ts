@@ -51,10 +51,10 @@ export function selectionErrors(selection: WizardSelection, step: number): Recor
 export interface CategoryFinding {
 	categoryId: string | null;
 	categoryName: string;
-	kind: 'missing' | 'gap' | 'deviation';
+	kind: 'missing' | 'gap' | 'new' | 'deviation';
 	current: { count: number; total: number };
 	previous: { count: number; total: number };
-	missingParts: string[];
+	missingParts: { start: string; end: string }[];
 	changePercent: number | null;
 }
 
@@ -76,31 +76,58 @@ type Coverage = {
 
 const invoices = (count: number) => (count === 1 ? '1 Rechnung' : `${count} Rechnungen`);
 
+// A whole calendar month, quarter or half-year by its name; null for other slices
+function calendarName({ start, end }: { start: string; end: string }) {
+	const from = new Date(`${start}T00:00:00Z`);
+	const after = new Date(new Date(`${end}T00:00:00Z`).getTime() + 86_400_000);
+	const months = (after.getUTCFullYear() - from.getUTCFullYear()) * 12 + after.getUTCMonth() - from.getUTCMonth();
+	const month = from.getUTCMonth();
+	if (from.getUTCDate() !== 1 || after.getUTCDate() !== 1 || month % months !== 0) return null;
+	const names: Record<number, string> = {
+		1: `den ${from.toLocaleDateString('de-CH', { month: 'long', timeZone: 'UTC' })}`,
+		3: `das ${month / 3 + 1}. Quartal`,
+		6: `das ${month / 6 + 1}. Halbjahr`
+	};
+	return names[months] ?? null;
+}
+
+// A slice of the period in words: a calendar month, quarter or half-year by its name, otherwise its dates
+const partLabel = (slice: { start: string; end: string }) =>
+	calendarName(slice) ?? `die Zeit vom ${formatDate(slice.start)} bis ${formatDate(slice.end)}`;
+
 /** One finding of the check per category in plain words, with what to look at */
 export function findingText({ kind, current, previous, missingParts, changePercent }: CategoryFinding): string {
 	if (kind === 'missing')
-		return `Keine Rechnung erfasst. Im Vorjahr: ${invoices(previous.count)} über ${formatCurrency(previous.total)}.`;
+		return `Keine Rechnung in dieser Kategorie erfasst. Im Vorjahr: ${invoices(previous.count)} über ${formatCurrency(previous.total)}.`;
+	if (kind === 'new')
+		return `Neu: ${formatCurrency(current.total)}, im Vorjahr keine Kosten. Ist diese Kategorie im Mietvertrag vereinbart? Nur vereinbarte Nebenkosten dürfen Sie abrechnen.`;
 	if (kind === 'gap') {
-		const parts = missingParts.join(' und ');
+		const parts = missingParts.map(partLabel).join(' und ');
 		const what = missingParts.length === 1 ? `Rechnung für ${parts} fehlt` : `Rechnungen für ${parts} fehlen`;
 		return `${what}. Im Vorjahr: ${invoices(previous.count)}.`;
 	}
 	const direction = (changePercent ?? 0) > 0 ? 'mehr' : 'weniger';
-	return `${formatCurrency(current.total)}, ${Math.abs(changePercent ?? 0)} % ${direction} als im Vorjahr (${formatCurrency(previous.total)}). Prüfen Sie Betrag und Rechnungsdatum.`;
+	return `${formatCurrency(current.total)}, ${Math.abs(changePercent ?? 0)} % ${direction} als im Vorjahr (${formatCurrency(previous.total)}). Prüfen Sie den Betrag und den Zeitraum, für den die Rechnung gilt.`;
 }
 
-// TODO(fachlich prüfen): costs more than 30 % above or below the Akonto of the tenant's own rental days are worth a look
-const AKONTO_SHARE = 0.3;
+// TODO(fachlich prüfen): costs 15 % above the Akonto suggest raising it, 30 % below suggest missing invoices
+const AKONTO_ABOVE = 0.15;
+const AKONTO_BELOW = 0.3;
 
-/** A statement whose costs are far from the Akonto paid: missing invoices, or an Akonto to adjust */
-export function akontoHint({ totalCosts, totalAdvancePayments }: { totalCosts: number; totalAdvancePayments: number }) {
+type AkontoRow = { totalCosts: number; totalAdvancePayments: number; rentalDays?: number; totalPeriodDays?: number };
+
+/** A statement whose costs are far from the Akonto paid: missing invoices, or an Akonto to raise */
+export function akontoHint({ totalCosts, totalAdvancePayments, rentalDays, totalPeriodDays }: AkontoRow) {
 	if (!(totalAdvancePayments > 0)) return null;
 	const change = (totalCosts - totalAdvancePayments) / totalAdvancePayments;
-	if (Math.abs(change) <= AKONTO_SHARE) return null;
+	const amount = formatCurrency(Math.abs(totalCosts - totalAdvancePayments));
 	const percent = Math.round(Math.abs(change) * 100);
-	return change < 0
-		? `Kosten ${percent} % unter dem Akonto. Fehlen Rechnungen?`
-		: `Kosten ${percent} % über dem Akonto. Prüfen Sie, ob das Akonto angepasst werden soll.`;
+	if (change > AKONTO_ABOVE)
+		return `Kosten ${amount} (${percent} %) über dem Akonto. Prüfen Sie, ob Sie das Akonto erhöhen; eine Erhöhung teilen Sie dem Mieter mit dem amtlichen Formular mit.`;
+	// part of the period: the months rented may carry little heating, low costs are no sign of missing invoices
+	const wholePeriod = !rentalDays || !totalPeriodDays || rentalDays >= totalPeriodDays;
+	if (change < -AKONTO_BELOW && wholePeriod) return `Kosten ${amount} (${percent} %) unter dem Akonto. Fehlen Rechnungen?`;
+	return null;
 }
 
 const coverageText = ({ count, first, last }: Coverage) => {
@@ -122,10 +149,17 @@ const partly = ({ count, first, last }: Coverage, { periodStart, periodEnd }: Pe
 
 type Period = { periodStart: string; periodEnd: string };
 
-// Findings per category; missing invoices (not a deviation) need a confirmation
+const lacksInvoices = (check?: InvoiceCheck) =>
+	!!check?.findings.some((f) => f.kind === 'missing' || f.kind === 'gap');
+
+/** No invoices, invoices missing in a category or statements that exist already: going on needs a confirmation */
+export const needsConfirmation = (coverage: Coverage[]) =>
+	coverage.some((c) => c.count === 0 || (c.statements ?? 0) > 0 || lacksInvoices(c.check));
+
+// Findings per category; missing invoices (not a hint on new or changed costs) need a confirmation
 const categoryCheck = (check?: InvoiceCheck) => ({
 	findings: check?.findings ?? [],
-	incomplete: !!check?.findings.some((f) => f.kind !== 'deviation'),
+	incomplete: lacksInvoices(check),
 	comparedWith: check?.hasComparison ? check.comparedWith : null
 });
 

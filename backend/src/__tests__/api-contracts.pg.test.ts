@@ -42,7 +42,7 @@ const period = { periodStart: '2024-01-01', periodEnd: '2024-12-31' };
 
 beforeAll(async () => {
 	rental = await createRental(token, { startDate: '2024-01-01', monthlyAdvancePayment: '150' });
-	await insertInvoice(rental.building, { amount: '1000.00', invoiceDate: '2024-06-30' });
+	await insertInvoice(rental.building, { amount: '1000.00', invoiceDate: '2024-03-31' });
 	// A year later 50 % more: the check for missing invoices reports a deviation with its percentage
 	await insertInvoice(rental.building, { amount: '1500.00', invoiceDate: '2025-06-30' });
 	// Optional fields filled, so the contract checks their JSON type too (null is not checked)

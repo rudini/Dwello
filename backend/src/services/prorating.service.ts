@@ -9,6 +9,7 @@
  * - Vacancy cost allocation
  */
 
+import { roundToRappen } from './pdf-format';
 import { getHeatingProfile, calculateHeatingShare } from './heating-profile.service';
 import { getContractsByPeriod, type ContractWithDetails } from './contract.service';
 
@@ -129,7 +130,7 @@ export function prorateCosts(
 
 	return {
 		totalAmount,
-		proratedAmount: Math.round(proratedAmount * 100) / 100, // Round to 2 decimals
+		proratedAmount: roundToRappen(proratedAmount),
 		prorationDays,
 		totalDays,
 		periodShare: Math.round(periodShare * 10000) / 10000 // 4 decimal precision
@@ -307,7 +308,7 @@ export function distributeCostsAcrossContracts(
 			return {
 				contract: c.contract,
 				share,
-				amount: Math.round(totalCost * share * 100) / 100
+				amount: roundToRappen(totalCost * share)
 			};
 		});
 	}
@@ -320,7 +321,7 @@ export function distributeCostsAcrossContracts(
 		return {
 			contract: c.contract,
 			share,
-			amount: Math.round(totalCost * share * 100) / 100
+			amount: roundToRappen(totalCost * share)
 		};
 	});
 }

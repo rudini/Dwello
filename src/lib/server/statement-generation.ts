@@ -70,7 +70,9 @@ export async function previewStatements(fetch: Fetch, request: GenerationRequest
 			apartmentNumber: contract.apartmentNumber,
 			totalCosts: Number(preview.totalCosts),
 			totalAdvancePayments: Number(preview.totalAdvancePayments),
-			balance: Number(preview.balance)
+			balance: Number(preview.balance),
+			rentalDays: Number(preview.rentalDays),
+			totalPeriodDays: Number(preview.totalPeriodDays)
 		});
 	}
 	return rows;
@@ -111,7 +113,10 @@ export async function invoicesInPeriod(
 					`invoices?buildingId=${building}&dateFrom=${periodStart}&dateTo=${periodEnd}&isValidUtilityCost=true&limit=1000`
 				),
 				call(fetch, `statements?buildingId=${building}&limit=1000`),
-				call(fetch, `invoices/completeness/${building}?periodStart=${periodStart}&periodEnd=${periodEnd}`)
+				// a hint only: without it the preview still shows
+				call(fetch, `invoices/completeness/${building}?periodStart=${periodStart}&periodEnd=${periodEnd}`).catch(
+					() => undefined
+				)
 			]);
 			const dates = (invoices as { invoiceDate: string }[]).map((i) => i.invoiceDate).sort();
 			return {
@@ -120,7 +125,7 @@ export async function invoicesInPeriod(
 				first: dates[0] ?? null,
 				last: dates.at(-1) ?? null,
 				statements: (statements as Period[]).filter(overlaps).length,
-				check: check as InvoiceCheck
+				check: check as InvoiceCheck | undefined
 			};
 		})
 	);

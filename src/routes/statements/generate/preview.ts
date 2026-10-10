@@ -6,4 +6,6 @@ export interface PreviewRow {
 	totalCosts: number;
 	totalAdvancePayments: number;
 	balance: number;
+	rentalDays?: number;
+	totalPeriodDays?: number;
 }

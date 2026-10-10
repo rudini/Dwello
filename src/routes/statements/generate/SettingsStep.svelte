@@ -47,7 +47,7 @@
 <Field
 	id="heatingProfile"
 	label="Heizprofil"
-	help="Verteilt die Heizkosten auf die Monate. Nur Heizprofile mit zusammen 100 % lassen sich wählen."
+	help="Verteilt die Heizkosten bei einem Mieterwechsel auf die Monate; wählen Sie das Profil, das Ihre Mietverträge vorsehen. Wurden beim Mieterwechsel die Zähler abgelesen, gelten diese Werte. Nur Heizprofile mit zusammen 100 % lassen sich wählen."
 	error={errors.heatingProfileId}
 >
 	{#snippet children(control)}
@@ -84,7 +84,7 @@
 	id="managementFeePercent"
 	label="Verwaltungspauschale in %"
 	type="number"
-	help="Prozentsatz der Nebenkosten der Liegenschaft, gilt für alle Abrechnungen dieses Laufs. Üblich sind bis {USUAL_MAXIMUM} %."
+	help="Prozentsatz der Nebenkosten der Liegenschaft, gilt für alle Abrechnungen dieses Laufs. Üblich sind bis {USUAL_MAXIMUM} %. Verlangen Sie eine Verwaltungspauschale nur, wenn sie im Mietvertrag vereinbart ist. Sonst geben Sie 0 ein."
 	bind:value={() => fee, (v) => (managementFeePercent = v === '' ? NaN : Number(v))}
 	error={errors.managementFeePercent}
 	testid="management-fee-input"
