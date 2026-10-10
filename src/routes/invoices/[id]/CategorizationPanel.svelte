@@ -1,7 +1,9 @@
 <script lang="ts">
 	import type { InvoiceWithDetails } from '$lib/types';
+	import Alert from '$lib/ui/Alert.svelte';
 	import Badge from '$lib/ui/Badge.svelte';
 	import Button from '$lib/ui/Button.svelte';
+	import { focusFirstError } from '$lib/ui/focus-error';
 	import Panel from '$lib/ui/Panel.svelte';
 	import KiAssessment from '../KiAssessment.svelte';
 
@@ -9,8 +11,20 @@
 	let {
 		invoice,
 		busy,
+		error,
 		onrecategorize
-	}: { invoice: InvoiceWithDetails; busy: boolean; onrecategorize: () => void } = $props();
+	}: {
+		invoice: InvoiceWithDetails;
+		busy: boolean;
+		error: string;
+		onrecategorize: () => void;
+	} = $props();
+
+	// The KI may take half a minute: its failure shows at the button and takes the focus, so it is in view
+	let feedback: HTMLElement | undefined = $state();
+	$effect(() => {
+		if (error) focusFirstError(feedback);
+	});
 </script>
 
 <Panel title="Kategorisierung">
@@ -32,7 +46,9 @@
 					{invoice.distributionKey.name}
 				</dd>
 			{:else}
-				<dd class="text-ink-muted">Nicht zugewiesen</dd>
+				<!-- TODO(fachlich prüfen): the equal split without a key is what the statement calculation does;
+				     the glossary states it only for the Verwaltungspauschale -->
+				<dd class="text-ink-muted">Keiner – die Kosten werden gleichmässig pro Wohnung verteilt</dd>
 			{/if}
 		</div>
 		<div class="flex flex-col gap-1">
@@ -60,13 +76,18 @@
 		</section>
 	{/if}
 
-	<div>
+	<div class="flex flex-col items-start gap-4" bind:this={feedback}>
 		<Button
 			icon="ai-suggestion"
 			onclick={onrecategorize}
 			{busy}
-			busyLabel="KI kategorisiert …"
+			busyLabel="Wird kategorisiert …"
 			testid="invoice-recategorize-button">Neu kategorisieren</Button
 		>
+		{#if error}
+			<Alert tone="critical" title="Kategorisierung fehlgeschlagen">
+				<p data-testid="invoice-recategorize-error">{error}</p>
+			</Alert>
+		{/if}
 	</div>
 </Panel>

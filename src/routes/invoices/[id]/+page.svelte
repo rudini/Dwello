@@ -73,16 +73,15 @@
 
 	<p><Badge tone={status.tone} label={status.label} /></p>
 
-	{#if recategorizeError}
-		<Alert tone="critical" title="Kategorisierung fehlgeschlagen">
-			<p data-testid="invoice-recategorize-error">{recategorizeError}</p>
-		</Alert>
-	{/if}
-
 	<div class="grid gap-8 lg:grid-cols-3">
 		<div class="flex flex-col gap-8 lg:col-span-2">
 			<InvoiceFacts {invoice} />
-			<CategorizationPanel {invoice} busy={recategorizing} onrecategorize={recategorize} />
+			<CategorizationPanel
+				{invoice}
+				busy={recategorizing}
+				error={recategorizeError}
+				onrecategorize={recategorize}
+			/>
 		</div>
 		<div class="flex flex-col gap-8">
 			{#if !invoice.isValidUtilityCost}

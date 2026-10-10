@@ -172,6 +172,14 @@ describe('Rechnungsdetail', () => {
 		expect(goto).toHaveBeenCalledWith('/invoices');
 	});
 
+	// TODO(fachlich prüfen): the glossary names the equal split only for the Verwaltungspauschale
+	it('erklärt eine Rechnung ohne Verteilschlüssel, statt einen Fehler anzudeuten', () => {
+		show(InvoicePage, { data: { invoice: invoice({ distributionKey: undefined }) } });
+
+		expect(text()).toContain('Keiner – die Kosten werden gleichmässig pro Wohnung verteilt');
+		expect(text()).not.toContain('Nicht zugewiesen');
+	});
+
 	it('meldet einen Fehler beim Neu-Kategorisieren', async () => {
 		fakeBff(() => [503, { error: { code: 'LLM', message: 'KI nicht erreichbar' } }]);
 		show(InvoicePage, {
@@ -215,6 +223,28 @@ describe('Rechnungsdetail', () => {
 		expect(byTestId('invoice-recategorize-error')!.textContent).toContain(
 			'Die KI ist nicht erreichbar oder hat keine passende Kategorie geliefert.'
 		);
+	});
+
+	it('zeigt beim Neu-Kategorisieren, dass die KI arbeitet, und den Fehler gleich beim Knopf', async () => {
+		fakeBff(() => [503, { error: 'Die KI ist nicht erreichbar.' }]);
+		show(InvoicePage, { data: { invoice: invoice() } });
+
+		click(button('Neu kategorisieren'));
+		const busyButton = byTestId('invoice-recategorize-button')!;
+		expect(busyButton.textContent).toContain('Wird kategorisiert …');
+		expect(busyButton.getAttribute('aria-busy')).toBe('true');
+		await settle();
+
+		const message = byTestId('invoice-recategorize-error')!.closest(
+			'[role="alert"]'
+		) as HTMLElement;
+		const recategorizeButton = byTestId('invoice-recategorize-button')!;
+		expect(message.closest('section')).toBe(recategorizeButton.closest('section'));
+		expect(
+			recategorizeButton.compareDocumentPosition(message) & Node.DOCUMENT_POSITION_FOLLOWING
+		).toBeTruthy();
+		// focus moves to the message, which also brings it into view on a phone
+		expect(document.activeElement).toBe(message);
 	});
 
 	it('zeigt den gespeicherten Grund, warum die Kategorie der KI überschrieben wurde', () => {
