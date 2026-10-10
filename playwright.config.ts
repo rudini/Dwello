@@ -6,6 +6,33 @@ import type { Driver } from './tests/e2e/fixtures/test';
 const E2E_BACKEND_URL = 'http://localhost:3101';
 const E2E_DATABASE_URL =
 	process.env.E2E_DATABASE_URL || 'postgresql://dwello:dwello@localhost:5432/dwello_e2e';
+// A second, empty instance (no buildings, no tenants) for the axe check of the 'empty' and 'first-use' states,
+// which the shared database never shows while scenarios run in parallel
+const E2E_EMPTY_DATABASE_URL = (() => {
+	const url = new URL(E2E_DATABASE_URL);
+	url.pathname = `${url.pathname}_empty`;
+	return url.href;
+})();
+
+// The frontend's environment (sessions, sign-in test credentials, operator, gallery)
+const frontendEnv = {
+	PORT: '3100',
+	ORIGIN: 'http://localhost:3100',
+	BACKEND_URL: E2E_BACKEND_URL,
+	JWT_SECRET: E2E_JWT_SECRET,
+	OAUTH_GOOGLE_CLIENT_ID: 'e2e-google-client',
+	OAUTH_GOOGLE_CLIENT_SECRET: 'e2e-google-secret',
+	OAUTH_GOOGLE_REDIRECT_URI: 'http://localhost:3100/auth/callback',
+	OAUTH_MICROSOFT_CLIENT_ID: '',
+	OAUTH_MICROSOFT_CLIENT_SECRET: '',
+	OAUTH_MICROSOFT_REDIRECT_URI: '',
+	// The operator that terms.feature expects under „Verfügbarkeit“
+	OPERATOR_NAME: 'Muster Hosting AG',
+	OPERATOR_ADDRESS: 'Bahnhofstrasse 1, 8001 Zürich',
+	OPERATOR_CONTACT: 'betrieb@muster-hosting.ch',
+	// The component gallery the axe check visits (src/routes/gallery)
+	UI_GALLERY: 'on'
+};
 
 const testDir = defineBddConfig({
 	paths: ['tests/e2e/features/**/*.feature'],
@@ -64,23 +91,32 @@ export default defineConfig<{ driver: Driver }>({
 			port: 3100,
 			reuseExistingServer: !process.env.CI,
 			timeout: 180000,
+			env: frontendEnv
+		},
+		{
+			// Empty backend for the axe check of 'empty' and 'first-use' (tests/e2e/interactions/accessibility.ts)
+			command: 'cd backend && bun run e2e-db && bun run src/index.ts',
+			port: 3103,
+			reuseExistingServer: false,
+			timeout: 60000,
 			env: {
-				PORT: '3100',
-				ORIGIN: 'http://localhost:3100',
-				BACKEND_URL: E2E_BACKEND_URL,
+				PORT: '3103',
+				DATABASE_URL: E2E_EMPTY_DATABASE_URL,
 				JWT_SECRET: E2E_JWT_SECRET,
-				OAUTH_GOOGLE_CLIENT_ID: 'e2e-google-client',
-				OAUTH_GOOGLE_CLIENT_SECRET: 'e2e-google-secret',
-				OAUTH_GOOGLE_REDIRECT_URI: 'http://localhost:3100/auth/callback',
-				OAUTH_MICROSOFT_CLIENT_ID: '',
-				OAUTH_MICROSOFT_CLIENT_SECRET: '',
-				OAUTH_MICROSOFT_REDIRECT_URI: '',
-				// The operator that terms.feature expects under „Verfügbarkeit“
-				OPERATOR_NAME: 'Muster Hosting AG',
-				OPERATOR_ADDRESS: 'Bahnhofstrasse 1, 8001 Zürich',
-				OPERATOR_CONTACT: 'betrieb@muster-hosting.ch',
-				// The component gallery the axe check visits (src/routes/gallery)
-				UI_GALLERY: 'on'
+				LLM_BASE_URL: 'http://127.0.0.1:9/v1'
+			}
+		},
+		{
+			// The same build as on 3100 (started after it), talking to the empty backend
+			command: 'node build',
+			port: 3102,
+			reuseExistingServer: !process.env.CI,
+			timeout: 60000,
+			env: {
+				...frontendEnv,
+				PORT: '3102',
+				ORIGIN: 'http://localhost:3102',
+				BACKEND_URL: 'http://localhost:3103'
 			}
 		}
 	],

@@ -22,9 +22,11 @@ Funktionalität: Barrierefreiheit
       | error-server           | default             |
       | error-server           | server-error        |
       | dashboard              | default             |
+      | dashboard              | first-use           |
       | dashboard              | mobile-menu-open    |
       | dashboard              | user-menu-open      |
       | buildings              | default             |
+      | buildings              | empty               |
       | buildings              | filtered-empty      |
       | building-new           | default             |
       | building-new           | submit-empty        |
@@ -34,6 +36,7 @@ Funktionalität: Barrierefreiheit
       | building-edit          | submit-cleared      |
       | building-edit          | saved-toast         |
       | apartments             | default             |
+      | apartments             | empty               |
       | apartments             | filtered-empty      |
       | apartment-new          | default             |
       | apartment-new          | submit-empty        |
@@ -41,6 +44,7 @@ Funktionalität: Barrierefreiheit
       | apartment-edit         | default             |
       | apartment-edit         | submit-cleared      |
       | tenants                | default             |
+      | tenants                | empty               |
       | tenants                | filtered-empty      |
       | tenant-new             | default             |
       | tenant-new             | submit-empty        |
@@ -49,6 +53,7 @@ Funktionalität: Barrierefreiheit
       | tenant-edit            | default             |
       | tenant-edit            | submit-cleared      |
       | contracts              | default             |
+      | contracts              | empty               |
       | contracts              | filtered-empty      |
       | contract-new           | default             |
       | contract-new           | submit-empty        |
@@ -61,6 +66,7 @@ Funktionalität: Barrierefreiheit
       | contract-edit          | default             |
       | contract-edit          | submit-cleared      |
       | invoices               | default             |
+      | invoices               | empty               |
       | invoices               | filtered-empty      |
       | invoice-new            | default             |
       | invoice-new            | submit-empty        |
@@ -69,6 +75,7 @@ Funktionalität: Barrierefreiheit
       | invoice-edit           | default             |
       | invoice-edit           | submit-cleared      |
       | statements             | default             |
+      | statements             | empty               |
       | statements             | filtered-empty      |
       | statements             | mark-paid-dialog    |
       | statement-generate     | default             |
@@ -86,6 +93,7 @@ Funktionalität: Barrierefreiheit
       | statement-edit         | default             |
       | statement-edit         | submit-cleared      |
       | documents              | default             |
+      | documents              | empty               |
       | config                 | default             |
       | categories             | default             |
       | category-new           | default             |

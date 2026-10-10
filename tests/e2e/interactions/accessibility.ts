@@ -67,6 +67,10 @@ export async function seedFor(seed: TestData, path: string, state: string) {
 	return path.replace(/\{(\w+)\}/g, (_, key: string) => ids[key]!);
 }
 
+// 'empty' and 'first-use' need a database without records: the empty instance of the stack (playwright.config.ts)
+const EMPTY_INSTANCE = 'http://localhost:3102';
+const onEmptyInstance = ['empty', 'first-use'];
+
 const press = (page: Page, testid: string) => page.getByTestId(testid).click();
 // Proves the state is reached before axe looks, so a state that never appears fails instead of passing silently
 const shows = (page: Page, selector: string) => page.locator(selector).first().waitFor();
@@ -77,6 +81,8 @@ const dialog = (page: Page) => shows(page, '[data-testid$="-confirm"]');
 const states: Record<string, (page: Page, viewport: Viewport) => Promise<unknown>> = {
 	default: async () => {},
 	'filtered-empty': async (page) => shows(page, '[data-testid$="-empty"]'),
+	empty: async (page) => shows(page, '[data-testid$="-empty"]'),
+	'first-use': async (page) => page.getByText('Erstes Gebäude erfassen').waitFor(),
 	'login-error': async (page) => shows(page, '[data-testid="login-error"]'),
 	'submit-empty': async (page) => {
 		await page.locator('main [type=submit]').last().click(); // the save button closes a form
@@ -194,7 +200,7 @@ export async function check(
 	await page.setViewportSize(screenList.viewports[viewport]);
 	await page.emulateMedia({ colorScheme: scheme, reducedMotion: 'reduce' });
 	await page.evaluate(() => localStorage.clear()).catch(() => {}); // no draft from the previous viewport
-	await visit(page, path);
+	await visit(page, onEmptyInstance.includes(state) ? EMPTY_INSTANCE + path : path);
 	if (state === 'every-wizard-step') return wizards[new URL(path, 'http://x').pathname](page);
 	await states[state](page, viewport);
 	return violations(page);

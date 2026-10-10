@@ -32,7 +32,7 @@ Every place in the code is marked `TODO(fachlich prüfen)` (`grep -rn "TODO(fach
 
 ## Accessibility check coverage
 
-- The states "empty" (no records at all) and "first-use" (no buildings) cannot be produced in the shared E2E database, which parallel scenarios fill. They are covered by DOM tests of the empty/first-use branches plus the browser axe check of the same `EmptyState`/task components in other states. A dedicated empty database for the axe run would close this gap (needs a second backend in the Playwright stack).
+- ~~The states "empty" and "first-use" cannot be produced in the shared E2E database~~ – they run on a second, empty instance of the E2E stack (backend 3103 on `dwello_e2e_empty`, the same frontend build on 3102); every listed state is now part of the axe check (108 examples).
 - ~~Dark mode is only switched on in stage 8~~ – done in stage 8 (531a70c): dark mode follows the system; the axe check covers every state light and dark.
 
 ## Privacy

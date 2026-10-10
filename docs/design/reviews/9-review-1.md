@@ -8,7 +8,7 @@ Final reviewer: independent general-purpose agent, read-only, against the Defini
 |---|---|---|---|
 | 1 | Only new tokens and components, no remnants | met | met |
 | 2 | Build, lint, typecheck, tests green; new logic via /tdd | partly (CI unit run on c4bb7d4 failed: unhandled map rejection) | met: fixed in 832d9a7 (CI green), unit 1292, E2E 389 |
-| 3 | Axe in CI, all screens and states, 0 violations, no blanket exceptions | partly (gaps: error page, visible toast, empty statement detail, edit-form submit-empty) | met: the named states added (0c237df), 100 examples, 0 violations; only 'empty' and 'first-use' need an empty database and stay covered by DOM tests (`offene-punkte.md`, accessibility section) |
+| 3 | Axe in CI, all screens and states, 0 violations, no blanket exceptions | partly (gaps: error page, visible toast, empty statement detail, edit-form submit-empty) | met: the named states added (0c237df); `empty` and `first-use` run on an empty instance of the E2E stack; 108 examples, 0 violations |
 | 4 | Domain terms from the glossary | met | met |
 | 5 | Review report per stage, Blockers/Majors fixed or justified | partly (no stage 9 report, status table stale) | met: this report, status table updated |
 | 6 | All 5 personas complete their task in the final run | partly (2 reports pending) | met: Helga, Marco, Dr. Weber, Sven and Anna completed their task |

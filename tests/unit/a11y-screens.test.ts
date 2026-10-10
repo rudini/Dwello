@@ -3,7 +3,7 @@ import { readFileSync } from 'fs';
 import screenList from '../a11y/screens.json';
 
 // The axe check (accessibility.feature) visits exactly the screens and states of tests/a11y/screens.json
-const coveredElsewhere = ['empty', 'first-use']; // DOM tests, see docs/design/offene-punkte.md
+const coveredElsewhere: string[] = []; // every state runs in the axe check ('empty' and 'first-use' on the empty instance)
 const feature = readFileSync('tests/e2e/features/accessibility.feature', 'utf8');
 const examples = [...feature.matchAll(/^\s*\| ([\w-]+)\s+\| ([\w-]+)\s+\|$/gm)]
 	.map(([, screen, state]) => `${screen} ${state}`)
