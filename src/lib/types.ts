@@ -221,12 +221,6 @@ export interface InvoicesListData {
 	categories: Category[];
 }
 
-// Categories list response
-export interface CategoriesListData {
-	categories: Category[];
-	total: number;
-}
-
 // Heating Profile types
 export interface HeatingProfile {
 	id: string;
@@ -293,6 +287,7 @@ export interface StatementWithDetails extends Statement {
 	tenantName: string;
 	tenantEmail?: string;
 	tenantCorrespondenceChannel?: 'email' | 'letter';
+	tenantAddress?: string;
 	apartmentUnit: string;
 	apartmentFloor: string;
 	buildingName: string;

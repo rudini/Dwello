@@ -56,6 +56,14 @@ Funktionalität: Abrechnungsdetail
     Wenn der Liegenschaftsverwalter die Abrechnung versendet
     Dann hat die Abrechnung den Status "Versendet"
 
+  Szenario: Vor dem Versand Empfänger und PDF prüfen
+    Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Wenn der Liegenschaftsverwalter die Abrechnung als versendet markieren will
+    Dann nennt die Bestätigung den Empfänger "Eva Frei" mit dem Korrespondenzweg "Per Brief"
+    Und sagt die Bestätigung, dass Dwello die Abrechnung nicht selbst verschickt
+    Und bietet die Bestätigung das PDF der Abrechnung zum Ansehen an
+
   Szenario: Zahlungseingang festhalten
     Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
     Und die Abrechnung 2024 von "Eva Frei" ist versendet

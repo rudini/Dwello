@@ -127,6 +127,29 @@ describe('Abrechnungsdetail', () => {
 		expect(byTestId('statement-delete-confirm')).not.toBeNull();
 	});
 
+	it('fragt vor dem Versenden nach und nennt Empfänger, Korrespondenzweg und PDF', () => {
+		detail();
+		click('statement-send-button');
+		const dialog = document.querySelector('[role="dialog"]')!;
+		expect(dialog.textContent).toContain('Dwello verschickt die Abrechnung nicht selbst');
+		const recipient = byTestId('send-recipient')!.textContent!.replace(/\s+/g, ' ');
+		expect(recipient).toContain('Anna Keller');
+		expect(recipient).toContain('Per E-Mail');
+		expect(recipient).toContain('anna@example.ch');
+		const pdf = byTestId('send-pdf-view')!;
+		expect(pdf.getAttribute('href')).toBe('/statements/s1/pdf?ansehen');
+		expect(pdf.getAttribute('target')).toBe('_blank');
+		expect(byTestId('statement-send-confirm')!.textContent).toContain('Als versendet markieren');
+	});
+
+	it('nennt beim Versand per Brief die Postadresse', () => {
+		detail({ tenantCorrespondenceChannel: 'letter', tenantAddress: 'Ahornweg 3, 8400 Winterthur' });
+		click('statement-send-button');
+		const recipient = byTestId('send-recipient')!.textContent!.replace(/\s+/g, ' ');
+		expect(recipient).toContain('Per Brief');
+		expect(recipient).toContain('Ahornweg 3, 8400 Winterthur');
+	});
+
 	it('bietet eine versendete Abrechnung zum Mahnen und Bezahlen an', () => {
 		detail({ status: 'sent' });
 

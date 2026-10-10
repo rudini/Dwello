@@ -10,6 +10,7 @@
 		variant = 'secondary',
 		href,
 		reload = false,
+		target,
 		type = 'button',
 		formaction,
 		onclick,
@@ -25,6 +26,7 @@
 		variant?: Variant;
 		href?: string;
 		reload?: boolean; // follows href with a full page load
+		target?: '_blank'; // a link that opens in a new tab, e.g. a PDF to look at
 		type?: 'button' | 'submit';
 		formaction?: string;
 		onclick?: (event: MouseEvent) => void;
@@ -48,6 +50,9 @@
 	const classes = $derived(
 		`inline-flex min-h-12 items-center justify-center gap-2 rounded-control border-2 px-6 py-2 text-base font-semibold transition-colors duration-fast disabled:cursor-not-allowed disabled:opacity-60 ${variants[variant]} ${full ? 'w-full' : ''}`
 	);
+
+	// A link only while it can be followed; disabled or busy it is a button that cannot be pressed
+	const isLink = $derived(!!href && !disabled && !busy);
 </script>
 
 {#snippet content()}
@@ -59,15 +64,18 @@
 	{/if}
 {/snippet}
 
-{#if href && !disabled && !busy}
+{#if isLink}
 	<a
 		{href}
 		class={classes}
 		aria-label={ariaLabel}
 		data-testid={testid}
 		data-sveltekit-reload={reload || undefined}
+		{target}
+		rel={target ? 'noopener' : undefined}
 	>
 		{@render content()}
+		{#if target}<span class="sr-only">(öffnet in neuem Tab)</span>{/if}
 	</a>
 {:else}
 	<button

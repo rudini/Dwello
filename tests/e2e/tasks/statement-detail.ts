@@ -3,6 +3,7 @@ import type { Actor } from '../fixtures/actor';
 import {
 	confirmDeleteStatementButton,
 	confirmMarkPaidButton,
+	confirmSendButton,
 	deleteStatementButton,
 	downloadPdfLink,
 	generatePdfButton,
@@ -18,7 +19,13 @@ const click = (target: (page: Actor['page']) => Locator) => async (actor: Actor)
 	await target(actor.page).click();
 };
 
-export const sendStatement = click(sendStatementButton);
+export const openSendConfirmation = click(sendStatementButton);
+
+// The confirmation names the recipient and the PDF; the user confirms having delivered it
+export const sendStatement = async (actor: Actor) => {
+	await sendStatementButton(actor.page).click();
+	await confirmSendButton(actor.page).click();
+};
 
 export const markStatementPaid = async (actor: Actor) => {
 	await markPaidButton(actor.page).click();

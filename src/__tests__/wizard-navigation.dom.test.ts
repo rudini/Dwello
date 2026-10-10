@@ -1,30 +1,36 @@
-import { describe, it, expect, afterEach } from 'vitest';
-import { flushSync, mount, unmount } from 'svelte';
-import WizardNavigation from '../routes/statements/generate/WizardNavigation.svelte';
+import { describe, it, expect, vi } from 'vitest';
 
-let component: ReturnType<typeof mount> | undefined;
-afterEach(() => {
-	if (component) unmount(component);
-	document.body.innerHTML = '';
-});
+vi.mock('$app/forms', () => ({ enhance: () => ({ destroy() {} }) }));
 
-const button = (testid: string) =>
-	document.querySelector<HTMLButtonElement>(`[data-testid="${testid}"]`);
+import WizardNav from '$lib/ui/WizardNav.svelte';
+import { byTestId, click, show } from './helpers/dom';
 
-describe('WizardNavigation', () => {
-	it('geht mit Weiter einen Schritt vor und mit Zurück wieder zurück', () => {
-		component = mount(WizardNavigation, {
-			target: document.body,
-			props: { currentStep: 1, canProceed: true, submitStep: 3, lastStep: 4 }
+// The statement wizard's navigation (formerly its own WizardNavigation) is the shared WizardNav
+describe('Navigation der Assistenten', () => {
+	it('geht mit Zurück einen Schritt zurück und bietet im ersten Schritt Abbrechen', () => {
+		let step = 2;
+		show(WizardNav, {
+			step,
+			last: 5,
+			onback: () => step--,
+			finalLabel: 'Entwürfe erstellen',
+			finalTestid: 'generate-statements-button',
+			cancelHref: '/statements'
 		});
-		expect(button('wizard-back')).toBeNull();
+		click('wizard-back');
+		expect(step).toBe(1);
+	});
 
-		button('wizard-next')!.click();
-		flushSync();
-		expect(button('wizard-back')).not.toBeNull();
-
-		button('wizard-back')!.click();
-		flushSync();
-		expect(button('wizard-back')).toBeNull();
+	it('nennt im letzten Schritt die Aktion des Assistenten', () => {
+		show(WizardNav, {
+			step: 5,
+			last: 5,
+			onback: () => {},
+			finalLabel: 'Entwürfe erstellen',
+			finalTestid: 'generate-statements-button',
+			cancelHref: '/statements'
+		});
+		expect(byTestId('generate-statements-button')!.textContent).toContain('Entwürfe erstellen');
+		expect(byTestId('wizard-next')).toBeNull();
 	});
 });

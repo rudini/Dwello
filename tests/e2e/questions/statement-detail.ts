@@ -1,5 +1,8 @@
 import type { Actor } from '../fixtures/actor';
-import { statementLineItem, statementStatus } from '../interactions/statement-detail';
+import { sendDialog, sendPdfLink, sendRecipient, statementLineItem, statementStatus } from '../interactions/statement-detail';
 
 export const statusOfStatement = (actor: Actor) => statementStatus(actor.page);
 export const heatingCosts = (actor: Actor) => statementLineItem(actor.page, 'Heating');
+export const sendConfirmation = (actor: Actor) => sendDialog(actor.page);
+export const recipient = (actor: Actor) => sendRecipient(actor.page);
+export const pdfToView = (actor: Actor) => sendPdfLink(actor.page);

@@ -3,6 +3,10 @@
 	import ReminderModal from './ReminderModal.svelte';
 	import ReminderHistory from './ReminderHistory.svelte';
 	import ReminderFeedback from './ReminderFeedback.svelte';
+	import SendDialog from './SendDialog.svelte';
+	import StatusActions from './StatusActions.svelte';
+	import PdfAction from './PdfAction.svelte';
+	import MetadataCard from './MetadataCard.svelte';
 	import { addToast } from '$lib/stores';
 	import Button from '$lib/components/Button.svelte';
 	import Icon from '$lib/components/Icon.svelte';
@@ -26,12 +30,9 @@
 	let showMarkPaidModal = $state(false);
 	let showSendReminderModal = $state(false);
 	let showDeleteModal = $state(false);
+	let showSendDialog = $state(false);
 	let isGeneratingPdf = $state(false);
 	let pdfGeneratedAt = $state(untrack(() => data.statement.pdfGeneratedAt));
-
-	function formatDateTime(dateString: string): string {
-		return new Date(dateString).toLocaleString('de-CH');
-	}
 
 	function getBalanceLabel(balance: number): string {
 		if (balance > 0) return 'Nachzahlung durch Mieter';
@@ -100,52 +101,18 @@
 			</div>
 		</div>
 		<div class="flex flex-wrap items-center gap-2">
-			{#if pdfGeneratedAt}
-				<Button
-					href="/statements/{data.statement.id}/pdf"
-					variant="secondary"
-					testid="statement-pdf-download"
-				>
-					<Icon name="picture_as_pdf" size={20} />
-					PDF herunterladen
-				</Button>
-			{:else}
-				<Button
-					variant="secondary"
-					onclick={handleGeneratePdf}
-					disabled={isGeneratingPdf}
-					testid="statement-generate-pdf-button"
-				>
-					<Icon name="picture_as_pdf" size={20} />
-					{isGeneratingPdf ? 'Wird generiert...' : 'PDF generieren'}
-				</Button>
-			{/if}
-			{#if data.statement.status === 'sent' || data.statement.status === 'overdue'}
-				<Button
-					variant="secondary"
-					onclick={() => (showSendReminderModal = true)}
-					testid="statement-reminder-button"
-				>
-					<Icon name="mail" size={20} />
-					Mahnung senden
-				</Button>
-				<Button
-					variant="primary"
-					onclick={() => (showMarkPaidModal = true)}
-					testid="statement-mark-paid-button"
-				>
-					<Icon name="paid" size={20} />
-					Als bezahlt markieren
-				</Button>
-			{/if}
-			{#if data.statement.status === 'draft'}
-				<form method="POST" action="?/send" use:enhance>
-					<Button type="submit" variant="primary" testid="statement-send-button">
-						<Icon name="send" size={20} />
-						Versenden
-					</Button>
-				</form>
-			{/if}
+			<PdfAction
+				id={data.statement.id}
+				generated={!!pdfGeneratedAt}
+				generating={isGeneratingPdf}
+				ongenerate={handleGeneratePdf}
+			/>
+			<StatusActions
+				status={data.statement.status}
+				onremind={() => (showSendReminderModal = true)}
+				onmarkpaid={() => (showMarkPaidModal = true)}
+				onsend={() => (showSendDialog = true)}
+			/>
 		</div>
 	</div>
 	<FieldError message={form?.actionError} />
@@ -356,26 +323,7 @@
 				</div>
 			</Card>
 
-			<!-- Metadata -->
-			{#if data.statement.createdAt || pdfGeneratedAt}
-				<Card>
-					<h2 class="text-sm font-semibold text-ink-muted mb-3">Metadaten</h2>
-					<div class="space-y-2 text-sm">
-						{#if data.statement.createdAt}
-							<div class="flex justify-between">
-								<span class="text-ink-muted">Erstellt</span>
-								<span class="text-gray-700">{formatDateTime(data.statement.createdAt)}</span>
-							</div>
-						{/if}
-						{#if pdfGeneratedAt}
-							<div class="flex justify-between">
-								<span class="text-ink-muted">PDF generiert</span>
-								<span class="text-gray-700">{formatDateTime(pdfGeneratedAt)}</span>
-							</div>
-						{/if}
-					</div>
-				</Card>
-			{/if}
+			<MetadataCard createdAt={data.statement.createdAt} {pdfGeneratedAt} />
 		</div>
 	</div>
 </div>
@@ -414,6 +362,8 @@
 		</Button>
 	</form>
 </Modal>
+
+<SendDialog bind:open={showSendDialog} statement={data.statement} />
 
 <ReminderModal
 	bind:open={showSendReminderModal}

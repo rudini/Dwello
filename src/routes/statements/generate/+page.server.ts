@@ -4,6 +4,7 @@ import { toHeatingProfile } from '$lib/server/heating-profile';
 import { toDistributionKey } from '$lib/server/distribution-key';
 import {
 	generateStatements,
+	invoicesInPeriod,
 	previewStatements,
 	type GenerationRequest
 } from '$lib/server/statement-generation';
@@ -56,9 +57,12 @@ const failed = (err: unknown) =>
 export const actions: Actions = {
 	preview: async ({ request, fetch }) => {
 		try {
-			return {
-				preview: await previewStatements(fetch, generationRequest(await request.formData()))
-			};
+			const run = generationRequest(await request.formData());
+			const [preview, invoices] = await Promise.all([
+				previewStatements(fetch, run),
+				invoicesInPeriod(fetch, run)
+			]);
+			return { preview, invoices };
 		} catch (err) {
 			return failed(err);
 		}

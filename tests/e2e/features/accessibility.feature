@@ -65,11 +65,14 @@ Funktionalität: Barrierefreiheit
       | statement-generate     | default             |
       | statement-generate     | every-wizard-step   |
       | statement-generate     | preview-empty       |
+      | statement-generate     | draft-restored      |
       | statement-detail       | default             |
+      | statement-detail       | send-dialog         |
       | statement-detail       | delete-dialog       |
       | statement-sent-detail  | default             |
       | statement-sent-detail  | reminder-dialog     |
       | statement-sent-detail  | mark-paid-dialog    |
+      | statement-sent-detail  | action-error        |
       | statement-edit         | default             |
       | documents              | default             |
       | config                 | default             |
@@ -95,11 +98,3 @@ Funktionalität: Barrierefreiheit
       | terms                  | default             |
       | analytics              | default             |
       | reports                | default             |
-
-    # Zustände, deren Oberfläche erst in einer späteren Etappe entsteht (docs/design/01-plan.md)
-    @wip
-    Beispiele:
-      | Bildschirm             | Zustand             |
-      | statement-generate     | draft-restored      |
-      | statement-detail       | send-dialog         |
-      | statement-sent-detail  | action-error        |

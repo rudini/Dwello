@@ -96,6 +96,15 @@ const states: Record<string, (page: Page, viewport: Viewport) => Promise<unknown
 		await press(page, 'contract-end-button');
 		await dialog(page);
 	},
+	'send-dialog': async (page) => {
+		await press(page, 'statement-send-button');
+		await dialog(page);
+	},
+	'action-error': async (page) => {
+		await press(page, 'statement-delete-button'); // a sent statement cannot be deleted: the server refuses
+		await press(page, 'statement-delete-confirm');
+		await shows(page, '[data-testid="form-error"]');
+	},
 	'reminder-dialog': async (page) => {
 		await press(page, 'statement-reminder-button');
 		await dialog(page);
@@ -129,7 +138,7 @@ const states: Record<string, (page: Page, viewport: Viewport) => Promise<unknown
 		await shows(page, '[data-testid="overlap-warning"]');
 	},
 	'draft-restored': async (page) => {
-		await page.getByTestId('contract-tenant-select').selectOption({ index: 1 }); // a draft starts with an input
+		await startDraft[new URL(page.url()).pathname](page); // a draft starts with an input
 		await page.getByTestId('save-status').getByText('Entwurf gespeichert').waitFor();
 		await page.reload();
 		await shows(page, '[data-testid="draft-restored"]');
@@ -140,6 +149,7 @@ const states: Record<string, (page: Page, viewport: Viewport) => Promise<unknown
 		await press(page, 'wizard-next');
 		await page.locator('[data-testid^="generate-building-"]').first().check();
 		await press(page, 'wizard-next');
+		await press(page, 'wizard-next'); // heating profile and fee as proposed
 		await page.getByTestId('preview-empty').waitFor();
 	}
 };
@@ -193,17 +203,31 @@ async function contractWizardSteps(page: Page) {
 
 // Statement wizard: period, buildings, preview; every step is checked before going on
 async function statementWizardSteps(page: Page) {
-	const found = await violations(page);
-	await page.getByTestId('wizard-next').click();
+	const found = await violations(page); // "Abrechnungsperiode"
 	const building = page.locator('[data-testid^="generate-building-"]').first();
-	await building.waitFor(); // step 2 is shown
-	found.push(...(await violations(page)));
+	const nextStep = async (shown: string) => {
+		await press(page, 'wizard-next');
+		await page.getByTestId(shown).first().waitFor();
+		found.push(...(await violations(page)));
+	};
+	await nextStep('generate-all-buildings'); // "Gebäude"
 	await building.check();
-	await page.getByTestId('wizard-next').click();
-	await page.getByTestId('preview-count').waitFor();
-	found.push(...(await violations(page)));
+	await nextStep('heating-profile-select'); // "Heizprofil und Verwaltungspauschale"
+	await nextStep('preview-count'); // "Vorschau", calculated on the server
+	const confirm = page.getByTestId('confirm-missing-invoices');
+	if (await confirm.isVisible()) await confirm.check(); // a building without invoices must be confirmed
+	await nextStep('generate-drafts-note'); // "Erstellen"
 	return found;
 }
+
+// The first input of each wizard, which starts its draft
+const startDraft: Record<string, (page: Page) => Promise<unknown>> = {
+	'/contracts/new': (page) => page.getByTestId('contract-tenant-select').selectOption({ index: 1 }),
+	'/statements/generate': async (page) => {
+		await press(page, 'wizard-next');
+		await page.locator('[data-testid^="generate-building-"]').first().check();
+	}
+};
 
 const wizards: Record<string, (page: Page) => Promise<string[]>> = {
 	'/contracts/new': contractWizardSteps,

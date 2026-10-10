@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import BuildingField from '../routes/apartments/new/BuildingField.svelte';
 import StatusField from '../routes/apartments/[id]/edit/StatusField.svelte';
 import DefaultsSection from '../routes/config/DefaultsSection.svelte';
-import PeriodStep from '../routes/statements/generate/PeriodStep.svelte';
+import SettingsStep from '../routes/statements/generate/SettingsStep.svelte';
 import { byTestId } from './helpers/dom';
 import { hydrateAs, serverRender } from './helpers/hydrate';
 
@@ -91,15 +91,17 @@ describe('Auswahl vor der Hydration in Erfassungsformularen', () => {
 	it('Abrechnungen erstellen: behält das gewählte Heizprofil', async () => {
 		const props = {
 			heatingProfiles,
-			periodStart: '2024-01-01',
-			periodEnd: '2024-12-31',
-			heatingProfileId: ''
+			distributionKeys: [],
+			heatingProfileId: '',
+			managementFeePercent: 3,
+			managementFeeDistributionKeyId: '',
+			errors: {}
 		};
-		await serverRender('routes/statements/generate/PeriodStep.svelte', props as never);
+		await serverRender('routes/statements/generate/SettingsStep.svelte', props as never);
 		select('heating-profile-select').value = 'h2';
 
 		let heatingProfileId = '';
-		hydrateAs(PeriodStep, {
+		hydrateAs(SettingsStep, {
 			...props,
 			heatingProfiles: heatingProfiles as never,
 			get heatingProfileId() {

@@ -12,12 +12,12 @@ Brief: `docs/REDESIGN_BRIEF.md`. Resume rules: `docs/design/arbeitsregeln.md`.
 | 3 Icons + illustrations | done | 1 round, 2 Majors fixed (`reviews/3-review-1.md`) | 79 examples, 0 violations | passed (9886b28) | | | |
 | 4 Shell, navigation, dashboard | done | 1 round, 3 Majors + persona Blocker fixed (`reviews/4-review-1.md`) | 0 violations (955733a) | passed (955733a, edf1dc4) |
 | 5 Rental contract wizard | done | 2 rounds (`reviews/5-review-1.md`, `5-review-2.md`), all Blockers/Majors fixed | 0 violations (5 contract-new states) | passed (bd2ea7c, 9d83882) | | | |
-| 6 Statement wizard | open | | | |
+| 6 Statement wizard | in progress | | | |
 | 7 Remaining screens | open | | | |
 | 8 Remove old design system | open | | | |
 | 9 Final | open | | | |
 
-**Next step:** stage 6 – statement wizard with plausibility checks, send confirmation and PDF preview access.
+**Next step:** stage 6 – commit, CI, review, all personas, checkpoint summary.
 
 ## Log
 
@@ -102,3 +102,12 @@ Brief: `docs/REDESIGN_BRIEF.md`. Resume rules: `docs/design/arbeitsregeln.md`.
 - Stage 6 (statement wizard): warning when the period has no invoices or invoices only for part of it (Anna, Marco, Dr. Weber – Blockers); step "Erstellen" must say that drafts are made, nothing is sent; confirmation before «Versenden» with recipient and PDF preview; old unsent drafts flagged (Anna); mobile: no horizontal scrolling, 48 px targets (Marco); trace the Verwaltungspauschale base and the Verteilschlüssel per line (Dr. Weber).
 - Stage 7: contract list/detail "AKTIV … – heute" for future contracts (Helga, Sven); English category/heating profile names; "Mietstagen" typo; one name for the management fee and Akonto everywhere; Saldo "CHF-83.43" format and US date on the statement edit page; clickable list rows; tenant form in the new design with "erfassen"; invoice date hint (Marco).
 - Review round 1 committed (ca34041, 9d83882), CI green. Review round 2 and re-runs of Helga and Sven (`personas/helga-5b.md`, `sven-5b.md`): strict amounts, in-place normalising, impossible years rejected, past start confirmed by a second "Weiter" (read out), longer confirmation – `reviews/5-review-2.md`.
+
+### Stage 6 – Statement wizard
+
+- ATDD: `statement-generate.feature` – warning for a building without invoices and confirmation, invoices named in the preview, "nothing is sent" before creating, draft restored; `statement-detail.feature` – recipient, Korrespondenzweg and PDF before marking as sent. Watched them fail.
+- Logic (TDD): `src/lib/statement-wizard.ts` (five steps, step checks incl. impossible years, invoices per building in words, draft restore without deleted buildings/heating profiles); `invoicesInPeriod` (BFF, same filter as the statement calculation: utility invoices dated in the period); the preview action returns them.
+- UI: `/statements/generate` rebuilt with the new components in five steps (Abrechnungsperiode → Gebäude → Heizprofil und Verwaltungspauschale → Vorschau → Erstellen): dates in words, buildings as cards, preview as a list (no sideways scrolling on phones) with the Saldo in words ("Nachzahlung"/"Rückerstattung"), invoices per building, warning + confirmation for buildings without invoices (link "Rechnung erfassen"), "Es wird nichts verschickt" before creating, result links to the drafts. Browser draft with save status (shared `DraftNotice`, also used by the contract wizard). Old `WizardNavigation`, `WizardProgress`, `WizardStep`, `ManagementFeeField` removed; their tests moved to the new components.
+- Finding: "Versenden" never sent anything – it only set the status "Versendet". It now opens a confirmation (`SendDialog`): "Dwello verschickt die Abrechnung nicht selbst", recipient with Korrespondenzweg and e-mail/postal address (address loaded from the tenant in the page loader), "PDF ansehen" in a new tab (the BFF creates the PDF if missing and shows it inline), then "Als versendet markieren".
+- Statement detail: action buttons, PDF button and history extracted into new-design components (`StatusActions`, `PdfAction`, `MetadataCard`); the rest of the page follows in stage 7.
+- Axe: statement-generate `every-wizard-step` (all five steps), `preview-empty`, `draft-restored`; statement-detail `send-dialog`; statement-sent-detail `action-error` – no `@wip` examples left.

@@ -1,8 +1,9 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import Alert from '$lib/ui/Alert.svelte';
 import Badge from '$lib/ui/Badge.svelte';
 import EmptyState from '$lib/ui/EmptyState.svelte';
 import SaveStatus from '$lib/ui/SaveStatus.svelte';
+import DraftNotice from '$lib/ui/DraftNotice.svelte';
 import ProgressBar from '$lib/ui/ProgressBar.svelte';
 import { byTestId, show } from './helpers/dom';
 import { markup } from './helpers/snippet';
@@ -76,5 +77,17 @@ describe('Fortschrittsbalken', () => {
 		expect(bar.getAttribute('aria-valuenow')).toBe('2');
 		expect(bar.getAttribute('aria-valuemax')).toBe('5');
 		expect(bar.getAttribute('aria-label')).toBe('Schritt 2 von 5');
+	});
+});
+
+describe('Wiederhergestellter Entwurf', () => {
+	it('sagt, wann der Entwurf zuletzt bearbeitet wurde, und lässt ihn verwerfen', () => {
+		const ondiscard = vi.fn();
+		show(DraftNotice, { savedAt: new Date('2026-10-09T14:32:00'), ondiscard });
+		expect(byTestId('draft-restored')!.textContent).toContain(
+			'zuletzt am 9.10.2026 um 14:32 bearbeitet'
+		);
+		byTestId('draft-discard')!.click();
+		expect(ondiscard).toHaveBeenCalled();
 	});
 });

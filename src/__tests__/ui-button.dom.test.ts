@@ -21,6 +21,19 @@ describe('Button', () => {
 		expect(byTestId('go')!.getAttribute('href')).toBe('/tenants/new');
 	});
 
+	it('öffnet einen Link auf Wunsch in einem neuen Tab und sagt es', () => {
+		show(Button, {
+			children: label,
+			href: '/statements/s1/pdf?ansehen',
+			target: '_blank',
+			testid: 'go'
+		});
+		const link = byTestId('go')!;
+		expect(link.getAttribute('target')).toBe('_blank');
+		expect(link.getAttribute('rel')).toBe('noopener');
+		expect(link.textContent).toContain('(öffnet in neuem Tab)');
+	});
+
 	it('sagt während des Speicherns, dass es arbeitet, und lässt sich nicht erneut auslösen', () => {
 		const onclick = vi.fn();
 		show(Button, {

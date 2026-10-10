@@ -9,7 +9,8 @@
 		onback,
 		finalLabel,
 		busy = false,
-		cancelHref
+		cancelHref,
+		finalTestid = 'submit-button'
 	}: {
 		step: number;
 		last: number;
@@ -17,6 +18,7 @@
 		finalLabel: string;
 		busy?: boolean;
 		cancelHref: string;
+		finalTestid?: string;
 	} = $props();
 </script>
 
@@ -35,7 +37,7 @@
 			icon="save"
 			{busy}
 			busyLabel="Wird gespeichert …"
-			testid="submit-button">{finalLabel}</Button
+			testid={finalTestid}>{finalLabel}</Button
 		>
 	{:else}
 		<Button type="submit" variant="primary" testid="wizard-next">Weiter</Button>

@@ -4,16 +4,24 @@ import { test } from '../fixtures/test';
 import { visit } from '../interactions/navigation';
 import {
 	allPreviewRows,
+	chosenBuilding,
+	draftsOnly,
 	feeAboveGuideline,
+	invoicesOfBuilding,
+	missingInvoicesWarning,
 	generationOutcome,
 	noContractsInPeriod,
 	periodChoice,
 	previewRow
 } from '../questions/statement-generate';
 import {
+	chooseBuilding,
 	generateMore,
 	generateStatements,
+	goToGeneration,
 	openPreview,
+	reopenStatementWizard,
+	tryNextWithoutConfirmation,
 	returnToStatementList,
 	setManagementFee,
 	showCreatedStatements
@@ -28,6 +36,15 @@ import {
 } from '../tasks/statement-generate-api';
 
 const { Given, When, Then } = createBdd(test);
+
+// The preview through the UI or, for @api scenarios, through the backend API
+const previewWith = (
+	driver: string,
+	seed: Parameters<typeof openPreviewViaApi>[0],
+	year: number,
+	buildingId: string,
+	options: Parameters<typeof openPreview>[2]
+) => (driver === 'api' ? openPreviewViaApi(seed, year, buildingId, options) : openPreview(year, buildingId, options));
 
 Given(
 	'der Liegenschaftsverwalter ist auf der Seite zum Erstellen von Abrechnungen',
@@ -96,16 +113,14 @@ Then(
 
 Then('wurden {int} Nebenkostenabrechnungen erstellt', async ({ verwalter, driver }, count: number) => {
 	if (driver === 'api') expect(createdStatements(verwalter)).toBe(count);
-	else await expect(generationOutcome(verwalter)).toHaveText(`${count} Nebenkostenabrechnungen wurden erfolgreich erstellt.`);
+	else await expect(generationOutcome(verwalter)).toContainText(`${count} Nebenkostenabrechnungen sind als Entwurf erstellt`);
 });
 
 When(
 	'der Liegenschaftsverwalter die Vorschau der Abrechnungen {int} für das Gebäude {string} mit dem Heizprofil {string} und {float} % Verwaltungspauschale öffnet',
 	async ({ verwalter, seed, driver }, year: number, building: string, profile: string, fee: number) => {
-		const options = { heatingProfileId: seed.idOf(profile), managementFeePercent: fee };
-		const buildingId = seed.idOf(building)!;
 		await verwalter.perform(
-			driver === 'api' ? openPreviewViaApi(seed, year, buildingId, options) : openPreview(year, buildingId, options)
+			previewWith(driver, seed, year, seed.idOf(building)!, { heatingProfileId: seed.idOf(profile), managementFeePercent: fee })
 		);
 	}
 );
@@ -113,16 +128,62 @@ When(
 When(
 	'der Liegenschaftsverwalter die Vorschau der Abrechnungen {int} für das Gebäude {string} mit {float} % Verwaltungspauschale nach dem Verteilschlüssel {string} öffnet',
 	async ({ verwalter, seed, driver }, year: number, building: string, fee: number, key: string) => {
-		const options = { managementFeePercent: fee, managementFeeKey: key };
-		const buildingId = seed.idOf(building)!;
 		await verwalter.perform(
-			driver === 'api' ? openPreviewViaApi(seed, year, buildingId, options) : openPreview(year, buildingId, options)
+			previewWith(driver, seed, year, seed.idOf(building)!, { managementFeePercent: fee, managementFeeKey: key })
 		);
 	}
 );
 
-When('der Liegenschaftsverwalter die Verwaltungspauschale auf {float} % setzt', async ({ verwalter }, fee: number) => {
-	await verwalter.perform(setManagementFee(fee));
+When(
+	'der Liegenschaftsverwalter für das Gebäude {string} die Verwaltungspauschale auf {float} % setzt',
+	async ({ verwalter, seed }, building: string, fee: number) => {
+		await verwalter.perform(setManagementFee(seed.idOf(building)!, fee));
+	}
+);
+
+When('der Liegenschaftsverwalter das Gebäude {string} für die Abrechnungen wählt', async ({ verwalter, seed }, building: string) => {
+	await verwalter.perform(chooseBuilding(seed.idOf(building)!));
+});
+
+When('der Liegenschaftsverwalter die Seite zum Erstellen von Abrechnungen später wieder öffnet', async ({ verwalter }) => {
+	await verwalter.perform(reopenStatementWizard);
+});
+
+When('der Liegenschaftsverwalter zum Erstellen weitergeht', async ({ verwalter }) => {
+	await verwalter.perform(goToGeneration);
+});
+
+Then(
+	'warnt die Vorschau, dass für {string} in der Abrechnungsperiode keine Rechnungen erfasst sind',
+	async ({ verwalter, names }, building: string) => {
+		await expect(missingInvoicesWarning(verwalter)).toContainText(names.get(building) ?? building);
+	}
+);
+
+Then('warnt die Vorschau nicht vor fehlenden Rechnungen', async ({ verwalter }) => {
+	await expect(missingInvoicesWarning(verwalter)).toHaveCount(0);
+});
+
+When('der Liegenschaftsverwalter ohne Bestätigung zum Erstellen weitergehen will', async ({ verwalter }) => {
+	await verwalter.perform(tryNextWithoutConfirmation);
+});
+
+Then(
+	'nennt die Vorschau für {string} {int} erfasste Rechnung',
+	async ({ verwalter, names }, building: string, count: number) => {
+		await expect(invoicesOfBuilding(verwalter, names.get(building) ?? building)).toContainText(`${count} Rechnung`);
+	}
+);
+
+Then(
+	'erfährt der Liegenschaftsverwalter, dass die Abrechnungen als Entwurf entstehen und nichts verschickt wird',
+	async ({ verwalter }) => {
+		await expect(draftsOnly(verwalter)).toContainText('nichts verschickt');
+	}
+);
+
+Then('ist für die Abrechnungen das Gebäude {string} gewählt', async ({ verwalter, seed }, building: string) => {
+	await expect(chosenBuilding(verwalter, seed.idOf(building)!)).toBeChecked();
 });
 
 Then(

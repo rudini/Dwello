@@ -90,3 +90,25 @@ export async function generateStatements(fetch: Fetch, request: GenerationReques
 	}
 	return contracts.length;
 }
+
+/** Per building: the utility invoices dated in the period, which the statements distribute (plausibility check) */
+export async function invoicesInPeriod(
+	fetch: Fetch,
+	{ buildingIds, periodStart, periodEnd }: GenerationRequest
+) {
+	return Promise.all(
+		buildingIds.map(async (buildingId) => {
+			const { invoices } = await call(
+				fetch,
+				`invoices?buildingId=${buildingId}&dateFrom=${periodStart}&dateTo=${periodEnd}&isValidUtilityCost=true&limit=1000`
+			);
+			const dates = (invoices as { invoiceDate: string }[]).map((i) => i.invoiceDate).sort();
+			return {
+				buildingId,
+				count: dates.length,
+				first: dates[0] ?? null,
+				last: dates.at(-1) ?? null
+			};
+		})
+	);
+}

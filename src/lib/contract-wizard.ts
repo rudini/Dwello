@@ -29,8 +29,8 @@ export function stepErrors(values: ContractFormValues, step: number): Record<str
 }
 
 // A date field typed over can end up in year 12026; such a date is surely a typing mistake
-const IMPOSSIBLE = 'Bitte prüfen Sie das Datum: Das Jahr ist nicht möglich.';
-const impossible = (date: string) => !!date && !/^(19|20)\d\d-/.test(date);
+export const IMPOSSIBLE = 'Bitte prüfen Sie das Datum: Das Jahr ist nicht möglich.';
+export const impossible = (date: string) => !!date && !/^(19|20)\d\d-/.test(date);
 
 function dateErrors({ startDate, endDate, isUnlimited }: ContractFormValues) {
 	return {

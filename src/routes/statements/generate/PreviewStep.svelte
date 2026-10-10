@@ -1,85 +1,118 @@
 <script lang="ts">
-	import Icon from '$lib/components/Icon.svelte';
+	import { invoiceRows } from '$lib/statement-wizard';
+	import Alert from '$lib/ui/Alert.svelte';
+	import Button from '$lib/ui/Button.svelte';
+	import Checkbox from '$lib/ui/Checkbox.svelte';
 	import { formatCurrency } from '$lib/utils/format';
 	import type { PreviewRow } from './preview';
 
-	let { previewRows, periodLabel }: { previewRows: PreviewRow[]; periodLabel: string } = $props();
+	// Step 4: what each rental contract will get, and the invoices behind it; missing invoices are flagged
+	let {
+		previewRows,
+		invoices,
+		buildings,
+		periodLabel,
+		confirmed = $bindable(),
+		error
+	}: {
+		previewRows: PreviewRow[];
+		invoices: Parameters<typeof invoiceRows>[0];
+		buildings: { id: string; name: string }[];
+		periodLabel: string;
+		confirmed: boolean;
+		error?: string;
+	} = $props();
 
-	const previewTotal = $derived(previewRows.reduce((sum, row) => sum + row.totalCosts, 0));
-	const headerClass = 'px-4 py-3 text-xs font-semibold text-ink-muted uppercase tracking-wider';
+	const total = $derived(previewRows.reduce((sum, row) => sum + row.totalCosts, 0));
+	const rows = $derived(invoiceRows(invoices, buildings));
+	const missing = $derived(rows.filter((row) => row.missing));
+	// Saldo > 0: the tenant pays the difference, < 0: the tenant gets it back
+	const saldo = (balance: number) =>
+		`${balance >= 0 ? 'Nachzahlung' : 'Rückerstattung'} ${formatCurrency(Math.abs(balance))}`;
 </script>
 
-<div class="space-y-6">
-	<div>
-		<h2 class="text-lg font-semibold text-gray-900 mb-4">Vorschau</h2>
-		<p class="text-ink-muted mb-6">
-			Überprüfen Sie die Zusammenfassung vor dem Erstellen der Abrechnungen.
+<dl class="grid gap-4 sm:grid-cols-3">
+	<div class="flex flex-col gap-1 rounded-panel bg-sunken p-4">
+		<dt class="text-ink-muted">Abrechnungsperiode</dt>
+		<dd class="font-semibold text-ink">{periodLabel}</dd>
+	</div>
+	<div class="flex flex-col gap-1 rounded-panel bg-sunken p-4">
+		<dt class="text-ink-muted">Anzahl Abrechnungen</dt>
+		<dd class="font-semibold tabular-nums text-ink" data-testid="preview-count">
+			{previewRows.length}
+		</dd>
+	</div>
+	<div class="flex flex-col gap-1 rounded-panel bg-sunken p-4">
+		<dt class="text-ink-muted">Kosten aller Abrechnungen</dt>
+		<dd class="font-semibold tabular-nums text-ink">{formatCurrency(total)}</dd>
+	</div>
+</dl>
+
+<section aria-labelledby="invoices-heading" class="flex flex-col gap-2">
+	<h3 id="invoices-heading" class="text-xl font-bold text-ink">
+		Rechnungen in der Abrechnungsperiode
+	</h3>
+	<ul class="flex flex-col divide-y divide-line">
+		{#each rows as row (row.buildingId)}
+			<li class="flex flex-wrap justify-between gap-x-4 py-2" data-testid="preview-invoices">
+				<span class="font-semibold text-ink">{row.name}</span>
+				<span class={row.missing ? 'font-semibold text-critical' : 'text-ink-muted'}
+					>{row.text}</span
+				>
+			</li>
+		{/each}
+	</ul>
+</section>
+
+{#if missing.length}
+	<Alert tone="caution" title="Rechnungen fehlen" testid="missing-invoices">
+		<p>
+			Für {missing.map((row) => row.name).join(', ')} sind in der Abrechnungsperiode keine Rechnungen
+			erfasst. Ohne Rechnungen werden CHF 0.00 Nebenkosten verteilt, und jeder Mieter erhält sein Akonto
+			zurück.
 		</p>
-	</div>
-
-	<!-- Summary Cards -->
-	<div class="grid gap-4 sm:grid-cols-3">
-		<div class="bg-gray-50 rounded-lg p-4">
-			<p class="text-sm text-ink-muted">Abrechnungsperiode</p>
-			<p class="text-lg font-semibold text-gray-900 mt-1">{periodLabel}</p>
-		</div>
-		<div class="bg-gray-50 rounded-lg p-4">
-			<p class="text-sm text-ink-muted">Anzahl Abrechnungen</p>
-			<p class="text-lg font-semibold text-gray-900 mt-1" data-testid="preview-count">
-				{previewRows.length}
-			</p>
-		</div>
-		<div class="bg-gray-50 rounded-lg p-4">
-			<p class="text-sm text-ink-muted">Gesamtkosten</p>
-			<p class="text-lg font-semibold text-gray-900 mt-1">{formatCurrency(previewTotal)}</p>
-		</div>
-	</div>
-
-	<!-- Breakdown per rental contract -->
-	<div>
-		<h3 class="text-sm font-medium text-gray-700 mb-3">Aufschlüsselung nach Mietvertrag</h3>
-		{#if previewRows.length === 0}
-			<p class="text-ink-muted" data-testid="preview-empty">
-				In dieser Periode gibt es keine Mietverträge.
-			</p>
-		{:else}
-			<div class="border border-gray-200 rounded-lg overflow-hidden">
-				<table class="w-full">
-					<thead class="bg-gray-50">
-						<tr>
-							<th class="{headerClass} text-left">Mieter</th>
-							<th class="{headerClass} text-left">Wohnung</th>
-							<th class="{headerClass} text-right">Kosten</th>
-							<th class="{headerClass} text-right">Saldo</th>
-						</tr>
-					</thead>
-					<tbody class="divide-y divide-gray-200 text-sm text-gray-900">
-						{#each previewRows as row (row.contractId)}
-							<tr data-testid="preview-row">
-								<td class="px-4 py-3">{row.tenantName}</td>
-								<td class="px-4 py-3">{row.apartmentNumber}</td>
-								<td class="px-4 py-3 text-right">{formatCurrency(row.totalCosts)}</td>
-								<td class="px-4 py-3 text-right">{formatCurrency(row.balance)}</td>
-							</tr>
-						{/each}
-					</tbody>
-				</table>
+		<p>Erfassen Sie zuerst die Rechnungen – oder bestätigen Sie, dass es keine gibt.</p>
+		{#snippet action()}
+			<div class="flex flex-col gap-2">
+				<Button href="/invoices/new" icon="invoice">Rechnung erfassen</Button>
+				<Checkbox
+					id="confirm-missing"
+					label="Die Abrechnungen trotzdem erstellen"
+					bind:checked={confirmed}
+					testid="confirm-missing-invoices"
+				/>
+				{#if error}
+					<p class="font-semibold text-critical" data-testid="form-error">{error}</p>
+				{/if}
 			</div>
-		{/if}
-	</div>
+		{/snippet}
+	</Alert>
+{/if}
 
-	<!-- Configuration Summary -->
-	<div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-		<div class="flex items-start gap-3">
-			<Icon name="warning" size={24} class="text-caution flex-shrink-0" />
-			<div>
-				<p class="font-medium text-caution">Vor dem Erstellen beachten</p>
-				<ul class="mt-2 text-sm text-caution space-y-1">
-					<li>• Alle Rechnungen für die Periode sollten erfasst sein</li>
-					<li>• Mieterwechsel sollten korrekt eingetragen sein</li>
-					<li>• Verteilschlüssel müssen konfiguriert sein</li>
-				</ul>
-			</div>
-		</div>
-	</div>
-</div>
+<section aria-labelledby="statements-heading" class="flex flex-col gap-2">
+	<h3 id="statements-heading" class="text-xl font-bold text-ink">Abrechnungen pro Mietvertrag</h3>
+	{#if previewRows.length === 0}
+		<p class="text-ink-muted" data-testid="preview-empty">
+			In dieser Abrechnungsperiode gibt es keine Mietverträge in den gewählten Gebäuden.
+		</p>
+	{:else}
+		<!-- a list instead of a table: readable on phones without scrolling sideways -->
+		<ul class="flex flex-col divide-y divide-line">
+			{#each previewRows as row (row.contractId)}
+				<li
+					class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 py-2"
+					data-testid="preview-row"
+				>
+					<span class="flex flex-col">
+						<span class="font-semibold text-ink">{row.tenantName}</span>
+						<span class="text-ink-muted">Wohnung {row.apartmentNumber}</span>
+					</span>
+					<span class="flex flex-col text-right tabular-nums">
+						<span class="text-ink">Kosten {formatCurrency(row.totalCosts)}</span>
+						<span class="font-semibold text-ink">{saldo(row.balance)}</span>
+					</span>
+				</li>
+			{/each}
+		</ul>
+	{/if}
+</section>

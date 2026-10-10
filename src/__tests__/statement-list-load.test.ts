@@ -75,6 +75,7 @@ describe('PDF einer Abrechnung herunterladen', () => {
 	const call = (response: () => Response) =>
 		downloadPdf({
 			params: { id: 's1' },
+			url: new URL('http://localhost/statements/s1/pdf'),
 			fetch: (async () => response()) as typeof globalThis.fetch
 		} as never);
 

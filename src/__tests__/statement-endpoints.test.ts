@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { POST as markPaid } from '../routes/statements/[id]/mark-paid/+server';
 import { POST as sendReminder } from '../routes/statements/[id]/send-reminder/+server';
 import { POST as generatePdf } from '../routes/api/statements/[id]/generate-pdf/+server';
+import { GET as getPdf } from '../routes/statements/[id]/pdf/+server';
 
 const API = 'http://localhost:3001/api/v1/statements/s1';
 
@@ -61,5 +62,40 @@ describe('POST /api/statements/[id]/generate-pdf', () => {
 
 		expect((await result).status).toBe(200);
 		expect(calls).toEqual([{ method: 'POST', url: `${API}/generate-pdf`, body: {} }]);
+	});
+});
+
+describe('GET /statements/[id]/pdf', () => {
+	const pdf = () => new Response(new Uint8Array([37, 80, 68, 70]), { status: 200 });
+
+	function backend(generated: boolean) {
+		const calls: string[] = [];
+		let ready = generated;
+		const fetch = async (url: string, init?: RequestInit) => {
+			calls.push(`${init?.method ?? 'GET'} ${url}`);
+			if (init?.method === 'POST') return ((ready = true), Response.json({ ok: true }));
+			return ready ? pdf() : Response.json({ error: 'PDF not generated yet' }, { status: 404 });
+		};
+		return { calls, fetch };
+	}
+	const get = (fetch: unknown, search = '') =>
+		getPdf({
+			params: { id: 's1' },
+			fetch,
+			url: new URL(`http://localhost/statements/s1/pdf${search}`)
+		} as never);
+
+	it('lädt das PDF herunter', async () => {
+		const response = await get(backend(true).fetch);
+		expect(response.headers.get('Content-Disposition')).toMatch(/^attachment/);
+	});
+
+	// Before marking a statement as sent, the user looks at the document the tenant gets
+	it('zeigt das PDF zum Ansehen im Browser und erstellt es, wenn es noch fehlt', async () => {
+		const { calls, fetch } = backend(false);
+		const response = await get(fetch, '?ansehen');
+		expect(response.status).toBe(200);
+		expect(response.headers.get('Content-Disposition')).toMatch(/^inline/);
+		expect(calls).toEqual([`GET ${API}/pdf`, `POST ${API}/generate-pdf`, `GET ${API}/pdf`]);
 	});
 });

@@ -23,7 +23,7 @@
 	} from '$lib/contract-wizard';
 	import { addToast } from '$lib/stores';
 	import Alert from '$lib/ui/Alert.svelte';
-	import Button from '$lib/ui/Button.svelte';
+	import DraftNotice from '$lib/ui/DraftNotice.svelte';
 	import SaveStatus from '$lib/ui/SaveStatus.svelte';
 	import Stepper from '$lib/ui/Stepper.svelte';
 	import WizardNav from '$lib/ui/WizardNav.svelte';
@@ -194,25 +194,14 @@
 	data-testid="contract-wizard"
 >
 	{#if restored}
-		<Alert title="Entwurf wiederhergestellt" testid="draft-restored">
-			<p>
-				Sie haben diesen Mietvertrag zuletzt am {restored.at.toLocaleDateString('de-CH')} um {restored.at.toLocaleTimeString(
-					'de-CH',
-					{ hour: '2-digit', minute: '2-digit' }
-				)} bearbeitet. Ihre Angaben sind wieder da.
-			</p>
+		<DraftNotice savedAt={restored.at} ondiscard={discardDraft}>
 			{#if restored.dropped}
 				<p>
 					Der gewählte Mieter oder die gewählte Wohnung ist nicht mehr vorhanden. Bitte wählen Sie
 					neu.
 				</p>
 			{/if}
-			{#snippet action()}
-				<Button variant="secondary" icon="delete" onclick={discardDraft} testid="draft-discard"
-					>Entwurf verwerfen</Button
-				>
-			{/snippet}
-		</Alert>
+		</DraftNotice>
 	{/if}
 
 	<Stepper steps={contractSteps.map((s) => s.label)} current={step} onselect={goTo} />

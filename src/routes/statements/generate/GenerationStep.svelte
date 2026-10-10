@@ -1,52 +1,38 @@
 <script lang="ts">
-	import Button from '$lib/components/Button.svelte';
-	import Icon from '$lib/components/Icon.svelte';
+	import Button from '$lib/ui/Button.svelte';
+	import Illustration from '$lib/ui/Illustration.svelte';
 
-	let {
-		isGenerating,
-		createdCount,
-		count
-	}: { isGenerating: boolean; createdCount: number | null; count: number } = $props();
-
-	const badgeClass = 'inline-flex items-center justify-center w-16 h-16 rounded-full mb-4';
+	// Step 5: before creating, what happens; after, how many drafts there are and where to find them
+	let { count, createdCount }: { count: number; createdCount: number | null } = $props();
 </script>
 
-<div class="text-center py-8">
-	{#if createdCount !== null}
-		<div class="{badgeClass} bg-green-100">
-			<Icon name="check_circle" size={32} class="text-positive" />
-		</div>
-		<h2 class="text-lg font-semibold text-gray-900 mb-2">Abrechnungen erstellt!</h2>
-		<p class="text-ink-muted mb-6" data-testid="generation-result">
-			{createdCount} Nebenkostenabrechnungen wurden erfolgreich erstellt.
+{#if createdCount === null}
+	<div class="flex flex-col items-center gap-4 text-center" data-testid="generate-drafts-note">
+		<Illustration name="statement" />
+		<p class="text-lg text-ink">
+			Es werden {count} Nebenkostenabrechnungen als Entwurf erstellt.
 		</p>
-		<div class="flex items-center justify-center gap-4">
-			<Button href="/statements" variant="primary" testid="show-statements-button">
-				<Icon name="visibility" size={20} />
-				Abrechnungen anzeigen
-			</Button>
-			<Button href="/statements/generate" reload variant="secondary" testid="generate-more-button">
-				<Icon name="add" size={20} />
-				Weitere erstellen
-			</Button>
-		</div>
-	{:else if isGenerating}
-		<div class="{badgeClass} bg-blue-100">
-			<Icon name="sync" size={32} class="text-accent animate-spin" />
-		</div>
-		<h2 class="text-lg font-semibold text-gray-900 mb-2">Abrechnungen werden erstellt...</h2>
-		<p class="text-ink-muted mb-6">Bitte warten Sie, bis der Vorgang abgeschlossen ist.</p>
-	{:else}
-		<div class="{badgeClass} bg-blue-100">
-			<Icon name="receipt_long" size={32} class="text-accent" />
-		</div>
-		<h2 class="text-lg font-semibold text-gray-900 mb-2">Bereit zum Erstellen</h2>
-		<p class="text-ink-muted mb-6">
-			Klicken Sie auf "Abrechnungen erstellen", um {count} Abrechnungen zu generieren.
+		<p class="max-w-prose text-ink-muted">
+			Es wird nichts verschickt. Sie prüfen danach jede Abrechnung und versenden sie einzeln.
 		</p>
-		<Button type="submit" variant="primary" testid="generate-statements-button">
-			<Icon name="play_arrow" size={20} />
-			Abrechnungen erstellen
-		</Button>
-	{/if}
-</div>
+	</div>
+{:else}
+	<div class="flex flex-col items-center gap-4 text-center">
+		<Illustration name="done" />
+		<p class="text-lg font-semibold text-ink" role="status" data-testid="generation-result">
+			{createdCount} Nebenkostenabrechnungen sind als Entwurf erstellt.
+		</p>
+		<p class="max-w-prose text-ink-muted">Prüfen Sie die Entwürfe und versenden Sie sie dann.</p>
+		<div class="flex flex-wrap justify-center gap-4">
+			<Button
+				href="/statements?status=draft"
+				variant="primary"
+				icon="statement"
+				testid="show-statements-button">Entwürfe ansehen</Button
+			>
+			<Button href="/statements/generate" reload icon="add" testid="generate-more-button"
+				>Weitere Abrechnungen erstellen</Button
+			>
+		</div>
+	</div>
+{/if}
