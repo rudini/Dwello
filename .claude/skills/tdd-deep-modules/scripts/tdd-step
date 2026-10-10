@@ -6,6 +6,8 @@ import sys
 phase = sys.argv[1]
 message = sys.argv[2] if len(sys.argv) > 2 else phase
 run = subprocess.run([sys.executable, "-m", "unittest", "discover"], capture_output=True, text=True)
+if phase == "red" and run.returncode == 0:
+    sys.exit("tdd-step: refused: red needs a failing assertion, but the suite passes")
 subprocess.run(["git", "add", "-A"], check=True)
 subprocess.run(["git", "commit", "-q", "-m", f"{phase}: {message}",
                 "--trailer", f"TDD-Phase: {phase}",
