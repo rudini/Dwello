@@ -26,6 +26,8 @@ summary = run.stderr.strip().splitlines()[-1]
 assertion_failure = summary.startswith("FAILED (failures=") and "errors=" not in summary
 if phase == "red" and not assertion_failure:
     sys.exit(f"tdd-step: refused: red needs a failing assertion, but the suite says: {summary}")
+if phase == "green" and run.returncode != 0:
+    sys.exit(f"tdd-step: refused: green needs all tests passing, but the suite says: {summary}")
 production = [f for f in changed_files() if is_production(f)]
 if phase == "red" and production:
     sys.exit(f"tdd-step: refused: production code changed: {', '.join(production)}")
