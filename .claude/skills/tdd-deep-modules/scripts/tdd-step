@@ -9,14 +9,18 @@ def git(*args):
     return subprocess.run(["git", *args], check=True, capture_output=True, text=True).stdout
 
 
+def is_code(path):
+    return path.endswith(".py")
+
+
 def is_production(path):
     name = PurePosixPath(path).name
-    return name.endswith(".py") and not (name.startswith("test_") or name.endswith("_test.py"))
+    return is_code(path) and not (name.startswith("test_") or name.endswith("_test.py"))
 
 
 def changed_files():
     tracked = git("diff", "--name-only", "HEAD").splitlines()
-    return tracked + git("ls-files", "--others", "--exclude-standard").splitlines()
+    return sorted(tracked + git("ls-files", "--others", "--exclude-standard").splitlines())
 
 
 # Phase -> phases it may follow. A red cycle must close with green before anything else.
@@ -45,6 +49,9 @@ if phase == "red" and not assertion_failure:
     sys.exit(f"tdd-step: refused: red needs a failing assertion, but the suite says: {summary}")
 if phase in ("green", "refactor") and run.returncode != 0:
     sys.exit(f"tdd-step: refused: {phase} needs all tests passing, but the suite says: {summary}")
+code = [f for f in changed_files() if is_code(f)]
+if phase == "test" and code:
+    sys.exit(f"tdd-step: refused: test phase may only change the test list, not code: {', '.join(code)}")
 production = [f for f in changed_files() if is_production(f)]
 if phase == "red" and production:
     sys.exit(f"tdd-step: refused: production code changed: {', '.join(production)}")
