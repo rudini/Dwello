@@ -247,3 +247,55 @@ Append one entry per session: date, phase, result of each exit gate (done / not 
 - `--fallow auto` uses only `node_modules/.bin/fallow`.
 - The weight sum is fixed, so scores without Fallow are at most about 95.
 - Conservative defaults until Phase 4: `failThreshold` 70, `tolerance` 5, `minInterfaceSize` 5.
+
+### 2026-10-10, Phase 2 (gate): done
+
+**Exit gates**
+- X2.1 done. One test per gate, each seen failing first at the unit level (`test/gate.test.ts`, `test/git.test.ts`, `test/baseline.test.ts`) and end to end in temporary git repositories (`test/check.test.ts`):
+  - G1: a new shallow module fails; an existing module that crosses the threshold is labelled "now shallow, not in the baseline".
+  - G2: fails only when the module is flagged and worse than its baseline score by more than `tolerance` (score - 5 passes, score - 6 fails).
+  - G3: an unchanged legacy module passes `check` but is listed by `scan`; a touched baselined module that did not worsen passes; renames (`git mv` and a plain `mv`) keep their baseline entry.
+  - G4: a reasonless suppression in a changed file fails; in an unchanged file it does not.
+  - G5: no git repository, an unknown `--changed-since` ref, a corrupt baseline or a repository without commits exit 2 with a JSON envelope.
+  - G6: the verdict is identical with `--fallow off` and with a stand-in Fallow, while the Fallow run demonstrably used other inputs and gave another score.
+  
+  Mutation checks: ignoring the old path, disabling G2, or raising the Fallow weight each make a test fail.
+- X2.2 done. Three runs in a scratch `git worktree` of HEAD (last on 7567349), with node_modules symlinked and the exact package scripts:
+  - A temporary 4-pass-through facade in `src/lib/server/` made `npm run deepcheck:audit` exit 1 with "G1 new shallow module 71" and the fixes.
+  - After committing it, `npm run deepcheck:ci -- claude/exciting-gauss-4lm9d9` exited 1 with an `::error` annotation and a step summary.
+  - After removing it, both exited 0.
+  
+  The independent reviewer reproduced this.
+- X2.3 done. `.deepcheck-baseline.json` is committed: failThreshold 70, fallow true, **0 modules at or above 70 of 124 analyzed**. It must be regenerated after Phase 4 calibration.
+- X2.4 done. `npm run deepcheck:audit` on this repo (clean tree, including npm start-up): **3.6–3.8 s** with Fallow (auto), **2.6–2.8 s** with `--fallow off`. The whole-project graph and analysis are always built. Acceptable for a per-step hook; the reviewer measured 3.7–3.9 s.
+- XC.1 done. Red/green per cycle:
+  - git changed set: 4 cycles, plus 3 review regressions.
+  - Baseline: 3.
+  - Gates: G1, G2, rename, G4 (G3 passed first because the changed-set filter already existed; characterization test).
+  - CLI check, agent mode, baseline command, github format, `--scope`, `--use-baseline`: one cycle each.
+  
+  End-to-end and G5/G6 tests passed on their first run, because the behaviour was driven red at the unit level; mutation-checked as listed above. In the first git cycle I wrote too much code and cut it back so that renames, `--changed-since` and errors each had their own red test.
+- XC.2 done. Two review rounds.
+  - Round 1, 10 findings, all fixed with tests except where noted:
+    - The baseline was read from the working tree, so a PR could regenerate it and pass. Now read at HEAD or the merge-base.
+    - A plain `mv` counted as a new module. Now a throwaway-index diff with `-M`.
+    - A lowered `failThreshold` failed touched legacy modules. Now the gate uses the base baseline's threshold and warns; an exit-2 alternative was rejected because a PR changing the threshold could then never pass.
+    - Subdirectory runs missed changes.
+    - The Fallow mode was not recorded in the baseline.
+    - The G1 label; the weak G6 test; agent ordering and cap.
+    - Staged-vs-working-tree: documented only. The working-tree content is judged, not the staged blob.
+  - Round 2, 7 findings, fixed with tests:
+    - Editing `deepcheck.config.json` (overrides, exclude, weights, tolerance) bypassed the gate. The config is now read at the base, with a warning when it differs.
+    - Subdirectory runs lost the baseline. Now `check` resolves the project root.
+    - An untracked nested repo crashed `git add`. Now only TS files are added.
+    - Unclear error without commits.
+  - Logged, not fixed: the throwaway-index `git add` writes loose blobs (harmless, 12 ms); the linked-worktree path has no test (verified manually by the reviewer).
+- XC.3 done. 5 commits in Phase 2 plus this log; the full repo checks pass (lint, check, 1429 frontend tests).
+- XC.4 done. No application code, CI or settings changed. Added `deepcheck:audit`, `deepcheck:ci` and `deepcheck:baseline` to package.json; they are not wired into hooks or CI.
+
+**Decisions.**
+- G1 covers every flagged changed module that is not in the baseline. That includes existing modules crossing the threshold, which differs from the brief's literal "new module"; otherwise a module just below the threshold could grow arbitrarily shallow unchecked.
+- The fingerprint is `<path>#shallow-module`.
+- Agent mode shows 3 findings.
+- A threshold or config change takes effect when merged together with a regenerated baseline.
+- CI must run `svelte-kit sync` before `deepcheck:ci`, otherwise `$lib` imports do not resolve (deepcheck warns).
