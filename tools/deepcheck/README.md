@@ -68,7 +68,15 @@ node tools/deepcheck/src/cli.ts scan --use-baseline   # hide baselined modules t
 | CI job "Deep modules" (`.github/workflows/ci.yml`, pull requests) | `npx svelte-kit sync`, then `npm run deepcheck:ci -- "origin/<base>"`: error annotations and a step summary | yes |
 | `.github/workflows/deepcheck-scan.yml` (`workflow_dispatch`: path, top, min_score; commented weekly `schedule`) | ranked scan to the job summary, JSON and markdown as the `deepcheck-report` artifact | never |
 
-The hook matches commands like fallow-gate.sh does (`git commit`, `git push`, also after `&&` or `;`); `git -C <dir> commit` is not matched, by either gate. The gate takes about 4.5 s with Fallow (3.5 s without) on this repo, so it runs at commit/push, not after every edit.
+The hook matches commands like fallow-gate.sh does (`git commit`, `git push`, also after `&&` or `;`). `git -C <dir> commit` is not matched, by either gate; a command that merely mentions it (`echo git commit`) is.
+
+- **On commit** it judges the working tree against HEAD, so unstaged and untracked TypeScript files count too, even if they are not part of the commit.
+- **On push** it judges everything since the merge-base with the upstream (`@{u}`, else `origin/HEAD`), so committed but unpushed modules are covered.
+- **Baseline and config** are read at that base. Committing a config or baseline change on its own therefore changes what the local hook uses, while CI (merge-base with the PR base) keeps the PR base's versions until they are merged.
+- Only a gate verdict blocks. A crash (e.g. dependencies not installed), a tool error, missing `jq` or `node`, or input that is not JSON fail open with a single notice.
+- The gate takes about 4.5 s with Fallow (3.5 s without) on this repo, so it runs at commit/push, not after every edit.
+
+Not verified: a real GitHub Actions run of the "Deep modules" job and of `deepcheck-scan.yml` (`act` is not available). Both workflows pass actionlint, and their exact shell commands were run locally.
 
 ## What is a module
 

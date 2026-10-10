@@ -1,17 +1,17 @@
 import { spawnSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
+import { copyFileSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
-import { SHALLOW_MODULE, writeFiles, writeRepo } from './helpers.ts';
+import { SHALLOW_MODULE, commitAll, git, writeFiles, writeProject, writeRepo } from './helpers.ts';
 
 const HOOK = fileURLToPath(new URL('../../../.claude/hooks/deepcheck-gate.sh', import.meta.url));
 const SETTINGS = fileURLToPath(new URL('../../../.claude/settings.json', import.meta.url));
 const STORE = 'export const store = new Map<string, string>();\n';
 
 /** Runs the hook the way Claude Code does: PreToolUse JSON on stdin, project dir in the environment. */
-const hook = (root: string, command: string) =>
-	spawnSync('bash', [HOOK], {
-		input: JSON.stringify({ hook_event_name: 'PreToolUse', tool_name: 'Bash', tool_input: { command } }),
+const hook = (root: string, command: string, script = HOOK, raw?: string) =>
+	spawnSync('bash', [script], {
+		input: raw ?? JSON.stringify({ hook_event_name: 'PreToolUse', tool_name: 'Bash', tool_input: { command } }),
 		env: { ...process.env, CLAUDE_PROJECT_DIR: root },
 		encoding: 'utf8',
 		timeout: 60_000
@@ -55,5 +55,33 @@ describe('deepcheck Claude Code hook (commit/push gate, like fallow-gate.sh)', (
 				{ type: 'command', command: '"$CLAUDE_PROJECT_DIR"/.claude/hooks/deepcheck-gate.sh', timeout: 60 }
 			])
 		);
+	});
+
+	it('fails open with a notice when deepcheck itself crashes (e.g. before npm ci), never blocking', () => {
+		const install = writeProject({ 'tools/deepcheck/src/cli.ts': "throw new Error('Cannot find package ts-morph');\n" });
+		writeFiles(install, { '.claude/hooks/.keep': '' });
+		copyFileSync(HOOK, `${install}/.claude/hooks/deepcheck-gate.sh`);
+		const result = hook(writeRepo({ 'src/store.ts': STORE }), 'git commit -m x', `${install}/.claude/hooks/deepcheck-gate.sh`);
+		expect(result.status).toBe(0);
+		expect(result.stderr).toMatch(/^deepcheck-gate: deepcheck error \(.*Cannot find package ts-morph.*\), skipping\.\n$/);
+	});
+
+	it('on git push checks what is not pushed yet, against the upstream', () => {
+		const root = writeRepo({ 'src/store.ts': STORE });
+		const remote = writeProject({});
+		git(remote, 'init', '-q', '--bare');
+		git(root, 'remote', 'add', 'origin', remote);
+		git(root, 'push', '-q', '-u', 'origin', 'main');
+		writeFiles(root, { 'src/shallow.ts': SHALLOW_MODULE });
+		commitAll(root, 'shallow, committed but not pushed');
+		const result = hook(root, 'git push');
+		expect(result.status).toBe(2);
+		expect(result.stderr).toContain('G1 new shallow module');
+	});
+
+	it('ignores stdin that is not JSON with a single notice', () => {
+		const result = hook(writeRepo({ 'src/store.ts': STORE }), '', HOOK, 'not json');
+		expect(result.status).toBe(0);
+		expect(result.stderr).toBe('deepcheck-gate: hook input is not JSON, skipping deepcheck.\n');
 	});
 });

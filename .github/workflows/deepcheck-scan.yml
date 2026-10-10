@@ -14,7 +14,7 @@ on:
         required: false
         default: '50'
       min_score:
-        description: Lowest score to list (empty for flagged modules only, see docs/deepcheck-validation.md)
+        description: Lowest score to list (35 lists the modules worth a look; empty lists flagged modules only, see docs/deepcheck-validation.md)
         required: false
         default: '35'
   # schedule:
@@ -43,10 +43,12 @@ jobs:
         run: |
           args=(--top "$SCAN_TOP")
           if [ -n "$SCAN_MIN_SCORE" ]; then args+=(--min-score "$SCAN_MIN_SCORE"); fi
-          if [ -n "$SCAN_PATH" ]; then args+=("$SCAN_PATH"); fi
+          # The path comes last, after --, so an input like --output=... stays a path
+          path=()
+          if [ -n "$SCAN_PATH" ]; then path=(-- "$SCAN_PATH"); fi
           mkdir -p deepcheck-report
-          npm run deepcheck:scan -- "${args[@]}" --format markdown --output deepcheck-report/deepcheck.md
-          npm run deepcheck:scan -- "${args[@]}" --format json --output deepcheck-report/deepcheck.json
+          npm run deepcheck:scan -- "${args[@]}" --format markdown --output deepcheck-report/deepcheck.md "${path[@]}"
+          npm run deepcheck:scan -- "${args[@]}" --format json --output deepcheck-report/deepcheck.json "${path[@]}"
           cat deepcheck-report/deepcheck.md >> "$GITHUB_STEP_SUMMARY"
       - name: Upload report
         if: ${{ !cancelled() }}

@@ -12,7 +12,10 @@ if ! command -v jq >/dev/null 2>&1; then
 fi
 
 INPUT="$(cat)"
-CMD="$(jq -r '.tool_input.command // empty' <<<"$INPUT")"
+if ! CMD="$(jq -r '.tool_input.command // empty' <<<"$INPUT" 2>/dev/null)"; then
+  echo "deepcheck-gate: hook input is not JSON, skipping deepcheck." >&2
+  exit 0
+fi
 
 if ! printf '%s\n' "$CMD" | grep -Eq '(^|[[:space:];|&()])git[[:space:]]+(commit|push)([[:space:]]|$)'; then
   exit 0
@@ -26,6 +29,14 @@ fi
 ROOT="${CLAUDE_PROJECT_DIR:-$(pwd)}"
 CLI="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)/tools/deepcheck/src/cli.ts"
 
+# A commit is judged against HEAD (working tree included); a push against the upstream, so commits
+# not pushed yet are covered even when the tree is clean (like fallow audit's merge-base).
+ARGS=(check --agent)
+if printf '%s\n' "$CMD" | grep -Eq '(^|[[:space:];|&()])git[[:space:]]+push([[:space:]]|$)'; then
+  BASE="$(cd "$ROOT" && { git merge-base HEAD '@{u}' 2>/dev/null || git merge-base HEAD origin/HEAD 2>/dev/null || true; })"
+  if [ -n "$BASE" ]; then ARGS+=(--changed-since "$BASE"); fi
+fi
+
 TMP_OUT="$(mktemp)"
 TMP_ERR="$(mktemp)"
 cleanup() {
@@ -33,13 +44,14 @@ cleanup() {
 }
 trap cleanup EXIT
 
-if (cd "$ROOT" && node "$CLI" check --agent) >"$TMP_OUT" 2>"$TMP_ERR"; then
+if (cd "$ROOT" && node "$CLI" "${ARGS[@]}") >"$TMP_OUT" 2>"$TMP_ERR"; then
   STATUS=0
 else
   STATUS=$?
 fi
 
-if [ "$STATUS" -eq 1 ]; then
+# Only a gate verdict blocks; a crash (e.g. dependencies not installed) also exits 1 but has no verdict.
+if [ "$STATUS" -eq 1 ] && grep -q 'fail the deep-module gate' "$TMP_OUT"; then
   {
     echo "deepcheck-gate: blocked: changed modules fail the deep-module gate. Fix the design before committing"
     echo "deepcheck-gate: (details: npm run deepcheck:audit; deliberate exception: // deepcheck-ignore-file -- reason)."
@@ -49,7 +61,8 @@ if [ "$STATUS" -eq 1 ]; then
 fi
 
 if [ "$STATUS" -ne 0 ]; then
-  echo "deepcheck-gate: deepcheck error ($(sed -n '1p' "$TMP_ERR" | sed 's/^deepcheck: //')), skipping." >&2
+  REASON="$(grep -m1 -E '^(deepcheck: |[A-Za-z]*Error)' "$TMP_ERR" || sed -n '1p' "$TMP_ERR")"
+  echo "deepcheck-gate: deepcheck error (${REASON#deepcheck: }), skipping." >&2
   exit 0
 fi
 

@@ -46,5 +46,8 @@ describe('GitHub Actions wiring', () => {
 		expect(scan).toContain('$GITHUB_STEP_SUMMARY');
 		expect(scan).toContain('uses: actions/upload-artifact@v4');
 		expect(scan).not.toContain('--fail-on-score');
+		// the path input goes after `--`, so a value like --output=... cannot become an option
+		expect(scan).toContain('-- "$SCAN_PATH"');
+		expect(scan).not.toContain('args+=("$SCAN_PATH")');
 	});
 });
