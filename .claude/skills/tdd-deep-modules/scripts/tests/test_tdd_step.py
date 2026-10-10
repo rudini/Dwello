@@ -525,3 +525,15 @@ class TddStepTest(unittest.TestCase):
         repo.write("calc.test.js", VITEST_TEST.replace(
             "  expect(", "  setTimeout(() => null.x, 0);\n  expect(") + 'test("waits", () => new Promise((r) => setTimeout(r, 50)));\n')
         self.assert_refused(repo, "red", "red needs a failing assertion")
+
+    def test_pytest_raises_and_fail_count_as_red(self):
+        bodies = {"raises": "    with pytest.raises(ValueError):\n        add(1, 2)\n",
+                  "fail": "    if add(1, 2) != 3:\n        pytest.fail('wrong sum')\n"}
+        for name, body in bodies.items():
+            with self.subTest(name):
+                repo = Repo(self, {"calc.py": WRONG_ADD, "pytest.ini": "[pytest]\n"})
+                repo.write("test_calc.py", f"import pytest\nfrom calc import add\n\n\ndef test_it():\n{body}")
+
+                result = repo.run("tdd-step", "red", "behaves")
+
+                self.assertEqual(result.returncode, 0, result.stderr)
