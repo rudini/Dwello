@@ -52,6 +52,22 @@ describe('Kategorien anzeigen', () => {
 			})
 		]);
 	});
+
+	// Dwello's own categories keep their English key; one recorded here is keyed by its German name
+	it('erkennt die vordefinierten Kategorien an ihrem Schlüssel', async () => {
+		const fetch = (async () =>
+			Response.json({
+				categories: [
+					{ id: 'c1', name: 'Heating', nameDE: 'Heizung' },
+					{ id: 'c2', name: 'Gartenpflege', nameDE: 'Gartenpflege' }
+				],
+				total: 2
+			})) as typeof globalThis.fetch;
+
+		const data = (await load({ fetch } as never)) as { categories: { predefined: boolean }[] };
+
+		expect(data.categories.map((c) => c.predefined)).toEqual([true, false]);
+	});
 });
 
 describe('Neue Kategorie', () => {

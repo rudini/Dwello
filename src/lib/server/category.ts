@@ -4,7 +4,7 @@ import { deleteRecord, fetchRecord, saveRecord } from './save-form';
 const API = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1/categories`;
 const LIST = '/config/categories';
 
-export type CategoryWithUsage = Category & { usageCount: number };
+export type CategoryWithUsage = Category & { usageCount: number; predefined: boolean };
 
 /** Backend category as shown in the German interface: `name` stays the English key for invoice recognition */
 export function toCategory(c: Record<string, unknown>): CategoryWithUsage {
@@ -17,7 +17,9 @@ export function toCategory(c: Record<string, unknown>): CategoryWithUsage {
 		isAllowedUtilityCost: (c.isAllowedUtilityCost ?? true) as boolean,
 		description: (c.description || '') as string,
 		sortOrder: Number(c.sortOrder) || 0,
-		usageCount: Number(c.invoiceCount) || 0
+		usageCount: Number(c.invoiceCount) || 0,
+		// Dwello's own categories keep their English key (and English description); one recorded here is keyed by its German name
+		predefined: !!c.nameDE && c.name !== c.nameDE
 	};
 }
 
