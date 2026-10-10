@@ -26,7 +26,7 @@ def last_phase():
 
 phase = sys.argv[1]
 previous = last_phase()
-if phase == "green" and previous != "red":
+if (phase == "green" and previous != "red") or (phase == "refactor" and previous not in ("green", "refactor")):
     sys.exit(f"tdd-step: refused: {phase} cannot follow {previous}")
 message = sys.argv[2] if len(sys.argv) > 2 else phase
 run = subprocess.run([sys.executable, "-m", "unittest", "discover"], capture_output=True, text=True)
