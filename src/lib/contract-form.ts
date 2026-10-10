@@ -57,17 +57,19 @@ function endDateError({ isUnlimited, startDate, endDate }: ContractFormValues) {
 		return 'Vertragsende muss nach Vertragsbeginn liegen';
 }
 
+// Francs and up to two decimals of Rappen; anything else ("1.450", "1,450.00") would be read as a wrong amount
+const FRANCS = /^\d+(\.\d{1,2})?$/;
+const AMOUNT_HINT = "Bitte geben Sie einen gültigen Betrag ein, zum Beispiel 1450.00 oder 1'450.";
+
 function baseRentError(baseRent: string) {
 	if (!baseRent) return 'Nettomiete ist erforderlich';
-	if (isNaN(parseFloat(baseRent)) || parseFloat(baseRent) <= 0)
-		return 'Bitte geben Sie eine gültige Miete ein';
+	if (!FRANCS.test(String(baseRent))) return AMOUNT_HINT;
+	if (parseFloat(baseRent) <= 0) return 'Bitte geben Sie eine gültige Miete ein';
 }
 
 // Optional amounts may be left empty, but not negative
 const amountError = (amount: string) =>
-	amount && (isNaN(parseFloat(amount)) || parseFloat(amount) < 0)
-		? 'Bitte geben Sie einen gültigen Betrag ein'
-		: undefined;
+	amount && !FRANCS.test(String(amount)) ? AMOUNT_HINT : undefined;
 
 /** Error message per field; empty when the contract can be saved */
 export function validateContract(values: ContractFormValues): Record<string, string> {

@@ -12,26 +12,31 @@ Funktionalität: Neuen Mietvertrag erfassen
     Und der Liegenschaftsverwalter ist auf der Seite "Neuer Mietvertrag"
 
   Szenario: Unbefristeten Mietvertrag erfassen
-    Wenn der Liegenschaftsverwalter "Anna Keller" die Wohnung "2.01" ab "2025-01-01" für "950" Franken vermietet
+    Wenn der Liegenschaftsverwalter "Anna Keller" die Wohnung "2.01" ab "2027-01-01" für "950" Franken vermietet
     Dann ist der Liegenschaftsverwalter auf der Mietvertragsliste
     Und sieht der Liegenschaftsverwalter die Bestätigung, dass der Mietvertrag von "Anna Keller" gespeichert ist
     Und der Mietvertrag von "Anna Keller" ist in der Liste auffindbar
 
   Szenario: Vor dem Speichern alle Angaben prüfen
-    Wenn der Liegenschaftsverwalter "Anna Keller" die Wohnung "2.01" ab "2025-01-01" für "950" Franken mit "180" Franken Akonto bis zur Prüfung erfasst
+    Wenn der Liegenschaftsverwalter "Anna Keller" die Wohnung "2.01" ab "2027-01-01" für "950" Franken mit "180" Franken Akonto bis zur Prüfung erfasst
     Dann zeigt die Prüfung "Mieter" mit "Anna Keller"
     Und zeigt die Prüfung "Wohnung" mit "2.01"
-    Und zeigt die Prüfung "Vertragsbeginn" mit "Mittwoch, 1. Januar 2025"
+    Und zeigt die Prüfung "Vertragsbeginn" mit "Freitag, 1. Januar 2027"
     Und zeigt die Prüfung "Vertragsende" mit "Unbefristet"
     Und zeigt die Prüfung "Akonto" mit "CHF 180.00"
     Und zeigt die Prüfung "Monatlich total" mit "CHF 1’130.00"
+
+  Szenario: Vertragsbeginn in der Vergangenheit bestätigen
+    Wenn der Liegenschaftsverwalter "Anna Keller" die Wohnung "2.01" ab "2020-01-01" für "950" Franken vermietet und den Vertragsbeginn bestätigt
+    Dann ist der Liegenschaftsverwalter auf der Mietvertragsliste
+    Und der Mietvertrag von "Anna Keller" ist in der Liste auffindbar
 
   Szenario: Ohne Mieter geht es nicht weiter
     Wenn der Liegenschaftsverwalter ohne Angaben weitergeht
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Bitte wählen Sie einen Mieter aus"
 
   Szenario: Nettomiete fehlt
-    Wenn der Liegenschaftsverwalter "Anna Keller" die Wohnung "2.01" ab "2025-01-01" ohne Nettomiete vermieten will
+    Wenn der Liegenschaftsverwalter "Anna Keller" die Wohnung "2.01" ab "2027-01-01" ohne Nettomiete vermieten will
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Nettomiete ist erforderlich"
 
   Szenario: Zurück verliert keine Angaben

@@ -21,13 +21,15 @@ const data = {
 	],
 	apartments: [
 		{ id: 'a1', unit: '2.01', building: 'Ahornhof' },
-		{ id: 'a2', unit: '2.02', building: 'Ahornhof' }
+		{ id: 'a2', unit: '2.02', building: 'Ahornhof' },
+		{ id: 'a3', unit: '2.03', building: 'Ahornhof' }
 	]
 };
 // As the contract list answers: a2 is rented without end, a1's last contract ended long ago
 const contractsOf: Record<string, unknown[]> = {
 	a1: [{ id: 'c8', startDate: '2015-01-01', endDate: '2019-12-31', tenantName: 'Ueli Graf' }],
-	a2: [{ id: 'c9', startDate: '2024-04-01', endDate: null, tenantName: 'Eva Frei' }]
+	a2: [{ id: 'c9', startDate: '2024-04-01', endDate: null, tenantName: 'Eva Frei' }],
+	a3: [{ id: 'c7', startDate: '2015-01-01', endDate: '2099-12-31', tenantName: 'Ida Roth' }] // free from 2100
 };
 
 function backend() {
@@ -56,7 +58,7 @@ async function untilReview() {
 	next();
 	select('apartment-select', 'a1');
 	next();
-	type('start-date-input', '2025-01-01');
+	type('start-date-input', '2027-01-01');
 	next();
 	type('contract-base-rent-input', '950');
 	type('contract-advance-payment-input', '180');
@@ -111,6 +113,7 @@ describe('Mietvertrag erfassen', () => {
 		const options = [...byTestId<HTMLSelectElement>('apartment-select')!.options].slice(1);
 		expect(options.map((o) => [o.value, o.disabled])).toEqual([
 			['a1', false],
+			['a3', false],
 			['a2', true]
 		]);
 	});
@@ -131,7 +134,7 @@ describe('Mietvertrag erfassen', () => {
 		next();
 		select('apartment-select', 'a1');
 		next();
-		type('start-date-input', '2025-01-01');
+		type('start-date-input', '2027-01-01');
 		next();
 		expect(document.body.textContent).toContain(
 			'Monatlicher Vorschuss des Mieters für Nebenkosten'
@@ -206,14 +209,46 @@ describe('Prüfungen im Mietvertrag', () => {
 		expect(rent.textContent).toContain('1’450.00');
 	});
 
-	it('fragt nach, wenn der Vertragsbeginn in der Vergangenheit liegt', async () => {
+	async function toPeriod(apartment = 'a1') {
 		await open();
 		select('contract-tenant-select', 't1');
 		next();
-		select('apartment-select', 'a1');
+		await settle();
+		select('apartment-select', apartment);
 		next();
+		await settle();
+	}
+
+	it('fragt nach, wenn der Vertragsbeginn in der Vergangenheit liegt, und geht erst beim zweiten Mal weiter', async () => {
+		await toPeriod();
 		type('start-date-input', '2020-01-11');
-		expect(byTestId('start-date-notice')!.textContent).toContain('liegt in der Vergangenheit');
+		expect(byTestId('start-date-notice')!.getAttribute('role')).toBe('status'); // read out while typing
+		next();
+		await settle();
+		expect(heading()).toBe('Vertragsdauer');
+		expect(byTestId('form-error')!.textContent).toContain('nochmals auf «Weiter»');
+		expect(document.activeElement).toBe(byTestId('start-date-input'));
+		next();
+		await settle();
+		expect(heading()).toBe('Miete');
+	});
+
+	it('lehnt ein unmögliches Datum ab', async () => {
+		await toPeriod();
+		type('start-date-input', '12026-01-12');
+		next();
+		await settle();
+		expect(byTestId('form-error')!.textContent).toContain('Bitte prüfen Sie das Datum');
+	});
+
+	it('füllt einen geleerten Vertragsbeginn nicht wieder aus', async () => {
+		await toPeriod('a3');
+		expect(byTestId<HTMLInputElement>('start-date-input')!.value).toBe('2100-01-01'); // suggested
+		type('start-date-input', '');
+		next();
+		await settle();
+		expect(byTestId<HTMLInputElement>('start-date-input')!.value).toBe('');
+		expect(byTestId('form-error')!.textContent).toContain('Vertragsbeginn ist erforderlich');
 	});
 
 	it('geht bei einer Überschneidung nicht weiter', async () => {
@@ -227,8 +262,14 @@ describe('Prüfungen im Mietvertrag', () => {
 		type('start-date-input', '2016-01-01');
 		next();
 		expect(byTestId('overlap-warning')).not.toBeNull();
-		expect(document.body.textContent).toContain('Ändern Sie Vertragsbeginn oder Vertragsende');
 		expect(heading()).toBe('Vertragsdauer');
+		// fixed by a limited contract that ends before the old one began: the error goes
+		click(byTestId('contract-duration')!.querySelectorAll('input')[1]);
+		type('end-date-input', '2014-12-31');
+		type('start-date-input', '2014-01-01');
+		await settle();
+		expect(byTestId('overlap-warning')).toBeNull();
+		expect(byTestId('form-error')).toBeNull();
 	});
 });
 

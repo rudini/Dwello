@@ -21,6 +21,7 @@ export type ContractData = {
 	startDate: string;
 	baseRent: string;
 	advancePayment?: string;
+	confirmPastStart?: boolean; // the wizard asks once about a start in the past
 };
 
 // Step "Mieter"
@@ -35,6 +36,7 @@ export const fillContract = (contract: Omit<ContractData, 'tenantId'>) => async 
 	await nextButton(actor.page).click();
 	await startDateInput(actor.page).fill(contract.startDate);
 	await nextButton(actor.page).click();
+	if (contract.confirmPastStart) await nextButton(actor.page).click();
 	await baseRentInput(actor.page).fill(contract.baseRent);
 	if (contract.advancePayment) await advancePaymentInput(actor.page).fill(contract.advancePayment);
 	await nextButton(actor.page).click();

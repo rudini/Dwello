@@ -25,6 +25,8 @@
 	} = $props();
 
 	// TODO(fachlich prüfen): explanations of unbefristet/befristet are not from the glossary
+	const pastStart = $derived(startDateNotice(startDate, today));
+
 	const durations = [
 		{
 			value: 'unlimited',
@@ -61,11 +63,12 @@
 	{@render inWords(startDate, 'start-date-words')}
 </div>
 
-{#if startDateNotice(startDate, today)}
-	<Alert tone="caution" title="Vertragsbeginn prüfen" testid="start-date-notice">
-		<p>{startDateNotice(startDate, today)}</p>
-	</Alert>
-{/if}
+<!-- always present, so screen readers hear the hint when it appears -->
+<div role="status" data-testid="start-date-notice">
+	{#if pastStart}
+		<Alert tone="caution" title="Vertragsbeginn prüfen"><p>{pastStart}</p></Alert>
+	{/if}
+</div>
 
 <RadioGroup
 	name="duration"
@@ -96,8 +99,7 @@
 {#if overlap}
 	<Alert tone="caution" title="Zeitraum überschneidet sich" testid="overlap-warning">
 		<p>
-			{overlap}. Pro Wohnung darf sich kein Mietvertrag mit einem anderen überschneiden. Ändern Sie
-			Vertragsbeginn oder Vertragsende.
+			{overlap}. Pro Wohnung darf sich kein Mietvertrag mit einem anderen überschneiden.
 		</p>
 	</Alert>
 {/if}

@@ -22,8 +22,21 @@ export const contractSteps: { label: string; fields: Field[] }[] = [
 export function stepErrors(values: ContractFormValues, step: number): Record<string, string> {
 	const fields: string[] = contractSteps[step - 1].fields;
 	return Object.fromEntries(
-		Object.entries(validateContract(values)).filter(([field]) => fields.includes(field))
+		Object.entries({ ...validateContract(values), ...dateErrors(values) }).filter(([field]) =>
+			fields.includes(field)
+		)
 	);
+}
+
+// A date field typed over can end up in year 12026; such a date is surely a typing mistake
+const IMPOSSIBLE = 'Bitte prüfen Sie das Datum: Das Jahr ist nicht möglich.';
+const impossible = (date: string) => !!date && !/^(19|20)\d\d-/.test(date);
+
+function dateErrors({ startDate, endDate, isUnlimited }: ContractFormValues) {
+	return {
+		...(impossible(startDate) && { startDate: IMPOSSIBLE }),
+		...(!isUnlimited && impossible(endDate) && { endDate: IMPOSSIBLE })
+	};
 }
 
 /** Step to go back to when saving finds errors */

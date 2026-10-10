@@ -11,13 +11,13 @@ Brief: `docs/REDESIGN_BRIEF.md`. Resume rules: `docs/design/arbeitsregeln.md`.
 | 2 Tokens + base components + axe | done | 2 rounds (`reviews/2-review-1.md`, `2-review-2.md`), all Majors fixed | 79 examples, 0 violations | passed (afcda10, e62b6cf) | | | |
 | 3 Icons + illustrations | done | 1 round, 2 Majors fixed (`reviews/3-review-1.md`) | 79 examples, 0 violations | passed (9886b28) | | | |
 | 4 Shell, navigation, dashboard | done | 1 round, 3 Majors + persona Blocker fixed (`reviews/4-review-1.md`) | 0 violations (955733a) | passed (955733a, edf1dc4) |
-| 5 Rental contract wizard | in progress | | | |
+| 5 Rental contract wizard | done | 2 rounds (`reviews/5-review-1.md`, `5-review-2.md`), all Blockers/Majors fixed | 0 violations (5 contract-new states) | passed (bd2ea7c, 9d83882) | | | |
 | 6 Statement wizard | open | | | |
 | 7 Remaining screens | open | | | |
 | 8 Remove old design system | open | | | |
 | 9 Final | open | | | |
 
-**Next step:** commit stage 5 review round 1, CI; then stage 6 (statement wizard).
+**Next step:** stage 6 – statement wizard with plausibility checks, send confirmation and PDF preview access.
 
 ## Log
 
@@ -101,3 +101,4 @@ Brief: `docs/REDESIGN_BRIEF.md`. Resume rules: `docs/design/arbeitsregeln.md`.
 
 - Stage 6 (statement wizard): warning when the period has no invoices or invoices only for part of it (Anna, Marco, Dr. Weber – Blockers); step "Erstellen" must say that drafts are made, nothing is sent; confirmation before «Versenden» with recipient and PDF preview; old unsent drafts flagged (Anna); mobile: no horizontal scrolling, 48 px targets (Marco); trace the Verwaltungspauschale base and the Verteilschlüssel per line (Dr. Weber).
 - Stage 7: contract list/detail "AKTIV … – heute" for future contracts (Helga, Sven); English category/heating profile names; "Mietstagen" typo; one name for the management fee and Akonto everywhere; Saldo "CHF-83.43" format and US date on the statement edit page; clickable list rows; tenant form in the new design with "erfassen"; invoice date hint (Marco).
+- Review round 1 committed (ca34041, 9d83882), CI green. Review round 2 and re-runs of Helga and Sven (`personas/helga-5b.md`, `sven-5b.md`): strict amounts, in-place normalising, impossible years rejected, past start confirmed by a second "Weiter" (read out), longer confirmation – `reviews/5-review-2.md`.

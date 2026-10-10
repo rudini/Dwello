@@ -67,6 +67,15 @@ When(
 );
 
 When(
+	'der Liegenschaftsverwalter {string} die Wohnung {string} ab {string} für {string} Franken vermietet und den Vertragsbeginn bestätigt',
+	async ({ verwalter, seed }, tenant: string, apartment: string, startDate: string, baseRent: string) => {
+		await verwalter.perform(
+			registerContract({ tenantId: seed.idOf(tenant)!, apartmentId: seed.idOf(apartment)!, startDate, baseRent, confirmPastStart: true })
+		);
+	}
+);
+
+When(
 	'der Liegenschaftsverwalter {string} die Wohnung {string} ab {string} ohne Nettomiete vermieten will',
 	async ({ verwalter, seed }, tenant: string, apartment: string, startDate: string) => {
 		await verwalter.perform(

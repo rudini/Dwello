@@ -32,6 +32,8 @@ const freeFrom = (date: string): AvailabilityInfo => ({
 	statusType: 'available-from'
 });
 
+const AMOUNT_HINT = "Bitte geben Sie einen gültigen Betrag ein, zum Beispiel 1450.00 oder 1'450.";
+
 describe('initialContractValues', () => {
 	it('starts a new unlimited contract for the tenant and apartment in the URL', () => {
 		expect(initialContractValues(undefined, new URLSearchParams('tenant=t1&apartment=a1'))).toEqual(
@@ -97,9 +99,19 @@ describe('validateContract', () => {
 			validateContract({ ...filled, baseRent: '0', additionalRent: '-1', advancePayment: 'x' })
 		).toEqual({
 			baseRent: 'Bitte geben Sie eine gültige Miete ein',
-			additionalRent: 'Bitte geben Sie einen gültigen Betrag ein',
-			advancePayment: 'Bitte geben Sie einen gültigen Betrag ein'
+			additionalRent: AMOUNT_HINT,
+			advancePayment: AMOUNT_HINT
 		});
+	});
+
+	// "1.450" or "1,450.00" must not silently become CHF 1.45
+	it('nimmt nur Beträge in Franken und Rappen an', () => {
+		for (const amount of ['1.450', '1,450.00', '1.450,50', '12.345', '1e3']) {
+			expect(validateContract({ ...filled, baseRent: amount }).baseRent, amount).toBe(AMOUNT_HINT);
+		}
+		for (const amount of ['1450', '1450.5', '1450.50']) {
+			expect(validateContract({ ...filled, baseRent: amount }).baseRent, amount).toBeUndefined();
+		}
 	});
 });
 

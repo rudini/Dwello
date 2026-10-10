@@ -17,6 +17,7 @@
 		contractSteps,
 		firstStepWithError,
 		normalizeAmounts,
+		startDateNotice,
 		startValues,
 		stepErrors
 	} from '$lib/contract-wizard';
@@ -48,7 +49,7 @@
 
 	const DRAFT = 'contract';
 	const OVERLAP =
-		'Der Zeitraum überschneidet sich mit einem anderen Mietvertrag dieser Wohnung. Ändern Sie Vertragsbeginn oder Vertragsende.';
+		'Der Zeitraum überschneidet sich mit einem anderen Mietvertrag dieser Wohnung. Ändern Sie den Vertragsbeginn oder wählen Sie «Befristet» mit einem früheren Vertragsende.';
 	// Error keys of the fields whose id differs from the value's name
 	const errorKey: Record<string, string> = { tenant: 'tenantId', apartment: 'apartmentId' };
 	const params = untrack(() => $page.url.searchParams);
@@ -60,6 +61,7 @@
 	let savedAt = $state<Date | null>(null);
 	let restored = $state<{ at: Date; dropped: boolean } | null>(null);
 	let touched = $state(false); // a draft is kept only once the user has entered something
+	let confirmedPastStart = ''; // a start in the past the user confirmed by pressing "Weiter" again
 	let section = $state<HTMLElement>();
 	let contracts = $state<Map<string, ContractForAvailability[]> | null>(null); // per apartment
 
@@ -116,6 +118,7 @@
 		touched = true;
 		const id = (event.target as HTMLElement).id;
 		delete errors[errorKey[id] ?? id];
+		if (errors.startDate === OVERLAP) delete errors.startDate; // any period change may resolve it
 	}
 
 	async function goTo(target: number) {
@@ -158,16 +161,25 @@
 		touched = false;
 		clearDraft(browserStorage(), DRAFT);
 		const tenant = tenants.find((t) => t.id === values.tenantId)?.name;
-		addToast('success', `Mietvertrag von ${tenant} gespeichert`);
+		addToast('success', `Mietvertrag von ${tenant} gespeichert`, 10_000); // long enough to read at large zoom
 		await goto('/contracts');
+	}
+
+	// The overlap blocks; a start in the past only asks once, so it is read out and can be confirmed
+	function periodWarnings(): Record<string, string> {
+		if (overlap) return { startDate: OVERLAP };
+		const past = startDateNotice(values.startDate, today);
+		if (!past || confirmedPastStart === values.startDate) return {};
+		confirmedPastStart = values.startDate;
+		return { startDate: `${past} Wenn es stimmt, klicken Sie nochmals auf «Weiter».` };
 	}
 
 	function submitStep(event: SubmitEvent) {
 		event.preventDefault();
-		values = normalizeAmounts(values);
+		Object.assign(values, normalizeAmounts(values)); // in place: a new object would rerun the effects
 		if (step === contractSteps.length) return save();
 		errors = stepErrors(values, step);
-		if (step === 3 && overlap) errors.startDate = OVERLAP;
+		if (step === 3 && !errors.startDate) errors = { ...errors, ...periodWarnings() };
 		if (Object.keys(errors).length > 0) return showErrors(step);
 		goTo(step + 1);
 	}
