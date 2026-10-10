@@ -98,7 +98,7 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Und der Liegenschaftsverwalter aus der Warnung eine Rechnung erfassen will
     Dann ist das Rechnungsdatum leer, damit es bewusst gewählt wird
     Wenn der Liegenschaftsverwalter das Rechnungsdatum "2025-01-10" einträgt
-    Dann warnt das Rechnungsformular, dass das Rechnungsdatum nicht in der Abrechnungsperiode "1.1.2024 – 31.12.2024" liegt
+    Dann warnt das Rechnungsformular, dass das Rechnungsdatum nicht in der Abrechnungsperiode "01.01.2024 – 31.12.2024" liegt
     Wenn der Liegenschaftsverwalter das Rechnungsdatum "2024-11-15" einträgt
     Dann warnt das Rechnungsformular nicht vor dem Rechnungsdatum
 

@@ -16,7 +16,7 @@ Funktionalität: Abrechnung bearbeiten
   Szenario: Zahlungsfrist und Bemerkung festhalten
     Wenn der Liegenschaftsverwalter die Zahlungsfrist auf "2025-03-31" verlängert mit der Bemerkung "Ratenzahlung vereinbart"
     Dann ist der Liegenschaftsverwalter auf der Detailseite der Abrechnung 2024 von "Anna Keller"
-    Und die Abrechnung ist zahlbar bis "31.3.2025"
+    Und die Abrechnung ist zahlbar bis "31.03.2025"
     Und die Abrechnung enthält die Bemerkung "Ratenzahlung vereinbart"
 
   Szenario: Berechnete Kosten werden nur durch Neuerstellen korrigiert
