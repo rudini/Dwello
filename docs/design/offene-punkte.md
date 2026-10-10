@@ -19,7 +19,7 @@ Items the redesign could not or deliberately did not resolve. Each with reason a
 | Explanations of Unbefristet/Befristet, Akonto examples, Mahnung steps, Heizprofil and Mietstage in plain words | contract wizard, help page | Explanations beyond the glossary definitions, written for first-time landlords. |
 | What follows the 3rd Mahnung | Mahnung dialog | "Klären Sie das weitere Vorgehen direkt mit dem Mieter" – Betreibung etc. are outside Dwello. |
 
-Every place in the code is marked `TODO(fachlich prüfen)` (`grep -rn "TODO(fachlich prüfen)" src`, 25 places at the end of the redesign); the sections below give the context per stage.
+Every place in the code is marked `TODO(fachlich prüfen)` (`grep -rn "TODO(fachlich prüfen)" src`, 23 places in the app code at the end of the redesign); the sections below give the context per stage.
 
 ## CI / ui-screenshots
 
