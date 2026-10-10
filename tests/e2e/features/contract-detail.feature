@@ -19,7 +19,14 @@ Funktionalität: Mietvertragsdetail
   Szenario: Mietvertrag beenden
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
     Wenn der Liegenschaftsverwalter den Mietvertrag beendet
-    Dann hat der Mietvertrag den Status "Beendet"
+    Dann endet der Mietvertrag heute
+
+  Szenario: Künftiger Mietvertrag
+    Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
+    Und der Mieter "Bruno Meier" existiert
+    Und "Bruno Meier" mietet die Wohnung "2.02" seit "2099-11-01" für "900" Franken
+    Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Bruno Meier"
+    Dann hat der Mietvertrag den Status "Künftig"
 
   Szenario: Aktiver Mietvertrag kann nicht gelöscht werden
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"

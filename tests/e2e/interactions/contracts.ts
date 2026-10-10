@@ -13,3 +13,6 @@ export const viewContractButton = (page: Page, tenantName: string) =>
 export const editContractButton = (page: Page, tenantName: string) =>
 	contractRow(page, tenantName).getByTestId('contract-edit-button');
 export const contractsEmptyNotice = (page: Page) => page.getByTestId('contracts-empty');
+// An amount of a listed contract by its label ("Nettomiete", "Monatlich total")
+export const contractAmount = (page: Page, tenantName: string, label: string) =>
+	contractRow(page, tenantName).locator(`dt:text-is("${label}") + dd`);
