@@ -11,3 +11,7 @@ Der Reviewer bestätigt H1, M1–M5 als behoben (Nachrechnung Meier/Brunner mit 
 | n4 | niedrig | Beispiel P9 passt nicht zur Demo | behoben |
 | n5 | niedrig | Verweis auf noch nicht vorhandenes Dokument | behoben (Verweis auf Schritt D1) |
 | n6 | niedrig | Bereits committete Migration 0003 nachträglich geändert | begründet offen: beide Commits liegen unveröffentlicht auf demselben Branch; die Testdatenbanken entstehen neu aus den Migrationen; künftig neue Migration |
+
+## Runde 3 – Nachprüfung von f1e14a2
+
+M-1 bestätigt behoben (Meier 2025: 319.39 / 4 × 181/365 = 39.60; Ganzjahres-PDF ohne Tageszusatz), n1/n4/n5 bestätigt. Begründungen für n2, n3, n6 tragen. **Keine offenen kritischen, hohen oder mittleren Findings – Schritt A abgeschlossen.**
