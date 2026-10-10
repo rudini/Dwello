@@ -77,4 +77,50 @@ describe('calibration regressions (Phase 4)', () => {
 		expect(m.score).toBeGreaterThanOrEqual(60);
 		expect(m.flagged).toBe(false);
 	});
+
+	const STORE = "export const client = { load: (a: string) => a, save: (a: string, b: string) => a + b, drop: (a: string) => a, find: (a: string) => a };\n";
+	const FORWARDERS = `import { client } from './client';
+function load2(id: string) {
+	return client.load(id);
+}
+function save2(id: string, data: string) {
+	return client.save(id, data);
+}
+function drop2(id: string) {
+	return client.drop(id);
+}
+function find2(id: string) {
+	return client.find(id);
+}
+`;
+
+	it('keeps flagging a pass-through facade exported through an export list (review round 2)', () => {
+		const report = analyze({ root: writeProject({ 'src/client.ts': STORE, 'src/facade.ts': `${FORWARDERS}export { load2, save2, drop2, find2 };\n` }), fallow: 'off' });
+		const m = report.modules.find((x) => x.path === 'src/facade.ts')!;
+		expect(m.metrics.passThroughs).toHaveLength(4);
+		expect(m.flagged).toBe(true);
+	});
+
+	it('keeps flagging a pass-through facade exported as a shorthand object (review round 2)', () => {
+		const report = analyze({ root: writeProject({ 'src/client.ts': STORE, 'src/facade.ts': `${FORWARDERS}export const facade = { load2, save2, drop2, find2 };\n` }), fallow: 'off' });
+		const m = report.modules.find((x) => x.path === 'src/facade.ts')!;
+		expect(m.metrics.interfaceSize).toBe(10);
+		expect(m.metrics.passThroughs).toHaveLength(4);
+		expect(m.flagged).toBe(true);
+	});
+
+	it('does not flag a flat module of UI copy whose only signal is an internal type (review round 2)', () => {
+		const copy = [
+			'type Hint = { title: string; help: string };',
+			"export const METER_NUMBER: Hint = { title: 'Zählernummer', help: 'Steht auf dem Zähler.' };",
+			"export const METER_READING: Hint = { title: 'Zählerstand', help: 'Ohne Nachkommastellen.' };",
+			"export const METER_DATE: Hint = { title: 'Ablesedatum', help: 'Tag der Ablesung.' };",
+			"export const METER_UNIT: Hint = { title: 'Einheit', help: 'kWh oder m³.' };",
+			"export const METER_NOTE: Hint = { title: 'Bemerkung', help: 'Freiwillig.' };",
+			''
+		].join('\n');
+		const m = analyze({ root: writeProject({ 'src/lib/copy/meter-copy.ts': copy }), fallow: 'off' }).modules[0];
+		expect(m.metrics.leakyExports.length).toBeGreaterThan(0);
+		expect(m.flagged).toBe(false);
+	});
 });

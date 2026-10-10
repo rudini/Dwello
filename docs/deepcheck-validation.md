@@ -7,23 +7,49 @@ How meaningful are deepcheck's results on this codebase, and can it gate changed
 **What the gate flags.** It uses `failThreshold` 65 and `tolerance` 5. A module is flagged only when all three hold:
 - it is eligible;
 - it scores at least 65;
-- it shows a **structural** sign of shallowness: a pass-through, a leaky export or classitis.
+- it shows a **structural** sign of shallowness: a pass-through or classitis.
 
-The structural condition was added after the final review. Depth and complexity alone saturate at 60 for flat-by-design modules (constants, types), and a new module of five label constants without callers reached exactly 65 through coupling. That was a reproducible false positive; it is fixed with a regression test.
+**Why the structural condition.** Depth and complexity alone saturate at 60 for flat-by-design modules (constants, types, copy). The two final reviews each found a new flat module that reached 65:
+- five label constants without callers, which crossed through coupling;
+- German UI copy typed with an internal type, which crossed through a leaky export.
+
+Both were reproducible false positives and are fixed with regression tests. Leaky exports no longer count as structural.
 
 **What the evidence shows.**
 - No module of this repo is flagged (0 of 71 eligible, highest 60), and none of the 24 eligible modules of three open-source projects reaches 65 (highest 60).
 - The textbook shallow designs are flagged at 71–75: pass-through classes, a facade of forwarding functions, Java-style stream wrappers. So is the deliberately shallow facade from X2.2.
 - Labelled deep modules stay at 39 or below.
 
+**Adversarial check with realistic new modules** (`tools/deepcheck/test/realistic.test.ts`). The probes below are shaped like code agents add here; I wrote them after the reviewers' probes. Only the forwarding facade is flagged:
+
+| New module | Score | Flagged |
+|---|---:|---|
+| `src/lib/server/meter-facade.ts`: two functions forwarding to `meter.ts` | 80 | yes (true positive) |
+| `src/lib/copy/meter-copy.ts`: UI copy constants with an internal type | 65 | no |
+| `src/lib/meter-types.ts`: types and two helpers | 53 | no |
+| `backend/src/services/meter.service.ts`: one-line Drizzle queries | 40 | no |
+| `src/lib/meter-store.ts`: Svelte stores and a reset | 39 | no |
+| `src/lib/server/meter.ts`: fetch and form handling | 26 | no |
+
+The second reviewer probed these and found none of them flagged:
+- a types-plus-helpers module (60 with exported types, 58 with internal types);
+- a CRUD fetch wrapper (57);
+- an Elysia service with Drizzle one-liners (46, also with an internal filter type);
+- a Svelte store module (37).
+
 **Limits of that evidence.**
-- **Zero real positives.** Gate precision is measured on no real positive in this repo or the OSS projects; every flagged case was written by the author as a fixture.
-- **No recall for moderately shallow modules.** None of the 14 modules labelled shallow here reaches 65.
-- So the gate blocks a narrow, clear class: new pass-through layers and thin facades, which agents easily write. It is not a general shallowness detector.
+- **Zero real positives.** Gate precision rests on author-written fixtures and probes; there is no real positive in this repo or the OSS projects.
+- **No recall for moderately shallow modules.** None of the 14 modules labelled shallow here is flagged. The gate blocks a narrow, clear class: new pass-through layers, thin facades and classitis, which agents easily write. It is not a general shallowness detector.
 - `scan` is the ranked review aid: 12 of its top 25 are truly shallow.
 - Treat a gate failure as "look at this design", with `// deepcheck-ignore-file -- reason` as the visible way out.
 
-**Why not "usable as scan only".** The final review called it that until findings 1–3 were fixed (the false positive at 65, live destructured code dropped, the dead-code check fooled by shadowing). They are now fixed, each with a regression test written first. What remains is low recall, which costs nothing when gating; the false-positive risk is now covered by the structural requirement.
+**Why not "usable as scan only".** Both final review rounds called it that until their findings were fixed:
+- round 1: the false positive at 65, live destructured code dropped, the dead-code check fooled by shadowing;
+- round 2: facades exported through `export { … }` or shorthand objects slipped through after the round-1 fix, and the leaky-only false positive.
+
+All of these are now fixed, each with a regression test seen failing first. The round-2 reviewer judged "ready to gate (narrow)" defensible once they were fixed. No third review round was allowed (the brief caps at two). The fixes were therefore verified by the tests above and by the adversarial check, not by a further independent review.
+
+**The after-step hook is a commit/push gate.** The brief asks to run the audit "through the same mechanism Fallow uses". Here that is the Claude Code `PreToolUse` hook on `git commit`/`git push`, not a hook after every edit. At 4.7–5.3 s with Fallow (3.7 s without) it fits that gate.
 
 ## Method
 
@@ -173,10 +199,10 @@ None of the 24 eligible OSS modules reaches 65.
 
 | Attempt | Result | Status |
 |---|---|---|
-| Pad a shallow module with dead internals (unused functions and constants) | Before: the score fell from 74 to 46 (gamed). Now unused non-exported top-level declarations, including chains that only feed each other, are left out of statements, operations, complexity and function count, and the score stays at 74. Uses are resolved by symbol, so a parameter, local or property with the same name does not keep dead code alive, and destructured declarations are tracked per bound name (review findings, tests). An unused `const x = sideEffect()` is treated as dead although it runs | mitigated, tests |
+| Pad a shallow module with dead internals (unused functions and constants) | Before: the score fell from 74 to 46 (gamed). Now unused non-exported top-level declarations, including chains that only feed each other, are left out of statements, operations, complexity and function count, and the score stays at 74. Uses are resolved by symbol, so a parameter, local or property with the same name does not keep dead code alive. Destructured declarations are tracked per bound name. Names in `export { … }` lists and shorthand members count as uses (review findings, tests). An unused `const x = sideEffect()` is treated as dead although it runs | mitigated, tests |
 | Split a deep module (CSV parser) into tiny files | the highest part scores above the whole, so `scan` shows it. But the tiny parts are not **eligible** (interfaceSize < 5, and fewer than 5 files for classitis), so the gate does not see them: splitting a flagged module into several small files evades the gate | **weakness, documented**: `scan --min-score` still ranks the parts |
 | Inline pass-throughs (do the work instead of forwarding) | score goes down | holds, test |
-| Wrap pass-throughs in an exported object literal | function members count as interface and pass-throughs are detected (Phase 1 review fix) | mitigated, test |
+| Wrap pass-throughs in an exported object literal, or export them through `export { … }` | function members count as interface (also shorthand `{ load }`) and pass-throughs are detected (Phase 1 review fix; round 2 found the dead-code check dropping such functions, fixed) | mitigated, tests |
 | Pad with *live* but pointless code (statements that are executed but do nothing useful) | lowers the score | **not mitigated**: not detectable statically without judgement; reviewers must catch it, and every finding says "fix the design, do not pad" |
 | Hide a module behind `// deepcheck-ignore-file -- reason`, or edit `deepcheck.config.json` in the same change | the suppression needs a reason and shows in review; the config is read at the base, so it only takes effect after merge (Phase 2) | by design |
 | Surround real code with many exported types to get "type-only" | only applies with <= 5 runtime statements | mitigated, test |

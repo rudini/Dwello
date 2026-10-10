@@ -182,7 +182,7 @@ function baseline(options: Options, io: Io): number {
 	const created = createBaseline(report, config);
 	writeBaseline(io.cwd, created);
 	io.stdout(
-		`deepcheck: baseline .deepcheck-baseline.json written: ${created.entries.length} module(s) at or above ${config.failThreshold} of ${report.modules.length} analyzed\n`
+		`deepcheck: baseline .deepcheck-baseline.json written: ${created.entries.length} flagged module(s) (threshold ${config.failThreshold}) of ${report.modules.length} analyzed\n`
 	);
 	return 0;
 }

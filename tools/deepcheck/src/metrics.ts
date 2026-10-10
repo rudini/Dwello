@@ -95,12 +95,16 @@ function valueOf(node: Node | undefined): Node | undefined {
 function paramCount(node: Node | undefined): number {
 	node = valueOf(node);
 	if (Node.isObjectLiteralExpression(node))
-		return node.getProperties().reduce((sum, p) => sum + (isFunctionMember(p) ? 1 + paramCount(p) : 0), 0);
+		return node.getProperties().reduce((sum, p) => sum + (isFunctionMember(p) ? 1 + paramCount(shorthandFunction(p) ?? p) : 0), 0);
 	return isFunction(node) ? node.getParameters().length : 0;
 }
 
+/** The local function a shorthand member `{ load }` refers to. */
+const shorthandFunction = (p: Node) =>
+	Node.isShorthandPropertyAssignment(p) ? p.getSourceFile().getFunction(p.getName()) : undefined;
+
 function isFunctionMember(p: Node): boolean {
-	if (Node.isMethodDeclaration(p)) return true;
+	if (Node.isMethodDeclaration(p) || shorthandFunction(p)) return true;
 	const init = Node.isPropertyAssignment(p) ? p.getInitializer() : undefined;
 	return Node.isArrowFunction(init) || Node.isFunctionExpression(init);
 }
@@ -178,7 +182,10 @@ const topLevel = (node: Node): Node => (node.getParent() === node.getSourceFile(
  * parameter, local or property with the same name does not keep a dead declaration alive.
  */
 function deadDeclarations(sf: SourceFile): Set<Node> {
-	const candidates = sf.getStatements().filter((s) => !hasExportKeyword(s) && declaredNameNodes(s).length > 0);
+	const exported = exportedNames(sf);
+	const candidates = sf
+		.getStatements()
+		.filter((s) => !hasExportKeyword(s) && declaredNameNodes(s).length > 0 && !declaredNameNodes(s).some((n) => exported.has(n.getText())));
 	const declared = new Map(candidates.map((s) => [s, new Set(declaredNameNodes(s).map((n) => n.getSymbol()).filter(Boolean))]));
 	const names = new Set(candidates.flatMap((s) => declaredNameNodes(s).map((n) => n.getText())));
 	const uses = sf
@@ -187,8 +194,13 @@ function deadDeclarations(sf: SourceFile): Set<Node> {
 		.map((id) => ({ id, owner: topLevel(id) }));
 	const dead = new Set<Node>();
 	// Symbols are resolved only for uses in other live statements, and only until the first real use is found.
+	// A shorthand member `{ load }` resolves to the property symbol, so it counts by name.
+	const refersTo = (id: Node, s: Node, symbols: Set<unknown>) =>
+		Node.isShorthandPropertyAssignment(id.getParent())
+			? declaredNameNodes(s as Statement).some((n) => n.getText() === id.getText())
+			: symbols.has(id.getSymbol());
 	const usedBy = (s: Node, symbols: Set<unknown>) =>
-		uses.some((u) => u.owner !== s && !dead.has(u.owner) && symbols.has(u.id.getSymbol()));
+		uses.some((u) => u.owner !== s && !dead.has(u.owner) && refersTo(u.id, s, symbols));
 	for (let changed = true; changed; ) {
 		changed = false;
 		for (const s of candidates.filter((c) => !dead.has(c))) {

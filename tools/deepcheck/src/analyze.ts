@@ -119,8 +119,9 @@ export function analyze({ root, fallow, config = loadConfig(root) }: AnalyzeOpti
 		const { failThreshold, minInterfaceSize } = settingsFor(path, config);
 		const eligible = metrics.interfaceSize >= minInterfaceSize || metrics.passThroughs.length > 0 || parts.classitis > 0;
 		// Phase 4: depth and complexity alone saturate at 60 for flat-by-design modules (constants, types), so a
-		// module is only flagged with a structural sign of shallowness: a pass-through, a leaky export or classitis.
-		const structural = parts.passThrough > 0 || parts.leaky > 0 || parts.classitis > 0;
+		// module is only flagged with a structural sign of shallowness: a pass-through or classitis (leaky exports
+		// alone flagged flat copy modules in review).
+		const structural = parts.passThrough > 0 || parts.classitis > 0;
 		const report: ModuleReport = {
 			path,
 			score,

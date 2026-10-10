@@ -299,7 +299,7 @@ describe('deepcheck baseline', () => {
 	it('writes the flagged modules to .deepcheck-baseline.json and reports how many', () => {
 		const root = writeRepo({ 'src/store.ts': STORE, 'src/shallow.ts': SHALLOW_MODULE, 'src/deep.ts': DEEP_MODULE });
 		const result = cli(root, 'baseline', '--fallow', 'off');
-		expect(result).toMatchObject({ code: 0, stdout: 'deepcheck: baseline .deepcheck-baseline.json written: 1 module(s) at or above 65 of 3 analyzed\n' });
+		expect(result).toMatchObject({ code: 0, stdout: 'deepcheck: baseline .deepcheck-baseline.json written: 1 flagged module(s) (threshold 65) of 3 analyzed\n' });
 		const baseline = JSON.parse(readFileSync(`${root}/.deepcheck-baseline.json`, 'utf8'));
 		expect(baseline.entries.map((e: { path: string }) => e.path)).toEqual(['src/shallow.ts']);
 	});

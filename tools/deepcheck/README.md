@@ -120,7 +120,7 @@ Default weights:
 | `coupling` | 5 |
 | `unusedExports` | 5 |
 
-A module is **eligible** when `interfaceSize >= minInterfaceSize`, or it has a pass-through, or a classitis component; tiny legitimate utilities (e.g. `clamp`) are never flagged. A module is **flagged** when it is eligible, `shallowScore >= failThreshold` (per-path overrides apply) and it has a structural sign of shallowness: a pass-through, a leaky export or classitis. Depth and complexity alone reach at most 60 for flat-by-design modules (constants, types), so they rank modules in `scan` but never fail the gate by themselves (Phase 4, `docs/deepcheck-validation.md`).
+A module is **eligible** when `interfaceSize >= minInterfaceSize`, or it has a pass-through, or a classitis component; tiny legitimate utilities (e.g. `clamp`) are never flagged. A module is **flagged** when it is eligible, `shallowScore >= failThreshold` (per-path overrides apply) and it has a structural sign of shallowness: a pass-through or classitis. Depth and complexity alone reach at most 60 for flat-by-design modules (constants, types), so they rank modules in `scan` but never fail the gate by themselves (Phase 4, `docs/deepcheck-validation.md`).
 
 Each finding names the metrics that are high (component >= 0.5) with a concrete fix in Ousterhout's terms: shrink the exported surface, merge pass-throughs into the callee, hide internal types, combine tiny modules, move behaviour into data-only classes.
 
