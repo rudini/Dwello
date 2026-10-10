@@ -71,7 +71,7 @@ Excluded by default (each configurable; `--explain` says why a file is excluded)
 | `declaration` | `*.d.ts` |
 | `generated` | `**/generated/**`, `**/*.gen.ts`, `**/*.generated.ts`, `@generated` / `auto-generated` / `do not edit` in the first 5 lines, and the `ignorePatterns` of `.fallowrc.json` |
 | `entry` | framework or tool entry modules whose exports are a fixed contract: SvelteKit `**/routes/**/+*.ts`, `**/hooks.ts`, `**/hooks.server.ts`, `**/hooks.client.ts`, and `**/*.config.ts` |
-| `type-only` | files that only declare types (DTOs, interfaces) |
+| `type-only` | files that only declare types (DTOs, interfaces), or whose exports are at least 80 % types with at most 5 runtime statements |
 | `barrel` | files that only re-export |
 | `suppressed` | `// deepcheck-ignore-file -- reason` |
 
@@ -81,7 +81,7 @@ Excluded files still take part in the import graph; tests, declarations and gene
 
 | Metric | Definition |
 |---|---|
-| `interfaceSize` | Per exported symbol 1, plus: parameters of exported functions (declarations, arrow/function constants, default exports); for exported classes the public members (not `private`, `protected` or `#x`) with their parameters, constructor parameters, one count per overload set; for exported object literals each function member (method, arrow or function property) with its parameters. Data keys of exported objects, members of exported interfaces and types are not counted (an exported type counts 1). `export { a }` counts like the local declaration of `a`; a re-export counts 1 per name, `export *` 1. |
+| `interfaceSize` | Per exported symbol 1, plus: parameters of exported functions (declarations, arrow/function constants, default exports); for exported classes the public members (not `private`, `protected` or `#x`) with their parameters, constructor parameters, one count per overload set; for exported object literals each function member (method, arrow or function property) with its parameters. Data keys of exported objects, members of exported interfaces and types are not counted (an exported type counts 1). `export { a }` counts like the local declaration of `a`; re-exports (`export ... from`) count 0: they are the interface of the module they come from and are measured there. |
 | `implementationSize` | Statements in the whole module, including non-exported code: variable, expression, control-flow, return, throw, try, function, class and enum statements, class members (methods, properties, accessors, constructors), and expression-bodied arrow functions. Not counted: blocks, imports, re-exports, type declarations (interfaces, type aliases), ambient (`declare`) code, overload signatures. Comments and blank lines never count. |
 | `operations` | Calls, `new` expressions, binary and conditional expressions and template strings in the module (Phase 4: statements alone undercount dense code such as checksum or mapping expressions). |
 | `depthRatio` | `implementationSize / max(1, interfaceSize)` (reported as defined; the score's depth component also counts `operations`) |

@@ -27,4 +27,37 @@ describe('calibration regressions (Phase 4)', () => {
 		expect(deep.metrics.operations).toBeGreaterThan(copy.metrics.operations);
 		expect(deep.components.depth).toBeLessThan(copy.components.depth);
 	});
+
+	it('does not count re-exported names in the interface of a package entry (ky source/index.ts)', () => {
+		const index = [
+			"import { create } from './core';",
+			"export { HTTPError, TimeoutError } from './errors';",
+			"export type { Options, Hooks, Input, KyResponse } from './types';",
+			"export * from './guards';",
+			'const createInstance = (defaults: object) => {',
+			'\tconst ky = create();',
+			'\tfor (const method of ["get", "post"]) Object.assign(ky, { [method]: () => defaults });',
+			'\treturn ky;',
+			'};',
+			'export default createInstance({});',
+			''
+		].join('\n');
+		const report = analyze({ root: writeProject({ 'src/index.ts': index, 'src/core.ts': 'export const create = () => ({});\n' }), fallow: 'off' });
+		const entry = report.modules.find((m) => m.path === 'src/index.ts')!;
+		expect(entry.metrics.interfaceSize).toBe(1);
+		expect(entry.eligible).toBe(false);
+	});
+
+	it('treats a module of exported types with a token of runtime code as type-only (immer types-external.ts)', () => {
+		const types = Array.from({ length: 10 }, (_, i) => `export interface T${i} { v: number }`);
+		const report = analyze({ root: writeProject({ 'src/types.ts': [...types, "export const NOTHING = Symbol('nothing');", ''].join('\n') }), fallow: 'off' });
+		expect(report.excluded).toContainEqual({ path: 'src/types.ts', reason: 'type-only' });
+	});
+
+	it('still analyzes a module whose types surround real code, so types cannot hide it', () => {
+		const types = Array.from({ length: 10 }, (_, i) => `export interface T${i} { v: number }`);
+		const code = `export function a(x: number) {\n\tconst y = x * 2;\n\tif (y > 3) return y;\n\tconst z = y + 1;\n\treturn z * z;\n}\n`;
+		const report = analyze({ root: writeProject({ 'src/types.ts': [...types, code].join('\n') }), fallow: 'off' });
+		expect(report.modules.map((m) => m.path)).toContain('src/types.ts');
+	});
 });

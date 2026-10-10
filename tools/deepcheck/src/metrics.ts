@@ -133,8 +133,8 @@ function localDeclarationSize(sf: SourceFile, name: string): number {
 
 function exportedStatementSize(sf: SourceFile, stmt: Statement): number {
 	if (Node.isExportDeclaration(stmt)) {
-		if (stmt.isNamespaceExport()) return 1;
-		if (stmt.hasModuleSpecifier()) return stmt.getNamedExports().length;
+		// Re-exports are the interface of the module they come from and are measured there (Phase 4).
+		if (stmt.hasModuleSpecifier()) return 0;
 		return stmt
 			.getNamedExports()
 			.reduce((sum, spec) => sum + localDeclarationSize(sf, spec.getNameNode().getText()), 0);
@@ -414,7 +414,21 @@ const TYPE_ONLY_KINDS = new Set([
 	SyntaxKind.ImportDeclaration
 ]);
 
-/** 'type-only' for files declaring only types, 'barrel' for files that only re-export. */
+/** Runtime statements a mostly-types module may still have (a sentinel, a tiny helper). */
+const TOKEN_RUNTIME = 5;
+
+/** Declared type exports and all own exported names (incl. default). */
+function exportShares(sf: SourceFile) {
+	const statements = sf.getStatements();
+	const types = statements.filter((s) => (Node.isInterfaceDeclaration(s) || Node.isTypeAliasDeclaration(s)) && hasExportKeyword(s)).length;
+	const total = exportedNames(sf).size + (statements.some(Node.isExportAssignment) ? 1 : 0);
+	return { types, total: Math.max(1, total) };
+}
+
+/**
+ * 'type-only' for files declaring only types, or (Phase 4) at least 80 % of their exports as types with only a
+ * token of runtime code; 'barrel' for files that only re-export.
+ */
 export function contentExclusion(sf: SourceFile): 'type-only' | 'barrel' | null {
 	const statements = sf.getStatements();
 	const isTypeOnly = (s: Statement) =>
@@ -423,5 +437,8 @@ export function contentExclusion(sf: SourceFile): 'type-only' | 'barrel' | null 
 	const declaresTypes = statements.some((s) => !Node.isImportDeclaration(s));
 	if (declaresTypes && statements.every(isTypeOnly)) return 'type-only';
 	const isReExport = (s: Statement) => Node.isExportDeclaration(s) || Node.isImportDeclaration(s);
-	return statements.some(Node.isExportDeclaration) && statements.every(isReExport) ? 'barrel' : null;
+	if (statements.some(Node.isExportDeclaration) && statements.every(isReExport)) return 'barrel';
+	if (implementationSize(sf) > TOKEN_RUNTIME) return null;
+	const { types, total } = exportShares(sf);
+	return types / total >= 0.8 ? 'type-only' : null;
 }
