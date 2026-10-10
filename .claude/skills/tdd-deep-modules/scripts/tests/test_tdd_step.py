@@ -374,3 +374,8 @@ class TddStepTest(unittest.TestCase):
         result = repo.run("tdd-step", "red", "adds two numbers")
 
         self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_a_phase_without_changes_is_refused(self):
+        repo = Repo(self, {"calc.py": RIGHT_ADD, "test_calc.py": ADD_TEST})
+        repo.commit_all("green: adds two numbers", {})
+        self.assert_refused(repo, "refactor", "nothing changed", head="green: adds two numbers")
