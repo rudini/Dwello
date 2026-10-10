@@ -3,6 +3,7 @@
 	"$id": "deepcheck.report.schema.json",
 	"title": "deepcheck JSON report (--format json); TypeScript types in tools/deepcheck/src/types.ts",
 	"type": "object",
+	"additionalProperties": false,
 	"required": ["schemaVersion", "tool", "command", "scope", "failThreshold", "summary", "findings", "suppressionFindings", "warnings"],
 	"properties": {
 		"schemaVersion": { "type": "number", "enum": [1] },
@@ -54,6 +55,7 @@
 		},
 		"module": {
 			"type": "object",
+			"additionalProperties": false,
 			"required": ["path", "score", "eligible", "flagged", "metrics", "classes", "components", "reasons"],
 			"properties": {
 				"path": { "type": "string" },

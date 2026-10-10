@@ -13,7 +13,7 @@ deepcheck is a warning system built on measurable proxies. It is **not a verdict
 Requires Node >= 22.18 (runs the TypeScript sources directly through Node's type stripping).
 
 ```bash
-npm run deepcheck:scan                         # all shallow modules, ranked (never fails)
+npm run deepcheck:scan                         # all flagged (shallow) modules, ranked (never fails)
 node tools/deepcheck/src/cli.ts scan src/lib   # limit to a directory
 node tools/deepcheck/src/cli.ts scan --min-score 40 --top 20 --group-by directory
 node tools/deepcheck/src/cli.ts scan --format json --output deepcheck.json
@@ -21,7 +21,11 @@ node tools/deepcheck/src/cli.ts --explain src/lib/api.ts    # every metric and w
 node tools/deepcheck/src/cli.ts suppressions                 # all inline suppressions, invalid ones marked
 ```
 
-Options: `--format human|json|markdown|github`, `--output <file>`, `--top <n>` (default 50), `--min-score <n>` (default: list flagged modules, i.e. score >= `failThreshold`), `--group-by directory|package`, `--fail-on-score <n>` (scan exits 1 if a module scores at least n), `--fallow auto|off|<path>`.
+The path argument may be relative, `./`-prefixed or absolute; a path that matches no source file is an error (exit 2).
+
+Until the Phase 4 calibration (see the brief's Status Log) the conservative default `failThreshold` of 70 flags no module of this repo, so the default scan output is empty; use `--min-score` to see the ranking.
+
+Options: `--format human|json|markdown|github`, `--output <file>`, `--top <n>` (default 50), `--min-score <n>` (default: list flagged modules, i.e. score >= `failThreshold`), `--group-by directory|package`, `--fail-on-score <n>` (scan exits 1 if an eligible module in the path scores at least n), `--fallow auto|off|<path>`.
 
 Exit codes: 0 ok, 1 gate failed (or `--fail-on-score` reached), 2 tool or config error. With `--format json` an error prints `{ "error": true, "message": "...", "exitCode": 2 }` on stdout.
 
@@ -40,7 +44,7 @@ Excluded by default (each configurable; `--explain` says why a file is excluded)
 | `test` | `**/*.test.*`, `**/*.spec.*`, `**/__tests__/**`, `**/__mocks__/**`, `**/test/**`, `tests/**` |
 | `declaration` | `*.d.ts` |
 | `generated` | `**/generated/**`, `**/*.gen.ts`, `**/*.generated.ts`, `@generated` / `auto-generated` / `do not edit` in the first 5 lines, and the `ignorePatterns` of `.fallowrc.json` |
-| `entry` | framework or tool entry modules whose exports are a fixed contract: SvelteKit `**/routes/**/+*.ts`, `hooks*.ts`, `**/*.config.ts` |
+| `entry` | framework or tool entry modules whose exports are a fixed contract: SvelteKit `**/routes/**/+*.ts`, `**/hooks.ts`, `**/hooks.server.ts`, `**/hooks.client.ts`, and `**/*.config.ts` |
 | `type-only` | files that only declare types (DTOs, interfaces) |
 | `barrel` | files that only re-export |
 | `suppressed` | `// deepcheck-ignore-file -- reason` |

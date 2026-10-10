@@ -10,7 +10,7 @@ export interface ScanSelection {
 	groupBy?: 'directory' | 'package';
 }
 
-const within = (path: string, prefix?: string) =>
+export const within = (path: string, prefix?: string) =>
 	!prefix || path === prefix || path.startsWith(prefix.replace(/\/?$/, '/'));
 
 function packageOf(root: string, path: string): string {
@@ -33,6 +33,7 @@ export const inScope = (report: Report, path?: string) =>
 export function scanOutput(root: string, report: Report, config: Config, s: ScanSelection): ScanOutput {
 	const selected = inScope(report, s.path).filter((m) => (s.minScore === undefined ? m.flagged : m.score >= s.minScore));
 	const findings = selected.slice(0, s.top);
+	const suppressionFindings = report.suppressionFindings.filter((f) => within(f.path, s.path));
 	return {
 		schemaVersion: 1,
 		tool: 'deepcheck',
@@ -46,11 +47,11 @@ export function scanOutput(root: string, report: Report, config: Config, s: Scan
 			shallow: selected.length,
 			shown: findings.length,
 			excluded: report.excluded.filter((m) => within(m.path, s.path)).length,
-			invalidSuppressions: report.suppressionFindings.length
+			invalidSuppressions: suppressionFindings.length
 		},
 		findings,
 		...(s.groupBy && { groups: groups(root, selected, s.groupBy) }),
-		suppressionFindings: report.suppressionFindings.filter((f) => within(f.path, s.path)),
+		suppressionFindings,
 		warnings: report.warnings
 	};
 }

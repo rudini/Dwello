@@ -1,11 +1,11 @@
-import { appendFileSync, writeFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { appendFileSync, mkdirSync, writeFileSync } from 'node:fs';
+import { dirname, relative, resolve, sep } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { parseArgs } from 'node:util';
 import { analyze } from './analyze.ts';
 import { loadConfig } from './config.ts';
 import { ToolError } from './errors.ts';
-import { inScope, scanOutput } from './scan.ts';
+import { inScope, scanOutput, within } from './scan.ts';
 import { renderExplain, renderGithub, renderHuman, renderMarkdown } from './render.ts';
 import type { ScanOutput } from './types.ts';
 
@@ -61,7 +61,7 @@ function parseOptions(argv: string[]): { command: string; options: Options; posi
 	const options: Options = {
 		fallow: v.fallow,
 		format: oneOf('format', v.format, FORMATS)!,
-		failOnScore: number('fail-on-score', v['fail-on-score'], Number.isFinite, 'a number'),
+		failOnScore: number('fail-on-score', v['fail-on-score'], isScore, 'a number from 0 to 100'),
 		top: number('top', v.top, (n) => Number.isInteger(n) && n > 0, 'a positive whole number')!,
 		minScore: number('min-score', v['min-score'], isScore, 'a number from 0 to 100'),
 		groupBy: oneOf('group-by', v['group-by'], GROUPS),
@@ -73,7 +73,11 @@ function parseOptions(argv: string[]): { command: string; options: Options; posi
 
 /** Writes the rendered report to --output or stdout; the GitHub format also writes the step summary. */
 function emit(options: Options, io: Io, text: string, summary?: string): void {
-	if (options.output) writeFileSync(resolve(io.cwd, options.output), text);
+	if (options.output) {
+		const file = resolve(io.cwd, options.output);
+		mkdirSync(dirname(file), { recursive: true });
+		writeFileSync(file, text);
+	}
 	else io.stdout(text);
 	if (summary !== undefined && io.env.GITHUB_STEP_SUMMARY) appendFileSync(io.env.GITHUB_STEP_SUMMARY, summary);
 }
@@ -85,9 +89,20 @@ const RENDER: Record<Options['format'], (out: ScanOutput) => string> = {
 	github: renderGithub
 };
 
-function scan(options: Options, io: Io, [path]: string[]): number {
+/** The path argument relative to the project root ('/'-separated), undefined for the whole project. */
+function projectPath(io: Io, path: string | undefined): string | undefined {
+	if (path === undefined) return undefined;
+	const rel = relative(io.cwd, resolve(io.cwd, path)).split(sep).join('/');
+	return rel === '' ? undefined : rel;
+}
+
+function scan(options: Options, io: Io, positionals: string[]): number {
+	if (positionals.length > 1) throw new ToolError(`scan takes at most one path, got ${positionals.join(' ')}`);
+	const path = projectPath(io, positionals[0]);
 	const config = loadConfig(io.cwd);
 	const report = analyze({ root: io.cwd, fallow: options.fallow, config });
+	const known = [...report.modules, ...report.excluded].some((m) => within(m.path, path));
+	if (path && !known) throw new ToolError(`${path} matches no source file`);
 	const output = scanOutput(io.cwd, report, config, { ...options, path });
 	if (options.format !== 'json') report.warnings.forEach((w) => io.stderr(`deepcheck: warning: ${w}\n`));
 	emit(options, io, RENDER[options.format](output), options.format === 'github' ? renderMarkdown(output) : undefined);
@@ -126,6 +141,7 @@ function run(argv: string[], io: Io): number {
 	const { command: name, options, positionals } = parseOptions(argv);
 	const command = COMMANDS[name];
 	if (!command) throw new ToolError(`unknown command "${name}"`);
+	if (name !== 'scan' && positionals.length) throw new ToolError(`unexpected argument ${positionals.join(' ')}`);
 	return command(options, io, positionals);
 }
 

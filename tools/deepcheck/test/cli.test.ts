@@ -164,6 +164,60 @@ describe('deepcheck suppressions', () => {
 	});
 });
 
+describe('review 2 regressions', () => {
+	const twoDirs = () =>
+		writeProject({
+			'src/store.ts': STORE,
+			'src/lib/shallow.ts': SHALLOW_MODULE.replace('./store', '../store'),
+			'src/library/shallow.ts': SHALLOW_MODULE.replace('./store', '../store')
+		});
+	const paths = (out: { findings: { path: string }[] }) => out.findings.map((f) => f.path);
+
+	it('normalizes the path argument and matches whole directory names', () => {
+		const root = twoDirs();
+		expect(paths(scanJson(root, 'src/lib'))).toEqual(['src/lib/shallow.ts']);
+		expect(paths(scanJson(root, './src/lib/'))).toEqual(['src/lib/shallow.ts']);
+		expect(paths(scanJson(root, `${root}/src/lib`))).toEqual(['src/lib/shallow.ts']);
+	});
+
+	it('exits 2 for a path that matches no source file, also with --fail-on-score', () => {
+		const result = cli(twoDirs(), 'scan', '--fallow', 'off', '--fail-on-score', '0', 'src/nope');
+		expect(result.code).toBe(2);
+		expect(result.stderr).toContain('src/nope matches no source file');
+	});
+
+	it('exits 2 for extra arguments and a --fail-on-score outside 0..100', () => {
+		expect(cli(twoDirs(), 'scan', '--fallow', 'off', 'src/lib', 'src/library').code).toBe(2);
+		expect(cli(twoDirs(), 'scan', '--fallow', 'off', '--fail-on-score=500').code).toBe(2);
+	});
+
+	it('counts only the invalid suppressions inside the path', () => {
+		const root = writeProject({ 'src/a/x.ts': '// deepcheck-ignore-file\nexport const x = 1;\n', 'src/b/y.ts': 'export const y = 1;\n' });
+		expect(scanJson(root, 'src/b').summary.invalidSuppressions).toBe(0);
+	});
+
+	it('renders groups, the min score and the top-N note in markdown, escaping table and HTML characters', () => {
+		const root = writeProject({ 'src/store.ts': STORE, 'src/a|b/<x>.ts': SHALLOW_MODULE.replace('./store', '../store'), 'src/c/y.ts': SHALLOW_MODULE.replace('./store', '../store') });
+		const md = cli(root, 'scan', '--fallow', 'off', '--format', 'markdown', '--group-by', 'directory', '--top', '1').stdout;
+		expect(md).toContain('| `src/a\\|b/<x>.ts` |');
+		expect(md).toContain('<code>src/a|b/&lt;x&gt;.ts</code>');
+		expect(md).toContain('showing the top 1');
+		expect(md).toMatch(/\| Group \| Modules \| Max score \|\n\|---\|---:\|---:\|\n\| `src\/a\\|b` \| 1 \|/);
+		expect(cli(root, 'scan', '--fallow', 'off', '--format', 'markdown', '--min-score', '99').stdout).toContain('No module reaches the min score of 99.');
+	});
+
+	it('escapes commas, colons and percent signs in GitHub annotation properties', () => {
+		const root = writeProject({ 'src/store.ts': STORE, 'src/a,b:c%.ts': SHALLOW_MODULE });
+		expect(cli(root, 'scan', '--fallow', 'off', '--format', 'github').stdout).toMatch(/^::warning file=src\/a%2Cb%3Ac%25\.ts,line=1,/);
+	});
+
+	it('resolves a relative --output against the project root', () => {
+		const root = shallowProject();
+		expect(cli(root, 'scan', '--fallow', 'off', '--output', 'out/report.txt').stdout).toBe('');
+		expect(readFileSync(`${root}/out/report.txt`, 'utf8')).toContain('src/shallow.ts');
+	});
+});
+
 describe('tool errors (G5)', () => {
 	it('exits 2 with a message for an unknown option or command', () => {
 		const option = cli(shallowProject(), 'scan', '--colour');
