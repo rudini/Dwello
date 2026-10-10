@@ -182,12 +182,12 @@ describe('review 3 regressions, threshold', () => {
 		const root = writeRepo({ 'src/store.ts': STORE, 'src/legacy.ts': SHALLOW_MODULE + DEEP_MODULE });
 		cli(root, 'baseline', '--fallow', 'off');
 		writeFiles(root, { 'deepcheck.config.json': '{ "failThreshold": 50 }' });
-		commitAll(root, 'baseline at 70, config lowered to 50');
+		commitAll(root, 'baseline at 65, config lowered to 50');
 		writeFiles(root, { 'src/legacy.ts': `${SHALLOW_MODULE + DEEP_MODULE}// touched\n` });
 		const result = JSON.parse(cli(root, 'check', '--fallow', 'off', '--format', 'json').stdout);
-		expect(result).toMatchObject({ passed: true, failThreshold: 70 });
+		expect(result).toMatchObject({ passed: true, failThreshold: 65 });
 		expect(result.warnings).toContain(
-			'the baseline was written with failThreshold 70 but the config has 50; the gate uses 70 until a regenerated baseline is merged (deepcheck baseline)'
+			'the baseline was written with failThreshold 65 but the config has 50; the gate uses 65 until a regenerated baseline is merged (deepcheck baseline)'
 		);
 	});
 });
@@ -299,7 +299,7 @@ describe('deepcheck baseline', () => {
 	it('writes the flagged modules to .deepcheck-baseline.json and reports how many', () => {
 		const root = writeRepo({ 'src/store.ts': STORE, 'src/shallow.ts': SHALLOW_MODULE, 'src/deep.ts': DEEP_MODULE });
 		const result = cli(root, 'baseline', '--fallow', 'off');
-		expect(result).toMatchObject({ code: 0, stdout: 'deepcheck: baseline .deepcheck-baseline.json written: 1 module(s) at or above 70 of 3 analyzed\n' });
+		expect(result).toMatchObject({ code: 0, stdout: 'deepcheck: baseline .deepcheck-baseline.json written: 1 module(s) at or above 65 of 3 analyzed\n' });
 		const baseline = JSON.parse(readFileSync(`${root}/.deepcheck-baseline.json`, 'utf8'));
 		expect(baseline.entries.map((e: { path: string }) => e.path)).toEqual(['src/shallow.ts']);
 	});

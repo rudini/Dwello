@@ -44,7 +44,7 @@ export const DEFAULT_CONFIG: Config = {
 	tests: ['**/*.test.*', '**/*.spec.*', '**/__tests__/**', '**/__mocks__/**', '**/test/**', 'tests/**'],
 	generated: ['**/generated/**', '**/*.gen.ts', '**/*.generated.ts'],
 	entries: ['**/routes/**/+*.ts', '**/hooks.ts', '**/hooks.server.ts', '**/hooks.client.ts', '**/*.config.ts'],
-	failThreshold: 70,
+	failThreshold: 65,
 	tolerance: 5,
 	minInterfaceSize: 5,
 	depthTarget: 8,

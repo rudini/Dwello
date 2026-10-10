@@ -37,7 +37,7 @@ const scanJson = (root: string, ...args: string[]) => JSON.parse(cli(root, 'scan
 describe('deepcheck scan output', () => {
 	it('prints a JSON report of the shallow modules with a summary', () => {
 		const out = scanJson(shallowProject());
-		expect(out).toMatchObject({ schemaVersion: 1, tool: 'deepcheck', command: 'scan', scope: 'all', failThreshold: 70 });
+		expect(out).toMatchObject({ schemaVersion: 1, tool: 'deepcheck', command: 'scan', scope: 'all', failThreshold: 65 });
 		expect(out.findings.map((f: { path: string }) => f.path)).toEqual(['src/shallow.ts']);
 		expect(out.summary).toEqual({ analyzed: 3, shallow: 1, shown: 1, excluded: 0, invalidSuppressions: 0 });
 		expect(out.findings[0].reasons.at(-1)).toBe('Fix the design; do not pad the implementation to game the ratio.');
@@ -85,7 +85,7 @@ describe('deepcheck scan output', () => {
 describe('deepcheck scan formats', () => {
 	it('prints each shallow module with its score, metrics and fixes for a terminal', () => {
 		const { stdout } = cli(shallowProject(), 'scan', '--fallow', 'off');
-		expect(stdout).toMatch(/^deepcheck: 1 shallow module\(s\) of 3 analyzed \(threshold 70\)/);
+		expect(stdout).toMatch(/^deepcheck: 1 shallow module\(s\) of 3 analyzed \(threshold 65\)/);
 		expect(stdout).toMatch(/\n {2}\d+ {2}src\/shallow\.ts\n/);
 		expect(stdout).toContain('4 pass-through(s) (getName:4, setName:7, hasName:10, deleteName:13)');
 		expect(stdout).toContain('Fix the design; do not pad the implementation to game the ratio.');
@@ -93,7 +93,7 @@ describe('deepcheck scan formats', () => {
 
 	it('says so when nothing is shallow', () => {
 		const root = writeProject({ 'src/deep.ts': DEEP_MODULE });
-		expect(cli(root, 'scan', '--fallow', 'off').stdout).toBe('deepcheck: no shallow modules among 1 analyzed (threshold 70)\n');
+		expect(cli(root, 'scan', '--fallow', 'off').stdout).toBe('deepcheck: no shallow modules among 1 analyzed (threshold 65)\n');
 	});
 
 	it('prints a markdown table with the reasons per module', () => {
@@ -137,7 +137,7 @@ describe('deepcheck --explain', () => {
 	it('shows every metric, the score components and the reasons of one module', () => {
 		const { code, stdout } = cli(shallowProject(), '--explain', 'src/deep.ts', '--fallow', 'off');
 		expect(code).toBe(0);
-		expect(stdout).toMatch(/^src\/deep\.ts: score \d+ \(not flagged, below minimum interface size, threshold 70\)/);
+		expect(stdout).toMatch(/^src\/deep\.ts: score \d+ \(not flagged, below minimum interface size, threshold 65\)/);
 		for (const metric of ['interfaceSize 2', 'implementationSize', 'depthRatio', 'passThroughs 0', 'leakyExports 0', 'fanIn 0', 'complexity', 'components: depth'])
 			expect(stdout).toContain(metric);
 	});

@@ -23,7 +23,7 @@ node tools/deepcheck/src/cli.ts suppressions                 # all inline suppre
 
 The path argument may be relative, `./`-prefixed or absolute; a path that matches no source file is an error (exit 2).
 
-Until the Phase 4 calibration (see the brief's Status Log) the conservative default `failThreshold` of 70 flags no module of this repo, so the default scan output is empty; use `--min-score` to see the ranking.
+With the calibrated `failThreshold` of 65 no module of this repo is flagged (the highest scores 60); the threshold is set to catch pass-through layers and thin facades, not to rank. Use `--min-score` to see the ranking, e.g. `--min-score 35` for the modules worth a look (`docs/deepcheck-validation.md`).
 
 Options: `--format human|json|markdown|github`, `--output <file>`, `--top <n>` (default 50), `--min-score <n>` (default: list flagged modules, i.e. score >= `failThreshold`), `--group-by directory|package`, `--fail-on-score <n>` (scan exits 1 if an eligible module in the path scores at least n), `--fallow auto|off|<path>`.
 
@@ -139,8 +139,8 @@ Fallow is optional enrichment in one adapter (`src/fallow.ts`): `fallow health -
 | `tests` | see above | test files (replaces the default) |
 | `generated` | see above | generated files (replaces the default) |
 | `entries` | see above | framework entry modules (replaces the default) |
-| `failThreshold` | 70 | score at which an eligible module is flagged |
-| `tolerance` | 5 | score points a baselined module may worsen |
+| `failThreshold` | 65 | score at which an eligible module is flagged (calibrated in Phase 4, see `docs/deepcheck-validation.md`) |
+| `tolerance` | 5 | score points a baselined module may worsen (calibrated in Phase 4) |
 | `minInterfaceSize` | 5 | smaller modules are not flagged (unless pass-through or classitis) |
 | `depthTarget` | 8 | (statements + operations) per interface unit at which the depth component reaches 0 |
 | `complexityTarget` | 4 | complexity per interface unit at which the complexity component reaches 0 |

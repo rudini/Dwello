@@ -16,7 +16,7 @@ describe('baseline', () => {
 		expect(createBaseline(report, DEFAULT_CONFIG)).toEqual({
 			schemaVersion: 1,
 			tool: 'deepcheck',
-			failThreshold: 70,
+			failThreshold: 65,
 			fallow: false,
 			entries: [{ fingerprint: 'src/shallow.ts#shallow-module', path: 'src/shallow.ts', rule: 'shallow-module', score }]
 		});
