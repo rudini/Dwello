@@ -81,9 +81,9 @@ Then(
 );
 
 Then(
-	'werden {int} Rechnungen nach dem Verteilschlüssel {string} verteilt',
+	'wird/werden {int} Rechnung(en) nach dem Verteilschlüssel {string} verteilt',
 	async ({ verwalter, names }, count: number, title: string) => {
-		await expect(invoicesBy(verwalter, names.get(title)!)).toHaveText(`${count} Rechnungen`);
+		await expect(invoicesBy(verwalter, names.get(title)!)).toHaveText(`${count} ${count === 1 ? 'Rechnung' : 'Rechnungen'}`);
 	}
 );
 

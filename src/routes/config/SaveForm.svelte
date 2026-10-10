@@ -31,8 +31,8 @@
 <form
 	method="POST"
 	{action}
-	use:enhance={({ formData }) => {
-		saving = true;
+	use:enhance={({ formData, submitter }) => {
+		saving = !submitter?.hasAttribute('formaction'); // another action, e.g. "Formel testen", saves nothing
 		const name = String(formData.get('name') ?? '').trim();
 		return async ({ result, update }) => {
 			if (result.type === 'redirect') addToast('success', `${record} «${name}» gespeichert`);

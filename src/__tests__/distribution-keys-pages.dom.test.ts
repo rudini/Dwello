@@ -1,8 +1,30 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { get } from 'svelte/store';
+
+// enhance as SvelteKit wires it: the test plays the server's answer to the last submit
+const server = vi.hoisted(() => ({
+	submit: null as null | ((input: unknown) => unknown),
+	form: null as HTMLFormElement | null
+}));
+vi.mock('$app/forms', () => ({
+	enhance: (form: HTMLFormElement, submit?: (input: unknown) => unknown) => {
+		if (submit) Object.assign(server, { submit, form });
+		return { destroy() {} };
+	}
+}));
+async function answer(result: { type: string }) {
+	const after = server.submit!({ formData: new FormData(server.form!) }) as (
+		input: unknown
+	) => Promise<void>;
+	await after({ update: async () => {}, result });
+	await settle();
+}
+
 import KeysPage from '../routes/config/distribution-keys/+page.svelte';
 import NewKeyPage from '../routes/config/distribution-keys/new/+page.svelte';
 import EditKeyPage from '../routes/config/distribution-keys/[id]/edit/+page.svelte';
-import { allByTestId, byTestId, click, show } from './helpers/dom';
+import { toasts } from '$lib/stores';
+import { allByTestId, byTestId, click, fireEvent, settle, show } from './helpers/dom';
 
 const key = (id: string, name: string, type: 'predefined' | 'custom', usageCount = 0) => ({
 	id,
@@ -12,20 +34,50 @@ const key = (id: string, name: string, type: 'predefined' | 'custom', usageCount
 	description: '',
 	usageCount
 });
+const keys = [
+	key('k1', 'Pro Fläche (m²)', 'predefined', 1),
+	key('k2', 'Eigener', 'custom', 2),
+	key('k3', 'Leer', 'custom')
+];
+const text = () => document.body.textContent!.replace(/\s+/g, ' ');
+const toastTexts = () => get(toasts).map((toast) => toast.message);
+
+beforeEach(() => toasts.set([]));
 
 describe('Verteilschlüssel', () => {
 	it('lässt nur eigene Verteilschlüssel bearbeiten und löschen, und nur ohne Rechnungen', () => {
-		const keys = [
-			key('k1', 'Nach Fläche', 'predefined'),
-			key('k2', 'Eigener', 'custom', 2),
-			key('k3', 'Leer', 'custom')
-		];
 		show(KeysPage, { data: { keys }, form: null } as never);
 
 		expect(allByTestId('distribution-key-edit-button')).toHaveLength(2);
 		const [used, unused] = allByTestId('distribution-key-delete-button') as HTMLButtonElement[];
 		expect(used.disabled).toBe(true);
 		expect(unused.disabled).toBe(false);
+		expect(unused.getAttribute('aria-label')).toBe('Verteilschlüssel «Leer» löschen');
+	});
+
+	it('öffnet einen eigenen Verteilschlüssel über seinen Namen', () => {
+		show(KeysPage, { data: { keys }, form: null } as never);
+
+		const link = allByTestId('distribution-key-row')[1].querySelector('a')!;
+		expect(link.textContent!.trim()).toBe('Eigener');
+		expect(link.getAttribute('href')).toBe('/config/distribution-keys/k2/edit');
+		expect(allByTestId('distribution-key-row')[0].querySelector('a')).toBeNull();
+	});
+
+	it('zählt die Rechnungen in Einzahl und Mehrzahl', () => {
+		show(KeysPage, { data: { keys }, form: null } as never);
+
+		expect(allByTestId('distribution-key-usage').map((usage) => usage.textContent!.trim())).toEqual(
+			['1 Rechnung', '2 Rechnungen', '0 Rechnungen']
+		);
+	});
+
+	it('erklärt Verteilschlüssel und Formeln in Alltagssprache', () => {
+		show(KeysPage, { data: { keys }, form: null } as never);
+
+		expect(text()).toContain('wie die Kosten eines Gebäudes auf die einzelnen Wohnungen');
+		expect(text()).toContain('Jede Wohnung trägt den Teil der Kosten');
+		expect(text()).toContain('* mal');
 	});
 
 	it('fragt vor dem Löschen nach', () => {
@@ -35,8 +87,18 @@ describe('Verteilschlüssel', () => {
 		} as never);
 
 		click('distribution-key-delete-button');
-		expect(document.body.textContent).toContain('«Leer»');
-		expect(document.body.textContent).toContain('Löschen fehlgeschlagen');
+		expect(text()).toContain('Verteilschlüssel «Leer» löschen?');
+		expect(text()).toContain('Löschen fehlgeschlagen');
+	});
+
+	it('bestätigt das Löschen mit dem Namen des Verteilschlüssels', async () => {
+		show(KeysPage, { data: { keys: [key('k3', 'Leer', 'custom')] }, form: null } as never);
+
+		click('distribution-key-delete-button');
+		click('distribution-key-delete-confirm');
+		await answer({ type: 'redirect' });
+
+		expect(toastTexts()).toEqual(['Verteilschlüssel «Leer» gelöscht']);
 	});
 });
 
@@ -62,6 +124,15 @@ describe('Verteilschlüssel erfassen', () => {
 		expect(byTestId('formula-test-error')!.textContent).toBe('Unbekannte Variable {persons}');
 		expect(byTestId('formula-test-share')!.textContent).toBe('42.5%');
 	});
+
+	it('bestätigt das Speichern mit dem Namen des Verteilschlüssels', async () => {
+		show(NewKeyPage, { form: null } as never);
+		fireEvent(byTestId<HTMLInputElement>('distribution-key-name-input')!, 'input', 'Nach Zimmern');
+
+		await answer({ type: 'redirect' });
+
+		expect(toastTexts()).toEqual(['Verteilschlüssel «Nach Zimmern» gespeichert']);
+	});
 });
 
 describe('Verteilschlüssel bearbeiten', () => {
@@ -71,6 +142,6 @@ describe('Verteilschlüssel bearbeiten', () => {
 
 		expect(byTestId<HTMLInputElement>('distribution-key-name-input')!.value).toBe('Eigener');
 		expect(byTestId<HTMLInputElement>('distribution-key-formula-input')!.value).toBe('{rooms} * 2');
-		expect(document.body.textContent).toContain('Formel ist ungültig');
+		expect(byTestId('form-error')!.textContent).toContain('Formel ist ungültig');
 	});
 });
