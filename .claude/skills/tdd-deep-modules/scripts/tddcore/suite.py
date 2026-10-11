@@ -135,8 +135,7 @@ def _run_bun(directory, command):
         cases = list(ElementTree.parse(report).iter("testcase")) if report.exists() else []
     failed = sum(1 for case in cases for _ in case.iter("failure"))
     ran = sum(1 for case in cases if case.find("skipped") is None)
-    outcome = "pass" if done.returncode == 0 else "fail"
-    return Run(done.returncode, outcome, f"bun: {failed} of {len(cases)} tests failed", failed, ran,
+    return Run(done.returncode, _bun_outcome(done.returncode, cases), f"bun: {failed} of {len(cases)} tests failed", failed, ran,
                not cases)
 
 
@@ -157,6 +156,13 @@ def _run_vitest(root):
                           done.stderr + done.stdout, re.MULTILINE) is not None
     return Run(done.returncode, _vitest_outcome(done.returncode, data, unhandled), summary,
                data["numFailedTests"], ran, data["numTotalTests"] == 0 and not load_errors)
+
+
+def _bun_outcome(exit_code, cases):
+    if exit_code == 0:
+        return "pass"
+    types = [f.get("type") for case in cases for f in case.iter("failure")]
+    return "fail" if types and all(t == "AssertionError" for t in types) else "error"
 
 
 def _is_vitest_assertion(message):
