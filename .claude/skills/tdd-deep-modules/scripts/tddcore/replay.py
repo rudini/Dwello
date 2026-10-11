@@ -37,14 +37,14 @@ def replay(repo, rev_range):
         tree = Path(tmp) / "replay"
         _git(repo, "worktree", "add", "-q", "--detach", str(tree), base)
         try:
-            known = suite.run(tree).tests if has_base else frozenset()
+            known = _run(tree).tests if has_base else frozenset()
             for commit in commits:
                 _git(tree, "checkout", "-q", "--detach", commit)
                 _git(tree, "clean", "-fdxq")
                 subject = _git(tree, "log", "-1", "--format=%s")
                 phase = protocol.phase_of(subject)
                 claimed = _git(tree, "log", "-1", "--format=%(trailers:key=TDD-Exit-Code,valueonly,separator=%x2C)")
-                run = suite.run(tree)
+                run = _run(tree)
                 changed = _git(tree, "diff-tree", "-r", "--root", "--no-commit-id", "--name-only",
                                "--no-renames", commit).split("\n")
                 if phase not in protocol.PHASES:
@@ -69,6 +69,14 @@ def replay(repo, rev_range):
     if verdicts[-1].phase == "red":
         verdicts[-1].violations.append("the history ends in red: every red needs a green")
     return verdicts
+
+
+def _run(tree):
+    """The suite's result; a commit without a test framework is an error run with exit code 2."""
+    try:
+        return suite.run(tree)
+    except suite.NoFramework as error:
+        return suite.Run(2, "error", str(error), 0, 0)
 
 
 def _git(cwd, *args):
