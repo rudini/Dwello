@@ -1,6 +1,8 @@
+import signal
 import subprocess
 import sys
 import tempfile
+import time
 import unittest
 
 from tests.fixture import (BUN_TEST, RIGHT_ADD_JS, RIGHT_ADD_TS, SCRIPTS, VITEST_TEST, WRONG_ADD_TS, Repo,
@@ -226,3 +228,15 @@ class TddReplayTest(unittest.TestCase):
                 repo.commit_phase("red", {name: test + "\n" + same_name_passing}, 1)
                 repo.commit_phase("green", green, 0)
                 self.assert_rejected(repo, base, "red must add exactly one new test, but adds 2")
+
+    def test_a_terminated_replay_removes_its_worktree(self):
+        repo, base = good_history(self)
+        replay = subprocess.Popen([sys.executable, str(SCRIPTS / "tdd_replay"), f"{base}..HEAD"], cwd=repo.path,
+                                  stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        deadline = time.monotonic() + 30
+        while repo.git("worktree", "list").count("\n") == 0 and time.monotonic() < deadline:
+            time.sleep(0.05)
+        replay.send_signal(signal.SIGTERM)
+        replay.wait(timeout=30)
+
+        self.assertEqual(repo.git("worktree", "list").count("\n"), 0, repo.git("worktree", "list"))
