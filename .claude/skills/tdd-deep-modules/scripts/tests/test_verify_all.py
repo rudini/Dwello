@@ -150,3 +150,38 @@ class ThinEntryPointTest(unittest.TestCase):
 
         self.assertEqual(logic, [])
         self.assertEqual(calls.count("gate.stage2"), 1)
+
+
+class LockFormatTest(unittest.TestCase):
+    def test_a_lock_must_hold_exactly_one_well_formed_line_per_file(self):
+        def edit(root, change):
+            lock = root / "verifiers.lock"
+            lock.write_text(change(lock.read_text()))
+            return root
+
+        def stale_then_right(text):
+            line = next(line for line in text.splitlines() if line.endswith("  scripts/skill_lint"))
+            return text.replace(line, "0" * 64 + "  scripts/skill_lint\n" + line)
+
+        cases = {
+            "duplicate": (lambda: edit(skill_dir(self), stale_then_right),
+                          "verifiers.lock: scripts/skill_lint is locked twice"),
+            "junk line": (lambda: edit(skill_dir(self), lambda text: text + "anything\n"),
+                          "verifiers.lock: line 'anything' is not '<sha256>  <path>'"),
+        }
+        for name, (build, line) in cases.items():
+            with self.subTest(name):
+                result = verify(build())
+
+                self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+                self.assertIn(line, result.stdout.splitlines())
+
+    def test_an_unreadable_lock_is_named(self):
+        root = skill_dir(self)
+        (root / "verifiers.lock").write_bytes(b"reviewed: \xff\n")
+
+        result = verify(root)
+
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn("verifiers.lock: not readable as UTF-8 text", result.stdout.splitlines())
+        self.assertEqual(result.stdout.strip().splitlines()[-1], "STAGE2: FAIL")
