@@ -50,18 +50,20 @@ Production file = code suffix (`.py .js .jsx .mjs .cjs .ts .tsx .mts .cts .svelt
 Every commit of the range (first-parent, oldest first) is checked out in a temporary git worktree (cleaned with `git clean -fdx`, installed `node_modules` linked from the caller's checkout) and its tests are run. The commit before the range is run too, to know which tests already exist. Each commit is judged from its own run, never from its subject or trailers:
 - the commit must carry a phase prefix; the protocol rules above apply with the claimed phase;
 - its `TDD-Exit-Code` trailer must equal the real exit code;
-- red adds exactly one new test id and its failing tests are exactly that new test; no other phase adds tests; no phase removes tests (test ids come from the frameworks' reports: bun JUnit test cases, vitest assertion results; a repeated name in a file gets a `#n` suffix, so same-named tests do not collapse);
+- red adds exactly one new test id and its failing tests are exactly that new test; no other phase adds tests; no phase removes tests, and a test that ran before and is now skipped, todo or filtered out counts as removed (test ids come from the frameworks' reports: bun JUnit test cases, vitest assertion results; a repeated name in a file gets a `#n` suffix, so same-named tests do not collapse);
 - the range must not end in red.
 
 ## Known limits
 
 - The previous phase is read from the HEAD subject prefix (`red: ...`), which a hand-made commit can fake; `tdd_replay` (step 2) re-runs history and does not trust subjects or trailers.
 - `tdd-step` cannot tell a new failing test from an existing test that broke; red requires exactly one failing test, and `tdd_replay` checks that exactly one new test was discovered.
-- Refactor can weaken a test or skip some (not all) tests while the suite stays green.
+- Red and refactor can weaken an existing test's assertion while the suite stays as required; neither `tdd-step` nor `tdd_replay` reads assertions. (Skipping or filtering tests is caught by `tdd_replay`.)
+- Test data that is not code (for example a JSON file of expected values at the repository root) is not classified as test code, so green may change it.
 - Tests run on the working tree; a gitignored file the tests depend on is not committed. The working-tree snapshot uses a fresh index, so a test run that modifies a tracked-but-gitignored file is not noticed.
 - Dwello's backend tests need PostgreSQL (`bun test --preload ./scripts/test-db.ts`). Without a database the bun run fails, so every red, green and refactor in Dwello is refused there. That is the rule, not a bug.
 - A bun run that exits non-zero with no failing test and no reported error (for example a coverage threshold) is an error, never red.
-- A new function or module cannot get its first red without existing production code: importing something that does not exist is an import error, which is never red. The stub has to exist before the cycle (from an earlier green or refactor). Stage 2's skill text addresses this when the interface is designed.
+- A same-named test inserted before an existing one in the same file takes the existing test's id (`#n` numbering follows report order), so that red is rejected; add same-named tests after the existing ones.
+- A new function or module cannot get its first red without existing production code: importing something that does not exist is an import error, which is never red. The stub has to exist before the cycle (from an earlier green or refactor). Stage 2's skill text addresses this when the interface is designed. Consequently a replay range that starts at the very first commit cannot contain a red before some production code exists; start ranges after the project's scaffold commit.
 - The replay judges the first-parent chain; a merge commit shows no changed files and is therefore rejected ("nothing changed"). Replay linear TDD histories.
 - Renaming or moving a test in refactor reads as one test removed and one added, so the replay rejects it. Rename tests as part of their red, or not at all.
 - A test-phase commit whose run crashes (no test ids) reads as removing every test.
