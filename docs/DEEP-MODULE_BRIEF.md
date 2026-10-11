@@ -532,7 +532,7 @@ The user asked to include other TypeScript codebases to improve accuracy.
 - Ranking mostly carries over: pooled AUC on the new codebases 0.828 with the unchanged weights (Dwello 0.828), 0.770 on the random draws alone; the two realworld apps have one shallow module each. Leave-one-codebase-out tuning is worse by 0.063 on average, so the weights stay.
 - Gate precision measured on real code for the first time: first real positives (11 umami query hooks, `password.ts`, two hono adapters). 14 of 38 flagged are shallow for both labellers, 27 for at least one; on application code 12 of 13, but 11 of them are one repeated umami pattern.
 - Fixed test-first (red, then green): a data-only class alone is no longer a structural sign (3 NestJS DTO false positives). The 0.5 data-only weighting stays, so DTOs do not climb in `scan` (review: dropping it raised a DTO to 75).
-- Open decision: forwarders with a fixed argument (date-fns `nextFriday`), disputed between labellers.
+- Decision (user, 2026-10-11): forwarders with a fixed argument (date-fns `nextFriday`, disputed between labellers) stay pass-throughs, so the evasion stays closed; libraries can exclude public entry points via `entries` or an ignore comment.
 - Independent review: numbers confirmed; findings on overstated wording and the dropped 0.5 weighting fixed as above.
 - Checks: 182 deepcheck tests, ESLint, tsc, `fallow audit`, `deepcheck:audit` clean; baseline regenerated, unchanged (0 of 124); Dwello precision@25 12/25, AUC 0.828.
 

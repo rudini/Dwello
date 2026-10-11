@@ -308,7 +308,7 @@ The two realworld apps have one shallow module each, so their AUC says little. L
 
 **Fixed, test first (`reference.test.ts`):** a data-only class alone no longer flags a module. NestJS DTOs (four readonly fields) scored 68 through it, and both labellers judged them flat by design. A data-only class still raises the score by half the classitis weight; only a pass-through or tiny-file classitis flags. The fix was tested on the same DTOs that prompted it; there is no held-out check.
 
-**Not changed, a decision to take:** forwarders with a fixed argument (date-fns `nextFriday`) split the labellers. Dropping them again would reopen the evasion closed earlier the same day. Libraries can list their public entry points in `entries` or use `// deepcheck-ignore-file -- reason`.
+**Decided by the user: forwarders with a fixed argument stay pass-throughs.** They split the labellers (date-fns `nextFriday`, 14 modules). Dropping them again would reopen the evasion closed earlier the same day. Libraries can list their public entry points in `entries` or use `// deepcheck-ignore-file -- reason`.
 
 ## Limits
 
