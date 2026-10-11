@@ -1,0 +1,7 @@
+KILLED   tddcore/gate.py: 'parents[2]' -> 'parents[1]' [test_verify_all]
+KILLED   tddcore/gate.py: '    if not (passed and latest and named' -> '    if not (latest and named' [test_verify_all]
+KILLED   tddcore/gate.py: '    for line in lines[1:]:' -> '    for line in lines:' [test_verify_all]
+KILLED   tddcore/gate.py: 'elif path not in present or hashlib' -> 'elif hashlib' [test_verify_all]
+KILLED   tddcore/gate.py: 'round-(\\d+)\\.md", reviewed)' -> 'round-(\\d)\\.md", reviewed)' [test_verify_all]
+KILLED   tddcore/gate.py: 'and (skill / reviewed).is_file() and' -> 'and' [test_verify_all]
+KILLED   tddcore/gate.py: 'set(path.relative_to(scripts).parts)' -> 'set()' [test_verify_all]

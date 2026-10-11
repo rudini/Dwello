@@ -198,3 +198,28 @@ class LockFormatTest(unittest.TestCase):
         self.assertEqual(named_right.returncode, 0, named_right.stdout + named_right.stderr)
         self.assertEqual(named_wrong.returncode, 1, named_wrong.stdout + named_wrong.stderr)
 
+
+    def test_a_lock_naming_a_failed_latest_review_is_named(self):
+        root = skill_dir(self, {**ALL_PASS, "08": ["PASS", "FAIL"]})
+
+        result = verify(root)
+
+        self.assertIn("verifiers.lock: reviewed evidence/reviews/step-08-round-2.md is not step 08's latest "
+                      "passing review", result.stdout.splitlines())
+
+
+class RealVerifiersTest(unittest.TestCase):
+    def test_a_copy_of_the_real_verifiers_run_without_arguments_checks_its_own_skill(self):
+        root = skill_dir(self, lock=False)
+        for path in (SKILL / "scripts").rglob("*"):
+            relative = path.relative_to(SKILL / "scripts")
+            if path.is_file() and not {"tests", "__pycache__"} & set(relative.parts):
+                (root / "scripts" / relative).parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(path, root / "scripts" / relative)
+        write_lock(root, "evidence/reviews/step-08-round-1.md")
+
+        result = subprocess.run([sys.executable, str(root / "scripts" / "verify_all")], cwd=tempfile.gettempdir(),
+                                capture_output=True, text=True)
+
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(result.stdout.strip().splitlines()[-1], "STAGE2: PASS")
