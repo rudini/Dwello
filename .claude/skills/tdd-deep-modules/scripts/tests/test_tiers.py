@@ -120,6 +120,21 @@ class TddStepTierTest(unittest.TestCase):
                 self.assertEqual(repo.subject(), "init")
 
 
+    def test_a_test_list_after_a_green_on_the_fast_suite_is_refused(self):
+        repo = tiered_repo(self, **{"db.pg.test.ts": DATABASE_TEST, "calc.test.ts": BUN_TEST})
+        repo.commit_phase("red", {"calc.test.ts": BUN_TEST + 'test("adds zero", () => {\n'
+                                  '  expect(add(0, 0)).toBe(0);\n});\n'}, 1, suite="fast")
+        repo.commit_phase("green", {"calc.ts": RIGHT_ADD_TS}, 0, suite="fast")
+        repo.write("TESTLIST.md", "- [ ] next task\n")
+
+        result = repo.run("tdd-step", "test", "next task")
+
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn("a test list after a green on the fast suite starts a new task, but the task before it "
+                      "did not end on the full suite: refactor, or redo the green with --suite full", result.stderr)
+        self.assertEqual(repo.subject(), "green: green step")
+
+
 class TddReplayTierTest(unittest.TestCase):
     def replay(self, repo, base):
         return repo.run("tdd_replay", f"{base}..HEAD")
