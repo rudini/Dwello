@@ -21,7 +21,8 @@ _CODE_SUFFIXES = {".py", ".js", ".jsx", ".mjs", ".cjs", ".ts", ".tsx", ".mts", "
                   ".svelte", ".vue"}
 _TEST_DIRS = {"tests", "test", "__tests__"}
 # Files that decide which tests run: changing them can hide a failing test.
-_TEST_CONFIG = {"conftest.py", "pytest.ini", "pyproject.toml", "setup.cfg", "tox.ini"}
+_TEST_CONFIG = {"conftest.py", "pytest.ini", ".pytest.ini", "pytest.toml", "pyproject.toml",
+                "setup.cfg", "tox.ini", "package.json"}
 
 
 def is_production(path):
