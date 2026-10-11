@@ -43,7 +43,7 @@ def _is_test(path):
             or not _TEST_DIRS.isdisjoint(path.parts[:-1]))
 
 
-def violations(previous, phase, run, changed, suite="full", previous_suite="full"):
+def violations(previous, phase, run, changed, suite, previous_suite):
     """Why committing `changed` as `phase` after `previous`, with suite result `run`, breaks TDD.
 
     `suite` is the tier `run` came from, `previous_suite` the tier of the commit before."""

@@ -50,19 +50,19 @@ def replay(repo, rev_range):
             # twice --force: an add interrupted by a signal leaves the worktree locked
             subprocess.run(["git", "worktree", "remove", "--force", "--force", str(tree)], cwd=repo,
                            capture_output=True)
-    if verdicts[-1].phase == "red":
-        last = verdicts[-1]
-        verdicts[-1] = replace(last, violations=last.violations
-                               + ("the history ends in red: every red needs a green",))
     last = verdicts[-1]
+    if last.phase == "red":
+        last = _flag(last, "the history ends in red: every red needs a green")
     if last.suite != "full":
-        verdicts[-1] = replace(last, violations=last.violations
-                               + ("the final commit must run the full suite",))
+        last = _flag(last, "the final commit must run the full suite")
     elif last.run.outcome != "pass":
-        verdicts[-1] = replace(last, violations=last.violations
-                               + (f"the final commit must pass the full suite, but it says: "
-                                  f"{last.run.summary}",))
+        last = _flag(last, f"the final commit must pass the full suite, but it says: {last.run.summary}")
+    verdicts[-1] = last
     return verdicts
+
+
+def _flag(verdict, violation):
+    return replace(verdict, violations=verdict.violations + (violation,))
 
 
 def _range(repo, rev_range):
