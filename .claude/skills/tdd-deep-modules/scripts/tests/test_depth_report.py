@@ -130,3 +130,21 @@ export class Ledger {
         # + add 1+1; audit and #check are private
         self.assertTrue(report_line(result, "src/ledger.ts").startswith("src/ledger.ts: surface 15,"),
                         result.stdout)
+
+    def test_usage_errors_exit_2_with_a_message(self):
+        repo = Repo(self, {"src/amount.ts": fixture("deep"), "README.md": "# x\n"})
+        outside = Repo(self, {})
+        (outside.path / ".git").rename(outside.path / "no-git")
+        outside.write("amount.ts", fixture("deep"))
+
+        for name, where, args, message in (
+                ("no file", repo, (), "usage: depth_report <file>..."),
+                ("missing file", repo, ("src/nope.ts",), "src/nope.ts: no such file"),
+                ("not a module", repo, ("README.md",), "README.md: not a TypeScript or JavaScript file"),
+                ("outside git", outside, ("amount.ts",), "amount.ts: not inside a git repository")):
+            with self.subTest(name):
+                result = where.run("depth_report", *args)
+
+                self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
+                self.assertIn(f"depth_report: {message}", result.stderr)
+                self.assertNotIn("Traceback", result.stderr)
