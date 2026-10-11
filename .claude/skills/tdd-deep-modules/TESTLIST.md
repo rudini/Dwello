@@ -196,3 +196,19 @@ Prints `skill_lint: OK` and exits 0, or one `skill_lint: <problem>` line per pro
 - [ ] every `references/...` link resolves
 - [ ] no SKILL.md -> exit 2
 - [ ] trigger tests with skill-creator's `run_eval.py` (evidence, not part of the suite: they call the model)
+
+## Step 4: `scripts/verify_all [skill-dir]` and `verifiers.lock`
+
+Design it twice. Hidden decision: what "stage 2 passes" means (which checks, which review steps, which files the lock covers and how the lock is tied to a review).
+- A: `gate.stage2(skill) -> (passed, lines)`; `verify_all` prints the lines and exits 0 or 1, nothing else.
+- B: `verify_all` calls `selfcheck`, `lint`, `verdicts` and a lock checker itself and combines them.
+- Chosen: A, because the entry point must hold no logic, and B would put the pass rule into it.
+
+Review steps: 01-03 stage 1 tools, 04 `verify_stage1`, 05 SKILL.md, 06 `depth_report`, 07 `skill_lint`, 08 `verify_all`. `verifiers.lock`: a `reviewed: evidence/reviews/step-08-round-N.md` line, then one `<sha256>  <path>` line per verifier file (`verify_all`, `verify_stage1`, `skill_lint`, `tddcore/gate.py`, `tddcore/verdicts.py`, `tddcore/selfcheck.py`, `tddcore/lint.py`).
+
+- [ ] everything passes -> `tests: OK`, `skill_lint: OK`, one verdict line per step 01-08, `verifiers.lock: OK`, `STAGE2: PASS`, exit 0
+- [ ] a step whose latest review failed, or that has none -> `STAGE2: FAIL`
+- [ ] a skill_lint problem is printed and fails the stage
+- [ ] a failing own suite fails the stage
+- [ ] `verifiers.lock` missing, a verifier changed after the lock, or a lock that names a review that is not step 08's latest passing one -> `STAGE2: FAIL` naming the cause
+- [ ] `verify_all` holds no logic: no branches or loops, only a call to `gate.stage2`, printing and the exit
