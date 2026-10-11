@@ -83,7 +83,7 @@
 	"glossary_advance_term": "Acompte",
 	"glossary_advance_text": "L’avance mensuelle du locataire pour les frais accessoires. Le décompte des charges l’impute sur les coûts effectifs.",
 	"glossary_net_rent_term": "Loyer net",
-	"glossary_net_rent_text": "Le loyer mensuel de base sans les frais accessoires, aussi appelé loyer.",
+	"glossary_net_rent_text": "Le loyer mensuel de base, sans les frais accessoires.",
 	"glossary_additional_rent_term": "Loyer supplémentaire",
 	"glossary_additional_rent_text": "Loyer mensuel supplémentaire, par exemple pour un garage, une place de parc ou une cave.",
 	"glossary_key_term": "Clé de répartition",
@@ -152,5 +152,7 @@
 	"terms_responsibility_2": "La gérance est responsable d’informer les locataires du traitement de leurs données.",
 	"terms_availability_title": "Disponibilité",
 	"terms_availability_1": "L’exploitation, la sauvegarde des données et la disponibilité incombent à l’exploitant de cette installation Dwello. Il n’existe aucun droit à une disponibilité ininterrompue.",
-	"language_prefix": "Langue : "
+	"language_prefix": "Langue : ",
+	"ui_opens_new_tab": "(s’ouvre dans un nouvel onglet)",
+	"language_choice": "Choix de la langue"
 }

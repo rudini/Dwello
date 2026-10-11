@@ -61,7 +61,7 @@
 	"help_tenants_title": "Manage tenants and rental contracts",
 	"help_tenants_1": "Under «Tenants» you add the tenants with their contact details and correspondence channel (letter or email).",
 	"help_tenants_2": "Under «Rental contracts», «Add rental contract» guides you through the contract in five steps: tenant, apartment, contract term, rent and review. «Back» and «Next» move between the steps without losing your entries.",
-	"help_tenants_3": "Only «Save rental contract» in the last step creates the rental contract. Until then your entries stay as a draft in this browser until you save, discard the draft or sign out.",
+	"help_tenants_3": "Only «Save rental contract» in the last step creates the rental contract. Until you save, discard the draft or sign out, your entries stay as a draft in this browser.",
 	"help_tenants_4": "When a tenancy ends, enter the contract end in the rental contract. The apartment then counts as vacant again.",
 	"help_invoices_title": "Add invoices",
 	"help_invoices_1": "Under «Invoices» you add each invoice from an invoice issuer with its date, amount and building.",
@@ -83,7 +83,7 @@
 	"glossary_advance_term": "Advance payment",
 	"glossary_advance_text": "The tenant’s monthly advance for the utility costs. The utility cost statement sets it off against the actual costs.",
 	"glossary_net_rent_term": "Net rent",
-	"glossary_net_rent_text": "The monthly base rent without utility costs, also called rent.",
+	"glossary_net_rent_text": "The monthly base rent, without utility costs.",
 	"glossary_additional_rent_term": "Additional rent",
 	"glossary_additional_rent_text": "Extra monthly rent, for example for a garage, parking space or cellar.",
 	"glossary_key_term": "Distribution key",
@@ -152,5 +152,7 @@
 	"terms_responsibility_2": "The management is responsible for informing the tenants about the processing of their data.",
 	"terms_availability_title": "Availability",
 	"terms_availability_1": "Operation, data backup and availability are the responsibility of the operator of this Dwello installation. There is no right to uninterrupted availability.",
-	"language_prefix": "Language: "
+	"language_prefix": "Language: ",
+	"ui_opens_new_tab": "(opens in a new tab)",
+	"language_choice": "Language choice"
 }

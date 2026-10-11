@@ -93,9 +93,9 @@
 {:else}
 	<div class="min-h-screen bg-canvas">
 		<!-- Without the header the language choice stands alone at the top -->
-		<div class="flex justify-end px-4 pt-4">
+		<nav aria-label={m.language_choice()} class="flex justify-end px-4 pt-4">
 			<LanguageSwitcher />
-		</div>
+		</nav>
 		<main id="main-content" tabindex="-1">
 			{@render children()}
 		</main>

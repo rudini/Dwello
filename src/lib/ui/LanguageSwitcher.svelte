@@ -44,6 +44,13 @@
 	</button>
 
 	{#if open}
+		<button
+			type="button"
+			class="fixed inset-0 z-10 cursor-default"
+			tabindex="-1"
+			aria-hidden="true"
+			onclick={() => (open = false)}
+		></button>
 		<ul
 			id="language-menu"
 			class="absolute right-0 z-20 mt-2 flex w-48 flex-col rounded-panel border border-line bg-surface py-2 shadow-raised"

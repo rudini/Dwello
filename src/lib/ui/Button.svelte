@@ -76,7 +76,7 @@
 		rel={target ? 'noopener' : undefined}
 	>
 		{@render content()}
-		{#if target}<span class="sr-only">(öffnet in neuem Tab)</span>{/if}
+		{#if target}<span class="sr-only">{m.ui_opens_new_tab()}</span>{/if}
 	</a>
 {:else}
 	<button

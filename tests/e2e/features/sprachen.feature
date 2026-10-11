@@ -6,7 +6,8 @@ Funktionalität: Sprache der Oberfläche
   damit ich jeden Schritt verstehe
 
   Szenario: Ohne Wahl ist Dwello deutsch, auch wenn der Browser Englisch will
-    Angenommen der Liegenschaftsverwalter öffnet die Übersicht
+    Angenommen der Browser des Liegenschaftsverwalters bevorzugt Englisch
+    Und der Liegenschaftsverwalter öffnet die Übersicht
     Dann ist die Seite auf "Deutsch"
 
   Szenario: Sprache in der Kopfzeile wechseln und auf der Seite bleiben

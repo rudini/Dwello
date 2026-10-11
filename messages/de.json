@@ -152,5 +152,7 @@
 	"terms_responsibility_2": "Die Verwaltung ist dafür verantwortlich, die Mieter über die Bearbeitung ihrer Daten zu informieren.",
 	"terms_availability_title": "Verfügbarkeit",
 	"terms_availability_1": "Betrieb, Datensicherung und Verfügbarkeit liegen beim Betreiber dieser Dwello-Installation. Ein Anspruch auf ununterbrochene Verfügbarkeit besteht nicht.",
-	"language_prefix": "Sprache: "
+	"language_prefix": "Sprache: ",
+	"ui_opens_new_tab": "(öffnet in neuem Tab)",
+	"language_choice": "Sprachwahl"
 }

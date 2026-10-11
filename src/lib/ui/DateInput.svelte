@@ -52,8 +52,7 @@
 	});
 
 	// while typing, "31.12.20" is not yet a date: a two-digit year counts only when the field is left
-	const typed = (text: string) =>
-		/\.\d{2}$/.test(text.trim()) ? '' : (parseSwissDate(text) ?? '');
+	const typed = (text: string) => (/\.\d{2}$/.test(text.trim()) ? '' : (parseSwissDate(text) ?? ''));
 
 	// a value set from outside (a draft, the calendar) shows in the field
 	$effect(() => {
@@ -65,12 +64,7 @@
 	// "1.12" is a real day without its year: say what is missing
 	const NO_YEAR = $derived(
 		m.ui_date_no_year({
-			example: `${text
-				.trim()
-				.replace(/\.$/, '')
-				.split('.')
-				.map((n) => n.padStart(2, '0'))
-				.join('.')}.${new Date().getFullYear()}`
+			example: `${text.trim().replace(/\.$/, '').split('.').map((n) => n.padStart(2, '0')).join('.')}.${new Date().getFullYear()}`
 		})
 	);
 	// a day that does not exist, a missing year, or another way of writing it (words, slashes)
@@ -95,10 +89,7 @@
 		// an edit in the middle stays as it is, the cursor too
 		if (input.selectionStart === input.value.length) {
 			const at = text.replace(/\.{2,}/g, '.'); // a dot typed after the automatic one
-			text =
-				/^\d{2}$|^\d{1,2}\.\d{2}$/.test(at) && event.inputType !== 'deleteContentBackward'
-					? `${at}.`
-					: at;
+			text = /^\d{2}$|^\d{1,2}\.\d{2}$/.test(at) && event.inputType !== 'deleteContentBackward' ? `${at}.` : at;
 			input.value = text;
 		}
 		value = typed(text);

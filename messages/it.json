@@ -32,7 +32,7 @@
 	"ui_page_of": "Pagina {page} di {pages}",
 	"ui_please_wait": "Attenda, prego …",
 	"ui_cancel": "Annullare",
-	"ui_action_failed": "Non è riuscito",
+	"ui_action_failed": "Non ha funzionato",
 	"ui_draft_restored": "Bozza ripristinata",
 	"ui_draft_back": "I suoi dati, modificati l’ultima volta il {date} alle {time}, sono di nuovo disponibili.",
 	"ui_draft_discard": "Scartare la bozza",
@@ -83,7 +83,7 @@
 	"glossary_advance_term": "Acconto",
 	"glossary_advance_text": "L’anticipo mensile dell’inquilino per le spese accessorie. Il conteggio spese accessorie lo compensa con i costi effettivi.",
 	"glossary_net_rent_term": "Pigione netta",
-	"glossary_net_rent_text": "La pigione mensile di base senza spese accessorie, detta anche pigione.",
+	"glossary_net_rent_text": "La pigione mensile di base, senza spese accessorie.",
 	"glossary_additional_rent_term": "Pigione supplementare",
 	"glossary_additional_rent_text": "Pigione mensile supplementare, per esempio per garage, posteggio o cantina.",
 	"glossary_key_term": "Chiave di riparto",
@@ -106,7 +106,7 @@
 	"glossary_channel_text": "Il modo in cui un inquilino riceve la sua posta: per lettera (predefinito) o per e-mail. Per l’e-mail serve un indirizzo e-mail.",
 	"glossary_status_term": "Stato di locazione",
 	"glossary_status_text": "Indica se un appartamento è locato: locato (un contratto di locazione è in corso), rilocato (è stato concluso un futuro contratto di locazione), sfitto o bloccato. Locato e rilocato derivano dai contratti di locazione; sfitto e bloccato li imposta modificando l’appartamento.",
-	"record_not_found": "{record}: nessun risultato",
+	"record_not_found": "{record}: non trovato",
 	"record_not_loaded": "{record}: il caricamento non è riuscito",
 	"login_title": "Accedere",
 	"login_intro": "Acceda con il suo account esistente. Non le serve una password apposita per Dwello.",
@@ -152,5 +152,7 @@
 	"terms_responsibility_2": "L’amministrazione è responsabile di informare gli inquilini sul trattamento dei loro dati.",
 	"terms_availability_title": "Disponibilità",
 	"terms_availability_1": "L’esercizio, il backup dei dati e la disponibilità spettano al gestore di questa installazione di Dwello. Non sussiste alcun diritto a una disponibilità ininterrotta.",
-	"language_prefix": "Lingua: "
+	"language_prefix": "Lingua: ",
+	"ui_opens_new_tab": "(si apre in una nuova scheda)",
+	"language_choice": "Scelta della lingua"
 }
