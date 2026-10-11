@@ -233,3 +233,12 @@ export class Ledger {
         line = report_line(repo.run("depth_report", "src/list.ts"), "src/list.ts")
 
         self.assertIn(", duplicate 0 ->", line)
+
+    def test_classes_without_methods_are_not_classitis(self):
+        module = ("export class OAuthError extends Error {\n  constructor(message: string) {\n    super(message);\n  }\n}\n"
+                  "export class JWTError extends Error {\n  constructor(message: string) {\n    super(message);\n  }\n}\n")
+        repo = Repo(self, {"src/errors.ts": module})
+
+        line = report_line(repo.run("depth_report", "src/errors.ts"), "src/errors.ts")
+
+        self.assertIn(", classitis no,", line)
