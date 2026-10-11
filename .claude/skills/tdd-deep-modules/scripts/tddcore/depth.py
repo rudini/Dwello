@@ -326,14 +326,19 @@ _EXPORTED_FUNCTION = re.compile(r"^export\s+(?:async\s+)?function\b\*?\s*(\w+)|"
 def _one_caller_exports(text, elsewhere):
     """Small exported functions the module uses exactly once besides declaring them, and no other
     production code (`elsewhere`) names: exported only to be tested."""
-    found = []
+    headers = {}  # name -> header matches; overloads declare one name several times
     for match in _EXPORTED_FUNCTION.finditer(text):
-        name = match[1] or match[2]
+        headers.setdefault(match[1] or match[2], []).append(match)
+    found = []
+    for name, matches in headers.items():
         word = re.compile(rf"\b{re.escape(name)}\b")
-        start, end = _body(text, match)
-        outside = text[:start] + text[end:]  # a recursive call is no caller
-        if (len(word.findall(outside)) == 2 and _size(text[start:end]) <= SMALL_HELPER
-                and not any(word.search(other) for other in elsewhere)):
+        bodies = sorted(_body(text, match) for match in matches)
+        outside, last = "", 0
+        for start, end in bodies:  # a recursive call is no caller
+            outside, last = outside + text[last:start], end
+        calls = len(word.findall(outside + text[last:])) - len(matches)
+        size = max(_size(text[start:end]) for start, end in bodies)
+        if calls == 1 and size <= SMALL_HELPER and not any(word.search(other) for other in elsewhere):
             found.append(name)
     return tuple(found)
 
