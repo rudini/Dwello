@@ -73,28 +73,27 @@ def _size(code):
     return sum(1 for line in code.splitlines() if line.strip())
 
 
-_EXPORTS = [  # (pattern, whether group 1 holds a parameter list); the first match per export wins
-    (r"export\s+(?:default\s+)?(?:async\s+)?function\*?\s*\w*\s*(?:<[^>]*>)?\s*\(([^)]*)\)", True),
-    (r"export\s+(?:const|let|var)\s+\w+\s*(?::[^=]+)?=\s*(?:async\s*)?(?:function\b[^(]*)?\(([^)]*)\)", True),
-    (r"export\s*\{([^}]*)\}", False),
-    (r"export\s+(?:default|const|let|var|type|interface|enum|declare|abstract|class|async|function|\*)", None),
-]
+_FUNCTION_EXPORT = re.compile(r"export\s+(?:default\s+)?(?:async\s+)?function\b\*?\s*\w*\s*")
+_VARIABLE_EXPORT = re.compile(r"export\s+(?:declare\s+)?(?:const|let|var)\s+")
+_LIST_EXPORT = re.compile(r"export\s*\{([^}]*)\}")
+_NAME_EXPORT = re.compile(r"export\s+(?:default|type|interface|enum|declare|abstract|class|\*)")
 
 
 def _surface(text):
     """Exported names, the parameters of exported functions, and the public members of exported classes."""
     surface = 0
     for start in re.finditer(r"^export\b", text, re.MULTILINE):
-        for pattern, params in _EXPORTS:
-            match = re.match(pattern, text[start.start():])
-            if match:
-                if params is None:
-                    surface += 1
-                elif params:
-                    surface += 1 + len(_names(match[1]))
-                else:
-                    surface += len([name for name in match[1].split(",") if name.strip()])
-                break
+        rest = text[start.start():]
+        if match := _FUNCTION_EXPORT.match(rest):
+            surface += 1 + len(_names(_parameters(rest, match.end()) or ""))
+        elif match := _VARIABLE_EXPORT.match(rest):
+            for declarator in _split(rest[match.end():_statement_end(rest, match.end())]):
+                value = re.match(r"\s*\w+\s*(?::[^=]+)?=\s*(.*)", declarator, re.DOTALL)
+                surface += 1 + len(_names(_function_parameters(value[1]) if value else ""))
+        elif match := _LIST_EXPORT.match(rest):
+            surface += len(_split(match[1]))
+        elif _NAME_EXPORT.match(rest):
+            surface += 1
     for match in re.finditer(r"^export\s+(?:default\s+)?(?:abstract\s+)?class\s+\w+[^{]*\{", text, re.MULTILINE):
         for modifiers, name, params in _members(_top_level(text[match.end():])):
             if name.startswith("#") or re.search(r"\b(private|protected)\b", modifiers):
@@ -144,6 +143,44 @@ def _forwarded_args(body):
     return statement[1][call.end():-1]
 
 
+def _parameters(text, index):
+    """The parameter list text of a signature whose `(` (after optional type parameters) is at `index`."""
+    index = _skip_type_parameters(text, len(text) - len(text[index:].lstrip()))
+    return text[index + 1:_close(text, index) - 1] if text[index:index + 1] == "(" else None
+
+
+def _function_parameters(value):
+    """The parameters when the initialiser `value` is a function or arrow function, else ``."""
+    head = re.match(r"(?:async\s*)?(function\b\*?\s*\w*\s*)?", value)
+    params = _parameters(value, head.end())
+    if params is None:
+        return ""
+    after = value[_close(value, value.index("(", head.end())):]
+    return params if head[1] or re.match(r"\s*(?::[^=\n]+)?=>", after) else ""
+
+
+def _skip_type_parameters(text, index):
+    """The index after a `<...>` type parameter list at `index`, or `index` when there is none."""
+    if text[index:index + 1] != "<":
+        return index
+    depth = 0
+    for position in range(index, len(text)):
+        depth += (text[position] == "<") - (text[position] == ">" and text[position - 1] != "=")
+        if depth == 0:
+            return len(text[:position + 1]) + len(text[position + 1:]) - len(text[position + 1:].lstrip())
+    return index
+
+
+def _statement_end(text, start):
+    """Where the statement starting at `start` ends: `;` or a line break outside brackets."""
+    depth = 0
+    for index in range(start, len(text)):
+        depth += (text[index] in "([{") - (text[index] in ")]}")
+        if depth == 0 and text[index] in ";\n":
+            return index
+    return len(text)
+
+
 def _close(text, opening):
     """The index just after the bracket that closes the one at `opening`."""
     depth = 0
@@ -180,8 +217,8 @@ def _names(params):
 def _split(items):
     """The non-empty parts of a comma-separated list, ignoring commas inside brackets."""
     parts, depth, current = [], 0, ""
-    for char in items:
-        depth += (char in "([{") - (char in ")]}")
+    for index, char in enumerate(items):
+        depth += (char in "([{<") - (char in ")]}" or (char == ">" and items[index - 1:index] != "="))
         if char == "," and depth == 0:
             parts.append(current)
             current = ""
