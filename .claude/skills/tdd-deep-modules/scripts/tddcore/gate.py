@@ -36,7 +36,8 @@ def _lock(skill):
     passed, description = verdicts.final(skill / "evidence" / "reviews", LOCK_STEP)
     latest = re.search(r"\(round (\d+)\)$", description)
     found = []
-    if not (passed and latest and reviewed == f"evidence/reviews/step-{LOCK_STEP}-round-{latest[1]}.md"):
+    named = re.fullmatch(rf"evidence/reviews/step-{LOCK_STEP}-round-(\d+)\.md", reviewed)
+    if not (passed and latest and named and (skill / reviewed).is_file() and int(named[1]) == int(latest[1])):
         found.append(f"reviewed {reviewed} is not step {LOCK_STEP}'s latest passing review")
     hashes = {}
     for line in lines[1:]:
