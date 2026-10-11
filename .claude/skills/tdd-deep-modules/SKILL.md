@@ -22,3 +22,42 @@ Break none of these, even when it would be faster.
 3. **Never mix refactoring with green.** Green is the smallest change that makes the new test pass. Clean-up waits for the refactor step, which starts and ends with every test passing.
 4. **No tests on private methods.** Test behaviour through the module's public interface. If you want to test something private, the interface is wrong or a deeper module is missing.
 5. **One test per cycle.** Red adds exactly one new test and sees it fail for the right reason: an assertion, never an import, syntax or setup error.
+
+## 1. Detect the context
+
+Before the first test:
+
+- Find the test runners: vitest (a `package.json` with `vitest`) and/or `bun test` (a `scripts.test` with `bun test`), at the root and in nested packages such as `backend/`. These are the only runners `tdd-step` supports; elsewhere it exits 2, and this skill does not apply.
+- Run every suite the way `tdd-step` will (all detected runners): it must pass now. If it does not, stop and report; never start a cycle on a red suite.
+- Read the last commit: `git log -1 --format=%s`. A `red:` subject means a cycle is open; finish it with green first.
+- Find the module that owns the behaviour and its public interface. Note where its tests live.
+
+## 2. Design it twice
+
+(See references/design-it-twice.md.)
+
+## 3. Write the behaviour test list
+
+Write the list into `TESTLIST.md` (or the place the project uses) and commit it with `scripts/tdd-step test "<what>"`; the test phase may not change code.
+
+- One line per behaviour, phrased as an observable outcome through the chosen interface ("rejects an empty name", not "calls validate()").
+- Order: the simplest behaviour that forces the interface into existence first, then the core cases, then edge cases and errors.
+- The list is a plan, not a contract: add lines when a cycle teaches you something; tick lines off as their green commits land.
+
+## 4. Red, green, refactor with tdd-step
+
+One behaviour from the list per cycle:
+
+1. **Red.** Write one test for the behaviour, run it, and see it fail on an assertion for the reason you expect. Commit with `scripts/tdd-step red "<behaviour>"`. It refuses when the suite passes, when the failure is an import, syntax or setup error, when more than one test fails, and when production code changed.
+2. **Green.** Write the least production code that makes this test pass. Commit with `scripts/tdd-step green "<behaviour>"`. It refuses unless every test passes and refuses changes to tests or test configuration.
+3. **Refactor.** With everything green, improve the design (section 5), run the tests after each change, and commit with `scripts/tdd-step refactor "<what changed>"`. Skip the commit when there is nothing to improve.
+
+Never batch: no second test before the first is green, no clean-up inside green. `tdd-step` runs the tests itself and records the real exit code in a `TDD-Exit-Code` trailer; do not commit phases by hand. `scripts/tdd_replay <base>..HEAD` re-runs the history and rejects anything that broke the protocol. Details: references/tooling.md.
+
+## 5. Depth check in every refactor
+
+(See references/depth.md.)
+
+## 6. Design note
+
+(Written at the end; see below.)
