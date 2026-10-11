@@ -630,3 +630,9 @@ class TddStepTest(unittest.TestCase):
             result = repo.run("tdd-step", "refactor", "log")
 
             self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_a_vitest_assertion_next_to_a_file_that_fails_to_load_is_not_red(self):
+        repo = vitest_repo(self)
+        repo.write("a.test.js", VITEST_TEST)
+        repo.write("b.test.js", VITEST_TEST.replace("./calc.js", "./missing.js").replace('"adds"', '"b"'))
+        self.assert_refused(repo, "red", "red needs a failing assertion")
