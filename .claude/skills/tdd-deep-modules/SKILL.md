@@ -45,7 +45,7 @@ The decision, both sketches and the sentence go into the design note (section 6)
 
 ## 3. Write the behaviour test list
 
-Write the list into `TESTLIST.md` (or the place the project uses) and commit it with `scripts/tdd-step test "<what>"`; the test phase may not change code.
+Write the list into `TESTLIST.md` (or the place the project uses), headed by the hidden decision, both sketches and the chosen design from section 2, so they survive a long session. Commit it with `scripts/tdd-step test "<what>"`; the test phase may not change code.
 
 - One line per behaviour, phrased as an observable outcome through the chosen interface ("rejects an empty name", not "calls validate()").
 - Order: the simplest behaviour that forces the interface into existence first, then the core cases, then edge cases and errors.
