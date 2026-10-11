@@ -49,6 +49,7 @@ def _lock(skill):
         else:
             hashes[entry[2]] = entry[1]
     present = _verifiers(skill)
+    found += [f"{path} is a symbolic link" for path in _links(skill)]
     for path in sorted(set(present) | set(hashes)):
         if path not in hashes:
             found.append(f"{path} is not locked")
@@ -62,3 +63,10 @@ def _verifiers(skill):
     scripts = skill / "scripts"
     return [path.relative_to(skill).as_posix() for path in scripts.rglob("*")
             if path.is_file() and not {"tests", "__pycache__"} & set(path.relative_to(scripts).parts)]
+
+
+def _links(skill):
+    """Symbolic links under scripts/: the lock cannot see through them, so none may exist."""
+    scripts = skill / "scripts"
+    return [path.relative_to(skill).as_posix() for path in scripts.rglob("*")
+            if path.is_symlink() and not {"tests", "__pycache__"} & set(path.relative_to(scripts).parts)]
