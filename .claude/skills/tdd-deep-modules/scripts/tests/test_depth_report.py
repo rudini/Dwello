@@ -169,3 +169,12 @@ export class Ledger {
 
         self.assertIn(", tests 1,", report_line(dotted, "src/services/apartment.service.ts"))
         self.assertIn(", tests 0,", report_line(plain, "src/services/apartment.ts"))
+
+    def test_a_sveltekit_lib_import_counts(self):
+        test = "import { parseAmount } from '$lib/server/amount';\n"
+        repo = Repo(self, {"src/lib/server/amount.ts": fixture("deep"),
+                           "src/__tests__/amount.test.ts": test})
+
+        result = repo.run("depth_report", "src/lib/server/amount.ts")
+
+        self.assertIn(", tests 1,", report_line(result, "src/lib/server/amount.ts"))
