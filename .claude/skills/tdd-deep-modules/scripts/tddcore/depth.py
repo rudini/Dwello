@@ -223,10 +223,13 @@ def _names(params):
 
 def _split(items):
     """The non-empty parts of a comma-separated list, ignoring commas inside brackets."""
-    parts, depth, current = [], 0, ""
+    parts, depth, angles, current = [], 0, 0, ""
     for index, char in enumerate(items):
-        depth += (char in "([{<") - (char in ")]}" or (char == ">" and items[index - 1:index] != "="))
-        if char == "," and depth == 0:
+        before = items[index - 1:index]
+        depth += (char in "([{") - (char in ")]}")
+        # `<` opens type arguments only right after a name (`Map<`); `a < b` and `=>` are no brackets
+        angles += (char == "<" and (before.isalnum() or before == "_")) - (char == ">" and angles > 0 and before != "=")
+        if char == "," and depth == 0 and angles == 0:
             parts.append(current)
             current = ""
         else:
