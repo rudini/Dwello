@@ -49,3 +49,12 @@ class SkillMdTest(unittest.TestCase):
                           "pass-through", "pull complexity downward", "size alone",
                           "cumbersome tests", "wrong interface"):
             self.assertIn(criterion, text)
+
+    def test_it_stays_short_and_every_reference_exists(self):
+        text = SKILL.read_text()
+        links = set(re.findall(r"references/[\w.-]+\.md", text))
+
+        self.assertLess(len(text.splitlines()), 400)
+        self.assertTrue(links, "SKILL.md links no references/ file")
+        for link in sorted(links):
+            self.assertTrue((SKILL.parent / link).is_file(), f"{link} does not exist")
