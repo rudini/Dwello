@@ -271,6 +271,6 @@ Fast tier = `scripts["test:fast"]` of each package.json (its `bun test` segment)
 
 A swarm member is an exported function (`export function f` or `export const f = (...) =>`) whose body has at most 10 code lines and whose name the module uses exactly once besides its declaration (one caller, inside the module: exported only to be tested). Three or more members are classitis (`classitis yes`, finding `classitis: exported helpers with one caller: a, b, c`). Fixtures: `swarm.ts.txt` (known bad: the deep amount parser with its helpers exported and tested one by one) and `deep.ts.txt` (known good: the same functional core kept private).
 
-- [ ] the known-bad swarm is flagged as classitis, naming the helpers
-- [ ] the known-good functional core (private helpers, one exported entry point) stays deep
-- [ ] only small, one-caller exports count: an export with two callers, with no caller in the module, or with a body over 10 lines is no member; two members are no swarm
+- [x] the known-bad swarm is flagged as classitis, naming the helpers
+- [x] the known-good functional core (private helpers, one exported entry point) stays deep
+- [x] only small, one-caller exports count: an export with two callers, with no caller in the module, or with a body over 10 lines is no member; two members are no swarm

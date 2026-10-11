@@ -10,6 +10,10 @@ Count what a caller must know: exported names, parameters, required call order, 
 
 Many tiny classes or files, each with one or two methods that call the next, spread one decision over many places. Merge them until one module owns the decision.
 
+## No swarm of exported helpers
+
+The test boundary is the public interface of the deep module or service. A functional core (small pure functions inside the module) is good internal structure, but exporting each of those functions so a test can reach it turns implementation details into interface: every helper now has a name callers can depend on and tests that freeze its shape. Many small exported pure functions with one caller each are classitis in function form. Keep them private, test the behaviour through the module's entry point, and let `scripts/depth_report` name the swarm (`classitis: exported helpers with one caller: ...`).
+
 ## No pass-through wrappers
 
 A function that only forwards its arguments to another function with the same shape adds an interface and hides nothing. Delete it and call the target directly, or give it a real job (defaults, validation, translation of the hidden decision).
