@@ -781,3 +781,20 @@ class TddStepTest(unittest.TestCase):
         repo.write("calc.test.js", 'import { test } from "vitest";\n\ntest.todo("adds");\n')
 
         self.assert_refused(repo, "refactor", "refactor needs all tests passing", head="green: seed")
+    def test_more_test_configuration_files_are_test_code(self):
+        deselect = '[pytest]\naddopts = ["--deselect", "test_calc.py::test_adds"]\n'
+        projects = {
+            "pytest.toml": (Repo(self, {"calc.py": WRONG_ADD, "test_one.py": "def test_one():\n    pass\n"}),
+                            {"test_calc.py": PYTEST_TEST}, deselect),
+            ".pytest.ini": (Repo(self, {"calc.py": WRONG_ADD, "test_one.py": "def test_one():\n    pass\n"}),
+                            {"test_calc.py": PYTEST_TEST},
+                            "[pytest]\naddopts = --deselect test_calc.py::test_adds\n"),
+            "package.json": (vitest_repo(self), {"calc.test.js": VITEST_TEST, "calc.py": RIGHT_ADD,
+                                                 "test_calc.py": PYTEST_TEST}, '{"devDependencies": {}}\n'),
+        }
+        for config, (repo, red, text) in projects.items():
+            with self.subTest(config):
+                repo.commit_all("red: adds", red)
+                repo.write(config, text)
+                self.assert_refused(repo, "green", f"not tests: {config}", head="red: adds")
+
