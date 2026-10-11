@@ -7,8 +7,6 @@ from tddcore import lint, selfcheck, verdicts
 
 STEPS = ("01", "02", "03", "04", "05", "06", "07", "08")
 LOCK_STEP = "08"  # the review of verify_all; the lock records the verifiers as that review saw them
-VERIFIERS = ("scripts/verify_all", "scripts/verify_stage1", "scripts/skill_lint", "scripts/tddcore/gate.py",
-             "scripts/tddcore/verdicts.py", "scripts/tddcore/selfcheck.py", "scripts/tddcore/lint.py")
 
 
 def stage2(skill=Path(__file__).resolve().parents[2]):
@@ -38,10 +36,17 @@ def _lock(skill):
     if not (passed and latest and reviewed == f"evidence/reviews/step-{LOCK_STEP}-round-{latest[1]}.md"):
         found.append(f"reviewed {reviewed} is not step {LOCK_STEP}'s latest passing review")
     hashes = dict(reversed(line.split("  ", 1)) for line in lines[1:] if "  " in line)
-    for path in VERIFIERS:
-        file = skill / path
+    present = _verifiers(skill)
+    for path in sorted(set(present) | set(hashes)):
         if path not in hashes:
             found.append(f"{path} is not locked")
-        elif not file.is_file() or hashlib.sha256(file.read_bytes()).hexdigest() != hashes[path]:
+        elif path not in present or hashlib.sha256((skill / path).read_bytes()).hexdigest() != hashes[path]:
             found.append(f"{path} changed since its review")
     return found
+
+
+def _verifiers(skill):
+    """Every file the scripts can load: all of scripts/ except the test suite and bytecode caches."""
+    scripts = skill / "scripts"
+    return [path.relative_to(skill).as_posix() for path in scripts.rglob("*")
+            if path.is_file() and not {"tests", "__pycache__"} & set(path.relative_to(scripts).parts)]
