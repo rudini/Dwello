@@ -147,7 +147,7 @@ _PYTEST_CONFIG = {"pytest.ini": "", "conftest.py": "", "pyproject.toml": "[tool.
 
 
 _PYTEST_FILE = re.compile(r"test_.*\.py|.*_test\.py")
-_PYTEST_FUNCTION = re.compile(r"^(async )?def test", re.MULTILINE)  # module level: only pytest runs it
+_PYTEST_FUNCTION = re.compile(r"^def test", re.MULTILINE)  # module level: only pytest runs it
 
 
 def _uses_pytest(root):
