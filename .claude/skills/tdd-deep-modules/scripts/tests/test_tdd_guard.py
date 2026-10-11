@@ -40,3 +40,12 @@ class TddGuardTest(unittest.TestCase):
                 result = guard(repo, "Edit", "calc.ts")
 
                 self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_writing_a_new_production_file_in_a_new_directory_is_judged_too(self):
+        repo = bun_repo(self)
+        repo.commit_phase("test", {"TESTLIST.md": "- [ ] adds\n"}, 1)
+
+        result = guard(repo, "Write", "src/new/calc.ts")
+
+        self.assertEqual(result.returncode, 2, result.stderr)
+        self.assertIn("src/new/calc.ts is production code", result.stderr)
