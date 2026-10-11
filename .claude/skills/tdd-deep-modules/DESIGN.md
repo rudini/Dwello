@@ -65,6 +65,10 @@ Deviation from the original wording "blocks edits to production files unless the
 
 `verify_stage1 [skill-dir]` runs the skill's own suite (`tddcore/selfcheck.own_suite`: passes only with exit 0, a bare `OK` summary (no skips, no expected failures) and at least one test run) and, before the suite runs, reads every step's latest review (`tddcore/verdicts.final`: the highest round number of `evidence/reviews/step-NN-round-M.md`; its last line must be exactly `VERDICT: PASS`; two files for one round number or an empty/unreadable review fail). It prints the suite summary and each step's final verdict, then `STAGE1: PASS` (exit 0) or `STAGE1: FAIL` (exit 1).
 
+## Depth report (`depth_report`)
+
+`depth_report <file>...` measures TypeScript/JavaScript modules from their source text (`tddcore/depth.measure(root, path) -> Depth`; the CLI only formats). Surface = exported names + parameters of exported functions + public methods of exported classes and their parameters (constructor parameters count, `private`, `protected` and `#` members do not; `export { a, b }` counts names only). Size = non-blank lines outside comments. Findings: ratio below 4 (shallow), two or more classes with at most two methods (classitis), functions whose body only returns a call with their own parameters (pass-through), no test file importing the module through a relative or `$lib/` import (untested), unused private top-level functions or three or more repeated code lines of at least 12 characters (bloat). Exit 0 without findings, 1 with findings, 2 for usage errors.
+
 ## Known limits
 
 - The previous phase is read from the HEAD subject prefix (`red: ...`), which a hand-made commit can fake; `tdd_replay` (step 2) re-runs history and does not trust subjects or trailers.
@@ -91,3 +95,4 @@ Deviation from the original wording "blocks edits to production files unless the
 - The hook reads the phase from the HEAD subject; a hand-made `git commit -m "red: ..."` (through Bash) unlocks it. `tdd_replay` judges such commits from real runs later.
 - `verify_stage1` reads only a review's last line; an earlier `VERDICT: FAIL` line in the same file does not count. Test files in subdirectories of `scripts/tests` without `__init__.py` are not discovered. Untracked review files count. The suite verdict comes from unittest's last stderr line: a late warning after `OK` fails the check, and a test that deliberately prints `OK` and exits 0 can fake a pass.
 - `tdd-guard`: a source directory on another mount than the repository is outside git's discovery and passes silently; files under `.git/` are judged like files at the repository root (they fail closed after a test commit); without git on PATH the hook prints a traceback (non-blocking).
+- `depth_report` reads source text with regular expressions, not a parser: braces or comment markers inside strings, multi-line parameter lists, and import aliases other than `$lib` (tsconfig paths) are not understood. Repeated object-literal lines (option objects, column lists) count as duplicates, so large modules often show a bloat finding; the numbers are prompts for the refactor, not verdicts.

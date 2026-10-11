@@ -166,11 +166,13 @@ Design it twice. Hidden decision: how a TypeScript/JavaScript module's interface
 
 Per module, one line: `<path>: surface S, size N, ratio R, classitis yes|no, pass-through P, tests T, unused U, duplicate D -> deep | <findings>`. Surface = exported names + parameters of exported functions + public methods of exported classes and their parameters. Size = code lines (no blanks, no comments). Ratio = size / surface. Exit 0 when no module has a finding, 1 when one has, 2 for usage errors. Fixtures: `scripts/tests/depth_fixtures/{deep,shallow,bloated}.ts`.
 
-- [ ] a deep module (one export, a large body) -> surface, size and ratio reported, verdict `deep`, exit 0
-- [ ] a shallow module (many one-line exports) -> verdict names the low ratio, exit 1
-- [ ] pass-through wrappers (a body that only returns another call with the same arguments) are counted and named a finding
-- [ ] classitis: two or more classes with at most two methods each is a finding
-- [ ] test boundary: the number of test files that import the module; none is a finding
-- [ ] bloat: unused private functions and duplicated lines are counted; any unused function or three duplicated lines is a finding
-- [ ] export forms: `export { a, b as c }`, `export default function`, `export const` arrow functions and values, `export type`/`interface`, class methods without `private`/`#`, constructor parameters
-- [ ] usage errors (no file, a missing file, a file that is not .ts/.js, outside git) -> exit 2 with a message
+- [x] a deep module (one export, a large body) -> surface, size and ratio reported, verdict `deep`, exit 0
+- [x] a shallow module (many one-line exports) -> verdict names the low ratio, exit 1
+- [x] pass-through wrappers (a body that only returns another call with the same arguments) are counted and named a finding
+- [x] classitis: two or more classes with at most two methods each is a finding
+- [x] test boundary: the number of test files that import the module; none is a finding
+- [x] bloat: unused private functions and duplicated lines are counted; any unused function or three duplicated lines is a finding
+- [x] export forms: `export { a, b as c }`, `export default function`, `export const` arrow functions and values, `export type`/`interface`, class methods without `private`/`#`, constructor parameters
+- [x] usage errors (no file, a missing file, a file that is not .ts/.js, outside git) -> exit 2 with a message
+- [x] block comments are not code: neither size nor duplicates count them
+- [x] found by a run on Dwello's own modules: a dotted module name (`apartment.service`) is matched whole; a SvelteKit `$lib/...` import counts as a test import
