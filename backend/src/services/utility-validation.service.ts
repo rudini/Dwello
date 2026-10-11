@@ -31,7 +31,7 @@ export function getUtilityCostRules(): UtilityCostRules {
 		notAllowedCategories: SWISS_UTILITY_CATEGORIES.notAllowed.map((c) => c.de),
 		notes: [
 			'Nebenkosten müssen verbrauchsabhängig oder nach Fläche verteilt werden',
-			'Verwaltungskosten dürfen maximal 3% der Nebenkosten betragen',
+			'Die Verwaltungspauschale beträgt üblicherweise 3% der Nebenkosten (Richtwert, keine Obergrenze)',
 			'Reparaturen und Renovationen sind keine umlagefähigen Nebenkosten',
 			'Grundsteuern und Hypothekarzinsen sind nie umlagefähig',
 			'Alle Nebenkosten müssen im Mietvertrag vereinbart sein'
