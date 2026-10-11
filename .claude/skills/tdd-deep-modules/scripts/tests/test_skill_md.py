@@ -64,3 +64,10 @@ class SkillMdTest(unittest.TestCase):
 
         for element in ("hidden decision", "both designs", "reason", "depth_report", "tdd_replay"):
             self.assertIn(element, text)
+
+    def test_detect_the_context_names_the_commands_and_an_exit(self):
+        text = dict(sections())["1. Detect the context"]
+
+        for element in ("npx vitest run", "bun test", "git log -1 --format=%s", "does not apply",
+                        "only for vitest"):
+            self.assertIn(element, text)
