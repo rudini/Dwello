@@ -151,8 +151,8 @@ Runs the skill's test suite and reads the final reviewer verdict of every step (
 
 Checked by `scripts/tests/test_skill_md.py` against the real SKILL.md.
 
-- [ ] the hard rules come first, before the workflow: no production code without a failing test; never delete assertions or paste computed values into expected values; never mix refactoring with green; no tests on private methods
-- [ ] the workflow sections appear in order: detect context, Design It Twice, behaviour test list, Red/Green/Refactor via tdd-step (one test at a time), depth check in every refactor, design note at the end
-- [ ] Design It Twice names the one hidden decision, two interface designs compared by depth, one chosen with a one-sentence reason
-- [ ] the depth check names: interface much simpler than implementation, no classitis, no pass-through wrappers, complexity pulled downward, no splitting by size alone, cumbersome tests signal a wrong interface
-- [ ] fewer than 400 lines; every `references/...` link points to an existing file
+- [x] the hard rules come first, before the workflow: no production code without a failing test; never delete assertions or paste computed values into expected values; never mix refactoring with green; no tests on private methods
+- [x] the workflow sections appear in order: detect context, Design It Twice, behaviour test list, Red/Green/Refactor via tdd-step (one test at a time), depth check in every refactor, design note at the end
+- [x] Design It Twice names the one hidden decision, two interface designs compared by depth, one chosen with a one-sentence reason
+- [x] the depth check names: interface much simpler than implementation, no classitis, no pass-through wrappers, complexity pulled downward, no splitting by size alone, cumbersome tests signal a wrong interface
+- [x] fewer than 400 lines; every `references/...` link points to an existing file
