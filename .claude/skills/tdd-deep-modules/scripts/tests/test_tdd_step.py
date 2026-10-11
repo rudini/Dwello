@@ -804,3 +804,15 @@ class TddStepTest(unittest.TestCase):
         repo.write("test_calc.py", PYTEST_TEST + "\n\ndef test_stop():\n    import pytest\n    pytest.exit('stop', returncode=2)\n")
 
         self.assert_refused(repo, "red", "red needs a failing assertion")
+
+    def test_a_bun_file_that_fails_to_load_is_not_red(self):
+        head = 'import { test, expect } from "bun:test";\n'
+        broken = {"missing import": head + 'import { nope } from "./calc";\n\ntest("b", () => {\n  expect(nope(1)).toBe(1);\n});\n',
+                  "top-level throw": head + 'throw new Error("broken setup");\n'}
+        for name, text in broken.items():
+            with self.subTest(name):
+                repo = Repo(self, BUN_FILES)
+                repo.write("backend/a.test.ts", head + 'import { add } from "./calc";\n\n'
+                           'test("a", () => {\n  expect(add(1, 2)).toBe(4);\n});\n')
+                repo.write("backend/b.test.ts", text)
+                self.assert_refused(repo, "red", "red needs a failing assertion")
