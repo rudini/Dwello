@@ -46,6 +46,9 @@ def replay(repo, rev_range):
                     found.append(f"red must add exactly one new test, but adds {len(new)}")
                 if phase != "red" and new:
                     found.append(f"only red may add tests, but {phase} adds {len(new)}")
+                removed = known - run.tests
+                if phase in ("green", "refactor") and removed:
+                    found.append(f"{phase} removes tests: {', '.join(sorted(removed))}")
                 verdicts.append(Verdict(commit, phase, run, found))
                 previous, known = phase, run.tests
         finally:
