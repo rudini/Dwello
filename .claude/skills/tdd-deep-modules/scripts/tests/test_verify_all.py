@@ -340,7 +340,6 @@ class RealVerifiersTest(unittest.TestCase):
 
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
-
     def test_the_suite_cannot_change_reviews_or_the_lock_for_the_gate(self):
         writes = {
             "a passing review": ("(ROOT / 'evidence' / 'reviews' / 'step-07-round-3.md').write_text('VERDICT: PASS\\n')",
