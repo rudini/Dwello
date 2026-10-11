@@ -215,3 +215,14 @@ class TddReplayTest(unittest.TestCase):
             repo.commit_phase("test", {"package.json": '{"scripts": {"test": "bun test nothing"}}\n',
                                        "TESTLIST.md": "- [ ] more\n"}, 1)
             self.assert_rejected(repo, base, "test removes tests: calc.test.ts::::adds")
+
+    def test_two_new_tests_with_the_same_name_are_two_tests(self):
+        same_name_passing = 'test("adds", () => {\n  expect(add(0, 0)).toBe(0);\n});\n'
+        projects = {"bun": (bun_repo(self), "calc.test.ts", BUN_TEST, {"calc.ts": RIGHT_ADD_TS}),
+                    "vitest": (vitest_repo(self), "calc.test.js", VITEST_TEST, {"calc.js": RIGHT_ADD_JS})}
+        for framework, (repo, name, test, green) in projects.items():
+            with self.subTest(framework):
+                base = repo.git("rev-parse", "HEAD")
+                repo.commit_phase("red", {name: test + "\n" + same_name_passing}, 1)
+                repo.commit_phase("green", green, 0)
+                self.assert_rejected(repo, base, "red must add exactly one new test, but adds 2")
