@@ -412,3 +412,20 @@ class HelperSwarmTest(unittest.TestCase):
         line = report_line(result, "src/amount.ts")
         self.assertIn(", classitis no,", line)
         self.assertTrue(line.endswith("-> deep"), line)
+
+    def test_only_small_exports_with_one_caller_count(self):
+        big_body = "".join(f"  const v{i} = x + {i};\n" for i in range(10)) + "  return v9;\n"
+        module = ("export const inc = (x: number) => x + 1;\n"
+                  "export function dec(x: number): number {\n  return x - 1;\n}\n"
+                  "export function twice(x: number): number {\n  return x * 2;\n}\n"
+                  "export function nobody(x: number): number {\n  return x;\n}\n"
+                  f"export function big(x: number): number {{\n{big_body}}}\n"
+                  "export function total(x: number): number {\n"
+                  "  return twice(x) + twice(inc(x)) + big(x) + dec(x);\n}\n")
+        repo = Repo(self, {"src/calc.ts": module})
+
+        result = repo.run("depth_report", "src/calc.ts")
+
+        line = report_line(result, "src/calc.ts")
+        self.assertIn(", classitis no,", line)
+        self.assertNotIn("exported helpers", line)
