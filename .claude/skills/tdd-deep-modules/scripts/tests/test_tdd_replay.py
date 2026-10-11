@@ -147,3 +147,15 @@ class TddReplayTest(unittest.TestCase):
         self.assertIn("REPLAY: ACCEPT", result.stdout)
         repo.commit_phase("refactor", {"more.test.js": VITEST_TEST.replace('"adds"', '"adds again"')}, 0)
         self.assert_rejected(repo, base, "only red may add tests, but refactor adds 1")
+
+    def test_tests_that_exist_before_the_range_are_not_new(self):
+        repo = vitest_repo(self)
+        repo.commit_all("green: seed", {"calc.js": RIGHT_ADD_JS, "calc.test.js": VITEST_TEST})
+        base = repo.git("rev-parse", "HEAD")
+        repo.commit_phase("red", {"calc.test.js": VITEST_TEST + 'test("adds numeric strings", () => {\n'
+                                  '  expect(add("1", "2")).toBe(3);\n});\n'}, 1)
+        repo.commit_phase("green", {"calc.js": "export const add = (a, b) => Number(a) + Number(b);\n"}, 0)
+
+        result = repo.run("tdd_replay", f"{base}..HEAD")
+
+        self.assertIn("REPLAY: ACCEPT", result.stdout, result.stdout + result.stderr)
