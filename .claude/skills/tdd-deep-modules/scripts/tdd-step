@@ -3,6 +3,7 @@
 import os
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -31,6 +32,15 @@ def changed_files():
     return sorted(paths)
 
 
+def snapshot():
+    """Tree id of the working tree as `git add -A` would commit it, without touching the index."""
+    with tempfile.TemporaryDirectory() as tmp:
+        index = {**os.environ, "GIT_INDEX_FILE": str(Path(tmp) / "index")}
+        subprocess.run(["git", "add", "-A"], env=index, check=True, capture_output=True)
+        return subprocess.run(["git", "write-tree"], env=index, check=True, capture_output=True,
+                              text=True).stdout.strip()
+
+
 def head_subject():
     done = run_git("log", "-1", "--format=%s")
     return done.stdout.strip() if done.returncode == 0 else ""
@@ -46,11 +56,18 @@ def main(args):
         print("tdd-step: not inside a git repository", file=sys.stderr)
         return 2
     os.chdir(root.stdout.strip())
+    before = snapshot()
     try:
         run = suite.run(".")
     except suite.NoFramework as error:
         print(f"tdd-step: {error}", file=sys.stderr)
         return 2
+    after = snapshot()
+    if after != before:
+        touched = git("diff", "--name-only", before, after).splitlines()
+        print(f"tdd-step: refused: the test run changed the working tree: {', '.join(touched)}",
+              file=sys.stderr)
+        return 1
     previous = protocol.phase_of(head_subject())
     found = protocol.violations(previous, phase, run, changed_files())
     if found:
