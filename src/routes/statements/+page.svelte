@@ -2,7 +2,8 @@
 	import { invalidateAll } from '$app/navigation';
 	import { page } from '$app/stores';
 	import type { StatementsListData, StatementWithDetails } from '$lib/types';
-	import { balanceLabel } from '$lib/statement';
+	import { balanceLabel, paidDateError, paidHelp } from '$lib/statement';
+	import { focusFirstError } from '$lib/ui/focus-error';
 	import { addToast } from '$lib/stores';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';
@@ -41,20 +42,29 @@
 	let paidDate = $state(localToday());
 	let saving = $state(false);
 	let payError = $state('');
+	let paidError = $state('');
 	async function markPaid() {
+		// a wrong date is said at the field, which gets the focus; nothing is sent
+		paidError = paidDateError(paidDate) ?? '';
+		if (paidError) return focusFirstError(document.querySelector('[role="dialog"]'));
 		saving = true;
 		payError = '';
+		const failed = 'Abrechnung konnte nicht als bezahlt markiert werden. Versuchen Sie es erneut.';
 		try {
 			const response = await fetch(`/statements/${paying!.id}/mark-paid`, {
 				method: 'POST',
 				body: JSON.stringify({ paidDate })
 			});
-			if (!response.ok) throw new Error(String(response.status));
+			if (!response.ok) {
+				// the date check says what to do; any other refusal gets the general sentence
+				payError = (await response.json().catch(() => ({}))).message ?? failed;
+				return;
+			}
 			addToast('success', `Abrechnung ${paying!.statementNumber} als bezahlt markiert`);
 			paying = null;
 			await invalidateAll();
 		} catch {
-			payError = 'Abrechnung konnte nicht als bezahlt markiert werden. Versuchen Sie es erneut.';
+			payError = failed;
 		} finally {
 			saving = false;
 		}
@@ -114,7 +124,14 @@
 			</h2>
 			<ul class="divide-y divide-line rounded-panel border border-line bg-surface">
 				{#each data.statements as statement (statement.id)}
-					<StatementRow {statement} onmarkpaid={(chosen) => (paying = chosen)} />
+					<StatementRow
+						{statement}
+						onmarkpaid={(chosen) => (
+							(paying = chosen),
+							(paidDate = localToday()),
+							(paidError = '')
+						)}
+					/>
 				{/each}
 			</ul>
 		</section>
@@ -136,11 +153,12 @@
 	}}
 >
 	{#if paying}
-		<p>Danach können Sie keine Mahnung mehr senden.</p>
+		{#if paying.balance > 0}<p>Danach können Sie keine Mahnung mehr senden.</p>{/if}
 		<DateInput
 			id="paidDate"
 			label="Bezahlt am"
-			help="Der Tag, an dem das Geld eingegangen ist."
+			help={paidHelp(paying.balance)}
+			error={paidError}
 			bind:value={paidDate}
 			testid="paid-date-input"
 		/>

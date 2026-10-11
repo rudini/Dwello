@@ -24,7 +24,7 @@ import { toasts } from '$lib/stores';
 import StatementsPage from '../routes/statements/+page.svelte';
 import StatementPage from '../routes/statements/[id]/+page.svelte';
 import EditStatementPage from '../routes/statements/[id]/edit/+page.svelte';
-import { allByTestId, byTestId, click, fakeBff, settle, show } from './helpers/dom';
+import { allByTestId, byTestId, click, fakeBff, fireEvent, settle, show } from './helpers/dom';
 import { statement } from './helpers/statement';
 
 const text = () => document.body.textContent ?? '';
@@ -157,6 +157,62 @@ describe('Abrechnungsliste', () => {
 		const dialog = document.querySelector('[role="dialog"]')!;
 		expect(dialog.textContent).toContain('Abrechnung konnte nicht als bezahlt markiert werden.');
 		expect(byTestId<HTMLButtonElement>('statement-list-mark-paid-confirm')!.disabled).toBe(false);
+	});
+
+	// Ein Datum in der Zukunft: die Meldung sagt, was zu tun ist
+	it('zeigt die Meldung zum Zahlungsdatum aus der Prüfung', async () => {
+		fakeBff(() => [
+			400,
+			{
+				message:
+					'Das Zahlungsdatum liegt in der Zukunft. Geben Sie den Tag ein, an dem das Geld eingegangen ist.'
+			}
+		]);
+		list([statement({ status: 'sent' })]);
+
+		click('statement-row-mark-paid');
+		click('statement-list-mark-paid-confirm');
+		await settle();
+
+		expect(document.querySelector('[role="dialog"]')!.textContent).toContain(
+			'Das Zahlungsdatum liegt in der Zukunft.'
+		);
+	});
+
+	it('schlägt beim nächsten Öffnen wieder heute vor', () => {
+		list([statement({ status: 'sent' })]);
+		click('statement-row-mark-paid');
+		fireEvent(byTestId<HTMLInputElement>('paid-date-input')!, 'input', '01.01.2020');
+		click('dialog-cancel');
+		click('statement-row-mark-paid');
+
+		expect(byTestId<HTMLInputElement>('paid-date-input')!.value).toBe(
+			new Date().toLocaleDateString('de-CH', { day: '2-digit', month: '2-digit', year: 'numeric' })
+		);
+	});
+
+	// Bei einer Rückerstattung zahlt der Vermieter: keine Mahnung, und der Tag der eigenen Überweisung
+	it('spricht bei einer Rückerstattung von der Überweisung, nicht von einer Mahnung', () => {
+		list([statement({ status: 'sent', balance: -45 })]);
+		click('statement-row-mark-paid');
+		const dialog = document.querySelector('[role="dialog"]')!.textContent!;
+
+		expect(dialog).not.toContain('Mahnung');
+		expect(dialog).toContain('Der Tag, an dem Sie den Betrag überwiesen haben.');
+	});
+
+	// Enter im Feld bestätigt, wie in jedem Formular; der versteckte Kalender ist kein Tabstopp
+	it('bestätigt mit Enter im Datumsfeld und überspringt den versteckten Kalender', async () => {
+		const calls = fakeBff();
+		list([statement({ status: 'sent' })]);
+		click('statement-row-mark-paid');
+		byTestId('paid-date-input-calendar')!.focus();
+		window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
+		expect(document.activeElement).toBe(byTestId('dialog-cancel'));
+
+		byTestId('paid-date-input')!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+		await settle();
+		expect(calls.map((call) => call.path)).toEqual(['/statements/s1/mark-paid']);
 	});
 
 	it('bleibt nicht beschäftigt, wenn die Verbindung abbricht', async () => {
@@ -461,6 +517,34 @@ describe('Abrechnungsdetail', () => {
 
 		expect(byTestId('statement-pdf-download')).toBeNull();
 		expect(byTestId<HTMLButtonElement>('statement-generate-pdf-button')!.disabled).toBe(false);
+	});
+
+	// Das Datumsfeld liegt im Dialog, ausserhalb des Formulars: der gewählte Tag muss mitgesendet werden
+	it('sendet das im Dialog gewählte Zahlungsdatum mit', () => {
+		detail({ status: 'sent' });
+		click('statement-mark-paid-button');
+		fireEvent(byTestId<HTMLInputElement>('paid-date-input')!, 'input', '05.01.2026');
+		const formData = new FormData();
+		actions.get('?/markPaid')!({ formData });
+
+		expect(formData.get('paidDate')).toBe('2026-01-05');
+	});
+
+	// Sven: ein unmögliches Datum wurde angesagt und trotzdem mit leerem Datum gespeichert
+	it('prüft das Zahlungsdatum im Dialog, bevor es gesendet wird', () => {
+		detail({ status: 'sent' });
+		click('statement-mark-paid-button');
+		const field = byTestId<HTMLInputElement>('paid-date-input')!;
+		fireEvent(field, 'input', '01.01.2099');
+		const submitted = vi.fn();
+		document.querySelector('form[action="?/markPaid"]')!.addEventListener('submit', submitted);
+		click('statement-mark-paid-confirm');
+		flushSync();
+
+		expect(submitted).not.toHaveBeenCalled();
+		expect(document.querySelector('[role="dialog"]')).not.toBeNull();
+		expect(field.getAttribute('aria-invalid')).toBe('true');
+		expect(document.getElementById(field.getAttribute('aria-describedby')!.split(' ').find((id) => id.endsWith('-error'))!)!.textContent).toContain('Das Zahlungsdatum liegt in der Zukunft.');
 	});
 
 	it('fragt beim Markieren als bezahlt nach dem Zahlungsdatum, heute vorgeschlagen', () => {

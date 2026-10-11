@@ -59,6 +59,16 @@ describe('Datumsfeld TT.MM.JJJJ', () => {
 		expect(describedBy()).toContain(`Es fehlt das Jahr. Bitte geben Sie das Datum als TT.MM.JJJJ ein, zum Beispiel 01.12.${new Date().getFullYear()}.`);
 	});
 
+	// «1. Dezember 2026» gibt es: das Format ist das Problem, nicht das Datum
+	it.each(['1. Dezember 2026', '1/12/2026'])('sagt bei «%s», in welchem Format das Datum einzugeben ist', (typed) => {
+		date();
+		type(typed);
+		field().dispatchEvent(new Event('blur'));
+		flushSync();
+
+		expect(describedBy()).toContain('Bitte geben Sie das Datum in Ziffern als TT.MM.JJJJ ein, zum Beispiel 31.12.2025.');
+	});
+
 	// Mitten im Text bearbeitet (Monat gelöscht): der Text bleibt, wie getippt, der Cursor springt nicht ans Ende
 	it('lässt eine Bearbeitung mitten im Datum unverändert', () => {
 		date('2024-12-31');

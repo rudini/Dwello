@@ -6,7 +6,7 @@ import type { RequestHandler } from './$types';
 export const POST: RequestHandler = async ({ params, fetch, request }) => {
 	const { paidDate = localToday() } = await request.json().catch(() => ({}));
 	const invalid = paidDateError(paidDate);
-	if (invalid) return json({ error: invalid }, { status: 400 });
+	if (invalid) return json({ message: invalid }, { status: 400 }); // German, shown in the dialog
 	const response = await markStatementPaid(fetch, params.id, paidDate);
 	return json(await response.json(), { status: response.status });
 };

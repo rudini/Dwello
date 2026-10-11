@@ -45,6 +45,17 @@ describe('Zahlungsdatum', () => {
 		]);
 	});
 
+	// Im Dialog «1.12» getippt: gesendet wird ein leeres Datum, nicht still das heutige
+	it('lehnt ein leeres oder ungültiges Zahlungsdatum ab, ohne zu speichern', async () => {
+		const { calls, result } = runAction(actions.markPaid, 's1', 200, { paidDate: '' });
+
+		expect(await result).toMatchObject({
+			status: 400,
+			data: { actionError: 'Bitte geben Sie das Zahlungsdatum als TT.MM.JJJJ ein.' }
+		});
+		expect(calls).toEqual([]);
+	});
+
 	it('lehnt ein Zahlungsdatum in der Zukunft ab, ohne zu speichern', async () => {
 		const { calls, result } = runAction(actions.markPaid, 's1', 200, { paidDate: '2999-01-01' });
 

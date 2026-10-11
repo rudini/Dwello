@@ -52,8 +52,8 @@ async function generateDemoStatement(contractId: string, { buildingId, year, dat
 		// Sent back then, not on the day the demo data is loaded; the payment deadline keeps the app's 30 days
 		await updateStatement(statement.id, { statementDate: date, paymentDeadline: addDays(date, 30) });
 	}
+	await generateStatementPdf(statement.id); // the PDF as sent, kept after paying
 	if (status === 'paid') await updateStatementStatus(statement.id, 'paid', { paidDate: addDays(date, 21) });
-	await generateStatementPdf(statement.id);
 }
 
 export async function loadDemoData() {

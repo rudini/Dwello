@@ -13,6 +13,7 @@ Funktionalität: Dokumente
     Und im Gebäude "Ahornhof" gibt es eine Heizkostenrechnung über "4000" Franken für 2024
     Und für "Anna Keller" im Gebäude "Ahornhof" gibt es die Nebenkostenabrechnung 2024
     Und die Abrechnung 2024 von "Anna Keller" ist versendet
+    Und die Zahlungsfrist der Abrechnung 2024 von "Anna Keller" ist abgelaufen
     Und "Anna Keller" wünscht Korrespondenz per Brief
     Und "Anna Keller" hat für die Abrechnung 2024 bereits eine Zahlungserinnerung erhalten
     Und der Liegenschaftsverwalter ist bei den zu versendenden Dokumenten

@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { contractPeriod, contractStatusOn, statusBadges } from '../lib/contract-status';
+import { describe, it, expect, vi } from 'vitest';
+import { contractPeriod, contractStatusOn, localToday, statusBadges } from '../lib/contract-status';
 
 const today = '2026-10-10';
 
@@ -35,5 +35,14 @@ describe('Vertragsdauer in Worten', () => {
 
 	it('nennt bei einem befristeten Mietvertrag Beginn und Ende', () => {
 		expect(contractPeriod('2024-01-01', '2024-12-31', 'ended')).toBe('01.01.2024 – 31.12.2024');
+	});
+});
+
+// Der Server läuft in UTC: um 00:30 Schweizer Zeit ist dort noch gestern
+describe('Heute', () => {
+	it('ist der Tag in der Schweiz, auch auf einem Server in UTC', () => {
+		vi.useFakeTimers({ now: new Date('2026-10-11T22:30:00Z') });
+		expect(localToday()).toBe('2026-10-12');
+		vi.useRealTimers();
 	});
 });

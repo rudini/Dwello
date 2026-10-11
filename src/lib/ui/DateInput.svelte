@@ -67,7 +67,15 @@
 	const NO_YEAR = $derived(
 		`Es fehlt das Jahr. Bitte geben Sie das Datum als TT.MM.JJJJ ein, zum Beispiel ${text.trim().replace(/\.$/, '').split('.').map((n) => n.padStart(2, '0')).join('.')}.${new Date().getFullYear()}.`
 	);
-	const wrongDate = $derived(/^\d{1,2}\.\d{1,2}\.?$/.test(text.trim()) ? NO_YEAR : NOT_A_DATE);
+	// a day that does not exist, a missing year, or another way of writing it (words, slashes)
+	const FORMAT_ONLY = 'Bitte geben Sie das Datum in Ziffern als TT.MM.JJJJ ein, zum Beispiel 31.12.2025.';
+	const wrongDate = $derived(
+		/^\d{1,2}\.\d{1,2}\.?$/.test(text.trim())
+			? NO_YEAR
+			: /^(\d{1,2}\.\d{1,2}\.\d{2,4}|\d{8})$/.test(text.trim())
+				? NOT_A_DATE
+				: FORMAT_ONLY
+	);
 	const shownError = $derived(invalid && left ? wrongDate : error);
 	const wordsId = $derived(`${id}-words`);
 	const helpText = $derived(help ? `${help} ${FORMAT}` : FORMAT);

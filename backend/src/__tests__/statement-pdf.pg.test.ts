@@ -289,9 +289,23 @@ describe('PDF zum Herunterladen', () => {
 		expect(after.statementDate).toBe(today); // made again, not the PDF of 2 March
 	});
 
-	it('erstellt ein verworfenes PDF beim Herunterladen neu, eine bezahlte Abrechnung ohne Zahlteil', async () => {
+	// Das zugestellte PDF bleibt nach der Zahlung, wie der Mieter es erhalten hat (Archiv)
+	it('behält nach der Zahlung das PDF, wie es versendet wurde', async () => {
 		const statement = await generateStatement({ contractId: rental.contract, buildingId: rental.building, periodStart: '2025-01-01', periodEnd: '2025-12-31', managementFeePercent: 0 });
 		await generateStatementPdf(statement.id, 'de');
+		await updateStatementStatus(statement.id, 'sent');
+		const sent = await pdfOf(statement.id);
+		await updateStatementStatus(statement.id, 'paid', { paidDate: today });
+		const text = await pdfOf(statement.id);
+		await db.update(utilityStatements).set({ status: 'draft' }).where(eq(utilityStatements.id, statement.id));
+		await deleteStatement(statement.id);
+
+		expect(text).toBe(sent);
+		expect(text).toContain('Zahlteil');
+	});
+
+	it('erstellt ein fehlendes PDF beim Herunterladen, eine bezahlte Abrechnung ohne Zahlteil', async () => {
+		const statement = await generateStatement({ contractId: rental.contract, buildingId: rental.building, periodStart: '2025-01-01', periodEnd: '2025-12-31', managementFeePercent: 0 });
 		await updateStatementStatus(statement.id, 'sent');
 		await updateStatementStatus(statement.id, 'paid', { paidDate: today });
 		const text = await pdfOf(statement.id);

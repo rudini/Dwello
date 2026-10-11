@@ -13,6 +13,7 @@
 		danger = false,
 		ondone,
 		fields = {},
+		check = () => true,
 		children
 	}: {
 		open: boolean;
@@ -23,6 +24,7 @@
 		danger?: boolean;
 		ondone?: () => void; // the action led to another page
 		fields?: Record<string, string>; // values of fields in the dialog, which lies outside the form
+		check?: () => boolean; // false: the dialog shows what is wrong, nothing is sent
 		children: Snippet;
 	} = $props();
 
@@ -54,7 +56,7 @@
 	{busy}
 	busyLabel="Wird gespeichert …"
 	{confirmTestid}
-	onconfirm={() => form?.requestSubmit()}
+	onconfirm={() => check() && form?.requestSubmit()}
 >
 	{@render children()}
 </Dialog>

@@ -55,7 +55,9 @@ export const actions: Actions = {
 	send: ({ params, fetch }) =>
 		changeStatus(fetch, params.id, { status: 'sent' }, 'Abrechnung konnte nicht versendet werden.'),
 	markPaid: async ({ params, fetch, request }) => {
-		const paidDate = String((await request.formData()).get('paidDate') ?? '') || localToday();
+		// none sent (no dialog field, no JavaScript): today; sent but empty (an invalid date): refused
+		const sent = (await request.formData()).get('paidDate');
+		const paidDate = sent === null ? localToday() : String(sent);
 		const invalid = paidDateError(paidDate);
 		if (invalid) return fail(400, { actionError: invalid });
 		const response = await markStatementPaid(fetch, params.id, paidDate);

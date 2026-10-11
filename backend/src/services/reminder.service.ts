@@ -45,6 +45,7 @@ async function nextLevel(statementId: string, status: string, balance: number) {
 	if (!['sent', 'overdue'].includes(status)) {
 		throw new ReminderError('Nur versendete Abrechnungen können gemahnt werden.');
 	}
+	if (status !== 'overdue') throw new ReminderError('Gemahnt wird erst nach Ablauf der Zahlungsfrist.');
 	if (!(balance > 0)) throw new ReminderError('Eine Rückerstattung wird nicht gemahnt: Sie schulden dem Mieter den Betrag.');
 	const level = (await countReminders(statementId)) + 1;
 	if (level > MAX_REMINDER_LEVEL) throw new ReminderError('Es wurden bereits 3 Mahnungen versendet.');

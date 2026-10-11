@@ -49,3 +49,27 @@ Offen, mit Begründung in `offene-punkte.md`:
 - Marco: Hinweis «Entwurf wiederhergestellt» nach dem Erstellen; Heizprofil-Hilfe lang; Pauschale mit 3 % vorbelegt (Einstellung); Rechnung aus der Warnung ohne Kategorie.
 - Dr. Weber: Mietzeitraum, Bruch und Heizprofil nur im PDF; Rundung der Spalte «Anteil» in der App; Kaminfeger nach Heizprofil; gespeichertes PDF wird nach dem Bezahlen neu erstellt (kein unveränderliches Archiv).
 - Sven: keine Fehlerzusammenfassung; «Abbrechen» vor «Weiter» in Schritt 1; Akonto-Hinweis nicht mit dem Feld verbunden.
+
+## Runde 4 (Code-Review R4 auf c1dd4a4) und Wiederholung der Personas
+
+| # | Schwere | Finding | Behandlung |
+|---|---|---|---|
+| R4-N1 | mittel | Ungültiges oder leeres «Bezahlt am» im Detaildialog wurde still zu «heute» | ein gesendetes, aber leeres Datum wird abgelehnt («Bitte geben Sie das Zahlungsdatum als TT.MM.JJJJ ein.»); «heute» nur, wenn kein Feld gesendet wurde |
+| R4-N2 | niedrig | «heute» in der Zeitzone des Servers (UTC) | `localToday` ist der Tag in der Schweiz (Europe/Zurich), für alle Prüfungen und Vorschläge |
+| R4-N3 | niedrig | Listendialog: Meldung zum Datum fehlte, Datum blieb vom letzten Öffnen | Meldung der Prüfung im Dialog; beim Öffnen wieder heute |
+| R4-N5 | niedrig | Mahnung vor Fristablauf nur in der App gesperrt | auch im Backend: «Gemahnt wird erst nach Ablauf der Zahlungsfrist.» |
+| R4-N8 | niedrig | Vertragsliste ohne ID als letztes Sortierkriterium | ergänzt |
+| R4-N9 | niedrig | Bezahlt-Dialoge bei Rückerstattung: Mahnung und «Geld eingegangen» | ohne Satz zur Mahnung; Hilfe «Der Tag, an dem Sie den Betrag überwiesen haben.» |
+| R4-N11 | niedrig | Verdrahtung ungetestet | Tests für Dialog → Formulardaten und für `managementFeeKeyed`; Referenz im Mahnbrief über `reminderLetter` getestet |
+| Anna-N1, Weber-N1 | mittel | Nach «bezahlt» war das PDF wie versendet weg; ein Download erzeugte es neu | Entscheid wie von CR8-N3 als Alternative vorgeschlagen: das PDF wie versendet bleibt (Archiv), «bezahlt» verwirft es nicht mehr; nur ein fehlendes PDF entsteht neu, dann ohne Zahlteil. Demodaten erzeugen das PDF vor dem Bezahlen (R8-12) |
+| Helga-N1 | mittel | «1. Dezember 2026» und «1/12/2026» hiessen «Dieses Datum gibt es nicht» | «Bitte geben Sie das Datum in Ziffern als TT.MM.JJJJ ein …»; «gibt es nicht» nur für einen unmöglichen Tag |
+| R4-N4, R4-N6, R4-N7, R4-N10 | niedrig | sehr alte Zahlungsdaten, Download datiert einen Entwurf (gewollt) und alte PDFs ohne IBAN, Beispiele im Design-Guard, fester Zeitraum der Fristen | offen, `offene-punkte.md` |
+
+| Sven-N1 (kritisch), Sven-N2, Sven-N3 | kritisch / hoch | Dialog «Als bezahlt markieren»: ein unmögliches Datum wurde angesagt und trotzdem mit leerem Datum gespeichert (wie R4-N1); Enter im Feld ohne Wirkung; Zukunftsdatum ohne Grund am Feld | Das Datum wird im Dialog geprüft, bevor etwas gesendet wird (dieselbe Regel wie im Server, `paidDateError` in `$lib/statement`): Fehler am Feld, Fokus ins Feld, Dialog bleibt offen; der Server lehnt ein leeres Datum zusätzlich ab. Enter in einem Feld eines Dialogs bestätigt ihn |
+| Sven-N4 | mittel | Fokusfalle hielt auf dem versteckten Kalenderfeld | Felder mit `tabindex="-1"` sind kein Tabstopp im Dialog |
+| Sven-N6 | niedrig | Nach «Abbrechen» stand beim nächsten Öffnen das alte Datum | beim Öffnen wieder heute (Detail und Liste) |
+| Sven-N5, N7, N8 | mittel / niedrig | Fokus startet auf «Abbrechen» vor dem Feld; lange Beschreibung des Dialogs; Fehler nach dem Hilfetext | offen, `offene-punkte.md` |
+
+Hinweis: Im Lauf von Sven wurde in der Persona-Datenbank `dwello_persona` die Abrechnung NK-33333333-2025-0002 ungewollt als bezahlt gespeichert (der Fehler Sven-N1). Die Datenbank wird bei jedem Persona-Lauf neu aufgesetzt.
+
+Wiederholung der Personas auf c1dd4a4: Helga, Anna, Marco und Dr. Weber haben ihre Aufgaben geschafft; Sven den Assistenten (seine Fehler nach Enter werden jetzt angesagt), nicht aber den Bezahlt-Dialog (siehe oben). Alle früheren hohen Findings sind behoben. Offen bleiben die schon begründeten mittleren (Mietzeitraum, Heizprofil und Rundung nur im PDF; Entwurfskasten im Assistenten; Hilfetext Heizprofil; Vorbelegung der Pauschale; Rechnung aus der Warnung).

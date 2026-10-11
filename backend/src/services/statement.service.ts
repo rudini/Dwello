@@ -383,11 +383,10 @@ export async function updateStatement(
 		}
 	}
 
-	// The PDF prints date, payment deadline and whether it is paid; a change discards it, it is made again
+	// The PDF prints date and payment deadline; a change discards it, it is made again. Once paid, the PDF as sent stays
 	const pdfOutdated =
 		(data.paymentDeadline !== undefined && data.paymentDeadline !== existing.paymentDeadline) ||
-		(data.statementDate !== undefined && data.statementDate !== existing.statementDate) ||
-		(data.status === 'paid' && existing.status !== 'paid'); // paid: no payment part any more
+		(data.statementDate !== undefined && data.statementDate !== existing.statementDate);
 
 	// Update the statement
 	const [updated] = await db

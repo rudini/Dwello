@@ -1,7 +1,8 @@
 <script lang="ts">
 	import type { StatementDocument, StatementWithDetails } from '$lib/types';
 	import { addToast } from '$lib/stores';
-	import { balanceLabel, statusLabels, statusTones } from '$lib/statement';
+	import { balanceLabel, paidDateError, paidHelp, statusLabels, statusTones } from '$lib/statement';
+	import { focusFirstError } from '$lib/ui/focus-error';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Badge from '$lib/ui/Badge.svelte';
 	import Button from '$lib/ui/Button.svelte';
@@ -48,6 +49,14 @@
 	let showSend = $state(false);
 	let generatingPdf = $state(false);
 	let paidDate = $state(localToday());
+	let paidError = $state('');
+
+	// checked in the dialog before sending: a wrong date is said at the field, which gets the focus
+	function checkPaidDate() {
+		paidError = paidDateError(paidDate) ?? '';
+		if (paidError) focusFirstError(document.querySelector('[role="dialog"]'));
+		return !paidError;
+	}
 	let pdfGeneratedAt = $derived(data.statement.pdfGeneratedAt); // set here after «PDF erstellen», else as the server has it
 
 	async function generatePdf() {
@@ -102,7 +111,7 @@
 				status={statement.status}
 				owes={statement.balance > 0}
 				onremind={() => (showReminder = true)}
-				onmarkpaid={() => (showMarkPaid = true)}
+				onmarkpaid={() => ((paidDate = localToday()), (paidError = ''), (showMarkPaid = true))}
 				onsend={() => (showSend = true)}
 			/>
 		{/snippet}
@@ -193,12 +202,14 @@
 	confirmLabel="Als bezahlt markieren"
 	confirmTestid="statement-mark-paid-confirm"
 	fields={{ paidDate }}
+	check={checkPaidDate}
 >
 	{#if statement.balance > 0}<p>Danach können Sie keine Mahnung mehr senden.</p>{/if}
 	<DateInput
 		id="paidDate"
 		label="Bezahlt am"
-		help="Der Tag, an dem das Geld eingegangen ist."
+		help={paidHelp(statement.balance)}
+		error={paidError}
 		bind:value={paidDate}
 		testid="paid-date-input"
 	/>
