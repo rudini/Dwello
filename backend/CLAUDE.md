@@ -7,6 +7,7 @@ bun run dev:demo        # load demo data into the dev database, then start with 
 bun run dev             # migrate the dev database, then start with hot reload
 bun run test            # all backend tests (unit + *.pg.test.ts) with coverage floor, as in CI
 bun run test:pg         # only the database tests
+bun run test:fast       # only the tests without database (no preload needed)
 bun test --preload ./scripts/test-db.ts src/__tests__/x.test.ts   # one file
 bun run type-check
 bun run db:migrate      # apply new files from migrations/

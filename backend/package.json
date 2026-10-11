@@ -11,6 +11,7 @@
     "start": "bun run dist/index.js",
     "test": "bun test --preload ./scripts/test-db.ts --coverage && bun scripts/coverage-check.ts",
     "test:pg": "bun test --preload ./scripts/test-db.ts .pg.test",
+    "test:fast": "bun test --path-ignore-patterns=**/*.pg.test.ts",
     "type-check": "tsc --noEmit",
     "lint": "eslint .",
     "format": "prettier --write .",
