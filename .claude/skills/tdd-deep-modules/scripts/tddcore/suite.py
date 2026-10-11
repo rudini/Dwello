@@ -93,7 +93,7 @@ def _uses_vitest(root):
         return False
     try:
         data = json.loads(manifest.read_text())
-    except json.JSONDecodeError as error:
+    except (json.JSONDecodeError, UnicodeDecodeError) as error:
         raise NoFramework(f"package.json is not valid JSON: {error}") from None
     sections = ("dependencies", "devDependencies", "scripts")
     if not isinstance(data, dict) or any(not isinstance(data.get(k, {}), dict) for k in sections):
