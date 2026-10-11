@@ -18,7 +18,7 @@ Build behaviour one failing test at a time, and keep every module deep: a small 
 Break none of these, even when it would be faster.
 
 1. **No production code without a failing test.** Production code changes only in green (to pass the one failing test) or in refactor (behaviour unchanged, all tests green). While this skill is active, the `tdd-guard` hook blocks production edits at any other time.
-2. **Never delete assertions, and never paste computed values into expected values.** An expected value comes from the requirement, worked out by hand, never copied from what the code returned. A test that is wrong gets fixed in its own red, never weakened to make code pass.
+2. **Never delete assertions, and never paste computed values into expected values.** An expected value comes from the requirement, worked out by hand, never copied from what the code returned. A test that is wrong is never weakened to make code pass; section 4 says how to undo a wrong red.
 3. **Never mix refactoring with green.** Green is the smallest change that makes the new test pass. Clean-up waits for the refactor step, which starts and ends with every test passing.
 4. **No tests on private methods.** Test behaviour through the module's public interface. If you want to test something private, the interface is wrong or a deeper module is missing.
 5. **One test per cycle.** Red adds exactly one new test and sees it fail for the right reason: an assertion, never an import, syntax or setup error.
@@ -58,6 +58,10 @@ One behaviour from the list per cycle:
 1. **Red.** Write one test for the behaviour, run it, and see it fail on an assertion for the reason you expect. Commit with `scripts/tdd-step red "<behaviour>"`. It refuses when the suite passes, when the failure is an import, syntax or setup error, when more than one test fails, and when production code changed.
 2. **Green.** Write the least production code that makes this test pass. Commit with `scripts/tdd-step green "<behaviour>"`. It refuses unless every test passes and refuses changes to tests or test configuration.
 3. **Refactor.** With everything green, improve the design (section 5), run the tests after each change, and commit with `scripts/tdd-step refactor "<what changed>"`. Skip the commit when there is nothing to improve.
+
+Test configuration (`package.json`, new dependencies, `vitest.config.*`, `vite.config.*`) counts as a test file: change it in the red or in a refactor before it, never in green.
+
+**The way back from a wrong red.** If the open red's test is wrong, or green turns out to need a test-configuration change, undo the red with `git reset --soft HEAD~1` (it is your own, unpushed commit), fix the test or add the configuration, and commit the red again. Never change a test after its green: `tdd_replay` rejects that. A test from an earlier cycle that is wrong is a question for the user.
 
 For a module that does not exist yet, the first test imports it dynamically so the red is an assertion, not an import error (example in references/tooling.md).
 
