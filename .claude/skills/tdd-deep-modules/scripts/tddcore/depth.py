@@ -42,7 +42,8 @@ def measure(root, path):
     text = module.read_text(errors="replace")
     code = re.sub(r"/\*.*?\*/|//[^\n]*", "", text, flags=re.DOTALL)  # without comments
     surface, size = _surface(code), _size(code)
-    tiny = [name for name, methods in _classes(code) if len(methods) <= TINY_CLASS]
+    # a class without methods (an error type, a record) carries a name, not a spread-out decision
+    tiny = [name for name, methods in _classes(code) if 0 < len(methods) <= TINY_CLASS]
     metrics = Depth(path, surface, size, size / surface if surface else float(size),
                     tuple(tiny) if len(tiny) >= 2 else (), _pass_through(code), _tests(module, path),
                     _unused(code), _duplicate(code), ())
