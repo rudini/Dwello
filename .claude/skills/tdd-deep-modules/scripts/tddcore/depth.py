@@ -33,6 +33,7 @@ BLOAT_DUPLICATES = 3  # repeated lines that make a module bloated
 DUPLICATE_LENGTH = 12  # shorter lines (`}`, `return x;`) repeat naturally
 TINY_CLASS = 2  # methods; two or more classes this small spread one decision over many places
 SWARM = 3  # exported helpers with one caller; this many turn one module's internals into interface
+SMALL_HELPER = 10  # code lines in a helper's body; longer functions are more than a helper
 
 
 def measure(root, path):
@@ -319,9 +320,28 @@ _EXPORTED_FUNCTION = re.compile(r"^export\s+(?:async\s+)?function\b\*?\s*(\w+)|"
 
 
 def _one_caller_exports(text):
-    """Exported functions whose name the module uses exactly once besides declaring it."""
-    names = [a or b for a, b in _EXPORTED_FUNCTION.findall(text)]
-    return tuple(n for n in names if len(re.findall(rf"\b{re.escape(n)}\b", text)) == 2)
+    """Small exported functions whose name the module uses exactly once besides declaring it."""
+    found = []
+    for match in _EXPORTED_FUNCTION.finditer(text):
+        name = match[1] or match[2]
+        if len(re.findall(rf"\b{re.escape(name)}\b", text)) == 2 and _size(_body(text, match)) <= SMALL_HELPER:
+            found.append(name)
+    return tuple(found)
+
+
+def _body(text, match):
+    """The body of the function whose header `match` found (up to its parameter list's opening)."""
+    opening = text.index("(", match.end() - 1 if match[2] else match.end())
+    close = _close(text, opening)
+    head = _ARROW_HEAD.match(text, close) or _FUNCTION_HEAD.match(text, close)
+    if not head:
+        return ""
+    start = head.end()
+    if text[start - 1:start] == "{":
+        return text[start:_close(text, start - 1) - 1]
+    if text[start:start + 1] == "{":
+        return text[start + 1:_close(text, start) - 1]
+    return text[start:_expression_end(text, start)]
 
 
 def _unused(text):
