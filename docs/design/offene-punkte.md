@@ -220,3 +220,11 @@ Every place in the code is marked `TODO(fachlich prüfen)` (`grep -rn "TODO(fach
 - Not in the PDF yet (D1 proposals): several tenants of one contract as recipients, Akonto per month when it changed in the period (only the total is printed), a list of receipts, the previous year per category.
 - QR-bill v2.4 (from 14.11.2026): no change needed for CHF bills according to the research (D1R-07); to check with the SIX guidelines – TODO(fachlich prüfen).
 
+
+## Session 11 – review round 8 and persona run (R3-review)
+
+- Reminders are German for every tenant (R8-04); the reminder letter names the QR reference with a QR-IBAN but has no payment part.
+- After saving an invoice for a period already billed, the list shows no hint; the hint is on the invoice and the statement (R8-07). The wizard and the invoice say «Tankbestand», the building page «Brennstoff im Tank oder Lager» (R8-08) – TODO(fachlich prüfen). The empty preview keeps «Weiter» and the totals (R8-09). English key names without unit, US and UK spelling mixed (R8-11). Creditor house number in the street field of the QR code (R8-13, allowed).
+- Demo data: stored PDFs of paid statements are made after paying; `paid_amount` empty; no invoice with a service period across the year end (R8-12, DP8-F2, DP8-F3).
+- Statements: no date «Versendet am» to choose, the app dates the statement on the day it is marked (by design); the stored PDF of a statement is made again after it is paid (no unchangeable archive of the PDF as sent) – TODO(fachlich prüfen).
+- Persona run session 11, left medium: existing statements are not shown in step 2 of the wizard (Anna); the restored-draft notice stays after creating statements, the heating profile help is long, the fee is preset to the setting's 3 %, an invoice recorded from a wizard warning has no category preset (Marco); tenancy period, key fraction and heating profile only in the PDF, the app's «Anteil» rounds differently, the chimney sweep is shared by the heating profile (Dr. Weber); no error summary, «Abbrechen» before «Weiter» in step 1, the Akonto notice is not linked to its field (Sven).

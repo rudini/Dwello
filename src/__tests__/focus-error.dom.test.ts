@@ -32,6 +32,22 @@ function form(html: string) {
 }
 
 describe('Fokus nach einem abgelehnten Speichern', () => {
+	// Mit Enter im fehlerhaften Feld gesendet: der Fokus stand schon dort und der Screenreader blieb stumm
+	it('setzt den Fokus neu, auch wenn das fehlerhafte Feld ihn schon hat, damit der Fehler vorgelesen wird', async () => {
+		const element = form(
+			`<input id="a" aria-invalid="true" aria-describedby="a-error" /><p id="a-error">Das Ende liegt vor dem Beginn.</p>`
+		);
+		const field = element.querySelector('input')!;
+		field.focus();
+		const focused = vi.fn();
+		field.addEventListener('focus', focused);
+
+		await focusFirstError(element);
+
+		expect(focused).toHaveBeenCalledTimes(1);
+		expect(document.activeElement).toBe(field);
+	});
+
 	it('springt zum ersten ungültigen Feld, damit sein Fehler vorgelesen wird', async () => {
 		const element = form(`
 			<div role="alert" tabindex="-1">Nicht gespeichert</div>

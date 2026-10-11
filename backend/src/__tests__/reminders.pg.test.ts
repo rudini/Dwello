@@ -40,6 +40,7 @@ async function statement(status: 'draft' | 'sent') {
 		})
 	).json()) as { id: string };
 	statementIds.push(created.id);
+	await db.update(utilityStatements).set({ balance: '120.00' }).where(eq(utilityStatements.id, created.id)); // owes
 	if (status === 'sent') await api('PUT', `/api/v1/statements/${created.id}/status`, { status: 'sent' });
 	return created.id;
 }
@@ -173,5 +174,15 @@ describe('Mahnbare Abrechnungen', () => {
 
 		expect(result.status).toBe(400);
 		expect(result.error).toBe('Nur versendete Abrechnungen können gemahnt werden.');
+	});
+
+	// Bei einer Rückerstattung schuldet der Vermieter: eine Zahlungsaufforderung an den Mieter wäre falsch
+	it('mahnt keine Rückerstattung', async () => {
+		const id = await statement('sent');
+		await db.update(utilityStatements).set({ balance: '-45.00' }).where(eq(utilityStatements.id, id));
+		const result = await remind(id);
+
+		expect(result.status).toBe(400);
+		expect(result.error).toBe('Eine Rückerstattung wird nicht gemahnt: Sie schulden dem Mieter den Betrag.');
 	});
 });

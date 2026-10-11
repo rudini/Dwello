@@ -302,17 +302,32 @@ export async function generateStatementPdf(id: string, language?: string) {
 	return { qrReference, pdfSize: pdfBase64.length };
 }
 
-/** The stored PDF (Base64) with the statement number, or why there is none */
+const storedPdf = async (id: string) =>
+	(
+		await db
+			.select({
+				pdfBlob: utilityStatements.pdfBlob,
+				statementNumber: utilityStatements.statementNumber,
+				status: utilityStatements.status,
+				statementDate: utilityStatements.statementDate
+			})
+			.from(utilityStatements)
+			.where(eq(utilityStatements.id, id))
+			.limit(1)
+	)[0];
+
+/**
+ * The PDF the tenant gets (Base64) with the statement number, or why there is none: a draft's as if sent today, and
+ * one discarded by sending or paying made again
+ */
 export async function getStatementPdf(id: string) {
-	const [result] = await db
-		.select({
-			pdfBlob: utilityStatements.pdfBlob,
-			statementNumber: utilityStatements.statementNumber
-		})
-		.from(utilityStatements)
-		.where(eq(utilityStatements.id, id))
-		.limit(1);
+	let result = await storedPdf(id);
 	if (!result) return { error: 'Statement not found' };
+	const stale = result.status === 'draft' && result.statementDate !== (await datedToday(null)).statementDate;
+	if (!result.pdfBlob || stale) {
+		await generateStatementPdf(id);
+		result = (await storedPdf(id))!;
+	}
 	if (!result.pdfBlob) return { error: 'PDF not generated yet. Call POST /:id/generate-pdf first.' };
 	return { pdfBlob: result.pdfBlob, statementNumber: result.statementNumber };
 }

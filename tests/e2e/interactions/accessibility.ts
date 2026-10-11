@@ -46,7 +46,7 @@ export async function seedFor(seed: TestData, path: string, state: string) {
 	await seed.contract('Bruno', '1.02', { startDate: '2015-01-01', baseRent: '1500.00', monthlyAdvancePayment: '150.00' });
 	await seed.contract('Carla', '1.04', { startDate: '2015-01-01', endDate: '2099-12-31', baseRent: '1400.00' });
 	await seed.heatingProfile('Standard', [18, 16, 13, 8, 4, 1, 0, 0, 3, 9, 13, 15]);
-	await seed.heatingInvoice('Seeblick', '3600.00', 2025);
+	await seed.heatingInvoice('Seeblick', '9000.00', 2025); // Bruno pays more than his Akonto: a reminder can be sent
 	await seed.fuelStock('Seeblick', '2025-12-31', '800.00'); // a Tankbestand to list and to delete
 	// 2025 recorded from its start: a year to compare 2026 with; the 2025 statements take it
 	const billedInvoice = await seed.invoiceOn('Seeblick', 'Hauswart', '300.00', '2025-01-31');
@@ -54,6 +54,7 @@ export async function seedFor(seed: TestData, path: string, state: string) {
 	await seed.statement('Anna', 'Seeblick', 2025, 'Standard');
 	await seed.statement('Bruno', 'Seeblick', 2025, 'Standard');
 	await seed.sendStatement('Bruno', 2025);
+	await seed.paymentDeadline('Bruno', 2025, '2026-01-31'); // overdue: only then a reminder can be sent
 	await seed.statement('Carla', 'Seeblick', 2023, 'Standard'); // no invoices in 2023: no positions
 	for (const tenant of ['Anna', 'Bruno', 'Carla']) await seed.statement(tenant, 'Seeblick', 2024, 'Standard'); // 2024 all billed
 	const lateInvoice = await seed.invoiceOn('Seeblick', 'Lift', '200.00', '2025-06-30'); // recorded after the 2025 statements

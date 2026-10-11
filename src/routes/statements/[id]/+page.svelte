@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { untrack } from 'svelte';
 	import type { StatementDocument, StatementWithDetails } from '$lib/types';
 	import { addToast } from '$lib/stores';
 	import { balanceLabel, statusLabels, statusTones } from '$lib/statement';
@@ -11,6 +10,8 @@
 	import { formatCurrency, formatDate } from '$lib/utils/format';
 	import CostTable from './CostTable.svelte';
 	import FormDialog from './FormDialog.svelte';
+	import DateInput from '$lib/ui/DateInput.svelte';
+	import { localToday } from '$lib/contract-status';
 	import MetadataCard from './MetadataCard.svelte';
 	import PartiesPanel from './PartiesPanel.svelte';
 	import PaymentPanel from './PaymentPanel.svelte';
@@ -46,7 +47,8 @@
 	let showDelete = $state(false);
 	let showSend = $state(false);
 	let generatingPdf = $state(false);
-	let pdfGeneratedAt = $state(untrack(() => data.statement.pdfGeneratedAt));
+	let paidDate = $state(localToday());
+	let pdfGeneratedAt = $derived(data.statement.pdfGeneratedAt); // set here after «PDF erstellen», else as the server has it
 
 	async function generatePdf() {
 		generatingPdf = true;
@@ -98,6 +100,7 @@
 			/>
 			<StatusActions
 				status={statement.status}
+				owes={statement.balance > 0}
 				onremind={() => (showReminder = true)}
 				onmarkpaid={() => (showMarkPaid = true)}
 				onsend={() => (showSend = true)}
@@ -116,7 +119,11 @@
 
 	{#if data.laterInvoices}
 		<!-- a draft is created again; a sent statement is corrected outside Dwello (it cannot be deleted) -->
-		<Alert tone="caution" title="Rechnungen fehlen in der Abrechnung" testid="statement-later-invoices">
+		<Alert
+			tone="caution"
+			title="Rechnungen fehlen in der Abrechnung"
+			testid="statement-later-invoices"
+		>
 			{#if statement.status === 'draft'}
 				<p>
 					Seit dem Erstellen dieses Entwurfs {laterInvoices}. Löschen Sie ihn und erstellen Sie die
@@ -125,9 +132,9 @@
 			{:else}
 				<p>
 					Seit dem Erstellen dieser Abrechnung {laterInvoices}. Versendete Abrechnungen berichtigen
-					Sie ausserhalb von Dwello: Schicken Sie dem Mieter eine berichtigte Abrechnung mit dem Beleg.
-					Ob Sie die Kosten noch nachverlangen können, ist nicht in jedem Fall sicher: Lassen Sie sich
-					im Zweifel beraten.
+					Sie ausserhalb von Dwello: Schicken Sie dem Mieter eine berichtigte Abrechnung mit dem
+					Beleg. Ob Sie die Kosten noch nachverlangen können, ist nicht in jedem Fall sicher: Lassen
+					Sie sich im Zweifel beraten.
 				</p>
 			{/if}
 		</Alert>
@@ -169,7 +176,12 @@
 					{/if}
 				</div>
 			</Panel>
-			<MetadataCard createdAt={statement.createdAt} {pdfGeneratedAt} />
+			<MetadataCard
+				createdAt={statement.createdAt}
+				{pdfGeneratedAt}
+				sentOn={statement.status === 'draft' ? null : statement.statementDate}
+				paidOn={statement.paidDate}
+			/>
 		</div>
 	</div>
 </div>
@@ -180,11 +192,16 @@
 	title="Abrechnung als bezahlt markieren"
 	confirmLabel="Als bezahlt markieren"
 	confirmTestid="statement-mark-paid-confirm"
+	fields={{ paidDate }}
 >
-	<p>
-		Das heutige Datum wird als Zahlungsdatum eingetragen. Danach können Sie keine Mahnung mehr
-		senden.
-	</p>
+	{#if statement.balance > 0}<p>Danach können Sie keine Mahnung mehr senden.</p>{/if}
+	<DateInput
+		id="paidDate"
+		label="Bezahlt am"
+		help="Der Tag, an dem das Geld eingegangen ist."
+		bind:value={paidDate}
+		testid="paid-date-input"
+	/>
 	<p class="rounded-panel bg-sunken p-4 font-semibold text-ink">
 		{statement.tenantName}: {balance}
 	</p>

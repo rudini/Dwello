@@ -2,7 +2,12 @@ import type { Actions, PageServerLoad } from './$types';
 import { fail, redirect } from '@sveltejs/kit';
 import { loadStatement } from '$lib/server/statement';
 import { loadDocuments } from '$lib/server/documents';
-import { markStatementPaid, sendStatementReminder } from '$lib/server/statement-actions';
+import {
+	markStatementPaid,
+	paidDateError,
+	sendStatementReminder
+} from '$lib/server/statement-actions';
+import { localToday } from '$lib/contract-status';
 import type { StatementDocument, StatementWithDetails } from '$lib/types';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
@@ -49,8 +54,11 @@ const changeStatus = async (fetch: Fetch, id: string, body: object, failure: str
 export const actions: Actions = {
 	send: ({ params, fetch }) =>
 		changeStatus(fetch, params.id, { status: 'sent' }, 'Abrechnung konnte nicht versendet werden.'),
-	markPaid: async ({ params, fetch }) => {
-		const response = await markStatementPaid(fetch, params.id);
+	markPaid: async ({ params, fetch, request }) => {
+		const paidDate = String((await request.formData()).get('paidDate') ?? '') || localToday();
+		const invalid = paidDateError(paidDate);
+		if (invalid) return fail(400, { actionError: invalid });
+		const response = await markStatementPaid(fetch, params.id, paidDate);
 		if (!response.ok) {
 			return fail(response.status, {
 				actionError: 'Abrechnung konnte nicht als bezahlt markiert werden.'

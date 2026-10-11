@@ -34,6 +34,31 @@ describe('Abrechnung als bezahlt markieren', () => {
 	});
 });
 
+// Die Zahlung kam vor einer Woche: das Datum aus dem Dialog, nicht der Tag des Erfassens
+describe('Zahlungsdatum', () => {
+	it('speichert das gewählte Zahlungsdatum', async () => {
+		const { calls, result } = runAction(actions.markPaid, 's1', 200, { paidDate: '2026-01-05' });
+		await result;
+
+		expect(calls).toEqual([
+			{ method: 'PUT', url: `${API}/status`, body: { status: 'paid', paidDate: '2026-01-05' } }
+		]);
+	});
+
+	it('lehnt ein Zahlungsdatum in der Zukunft ab, ohne zu speichern', async () => {
+		const { calls, result } = runAction(actions.markPaid, 's1', 200, { paidDate: '2999-01-01' });
+
+		expect(await result).toMatchObject({
+			status: 400,
+			data: {
+				actionError:
+					'Das Zahlungsdatum liegt in der Zukunft. Geben Sie den Tag ein, an dem das Geld eingegangen ist.'
+			}
+		});
+		expect(calls).toEqual([]);
+	});
+});
+
 describe('Abrechnung löschen', () => {
 	it('löscht die Abrechnung und kehrt zur Abrechnungsliste zurück', async () => {
 		const { calls, result } = runAction(actions.delete, 's1', 204);

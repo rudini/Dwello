@@ -17,7 +17,7 @@ import { byTestId, click, fakeBff, fireEvent, settle, show, submit } from './hel
 const data = {
 	tenants: [
 		{ id: 't1', name: 'Anna Keller' },
-		{ id: 't2', name: 'Bruno Meier' }
+		{ id: 't2', name: 'Bruno Meier', place: 'Winterthur' }
 	],
 	apartments: [
 		{ id: 'a1', unit: '2.01', building: 'Ahornhof' },
@@ -300,6 +300,16 @@ describe('Prüfungen im Mietvertrag', () => {
 		expect(byTestId('overlap-warning')).toBeNull();
 		expect(byTestId('form-error')).toBeNull();
 	});
+});
+
+// «Nina Brunner» und «Rosa Brunner»: der Ort hilft, den richtigen Mieter zu wählen
+it('nennt in der Mieterauswahl den Ort neben dem Namen', async () => {
+	await open();
+	const options = [...byTestId<HTMLSelectElement>('contract-tenant-select')!.options].map((o) =>
+		o.textContent!.trim()
+	);
+
+	expect(options).toEqual(['Mieter wählen', 'Anna Keller', 'Bruno Meier, Winterthur']);
 });
 
 describe('Entwurf des Mietvertrags', () => {

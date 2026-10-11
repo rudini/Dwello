@@ -176,6 +176,17 @@ describe('Beträge und Daten wie in der Schweiz geschrieben', () => {
 		]);
 	});
 
+	// «1'450.-» ist in der Schweiz ein ganzer Frankenbetrag; das Total rechnete ihn mit, «Weiter» lehnte ihn ab
+	it('versteht einen ganzen Frankenbetrag mit Strich', () => {
+		const values = normalizeAmounts({
+			...filled,
+			baseRent: "1'450.-",
+			advancePayment: '180.–',
+			additionalRent: ''
+		});
+		expect([values.baseRent, values.advancePayment]).toEqual(['1450', '180']);
+	});
+
 	it('weist auf einen Vertragsbeginn in der Vergangenheit hin', () => {
 		expect(startDateNotice('2026-01-11', '2026-10-10')).toBe(
 			'Der Vertragsbeginn Sonntag, 11. Januar 2026 liegt in der Vergangenheit. Stimmt das Datum?'

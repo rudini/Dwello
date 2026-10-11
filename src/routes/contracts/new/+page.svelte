@@ -3,7 +3,7 @@
 	import ContractWizard from './ContractWizard.svelte';
 
 	interface PageData {
-		tenants: { id: string; name: string }[];
+		tenants: { id: string; name: string; place?: string }[];
 		apartments: { id: string; unit: string; building: string; status: string }[];
 	}
 	let { data }: { data: PageData } = $props();

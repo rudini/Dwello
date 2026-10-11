@@ -6,7 +6,9 @@
 	import { addToast } from '$lib/stores';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';
+	import DateInput from '$lib/ui/DateInput.svelte';
 	import Dialog from '$lib/ui/Dialog.svelte';
+	import { localToday } from '$lib/contract-status';
 	import EmptyState from '$lib/ui/EmptyState.svelte';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import Pagination from '$lib/ui/Pagination.svelte';
@@ -34,15 +36,19 @@
 		return `/statements?${next}`;
 	}
 
-	// Payment received today, after a confirmation; the endpoint stores it in the database
+	// Payment received on a day asked for (today proposed), after a confirmation; the endpoint stores it
 	let paying = $state<StatementWithDetails | null>(null);
+	let paidDate = $state(localToday());
 	let saving = $state(false);
 	let payError = $state('');
 	async function markPaid() {
 		saving = true;
 		payError = '';
 		try {
-			const response = await fetch(`/statements/${paying!.id}/mark-paid`, { method: 'POST' });
+			const response = await fetch(`/statements/${paying!.id}/mark-paid`, {
+				method: 'POST',
+				body: JSON.stringify({ paidDate })
+			});
 			if (!response.ok) throw new Error(String(response.status));
 			addToast('success', `Abrechnung ${paying!.statementNumber} als bezahlt markiert`);
 			paying = null;
@@ -130,7 +136,14 @@
 	}}
 >
 	{#if paying}
-		<p>Das heutige Datum wird als Zahlungsdatum eingetragen.</p>
+		<p>Danach können Sie keine Mahnung mehr senden.</p>
+		<DateInput
+			id="paidDate"
+			label="Bezahlt am"
+			help="Der Tag, an dem das Geld eingegangen ist."
+			bind:value={paidDate}
+			testid="paid-date-input"
+		/>
 		<p class="rounded-panel bg-sunken p-4 font-semibold text-ink">
 			{paying.statementNumber}, {paying.tenantName}: {balanceLabel(paying.balance)}
 			{formatCurrency(Math.abs(paying.balance))}

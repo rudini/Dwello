@@ -5,6 +5,7 @@
  * by e-mail, or kept as "to_send" for the property manager to print and post.
  */
 
+import { formatQRReferenceForDisplay, isQRIBAN, statementQRReference } from './qr-bill.service';
 import { createMailTransport, MailConfigError } from '../mail';
 import { getTypedConfig } from './config.service';
 import { countReminders, createDocument, markDocumentSent, recordDeliveryError } from './document.service';
@@ -40,10 +41,11 @@ async function sender(): Promise<PostalAddress & { iban: string }> {
 	};
 }
 
-async function nextLevel(statementId: string, status: string) {
+async function nextLevel(statementId: string, status: string, balance: number) {
 	if (!['sent', 'overdue'].includes(status)) {
 		throw new ReminderError('Nur versendete Abrechnungen können gemahnt werden.');
 	}
+	if (!(balance > 0)) throw new ReminderError('Eine Rückerstattung wird nicht gemahnt: Sie schulden dem Mieter den Betrag.');
 	const level = (await countReminders(statementId)) + 1;
 	if (level > MAX_REMINDER_LEVEL) throw new ReminderError('Es wurden bereits 3 Mahnungen versendet.');
 	return level;
@@ -71,7 +73,7 @@ async function deliverByEmail(document: Document, to: string | null, letter: Ret
 export async function sendReminder(statementId: string) {
 	const statement = await getStatement(statementId);
 	if (!statement) throw new ReminderError('Abrechnung nicht gefunden.', 404);
-	const level = await nextLevel(statementId, statement.status);
+	const level = await nextLevel(statementId, statement.status, Number(statement.balance));
 	const tenant = (await getTenant(statement.tenantId))!;
 	const from = await sender();
 	const today = new Date();
@@ -84,7 +86,8 @@ export async function sendReminder(statementId: string) {
 		balance: Number(statement.balance),
 		deadline: isoDate(new Date(today.getTime() + PAYMENT_DAYS * 86_400_000)),
 		tenant,
-		sender: { name: from.name, iban: from.iban }
+		sender: { name: from.name, iban: from.iban },
+		reference: isQRIBAN(from.iban) ? formatQRReferenceForDisplay(statementQRReference(statementId)) : undefined
 	});
 	const recipient = { ...tenant, name: `${tenant.firstName} ${tenant.lastName}` };
 	const pdf = await renderReminderPdf(letter, from, recipient, today.toLocaleDateString('de-CH'));

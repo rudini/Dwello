@@ -14,7 +14,8 @@ function call(handler: unknown, status: number, answer: object) {
 	};
 	const result = (handler as (event: never) => Promise<Response>)({
 		params: { id: 's1' },
-		fetch
+		fetch,
+		request: new Request('http://localhost/', { method: 'POST' }) // no body: the defaults apply
 	} as never);
 	return { calls, result };
 }

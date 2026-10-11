@@ -19,7 +19,8 @@ export const servicePeriodOf = (values: { servicePeriodStart: string; servicePer
 });
 
 /** An amount as typed in Switzerland ("1'200.50", "1’200,50") in the form the backend reads */
-export const plainAmount = (value: string) => value.replace(/['’\s]/g, '').replace(',', '.');
+export const plainAmount = (value: string) =>
+	value.replace(/['’\s]/g, '').replace(',', '.').replace(/\.[-–—]+$/, ''); // «1'450.-»: whole francs
 
 // The Leistungszeitraum is optional, but with both dates and the end not before the start (ISO dates compare as text)
 function servicePeriodErrors(start = '', end = ''): Record<string, string> {

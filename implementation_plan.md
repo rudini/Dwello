@@ -4487,6 +4487,12 @@ critical/high/medium is open; reviews in `docs/reviews/`.
   Review round 2 (`docs/reviews/D2-review-2.md`): sending dates the statement (`datedToday` in `statement.service.ts`,
   `SendDialog.svelte`), demo dates kept (`db/demo-data.ts`), key values stored (`key_values`, migration 0011), mixed key as
   a formula (`keyShareOf`), Romansh PDF in German (`TenantFormFields.svelte`), paid refund, totals kept together.
+- [x] **Review round 8 / D2 round 3 and persona run** (`docs/reviews/R3-review.md`, `docs/design/personas/*-s11.md`):
+  reminders only for an overdue amount due (`StatusActions.svelte`, `reminder.service.ts`, QR reference in
+  `reminder-letter.ts`); PDF made again when stale or discarded (`getStatementPdf`, paid discards it); paid date field
+  (`statement-actions.ts`, both paid dialogs); fee text as in the PDF (`CostTable.svelte`); deadlines up to 30 days
+  (`overview.ts`); stable list order (services); refocus on errors (`focus-error.ts`); «.-» amounts (`invoice.ts`);
+  missing year message (`DateInput.svelte`); PLZ for letters; town in the tenant choice; history with sent and paid.
 
 
 ---

@@ -12,6 +12,7 @@
 		confirmTestid,
 		danger = false,
 		ondone,
+		fields = {},
 		children
 	}: {
 		open: boolean;
@@ -21,6 +22,7 @@
 		confirmTestid: string;
 		danger?: boolean;
 		ondone?: () => void; // the action led to another page
+		fields?: Record<string, string>; // values of fields in the dialog, which lies outside the form
 		children: Snippet;
 	} = $props();
 
@@ -32,7 +34,8 @@
 	bind:this={form}
 	method="POST"
 	{action}
-	use:enhance={() => {
+	use:enhance={({ formData }) => {
+		for (const [name, value] of Object.entries(fields)) formData.set(name, value);
 		busy = true;
 		return async ({ result, update }) => {
 			if (result.type === 'redirect') ondone?.();

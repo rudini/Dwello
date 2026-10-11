@@ -20,7 +20,8 @@ export function readPdf(pdf: Buffer) {
 				.map(([, hex]) => winAnsi.decode(Buffer.from(hex, 'hex')))
 				.join('')
 		)
-		.join('\n');
+		.join('\n')
+		.replace(/\u00a0/g, ' '); // a protected space reads as a space
 	// flowing: wrapped lines joined, for sentences the PDF breaks over two lines
 	return { pages, text, flowing: text.replace(/\s*\n\s*/g, ' ') };
 }

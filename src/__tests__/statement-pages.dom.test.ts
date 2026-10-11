@@ -1,11 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { readable } from 'svelte/store';
+import { flushSync } from 'svelte';
+import { SvelteMap } from 'svelte/reactivity';
 
 let url = new URL('http://localhost/statements');
 vi.mock('$app/environment', () => ({ browser: true }));
 vi.mock('$app/navigation', () => ({ goto: vi.fn(), invalidateAll: vi.fn() }));
 // enhance as SvelteKit wires it: the test plays the server's answer to an action of the page
-const actions = vi.hoisted(() => new Map<string, () => unknown>());
+const actions = vi.hoisted(() => new Map<string, (input?: unknown) => unknown>());
 vi.mock('$app/forms', () => ({
 	enhance: (form: HTMLFormElement, submit?: () => unknown) => {
 		if (submit) actions.set(form.getAttribute('action')!, submit);
@@ -117,7 +119,10 @@ describe('Abrechnungsliste', () => {
 		click('statement-list-mark-paid-confirm');
 		await settle();
 
-		expect(calls).toEqual([{ method: 'POST', path: '/statements/s1/mark-paid', body: undefined }]);
+		const today = new Date().toLocaleDateString('sv-SE');
+		expect(calls).toEqual([
+			{ method: 'POST', path: '/statements/s1/mark-paid', body: { paidDate: today } }
+		]);
 		expect(invalidateAll).toHaveBeenCalled();
 	});
 
@@ -258,6 +263,28 @@ describe('Abrechnungsdetail', () => {
 		);
 	});
 
+	// Versenden oder Bezahlen verwirft ein älteres PDF: die Seite zeigt danach den Stand des Servers
+	it('zeigt nach dem Versand den Stand des PDF, wie ihn der Server liefert', () => {
+		const box = new SvelteMap<string, unknown>([
+			['data', { statement: statement({ pdfGeneratedAt: '2026-10-05T08:00:00Z' }), reminders: [] }]
+		]);
+		show(StatementPage, {
+			get data() {
+				return box.get('data');
+			},
+			form: null
+		} as never);
+		expect(byTestId('statement-pdf-download')).not.toBeNull();
+
+		box.set('data', {
+			statement: statement({ status: 'sent', pdfGeneratedAt: undefined }),
+			reminders: []
+		});
+		flushSync();
+
+		expect(byTestId('statement-pdf-download')).toBeNull();
+	});
+
 	it('zeigt keinen Hinweis ohne später erfasste Rechnungen', () => {
 		detail();
 		expect(byTestId('statement-status')).not.toBeNull();
@@ -320,11 +347,16 @@ describe('Abrechnungsdetail', () => {
 		expect(email.className.split(/\s+/)).toEqual(expect.arrayContaining(['min-w-0', 'break-all']));
 	});
 
-	it('nennt die Verwaltungspauschale mit ihrer Grundlage', () => {
+	// Wie im PDF: ohne Verteilschlüssel ein Anteil der eigenen Kosten, mit Schlüssel der Kosten der Liegenschaft
+	it('nennt die Verwaltungspauschale mit ihrer Grundlage wie im PDF', () => {
 		detail();
+		const fee = () => byTestId('statement-management-fee')!.textContent!.replace(/\s+/g, ' ');
+		expect(fee()).toContain('3 % der Zwischensumme');
+		document.body.innerHTML = '';
 
-		expect(byTestId('statement-management-fee')!.textContent).toContain(
-			'3 % der Nebenkosten der Liegenschaft, Anteil dieser Wohnung'
+		detail({ managementFeeKeyed: true });
+		expect(fee()).toContain(
+			'3 % der Nebenkosten der Liegenschaft, verteilt nach dem Verteilschlüssel, Anteil dieser Wohnung für 366 Mietstage'
 		);
 		expect(text()).not.toMatch(/Verwaltungsgebühr|Verwaltungskosten/);
 	});
@@ -351,7 +383,9 @@ describe('Abrechnungsdetail', () => {
 		toasts.set([]);
 		detail();
 		click('statement-delete-button');
-		const after = actions.get('?/delete')!() as (input: unknown) => Promise<void>;
+		const after = actions.get('?/delete')!({ formData: new FormData() }) as (
+			input: unknown
+		) => Promise<void>;
 		await after({ update: async () => {}, result: { type: 'redirect' } });
 		expect(get(toasts).map((toast) => toast.message)).toEqual(['Abrechnung NK-2024-0001 gelöscht']);
 	});
@@ -378,7 +412,7 @@ describe('Abrechnungsdetail', () => {
 		click('statement-send-button');
 
 		expect(document.querySelector('[role="dialog"]')!.textContent!.replace(/\s+/g, ' ')).toContain(
-			'Die Zahlungsfrist läuft ab dem Tag, an dem Sie die Abrechnung als versendet markieren. Stellen Sie das PDF deshalb am selben Tag zu.'
+			'Dwello datiert die Abrechnung auf den Tag, an dem Sie sie als versendet markieren. Stellen Sie das PDF deshalb am selben Tag zu.'
 		);
 	});
 
@@ -427,6 +461,40 @@ describe('Abrechnungsdetail', () => {
 
 		expect(byTestId('statement-pdf-download')).toBeNull();
 		expect(byTestId<HTMLButtonElement>('statement-generate-pdf-button')!.disabled).toBe(false);
+	});
+
+	it('fragt beim Markieren als bezahlt nach dem Zahlungsdatum, heute vorgeschlagen', () => {
+		detail({ status: 'sent' });
+		click('statement-mark-paid-button');
+
+		expect(byTestId<HTMLInputElement>('paid-date-input')!.value).toBe(
+			new Date().toLocaleDateString('de-CH', { day: '2-digit', month: '2-digit', year: 'numeric' })
+		);
+	});
+
+	// Gemahnt wird erst nach Ablauf der Frist, und nie bei einer Rückerstattung: dann schuldet der Vermieter
+	it('bietet eine Mahnung nur bei einer überfälligen Nachzahlung an', () => {
+		detail({ status: 'sent' });
+		expect(byTestId('statement-reminder-button')).toBeNull();
+		document.body.innerHTML = '';
+		detail({ status: 'overdue', balance: -45 });
+		expect(byTestId('statement-reminder-button')).toBeNull();
+		expect(byTestId('statement-mark-paid-button')).not.toBeNull();
+	});
+
+	// Der Knopf sagt, was er tut: Dwello verschickt nichts selbst
+	it('nennt den Knopf «Als versendet markieren»', () => {
+		detail();
+		expect(byTestId('statement-send-button')!.textContent!.trim()).toBe('Als versendet markieren');
+	});
+
+	// Ab dem Versand läuft die Frist: der Verlauf zeigt, wann versendet und wann bezahlt wurde
+	it('führt im Verlauf Versand und Zahlung', () => {
+		detail({ status: 'paid', statementDate: '2026-09-28', paidDate: '2026-10-05' });
+		const history = text().replace(/\s+/g, ' ');
+
+		expect(history).toContain('Versendet 28.09.2026');
+		expect(history).toContain('Bezahlt 05.10.2026');
 	});
 
 	it('kündigt die nächste Mahnung mit ihrem Versandweg an', () => {

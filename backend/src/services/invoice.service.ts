@@ -130,7 +130,7 @@ export async function listInvoices(filters: InvoiceFilters = {}): Promise<{
 	// Build the query with joins
 	const results = await selectWithDetails()
 		.where(whereClause)
-		.orderBy(desc(invoices.invoiceDate), desc(invoices.createdAt))
+		.orderBy(desc(invoices.invoiceDate), desc(invoices.createdAt), desc(invoices.id)) // id: a stable page order for ties
 		.limit(limit)
 		.offset(offset);
 

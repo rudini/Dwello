@@ -603,8 +603,9 @@ function heatingLines({ t, data }: Page) {
 	const { profile, percent, months } = data.heating;
 	const names = t.months.split(',');
 	const lines = [fill(t.heatingNote, { profile, percent: (Math.round(percent * 100) / 100).toFixed(2) })];
+	// no line break inside one month («Jun 3.70 %»)
 	if (months?.length && percent < 100)
-		lines.push(fill(t.heatingMonths, { months: months.map((m) => `${names[m.month - 1]} ${m.percentage.toFixed(2)} %`).join(', ') }));
+		lines.push(fill(t.heatingMonths, { months: months.map((m) => `${names[m.month - 1]}\u00a0${m.percentage.toFixed(2)}\u00a0%`).join(', ') }));
 	return lines;
 }
 

@@ -49,6 +49,16 @@ describe('Datumsfeld TT.MM.JJJJ', () => {
 		expect(field().value).toBe('31.12.2024');
 	});
 
+	// «1.12» ohne Jahr gibt es sehr wohl: die Meldung sagt, was fehlt
+	it('sagt beim Verlassen, dass das Jahr fehlt', () => {
+		date();
+		type('1.12');
+		field().dispatchEvent(new Event('blur'));
+		flushSync();
+
+		expect(describedBy()).toContain(`Es fehlt das Jahr. Bitte geben Sie das Datum als TT.MM.JJJJ ein, zum Beispiel 01.12.${new Date().getFullYear()}.`);
+	});
+
 	// Mitten im Text bearbeitet (Monat gelöscht): der Text bleibt, wie getippt, der Cursor springt nicht ans Ende
 	it('lässt eine Bearbeitung mitten im Datum unverändert', () => {
 		date('2024-12-31');

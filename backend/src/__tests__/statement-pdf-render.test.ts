@@ -162,6 +162,14 @@ describe('Heiz- und Warmwasserkosten im PDF', () => {
 		expect((await textOf(heated)).flowing).toContain('Nov 10.70 %, Dez 13.00 %');
 	});
 
+	// «Jun 3.70» und «%» standen auf zwei Zeilen
+	it('trennt einen Monatsanteil nicht von seinem Prozentzeichen', async () => {
+		const months = [13.6, 12.1, 11.5, 9.3, 5.6, 3.7].map((percentage, i) => ({ month: i + 1, percentage }));
+		const pdf = await textOf({ ...heated, heating: { profile: 'Heizung + Warmwasser', percent: 55.8, months } });
+
+		expect(pdf.text).toContain('Jun 3.70 %');
+	});
+
 	// Beim Tank zählt nicht die Rechnung, sondern der Verbrauch
 	it('erklärt in der Fussnote, dass beim Tank der Verbrauch zählt', async () => {
 		expect((await textOf(heated)).flowing).toContain('Kosten Liegenschaft bei Heizmaterial aus dem Tank: der Verbrauch');

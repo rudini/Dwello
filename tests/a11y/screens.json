@@ -280,7 +280,7 @@
 			"name": "statements",
 			"path": "/statements",
 			"queries": {
-				"mark-paid-dialog": "?status=sent"
+				"mark-paid-dialog": "?status=open"
 			},
 			"states": [
 				"default",

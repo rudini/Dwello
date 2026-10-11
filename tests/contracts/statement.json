@@ -11,6 +11,7 @@
 	"totalAdvancePayments": "0.00",
 	"managementFee": "45.00",
 	"managementFeePercent": "3.00",
+	"managementFeeDistributionKeyId": "k1",
 	"balance": "1045.00",
 	"status": "draft",
 	"paymentDeadline": "2025-02-14",

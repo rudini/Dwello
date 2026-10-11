@@ -105,7 +105,7 @@
 			name="postalCode"
 			label="PLZ"
 			value={value('postalCode')}
-			optional
+			optional={byEmail}
 			example="8400"
 			error={errors.postalCode}
 			testid="tenant-postal-code-input"

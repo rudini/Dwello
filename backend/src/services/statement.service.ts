@@ -133,7 +133,7 @@ export async function listStatements(filters: StatementFilters = {}): Promise<{
 		.leftJoin(apartments, eq(utilityStatements.apartmentId, apartments.id))
 		.leftJoin(buildings, eq(apartments.buildingId, buildings.id))
 		.where(whereClause)
-		.orderBy(desc(utilityStatements.statementDate), desc(utilityStatements.createdAt))
+		.orderBy(desc(utilityStatements.statementDate), desc(utilityStatements.createdAt), desc(utilityStatements.id))
 		.limit(limit)
 		.offset(offset);
 
@@ -383,10 +383,11 @@ export async function updateStatement(
 		}
 	}
 
-	// The PDF prints date and payment deadline; a change discards it so it can be generated again
+	// The PDF prints date, payment deadline and whether it is paid; a change discards it, it is made again
 	const pdfOutdated =
 		(data.paymentDeadline !== undefined && data.paymentDeadline !== existing.paymentDeadline) ||
-		(data.statementDate !== undefined && data.statementDate !== existing.statementDate);
+		(data.statementDate !== undefined && data.statementDate !== existing.statementDate) ||
+		(data.status === 'paid' && existing.status !== 'paid'); // paid: no payment part any more
 
 	// Update the statement
 	const [updated] = await db

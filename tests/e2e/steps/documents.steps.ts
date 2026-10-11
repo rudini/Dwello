@@ -1,11 +1,14 @@
 import { expect } from '@playwright/test';
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
+import { reminderButton } from '../interactions/documents';
 import { visit } from '../interactions/navigation';
 import { deliveryOf, documentFor, mailsTo, reminderOutcome } from '../questions/documents';
 import { markLetterSent, sendReminder } from '../tasks/documents';
 
 const { Given, When, Then } = createBdd(test);
+
+const inDays = (days: number) => new Date(Date.now() + days * 86_400_000).toLocaleDateString('sv-SE');
 
 const CHANNELS: Record<string, 'email' | 'letter'> = { 'E-Mail': 'email', Brief: 'letter' };
 
@@ -71,3 +74,16 @@ Then(
 		await expect(documentFor(verwalter, title, names.get(tenant) ?? tenant)).toContainText('Versendet');
 	}
 );
+
+// Set after sending, which dates the statement and its deadline from that day
+Given('die Zahlungsfrist der Abrechnung {int} von {string} ist abgelaufen', async ({ seed }, year: number, tenant: string) => {
+	await seed.paymentDeadline(tenant, year, inDays(-1));
+});
+
+Given('die Zahlungsfrist der Abrechnung {int} von {string} läuft noch', async ({ seed }, year: number, tenant: string) => {
+	await seed.paymentDeadline(tenant, year, inDays(10));
+});
+
+Then('bietet die Abrechnung keine Mahnung an', async ({ verwalter }) => {
+	await expect(reminderButton(verwalter.page)).toHaveCount(0);
+});

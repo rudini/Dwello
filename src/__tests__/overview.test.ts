@@ -65,6 +65,10 @@ describe('Aufgaben der Übersicht', () => {
 			})
 		);
 		expect(tasks.map((task) => task.id)).toEqual(['overdue', 'missing-period', 'drafts']);
+		// auch eine Rückerstattung kann überfällig sein: dann schuldet der Vermieter, eine Mahnung wäre falsch
+		expect(tasks[0].text).toContain(
+			'Bei einer Rückerstattung überweisen Sie den Betrag und markieren die Abrechnung danach als bezahlt.'
+		);
 		expect(tasks[1]).toMatchObject({
 			title: 'Nebenkostenabrechnungen erstellen',
 			href: '/statements/generate'
@@ -116,10 +120,14 @@ describe('Fristen der Übersicht', () => {
 		]);
 	});
 
-	it('lässt ferne Termine weg: Zahlungsfrist nach 14, Vertragsende nach 60 Tagen', () => {
+	// Die Zahlungsfrist beträgt 30 Tage: eine eben versendete Abrechnung steht gleich in den Fristen
+	it('lässt ferne Termine weg: Zahlungsfrist nach 30, Vertragsende nach 60 Tagen', () => {
 		const deadlines = overviewDeadlines(
 			input({
-				dueStatements: [{ id: 's1', tenantName: 'Anna Keller', paymentDeadline: '2026-10-25' }],
+				dueStatements: [
+					{ id: 's1', tenantName: 'Anna Keller', paymentDeadline: '2026-11-10' },
+					{ id: 's2', tenantName: 'Hans Müller', paymentDeadline: '2026-11-09' }
+				],
 				endingContracts: [
 					{ id: 'c1', tenantName: 'Eva Frei', endDate: '2026-12-10' },
 					{ id: 'c2', tenantName: 'Ueli Graf', endDate: '2026-12-09' },
@@ -127,7 +135,7 @@ describe('Fristen der Übersicht', () => {
 				]
 			})
 		);
-		expect(deadlines.map((d) => d.name)).toEqual(['Ueli Graf']);
+		expect(deadlines.map((d) => d.name)).toEqual(['Hans Müller', 'Ueli Graf']);
 	});
 
 	it('sagt heute und ein Tag in der Einzahl', () => {

@@ -270,3 +270,35 @@ describe('Versand einer früher erstellten Abrechnung', () => {
 		expect((await sentWith({ statementDate: '2026-03-02', paymentDeadline: '2099-06-30' })).paymentDeadline).toBe('2099-06-30');
 	});
 });
+
+// Was man herunterlädt, ist das, was der Mieter erhält: ein Entwurf von heute, nach Versand und Zahlung neu erstellt
+describe('PDF zum Herunterladen', () => {
+	const pdfOf = async (id: string) => readPdf(Buffer.from((await getStatementPdf(id)).pdfBlob!, 'base64')).flowing;
+	const today = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Zurich' });
+	const swiss = (iso: string) => iso.split('-').reverse().join('.');
+
+	it('erstellt das PDF eines Entwurfs von einem früheren Tag neu, mit dem heutigen Datum', async () => {
+		const statement = await generateStatement({ contractId: rental.contract, buildingId: rental.building, periodStart: '2025-01-01', periodEnd: '2025-12-31', managementFeePercent: 0 });
+		await generateStatementPdf(statement.id, 'de');
+		await db.update(utilityStatements).set({ statementDate: '2026-03-02', paymentDeadline: '2026-04-01' }).where(eq(utilityStatements.id, statement.id));
+		const text = await pdfOf(statement.id);
+		const [after] = await db.select().from(utilityStatements).where(eq(utilityStatements.id, statement.id));
+		await deleteStatement(statement.id);
+
+		expect(text).toContain(`Abrechnungsdatum ${swiss(today)}`);
+		expect(after.statementDate).toBe(today); // made again, not the PDF of 2 March
+	});
+
+	it('erstellt ein verworfenes PDF beim Herunterladen neu, eine bezahlte Abrechnung ohne Zahlteil', async () => {
+		const statement = await generateStatement({ contractId: rental.contract, buildingId: rental.building, periodStart: '2025-01-01', periodEnd: '2025-12-31', managementFeePercent: 0 });
+		await generateStatementPdf(statement.id, 'de');
+		await updateStatementStatus(statement.id, 'sent');
+		await updateStatementStatus(statement.id, 'paid', { paidDate: today });
+		const text = await pdfOf(statement.id);
+		await db.update(utilityStatements).set({ status: 'draft' }).where(eq(utilityStatements.id, statement.id));
+		await deleteStatement(statement.id);
+
+		expect(text).toContain(`Bezahlt am ${swiss(today)}`);
+		expect(text).not.toContain('Zahlteil');
+	});
+});

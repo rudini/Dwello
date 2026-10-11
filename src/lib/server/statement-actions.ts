@@ -5,12 +5,20 @@ type Fetch = typeof globalThis.fetch;
 
 const json = { 'Content-Type': 'application/json' };
 
-/** Payment received today; stored in the database */
-export const markStatementPaid = (fetch: Fetch, id: string) =>
+/** Why a payment date cannot be stored: none, or a day in the future */
+export const paidDateError = (paidDate: string) =>
+	!/^\d{4}-\d{2}-\d{2}$/.test(paidDate)
+		? 'Bitte geben Sie das Zahlungsdatum als TT.MM.JJJJ ein.'
+		: paidDate > localToday()
+			? 'Das Zahlungsdatum liegt in der Zukunft. Geben Sie den Tag ein, an dem das Geld eingegangen ist.'
+			: null;
+
+/** Payment received on the given day, today if none was given; stored in the database */
+export const markStatementPaid = (fetch: Fetch, id: string, paidDate = localToday()) =>
 	fetch(`${API}/${id}/status`, {
 		method: 'PUT',
 		headers: json,
-		body: JSON.stringify({ status: 'paid', paidDate: localToday() })
+		body: JSON.stringify({ status: 'paid', paidDate })
 	});
 
 /** Next reminder (1 to 3), stored as document and sent by e-mail or kept for the letter post */

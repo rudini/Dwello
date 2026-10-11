@@ -63,11 +63,16 @@
 
 	const invalid = $derived(!!text.trim() && !parseSwissDate(text));
 	// checked when leaving the field; a half-typed date is no error yet
-	const shownError = $derived(invalid && left ? NOT_A_DATE : error);
+	// "1.12" is a real day without its year: say what is missing
+	const NO_YEAR = $derived(
+		`Es fehlt das Jahr. Bitte geben Sie das Datum als TT.MM.JJJJ ein, zum Beispiel ${text.trim().replace(/\.$/, '').split('.').map((n) => n.padStart(2, '0')).join('.')}.${new Date().getFullYear()}.`
+	);
+	const wrongDate = $derived(/^\d{1,2}\.\d{1,2}\.?$/.test(text.trim()) ? NO_YEAR : NOT_A_DATE);
+	const shownError = $derived(invalid && left ? wrongDate : error);
 	const wordsId = $derived(`${id}-words`);
 	const helpText = $derived(help ? `${help} ${FORMAT}` : FORMAT);
 	const words = $derived(value ? formatDateLong(value) : '');
-	const announced = $derived(invalid && left ? NOT_A_DATE : ''); // said when the field is left
+	const announced = $derived(invalid && left ? wrongDate : ''); // said when the field is left
 
 	function oninput(event: Event & { currentTarget: HTMLInputElement; inputType?: string }) {
 		left = false;

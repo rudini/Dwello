@@ -44,7 +44,7 @@
 		tenants,
 		apartments
 	}: {
-		tenants: { id: string; name: string }[];
+		tenants: { id: string; name: string; place?: string }[];
 		apartments: { id: string; unit: string; building: string; size?: string }[];
 	} = $props();
 
