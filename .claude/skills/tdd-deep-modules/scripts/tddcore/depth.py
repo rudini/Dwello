@@ -20,6 +20,7 @@ class Depth:
     size: int  # code lines: no blanks, no comments
     ratio: float  # size per unit of surface
     classitis: tuple  # names of tiny classes, when the module has two or more of them
+    swarm: tuple  # exported helpers with one caller in the module, when there are SWARM or more
     pass_through: tuple  # names of functions that only forward their arguments
     tests: tuple  # test files that import the module
     unused: tuple  # names of private functions nothing in the module calls
@@ -31,6 +32,7 @@ SHALLOW_RATIO = 4  # fewer code lines per thing a caller must know means the mod
 BLOAT_DUPLICATES = 3  # repeated lines that make a module bloated
 DUPLICATE_LENGTH = 12  # shorter lines (`}`, `return x;`) repeat naturally
 TINY_CLASS = 2  # methods; two or more classes this small spread one decision over many places
+SWARM = 3  # exported helpers with one caller; this many turn one module's internals into interface
 
 
 def measure(root, path):
@@ -47,8 +49,10 @@ def measure(root, path):
     surface, size = _surface(code), _size(code)
     # a class without methods (an error type, a record) carries a name, not a spread-out decision
     tiny = [name for name, methods in _classes(code) if 0 < len(methods) <= TINY_CLASS]
+    helpers = _one_caller_exports(code)
     metrics = Depth(path, surface, size, size / surface if surface else float(size),
-                    tuple(tiny) if len(tiny) >= 2 else (), _pass_through(code), _tests(module, path),
+                    tuple(tiny) if len(tiny) >= 2 else (), helpers if len(helpers) >= SWARM else (),
+                    _pass_through(code), _tests(module, path),
                     _unused(code), _duplicate(code), ())
     return replace(metrics, findings=_findings(metrics))
 
@@ -59,6 +63,8 @@ def _findings(module):
         findings.append(f"shallow: ratio {module.ratio:.1f} < {SHALLOW_RATIO}")
     if module.classitis:
         findings.append(f"classitis: {', '.join(module.classitis)}")
+    if module.swarm:
+        findings.append(f"classitis: exported helpers with one caller: {', '.join(module.swarm)}")
     if module.pass_through:
         findings.append(f"pass-through: {', '.join(module.pass_through)}")
     if not module.tests:
@@ -305,6 +311,17 @@ def _test_imports(top):
                     for spec in specs)
         tests.append((rel, frozenset(_without_source_suffix(Path(os.path.normpath(path))) for path in resolved)))
     return tuple(tests)
+
+
+_EXPORTED_FUNCTION = re.compile(r"^export\s+(?:async\s+)?function\b\*?\s*(\w+)|"
+                                r"^export\s+const\s+(\w+)\s*(?::[^=\n]+)?=\s*(?:async\s*)?(?:<[^<>\n]*>)?\s*\(",
+                                re.MULTILINE)
+
+
+def _one_caller_exports(text):
+    """Exported functions whose name the module uses exactly once besides declaring it."""
+    names = [a or b for a, b in _EXPORTED_FUNCTION.findall(text)]
+    return tuple(n for n in names if len(re.findall(rf"\b{re.escape(n)}\b", text)) == 2)
 
 
 def _unused(text):
