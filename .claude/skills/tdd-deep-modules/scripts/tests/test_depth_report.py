@@ -34,3 +34,12 @@ class DepthReportTest(unittest.TestCase):
 
         self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
         self.assertRegex(report_line(result, "src/amount.ts"), r"-> .*shallow: ratio \d+\.\d < 4")
+
+    def test_pass_through_wrappers_are_counted_and_named(self):
+        repo = Repo(self, {"src/amount.ts": fixture("shallow")})
+
+        result = repo.run("depth_report", "src/amount.ts")
+
+        line = report_line(result, "src/amount.ts")
+        self.assertIn(", pass-through 3", line)
+        self.assertIn("pass-through: parse, clean, convert", line.split(" -> ", 1)[1])
