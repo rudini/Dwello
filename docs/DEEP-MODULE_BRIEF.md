@@ -517,3 +517,11 @@ The user asked whether the calibration can be improved, and to close the evasion
 - XC.4 done. Only `tools/deepcheck`, its tests and docs changed; no application code, CI steps or settings.
 - Exit gates re-checked by running them: 181 deepcheck tests, ESLint, tsc, `fallow audit`, baseline regenerated (0 of 124), Phase 2 gate tests green within the 181, GitHub CI run 38124942116 green (9/9).
 - Runtimes now: `deepcheck:audit` 4.1 s with Fallow, 3.3 s without; `scan` 4.1 s.
+
+### 2026-10-11, final review against the Phase 3 exit gates (state 31d7120, after the follow-ups)
+An independent reviewer re-ran X3.1 to X3.4 on the current state; all temp files were removed afterwards (`git status` clean).
+- X3.1 done. `deepcheck-gate.sh` fed `git commit` and `git push` PreToolUse JSON: exit 0 on the clean tree, exit 2 with the finding when a shallow temp module is present.
+- X3.2 done. actionlint 1.7.7 on `ci.yml` and `deepcheck-scan.yml`: exit 0 (shellcheck possibly not on PATH). The "Deep modules" command `npm run deepcheck:ci -- origin/main` dry-run: exit 0. `act` not available, so the scan workflow is linted only, not run.
+- X3.3 done. A 4-function forwarding facade (`src/lib/server/tmp-facade.ts`) is blocked by the hook (exit 2) and the CI command (exit 1, G1, score 72). A classitis split (three one-function files in one new directory, imported only by one new module) is blocked in all three files (80, 72, 72); a single tiny file with one importer passes.
+- X3.4 done. README weights, classitis rule, gate rules and pass-through variants match the code; CLAUDE.md commands and the gate gotcha match `package.json` and the hook.
+- Noted, not changed: in the classitis probe the pieces also showed "1 export unused (Fallow)", because the new importer itself had no importer.
