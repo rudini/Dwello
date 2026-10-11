@@ -34,3 +34,10 @@ class SkillMdTest(unittest.TestCase):
         self.assertEqual([h for h in headings if h in workflow], workflow)
         self.assertEqual(headings[-1], "6. Design note")
         self.assertLess(headings.index("Hard rules"), headings.index(workflow[0]))
+
+    def test_design_it_twice_names_the_decision_two_designs_and_a_reason(self):
+        text = dict(sections())["2. Design it twice"].lower()
+
+        for element in ("hidden decision", "two interface designs", "compare", "depth",
+                        "one sentence", "chosen"):
+            self.assertIn(element, text)
