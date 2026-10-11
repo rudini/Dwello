@@ -202,3 +202,23 @@ class TddReplayTierTest(unittest.TestCase):
 
                 self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
                 self.assertIn(reason, result.stdout)
+
+    def test_every_task_must_end_on_the_full_suite(self):
+        multiplies = ('import { test, expect } from "bun:test";\n\ntest("multiplies", async () => {\n'
+                      '  const m = await import("./mul").catch(() => ({ mul: () => 0 }));\n'
+                      '  expect(m.mul(2, 3)).toBe(6);\n});\n')
+        repo = green_tiered_repo(self)
+        base = repo.git("rev-parse", "HEAD")
+        repo.commit_phase("test", {"TESTLIST.md": "- [ ] multiplies\n"}, 0, suite="fast")
+        repo.commit_phase("red", {"mul.test.ts": multiplies}, 1, suite="fast")
+        task_end = repo.commit_phase("green", {"mul.ts": "export const mul = (a: number, b: number) => a * b;\n"},
+                                     0, suite="fast")
+        repo.commit_phase("test", {"TESTLIST.md": "- [x] multiplies\n- [ ] sums in SQL\n"}, 0)
+        repo.commit_phase("red", {"sum.pg.test.ts": SQL_TEST}, 1)
+        repo.commit_phase("green", {"sum.ts": RIGHT_SUM_TS}, 0)
+
+        result = self.replay(repo, base)
+
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn(f"{task_end[:7]} green    pass  exit=0 REJECT\n"
+                      "    - the final commit must run the full suite\n", result.stdout)
