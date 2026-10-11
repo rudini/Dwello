@@ -1,0 +1,3 @@
+KILLED   tddcore/suite.py: '    skipped = frozenset(i for i, case in zip(ids, cases) if case.find("skipped") is not None)' -> '    skipped = frozenset()' [test_a_test_that_stops_running_counts_as_removed]
+KILLED   tddcore/suite.py: '                         if status in ("skipped", "pending", "todo")))' -> '                         if False))' [test_a_test_that_stops_running_counts_as_removed]
+KILLED   tddcore/replay.py: '    removed = (known.tests - known.skipped) - (run.tests - run.skipped)  # gone, or no longer running' -> '    removed = known.tests - run.tests' [test_a_test_that_stops_running_counts_as_removed]
