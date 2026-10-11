@@ -286,3 +286,8 @@ Stage 2b replaces stage 2's pass line: the reviews of steps 01-12 (09 two-tier s
 - [x] `test:` commits after a task's last green or refactor (the design note) are no task end
 - [x] `tdd-step test` (and the replay) refuse a test list right after a green on the fast suite
 - [x] fixture repos turn commit signing off
+
+### Step 10, review round 1 (fixes)
+
+- [x] `skill_lint` requires the doubles and depth rules as whole statements: "every fake of a boundary has a contract test suite", "in a small project-owned adapter", "pure helper functions inside it are implementation details", and in the depth check "with one caller each are classitis" (the reviewer's attacks are the red's cases)
+- note: the conflict with Dwello's `vi.mock` for `$app/*` is recorded in DESIGN.md (Known limits) as the user's decision
