@@ -9,9 +9,10 @@ All scripts live in `scripts/` of this skill and run from anywhere inside the re
 - nothing changed, or the phase may not follow the last one (red after red, green without red, refactor after red);
 - **test:** code changed;
 - **red:** the suite passes, the failure is not an assertion (import, syntax, setup or unhandled errors), more than one test fails, or production code changed;
-- **green / refactor:** any test fails or errors; green may not change tests or test configuration.
+- **green / refactor:** any test fails or errors; green may not change tests or test configuration (`package.json`, `vitest.config.*`, `vite.config.*`);
+- any phase: the test run changed the working tree.
 
-Exit 2 means it could not judge: not a git repository, no supported runner, a runner not installed, or the test run changed the working tree.
+Exit 2 means it could not judge: not a git repository, no supported runner, or a runner not installed.
 
 ## The first red for a new module
 
@@ -24,7 +25,7 @@ test("total sums the prices", async () => {
 });
 ```
 
-Green then creates the module. Later tests import it normally.
+Green then creates the module. In TypeScript the caught import is typed `{}`; cast it (`as Partial<typeof import("./price")>`) or switch to a static import in the next refactor. Later tests import it normally.
 
 ## tdd-guard (the hook)
 
@@ -32,7 +33,7 @@ The skill registers a PreToolUse hook on Write, Edit and MultiEdit. It blocks ed
 
 ## tdd_replay
 
-`scripts/tdd_replay <base>..<head>` checks out every commit of the range in a temporary worktree, re-runs the suite and rejects: a trailer that does not match the real exit code, production code before red, a red that fails by error, a red that adds more than one test, a refactor or green on a red suite, removed or skipped tests, and a history that ends in red. Exit 0 ACCEPT, 1 REJECT, 2 cannot judge.
+`scripts/tdd_replay <base>..<head>` checks out every commit of the range in a temporary worktree, re-runs the suite and rejects: a commit that is not a phase commit (ordinary and merge commits included), a trailer that does not match the real exit code, production code before red, a red that fails by error, a red that adds other than exactly one test, a test added outside red, a refactor or green on a red suite, removed or skipped tests, and a history that ends in red. Exit 0 ACCEPT, 1 REJECT, 2 cannot judge.
 
 ## depth_report
 
