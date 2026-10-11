@@ -1,0 +1,6 @@
+KILLED   tddcore/depth.py: '|type|interface|enum|declare|abstract|class|async|function|\\*)' -> '|type|interface|class|async|function)' [test_pins_the_remaining_export_forms_and_import_kinds]
+KILLED   tddcore/depth.py: 'static|async|readonly|get|set)' -> 'static|async|readonly)' [test_pins_the_remaining_export_forms_and_import_kinds]
+KILLED   tddcore/depth.py: 'function\\*?\\s*\\w*\\s*(?:<' -> 'function\\s*\\w*\\s*(?:<' [test_pins_the_remaining_export_forms_and_import_kinds]
+KILLED   tddcore/depth.py: '"git", "ls-files", "-z", "-co", "--exclude-standard"], cwd=top' -> '"git", "ls-files", "-z"], cwd=top' [test_pins_the_remaining_export_forms_and_import_kinds]
+KILLED   tddcore/depth.py: 'text = module.read_text(errors="replace")' -> 'text = module.read_text()' [test_pins_the_remaining_export_forms_and_import_kinds]
+KILLED   tddcore/depth.py: '(?:\\bfrom\\s*|\\bimport\\s*\\(?\\s*|' -> '(?:\\bfrom\\s*|' [test_pins_the_remaining_export_forms_and_import_kinds]

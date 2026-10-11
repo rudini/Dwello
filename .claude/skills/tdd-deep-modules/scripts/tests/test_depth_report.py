@@ -260,3 +260,20 @@ export class Ledger {
         line = report_line(repo.run("depth_report", "src/run.ts"), "src/run.ts")
 
         self.assertIn("bloat: unused legacy", line.split(" -> ", 1)[1])
+
+    def test_pins_the_remaining_export_forms_and_import_kinds(self):
+        module = ("// caf\xe9\nexport enum Kind {\n  A,\n  B,\n}\nexport declare const VERSION: string;\n"
+                  "export abstract class Shape {\n  get size(): number {\n    return 1;\n  }\n}\n"
+                  'export * from "./other";\nexport let counter = 0;\nexport var legacy = 1;\n'
+                  "export function* ids(start: number) {\n  yield start;\n}\n"
+                  "export const load = async (id: string) => id;\n").encode("latin-1")
+        repo = Repo(self, {})
+        (repo.path / "src").mkdir()
+        (repo.path / "src" / "shape.ts").write_bytes(module)
+        repo.write("src/shape.test.ts", 'const shape = await import("./shape");\n')  # untracked
+
+        line = report_line(repo.run("depth_report", "src/shape.ts"), "src/shape.ts")
+
+        # Kind, VERSION, Shape + size, *, counter, legacy, ids + start, load + id
+        self.assertTrue(line.startswith("src/shape.ts: surface 11,"), line)
+        self.assertIn(", tests 1,", line)
