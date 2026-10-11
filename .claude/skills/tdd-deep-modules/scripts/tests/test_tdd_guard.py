@@ -170,3 +170,11 @@ class TddGuardTest(unittest.TestCase):
                 result = guard(repo, "Edit", rel)
 
                 self.assertEqual(result.returncode, expected, result.stderr)
+
+    def test_a_directory_name_with_leading_whitespace_keeps_its_name(self):
+        repo = bun_repo(self, **{" tests/keep.md": "x\n"})
+        repo.commit_phase("test", {"TESTLIST.md": "- [ ] adds\n"}, 1)
+
+        result = guard(repo, "Edit", " tests/x.ts")
+
+        self.assertEqual(result.returncode, 2, result.stderr)
