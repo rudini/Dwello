@@ -250,3 +250,13 @@ export class Ledger {
         line = report_line(repo.run("depth_report", "src/amount.ts"), "src/amount.ts")
 
         self.assertIn(", tests 1,", line)
+
+    def test_an_unused_function_expression_is_bloat(self):
+        module = ("export function run(a: number): number {\n  let total = a;\n  total = total * 3;\n"
+                  "  total = total + 1;\n  return total;\n}\n"
+                  "const legacy = function (a: number): number {\n  return a * 2;\n};\n")
+        repo = Repo(self, {"src/run.ts": module})
+
+        line = report_line(repo.run("depth_report", "src/run.ts"), "src/run.ts")
+
+        self.assertIn("bloat: unused legacy", line.split(" -> ", 1)[1])
