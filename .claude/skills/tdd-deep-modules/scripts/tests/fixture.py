@@ -33,6 +33,17 @@ class Repo:
         self.git("commit", "-q", "--allow-empty", "-m", message)
         return self.git("rev-parse", "HEAD")
 
+    def commit_phase(self, phase, files, exit_code, deleted=()):
+        """A hand-built phase commit, shaped like tdd-step's, whatever the suite really does."""
+        for rel, text in files.items():
+            self.write(rel, text)
+        for rel in deleted:
+            (self.path / rel).unlink()
+        self.git("add", "-A")
+        self.git("commit", "-q", "--allow-empty", "-m", f"{phase}: {phase} step",
+                 "--trailer", f"TDD-Phase: {phase}", "--trailer", f"TDD-Exit-Code: {exit_code}")
+        return self.git("rev-parse", "HEAD")
+
     def run(self, script, *args, cwd=".", path=None):
         env = {**os.environ, "PYTHONDONTWRITEBYTECODE": "1"}
         if path is not None:
