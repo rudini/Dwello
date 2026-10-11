@@ -50,7 +50,7 @@ Production file = code suffix (`.py .js .jsx .mjs .cjs .ts .tsx .mts .cts .svelt
 Every commit of the range (first-parent, oldest first) is checked out in a temporary git worktree (cleaned with `git clean -fdx`, installed `node_modules` linked from the caller's checkout) and its tests are run. The commit before the range is run too, to know which tests already exist. Each commit is judged from its own run, never from its subject or trailers:
 - the commit must carry a phase prefix; the protocol rules above apply with the claimed phase;
 - its `TDD-Exit-Code` trailer must equal the real exit code;
-- red adds exactly one new test id, no other phase adds tests; green and refactor remove none (test ids come from the frameworks' reports: bun JUnit test cases, vitest assertion results);
+- red adds exactly one new test id and its failing tests are exactly that new test; no other phase adds tests; no phase removes tests (test ids come from the frameworks' reports: bun JUnit test cases, vitest assertion results; a repeated name in a file gets a `#n` suffix, so same-named tests do not collapse);
 - the range must not end in red.
 
 ## Known limits
@@ -62,4 +62,8 @@ Every commit of the range (first-parent, oldest first) is checked out in a tempo
 - Dwello's backend tests need PostgreSQL (`bun test --preload ./scripts/test-db.ts`). Without a database the bun run fails, so every red, green and refactor in Dwello is refused there. That is the rule, not a bug.
 - A bun run that exits non-zero with no failing test and no reported error (for example a coverage threshold) is an error, never red.
 - A new function or module cannot get its first red without existing production code: importing something that does not exist is an import error, which is never red. The stub has to exist before the cycle (from an earlier green or refactor). Stage 2's skill text addresses this when the interface is designed.
-- The replay judges the first-parent chain; merge commits are judged as one commit against their first parent.
+- The replay judges the first-parent chain; a merge commit shows no changed files and is therefore rejected ("nothing changed"). Replay linear TDD histories.
+- Renaming or moving a test in refactor reads as one test removed and one added, so the replay rejects it. Rename tests as part of their red, or not at all.
+- A test-phase commit whose run crashes (no test ids) reads as removing every test.
+- The replay worktree borrows `node_modules` through a symlink, so tools that cache inside `node_modules` (vitest's `.vite` cache) write into the caller's installation.
+- `tdd_replay` exits 2 (not 1) on any unexpected error, so a crash is never read as REJECT; SIGTERM and Ctrl-C remove the replay worktree.

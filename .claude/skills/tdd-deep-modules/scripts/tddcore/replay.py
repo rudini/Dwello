@@ -40,7 +40,8 @@ def replay(repo, rev_range):
                 run = _run(tree)
                 phase = protocol.phase_of(subject)
                 verdicts.append(Verdict(commit, phase, run,
-                                        tuple(_judge(previous, known, subject, claimed, run, changed))))
+                                        tuple(_judge(previous, known, subject, claimed, run,
+                                                     changed))))
                 previous, known = phase, run.tests
         finally:
             # twice --force: an add interrupted by a signal leaves the worktree locked
