@@ -479,7 +479,7 @@ class TddStepTest(unittest.TestCase):
         result = repo.run("tdd-step", "green", "adds two numbers")
 
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertEqual(repo.trailer("TDD-Exit-Code"), "0")
+        self.assertEqual(repo.trailer("TDD-Exit-Code"), "5")  # unittest ran and found nothing
 
     def test_a_suite_that_runs_no_tests_does_not_pass(self):
         repo = vitest_repo(self)
