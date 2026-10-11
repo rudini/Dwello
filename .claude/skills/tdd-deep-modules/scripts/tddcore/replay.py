@@ -103,6 +103,8 @@ def _judge(previous, previous_suite, known, subject, claimed, tier, run, full, c
     removed = (known.tests - known.skipped) - (full.tests - full.skipped)  # gone, or not running
     if phase == "red" and len(new) != 1:
         found.append(f"red must add exactly one new test, but adds {len(new)}")
+    if phase == "red" and new - run.tests:
+        found.append(f"red's new test is not in the {tier} suite: {', '.join(sorted(new - run.tests))}")
     if phase == "red" and run.failing - new:
         found.append(f"red's failing test must be its new test, but these fail: "
                      f"{', '.join(sorted(run.failing - new))}")
