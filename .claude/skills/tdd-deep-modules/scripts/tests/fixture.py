@@ -71,6 +71,8 @@ class Repo:
 RIGHT_ADD_JS = "export const add = (a, b) => a + b;\n"
 VITEST_FILES = {"package.json": '{"devDependencies": {"vitest": "*"}}\n',
                 ".gitignore": "node_modules\n",
+                # like Dwello's own config: vitest owns the root tests, bun owns backend/
+                "vitest.config.js": 'export default { test: { include: ["*.test.js"] } };\n',
                 "calc.js": "export const add = (a, b) => 0;\n"}
 VITEST_TEST = """import { test, expect } from "vitest";
 import { add } from "./calc.js";
@@ -93,3 +95,14 @@ BUN_FILES = {"backend/package.json": '{"scripts": {"test": "bun test"}}\n',
              "backend/calc.ts": "export const add = (a: number, b: number) => a + b;\n",
              "backend/calc.test.ts": 'import { test, expect } from "bun:test";\nimport { add } from "./calc";\n\n'
                                      'test("adds", () => {\n  expect(add(1, 2)).toBe(3);\n});\n'}
+
+BUN_PACKAGE = '{"scripts": {"test": "bun test"}}\n'
+WRONG_ADD_TS = "export const add = (a: number, b: number) => 0;\n"
+RIGHT_ADD_TS = "export const add = (a: number, b: number) => a + b;\n"
+BUN_TEST = ('import { test, expect } from "bun:test";\nimport { add } from "./calc";\n\n'
+            'test("adds", () => {\n  expect(add(1, 2)).toBe(3);\n});\n')
+
+
+def bun_repo(case, calc=WRONG_ADD_TS, **files):
+    """A bun project at the repository root with `calc.ts` and no tests yet."""
+    return Repo(case, {"package.json": BUN_PACKAGE, "calc.ts": calc, **files})
