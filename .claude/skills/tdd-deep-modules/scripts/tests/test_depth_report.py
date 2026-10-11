@@ -24,5 +24,5 @@ class DepthReportTest(unittest.TestCase):
 
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         line = report_line(result, "src/amount.ts")
-        self.assertTrue(line.startswith("src/amount.ts: surface 2, size 34, ratio 17.0,"), line)
+        self.assertTrue(line.startswith("src/amount.ts: surface 2, size 34, ratio 17.0"), line)
         self.assertTrue(line.endswith("-> deep"), line)
