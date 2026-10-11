@@ -16,7 +16,7 @@ rel = target.relative_to(root).as_posix()
 subject = subprocess.run(["git", "log", "-1", "--format=%s"], cwd=root,
                          capture_output=True, text=True).stdout.strip()
 phase = protocol.phase_of(subject)
-if protocol.is_production(rel):
+if protocol.is_production(rel) and phase != "red":
     print(f"tdd-guard: blocked: {rel} is production code and the last TDD phase is {phase}. "
           "Write one failing test and commit it with `tdd-step red` first.", file=sys.stderr)
     sys.exit(2)
