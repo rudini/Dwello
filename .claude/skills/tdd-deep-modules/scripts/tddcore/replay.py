@@ -87,7 +87,7 @@ def _judge(previous, known, subject, claimed, run, changed):
                      f"{', '.join(sorted(run.failing - new))}")
     if phase != "red" and new:
         found.append(f"only red may add tests, but {phase} adds {len(new)}")
-    if phase in ("green", "refactor") and removed:
+    if removed:
         found.append(f"{phase} removes tests: {', '.join(sorted(removed))}")
     return found
 
