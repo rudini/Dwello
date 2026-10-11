@@ -7,9 +7,9 @@ import { SWISS_UTILITY_CATEGORIES } from '../config/llm';
 import { getCategory } from './category.service';
 
 /**
- * Maximum management fee percentage per Swiss law
+ * Customary management fee percentage (a guideline, not a cap)
  */
-export const MAX_MANAGEMENT_FEE_PERCENT = 3.0;
+const MAX_MANAGEMENT_FEE_PERCENT = 3.0;
 
 /**
  * Swiss Utility Cost Rules
@@ -40,19 +40,9 @@ export function getUtilityCostRules(): UtilityCostRules {
 }
 
 /**
- * Check if a category is an allowed utility cost
- */
-export async function isAllowedUtilityCost(categoryId: string): Promise<boolean> {
-	const category = await getCategory(categoryId);
-	if (!category) return false;
-
-	return category.isAllowedUtilityCost;
-}
-
-/**
  * Validate an invoice for inclusion in utility statements
  */
-export interface InvoiceValidationResult {
+interface InvoiceValidationResult {
 	isValid: boolean;
 	errors: string[];
 	warnings: string[];
@@ -76,9 +66,9 @@ export async function validateInvoiceForUtilityStatement(invoice: {
 	if (!invoice.categoryId) {
 		errors.push('Rechnung hat keine Kategorie zugewiesen');
 	} else {
-		// Check if category allows utility cost inclusion
-		const allowed = await isAllowedUtilityCost(invoice.categoryId);
-		if (!allowed) {
+		// Check if category allows utility cost inclusion (an unknown category does not)
+		const category = await getCategory(invoice.categoryId);
+		if (!category?.isAllowedUtilityCost) {
 			errors.push('Die Kategorie dieser Rechnung ist nicht umlagefähig gemäss Schweizer Mietrecht');
 		}
 	}
@@ -115,93 +105,5 @@ export async function validateInvoiceForUtilityStatement(invoice: {
 		isValid: errors.length === 0,
 		errors,
 		warnings
-	};
-}
-
-/**
- * Validate management fee amount
- */
-export function validateManagementFee(
-	managementFee: number,
-	totalCosts: number
-): { isValid: boolean; actualPercent: number; maxPercent: number; error?: string } {
-	if (totalCosts <= 0) {
-		return {
-			isValid: managementFee === 0,
-			actualPercent: 0,
-			maxPercent: MAX_MANAGEMENT_FEE_PERCENT,
-			error: managementFee > 0 ? 'Verwaltungskosten nur bei Nebenkosten erlaubt' : undefined
-		};
-	}
-
-	const actualPercent = (managementFee / totalCosts) * 100;
-
-	if (actualPercent > MAX_MANAGEMENT_FEE_PERCENT) {
-		return {
-			isValid: false,
-			actualPercent,
-			maxPercent: MAX_MANAGEMENT_FEE_PERCENT,
-			error: `Verwaltungskosten (${actualPercent.toFixed(1)}%) überschreiten Maximum von ${MAX_MANAGEMENT_FEE_PERCENT}%`
-		};
-	}
-
-	return {
-		isValid: true,
-		actualPercent,
-		maxPercent: MAX_MANAGEMENT_FEE_PERCENT
-	};
-}
-
-/**
- * Calculate maximum allowed management fee
- */
-export function calculateMaxManagementFee(totalCosts: number): number {
-	return (totalCosts * MAX_MANAGEMENT_FEE_PERCENT) / 100;
-}
-
-/**
- * Validate a batch of invoices for utility statement generation
- */
-export async function validateInvoicesForStatement(
-	invoices: Array<{
-		id: string;
-		categoryId: string | null;
-		amount: string | number;
-		isValidUtilityCost: boolean;
-		description: string;
-	}>
-): Promise<{
-	validInvoices: string[];
-	invalidInvoices: Array<{ id: string; errors: string[] }>;
-	warnings: Array<{ id: string; warnings: string[] }>;
-	totalValidAmount: number;
-}> {
-	const validInvoices: string[] = [];
-	const invalidInvoices: Array<{ id: string; errors: string[] }> = [];
-	const allWarnings: Array<{ id: string; warnings: string[] }> = [];
-	let totalValidAmount = 0;
-
-	for (const invoice of invoices) {
-		const result = await validateInvoiceForUtilityStatement(invoice);
-
-		if (result.isValid) {
-			validInvoices.push(invoice.id);
-			const amount =
-				typeof invoice.amount === 'string' ? parseFloat(invoice.amount) : invoice.amount;
-			totalValidAmount += amount;
-		} else {
-			invalidInvoices.push({ id: invoice.id, errors: result.errors });
-		}
-
-		if (result.warnings.length > 0) {
-			allWarnings.push({ id: invoice.id, warnings: result.warnings });
-		}
-	}
-
-	return {
-		validInvoices,
-		invalidInvoices,
-		warnings: allWarnings,
-		totalValidAmount
 	};
 }

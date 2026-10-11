@@ -36,6 +36,18 @@ describe('POST /statements/[id]/mark-paid', () => {
 	});
 });
 
+describe('POST /statements/[id]/mark-paid (Ablehnung)', () => {
+	it('sagt in Worten, was passiert ist und was zu tun ist, wenn das Backend ablehnt', async () => {
+		const { result } = call(markPaid, 409, { error: 'Statement must be sent first' });
+
+		const response = await result;
+		expect(response.status).toBe(409);
+		expect(await response.json()).toEqual({
+			message: 'Abrechnung konnte nicht als bezahlt markiert werden. Versuchen Sie es erneut.'
+		});
+	});
+});
+
 describe('POST /statements/[id]/send-reminder', () => {
 	it('versendet die nächste Mahnung über den Korrespondenzkanal des Mieters', async () => {
 		const document = { reminderLevel: 2, channel: 'letter', status: 'to_send' };

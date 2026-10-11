@@ -4518,6 +4518,45 @@ critical/high/medium is open; reviews in `docs/reviews/`.
   pages via pdftoppm, changes framed in red, posted with the page screenshots.
 
 
+## Session 12 - October 2026: Deeper Modules from the deepcheck Scan
+
+The nine modules that blind reviewers labelled shallow with high or medium confidence (`docs/deepcheck-validation.md`),
+except the security-sensitive `auth.ts` and `api-proxy.ts`, made deeper without changing what users see; one commit each.
+
+### Done ✅
+- [x] **`src/lib/server/statement-actions.ts`**: `markStatementPaid` defaults and checks the paid date and turns a backend
+  refusal into a German message with the next step; `sendStatementReminder` returns the reminder or the reason. The
+  endpoints `mark-paid`, `send-reminder` and the page actions of `statements/[id]` no longer repeat that. Tests first:
+  `statement-endpoints.test.ts`, `statement-actions.test.ts` (refusal message). Score 49 to 37.
+- [x] **`src/lib/services/openplz.ts`**: `searchAddresses(query, limit)` returns ready addresses and hides URL, parameters,
+  errors and the API's six DTO types; the six functions without callers are gone (`AddressSearch.svelte` adapted).
+  `tests/unit/openplz.test.ts` rewritten for the narrow interface, German names. Interface 26 to 6 units, score 31 to 23.
+- [x] **`src/lib/server/tenant.ts`**: `loadTenant` instead of `toTenant(await fetchTenant(…))` in both tenant pages.
+- [x] **`src/lib/server/distribution-key.ts`**: `listDistributionKeys` replaces the URL and mapping repeated in four page
+  loads (`config/distribution-keys`, `invoices/new`, `invoices/[id]/edit`, `statements/generate`); each page keeps its
+  error policy (error page, or `.catch(() => [])`). Characterisation test for the error page first
+  (`distribution-keys.test.ts`).
+- [x] **`src/lib/stores.ts`**: the `user` store and `clearStores` only mirrored `data.user`; removed (`+layout.svelte`,
+  `Header.svelte`). The `toasts` store stays writable: only tests reset it.
+- [x] **`src/lib/server/error-handler.ts`**: `OAuthError`, `AuthorizationError`, `RateLimitError` had no callers;
+  `errorResponse` and `LogLevel` are internal.
+- [x] **`backend/src/services/utility-validation.service.ts`**: two exports remain. `validateManagementFee` treated the
+  customary 3 % as a cap (against `backend/CLAUDE.md`); it, `calculateMaxManagementFee` and
+  `validateInvoicesForStatement` had no callers. Category cases now tested through `validateInvoiceForUtilityStatement`.
+- [x] **`backend/src/services/prorating.service.ts`**: three exports remain (`calculateApartmentProrating`,
+  `prorateCosts`, `handleMidYearMoves`); day, overlap and vacancy steps tested through `calculateApartmentProrating`
+  (new `prorating.pg.test.ts` cases: vacancy before the first contract and after a move-out); `distributeCostsAcrossContracts` removed.
+- [x] **`tools/deepcheck/src/discover.ts`**: `discover(root, config)` returns sources, modules and exclusions;
+  `analyze.ts` no longer orchestrates walk, filters and Fallow ignores.
+- [x] **README**: section "Deep modules (deepcheck)" (when it runs, commands, what to do with a finding); checked by
+  `tools/deepcheck/test/readme.test.ts`.
+
+**Checks:** `npm run lint`, `npm run check`, `npm run test:coverage` (1625 tests), `bun run test` (494 tests, 89.2 %
+lines), `bun run type-check`, `npx vitest run tools` (182), `fallow audit`, `deepcheck:audit`; deepcheck scan 0 flagged.
+E2E locally: all 433 scenarios of the `api` and `chromium` projects pass; `firefox` and `webkit` could not start here
+(browsers not installed), they run in CI. Independent review: no behaviour regression; fixed its findings (two commit
+subjects over 50 characters, a missing test for vacancy after a move-out, the README's description of `scan`).
+
 ---
 
 # Success Criteria

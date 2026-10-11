@@ -16,7 +16,7 @@ import { getContractsByPeriod, type ContractWithDetails } from './contract.servi
 /**
  * Period definition
  */
-export interface Period {
+interface Period {
 	start: Date;
 	end: Date;
 }
@@ -24,7 +24,7 @@ export interface Period {
 /**
  * Contract overlap with period
  */
-export interface ContractPeriodOverlap {
+interface ContractPeriodOverlap {
 	contract: ContractWithDetails;
 	overlapStart: Date;
 	overlapEnd: Date;
@@ -35,7 +35,7 @@ export interface ContractPeriodOverlap {
 /**
  * Prorated cost result
  */
-export interface ProratedCost {
+interface ProratedCost {
 	totalAmount: number;
 	proratedAmount: number;
 	prorationDays: number;
@@ -46,7 +46,7 @@ export interface ProratedCost {
 /**
  * Calculate the number of days between two dates (inclusive)
  */
-export function calculateDaysBetween(start: Date, end: Date): number {
+function calculateDaysBetween(start: Date, end: Date): number {
 	const oneDay = 24 * 60 * 60 * 1000;
 	const startTime = new Date(start).setHours(0, 0, 0, 0);
 	const endTime = new Date(end).setHours(0, 0, 0, 0);
@@ -56,7 +56,7 @@ export function calculateDaysBetween(start: Date, end: Date): number {
 /**
  * Calculate the overlap between two date ranges
  */
-export function calculateOverlap(
+function calculateOverlap(
 	range1Start: Date,
 	range1End: Date,
 	range2Start: Date,
@@ -79,7 +79,7 @@ export function calculateOverlap(
 /**
  * Calculate proration days for a contract within a period
  */
-export function calculateProrationDays(
+function calculateProrationDays(
 	contractStart: Date,
 	contractEnd: Date | null,
 	periodStart: Date,
@@ -141,7 +141,7 @@ export function prorateCosts(
  * Handle multiple contracts for an apartment in a period
  * Returns the proration share for each contract
  */
-export async function handleMultipleContracts(
+async function handleMultipleContracts(
 	apartmentId: string,
 	periodStart: Date,
 	periodEnd: Date
@@ -244,7 +244,7 @@ export async function handleMidYearMoves(
  * Calculate vacancy costs for an apartment
  * Returns periods where apartment was vacant and associated costs
  */
-export function handleVacancy(
+function handleVacancy(
 	contracts: ContractPeriodOverlap[],
 	periodStart: Date,
 	periodEnd: Date
@@ -295,51 +295,9 @@ export function handleVacancy(
 }
 
 /**
- * Distribute costs across multiple contracts based on their share
- */
-export function distributeCostsAcrossContracts(
-	contracts: ContractPeriodOverlap[],
-	totalCost: number,
-	useHeatingProfile: boolean = false,
-	heatingShares?: Map<string, number>
-): Array<{
-	contract: ContractWithDetails;
-	share: number;
-	amount: number;
-}> {
-	if (contracts.length === 0) {
-		return [];
-	}
-
-	// If using heating profile, use pre-calculated shares
-	if (useHeatingProfile && heatingShares) {
-		return contracts.map((c) => {
-			const share = heatingShares.get(c.contract.id) || 0;
-			return {
-				contract: c.contract,
-				share,
-				amount: roundToRappen(totalCost * share)
-			};
-		});
-	}
-
-	// Otherwise, use day-based shares
-	const totalDays = contracts.reduce((sum, c) => sum + c.overlapDays, 0);
-
-	return contracts.map((c) => {
-		const share = totalDays > 0 ? c.overlapDays / totalDays : 0;
-		return {
-			contract: c.contract,
-			share,
-			amount: roundToRappen(totalCost * share)
-		};
-	});
-}
-
-/**
  * Calculate complete prorating for an apartment in a period
  */
-export interface ProratingResult {
+interface ProratingResult {
 	apartmentId: string;
 	periodStart: Date;
 	periodEnd: Date;

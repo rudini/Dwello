@@ -1,12 +1,10 @@
 import { json } from '@sveltejs/kit';
-import { localToday } from '$lib/contract-status';
-import { markStatementPaid, paidDateError } from '$lib/server/statement-actions';
+import { markStatementPaid } from '$lib/server/statement-actions';
 import type { RequestHandler } from './$types';
 
 export const POST: RequestHandler = async ({ params, fetch, request }) => {
-	const { paidDate = localToday() } = await request.json().catch(() => ({}));
-	const invalid = paidDateError(paidDate);
-	if (invalid) return json({ message: invalid }, { status: 400 }); // German, shown in the dialog
-	const response = await markStatementPaid(fetch, params.id, paidDate);
-	return json(await response.json(), { status: response.status });
+	const { paidDate } = await request.json().catch(() => ({}));
+	const refused = await markStatementPaid(fetch, params.id, paidDate);
+	// German, shown in the dialog
+	return refused ? json({ message: refused.message }, { status: refused.status }) : json({});
 };

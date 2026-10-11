@@ -40,3 +40,15 @@ describe('README', () => {
 		expect(claude).toMatch(/bun run deepcheck:scan[^\n]*only when/);
 	});
 });
+
+describe('root README', () => {
+	const root = () => readFileSync(new URL('../../../README.md', import.meta.url), 'utf8');
+
+	it('explains how to use deepcheck and points to its reference', () => {
+		expect(root()).toMatch(/### Deep modules \(deepcheck\)/);
+		for (const script of ['bun run deepcheck:scan', 'bun run deepcheck:audit', 'bun run deepcheck:ci', 'bun run deepcheck:baseline', 'deepcheck-ignore-file'])
+			expect(root()).toContain(script);
+		expect(root()).not.toMatch(/npm run deepcheck/);
+		expect(root()).toContain('(tools/deepcheck/README.md)');
+	});
+});

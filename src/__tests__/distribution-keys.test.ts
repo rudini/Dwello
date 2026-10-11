@@ -42,6 +42,15 @@ describe('Verteilschlüssel anzeigen', () => {
 			}
 		]);
 	});
+
+	it('zeigt eine Fehlerseite, wenn das Backend die Verteilschlüssel nicht liefert', async () => {
+		const fetch = (async () => Response.json({}, { status: 503 })) as typeof globalThis.fetch;
+
+		await expect(load({ fetch } as never)).rejects.toMatchObject({
+			status: 503,
+			body: { message: 'Fehler beim Laden der Verteilschlüssel' }
+		});
+	});
 });
 
 describe('Neuer Verteilschlüssel', () => {

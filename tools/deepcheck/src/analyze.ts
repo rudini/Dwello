@@ -2,13 +2,13 @@ import { dirname } from 'node:path';
 import { Project, type SourceFile } from 'ts-morph';
 import { reasons } from './advice.ts';
 import { loadConfig, type Config } from './config.ts';
-import { excludeByPath, isModuleCandidate, isSource, matchesAny, walk } from './discover.ts';
-import { fallowIgnorePatterns, loadFallow, type FallowData } from './fallow.ts';
+import { discover, matchesAny } from './discover.ts';
+import { loadFallow, type FallowData } from './fallow.ts';
 import { coupling, type Coupling } from './graph.ts';
 import { contentExclusion, fileMetrics, type FileMetrics } from './metrics.ts';
 import { components, shallowScore } from './score.ts';
 import { parseSuppressions, suppressesFile, suppressesLine, suppressionProblems, type Suppression } from './suppress.ts';
-import type { ExcludedModule, ListedSuppression, ModuleReport, Report, SuppressionFinding } from './types.ts';
+import type { ListedSuppression, ModuleReport, Report, SuppressionFinding } from './types.ts';
 
 export interface AnalyzeOptions {
 	root: string;
@@ -85,15 +85,7 @@ function settingsFor(path: string, config: Config) {
 export function analyze({ root, fallow, config = loadConfig(root) }: AnalyzeOptions): Report {
 	const warnings: string[] = [];
 	const fallowData = loadFallow(root, fallow, warnings);
-	const sources = walk(root, config).filter(isSource);
-	const excluded: ExcludedModule[] = [];
-	const modulePaths: string[] = [];
-	const fallowIgnores = fallowIgnorePatterns(root);
-	for (const path of sources.filter((p) => isModuleCandidate(p, config))) {
-		const reason = excludeByPath(root, path, config, fallowIgnores);
-		if (reason) excluded.push({ path, reason });
-		else modulePaths.push(path);
-	}
+	const { sources, modulePaths, excluded } = discover(root, config);
 	const candidates: Candidate[] = [];
 	const suppressionFindings: SuppressionFinding[] = [];
 	const listed: ListedSuppression[] = [];

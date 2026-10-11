@@ -16,11 +16,6 @@ export interface User {
 }
 
 /**
- * User store - holds current authenticated user
- */
-export const user = writable<User | null>(null);
-
-/**
  * Toast notifications
  */
 export interface Toast {
@@ -52,11 +47,4 @@ export function addToast(
  */
 export function dismissToast(id: number): void {
 	toasts.update((all) => all.filter((t) => t.id !== id));
-}
-
-/**
- * Clear all stores (used on logout)
- */
-export function clearStores(): void {
-	user.set(null);
 }
