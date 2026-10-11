@@ -60,3 +60,13 @@ class VerifyStage1Test(unittest.TestCase):
         self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
         self.assertIn("step 03: no review", result.stdout)
         self.assertEqual(result.stdout.strip().splitlines()[-1], "STAGE1: FAIL")
+
+    def test_a_failing_test_suite_is_stage1_fail(self):
+        failing = PASSING_TEST.replace("pass\n", "self.fail('broken')\n")
+        root = skill_dir(self, {"01": ["PASS"], "02": ["PASS"], "03": ["PASS"]}, test=failing)
+
+        result = verify(root)
+
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn("tests: FAILED (failures=1)", result.stdout)
+        self.assertEqual(result.stdout.strip().splitlines()[-1], "STAGE1: FAIL")
