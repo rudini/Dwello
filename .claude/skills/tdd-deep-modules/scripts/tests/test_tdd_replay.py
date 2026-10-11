@@ -253,3 +253,41 @@ class TddReplayTest(unittest.TestCase):
         self.assertIn("tdd_replay: internal error", result.stderr)
         self.assertNotIn("Traceback", result.stderr)
         self.assertEqual(repo.git("worktree", "list").count("\n"), 0)
+
+    def test_a_test_that_stops_running_counts_as_removed(self):
+        mul_stub = "export const mul = (a: number, b: number) => 0;\n"
+        muls = 'test("muls", () => {\n  expect(mul(2, 3)).toBe(6);\n});\n'
+        bun_with_mul = BUN_TEST.replace("import { add }", "import { add, mul }")
+        vitest_with_mul = VITEST_TEST.replace("import { add }", "import { add, mul }")
+        js_mul_stub = "export const mul = () => 0;\n"
+        cases = {
+            "bun red skips an old test": (
+                bun_repo(self, RIGHT_ADD_TS + mul_stub, **{"calc.test.ts": BUN_TEST}),
+                [("red", {"calc.test.ts": bun_with_mul.replace('test("adds"', 'test.skip("adds"') + muls}, 1),
+                 ("green", {"calc.ts": WRONG_ADD_TS + mul_stub.replace("=> 0", "=> a * b")}, 0)]),
+            "bun test phase filters by name": (
+                bun_repo(self, RIGHT_ADD_TS + mul_stub, **{"calc.test.ts": BUN_TEST}),
+                [("test", {"package.json": '{"scripts": {"test": "bun test -t muls"}}\n'}, 1),
+                 ("red", {"calc.test.ts": bun_with_mul + muls}, 1),
+                 ("green", {"calc.ts": WRONG_ADD_TS + mul_stub.replace("=> 0", "=> a * b")}, 0)]),
+            "vitest red skips an old test": (
+                vitest_repo(self),
+                [("red", {"calc.test.js": vitest_with_mul.replace('test("adds"', 'test.skip("adds"') + muls}, 1),
+                 ("green", {"calc.js": "export const add = () => 0;\nexport const mul = (a, b) => a * b;\n"}, 0)]),
+            "vitest red filters by name": (
+                vitest_repo(self),
+                [("red", {"calc.test.js": vitest_with_mul + muls,
+                          "vitest.config.js": 'export default { test: { include: ["*.test.js"], '
+                                              'testNamePattern: "muls" } };\n'}, 1),
+                 ("green", {"calc.js": "export const add = () => 0;\nexport const mul = (a, b) => a * b;\n"}, 0)]),
+        }
+        for name, (repo, steps) in cases.items():
+            with self.subTest(name):
+                if name.startswith("vitest"):
+                    repo.commit_all("green: seed", {"calc.js": RIGHT_ADD_JS + js_mul_stub, "calc.test.js": VITEST_TEST})
+                else:
+                    repo.commit_all("green: seed", {})
+                base = repo.git("rev-parse", "HEAD")
+                for phase, files, exit_code in steps:
+                    repo.commit_phase(phase, files, exit_code)
+                self.assert_rejected(repo, base, "removes tests:")
