@@ -68,3 +68,9 @@ class TddReplayTest(unittest.TestCase):
         repo.commit_phase("red", {"calc.test.ts": BUN_TEST + "\n" + passing}, 1)
         repo.commit_phase("green", {"calc.ts": RIGHT_ADD_TS}, 0)
         self.assert_rejected(repo, base, "red must add exactly one new test, but adds 2")
+
+    def test_a_test_added_outside_red_is_rejected(self):
+        repo, base = good_history(self)
+        repo.commit_phase("refactor", {"zero.test.ts": BUN_TEST.replace("toBe(3)", "toBe(3);\n  expect(add(0, 0)).toBe(0)")
+                                       .replace('"adds"', '"adds zero"')}, 0)
+        self.assert_rejected(repo, base, "only red may add tests, but refactor adds 1")
