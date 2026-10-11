@@ -76,4 +76,11 @@ Details: [references/depth.md](references/depth.md).
 
 ## 6. Design note
 
-(Written at the end; see below.)
+When the test list is done, write a short design note (in the PR description, or `DESIGN.md` next to the module) and commit it as `scripts/tdd-step test "design note"` or with the last refactor:
+
+- **Hidden decision:** the one sentence from section 2.
+- **Both designs:** the two sketches, and the chosen one with its one-sentence reason.
+- **Interface:** the final public names and what each promises.
+- **Depth:** the latest `scripts/depth_report` lines for the module, and what changed during refactors.
+- **Open points:** behaviours left out on purpose, and known limits.
+- **Proof:** `scripts/tdd_replay <base>..HEAD` printed ACCEPT for the history.
