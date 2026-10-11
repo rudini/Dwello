@@ -12,7 +12,7 @@ SKILL = SCRIPTS.parent
 PASSING_TEST = "import unittest\n\n\nclass T(unittest.TestCase):\n    def test_ok(self):\n        pass\n"
 VERIFIERS = ["verify_all", "verify_stage1", "skill_lint", "tddcore/__init__.py", "tddcore/gate.py",
              "tddcore/verdicts.py", "tddcore/selfcheck.py", "tddcore/lint.py"]
-ALL_PASS = {f"{n:02d}": ["PASS"] for n in range(1, 9)}
+ALL_PASS = {f"{n:02d}": ["PASS"] for n in range(1, 13)}
 
 
 def skill_dir(case, verdicts=ALL_PASS, test=PASSING_TEST, lock=True):
@@ -36,7 +36,7 @@ def skill_dir(case, verdicts=ALL_PASS, test=PASSING_TEST, lock=True):
     (tests / "__init__.py").write_text("")
     (tests / "test_it.py").write_text(test)
     if lock:
-        write_lock(root, f"evidence/reviews/step-08-round-{len(verdicts.get('08', ['PASS']))}.md")
+        write_lock(root, f"evidence/reviews/step-12-round-{len(verdicts.get('12', ['PASS']))}.md")
     return root
 
 
@@ -64,8 +64,8 @@ class VerifyAllTest(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         lines = result.stdout.strip().splitlines()
         self.assertEqual(lines[:2], ["tests: OK", "skill_lint: OK"])
-        self.assertEqual(lines[2:10], [f"step {n:02d}: VERDICT: PASS (round 1)" for n in range(1, 9)])
-        self.assertEqual(lines[10:], ["verifiers.lock: OK", "STAGE2: PASS"])
+        self.assertEqual(lines[2:14], [f"step {n:02d}: VERDICT: PASS (round 1)" for n in range(1, 13)])
+        self.assertEqual(lines[14:], ["verifiers.lock: OK", "STAGE2B: PASS"])
 
     def test_a_failed_or_missing_review_lint_problem_or_failing_suite_is_stage2_fail(self):
         failing = "import unittest\n\n\nclass T(unittest.TestCase):\n    def test_a(self):\n        self.fail('x')\n"
@@ -83,7 +83,7 @@ class VerifyAllTest(unittest.TestCase):
 
                 self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
                 self.assertIn(line, result.stdout.splitlines())
-                self.assertEqual(result.stdout.strip().splitlines()[-1], "STAGE2: FAIL")
+                self.assertEqual(result.stdout.strip().splitlines()[-1], "STAGE2B: FAIL")
 
 
 def _broken_lint(root):
@@ -99,7 +99,7 @@ class VerifiersLockTest(unittest.TestCase):
             return root
 
         def old_review(root):
-            write_lock(root, "evidence/reviews/step-08-round-1.md")
+            write_lock(root, "evidence/reviews/step-12-round-1.md")
             return root
 
         def tampered(root):
@@ -123,8 +123,8 @@ class VerifiersLockTest(unittest.TestCase):
             "missing": (lambda: skill_dir(self, lock=False), "verifiers.lock: missing"),
             "verifier changed": (lambda: changed(skill_dir(self)),
                                  "verifiers.lock: scripts/tddcore/lint.py changed since its review"),
-            "not the latest review": (lambda: old_review(skill_dir(self, {**ALL_PASS, "08": ["FAIL", "PASS"]})),
-                                      "verifiers.lock: reviewed evidence/reviews/step-08-round-1.md is not step 08's "
+            "not the latest review": (lambda: old_review(skill_dir(self, {**ALL_PASS, "12": ["FAIL", "PASS"]})),
+                                      "verifiers.lock: reviewed evidence/reviews/step-12-round-1.md is not step 12's "
                                       "latest passing review"),
             "a verifier not locked": (lambda: tampered(skill_dir(self)),
                                       "verifiers.lock: scripts/skill_lint is not locked"),
@@ -135,7 +135,7 @@ class VerifiersLockTest(unittest.TestCase):
 
                 self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
                 self.assertIn(line, result.stdout.splitlines())
-                self.assertEqual(result.stdout.strip().splitlines()[-1], "STAGE2: FAIL")
+                self.assertEqual(result.stdout.strip().splitlines()[-1], "STAGE2B: FAIL")
 
 
 class ThinEntryPointTest(unittest.TestCase):
@@ -184,15 +184,15 @@ class LockFormatTest(unittest.TestCase):
 
         self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
         self.assertIn("verifiers.lock: not readable as UTF-8 text", result.stdout.splitlines())
-        self.assertEqual(result.stdout.strip().splitlines()[-1], "STAGE2: FAIL")
+        self.assertEqual(result.stdout.strip().splitlines()[-1], "STAGE2B: FAIL")
 
     def test_the_lock_names_the_real_file_of_the_latest_review(self):
         root = skill_dir(self, lock=False)
         reviews = root / "evidence" / "reviews"
-        (reviews / "step-08-round-1.md").rename(reviews / "step-08-round-01.md")
-        write_lock(root, "evidence/reviews/step-08-round-01.md")
+        (reviews / "step-12-round-1.md").rename(reviews / "step-12-round-01.md")
+        write_lock(root, "evidence/reviews/step-12-round-01.md")
         named_right = verify(root)
-        write_lock(root, "evidence/reviews/step-08-round-1.md")
+        write_lock(root, "evidence/reviews/step-12-round-1.md")
         named_wrong = verify(root)
 
         self.assertEqual(named_right.returncode, 0, named_right.stdout + named_right.stderr)
@@ -200,11 +200,11 @@ class LockFormatTest(unittest.TestCase):
 
 
     def test_a_lock_naming_a_failed_latest_review_is_named(self):
-        root = skill_dir(self, {**ALL_PASS, "08": ["PASS", "FAIL"]})
+        root = skill_dir(self, {**ALL_PASS, "12": ["PASS", "FAIL"]})
 
         result = verify(root)
 
-        self.assertIn("verifiers.lock: reviewed evidence/reviews/step-08-round-2.md is not step 08's latest "
+        self.assertIn("verifiers.lock: reviewed evidence/reviews/step-12-round-2.md is not step 12's latest "
                       "passing review", result.stdout.splitlines())
 
 
@@ -216,7 +216,7 @@ def real_copy(case):
         if path.is_file() and relative.parts[0] != "tests" and "__pycache__" not in relative.parts:
             (root / "scripts" / relative).parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(path, root / "scripts" / relative)
-    write_lock(root, "evidence/reviews/step-08-round-1.md")
+    write_lock(root, "evidence/reviews/step-12-round-1.md")
     return root
 
 
@@ -231,12 +231,12 @@ class RealVerifiersTest(unittest.TestCase):
         result = run_copy(real_copy(self))
 
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertEqual(result.stdout.strip().splitlines()[-1], "STAGE2: PASS")
+        self.assertEqual(result.stdout.strip().splitlines()[-1], "STAGE2B: PASS")
 
     def test_a_module_added_to_scripts_cannot_shadow_an_import(self):
         root = real_copy(self)
         for name in ("hashlib", "pathlib", "re"):
-            (root / "scripts" / f"{name}.py").write_text('print("STAGE2: PASS")\nraise SystemExit(0)\n')
+            (root / "scripts" / f"{name}.py").write_text('print("STAGE2B: PASS")\nraise SystemExit(0)\n')
 
         result = run_copy(root)
 
@@ -279,7 +279,7 @@ class RealVerifiersTest(unittest.TestCase):
         nested.mkdir()
         (nested / "a.py").write_text("# loadable as tddcore.tests.a\n")
         locked = run_copy(root)
-        write_lock(root, "evidence/reviews/step-08-round-1.md")
+        write_lock(root, "evidence/reviews/step-12-round-1.md")
         relocked = run_copy(root)
 
         self.assertIn("verifiers.lock: scripts/tddcore/tests/a.py is not locked", locked.stdout.splitlines())
