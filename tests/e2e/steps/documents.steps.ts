@@ -74,9 +74,10 @@ Then(
 	}
 );
 
-// Set after sending, which dates the statement and its deadline from that day
+// Set after sending, which dates the statement and its deadline from that day; two days ago, so it has passed both
+// in Switzerland and in the backend's UTC day (offene-punkte: «überfällig» in server time)
 Given('die Zahlungsfrist der Abrechnung {int} von {string} ist abgelaufen', async ({ seed }, year: number, tenant: string) => {
-	await seed.paymentDeadline(tenant, year, inDays(-1));
+	await seed.paymentDeadline(tenant, year, inDays(-2));
 });
 
 Given('die Zahlungsfrist der Abrechnung {int} von {string} läuft noch', async ({ seed }, year: number, tenant: string) => {

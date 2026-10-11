@@ -86,3 +86,13 @@ Wiederholung der Personas auf c1dd4a4: Helga, Anna, Marco und Dr. Weber haben ih
 | R5-6 | niedrig | Testlücken (Hilfe bei Rückerstattung im Detail, Reset im Detail, Demo-Reihenfolge, Sortierung) | offen; Prüfung im Listendialog vor dem Senden jetzt getestet (zweiter Versuch, Enter) |
 | R5-7 | niedrig | Plan und Szenarien fehlten | Plan nachgeführt; Szenarien «Zahlungseingang mit Datum festhalten» und «Kein Zahlungseingang in der Zukunft» (grün auch ohne diese Runde, sie sichern das Verhalten aus c1dd4a4) |
 | R5-8 | niedrig | 2. Mahnung sofort nach der 1. möglich | offen, `offene-punkte.md` – TODO(fachlich prüfen) |
+
+## Runde 6 (Code-Review R6 auf 3cbd65e)
+
+Kein Finding kritisch oder hoch. Bestätigt: Enter in einem Formular mit Datumsfeld sendet weiterhin, mit ausgeschriebenem Jahr; `Field` zeigt Serverfehler wie bisher; die Unit-Tests sind um 22:30 UTC und am 31.12. um 23:30 UTC grün.
+
+| # | Schwere | Finding | Behandlung |
+|---|---|---|---|
+| R6-N1 | mittel | «Zahlungsfrist abgelaufen» in den E2E-Schritten war gestern nach Schweizer Tag; das Backend rechnet «überfällig» in UTC (R5-4): zwischen 22 und 24 Uhr UTC rot | vorgestern: abgelaufen in beiden Zeitzonen |
+| R6 zu R5-1, R5-5 | niedrig | zweiter Versuch im Detaildialog und Enter bei gesperrter Aktion ungetestet | Tests ergänzt |
+| R6 zu R5-7 | niedrig | Szenario «Zahlungseingang mit Datum festhalten» nennt einen Tag vor dem Versand | offen: gültig, solange es keine Untergrenze gibt (R4-N4) |

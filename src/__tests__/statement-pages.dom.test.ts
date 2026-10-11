@@ -574,6 +574,18 @@ describe('Abrechnungsdetail', () => {
 		expect(document.getElementById(field.getAttribute('aria-describedby')!.split(' ').find((id) => id.endsWith('-error'))!)!.textContent).toContain('Das Zahlungsdatum liegt in der Zukunft.');
 	});
 
+	it('meldet im Detaildialog ein falsches Zahlungsdatum auch beim zweiten Versuch', () => {
+		detail({ status: 'sent' });
+		click('statement-mark-paid-button');
+		const field = byTestId<HTMLInputElement>('paid-date-input')!;
+		for (const date of ['01.01.2099', '01.01.2098']) {
+			fireEvent(field, 'input', date);
+			click('statement-mark-paid-confirm');
+			flushSync();
+			expect(field.getAttribute('aria-invalid'), date).toBe('true');
+		}
+	});
+
 	it('fragt beim Markieren als bezahlt nach dem Zahlungsdatum, heute vorgeschlagen', () => {
 		detail({ status: 'sent' });
 		click('statement-mark-paid-button');
