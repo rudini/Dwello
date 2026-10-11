@@ -60,3 +60,11 @@ class TddReplayTest(unittest.TestCase):
         repo, base = good_history(self)
         repo.commit_phase("refactor", {"calc.ts": RIGHT_ADD_TS.replace("a + b", "a - b")}, 1)
         self.assert_rejected(repo, base, "refactor needs all tests passing")
+
+    def test_two_new_tests_in_one_cycle_are_rejected(self):
+        passing = 'test("adds zero", () => {\n  expect(add(0, 0)).toBe(0);\n});\n'
+        repo = bun_repo(self)
+        base = repo.git("rev-parse", "HEAD")
+        repo.commit_phase("red", {"calc.test.ts": BUN_TEST + "\n" + passing}, 1)
+        repo.commit_phase("green", {"calc.ts": RIGHT_ADD_TS}, 0)
+        self.assert_rejected(repo, base, "red must add exactly one new test, but adds 2")
