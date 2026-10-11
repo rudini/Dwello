@@ -1,12 +1,12 @@
-"""Stage 2's pass rule: the skill's own tests, its lint, every step's latest review and the verifier lock."""
+"""Stage 2b's pass rule: the skill's own tests, its lint, every step's latest review and the verifier lock."""
 import hashlib
 import re
 from pathlib import Path
 
 from tddcore import lint, selfcheck, verdicts
 
-STEPS = ("01", "02", "03", "04", "05", "06", "07", "08")
-LOCK_STEP = "08"  # the review of verify_all; the lock records the verifiers as that review saw them
+STEPS = tuple(f"{n:02d}" for n in range(1, 13))  # 01-08 stage 1 and 2, 09-12 stage 2b
+LOCK_STEP = "12"  # the review of verify_all; the lock records the verifiers as that review saw them
 
 
 def stage2(skill=Path(__file__).resolve().parents[2]):
@@ -21,11 +21,11 @@ def stage2(skill=Path(__file__).resolve().parents[2]):
     lines += [f"step {step}: {description}" for step, _, description in steps]
     lines += [f"verifiers.lock: {p}" for p in stale or ["OK"]]
     passed = passed and not problems and not stale and all(step_passed for _, step_passed, _ in steps)
-    return passed, lines + ["STAGE2: PASS" if passed else "STAGE2: FAIL"]
+    return passed, lines + ["STAGE2B: PASS" if passed else "STAGE2B: FAIL"]
 
 
 def _lock(skill):
-    """Problems of verifiers.lock: it must name step 08's latest passing review and every verifier's hash."""
+    """Problems of verifiers.lock: it must name the lock step's latest passing review and every verifier's hash."""
     lock = skill / "verifiers.lock"
     if not lock.is_file():
         return ["missing"]

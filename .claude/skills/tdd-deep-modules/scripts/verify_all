@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""verify_all [skill-dir]: prints every check of stage 2 and STAGE2: PASS or FAIL (rule: tddcore/gate.py)."""
+"""verify_all [skill-dir]: prints every check of stage 2b and STAGE2B: PASS or FAIL (rule: tddcore/gate.py)."""
 import sys
 
 # Python put this script's directory first on the path; move it last, so no file in scripts/ can shadow
