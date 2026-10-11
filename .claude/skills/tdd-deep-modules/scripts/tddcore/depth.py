@@ -33,7 +33,7 @@ BLOAT_DUPLICATES = 3  # repeated lines that make a module bloated
 DUPLICATE_LENGTH = 12  # shorter lines (`}`, `return x;`) repeat naturally
 TINY_CLASS = 2  # methods; two or more classes this small spread one decision over many places
 SWARM = 3  # exported helpers with one caller; this many turn one module's internals into interface
-SMALL_HELPER = 10  # code lines in a helper's body; longer functions are more than a helper
+SMALL_HELPER = 20  # code lines in a helper's body; longer functions are more than a helper
 
 
 def measure(root, path):
