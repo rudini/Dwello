@@ -1,5 +1,6 @@
 import type { Actor } from '../fixtures/actor';
 import {
+	announcements,
 	buildingCheckbox,
 	buildingInvoices,
 	categoryFindings,
@@ -10,6 +11,7 @@ import {
 	managementFeeInput,
 	periodStartInput,
 	previewEmpty,
+	previewFee,
 	previewRows,
 	wizardChoices
 } from '../interactions/statement-generate';
@@ -20,7 +22,9 @@ export const allPreviewRows = (actor: Actor) => previewRows(actor.page);
 export const noContractsInPeriod = (actor: Actor) => previewEmpty(actor.page);
 export const generationOutcome = (actor: Actor) => generationResult(actor.page);
 export const feeAboveGuideline = (actor: Actor) => managementFeeHint(actor.page);
+export const feeOfRun = (actor: Actor) => previewFee(actor.page);
 export const feeField = (actor: Actor) => managementFeeInput(actor.page);
+export const announcedFeeHint = (actor: Actor) => announcements(actor.page).filter({ hasText: 'Über dem üblichen Richtwert' });
 // Step 3 offers one choice, the Heizprofil: the fee has no distribution key
 export const settingsChoices = (actor: Actor) => wizardChoices(actor.page);
 export const periodChoice = (actor: Actor) => periodStartInput(actor.page);

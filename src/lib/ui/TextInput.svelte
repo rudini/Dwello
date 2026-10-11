@@ -14,6 +14,7 @@
 		optional = false,
 		placeholder,
 		autocomplete,
+		inputmode,
 		min,
 		max,
 		disabled = false,
@@ -31,6 +32,7 @@
 		optional?: boolean;
 		placeholder?: string;
 		autocomplete?: HTMLInputElement['autocomplete'];
+		inputmode?: 'decimal' | 'numeric';
 		min?: string;
 		max?: string;
 		disabled?: boolean;
@@ -48,6 +50,7 @@
 			bind:value
 			{placeholder}
 			{autocomplete}
+			{inputmode}
 			{min}
 			{max}
 			{disabled}

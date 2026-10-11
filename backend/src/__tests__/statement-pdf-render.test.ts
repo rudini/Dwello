@@ -26,6 +26,7 @@ const refund: StatementPDFData = {
 	subtotal: 784.13,
 	managementFee: 0,
 	managementFeePercent: 0,
+	managementFeeBase: 784.13,
 	totalCosts: 784.13,
 	totalAdvancePayments: 878,
 	balance: -93.87

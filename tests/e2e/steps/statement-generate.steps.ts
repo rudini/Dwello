@@ -7,7 +7,9 @@ import {
 	chosenBuilding,
 	draftsOnly,
 	feeAboveGuideline,
+	announcedFeeHint,
 	feeField,
+	feeOfRun,
 	settingsChoices,
 	invoicesOfBuilding,
 	missingInvoicesWarning,
@@ -30,6 +32,7 @@ import {
 	tryNextWithoutConfirmation,
 	returnToStatementList,
 	setManagementFee,
+	typeManagementFee,
 	showCreatedStatements
 } from '../tasks/statement-generate';
 
@@ -150,6 +153,25 @@ When(
 	}
 );
 
+When(
+	'der Liegenschaftsverwalter für das Gebäude {string} die Verwaltungspauschale {string} eintippt',
+	async ({ verwalter, seed }, building: string, text: string) => {
+		await verwalter.perform(typeManagementFee(seed.idOf(building)!, text));
+	}
+);
+
+Then('nennt die Vorschau eine Verwaltungspauschale von {string}', async ({ verwalter }, text: string) => {
+	await expect(feeOfRun(verwalter)).toContainText(text);
+});
+
+Then('steht im Feld der Verwaltungspauschale {string}', async ({ verwalter }, text: string) => {
+	await expect(feeField(verwalter)).toHaveValue(text);
+});
+
+Then('meldet der Assistent, dass die Verwaltungspauschale über dem üblichen Richtwert liegt', async ({ verwalter }) => {
+	await expect(announcedFeeHint(verwalter)).toBeVisible();
+});
+
 When('der Liegenschaftsverwalter das Gebäude {string} für die Abrechnungen wählt', async ({ verwalter, seed }, building: string) => {
 	await verwalter.perform(chooseBuilding(seed.idOf(building)!));
 });
@@ -235,6 +257,7 @@ Then(
 Then('bietet der Assistent keine Verteilung der Verwaltungspauschale an', async ({ verwalter }) => {
 	await expect(feeField(verwalter)).toBeVisible();
 	await expect(settingsChoices(verwalter)).toHaveCount(1);
+	await expect(settingsChoices(verwalter)).toHaveAccessibleName('Heizprofil');
 });
 
 When('der Liegenschaftsverwalter weitere Abrechnungen erstellen will', async ({ verwalter }) => {

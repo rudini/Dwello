@@ -53,12 +53,13 @@ type Names = { name: string; nameDE: string | null; nameFR: string | null; nameI
 const localName = (names: Names, language: Language) =>
 	({ fr: names.nameFR, it: names.nameIT, en: names.nameEN })[language as 'fr' | 'it' | 'en'] || names.nameDE || names.name;
 
-/** What the generation run used, as the PDF names it: the tenant's dates and the heating profile */
+/** What the generation run used, as the PDF names it: the tenant's dates, the heating profile and an older fee's key */
 export interface RunDetails {
 	rentalStart: string;
 	rentalEnd: string;
 	heating?: StatementPDFData['heating'];
 	fuel?: StatementPDFData['fuel'];
+	managementFeeKey?: string;
 }
 
 type LineNames = { categoryNames: Map<string, Names>; keyNames: Map<string, Names>; keyShares: Map<string, string> };
@@ -116,11 +117,15 @@ export function toPdfData(
 		lineItems: statement.lineItems.map((item) => lineItemOf(item, statement, { categoryNames, keyNames, keyShares }, language)),
 		subtotal,
 		managementFee,
+		// A percentage of the tenant's own costs; created with a key before: of the building's costs (the line items' totals)
+		managementFeeBase: run.managementFeeKey
+			? statement.lineItems.reduce((sum, item) => sum + parseFloat(item.totalAmount), 0)
+			: subtotal,
 		// Older statements have no stored rate; their fee was a percentage of the tenant's own costs
 		managementFeePercent: statement.managementFeePercent
 			? parseFloat(statement.managementFeePercent)
-			: managementFee > 0
-				? (managementFee / subtotal) * 100
+			: subtotal > 0
+				? Math.round((managementFee / subtotal) * 10000) / 100
 				: 0,
 		totalCosts: parseFloat(statement.totalCosts),
 		totalAdvancePayments: parseFloat(statement.totalAdvancePayments),
@@ -185,13 +190,21 @@ function fuelOf(statement: StatementWithDetails, names: Map<string, Names>, lang
 	};
 }
 
-// What the generation run used, for the PDF: the tenant's dates and the heating profile
+// A statement created before the fee was always of the tenant's own costs may name a key for it
+async function feeKeyOf(statement: StatementWithDetails, language: Language) {
+	if (!statement.managementFeeDistributionKeyId) return {};
+	const [key] = await db.select().from(distributionKeys).where(eq(distributionKeys.id, statement.managementFeeDistributionKeyId));
+	return key ? { managementFeeKey: localName(key, language) } : {};
+}
+
+// What the generation run used, for the PDF: the tenant's dates, the heating profile and an older fee's key
 async function runDetailsOf(statement: StatementWithDetails, names: Map<string, Names>, language: Language, hasHeating: boolean): Promise<RunDetails> {
 	const rental = await rentalDatesOf(statement);
 	return {
 		...rental,
 		...(await heatingOf(statement, rental, language, hasHeating)),
-		...fuelOf(statement, names, language)
+		...fuelOf(statement, names, language),
+		...(await feeKeyOf(statement, language))
 	};
 }
 

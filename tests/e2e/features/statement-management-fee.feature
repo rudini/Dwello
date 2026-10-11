@@ -27,3 +27,18 @@ Funktionalität: Verwaltungspauschale berechnen
     Wenn der Liegenschaftsverwalter für das Gebäude "Rosenhof" die Verwaltungspauschale auf 3 % setzt
     Dann erklärt der Assistent, dass die Verwaltungspauschale ein Prozentsatz der eigenen Nebenkosten jedes Mieters ist
     Und bietet der Assistent keine Verteilung der Verwaltungspauschale an
+
+  Szenario: Die Vorschau nennt die Verwaltungspauschale
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Rosenhof" mit 4.5 % Verwaltungspauschale öffnet
+    Dann nennt die Vorschau eine Verwaltungspauschale von "4.5 % der eigenen Nebenkosten jedes Mieters"
+
+  # Mit Komma oder Punkt, Zeichen für Zeichen wie auf der Tastatur
+  Szenariogrundriss: Pauschale mit Dezimalstellen eintippen
+    Wenn der Liegenschaftsverwalter für das Gebäude "Rosenhof" die Verwaltungspauschale "<Eingabe>" eintippt
+    Dann steht im Feld der Verwaltungspauschale "<Eingabe>"
+    Und meldet der Assistent, dass die Verwaltungspauschale über dem üblichen Richtwert liegt
+
+    Beispiele:
+      | Eingabe |
+      | 4,5     |
+      | 4.5     |

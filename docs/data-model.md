@@ -238,6 +238,7 @@ total_advance_payments DECIMAL(12,2) NOT NULL  -- Geleistete Akontobeiträge
 management_fee         DECIMAL(12,2) DEFAULT 0 -- Verwaltungspauschale
 management_fee_percent DECIMAL(5,2)            -- rate chosen in the Abrechnungslauf
 heating_profile_id     UUID                    -- Heizprofil of the Abrechnungslauf, printed in the PDF (SET NULL)
+management_fee_distribution_key_id UUID        -- older statements only: Verteilschlüssel of the Verwaltungspauschale (SET NULL); since session 12 the fee is of the tenant's own costs
 fuel_stock             JSONB                   -- Tankbestand readings at creation, for the PDF (migration 0011)
 key_values             JSONB                   -- area, apartments, rooms: own and building's total at creation (migration 0011)
 balance                DECIMAL(12,2) NOT NULL  -- Saldo: positive = Nachzahlung, negative = Rückerstattung

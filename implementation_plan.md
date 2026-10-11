@@ -4565,27 +4565,25 @@ subjects over 50 characters, a missing test for vacancy after a move-out, the RE
 ### Follow-up: Verwaltungspauschale always of the tenant's own costs
 
 Product decision after the MV leaflet «Zulässige und unzulässige Nebenkosten» (2026): the fee is a percentage of the
-tenant's own Nebenkosten; the optional distribution key (fee of the building's costs, shared by key) is removed.
+tenant's own Nebenkosten; the optional distribution key (fee of the building's costs, shared by key) is removed for new
+statements. Statements created with a key before keep it and their basis (column `management_fee_distribution_key_id`
+stays, PDF and detail page still describe it).
 
-- [x] **Scenario** `tests/e2e/features/statement-management-fee.feature`: own costs (`@api`) and no fee key in the wizard
-  (failed first on the help text and the select).
-- [x] **Wizard/BFF**: `SettingsStep.svelte` (select gone, help names the own costs), `StatementStep.svelte`,
-  `StatementWizard.svelte`, `+page.svelte`, `+page.server.ts` (no distribution keys loaded), `statement-wizard.ts`,
-  `statement-generation.ts`; detail `CostTable.svelte` and `statement.ts` (`managementFeeKeyed` gone).
-- [x] **Backend**: `calculation.service.ts` (`buildingFeeShare` gone), `statement.service.ts`, `routes/statements.ts`,
-  `statement-pdf.service.ts` and `pdf.service.ts` (fee always «x % der Zwischensumme»), `schema.ts`, migration
-  `0012_pauschale_eigene_kosten.sql` drops `management_fee_distribution_key_id`; contract `tests/contracts/statement.json`.
-- [x] **Docs**: `offene-punkte.md` (decided; glossary entry to adjust by the product owner), `nebenkostenabrechnung-anforderungen.md`,
-  `data-model.md`, `api-specification.md`.
-
-- [x] **Review** (independent, no critical): migration 0012 first sets the rate of statements made with a key to the share
-  their stored fee is of their own costs, so their PDF adds up (checked on a scratch database: CHF 7.54 of 377.05 → 2.00 %);
-  `managementFeeBase` dropped (the PDF uses the subtotal); test renamed to `management-fee.pg.test.ts`; step 3 checked
-  to offer only the Heizprofil as a choice; glossary proposal names «Verteilschlüssel» and «Abrechnungslauf» too;
-  `docs/PRD-Dwello.md` formula and glossary line.
-
-**Checks:** `bun run lint`, `bun run check`, `bun run test:coverage` (1626), backend `bun run test` (489, 88.8 % lines) and
-`type-check`, `deepcheck:audit`, `fallow audit`; E2E `tests/e2e/features/statement*` on chromium and api: 64 passed.
+- [x] **Scenario** `tests/e2e/features/statement-management-fee.feature`: own costs (`@api`), no fee key in the wizard,
+  the preview names the fee, decimals typed with comma or point (each failed first for the right reason).
+- [x] **Wizard/BFF**: `SettingsStep.svelte` (select gone; help names the own costs and how to bill another rate; the fee
+  is a text field with a decimal keypad that keeps what was typed, empty is no rate; the hint above 3 % is announced),
+  `TextInput.svelte` (`inputmode`), `PreviewStep.svelte`/`StatementStep.svelte` (heating profile and fee in the preview),
+  `StatementWizard.svelte`, `+page.svelte`, `+page.server.ts`, `statement-wizard.ts`, `statement-generation.ts`;
+  help texts `help/Glossary.svelte`, `config/help.ts`.
+- [x] **Backend**: `calculation.service.ts` (`buildingFeeShare` gone), `statement.service.ts`, `routes/statements.ts`;
+  `statement-pdf.service.ts` (fallback rate of older statements rounded to 2 places).
+- [x] **Reviews**: code review 1 and 2 (`docs/reviews/F-review-1.md`), Fachreview (`docs/reviews/F-fachreview-1.md`),
+  personas Marco, Dr. Weber, Sven (`docs/design/personas/*-f.md`). A first migration that rewrote the rate of keyed
+  statements and dropped the column was withdrawn (overflow, rates that do not add up, not acceptable for sent
+  statements). Open product points: `offene-punkte.md`, section «Session 12».
+- [x] **Docs**: `offene-punkte.md`, `nebenkostenabrechnung-anforderungen.md`, `data-model.md`, `api-specification.md`,
+  `PRD-Dwello.md`, `seed-daten-aenderungen.md`.
 
 ---
 

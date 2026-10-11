@@ -480,11 +480,17 @@ describe('Abrechnungsdetail', () => {
 		expect(email.className.split(/\s+/)).toEqual(expect.arrayContaining(['min-w-0', 'break-all']));
 	});
 
-	// Wie im PDF: ein Anteil der eigenen Kosten
+	// Wie im PDF: ein Anteil der eigenen Kosten; Abrechnungen von früher mit Schlüssel: der Kosten der Liegenschaft
 	it('nennt die Verwaltungspauschale mit ihrer Grundlage wie im PDF', () => {
 		detail();
 		const fee = () => byTestId('statement-management-fee')!.textContent!.replace(/\s+/g, ' ');
 		expect(fee()).toContain('3 % der Zwischensumme');
+		document.body.innerHTML = '';
+
+		detail({ managementFeeKeyed: true });
+		expect(fee()).toContain(
+			'3 % der Nebenkosten der Liegenschaft, verteilt nach dem Verteilschlüssel, Anteil dieser Wohnung für 366 Mietstage'
+		);
 		expect(text()).not.toMatch(/Verwaltungsgebühr|Verwaltungskosten/);
 	});
 

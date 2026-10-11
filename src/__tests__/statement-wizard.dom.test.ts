@@ -198,8 +198,9 @@ describe('Abrechnungen erstellen', () => {
 		expect(text()).toContain(
 			'Verlangen Sie eine Verwaltungspauschale nur, wenn sie im Mietvertrag vereinbart ist.'
 		);
+		// Ein Lauf rechnet alle Mietverträge eines Gebäudes: andere Sätze über die Entwürfe dieser Mietverträge
 		expect(text()).toContain(
-			'Haben Mietverträge verschiedene Sätze, erstellen Sie die Abrechnungen getrennt.'
+			'Hat ein Mietvertrag einen anderen Satz, löschen Sie danach seinen Entwurf und erstellen Sie ihn mit diesem Satz neu.'
 		);
 	});
 
@@ -208,6 +209,26 @@ describe('Abrechnungen erstellen', () => {
 		expect(text()).toContain('Prozentsatz der eigenen Nebenkosten jedes Mieters');
 		fireEvent(byTestId<HTMLInputElement>('management-fee-input')!, 'input', '4.5');
 		expect(byTestId('management-fee-hint')).not.toBeNull();
+	});
+
+	// Ein geleertes Feld ist kein Satz von 0 %: der Assistent fragt nach, statt still keine Pauschale zu verrechnen
+	it('verlangt einen Satz, wenn das Feld der Verwaltungspauschale leer ist, und nimmt ein Komma an', async () => {
+		await toSettings();
+		const fee = byTestId<HTMLInputElement>('management-fee-input')!;
+		fireEvent(fee, 'input', '');
+		await next();
+		expect(text()).toContain('Bitte geben Sie einen Prozentsatz ab 0 ein, zum Beispiel 3.');
+		fireEvent(fee, 'input', '2,5');
+		expect(fee.value).toBe('2,5');
+		expect(document.querySelector<HTMLInputElement>('input[name="managementFeePercent"]')!.value).toBe('2.5');
+	});
+
+	// Vor dem Erstellen sieht man, mit welchem Heizprofil und welcher Pauschale gerechnet wurde
+	it('nennt in der Vorschau Heizprofil und Verwaltungspauschale des Laufs', () => {
+		const run = { ...data, defaultHeatingProfileId: 'hp1', defaultManagementFeePercent: 2.5 };
+		show(GeneratePage, { data: run, form: { preview, invoices } } as never);
+		expect(byTestId('preview-fee')!.textContent).toContain('2.5 % der eigenen Nebenkosten jedes Mieters');
+		expect(byTestId('preview-heating-profile')!.textContent).toContain('Gleichmässig');
 	});
 
 	it('erklärt, warum die Kosten aller Abrechnungen kleiner sein können als die Rechnungen', () => {

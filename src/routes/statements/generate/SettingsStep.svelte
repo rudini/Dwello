@@ -37,7 +37,13 @@
 	const selected = $derived(heatingProfiles.find((p) => p.id === heatingProfileId));
 	// The predefined profiles' descriptions are English; only an own profile's is shown
 	const ownDescription = $derived(selected?.type === 'custom' ? selected.description : '');
-	const fee = $derived(String(managementFeePercent ?? ''));
+	// TODO(fachlich prüfen): the glossary says of the building's costs; the fee is of each tenant's own (offene-punkte.md)
+	// The text as typed (a half-typed «4,» stays), the number for the run: comma or point, empty is no rate
+	let feeText = $state(Number.isFinite(managementFeePercent) ? String(managementFeePercent) : '');
+	const typeFee = (text: string) => {
+		feeText = text;
+		managementFeePercent = text.trim() === '' ? NaN : Number(text.replace(',', '.'));
+	};
 </script>
 
 <Field
@@ -79,17 +85,20 @@
 <TextInput
 	id="managementFeePercent"
 	label="Verwaltungspauschale in %"
-	type="number"
-	help="Prozentsatz der eigenen Nebenkosten jedes Mieters, gilt für alle Abrechnungen dieses Laufs. Üblich sind bis {USUAL_MAXIMUM} %. Verlangen Sie eine Verwaltungspauschale nur, wenn sie im Mietvertrag vereinbart ist. Sonst geben Sie 0 ein. Haben Mietverträge verschiedene Sätze, erstellen Sie die Abrechnungen getrennt."
-	bind:value={() => fee, (v) => (managementFeePercent = v === '' ? NaN : Number(v))}
+	inputmode="decimal"
+	help="Prozentsatz der eigenen Nebenkosten jedes Mieters, gilt für alle Abrechnungen dieses Laufs. Üblich sind bis {USUAL_MAXIMUM} %. Verlangen Sie eine Verwaltungspauschale nur, wenn sie im Mietvertrag vereinbart ist. Sonst geben Sie 0 ein. Hat ein Mietvertrag einen anderen Satz, löschen Sie danach seinen Entwurf und erstellen Sie ihn mit diesem Satz neu."
+	bind:value={() => feeText, typeFee}
 	error={errors.managementFeePercent}
 	testid="management-fee-input"
 />
-{#if managementFeePercent > USUAL_MAXIMUM}
-	<Alert tone="caution" title="Über dem üblichen Richtwert" testid="management-fee-hint">
-		<p>
-			Die Verwaltungspauschale ist höher als der übliche Richtwert von {USUAL_MAXIMUM} %. Prüfen Sie,
-			ob der Mehraufwand begründet ist.
-		</p>
-	</Alert>
-{/if}
+<!-- announced while typing: the hint appears without the focus moving -->
+<div role="status">
+	{#if managementFeePercent > USUAL_MAXIMUM}
+		<Alert tone="caution" title="Über dem üblichen Richtwert" testid="management-fee-hint">
+			<p>
+				Die Verwaltungspauschale ist höher als der übliche Richtwert von {USUAL_MAXIMUM} %. Prüfen Sie,
+				ob der Mehraufwand begründet ist.
+			</p>
+		</Alert>
+	{/if}
+</div>

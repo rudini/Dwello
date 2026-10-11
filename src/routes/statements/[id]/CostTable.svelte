@@ -69,8 +69,15 @@
 	<div class="flex justify-between gap-4" data-testid="statement-management-fee">
 		<dt class="flex flex-col text-ink-muted">
 			<span>Verwaltungspauschale</span>
-			<!-- as the PDF says it: a share of the tenant's own costs -->
-			<span>{statement.managementFeePercent} % der Zwischensumme</span>
+			<!-- as the PDF says it: a share of the tenant's own costs, or of the building's costs by a key -->
+			<span>
+				{#if statement.managementFeeKeyed}
+					{statement.managementFeePercent} % der Nebenkosten der Liegenschaft, verteilt nach dem Verteilschlüssel,
+					Anteil dieser Wohnung für {statement.rentalDays} Mietstage
+				{:else}
+					{statement.managementFeePercent} % der Zwischensumme
+				{/if}
+			</span>
 		</dt>
 		<dd class="text-ink">{formatCurrency(statement.managementFee)}</dd>
 	</div>

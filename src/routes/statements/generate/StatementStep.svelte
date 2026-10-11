@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { germanName } from '$lib/names';
 	import { invoiceRows, type WizardSelection } from '$lib/statement-wizard';
 	import type { Building, HeatingProfile } from '$lib/types';
 	import BuildingStep from './BuildingStep.svelte';
@@ -33,6 +34,8 @@
 		periodLabel: string;
 		createdCount: number | null;
 	} = $props();
+
+	const heatingProfile = $derived(data.heatingProfiles.find((p) => p.id === selection.heatingProfileId));
 </script>
 
 {#if step === 1}
@@ -62,6 +65,8 @@
 		buildings={data.buildings}
 		{periodLabel}
 		period={selection}
+		heatingProfile={heatingProfile && germanName(heatingProfile)}
+		feePercent={selection.managementFeePercent}
 		bind:confirmed
 		{errors}
 	/>

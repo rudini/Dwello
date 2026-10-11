@@ -341,6 +341,10 @@ export const utilityStatements = pgTable(
 		// the Tankbestand readings the statement was created with (migration 0011)
 		fuelStock: jsonb('fuel_stock').$type<{ categoryId: string; openingDate: string; opening: string; closingDate: string; closing: string }>(),
 		keyValues: jsonb('key_values').$type<KeyValues>(),
+		// the fee's key of statements created before the fee was always of the tenant's own costs; new ones have none
+		managementFeeDistributionKeyId: uuid('management_fee_distribution_key_id').references(() => distributionKeys.id, {
+			onDelete: 'set null'
+		}),
 		balance: decimal('balance', { precision: 12, scale: 2 }).notNull(), // positive = tenant owes, negative = refund
 		status: varchar('status', { length: 20 }).notNull().default('draft'), // draft, sent, paid; overdue is computed from the payment deadline
 		paymentDeadline: date('payment_deadline'),

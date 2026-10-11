@@ -283,6 +283,7 @@ export interface Statement {
 	totalAdvancePayments: number;
 	managementFee: number;
 	managementFeePercent: number; // rate used when the statement was generated
+	managementFeeKeyed?: boolean; // created before the fee was always of the tenant's own costs: of the building's costs, shared by a key
 	balance: number; // positive = tenant owes, negative = refund
 	status: StatementStatus;
 	paymentDeadline: string;

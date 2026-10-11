@@ -33,6 +33,14 @@ export const setManagementFee = (buildingId: string, percent: number) => async (
 	await managementFeeInput(actor.page).fill(String(percent));
 };
 
+// Typed key by key, as a user does: what the field keeps while typing matters
+export const typeManagementFee = (buildingId: string, text: string) => async (actor: Actor) => {
+	await chooseBuilding(buildingId)(actor);
+	await nextButton(actor.page).click();
+	await managementFeeInput(actor.page).clear();
+	await managementFeeInput(actor.page).pressSequentially(text);
+};
+
 export const openPreview =
 	(year: number, buildingId: string, options: RunOptions = {}) =>
 	async (actor: Actor) => {

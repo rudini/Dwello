@@ -59,6 +59,12 @@ const categories = new Map([
 ]);
 
 describe('Daten der Abrechnung im PDF', () => {
+	// Ältere Abrechnungen ohne gespeicherten Satz: der Anteil der Pauschale an der Zwischensumme, wie in der Webansicht gerundet
+	it('druckt den Satz älterer Abrechnungen auf zwei Stellen gerundet', () => {
+		const older = { ...statement, managementFeePercent: null } as unknown as StatementWithDetails;
+		expect(toPdfData(older, categories, 'de').managementFeePercent).toBe(3.19);
+	});
+
 	it('druckt die Postadresse des Mieters', () => {
 		expect(toPdfData(statement, categories, 'fr').tenant).toMatchObject({
 			firstName: 'Pierre',
