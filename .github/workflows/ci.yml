@@ -174,6 +174,8 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
       - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
+      # tsconfig.json extends .svelte-kit/tsconfig.json: without it Fallow cannot resolve $lib imports
+      - run: bunx svelte-kit sync
       - name: Fallow audit
         # Pull requests: changes against the target branch; pushes: changes of the pushed commits
         run: bunx fallow audit --base "${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || github.event.before }}"
