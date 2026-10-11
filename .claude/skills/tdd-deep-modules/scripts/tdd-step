@@ -56,7 +56,8 @@ def main(args):
     tier = "full" if phase == "refactor" else "fast"
     if rest[:1] == ["--suite"]:
         tier, rest = (rest + [None])[1], rest[2:]
-    if phase not in protocol.PHASES or tier not in ("fast", "full"):
+    stray = any(word.startswith("--") for word in rest)
+    if phase not in protocol.PHASES or tier not in ("fast", "full") or stray:
         print("usage: tdd-step <test|red|green|refactor> [--suite fast|full] [message]",
               file=sys.stderr)
         return 2
