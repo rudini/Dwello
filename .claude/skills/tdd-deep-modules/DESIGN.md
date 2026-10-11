@@ -9,8 +9,8 @@
 | Module | Interface | Hides |
 |---|---|---|
 | `scripts/tddcore/suite.py` | `run(root, tier) -> Run(exit_code, outcome, summary, failed, ran)`, `NoFramework` | finding every vitest / bun package, the command of each tier, running each, parsing vitest JSON and bun JUnit + summary, classifying, combining |
-| `scripts/tddcore/protocol.py` | `PHASES`, `phase_of(subject)`, `is_production(path)`, `violations(previous, phase, run, changed, suite, previous_suite)` | phase order table, file classification, every refusal rule, the tier rules |
-| `scripts/tddcore/replay.py` | `replay(repo, rev_range) -> [Verdict(commit, phase, run, violations)]`, `ReplayError` | listing the range, a private worktree, borrowing `node_modules`, running each commit, judging it |
+| `scripts/tddcore/protocol.py` | `PHASES`, `TIERS`, `default_tier(phase)`, `phase_of(subject)`, `is_production(path)`, `violations(previous, phase, run, changed, suite, previous_suite)` | phase order table, file classification, every refusal rule, the tier rules |
+| `scripts/tddcore/replay.py` | `replay(repo, rev_range) -> [Verdict(commit, phase, run, violations, suite)]`, `ReplayError` | listing the range, a private worktree, borrowing `node_modules`, running each commit, judging it |
 | `scripts/tdd-step` | CLI | git plumbing: repository root, changed files, working-tree snapshot, index restore |
 | `scripts/tdd_replay` | CLI | output format and exit codes (0 accept, 1 reject, 2 usage/git error) |
 
@@ -23,7 +23,7 @@ Every tracked `package.json` (root and nested, e.g. Dwello's `backend/`), run in
 
 ## Tiers
 
-The project defines two suites, and both tools read their commands from each `package.json`, never assume them: the **full** tier runs `scripts.test` (in Dwello's backend: unit tests, `*.pg.test.ts` against PostgreSQL, and the API contract test `api-contracts.pg.test.ts`); the **fast** tier runs `scripts["test:fast"]` (Dwello's backend: `bun test --path-ignore-patterns=**/*.pg.test.ts`, no database, no network), or `scripts.test` where a package declares no fast suite. The same `bun test` segment rules apply to both scripts. Vitest packages run `vitest run` in both tiers (Dwello's frontend tests need neither database nor network). `tdd-step` records the tier in the `TDD-Suite` trailer.
+The project defines two suites, and both tools read their commands from each `package.json`, never assume them: the **full** tier runs `scripts.test` (in Dwello's backend: unit tests, `*.pg.test.ts` against PostgreSQL, and the API contract test `api-contracts.pg.test.ts`); the **fast** tier runs `scripts["test:fast"]` (Dwello's backend: `bun test --path-ignore-patterns=**/*.pg.test.ts`, no database, no external network; `mail.test.ts` binds a stand-in on localhost), or `scripts.test` where a package declares no fast suite. The same `bun test` segment rules apply to both scripts. Vitest packages run `vitest run` in both tiers (Dwello's frontend tests need neither database nor external network). `tdd-step` records the tier in the `TDD-Suite` trailer.
 
 Every detected framework counts. Combined: outcome is the worst (error > fail > pass), the exit code the highest, failures and run counts summed. A framework that has no tests, writes no report, or crashes makes the run an error. A "pass" in which no test ran (none found, all skipped or todo) is an error.
 
@@ -52,12 +52,12 @@ Production file = code suffix (`.py .js .jsx .mjs .cjs .ts .tsx .mts .cts .svelt
 
 ## Replay (`tdd_replay <commit-range>`)
 
-Every commit of the range (first-parent, oldest first) is checked out in a temporary git worktree (cleaned with `git clean -fdx`, installed `node_modules` linked from the caller's checkout) and its full suite is run; a commit whose `TDD-Suite` trailer says `fast` is run on the fast suite too. The commit before the range is run (full) too, to know which tests already exist. Each commit is judged from its own runs, never from its subject or trailers:
+Every commit of the range (first-parent, oldest first) is checked out in a temporary git worktree (cleaned with `git clean -fdx`, installed `node_modules` linked from the caller's checkout) and both its suites are run (fast and full). The commit before the range is run too, to know which tests already exist. Each commit is judged from its own runs, never from its subject or trailers:
 - the commit must carry a phase prefix and a `TDD-Suite` trailer of `fast` or `full`; the protocol rules above apply with the claimed phase and tier, on the run of the claimed tier;
 - its `TDD-Exit-Code` trailer must equal the real exit code of the claimed tier;
-- which tests are new, removed or skipped comes from the full runs; red's new test must be in the run of its claimed tier (a red on the fast suite for a test that exists only in the full tier is rejected);
+- which tests are new comes from the full runs; a test that ran in the previous commit's full run, or in its fast run, and no longer runs in the same tier (gone, skipped, todo, or filtered out, for example by a changed `test:fast`) is removed, and no phase may remove tests; red's new test must be in the run of its claimed tier (a red on the fast suite for a test that exists only in the full tier is rejected; such a red also fails the other red rules, so this rule only names the cause);
 - red adds exactly one new test id and its failing tests are exactly that new test; no other phase adds tests; no phase removes tests, and a test that ran before and is now skipped, todo or filtered out counts as removed (test ids come from the frameworks' reports: bun JUnit test cases, vitest assertion results; a repeated name in a file gets a `#n` suffix, so same-named tests do not collapse);
-- the range must not end in red, and its last commit (the end of the task) must have run the full suite and passed it.
+- the range must not end in red, and the last commit of every task must have run the full suite and passed it. A task ends with the range, and at every green or refactor that a `test:` commit (the next task's test list) follows.
 
 ## Hook (`tdd-guard`)
 
@@ -112,9 +112,10 @@ diff <(tail -n +2 verifiers.lock | cut -c67- | sort) \
 - Test data that is not code (for example a JSON file of expected values at the repository root) is not classified as test code, so green may change it.
 - Tests run on the working tree; a gitignored file the tests depend on is not committed. The working-tree snapshot uses a fresh index, so a test run that modifies a tracked-but-gitignored file is not noticed.
 - Dwello's full backend suite needs PostgreSQL (`bun test --preload ./scripts/test-db.ts`). Without a database the full run fails, so every refactor, every `--suite full` step and the final commit of a task are refused there (red and green on the fast suite work). That is the rule, not a bug.
-- A green on the fast suite after a red on the fast suite is not checked against the full suite; a production change that breaks a database test shows up at the next refactor or final commit (both full), not at that green.
+- A green on the fast suite after a red on the fast suite is not checked against the full suite by `tdd-step`; a production change that breaks a database test shows up at the next refactor or the end of the task (both full); `tdd_replay` sees it in that green's full run only as a failure there, not as a violation of the green.
+- A task is recognised by its test list: a task that starts with a red instead of a `test:` commit merges with the task before it for the end-of-task rule.
 - A vitest package's tiers are the same command; a `test:fast` script in a vitest package is not read.
-- `tdd_replay` runs the full suite of every commit, so replaying a range needs everything the full suite needs (Dwello: PostgreSQL), and a commit on the fast tier is run twice.
+- `tdd_replay` runs both suites of every commit, so replaying a range needs everything the full suite needs (Dwello: PostgreSQL) and takes about two suite runs per commit.
 - A bun run that exits non-zero with no failing test and no reported error (for example a coverage threshold) is an error, never red.
 - A same-named test inserted before an existing one in the same file takes the existing test's id (`#n` numbering follows report order), so that red is rejected; add same-named tests after the existing ones.
 - Importing a module that does not exist is an import error, which is never red. The first test of a new module therefore imports it dynamically and catches the failure, so the red is an assertion (references/tooling.md); a static import of a missing module is refused.

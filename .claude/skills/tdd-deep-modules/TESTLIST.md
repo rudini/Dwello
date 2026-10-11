@@ -258,3 +258,11 @@ Fast tier = `scripts["test:fast"]` of each package.json (its `bun test` segment)
 - [ ] the depth check names the swarm of exported helpers: a functional core is fine as internal structure, but many small exported pure functions with one caller are classitis
 - [ ] `skill_lint` names a SKILL.md without the doubles rule (its phrases and its bold item)
 - [ ] `skill_lint` names a SKILL.md without the test boundary or the swarm item
+
+### Step 09, review round 1 (fixes)
+
+- [x] every task (not only the range) ends on the full suite: a green or refactor before a `test:` commit is a task end
+- [x] a commit whose fast run loses a test that ran in the previous fast run is rejected (both tiers run for every commit)
+- [x] `tdd-step`: `--suite` anywhere but right after the phase, `--suite=x` and other `--` words exit 2 with usage
+- [x] refactor: `TIERS` and `default_tier(phase)` live in `protocol`; `Verdict.suite` has no default
+- note: red a81080a changed the old usage assertion together with the new test, so it failed two tests; the old assertion had to follow the new usage text and could not stay green in that red. Accepted as an exception, recorded here.
