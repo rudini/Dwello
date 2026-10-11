@@ -692,3 +692,16 @@ class TddStepTest(unittest.TestCase):
 
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(repo.trailer("TDD-Exit-Code"), "1")
+
+    def test_vitest_async_matcher_failures_are_red(self):
+        bodies = {"resolves": "  await expect(Promise.resolve(add(1, 2))).resolves.toBe(3);\n",
+                  "rejects": "  await expect(Promise.reject({ status: add(1, 2) })).rejects.toMatchObject({ status: 3 });\n"}
+        for name, body in bodies.items():
+            with self.subTest(name):
+                repo = vitest_repo(self)
+                repo.write("calc.test.js", 'import { test, expect } from "vitest";\nimport { add } from "./calc.js";\n\n'
+                           f'test("adds", async () => {{\n{body}}});\n')
+
+                result = repo.run("tdd-step", "red", "adds two numbers")
+
+                self.assertEqual(result.returncode, 0, result.stderr)
