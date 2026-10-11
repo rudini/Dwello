@@ -57,3 +57,12 @@ already produced the behavior; each pin was mutation-checked instead.
 - [x] pytest config in `setup.cfg` / `tox.ini`; plain module-level `def test_` without config
 - [x] deleted tracked test files do not crash detection
 - [x] pins: `-uall`, `.spec.`, `test/`, `__tests__/` (mutation-checked)
+
+### Step 1, review round 3 (fixes)
+
+- [x] a suite that crashes before collecting is kept (error) in a mixed repo
+- [x] green cannot change test configuration (`vite.config.*`, `pytest.ini`, `pyproject.toml`, `setup.cfg`, `tox.ini`)
+- [x] a test named after unhandled errors is still red
+- [x] non-UTF-8 package.json exits 2
+- [x] non-ASCII test file names are detected
+- [x] pins: pytest config sections alone, highest exit code in mixed repos
