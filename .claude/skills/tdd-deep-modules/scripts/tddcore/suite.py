@@ -132,11 +132,13 @@ def _run_bun(directory, command):
         report = Path(tmp) / "report.xml"
         done = subprocess.run([*shlex.split(command), "--reporter=junit", f"--reporter-outfile={report}"],
                               cwd=directory, capture_output=True, text=True, errors="replace")
-        cases = list(ElementTree.parse(report).iter("testcase")) if report.exists() else []
+        reported = report.exists()
+        cases = list(ElementTree.parse(report).iter("testcase")) if reported else []
     failed = sum(1 for case in cases for _ in case.iter("failure"))
     ran = sum(1 for case in cases if case.find("skipped") is None)
-    return Run(done.returncode, _bun_outcome(done.returncode, cases), f"bun: {failed} of {len(cases)} tests failed", failed, ran,
-               not cases)
+    outcome = _bun_outcome(done.returncode, cases) if reported else "error"
+    return Run(done.returncode, outcome, f"bun: {failed} of {len(cases)} tests failed", failed, ran,
+               reported and not cases)
 
 
 def _run_vitest(root):
