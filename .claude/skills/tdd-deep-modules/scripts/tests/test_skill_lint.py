@@ -251,3 +251,24 @@ class SkillLintTest(unittest.TestCase):
 
         self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
         self.assertIn("skill_lint: references/depth.md is not linked from SKILL.md\n", result.stdout)
+
+    def test_the_hook_check_follows_claude_codes_matcher_and_command_rules(self):
+        real = (SKILL / "SKILL.md").read_text()
+        matcher = 'matcher: "Write|Edit|MultiEdit"'
+        command = "'\"$CLAUDE_PROJECT_DIR\"/.claude/skills/tdd-deep-modules/scripts/tdd-guard'"
+        self.assertIn(matcher, real)
+        self.assertIn(command, real)
+        accepted = {"star matcher": real.replace(matcher, 'matcher: "*"'),
+                    "empty matcher": real.replace(matcher, 'matcher: ""'),
+                    "no matcher": real.replace("    - " + matcher + "\n      hooks:", "    - hooks:")}
+        rejected = {"prompt hook": real.replace("type: command", "type: prompt"),
+                    "echo": real.replace(command, "'echo scripts/tdd-guard'")}
+        for name, text in {**accepted, **rejected}.items():
+            with self.subTest(name):
+                copy = copy_of_skill(self)
+                (copy / "SKILL.md").write_text(text)
+
+                result = lint(copy)
+
+                registered = "hooks: no PreToolUse hook" not in result.stdout
+                self.assertEqual(registered, name in accepted, result.stdout)
