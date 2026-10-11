@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""tdd-step <test|red|green|refactor> [message]: run the tests, then commit the phase."""
+"""tdd-step <test|red|green|refactor> [--suite fast|full] [message]: run the tests, commit the phase."""
 import os
 import subprocess
 import sys
@@ -52,13 +52,14 @@ def head_suite():
 
 
 def main(args):
-    if not args or args[0] not in protocol.PHASES:
-        print("usage: tdd-step <test|red|green|refactor> [message]", file=sys.stderr)
-        return 2
-    phase, rest = args[0], args[1:]
+    phase, rest = (args[0], args[1:]) if args else (None, [])
     tier = "full" if phase == "refactor" else "fast"
     if rest[:1] == ["--suite"]:
-        tier, rest = rest[1], rest[2:]
+        tier, rest = (rest + [None])[1], rest[2:]
+    if phase not in protocol.PHASES or tier not in ("fast", "full"):
+        print("usage: tdd-step <test|red|green|refactor> [--suite fast|full] [message]",
+              file=sys.stderr)
+        return 2
     message = " ".join(" ".join(rest).split()) or phase
     root = run_git("rev-parse", "--show-toplevel")
     if root.returncode != 0:
