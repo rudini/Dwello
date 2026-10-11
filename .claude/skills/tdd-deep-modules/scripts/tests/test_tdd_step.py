@@ -641,3 +641,11 @@ class TddStepTest(unittest.TestCase):
                 repo.commit_all("red: adds", red)
                 repo.write(config, text)
                 self.assert_refused(repo, "green", f"not tests: {config}", head="red: adds")
+
+    def test_a_test_named_after_unhandled_errors_is_still_red(self):
+        repo = vitest_repo(self)
+        repo.write("calc.test.js", VITEST_TEST.replace('"adds"', '"reports an unhandled error"'))
+
+        result = repo.run("tdd-step", "red", "reports errors")
+
+        self.assertEqual(result.returncode, 0, result.stderr)
