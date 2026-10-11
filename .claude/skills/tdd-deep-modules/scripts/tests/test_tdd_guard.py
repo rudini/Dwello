@@ -49,3 +49,20 @@ class TddGuardTest(unittest.TestCase):
 
         self.assertEqual(result.returncode, 2, result.stderr)
         self.assertIn("src/new/calc.ts is production code", result.stderr)
+
+    def test_production_edits_are_blocked_before_any_tdd_commit(self):
+        repo = bun_repo(self)
+
+        result = guard(repo, "MultiEdit", "calc.ts")
+
+        self.assertEqual(result.returncode, 2, result.stderr)
+        self.assertIn("last TDD phase is start", result.stderr)
+
+    def test_test_files_may_always_be_edited(self):
+        repo = bun_repo(self)
+        repo.commit_phase("test", {"TESTLIST.md": "- [ ] adds\n"}, 1)
+        for rel in ("calc.test.ts", "tests/helpers.ts", "vitest.config.ts", "TESTLIST.md"):
+            with self.subTest(rel):
+                result = guard(repo, "Write", rel)
+
+                self.assertEqual(result.returncode, 0, result.stderr)

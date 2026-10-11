@@ -1,0 +1,2 @@
+KILLED   tdd-guard: 'if protocol.is_production(rel) and phase not in ("red", "green", "refactor"):' -> 'if protocol.is_production(rel) and phase not in ("red", "green", "refactor", "start"):' [test_production_edits_are_blocked_before_any_tdd_commit]
+KILLED   tdd-guard: 'if protocol.is_production(rel) and phase not in ("red", "green", "refactor"):' -> 'if phase not in ("red", "green", "refactor"):' [test_test_files_may_always_be_edited]
