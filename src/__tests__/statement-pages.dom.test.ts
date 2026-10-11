@@ -147,6 +147,17 @@ describe('Abrechnungsliste', () => {
 		expect(document.querySelector('[role="dialog"]')).toBeNull();
 	});
 
+	// Der Knopf der Zeile verschwindet nach dem Speichern: der Fokus geht auf den Titel, nicht auf die Seite
+	it('setzt nach dem Zahlungseingang aus der Liste den Fokus auf den Titel', async () => {
+		fakeBff();
+		list([statement({ status: 'sent' })]);
+		click('statement-row-mark-paid');
+		click('statement-list-mark-paid-confirm');
+		await settle();
+
+		expect(document.activeElement).toBe(document.querySelector('h1'));
+	});
+
 	it('meldet im Dialog, wenn der Zahlungseingang nicht gespeichert wird', async () => {
 		fakeBff(() => [400, { error: 'Invalid status transition' }]);
 		list([statement({ status: 'sent' })]);
@@ -238,7 +249,9 @@ describe('Abrechnungsliste', () => {
 		flushSync();
 		expect(field.getAttribute('aria-invalid')).toBe('true');
 
-		const calendar = document.querySelector<HTMLInputElement>('[role="dialog"] input[type="date"]')!;
+		const calendar = document.querySelector<HTMLInputElement>(
+			'[role="dialog"] input[type="date"]'
+		)!;
 		calendar.value = '2026-10-01';
 		calendar.dispatchEvent(new Event('input', { bubbles: true })); // the picker sends input, then change
 		calendar.dispatchEvent(new Event('change', { bubbles: true }));
@@ -258,7 +271,9 @@ describe('Abrechnungsliste', () => {
 		field.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
 		await settle();
 
-		expect(calls).toEqual([{ method: 'POST', path: '/statements/s1/mark-paid', body: { paidDate: '2025-01-01' } }]);
+		expect(calls).toEqual([
+			{ method: 'POST', path: '/statements/s1/mark-paid', body: { paidDate: '2025-01-01' } }
+		]);
 	});
 
 	// Enter im Feld bestätigt, wie in jedem Formular; der versteckte Kalender ist kein Tabstopp
@@ -270,7 +285,9 @@ describe('Abrechnungsliste', () => {
 		window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
 		expect(document.activeElement).toBe(byTestId('dialog-cancel'));
 
-		byTestId('paid-date-input')!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+		byTestId('paid-date-input')!.dispatchEvent(
+			new KeyboardEvent('keydown', { key: 'Enter', bubbles: true })
+		);
 		await settle();
 		expect(calls.map((call) => call.path)).toEqual(['/statements/s1/mark-paid']);
 	});
@@ -604,7 +621,14 @@ describe('Abrechnungsdetail', () => {
 		expect(submitted).not.toHaveBeenCalled();
 		expect(document.querySelector('[role="dialog"]')).not.toBeNull();
 		expect(field.getAttribute('aria-invalid')).toBe('true');
-		expect(document.getElementById(field.getAttribute('aria-describedby')!.split(' ').find((id) => id.endsWith('-error'))!)!.textContent).toContain('Das Zahlungsdatum liegt in der Zukunft.');
+		expect(
+			document.getElementById(
+				field
+					.getAttribute('aria-describedby')!
+					.split(' ')
+					.find((id) => id.endsWith('-error'))!
+			)!.textContent
+		).toContain('Das Zahlungsdatum liegt in der Zukunft.');
 	});
 
 	it('meldet im Detaildialog ein falsches Zahlungsdatum auch beim zweiten Versuch', () => {
@@ -624,7 +648,9 @@ describe('Abrechnungsdetail', () => {
 		toasts.set([]);
 		detail({ status: 'sent' });
 		click('statement-mark-paid-button');
-		const after = actions.get('?/markPaid')!({ formData: new FormData() }) as (input: unknown) => Promise<void>;
+		const after = actions.get('?/markPaid')!({ formData: new FormData() }) as (
+			input: unknown
+		) => Promise<void>;
 		await after({ update: async () => {}, result: { type: 'success' } });
 		await settle();
 

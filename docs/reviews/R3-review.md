@@ -116,3 +116,11 @@ Sven-N9 und Sven-N10 bestätigt: beim ersten Enter in allen Fällen der richtige
 | R7-F1 | mittel | Nach einem unmöglichen Datum und der Wahl im Kalender blieb ein veralteter Fehler stehen (der Kalender übernahm das Datum erst bei `change`) | Kalender übernimmt das Datum bei `input`; Test mit der Ereignisfolge des Pickers |
 | R7-F3 | niedrig | Liste: nach dem Speichern verschwindet der Knopf der Zeile, der Fokus fiel auf die Seite | Fokus auf den Titel |
 | R7-F2 | niedrig | Desktop: Der Fehler beim Verlassen des Felds vergrössert den zentrierten Dialog, der Knopf rutscht 28 px, der erste Klick geht verloren (erklärt wohl Sven-N12) | offen, `offene-punkte.md` |
+
+## Runde 8 (Prüfung im echten Chromium auf 3d12d67)
+
+R7-F1 und R7-F3 bestätigt: nach einem unmöglichen Datum nimmt die Wahl im Kalender den Fehler weg (Bezahlt-Dialoge, neue Rechnung, Tankbestand); Leeren des Kalenders leert Text, Worte und Formularfeld; Fokus nach dem Speichern aus der Liste auf dem Titel. Kein Finding über «niedrig».
+
+| # | Schwere | Finding | Behandlung |
+|---|---|---|---|
+| R8-F1 | niedrig | Fokus auf den Titel in der Liste ohne Test | Test ergänzt; er scheitert ohne den Fokus |
