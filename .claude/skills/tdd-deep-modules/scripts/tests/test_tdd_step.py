@@ -816,3 +816,14 @@ class TddStepTest(unittest.TestCase):
                            'test("a", () => {\n  expect(add(1, 2)).toBe(4);\n});\n')
                 repo.write("backend/b.test.ts", text)
                 self.assert_refused(repo, "red", "red needs a failing assertion")
+
+    def test_the_trailer_counts_a_dropped_framework_exit_code(self):
+        repo = vitest_repo(self)
+        repo.commit_all("green: seed", {"calc.js": RIGHT_ADD_JS, "calc.test.js": VITEST_TEST,
+                                        "calc.py": RIGHT_ADD, "test_calc.py": PYTEST_TEST})
+        (repo.path / "calc.test.js").unlink()
+
+        result = repo.run("tdd-step", "refactor", "drop js test")
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(repo.trailer("TDD-Exit-Code"), "1")
