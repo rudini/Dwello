@@ -119,7 +119,8 @@ def _required(body):
 def _hook(front, skill):
     """The PreToolUse hook that runs scripts/tdd-guard on Write and Edit, and the script itself."""
     hooks = front.get("hooks") if isinstance(front.get("hooks"), dict) else {}
-    registered = any(_runs_guard(entry) for entry in hooks.get("PreToolUse") or [])
+    entries = hooks.get("PreToolUse")
+    registered = isinstance(entries, list) and any(_runs_guard(entry, skill.name) for entry in entries)
     found = [] if registered else ["hooks: no PreToolUse hook runs scripts/tdd-guard for Write and Edit"]
     guard = skill / "scripts" / "tdd-guard"
     if not (guard.is_file() and os.access(guard, os.X_OK)):
@@ -149,23 +150,26 @@ def _frontmatter(front, directory):
     return found
 
 
-def _runs_guard(entry):
-    """True for a hook entry whose matcher covers Write and Edit and whose command runs scripts/tdd-guard."""
-    if not isinstance(entry, dict):
+def _runs_guard(entry, name):
+    """True for a hook entry whose matcher covers Write and Edit and whose command runs this skill's guard."""
+    if not isinstance(entry, dict) or not isinstance(entry.get("hooks"), list):
         return False
     matcher = str(entry.get("matcher") or "*")  # Claude Code: no, empty or `*` matcher matches every tool
     try:
         matches = matcher == "*" or all(re.fullmatch(matcher, tool) for tool in ("Write", "Edit"))
     except re.error:
         return False
-    hooks = [hook for hook in entry.get("hooks") or [] if isinstance(hook, dict) and hook.get("type") == "command"]
-    return matches and any(_program(str(hook.get("command", ""))).endswith("scripts/tdd-guard") for hook in hooks)
+    commands = [str(hook.get("command", "")) for hook in entry["hooks"]
+                if isinstance(hook, dict) and hook.get("type") == "command"]
+    return matches and any(_runs_only(command, f".claude/skills/{name}/scripts/tdd-guard") for command in commands)
 
 
-def _program(command):
-    """The program a hook command runs: its first shell word."""
+def _runs_only(command, guard):
+    """True when the shell command runs `guard` and nothing else (directly, or through `sh`/`bash`)."""
     try:
         words = shlex.split(command)
     except ValueError:
-        return ""
-    return words[0] if words else ""
+        return False
+    if words[:1] in (["sh"], ["bash"]):
+        words = words[1:]
+    return len(words) == 1 and words[0].endswith(guard)
