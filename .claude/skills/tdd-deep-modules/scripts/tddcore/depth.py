@@ -40,12 +40,12 @@ def measure(root, path):
     if not module.is_file():
         raise NotAModule(f"{path}: no such file")
     text = module.read_text(errors="replace")
-    code = re.sub(r"/\*.*?\*/", "", text, flags=re.DOTALL)  # without block comments
-    surface, size = _surface(text), _size(code)
-    tiny = [name for name, methods in _classes(text) if len(methods) <= TINY_CLASS]
+    code = re.sub(r"/\*.*?\*/|//[^\n]*", "", text, flags=re.DOTALL)  # without comments
+    surface, size = _surface(code), _size(code)
+    tiny = [name for name, methods in _classes(code) if len(methods) <= TINY_CLASS]
     metrics = Depth(path, surface, size, size / surface if surface else float(size),
-                    tuple(tiny) if len(tiny) >= 2 else (), _pass_through(text), _tests(module, path),
-                    _unused(text), _duplicate(code), ())
+                    tuple(tiny) if len(tiny) >= 2 else (), _pass_through(code), _tests(module, path),
+                    _unused(code), _duplicate(code), ())
     return replace(metrics, findings=_findings(metrics))
 
 
