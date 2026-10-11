@@ -1,0 +1,5 @@
+KILLED   tdd-step: '"-z", "-uall"' -> '"-z", "-unormal"' [test_untracked_production_code_in_a_new_directory_is_refused_as_red]
+KILLED   tddcore/protocol.py: ' or ".spec." in name' -> '' [test_spec_files_and_test_directories_are_test_code]
+KILLED   tddcore/protocol.py: '_TEST_DIRS = {"tests", "test", "__tests__"}' -> '_TEST_DIRS = {"tests", "__tests__"}' [test_spec_files_and_test_directories_are_test_code]
+KILLED   tddcore/protocol.py: '_TEST_DIRS = {"tests", "test", "__tests__"}' -> '_TEST_DIRS = {"tests", "test"}' [test_spec_files_and_test_directories_are_test_code]
+SURVIVED tddcore/suite.py: '"-p", "no:cacheprovider",' -> '' [test_pytest_assertion_failure_is_committed_as_red]

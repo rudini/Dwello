@@ -591,3 +591,22 @@ class TddStepTest(unittest.TestCase):
         result = repo.run("tdd-step", "refactor", "drop duplicate test")
 
         self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_untracked_production_code_in_a_new_directory_is_refused_as_red(self):
+        repo = Repo(self, {"calc.py": WRONG_ADD})
+        repo.write("test_calc.py", ADD_TEST)
+        repo.write("lib/prod.py", "X = 1\n")
+        self.assert_refused(repo, "red", "production code changed: lib/prod.py")
+
+    def test_spec_files_and_test_directories_are_test_code(self):
+        helpers = {".spec. file": "calc.spec.js", "test/ directory": "test/helper.js",
+                   "__tests__/ directory": "__tests__/helper.js"}
+        for kind, helper in helpers.items():
+            with self.subTest(kind):
+                repo = Repo(self, {"calc.py": WRONG_ADD})
+                repo.write("test_calc.py", ADD_TEST)
+                repo.write(helper, "export const pair = [1, 2];\n")
+
+                result = repo.run("tdd-step", "red", "adds two numbers")
+
+                self.assertEqual(result.returncode, 0, result.stderr)
