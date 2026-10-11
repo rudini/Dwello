@@ -197,3 +197,12 @@ class SkillLintTest(unittest.TestCase):
                 result = lint(copy)
 
                 self.assertIn(f"skill_lint: missing in '{section}': {named}\n", result.stdout)
+
+    def test_a_relative_skill_path_is_judged_by_its_real_directory_name(self):
+        copy = copy_of_skill(self)
+
+        result = subprocess.run([sys.executable, str(SCRIPTS / "skill_lint"), "."], cwd=copy,
+                                capture_output=True, text=True)
+
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
