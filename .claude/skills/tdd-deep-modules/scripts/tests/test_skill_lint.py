@@ -33,3 +33,33 @@ class SkillLintTest(unittest.TestCase):
 
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertEqual(result.stdout.strip(), "skill_lint: OK")
+
+    def test_frontmatter_problems_are_named(self):
+        real = (SKILL / "SKILL.md").read_text()
+        description = next(line for line in real.splitlines() if line.startswith("description: "))
+        body = real.split("---\n", 2)[2]
+        cases = {
+            "no frontmatter": (body, "SKILL.md has no frontmatter"),
+            "unreadable": ("---\nname: [x\n---\n" + body, "frontmatter is not valid YAML"),
+            "no name": (real.replace("name: tdd-deep-modules\n", ""), "frontmatter: name is missing"),
+            "not kebab": (real.replace("name: tdd-deep-modules", "name: TDD_Deep"),
+                          "frontmatter: name 'TDD_Deep' is not kebab-case"),
+            "other name": (real.replace("name: tdd-deep-modules", "name: tdd-other"),
+                           "frontmatter: name 'tdd-other' differs from the directory 'tdd-deep-modules'"),
+            "no description": (real.replace(description + "\n", ""), "frontmatter: description is missing"),
+            "long description": (real.replace(description, "description: " + "x" * 1100),
+                                 "frontmatter: description has 1100 characters (limit 1024)"),
+            "angle brackets": (real.replace(description, "description: Use for <tdd>"),
+                               "frontmatter: description contains angle brackets"),
+            "unknown key": (real.replace("name: tdd-deep-modules\n", "name: tdd-deep-modules\ncolor: red\n"),
+                            "frontmatter: unknown key 'color'"),
+        }
+        for name, (text, message) in cases.items():
+            with self.subTest(name):
+                copy = copy_of_skill(self)
+                (copy / "SKILL.md").write_text(text)
+
+                result = lint(copy)
+
+                self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+                self.assertIn(f"skill_lint: {message}\n", result.stdout)
