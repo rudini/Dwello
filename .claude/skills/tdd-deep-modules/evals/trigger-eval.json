@@ -1,0 +1,12 @@
+[
+  {"query": "In our SvelteKit app with vitest, add a function that splits a utility bill across apartments by area. Do it strictly test-first: one failing test, then the code, then refactor, and commit each step.", "should_trigger": true},
+  {"query": "Fix the bug where the invoice total in backend/src/services/invoice.service.ts rounds wrong; write a red test with bun test first and then make it green.", "should_trigger": true},
+  {"query": "I want red-green-refactor with real enforcement on this TypeScript project, and the module design should be deep (small interface, lots hidden). Start with the tenant import parser.", "should_trigger": true},
+  {"query": "Check that the last 12 commits on this branch really followed TDD: every red failing, every green passing, re-run each commit.", "should_trigger": true},
+  {"query": "Build the new deposit calculation module the TDD way with vitest and keep the interface minimal, compare two interface designs before you start.", "should_trigger": true},
+  {"query": "Write a Python pytest suite for our data import script.", "should_trigger": false},
+  {"query": "Explain what the difference between unit tests and integration tests is, with examples.", "should_trigger": false},
+  {"query": "Our Playwright e2e tests are flaky on CI, please find out why the login scenario times out.", "should_trigger": false},
+  {"query": "Increase the vitest coverage threshold in vitest.config.ts to 85 percent and update CI.", "should_trigger": false},
+  {"query": "Refactor src/lib/server/auth.ts to remove the duplicated cookie options, the tests already pass.", "should_trigger": false}
+]
