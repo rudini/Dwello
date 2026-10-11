@@ -620,3 +620,24 @@ class TddStepTest(unittest.TestCase):
         repo.write("pymod.py", "def f(:\n")
 
         self.assert_refused(repo, "green", "green needs all tests passing", head="red: seed")
+
+    def test_green_cannot_exclude_the_failing_test_through_configuration(self):
+        deselect = "--deselect test_calc.py::test_adds"
+        projects = {
+            "vite.config.js": (vitest_repo(self), {"calc.test.js": VITEST_TEST},
+                               'export default { test: { exclude: ["calc.test.js", "node_modules/**"] } };\n'),
+            "pytest.ini": (Repo(self, {"calc.py": WRONG_ADD, "pytest.ini": "[pytest]\n"}),
+                           {"test_calc.py": PYTEST_TEST}, f"[pytest]\naddopts = {deselect}\n"),
+            "pyproject.toml": (Repo(self, {"calc.py": WRONG_ADD, "pyproject.toml": "[tool.pytest.ini_options]\n"}),
+                               {"test_calc.py": PYTEST_TEST},
+                               f'[tool.pytest.ini_options]\naddopts = "{deselect}"\n'),
+            "setup.cfg": (Repo(self, {"calc.py": WRONG_ADD, "setup.cfg": "[tool:pytest]\n"}),
+                          {"test_calc.py": PYTEST_TEST}, f"[tool:pytest]\naddopts = {deselect}\n"),
+            "tox.ini": (Repo(self, {"calc.py": WRONG_ADD, "tox.ini": "[pytest]\n"}),
+                        {"test_calc.py": PYTEST_TEST}, f"[pytest]\naddopts = {deselect}\n"),
+        }
+        for config, (repo, red, text) in projects.items():
+            with self.subTest(config):
+                repo.commit_all("red: adds", red)
+                repo.write(config, text)
+                self.assert_refused(repo, "green", f"not tests: {config}", head="red: adds")
