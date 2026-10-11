@@ -213,3 +213,13 @@ export class Ledger {
         self.assertTrue(line.startswith("src/run.ts: surface 2, size 3, ratio 1.5, classitis no, "
                                         "pass-through 0, tests 0, unused 0,"), line)
         self.assertNotIn("for", line.split(" -> ", 1)[1])
+
+    def test_arrow_and_awaiting_forwards_are_pass_throughs(self):
+        module = ("export const get = (id: string) => fetchIt(id);\n"
+                  "export async function load(id: string) {\n  return await fetchIt(id);\n}\n"
+                  "function fetchIt(id: string) {\n  return id.trim().toUpperCase();\n}\n")
+        repo = Repo(self, {"src/get.ts": module})
+
+        line = report_line(repo.run("depth_report", "src/get.ts"), "src/get.ts")
+
+        self.assertIn("pass-through: get, load", line.split(" -> ", 1)[1])
