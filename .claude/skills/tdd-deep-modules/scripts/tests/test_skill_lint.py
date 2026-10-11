@@ -374,3 +374,15 @@ class SkillLintTest(unittest.TestCase):
                 self.assertNotIn("Traceback", result.stderr)
                 registered = "hooks: no PreToolUse hook" not in result.stdout
                 self.assertEqual(registered, name in accepted, result.stdout + result.stderr)
+
+    def test_tilde_fences_and_html_comments_hold_no_sections(self):
+        real = (SKILL / "SKILL.md").read_text()
+        rules = real[real.index("## Hard rules"):real.index("## 1. ")]
+        for name, (opening, closing) in {"tilde fence": ("~~~\n", "~~~\n\n"), "comment": ("<!--\n", "-->\n\n")}.items():
+            with self.subTest(name):
+                copy = copy_of_skill(self)
+                (copy / "SKILL.md").write_text(real.replace(rules, opening + rules + closing))
+
+                result = lint(copy)
+
+                self.assertIn("skill_lint: missing section 'Hard rules'\n", result.stdout)
