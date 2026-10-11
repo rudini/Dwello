@@ -23,6 +23,7 @@ class Run:
     ran: int  # tests run, not skipped
     tests: frozenset = frozenset()  # ids of the tests the framework collected
     failing: frozenset = frozenset()  # ids of the tests that failed
+    skipped: frozenset = frozenset()  # ids of collected tests that did not run (skip, todo, filtered)
 
 
 def run(root):
@@ -43,7 +44,8 @@ def _combine(runs):
     # the exit code covers every command run, so the trailer never hides a failing one
     return Run(max(r.exit_code for r in runs), outcome, summary, sum(r.failed for r in runs), ran,
                frozenset().union(*(r.tests for r in runs)),
-               frozenset().union(*(r.failing for r in runs)))
+               frozenset().union(*(r.failing for r in runs)),
+               frozenset().union(*(r.skipped for r in runs)))
 
 
 def _files(root):
@@ -119,7 +121,8 @@ def _run_bun(directory, command, package):
     ids = _numbered(f"{package / case.get('file', '')}::{case.get('classname', '')}::"
                     f"{case.get('name')}" for case in cases)
     failing = frozenset(i for i, case in zip(ids, cases) if case.find("failure") is not None)
-    return Run(done.returncode, outcome, summary, failed, ran, frozenset(ids), failing)
+    skipped = frozenset(i for i, case in zip(ids, cases) if case.find("skipped") is not None)
+    return Run(done.returncode, outcome, summary, failed, ran, frozenset(ids), failing, skipped)
 
 
 def _run_vitest(root, package):
@@ -142,7 +145,9 @@ def _run_vitest(root, package):
     ids = _numbered(i for i, _ in results)
     return Run(done.returncode, _vitest_outcome(done.returncode, data, unhandled), summary,
                data["numFailedTests"], ran, frozenset(ids),
-               frozenset(i for i, (_, status) in zip(ids, results) if status == "failed"))
+               frozenset(i for i, (_, status) in zip(ids, results) if status == "failed"),
+               frozenset(i for i, (_, status) in zip(ids, results)
+                         if status in ("skipped", "pending", "todo")))
 
 
 def _numbered(ids):

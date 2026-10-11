@@ -29,7 +29,7 @@ def replay(repo, rev_range):
         try:
             _git(repo, "worktree", "add", "-q", "--detach", str(tree), base or commits[0])
             _borrow_node_modules(repo, tree)
-            known = _run(tree).tests if base else frozenset()
+            known = _run(tree) if base else suite.Run(0, "pass", "", 0, 0)
             for commit in commits:
                 _checkout(repo, tree, commit)
                 subject = _git(tree, "log", "-1", "--format=%s")
@@ -42,7 +42,7 @@ def replay(repo, rev_range):
                 verdicts.append(Verdict(commit, phase, run,
                                         tuple(_judge(previous, known, subject, claimed, run,
                                                      changed))))
-                previous, known = phase, run.tests
+                previous, known = phase, run
         finally:
             # twice --force: an add interrupted by a signal leaves the worktree locked
             subprocess.run(["git", "worktree", "remove", "--force", "--force", str(tree)], cwd=repo,
@@ -85,7 +85,8 @@ def _judge(previous, known, subject, claimed, run, changed):
         if claimed != str(run.exit_code):
             found.append(f"the trailer says exit code {claimed or 'nothing'}, "
                          f"but the tests exit with {run.exit_code}")
-    new, removed = run.tests - known, known - run.tests
+    new = run.tests - known.tests
+    removed = (known.tests - known.skipped) - (run.tests - run.skipped)  # gone, or no longer running
     if phase == "red" and len(new) != 1:
         found.append(f"red must add exactly one new test, but adds {len(new)}")
     if phase == "red" and run.failing - new:
