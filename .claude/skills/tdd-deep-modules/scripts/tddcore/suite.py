@@ -110,13 +110,12 @@ def _run_bun(directory, command):
     failed = sum(1 for case in cases for _ in case.iter("failure"))
     ran = sum(1 for case in cases if case.find("skipped") is None)
     # Files that fail to load never reach the JUnit report; bun's own summary counts them.
-    output = done.stdout + done.stderr
-    errors = re.search(r"^\s*(\d+) errors?$", output, re.MULTILINE)
-    hidden = errors is not None and int(errors[1]) > 0
+    errors = _bun_summary_errors(done.stderr)
+    hidden = errors > 0
     outcome = _bun_outcome(done.returncode, cases) if reported and not hidden else "error"
     summary = f"bun: {failed} of {len(cases)} tests failed"
     if hidden:
-        summary += f" ({errors[1]} errors outside tests)"
+        summary += f" ({errors} errors outside tests)"
     return Run(done.returncode, outcome, summary, failed, ran)
 
 
@@ -136,6 +135,21 @@ def _run_vitest(root):
                           done.stderr + done.stdout, re.MULTILINE) is not None
     return Run(done.returncode, _vitest_outcome(done.returncode, data, unhandled), summary,
                data["numFailedTests"], ran)
+
+
+def _bun_summary_errors(stderr):
+    """The `N error(s)` count of bun's closing summary: the counter lines right above `Ran N tests`."""
+    lines = stderr.splitlines()
+    ran = [i for i, line in enumerate(lines) if re.match(r"Ran \d+ tests? across", line)]
+    if not ran:
+        return 0
+    for line in reversed(lines[:ran[-1]]):
+        counter = re.fullmatch(r"\s*(\d+) (\w+).*", line)
+        if not counter:
+            break
+        if counter[2] in ("error", "errors"):
+            return int(counter[1])
+    return 0
 
 
 def _bun_outcome(exit_code, cases):
