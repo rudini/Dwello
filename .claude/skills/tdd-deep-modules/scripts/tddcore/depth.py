@@ -70,20 +70,20 @@ def _size(text):
     return sum(1 for line in text.splitlines() if line.strip() and not line.strip().startswith("//"))
 
 
-_EXPORTS = [  # (pattern, whether group 1 holds a parameter list); the first match per line wins
-    (r"export\s+(?:default\s+)?(?:async\s+)?function\*?\s*\w*\s*\(([^)]*)\)", True),
+_EXPORTS = [  # (pattern, whether group 1 holds a parameter list); the first match per export wins
+    (r"export\s+(?:default\s+)?(?:async\s+)?function\*?\s*\w*\s*(?:<[^>]*>)?\s*\(([^)]*)\)", True),
     (r"export\s+(?:const|let|var)\s+\w+\s*(?::[^=]+)?=\s*(?:async\s*)?(?:function\b[^(]*)?\(([^)]*)\)", True),
     (r"export\s*\{([^}]*)\}", False),
-    (r"export\s+(?:default|const|let|var|type|interface|enum|declare|abstract|class|\*)", None),
+    (r"export\s+(?:default|const|let|var|type|interface|enum|declare|abstract|class|async|function|\*)", None),
 ]
 
 
 def _surface(text):
     """Exported names, the parameters of exported functions, and the public members of exported classes."""
     surface = 0
-    for line in text.splitlines():
+    for start in re.finditer(r"^export\b", text, re.MULTILINE):
         for pattern, params in _EXPORTS:
-            match = re.match(pattern, line)
+            match = re.match(pattern, text[start.start():])
             if match:
                 if params is None:
                     surface += 1
