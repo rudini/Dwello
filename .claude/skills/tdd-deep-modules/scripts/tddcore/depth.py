@@ -9,11 +9,8 @@ class Depth:
     path: str
     surface: int  # what a caller must know: exported names and their parameters
     size: int  # code lines: no blanks, no comments
+    ratio: float  # size per unit of surface
     findings: tuple
-
-    @property
-    def ratio(self):
-        return self.size / self.surface if self.surface else float(self.size)
 
 
 SHALLOW_RATIO = 4  # fewer code lines per thing a caller must know means the module hides little
@@ -24,7 +21,7 @@ def measure(root, path):
     surface, size = _surface(text), _size(text)
     ratio = size / surface if surface else float(size)
     findings = (f"shallow: ratio {ratio:.1f} < {SHALLOW_RATIO}",) if ratio < SHALLOW_RATIO else ()
-    return Depth(path, surface, size, findings)
+    return Depth(path, surface, size, ratio, findings)
 
 
 def _size(text):
