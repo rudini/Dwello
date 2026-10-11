@@ -116,3 +116,13 @@ class TddGuardTest(unittest.TestCase):
         result = guard(repo, "Write", "Calc.TS")
 
         self.assertEqual(result.returncode, 2, result.stderr)
+
+    def test_odd_input_shapes_are_a_clean_non_blocking_error(self):
+        for raw in ("[]", '{"tool_input": "calc.ts"}', '{"tool_input": {"file_path": 3}}'):
+            with self.subTest(raw):
+                result = subprocess.run([sys.executable, str(SCRIPTS / "tdd-guard")], input=raw,
+                                        capture_output=True, text=True)
+
+                self.assertEqual(result.returncode, 1, result.stderr)
+                self.assertIn("tdd-guard: cannot read the hook input", result.stderr)
+                self.assertNotIn("Traceback", result.stderr)
