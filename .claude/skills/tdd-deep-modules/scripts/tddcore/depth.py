@@ -183,7 +183,7 @@ def _tests(module, path):
 
 def _unused(text):
     """Top-level functions that are not exported and whose name appears nowhere else in the module."""
-    declared = re.findall(r"^(?:async\s+)?function\*?\s*(\w+)|^(?:const|let)\s+(\w+)\s*=\s*(?:async\s*)?\(",
+    declared = re.findall(r"^(?:async\s+)?function\*?\s*(\w+)|^(?:const|let)\s+(\w+)\s*=\s*(?:async\s*)?(?:\(|function\b)",
                           text, re.MULTILINE)
     names = [a or b for a, b in declared]
     return tuple(n for n in names if len(re.findall(rf"\b{re.escape(n)}\b", text)) == 1)
