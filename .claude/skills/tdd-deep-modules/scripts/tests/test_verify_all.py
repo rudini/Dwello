@@ -10,8 +10,8 @@ from tests.fixture import SCRIPTS
 
 SKILL = SCRIPTS.parent
 PASSING_TEST = "import unittest\n\n\nclass T(unittest.TestCase):\n    def test_ok(self):\n        pass\n"
-VERIFIERS = ["verify_all", "verify_stage1", "skill_lint", "tddcore/gate.py", "tddcore/verdicts.py",
-             "tddcore/selfcheck.py", "tddcore/lint.py"]
+VERIFIERS = ["verify_all", "verify_stage1", "skill_lint", "tddcore/__init__.py", "tddcore/gate.py",
+             "tddcore/verdicts.py", "tddcore/selfcheck.py", "tddcore/lint.py"]
 ALL_PASS = {f"{n:02d}": ["PASS"] for n in range(1, 9)}
 
 
@@ -41,9 +41,12 @@ def skill_dir(case, verdicts=ALL_PASS, test=PASSING_TEST, lock=True):
 
 
 def write_lock(root, review):
+    """The lock as the documented sha256sum command writes it: every file under scripts/ but tests/."""
+    files = sorted(path.relative_to(root).as_posix() for path in (root / "scripts").rglob("*")
+                   if path.is_file() and "tests" not in path.relative_to(root / "scripts").parts
+                   and "__pycache__" not in path.parts)
     lines = [f"reviewed: {review}"] + [
-        f"{hashlib.sha256((root / 'scripts' / name).read_bytes()).hexdigest()}  scripts/{name}"
-        for name in VERIFIERS]
+        f"{hashlib.sha256((root / name).read_bytes()).hexdigest()}  {name}" for name in files]
     (root / "verifiers.lock").write_text("\n".join(lines) + "\n")
 
 
@@ -104,7 +107,19 @@ class VerifiersLockTest(unittest.TestCase):
             lock.write_text(lock.read_text().replace("  scripts/skill_lint\n", "  scripts/other\n"))
             return root
 
+        def init_edited(root):
+            (root / "scripts" / "tddcore" / "__init__.py").write_text("from tddcore import lint\n")
+            return root
+
+        def shadow(root):
+            (root / "scripts" / "hashlib.py").write_text("# shadows the standard library\n")
+            return root
+
         cases = {
+            "package init edited": (lambda: init_edited(skill_dir(self)),
+                                    "verifiers.lock: scripts/tddcore/__init__.py changed since its review"),
+            "file added next to the verifiers": (lambda: shadow(skill_dir(self)),
+                                                 "verifiers.lock: scripts/hashlib.py is not locked"),
             "missing": (lambda: skill_dir(self, lock=False), "verifiers.lock: missing"),
             "verifier changed": (lambda: changed(skill_dir(self)),
                                  "verifiers.lock: scripts/tddcore/lint.py changed since its review"),
