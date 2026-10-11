@@ -2,12 +2,13 @@
 import json
 import os
 import re
+import shlex
 import subprocess
 import sys
 import tempfile
 import xml.etree.ElementTree as ElementTree
 from dataclasses import dataclass
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 
 _PYTHON_ENV = {**os.environ, "PYTHONDONTWRITEBYTECODE": "1"}
@@ -29,17 +30,15 @@ class Run:
 
 def run(root):
     """Detect every test framework under `root`, run each whole suite and classify the result."""
-    runners = []
-    if _uses_vitest(root):
-        runners.append(_run_vitest)
+    runners = _node_runners(root)
     if _uses_pytest(root):
-        runners.append(_run_pytest)
+        runners.append(lambda: _run_pytest(root))
     elif _has_python(root):
-        runners.append(_run_unittest)
+        runners.append(lambda: _run_unittest(root))
     if not runners:
         raise NoFramework("no supported test framework detected"
-                          " (looked for vitest, pytest, unittest)")
-    return _combine([runner(root) for runner in runners])
+                          " (looked for vitest, bun, pytest, unittest)")
+    return _combine([runner() for runner in runners])
 
 
 def _combine(runs):
@@ -88,10 +87,25 @@ def _unittest_outcome(exit_code, summary):
     return "error"
 
 
-def _uses_vitest(root):
-    manifest = Path(root) / "package.json"
-    if not manifest.exists():
-        return False
+def _node_runners(root):
+    """One runner per package.json in the repository: vitest or `bun test`, run in its directory."""
+    runners = []
+    for path in _files(root):
+        package = PurePosixPath(path)
+        if package.name != "package.json":
+            continue
+        directory = str(Path(root) / package.parent)
+        command = _test_command(directory)
+        if command == "vitest":
+            runners.append(lambda d=directory: _run_vitest(d))
+        elif command:
+            runners.append(lambda d=directory, c=command: _run_bun(d, c))
+    return runners
+
+
+def _test_command(directory):
+    """"vitest", the `bun test ...` command line, or None for a package.json without tests."""
+    manifest = Path(directory) / "package.json"
     try:
         data = json.loads(manifest.read_text())
     except (json.JSONDecodeError, UnicodeDecodeError) as error:
@@ -100,14 +114,30 @@ def _uses_vitest(root):
     if not isinstance(data, dict) or any(not isinstance(data.get(k, {}), dict) for k in sections):
         raise NoFramework(f"package.json must be an object whose {', '.join(sections)} are objects")
     if "vitest" in {**data.get("dependencies", {}), **data.get("devDependencies", {})}:
-        if not (Path(root) / "node_modules" / ".bin" / "vitest").exists():
+        if not (Path(directory) / "node_modules" / ".bin" / "vitest").exists():
             raise NoFramework("vitest is not installed: run npm install first")
-        return True
+        return "vitest"
     command = data.get("scripts", {}).get("test")
-    if command:
-        raise NoFramework(f"no supported test framework for package.json test script {command!r}"
-                          " (supported: vitest, pytest, unittest)")
-    return False
+    if not command:
+        return None
+    bun = [part.strip() for part in command.split("&&") if part.strip().startswith("bun test")]
+    if bun:
+        return bun[0]
+    raise NoFramework(f"no supported test framework for package.json test script {command!r}"
+                      " (supported: vitest, bun test, pytest, unittest)")
+
+
+def _run_bun(directory, command):
+    with tempfile.TemporaryDirectory() as tmp:
+        report = Path(tmp) / "report.xml"
+        done = subprocess.run([*shlex.split(command), "--reporter=junit", f"--reporter-outfile={report}"],
+                              cwd=directory, capture_output=True, text=True, errors="replace")
+        cases = list(ElementTree.parse(report).iter("testcase")) if report.exists() else []
+    failed = sum(1 for case in cases for _ in case.iter("failure"))
+    ran = sum(1 for case in cases if case.find("skipped") is None)
+    outcome = "pass" if done.returncode == 0 else "fail"
+    return Run(done.returncode, outcome, f"bun: {failed} of {len(cases)} tests failed", failed, ran,
+               not cases)
 
 
 def _run_vitest(root):
