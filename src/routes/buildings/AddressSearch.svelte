@@ -1,11 +1,5 @@
 <script lang="ts">
-	import {
-		searchAddress,
-		streetToAddress,
-		formatAddress,
-		type OpenPlzStreet,
-		type Address
-	} from '$lib/services/openplz';
+	import { searchAddresses, formatAddress, type Address } from '$lib/services/openplz';
 	import Field from '$lib/ui/Field.svelte';
 	import Icon from '$lib/ui/Icon.svelte';
 	import { controlClass } from '$lib/ui/field';
@@ -17,7 +11,7 @@
 		help?: string;
 		example?: string;
 		placeholder?: string;
-		onselect?: (_address: Address, _street: OpenPlzStreet) => void;
+		onselect?: (_address: Address) => void;
 	}
 
 	let {
@@ -30,7 +24,7 @@
 	}: Props = $props();
 
 	let value = $state('');
-	let results = $state<OpenPlzStreet[]>([]);
+	let results = $state<Address[]>([]);
 	let isLoading = $state(false);
 	let isOpen = $state(false);
 	let selectedIndex = $state(-1);
@@ -48,25 +42,18 @@
 		}
 		searchTimeout = setTimeout(async () => {
 			isLoading = true;
-			try {
-				results = await searchAddress(value, 8);
-				isOpen = results.length > 0;
-			} catch (err) {
-				console.error('Address search error:', err);
-				results = [];
-			} finally {
-				isLoading = false;
-			}
+			results = await searchAddresses(value, 8); // empty when the lookup fails
+			isOpen = results.length > 0;
+			isLoading = false;
 		}, 300);
 	}
 
-	function handleSelect(street: OpenPlzStreet) {
-		const address = streetToAddress(street);
+	function handleSelect(address: Address) {
 		value = formatAddress(address);
 		results = [];
 		isOpen = false;
 		selectedIndex = -1;
-		onselect?.(address, street);
+		onselect?.(address);
 	}
 
 	function handleKeydown(e: KeyboardEvent) {
@@ -152,7 +139,7 @@
 			role="listbox"
 			aria-label="Gefundene Adressen"
 		>
-			{#each results as street, index (index)}
+			{#each results as address, index (index)}
 				<li
 					id="{id}-result-{index}"
 					role="option"
@@ -160,13 +147,13 @@
 					class="flex min-h-12 cursor-pointer items-start gap-4 px-4 py-2 {index === selectedIndex
 						? 'bg-accent-soft'
 						: 'hover:bg-sunken'}"
-					onmousedown={() => handleSelect(street)}
+					onmousedown={() => handleSelect(address)}
 				>
 					<span class="text-ink-muted"><Icon name="location" /></span>
 					<span class="flex min-w-0 flex-col">
-						<span class="font-semibold text-ink">{street.name}</span>
+						<span class="font-semibold text-ink">{address.street}</span>
 						<span class="text-ink-muted"
-							>{street.postalCode} {street.locality} ({street.canton.shortName})</span
+							>{address.postalCode} {address.city} ({address.cantonShort})</span
 						>
 					</span>
 				</li>
