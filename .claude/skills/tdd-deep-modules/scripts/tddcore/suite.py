@@ -1,18 +1,13 @@
 """Run a project's test suite and say how it ended: pass, assertion failure, or error."""
 import json
-import os
 import re
 import shlex
 import shutil
 import subprocess
-import sys
 import tempfile
 import xml.etree.ElementTree as ElementTree
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
-
-
-_PYTHON_ENV = {**os.environ, "PYTHONDONTWRITEBYTECODE": "1"}
 
 
 class NoFramework(Exception):
