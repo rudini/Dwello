@@ -122,7 +122,8 @@ def _test_command(directory):
     command = data.get("scripts", {}).get("test")
     if not command:
         return None
-    bun = [part.strip() for part in command.split("&&") if part.strip().startswith("bun test")]
+    bun = [part.strip() for part in re.split(r"&&|\|\||;", command)
+           if re.search(r"(^|\s)bun test(\s|$)", part)]
     if bun:
         if shutil.which("bun") is None:
             raise NoFramework(f"bun is not installed, but {manifest} runs bun test")
@@ -134,8 +135,8 @@ def _test_command(directory):
 def _run_bun(directory, command):
     with tempfile.TemporaryDirectory() as tmp:
         report = Path(tmp) / "report.xml"
-        done = subprocess.run([*shlex.split(command), "--reporter=junit",
-                               f"--reporter-outfile={report}"],
+        done = subprocess.run(["sh", "-c", f"{command} --reporter=junit"
+                               f" --reporter-outfile={shlex.quote(str(report))}"],
                               cwd=directory, capture_output=True, text=True, errors="replace")
         reported = report.exists()
         cases = list(ElementTree.parse(report).iter("testcase")) if reported else []
