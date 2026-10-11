@@ -58,3 +58,9 @@ class SkillMdTest(unittest.TestCase):
         self.assertTrue(links, "SKILL.md links no references/ file")
         for link in sorted(links):
             self.assertTrue((SKILL.parent / link).is_file(), f"{link} does not exist")
+
+    def test_the_design_note_records_the_design_at_the_end(self):
+        text = dict(sections())["6. Design note"].lower()
+
+        for element in ("hidden decision", "both designs", "reason", "depth_report", "tdd_replay"):
+            self.assertIn(element, text)
