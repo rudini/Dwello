@@ -1,6 +1,6 @@
 import unittest
 
-from tests.fixture import BUN_TEST, NO_DATABASE_TEST, RIGHT_ADD_TS, tiered_repo
+from tests.fixture import BUN_TEST, NO_DATABASE_TEST, RIGHT_ADD_TS, TIERED_PACKAGE, tiered_repo
 
 DATABASE_TEST = NO_DATABASE_TEST.replace('"no database"', '"rows"')
 SQL_TEST = ('import { test, expect } from "bun:test";\nimport { sum } from "./sum";\n\n'
@@ -222,3 +222,15 @@ class TddReplayTierTest(unittest.TestCase):
         self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
         self.assertIn(f"{task_end[:7]} green    pass  exit=0 REJECT\n"
                       "    - the final commit must run the full suite\n", result.stdout)
+
+    def test_a_commit_that_drops_a_test_from_the_fast_suite_is_rejected(self):
+        repo = green_tiered_repo(self)
+        base = repo.git("rev-parse", "HEAD")
+        narrowed = TIERED_PACKAGE.replace("**/*.pg.test.ts", "**/*.pg.test.ts --path-ignore-patterns=calc.test.ts")
+        repo.commit_phase("red", {"package.json": narrowed, "sum.pg.test.ts": SQL_TEST}, 1)
+        repo.commit_phase("green", {"sum.ts": RIGHT_SUM_TS}, 0)
+
+        result = self.replay(repo, base)
+
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn("red removes tests from the fast suite: calc.test.ts::::adds", result.stdout)
