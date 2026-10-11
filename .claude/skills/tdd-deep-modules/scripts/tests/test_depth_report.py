@@ -414,7 +414,7 @@ class HelperSwarmTest(unittest.TestCase):
         self.assertTrue(line.endswith("-> deep"), line)
 
     def test_only_small_exports_with_one_caller_count(self):
-        big_body = "".join(f"  const v{i} = x + {i};\n" for i in range(10)) + "  return v9;\n"
+        big_body = "".join(f"  const v{i} = x + {i};\n" for i in range(20)) + "  return v19;\n"
         module = ("export const inc = (x: number) => x + 1;\n"
                   "export function dec(x: number): number {\n  return x - 1;\n}\n"
                   "export function twice(x: number): number {\n  return x * 2;\n}\n"
@@ -462,3 +462,12 @@ class HelperSwarmTest(unittest.TestCase):
 
         self.assertIn(", classitis no,", none)
         self.assertIn("classitis: exported helpers with one caller: a, b, c;", swarm + ";")
+
+    def test_helpers_up_to_twenty_lines_count_as_small(self):
+        body = "".join(f"  const v{i} = x + {i};\n" for i in range(14)) + "  return v13;\n"  # 15 code lines
+        helpers = "".join(f"export function {n}(x: number): number {{\n{body}}}\n" for n in ("fee", "advance", "balance"))
+        repo = Repo(self, {"src/statement.ts": helpers + "export const total = (x: number) => fee(x) + advance(x) + balance(x);\n"})
+
+        line = report_line(repo.run("depth_report", "src/statement.ts"), "src/statement.ts")
+
+        self.assertIn("classitis: exported helpers with one caller: fee, advance, balance", line)
