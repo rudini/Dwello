@@ -253,11 +253,11 @@ Fast tier = `scripts["test:fast"]` of each package.json (its `bun test` segment)
 
 ## Step 10: doubles rule and depth rule in SKILL.md (checked by `test_skill_md.py` and `skill_lint`)
 
-- [ ] the hard rules (top section) hold the doubles rule, short: no mocks or spies of your own logic; real objects by default; doubles only at system boundaries (mail, login, network, framework modules, external backends); every fake of a boundary has a contract test suite run against both the fake and the real implementation; framework modules (`$app/*`) are wrapped in a small project-owned adapter and the adapter is faked, not the framework; many mocks in a test signal a wrongly cut interface
-- [ ] the hard rules name the test boundary: the public interface of the deep module or service; pure helpers inside it are implementation details, with no tests and no public exports of their own
-- [ ] the depth check names the swarm of exported helpers: a functional core is fine as internal structure, but many small exported pure functions with one caller are classitis
-- [ ] `skill_lint` names a SKILL.md without the doubles rule (its phrases and its bold item)
-- [ ] `skill_lint` names a SKILL.md without the test boundary or the swarm item
+- [x] the hard rules (top section) hold the doubles rule, short: no mocks or spies of your own logic; real objects by default; doubles only at system boundaries (mail, login, network, framework modules, external backends); every fake of a boundary has a contract test suite run against both the fake and the real implementation; framework modules (`$app/*`) are wrapped in a small project-owned adapter and the adapter is faked, not the framework; many mocks in a test signal a wrongly cut interface
+- [x] the hard rules name the test boundary: the public interface of the deep module or service; pure helpers inside it are implementation details, with no tests and no public exports of their own
+- [x] the depth check names the swarm of exported helpers: a functional core is fine as internal structure, but many small exported pure functions with one caller are classitis
+- [x] `skill_lint` names a SKILL.md without the doubles rule (its phrases and its bold item)
+- [x] `skill_lint` names a SKILL.md without the test boundary or the swarm item
 
 ### Step 09, review round 1 (fixes)
 
