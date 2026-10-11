@@ -837,3 +837,15 @@ class TddStepTest(unittest.TestCase):
         self.assertEqual(result.returncode, 2, result.stderr)
         self.assertIn("bun is not installed", result.stderr)
         self.assertNotIn("Traceback", result.stderr)
+
+    def test_bun_test_is_found_in_common_script_shapes(self):
+        failing = 'import { test, expect } from "bun:test";\nimport { add } from "./calc";\n\n' \
+                  'test("adds more", () => {\n  expect(add(2, 2)).toBe(5);\n});\n'
+        for script in ("NODE_ENV=test bun test", "bun test || true", "bun test; echo done"):
+            with self.subTest(script):
+                repo = Repo(self, {**BUN_FILES, "backend/package.json": f'{{"scripts": {{"test": "{script}"}}}}\n'})
+                repo.write("backend/more.test.ts", failing)
+
+                result = repo.run("tdd-step", "red", "adds more")
+
+                self.assertEqual(result.returncode, 0, result.stderr)
