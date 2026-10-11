@@ -4,15 +4,20 @@ All scripts live in `scripts/` of this skill and run from anywhere inside the re
 
 ## tdd-step
 
-`scripts/tdd-step <test|red|green|refactor> "<message>"` runs every supported suite (vitest and `bun test`, one run per `package.json`), checks the phase rules and commits all changes as `<phase>: <message>` with the trailers `TDD-Phase` and `TDD-Exit-Code`. It refuses (exit 1, nothing committed) when:
+`scripts/tdd-step <test|red|green|refactor> [--suite fast|full] "<message>"` runs every supported suite (vitest and `bun test`, one run per `package.json`) in the chosen tier, checks the phase rules and commits all changes as `<phase>: <message>` with the trailers `TDD-Phase`, `TDD-Exit-Code` and `TDD-Suite`.
+
+Two tiers, both read from each `package.json`: the **fast** suite (no database, no network) is `scripts["test:fast"]`, or `scripts.test` where the package declares none; the **full** suite (adds database tests such as `*.pg.test.ts` and contract tests) is `scripts.test`. Vitest packages run vitest in both tiers. Test, red and green run the fast suite unless `--suite full` is given; use it for a test that lives only in the full tier (SQL behaviour). Refactor always runs the full suite. The last commit of every task must run the full suite all green: a refactor, or `green --suite full` when there is nothing to refactor.
+
+It refuses (exit 1, nothing committed) when:
 
 - nothing changed, or the phase may not follow the last one (red after red, green without red, refactor after red, after a `test:` commit or after a commit that is not a phase);
 - **test:** code changed;
 - **red:** the suite passes, the failure is not an assertion (import, syntax, setup or unhandled errors), more than one test fails, or production code changed;
 - **green / refactor:** any test fails or errors; green may not change tests or test configuration (`package.json`, `vitest.config.*`, `vite.config.*`);
+- **green** after a red on the full suite without `--suite full`; **refactor** with `--suite fast`;
 - any phase: the test run changed the working tree.
 
-Exit 2 means it could not judge: not a git repository, no supported runner, or a runner not installed.
+Exit 2 means it could not judge: not a git repository, no supported runner, a runner not installed, or an unknown `--suite`.
 
 ## The first red for a new module
 
@@ -33,7 +38,7 @@ The skill registers a PreToolUse hook on Write, Edit and MultiEdit. It blocks ed
 
 ## tdd_replay
 
-`scripts/tdd_replay <base>..<head>` checks out every commit of the range in a temporary worktree, re-runs the suite and rejects: a commit that is not a phase commit (ordinary and merge commits included), a trailer that does not match the real exit code, production code before red, a red that fails by error, a red that adds other than exactly one test, a red whose failing test is not its new test, a test added outside red, a refactor or green on a red suite, removed or skipped tests, and a history that ends in red. Exit 0 ACCEPT, 1 REJECT, 2 cannot judge.
+`scripts/tdd_replay <base>..<head>` checks out every commit of the range in a temporary worktree, re-runs the suite in the tier of its `TDD-Suite` trailer (and the full suite, to know which tests exist) and rejects: a commit that is not a phase commit (ordinary and merge commits included), a missing or unknown `TDD-Suite` trailer, a trailer exit code that does not match the real run of that tier, a refactor or a final commit not run on the full suite, a final commit that fails the full suite, a red on the fast suite whose new test exists only in the full tier, a green on the fast suite after a red on the full suite, a green that skips red's test, production code before red, a red that fails by error, a red that adds other than exactly one test, a red whose failing test is not its new test, a test added outside red, a refactor or green on a red suite, removed or skipped tests, and a history that ends in red. Exit 0 ACCEPT, 1 REJECT, 2 cannot judge.
 
 ## depth_report
 

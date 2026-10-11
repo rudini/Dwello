@@ -55,9 +55,11 @@ Write the list into `TESTLIST.md` (or the place the project uses), headed by the
 
 One behaviour from the list per cycle:
 
-1. **Red.** Write one test for the behaviour, run it, and see it fail on an assertion for the reason you expect. Commit with `scripts/tdd-step red "<behaviour>"`. It refuses when the suite passes, when the failure is an import, syntax or setup error, when more than one test fails, and when production code changed.
-2. **Green.** Write the least production code that makes this test pass. Commit with `scripts/tdd-step green "<behaviour>"`. It refuses unless every test passes and refuses changes to tests or test configuration.
-3. **Refactor.** With everything green, improve the design (section 5), run the tests after each change, and commit with `scripts/tdd-step refactor "<what changed>"`. Skip the commit when there is nothing to improve.
+1. **Red.** Write one test for the behaviour, run it, and see it fail on an assertion for the reason you expect. Commit with `scripts/tdd-step red "<behaviour>"` (add `--suite full` when the test lives only in the full tier, such as a `*.pg.test.ts`). It refuses when the suite passes, when the failure is an import, syntax or setup error, when more than one test fails, and when production code changed.
+2. **Green.** Write the least production code that makes this test pass. Commit with `scripts/tdd-step green "<behaviour>"` (`--suite full` after a red on the full suite). It refuses unless every test passes and refuses changes to tests or test configuration.
+3. **Refactor.** With everything green, improve the design (section 5), run the tests after each change, and commit with `scripts/tdd-step refactor "<what changed>"`; refactor always runs the full suite. Skip the commit when there is nothing to improve.
+
+**Two tiers.** The fast suite (no database, no network: `scripts["test:fast"]`, else `scripts.test`) checks red and green; the full suite (`scripts.test`: adds database and contract tests) checks every refactor and the end of every task. The last commit of a task runs the full suite all green: a refactor, or `green --suite full` when there is nothing to refactor.
 
 Test configuration (`package.json`, new dependencies, `vitest.config.*`, `vite.config.*`) counts as a test file: change it in the red or in a refactor before it, never in green.
 

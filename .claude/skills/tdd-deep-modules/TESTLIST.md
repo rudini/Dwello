@@ -238,15 +238,15 @@ Design it twice. Hidden decision: which command a package runs for each tier and
 
 Fast tier = `scripts["test:fast"]` of each package.json (its `bun test` segment), or `scripts.test` where a package declares no fast suite; vitest packages run vitest in both tiers. Full tier = `scripts.test`. Trailer `TDD-Suite: fast|full`.
 
-- [ ] red without `--suite` runs the fast suite and records `TDD-Suite: fast`
-- [ ] `red --suite full` runs the full suite and records `TDD-Suite: full` (a test that lives only in the full tier)
-- [ ] green without `--suite` runs the fast suite; `green --suite full` runs the full suite
-- [ ] green after a red on the full suite must run the full suite
-- [ ] refactor runs the full suite by default, and refuses `--suite fast`
-- [ ] an unknown or missing `--suite` value exits 2 with usage
-- [ ] replay: each commit is run with the tier of its `TDD-Suite` trailer (exit-code trailer checked against that run); a missing trailer is rejected
-- [ ] replay: a refactor verified only against the fast suite is rejected
-- [ ] replay: a final commit verified only against the fast suite is rejected
-- [ ] replay: a red claimed on the fast suite for a test that exists only in the full tier is rejected
-- [ ] replay: a green that does not run red's test (skips it, or runs a tier without it) is rejected
-- [ ] the existing sabotage cases still pass
+- [x] red without `--suite` runs the fast suite and records `TDD-Suite: fast`
+- [x] `red --suite full` runs the full suite and records `TDD-Suite: full` (a test that lives only in the full tier)
+- [x] green without `--suite` runs the fast suite; `green --suite full` runs the full suite
+- [x] green after a red on the full suite must run the full suite
+- [x] refactor runs the full suite by default, and refuses `--suite fast`
+- [x] an unknown or missing `--suite` value exits 2 with usage
+- [x] replay: each commit is run with the tier of its `TDD-Suite` trailer (exit-code trailer checked against that run); a missing trailer is rejected
+- [x] replay: a refactor verified only against the fast suite is rejected
+- [x] replay: a final commit verified only against the fast suite is rejected
+- [x] replay: a red claimed on the fast suite for a test that exists only in the full tier is rejected
+- [x] replay: a green that does not run red's test (skips it, or runs a tier without it) is rejected
+- [x] the existing sabotage cases still pass
