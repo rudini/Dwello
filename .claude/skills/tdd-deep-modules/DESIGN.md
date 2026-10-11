@@ -57,7 +57,10 @@ Every commit of the range (first-parent, oldest first) is checked out in a tempo
 
 - The previous phase is read from the HEAD subject prefix (`red: ...`), which a hand-made commit can fake; `tdd_replay` (step 2) re-runs history and does not trust subjects or trailers.
 - `tdd-step` cannot tell a new failing test from an existing test that broke; red requires exactly one failing test, and `tdd_replay` checks that exactly one new test was discovered.
-- Red and refactor can weaken an existing test's assertion while the suite stays as required; neither `tdd-step` nor `tdd_replay` reads assertions. (Skipping or filtering tests is caught by `tdd_replay`.)
+- Red and refactor can weaken an existing test while the suite stays as required: change its assertion, invert it (`test.failing`, `test.fails`), or mock the code under test in a setup file (`--preload`, `setupFiles`). Neither `tdd-step` nor `tdd_replay` reads assertions or mocks. (Skipping or filtering tests is caught by `tdd_replay`.)
+- A skipped or todo placeholder that a red turns into a real test is not new (its id existed), so that red is rejected ("adds 0"); write the new test without a placeholder.
+- With `--bail` (bun) or `bail` (vitest), tests after the first failure do not run, so a red or green with a failure reads as removing them; do not use bail with these tools.
+- Stopping `tdd_replay` with a signal removes its worktree; a vitest child process may keep running from the deleted directory until its tests end.
 - Test data that is not code (for example a JSON file of expected values at the repository root) is not classified as test code, so green may change it.
 - Tests run on the working tree; a gitignored file the tests depend on is not committed. The working-tree snapshot uses a fresh index, so a test run that modifies a tracked-but-gitignored file is not noticed.
 - Dwello's backend tests need PostgreSQL (`bun test --preload ./scripts/test-db.ts`). Without a database the bun run fails, so every red, green and refactor in Dwello is refused there. That is the rule, not a bug.

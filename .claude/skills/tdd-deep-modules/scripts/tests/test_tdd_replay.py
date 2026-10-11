@@ -275,6 +275,11 @@ class TddReplayTest(unittest.TestCase):
                 vitest_repo(self),
                 [("red", {"calc.test.js": vitest_with_mul.replace('test("adds"', 'test.skip("adds"') + muls}, 1),
                  ("green", {"calc.js": "export const add = () => 0;\nexport const mul = (a, b) => a * b;\n"}, 0)]),
+            "vitest red turns an old test into a todo": (
+                vitest_repo(self),
+                [("red", {"calc.test.js": vitest_with_mul.replace('test("adds", () => {', 'test.todo("adds");\n'
+                                                                    'test("unused", () => {') + muls}, 1),
+                 ("green", {"calc.js": "export const add = () => 0;\nexport const mul = (a, b) => a * b;\n"}, 0)]),
             "vitest red filters by name": (
                 vitest_repo(self),
                 [("red", {"calc.test.js": vitest_with_mul + muls,
