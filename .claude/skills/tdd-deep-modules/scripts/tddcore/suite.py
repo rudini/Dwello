@@ -89,6 +89,9 @@ def _unittest_outcome(exit_code, summary):
     return "error"
 
 
+_NPM_PLACEHOLDER = 'echo "Error: no test specified" && exit 1'  # what `npm init` writes
+
+
 def _node_runners(root):
     """One runner per package.json in the repository: vitest or `bun test`, run in its directory."""
     runners = []
@@ -120,7 +123,7 @@ def _test_command(directory):
             raise NoFramework("vitest is not installed: run npm install first")
         return "vitest"
     command = data.get("scripts", {}).get("test")
-    if not command:
+    if not command or command == _NPM_PLACEHOLDER:
         return None
     bun = [part.strip() for part in re.split(r"&&|\|\||;", command)
            if re.search(r"(^|\s)bun test(\s|$)", part)]
