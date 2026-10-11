@@ -186,3 +186,15 @@ class TddReplayTest(unittest.TestCase):
         repo.commit_phase("red", {"calc.test.ts": old_now_failing + "\n" + new_passing}, 1)
         repo.commit_phase("green", {"calc.ts": calc.replace("=> 0;", "=> a * b;")}, 0)
         self.assert_rejected(repo, base, "red's failing test must be its new test")
+
+    def test_a_vitest_red_whose_failing_test_is_an_old_test_is_rejected(self):
+        repo = vitest_repo(self)
+        repo.commit_all("green: seed", {"calc.js": RIGHT_ADD_JS + "export const mul = () => 0;\n",
+                                        "calc.test.js": VITEST_TEST})
+        base = repo.git("rev-parse", "HEAD")
+        old_now_failing = VITEST_TEST.replace("import { add }", "import { add, mul }") \
+            .replace("toBe(3);", "toBe(3);\n  expect(mul(2, 3)).toBe(6);")
+        new_passing = 'test("adds zero", () => {\n  expect(add(0, 0)).toBe(0);\n});\n'
+        repo.commit_phase("red", {"calc.test.js": old_now_failing + "\n" + new_passing}, 1)
+        repo.commit_phase("green", {"calc.js": RIGHT_ADD_JS + "export const mul = (a, b) => a * b;\n"}, 0)
+        self.assert_rejected(repo, base, "red's failing test must be its new test")
