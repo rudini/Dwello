@@ -210,12 +210,16 @@ def _run_pytest(root):
         done = subprocess.run([sys.executable, "-m", "pytest", "-q",
                                f"--junitxml={report}"], cwd=root, env=_PYTHON_ENV,
                               capture_output=True, text=True, errors="replace")
-        cases = list(ElementTree.parse(report).iter("testcase")) if report.exists() else []
-    lines = done.stdout.strip().splitlines()
+        reported = report.exists()
+        cases = list(ElementTree.parse(report).iter("testcase")) if reported else []
+    lines = (done.stdout.strip() if reported else done.stderr.strip() or done.stdout.strip()).splitlines()
     summary = lines[-1] if lines else f"exit code {done.returncode}, no output"
+    if not reported:
+        summary = f"pytest wrote no report: {summary}"
     failed = sum(1 for case in cases for _ in case.iter("failure"))
     ran = sum(1 for case in cases if case.find("skipped") is None)
-    return Run(done.returncode, _pytest_outcome(done.returncode, cases), summary, failed, ran,
+    outcome = _pytest_outcome(done.returncode, cases) if reported else "error"
+    return Run(done.returncode, outcome, summary, failed, ran,
                done.returncode == 5)  # pytest's "no tests collected"
 
 
