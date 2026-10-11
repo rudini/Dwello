@@ -309,3 +309,30 @@ class SkillLintTest(unittest.TestCase):
         self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
         self.assertIn("skill_lint: frontmatter: key 'name' appears twice\n", result.stdout)
 
+
+    def test_a_negated_item_is_named(self):
+        real = (SKILL / "SKILL.md").read_text()
+        items = {
+            "Hard rules": ["No production code without a failing test.",
+                           "Never delete assertions, and never paste computed values into expected values.",
+                           "Never mix refactoring with green.", "No tests on private methods.", "One test per cycle."],
+            "2. Design it twice": ["Name the one hidden decision", "Sketch two interface designs",
+                                   "Compare them by depth:", "Record the chosen design with a one-sentence reason"],
+            "4. Red, green, refactor with tdd-step": ["Red.", "Green.", "Refactor."],
+            "5. Depth check in every refactor": ["Interface much simpler than the implementation.", "No classitis.",
+                                                 "No pass-through wrappers.", "Pull complexity downward.",
+                                                 "Do not split by size alone.",
+                                                 "Cumbersome tests signal a wrong interface."],
+            "6. Design note": ["Hidden decision:", "Both designs:", "Interface:", "Depth:", "Open points:", "Proof:"],
+        }
+        for section, labels in items.items():
+            for label in labels:
+                with self.subTest(label):
+                    self.assertIn(f"**{label}**", real)
+                    copy = copy_of_skill(self)
+                    (copy / "SKILL.md").write_text(real.replace(f"**{label}**", f"**Do not {label.lower()}**", 1))
+
+                    result = lint(copy)
+
+                    self.assertIn(f"skill_lint: '{section}' has no item **{label}**\n", result.stdout)
+
