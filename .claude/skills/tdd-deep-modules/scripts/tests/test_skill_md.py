@@ -105,3 +105,10 @@ class SkillMdTest(unittest.TestCase):
         self.assertIn("one-sentence reason", found["2. Design it twice"])
         self.assertIn("One test per cycle", found["Hard rules"])
         self.assertIn("no second test before the first is green", found["4. Red, green, refactor with tdd-step"])
+
+    def test_depth_report_and_proof_are_described_as_they_work(self):
+        found = dict(sections())
+
+        self.assertIn("depth_report <changed production .ts/.js files>", found["5. Depth check in every refactor"])
+        self.assertIn("not assertion strength", found["6. Design note"])
+        self.assertNotIn("rejects anything", found["4. Red, green, refactor with tdd-step"])
