@@ -27,7 +27,11 @@ def main(raw):
     prefix = subprocess.run(["git", "rev-parse", "--show-prefix"], cwd=existing,
                             capture_output=True, text=True)
     if prefix.returncode != 0:
-        return 0  # outside any git repository: nothing to guard
+        if "not a git repository" in prefix.stderr:
+            return 0  # outside any git repository: nothing to guard
+        reason = (prefix.stderr.strip() or "git failed").splitlines()[0]
+        print(f"tdd-guard: cannot check {target.name}: {reason}", file=sys.stderr)
+        return 1  # visible, but a broken check must not stop the user
     rel = prefix.stdout.strip() + target.relative_to(existing).as_posix()
     subject = subprocess.run(["git", "log", "-1", "--format=%s"], cwd=existing,
                              capture_output=True, text=True).stdout.strip()
