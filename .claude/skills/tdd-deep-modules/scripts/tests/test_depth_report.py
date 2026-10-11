@@ -450,3 +450,15 @@ class HelperSwarmTest(unittest.TestCase):
         line = report_line(result, "src/recursion.ts")
         self.assertIn(", classitis no,", line)
         self.assertNotIn("exported helpers", line)
+
+    def test_overload_signatures_are_neither_callers_nor_helpers(self):
+        overloaded = "".join(f"export function {n}(x: string): string;\nexport function {n}(x: number): number;\n"
+                             f"export function {n}(x: any): any {{\n  return x;\n}}\n" for n in ("a", "b", "c"))
+        uncalled = Repo(self, {"src/ids.ts": overloaded})
+        called = Repo(self, {"src/ids.ts": overloaded + "export const all = (x: number) => a(x) + b(x) + c(x);\n"})
+
+        none = report_line(uncalled.run("depth_report", "src/ids.ts"), "src/ids.ts")
+        swarm = report_line(called.run("depth_report", "src/ids.ts"), "src/ids.ts")
+
+        self.assertIn(", classitis no,", none)
+        self.assertIn("classitis: exported helpers with one caller: a, b, c;", swarm + ";")
