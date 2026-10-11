@@ -1,0 +1,22 @@
+#!/usr/bin/env python3
+"""PreToolUse hook: block edits to production files while no commit may contain production code."""
+import json
+import subprocess
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from tddcore import protocol  # noqa: E402
+
+event = json.load(sys.stdin)
+target = Path(event["tool_input"]["file_path"])
+root = subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=target.parent,
+                      capture_output=True, text=True).stdout.strip()
+rel = target.relative_to(root).as_posix()
+subject = subprocess.run(["git", "log", "-1", "--format=%s"], cwd=root,
+                         capture_output=True, text=True).stdout.strip()
+phase = protocol.phase_of(subject)
+if protocol.is_production(rel):
+    print(f"tdd-guard: blocked: {rel} is production code and the last TDD phase is {phase}. "
+          "Write one failing test and commit it with `tdd-step red` first.", file=sys.stderr)
+    sys.exit(2)
