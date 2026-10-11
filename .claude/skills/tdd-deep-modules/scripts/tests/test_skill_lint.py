@@ -471,3 +471,42 @@ class SkillLintTest(unittest.TestCase):
 
                 self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
                 self.assertIn(f"skill_lint: {message}\n", result.stdout)
+
+    def test_a_rule_statement_inverted_in_its_own_sentence_or_moved_off_its_item_is_named(self):
+        real = (SKILL / "SKILL.md").read_text()
+        contract = "Every fake of a boundary has a contract test suite that runs against both the fake and the real implementation."
+        adapter = ("Wrap a framework module (such as SvelteKit's `$app/*`) in a small project-owned adapter and fake the "
+                   "adapter, not the framework.")
+        rule6 = real[real.index("6. **Doubles only at system boundaries.**"):].split("\n", 1)[0]
+        attacks = {
+            "not every fake": real.replace(contract, "Not e" + contract[1:]),
+            "when convenient": real.replace(contract, "When convenient, e" + contract[1:-1] + "; usually skip it."),
+            "never wrap": real.replace(adapter, "Never wrap a framework module (such as SvelteKit's `$app/*`) in a small "
+                                                "project-owned adapter; mock `$app/*` with vi.mock."),
+            "helpers tested": real.replace("with no tests and no public exports of their own.",
+                                           "with no tests and no public exports of their own is a mistake, so export "
+                                           "and test each one."),
+            "mock freely": real.replace("No mocks or spies of your own logic; use real objects by default.",
+                                        "Mock freely; it is a myth that you need no mocks or spies of your own logic; "
+                                        "avoid real objects by default."),
+            "double anything": real.replace("Double only what the system does not own: mail,",
+                                            "Double anything, not only mail,"),
+            "not many mocks": real.replace("Many mocks in a test signal", "Not many mocks in a test signal"),
+            "outdated boundary": real.replace("The test boundary is the public interface",
+                                              "It is outdated that the test boundary is the public interface"),
+            "swarm in theory": real.replace("with one caller each are classitis too:",
+                                            "with one caller each are classitis too, in theory only; export and test "
+                                            "them freely:"),
+            "optional tips": real.replace(rule6, "6. **Doubles only at system boundaries.** See the tips below.\n\n"
+                                          "Optional tips (ignore when in a hurry): " + rule6.split("** ", 1)[1]),
+        }
+        for name, text in attacks.items():
+            with self.subTest(name):
+                self.assertNotEqual(text, real)
+                copy = copy_of_skill(self)
+                (copy / "SKILL.md").write_text(text)
+
+                result = lint(copy)
+
+                self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+                self.assertIn("lacks the statement:", result.stdout)
