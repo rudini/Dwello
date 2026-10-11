@@ -77,13 +77,12 @@ Deviation from the original wording "blocks edits to production files unless the
 
 `verify_all [skill-dir]` is three statements: call `tddcore/gate.stage2`, print its lines, exit with `not passed`. The rule lives in `gate.stage2(skill) -> (passed, lines)`: the reviews of steps 01-08 are read first (as in stage 1, so the suite cannot write them), then the skill's own suite must pass (`selfcheck.own_suite`), `skill_lint` must find nothing, every step's latest review must end in `VERDICT: PASS`, and `verifiers.lock` must hold. It prints `tests: ...`, the lint result, one `step NN: ...` line per step, the lock result, then `STAGE2: PASS` (exit 0) or `STAGE2: FAIL` (exit 1).
 
-`verifiers.lock` is written after step 08's clean review and ties the verifier files to it: the first line is `reviewed: evidence/reviews/step-08-round-N.md`, which must be step 08's latest round and a pass; then one `sha256sum` line per verifier (`scripts/verify_all`, `scripts/verify_stage1`, `scripts/skill_lint`, `scripts/tddcore/gate.py`, `verdicts.py`, `selfcheck.py`, `lint.py`). A verifier missing from the lock, or whose hash differs, fails stage 2 until a new review passes and the lock is rewritten:
+`verifiers.lock` is written after step 08's clean review and ties every file the scripts can load to it: the first line is `reviewed: evidence/reviews/step-08-round-N.md`, which must be an existing file of step 08's latest round, and that round must pass; then exactly one `<sha256>  <path>` line (lowercase hex, two spaces) for every file under `scripts/` except `scripts/tests/` and `__pycache__/` (all CLIs, `tddcore/*` including `__init__.py`). A file under `scripts/` missing from the lock (for example a new `scripts/hashlib.py` that would shadow the standard library), a changed or deleted file, a duplicate or malformed line, or a lock that is not UTF-8 fails stage 2 until a new review passes and the lock is rewritten:
 
 ```bash
 cd .claude/skills/tdd-deep-modules
 { echo "reviewed: evidence/reviews/step-08-round-N.md"
-  sha256sum scripts/verify_all scripts/verify_stage1 scripts/skill_lint scripts/tddcore/gate.py \
-    scripts/tddcore/verdicts.py scripts/tddcore/selfcheck.py scripts/tddcore/lint.py; } > verifiers.lock
+  find scripts -type f -not -path 'scripts/tests/*' -not -path '*/__pycache__/*' | sort | xargs sha256sum; } > verifiers.lock
 ```
 
 ## Known limits
@@ -114,4 +113,4 @@ cd .claude/skills/tdd-deep-modules
 - `tdd-guard`: a source directory on another mount than the repository is outside git's discovery and passes silently; files under `.git/` are judged like files at the repository root (they fail closed after a test commit); without git on PATH the hook prints a traceback (non-blocking).
 - `depth_report` reads source text with regular expressions, not a parser: comment markers and brackets inside strings (`"http://..."`, `"("`), comparisons inside type parameters, type annotations that contain `=`, abstract methods, symlinked module names and import aliases other than `$lib` (tsconfig paths) are not understood. A module without exports gets ratio = size. Repeated query fragments (`.from(table)`, `const today = ...`) count as duplicates, so large service modules often show a bloat finding; the numbers are prompts for the refactor, not verdicts.
 - `skill_lint` needs PyYAML. Required phrases are matched as text, and every bold list item of the hard rules, Design It Twice, the cycle, the depth check and the design note must open its line exactly (`lint.ITEMS`), so "Prefer classitis" or "Do not name the one hidden decision" fail; a statement that is present and contradicted in another sentence, or plain text outside those items, can still pass. An unreadable SKILL.md (permissions) ends in a traceback.
-- `verifiers.lock` guards the verifier files against unreviewed edits, not against an author who edits a verifier and rewrites the lock in one go; the review files and git history are the record for that.
+- `verifiers.lock` guards the scripts against unreviewed edits and added files, not against an author who edits a script and rewrites the lock in one go (the review files and git history are the record for that), and not against changes outside `scripts/` that Python loads first (`sitecustomize`, `PYTHONPATH`, a crafted `__pycache__` file).
