@@ -15,6 +15,7 @@ class Repo:
         self.git("init", "-q", "-b", "main")
         self.git("config", "user.email", "t@example.com")
         self.git("config", "user.name", "t")
+        self.git("config", "commit.gpgsign", "false")  # throwaway commits need no signing server
         self.commit_all("init", files)
 
     def write(self, rel, text):
