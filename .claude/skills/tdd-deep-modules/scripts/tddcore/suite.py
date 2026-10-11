@@ -42,7 +42,8 @@ def _combine(runs):
         outcome, summary = "error", f"no tests ran ({summary})"
     # the exit code covers every command run, so the trailer never hides a failing one
     return Run(max(r.exit_code for r in runs), outcome, summary, sum(r.failed for r in runs), ran,
-               frozenset().union(*(r.tests for r in runs)), frozenset().union(*(r.failing for r in runs)))
+               frozenset().union(*(r.tests for r in runs)),
+               frozenset().union(*(r.failing for r in runs)))
 
 
 def _files(root):
@@ -115,8 +116,8 @@ def _run_bun(directory, command, package):
     summary = f"bun: {failed} of {len(cases)} tests failed"
     if hidden:
         summary += f" ({errors} errors outside tests)"
-    ids = _numbered(f"{package / case.get('file', '')}::{case.get('classname', '')}::{case.get('name')}"
-                    for case in cases)
+    ids = _numbered(f"{package / case.get('file', '')}::{case.get('classname', '')}::"
+                    f"{case.get('name')}" for case in cases)
     failing = frozenset(i for i, case in zip(ids, cases) if case.find("failure") is not None)
     return Run(done.returncode, outcome, summary, failed, ran, frozenset(ids), failing)
 

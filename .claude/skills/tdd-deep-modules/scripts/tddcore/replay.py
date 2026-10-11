@@ -1,7 +1,7 @@
 """Replay a commit range and judge every commit from a real run of its tests."""
 import subprocess
 import tempfile
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 
 from tddcore import protocol, suite
@@ -16,7 +16,7 @@ class Verdict:
     commit: str
     phase: str
     run: suite.Run
-    violations: list
+    violations: tuple
 
 
 def replay(repo, rev_range):
@@ -40,7 +40,7 @@ def replay(repo, rev_range):
                 run = _run(tree)
                 phase = protocol.phase_of(subject)
                 verdicts.append(Verdict(commit, phase, run,
-                                        _judge(previous, known, subject, claimed, run, changed)))
+                                        tuple(_judge(previous, known, subject, claimed, run, changed))))
                 previous, known = phase, run.tests
         finally:
             # twice --force: an add interrupted by a signal leaves the worktree locked
@@ -48,7 +48,9 @@ def replay(repo, rev_range):
                            capture_output=True)
             subprocess.run(["git", "worktree", "prune"], cwd=repo, capture_output=True)
     if verdicts[-1].phase == "red":
-        verdicts[-1].violations.append("the history ends in red: every red needs a green")
+        last = verdicts[-1]
+        verdicts[-1] = replace(last, violations=last.violations
+                               + ("the history ends in red: every red needs a green",))
     return verdicts
 
 
