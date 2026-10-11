@@ -41,5 +41,5 @@ class DepthReportTest(unittest.TestCase):
         result = repo.run("depth_report", "src/amount.ts")
 
         line = report_line(result, "src/amount.ts")
-        self.assertIn(", pass-through 3", line)
-        self.assertIn("pass-through: parse, clean, convert", line.split(" -> ", 1)[1])
+        self.assertIn(", pass-through 4", line)
+        self.assertIn("pass-through: toNumber, parse, clean, convert", line.split(" -> ", 1)[1])
