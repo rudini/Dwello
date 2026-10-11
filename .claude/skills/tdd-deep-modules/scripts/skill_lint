@@ -8,6 +8,9 @@ from tddcore import lint  # noqa: E402
 
 
 def main(skill):
+    if not (skill / "SKILL.md").is_file():
+        print(f"skill_lint: no SKILL.md in {skill}", file=sys.stderr)
+        return 2
     found = lint.problems(skill)
     for problem in found:
         print(f"skill_lint: {problem}")
