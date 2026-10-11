@@ -15,3 +15,4 @@ Unabhängiges Code-Review (CC) von f3ad329, af22a6b und den Merges bis adcd484, 
 | CC-9 | niedrig | `testid` optional («undefined-words»), Picker-Bedienbarkeit offen | `testid` Pflicht; Picker offener Punkt |
 | CC-10 | niedrig | offene-punkte veraltet, Entscheid fehlt | nachgeführt (`offene-punkte.md`, `design-decisions.md`) |
 | (vorher) | niedrig | «heute» in UTC (Rechnungsdatum, bezahlt am) | `localToday()` |
+| (E2E) | hoch | Kam der Vorschlag für den Vertragsbeginn an, während man schon tippte, wurde er ins Feld gemischt («01.01.210001.01.2020») | Der Vorschlag überschreibt einen bearbeiteten Vertragsbeginn nicht mehr (DOM-Test mit verzögerten Daten); `typeDate` tippt im Takt eines Menschen und prüft das Ergebnis |

@@ -63,6 +63,7 @@
 	let restored = $state<{ at: Date; dropped: boolean } | null>(null);
 	let touched = $state(false); // a draft is kept only once the user has entered something
 	let confirmedPastStart = ''; // a start in the past the user confirmed by pressing "Weiter" again
+	let startEdited = false; // the suggestion never overwrites a start date being typed
 	let section = $state<HTMLElement>();
 	let contracts = $state<Map<string, ContractForAvailability[]> | null>(null); // per apartment
 
@@ -119,13 +120,14 @@
 		const info = availability.get(values.apartmentId);
 		untrack(() => {
 			const start = suggestedStartDate(values.startDate, info);
-			if (start) values.startDate = start;
+			if (start && !startEdited) values.startDate = start;
 		});
 	});
 
 	function edited(event: Event) {
 		touched = true;
 		const id = (event.target as HTMLElement).id;
+		if (id === 'startDate') startEdited = true;
 		delete errors[errorKey[id] ?? id];
 		if (errors.startDate === OVERLAP) delete errors.startDate; // any period change may resolve it
 	}

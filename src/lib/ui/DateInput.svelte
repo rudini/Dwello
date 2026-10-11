@@ -60,6 +60,9 @@
 	// checked when leaving the field; a half-typed date is no error yet
 	const shownError = $derived(invalid && left ? NOT_A_DATE : error);
 	const wordsId = $derived(`${id}-words`);
+	const helpText = $derived(help ? `${help} ${FORMAT}` : FORMAT);
+	const words = $derived(value ? formatDateLong(value) : '');
+	const announced = $derived(invalid && left ? NOT_A_DATE : ''); // said when the field is left
 
 	function oninput(event: Event & { currentTarget: HTMLInputElement; inputType?: string }) {
 		left = false;
@@ -80,14 +83,7 @@
 </script>
 
 <div bind:this={frame} class="flex flex-col gap-2">
-	<Field
-		{id}
-		{label}
-		help={help ? `${help} ${FORMAT}` : FORMAT}
-		example="31.12.2025"
-		error={shownError}
-		{optional}
-	>
+	<Field {id} {label} help={helpText} example="31.12.2025" error={shownError} {optional}>
 		{#snippet children(control)}
 			<div class="flex gap-2">
 				<input
@@ -135,8 +131,8 @@
 		aria-live="polite"
 		data-testid="{testid}-words"
 	>
-		{value ? formatDateLong(value) : ''}
+		{words}
 	</p>
 	<!-- the focus is in the next field when the check on leaving fails: say it -->
-	<p class="sr-only" aria-live="assertive">{invalid && left ? NOT_A_DATE : ''}</p>
+	<p class="sr-only" aria-live="assertive">{announced}</p>
 </div>
