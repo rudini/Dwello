@@ -10,6 +10,8 @@ _KEYS = {"name", "description", "license", "allowed-tools", "metadata", "compati
          "argument-hint", "disable-model-invocation", "user-invocable", "context", "agent", "when_to_use",
          "version", "paths", "effort", "shell"}
 
+LINE_LIMIT = 400  # SKILL.md must stay below this; details belong in references/
+
 # every section the skill must have, in order, with the phrases it must contain (compared in lower case)
 REQUIRED = {
     "Hard rules": ["no production code without a failing test", "never delete assertions",
@@ -43,7 +45,9 @@ def problems(skill):
         return ["frontmatter is not valid YAML"]
     if not isinstance(front, dict):
         return ["frontmatter is not valid YAML"]
-    return _frontmatter(front, skill.name) + _hook(front, skill) + _required(text[match.end():])
+    lines = len(text.splitlines())
+    length = [f"SKILL.md has {lines} lines (limit: fewer than {LINE_LIMIT})"] if lines >= LINE_LIMIT else []
+    return _frontmatter(front, skill.name) + _hook(front, skill) + _required(text[match.end():]) + length
 
 
 def _required(body):
