@@ -10,7 +10,9 @@
 |---|---|---|
 | `scripts/tddcore/suite.py` | `run(root) -> Run(exit_code, outcome, summary, failed, ran)`, `NoFramework` | finding every vitest / bun package, running each, parsing vitest JSON and bun JUnit + summary, classifying, combining |
 | `scripts/tddcore/protocol.py` | `PHASES`, `phase_of(subject)`, `is_production(path)`, `violations(previous, phase, run, changed)` | phase order table, file classification, every refusal rule |
+| `scripts/tddcore/replay.py` | `replay(repo, rev_range) -> [Verdict(commit, phase, run, violations)]`, `ReplayError` | listing the range, a private worktree, borrowing `node_modules`, running each commit, judging it |
 | `scripts/tdd-step` | CLI | git plumbing: repository root, changed files, working-tree snapshot, index restore |
+| `scripts/tdd_replay` | CLI | output format and exit codes (0 accept, 1 reject, 2 usage/git error) |
 
 ## Detection
 
@@ -43,6 +45,14 @@ Production file = code suffix (`.py .js .jsx .mjs .cjs .ts .tsx .mts .cts .svelt
 - Every phase commit needs a change.
 - `tdd-step` also refuses when running the tests changed the working tree, so the commit is exactly what was tested.
 
+## Replay (`tdd_replay <commit-range>`)
+
+Every commit of the range (first-parent, oldest first) is checked out in a temporary git worktree (cleaned with `git clean -fdx`, installed `node_modules` linked from the caller's checkout) and its tests are run. The commit before the range is run too, to know which tests already exist. Each commit is judged from its own run, never from its subject or trailers:
+- the commit must carry a phase prefix; the protocol rules above apply with the claimed phase;
+- its `TDD-Exit-Code` trailer must equal the real exit code;
+- red adds exactly one new test id, no other phase adds tests; green and refactor remove none (test ids come from the frameworks' reports: bun JUnit test cases, vitest assertion results);
+- the range must not end in red.
+
 ## Known limits
 
 - The previous phase is read from the HEAD subject prefix (`red: ...`), which a hand-made commit can fake; `tdd_replay` (step 2) re-runs history and does not trust subjects or trailers.
@@ -51,3 +61,5 @@ Production file = code suffix (`.py .js .jsx .mjs .cjs .ts .tsx .mts .cts .svelt
 - Tests run on the working tree; a gitignored file the tests depend on is not committed. The working-tree snapshot uses a fresh index, so a test run that modifies a tracked-but-gitignored file is not noticed.
 - Dwello's backend tests need PostgreSQL (`bun test --preload ./scripts/test-db.ts`). Without a database the bun run fails, so every red, green and refactor in Dwello is refused there. That is the rule, not a bug.
 - A bun run that exits non-zero with no failing test and no reported error (for example a coverage threshold) is an error, never red.
+- A new function or module cannot get its first red without existing production code: importing something that does not exist is an import error, which is never red. The stub has to exist before the cycle (from an earlier green or refactor). Stage 2's skill text addresses this when the interface is designed.
+- The replay judges the first-parent chain; merge commits are judged as one commit against their first parent.
