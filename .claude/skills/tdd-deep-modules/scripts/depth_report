@@ -13,7 +13,8 @@ def main(paths):
     for path in paths:
         module = depth.measure(os.getcwd(), path)
         verdict = "; ".join(module.findings) or "deep"
-        print(f"{path}: surface {module.surface}, size {module.size}, ratio {module.ratio:.1f}"
+        print(f"{path}: surface {module.surface}, size {module.size}, ratio {module.ratio:.1f}, "
+              f"pass-through {len(module.pass_through)}"
               f" -> {verdict}")
         found = found or bool(module.findings)
     return 1 if found else 0

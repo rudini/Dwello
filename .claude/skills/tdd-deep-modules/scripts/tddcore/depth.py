@@ -10,6 +10,7 @@ class Depth:
     surface: int  # what a caller must know: exported names and their parameters
     size: int  # code lines: no blanks, no comments
     ratio: float  # size per unit of surface
+    pass_through: tuple  # names of functions that only forward their arguments
     findings: tuple
 
 
@@ -20,8 +21,13 @@ def measure(root, path):
     text = (Path(root) / path).read_text()
     surface, size = _surface(text), _size(text)
     ratio = size / surface if surface else float(size)
-    findings = (f"shallow: ratio {ratio:.1f} < {SHALLOW_RATIO}",) if ratio < SHALLOW_RATIO else ()
-    return Depth(path, surface, size, ratio, findings)
+    pass_through = _pass_through(text)
+    findings = []
+    if ratio < SHALLOW_RATIO:
+        findings.append(f"shallow: ratio {ratio:.1f} < {SHALLOW_RATIO}")
+    if pass_through:
+        findings.append(f"pass-through: {', '.join(pass_through)}")
+    return Depth(path, surface, size, ratio, pass_through, tuple(findings))
 
 
 def _size(text):
@@ -33,3 +39,18 @@ def _surface(text):
     for params in re.findall(r"^export (?:async )?function\*? *\w+ *\(([^)]*)\)", text, re.MULTILINE):
         surface += 1 + len([p for p in params.split(",") if p.strip()])
     return surface
+
+
+# a function or method whose whole body returns one call: `name(params) { return target(args); }`
+_FORWARD = re.compile(r"(?:function\s+)?(\w+)\s*\(([^()]*)\)[^{};=]*\{\s*return\s+[\w.]+\(([^()]*)\);?\s*\}")
+
+
+def _pass_through(text):
+    """Names of functions whose body only passes their own parameters, unchanged, to another call."""
+    return tuple(name for name, params, args in _FORWARD.findall(text)
+                 if _names(params) and _names(params) == [a.strip() for a in args.split(",") if a.strip()])
+
+
+def _names(params):
+    """Parameter names without types or defaults: `a: number, b = 2` -> [a, b]."""
+    return [re.split(r"[?:=]", p)[0].strip() for p in params.split(",") if p.strip()]
