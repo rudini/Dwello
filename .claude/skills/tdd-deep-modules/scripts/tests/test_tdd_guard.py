@@ -1,4 +1,6 @@
 import json
+import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -126,3 +128,21 @@ class TddGuardTest(unittest.TestCase):
                 self.assertEqual(result.returncode, 1, result.stderr)
                 self.assertIn("tdd-guard: cannot read the hook input", result.stderr)
                 self.assertNotIn("Traceback", result.stderr)
+
+    def test_a_toplevel_in_different_letter_case_still_blocks(self):
+        repo = bun_repo(self)
+        repo.commit_phase("test", {"TESTLIST.md": "- [ ] adds\n"}, 1)
+        real_git = shutil.which("git")
+        with tempfile.TemporaryDirectory() as bin_dir:
+            # like macOS on a case-insensitive disk: git reports the toplevel in its own spelling
+            fake = Path(bin_dir) / "git"
+            fake.write_text(f'#!/bin/sh\nif [ "$1 $2" = "rev-parse --show-toplevel" ]; then\n'
+                            f'  {real_git} "$@" | tr "[:lower:]" "[:upper:]"\nelse\n  exec {real_git} "$@"\nfi\n')
+            fake.chmod(0o755)
+            event = {"tool_name": "Edit", "tool_input": {"file_path": str(repo.path / "calc.ts")}}
+            result = subprocess.run([sys.executable, str(SCRIPTS / "tdd-guard")], input=json.dumps(event),
+                                    capture_output=True, text=True,
+                                    env={**os.environ, "PATH": f"{bin_dir}:{os.environ['PATH']}"})
+
+        self.assertEqual(result.returncode, 2, result.stderr)
+        self.assertIn("calc.ts is production code", result.stderr)
