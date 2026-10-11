@@ -154,7 +154,7 @@ describe('Wohnungen zur Auswahl', () => {
 			]) as never
 		);
 		expect(choices).toEqual([
-			{ value: 'a2', label: 'Wohnung 1.02 - Ahornhof (verfügbar ab 1.12.2026)', disabled: false },
+			{ value: 'a2', label: 'Wohnung 1.02 - Ahornhof (verfügbar ab 01.12.2026)', disabled: false },
 			{ value: 'a3', label: 'Wohnung 1.03 - Ahornhof', disabled: false },
 			{ value: 'a1', label: 'Wohnung 1.01 - Ahornhof (nicht verfügbar)', disabled: true }
 		]);
@@ -174,6 +174,17 @@ describe('Beträge und Daten wie in der Schweiz geschrieben', () => {
 			'180.50',
 			'1000'
 		]);
+	});
+
+	// «1'450.-» ist in der Schweiz ein ganzer Frankenbetrag; das Total rechnete ihn mit, «Weiter» lehnte ihn ab
+	it('versteht einen ganzen Frankenbetrag mit Strich', () => {
+		const values = normalizeAmounts({
+			...filled,
+			baseRent: "1'450.-",
+			advancePayment: '180.–',
+			additionalRent: ''
+		});
+		expect([values.baseRent, values.advancePayment]).toEqual(['1450', '180']);
 	});
 
 	it('weist auf einen Vertragsbeginn in der Vergangenheit hin', () => {

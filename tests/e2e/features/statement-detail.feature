@@ -71,6 +71,23 @@ Funktionalität: Abrechnungsdetail
     Wenn der Liegenschaftsverwalter die Abrechnung als bezahlt markiert
     Dann hat die Abrechnung den Status "Bezahlt"
 
+  # Das Geld kam vor einigen Tagen: festgehalten wird der Tag des Eingangs, nicht der Tag des Erfassens
+  Szenario: Zahlungseingang mit Datum festhalten
+    Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und die Abrechnung 2024 von "Eva Frei" ist versendet
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Wenn der Liegenschaftsverwalter die Abrechnung als am "2026-01-05" bezahlt markiert
+    Dann hat die Abrechnung den Status "Bezahlt"
+    Und nennt der Verlauf "Bezahlt" am "05.01.2026"
+
+  Szenario: Kein Zahlungseingang in der Zukunft
+    Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und die Abrechnung 2024 von "Eva Frei" ist versendet
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Wenn der Liegenschaftsverwalter die Abrechnung als am "2099-01-01" bezahlt markiert
+    Dann meldet das Feld «Bezahlt am» "Das Zahlungsdatum liegt in der Zukunft."
+    Und hat die Abrechnung den Status "Versendet"
+
   # Drei Aktionen im Seitenkopf (PDF, Mahnung, Bezahlt) brechen unter den Titel um, statt ihn zusammenzudrücken
   Szenario: Seitentitel einer versendeten Abrechnung im schmalen Fenster
     Angenommen das Browserfenster ist 1024 Pixel breit
@@ -125,6 +142,23 @@ Funktionalität: Abrechnungsdetail
     Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
     Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
     Dann erhält der Liegenschaftsverwalter die Abrechnung als PDF
+
+  # Der Mieter prüft die Abrechnung nach: Verteilschlüssel und Anteile je Position, Heizöl nach Verbrauch
+  # (Art. 5 VMWG), Recht auf Belegeinsicht und detaillierte Heizkostenabrechnung (Art. 257b OR, Art. 8 VMWG)
+  Szenario: Das PDF erklärt die Verteilung und den Heizölverbrauch
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und im Gebäude "Lindenhof" war am "2023-12-31" Heizöl für "600" Franken im Tank
+    Und im Gebäude "Lindenhof" war am "2024-12-31" Heizöl für "100" Franken im Tank
+    Und für "Marc Huber" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Marc Huber"
+    Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
+    Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
+    Dann steht im PDF "Pro Fläche (m²) 70.00 / 70.00 m²"
+    Und steht im PDF "Anfangsbestand am 31.12.2023 CHF 600.00"
+    Und steht im PDF "Verbrauch CHF 1'500.00"
+    Und steht im PDF "Seite 1 von"
+    Und steht im PDF "können die Belege einsehen"
+    Und steht im PDF "detaillierte Abrechnung der Heiz- und Warmwasserkosten"
 
   Szenario: PDF in der Sprache des Mieters
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt

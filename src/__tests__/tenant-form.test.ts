@@ -54,11 +54,20 @@ describe('Mieterformular', () => {
 
 	it('verlangt eine vollständige Adresse, wenn per Brief korrespondiert wird', () => {
 		const { errors } = parseTenantForm(
-			form({ ...anna, email: '', address: '', city: '', correspondenceChannel: 'letter' })
+			form({
+				...anna,
+				email: '',
+				address: '',
+				postalCode: '',
+				city: '',
+				correspondenceChannel: 'letter'
+			})
 		);
 
+		// ohne PLZ kommt ein Brief kaum an, und die QR-Rechnung nennt den Mieter nur mit PLZ und Ort
 		expect(errors).toEqual({
 			address: 'Für Briefe ist eine Adresse erforderlich',
+			postalCode: 'Für Briefe ist eine PLZ erforderlich',
 			city: 'Für Briefe ist ein Ort erforderlich'
 		});
 	});

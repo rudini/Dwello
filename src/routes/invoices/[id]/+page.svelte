@@ -6,6 +6,8 @@
 	import Alert from '$lib/ui/Alert.svelte';
 	import Badge from '$lib/ui/Badge.svelte';
 	import Button from '$lib/ui/Button.svelte';
+	import BilledWarning from '../BilledWarning.svelte';
+	import MissedWarning from '../MissedWarning.svelte';
 	import Dialog from '$lib/ui/Dialog.svelte';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import Panel from '$lib/ui/Panel.svelte';
@@ -13,7 +15,15 @@
 	import CategorizationPanel from './CategorizationPanel.svelte';
 	import InvoiceFacts from './InvoiceFacts.svelte';
 
-	let { data }: { data: { invoice: InvoiceWithDetails } } = $props();
+	let {
+		data
+	}: {
+		data: {
+			invoice: InvoiceWithDetails;
+			billedIn?: { start: string; end: string }[];
+			missedIn?: { start: string; end: string }[];
+		};
+	} = $props();
 
 	const invoice = $derived(data.invoice);
 	let showDelete = $state(false);
@@ -75,6 +85,8 @@
 
 	<p><Badge tone={status.tone} label={status.label} /></p>
 
+	{#if data.missedIn?.length}<MissedWarning periods={data.missedIn} />{/if}
+
 	<div class="grid gap-8 lg:grid-cols-3">
 		<div class="flex flex-col gap-8 lg:col-span-2">
 			<InvoiceFacts {invoice} />
@@ -122,6 +134,16 @@
 		Die Rechnung von {invoice.billingEntity} über {formatCurrency(invoice.amount)} wird gelöscht. Sie
 		fliesst dann in keine neue Nebenkostenabrechnung mehr ein. Das lässt sich nicht rückgängig machen.
 	</p>
+	{#if data.billedIn?.length}
+		<BilledWarning periods={data.billedIn}>
+			<p>
+				Löschen Sie nur falsch erfasste Rechnungen. Die Entwürfe enthalten sie weiter: Löschen Sie
+				danach die Entwürfe und erstellen Sie die Abrechnungen erneut. Versendete oder bezahlte
+				Abrechnungen berichtigen Sie ausserhalb von Dwello gegenüber dem Mieter und zahlen zu viel
+				Bezahltes zurück. Bewahren Sie den Beleg auf: Der Mieter kann Einsicht verlangen.
+			</p>
+		</BilledWarning>
+	{/if}
 	{#if deleteError}
 		<Alert tone="critical" title="Nicht gelöscht"><p>{deleteError}</p></Alert>
 	{/if}

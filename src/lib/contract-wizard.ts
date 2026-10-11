@@ -1,3 +1,4 @@
+import { plainAmount } from './invoice';
 import {
 	apartmentOption,
 	initialContractValues,
@@ -53,9 +54,6 @@ export function advancePaymentNotice(values: ContractFormValues): string | null 
 }
 
 const amount = (value: string) => parseFloat(value) || 0;
-
-// "1'450", "1’450" and "180,50" as written in Switzerland; parseFloat would stop at the separator
-const plainAmount = (value: string) => value.replace(/['’\s]/g, '').replace(',', '.');
 
 /** The amounts in the form the checks and the backend read */
 export const normalizeAmounts = (values: ContractFormValues): ContractFormValues => ({

@@ -53,6 +53,21 @@ describe('Nebenkostenabrechnung erstellen', () => {
 		});
 		await deleteStatement(statement.id);
 	});
+
+	// Das PDF erklärt jede Position: Anteil der Wohnung an den Kosten der Liegenschaft und Anteil der Mietdauer
+	it('hält je Position den Anteil der Wohnung und den Zeitanteil fest', async () => {
+		const statement = await generateStatement({
+			contractId: rental.contract,
+			buildingId: rental.building,
+			periodStart: '2023-07-01',
+			periodEnd: '2024-06-30',
+			managementFeePercent: 0
+		});
+
+		// eingezogen am 1.1.2024: 182 von 366 Tagen
+		expect(statement.lineItems[0]).toMatchObject({ apartmentShare: '1500.00', periodShare: '0.4973', tenantShare: '745.90' });
+		await deleteStatement(statement.id);
+	});
 });
 
 describe('Nebenkostenabrechnung speichern', () => {

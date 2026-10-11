@@ -28,7 +28,7 @@
 			if (result.type === 'success') {
 				addToast('success', 'Abrechnung als versendet markiert');
 				await tick(); // after the dialog has handed the focus back
-				document.querySelector<HTMLElement>('h1')?.focus(); // "Versenden" is gone now
+				document.querySelector<HTMLElement>('h1')?.focus(); // "Als versendet markieren" is gone now
 			}
 		};
 	}}
@@ -46,6 +46,10 @@
 	<p>
 		Dwello verschickt die Abrechnung nicht selbst. Stellen Sie dem Mieter das PDF zu und markieren
 		Sie die Abrechnung danach als versendet.
+	</p>
+	<p>
+		Dwello datiert die Abrechnung auf den Tag, an dem Sie sie als versendet markieren. Stellen Sie
+		das PDF deshalb am selben Tag zu.
 	</p>
 	<dl class="flex flex-col gap-2 rounded-panel bg-sunken p-4" data-testid="send-recipient">
 		<div class="flex flex-wrap gap-x-2">

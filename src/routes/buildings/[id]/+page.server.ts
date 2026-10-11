@@ -1,5 +1,6 @@
 import { error, fail, redirect } from '@sveltejs/kit';
 import { countStatus } from '$lib/apartment';
+import { plainAmount } from '$lib/invoice';
 import type { BuildingWithStats, Apartment, ApartmentStatus } from '$lib/types';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -8,13 +9,72 @@ const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 export interface BuildingDetailsData {
 	building: BuildingWithStats;
 	apartments: Apartment[];
+	fuelStocks: FuelStock[] | null; // null: could not be loaded
+	heatingCategories: { id: string; name: string }[] | null; // null: could not be loaded
+}
+
+/** Heating oil or pellets in the tank at the end of a reading day, in CHF, billed in its category */
+export interface FuelStock {
+	id: string;
+	readingDate: string;
+	amount: number;
+	categoryId: string;
+	categoryName: string;
+}
+
+type Fetch = typeof globalThis.fetch;
+
+// Why the backend refused a reading, in words: the day is taken, or the tank's category differs
+async function notSaved(response: Response) {
+	if (response.status !== 409)
+		return 'Der Bestand konnte nicht gespeichert werden. Versuchen Sie es erneut.';
+	const { error = '' } = await response.json().catch(() => ({}));
+	return String(error).includes('category')
+		? 'Alle Bestände eines Gebäudes gehören zur selben Kategorie. Wählen Sie die Kategorie der bisherigen Bestände.'
+		: 'Für diesen Stichtag ist schon ein Bestand erfasst. Löschen Sie ihn zuerst.';
+}
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+// The building's Tankbestand readings and the heating cost categories they can be billed in
+async function fuelStockData(fetch: Fetch, buildingId: string) {
+	const [stocksRes, categoriesRes] = await Promise.all([
+		fetch(`${BACKEND_URL}/api/v1/buildings/${buildingId}/fuel-stocks`),
+		fetch(`${BACKEND_URL}/api/v1/categories?limit=100`)
+	]);
+	const stocks = stocksRes.ok ? await stocksRes.json() : null;
+	// without the categories the page still shows, only the choice is empty
+	const categories: Record<string, string | boolean>[] | null = categoriesRes.ok
+		? ((await categoriesRes.json()).categories ?? [])
+		: null;
+	const name = (c: Record<string, string | boolean>) => String(c.nameDE || c.name);
+	return {
+		fuelStocks: Array.isArray(stocks)
+			? stocks.map((s: Record<string, string>) => {
+					// named from all categories: one no longer allocable is not in the choice
+					const category = categories?.find((c) => c.id === s.categoryId);
+					return {
+						id: s.id,
+						readingDate: s.readingDate,
+						amount: Number(s.amount),
+						categoryId: s.categoryId,
+						categoryName: category ? name(category) : ''
+					};
+				})
+			: null,
+		// allocable fuel only: the chimney sweep is shared like heating but is no fuel (the API refuses it too)
+		heatingCategories:
+			categories
+				?.filter((c) => c.isHeatingCost && c.isAllowedUtilityCost && c.name !== 'Chimney Sweep')
+				.map((c) => ({ id: String(c.id), name: name(c) })) ?? null
+	};
 }
 
 export const load: PageServerLoad = async ({ params, fetch }): Promise<BuildingDetailsData> => {
 	try {
-		const [buildingRes, apartmentsRes] = await Promise.all([
+		const [buildingRes, apartmentsRes, fuel] = await Promise.all([
 			fetch(`${BACKEND_URL}/api/v1/buildings/${params.id}`),
-			fetch(`${BACKEND_URL}/api/v1/apartments?buildingId=${params.id}&limit=100`)
+			fetch(`${BACKEND_URL}/api/v1/apartments?buildingId=${params.id}&limit=100`),
+			fuelStockData(fetch, params.id)
 		]);
 
 		if (!buildingRes.ok) {
@@ -62,7 +122,7 @@ export const load: PageServerLoad = async ({ params, fetch }): Promise<BuildingD
 		building.reletCount = countStatus(apartments, 'relet');
 		building.reservedCount = countStatus(apartments, 'reserved');
 
-		return { building, apartments };
+		return { building, apartments, ...fuel };
 	} catch (err) {
 		console.error('Failed to fetch building:', err);
 		if (err && typeof err === 'object' && 'status' in err) {
@@ -81,5 +141,43 @@ export const actions: Actions = {
 			return fail(response.status, { deleteError: 'Gebäude konnte nicht gelöscht werden.' });
 		}
 		throw redirect(303, '/buildings');
+	},
+
+	// Heating oil in the tank on a reading day (Tankbestand), in CHF
+	addFuelStock: async ({ request, params, fetch }) => {
+		const form = await request.formData();
+		const readingDate = String(form.get('readingDate') ?? '');
+		const amount = plainAmount(String(form.get('amount') ?? ''));
+		const categoryId = String(form.get('categoryId') ?? '');
+		const fuelStockErrors: Record<string, string> = {};
+		if (!readingDate) fuelStockErrors.readingDate = 'Bitte geben Sie den Stichtag ein.';
+		if (!/^\d+(\.\d{1,2})?$/.test(amount))
+			fuelStockErrors.amount = 'Bitte geben Sie den Wert in Franken ein, zum Beispiel 2650.00.';
+		if (Object.keys(fuelStockErrors).length) return fail(400, { fuelStockErrors });
+
+		const response = await fetch(`${BACKEND_URL}/api/v1/buildings/${params.id}/fuel-stocks`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ readingDate, amount, categoryId })
+		});
+		if (!response.ok)
+			return fail(response.status, { fuelStockErrors: { form: await notSaved(response) } });
+		return { fuelStockSaved: true };
+	},
+
+	deleteFuelStock: async ({ request, params, fetch }) => {
+		const stockId = String((await request.formData()).get('stockId'));
+		const notDeleted = (status: number) =>
+			fail(status, {
+				fuelStockDeleteError: 'Der Bestand konnte nicht gelöscht werden. Laden Sie die Seite neu.'
+			});
+		if (!UUID.test(stockId)) return notDeleted(400);
+		const response = await fetch(
+			`${BACKEND_URL}/api/v1/buildings/${params.id}/fuel-stocks/${stockId}`,
+			{
+				method: 'DELETE'
+			}
+		);
+		return response.ok ? { fuelStockDeleted: true } : notDeleted(response.status);
 	}
 };

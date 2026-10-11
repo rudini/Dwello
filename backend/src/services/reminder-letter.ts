@@ -11,6 +11,7 @@ export interface ReminderLetterInput {
 	deadline: string;
 	tenant: { firstName: string; lastName: string };
 	sender: { name: string; iban: string };
+	reference?: string; // the QR reference: a QR-IBAN takes a payment only with it
 }
 
 const TITLES = ['Zahlungserinnerung', '2. Mahnung', '3. Mahnung'];
@@ -39,7 +40,7 @@ export function reminderLetter(input: ReminderLetterInput) {
 	const paragraphs = [
 		opening(input.level, statement),
 		`Offener Betrag: ${chf(input.balance)}`,
-		`Bitte überweisen Sie den Betrag bis ${swissDate(input.deadline)} auf folgendes Konto:\nIBAN ${input.sender.iban}`,
+		`Bitte überweisen Sie den Betrag bis ${swissDate(input.deadline)} auf folgendes Konto:\nIBAN ${input.sender.iban}${input.reference ? `\nReferenz ${input.reference} (bitte bei der Zahlung angeben)` : ''}`,
 		'Haben Sie die Zahlung bereits geleistet, betrachten Sie dieses Schreiben als gegenstandslos.'
 	];
 	const salutation = `Guten Tag ${input.tenant.firstName} ${input.tenant.lastName}`;

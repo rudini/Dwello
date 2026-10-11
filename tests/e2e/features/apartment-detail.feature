@@ -34,8 +34,8 @@ Funktionalität: Wohnungsdetail
     Und der Mieter "Carla Rossi" existiert
     Und "Carla Rossi" mietet die Wohnung "3.02" seit "2099-11-01" für "900" Franken
     Und der Liegenschaftsverwalter ist auf der Detailseite der Wohnung "3.02"
-    Dann hat die Wohnung den Status "Wiedervermietet ab 1.11.2099"
-    Und zieht "Carla Rossi" am "1.11.2099" in die Wohnung ein
+    Dann hat die Wohnung den Status "Wiedervermietet ab 01.11.2099"
+    Und zieht "Carla Rossi" am "01.11.2099" in die Wohnung ein
 
   Szenario: Wohnung bearbeiten
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite der Wohnung "3.01"

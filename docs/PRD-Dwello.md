@@ -433,7 +433,7 @@ Seeded by `backend/migrations/0002_stammdaten.sql`. The divisor is always all ap
 3. **Pro Zimmer** (Per Rooms), formula `{rooms}`
    - Distribution by number of rooms
 
-4. **Heizung (Fläche 70% / Einheit 30%)** (Heating Split), formula `0.7 * {area} + 0.3 * {units}`
+4. **Heizung (Fläche 70% / Einheit 30%)** (Heating Split), formula `0.7 * {area} / {area_total} + 0.3 * {units} / {units_total}`
    - Swiss standard heating distribution
    - The time-based split for tenants who moved mid-period uses the heating profile (see section 5.7)
 
@@ -444,6 +444,7 @@ Users can create custom formulas using apartment variables:
 - **{volume}** - Apartment volume in m³ (estimated as area × ceiling height)
 - **{rooms}** - Number of rooms in apartment
 - **{units}** - Always 1 (for per-unit calculations)
+- **{area_total}**, **{rooms_total}**, **{volume_total}**, **{units_total}** - Sums over all apartments of the building (for keys with fixed parts such as 70/30)
 
 **Custom Formula Examples:**
 - `{area} * 1.5` - Area with 1.5x weighting
@@ -471,7 +472,7 @@ Five flat profiles, seeded by `backend/migrations/0002_stammdaten.sql`; each dis
 2. **Heizung Mittelland** (Heating Only, Swiss Plateau): for Bern, Zürich, Basel, etc.
 3. **Heizung Bergregion** (Heating Only, Mountain Region): for Alpine and pre-Alpine regions
 4. **Heizung Tessin** (Heating Only, Southern Switzerland): for Ticino and southern regions
-5. **Nur Warmwasser** (Hot Water Only): nearly even distribution across the year
+5. ~~**Nur Warmwasser** (Hot Water Only)~~: removed (migration 0010); separate hot water costs are shared by days
 
 **Manual Configuration:**
 - Option to input custom monthly percentages manually
@@ -558,11 +559,17 @@ Five flat profiles, seeded by `backend/migrations/0002_stammdaten.sql`; each dis
   - Total costs and advance payments
   - Balance (refund or additional payment)
 - Ability to adjust individual statement amounts if needed (drafts only)
-- Ability to regenerate if invoices/contracts change
+- Ability to regenerate if invoices/contracts change: delete the draft and run the wizard again; a run creates drafts only for contracts without a statement in the period, and a draft names invoices recorded after it was created
 
 **Step 4: Generate PDFs**
-- Generate statement PDF for each apartment
-- Append Swiss QR-bill to each statement
+- Generate statement PDF for each apartment (requirements and sources: `docs/nebenkostenabrechnung-anforderungen.md`):
+  A4, sender and «Seite x von y» on every page, property and period in the footer; recipient in the address field;
+  the balance first (Nachzahlung with payment deadline or Rückerstattung); per category the distribution key, the
+  building's costs, the Wohnungsanteil, the Zeitanteil (days rented or heating profile) and the tenant's share;
+  heating costs with the heating profile and, for a tank, opening stock + invoices – closing stock; notes on the
+  receipts (Art. 257b Abs. 2 OR) and the detailed heating statement (Art. 8 VMWG)
+- Append Swiss QR-bill to each statement with an amount due (SIX layout: receipt 62 mm, payment part, 105 mm high at
+  the bottom of the last page)
 - Store PDFs in database
 - Option to download all as ZIP (planned, not implemented)
 
@@ -1064,7 +1071,6 @@ BALANCE (refund): CHF 30
   - "Heizung Mittelland"
   - "Heizung Bergregion"
   - "Heizung Tessin"
-  - "Nur Warmwasser"
 - Section 2: Monthly percentages table
   - Months: Jan, Feb, Mar, ..., Dec
   - Percentage inputs (read-only if predefined profile selected)

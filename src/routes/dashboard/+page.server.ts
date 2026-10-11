@@ -1,6 +1,7 @@
 import { fetchRecord } from '$lib/server/save-form';
 import { lastCompletedPeriod, type AccountingPeriodType } from '$lib/accounting-period';
 import { overviewDeadlines, overviewTasks, type Deadline, type Task } from '$lib/overview';
+import { localToday } from '$lib/contract-status';
 
 export interface DashboardData {
 	portfolio: {
@@ -102,7 +103,7 @@ export const load = async ({
 		reletStarts: reletStarts(b.buildingId)
 	}));
 	const input = {
-		today: new Date().toLocaleDateString('sv-SE'), // local YYYY-MM-DD
+		today: localToday(), // the day in Switzerland
 		portfolio: figures.portfolio,
 		statementCounts: figures.statements,
 		dueStatements: [...overdue, ...sent].map((s) => ({

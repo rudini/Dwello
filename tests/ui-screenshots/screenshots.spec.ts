@@ -4,10 +4,10 @@ import { changedAreas } from './changed-areas';
 import { testData } from '../e2e/fixtures/backend';
 import { sessionCookies, sessionToken } from '../e2e/fixtures/session';
 
-// Routes to capture, one per line (written by affected-routes.ts)
+// Routes to capture, one per line (written by affected-routes.ts); «pdf» is captured by statement-pdf.ts
 const routes = readFileSync(process.env.UI_ROUTES_FILE || 'ui-routes.txt', 'utf8')
 	.split('\n')
-	.filter(Boolean);
+	.filter((line) => line.startsWith('/'));
 const PUBLIC = ['/login'];
 const BASE_URL = process.env.UI_BASE_DIR && 'http://localhost:3200'; // frontend of the base branch (playwright.screenshots.config.ts)
 

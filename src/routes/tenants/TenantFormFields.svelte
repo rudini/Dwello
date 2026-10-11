@@ -81,7 +81,7 @@
 	id="language"
 	name="language"
 	label="Sprache"
-	help="In dieser Sprache wird die Nebenkostenabrechnung erstellt."
+	help="In dieser Sprache wird die Nebenkostenabrechnung erstellt. Auf Rätoromanisch erstellt Dwello die Abrechnung vorerst auf Deutsch."
 	options={languages}
 	value={tenant.language ?? 'de'}
 	testid="tenant-language-select"
@@ -105,7 +105,7 @@
 			name="postalCode"
 			label="PLZ"
 			value={value('postalCode')}
-			optional
+			optional={byEmail}
 			example="8400"
 			error={errors.postalCode}
 			testid="tenant-postal-code-input"

@@ -170,6 +170,8 @@ export interface Category {
 	nameIT?: string;
 	nameEN?: string;
 	isAllowedUtilityCost: boolean;
+	// Shared by the heating profile at a tenant change (heating, chimney sweep), not by days
+	isHeatingCost?: boolean;
 	description?: string;
 	sortOrder?: number;
 }
@@ -193,6 +195,9 @@ export interface Invoice {
 	id: string;
 	buildingId: string;
 	invoiceDate: string;
+	/** Leistungszeitraum: the time the invoice bills, if not its date */
+	servicePeriodStart?: string | null;
+	servicePeriodEnd?: string | null;
 	billingEntity: string;
 	description: string;
 	amount: number;
@@ -278,6 +283,7 @@ export interface Statement {
 	totalAdvancePayments: number;
 	managementFee: number;
 	managementFeePercent: number; // rate used when the statement was generated
+	managementFeeKeyed?: boolean; // the fee is of the building's costs, shared by a key (else of the subtotal)
 	balance: number; // positive = tenant owes, negative = refund
 	status: StatementStatus;
 	paymentDeadline: string;

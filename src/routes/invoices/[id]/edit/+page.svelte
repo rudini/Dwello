@@ -3,10 +3,12 @@
 	import { untrack } from 'svelte';
 	import { api } from '$lib/api';
 	import type { DistributionKeyRow } from '$lib/distribution-key';
-	import { plainAmount, validateInvoice } from '$lib/invoice';
+	import { plainAmount, servicePeriodOf, validateInvoice } from '$lib/invoice';
 	import { addToast } from '$lib/stores';
 	import type { Category, InvoiceWithDetails } from '$lib/types';
 	import Alert from '$lib/ui/Alert.svelte';
+	import BilledWarning from '../../BilledWarning.svelte';
+	import MissedWarning from '../../MissedWarning.svelte';
 	import { focusFirstError } from '$lib/ui/focus-error';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import Panel from '$lib/ui/Panel.svelte';
@@ -24,6 +26,8 @@
 			buildings: { id: string; name: string; address: string }[];
 			categories: Category[];
 			distributionKeys: DistributionKeyRow[];
+			billedIn?: { start: string; end: string }[]; // periods with statements that took this invoice
+			missedIn?: { start: string; end: string }[]; // periods with statements made before it was recorded
 		};
 	} = $props();
 
@@ -31,6 +35,8 @@
 	const initial = untrack(() => ({
 		buildingId: data.invoice.buildingId,
 		invoiceDate: data.invoice.invoiceDate,
+		servicePeriodStart: data.invoice.servicePeriodStart ?? '',
+		servicePeriodEnd: data.invoice.servicePeriodEnd ?? '',
 		billingEntity: data.invoice.billingEntity,
 		description: data.invoice.description,
 		amount: data.invoice.amount.toFixed(2),
@@ -63,6 +69,7 @@
 		const result = await api.put(`/invoices/${invoice.id}`, {
 			buildingId: values.buildingId,
 			invoiceDate: values.invoiceDate,
+			...servicePeriodOf(values),
 			billingEntityName: values.billingEntity.trim(),
 			description: values.description,
 			amount: plainAmount(values.amount),
@@ -96,10 +103,24 @@
 		]}
 	/>
 
+	{#if data.missedIn?.length}<MissedWarning periods={data.missedIn} />{/if}
+
+	{#if data.billedIn?.length}
+		<BilledWarning periods={data.billedIn}>
+			<p>
+				Ändern Sie diese Rechnung, stimmen diese Abrechnungen nicht mehr. Löschen Sie danach die
+				Entwürfe und erstellen Sie die Abrechnungen erneut. Versendete oder bezahlte Abrechnungen
+				berichtigen Sie ausserhalb von Dwello gegenüber dem Mieter.
+			</p>
+		</BilledWarning>
+	{/if}
+
 	<Panel title="Rechnungsdaten">
 		<InvoiceDataFields
 			bind:buildingId={values.buildingId}
 			bind:invoiceDate={values.invoiceDate}
+			bind:servicePeriodStart={values.servicePeriodStart}
+			bind:servicePeriodEnd={values.servicePeriodEnd}
 			bind:amount={values.amount}
 			bind:billingEntity={values.billingEntity}
 			bind:description={values.description}

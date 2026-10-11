@@ -57,10 +57,17 @@ export function affectedRoutes(changed: string[], files: string[], read: (file: 
 	return [...routes].sort();
 }
 
-// CLI: changed files on stdin, affected routes on stdout, one per line
+// The backend code that draws the statement PDF: its pages are captured on their own (statement-pdf.ts)
+const PDF_SOURCES = ['pdf.service.ts', 'pdf-format.ts', 'qr-bill.service.ts'].map((file) => `backend/src/services/${file}`);
+
+/** Whether a change can alter how the statement PDF looks */
+export const pdfAffected = (changed: string[]) => changed.some((file) => PDF_SOURCES.includes(file));
+
+// CLI: changed files on stdin, affected routes on stdout, one per line, and «pdf» when the statement PDF changed
 if (process.argv[1]?.endsWith('affected-routes.ts')) {
 	const changed = readFileSync(0, 'utf8').split('\n').filter(Boolean);
 	const cache = new Map<string, string>();
 	const read = (file: string) => cache.get(file) ?? cache.set(file, readFileSync(file, 'utf8')).get(file)!;
-	console.log(affectedRoutes(changed, sourceFiles(), read).join('\n'));
+	const routes = affectedRoutes(changed, sourceFiles(), read);
+	console.log([...routes, ...(pdfAffected(changed) ? ['pdf'] : [])].join('\n'));
 }

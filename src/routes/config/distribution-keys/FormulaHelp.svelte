@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { FORMULA_VARIABLES } from '$lib/distribution-key';
+	import { BUILDING_TOTALS, FORMULA_VARIABLES } from '$lib/distribution-key';
 	import Panel from '$lib/ui/Panel.svelte';
 
 	// Examples whose explanation holds for the backend's calculation (share = value / sum of all values)
@@ -10,9 +10,24 @@
 		{
 			formula: '{area} + {rooms} * 10',
 			text: 'Fläche und Zimmer zusammen: jedes Zimmer zählt wie 10 m² zusätzliche Fläche.'
+		},
+		{
+			formula: '0.7 * {area} / {area_total} + 0.3 * {units} / {units_total}',
+			text: 'Feste Teile: 70 % der Kosten nach Fläche, 30 % zu gleichen Teilen pro Wohnung.'
 		}
 	];
 </script>
+
+{#snippet variables(list: { name: string; description: string }[])}
+	<dl class="flex flex-col gap-2">
+		{#each list as variable (variable.name)}
+			<div class="flex flex-wrap gap-x-4">
+				<dt class="font-mono font-semibold text-ink">{`{${variable.name}}`}</dt>
+				<dd class="text-ink-muted">{variable.description}</dd>
+			</div>
+		{/each}
+	</dl>
+{/snippet}
 
 <Panel title="So funktioniert eine Formel">
 	<p>
@@ -23,14 +38,11 @@
 	</p>
 
 	<h3 class="text-lg font-semibold text-ink">Bausteine</h3>
-	<dl class="flex flex-col gap-2">
-		{#each FORMULA_VARIABLES as variable (variable.name)}
-			<div class="flex flex-wrap gap-x-4">
-				<dt class="font-mono font-semibold text-ink">{`{${variable.name}}`}</dt>
-				<dd class="text-ink-muted">{variable.description}</dd>
-			</div>
-		{/each}
-	</dl>
+	{@render variables(FORMULA_VARIABLES)}
+
+	<h3 class="text-lg font-semibold text-ink">Summen des Gebäudes</h3>
+	<p>Für Schlüssel aus festen Teilen teilen Sie einen Baustein durch seine Summe.</p>
+	{@render variables(BUILDING_TOTALS)}
 
 	<h3 class="text-lg font-semibold text-ink">Rechnen</h3>
 	<p>

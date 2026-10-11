@@ -88,7 +88,7 @@ function workTasks({ statementCounts, lettersToSend, missingPeriod }: OverviewIn
 			id: 'overdue',
 			// TODO(fachlich prüfen): shown from the Zahlungsfrist on; a Mahnung is customary only after the Mahnfrist
 			title: 'Überfällige Abrechnungen prüfen',
-			text: `${count(statementCounts.overdue, 'Nebenkostenabrechnung ist', 'Nebenkostenabrechnungen sind')} über der Zahlungsfrist. Prüfen Sie, ob das Geld eingegangen ist: Dann markieren Sie die Abrechnung als bezahlt, sonst können Sie eine Mahnung senden.`,
+			text: `${count(statementCounts.overdue, 'Nebenkostenabrechnung ist', 'Nebenkostenabrechnungen sind')} über der Zahlungsfrist. Prüfen Sie, ob das Geld eingegangen ist: Dann markieren Sie die Abrechnung als bezahlt, sonst können Sie eine Mahnung senden. Bei einer Rückerstattung überweisen Sie den Betrag und markieren die Abrechnung danach als bezahlt.`,
 			href: '/statements?status=overdue',
 			action: 'Überfällige ansehen',
 			icon: 'reminder'
@@ -141,7 +141,7 @@ export interface Deadline {
 }
 
 // How far ahead the overview looks – TODO(fachlich prüfen): windows chosen for usability, no legal basis
-const PAYMENT_WINDOW_DAYS = 14;
+const PAYMENT_WINDOW_DAYS = 30; // the payment deadline the app gives: every open one shows
 const CONTRACT_END_WINDOW_DAYS = 60;
 
 const daysFrom = (today: string, date: string) =>

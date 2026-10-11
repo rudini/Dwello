@@ -62,6 +62,6 @@ describe('Hilfe', () => {
 
 		const text = section('Nebenkostenabrechnungen erstellen')?.textContent;
 		expect(text).toContain('Dwello verschickt die Abrechnungen nicht selbst');
-		expect(text).toContain('«Versenden»');
+		expect(text).toContain('«Als versendet markieren»');
 	});
 });

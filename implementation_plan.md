@@ -4408,6 +4408,105 @@ Brief: `docs/design/REDESIGN_BRIEF.md`; log and decisions: `docs/design/progress
   (`src/routes/buildings/BuildingMiniMap.svelte`, `src/__tests__/building-mini-map.dom.test.ts`, `vitest.config.ts`,
   `.env.example`, `docker-compose.prod.yml`, `docs/tech-stack.md`)
 
+## Session 11 - October 2026: Open Points, Missing-Invoice Check, Swiss Date Field, Statement PDF
+
+Order A → B → C → D1 → D2, each step reviewed by an independent agent until no finding of severity
+critical/high/medium is open; reviews in `docs/reviews/`.
+
+### Done ✅
+- [x] **A: seed and master data, PDF content** (`docs/seed-daten-aenderungen.md`): demo data with two complete billing
+  years, tenant addresses, a tenant change, realistic Akonto and statement dates (`backend/demo/demo-data.sql`,
+  `backend/src/db/demo-data.ts`); migration `0003_stammdaten_korrektur.sql` (Swiss monthly heating shares, 70/30 key
+  with the new building sums `{area_total}` … in `formula.service.ts`, formula help in the settings); PDF with tenant
+  address, category names in the tenant's language, TT.MM.JJJJ, CHF 1'234.50, glossary terms, no page break storm
+  (`pdf-format.ts`, `statement-pdf.service.ts`, `pdf.service.ts`). Tests: `formula.service.test.ts`,
+  `statement-pdf-data.test.ts`, `heating-profiles.pg.test.ts`, `demo-data.pg.test.ts`, expectations in
+  `statement-generation.pg.test.ts` and `prorating.pg.test.ts` recalculated by hand.
+- [x] **B: check for missing invoices per category** (`backend/src/services/invoice-completeness.service.ts`,
+  `GET /api/v1/invoices/completeness/:buildingId`, contract `tests/contracts/invoice-completeness.json`): each category
+  against the same dates one year earlier (missing category, gap in the rhythm by quarter/half-year/month, deviation);
+  Akonto comparison per statement (`akontoHint`, `src/lib/statement-wizard.ts`); shown in the preview of
+  "Abrechnungen erstellen" (`PreviewChecks.svelte`, `PreviewStep.svelte`, `GenerationStep.svelte`), confirmation for
+  missing invoices; scenario "Hinweis auf fehlende Rechnungen einer Kategorie", axe state `category-check`. Tests:
+  `invoice-completeness.test.ts` (incl. part period, category without costs, leap year), `invoice-completeness.pg.test.ts`,
+  `statement-wizard.test.ts` (Akonto with tenant change), `statement-wizard.dom.test.ts`, `statement-generation.test.ts`.
+- [x] **B, review round 1 – domain model** (`docs/reviews/B-review-1.md`): category flag "Heiz- und Warmwasserkosten"
+  (migration `0006`), Verwaltungspauschale without key on the tenant's own costs (`calculation.service.ts`),
+  Leistungszeitraum per invoice (migration `0007`, `invoice.service.ts` `inPeriod`, form fields in
+  `InvoiceDataFields.svelte`, shown in `InvoiceFacts.svelte`, `servicePeriodOf` in `src/lib/invoice.ts`), Tankbestand
+  per building (migration `0008`, `fuel-stock.service.ts`, `GET/POST/DELETE /api/v1/buildings/:id/fuel-stocks`, contract
+  `tests/contracts/fuel-stocks.json`, `FuelStocks.svelte` on the building page, demo readings for Musterhaus Zentrum).
+  Scenarios "Eine Rechnung gilt für ihren Leistungszeitraum …", "Heizöl wird nach Verbrauch abgerechnet …". Tests:
+  `service-period.pg.test.ts`, `fuel-stock.pg.test.ts`, `building-actions.test.ts`, `buildings-pages.dom.test.ts`,
+  `invoice-pages.dom.test.ts`; demo recalculation in `docs/seed-daten-aenderungen.md`.
+- [x] **B, review round 2** (`docs/reviews/B-review-2.md`): Tankbestand with its heating cost category (migration
+  `0009`, select on the building page), key fallback, reported in the check when a reading day is missing or the
+  consumption is negative (kind `stock`, confirmation in the wizard, link to the building), consumption compared with
+  the year before, validated endpoints (`real-date.ts`), delete with confirmation (`FuelStockList.svelte`); heating
+  share relative to the period's months (`prorating.service.ts`), rounded before the subtotal; Warmwasser by days;
+  Leistungszeitraum rounded and used for the coverage; warning when editing an invoice already in statements
+  (`invoices/[id]/edit`); texts (Akonto increase, new category, meter readings, rate per run, Leistungszeitraum);
+  demo: Alpenblick readings, Fernwärme Q4 with Leistungszeitraum. Tests: `fuel-stock.pg.test.ts`,
+  `heating-distribution.pg.test.ts`, `service-period.pg.test.ts`, `invoice-completeness.test.ts`,
+  `statement-wizard*.test.ts`, `building-actions.test.ts`, `buildings-pages.dom.test.ts`, `invoices.test.ts`,
+  `invoice-pages.dom.test.ts`, `statement-generation.test.ts`, `categories-page.dom.test.ts`.
+- [x] **B, review round 3** (`docs/reviews/B-review-3.md`): PDF heating share as calculated (`statement-pdf.service.ts`);
+  no purchase rhythm with a Tankbestand; one tank category per building (409), allocable only, key up to the period
+  end, retired tank silent; hint `tank` for heating costs without any reading (`CategoryFindingItem.svelte`); stock
+  hints also for buildings without invoices (`PreviewChecks.svelte`); warning for a period not yet over
+  (`PeriodStep.svelte`, axe state `period-not-over`); «already billed» only for allocable invoices recorded before the
+  statements, also in the delete dialog (`BilledWarning.svelte`, `billedIn` in `src/lib/server/invoice.ts`); texts
+  (meter readings, Akonto, new costs, tank valuation). Tests: `fuel-stock.pg.test.ts`, `invoice-completeness*.test.ts`,
+  `statement-pdf.pg.test.ts`, `statement-wizard*.test.ts`, `building-actions.test.ts`, `buildings-pages.dom.test.ts`,
+  `invoices.test.ts`, `invoice-pages.dom.test.ts`.
+- [x] **Heating profile «Nur Warmwasser» removed** (product owner's decision after research): migration
+  `0010_ohne_nur_warmwasser.sql` (a default in the configuration is cleared, statements keep their amounts);
+  `heating-profiles.pg.test.ts`; data model table updated to the values of 0003.
+- [x] **B, review round 4** (`docs/reviews/B-review-4.md`): tank stock of a non-allocable category not billed, chimney
+  sweep no tank category, summer period by days (`prorating.service.ts`); hint for invoices recorded after their
+  period's statements (`MissedWarning.svelte`, `statementPeriods`); tank question as its own hint
+  (`TankQuestion.svelte`); running-period warning also in the preview; texts (meters in the flats, delete dialog, new
+  costs, Holz); scenario «Warnung beim Bearbeiten einer schon abgerechneten Rechnung».
+- [x] **B, review round 5** (`docs/reviews/B-review-5.md`): the wizard skips contracts that already have a statement in
+  the period (`statement-generation.ts`, API driver; scenario «Abrechnungen erneut erstellen ergänzt nur die
+  fehlenden»); a draft names invoices recorded after it (`statements/[id]`), statement `buildingId` from `building.id`;
+  `statementPeriods` lists a period in both lists; Tankbestand named from all categories; texts (Flüssiggas,
+  Heizkostenverteiler, delete and late-invoice instructions); summer period with `calculateDaysBetween`; axe screens
+  for billed and late invoices, state `tank-question`.
+- [x] **Swiss date field (step C)** (`src/lib/ui/DateInput.svelte`, `src/lib/swiss-date.ts`, `formatDate` padded):
+  every date field TT.MM.JJJJ with mask, date in words, calendar button; scenarios with padded dates; E2E 428.
+- [x] **B, review round 6** (`docs/reviews/B-review-6.md`): empty preview when every contract is billed explains how
+  to recalculate; sent statements are corrected outside Dwello (texts, hint on sent statements); meter and fuel texts;
+  no Akonto raise after moving out (`movedOut`); `.gitignore` matches links.
+- [x] **D1: requirements of a Swiss statement** (`docs/nebenkostenabrechnung-anforderungen.md`, reviews
+  `docs/reviews/D1-review-1.md`, round 2 in `D2-review-1.md`): requirement, source, certainty, PDF proposal; nothing
+  read on Fedlex (all «unsicher», graded A/B/C).
+- [x] **D2: statement PDF** (`backend/src/services/pdf.service.ts`, `statement-pdf.service.ts`, migration 0011
+  `apartment_share`, `period_share`, `fuel_stock`): A4 with sender and page numbers, balance first, per category key with
+  the apartment's part, Wohnungsanteil, Zeitanteil (days or heating profile) and share; heating months; tank
+  derivation from the stored readings; notes on receipts and Art. 8 VMWG; SIX payment part (German for Romansh, QR text
+  printed as in the code, sharper QR image); a draft's PDF dates it today with the full deadline; scenario «Das PDF
+  erklärt die Verteilung und den Heizölverbrauch». Review round 1: `docs/reviews/D2-review-1.md`.
+  Review round 2 (`docs/reviews/D2-review-2.md`): sending dates the statement (`datedToday` in `statement.service.ts`,
+  `SendDialog.svelte`), demo dates kept (`db/demo-data.ts`), key values stored (`key_values`, migration 0011), mixed key as
+  a formula (`keyShareOf`), Romansh PDF in German (`TenantFormFields.svelte`), paid refund, totals kept together.
+- [x] **Review round 8 / D2 round 3 and persona run** (`docs/reviews/R3-review.md`, `docs/design/personas/*-s11.md`):
+  reminders only for an overdue amount due (`StatusActions.svelte`, `reminder.service.ts`, QR reference in
+  `reminder-letter.ts`); PDF made again when stale or discarded (`getStatementPdf`, paid discards it); paid date field
+  (`statement-actions.ts`, both paid dialogs); fee text as in the PDF (`CostTable.svelte`); deadlines up to 30 days
+  (`overview.ts`); stable list order (services); refocus on errors (`focus-error.ts`); «.-» amounts (`invoice.ts`);
+  missing year message (`DateInput.svelte`); PLZ for letters; town in the tenant choice; history with sent and paid.
+- [x] **Review rounds 4 and 5, persona reruns** (`docs/reviews/R3-review.md`): paid date checked in the dialog before
+  sending (`paidDateError` in `src/lib/statement.ts`, `FormDialog` `check`, list dialog) and refused when empty; Enter
+  confirms a dialog (`Dialog.svelte`) after reading a two-digit year (`DateInput.svelte`); `Field` shows a repeated
+  error again; `localToday` is the Swiss day (also in tests and E2E steps); the PDF as sent stays after paying;
+  reminders only when overdue (backend); date messages for a missing year and other formats; scenarios «Zahlungseingang
+  mit Datum festhalten», «Kein Zahlungseingang in der Zukunft».
+- [x] **Statement PDF in the CI job «UI screenshots»** (`tests/ui-screenshots/statement-pdf.ts`, `affected-routes.ts`
+  `pdfAffected`, `changed-areas.ts` `markAreas`, `.github/workflows/ci.yml`): a change of the backend's PDF code captures
+  a fixed example (Musterhaus 2025, mixed key, tank, QR) in German and French, drawn by this branch and the base branch,
+  pages via pdftoppm, changes framed in red, posted with the page screenshots.
+
 
 ---
 

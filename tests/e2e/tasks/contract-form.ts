@@ -1,4 +1,5 @@
 import type { Actor } from '../fixtures/actor';
+import { typeDate } from '../interactions/form';
 import {
 	advancePaymentInput,
 	apartmentSelect,
@@ -34,7 +35,7 @@ export const chooseTenant = (tenantId: string) => async (actor: Actor) => {
 export const fillContract = (contract: Omit<ContractData, 'tenantId'>) => async (actor: Actor) => {
 	await apartmentSelect(actor.page).selectOption(contract.apartmentId);
 	await nextButton(actor.page).click();
-	await startDateInput(actor.page).fill(contract.startDate);
+	await typeDate(startDateInput(actor.page), contract.startDate);
 	await nextButton(actor.page).click();
 	if (contract.confirmPastStart) await nextButton(actor.page).click();
 	await baseRentInput(actor.page).fill(contract.baseRent);

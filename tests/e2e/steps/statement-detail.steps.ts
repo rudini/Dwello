@@ -2,8 +2,8 @@ import { expect } from '@playwright/test';
 import { createBdd, type DataTable } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { visit } from '../interactions/navigation';
-import { downloadedFile, downloadedPdfTitle } from '../questions/download';
-import { deleteOffer, heatingCosts, pdfToView, recipient, sendConfirmation, statusOfStatement } from '../questions/statement-detail';
+import { downloadedFile, downloadedPdfText, downloadedPdfTitle } from '../questions/download';
+import { deleteOffer, heatingCosts, historyOf, paidDate, pdfToView, recipient, sendConfirmation, statusOfStatement } from '../questions/statement-detail';
 import { emptyStatementList, statementOfYear, statementPath } from '../questions/statements';
 import { searchStatements } from '../tasks/statements';
 import { francs } from '../tasks/statement-generate-api';
@@ -13,6 +13,7 @@ import {
 	editStatementFromDetail,
 	generateStatementPdf,
 	markStatementPaid,
+	markStatementPaidOn,
 	openStatementApartment,
 	openSendConfirmation,
 	openStatementTenant,
@@ -29,6 +30,20 @@ Given(
 	'im Gebäude {string} gibt es eine Heizkostenrechnung über {string} Franken für {int}',
 	async ({ seed }, building: string, amount: string, year: number) => {
 		await seed.heatingInvoice(building, amount, year);
+	}
+);
+
+Given(
+	'im Gebäude {string} gibt es eine Rechnung der Kategorie {string} über {string} Franken vom {string} für die Zeit vom {string} bis {string}',
+	async ({ seed }, building: string, category: string, amount: string, date: string, from: string, to: string) => {
+		await seed.invoiceOn(building, category, amount, date, [from, to]);
+	}
+);
+
+Given(
+	'im Gebäude {string} gibt es eine Rechnung der Kategorie {string} über {string} Franken vom {string}',
+	async ({ seed }, building: string, category: string, amount: string, date: string) => {
+		await seed.invoiceOn(building, category, amount, date);
 	}
 );
 
@@ -77,6 +92,20 @@ Then('bietet die Bestätigung das PDF der Abrechnung zum Ansehen an', async ({ v
 
 When('der Liegenschaftsverwalter die Abrechnung als bezahlt markiert', async ({ verwalter }) => {
 	await verwalter.perform(markStatementPaid);
+});
+
+When('der Liegenschaftsverwalter die Abrechnung als am {string} bezahlt markiert', async ({ verwalter }, date: string) => {
+	await verwalter.perform(markStatementPaidOn(date));
+});
+
+Then('nennt der Verlauf {string} am {string}', async ({ verwalter }, label: string, date: string) => {
+	await expect(historyOf(verwalter)).toContainText(new RegExp(`${label}\\s*${date.replace(/\./g, '\\.')}`));
+});
+
+Then('meldet das Feld «Bezahlt am» {string}', async ({ verwalter }, message: string) => {
+	const field = paidDate(verwalter);
+	await expect(field).toHaveAttribute('aria-invalid', 'true');
+	await expect(field).toHaveAccessibleDescription(new RegExp(message.replace(/\./g, '\\.')));
 });
 
 When('der Liegenschaftsverwalter die Abrechnung löscht', async ({ verwalter }) => {
@@ -150,4 +179,12 @@ Then(
 
 Then('trägt das PDF den Titel {string}', async ({ verwalter }, title: string) => {
 	expect(await downloadedPdfTitle(verwalter)).toContain(title);
+});
+
+Given('im Gebäude {string} war am {string} Heizöl für {string} Franken im Tank', async ({ seed }, building: string, date: string, amount: string) => {
+	await seed.fuelStock(building, date, amount);
+});
+
+Then('steht im PDF {string}', async ({ verwalter }, text: string) => {
+	expect(await downloadedPdfText(verwalter)).toContain(text);
 });
