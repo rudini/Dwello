@@ -316,7 +316,6 @@ class RealVerifiersTest(unittest.TestCase):
         self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
         self.assertIn("skill_lint: missing section '6. Design note'", result.stdout.splitlines())
 
-
     def test_a_package_in_the_working_directory_cannot_replace_the_test_runner(self):
         root = real_copy(self)
         (root / "scripts" / "tests" / "test_it.py").write_text(
@@ -340,3 +339,33 @@ class RealVerifiersTest(unittest.TestCase):
         result = run_copy(root)
 
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+
+    def test_the_suite_cannot_change_reviews_or_the_lock_for_the_gate(self):
+        writes = {
+            "a passing review": ("(ROOT / 'evidence' / 'reviews' / 'step-07-round-3.md').write_text('VERDICT: PASS\\n')",
+                                 "step 07: VERDICT: FAIL (round 2)", {"07": ["PASS", "FAIL"]}),
+            "a fresh lock": ("lock = ROOT / 'verifiers.lock'\n        lock.write_text(lock.read_text().replace("
+                             "'0' * 64, __import__('hashlib').sha256((ROOT / 'scripts' / 'skill_lint').read_bytes())"
+                             ".hexdigest()))", "verifiers.lock: scripts/skill_lint changed since its review", None),
+        }
+        for name, (write, line, verdicts) in writes.items():
+            with self.subTest(name):
+                root = real_copy(self)
+                if verdicts:
+                    for step, rounds in verdicts.items():
+                        for number, verdict in enumerate(rounds, start=1):
+                            (root / "evidence" / "reviews" / f"step-{step}-round-{number}.md").write_text(
+                                f"VERDICT: {verdict}\n")
+                else:
+                    lock = root / "verifiers.lock"
+                    entry = next(l for l in lock.read_text().splitlines() if l.endswith("  scripts/skill_lint"))
+                    lock.write_text(lock.read_text().replace(entry, "0" * 64 + "  scripts/skill_lint"))
+                (root / "scripts" / "tests" / "test_it.py").write_text(
+                    "import unittest\nfrom pathlib import Path\n\nROOT = Path(__file__).resolve().parents[2]\n\n\n"
+                    f"class T(unittest.TestCase):\n    def test_ok(self):\n        {write}\n")
+
+                result = run_copy(root)
+
+                self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+                self.assertIn(line, result.stdout.splitlines())
