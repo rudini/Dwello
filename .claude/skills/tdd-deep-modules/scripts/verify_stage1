@@ -7,7 +7,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from tddcore import verdicts  # noqa: E402
 
 skill = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(__file__).resolve().parent.parent
+passed = True
 for step in ("01", "02", "03"):
     number, verdict = verdicts.final(skill / "evidence" / "reviews", step)
     print(f"step {step}: {verdict} (round {number})")
-print("STAGE1: PASS")
+    passed = passed and verdict == "VERDICT: PASS"
+print("STAGE1: PASS" if passed else "STAGE1: FAIL")
+sys.exit(0 if passed else 1)
