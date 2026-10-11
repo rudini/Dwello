@@ -712,3 +712,16 @@ class TddStepTest(unittest.TestCase):
         repo.write("backend/calc.ts", "export const add = (a: number, b: number) => a - b;\n")
 
         self.assert_refused(repo, "refactor", "refactor needs all tests passing", head="green: seed")
+
+    def test_bun_classifies_assertions_and_errors(self):
+        test_head = 'import { test, expect } from "bun:test";\nimport { add } from "./calc";\n\n'
+        cases = {"assertion": ('test("adds", () => {\n  expect(add(1, 2)).toBe(4);\n});\n', 0),
+                 "thrown error": ('test("adds", () => {\n  throw new Error("boom");\n});\n', 1)}
+        for name, (body, expected) in cases.items():
+            with self.subTest(name):
+                repo = Repo(self, BUN_FILES)
+                repo.write("backend/more.test.ts", test_head + body)
+
+                result = repo.run("tdd-step", "red", "adds")
+
+                self.assertEqual(result.returncode, expected, result.stderr)
