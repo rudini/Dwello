@@ -1,6 +1,9 @@
+import subprocess
+import sys
+import tempfile
 import unittest
 
-from tests.fixture import BUN_TEST, RIGHT_ADD_TS, WRONG_ADD_TS, bun_repo
+from tests.fixture import BUN_TEST, RIGHT_ADD_TS, SCRIPTS, WRONG_ADD_TS, bun_repo
 
 DECIMALS_TEST = 'test("adds decimals", () => {\n  expect(add(0.1, 0.2)).toBe(0.3);\n});\n'
 ROUNDING_ADD_TS = "export const add = (a: number, b: number) => Math.round((a + b) * 1e9) / 1e9;\n"
@@ -95,3 +98,22 @@ class TddReplayTest(unittest.TestCase):
         repo, base = good_history(self)
         repo.commit_phase("refactor", {"calc.test.ts": BUN_TEST}, 0)
         self.assert_rejected(repo, base, "refactor removes tests: calc.test.ts::::adds decimals")
+
+    def test_bad_arguments_and_places_exit_2(self):
+        repo, _ = good_history(self)
+        cases = {"no range": ([], "usage: tdd_replay <commit-range>"),
+                 "unknown revision": (["nope..HEAD"], "tdd_replay: cannot read the range 'nope..HEAD'"),
+                 "empty range": (["HEAD..HEAD"], "tdd_replay: the range 'HEAD..HEAD' has no commits")}
+        for name, (args, message) in cases.items():
+            with self.subTest(name):
+                result = repo.run("tdd_replay", *args)
+
+                self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
+                self.assertIn(message, result.stderr)
+                self.assertNotIn("Traceback", result.stderr)
+        with self.subTest("outside git"), tempfile.TemporaryDirectory() as plain:
+            result = subprocess.run([sys.executable, str(SCRIPTS / "tdd_replay"), "HEAD"], cwd=plain,
+                                    capture_output=True, text=True)
+
+            self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
+            self.assertIn("tdd_replay: not inside a git repository", result.stderr)
