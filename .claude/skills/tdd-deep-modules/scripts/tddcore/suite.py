@@ -96,7 +96,7 @@ def _test_command(directory):
             raise NoFramework(f"bun is not installed, but {manifest} runs bun test")
         return bun[0]
     raise NoFramework(f"no supported test framework for package.json test script {command!r}"
-                      " (supported: vitest, bun test, pytest, unittest)")
+                      " (supported: vitest, bun test)")
 
 
 def _run_bun(directory, command):
