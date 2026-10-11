@@ -215,3 +215,29 @@ class SkillLintTest(unittest.TestCase):
         self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
         self.assertIn("skill_lint: SKILL.md is not valid UTF-8\n", result.stdout)
         self.assertNotIn("Traceback", result.stderr)
+
+    def test_an_inverted_element_is_named(self):
+        real = (SKILL / "SKILL.md").read_text()
+        cases = {
+            "**No classitis.**": ("**Prefer classitis.**", "5. Depth check in every refactor", "no classitis"),
+            "**No pass-through wrappers.**": ("**Add pass-through wrappers freely.**",
+                                              "5. Depth check in every refactor", "no pass-through wrappers"),
+            "**Do not split by size alone.**": ("**Split by size alone.**", "5. Depth check in every refactor",
+                                                "do not split by size alone"),
+            "**Cumbersome tests signal a wrong interface.**": (
+                "**Cumbersome tests are fine; a wrong interface is rare.**", "5. Depth check in every refactor",
+                "cumbersome tests signal a wrong interface"),
+            "**Compare them by depth:**": ("**Compare them by line count:**", "2. Design it twice",
+                                           "compare them by depth"),
+            "**Pull complexity downward.**": ("**Push complexity to callers.**", "5. Depth check in every refactor",
+                                              "pull complexity downward"),
+        }
+        for original, (inverted, section, named) in cases.items():
+            with self.subTest(original):
+                self.assertIn(original, real)
+                copy = copy_of_skill(self)
+                (copy / "SKILL.md").write_text(real.replace(original, inverted))
+
+                result = lint(copy)
+
+                self.assertIn(f"skill_lint: missing in '{section}': {named}\n", result.stdout)
