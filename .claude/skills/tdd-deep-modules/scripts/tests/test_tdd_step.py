@@ -607,3 +607,9 @@ class TddStepTest(unittest.TestCase):
 
                 self.assertEqual(result.returncode, 2, result.stderr)
                 self.assertIn("no supported test framework detected (looked for vitest, bun test)", result.stderr)
+
+    def test_a_detected_framework_without_tests_makes_the_run_an_error(self):
+        repo = vitest_repo(self)
+        repo.commit_all("green: seed", {"calc.js": RIGHT_ADD_JS, "calc.test.js": VITEST_TEST, **BUN_FILES})
+        (repo.path / "calc.test.js").unlink()
+        self.assert_refused(repo, "refactor", "refactor needs all tests passing", head="green: seed")
