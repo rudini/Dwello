@@ -57,11 +57,15 @@ describe('Abrechnungen Schritt für Schritt', () => {
 			selectionErrors({ ...selection, heatingProfileId: '', managementFeePercent: -1 }, 3)
 		).toEqual({
 			heatingProfileId: 'Bitte wählen Sie ein Heizprofil.',
-			managementFeePercent: 'Bitte geben Sie einen Prozentsatz ab 0 ein, zum Beispiel 3.'
+			managementFeePercent: 'Bitte geben Sie einen Prozentsatz ab 0 ein, zum Beispiel 3 oder 2,5.'
 		});
 		expect(selectionErrors({ ...selection, managementFeePercent: NaN }, 3)).toHaveProperty(
 			'managementFeePercent'
 		);
+		// ein geleertes Feld kommt aus dem gespeicherten Zwischenstand als null zurück, nicht als 0 %
+		expect(
+			selectionErrors({ ...selection, managementFeePercent: null as unknown as number }, 3)
+		).toHaveProperty('managementFeePercent');
 	});
 });
 

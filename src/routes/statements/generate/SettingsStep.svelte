@@ -2,6 +2,7 @@
 	import HeatingProfileChart from '$lib/ui/HeatingProfileChart.svelte';
 	import type { HeatingProfile } from '$lib/types';
 	import { germanName } from '$lib/names';
+	import { parsePercent } from '$lib/utils/format';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Field from '$lib/ui/Field.svelte';
 	import TextInput from '$lib/ui/TextInput.svelte';
@@ -22,7 +23,8 @@
 	} = $props();
 
 	// 3 % is the usual guideline for Swiss utility statements (glossary), not a limit;
-	// TODO(fachlich prüfen): sources name 3 to 5 % depending on the region (review B, MR2-N2)
+	// TODO(fachlich prüfen): sources name 3 to 5 % depending on the region (review B, MR2-N2); the MV leaflet 2026 names
+	// at most 3 % as usual (cantonal decisions, BWO 32 Nr. 12)
 	const USUAL_MAXIMUM = 3;
 
 	const sum = (profile: HeatingProfile) =>
@@ -42,7 +44,7 @@
 	let feeText = $state(Number.isFinite(managementFeePercent) ? String(managementFeePercent) : '');
 	const typeFee = (text: string) => {
 		feeText = text;
-		managementFeePercent = text.trim() === '' ? NaN : Number(text.replace(',', '.'));
+		managementFeePercent = parsePercent(text);
 	};
 </script>
 

@@ -1,4 +1,5 @@
 import { fail } from '@sveltejs/kit';
+import { parsePercent } from '$lib/utils/format';
 
 const API = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1/config`;
 
@@ -40,8 +41,8 @@ function settingsErrors(s: Settings) {
 	if (iban && !(/^CH\d{19}$/.test(iban) && ibanChecksumValid(iban))) {
 		errors.iban = 'Bitte geben Sie eine gültige Schweizer IBAN ein';
 	}
-	if (!(Number(s.managementFeePercent) >= 0)) {
-		errors.managementFeePercent = 'Die Verwaltungspauschale darf nicht negativ sein';
+	if (s.managementFeePercent && Number.isNaN(parsePercent(s.managementFeePercent))) {
+		errors.managementFeePercent = 'Bitte geben Sie einen Prozentsatz ab 0 ein, zum Beispiel 3 oder 2,5.';
 	}
 	return errors;
 }
@@ -55,7 +56,8 @@ export async function saveSettings(fetch: typeof globalThis.fetch, request: Requ
 	const errors = settingsErrors(settings);
 	if (Object.keys(errors).length > 0) return fail(400, { errors });
 
-	const entries = Object.entries({ ...settings, iban: compact(settings.iban) }).map(
+	const fee = settings.managementFeePercent && String(parsePercent(settings.managementFeePercent));
+	const entries = Object.entries({ ...settings, iban: compact(settings.iban), managementFeePercent: fee }).map(
 		([field, value]) => [KEYS[field as keyof Settings], value] as const
 	);
 	const filled = Object.fromEntries(entries.filter(([, value]) => value));

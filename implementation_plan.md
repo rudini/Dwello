@@ -4565,9 +4565,10 @@ subjects over 50 characters, a missing test for vacancy after a move-out, the RE
 ### Follow-up: Verwaltungspauschale always of the tenant's own costs
 
 Product decision after the MV leaflet «Zulässige und unzulässige Nebenkosten» (2026): the fee is a percentage of the
-tenant's own Nebenkosten; the optional distribution key (fee of the building's costs, shared by key) is removed for new
-statements. Statements created with a key before keep it and their basis (column `management_fee_distribution_key_id`
-stays, PDF and detail page still describe it).
+tenant's own Nebenkosten; the optional distribution key (fee of the building's costs, shared by key) is removed with its
+column. No installation exists yet, so the migrations were merged: `0001_schema.sql` (schema) and `0002_stammdaten.sql`
+(master data) replace 0001–0011; the old and the new chain give the same database apart from the removed column
+(columns, constraints, indexes and master data compared on scratch databases). Local databases: `bun run db:reset`.
 
 - [x] **Scenario** `tests/e2e/features/statement-management-fee.feature`: own costs (`@api`), no fee key in the wizard,
   the preview names the fee, decimals typed with comma or point (each failed first for the right reason).
@@ -4576,14 +4577,19 @@ stays, PDF and detail page still describe it).
   `TextInput.svelte` (`inputmode`), `PreviewStep.svelte`/`StatementStep.svelte` (heating profile and fee in the preview),
   `StatementWizard.svelte`, `+page.svelte`, `+page.server.ts`, `statement-wizard.ts`, `statement-generation.ts`;
   help texts `help/Glossary.svelte`, `config/help.ts`.
-- [x] **Backend**: `calculation.service.ts` (`buildingFeeShare` gone), `statement.service.ts`, `routes/statements.ts`;
-  `statement-pdf.service.ts` (fallback rate of older statements rounded to 2 places).
+- [x] **Backend**: `calculation.service.ts` (`buildingFeeShare` gone), `statement.service.ts`, `routes/statements.ts`,
+  `pdf.service.ts` and `statement-pdf.service.ts` (fee always «x % der Zwischensumme»; fallback rate of statements
+  without a stored rate rounded to 2 places), `schema.ts`; migrations merged into `0001_schema.sql`/`0002_stammdaten.sql`.
+- [x] **Rate as typed** (review F round 3): `parsePercent` in `src/lib/utils/format.ts` (comma or point, at most two
+  decimals) for wizard and settings (`config/+page.svelte`, `SettingField.svelte`, `settings.ts`); an emptied rate
+  restored from the draft is refused (`statement-wizard.ts`); «Üblich sind bis 3 %» in wizard, settings and help.
 - [x] **Reviews**: code review 1 and 2 (`docs/reviews/F-review-1.md`), Fachreview (`docs/reviews/F-fachreview-1.md`),
-  personas Marco, Dr. Weber, Sven (`docs/design/personas/*-f.md`). A first migration that rewrote the rate of keyed
-  statements and dropped the column was withdrawn (overflow, rates that do not add up, not acceptable for sent
-  statements). Open product points: `offene-punkte.md`, section «Session 12».
+  personas Marco, Dr. Weber, Sven (`docs/design/personas/*-f.md`, Sven rerun `sven-f2.md`), round 3
+  (`docs/reviews/F-review-3.md`). A first migration that rewrote the rate of keyed statements was withdrawn (overflow,
+  rates that do not add up); it became moot with the merged migrations. Open product points and the low findings left:
+  `offene-punkte.md`, section «Session 12».
 - [x] **Docs**: `offene-punkte.md`, `nebenkostenabrechnung-anforderungen.md`, `data-model.md`, `api-specification.md`,
-  `PRD-Dwello.md`, `seed-daten-aenderungen.md`.
+  `PRD-Dwello.md`, `seed-daten-aenderungen.md`, `README.md`, `backend/CLAUDE.md`.
 
 ---
 

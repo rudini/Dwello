@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { formatCurrency, formatDate, normalizeDecimal } from '../format';
+import { formatCurrency, formatDate, normalizeDecimal, parsePercent } from '../format';
 
 describe('normalizeDecimal', () => {
 	it('strips trailing .0 from whole numbers', () => {
@@ -78,5 +78,20 @@ describe('formatCurrency / formatDate', () => {
 		// Same separator whichever ICU version Node ships with
 		expect(formatCurrency(1800).replace(/\s/g, ' ')).toBe('CHF 1’800.00');
 		expect(formatDate('2024-12-31')).toBe('31.12.2024');
+	});
+});
+
+describe('parsePercent', () => {
+	// Ein Satz wie getippt: Komma oder Punkt, höchstens zwei Stellen nach dem Komma, wie gespeichert und gedruckt
+	it('liest einen Prozentsatz mit Komma oder Punkt', () => {
+		expect(parsePercent('2,5')).toBe(2.5);
+		expect(parsePercent(' 4.25 ')).toBe(4.25);
+		expect(parsePercent('3')).toBe(3);
+		expect(parsePercent('0')).toBe(0);
+	});
+
+	it('lehnt Leeres, Negatives, Exponenten und mehr als zwei Nachkommastellen ab', () => {
+		for (const text of ['', ' ', '-1', '1e2', 'Infinity', '0x1F', '2,555', '2.5.1', 'abc', '3,'])
+			expect(parsePercent(text)).toBeNaN();
 	});
 });

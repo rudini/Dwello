@@ -30,7 +30,7 @@
 		{
 			term: 'Verwaltungspauschale',
 			// TODO(fachlich prüfen): the glossary still says of the building's costs, shared by a key (offene-punkte.md)
-			text: 'Die Abgeltung Ihres Verwaltungsaufwands: ein Prozentsatz der eigenen Nebenkosten jedes Mieters, üblich sind 3 %. Den Satz wählen Sie beim Erstellen der Abrechnungen.'
+			text: 'Die Abgeltung Ihres Verwaltungsaufwands: ein Prozentsatz der eigenen Nebenkosten jedes Mieters. Üblich sind bis 3 %. Den Satz wählen Sie beim Erstellen der Abrechnungen.'
 		},
 		{
 			term: 'Mietstage',

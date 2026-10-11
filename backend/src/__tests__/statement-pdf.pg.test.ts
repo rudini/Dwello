@@ -5,7 +5,7 @@
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import { eq } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { categories, distributionKeys, fuelStocks, tenants, utilityStatements } from '../db/schema';
+import { categories, fuelStocks, tenants, utilityStatements } from '../db/schema';
 import { deleteConfig, getConfig, setConfig } from '../services/config.service';
 import { createApartment, deleteApartment } from '../services/apartment.service';
 import { createFuelStock } from '../services/fuel-stock.service';
@@ -212,28 +212,6 @@ describe('Verwaltungspauschale im PDF', () => {
 
 	it('nennt die eigenen Nebenkosten als Grundlage', () => {
 		expect(ownFee.flowing).toMatch(/Verwaltungspauschale: 3 % der Zwischensumme von CHF [\d'.]+/);
-	});
-});
-
-// Abrechnungen von früher konnten die Pauschale nach einem Verteilschlüssel verteilen; ihr PDF nennt diese Grundlage weiter
-describe('Verwaltungspauschale einer früheren Abrechnung mit Verteilschlüssel', () => {
-	let keyed: ReturnType<typeof readPdf>;
-	let id: string;
-
-	beforeAll(async () => {
-		const statement = await generateStatement({ contractId: rental.contract, buildingId: rental.building, periodStart: '2025-01-01', periodEnd: '2025-12-31', managementFeePercent: 3 });
-		id = statement.id;
-		const [perArea] = await db.select().from(distributionKeys).where(eq(distributionKeys.name, 'Per Area (m²)'));
-		await db.update(utilityStatements).set({ managementFeeDistributionKeyId: perArea.id }).where(eq(utilityStatements.id, id));
-		await generateStatementPdf(id, 'de');
-		keyed = readPdf(Buffer.from((await getStatementPdf(id)).pdfBlob!, 'base64'));
-	});
-
-	afterAll(() => deleteStatement(id));
-
-	// 3 % der Kosten der Liegenschaft (alle Positionen), verteilt nach Fläche, für 184 von 365 Tagen
-	it('nennt die Kosten der Liegenschaft, den Schlüssel und die Mietstage als Grundlage', () => {
-		expect(keyed.flowing).toMatch(/Verwaltungspauschale: 3 % von CHF [\d'.]+, verteilt nach Pro Fläche \(m²\), für Ihre 184 von 365 Tagen/);
 	});
 });
 

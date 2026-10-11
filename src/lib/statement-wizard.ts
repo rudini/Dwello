@@ -31,8 +31,9 @@ function periodErrors({ periodStart, periodEnd }: WizardSelection): Record<strin
 function settingErrors({ heatingProfileId, managementFeePercent }: WizardSelection) {
 	return {
 		...(!heatingProfileId && { heatingProfileId: 'Bitte wählen Sie ein Heizprofil.' }),
-		...(!(managementFeePercent >= 0) && {
-			managementFeePercent: 'Bitte geben Sie einen Prozentsatz ab 0 ein, zum Beispiel 3.'
+		// a rate emptied and restored from the draft is null, not 0 %
+		...(!(Number.isFinite(managementFeePercent) && managementFeePercent >= 0) && {
+			managementFeePercent: 'Bitte geben Sie einen Prozentsatz ab 0 ein, zum Beispiel 3 oder 2,5.'
 		})
 	};
 }

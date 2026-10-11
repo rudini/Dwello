@@ -217,7 +217,10 @@ describe('Abrechnungen erstellen', () => {
 		const fee = byTestId<HTMLInputElement>('management-fee-input')!;
 		fireEvent(fee, 'input', '');
 		await next();
-		expect(text()).toContain('Bitte geben Sie einen Prozentsatz ab 0 ein, zum Beispiel 3.');
+		expect(text()).toContain('Bitte geben Sie einen Prozentsatz ab 0 ein, zum Beispiel 3 oder 2,5.');
+		fireEvent(fee, 'input', '1e2');
+		await next();
+		expect(text()).toContain('Bitte geben Sie einen Prozentsatz ab 0 ein, zum Beispiel 3 oder 2,5.');
 		fireEvent(fee, 'input', '2,5');
 		expect(fee.value).toBe('2,5');
 		expect(document.querySelector<HTMLInputElement>('input[name="managementFeePercent"]')!.value).toBe('2.5');

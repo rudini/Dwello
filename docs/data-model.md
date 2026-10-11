@@ -238,9 +238,8 @@ total_advance_payments DECIMAL(12,2) NOT NULL  -- Geleistete Akontobeiträge
 management_fee         DECIMAL(12,2) DEFAULT 0 -- Verwaltungspauschale
 management_fee_percent DECIMAL(5,2)            -- rate chosen in the Abrechnungslauf
 heating_profile_id     UUID                    -- Heizprofil of the Abrechnungslauf, printed in the PDF (SET NULL)
-management_fee_distribution_key_id UUID        -- older statements only: Verteilschlüssel of the Verwaltungspauschale (SET NULL); since session 12 the fee is of the tenant's own costs
-fuel_stock             JSONB                   -- Tankbestand readings at creation, for the PDF (migration 0011)
-key_values             JSONB                   -- area, apartments, rooms: own and building's total at creation (migration 0011)
+fuel_stock             JSONB                   -- Tankbestand readings at creation, for the PDF
+key_values             JSONB                   -- area, apartments, rooms: own and building's total at creation
 balance                DECIMAL(12,2) NOT NULL  -- Saldo: positive = Nachzahlung, negative = Rückerstattung
 status                 VARCHAR(20)   NOT NULL DEFAULT 'draft'
 payment_deadline       DATE                    -- Zahlungsfrist
@@ -287,13 +286,12 @@ description         VARCHAR(255)  NOT NULL
 total_amount        DECIMAL(12,2) NOT NULL  -- building total
 tenant_share        DECIMAL(12,2) NOT NULL  -- tenant's portion
 share_percentage    DECIMAL(8,4)
-apartment_share     DECIMAL(12,2)           -- the apartment's part of the total by the key (migration 0011)
-period_share        DECIMAL(8,4)            -- 0-1: days rented, or the heating profile's share (migration 0011)
+apartment_share     DECIMAL(12,2)           -- the apartment's part of the total by the key
+period_share        DECIMAL(8,4)            -- 0-1: days rented, or the heating profile's share
 sort_order          INTEGER DEFAULT 0
 ```
 
-`apartment_share` and `period_share` are kept when a statement is created so the PDF can explain each position;
-statements created before migration 0011 have NULL, their PDF leaves those columns empty.
+`apartment_share` and `period_share` are kept when a statement is created so the PDF can explain each position.
 
 No `updated_at`. Index: `line_items_statement_id_idx`.
 
@@ -367,7 +365,7 @@ through the Verwaltungspauschale, not through invoices in Verwaltung.
 | Pro Einheit | `{units}` | 1 |
 | Pro Fläche (m²) | `{area}` | 2 |
 | Pro Zimmer | `{rooms}` | 3 |
-| Heizung (Fläche 70% / Einheit 30%) | `0.7 * {area} / {area_total} + 0.3 * {units} / {units_total}` (migration 0003) | 6 |
+| Heizung (Fläche 70% / Einheit 30%) | `0.7 * {area} / {area_total} + 0.3 * {units} / {units_total}` | 6 |
 
 ### Heating profiles (all `predefined`, table `heating_profiles`)
 
@@ -378,9 +376,9 @@ through the Verwaltungspauschale, not through invoices in Verwaltung.
 | Heizung Bergregion | 14 | 11.5 | 11.5 | 9 | 7 | 4.5 | 1 | 4 | 5.5 | 8.5 | 10.5 | 13 |
 | Heizung Tessin | 21.5 | 17 | 15.5 | 5 | 0 | 0 | 0 | 0 | 0 | 6 | 15 | 20 |
 
-Values as corrected by migration 0003 (Swiss table «Mieterwechsel: So werden die Heizkosten verteilt»). «Nur Warmwasser»
-was removed by migration 0010: separate Warmwasser is shared by days (0009), and as the heating profile of a run it
-would have spread the heating costs evenly over the year.
+Values from the Swiss table «Mieterwechsel: So werden die Heizkosten verteilt». There is no «Nur Warmwasser» profile:
+separate Warmwasser is shared by days, and as the heating profile of a run it would spread the heating costs evenly
+over the year.
 
 Demo data (`backend/demo/`, `bun run db:demo`) is never part of the migrations.
 
@@ -390,21 +388,15 @@ Demo data (`backend/demo/`, `bun run db:demo`) is never part of the migrations.
 
 ```
 backend/migrations/
-  0001_schema.sql       -- schema (baseline of October 2026, replaces the earlier 0001–0011)
+  0001_schema.sql       -- schema
   0002_stammdaten.sql   -- master data: categories, distribution keys, heating profiles
-  0003_stammdaten_korrektur.sql      -- Swiss heating shares, 70/30 key with building sums
-  0004_statement_settings.sql        -- heating profile and fee key of a statement
-  0005_stammdaten_beschreibungen.sql -- German descriptions of categories and keys
-  0006_heizkosten_kategorien.sql     -- categories.is_heating_cost
-  0007_leistungszeitraum.sql         -- invoices.service_period_start/end
-  0008_tankbestand.sql               -- fuel_stocks
-  0009_tankbestand_kategorie.sql     -- fuel_stocks.category_id; Hot Water shared by days
-  0010_ohne_nur_warmwasser.sql       -- predefined profile «Nur Warmwasser» removed
 ```
 
 `src/db/migrate.ts` applies the `.sql` files in file order, each in its own transaction, and records them in
 `schema_migrations`. It refuses a database that was set up without this table, or one that has records of
-migrations that no longer exist (pre-baseline databases); recreate those with `bun run db:reset`.
+migrations that no longer exist (databases from before a baseline); recreate those with `bun run db:reset`. Until the
+first installation, changes go into these two files (baselines of October 2026, last merged in session 12); afterwards
+a schema change is a new numbered file.
 
 Commands (in `backend/`):
 

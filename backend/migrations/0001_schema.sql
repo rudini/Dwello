@@ -102,6 +102,8 @@ CREATE TABLE categories (
     name_it VARCHAR(100),
     name_en VARCHAR(100),
     is_allowed_utility_cost BOOLEAN NOT NULL DEFAULT true,
+    -- heating costs (Art. 5 VMWG) follow the heating profile at a tenant change
+    is_heating_cost BOOLEAN NOT NULL DEFAULT false,
     description TEXT,
     sort_order INTEGER DEFAULT 0,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
@@ -179,13 +181,37 @@ CREATE TABLE invoices (
     manual_override_reason TEXT, -- why the category the KI suggested was overridden
     invoice_pdf TEXT,
     notes TEXT,
+    -- the period the invoice bills (Leistungszeitraum): a statement takes the share of its days in the
+    -- Abrechnungsperiode (Art. 257b OR); without one, the Rechnungsdatum decides
+    service_period_start DATE,
+    service_period_end DATE,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    CONSTRAINT invoices_service_period_check CHECK (
+        (service_period_start IS NULL) = (service_period_end IS NULL)
+        AND (service_period_end IS NULL OR service_period_end >= service_period_start)
+    )
 );
 
 CREATE INDEX invoices_building_id_idx ON invoices(building_id);
 CREATE INDEX invoices_invoice_date_idx ON invoices(invoice_date);
 CREATE INDEX invoices_category_id_idx ON invoices(category_id);
+
+-- ============================================================================
+-- Fuel Stocks (Tankbestand)
+-- Fuel in the tank or store of a heating cost category, valued in CHF at the end of the reading day. Heating costs
+-- are the consumption: stock at the start + purchases − stock at the end; a reading on 31.12.2024 closes 2024 and
+-- opens 2025.
+-- ============================================================================
+CREATE TABLE fuel_stocks (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    building_id UUID NOT NULL REFERENCES buildings(id) ON DELETE CASCADE,
+    category_id UUID NOT NULL REFERENCES categories(id) ON DELETE RESTRICT,
+    reading_date DATE NOT NULL,
+    amount DECIMAL(12, 2) NOT NULL CHECK (amount >= 0),
+    created_at TIMESTAMP NOT NULL DEFAULT now(),
+    UNIQUE (building_id, reading_date)
+);
 
 -- ============================================================================
 -- Utility Statements Table
@@ -204,6 +230,13 @@ CREATE TABLE utility_statements (
     total_advance_payments DECIMAL(12, 2) NOT NULL,
     management_fee DECIMAL(12, 2) DEFAULT 0,
     management_fee_percent DECIMAL(5, 2), -- rate chosen when the statement was generated
+    -- what the generation run used, for the PDF: the heating profile, the Tankbestand readings
+    -- ({"categoryId", "openingDate", "opening", "closingDate", "closing"}; NULL without a tank) and the apartment's and
+    -- building's area, apartments and rooms ({"area": [own, total], "units": …, "rooms": …}), so the PDF prints how the
+    -- amounts came about even if a reading or an apartment changes later
+    heating_profile_id UUID REFERENCES heating_profiles(id) ON DELETE SET NULL,
+    fuel_stock JSONB,
+    key_values JSONB,
     balance DECIMAL(12, 2) NOT NULL,
     status VARCHAR(20) NOT NULL DEFAULT 'draft',
     payment_deadline DATE,
@@ -240,6 +273,10 @@ CREATE TABLE utility_statement_line_items (
     total_amount DECIMAL(12, 2) NOT NULL,
     tenant_share DECIMAL(12, 2) NOT NULL,
     share_percentage DECIMAL(8, 4),
+    -- how the position was shared, for the PDF: the apartment's share of the building's costs (by the key) and the
+    -- share of the period (days rented, or the heating profile)
+    apartment_share DECIMAL(12, 2),
+    period_share DECIMAL(8, 4),
     sort_order INTEGER DEFAULT 0,
     created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );

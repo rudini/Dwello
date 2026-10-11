@@ -6,7 +6,7 @@ export const help = {
 		'Bestimmt, wie die Kosten eines Gebäudes auf die einzelnen Wohnungen aufgeteilt werden, zum Beispiel nach Fläche, nach Zimmern oder zu gleichen Teilen. Jede Rechnung hat einen Verteilschlüssel.',
 	// TODO(fachlich prüfen): the glossary still says of the building's costs (offene-punkte.md)
 	managementFee:
-		'Abgeltung Ihres Aufwands für die Nebenkosten: ein Prozentsatz der eigenen Nebenkosten jedes Mieters. 3 % ist der übliche Richtwert, keine Obergrenze.',
+		'Abgeltung Ihres Aufwands für die Nebenkosten: ein Prozentsatz der eigenen Nebenkosten jedes Mieters. Üblich sind bis 3 %.',
 	accountingPeriod:
 		'Zeitraum, für den Sie die Nebenkosten abrechnen, z. B. Kalenderjahr (01.01.–31.12.), Juli–Juni oder November–Oktober.'
 };
