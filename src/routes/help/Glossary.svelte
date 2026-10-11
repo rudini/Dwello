@@ -42,7 +42,8 @@
 		},
 		{
 			term: 'Saldo',
-			text: 'Der Kostenanteil des Mieters samt Verwaltungspauschale minus seine geleisteten Akontobeiträge. Ist der Saldo positiv, zahlt der Mieter nach (Nachzahlung); ist er negativ, erhält er Geld zurück (Rückerstattung).'
+			// TODO(fachlich prüfen): the glossary does not name the rounding to 5 Rappen (offene-punkte.md)
+			text: 'Der Kostenanteil des Mieters samt Verwaltungspauschale minus seine geleisteten Akontobeiträge, auf 5 Rappen gerundet. Ist der Saldo positiv, zahlt der Mieter nach (Nachzahlung); ist er negativ, erhält er Geld zurück (Rückerstattung).'
 		},
 		{
 			term: 'Zahlungsfrist',

@@ -4604,6 +4604,10 @@ subtotal, fee and «Ihre Nebenkosten» stay exact. A row «Rundung auf 5 Rappen�
 - [x] **Tests**: `statement-pdf-data.test.ts`, `statement-pdf-render.test.ts`, `statement-pages.dom.test.ts`; expected
   balances in `statement-generation.pg.test.ts` updated; screenshot example `tests/ui-screenshots/statement-pdf.ts`.
 - [x] **Docs**: `data-model.md`, `nebenkostenabrechnung-anforderungen.md`.
+- [x] **Review G** (`docs/reviews/G-review-1.md`, no critical/high): a Saldo of 0 after rounding says so instead of
+  «gleich hoch» (de/fr/it/en); the Italian label is «Arrotondamento» so the row stays on one line; the wizard preview
+  says «Ausgeglichen» for 0; help text «Saldo» names the rounding; open point and glossary proposal in
+  `offene-punkte.md`; web and PDF show the same rounding; `roundTo5Rappen` keeps NaN visible.
 
 ---
 

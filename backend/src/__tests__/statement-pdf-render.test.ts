@@ -60,6 +60,21 @@ describe('Rundung des Saldos im PDF', () => {
 		expect((await textOf(refund)).flowing).toContain('Rundung auf 5 Rappen + 0.02 Rückerstattung 93.85');
 	});
 
+	// 1000.02 − 1000.00 gibt nach der Rundung 0: der Text sagt, dass nach der Rundung nichts zu bezahlen ist
+	it('nennt bei einem Saldo von 0 nach der Rundung die Rundung statt gleich hoher Beträge', async () => {
+		const evened = { ...due, totalCosts: 1000.02, totalAdvancePayments: 1000, balance: 0 };
+		const pdf = (await textOf(evened)).flowing;
+		expect(pdf).toContain('Rundung auf 5 Rappen – 0.02');
+		expect(pdf).toContain('Nach der Rundung auf 5 Rappen müssen Sie nichts bezahlen.');
+		expect(pdf).not.toContain('sind gleich hoch');
+	});
+
+	// Die Zeile passt in allen Sprachen auf eine Zeile, sonst kann der Saldo allein auf die nächste Seite rutschen
+	it('nennt die Rundung auf Italienisch in einer Zeile mit ihrem Betrag', async () => {
+		const it = readPdf(Buffer.from(await generateStatementPDFBase64(due, config, 'it'), 'base64')).flowing;
+		expect(it).toContain('Arrotondamento + 0.02');
+	});
+
 	it('lässt die Zeile weg, wenn nichts gerundet ist', async () => {
 		expect((await textOf({ ...due, totalAdvancePayments: 600.03, balance: 184.1 })).flowing).not.toContain('Rundung');
 	});

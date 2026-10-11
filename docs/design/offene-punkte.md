@@ -241,3 +241,8 @@ Every place in the code is marked `TODO(fachlich prüfen)` (`grep -rn "TODO(fach
 - `prorateCosts` is now only used by its own tests (review F, F-9); left as it is, fallow does not flag it.
 - Left low (review F round 3, persona Sven F2): a rate typed with a comma shows with a point after going back from the preview (R3-7; Swiss amounts use the point too); a rate above 3 % that is already set when step 3 opens is shown but not announced (R3-8; announced as soon as it is typed); the wizard says «eigene Nebenkosten», the statement and PDF «Zwischensumme» for the same base (R3-10; the PDF names the amount, so it can be checked); no confirmation for a rate above 3 % (the hint stays visible); the error is read after the help text, «Entwurf gespeichert» also for an invalid rate and the long heating profile help (Sven, existed before).
 
+## Session 12 – Saldo to 5 Rappen (review G)
+
+- Glossary proposal: «Saldo» should say «auf 5 Rappen gerundet» (help text and PDF do) – TODO(fachlich prüfen). Rounding to 5 Rappen is common for the final amount but not required (SIX allows any amount with two decimals); whether rounding up to 2 Rappen against the tenant fits Art. 257a OR (actual costs) is not settled – TODO(fachlich prüfen), unsicher.
+- Left low (review G): the Akonto hint in the wizard names the exact difference next to the rounded Saldo (G-10; it compares costs with Akonto, not the Saldo); `paid_amount` is never written, so the dashboard's «paid this month» is always 0 (G-11, existed before, not displayed).
+

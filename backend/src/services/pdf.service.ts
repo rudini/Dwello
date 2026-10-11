@@ -80,6 +80,7 @@ const translations: Record<Exclude<Language, 'rm'>, Record<string, string>> = {
 		refundNoDate: 'Wir überweisen Ihnen den Betrag.',
 		refundAccount: 'Teilen Sie uns dafür Ihre IBAN mit, falls Sie das noch nicht getan haben.',
 		balancedNote: 'Ihre Nebenkosten und Ihre Akontobeiträge sind gleich hoch. Sie müssen nichts bezahlen.',
+		balancedRounded: 'Nach der Rundung auf 5 Rappen müssen Sie nichts bezahlen.',
 		sharesNote: 'Kosten Liegenschaft: die Rechnungen der Abrechnungsperiode; eine Rechnung mit Leistungszeitraum zählt mit den Tagen, die in die Periode fallen. Wohnungsanteil: Kosten der Liegenschaft nach dem Verteilschlüssel. Zeitanteil: Ihre Mietstage in der Abrechnungsperiode, bei Heizkosten der Anteil nach dem Heizprofil.',
 		sharesNoteFuel: 'Kosten Liegenschaft bei Heizmaterial aus dem Tank: der Verbrauch (siehe Heiz- und Warmwasserkosten).',
 		heatingSection: 'Heiz- und Warmwasserkosten',
@@ -143,6 +144,7 @@ const translations: Record<Exclude<Language, 'rm'>, Record<string, string>> = {
 		refundNoDate: 'Nous vous virons le montant.',
 		refundAccount: 'Communiquez-nous votre IBAN si vous ne l’avez pas encore fait.',
 		balancedNote: 'Vos frais accessoires et vos acomptes sont égaux. Vous n’avez rien à payer.',
+		balancedRounded: 'Après l’arrondi à 5 centimes, vous n’avez rien à payer.',
 		sharesNote: 'Coûts de l’immeuble : les factures de la période de décompte ; une facture avec période de prestation compte pour les jours compris dans la période. Part du logement : coûts de l’immeuble selon la clé de répartition. Part temporelle : vos jours de location dans la période de décompte, pour le chauffage la part selon le profil de chauffage.',
 		sharesNoteFuel: 'Coûts de l’immeuble pour le combustible en citerne : la consommation (voir frais de chauffage et d’eau chaude).',
 		heatingSection: 'Frais de chauffage et d’eau chaude',
@@ -171,7 +173,7 @@ const translations: Record<Exclude<Language, 'rm'>, Record<string, string>> = {
 		managementFee: 'Spese di gestione',
 		colon: ': ',
 		advancePayments: 'Acconti versati',
-		rounding: 'Arrotondamento a 5 centesimi',
+		rounding: 'Arrotondamento',
 		amountDue: 'Importo dovuto',
 		refund: 'Rimborso',
 		balanced: 'Saldato',
@@ -206,6 +208,7 @@ const translations: Record<Exclude<Language, 'rm'>, Record<string, string>> = {
 		refundNoDate: 'Le bonifichiamo l’importo.',
 		refundAccount: 'Ci comunichi il suo IBAN, se non l’ha già fatto.',
 		balancedNote: 'Le sue spese accessorie e i suoi acconti sono uguali. Non deve pagare nulla.',
+		balancedRounded: 'Dopo l’arrotondamento a 5 centesimi non deve pagare nulla.',
 		sharesNote: 'Costi immobile: le fatture del periodo di conteggio; una fattura con periodo di prestazione conta per i giorni compresi nel periodo. Quota appartamento: costi dell’immobile secondo la chiave di riparto. Quota temporale: i suoi giorni di locazione nel periodo di conteggio, per il riscaldamento la quota secondo il profilo di riscaldamento.',
 		sharesNoteFuel: 'Costi immobile per il combustibile in cisterna: il consumo (vedi costi di riscaldamento e acqua calda).',
 		heatingSection: 'Spese di riscaldamento e acqua calda',
@@ -269,6 +272,7 @@ const translations: Record<Exclude<Language, 'rm'>, Record<string, string>> = {
 		refundNoDate: 'We will transfer the amount to you.',
 		refundAccount: 'Please send us your IBAN if you have not done so yet.',
 		balancedNote: 'Your utility costs equal your advance payments. You do not need to pay anything.',
+		balancedRounded: 'After rounding to 5 centimes, you do not need to pay anything.',
 		sharesNote: 'Building costs: the invoices of the billing period; an invoice with a service period counts for its days within the period. Apartment share: the building’s costs by the distribution key. Time share: your days rented in the billing period, for heating the share by the heating profile.',
 		sharesNoteFuel: 'Building costs for fuel from a tank: the consumption (see heating and hot water costs).',
 		heatingSection: 'Heating and hot water costs',
@@ -477,7 +481,7 @@ function title({ doc, t, data }: Page, y: number) {
 function balanceText({ t, data }: Page) {
 	const date = data.paymentDeadline && formatDate(data.paymentDeadline);
 	if (data.paidDate) return fill(data.balance < 0 ? t.refundPaidOn : t.paidOn, { date: formatDate(data.paidDate) });
-	if (data.balance === 0) return t.balancedNote;
+	if (data.balance === 0) return rounding(data) ? t.balancedRounded : t.balancedNote;
 	if (data.balance < 0) return `${date ? fill(t.refundBy, { date }) : t.refundNoDate} ${t.refundAccount}`;
 	return date ? fill(t.payBy, { date }) : t.payNoDate;
 }
@@ -497,7 +501,8 @@ function balanceBox(page: Page, y: number) {
 	const { doc, t, data } = page;
 	const width = PAGE.right - PAGE.left;
 	const what = balanceText(page);
-	const rounded = rounding(data) ? `, ${t.rounding} ${signed(rounding(data))}` : '';
+	const difference = rounding(data);
+	const rounded = difference ? ` ${difference > 0 ? '+' : '–'} ${t.rounding} ${formatCurrency(Math.abs(difference))}` : '';
 	const how = `${t.yourCosts} ${formatCurrency(data.totalCosts)} – ${t.advancePayments} ${formatCurrency(data.totalAdvancePayments)}${rounded}`;
 	doc.font('Helvetica').fontSize(9);
 	const height = 46 + doc.heightOfString(what, { width: width - 24 }) + doc.heightOfString(how, { width: width - 24 });

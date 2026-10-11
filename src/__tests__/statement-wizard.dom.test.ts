@@ -17,7 +17,7 @@ async function answer(result: { type: string; data?: unknown }) {
 
 import GeneratePage from '../routes/statements/generate/+page.svelte';
 import EditStatementPage from '../routes/statements/[id]/edit/+page.svelte';
-import { byTestId, click, fakeBff, fireEvent, settle, show, submit } from './helpers/dom';
+import { allByTestId, byTestId, click, fakeBff, fireEvent, settle, show, submit } from './helpers/dom';
 import { statement } from './helpers/statement';
 import { browserStorage, writeDraft } from '$lib/wizard-draft';
 
@@ -232,6 +232,11 @@ describe('Abrechnungen erstellen', () => {
 		show(GeneratePage, { data: run, form: { preview, invoices } } as never);
 		expect(byTestId('preview-fee')!.textContent).toContain('2.5 % der eigenen Nebenkosten jedes Mieters');
 		expect(byTestId('preview-heating-profile')!.textContent).toContain('Gleichmässig');
+	});
+
+	it('nennt einen Saldo von 0 in der Vorschau ausgeglichen', () => {
+		open({ preview: [{ ...preview[0], balance: 0 }], invoices });
+		expect(allByTestId('preview-row')[0].textContent!.replace(/\s+/g, ' ')).toContain('Ausgeglichen CHF 0.00');
 	});
 
 	it('erklärt, warum die Kosten aller Abrechnungen kleiner sein können als die Rechnungen', () => {

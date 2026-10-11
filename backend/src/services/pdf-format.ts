@@ -17,4 +17,4 @@ export function formatCHF(amount: number): string {
 export const roundToRappen = (amount: number) => Math.round(Number((amount * 100).toPrecision(12))) / 100;
 /** The Saldo the tenant pays or gets back, commercially to 5 Rappen; a refund the same way as a payment */
 export const roundTo5Rappen = (amount: number) =>
-	(Math.sign(amount) * Math.round(Number((Math.abs(amount) * 20).toPrecision(12)))) / 20 || 0;
+	(Math.sign(amount) * Math.round(Number((Math.abs(amount) * 20).toPrecision(12)))) / 20 + 0; // + 0: no −0, NaN stays NaN

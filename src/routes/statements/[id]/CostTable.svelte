@@ -10,8 +10,9 @@
 	const subtotal = $derived(statement.lineItems.reduce((sum, item) => sum + item.tenantShare, 0));
 	// The Saldo goes to 5 Rappen; the difference is shown as in the PDF, only a real rounding (under 5 Rappen)
 	const rounding = $derived.by(() => {
-		const difference = statement.balance - (statement.totalCosts - statement.totalAdvancePayments);
-		return Math.abs(difference) >= 0.005 && Math.abs(difference) < 0.05 ? difference : 0;
+		const difference =
+			Math.round((statement.balance - (statement.totalCosts - statement.totalAdvancePayments)) * 100) / 100;
+		return Math.abs(difference) < 0.05 ? difference : 0;
 	});
 	const columns = [
 		{ label: 'Kategorie' },

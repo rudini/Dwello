@@ -499,10 +499,10 @@ describe('Abrechnungsdetail', () => {
 	});
 
 	it('nennt eine Rückerstattung ohne Minuszeichen und ohne Zahlungsfrist für den Mieter', () => {
-		detail({ balance: -83.43 });
+		detail({ balance: -83.45 });
 
-		expect(byTestId('statement-balance')!.textContent).toMatch(/Rückerstattung.*CHF\s83.43/);
-		expect(text()).not.toContain('CHF-83.43');
+		expect(byTestId('statement-balance')!.textContent).toMatch(/Rückerstattung.*CHF\s83.45/);
+		expect(text()).not.toContain('CHF-83.45');
 		expect(text()).not.toContain('Zahlungsfrist');
 		expect(byTestId('statement-payment-deadline')!.textContent).toBe('28.02.2025');
 	});
@@ -773,7 +773,7 @@ describe('Abrechnung bearbeiten', () => {
 	});
 
 	it('nennt die Frist einer Rückerstattung nicht Zahlungsfrist', () => {
-		edit({ balance: -83.43 });
+		edit({ balance: -83.45 });
 
 		expect(document.querySelector('label[for="paymentDeadline"]')!.textContent).toContain(
 			'Rückerstattung bis'

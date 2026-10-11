@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { balanceLabel } from '$lib/statement';
 	import { akontoHint, invoiceRows } from '$lib/statement-wizard';
 	import Icon from '$lib/ui/Icon.svelte';
 	import { formatCurrency } from '$lib/utils/format';
@@ -32,9 +33,8 @@
 	const total = $derived(previewRows.reduce((sum, row) => sum + row.totalCosts, 0));
 	const rows = $derived(invoiceRows(invoices, buildings, period));
 	const billed = $derived(rows.filter((row) => row.existing > 0));
-	// Saldo > 0: the tenant pays the difference, < 0: the tenant gets it back
-	const saldo = (balance: number) =>
-		`${balance >= 0 ? 'Nachzahlung' : 'Rückerstattung'} ${formatCurrency(Math.abs(balance))}`;
+	// Saldo > 0: the tenant pays the difference, < 0: the tenant gets it back, 0: Ausgeglichen
+	const saldo = (balance: number) => `${balanceLabel(balance)} ${formatCurrency(Math.abs(balance))}`;
 </script>
 
 <dl class="grid gap-4 sm:grid-cols-3">
