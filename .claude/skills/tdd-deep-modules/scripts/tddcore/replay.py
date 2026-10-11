@@ -52,10 +52,13 @@ def replay(repo, rev_range):
                            capture_output=True)
     if verdicts[-1].phase == "red":
         verdicts[-1] = _flag(verdicts[-1], "the history ends in red: every red needs a green")
-    # a task ends with the range, and before each test list that follows a green or refactor
-    ends = [i for i in range(len(verdicts) - 1)
-            if verdicts[i].phase in ("green", "refactor") and verdicts[i + 1].phase == "test"]
-    for i in ends + [len(verdicts) - 1]:
+    # a task ends at a green or refactor that a test list follows, and at the range's last green or
+    # refactor (test commits after it, such as the design note, are no task end; a range without any
+    # green or refactor is judged by its last commit)
+    steps = [i for i, verdict in enumerate(verdicts) if verdict.phase in ("green", "refactor")]
+    ends = {i for i in steps if i + 1 < len(verdicts) and verdicts[i + 1].phase == "test"}
+    ends.add(steps[-1] if steps else len(verdicts) - 1)
+    for i in sorted(ends):
         verdicts[i] = _task_end(verdicts[i])
     return verdicts
 
