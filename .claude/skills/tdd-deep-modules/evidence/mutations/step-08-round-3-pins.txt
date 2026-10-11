@@ -1,0 +1,3 @@
+KILLED   tddcore/gate.py: '    return relative.parts[0] != "tests" and "__pycache__" not in relative.parts' -> '    return relative.parts[0] != "tests"' [test_verify_all]
+KILLED   tddcore/gate.py: '    stale = _lock(skill)\n    problems = lint.problems(skill)\n    passed, summary = selfcheck.own_suite(skill / "scripts")' -> '    stale = _lock(skill)\n    passed, summary = selfcheck.own_suite(skill / "scripts")\n    problems = lint.problems(skill)' [test_verify_all]
+KILLED   tddcore/selfcheck.py: '[sys.executable, "-P", "-m",' -> '[sys.executable, "-m",' [test_verify_all]

@@ -330,3 +330,13 @@ class RealVerifiersTest(unittest.TestCase):
 
         self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
         self.assertIn("tests: FAILED (failures=1)", result.stdout.splitlines())
+
+    def test_bytecode_caches_left_by_normal_runs_are_not_locked(self):
+        root = real_copy(self)
+        cache = root / "scripts" / "tddcore" / "__pycache__"
+        cache.mkdir()
+        (cache / "lint.cpython-313.pyc").write_bytes(b"left by an ordinary run")
+
+        result = run_copy(root)
+
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
