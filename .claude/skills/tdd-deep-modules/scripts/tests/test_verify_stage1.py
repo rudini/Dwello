@@ -70,3 +70,12 @@ class VerifyStage1Test(unittest.TestCase):
         self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
         self.assertIn("tests: FAILED (failures=1)", result.stdout)
         self.assertEqual(result.stdout.strip().splitlines()[-1], "STAGE1: FAIL")
+
+    def test_two_reviews_with_the_same_round_number_are_stage1_fail(self):
+        root = skill_dir(self, {"01": ["PASS", "FAIL"], "02": ["PASS"], "03": ["PASS"]})
+        (root / "evidence" / "reviews" / "step-01-round-02.md").write_text("VERDICT: PASS\n")
+
+        result = verify(root)
+
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn("step 01: round 2 has two reviews", result.stdout)
