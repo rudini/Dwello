@@ -242,3 +242,15 @@ class RealVerifiersTest(unittest.TestCase):
 
         self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
         self.assertIn("verifiers.lock: scripts/hashlib.py is not locked", result.stdout.splitlines())
+
+    def test_a_symbolic_link_under_scripts_is_named(self):
+        root = real_copy(self)
+        outside = root.parent / "hidden"
+        outside.mkdir()
+        (outside / "__init__.py").write_text("")
+        (root / "scripts" / "extra").symlink_to(outside, target_is_directory=True)
+
+        result = run_copy(root)
+
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn("verifiers.lock: scripts/extra is a symbolic link", result.stdout.splitlines())
