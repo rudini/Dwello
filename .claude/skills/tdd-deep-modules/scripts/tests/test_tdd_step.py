@@ -660,3 +660,11 @@ class TddStepTest(unittest.TestCase):
         self.assertEqual(result.returncode, 2, result.stderr)
         self.assertIn("package.json", result.stderr)
         self.assertNotIn("Traceback", result.stderr)
+
+    def test_non_ascii_test_file_names_are_detected(self):
+        repo = Repo(self, {"calc.py": WRONG_ADD})
+        repo.write("test_rechnung_ü.py", PYTEST_TEST)
+
+        result = repo.run("tdd-step", "red", "adds two numbers")
+
+        self.assertEqual(result.returncode, 0, result.stderr)
