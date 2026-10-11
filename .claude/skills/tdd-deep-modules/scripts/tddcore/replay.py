@@ -54,10 +54,14 @@ def replay(repo, rev_range):
         last = verdicts[-1]
         verdicts[-1] = replace(last, violations=last.violations
                                + ("the history ends in red: every red needs a green",))
-    if verdicts[-1].suite != "full":
-        last = verdicts[-1]
+    last = verdicts[-1]
+    if last.suite != "full":
         verdicts[-1] = replace(last, violations=last.violations
                                + ("the final commit must run the full suite",))
+    elif last.run.outcome != "pass":
+        verdicts[-1] = replace(last, violations=last.violations
+                               + (f"the final commit must pass the full suite, but it says: "
+                                  f"{last.run.summary}",))
     return verdicts
 
 
