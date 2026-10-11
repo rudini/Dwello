@@ -1,4 +1,5 @@
 """The red-green-refactor rules every phase commit must satisfy."""
+import re
 from pathlib import PurePosixPath
 
 # Phase -> phases it may follow. A red cycle must close with green before anything else.
@@ -31,7 +32,7 @@ def is_production(path):
 
 def _is_test(path):
     name = path.name
-    return (name.startswith("test_") or name.endswith("_test.py")
+    return (name.startswith("test_") or re.search(r"_(test|spec)_?\.[^.]+$", name) is not None
             or ".test." in name or ".spec." in name
             or name in _TEST_CONFIG or name.startswith(("vitest.config.", "vite.config."))
             or not _TEST_DIRS.isdisjoint(path.parts[:-1]))
