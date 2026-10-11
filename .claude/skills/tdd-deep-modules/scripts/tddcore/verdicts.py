@@ -15,4 +15,8 @@ def final(reviews, step):
     latest = max(rounds)
     if len(rounds[latest]) > 1:
         return latest, f"round {latest} has two reviews"
-    return latest, rounds[latest][0].read_text().strip().splitlines()[-1]
+    try:
+        lines = rounds[latest][0].read_text().strip().splitlines()
+    except (OSError, UnicodeDecodeError):
+        lines = []
+    return latest, lines[-1] if lines else "unreadable review"
