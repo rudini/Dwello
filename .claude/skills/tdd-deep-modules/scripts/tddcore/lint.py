@@ -29,12 +29,8 @@ def problems(skill):
 
 def _hook(front, skill):
     """The PreToolUse hook that runs scripts/tdd-guard on Write and Edit, and the script itself."""
-    entries = (front.get("hooks") or {}).get("PreToolUse") or [] if isinstance(front.get("hooks"), dict) else []
-    registered = any(
-        isinstance(entry, dict) and all(re.fullmatch(str(entry.get("matcher", "")), tool) for tool in ("Write", "Edit"))
-        and any(isinstance(hook, dict) and "scripts/tdd-guard" in str(hook.get("command", ""))
-                for hook in entry.get("hooks") or [])
-        for entry in entries)
+    hooks = front.get("hooks") if isinstance(front.get("hooks"), dict) else {}
+    registered = any(_runs_guard(entry) for entry in hooks.get("PreToolUse") or [])
     found = [] if registered else ["hooks: no PreToolUse hook runs scripts/tdd-guard for Write and Edit"]
     guard = skill / "scripts" / "tdd-guard"
     if not (guard.is_file() and os.access(guard, os.X_OK)):
@@ -61,3 +57,15 @@ def _frontmatter(front, directory):
         if "<" in description or ">" in description:
             found.append("frontmatter: description contains angle brackets")
     return found
+
+
+def _runs_guard(entry):
+    """True for a hook entry whose matcher covers Write and Edit and that runs scripts/tdd-guard."""
+    if not isinstance(entry, dict):
+        return False
+    try:
+        matches = all(re.fullmatch(str(entry.get("matcher", "")), tool) for tool in ("Write", "Edit"))
+    except re.error:
+        return False
+    commands = [str(hook.get("command", "")) for hook in entry.get("hooks") or [] if isinstance(hook, dict)]
+    return matches and any("scripts/tdd-guard" in command for command in commands)
