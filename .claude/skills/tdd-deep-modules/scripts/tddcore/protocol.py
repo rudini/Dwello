@@ -64,4 +64,4 @@ def violations(previous, phase, run, changed):
 
 
 def _is_code(path):
-    return PurePosixPath(path).suffix in _CODE_SUFFIXES
+    return PurePosixPath(path).suffix.lower() in _CODE_SUFFIXES
