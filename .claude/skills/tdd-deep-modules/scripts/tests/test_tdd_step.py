@@ -491,6 +491,7 @@ class TddStepTest(unittest.TestCase):
                 self.assertEqual(result.returncode, 2, result.stderr)
                 self.assertIn("no supported test framework", result.stderr)
                 self.assertIn("jest", result.stderr)
+                self.assertIn("(supported: vitest, bun test)", result.stderr)
 
     def test_the_npm_init_placeholder_test_script_means_no_tests(self):
         placeholder = json.dumps({"scripts": {"test": 'echo "Error: no test specified" && exit 1'}})
@@ -515,7 +516,7 @@ class TddStepTest(unittest.TestCase):
                 result = repo.run("tdd-step", "test", "plan")
 
                 self.assertEqual(result.returncode, 2, result.stderr)
-                self.assertIn("package.json", result.stderr if "installed" not in name else "package.json")
+                self.assertIn("vitest is not installed" if "installed" in name else "package.json", result.stderr)
                 self.assertNotIn("Traceback", result.stderr)
 
     def test_a_package_json_that_is_not_utf8_exits_2(self):
