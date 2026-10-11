@@ -1,6 +1,6 @@
 # Dwello
 
-Web app for Swiss property managers (Liegenschaftsverwalter): buildings, apartments, tenants, contracts, invoices categorized by a local LLM, utility cost statements (Nebenkostenabrechnungen) with Swiss QR-bills. Single-user MVP, under 50 apartments.
+Web app for Swiss property managers (Liegenschaftsverwalter): buildings, apartments, tenants, contracts, invoices categorized by an LLM, utility cost statements (Nebenkostenabrechnungen) with Swiss QR-bills. Single-user MVP, under 50 apartments.
 
 Stack: SvelteKit + TypeScript + Tailwind (frontend and BFF) | ElysiaJS on Bun + Drizzle + PostgreSQL (`backend/`) | an LLM for invoice categorization (any OpenAI-compatible API, by default a local Ollama).
 
@@ -60,7 +60,7 @@ Before marking anything complete, all of these pass: `bun run test:coverage`, `b
 
 ## Gotchas
 
-- **`bun run test`, not `bun test`:** Bun is the package manager everywhere, but the frontend runs on Node. In the repo root `bun test` starts Bun's own test runner instead of Vitest, without `vitest.config.ts` (no jsdom, no coverage floor).
+- **Never `bun test` in the repo root:** Bun is the package manager everywhere, but the frontend runs on Node. There `bun test` starts Bun's own test runner instead of Vitest, without `vitest.config.ts` (no jsdom, no coverage floor). Use `bunx vitest run`.
 - **Fallow gate:** a hook runs `fallow audit` before every `git commit` and `git push` and blocks the whole Bash command on new unused exports or files, duplication, or complexity/CRAP findings. Run git commands on their own, not chained after edits, and fix the reported finding (un-export, delete, split the function) rather than working around it. `bunx fallow audit` shows the findings before committing; CI runs the same audit.
 - **Deepcheck gate:** a second hook (`.claude/hooks/deepcheck-gate.sh`) runs the changed-scope deepcheck before every `git commit` and `git push` and blocks new or worsened shallow modules (pass-through layers, thin facades); CI runs the same check (job "Deep modules"). Fix the design, not the numbers; a deliberate exception needs `// deepcheck-ignore-file -- reason`.
 - **API contracts:** frontend tests take backend responses from `tests/contracts/*.json`; `backend/src/__tests__/api-contracts.pg.test.ts` checks them against the real API. Changing an API response means updating its contract.
@@ -69,9 +69,7 @@ Before marking anything complete, all of these pass: `bun run test:coverage`, `b
 ## Coding guidelines
 
 - **Think before coding:** state assumptions; if a request has several readings, name them instead of picking silently; push back when a simpler approach exists.
-- **Simplicity first:** the minimum code that solves the problem. No speculative features, abstractions for single use, configurability nobody asked for, or error handling for impossible cases.
 - **Surgical changes:** touch only what the task needs; match the surrounding style; don't reformat or refactor adjacent code. Remove what your change made unused, leave pre-existing dead code unless asked.
-- **Goal-driven:** turn the task into a verifiable check (a failing test) before writing the fix.
 
 ## Documentation (read when relevant)
 

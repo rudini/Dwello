@@ -4618,6 +4618,24 @@ subtotal, fee and «Ihre Nebenkosten» stay exact. A row «Rundung auf 5 Rappen�
 - [x] **Decisions** recorded in `docs/design/design-decisions.md` («Decided during the work», Session 12): fee on own
   costs, Saldo to 5 Rappen, Saldo 0 settled when sent, merged migrations.
 
+## Session 13 - October 2026: Prompt Audit of the Agent Files and the Categorization Prompt
+
+### Done ✅
+- [x] **Categorization prompt** (`backend/src/config/llm.ts`): `Administration` moved to the non-allocable list, as
+  `0002_stammdaten.sql` seeds it; `GET /utility-rules` follows. `buildCategorizationPrompt` fills the placeholders in
+  one pass, so `$&` or `{description}` in invoice text stays as written. Tests first: `llm-prompt.test.ts`,
+  `utility-validation.service.test.ts`.
+- [x] **3 % note** (`utility-validation.service.ts`): a guideline, not a cap, as in `backend/CLAUDE.md`.
+- [x] **Agent files**: `CLAUDE.md` (LLM no longer "local", `bun test` gotcha, two duplicated guidelines removed);
+  `.claude/skills/bdd-acceptance/SKILL.md` (`bun run test:e2e`, password-login bootstrap removed);
+  `.claude/skills/ponytail/SKILL.md` (test rule matches `CLAUDE.md`); `.claude/skills/tdd/SKILL.md`
+  (`UBIQUITOUS_LANGUAGE.md`). `CLAUDE.md.backup` deleted (`docs/design/offene-punkte.md` updated).
+
+### Open
+- [ ] Project `.claude/skills/ponytail*` and the user-level ponytail plugin both load and mark shortcuts differently
+  (`ponytail:` vs `shortcut:`): keep one.
+- [ ] `bdd-acceptance` says one feature file per page, `tests/e2e/CLAUDE.md` one per area: decide.
+
 ---
 
 # Success Criteria

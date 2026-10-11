@@ -115,5 +115,16 @@ describe('Utility Validation Service', () => {
 			);
 			expect(mentionsRepairs).toBe(true);
 		});
+
+		it('führt Verwaltungskosten als nicht umlagefähig, wie die Kategorie Administration', () => {
+			const rules = getUtilityCostRules();
+			expect(rules.notAllowedCategories).toContain('Verwaltungskosten');
+			expect(rules.allowedCategories).not.toContain('Verwaltungskosten');
+		});
+
+		it('nennt 3% als Richtwert, nicht als Obergrenze', () => {
+			const rules = getUtilityCostRules();
+			expect(rules.notes.some(n => n.includes('maximal'))).toBe(false);
+		});
 	});
 });
