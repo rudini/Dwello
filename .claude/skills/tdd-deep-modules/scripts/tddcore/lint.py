@@ -58,7 +58,9 @@ def problems(skill):
         return ["frontmatter is not valid YAML"]
     if not isinstance(front, dict):
         return ["frontmatter is not valid YAML"]
-    return (_frontmatter(front, skill.name) + _hook(front, skill) + _required(text[match.end():])
+    keys = re.findall(r"^([\w-]+):", match[1], re.MULTILINE)  # top-level keys; YAML keeps only the last
+    twice = [f"frontmatter: key '{key}' appears twice" for key in sorted({k for k in keys if keys.count(k) > 1})]
+    return (twice + _frontmatter(front, skill.name) + _hook(front, skill) + _required(text[match.end():])
             + _length(text) + _references(text, skill))
 
 
