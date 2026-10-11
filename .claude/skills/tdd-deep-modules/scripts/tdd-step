@@ -58,7 +58,7 @@ def main(args):
     os.chdir(root.stdout.strip())
     before = snapshot()
     try:
-        run = suite.run(".")
+        run = suite.run(".", "fast")
     except suite.NoFramework as error:
         print(f"tdd-step: {error}", file=sys.stderr)
         return 2
@@ -76,7 +76,7 @@ def main(args):
     index = git("write-tree").strip()
     git("add", "-A")
     done = run_git("commit", "-q", "-m", f"{phase}: {message}", "--trailer", f"TDD-Phase: {phase}",
-                   "--trailer", f"TDD-Exit-Code: {run.exit_code}")
+                   "--trailer", f"TDD-Exit-Code: {run.exit_code}", "--trailer", "TDD-Suite: fast")
     if done.returncode != 0:
         git("read-tree", index)
         print(f"tdd-step: git commit failed:\n{done.stderr}{done.stdout}", file=sys.stderr)

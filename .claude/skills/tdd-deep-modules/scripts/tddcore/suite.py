@@ -26,9 +26,12 @@ class Run:
     skipped: frozenset = frozenset()  # ids of collected tests that did not run (skip, todo, filtered)
 
 
-def run(root):
-    """Detect every test framework under `root`, run each whole suite and classify the result."""
-    runners = _node_runners(root)
+def run(root, tier="full"):
+    """Detect every test framework under `root`, run each suite of `tier` and classify the result.
+
+    The full tier runs each package's `scripts.test`; the fast tier its `scripts["test:fast"]`,
+    or `scripts.test` where the package declares no fast suite."""
+    runners = _node_runners(root, tier)
     if not runners:
         raise NoFramework("no supported test framework detected (looked for vitest, bun test)")
     return _combine([runner() for runner in runners])
@@ -58,7 +61,7 @@ def _files(root):
 _NPM_PLACEHOLDER = 'echo "Error: no test specified" && exit 1'  # what `npm init` writes
 
 
-def _node_runners(root):
+def _node_runners(root, tier):
     """One runner per package.json in the repository: vitest or `bun test`, run in its directory."""
     runners = []
     for path in _files(root):
@@ -66,7 +69,7 @@ def _node_runners(root):
         if package.name != "package.json":
             continue
         directory = str(Path(root) / package.parent)
-        command = _test_command(directory)
+        command = _test_command(directory, tier)
         if command == "vitest":
             runners.append(lambda d=directory, p=package.parent: _run_vitest(d, p))
         elif command:
@@ -74,7 +77,7 @@ def _node_runners(root):
     return runners
 
 
-def _test_command(directory):
+def _test_command(directory, tier):
     """"vitest", the `bun test ...` command line, or None for a package.json without tests."""
     manifest = Path(directory) / "package.json"
     try:
@@ -88,7 +91,8 @@ def _test_command(directory):
         if not (Path(directory) / "node_modules" / ".bin" / "vitest").exists():
             raise NoFramework("vitest is not installed: run npm install first")
         return "vitest"
-    command = data.get("scripts", {}).get("test")
+    scripts = data.get("scripts", {})
+    command = scripts.get("test:fast" if tier == "fast" and "test:fast" in scripts else "test")
     if not command or command == _NPM_PLACEHOLDER:
         return None
     bun = [part.strip() for part in re.split(r"&&|\|\||;", command)
