@@ -52,10 +52,13 @@ def _combine(runs):
     return Run(max(r.exit_code for r in runs), outcome, summary, sum(r.failed for r in runs), ran)
 
 
+def _files(root):
+    return subprocess.run(["git", "ls-files", "-co", "--exclude-standard"], cwd=root, check=True,
+                          capture_output=True, text=True, errors="replace").stdout.splitlines()
+
+
 def _has_python(root):
-    files = subprocess.run(["git", "ls-files", "-co", "--exclude-standard"], cwd=root, check=True,
-                           capture_output=True, text=True, errors="replace").stdout.splitlines()
-    return any(f.endswith(".py") for f in files)
+    return any(f.endswith(".py") for f in _files(root))
 
 
 def _run_unittest(root):
@@ -137,12 +140,17 @@ _PYTEST_CONFIG = {"pytest.ini": "", "conftest.py": "", "pyproject.toml": "[tool.
                   "setup.cfg": "[tool:pytest]", "tox.ini": "[pytest]"}
 
 
+_PYTEST_FILE = re.compile(r"test_.*\.py|.*_test\.py")
+_PYTEST_FUNCTION = re.compile(r"^(async )?def test", re.MULTILINE)  # module level: only pytest runs it
+
+
 def _uses_pytest(root):
     for name, section in _PYTEST_CONFIG.items():
         config = Path(root) / name
         if config.exists() and section in config.read_text(errors="replace"):
             return True
-    return False
+    return any(_PYTEST_FUNCTION.search((Path(root) / f).read_text(errors="replace"))
+               for f in _files(root) if _PYTEST_FILE.fullmatch(Path(f).name))
 
 
 def _run_pytest(root):
