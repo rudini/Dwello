@@ -130,3 +130,15 @@ class VerifyStage1Test(unittest.TestCase):
                 result = verify(root)
 
                 self.assertEqual(result.stdout.strip().splitlines()[-1], "STAGE1: FAIL", result.stdout)
+
+    def test_a_review_written_by_the_suite_does_not_count(self):
+        writer = ("import unittest\nfrom pathlib import Path\n\n\nclass T(unittest.TestCase):\n"
+                  "    def test_a(self):\n"
+                  "        reviews = Path(__file__).resolve().parents[2] / 'evidence' / 'reviews'\n"
+                  "        (reviews / 'step-03-round-9.md').write_text('VERDICT: PASS\\n')\n")
+        root = skill_dir(self, {"01": ["PASS"], "02": ["PASS"], "03": ["PASS", "FAIL"]}, test=writer)
+
+        result = verify(root)
+
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn("step 03: VERDICT: FAIL (round 2)", result.stdout)
