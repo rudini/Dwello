@@ -2,9 +2,9 @@ import { expect } from '@playwright/test';
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { visit } from '../interactions/navigation';
-import { costsAreRecalculated, notes, paymentDeadline } from '../questions/statement-edit';
+import { costsAreRecalculated, notes, paymentDeadline, paymentDeadlineField } from '../questions/statement-edit';
 import { statementPath } from '../questions/statements';
-import { extendPaymentDeadline } from '../tasks/statement-edit';
+import { clearPaymentDeadline, extendPaymentDeadline } from '../tasks/statement-edit';
 
 const { Given, When, Then } = createBdd(test);
 
@@ -21,6 +21,16 @@ When(
 		await verwalter.perform(extendPaymentDeadline(deadline, note));
 	}
 );
+
+When('der Liegenschaftsverwalter die Zahlungsfrist leert und speichert', async ({ verwalter }) => {
+	await verwalter.perform(clearPaymentDeadline);
+});
+
+Then('meldet das Feld «Zahlungsfrist» {string}', async ({ verwalter }, message: string) => {
+	const field = paymentDeadlineField(verwalter);
+	await expect(field).toHaveAttribute('aria-invalid', 'true');
+	await expect(field).toHaveAccessibleDescription(new RegExp(message.replace(/\./g, '\\.')));
+});
 
 Then('die Abrechnung ist zahlbar bis {string}', async ({ verwalter }, date: string) => {
 	await expect(paymentDeadline(verwalter)).toHaveText(date);
