@@ -43,7 +43,7 @@ def skill_dir(case, verdicts=ALL_PASS, test=PASSING_TEST, lock=True):
 def write_lock(root, review):
     """The lock as the documented sha256sum command writes it: every file under scripts/ but tests/."""
     files = sorted(path.relative_to(root).as_posix() for path in (root / "scripts").rglob("*")
-                   if path.is_file() and "tests" not in path.relative_to(root / "scripts").parts
+                   if path.is_file() and path.relative_to(root / "scripts").parts[0] != "tests"
                    and "__pycache__" not in path.parts)
     lines = [f"reviewed: {review}"] + [
         f"{hashlib.sha256((root / name).read_bytes()).hexdigest()}  {name}" for name in files]
@@ -271,3 +271,16 @@ class RealVerifiersTest(unittest.TestCase):
 
         self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
         self.assertIn("skill_lint: missing section '6. Design note'", result.stdout.splitlines())
+
+
+    def test_only_the_top_level_test_suite_is_left_out_of_the_lock(self):
+        root = real_copy(self)
+        nested = root / "scripts" / "tddcore" / "tests"
+        nested.mkdir()
+        (nested / "a.py").write_text("# loadable as tddcore.tests.a\n")
+        locked = run_copy(root)
+        write_lock(root, "evidence/reviews/step-08-round-1.md")
+        relocked = run_copy(root)
+
+        self.assertIn("verifiers.lock: scripts/tddcore/tests/a.py is not locked", locked.stdout.splitlines())
+        self.assertEqual(relocked.returncode, 0, relocked.stdout + relocked.stderr)
