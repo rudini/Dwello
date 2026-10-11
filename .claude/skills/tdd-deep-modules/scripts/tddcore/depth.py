@@ -103,20 +103,73 @@ def _surface(text):
     return surface
 
 
-# a function or method whose whole body returns one call: `name(params) { return [await] target(args); }`,
-# or an arrow function whose expression body is that call: `name = (params) => [await] target(args)`
-_FORWARD = re.compile(r"(?:function\s+)?(\w+)\s*\(([^()]*)\)[^{};=]*\{\s*return\s+(?:await\s+)?[\w.]+\(([^()]*)\);?\s*\}"
-                      r"|(\w+)\s*(?::[^=]+)?=\s*(?:async\s*)?\(([^()]*)\)[^=;{]*=>\s*(?:await\s+)?[\w.]+\(([^()]*)\)")
+# `name(params) ... {` of a function or method, and `name = (params) => ` of an arrow function
+_FUNCTION = re.compile(r"(?:function\s+)?\b(?!(?:if|for|while|switch|catch|return|function|async)\b)(\w+)\s*"
+                       r"(?:<[^<>\n]*>)?\s*\(")
+_ARROW = re.compile(r"\b(\w+)\s*(?::[^=\n]+)?=\s*(?:async\s*)?(?:<[^<>\n]*>)?\s*\(")
+_CALL = re.compile(r"(?:await\s+)?[\w.]+\s*\(")
 
 
 def _pass_through(text):
     """Names of functions whose body only passes their own parameters, unchanged, to another call."""
     found = []
-    for match in _FORWARD.finditer(text):
-        name, params, args = match.group(1, 2, 3) if match[1] else match.group(4, 5, 6)
-        if _names(params) and _names(params) == [a.strip() for a in args.split(",") if a.strip()]:
-            found.append(name)
-    return tuple(found)
+    for pattern, arrow in ((_FUNCTION, False), (_ARROW, True)):
+        for match in pattern.finditer(text):
+            close = _close(text, match.end() - 1)
+            params, rest = text[match.end():close - 1], text[close:]
+            head = re.match(r"\s*(?::[^=\n]+)?=>\s*" if arrow else r"[^{};=\n]*\{", rest)
+            if not head:
+                continue
+            body_start = close + head.end()
+            if arrow and text[body_start:body_start + 1] == "{":
+                body = text[body_start + 1:_close(text, body_start) - 1]
+            elif arrow:
+                body = "return " + text[body_start:_expression_end(text, body_start)]
+            else:
+                body = text[body_start:_close(text, body_start - 1) - 1]
+            args = _forwarded_args(body)
+            if args is not None and _names(params) and _names(params) == _names(args):
+                found.append((match.start(), match[1]))
+    return tuple(name for _, name in sorted(found))
+
+
+def _forwarded_args(body):
+    """The argument text when `body` is exactly `return [await] target(args)`, else None."""
+    statement = re.fullmatch(r"\s*return\s+(.*?);?\s*", body, re.DOTALL)
+    if not statement:
+        return None
+    call = _CALL.match(statement[1])
+    if not call or _close(statement[1], call.end() - 1) != len(statement[1]):
+        return None
+    return statement[1][call.end():-1]
+
+
+def _close(text, opening):
+    """The index just after the bracket that closes the one at `opening`."""
+    depth = 0
+    for index in range(opening, len(text)):
+        if text[index] in "([{":
+            depth += 1
+        elif text[index] in ")]}":
+            depth -= 1
+            if depth == 0:
+                return index + 1
+    return len(text)
+
+
+def _expression_end(text, start):
+    """Where the expression starting at `start` ends: `;`, a line break, or a closing bracket at depth 0."""
+    depth = 0
+    for index in range(start, len(text)):
+        if text[index] in "([{":
+            depth += 1
+        elif text[index] in ")]}":
+            if depth == 0:
+                return index
+            depth -= 1
+        elif depth == 0 and text[index] in ";,\n":
+            return index
+    return len(text)
 
 
 def _names(params):
