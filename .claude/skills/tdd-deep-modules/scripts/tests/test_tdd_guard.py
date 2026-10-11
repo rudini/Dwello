@@ -22,3 +22,11 @@ class TddGuardTest(unittest.TestCase):
 
         self.assertEqual(result.returncode, 2, result.stderr)
         self.assertIn("calc.ts is production code and the last TDD phase is test", result.stderr)
+
+    def test_a_production_edit_after_red_is_allowed(self):
+        repo = bun_repo(self)
+        repo.commit_phase("red", {"calc.test.ts": "test"}, 1)
+
+        result = guard(repo, "Edit", "calc.ts")
+
+        self.assertEqual(result.returncode, 0, result.stderr)
