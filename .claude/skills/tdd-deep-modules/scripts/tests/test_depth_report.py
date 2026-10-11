@@ -336,3 +336,13 @@ export class Ledger {
         line = report_line(repo.run("depth_report", "src/rows.ts"), "src/rows.ts")
 
         self.assertIn(", duplicate 0 ->", line)
+
+    def test_a_call_in_a_condition_is_not_a_function(self):
+        module = ("export function cached(key: string): string {\n  if (cache.has(key)) {\n    return cache.get(key);\n  }\n"
+                  "  while (more(key)) {\n    return use(key);\n  }\n  if (ok) {\n    return g(ok);\n  } else if (has(key)) {\n"
+                  "    return use(key);\n  }\n  return key;\n}\n")
+        repo = Repo(self, {"src/cache.ts": module})
+
+        line = report_line(repo.run("depth_report", "src/cache.ts"), "src/cache.ts")
+
+        self.assertIn(", pass-through 0,", line)
