@@ -429,3 +429,13 @@ class HelperSwarmTest(unittest.TestCase):
         line = report_line(result, "src/calc.ts")
         self.assertIn(", classitis no,", line)
         self.assertNotIn("exported helpers", line)
+
+    def test_a_helper_another_production_module_uses_is_no_member(self):
+        other = 'import { splitSign, stripCurrency } from "./amount";\n\nexport const sign = (t: string) => splitSign(stripCurrency(t))[0];\n'
+        repo = Repo(self, {"src/amount.ts": fixture("swarm"), "src/amount.test.ts": SWARM_TEST, "src/sign.ts": other})
+
+        result = repo.run("depth_report", "src/amount.ts")
+
+        line = report_line(result, "src/amount.ts")
+        self.assertIn(", classitis no,", line)
+        self.assertNotIn("exported helpers", line)
