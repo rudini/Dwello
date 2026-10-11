@@ -649,3 +649,14 @@ class TddStepTest(unittest.TestCase):
         result = repo.run("tdd-step", "red", "reports errors")
 
         self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_a_package_json_that_is_not_utf8_exits_2(self):
+        repo = Repo(self, {})
+        (repo.path / "package.json").write_bytes(b'{"name": "\xff"}')
+        repo.write("TESTLIST.md", "- [ ] something\n")
+
+        result = repo.run("tdd-step", "test", "plan")
+
+        self.assertEqual(result.returncode, 2, result.stderr)
+        self.assertIn("package.json", result.stderr)
+        self.assertNotIn("Traceback", result.stderr)
