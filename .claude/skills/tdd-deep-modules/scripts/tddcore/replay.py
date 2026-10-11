@@ -30,9 +30,13 @@ def replay(repo, rev_range):
                 _git(tree, "checkout", "-q", "--detach", commit)
                 _git(tree, "clean", "-fdxq")
                 phase = protocol.phase_of(_git(tree, "log", "-1", "--format=%s"))
+                claimed = _git(tree, "log", "-1", "--format=%(trailers:key=TDD-Exit-Code,valueonly,separator=%x2C)")
                 run = suite.run(tree)
                 changed = _git(tree, "diff", "--name-only", "--no-renames", f"{commit}^", commit).split("\n")
                 found = protocol.violations(previous, phase, run, [c for c in changed if c])
+                if claimed != str(run.exit_code):
+                    found.append(f"the trailer says exit code {claimed or 'nothing'}, "
+                                 f"but the tests exit with {run.exit_code}")
                 new = run.tests - known
                 if phase == "red" and len(new) != 1:
                     found.append(f"red must add exactly one new test, but adds {len(new)}")
