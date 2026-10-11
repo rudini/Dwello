@@ -28,3 +28,32 @@ already produced the behavior; each pin was mutation-checked instead.
 - [x] files under `tests/`, `test/`, `__tests__/` are test code
 - [x] vitest: config error is refused as red (no crash)
 - [x] vitest: green commits when all pass (pin)
+
+### Step 1, review round 1 (fixes)
+
+- [x] run from a subdirectory: checks and tests the whole repository
+- [x] pytest projects detected by config; assertion failure is red
+- [x] pytest non-assertion exception refused; unittest-style AssertionError under pytest accepted
+- [x] pytest fixture error next to an assertion failure refused
+- [x] unsupported package.json test script exits 2; malformed package.json / uninstalled vitest exit 2
+- [x] pins: vitest TypeError, vitest without test files, unittest failure+error, `_test.py`, test-after-red, refactor-after-start/test (mutation-checked)
+- [x] output after the unittest summary does not hide the result
+- [x] phase without changes refused; repo without commits works; staged renames list both paths
+- [x] message cannot forge trailers
+- [x] green may not change tests; red needs exactly one failing test (unittest, pytest, vitest)
+- [x] rejected git commit exits 2 and restores the index; outside git exits 2
+
+### Step 1, review round 2 (fixes)
+
+- [x] mixed repos run every detected framework; green refused if any fails
+- [x] a framework that finds no tests is left out when another has tests (Dwello: vitest + stray .py)
+- [x] a run in which no test ran is not a pass; skipped tests do not count (unittest, pytest, vitest)
+- [x] `conftest.py` and `vitest.config.*` are test code
+- [x] vitest unhandled errors refused as red
+- [x] pytest `Failed:` (`pytest.raises` not raised, `pytest.fail`) is red
+- [x] non-UTF-8 test output and file names do not crash
+- [x] unexpected package.json shapes exit 2
+- [x] a test run that changes the working tree is refused
+- [x] pytest config in `setup.cfg` / `tox.ini`; plain module-level `def test_` without config
+- [x] deleted tracked test files do not crash detection
+- [x] pins: `-uall`, `.spec.`, `test/`, `__tests__/` (mutation-checked)
