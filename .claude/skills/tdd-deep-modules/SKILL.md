@@ -63,7 +63,16 @@ Never batch: no second test before the first is green, no clean-up inside green.
 
 ## 5. Depth check in every refactor
 
-(See references/depth.md.)
+In every refactor phase, with all tests green, run `scripts/depth_report <changed files>` and walk this list. Fix what fails in the same refactor, one change at a time, tests green after each.
+
+- **Interface much simpler than the implementation.** A caller learns few names, parameters and rules; a lot happens behind them. A module about as big as its interface is shallow: merge it into its caller or callee.
+- **No classitis.** Many tiny classes or files that each forward to the next spread one decision over many places. Merge them.
+- **No pass-through wrappers.** A function that only forwards its arguments with the same shape hides nothing. Call the target directly or give the wrapper a real job.
+- **Pull complexity downward.** When the module or every caller could handle a case (defaults, normalisation, retries), handle it inside the module once.
+- **Do not split by size alone.** A long function that hides one decision stays whole; split only along separate decisions.
+- **Cumbersome tests signal a wrong interface.** Many mocks, long setup or reaching into internals mean the interface is wrong, not the test. Change the interface in a refactor; never test private methods instead.
+
+Details: [references/depth.md](references/depth.md).
 
 ## 6. Design note
 
