@@ -28,14 +28,16 @@ def replay(repo, rev_range):
     commits = listed.stdout.split()
     if not commits:
         raise ReplayError(f"the range {rev_range!r} has no commits")
-    base = f"{commits[0]}^"
-    previous = protocol.phase_of(_git(repo, "log", "-1", "--format=%s", base))
+    has_base = subprocess.run(["git", "rev-parse", "--verify", "-q", f"{commits[0]}^"], cwd=repo,
+                              capture_output=True).returncode == 0
+    base = f"{commits[0]}^" if has_base else commits[0]
+    previous = protocol.phase_of(_git(repo, "log", "-1", "--format=%s", base)) if has_base else "start"
     verdicts = []
     with tempfile.TemporaryDirectory() as tmp:
         tree = Path(tmp) / "replay"
         _git(repo, "worktree", "add", "-q", "--detach", str(tree), base)
         try:
-            known = suite.run(tree).tests
+            known = suite.run(tree).tests if has_base else frozenset()
             for commit in commits:
                 _git(tree, "checkout", "-q", "--detach", commit)
                 _git(tree, "clean", "-fdxq")
@@ -43,7 +45,8 @@ def replay(repo, rev_range):
                 phase = protocol.phase_of(subject)
                 claimed = _git(tree, "log", "-1", "--format=%(trailers:key=TDD-Exit-Code,valueonly,separator=%x2C)")
                 run = suite.run(tree)
-                changed = _git(tree, "diff", "--name-only", "--no-renames", f"{commit}^", commit).split("\n")
+                changed = _git(tree, "diff-tree", "-r", "--root", "--no-commit-id", "--name-only",
+                               "--no-renames", commit).split("\n")
                 if phase not in protocol.PHASES:
                     found = [f"not a TDD phase commit: {subject!r}"]
                 else:
