@@ -3,7 +3,6 @@
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import { afterNavigate, goto } from '$app/navigation';
-	import { user, clearStores } from '$lib/stores';
 	import { getXsrfTokenFromCookie } from '$lib/api';
 	import Header from '$lib/ui/Header.svelte';
 	import Navigation from '$lib/ui/Navigation.svelte';
@@ -23,20 +22,11 @@
 		return publicPaths.some((p) => path.startsWith(p));
 	}
 
-	// Sync server-loaded user to store
-	$effect(() => {
-		if (data.user) {
-			user.set(data.user);
-		} else {
-			user.set(null);
-		}
-	});
-
 	// Setup token refresh interval (every 50 minutes)
 	onMount(() => {
 		const refreshInterval = setInterval(
 			async () => {
-				if ($user && !isPublicPath($page.url.pathname)) {
+				if (data.user && !isPublicPath($page.url.pathname)) {
 					try {
 						const xsrfToken = getXsrfTokenFromCookie();
 						const response = await fetch('/auth/refresh', {
@@ -45,7 +35,6 @@
 						});
 						if (!response.ok) {
 							console.warn('Token refresh failed, logging out');
-							clearStores();
 							goto('/login');
 						}
 					} catch (error) {
