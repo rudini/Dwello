@@ -153,3 +153,12 @@ class SkillLintTest(unittest.TestCase):
 
         self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
         self.assertIn("skill_lint: SKILL.md has 400 lines (limit: fewer than 400)\n", result.stdout)
+
+    def test_a_missing_reference_file_is_named(self):
+        copy = copy_of_skill(self)
+        (copy / "references" / "depth.md").unlink()
+
+        result = lint(copy)
+
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn("skill_lint: references/depth.md is linked but does not exist\n", result.stdout)
