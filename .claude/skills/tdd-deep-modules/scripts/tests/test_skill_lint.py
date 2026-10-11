@@ -415,3 +415,32 @@ class SkillLintTest(unittest.TestCase):
 
                 self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
                 self.assertIn(f"skill_lint: {message}\n", result.stdout)
+
+    def test_the_test_boundary_and_the_swarm_item_are_required(self):
+        real = (SKILL / "SKILL.md").read_text()
+        cases = {
+            "boundary": (real.replace("The test boundary is the public interface of the deep module or service",
+                                      "Test what you like"),
+                         "missing in 'Hard rules': the test boundary is the public interface of the deep module"
+                         " or service"),
+            "helpers": (real.replace("with no tests and no public exports of their own", "with their own tests"),
+                        "missing in 'Hard rules': no tests and no public exports of their own"),
+            "the item": (real.replace("**No swarm of exported helpers.**", "**Export helpers freely.**"),
+                         "'5. Depth check in every refactor' has no item **No swarm of exported helpers.**"),
+            "core": (real.replace("A functional core is fine as internal structure", "Export the core"),
+                     "missing in '5. Depth check in every refactor': a functional core is fine as internal"
+                     " structure"),
+            "one caller": (real.replace("small exported pure functions with one caller", "exported functions"),
+                           "missing in '5. Depth check in every refactor': small exported pure functions with one"
+                           " caller"),
+        }
+        for name, (text, message) in cases.items():
+            with self.subTest(name):
+                self.assertNotEqual(text, real)
+                copy = copy_of_skill(self)
+                (copy / "SKILL.md").write_text(text)
+
+                result = lint(copy)
+
+                self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+                self.assertIn(f"skill_lint: {message}\n", result.stdout)
