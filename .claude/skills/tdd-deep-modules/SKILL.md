@@ -78,6 +78,8 @@ In every refactor phase, with all tests green, run `scripts/depth_report <change
 - **Do not split by size alone.** A long function that hides one decision stays whole; split only along separate decisions.
 - **Cumbersome tests signal a wrong interface.** Many mocks, long setup or reaching into internals mean the interface is wrong, not the test. Change the interface in a refactor; never test private methods instead.
 
+When merging modules or changing an interface, keep every test's name and file: `tdd_replay` identifies tests by file and name and rejects a refactor that seems to remove one. Update the calls inside the tests instead.
+
 Details: [references/depth.md](references/depth.md).
 
 ## 6. Design note
