@@ -128,3 +128,8 @@ class TddReplayTest(unittest.TestCase):
 
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn("REPLAY: ACCEPT", result.stdout)
+
+    def test_a_commit_without_a_test_framework_is_rejected(self):
+        repo, base = good_history(self)
+        repo.commit_phase("refactor", {}, 0, deleted=["package.json"])
+        self.assert_rejected(repo, base, "no supported test framework detected")
