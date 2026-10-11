@@ -165,11 +165,13 @@ It is a warning system, not a verdict on design quality.
 When it runs:
 - Before every `git commit` and `git push` (Claude Code hook) and in the CI job "Deep modules", on the changed modules only.
 - A changed module fails when it is new or got shallower, scores at least 65 and contains a pass-through (a function
-  that only forwards its parameters) or classitis (one module cut into tiny files).
+  that only forwards its parameters) or classitis (one module cut into tiny files). An exception comment without a
+  reason fails too.
 
 Commands (repo root):
 - `npm run deepcheck:audit` - check the changed modules as the hook does; silent when clean
-- `npm run deepcheck:scan` - rank all modules by score; a review aid, it never fails
+- `npm run deepcheck:scan` - list the flagged modules of the whole repo; `npm run deepcheck:scan -- --min-score 35`
+  ranks every module scoring 35 or more, a review aid that never fails
 - `npm run deepcheck:ci -- origin/main` - the CI check against a base branch
 - `npm run deepcheck:baseline` - rewrite `.deepcheck-baseline.json` after a deliberate scoring change
 
