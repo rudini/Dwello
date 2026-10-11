@@ -61,6 +61,10 @@ Paths are resolved (`..`, symlinks) and the file's place in its repository comes
 
 Deviation from the original wording "blocks edits to production files unless the last phase was red", made on purpose and told to the user: the hook allows production edits whenever the next commit may contain production code under `tdd-step`'s rules, i.e. after `red` (towards green) and after `green`/`refactor` (towards a refactor). Allowing them only after red would make every refactor of production code impossible, which contradicts the refactor phase and stage 2's depth check in every refactor. Behaviour smuggled into a refactor stays the documented weak spot (no new or removed tests is all `tdd_replay` can check).
 
+## Stage 1 check (`verify_stage1`)
+
+`verify_stage1 [skill-dir]` runs the skill's own suite (`tddcore/selfcheck.own_suite`: passes only with exit 0, an `OK` summary and at least one executed test) and reads every step's latest review (`tddcore/verdicts.final`: the highest round number of `evidence/reviews/step-NN-round-M.md`; its last line must be exactly `VERDICT: PASS`; two files for one round number or an empty/unreadable review fail). It prints the suite summary and each step's final verdict, then `STAGE1: PASS` (exit 0) or `STAGE1: FAIL` (exit 1).
+
 ## Known limits
 
 - The previous phase is read from the HEAD subject prefix (`red: ...`), which a hand-made commit can fake; `tdd_replay` (step 2) re-runs history and does not trust subjects or trailers.
@@ -85,3 +89,5 @@ Deviation from the original wording "blocks edits to production files unless the
 - Test-file names are matched generously (`test_*`, `*_test.*`, `*.test.*`, `*.spec.*`, test directories); a production file named like a test passes the guard.
 - A hardlink inside a test directory to a production file is classified by its own path (test code), so editing it changes production content unguarded; creating one needs Bash, which is unguarded anyway.
 - The hook reads the phase from the HEAD subject; a hand-made `git commit -m "red: ..."` (through Bash) unlocks it. `tdd_replay` judges such commits from real runs later.
+- `verify_stage1` reads only a review's last line; an earlier `VERDICT: FAIL` line in the same file does not count. Test files in subdirectories of `scripts/tests` without `__init__.py` are not discovered.
+- `tdd-guard`: a source directory on another mount than the repository is outside git's discovery and passes silently; files under `.git/` are judged like files at the repository root (they fail closed after a test commit); without git on PATH the hook prints a traceback (non-blocking).

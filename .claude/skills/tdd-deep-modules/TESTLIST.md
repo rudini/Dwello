@@ -134,7 +134,11 @@ Rule: a production file may be edited only when the next commit may contain prod
 
 Runs the skill's test suite and reads the final reviewer verdict of every step (`evidence/reviews/step-NN-round-M.md`, highest M per step, last line `VERDICT: ...`). Prints each step's final verdict, then `STAGE1: PASS` (exit 0) only if the suite passes and every step 01-03 ends in `VERDICT: PASS`; otherwise `STAGE1: FAIL` (exit 1) with the reason.
 
-- [ ] all steps passed and the suite passes -> `STAGE1: PASS`, exit 0, one verdict line per step
-- [ ] a step whose latest round failed -> `STAGE1: FAIL`
-- [ ] a missing step review -> `STAGE1: FAIL` naming the step
-- [ ] a failing test suite -> `STAGE1: FAIL`
+- [x] all steps passed and the suite passes -> `STAGE1: PASS`, exit 0, one verdict line per step
+- [x] a step whose latest round failed -> `STAGE1: FAIL`
+- [x] a missing step review -> `STAGE1: FAIL` naming the step
+- [x] a failing test suite -> `STAGE1: FAIL`
+- [x] two reviews with the same round number (`round-2`, `round-02`) -> `STAGE1: FAIL`
+- [x] a suite that did not really pass (exit 0 after a failure via `os._exit`, every test skipped) -> `STAGE1: FAIL`
+- [x] an empty or non-UTF-8 review -> `STAGE1: FAIL`, no traceback
+- [x] pins: round 10 after round 9, `.bak` and `-response.md` files ignored, `PASS (with caveats)` is no pass
