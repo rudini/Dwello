@@ -1,0 +1,3 @@
+KILLED   SKILL.md: 'one-sentence reason' -> 'reason' [test_one_test_per_cycle_and_the_one_sentence_reason_stay]
+KILLED   SKILL.md: '**One test per cycle.**' -> '**Cycles.**' [same]
+KILLED   SKILL.md: 'no second test before the first is green' -> 'keep going' [same]

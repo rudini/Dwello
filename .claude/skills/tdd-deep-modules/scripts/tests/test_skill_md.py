@@ -98,3 +98,10 @@ class SkillMdTest(unittest.TestCase):
         for element in ("never what it expects", "does not catch a weakened assertion",
                         "git stash push -u --", "git stash pop"):
             self.assertIn(element, text)
+
+    def test_one_test_per_cycle_and_the_one_sentence_reason_stay(self):
+        found = dict(sections())
+
+        self.assertIn("one-sentence reason", found["2. Design it twice"])
+        self.assertIn("One test per cycle", found["Hard rules"])
+        self.assertIn("no second test before the first is green", found["4. Red, green, refactor with tdd-step"])
