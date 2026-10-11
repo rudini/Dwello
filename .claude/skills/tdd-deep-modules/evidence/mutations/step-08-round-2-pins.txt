@@ -1,0 +1,5 @@
+KILLED   verify_all: 'sys.path.pop(0)\nimport os' -> 'import os' [test_verify_all]
+KILLED   verify_all: 'os.environ["PYTHONPYCACHEPREFIX"] = sys.pycache_prefix = tempfile.mkdtemp(prefix="verify_all-")' -> 'sys.pycache_prefix = tempfile.mkdtemp(prefix="verify_all-")' [test_verify_all]  (after pin test_crafted_bytecode_for_the_test_suite_is_never_loaded)
+KILLED   verify_all: 'os.environ["PYTHONPYCACHEPREFIX"] = sys.pycache_prefix = tempfile.mkdtemp(prefix="verify_all-")' -> 'os.environ["PYTHONPYCACHEPREFIX"] = tempfile.mkdtemp(prefix="verify_all-")' [test_verify_all]
+KILLED   tddcore/gate.py: '    found += [f"{path} is a symbolic link" for path in _links(skill)]' -> '    found += []' [test_verify_all]
+KILLED   tddcore/gate.py: '    return relative.parts[0] != "tests" and' -> '    return "tests" not in relative.parts and' [test_verify_all]

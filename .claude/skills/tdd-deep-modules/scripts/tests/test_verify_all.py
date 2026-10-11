@@ -284,3 +284,19 @@ class RealVerifiersTest(unittest.TestCase):
 
         self.assertIn("verifiers.lock: scripts/tddcore/tests/a.py is not locked", locked.stdout.splitlines())
         self.assertEqual(relocked.returncode, 0, relocked.stdout + relocked.stderr)
+
+    def test_crafted_bytecode_for_the_test_suite_is_never_loaded(self):
+        import importlib.util
+        import py_compile
+        root = real_copy(self)
+        test = root / "scripts" / "tests" / "test_it.py"
+        test.write_text("import unittest\n\n\nclass T(unittest.TestCase):\n    def test_a(self):\n        self.fail('x')\n")
+        forged = root.parent / "forged_test.py"
+        forged.write_text(PASSING_TEST)
+        py_compile.compile(str(forged), cfile=importlib.util.cache_from_source(str(test)), doraise=True,
+                           invalidation_mode=py_compile.PycInvalidationMode.UNCHECKED_HASH)
+
+        result = run_copy(root)
+
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn("tests: FAILED (failures=1)", result.stdout.splitlines())
