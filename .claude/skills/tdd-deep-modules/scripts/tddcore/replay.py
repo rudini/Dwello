@@ -46,6 +46,8 @@ def replay(repo, rev_range):
                 previous, known = phase, run.tests
         finally:
             _git(repo, "worktree", "remove", "--force", str(tree))
+    if verdicts[-1].phase == "red":
+        verdicts[-1].violations.append("the history ends in red: every red needs a green")
     return verdicts
 
 
