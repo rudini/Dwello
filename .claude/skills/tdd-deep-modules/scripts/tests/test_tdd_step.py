@@ -862,6 +862,7 @@ class TddStepTest(unittest.TestCase):
 
     def test_vitest_errors_that_are_not_assertions_are_refused_as_red(self):
         bodies = {"thrown Error": '  throw new Error("boom");\n',
+                  "thrown Error worded like an assertion": '  throw new Error("expected a widget");\n',
                   "TypeError in a matcher": '  await expect(Promise.resolve(1)).resolves.toSatisfy(() => null.x);\n'}
         for name, body in bodies.items():
             with self.subTest(name):

@@ -1,0 +1,9 @@
+SURVIVED tddcore/suite.py: 'lines[1].strip().startswith("at _Assertion.")' -> 'lines[1].strip().startswith("at ")' [test_vitest_errors_that_are_not_assertions_are_refused_as_red]
+KILLED   tddcore/suite.py: 're.match(r"Error: (expected |promise (resolved|rejected) )", lines[0])' -> 're.match(r"Error: ", lines[0])' [test_vitest_errors_that_are_not_assertions_are_refused_as_red]
+KILLED   tddcore/suite.py: 'all(t == "AssertionError" for t in types)' -> 'any(t == "AssertionError" for t in types)' [test_bun_assertion_next_to_a_thrown_error_is_refused_as_red]
+KILLED   tddcore/suite.py: 'if exit_code == 1 and failures and not errors and asserted:' -> 'if failures and not errors and asserted:' [test_an_interrupted_pytest_run_is_not_red]
+KILLED   tddcore/suite.py: '    hidden = errors is not None and int(errors[1]) > 0' -> '    hidden = False' [test_a_bun_file_that_fails_to_load_is_not_red]
+KILLED   tddcore/suite.py: '    if not command or command == _NPM_PLACEHOLDER:' -> '    if not command:' [test_the_npm_init_placeholder_test_script_means_no_tests]
+KILLED   tddcore/suite.py: '    return Run(max(r.exit_code for r in all_runs)' -> '    return Run(max(r.exit_code for r in runs)' [test_the_trailer_counts_a_dropped_framework_exit_code]
+KILLED   tddcore/suite.py: 'lines[1].strip().startswith("at _Assertion.")' -> 'lines[1].strip().startswith("at ")' [test_vitest_errors_that_are_not_assertions_are_refused_as_red]
+(re-run after adding the 'worded like an assertion' subtest: the first line above is superseded by the last line)
