@@ -725,3 +725,23 @@ class TddStepTest(unittest.TestCase):
                 result = repo.run("tdd-step", "red", "adds")
 
                 self.assertEqual(result.returncode, expected, result.stderr)
+
+    def test_a_crashed_bun_run_is_not_dropped(self):
+        crashing = {**BUN_FILES, "backend/package.json":
+                    '{"scripts": {"test": "bun test --preload ./setup.ts && echo done"}}\n',
+                    "backend/setup.ts": "export {};\n"}
+        repo = Repo(self, {"calc.py": RIGHT_ADD, "test_calc.py": PYTEST_TEST, **crashing})
+        repo.commit_all("green: seed", {})
+        repo.write("backend/setup.ts", "throw new Error('database down');\n")
+
+        self.assert_refused(repo, "refactor", "refactor needs all tests passing", head="green: seed")
+
+    def test_an_unsupported_nested_test_script_exits_2(self):
+        repo = Repo(self, {"calc.py": RIGHT_ADD, "test_calc.py": PYTEST_TEST,
+                           "web/package.json": '{"scripts": {"test": "jest"}}\n'})
+        repo.write("TESTLIST.md", "- [ ] something\n")
+
+        result = repo.run("tdd-step", "test", "plan")
+
+        self.assertEqual(result.returncode, 2, result.stderr)
+        self.assertIn("jest", result.stderr)
