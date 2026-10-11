@@ -38,7 +38,7 @@ REQUIRED = {
 
 def problems(skill):
     """One message per problem found in the skill at `skill`; empty when it is valid."""
-    skill = Path(skill)
+    skill = Path(skill).resolve()
     text = (skill / "SKILL.md").read_text()
     match = re.match(r"---\n(.*?)\n---\n", text, re.DOTALL)
     if not match:
