@@ -595,3 +595,15 @@ class TddStepTest(unittest.TestCase):
             result = repo.run("tdd-step", "test", "plan")
 
             self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_python_test_suites_are_not_supported(self):
+        for files in ({"test_calc.py": "def test_adds():\n    assert False\n"},
+                      {"pytest.ini": "[pytest]\n", "calc.py": "X = 1\n"}):
+            with self.subTest(sorted(files)):
+                repo = Repo(self, files)
+                repo.write("TESTLIST.md", "- [ ] something\n")
+
+                result = repo.run("tdd-step", "test", "plan")
+
+                self.assertEqual(result.returncode, 2, result.stderr)
+                self.assertIn("no supported test framework detected (looked for vitest, bun test)", result.stderr)
