@@ -39,6 +39,20 @@ REQUIRED = {
                        "not assertion strength"],
 }
 
+# the bold list items each section must open with, so a negation in front of one ("Do not ...") is caught
+ITEMS = {
+    "Hard rules": ["No production code without a failing test.",
+                   "Never delete assertions, and never paste computed values into expected values.",
+                   "Never mix refactoring with green.", "No tests on private methods.", "One test per cycle."],
+    "2. Design it twice": ["Name the one hidden decision", "Sketch two interface designs", "Compare them by depth:",
+                           "Record the chosen design with a one-sentence reason"],
+    "4. Red, green, refactor with tdd-step": ["Red.", "Green.", "Refactor."],
+    "5. Depth check in every refactor": ["Interface much simpler than the implementation.", "No classitis.",
+                                         "No pass-through wrappers.", "Pull complexity downward.",
+                                         "Do not split by size alone.", "Cumbersome tests signal a wrong interface."],
+    "6. Design note": ["Hidden decision:", "Both designs:", "Interface:", "Depth:", "Open points:", "Proof:"],
+}
+
 
 def problems(skill):
     """One message per problem found in the skill at `skill`; empty when it is valid."""
@@ -80,6 +94,7 @@ def _required(body):
     parts = re.split(r"^## +(.+)$", body, flags=re.MULTILINE)
     headings = [parts[i].strip() for i in range(1, len(parts), 2)]
     sections = {parts[i].strip(): parts[i + 1].lower() for i in range(1, len(parts), 2)}
+    raw = {parts[i].strip(): parts[i + 1] for i in range(1, len(parts), 2)}
     found = []
     present = [heading for heading in headings if heading in REQUIRED]
     if present != [heading for heading in REQUIRED if heading in present]:
@@ -94,6 +109,8 @@ def _required(body):
             found.append(f"missing section '{heading}'")
             continue
         found += [f"missing in '{heading}': {phrase}" for phrase in phrases if phrase not in sections[heading]]
+        found += [f"'{heading}' has no item **{label}**" for label in ITEMS.get(heading, [])
+                  if not re.search(rf"^\s*(?:-|\d+\.)\s+\*\*{re.escape(label)}\*\*", raw[heading], re.MULTILINE)]
     return found
 
 
