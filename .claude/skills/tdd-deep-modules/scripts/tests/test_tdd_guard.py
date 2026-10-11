@@ -1,6 +1,7 @@
 import json
 import subprocess
 import sys
+import tempfile
 import unittest
 
 from tests.fixture import SCRIPTS, bun_repo
@@ -75,3 +76,18 @@ class TddGuardTest(unittest.TestCase):
                 result = guard(repo, tool, "analysis.ipynb", field=field)
 
                 self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_files_outside_git_pass_and_bad_input_never_blocks(self):
+        with self.subTest("outside git"), tempfile.TemporaryDirectory() as plain:
+            event = {"tool_name": "Write", "tool_input": {"file_path": f"{plain}/calc.ts"}}
+            result = subprocess.run([sys.executable, str(SCRIPTS / "tdd-guard")], input=json.dumps(event),
+                                    cwd=plain, capture_output=True, text=True)
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+        with self.subTest("malformed input"):
+            result = subprocess.run([sys.executable, str(SCRIPTS / "tdd-guard")], input="not json",
+                                    capture_output=True, text=True)
+
+            self.assertEqual(result.returncode, 1, result.stderr)
+            self.assertIn("tdd-guard: cannot read the hook input", result.stderr)
+            self.assertNotIn("Traceback", result.stderr)
