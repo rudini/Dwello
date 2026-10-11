@@ -17,6 +17,7 @@ class Verdict:
     phase: str
     run: suite.Run
     violations: tuple
+    suite: str = "full"  # the tier its trailer claims (and `run` came from)
 
 
 def replay(repo, rev_range):
@@ -43,7 +44,7 @@ def replay(repo, rev_range):
                 phase = protocol.phase_of(subject)
                 verdicts.append(Verdict(commit, phase, run,
                                         tuple(_judge(previous, previous_suite, known, subject,
-                                                     claimed, tier, run, full, changed))))
+                                                     claimed, tier, run, full, changed)), tier))
                 previous, previous_suite, known = phase, tier, full
         finally:
             # twice --force: an add interrupted by a signal leaves the worktree locked
@@ -53,6 +54,10 @@ def replay(repo, rev_range):
         last = verdicts[-1]
         verdicts[-1] = replace(last, violations=last.violations
                                + ("the history ends in red: every red needs a green",))
+    if verdicts[-1].suite != "full":
+        last = verdicts[-1]
+        verdicts[-1] = replace(last, violations=last.violations
+                               + ("the final commit must run the full suite",))
     return verdicts
 
 
