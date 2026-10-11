@@ -185,9 +185,10 @@ def _bun_outcome(exit_code, cases):
 def _is_vitest_assertion(message):
     # .resolves/.rejects failures are plain Errors raised inside vitest's assertion chain
     lines = message.splitlines()
+    # (vitest rewraps anything thrown in that chain, so the message must read like chai's)
     return message.startswith("AssertionError") or (
-        len(lines) > 1 and lines[0].startswith("Error: ")
-        and lines[1].strip().startswith("at _Assertion."))
+        len(lines) > 1 and re.match(r"Error: (expected |promise (resolved|rejected) )", lines[0])
+        is not None and lines[1].strip().startswith("at _Assertion."))
 
 
 def _vitest_outcome(exit_code, data, unhandled):
