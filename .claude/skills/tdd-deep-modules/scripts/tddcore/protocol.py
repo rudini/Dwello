@@ -58,6 +58,9 @@ def violations(previous, phase, run, changed, suite, previous_suite):
         found.append("green must run the full suite, like its red")
     if phase == "refactor" and suite != "full":
         found.append("refactor must run the full suite")
+    if phase == "test" and previous == "green" and previous_suite != "full":
+        found.append("a test list after a green on the fast suite starts a new task, but the task before it did"
+                     " not end on the full suite: refactor, or redo the green with --suite full")
     if not changed:
         found.append(f"nothing changed: a {phase} commit needs a change")
     if previous not in _FOLLOWS[phase]:
