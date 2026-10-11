@@ -74,3 +74,8 @@ class TddReplayTest(unittest.TestCase):
         repo.commit_phase("refactor", {"zero.test.ts": BUN_TEST.replace("toBe(3)", "toBe(3);\n  expect(add(0, 0)).toBe(0)")
                                        .replace('"adds"', '"adds zero"')}, 0)
         self.assert_rejected(repo, base, "only red may add tests, but refactor adds 1")
+
+    def test_a_trailer_exit_code_that_differs_from_the_real_run_is_rejected(self):
+        repo, base = good_history(self)
+        repo.commit_phase("refactor", {"calc.ts": ROUNDING_ADD_TS.replace("a + b", "b + a")}, 7)
+        self.assert_rejected(repo, base, "the trailer says exit code 7, but the tests exit with 0")
