@@ -10,10 +10,11 @@ STEPS = ("01", "02", "03")
 
 
 def main(skill):
+    # read the reviews before the suite runs, so nothing the tests write can change them
+    steps = [(step, *verdicts.final(skill / "evidence" / "reviews", step)) for step in STEPS]
     passed, summary = selfcheck.own_suite(skill / "scripts")
     print(f"tests: {summary}")
-    for step in STEPS:
-        step_passed, description = verdicts.final(skill / "evidence" / "reviews", step)
+    for step, step_passed, description in steps:
         print(f"step {step}: {description}")
         passed = passed and step_passed
     print("STAGE1: PASS" if passed else "STAGE1: FAIL")
