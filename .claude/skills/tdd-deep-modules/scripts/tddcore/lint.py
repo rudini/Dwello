@@ -48,8 +48,15 @@ def problems(skill):
 
 def _required(body):
     parts = re.split(r"^## +(.+)$", body, flags=re.MULTILINE)
+    headings = [parts[i].strip() for i in range(1, len(parts), 2)]
     sections = {parts[i].strip(): parts[i + 1].lower() for i in range(1, len(parts), 2)}
     found = []
+    present = [heading for heading in headings if heading in REQUIRED]
+    if present != [heading for heading in REQUIRED if heading in present]:
+        found.append(f"sections out of order: expected {', '.join(REQUIRED)}")
+    last = list(REQUIRED)[-1]
+    if headings and last in headings and headings[-1] != last:
+        found.append(f"'{last}' is not the last section")
     for heading, phrases in REQUIRED.items():
         if heading not in sections:
             found.append(f"missing section '{heading}'")
