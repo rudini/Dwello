@@ -66,3 +66,12 @@ already produced the behavior; each pin was mutation-checked instead.
 - [x] non-UTF-8 package.json exits 2
 - [x] non-ASCII test file names are detected
 - [x] pins: pytest config sections alone, highest exit code in mixed repos
+
+### Step 1, review round 4 (fixes)
+
+- [x] vitest `.resolves` / `.rejects` failures are red
+- [x] nested `bun test` package runs; bun assertion = red, thrown error refused; crashed bun run kept as error
+- [x] unsupported nested test script exits 2 (pin)
+- [x] pytest without a report is an error even with exit 0
+- [x] `pytest.toml`, `.pytest.ini`, `package.json` are test configuration
+- [x] pins: vitest summary anchor, broken vitest suite kept in mixed repos, todo-only suite does not pass
