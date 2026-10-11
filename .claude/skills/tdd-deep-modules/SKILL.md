@@ -22,6 +22,7 @@ Break none of these, even when it would be faster.
 3. **Never mix refactoring with green.** Green is the smallest change that makes the new test pass. Clean-up waits for the refactor step, which starts and ends with every test passing.
 4. **No tests on private methods.** Test behaviour through the module's public interface. If you want to test something private, the interface is wrong or a deeper module is missing.
 5. **One test per cycle.** Red adds exactly one new test and sees it fail for the right reason: an assertion, never an import, syntax or setup error.
+6. **Doubles only at system boundaries.** No mocks or spies of your own logic; use real objects by default. Double only what the system does not own: mail, login, network, framework modules, external backends. Every fake of a boundary has a contract test suite that runs against both the fake and the real implementation. Wrap a framework module (such as SvelteKit's `$app/*`) in a small project-owned adapter and fake the adapter, not the framework. Many mocks in a test signal a wrongly cut interface: fix the interface, not the test.
 
 ## 1. Detect the context
 
