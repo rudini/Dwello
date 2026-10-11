@@ -208,18 +208,37 @@ class LockFormatTest(unittest.TestCase):
                       "passing review", result.stdout.splitlines())
 
 
+def real_copy(case):
+    """A skill-shaped directory holding a copy of the real scripts (all but the tests), locked."""
+    root = skill_dir(case, lock=False)
+    for path in (SKILL / "scripts").rglob("*"):
+        relative = path.relative_to(SKILL / "scripts")
+        if path.is_file() and relative.parts[0] != "tests" and "__pycache__" not in relative.parts:
+            (root / "scripts" / relative).parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(path, root / "scripts" / relative)
+    write_lock(root, "evidence/reviews/step-08-round-1.md")
+    return root
+
+
+def run_copy(root):
+    """The copy's own verify_all, run without arguments from another directory, as "Done when" runs it."""
+    return subprocess.run([sys.executable, str(root / "scripts" / "verify_all")], cwd=tempfile.gettempdir(),
+                          capture_output=True, text=True)
+
+
 class RealVerifiersTest(unittest.TestCase):
     def test_a_copy_of_the_real_verifiers_run_without_arguments_checks_its_own_skill(self):
-        root = skill_dir(self, lock=False)
-        for path in (SKILL / "scripts").rglob("*"):
-            relative = path.relative_to(SKILL / "scripts")
-            if path.is_file() and not {"tests", "__pycache__"} & set(relative.parts):
-                (root / "scripts" / relative).parent.mkdir(parents=True, exist_ok=True)
-                shutil.copy2(path, root / "scripts" / relative)
-        write_lock(root, "evidence/reviews/step-08-round-1.md")
-
-        result = subprocess.run([sys.executable, str(root / "scripts" / "verify_all")], cwd=tempfile.gettempdir(),
-                                capture_output=True, text=True)
+        result = run_copy(real_copy(self))
 
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertEqual(result.stdout.strip().splitlines()[-1], "STAGE2: PASS")
+
+    def test_a_module_added_to_scripts_cannot_shadow_an_import(self):
+        root = real_copy(self)
+        for name in ("hashlib", "pathlib", "re"):
+            (root / "scripts" / f"{name}.py").write_text('print("STAGE2: PASS")\nraise SystemExit(0)\n')
+
+        result = run_copy(root)
+
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn("verifiers.lock: scripts/hashlib.py is not locked", result.stdout.splitlines())
