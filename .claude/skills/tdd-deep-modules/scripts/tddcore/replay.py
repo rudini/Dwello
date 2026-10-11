@@ -36,6 +36,8 @@ def replay(repo, rev_range):
                 new = run.tests - known
                 if phase == "red" and len(new) != 1:
                     found.append(f"red must add exactly one new test, but adds {len(new)}")
+                if phase != "red" and new:
+                    found.append(f"only red may add tests, but {phase} adds {len(new)}")
                 verdicts.append(Verdict(commit, phase, run, found))
                 previous, known = phase, run.tests
         finally:
