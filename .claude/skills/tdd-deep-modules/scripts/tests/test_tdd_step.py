@@ -478,7 +478,7 @@ class TddStepTest(unittest.TestCase):
             result = repo.run("tdd-step", *args)
 
             self.assertEqual(result.returncode, 2, result.stderr)
-            self.assertIn("usage: tdd-step <test|red|green|refactor> [message]", result.stderr)
+            self.assertIn("usage: tdd-step <test|red|green|refactor> [--suite fast|full] [message]", result.stderr)
 
     def test_unsupported_test_scripts_exit_2(self):
         for manifest_path in ("package.json", "web/package.json"):

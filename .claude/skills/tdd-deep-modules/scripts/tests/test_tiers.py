@@ -91,3 +91,17 @@ class TddStepTierTest(unittest.TestCase):
 
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(repo.trailer("TDD-Suite"), "full")
+
+    def test_an_unknown_or_missing_suite_exits_2_with_usage(self):
+        for args in (["--suite", "slow", "x"], ["--suite"]):
+            with self.subTest(args):
+                repo = tiered_repo(self)
+                repo.write("calc.test.ts", BUN_TEST)
+
+                result = repo.run("tdd-step", "red", *args)
+
+                self.assertEqual(result.returncode, 2, result.stderr)
+                self.assertIn("usage: tdd-step <test|red|green|refactor> [--suite fast|full] [message]",
+                              result.stderr)
+                self.assertNotIn("Traceback", result.stderr)
+                self.assertEqual(repo.subject(), "init")
