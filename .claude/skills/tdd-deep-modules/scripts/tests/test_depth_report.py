@@ -486,3 +486,12 @@ class HelperSwarmTest(unittest.TestCase):
                 line = report_line(repo.run("depth_report", "src/shapes.ts"), "src/shapes.ts")
 
                 self.assertIn(", classitis no,", line)
+
+    def test_a_name_in_a_comment_of_another_file_is_no_use(self):
+        other = "// stripCurrency and splitSign live in amount.ts\n/* toRappen too */\nexport const one = 1;\n"
+        repo = Repo(self, {"src/amount.ts": fixture("swarm"), "src/amount.test.ts": SWARM_TEST, "src/notes.ts": other})
+
+        line = report_line(repo.run("depth_report", "src/amount.ts"), "src/amount.ts")
+
+        self.assertIn("classitis: exported helpers with one caller: stripCurrency, splitSign, normaliseFraction, "
+                      "toRappen", line)
