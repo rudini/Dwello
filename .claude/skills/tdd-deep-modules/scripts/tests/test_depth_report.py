@@ -471,3 +471,18 @@ class HelperSwarmTest(unittest.TestCase):
         line = report_line(repo.run("depth_report", "src/statement.ts"), "src/statement.ts")
 
         self.assertIn("classitis: exported helpers with one caller: fee, advance, balance", line)
+
+    def test_an_object_return_type_is_not_the_body(self):
+        long_body = "".join(f"  const v{i} = x + {i};\n" for i in range(21)) + "  return { v: v20 };\n"
+        long = "".join(f"export function {n}(x: number): {{ v: number }} {{\n{long_body}}}\n" for n in ("p", "q", "r"))
+        recursive = "".join(f"export function {n}(x: number): {{ v: number }} {{\n"
+                            f"  return x <= 0 ? {{ v: 0 }} : {{ v: {n}(x - 1).v + 1 }};\n}}\n" for n in ("s", "t", "u"))
+        cases = {"long": (long + "export const all = (x: number) => p(x).v + q(x).v + r(x).v;\n"),
+                 "recursive": recursive}
+        for name, module in cases.items():
+            with self.subTest(name):
+                repo = Repo(self, {"src/shapes.ts": module})
+
+                line = report_line(repo.run("depth_report", "src/shapes.ts"), "src/shapes.ts")
+
+                self.assertIn(", classitis no,", line)
