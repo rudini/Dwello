@@ -1,4 +1,5 @@
 """Check that a tdd-deep-modules skill directory holds everything the skill must contain."""
+import os
 import re
 from pathlib import Path
 
@@ -23,7 +24,22 @@ def problems(skill):
         return ["frontmatter is not valid YAML"]
     if not isinstance(front, dict):
         return ["frontmatter is not valid YAML"]
-    return _frontmatter(front, skill.name)
+    return _frontmatter(front, skill.name) + _hook(front, skill)
+
+
+def _hook(front, skill):
+    """The PreToolUse hook that runs scripts/tdd-guard on Write and Edit, and the script itself."""
+    entries = (front.get("hooks") or {}).get("PreToolUse") or [] if isinstance(front.get("hooks"), dict) else []
+    registered = any(
+        isinstance(entry, dict) and all(re.fullmatch(str(entry.get("matcher", "")), tool) for tool in ("Write", "Edit"))
+        and any(isinstance(hook, dict) and "scripts/tdd-guard" in str(hook.get("command", ""))
+                for hook in entry.get("hooks") or [])
+        for entry in entries)
+    found = [] if registered else ["hooks: no PreToolUse hook runs scripts/tdd-guard for Write and Edit"]
+    guard = skill / "scripts" / "tdd-guard"
+    if not (guard.is_file() and os.access(guard, os.X_OK)):
+        found.append("hooks: scripts/tdd-guard is missing or not executable")
+    return found
 
 
 def _frontmatter(front, directory):
