@@ -156,3 +156,21 @@ Checked by `scripts/tests/test_skill_md.py` against the real SKILL.md.
 - [x] Design It Twice names the one hidden decision, two interface designs compared by depth, one chosen with a one-sentence reason
 - [x] the depth check names: interface much simpler than implementation, no classitis, no pass-through wrappers, complexity pulled downward, no splitting by size alone, cumbersome tests signal a wrong interface
 - [x] fewer than 400 lines; every `references/...` link points to an existing file
+
+## Step 2: `scripts/depth_report <file>...`
+
+Design it twice. Hidden decision: how a TypeScript/JavaScript module's interface and implementation are measured from its source text (which exports count, how parameters, pass-throughs, unused code and tests are found).
+- A: one call `depth.measure(root, path) -> Depth` that returns every metric and the findings; the CLI only formats.
+- B: one function per metric (`surface`, `size`, `pass_throughs`, ...) that the CLI calls and combines into findings.
+- Chosen: A, because the CLI then knows one name and the rules that turn metrics into findings stay inside the module that computes them.
+
+Per module, one line: `<path>: surface S, size N, ratio R, classitis yes|no, pass-through P, tests T, unused U, duplicate D -> deep | <findings>`. Surface = exported names + parameters of exported functions + public methods of exported classes and their parameters. Size = code lines (no blanks, no comments). Ratio = size / surface. Exit 0 when no module has a finding, 1 when one has, 2 for usage errors. Fixtures: `scripts/tests/depth_fixtures/{deep,shallow,bloated}.ts`.
+
+- [ ] a deep module (one export, a large body) -> surface, size and ratio reported, verdict `deep`, exit 0
+- [ ] a shallow module (many one-line exports) -> verdict names the low ratio, exit 1
+- [ ] pass-through wrappers (a body that only returns another call with the same arguments) are counted and named a finding
+- [ ] classitis: two or more classes with at most two methods each is a finding
+- [ ] test boundary: the number of test files that import the module; none is a finding
+- [ ] bloat: unused private functions and duplicated lines are counted; any unused function or three duplicated lines is a finding
+- [ ] export forms: `export { a, b as c }`, `export default function`, `export const` arrow functions and values, `export type`/`interface`, class methods without `private`/`#`, constructor parameters
+- [ ] usage errors (no file, a missing file, a file that is not .ts/.js, outside git) -> exit 2 with a message
