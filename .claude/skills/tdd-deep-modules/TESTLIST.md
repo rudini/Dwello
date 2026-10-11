@@ -274,3 +274,9 @@ A swarm member is an exported function (`export function f` or `export const f =
 - [x] the known-bad swarm is flagged as classitis, naming the helpers
 - [x] the known-good functional core (private helpers, one exported entry point) stays deep
 - [x] only small, one-caller exports count: an export with two callers, with no caller in the module, or with a body over 10 lines is no member; two members are no swarm
+
+## Step 12: `verify_all` checks stage 2b
+
+Stage 2b replaces stage 2's pass line: the reviews of steps 01-12 (09 two-tier suite, 10 SKILL.md rules, 11 helper swarm, 12 `verify_all`), the lock tied to step 12's latest passing review, the last line `STAGE2B: PASS` or `STAGE2B: FAIL`. The existing `test_verify_all.py` expectations change with it in one red (its helpers and expected lines all name the steps, the lock step and the pass line).
+
+- [ ] everything passing -> one verdict line per step 01-12, `verifiers.lock: OK`, `STAGE2B: PASS`; every failure case ends in `STAGE2B: FAIL`; the lock must name step 12's latest passing review
