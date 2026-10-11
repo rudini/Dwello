@@ -142,3 +142,14 @@ class SkillLintTest(unittest.TestCase):
 
         self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
         self.assertIn("skill_lint: 'Hard rules' is not the first section\n", result.stdout)
+
+    def test_a_skill_md_of_400_lines_or_more_is_too_long(self):
+        real = (SKILL / "SKILL.md").read_text()
+        padding = "\n" * (400 - len(real.splitlines()))
+        copy = copy_of_skill(self)
+        (copy / "SKILL.md").write_text(real.replace("## Hard rules", padding + "## Hard rules"))
+
+        result = lint(copy)
+
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn("skill_lint: SKILL.md has 400 lines (limit: fewer than 400)\n", result.stdout)
