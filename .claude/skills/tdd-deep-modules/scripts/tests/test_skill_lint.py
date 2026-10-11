@@ -172,3 +172,25 @@ class SkillLintTest(unittest.TestCase):
         self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
         self.assertIn(f"skill_lint: no SKILL.md in {tmp.name}", result.stderr)
         self.assertNotIn("Traceback", result.stderr)
+
+    def test_the_review_hardened_statements_are_required(self):
+        real = (SKILL / "SKILL.md").read_text()
+        cases = {
+            "one-sentence reason": ("2. Design it twice", "one-sentence reason"),
+            "One test per cycle": ("Hard rules", "one test per cycle"),
+            "no second test before the first is green": ("4. Red, green, refactor with tdd-step",
+                                                         "no second test before the first is green"),
+            "never what it expects": ("4. Red, green, refactor with tdd-step", "never what it expects"),
+            "git stash push -u --": ("4. Red, green, refactor with tdd-step", "git stash push -u --"),
+            "changed production .ts/.js files": ("5. Depth check in every refactor",
+                                                 "changed production .ts/.js files"),
+            "not assertion strength": ("6. Design note", "not assertion strength"),
+        }
+        for phrase, (section, named) in cases.items():
+            with self.subTest(phrase):
+                copy = copy_of_skill(self)
+                (copy / "SKILL.md").write_text(real.replace(phrase, "removed"))
+
+                result = lint(copy)
+
+                self.assertIn(f"skill_lint: missing in '{section}': {named}\n", result.stdout)
