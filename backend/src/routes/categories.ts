@@ -31,6 +31,7 @@ const categoryBodySchema = t.Object({
 	nameIT: t.Optional(t.Nullable(t.String())),
 	nameEN: t.Optional(t.Nullable(t.String())),
 	isAllowedUtilityCost: t.Boolean(),
+	isHeatingCost: t.Optional(t.Boolean()),
 	description: t.Optional(t.Nullable(t.String())),
 	sortOrder: t.Optional(t.Number())
 });

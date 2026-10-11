@@ -5,15 +5,23 @@ type Contract = { id: string; startDate: string; endDate: string | null; tenantN
 type RunOptions = { heatingProfileId?: string; managementFeePercent?: number; managementFeeKey?: string };
 
 // API protocol driver for a generation run: the backend calculates the statement of every contract of the building
-// in the year, like the generation wizard does through the BFF
+// in the year without a statement in it, like the generation wizard does through the BFF
 async function run(seed: TestData, year: number, buildingId: string, options: RunOptions) {
 	const [periodStart, periodEnd] = [`${year}-01-01`, `${year}-12-31`];
 	const keys = (await seed.backend.get('distribution-keys?limit=100')).data as { id: string; nameDE: string }[];
 	const { contracts } = (await seed.backend.get(`contracts?buildingId=${buildingId}&limit=1000`)) as {
 		contracts: Contract[];
 	};
+	const { data: statements } = (await seed.backend.get(`statements?buildingId=${buildingId}&limit=1000`)) as {
+		data: { contractId: string; periodStart: string; periodEnd: string }[];
+	};
+	const billed = new Set(
+		statements.filter((s) => s.periodStart <= periodEnd && s.periodEnd >= periodStart).map((s) => s.contractId)
+	);
 	return {
-		contracts: contracts.filter((c) => c.startDate <= periodEnd && (!c.endDate || c.endDate >= periodStart)),
+		contracts: contracts.filter(
+			(c) => c.startDate <= periodEnd && (!c.endDate || c.endDate >= periodStart) && !billed.has(c.id)
+		),
 		body: {
 			periodStart,
 			periodEnd,

@@ -17,7 +17,7 @@ import { createContract, deleteContract } from '../services/contract.service';
 import { callApi } from './helpers/auth';
 import { insertInvoice } from './helpers/records';
 
-type LineItem = { isHeatingCost: boolean; apartmentShare: number; tenantShare: number; periodShare: number };
+type LineItem = { categoryName: string; isHeatingCost: boolean; apartmentShare: number; tenantShare: number; periodShare: number };
 
 const token = crypto.randomUUID();
 const created: { building: string; apartments: string[]; tenants: string[]; contracts: string[] } = {
@@ -41,6 +41,15 @@ async function rent(firstName: string, apartmentId: string, startDate: string, e
 	created.tenants.push(tenant.id);
 	created.contracts.push(contract.id);
 	return contract.id;
+}
+
+async function lines(contractId: string): Promise<LineItem[]> {
+	const response = await callApi('/api/v1/statements/preview', {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({ contractId, periodStart: '2024-01-01', periodEnd: '2024-12-31', heatingProfileId })
+	});
+	return ((await response.json()) as { lineItems: LineItem[] }).lineItems;
 }
 
 async function heatingLine(contractId: string): Promise<LineItem> {
@@ -71,6 +80,10 @@ beforeAll(async () => {
 
 	const [heating] = await db.select().from(categories).where(eq(categories.name, 'Heating'));
 	await insertInvoice(building.id, { categoryId: heating.id, description: 'Heizöl 2024', amount: '1000.00', invoiceDate: '2024-06-30' });
+	const [chimney] = await db.select().from(categories).where(eq(categories.name, 'Chimney Sweep'));
+	await insertInvoice(building.id, { categoryId: chimney.id, description: 'Kaminfeger 2024', amount: '200.00', invoiceDate: '2024-10-15' });
+	const [hotWater] = await db.select().from(categories).where(eq(categories.name, 'Hot Water'));
+	await insertInvoice(building.id, { categoryId: hotWater.id, description: 'Warmwasser 2024', amount: '300.00', invoiceDate: '2024-11-30' });
 	const [profile] = await db
 		.insert(heatingProfiles)
 		.values({
@@ -128,5 +141,69 @@ describe('Heizkostenverteilung bei Mieterwechsel und Leerstand', () => {
 		const shares = (await heatingLine(tenant1)).tenantShare + (await heatingLine(tenant2)).tenantShare;
 
 		expect(700 - shares).toBe(35);
+	});
+
+	// Der Kaminfeger hängt an der Heizung: beim Mieterwechsel nach Heizprofil, nicht nach Tagen
+	it('verteilt den Kaminfeger als Heiz- und Warmwasserkosten nach dem Heizprofil', async () => {
+		const chimney = (await lines(tenant1)).find((line) => line.categoryName === 'Chimney Sweep')!;
+
+		expect(chimney).toMatchObject({ isHeatingCost: true, apartmentShare: 140, periodShare: 0.43, tenantShare: 60.2 });
+	});
+
+	// Teilperiode (z.B. bei Verkauf): wer die ganze Periode mietet, trägt die ganzen Heizkosten der Periode
+	it('belastet in einer Periode unter einem Jahr den Mieter der ganzen Periode mit dem ganzen Wohnungsanteil', async () => {
+		const response = await callApi('/api/v1/statements/preview', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ contractId: tenant2, periodStart: '2024-05-01', periodEnd: '2024-12-31', heatingProfileId })
+		});
+		const heating = ((await response.json()) as { lineItems: LineItem[] }).lineItems.find((line) => line.categoryName === 'Heating')!;
+
+		expect(heating).toMatchObject({ periodShare: 1, tenantShare: heating.apartmentShare });
+	});
+
+	// Sommerperiode: das Profil hat in diesen Monaten 0 %, die Heizkosten der Periode trägt trotzdem jemand
+	it('verteilt die Heizkosten einer Periode ohne Profilanteil nach Tagen', async () => {
+		const response = await callApi('/api/v1/statements/preview', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ contractId: tenant2, periodStart: '2024-06-01', periodEnd: '2024-08-31', heatingProfileId })
+		});
+		const heating = ((await response.json()) as { lineItems: LineItem[] }).lineItems.find((line) => line.categoryName === 'Heating')!;
+
+		expect(heating).toMatchObject({ periodShare: 1, tenantShare: heating.apartmentShare });
+	});
+
+	// Einzug mitten in der Sommerperiode: 62 von 92 Tagen, Wohnungsanteil 30 % von CHF 1000
+	it('verteilt die Heizkosten einer Periode ohne Profilanteil bei einem Einzug nach Tagen', async () => {
+		const contractId = await rent('Mieter Drei', created.apartments[1], '2024-07-01');
+		const response = await callApi('/api/v1/statements/preview', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ contractId, periodStart: '2024-06-01', periodEnd: '2024-08-31', heatingProfileId })
+		});
+		const heating = ((await response.json()) as { lineItems: LineItem[] }).lineItems.find((line) => line.categoryName === 'Heating')!;
+
+		expect(heating).toMatchObject({ apartmentShare: 300, periodShare: 0.6739, tenantShare: 202.17 });
+	});
+
+	// Warmwasser wird das ganze Jahr etwa gleich verbraucht: nach Tagen, nicht nach dem Heizprofil
+	it('verteilt separat abgerechnetes Warmwasser nach Tagen', async () => {
+		const hotWater = (await lines(tenant1)).find((line) => line.categoryName === 'Hot Water')!;
+
+		expect(hotWater).toMatchObject({ isHeatingCost: false, apartmentShare: 210, tenantShare: 52.21 });
+	});
+
+	// Der Mieter rechnet das Total aus den Positionen nach: die Zwischensumme ist die Summe der gerundeten Positionen
+	it('rechnet die Zwischensumme aus den gerundeten Positionen, auch bei einer Periode bis mitten im Monat', async () => {
+		const response = await callApi('/api/v1/statements/preview', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ contractId: tenant2, periodStart: '2024-01-01', periodEnd: '2024-10-19', heatingProfileId })
+		});
+		const preview = (await response.json()) as { subtotal: number; lineItems: LineItem[] };
+		const sum = preview.lineItems.reduce((total, line) => total + line.tenantShare, 0);
+
+		expect(preview.subtotal).toBe(Math.round(sum * 100) / 100);
 	});
 });

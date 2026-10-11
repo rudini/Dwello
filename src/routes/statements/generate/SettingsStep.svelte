@@ -26,7 +26,8 @@
 		errors: Record<string, string>;
 	} = $props();
 
-	// 3 % is the usual guideline for Swiss utility statements, not a limit
+	// 3 % is the usual guideline for Swiss utility statements (glossary), not a limit;
+	// TODO(fachlich prüfen): sources name 3 to 5 % depending on the region (review B, MR2-N2)
 	const USUAL_MAXIMUM = 3;
 
 	const sum = (profile: HeatingProfile) =>
@@ -47,7 +48,7 @@
 <Field
 	id="heatingProfile"
 	label="Heizprofil"
-	help="Verteilt die Heizkosten auf die Monate. Nur Heizprofile mit zusammen 100 % lassen sich wählen."
+	help="Verteilt die Heizkosten bei einem Mieterwechsel auf die Monate; wählen Sie das Profil, das Ihre Mietverträge vorsehen. Dwello verteilt nach dem Heizprofil und kann Zählerstände nicht berücksichtigen. Wurden beim Mieterwechsel die Zähler für Heizung oder Warmwasser in der Wohnung abgelesen, gelten diese Werte: Erstellen Sie die Abrechnung dieser Wohnung dann ausserhalb von Dwello und löschen Sie die Entwürfe aller Mietverträge dieser Wohnung, auch wenn Sie die Abrechnungen später neu erstellen. Hat Ihr Gebäude in den Wohnungen Wärme- oder Warmwasserzähler oder Heizkostenverteiler (kleine Geräte an den Heizkörpern), müssen Sie meist nach Verbrauch abrechnen. Das kann Dwello nicht: Erstellen Sie die Abrechnungen dann ausserhalb von Dwello. Nur Heizprofile mit zusammen 100 % lassen sich wählen."
 	error={errors.heatingProfileId}
 >
 	{#snippet children(control)}
@@ -84,7 +85,7 @@
 	id="managementFeePercent"
 	label="Verwaltungspauschale in %"
 	type="number"
-	help="Prozentsatz der Nebenkosten der Liegenschaft, gilt für alle Abrechnungen dieses Laufs. Üblich sind bis {USUAL_MAXIMUM} %."
+	help="Prozentsatz der Nebenkosten, gilt für alle Abrechnungen dieses Laufs. Üblich sind bis {USUAL_MAXIMUM} %. Verlangen Sie eine Verwaltungspauschale nur, wenn sie im Mietvertrag vereinbart ist. Sonst geben Sie 0 ein. Haben Mietverträge verschiedene Sätze, erstellen Sie die Abrechnungen getrennt."
 	bind:value={() => fee, (v) => (managementFeePercent = v === '' ? NaN : Number(v))}
 	error={errors.managementFeePercent}
 	testid="management-fee-input"
@@ -101,9 +102,9 @@
 <Select
 	id="managementFeeDistributionKeyId"
 	label="Verteilung der Verwaltungspauschale"
-	help="Nach diesem Verteilschlüssel wird die Pauschale auf die Wohnungen verteilt; jeder Mieter trägt den Teil seiner Mietstage."
+	help="Üblich ist der Prozentsatz der eigenen Nebenkosten jedes Mieters. Mit einem Verteilschlüssel wird stattdessen der Prozentsatz der Nebenkosten der Liegenschaft auf die Wohnungen verteilt; jeder Mieter trägt den Teil seiner Mietstage."
 	options={[
-		{ value: '', label: 'Gleichmässig pro Wohnung' },
+		{ value: '', label: 'Nach den eigenen Nebenkosten jedes Mieters' },
 		...distributionKeys.map((key) => ({ value: key.id, label: key.name }))
 	]}
 	bind:value={managementFeeDistributionKeyId}

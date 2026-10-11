@@ -2,6 +2,7 @@ import type { Actor } from '../fixtures/actor';
 import {
 	buildingCheckbox,
 	buildingInvoices,
+	categoryFindings,
 	draftsOnlyNote,
 	generationResult,
 	missingInvoices,
@@ -22,3 +23,4 @@ export const missingInvoicesWarning = (actor: Actor) => missingInvoices(actor.pa
 export const invoicesOfBuilding = (actor: Actor, buildingName: string) => buildingInvoices(actor.page, buildingName);
 export const draftsOnly = (actor: Actor) => draftsOnlyNote(actor.page);
 export const chosenBuilding = (actor: Actor, buildingId: string) => buildingCheckbox(actor.page, buildingId);
+export const categoryFinding = (actor: Actor, category: string) => categoryFindings(actor.page).filter({ hasText: category });

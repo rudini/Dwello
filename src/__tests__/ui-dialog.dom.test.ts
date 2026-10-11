@@ -127,4 +127,15 @@ describe('Dialog', () => {
 		openDialog({ open: false });
 		expect(document.querySelector('[role=dialog]')).toBeNull();
 	});
+
+	// Enter in einem Feld bestätigt, aber nicht, wenn die Aktion gesperrt ist
+	it('bestätigt mit Enter in einem Feld nur, wenn die Aktion möglich ist', () => {
+		for (const confirmDisabled of [false, true]) {
+			document.body.innerHTML = '';
+			const { onconfirm } = openDialog({ confirmDisabled, children: markup('<input id="x" />') });
+			document.getElementById('x')!.focus();
+			press('Enter');
+			expect(onconfirm, String(confirmDisabled)).toHaveBeenCalledTimes(confirmDisabled ? 0 : 1);
+		}
+	});
 });

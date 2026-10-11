@@ -163,6 +163,69 @@ describe('Rechnung erfassen und bearbeiten', () => {
 		'/config/default_distribution_key_id': { value: 'k1' }
 	};
 
+	// Wer eine schon abgerechnete Rechnung ändert oder löscht, verschiebt Kosten zwischen den Perioden
+	describe('Perioden mit Abrechnungen, die diese Rechnung enthalten', () => {
+		// the invoice (contract sample) was recorded on 1.4.2026 and dates from 31.3.2026 (Leistungszeitraum Q1 2026)
+		const statements = [
+			{ periodStart: '2026-01-01', periodEnd: '2026-12-31', createdAt: '2026-05-01T08:00:00.000Z' },
+			{ periodStart: '2026-01-01', periodEnd: '2026-12-31', createdAt: '2026-05-01T08:00:00.000Z' }, // second tenant
+			{ periodStart: '2026-01-01', periodEnd: '2026-06-30', createdAt: '2026-07-01T08:00:00.000Z' }, // same start
+			{ periodStart: '2025-07-01', periodEnd: '2026-06-30', createdAt: '2026-03-01T08:00:00.000Z' }, // before the invoice
+			{ periodStart: '2025-01-01', periodEnd: '2025-12-31', createdAt: '2026-05-01T08:00:00.000Z' } // other period
+		];
+		const billed = async (
+			load: typeof editLoad | typeof detailLoad,
+			values = {},
+			rows = statements
+		) => {
+			const { fetch, urls } = backend({
+				...answers,
+				'/invoices/i1': invoice(values),
+				'/statements': { data: rows }
+			});
+			const data = (await load({ params: { id: 'i1' }, fetch } as never)) as {
+				billedIn: unknown;
+				missedIn: unknown;
+			};
+			return { billedIn: data.billedIn, missedIn: data.missedIn, urls };
+		};
+
+		it('nennt die Perioden, deren Abrechnungen nach dem Erfassen der Rechnung erstellt wurden', async () => {
+			for (const load of [editLoad, detailLoad]) {
+				const { billedIn, urls } = await billed(load);
+				expect(billedIn).toEqual([
+					{ start: '2026-01-01', end: '2026-12-31' },
+					{ start: '2026-01-01', end: '2026-06-30' }
+				]);
+				expect(urls).toContain(`${API}/statements?buildingId=b1&limit=1000`);
+			}
+		});
+
+		it('nennt keine Periode für eine Rechnung, die nicht umlagefähig ist', async () => {
+			expect((await billed(editLoad, { isValidUtilityCost: false })).billedIn).toEqual([]);
+			expect((await billed(editLoad, { isValidUtilityCost: false })).missedIn).toEqual([]);
+		});
+
+		// Nachzügler: die Abrechnungen dieser Periode gibt es schon, ohne diese Rechnung
+		it('nennt die Perioden, deren Abrechnungen vor dem Erfassen der Rechnung erstellt wurden', async () => {
+			for (const load of [editLoad, detailLoad]) {
+				expect((await billed(load)).missedIn).toEqual([{ start: '2025-07-01', end: '2026-06-30' }]);
+			}
+		});
+
+		// Neu erstellte Entwürfe ersetzen die alten nicht: die alten ohne die Rechnung bleiben
+		it('nennt eine Periode auch dann, wenn es dort neben neuen noch alte Abrechnungen ohne die Rechnung gibt', async () => {
+			const older = {
+				periodStart: '2026-01-01',
+				periodEnd: '2026-12-31',
+				createdAt: '2026-03-01T08:00:00.000Z'
+			};
+			const { billedIn, missedIn } = await billed(detailLoad, {}, [...statements, older]);
+			expect(billedIn).toContainEqual({ start: '2026-01-01', end: '2026-12-31' });
+			expect(missedIn).toContainEqual({ start: '2026-01-01', end: '2026-12-31' });
+		});
+	});
+
 	it('bietet Kategorien und Verteilschlüssel deutsch zur Auswahl an', async () => {
 		for (const load of [newLoad, editLoad]) {
 			const data = (await load({
@@ -274,6 +337,24 @@ describe('Rechnung prüfen', () => {
 
 	it('nimmt Beträge so, wie man sie in der Schweiz schreibt', () => {
 		expect(validateInvoice(filled)).toEqual({});
+	});
+
+	// Leistungszeitraum: freiwillig, aber vollständig und in der richtigen Reihenfolge
+	it('verlangt zum Beginn des Leistungszeitraums das Ende, und nicht davor', () => {
+		const period = (servicePeriodStart: string, servicePeriodEnd: string) =>
+			validateInvoice({ ...filled, servicePeriodStart, servicePeriodEnd });
+
+		expect(period('', '')).toEqual({});
+		expect(period('2025-01-01', '2025-03-31')).toEqual({});
+		expect(period('2025-01-01', '')).toEqual({
+			servicePeriodEnd: 'Bitte geben Sie auch das Ende des Leistungszeitraums ein.'
+		});
+		expect(period('', '2025-03-31')).toEqual({
+			servicePeriodStart: 'Bitte geben Sie auch den Beginn des Leistungszeitraums ein.'
+		});
+		expect(period('2025-03-31', '2025-01-01')).toEqual({
+			servicePeriodEnd: 'Das Ende darf nicht vor dem Beginn liegen.'
+		});
 	});
 });
 

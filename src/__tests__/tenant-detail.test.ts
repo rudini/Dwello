@@ -7,7 +7,9 @@ import tenantList from '../../tests/contracts/tenants.json';
 
 const API = 'http://localhost:3001/api/v1';
 const day = (offset: number) =>
-	new Date(Date.now() + offset * 86_400_000).toISOString().split('T')[0];
+	new Date(Date.now() + offset * 86_400_000).toLocaleDateString('sv-SE', {
+		timeZone: 'Europe/Zurich'
+	});
 
 const contract = (
 	id: string,

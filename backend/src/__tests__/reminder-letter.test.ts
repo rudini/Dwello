@@ -31,6 +31,13 @@ describe('Mahnschreiben', () => {
 		expect(text).toContain('Freundliche Grüsse\nVerwaltung Muster AG');
 	});
 
+	// Auf eine QR-IBAN geht eine Zahlung nur mit der QR-Referenz durch (SIX)
+	it('nennt bei einer QR-IBAN die Referenz, die bei der Zahlung anzugeben ist', () => {
+		const { text } = reminderLetter({ ...input, sender: { ...input.sender, iban: 'CH44 3199 9123 0008 8901 2' }, reference: '21 00000 00003 13947 14300 09017' });
+
+		expect(text).toContain('IBAN CH44 3199 9123 0008 8901 2\nReferenz 21 00000 00003 13947 14300 09017 (bitte bei der Zahlung angeben)');
+	});
+
 	it('wird mit jeder Stufe deutlicher', () => {
 		expect(reminderLetter({ ...input, level: 1 }).text).toContain('übersehen');
 		expect(reminderLetter({ ...input, level: 2 }).text).toContain('Trotz unserer Zahlungserinnerung');

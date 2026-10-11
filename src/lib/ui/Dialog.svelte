@@ -76,6 +76,15 @@
 			close();
 		}
 		if (event.key === 'Tab') trapFocus(event);
+		if (event.key === 'Enter') confirmFromField(event);
+	}
+
+	// Enter in a field of the dialog confirms, as in a form
+	function confirmFromField(event: KeyboardEvent) {
+		const target = event.target as HTMLElement;
+		if (!target.matches?.('input') || !panel?.contains(target)) return;
+		event.preventDefault();
+		if (!busy && !confirmDisabled) onconfirm();
 	}
 
 	// Tab moves through the dialog's controls only, wrapping at both ends; while busy it stays on the panel
@@ -84,7 +93,7 @@
 		if (busy) return;
 		const focusable = [
 			...(panel?.querySelectorAll<HTMLElement>(
-				'button:not([disabled]), [href], input, select, textarea'
+				'button:not([disabled]), [href], input:not([tabindex="-1"]), select, textarea'
 			) ?? [])
 		];
 		const at = focusable.indexOf(document.activeElement as HTMLElement);

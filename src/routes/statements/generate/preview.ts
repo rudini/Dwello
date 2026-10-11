@@ -4,5 +4,9 @@ export interface PreviewRow {
 	tenantName: string;
 	apartmentNumber: string;
 	totalCosts: number;
+	totalAdvancePayments: number;
 	balance: number;
+	rentalDays?: number;
+	totalPeriodDays?: number;
+	movedOut?: boolean;
 }

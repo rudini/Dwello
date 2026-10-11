@@ -40,7 +40,12 @@ async function statement(status: 'draft' | 'sent') {
 		})
 	).json()) as { id: string };
 	statementIds.push(created.id);
-	if (status === 'sent') await api('PUT', `/api/v1/statements/${created.id}/status`, { status: 'sent' });
+	// owes, and the payment deadline has passed
+	await db.update(utilityStatements).set({ balance: '120.00' }).where(eq(utilityStatements.id, created.id));
+	if (status === 'sent') {
+		await api('PUT', `/api/v1/statements/${created.id}/status`, { status: 'sent' });
+		await db.update(utilityStatements).set({ paymentDeadline: '2020-01-31' }).where(eq(utilityStatements.id, created.id));
+	}
 	return created.id;
 }
 
@@ -173,5 +178,25 @@ describe('Mahnbare Abrechnungen', () => {
 
 		expect(result.status).toBe(400);
 		expect(result.error).toBe('Nur versendete Abrechnungen können gemahnt werden.');
+	});
+
+	// Vor Ablauf der Zahlungsfrist ist eine Mahnung verfrüht, auch über einen alten Tab
+	it('mahnt keine Abrechnung, deren Zahlungsfrist noch läuft', async () => {
+		const id = await statement('sent');
+		await db.update(utilityStatements).set({ paymentDeadline: '2999-12-31' }).where(eq(utilityStatements.id, id));
+		const result = await remind(id);
+
+		expect(result.status).toBe(400);
+		expect(result.error).toBe('Gemahnt wird erst nach Ablauf der Zahlungsfrist.');
+	});
+
+	// Bei einer Rückerstattung schuldet der Vermieter: eine Zahlungsaufforderung an den Mieter wäre falsch
+	it('mahnt keine Rückerstattung', async () => {
+		const id = await statement('sent');
+		await db.update(utilityStatements).set({ balance: '-45.00' }).where(eq(utilityStatements.id, id));
+		const result = await remind(id);
+
+		expect(result.status).toBe(400);
+		expect(result.error).toBe('Eine Rückerstattung wird nicht gemahnt: Sie schulden dem Mieter den Betrag.');
 	});
 });

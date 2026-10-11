@@ -5,6 +5,8 @@
 	"description": "Treppenhausreinigung Q1",
 	"amount": "450.00",
 	"invoiceDate": "2026-03-31",
+	"servicePeriodStart": "2026-01-01",
+	"servicePeriodEnd": "2026-03-31",
 	"isValidUtilityCost": true,
 	"categoryId": "c1",
 	"distributionKeyId": "k1",

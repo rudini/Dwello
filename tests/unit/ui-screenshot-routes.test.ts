@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { affectedRoutes } from '../ui-screenshots/affected-routes';
+import { affectedRoutes, pdfAffected } from '../ui-screenshots/affected-routes';
 
 const sources: Record<string, string> = {
 	'src/app.html': '',
@@ -59,5 +59,19 @@ describe('affectedRoutes', () => {
 
 	it('ignores tests and files outside the frontend', () => {
 		expect(routes('src/__tests__/card.test.ts', 'backend/src/index.ts', 'README.md')).toEqual([]);
+	});
+});
+
+// The statement PDF is drawn in the backend: a change there gets its own screenshots
+describe('pdfAffected', () => {
+	it('reports a change of the code that draws the statement PDF', () => {
+		expect(pdfAffected(['backend/src/services/pdf.service.ts'])).toBe(true);
+		expect(pdfAffected(['src/routes/+page.svelte', 'backend/src/services/qr-bill.service.ts'])).toBe(true);
+		expect(pdfAffected(['backend/src/services/pdf-format.ts'])).toBe(true);
+	});
+
+	it('ignores other backend code and tests', () => {
+		expect(pdfAffected(['backend/src/services/statement.service.ts'])).toBe(false);
+		expect(pdfAffected(['backend/src/__tests__/statement-pdf-render.test.ts'])).toBe(false);
 	});
 });

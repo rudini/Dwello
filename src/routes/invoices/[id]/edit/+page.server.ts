@@ -1,6 +1,6 @@
 import { toCategory } from '$lib/server/category';
 import { toDistributionKey } from '$lib/server/distribution-key';
-import { toInvoice } from '$lib/server/invoice';
+import { statementPeriods, toInvoice } from '$lib/server/invoice';
 import { fetchRecord } from '$lib/server/save-form';
 import type { PageServerLoad } from './$types';
 
@@ -24,6 +24,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 
 	return {
 		invoice: toInvoice(invoice),
+		...(await statementPeriods(fetch, BACKEND_URL, invoice)),
 		buildings,
 		categories: (categoriesData.categories || categoriesData.data || []).map(toCategory),
 		distributionKeys: (distributionKeysData.data || []).map(toDistributionKey)

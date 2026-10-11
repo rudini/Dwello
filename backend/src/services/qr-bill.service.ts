@@ -63,13 +63,14 @@ export interface QRBillData {
 export interface StatementForQRBill {
 	id: string;
 	statementNumber: string;
+	title?: string; // the message reads "{title} {number}", in the PDF's language
 	balance: string;
 	tenant: {
 		firstName: string;
 		lastName: string;
-		address?: string;
-		postalCode?: string;
-		city?: string;
+		address?: string | null;
+		postalCode?: string | null;
+		city?: string | null;
 	};
 }
 
@@ -224,10 +225,27 @@ function formatAmount(amount: number): string {
 	return amount.toFixed(2);
 }
 
+// An optional field of the payload, cut to its length (empty if not given)
+const field = (value: string | undefined, max = Infinity) => (value ?? '').slice(0, max);
+
+// Ultimate Debtor Address (type S = structured), only complete: SIX requires postal code and town with a name
+function debtorLines(data: QRBillData) {
+	if (!(data.debtorName && data.debtorPostalCode && data.debtorCity)) return ['', '', '', '', '', '', ''];
+	return [
+		'S',
+		data.debtorName.slice(0, 70),
+		field(data.debtorStreet, 70),
+		field(data.debtorHouseNumber, 16),
+		data.debtorPostalCode.slice(0, 16),
+		data.debtorCity.slice(0, 35),
+		field(data.debtorCountry, 2)
+	];
+}
+
 /**
  * Generate QR-bill data string according to Swiss standard
  */
-export function generateQRDataString(data: QRBillData): string {
+function generateQRDataString(data: QRBillData): string {
 	const lines: string[] = [
 		data.qrType, // SPC
 		data.version, // 0200
@@ -239,46 +257,35 @@ export function generateQRDataString(data: QRBillData): string {
 		// Creditor Address (type S = structured)
 		'S',
 		data.creditorName.slice(0, 70),
-		data.creditorStreet?.slice(0, 70) || '',
-		data.creditorHouseNumber?.slice(0, 16) || '',
+		field(data.creditorStreet, 70),
+		field(data.creditorHouseNumber, 16),
 		data.creditorPostalCode.slice(0, 16),
 		data.creditorCity.slice(0, 35),
 		data.creditorCountry.slice(0, 2),
 
 		// Ultimate Creditor (empty if not used)
 		'',
-		data.ultimateCreditorName?.slice(0, 70) || '',
-		data.ultimateCreditorStreet?.slice(0, 70) || '',
-		data.ultimateCreditorHouseNumber?.slice(0, 16) || '',
-		data.ultimateCreditorPostalCode?.slice(0, 16) || '',
-		data.ultimateCreditorCity?.slice(0, 35) || '',
-		data.ultimateCreditorCountry?.slice(0, 2) || '',
+		field(data.ultimateCreditorName, 70),
+		field(data.ultimateCreditorStreet, 70),
+		field(data.ultimateCreditorHouseNumber, 16),
+		field(data.ultimateCreditorPostalCode, 16),
+		field(data.ultimateCreditorCity, 35),
+		field(data.ultimateCreditorCountry, 2),
 
 		// Payment Amount
-		data.amount || '',
+		field(data.amount),
 		data.currency,
 
-		// Ultimate Debtor Address (type S = structured), only complete: SIX requires postal code and town with a name
-		...(data.debtorName && data.debtorPostalCode && data.debtorCity
-			? [
-					'S',
-					data.debtorName.slice(0, 70),
-					data.debtorStreet?.slice(0, 70) || '',
-					data.debtorHouseNumber?.slice(0, 16) || '',
-					data.debtorPostalCode.slice(0, 16),
-					data.debtorCity.slice(0, 35),
-					data.debtorCountry?.slice(0, 2) || ''
-				]
-			: ['', '', '', '', '', '', '']),
+		...debtorLines(data),
 
 		// Reference
 		data.referenceType,
-		data.reference || '',
+		field(data.reference),
 
 		// Additional information
-		data.unstructuredMessage?.slice(0, 140) || '',
+		field(data.unstructuredMessage, 140),
 		data.trailer,
-		data.billingInfo?.slice(0, 140) || ''
+		field(data.billingInfo, 140)
 	];
 
 	return lines.join('\n');
@@ -287,29 +294,19 @@ export function generateQRDataString(data: QRBillData): string {
 /**
  * Generate QR code image from QR-bill data
  */
-export async function generateQRCodeImage(
+async function generateQRCodeImage(
 	qrDataString: string,
 	options?: { width?: number; margin?: number }
 ): Promise<Buffer> {
+	// 10 pixels per module: printed at 46 mm every module keeps the same width (166 px made them uneven)
 	const qrOptions = {
 		type: 'png' as const,
-		width: options?.width || 166, // Swiss standard: 46mm at 92 DPI = ~166px
+		...(options?.width ? { width: options.width } : { scale: 10 }),
 		margin: options?.margin || 0,
 		errorCorrectionLevel: 'M' as const // Medium error correction
 	};
 
 	return QRCode.toBuffer(qrDataString, qrOptions);
-}
-
-/**
- * Generate QR code as data URL for embedding
- */
-export async function generateQRCodeDataURL(qrDataString: string): Promise<string> {
-	return QRCode.toDataURL(qrDataString, {
-		width: 166,
-		margin: 0,
-		errorCorrectionLevel: 'M'
-	});
 }
 
 /**
@@ -355,15 +352,15 @@ export async function generateQRBillForStatement(
 		currency: 'CHF',
 
 		debtorName: `${statement.tenant.firstName} ${statement.tenant.lastName}`,
-		debtorStreet: statement.tenant.address,
-		debtorPostalCode: statement.tenant.postalCode,
-		debtorCity: statement.tenant.city,
+		debtorStreet: statement.tenant.address ?? undefined,
+		debtorPostalCode: statement.tenant.postalCode ?? undefined,
+		debtorCity: statement.tenant.city ?? undefined,
 		debtorCountry: 'CH',
 
 		referenceType: useQRReference ? 'QRR' : 'NON',
 		reference,
 
-		unstructuredMessage: `Nebenkostenabrechnung ${statement.statementNumber}`,
+		unstructuredMessage: `${statement.title ?? 'Nebenkostenabrechnung'} ${statement.statementNumber}`,
 		trailer: 'EPD'
 	};
 
@@ -382,8 +379,9 @@ export async function generateQRBillForStatement(
  * Format QR-Reference for display (groups of 5)
  */
 export function formatQRReferenceForDisplay(reference: string): string {
+	// SIX: blocks of five from the right, "21 00000 00003 13947 14300 09017"
 	const clean = reference.replace(/\s/g, '');
-	return clean.match(/.{1,5}/g)?.join(' ') || reference;
+	return clean.replace(/\B(?=(.{5})+$)/g, ' ') || reference;
 }
 
 /**

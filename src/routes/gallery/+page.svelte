@@ -22,6 +22,7 @@
 	import Table from '$lib/ui/Table.svelte';
 	import Tabs from '$lib/ui/Tabs.svelte';
 	import TextInput from '$lib/ui/TextInput.svelte';
+	import DateInput from '$lib/ui/DateInput.svelte';
 	import Textarea from '$lib/ui/Textarea.svelte';
 
 	// Every component of the design system in every state, so the axe check sees them in a real browser
@@ -108,7 +109,12 @@
 				error="Bitte geben Sie die Strasse ein, zum Beispiel Musterstrasse 12."
 				value=""
 			/>
-			<TextInput id="g-date" type="date" label="Vertragsbeginn" value="2026-04-01" />
+			<DateInput
+				id="g-date"
+				label="Vertragsbeginn"
+				value="2026-04-01"
+				testid="gallery-date-input"
+			/>
 			<TextInput
 				id="g-disabled"
 				label="Gebäude"

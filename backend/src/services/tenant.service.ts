@@ -98,7 +98,7 @@ export async function listTenants(filters: TenantFilters = {}): Promise<{
 		.select({ ...tenantFields, isActive })
 		.from(tenants)
 		.where(whereClause)
-		.orderBy(tenants.lastName, tenants.firstName)
+		.orderBy(tenants.lastName, tenants.firstName, tenants.id)
 		.limit(limit)
 		.offset(offset);
 

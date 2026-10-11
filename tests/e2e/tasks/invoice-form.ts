@@ -1,4 +1,5 @@
 import type { Actor } from '../fixtures/actor';
+import { typeDate } from '../interactions/form';
 import {
 	amountInput,
 	buildingSelect,
@@ -50,6 +51,13 @@ export const clearSupplier = async (actor: Actor) => {
 	await actor.perform(saveInvoice);
 };
 
+// Types key by key, as a person on a phone's number pad does, then leaves the field
+export const typeInvoiceDate = (text: string) => async (actor: Actor) => {
+	await invoiceDateInput(actor.page).fill('');
+	await invoiceDateInput(actor.page).pressSequentially(text);
+	await invoiceDateInput(actor.page).blur();
+};
+
 export const enterInvoiceDate = (date: string) => async (actor: Actor) => {
-	await invoiceDateInput(actor.page).fill(date);
+	await typeDate(invoiceDateInput(actor.page), date);
 };

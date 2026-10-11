@@ -64,7 +64,7 @@ describe('Mietvertragsliste', () => {
 		const body = row(list([contract('c1', 'Anna Keller', '2099-11-01', null)]), 'c1');
 
 		expect(body).toContain('Künftig');
-		expect(body).toContain('ab 1.11.2099, unbefristet');
+		expect(body).toContain('ab 01.11.2099, unbefristet');
 		expect(body).not.toMatch(/heute|AKTIV|Laufend/);
 	});
 
@@ -87,7 +87,7 @@ describe('Mietvertragsliste', () => {
 		const body = row(list([contract('c1', 'Anna Keller', '2024-04-01', null)]), 'c1');
 
 		expect(body).toContain('Laufend');
-		expect(body).toContain('seit 1.4.2024, unbefristet');
+		expect(body).toContain('seit 01.04.2024, unbefristet');
 	});
 
 	it('nennt die Nettomiete und getrennt davon das monatliche Total', () => {

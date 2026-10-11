@@ -23,6 +23,7 @@ sync with the migrations by hand. Domain terms follow `UBIQUITOUS_LANGUAGE.md`.
 ```
 buildings 1─n apartments 1─n rental_contracts n─1 tenants
 buildings 1─n invoices ──> categories (category_id, llm_category_id), distribution_keys
+buildings 1─n fuel_stocks
 
 utility_statements ──> tenants, apartments, rental_contracts (contract_id)
 utility_statements 1─n utility_statement_line_items ──> categories, distribution_keys
@@ -39,6 +40,8 @@ heating_profiles, configuration: no foreign keys
 | `invoices.building_id` → `buildings` | CASCADE |
 | `invoices.category_id`, `invoices.llm_category_id` → `categories` | SET NULL |
 | `invoices.distribution_key_id` → `distribution_keys` | SET NULL |
+| `fuel_stocks.building_id` → `buildings` | CASCADE |
+| `fuel_stocks.category_id` → `categories` | RESTRICT (deleting such a category answers 409) |
 | `utility_statements.tenant_id` / `apartment_id` / `contract_id` | RESTRICT |
 | `utility_statement_line_items.statement_id` → `utility_statements` | CASCADE |
 | `utility_statement_line_items.category_id` / `distribution_key_id` | SET NULL |
@@ -132,6 +135,8 @@ That contracts of one apartment must not overlap is enforced in the application,
 name                    VARCHAR(100) NOT NULL   -- internal English name
 name_de, name_fr, name_it, name_en VARCHAR(100) -- display names
 is_allowed_utility_cost BOOLEAN NOT NULL DEFAULT true  -- umlagefähig (OR 257a)
+is_heating_cost         BOOLEAN NOT NULL DEFAULT false -- distributed by the heating profile at a tenant change (0006):
+                                                       -- Heating, Chimney Sweep; Hot Water by days since 0009
 description             TEXT
 sort_order              INTEGER DEFAULT 0
 ```
@@ -144,7 +149,7 @@ A category that is not allocable always makes its invoices non-allocable (enforc
 name                               VARCHAR(100) NOT NULL
 name_de, name_fr, name_it, name_en VARCHAR(100)
 type        VARCHAR(20) NOT NULL DEFAULT 'predefined'
-formula     TEXT        -- variables {area}, {rooms}, {units} (custom keys also {volume})
+formula     TEXT        -- variables {area}, {rooms}, {units}, {volume} and the building sums {area_total}, {rooms_total}, {units_total}, {volume_total}
 description TEXT
 sort_order  INTEGER DEFAULT 0
 CHECK (type IN ('predefined', 'custom'))
@@ -175,7 +180,9 @@ category_id             UUID REFERENCES categories ON DELETE SET NULL
 distribution_key_id     UUID REFERENCES distribution_keys ON DELETE SET NULL
 amount                  DECIMAL(12,2) NOT NULL -- Betrag
 is_valid_utility_cost   BOOLEAN NOT NULL DEFAULT true  -- umlagefähige Rechnung
-invoice_date            DATE NOT NULL          -- Rechnungsdatum, decides the Abrechnungsperiode
+invoice_date            DATE NOT NULL          -- Rechnungsdatum, decides the Abrechnungsperiode without a Leistungszeitraum
+service_period_start    DATE                   -- Leistungszeitraum (0007): both or none, end >= start (CHECK);
+service_period_end      DATE                   --   a statement takes the share of its days that falls into the period
 due_date                DATE                   -- Fälligkeitsdatum
 paid_date               DATE                   -- Zahlungsdatum
 llm_category_id         UUID REFERENCES categories ON DELETE SET NULL  -- KI-Kategorie
@@ -188,6 +195,32 @@ notes                   TEXT
 
 Indexes: `invoices_building_id_idx`, `invoices_invoice_date_idx`, `invoices_category_id_idx`.
 No CHECK on `amount`.
+
+### fuel_stocks (Tankbestand, migrations 0008, 0009)
+
+```sql
+building_id   UUID NOT NULL REFERENCES buildings ON DELETE CASCADE
+reading_date  DATE NOT NULL           -- Stichtag; the stock at the end of that day
+amount        DECIMAL(12,2) NOT NULL  -- value of the oil or pellets in the tank in CHF, CHECK >= 0
+category_id   UUID NOT NULL REFERENCES categories ON DELETE RESTRICT  -- a heating cost category (checked by the API)
+UNIQUE (building_id, reading_date)
+```
+
+With a reading on the day before the period and one on its last day, a statement adds opening − closing stock as one
+more cost of the period in the category of the closing reading, distributed by the key of that category's latest
+allocable invoice in the building (else the configured default key): heating costs are the consumption, not the
+purchases (`fuel-stock.service.ts`). All readings of a building are in one allocable heating cost category (the API
+answers 409 otherwise); the key is that of the category's latest allocable invoice up to the period end. Without both
+readings the statement bills the purchases; the check for missing invoices reports the missing reading day (kind
+`stock`) and a negative consumption, compares the consumption with the year before (no purchase rhythm), and asks
+about a tank (kind `tank`, no confirmation) for heating costs of a building that never had a reading. A building whose
+last reading lies before the period (tank retired) needs none.
+
+Rounding in a statement: each invoice's part in the period (Leistungszeitraum) and each apartment's share of a group
+are rounded to the Rappen first, then the tenant's part of the days or of the heating profile; the subtotal is the
+sum of the rounded lines. A heating profile share is the profile percentage of the tenant's months divided by that of
+the period's months (a period under a year). The profile applies to the whole group, also to an invoice with a
+Leistungszeitraum (TODO(fachlich prüfen), review B CR2-N2).
 
 ### utility_statements (Nebenkostenabrechnung)
 
@@ -204,6 +237,10 @@ total_costs            DECIMAL(12,2) NOT NULL
 total_advance_payments DECIMAL(12,2) NOT NULL  -- Geleistete Akontobeiträge
 management_fee         DECIMAL(12,2) DEFAULT 0 -- Verwaltungspauschale
 management_fee_percent DECIMAL(5,2)            -- rate chosen in the Abrechnungslauf
+heating_profile_id     UUID                    -- Heizprofil of the Abrechnungslauf, printed in the PDF (SET NULL)
+management_fee_distribution_key_id UUID        -- Verteilschlüssel of the Verwaltungspauschale (SET NULL; none: equally)
+fuel_stock             JSONB                   -- Tankbestand readings at creation, for the PDF (migration 0011)
+key_values             JSONB                   -- area, apartments, rooms: own and building's total at creation (migration 0011)
 balance                DECIMAL(12,2) NOT NULL  -- Saldo: positive = Nachzahlung, negative = Rückerstattung
 status                 VARCHAR(20)   NOT NULL DEFAULT 'draft'
 payment_deadline       DATE                    -- Zahlungsfrist
@@ -250,8 +287,13 @@ description         VARCHAR(255)  NOT NULL
 total_amount        DECIMAL(12,2) NOT NULL  -- building total
 tenant_share        DECIMAL(12,2) NOT NULL  -- tenant's portion
 share_percentage    DECIMAL(8,4)
+apartment_share     DECIMAL(12,2)           -- the apartment's part of the total by the key (migration 0011)
+period_share        DECIMAL(8,4)            -- 0-1: days rented, or the heating profile's share (migration 0011)
 sort_order          INTEGER DEFAULT 0
 ```
+
+`apartment_share` and `period_share` are kept when a statement is created so the PDF can explain each position;
+statements created before migration 0011 have NULL, their PDF leaves those columns empty.
 
 No `updated_at`. Index: `line_items_statement_id_idx`.
 
@@ -325,17 +367,20 @@ through the Verwaltungspauschale, not through invoices in Verwaltung.
 | Pro Einheit | `{units}` | 1 |
 | Pro Fläche (m²) | `{area}` | 2 |
 | Pro Zimmer | `{rooms}` | 3 |
-| Heizung (Fläche 70% / Einheit 30%) | `0.7 * {area} + 0.3 * {units}` | 6 |
+| Heizung (Fläche 70% / Einheit 30%) | `0.7 * {area} / {area_total} + 0.3 * {units} / {units_total}` (migration 0003) | 6 |
 
 ### Heating profiles (all `predefined`, table `heating_profiles`)
 
 | name_de | Jan | Feb | Mar | Apr | May | Jun | Jul | Aug | Sep | Oct | Nov | Dec |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Heizung + Warmwasser | 14 | 12 | 10 | 6 | 3 | 2 | 2 | 2 | 4 | 8 | 12 | 25 |
-| Heizung Mittelland | 28 | 14 | 11 | 5 | 0 | 0 | 0 | 0 | 2 | 8 | 14 | 18 |
-| Heizung Bergregion | 16 | 14 | 12 | 8 | 4 | 1 | 0 | 1 | 4 | 10 | 14 | 16 |
-| Heizung Tessin | 30 | 16 | 12 | 4 | 0 | 0 | 0 | 0 | 0 | 6 | 14 | 18 |
-| Nur Warmwasser | 8.5 | 8.5 | 8.5 | 8 | 8.5 | 8 | 8.5 | 8.5 | 8 | 8.5 | 8 | 8.5 |
+| Heizung + Warmwasser | 13.6 | 12.1 | 11.5 | 9.3 | 5.6 | 3.7 | 3.7 | 3.6 | 3.7 | 9.5 | 10.7 | 13 |
+| Heizung Mittelland | 17.5 | 14.5 | 13.5 | 9.5 | 3.5 | 0 | 0 | 0 | 1 | 10 | 13.5 | 17 |
+| Heizung Bergregion | 14 | 11.5 | 11.5 | 9 | 7 | 4.5 | 1 | 4 | 5.5 | 8.5 | 10.5 | 13 |
+| Heizung Tessin | 21.5 | 17 | 15.5 | 5 | 0 | 0 | 0 | 0 | 0 | 6 | 15 | 20 |
+
+Values as corrected by migration 0003 (Swiss table «Mieterwechsel: So werden die Heizkosten verteilt»). «Nur Warmwasser»
+was removed by migration 0010: separate Warmwasser is shared by days (0009), and as the heating profile of a run it
+would have spread the heating costs evenly over the year.
 
 Demo data (`backend/demo/`, `bun run db:demo`) is never part of the migrations.
 
@@ -347,6 +392,14 @@ Demo data (`backend/demo/`, `bun run db:demo`) is never part of the migrations.
 backend/migrations/
   0001_schema.sql       -- schema (baseline of October 2026, replaces the earlier 0001–0011)
   0002_stammdaten.sql   -- master data: categories, distribution keys, heating profiles
+  0003_stammdaten_korrektur.sql      -- Swiss heating shares, 70/30 key with building sums
+  0004_statement_settings.sql        -- heating profile and fee key of a statement
+  0005_stammdaten_beschreibungen.sql -- German descriptions of categories and keys
+  0006_heizkosten_kategorien.sql     -- categories.is_heating_cost
+  0007_leistungszeitraum.sql         -- invoices.service_period_start/end
+  0008_tankbestand.sql               -- fuel_stocks
+  0009_tankbestand_kategorie.sql     -- fuel_stocks.category_id; Hot Water shared by days
+  0010_ohne_nur_warmwasser.sql       -- predefined profile «Nur Warmwasser» removed
 ```
 
 `src/db/migrate.ts` applies the `.sql` files in file order, each in its own transaction, and records them in

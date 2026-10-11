@@ -37,6 +37,16 @@ describe('Kostenkategorien', () => {
 		await expectRejection(response, 409, `Eine Kategorie mit dem Namen "Dachrinne ${token}" existiert bereits.`);
 	});
 
+	// Pellets, Gas, Fernwärme: eigene Heizkosten folgen beim Mieterwechsel dem Heizprofil
+	it('legt eine eigene Kategorie als Heiz- und Warmwasserkosten an', async () => {
+		const id = await idOf(
+			await categories.create({ name: `Pellets ${token}`, nameDE: `Pellets ${token}`, isAllowedUtilityCost: true, isHeatingCost: true })
+		);
+
+		const category = (await (await callApi(`/api/v1/categories/${id}`)).json()) as { isHeatingCost: boolean };
+		expect(category.isHeatingCost).toBe(true);
+	});
+
 	it('findet Kategorien über den deutschen Namen', async () => {
 		await categories.create({ name: `Stairs ${token}`, nameDE: `Treppenlift ${token}`, isAllowedUtilityCost: true });
 

@@ -11,6 +11,7 @@
 	"totalAdvancePayments": "0.00",
 	"managementFee": "45.00",
 	"managementFeePercent": "3.00",
+	"managementFeeDistributionKeyId": "k1",
 	"balance": "1045.00",
 	"status": "draft",
 	"paymentDeadline": "2025-02-14",
@@ -21,7 +22,7 @@
 	"createdAt": "2025-01-15T08:00:00.000Z",
 	"tenant": { "firstName": "Eva", "lastName": "Frei", "email": "eva@example.com", "correspondenceChannel": "letter" },
 	"apartment": { "number": "3.01", "floor": 3 },
-	"building": { "name": "Lindenhof", "address": "Testweg 1" },
+	"building": { "id": "b1", "name": "Lindenhof", "address": "Testweg 1" },
 	"lineItems": [
 		{
 			"id": "l1",

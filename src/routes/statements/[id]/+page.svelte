@@ -1,8 +1,9 @@
 <script lang="ts">
-	import { untrack } from 'svelte';
+	import { flushSync } from 'svelte';
 	import type { StatementDocument, StatementWithDetails } from '$lib/types';
 	import { addToast } from '$lib/stores';
-	import { balanceLabel, statusLabels, statusTones } from '$lib/statement';
+	import { balanceLabel, paidDateError, paidHelp, statusLabels, statusTones } from '$lib/statement';
+	import { focusFirstError } from '$lib/ui/focus-error';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Badge from '$lib/ui/Badge.svelte';
 	import Button from '$lib/ui/Button.svelte';
@@ -11,6 +12,8 @@
 	import { formatCurrency, formatDate } from '$lib/utils/format';
 	import CostTable from './CostTable.svelte';
 	import FormDialog from './FormDialog.svelte';
+	import DateInput from '$lib/ui/DateInput.svelte';
+	import { localToday } from '$lib/contract-status';
 	import MetadataCard from './MetadataCard.svelte';
 	import PartiesPanel from './PartiesPanel.svelte';
 	import PaymentPanel from './PaymentPanel.svelte';
@@ -26,17 +29,38 @@
 		data,
 		form
 	}: {
-		data: { statement: StatementWithDetails; reminders: StatementDocument[] };
+		data: {
+			statement: StatementWithDetails;
+			reminders: StatementDocument[];
+			laterInvoices?: number;
+		};
 		form: ActionData;
 	} = $props();
 
 	const statement = $derived(data.statement);
+	// invoices of the period recorded after the draft was created: it lacks them
+	const laterInvoices = $derived(
+		data.laterInvoices === 1
+			? 'wurde 1 Rechnung für die Abrechnungsperiode erfasst, sie fehlt darin'
+			: `wurden ${data.laterInvoices} Rechnungen für die Abrechnungsperiode erfasst, sie fehlen darin`
+	);
 	let showMarkPaid = $state(false);
 	let showReminder = $state(false);
 	let showDelete = $state(false);
 	let showSend = $state(false);
 	let generatingPdf = $state(false);
-	let pdfGeneratedAt = $state(untrack(() => data.statement.pdfGeneratedAt));
+	let paidDate = $state(localToday());
+	let paidError = $state('');
+
+	// checked in the dialog before sending: a wrong date is said at the field, which gets the focus
+	function checkPaidDate() {
+		paidError = '';
+		flushSync(); // cleared first: the same error set again shows again
+		paidError = paidDateError(paidDate) ?? '';
+		if (paidError) focusFirstError(document.querySelector('[role="dialog"]'));
+		return !paidError;
+	}
+	let pdfGeneratedAt = $derived(data.statement.pdfGeneratedAt); // set here after «PDF erstellen», else as the server has it
 
 	async function generatePdf() {
 		generatingPdf = true;
@@ -88,8 +112,9 @@
 			/>
 			<StatusActions
 				status={statement.status}
+				owes={statement.balance > 0}
 				onremind={() => (showReminder = true)}
-				onmarkpaid={() => (showMarkPaid = true)}
+				onmarkpaid={() => ((paidDate = localToday()), (paidError = ''), (showMarkPaid = true))}
 				onsend={() => (showSend = true)}
 			/>
 		{/snippet}
@@ -103,6 +128,29 @@
 			testid="statement-status"
 		/>
 	</p>
+
+	{#if data.laterInvoices}
+		<!-- a draft is created again; a sent statement is corrected outside Dwello (it cannot be deleted) -->
+		<Alert
+			tone="caution"
+			title="Rechnungen fehlen in der Abrechnung"
+			testid="statement-later-invoices"
+		>
+			{#if statement.status === 'draft'}
+				<p>
+					Seit dem Erstellen dieses Entwurfs {laterInvoices}. Löschen Sie ihn und erstellen Sie die
+					Abrechnung erneut.
+				</p>
+			{:else}
+				<p>
+					Seit dem Erstellen dieser Abrechnung {laterInvoices}. Versendete Abrechnungen berichtigen
+					Sie ausserhalb von Dwello: Schicken Sie dem Mieter eine berichtigte Abrechnung mit dem
+					Beleg. Ob Sie die Kosten noch nachverlangen können, ist nicht in jedem Fall sicher: Lassen
+					Sie sich im Zweifel beraten.
+				</p>
+			{/if}
+		</Alert>
+	{/if}
 
 	{#if form?.actionError}
 		<Alert tone="critical" title="Das hat nicht geklappt">
@@ -140,7 +188,12 @@
 					{/if}
 				</div>
 			</Panel>
-			<MetadataCard createdAt={statement.createdAt} {pdfGeneratedAt} />
+			<MetadataCard
+				createdAt={statement.createdAt}
+				{pdfGeneratedAt}
+				sentOn={statement.status === 'draft' ? null : statement.statementDate}
+				paidOn={statement.paidDate}
+			/>
 		</div>
 	</div>
 </div>
@@ -151,11 +204,19 @@
 	title="Abrechnung als bezahlt markieren"
 	confirmLabel="Als bezahlt markieren"
 	confirmTestid="statement-mark-paid-confirm"
+	fields={{ paidDate }}
+	check={checkPaidDate}
+	success="Abrechnung als bezahlt markiert"
 >
-	<p>
-		Das heutige Datum wird als Zahlungsdatum eingetragen. Danach können Sie keine Mahnung mehr
-		senden.
-	</p>
+	{#if statement.balance > 0}<p>Danach können Sie keine Mahnung mehr senden.</p>{/if}
+	<DateInput
+		id="paidDate"
+		label="Bezahlt am"
+		help={paidHelp(statement.balance)}
+		error={paidError}
+		bind:value={paidDate}
+		testid="paid-date-input"
+	/>
 	<p class="rounded-panel bg-sunken p-4 font-semibold text-ink">
 		{statement.tenantName}: {balance}
 	</p>

@@ -10,8 +10,10 @@ Funktionalität: Dokumente
     Und im Gebäude "Ahornhof" gibt es die leere Wohnung "2.01"
     Und der Mieter "Anna Keller" existiert
     Und "Anna Keller" mietet die Wohnung "2.01" seit "2014-01-01" für "950" Franken mit "150" Franken Akonto
+    Und im Gebäude "Ahornhof" gibt es eine Heizkostenrechnung über "4000" Franken für 2024
     Und für "Anna Keller" im Gebäude "Ahornhof" gibt es die Nebenkostenabrechnung 2024
     Und die Abrechnung 2024 von "Anna Keller" ist versendet
+    Und die Zahlungsfrist der Abrechnung 2024 von "Anna Keller" ist abgelaufen
     Und "Anna Keller" wünscht Korrespondenz per Brief
     Und "Anna Keller" hat für die Abrechnung 2024 bereits eine Zahlungserinnerung erhalten
     Und der Liegenschaftsverwalter ist bei den zu versendenden Dokumenten

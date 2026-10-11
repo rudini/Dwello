@@ -14,6 +14,7 @@ import { like, max } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { utilityStatements } from '../db/schema';
 import { getInvoicesForStatement } from './invoice.service';
+import { fuelStockChange } from './fuel-stock.service';
 import { calculateBuildingDistribution } from './distribution-key.service';
 import { getTypedConfig } from './config.service';
 import {
@@ -23,6 +24,7 @@ import {
 } from './prorating.service';
 import { getApartment, listApartments } from './apartment.service';
 import { getContract } from './contract.service';
+import { roundToRappen } from './pdf-format';
 
 /**
  * Line item for statement
@@ -69,17 +71,27 @@ interface InvoiceGroup {
 	distributionKeyId: string | null;
 	distributionKeyName: string;
 	totalAmount: number;
+	// each invoice's amount in the period and the days it bills there (the whole period without a Leistungszeitraum)
 	invoices: Array<{
 		id: string;
 		description: string;
 		amount: number;
+		start: string;
+		end: string;
 	}>;
 	isHeatingCost: boolean;
 }
 
-function groupInvoicesByCategory(
-	invoices: Awaited<ReturnType<typeof getInvoicesForStatement>>
-): InvoiceGroup[] {
+// An invoice of the period, or the change of the Tankbestand billed like one
+type PeriodCost = Pick<
+	Awaited<ReturnType<typeof getInvoicesForStatement>>[number],
+	'id' | 'description' | 'categoryId' | 'distributionKeyId' | 'inPeriod'
+> & {
+	category: { name: string; isHeatingCost: boolean } | null;
+	distributionKey: { name: string } | null;
+};
+
+function groupInvoicesByCategory(invoices: PeriodCost[]): InvoiceGroup[] {
 	const groups = new Map<string, InvoiceGroup>();
 
 	for (const invoice of invoices) {
@@ -93,20 +105,34 @@ function groupInvoicesByCategory(
 				distributionKeyName: invoice.distributionKey?.name || 'Gleichmässig',
 				totalAmount: 0,
 				invoices: [],
-				isHeatingCost: /heiz|wärme|heating/i.test(invoice.category?.name ?? '')
+				isHeatingCost: invoice.category?.isHeatingCost ?? false
 			});
 		}
 
 		const group = groups.get(key)!;
-		group.totalAmount += parseFloat(invoice.amount);
-		group.invoices.push({
-			id: invoice.id,
-			description: invoice.description,
-			amount: parseFloat(invoice.amount)
-		});
+		group.totalAmount += invoice.inPeriod.amount;
+		group.invoices.push({ id: invoice.id, description: invoice.description, ...invoice.inPeriod });
 	}
 
 	return Array.from(groups.values());
+}
+
+const isoDay = (date: Date) => date.toISOString().split('T')[0];
+const days = (start: string, end: string) => Math.max(0, (Date.parse(end) - Date.parse(start)) / 86_400_000 + 1);
+
+/**
+ * The tenant's share (0–1) of a group: each invoice weighs with its amount, and the tenant bears the part of the days it
+ * bills that he rented (without a Leistungszeitraum the whole period: his rental days / the period's days)
+ */
+function rentalShare(group: InvoiceGroup, rentalStart: string, rentalEnd: string) {
+	// ponytail: a group summing to 0 (invoice and credit over different Leistungszeiträume) bills nothing; per-invoice shares if that occurs
+	if (group.totalAmount === 0) return 0;
+	const rented = group.invoices.reduce((sum, invoice) => {
+		const from = invoice.start > rentalStart ? invoice.start : rentalStart;
+		const to = invoice.end < rentalEnd ? invoice.end : rentalEnd;
+		return sum + (invoice.amount * days(from, to)) / days(invoice.start, invoice.end);
+	}, 0);
+	return rented / group.totalAmount;
 }
 
 /**
@@ -122,7 +148,7 @@ async function calculateApartmentShare(
 	if (!distributionKeyId) {
 		const equalShare = totalAmount / buildingApartments.length;
 		return {
-			share: Math.round(equalShare * 100) / 100,
+			share: roundToRappen(equalShare),
 			percentage: 1 / buildingApartments.length
 		};
 	}
@@ -137,7 +163,7 @@ async function calculateApartmentShare(
 		// Fallback to equal distribution
 		const equalShare = totalAmount / buildingApartments.length;
 		return {
-			share: Math.round(equalShare * 100) / 100,
+			share: roundToRappen(equalShare),
 			percentage: 1 / buildingApartments.length
 		};
 	}
@@ -149,9 +175,25 @@ async function calculateApartmentShare(
 	}
 
 	return {
-		share: Math.round(apartmentDist.amount * 100) / 100,
+		share: roundToRappen(apartmentDist.amount),
 		percentage: apartmentDist.share
 	};
+}
+
+// The apartment's part of the building's fee by the distribution key, for the tenant's days
+async function buildingFeeShare(
+	groups: InvoiceGroup[],
+	feePercent: number,
+	buildingApartments: Array<{ id: string; area: number; rooms: number }>,
+	apartmentId: string,
+	distributionKeyId: string,
+	rentalDays: number,
+	totalPeriodDays: number
+) {
+	const buildingCosts = groups.reduce((sum, group) => sum + group.totalAmount, 0);
+	const buildingFee = calculateManagementFee(buildingCosts, feePercent).fee;
+	const apartmentFee = await calculateApartmentShare(buildingApartments, apartmentId, buildingFee, distributionKeyId);
+	return prorateCosts(apartmentFee.share, rentalDays, totalPeriodDays).proratedAmount;
 }
 
 /**
@@ -161,7 +203,7 @@ export function calculateManagementFee(
 	totalCosts: number,
 	feePercentage: number
 ): { fee: number; actualPercentage: number } {
-	const fee = Math.round((totalCosts * feePercentage) / 100 * 100) / 100;
+	const fee = roundToRappen((totalCosts * feePercentage) / 100);
 
 	return { fee, actualPercentage: feePercentage };
 }
@@ -187,14 +229,14 @@ export function calculateTotalAdvancePayments(
 		cursor.setUTCMonth(month + 1);
 	}
 
-	return Math.round(months * monthlyAdvancePayment * 100) / 100;
+	return roundToRappen(months * monthlyAdvancePayment);
 }
 
 /**
  * Calculate balance (tenant owes vs. refund)
  */
 export function calculateBalance(totalCosts: number, totalAdvancePayments: number): number {
-	return Math.round((totalCosts - totalAdvancePayments) * 100) / 100;
+	return roundToRappen(totalCosts - totalAdvancePayments);
 }
 
 /**
@@ -239,11 +281,11 @@ export async function calculateStatementForContract(
 	const totalPeriodDays = prorating.totalPeriodDays;
 
 	// Get all valid invoices for the building in the period
-	const invoices = await getInvoicesForStatement(
-		buildingId,
-		periodStart.toISOString().split('T')[0],
-		periodEnd.toISOString().split('T')[0]
-	);
+	const [start, end] = [isoDay(periodStart), isoDay(periodEnd)];
+	const invoices = [
+		...(await getInvoicesForStatement(buildingId, start, end)),
+		...(await fuelStockChange(buildingId, start, end))
+	];
 
 	// Group invoices by category
 	const invoiceGroups = groupInvoicesByCategory(invoices);
@@ -282,17 +324,12 @@ export async function calculateStatementForContract(
 				periodEnd,
 				apartmentShareResult.share
 			);
-			tenantShare = heatingResult.share;
+			tenantShare = roundToRappen(heatingResult.share);
 			periodShare = heatingResult.percentage / 100;
 		} else {
-			// Standard day-based prorating
-			const prorated = prorateCosts(
-				apartmentShareResult.share,
-				rentalDays,
-				totalPeriodDays
-			);
-			tenantShare = prorated.proratedAmount;
-			periodShare = prorated.periodShare;
+			// By days: the tenant's days within the days each invoice bills in the period
+			periodShare = rentalShare(group, isoDay(contractOverlap.overlapStart), isoDay(contractOverlap.overlapEnd));
+			tenantShare = roundToRappen(apartmentShareResult.share * periodShare);
 		}
 
 		lineItems.push({
@@ -303,7 +340,7 @@ export async function calculateStatementForContract(
 			description: group.categoryName,
 			totalBuildingAmount: group.totalAmount,
 			apartmentShare: apartmentShareResult.share,
-			tenantShare: Math.round(tenantShare * 100) / 100,
+			tenantShare: roundToRappen(tenantShare),
 			periodShare: Math.round(periodShare * 10000) / 10000,
 			isHeatingCost: group.isHeatingCost
 		});
@@ -311,21 +348,16 @@ export async function calculateStatementForContract(
 		subtotal += tenantShare;
 	}
 
-	subtotal = Math.round(subtotal * 100) / 100;
+	subtotal = roundToRappen(subtotal);
 
-	// Management fee: a percentage (chosen per generation run, otherwise the configured default) of the building's
-	// utility costs, distributed to the apartments by its distribution key (none: equally) and to the tenant by days
+	// Management fee: a percentage (chosen per generation run, otherwise the configured default) of the tenant's own
+	// utility costs; with a distribution key chosen, of the building's utility costs, distributed to the apartments by
+	// the key and to the tenant by days
 	const feePercent = managementFeePercent ?? (await getTypedConfig('management_fee_pct'));
-	const buildingCosts = invoiceGroups.reduce((sum, group) => sum + group.totalAmount, 0);
-	const buildingFee = calculateManagementFee(buildingCosts, feePercent).fee;
-	const apartmentFee = await calculateApartmentShare(
-		buildingApartments,
-		apartment.id,
-		buildingFee,
-		managementFeeDistributionKeyId ?? null
-	);
-	const managementFee = prorateCosts(apartmentFee.share, rentalDays, totalPeriodDays).proratedAmount;
-	const totalCosts = Math.round((subtotal + managementFee) * 100) / 100;
+	const managementFee = managementFeeDistributionKeyId
+		? await buildingFeeShare(invoiceGroups, feePercent, buildingApartments, apartment.id, managementFeeDistributionKeyId, rentalDays, totalPeriodDays)
+		: calculateManagementFee(subtotal, feePercent).fee;
+	const totalCosts = roundToRappen(subtotal + managementFee);
 
 	// Calculate total advance payments
 	const monthlyAdvance = parseFloat(contract.monthlyAdvancePayment);
