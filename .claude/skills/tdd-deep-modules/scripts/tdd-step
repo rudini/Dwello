@@ -50,7 +50,11 @@ def main(args):
     if not args or args[0] not in protocol.PHASES:
         print("usage: tdd-step <test|red|green|refactor> [message]", file=sys.stderr)
         return 2
-    phase, message = args[0], " ".join(" ".join(args[1:]).split()) or args[0]
+    phase, rest = args[0], args[1:]
+    tier = "fast"
+    if rest[:1] == ["--suite"]:
+        tier, rest = rest[1], rest[2:]
+    message = " ".join(" ".join(rest).split()) or phase
     root = run_git("rev-parse", "--show-toplevel")
     if root.returncode != 0:
         print("tdd-step: not inside a git repository", file=sys.stderr)
@@ -58,7 +62,7 @@ def main(args):
     os.chdir(root.stdout.strip())
     before = snapshot()
     try:
-        run = suite.run(".", "fast")
+        run = suite.run(".", tier)
     except suite.NoFramework as error:
         print(f"tdd-step: {error}", file=sys.stderr)
         return 2
@@ -76,7 +80,7 @@ def main(args):
     index = git("write-tree").strip()
     git("add", "-A")
     done = run_git("commit", "-q", "-m", f"{phase}: {message}", "--trailer", f"TDD-Phase: {phase}",
-                   "--trailer", f"TDD-Exit-Code: {run.exit_code}", "--trailer", "TDD-Suite: fast")
+                   "--trailer", f"TDD-Exit-Code: {run.exit_code}", "--trailer", f"TDD-Suite: {tier}")
     if done.returncode != 0:
         git("read-tree", index)
         print(f"tdd-step: git commit failed:\n{done.stderr}{done.stdout}", file=sys.stderr)
