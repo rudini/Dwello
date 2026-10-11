@@ -613,3 +613,19 @@ class TddStepTest(unittest.TestCase):
         repo.commit_all("green: seed", {"calc.js": RIGHT_ADD_JS, "calc.test.js": VITEST_TEST, **BUN_FILES})
         (repo.path / "calc.test.js").unlink()
         self.assert_refused(repo, "refactor", "refactor needs all tests passing", head="green: seed")
+
+    def test_bun_error_counts_come_only_from_bun_s_own_summary(self):
+        with self.subTest("a logged '0 errors' does not hide a load error"):
+            repo = Repo(self, BUN_FILES)
+            repo.write("backend/a.test.ts", bun_test("a", '  console.error("0 errors");\n  expect(add(1, 2)).toBe(4);\n'))
+            repo.write("backend/b.test.ts", 'import { test } from "bun:test";\nthrow new Error("broken setup");\n')
+            self.assert_refused(repo, "red", "red needs a failing assertion")
+        with self.subTest("a logged '3 errors' in a passing suite is not an error"):
+            repo = Repo(self, BUN_FILES)
+            repo.commit_all("green: seed", {})
+            repo.write("backend/calc.test.ts", BUN_FILES["backend/calc.test.ts"].replace(
+                "  expect(", '  console.error("3 errors");\n  expect('))
+
+            result = repo.run("tdd-step", "refactor", "log")
+
+            self.assertEqual(result.returncode, 0, result.stderr)
