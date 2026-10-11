@@ -114,8 +114,8 @@ def _run_bun(directory, command, package):
     summary = f"bun: {failed} of {len(cases)} tests failed"
     if hidden:
         summary += f" ({errors} errors outside tests)"
-    tests = frozenset(f"{package / case.get('file', '')}::{case.get('classname', '')}::{case.get('name')}"
-                      for case in cases)
+    tests = frozenset(f"{package / case.get('file', '')}::{case.get('classname', '')}::"
+                      f"{case.get('name')}" for case in cases)
     return Run(done.returncode, outcome, summary, failed, ran, tests)
 
 
@@ -133,14 +133,15 @@ def _run_vitest(root, package):
     ran = data["numTotalTests"] - data["numPendingTests"] - data["numTodoTests"]
     unhandled = re.search(r"^Vitest caught \d+ unhandled errors? during the test run",
                           done.stderr + done.stdout, re.MULTILINE) is not None
-    tests = frozenset(f"{package / Path(f['name']).relative_to(Path(root).resolve())}::{a['fullName']}"
+    here = Path(root).resolve()
+    tests = frozenset(f"{package / Path(f['name']).relative_to(here)}::{a['fullName']}"
                       for f in data["testResults"] for a in f["assertionResults"])
     return Run(done.returncode, _vitest_outcome(done.returncode, data, unhandled), summary,
                data["numFailedTests"], ran, tests)
 
 
 def _bun_summary_errors(stderr):
-    """The `N error(s)` count of bun's closing summary: the counter lines right above `Ran N tests`."""
+    """The `N error(s)` count of bun's closing summary (the counter lines above `Ran N tests`)."""
     lines = stderr.splitlines()
     ran = [i for i, line in enumerate(lines) if re.match(r"Ran \d+ tests? across", line)]
     if not ran:
