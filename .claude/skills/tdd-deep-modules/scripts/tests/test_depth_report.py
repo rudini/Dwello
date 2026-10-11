@@ -464,7 +464,7 @@ class HelperSwarmTest(unittest.TestCase):
         self.assertIn("classitis: exported helpers with one caller: a, b, c;", swarm + ";")
 
     def test_helpers_up_to_twenty_lines_count_as_small(self):
-        body = "".join(f"  const v{i} = x + {i};\n" for i in range(14)) + "  return v13;\n"  # 15 code lines
+        body = "".join(f"  const v{i} = x + {i};\n" for i in range(19)) + "  return v18;\n"  # 20 code lines
         helpers = "".join(f"export function {n}(x: number): number {{\n{body}}}\n" for n in ("fee", "advance", "balance"))
         repo = Repo(self, {"src/statement.ts": helpers + "export const total = (x: number) => fee(x) + advance(x) + balance(x);\n"})
 
