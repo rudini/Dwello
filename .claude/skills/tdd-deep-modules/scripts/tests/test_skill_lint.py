@@ -63,3 +63,30 @@ class SkillLintTest(unittest.TestCase):
 
                 self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
                 self.assertIn(f"skill_lint: {message}\n", result.stdout)
+
+    def test_the_guard_hook_must_be_registered(self):
+        real = (SKILL / "SKILL.md").read_text()
+        hooks = real[real.index("hooks:\n"):real.index("---\n", 4)]
+        cases = {
+            "no hooks": (lambda copy: (copy / "SKILL.md").write_text(real.replace(hooks, "")),
+                         "hooks: no PreToolUse hook runs scripts/tdd-guard for Write and Edit"),
+            "edit not matched": (lambda copy: (copy / "SKILL.md").write_text(
+                real.replace('matcher: "Write|Edit|MultiEdit"', 'matcher: "Write"')),
+                "hooks: no PreToolUse hook runs scripts/tdd-guard for Write and Edit"),
+            "other command": (lambda copy: (copy / "SKILL.md").write_text(
+                real.replace("scripts/tdd-guard'", "scripts/other'")),
+                "hooks: no PreToolUse hook runs scripts/tdd-guard for Write and Edit"),
+            "script missing": (lambda copy: (copy / "scripts" / "tdd-guard").unlink(),
+                               "hooks: scripts/tdd-guard is missing or not executable"),
+            "not executable": (lambda copy: (copy / "scripts" / "tdd-guard").chmod(0o644),
+                               "hooks: scripts/tdd-guard is missing or not executable"),
+        }
+        for name, (breaks, message) in cases.items():
+            with self.subTest(name):
+                copy = copy_of_skill(self)
+                breaks(copy)
+
+                result = lint(copy)
+
+                self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+                self.assertIn(f"skill_lint: {message}\n", result.stdout)
