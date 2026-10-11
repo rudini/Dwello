@@ -128,7 +128,7 @@ def _pass_through(text):
             else:
                 body = text[body_start:_close(text, body_start - 1) - 1]
             args = _forwarded_args(body)
-            if args is not None and _names(params) and _names(params) == _names(args):
+            if args is not None and _names(params) and _names(params) == [a.strip() for a in _split(args)]:
                 found.append((match.start(), match[1]))
     return tuple(name for _, name in sorted(found))
 
@@ -174,7 +174,20 @@ def _expression_end(text, start):
 
 def _names(params):
     """Parameter names without types or defaults: `a: number, b = 2` -> [a, b]."""
-    return [re.split(r"[?:=]", p)[0].strip() for p in params.split(",") if p.strip()]
+    return [re.split(r"[?:=]", p)[0].strip() for p in _split(params)]
+
+
+def _split(items):
+    """The non-empty parts of a comma-separated list, ignoring commas inside brackets."""
+    parts, depth, current = [], 0, ""
+    for char in items:
+        depth += (char in "([{") - (char in ")]}")
+        if char == "," and depth == 0:
+            parts.append(current)
+            current = ""
+        else:
+            current += char
+    return [part for part in parts + [current] if part.strip()]
 
 
 def _classes(text):
