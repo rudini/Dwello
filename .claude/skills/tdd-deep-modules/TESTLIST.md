@@ -75,3 +75,14 @@ already produced the behavior; each pin was mutation-checked instead.
 - [x] pytest without a report is an error even with exit 0
 - [x] `pytest.toml`, `.pytest.ini`, `package.json` are test configuration
 - [x] pins: vitest summary anchor, broken vitest suite kept in mixed repos, todo-only suite does not pass
+
+### Step 1, review round 5 (fixes)
+
+- [x] config cycle redone: red with discriminating subtests, then green
+- [x] interrupted pytest next to an assertion failure is not red
+- [x] bun file that fails to load (missing import, top-level throw) is not red
+- [x] trailer records the highest exit code of every command run
+- [x] bun missing from PATH exits 2
+- [x] `bun test` found in `NODE_ENV=... bun test`, `bun test || true`, `bun test; ...`
+- [x] npm init placeholder test script means no tests
+- [x] vitest: Error thrown inside a matcher is not red; pins for plain thrown Error, assertion-worded Error, bun assertion + thrown error
