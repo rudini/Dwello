@@ -5,7 +5,7 @@
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import { eq } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { categories, distributionKeys, fuelStocks, tenants } from '../db/schema';
+import { categories, distributionKeys, fuelStocks, tenants, utilityStatements } from '../db/schema';
 import { deleteConfig, getConfig, setConfig } from '../services/config.service';
 import { createFuelStock } from '../services/fuel-stock.service';
 import { getHeatingProfileByName } from '../services/heating-profile.service';
@@ -79,7 +79,8 @@ describe('PDF der Nebenkostenabrechnung', () => {
 	// Juli bis Dezember im Mittelland: 0 + 0 + 1 + 10 + 13.5 + 17 = 41.5 %
 	it('nennt das Heizprofil und den Anteil der Heizkosten aus den Monaten der Mietdauer', () => {
 		expect(pdf.text).toContain('Heizung Mittelland');
-		expect(pdf.text).toContain('41.5 %');
+		expect(pdf.text).toContain('41.50 %');
+		expect(pdf.flowing).toContain('Anteile der Monate Ihres Mietverhältnisses: Jul 0 %, Aug 0 %, Sep 1 %, Okt 10 %, Nov 13.5 %, Dez 17 %');
 	});
 
 	// Periode Juli bis Dezember, ganz gemietet: das PDF nennt denselben Anteil, den die Abrechnung rechnet
@@ -98,7 +99,7 @@ describe('PDF der Nebenkostenabrechnung', () => {
 		const text = readPdf(Buffer.from((await getStatementPdf(part.id)).pdfBlob!, 'base64')).flowing;
 		await deleteStatement(part.id);
 
-		expect(text).toContain('100 % der Heizkosten Ihrer Wohnung in der Abrechnungsperiode');
+		expect(text).toContain('100.00 % der Heizkosten Ihrer Wohnung in der Abrechnungsperiode');
 	});
 
 	// Verwaltungspauschale: 3 % der Nebenkosten der Liegenschaft (2400 + 1200), verteilt nach Fläche
@@ -115,7 +116,7 @@ describe('PDF der Nebenkostenabrechnung', () => {
 	// Einzige Wohnung des Gebäudes: Wohnungsanteil = Kosten der Liegenschaft; Hauswart nach Tagen 184 / 365
 	it('nennt je Position den Verteilschlüssel, den Wohnungsanteil und den Zeitanteil', () => {
 		expect(pdf.flowing).toContain('Verteilschlüssel');
-		expect(pdf.flowing).toMatch(/Hauswart Pro Fläche \(m²\) 1'200.00 1'200.00 50.41 % 604.93/);
+		expect(pdf.flowing).toContain("Hauswart Pro Fläche (m²) 70.00 / 70.00 m² 1'200.00 1'200.00 184/365 Tage 604.93");
 	});
 
 	it('nummeriert die Seiten und nennt in der Kopfzeile Absender und Abrechnung', () => {
@@ -130,12 +131,15 @@ describe('PDF der Nebenkostenabrechnung', () => {
 	});
 
 	it('nennt das Recht auf Belegeinsicht und auf die detaillierte Heizkostenabrechnung', () => {
-		expect(pdf.flowing).toContain('Sie können die Belege einsehen. Melden Sie sich dafür bei Muster Immobilien AG, Firmenweg 9, 8001 Zürich');
-		expect(pdf.flowing).toContain('detaillierte Abrechnung der Heizkosten');
+		expect(pdf.flowing).toContain(
+			'Sie oder eine bevollmächtigte Person können die Belege einsehen. Melden Sie sich dafür bei Muster Immobilien AG, Firmenweg 9, 8001 Zürich'
+		);
+		expect(pdf.flowing).toContain('detaillierte Abrechnung der Heiz- und Warmwasserkosten');
 	});
 
-	it('nennt im Zahlteil die Abrechnung als zusätzliche Information', () => {
-		expect(pdf.flowing).toContain('Zusätzliche Informationen');
+	// SIX: gedruckt wird, was im QR-Code steht
+	it('nennt im Zahlteil die Abrechnung als zusätzliche Information wie im QR-Code', () => {
+		expect(pdf.flowing).toMatch(/Zusätzliche Informationen Nebenkostenabrechnung NK-[\w-]+/);
 	});
 });
 
@@ -171,9 +175,20 @@ describe('Tankbestand im PDF', () => {
 
 	it('leitet die Heizkosten aus Anfangsbestand, Rechnungen und Endbestand her', () => {
 		expect(text).toContain('Anfangsbestand am 31.12.2024 CHF 600.00');
-		expect(text).toContain("Rechnungen Heizung in der Abrechnungsperiode CHF 1'000.00");
+		expect(text).toContain("Rechnungen «Heizung» in der Abrechnungsperiode CHF 1'000.00");
 		expect(text).toContain('Endbestand am 31.12.2025 CHF 100.00');
 		expect(text).toContain("Heizkosten nach Verbrauch CHF 1'500.00");
+		expect(text).toContain('Über den Anfangs- und Endbestand des Heizmaterials erhalten Sie Auskunft');
+	});
+
+	// Ein später geänderter Stand ändert die Abrechnung nicht, also auch nicht ihre Herleitung im PDF
+	it('zeigt die Stände, mit denen die Abrechnung erstellt wurde', async () => {
+		await db.update(fuelStocks).set({ amount: '999.00' }).where(eq(fuelStocks.buildingId, tank.building));
+		await generateStatementPdf(id, 'de');
+		const again = readPdf(Buffer.from((await getStatementPdf(id)).pdfBlob!, 'base64')).flowing;
+
+		expect(again).toContain('Anfangsbestand am 31.12.2024 CHF 600.00');
+		expect(again).toContain('Endbestand am 31.12.2025 CHF 100.00');
 	});
 });
 
@@ -198,6 +213,21 @@ describe('Verwaltungspauschale ohne Verteilschlüssel im PDF', () => {
 	afterAll(() => deleteStatement(id));
 
 	it('nennt die eigenen Nebenkosten als Grundlage', () => {
-		expect(ownFee.flowing).toMatch(/Verwaltungspauschale: 3 % Ihrer Nebenkosten von CHF [\d'.]+/);
+		expect(ownFee.flowing).toMatch(/Verwaltungspauschale: 3 % der Zwischensumme von CHF [\d'.]+/);
+	});
+});
+
+// Ein Entwurf wird mit dem PDF versendet: Datum und Zahlungsfrist gelten ab dem Tag, an dem das PDF entsteht
+describe('PDF eines älteren Entwurfs', () => {
+	it('datiert den Entwurf auf heute und gibt die volle Zahlungsfrist', async () => {
+		const statement = await generateStatement({ contractId: rental.contract, buildingId: rental.building, periodStart: '2025-01-01', periodEnd: '2025-12-31', managementFeePercent: 0 });
+		await db.update(utilityStatements).set({ statementDate: '2026-01-15', paymentDeadline: '2026-02-14' }).where(eq(utilityStatements.id, statement.id));
+		await generateStatementPdf(statement.id, 'de');
+		const [after] = await db.select().from(utilityStatements).where(eq(utilityStatements.id, statement.id));
+		await deleteStatement(statement.id);
+
+		const today = new Date().toLocaleDateString('sv-SE');
+		expect(after.statementDate).toBe(today);
+		expect(Date.parse(after.paymentDeadline!) - Date.parse(today)).toBe(30 * 86_400_000);
 	});
 });

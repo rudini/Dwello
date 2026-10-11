@@ -4475,6 +4475,15 @@ critical/high/medium is open; reviews in `docs/reviews/`.
 - [x] **B, review round 6** (`docs/reviews/B-review-6.md`): empty preview when every contract is billed explains how
   to recalculate; sent statements are corrected outside Dwello (texts, hint on sent statements); meter and fuel texts;
   no Akonto raise after moving out (`movedOut`); `.gitignore` matches links.
+- [x] **D1: requirements of a Swiss statement** (`docs/nebenkostenabrechnung-anforderungen.md`, reviews
+  `docs/reviews/D1-review-1.md`, round 2 in `D2-review-1.md`): requirement, source, certainty, PDF proposal; nothing
+  read on Fedlex (all «unsicher», graded A/B/C).
+- [x] **D2: statement PDF** (`backend/src/services/pdf.service.ts`, `statement-pdf.service.ts`, migration 0011
+  `apartment_share`, `period_share`, `fuel_stock`): A4 with sender and page numbers, balance first, per category key with
+  the apartment's part, Wohnungsanteil, Zeitanteil (days or heating profile) and share; heating months; tank
+  derivation from the stored readings; notes on receipts and Art. 8 VMWG; SIX payment part (German for Romansh, QR text
+  printed as in the code, sharper QR image); a draft's PDF dates it today with the full deadline; scenario «Das PDF
+  erklärt die Verteilung und den Heizölverbrauch». Review round 1: `docs/reviews/D2-review-1.md`.
 
 
 ---

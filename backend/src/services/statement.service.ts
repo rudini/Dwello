@@ -18,6 +18,7 @@ import {
 } from '../db/schema';
 import { calculateStatementForContract, generateStatementNumber } from './calculation.service';
 import { getTypedConfig } from './config.service';
+import { fuelStockChange } from './fuel-stock.service';
 
 export interface StatementFilters {
 	search?: string;
@@ -307,6 +308,7 @@ export async function generateStatement(
 			managementFeePercent: String(calculation.managementFeePercent),
 			heatingProfileId: input.heatingProfileId || null,
 			managementFeeDistributionKeyId: input.managementFeeDistributionKeyId || null,
+			fuelStock: (await fuelStockChange(input.buildingId, input.periodStart, input.periodEnd))[0]?.stock ?? null,
 			balance: String(calculation.balance),
 			status: 'draft',
 			paymentDeadline: paymentDeadline.toISOString().split('T')[0]

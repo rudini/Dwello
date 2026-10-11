@@ -14,7 +14,8 @@ import {
 	timestamp,
 	date,
 	index,
-	uniqueIndex
+	uniqueIndex,
+	jsonb
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
@@ -149,6 +150,14 @@ export const rentalContractsRelations = relations(rentalContracts, ({ one, many 
 // ============================================================================
 // Categories Table (Utility Cost Categories)
 // ============================================================================
+// Master data shared by categories and distribution keys: a description, a position in lists and timestamps
+const describedAndOrdered = () => ({
+	description: text('description'),
+	sortOrder: integer('sort_order').default(0),
+	createdAt: timestamp('created_at').defaultNow().notNull(),
+	updatedAt: timestamp('updated_at').defaultNow().notNull()
+});
+
 export const categories = pgTable('categories', {
 	id: uuid('id').defaultRandom().primaryKey(),
 	name: varchar('name', { length: 100 }).notNull(),
@@ -159,10 +168,7 @@ export const categories = pgTable('categories', {
 	isAllowedUtilityCost: boolean('is_allowed_utility_cost').notNull().default(true),
 	// Heating and hot water costs (Art. 5 VMWG): shared by the heating profile at a tenant change
 	isHeatingCost: boolean('is_heating_cost').notNull().default(false),
-	description: text('description'),
-	sortOrder: integer('sort_order').default(0),
-	createdAt: timestamp('created_at').defaultNow().notNull(),
-	updatedAt: timestamp('updated_at').defaultNow().notNull()
+	...describedAndOrdered()
 });
 
 export const categoriesRelations = relations(categories, ({ many }) => ({
@@ -182,10 +188,7 @@ export const distributionKeys = pgTable('distribution_keys', {
 	nameEN: varchar('name_en', { length: 100 }),
 	type: varchar('type', { length: 20 }).notNull().default('predefined'), // predefined, custom
 	formula: text('formula'), // For custom keys: {area}, {rooms}, {units}
-	description: text('description'),
-	sortOrder: integer('sort_order').default(0),
-	createdAt: timestamp('created_at').defaultNow().notNull(),
-	updatedAt: timestamp('updated_at').defaultNow().notNull()
+	...describedAndOrdered()
 });
 
 export const distributionKeysRelations = relations(distributionKeys, ({ many }) => ({
@@ -332,6 +335,8 @@ export const utilityStatements = pgTable(
 		managementFee: decimal('management_fee', { precision: 12, scale: 2 }).default('0'),
 		// Settings of the generation run, printed in the PDF
 		heatingProfileId: uuid('heating_profile_id').references(() => heatingProfiles.id, { onDelete: 'set null' }),
+		// the Tankbestand readings the statement was created with (migration 0011)
+		fuelStock: jsonb('fuel_stock').$type<{ categoryId: string; openingDate: string; opening: string; closingDate: string; closing: string }>(),
 		managementFeeDistributionKeyId: uuid('management_fee_distribution_key_id').references(() => distributionKeys.id, {
 			onDelete: 'set null'
 		}),

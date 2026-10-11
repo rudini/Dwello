@@ -4,6 +4,7 @@
 
 import { describe, expect, it } from 'bun:test';
 import { formatCHF, formatSwissDate, roundToRappen } from '../services/pdf-format';
+import { formatQRReferenceForDisplay } from '../services/qr-bill.service';
 import { toPdfData } from '../services/statement-pdf.service';
 import type { StatementWithDetails } from '../services/statement.service';
 
@@ -80,5 +81,12 @@ describe('Rundung auf Rappen', () => {
 		expect(roundToRappen(3060 * (82 / 320))).toBe(784.13);
 		expect(roundToRappen(1.005)).toBe(1.01);
 		expect(roundToRappen(2.344)).toBe(2.34);
+	});
+});
+
+describe('QR-Referenz im Zahlteil', () => {
+	// SIX: in Fünfergruppen von rechts, wie «21 00000 00003 13947 14300 09017»
+	it('gruppiert die Referenz von rechts', () => {
+		expect(formatQRReferenceForDisplay('210000000003139471430009017')).toBe('21 00000 00003 13947 14300 09017');
 	});
 });

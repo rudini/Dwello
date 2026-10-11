@@ -128,7 +128,6 @@ Funktionalität: Abrechnungsdetail
 
   # Der Mieter prüft die Abrechnung nach: Verteilschlüssel und Anteile je Position, Heizöl nach Verbrauch
   # (Art. 5 VMWG), Recht auf Belegeinsicht und detaillierte Heizkostenabrechnung (Art. 257b OR, Art. 8 VMWG)
-  @wip
   Szenario: Das PDF erklärt die Verteilung und den Heizölverbrauch
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
     Und im Gebäude "Lindenhof" war am "2023-12-31" Heizöl für "600" Franken im Tank
@@ -137,12 +136,12 @@ Funktionalität: Abrechnungsdetail
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Marc Huber"
     Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
     Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
-    Dann steht im PDF "Pro Fläche (m²)"
+    Dann steht im PDF "Pro Fläche (m²) 70.00 / 70.00 m²"
     Und steht im PDF "Anfangsbestand am 31.12.2023 CHF 600.00"
     Und steht im PDF "Verbrauch CHF 1'500.00"
     Und steht im PDF "Seite 1 von"
-    Und steht im PDF "Sie können die Belege einsehen"
-    Und steht im PDF "detaillierte Abrechnung der Heizkosten"
+    Und steht im PDF "können die Belege einsehen"
+    Und steht im PDF "detaillierte Abrechnung der Heiz- und Warmwasserkosten"
 
   Szenario: PDF in der Sprache des Mieters
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt

@@ -4,6 +4,7 @@
 
 import { describe, expect, it } from 'bun:test';
 import { generateStatementPDFBase64, type StatementPDFData } from '../services/pdf.service';
+import { generateQRBillForStatement } from '../services/qr-bill.service';
 import { readPdf } from './helpers/pdf-text';
 
 const config = { iban: 'CH4431999123000889012', companyName: 'Muster Immobilien AG', address: 'Firmenweg 9', postalCode: '8001', city: 'Zürich' };
@@ -18,7 +19,7 @@ const refund: StatementPDFData = {
 	tenant: { firstName: 'Nina', lastName: 'Brunner', address: 'Seeweg 15', postalCode: '6003', city: 'Luzern' },
 	apartment: { number: 'A2', floor: 0, area: '82.00' },
 	building: { name: 'Seepark', address: 'Seeweg 15', place: '6003 Luzern' },
-	lineItems: [{ category: 'Hauswart', key: 'Pro Fläche (m²)', totalAmount: 3060, apartmentShare: 784.13, periodShare: 1, tenantShare: 784.13, sharePercentage: 0.2563 }],
+	lineItems: [{ category: 'Hauswart', key: 'Pro Fläche (m²)', totalAmount: 3060, apartmentShare: 784.13, periodShare: 1, tenantShare: 784.13 }],
 	rentalStart: '2025-01-01',
 	rentalEnd: '2025-12-31',
 	periodDays: 365,
@@ -48,5 +49,78 @@ describe('PDF einer Rückerstattung', () => {
 		const older = { ...refund, lineItems: [{ ...refund.lineItems[0], apartmentShare: null, periodShare: null }] };
 
 		expect((await textOf(older)).flowing).toContain("Hauswart Pro Fläche (m²) 3'060.00 – – 784.13");
+	});
+});
+
+const due: StatementPDFData = { ...refund, totalAdvancePayments: 600, balance: 184.13, paymentDeadline: '2026-03-17' };
+
+describe('PDF einer Nachzahlung', () => {
+	// SIX: die Angaben im Zahlteil entsprechen dem QR-Code; Rätoromanisch sieht der Zahlteil nicht vor
+	it('druckt den Zahlteil auf Rätoromanisch deutsch und die Mitteilung wie im QR-Code', async () => {
+		const rm = readPdf(Buffer.from(await generateStatementPDFBase64(due, config, 'rm'), 'base64')).flowing;
+		const fr = readPdf(Buffer.from(await generateStatementPDFBase64(due, config, 'fr'), 'base64')).flowing;
+
+		expect(rm).toContain('Empfangsschein');
+		expect(rm).toContain('Zahlteil');
+		expect(fr).toContain('Informations supplémentaires Nebenkostenabrechnung NK-1-2025-0001');
+	});
+
+	// Der QR-Code nennt den Zahlungspflichtigen nur mit vollständiger Adresse
+	it('nennt «Zahlbar durch» nur mit Name, Postleitzahl und Ort', async () => {
+		const pdf = await textOf({ ...due, tenant: { firstName: 'Nina', lastName: 'Brunner' } });
+
+		expect(pdf.flowing).not.toContain('Zahlbar durch');
+	});
+
+	it('wiederholt den Tabellenkopf auf jeder Seite der Kostenübersicht', async () => {
+		const many = { ...due, lineItems: Array.from({ length: 45 }, (_, i) => ({ ...refund.lineItems[0], category: `Kategorie ${i + 1}` })) };
+
+		expect((await textOf(many)).flowing.split('Kosten Liegenschaft').length - 1).toBeGreaterThanOrEqual(2);
+	});
+
+	it('schreibt Zeichen ausserhalb der Schrift lesbar, statt sie zu verstümmeln', async () => {
+		const pdf = await textOf({ ...due, tenant: { ...due.tenant, firstName: 'Łukasz', lastName: 'Dragoș' } });
+
+		expect(pdf.flowing).toContain('Lukasz Dragos');
+	});
+
+	it('nennt die Grundlage der Verwaltungspauschale als Zwischensumme', async () => {
+		const pdf = await textOf({ ...due, managementFee: 23.52, managementFeePercent: 3 });
+
+		expect(pdf.flowing).toContain("3 % der Zwischensumme von CHF 784.13");
+	});
+});
+
+describe('PDF ohne Saldo und einer bezahlten Abrechnung', () => {
+	it('sagt bei Saldo 0, dass nichts zu bezahlen ist', async () => {
+		const pdf = await textOf({ ...due, totalAdvancePayments: 784.13, balance: 0 });
+
+		expect(pdf.flowing).toContain('Ausgeglichen');
+		expect(pdf.flowing).not.toContain('mit dem Zahlteil');
+	});
+
+	// Eine bezahlte Abrechnung neu gedruckt: kein Zahlteil, sonst zahlt der Mieter zweimal
+	it('druckt für eine bezahlte Abrechnung keinen Zahlteil', async () => {
+		const pdf = await textOf({ ...due, paidDate: '2026-03-01' });
+
+		expect(pdf.flowing).toContain('Bezahlt am 01.03.2026');
+		expect(pdf.flowing).not.toContain('Zahlteil');
+	});
+
+	it('nennt bei einer Rückerstattung den Termin', async () => {
+		const pdf = await textOf({ ...refund, paymentDeadline: '2026-03-17' });
+
+		expect(pdf.flowing).toContain('Wir überweisen Ihnen den Betrag bis 17.03.2026.');
+	});
+});
+
+describe('QR-Code im Zahlteil', () => {
+	// 46 mm gedruckt: mit 166 Pixeln waren die Module ungleich breit; jetzt ganze Pixel je Modul, scharf auch beim Druck
+	it('bettet den QR-Code mit ganzen Pixeln je Modul in Druckauflösung ein', async () => {
+		const { qrCodeImage } = await generateQRBillForStatement({ id: due.id, statementNumber: due.statementNumber, balance: '184.13', tenant: due.tenant }, config);
+		const width = qrCodeImage.readUInt32BE(16); // PNG header
+
+		expect(width).toBeGreaterThanOrEqual(500);
+		expect(width % 10).toBe(0);
 	});
 });
