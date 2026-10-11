@@ -162,3 +162,13 @@ class SkillLintTest(unittest.TestCase):
 
         self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
         self.assertIn("skill_lint: references/depth.md is linked but does not exist\n", result.stdout)
+
+    def test_a_directory_without_skill_md_exits_2(self):
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+
+        result = lint(Path(tmp.name))
+
+        self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
+        self.assertIn(f"skill_lint: no SKILL.md in {tmp.name}", result.stderr)
+        self.assertNotIn("Traceback", result.stderr)
