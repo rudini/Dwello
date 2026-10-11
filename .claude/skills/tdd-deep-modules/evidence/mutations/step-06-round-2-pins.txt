@@ -1,0 +1,6 @@
+KILLED   tddcore/depth.py: '            if arrow and text[body_start:body_start + 1] == "{":' -> '            if False:' [test_block_typed_async_and_generic_arrow_forwards_are_pass_throughs]
+KILLED   tddcore/depth.py: '_ARROW = re.compile(r"\\b(\\w+)\\s*(?::[^=\\n]+)?=\\s*(?:async\\s*)?(?:<[^<>\\n]*>)?\\s*\\(")' -> '_ARROW = re.compile(r"\\b(\\w+)\\s*(?::[^=\\n]+)?=\\s*(?:async\\s*)?\\s*\\(")' [test_block_typed_async_and_generic_arrow_forwards_are_pass_throughs]
+KILLED   tddcore/depth.py: '_ARROW = re.compile(r"\\b(\\w+)\\s*(?::[^=\\n]+)?=\\s*(?:async\\s*)?(?:<[^<>\\n]*>)?\\s*\\(")' -> '_ARROW = re.compile(r"\\b(\\w+)\\s*=\\s*(?:async\\s*)?(?:<[^<>\\n]*>)?\\s*\\(")' [test_block_typed_async_and_generic_arrow_forwards_are_pass_throughs]
+KILLED   tddcore/depth.py: '_ARROW = re.compile(r"\\b(\\w+)\\s*(?::[^=\\n]+)?=\\s*(?:async\\s*)?(?:<[^<>\\n]*>)?\\s*\\(")' -> '_ARROW = re.compile(r"\\b(\\w+)\\s*(?::[^=\\n]+)?=\\s*(?:<[^<>\\n]*>)?\\s*\\(")' [test_block_typed_async_and_generic_arrow_forwards_are_pass_throughs]
+KILLED   tddcore/depth.py: '_CALL = re.compile(r"(?:await\\s+)?[\\w.]+\\s*\\(")' -> '_CALL = re.compile(r"[\\w.]+\\s*\\(")' [test_block_typed_async_and_generic_arrow_forwards_are_pass_throughs]
+KILLED   tddcore/depth.py: 'not line.endswith((",", "({", "["))' -> 'not line.endswith((",", "({"))' [test_repeated_array_openers_are_not_duplicates]

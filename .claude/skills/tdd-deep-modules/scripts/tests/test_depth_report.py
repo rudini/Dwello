@@ -316,3 +316,23 @@ export class Ledger {
 
         # cb 1+3, x 1, y 1, z 1, w 1+1, pair 1+2
         self.assertTrue(line.startswith("src/cb.ts: surface 12,"), line)
+
+    def test_block_typed_async_and_generic_arrow_forwards_are_pass_throughs(self):
+        module = ("export const f = (a: number) => {\n  return g(a);\n};\n"
+                  "export const h = <T>(a: T) => g(a);\n"
+                  "export const k: Loader = async (a: number) => await g(a);\n"
+                  "function g(a: unknown) {\n  console.log(a);\n  console.log(typeof a);\n  return a;\n}\n")
+        repo = Repo(self, {"src/fwd.ts": module})
+
+        line = report_line(repo.run("depth_report", "src/fwd.ts"), "src/fwd.ts")
+
+        self.assertIn("pass-through: f, h, k;", line.split(" -> ", 1)[1])
+
+    def test_repeated_array_openers_are_not_duplicates(self):
+        rows = "  const headerRows = [\n    1,\n  ];\n"
+        module = "".join(f"export function t{n}(): number[] {{\n{rows}  return headerRows.slice({n});\n}}\n" for n in range(3))
+        repo = Repo(self, {"src/rows.ts": module})
+
+        line = report_line(repo.run("depth_report", "src/rows.ts"), "src/rows.ts")
+
+        self.assertIn(", duplicate 0 ->", line)
