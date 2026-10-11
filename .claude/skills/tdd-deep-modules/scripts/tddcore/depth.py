@@ -144,31 +144,36 @@ def _forwarded_args(body):
 
 
 def _parameters(text, index):
-    """The parameter list text of a signature whose `(` (after optional type parameters) is at `index`."""
-    index = _skip_type_parameters(text, len(text) - len(text[index:].lstrip()))
+    """The parameter list of a signature whose `(` follows `index` (after blanks and type parameters), or None."""
+    index = _skip_type_parameters(text, _skip_blanks(text, index))
     return text[index + 1:_close(text, index) - 1] if text[index:index + 1] == "(" else None
 
 
 def _function_parameters(value):
     """The parameters when the initialiser `value` is a function or arrow function, else ``."""
     head = re.match(r"(?:async\s*)?(function\b\*?\s*\w*\s*)?", value)
-    params = _parameters(value, head.end())
-    if params is None:
+    opening = _skip_type_parameters(value, _skip_blanks(value, head.end()))
+    if value[opening:opening + 1] != "(":
         return ""
-    after = value[_close(value, value.index("(", head.end())):]
-    return params if head[1] or re.match(r"\s*(?::[^=\n]+)?=>", after) else ""
+    closing = _close(value, opening)
+    arrow = re.match(r"\s*(?::[^=\n]+)?=>", value[closing:])
+    return value[opening + 1:closing - 1] if head[1] or arrow else ""
 
 
 def _skip_type_parameters(text, index):
-    """The index after a `<...>` type parameter list at `index`, or `index` when there is none."""
+    """The index after a `<...>` type parameter list (and the blanks after it) at `index`, else `index`."""
     if text[index:index + 1] != "<":
         return index
     depth = 0
     for position in range(index, len(text)):
         depth += (text[position] == "<") - (text[position] == ">" and text[position - 1] != "=")
         if depth == 0:
-            return len(text[:position + 1]) + len(text[position + 1:]) - len(text[position + 1:].lstrip())
+            return _skip_blanks(text, position + 1)
     return index
+
+
+def _skip_blanks(text, index):
+    return len(text) - len(text[index:].lstrip())
 
 
 def _statement_end(text, start):
