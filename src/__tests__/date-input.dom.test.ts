@@ -3,6 +3,8 @@ import { flushSync } from 'svelte';
 import DateInput from '$lib/ui/DateInput.svelte';
 import { byTestId, fireEvent, show } from './helpers/dom';
 
+// the example is the last day of this year: never in the past
+const example = `31.12.${new Date().getFullYear()}`;
 const field = () => byTestId<HTMLInputElement>('date-input')!;
 const describedBy = () =>
 	(field().getAttribute('aria-describedby') ?? '')
@@ -66,7 +68,7 @@ describe('Datumsfeld TT.MM.JJJJ', () => {
 		field().dispatchEvent(new Event('blur'));
 		flushSync();
 
-		expect(describedBy()).toContain('Bitte geben Sie das Datum in Ziffern als TT.MM.JJJJ ein, zum Beispiel 31.12.2025.');
+		expect(describedBy()).toContain(`Bitte geben Sie das Datum in Ziffern als TT.MM.JJJJ ein, zum Beispiel ${example}.`);
 	});
 
 	// Mitten im Text bearbeitet (Monat gelöscht): der Text bleibt, wie getippt, der Cursor springt nicht ans Ende
@@ -101,7 +103,7 @@ describe('Datumsfeld TT.MM.JJJJ', () => {
 		form.requestSubmit();
 		flushSync();
 		expect(describedBy()).toContain(
-			'Dieses Datum gibt es nicht. Bitte geben Sie es als TT.MM.JJJJ ein, zum Beispiel 31.12.2025.'
+			`Dieses Datum gibt es nicht. Bitte geben Sie es als TT.MM.JJJJ ein, zum Beispiel ${example}.`
 		);
 	});
 
@@ -111,7 +113,7 @@ describe('Datumsfeld TT.MM.JJJJ', () => {
 		expect(field().type).toBe('text');
 		expect(field().inputMode).toBe('numeric');
 		expect(field().value).toBe('31.12.2024');
-		expect(describedBy()).toContain('Format TT.MM.JJJJ. Beispiel: 31.12.2025');
+		expect(describedBy()).toContain(`Format TT.MM.JJJJ. Beispiel: ${example}`);
 	});
 
 	it('nennt das Datum in Worten unter dem Feld', () => {
@@ -166,7 +168,7 @@ describe('Datumsfeld TT.MM.JJJJ', () => {
 		flushSync();
 
 		expect(describedBy()).toContain(
-			'Dieses Datum gibt es nicht. Bitte geben Sie es als TT.MM.JJJJ ein, zum Beispiel 31.12.2025.'
+			`Dieses Datum gibt es nicht. Bitte geben Sie es als TT.MM.JJJJ ein, zum Beispiel ${example}.`
 		);
 	});
 
@@ -180,6 +182,14 @@ describe('Datumsfeld TT.MM.JJJJ', () => {
 		flushSync();
 		expect(document.querySelector('[aria-live="assertive"]')!.textContent).toContain(
 			'Dieses Datum gibt es nicht.'
+		);
+	});
+
+	// ein Fehler, den die Seite beim Senden meldet, wird angesagt, auch wenn das Feld schon den Fokus hat (Enter)
+	it('sagt einen Fehler der Seite an', () => {
+		date('2024-01-31', { error: 'Das Vertragsende kann nicht vor heute liegen.' });
+		expect(document.querySelector('[aria-live="assertive"]')!.textContent).toContain(
+			'Das Vertragsende kann nicht vor heute liegen.'
 		);
 	});
 
@@ -218,7 +228,7 @@ describe('Datumsfeld TT.MM.JJJJ', () => {
 		expect(bound.value).toBe('');
 		expect(field().getAttribute('aria-invalid')).toBe('true');
 		expect(describedBy()).toContain(
-			'Dieses Datum gibt es nicht. Bitte geben Sie es als TT.MM.JJJJ ein, zum Beispiel 31.12.2025.'
+			`Dieses Datum gibt es nicht. Bitte geben Sie es als TT.MM.JJJJ ein, zum Beispiel ${example}.`
 		);
 	});
 

@@ -46,10 +46,7 @@
 		endError = '';
 		flushSync(); // cleared first: the same error set again shows again
 		endError = contractEndError(endDate, contract.startDate, data.today) ?? '';
-		if (endError) {
-			(document.activeElement as HTMLElement | null)?.blur(); // after Enter in the field: focused anew, so it is read
-			focusFirstError(document.querySelector('[role="dialog"]'));
-		}
+		if (endError) focusFirstError(document.querySelector('[role="dialog"]'));
 		return !endError;
 	}
 	// a refused delete (also without JavaScript) shows the dialog with its reason
@@ -142,6 +139,7 @@
 		bind:value={endDate}
 		testid="contract-end-date-input"
 	/>
+	<p class="text-ink-muted">Ab dem Tag danach ist die Wohnung frei, wenn kein neuer Mietvertrag beginnt.</p>
 </ActionDialog>
 
 <ActionDialog
@@ -150,25 +148,22 @@
 	title="Mietvertrag löschen?"
 	confirmLabel="Mietvertrag löschen"
 	danger
-	disabled={status === 'active'}
+	disabled={!contract.endDate || status === 'active'}
 	confirmTestid="contract-delete-confirm"
 	error={form?.deleteError}
 	onsuccess={() => addToast('success', `Mietvertrag von ${name} gelöscht`)}
 >
-	{#if status !== 'active'}
-		<p>
-			Der Mietvertrag von {name} wird endgültig gelöscht. Ein Mietvertrag mit Nebenkostenabrechnungen
-			kann nicht gelöscht werden. Löschen Sie einen Mietvertrag nur, wenn er irrtümlich erfasst wurde.
-		</p>
-	{:else if contract.endDate}
+	{#if !contract.endDate}
+		<p>Ein Mietvertrag ohne Vertragsende kann nicht gelöscht werden. Beenden Sie ihn zuerst.</p>
+	{:else if status === 'active'}
 		<p>
 			Der Mietvertrag läuft bis am {formatDate(contract.endDate.slice(0, 10))} und kann bis dahin nicht
-			gelöscht werden. Behalten Sie ihn auch danach: Die Nebenkostenabrechnung braucht seine Mietstage.
+			gelöscht werden.
 		</p>
 	{:else}
 		<p>
-			Ein laufender Mietvertrag kann nicht gelöscht werden. Wurde er gekündigt, tragen Sie unter
-			«Beenden» das Vertragsende ein.
+			Der Mietvertrag von {name} wird endgültig gelöscht. Ein Mietvertrag mit Nebenkostenabrechnungen
+			kann nicht gelöscht werden.
 		</p>
 	{/if}
 </ActionDialog>

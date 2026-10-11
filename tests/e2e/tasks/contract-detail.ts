@@ -27,7 +27,7 @@ export const endContractOn = (isoDate: string) => async (actor: Actor) => {
 };
 
 // Today as the last day: no day is proposed, it is typed like any other
-export const endContract = endContractOn(inDays(0));
+export const endContract = (actor: Actor) => endContractOn(inDays(0))(actor);
 
 export const startDeletingContract = click(deleteContractButton);
 

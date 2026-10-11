@@ -4636,6 +4636,10 @@ A tenant gives notice for a later day: «Mietvertrag beenden» asks for the Vert
   longer be deleted (only ended ones; the dialog says until when it runs, scenario first); a future contract proposes
   its start; the action reads the Vertragsbeginn from the backend and checks the format; the toast and the sent date
   are tested; the field-error state is in the axe check (`end-dialog-error`); lows in `offene-punkte.md`.
+- [x] **Review I round 3, persona reruns** (`I-review-3.md`; `helga-i2.md`, `sven-i2.md`): «Löschen» back to its
+  behaviour before this change (product owner: a separate action) except the one guard for a running contract with a
+  future end; the field error is announced by the `DateInput` live region; the example date uses the current year;
+  a sentence says when the apartment is free; `endContract` computes today when the step runs.
 - [x] **Review I round 2 and personas** (`I-review-2.md`; `helga-i.md`, `sven-i.md`, `anna-i.md`): no day proposed;
   a future contract can be deleted again (scenario first), a running one cannot; delete dialog says a contract is kept
   for the Nebenkostenabrechnung; the action refuses an existing end and a contract it cannot load; shorter help; the

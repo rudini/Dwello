@@ -46,7 +46,7 @@ describe('Mietvertrag beenden', () => {
 		]);
 	});
 
-	// auch ohne JavaScript geprüft: ein Tag vor heute geht nicht ans Backend
+	// auch ohne JavaScript geprüft: ein Tag vor heute wird nicht gespeichert
 	it('lehnt ein Vertragsende vor heute ab, ohne den Mietvertrag zu ändern', async () => {
 		const { calls, result } = runAction(
 			actions.end,

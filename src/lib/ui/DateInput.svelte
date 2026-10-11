@@ -30,8 +30,9 @@
 	} = $props();
 
 	const FORMAT = 'Format TT.MM.JJJJ.';
-	const NOT_A_DATE =
-		'Dieses Datum gibt es nicht. Bitte geben Sie es als TT.MM.JJJJ ein, zum Beispiel 31.12.2025.';
+	// the example is the last day of this year: never in the past
+	const EXAMPLE = `31.12.${new Date().getFullYear()}`;
+	const NOT_A_DATE = `Dieses Datum gibt es nicht. Bitte geben Sie es als TT.MM.JJJJ ein, zum Beispiel ${EXAMPLE}.`;
 	const toText = (iso: string) => (iso ? formatDate(iso) : '');
 
 	let text = $state(toText(value));
@@ -68,7 +69,7 @@
 		`Es fehlt das Jahr. Bitte geben Sie das Datum als TT.MM.JJJJ ein, zum Beispiel ${text.trim().replace(/\.$/, '').split('.').map((n) => n.padStart(2, '0')).join('.')}.${new Date().getFullYear()}.`
 	);
 	// a day that does not exist, a missing year, or another way of writing it (words, slashes)
-	const FORMAT_ONLY = 'Bitte geben Sie das Datum in Ziffern als TT.MM.JJJJ ein, zum Beispiel 31.12.2025.';
+	const FORMAT_ONLY = `Bitte geben Sie das Datum in Ziffern als TT.MM.JJJJ ein, zum Beispiel ${EXAMPLE}.`;
 	const wrongDate = $derived(
 		/^\d{1,2}\.\d{1,2}\.?$/.test(text.trim())
 			? NO_YEAR
@@ -80,7 +81,8 @@
 	const wordsId = $derived(`${id}-words`);
 	const helpText = $derived(help ? `${help} ${FORMAT}` : FORMAT);
 	const words = $derived(value ? formatDateLong(value) : '');
-	const announced = $derived(invalid && left ? wrongDate : ''); // said when the field is left
+	// said when the field is left, and an error of the page, also when the field kept the focus (Enter)
+	const announced = $derived(invalid && left ? wrongDate : (error ?? ''));
 
 	function oninput(event: Event & { currentTarget: HTMLInputElement; inputType?: string }) {
 		left = false;
@@ -109,7 +111,7 @@
 </script>
 
 <div bind:this={frame} class="flex flex-col gap-2">
-	<Field {id} {label} help={helpText} example="31.12.2025" error={shownError} {optional}>
+	<Field {id} {label} help={helpText} example={EXAMPLE} error={shownError} {optional}>
 		{#snippet children(control)}
 			<div class="flex gap-2">
 				<input
