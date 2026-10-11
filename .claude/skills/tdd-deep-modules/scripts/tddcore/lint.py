@@ -54,7 +54,9 @@ def _required(body):
     present = [heading for heading in headings if heading in REQUIRED]
     if present != [heading for heading in REQUIRED if heading in present]:
         found.append(f"sections out of order: expected {', '.join(REQUIRED)}")
-    last = list(REQUIRED)[-1]
+    first, last = list(REQUIRED)[0], list(REQUIRED)[-1]
+    if headings and first in headings and headings[0] != first:
+        found.append(f"'{first}' is not the first section")
     if headings and last in headings and headings[-1] != last:
         found.append(f"'{last}' is not the last section")
     for heading, phrases in REQUIRED.items():
