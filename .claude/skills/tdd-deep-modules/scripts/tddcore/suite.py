@@ -23,7 +23,8 @@ class Run:
     outcome: str  # "pass", "fail" (assertion failures only) or "error" (anything else)
     summary: str
     failed: int  # number of failing tests
-    ran: int  # tests run, not skipped; a file or config that failed to load counts as one
+    ran: int  # tests run, not skipped
+    empty: bool  # the framework collected no tests at all (not: crashed before collecting)
 
 
 def run(root):
@@ -42,14 +43,15 @@ def run(root):
 
 
 def _combine(runs):
-    runs = [r for r in runs if r.ran] or runs  # a framework that found no tests is not this repo's
+    runs = [r for r in runs if not r.empty] or runs  # a framework with no tests is not this repo's
     outcomes = {r.outcome for r in runs}
     outcome = next(o for o in ("error", "fail", "pass") if o in outcomes)
     ran = sum(r.ran for r in runs)
     summary = "; ".join(r.summary for r in runs)
     if outcome == "pass" and not ran:
         outcome, summary = "error", f"no tests ran ({summary})"
-    return Run(max(r.exit_code for r in runs), outcome, summary, sum(r.failed for r in runs), ran)
+    return Run(max(r.exit_code for r in runs), outcome, summary, sum(r.failed for r in runs), ran,
+               all(r.empty for r in runs))
 
 
 def _files(root):
@@ -73,7 +75,8 @@ def _run_unittest(root):
     skipped = re.search(r"skipped=(\d+)", summary)
     return Run(done.returncode, _unittest_outcome(done.returncode, summary), summary,
                int(failed[1]) if failed else 0,
-               (int(ran[1]) if ran else 0) - (int(skipped[1]) if skipped else 0))
+               (int(ran[1]) if ran else 0) - (int(skipped[1]) if skipped else 0),
+               summary == "NO TESTS RAN")
 
 
 def _unittest_outcome(exit_code, summary):
@@ -114,14 +117,14 @@ def _run_vitest(root):
                               cwd=root, capture_output=True, text=True, errors="replace")
         if not report.exists():
             last = (done.stderr.strip() or done.stdout.strip() or "no output").splitlines()[-1]
-            return Run(done.returncode, "error", f"vitest wrote no report: {last}", 0, 1)
+            return Run(done.returncode, "error", f"vitest wrote no report: {last}", 0, 0, False)
         data = json.loads(report.read_text())
     summary = f"{data['numFailedTests']} of {data['numTotalTests']} tests failed"
     load_errors = sum(1 for f in data["testResults"] if f["message"])
     ran = data["numTotalTests"] - data["numPendingTests"] - data["numTodoTests"]
     unhandled = "unhandled error" in done.stderr + done.stdout
     return Run(done.returncode, _vitest_outcome(done.returncode, data, unhandled), summary,
-               data["numFailedTests"], ran + load_errors)
+               data["numFailedTests"], ran, data["numTotalTests"] == 0 and not load_errors)
 
 
 def _vitest_outcome(exit_code, data, unhandled):
@@ -165,7 +168,8 @@ def _run_pytest(root):
     summary = lines[-1] if lines else f"exit code {done.returncode}, no output"
     failed = sum(1 for case in cases for _ in case.iter("failure"))
     ran = sum(1 for case in cases if case.find("skipped") is None)
-    return Run(done.returncode, _pytest_outcome(done.returncode, cases), summary, failed, ran)
+    return Run(done.returncode, _pytest_outcome(done.returncode, cases), summary, failed, ran,
+               done.returncode == 5)  # pytest's "no tests collected"
 
 
 def _pytest_outcome(exit_code, cases):
