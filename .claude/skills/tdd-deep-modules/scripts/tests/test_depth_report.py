@@ -132,7 +132,7 @@ export class Ledger {
                         result.stdout)
 
     def test_usage_errors_exit_2_with_a_message(self):
-        repo = Repo(self, {"src/amount.ts": fixture("deep"), "README.md": "# x\n"})
+        repo = Repo(self, {"src/amount.ts": fixture("deep"), "README.md": "# x\n", "src/dir.ts/keep": ""})
         outside = Repo(self, {})
         (outside.path / ".git").rename(outside.path / "no-git")
         outside.write("amount.ts", fixture("deep"))
@@ -140,6 +140,8 @@ export class Ledger {
         for name, where, args, message in (
                 ("no file", repo, (), "usage: depth_report <file>..."),
                 ("missing file", repo, ("src/nope.ts",), "src/nope.ts: no such file"),
+                ("a directory", repo, ("src",), "src: not a TypeScript or JavaScript file"),
+                ("a directory named like a module", repo, ("src/dir.ts",), "src/dir.ts: not a file"),
                 ("not a module", repo, ("README.md",), "README.md: not a TypeScript or JavaScript file"),
                 ("outside git", outside, ("amount.ts",), "amount.ts: not inside a git repository")):
             with self.subTest(name):
