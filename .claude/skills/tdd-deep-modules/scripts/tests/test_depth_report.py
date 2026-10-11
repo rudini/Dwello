@@ -178,3 +178,13 @@ export class Ledger {
         result = repo.run("depth_report", "src/lib/server/amount.ts")
 
         self.assertIn(", tests 1,", report_line(result, "src/lib/server/amount.ts"))
+
+    def test_repeated_comment_lines_are_not_duplicates(self):
+        doc = "/**\n * Reads the session from the cookies.\n * @param cookies SvelteKit cookies object\n */\n"
+        module = (doc + "export function read(cookies: string): string {\n  return cookies.trim();\n}\n"
+                  + doc + "export function clear(cookies: string): string {\n  return cookies.slice(1);\n}\n")
+        repo = Repo(self, {"src/session.ts": module})
+
+        line = report_line(repo.run("depth_report", "src/session.ts"), "src/session.ts")
+
+        self.assertIn(", duplicate 0 ->", line)
