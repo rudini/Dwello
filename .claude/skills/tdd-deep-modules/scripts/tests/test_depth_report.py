@@ -157,3 +157,15 @@ export class Ledger {
         line = report_line(repo.run("depth_report", "src/double.ts"), "src/double.ts")
 
         self.assertTrue(line.startswith("src/double.ts: surface 2, size 3,"), line)
+
+    def test_a_dotted_module_name_is_matched_whole(self):
+        test = "import { createApartment } from '../services/apartment.service';\n"
+        repo = Repo(self, {"src/services/apartment.service.ts": fixture("deep"),
+                           "src/services/apartment.ts": fixture("deep"),
+                           "src/__tests__/apartment.pg.test.ts": test})
+
+        dotted = repo.run("depth_report", "src/services/apartment.service.ts")
+        plain = repo.run("depth_report", "src/services/apartment.ts")
+
+        self.assertIn(", tests 1,", report_line(dotted, "src/services/apartment.service.ts"))
+        self.assertIn(", tests 0,", report_line(plain, "src/services/apartment.ts"))
