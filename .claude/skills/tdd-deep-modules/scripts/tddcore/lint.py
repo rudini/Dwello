@@ -10,6 +10,7 @@ _KEYS = {"name", "description", "license", "allowed-tools", "metadata", "compati
          "argument-hint", "disable-model-invocation", "user-invocable", "context", "agent", "when_to_use",
          "version", "paths", "effort", "shell"}
 
+REFERENCES = ("references/design-it-twice.md", "references/depth.md", "references/tooling.md")  # the details
 LINE_LIMIT = 400  # SKILL.md must stay below this; details belong in references/
 
 # every section the skill must have, in order, with the phrases it must contain (compared in lower case)
@@ -65,7 +66,8 @@ def _length(text):
 
 def _references(text, skill):
     links = sorted(set(re.findall(r"references/[\w./-]+\.md", text)))
-    return [f"{link} is linked but does not exist" for link in links if not (skill / link).is_file()]
+    return ([f"{link} is linked but does not exist" for link in links if not (skill / link).is_file()]
+            + [f"{reference} is not linked from SKILL.md" for reference in REFERENCES if reference not in links])
 
 
 def _required(body):
