@@ -159,3 +159,18 @@ class TddReplayTest(unittest.TestCase):
         result = repo.run("tdd_replay", f"{base}..HEAD")
 
         self.assertIn("REPLAY: ACCEPT", result.stdout, result.stdout + result.stderr)
+
+    def test_the_replay_leaves_the_callers_checkout_untouched(self):
+        repo, base = good_history(self)
+        repo.write("calc.ts", "// work in progress\n")
+        repo.write("notes.md", "untracked\n")
+        repo.git("add", "notes.md")
+        before = (repo.git("status", "--porcelain"), repo.git("rev-parse", "HEAD"),
+                  repo.git("symbolic-ref", "HEAD"), repo.git("worktree", "list", "--porcelain"))
+
+        repo.run("tdd_replay", f"{base}..HEAD")
+
+        after = (repo.git("status", "--porcelain"), repo.git("rev-parse", "HEAD"),
+                 repo.git("symbolic-ref", "HEAD"), repo.git("worktree", "list", "--porcelain"))
+        self.assertEqual(after, before)
+        self.assertEqual((repo.path / "calc.ts").read_text(), "// work in progress\n")

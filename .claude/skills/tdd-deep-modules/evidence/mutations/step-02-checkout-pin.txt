@@ -1,0 +1,1 @@
+KILLED   tddcore/replay.py: '            _git(repo, "worktree", "remove", "--force", str(tree))' -> '            pass' [test_the_replay_leaves_the_callers_checkout_untouched]
