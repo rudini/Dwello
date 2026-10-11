@@ -58,10 +58,33 @@ def _size(text):
     return sum(1 for line in text.splitlines() if line.strip() and not line.strip().startswith("//"))
 
 
+_EXPORTS = [  # (pattern, whether group 1 holds a parameter list); the first match per line wins
+    (r"export\s+(?:default\s+)?(?:async\s+)?function\*?\s*\w*\s*\(([^)]*)\)", True),
+    (r"export\s+(?:const|let|var)\s+\w+\s*(?::[^=]+)?=\s*(?:async\s*)?(?:function\b[^(]*)?\(([^)]*)\)", True),
+    (r"export\s*\{([^}]*)\}", False),
+    (r"export\s+(?:default|const|let|var|type|interface|enum|declare|abstract|class|\*)", None),
+]
+
+
 def _surface(text):
+    """Exported names, the parameters of exported functions, and the public members of exported classes."""
     surface = 0
-    for params in re.findall(r"^export (?:async )?function\*? *\w+ *\(([^)]*)\)", text, re.MULTILINE):
-        surface += 1 + len([p for p in params.split(",") if p.strip()])
+    for line in text.splitlines():
+        for pattern, params in _EXPORTS:
+            match = re.match(pattern, line)
+            if match:
+                if params is None:
+                    surface += 1
+                elif params:
+                    surface += 1 + len(_names(match[1]))
+                else:
+                    surface += len([name for name in match[1].split(",") if name.strip()])
+                break
+    for match in re.finditer(r"^export\s+(?:default\s+)?(?:abstract\s+)?class\s+\w+[^{]*\{", text, re.MULTILINE):
+        for modifiers, name, params in _members(_top_level(text[match.end():])):
+            if name.startswith("#") or re.search(r"\b(private|protected)\b", modifiers):
+                continue
+            surface += len(_names(params)) + (name != "constructor")
     return surface
 
 
@@ -84,11 +107,15 @@ def _classes(text):
     """[(name, [method names])] of every class, methods read from the class body's top level."""
     classes = []
     for match in re.finditer(r"\bclass\s+(\w+)[^{]*\{", text):
-        body = _top_level(text[match.end():])
-        methods = re.findall(r"^\s*(?:(?:public|protected|private|static|async|readonly)\s+)*(#?\w+)\s*\(",
-                             body, re.MULTILINE)
-        classes.append((match[1], [m for m in methods if m != "constructor"]))
+        members = _members(_top_level(text[match.end():]))
+        classes.append((match[1], [name for _, name, _ in members if name != "constructor"]))
     return classes
+
+
+def _members(body):
+    """[(modifiers, name, parameters)] of the methods declared in a class body's top level."""
+    return re.findall(r"^\s*((?:(?:public|protected|private|static|async|readonly|get|set)\s+)*)(#?\w+)\s*"
+                      r"\(([^)]*)\)", body, re.MULTILINE)
 
 
 def _top_level(text):
