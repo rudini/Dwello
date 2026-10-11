@@ -68,3 +68,26 @@ class TddStepTierTest(unittest.TestCase):
         self.assertEqual(result.returncode, 1, result.stderr)
         self.assertIn("green must run the full suite, like its red", result.stderr)
         self.assertEqual(repo.subject(), "red: sums")
+
+    def test_refactor_runs_the_full_suite_and_refuses_the_fast_one(self):
+        broken = tiered_repo(self, RIGHT_ADD_TS, **{"calc.test.ts": BUN_TEST})
+        broken.commit_phase("green", {"calc.ts": RIGHT_ADD_TS + "// green\n"}, 0)
+        broken.write("calc.ts", RIGHT_ADD_TS)
+        self.assertEqual(broken.subject(), "green: green step")
+
+        default = broken.run("tdd-step", "refactor", "tidy")
+        fast = broken.run("tdd-step", "refactor", "--suite", "fast", "tidy")
+
+        self.assertEqual(default.returncode, 1, default.stderr)
+        self.assertIn("refactor needs all tests passing", default.stderr)
+        self.assertEqual(fast.returncode, 1, fast.stderr)
+        self.assertIn("refactor must run the full suite", fast.stderr)
+        self.assertEqual(broken.subject(), "green: green step")
+        repo = green_tiered_repo(self)
+        repo.commit_phase("green", {"calc.ts": RIGHT_ADD_TS + "// green\n"}, 0)
+        repo.write("calc.ts", RIGHT_ADD_TS)
+
+        result = repo.run("tdd-step", "refactor", "tidy")
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(repo.trailer("TDD-Suite"), "full")
