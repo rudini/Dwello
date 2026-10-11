@@ -40,7 +40,7 @@ export function contractEndError(endDate: string, startDate: string, today: stri
 	if (!/^\d{4}-\d{2}-\d{2}$/.test(endDate))
 		return `Bitte geben Sie das Vertragsende ein, zum Beispiel 31.12.${today.slice(0, 4)}.`;
 	if (endDate < today)
-		return 'Das Vertragsende kann nicht vor heute liegen. Ein früheres Vertragsende tragen Sie unter «Bearbeiten» ein.';
+		return 'Das Vertragsende liegt vor heute. Liegt der Kündigungstermin schon zurück, tragen Sie ihn unter «Bearbeiten» ein.';
 	if (endDate < startDate.slice(0, 10))
 		return `Das Vertragsende kann nicht vor dem Vertragsbeginn am ${formatDate(startDate.slice(0, 10))} liegen.`;
 	return null;

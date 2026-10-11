@@ -46,7 +46,7 @@ describe('Vertragsende beim Beenden', () => {
 
 	it('lehnt einen Tag vor heute ab und sagt, wo ein früheres Ende hingehört', () => {
 		expect(contractEndError('2026-10-09', '2024-04-01', today)).toBe(
-			'Das Vertragsende kann nicht vor heute liegen. Ein früheres Vertragsende tragen Sie unter «Bearbeiten» ein.'
+			'Das Vertragsende liegt vor heute. Liegt der Kündigungstermin schon zurück, tragen Sie ihn unter «Bearbeiten» ein.'
 		);
 	});
 

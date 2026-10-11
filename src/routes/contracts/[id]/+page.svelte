@@ -129,17 +129,21 @@
 				: `Der Mietvertrag von ${name} endet am ${formatDate(endDate)}`
 		)}
 >
-	<!-- TODO(fachlich prüfen): «gekündigt» is not in the glossary (offene-punkte.md) -->
+	<!-- TODO(fachlich prüfen): «Kündigungstermin», «Kündigungsfrist» are not in the glossary (offene-punkte.md) -->
 	<DateInput
 		id="endDate"
 		label="Vertragsende"
-		help="Der letzte Tag des Mietverhältnisses, zum Beispiel der Tag, auf den gekündigt ist. Bis und mit diesem Tag läuft der Mietvertrag."
+		help="Der letzte Tag des Mietverhältnisses, also der Kündigungstermin. Bis und mit diesem Tag läuft der Mietvertrag, auch wenn der Mieter früher auszieht."
 		min={earliestEnd}
 		error={endError}
 		bind:value={endDate}
 		testid="contract-end-date-input"
 	/>
-	<p class="text-ink-muted">Ab dem Tag danach ist die Wohnung frei, wenn kein neuer Mietvertrag beginnt.</p>
+	<p class="text-ink-muted">
+		Prüfen Sie Frist und Termin im Mietvertrag: Für Wohnungen gilt eine Kündigungsfrist von
+		mindestens 3 Monaten. Ist die Kündigung zu spät, gilt sie erst auf den nächsten
+		Kündigungstermin. Ein neuer Mietvertrag kann am Tag danach beginnen.
+	</p>
 </ActionDialog>
 
 <ActionDialog

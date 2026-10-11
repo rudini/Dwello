@@ -122,9 +122,13 @@ describe('Mietvertragsdetail', () => {
 		expect(dialog.textContent).toContain(
 			'Bitte geben Sie das Vertragsende ein, zum Beispiel 31.12.2026.'
 		);
-		expect(dialog.textContent).toContain(
-			'Der letzte Tag des Mietverhältnisses, zum Beispiel der Tag, auf den gekündigt ist.'
+		const words = dialog.textContent!.replace(/\s+/g, ' ');
+		expect(words).toContain('Der letzte Tag des Mietverhältnisses, also der Kündigungstermin.');
+		expect(words).toContain('auch wenn der Mieter früher auszieht.');
+		expect(words).toContain(
+			'Ist die Kündigung zu spät, gilt sie erst auf den nächsten Kündigungstermin.'
 		);
+		expect(words).toContain('Ein neuer Mietvertrag kann am Tag danach beginnen.');
 		expect(byTestId('contract-end-confirm')!.textContent).toContain('Mietvertrag beenden');
 	});
 
@@ -137,7 +141,7 @@ describe('Mietvertragsdetail', () => {
 		click('contract-end-confirm');
 		await settle();
 		expect(document.querySelector('[role=dialog]')!.textContent).toContain(
-			'Das Vertragsende kann nicht vor heute liegen.'
+			'Das Vertragsende liegt vor heute.'
 		);
 		expect(submitted).not.toHaveBeenCalled();
 	});

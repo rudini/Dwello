@@ -187,9 +187,9 @@ describe('Datumsfeld TT.MM.JJJJ', () => {
 
 	// ein Fehler, den die Seite beim Senden meldet, wird angesagt, auch wenn das Feld schon den Fokus hat (Enter)
 	it('sagt einen Fehler der Seite an', () => {
-		date('2024-01-31', { error: 'Das Vertragsende kann nicht vor heute liegen.' });
+		date('2024-01-31', { error: 'Das Vertragsende liegt vor heute.' });
 		expect(document.querySelector('[aria-live="assertive"]')!.textContent).toContain(
-			'Das Vertragsende kann nicht vor heute liegen.'
+			'Das Vertragsende liegt vor heute.'
 		);
 	});
 

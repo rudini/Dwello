@@ -60,7 +60,7 @@ describe('Mietvertrag beenden', () => {
 			status: 400,
 			data: {
 				endError:
-					'Das Vertragsende kann nicht vor heute liegen. Ein früheres Vertragsende tragen Sie unter «Bearbeiten» ein.'
+					'Das Vertragsende liegt vor heute. Liegt der Kündigungstermin schon zurück, tragen Sie ihn unter «Bearbeiten» ein.'
 			}
 		});
 		expect(calls.filter((call) => call.method === 'PUT')).toEqual([]);

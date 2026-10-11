@@ -31,7 +31,7 @@ Funktionalität: Mietvertragsdetail
   Szenario: Vertragsende in der Vergangenheit
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
     Wenn der Liegenschaftsverwalter den Mietvertrag auf den "2024-01-31" beenden will
-    Dann meldet der Dialog "Das Vertragsende kann nicht vor heute liegen."
+    Dann meldet der Dialog "Das Vertragsende liegt vor heute."
     Und ist der Mietvertrag unbefristet
 
   Szenario: Künftiger Mietvertrag
