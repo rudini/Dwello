@@ -6,10 +6,15 @@ import sys
 # the standard library or an installed package before the gate has checked the lock.
 sys.path.pop(0)
 import os  # noqa: E402
+import shutil  # noqa: E402
+import tempfile  # noqa: E402
 
+# compile into a fresh cache, here and in the test run, so no bytecode left in scripts/ is ever loaded
+os.environ["PYTHONPYCACHEPREFIX"] = sys.pycache_prefix = tempfile.mkdtemp(prefix="verify_all-")
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from tddcore import gate  # noqa: E402
 
 passed, lines = gate.stage2(*sys.argv[1:2])
 print("\n".join(lines))
+shutil.rmtree(sys.pycache_prefix)
 sys.exit(not passed)
