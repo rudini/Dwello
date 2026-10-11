@@ -1,7 +1,11 @@
 """Measure how deep a TypeScript/JavaScript module is: its interface against its implementation."""
+import os
 import re
+import subprocess
 from dataclasses import dataclass
 from pathlib import Path
+
+from tddcore import protocol
 
 
 @dataclass(frozen=True)
@@ -12,6 +16,7 @@ class Depth:
     ratio: float  # size per unit of surface
     classitis: tuple  # names of tiny classes, when the module has two or more of them
     pass_through: tuple  # names of functions that only forward their arguments
+    tests: tuple  # test files that import the module
     findings: tuple
 
 
@@ -24,6 +29,7 @@ def measure(root, path):
     surface, size = _surface(text), _size(text)
     ratio = size / surface if surface else float(size)
     pass_through = _pass_through(text)
+    tests = _tests(Path(root) / path)
     tiny = [name for name, methods in _classes(text) if len(methods) <= TINY_CLASS]
     classitis = tuple(tiny) if len(tiny) >= 2 else ()
     findings = []
@@ -33,7 +39,9 @@ def measure(root, path):
         findings.append(f"classitis: {', '.join(classitis)}")
     if pass_through:
         findings.append(f"pass-through: {', '.join(pass_through)}")
-    return Depth(path, surface, size, ratio, classitis, pass_through, tuple(findings))
+    if not tests:
+        findings.append("untested: no test file imports it")
+    return Depth(path, surface, size, ratio, classitis, pass_through, tests, tuple(findings))
 
 
 def _size(text):
@@ -86,3 +94,26 @@ def _top_level(text):
         elif depth == 0:
             kept.append(char)
     return "".join(kept)
+
+
+_SOURCE = {".ts", ".tsx", ".mts", ".cts", ".js", ".jsx", ".mjs", ".cjs"}
+_IMPORT = re.compile(r"""(?:\bfrom\s*|\bimport\s*\(?\s*)["'](\.{1,2}/[^"']*)["']""")
+
+
+def _tests(module):
+    """Test files of the module's repository whose relative imports resolve to the module."""
+    module = module.resolve()
+    top = Path(subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=module.parent, check=True,
+                              capture_output=True, text=True).stdout.strip())
+    listed = subprocess.run(["git", "ls-files", "-z", "-co", "--exclude-standard"], cwd=top, check=True,
+                            capture_output=True, text=True).stdout.split("\0")
+    target = module.with_suffix("")
+    found = []
+    for rel in listed:
+        test = top / rel
+        if Path(rel).suffix not in _SOURCE or protocol.is_production(rel) or not test.is_file():
+            continue
+        specs = _IMPORT.findall(test.read_text(errors="replace"))
+        if any(Path(os.path.normpath(test.parent / spec)).with_suffix("") == target for spec in specs):
+            found.append(rel)
+    return tuple(found)
