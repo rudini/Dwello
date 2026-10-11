@@ -6,40 +6,40 @@
       "query": "In our SvelteKit app with vitest, add a function that splits a utility bill across apartments by area. Do it strictly test-first: one failing test, then the code, then refactor, and commit each step.",
       "should_trigger": true,
       "trigger_rate": 1.0,
-      "triggers": 1,
-      "runs": 1,
+      "triggers": 3,
+      "runs": 3,
       "pass": true
     },
     {
       "query": "Fix the bug where the invoice total in backend/src/services/invoice.service.ts rounds wrong; write a red test with bun test first and then make it green.",
       "should_trigger": true,
       "trigger_rate": 1.0,
-      "triggers": 1,
-      "runs": 1,
+      "triggers": 3,
+      "runs": 3,
       "pass": true
     },
     {
       "query": "I want red-green-refactor with real enforcement on this TypeScript project, and the module design should be deep (small interface, lots hidden). Start with the tenant import parser.",
       "should_trigger": true,
       "trigger_rate": 1.0,
-      "triggers": 1,
-      "runs": 1,
+      "triggers": 3,
+      "runs": 3,
       "pass": true
     },
     {
       "query": "Check that the last 12 commits on this branch really followed TDD: every red failing, every green passing, re-run each commit.",
       "should_trigger": true,
       "trigger_rate": 1.0,
-      "triggers": 1,
-      "runs": 1,
+      "triggers": 3,
+      "runs": 3,
       "pass": true
     },
     {
       "query": "Build the new deposit calculation module the TDD way with vitest and keep the interface minimal, compare two interface designs before you start.",
       "should_trigger": true,
       "trigger_rate": 1.0,
-      "triggers": 1,
-      "runs": 1,
+      "triggers": 3,
+      "runs": 3,
       "pass": true
     },
     {
@@ -47,7 +47,7 @@
       "should_trigger": false,
       "trigger_rate": 0.0,
       "triggers": 0,
-      "runs": 1,
+      "runs": 3,
       "pass": true
     },
     {
@@ -55,7 +55,7 @@
       "should_trigger": false,
       "trigger_rate": 0.0,
       "triggers": 0,
-      "runs": 1,
+      "runs": 3,
       "pass": true
     },
     {
@@ -63,7 +63,7 @@
       "should_trigger": false,
       "trigger_rate": 0.0,
       "triggers": 0,
-      "runs": 1,
+      "runs": 3,
       "pass": true
     },
     {
@@ -71,7 +71,7 @@
       "should_trigger": false,
       "trigger_rate": 0.0,
       "triggers": 0,
-      "runs": 1,
+      "runs": 3,
       "pass": true
     },
     {
@@ -79,13 +79,29 @@
       "should_trigger": false,
       "trigger_rate": 0.0,
       "triggers": 0,
-      "runs": 1,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "Let's do strict red-green-refactor TDD in our Django app: write a failing pytest for the rent reminder view first, then make it pass.",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "Drive the new parser in our Rust crate test-first with cargo test, one failing test at a time, and keep the module interface small.",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
       "pass": true
     }
   ],
   "summary": {
-    "total": 10,
-    "passed": 10,
+    "total": 12,
+    "passed": 12,
     "failed": 0
   }
 }
