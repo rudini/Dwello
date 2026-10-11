@@ -146,3 +146,17 @@ class TddGuardTest(unittest.TestCase):
 
         self.assertEqual(result.returncode, 2, result.stderr)
         self.assertIn("calc.ts is production code", result.stderr)
+
+    def test_a_git_failure_other_than_no_repository_is_reported(self):
+        repo = bun_repo(self)
+        with tempfile.TemporaryDirectory() as bin_dir:
+            fake = Path(bin_dir) / "git"
+            fake.write_text("#!/bin/sh\necho \"fatal: detected dubious ownership in repository at '$PWD'\" >&2\nexit 128\n")
+            fake.chmod(0o755)
+            event = {"tool_name": "Edit", "tool_input": {"file_path": str(repo.path / "calc.ts")}}
+            result = subprocess.run([sys.executable, str(SCRIPTS / "tdd-guard")], input=json.dumps(event),
+                                    capture_output=True, text=True,
+                                    env={**os.environ, "PATH": f"{bin_dir}:{os.environ['PATH']}"})
+
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn("tdd-guard: cannot check calc.ts: fatal: detected dubious ownership", result.stderr)
