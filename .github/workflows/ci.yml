@@ -217,6 +217,8 @@ jobs:
           git diff --name-only "origin/${{ github.base_ref }}...HEAD" | bun tests/ui-screenshots/affected-routes.ts > ui-routes.txt
           cat ui-routes.txt
           echo "any=$(grep -q . ui-routes.txt && echo true || echo false)" >> "$GITHUB_OUTPUT"
+          echo "pages=$(grep -q '^/' ui-routes.txt && echo true || echo false)" >> "$GITHUB_OUTPUT"
+          echo "pdf=$(grep -qx pdf ui-routes.txt && echo true || echo false)" >> "$GITHUB_OUTPUT"
       - uses: actions/setup-node@v4
         if: steps.routes.outputs.any == 'true'
         with:
@@ -236,8 +238,17 @@ jobs:
           git worktree add ../base "origin/${{ github.base_ref }}"
           cd ../base && npm ci
       - name: Take screenshots
-        if: steps.routes.outputs.any == 'true'
+        if: steps.routes.outputs.pages == 'true'
         run: npx playwright test -c playwright.screenshots.config.ts
+        env:
+          UI_BASE_DIR: ${{ github.workspace }}/../base
+      # The statement PDF is drawn by the backend: a fixed example in German and French, against the base branch's code
+      - name: Take screenshots of the statement PDF
+        if: steps.routes.outputs.pdf == 'true'
+        run: |
+          sudo apt-get update -q && sudo apt-get install -y --no-install-recommends poppler-utils
+          (cd ../base/backend && bun install --frozen-lockfile)
+          bun tests/ui-screenshots/statement-pdf.ts
         env:
           UI_BASE_DIR: ${{ github.workspace }}/../base
       - name: Publish screenshots to branch ui-screenshots
@@ -260,13 +271,22 @@ jobs:
             const pr = context.payload.pull_request;
             const base = `https://github.com/${context.repo.owner}/${context.repo.repo}/blob/ui-screenshots/pr-${pr.number}/${pr.head.sha}`;
             const marker = '<!-- ui-screenshots -->';
-            const shots = fs.readFileSync('ui-routes.txt', 'utf8').split('\n').filter(Boolean).map((route) => {
-              const name = route.split(/[/[\]]+/).filter(Boolean).join('_') || 'home';
+            const shot = (title, name) => {
               const before = fs.existsSync(`ui-screenshots/${name}.before.png`)
-                ? `\n<details><summary>Before</summary>\n\n![${route} before](${base}/${name}.before.png?raw=true)\n</details>`
+                ? `\n<details><summary>Before</summary>\n\n![${title} before](${base}/${name}.before.png?raw=true)\n</details>`
                 : '\n_New page, nothing to compare with._';
-              return `### \`${route}\`\n![${route}](${base}/${name}.png?raw=true)${before}`;
-            });
+              return `### ${title}\n![${title}](${base}/${name}.png?raw=true)${before}`;
+            };
+            // the statement PDF (statement-pdf.ts): pdf_<language>_<page>.png
+            const pdfPages = fs.readdirSync('ui-screenshots').filter((file) => /^pdf_\w+_\d+\.png$/.test(file)).sort();
+            const shots = fs.readFileSync('ui-routes.txt', 'utf8').split('\n').filter(Boolean).flatMap((route) =>
+              route === 'pdf'
+                ? pdfPages.map((file) => {
+                    const [, language, page] = file.match(/^pdf_(\w+)_(\d+)\.png$/);
+                    return shot(`Statement PDF (${language}), page ${page}`, file.replace('.png', ''));
+                  })
+                : [shot(`\`${route}\``, route.split(/[/[\]]+/).filter(Boolean).join('_') || 'home')]
+            );
             const body = `${marker}\n## UI screenshots\nChanged pages as of ${pr.head.sha.slice(0, 7)}; changes against ${pr.base.ref} are framed in red:\n\n${shots.join('\n\n')}`;
             const comments = await github.paginate(github.rest.issues.listComments, { ...context.repo, issue_number: pr.number });
             const existing = comments.find((comment) => comment.body?.startsWith(marker));

@@ -4499,6 +4499,10 @@ critical/high/medium is open; reviews in `docs/reviews/`.
   error again; `localToday` is the Swiss day (also in tests and E2E steps); the PDF as sent stays after paying;
   reminders only when overdue (backend); date messages for a missing year and other formats; scenarios «Zahlungseingang
   mit Datum festhalten», «Kein Zahlungseingang in der Zukunft».
+- [x] **Statement PDF in the CI job «UI screenshots»** (`tests/ui-screenshots/statement-pdf.ts`, `affected-routes.ts`
+  `pdfAffected`, `changed-areas.ts` `markAreas`, `.github/workflows/ci.yml`): a change of the backend's PDF code captures
+  a fixed example (Musterhaus 2025, mixed key, tank, QR) in German and French, drawn by this branch and the base branch,
+  pages via pdftoppm, changes framed in red, posted with the page screenshots.
 
 
 ---
