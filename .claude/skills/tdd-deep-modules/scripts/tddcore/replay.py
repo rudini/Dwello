@@ -82,6 +82,9 @@ def _judge(previous, known, subject, claimed, run, changed):
     new, removed = run.tests - known, known - run.tests
     if phase == "red" and len(new) != 1:
         found.append(f"red must add exactly one new test, but adds {len(new)}")
+    if phase == "red" and run.failing - new:
+        found.append(f"red's failing test must be its new test, but these fail: "
+                     f"{', '.join(sorted(run.failing - new))}")
     if phase != "red" and new:
         found.append(f"only red may add tests, but {phase} adds {len(new)}")
     if phase in ("green", "refactor") and removed:

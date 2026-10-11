@@ -22,6 +22,7 @@ class Run:
     failed: int  # number of failing tests
     ran: int  # tests run, not skipped
     tests: frozenset = frozenset()  # ids of the tests the framework collected
+    failing: frozenset = frozenset()  # ids of the tests that failed
 
 
 def run(root):
@@ -41,7 +42,7 @@ def _combine(runs):
         outcome, summary = "error", f"no tests ran ({summary})"
     # the exit code covers every command run, so the trailer never hides a failing one
     return Run(max(r.exit_code for r in runs), outcome, summary, sum(r.failed for r in runs), ran,
-               frozenset().union(*(r.tests for r in runs)))
+               frozenset().union(*(r.tests for r in runs)), frozenset().union(*(r.failing for r in runs)))
 
 
 def _files(root):
@@ -114,9 +115,11 @@ def _run_bun(directory, command, package):
     summary = f"bun: {failed} of {len(cases)} tests failed"
     if hidden:
         summary += f" ({errors} errors outside tests)"
-    tests = frozenset(f"{package / case.get('file', '')}::{case.get('classname', '')}::"
-                      f"{case.get('name')}" for case in cases)
-    return Run(done.returncode, outcome, summary, failed, ran, tests)
+    def test_id(case):
+        return f"{package / case.get('file', '')}::{case.get('classname', '')}::{case.get('name')}"
+    tests = frozenset(test_id(case) for case in cases)
+    failing = frozenset(test_id(case) for case in cases if case.find("failure") is not None)
+    return Run(done.returncode, outcome, summary, failed, ran, tests, failing)
 
 
 def _run_vitest(root, package):
