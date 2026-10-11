@@ -247,3 +247,17 @@ class TddReplayTierTest(unittest.TestCase):
 
         self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
         self.assertIn("red removes tests from the fast suite: calc.test.ts::::adds", result.stdout)
+
+    def test_test_commits_after_the_task_s_last_full_step_are_accepted(self):
+        repo = tiered_repo(self, **{"db.pg.test.ts": DATABASE_TEST})
+        base = repo.git("rev-parse", "HEAD")
+        repo.commit_phase("test", {"TESTLIST.md": "- [ ] adds\n"}, 1, suite="fast")  # no fast tests yet
+        repo.commit_phase("red", {"calc.test.ts": BUN_TEST}, 1, suite="fast")
+        repo.commit_phase("green", {"calc.ts": RIGHT_ADD_TS}, 0, suite="fast")
+        repo.commit_phase("refactor", {"calc.ts": RIGHT_ADD_TS + "// tidy\n"}, 0)
+        repo.commit_phase("test", {"DESIGN.md": "design note\n"}, 0, suite="fast")
+
+        result = self.replay(repo, base)
+
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("REPLAY: ACCEPT", result.stdout)
