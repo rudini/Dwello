@@ -10,7 +10,6 @@ import {
 	generateMoreButton,
 	heatingProfileSelect,
 	managementFeeInput,
-	managementFeeKeySelect,
 	newInvoiceFromWarning,
 	nextButton,
 	periodEndInput,
@@ -19,7 +18,7 @@ import {
 	showStatementsButton
 } from '../interactions/statement-generate';
 
-type RunOptions = { heatingProfileId?: string; managementFeePercent?: number; managementFeeKey?: string };
+type RunOptions = { heatingProfileId?: string; managementFeePercent?: number };
 
 // Steps "Abrechnungsperiode" (default period) and "Gebäude"
 export const chooseBuilding = (buildingId: string) => async (actor: Actor) => {
@@ -44,7 +43,6 @@ export const openPreview =
 		if (options.heatingProfileId) await heatingProfileSelect(actor.page).selectOption(options.heatingProfileId);
 		if (options.managementFeePercent !== undefined)
 			await managementFeeInput(actor.page).fill(String(options.managementFeePercent));
-		if (options.managementFeeKey) await managementFeeKeySelect(actor.page).selectOption({ label: options.managementFeeKey });
 		await nextButton(actor.page).click();
 		await previewCount(actor.page).waitFor(); // the preview is calculated on the server
 	};

@@ -4,7 +4,6 @@
 	import { germanName } from '$lib/names';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Field from '$lib/ui/Field.svelte';
-	import Select from '$lib/ui/Select.svelte';
 	import TextInput from '$lib/ui/TextInput.svelte';
 	import { controlClass } from '$lib/ui/field';
 	import { keepEarlyChoice } from '$lib/early-choice';
@@ -12,17 +11,13 @@
 	// Step 3: how heating costs spread over the months, and the Verwaltungspauschale of this run
 	let {
 		heatingProfiles,
-		distributionKeys,
 		heatingProfileId = $bindable(),
 		managementFeePercent = $bindable(),
-		managementFeeDistributionKeyId = $bindable(),
 		errors
 	}: {
 		heatingProfiles: HeatingProfile[];
-		distributionKeys: { id: string; name: string }[];
 		heatingProfileId: string;
 		managementFeePercent: number;
-		managementFeeDistributionKeyId: string;
 		errors: Record<string, string>;
 	} = $props();
 
@@ -85,7 +80,7 @@
 	id="managementFeePercent"
 	label="Verwaltungspauschale in %"
 	type="number"
-	help="Prozentsatz der Nebenkosten, gilt für alle Abrechnungen dieses Laufs. Üblich sind bis {USUAL_MAXIMUM} %. Verlangen Sie eine Verwaltungspauschale nur, wenn sie im Mietvertrag vereinbart ist. Sonst geben Sie 0 ein. Haben Mietverträge verschiedene Sätze, erstellen Sie die Abrechnungen getrennt."
+	help="Prozentsatz der eigenen Nebenkosten jedes Mieters, gilt für alle Abrechnungen dieses Laufs. Üblich sind bis {USUAL_MAXIMUM} %. Verlangen Sie eine Verwaltungspauschale nur, wenn sie im Mietvertrag vereinbart ist. Sonst geben Sie 0 ein. Haben Mietverträge verschiedene Sätze, erstellen Sie die Abrechnungen getrennt."
 	bind:value={() => fee, (v) => (managementFeePercent = v === '' ? NaN : Number(v))}
 	error={errors.managementFeePercent}
 	testid="management-fee-input"
@@ -98,15 +93,3 @@
 		</p>
 	</Alert>
 {/if}
-
-<Select
-	id="managementFeeDistributionKeyId"
-	label="Verteilung der Verwaltungspauschale"
-	help="Üblich ist der Prozentsatz der eigenen Nebenkosten jedes Mieters. Mit einem Verteilschlüssel wird stattdessen der Prozentsatz der Nebenkosten der Liegenschaft auf die Wohnungen verteilt; jeder Mieter trägt den Teil seiner Mietstage."
-	options={[
-		{ value: '', label: 'Nach den eigenen Nebenkosten jedes Mieters' },
-		...distributionKeys.map((key) => ({ value: key.id, label: key.name }))
-	]}
-	bind:value={managementFeeDistributionKeyId}
-	testid="management-fee-key-select"
-/>

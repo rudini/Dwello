@@ -143,20 +143,6 @@ describe('Abrechnungen erstellen', () => {
 		expect(posts.map((post) => post.body.contractId)).toEqual(['einzug', 'einzug']);
 	});
 
-	it('verteilt die Verwaltungspauschale nach dem gewählten Verteilschlüssel', async () => {
-		const { fetch, posts } = backend();
-		const byArea = { ...period, managementFeeDistributionKeyId: 'k-area' };
-		await previewStatements(fetch, byArea);
-		await generateStatements(fetch, byArea);
-
-		expect(posts.map((post) => post.body.managementFeeDistributionKeyId)).toEqual([
-			'k-area',
-			'k-area',
-			'k-area',
-			'k-area'
-		]);
-	});
-
 	it('meldet einen Fehler, wenn das Backend die Berechnung ablehnt', async () => {
 		const fetch = (async (url: string) =>
 			url.includes('contracts')

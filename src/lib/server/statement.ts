@@ -45,7 +45,6 @@ export function toStatement(data: BackendStatement): StatementWithDetails {
 			data.managementFeePercent != null
 				? Number(data.managementFeePercent)
 				: feePercent(Number(data.totalCosts), Number(data.managementFee)),
-		managementFeeKeyed: !!data.managementFeeDistributionKeyId,
 		balance: Number(data.balance),
 		status: data.status,
 		paymentDeadline: data.paymentDeadline,

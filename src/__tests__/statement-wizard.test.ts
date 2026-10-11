@@ -14,7 +14,6 @@ const selection = {
 	periodEnd: '2024-12-31',
 	heatingProfileId: 'hp1',
 	managementFeePercent: 3,
-	managementFeeDistributionKeyId: '',
 	buildingIds: ['b1']
 };
 const period = { periodStart: '2024-01-01', periodEnd: '2024-12-31' };

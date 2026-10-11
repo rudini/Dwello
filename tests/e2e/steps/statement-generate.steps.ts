@@ -7,6 +7,8 @@ import {
 	chosenBuilding,
 	draftsOnly,
 	feeAboveGuideline,
+	feeField,
+	settingsChoices,
 	invoicesOfBuilding,
 	missingInvoicesWarning,
 	generationOutcome,
@@ -135,11 +137,9 @@ When(
 );
 
 When(
-	'der Liegenschaftsverwalter die Vorschau der Abrechnungen {int} für das Gebäude {string} mit {float} % Verwaltungspauschale nach dem Verteilschlüssel {string} öffnet',
-	async ({ verwalter, seed, driver }, year: number, building: string, fee: number, key: string) => {
-		await verwalter.perform(
-			previewWith(driver, seed, year, seed.idOf(building)!, { managementFeePercent: fee, managementFeeKey: key })
-		);
+	'der Liegenschaftsverwalter die Vorschau der Abrechnungen {int} für das Gebäude {string} mit {float} % Verwaltungspauschale öffnet',
+	async ({ verwalter, seed, driver }, year: number, building: string, fee: number) => {
+		await verwalter.perform(previewWith(driver, seed, year, seed.idOf(building)!, { managementFeePercent: fee }));
 	}
 );
 
@@ -224,6 +224,18 @@ Then(
 		await expect(feeAboveGuideline(verwalter)).toBeVisible();
 	}
 );
+
+Then(
+	'erklärt der Assistent, dass die Verwaltungspauschale ein Prozentsatz der eigenen Nebenkosten jedes Mieters ist',
+	async ({ verwalter }) => {
+		await expect(feeField(verwalter)).toHaveAccessibleDescription(/Prozentsatz der eigenen Nebenkosten jedes Mieters/);
+	}
+);
+
+Then('bietet der Assistent keine Verteilung der Verwaltungspauschale an', async ({ verwalter }) => {
+	await expect(feeField(verwalter)).toBeVisible();
+	await expect(settingsChoices(verwalter)).toHaveCount(1);
+});
 
 When('der Liegenschaftsverwalter weitere Abrechnungen erstellen will', async ({ verwalter }) => {
 	await verwalter.perform(generateMore);

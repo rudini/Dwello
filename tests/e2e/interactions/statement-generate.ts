@@ -4,7 +4,7 @@ export const periodStartInput = (page: Page) => page.getByTestId('period-start-i
 export const periodEndInput = (page: Page) => page.getByTestId('period-end-input');
 export const heatingProfileSelect = (page: Page) => page.getByTestId('heating-profile-select');
 export const managementFeeInput = (page: Page) => page.getByTestId('management-fee-input');
-export const managementFeeKeySelect = (page: Page) => page.getByTestId('management-fee-key-select');
+export const wizardChoices = (page: Page) => page.getByRole('combobox');
 export const managementFeeHint = (page: Page) => page.getByTestId('management-fee-hint');
 export const buildingCheckbox = (page: Page, buildingId: string) =>
 	page.getByTestId(`generate-building-${buildingId}`);

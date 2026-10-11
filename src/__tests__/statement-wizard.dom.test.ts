@@ -69,7 +69,6 @@ const data = {
 			monthlyPercentages: { ...profile('', '', 8).monthlyPercentages, january: 12 }
 		}
 	],
-	distributionKeys: [{ id: 'k-area', name: 'Pro Fläche (m²)' }],
 	defaultManagementFeePercent: 3,
 	defaultHeatingProfileId: '',
 	defaultPeriod: { start: '2024-01-01', end: '2024-12-31' }
@@ -204,18 +203,9 @@ describe('Abrechnungen erstellen', () => {
 		);
 	});
 
-	it('berechnet die Verwaltungspauschale aus den eigenen Nebenkosten oder verteilt sie nach einem Verteilschlüssel und warnt über 3 %', async () => {
+	it('berechnet die Verwaltungspauschale aus den eigenen Nebenkosten jedes Mieters und warnt über 3 %', async () => {
 		await toSettings();
-		const key = byTestId<HTMLSelectElement>('management-fee-key-select')!;
-		expect([...key.options].map((o) => [o.value, o.textContent?.trim()])).toEqual([
-			['', 'Nach den eigenen Nebenkosten jedes Mieters'],
-			['k-area', 'Pro Fläche (m²)']
-		]);
-		fireEvent(key, 'change', 'k-area');
-		expect(
-			document.querySelector<HTMLInputElement>('input[name="managementFeeDistributionKeyId"]')!
-				.value
-		).toBe('k-area');
+		expect(text()).toContain('Prozentsatz der eigenen Nebenkosten jedes Mieters');
 		fireEvent(byTestId<HTMLInputElement>('management-fee-input')!, 'input', '4.5');
 		expect(byTestId('management-fee-hint')).not.toBeNull();
 	});
@@ -744,7 +734,6 @@ describe('Zurück vom Erfassen einer Rechnung', () => {
 				periodEnd: '2024-12-31',
 				heatingProfileId: 'hp1',
 				managementFeePercent: 3,
-				managementFeeDistributionKeyId: '',
 				buildingIds: ['b1']
 			},
 			new Date()

@@ -8,14 +8,6 @@ describe('Abrechnung aus dem Backend', () => {
 		expect(toStatement(backendStatement).managementFeePercent).toBe(3);
 	});
 
-	// Mit Verteilschlüssel ist die Pauschale ein Anteil der Kosten der Liegenschaft, sonst der Zwischensumme
-	it('weiss, ob die Verwaltungspauschale nach einem Verteilschlüssel verteilt ist', () => {
-		expect(toStatement(backendStatement).managementFeeKeyed).toBe(true);
-		expect(
-			toStatement({ ...backendStatement, managementFeeDistributionKeyId: null }).managementFeeKeyed
-		).toBe(false);
-	});
-
 	it('berechnet den Satz älterer Abrechnungen ohne gespeicherten Satz aus Pauschale und Nebenkosten', () => {
 		expect(
 			toStatement({ ...backendStatement, managementFeePercent: null }).managementFeePercent

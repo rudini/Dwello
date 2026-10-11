@@ -24,7 +24,6 @@
 		data: {
 			buildings: (Building & { apartmentCount: number })[];
 			heatingProfiles: HeatingProfile[];
-			distributionKeys: { id: string; name: string }[];
 		};
 		selection: WizardSelection;
 		confirmed: boolean;
@@ -52,10 +51,8 @@
 {:else if step === 3}
 	<SettingsStep
 		heatingProfiles={data.heatingProfiles}
-		distributionKeys={data.distributionKeys}
 		bind:heatingProfileId={selection.heatingProfileId}
 		bind:managementFeePercent={selection.managementFeePercent}
-		bind:managementFeeDistributionKeyId={selection.managementFeeDistributionKeyId}
 		{errors}
 	/>
 {:else if step === 4}

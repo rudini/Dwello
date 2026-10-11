@@ -499,7 +499,7 @@ Five flat profiles, seeded by `backend/migrations/0002_stammdaten.sql`; each dis
 **Features:**
 - Global management cost percentage (0% or more; default suggestion for new statements, adjustable per building and period)
 - Automatic calculation and inclusion in statements
-- Formula: `Total Utility Costs × (Management Cost % / 100)`
+- Formula: `Tenant's own utility costs (subtotal) × (Management Cost % / 100)`
 - Optional: Can be disabled (set to 0%)
 
 **Configuration:**
@@ -1851,7 +1851,7 @@ An audit log is planned, not implemented.
 | **Liegenschaft** | Property; building or real estate |
 | **Vertragsende** | Contract end date |
 | **Vertragsbeginn** | Contract start date |
-| **Verwaltungspauschale** | Management fee: a percentage of the building's utility costs for the administrative effort, a separate statement line, not an invoice category |
+| **Verwaltungspauschale** | Management fee: a percentage of the tenant's own utility costs for the administrative effort, a separate statement line, not an invoice category |
 | **zulässig** | Allowed (utility costs) |
 | **nicht zulässig** | Not allowed (utility costs) |
 | **QR-bill** | Swiss QR invoice standard for payments |

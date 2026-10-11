@@ -62,9 +62,6 @@ const translations: Record<Exclude<Language, 'rm'>, Record<string, string>> = {
 		heatingNote: 'Heizkosten nach Heizprofil «{profile}»: {percent} % der Heizkosten Ihrer Wohnung in der Abrechnungsperiode',
 		heatingMonths: 'Anteile der Monate Ihres Mietverhältnisses: {months}',
 		months: 'Jan,Feb,Mär,Apr,Mai,Jun,Jul,Aug,Sep,Okt,Nov,Dez',
-		feeBase: '{percent} % von CHF {base}',
-		feeKey: 'verteilt nach {key}',
-		feeDays: ', für Ihre {days} von {total} Tagen',
 		feeOwn: '{percent} % der Zwischensumme von CHF {base}',
 		sqm: 'm²',
 		keyColumn: 'Verteilschlüssel',
@@ -128,9 +125,6 @@ const translations: Record<Exclude<Language, 'rm'>, Record<string, string>> = {
 		heatingNote: 'Frais de chauffage selon le profil « {profile} » : {percent} % des frais de chauffage de votre logement pour la période de décompte',
 		heatingMonths: 'Parts des mois de votre bail : {months}',
 		months: 'janv.,févr.,mars,avr.,mai,juin,juil.,août,sept.,oct.,nov.,déc.',
-		feeBase: '{percent} % de CHF {base}',
-		feeKey: 'réparti selon {key}',
-		feeDays: ', pour vos {days} jours sur {total}',
 		feeOwn: '{percent} % du sous-total de CHF {base}',
 		keyColumn: 'Clé de répartition',
 		apartmentShareColumn: 'Part du logement',
@@ -193,9 +187,6 @@ const translations: Record<Exclude<Language, 'rm'>, Record<string, string>> = {
 		heatingNote: 'Spese di riscaldamento secondo il profilo «{profile}»: {percent} % delle spese di riscaldamento del suo appartamento nel periodo di conteggio',
 		heatingMonths: 'Quote dei mesi della sua locazione: {months}',
 		months: 'gen,feb,mar,apr,mag,giu,lug,ago,set,ott,nov,dic',
-		feeBase: '{percent} % di CHF {base}',
-		feeKey: 'ripartito secondo {key}',
-		feeDays: ', per i suoi {days} giorni su {total}',
 		feeOwn: '{percent} % del subtotale di CHF {base}',
 		keyColumn: 'Chiave di riparto',
 		apartmentShareColumn: 'Quota appartamento',
@@ -258,9 +249,6 @@ const translations: Record<Exclude<Language, 'rm'>, Record<string, string>> = {
 		heatingNote: 'Heating costs by heating profile «{profile}»: {percent} % of the heating costs of your apartment in the billing period',
 		heatingMonths: 'Shares of the months of your tenancy: {months}',
 		months: 'Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec',
-		feeBase: '{percent} % of CHF {base}',
-		feeKey: 'split by {key}',
-		feeDays: ', for your {days} of {total} days',
 		feeOwn: '{percent} % of the subtotal of CHF {base}',
 		keyColumn: 'Distribution key',
 		apartmentShareColumn: 'Apartment share',
@@ -353,13 +341,11 @@ export interface StatementPDFData {
 	heating?: { profile: string; percent: number; months?: { month: number; percentage: number }[] };
 	// A tank: the heating costs of its category are opening stock + invoices – closing stock
 	fuel?: { category: string; openingDate: string; opening: number; invoices: number; closingDate: string; closing: number; total: number };
-	managementFeeKey?: string;
 
 	// Totals
 	subtotal: number;
 	managementFee: number;
 	managementFeePercent: number;
-	managementFeeBase: number; // the building's utility costs the percentage applies to
 	totalCosts: number;
 	totalAdvancePayments: number;
 	balance: number; // Positive = tenant owes, negative = refund
@@ -413,13 +399,9 @@ function formatFloor(floor: number, lang: Language): string {
 const fill = (text: string, values: Record<string, string | number>) =>
 	Object.entries(values).reduce((result, [key, value]) => result.split(`{${key}}`).join(String(value)), text);
 
-// The base of the management fee: the subtotal, or the building's costs split by a key for the tenant's days
-function feeBasis(data: StatementPDFData, t: Record<string, string>) {
-	const values = { percent: data.managementFeePercent, base: formatCHF(data.managementFeeBase) };
-	if (!data.managementFeeKey) return fill(t.feeOwn, values);
-	const days = data.rentalDays < data.periodDays ? fill(t.feeDays, { days: data.rentalDays, total: data.periodDays }) : '';
-	return `${fill(t.feeBase, values)}, ${fill(t.feeKey, { key: data.managementFeeKey })}${days}`;
-}
+// The base of the management fee: the subtotal, the tenant's own costs
+const feeBasis = (data: StatementPDFData, t: Record<string, string>) =>
+	fill(t.feeOwn, { percent: data.managementFeePercent, base: formatCHF(data.subtotal) });
 
 // The time share as the tenant can check it: days rented / days of the period, or the heating profile's share
 function timeShare(item: LineItem, data: StatementPDFData, t: Record<string, string>) {

@@ -1,9 +1,9 @@
 # language: de
-@statements @api
-Funktionalität: Verwaltungspauschale verteilen
+@statements
+Funktionalität: Verwaltungspauschale berechnen
   Als Liegenschaftsverwalter
-  möchte ich die Verwaltungspauschale der Liegenschaft nach einem Verteilschlüssel auf die Wohnungen verteilen
-  damit jeder Mieter den Anteil trägt, den sein Mietvertrag vorsieht
+  möchte ich die Verwaltungspauschale als Prozentsatz der eigenen Nebenkosten jedes Mieters berechnen
+  damit jeder Mieter den Satz auf seiner Abrechnung nachprüfen kann
 
   Grundlage:
     Angenommen das Gebäude "Rosenhof" in "Winterthur" existiert
@@ -16,12 +16,14 @@ Funktionalität: Verwaltungspauschale verteilen
     Und im Gebäude "Rosenhof" gibt es eine Heizkostenrechnung über "1000" Franken für 2024
     Und der Liegenschaftsverwalter ist auf der Seite zum Erstellen von Abrechnungen
 
-  Szenariogrundriss: Pauschale in Prozent der Nebenkosten der Liegenschaft, verteilt nach Schlüssel
-    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Rosenhof" mit 3 % Verwaltungspauschale nach dem Verteilschlüssel "<Schlüssel>" öffnet
-    Dann kostet die Abrechnung von "Anna Keller" "<Anna Keller>"
-    Und kostet die Abrechnung von "Beat Huber" "<Beat Huber>"
+  # Heizkosten nach Fläche: 250 und 750 Franken, dazu je 3 % davon
+  @api
+  Szenario: Pauschale in Prozent der eigenen Nebenkosten
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Rosenhof" mit 3 % Verwaltungspauschale öffnet
+    Dann kostet die Abrechnung von "Anna Keller" "CHF 257.50"
+    Und kostet die Abrechnung von "Beat Huber" "CHF 772.50"
 
-    Beispiele:
-      | Schlüssel       | Anna Keller | Beat Huber |
-      | Pro Einheit     | CHF 265.00  | CHF 765.00 |
-      | Pro Fläche (m²) | CHF 257.50  | CHF 772.50 |
+  Szenario: Der Assistent fragt nicht nach einer Verteilung der Pauschale
+    Wenn der Liegenschaftsverwalter für das Gebäude "Rosenhof" die Verwaltungspauschale auf 3 % setzt
+    Dann erklärt der Assistent, dass die Verwaltungspauschale ein Prozentsatz der eigenen Nebenkosten jedes Mieters ist
+    Und bietet der Assistent keine Verteilung der Verwaltungspauschale an

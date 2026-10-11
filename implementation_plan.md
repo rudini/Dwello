@@ -4562,6 +4562,31 @@ subjects over 50 characters, a missing test for vacancy after a move-out, the RE
 - [x] **`docs/design/offene-punkte.md`**: the PDF as sent is kept after payment (`updateStatement` discards it only on a
   new date or payment deadline; demo data makes it before paying); the two lines saying otherwise are corrected.
 
+### Follow-up: Verwaltungspauschale always of the tenant's own costs
+
+Product decision after the MV leaflet «Zulässige und unzulässige Nebenkosten» (2026): the fee is a percentage of the
+tenant's own Nebenkosten; the optional distribution key (fee of the building's costs, shared by key) is removed.
+
+- [x] **Scenario** `tests/e2e/features/statement-management-fee.feature`: own costs (`@api`) and no fee key in the wizard
+  (failed first on the help text and the select).
+- [x] **Wizard/BFF**: `SettingsStep.svelte` (select gone, help names the own costs), `StatementStep.svelte`,
+  `StatementWizard.svelte`, `+page.svelte`, `+page.server.ts` (no distribution keys loaded), `statement-wizard.ts`,
+  `statement-generation.ts`; detail `CostTable.svelte` and `statement.ts` (`managementFeeKeyed` gone).
+- [x] **Backend**: `calculation.service.ts` (`buildingFeeShare` gone), `statement.service.ts`, `routes/statements.ts`,
+  `statement-pdf.service.ts` and `pdf.service.ts` (fee always «x % der Zwischensumme»), `schema.ts`, migration
+  `0012_pauschale_eigene_kosten.sql` drops `management_fee_distribution_key_id`; contract `tests/contracts/statement.json`.
+- [x] **Docs**: `offene-punkte.md` (decided; glossary entry to adjust by the product owner), `nebenkostenabrechnung-anforderungen.md`,
+  `data-model.md`, `api-specification.md`.
+
+- [x] **Review** (independent, no critical): migration 0012 first sets the rate of statements made with a key to the share
+  their stored fee is of their own costs, so their PDF adds up (checked on a scratch database: CHF 7.54 of 377.05 → 2.00 %);
+  `managementFeeBase` dropped (the PDF uses the subtotal); test renamed to `management-fee.pg.test.ts`; step 3 checked
+  to offer only the Heizprofil as a choice; glossary proposal names «Verteilschlüssel» and «Abrechnungslauf» too;
+  `docs/PRD-Dwello.md` formula and glossary line.
+
+**Checks:** `bun run lint`, `bun run check`, `bun run test:coverage` (1626), backend `bun run test` (489, 88.8 % lines) and
+`type-check`, `deepcheck:audit`, `fallow audit`; E2E `tests/e2e/features/statement*` on chromium and api: 64 passed.
+
 ---
 
 # Success Criteria
