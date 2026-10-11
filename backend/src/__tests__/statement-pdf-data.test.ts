@@ -3,8 +3,10 @@
  */
 
 import { describe, expect, it } from 'bun:test';
+import type { KeyValues } from '../db/schema';
 import { formatCHF, formatSwissDate, roundToRappen } from '../services/pdf-format';
-import { toPdfData } from '../services/statement-pdf.service';
+import { formatQRReferenceForDisplay } from '../services/qr-bill.service';
+import { keyShareOf, toPdfData } from '../services/statement-pdf.service';
 import type { StatementWithDetails } from '../services/statement.service';
 
 describe('Schweizer Formate im PDF', () => {
@@ -82,3 +84,35 @@ describe('Rundung auf Rappen', () => {
 		expect(roundToRappen(2.344)).toBe(2.34);
 	});
 });
+
+describe('QR-Referenz im Zahlteil', () => {
+	// SIX: in Fünfergruppen von rechts, wie «21 00000 00003 13947 14300 09017»
+	it('gruppiert die Referenz von rechts', () => {
+		expect(formatQRReferenceForDisplay('210000000003139471430009017')).toBe('21 00000 00003 13947 14300 09017');
+	});
+});
+
+// Wohnung 75.50 m² von 492.50 m², eine von 6 Wohnungen
+const values: KeyValues = { area: [75.5, 492.5], units: [1, 6], rooms: [3.5, 21] };
+
+describe('Verteilschlüssel im PDF', () => {
+	it('nennt bei einem einfachen Schlüssel den Bruch der Wohnung', () => {
+		expect(keyShareOf('{area}', values, 'de')).toBe('75.50 / 492.50 m²');
+		expect(keyShareOf('{units}', values, 'fr')).toBe('1 / 6 logements');
+	});
+
+	// Ein gerundeter Prozentwert liess sich nicht auf den Rappen nachrechnen, die Rechnung mit Brüchen schon
+	it('schreibt einen gemischten Schlüssel als Rechnung mit Brüchen', () => {
+		expect(keyShareOf('0.7 * {area} / {area_total} + 0.3 * {units} / {units_total}', values, 'de')).toBe(
+			'70 % × 75.50 / 492.50 m²\n+ 30 % × 1 / 6 Wohnungen'
+		);
+	});
+
+	// Gewichte, die nicht 100 % ergeben, verteilt die App anders: dann bleibt der Prozentwert
+	it('schreibt keine Rechnung, die nicht der Verteilung entspricht', () => {
+		expect(keyShareOf('0.7 * {area} + 0.3 * {units}', values, 'de')).toBeUndefined();
+		expect(keyShareOf('0.5 * {area} / {area_total} + 0.3 * {units} / {units_total}', values, 'de')).toBeUndefined();
+		expect(keyShareOf('{volume}', values, 'de')).toBeUndefined();
+	});
+});
+

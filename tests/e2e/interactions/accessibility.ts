@@ -1,6 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import { typeDate } from './form';
-import type { Page } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
 import { readFileSync } from 'fs';
 import type { TestData } from '../fixtures/backend';
 import { visit } from './navigation';
@@ -194,7 +194,9 @@ const states: Record<string, (page: Page, viewport: Viewport) => Promise<unknown
 	'overlap-warning': async (page) => {
 		await page.getByTestId('wizard-next').click(); // tenant and apartment come from the address
 		await page.getByTestId('wizard-next').click();
-		await typeDate(page.getByTestId('start-date-input'), '2020-01-01'); // the apartment is rented until 2099
+		const start = page.getByTestId('start-date-input');
+		await expect(start).toHaveValue('01.01.2100'); // the suggestion arrived, it cannot land in the typed date
+		await typeDate(start, '2020-01-01'); // the apartment is rented until 2099
 		await shows(page, '[data-testid="overlap-warning"]');
 	},
 	'draft-restored': async (page) => {

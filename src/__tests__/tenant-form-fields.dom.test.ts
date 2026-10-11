@@ -21,3 +21,10 @@ describe('Mieterformular nach einem abgelehnten Speichern', () => {
 		expect(byTestId('tenant-first-name-input')!.getAttribute('aria-invalid')).toBe('true');
 	});
 });
+
+// Das PDF gibt es noch nicht auf Rätoromanisch: wer es wählt, soll wissen, was der Mieter erhält
+it('sagt bei der Sprache, dass Rätoromanisch vorerst deutsch erstellt wird', () => {
+	show(TenantFormFields, {});
+
+	expect(document.body.textContent).toContain('Auf Rätoromanisch erstellt Dwello die Abrechnung vorerst auf Deutsch.');
+});

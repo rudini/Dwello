@@ -47,6 +47,10 @@
 		Dwello verschickt die Abrechnung nicht selbst. Stellen Sie dem Mieter das PDF zu und markieren
 		Sie die Abrechnung danach als versendet.
 	</p>
+	<p>
+		Die Zahlungsfrist läuft ab dem Tag, an dem Sie die Abrechnung als versendet markieren. Stellen
+		Sie das PDF deshalb am selben Tag zu.
+	</p>
 	<dl class="flex flex-col gap-2 rounded-panel bg-sunken p-4" data-testid="send-recipient">
 		<div class="flex flex-wrap gap-x-2">
 			<dt class="text-ink-muted">Empfänger:</dt>

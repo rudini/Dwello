@@ -239,6 +239,8 @@ management_fee         DECIMAL(12,2) DEFAULT 0 -- Verwaltungspauschale
 management_fee_percent DECIMAL(5,2)            -- rate chosen in the Abrechnungslauf
 heating_profile_id     UUID                    -- Heizprofil of the Abrechnungslauf, printed in the PDF (SET NULL)
 management_fee_distribution_key_id UUID        -- Verteilschlüssel of the Verwaltungspauschale (SET NULL; none: equally)
+fuel_stock             JSONB                   -- Tankbestand readings at creation, for the PDF (migration 0011)
+key_values             JSONB                   -- area, apartments, rooms: own and building's total at creation (migration 0011)
 balance                DECIMAL(12,2) NOT NULL  -- Saldo: positive = Nachzahlung, negative = Rückerstattung
 status                 VARCHAR(20)   NOT NULL DEFAULT 'draft'
 payment_deadline       DATE                    -- Zahlungsfrist
@@ -285,8 +287,13 @@ description         VARCHAR(255)  NOT NULL
 total_amount        DECIMAL(12,2) NOT NULL  -- building total
 tenant_share        DECIMAL(12,2) NOT NULL  -- tenant's portion
 share_percentage    DECIMAL(8,4)
+apartment_share     DECIMAL(12,2)           -- the apartment's part of the total by the key (migration 0011)
+period_share        DECIMAL(8,4)            -- 0-1: days rented, or the heating profile's share (migration 0011)
 sort_order          INTEGER DEFAULT 0
 ```
+
+`apartment_share` and `period_share` are kept when a statement is created so the PDF can explain each position;
+statements created before migration 0011 have NULL, their PDF leaves those columns empty.
 
 No `updated_at`. Index: `line_items_statement_id_idx`.
 

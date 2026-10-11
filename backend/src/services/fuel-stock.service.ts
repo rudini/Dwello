@@ -88,6 +88,13 @@ export async function fuelStockChange(buildingId: string, periodStart: string, p
 			category,
 			distributionKey,
 			isFuelStock: true,
+			stock: {
+				categoryId: category.id,
+				openingDate: readings.opening.readingDate,
+				opening: readings.opening.amount,
+				closingDate: readings.closing.readingDate,
+				closing: readings.closing.amount
+			},
 			inPeriod: { start: periodStart, end: periodEnd, amount: parseFloat(readings.opening.amount) - parseFloat(readings.closing.amount) }
 		}
 	];
