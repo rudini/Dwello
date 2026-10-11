@@ -274,10 +274,41 @@ Pass-through, leaky, classitis and unused exports are sparse indicators: alone t
 **What was changed: classitis now blocks, also for split modules** (tests first: `gaming.test.ts`, `reference.test.ts`).
 - Classitis never reached the gate: tiny pieces with real logic score 57–62, because classitis weighed 10 and depth or complexity cannot reach 1 for a two-statement function. Even the textbook directory of six one-function files scored 62.
 - Weights: `classitis` 10 to 15, `leaky` 5 to 0 (sum still 100). Leaky exports were noise in the ablation and caused one of the two earlier false positives at 65; they are still measured and explained in findings. `unusedExports` stays at 5, because the brief uses Fallow's data as score inputs.
-- A data-only class alone now counts 0.5 in the classitis component: a single value class (`Point` with x, y and a constructor) would otherwise fail the gate (58, not flagged; 61 before).
+- A data-only class alone counts 0.5 in the classitis component: a single value class (`Point` with x, y and a constructor) would otherwise have failed the gate at 71. Since the cross-codebase fix below, a data-only class alone no longer flags at all; the 0.5 keeps such classes from climbing in `scan`.
 - Classitis also marks at least 3 tiny single-export files of one directory whose only importer is the same counted module: a module cut into pieces that its caller assembles. Shared utilities from different directories, or with other importers, are not pieces. In this repo, ky, zustand and immer no module imports more than 2 tiny files at all.
 - Effects: precision@25 12/25 and AUC 0.828 (from 0.827); 0 flagged in this repo (baseline unchanged, 0 of 124) and in the OSS projects (highest 60). Labelled shallow 47 and below, flat by design 60 and below, deep 39 and below. Textbook pass-through designs 71–80, the classitis directory 67, all flagged.
 - First attempt, rejected by the independent review: weights classitis 20 with leaky and unusedExports 0, and assembled pieces counted across directories. It flagged a page importing three one-function utilities from different folders (67–82), one error class per file thrown by one module (80), and a single value class (71), and it dropped Fallow as a score input. Each case is now a regression test.
+
+## Cross-codebase validation (2026-10-11, on request)
+
+Six more TypeScript codebases, shallow clones of their default branches: hono 552ea02, zod 284243f, date-fns 717ce0a, umami ec0ff50, nestjs-realworld-example-app c1c2cc4, angular-realworld-example-app dd99ed2. None was used for calibration before.
+
+**Sample and labels.** Per codebase: every flagged module, the 5 highest-scoring unflagged eligible modules and 7 more drawn at random (seed 20261011), 113 modules in total. The 113 modules were split over four agents (about 28 each), so every module has one first label, given blind with the same rubric as the Dwello labels (no scores, no tool, no docs). Two further agents gave a second label to the 41 flagged modules, mixed with 41 decoys. First and second labels agree on 67 of 82 double-labelled modules (82 %).
+
+**Ranking mostly carries over.** AUC of the unchanged weights, shallow against the rest. The sample over-represents high scores (flagged and top-5 modules); on the random draws alone the pooled AUC is lower:
+
+| Codebase | Labelled | Shallow | AUC |
+|---|---:|---:|---:|
+| Dwello (calibration set) | 57 | 14 | 0.828 |
+| hono | 20 | 7 | 0.786 |
+| zod | 13 | 3 | 0.650 |
+| date-fns | 28 | 10 | 0.806 |
+| umami | 24 | 16 | 0.918 |
+| nestjs-realworld | 16 | 1 | 0.067 (one positive) |
+| angular-realworld | 12 | 1 | 0.364 (one positive) |
+| six new codebases pooled | 113 | 38 | 0.828 (random draws only: 0.770) |
+
+The two realworld apps have one shallow module each, so their AUC says little. Leave-one-codebase-out tuning (best of 3,000 weight sets on six codebases, measured on the seventh, on unrounded scores, hence slightly different AUCs) is worse than the default weights by 0.063 on average, so the weights stay. Single components on the new codebases: passThrough 0.75 and depth 0.74 carry the ranking; leaky (0.45) and unusedExports (0.50) do not.
+
+**Gate precision on real code, measured for the first time.** 41 modules were flagged before the fix below, 38 after.
+- True positives, both labellers shallow (14): 11 umami query hooks (one-function files such as `useHeatmapQuery`, which only call `useAnalyticsQuery('heatmaps', params, options)`; 66–94), umami `password.ts`, and hono's two `serve-static-module.ts` adapters.
+- False positives, both labellers flat by design or deep: 3 NestJS DTO classes (fixed below), the NestJS profile controller (framework glue forwarding to a service), zod `v4/classic/iso.ts`, hono `adapters/bun/src/ssg.ts`, `helper/testing/index.ts` and `jsx/dom/jsx-dev-runtime.ts`, date-fns `TimestampSecondsParser`/`TimestampMillisecondsParser` and `previousMonday`/`previousSaturday`/`previousFriday`/`nextMonday`.
+- Disputed, one labeller shallow: 10 more date-fns `nextX`/`previousX` functions (`nextDay(date, 5, options)`: a forwarder with a fixed argument, caught since the pass-through widening of the same day; a public convenience API), hono `src/adapter/bun/ssg.ts`, `src/adapter/deno/ssg.ts` and `trie-router/router.ts`.
+- After the fix: 14 of 38 flagged are shallow for both labellers (37 %), 27 of 38 for at least one (71 %). On application code (umami, the realworld apps) 12 of 13 flagged modules are shallow for both, but 11 of them are one repeated pattern in one repo, and `password.ts` (hides bcrypt and the salt rounds) is debatable. The false positives concentrate in libraries, whose public entry points and adapters exist for API convenience.
+
+**Fixed, test first (`reference.test.ts`):** a data-only class alone no longer flags a module. NestJS DTOs (four readonly fields) scored 68 through it, and both labellers judged them flat by design. A data-only class still raises the score by half the classitis weight; only a pass-through or tiny-file classitis flags. The fix was tested on the same DTOs that prompted it; there is no held-out check.
+
+**Not changed, a decision to take:** forwarders with a fixed argument (date-fns `nextFriday`) split the labellers. Dropping them again would reopen the evasion closed earlier the same day. Libraries can list their public entry points in `entries` or use `// deepcheck-ignore-file -- reason`.
 
 ## Limits
 

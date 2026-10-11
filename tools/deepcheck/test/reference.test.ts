@@ -202,6 +202,13 @@ describe('reference designs', () => {
 		expect(m.flagged).toBe(false);
 	});
 
+	it('does not flag a DTO class: a data-only class alone is no structural sign (NestJS realworld, cross-codebase labels)', () => {
+		const dto = 'export class CreateArticleDto {\n\treadonly title: string;\n\treadonly description: string;\n\treadonly body: string;\n\treadonly tagList: string[];\n}\n';
+		const m = analyze({ root: writeProject({ 'src/create-article.dto.ts': dto }), fallow: 'off' }).modules[0];
+		expect(m.metrics.dataOnlyClasses).toEqual(['CreateArticleDto']);
+		expect(m.flagged).toBe(false);
+	});
+
 	it('flags classitis in a directory of tiny single-function files', () => {
 		const address = report.modules.filter((m) => m.path.startsWith('src/address/'));
 		expect(address.every((m) => m.metrics.classitis && m.flagged)).toBe(true);

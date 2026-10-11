@@ -525,3 +525,14 @@ An independent reviewer re-ran X3.1 to X3.4 on the current state; all temp files
 - X3.3 done. A 4-function forwarding facade (`src/lib/server/tmp-facade.ts`) is blocked by the hook (exit 2) and the CI command (exit 1, G1, score 72). A classitis split (three one-function files in one new directory, imported only by one new module) is blocked in all three files (80, 72, 72); a single tiny file with one importer passes.
 - X3.4 done. README weights, classitis rule, gate rules and pass-through variants match the code; CLAUDE.md commands and the gate gotcha match `package.json` and the hook.
 - Noted, not changed: in the classitis probe the pieces also showed "1 export unused (Fallow)", because the new importer itself had no importer.
+
+### 2026-10-11, follow-up on request: other TypeScript codebases
+The user asked to include other TypeScript codebases to improve accuracy.
+- Six codebases cloned (hono, zod, date-fns, umami, nestjs-realworld, angular-realworld); 113 modules labelled blind once (split over four agents), the 41 flagged ones a second time by two more (agreement 82 %). Details: `docs/deepcheck-validation.md`, "Cross-codebase validation".
+- Ranking mostly carries over: pooled AUC on the new codebases 0.828 with the unchanged weights (Dwello 0.828), 0.770 on the random draws alone; the two realworld apps have one shallow module each. Leave-one-codebase-out tuning is worse by 0.063 on average, so the weights stay.
+- Gate precision measured on real code for the first time: first real positives (11 umami query hooks, `password.ts`, two hono adapters). 14 of 38 flagged are shallow for both labellers, 27 for at least one; on application code 12 of 13, but 11 of them are one repeated umami pattern.
+- Fixed test-first (red, then green): a data-only class alone is no longer a structural sign (3 NestJS DTO false positives). The 0.5 data-only weighting stays, so DTOs do not climb in `scan` (review: dropping it raised a DTO to 75).
+- Open decision: forwarders with a fixed argument (date-fns `nextFriday`), disputed between labellers.
+- Independent review: numbers confirmed; findings on overstated wording and the dropped 0.5 weighting fixed as above.
+- Checks: 182 deepcheck tests, ESLint, tsc, `fallow audit`, `deepcheck:audit` clean; baseline regenerated, unchanged (0 of 124); Dwello precision@25 12/25, AUC 0.828.
+
