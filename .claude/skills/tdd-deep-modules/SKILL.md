@@ -59,6 +59,8 @@ One behaviour from the list per cycle:
 2. **Green.** Write the least production code that makes this test pass. Commit with `scripts/tdd-step green "<behaviour>"`. It refuses unless every test passes and refuses changes to tests or test configuration.
 3. **Refactor.** With everything green, improve the design (section 5), run the tests after each change, and commit with `scripts/tdd-step refactor "<what changed>"`. Skip the commit when there is nothing to improve.
 
+For a module that does not exist yet, the first test imports it dynamically so the red is an assertion, not an import error (example in references/tooling.md).
+
 Never batch: no second test before the first is green, no clean-up inside green. `tdd-step` runs the tests itself and records the real exit code in a `TDD-Exit-Code` trailer; do not commit phases by hand. `scripts/tdd_replay <base>..HEAD` re-runs the history and rejects anything that broke the protocol. Details: references/tooling.md.
 
 ## 5. Depth check in every refactor

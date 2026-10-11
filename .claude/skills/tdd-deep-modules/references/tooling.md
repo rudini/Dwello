@@ -13,9 +13,18 @@ All scripts live in `scripts/` of this skill and run from anywhere inside the re
 
 Exit 2 means it could not judge: not a git repository, no supported runner, a runner not installed, or the test run changed the working tree.
 
-## A new module needs a stub first
+## The first red for a new module
 
-A test that imports a function that does not exist fails with an import error, which is never a valid red. Create the smallest stub (the exported name, returning nothing useful) in the previous green or refactor commit, then write the red against it.
+A test that imports a file that does not exist fails with an import error, which is never a valid red, and the hook blocks a production stub until a red exists. So the first test of a new module imports it dynamically and turns the missing module into an assertion failure:
+
+```js
+test("total sums the prices", async () => {
+  const price = await import("./price.js").catch(() => ({}));
+  expect(price.total?.([1, 2])).toBe(3);
+});
+```
+
+Green then creates the module. Later tests import it normally.
 
 ## tdd-guard (the hook)
 
