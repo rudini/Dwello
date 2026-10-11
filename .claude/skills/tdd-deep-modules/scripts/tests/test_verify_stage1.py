@@ -42,3 +42,12 @@ class VerifyStage1Test(unittest.TestCase):
         self.assertIn("step 02: VERDICT: PASS (round 1)", result.stdout)
         self.assertIn("step 03: VERDICT: PASS (round 1)", result.stdout)
         self.assertEqual(result.stdout.strip().splitlines()[-1], "STAGE1: PASS")
+
+    def test_a_step_whose_latest_round_failed_is_stage1_fail(self):
+        root = skill_dir(self, {"01": ["PASS"], "02": ["PASS", "FAIL"], "03": ["PASS"]})
+
+        result = verify(root)
+
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn("step 02: VERDICT: FAIL (round 2)", result.stdout)
+        self.assertEqual(result.stdout.strip().splitlines()[-1], "STAGE1: FAIL")
