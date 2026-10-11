@@ -143,3 +143,14 @@ class TddReplayTierTest(unittest.TestCase):
 
         self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
         self.assertIn("refactor must run the full suite", result.stdout)
+
+    def test_a_final_commit_verified_only_against_the_fast_suite_is_rejected(self):
+        repo = tiered_repo(self)
+        base = repo.git("rev-parse", "HEAD")
+        repo.commit_phase("red", {"calc.test.ts": BUN_TEST}, 1, suite="fast")
+        repo.commit_phase("green", {"calc.ts": RIGHT_ADD_TS}, 0, suite="fast")
+
+        result = self.replay(repo, base)
+
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn("the final commit must run the full suite", result.stdout)
