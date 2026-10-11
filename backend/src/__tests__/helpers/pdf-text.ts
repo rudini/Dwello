@@ -4,7 +4,8 @@ import { inflateSync } from 'zlib';
 export function readPdf(pdf: Buffer) {
 	const raw = pdf.toString('latin1');
 	const pages = raw.match(/\/Type \/Page\b(?!s)/g)?.length ?? 0;
-	const streams = [...raw.matchAll(/stream\r?\n([\s\S]*?)\r?\nendstream/g)].map(([, body]) => {
+	// pdfkit writes «stream\n…\nendstream»; a \r before \nendstream is the last byte of the compressed content
+	const streams = [...raw.matchAll(/stream\n([\s\S]*?)\nendstream/g)].map(([, body]) => {
 		try {
 			return inflateSync(Buffer.from(body, 'latin1')).toString('latin1');
 		} catch {
