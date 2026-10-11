@@ -79,3 +79,9 @@ class TddReplayTest(unittest.TestCase):
         repo, base = good_history(self)
         repo.commit_phase("refactor", {"calc.ts": ROUNDING_ADD_TS.replace("a + b", "b + a")}, 7)
         self.assert_rejected(repo, base, "the trailer says exit code 7, but the tests exit with 0")
+
+    def test_a_history_that_ends_in_red_is_rejected(self):
+        repo = bun_repo(self)
+        base = repo.git("rev-parse", "HEAD")
+        repo.commit_phase("red", {"calc.test.ts": BUN_TEST}, 1)
+        self.assert_rejected(repo, base, "the history ends in red: every red needs a green")
