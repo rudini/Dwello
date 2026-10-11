@@ -161,6 +161,31 @@ def _forwarded_args(body):
     return statement[1][call.end():-1]
 
 
+def _skip_return_type(text, index):
+    """The index after a `: Type` annotation at `index` (object literals, generics and arrays included)."""
+    annotation = re.match(r"\s*:", text[index:])
+    if not annotation:
+        return index
+    index, expect = index + annotation.end(), True  # a `{` where a type is expected is an object type
+    while index < len(text):
+        char = text[index]
+        if char.isspace():
+            index += 1
+        elif char == "{" and not expect or text.startswith("=>", index):
+            return index
+        elif char in "{([":
+            index, expect = _close(text, index), False
+        elif char == "<":
+            index, expect = _skip_type_parameters(text, index), False
+        elif char in "|&":
+            index, expect = index + 1, True
+        elif word := re.match(r"[\w$.?]+", text[index:]):
+            index, expect = index + word.end(), False
+        else:
+            return index
+    return index
+
+
 def _parameters(text, index):
     """The parameter list of a signature whose `(` follows `index` (after blanks and type parameters), or None."""
     index = _skip_type_parameters(text, _skip_blanks(text, index))
@@ -366,7 +391,8 @@ def _body(text, match):
     """(start, end) of the body of the function whose header `match` found; empty without a body."""
     opening = text.index("(", match.end() - 1 if match[2] else match.end())
     close = _close(text, opening)
-    head = _ARROW_HEAD.match(text, close) or _FUNCTION_HEAD.match(text, close)
+    after = _skip_return_type(text, close)
+    head = _ARROW_HEAD.match(text, after) or _FUNCTION_HEAD.match(text, after)
     if not head:
         return close, close
     start = head.end()
