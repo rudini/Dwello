@@ -7,24 +7,6 @@ from pathlib import Path
 
 SCRIPTS = Path(__file__).resolve().parents[1]
 
-ADD_TEST = """import unittest
-from calc import add
-
-
-class AddTest(unittest.TestCase):
-    def test_adds(self):
-        self.assertEqual(add(1, 2), 3)
-"""
-PYTEST_TEST = "from calc import add\n\n\ndef test_adds():\n    assert add(1, 2) == 3\n"
-PYTEST_MARKERS = {"pytest.ini": "[pytest]\n",
-                  "pyproject.toml": "[tool.pytest.ini_options]\n",
-                  "conftest.py": "",
-                  "setup.cfg": "[tool:pytest]\n",
-                  "tox.ini": "[pytest]\n"}
-WRONG_ADD = "def add(a, b):\n    return 0\n"
-RIGHT_ADD = "def add(a, b):\n    return a + b\n"
-
-
 class Repo:
     def __init__(self, case, files):
         tmp = tempfile.TemporaryDirectory()

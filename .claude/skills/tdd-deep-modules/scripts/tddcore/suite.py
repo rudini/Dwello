@@ -49,10 +49,6 @@ def _files(root):
     return [f for f in listed if (Path(root) / f).is_file()]  # tracked files may be deleted
 
 
-
-
-
-
 _NPM_PLACEHOLDER = 'echo "Error: no test specified" && exit 1'  # what `npm init` writes
 
 
