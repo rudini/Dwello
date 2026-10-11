@@ -16,9 +16,15 @@ class Depth:
         return self.size / self.surface if self.surface else float(self.size)
 
 
+SHALLOW_RATIO = 4  # fewer code lines per thing a caller must know means the module hides little
+
+
 def measure(root, path):
     text = (Path(root) / path).read_text()
-    return Depth(path, _surface(text), _size(text), ())
+    surface, size = _surface(text), _size(text)
+    ratio = size / surface if surface else float(size)
+    findings = (f"shallow: ratio {ratio:.1f} < {SHALLOW_RATIO}",) if ratio < SHALLOW_RATIO else ()
+    return Depth(path, surface, size, findings)
 
 
 def _size(text):
