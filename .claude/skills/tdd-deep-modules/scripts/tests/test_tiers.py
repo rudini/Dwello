@@ -107,6 +107,19 @@ class TddStepTierTest(unittest.TestCase):
                 self.assertEqual(repo.subject(), "init")
 
 
+    def test_options_anywhere_but_right_after_the_phase_exit_2_with_usage(self):
+        for args in (["sums", "--suite", "full"], ["--suite=full", "sums"], ["tidy", "--suite", "fast"]):
+            with self.subTest(args):
+                repo = tiered_repo(self)
+                repo.write("calc.test.ts", BUN_TEST)
+
+                result = repo.run("tdd-step", "red", *args)
+
+                self.assertEqual(result.returncode, 2, result.stderr)
+                self.assertIn("usage: tdd-step", result.stderr)
+                self.assertEqual(repo.subject(), "init")
+
+
 class TddReplayTierTest(unittest.TestCase):
     def replay(self, repo, base):
         return repo.run("tdd_replay", f"{base}..HEAD")
