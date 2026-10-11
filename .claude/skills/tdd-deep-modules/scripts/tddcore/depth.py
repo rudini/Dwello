@@ -330,7 +330,9 @@ def _one_caller_exports(text, elsewhere):
     for match in _EXPORTED_FUNCTION.finditer(text):
         name = match[1] or match[2]
         word = re.compile(rf"\b{re.escape(name)}\b")
-        if (len(word.findall(text)) == 2 and _size(_body(text, match)) <= SMALL_HELPER
+        start, end = _body(text, match)
+        outside = text[:start] + text[end:]  # a recursive call is no caller
+        if (len(word.findall(outside)) == 2 and _size(text[start:end]) <= SMALL_HELPER
                 and not any(word.search(other) for other in elsewhere)):
             found.append(name)
     return tuple(found)
@@ -351,18 +353,18 @@ def _production_code(top):
 
 
 def _body(text, match):
-    """The body of the function whose header `match` found (up to its parameter list's opening)."""
+    """(start, end) of the body of the function whose header `match` found; empty without a body."""
     opening = text.index("(", match.end() - 1 if match[2] else match.end())
     close = _close(text, opening)
     head = _ARROW_HEAD.match(text, close) or _FUNCTION_HEAD.match(text, close)
     if not head:
-        return ""
+        return close, close
     start = head.end()
     if text[start - 1:start] == "{":
-        return text[start:_close(text, start - 1) - 1]
+        return start, _close(text, start - 1) - 1
     if text[start:start + 1] == "{":
-        return text[start + 1:_close(text, start) - 1]
-    return text[start:_expression_end(text, start)]
+        return start + 1, _close(text, start) - 1
+    return start, _expression_end(text, start)
 
 
 def _unused(text):
