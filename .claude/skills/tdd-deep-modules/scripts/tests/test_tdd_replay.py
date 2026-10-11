@@ -240,3 +240,16 @@ class TddReplayTest(unittest.TestCase):
         replay.wait(timeout=30)
 
         self.assertEqual(repo.git("worktree", "list").count("\n"), 0, repo.git("worktree", "list"))
+
+    def test_a_crash_exits_2_not_1(self):
+        repo = vitest_repo(self)
+        base = repo.git("rev-parse", "HEAD")
+        repo.commit_phase("red", {"calc.test.js": VITEST_TEST}, 1)
+        repo.commit_phase("green", {"calc.js": RIGHT_ADD_JS}, 0)
+
+        result = repo.run("tdd_replay", f"{base}..HEAD", path="/usr/bin:/bin")
+
+        self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
+        self.assertIn("tdd_replay: internal error", result.stderr)
+        self.assertNotIn("Traceback", result.stderr)
+        self.assertEqual(repo.git("worktree", "list").count("\n"), 0)
