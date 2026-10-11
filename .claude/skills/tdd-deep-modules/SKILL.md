@@ -76,6 +76,7 @@ In every refactor phase, with all tests green, run `scripts/depth_report <change
 
 - **Interface much simpler than the implementation.** A caller learns few names, parameters and rules; a lot happens behind them. A module about as big as its interface is shallow: merge it into its caller or callee.
 - **No classitis.** Many tiny classes or files that each forward to the next spread one decision over many places. Merge them.
+- **No swarm of exported helpers.** A functional core is fine as internal structure, but many small exported pure functions with one caller each are classitis too: they turn implementation details into interface. Keep them private behind the module's interface, and test them through it.
 - **No pass-through wrappers.** A function that only forwards its arguments with the same shape hides nothing. Call the target directly or give the wrapper a real job.
 - **Pull complexity downward.** When the module or every caller could handle a case (defaults, normalisation, retries), handle it inside the module once.
 - **Do not split by size alone.** A long function that hides one decision stays whole; split only along separate decisions.
