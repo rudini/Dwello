@@ -93,3 +93,21 @@ already produced the behavior; each pin was mutation-checked instead.
 - [x] Python test suites are not supported (exit 2)
 - [x] a detected framework without tests makes the run an error
 - [x] bun error counts come only from bun's own closing summary
+
+## Step 2: `tdd_replay <commit-range>`
+
+Re-runs every commit of the range in a separate worktree and decides from the real runs. Exit 0 + `REPLAY: ACCEPT`, exit 1 + `REPLAY: REJECT` (with the reasons per commit), exit 2 for usage or git errors.
+
+- [ ] a hand-built good history (test, red, green, refactor, red, green) is accepted
+- [ ] a commit that only claims red (its suite passes) is rejected
+- [ ] an import error committed as red is rejected
+- [ ] production code committed before its red test (in the red commit) is rejected
+- [ ] a refactor on red (refactor whose suite fails) is rejected
+- [ ] two new tests in one cycle (framework discovery: one fails, one passes) are rejected
+- [ ] a trailer exit code that differs from the real run is rejected
+- [ ] a history that ends in red is rejected
+- [ ] a commit without a phase prefix is rejected
+- [ ] green or refactor that removes tests is rejected
+- [ ] a bad range or a path outside git exits 2
+- [ ] vitest histories replay (the worktree borrows node_modules)
+- [ ] the replay leaves the caller's working tree, index and branch untouched
