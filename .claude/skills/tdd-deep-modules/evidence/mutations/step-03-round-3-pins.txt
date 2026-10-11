@@ -1,0 +1,2 @@
+KILLED   tdd-guard: '    rel = prefix.stdout.strip() + target.relative_to(existing).as_posix()' -> '    rel = target.relative_to(existing).as_posix()' [test_files_in_existing_directories_are_placed_by_git]
+KILLED   tdd-guard: '    target = Path(path).resolve()  # no `..` or symlink detours' -> '    target = Path(path)' [test_files_in_existing_directories_are_placed_by_git]

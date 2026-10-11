@@ -160,3 +160,13 @@ class TddGuardTest(unittest.TestCase):
 
         self.assertEqual(result.returncode, 1, result.stderr)
         self.assertIn("tdd-guard: cannot check calc.ts: fatal: detected dubious ownership", result.stderr)
+
+    def test_files_in_existing_directories_are_placed_by_git(self):
+        repo = bun_repo(self, **{"tests/keep.md": "x\n", "src/keep.md": "x\n"})
+        repo.commit_phase("test", {"TESTLIST.md": "- [ ] adds\n"}, 1)
+        (repo.path / "tests" / "alias.ts").symlink_to(repo.path / "src" / "calc.ts")
+        for rel, expected in (("tests/helpers.ts", 0), ("src/calc.ts", 2), ("tests/alias.ts", 2)):
+            with self.subTest(rel):
+                result = guard(repo, "Edit", rel)
+
+                self.assertEqual(result.returncode, expected, result.stderr)
