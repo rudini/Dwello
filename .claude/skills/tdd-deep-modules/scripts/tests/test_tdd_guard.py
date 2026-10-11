@@ -108,3 +108,11 @@ class TddGuardTest(unittest.TestCase):
 
                     self.assertEqual(result.returncode, 2, result.stderr)
                     self.assertIn("calc.ts is production code", result.stderr)
+
+    def test_code_suffixes_are_matched_without_case(self):
+        repo = bun_repo(self)
+        repo.commit_phase("test", {"TESTLIST.md": "- [ ] adds\n"}, 1)
+
+        result = guard(repo, "Write", "Calc.TS")
+
+        self.assertEqual(result.returncode, 2, result.stderr)
