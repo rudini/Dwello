@@ -73,6 +73,19 @@ Deviation from the original wording "blocks edits to production files unless the
 
 `skill_lint [skill-dir]` checks the skill itself (`tddcore/lint.problems(skill) -> [message]`; the CLI prints them, exit 0 OK, 1 problems, 2 no SKILL.md). Frontmatter (read with PyYAML): present and valid YAML; `name` kebab-case, at most 64 characters, equal to the directory name; `description` present, at most 1024 characters, no angle brackets; only keys Claude Code reads. The hook: a `PreToolUse` entry whose matcher covers Write and Edit and that runs `scripts/tdd-guard`, which must exist and be executable. Content: every section in `lint.REQUIRED` with its phrases (case-insensitive), the hard rules first, the six workflow sections in order, the design note last; fewer than 400 lines; every `references/...md` link resolves. Trigger behaviour is checked separately with skill-creator's `run_eval.py` (`evals/`), because it calls the model.
 
+## Stage 2 check (`verify_all`) and `verifiers.lock`
+
+`verify_all [skill-dir]` is three statements: call `tddcore/gate.stage2`, print its lines, exit with `not passed`. The rule lives in `gate.stage2(skill) -> (passed, lines)`: the reviews of steps 01-08 are read first (as in stage 1, so the suite cannot write them), then the skill's own suite must pass (`selfcheck.own_suite`), `skill_lint` must find nothing, every step's latest review must end in `VERDICT: PASS`, and `verifiers.lock` must hold. It prints `tests: ...`, the lint result, one `step NN: ...` line per step, the lock result, then `STAGE2: PASS` (exit 0) or `STAGE2: FAIL` (exit 1).
+
+`verifiers.lock` is written after step 08's clean review and ties the verifier files to it: the first line is `reviewed: evidence/reviews/step-08-round-N.md`, which must be step 08's latest round and a pass; then one `sha256sum` line per verifier (`scripts/verify_all`, `scripts/verify_stage1`, `scripts/skill_lint`, `scripts/tddcore/gate.py`, `verdicts.py`, `selfcheck.py`, `lint.py`). A verifier missing from the lock, or whose hash differs, fails stage 2 until a new review passes and the lock is rewritten:
+
+```bash
+cd .claude/skills/tdd-deep-modules
+{ echo "reviewed: evidence/reviews/step-08-round-N.md"
+  sha256sum scripts/verify_all scripts/verify_stage1 scripts/skill_lint scripts/tddcore/gate.py \
+    scripts/tddcore/verdicts.py scripts/tddcore/selfcheck.py scripts/tddcore/lint.py; } > verifiers.lock
+```
+
 ## Known limits
 
 - The previous phase is read from the HEAD subject prefix (`red: ...`), which a hand-made commit can fake; `tdd_replay` (step 2) re-runs history and does not trust subjects or trailers.
@@ -101,3 +114,4 @@ Deviation from the original wording "blocks edits to production files unless the
 - `tdd-guard`: a source directory on another mount than the repository is outside git's discovery and passes silently; files under `.git/` are judged like files at the repository root (they fail closed after a test commit); without git on PATH the hook prints a traceback (non-blocking).
 - `depth_report` reads source text with regular expressions, not a parser: comment markers and brackets inside strings (`"http://..."`, `"("`), comparisons inside type parameters, type annotations that contain `=`, abstract methods, symlinked module names and import aliases other than `$lib` (tsconfig paths) are not understood. A module without exports gets ratio = size. Repeated query fragments (`.from(table)`, `const today = ...`) count as duplicates, so large service modules often show a bloat finding; the numbers are prompts for the refactor, not verdicts.
 - `skill_lint` needs PyYAML; it reads SKILL.md with `\n` line endings (a CRLF file has no frontmatter for it). Required phrases are matched as text, so a phrase that is present but contradicted elsewhere passes.
+- `verifiers.lock` guards the verifier files against unreviewed edits, not against an author who edits a verifier and rewrites the lock in one go; the review files and git history are the record for that.

@@ -211,9 +211,9 @@ Design it twice. Hidden decision: what "stage 2 passes" means (which checks, whi
 
 Review steps: 01-03 stage 1 tools, 04 `verify_stage1`, 05 SKILL.md, 06 `depth_report`, 07 `skill_lint`, 08 `verify_all`. `verifiers.lock`: a `reviewed: evidence/reviews/step-08-round-N.md` line, then one `<sha256>  <path>` line per verifier file (`verify_all`, `verify_stage1`, `skill_lint`, `tddcore/gate.py`, `tddcore/verdicts.py`, `tddcore/selfcheck.py`, `tddcore/lint.py`).
 
-- [ ] everything passes -> `tests: OK`, `skill_lint: OK`, one verdict line per step 01-08, `verifiers.lock: OK`, `STAGE2: PASS`, exit 0
-- [ ] a step whose latest review failed, or that has none -> `STAGE2: FAIL`
-- [ ] a skill_lint problem is printed and fails the stage
-- [ ] a failing own suite fails the stage
-- [ ] `verifiers.lock` missing, a verifier changed after the lock, or a lock that names a review that is not step 08's latest passing one -> `STAGE2: FAIL` naming the cause
-- [ ] `verify_all` holds no logic: no branches or loops, only a call to `gate.stage2`, printing and the exit
+- [x] everything passes -> `tests: OK`, `skill_lint: OK`, one verdict line per step 01-08, `verifiers.lock: OK`, `STAGE2: PASS`, exit 0
+- [x] a step whose latest review failed, or that has none -> `STAGE2: FAIL`
+- [x] a skill_lint problem is printed and fails the stage
+- [x] a failing own suite fails the stage
+- [x] `verifiers.lock` missing, a verifier changed after the lock, or a lock that names a review that is not step 08's latest passing one -> `STAGE2: FAIL` naming the cause
+- [x] `verify_all` holds no logic: no branches or loops, only a call to `gate.stage2`, printing and the exit
