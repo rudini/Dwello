@@ -4,6 +4,7 @@ import sys
 import tempfile
 import time
 import unittest
+from pathlib import Path
 
 from tests.fixture import (BUN_TEST, RIGHT_ADD_JS, RIGHT_ADD_TS, SCRIPTS, VITEST_TEST, WRONG_ADD_TS, Repo,
                            bun_repo, vitest_repo)
@@ -291,3 +292,14 @@ class TddReplayTest(unittest.TestCase):
                 for phase, files, exit_code in steps:
                     repo.commit_phase(phase, files, exit_code)
                 self.assert_rejected(repo, base, "removes tests:")
+
+    def test_the_replay_keeps_the_callers_other_worktrees(self):
+        repo, base = good_history(self)
+        with tempfile.TemporaryDirectory() as elsewhere:
+            other = Path(elsewhere) / "other"
+            repo.git("worktree", "add", "-q", "-b", "feature", str(other))
+        before = repo.git("worktree", "list", "--porcelain")
+
+        repo.run("tdd_replay", f"{base}..HEAD")
+
+        self.assertEqual(repo.git("worktree", "list", "--porcelain"), before)
