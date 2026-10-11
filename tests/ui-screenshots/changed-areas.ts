@@ -65,6 +65,13 @@ export function changedAreas(before: Buffer, after: Buffer, cell = 16): Area[] {
 	return areas;
 }
 
+/** Same size and the same pixels, however the PNG files are encoded: a page without any visible change */
+export function looksTheSame(a: Buffer, b: Buffer): boolean {
+	const before = PNG.sync.read(a);
+	const after = PNG.sync.read(b);
+	return before.width === after.width && before.height === after.height && before.data.equals(after.data);
+}
+
 /**
  * The image with every area framed as the pages are: a red line 3 px wide, 2 px outside the area (#dc2626)
  */

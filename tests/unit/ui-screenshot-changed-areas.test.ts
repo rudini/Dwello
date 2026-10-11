@@ -1,6 +1,6 @@
 import { PNG } from 'pngjs';
 import { describe, expect, it } from 'vitest';
-import { changedAreas, markAreas } from '../ui-screenshots/changed-areas';
+import { changedAreas, looksTheSame, markAreas } from '../ui-screenshots/changed-areas';
 
 // White image of the given size, with black pixels at the given points
 function image(width: number, height: number, ...black: [number, number][]) {
@@ -44,5 +44,23 @@ describe('markAreas', () => {
 		expect(pixel(12, 20)).toEqual([220, 38, 38]); // left edge of the frame, 2 px off the area like the pages' outline
 		expect(pixel(20, 20)).toEqual([255, 255, 255]); // inside
 		expect(pixel(2, 2)).toEqual([255, 255, 255]); // far outside
+	});
+});
+
+describe('looksTheSame', () => {
+	it('erkennt gleich aussehende Screenshots, auch wenn die PNG-Datei anders kodiert ist', () => {
+		const png = PNG.sync.read(image(32, 32, [3, 3]));
+		const recoded = PNG.sync.write(png, { deflateLevel: 0 });
+
+		expect(recoded.equals(image(32, 32, [3, 3]))).toBe(false);
+		expect(looksTheSame(image(32, 32, [3, 3]), recoded)).toBe(true);
+	});
+
+	it('sieht einen geänderten Pixel als Änderung', () => {
+		expect(looksTheSame(image(32, 32), image(32, 32, [10, 20]))).toBe(false);
+	});
+
+	it('sieht eine kürzer gewordene Seite als Änderung', () => {
+		expect(looksTheSame(image(32, 48), image(32, 32))).toBe(false);
 	});
 });
