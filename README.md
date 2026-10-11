@@ -157,6 +157,30 @@ Dwello is a comprehensive web application for managing residential properties in
   numbered SQL file in `backend/migrations` by hand (see `backend/CLAUDE.md`)
 - `bun run db:push` - Drizzle Kit changes the database directly, without a migration; only for throwaway databases
 
+### Deep modules (deepcheck)
+
+deepcheck finds shallow modules (A Philosophy of Software Design, ch. 4): an interface almost as large as what it hides.
+It is a warning system, not a verdict on design quality.
+
+When it runs:
+- Before every `git commit` and `git push` (Claude Code hook) and in the CI job "Deep modules", on the changed modules only.
+- A changed module fails when it is new or got shallower, scores at least 65 and contains a pass-through (a function
+  that only forwards its parameters) or classitis (one module cut into tiny files).
+
+Commands (repo root):
+- `npm run deepcheck:audit` - check the changed modules as the hook does; silent when clean
+- `npm run deepcheck:scan` - rank all modules by score; a review aid, it never fails
+- `npm run deepcheck:ci -- origin/main` - the CI check against a base branch
+- `npm run deepcheck:baseline` - rewrite `.deepcheck-baseline.json` after a deliberate scoring change
+
+When it reports a module:
+1. Read the reason; `node tools/deepcheck/src/cli.ts --explain <path>` shows every metric.
+2. Fix the design: merge forwarders into their callee, pull tiny files together, hide steps behind one function.
+   Do not pad a module to lower its score.
+3. For a deliberate exception put `// deepcheck-ignore-file -- <reason>` at the top of the file; it shows in review.
+
+Metrics, weights, configuration and known false positives: [tools/deepcheck/README.md](tools/deepcheck/README.md).
+
 ### Project Structure
 
 ```
