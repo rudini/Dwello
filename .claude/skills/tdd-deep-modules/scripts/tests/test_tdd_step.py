@@ -668,3 +668,27 @@ class TddStepTest(unittest.TestCase):
         result = repo.run("tdd-step", "red", "adds two numbers")
 
         self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_pytest_is_detected_from_its_config_section_alone(self):
+        configs = {"pytest.ini": "[pytest]\npython_files = check_*.py\n",
+                   "pyproject.toml": '[tool.pytest.ini_options]\npython_files = "check_*.py"\n',
+                   "setup.cfg": "[tool:pytest]\npython_files = check_*.py\n",
+                   "tox.ini": "[pytest]\npython_files = check_*.py\n"}
+        for config, text in configs.items():
+            with self.subTest(config):
+                repo = Repo(self, {"calc.py": WRONG_ADD, config: text})
+                repo.write("tests/check_calc.py", PYTEST_TEST)
+
+                result = repo.run("tdd-step", "red", "adds two numbers")
+
+                self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_a_mixed_repository_records_the_highest_exit_code(self):
+        repo = vitest_repo(self)
+        repo.commit_all("green: seed", {"calc.py": RIGHT_ADD, "test_calc.py": PYTEST_TEST})
+        repo.write("calc.test.js", VITEST_TEST)
+
+        result = repo.run("tdd-step", "red", "adds in js")
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(repo.trailer("TDD-Exit-Code"), "1")

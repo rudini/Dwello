@@ -1,0 +1,6 @@
+KILLED   tddcore/suite.py: '"setup.cfg": "[tool:pytest]"' -> '"setup.cfg": "[nopytest]"' [test_pytest_is_detected_from_its_config_section_alone]
+KILLED   tddcore/suite.py: '"tox.ini": "[pytest]"' -> '"tox.ini": "[nopytest]"' [test_pytest_is_detected_from_its_config_section_alone]
+KILLED   tddcore/suite.py: '"pyproject.toml": "[tool.pytest"' -> '"pyproject.toml": "[nopytest"' [test_pytest_is_detected_from_its_config_section_alone]
+KILLED   tddcore/suite.py: '_PYTEST_CONFIG = {"pytest.ini": ""' -> '_PYTEST_CONFIG = {"pytest.ini": "[nopytest]"' [test_pytest_is_detected_from_its_config_section_alone]
+KILLED   tddcore/suite.py: 'return Run(max(r.exit_code' -> 'return Run(min(r.exit_code' [test_a_mixed_repository_records_the_highest_exit_code]
+KILLED   tddcore/suite.py: 'runs = [r for r in runs if not r.empty] or runs' -> 'runs = [r for r in runs if r.ran] or runs' [test_a_crashed_suite_is_not_dropped_in_a_mixed_repository]
