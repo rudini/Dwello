@@ -303,3 +303,16 @@ export class Ledger {
         line = report_line(repo.run("depth_report", "src/amount.ts"), "src/amount.ts")
 
         self.assertIn(", pass-through 0,", line)
+
+    def test_parameters_are_counted_by_their_brackets_and_declarators_one_by_one(self):
+        module = ("export function cb(fn: () => void, n: number, opts = { a: 1, b: [2, 3] }) {\n  fn();\n}\n"
+                  "export const x = 1, y = 2;\n"
+                  "export let z: number;\n"
+                  "export const w = (a: number) => a * 2;\n"
+                  "export const pair = <T extends Map<string, T>>(a: T, b: T) => [a, b];\n")
+        repo = Repo(self, {"src/cb.ts": module})
+
+        line = report_line(repo.run("depth_report", "src/cb.ts"), "src/cb.ts")
+
+        # cb 1+3, x 1, y 1, z 1, w 1+1, pair 1+2
+        self.assertTrue(line.startswith("src/cb.ts: surface 12,"), line)
