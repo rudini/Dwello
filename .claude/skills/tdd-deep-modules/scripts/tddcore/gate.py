@@ -62,11 +62,16 @@ def _verifiers(skill):
     """Every file the scripts can load: all of scripts/ except the test suite and bytecode caches."""
     scripts = skill / "scripts"
     return [path.relative_to(skill).as_posix() for path in scripts.rglob("*")
-            if path.is_file() and not {"tests", "__pycache__"} & set(path.relative_to(scripts).parts)]
+            if path.is_file() and _loadable(path.relative_to(scripts))]
 
 
 def _links(skill):
     """Symbolic links under scripts/: the lock cannot see through them, so none may exist."""
     scripts = skill / "scripts"
     return [path.relative_to(skill).as_posix() for path in scripts.rglob("*")
-            if path.is_symlink() and not {"tests", "__pycache__"} & set(path.relative_to(scripts).parts)]
+            if path.is_symlink() and _loadable(path.relative_to(scripts))]
+
+
+def _loadable(relative):
+    """False for the test suite (scripts/tests/) and bytecode caches, which the verifiers never load."""
+    return relative.parts[0] != "tests" and "__pycache__" not in relative.parts
