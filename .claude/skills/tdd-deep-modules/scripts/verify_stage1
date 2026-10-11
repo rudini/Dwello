@@ -1,20 +1,17 @@
 #!/usr/bin/env python3
 """verify_stage1 [skill-dir]: stage 1 holds when the skill's tests pass and every step's latest review passed."""
-import subprocess
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from tddcore import verdicts  # noqa: E402
+from tddcore import selfcheck, verdicts  # noqa: E402
 
 STEPS = ("01", "02", "03")
 
 
 def main(skill):
-    suite = subprocess.run([sys.executable, "-m", "unittest", "discover", "-s", str(skill / "scripts" / "tests"),
-                            "-t", str(skill / "scripts")], capture_output=True, text=True)
-    print(f"tests: {suite.stderr.strip().splitlines()[-1]}")
-    passed = suite.returncode == 0
+    passed, summary = selfcheck.own_suite(skill / "scripts")
+    print(f"tests: {summary}")
     for step in STEPS:
         latest = verdicts.final(skill / "evidence" / "reviews", step)
         if latest is None:
