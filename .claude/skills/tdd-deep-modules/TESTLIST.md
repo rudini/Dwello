@@ -200,7 +200,9 @@ Prints `skill_lint: OK` and exits 0, or one `skill_lint: <problem>` line per pro
 - [x] a broken hook matcher regex is no match, not a crash
 - [x] the statements hardened by the SKILL.md reviews are required too (one-sentence reason, one test per cycle, no second test before the first is green, never what it expects, the stash, changed production .ts/.js files, not assertion strength)
 - [x] a relative skill path (`skill_lint .`) is judged by the real directory name; a SKILL.md that is not UTF-8 is named
-- [x] trigger tests: `evals/trigger-eval.json`, result 10/10 in `evals/trigger-result.json`
+- [x] trigger tests: `evals/trigger-eval.json` (5 should, 7 near misses), result 12/12 with 3 runs each in `evals/trigger-result.json`
+- [x] round 1 review: inverted elements named; the three reference files must be linked; hook matcher rules (`*`, empty, absent), only `command` hooks, the program is the guard; `name`/`description` must be text; a byte order mark is named; headings in code fences are no sections; duplicate keys are named
+- [x] round 2 review: a negation in front of a bold list item is named (`ITEMS`); the framing sentences "break none of these" and "in every refactor phase" are required; the hook command must run exactly this skill's guard (directly or through sh/bash), malformed hook values give no traceback; `~~~` fences and HTML comments hold no sections
 
 ## Step 4: `scripts/verify_all [skill-dir]` and `verifiers.lock`
 

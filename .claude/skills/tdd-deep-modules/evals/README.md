@@ -6,7 +6,7 @@
 cd <an empty project dir with a .claude/ folder>
 PYTHONPATH=/mnt/skills/examples/skill-creator python3 -m scripts.run_eval \
   --eval-set <skill>/evals/trigger-eval.json --skill-path <skill> \
-  --runs-per-query 1 --timeout 120 --num-workers 1
+  --runs-per-query 3 --timeout 120 --num-workers 1
 ```
 
 Use `--num-workers 1`: with parallel workers every run sees several identical copies of the skill and picks another worker's copy, which `run_eval` counts as "not triggered" (a first parallel run scored 0 of 5 triggers this way).
