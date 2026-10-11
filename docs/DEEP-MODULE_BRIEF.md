@@ -508,3 +508,4 @@ The user asked whether the calibration can be improved, and to close the evasion
   - Precision@25 12/25, AUC 0.828.
   - OSS: highest 60, none flagged. Textbook designs 71–80, classitis directory 67, all flagged.
 - **Remaining:** pieces spread over directories or also imported elsewhere; the classitis margin is small (67 against 65).
+- **GitHub CI:** run 38124942116 on d480122 (contains 763ba50) passed all 9 jobs, including "Deep modules", "Fallow audit", "Unit tests" and "E2E tests". The check suite of 763ba50 on its own also completed without failures.
