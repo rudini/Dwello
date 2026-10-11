@@ -745,3 +745,12 @@ class TddStepTest(unittest.TestCase):
 
         self.assertEqual(result.returncode, 2, result.stderr)
         self.assertIn("jest", result.stderr)
+
+    def test_a_pytest_run_without_a_report_is_an_error_even_with_exit_0(self):
+        repo = vitest_repo(self)
+        repo.commit_all("red: seed", {"calc.js": "export const add = () => 0;\n", "calc.test.js": VITEST_TEST,
+                                      "calc.py": RIGHT_ADD, "test_calc.py": PYTEST_TEST})
+        repo.write("calc.js", RIGHT_ADD_JS)
+        repo.write("calc.py", "import os\nos._exit(0)\n" + RIGHT_ADD)
+
+        self.assert_refused(repo, "green", "green needs all tests passing", head="red: seed")
