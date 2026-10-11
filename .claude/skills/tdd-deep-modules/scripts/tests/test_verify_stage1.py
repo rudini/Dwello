@@ -105,7 +105,9 @@ class VerifyStage1Test(unittest.TestCase):
 
     def test_an_empty_or_unreadable_review_is_stage1_fail(self):
         for name, write in (("empty", lambda p: p.write_text("  \n")),
-                            ("not utf-8", lambda p: p.write_bytes(b"VERDICT: PASS\xff\n"))):
+                            ("not utf-8", lambda p: p.write_bytes(b"VERDICT: PASS\xff\n")),
+                            ("a directory", lambda p: p.mkdir()),
+                            ("a broken symlink", lambda p: p.symlink_to(p.parent / "missing.md"))):
             with self.subTest(name):
                 root = skill_dir(self, {"01": ["PASS"], "02": ["PASS"], "03": ["PASS"]})
                 write(root / "evidence" / "reviews" / "step-02-round-2.md")
@@ -142,3 +144,12 @@ class VerifyStage1Test(unittest.TestCase):
 
         self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
         self.assertIn("step 03: VERDICT: FAIL (round 2)", result.stdout)
+
+    def test_a_suite_without_output_is_stage1_fail(self):
+        silent = "import os\nos._exit(0)\n"
+        root = skill_dir(self, {"01": ["PASS"], "02": ["PASS"], "03": ["PASS"]}, test=silent)
+
+        result = verify(root)
+
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn("tests: exit code 0, no output", result.stdout)

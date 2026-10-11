@@ -1,0 +1,4 @@
+KILLED   tddcore/verdicts.py: '    except (OSError, UnicodeDecodeError):' -> '    except (UnicodeDecodeError,):' [test_an_empty_or_unreadable_review_is_stage1_fail]
+KILLED   tddcore/selfcheck.py: 'f"exit code {done.returncode}, no output"' -> '""' [test_a_suite_without_output_is_stage1_fail]
+KILLED   verify_stage1: '    steps = [(step, *verdicts.final(skill / "evidence" / "reviews", step)) for step in STEPS]\n    passed, summary = selfcheck.own_suite(skill / "scripts")' -> '    passed, summary = selfcheck.own_suite(skill / "scripts")\n    steps = [(step, *verdicts.final(skill / "evidence" / "reviews", step)) for step in STEPS]' [test_a_review_written_by_the_suite_does_not_count]
+KILLED   tddcore/selfcheck.py: 'summary == "OK" and' -> 'summary.startswith("OK") and' [test_a_suite_that_did_not_really_pass_is_stage1_fail]

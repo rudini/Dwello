@@ -63,7 +63,7 @@ Deviation from the original wording "blocks edits to production files unless the
 
 ## Stage 1 check (`verify_stage1`)
 
-`verify_stage1 [skill-dir]` runs the skill's own suite (`tddcore/selfcheck.own_suite`: passes only with exit 0, an `OK` summary and at least one executed test) and reads every step's latest review (`tddcore/verdicts.final`: the highest round number of `evidence/reviews/step-NN-round-M.md`; its last line must be exactly `VERDICT: PASS`; two files for one round number or an empty/unreadable review fail). It prints the suite summary and each step's final verdict, then `STAGE1: PASS` (exit 0) or `STAGE1: FAIL` (exit 1).
+`verify_stage1 [skill-dir]` runs the skill's own suite (`tddcore/selfcheck.own_suite`: passes only with exit 0, a bare `OK` summary (no skips, no expected failures) and at least one test run) and, before the suite runs, reads every step's latest review (`tddcore/verdicts.final`: the highest round number of `evidence/reviews/step-NN-round-M.md`; its last line must be exactly `VERDICT: PASS`; two files for one round number or an empty/unreadable review fail). It prints the suite summary and each step's final verdict, then `STAGE1: PASS` (exit 0) or `STAGE1: FAIL` (exit 1).
 
 ## Known limits
 
@@ -89,5 +89,5 @@ Deviation from the original wording "blocks edits to production files unless the
 - Test-file names are matched generously (`test_*`, `*_test.*`, `*.test.*`, `*.spec.*`, test directories); a production file named like a test passes the guard.
 - A hardlink inside a test directory to a production file is classified by its own path (test code), so editing it changes production content unguarded; creating one needs Bash, which is unguarded anyway.
 - The hook reads the phase from the HEAD subject; a hand-made `git commit -m "red: ..."` (through Bash) unlocks it. `tdd_replay` judges such commits from real runs later.
-- `verify_stage1` reads only a review's last line; an earlier `VERDICT: FAIL` line in the same file does not count. Test files in subdirectories of `scripts/tests` without `__init__.py` are not discovered.
+- `verify_stage1` reads only a review's last line; an earlier `VERDICT: FAIL` line in the same file does not count. Test files in subdirectories of `scripts/tests` without `__init__.py` are not discovered. Untracked review files count. The suite verdict comes from unittest's last stderr line: a late warning after `OK` fails the check, and a test that deliberately prints `OK` and exits 0 can fake a pass.
 - `tdd-guard`: a source directory on another mount than the repository is outside git's discovery and passes silently; files under `.git/` are judged like files at the repository root (they fail closed after a test commit); without git on PATH the hook prints a traceback (non-blocking).

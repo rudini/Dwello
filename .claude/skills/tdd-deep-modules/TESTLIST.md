@@ -139,7 +139,9 @@ Runs the skill's test suite and reads the final reviewer verdict of every step (
 - [x] a missing step review -> `STAGE1: FAIL` naming the step
 - [x] a failing test suite -> `STAGE1: FAIL`
 - [x] two reviews with the same round number (`round-2`, `round-02`) -> `STAGE1: FAIL`
-- [x] a suite that did not really pass (exit 0 after a failure via `os._exit`, every test skipped) -> `STAGE1: FAIL`
+- [x] a suite that did not really pass (exit 0 after a failure via `os._exit`, every test skipped, a failing test skipped or expected to fail) -> `STAGE1: FAIL`
+- [x] a review the suite writes while it runs does not count
+- [x] pins: a directory or broken symlink as review, a suite without output -> `STAGE1: FAIL`
 - [x] an empty or non-UTF-8 review -> `STAGE1: FAIL`, no traceback
 - [x] pins: round 10 after round 9, `.bak` and `-response.md` files ignored, `PASS (with caveats)` is no pass
 
