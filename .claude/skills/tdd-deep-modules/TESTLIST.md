@@ -177,6 +177,7 @@ Per module, one line: `<path>: surface S, size N, ratio R, classitis yes|no, pas
 - [x] block comments are not code: neither size nor duplicates count them
 - [x] found by a run on Dwello's own modules: a dotted module name (`apartment.service`) is matched whole; a SvelteKit `$lib/...` import counts as a test import
 - [x] round 1 review: wrapped and generic signatures count; nothing in comments counts; arrow and awaiting forwards are pass-throughs; object-literal members are not duplicates; classes without methods are not classitis; `require()` counts; unused function expressions are bloat; a directory is "not a file"; pins for enum, declare, abstract class, `export *`, let/var, generators, async arrows, getters, non-UTF-8 input, dynamic imports and untracked test files
+- [x] round 2 review: only an arrow whose whole body is the call is a pass-through (no chained, operated or ternary bodies, no name taken from an earlier line); a call that changes an argument is not a pass-through; parameters are counted by their brackets and each declarator counts; block-bodied, typed, async and generic arrow forwards are pass-throughs; repeated array openers are not duplicates
 
 ## Step 3: `scripts/skill_lint [skill-dir]`
 
