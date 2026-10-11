@@ -1,5 +1,6 @@
 import { expect } from '@playwright/test';
 import { createBdd } from 'playwright-bdd';
+import { inDays } from '../fixtures/dates';
 import { test } from '../fixtures/test';
 import { reminderButton } from '../interactions/documents';
 import { visit } from '../interactions/navigation';
@@ -7,8 +8,6 @@ import { deliveryOf, documentFor, mailsTo, reminderOutcome } from '../questions/
 import { markLetterSent, sendReminder } from '../tasks/documents';
 
 const { Given, When, Then } = createBdd(test);
-
-const inDays = (days: number) => new Date(Date.now() + days * 86_400_000).toLocaleDateString('sv-SE');
 
 const CHANNELS: Record<string, 'email' | 'letter'> = { 'E-Mail': 'email', Brief: 'letter' };
 

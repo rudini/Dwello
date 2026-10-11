@@ -27,6 +27,10 @@
 	let corrected = $state<string>(); // the error the field was changed after
 	const shown = $derived(error === corrected ? undefined : error);
 	const change = () => (corrected = error);
+	// a check that cleared the error starts over: the same error set again is shown again
+	$effect(() => {
+		if (!error) corrected = undefined;
+	});
 	$effect(() => {
 		const form = frame?.closest('form');
 		const check = () => (corrected = undefined);

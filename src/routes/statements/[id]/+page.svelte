@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { flushSync } from 'svelte';
 	import type { StatementDocument, StatementWithDetails } from '$lib/types';
 	import { addToast } from '$lib/stores';
 	import { balanceLabel, paidDateError, paidHelp, statusLabels, statusTones } from '$lib/statement';
@@ -53,6 +54,8 @@
 
 	// checked in the dialog before sending: a wrong date is said at the field, which gets the focus
 	function checkPaidDate() {
+		paidError = '';
+		flushSync(); // cleared first: the same error set again shows again
 		paidError = paidDateError(paidDate) ?? '';
 		if (paidError) focusFirstError(document.querySelector('[role="dialog"]'));
 		return !paidError;

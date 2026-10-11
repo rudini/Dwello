@@ -76,15 +76,15 @@
 			close();
 		}
 		if (event.key === 'Tab') trapFocus(event);
-		// Enter in a field confirms, as in a form
-		if (
-			event.key === 'Enter' &&
-			(event.target as HTMLElement).matches?.('input') &&
-			panel?.contains(event.target as Node)
-		) {
-			event.preventDefault();
-			if (!busy) onconfirm();
-		}
+		if (event.key === 'Enter') confirmFromField(event);
+	}
+
+	// Enter in a field of the dialog confirms, as in a form
+	function confirmFromField(event: KeyboardEvent) {
+		const target = event.target as HTMLElement;
+		if (!target.matches?.('input') || !panel?.contains(target)) return;
+		event.preventDefault();
+		if (!busy && !confirmDisabled) onconfirm();
 	}
 
 	// Tab moves through the dialog's controls only, wrapping at both ends; while busy it stays on the panel

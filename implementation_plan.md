@@ -4493,6 +4493,12 @@ critical/high/medium is open; reviews in `docs/reviews/`.
   (`statement-actions.ts`, both paid dialogs); fee text as in the PDF (`CostTable.svelte`); deadlines up to 30 days
   (`overview.ts`); stable list order (services); refocus on errors (`focus-error.ts`); «.-» amounts (`invoice.ts`);
   missing year message (`DateInput.svelte`); PLZ for letters; town in the tenant choice; history with sent and paid.
+- [x] **Review rounds 4 and 5, persona reruns** (`docs/reviews/R3-review.md`): paid date checked in the dialog before
+  sending (`paidDateError` in `src/lib/statement.ts`, `FormDialog` `check`, list dialog) and refused when empty; Enter
+  confirms a dialog (`Dialog.svelte`) after reading a two-digit year (`DateInput.svelte`); `Field` shows a repeated
+  error again; `localToday` is the Swiss day (also in tests and E2E steps); the PDF as sent stays after paying;
+  reminders only when overdue (backend); date messages for a missing year and other formats; scenarios «Zahlungseingang
+  mit Datum festhalten», «Kein Zahlungseingang in der Zukunft».
 
 
 ---

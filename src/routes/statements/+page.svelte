@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { flushSync } from 'svelte';
 	import { invalidateAll } from '$app/navigation';
 	import { page } from '$app/stores';
 	import type { StatementsListData, StatementWithDetails } from '$lib/types';
@@ -45,6 +46,8 @@
 	let paidError = $state('');
 	async function markPaid() {
 		// a wrong date is said at the field, which gets the focus; nothing is sent
+		paidError = '';
+		flushSync(); // cleared first: the same error set again shows again
 		paidError = paidDateError(paidDate) ?? '';
 		if (paidError) return focusFirstError(document.querySelector('[role="dialog"]'));
 		saving = true;

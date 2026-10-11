@@ -26,6 +26,7 @@ import StatementPage from '../routes/statements/[id]/+page.svelte';
 import EditStatementPage from '../routes/statements/[id]/edit/+page.svelte';
 import { allByTestId, byTestId, click, fakeBff, fireEvent, settle, show } from './helpers/dom';
 import { statement } from './helpers/statement';
+import { localToday } from '$lib/contract-status';
 
 const text = () => document.body.textContent ?? '';
 const counts = { draft: 3, sent: 2, paid: 5, overdue: 1 };
@@ -119,7 +120,7 @@ describe('Abrechnungsliste', () => {
 		click('statement-list-mark-paid-confirm');
 		await settle();
 
-		const today = new Date().toLocaleDateString('sv-SE');
+		const today = localToday();
 		expect(calls).toEqual([
 			{ method: 'POST', path: '/statements/s1/mark-paid', body: { paidDate: today } }
 		]);
@@ -187,7 +188,7 @@ describe('Abrechnungsliste', () => {
 		click('statement-row-mark-paid');
 
 		expect(byTestId<HTMLInputElement>('paid-date-input')!.value).toBe(
-			new Date().toLocaleDateString('de-CH', { day: '2-digit', month: '2-digit', year: 'numeric' })
+			localToday().split('-').reverse().join('.')
 		);
 	});
 
@@ -199,6 +200,32 @@ describe('Abrechnungsliste', () => {
 
 		expect(dialog).not.toContain('Mahnung');
 		expect(dialog).toContain('Der Tag, an dem Sie den Betrag überwiesen haben.');
+	});
+
+	// Zweimal ein Datum in der Zukunft: die Meldung erscheint auch beim zweiten Versuch
+	it('meldet ein falsches Zahlungsdatum auch beim zweiten Versuch', () => {
+		list([statement({ status: 'sent' })]);
+		click('statement-row-mark-paid');
+		const field = byTestId<HTMLInputElement>('paid-date-input')!;
+		for (const date of ['01.01.2099', '01.01.2098']) {
+			fireEvent(field, 'input', date);
+			click('statement-list-mark-paid-confirm');
+			flushSync();
+			expect(field.getAttribute('aria-invalid'), date).toBe('true');
+		}
+	});
+
+	// «01.01.25» mit Enter gesendet: wie beim Verlassen des Felds als 2025 gelesen, nicht abgelehnt
+	it('liest ein zweistelliges Jahr auch, wenn mit Enter bestätigt wird', async () => {
+		const calls = fakeBff();
+		list([statement({ status: 'sent' })]);
+		click('statement-row-mark-paid');
+		const field = byTestId<HTMLInputElement>('paid-date-input')!;
+		fireEvent(field, 'input', '01.01.25');
+		field.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+		await settle();
+
+		expect(calls).toEqual([{ method: 'POST', path: '/statements/s1/mark-paid', body: { paidDate: '2025-01-01' } }]);
 	});
 
 	// Enter im Feld bestätigt, wie in jedem Formular; der versteckte Kalender ist kein Tabstopp
@@ -552,7 +579,7 @@ describe('Abrechnungsdetail', () => {
 		click('statement-mark-paid-button');
 
 		expect(byTestId<HTMLInputElement>('paid-date-input')!.value).toBe(
-			new Date().toLocaleDateString('de-CH', { day: '2-digit', month: '2-digit', year: 'numeric' })
+			localToday().split('-').reverse().join('.')
 		);
 	});
 

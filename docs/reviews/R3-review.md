@@ -73,3 +73,16 @@ Offen, mit Begründung in `offene-punkte.md`:
 Hinweis: Im Lauf von Sven wurde in der Persona-Datenbank `dwello_persona` die Abrechnung NK-33333333-2025-0002 ungewollt als bezahlt gespeichert (der Fehler Sven-N1). Die Datenbank wird bei jedem Persona-Lauf neu aufgesetzt.
 
 Wiederholung der Personas auf c1dd4a4: Helga, Anna, Marco und Dr. Weber haben ihre Aufgaben geschafft; Sven den Assistenten (seine Fehler nach Enter werden jetzt angesagt), nicht aber den Bezahlt-Dialog (siehe oben). Alle früheren hohen Findings sind behoben. Offen bleiben die schon begründeten mittleren (Mietzeitraum, Heizprofil und Rundung nur im PDF; Entwurfskasten im Assistenten; Hilfetext Heizprofil; Vorbelegung der Pauschale; Rechnung aus der Warnung).
+
+## Runde 5 (Code-Review R5 auf 9f19492)
+
+| # | Schwere | Finding | Behandlung |
+|---|---|---|---|
+| R5-1 | hoch | Dieselbe Datumsmeldung erschien beim zweiten Versuch nicht mehr (`Field` hielt sie für korrigiert, ohne Formular wurde das nie zurückgesetzt) | `Field` vergisst die Korrektur, sobald der Fehler leer ist; die Dialoge leeren den Fehler vor jeder Prüfung. Test mit zwei Zukunftsdaten nacheinander |
+| R5-2 | mittel | Enter nach «01.01.25» wurde abgelehnt, das Feld zeigte danach «01.01.2025» | Enter im Datumsfeld liest das Datum wie beim Verlassen, bevor der Dialog bestätigt |
+| R5-3 | mittel | Tests und E2E-Schritte rechneten «heute» in UTC: zwischen 00 und 02 Uhr Schweizer Zeit rot | alle nehmen den Tag in der Schweiz (`localToday` bzw. `timeZone: 'Europe/Zurich'`) |
+| R5-4 | niedrig | Übersicht und Backend («überfällig») rechnen weiter in Serverzeit | Übersicht: `localToday`; Backend offen, `offene-punkte.md` |
+| R5-5 | niedrig | Enter überging `confirmDisabled` | geprüft |
+| R5-6 | niedrig | Testlücken (Hilfe bei Rückerstattung im Detail, Reset im Detail, Demo-Reihenfolge, Sortierung) | offen; Prüfung im Listendialog vor dem Senden jetzt getestet (zweiter Versuch, Enter) |
+| R5-7 | niedrig | Plan und Szenarien fehlten | Plan nachgeführt; Szenarien «Zahlungseingang mit Datum festhalten» und «Kein Zahlungseingang in der Zukunft» (grün auch ohne diese Runde, sie sichern das Verhalten aus c1dd4a4) |
+| R5-8 | niedrig | 2. Mahnung sofort nach der 1. möglich | offen, `offene-punkte.md` – TODO(fachlich prüfen) |

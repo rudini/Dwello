@@ -3,7 +3,7 @@ import { createBdd, type DataTable } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { visit } from '../interactions/navigation';
 import { downloadedFile, downloadedPdfText, downloadedPdfTitle } from '../questions/download';
-import { deleteOffer, heatingCosts, pdfToView, recipient, sendConfirmation, statusOfStatement } from '../questions/statement-detail';
+import { deleteOffer, heatingCosts, historyOf, paidDate, pdfToView, recipient, sendConfirmation, statusOfStatement } from '../questions/statement-detail';
 import { emptyStatementList, statementOfYear, statementPath } from '../questions/statements';
 import { searchStatements } from '../tasks/statements';
 import { francs } from '../tasks/statement-generate-api';
@@ -13,6 +13,7 @@ import {
 	editStatementFromDetail,
 	generateStatementPdf,
 	markStatementPaid,
+	markStatementPaidOn,
 	openStatementApartment,
 	openSendConfirmation,
 	openStatementTenant,
@@ -91,6 +92,20 @@ Then('bietet die Bestätigung das PDF der Abrechnung zum Ansehen an', async ({ v
 
 When('der Liegenschaftsverwalter die Abrechnung als bezahlt markiert', async ({ verwalter }) => {
 	await verwalter.perform(markStatementPaid);
+});
+
+When('der Liegenschaftsverwalter die Abrechnung als am {string} bezahlt markiert', async ({ verwalter }, date: string) => {
+	await verwalter.perform(markStatementPaidOn(date));
+});
+
+Then('nennt der Verlauf {string} am {string}', async ({ verwalter }, label: string, date: string) => {
+	await expect(historyOf(verwalter)).toContainText(new RegExp(`${label}\\s*${date.replace(/\./g, '\\.')}`));
+});
+
+Then('meldet das Feld «Bezahlt am» {string}', async ({ verwalter }, message: string) => {
+	const field = paidDate(verwalter);
+	await expect(field).toHaveAttribute('aria-invalid', 'true');
+	await expect(field).toHaveAccessibleDescription(new RegExp(message.replace(/\./g, '\\.')));
 });
 
 When('der Liegenschaftsverwalter die Abrechnung löscht', async ({ verwalter }) => {

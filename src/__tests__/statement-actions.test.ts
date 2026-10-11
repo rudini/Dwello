@@ -1,9 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import { runAction } from './helpers/action';
 import { actions } from '../routes/statements/[id]/+page.server';
+import { localToday } from '$lib/contract-status';
 
 const API = 'http://localhost:3001/api/v1/statements/s1';
-const today = new Date().toLocaleDateString('sv-SE'); // the day in Switzerland, as the app takes it
+const today = localToday(); // the day in Switzerland, as the app takes it
 
 describe('Abrechnung versenden', () => {
 	it('setzt den Status im Backend auf versendet', async () => {

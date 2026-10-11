@@ -10,29 +10,29 @@ import {
 	openStatementsWithStatus,
 	openTile
 } from '../tasks/dashboard';
+import type { TestData } from '../fixtures/backend';
+import { inDays } from '../fixtures/dates';
 
 const { Given, When, Then } = createBdd(test);
 
-// Dates relative to today, as the overview counts days from today
-const inDays = (days: number) => new Date(Date.now() + days * 86_400_000).toLocaleDateString('sv-SE');
 const lastYear = new Date().getFullYear() - 1;
+
+// Sent earlier, with its deadline some days from today (the overview counts days from today); sending sets the
+// deadline, so it is set afterwards
+async function sentWithDeadline(seed: TestData, tenant: string, days: number) {
+	await seed.statement(tenant, 'Seeblick', lastYear);
+	await seed.sendStatement(tenant, lastYear);
+	await seed.paymentDeadline(tenant, lastYear, inDays(days));
+}
 
 Given(
 	'{string} hat eine versendete Abrechnung, deren Zahlungsfrist seit {int} Tagen abgelaufen ist',
-	async ({ seed }, tenant: string, days: number) => {
-		await seed.statement(tenant, 'Seeblick', lastYear);
-		await seed.sendStatement(tenant, lastYear); // sending sets the deadline; this one was sent earlier
-		await seed.paymentDeadline(tenant, lastYear, inDays(-days));
-	}
+	({ seed }, tenant: string, days: number) => sentWithDeadline(seed, tenant, -days)
 );
 
 Given(
 	'{string} hat eine versendete Abrechnung, deren Zahlungsfrist in {int} Tagen abläuft',
-	async ({ seed }, tenant: string, days: number) => {
-		await seed.statement(tenant, 'Seeblick', lastYear);
-		await seed.sendStatement(tenant, lastYear); // sending sets the deadline; this one was sent earlier
-		await seed.paymentDeadline(tenant, lastYear, inDays(days));
-	}
+	({ seed }, tenant: string, days: number) => sentWithDeadline(seed, tenant, days)
 );
 
 Given('{string} hat eine Abrechnung im Entwurf', async ({ seed }, tenant: string) => {

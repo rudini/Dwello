@@ -96,6 +96,11 @@
 		value = typed(text);
 	}
 
+	// Enter (in a dialog it confirms): the date counts as when the field is left, «01.01.25» as 2025
+	function onkeydown(event: KeyboardEvent) {
+		if (event.key === 'Enter') flushSync(onblur);
+	}
+
 	function onblur() {
 		left = true;
 		value = parseSwissDate(text) ?? '';
@@ -115,6 +120,7 @@
 					value={text}
 					{oninput}
 					{onblur}
+					{onkeydown}
 					aria-required={!optional}
 					aria-describedby={[control.describedBy, value && wordsId].filter(Boolean).join(' ')}
 					aria-invalid={control.invalid || undefined}
