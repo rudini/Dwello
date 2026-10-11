@@ -49,8 +49,8 @@ def _lock(skill):
             found.append(f"{entry[2]} is locked twice")
         else:
             hashes[entry[2]] = entry[1]
-    present = _verifiers(skill)
-    found += [f"{path} is a symbolic link" for path in _links(skill)]
+    present, links = _verifiers(skill)
+    found += [f"{path} is a symbolic link" for path in links]
     for path in sorted(set(present) | set(hashes)):
         if path not in hashes:
             found.append(f"{path} is not locked")
@@ -60,17 +60,11 @@ def _lock(skill):
 
 
 def _verifiers(skill):
-    """Every file the scripts can load: all of scripts/ except the test suite and bytecode caches."""
+    """(files, symbolic links) the scripts can load: all of scripts/ but the test suite and bytecode caches."""
     scripts = skill / "scripts"
-    return [path.relative_to(skill).as_posix() for path in scripts.rglob("*")
-            if path.is_file() and _loadable(path.relative_to(scripts))]
-
-
-def _links(skill):
-    """Symbolic links under scripts/: the lock cannot see through them, so none may exist."""
-    scripts = skill / "scripts"
-    return [path.relative_to(skill).as_posix() for path in scripts.rglob("*")
-            if path.is_symlink() and _loadable(path.relative_to(scripts))]
+    entries = [path for path in scripts.rglob("*") if _loadable(path.relative_to(scripts))]
+    return ([path.relative_to(skill).as_posix() for path in entries if path.is_file()],
+            [path.relative_to(skill).as_posix() for path in entries if path.is_symlink()])
 
 
 def _loadable(relative):
