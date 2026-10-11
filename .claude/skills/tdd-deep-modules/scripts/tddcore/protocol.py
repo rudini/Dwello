@@ -43,9 +43,13 @@ def _is_test(path):
             or not _TEST_DIRS.isdisjoint(path.parts[:-1]))
 
 
-def violations(previous, phase, run, changed):
-    """Why committing `changed` as `phase` after `previous`, with suite result `run`, breaks TDD."""
+def violations(previous, phase, run, changed, suite="full", previous_suite="full"):
+    """Why committing `changed` as `phase` after `previous`, with suite result `run`, breaks TDD.
+
+    `suite` is the tier `run` came from, `previous_suite` the tier of the commit before."""
     found = []
+    if phase == "green" and previous == "red" and previous_suite == "full" and suite != "full":
+        found.append("green must run the full suite, like its red")
     if not changed:
         found.append(f"nothing changed: a {phase} commit needs a change")
     if previous not in _FOLLOWS[phase]:

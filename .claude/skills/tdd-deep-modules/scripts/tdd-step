@@ -46,6 +46,11 @@ def head_subject():
     return done.stdout.strip() if done.returncode == 0 else ""
 
 
+def head_suite():
+    done = run_git("log", "-1", "--format=%(trailers:key=TDD-Suite,valueonly)")
+    return done.stdout.strip() if done.returncode == 0 else ""
+
+
 def main(args):
     if not args or args[0] not in protocol.PHASES:
         print("usage: tdd-step <test|red|green|refactor> [message]", file=sys.stderr)
@@ -73,7 +78,7 @@ def main(args):
               file=sys.stderr)
         return 1
     previous = protocol.phase_of(head_subject())
-    found = protocol.violations(previous, phase, run, changed_files())
+    found = protocol.violations(previous, phase, run, changed_files(), tier, head_suite())
     if found:
         print("\n".join(f"tdd-step: refused: {v}" for v in found), file=sys.stderr)
         return 1
