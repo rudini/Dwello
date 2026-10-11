@@ -6,7 +6,7 @@ from pathlib import Path
 
 
 def own_suite(scripts):
-    """(passed, summary): passed only with exit 0, an `OK` summary and at least one test executed."""
+    """(passed, summary): passed only with exit 0, a bare `OK` summary (no skips, no expected failures) and at least one test executed."""
     scripts = Path(scripts)
     done = subprocess.run([sys.executable, "-m", "unittest", "discover", "-s", str(scripts / "tests"),
                            "-t", str(scripts)], capture_output=True, text=True, errors="replace")
@@ -15,4 +15,4 @@ def own_suite(scripts):
     ran = re.search(r"^Ran (\d+) tests? in", done.stderr, re.MULTILINE)
     skipped = re.search(r"skipped=(\d+)", summary)
     executed = (int(ran[1]) if ran else 0) - (int(skipped[1]) if skipped else 0)
-    return done.returncode == 0 and summary.startswith("OK") and executed > 0, summary
+    return done.returncode == 0 and summary == "OK" and executed > 0, summary
