@@ -100,14 +100,20 @@ def _surface(text):
     return surface
 
 
-# a function or method whose whole body returns one call: `name(params) { return target(args); }`
-_FORWARD = re.compile(r"(?:function\s+)?(\w+)\s*\(([^()]*)\)[^{};=]*\{\s*return\s+[\w.]+\(([^()]*)\);?\s*\}")
+# a function or method whose whole body returns one call: `name(params) { return [await] target(args); }`,
+# or an arrow function whose expression body is that call: `name = (params) => [await] target(args)`
+_FORWARD = re.compile(r"(?:function\s+)?(\w+)\s*\(([^()]*)\)[^{};=]*\{\s*return\s+(?:await\s+)?[\w.]+\(([^()]*)\);?\s*\}"
+                      r"|(\w+)\s*(?::[^=]+)?=\s*(?:async\s*)?\(([^()]*)\)[^=;{]*=>\s*(?:await\s+)?[\w.]+\(([^()]*)\)")
 
 
 def _pass_through(text):
     """Names of functions whose body only passes their own parameters, unchanged, to another call."""
-    return tuple(name for name, params, args in _FORWARD.findall(text)
-                 if _names(params) and _names(params) == [a.strip() for a in args.split(",") if a.strip()])
+    found = []
+    for match in _FORWARD.finditer(text):
+        name, params, args = match.group(1, 2, 3) if match[1] else match.group(4, 5, 6)
+        if _names(params) and _names(params) == [a.strip() for a in args.split(",") if a.strip()]:
+            found.append(name)
+    return tuple(found)
 
 
 def _names(params):
