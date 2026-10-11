@@ -90,3 +90,23 @@ class SkillLintTest(unittest.TestCase):
 
                 self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
                 self.assertIn(f"skill_lint: {message}\n", result.stdout)
+
+    def test_a_missing_required_element_is_named_with_its_section(self):
+        real = (SKILL / "SKILL.md").read_text()
+        design = real[real.index("## 2. Design it twice"):real.index("## 3. ")]
+        cases = {
+            "phrase": (real.replace("classitis", "many classes"),
+                       "missing in '5. Depth check in every refactor': classitis"),
+            "hard rule": (real.replace("No tests on private methods", "Tests where it helps"),
+                          "missing in 'Hard rules': no tests on private methods"),
+            "section": (real.replace(design, ""), "missing section '2. Design it twice'"),
+        }
+        for name, (text, message) in cases.items():
+            with self.subTest(name):
+                copy = copy_of_skill(self)
+                (copy / "SKILL.md").write_text(text)
+
+                result = lint(copy)
+
+                self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+                self.assertIn(f"skill_lint: {message}\n", result.stdout)
