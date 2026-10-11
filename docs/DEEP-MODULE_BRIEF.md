@@ -450,6 +450,6 @@ The last Phase 4 fixes had only been verified by me. A fresh independent reviewe
 
 At the user's request a **draft** PR was opened so CI could run on GitHub: rudini/Dwello#38, head c661180; it will not be merged by me.
 
-- **X3.2 / X3.3, CI part: verified on GitHub.** Run 38122016759, job "Deep modules": every step succeeded (checkout with full history, setup-node with npm cache, `npm ci`, `npx svelte-kit sync`, `npm run deepcheck:ci -- "origin/main"`). Of the other jobs, Changes, UI screenshots, Fallow audit and Build passed; the remaining jobs are recorded in the next entry.
+- **X3.2 / X3.3, CI part: verified on GitHub.** Run 38122016759, job "Deep modules": every step succeeded (checkout with full history, setup-node with npm cache, `npm ci`, `npx svelte-kit sync`, `npm run deepcheck:ci -- "origin/main"`). **The whole run succeeded, 9 of 9 jobs:** Changes, Build, Lint and types, Unit tests, E2E tests, Accessibility (axe), Fallow audit, UI screenshots and Deep modules. The new job did not disturb the existing ones.
 - A failing case on GitHub (an actual `::error` annotation) was not produced, deliberately: it would mean pushing a shallow module to the PR. The failing path was verified locally (X2.2 and X3.3: exit 1 with annotation and summary) and in `test/check.test.ts` (CI-mode test).
 - **`deepcheck-scan.yml`: still not verifiable on GitHub.** `workflow_dispatch` only runs workflows that exist on the default branch. It remains verified by actionlint and a local run of its exact shell step.
