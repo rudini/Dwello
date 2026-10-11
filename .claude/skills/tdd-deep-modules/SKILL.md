@@ -11,4 +11,14 @@ hooks:
 
 # TDD with deep modules
 
-Commit every phase with `scripts/tdd-step <test|red|green|refactor> "<message>"`; it runs the tests itself and refuses a phase the tests do not support. Verify a history with `scripts/tdd_replay <base>..HEAD`. While this skill is active, a hook blocks edits to production files unless the last phase allows production code (red, green, refactor).
+Build behaviour one failing test at a time, and keep every module deep: a small interface hiding a lot of implementation. The tools in `scripts/` enforce the cycle; this file says how to work with them.
+
+## Hard rules
+
+Break none of these, even when it would be faster.
+
+1. **No production code without a failing test.** Production code changes only in green (to pass the one failing test) or in refactor (behaviour unchanged, all tests green). While this skill is active, the `tdd-guard` hook blocks production edits at any other time.
+2. **Never delete assertions, and never paste computed values into expected values.** An expected value comes from the requirement, worked out by hand, never copied from what the code returned. A test that is wrong gets fixed in its own red, never weakened to make code pass.
+3. **Never mix refactoring with green.** Green is the smallest change that makes the new test pass. Clean-up waits for the refactor step, which starts and ends with every test passing.
+4. **No tests on private methods.** Test behaviour through the module's public interface. If you want to test something private, the interface is wrong or a deeper module is missing.
+5. **One test per cycle.** Red adds exactly one new test and sees it fail for the right reason: an assertion, never an import, syntax or setup error.
