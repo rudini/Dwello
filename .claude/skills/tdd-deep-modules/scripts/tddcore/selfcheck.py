@@ -13,6 +13,5 @@ def own_suite(scripts):
     lines = done.stderr.strip().splitlines()
     summary = lines[-1] if lines else f"exit code {done.returncode}, no output"
     ran = re.search(r"^Ran (\d+) tests? in", done.stderr, re.MULTILINE)
-    skipped = re.search(r"skipped=(\d+)", summary)
-    executed = (int(ran[1]) if ran else 0) - (int(skipped[1]) if skipped else 0)
-    return done.returncode == 0 and summary == "OK" and executed > 0, summary
+    # a bare OK means nothing was skipped or expected to fail, so every test that ran passed
+    return done.returncode == 0 and summary == "OK" and ran is not None and int(ran[1]) > 0, summary
