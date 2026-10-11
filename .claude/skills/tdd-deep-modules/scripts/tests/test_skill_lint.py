@@ -110,3 +110,25 @@ class SkillLintTest(unittest.TestCase):
 
                 self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
                 self.assertIn(f"skill_lint: {message}\n", result.stdout)
+
+    def test_sections_out_of_order_are_named(self):
+        real = (SKILL / "SKILL.md").read_text()
+        rules = real[real.index("## Hard rules"):real.index("## 1. ")]
+        design = real[real.index("## 2. "):real.index("## 3. ")]
+        tests = real[real.index("## 3. "):real.index("## 4. ")]
+        cases = {
+            "swapped": (real.replace(design + tests, tests + design),
+                        "sections out of order: expected Hard rules, 1. Detect the context, "
+                        "2. Design it twice, 3. Write the behaviour test list"),
+            "rules late": (real.replace(rules, "") + "\n" + rules, "sections out of order"),
+            "note not last": (real + "\n## 7. Extras\n\nMore.\n", "'6. Design note' is not the last section"),
+        }
+        for name, (text, message) in cases.items():
+            with self.subTest(name):
+                copy = copy_of_skill(self)
+                (copy / "SKILL.md").write_text(text)
+
+                result = lint(copy)
+
+                self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+                self.assertIn(f"skill_lint: {message}", result.stdout)
