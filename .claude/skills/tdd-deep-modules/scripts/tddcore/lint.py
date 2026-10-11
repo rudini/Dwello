@@ -108,15 +108,16 @@ def _frontmatter(front, directory):
     name = front.get("name")
     if not name:
         found.append("frontmatter: name is missing")
-    elif not re.fullmatch(r"[a-z0-9]+(-[a-z0-9]+)*", str(name)) or len(str(name)) > 64:
+    elif not isinstance(name, str) or not re.fullmatch(r"[a-z0-9]+(-[a-z0-9]+)*", name) or len(name) > 64:
         found.append(f"frontmatter: name '{name}' is not kebab-case")
     elif name != directory:
         found.append(f"frontmatter: name '{name}' differs from the directory '{directory}'")
     description = front.get("description")
     if not description:
         found.append("frontmatter: description is missing")
+    elif not isinstance(description, str):
+        found.append("frontmatter: description must be text")
     else:
-        description = str(description)
         if len(description) > 1024:
             found.append(f"frontmatter: description has {len(description)} characters (limit 1024)")
         if "<" in description or ">" in description:
