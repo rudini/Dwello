@@ -346,3 +346,12 @@ export class Ledger {
         line = report_line(repo.run("depth_report", "src/cache.ts"), "src/cache.ts")
 
         self.assertIn(", pass-through 0,", line)
+
+    def test_a_comparison_in_a_default_value_does_not_merge_parameters(self):
+        module = "export function f(a = 1 < 2, b = 3, c: Map<string, number>) {\n  return [a, b, c];\n}\n"
+        repo = Repo(self, {"src/f.ts": module})
+
+        line = report_line(repo.run("depth_report", "src/f.ts"), "src/f.ts")
+
+        # f 1 + a, b, c
+        self.assertTrue(line.startswith("src/f.ts: surface 4,"), line)
