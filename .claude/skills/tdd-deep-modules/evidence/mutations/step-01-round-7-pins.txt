@@ -1,0 +1,4 @@
+KILLED   tddcore/suite.py: '        if not counter:\n            break' -> '        if not counter:\n            continue' [test_bun_error_counts_come_only_from_bun_s_own_summary]
+KILLED   tddcore/suite.py: '    hidden = errors > 0' -> '    hidden = False' [test_a_bun_file_that_fails_to_load_is_not_red]
+SURVIVED tddcore/suite.py: '    errors = _bun_summary_errors(done.stderr)' -> '    errors = _bun_summary_errors(done.stdout + done.stderr)' [test_bun_error_counts_come_only_from_bun_s_own_summary]
+Note: the surviving mutant is equivalent: stdout is placed before stderr, and bun's summary block (on stderr) still ends the text.
