@@ -220,9 +220,9 @@ def real_copy(case):
     return root
 
 
-def run_copy(root):
-    """The copy's own verify_all, run without arguments from another directory, as "Done when" runs it."""
-    return subprocess.run([sys.executable, str(root / "scripts" / "verify_all")], cwd=tempfile.gettempdir(),
+def run_copy(root, cwd=None):
+    """The copy's own verify_all, run without arguments (by default from another directory), as "Done when" runs it."""
+    return subprocess.run([sys.executable, str(root / "scripts" / "verify_all")], cwd=cwd or tempfile.gettempdir(),
                           capture_output=True, text=True)
 
 
@@ -315,3 +315,18 @@ class RealVerifiersTest(unittest.TestCase):
 
         self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
         self.assertIn("skill_lint: missing section '6. Design note'", result.stdout.splitlines())
+
+
+    def test_a_package_in_the_working_directory_cannot_replace_the_test_runner(self):
+        root = real_copy(self)
+        (root / "scripts" / "tests" / "test_it.py").write_text(
+            "import unittest\n\n\nclass T(unittest.TestCase):\n    def test_a(self):\n        self.fail('x')\n")
+        fake = root / "unittest"
+        fake.mkdir()
+        (fake / "__init__.py").write_text("")
+        (fake / "__main__.py").write_text("import sys\nsys.stderr.write('Ran 5 tests in 0.1s\\n\\nOK\\n')\n")
+
+        result = run_copy(root, cwd=root)
+
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn("tests: FAILED (failures=1)", result.stdout.splitlines())
