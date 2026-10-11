@@ -122,7 +122,8 @@ def _run_vitest(root):
     summary = f"{data['numFailedTests']} of {data['numTotalTests']} tests failed"
     load_errors = sum(1 for f in data["testResults"] if f["message"])
     ran = data["numTotalTests"] - data["numPendingTests"] - data["numTodoTests"]
-    unhandled = "unhandled error" in done.stderr + done.stdout
+    unhandled = re.search(r"^Vitest caught \d+ unhandled errors? during the test run",
+                          done.stderr + done.stdout, re.MULTILINE) is not None
     return Run(done.returncode, _vitest_outcome(done.returncode, data, unhandled), summary,
                data["numFailedTests"], ran, data["numTotalTests"] == 0 and not load_errors)
 
