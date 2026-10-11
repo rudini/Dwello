@@ -189,9 +189,10 @@ def _unused(text):
 
 
 def _duplicate(text):
-    """Extra copies of code lines (DUPLICATE_LENGTH characters or longer) that occur more than once."""
+    """Extra copies of statement lines (DUPLICATE_LENGTH characters or longer) that occur more than once."""
     lines = [line.strip() for line in text.splitlines()]
-    long = [line for line in lines if len(line) >= DUPLICATE_LENGTH]
+    # members and openers of object, array and argument literals repeat in data, not in copied logic
+    long = [line for line in lines if len(line) >= DUPLICATE_LENGTH and not line.endswith((",", "({", "["))]
     return len(long) - len(set(long))
 
 
