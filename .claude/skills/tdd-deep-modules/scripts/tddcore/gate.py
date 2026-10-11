@@ -28,14 +28,25 @@ def _lock(skill):
     lock = skill / "verifiers.lock"
     if not lock.is_file():
         return ["missing"]
-    lines = lock.read_text().splitlines()
+    try:
+        lines = lock.read_text(encoding="utf-8").splitlines()
+    except UnicodeDecodeError:
+        return ["not readable as UTF-8 text"]
     reviewed = lines[0].removeprefix("reviewed: ") if lines else ""
     passed, description = verdicts.final(skill / "evidence" / "reviews", LOCK_STEP)
     latest = re.search(r"\(round (\d+)\)$", description)
     found = []
     if not (passed and latest and reviewed == f"evidence/reviews/step-{LOCK_STEP}-round-{latest[1]}.md"):
         found.append(f"reviewed {reviewed} is not step {LOCK_STEP}'s latest passing review")
-    hashes = dict(reversed(line.split("  ", 1)) for line in lines[1:] if "  " in line)
+    hashes = {}
+    for line in lines[1:]:
+        entry = re.fullmatch(r"([0-9a-f]{64})  (\S+)", line)
+        if not entry:
+            found.append(f"line {line!r} is not '<sha256>  <path>'")
+        elif entry[2] in hashes:
+            found.append(f"{entry[2]} is locked twice")
+        else:
+            hashes[entry[2]] = entry[1]
     present = _verifiers(skill)
     for path in sorted(set(present) | set(hashes)):
         if path not in hashes:
