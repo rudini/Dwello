@@ -53,8 +53,9 @@ def _combine(runs):
 
 
 def _files(root):
-    return subprocess.run(["git", "ls-files", "-co", "--exclude-standard"], cwd=root, check=True,
-                          capture_output=True, text=True, errors="replace").stdout.splitlines()
+    listed = subprocess.run(["git", "ls-files", "-co", "--exclude-standard"], cwd=root, check=True,
+                            capture_output=True, text=True, errors="replace").stdout.splitlines()
+    return [f for f in listed if (Path(root) / f).is_file()]  # tracked files may be deleted
 
 
 def _has_python(root):
