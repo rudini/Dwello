@@ -85,3 +85,8 @@ class SkillMdTest(unittest.TestCase):
                         "One behaviour from the list per cycle", "git reset --soft HEAD~1",
                         "package.json"):
             self.assertIn(element, text)
+
+    def test_the_depth_check_keeps_tests_where_they_are(self):
+        text = dict(sections())["5. Depth check in every refactor"]
+
+        self.assertIn("keep every test's name and file", text)
