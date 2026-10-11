@@ -572,3 +572,13 @@ class TddStepTest(unittest.TestCase):
         repo.write("test_calc.py", "open('leftover.txt', 'w').write('x')\n" + ADD_TEST)
 
         self.assert_refused(repo, "red", "the test run changed the working tree: leftover.txt")
+
+    def test_plain_pytest_test_functions_are_detected_without_config(self):
+        for name in ("test_calc.py", "tests/calc_test.py"):
+            with self.subTest(name):
+                repo = Repo(self, {"calc.py": WRONG_ADD})
+                repo.write(name, PYTEST_TEST)
+
+                result = repo.run("tdd-step", "red", "adds two numbers")
+
+                self.assertEqual(result.returncode, 0, result.stderr)
