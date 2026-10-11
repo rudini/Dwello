@@ -123,3 +123,11 @@ class SkillMdTest(unittest.TestCase):
                         "project-owned adapter", "fake the adapter, not the framework",
                         "many mocks in a test signal a wrongly cut interface"):
             self.assertIn(element, text.lower())
+
+    def test_the_hard_rules_put_the_test_boundary_at_the_public_interface(self):
+        text = dict(sections())["Hard rules"].lower()
+
+        for element in ("the test boundary is the public interface of the deep module or service",
+                        "pure helper functions inside it are implementation details",
+                        "no tests and no public exports of their own"):
+            self.assertIn(element, text)
