@@ -174,3 +174,15 @@ class TddReplayTest(unittest.TestCase):
                  repo.git("symbolic-ref", "HEAD"), repo.git("worktree", "list", "--porcelain"))
         self.assertEqual(after, before)
         self.assertEqual((repo.path / "calc.ts").read_text(), "// work in progress\n")
+
+    def test_a_red_whose_failing_test_is_an_old_test_is_rejected(self):
+        calc = RIGHT_ADD_TS + "export const mul = (a: number, b: number) => 0;\n"
+        repo = bun_repo(self, calc, **{"calc.test.ts": BUN_TEST})
+        repo.commit_all("green: seed", {})
+        base = repo.git("rev-parse", "HEAD")
+        old_now_failing = BUN_TEST.replace('import { add } from "./calc";', 'import { add, mul } from "./calc";') \
+            .replace("toBe(3);", "toBe(3);\n  expect(mul(2, 3)).toBe(6);")
+        new_passing = 'test("adds zero", () => {\n  expect(add(0, 0)).toBe(0);\n});\n'
+        repo.commit_phase("red", {"calc.test.ts": old_now_failing + "\n" + new_passing}, 1)
+        repo.commit_phase("green", {"calc.ts": calc.replace("=> 0;", "=> a * b;")}, 0)
+        self.assert_rejected(repo, base, "red's failing test must be its new test")
