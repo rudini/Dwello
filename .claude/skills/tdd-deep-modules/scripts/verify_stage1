@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""verify_stage1 [skill-dir]: stage 1 holds when every step's latest review passed."""
+"""verify_stage1 [skill-dir]: stage 1 holds when the skill's tests pass and every step's latest review passed."""
 import subprocess
 import sys
 from pathlib import Path
@@ -7,19 +7,25 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from tddcore import verdicts  # noqa: E402
 
-skill = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(__file__).resolve().parent.parent
-suite = subprocess.run([sys.executable, "-m", "unittest", "discover", "-s", str(skill / "scripts" / "tests"),
-                        "-t", str(skill / "scripts")], capture_output=True, text=True)
-print(f"tests: {suite.stderr.strip().splitlines()[-1]}")
-passed = suite.returncode == 0
-for step in ("01", "02", "03"):
-    latest = verdicts.final(skill / "evidence" / "reviews", step)
-    if latest is None:
-        print(f"step {step}: no review")
-        passed = False
-        continue
-    number, verdict = latest
-    print(f"step {step}: {verdict} (round {number})")
-    passed = passed and verdict == "VERDICT: PASS"
-print("STAGE1: PASS" if passed else "STAGE1: FAIL")
-sys.exit(0 if passed else 1)
+STEPS = ("01", "02", "03")
+
+
+def main(skill):
+    suite = subprocess.run([sys.executable, "-m", "unittest", "discover", "-s", str(skill / "scripts" / "tests"),
+                            "-t", str(skill / "scripts")], capture_output=True, text=True)
+    print(f"tests: {suite.stderr.strip().splitlines()[-1]}")
+    passed = suite.returncode == 0
+    for step in STEPS:
+        latest = verdicts.final(skill / "evidence" / "reviews", step)
+        if latest is None:
+            print(f"step {step}: no review")
+            passed = False
+            continue
+        number, verdict = latest
+        print(f"step {step}: {verdict} (round {number})")
+        passed = passed and verdict == "VERDICT: PASS"
+    print("STAGE1: PASS" if passed else "STAGE1: FAIL")
+    return 0 if passed else 1
+
+
+sys.exit(main(Path(sys.argv[1]) if len(sys.argv) > 1 else Path(__file__).resolve().parent.parent))
