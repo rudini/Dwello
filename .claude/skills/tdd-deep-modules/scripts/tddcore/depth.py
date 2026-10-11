@@ -40,11 +40,12 @@ def measure(root, path):
     if not module.is_file():
         raise NotAModule(f"{path}: no such file")
     text = module.read_text(errors="replace")
-    surface, size = _surface(text), _size(text)
+    code = re.sub(r"/\*.*?\*/", "", text, flags=re.DOTALL)  # without block comments
+    surface, size = _surface(text), _size(code)
     tiny = [name for name, methods in _classes(text) if len(methods) <= TINY_CLASS]
     metrics = Depth(path, surface, size, size / surface if surface else float(size),
                     tuple(tiny) if len(tiny) >= 2 else (), _pass_through(text), _tests(module, path),
-                    _unused(text), _duplicate(text), ())
+                    _unused(text), _duplicate(code), ())
     return replace(metrics, findings=_findings(metrics))
 
 
@@ -66,7 +67,6 @@ def _findings(module):
 
 
 def _size(text):
-    text = re.sub(r"/\*.*?\*/", "", text, flags=re.DOTALL)
     return sum(1 for line in text.splitlines() if line.strip() and not line.strip().startswith("//"))
 
 
@@ -184,7 +184,6 @@ def _unused(text):
 
 def _duplicate(text):
     """Extra copies of code lines (DUPLICATE_LENGTH characters or longer) that occur more than once."""
-    text = re.sub(r"/\*.*?\*/", "", text, flags=re.DOTALL)
     lines = [line.strip() for line in text.splitlines()]
     long = [line for line in lines if len(line) >= DUPLICATE_LENGTH and not line.startswith("//")]
     return len(long) - len(set(long))
