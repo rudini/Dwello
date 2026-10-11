@@ -64,7 +64,7 @@ def _node_runners(root):
         directory = str(Path(root) / package.parent)
         command = _test_command(directory)
         if command == "vitest":
-            runners.append(lambda d=directory: _run_vitest(d))
+            runners.append(lambda d=directory, p=package.parent: _run_vitest(d, p))
         elif command:
             runners.append(lambda d=directory, c=command, p=package.parent: _run_bun(d, c, p))
     return runners
@@ -119,7 +119,7 @@ def _run_bun(directory, command, package):
     return Run(done.returncode, outcome, summary, failed, ran, tests)
 
 
-def _run_vitest(root):
+def _run_vitest(root, package):
     with tempfile.TemporaryDirectory() as tmp:
         report = Path(tmp) / "report.json"
         done = subprocess.run(["npx", "--no-install", "vitest", "run", "--reporter=default",
@@ -133,8 +133,10 @@ def _run_vitest(root):
     ran = data["numTotalTests"] - data["numPendingTests"] - data["numTodoTests"]
     unhandled = re.search(r"^Vitest caught \d+ unhandled errors? during the test run",
                           done.stderr + done.stdout, re.MULTILINE) is not None
+    tests = frozenset(f"{package / Path(f['name']).relative_to(Path(root).resolve())}::{a['fullName']}"
+                      for f in data["testResults"] for a in f["assertionResults"])
     return Run(done.returncode, _vitest_outcome(done.returncode, data, unhandled), summary,
-               data["numFailedTests"], ran)
+               data["numFailedTests"], ran, tests)
 
 
 def _bun_summary_errors(stderr):

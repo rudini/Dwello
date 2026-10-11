@@ -40,7 +40,8 @@ def replay(repo, rev_range):
             known = _run(tree).tests if has_base else frozenset()
             for commit in commits:
                 _git(tree, "checkout", "-q", "--detach", commit)
-                _git(tree, "clean", "-fdxq")
+                _git(tree, "clean", "-fdxq", "-e", "node_modules")
+                _borrow_node_modules(repo, tree)
                 subject = _git(tree, "log", "-1", "--format=%s")
                 phase = protocol.phase_of(subject)
                 claimed = _git(tree, "log", "-1", "--format=%(trailers:key=TDD-Exit-Code,valueonly,separator=%x2C)")
@@ -69,6 +70,15 @@ def replay(repo, rev_range):
     if verdicts[-1].phase == "red":
         verdicts[-1].violations.append("the history ends in red: every red needs a green")
     return verdicts
+
+
+def _borrow_node_modules(repo, tree):
+    """Link each package's installed node_modules from the real checkout into the replay tree."""
+    for manifest in _git(tree, "ls-files", "*package.json").splitlines():
+        package = Path(manifest).parent
+        installed, link = Path(repo) / package / "node_modules", tree / package / "node_modules"
+        if Path(manifest).name == "package.json" and installed.is_dir() and not link.exists():
+            link.symlink_to(installed.resolve())
 
 
 def _run(tree):
