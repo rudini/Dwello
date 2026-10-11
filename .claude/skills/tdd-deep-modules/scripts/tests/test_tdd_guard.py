@@ -30,3 +30,13 @@ class TddGuardTest(unittest.TestCase):
         result = guard(repo, "Edit", "calc.ts")
 
         self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_production_edits_are_allowed_for_refactoring(self):
+        for phase in ("green", "refactor"):
+            with self.subTest(phase):
+                repo = bun_repo(self)
+                repo.commit_phase(phase, {"notes.md": phase}, 0)
+
+                result = guard(repo, "Edit", "calc.ts")
+
+                self.assertEqual(result.returncode, 0, result.stderr)
