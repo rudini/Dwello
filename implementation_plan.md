@@ -4636,6 +4636,16 @@ subtotal, fee and «Ihre Nebenkosten» stay exact. A row «Rundung auf 5 Rappen�
   (`ponytail:` vs `shortcut:`): keep one.
 - [ ] `bdd-acceptance` says one feature file per page, `tests/e2e/CLAUDE.md` one per area: decide.
 
+## Session 14 - October 2026: Missing Payment Deadline
+
+### Done ✅
+- [x] **Statement edit without a deadline**: an emptied Zahlungsfrist no longer reaches Postgres as `""` (seen in the
+  axe job's log). The edit action (`src/routes/statements/[id]/edit/+page.server.ts`) answers with "Die Frist fehlt.
+  Bitte geben Sie ein Datum ein." at the field (`+page.svelte`) without asking the backend; `PUT /statements/:id`
+  validates `paymentDeadline` as a date (422, `backend/src/routes/statements.ts`, `docs/api-specification.md`).
+  Tests first: scenario "Zahlungsfrist fehlt" (`statement-edit.feature`), `statement-edit-actions.test.ts`,
+  `statement-pages.dom.test.ts`, `statement.routes.pg.test.ts`.
+
 ---
 
 # Success Criteria

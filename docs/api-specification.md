@@ -200,7 +200,7 @@ Filter `status` in `GET /` and `/counts`: `draft`, `paid`, `sent` (sent, deadlin
 | POST | `/preview` | Body: calculation input (below). Stores nothing. → `{ preview: true, contractId, apartmentId, tenantId, periodStart, periodEnd, rentalDays, totalPeriodDays, lineItems, subtotal, managementFee, managementFeePercent, totalCosts, totalAdvancePayments, balance }` (numbers; positive balance = tenant owes). 400 |
 | POST | `/generate` | Body: calculation input + `buildingId`. Synchronous, one contract: calculates and stores a **draft** with line items and a payment deadline of `payment_deadline_days`. → **201** statement. 400 (e.g. contract not found, contract outside the period) |
 | GET | `/:id` | → statement with `tenant`, `apartment`, `building`, `lineItems` (see `tests/contracts/statement.json`). 404 |
-| PUT | `/:id` | Body: optional `notes`, `paymentDeadline` (date). → statement. 404; 400; 422 deadline not a date. A changed deadline discards the stored PDF |
+| PUT | `/:id` | Body: optional `notes`, `paymentDeadline` (date). → statement. 404; 400 date that does not exist; 422 deadline not YYYY-MM-DD. A changed deadline discards the stored PDF |
 | PUT | `/:id/status` | Body: `status` required; optional `paidDate`, `paidAmount`, `reminderSentDate`. → statement. 404; 400 invalid transition |
 | DELETE | `/:id` | 204. 404; 400 not a draft |
 | POST | `/:id/line-items` | Body: `items: [{ description, totalAmount, tenantShare, categoryId?, distributionKeyId?, sharePercentage?, sortOrder? }]` (amounts as strings). → 201 `{ message, items }`. 400 not found or not a draft |
