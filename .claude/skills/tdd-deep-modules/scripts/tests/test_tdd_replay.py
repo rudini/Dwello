@@ -28,3 +28,16 @@ class TddReplayTest(unittest.TestCase):
 
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn("REPLAY: ACCEPT", result.stdout)
+
+    def assert_rejected(self, repo, base, reason):
+        result = repo.run("tdd_replay", f"{base}..HEAD")
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn("REPLAY: REJECT", result.stdout)
+        self.assertIn(reason, result.stdout)
+
+    def test_a_commit_that_only_claims_red_is_rejected(self):
+        repo = bun_repo(self, RIGHT_ADD_TS)
+        base = repo.git("rev-parse", "HEAD")
+        repo.commit_phase("red", {"calc.test.ts": BUN_TEST}, 1)
+        repo.commit_phase("green", {"calc.ts": REDUCED_ADD_TS}, 0)
+        self.assert_rejected(repo, base, "red needs a failing assertion")
