@@ -132,3 +132,13 @@ class SkillLintTest(unittest.TestCase):
 
                 self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
                 self.assertIn(f"skill_lint: {message}", result.stdout)
+
+    def test_the_hard_rules_must_be_the_first_section(self):
+        real = (SKILL / "SKILL.md").read_text()
+        copy = copy_of_skill(self)
+        (copy / "SKILL.md").write_text(real.replace("## Hard rules", "## Background\n\nHistory.\n\n## Hard rules"))
+
+        result = lint(copy)
+
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn("skill_lint: 'Hard rules' is not the first section\n", result.stdout)
