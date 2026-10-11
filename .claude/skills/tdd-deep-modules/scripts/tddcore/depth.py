@@ -153,7 +153,7 @@ def _top_level(text):
 
 
 _SOURCE = {".ts", ".tsx", ".mts", ".cts", ".js", ".jsx", ".mjs", ".cjs"}
-_IMPORT = re.compile(r"""(?:\bfrom\s*|\bimport\s*\(?\s*)["']((?:\.{1,2}|\$lib)/[^"']*)["']""")
+_IMPORT = re.compile(r"""(?:\bfrom\s*|\bimport\s*\(?\s*|\brequire\s*\(\s*)["']((?:\.{1,2}|\$lib)/[^"']*)["']""")
 
 
 def _tests(module, path):
