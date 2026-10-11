@@ -102,9 +102,11 @@ def _surface(text):
     return surface
 
 
-# `name(params) ... {` of a function or method, and `name = (params) => ` of an arrow function
-_FUNCTION = re.compile(r"(?:function\s+)?\b(?!(?:if|for|while|switch|catch|return|function|async)\b)(\w+)\s*"
-                       r"(?:<[^<>\n]*>)?\s*\(")
+# `name(params) ... {` of a function or method, and `name = (params) => ` of an arrow function; a function header
+# starts after `function` or, for a method, at the start of its line, never inside an expression (`if (has(a))`)
+_FUNCTION = re.compile(r"(?:\bfunction\s*\*?\s*|^[ \t]*(?:(?:public|protected|private|static|async|readonly|get|set|"
+                       r"override)\s+)*)(?!(?:if|for|while|switch|catch|return|function|async)\b)(\w+)\s*"
+                       r"(?:<[^<>\n]*>)?\s*\(", re.MULTILINE)
 _ARROW = re.compile(r"\b(\w+)\s*(?::[^=\n]+)?=\s*(?:async\s*)?(?:<[^<>\n]*>)?\s*\(")
 _CALL = re.compile(r"(?:await\s+)?[\w.]+\s*\(")
 
