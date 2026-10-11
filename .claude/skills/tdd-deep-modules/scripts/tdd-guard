@@ -23,11 +23,12 @@ def main(raw):
         return 0  # not a file edit
     target = Path(path).resolve()  # no `..` or symlink detours
     existing = next(d for d in target.parents if d.is_dir())  # a Write may create new directories
-    root = subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=existing,
-                          capture_output=True, text=True)
-    if root.returncode != 0:
+    # git names the directory's place in the repository, so no path spelling has to match git's
+    prefix = subprocess.run(["git", "rev-parse", "--show-prefix"], cwd=existing,
+                            capture_output=True, text=True)
+    if prefix.returncode != 0:
         return 0  # outside any git repository: nothing to guard
-    rel = target.relative_to(Path(root.stdout.strip()).resolve()).as_posix()
+    rel = prefix.stdout.strip() + target.relative_to(existing).as_posix()
     subject = subprocess.run(["git", "log", "-1", "--format=%s"], cwd=existing,
                              capture_output=True, text=True).stdout.strip()
     phase = protocol.phase_of(subject)
