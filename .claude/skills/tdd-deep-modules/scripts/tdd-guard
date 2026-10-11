@@ -9,6 +9,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from tddcore import protocol  # noqa: E402
 
 event = json.load(sys.stdin)
+if "file_path" not in event.get("tool_input", {}):
+    sys.exit(0)  # not a file edit
 target = Path(event["tool_input"]["file_path"])
 existing = next(d for d in target.parents if d.is_dir())  # a Write may create new directories
 root = subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=existing,
