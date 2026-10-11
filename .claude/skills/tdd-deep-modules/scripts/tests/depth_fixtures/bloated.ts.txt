@@ -1,0 +1,32 @@
+// Sums prices. Grew by copy and paste; most of it is never called.
+
+export function total(prices: number[]): number {
+  let sum = 0;
+  for (const price of prices) {
+    sum = sum + price;
+  }
+  return sum;
+}
+
+function totalWithDiscount(prices: number[], discount: number): number {
+  let sum = 0;
+  for (const price of prices) {
+    sum = sum + price;
+  }
+  return sum - discount;
+}
+
+function totalOfPositive(prices: number[]): number {
+  let sum = 0;
+  for (const price of prices) {
+    if (price > 0) {
+      sum = sum + price;
+    }
+  }
+  return sum;
+}
+
+function formatTotal(prices: number[]): string {
+  const value = total(prices);
+  return `CHF ${(value / 100).toFixed(2)}`;
+}

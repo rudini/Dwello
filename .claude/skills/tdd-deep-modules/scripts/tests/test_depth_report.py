@@ -71,3 +71,18 @@ class DepthReportTest(unittest.TestCase):
         self.assertIn(", tests 0", line)
         self.assertIn("untested: no test file imports it", line.split(" -> ", 1)[1])
         self.assertEqual(none.returncode, 1, none.stdout + none.stderr)
+
+    def test_unused_functions_and_duplicated_lines_are_bloat(self):
+        bloated = Repo(self, {"src/total.ts": fixture("bloated"),
+                              "src/total.test.ts": 'import { total } from "./total";\n'})
+        deep = Repo(self, {"src/amount.ts": fixture("deep"), "src/amount.test.ts": AMOUNT_TEST})
+
+        result = bloated.run("depth_report", "src/total.ts")
+        clean = report_line(deep.run("depth_report", "src/amount.ts"), "src/amount.ts")
+
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        line = report_line(result, "src/total.ts")
+        self.assertIn(", unused 3, duplicate 6 ->", line)
+        self.assertIn("bloat: unused totalWithDiscount, totalOfPositive, formatTotal; 6 duplicated lines",
+                      line.split(" -> ", 1)[1])
+        self.assertIn(", unused 0, duplicate 1 -> deep", clean)
