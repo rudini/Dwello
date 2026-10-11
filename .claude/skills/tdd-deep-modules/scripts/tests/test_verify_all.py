@@ -254,3 +254,20 @@ class RealVerifiersTest(unittest.TestCase):
 
         self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
         self.assertIn("verifiers.lock: scripts/extra is a symbolic link", result.stdout.splitlines())
+
+    def test_crafted_bytecode_next_to_a_verifier_is_never_loaded(self):
+        import importlib.util
+        import py_compile
+        root = real_copy(self)
+        skill_md = root / "SKILL.md"
+        skill_md.write_text(skill_md.read_text().split("## 6. Design note")[0])
+        lint = root / "scripts" / "tddcore" / "lint.py"
+        forged = root.parent / "forged_lint.py"
+        forged.write_text("def problems(skill):\n    return []\n")
+        py_compile.compile(str(forged), cfile=importlib.util.cache_from_source(str(lint)), doraise=True,
+                           invalidation_mode=py_compile.PycInvalidationMode.UNCHECKED_HASH)
+
+        result = run_copy(root)
+
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn("skill_lint: missing section '6. Design note'", result.stdout.splitlines())
