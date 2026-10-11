@@ -1,3 +1,23 @@
 #!/usr/bin/env python3
 """tdd_replay <commit-range>: re-run every commit of the range and check the TDD protocol held."""
-print("REPLAY: ACCEPT")
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from tddcore import replay  # noqa: E402
+
+
+def main(args):
+    verdicts = replay.replay(".", args[0])
+    for verdict in verdicts:
+        status = "REJECT" if verdict.violations else "ok"
+        print(f"{verdict.commit[:7]} {verdict.phase:8} {verdict.run.outcome:5} "
+              f"exit={verdict.run.exit_code} {status}")
+        for violation in verdict.violations:
+            print(f"    - {violation}")
+    rejected = any(v.violations for v in verdicts)
+    print("REPLAY: REJECT" if rejected else "REPLAY: ACCEPT")
+    return 1 if rejected else 0
+
+
+sys.exit(main(sys.argv[1:]))
