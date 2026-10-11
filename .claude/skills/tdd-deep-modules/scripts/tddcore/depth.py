@@ -66,8 +66,8 @@ def _findings(module):
     return tuple(findings)
 
 
-def _size(text):
-    return sum(1 for line in text.splitlines() if line.strip() and not line.strip().startswith("//"))
+def _size(code):
+    return sum(1 for line in code.splitlines() if line.strip())
 
 
 _EXPORTS = [  # (pattern, whether group 1 holds a parameter list); the first match per export wins
@@ -185,7 +185,7 @@ def _unused(text):
 def _duplicate(text):
     """Extra copies of code lines (DUPLICATE_LENGTH characters or longer) that occur more than once."""
     lines = [line.strip() for line in text.splitlines()]
-    long = [line for line in lines if len(line) >= DUPLICATE_LENGTH and not line.startswith("//")]
+    long = [line for line in lines if len(line) >= DUPLICATE_LENGTH]
     return len(long) - len(set(long))
 
 
