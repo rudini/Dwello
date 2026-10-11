@@ -1,4 +1,5 @@
 """Measure how deep a TypeScript/JavaScript module is: its interface against its implementation."""
+import functools
 import os
 import re
 import subprocess
@@ -284,10 +285,16 @@ def _tests(module, path):
     if found.returncode != 0:
         raise NotAModule(f"{path}: not inside a git repository")
     top = Path(found.stdout.strip())
+    target = module.with_suffix("")
+    return tuple(rel for rel, imported in _test_imports(top) if target in imported)
+
+
+@functools.lru_cache(maxsize=None)
+def _test_imports(top):
+    """[(test file, the module paths it imports)] of the repository at `top`, read once per run."""
     listed = subprocess.run(["git", "ls-files", "-z", "-co", "--exclude-standard"], cwd=top, check=True,
                             capture_output=True, text=True).stdout.split("\0")
-    target = module.with_suffix("")
-    found = []
+    tests = []
     for rel in listed:
         test = top / rel
         if Path(rel).suffix not in _SOURCE or protocol.is_production(rel) or not test.is_file():
@@ -296,9 +303,8 @@ def _tests(module, path):
         # `$lib` is SvelteKit's alias for src/lib at the repository root
         resolved = (top / "src/lib" / spec[5:] if spec.startswith("$lib/") else test.parent / spec
                     for spec in specs)
-        if any(_without_source_suffix(Path(os.path.normpath(path))) == target for path in resolved):
-            found.append(rel)
-    return tuple(found)
+        tests.append((rel, frozenset(_without_source_suffix(Path(os.path.normpath(path))) for path in resolved)))
+    return tuple(tests)
 
 
 def _unused(text):
