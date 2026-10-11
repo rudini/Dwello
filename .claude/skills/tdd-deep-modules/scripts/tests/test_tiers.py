@@ -122,3 +122,13 @@ class TddReplayTierTest(unittest.TestCase):
 
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn("REPLAY: ACCEPT", result.stdout)
+
+    def test_a_commit_without_a_suite_trailer_is_rejected(self):
+        repo = green_tiered_repo(self)
+        base = repo.git("rev-parse", "HEAD")
+        repo.commit_phase("refactor", {"calc.ts": RIGHT_ADD_TS + "// tidy\n"}, 0, suite=None)
+
+        result = self.replay(repo, base)
+
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn("the TDD-Suite trailer must say fast or full, but says nothing", result.stdout)
