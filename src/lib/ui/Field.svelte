@@ -22,11 +22,16 @@
 		children: Snippet<[FieldControl]>;
 	} = $props();
 
-	// The error belongs to what was sent: changing the field takes it away, the next submit checks again
+	// The error belongs to what was sent: editing the field (input, also on selects) takes it away, the next submit
+	// checks again. Not «change»: browsers send it after Enter, when a dialog has just checked
 	let frame = $state<HTMLElement>();
 	let corrected = $state<string>(); // the error the field was changed after
 	const shown = $derived(error === corrected ? undefined : error);
 	const change = () => (corrected = error);
+	// a check that cleared the error starts over: the same error set again is shown again
+	$effect(() => {
+		if (!error) corrected = undefined;
+	});
 	$effect(() => {
 		const form = frame?.closest('form');
 		const check = () => (corrected = undefined);
@@ -41,7 +46,7 @@
 	);
 </script>
 
-<div bind:this={frame} class="flex flex-col gap-2" oninput={change} onchange={change}>
+<div bind:this={frame} class="flex flex-col gap-2" oninput={change}>
 	<label for={id} class="font-semibold text-ink">
 		{label}
 		{#if optional}<span class="font-normal text-ink-muted">(optional)</span>{/if}

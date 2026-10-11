@@ -9,3 +9,7 @@ export const addApartmentButton = (page: Page) => page.getByTestId('apartment-ad
 export const firstApartmentButton = (page: Page) => page.getByTestId('apartment-first-create-button');
 export const addressLine = (page: Page) => page.getByTestId('building-address');
 export const yearBuiltValue = (page: Page) => page.getByTestId('building-year-built');
+export const fuelStockDate = (page: Page) => page.getByTestId('fuel-stock-date-input');
+export const fuelStockAmount = (page: Page) => page.getByTestId('fuel-stock-amount-input');
+export const saveFuelStockButton = (page: Page) => page.getByTestId('fuel-stock-save-button');
+export const fuelStockRows = (page: Page) => page.getByTestId(/^fuel-stock-[0-9a-f-]{36}$/);

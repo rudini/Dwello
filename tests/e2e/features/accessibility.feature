@@ -32,6 +32,7 @@ Funktionalität: Barrierefreiheit
       | building-new           | submit-empty        |
       | building-detail        | default             |
       | building-detail        | delete-dialog       |
+      | building-detail        | fuel-stock-dialog   |
       | building-edit          | default             |
       | building-edit          | submit-cleared      |
       | building-edit          | saved-toast         |
@@ -74,6 +75,10 @@ Funktionalität: Barrierefreiheit
       | invoice-detail         | delete-dialog       |
       | invoice-edit           | default             |
       | invoice-edit           | submit-cleared      |
+      | invoice-billed-detail  | default             |
+      | invoice-billed-detail  | delete-dialog       |
+      | invoice-billed-edit    | default             |
+      | invoice-late-detail    | default             |
       | statements             | default             |
       | statements             | empty               |
       | statements             | filtered-empty      |
@@ -81,6 +86,10 @@ Funktionalität: Barrierefreiheit
       | statement-generate     | default             |
       | statement-generate     | every-wizard-step   |
       | statement-generate     | preview-empty       |
+      | statement-generate     | category-check      |
+      | statement-generate     | period-not-over     |
+      | statement-generate     | tank-question       |
+      | statement-generate     | preview-all-billed  |
       | statement-generate     | draft-restored      |
       | statement-detail       | default             |
       | statement-detail       | send-dialog         |

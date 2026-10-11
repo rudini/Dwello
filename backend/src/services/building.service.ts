@@ -56,7 +56,7 @@ export async function listBuildings(filters: BuildingFilters = {}): Promise<{
 	const buildingsQuery = db
 		.select()
 		.from(buildings)
-		.orderBy(desc(buildings.updatedAt))
+		.orderBy(desc(buildings.updatedAt), desc(buildings.id))
 		.limit(limit)
 		.offset(offset);
 

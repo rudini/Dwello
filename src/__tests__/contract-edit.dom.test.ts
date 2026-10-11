@@ -71,7 +71,7 @@ describe('Mietvertrag bearbeiten', () => {
 
 	it('wiederholt den Vertragsbeginn in Worten und fragt bei unverändertem Beginn nicht nach', async () => {
 		await open();
-		expect(byTestId('start-date-words')!.textContent).toContain('Montag, 1. April 2024');
+		expect(byTestId('start-date-input-words')!.textContent).toContain('Montag, 1. April 2024');
 		expect(byTestId('start-date-notice')!.textContent!.trim()).toBe('');
 	});
 

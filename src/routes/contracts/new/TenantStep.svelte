@@ -13,7 +13,7 @@
 		error
 	}: {
 		tenantId: string;
-		tenants: { id: string; name: string }[];
+		tenants: { id: string; name: string; place?: string }[];
 		createdId: string | null; // back from "Neuen Mieter erfassen" with this tenant
 		error?: string;
 	} = $props();
@@ -49,7 +49,9 @@
 		>
 			<option value="" selected={!tenantId}>Mieter wählen</option>
 			{#each tenants as tenant (tenant.id)}
-				<option value={tenant.id} selected={tenant.id === tenantId}>{tenant.name}</option>
+				<option value={tenant.id} selected={tenant.id === tenantId}
+					>{tenant.place ? `${tenant.name}, ${tenant.place}` : tenant.name}</option
+				>
 			{/each}
 		</select>
 	{/snippet}

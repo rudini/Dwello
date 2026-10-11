@@ -131,7 +131,7 @@ export async function listContracts(filters: ContractFilters = {}): Promise<{
 	// Query with tenant and apartment info
 	const results = await selectContracts()
 		.where(whereClause)
-		.orderBy(desc(rentalContracts.startDate))
+		.orderBy(desc(rentalContracts.startDate), desc(rentalContracts.id))
 		.limit(limit)
 		.offset(offset);
 

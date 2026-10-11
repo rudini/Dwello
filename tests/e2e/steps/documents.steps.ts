@@ -1,6 +1,8 @@
 import { expect } from '@playwright/test';
 import { createBdd } from 'playwright-bdd';
+import { inDays } from '../fixtures/dates';
 import { test } from '../fixtures/test';
+import { reminderButton } from '../interactions/documents';
 import { visit } from '../interactions/navigation';
 import { deliveryOf, documentFor, mailsTo, reminderOutcome } from '../questions/documents';
 import { markLetterSent, sendReminder } from '../tasks/documents';
@@ -71,3 +73,17 @@ Then(
 		await expect(documentFor(verwalter, title, names.get(tenant) ?? tenant)).toContainText('Versendet');
 	}
 );
+
+// Set after sending, which dates the statement and its deadline from that day; two days ago, so it has passed both
+// in Switzerland and in the backend's UTC day (offene-punkte: «überfällig» in server time)
+Given('die Zahlungsfrist der Abrechnung {int} von {string} ist abgelaufen', async ({ seed }, year: number, tenant: string) => {
+	await seed.paymentDeadline(tenant, year, inDays(-2));
+});
+
+Given('die Zahlungsfrist der Abrechnung {int} von {string} läuft noch', async ({ seed }, year: number, tenant: string) => {
+	await seed.paymentDeadline(tenant, year, inDays(10));
+});
+
+Then('bietet die Abrechnung keine Mahnung an', async ({ verwalter }) => {
+	await expect(reminderButton(verwalter.page)).toHaveCount(0);
+});

@@ -38,7 +38,25 @@ export function formatDateLong(isoDate: string): string {
 	});
 }
 
-/** Swiss date, e.g. "31.12.2024" */
+/** Swiss date, e.g. "01.10.2024", whatever the browser's locale and time zone */
 export function formatDate(dateString: string): string {
-	return new Date(dateString).toLocaleDateString('de-CH');
+	return new Date(dateString).toLocaleDateString('de-CH', {
+		day: '2-digit',
+		month: '2-digit',
+		year: 'numeric',
+		// a YYYY-MM-DD date is midnight UTC; a point in time shows its day in Switzerland
+		timeZone: dateString.length === 10 ? 'UTC' : 'Europe/Zurich'
+	});
+}
+
+/** Point in time in Switzerland, e.g. "16.03.2024, 10:05" */
+export function formatDateTime(isoTimestamp: string): string {
+	return new Date(isoTimestamp).toLocaleString('de-CH', {
+		day: '2-digit',
+		month: '2-digit',
+		year: 'numeric',
+		hour: '2-digit',
+		minute: '2-digit',
+		timeZone: 'Europe/Zurich'
+	});
 }

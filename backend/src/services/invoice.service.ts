@@ -3,7 +3,7 @@
  * Business logic for invoice operations with LLM categorization
  */
 
-import { eq, sql, desc, and, gte, lte, ilike, or } from 'drizzle-orm';
+import { eq, sql, desc, and, gte, lte, ilike, isNull, or } from 'drizzle-orm';
 import { db } from '../db/connection';
 import {
 	invoices,
@@ -17,6 +17,7 @@ import { categorizeInvoice, recategorizeInvoice } from './llm.service';
 import { validateInvoiceForUtilityStatement } from './utility-validation.service';
 import { buildingExists } from './building.service';
 import { getCategory } from './category.service';
+import { roundToRappen } from './pdf-format';
 
 export interface InvoiceFilters {
 	search?: string;
@@ -32,7 +33,7 @@ export interface InvoiceFilters {
 
 export interface InvoiceWithDetails extends Invoice {
 	building: { id: string; name: string; address: string } | null;
-	category: { id: string; name: string; nameDE: string | null; isAllowedUtilityCost: boolean } | null;
+	category: { id: string; name: string; nameDE: string | null; isAllowedUtilityCost: boolean; isHeatingCost: boolean } | null;
 	distributionKey: { id: string; name: string; nameDE: string | null } | null;
 	llmCategory: { id: string; name: string; nameDE: string | null } | null;
 }
@@ -53,7 +54,8 @@ function selectWithDetails() {
 				id: categories.id,
 				name: categories.name,
 				nameDE: categories.nameDE,
-				isAllowedUtilityCost: categories.isAllowedUtilityCost
+				isAllowedUtilityCost: categories.isAllowedUtilityCost,
+				isHeatingCost: categories.isHeatingCost
 			},
 			distributionKey: {
 				id: distributionKeys.id,
@@ -128,7 +130,7 @@ export async function listInvoices(filters: InvoiceFilters = {}): Promise<{
 	// Build the query with joins
 	const results = await selectWithDetails()
 		.where(whereClause)
-		.orderBy(desc(invoices.invoiceDate), desc(invoices.createdAt))
+		.orderBy(desc(invoices.invoiceDate), desc(invoices.createdAt), desc(invoices.id)) // id: a stable page order for ties
 		.limit(limit)
 		.offset(offset);
 
@@ -408,21 +410,39 @@ export async function validateInvoice(id: string): Promise<{
 	});
 }
 
+const DAY = 86_400_000;
+const daysFrom = (start: string, end: string) => (Date.parse(end) - Date.parse(start)) / DAY + 1;
+
 /**
- * Get invoices for a building within a date range (for statement generation)
+ * An invoice's part in a period: the days of its Leistungszeitraum within the period (without one, the whole period
+ * when the Rechnungsdatum lies in it) and the amount of those days
  */
-export async function getInvoicesForStatement(
-	buildingId: string,
+function inPeriod(
+	invoice: { amount: string; servicePeriodStart: string | null; servicePeriodEnd: string | null },
 	periodStart: string,
 	periodEnd: string
-): Promise<InvoiceWithDetails[]> {
+) {
+	const amount = parseFloat(invoice.amount);
+	if (!invoice.servicePeriodStart || !invoice.servicePeriodEnd) return { start: periodStart, end: periodEnd, amount };
+	const start = invoice.servicePeriodStart > periodStart ? invoice.servicePeriodStart : periodStart;
+	const end = invoice.servicePeriodEnd < periodEnd ? invoice.servicePeriodEnd : periodEnd;
+	return { start, end, amount: roundToRappen((amount * daysFrom(start, end)) / daysFrom(invoice.servicePeriodStart, invoice.servicePeriodEnd)) };
+}
+
+/**
+ * Allocable invoices of a building for a period (for statement generation): those whose Leistungszeitraum overlaps it,
+ * or without one, whose Rechnungsdatum lies in it; each with its part in the period
+ */
+export async function getInvoicesForStatement(buildingId: string, periodStart: string, periodEnd: string) {
 	const results = await selectWithDetails()
 		.where(
 			and(
 				eq(invoices.buildingId, buildingId),
 				eq(invoices.isValidUtilityCost, true),
-				gte(invoices.invoiceDate, periodStart),
-				lte(invoices.invoiceDate, periodEnd)
+				or(
+					and(isNull(invoices.servicePeriodStart), gte(invoices.invoiceDate, periodStart), lte(invoices.invoiceDate, periodEnd)),
+					and(lte(invoices.servicePeriodStart, periodEnd), gte(invoices.servicePeriodEnd, periodStart))
+				)
 			)
 		)
 		.orderBy(invoices.invoiceDate);
@@ -432,7 +452,8 @@ export async function getInvoicesForStatement(
 		building: row.building,
 		category: row.category,
 		distributionKey: row.distributionKey,
-		llmCategory: null
+		llmCategory: null,
+		inPeriod: inPeriod(row.invoice, periodStart, periodEnd)
 	}));
 }
 

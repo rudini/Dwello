@@ -7,6 +7,7 @@
 		"filtered-empty": "A list whose search matches nothing (?search=…).",
 		"submit-empty": "A new-record form submitted without input: all validation errors visible.",
 		"delete-dialog": "The delete confirmation dialog open.",
+		"fuel-stock-dialog": "Building page with a Tankbestand reading: the confirmation before deleting it open.",
 		"end-dialog": "The dialog that ends a rental contract open.",
 		"send-dialog": "The confirmation before marking a statement as sent open.",
 		"reminder-dialog": "The Mahnung dialog of a sent statement open.",
@@ -14,6 +15,10 @@
 		"action-error": "A server action failed (deleting a sent statement, posted as from a stale tab, is refused): the error alert visible.",
 		"every-wizard-step": "Each step of the wizard in turn, up to the step before saving.",
 		"preview-empty": "Statement wizard preview for a period without rental contracts.",
+		"category-check": "Statement wizard preview whose check per category reports invoices missing against the year before.",
+		"period-not-over": "Statement wizard with a period that has not ended yet: the warning in step 1 visible.",
+		"preview-all-billed": "Statement wizard preview of a period in which every contract already has a statement: how to recalculate and the links to the statements.",
+		"tank-question": "Statement wizard preview with a building that has heating costs but never had a Tankbestand: the question about a tank visible.",
 		"overlap-warning": "Rental contract wizard with a start date that overlaps another contract of the apartment.",
 		"draft-restored": "A wizard reopened with a draft saved in the browser: restore notice and save status visible.",
 		"formula-tested": "Distribution key form after testing a formula.",
@@ -93,7 +98,8 @@
 			"path": "/buildings/{building}",
 			"states": [
 				"default",
-				"delete-dialog"
+				"delete-dialog",
+				"fuel-stock-dialog"
 			]
 		},
 		{
@@ -249,10 +255,32 @@
 			]
 		},
 		{
+			"name": "invoice-billed-detail",
+			"path": "/invoices/{billedInvoice}",
+			"states": [
+				"default",
+				"delete-dialog"
+			]
+		},
+		{
+			"name": "invoice-billed-edit",
+			"path": "/invoices/{billedInvoice}/edit",
+			"states": [
+				"default"
+			]
+		},
+		{
+			"name": "invoice-late-detail",
+			"path": "/invoices/{lateInvoice}",
+			"states": [
+				"default"
+			]
+		},
+		{
 			"name": "statements",
 			"path": "/statements",
 			"queries": {
-				"mark-paid-dialog": "?status=sent"
+				"mark-paid-dialog": "?status=open"
 			},
 			"states": [
 				"default",
@@ -268,6 +296,10 @@
 				"default",
 				"every-wizard-step",
 				"preview-empty",
+				"category-check",
+				"period-not-over",
+				"tank-question",
+				"preview-all-billed",
 				"draft-restored"
 			]
 		},

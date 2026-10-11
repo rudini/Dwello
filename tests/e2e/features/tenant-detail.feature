@@ -21,7 +21,7 @@ Funktionalität: Mieterdetail
   Szenario: Bevorstehender Einzug
     Angenommen "Lea Frei" mietet die Wohnung "2.01" seit "2099-11-01" für "800" Franken
     Und der Liegenschaftsverwalter ist auf der Detailseite des Mieters "Lea Frei"
-    Dann zieht der Mieter am "1.11.2099" in die Wohnung "2.01" ein
+    Dann zieht der Mieter am "01.11.2099" in die Wohnung "2.01" ein
 
   Szenario: Mieter ohne Mietvertrag löschen
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mieters "Lea Frei"

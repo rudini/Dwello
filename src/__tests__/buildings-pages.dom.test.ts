@@ -141,7 +141,12 @@ describe('Gebäudedetail', () => {
 	});
 	const detail = (apartments: ReturnType<typeof flat>[], counts = {}) =>
 		show(BuildingPage, {
-			data: { building: building({ apartmentCount: apartments.length, ...counts }), apartments },
+			data: {
+				building: building({ apartmentCount: apartments.length, ...counts }),
+				apartments,
+				fuelStocks: [],
+				heatingCategories: []
+			},
 			form: null
 		} as never);
 
@@ -223,6 +228,163 @@ describe('Gebäudedetail', () => {
 			'Dieses Gebäude kann nicht gelöscht werden'
 		);
 		expect(byTestId<HTMLButtonElement>('building-delete-confirm')!.disabled).toBe(true);
+	});
+});
+
+describe('Tankbestand', () => {
+	const heatingCategories = [
+		{ id: 'c1', name: 'Heizung' },
+		{ id: 'c3', name: 'Pellets' }
+	];
+	const detail = (fuelStocks: unknown[] | null, form: unknown = null) =>
+		show(BuildingPage, {
+			data: { building: building(), apartments: [], fuelStocks, heatingCategories },
+			form
+		} as never);
+	const section = () => byTestId('fuel-stocks')!.textContent!.replace(/\s+/g, ' ');
+
+	it('listet die Stichtage mit Wert und Kategorie und erklärt, wozu sie dienen und wie man bewertet', () => {
+		detail([
+			{
+				id: 'f1',
+				readingDate: '2024-12-31',
+				amount: 2650,
+				categoryId: 'c1',
+				categoryName: 'Heizung'
+			}
+		]);
+
+		expect(section()).toContain('Brennstoff im Tank oder Lager');
+		expect(section()).toContain('den Wert im Tank oder Lager in Franken'); // Pellets und Holz liegen im Lager
+		expect(section()).toContain(
+			'Nur für Gebäude, die mit Öl, Flüssiggas, Pellets oder Holz heizen.'
+		);
+		expect(section()).toContain('Anfangsbestand + Einkauf − Endbestand');
+		expect(section()).toContain(
+			'Menge im Tank oder Lager mal Preis pro Einheit (Liter, kg oder Ster) der letzten Lieferung'
+		);
+		expect(section()).toContain(
+			'Ist mehr im Tank oder Lager als die letzte Lieferung, rechnen Sie den Rest zum Preis der Lieferung davor.'
+		);
+		expect(section()).toContain(
+			'Lesen Sie erst Anfang Januar ab, erfassen Sie den Wert trotzdem per 31.12.'
+		);
+		expect(byTestId('fuel-stock-f1')!.textContent).toMatch(/31\.12\.2024.*Heizung.*CHF\s2’650\.00/);
+		expect(byTestId('fuel-stock-delete-f1')!.getAttribute('aria-label')).toBe(
+			'Bestand vom 31.12.2024 löschen'
+		);
+	});
+
+	it('erfasst einen Stichtag mit Datum, Wert und Kategorie der Heizkosten', () => {
+		detail([]);
+
+		// typed as TT.MM.JJJJ, sent as JJJJ-MM-TT
+		expect(document.querySelector('input[type="hidden"][name="readingDate"]')).not.toBeNull();
+		expect(byTestId<HTMLInputElement>('fuel-stock-amount-input')!.name).toBe('amount');
+		const category = byTestId<HTMLSelectElement>('fuel-stock-category-select')!;
+		expect(category.name).toBe('categoryId');
+		expect([...category.options].map((o) => o.textContent)).toEqual(['Heizung', 'Pellets']);
+		expect(category.value).toBe('c1');
+		expect(byTestId('fuel-stock-save-button')!.textContent).toContain('Bestand speichern');
+	});
+
+	it('zeigt die Fehler beim Erfassen am Feld', () => {
+		detail([], { fuelStockErrors: { readingDate: 'Bitte geben Sie den Stichtag ein.' } });
+
+		expect(section()).toContain('Bitte geben Sie den Stichtag ein.');
+	});
+
+	it('wählt die Kategorie der bisherigen Stände vor', () => {
+		detail([
+			{
+				id: 'f1',
+				readingDate: '2024-12-31',
+				amount: 900,
+				categoryId: 'c3',
+				categoryName: 'Pellets'
+			}
+		]);
+
+		expect(byTestId<HTMLSelectElement>('fuel-stock-category-select')!.value).toBe('c3');
+	});
+
+	it('sagt ohne Kategorie der Heizkosten, wo man eine anlegt', () => {
+		show(BuildingPage, {
+			data: { building: building(), apartments: [], fuelStocks: [], heatingCategories: [] },
+			form: null
+		} as never);
+
+		expect(section()).toContain(
+			'Es gibt keine Kategorie, die Heizkosten nach dem Heizprofil verteilt.'
+		);
+		expect(byTestId('fuel-stock-categories-link')!.getAttribute('href')).toBe('/config/categories');
+	});
+
+	it('sagt, wenn die Kategorien nicht geladen werden konnten, statt zu behaupten, es gebe keine', () => {
+		show(BuildingPage, {
+			data: { building: building(), apartments: [], fuelStocks: [], heatingCategories: null },
+			form: null
+		} as never);
+
+		expect(section()).toContain(
+			'Die Kategorien konnten nicht geladen werden. Laden Sie die Seite neu.'
+		);
+		expect(section()).not.toContain('Es gibt keine Kategorie');
+	});
+
+	it('meldet ein misslungenes Löschen beim Bestand, nicht beim Formular zum Speichern', () => {
+		detail(
+			[
+				{
+					id: 'f1',
+					readingDate: '2024-12-31',
+					amount: 2650,
+					categoryId: 'c1',
+					categoryName: 'Heizung'
+				}
+			],
+			{
+				fuelStockDeleteError: 'Der Bestand konnte nicht gelöscht werden. Laden Sie die Seite neu.'
+			}
+		);
+
+		expect(byTestId('fuel-stock-delete-error')!.textContent).toContain('Nicht gelöscht');
+		expect(byTestId('fuel-stock-error')).toBeNull();
+	});
+
+	it('bestätigt das Speichern', () => {
+		detail([], { fuelStockSaved: true });
+
+		expect(byTestId('fuel-stock-status')!.textContent).toContain('Bestand gespeichert.');
+	});
+
+	it('sagt, wenn die Stichtage nicht geladen werden konnten', () => {
+		detail(null);
+
+		expect(section()).toContain(
+			'Die Tankbestände konnten nicht geladen werden. Laden Sie die Seite neu.'
+		);
+	});
+
+	it('löscht einen Stichtag erst nach Bestätigung mit der Folge', () => {
+		detail([
+			{
+				id: 'f1',
+				readingDate: '2024-12-31',
+				amount: 2650,
+				categoryId: 'c1',
+				categoryName: 'Heizung'
+			}
+		]);
+
+		click('fuel-stock-delete-f1');
+
+		const dialog = document.querySelector('[role=dialog]')!;
+		expect(dialog.textContent).toContain('Bestand vom 31.12.2024 löschen?');
+		expect(dialog.textContent!.replace(/\s+/g, ' ')).toContain(
+			'Abrechnungen, die am Tag danach beginnen oder an diesem Tag enden, rechnen dann den Einkauf ab, nicht den Verbrauch. Bestehende Abrechnungen ändern sich nicht: Löschen Sie danach die Entwürfe beider Perioden und erstellen Sie die Abrechnungen erneut. Versendete Abrechnungen berichtigen Sie ausserhalb von Dwello.'
+		);
+		expect(byTestId('fuel-stock-delete-confirm')!.textContent).toContain('Bestand löschen');
 	});
 });
 

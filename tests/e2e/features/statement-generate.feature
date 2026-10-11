@@ -37,6 +37,13 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Wenn der Liegenschaftsverwalter die Abrechnungen 2024 für das Gebäude "Lindenhof" erstellt
     Dann wurden 2 Nebenkostenabrechnungen erstellt
 
+  # Erneut erstellen ergänzt nur: ein Mietvertrag mit einer Abrechnung dieser Periode erhält keine zweite
+  @api
+  Szenario: Abrechnungen erneut erstellen ergänzt nur die fehlenden
+    Angenommen für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024
+    Wenn der Liegenschaftsverwalter die Abrechnungen 2024 für das Gebäude "Lindenhof" erstellt
+    Dann wurde 1 Nebenkostenabrechnung erstellt
+
   @api
   Szenario: Erhöhte Verwaltungspauschale gilt für alle Mieter der Liegenschaft
     Angenommen das Heizprofil "Winter" verteilt die Heizkosten so:
@@ -56,8 +63,27 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Und im Gebäude "Lindenhof" gibt es eine Heizkostenrechnung über "1000" Franken für 2024
     Und der Liegenschaftsverwalter ist auf der Seite zum Erstellen von Abrechnungen
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" mit dem Heizprofil "Winter" und 4.5 % Verwaltungspauschale öffnet
-    Dann kostet die Abrechnung von "Eva Frei" "CHF 441.19"
-    Und kostet die Abrechnung von "Marc Huber" "CHF 550.12"
+    Dann kostet die Abrechnung von "Eva Frei" "CHF 449.35"
+    Und kostet die Abrechnung von "Marc Huber" "CHF 543.40"
+
+  # Abgerechnet werden die Kosten der Periode: massgebend ist der Zeitraum der Leistung (Art. 257b OR)
+  @api
+  Szenario: Eine Rechnung gilt für ihren Leistungszeitraum, nicht für ihr Rechnungsdatum
+    Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Hauswart" über "900" Franken vom "2025-01-15" für die Zeit vom "2024-10-01" bis "2024-12-31"
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
+    Dann kostet die Abrechnung von "Marc Huber" "CHF 927.00"
+    Und kostet die Abrechnung von "Eva Frei" "CHF 0.00"
+
+  # Abgerechnet wird das verbrauchte Heizöl: Anfangsbestand + Einkauf − Endbestand, hier 600 + 1000 − 100 = 1500 Franken,
+  # verteilt nach dem vorgewählten Heizprofil mit Warmwasser (Mai–Dezember 53.5 %, Januar–März 37.2 %) plus 3 % Verwaltungspauschale
+  Szenario: Heizöl wird nach Verbrauch abgerechnet, nicht nach Einkauf
+    Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Heizung" über "1000" Franken vom "2024-06-15"
+    Wenn der Liegenschaftsverwalter für das Gebäude "Lindenhof" den Tankbestand vom "2023-12-31" mit "600" Franken erfasst
+    Und der Liegenschaftsverwalter für das Gebäude "Lindenhof" den Tankbestand vom "2024-12-31" mit "100" Franken erfasst
+    Und der Liegenschaftsverwalter ist auf der Seite zum Erstellen von Abrechnungen
+    Und der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
+    Dann kostet die Abrechnung von "Marc Huber" "CHF 826.58"
+    Und kostet die Abrechnung von "Eva Frei" "CHF 574.74"
 
   Szenario: Hinweis bei Verwaltungspauschale über dem Richtwert
     Wenn der Liegenschaftsverwalter für das Gebäude "Lindenhof" die Verwaltungspauschale auf 4.5 % setzt
@@ -79,7 +105,7 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Und der Liegenschaftsverwalter aus der Warnung eine Rechnung erfassen will
     Dann ist das Rechnungsdatum leer, damit es bewusst gewählt wird
     Wenn der Liegenschaftsverwalter das Rechnungsdatum "2025-01-10" einträgt
-    Dann warnt das Rechnungsformular, dass das Rechnungsdatum nicht in der Abrechnungsperiode "1.1.2024 – 31.12.2024" liegt
+    Dann warnt das Rechnungsformular, dass das Rechnungsdatum nicht in der Abrechnungsperiode "01.01.2024 – 31.12.2024" liegt
     Wenn der Liegenschaftsverwalter das Rechnungsdatum "2024-11-15" einträgt
     Dann warnt das Rechnungsformular nicht vor dem Rechnungsdatum
 
@@ -95,6 +121,18 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
     Dann nennt die Vorschau für "Lindenhof" 1 erfasste Rechnung
     Und warnt die Vorschau nicht vor fehlenden Rechnungen
+
+  # Jede Kategorie mit Kosten im Vorjahr wird mit dem gleichen Zeitraum im Vorjahr verglichen
+  Szenario: Hinweis auf fehlende Rechnungen einer Kategorie
+    Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Kaminfeger" über "290" Franken vom "2023-10-15"
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Kaltwasser" über "460" Franken vom "2023-03-31"
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Kaltwasser" über "475" Franken vom "2023-12-31"
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Kaltwasser" über "470" Franken vom "2024-06-30"
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
+    Dann meldet die Prüfung der Kategorien für "Kaminfeger": "Keine Rechnung in dieser Kategorie erfasst"
+    Und meldet die Prüfung der Kategorien für "Kaltwasser": "Rechnung für das 2. Halbjahr fehlt"
+    Wenn der Liegenschaftsverwalter ohne Bestätigung zum Erstellen weitergehen will
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Bestätigen Sie, dass die Abrechnungen trotzdem erstellt werden sollen."
 
   Szenario: Vor dem Erstellen ist klar, dass nichts verschickt wird
     Angenommen im Gebäude "Lindenhof" gibt es eine Heizkostenrechnung über "1000" Franken für 2024

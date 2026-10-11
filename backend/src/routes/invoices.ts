@@ -3,6 +3,7 @@
  * CRUD endpoints for invoice management with LLM categorization
  */
 
+import { isRealDate } from './real-date';
 import { Elysia, t } from 'elysia';
 import { authMiddleware } from '../middleware/auth';
 import {
@@ -19,6 +20,7 @@ import {
 import { llmRecipient } from '../config/llm';
 import { isLlmAvailable, getCacheStats, categorizeInvoice } from '../services/llm.service';
 import { getUtilityCostRules } from '../services/utility-validation.service';
+import { checkBuildingInvoices } from '../services/invoice-completeness.service';
 
 // Validation schemas
 const invoiceQuerySchema = t.Object({
@@ -49,6 +51,9 @@ const invoiceBodySchema = t.Object({
 	amount: t.String(), // Decimal as string
 	isValidUtilityCost: t.Optional(t.Boolean()),
 	invoiceDate: t.String(), // YYYY-MM-DD
+	// Leistungszeitraum: both or none, the end not before the start (database constraint)
+	servicePeriodStart: t.Optional(t.Nullable(t.String({ format: 'date' }))),
+	servicePeriodEnd: t.Optional(t.Nullable(t.String({ format: 'date' }))),
 	dueDate: t.Optional(t.Nullable(t.String())),
 	paidDate: t.Optional(t.Nullable(t.String())),
 	invoicePdf: t.Optional(t.Nullable(t.String())),
@@ -150,6 +155,21 @@ export const invoiceRoutes = new Elysia({ prefix: '/api/v1/invoices' })
 		},
 		{
 			query: statementPeriodSchema
+		}
+	)
+	// Check for missing invoices per category against the same dates one year earlier
+	.get(
+		'/completeness/:buildingId',
+		async ({ params, query, set }) => {
+			if (!isRealDate(query.periodStart) || !isRealDate(query.periodEnd) || query.periodEnd < query.periodStart) {
+				set.status = 400;
+				return { error: 'periodStart and periodEnd must be existing dates, the end not before the start' };
+			}
+			return await checkBuildingInvoices(params.buildingId, { start: query.periodStart, end: query.periodEnd });
+		},
+		{
+			params: t.Object({ buildingId: t.String({ format: 'uuid' }) }),
+			query: t.Object({ periodStart: t.String({ format: 'date' }), periodEnd: t.String({ format: 'date' }) })
 		}
 	)
 	// Get single invoice

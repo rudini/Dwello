@@ -26,7 +26,8 @@
 			...{ name: '', description: '', nameFR: '', nameIT: '', nameEN: '' },
 			...category,
 			sortOrder: String(category?.sortOrder || ''),
-			allowed: category?.isAllowedUtilityCost ?? true
+			allowed: category?.isAllowedUtilityCost ?? true,
+			heating: category?.isHeatingCost ?? false
 		}))
 	);
 </script>
@@ -64,6 +65,15 @@
 		help="Nur umlagefähige Kosten (Art. 257a–257b OR) fliessen in die Nebenkostenabrechnung, z. B. Heizung, Wasser, Hauswart. Reparaturen, Versicherungen und Steuern sind nicht umlagefähig."
 		bind:checked={values.allowed}
 		testid="category-allowed-checkbox"
+	/>
+	<!-- TODO(fachlich prüfen): which costs follow the heating profile is not in the glossary -->
+	<Checkbox
+		id="isHeatingCost"
+		name="isHeatingCost"
+		label="Heizkosten nach dem Heizprofil verteilen"
+		help="Zum Beispiel Heizöl, Fernwärme, Pellets oder Kaminfeger. Zieht ein Mieter während der Abrechnungsperiode ein oder aus, verteilt Dwello diese Kosten nach dem Heizprofil auf die Monate, alle anderen nach Tagen. Separat abgerechnetes Warmwasser wird das ganze Jahr etwa gleich verbraucht: Lassen Sie das Häkchen dort weg."
+		bind:checked={values.heating}
+		testid="category-heating-checkbox"
 	/>
 	<TextInput
 		id="sortOrder"

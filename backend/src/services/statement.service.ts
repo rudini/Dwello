@@ -14,10 +14,13 @@ import {
 	type UtilityStatement,
 	type NewUtilityStatement,
 	type UtilityStatementLineItem,
-	type NewUtilityStatementLineItem
+	type NewUtilityStatementLineItem,
+	type KeyValues
 } from '../db/schema';
 import { calculateStatementForContract, generateStatementNumber } from './calculation.service';
 import { getTypedConfig } from './config.service';
+import { fuelStockChange } from './fuel-stock.service';
+import { listApartments } from './apartment.service';
 
 export interface StatementFilters {
 	search?: string;
@@ -35,9 +38,18 @@ export interface StatementFilters {
 const { pdfBlob: _pdfBlob, ...statementColumns } = getTableColumns(utilityStatements);
 
 export interface StatementWithDetails extends Omit<UtilityStatement, 'pdfBlob'> {
-	tenant: { id: string; firstName: string; lastName: string; email: string | null; language?: string } | null;
+	tenant: {
+		id: string;
+		firstName: string;
+		lastName: string;
+		email: string | null;
+		language?: string;
+		address?: string | null;
+		postalCode?: string | null;
+		city?: string | null;
+	} | null;
 	apartment: { id: string; number: string; floor: number; area: string } | null;
-	building: { id: string; name: string; address: string } | null;
+	building: { id: string; name: string; address: string; postalCode?: string; city?: string } | null;
 	lineItems: UtilityStatementLineItem[];
 }
 
@@ -121,7 +133,7 @@ export async function listStatements(filters: StatementFilters = {}): Promise<{
 		.leftJoin(apartments, eq(utilityStatements.apartmentId, apartments.id))
 		.leftJoin(buildings, eq(apartments.buildingId, buildings.id))
 		.where(whereClause)
-		.orderBy(desc(utilityStatements.statementDate), desc(utilityStatements.createdAt))
+		.orderBy(desc(utilityStatements.statementDate), desc(utilityStatements.createdAt), desc(utilityStatements.id))
 		.limit(limit)
 		.offset(offset);
 
@@ -192,7 +204,10 @@ export async function getStatement(id: string): Promise<StatementWithDetails | n
 				lastName: tenants.lastName,
 				email: tenants.email,
 				correspondenceChannel: tenants.correspondenceChannel,
-				language: tenants.language
+				language: tenants.language,
+				address: tenants.address,
+				postalCode: tenants.postalCode,
+				city: tenants.city
 			},
 			apartment: {
 				id: apartments.id,
@@ -203,7 +218,9 @@ export async function getStatement(id: string): Promise<StatementWithDetails | n
 			building: {
 				id: buildings.id,
 				name: buildings.name,
-				address: buildings.address
+				address: buildings.address,
+				postalCode: buildings.postalCode,
+				city: buildings.city
 			}
 		})
 		.from(utilityStatements)
@@ -291,6 +308,10 @@ export async function generateStatement(
 			totalAdvancePayments: String(calculation.totalAdvancePayments),
 			managementFee: String(calculation.managementFee),
 			managementFeePercent: String(calculation.managementFeePercent),
+			heatingProfileId: input.heatingProfileId || null,
+			managementFeeDistributionKeyId: input.managementFeeDistributionKeyId || null,
+			fuelStock: (await fuelStockChange(input.buildingId, input.periodStart, input.periodEnd))[0]?.stock ?? null,
+			keyValues: await keyValuesOf(input.buildingId, calculation.apartmentId),
 			balance: String(calculation.balance),
 			status: 'draft',
 			paymentDeadline: paymentDeadline.toISOString().split('T')[0]
@@ -303,6 +324,8 @@ export async function generateStatement(
 			tenantShare: String(item.tenantShare),
 			// Share column next to building total and tenant share: the tenant's share of the building total
 			sharePercentage: item.totalBuildingAmount ? String((item.tenantShare / item.totalBuildingAmount) * 100) : '0',
+			apartmentShare: String(item.apartmentShare),
+			periodShare: String(item.periodShare),
 			sortOrder: index
 		}))
 	);
@@ -360,8 +383,10 @@ export async function updateStatement(
 		}
 	}
 
-	// The PDF prints the payment deadline; a changed deadline discards it so it can be generated again
-	const pdfOutdated = data.paymentDeadline !== undefined && data.paymentDeadline !== existing.paymentDeadline;
+	// The PDF prints date and payment deadline; a change discards it, it is made again. Once paid, the PDF as sent stays
+	const pdfOutdated =
+		(data.paymentDeadline !== undefined && data.paymentDeadline !== existing.paymentDeadline) ||
+		(data.statementDate !== undefined && data.statementDate !== existing.statementDate);
 
 	// Update the statement
 	const [updated] = await db
@@ -373,6 +398,22 @@ export async function updateStatement(
 	if (!updated) return null;
 
 	return await getStatement(id);
+}
+
+/** The apartment's and the building's area, apartments and rooms: what a simple distribution key divides by */
+export async function keyValuesOf(buildingId: string, apartmentId: string): Promise<KeyValues | null> {
+	const { apartments: all } = await listApartments({ buildingId, limit: 1000 });
+	const own = all.find((apartment) => apartment.id === apartmentId);
+	if (!own) return null;
+	const pair = (value: (apartment: (typeof all)[number]) => number): [number, number] => [value(own), all.reduce((sum, apartment) => sum + value(apartment), 0)];
+	return { area: pair((a) => parseFloat(a.area)), units: pair(() => 1), rooms: pair((a) => parseFloat(a.rooms)) };
+}
+
+/** A statement goes out dated on the day it is sent (Swiss time), with the full payment deadline, never a shorter one */
+export async function datedToday(paymentDeadline: string | null) {
+	const statementDate = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Zurich' });
+	const due = new Date(Date.parse(statementDate) + (await getTypedConfig('payment_deadline_days')) * 86_400_000).toISOString().slice(0, 10);
+	return { statementDate, paymentDeadline: paymentDeadline && paymentDeadline > due ? paymentDeadline : due };
 }
 
 /**
@@ -404,7 +445,8 @@ export async function updateStatementStatus(
 
 	const updateData: Partial<NewUtilityStatement> = {
 		status,
-		...additionalData
+		...additionalData,
+		...(status === 'sent' && (await datedToday(existing.paymentDeadline)))
 	};
 
 	return updateStatement(id, updateData);
@@ -469,37 +511,6 @@ export async function addLineItems(
 		.returning();
 
 	return lineItems;
-}
-
-/**
- * Get statements for a building in a period
- */
-export async function getStatementsForBuilding(
-	buildingId: string,
-	periodStart: string,
-	periodEnd: string
-): Promise<StatementWithDetails[]> {
-	const { statements } = await listStatements({
-		buildingId,
-		periodStart,
-		periodEnd,
-		limit: 1000
-	});
-
-	return statements;
-}
-
-/**
- * Check if a statement exists
- */
-export async function statementExists(id: string): Promise<boolean> {
-	const [result] = await db
-		.select({ id: utilityStatements.id })
-		.from(utilityStatements)
-		.where(eq(utilityStatements.id, id))
-		.limit(1);
-
-	return !!result;
 }
 
 /**

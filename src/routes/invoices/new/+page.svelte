@@ -1,9 +1,11 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { untrack } from 'svelte';
+	import { localToday } from '$lib/contract-status';
 	import { api } from '$lib/api';
 	import {
 		plainAmount,
+		servicePeriodOf,
 		suggestionProvenance,
 		validateInvoice,
 		type Suggestion
@@ -40,8 +42,10 @@
 	let buildingId = $state(untrack(() => data.buildingId));
 	// From the statement wizard the date stays empty: today would fall outside the period being completed
 	let invoiceDate = $state(
-		untrack(() => (data.period ? '' : new Date().toISOString().split('T')[0]))
+		untrack(() => (data.period ? '' : localToday()))
 	);
+	let servicePeriodStart = $state('');
+	let servicePeriodEnd = $state('');
 	let billingEntity = $state('');
 	let description = $state('');
 	let amount = $state('');
@@ -80,13 +84,22 @@
 
 	async function save(event: Event) {
 		event.preventDefault();
-		errors = validateInvoice({ buildingId, invoiceDate, billingEntity, description, amount });
+		errors = validateInvoice({
+			buildingId,
+			invoiceDate,
+			servicePeriodStart,
+			servicePeriodEnd,
+			billingEntity,
+			description,
+			amount
+		});
 		if (Object.keys(errors).length) return focusFirstError(event.target as Element);
 
 		saving = true;
 		const response = await api.post('/invoices', {
 			buildingId,
 			invoiceDate,
+			...servicePeriodOf({ servicePeriodStart, servicePeriodEnd }),
 			billingEntityName: billingEntity.trim(),
 			description: description.trim(),
 			amount: plainAmount(amount),
@@ -128,6 +141,8 @@
 		<InvoiceDataFields
 			bind:buildingId
 			bind:invoiceDate
+			bind:servicePeriodStart
+			bind:servicePeriodEnd
 			bind:amount
 			bind:billingEntity
 			bind:description

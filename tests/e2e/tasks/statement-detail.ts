@@ -8,12 +8,14 @@ import {
 	downloadPdfLink,
 	generatePdfButton,
 	markPaidButton,
+	paidDateInput,
 	sendStatementButton,
 	statementApartmentLink,
 	statementEditButton,
 	statementTenantLink
 } from '../interactions/statement-detail';
 import { downloadFrom } from './download';
+import { typeDate } from '../interactions/form';
 
 const click = (target: (page: Actor['page']) => Locator) => async (actor: Actor) => {
 	await target(actor.page).click();
@@ -29,6 +31,13 @@ export const sendStatement = async (actor: Actor) => {
 
 export const markStatementPaid = async (actor: Actor) => {
 	await markPaidButton(actor.page).click();
+	await confirmMarkPaidButton(actor.page).click();
+};
+
+// The day the money came in, typed into the dialog's date field
+export const markStatementPaidOn = (isoDate: string) => async (actor: Actor) => {
+	await markPaidButton(actor.page).click();
+	await typeDate(paidDateInput(actor.page), isoDate);
 	await confirmMarkPaidButton(actor.page).click();
 };
 

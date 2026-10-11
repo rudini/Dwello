@@ -32,7 +32,7 @@ export function toStatement(data: BackendStatement): StatementWithDetails {
 		statementNumber: data.statementNumber,
 		tenantId: data.tenantId,
 		apartmentId: data.apartmentId,
-		buildingId: apartment.buildingId || '',
+		buildingId: building.id || '',
 		periodStart: data.periodStart,
 		periodEnd: data.periodEnd,
 		statementDate: data.statementDate,
@@ -45,6 +45,7 @@ export function toStatement(data: BackendStatement): StatementWithDetails {
 			data.managementFeePercent != null
 				? Number(data.managementFeePercent)
 				: feePercent(Number(data.totalCosts), Number(data.managementFee)),
+		managementFeeKeyed: !!data.managementFeeDistributionKeyId,
 		balance: Number(data.balance),
 		status: data.status,
 		paymentDeadline: data.paymentDeadline,

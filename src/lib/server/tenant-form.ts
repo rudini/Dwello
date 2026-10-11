@@ -39,6 +39,8 @@ function channelErrors(t: TenantFields) {
 	}
 	if (t.correspondenceChannel === 'letter' && !t.address)
 		errors.address = 'Für Briefe ist eine Adresse erforderlich';
+	if (t.correspondenceChannel === 'letter' && !t.postalCode)
+		errors.postalCode = 'Für Briefe ist eine PLZ erforderlich';
 	if (t.correspondenceChannel === 'letter' && !t.city)
 		errors.city = 'Für Briefe ist ein Ort erforderlich';
 	return errors;

@@ -72,8 +72,8 @@ describe('handleMidYearMoves', () => {
 			10000
 		);
 
-		// Januar bis Juni im Mittelland: 28 + 14 + 11 + 5 + 0 + 0 = 58 % der Heizkosten
-		expect(result.share).toBeCloseTo(5800);
+		// Januar bis Juni im Mittelland: 17.5 + 14.5 + 13.5 + 9.5 + 3.5 + 0 = 58.5 % der Heizkosten
+		expect(result.share).toBeCloseTo(5850);
 	});
 
 	it('teilt nach Tagen, wenn das Heizprofil nicht existiert', async () => {

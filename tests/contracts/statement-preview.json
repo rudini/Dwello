@@ -1,4 +1,7 @@
 {
 	"totalCosts": 1045,
-	"balance": 1045
+	"totalAdvancePayments": 1800,
+	"balance": 1045,
+	"rentalDays": 366,
+	"totalPeriodDays": 366
 }

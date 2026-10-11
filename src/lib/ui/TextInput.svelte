@@ -24,7 +24,7 @@
 		label: string;
 		value?: string;
 		name?: string;
-		type?: 'text' | 'email' | 'tel' | 'date' | 'number' | 'url';
+		type?: 'text' | 'email' | 'tel' | 'number' | 'url'; // dates: DateInput
 		help?: string;
 		example?: string;
 		error?: string;

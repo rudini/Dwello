@@ -9,6 +9,7 @@
  * - Vacancy cost allocation
  */
 
+import { roundToRappen } from './pdf-format';
 import { getHeatingProfile, calculateHeatingShare } from './heating-profile.service';
 import { getContractsByPeriod, type ContractWithDetails } from './contract.service';
 
@@ -129,7 +130,7 @@ export function prorateCosts(
 
 	return {
 		totalAmount,
-		proratedAmount: Math.round(proratedAmount * 100) / 100, // Round to 2 decimals
+		proratedAmount: roundToRappen(proratedAmount),
 		prorationDays,
 		totalDays,
 		periodShare: Math.round(periodShare * 10000) / 10000 // 4 decimal precision
@@ -226,7 +227,17 @@ export async function handleMidYearMoves(
 		? new Date(Math.min(contractEnd.getTime(), periodEnd.getTime()))
 		: periodEnd;
 
-	return calculateHeatingShare(profile, effectiveStart, effectiveEnd, totalHeatingCosts);
+	// The tenant's months against the months of the period: a period under a year carries only its months' shares
+	const tenant = calculateHeatingShare(profile, effectiveStart, effectiveEnd, totalHeatingCosts);
+	const period = calculateHeatingShare(profile, periodStart, periodEnd, totalHeatingCosts);
+	// a period of months without heating in the profile (summer): its heating costs are shared by days
+	if (period.percentage <= 0) {
+		const percentage =
+			(calculateDaysBetween(effectiveStart, effectiveEnd) / calculateDaysBetween(periodStart, periodEnd)) * 100;
+		return { ...tenant, share: totalHeatingCosts * (percentage / 100), percentage };
+	}
+	const percentage = (tenant.percentage / period.percentage) * 100;
+	return { ...tenant, share: totalHeatingCosts * (percentage / 100), percentage };
 }
 
 /**
@@ -307,7 +318,7 @@ export function distributeCostsAcrossContracts(
 			return {
 				contract: c.contract,
 				share,
-				amount: Math.round(totalCost * share * 100) / 100
+				amount: roundToRappen(totalCost * share)
 			};
 		});
 	}
@@ -320,7 +331,7 @@ export function distributeCostsAcrossContracts(
 		return {
 			contract: c.contract,
 			share,
-			amount: Math.round(totalCost * share * 100) / 100
+			amount: roundToRappen(totalCost * share)
 		};
 	});
 }

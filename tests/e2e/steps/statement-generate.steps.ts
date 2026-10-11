@@ -12,7 +12,8 @@ import {
 	generationOutcome,
 	noContractsInPeriod,
 	periodChoice,
-	previewRow
+	previewRow,
+	categoryFinding
 } from '../questions/statement-generate';
 import {
 	chooseBuilding,
@@ -114,6 +115,11 @@ Then(
 	}
 );
 
+Then('wurde 1 Nebenkostenabrechnung erstellt', async ({ verwalter, driver }) => {
+	if (driver === 'api') expect(createdStatements(verwalter)).toBe(1);
+	else await expect(generationOutcome(verwalter)).toContainText('1 Nebenkostenabrechnung ist als Entwurf erstellt');
+});
+
 Then('wurden {int} Nebenkostenabrechnungen erstellt', async ({ verwalter, driver }, count: number) => {
 	if (driver === 'api') expect(createdStatements(verwalter)).toBe(count);
 	else await expect(generationOutcome(verwalter)).toContainText(`${count} Nebenkostenabrechnungen sind als Entwurf erstellt`);
@@ -168,6 +174,13 @@ Then(
 	'warnt die Vorschau, dass für {string} in der Abrechnungsperiode keine Rechnungen erfasst sind',
 	async ({ verwalter, names }, building: string) => {
 		await expect(missingInvoicesWarning(verwalter)).toContainText(names.get(building) ?? building);
+	}
+);
+
+Then(
+	'meldet die Prüfung der Kategorien für {string}: {string}',
+	async ({ verwalter }, category: string, finding: string) => {
+		await expect(categoryFinding(verwalter, category)).toContainText(finding);
 	}
 );
 

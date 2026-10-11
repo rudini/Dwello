@@ -7,6 +7,7 @@ import {
 // Backend answers as checked against the real API (backend/src/__tests__/api-contracts.pg.test.ts)
 import buildingContracts from '../../tests/contracts/building-contracts.json';
 import statementPreview from '../../tests/contracts/statement-preview.json';
+import invoiceCompleteness from '../../tests/contracts/invoice-completeness.json';
 
 const API = 'http://localhost:3001/api/v1';
 const period = {
@@ -26,18 +27,19 @@ const contract = (id: string, startDate: string, endDate: string | null) => ({
 	apartmentNumber: '2.01'
 });
 
-function backend() {
+const contracts = [
+	contract('vorher', '2020-01-01', '2023-12-31'),
+	contract('auszug', '2020-01-01', '2024-03-31'),
+	contract('einzug', '2024-05-01', null),
+	contract('nachher', '2025-01-01', null)
+];
+
+function backend(statements: { contractId: string; periodStart: string; periodEnd: string }[] = [], inBuilding = contracts) {
 	const posts: { url: string; body: Record<string, string> }[] = [];
 	const fetch = async (url: string, init?: RequestInit) => {
+		if (url === `${API}/statements?buildingId=b1&limit=1000`) return Response.json({ data: statements });
 		if (url === `${API}/contracts?buildingId=b1&limit=1000`) {
-			return Response.json({
-				contracts: [
-					contract('vorher', '2020-01-01', '2023-12-31'),
-					contract('auszug', '2020-01-01', '2024-03-31'),
-					contract('einzug', '2024-05-01', null),
-					contract('nachher', '2025-01-01', null)
-				]
-			});
+			return Response.json({ contracts: inBuilding });
 		}
 		const body = JSON.parse(String(init?.body));
 		posts.push({ url, body });
@@ -63,15 +65,33 @@ describe('Abrechnungen erstellen', () => {
 				tenantName: 'Mieter auszug',
 				apartmentNumber: '2.01',
 				totalCosts: 300,
-				balance: -50
+				totalAdvancePayments: 1800,
+				balance: -50,
+				rentalDays: 366,
+				totalPeriodDays: 366,
+				movedOut: true
 			},
 			{
 				contractId: 'einzug',
 				tenantName: 'Mieter einzug',
 				apartmentNumber: '2.01',
 				totalCosts: 400,
-				balance: -50
+				totalAdvancePayments: 1800,
+				balance: -50,
+				rentalDays: 366,
+				totalPeriodDays: 366,
+				movedOut: false
 			}
+		]);
+	});
+
+	// Abrechnung 2024 im Jahr 2026 erstellt, Auszug im März 2025: der Mieter ist schon weg, eine Akonto-Erhöhung nützt nichts
+	it('zählt einen Mieter, der bis heute ausgezogen ist, als ausgezogen', async () => {
+		const { fetch } = backend([], [contract('spaeter', '2020-01-01', '2025-03-31'), contract('bleibt', '2020-01-01', '2099-12-31')]);
+
+		expect((await previewStatements(fetch, period)).map((row) => [row.contractId, row.movedOut])).toEqual([
+			['spaeter', true],
+			['bleibt', false]
 		]);
 	});
 
@@ -107,6 +127,20 @@ describe('Abrechnungen erstellen', () => {
 			heatingProfileId: 'hp1',
 			managementFeePercent: 4.5
 		});
+	});
+
+	// Erneut erstellen ergänzt nur: die Abrechnung eines Mietvertrags wird nicht verdoppelt
+	it('übergeht Mietverträge, die in der Periode schon eine Abrechnung haben', async () => {
+		const { fetch, posts } = backend([
+			{ contractId: 'auszug', periodStart: '2024-01-01', periodEnd: '2024-12-31' },
+			{ contractId: 'einzug', periodStart: '2023-01-01', periodEnd: '2023-12-31' } // other period
+		]);
+
+		expect((await previewStatements(fetch, period)).map((row) => row.contractId)).toEqual([
+			'einzug'
+		]);
+		expect(await generateStatements(fetch, period)).toBe(1);
+		expect(posts.map((post) => post.body.contractId)).toEqual(['einzug', 'einzug']);
 	});
 
 	it('verteilt die Verwaltungspauschale nach dem gewählten Verteilschlüssel', async () => {
@@ -152,20 +186,54 @@ describe('Rechnungen der Abrechnungsperiode', () => {
 							]
 						: []
 				});
-			const invoices = url.includes('buildingId=b1')
+			if (url.includes('/invoices/completeness/'))
+				return Response.json({ ...invoiceCompleteness, buildingId: url.includes('b1') ? 'b1' : 'b2' });
+			const invoices = url.includes('/for-statement/b1')
 				? [{ invoiceDate: '2024-06-30' }, { invoiceDate: '2024-01-15' }]
 				: [];
-			return Response.json({ invoices, total: invoices.length });
+			return Response.json(invoices);
 		}) as typeof globalThis.fetch;
 
 		expect(await invoicesInPeriod(fetch, { ...period, buildingIds: ['b1', 'b2'] })).toEqual([
-			{ buildingId: 'b1', count: 2, first: '2024-01-15', last: '2024-06-30', statements: 0 },
-			{ buildingId: 'b2', count: 0, first: null, last: null, statements: 2 }
+			{ buildingId: 'b1', count: 2, first: '2024-01-15', last: '2024-06-30', statements: 0, check: { ...invoiceCompleteness, buildingId: 'b1' } },
+			{ buildingId: 'b2', count: 0, first: null, last: null, statements: 2, check: { ...invoiceCompleteness, buildingId: 'b2' } }
 		]);
+		// each category compared with the same dates one year earlier
+		expect(urls).toContain(`${API}/invoices/completeness/b1?periodStart=2024-01-01&periodEnd=2024-12-31`);
 		// statements of the building whose period overlaps the chosen one
 		expect(urls).toContain(`${API}/statements?buildingId=b2&limit=1000`);
-		expect(urls[0]).toBe(
-			`${API}/invoices?buildingId=b1&dateFrom=2024-01-01&dateTo=2024-12-31&isValidUtilityCost=true&limit=1000`
-		);
+		// the invoices the statement takes: by Leistungszeitraum, otherwise by Rechnungsdatum
+		expect(urls[0]).toBe(`${API}/invoices/for-statement/b1?periodStart=2024-01-01&periodEnd=2024-12-31`);
+	});
+
+	// Die Rechnung vom Januar 2025 für das 4. Quartal 2024 deckt das Ende der Periode ab, nicht den Januar
+	it('nimmt für den Zeitraum der Rechnungen den Leistungszeitraum in der Periode', async () => {
+		const fetch = (async (url: string) =>
+			Response.json(
+				url.includes('/for-statement/')
+					? [
+							{ invoiceDate: '2024-03-31', servicePeriodEnd: null, inPeriod: { start: '2024-01-01', end: '2024-12-31' } },
+							{ invoiceDate: '2025-01-20', servicePeriodEnd: '2024-12-31', inPeriod: { start: '2024-10-01', end: '2024-12-31' } }
+						]
+					: url.includes('/statements?')
+						? { data: [] }
+						: invoiceCompleteness
+			)) as typeof globalThis.fetch;
+
+		expect(await invoicesInPeriod(fetch, period)).toMatchObject([{ count: 2, first: '2024-03-31', last: '2024-12-31' }]);
+	});
+
+	// Without the check per category the preview still shows; the look at start and end of the period stays
+	it('zeigt die Rechnungen auch, wenn die Prüfung pro Kategorie scheitert', async () => {
+		const fetch = (async (url: string) =>
+			url.includes('/invoices/completeness/')
+				? Response.json({ error: 'kaputt' }, { status: 500 })
+				: url.includes('/for-statement/')
+					? Response.json([])
+					: Response.json({ data: [], total: 0 })) as typeof globalThis.fetch;
+
+		expect(await invoicesInPeriod(fetch, period)).toEqual([
+			{ buildingId: 'b1', count: 0, first: null, last: null, statements: 0, check: undefined }
+		]);
 	});
 });

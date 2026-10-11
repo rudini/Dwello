@@ -3,6 +3,7 @@ import { POST as markPaid } from '../routes/statements/[id]/mark-paid/+server';
 import { POST as sendReminder } from '../routes/statements/[id]/send-reminder/+server';
 import { POST as generatePdf } from '../routes/api/statements/[id]/generate-pdf/+server';
 import { GET as getPdf } from '../routes/statements/[id]/pdf/+server';
+import { localToday } from '$lib/contract-status';
 
 const API = 'http://localhost:3001/api/v1/statements/s1';
 
@@ -14,7 +15,8 @@ function call(handler: unknown, status: number, answer: object) {
 	};
 	const result = (handler as (event: never) => Promise<Response>)({
 		params: { id: 's1' },
-		fetch
+		fetch,
+		request: new Request('http://localhost/', { method: 'POST' }) // no body: the defaults apply
 	} as never);
 	return { calls, result };
 }
@@ -28,7 +30,7 @@ describe('POST /statements/[id]/mark-paid', () => {
 			{
 				method: 'PUT',
 				url: `${API}/status`,
-				body: { status: 'paid', paidDate: new Date().toISOString().split('T')[0] }
+				body: { status: 'paid', paidDate: localToday() }
 			}
 		]);
 	});
