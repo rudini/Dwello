@@ -87,3 +87,37 @@ def _broken_lint(root):
     text = (root / "SKILL.md").read_text()
     (root / "SKILL.md").write_text(text[:text.index("## 6. Design note")])
     return root
+
+
+class VerifiersLockTest(unittest.TestCase):
+    def test_a_missing_stale_or_misplaced_lock_is_stage2_fail(self):
+        def changed(root):
+            (root / "scripts" / "tddcore" / "lint.py").write_text("# edited after the review\n")
+            return root
+
+        def old_review(root):
+            write_lock(root, "evidence/reviews/step-08-round-1.md")
+            return root
+
+        def tampered(root):
+            lock = root / "verifiers.lock"
+            lock.write_text(lock.read_text().replace("  scripts/skill_lint\n", "  scripts/other\n"))
+            return root
+
+        cases = {
+            "missing": (lambda: skill_dir(self, lock=False), "verifiers.lock: missing"),
+            "verifier changed": (lambda: changed(skill_dir(self)),
+                                 "verifiers.lock: scripts/tddcore/lint.py changed since its review"),
+            "not the latest review": (lambda: old_review(skill_dir(self, {**ALL_PASS, "08": ["FAIL", "PASS"]})),
+                                      "verifiers.lock: reviewed evidence/reviews/step-08-round-1.md is not step 08's "
+                                      "latest passing review"),
+            "a verifier not locked": (lambda: tampered(skill_dir(self)),
+                                      "verifiers.lock: scripts/skill_lint is not locked"),
+        }
+        for name, (build, line) in cases.items():
+            with self.subTest(name):
+                result = verify(build())
+
+                self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+                self.assertIn(line, result.stdout.splitlines())
+                self.assertEqual(result.stdout.strip().splitlines()[-1], "STAGE2: FAIL")
