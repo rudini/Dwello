@@ -148,3 +148,12 @@ export class Ledger {
                 self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
                 self.assertIn(f"depth_report: {message}", result.stderr)
                 self.assertNotIn("Traceback", result.stderr)
+
+    def test_block_comments_are_not_code(self):
+        module = ("/**\n * Doubles a value.\n * @param x the value\n */\n"
+                  "export function double(x: number): number {\n  /* no rounding */\n  return x * 2;\n}\n")
+        repo = Repo(self, {"src/double.ts": module})
+
+        line = report_line(repo.run("depth_report", "src/double.ts"), "src/double.ts")
+
+        self.assertTrue(line.startswith("src/double.ts: surface 2, size 3,"), line)
