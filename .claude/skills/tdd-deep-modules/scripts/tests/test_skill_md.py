@@ -90,3 +90,11 @@ class SkillMdTest(unittest.TestCase):
         text = dict(sections())["5. Depth check in every refactor"]
 
         self.assertIn("keep every test's name and file", text)
+
+    def test_the_cycle_is_honest_about_what_the_replay_checks(self):
+        text = dict(sections())["4. Red, green, refactor with tdd-step"]
+
+        self.assertNotIn("Never change a test after its green", text)
+        for element in ("never what it expects", "does not catch a weakened assertion",
+                        "git stash push -u --", "git stash pop"):
+            self.assertIn(element, text)
