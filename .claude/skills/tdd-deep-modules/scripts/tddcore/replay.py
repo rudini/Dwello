@@ -31,7 +31,8 @@ def replay(repo, rev_range):
         try:
             _git(repo, "worktree", "add", "-q", "--detach", str(tree), base or commits[0])
             _borrow_node_modules(repo, tree)
-            known = _run(tree) if base else suite.Run(0, "pass", "", 0, 0)
+            empty = suite.Run(0, "pass", "", 0, 0)
+            known = _runs(tree) if base else {"fast": empty, "full": empty}
             for commit in commits:
                 _checkout(repo, tree, commit)
                 subject = _git(tree, "log", "-1", "--format=%s")
@@ -39,13 +40,12 @@ def replay(repo, rev_range):
                 tier = _trailer(tree, "TDD-Suite", "HEAD")
                 changed = _git(tree, "diff-tree", "-r", "--root", "--no-commit-id", "--name-only",
                                "--no-renames", commit).splitlines()
-                full = _run(tree)
-                run = _run(tree, "fast") if tier == "fast" else full
+                runs = _runs(tree)
                 phase = protocol.phase_of(subject)
-                verdicts.append(Verdict(commit, phase, run,
+                verdicts.append(Verdict(commit, phase, runs.get(tier, runs["full"]),
                                         tuple(_judge(previous, previous_suite, known, subject,
-                                                     claimed, tier, run, full, changed)), tier))
-                previous, previous_suite, known = phase, tier, full
+                                                     claimed, tier, runs, changed)), tier))
+                previous, previous_suite, known = phase, tier, runs
         finally:
             # twice --force: an add interrupted by a signal leaves the worktree locked
             subprocess.run(["git", "worktree", "remove", "--force", "--force", str(tree)], cwd=repo,
@@ -93,11 +93,13 @@ def _checkout(repo, tree, commit):
     _borrow_node_modules(repo, tree)
 
 
-def _judge(previous, previous_suite, known, subject, claimed, tier, run, full, changed):
+def _judge(previous, previous_suite, known, subject, claimed, tier, runs, changed):
     """Why this commit breaks the protocol, judged from its real runs and the tests before it.
 
-    `run` comes from the tier the commit claims (`tier`), `full` and `known` from the full suite."""
+    `runs` and `known` hold the fast and full runs of this commit and the one before; the
+    protocol is checked on the run of the tier the commit claims (`tier`)."""
     phase = protocol.phase_of(subject)
+    run, full = runs.get(tier, runs["full"]), runs["full"]
     if phase not in protocol.PHASES:
         found = [f"not a TDD phase commit: {subject!r}"]
     else:
@@ -107,8 +109,8 @@ def _judge(previous, previous_suite, known, subject, claimed, tier, run, full, c
         if claimed != str(run.exit_code):
             found.append(f"the trailer says exit code {claimed or 'nothing'}, "
                          f"but the tests exit with {run.exit_code}")
-    new = full.tests - known.tests
-    removed = (known.tests - known.skipped) - (full.tests - full.skipped)  # gone, or not running
+    new = full.tests - known["full"].tests
+    removed, dropped = (_running(known[t]) - _running(runs[t]) for t in ("full", "fast"))
     if phase == "red" and len(new) != 1:
         found.append(f"red must add exactly one new test, but adds {len(new)}")
     if phase == "red" and new - run.tests:
@@ -120,6 +122,8 @@ def _judge(previous, previous_suite, known, subject, claimed, tier, run, full, c
         found.append(f"only red may add tests, but {phase} adds {len(new)}")
     if removed:
         found.append(f"{phase} removes tests: {', '.join(sorted(removed))}")
+    elif dropped:
+        found.append(f"{phase} removes tests from the fast suite: {', '.join(sorted(dropped))}")
     return found
 
 
@@ -136,7 +140,16 @@ def _trailer(cwd, key, commit):
     return _git(cwd, "log", "-1", f"--format=%(trailers:key={key},valueonly,separator=%x2C)", commit)
 
 
-def _run(tree, tier="full"):
+def _running(run):
+    """Tests that ran: gone, skipped, todo and filtered tests are not among them."""
+    return run.tests - run.skipped
+
+
+def _runs(tree):
+    return {"fast": _run(tree, "fast"), "full": _run(tree, "full")}
+
+
+def _run(tree, tier):
     """The suite's result; a commit without a test framework is an error run with exit code 2."""
     try:
         return suite.run(tree, tier)
