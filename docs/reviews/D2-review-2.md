@@ -31,4 +31,4 @@ Jede Behandlung hat einen Test, der vorher scheiterte.
 | DMR2-02 | niedrig | IBAN erbeten, nur Postadresse | offen mit DMR-09 (Kontakt in der Konfiguration) |
 | Lint | – | ungenutzter Import `StatementForQRBill` | entfernt |
 
-Daneben: Szenario «overlap-warning» im Barrierefreiheitstest wartet auf den Vorschlag des Vertragsbeginns, bevor es tippt (ein Lauf zeigte «01.01.210001.01.2020»).
+Daneben: die Szenarien der Übersicht mit überfälliger und bald fälliger Abrechnung versenden zuerst und setzen dann die Frist, wie bei einer früher versendeten Abrechnung (das Versenden setzt die Frist neu). Das Szenario «overlap-warning» im Barrierefreiheitstest wartet auf den Vorschlag des Vertragsbeginns, bevor es tippt (ein Lauf zeigte «01.01.210001.01.2020»).

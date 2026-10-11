@@ -21,8 +21,8 @@ Given(
 	'{string} hat eine versendete Abrechnung, deren Zahlungsfrist seit {int} Tagen abgelaufen ist',
 	async ({ seed }, tenant: string, days: number) => {
 		await seed.statement(tenant, 'Seeblick', lastYear);
+		await seed.sendStatement(tenant, lastYear); // sending sets the deadline; this one was sent earlier
 		await seed.paymentDeadline(tenant, lastYear, inDays(-days));
-		await seed.sendStatement(tenant, lastYear);
 	}
 );
 
@@ -30,8 +30,8 @@ Given(
 	'{string} hat eine versendete Abrechnung, deren Zahlungsfrist in {int} Tagen abläuft',
 	async ({ seed }, tenant: string, days: number) => {
 		await seed.statement(tenant, 'Seeblick', lastYear);
+		await seed.sendStatement(tenant, lastYear); // sending sets the deadline; this one was sent earlier
 		await seed.paymentDeadline(tenant, lastYear, inDays(days));
-		await seed.sendStatement(tenant, lastYear);
 	}
 );
 
