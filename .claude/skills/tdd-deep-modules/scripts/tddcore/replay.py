@@ -37,6 +37,7 @@ def replay(repo, rev_range):
         tree = Path(tmp) / "replay"
         _git(repo, "worktree", "add", "-q", "--detach", str(tree), base)
         try:
+            _borrow_node_modules(repo, tree)
             known = _run(tree).tests if has_base else frozenset()
             for commit in commits:
                 _git(tree, "checkout", "-q", "--detach", commit)
