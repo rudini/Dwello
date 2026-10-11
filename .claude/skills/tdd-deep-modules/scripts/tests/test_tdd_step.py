@@ -827,3 +827,13 @@ class TddStepTest(unittest.TestCase):
 
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(repo.trailer("TDD-Exit-Code"), "1")
+
+    def test_bun_missing_from_path_exits_2(self):
+        repo = Repo(self, BUN_FILES)
+        repo.write("TESTLIST.md", "- [ ] something\n")
+
+        result = repo.run("tdd-step", "test", "plan", path="/usr/bin:/bin")
+
+        self.assertEqual(result.returncode, 2, result.stderr)
+        self.assertIn("bun is not installed", result.stderr)
+        self.assertNotIn("Traceback", result.stderr)

@@ -51,8 +51,10 @@ class Repo:
         self.git("commit", "-q", "--allow-empty", "-m", message)
         return self.git("rev-parse", "HEAD")
 
-    def run(self, script, *args, cwd="."):
+    def run(self, script, *args, cwd=".", path=None):
         env = {**os.environ, "PYTHONDONTWRITEBYTECODE": "1"}
+        if path is not None:
+            env["PATH"] = path
         return subprocess.run([sys.executable, str(SCRIPTS / script), *args], cwd=self.path / cwd,
                               capture_output=True, text=True, env=env)
 
