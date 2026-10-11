@@ -26,8 +26,8 @@ def replay(repo, rev_range):
     verdicts = []
     with tempfile.TemporaryDirectory() as tmp:
         tree = Path(tmp) / "replay"
-        _git(repo, "worktree", "add", "-q", "--detach", str(tree), base or commits[0])
         try:
+            _git(repo, "worktree", "add", "-q", "--detach", str(tree), base or commits[0])
             _borrow_node_modules(repo, tree)
             known = _run(tree).tests if base else frozenset()
             for commit in commits:
@@ -43,7 +43,10 @@ def replay(repo, rev_range):
                                         _judge(previous, known, subject, claimed, run, changed)))
                 previous, known = phase, run.tests
         finally:
-            _git(repo, "worktree", "remove", "--force", str(tree))
+            # twice --force: an add interrupted by a signal leaves the worktree locked
+            subprocess.run(["git", "worktree", "remove", "--force", "--force", str(tree)], cwd=repo,
+                           capture_output=True)
+            subprocess.run(["git", "worktree", "prune"], cwd=repo, capture_output=True)
     if verdicts[-1].phase == "red":
         verdicts[-1].violations.append("the history ends in red: every red needs a green")
     return verdicts
