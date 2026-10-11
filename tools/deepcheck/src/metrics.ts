@@ -96,7 +96,18 @@ function paramCount(node: Node | undefined): number {
 	node = valueOf(node);
 	if (Node.isObjectLiteralExpression(node))
 		return node.getProperties().reduce((sum, p) => sum + (isFunctionMember(p) ? 1 + paramCount(shorthandFunction(p) ?? p) : 0), 0);
-	return isFunction(node) ? node.getParameters().length : 0;
+	if (!isFunction(node)) return 0;
+	// A factory `(deps) => ({ load, save })`: the methods of the object it returns are what callers use.
+	const result = returnedValue(node);
+	return node.getParameters().length + (Node.isObjectLiteralExpression(result) ? paramCount(result) : 0);
+}
+
+/** What a function returns: its expression body, or the value of a final `return` statement. */
+function returnedValue(fn: Node): Node | undefined {
+	const body = Node.isBodyable(fn) || Node.isBodied(fn) ? fn.getBody() : undefined;
+	if (!Node.isBlock(body)) return valueOf(body);
+	const last = body.getStatements().at(-1);
+	return Node.isReturnStatement(last) ? valueOf(last.getExpression()) : undefined;
 }
 
 /** The local function a shorthand member `{ load }` refers to. */
@@ -267,12 +278,22 @@ function isModuleLevelObject(node: Node | undefined): boolean {
 	return Node.isVariableDeclaration(parent) || Node.isExportAssignment(parent);
 }
 
+/** An object literal a named function returns (a factory), e.g. `const api = (fetch) => ({ load: ... })`. */
+function isFactoryResult(node: Node | undefined): boolean {
+	let parent = node?.getParent();
+	while (Node.isAsExpression(parent) || Node.isSatisfiesExpression(parent) || Node.isParenthesizedExpression(parent))
+		parent = parent.getParent();
+	const fn = Node.isReturnStatement(parent) ? parent.getFirstAncestor((a) => isFunction(a)) : isFunction(parent) ? parent : undefined;
+	return fn !== undefined && functionName(fn) !== undefined;
+}
+
 /** The name a function-like node is declared or assigned under; undefined for anonymous callbacks. */
 function functionName(node: Node): string | undefined {
 	if (Node.isFunctionDeclaration(node) || Node.isMethodDeclaration(node)) return node.getName();
 	const parent = node.getParent();
 	if (Node.isVariableDeclaration(parent) || Node.isPropertyDeclaration(parent)) return parent.getName();
-	if (Node.isPropertyAssignment(parent) && isModuleLevelObject(parent.getParent())) return parent.getName();
+	if (Node.isPropertyAssignment(parent) && (isModuleLevelObject(parent.getParent()) || isFactoryResult(parent.getParent())))
+		return parent.getName();
 	return undefined;
 }
 
@@ -291,10 +312,30 @@ function soleExpression(body: Node | undefined): Node | undefined {
 	return undefined;
 }
 
-function argumentMatchesParameter(arg: Node, param: string): boolean {
-	const target = Node.isSpreadElement(arg) ? arg.getExpression() : arg;
-	return Node.isIdentifier(target) && target.getText() === param;
+/** Names a parameter binds: the identifier, or each name of a destructuring pattern. */
+function boundNames(param: Node): string[] {
+	const name = Node.isParameterDeclaration(param) ? param.getNameNode() : undefined;
+	if (!name) return [];
+	return Node.isIdentifier(name) ? [name.getText()] : name.getDescendantsOfKind(SyntaxKind.BindingElement).map((b) => b.getNameNode().getText());
 }
+
+const FIXED_KINDS = new Set([
+	SyntaxKind.StringLiteral,
+	SyntaxKind.NumericLiteral,
+	SyntaxKind.NoSubstitutionTemplateLiteral,
+	SyntaxKind.TrueKeyword,
+	SyntaxKind.FalseKeyword,
+	SyntaxKind.NullKeyword
+]);
+
+/** A parameter passed on unchanged (also spread), or null for any other argument. */
+function forwardedParameter(arg: Node, params: Set<string>): string | null {
+	const target = Node.isSpreadElement(arg) ? arg.getExpression() : arg;
+	return Node.isIdentifier(target) && params.has(target.getText()) ? target.getText() : null;
+}
+
+/** A value fixed by the forwarder rather than computed: a literal, or a constant or closure variable. */
+const isFixedValue = (arg: Node) => FIXED_KINDS.has(arg.getKind()) || Node.isIdentifier(arg);
 
 /** The call a function body consists of, if that is all it does. */
 function soleCall(node: Node) {
@@ -303,16 +344,70 @@ function soleCall(node: Node) {
 	return Node.isCallExpression(call) ? call : undefined;
 }
 
-/** A function that only forwards all its parameters, in order, to another call. */
+/**
+ * A function whose body is one call that receives all its parameters unchanged (also destructured ones), plus at
+ * most fixed values: literals, constants or closure variables (Phase 4 review: a forwarder that adds a constant
+ * argument or fixes a parameter from a closure is still a pass-through).
+ */
 function isPassThrough(node: Node, name: string): boolean {
-	const params = isFunction(node) ? node.getParameters() : [];
+	const params = new Set((isFunction(node) ? node.getParameters() : []).flatMap(boundNames));
 	const call = soleCall(node);
-	if (!call || params.length === 0) return false;
-	const args = call.getArguments();
+	if (!call || params.size === 0) return false;
 	const callee = call.getExpression().getText();
-	const forwardsAll =
-		args.length === params.length && args.every((arg, i) => argumentMatchesParameter(arg, params[i].getNameNode().getText()));
-	return forwardsAll && callee !== name && callee !== `this.${name}`;
+	if (callee === name || callee === `this.${name}` || isHiddenHelper(node.getSourceFile(), callee)) return false;
+	return forwardsAll(call.getArguments(), params);
+}
+
+/** Every parameter is passed on unchanged, and every other argument is a fixed value. */
+function forwardsAll(args: Node[], params: Set<string>): boolean {
+	const forwarded = new Set<string>();
+	for (const arg of args) {
+		const param = forwardedParameter(arg, params);
+		if (param) forwarded.add(param);
+		else if (!isFixedValue(arg)) return false;
+	}
+	return forwarded.size === params.size;
+}
+
+/**
+ * A non-exported function of the same module that does its own work: forwarding to it is an entry point into the
+ * module's hidden implementation (e.g. typed guards over one private check), not a layer that passes work on
+ * (Phase 4, ky). A helper that only makes a call itself (`call(fn, ...args)`) hides nothing.
+ */
+function isHiddenHelper(sf: SourceFile, callee: string): boolean {
+	const fn = sf.getFunction(callee);
+	if (fn) return !hasExportKeyword(fn) && !soleCall(fn);
+	const variable = sf.getVariableStatements().find((s) => s.getDeclarations().some((d) => d.getName() === callee));
+	const value = valueOf(variable?.getDeclarations().find((d) => d.getName() === callee));
+	return variable !== undefined && !hasExportKeyword(variable) && isFunction(value) && !soleCall(value);
+}
+
+/**
+ * Imported names and local functions a module could re-export under another name. Imports are not resolved, so
+ * an imported name counts as a function only when it is camelCase: `LIMIT` (a constant) and `Client` (a class)
+ * renamed are not forwarding layers.
+ */
+function functionLikeNames(sf: SourceFile): Set<string> {
+	const imported = sf.getImportDeclarations().flatMap((d) => [
+		...d.getNamedImports().map((n) => n.getAliasNode()?.getText() ?? n.getName()),
+		...(d.getDefaultImport() ? [d.getDefaultImport()!.getText()] : [])
+	]);
+	const camelCase = (name: string) => /^[a-z]/.test(name) && name !== name.toUpperCase();
+	return new Set([...imported.filter(camelCase), ...sf.getFunctions().flatMap((f) => (f.getName() ? [f.getName()!] : []))]);
+}
+
+/** Exported constants that are only another name for an imported or local function: `export const load = get`. */
+function aliases(sf: SourceFile): Location[] {
+	const candidates = functionLikeNames(sf);
+	return sf
+		.getVariableStatements()
+		.filter(hasExportKeyword)
+		.flatMap((s) => s.getDeclarations())
+		.filter((d) => {
+			const init = d.getInitializer();
+			return Node.isIdentifier(init) && candidates.has(init.getText());
+		})
+		.map((d) => ({ name: d.getName(), line: d.getStartLineNumber() }));
 }
 
 function namedFunctions(sf: SourceFile): { node: Node; name: string }[] {
@@ -457,15 +552,17 @@ export function fileMetrics(sf: SourceFile): FileMetrics {
 	const statements = sf.getStatements();
 	const classes = classReports(sf);
 	const functions = namedFunctions(sf);
+	const aliased = aliases(sf);
 	return {
 		interfaceSize: statements.reduce((sum, s) => sum + exportedStatementSize(sf, s), 0),
 		exportCount: exportedNames(sf).size,
 		implementationSize: implementationSize(sf),
 		operations: operations(sf),
-		passThroughs: functions
-			.filter((f) => isPassThrough(f.node, f.name))
-			.map((f) => ({ name: f.name, line: f.node.getStartLineNumber() })),
-		functionCount: functions.length,
+		passThroughs: [
+			...functions.filter((f) => isPassThrough(f.node, f.name)).map((f) => ({ name: f.name, line: f.node.getStartLineNumber() })),
+			...aliased
+		].sort((a, b) => a.line - b.line),
+		functionCount: functions.length + aliased.length,
 		leakyExports: leakyExports(sf),
 		dataOnlyClasses: classes.filter((c) => c.dataOnly).map((c) => c.name),
 		classes,

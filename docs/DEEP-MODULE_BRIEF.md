@@ -459,3 +459,29 @@ At the user's request a **draft** PR was opened so CI could run on GitHub: rudin
   - CI run 38122729245: job "Deep modules", step "Deep-module gate" failed, with the error annotation "deepcheck G1 new shallow module (score 80)" on `zz-deepcheck-ci-probe.ts:1` and the fixes as message.
   - The Fallow audit failed too (unused file), as expected.
   - The probe was removed in the next commit; that run is recorded below.
+
+### 2026-10-11, follow-up on request: pass-through variants that evaded the gate
+
+The user asked to close the evasions found by the third independent check.
+
+- **Regression tests first** (`test/variants.test.ts`, red on 4 cases): a forwarder with a constant extra argument, closure-fixed parameters in a factory, a destructured parameter object, and plain aliases.
+- **Implementation:**
+  - A pass-through now forwards every parameter unchanged (destructured names included) plus at most literals, constants or closure variables.
+  - Members of objects a named factory returns are named functions, and the factory's returned methods count as interface.
+  - Exported aliases of imported or local functions are pass-throughs.
+- **New false positive, fixed:** the widening flagged ky `source/utils/type-guards.ts` (exported guards calling the module's private `isErrorType`). Regression test first (red), then fixed: forwarding to a non-exported function of the same module is not a pass-through.
+- **Negative tests stay unflagged:**
+  - argument-transforming calls and callbacks;
+  - a utility module with default-adding helpers beside real logic;
+  - the realistic new-module check.
+- **Independent review (one round), findings and outcome:**
+  - High: imported constants and classes renamed (`export const MAX = LIMIT`) counted as aliases. Fixed test-first: only camelCase imports and local functions count.
+  - High: a factory with a block body or a function declaration evaded (members detected, interface not counted, score 36). Fixed test-first: the object a final `return` gives counts.
+  - Medium: a generic private `call(fn, ...args)` helper exempted every forwarder (score 61). Fixed test-first: only a private helper that does its own work exempts.
+  - Low, accepted: a single thin standard-library wrapper is flagged (it was before, without the constant); untested false negatives (object-literal constants, `-1`, nested destructuring, namespace aliases, `bind`) left as they are.
+  - Docs: argument order is ignored; now stated in the README.
+- **Checks after the change:**
+  - 177 deepcheck tests pass; ESLint, tsc and `fallow audit` clean.
+  - Repo: 0 flagged, precision@25 12/25 and AUC 0.827, unchanged.
+  - ky, zustand, immer: 0 flagged.
+- **Remaining evasion:** splitting into small non-forwarding files (documented).

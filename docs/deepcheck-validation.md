@@ -57,12 +57,19 @@ All of these are now fixed, each with a regression test seen failing first. The 
 - **Found and fixed (regression tests first):**
   - A directory of five or more one-constant files (one translation table per language, one icon per file) was flagged at 70 through classitis. Only files whose single export is a function or class now count as tiny pieces.
   - `export type P = typeof deadFn` kept dead padding alive. Uses in type positions no longer count.
-- **Known evasions, documented, not fixed:**
-  - a forwarder with one constant extra argument (65, not flagged);
-  - a parameter fixed through a closure, a destructured parameter object, or a factory returning forwarders (53–57);
-  - plain aliases (`export const load = getTenant`), which are not eligible.
+- **Evasions, fixed afterwards on request (regression tests first, `test/variants.test.ts`).** All are now detected as pass-throughs and the facades are flagged:
+  - a forwarder with a constant extra argument;
+  - a parameter fixed through a closure, and a factory returning forwarders (the factory's returned methods now count as interface);
+  - a destructured parameter object;
+  - plain aliases (`export const load = getTenant`).
 
-  The gate's narrow class is therefore narrower than "all thin facades".
+  This widening first produced a false positive on ky's `type-guards.ts` (exported guards that call the module's own private `isErrorType`, score 65). It was fixed test-first: a call to a non-exported function of the same module is not a pass-through.
+
+  An independent review of the change found three more holes, each fixed test-first: renamed imported constants and classes counted as aliases (false positive); a factory with a block body or a function declaration did not count its returned methods as interface (evasion); a generic private `call(fn, ...args)` helper exempted every forwarder (evasion). Accepted: a module holding only one thin standard-library wrapper (`(s) => Number.parseInt(s, 10)`) is flagged, as the same wrapper without the constant already was.
+
+  After the change, nothing is flagged in this repo, in ky, zustand or immer; precision@25 and AUC are unchanged (12/25, 0.827).
+- **Remaining evasion:** splitting a module into files that are each below the minimum interface size and not forwarders.
+
 - **The reviewer's call:** "usable as scan only" until the classitis false positive was fixed, then "ready to gate (narrow) is defensible". It is fixed.
 - A typed EventEmitter wrapper is flagged at 73, which the reviewer called debatable. Typed emit/on/off forwarders are thin wrappers whose value is the type, so `// deepcheck-ignore-file -- reason` is the intended way out.
 
