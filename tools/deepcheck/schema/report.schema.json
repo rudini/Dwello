@@ -1,0 +1,120 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "deepcheck.report.schema.json",
+	"title": "deepcheck JSON report (--format json); TypeScript types in tools/deepcheck/src/types.ts",
+	"type": "object",
+	"additionalProperties": false,
+	"required": ["schemaVersion", "tool", "command", "scope", "failThreshold", "summary", "findings", "suppressionFindings", "warnings"],
+	"properties": {
+		"schemaVersion": { "type": "number", "enum": [1] },
+		"tool": { "type": "string", "enum": ["deepcheck"] },
+		"command": { "type": "string", "enum": ["scan", "check"] },
+		"scope": { "type": "string", "enum": ["all", "changed"] },
+		"path": { "type": ["string", "null"] },
+		"base": { "type": ["string", "null"], "description": "check: the ref the changed set is computed against" },
+		"failThreshold": { "type": "number" },
+		"tolerance": { "type": "number" },
+		"minScore": { "type": ["number", "null"] },
+		"passed": { "type": "boolean", "description": "check: false when a gate failed" },
+		"summary": {
+			"type": "object",
+			"properties": {
+				"analyzed": { "type": "number" },
+				"shallow": { "type": "number" },
+				"shown": { "type": "number" },
+				"excluded": { "type": "number" },
+				"invalidSuppressions": { "type": "number" },
+				"changed": { "type": "number" },
+				"failed": { "type": "number" }
+			}
+		},
+		"findings": { "type": "array", "items": { "$ref": "#/$defs/module" } },
+		"groups": {
+			"type": "array",
+			"items": {
+				"type": "object",
+				"required": ["key", "count", "maxScore"],
+				"properties": { "key": { "type": "string" }, "count": { "type": "number" }, "maxScore": { "type": "number" } }
+			}
+		},
+		"suppressionFindings": {
+			"type": "array",
+			"items": {
+				"type": "object",
+				"required": ["path", "line", "message"],
+				"properties": { "path": { "type": "string" }, "line": { "type": "number" }, "message": { "type": "string" } }
+			}
+		},
+		"warnings": { "type": "array", "items": { "type": "string" } }
+	},
+	"$defs": {
+		"location": {
+			"type": "object",
+			"required": ["name", "line"],
+			"properties": { "name": { "type": "string" }, "line": { "type": "number" }, "type": { "type": "string" } }
+		},
+		"module": {
+			"type": "object",
+			"additionalProperties": false,
+			"required": ["path", "score", "eligible", "flagged", "metrics", "classes", "components", "reasons"],
+			"properties": {
+				"path": { "type": "string" },
+				"score": { "type": "number", "minimum": 0, "maximum": 100 },
+				"eligible": { "type": "boolean" },
+				"flagged": { "type": "boolean" },
+				"gate": { "type": "string", "enum": ["G1", "G2", "G4"], "description": "check: the gate this module fails" },
+				"baselineScore": { "type": ["number", "null"], "description": "check: score recorded in the baseline" },
+				"newFile": { "type": "boolean", "description": "check: the file did not exist at the base" },
+				"metrics": {
+					"type": "object",
+					"required": ["interfaceSize", "implementationSize", "operations", "depthRatio", "passThroughs", "leakyExports", "classitis", "dataOnlyClasses", "fanIn", "fanOut", "complexity", "complexitySource", "unusedExports"],
+					"properties": {
+						"interfaceSize": { "type": "number" },
+						"implementationSize": { "type": "number" },
+						"operations": { "type": "number" },
+						"depthRatio": { "type": "number" },
+						"passThroughs": { "type": "array", "items": { "$ref": "#/$defs/location" } },
+						"leakyExports": { "type": "array", "items": { "$ref": "#/$defs/location" } },
+						"classitis": { "type": "boolean" },
+						"dataOnlyClasses": { "type": "array", "items": { "type": "string" } },
+						"fanIn": { "type": "number" },
+						"fanOut": { "type": "number" },
+						"complexity": { "type": "number" },
+						"complexitySource": { "type": "string", "enum": ["fallow", "own"] },
+						"unusedExports": { "type": ["number", "null"] }
+					}
+				},
+				"classes": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"required": ["name", "line", "interfaceSize", "implementationSize", "depthRatio", "dataOnly"],
+						"properties": {
+							"name": { "type": "string" },
+							"line": { "type": "number" },
+							"interfaceSize": { "type": "number" },
+							"implementationSize": { "type": "number" },
+						"operations": { "type": "number" },
+							"depthRatio": { "type": "number" },
+							"dataOnly": { "type": "boolean" }
+						}
+					}
+				},
+				"components": {
+					"type": "object",
+					"description": "Score components, 0 (deep) to 1 (shallow), before weighting",
+					"properties": {
+						"depth": { "type": "number" },
+						"complexity": { "type": "number" },
+						"passThrough": { "type": "number" },
+						"leaky": { "type": "number" },
+						"classitis": { "type": "number" },
+						"coupling": { "type": "number" },
+						"unusedExports": { "type": "number" }
+					}
+				},
+				"reasons": { "type": "array", "items": { "type": "string" } }
+			}
+		}
+	}
+}

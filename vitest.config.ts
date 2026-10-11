@@ -16,7 +16,11 @@ export default defineConfig({
 				extends: true,
 				test: {
 					name: 'server',
-					include: ['src/**/*.{test,spec}.{js,ts}', 'tests/unit/**/*.{test,spec}.{js,ts}'],
+					include: [
+						'src/**/*.{test,spec}.{js,ts}',
+						'tests/unit/**/*.{test,spec}.{js,ts}',
+						'tools/**/*.test.ts'
+					],
 					exclude: ['src/**/*.dom.test.ts'],
 					environment: 'node'
 				}

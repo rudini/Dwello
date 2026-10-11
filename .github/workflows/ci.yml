@@ -178,6 +178,25 @@ jobs:
         # Pull requests: changes against the target branch; pushes: changes of the pushed commits
         run: bunx fallow audit --base "${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || github.event.before }}"
 
+  # New or worsened shallow modules in the changed code (tools/deepcheck), with annotations and a step summary
+  deepcheck:
+    name: Deep modules
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      # $lib comes from .svelte-kit/tsconfig.json; without it the import graph misses most imports
+      - run: bunx svelte-kit sync
+      - name: Deep-module gate
+        run: bun run deepcheck:ci -- "origin/${{ github.base_ref }}"
+
   ui-screenshots:
     name: UI screenshots
     # Screenshots of every page a pull request changes, posted as a comment on the pull request

@@ -4410,7 +4410,8 @@ Brief: `docs/design/REDESIGN_BRIEF.md`; log and decisions: `docs/design/progress
 - [x] **Bun as the only package manager:** the frontend installs with Bun (`bun.lock` migrated from
   `package-lock.json`, same versions) and keeps Node as its runtime; stale `backend/package-lock.json` removed
   (`.github/workflows/ci.yml`, `Dockerfile`, `playwright.config.ts`, `playwright.screenshots.config.ts`, README, CLAUDE.md
-  and docs with `bun run`/`bunx`)
+  and docs with `bun run`/`bunx`); after merging `main`, `tools/deepcheck` too (CI job "Deep modules",
+  `deepcheck-scan.yml`, its README and workflow tests, `deepcheck-gate.sh` notice)
 - [x] **Backend image builds and reports health:** uses the image's `bun` user instead of `addgroup` (missing on
   Debian), health check through `bun` instead of `wget` (missing in the slim image); README and tech stack require
   Bun >= 1.4 (`backend/Dockerfile`, `docker-compose.prod.yml`, `README.md`, `docs/tech-stack.md`)
