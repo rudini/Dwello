@@ -17,10 +17,14 @@ class Depth:
     classitis: tuple  # names of tiny classes, when the module has two or more of them
     pass_through: tuple  # names of functions that only forward their arguments
     tests: tuple  # test files that import the module
+    unused: tuple  # names of private functions nothing in the module calls
+    duplicate: int  # extra copies of repeated code lines
     findings: tuple
 
 
 SHALLOW_RATIO = 4  # fewer code lines per thing a caller must know means the module hides little
+BLOAT_DUPLICATES = 3  # repeated lines that make a module bloated
+DUPLICATE_LENGTH = 12  # shorter lines (`}`, `return x;`) repeat naturally
 TINY_CLASS = 2  # methods; two or more classes this small spread one decision over many places
 
 
@@ -30,6 +34,7 @@ def measure(root, path):
     ratio = size / surface if surface else float(size)
     pass_through = _pass_through(text)
     tests = _tests(Path(root) / path)
+    unused, duplicate = _unused(text), _duplicate(text)
     tiny = [name for name, methods in _classes(text) if len(methods) <= TINY_CLASS]
     classitis = tuple(tiny) if len(tiny) >= 2 else ()
     findings = []
@@ -41,7 +46,12 @@ def measure(root, path):
         findings.append(f"pass-through: {', '.join(pass_through)}")
     if not tests:
         findings.append("untested: no test file imports it")
-    return Depth(path, surface, size, ratio, classitis, pass_through, tests, tuple(findings))
+    bloat = ([f"unused {', '.join(unused)}"] if unused else []) + \
+        ([f"{duplicate} duplicated lines"] if duplicate >= BLOAT_DUPLICATES else [])
+    if bloat:
+        findings.append(f"bloat: {'; '.join(bloat)}")
+    return Depth(path, surface, size, ratio, classitis, pass_through, tests, unused, duplicate,
+                 tuple(findings))
 
 
 def _size(text):
@@ -117,3 +127,18 @@ def _tests(module):
         if any(Path(os.path.normpath(test.parent / spec)).with_suffix("") == target for spec in specs):
             found.append(rel)
     return tuple(found)
+
+
+def _unused(text):
+    """Top-level functions that are not exported and whose name appears nowhere else in the module."""
+    declared = re.findall(r"^(?:async\s+)?function\*?\s*(\w+)|^(?:const|let)\s+(\w+)\s*=\s*(?:async\s*)?\(",
+                          text, re.MULTILINE)
+    names = [a or b for a, b in declared]
+    return tuple(n for n in names if len(re.findall(rf"\b{re.escape(n)}\b", text)) == 1)
+
+
+def _duplicate(text):
+    """Extra copies of code lines (DUPLICATE_LENGTH characters or longer) that occur more than once."""
+    lines = [line.strip() for line in text.splitlines()]
+    long = [line for line in lines if len(line) >= DUPLICATE_LENGTH and not line.startswith("//")]
+    return len(long) - len(set(long))
