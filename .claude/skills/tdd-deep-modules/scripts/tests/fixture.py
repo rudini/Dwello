@@ -86,3 +86,8 @@ def vitest_repo(case):
     repo = Repo(case, VITEST_FILES)
     (repo.path / "node_modules").symlink_to(node_modules)
     return repo
+
+BUN_FILES = {"backend/package.json": '{"scripts": {"test": "bun test"}}\n',
+             "backend/calc.ts": "export const add = (a: number, b: number) => a + b;\n",
+             "backend/calc.test.ts": 'import { test, expect } from "bun:test";\nimport { add } from "./calc";\n\n'
+                                     'test("adds", () => {\n  expect(add(1, 2)).toBe(3);\n});\n'}

@@ -4,7 +4,7 @@ import sys
 import tempfile
 import unittest
 
-from tests.fixture import ADD_TEST, RIGHT_ADD_JS, SCRIPTS, PYTEST_MARKERS, PYTEST_TEST, RIGHT_ADD, VITEST_TEST, WRONG_ADD, Repo, vitest_repo
+from tests.fixture import ADD_TEST, BUN_FILES, RIGHT_ADD_JS, SCRIPTS, PYTEST_MARKERS, PYTEST_TEST, RIGHT_ADD, VITEST_TEST, WRONG_ADD, Repo, vitest_repo
 
 
 class TddStepTest(unittest.TestCase):
@@ -705,3 +705,10 @@ class TddStepTest(unittest.TestCase):
                 result = repo.run("tdd-step", "red", "adds two numbers")
 
                 self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_a_nested_bun_package_is_part_of_the_suite(self):
+        repo = Repo(self, {"calc.py": RIGHT_ADD, "test_calc.py": PYTEST_TEST, **BUN_FILES})
+        repo.commit_all("green: seed", {})
+        repo.write("backend/calc.ts", "export const add = (a: number, b: number) => a - b;\n")
+
+        self.assert_refused(repo, "refactor", "refactor needs all tests passing", head="green: seed")
