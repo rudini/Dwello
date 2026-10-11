@@ -90,3 +90,8 @@ class TddReplayTest(unittest.TestCase):
         repo, base = good_history(self)
         repo.commit_all("tweak add", {"calc.ts": ROUNDING_ADD_TS.replace("a + b", "b + a")})
         self.assert_rejected(repo, base, "not a TDD phase commit: 'tweak add'")
+
+    def test_a_refactor_that_removes_tests_is_rejected(self):
+        repo, base = good_history(self)
+        repo.commit_phase("refactor", {"calc.test.ts": BUN_TEST}, 0)
+        self.assert_rejected(repo, base, "refactor removes tests: calc.test.ts::::adds decimals")
