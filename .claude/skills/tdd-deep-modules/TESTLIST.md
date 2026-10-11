@@ -129,3 +129,12 @@ Rule: a production file may be edited only when the next commit may contain prod
 - [x] MultiEdit is covered; tools without a file_path (Bash, NotebookEdit: notebooks are never production) pass
 - [x] files outside a git repository pass; malformed input is a non-blocking error (exit 1), never a block
 - [x] SKILL.md registers the hook in its `hooks:` frontmatter (PreToolUse, matcher for the edit tools, command path into the skill)
+
+## Stage 1 check: `scripts/verify_stage1 [skill-dir]`
+
+Runs the skill's test suite and reads the final reviewer verdict of every step (`evidence/reviews/step-NN-round-M.md`, highest M per step, last line `VERDICT: ...`). Prints each step's final verdict, then `STAGE1: PASS` (exit 0) only if the suite passes and every step 01-03 ends in `VERDICT: PASS`; otherwise `STAGE1: FAIL` (exit 1) with the reason.
+
+- [ ] all steps passed and the suite passes -> `STAGE1: PASS`, exit 0, one verdict line per step
+- [ ] a step whose latest round failed -> `STAGE1: FAIL`
+- [ ] a missing step review -> `STAGE1: FAIL` naming the step
+- [ ] a failing test suite -> `STAGE1: FAIL`
