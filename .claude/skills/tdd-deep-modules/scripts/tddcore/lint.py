@@ -74,6 +74,7 @@ def _references(text, skill):
 
 
 def _required(body):
+    body = re.sub(r"^```.*?^```", "", body, flags=re.MULTILINE | re.DOTALL)  # code blocks hold no sections
     parts = re.split(r"^## +(.+)$", body, flags=re.MULTILINE)
     headings = [parts[i].strip() for i in range(1, len(parts), 2)]
     sections = {parts[i].strip(): parts[i + 1].lower() for i in range(1, len(parts), 2)}
