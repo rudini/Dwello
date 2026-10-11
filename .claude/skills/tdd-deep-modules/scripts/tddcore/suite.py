@@ -32,13 +32,8 @@ class Run:
 def run(root):
     """Detect every test framework under `root`, run each whole suite and classify the result."""
     runners = _node_runners(root)
-    if _uses_pytest(root):
-        runners.append(lambda: _run_pytest(root))
-    elif _has_python(root):
-        runners.append(lambda: _run_unittest(root))
     if not runners:
-        raise NoFramework("no supported test framework detected"
-                          " (looked for vitest, bun, pytest, unittest)")
+        raise NoFramework("no supported test framework detected (looked for vitest, bun test)")
     return _combine([runner() for runner in runners])
 
 
@@ -62,31 +57,8 @@ def _files(root):
     return [f for f in listed if (Path(root) / f).is_file()]  # tracked files may be deleted
 
 
-def _has_python(root):
-    return any(f.endswith(".py") for f in _files(root))
 
 
-def _run_unittest(root):
-    done = subprocess.run([sys.executable, "-m", "unittest", "discover"], cwd=root, env=_PYTHON_ENV,
-                          capture_output=True, text=True, errors="replace")
-    verdicts = [line for line in done.stderr.splitlines()
-                if line.startswith(("OK", "FAILED (", "NO TESTS RAN"))]
-    summary = verdicts[-1] if verdicts else f"exit code {done.returncode}, no unittest summary"
-    failed = re.search(r"failures=(\d+)", summary)
-    ran = re.search(r"^Ran (\d+) tests? in", done.stderr, re.MULTILINE)
-    skipped = re.search(r"skipped=(\d+)", summary)
-    return Run(done.returncode, _unittest_outcome(done.returncode, summary), summary,
-               int(failed[1]) if failed else 0,
-               (int(ran[1]) if ran else 0) - (int(skipped[1]) if skipped else 0),
-               summary == "NO TESTS RAN")
-
-
-def _unittest_outcome(exit_code, summary):
-    if exit_code == 0:
-        return "pass"
-    if summary.startswith("FAILED (failures=") and "errors=" not in summary:
-        return "fail"
-    return "error"
 
 
 _NPM_PLACEHOLDER = 'echo "Error: no test specified" && exit 1'  # what `npm init` writes
@@ -199,54 +171,5 @@ def _vitest_outcome(exit_code, data, unhandled):
     load_errors = [f for f in files if f["message"]]
     asserted = all(_is_vitest_assertion(m) for m in messages)
     if messages and not load_errors and not unhandled and asserted:
-        return "fail"
-    return "error"
-
-
-# Files that configure pytest, with the section that must appear in them ("" = any content).
-_PYTEST_CONFIG = {"pytest.ini": "", "conftest.py": "", "pyproject.toml": "[tool.pytest",
-                  "setup.cfg": "[tool:pytest]", "tox.ini": "[pytest]"}
-
-
-_PYTEST_FILE = re.compile(r"test_.*\.py|.*_test\.py")
-_PYTEST_FUNCTION = re.compile(r"^def test", re.MULTILINE)  # module level: only pytest runs it
-
-
-def _uses_pytest(root):
-    for name, section in _PYTEST_CONFIG.items():
-        config = Path(root) / name
-        if config.exists() and section in config.read_text(errors="replace"):
-            return True
-    return any(_PYTEST_FUNCTION.search((Path(root) / f).read_text(errors="replace"))
-               for f in _files(root) if _PYTEST_FILE.fullmatch(Path(f).name))
-
-
-def _run_pytest(root):
-    with tempfile.TemporaryDirectory() as tmp:
-        report = Path(tmp) / "report.xml"
-        done = subprocess.run([sys.executable, "-m", "pytest", "-q",
-                               f"--junitxml={report}"], cwd=root, env=_PYTHON_ENV,
-                              capture_output=True, text=True, errors="replace")
-        reported = report.exists()
-        cases = list(ElementTree.parse(report).iter("testcase")) if reported else []
-    output = done.stdout if reported else done.stderr.strip() or done.stdout
-    lines = output.strip().splitlines()
-    summary = lines[-1] if lines else f"exit code {done.returncode}, no output"
-    if not reported:
-        summary = f"pytest wrote no report: {summary}"
-    failed = sum(1 for case in cases for _ in case.iter("failure"))
-    ran = sum(1 for case in cases if case.find("skipped") is None)
-    outcome = _pytest_outcome(done.returncode, cases) if reported else "error"
-    return Run(done.returncode, outcome, summary, failed, ran,
-               done.returncode == 5)  # pytest's "no tests collected"
-
-
-def _pytest_outcome(exit_code, cases):
-    if exit_code == 0:
-        return "pass"
-    failures = [f.get("message", "") for case in cases for f in case.iter("failure")]
-    errors = [e for case in cases for e in case.iter("error")]
-    asserted = all(m.startswith(("assert", "AssertionError", "Failed: ")) for m in failures)
-    if exit_code == 1 and failures and not errors and asserted:
         return "fail"
     return "error"
