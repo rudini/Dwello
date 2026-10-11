@@ -71,3 +71,9 @@ class SkillMdTest(unittest.TestCase):
         for element in ("npx vitest run", "bun test", "git log -1 --format=%s", "does not apply",
                         "only for vitest"):
             self.assertIn(element, text)
+
+    def test_the_test_list_is_written_down_with_the_design(self):
+        text = dict(sections())["3. Write the behaviour test list"]
+
+        for element in ("one line per behaviour", "tdd-step test", "hidden decision", "both sketches"):
+            self.assertIn(element, text.lower())
