@@ -859,3 +859,18 @@ class TddStepTest(unittest.TestCase):
         result = repo.run("tdd-step", "red", "adds two numbers")
 
         self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_vitest_errors_that_are_not_assertions_are_refused_as_red(self):
+        bodies = {"thrown Error": '  throw new Error("boom");\n',
+                  "TypeError in a matcher": '  await expect(Promise.resolve(1)).resolves.toSatisfy(() => null.x);\n'}
+        for name, body in bodies.items():
+            with self.subTest(name):
+                repo = vitest_repo(self)
+                repo.write("calc.test.js", f'import {{ test, expect }} from "vitest";\n\ntest("adds", async () => {{\n{body}}});\n')
+                self.assert_refused(repo, "red", "red needs a failing assertion")
+
+    def test_bun_assertion_next_to_a_thrown_error_is_refused_as_red(self):
+        repo = Repo(self, BUN_FILES)
+        repo.write("backend/more.test.ts", 'import { test, expect } from "bun:test";\n\n'
+                   'test("a", () => {\n  expect(1).toBe(2);\n});\n\ntest("b", () => {\n  throw new Error("boom");\n});\n')
+        self.assert_refused(repo, "red", "red needs a failing assertion")
