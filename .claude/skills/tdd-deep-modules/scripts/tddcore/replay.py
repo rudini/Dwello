@@ -85,6 +85,8 @@ def _judge(previous, previous_suite, known, subject, claimed, tier, run, full, c
         found = [f"not a TDD phase commit: {subject!r}"]
     else:
         found = protocol.violations(previous, phase, run, changed, tier, previous_suite)
+        if tier not in ("fast", "full"):
+            found.append(f"the TDD-Suite trailer must say fast or full, but says {tier or 'nothing'}")
         if claimed != str(run.exit_code):
             found.append(f"the trailer says exit code {claimed or 'nothing'}, "
                          f"but the tests exit with {run.exit_code}")
