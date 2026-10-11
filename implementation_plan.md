@@ -4557,6 +4557,11 @@ E2E locally: all 433 scenarios of the `api` and `chromium` projects pass; `firef
 (browsers not installed), they run in CI. Independent review: no behaviour regression; fixed its findings (two commit
 subjects over 50 characters, a missing test for vacancy after a move-out, the README's description of `scan`).
 
+### Follow-up: stale open point on the sent PDF
+
+- [x] **`docs/design/offene-punkte.md`**: the PDF as sent is kept after payment (`updateStatement` discards it only on a
+  new date or payment deadline; demo data makes it before paying); the two lines saying otherwise are corrected.
+
 ---
 
 # Success Criteria
