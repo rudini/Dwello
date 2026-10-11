@@ -51,6 +51,12 @@ class SkillLintTest(unittest.TestCase):
                                  "frontmatter: description has 1100 characters (limit 1024)"),
             "angle brackets": (real.replace(description, "description: Use for <tdd>"),
                                "frontmatter: description contains angle brackets"),
+            "list description": (real.replace(description, "description: [Enforced, tdd]"),
+                                 "frontmatter: description must be text"),
+            "number description": (real.replace(description, "description: 42"),
+                                   "frontmatter: description must be text"),
+            "number name": (real.replace("name: tdd-deep-modules", "name: 123"),
+                            "frontmatter: name '123' is not kebab-case"),
             "unknown key": (real.replace("name: tdd-deep-modules\n", "name: tdd-deep-modules\ncolor: red\n"),
                             "frontmatter: unknown key 'color'"),
         }
