@@ -1,0 +1,29 @@
+// Amount helpers, one tiny piece each.
+
+export function trimText(text: string): string {
+  return text.trim();
+}
+
+export function dropCurrency(text: string): string {
+  return text.replace("CHF", "");
+}
+
+export function toNumber(text: string): number {
+  return Number(text);
+}
+
+export function parse(text: string): number {
+  return toNumber(text);
+}
+
+export class Cleaner {
+  clean(text: string): string {
+    return trimText(text);
+  }
+}
+
+export class Converter {
+  convert(text: string): number {
+    return toNumber(text);
+  }
+}

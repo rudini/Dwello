@@ -26,3 +26,11 @@ class DepthReportTest(unittest.TestCase):
         line = report_line(result, "src/amount.ts")
         self.assertTrue(line.startswith("src/amount.ts: surface 2, size 34, ratio 17.0"), line)
         self.assertTrue(line.endswith("-> deep"), line)
+
+    def test_a_shallow_module_is_a_finding(self):
+        repo = Repo(self, {"src/amount.ts": fixture("shallow")})
+
+        result = repo.run("depth_report", "src/amount.ts")
+
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertRegex(report_line(result, "src/amount.ts"), r"-> .*shallow: ratio \d+\.\d < 4")
