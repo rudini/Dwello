@@ -3,7 +3,7 @@
  */
 
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
-import { inArray } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { utilityStatements } from '../db/schema';
 import { updateStatement } from '../services/statement.service';
@@ -82,3 +82,27 @@ describe('Überfällige Abrechnung', () => {
 		);
 	});
 });
+
+// Ein Saldo von 0 (oft nach der Rundung auf 5 Rappen) ist mit dem Versenden erledigt: nichts zu zahlen, nichts
+// zurückzuerstatten; sonst würde die Abrechnung nach der Zahlungsfrist überfällig und verlangte eine Prüfung
+describe('Abrechnung mit Saldo 0', () => {
+	it('ist mit dem Versenden bezahlt', async () => {
+		const id = await idOf(
+			await sendJson('POST', '/api/v1/statements/generate', {
+				contractId: rental.contract,
+				buildingId: rental.building,
+				periodStart: '2025-01-01',
+				periodEnd: '2025-12-31'
+			})
+		);
+		await db.update(utilityStatements).set({ balance: '0.00' }).where(eq(utilityStatements.id, id));
+		try {
+			const sent = await (await sendJson('PUT', `/api/v1/statements/${id}/status`, { status: 'sent' })).json();
+			const today = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Zurich' });
+			expect(sent).toMatchObject({ status: 'paid', paidDate: today, statementDate: today });
+		} finally {
+			await db.delete(utilityStatements).where(eq(utilityStatements.id, id));
+		}
+	});
+});
+

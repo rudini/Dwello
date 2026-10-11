@@ -466,7 +466,7 @@ Users can create custom formulas using apartment variables:
 
 **Predefined Profiles:**
 
-Five flat profiles, seeded by `backend/migrations/0002_stammdaten.sql`; each distributes exactly 100%:
+Four profiles, seeded by `backend/migrations/0002_stammdaten.sql`; each distributes exactly 100%:
 
 1. **Heizung + Warmwasser** (Heating + Hot Water): standard profile for combined heating and hot water systems
 2. **Heizung Mittelland** (Heating Only, Swiss Plateau): for Bern, Zürich, Basel, etc.
@@ -500,6 +500,7 @@ Five flat profiles, seeded by `backend/migrations/0002_stammdaten.sql`; each dis
 - Global management cost percentage (0% or more; default suggestion for new statements, adjustable per building and period)
 - Automatic calculation and inclusion in statements
 - Formula: `Tenant's own utility costs (subtotal) × (Management Cost % / 100)`
+- The Saldo (costs minus Akonto) is rounded commercially to 5 Rappen; the statement shows the amount before rounding and the rounding
 - Optional: Can be disabled (set to 0%)
 
 **Configuration:**

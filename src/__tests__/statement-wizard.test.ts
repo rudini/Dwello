@@ -57,7 +57,7 @@ describe('Abrechnungen Schritt für Schritt', () => {
 			selectionErrors({ ...selection, heatingProfileId: '', managementFeePercent: -1 }, 3)
 		).toEqual({
 			heatingProfileId: 'Bitte wählen Sie ein Heizprofil.',
-			managementFeePercent: 'Bitte geben Sie einen Prozentsatz ab 0 ein, zum Beispiel 3 oder 2,5.'
+			managementFeePercent: 'Bitte geben Sie einen Prozentsatz ab 0 mit höchstens zwei Stellen nach dem Komma ein, zum Beispiel 3 oder 2,5.'
 		});
 		expect(selectionErrors({ ...selection, managementFeePercent: NaN }, 3)).toHaveProperty(
 			'managementFeePercent'

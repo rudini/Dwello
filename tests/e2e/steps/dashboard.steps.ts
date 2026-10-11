@@ -19,7 +19,9 @@ const lastYear = new Date().getFullYear() - 1;
 
 // Sent earlier, with its deadline some days from today (the overview counts days from today); sending sets the
 // deadline, so it is set afterwards
+// A statement with an amount to pay: a Saldo of 0 is settled once sent and has no open deadline
 async function sentWithDeadline(seed: TestData, tenant: string, days: number) {
+	await seed.heatingInvoice('Seeblick', '1000', lastYear);
 	await seed.statement(tenant, 'Seeblick', lastYear);
 	await seed.sendStatement(tenant, lastYear);
 	await seed.paymentDeadline(tenant, lastYear, inDays(days));

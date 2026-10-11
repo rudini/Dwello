@@ -56,23 +56,28 @@ const due: StatementPDFData = { ...refund, totalAdvancePayments: 600, balance: 1
 // Der Saldo ist auf 5 Rappen gerundet; die Zeile «Rundung» lässt die Rechnung aufgehen
 describe('Rundung des Saldos im PDF', () => {
 	it('nennt die Rundung zwischen Akonto und Saldo, bei Nachzahlung und Rückerstattung', async () => {
-		expect((await textOf(due)).flowing).toContain('Rundung auf 5 Rappen + 0.02 Nachzahlung 184.15');
-		expect((await textOf(refund)).flowing).toContain('Rundung auf 5 Rappen + 0.02 Rückerstattung 93.85');
+		// von oben nach unten lesbar: der Betrag vor der Rundung, die Rundung dieses Betrags, der Saldo
+		expect((await textOf(due)).flowing).toContain('Nachzahlung vor Rundung 184.13 Rundung auf 5 Rappen + 0.02 Nachzahlung 184.15');
+		expect((await textOf(refund)).flowing).toContain('Rückerstattung vor Rundung 93.87 Rundung auf 5 Rappen – 0.02 Rückerstattung 93.85');
+		expect((await textOf(refund)).flowing).toContain('auf 5 Rappen gerundet');
 	});
 
 	// 1000.02 − 1000.00 gibt nach der Rundung 0: der Text sagt, dass nach der Rundung nichts zu bezahlen ist
 	it('nennt bei einem Saldo von 0 nach der Rundung die Rundung statt gleich hoher Beträge', async () => {
 		const evened = { ...due, totalCosts: 1000.02, totalAdvancePayments: 1000, balance: 0 };
 		const pdf = (await textOf(evened)).flowing;
-		expect(pdf).toContain('Rundung auf 5 Rappen – 0.02');
-		expect(pdf).toContain('Nach der Rundung auf 5 Rappen müssen Sie nichts bezahlen.');
+		expect(pdf).toContain('Nachzahlung vor Rundung 0.02 Rundung auf 5 Rappen – 0.02 Ausgeglichen 0.00');
+		expect(pdf).toContain('Nach der Rundung auf 5 Rappen müssen Sie nichts bezahlen und erhalten nichts zurück.');
 		expect(pdf).not.toContain('sind gleich hoch');
+		// mit dem Versenden erledigt (bezahlt): der Text bleibt derselbe
+		expect((await textOf({ ...evened, paidDate: '2026-03-01' })).flowing).toContain('Nach der Rundung auf 5 Rappen müssen Sie nichts bezahlen und erhalten nichts zurück.');
 	});
 
 	// Die Zeile passt in allen Sprachen auf eine Zeile, sonst kann der Saldo allein auf die nächste Seite rutschen
 	it('nennt die Rundung auf Italienisch in einer Zeile mit ihrem Betrag', async () => {
 		const it = readPdf(Buffer.from(await generateStatementPDFBase64(due, config, 'it'), 'base64')).flowing;
 		expect(it).toContain('Arrotondamento + 0.02');
+		expect(it).toContain('prima dell’arrotondamento 184.13');
 	});
 
 	it('lässt die Zeile weg, wenn nichts gerundet ist', async () => {

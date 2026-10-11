@@ -60,12 +60,6 @@ const categories = new Map([
 ]);
 
 describe('Daten der Abrechnung im PDF', () => {
-	// Ältere Abrechnungen ohne gespeicherten Satz: der Anteil der Pauschale an der Zwischensumme, wie in der Webansicht gerundet
-	it('druckt den Satz älterer Abrechnungen auf zwei Stellen gerundet', () => {
-		const older = { ...statement, managementFeePercent: null } as unknown as StatementWithDetails;
-		expect(toPdfData(older, categories, 'de').managementFeePercent).toBe(3.19);
-	});
-
 	it('druckt die Postadresse des Mieters', () => {
 		expect(toPdfData(statement, categories, 'fr').tenant).toMatchObject({
 			firstName: 'Pierre',
@@ -94,12 +88,22 @@ describe('Rundung auf Rappen', () => {
 
 describe('Saldo auf 5 Rappen', () => {
 	// Kaufmännisch: ab 2.5 Rappen auf, darunter ab; Nachzahlung und Rückerstattung gleich
-	it('rundet auf 5 Rappen, auch knapp unter der Grenze als Fliesskommazahl', () => {
+	it('rundet kaufmännisch auf 5 Rappen, eine Rückerstattung wie eine Nachzahlung', () => {
 		expect(roundTo5Rappen(791.03)).toBe(791.05);
 		expect(roundTo5Rappen(791.02)).toBe(791.0);
 		expect(roundTo5Rappen(0.025)).toBe(0.05);
+		expect(roundTo5Rappen(-0.025)).toBe(-0.05);
 		expect(roundTo5Rappen(-48.97)).toBe(-48.95);
 		expect(roundTo5Rappen(-48.98)).toBe(-49.0);
+		// ein Rest unter 2.5 Rappen ist 0, nicht −0 (sonst «Rückerstattung CHF 0.00»)
+		expect(Object.is(roundTo5Rappen(-0.01), 0)).toBe(true);
+	});
+
+	// Schweizer Rappenrundung: …1, …2 → …0; …3 bis …7 → …5; …8, …9 → nächste …0
+	it('rundet jede Endziffer nach der Schweizer Rappenrundung', () => {
+		const endings = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((cent) => roundTo5Rappen(10 + cent / 100));
+		expect(endings).toEqual([10, 10, 10, 10.05, 10.05, 10.05, 10.05, 10.05, 10.1, 10.1]);
+		expect([1, 2, 3, 7, 8].map((cent) => roundTo5Rappen(-(10 + cent / 100)))).toEqual([-10, -10, -10.05, -10.05, -10.1]);
 	});
 
 	it('rundet den Saldo aus Nebenkosten und Akonto', () => {

@@ -491,7 +491,16 @@ describe('Abrechnungsdetail', () => {
 	// Der Saldo ist auf 5 Rappen gerundet; wie im PDF lässt die Zeile «Rundung» die Rechnung aufgehen
 	it('nennt die Rundung des Saldos auf 5 Rappen', () => {
 		detail({ totalCosts: 784.13, totalAdvancePayments: 600, balance: 184.15 });
-		expect(byTestId('statement-rounding')!.textContent!.replace(/\s+/g, ' ')).toContain('Rundung auf 5 Rappen + CHF 0.02');
+		expect(byTestId('statement-rounding')!.textContent!.replace(/\s+/g, ' ')).toContain(
+			'Nachzahlung vor Rundung CHF 184.13 Rundung auf 5 Rappen + CHF 0.02'
+		);
+		document.body.innerHTML = '';
+
+		// eine Rückerstattung wird von 93.87 auf 93.85 kleiner: aus ihrer Sicht − 0.02
+		detail({ totalCosts: 784.13, totalAdvancePayments: 878, balance: -93.85 });
+		expect(byTestId('statement-rounding')!.textContent!.replace(/\s+/g, ' ')).toContain(
+			'Rückerstattung vor Rundung CHF 93.87 Rundung auf 5 Rappen − CHF 0.02'
+		);
 		document.body.innerHTML = '';
 
 		detail({ totalCosts: 784.13, totalAdvancePayments: 600.03, balance: 184.1 });

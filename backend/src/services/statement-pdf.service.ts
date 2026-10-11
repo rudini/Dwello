@@ -116,12 +116,7 @@ export function toPdfData(
 		lineItems: statement.lineItems.map((item) => lineItemOf(item, statement, { categoryNames, keyNames, keyShares }, language)),
 		subtotal,
 		managementFee,
-		// Older statements have no stored rate; their fee was a percentage of the tenant's own costs
-		managementFeePercent: statement.managementFeePercent
-			? parseFloat(statement.managementFeePercent)
-			: subtotal > 0
-				? Math.round((managementFee / subtotal) * 10000) / 100
-				: 0,
+		managementFeePercent: parseFloat(statement.managementFeePercent ?? '0'), // rate chosen for the generation run
 		totalCosts: parseFloat(statement.totalCosts),
 		totalAdvancePayments: parseFloat(statement.totalAdvancePayments),
 		balance: parseFloat(statement.balance),

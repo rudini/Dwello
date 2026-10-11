@@ -440,10 +440,14 @@ export async function updateStatementStatus(
 		throw new Error(`Invalid status transition from ${existing.status} to ${status}`);
 	}
 
+	const sentToday = status === 'sent' && (await datedToday(existing.paymentDeadline));
+	// A Saldo of 0 (often after the rounding to 5 Rappen) is settled once sent: nothing to pay or to pay back
+	const settled = sentToday && parseFloat(existing.balance) === 0 && { status: 'paid', paidDate: sentToday.statementDate };
 	const updateData: Partial<NewUtilityStatement> = {
 		status,
 		...additionalData,
-		...(status === 'sent' && (await datedToday(existing.paymentDeadline)))
+		...sentToday,
+		...settled
 	};
 
 	return updateStatement(id, updateData);

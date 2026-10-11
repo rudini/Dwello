@@ -33,7 +33,7 @@ function settingErrors({ heatingProfileId, managementFeePercent }: WizardSelecti
 		...(!heatingProfileId && { heatingProfileId: 'Bitte wählen Sie ein Heizprofil.' }),
 		// a rate emptied and restored from the draft is null, not 0 %
 		...(!(Number.isFinite(managementFeePercent) && managementFeePercent >= 0) && {
-			managementFeePercent: 'Bitte geben Sie einen Prozentsatz ab 0 ein, zum Beispiel 3 oder 2,5.'
+			managementFeePercent: 'Bitte geben Sie einen Prozentsatz ab 0 mit höchstens zwei Stellen nach dem Komma ein, zum Beispiel 3 oder 2,5.'
 		})
 	};
 }

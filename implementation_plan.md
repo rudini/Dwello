@@ -4608,6 +4608,13 @@ subtotal, fee and «Ihre Nebenkosten» stay exact. A row «Rundung auf 5 Rappen�
   «gleich hoch» (de/fr/it/en); the Italian label is «Arrotondamento» so the row stays on one line; the wizard preview
   says «Ausgeglichen» for 0; help text «Saldo» names the rounding; open point and glossary proposal in
   `offene-punkte.md`; web and PDF show the same rounding; `roundTo5Rappen` keeps NaN visible.
+- [x] **Final round H** (`docs/reviews/H-final-review.md`, `H-final-fachreview.md`, persona `weber-f2.md`; no
+  critical/high; the data checker recomputed all 17 demo statements, 13 PDFs and the QR amounts without deviation):
+  the rounding reads top to bottom (amount before rounding, its rounding seen from that amount, Saldo) in PDF and
+  detail page; a Saldo of 0 is settled when sent (`statement.service.ts`) and its PDF keeps «nichts bezahlen und
+  nichts zurück»; the dead fallback rate of statements without a stored rate is gone; the rate message names the two
+  decimals; preview contract balance corrected; stale docs (`seed-daten-aenderungen.md`, `PRD-Dwello.md`,
+  `offene-punkte.md`, comments) updated; lows left with reasons in `offene-punkte.md`.
 
 ---
 

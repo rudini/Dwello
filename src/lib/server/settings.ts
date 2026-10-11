@@ -42,7 +42,7 @@ function settingsErrors(s: Settings) {
 		errors.iban = 'Bitte geben Sie eine gültige Schweizer IBAN ein';
 	}
 	if (s.managementFeePercent && Number.isNaN(parsePercent(s.managementFeePercent))) {
-		errors.managementFeePercent = 'Bitte geben Sie einen Prozentsatz ab 0 ein, zum Beispiel 3 oder 2,5.';
+		errors.managementFeePercent = 'Bitte geben Sie einen Prozentsatz ab 0 mit höchstens zwei Stellen nach dem Komma ein, zum Beispiel 3 oder 2,5.';
 	}
 	return errors;
 }
