@@ -124,8 +124,10 @@
 				</p>
 			{:else}
 				<p>
-					Seit dem Erstellen dieser Abrechnung {laterInvoices}. Berichtigen Sie die Abrechnung
-					ausserhalb von Dwello gegenüber dem Mieter.
+					Seit dem Erstellen dieser Abrechnung {laterInvoices}. Versendete Abrechnungen berichtigen
+					Sie ausserhalb von Dwello: Schicken Sie dem Mieter eine berichtigte Abrechnung mit dem Beleg.
+					Ob Sie die Kosten noch nachverlangen können, ist nicht in jedem Fall sicher: Lassen Sie sich
+					im Zweifel beraten.
 				</p>
 			{/if}
 		</Alert>

@@ -252,7 +252,9 @@ describe('Abrechnungsdetail', () => {
 	it('weist bei einer versendeten Abrechnung auf später erfasste Rechnungen hin und sagt, wie man berichtigt', () => {
 		later(1, 'sent');
 		expect(byTestId('statement-later-invoices')!.textContent!.replace(/\s+/g, ' ')).toContain(
-			'Seit dem Erstellen dieser Abrechnung wurde 1 Rechnung für die Abrechnungsperiode erfasst, sie fehlt darin. Berichtigen Sie die Abrechnung ausserhalb von Dwello gegenüber dem Mieter.'
+			'Seit dem Erstellen dieser Abrechnung wurde 1 Rechnung für die Abrechnungsperiode erfasst, sie fehlt darin. ' +
+				'Versendete Abrechnungen berichtigen Sie ausserhalb von Dwello: Schicken Sie dem Mieter eine berichtigte Abrechnung mit dem Beleg. ' +
+				'Ob Sie die Kosten noch nachverlangen können, ist nicht in jedem Fall sicher: Lassen Sie sich im Zweifel beraten.'
 		);
 	});
 

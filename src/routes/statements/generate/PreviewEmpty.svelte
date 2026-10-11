@@ -11,7 +11,8 @@
 {#if billed.length}
 	<p class="text-ink" data-testid="preview-all-billed">
 		Alle Mietverträge haben in dieser Periode schon eine Abrechnung. Um einen Entwurf neu zu
-		berechnen, löschen Sie ihn und erstellen Sie die Abrechnungen erneut.
+		berechnen, löschen Sie ihn und erstellen Sie die Abrechnungen erneut. Versendete Abrechnungen
+		lassen sich nicht neu berechnen.
 	</p>
 	<ul class="flex flex-col">
 		{#each billed as row (row.buildingId)}

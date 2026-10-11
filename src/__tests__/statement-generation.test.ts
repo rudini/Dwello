@@ -27,19 +27,19 @@ const contract = (id: string, startDate: string, endDate: string | null) => ({
 	apartmentNumber: '2.01'
 });
 
-function backend(statements: { contractId: string; periodStart: string; periodEnd: string }[] = []) {
+const contracts = [
+	contract('vorher', '2020-01-01', '2023-12-31'),
+	contract('auszug', '2020-01-01', '2024-03-31'),
+	contract('einzug', '2024-05-01', null),
+	contract('nachher', '2025-01-01', null)
+];
+
+function backend(statements: { contractId: string; periodStart: string; periodEnd: string }[] = [], inBuilding = contracts) {
 	const posts: { url: string; body: Record<string, string> }[] = [];
 	const fetch = async (url: string, init?: RequestInit) => {
 		if (url === `${API}/statements?buildingId=b1&limit=1000`) return Response.json({ data: statements });
 		if (url === `${API}/contracts?buildingId=b1&limit=1000`) {
-			return Response.json({
-				contracts: [
-					contract('vorher', '2020-01-01', '2023-12-31'),
-					contract('auszug', '2020-01-01', '2024-03-31'),
-					contract('einzug', '2024-05-01', null),
-					contract('nachher', '2025-01-01', null)
-				]
-			});
+			return Response.json({ contracts: inBuilding });
 		}
 		const body = JSON.parse(String(init?.body));
 		posts.push({ url, body });
@@ -82,6 +82,16 @@ describe('Abrechnungen erstellen', () => {
 				totalPeriodDays: 366,
 				movedOut: false
 			}
+		]);
+	});
+
+	// Abrechnung 2024 im Jahr 2026 erstellt, Auszug im März 2025: der Mieter ist schon weg, eine Akonto-Erhöhung nützt nichts
+	it('zählt einen Mieter, der bis heute ausgezogen ist, als ausgezogen', async () => {
+		const { fetch } = backend([], [contract('spaeter', '2020-01-01', '2025-03-31'), contract('bleibt', '2020-01-01', '2099-12-31')]);
+
+		expect((await previewStatements(fetch, period)).map((row) => [row.contractId, row.movedOut])).toEqual([
+			['spaeter', true],
+			['bleibt', false]
 		]);
 	});
 

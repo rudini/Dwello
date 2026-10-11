@@ -1,3 +1,4 @@
+import { localToday } from '$lib/contract-status';
 import type { InvoiceCheck } from '$lib/statement-wizard';
 
 const API = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1`;
@@ -83,7 +84,7 @@ export async function previewStatements(fetch: Fetch, request: GenerationRequest
 			balance: Number(preview.balance),
 			rentalDays: Number(preview.rentalDays),
 			totalPeriodDays: Number(preview.totalPeriodDays),
-			movedOut: !!contract.endDate && contract.endDate <= periodEnd
+			movedOut: !!contract.endDate && contract.endDate <= [periodEnd, localToday()].sort()[1] // ended by now
 		});
 	}
 	return rows;

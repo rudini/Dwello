@@ -1,5 +1,8 @@
 /** Dates typed as TT.MM.JJJJ, whatever the browser's locale; stored as YYYY-MM-DD */
 
+// 31.12.24 is 2024, 01.04.99 is 1999: up to 20 years ahead is this century
+const century = (yy: number) => (yy <= (new Date().getFullYear() % 100) + 20 ? 20 : 19);
+
 /** "31.12.2024", "1.1.2025", "31.12.24", "31122024" or pasted "2024-12-31" → "2024-12-31"; null if it is no real date */
 export function parseSwissDate(text: string): string | null {
 	const trimmed = text.trim();
@@ -12,8 +15,8 @@ export function parseSwissDate(text: string): string | null {
 			)?.slice(1);
 	if (!parts) return null;
 	const [day, month] = parts.map(Number);
-	const year = Number(parts[2].length === 2 ? `20${parts[2]}` : parts[2]); // 31.12.24 is 2024
-	if (year < 1900) return null; // Date.UTC would read 0024 as 1924
+	const year = Number(parts[2].length === 2 ? `${century(Number(parts[2]))}${parts[2]}` : parts[2]);
+	if (year < 1900 || year > 2199) return null; // Date.UTC would read 0024 as 1924; 9999 is a typing error
 	const date = new Date(Date.UTC(year, month - 1, day));
 	// Date.UTC rolls 30.02. over into March: only a date that stays the same is real
 	if (date.getUTCDate() !== day || date.getUTCMonth() !== month - 1) return null;

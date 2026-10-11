@@ -2,6 +2,7 @@
 	import Field from './Field.svelte';
 	import IconButton from './IconButton.svelte';
 	import { controlClass } from './field';
+	import { flushSync } from 'svelte';
 	import { parseSwissDate } from '$lib/swiss-date';
 	import { formatDate, formatDateLong } from '$lib/utils/format';
 
@@ -42,7 +43,8 @@
 	$effect(() => {
 		const form = frame?.closest('form');
 		const reset = () => ((text = ''), (value = ''));
-		const sent = () => (left = true);
+		// before the form data is read: a two-digit year goes out written in full
+		const sent = () => flushSync(onblur);
 		form?.addEventListener('reset', reset);
 		form?.addEventListener('submit', sent, true);
 		return () => {
@@ -51,9 +53,12 @@
 		};
 	});
 
+	// while typing, "31.12.20" is not yet a date: a two-digit year counts only when the field is left
+	const typed = (text: string) => (/\.\d{2}$/.test(text.trim()) ? '' : (parseSwissDate(text) ?? ''));
+
 	// a value set from outside (a draft, the calendar) shows in the field
 	$effect(() => {
-		if (value !== (parseSwissDate(text) ?? '')) text = toText(value);
+		if (value !== typed(text)) text = toText(value);
 	});
 
 	const invalid = $derived(!!text.trim() && !parseSwissDate(text));
@@ -66,18 +71,21 @@
 
 	function oninput(event: Event & { currentTarget: HTMLInputElement; inputType?: string }) {
 		left = false;
-		// the dots come by themselves after day and month, so the number keypad is enough
-		const typed = event.currentTarget.value.replace(/\.{2,}/g, '.'); // a dot typed after the automatic one
-		text =
-			/^\d{2}$|^\d{1,2}\.\d{2}$/.test(typed) && event.inputType !== 'deleteContentBackward'
-				? `${typed}.`
-				: typed;
-		event.currentTarget.value = text;
-		value = parseSwissDate(text) ?? '';
+		const input = event.currentTarget;
+		text = input.value;
+		// typing at the end: the dots come by themselves after day and month, so the number keypad is enough;
+		// an edit in the middle stays as it is, the cursor too
+		if (input.selectionStart === input.value.length) {
+			const at = text.replace(/\.{2,}/g, '.'); // a dot typed after the automatic one
+			text = /^\d{2}$|^\d{1,2}\.\d{2}$/.test(at) && event.inputType !== 'deleteContentBackward' ? `${at}.` : at;
+			input.value = text;
+		}
+		value = typed(text);
 	}
 
 	function onblur() {
 		left = true;
+		value = parseSwissDate(text) ?? '';
 		if (value) text = toText(value);
 	}
 </script>

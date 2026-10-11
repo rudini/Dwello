@@ -32,6 +32,59 @@ function type(text: string) {
 }
 
 describe('Datumsfeld TT.MM.JJJJ', () => {
+	// «31.12.2024» Taste für Taste: «31.12.20» war schon ein Datum (2020) und wurde angesagt und geprüft
+	it('übernimmt ein zweistelliges Jahr erst beim Verlassen, nicht beim Tippen', () => {
+		const bound = date();
+
+		type('31.12.20');
+		expect(bound.value).toBe('');
+		type('31.12.2024');
+		expect(bound.value).toBe('2024-12-31');
+
+		type('31.12.24');
+		expect(bound.value).toBe('');
+		field().dispatchEvent(new Event('blur'));
+		flushSync();
+		expect(bound.value).toBe('2024-12-31');
+		expect(field().value).toBe('31.12.2024');
+	});
+
+	// Mitten im Text bearbeitet (Monat gelöscht): der Text bleibt, wie getippt, der Cursor springt nicht ans Ende
+	it('lässt eine Bearbeitung mitten im Datum unverändert', () => {
+		date('2024-12-31');
+
+		field().value = '31..2024';
+		field().setSelectionRange(3, 3);
+		field().dispatchEvent(new Event('input', { bubbles: true }));
+		flushSync();
+
+		expect(field().value).toBe('31..2024');
+		expect(field().selectionStart).toBe(3);
+	});
+
+	// Senden per Enter, ohne das Feld zu verlassen: das Datum wird geprüft und mit vierstelligem Jahr gesendet
+	it('prüft beim Senden und sendet ein zweistelliges Jahr ausgeschrieben', () => {
+		const form = document.createElement('form');
+		document.body.append(form);
+		let sent: string | null = null;
+		show(DateInput, { id: 'paidDate', label: 'Bezahlt am', name: 'paidDate', testid: 'date-input' }, form);
+		form.addEventListener('submit', (event) => {
+			event.preventDefault();
+			sent = String(new FormData(form).get('paidDate'));
+		});
+
+		type('31.12.24');
+		form.requestSubmit();
+		expect(sent).toBe('2024-12-31');
+
+		type('30022025');
+		form.requestSubmit();
+		flushSync();
+		expect(describedBy()).toContain(
+			'Dieses Datum gibt es nicht. Bitte geben Sie es als TT.MM.JJJJ ein, zum Beispiel 31.12.2025.'
+		);
+	});
+
 	it('zeigt das Datum als TT.MM.JJJJ in einem Textfeld mit Zifferntastatur, unabhängig von der Sprache des Browsers', () => {
 		date('2024-12-31');
 

@@ -194,7 +194,7 @@ describe('Abrechnungen erstellen', () => {
 		);
 		// Zähler in den Wohnungen: meist ist das ganze Gebäude nach Verbrauch abzurechnen
 		expect(text()).toContain(
-			'Hat Ihr Gebäude Zähler für Heizung oder Warmwasser oder Heizkostenverteiler (kleine Geräte an den Heizkörpern) in den Wohnungen, müssen Sie meist nach Verbrauch abrechnen. Das kann Dwello nicht: Erstellen Sie die Abrechnungen dann ausserhalb von Dwello.'
+			'Hat Ihr Gebäude in den Wohnungen Wärme- oder Warmwasserzähler oder Heizkostenverteiler (kleine Geräte an den Heizkörpern), müssen Sie meist nach Verbrauch abrechnen. Das kann Dwello nicht: Erstellen Sie die Abrechnungen dann ausserhalb von Dwello.'
 		);
 		expect(text()).toContain(
 			'Verlangen Sie eine Verwaltungspauschale nur, wenn sie im Mietvertrag vereinbart ist.'
@@ -353,7 +353,7 @@ describe('Abrechnungen erstellen', () => {
 
 		const empty = byTestId('preview-empty')!.parentElement!.textContent!.replace(/\s+/g, ' ');
 		expect(empty).toContain(
-			'Alle Mietverträge haben in dieser Periode schon eine Abrechnung. Um einen Entwurf neu zu berechnen, löschen Sie ihn und erstellen Sie die Abrechnungen erneut.'
+			'Alle Mietverträge haben in dieser Periode schon eine Abrechnung. Um einen Entwurf neu zu berechnen, löschen Sie ihn und erstellen Sie die Abrechnungen erneut. Versendete Abrechnungen lassen sich nicht neu berechnen.'
 		);
 		expect(document.querySelector('a[href="/statements?building=b1"]')).not.toBeNull();
 	});

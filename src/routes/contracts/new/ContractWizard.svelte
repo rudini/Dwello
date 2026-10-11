@@ -156,6 +156,7 @@
 		restored = null;
 		savedAt = null;
 		touched = false;
+		startEdited = false;
 		errors = {};
 		goTo(1);
 	}

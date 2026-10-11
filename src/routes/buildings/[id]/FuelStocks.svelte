@@ -34,9 +34,9 @@
 	<p class="text-ink-muted">
 		Nur für Gebäude, die mit Öl, Flüssiggas, Pellets oder Holz heizen. Abgerechnet wird, was
 		verbraucht wurde: Anfangsbestand + Einkauf − Endbestand. Erfassen Sie dafür am letzten Tag jeder
-		Abrechnungsperiode, zum Beispiel am 31.12., den Wert im Tank in Franken. Der Wert vom 31.12.2024
+		Abrechnungsperiode, zum Beispiel am 31.12., den Wert im Tank oder Lager in Franken. Der Wert vom 31.12.2024
 		ist der Endbestand 2024 und der Anfangsbestand 2025. Den Wert berechnen Sie so: Menge im Tank
-		oder Lager mal Preis pro Einheit (Liter, kg oder Ster) der letzten Lieferung. Ist mehr im Tank als die letzte Lieferung, rechnen
+		oder Lager mal Preis pro Einheit (Liter, kg oder Ster) der letzten Lieferung. Ist mehr im Tank oder Lager als die letzte Lieferung, rechnen
 		Sie den Rest zum Preis der Lieferung davor. Lesen Sie erst Anfang Januar ab, erfassen Sie den
 		Wert trotzdem per 31.12.
 	</p>

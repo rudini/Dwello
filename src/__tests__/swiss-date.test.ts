@@ -9,12 +9,13 @@ describe('Datum als TT.MM.JJJJ eingeben', () => {
 		['01012025', '2025-01-01'],
 		[' 29.02.2024 ', '2024-02-29'],
 		['31.12.24', '2024-12-31'],
+		['01.04.99', '1999-04-01'], // ein alter Mietvertrag, nicht 2099
 		['2024-12-31', '2024-12-31']
 	])('liest %s als %s', (text, iso) => {
 		expect(parseSwissDate(text)).toBe(iso);
 	});
 
-	it.each(['30.02.2025', '29.02.2025', '32.01.2025', '15.13.2025', '31/12/2024', 'morgen', '1.1.', '01.01.0024'])(
+	it.each(['30.02.2025', '29.02.2025', '32.01.2025', '15.13.2025', '31/12/2024', 'morgen', '1.1.', '01.01.0024', '31.12.9999'])(
 		'lehnt %s als Datum ab',
 		(text) => {
 			expect(parseSwissDate(text)).toBeNull();

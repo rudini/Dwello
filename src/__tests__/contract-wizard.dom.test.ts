@@ -335,6 +335,29 @@ describe('Entwurf des Mietvertrags', () => {
 		expect(localStorage.length).toBe(0);
 	});
 
+	// Nach «Entwurf verwerfen» beginnt der Assistent neu: der Vorschlag für den Vertragsbeginn kommt wieder
+	it('schlägt nach dem Verwerfen des Entwurfs den Vertragsbeginn wieder vor', async () => {
+		writeDraft(localStorage, 'contract', { tenantId: 't1' }, new Date());
+		await open();
+		await settle();
+		next();
+		await settle();
+		select('apartment-select', 'a1');
+		next();
+		await settle();
+		type('start-date-input', '01.01.2016');
+		click('draft-discard');
+		await settle();
+		select('contract-tenant-select', 't1');
+		next();
+		await settle();
+		select('apartment-select', 'a3');
+		next();
+		await settle();
+
+		expect(byTestId<HTMLInputElement>('start-date-input')!.value).toBe('01.01.2100');
+	});
+
 	it('übernimmt einen eben erfassten Mieter und bestätigt ihn', async () => {
 		location.url = new URL('http://localhost/contracts/new?tenant=t2&created=1');
 		await open();

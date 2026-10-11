@@ -255,6 +255,7 @@ describe('Tankbestand', () => {
 		]);
 
 		expect(section()).toContain('Brennstoff im Tank oder Lager');
+		expect(section()).toContain('den Wert im Tank oder Lager in Franken'); // Pellets und Holz liegen im Lager
 		expect(section()).toContain(
 			'Nur für Gebäude, die mit Öl, Flüssiggas, Pellets oder Holz heizen.'
 		);
@@ -263,7 +264,7 @@ describe('Tankbestand', () => {
 			'Menge im Tank oder Lager mal Preis pro Einheit (Liter, kg oder Ster) der letzten Lieferung'
 		);
 		expect(section()).toContain(
-			'Ist mehr im Tank als die letzte Lieferung, rechnen Sie den Rest zum Preis der Lieferung davor.'
+			'Ist mehr im Tank oder Lager als die letzte Lieferung, rechnen Sie den Rest zum Preis der Lieferung davor.'
 		);
 		expect(section()).toContain(
 			'Lesen Sie erst Anfang Januar ab, erfassen Sie den Wert trotzdem per 31.12.'
@@ -381,7 +382,7 @@ describe('Tankbestand', () => {
 		const dialog = document.querySelector('[role=dialog]')!;
 		expect(dialog.textContent).toContain('Bestand vom 31.12.2024 löschen?');
 		expect(dialog.textContent!.replace(/\s+/g, ' ')).toContain(
-			'Abrechnungen, die am Tag danach beginnen oder an diesem Tag enden, rechnen dann den Einkauf ab, nicht den Verbrauch. Bestehende Abrechnungen ändern sich nicht: Löschen Sie danach die Entwürfe dieser Periode und erstellen Sie die Abrechnungen erneut.'
+			'Abrechnungen, die am Tag danach beginnen oder an diesem Tag enden, rechnen dann den Einkauf ab, nicht den Verbrauch. Bestehende Abrechnungen ändern sich nicht: Löschen Sie danach die Entwürfe beider Perioden und erstellen Sie die Abrechnungen erneut. Versendete Abrechnungen berichtigen Sie ausserhalb von Dwello.'
 		);
 		expect(byTestId('fuel-stock-delete-confirm')!.textContent).toContain('Bestand löschen');
 	});
