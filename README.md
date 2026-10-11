@@ -117,8 +117,8 @@ Dwello is a comprehensive web application for managing residential properties in
    starts without it. A demo statement that already exists is kept; delete it in the app to have it generated anew.
 
    A schema change is a new numbered SQL file (e.g. `0003_<what>.sql`), never an edit of a migration that an
-   installation has applied. Until the first installation, `0001_schema.sql` may still be edited; rebuild local
-   databases with `bun run db:reset`. A database from before the October 2026 baseline is refused with a hint to
+   installation has applied. Until the first installation, `0001_schema.sql` and `0002_stammdaten.sql` are edited instead; rebuild local
+   databases with `bun run db:reset`. A database from before a baseline is refused with a hint to
    `bun run db:reset`.
 
 ---

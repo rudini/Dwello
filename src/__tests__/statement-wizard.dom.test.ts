@@ -17,7 +17,7 @@ async function answer(result: { type: string; data?: unknown }) {
 
 import GeneratePage from '../routes/statements/generate/+page.svelte';
 import EditStatementPage from '../routes/statements/[id]/edit/+page.svelte';
-import { byTestId, click, fakeBff, fireEvent, settle, show, submit } from './helpers/dom';
+import { allByTestId, byTestId, click, fakeBff, fireEvent, settle, show, submit } from './helpers/dom';
 import { statement } from './helpers/statement';
 import { browserStorage, writeDraft } from '$lib/wizard-draft';
 
@@ -69,7 +69,6 @@ const data = {
 			monthlyPercentages: { ...profile('', '', 8).monthlyPercentages, january: 12 }
 		}
 	],
-	distributionKeys: [{ id: 'k-area', name: 'Pro Fläche (m²)' }],
 	defaultManagementFeePercent: 3,
 	defaultHeatingProfileId: '',
 	defaultPeriod: { start: '2024-01-01', end: '2024-12-31' }
@@ -199,25 +198,45 @@ describe('Abrechnungen erstellen', () => {
 		expect(text()).toContain(
 			'Verlangen Sie eine Verwaltungspauschale nur, wenn sie im Mietvertrag vereinbart ist.'
 		);
+		// Ein Lauf rechnet alle Mietverträge eines Gebäudes: andere Sätze über die Entwürfe dieser Mietverträge
 		expect(text()).toContain(
-			'Haben Mietverträge verschiedene Sätze, erstellen Sie die Abrechnungen getrennt.'
+			'Hat ein Mietvertrag einen anderen Satz, löschen Sie danach seinen Entwurf und erstellen Sie ihn mit diesem Satz neu.'
 		);
 	});
 
-	it('berechnet die Verwaltungspauschale aus den eigenen Nebenkosten oder verteilt sie nach einem Verteilschlüssel und warnt über 3 %', async () => {
+	it('berechnet die Verwaltungspauschale aus den eigenen Nebenkosten jedes Mieters und warnt über 3 %', async () => {
 		await toSettings();
-		const key = byTestId<HTMLSelectElement>('management-fee-key-select')!;
-		expect([...key.options].map((o) => [o.value, o.textContent?.trim()])).toEqual([
-			['', 'Nach den eigenen Nebenkosten jedes Mieters'],
-			['k-area', 'Pro Fläche (m²)']
-		]);
-		fireEvent(key, 'change', 'k-area');
-		expect(
-			document.querySelector<HTMLInputElement>('input[name="managementFeeDistributionKeyId"]')!
-				.value
-		).toBe('k-area');
+		expect(text()).toContain('Prozentsatz der eigenen Nebenkosten jedes Mieters');
 		fireEvent(byTestId<HTMLInputElement>('management-fee-input')!, 'input', '4.5');
 		expect(byTestId('management-fee-hint')).not.toBeNull();
+	});
+
+	// Ein geleertes Feld ist kein Satz von 0 %: der Assistent fragt nach, statt still keine Pauschale zu verrechnen
+	it('verlangt einen Satz, wenn das Feld der Verwaltungspauschale leer ist, und nimmt ein Komma an', async () => {
+		await toSettings();
+		const fee = byTestId<HTMLInputElement>('management-fee-input')!;
+		fireEvent(fee, 'input', '');
+		await next();
+		expect(text()).toContain('Bitte geben Sie einen Prozentsatz ab 0 mit höchstens zwei Stellen nach dem Komma ein, zum Beispiel 3 oder 2,5.');
+		fireEvent(fee, 'input', '1e2');
+		await next();
+		expect(text()).toContain('Bitte geben Sie einen Prozentsatz ab 0 mit höchstens zwei Stellen nach dem Komma ein, zum Beispiel 3 oder 2,5.');
+		fireEvent(fee, 'input', '2,5');
+		expect(fee.value).toBe('2,5');
+		expect(document.querySelector<HTMLInputElement>('input[name="managementFeePercent"]')!.value).toBe('2.5');
+	});
+
+	// Vor dem Erstellen sieht man, mit welchem Heizprofil und welcher Pauschale gerechnet wurde
+	it('nennt in der Vorschau Heizprofil und Verwaltungspauschale des Laufs', () => {
+		const run = { ...data, defaultHeatingProfileId: 'hp1', defaultManagementFeePercent: 2.5 };
+		show(GeneratePage, { data: run, form: { preview, invoices } } as never);
+		expect(byTestId('preview-fee')!.textContent).toContain('2.5 % der eigenen Nebenkosten jedes Mieters');
+		expect(byTestId('preview-heating-profile')!.textContent).toContain('Gleichmässig');
+	});
+
+	it('nennt einen Saldo von 0 in der Vorschau ausgeglichen', () => {
+		open({ preview: [{ ...preview[0], balance: 0 }], invoices });
+		expect(allByTestId('preview-row')[0].textContent!.replace(/\s+/g, ' ')).toContain('Ausgeglichen CHF 0.00');
 	});
 
 	it('erklärt, warum die Kosten aller Abrechnungen kleiner sein können als die Rechnungen', () => {
@@ -744,7 +763,6 @@ describe('Zurück vom Erfassen einer Rechnung', () => {
 				periodEnd: '2024-12-31',
 				heatingProfileId: 'hp1',
 				managementFeePercent: 3,
-				managementFeeDistributionKeyId: '',
 				buildingIds: ['b1']
 			},
 			new Date()

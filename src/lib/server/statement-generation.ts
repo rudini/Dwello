@@ -18,8 +18,6 @@ export interface GenerationRequest {
 	periodEnd: string;
 	heatingProfileId: string;
 	managementFeePercent: number;
-	// Distributes the management fee to the apartments; none: equally
-	managementFeeDistributionKeyId?: string;
 }
 
 async function call(fetch: Fetch, path: string, body?: object) {
@@ -64,7 +62,6 @@ async function contractsInPeriod(
 
 export async function previewStatements(fetch: Fetch, request: GenerationRequest) {
 	const { periodStart, periodEnd, heatingProfileId, managementFeePercent } = request;
-	const managementFeeDistributionKeyId = request.managementFeeDistributionKeyId || undefined;
 	const rows = [];
 	for (const { contract } of await contractsInPeriod(fetch, request)) {
 		const preview = await call(fetch, 'statements/preview', {
@@ -72,8 +69,7 @@ export async function previewStatements(fetch: Fetch, request: GenerationRequest
 			periodStart,
 			periodEnd,
 			heatingProfileId,
-			managementFeePercent,
-			managementFeeDistributionKeyId
+			managementFeePercent
 		});
 		rows.push({
 			contractId: contract.id,
@@ -92,7 +88,6 @@ export async function previewStatements(fetch: Fetch, request: GenerationRequest
 
 export async function generateStatements(fetch: Fetch, request: GenerationRequest) {
 	const { periodStart, periodEnd, heatingProfileId, managementFeePercent } = request;
-	const managementFeeDistributionKeyId = request.managementFeeDistributionKeyId || undefined;
 	const contracts = await contractsInPeriod(fetch, request);
 	for (const { buildingId, contract } of contracts) {
 		await call(fetch, 'statements/generate', {
@@ -101,8 +96,7 @@ export async function generateStatements(fetch: Fetch, request: GenerationReques
 			periodStart,
 			periodEnd,
 			heatingProfileId,
-			managementFeePercent,
-			managementFeeDistributionKeyId
+			managementFeePercent
 		});
 	}
 	return contracts.length;

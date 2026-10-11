@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { balanceLabel } from '$lib/statement';
 	import { akontoHint, invoiceRows } from '$lib/statement-wizard';
 	import Icon from '$lib/ui/Icon.svelte';
 	import { formatCurrency } from '$lib/utils/format';
@@ -13,6 +14,8 @@
 		buildings,
 		periodLabel,
 		period,
+		heatingProfile,
+		feePercent,
 		confirmed = $bindable(),
 		errors
 	}: {
@@ -21,6 +24,8 @@
 		buildings: { id: string; name: string }[];
 		periodLabel: string;
 		period: { periodStart: string; periodEnd: string };
+		heatingProfile?: string; // what step 3 chose, to check before creating
+		feePercent: number;
 		confirmed: boolean;
 		errors: Record<string, string>;
 	} = $props();
@@ -28,9 +33,8 @@
 	const total = $derived(previewRows.reduce((sum, row) => sum + row.totalCosts, 0));
 	const rows = $derived(invoiceRows(invoices, buildings, period));
 	const billed = $derived(rows.filter((row) => row.existing > 0));
-	// Saldo > 0: the tenant pays the difference, < 0: the tenant gets it back
-	const saldo = (balance: number) =>
-		`${balance >= 0 ? 'Nachzahlung' : 'Rückerstattung'} ${formatCurrency(Math.abs(balance))}`;
+	// Saldo > 0: the tenant pays the difference, < 0: the tenant gets it back, 0: Ausgeglichen
+	const saldo = (balance: number) => `${balanceLabel(balance)} ${formatCurrency(Math.abs(balance))}`;
 </script>
 
 <dl class="grid gap-4 sm:grid-cols-3">
@@ -50,6 +54,18 @@
 		<!-- Glossary (Vermieter, Proration): the landlord bears the costs of vacancy -->
 		<dd class="text-ink-muted">
 			Den Anteil leerer Wohnungen trägt der Vermieter; er ist in diesem Betrag nicht enthalten.
+		</dd>
+	</div>
+	{#if heatingProfile}
+		<div class="flex flex-col gap-1 rounded-panel bg-sunken p-4">
+			<dt class="text-ink-muted">Heizprofil</dt>
+			<dd class="font-semibold text-ink" data-testid="preview-heating-profile">{heatingProfile}</dd>
+		</div>
+	{/if}
+	<div class="flex flex-col gap-1 rounded-panel bg-sunken p-4">
+		<dt class="text-ink-muted">Verwaltungspauschale</dt>
+		<dd class="font-semibold text-ink" data-testid="preview-fee">
+			{feePercent} % der eigenen Nebenkosten jedes Mieters
 		</dd>
 	</div>
 </dl>

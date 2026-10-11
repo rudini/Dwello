@@ -5,7 +5,7 @@
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import { eq } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { categories, distributionKeys, fuelStocks, tenants, utilityStatements } from '../db/schema';
+import { categories, fuelStocks, tenants, utilityStatements } from '../db/schema';
 import { deleteConfig, getConfig, setConfig } from '../services/config.service';
 import { createApartment, deleteApartment } from '../services/apartment.service';
 import { createFuelStock } from '../services/fuel-stock.service';
@@ -34,15 +34,13 @@ beforeAll(async () => {
 	await insertInvoice(rental.building, { categoryId: heating.id, amount: '2400.00', description: 'Heizöl 2025' });
 	await insertInvoice(rental.building);
 
-	const [perArea] = await db.select().from(distributionKeys).where(eq(distributionKeys.name, 'Per Area (m²)'));
 	const statement = await generateStatement({
 		contractId: rental.contract,
 		buildingId: rental.building,
 		periodStart: '2025-01-01',
 		periodEnd: '2025-12-31',
 		heatingProfileId: (await getHeatingProfileByName('Heating Mittelland'))!.id,
-		managementFeePercent: 3,
-		managementFeeDistributionKeyId: perArea.id
+		managementFeePercent: 3
 	});
 	statementId = statement.id;
 	await generateStatementPdf(statementId, 'de');
@@ -101,17 +99,6 @@ describe('PDF der Nebenkostenabrechnung', () => {
 		await deleteStatement(part.id);
 
 		expect(text).toContain('100.00 % der Heizkosten Ihrer Wohnung in der Abrechnungsperiode');
-	});
-
-	// Verwaltungspauschale: 3 % der Nebenkosten der Liegenschaft (2400 + 1200), verteilt nach Fläche
-	it('nennt die Grundlage der Verwaltungspauschale', () => {
-		expect(pdf.text).toContain("3 % von CHF 3'600.00");
-		expect(pdf.text).toContain('Pro Fläche (m²)');
-	});
-
-	// Eingezogen am 1. Juli: der Mieter trägt die Pauschale seiner Wohnung für 184 von 365 Tagen
-	it('nennt bei einem Teil des Jahres die Mietstage, für die die Verwaltungspauschale gilt', () => {
-		expect(pdf.flowing).toContain('für Ihre 184 von 365 Tagen');
 	});
 
 	// Einzige Wohnung des Gebäudes: Wohnungsanteil = Kosten der Liegenschaft; Hauswart nach Tagen 184 / 365
@@ -203,8 +190,8 @@ describe('Tankbestand im PDF', () => {
 	});
 });
 
-// Ohne Verteilschlüssel ist die Pauschale ein Prozentsatz der eigenen Nebenkosten
-describe('Verwaltungspauschale ohne Verteilschlüssel im PDF', () => {
+// Die Pauschale ist ein Prozentsatz der eigenen Nebenkosten
+describe('Verwaltungspauschale im PDF', () => {
 	let ownFee: ReturnType<typeof readPdf>;
 	let id: string;
 

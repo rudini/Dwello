@@ -480,25 +480,38 @@ describe('Abrechnungsdetail', () => {
 		expect(email.className.split(/\s+/)).toEqual(expect.arrayContaining(['min-w-0', 'break-all']));
 	});
 
-	// Wie im PDF: ohne Verteilschlüssel ein Anteil der eigenen Kosten, mit Schlüssel der Kosten der Liegenschaft
+	// Wie im PDF: ein Anteil der eigenen Kosten
 	it('nennt die Verwaltungspauschale mit ihrer Grundlage wie im PDF', () => {
 		detail();
 		const fee = () => byTestId('statement-management-fee')!.textContent!.replace(/\s+/g, ' ');
 		expect(fee()).toContain('3 % der Zwischensumme');
-		document.body.innerHTML = '';
-
-		detail({ managementFeeKeyed: true });
-		expect(fee()).toContain(
-			'3 % der Nebenkosten der Liegenschaft, verteilt nach dem Verteilschlüssel, Anteil dieser Wohnung für 366 Mietstage'
-		);
 		expect(text()).not.toMatch(/Verwaltungsgebühr|Verwaltungskosten/);
 	});
 
-	it('nennt eine Rückerstattung ohne Minuszeichen und ohne Zahlungsfrist für den Mieter', () => {
-		detail({ balance: -83.43 });
+	// Der Saldo ist auf 5 Rappen gerundet; wie im PDF lässt die Zeile «Rundung» die Rechnung aufgehen
+	it('nennt die Rundung des Saldos auf 5 Rappen', () => {
+		detail({ totalCosts: 784.13, totalAdvancePayments: 600, balance: 184.15 });
+		expect(byTestId('statement-rounding')!.textContent!.replace(/\s+/g, ' ')).toContain(
+			'Nachzahlung vor Rundung CHF 184.13 Rundung auf 5 Rappen + CHF 0.02'
+		);
+		document.body.innerHTML = '';
 
-		expect(byTestId('statement-balance')!.textContent).toMatch(/Rückerstattung.*CHF\s83.43/);
-		expect(text()).not.toContain('CHF-83.43');
+		// eine Rückerstattung wird von 93.87 auf 93.85 kleiner: aus ihrer Sicht − 0.02
+		detail({ totalCosts: 784.13, totalAdvancePayments: 878, balance: -93.85 });
+		expect(byTestId('statement-rounding')!.textContent!.replace(/\s+/g, ' ')).toContain(
+			'Rückerstattung vor Rundung CHF 93.87 Rundung auf 5 Rappen − CHF 0.02'
+		);
+		document.body.innerHTML = '';
+
+		detail({ totalCosts: 784.13, totalAdvancePayments: 600.03, balance: 184.1 });
+		expect(byTestId('statement-rounding')).toBeNull();
+	});
+
+	it('nennt eine Rückerstattung ohne Minuszeichen und ohne Zahlungsfrist für den Mieter', () => {
+		detail({ balance: -83.45 });
+
+		expect(byTestId('statement-balance')!.textContent).toMatch(/Rückerstattung.*CHF\s83.45/);
+		expect(text()).not.toContain('CHF-83.45');
 		expect(text()).not.toContain('Zahlungsfrist');
 		expect(byTestId('statement-payment-deadline')!.textContent).toBe('28.02.2025');
 	});
@@ -769,7 +782,7 @@ describe('Abrechnung bearbeiten', () => {
 	});
 
 	it('nennt die Frist einer Rückerstattung nicht Zahlungsfrist', () => {
-		edit({ balance: -83.43 });
+		edit({ balance: -83.45 });
 
 		expect(document.querySelector('label[for="paymentDeadline"]')!.textContent).toContain(
 			'Rückerstattung bis'

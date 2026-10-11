@@ -2,13 +2,12 @@ import type { Actor } from '../fixtures/actor';
 import type { TestData } from '../fixtures/backend';
 
 type Contract = { id: string; startDate: string; endDate: string | null; tenantName: string };
-type RunOptions = { heatingProfileId?: string; managementFeePercent?: number; managementFeeKey?: string };
+type RunOptions = { heatingProfileId?: string; managementFeePercent?: number };
 
 // API protocol driver for a generation run: the backend calculates the statement of every contract of the building
 // in the year without a statement in it, like the generation wizard does through the BFF
 async function run(seed: TestData, year: number, buildingId: string, options: RunOptions) {
 	const [periodStart, periodEnd] = [`${year}-01-01`, `${year}-12-31`];
-	const keys = (await seed.backend.get('distribution-keys?limit=100')).data as { id: string; nameDE: string }[];
 	const { contracts } = (await seed.backend.get(`contracts?buildingId=${buildingId}&limit=1000`)) as {
 		contracts: Contract[];
 	};
@@ -26,23 +25,25 @@ async function run(seed: TestData, year: number, buildingId: string, options: Ru
 			periodStart,
 			periodEnd,
 			heatingProfileId: options.heatingProfileId,
-			managementFeePercent: options.managementFeePercent,
-			managementFeeDistributionKeyId: keys.find((k) => k.nameDE === options.managementFeeKey)?.id
+			managementFeePercent: options.managementFeePercent
 		}
 	};
 }
 
-/** Preview: remembers the total costs per tenant for `previewTotals` */
+/** Preview: remembers the total costs and the Saldo per tenant for `previewTotals` and `previewBalances` */
 export const openPreviewViaApi =
 	(seed: TestData, year: number, buildingId: string, options: RunOptions = {}) =>
 	async (actor: Actor) => {
 		const { contracts, body } = await run(seed, year, buildingId, options);
 		const totals = new Map<string, number>();
+		const balances = new Map<string, number>();
 		for (const contract of contracts) {
 			const preview = await seed.backend.post('statements/preview', { ...body, contractId: contract.id });
 			totals.set(contract.tenantName, Number(preview.totalCosts));
+			balances.set(contract.tenantName, Number(preview.balance));
 		}
 		actor.remember('preview', totals);
+		actor.remember('balances', balances);
 	};
 
 /** Generation: remembers how many statements were created for `createdStatements` */
@@ -56,6 +57,7 @@ export const generateStatementsViaApi =
 	};
 
 export const previewTotals = (actor: Actor) => actor.recall<Map<string, number>>('preview');
+export const previewBalances = (actor: Actor) => actor.recall<Map<string, number>>('balances');
 export const createdStatements = (actor: Actor) => actor.recall<number>('created');
 
 // "CHF 1’250.50" → 1250.5

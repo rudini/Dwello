@@ -11,7 +11,6 @@
 		data: {
 			buildings: (Building & { apartmentCount: number })[];
 			heatingProfiles: HeatingProfile[];
-			distributionKeys: { id: string; name: string }[];
 			defaultManagementFeePercent: number;
 			defaultHeatingProfileId: string;
 			defaultPeriod: { start: string; end: string };
@@ -34,7 +33,6 @@
 		data={{
 			buildings: data.buildings,
 			heatingProfiles: data.heatingProfiles,
-			distributionKeys: data.distributionKeys,
 			defaultManagementFeePercent: data.defaultManagementFeePercent,
 			defaultHeatingProfileId: data.defaultHeatingProfileId,
 			defaultPeriod: data.defaultPeriod

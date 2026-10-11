@@ -14,7 +14,6 @@ const selection = {
 	periodEnd: '2024-12-31',
 	heatingProfileId: 'hp1',
 	managementFeePercent: 3,
-	managementFeeDistributionKeyId: '',
 	buildingIds: ['b1']
 };
 const period = { periodStart: '2024-01-01', periodEnd: '2024-12-31' };
@@ -58,11 +57,15 @@ describe('Abrechnungen Schritt für Schritt', () => {
 			selectionErrors({ ...selection, heatingProfileId: '', managementFeePercent: -1 }, 3)
 		).toEqual({
 			heatingProfileId: 'Bitte wählen Sie ein Heizprofil.',
-			managementFeePercent: 'Bitte geben Sie einen Prozentsatz ab 0 ein, zum Beispiel 3.'
+			managementFeePercent: 'Bitte geben Sie einen Prozentsatz ab 0 mit höchstens zwei Stellen nach dem Komma ein, zum Beispiel 3 oder 2,5.'
 		});
 		expect(selectionErrors({ ...selection, managementFeePercent: NaN }, 3)).toHaveProperty(
 			'managementFeePercent'
 		);
+		// ein geleertes Feld kommt aus dem gespeicherten Zwischenstand als null zurück, nicht als 0 %
+		expect(
+			selectionErrors({ ...selection, managementFeePercent: null as unknown as number }, 3)
+		).toHaveProperty('managementFeePercent');
 	});
 });
 

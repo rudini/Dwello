@@ -88,10 +88,9 @@ function example(language: Language) {
 		subtotal: 3005.65,
 		managementFee: 90.17,
 		managementFeePercent: 3,
-		managementFeeBase: 3005.65,
 		totalCosts: 3095.82,
 		totalAdvancePayments: 2880,
-		balance: 215.82
+		balance: 215.8 // 3095.82 − 2880.00, to 5 Rappen
 	};
 }
 

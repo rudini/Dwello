@@ -166,7 +166,7 @@ export const categories = pgTable('categories', {
 	nameIT: varchar('name_it', { length: 100 }),
 	nameEN: varchar('name_en', { length: 100 }),
 	isAllowedUtilityCost: boolean('is_allowed_utility_cost').notNull().default(true),
-	// Heating and hot water costs (Art. 5 VMWG): shared by the heating profile at a tenant change
+	// Heating costs (Art. 5 VMWG): shared by the heating profile at a tenant change; separate hot water by days
 	isHeatingCost: boolean('is_heating_cost').notNull().default(false),
 	...describedAndOrdered()
 });
@@ -338,12 +338,9 @@ export const utilityStatements = pgTable(
 		managementFee: decimal('management_fee', { precision: 12, scale: 2 }).default('0'),
 		// Settings of the generation run, printed in the PDF
 		heatingProfileId: uuid('heating_profile_id').references(() => heatingProfiles.id, { onDelete: 'set null' }),
-		// the Tankbestand readings the statement was created with (migration 0011)
+		// the Tankbestand readings the statement was created with
 		fuelStock: jsonb('fuel_stock').$type<{ categoryId: string; openingDate: string; opening: string; closingDate: string; closing: string }>(),
 		keyValues: jsonb('key_values').$type<KeyValues>(),
-		managementFeeDistributionKeyId: uuid('management_fee_distribution_key_id').references(() => distributionKeys.id, {
-			onDelete: 'set null'
-		}),
 		balance: decimal('balance', { precision: 12, scale: 2 }).notNull(), // positive = tenant owes, negative = refund
 		status: varchar('status', { length: 20 }).notNull().default('draft'), // draft, sent, paid; overdue is computed from the payment deadline
 		paymentDeadline: date('payment_deadline'),

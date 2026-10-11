@@ -28,7 +28,6 @@
 		data: {
 			buildings: (Building & { apartmentCount: number })[];
 			heatingProfiles: HeatingProfile[];
-			distributionKeys: { id: string; name: string }[];
 			defaultManagementFeePercent: number;
 			defaultHeatingProfileId: string;
 			defaultPeriod: { start: string; end: string };
@@ -54,7 +53,6 @@
 		periodEnd: data.defaultPeriod.end,
 		heatingProfileId: data.defaultHeatingProfileId,
 		managementFeePercent: data.defaultManagementFeePercent,
-		managementFeeDistributionKeyId: '',
 		buildingIds: []
 	});
 
@@ -194,11 +192,6 @@
 	<input type="hidden" name="periodEnd" value={selection.periodEnd} />
 	<input type="hidden" name="heatingProfileId" value={selection.heatingProfileId} />
 	<input type="hidden" name="managementFeePercent" value={selection.managementFeePercent} />
-	<input
-		type="hidden"
-		name="managementFeeDistributionKeyId"
-		value={selection.managementFeeDistributionKeyId}
-	/>
 	<input type="hidden" name="buildingIds" value={selection.buildingIds.join(',')} />
 
 	<DraftNotice savedAt={restoredAt} ondiscard={discardDraft}>

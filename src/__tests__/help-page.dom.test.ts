@@ -40,6 +40,9 @@ describe('Hilfe', () => {
 			'Mietstatus'
 		]);
 		expect(glossary?.textContent).toContain('Ist der Saldo positiv, zahlt der Mieter nach');
+		expect(glossary?.textContent).toContain('auf 5 Rappen gerundet');
+		expect(glossary?.textContent).toContain('ein Prozentsatz der eigenen Nebenkosten jedes Mieters. Üblich sind bis 3 %.');
+		expect(glossary?.textContent).not.toContain('Satz und Verteilschlüssel');
 		for (const word of ['Nachzahlung', 'Rückerstattung', 'Wiedervermietet', 'Gesperrt'])
 			expect(glossary?.textContent).toContain(word);
 	});

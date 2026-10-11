@@ -18,12 +18,6 @@ const toLineItem = (item: BackendStatement): StatementLineItem => ({
 	percentage: Math.round(Number(item.sharePercentage) * 100) / 100 || 0
 });
 
-// Before the rate was stored, the fee was a percentage of the tenant's costs before the fee
-function feePercent(totalCosts: number, fee: number) {
-	const subtotal = totalCosts - fee;
-	return subtotal > 0 ? Math.round((fee / subtotal) * 10000) / 100 : 0;
-}
-
 /** Backend statement (with tenant, apartment, building, line items) as frontend StatementWithDetails */
 export function toStatement(data: BackendStatement): StatementWithDetails {
 	const { tenant = {}, apartment = {}, building = {} } = data;
@@ -40,12 +34,7 @@ export function toStatement(data: BackendStatement): StatementWithDetails {
 		totalCosts: Number(data.totalCosts),
 		totalAdvancePayments: Number(data.totalAdvancePayments),
 		managementFee: Number(data.managementFee),
-		// Rate chosen for the generation run; statements from before it was stored derive it from fee / costs
-		managementFeePercent:
-			data.managementFeePercent != null
-				? Number(data.managementFeePercent)
-				: feePercent(Number(data.totalCosts), Number(data.managementFee)),
-		managementFeeKeyed: !!data.managementFeeDistributionKeyId,
+		managementFeePercent: Number(data.managementFeePercent ?? 0), // rate chosen for the generation run
 		balance: Number(data.balance),
 		status: data.status,
 		paymentDeadline: data.paymentDeadline,

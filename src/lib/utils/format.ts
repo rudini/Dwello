@@ -60,3 +60,7 @@ export function formatDateTime(isoTimestamp: string): string {
 		timeZone: 'Europe/Zurich'
 	});
 }
+
+/** A percentage as typed: «2,5» or «2.5», at most two decimals as stored and printed; anything else is NaN */
+export const parsePercent = (text: string) =>
+	/^\d+([.,]\d{1,2})?$/.test(text.trim()) ? Number(text.trim().replace(',', '.')) : NaN;

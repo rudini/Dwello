@@ -4557,6 +4557,67 @@ E2E locally: all 433 scenarios of the `api` and `chromium` projects pass; `firef
 (browsers not installed), they run in CI. Independent review: no behaviour regression; fixed its findings (two commit
 subjects over 50 characters, a missing test for vacancy after a move-out, the README's description of `scan`).
 
+### Follow-up: stale open point on the sent PDF
+
+- [x] **`docs/design/offene-punkte.md`**: the PDF as sent is kept after payment (`updateStatement` discards it only on a
+  new date or payment deadline; demo data makes it before paying); the two lines saying otherwise are corrected.
+
+### Follow-up: Verwaltungspauschale always of the tenant's own costs
+
+Product decision after the MV leaflet «Zulässige und unzulässige Nebenkosten» (2026): the fee is a percentage of the
+tenant's own Nebenkosten; the optional distribution key (fee of the building's costs, shared by key) is removed with its
+column. No installation exists yet, so the migrations were merged: `0001_schema.sql` (schema) and `0002_stammdaten.sql`
+(master data) replace 0001–0011; the old and the new chain give the same database apart from the removed column
+(columns, constraints, indexes and master data compared on scratch databases). Local databases: `bun run db:reset`.
+
+- [x] **Scenario** `tests/e2e/features/statement-management-fee.feature`: own costs (`@api`), no fee key in the wizard,
+  the preview names the fee, decimals typed with comma or point (each failed first for the right reason).
+- [x] **Wizard/BFF**: `SettingsStep.svelte` (select gone; help names the own costs and how to bill another rate; the fee
+  is a text field with a decimal keypad that keeps what was typed, empty is no rate; the hint above 3 % is announced),
+  `TextInput.svelte` (`inputmode`), `PreviewStep.svelte`/`StatementStep.svelte` (heating profile and fee in the preview),
+  `StatementWizard.svelte`, `+page.svelte`, `+page.server.ts`, `statement-wizard.ts`, `statement-generation.ts`;
+  help texts `help/Glossary.svelte`, `config/help.ts`.
+- [x] **Backend**: `calculation.service.ts` (`buildingFeeShare` gone), `statement.service.ts`, `routes/statements.ts`,
+  `pdf.service.ts` and `statement-pdf.service.ts` (fee always «x % der Zwischensumme»; fallback rate of statements
+  without a stored rate rounded to 2 places), `schema.ts`; migrations merged into `0001_schema.sql`/`0002_stammdaten.sql`.
+- [x] **Rate as typed** (review F round 3): `parsePercent` in `src/lib/utils/format.ts` (comma or point, at most two
+  decimals) for wizard and settings (`config/+page.svelte`, `SettingField.svelte`, `settings.ts`); an emptied rate
+  restored from the draft is refused (`statement-wizard.ts`); «Üblich sind bis 3 %» in wizard, settings and help.
+- [x] **Reviews**: code review 1 and 2 (`docs/reviews/F-review-1.md`), Fachreview (`docs/reviews/F-fachreview-1.md`),
+  personas Marco, Dr. Weber, Sven (`docs/design/personas/*-f.md`, Sven rerun `sven-f2.md`), round 3
+  (`docs/reviews/F-review-3.md`). A first migration that rewrote the rate of keyed statements was withdrawn (overflow,
+  rates that do not add up); it became moot with the merged migrations. Open product points and the low findings left:
+  `offene-punkte.md`, section «Session 12».
+- [x] **Docs**: `offene-punkte.md`, `nebenkostenabrechnung-anforderungen.md`, `data-model.md`, `api-specification.md`,
+  `PRD-Dwello.md`, `seed-daten-aenderungen.md`, `README.md`, `backend/CLAUDE.md`.
+
+
+### Follow-up: Saldo to 5 Rappen
+
+Decision of the product owner: the Saldo (Nachzahlung and Rückerstattung) is rounded commercially to 5 Rappen; positions,
+subtotal, fee and «Ihre Nebenkosten» stay exact. A row «Rundung auf 5 Rappen» between Akonto and Saldo makes it add up.
+
+- [x] **Scenario** `tests/e2e/features/statement-rounding.feature` (`@api`): 791.03 → 791.05, −48.97 → −48.95 (failed first).
+- [x] **Backend**: `roundTo5Rappen` in `pdf-format.ts` (symmetric for refunds), `calculateBalance` in `calculation.service.ts`;
+  `pdf.service.ts` prints the rounding row (de/fr/it/en) and names it in the balance box; QR amount = Saldo.
+- [x] **Frontend**: `CostTable.svelte` shows the rounding row; only a real rounding (under 5 Rappen) is shown.
+- [x] **Tests**: `statement-pdf-data.test.ts`, `statement-pdf-render.test.ts`, `statement-pages.dom.test.ts`; expected
+  balances in `statement-generation.pg.test.ts` updated; screenshot example `tests/ui-screenshots/statement-pdf.ts`.
+- [x] **Docs**: `data-model.md`, `nebenkostenabrechnung-anforderungen.md`.
+- [x] **Review G** (`docs/reviews/G-review-1.md`, no critical/high): a Saldo of 0 after rounding says so instead of
+  «gleich hoch» (de/fr/it/en); the Italian label is «Arrotondamento» so the row stays on one line; the wizard preview
+  says «Ausgeglichen» for 0; help text «Saldo» names the rounding; open point and glossary proposal in
+  `offene-punkte.md`; web and PDF show the same rounding; `roundTo5Rappen` keeps NaN visible.
+- [x] **Final round H** (`docs/reviews/H-final-review.md`, `H-final-fachreview.md`, persona `weber-f2.md`; no
+  critical/high; the data checker recomputed all 17 demo statements, 13 PDFs and the QR amounts without deviation):
+  the rounding reads top to bottom (amount before rounding, its rounding seen from that amount, Saldo) in PDF and
+  detail page; a Saldo of 0 is settled when sent (`statement.service.ts`) and its PDF keeps «nichts bezahlen und
+  nichts zurück»; the dead fallback rate of statements without a stored rate is gone; the rate message names the two
+  decimals; preview contract balance corrected; stale docs (`seed-daten-aenderungen.md`, `PRD-Dwello.md`,
+  `offene-punkte.md`, comments) updated; lows left with reasons in `offene-punkte.md`.
+- [x] **Decisions** recorded in `docs/design/design-decisions.md` («Decided during the work», Session 12): fee on own
+  costs, Saldo to 5 Rappen, Saldo 0 settled when sent, merged migrations.
+
 ---
 
 # Success Criteria

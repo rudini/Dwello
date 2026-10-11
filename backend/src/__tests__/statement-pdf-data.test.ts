@@ -4,7 +4,8 @@
 
 import { describe, expect, it } from 'bun:test';
 import type { KeyValues } from '../db/schema';
-import { formatCHF, formatSwissDate, roundToRappen } from '../services/pdf-format';
+import { formatCHF, formatSwissDate, roundTo5Rappen, roundToRappen } from '../services/pdf-format';
+import { calculateBalance } from '../services/calculation.service';
 import { formatQRReferenceForDisplay } from '../services/qr-bill.service';
 import { keyShareOf, toPdfData } from '../services/statement-pdf.service';
 import type { StatementWithDetails } from '../services/statement.service';
@@ -82,6 +83,32 @@ describe('Rundung auf Rappen', () => {
 		expect(roundToRappen(3060 * (82 / 320))).toBe(784.13);
 		expect(roundToRappen(1.005)).toBe(1.01);
 		expect(roundToRappen(2.344)).toBe(2.34);
+	});
+});
+
+describe('Saldo auf 5 Rappen', () => {
+	// Kaufmännisch: ab 2.5 Rappen auf, darunter ab; Nachzahlung und Rückerstattung gleich
+	it('rundet kaufmännisch auf 5 Rappen, eine Rückerstattung wie eine Nachzahlung', () => {
+		expect(roundTo5Rappen(791.03)).toBe(791.05);
+		expect(roundTo5Rappen(791.02)).toBe(791.0);
+		expect(roundTo5Rappen(0.025)).toBe(0.05);
+		expect(roundTo5Rappen(-0.025)).toBe(-0.05);
+		expect(roundTo5Rappen(-48.97)).toBe(-48.95);
+		expect(roundTo5Rappen(-48.98)).toBe(-49.0);
+		// ein Rest unter 2.5 Rappen ist 0, nicht −0 (sonst «Rückerstattung CHF 0.00»)
+		expect(Object.is(roundTo5Rappen(-0.01), 0)).toBe(true);
+	});
+
+	// Schweizer Rappenrundung: …1, …2 → …0; …3 bis …7 → …5; …8, …9 → nächste …0
+	it('rundet jede Endziffer nach der Schweizer Rappenrundung', () => {
+		const endings = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((cent) => roundTo5Rappen(10 + cent / 100));
+		expect(endings).toEqual([10, 10, 10, 10.05, 10.05, 10.05, 10.05, 10.05, 10.1, 10.1]);
+		expect([1, 2, 3, 7, 8].map((cent) => roundTo5Rappen(-(10 + cent / 100)))).toEqual([-10, -10, -10.05, -10.05, -10.1]);
+	});
+
+	it('rundet den Saldo aus Nebenkosten und Akonto', () => {
+		expect(calculateBalance(1031.03, 240)).toBe(791.05);
+		expect(calculateBalance(1031.03, 1080)).toBe(-48.95);
 	});
 });
 

@@ -265,7 +265,6 @@ export interface StatementInput {
 	periodEnd: string;
 	heatingProfileId?: string;
 	managementFeePercent?: number;
-	managementFeeDistributionKeyId?: string;
 }
 
 /** Calculate a contract's statement for a period without storing it */
@@ -275,8 +274,7 @@ export const calculateStatement = (input: StatementInput) =>
 		new Date(input.periodStart),
 		new Date(input.periodEnd),
 		input.heatingProfileId,
-		input.managementFeePercent,
-		input.managementFeeDistributionKeyId
+		input.managementFeePercent
 	);
 
 /** Calculate a contract's statement and store it as a draft with its line items */
@@ -309,7 +307,6 @@ export async function generateStatement(
 			managementFee: String(calculation.managementFee),
 			managementFeePercent: String(calculation.managementFeePercent),
 			heatingProfileId: input.heatingProfileId || null,
-			managementFeeDistributionKeyId: input.managementFeeDistributionKeyId || null,
 			fuelStock: (await fuelStockChange(input.buildingId, input.periodStart, input.periodEnd))[0]?.stock ?? null,
 			keyValues: await keyValuesOf(input.buildingId, calculation.apartmentId),
 			balance: String(calculation.balance),
@@ -443,10 +440,14 @@ export async function updateStatementStatus(
 		throw new Error(`Invalid status transition from ${existing.status} to ${status}`);
 	}
 
+	const sentToday = status === 'sent' && (await datedToday(existing.paymentDeadline));
+	// A Saldo of 0 (often after the rounding to 5 Rappen) is settled once sent: nothing to pay or to pay back
+	const settled = sentToday && parseFloat(existing.balance) === 0 && { status: 'paid', paidDate: sentToday.statementDate };
 	const updateData: Partial<NewUtilityStatement> = {
 		status,
 		...additionalData,
-		...(status === 'sent' && (await datedToday(existing.paymentDeadline)))
+		...sentToday,
+		...settled
 	};
 
 	return updateStatement(id, updateData);

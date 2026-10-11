@@ -4,13 +4,16 @@ export const periodStartInput = (page: Page) => page.getByTestId('period-start-i
 export const periodEndInput = (page: Page) => page.getByTestId('period-end-input');
 export const heatingProfileSelect = (page: Page) => page.getByTestId('heating-profile-select');
 export const managementFeeInput = (page: Page) => page.getByTestId('management-fee-input');
-export const managementFeeKeySelect = (page: Page) => page.getByTestId('management-fee-key-select');
+export const wizardChoices = (page: Page) => page.getByRole('combobox');
 export const managementFeeHint = (page: Page) => page.getByTestId('management-fee-hint');
+// What a screen reader announces without moving the focus
+export const announcements = (page: Page) => page.getByRole('status');
 export const buildingCheckbox = (page: Page, buildingId: string) =>
 	page.getByTestId(`generate-building-${buildingId}`);
 export const nextButton = (page: Page) => page.getByTestId('wizard-next');
 export const generateButton = (page: Page) => page.getByTestId('generate-statements-button');
 export const previewCount = (page: Page) => page.getByTestId('preview-count');
+export const previewFee = (page: Page) => page.getByTestId('preview-fee');
 export const previewRows = (page: Page) => page.getByTestId('preview-row');
 export const previewEmpty = (page: Page) => page.getByTestId('preview-empty');
 export const generationResult = (page: Page) => page.getByTestId('generation-result');

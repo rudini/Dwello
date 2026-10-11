@@ -94,7 +94,9 @@ describe('Einstellungen', () => {
 		const body = settingsPage().replace(/\s+/g, ' ');
 
 		expect(body).toContain('Zeitraum, für den Sie die Nebenkosten abrechnen');
-		expect(body).toContain('Abgeltung Ihres Aufwands für die Nebenkosten');
+		expect(body).toContain(
+			'Abgeltung Ihres Aufwands für die Nebenkosten: ein Prozentsatz der eigenen Nebenkosten jedes Mieters. Üblich sind bis 3 %.'
+		);
 		expect(body).toContain('Verteilt die Heizkosten in Prozent auf die 12 Monate');
 		expect(body).toContain('wie die Kosten eines Gebäudes auf die einzelnen Wohnungen');
 	});

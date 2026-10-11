@@ -16,7 +16,7 @@ import {
 	formatQRReferenceForDisplay,
 	type QRBillConfig
 } from './qr-bill.service';
-import { formatCHF, formatSwissDate } from './pdf-format';
+import { formatCHF, formatSwissDate, roundToRappen } from './pdf-format';
 
 /**
  * Supported languages
@@ -44,6 +44,9 @@ const translations: Record<Exclude<Language, 'rm'>, Record<string, string>> = {
 		managementFee: 'Verwaltungspauschale',
 		colon: ': ',
 		advancePayments: 'Geleistete Akontobeiträge',
+		rounding: 'Rundung auf 5 Rappen',
+		beforeRounding: 'vor Rundung',
+		roundedNote: 'auf 5 Rappen gerundet',
 		amountDue: 'Nachzahlung',
 		refund: 'Rückerstattung',
 		balanced: 'Ausgeglichen',
@@ -62,9 +65,6 @@ const translations: Record<Exclude<Language, 'rm'>, Record<string, string>> = {
 		heatingNote: 'Heizkosten nach Heizprofil «{profile}»: {percent} % der Heizkosten Ihrer Wohnung in der Abrechnungsperiode',
 		heatingMonths: 'Anteile der Monate Ihres Mietverhältnisses: {months}',
 		months: 'Jan,Feb,Mär,Apr,Mai,Jun,Jul,Aug,Sep,Okt,Nov,Dez',
-		feeBase: '{percent} % von CHF {base}',
-		feeKey: 'verteilt nach {key}',
-		feeDays: ', für Ihre {days} von {total} Tagen',
 		feeOwn: '{percent} % der Zwischensumme von CHF {base}',
 		sqm: 'm²',
 		keyColumn: 'Verteilschlüssel',
@@ -82,6 +82,7 @@ const translations: Record<Exclude<Language, 'rm'>, Record<string, string>> = {
 		refundNoDate: 'Wir überweisen Ihnen den Betrag.',
 		refundAccount: 'Teilen Sie uns dafür Ihre IBAN mit, falls Sie das noch nicht getan haben.',
 		balancedNote: 'Ihre Nebenkosten und Ihre Akontobeiträge sind gleich hoch. Sie müssen nichts bezahlen.',
+		balancedRounded: 'Nach der Rundung auf 5 Rappen müssen Sie nichts bezahlen und erhalten nichts zurück.',
 		sharesNote: 'Kosten Liegenschaft: die Rechnungen der Abrechnungsperiode; eine Rechnung mit Leistungszeitraum zählt mit den Tagen, die in die Periode fallen. Wohnungsanteil: Kosten der Liegenschaft nach dem Verteilschlüssel. Zeitanteil: Ihre Mietstage in der Abrechnungsperiode, bei Heizkosten der Anteil nach dem Heizprofil.',
 		sharesNoteFuel: 'Kosten Liegenschaft bei Heizmaterial aus dem Tank: der Verbrauch (siehe Heiz- und Warmwasserkosten).',
 		heatingSection: 'Heiz- und Warmwasserkosten',
@@ -110,6 +111,9 @@ const translations: Record<Exclude<Language, 'rm'>, Record<string, string>> = {
 		managementFee: 'Frais de gestion',
 		colon: ' : ',
 		advancePayments: 'Acomptes versés',
+		rounding: 'Arrondi à 5 centimes',
+		beforeRounding: 'avant arrondi',
+		roundedNote: 'arrondi à 5 centimes',
 		amountDue: 'Montant à payer',
 		refund: 'Remboursement',
 		balanced: 'Soldé',
@@ -128,9 +132,6 @@ const translations: Record<Exclude<Language, 'rm'>, Record<string, string>> = {
 		heatingNote: 'Frais de chauffage selon le profil « {profile} » : {percent} % des frais de chauffage de votre logement pour la période de décompte',
 		heatingMonths: 'Parts des mois de votre bail : {months}',
 		months: 'janv.,févr.,mars,avr.,mai,juin,juil.,août,sept.,oct.,nov.,déc.',
-		feeBase: '{percent} % de CHF {base}',
-		feeKey: 'réparti selon {key}',
-		feeDays: ', pour vos {days} jours sur {total}',
 		feeOwn: '{percent} % du sous-total de CHF {base}',
 		keyColumn: 'Clé de répartition',
 		apartmentShareColumn: 'Part du logement',
@@ -147,6 +148,7 @@ const translations: Record<Exclude<Language, 'rm'>, Record<string, string>> = {
 		refundNoDate: 'Nous vous virons le montant.',
 		refundAccount: 'Communiquez-nous votre IBAN si vous ne l’avez pas encore fait.',
 		balancedNote: 'Vos frais accessoires et vos acomptes sont égaux. Vous n’avez rien à payer.',
+		balancedRounded: 'Après l’arrondi à 5 centimes, vous n’avez rien à payer et ne recevez rien.',
 		sharesNote: 'Coûts de l’immeuble : les factures de la période de décompte ; une facture avec période de prestation compte pour les jours compris dans la période. Part du logement : coûts de l’immeuble selon la clé de répartition. Part temporelle : vos jours de location dans la période de décompte, pour le chauffage la part selon le profil de chauffage.',
 		sharesNoteFuel: 'Coûts de l’immeuble pour le combustible en citerne : la consommation (voir frais de chauffage et d’eau chaude).',
 		heatingSection: 'Frais de chauffage et d’eau chaude',
@@ -175,6 +177,9 @@ const translations: Record<Exclude<Language, 'rm'>, Record<string, string>> = {
 		managementFee: 'Spese di gestione',
 		colon: ': ',
 		advancePayments: 'Acconti versati',
+		rounding: 'Arrotondamento',
+		beforeRounding: 'prima dell’arrotondamento',
+		roundedNote: 'arrotondato a 5 centesimi',
 		amountDue: 'Importo dovuto',
 		refund: 'Rimborso',
 		balanced: 'Saldato',
@@ -193,9 +198,6 @@ const translations: Record<Exclude<Language, 'rm'>, Record<string, string>> = {
 		heatingNote: 'Spese di riscaldamento secondo il profilo «{profile}»: {percent} % delle spese di riscaldamento del suo appartamento nel periodo di conteggio',
 		heatingMonths: 'Quote dei mesi della sua locazione: {months}',
 		months: 'gen,feb,mar,apr,mag,giu,lug,ago,set,ott,nov,dic',
-		feeBase: '{percent} % di CHF {base}',
-		feeKey: 'ripartito secondo {key}',
-		feeDays: ', per i suoi {days} giorni su {total}',
 		feeOwn: '{percent} % del subtotale di CHF {base}',
 		keyColumn: 'Chiave di riparto',
 		apartmentShareColumn: 'Quota appartamento',
@@ -212,6 +214,7 @@ const translations: Record<Exclude<Language, 'rm'>, Record<string, string>> = {
 		refundNoDate: 'Le bonifichiamo l’importo.',
 		refundAccount: 'Ci comunichi il suo IBAN, se non l’ha già fatto.',
 		balancedNote: 'Le sue spese accessorie e i suoi acconti sono uguali. Non deve pagare nulla.',
+		balancedRounded: 'Dopo l’arrotondamento a 5 centesimi non deve pagare nulla e non riceve nulla.',
 		sharesNote: 'Costi immobile: le fatture del periodo di conteggio; una fattura con periodo di prestazione conta per i giorni compresi nel periodo. Quota appartamento: costi dell’immobile secondo la chiave di riparto. Quota temporale: i suoi giorni di locazione nel periodo di conteggio, per il riscaldamento la quota secondo il profilo di riscaldamento.',
 		sharesNoteFuel: 'Costi immobile per il combustibile in cisterna: il consumo (vedi costi di riscaldamento e acqua calda).',
 		heatingSection: 'Spese di riscaldamento e acqua calda',
@@ -240,6 +243,9 @@ const translations: Record<Exclude<Language, 'rm'>, Record<string, string>> = {
 		managementFee: 'Management fee',
 		colon: ': ',
 		advancePayments: 'Advance payments made',
+		rounding: 'Rounding to 5 centimes',
+		beforeRounding: 'before rounding',
+		roundedNote: 'rounded to 5 centimes',
 		amountDue: 'Amount due',
 		refund: 'Refund',
 		balanced: 'Settled',
@@ -258,9 +264,6 @@ const translations: Record<Exclude<Language, 'rm'>, Record<string, string>> = {
 		heatingNote: 'Heating costs by heating profile «{profile}»: {percent} % of the heating costs of your apartment in the billing period',
 		heatingMonths: 'Shares of the months of your tenancy: {months}',
 		months: 'Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec',
-		feeBase: '{percent} % of CHF {base}',
-		feeKey: 'split by {key}',
-		feeDays: ', for your {days} of {total} days',
 		feeOwn: '{percent} % of the subtotal of CHF {base}',
 		keyColumn: 'Distribution key',
 		apartmentShareColumn: 'Apartment share',
@@ -277,6 +280,7 @@ const translations: Record<Exclude<Language, 'rm'>, Record<string, string>> = {
 		refundNoDate: 'We will transfer the amount to you.',
 		refundAccount: 'Please send us your IBAN if you have not done so yet.',
 		balancedNote: 'Your utility costs equal your advance payments. You do not need to pay anything.',
+		balancedRounded: 'After rounding to 5 centimes, you do not need to pay anything and receive nothing back.',
 		sharesNote: 'Building costs: the invoices of the billing period; an invoice with a service period counts for its days within the period. Apartment share: the building’s costs by the distribution key. Time share: your days rented in the billing period, for heating the share by the heating profile.',
 		sharesNoteFuel: 'Building costs for fuel from a tank: the consumption (see heating and hot water costs).',
 		heatingSection: 'Heating and hot water costs',
@@ -353,13 +357,11 @@ export interface StatementPDFData {
 	heating?: { profile: string; percent: number; months?: { month: number; percentage: number }[] };
 	// A tank: the heating costs of its category are opening stock + invoices – closing stock
 	fuel?: { category: string; openingDate: string; opening: number; invoices: number; closingDate: string; closing: number; total: number };
-	managementFeeKey?: string;
 
 	// Totals
 	subtotal: number;
 	managementFee: number;
 	managementFeePercent: number;
-	managementFeeBase: number; // the building's utility costs the percentage applies to
 	totalCosts: number;
 	totalAdvancePayments: number;
 	balance: number; // Positive = tenant owes, negative = refund
@@ -413,13 +415,9 @@ function formatFloor(floor: number, lang: Language): string {
 const fill = (text: string, values: Record<string, string | number>) =>
 	Object.entries(values).reduce((result, [key, value]) => result.split(`{${key}}`).join(String(value)), text);
 
-// The base of the management fee: the subtotal, or the building's costs split by a key for the tenant's days
-function feeBasis(data: StatementPDFData, t: Record<string, string>) {
-	const values = { percent: data.managementFeePercent, base: formatCHF(data.managementFeeBase) };
-	if (!data.managementFeeKey) return fill(t.feeOwn, values);
-	const days = data.rentalDays < data.periodDays ? fill(t.feeDays, { days: data.rentalDays, total: data.periodDays }) : '';
-	return `${fill(t.feeBase, values)}, ${fill(t.feeKey, { key: data.managementFeeKey })}${days}`;
-}
+// The base of the management fee: the subtotal, the tenant's own costs
+const feeBasis = (data: StatementPDFData, t: Record<string, string>) =>
+	fill(t.feeOwn, { percent: data.managementFeePercent, base: formatCHF(data.subtotal) });
 
 // The time share as the tenant can check it: days rented / days of the period, or the heating profile's share
 function timeShare(item: LineItem, data: StatementPDFData, t: Record<string, string>) {
@@ -490,20 +488,31 @@ function title({ doc, t, data }: Page, y: number) {
 // What the balance asks the tenant to do: pay with the payment part, wait for the refund, or nothing
 function balanceText({ t, data }: Page) {
 	const date = data.paymentDeadline && formatDate(data.paymentDeadline);
+	if (data.balance === 0) return rounding(data) ? t.balancedRounded : t.balancedNote; // settled when sent
 	if (data.paidDate) return fill(data.balance < 0 ? t.refundPaidOn : t.paidOn, { date: formatDate(data.paidDate) });
-	if (data.balance === 0) return t.balancedNote;
 	if (data.balance < 0) return `${date ? fill(t.refundBy, { date }) : t.refundNoDate} ${t.refundAccount}`;
 	return date ? fill(t.payBy, { date }) : t.payNoDate;
 }
 
-const balanceLabel = ({ t, data }: Page) => (data.balance === 0 ? t.balanced : data.balance < 0 ? t.refund : t.amountDue);
+// The Saldo is rounded to 5 Rappen. Read top to bottom: the amount before rounding, its rounding as «+ 0.02» or
+// «– 0.02» (seen from the amount shown, so a refund that grows gets +), the Saldo; only a real rounding is shown
+const unrounded = (data: StatementPDFData) => roundToRappen(data.totalCosts - data.totalAdvancePayments);
+function rounding(data: StatementPDFData) {
+	const difference = roundToRappen(Math.abs(data.balance) - Math.abs(unrounded(data)));
+	return Math.abs(data.balance - unrounded(data)) < 0.05 ? difference : 0;
+}
+const labelOf = (balance: number, t: Record<string, string>) => (balance === 0 ? t.balanced : balance < 0 ? t.refund : t.amountDue);
+const signed = (amount: number) => `${amount > 0 ? '+' : '–'} ${formatCHF(Math.abs(amount))}`;
+
+const balanceLabel = ({ t, data }: Page) => labelOf(data.balance, t);
 
 // The result first: what the tenant pays or gets back, and how it comes about
 function balanceBox(page: Page, y: number) {
 	const { doc, t, data } = page;
 	const width = PAGE.right - PAGE.left;
 	const what = balanceText(page);
-	const how = `${t.yourCosts} ${formatCurrency(data.totalCosts)} – ${t.advancePayments} ${formatCurrency(data.totalAdvancePayments)}`;
+	const rounded = rounding(data) ? `, ${t.roundedNote}` : '';
+	const how = `${t.yourCosts} ${formatCurrency(data.totalCosts)} – ${t.advancePayments} ${formatCurrency(data.totalAdvancePayments)}${rounded}`;
 	doc.font('Helvetica').fontSize(9);
 	const height = 46 + doc.heightOfString(what, { width: width - 24 }) + doc.heightOfString(how, { width: width - 24 });
 	doc.lineWidth(1.5).strokeColor(COLORS.ink).rect(PAGE.left, y, width, height).stroke();
@@ -572,7 +581,7 @@ function costTable(page: Page, y: number) {
 	const fee = `${t.managementFee}${t.colon}${feeBasis(data, t)}`;
 	doc.font('Helvetica-Bold').fontSize(8.5);
 	const feeHeight = data.managementFee > 0 ? doc.heightOfString(fee, { width }) + 6 : 0;
-	top = room(doc, top, 4 * (doc.heightOfString(t.subtotal) + 8) + feeHeight);
+	top = room(doc, top, (rounding(data) ? 6 : 4) * (doc.heightOfString(t.subtotal) + 8) + feeHeight);
 	top = row(doc, total(t.subtotal, formatCHF(data.subtotal)), top + 2, { bold: true, above: 0.5 });
 	if (feeHeight) {
 		doc.font('Helvetica').fontSize(8.5);
@@ -582,6 +591,11 @@ function costTable(page: Page, y: number) {
 	}
 	top = row(doc, total(t.yourCosts, formatCHF(data.totalCosts)), top + 2, { bold: true, above: 1 });
 	top = row(doc, total(t.advancePayments, `– ${formatCHF(data.totalAdvancePayments)}`), top);
+	if (rounding(data)) {
+		const before = `${labelOf(unrounded(data), t)} ${t.beforeRounding}`;
+		top = row(doc, total(before, formatCHF(Math.abs(unrounded(data)))), top + 2, { above: 1 });
+		top = row(doc, total(t.rounding, signed(rounding(data))), top);
+	}
 	top = row(doc, total(balanceLabel(page), formatCHF(Math.abs(data.balance))), top + 2, { bold: true, above: 1 });
 	const note = data.fuel ? `${t.sharesNote} ${t.sharesNoteFuel}` : t.sharesNote;
 	doc.font('Helvetica').fontSize(7.5);

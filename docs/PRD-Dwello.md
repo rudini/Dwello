@@ -466,13 +466,13 @@ Users can create custom formulas using apartment variables:
 
 **Predefined Profiles:**
 
-Five flat profiles, seeded by `backend/migrations/0002_stammdaten.sql`; each distributes exactly 100%:
+Four profiles, seeded by `backend/migrations/0002_stammdaten.sql`; each distributes exactly 100%:
 
 1. **Heizung + Warmwasser** (Heating + Hot Water): standard profile for combined heating and hot water systems
 2. **Heizung Mittelland** (Heating Only, Swiss Plateau): for Bern, Zürich, Basel, etc.
 3. **Heizung Bergregion** (Heating Only, Mountain Region): for Alpine and pre-Alpine regions
 4. **Heizung Tessin** (Heating Only, Southern Switzerland): for Ticino and southern regions
-5. ~~**Nur Warmwasser** (Hot Water Only)~~: removed (migration 0010); separate hot water costs are shared by days
+5. ~~**Nur Warmwasser** (Hot Water Only)~~: removed; separate hot water costs are shared by days
 
 **Manual Configuration:**
 - Option to input custom monthly percentages manually
@@ -499,7 +499,8 @@ Five flat profiles, seeded by `backend/migrations/0002_stammdaten.sql`; each dis
 **Features:**
 - Global management cost percentage (0% or more; default suggestion for new statements, adjustable per building and period)
 - Automatic calculation and inclusion in statements
-- Formula: `Total Utility Costs × (Management Cost % / 100)`
+- Formula: `Tenant's own utility costs (subtotal) × (Management Cost % / 100)`
+- The Saldo (costs minus Akonto) is rounded commercially to 5 Rappen; the statement shows the amount before rounding and the rounding
 - Optional: Can be disabled (set to 0%)
 
 **Configuration:**
@@ -1851,7 +1852,7 @@ An audit log is planned, not implemented.
 | **Liegenschaft** | Property; building or real estate |
 | **Vertragsende** | Contract end date |
 | **Vertragsbeginn** | Contract start date |
-| **Verwaltungspauschale** | Management fee: a percentage of the building's utility costs for the administrative effort, a separate statement line, not an invoice category |
+| **Verwaltungspauschale** | Management fee: a percentage of the tenant's own utility costs for the administrative effort, a separate statement line, not an invoice category |
 | **zulässig** | Allowed (utility costs) |
 | **nicht zulässig** | Not allowed (utility costs) |
 | **QR-bill** | Swiss QR invoice standard for payments |

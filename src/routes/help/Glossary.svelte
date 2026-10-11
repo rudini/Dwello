@@ -29,7 +29,8 @@
 		},
 		{
 			term: 'Verwaltungspauschale',
-			text: 'Die Abgeltung Ihres Verwaltungsaufwands: ein Prozentsatz der Nebenkosten des Gebäudes, üblich sind 3 %. Satz und Verteilschlüssel wählen Sie beim Erstellen der Abrechnungen.'
+			// TODO(fachlich prüfen): the glossary still says of the building's costs, shared by a key (offene-punkte.md)
+			text: 'Die Abgeltung Ihres Verwaltungsaufwands: ein Prozentsatz der eigenen Nebenkosten jedes Mieters. Üblich sind bis 3 %. Den Satz wählen Sie beim Erstellen der Abrechnungen.'
 		},
 		{
 			term: 'Mietstage',
@@ -41,7 +42,8 @@
 		},
 		{
 			term: 'Saldo',
-			text: 'Der Kostenanteil des Mieters samt Verwaltungspauschale minus seine geleisteten Akontobeiträge. Ist der Saldo positiv, zahlt der Mieter nach (Nachzahlung); ist er negativ, erhält er Geld zurück (Rückerstattung).'
+			// TODO(fachlich prüfen): the glossary does not name the rounding to 5 Rappen (offene-punkte.md)
+			text: 'Der Kostenanteil des Mieters samt Verwaltungspauschale minus seine geleisteten Akontobeiträge, auf 5 Rappen gerundet. Ist der Saldo positiv, zahlt der Mieter nach (Nachzahlung); ist er negativ, erhält er Geld zurück (Rückerstattung).'
 		},
 		{
 			term: 'Zahlungsfrist',

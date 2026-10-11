@@ -24,8 +24,7 @@ const calculationBody = t.Object({
 	periodStart: t.String(),
 	periodEnd: t.String(),
 	heatingProfileId: t.Optional(t.String()),
-	managementFeePercent: t.Optional(t.Number({ minimum: 0 })),
-	managementFeeDistributionKeyId: t.Optional(t.String())
+	managementFeePercent: t.Optional(t.Number({ minimum: 0 }))
 });
 
 export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
