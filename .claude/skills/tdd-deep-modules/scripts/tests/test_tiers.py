@@ -177,3 +177,28 @@ class TddReplayTierTest(unittest.TestCase):
         self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
         self.assertIn("red's new test is not in the fast suite: sum.pg.test.ts::::sums in SQL",
                       result.stdout)
+
+    def test_a_green_that_skips_red_s_test_is_rejected(self):
+        skipping = ('import { test, expect } from "bun:test";\nimport { add } from "./calc";\n\n'
+                    'test.skipIf(process.env.CALC_DONE === "yes")("adds", () => {\n'
+                    '  expect(add(1, 2)).toBe(3);\n});\n')
+        cases = {"skipped by production code": (
+                     {"calc.test.ts": skipping}, "fast",
+                     {"calc.ts": 'process.env.CALC_DONE = "yes";\n' + RIGHT_ADD_TS}, "fast",
+                     "green removes tests: calc.test.ts::::adds"),
+                 "a tier without red's test": (
+                     {"sum.pg.test.ts": SQL_TEST}, "full", {"sum.ts": RIGHT_SUM_TS}, "fast",
+                     "green must run the full suite, like its red")}
+        for name, (red, red_suite, green, green_suite, reason) in cases.items():
+            with self.subTest(name):
+                repo = tiered_repo(self, **{"db.pg.test.ts": DATABASE_TEST,
+                                            "sum.ts": "export const sum = (xs: number[]) => 0;\n"})
+                base = repo.git("rev-parse", "HEAD")
+                repo.commit_phase("red", red, 1, suite=red_suite)
+                repo.commit_phase("green", green, 0, suite=green_suite)
+                repo.commit_phase("refactor", {"calc.ts": RIGHT_ADD_TS}, 0)
+
+                result = self.replay(repo, base)
+
+                self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+                self.assertIn(reason, result.stdout)
