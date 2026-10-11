@@ -20,19 +20,6 @@ export class AppError extends Error {
 }
 
 /**
- * OAuth-related errors
- */
-export class OAuthError extends AppError {
-	constructor(
-		message: string,
-		public provider?: string,
-		statusCode: number = 400
-	) {
-		super(message, statusCode, 'OAUTH_ERROR');
-	}
-}
-
-/**
  * JWT-related errors
  */
 export class JWTError extends AppError {
@@ -54,27 +41,6 @@ export class ValidationError extends AppError {
 }
 
 /**
- * Authorization errors (different from authentication)
- */
-export class AuthorizationError extends AppError {
-	constructor(message: string = 'Access denied') {
-		super(message, 403, 'AUTHORIZATION_ERROR');
-	}
-}
-
-/**
- * Rate limit errors
- */
-export class RateLimitError extends AppError {
-	constructor(
-		message: string = 'Too many requests',
-		public retryAfter?: number
-	) {
-		super(message, 429, 'RATE_LIMIT_ERROR');
-	}
-}
-
-/**
  * Standard error response format
  */
 interface ErrorResponse {
@@ -88,7 +54,7 @@ interface ErrorResponse {
 /**
  * Create a standardized JSON error response
  */
-export function errorResponse(
+function errorResponse(
 	error: AppError | Error,
 	details?: Record<string, unknown>
 ): Response {
@@ -113,7 +79,7 @@ export function errorResponse(
 /**
  * Log level enum
  */
-export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
+type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 
 /**
  * Structured log entry
