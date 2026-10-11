@@ -85,3 +85,8 @@ class TddReplayTest(unittest.TestCase):
         base = repo.git("rev-parse", "HEAD")
         repo.commit_phase("red", {"calc.test.ts": BUN_TEST}, 1)
         self.assert_rejected(repo, base, "the history ends in red: every red needs a green")
+
+    def test_a_commit_without_a_phase_prefix_is_rejected(self):
+        repo, base = good_history(self)
+        repo.commit_all("tweak add", {"calc.ts": ROUNDING_ADD_TS.replace("a + b", "b + a")})
+        self.assert_rejected(repo, base, "not a TDD phase commit: 'tweak add'")
