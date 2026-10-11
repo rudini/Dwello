@@ -66,3 +66,12 @@ class TddGuardTest(unittest.TestCase):
                 result = guard(repo, "Write", rel)
 
                 self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_tools_without_a_file_path_pass(self):
+        repo = bun_repo(self)
+        repo.commit_phase("test", {"TESTLIST.md": "- [ ] adds\n"}, 1)
+        for tool, field in (("Bash", "command"), ("NotebookEdit", "notebook_path")):
+            with self.subTest(tool):
+                result = guard(repo, tool, "analysis.ipynb", field=field)
+
+                self.assertEqual(result.returncode, 0, result.stderr)
