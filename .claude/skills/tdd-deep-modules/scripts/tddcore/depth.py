@@ -51,7 +51,7 @@ def measure(root, path):
     if not module.is_file():
         raise NotAModule(f"{path}: not a file")
     text = module.read_text(errors="replace")
-    code = re.sub(r"/\*.*?\*/|//[^\n]*", "", text, flags=re.DOTALL)  # without comments
+    code = _without_comments(text)
     surface, size = _surface(code), _size(code)
     # a class without methods (an error type, a record) carries a name, not a spread-out decision
     tiny = [name for name, methods in _classes(code) if 0 < len(methods) <= TINY_CLASS]
@@ -62,6 +62,10 @@ def measure(root, path):
                     _pass_through(code), _tests(module, top),
                     _unused(code), _duplicate(code), ())
     return replace(metrics, findings=_findings(metrics))
+
+
+def _without_comments(text):
+    return re.sub(r"/\*.*?\*/|//[^\n]*", "", text, flags=re.DOTALL)
 
 
 def _findings(module):
@@ -383,7 +387,7 @@ def _production_code(top):
     """[(path, text)] of the production source files of the repository at `top`, read once per run."""
     listed = subprocess.run(["git", "ls-files", "-z", "-co", "--exclude-standard"], cwd=top, check=True,
                             capture_output=True, text=True).stdout.split("\0")
-    return tuple(((top / rel).resolve(), (top / rel).read_text(errors="replace")) for rel in listed
+    return tuple(((top / rel).resolve(), _without_comments((top / rel).read_text(errors="replace"))) for rel in listed
                  if Path(rel).suffix in _SOURCE and protocol.is_production(rel) and (top / rel).is_file())
 
 
