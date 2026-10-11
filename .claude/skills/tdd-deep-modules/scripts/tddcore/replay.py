@@ -18,21 +18,26 @@ class Verdict:
 def replay(repo, rev_range):
     """One Verdict per commit of `rev_range` (oldest first), each from a clean checkout of it."""
     commits = _git(repo, "rev-list", "--reverse", "--first-parent", rev_range).split()
-    previous = protocol.phase_of(_git(repo, "log", "-1", "--format=%s", f"{commits[0]}^"))
+    base = f"{commits[0]}^"
+    previous = protocol.phase_of(_git(repo, "log", "-1", "--format=%s", base))
     verdicts = []
     with tempfile.TemporaryDirectory() as tmp:
         tree = Path(tmp) / "replay"
-        _git(repo, "worktree", "add", "-q", "--detach", str(tree), commits[0])
+        _git(repo, "worktree", "add", "-q", "--detach", str(tree), base)
         try:
+            known = suite.run(tree).tests
             for commit in commits:
                 _git(tree, "checkout", "-q", "--detach", commit)
                 _git(tree, "clean", "-fdxq")
                 phase = protocol.phase_of(_git(tree, "log", "-1", "--format=%s"))
                 run = suite.run(tree)
                 changed = _git(tree, "diff", "--name-only", "--no-renames", f"{commit}^", commit).split("\n")
-                verdicts.append(Verdict(commit, phase, run,
-                                        protocol.violations(previous, phase, run, [c for c in changed if c])))
-                previous = phase
+                found = protocol.violations(previous, phase, run, [c for c in changed if c])
+                new = run.tests - known
+                if phase == "red" and len(new) != 1:
+                    found.append(f"red must add exactly one new test, but adds {len(new)}")
+                verdicts.append(Verdict(commit, phase, run, found))
+                previous, known = phase, run.tests
         finally:
             _git(repo, "worktree", "remove", "--force", str(tree))
     return verdicts

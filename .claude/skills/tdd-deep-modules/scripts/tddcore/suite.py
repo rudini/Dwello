@@ -21,6 +21,7 @@ class Run:
     summary: str
     failed: int  # number of failing tests
     ran: int  # tests run, not skipped
+    tests: frozenset = frozenset()  # ids of the tests the framework collected
 
 
 def run(root):
@@ -39,7 +40,8 @@ def _combine(runs):
     if outcome == "pass" and not ran:
         outcome, summary = "error", f"no tests ran ({summary})"
     # the exit code covers every command run, so the trailer never hides a failing one
-    return Run(max(r.exit_code for r in runs), outcome, summary, sum(r.failed for r in runs), ran)
+    return Run(max(r.exit_code for r in runs), outcome, summary, sum(r.failed for r in runs), ran,
+               frozenset().union(*(r.tests for r in runs)))
 
 
 def _files(root):
@@ -64,7 +66,7 @@ def _node_runners(root):
         if command == "vitest":
             runners.append(lambda d=directory: _run_vitest(d))
         elif command:
-            runners.append(lambda d=directory, c=command: _run_bun(d, c))
+            runners.append(lambda d=directory, c=command, p=package.parent: _run_bun(d, c, p))
     return runners
 
 
@@ -95,7 +97,7 @@ def _test_command(directory):
                       " (supported: vitest, bun test)")
 
 
-def _run_bun(directory, command):
+def _run_bun(directory, command, package):
     with tempfile.TemporaryDirectory() as tmp:
         report = Path(tmp) / "report.xml"
         done = subprocess.run(["sh", "-c", f"{command} --reporter=junit"
@@ -112,7 +114,9 @@ def _run_bun(directory, command):
     summary = f"bun: {failed} of {len(cases)} tests failed"
     if hidden:
         summary += f" ({errors} errors outside tests)"
-    return Run(done.returncode, outcome, summary, failed, ran)
+    tests = frozenset(f"{package / case.get('file', '')}::{case.get('classname', '')}::{case.get('name')}"
+                      for case in cases)
+    return Run(done.returncode, outcome, summary, failed, ran, tests)
 
 
 def _run_vitest(root):
