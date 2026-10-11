@@ -76,6 +76,9 @@ class SkillLintTest(unittest.TestCase):
             "other command": (lambda copy: (copy / "SKILL.md").write_text(
                 real.replace("scripts/tdd-guard'", "scripts/other'")),
                 "hooks: no PreToolUse hook runs scripts/tdd-guard for Write and Edit"),
+            "broken matcher": (lambda copy: (copy / "SKILL.md").write_text(
+                real.replace('matcher: "Write|Edit|MultiEdit"', 'matcher: "Write|(Edit"')),
+                "hooks: no PreToolUse hook runs scripts/tdd-guard for Write and Edit"),
             "script missing": (lambda copy: (copy / "scripts" / "tdd-guard").unlink(),
                                "hooks: scripts/tdd-guard is missing or not executable"),
             "not executable": (lambda copy: (copy / "scripts" / "tdd-guard").chmod(0o644),

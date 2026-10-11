@@ -1,0 +1,1 @@
+KILLED   tddcore/lint.py: '    except re.error:\n        return False' -> '    except ZeroDivisionError:\n        return False' [test_the_guard_hook_must_be_registered]
