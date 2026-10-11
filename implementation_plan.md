@@ -4615,6 +4615,8 @@ subtotal, fee and «Ihre Nebenkosten» stay exact. A row «Rundung auf 5 Rappen�
   nichts zurück»; the dead fallback rate of statements without a stored rate is gone; the rate message names the two
   decimals; preview contract balance corrected; stale docs (`seed-daten-aenderungen.md`, `PRD-Dwello.md`,
   `offene-punkte.md`, comments) updated; lows left with reasons in `offene-punkte.md`.
+- [x] **Decisions** recorded in `docs/design/design-decisions.md` («Decided during the work», Session 12): fee on own
+  costs, Saldo to 5 Rappen, Saldo 0 settled when sent, merged migrations.
 
 ---
 
