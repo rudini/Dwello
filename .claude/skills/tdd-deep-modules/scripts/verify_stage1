@@ -9,7 +9,12 @@ from tddcore import verdicts  # noqa: E402
 skill = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(__file__).resolve().parent.parent
 passed = True
 for step in ("01", "02", "03"):
-    number, verdict = verdicts.final(skill / "evidence" / "reviews", step)
+    latest = verdicts.final(skill / "evidence" / "reviews", step)
+    if latest is None:
+        print(f"step {step}: no review")
+        passed = False
+        continue
+    number, verdict = latest
     print(f"step {step}: {verdict} (round {number})")
     passed = passed and verdict == "VERDICT: PASS"
 print("STAGE1: PASS" if passed else "STAGE1: FAIL")
