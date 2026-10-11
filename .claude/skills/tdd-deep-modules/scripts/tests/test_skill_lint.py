@@ -287,3 +287,13 @@ class SkillLintTest(unittest.TestCase):
 
         self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
         self.assertEqual(result.stdout, "skill_lint: SKILL.md starts with a byte order mark; save it without one\n")
+
+    def test_headings_inside_code_fences_are_not_sections(self):
+        real = (SKILL / "SKILL.md").read_text()
+        rules = real[real.index("## Hard rules"):real.index("## 1. ")]
+        copy = copy_of_skill(self)
+        (copy / "SKILL.md").write_text(real.replace(rules, "```\n" + rules + "```\n\n"))
+
+        result = lint(copy)
+
+        self.assertIn("skill_lint: missing section 'Hard rules'\n", result.stdout)
