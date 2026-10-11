@@ -22,6 +22,9 @@ def main(args):
     except replay.ReplayError as error:
         print(f"tdd_replay: {error}", file=sys.stderr)
         return 2
+    except Exception as error:  # a crash must not read as REJECT (exit 1)
+        print(f"tdd_replay: internal error: {type(error).__name__}: {error}", file=sys.stderr)
+        return 2
     for verdict in verdicts:
         status = "REJECT" if verdict.violations else "ok"
         print(f"{verdict.commit[:7]} {verdict.phase:8} {verdict.run.outcome:5} "
