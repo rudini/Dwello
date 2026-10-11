@@ -83,16 +83,16 @@ def _surface(text):
     """Exported names, the parameters of exported functions, and the public members of exported classes."""
     surface = 0
     for start in re.finditer(r"^export\b", text, re.MULTILINE):
-        rest = text[start.start():]
-        if match := _FUNCTION_EXPORT.match(rest):
-            surface += 1 + len(_names(_parameters(rest, match.end()) or ""))
-        elif match := _VARIABLE_EXPORT.match(rest):
-            for declarator in _split(rest[match.end():_statement_end(rest, match.end())]):
+        at = start.start()
+        if match := _FUNCTION_EXPORT.match(text, at):
+            surface += 1 + len(_names(_parameters(text, match.end()) or ""))
+        elif match := _VARIABLE_EXPORT.match(text, at):
+            for declarator in _split(text[match.end():_statement_end(text, match.end())]):
                 value = re.match(r"\s*\w+\s*(?::[^=]+)?=\s*(.*)", declarator, re.DOTALL)
                 surface += 1 + len(_names(_function_parameters(value[1]) if value else ""))
-        elif match := _LIST_EXPORT.match(rest):
+        elif match := _LIST_EXPORT.match(text, at):
             surface += len(_split(match[1]))
-        elif _NAME_EXPORT.match(rest):
+        elif _NAME_EXPORT.match(text, at):
             surface += 1
     for match in re.finditer(r"^export\s+(?:default\s+)?(?:abstract\s+)?class\s+\w+[^{]*\{", text, re.MULTILINE):
         for modifiers, name, params in _members(_top_level(text[match.end():])):
@@ -108,6 +108,8 @@ _FUNCTION = re.compile(r"(?:\bfunction\s*\*?\s*|^[ \t]*(?:(?:public|protected|pr
                        r"override)\s+)*)(?!(?:if|for|while|switch|catch|return|function|async)\b)(\w+)\s*"
                        r"(?:<[^<>\n]*>)?\s*\(", re.MULTILINE)
 _ARROW = re.compile(r"\b(\w+)\s*(?::[^=\n]+)?=\s*(?:async\s*)?(?:<[^<>\n]*>)?\s*\(")
+_ARROW_HEAD = re.compile(r"\s*(?::[^=\n]+)?=>\s*")  # after the parameters: optional return type, `=>`
+_FUNCTION_HEAD = re.compile(r"[^{};=\n]*\{")  # after the parameters: optional return type, `{`
 _CALL = re.compile(r"(?:await\s+)?[\w.]+\s*\(")
 
 
@@ -117,11 +119,11 @@ def _pass_through(text):
     for pattern, arrow in ((_FUNCTION, False), (_ARROW, True)):
         for match in pattern.finditer(text):
             close = _close(text, match.end() - 1)
-            params, rest = text[match.end():close - 1], text[close:]
-            head = re.match(r"\s*(?::[^=\n]+)?=>\s*" if arrow else r"[^{};=\n]*\{", rest)
+            params = text[match.end():close - 1]
+            head = (_ARROW_HEAD if arrow else _FUNCTION_HEAD).match(text, close)
             if not head:
                 continue
-            body_start = close + head.end()
+            body_start = head.end()
             if arrow and text[body_start:body_start + 1] == "{":
                 body = text[body_start + 1:_close(text, body_start) - 1]
             elif arrow:
@@ -175,7 +177,10 @@ def _skip_type_parameters(text, index):
 
 
 def _skip_blanks(text, index):
-    return len(text) - len(text[index:].lstrip())
+    return _BLANKS.match(text, index).end()
+
+
+_BLANKS = re.compile(r"\s*")
 
 
 def _statement_end(text, start):
