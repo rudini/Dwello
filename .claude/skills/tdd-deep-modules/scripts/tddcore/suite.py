@@ -130,7 +130,8 @@ def _test_command(directory):
 def _run_bun(directory, command):
     with tempfile.TemporaryDirectory() as tmp:
         report = Path(tmp) / "report.xml"
-        done = subprocess.run([*shlex.split(command), "--reporter=junit", f"--reporter-outfile={report}"],
+        done = subprocess.run([*shlex.split(command), "--reporter=junit",
+                               f"--reporter-outfile={report}"],
                               cwd=directory, capture_output=True, text=True, errors="replace")
         reported = report.exists()
         cases = list(ElementTree.parse(report).iter("testcase")) if reported else []
@@ -171,7 +172,8 @@ def _is_vitest_assertion(message):
     # .resolves/.rejects failures are plain Errors raised inside vitest's assertion chain
     lines = message.splitlines()
     return message.startswith("AssertionError") or (
-        len(lines) > 1 and lines[0].startswith("Error: ") and lines[1].strip().startswith("at _Assertion."))
+        len(lines) > 1 and lines[0].startswith("Error: ")
+        and lines[1].strip().startswith("at _Assertion."))
 
 
 def _vitest_outcome(exit_code, data, unhandled):
@@ -212,7 +214,8 @@ def _run_pytest(root):
                               capture_output=True, text=True, errors="replace")
         reported = report.exists()
         cases = list(ElementTree.parse(report).iter("testcase")) if reported else []
-    lines = (done.stdout.strip() if reported else done.stderr.strip() or done.stdout.strip()).splitlines()
+    output = done.stdout if reported else done.stderr.strip() or done.stdout
+    lines = output.strip().splitlines()
     summary = lines[-1] if lines else f"exit code {done.returncode}, no output"
     if not reported:
         summary = f"pytest wrote no report: {summary}"
@@ -229,6 +232,6 @@ def _pytest_outcome(exit_code, cases):
     failures = [f.get("message", "") for case in cases for f in case.iter("failure")]
     errors = [e for case in cases for e in case.iter("error")]
     asserted = all(m.startswith(("assert", "AssertionError", "Failed: ")) for m in failures)
-    if exit_code == 1 and failures and not errors and asserted:
+    if failures and not errors and asserted:
         return "fail"
     return "error"
