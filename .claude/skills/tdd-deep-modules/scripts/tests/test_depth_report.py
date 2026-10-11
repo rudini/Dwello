@@ -188,3 +188,14 @@ export class Ledger {
         line = report_line(repo.run("depth_report", "src/session.ts"), "src/session.ts")
 
         self.assertIn(", duplicate 0 ->", line)
+
+    def test_wrapped_and_generic_signatures_count_towards_the_surface(self):
+        module = ("export async function load(\n  id: string,\n  limit: number\n): Promise<string[]> {\n"
+                  "  return [id, String(limit)];\n}\n\n"
+                  "export function pair<T>(a: T, b: T): T[] {\n  return [a, b];\n}\n")
+        repo = Repo(self, {"src/load.ts": module})
+
+        line = report_line(repo.run("depth_report", "src/load.ts"), "src/load.ts")
+
+        # load 1+2, pair 1+2
+        self.assertTrue(line.startswith("src/load.ts: surface 6,"), line)
