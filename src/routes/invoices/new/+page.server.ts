@@ -6,7 +6,7 @@
 import type { PageServerLoad } from './$types';
 import { localPath } from '$lib/invoice';
 import { toCategory } from '$lib/server/category';
-import { toDistributionKey } from '$lib/server/distribution-key';
+import { listDistributionKeys } from '$lib/server/distribution-key';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
@@ -19,13 +19,14 @@ async function get(fetch: typeof globalThis.fetch, path: string) {
 const isoDate = (value: string | null) => (value && /^\d{4}-\d{2}-\d{2}$/.test(value) ? value : '');
 
 export const load: PageServerLoad = async ({ fetch, url }) => {
-	const [buildingsData, categoriesData, keysData, llmStatus, defaultKey] = await Promise.all([
-		get(fetch, 'buildings?limit=100'),
-		get(fetch, 'categories?limit=100'),
-		get(fetch, 'distribution-keys?limit=100'),
-		get(fetch, 'invoices/llm-status'),
-		get(fetch, 'config/default_distribution_key_id')
-	]);
+	const [buildingsData, categoriesData, distributionKeys, llmStatus, defaultKey] =
+		await Promise.all([
+			get(fetch, 'buildings?limit=100'),
+			get(fetch, 'categories?limit=100'),
+			listDistributionKeys(fetch).catch(() => []),
+			get(fetch, 'invoices/llm-status'),
+			get(fetch, 'config/default_distribution_key_id')
+		]);
 	const buildings: { id: string }[] = buildingsData.buildings || buildingsData.data || [];
 	const building = url.searchParams.get('building');
 	const start = isoDate(url.searchParams.get('periodStart'));
@@ -34,7 +35,7 @@ export const load: PageServerLoad = async ({ fetch, url }) => {
 	return {
 		buildings,
 		categories: (categoriesData.categories || categoriesData.data || []).map(toCategory),
-		distributionKeys: (keysData.data || []).map(toDistributionKey),
+		distributionKeys,
 		llmAvailable: llmStatus.llmAvailable === true,
 		// Preselected as set in the settings
 		defaultDistributionKeyId: (defaultKey.value as string) ?? '',

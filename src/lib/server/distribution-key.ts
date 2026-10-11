@@ -17,6 +17,16 @@ export function toDistributionKey(d: Record<string, unknown>): DistributionKeyRo
 	};
 }
 
+/** All keys, predefined and custom, or an error page when the backend does not answer */
+export async function listDistributionKeys(
+	fetch: typeof globalThis.fetch
+): Promise<DistributionKeyRow[]> {
+	const response = await fetch(`${API}?limit=100`);
+	if (!response.ok) throw error(response.status, 'Fehler beim Laden der Verteilschlüssel');
+	const { data = [] }: { data?: Record<string, unknown>[] } = await response.json();
+	return data.map(toDistributionKey);
+}
+
 /** Only custom keys can be edited; the predefined ones follow Swiss practice */
 export async function fetchCustomKey(fetch: typeof globalThis.fetch, id: string) {
 	const key = toDistributionKey(await fetchRecord(fetch, `${API}/${id}`, 'Verteilschlüssel'));
