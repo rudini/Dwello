@@ -3,6 +3,7 @@ import json
 import os
 import re
 import shlex
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -123,6 +124,8 @@ def _test_command(directory):
         return None
     bun = [part.strip() for part in command.split("&&") if part.strip().startswith("bun test")]
     if bun:
+        if shutil.which("bun") is None:
+            raise NoFramework(f"bun is not installed, but {manifest} runs bun test")
         return bun[0]
     raise NoFramework(f"no supported test framework for package.json test script {command!r}"
                       " (supported: vitest, bun test, pytest, unittest)")
