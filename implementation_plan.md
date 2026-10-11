@@ -4414,6 +4414,8 @@ Brief: `docs/design/REDESIGN_BRIEF.md`; log and decisions: `docs/design/progress
 - [x] **Backend image builds and reports health:** uses the image's `bun` user instead of `addgroup` (missing on
   Debian), health check through `bun` instead of `wget` (missing in the slim image); README and tech stack require
   Bun >= 1.4 (`backend/Dockerfile`, `docker-compose.prod.yml`, `README.md`, `docs/tech-stack.md`)
+- [x] **Smaller frontend image:** runtime gets production dependencies only and `COPY --chown` instead of a
+  `chown -R` layer; 1.2 GB to 328 MB (`Dockerfile`)
 
 
 ---
