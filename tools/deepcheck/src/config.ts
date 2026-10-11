@@ -54,8 +54,10 @@ export const DEFAULT_CONFIG: Config = {
 		depth: 40,
 		complexity: 20,
 		passThrough: 15,
-		leaky: 5,
-		classitis: 10,
+		// Leaky exports are reported but not scored: alone they cannot rank (ablation), and their weight lets tiny
+		// classitis pieces reach failThreshold (follow-up calibration).
+		leaky: 0,
+		classitis: 15,
 		coupling: 5,
 		unusedExports: 5
 	},

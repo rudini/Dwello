@@ -20,7 +20,7 @@ const ADVICE: Record<keyof Weights, Advice> = {
 	classitis: ({ metrics: m }) =>
 		m.dataOnlyClasses.length > 0
 			? `data-only class(es) ${m.dataOnlyClasses.join(', ')}: only fields, getters and setters. Move the behaviour that uses the data into the class, or combine it with the module that does.`
-			: 'classitis: one of many tiny single-export files in this directory. Combine them into one deeper module.',
+			: 'classitis: one of many tiny single-export files in this directory, or of several that one module imports together. Combine them into one deeper module.',
 	coupling: ({ metrics: m }) =>
 		`coupling: imports ${m.fanOut} module(s) but is used by ${m.fanIn}. A deep module is used widely and depends on little; pull the work it delegates into it.`,
 	unusedExports: ({ metrics: m }) =>

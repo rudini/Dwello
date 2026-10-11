@@ -4,7 +4,7 @@ import { reasons } from './advice.ts';
 import { loadConfig, type Config } from './config.ts';
 import { excludeByPath, isModuleCandidate, isSource, matchesAny, walk } from './discover.ts';
 import { fallowIgnorePatterns, loadFallow, type FallowData } from './fallow.ts';
-import { coupling } from './graph.ts';
+import { coupling, type Coupling } from './graph.ts';
 import { contentExclusion, fileMetrics, type FileMetrics } from './metrics.ts';
 import { components, shallowScore } from './score.ts';
 import { parseSuppressions, suppressesFile, suppressesLine, suppressionProblems, type Suppression } from './suppress.ts';
@@ -32,17 +32,29 @@ function loadModules(root: string, paths: string[]): Map<string, SourceFile> {
 	return new Map(paths.map((p) => [p, project.addSourceFileAtPath(`${root}/${p}`)]));
 }
 
-/** Files in directories of at least `minFiles` analyzed modules, most of which are tiny single-export files. */
-function classitisFiles(candidates: Candidate[], minFiles: number): Set<string> {
+/**
+ * A module that alone imports this many tiny files of one directory assembles one module that was cut into
+ * pieces. No module of this repo, ky, zustand or immer imports more than two tiny files at all (review 3).
+ */
+const ASSEMBLED_PIECES = 3;
+
+/**
+ * Tiny single-export files that make up most of a directory of at least `minFiles` analyzed modules, or of which
+ * one module, their only importer, imports at least ASSEMBLED_PIECES from one directory. Shared utilities (other
+ * importers, other directories) are not pieces (review 4).
+ */
+function classitisFiles(candidates: Candidate[], minFiles: number, graph: Map<string, Coupling>): Set<string> {
 	// Only behaviour counts as a tiny piece: one-constant files (a table per language, an icon per file) are data.
 	const tiny = (c: Candidate) =>
 		c.file.exportCount === 1 && c.file.implementationSize <= 3 && (c.file.functionCount > 0 || c.file.classes.length > 0);
-	const byDir = Map.groupBy(candidates, (c) => dirname(c.path));
 	const result = new Set<string>();
-	for (const group of byDir.values()) {
+	for (const group of Map.groupBy(candidates, (c) => dirname(c.path)).values()) {
 		const tinyOnes = group.filter(tiny);
 		if (group.length >= minFiles && tinyOnes.length >= 0.8 * group.length) tinyOnes.forEach((c) => result.add(c.path));
 	}
+	const pieces = candidates.filter((c) => tiny(c) && graph.get(c.path)!.importers.length === 1).map((c) => c.path);
+	const byAssembler = Map.groupBy(pieces, (path) => `${graph.get(path)!.importers[0]} ${dirname(path)}`);
+	for (const group of byAssembler.values()) if (group.length >= ASSEMBLED_PIECES) group.forEach((p) => result.add(p));
 	return result;
 }
 
@@ -99,7 +111,7 @@ export function analyze({ root, fallow, config = loadConfig(root) }: AnalyzeOpti
 	);
 	const barrels = new Set(excluded.filter((e) => e.reason === 'barrel').map((e) => e.path));
 	const graph = coupling(root, sources, new Set(sources.filter((s) => !notCounted.has(s))), barrels, warnings);
-	const classitis = classitisFiles(candidates, config.classitisMinFiles);
+	const classitis = classitisFiles(candidates, config.classitisMinFiles, graph);
 	const modules = candidates.map(({ path, file }) => {
 		const { fanIn, fanOut } = graph.get(path)!;
 		const metrics = {

@@ -17,7 +17,7 @@ Both were reproducible false positives and are fixed with regression tests. Leak
 
 **What the evidence shows.**
 - No module of this repo is flagged (0 of 71 eligible, highest 60), and none of the 24 eligible modules of three open-source projects reaches 65 (highest 60).
-- The textbook shallow designs are flagged at 71–75: pass-through classes, a facade of forwarding functions, Java-style stream wrappers. So is the deliberately shallow facade from X2.2.
+- The textbook shallow designs are flagged at 71–80: pass-through classes, a facade of forwarding functions, Java-style stream wrappers, and (since the follow-up calibration below) tiny classitis files at 67. So is the deliberately shallow facade from X2.2.
 - Labelled deep modules stay at 39 or below.
 
 **Adversarial check with realistic new modules** (`tools/deepcheck/test/realistic.test.ts`). The probes below are shaped like code agents add here; I wrote them after the reviewers' probes. Only the forwarding facade is flagged:
@@ -25,7 +25,7 @@ Both were reproducible false positives and are fixed with regression tests. Leak
 | New module | Score | Flagged |
 |---|---:|---|
 | `src/lib/server/meter-facade.ts`: two functions forwarding to `meter.ts` | 80 | yes (true positive) |
-| `src/lib/copy/meter-copy.ts`: UI copy constants with an internal type | 65 | no |
+| `src/lib/copy/meter-copy.ts`: UI copy constants with an internal type | 60 (65 before leaky exports stopped scoring) | no |
 | `src/lib/meter-types.ts`: types and two helpers | 53 | no |
 | `backend/src/services/meter.service.ts`: one-line Drizzle queries | 40 | no |
 | `src/lib/meter-store.ts`: Svelte stores and a reset | 39 | no |
@@ -68,7 +68,7 @@ All of these are now fixed, each with a regression test seen failing first. The 
   An independent review of the change found three more holes, each fixed test-first: renamed imported constants and classes counted as aliases (false positive); a factory with a block body or a function declaration did not count its returned methods as interface (evasion); a generic private `call(fn, ...args)` helper exempted every forwarder (evasion). Accepted: a module holding only one thin standard-library wrapper (`(s) => Number.parseInt(s, 10)`) is flagged, as the same wrapper without the constant already was.
 
   After the change, nothing is flagged in this repo, in ky, zustand or immer; precision@25 and AUC are unchanged (12/25, 0.827).
-- **Remaining evasion:** splitting a module into files that are each below the minimum interface size and not forwarders.
+- **Splitting, measured and fixed afterwards on request** (see "Follow-up calibration" below). A split pass-through facade was never an evasion: every part keeps its forwarders and stays flagged (72–80). What evaded was splitting into tiny non-forwarding pieces, and classitis did not block even in a full directory (62 < 65).
 
 - **The reviewer's call:** "usable as scan only" until the classitis false positive was fixed, then "ready to gate (narrow) is defensible". It is fixed.
 - A typed EventEmitter wrapper is flagged at 73, which the reviewer called debatable. Typed emit/on/off forwarders are thin wrappers whose value is the type, so `// deepcheck-ignore-file -- reason` is the intended way out.
@@ -196,7 +196,7 @@ Three modules that entered the top 30 after calibration were labelled later: `wi
 | Text area behind the document (deep enough) | 36 | no |
 | Java-style stream wrappers: FileInputStream, BufferedInputStream, ObjectInputStream (shallow) | 71 | yes |
 | TextDocument whose methods forward to TextArea (pass-through, ch. 7) | 74 | yes |
-| Tiny single-function files in one directory (classitis) | marked classitis | eligible |
+| Tiny single-function files in one directory (classitis) | 67 (62 before the follow-up calibration) | yes |
 | Facade of four forwarding functions (`tenant-facade.ts`, used in X2.2) | 75 | yes |
 | Thin URL wrappers around fetch (3 one-line functions) | 53 | no |
 
@@ -224,7 +224,7 @@ None of the 24 eligible OSS modules reaches 65.
 | Attempt | Result | Status |
 |---|---|---|
 | Pad a shallow module with dead internals (unused functions and constants) | Before: the score fell from 74 to 46 (gamed). Now unused non-exported top-level declarations, including chains that only feed each other, are left out of statements, operations, complexity and function count, and the score stays at 74. Uses are resolved by symbol, so a parameter, local or property with the same name does not keep dead code alive. Destructured declarations are tracked per bound name. Names in `export { … }` lists and shorthand members count as uses (review findings, tests). An unused `const x = sideEffect()` is treated as dead although it runs | mitigated, tests |
-| Split a deep module (CSV parser) into tiny files | the highest part scores above the whole, so `scan` shows it. But the tiny parts are not **eligible** (interfaceSize < 5, and fewer than 5 files for classitis), so the gate does not see them: splitting a flagged module into several small files evades the gate | **weakness, documented**: `scan --min-score` still ranks the parts |
+| Split a deep module (CSV parser) into tiny files | the highest part scores above the whole. At least 3 tiny single-function files in one directory whose only importer is the same module are classitis; the larger pieces reach 65–67 and fail the gate, the smallest (one comparison) stays at 62. A split pass-through facade stays flagged part by part (72–80) | **mitigated, tests** (follow-up calibration); pieces that also have other importers or sit in different directories still evade |
 | Inline pass-throughs (do the work instead of forwarding) | score goes down | holds, test |
 | Wrap pass-throughs in an exported object literal, or export them through `export { … }` | function members count as interface (also shorthand `{ load }`) and pass-throughs are detected (Phase 1 review fix; round 2 found the dead-code check dropping such functions, fixed) | mitigated, tests |
 | Pad with *live* but pointless code (statements that are executed but do nothing useful) | lowers the score | **not mitigated**: not detectable statically without judgement; reviewers must catch it, and every finding says "fix the design, do not pad" |
@@ -255,7 +255,7 @@ Pass-through, leaky, classitis and unused exports are sparse indicators: alone t
   - Flat by design: 60, 43, 43, 42, 41, 35, 27, 26, 20, 20, 19, 3.
   - Deep: at most 39.
   - OSS: at most 60.
-  - Textbook pass-through designs: 71 to 75.
+  - Textbook pass-through designs: 71 to 75 (71 to 80 and classitis at 67 after the follow-up calibration below, where the other numbers moved by at most 2).
   - 65 lies between them, 5 points above the highest legitimate module and 6 below the lowest textbook case. **0 modules of this repo are at or above it** (0 of 124 analyzed in the baseline).
   - A lower threshold (e.g. 45) would add 1 shallow module (`stores.ts`, 47) but also flat modules at 60, 43 and 43. It would block legitimate designs.
 - **tolerance 5.** I applied three benign one-step edits to each of the 71 eligible modules: one tiny exported helper, one live internal helper, one exported constant.
@@ -263,13 +263,29 @@ Pass-through, leaky, classitis and unused exports are sparse indicators: alone t
   - 5 lets one small benign edit pass. A baselined module that keeps getting shallower fails G2.
   - Today the baseline is empty, so G2 and the tolerance do not apply yet; they matter once modules are baselined. The current risk is G1: a benign edit pushing an unbaselined module over 65. The structural requirement covers it, since a module needs a pass-through, leaky export or classitis to fail.
 
+## Follow-up calibration (2026-10-11, on request)
+
+**Can the weights be tuned better? No, measured.** Repeated 5-fold cross-validation (20 repetitions, 98 folds): on each training part the best of 3,000 random weight sets was chosen and compared with the default weights on the held-out part.
+- Held-out AUC: default weights 0.841, tuned weights 0.792 (tuned better in 15 folds, worse in 53).
+- On all 58 labels the best weight set reaches 0.859 instead of 0.827: that gain is overfitting.
+- A candidate new signal was also checked: the share of functions whose body is one call (thin wrappers that transform their arguments). It does not separate: shallow modules have about a quarter, but deep `api.ts` 0.57 and flat-by-design `utils/format.ts` 0.75. Not adopted.
+- So the ranking is limited by what the metrics see and by 58 judgement labels, not by the weights.
+
+**What was changed: classitis now blocks, also for split modules** (tests first: `gaming.test.ts`, `reference.test.ts`).
+- Classitis never reached the gate: tiny pieces with real logic score 57–62, because classitis weighed 10 and depth or complexity cannot reach 1 for a two-statement function. Even the textbook directory of six one-function files scored 62.
+- Weights: `classitis` 10 to 15, `leaky` 5 to 0 (sum still 100). Leaky exports were noise in the ablation and caused one of the two earlier false positives at 65; they are still measured and explained in findings. `unusedExports` stays at 5, because the brief uses Fallow's data as score inputs.
+- A data-only class alone now counts 0.5 in the classitis component: a single value class (`Point` with x, y and a constructor) would otherwise fail the gate (58, not flagged; 61 before).
+- Classitis also marks at least 3 tiny single-export files of one directory whose only importer is the same counted module: a module cut into pieces that its caller assembles. Shared utilities from different directories, or with other importers, are not pieces. In this repo, ky, zustand and immer no module imports more than 2 tiny files at all.
+- Effects: precision@25 12/25 and AUC 0.828 (from 0.827); 0 flagged in this repo (baseline unchanged, 0 of 124) and in the OSS projects (highest 60). Labelled shallow 47 and below, flat by design 60 and below, deep 39 and below. Textbook pass-through designs 71–80, the classitis directory 67, all flagged.
+- First attempt, rejected by the independent review: weights classitis 20 with leaky and unusedExports 0, and assembled pieces counted across directories. It flagged a page importing three one-function utilities from different folders (67–82), one error class per file thrown by one module (80), and a single value class (71), and it dropped Fallow as a score input. Each case is now a regression test.
+
 ## Limits
 
 - **Small sample, one codebase.** 58 labelled modules from one SvelteKit and Elysia repo. Precision@25 moves by 4 percentage points per module. The threshold's margin to the highest legitimate module is 5 points.
 - **Judgement labels.** They come from three reviewer agents, not humans, and 9 of 58 are low confidence. "Flat by design" versus "shallow" is the most disputable boundary (utility collections, CRUD services).
 - **Calibration on the same labels it is measured on.** The changes were few and generic (operations, re-exports, mostly-types, dead code, two targets, one weight), and several came from the OSS projects rather than the labels. Even so, precision and AUC "after" are optimistic.
 - **Low recall at the gate.** It catches pass-through layers and thin facades, not moderately shallow modules (0 of 14 labelled shallow modules here reach 65). Gate precision rests on author-written fixtures and one scratch module, not on real positives.
-- **Splitting evades the gate.** A shallow module split into small files has parts that are not eligible.
+- **Splitting into scattered pieces.** At least 3 tiny files of one directory that only one module imports are caught; pieces spread over directories, or also imported elsewhere, still evade. The classitis margin is small: the textbook directory scores 67 against 65.
 - **Runtime.** After the symbol-based dead-code check, `npm run deepcheck:audit` takes 4.7–5.3 s with Fallow and about 3.7 s without (the type checker's first symbol resolution). That fits a commit/push gate, not an after-every-edit hook.
 - **Blind spots of the metrics.**
   - Svelte components are not measured.

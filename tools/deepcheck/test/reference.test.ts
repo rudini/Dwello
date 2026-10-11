@@ -195,8 +195,15 @@ describe('reference designs', () => {
 		expect(flagged).not.toContain('src/unix-io.ts');
 	});
 
-	it('marks classitis in a directory of tiny single-function files', () => {
+	it('does not flag a single value class on its own (review 4)', () => {
+		const point = 'export class Point {\n\tx: number;\n\ty: number;\n\tconstructor(x: number, y: number) {\n\t\tthis.x = x;\n\t\tthis.y = y;\n\t}\n}\n';
+		const m = analyze({ root: writeProject({ 'src/point.ts': point }), fallow: 'off' }).modules[0];
+		expect(m.metrics.dataOnlyClasses).toEqual(['Point']);
+		expect(m.flagged).toBe(false);
+	});
+
+	it('flags classitis in a directory of tiny single-function files', () => {
 		const address = report.modules.filter((m) => m.path.startsWith('src/address/'));
-		expect(address.every((m) => m.metrics.classitis && m.eligible)).toBe(true);
+		expect(address.every((m) => m.metrics.classitis && m.flagged)).toBe(true);
 	});
 });

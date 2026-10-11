@@ -485,3 +485,26 @@ The user asked to close the evasions found by the third independent check.
   - Repo: 0 flagged, precision@25 12/25 and AUC 0.827, unchanged.
   - ky, zustand, immer: 0 flagged.
 - **Remaining evasion:** splitting into small non-forwarding files (documented).
+
+### 2026-10-11, follow-up on request: calibration and splitting
+
+The user asked whether the calibration can be improved, and to close the evasion by splitting a module into small files.
+- **Calibration, measured before changing anything:** repeated 5-fold cross-validation of weight tuning. Tuned weights do worse on held-out labels (AUC 0.792 vs 0.841 for the defaults; worse in 53 of 98 folds). A thin-wrapper signal was checked and does not separate the labels. Weights for ranking stay as they are.
+- **Splitting, measured:** a split pass-through facade stays flagged part by part (72–80), so it never evaded. Tiny non-forwarding pieces evaded, and classitis did not block at all (textbook directory 62 < 65).
+- **Tests first** (red): classitis in a directory is flagged; three tiny files that one module imports are classitis and flagged; two are not.
+- **Implementation:**
+  - `graph.ts` records each module's counted importers.
+  - Classitis also marks at least 3 tiny single-export files of one directory whose only importer is the same module (no module in this repo, ky, zustand or immer imports more than 2 tiny files).
+  - Weights: classitis 10 to 15, leaky 5 to 0 (ablation noise; still reported). A data-only class alone counts 0.5.
+- **Independent review (one round):** the first version (classitis 20, leaky and unusedExports 0, pieces counted across directories) had valid findings, all fixed test-first:
+  - High: a page importing three one-function utilities from different folders flagged them (67–82). Now pieces must share a directory and have no other importer.
+  - Medium: one error class per file thrown by one module was flagged (80). Fixed by the same rule.
+  - Medium: a single value class newly failed the gate (71). A data-only class alone now counts 0.5 (58).
+  - Low: unusedExports at 0 dropped Fallow as a score input, which the brief asks for. Restored to 5; the G6 test is unchanged again.
+  - Low: score range in the docs held for fixtures only; corrected.
+- **Checks:**
+  - 181 deepcheck tests pass; ESLint, tsc, `fallow audit` and `deepcheck:audit` clean.
+  - Baseline regenerated: unchanged, 0 of 124.
+  - Precision@25 12/25, AUC 0.828.
+  - OSS: highest 60, none flagged. Textbook designs 71–80, classitis directory 67, all flagged.
+- **Remaining:** pieces spread over directories or also imported elsewhere; the classitis margin is small (67 against 65).

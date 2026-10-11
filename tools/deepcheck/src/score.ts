@@ -16,7 +16,8 @@ export function components(m: ModuleMetrics, exportCount: number, functionCount:
 		complexity: logShallowness(m.complexity / interfaceSize, config.complexityTarget),
 		passThrough: clamp01((2 * m.passThroughs.length) / Math.max(1, functionCount)),
 		leaky: clamp01(m.leakyExports.length / Math.max(1, exportCount)),
-		classitis: m.classitis || m.dataOnlyClasses.length > 0 ? 1 : 0,
+		// A data-only class alone is a weaker sign than a module cut into tiny files (a value class is a common idiom).
+		classitis: m.classitis ? 1 : m.dataOnlyClasses.length > 0 ? 0.5 : 0,
 		coupling: coupled === 0 ? 0 : m.fanOut / coupled,
 		unusedExports: m.unusedExports === null ? 0 : clamp01(m.unusedExports / Math.max(1, exportCount))
 	};

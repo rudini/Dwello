@@ -5,6 +5,8 @@ import { ts } from 'ts-morph';
 export interface Coupling {
 	fanIn: number;
 	fanOut: number;
+	/** The counted modules that import this one (through barrels). */
+	importers: string[];
 }
 
 /** TS5083 "Cannot read file '...'", e.g. an `extends` target that is generated later. */
@@ -83,10 +85,13 @@ export function coupling(
 	warnings: string[]
 ): Map<string, Coupling> {
 	const graph = edges(root, files, warnings);
-	const result = new Map<string, Coupling>(files.map((f) => [f, { fanIn: 0, fanOut: graph.get(f)!.size }]));
+	const result = new Map<string, Coupling>(files.map((f) => [f, { fanIn: 0, fanOut: graph.get(f)!.size, importers: [] }]));
 	for (const [file, targets] of graph) {
 		if (!countedImporters.has(file) || barrels.has(file)) continue;
-		for (const t of throughBarrels(targets, graph, barrels)) result.get(t)!.fanIn++;
+		for (const t of throughBarrels(targets, graph, barrels)) {
+			result.get(t)!.fanIn++;
+			result.get(t)!.importers.push(file);
+		}
 	}
 	return result;
 }

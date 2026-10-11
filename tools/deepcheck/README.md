@@ -106,7 +106,7 @@ Excluded files still take part in the import graph; tests, declarations and gene
 | `depthRatio` | `implementationSize / max(1, interfaceSize)` (reported as defined; the score's depth component also counts `operations`) |
 | `passThroughs` | Named functions and methods (declarations, methods, functions and arrows assigned to variables, class properties, members of module-level objects or of objects a named factory returns; not inline callbacks) whose whole body is one call (`return f(a, b)`, `f(a, b);`, `=> f(a, b)`, optionally awaited) that receives every parameter unchanged (in any order), destructured names included, plus at most fixed values: literals, constants or closure variables (`=> get(fetch, id, true)`). At least one parameter; recursion is excluded; a call to a non-exported function of the same module that does its own work does not count (an entry point into the module's own hidden helper); a private helper that is itself just one call (`call(fn, ...args)`) does not hide anything and does not exempt its callers. Exported aliases of a local function or of a camelCase import (`export const load = getTenant`) count too; imports are not resolved, so renamed `CONSTANTS` and `Classes` do not. Each location is reported. |
 | `leakyExports` | Exported signatures (parameter, return and property types of exported functions, variables, classes' public members, and exported type bodies) that reference a type declared in this module but not exported, resolved by symbol. Conservative: only interfaces, classes, enums and object-literal type aliases count; a local alias of another type (`type Fetch = typeof fetch`) is nameable by callers and is not a leak. |
-| `classitis` | (a) A directory with at least `classitisMinFiles` analyzed modules where at least 80 % are tiny single-export files (1 export, at most 3 statements): those tiny files are marked. (b) Exported classes made only of fields, simple accessors (at most one statement) and a constructor that only assigns `this.x`, without `extends` (`dataOnlyClasses`). |
+| `classitis` | (a) Tiny single-export files (1 function or class export, at most 3 statements) that make up at least 80 % of a directory with at least `classitisMinFiles` analyzed modules, or at least 3 of which, in one directory, are imported only by one and the same counted module (a module cut into pieces that its caller assembles; shared utilities from other directories or with other importers are not pieces; no module in this repo, ky, zustand or immer imports more than 2 tiny files at all): those tiny files are marked. (b) Exported classes made only of fields, simple accessors (at most one statement) and a constructor that only assigns `this.x`, without `extends` (`dataOnlyClasses`). |
 | `fanIn` / `fanOut` | From the whole-project import graph (TS and Svelte files), resolved with the nearest `tsconfig.json` (paths, baseUrl). `fanOut`: distinct project modules imported. `fanIn`: distinct importers; importing a barrel counts as importing what it re-exports. Deep modules tend to have high fan-in and low fan-out. |
 | `complexity` | Fallow's `total_cyclomatic` per file when Fallow data is available, else own count: 1 per function (including arrows and methods) plus 1 per `if`, `?:`, `case`, loop, `catch`, `&&`, `\|\|`, `??` and their assignment forms. |
 | `unusedExports` | Fallow's unused exports and unused types of the file; `null` without Fallow. |
@@ -121,7 +121,7 @@ Each component is 0 (deep) to 1 (shallow):
 | `complexity` | `clamp01(1 - log2(max(complexity / max(1, interfaceSize), 1)) / log2(complexityTarget))` |
 | `passThrough` | `clamp01(2 * passThroughs / max(1, named functions))` |
 | `leaky` | `clamp01(leakyExports / max(1, exported names))` |
-| `classitis` | 1 if the module is marked as classitis or has a data-only class, else 0 |
+| `classitis` | 1 if the module is marked as classitis, 0.5 if it only has a data-only class (a value class alone is a common idiom), else 0 |
 | `coupling` | `fanOut / (fanIn + fanOut)`, 0 when both are 0 |
 | `unusedExports` | `clamp01(unusedExports / max(1, exported names))`, 0 without Fallow data |
 
@@ -134,10 +134,12 @@ Default weights:
 | `depth` | 40 |
 | `complexity` | 20 |
 | `passThrough` | 15 |
-| `leaky` | 5 |
-| `classitis` | 10 |
+| `leaky` | 0 |
+| `classitis` | 15 |
 | `coupling` | 5 |
 | `unusedExports` | 5 |
+
+`leaky` is measured and explained in findings but not scored: alone it cannot rank modules (ablation in `docs/deepcheck-validation.md`), and its weight moved to `classitis` so that tiny classitis pieces reach `failThreshold`.
 
 A module is **eligible** when `interfaceSize >= minInterfaceSize`, or it has a pass-through, or a classitis component; tiny legitimate utilities (e.g. `clamp`) are never flagged. A module is **flagged** when it is eligible, `shallowScore >= failThreshold` (per-path overrides apply) and it has a structural sign of shallowness: a pass-through or classitis. Depth and complexity alone reach at most 60 for flat-by-design modules (constants, types), so they rank modules in `scan` but never fail the gate by themselves (Phase 4, `docs/deepcheck-validation.md`).
 

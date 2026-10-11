@@ -41,6 +41,70 @@ describe('gaming (Phase 4)', () => {
 		expect(Math.max(...partScores)).toBeGreaterThan(whole);
 	});
 
+	describe('splitting a module into tiny files that one module assembles', () => {
+		const PARTS = {
+			'src/csv/blank.ts': 'export function isBlank(line: string): boolean {\n\treturn line.trim().length === 0;\n}\n',
+			'src/csv/cells.ts': "export function finishCell(cells: string[], current: string): string {\n\tcells.push(current.trim());\n\treturn '';\n}\n",
+			'src/csv/split.ts': "export function splitLines(text: string): string[] {\n\treturn text.split('\\n');\n}\n"
+		};
+		const parser = (parts: string[]) =>
+			`${parts.map((p) => `import { ${p} } from './csv/${{ isBlank: 'blank', finishCell: 'cells', splitLines: 'split' }[p]}';`).join('\n')}
+export function parse(text: string): string[][] {
+	const rows: string[][] = [];
+	for (const line of ${parts.includes('splitLines') ? 'splitLines(text)' : "text.split('\\n')"}) {
+		if (${parts.includes('isBlank') ? 'isBlank(line)' : '!line.trim()'}) continue;
+		const cells: string[] = [];
+		let current = '';
+		for (const ch of line) {
+			if (ch === ',') current = ${parts.includes('finishCell') ? 'finishCell(cells, current)' : "(cells.push(current), '')"};
+			else current += ch;
+		}
+		rows.push([...cells, current]);
+	}
+	return rows;
+}
+`;
+		const report = (parts: string[]) => analyze({ root: writeProject({ ...PARTS, 'src/parse.ts': parser(parts) }), fallow: 'off' });
+
+		it('flags the parts as classitis although fewer than five files share a directory (review 3)', () => {
+			const parts = report(['isBlank', 'finishCell', 'splitLines']).modules.filter((m) => m.path.startsWith('src/csv/'));
+			expect(parts.every((m) => m.metrics.classitis)).toBe(true);
+			// One flagged piece fails the gate; the smallest piece (one comparison) stays just below the threshold.
+			expect(parts.filter((m) => m.flagged).map((m) => m.path).sort()).toEqual(['src/csv/cells.ts', 'src/csv/split.ts']);
+		});
+
+		it('leaves shared one-function utilities alone: from different folders, or also used elsewhere (review 4)', () => {
+			const util = (name: string) => `export function ${name}(v: string): string {\n\treturn v.trim().toLowerCase();\n}\n`;
+			const page = (from: string[]) => `${from.map((f, i) => `import { u${i} } from '${f}';`).join('\n')}\nexport const all = (v: string) => [u0(v), u1(v), u2(v)];\n`;
+			const scattered = analyze({
+				root: writeProject({
+					'src/math/clamp.ts': util('u0'),
+					'src/text/slugify.ts': util('u1'),
+					'src/format/chf.ts': util('u2'),
+					'src/page.ts': page(['./math/clamp', './text/slugify', './format/chf'])
+				}),
+				fallow: 'off'
+			});
+			const shared = analyze({
+				root: writeProject({
+					'src/utils/clamp.ts': util('u0'),
+					'src/utils/slugify.ts': util('u1'),
+					'src/utils/chf.ts': util('u2'),
+					'src/page.ts': page(['./utils/clamp', './utils/slugify', './utils/chf']),
+					'src/other.ts': "import { u0 } from './utils/clamp';\nexport const one = (v: string) => u0(v);\n"
+				}),
+				fallow: 'off'
+			});
+			const pieces = [...scattered.modules, ...shared.modules].filter((m) => !['src/page.ts', 'src/other.ts'].includes(m.path));
+			expect(pieces.some((m) => m.metrics.classitis || m.flagged)).toBe(false);
+		});
+
+		it('leaves two small helpers that one module imports alone', () => {
+			const parts = report(['isBlank', 'finishCell']).modules.filter((m) => m.path.startsWith('src/csv/'));
+			expect(parts.some((m) => m.metrics.classitis || m.flagged)).toBe(false);
+		});
+	});
+
 	it('inlining pass-throughs (doing the work instead of forwarding it) lowers the score', () => {
 		const forwarding = `import { store } from './store';
 export class Names {
