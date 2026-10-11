@@ -279,3 +279,17 @@ export class Ledger {
         # Kind, VERSION, Shape + size, *, counter, legacy, ids + start, load + id
         self.assertTrue(line.startswith("src/shape.ts: surface 11,"), line)
         self.assertIn(", tests 1,", line)
+
+    def test_only_an_arrow_whose_whole_body_is_the_call_is_a_pass_through(self):
+        module = ("export const up = (s: string) => trim(s).toUpperCase();\n"
+                  "export const inc = (n: number) => count(n) + 1;\n"
+                  "export const ok = (n: number) => count(n) > 0 ? 'yes' : 'no';\n"
+                  "export const groupIban = (iban: string) => compact(iban).replace(/(.{4})(?=.)/g, '$1 ');\n"
+                  "function inner(a: number, b: number) {\n  return a - b;\n}\n"
+                  "export const m = (a: string) => obj.method(a);\n")
+        repo = Repo(self, {"src/fmt.ts": module})
+
+        line = report_line(repo.run("depth_report", "src/fmt.ts"), "src/fmt.ts")
+
+        self.assertIn(", pass-through 1,", line)
+        self.assertIn("pass-through: m;", line.split(" -> ", 1)[1])
