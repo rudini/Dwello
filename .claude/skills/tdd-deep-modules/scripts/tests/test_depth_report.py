@@ -54,3 +54,20 @@ class DepthReportTest(unittest.TestCase):
         self.assertIn(", classitis yes,", tiny)
         self.assertIn("classitis: Cleaner, Converter", tiny.split(" -> ", 1)[1])
         self.assertIn(", classitis no,", none)
+
+    def test_the_test_boundary_counts_test_files_importing_the_module(self):
+        spec = 'import { parseAmount } from "../src/amount.js";\n'
+        other = 'import { parseAmount } from "./amounts";\n'
+        tested = Repo(self, {"src/amount.ts": fixture("deep"), "src/amount.test.ts": AMOUNT_TEST,
+                             "tests/amount.spec.ts": spec, "src/other.test.ts": other})
+        untested = Repo(self, {"src/amount.ts": fixture("deep"), "src/amount.md": other})
+
+        two = tested.run("depth_report", "src/amount.ts")
+        none = untested.run("depth_report", "src/amount.ts")
+
+        self.assertIn(", tests 2", report_line(two, "src/amount.ts"))
+        self.assertEqual(two.returncode, 0, two.stdout + two.stderr)
+        line = report_line(none, "src/amount.ts")
+        self.assertIn(", tests 0", line)
+        self.assertIn("untested: no test file imports it", line.split(" -> ", 1)[1])
+        self.assertEqual(none.returncode, 1, none.stdout + none.stderr)
