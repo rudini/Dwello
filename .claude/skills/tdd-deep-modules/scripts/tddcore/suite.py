@@ -137,10 +137,11 @@ def _run_vitest(root, package):
     unhandled = re.search(r"^Vitest caught \d+ unhandled errors? during the test run",
                           done.stderr + done.stdout, re.MULTILINE) is not None
     here = Path(root).resolve()
-    tests = frozenset(f"{package / Path(f['name']).relative_to(here)}::{a['fullName']}"
-                      for f in data["testResults"] for a in f["assertionResults"])
+    results = [(f"{package / Path(f['name']).relative_to(here)}::{a['fullName']}", a["status"])
+               for f in data["testResults"] for a in f["assertionResults"]]
     return Run(done.returncode, _vitest_outcome(done.returncode, data, unhandled), summary,
-               data["numFailedTests"], ran, tests)
+               data["numFailedTests"], ran, frozenset(i for i, _ in results),
+               frozenset(i for i, status in results if status == "failed"))
 
 
 def _bun_summary_errors(stderr):
