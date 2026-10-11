@@ -2,7 +2,7 @@
 import os
 import re
 import subprocess
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 
 from tddcore import protocol
@@ -33,6 +33,7 @@ TINY_CLASS = 2  # methods; two or more classes this small spread one decision ov
 
 
 def measure(root, path):
+    """Every depth metric of the module at `path` (relative to `root`), and the findings they raise."""
     module = Path(root) / path
     if Path(path).suffix not in _SOURCE:
         raise NotAModule(f"{path}: not a TypeScript or JavaScript file")
@@ -40,27 +41,28 @@ def measure(root, path):
         raise NotAModule(f"{path}: no such file")
     text = module.read_text(errors="replace")
     surface, size = _surface(text), _size(text)
-    ratio = size / surface if surface else float(size)
-    pass_through = _pass_through(text)
-    tests = _tests(Path(root) / path)
-    unused, duplicate = _unused(text), _duplicate(text)
     tiny = [name for name, methods in _classes(text) if len(methods) <= TINY_CLASS]
-    classitis = tuple(tiny) if len(tiny) >= 2 else ()
+    metrics = Depth(path, surface, size, size / surface if surface else float(size),
+                    tuple(tiny) if len(tiny) >= 2 else (), _pass_through(text), _tests(module, path),
+                    _unused(text), _duplicate(text), ())
+    return replace(metrics, findings=_findings(metrics))
+
+
+def _findings(module):
     findings = []
-    if ratio < SHALLOW_RATIO:
-        findings.append(f"shallow: ratio {ratio:.1f} < {SHALLOW_RATIO}")
-    if classitis:
-        findings.append(f"classitis: {', '.join(classitis)}")
-    if pass_through:
-        findings.append(f"pass-through: {', '.join(pass_through)}")
-    if not tests:
+    if module.ratio < SHALLOW_RATIO:
+        findings.append(f"shallow: ratio {module.ratio:.1f} < {SHALLOW_RATIO}")
+    if module.classitis:
+        findings.append(f"classitis: {', '.join(module.classitis)}")
+    if module.pass_through:
+        findings.append(f"pass-through: {', '.join(module.pass_through)}")
+    if not module.tests:
         findings.append("untested: no test file imports it")
-    bloat = ([f"unused {', '.join(unused)}"] if unused else []) + \
-        ([f"{duplicate} duplicated lines"] if duplicate >= BLOAT_DUPLICATES else [])
+    bloat = ([f"unused {', '.join(module.unused)}"] if module.unused else []) + \
+        ([f"{module.duplicate} duplicated lines"] if module.duplicate >= BLOAT_DUPLICATES else [])
     if bloat:
         findings.append(f"bloat: {'; '.join(bloat)}")
-    return Depth(path, surface, size, ratio, classitis, pass_through, tests, unused, duplicate,
-                 tuple(findings))
+    return tuple(findings)
 
 
 def _size(text):
@@ -146,13 +148,13 @@ _SOURCE = {".ts", ".tsx", ".mts", ".cts", ".js", ".jsx", ".mjs", ".cjs"}
 _IMPORT = re.compile(r"""(?:\bfrom\s*|\bimport\s*\(?\s*)["'](\.{1,2}/[^"']*)["']""")
 
 
-def _tests(module):
+def _tests(module, path):
     """Test files of the module's repository whose relative imports resolve to the module."""
     module = module.resolve()
     found = subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=module.parent,
                            capture_output=True, text=True)
     if found.returncode != 0:
-        raise NotAModule(f"{module.name}: not inside a git repository")
+        raise NotAModule(f"{path}: not inside a git repository")
     top = Path(found.stdout.strip())
     listed = subprocess.run(["git", "ls-files", "-z", "-co", "--exclude-standard"], cwd=top, check=True,
                             capture_output=True, text=True).stdout.split("\0")
