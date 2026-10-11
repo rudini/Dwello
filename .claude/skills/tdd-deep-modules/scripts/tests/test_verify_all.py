@@ -185,3 +185,16 @@ class LockFormatTest(unittest.TestCase):
         self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
         self.assertIn("verifiers.lock: not readable as UTF-8 text", result.stdout.splitlines())
         self.assertEqual(result.stdout.strip().splitlines()[-1], "STAGE2: FAIL")
+
+    def test_the_lock_names_the_real_file_of_the_latest_review(self):
+        root = skill_dir(self, lock=False)
+        reviews = root / "evidence" / "reviews"
+        (reviews / "step-08-round-1.md").rename(reviews / "step-08-round-01.md")
+        write_lock(root, "evidence/reviews/step-08-round-01.md")
+        named_right = verify(root)
+        write_lock(root, "evidence/reviews/step-08-round-1.md")
+        named_wrong = verify(root)
+
+        self.assertEqual(named_right.returncode, 0, named_right.stdout + named_right.stderr)
+        self.assertEqual(named_wrong.returncode, 1, named_wrong.stdout + named_wrong.stderr)
+
