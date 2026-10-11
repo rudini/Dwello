@@ -14,6 +14,7 @@ def main(paths):
         module = depth.measure(os.getcwd(), path)
         verdict = "; ".join(module.findings) or "deep"
         print(f"{path}: surface {module.surface}, size {module.size}, ratio {module.ratio:.1f}, "
+              f"classitis {'yes' if module.classitis else 'no'}, "
               f"pass-through {len(module.pass_through)}"
               f" -> {verdict}")
         found = found or bool(module.findings)
