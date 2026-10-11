@@ -107,3 +107,18 @@ class VerifyStage1Test(unittest.TestCase):
                 self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
                 self.assertIn("step 02: unreadable review (round 2)", result.stdout)
                 self.assertNotIn("Traceback", result.stderr)
+
+    def test_review_files_cannot_be_gamed(self):
+        cases = {"round 10 is later than round 9": (["PASS"] * 9 + ["FAIL"], {}),
+                 "a backup file does not count": (["FAIL"], {"step-01-round-2.md.bak": "VERDICT: PASS\n"}),
+                 "a response file does not count": (["FAIL"], {"step-01-round-2-response.md": "VERDICT: PASS\n"}),
+                 "a qualified pass is no pass": (["PASS (with caveats)"], {})}
+        for name, (rounds, extra) in cases.items():
+            with self.subTest(name):
+                root = skill_dir(self, {"01": rounds, "02": ["PASS"], "03": ["PASS"]})
+                for file, text in extra.items():
+                    (root / "evidence" / "reviews" / file).write_text(text)
+
+                result = verify(root)
+
+                self.assertEqual(result.stdout.strip().splitlines()[-1], "STAGE1: FAIL", result.stdout)

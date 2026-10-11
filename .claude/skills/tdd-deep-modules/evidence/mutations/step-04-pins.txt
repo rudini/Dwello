@@ -1,0 +1,3 @@
+KILLED   tddcore/verdicts.py: '    latest = max(rounds)' -> '    latest = max(rounds, key=str)' [test_review_files_cannot_be_gamed]
+KILLED   tddcore/verdicts.py: '        number = re.fullmatch(rf"step-{step}-round-(\\d+)\\.md", review.name)' -> '        number = re.match(rf"step-{step}-round-(\\d+)", review.name)' [test_review_files_cannot_be_gamed]
+KILLED   tddcore/verdicts.py: '    return verdict == "VERDICT: PASS", f"{verdict} (round {latest})"' -> '    return verdict.startswith("VERDICT: PASS"), f"{verdict} (round {latest})"' [test_review_files_cannot_be_gamed]
