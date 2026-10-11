@@ -636,3 +636,13 @@ class TddStepTest(unittest.TestCase):
         repo.write("a.test.js", VITEST_TEST)
         repo.write("b.test.js", VITEST_TEST.replace("./calc.js", "./missing.js").replace('"adds"', '"b"'))
         self.assert_refused(repo, "red", "red needs a failing assertion")
+
+    def test_bun_test_file_name_patterns_are_test_code(self):
+        for name in ("calc_test.ts", "calc_spec.ts"):
+            with self.subTest(name):
+                repo = bun_repo(self)
+                repo.write(name, BUN_TEST)
+
+                result = repo.run("tdd-step", "red", "adds two numbers")
+
+                self.assertEqual(result.returncode, 0, result.stderr)
