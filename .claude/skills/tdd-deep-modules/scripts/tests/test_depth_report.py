@@ -86,3 +86,47 @@ class DepthReportTest(unittest.TestCase):
         self.assertIn("bloat: unused totalWithDiscount, totalOfPositive, formatTotal; 6 duplicated lines",
                       line.split(" -> ", 1)[1])
         self.assertIn(", unused 0, duplicate 1 -> deep", clean)
+
+    def test_every_export_form_counts_towards_the_surface(self):
+        module = """export type Rappen = number;
+export interface Line {
+  amount: Rappen;
+}
+export const VAT = 8.1;
+export const net = (gross: number, rate = VAT) => gross / (1 + rate / 100);
+
+export default function sum(lines: Line[]): number {
+  return lines.reduce((total, line) => total + line.amount, 0);
+}
+
+const half = (x: number) => x / 2;
+function round(x: number): number {
+  return Math.round(x);
+}
+export { half, round as roundRappen };
+
+export class Ledger {
+  #entries: number[] = [];
+  constructor(owner: string, currency: string) {
+    this.audit(owner, currency);
+  }
+  add(amount: number): void {
+    this.#entries.push(amount);
+    this.#check();
+  }
+  private audit(owner: string, currency: string): void {
+    console.log(owner, currency);
+  }
+  #check(): void {
+    console.log(this.#entries.length);
+  }
+}
+"""
+        repo = Repo(self, {"src/ledger.ts": module})
+
+        result = repo.run("depth_report", "src/ledger.ts")
+
+        # Rappen, Line, VAT 3 + net 1+2 + sum 1+1 + half, roundRappen 2 + Ledger 1+2 (constructor)
+        # + add 1+1; audit and #check are private
+        self.assertTrue(report_line(result, "src/ledger.ts").startswith("src/ledger.ts: surface 15,"),
+                        result.stdout)
