@@ -381,3 +381,24 @@ export class Ledger {
                 line = report_line(repo.run("depth_report", "src/m.ts"), "src/m.ts")
 
                 self.assertIn(expected, line)
+
+
+SWARM_TEST = ('import { expect, test } from "vitest";\n'
+              'import { normaliseFraction, splitSign, stripCurrency, toRappen } from "./amount";\n\n'
+              'test("strips the currency", () => {\n  expect(stripCurrency("CHF 5")).toBe("5");\n});\n'
+              'test("splits the sign", () => {\n  expect(splitSign("-5")).toEqual([-1, "5"]);\n});\n'
+              'test("pads the fraction", () => {\n  expect(normaliseFraction("5.5")).toBe("5.50");\n});\n'
+              'test("counts Rappen", () => {\n  expect(toRappen("5.50")).toBe(550);\n});\n')
+
+
+class HelperSwarmTest(unittest.TestCase):
+    def test_a_swarm_of_exported_one_caller_helpers_is_classitis(self):
+        repo = Repo(self, {"src/amount.ts": fixture("swarm"), "src/amount.test.ts": SWARM_TEST})
+
+        result = repo.run("depth_report", "src/amount.ts")
+
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        line = report_line(result, "src/amount.ts")
+        self.assertIn(", classitis yes,", line)
+        self.assertIn("classitis: exported helpers with one caller: stripCurrency, splitSign, normaliseFraction, "
+                      "toRappen", line.split(" -> ", 1)[1])

@@ -1,0 +1,41 @@
+// Parses Swiss amounts such as "CHF 1'234.50", "1'234.–" or "-12.5" into Rappen.
+
+const CURRENCY = /^(CHF|Fr\.)\s*/i;
+const THOUSANDS = /['’\s]/g;
+
+export function stripCurrency(text: string): string {
+  return text.trim().replace(CURRENCY, "");
+}
+
+export function splitSign(text: string): [number, string] {
+  if (text.startsWith("-")) {
+    return [-1, text.slice(1)];
+  }
+  return [1, text];
+}
+
+export function normaliseFraction(text: string): string {
+  const dash = text.replace(/\.[–-]$/, ".00");
+  const parts = dash.split(".");
+  if (parts.length === 1) {
+    return `${parts[0]}.00`;
+  }
+  if (parts.length !== 2 || parts[1].length > 2) {
+    throw new Error(`not an amount: ${text}`);
+  }
+  return `${parts[0]}.${parts[1].padEnd(2, "0")}`;
+}
+
+export function toRappen(text: string): number {
+  const [francs, rappen] = text.split(".");
+  if (!/^\d+$/.test(francs) || !/^\d{2}$/.test(rappen)) {
+    throw new Error(`not an amount: ${text}`);
+  }
+  return Number(francs) * 100 + Number(rappen);
+}
+
+export function parseAmount(text: string): number {
+  const [sign, rest] = splitSign(stripCurrency(text));
+  const digits = rest.replace(THOUSANDS, "");
+  return sign * toRappen(normaliseFraction(digits));
+}
