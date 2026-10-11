@@ -27,6 +27,7 @@ Funktionalität: Barrierefreiheit
       | dashboard              | mobile-menu-open    |
       | dashboard              | user-menu-open      |
       | dashboard              | other-language      |
+      | dashboard              | language-menu-open  |
       | buildings              | default             |
       | buildings              | empty               |
       | buildings              | filtered-empty      |

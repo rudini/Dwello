@@ -210,6 +210,10 @@ const states: Record<string, (page: Page, viewport: Viewport) => Promise<unknown
 		await press(page, 'mobile-menu-button');
 		await shows(page, `[role="dialog"][aria-label="${await say(page, 'Hauptnavigation')}"]`);
 	},
+	'language-menu-open': async (page) => {
+		await press(page, 'language-button');
+		await shows(page, '[data-testid="language-option"]');
+	},
 	'user-menu-open': async (page) => {
 		await press(page, 'user-menu-button');
 		await shows(page, '[data-testid="user-menu-settings"]');

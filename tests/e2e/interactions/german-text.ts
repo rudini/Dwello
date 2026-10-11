@@ -2,7 +2,7 @@ import type { Page } from '@playwright/test';
 import { readFileSync } from 'fs';
 
 // German left on a screen in another language: words that occur in German UI texts (messages/de.json) but in no text
-// of the shown language. User data is masked first: scenario records carry a UUID, seeded places and addresses are fixed.
+// of the shown language, and words with umlauts or ß. User data is masked first: scenario records carry a UUID, seeded places and addresses are fixed.
 const messages = (language: string): Record<string, string> =>
 	JSON.parse(readFileSync(`messages/${language}.json`, 'utf8'));
 const words = (text: string) => text.toLowerCase().match(/\p{L}{3,}/gu) ?? [];
@@ -55,7 +55,8 @@ export async function germanOnScreen(page: Page, language: string, userData: str
 			.reduce((rest, value) => rest.split(value).join(' '), text)
 			.replace(scenarioRecord, ' ');
 	return (await pageTexts(page)).flatMap((text) => {
-		const left = words(masked(text)).filter((word) => germanOnly[language].has(word));
+		// a German word, or one with ä, ö, ü or ß, which French, Italian and English never use
+		const left = words(masked(text)).filter((word) => germanOnly[language].has(word) || /[äöüß]/.test(word));
 		return left.length ? [`«${text}» (${[...new Set(left)].join(', ')})`] : [];
 	});
 }

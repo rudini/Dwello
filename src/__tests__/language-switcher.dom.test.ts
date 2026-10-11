@@ -64,6 +64,13 @@ describe('Sprachwahl', () => {
 		expect(document.activeElement).toBe(button());
 	});
 
+	it('schliesst bei einem Klick daneben', () => {
+		show(LanguageSwitcher, {});
+		click(button());
+		click(document.querySelector<HTMLElement>('button[aria-hidden="true"]')!);
+		expect(allByTestId('language-option')).toHaveLength(0);
+	});
+
 	it('steht in der Kopfzeile, ohne ein weiteres Auswahlfeld', () => {
 		show(Header, {
 			user: { id: 'u1', sub: 'u1', name: 'Vera Verwalter', email: 'vera@example.ch' }
@@ -81,5 +88,6 @@ describe('Sprachwahl ohne Kopfzeile', () => {
 		show(Layout, { data: { user: null }, children } as never);
 		expect(document.querySelector('header')).toBeNull();
 		expect(allByTestId('language-button')).toHaveLength(1);
+		expect(document.querySelector('nav[aria-label="Sprachwahl"] [data-testid="language-button"]')).not.toBeNull();
 	});
 });

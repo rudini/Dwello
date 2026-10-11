@@ -58,7 +58,8 @@ Then(
 		const path = await seedFor(seed, address(screen, state), state);
 		const userData = [...seed.names.values()];
 		const found: string[] = [];
-		for (const language of ['fr', 'it', 'en']) {
+		// 'other-language' chooses French itself
+		for (const language of state === 'other-language' ? ['fr'] : ['fr', 'it', 'en']) {
 			await useLanguage(page, language);
 			const look = async (shownPage: Page) => {
 				const shown = (await documentLanguage(shownPage).getAttribute('lang'))!;

@@ -154,5 +154,5 @@
 	"terms_availability_1": "Operation, data backup and availability are the responsibility of the operator of this Dwello installation. There is no right to uninterrupted availability.",
 	"language_prefix": "Language: ",
 	"ui_opens_new_tab": "(opens in a new tab)",
-	"language_choice": "Language choice"
+	"language_choice": "Language selection"
 }
