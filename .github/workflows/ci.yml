@@ -297,15 +297,20 @@ jobs:
             };
             // the statement PDF (statement-pdf.ts): pdf_<language>_<page>.png
             const pdfPages = fs.readdirSync('ui-screenshots').filter((file) => /^pdf_\w+_\d+\.png$/.test(file)).sort();
+            // PDF pages that look the same (statement-pdf.ts): pdf_<language>_<page>
+            const samePdfPages = fs.existsSync('ui-screenshots/unchanged.txt')
+              ? fs.readFileSync('ui-screenshots/unchanged.txt', 'utf8').split('\n').filter(Boolean).sort()
+              : [];
+            const pdfTitle = (name) => {
+              const [, language, page] = name.match(/^pdf_(\w+)_(\d+)/);
+              return `Statement PDF (${language}), page ${page}`;
+            };
             // a page that looks the same as on the base branch has no screenshot (looksTheSame)
             const unchanged = [];
             const shots = fs.readFileSync('ui-routes.txt', 'utf8').split('\n').filter(Boolean).flatMap((route) => {
               if (route === 'pdf') {
-                if (!pdfPages.length) unchanged.push('Statement PDF');
-                return pdfPages.map((file) => {
-                  const [, language, page] = file.match(/^pdf_(\w+)_(\d+)\.png$/);
-                  return shot(`Statement PDF (${language}), page ${page}`, file.replace('.png', ''));
-                });
+                unchanged.push(...samePdfPages.map(pdfTitle));
+                return pdfPages.map((file) => shot(pdfTitle(file), file.replace('.png', '')));
               }
               const name = route.split(/[/[\]]+/).filter(Boolean).join('_') || 'home';
               if (!fs.existsSync(`ui-screenshots/${name}.png`)) return (unchanged.push(`\`${route}\``), []);
