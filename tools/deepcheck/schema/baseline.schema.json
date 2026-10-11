@@ -1,0 +1,26 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "deepcheck.baseline.schema.json",
+	"title": "deepcheck baseline (.deepcheck-baseline.json)",
+	"type": "object",
+	"required": ["schemaVersion", "tool", "failThreshold", "fallow", "entries"],
+	"properties": {
+		"schemaVersion": { "type": "number", "enum": [1] },
+		"tool": { "type": "string", "enum": ["deepcheck"] },
+		"failThreshold": { "type": "number", "description": "failThreshold when the baseline was written" },
+		"fallow": { "type": "boolean", "description": "Fallow data fed the recorded scores" },
+		"entries": {
+			"type": "array",
+			"items": {
+				"type": "object",
+				"required": ["fingerprint", "path", "rule", "score"],
+				"properties": {
+					"fingerprint": { "type": "string", "description": "<module path>#<rule id>, no line numbers" },
+					"path": { "type": "string" },
+					"rule": { "type": "string", "enum": ["shallow-module"] },
+					"score": { "type": "number", "minimum": 0, "maximum": 100 }
+				}
+			}
+		}
+	}
+}

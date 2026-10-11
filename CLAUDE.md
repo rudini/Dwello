@@ -52,6 +52,7 @@ PostgreSQL on localhost:5432 (user and password `dwello`) is required for backen
 1. **Acceptance test first (ATDD):** every feature or behavior change starts with a German scenario in `tests/e2e/features/*.feature`, tagged `@wip` (excluded from runs). Watch it fail for the right reason.
 2. **`/tdd`:** drive the implementation red-green, one behavior at a time, through public interfaces. A test must fail before the code changes. Every bug fix gets a test that reproduces it first, at the lowest layer that can show it (unit, `*.pg.test.ts` or scenario).
 3. **`/ponytail`:** keep the shortest diff that works; check the finished change against it.
+   **Deep modules:** after each implementation step run `npm run deepcheck:audit` (silent when clean) and fix its findings before continuing; run `npm run deepcheck:scan` only when a codebase-wide review is requested (`tools/deepcheck/README.md`).
 4. **Done:** remove `@wip` once the scenario is green. A feature is done when its scenario passes, not when unit tests pass.
 5. **Plan:** log the task in `implementation_plan.md` (check the items, note the files changed). The file is long: read only its latest `## Session` section (`grep -n '^## Session' implementation_plan.md`) and add new work there. The phase table at the top is no longer maintained.
 
@@ -60,6 +61,7 @@ Before marking anything complete, all of these pass: `npm run test:coverage`, `n
 ## Gotchas
 
 - **Fallow gate:** a hook runs `fallow audit` before every `git commit` and `git push` and blocks the whole Bash command on new unused exports or files, duplication, or complexity/CRAP findings. Run git commands on their own, not chained after edits, and fix the reported finding (un-export, delete, split the function) rather than working around it. `npx fallow audit` shows the findings before committing; CI runs the same audit.
+- **Deepcheck gate:** a second hook (`.claude/hooks/deepcheck-gate.sh`) runs the changed-scope deepcheck before every `git commit` and `git push` and blocks new or worsened shallow modules (pass-through layers, thin facades); CI runs the same check (job "Deep modules"). Fix the design, not the numbers; a deliberate exception needs `// deepcheck-ignore-file -- reason`.
 - **API contracts:** frontend tests take backend responses from `tests/contracts/*.json`; `backend/src/__tests__/api-contracts.pg.test.ts` checks them against the real API. Changing an API response means updating its contract.
 - **Coverage floors** in `vitest.config.ts` and `backend/scripts/coverage-check.ts` may not drop; the target is in `docs/test-pyramid.md`.
 

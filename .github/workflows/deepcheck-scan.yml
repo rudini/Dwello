@@ -1,0 +1,59 @@
+name: Deep-module scan
+
+# Ranked list of shallow modules in the whole codebase (tools/deepcheck), legacy included.
+# Manual only and never blocking; the gate on changed code runs in CI (job "Deep modules").
+on:
+  workflow_dispatch:
+    inputs:
+      path:
+        description: Directory or file to scan (empty for the whole project)
+        required: false
+        default: ''
+      top:
+        description: Number of modules to list
+        required: false
+        default: '50'
+      min_score:
+        description: Lowest score to list (35 lists the modules worth a look; empty lists flagged modules only, see docs/deepcheck-validation.md)
+        required: false
+        default: '35'
+  # schedule:
+  #   - cron: '0 6 * * 1' # Mondays 06:00 UTC
+
+env:
+  NODE_VERSION: 22
+
+jobs:
+  scan:
+    name: Deep-module scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - run: npx svelte-kit sync
+      - name: Scan
+        env:
+          SCAN_PATH: ${{ inputs.path }}
+          SCAN_TOP: ${{ inputs.top || '50' }}
+          SCAN_MIN_SCORE: ${{ inputs.min_score }}
+        run: |
+          args=(--top "$SCAN_TOP")
+          if [ -n "$SCAN_MIN_SCORE" ]; then args+=(--min-score "$SCAN_MIN_SCORE"); fi
+          # The path comes last, after --, so an input like --output=... stays a path
+          path=()
+          if [ -n "$SCAN_PATH" ]; then path=(-- "$SCAN_PATH"); fi
+          mkdir -p deepcheck-report
+          npm run deepcheck:scan -- "${args[@]}" --format markdown --output deepcheck-report/deepcheck.md "${path[@]}"
+          npm run deepcheck:scan -- "${args[@]}" --format json --output deepcheck-report/deepcheck.json "${path[@]}"
+          cat deepcheck-report/deepcheck.md >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: deepcheck-report
+          path: deepcheck-report/
+          retention-days: 30
