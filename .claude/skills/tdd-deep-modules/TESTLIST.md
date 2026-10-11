@@ -188,15 +188,19 @@ Design it twice. Hidden decision: what a valid `tdd-deep-modules` skill must con
 
 Prints `skill_lint: OK` and exits 0, or one `skill_lint: <problem>` line per problem and exits 1; exit 2 when the directory has no SKILL.md. Frontmatter is read with PyYAML.
 
-- [ ] the real skill passes
-- [ ] frontmatter: none, unreadable YAML, missing or non-kebab `name`, `name` other than the directory, missing description, description over 1024 characters or with angle brackets, an unknown key -> each named
-- [ ] the hook: a PreToolUse entry whose matcher covers Write and Edit and whose command runs the skill's `scripts/tdd-guard`, and the script exists and is executable
-- [ ] every required section and phrase present; a missing one is named with its section
-- [ ] order: hard rules first, the six workflow sections in order, design note last
-- [ ] SKILL.md has fewer than 400 lines
-- [ ] every `references/...` link resolves
-- [ ] no SKILL.md -> exit 2
-- [ ] trigger tests with skill-creator's `run_eval.py` (evidence, not part of the suite: they call the model)
+- [x] the real skill passes
+- [x] frontmatter: none, unreadable YAML, missing or non-kebab `name`, `name` other than the directory, missing description, description over 1024 characters or with angle brackets, an unknown key -> each named
+- [x] the hook: a PreToolUse entry whose matcher covers Write and Edit and whose command runs the skill's `scripts/tdd-guard`, and the script exists and is executable
+- [x] every required section and phrase present; a missing one is named with its section
+- [x] order: hard rules first, the six workflow sections in order, design note last
+- [x] SKILL.md has fewer than 400 lines
+- [x] every `references/...` link resolves
+- [x] no SKILL.md -> exit 2
+- [x] trigger tests with skill-creator's `run_eval.py` (evidence, not part of the suite: they call the model)
+- [x] a broken hook matcher regex is no match, not a crash
+- [x] the statements hardened by the SKILL.md reviews are required too (one-sentence reason, one test per cycle, no second test before the first is green, never what it expects, the stash, changed production .ts/.js files, not assertion strength)
+- [x] a relative skill path (`skill_lint .`) is judged by the real directory name; a SKILL.md that is not UTF-8 is named
+- [x] trigger tests: `evals/trigger-eval.json`, result 10/10 in `evals/trigger-result.json`
 
 ## Step 4: `scripts/verify_all [skill-dir]` and `verifiers.lock`
 
