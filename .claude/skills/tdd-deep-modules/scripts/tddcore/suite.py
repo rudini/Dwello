@@ -157,7 +157,7 @@ def _uses_pytest(root):
 def _run_pytest(root):
     with tempfile.TemporaryDirectory() as tmp:
         report = Path(tmp) / "report.xml"
-        done = subprocess.run([sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider",
+        done = subprocess.run([sys.executable, "-m", "pytest", "-q",
                                f"--junitxml={report}"], cwd=root, env=_PYTHON_ENV,
                               capture_output=True, text=True, errors="replace")
         cases = list(ElementTree.parse(report).iter("testcase")) if report.exists() else []
