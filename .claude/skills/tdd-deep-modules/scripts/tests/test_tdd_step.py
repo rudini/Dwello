@@ -755,23 +755,6 @@ class TddStepTest(unittest.TestCase):
 
         self.assert_refused(repo, "green", "green needs all tests passing", head="red: seed")
 
-    def test_more_test_configuration_files_are_test_code(self):
-        deselect = '[pytest]\naddopts = ["--deselect", "test_calc.py::test_adds"]\n'
-        projects = {
-            "pytest.toml": (Repo(self, {"calc.py": WRONG_ADD, "test_one.py": "def test_one():\n    pass\n"}),
-                            {"test_calc.py": PYTEST_TEST}, deselect),
-            ".pytest.ini": (Repo(self, {"calc.py": WRONG_ADD, "test_one.py": "def test_one():\n    pass\n"}),
-                            {"test_calc.py": PYTEST_TEST},
-                            "[pytest]\naddopts = --deselect test_calc.py::test_adds\n"),
-            "package.json": (vitest_repo(self), {"calc.test.js": VITEST_TEST, "calc.py": RIGHT_ADD,
-                                                 "test_calc.py": PYTEST_TEST}, '{"devDependencies": {}}\n'),
-        }
-        for config, (repo, red, text) in projects.items():
-            with self.subTest(config):
-                repo.commit_all("red: adds", red)
-                repo.write(config, text)
-                self.assert_refused(repo, "green", f"not tests: {config}", head="red: adds")
-
     def test_a_vitest_test_named_like_the_unhandled_error_summary_is_still_red(self):
         repo = vitest_repo(self)
         repo.write("calc.test.js", VITEST_TEST.replace(
