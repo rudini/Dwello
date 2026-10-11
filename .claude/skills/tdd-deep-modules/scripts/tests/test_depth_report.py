@@ -43,3 +43,14 @@ class DepthReportTest(unittest.TestCase):
         line = report_line(result, "src/amount.ts")
         self.assertIn(", pass-through 4", line)
         self.assertIn("pass-through: toNumber, parse, clean, convert", line.split(" -> ", 1)[1])
+
+    def test_two_tiny_classes_are_classitis(self):
+        shallow = Repo(self, {"src/amount.ts": fixture("shallow")})
+        deep = Repo(self, {"src/amount.ts": fixture("deep"), "src/amount.test.ts": AMOUNT_TEST})
+
+        tiny = report_line(shallow.run("depth_report", "src/amount.ts"), "src/amount.ts")
+        none = report_line(deep.run("depth_report", "src/amount.ts"), "src/amount.ts")
+
+        self.assertIn(", classitis yes,", tiny)
+        self.assertIn("classitis: Cleaner, Converter", tiny.split(" -> ", 1)[1])
+        self.assertIn(", classitis no,", none)
