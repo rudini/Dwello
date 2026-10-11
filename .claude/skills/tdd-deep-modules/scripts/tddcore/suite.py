@@ -115,11 +115,10 @@ def _run_bun(directory, command, package):
     summary = f"bun: {failed} of {len(cases)} tests failed"
     if hidden:
         summary += f" ({errors} errors outside tests)"
-    def test_id(case):
-        return f"{package / case.get('file', '')}::{case.get('classname', '')}::{case.get('name')}"
-    tests = frozenset(test_id(case) for case in cases)
-    failing = frozenset(test_id(case) for case in cases if case.find("failure") is not None)
-    return Run(done.returncode, outcome, summary, failed, ran, tests, failing)
+    ids = _numbered(f"{package / case.get('file', '')}::{case.get('classname', '')}::{case.get('name')}"
+                    for case in cases)
+    failing = frozenset(i for i, case in zip(ids, cases) if case.find("failure") is not None)
+    return Run(done.returncode, outcome, summary, failed, ran, frozenset(ids), failing)
 
 
 def _run_vitest(root, package):
@@ -139,9 +138,19 @@ def _run_vitest(root, package):
     here = Path(root).resolve()
     results = [(f"{package / Path(f['name']).relative_to(here)}::{a['fullName']}", a["status"])
                for f in data["testResults"] for a in f["assertionResults"]]
+    ids = _numbered(i for i, _ in results)
     return Run(done.returncode, _vitest_outcome(done.returncode, data, unhandled), summary,
-               data["numFailedTests"], ran, frozenset(i for i, _ in results),
-               frozenset(i for i, status in results if status == "failed"))
+               data["numFailedTests"], ran, frozenset(ids),
+               frozenset(i for i, (_, status) in zip(ids, results) if status == "failed"))
+
+
+def _numbered(ids):
+    """Test ids in report order, the n-th repeat of a name suffixed with #n so none collapse."""
+    seen, numbered = {}, []
+    for test_id in ids:
+        seen[test_id] = seen.get(test_id, 0) + 1
+        numbered.append(test_id if seen[test_id] == 1 else f"{test_id}#{seen[test_id]}")
+    return numbered
 
 
 def _bun_summary_errors(stderr):
