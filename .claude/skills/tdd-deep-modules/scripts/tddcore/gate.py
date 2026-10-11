@@ -11,8 +11,8 @@ VERIFIERS = ("scripts/verify_all", "scripts/verify_stage1", "scripts/skill_lint"
              "scripts/tddcore/verdicts.py", "scripts/tddcore/selfcheck.py", "scripts/tddcore/lint.py")
 
 
-def stage2(skill):
-    """(passed, lines to print) for the skill at `skill`."""
+def stage2(skill=Path(__file__).resolve().parents[2]):
+    """(passed, lines to print) for the skill at `skill` (default: the skill this file belongs to)."""
     skill = Path(skill)
     steps = [(step, *verdicts.final(skill / "evidence" / "reviews", step)) for step in STEPS]
     stale = _lock(skill)
