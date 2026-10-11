@@ -165,3 +165,15 @@ class TddReplayTierTest(unittest.TestCase):
         self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
         self.assertIn("the final commit must pass the full suite, but it says: bun: 1 of 2 tests failed",
                       result.stdout)
+
+    def test_a_red_on_the_fast_suite_for_a_test_only_in_the_full_suite_is_rejected(self):
+        repo = green_tiered_repo(self)
+        base = repo.git("rev-parse", "HEAD")
+        repo.commit_phase("red", {"sum.pg.test.ts": SQL_TEST}, 0, suite="fast")
+        repo.commit_phase("green", {"sum.ts": RIGHT_SUM_TS}, 0)
+
+        result = self.replay(repo, base)
+
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn("red's new test is not in the fast suite: sum.pg.test.ts::::sums in SQL",
+                      result.stdout)
