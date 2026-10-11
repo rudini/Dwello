@@ -1,6 +1,7 @@
 """Check that a tdd-deep-modules skill directory holds everything the skill must contain."""
 import os
 import re
+import shlex
 from pathlib import Path
 
 import yaml
@@ -124,12 +125,22 @@ def _frontmatter(front, directory):
 
 
 def _runs_guard(entry):
-    """True for a hook entry whose matcher covers Write and Edit and that runs scripts/tdd-guard."""
+    """True for a hook entry whose matcher covers Write and Edit and whose command runs scripts/tdd-guard."""
     if not isinstance(entry, dict):
         return False
+    matcher = str(entry.get("matcher") or "*")  # Claude Code: no, empty or `*` matcher matches every tool
     try:
-        matches = all(re.fullmatch(str(entry.get("matcher", "")), tool) for tool in ("Write", "Edit"))
+        matches = matcher == "*" or all(re.fullmatch(matcher, tool) for tool in ("Write", "Edit"))
     except re.error:
         return False
-    commands = [str(hook.get("command", "")) for hook in entry.get("hooks") or [] if isinstance(hook, dict)]
-    return matches and any("scripts/tdd-guard" in command for command in commands)
+    hooks = [hook for hook in entry.get("hooks") or [] if isinstance(hook, dict) and hook.get("type") == "command"]
+    return matches and any(_program(str(hook.get("command", ""))).endswith("scripts/tdd-guard") for hook in hooks)
+
+
+def _program(command):
+    """The program a hook command runs: its first shell word."""
+    try:
+        words = shlex.split(command)
+    except ValueError:
+        return ""
+    return words[0] if words else ""
