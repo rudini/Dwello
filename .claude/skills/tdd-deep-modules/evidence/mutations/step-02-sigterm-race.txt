@@ -1,2 +1,3 @@
 before fix: 5 of 12 runs failed
 after fix: 0 of 12 runs failed
+SIGTERM test without prune: 0 of 12 runs failed

@@ -47,7 +47,6 @@ def replay(repo, rev_range):
             # twice --force: an add interrupted by a signal leaves the worktree locked
             subprocess.run(["git", "worktree", "remove", "--force", "--force", str(tree)], cwd=repo,
                            capture_output=True)
-            subprocess.run(["git", "worktree", "prune"], cwd=repo, capture_output=True)
     if verdicts[-1].phase == "red":
         last = verdicts[-1]
         verdicts[-1] = replace(last, violations=last.violations
