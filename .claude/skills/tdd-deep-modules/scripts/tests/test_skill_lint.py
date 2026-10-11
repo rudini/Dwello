@@ -206,3 +206,12 @@ class SkillLintTest(unittest.TestCase):
 
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
+    def test_a_skill_md_that_is_not_utf8_is_named(self):
+        copy = copy_of_skill(self)
+        (copy / "SKILL.md").write_bytes((SKILL / "SKILL.md").read_bytes() + b"\xff\n")
+
+        result = lint(copy)
+
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn("skill_lint: SKILL.md is not valid UTF-8\n", result.stdout)
+        self.assertNotIn("Traceback", result.stderr)
