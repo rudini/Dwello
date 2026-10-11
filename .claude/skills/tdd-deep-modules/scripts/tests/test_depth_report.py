@@ -439,3 +439,14 @@ class HelperSwarmTest(unittest.TestCase):
         line = report_line(result, "src/amount.ts")
         self.assertIn(", classitis no,", line)
         self.assertNotIn("exported helpers", line)
+
+    def test_recursive_exports_are_no_helpers(self):
+        module = "".join(f"export function {name}(n: number): number {{\n  return n <= 0 ? 0 : {op} + {name}(n - 1);\n}}\n"
+                         for name, op in (("sum", "n"), ("count", "1"), ("double", "2")))
+        repo = Repo(self, {"src/recursion.ts": module})
+
+        result = repo.run("depth_report", "src/recursion.ts")
+
+        line = report_line(result, "src/recursion.ts")
+        self.assertIn(", classitis no,", line)
+        self.assertNotIn("exported helpers", line)
