@@ -1,6 +1,6 @@
 import { fail, redirect } from '@sveltejs/kit';
 import { loadDocuments } from '$lib/server/documents';
-import { fetchTenant, toTenant } from '$lib/server/tenant';
+import { loadTenant } from '$lib/server/tenant';
 import { contractStatus, grossRent, toContractHistory } from '$lib/server/contract-history';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -31,7 +31,7 @@ function currentRental(contracts: BackendContract[]) {
 }
 
 export const load: PageServerLoad = async ({ params, fetch }) => {
-	const tenant = toTenant(await fetchTenant(fetch, params.id));
+	const tenant = await loadTenant(fetch, params.id);
 	const { contracts } = await (
 		await fetch(`${API}/contracts?tenantId=${params.id}&limit=100`)
 	).json();

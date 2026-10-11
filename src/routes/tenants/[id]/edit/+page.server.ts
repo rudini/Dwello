@@ -1,9 +1,9 @@
 import type { Actions, PageServerLoad } from './$types';
 import { saveTenant } from '$lib/server/tenant-form';
-import { fetchTenant, toTenant } from '$lib/server/tenant';
+import { loadTenant } from '$lib/server/tenant';
 
 export const load: PageServerLoad = async ({ params, fetch }) => ({
-	tenant: toTenant(await fetchTenant(fetch, params.id))
+	tenant: await loadTenant(fetch, params.id)
 });
 
 export const actions: Actions = {

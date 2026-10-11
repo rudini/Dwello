@@ -6,18 +6,15 @@ const API = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1/tenant
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- backend JSON
 type BackendTenant = Record<string, any>;
 
-/** Backend tenant (with contracts and occupancy) or a 404/500 page */
-export async function fetchTenant(
-	fetch: typeof globalThis.fetch,
-	id: string
-): Promise<BackendTenant> {
+/** The tenant as the pages show it, or a 404/500 page */
+export async function loadTenant(fetch: typeof globalThis.fetch, id: string): Promise<Tenant> {
 	const response = await fetch(`${API}/${id}`);
 	if (response.status === 404) throw error(404, 'Mieter nicht gefunden');
 	if (!response.ok) throw error(response.status, 'Fehler beim Laden des Mieters');
-	return response.json();
+	return toTenant(await response.json());
 }
 
-export const toTenant = (data: BackendTenant): Tenant => ({
+const toTenant = (data: BackendTenant): Tenant => ({
 	id: data.id,
 	firstName: data.firstName,
 	lastName: data.lastName,
