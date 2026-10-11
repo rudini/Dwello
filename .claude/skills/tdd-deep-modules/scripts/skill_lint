@@ -1,0 +1,19 @@
+#!/usr/bin/env python3
+"""skill_lint [skill-dir]: the skill's frontmatter, required elements, order, length and references."""
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from tddcore import lint  # noqa: E402
+
+
+def main(skill):
+    found = lint.problems(skill)
+    for problem in found:
+        print(f"skill_lint: {problem}")
+    if not found:
+        print("skill_lint: OK")
+    return 1 if found else 0
+
+
+sys.exit(main(Path(sys.argv[1]) if len(sys.argv) > 1 else Path(__file__).resolve().parent.parent))
