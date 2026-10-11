@@ -146,7 +146,7 @@ def _top_level(text):
 
 
 _SOURCE = {".ts", ".tsx", ".mts", ".cts", ".js", ".jsx", ".mjs", ".cjs"}
-_IMPORT = re.compile(r"""(?:\bfrom\s*|\bimport\s*\(?\s*)["'](\.{1,2}/[^"']*)["']""")
+_IMPORT = re.compile(r"""(?:\bfrom\s*|\bimport\s*\(?\s*)["']((?:\.{1,2}|\$lib)/[^"']*)["']""")
 
 
 def _tests(module, path):
@@ -166,7 +166,10 @@ def _tests(module, path):
         if Path(rel).suffix not in _SOURCE or protocol.is_production(rel) or not test.is_file():
             continue
         specs = _IMPORT.findall(test.read_text(errors="replace"))
-        if any(_without_source_suffix(Path(os.path.normpath(test.parent / spec))) == target for spec in specs):
+        # `$lib` is SvelteKit's alias for src/lib at the repository root
+        resolved = (top / "src/lib" / spec[5:] if spec.startswith("$lib/") else test.parent / spec
+                    for spec in specs)
+        if any(_without_source_suffix(Path(os.path.normpath(path))) == target for path in resolved):
             found.append(rel)
     return tuple(found)
 
