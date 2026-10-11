@@ -61,11 +61,11 @@ One behaviour from the list per cycle:
 
 Test configuration (`package.json`, new dependencies, `vitest.config.*`, `vite.config.*`) counts as a test file: change it in the red or in a refactor before it, never in green.
 
-**The way back from a wrong red.** If the open red's test is wrong, or green turns out to need a test-configuration change, undo the red with `git reset --soft HEAD~1` (it is your own, unpushed commit), fix the test or add the configuration, and commit the red again. Never change a test after its green: `tdd_replay` rejects that. A test from an earlier cycle that is wrong is a question for the user.
+**The way back from a wrong red.** If the open red's test is wrong, or green turns out to need a test-configuration change, first set aside any production code already written (`git stash push -u -- <files>`), undo the red with `git reset --soft HEAD~1` (it is your own, unpushed commit), fix the test or add the configuration, commit the red again, then `git stash pop`. After its green, a test's expectations are fixed: a refactor may change how a test calls the module, never what it expects. `tdd_replay` does not catch a weakened assertion; that rule is yours to keep. A test from an earlier cycle that is wrong is a question for the user.
 
 For a module that does not exist yet, the first test imports it dynamically so the red is an assertion, not an import error (example in references/tooling.md).
 
-Never batch: no second test before the first is green, no clean-up inside green. `tdd-step` runs the tests itself and records the real exit code in a `TDD-Exit-Code` trailer; do not commit phases by hand. `scripts/tdd_replay <base>..HEAD` re-runs the history and rejects anything that broke the protocol. Details: references/tooling.md.
+Never batch: no second test before the first is green, no clean-up inside green. `tdd-step` runs the tests itself and records the real exit code in a `TDD-Exit-Code` trailer; do not commit phases by hand. `scripts/tdd_replay <base>..HEAD` re-runs the history and rejects phase-order, test-count and exit-code violations (references/tooling.md lists them). Details: references/tooling.md.
 
 ## 5. Depth check in every refactor
 
