@@ -798,3 +798,9 @@ class TddStepTest(unittest.TestCase):
                 repo.write(config, text)
                 self.assert_refused(repo, "green", f"not tests: {config}", head="red: adds")
 
+
+    def test_an_interrupted_pytest_run_is_not_red(self):
+        repo = Repo(self, {"calc.py": WRONG_ADD, "pytest.ini": "[pytest]\n"})
+        repo.write("test_calc.py", PYTEST_TEST + "\n\ndef test_stop():\n    import pytest\n    pytest.exit('stop', returncode=2)\n")
+
+        self.assert_refused(repo, "red", "red needs a failing assertion")
