@@ -8,7 +8,8 @@ from pathlib import Path
 def own_suite(scripts):
     """(passed, summary): passed only with exit 0, a bare `OK` summary (no skips, no expected failures) and at least one test executed."""
     scripts = Path(scripts)
-    done = subprocess.run([sys.executable, "-m", "unittest", "discover", "-s", str(scripts / "tests"),
+    # -P: the caller's working directory is not put on the path, so nothing there can replace unittest
+    done = subprocess.run([sys.executable, "-P", "-m", "unittest", "discover", "-s", str(scripts / "tests"),
                            "-t", str(scripts)], capture_output=True, text=True, errors="replace")
     lines = done.stderr.strip().splitlines()
     summary = lines[-1] if lines else f"exit code {done.returncode}, no output"
