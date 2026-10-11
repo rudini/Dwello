@@ -242,3 +242,11 @@ export class Ledger {
         line = report_line(repo.run("depth_report", "src/errors.ts"), "src/errors.ts")
 
         self.assertIn(", classitis no,", line)
+
+    def test_a_require_in_a_test_counts(self):
+        test = 'const { parseAmount } = require("./amount");\n'
+        repo = Repo(self, {"src/amount.ts": fixture("deep"), "src/amount.test.js": test})
+
+        line = report_line(repo.run("depth_report", "src/amount.ts"), "src/amount.ts")
+
+        self.assertIn(", tests 1,", line)
