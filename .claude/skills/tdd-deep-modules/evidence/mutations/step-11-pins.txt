@@ -1,2 +1,3 @@
 step 11 pins (each test passed on its first run; the mutation makes it fail)
 - test_a_private_functional_core_is_no_swarm: _EXPORTED_FUNCTION also matches private functions (`^(?:export\s+)?`): FAILED (failures=1)
+  note (review round 1): the same mutation also fails 4 older tests, e.g. test_a_deep_module_is_reported_deep on the same fixture; the pin names the known-good case explicitly rather than adding new protection.
