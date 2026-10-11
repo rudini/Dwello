@@ -56,3 +56,15 @@ class TddStepTierTest(unittest.TestCase):
 
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(full.trailer("TDD-Suite"), "full")
+
+    def test_green_after_a_red_on_the_full_suite_must_run_the_full_suite(self):
+        repo = green_tiered_repo(self)
+        repo.write("sum.pg.test.ts", SQL_TEST)
+        self.assertEqual(repo.run("tdd-step", "red", "--suite", "full", "sums").returncode, 0)
+        repo.write("sum.ts", RIGHT_SUM_TS)
+
+        result = repo.run("tdd-step", "green", "sums")
+
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn("green must run the full suite, like its red", result.stderr)
+        self.assertEqual(repo.subject(), "red: sums")
