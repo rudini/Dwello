@@ -336,3 +336,18 @@ class SkillLintTest(unittest.TestCase):
 
                     self.assertIn(f"skill_lint: '{section}' has no item **{label}**\n", result.stdout)
 
+    def test_inverting_the_framing_sentences_is_named(self):
+        real = (SKILL / "SKILL.md").read_text()
+        cases = {"Break none of these, even when it would be faster.":
+                 ("Break any of these when it would be faster.", "Hard rules", "break none of these"),
+                 "In every refactor phase": ("In some refactor phases", "5. Depth check in every refactor",
+                                             "in every refactor phase")}
+        for original, (inverted, section, named) in cases.items():
+            with self.subTest(original):
+                self.assertIn(original, real)
+                copy = copy_of_skill(self)
+                (copy / "SKILL.md").write_text(real.replace(original, inverted))
+
+                result = lint(copy)
+
+                self.assertIn(f"skill_lint: missing in '{section}': {named}\n", result.stdout)
