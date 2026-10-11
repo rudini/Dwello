@@ -198,3 +198,20 @@ class TddReplayTest(unittest.TestCase):
         repo.commit_phase("red", {"calc.test.js": old_now_failing + "\n" + new_passing}, 1)
         repo.commit_phase("green", {"calc.js": RIGHT_ADD_JS + "export const mul = (a, b) => a * b;\n"}, 0)
         self.assert_rejected(repo, base, "red's failing test must be its new test")
+
+    def test_no_phase_may_remove_tests(self):
+        with self.subTest("red replaces an old test"):
+            calc = RIGHT_ADD_TS + "export const mul = (a: number, b: number) => 0;\n"
+            repo = bun_repo(self, calc, **{"calc.test.ts": BUN_TEST})
+            repo.commit_all("green: seed", {})
+            base = repo.git("rev-parse", "HEAD")
+            muls = BUN_TEST.replace("import { add }", "import { mul }").replace('"adds"', '"muls"') \
+                .replace("add(1, 2)).toBe(3)", "mul(2, 3)).toBe(6)")
+            repo.commit_phase("red", {"calc.test.ts": muls}, 1)
+            repo.commit_phase("green", {"calc.ts": calc.replace("=> 0;", "=> a * b;").replace("a + b", "a - b")}, 0)
+            self.assert_rejected(repo, base, "red removes tests: calc.test.ts::::adds")
+        with self.subTest("test phase narrows the test command"):
+            repo, base = good_history(self)
+            repo.commit_phase("test", {"package.json": '{"scripts": {"test": "bun test nothing"}}\n',
+                                       "TESTLIST.md": "- [ ] more\n"}, 1)
+            self.assert_rejected(repo, base, "test removes tests: calc.test.ts::::adds")
