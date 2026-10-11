@@ -112,3 +112,14 @@ class SkillMdTest(unittest.TestCase):
         self.assertIn("depth_report <changed production .ts/.js files>", found["5. Depth check in every refactor"])
         self.assertIn("not assertion strength", found["6. Design note"])
         self.assertNotIn("rejects anything", found["4. Red, green, refactor with tdd-step"])
+
+    def test_the_hard_rules_hold_the_doubles_rule(self):
+        text = dict(sections())["Hard rules"]
+
+        self.assertIn("**Doubles only at system boundaries.**", text)
+        for element in ("no mocks or spies of your own logic", "real objects by default",
+                        "mail, login, network, framework modules, external backends",
+                        "contract test suite", "against both the fake and the real implementation",
+                        "project-owned adapter", "fake the adapter, not the framework",
+                        "many mocks in a test signal a wrongly cut interface"):
+            self.assertIn(element, text.lower())
