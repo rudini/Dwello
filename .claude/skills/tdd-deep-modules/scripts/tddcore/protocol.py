@@ -26,6 +26,11 @@ _TEST_CONFIG = {"conftest.py", "pytest.ini", ".pytest.ini", "pytest.toml", "pypr
                 "setup.cfg", "tox.ini", "package.json"}
 
 
+def production_may_follow(previous):
+    """Whether a commit after `previous` may contain production code (green or refactor)."""
+    return any(previous in _FOLLOWS[phase] for phase in ("green", "refactor"))
+
+
 def is_production(path):
     return _is_code(path) and not _is_test(PurePosixPath(path))
 

@@ -31,8 +31,7 @@ def main(raw):
     subject = subprocess.run(["git", "log", "-1", "--format=%s"], cwd=existing,
                              capture_output=True, text=True).stdout.strip()
     phase = protocol.phase_of(subject)
-    # production code may land in the next commit only as green (after red) or refactor
-    if protocol.is_production(rel) and phase not in ("red", "green", "refactor"):
+    if protocol.is_production(rel) and not protocol.production_may_follow(phase):
         print(f"tdd-guard: blocked: {rel} is production code and the last TDD phase is {phase}. "
               "Write one failing test and commit it with `tdd-step red` first.", file=sys.stderr)
         return 2
