@@ -402,3 +402,13 @@ class HelperSwarmTest(unittest.TestCase):
         self.assertIn(", classitis yes,", line)
         self.assertIn("classitis: exported helpers with one caller: stripCurrency, splitSign, normaliseFraction, "
                       "toRappen", line.split(" -> ", 1)[1])
+
+    def test_a_private_functional_core_is_no_swarm(self):
+        repo = Repo(self, {"src/amount.ts": fixture("deep"), "src/amount.test.ts": AMOUNT_TEST})
+
+        result = repo.run("depth_report", "src/amount.ts")
+
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        line = report_line(result, "src/amount.ts")
+        self.assertIn(", classitis no,", line)
+        self.assertTrue(line.endswith("-> deep"), line)
