@@ -127,6 +127,11 @@ class TddReplayTest(unittest.TestCase):
         repo.git("update-ref", "-d", "HEAD")
         repo.commit_phase("test", {"package.json": '{"scripts": {"test": "bun test"}}\n',
                                    "TESTLIST.md": "- [ ] adds\n"}, 1)
+        first_test = ('import { test, expect } from "bun:test";\n\ntest("adds", async () => {\n'
+                      '  const calc = await import("./calc").catch(() => ({ add: () => 0 }));\n'
+                      '  expect(calc.add(1, 2)).toBe(3);\n});\n')
+        repo.commit_phase("red", {"calc.test.ts": first_test}, 1)
+        repo.commit_phase("green", {"calc.ts": RIGHT_ADD_TS}, 0)  # a task ends all green
 
         result = repo.run("tdd_replay", "HEAD")
 

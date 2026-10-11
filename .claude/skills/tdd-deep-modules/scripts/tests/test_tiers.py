@@ -154,3 +154,14 @@ class TddReplayTierTest(unittest.TestCase):
 
         self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
         self.assertIn("the final commit must run the full suite", result.stdout)
+
+    def test_a_final_commit_that_fails_the_full_suite_is_rejected(self):
+        repo = tiered_repo(self, RIGHT_ADD_TS, **{"calc.test.ts": BUN_TEST})
+        base = repo.git("rev-parse", "HEAD")
+        repo.commit_phase("test", {"TESTLIST.md": "- [ ] sums in SQL\n"}, 1)
+
+        result = self.replay(repo, base)
+
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn("the final commit must pass the full suite, but it says: bun: 1 of 2 tests failed",
+                      result.stdout)
