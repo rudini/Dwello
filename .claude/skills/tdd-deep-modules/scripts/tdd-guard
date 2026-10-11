@@ -12,12 +12,16 @@ from tddcore import protocol  # noqa: E402
 def main(raw):
     try:
         event = json.loads(raw)
-    except json.JSONDecodeError as error:
+        tool_input = event.get("tool_input", {})
+        path = tool_input.get("file_path")
+        if not isinstance(path, (str, type(None))):
+            raise TypeError(f"file_path is {type(path).__name__}, not a string")
+    except (json.JSONDecodeError, AttributeError, TypeError) as error:
         print(f"tdd-guard: cannot read the hook input: {error}", file=sys.stderr)
         return 1  # a non-blocking error: never stop the user because the hook is broken
-    if "file_path" not in event.get("tool_input", {}):
+    if path is None:
         return 0  # not a file edit
-    target = Path(event["tool_input"]["file_path"]).resolve()  # no `..` or symlink detours
+    target = Path(path).resolve()  # no `..` or symlink detours
     existing = next(d for d in target.parents if d.is_dir())  # a Write may create new directories
     root = subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=existing,
                           capture_output=True, text=True)
