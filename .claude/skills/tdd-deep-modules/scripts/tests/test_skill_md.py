@@ -25,3 +25,12 @@ class SkillMdTest(unittest.TestCase):
                      "never paste computed values into expected values", "never mix refactoring with green",
                      "no tests on private methods"):
             self.assertIn(rule, text.lower())
+
+    def test_the_workflow_sections_follow_in_order(self):
+        headings = [heading for heading, _ in sections()]
+        workflow = ["1. Detect the context", "2. Design it twice", "3. Write the behaviour test list",
+                    "4. Red, green, refactor with tdd-step", "5. Depth check in every refactor", "6. Design note"]
+
+        self.assertEqual([h for h in headings if h in workflow], workflow)
+        self.assertEqual(headings[-1], "6. Design note")
+        self.assertLess(headings.index("Hard rules"), headings.index(workflow[0]))
