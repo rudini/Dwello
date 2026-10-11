@@ -33,7 +33,7 @@ def run(root):
 
 
 def _combine(all_runs):
-    runs = [r for r in all_runs if not r.empty] or all_runs  # a framework without tests is left out
+    runs = all_runs
     outcomes = {r.outcome for r in runs}
     outcome = next(o for o in ("error", "fail", "pass") if o in outcomes)
     ran = sum(r.ran for r in runs)
