@@ -7,6 +7,10 @@ from pathlib import Path
 from tddcore import protocol, suite
 
 
+class ReplayError(Exception):
+    pass
+
+
 @dataclass(frozen=True)
 class Verdict:
     commit: str
@@ -17,7 +21,13 @@ class Verdict:
 
 def replay(repo, rev_range):
     """One Verdict per commit of `rev_range` (oldest first), each from a clean checkout of it."""
-    commits = _git(repo, "rev-list", "--reverse", "--first-parent", rev_range).split()
+    listed = subprocess.run(["git", "rev-list", "--reverse", "--first-parent", rev_range], cwd=repo,
+                            capture_output=True, text=True)
+    if listed.returncode != 0:
+        raise ReplayError(f"cannot read the range {rev_range!r}: {listed.stderr.strip()}")
+    commits = listed.stdout.split()
+    if not commits:
+        raise ReplayError(f"the range {rev_range!r} has no commits")
     base = f"{commits[0]}^"
     previous = protocol.phase_of(_git(repo, "log", "-1", "--format=%s", base))
     verdicts = []

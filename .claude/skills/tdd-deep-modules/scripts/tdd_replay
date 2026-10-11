@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """tdd_replay <commit-range>: re-run every commit of the range and check the TDD protocol held."""
+import subprocess
 import sys
 from pathlib import Path
 
@@ -8,7 +9,18 @@ from tddcore import replay  # noqa: E402
 
 
 def main(args):
-    verdicts = replay.replay(".", args[0])
+    if len(args) != 1:
+        print("usage: tdd_replay <commit-range>", file=sys.stderr)
+        return 2
+    root = subprocess.run(["git", "rev-parse", "--show-toplevel"], capture_output=True, text=True)
+    if root.returncode != 0:
+        print("tdd_replay: not inside a git repository", file=sys.stderr)
+        return 2
+    try:
+        verdicts = replay.replay(root.stdout.strip(), args[0])
+    except replay.ReplayError as error:
+        print(f"tdd_replay: {error}", file=sys.stderr)
+        return 2
     for verdict in verdicts:
         status = "REJECT" if verdict.violations else "ok"
         print(f"{verdict.commit[:7]} {verdict.phase:8} {verdict.run.outcome:5} "
