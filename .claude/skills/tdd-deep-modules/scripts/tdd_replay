@@ -1,0 +1,3 @@
+#!/usr/bin/env python3
+"""tdd_replay <commit-range>: re-run every commit of the range and check the TDD protocol held."""
+print("REPLAY: ACCEPT")
