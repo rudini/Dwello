@@ -297,3 +297,15 @@ class SkillLintTest(unittest.TestCase):
         result = lint(copy)
 
         self.assertIn("skill_lint: missing section 'Hard rules'\n", result.stdout)
+
+    def test_a_duplicate_frontmatter_key_is_named(self):
+        real = (SKILL / "SKILL.md").read_text()
+        copy = copy_of_skill(self)
+        (copy / "SKILL.md").write_text(real.replace("name: tdd-deep-modules\n",
+                                                    "name: tdd-deep-modules\nname: tdd-deep-modules\n"))
+
+        result = lint(copy)
+
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn("skill_lint: frontmatter: key 'name' appears twice\n", result.stdout)
+
