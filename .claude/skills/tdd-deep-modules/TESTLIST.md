@@ -224,3 +224,29 @@ Review steps: 01-03 stage 1 tools, 04 `verify_stage1`, 05 SKILL.md, 06 `depth_re
 - [x] round 2 review: run without arguments (as "Done when" does), a module added to `scripts/` cannot shadow an import; a symbolic link under `scripts/` is named; crafted bytecode next to a verifier or a test is never loaded; only the top-level `scripts/tests/` is left out of the lock
 - [x] round 3 review: the lock, the reviews and the lint read their input before the suite runs (a test that repairs SKILL.md cannot help); a `unittest` package in the working directory cannot replace the test runner; bytecode caches left by normal runs are not locked
 - [x] round 4 review: pins that a test writing a passing review or a fresh lock during the suite cannot change the gate's result; DESIGN.md names the self-check limit and gives an independent `sha256sum --check` command; Python 3.11+ documented
+
+# Stage 2b
+
+The tool commits of this stage are made by hand in the repository's commit style (`chore(tests): red ...`, `feat(build): green ...`, `chore(build): refactor ...`): `tdd-step` runs only vitest and bun suites, and this skill's own suite is Python (`DESIGN.md`, Scope). Each red is run and seen failing on an assertion before its commit.
+
+## Step 09: two-tier suite (`tdd-step --suite`, `tdd_replay`)
+
+Design it twice. Hidden decision: which command a package runs for each tier and which phases need which tier.
+- A: `suite.run(root, tier)` reads the tier's command from each package.json (`scripts["test:fast"]` for fast, falling back to `scripts.test`; `scripts.test` for full); the tier rules live in `protocol.violations(..., suite=, previous_suite=)`, shared by `tdd-step` and `tdd_replay`.
+- B: a separate `tiers` module that returns command lists, with `tdd-step` and `tdd_replay` each checking the tier rules themselves.
+- Chosen: A, because the tier's command is one more detail of "how a package runs its tests" (already hidden in `suite`) and the rules stay in the one place both tools share.
+
+Fast tier = `scripts["test:fast"]` of each package.json (its `bun test` segment), or `scripts.test` where a package declares no fast suite; vitest packages run vitest in both tiers. Full tier = `scripts.test`. Trailer `TDD-Suite: fast|full`.
+
+- [ ] red without `--suite` runs the fast suite and records `TDD-Suite: fast`
+- [ ] `red --suite full` runs the full suite and records `TDD-Suite: full` (a test that lives only in the full tier)
+- [ ] green without `--suite` runs the fast suite; `green --suite full` runs the full suite
+- [ ] green after a red on the full suite must run the full suite
+- [ ] refactor runs the full suite by default, and refuses `--suite fast`
+- [ ] an unknown or missing `--suite` value exits 2 with usage
+- [ ] replay: each commit is run with the tier of its `TDD-Suite` trailer (exit-code trailer checked against that run); a missing trailer is rejected
+- [ ] replay: a refactor verified only against the fast suite is rejected
+- [ ] replay: a final commit verified only against the fast suite is rejected
+- [ ] replay: a red claimed on the fast suite for a test that exists only in the full tier is rejected
+- [ ] replay: a green that does not run red's test (skips it, or runs a tier without it) is rejected
+- [ ] the existing sabotage cases still pass
