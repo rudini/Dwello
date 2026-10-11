@@ -12,10 +12,11 @@ LOCK_STEP = "08"  # the review of verify_all; the lock records the verifiers as 
 def stage2(skill=Path(__file__).resolve().parents[2]):
     """(passed, lines to print) for the skill at `skill` (default: the skill this file belongs to)."""
     skill = Path(skill)
+    # every other check reads its input before the suite runs, so nothing a test does can change it
     steps = [(step, *verdicts.final(skill / "evidence" / "reviews", step)) for step in STEPS]
     stale = _lock(skill)
-    passed, summary = selfcheck.own_suite(skill / "scripts")
     problems = lint.problems(skill)
+    passed, summary = selfcheck.own_suite(skill / "scripts")
     lines = [f"tests: {summary}"] + [f"skill_lint: {p}" for p in problems or ["OK"]]
     lines += [f"step {step}: {description}" for step, _, description in steps]
     lines += [f"verifiers.lock: {p}" for p in stale or ["OK"]]
