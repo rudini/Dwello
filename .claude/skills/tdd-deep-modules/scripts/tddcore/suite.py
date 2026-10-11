@@ -21,7 +21,6 @@ class Run:
     summary: str
     failed: int  # number of failing tests
     ran: int  # tests run, not skipped
-    empty: bool  # the framework collected no tests at all (not: crashed before collecting)
 
 
 def run(root):
@@ -32,8 +31,7 @@ def run(root):
     return _combine([runner() for runner in runners])
 
 
-def _combine(all_runs):
-    runs = all_runs
+def _combine(runs):
     outcomes = {r.outcome for r in runs}
     outcome = next(o for o in ("error", "fail", "pass") if o in outcomes)
     ran = sum(r.ran for r in runs)
@@ -41,8 +39,7 @@ def _combine(all_runs):
     if outcome == "pass" and not ran:
         outcome, summary = "error", f"no tests ran ({summary})"
     # the exit code covers every command run, so the trailer never hides a failing one
-    return Run(max(r.exit_code for r in all_runs), outcome, summary, sum(r.failed for r in runs),
-               ran, all(r.empty for r in runs))
+    return Run(max(r.exit_code for r in runs), outcome, summary, sum(r.failed for r in runs), ran)
 
 
 def _files(root):
@@ -120,7 +117,7 @@ def _run_bun(directory, command):
     summary = f"bun: {failed} of {len(cases)} tests failed"
     if hidden:
         summary += f" ({errors[1]} errors outside tests)"
-    return Run(done.returncode, outcome, summary, failed, ran, reported and not cases)
+    return Run(done.returncode, outcome, summary, failed, ran)
 
 
 def _run_vitest(root):
@@ -131,15 +128,14 @@ def _run_vitest(root):
                               cwd=root, capture_output=True, text=True, errors="replace")
         if not report.exists():
             last = (done.stderr.strip() or done.stdout.strip() or "no output").splitlines()[-1]
-            return Run(done.returncode, "error", f"vitest wrote no report: {last}", 0, 0, False)
+            return Run(done.returncode, "error", f"vitest wrote no report: {last}", 0, 0)
         data = json.loads(report.read_text())
     summary = f"{data['numFailedTests']} of {data['numTotalTests']} tests failed"
-    load_errors = sum(1 for f in data["testResults"] if f["message"])
     ran = data["numTotalTests"] - data["numPendingTests"] - data["numTodoTests"]
     unhandled = re.search(r"^Vitest caught \d+ unhandled errors? during the test run",
                           done.stderr + done.stdout, re.MULTILINE) is not None
     return Run(done.returncode, _vitest_outcome(done.returncode, data, unhandled), summary,
-               data["numFailedTests"], ran, data["numTotalTests"] == 0 and not load_errors)
+               data["numFailedTests"], ran)
 
 
 def _bun_outcome(exit_code, cases):
