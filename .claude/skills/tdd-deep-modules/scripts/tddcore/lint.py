@@ -16,19 +16,23 @@ LINE_LIMIT = 400  # SKILL.md must stay below this; details belong in references/
 REQUIRED = {
     "Hard rules": ["no production code without a failing test", "never delete assertions",
                    "never paste computed values into expected values", "never mix refactoring with green",
-                   "no tests on private methods"],
+                   "no tests on private methods", "one test per cycle"],
     "1. Detect the context": ["npx vitest run", "bun test", "git log -1 --format=%s", "does not apply"],
     "2. Design it twice": ["hidden decision", "two interface designs", "compare", "depth", "one sentence",
-                           "chosen"],
+                           "chosen", "one-sentence reason"],
     "3. Write the behaviour test list": ["one line per behaviour", "tdd-step test", "hidden decision",
                                          "both sketches"],
     "4. Red, green, refactor with tdd-step": ["scripts/tdd-step red", "scripts/tdd-step green",
                                               "scripts/tdd-step refactor", "one behaviour from the list per cycle",
-                                              "git reset --soft head~1", "package.json"],
+                                              "git reset --soft head~1", "package.json",
+                                              "no second test before the first is green", "never what it expects",
+                                              "git stash push -u --"],
     "5. Depth check in every refactor": ["interface much simpler than the implementation", "classitis",
                                          "pass-through", "pull complexity downward", "size alone",
-                                         "cumbersome tests", "wrong interface", "keep every test's name and file"],
-    "6. Design note": ["hidden decision", "both designs", "reason", "depth_report", "tdd_replay"],
+                                         "cumbersome tests", "wrong interface", "keep every test's name and file",
+                                         "changed production .ts/.js files"],
+    "6. Design note": ["hidden decision", "both designs", "reason", "depth_report", "tdd_replay",
+                       "not assertion strength"],
 }
 
 
