@@ -269,7 +269,7 @@ Fast tier = `scripts["test:fast"]` of each package.json (its `bun test` segment)
 
 ## Step 11: `depth_report` names a swarm of exported helpers as classitis
 
-A swarm member is an exported function (`export function f` or `export const f = (...) =>`) whose body has at most 10 code lines (20 since review round 1) and whose name the module uses exactly once besides its declaration (one caller, inside the module: exported only to be tested). Three or more members are classitis (`classitis yes`, finding `classitis: exported helpers with one caller: a, b, c`). Fixtures: `swarm.ts.txt` (known bad: the deep amount parser with its helpers exported and tested one by one) and `deep.ts.txt` (known good: the same functional core kept private).
+A swarm member is an exported function (`export function f` or `export const f = (...) =>`) whose body has at most 10 code lines (20 since review round 1) and whose name the module uses exactly once besides its declaration (one caller, inside the module: exported only to be tested) and, since review round 1, no other production file names. Three or more members are classitis (`classitis yes`, finding `classitis: exported helpers with one caller: a, b, c`). Fixtures: `swarm.ts.txt` (known bad: the deep amount parser with its helpers exported and tested one by one) and `deep.ts.txt` (known good: the same functional core kept private).
 
 - [x] the known-bad swarm is flagged as classitis, naming the helpers
 - [x] the known-good functional core (private helpers, one exported entry point) stays deep
@@ -303,3 +303,10 @@ Stage 2b replaces stage 2's pass line: the reviews of steps 01-12 (09 two-tier s
 - [x] overload signatures are neither callers nor extra helpers; each name is listed once
 - [x] helpers up to 20 code lines count as small (the older ">10 lines" test now uses a 21-line body; its expectation is unchanged)
 - [x] refactor: `Depth.has_classitis` holds the verdict, the CLI only prints it
+
+### Step 11, review round 2 (fixes)
+
+- [x] an object return type (`): { v: number } {`, `Promise<{ ... }>`) is skipped before the body is measured: long object-returning helpers are not small, recursive object-returning helpers are not one-caller helpers
+- [x] other production files are read without comments: a name in a comment there is no use
+- [x] pin: the twenty-line test uses a 20-line body (cap 19 fails it)
+- no-caller exports, unrelated same-name functions and bracketed `const` expressions: Known limits
