@@ -37,8 +37,10 @@ def measure(root, path):
     module = Path(root) / path
     if Path(path).suffix not in _SOURCE:
         raise NotAModule(f"{path}: not a TypeScript or JavaScript file")
-    if not module.is_file():
+    if not module.exists():
         raise NotAModule(f"{path}: no such file")
+    if not module.is_file():
+        raise NotAModule(f"{path}: not a file")
     text = module.read_text(errors="replace")
     code = re.sub(r"/\*.*?\*/|//[^\n]*", "", text, flags=re.DOTALL)  # without comments
     surface, size = _surface(code), _size(code)
