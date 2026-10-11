@@ -184,6 +184,7 @@ def _unused(text):
 
 def _duplicate(text):
     """Extra copies of code lines (DUPLICATE_LENGTH characters or longer) that occur more than once."""
+    text = re.sub(r"/\*.*?\*/", "", text, flags=re.DOTALL)
     lines = [line.strip() for line in text.splitlines()]
     long = [line for line in lines if len(line) >= DUPLICATE_LENGTH and not line.startswith("//")]
     return len(long) - len(set(long))
