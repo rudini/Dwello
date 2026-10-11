@@ -27,8 +27,8 @@ Break none of these, even when it would be faster.
 
 Before the first test:
 
-- Find the test runners: vitest (a `package.json` with `vitest`) and/or `bun test` (a `scripts.test` with `bun test`), at the root and in nested packages such as `backend/`. These are the only runners `tdd-step` supports; elsewhere it exits 2, and this skill does not apply.
-- Run every suite the way `tdd-step` will (all detected runners): it must pass now. If it does not, stop and report; never start a cycle on a red suite.
+- Find the test runners: vitest (a `package.json` with `vitest`) and/or `bun test` (a `scripts.test` with `bun test`), at the root and in nested packages such as `backend/`. This skill is only for vitest and `bun test` projects. Where neither exists, the skill does not apply: stop, tell the user, and do not edit production code in this session, because the `tdd-guard` hook stays active and blocks it.
+- Run every suite as `tdd-step` will, each in its package directory: `npx vitest run` for vitest, the `bun test` part of `scripts.test` for bun. All must pass now. If one does not, stop and report; never start a cycle on a red suite.
 - Read the last commit: `git log -1 --format=%s`. A `red:` subject means a cycle is open; finish it with green first.
 - Find the module that owns the behaviour and its public interface. Note where its tests live.
 
