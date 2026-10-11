@@ -3,6 +3,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from pathlib import Path
 
 from tests.fixture import SCRIPTS, bun_repo
 
@@ -91,3 +92,19 @@ class TddGuardTest(unittest.TestCase):
             self.assertEqual(result.returncode, 1, result.stderr)
             self.assertIn("tdd-guard: cannot read the hook input", result.stderr)
             self.assertNotIn("Traceback", result.stderr)
+
+    def test_paths_are_resolved_before_they_are_judged(self):
+        repo = bun_repo(self, **{"tests/keep.md": "x\n"})
+        repo.commit_phase("test", {"TESTLIST.md": "- [ ] adds\n"}, 1)
+        with tempfile.TemporaryDirectory() as elsewhere:
+            link = Path(elsewhere) / "link"
+            link.symlink_to(repo.path)
+            for name, path in (("dot-dot through tests/", f"{repo.path}/tests/../calc.ts"),
+                               ("symlinked checkout", f"{link}/calc.ts")):
+                with self.subTest(name):
+                    event = {"tool_name": "Edit", "tool_input": {"file_path": path}}
+                    result = subprocess.run([sys.executable, str(SCRIPTS / "tdd-guard")],
+                                            input=json.dumps(event), capture_output=True, text=True)
+
+                    self.assertEqual(result.returncode, 2, result.stderr)
+                    self.assertIn("calc.ts is production code", result.stderr)
