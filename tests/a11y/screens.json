@@ -9,6 +9,7 @@
 		"delete-dialog": "The delete confirmation dialog open.",
 		"fuel-stock-dialog": "Building page with a Tankbestand reading: the confirmation before deleting it open.",
 		"end-dialog": "The dialog that ends a rental contract open.",
+		"end-dialog-error": "The dialog that ends a rental contract with a Vertragsende before today: the error at the field.",
 		"send-dialog": "The confirmation before marking a statement as sent open.",
 		"reminder-dialog": "The Mahnung dialog of a sent statement open.",
 		"mark-paid-dialog": "The dialog that marks a statement as paid open.",
@@ -210,6 +211,7 @@
 			"states": [
 				"default",
 				"end-dialog",
+				"end-dialog-error",
 				"delete-dialog"
 			]
 		},

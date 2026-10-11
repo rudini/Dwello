@@ -32,6 +32,7 @@ Funktionalität: Mietvertragsdetail
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
     Wenn der Liegenschaftsverwalter den Mietvertrag auf den "2024-01-31" beenden will
     Dann meldet der Dialog "Das Vertragsende kann nicht vor heute liegen."
+    Und ist der Mietvertrag unbefristet
 
   Szenario: Künftiger Mietvertrag
     Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
@@ -42,6 +43,13 @@ Funktionalität: Mietvertragsdetail
 
   Szenario: Aktiver Mietvertrag kann nicht gelöscht werden
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
+    Wenn der Liegenschaftsverwalter den Mietvertrag löschen will
+    Dann kann der Liegenschaftsverwalter das Löschen nicht bestätigen
+
+  # Gekündigt, aber noch laufend: gelöscht werden kann er erst nach dem Vertragsende
+  Szenario: Laufender Mietvertrag mit künftigem Vertragsende kann nicht gelöscht werden
+    Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
+    Und der Liegenschaftsverwalter den Mietvertrag auf den "2099-12-31" beendet
     Wenn der Liegenschaftsverwalter den Mietvertrag löschen will
     Dann kann der Liegenschaftsverwalter das Löschen nicht bestätigen
 

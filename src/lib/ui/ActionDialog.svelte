@@ -50,7 +50,7 @@
 			open = false;
 			onsuccess?.();
 		},
-		onsuccess // a delete leads to another page, which confirms it
+		() => onsuccess?.() // a delete leads to another page, which confirms it
 	)}
 ></form>
 

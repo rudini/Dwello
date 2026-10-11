@@ -111,18 +111,54 @@ describe('Mietvertragsdetail', () => {
 		const dialog = document.querySelector('[role=dialog]')!;
 		expect(dialog.textContent).toContain('Mietvertrag beenden');
 		expect(byTestId<HTMLInputElement>('contract-end-date-input')!.value).toBe('10.10.2026');
-		expect(dialog.textContent).toContain('zum Beispiel der Tag, auf den der Mieter gekündigt hat');
+		expect(dialog.textContent).toContain('zum Beispiel der Tag, auf den der Mietvertrag gekündigt ist');
+		expect(dialog.textContent).toContain('Ändern können Sie das Vertragsende später unter «Bearbeiten».');
 		expect(byTestId('contract-end-confirm')!.textContent).toContain('Mietvertrag beenden');
 	});
 
 	it('sagt am Feld, wenn das Vertragsende vor heute liegt, und sendet nichts', async () => {
 		open();
 		click('contract-end-button');
+		const submitted = vi.fn();
+		document.querySelector('form[action="?/end"]')!.addEventListener('submit', submitted);
 		fireEvent(byTestId<HTMLInputElement>('contract-end-date-input')!, 'input', '31.01.2024');
 		click('contract-end-confirm');
 		await settle();
 		expect(document.querySelector('[role=dialog]')!.textContent).toContain(
 			'Das Vertragsende kann nicht vor heute liegen.'
+		);
+		expect(submitted).not.toHaveBeenCalled();
+	});
+
+	// der Tag geht mit dem Formular an die Aktion; die Meldung nennt ihn
+	it('sendet das Vertragsende und meldet den Tag, an dem der Mietvertrag endet', async () => {
+		toasts.set([]);
+		open();
+		click('contract-end-button');
+		fireEvent(byTestId<HTMLInputElement>('contract-end-date-input')!, 'input', '31.03.2027');
+		await settle();
+		const formData = new FormData();
+		const after = actions.get('?/end')!({ formData }) as (input: unknown) => Promise<void>;
+		expect(formData.get('endDate')).toBe('2027-03-31');
+		await after({ update: async () => {}, result: { type: 'success' } });
+		expect(get(toasts).map((toast) => toast.message)).toEqual([
+			'Der Mietvertrag von Anna Keller endet am 31.03.2027'
+		]);
+	});
+
+	// ein künftiger Mietvertrag kann frühestens am Tag seines Beginns enden
+	it('schlägt bei einem künftigen Mietvertrag den Vertragsbeginn vor', () => {
+		open('2099-11-01');
+		click('contract-end-button');
+		expect(byTestId<HTMLInputElement>('contract-end-date-input')!.value).toBe('01.11.2099');
+	});
+
+	it('lässt einen laufenden Mietvertrag mit künftigem Vertragsende nicht löschen und sagt bis wann', () => {
+		open('2024-04-01', '2027-03-31');
+		click('contract-delete-button');
+		expect(byTestId<HTMLButtonElement>('contract-delete-confirm')!.disabled).toBe(true);
+		expect(document.querySelector('[role=dialog]')!.textContent!.replace(/\s+/g, ' ')).toContain(
+			'Der Mietvertrag läuft bis am 31.03.2027. Danach können Sie ihn löschen.'
 		);
 	});
 

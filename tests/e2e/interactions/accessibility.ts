@@ -152,6 +152,13 @@ const states: Record<string, (page: Page, viewport: Viewport) => Promise<unknown
 		await press(page, 'contract-end-button');
 		await dialog(page);
 	},
+	'end-dialog-error': async (page) => {
+		await press(page, 'contract-end-button');
+		await dialog(page);
+		await typeDate(page.getByTestId('contract-end-date-input'), '2024-01-31');
+		await press(page, 'contract-end-confirm');
+		await page.getByRole('dialog').getByTestId('form-error').waitFor();
+	},
 	'send-dialog': async (page) => {
 		await press(page, 'statement-send-button');
 		await dialog(page);

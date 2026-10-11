@@ -248,3 +248,8 @@ Every place in the code is marked `TODO(fachlich prüfen)` (`grep -rn "TODO(fach
 - A Saldo of 0 is settled once sent (status «Bezahlt» on the day it is marked as sent), so it never becomes «Überfällig» (final review, V-1).
 - Left low (final round H, persona Dr. Weber F2): a Nachzahlung or Rückerstattung of CHF 0.05 still gets a payment part or the request for an IBAN; a minimum amount is a product decision (V-2). The detail page says «Gesamtkosten» where the PDF says «Ihre Nebenkosten» (V-5, existed before). `prorateCosts` is only used by its tests; the deepcheck work of session 12 kept it as one of the three exports of `prorating.service.ts` (H-3). The commit subject of bebb4cd is 52 characters (H-4; history is not rewritten, fixable at squash-merge). The preview fee test takes the default rate; the typed rate is covered by the scenario «Die Vorschau nennt die Verwaltungspauschale» (H-8). The wizard's heating profile preset, the «Anteil» column rounding and «Entwurf gespeichert» existed before (Dr. Weber F2).
 
+## Session 12 – end a contract on a chosen day (review I)
+
+- Glossary: «Kündigung» / «gekündigt» is not in the glossary; the help of the Vertragsende says «der Tag, auf den der Mietvertrag gekündigt ist» – TODO(fachlich prüfen).
+- Left low (review I): a refusal of the backend shows at the bottom of the dialog, not at the field, and stays until the next action (I-5; the backend refuses only overlaps, which the wizard checks). The backend computes «today» in UTC, the app in Swiss time: around midnight a contract ending that day can show as ended one or two hours early in backend filters (I-10, existed before, see R5-4).
+

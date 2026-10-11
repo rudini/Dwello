@@ -31,11 +31,12 @@
 	const name = $derived(`${contract.tenant.firstName} ${contract.tenant.lastName}`);
 	const status = $derived(contractStatusOn(contract.startDate, contract.endDate, data.today));
 	let ending = $state(false);
-	// the last day of the tenancy, e.g. the day the tenant gave notice for; today is proposed
+	// the last day of the tenancy, e.g. the day the tenant gave notice for; proposed: today, a future contract its start
+	const earliestEnd = $derived([data.today, contract.startDate.slice(0, 10)].sort()[1]);
 	let endDate = $state(untrack(() => data.today));
 	let endError = $state('');
 	function startEnding() {
-		endDate = data.today;
+		endDate = earliestEnd;
 		endError = '';
 		ending = true;
 	}
@@ -117,7 +118,7 @@
 	confirmLabel="Mietvertrag beenden"
 	confirmTestid="contract-end-confirm"
 	error={form?.endError}
-	fields={{ endDate, startDate: contract.startDate }}
+	fields={{ endDate }}
 	check={checkEndDate}
 	onsuccess={() =>
 		addToast(
@@ -127,10 +128,12 @@
 				: `Der Mietvertrag von ${name} endet am ${formatDate(endDate)}`
 		)}
 >
+	<!-- TODO(fachlich prüfen): «gekündigt» is not in the glossary (offene-punkte.md) -->
 	<DateInput
 		id="endDate"
 		label="Vertragsende"
-		help="Der letzte Tag des Mietverhältnisses von {name}, zum Beispiel der Tag, auf den der Mieter gekündigt hat. Bis und mit diesem Tag läuft der Mietvertrag; danach gilt er als beendet."
+		help="Der letzte Tag des Mietverhältnisses von {name}, zum Beispiel der Tag, auf den der Mietvertrag gekündigt ist. Bis und mit diesem Tag läuft der Mietvertrag; danach gilt er als beendet. Ändern können Sie das Vertragsende später unter «Bearbeiten»."
+		min={earliestEnd}
 		error={endError}
 		bind:value={endDate}
 		testid="contract-end-date-input"
@@ -143,15 +146,20 @@
 	title="Mietvertrag löschen?"
 	confirmLabel="Mietvertrag löschen"
 	danger
-	disabled={!contract.endDate}
+	disabled={status !== 'ended'}
 	confirmTestid="contract-delete-confirm"
 	error={form?.deleteError}
 	onsuccess={() => addToast('success', `Mietvertrag von ${name} gelöscht`)}
 >
-	{#if contract.endDate}
+	{#if status === 'ended'}
 		<p>
 			Der Mietvertrag von {name} wird endgültig gelöscht. Ein Mietvertrag mit Nebenkostenabrechnungen
 			kann nicht gelöscht werden.
+		</p>
+	{:else if contract.endDate}
+		<p>
+			Der Mietvertrag läuft bis am {formatDate(contract.endDate.slice(0, 10))}. Danach können Sie ihn
+			löschen.
 		</p>
 	{:else}
 		<p>Ein Mietvertrag ohne Vertragsende kann nicht gelöscht werden. Beenden Sie ihn zuerst.</p>

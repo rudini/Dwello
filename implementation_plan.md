@@ -4632,6 +4632,10 @@ A tenant gives notice for a later day: «Mietvertrag beenden» asks for the Vert
   `src/lib/ui/dialog-submit.ts` (fallow duplication).
 - [x] **Tests**: `contract-status.test.ts`, `contract-actions.test.ts`, `contract-detail-page.dom.test.ts`; the
   `enhance` mocks pass `formData` as SvelteKit does. Open points in `offene-punkte.md` (lines on «Beenden») closed.
+- [x] **Review I** (`docs/reviews/I-review-1.md`, no critical): a running contract with a future Vertragsende can no
+  longer be deleted (only ended ones; the dialog says until when it runs, scenario first); a future contract proposes
+  its start; the action reads the Vertragsbeginn from the backend and checks the format; the toast and the sent date
+  are tested; the field-error state is in the axe check (`end-dialog-error`); lows in `offene-punkte.md`.
 
 ---
 

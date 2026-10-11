@@ -97,11 +97,13 @@ export const load: PageServerLoad = async ({ params, fetch }): Promise<ContractD
 export const actions: Actions = {
 	// The last day of the tenancy, e.g. the day the tenant gave notice for: today or later
 	end: async ({ params, fetch, request }) => {
-		const form = await request.formData();
-		const endDate = String(form.get('endDate') ?? '');
-		const endError = contractEndError(endDate, String(form.get('startDate') ?? ''), localToday());
+		const endDate = String((await request.formData()).get('endDate') ?? '');
+		const url = `${BACKEND_URL}/api/v1/contracts/${params.id}`;
+		const stored = await fetch(url);
+		const { startDate } = stored.ok ? await stored.json() : { startDate: '' };
+		const endError = contractEndError(endDate, String(startDate ?? ''), localToday());
 		if (endError) return fail(400, { endError });
-		const response = await fetch(`${BACKEND_URL}/api/v1/contracts/${params.id}`, {
+		const response = await fetch(url, {
 			method: 'PUT',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({ endDate })

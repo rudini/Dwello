@@ -31,8 +31,11 @@ describe('Vertragsende beim Beenden', () => {
 		expect(contractEndError('2027-03-31', '2024-04-01', today)).toBeNull();
 	});
 
-	it('verlangt ein Datum', () => {
-		expect(contractEndError('', '2024-04-01', today)).toBe('Bitte geben Sie das Vertragsende ein.');
+	it('verlangt ein Datum als Tag', () => {
+		for (const wrong of ['', '31.03.2027', '2027-3-31'])
+			expect(contractEndError(wrong, '2024-04-01', today)).toBe(
+				'Bitte geben Sie das Vertragsende ein, zum Beispiel 31.03.2027.'
+			);
 	});
 
 	it('lehnt einen Tag vor heute ab und sagt, wo ein früheres Ende hingehört', () => {

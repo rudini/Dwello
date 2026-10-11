@@ -89,8 +89,13 @@ Then('endet der Mietvertrag am {string}', async ({ verwalter }, date: string) =>
 	await expect(endOfContract(verwalter)).toHaveText(date);
 });
 
+// the field's error and a refusal of the server use the same frame: the one with the message counts
 Then('meldet der Dialog {string}', async ({ verwalter }, message: string) => {
-	await expect(endDateProblem(verwalter)).toContainText(message);
+	await expect(endDateProblem(verwalter).filter({ hasText: message })).toBeVisible();
+});
+
+Then('ist der Mietvertrag unbefristet', async ({ verwalter }) => {
+	await expect(endOfContract(verwalter)).toHaveText('Unbefristet');
 });
 
 Then('der Mietvertrag von {string} ist nicht mehr auffindbar', async ({ verwalter, names }, tenant: string) => {
