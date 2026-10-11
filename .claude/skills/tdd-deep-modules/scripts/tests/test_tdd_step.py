@@ -610,3 +610,13 @@ class TddStepTest(unittest.TestCase):
                 result = repo.run("tdd-step", "red", "adds two numbers")
 
                 self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_a_crashed_suite_is_not_dropped_in_a_mixed_repository(self):
+        repo = vitest_repo(self)
+        repo.commit_all("red: seed", {"calc.js": RIGHT_ADD_JS, "calc.test.js": VITEST_TEST,
+                                      "pymod.py": "def f():\n    return 1\n",
+                                      "conftest.py": "import pymod\n",
+                                      "test_py.py": "import pymod\n\n\ndef test_f():\n    assert pymod.f() == 1\n"})
+        repo.write("pymod.py", "def f(:\n")
+
+        self.assert_refused(repo, "green", "green needs all tests passing", head="red: seed")
