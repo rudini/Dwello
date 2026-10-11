@@ -129,13 +129,20 @@ def _run_vitest(root):
                data["numFailedTests"], ran, data["numTotalTests"] == 0 and not load_errors)
 
 
+def _is_vitest_assertion(message):
+    # .resolves/.rejects failures are plain Errors raised inside vitest's assertion chain
+    lines = message.splitlines()
+    return message.startswith("AssertionError") or (
+        len(lines) > 1 and lines[0].startswith("Error: ") and lines[1].strip().startswith("at _Assertion."))
+
+
 def _vitest_outcome(exit_code, data, unhandled):
     if exit_code == 0:
         return "pass"
     files = data["testResults"]
     messages = [m for f in files for a in f["assertionResults"] for m in a["failureMessages"]]
     load_errors = [f for f in files if f["message"]]
-    asserted = all(m.startswith("AssertionError") for m in messages)
+    asserted = all(_is_vitest_assertion(m) for m in messages)
     if messages and not load_errors and not unhandled and asserted:
         return "fail"
     return "error"
