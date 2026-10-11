@@ -10,6 +10,12 @@ _FOLLOWS = {
     "refactor": {"green", "refactor"},
 }
 PHASES = tuple(_FOLLOWS)
+TIERS = ("fast", "full")  # fast: no database, no external network; full: everything
+
+
+def default_tier(phase):
+    """The suite a phase runs unless told otherwise: refactor checks everything."""
+    return "full" if phase == "refactor" else "fast"
 
 
 def phase_of(subject):

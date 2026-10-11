@@ -17,7 +17,7 @@ class Verdict:
     phase: str
     run: suite.Run
     violations: tuple
-    suite: str = "full"  # the tier its trailer claims (and `run` came from)
+    suite: str  # the tier its trailer claims (and `run` came from)
 
 
 def replay(repo, rev_range):
@@ -104,7 +104,7 @@ def _judge(previous, previous_suite, known, subject, claimed, tier, runs, change
         found = [f"not a TDD phase commit: {subject!r}"]
     else:
         found = protocol.violations(previous, phase, run, changed, tier, previous_suite)
-        if tier not in ("fast", "full"):
+        if tier not in protocol.TIERS:
             found.append(f"the TDD-Suite trailer must say fast or full, but says {tier or 'nothing'}")
         if claimed != str(run.exit_code):
             found.append(f"the trailer says exit code {claimed or 'nothing'}, "
@@ -146,7 +146,7 @@ def _running(run):
 
 
 def _runs(tree):
-    return {"fast": _run(tree, "fast"), "full": _run(tree, "full")}
+    return {tier: _run(tree, tier) for tier in protocol.TIERS}
 
 
 def _run(tree, tier):
