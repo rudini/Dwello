@@ -1,0 +1,9 @@
+# Response to step 08 (verify_all), round 2
+
+- [blocker] shadow modules before the gate: red "shadowed imports" copies the real scripts into a fixture skill, adds `scripts/hashlib.py`, `pathlib.py` and `re.py` that print `STAGE2: PASS` and exit 0, and runs the copy's own `verify_all` without arguments (as "Done when" does); green: `verify_all` imports only `sys`, removes its own directory from the front of `sys.path`, imports `os`, and appends the scripts directory at the end before importing `tddcore`. The shadow files stay inert and the gate names them "not locked". Still no branches; the AST test passes. The round-1 test with a fixture argument stays; the new helpers `real_copy`/`run_copy` cover the shipping invocation.
+- [major] symbolic links: red/green "symbolic links": any symlink under `scripts/` (file or directory) is named "is a symbolic link" and fails stage 2.
+- [major] crafted bytecode: red "crafted bytecode" forges an unchecked-hash `.pyc` for `tddcore/lint.py` (returning no problems) next to the source, with SKILL.md broken; green: `verify_all` sets `sys.pycache_prefix` and `PYTHONPYCACHEPREFIX` to a fresh temporary directory before importing `tddcore` and removes it at the end, so bytecode under `scripts/` is never read, also in the test run (pinned by "crafted bytecode for the test suite"). The known-limits line now names only changes outside the skill.
+- [minor] `tests` exclusion broader than documented: red/green "top-level tests only": only `scripts/tests/` (and `__pycache__/`) are left out; `scripts/tddcore/tests/a.py` must be locked, and the documented `find` command's lock is accepted.
+- [minor, TDD] red 1ffaa67 with two test methods: acknowledged; this round's reds each start one test.
+- [nit] BOM or trailing blank line in the lock: left; fails closed with a line-specific message.
+- Mutation log `evidence/mutations/step-08-round-2-pins.txt`: 5/5 KILLED (the `PYTHONPYCACHEPREFIX` part after its pin).
