@@ -50,10 +50,11 @@ def measure(root, path):
     surface, size = _surface(code), _size(code)
     # a class without methods (an error type, a record) carries a name, not a spread-out decision
     tiny = [name for name, methods in _classes(code) if 0 < len(methods) <= TINY_CLASS]
-    helpers = _one_caller_exports(code)
+    top = _top(module, path)
+    helpers = _one_caller_exports(code, _other_production_code(module, top))
     metrics = Depth(path, surface, size, size / surface if surface else float(size),
                     tuple(tiny) if len(tiny) >= 2 else (), helpers if len(helpers) >= SWARM else (),
-                    _pass_through(code), _tests(module, path),
+                    _pass_through(code), _tests(module, top),
                     _unused(code), _duplicate(code), ())
     return replace(metrics, findings=_findings(metrics))
 
@@ -284,15 +285,18 @@ _SOURCE = {".ts", ".tsx", ".mts", ".cts", ".js", ".jsx", ".mjs", ".cjs"}
 _IMPORT = re.compile(r"""(?:\bfrom\s*|\bimport\s*\(?\s*|\brequire\s*\(\s*)["']((?:\.{1,2}|\$lib)/[^"']*)["']""")
 
 
-def _tests(module, path):
-    """Test files of the module's repository whose relative imports resolve to the module."""
-    module = module.resolve()
-    found = subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=module.parent,
+def _top(module, path):
+    """The root of the git repository holding `module`."""
+    found = subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=module.resolve().parent,
                            capture_output=True, text=True)
     if found.returncode != 0:
         raise NotAModule(f"{path}: not inside a git repository")
-    top = Path(found.stdout.strip())
-    target = module.with_suffix("")
+    return Path(found.stdout.strip())
+
+
+def _tests(module, top):
+    """Test files of the module's repository whose relative imports resolve to the module."""
+    target = module.resolve().with_suffix("")
     return tuple(rel for rel, imported in _test_imports(top) if target in imported)
 
 
@@ -319,14 +323,31 @@ _EXPORTED_FUNCTION = re.compile(r"^export\s+(?:async\s+)?function\b\*?\s*(\w+)|"
                                 re.MULTILINE)
 
 
-def _one_caller_exports(text):
-    """Small exported functions whose name the module uses exactly once besides declaring it."""
+def _one_caller_exports(text, elsewhere):
+    """Small exported functions the module uses exactly once besides declaring them, and no other
+    production code (`elsewhere`) names: exported only to be tested."""
     found = []
     for match in _EXPORTED_FUNCTION.finditer(text):
         name = match[1] or match[2]
-        if len(re.findall(rf"\b{re.escape(name)}\b", text)) == 2 and _size(_body(text, match)) <= SMALL_HELPER:
+        word = re.compile(rf"\b{re.escape(name)}\b")
+        if (len(word.findall(text)) == 2 and _size(_body(text, match)) <= SMALL_HELPER
+                and not any(word.search(other) for other in elsewhere)):
             found.append(name)
     return tuple(found)
+
+
+def _other_production_code(module, top):
+    """The text of every other TypeScript/JavaScript production file in the module's repository."""
+    return tuple(text for path, text in _production_code(top) if path != module.resolve())
+
+
+@functools.lru_cache(maxsize=None)
+def _production_code(top):
+    """[(path, text)] of the production source files of the repository at `top`, read once per run."""
+    listed = subprocess.run(["git", "ls-files", "-z", "-co", "--exclude-standard"], cwd=top, check=True,
+                            capture_output=True, text=True).stdout.split("\0")
+    return tuple(((top / rel).resolve(), (top / rel).read_text(errors="replace")) for rel in listed
+                 if Path(rel).suffix in _SOURCE and protocol.is_production(rel) and (top / rel).is_file())
 
 
 def _body(text, match):
