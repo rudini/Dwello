@@ -351,3 +351,26 @@ class SkillLintTest(unittest.TestCase):
                 result = lint(copy)
 
                 self.assertIn(f"skill_lint: missing in '{section}': {named}\n", result.stdout)
+
+    def test_the_hook_must_run_exactly_this_skills_guard(self):
+        real = (SKILL / "SKILL.md").read_text()
+        command = "'\"$CLAUDE_PROJECT_DIR\"/.claude/skills/tdd-deep-modules/scripts/tdd-guard'"
+        guard = '"$CLAUDE_PROJECT_DIR"/.claude/skills/tdd-deep-modules/scripts/tdd-guard'
+        hooks = real[real.index("  PreToolUse:\n"):real.index("---\n", 4)]
+        accepted = {"bash": real.replace(command, f"'bash {guard}'")}
+        rejected = {"or true": real.replace(command, f"'{guard} || true'"),
+                    "other skill": real.replace(command, "'\"$CLAUDE_PROJECT_DIR\"/.claude/skills/other/scripts/tdd-guard'"),
+                    "unbalanced quote": real.replace(command, "'\"$CLAUDE_PROJECT_DIR/.claude/skills/tdd-deep-modules/scripts/tdd-guard'"),
+                    "entry not a mapping": real.replace(hooks, "  PreToolUse:\n    - just a string\n"),
+                    "PreToolUse a number": real.replace(hooks, "  PreToolUse: 3\n"),
+                    "hooks a number": real.replace("      hooks:\n        - type: command", "      hooks: 3\n      x:\n        - type: command")}
+        for name, text in {**accepted, **rejected}.items():
+            with self.subTest(name):
+                copy = copy_of_skill(self)
+                (copy / "SKILL.md").write_text(text)
+
+                result = lint(copy)
+
+                self.assertNotIn("Traceback", result.stderr)
+                registered = "hooks: no PreToolUse hook" not in result.stdout
+                self.assertEqual(registered, name in accepted, result.stdout + result.stderr)
