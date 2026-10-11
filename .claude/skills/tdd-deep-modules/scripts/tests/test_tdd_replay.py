@@ -3,7 +3,7 @@ import sys
 import tempfile
 import unittest
 
-from tests.fixture import BUN_TEST, RIGHT_ADD_TS, SCRIPTS, WRONG_ADD_TS, bun_repo
+from tests.fixture import BUN_TEST, RIGHT_ADD_TS, SCRIPTS, WRONG_ADD_TS, Repo, bun_repo
 
 DECIMALS_TEST = 'test("adds decimals", () => {\n  expect(add(0.1, 0.2)).toBe(0.3);\n});\n'
 ROUNDING_ADD_TS = "export const add = (a: number, b: number) => Math.round((a + b) * 1e9) / 1e9;\n"
@@ -117,3 +117,14 @@ class TddReplayTest(unittest.TestCase):
 
             self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
             self.assertIn("tdd_replay: not inside a git repository", result.stderr)
+
+    def test_a_range_from_the_first_commit_is_replayed(self):
+        repo = Repo(self, {})
+        repo.git("update-ref", "-d", "HEAD")
+        repo.commit_phase("test", {"package.json": '{"scripts": {"test": "bun test"}}\n',
+                                   "TESTLIST.md": "- [ ] adds\n"}, 1)
+
+        result = repo.run("tdd_replay", "HEAD")
+
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("REPLAY: ACCEPT", result.stdout)
