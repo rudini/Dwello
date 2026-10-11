@@ -105,3 +105,20 @@ class TddStepTierTest(unittest.TestCase):
                               result.stderr)
                 self.assertNotIn("Traceback", result.stderr)
                 self.assertEqual(repo.subject(), "init")
+
+
+class TddReplayTierTest(unittest.TestCase):
+    def replay(self, repo, base):
+        return repo.run("tdd_replay", f"{base}..HEAD")
+
+    def test_each_commit_is_replayed_with_the_suite_of_its_trailer(self):
+        repo = tiered_repo(self)
+        base = repo.git("rev-parse", "HEAD")
+        repo.commit_phase("red", {"calc.test.ts": BUN_TEST}, 1, suite="fast")
+        repo.commit_phase("green", {"calc.ts": RIGHT_ADD_TS}, 0, suite="fast")  # full: exit 1
+        repo.commit_phase("refactor", {"db.pg.test.ts": DATABASE_TEST}, 0)  # the database is up
+
+        result = self.replay(repo, base)
+
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("REPLAY: ACCEPT", result.stdout)
