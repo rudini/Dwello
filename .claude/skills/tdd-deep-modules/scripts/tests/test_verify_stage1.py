@@ -79,3 +79,18 @@ class VerifyStage1Test(unittest.TestCase):
 
         self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
         self.assertIn("step 01: round 2 has two reviews", result.stdout)
+
+    def test_a_suite_that_did_not_really_pass_is_stage1_fail(self):
+        cases = {"exits 0 after a failure": "import os\nimport unittest\n\n\nclass T(unittest.TestCase):\n"
+                                            "    def test_a(self):\n        self.fail('broken')\n\n"
+                                            "    def test_b(self):\n        os._exit(0)\n",
+                 "every test skipped": "import unittest\n\n\nclass T(unittest.TestCase):\n"
+                                       "    @unittest.skip('later')\n    def test_a(self):\n        pass\n"}
+        for name, test in cases.items():
+            with self.subTest(name):
+                root = skill_dir(self, {"01": ["PASS"], "02": ["PASS"], "03": ["PASS"]}, test=test)
+
+                result = verify(root)
+
+                self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+                self.assertEqual(result.stdout.strip().splitlines()[-1], "STAGE1: FAIL")
