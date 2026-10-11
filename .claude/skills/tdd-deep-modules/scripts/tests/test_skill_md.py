@@ -131,3 +131,11 @@ class SkillMdTest(unittest.TestCase):
                         "pure helper functions inside it are implementation details",
                         "no tests and no public exports of their own"):
             self.assertIn(element, text)
+
+    def test_the_depth_check_names_the_swarm_of_exported_helpers(self):
+        text = dict(sections())["5. Depth check in every refactor"]
+
+        self.assertIn("**No swarm of exported helpers.**", text)
+        for element in ("a functional core is fine as internal structure",
+                        "small exported pure functions with one caller", "classitis"):
+            self.assertIn(element, text.lower())
