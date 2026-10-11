@@ -100,8 +100,15 @@ export const actions: Actions = {
 		const endDate = String((await request.formData()).get('endDate') ?? '');
 		const url = `${BACKEND_URL}/api/v1/contracts/${params.id}`;
 		const stored = await fetch(url);
-		const { startDate } = stored.ok ? await stored.json() : { startDate: '' };
-		const endError = contractEndError(endDate, String(startDate ?? ''), localToday());
+		if (!stored.ok)
+			return fail(stored.status, { endError: 'Mietvertrag konnte nicht beendet werden.' });
+		const contract = await stored.json();
+		// a stale page: an end already set is changed under «Bearbeiten», not overwritten
+		if (contract.endDate)
+			return fail(409, {
+				endError: 'Der Mietvertrag hat schon ein Vertragsende. Ändern Sie es unter «Bearbeiten».'
+			});
+		const endError = contractEndError(endDate, String(contract.startDate ?? ''), localToday());
 		if (endError) return fail(400, { endError });
 		const response = await fetch(url, {
 			method: 'PUT',

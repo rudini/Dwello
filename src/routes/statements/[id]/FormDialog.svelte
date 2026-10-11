@@ -52,7 +52,7 @@
 				document.querySelector<HTMLElement>('h1')?.focus(); // its button may be gone now
 			}
 		},
-		ondone
+		() => ondone?.()
 	)}
 ></form>
 

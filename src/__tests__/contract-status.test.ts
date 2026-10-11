@@ -1,5 +1,11 @@
 import { describe, it, expect, vi } from 'vitest';
-import { contractEndError, contractPeriod, contractStatusOn, localToday, statusBadges } from '../lib/contract-status';
+import {
+	contractEndError,
+	contractPeriod,
+	contractStatusOn,
+	localToday,
+	statusBadges
+} from '../lib/contract-status';
 
 const today = '2026-10-10';
 

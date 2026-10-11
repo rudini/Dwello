@@ -9,7 +9,9 @@ vi.mock('$app/forms', () => ({
 	}
 }));
 async function redirectAfter(action: string) {
-	const after = actions.get(action)!({ formData: new FormData() }) as (input: unknown) => Promise<void>;
+	const after = actions.get(action)!({ formData: new FormData() }) as (
+		input: unknown
+	) => Promise<void>;
 	await after({ update: async () => {}, result: { type: 'redirect' } });
 }
 
@@ -105,14 +107,21 @@ describe('Mietvertragsdetail', () => {
 		expect(byTestId('tenant-phone-link')!.getAttribute('href')).toBe('tel:+41 52 123 45 67');
 	});
 
-	it('fragt beim Beenden nach dem Vertragsende, vorgeschlagen ist heute', () => {
+	// kein Vorschlag: ein schnelles Bestätigen soll den Mietvertrag nicht aus Versehen heute beenden
+	it('fragt beim Beenden nach dem Vertragsende, ohne einen Tag vorzuschlagen', async () => {
 		open();
 		click('contract-end-button');
 		const dialog = document.querySelector('[role=dialog]')!;
 		expect(dialog.textContent).toContain('Mietvertrag beenden');
-		expect(byTestId<HTMLInputElement>('contract-end-date-input')!.value).toBe('10.10.2026');
-		expect(dialog.textContent).toContain('zum Beispiel der Tag, auf den der Mietvertrag gekündigt ist');
-		expect(dialog.textContent).toContain('Ändern können Sie das Vertragsende später unter «Bearbeiten».');
+		expect(byTestId<HTMLInputElement>('contract-end-date-input')!.value).toBe('');
+		click('contract-end-confirm');
+		await settle();
+		expect(dialog.textContent).toContain(
+			'Bitte geben Sie das Vertragsende ein, zum Beispiel 31.03.2027.'
+		);
+		expect(dialog.textContent).toContain(
+			'Der letzte Tag des Mietverhältnisses, zum Beispiel der Tag, auf den gekündigt ist.'
+		);
 		expect(byTestId('contract-end-confirm')!.textContent).toContain('Mietvertrag beenden');
 	});
 
@@ -146,19 +155,24 @@ describe('Mietvertragsdetail', () => {
 		]);
 	});
 
-	// ein künftiger Mietvertrag kann frühestens am Tag seines Beginns enden
-	it('schlägt bei einem künftigen Mietvertrag den Vertragsbeginn vor', () => {
+	// irrtümlich erfasst und noch nicht begonnen: er soll die Wohnung nicht blockieren
+	it('lässt einen künftigen Mietvertrag löschen', () => {
 		open('2099-11-01');
-		click('contract-end-button');
-		expect(byTestId<HTMLInputElement>('contract-end-date-input')!.value).toBe('01.11.2099');
+		click('contract-delete-button');
+		expect(byTestId<HTMLButtonElement>('contract-delete-confirm')!.disabled).toBe(false);
 	});
 
-	it('lässt einen laufenden Mietvertrag mit künftigem Vertragsende nicht löschen und sagt bis wann', () => {
+	// gekündigt, aber laufend; auch danach wird er für die Nebenkostenabrechnung gebraucht
+	it('lässt einen laufenden Mietvertrag mit künftigem Vertragsende nicht löschen und sagt, wofür er bleibt', () => {
 		open('2024-04-01', '2027-03-31');
 		click('contract-delete-button');
 		expect(byTestId<HTMLButtonElement>('contract-delete-confirm')!.disabled).toBe(true);
-		expect(document.querySelector('[role=dialog]')!.textContent!.replace(/\s+/g, ' ')).toContain(
-			'Der Mietvertrag läuft bis am 31.03.2027. Danach können Sie ihn löschen.'
+		const words = document.querySelector('[role=dialog]')!.textContent!.replace(/\s+/g, ' ');
+		expect(words).toContain(
+			'Der Mietvertrag läuft bis am 31.03.2027 und kann bis dahin nicht gelöscht werden.'
+		);
+		expect(words).toContain(
+			'Behalten Sie ihn auch danach: Die Nebenkostenabrechnung braucht seine Mietstage.'
 		);
 	});
 
@@ -166,18 +180,19 @@ describe('Mietvertragsdetail', () => {
 		open();
 		click('contract-delete-button');
 		expect(byTestId<HTMLButtonElement>('contract-delete-confirm')!.disabled).toBe(true);
-		expect(document.querySelector('[role=dialog]')!.textContent).toContain(
-			'Beenden Sie ihn zuerst'
+		expect(document.querySelector('[role=dialog]')!.textContent!.replace(/\s+/g, ' ')).toContain(
+			'Ein laufender Mietvertrag kann nicht gelöscht werden. Wurde er gekündigt, tragen Sie unter «Beenden» das Vertragsende ein.'
 		);
 	});
 
-	it('sagt vor dem Löschen, dass ein Mietvertrag mit Abrechnungen bleibt', () => {
+	it('sagt vor dem Löschen, dass ein Mietvertrag mit Abrechnungen bleibt und wann Löschen passt', () => {
 		open('2024-01-01', '2024-12-31');
 		click('contract-delete-button');
 		const words = document.querySelector('[role=dialog]')!.textContent!.replace(/\s+/g, ' ');
 		expect(words).toContain(
 			'Ein Mietvertrag mit Nebenkostenabrechnungen kann nicht gelöscht werden.'
 		);
+		expect(words).toContain('Löschen Sie einen Mietvertrag nur, wenn er irrtümlich erfasst wurde.');
 		expect(words).not.toContain('bleiben erhalten');
 	});
 

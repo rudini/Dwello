@@ -27,7 +27,13 @@ describe('Vertragsstatus', () => {
 describe('Mietvertrag beenden', () => {
 	// den Vertragsbeginn liest die Aktion beim Backend, nicht aus dem Formular
 	it('setzt das Vertragsende im Backend auf den eingegebenen Tag', async () => {
-		const { calls, result } = runAction(actions.end, 'c1', 200, { endDate: '2099-12-31' }, { startDate: '2024-04-01' });
+		const { calls, result } = runAction(
+			actions.end,
+			'c1',
+			200,
+			{ endDate: '2099-12-31' },
+			{ startDate: '2024-04-01' }
+		);
 		await result;
 
 		expect(calls).toEqual([
@@ -41,8 +47,14 @@ describe('Mietvertrag beenden', () => {
 	});
 
 	// auch ohne JavaScript geprüft: ein Tag vor heute geht nicht ans Backend
-	it('lehnt ein Vertragsende vor heute ab, ohne das Backend zu fragen', async () => {
-		const { calls, result } = runAction(actions.end, 'c1', 200, { endDate: '2024-01-31' }, { startDate: '2024-04-01' });
+	it('lehnt ein Vertragsende vor heute ab, ohne den Mietvertrag zu ändern', async () => {
+		const { calls, result } = runAction(
+			actions.end,
+			'c1',
+			200,
+			{ endDate: '2024-01-31' },
+			{ startDate: '2024-04-01' }
+		);
 
 		expect(await result).toMatchObject({
 			status: 400,
@@ -54,8 +66,43 @@ describe('Mietvertrag beenden', () => {
 		expect(calls.filter((call) => call.method === 'PUT')).toEqual([]);
 	});
 
+	// aus einem alten Fenster: ein schon gesetztes Vertragsende ändert man unter «Bearbeiten»
+	it('überschreibt kein schon gesetztes Vertragsende', async () => {
+		const { calls, result } = runAction(
+			actions.end,
+			'c1',
+			200,
+			{ endDate: '2099-12-31' },
+			{ startDate: '2024-04-01', endDate: '2026-12-31' }
+		);
+
+		expect(await result).toMatchObject({
+			status: 409,
+			data: {
+				endError: 'Der Mietvertrag hat schon ein Vertragsende. Ändern Sie es unter «Bearbeiten».'
+			}
+		});
+		expect(calls.filter((call) => call.method === 'PUT')).toEqual([]);
+	});
+
+	it('meldet, wenn der Mietvertrag nicht geladen werden kann', async () => {
+		const { calls, result } = runAction(actions.end, 'c1', 404, { endDate: '2099-12-31' });
+
+		expect(await result).toMatchObject({
+			status: 404,
+			data: { endError: 'Mietvertrag konnte nicht beendet werden.' }
+		});
+		expect(calls.filter((call) => call.method === 'PUT')).toEqual([]);
+	});
+
 	it('lehnt ein Vertragsende vor dem Vertragsbeginn eines künftigen Mietvertrags ab', async () => {
-		const { calls, result } = runAction(actions.end, 'c1', 200, { endDate: '2099-10-31' }, { startDate: '2099-11-01' });
+		const { calls, result } = runAction(
+			actions.end,
+			'c1',
+			200,
+			{ endDate: '2099-10-31' },
+			{ startDate: '2099-11-01' }
+		);
 
 		expect(await result).toMatchObject({
 			status: 400,

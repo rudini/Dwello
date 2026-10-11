@@ -4636,6 +4636,11 @@ A tenant gives notice for a later day: «Mietvertrag beenden» asks for the Vert
   longer be deleted (only ended ones; the dialog says until when it runs, scenario first); a future contract proposes
   its start; the action reads the Vertragsbeginn from the backend and checks the format; the toast and the sent date
   are tested; the field-error state is in the axe check (`end-dialog-error`); lows in `offene-punkte.md`.
+- [x] **Review I round 2 and personas** (`I-review-2.md`; `helga-i.md`, `sven-i.md`, `anna-i.md`): no day proposed;
+  a future contract can be deleted again (scenario first), a running one cannot; delete dialog says a contract is kept
+  for the Nebenkostenabrechnung; the action refuses an existing end and a contract it cannot load; shorter help; the
+  field is focused anew after an error; `FormDialog` reads `ondone` when it fires; scenario precondition via the API.
+  Product points beyond this change in `offene-punkte.md`.
 
 ---
 

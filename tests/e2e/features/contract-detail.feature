@@ -48,10 +48,22 @@ Funktionalität: Mietvertragsdetail
 
   # Gekündigt, aber noch laufend: gelöscht werden kann er erst nach dem Vertragsende
   Szenario: Laufender Mietvertrag mit künftigem Vertragsende kann nicht gelöscht werden
-    Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
-    Und der Liegenschaftsverwalter den Mietvertrag auf den "2099-12-31" beendet
+    Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
+    Und der Mieter "Bruno Meier" existiert
+    Und "Bruno Meier" mietete die Wohnung "2.02" von "2024-01-01" bis "2099-12-31" für "900" Franken
+    Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Bruno Meier"
     Wenn der Liegenschaftsverwalter den Mietvertrag löschen will
     Dann kann der Liegenschaftsverwalter das Löschen nicht bestätigen
+
+  # Irrtümlich erfasst, noch nicht begonnen: er darf die Wohnung nicht blockieren
+  Szenario: Künftigen Mietvertrag löschen
+    Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
+    Und der Mieter "Bruno Meier" existiert
+    Und "Bruno Meier" mietet die Wohnung "2.02" seit "2099-11-01" für "900" Franken
+    Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Bruno Meier"
+    Wenn der Liegenschaftsverwalter den Mietvertrag löscht
+    Dann ist der Liegenschaftsverwalter auf der Mietvertragsliste
+    Und der Mietvertrag von "Bruno Meier" ist nicht mehr auffindbar
 
   Szenario: Beendeten Mietvertrag löschen
     Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"

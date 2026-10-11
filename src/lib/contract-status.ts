@@ -37,7 +37,8 @@ export function contractPeriod(
 
 /** Why a contract cannot be ended on that day (YYYY-MM-DD), or null: today or later, never before its start */
 export function contractEndError(endDate: string, startDate: string, today: string): string | null {
-	if (!/^\d{4}-\d{2}-\d{2}$/.test(endDate)) return 'Bitte geben Sie das Vertragsende ein, zum Beispiel 31.03.2027.';
+	if (!/^\d{4}-\d{2}-\d{2}$/.test(endDate))
+		return 'Bitte geben Sie das Vertragsende ein, zum Beispiel 31.03.2027.';
 	if (endDate < today)
 		return 'Das Vertragsende kann nicht vor heute liegen. Ein früheres Vertragsende tragen Sie unter «Bearbeiten» ein.';
 	if (endDate < startDate.slice(0, 10))
