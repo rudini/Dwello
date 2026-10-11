@@ -137,9 +137,15 @@ def _run_bun(directory, command):
         cases = list(ElementTree.parse(report).iter("testcase")) if reported else []
     failed = sum(1 for case in cases for _ in case.iter("failure"))
     ran = sum(1 for case in cases if case.find("skipped") is None)
-    outcome = _bun_outcome(done.returncode, cases) if reported else "error"
-    return Run(done.returncode, outcome, f"bun: {failed} of {len(cases)} tests failed", failed, ran,
-               reported and not cases)
+    # Files that fail to load never reach the JUnit report; bun's own summary counts them.
+    output = done.stdout + done.stderr
+    errors = re.search(r"^\s*(\d+) errors?$", output, re.MULTILINE)
+    hidden = errors is not None and int(errors[1]) > 0
+    outcome = _bun_outcome(done.returncode, cases) if reported and not hidden else "error"
+    summary = f"bun: {failed} of {len(cases)} tests failed"
+    if hidden:
+        summary += f" ({errors[1]} errors outside tests)"
+    return Run(done.returncode, outcome, summary, failed, ran, reported and not cases)
 
 
 def _run_vitest(root):
