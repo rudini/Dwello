@@ -369,7 +369,7 @@ MAIL_TRANSPORT / MAIL_FROM / SMTP_* / RESEND_API_KEY
 
 **Requirements:**
 - Node.js >= 20 (frontend runtime; `package.json` engines; CI uses 22)
-- Bun >= 1.0 (package manager; backend runtime)
+- Bun >= 1.4 (package manager; backend runtime; older versions misread `bun.lock`)
 - Docker & Docker Compose (PostgreSQL)
 
 **Installation:**

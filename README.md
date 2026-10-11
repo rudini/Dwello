@@ -41,7 +41,7 @@ Dwello is a comprehensive web application for managing residential properties in
 ### Prerequisites
 
 - Node.js >= 20.0.0 (frontend runtime)
-- Bun >= 1.0.0 (package manager; backend runtime)
+- Bun >= 1.4 (package manager; backend runtime; older versions misread `bun.lock`)
 - PostgreSQL >= 15
 - Docker & Docker Compose (optional, for containerized deployment)
 
