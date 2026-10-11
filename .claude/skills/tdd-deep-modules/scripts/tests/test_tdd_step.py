@@ -1,3 +1,4 @@
+import json
 import os
 import subprocess
 import sys
@@ -849,3 +850,12 @@ class TddStepTest(unittest.TestCase):
                 result = repo.run("tdd-step", "red", "adds more")
 
                 self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_the_npm_init_placeholder_test_script_means_no_tests(self):
+        placeholder = json.dumps({"scripts": {"test": 'echo "Error: no test specified" && exit 1'}})
+        repo = Repo(self, {"calc.py": WRONG_ADD, "tools/package.json": placeholder})
+        repo.write("test_calc.py", PYTEST_TEST)
+
+        result = repo.run("tdd-step", "red", "adds two numbers")
+
+        self.assertEqual(result.returncode, 0, result.stderr)
