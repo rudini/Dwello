@@ -57,6 +57,8 @@ Every commit of the range (first-parent, oldest first) is checked out in a tempo
 
 Registered in the `hooks:` frontmatter of `SKILL.md` as a `PreToolUse` hook for `Write|Edit|MultiEdit`, so it is active once the skill is invoked (for the rest of the session). It reads the hook JSON from stdin, resolves the file's git repository and the phase of its HEAD commit, and exits 2 (blocking, reason on stderr) when the file is production code and the last phase is `start` or `test`. Test files, test configuration and non-code files always pass; files outside git pass; unreadable input is a non-blocking error (exit 1).
 
+Paths are resolved (`..`, symlinks) before they are classified; code suffixes are matched without case. The phases after which production edits are allowed come from the protocol table (`production_may_follow`), the same rules `tdd-step` enforces.
+
 Deviation from the original wording "blocks edits to production files unless the last phase was red", made on purpose and told to the user: the hook allows production edits whenever the next commit may contain production code under `tdd-step`'s rules, i.e. after `red` (towards green) and after `green`/`refactor` (towards a refactor). Allowing them only after red would make every refactor of production code impossible, which contradicts the refactor phase and stage 2's depth check in every refactor. Behaviour smuggled into a refactor stays the documented weak spot (no new or removed tests is all `tdd_replay` can check).
 
 ## Known limits
@@ -78,3 +80,6 @@ Deviation from the original wording "blocks edits to production files unless the
 - A test-phase commit whose run crashes (no test ids) reads as removing every test.
 - The replay worktree borrows `node_modules` through a symlink, so tools that cache inside `node_modules` (vitest's `.vite` cache) write into the caller's installation.
 - `tdd_replay` exits 2 (not 1) on any unexpected error, so a crash is never read as REJECT; SIGTERM and Ctrl-C remove the replay worktree.
+- The hook guards `Write`, `Edit` and `MultiEdit` only. Production files changed through `Bash` (`sed -i`, redirection) or `NotebookEdit` are not blocked; `tdd-step` and `tdd_replay` still judge them at commit time.
+- The hook command assumes the skill lives at `$CLAUDE_PROJECT_DIR/.claude/skills/tdd-deep-modules` (Claude Code documents no skill-directory variable for hooks). Installed elsewhere, the command fails with a non-blocking error and the guard is off.
+- Test-file names are matched generously (`test_*`, `*_test.*`, `*.test.*`, `*.spec.*`, test directories); a production file named like a test passes the guard.
