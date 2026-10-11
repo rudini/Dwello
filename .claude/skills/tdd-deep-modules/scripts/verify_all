@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
 """verify_all [skill-dir]: prints every check of stage 2 and STAGE2: PASS or FAIL (rule: tddcore/gate.py)."""
 import sys
-from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
+# Python put this script's directory first on the path; move it last, so no file in scripts/ can shadow
+# the standard library or an installed package before the gate has checked the lock.
+sys.path.pop(0)
+import os  # noqa: E402
+
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from tddcore import gate  # noqa: E402
 
 passed, lines = gate.stage2(*sys.argv[1:2])
