@@ -99,3 +99,15 @@ BUN_TEST = ('import { test, expect } from "bun:test";\nimport { add } from "./ca
 def bun_repo(case, calc=WRONG_ADD_TS, **files):
     """A bun project at the repository root with `calc.ts` and no tests yet."""
     return Repo(case, {"package.json": BUN_PACKAGE, "calc.ts": calc, **files})
+
+# fast tier: everything but *.pg.test.ts; full tier: everything (like Dwello's backend)
+TIERED_PACKAGE = ('{"scripts": {"test": "bun test",'
+                  ' "test:fast": "bun test --path-ignore-patterns=**/*.pg.test.ts"}}\n')
+NO_DATABASE_TEST = ('import { test, expect } from "bun:test";\n\n'
+                    'test("reads the database", () => {\n  expect("no database").toBe("rows");\n});\n')
+
+
+def tiered_repo(case, calc=WRONG_ADD_TS, **files):
+    """A bun project whose full tier holds a database test that fails (no database here)."""
+    return bun_repo(case, calc, **{"package.json": TIERED_PACKAGE, "db.pg.test.ts": NO_DATABASE_TEST,
+                                   **files})
