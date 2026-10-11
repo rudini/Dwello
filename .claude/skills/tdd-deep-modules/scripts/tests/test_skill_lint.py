@@ -278,3 +278,12 @@ class SkillLintTest(unittest.TestCase):
 
                 registered = "hooks: no PreToolUse hook" not in result.stdout
                 self.assertEqual(registered, name in accepted, result.stdout)
+
+    def test_a_byte_order_mark_is_named(self):
+        copy = copy_of_skill(self)
+        (copy / "SKILL.md").write_bytes(b"\xef\xbb\xbf" + (SKILL / "SKILL.md").read_bytes())
+
+        result = lint(copy)
+
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertEqual(result.stdout, "skill_lint: SKILL.md starts with a byte order mark; save it without one\n")
