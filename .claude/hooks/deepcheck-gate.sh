@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # Blocks Claude Code git commit and git push when deepcheck's changed-scope gate fails
-# (tools/deepcheck, `npm run deepcheck:audit`), the same way fallow-gate.sh gates on fallow audit.
+# (tools/deepcheck, `bun run deepcheck:audit`), the same way fallow-gate.sh gates on fallow audit.
 # Exit 2 blocks the Bash call and shows stderr to Claude. Tool errors (deepcheck exit 2) and a
 # missing jq or node fail open with a single stderr notice so skips stay visible.
 
@@ -59,7 +59,7 @@ fi
 if [ "$STATUS" -eq 1 ] && grep -q 'fail the deep-module gate' "$TMP_OUT"; then
   {
     echo "deepcheck-gate: blocked: changed modules fail the deep-module gate. Fix the design before committing or pushing"
-    echo "deepcheck-gate: (details: npm run deepcheck:audit; deliberate exception: // deepcheck-ignore-file -- reason)."
+    echo "deepcheck-gate: (details: bun run deepcheck:audit; deliberate exception: // deepcheck-ignore-file -- reason)."
     cat "$TMP_OUT"
   } >&2
   exit 2

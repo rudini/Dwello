@@ -36,7 +36,7 @@ describe('README', () => {
 
 	it('tells agents in CLAUDE.md to run the audit after each step and the scan only on request', () => {
 		const claude = readFileSync(new URL('../../../CLAUDE.md', import.meta.url), 'utf8');
-		expect(claude).toMatch(/npm run deepcheck:audit/);
-		expect(claude).toMatch(/npm run deepcheck:scan[^\n]*only when/);
+		expect(claude).toMatch(/bun run deepcheck:audit/);
+		expect(claude).toMatch(/bun run deepcheck:scan[^\n]*only when/);
 	});
 });

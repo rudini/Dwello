@@ -95,7 +95,9 @@ export default [
 			'backend/node_modules/**',
 			'backend/dist/**',
 			'coverage/**',
-			'backend/coverage/**'
+			'backend/coverage/**',
+			// Claude Code worktrees: other checkouts of this repo
+			'.claude/worktrees/**'
 		]
 	}
 ];

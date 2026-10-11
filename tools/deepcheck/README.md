@@ -13,7 +13,7 @@ deepcheck is a warning system built on measurable proxies. It is **not a verdict
 Requires Node >= 22.18 (runs the TypeScript sources directly through Node's type stripping).
 
 ```bash
-npm run deepcheck:scan                         # all flagged (shallow) modules, ranked (never fails)
+bun run deepcheck:scan                         # all flagged (shallow) modules, ranked (never fails)
 node tools/deepcheck/src/cli.ts scan src/lib   # limit to a directory
 node tools/deepcheck/src/cli.ts scan --min-score 40 --top 20 --group-by directory
 node tools/deepcheck/src/cli.ts scan --format json --output deepcheck.json
@@ -36,9 +36,9 @@ For SvelteKit, run `svelte-kit sync` first: the root tsconfig extends `.svelte-k
 ## Gate on changed code
 
 ```bash
-npm run deepcheck:audit                         # changed vs HEAD (working tree, staged, untracked), agent mode
-npm run deepcheck:ci -- origin/main             # changed since the merge-base with the PR base, GitHub annotations
-npm run deepcheck:baseline                      # (re)write .deepcheck-baseline.json from the current state
+bun run deepcheck:audit                         # changed vs HEAD (working tree, staged, untracked), agent mode
+bun run deepcheck:ci -- origin/main             # changed since the merge-base with the PR base, GitHub annotations
+bun run deepcheck:baseline                      # (re)write .deepcheck-baseline.json from the current state
 node tools/deepcheck/src/cli.ts check --format json
 node tools/deepcheck/src/cli.ts --scope changed # same as check; --scope all is the same as scan
 node tools/deepcheck/src/cli.ts scan --use-baseline   # hide baselined modules that did not worsen
@@ -64,8 +64,8 @@ node tools/deepcheck/src/cli.ts scan --use-baseline   # hide baselined modules t
 | Where | What | Blocks? |
 |---|---|---|
 | Claude Code hook `.claude/hooks/deepcheck-gate.sh`, `PreToolUse` on Bash (`.claude/settings.json`, timeout 60 s) | before every `git commit` / `git push` (same mechanism and fail-open policy as `fallow-gate.sh`): `check --agent`; exit 2 with the findings on stderr when the gate fails, a single notice and exit 0 on a tool error | yes, the Bash call |
-| `CLAUDE.md` | agents run `npm run deepcheck:audit` after each implementation step, `npm run deepcheck:scan` only on request | — |
-| CI job "Deep modules" (`.github/workflows/ci.yml`, pull requests) | `npx svelte-kit sync`, then `npm run deepcheck:ci -- "origin/<base>"`: error annotations and a step summary | yes |
+| `CLAUDE.md` | agents run `bun run deepcheck:audit` after each implementation step, `bun run deepcheck:scan` only on request | — |
+| CI job "Deep modules" (`.github/workflows/ci.yml`, pull requests) | `bunx svelte-kit sync`, then `bun run deepcheck:ci -- "origin/<base>"`: error annotations and a step summary | yes |
 | `.github/workflows/deepcheck-scan.yml` (`workflow_dispatch`: path, top, min_score; commented weekly `schedule`) | ranked scan to the job summary, JSON and markdown as the `deepcheck-report` artifact | never |
 
 The hook matches commands like fallow-gate.sh does (`git commit`, `git push`, also after `&&` or `;`). `git -C <dir> commit` is not matched, by either gate; a command that merely mentions it (`echo git commit`) is.

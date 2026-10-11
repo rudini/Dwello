@@ -58,7 +58,7 @@ describe('deepcheck Claude Code hook (commit/push gate, like fallow-gate.sh)', (
 		);
 	});
 
-	it('fails open with a notice when deepcheck itself crashes (e.g. before npm ci), never blocking', () => {
+	it('fails open with a notice when deepcheck itself crashes (e.g. before bun install), never blocking', () => {
 		const install = writeProject({ 'tools/deepcheck/src/cli.ts': "throw new Error('Cannot find package ts-morph');\n" });
 		writeFiles(install, { '.claude/hooks/.keep': '' });
 		copyFileSync(HOOK, `${install}/.claude/hooks/deepcheck-gate.sh`);

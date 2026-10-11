@@ -24,24 +24,20 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3001
 
-# Create non-root user for security
-RUN addgroup --system --gid 1001 bun
-RUN adduser --system --uid 1001 elysia
-
 # Copy dependencies and source
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Set ownership
-RUN chown -R elysia:bun /app
+# Run as the image's non-root user
+RUN chown -R bun:bun /app
 
-USER elysia
+USER bun
 
 EXPOSE 3001
 
-# Health check
+# Health check (the slim image has neither wget nor curl)
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:3001/health || exit 1
+  CMD ["bun", "-e", "fetch('http://localhost:3001/health').then(r => process.exit(r.ok ? 0 : 1), () => process.exit(1))"]
 
 # Apply missing migrations, then start the API
 CMD ["sh", "-c", "bun scripts/migrate.ts && bun run src/index.ts"]
