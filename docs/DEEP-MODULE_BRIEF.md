@@ -509,3 +509,11 @@ The user asked whether the calibration can be improved, and to close the evasion
   - OSS: highest 60, none flagged. Textbook designs 71–80, classitis directory 67, all flagged.
 - **Remaining:** pieces spread over directories or also imported elsewhere; the classitis margin is small (67 against 65).
 - **GitHub CI:** run 38124942116 on d480122 (contains 763ba50) passed all 9 jobs, including "Deep modules", "Fallow audit", "Unit tests" and "E2E tests". The check suite of 763ba50 on its own also completed without failures.
+
+### 2026-10-11, cross-cutting gates for both follow-ups (pass-through variants, calibration and splitting)
+- XC.1 done. Every logic change had a test seen failing first: 4 variant tests and 4 review-1 tests (`variants.test.ts`), 2 split tests (`gaming.test.ts`) and the classitis flag test (`reference.test.ts`), then the 2 review-4 tests (shared utilities, single value class). Each was run red before the code changed; the red runs are in this session's tool output.
+- XC.2 done. One independent review per follow-up; all valid findings fixed, the low ones left as they are are logged above (single thin standard-library wrapper, untested pass-through variants).
+- XC.3 done. Commits 763ba50, d480122, 2df3333 and this entry; Status Log updated.
+- XC.4 done. Only `tools/deepcheck`, its tests and docs changed; no application code, CI steps or settings.
+- Exit gates re-checked by running them: 181 deepcheck tests, ESLint, tsc, `fallow audit`, baseline regenerated (0 of 124), Phase 2 gate tests green within the 181, GitHub CI run 38124942116 green (9/9).
+- Runtimes now: `deepcheck:audit` 4.1 s with Fallow, 3.3 s without; `scan` 4.1 s.
