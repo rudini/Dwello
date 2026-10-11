@@ -444,3 +444,30 @@ class SkillLintTest(unittest.TestCase):
 
                 self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
                 self.assertIn(f"skill_lint: {message}\n", result.stdout)
+
+    def test_the_doubles_and_depth_rules_are_guarded_as_whole_statements(self):
+        real = (SKILL / "SKILL.md").read_text()
+        contract = "Every fake of a boundary has a contract test suite that runs against both the fake and the real implementation."
+        adapter = "Wrap a framework module (such as SvelteKit's `$app/*`) in a small project-owned adapter"
+        cases = {
+            "contract optional": (real.replace(contract, "A fake needs no contract test suite; at most, compare it once by "
+                                               "hand against both the fake and the real implementation."),
+                                  "missing in 'Hard rules': every fake of a boundary has a contract test suite"),
+            "adapter dropped": (real.replace(adapter, "Mock `$app/*` directly with vi.mock; if you ever write an adapter"),
+                                "missing in 'Hard rules': in a small project-owned adapter"),
+            "helpers are details": (real.replace("Pure helper functions inside it are implementation details",
+                                                 "Pure helper functions inside it deserve tests"),
+                                    "missing in 'Hard rules': pure helper functions inside it are implementation details"),
+            "swarm is fine": (real.replace("with one caller each are classitis too", "with one caller each are fine"),
+                              "missing in '5. Depth check in every refactor': with one caller each are classitis"),
+        }
+        for name, (text, message) in cases.items():
+            with self.subTest(name):
+                self.assertNotEqual(text, real)
+                copy = copy_of_skill(self)
+                (copy / "SKILL.md").write_text(text)
+
+                result = lint(copy)
+
+                self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+                self.assertIn(f"skill_lint: {message}\n", result.stdout)
