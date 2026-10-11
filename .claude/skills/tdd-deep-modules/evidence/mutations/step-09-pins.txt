@@ -1,0 +1,2 @@
+step 09 pins (each test passed on its first run; the mutation makes it fail)
+- test_green_runs_the_fast_suite_by_default_and_the_full_suite_on_request: tdd-step default tier 'fast' -> 'full': FAILED (failures=1)
