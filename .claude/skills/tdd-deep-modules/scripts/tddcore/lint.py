@@ -10,6 +10,25 @@ _KEYS = {"name", "description", "license", "allowed-tools", "metadata", "compati
          "argument-hint", "disable-model-invocation", "user-invocable", "context", "agent", "when_to_use",
          "version", "paths", "effort", "shell"}
 
+# every section the skill must have, in order, with the phrases it must contain (compared in lower case)
+REQUIRED = {
+    "Hard rules": ["no production code without a failing test", "never delete assertions",
+                   "never paste computed values into expected values", "never mix refactoring with green",
+                   "no tests on private methods"],
+    "1. Detect the context": ["npx vitest run", "bun test", "git log -1 --format=%s", "does not apply"],
+    "2. Design it twice": ["hidden decision", "two interface designs", "compare", "depth", "one sentence",
+                           "chosen"],
+    "3. Write the behaviour test list": ["one line per behaviour", "tdd-step test", "hidden decision",
+                                         "both sketches"],
+    "4. Red, green, refactor with tdd-step": ["scripts/tdd-step red", "scripts/tdd-step green",
+                                              "scripts/tdd-step refactor", "one behaviour from the list per cycle",
+                                              "git reset --soft head~1", "package.json"],
+    "5. Depth check in every refactor": ["interface much simpler than the implementation", "classitis",
+                                         "pass-through", "pull complexity downward", "size alone",
+                                         "cumbersome tests", "wrong interface", "keep every test's name and file"],
+    "6. Design note": ["hidden decision", "both designs", "reason", "depth_report", "tdd_replay"],
+}
+
 
 def problems(skill):
     """One message per problem found in the skill at `skill`; empty when it is valid."""
@@ -24,7 +43,19 @@ def problems(skill):
         return ["frontmatter is not valid YAML"]
     if not isinstance(front, dict):
         return ["frontmatter is not valid YAML"]
-    return _frontmatter(front, skill.name) + _hook(front, skill)
+    return _frontmatter(front, skill.name) + _hook(front, skill) + _required(text[match.end():])
+
+
+def _required(body):
+    parts = re.split(r"^## +(.+)$", body, flags=re.MULTILINE)
+    sections = {parts[i].strip(): parts[i + 1].lower() for i in range(1, len(parts), 2)}
+    found = []
+    for heading, phrases in REQUIRED.items():
+        if heading not in sections:
+            found.append(f"missing section '{heading}'")
+            continue
+        found += [f"missing in '{heading}': {phrase}" for phrase in phrases if phrase not in sections[heading]]
+    return found
 
 
 def _hook(front, skill):
