@@ -17,13 +17,13 @@ def main(raw):
         return 1  # a non-blocking error: never stop the user because the hook is broken
     if "file_path" not in event.get("tool_input", {}):
         return 0  # not a file edit
-    target = Path(event["tool_input"]["file_path"])
+    target = Path(event["tool_input"]["file_path"]).resolve()  # no `..` or symlink detours
     existing = next(d for d in target.parents if d.is_dir())  # a Write may create new directories
     root = subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=existing,
                           capture_output=True, text=True)
     if root.returncode != 0:
         return 0  # outside any git repository: nothing to guard
-    rel = target.relative_to(root.stdout.strip()).as_posix()
+    rel = target.relative_to(Path(root.stdout.strip()).resolve()).as_posix()
     subject = subprocess.run(["git", "log", "-1", "--format=%s"], cwd=existing,
                              capture_output=True, text=True).stdout.strip()
     phase = protocol.phase_of(subject)
