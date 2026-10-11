@@ -121,3 +121,17 @@ class VerifiersLockTest(unittest.TestCase):
                 self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
                 self.assertIn(line, result.stdout.splitlines())
                 self.assertEqual(result.stdout.strip().splitlines()[-1], "STAGE2: FAIL")
+
+
+class ThinEntryPointTest(unittest.TestCase):
+    def test_verify_all_holds_no_logic(self):
+        import ast
+        tree = ast.parse((SCRIPTS / "verify_all").read_text())
+
+        logic = [type(node).__name__ for node in ast.walk(tree)
+                 if isinstance(node, (ast.If, ast.For, ast.While, ast.Try, ast.With, ast.FunctionDef, ast.ClassDef,
+                                      ast.BoolOp, ast.Compare, ast.comprehension))]
+        calls = [ast.unparse(node.func) for node in ast.walk(tree) if isinstance(node, ast.Call)]
+
+        self.assertEqual(logic, [])
+        self.assertEqual(calls.count("gate.stage2"), 1)
