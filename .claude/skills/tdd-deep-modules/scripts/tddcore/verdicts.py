@@ -9,8 +9,10 @@ def final(reviews, step):
     for review in Path(reviews).glob(f"step-{step}-round-*.md"):
         number = re.fullmatch(rf"step-{step}-round-(\d+)\.md", review.name)
         if number:
-            rounds[int(number[1])] = review
+            rounds.setdefault(int(number[1]), []).append(review)
     if not rounds:
         return None
     latest = max(rounds)
-    return latest, rounds[latest].read_text().strip().splitlines()[-1]
+    if len(rounds[latest]) > 1:
+        return latest, f"round {latest} has two reviews"
+    return latest, rounds[latest][0].read_text().strip().splitlines()[-1]
