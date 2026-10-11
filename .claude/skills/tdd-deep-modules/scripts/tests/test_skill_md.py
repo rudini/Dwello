@@ -77,3 +77,11 @@ class SkillMdTest(unittest.TestCase):
 
         for element in ("one line per behaviour", "tdd-step test", "hidden decision", "both sketches"):
             self.assertIn(element, text.lower())
+
+    def test_the_cycle_runs_through_tdd_step_and_has_a_way_back(self):
+        text = dict(sections())["4. Red, green, refactor with tdd-step"]
+
+        for element in ("scripts/tdd-step red", "scripts/tdd-step green", "scripts/tdd-step refactor",
+                        "One behaviour from the list per cycle", "git reset --soft HEAD~1",
+                        "package.json"):
+            self.assertIn(element, text)
