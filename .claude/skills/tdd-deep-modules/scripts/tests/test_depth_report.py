@@ -223,3 +223,13 @@ export class Ledger {
         line = report_line(repo.run("depth_report", "src/get.ts"), "src/get.ts")
 
         self.assertIn("pass-through: get, load", line.split(" -> ", 1)[1])
+
+    def test_repeated_object_literal_members_are_not_duplicates(self):
+        columns = "    id: apartments.id,\n    number: apartments.number,\n    floor: apartments.floor,\n"
+        module = (f"export function list(db: Db) {{\n  return db.select({{\n{columns}  }}).from(apartments);\n}}\n"
+                  f"export function one(db: Db, id: string) {{\n  return db.select({{\n{columns}  }}).where(id);\n}}\n")
+        repo = Repo(self, {"src/list.ts": module})
+
+        line = report_line(repo.run("depth_report", "src/list.ts"), "src/list.ts")
+
+        self.assertIn(", duplicate 0 ->", line)
