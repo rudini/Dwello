@@ -241,3 +241,13 @@ class SkillLintTest(unittest.TestCase):
                 result = lint(copy)
 
                 self.assertIn(f"skill_lint: missing in '{section}': {named}\n", result.stdout)
+
+    def test_every_reference_file_must_be_linked(self):
+        real = (SKILL / "SKILL.md").read_text()
+        copy = copy_of_skill(self)
+        (copy / "SKILL.md").write_text(real.replace("references/depth.md", "the depth notes"))
+
+        result = lint(copy)
+
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn("skill_lint: references/depth.md is not linked from SKILL.md\n", result.stdout)
