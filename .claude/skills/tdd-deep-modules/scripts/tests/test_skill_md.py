@@ -41,3 +41,11 @@ class SkillMdTest(unittest.TestCase):
         for element in ("hidden decision", "two interface designs", "compare", "depth",
                         "one sentence", "chosen"):
             self.assertIn(element, text)
+
+    def test_the_depth_check_names_every_criterion(self):
+        text = dict(sections())["5. Depth check in every refactor"].lower()
+
+        for criterion in ("interface much simpler than the implementation", "classitis",
+                          "pass-through", "pull complexity downward", "size alone",
+                          "cumbersome tests", "wrong interface"):
+            self.assertIn(criterion, text)
