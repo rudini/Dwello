@@ -1,9 +1,11 @@
 import type { Locator } from '@playwright/test';
 import type { Actor } from '../fixtures/actor';
+import { typeDate } from '../interactions/form';
 import {
 	confirmDeleteContractButton,
 	confirmEndContractButton,
 	contractApartmentLink,
+	contractEndInput,
 	contractEditButton,
 	contractInvoicesLink,
 	contractStatementsLink,
@@ -18,6 +20,13 @@ const click = (target: (page: Actor['page']) => Locator) => async (actor: Actor)
 
 export const endContract = async (actor: Actor) => {
 	await endContractButton(actor.page).click();
+	await confirmEndContractButton(actor.page).click();
+};
+
+// The tenant gave notice for a later day: that day is typed in the dialog
+export const endContractOn = (isoDate: string) => async (actor: Actor) => {
+	await endContractButton(actor.page).click();
+	await typeDate(contractEndInput(actor.page), isoDate);
 	await confirmEndContractButton(actor.page).click();
 };
 

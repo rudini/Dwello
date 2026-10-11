@@ -104,8 +104,8 @@ Every place in the code is marked `TODO(fachlich prüfen)` (`grep -rn "TODO(fach
 - "Monatlich total" (Nettomiete + Zusatzmiete + Akonto) has no glossary term; used in the contract list and detail, the tenant rental panel and the apartment page – TODO(fachlich prüfen).
 - Notice in the contract edit form "Bei Mietanpassungen sollten Sie die gesetzlichen Kündigungsfristen beachten" is existing copy with a legal claim – TODO(fachlich prüfen).
 - The E2E step "sieht den monatlichen Mietzins" reads the monthly total, while the glossary defines Mietzins as Nettomiete. Equal in the scenarios (no Akonto); wording of the step is wrong.
-- A contract that has not started and has no end date offers "Beenden", which would set an end before its start; it also cannot be deleted (deleting needs an end date). Pre-existing behaviour.
-- "Mietvertrag beenden" sets the Vertragsende to today; by the backend's rule a contract still runs on its last day, so the status stays "Laufend" until tomorrow. The scenario now checks the end date instead of the status. Whether "beenden" should mean "today was the last day" is a product question – TODO(fachlich prüfen).
+- ~~A contract that has not started and has no end date offers "Beenden", which would set an end before its start~~ – since session 12 the end dialog refuses a day before the Vertragsbeginn. Such a contract still cannot be deleted without an end date (pre-existing).
+- ~~"Mietvertrag beenden" sets the Vertragsende to today~~ – since session 12 the dialog asks for the Vertragsende (today proposed, today or later, e.g. the day the tenant gave notice for); the contract runs up to and including that day. An earlier end is set under «Bearbeiten».
 - When the backend refuses to delete a contract, the BFF shows only the generic "Mietvertrag konnte nicht gelöscht werden."
 - Default Korrespondenzkanal for a new tenant is now Brief (glossary and plan D15a); before, the form preselected E-Mail.
 

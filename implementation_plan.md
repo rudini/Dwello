@@ -4618,6 +4618,21 @@ subtotal, fee and «Ihre Nebenkosten» stay exact. A row «Rundung auf 5 Rappen�
 - [x] **Decisions** recorded in `docs/design/design-decisions.md` («Decided during the work», Session 12): fee on own
   costs, Saldo to 5 Rappen, Saldo 0 settled when sent, merged migrations.
 
+
+### Follow-up: end a contract on a future day
+
+A tenant gives notice for a later day: «Mietvertrag beenden» asks for the Vertragsende instead of setting today.
+
+- [x] **Scenarios** `tests/e2e/features/contract-detail.feature`: end on a future day (status stays «Laufend»), a day
+  before today refused (both failed first: no date field).
+- [x] **Rule** `contractEndError` in `src/lib/contract-status.ts`: today or later, never before the Vertragsbeginn; an
+  earlier end goes through «Bearbeiten». Checked in the dialog and again in the action (`contracts/[id]/+page.server.ts`).
+- [x] **Dialog** `contracts/[id]/+page.svelte`: `DateInput` «Vertragsende», today proposed, error at the field; toast
+  names the day. `ActionDialog` takes `fields` and `check`; its form handling and `FormDialog`'s share
+  `src/lib/ui/dialog-submit.ts` (fallow duplication).
+- [x] **Tests**: `contract-status.test.ts`, `contract-actions.test.ts`, `contract-detail-page.dom.test.ts`; the
+  `enhance` mocks pass `formData` as SvelteKit does. Open points in `offene-punkte.md` (lines on «Beenden») closed.
+
 ---
 
 # Success Criteria

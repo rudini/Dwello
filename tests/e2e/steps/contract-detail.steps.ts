@@ -2,12 +2,13 @@ import { expect } from '@playwright/test';
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { visit } from '../interactions/navigation';
-import { apartmentOfContract, endOfContract, statusOfContract, totalRent } from '../questions/contract-detail';
+import { apartmentOfContract, endDateProblem, endOfContract, statusOfContract, totalRent } from '../questions/contract-detail';
 import { emptyContractList, listedContract } from '../questions/contracts';
 import {
 	deleteContract,
 	editContractFromDetail,
 	endContract,
+	endContractOn,
 	openContractApartment,
 	openContractTenant,
 	showBuildingInvoices,
@@ -27,6 +28,15 @@ Given(
 
 When('der Liegenschaftsverwalter den Mietvertrag beendet', async ({ verwalter }) => {
 	await verwalter.perform(endContract);
+});
+
+When('der Liegenschaftsverwalter den Mietvertrag auf den {string} beendet', async ({ verwalter }, date: string) => {
+	await verwalter.perform(endContractOn(date));
+});
+
+// The same steps; the dialog refuses the date and stays open
+When('der Liegenschaftsverwalter den Mietvertrag auf den {string} beenden will', async ({ verwalter }, date: string) => {
+	await verwalter.perform(endContractOn(date));
 });
 
 When('der Liegenschaftsverwalter den Mietvertrag löschen will', async ({ verwalter }) => {
@@ -73,6 +83,14 @@ Then('hat der Mietvertrag den Status {string}', async ({ verwalter }, status: st
 Then('endet der Mietvertrag heute', async ({ verwalter }) => {
 	const today = new Date().toLocaleDateString('de-CH', { timeZone: 'Europe/Zurich' });
 	await expect(endOfContract(verwalter)).toHaveText(today);
+});
+
+Then('endet der Mietvertrag am {string}', async ({ verwalter }, date: string) => {
+	await expect(endOfContract(verwalter)).toHaveText(date);
+});
+
+Then('meldet der Dialog {string}', async ({ verwalter }, message: string) => {
+	await expect(endDateProblem(verwalter)).toContainText(message);
 });
 
 Then('der Mietvertrag von {string} ist nicht mehr auffindbar', async ({ verwalter, names }, tenant: string) => {

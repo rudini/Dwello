@@ -1,15 +1,15 @@
 import { describe, it, expect, vi } from 'vitest';
 
 // enhance as SvelteKit wires it: the test plays the server's answer to an action of the page
-const actions = vi.hoisted(() => new Map<string, () => unknown>());
+const actions = vi.hoisted(() => new Map<string, (input: { formData: FormData }) => unknown>());
 vi.mock('$app/forms', () => ({
-	enhance: (form: HTMLFormElement, submit: () => unknown) => {
+	enhance: (form: HTMLFormElement, submit: (input: { formData: FormData }) => unknown) => {
 		actions.set(form.getAttribute('action')!, submit);
 		return { destroy() {} };
 	}
 }));
 async function redirectAfter(action: string) {
-	const after = actions.get(action)!() as (input: unknown) => Promise<void>;
+	const after = actions.get(action)!({ formData: new FormData() }) as (input: unknown) => Promise<void>;
 	await after({ update: async () => {}, result: { type: 'redirect' } });
 }
 

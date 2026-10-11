@@ -3,6 +3,7 @@
 	import type { Snippet } from 'svelte';
 	import Alert from './Alert.svelte';
 	import Dialog from './Dialog.svelte';
+	import { dialogSubmit } from './dialog-submit';
 
 	// Confirmation that posts to a form action of the page; a refusal stays in the dialog with its reason
 	let {
@@ -15,6 +16,8 @@
 		confirmTestid,
 		error,
 		onsuccess,
+		fields = {},
+		check = () => true,
 		children
 	}: {
 		open: boolean;
@@ -26,6 +29,8 @@
 		confirmTestid: string;
 		error?: string;
 		onsuccess?: () => void;
+		fields?: Record<string, string>; // values of fields in the dialog, which lies outside the form
+		check?: () => boolean; // false: the dialog shows what is wrong, nothing is sent
 		children: Snippet;
 	} = $props();
 
@@ -37,18 +42,16 @@
 	bind:this={form}
 	method="POST"
 	{action}
-	use:enhance={() => {
-		busy = true;
-		return async ({ result, update }) => {
-			// a delete leads to another page, which confirms it
-			if (result.type === 'redirect') onsuccess?.();
-			await update();
-			busy = false;
+	use:enhance={dialogSubmit(
+		() => fields,
+		(running) => (busy = running),
+		(result) => {
 			if (result.type !== 'success') return;
 			open = false;
 			onsuccess?.();
-		};
-	}}
+		},
+		onsuccess // a delete leads to another page, which confirms it
+	)}
 ></form>
 
 <Dialog
@@ -60,7 +63,7 @@
 	busyLabel="Bitte warten …"
 	confirmDisabled={disabled}
 	{confirmTestid}
-	onconfirm={() => form?.requestSubmit()}
+	onconfirm={() => check() && form?.requestSubmit()}
 >
 	{@render children()}
 	{#if error}

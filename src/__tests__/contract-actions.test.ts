@@ -25,17 +25,31 @@ describe('Vertragsstatus', () => {
 });
 
 describe('Mietvertrag beenden', () => {
-	it('setzt das Vertragsende im Backend auf heute', async () => {
-		const { calls, result } = runAction(actions.end, 'c1');
+	it('setzt das Vertragsende im Backend auf den eingegebenen Tag', async () => {
+		const { calls, result } = runAction(actions.end, 'c1', 200, { endDate: '2099-12-31', startDate: '2024-04-01' });
 		await result;
 
 		expect(calls).toEqual([
 			{
 				method: 'PUT',
 				url: 'http://localhost:3001/api/v1/contracts/c1',
-				body: { endDate: localToday() }
+				body: { endDate: '2099-12-31' }
 			}
 		]);
+	});
+
+	// auch ohne JavaScript geprüft: ein Tag vor heute geht nicht ans Backend
+	it('lehnt ein Vertragsende vor heute ab, ohne das Backend zu fragen', async () => {
+		const { calls, result } = runAction(actions.end, 'c1', 200, { endDate: '2024-01-31', startDate: '2024-04-01' });
+
+		expect(await result).toMatchObject({
+			status: 400,
+			data: {
+				endError:
+					'Das Vertragsende kann nicht vor heute liegen. Ein früheres Vertragsende tragen Sie unter «Bearbeiten» ein.'
+			}
+		});
+		expect(calls).toEqual([]);
 	});
 });
 

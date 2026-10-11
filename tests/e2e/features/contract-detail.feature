@@ -21,6 +21,18 @@ Funktionalität: Mietvertragsdetail
     Wenn der Liegenschaftsverwalter den Mietvertrag beendet
     Dann endet der Mietvertrag heute
 
+  # Der Mieter kündigt auf einen späteren Termin: der Vertrag läuft bis dahin weiter
+  Szenario: Mietvertrag auf ein künftiges Datum beenden
+    Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
+    Wenn der Liegenschaftsverwalter den Mietvertrag auf den "2099-12-31" beendet
+    Dann endet der Mietvertrag am "31.12.2099"
+    Und hat der Mietvertrag den Status "Laufend"
+
+  Szenario: Vertragsende in der Vergangenheit
+    Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
+    Wenn der Liegenschaftsverwalter den Mietvertrag auf den "2024-01-31" beenden will
+    Dann meldet der Dialog "Das Vertragsende kann nicht vor heute liegen."
+
   Szenario: Künftiger Mietvertrag
     Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
     Und der Mieter "Bruno Meier" existiert

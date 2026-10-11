@@ -1,22 +1,22 @@
 import { describe, it, expect, vi } from 'vitest';
 
 // enhance as SvelteKit wires it: the test plays the server's answer to an action of the page
-const actions = vi.hoisted(() => new Map<string, () => unknown>());
+const actions = vi.hoisted(() => new Map<string, (input: { formData: FormData }) => unknown>());
 vi.mock('$app/forms', () => ({
-	enhance: (form: HTMLFormElement, submit: () => unknown) => {
+	enhance: (form: HTMLFormElement, submit: (input: { formData: FormData }) => unknown) => {
 		actions.set(form.getAttribute('action')!, submit);
 		return { destroy() {} };
 	}
 }));
 async function redirectAfter(action: string) {
-	const after = actions.get(action)!() as (input: unknown) => Promise<void>;
+	const after = actions.get(action)!({ formData: new FormData() }) as (input: unknown) => Promise<void>;
 	await after({ update: async () => {}, result: { type: 'redirect' } });
 }
 
 import ContractPage from '../routes/contracts/[id]/+page.svelte';
 import { get } from 'svelte/store';
 import { toasts } from '$lib/stores';
-import { byTestId, click, show } from './helpers/dom';
+import { byTestId, click, fireEvent, settle, show } from './helpers/dom';
 
 const contract = (startDate: string, endDate: string | null) => ({
 	id: 'c1',
@@ -105,13 +105,25 @@ describe('Mietvertragsdetail', () => {
 		expect(byTestId('tenant-phone-link')!.getAttribute('href')).toBe('tel:+41 52 123 45 67');
 	});
 
-	it('nennt vor dem Beenden, was geschieht', () => {
+	it('fragt beim Beenden nach dem Vertragsende, vorgeschlagen ist heute', () => {
 		open();
 		click('contract-end-button');
 		const dialog = document.querySelector('[role=dialog]')!;
 		expect(dialog.textContent).toContain('Mietvertrag beenden');
-		expect(dialog.textContent).toContain('Das Vertragsende wird auf heute gesetzt');
+		expect(byTestId<HTMLInputElement>('contract-end-date-input')!.value).toBe('10.10.2026');
+		expect(dialog.textContent).toContain('zum Beispiel der Tag, auf den der Mieter gekündigt hat');
 		expect(byTestId('contract-end-confirm')!.textContent).toContain('Mietvertrag beenden');
+	});
+
+	it('sagt am Feld, wenn das Vertragsende vor heute liegt, und sendet nichts', async () => {
+		open();
+		click('contract-end-button');
+		fireEvent(byTestId<HTMLInputElement>('contract-end-date-input')!, 'input', '31.01.2024');
+		click('contract-end-confirm');
+		await settle();
+		expect(document.querySelector('[role=dialog]')!.textContent).toContain(
+			'Das Vertragsende kann nicht vor heute liegen.'
+		);
 	});
 
 	it('lässt einen Mietvertrag ohne Vertragsende nicht löschen und sagt warum', () => {

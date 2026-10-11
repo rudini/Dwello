@@ -1,6 +1,9 @@
 <script lang="ts">
-	import { untrack } from 'svelte';
-	import { contractStatusOn } from '$lib/contract-status';
+	import { flushSync, untrack } from 'svelte';
+	import { contractEndError, contractStatusOn } from '$lib/contract-status';
+	import { formatDate } from '$lib/utils/format';
+	import DateInput from '$lib/ui/DateInput.svelte';
+	import { focusFirstError } from '$lib/ui/focus-error';
 	import { addToast } from '$lib/stores';
 	import type { Apartment, Building, RentalContract, Tenant } from '$lib/types';
 	import Button from '$lib/ui/Button.svelte';
@@ -28,6 +31,22 @@
 	const name = $derived(`${contract.tenant.firstName} ${contract.tenant.lastName}`);
 	const status = $derived(contractStatusOn(contract.startDate, contract.endDate, data.today));
 	let ending = $state(false);
+	// the last day of the tenancy, e.g. the day the tenant gave notice for; today is proposed
+	let endDate = $state(untrack(() => data.today));
+	let endError = $state('');
+	function startEnding() {
+		endDate = data.today;
+		endError = '';
+		ending = true;
+	}
+	// checked in the dialog before sending: a wrong date is said at the field, which gets the focus
+	function checkEndDate() {
+		endError = '';
+		flushSync(); // cleared first: the same error set again shows again
+		endError = contractEndError(endDate, contract.startDate, data.today) ?? '';
+		if (endError) focusFirstError(document.querySelector('[role="dialog"]'));
+		return !endError;
+	}
 	// a refused delete (also without JavaScript) shows the dialog with its reason
 	let deleting = $state(untrack(() => !!form?.deleteError));
 </script>
@@ -48,7 +67,7 @@
 				>Bearbeiten</Button
 			>
 			{#if !contract.endDate}
-				<Button onclick={() => (ending = true)} icon="calendar-busy" testid="contract-end-button"
+				<Button onclick={startEnding} icon="calendar-busy" testid="contract-end-button"
 					>Beenden</Button
 				>
 			{/if}
@@ -98,12 +117,24 @@
 	confirmLabel="Mietvertrag beenden"
 	confirmTestid="contract-end-confirm"
 	error={form?.endError}
-	onsuccess={() => addToast('success', `Der Mietvertrag von ${name} endet heute`)}
+	fields={{ endDate, startDate: contract.startDate }}
+	check={checkEndDate}
+	onsuccess={() =>
+		addToast(
+			'success',
+			endDate === data.today
+				? `Der Mietvertrag von ${name} endet heute`
+				: `Der Mietvertrag von ${name} endet am ${formatDate(endDate)}`
+		)}
 >
-	<p>
-		Das Vertragsende wird auf heute gesetzt. Heute ist der letzte Tag des Mietverhältnisses von {name};
-		ab morgen gilt der Mietvertrag als beendet.
-	</p>
+	<DateInput
+		id="endDate"
+		label="Vertragsende"
+		help="Der letzte Tag des Mietverhältnisses von {name}, zum Beispiel der Tag, auf den der Mieter gekündigt hat. Bis und mit diesem Tag läuft der Mietvertrag; danach gilt er als beendet."
+		error={endError}
+		bind:value={endDate}
+		testid="contract-end-date-input"
+	/>
 </ActionDialog>
 
 <ActionDialog

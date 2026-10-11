@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { contractPeriod, contractStatusOn, localToday, statusBadges } from '../lib/contract-status';
+import { contractEndError, contractPeriod, contractStatusOn, localToday, statusBadges } from '../lib/contract-status';
 
 const today = '2026-10-10';
 
@@ -21,6 +21,30 @@ describe('Vertragsstatus', () => {
 			'Künftig',
 			'Beendet'
 		]);
+	});
+});
+
+// Beenden auf den Tag, auf den der Mieter gekündigt hat: heute oder später, nie vor dem Vertragsbeginn
+describe('Vertragsende beim Beenden', () => {
+	it('nimmt heute und spätere Tage an', () => {
+		expect(contractEndError('2026-10-10', '2024-04-01', today)).toBeNull();
+		expect(contractEndError('2027-03-31', '2024-04-01', today)).toBeNull();
+	});
+
+	it('verlangt ein Datum', () => {
+		expect(contractEndError('', '2024-04-01', today)).toBe('Bitte geben Sie das Vertragsende ein.');
+	});
+
+	it('lehnt einen Tag vor heute ab und sagt, wo ein früheres Ende hingehört', () => {
+		expect(contractEndError('2026-10-09', '2024-04-01', today)).toBe(
+			'Das Vertragsende kann nicht vor heute liegen. Ein früheres Vertragsende tragen Sie unter «Bearbeiten» ein.'
+		);
+	});
+
+	it('lehnt bei einem künftigen Mietvertrag einen Tag vor dem Vertragsbeginn ab', () => {
+		expect(contractEndError('2099-10-31', '2099-11-01', today)).toBe(
+			'Das Vertragsende kann nicht vor dem Vertragsbeginn am 01.11.2099 liegen.'
+		);
 	});
 });
 

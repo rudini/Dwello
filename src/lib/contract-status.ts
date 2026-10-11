@@ -34,3 +34,13 @@ export function contractPeriod(
 	if (endDate) return `${formatDate(startDate)} – ${formatDate(endDate)}`;
 	return `${status === 'future' ? 'ab' : 'seit'} ${formatDate(startDate)}, unbefristet`;
 }
+
+/** Why a contract cannot be ended on that day (YYYY-MM-DD), or null: today or later, never before its start */
+export function contractEndError(endDate: string, startDate: string, today: string): string | null {
+	if (!endDate) return 'Bitte geben Sie das Vertragsende ein.';
+	if (endDate < today)
+		return 'Das Vertragsende kann nicht vor heute liegen. Ein früheres Vertragsende tragen Sie unter «Bearbeiten» ein.';
+	if (endDate < startDate.slice(0, 10))
+		return `Das Vertragsende kann nicht vor dem Vertragsbeginn am ${formatDate(startDate.slice(0, 10))} liegen.`;
+	return null;
+}

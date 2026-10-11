@@ -1,9 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
 
 // enhance as SvelteKit wires it: the test plays the server's answer to the submit
-const server = vi.hoisted(() => ({ submit: null as null | (() => unknown) }));
+const server = vi.hoisted(() => ({ submit: null as null | ((input: { formData: FormData }) => unknown) }));
 vi.mock('$app/forms', () => ({
-	enhance: (_form: unknown, submit: () => unknown) => {
+	enhance: (_form: unknown, submit: (input: { formData: FormData }) => unknown) => {
 		server.submit = submit;
 		return { destroy() {} };
 	}
@@ -14,7 +14,7 @@ import { byTestId, settle, show } from './helpers/dom';
 import { markup } from './helpers/snippet';
 
 async function answer(type: 'success' | 'failure' | 'redirect') {
-	const after = server.submit!() as (input: unknown) => Promise<void>;
+	const after = server.submit!({ formData: new FormData() }) as (input: unknown) => Promise<void>;
 	await after({ update: async () => {}, result: { type } });
 	await settle();
 }
