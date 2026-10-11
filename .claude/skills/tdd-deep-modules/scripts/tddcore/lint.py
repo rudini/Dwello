@@ -67,6 +67,30 @@ ITEMS = {
     "6. Design note": ["Hidden decision:", "Both designs:", "Interface:", "Depth:", "Open points:", "Proof:"],
 }
 
+# whole statements that must stand on the line of their bold item, each starting a sentence, so a negation or a
+# qualifier inside the sentence ("Not every fake ...") or moving the rule away from its item is caught
+STATEMENTS = {
+    "Hard rules": {
+        "No tests on private methods.": [
+            "The test boundary is the public interface of the deep module or service: test behaviour through it.",
+            "Pure helper functions inside it are implementation details, with no tests and no public exports of their "
+            "own."],
+        "Doubles only at system boundaries.": [
+            "No mocks or spies of your own logic; use real objects by default.",
+            "Double only what the system does not own: mail, login, network, framework modules, external backends.",
+            "Every fake of a boundary has a contract test suite that runs against both the fake and the real "
+            "implementation.",
+            "Wrap a framework module (such as SvelteKit's `$app/*`) in a small project-owned adapter and fake the "
+            "adapter, not the framework.",
+            "Many mocks in a test signal a wrongly cut interface: fix the interface, not the test."],
+    },
+    "5. Depth check in every refactor": {
+        "No swarm of exported helpers.": [
+            "A functional core is fine as internal structure, but many small exported pure functions with one caller "
+            "each are classitis too: they turn implementation details into interface."],
+    },
+}
+
 
 def problems(skill):
     """One message per problem found in the skill at `skill`; empty when it is valid."""
@@ -126,6 +150,18 @@ def _required(body):
         found += [f"missing in '{heading}': {phrase}" for phrase in phrases if phrase not in sections[heading]]
         found += [f"'{heading}' has no item **{label}**" for label in ITEMS.get(heading, [])
                   if not re.search(rf"^\s*(?:-|\d+\.)\s+\*\*{re.escape(label)}\*\*", raw[heading], re.MULTILINE)]
+        found += _statements(heading, raw[heading])
+    return found
+
+
+def _statements(heading, text):
+    """Each required statement on its item's line, starting a sentence and ending as written."""
+    found = []
+    for label, statements in STATEMENTS.get(heading, {}).items():
+        item = re.search(rf"^\s*(?:-|\d+\.)\s+\*\*{re.escape(label)}\*\*(.*)$", text, re.MULTILINE)
+        line = item[1] if item else ""
+        found += [f"'{heading}' item **{label}** lacks the statement: {statement}" for statement in statements
+                  if not re.search(rf"(?:^|[.:;])\s+{re.escape(statement)}(?:\s|$)", line)]
     return found
 
 
