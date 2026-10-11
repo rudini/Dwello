@@ -166,7 +166,7 @@ def _tests(module, path):
         if Path(rel).suffix not in _SOURCE or protocol.is_production(rel) or not test.is_file():
             continue
         specs = _IMPORT.findall(test.read_text(errors="replace"))
-        if any(Path(os.path.normpath(test.parent / spec)).with_suffix("") == target for spec in specs):
+        if any(_without_source_suffix(Path(os.path.normpath(test.parent / spec))) == target for spec in specs):
             found.append(rel)
     return tuple(found)
 
@@ -184,3 +184,8 @@ def _duplicate(text):
     lines = [line.strip() for line in text.splitlines()]
     long = [line for line in lines if len(line) >= DUPLICATE_LENGTH and not line.startswith("//")]
     return len(long) - len(set(long))
+
+
+def _without_source_suffix(path):
+    """`a/b.service.js` -> `a/b.service`; `a/b.service` stays, its suffix is part of the name."""
+    return path.with_suffix("") if path.suffix in _SOURCE else path
