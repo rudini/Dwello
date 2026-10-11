@@ -28,7 +28,7 @@ const refund: StatementPDFData = {
 	managementFeePercent: 0,
 	totalCosts: 784.13,
 	totalAdvancePayments: 878,
-	balance: -93.87
+	balance: -93.85 // 784.13 − 878.00 = −93.87, to 5 Rappen
 };
 
 const textOf = async (data: StatementPDFData) => readPdf(Buffer.from(await generateStatementPDFBase64(data, config, 'de'), 'base64'));
@@ -37,8 +37,8 @@ describe('PDF einer Rückerstattung', () => {
 	it('nennt die Rückerstattung als Betrag ohne Minuszeichen und ohne Zahlteil', async () => {
 		const pdf = await textOf(refund);
 
-		expect(pdf.flowing).toContain('Rückerstattung 93.87');
-		expect(pdf.flowing).not.toContain('-93.87');
+		expect(pdf.flowing).toContain('Rückerstattung 93.85');
+		expect(pdf.flowing).not.toContain('-93.85');
 		expect(pdf.flowing).not.toContain('Zahlteil');
 		expect(pdf.pages).toBe(1);
 	});
@@ -51,7 +51,19 @@ describe('PDF einer Rückerstattung', () => {
 	});
 });
 
-const due: StatementPDFData = { ...refund, totalAdvancePayments: 600, balance: 184.13, paymentDeadline: '2026-03-17' };
+const due: StatementPDFData = { ...refund, totalAdvancePayments: 600, balance: 184.15, paymentDeadline: '2026-03-17' };
+
+// Der Saldo ist auf 5 Rappen gerundet; die Zeile «Rundung» lässt die Rechnung aufgehen
+describe('Rundung des Saldos im PDF', () => {
+	it('nennt die Rundung zwischen Akonto und Saldo, bei Nachzahlung und Rückerstattung', async () => {
+		expect((await textOf(due)).flowing).toContain('Rundung auf 5 Rappen + 0.02 Nachzahlung 184.15');
+		expect((await textOf(refund)).flowing).toContain('Rundung auf 5 Rappen + 0.02 Rückerstattung 93.85');
+	});
+
+	it('lässt die Zeile weg, wenn nichts gerundet ist', async () => {
+		expect((await textOf({ ...due, totalAdvancePayments: 600.03, balance: 184.1 })).flowing).not.toContain('Rundung');
+	});
+});
 
 describe('PDF einer Nachzahlung', () => {
 	// SIX: die Angaben im Zahlteil entsprechen dem QR-Code; Rätoromanisch sieht der Zahlteil nicht vor
@@ -142,7 +154,7 @@ describe('PDF ohne Saldo und einer bezahlten Abrechnung', () => {
 describe('QR-Code im Zahlteil', () => {
 	// 46 mm gedruckt: mit 166 Pixeln waren die Module ungleich breit; jetzt ganze Pixel je Modul, scharf auch beim Druck
 	it('bettet den QR-Code mit ganzen Pixeln je Modul in Druckauflösung ein', async () => {
-		const { qrCodeImage } = await generateQRBillForStatement({ id: due.id, statementNumber: due.statementNumber, balance: '184.13', tenant: due.tenant }, config);
+		const { qrCodeImage } = await generateQRBillForStatement({ id: due.id, statementNumber: due.statementNumber, balance: '184.15', tenant: due.tenant }, config);
 		const width = qrCodeImage.readUInt32BE(16); // PNG header
 
 		expect(width).toBeGreaterThanOrEqual(500);

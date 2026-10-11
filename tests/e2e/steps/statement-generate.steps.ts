@@ -41,6 +41,7 @@ import {
 	francs,
 	generateStatementsViaApi,
 	openPreviewViaApi,
+	previewBalances,
 	previewTotals
 } from '../tasks/statement-generate-api';
 
@@ -231,6 +232,16 @@ Then(
 Then('ist für die Abrechnungen das Gebäude {string} gewählt', async ({ verwalter, seed }, building: string) => {
 	await expect(chosenBuilding(verwalter, seed.idOf(building)!)).toBeChecked();
 });
+
+Then(
+	'beträgt der Saldo von {string} {string}',
+	async ({ verwalter, names, driver }, tenant: string, saldo: string) => {
+		const name = names.get(tenant) ?? tenant;
+		const signed = (saldo.startsWith('Rückerstattung') ? -1 : 1) * francs(saldo);
+		if (driver === 'api') expect(previewBalances(verwalter).get(name)).toBe(signed);
+		else await expect(previewRow(verwalter, name)).toContainText(saldo);
+	}
+);
 
 Then(
 	'kostet die Abrechnung von {string} {string}',

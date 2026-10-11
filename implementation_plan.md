@@ -4591,6 +4591,20 @@ column. No installation exists yet, so the migrations were merged: `0001_schema.
 - [x] **Docs**: `offene-punkte.md`, `nebenkostenabrechnung-anforderungen.md`, `data-model.md`, `api-specification.md`,
   `PRD-Dwello.md`, `seed-daten-aenderungen.md`, `README.md`, `backend/CLAUDE.md`.
 
+
+### Follow-up: Saldo to 5 Rappen
+
+Decision of the product owner: the Saldo (Nachzahlung and Rückerstattung) is rounded commercially to 5 Rappen; positions,
+subtotal, fee and «Ihre Nebenkosten» stay exact. A row «Rundung auf 5 Rappen» between Akonto and Saldo makes it add up.
+
+- [x] **Scenario** `tests/e2e/features/statement-rounding.feature` (`@api`): 791.03 → 791.05, −48.97 → −48.95 (failed first).
+- [x] **Backend**: `roundTo5Rappen` in `pdf-format.ts` (symmetric for refunds), `calculateBalance` in `calculation.service.ts`;
+  `pdf.service.ts` prints the rounding row (de/fr/it/en) and names it in the balance box; QR amount = Saldo.
+- [x] **Frontend**: `CostTable.svelte` shows the rounding row; only a real rounding (under 5 Rappen) is shown.
+- [x] **Tests**: `statement-pdf-data.test.ts`, `statement-pdf-render.test.ts`, `statement-pages.dom.test.ts`; expected
+  balances in `statement-generation.pg.test.ts` updated; screenshot example `tests/ui-screenshots/statement-pdf.ts`.
+- [x] **Docs**: `data-model.md`, `nebenkostenabrechnung-anforderungen.md`.
+
 ---
 
 # Success Criteria

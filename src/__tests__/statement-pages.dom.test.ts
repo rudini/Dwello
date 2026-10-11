@@ -488,6 +488,16 @@ describe('Abrechnungsdetail', () => {
 		expect(text()).not.toMatch(/Verwaltungsgebühr|Verwaltungskosten/);
 	});
 
+	// Der Saldo ist auf 5 Rappen gerundet; wie im PDF lässt die Zeile «Rundung» die Rechnung aufgehen
+	it('nennt die Rundung des Saldos auf 5 Rappen', () => {
+		detail({ totalCosts: 784.13, totalAdvancePayments: 600, balance: 184.15 });
+		expect(byTestId('statement-rounding')!.textContent!.replace(/\s+/g, ' ')).toContain('Rundung auf 5 Rappen + CHF 0.02');
+		document.body.innerHTML = '';
+
+		detail({ totalCosts: 784.13, totalAdvancePayments: 600.03, balance: 184.1 });
+		expect(byTestId('statement-rounding')).toBeNull();
+	});
+
 	it('nennt eine Rückerstattung ohne Minuszeichen und ohne Zahlungsfrist für den Mieter', () => {
 		detail({ balance: -83.43 });
 

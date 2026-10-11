@@ -23,7 +23,7 @@ import {
 } from './prorating.service';
 import { getApartment, listApartments } from './apartment.service';
 import { getContract } from './contract.service';
-import { roundToRappen } from './pdf-format';
+import { roundTo5Rappen, roundToRappen } from './pdf-format';
 
 /**
  * Line item for statement
@@ -216,10 +216,10 @@ export function calculateTotalAdvancePayments(
 }
 
 /**
- * Calculate balance (tenant owes vs. refund)
+ * Calculate balance (tenant owes vs. refund), rounded to 5 Rappen: the amount the tenant pays or gets back
  */
 export function calculateBalance(totalCosts: number, totalAdvancePayments: number): number {
-	return roundToRappen(totalCosts - totalAdvancePayments);
+	return roundTo5Rappen(totalCosts - totalAdvancePayments);
 }
 
 /**

@@ -8,6 +8,11 @@
 	let { statement }: { statement: StatementWithDetails } = $props();
 
 	const subtotal = $derived(statement.lineItems.reduce((sum, item) => sum + item.tenantShare, 0));
+	// The Saldo goes to 5 Rappen; the difference is shown as in the PDF, only a real rounding (under 5 Rappen)
+	const rounding = $derived.by(() => {
+		const difference = statement.balance - (statement.totalCosts - statement.totalAdvancePayments);
+		return Math.abs(difference) >= 0.005 && Math.abs(difference) < 0.05 ? difference : 0;
+	});
 	const columns = [
 		{ label: 'Kategorie' },
 		{ label: 'Verteilschlüssel' },
@@ -82,6 +87,14 @@
 		<dt class="text-ink-muted">Geleistete Akontobeiträge</dt>
 		<dd class="whitespace-nowrap text-ink">− {formatCurrency(statement.totalAdvancePayments)}</dd>
 	</div>
+	{#if rounding}
+		<div class="flex justify-between gap-4" data-testid="statement-rounding">
+			<dt class="text-ink-muted">Rundung auf 5 Rappen</dt>
+			<dd class="whitespace-nowrap text-ink">
+				{rounding > 0 ? '+' : '−'} {formatCurrency(Math.abs(rounding))}
+			</dd>
+		</div>
+	{/if}
 	<div
 		class="flex justify-between gap-4 border-t border-line pt-2 text-lg font-bold"
 		data-testid="statement-balance"

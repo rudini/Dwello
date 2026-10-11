@@ -16,7 +16,7 @@ import {
 	formatQRReferenceForDisplay,
 	type QRBillConfig
 } from './qr-bill.service';
-import { formatCHF, formatSwissDate } from './pdf-format';
+import { formatCHF, formatSwissDate, roundToRappen } from './pdf-format';
 
 /**
  * Supported languages
@@ -44,6 +44,7 @@ const translations: Record<Exclude<Language, 'rm'>, Record<string, string>> = {
 		managementFee: 'Verwaltungspauschale',
 		colon: ': ',
 		advancePayments: 'Geleistete Akontobeiträge',
+		rounding: 'Rundung auf 5 Rappen',
 		amountDue: 'Nachzahlung',
 		refund: 'Rückerstattung',
 		balanced: 'Ausgeglichen',
@@ -107,6 +108,7 @@ const translations: Record<Exclude<Language, 'rm'>, Record<string, string>> = {
 		managementFee: 'Frais de gestion',
 		colon: ' : ',
 		advancePayments: 'Acomptes versés',
+		rounding: 'Arrondi à 5 centimes',
 		amountDue: 'Montant à payer',
 		refund: 'Remboursement',
 		balanced: 'Soldé',
@@ -169,6 +171,7 @@ const translations: Record<Exclude<Language, 'rm'>, Record<string, string>> = {
 		managementFee: 'Spese di gestione',
 		colon: ': ',
 		advancePayments: 'Acconti versati',
+		rounding: 'Arrotondamento a 5 centesimi',
 		amountDue: 'Importo dovuto',
 		refund: 'Rimborso',
 		balanced: 'Saldato',
@@ -231,6 +234,7 @@ const translations: Record<Exclude<Language, 'rm'>, Record<string, string>> = {
 		managementFee: 'Management fee',
 		colon: ': ',
 		advancePayments: 'Advance payments made',
+		rounding: 'Rounding to 5 centimes',
 		amountDue: 'Amount due',
 		refund: 'Refund',
 		balanced: 'Settled',
@@ -478,6 +482,14 @@ function balanceText({ t, data }: Page) {
 	return date ? fill(t.payBy, { date }) : t.payNoDate;
 }
 
+// The Saldo is rounded to 5 Rappen; the difference to costs minus Akonto, as «+ 0.02» or «– 0.03»; only a real
+// rounding (under 5 Rappen) is shown
+function rounding(data: StatementPDFData) {
+	const difference = roundToRappen(data.balance - (data.totalCosts - data.totalAdvancePayments));
+	return Math.abs(difference) < 0.05 ? difference : 0;
+}
+const signed = (amount: number) => `${amount > 0 ? '+' : '–'} ${formatCHF(Math.abs(amount))}`;
+
 const balanceLabel = ({ t, data }: Page) => (data.balance === 0 ? t.balanced : data.balance < 0 ? t.refund : t.amountDue);
 
 // The result first: what the tenant pays or gets back, and how it comes about
@@ -485,7 +497,8 @@ function balanceBox(page: Page, y: number) {
 	const { doc, t, data } = page;
 	const width = PAGE.right - PAGE.left;
 	const what = balanceText(page);
-	const how = `${t.yourCosts} ${formatCurrency(data.totalCosts)} – ${t.advancePayments} ${formatCurrency(data.totalAdvancePayments)}`;
+	const rounded = rounding(data) ? `, ${t.rounding} ${signed(rounding(data))}` : '';
+	const how = `${t.yourCosts} ${formatCurrency(data.totalCosts)} – ${t.advancePayments} ${formatCurrency(data.totalAdvancePayments)}${rounded}`;
 	doc.font('Helvetica').fontSize(9);
 	const height = 46 + doc.heightOfString(what, { width: width - 24 }) + doc.heightOfString(how, { width: width - 24 });
 	doc.lineWidth(1.5).strokeColor(COLORS.ink).rect(PAGE.left, y, width, height).stroke();
@@ -554,7 +567,7 @@ function costTable(page: Page, y: number) {
 	const fee = `${t.managementFee}${t.colon}${feeBasis(data, t)}`;
 	doc.font('Helvetica-Bold').fontSize(8.5);
 	const feeHeight = data.managementFee > 0 ? doc.heightOfString(fee, { width }) + 6 : 0;
-	top = room(doc, top, 4 * (doc.heightOfString(t.subtotal) + 8) + feeHeight);
+	top = room(doc, top, (rounding(data) ? 5 : 4) * (doc.heightOfString(t.subtotal) + 8) + feeHeight);
 	top = row(doc, total(t.subtotal, formatCHF(data.subtotal)), top + 2, { bold: true, above: 0.5 });
 	if (feeHeight) {
 		doc.font('Helvetica').fontSize(8.5);
@@ -564,6 +577,7 @@ function costTable(page: Page, y: number) {
 	}
 	top = row(doc, total(t.yourCosts, formatCHF(data.totalCosts)), top + 2, { bold: true, above: 1 });
 	top = row(doc, total(t.advancePayments, `– ${formatCHF(data.totalAdvancePayments)}`), top);
+	if (rounding(data)) top = row(doc, total(t.rounding, signed(rounding(data))), top);
 	top = row(doc, total(balanceLabel(page), formatCHF(Math.abs(data.balance))), top + 2, { bold: true, above: 1 });
 	const note = data.fuel ? `${t.sharesNote} ${t.sharesNoteFuel}` : t.sharesNote;
 	doc.font('Helvetica').fontSize(7.5);

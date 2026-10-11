@@ -240,7 +240,7 @@ management_fee_percent DECIMAL(5,2)            -- rate chosen in the Abrechnungs
 heating_profile_id     UUID                    -- Heizprofil of the Abrechnungslauf, printed in the PDF (SET NULL)
 fuel_stock             JSONB                   -- Tankbestand readings at creation, for the PDF
 key_values             JSONB                   -- area, apartments, rooms: own and building's total at creation
-balance                DECIMAL(12,2) NOT NULL  -- Saldo: positive = Nachzahlung, negative = Rückerstattung
+balance                DECIMAL(12,2) NOT NULL  -- Saldo, commercially to 5 Rappen: positive = Nachzahlung, negative = Rückerstattung
 status                 VARCHAR(20)   NOT NULL DEFAULT 'draft'
 payment_deadline       DATE                    -- Zahlungsfrist
 paid_date              DATE
