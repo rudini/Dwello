@@ -47,6 +47,8 @@ def problems(skill):
         text = (skill / "SKILL.md").read_text(encoding="utf-8")
     except UnicodeDecodeError:
         return ["SKILL.md is not valid UTF-8"]
+    if text.startswith("\ufeff"):
+        return ["SKILL.md starts with a byte order mark; save it without one"]
     match = re.match(r"---\n(.*?)\n---\n", text, re.DOTALL)
     if not match:
         return ["SKILL.md has no frontmatter"]
