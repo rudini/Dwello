@@ -1,6 +1,6 @@
 import { test } from '@playwright/test';
 import { mkdirSync, readFileSync, writeFileSync } from 'fs';
-import { changedAreas } from './changed-areas';
+import { changedAreas, looksTheSame } from './changed-areas';
 import { testData } from '../e2e/fixtures/backend';
 import { sessionCookies, sessionToken } from '../e2e/fixtures/session';
 
@@ -71,9 +71,11 @@ for (const route of routes) {
 
 		// The page as the base branch renders it, on the same backend and data, for marking what changed
 		const before = BASE_URL ? await shoot(BASE_URL) : undefined;
-		if (before?.ok) writeFileSync(`${file}.before.png`, before.image);
 		const after = await shoot(baseURL!);
 		if (!before?.ok) return writeFileSync(`${file}.png`, after.image);
+		// no file: the comment lists the page as unchanged
+		if (looksTheSame(before.image, after.image)) return;
+		writeFileSync(`${file}.before.png`, before.image);
 
 		const areas = changedAreas(before.image, after.image);
 		await page.evaluate((areas) => {

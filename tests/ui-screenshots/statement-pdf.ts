@@ -8,7 +8,7 @@ import { spawnSync } from 'child_process';
 import { mkdirSync, mkdtempSync, readdirSync, readFileSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { join, resolve } from 'path';
-import { changedAreas, markAreas } from './changed-areas';
+import { changedAreas, looksTheSame, markAreas } from './changed-areas';
 
 const LANGUAGES = ['de', 'fr'] as const;
 type Language = (typeof LANGUAGES)[number];
@@ -123,6 +123,7 @@ for (const language of LANGUAGES) {
 	after.forEach((page, i) => {
 		const file = `ui-screenshots/pdf_${language}_${i + 1}`;
 		const old = before[i];
+		if (old && looksTheSame(old, page)) return; // no file: the comment lists the page as unchanged
 		if (old) writeFileSync(`${file}.before.png`, old);
 		writeFileSync(`${file}.png`, old ? markAreas(page, changedAreas(old, page)) : page);
 		console.log(`${file}.png`);
