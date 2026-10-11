@@ -169,11 +169,11 @@ When it runs:
   reason fails too.
 
 Commands (repo root):
-- `npm run deepcheck:audit` - check the changed modules as the hook does; silent when clean
-- `npm run deepcheck:scan` - list the flagged modules of the whole repo; `npm run deepcheck:scan -- --min-score 35`
+- `bun run deepcheck:audit` - check the changed modules as the hook does; silent when clean
+- `bun run deepcheck:scan` - list the flagged modules of the whole repo; `bun run deepcheck:scan -- --min-score 35`
   ranks every module scoring 35 or more, a review aid that never fails
-- `npm run deepcheck:ci -- origin/main` - the CI check against a base branch
-- `npm run deepcheck:baseline` - rewrite `.deepcheck-baseline.json` after a deliberate scoring change
+- `bun run deepcheck:ci -- origin/main` - the CI check against a base branch
+- `bun run deepcheck:baseline` - rewrite `.deepcheck-baseline.json` after a deliberate scoring change
 
 When it reports a module:
 1. Read the reason; `node tools/deepcheck/src/cli.ts --explain <path>` shows every metric.
