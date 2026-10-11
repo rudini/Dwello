@@ -2,13 +2,8 @@ import type { Actions, PageServerLoad } from './$types';
 import { fail, redirect } from '@sveltejs/kit';
 import { loadStatement } from '$lib/server/statement';
 import { loadDocuments } from '$lib/server/documents';
-import {
-	markStatementPaid,
-	paidDateError,
-	sendStatementReminder
-} from '$lib/server/statement-actions';
-import { localToday } from '$lib/contract-status';
-import type { StatementDocument, StatementWithDetails } from '$lib/types';
+import { markStatementPaid, sendStatementReminder } from '$lib/server/statement-actions';
+import type { StatementWithDetails } from '$lib/types';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
@@ -57,25 +52,17 @@ export const actions: Actions = {
 	markPaid: async ({ params, fetch, request }) => {
 		// none sent (no dialog field, no JavaScript): today; sent but empty (an invalid date): refused
 		const sent = (await request.formData()).get('paidDate');
-		const paidDate = sent === null ? localToday() : String(sent);
-		const invalid = paidDateError(paidDate);
-		if (invalid) return fail(400, { actionError: invalid });
-		const response = await markStatementPaid(fetch, params.id, paidDate);
-		if (!response.ok) {
-			return fail(response.status, {
-				actionError: 'Abrechnung konnte nicht als bezahlt markiert werden.'
-			});
-		}
+		const refused = await markStatementPaid(
+			fetch,
+			params.id,
+			sent === null ? undefined : String(sent)
+		);
+		if (refused) return fail(refused.status, { actionError: refused.message });
 	},
 	remind: async ({ params, fetch }) => {
-		const response = await sendStatementReminder(fetch, params.id);
-		const result = await response.json();
-		if (!response.ok) {
-			return fail(response.status, {
-				actionError: result.error ?? 'Mahnung konnte nicht erstellt werden.'
-			});
-		}
-		return { reminder: result as { document: StatementDocument; deliveryError?: string } };
+		const result = await sendStatementReminder(fetch, params.id);
+		if ('error' in result) return fail(result.status, { actionError: result.error });
+		return { reminder: result.reminder };
 	},
 	delete: async ({ params, fetch }) => {
 		const response = await fetch(`${BACKEND_URL}/api/v1/statements/${params.id}`, {

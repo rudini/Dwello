@@ -35,6 +35,19 @@ describe('Abrechnung als bezahlt markieren', () => {
 	});
 });
 
+describe('Abrechnung als bezahlt markieren (Ablehnung)', () => {
+	it('meldet einen Fehler mit dem nächsten Schritt, wenn das Backend ablehnt', async () => {
+		const { result } = runAction(actions.markPaid, 's1', 409);
+
+		expect(await result).toMatchObject({
+			status: 409,
+			data: {
+				actionError: 'Abrechnung konnte nicht als bezahlt markiert werden. Versuchen Sie es erneut.'
+			}
+		});
+	});
+});
+
 // Die Zahlung kam vor einer Woche: das Datum aus dem Dialog, nicht der Tag des Erfassens
 describe('Zahlungsdatum', () => {
 	it('speichert das gewählte Zahlungsdatum', async () => {
