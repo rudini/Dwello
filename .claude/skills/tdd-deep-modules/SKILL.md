@@ -69,7 +69,7 @@ Never batch: no second test before the first is green, no clean-up inside green.
 
 ## 5. Depth check in every refactor
 
-In every refactor phase, with all tests green, run `scripts/depth_report <changed files>` and walk this list. Fix what fails in the same refactor, one change at a time, tests green after each.
+In every refactor phase, with all tests green, run `scripts/depth_report <changed production .ts/.js files>` and walk this list. Fix what fails in the same refactor, one change at a time, tests green after each.
 
 - **Interface much simpler than the implementation.** A caller learns few names, parameters and rules; a lot happens behind them. A module about as big as its interface is shallow: merge it into its caller or callee.
 - **No classitis.** Many tiny classes or files that each forward to the next spread one decision over many places. Merge them.
@@ -91,4 +91,4 @@ When the test list is done, write a short design note (in the PR description, or
 - **Interface:** the final public names and what each promises.
 - **Depth:** the latest `scripts/depth_report` lines for the module, and what changed during refactors.
 - **Open points:** behaviours left out on purpose, and known limits.
-- **Proof:** `scripts/tdd_replay <base>..HEAD` printed ACCEPT for the history.
+- **Proof:** `scripts/tdd_replay <base>..HEAD` printed ACCEPT for the history (it proves phase order, test counts and exit codes, not assertion strength).

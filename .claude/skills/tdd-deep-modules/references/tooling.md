@@ -6,7 +6,7 @@ All scripts live in `scripts/` of this skill and run from anywhere inside the re
 
 `scripts/tdd-step <test|red|green|refactor> "<message>"` runs every supported suite (vitest and `bun test`, one run per `package.json`), checks the phase rules and commits all changes as `<phase>: <message>` with the trailers `TDD-Phase` and `TDD-Exit-Code`. It refuses (exit 1, nothing committed) when:
 
-- nothing changed, or the phase may not follow the last one (red after red, green without red, refactor after red);
+- nothing changed, or the phase may not follow the last one (red after red, green without red, refactor after red, after a `test:` commit or after a commit that is not a phase);
 - **test:** code changed;
 - **red:** the suite passes, the failure is not an assertion (import, syntax, setup or unhandled errors), more than one test fails, or production code changed;
 - **green / refactor:** any test fails or errors; green may not change tests or test configuration (`package.json`, `vitest.config.*`, `vite.config.*`);
@@ -33,7 +33,7 @@ The skill registers a PreToolUse hook on Write, Edit and MultiEdit. It blocks ed
 
 ## tdd_replay
 
-`scripts/tdd_replay <base>..<head>` checks out every commit of the range in a temporary worktree, re-runs the suite and rejects: a commit that is not a phase commit (ordinary and merge commits included), a trailer that does not match the real exit code, production code before red, a red that fails by error, a red that adds other than exactly one test, a test added outside red, a refactor or green on a red suite, removed or skipped tests, and a history that ends in red. Exit 0 ACCEPT, 1 REJECT, 2 cannot judge.
+`scripts/tdd_replay <base>..<head>` checks out every commit of the range in a temporary worktree, re-runs the suite and rejects: a commit that is not a phase commit (ordinary and merge commits included), a trailer that does not match the real exit code, production code before red, a red that fails by error, a red that adds other than exactly one test, a red whose failing test is not its new test, a test added outside red, a refactor or green on a red suite, removed or skipped tests, and a history that ends in red. Exit 0 ACCEPT, 1 REJECT, 2 cannot judge.
 
 ## depth_report
 
