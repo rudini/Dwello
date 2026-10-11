@@ -53,6 +53,12 @@ Every commit of the range (first-parent, oldest first) is checked out in a tempo
 - red adds exactly one new test id and its failing tests are exactly that new test; no other phase adds tests; no phase removes tests, and a test that ran before and is now skipped, todo or filtered out counts as removed (test ids come from the frameworks' reports: bun JUnit test cases, vitest assertion results; a repeated name in a file gets a `#n` suffix, so same-named tests do not collapse);
 - the range must not end in red.
 
+## Hook (`tdd-guard`)
+
+Registered in the `hooks:` frontmatter of `SKILL.md` as a `PreToolUse` hook for `Write|Edit|MultiEdit`, so it is active once the skill is invoked (for the rest of the session). It reads the hook JSON from stdin, resolves the file's git repository and the phase of its HEAD commit, and exits 2 (blocking, reason on stderr) when the file is production code and the last phase is `start` or `test`. Test files, test configuration and non-code files always pass; files outside git pass; unreadable input is a non-blocking error (exit 1).
+
+Deviation from the original wording "blocks edits to production files unless the last phase was red", made on purpose and told to the user: the hook allows production edits whenever the next commit may contain production code under `tdd-step`'s rules, i.e. after `red` (towards green) and after `green`/`refactor` (towards a refactor). Allowing them only after red would make every refactor of production code impossible, which contradicts the refactor phase and stage 2's depth check in every refactor. Behaviour smuggled into a refactor stays the documented weak spot (no new or removed tests is all `tdd_replay` can check).
+
 ## Known limits
 
 - The previous phase is read from the HEAD subject prefix (`red: ...`), which a hand-made commit can fake; `tdd_replay` (step 2) re-runs history and does not trust subjects or trailers.

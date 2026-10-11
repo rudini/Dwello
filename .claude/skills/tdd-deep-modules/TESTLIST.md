@@ -121,11 +121,11 @@ Re-runs every commit of the range in a separate worktree and decides from the re
 Reads the hook JSON on stdin. Exit 2 (with the reason on stderr) blocks the tool call; exit 0 lets it through.
 Rule: a production file may be edited only when the next commit may contain production code, i.e. the last phase is `red` (towards green) or `green`/`refactor` (towards a refactor). After start or `test`, production edits are blocked.
 
-- [ ] Edit of a production file after a `test` commit is blocked (exit 2, reason names the file and the phase)
-- [ ] Edit of a production file after `red` is allowed
-- [ ] after `green` and `refactor` it is allowed (refactoring)
-- [ ] in a repository without TDD commits (start) it is blocked
-- [ ] Write of a new production file is judged the same way; Write/Edit of a test file is always allowed
-- [ ] MultiEdit and NotebookEdit (notebook_path) are covered; other tools pass
-- [ ] files outside a git repository pass; malformed input is a non-blocking error (exit 1), never a block
-- [ ] SKILL.md registers the hook in its `hooks:` frontmatter (PreToolUse, matcher for the edit tools, command path into the skill)
+- [x] Edit of a production file after a `test` commit is blocked (exit 2, reason names the file and the phase)
+- [x] Edit of a production file after `red` is allowed
+- [x] after `green` and `refactor` it is allowed (refactoring)
+- [x] in a repository without TDD commits (start) it is blocked
+- [x] Write of a new production file is judged the same way; Write/Edit of a test file is always allowed
+- [x] MultiEdit is covered; tools without a file_path (Bash, NotebookEdit: notebooks are never production) pass
+- [x] files outside a git repository pass; malformed input is a non-blocking error (exit 1), never a block
+- [x] SKILL.md registers the hook in its `hooks:` frontmatter (PreToolUse, matcher for the edit tools, command path into the skill)
