@@ -27,6 +27,11 @@ class Depth:
     duplicate: int  # extra copies of repeated code lines
     findings: tuple
 
+    @property
+    def has_classitis(self):
+        """Tiny classes or a swarm of exported helpers: one decision spread over many names."""
+        return bool(self.classitis or self.swarm)
+
 
 SHALLOW_RATIO = 4  # fewer code lines per thing a caller must know means the module hides little
 BLOAT_DUPLICATES = 3  # repeated lines that make a module bloated

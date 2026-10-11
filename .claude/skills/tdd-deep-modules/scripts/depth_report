@@ -21,7 +21,7 @@ def main(paths):
     for module in modules:
         verdict = "; ".join(module.findings) or "deep"
         print(f"{module.path}: surface {module.surface}, size {module.size}, ratio {module.ratio:.1f}, "
-              f"classitis {'yes' if module.classitis or module.swarm else 'no'}, "
+              f"classitis {'yes' if module.has_classitis else 'no'}, "
               f"pass-through {len(module.pass_through)}, tests {len(module.tests)}, "
               f"unused {len(module.unused)}, duplicate {module.duplicate}"
               f" -> {verdict}")
