@@ -355,3 +355,29 @@ export class Ledger {
 
         # f 1 + a, b, c
         self.assertTrue(line.startswith("src/f.ts: surface 4,"), line)
+
+    def test_pins_where_signatures_and_bodies_end(self):
+        cases = {
+            "arrow ends at a comma": ("export const f = (a: number) => g(a), y = 1;\n", "pass-through: f;"),
+            "arrow ends at a line break": ("export const f = (a: number) => g(a)\nexport const k = 1\n",
+                                           "pass-through: f;"),
+            "arrow ends at a closing bracket": ("export function setup(cb = (a: number) => g(a)) {\n  return cb;\n}\n",
+                                                "pass-through: cb;"),
+            "a statement before the brace": ("export function run(a: number) {\n  handle(a); if (a) {\n"
+                                             "    return g(a);\n  }\n  return a;\n}\n", "pass-through 0,"),
+            "no parameters": ("export function now() {\n  return Date.now();\n}\n", "pass-through 0,"),
+            "arrow return type": ("export const f = (a: number): number => g(a);\n", "pass-through: f;"),
+            "generic function": ("export function id<T>(a: T): T {\n  return keep(a);\n}\n", "pass-through: id;"),
+            "arrow type in type parameters": ("export function f<T extends () => void>(a: T) {\n  a();\n}\n",
+                                              "surface 2,"),
+            "arrow type in type arguments": ("export function f(m: Map<() => void, string>, n: number) {\n"
+                                             "  m.clear();\n}\n", "surface 3,"),
+            "statement across lines": ("export const x = f(1,\n  2), y = 2;\n", "surface 2,"),
+        }
+        for name, (module, expected) in cases.items():
+            with self.subTest(name):
+                repo = Repo(self, {"src/m.ts": module})
+
+                line = report_line(repo.run("depth_report", "src/m.ts"), "src/m.ts")
+
+                self.assertIn(expected, line)
