@@ -8,6 +8,10 @@ from pathlib import Path
 from tddcore import protocol
 
 
+class NotAModule(Exception):
+    """The path cannot be measured: missing, not TypeScript/JavaScript, or outside git."""
+
+
 @dataclass(frozen=True)
 class Depth:
     path: str
@@ -29,7 +33,12 @@ TINY_CLASS = 2  # methods; two or more classes this small spread one decision ov
 
 
 def measure(root, path):
-    text = (Path(root) / path).read_text()
+    module = Path(root) / path
+    if Path(path).suffix not in _SOURCE:
+        raise NotAModule(f"{path}: not a TypeScript or JavaScript file")
+    if not module.is_file():
+        raise NotAModule(f"{path}: no such file")
+    text = module.read_text(errors="replace")
     surface, size = _surface(text), _size(text)
     ratio = size / surface if surface else float(size)
     pass_through = _pass_through(text)
@@ -140,8 +149,11 @@ _IMPORT = re.compile(r"""(?:\bfrom\s*|\bimport\s*\(?\s*)["'](\.{1,2}/[^"']*)["']
 def _tests(module):
     """Test files of the module's repository whose relative imports resolve to the module."""
     module = module.resolve()
-    top = Path(subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=module.parent, check=True,
-                              capture_output=True, text=True).stdout.strip())
+    found = subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=module.parent,
+                           capture_output=True, text=True)
+    if found.returncode != 0:
+        raise NotAModule(f"{module.name}: not inside a git repository")
+    top = Path(found.stdout.strip())
     listed = subprocess.run(["git", "ls-files", "-z", "-co", "--exclude-standard"], cwd=top, check=True,
                             capture_output=True, text=True).stdout.split("\0")
     target = module.with_suffix("")

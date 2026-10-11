@@ -9,9 +9,16 @@ from tddcore import depth  # noqa: E402
 
 
 def main(paths):
+    if not paths:
+        print("depth_report: usage: depth_report <file>...", file=sys.stderr)
+        return 2
+    try:
+        modules = [depth.measure(os.getcwd(), path) for path in paths]
+    except depth.NotAModule as error:
+        print(f"depth_report: {error}", file=sys.stderr)
+        return 2
     found = False
-    for path in paths:
-        module = depth.measure(os.getcwd(), path)
+    for path, module in zip(paths, modules):
         verdict = "; ".join(module.findings) or "deep"
         print(f"{path}: surface {module.surface}, size {module.size}, ratio {module.ratio:.1f}, "
               f"classitis {'yes' if module.classitis else 'no'}, "
