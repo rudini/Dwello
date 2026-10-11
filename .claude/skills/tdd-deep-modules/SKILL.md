@@ -34,7 +34,14 @@ Before the first test:
 
 ## 2. Design it twice
 
-(See references/design-it-twice.md.)
+Before the first test, because tests freeze the interface:
+
+1. **Name the one hidden decision** the module owns, in one sentence: what callers will never have to know (a file format, a rounding rule, which runner runs). No hidden decision, no module.
+2. **Sketch two interface designs** that differ in kind (one general call versus several special calls, value versus result object, function versus stateful object), each with a signature and one call site.
+3. **Compare them by depth:** how much must a caller know, does the hidden decision leak into a signature, how much behaviour sits behind the interface, how short is the first test?
+4. **Record the chosen design with a one-sentence reason**: "Chosen: <design>, because <reason about depth>."
+
+The decision, both sketches and the sentence go into the design note (section 6). Details and a worked example: [references/design-it-twice.md](references/design-it-twice.md).
 
 ## 3. Write the behaviour test list
 
