@@ -132,11 +132,17 @@ def _vitest_outcome(exit_code, data, unhandled):
     return "error"
 
 
+# Files that configure pytest, with the section that must appear in them ("" = any content).
+_PYTEST_CONFIG = {"pytest.ini": "", "conftest.py": "", "pyproject.toml": "[tool.pytest",
+                  "setup.cfg": "[tool:pytest]", "tox.ini": "[pytest]"}
+
+
 def _uses_pytest(root):
-    base = Path(root)
-    pyproject = base / "pyproject.toml"
-    return ((base / "pytest.ini").exists() or (base / "conftest.py").exists()
-            or (pyproject.exists() and "[tool.pytest" in pyproject.read_text()))
+    for name, section in _PYTEST_CONFIG.items():
+        config = Path(root) / name
+        if config.exists() and section in config.read_text(errors="replace"):
+            return True
+    return False
 
 
 def _run_pytest(root):
