@@ -23,6 +23,7 @@ def replay(repo, rev_range):
     """One Verdict per commit of `rev_range` (oldest first), each from a clean checkout of it."""
     commits, base = _range(repo, rev_range)
     previous = protocol.phase_of(_git(repo, "log", "-1", "--format=%s", base)) if base else "start"
+    previous_suite = _trailer(repo, "TDD-Suite", base) if base else ""
     verdicts = []
     with tempfile.TemporaryDirectory() as tmp:
         tree = Path(tmp) / "replay"
@@ -33,16 +34,17 @@ def replay(repo, rev_range):
             for commit in commits:
                 _checkout(repo, tree, commit)
                 subject = _git(tree, "log", "-1", "--format=%s")
-                claimed = _git(tree, "log", "-1",
-                               "--format=%(trailers:key=TDD-Exit-Code,valueonly,separator=%x2C)")
+                claimed = _trailer(tree, "TDD-Exit-Code", "HEAD")
+                tier = _trailer(tree, "TDD-Suite", "HEAD")
                 changed = _git(tree, "diff-tree", "-r", "--root", "--no-commit-id", "--name-only",
                                "--no-renames", commit).splitlines()
-                run = _run(tree)
+                full = _run(tree)
+                run = _run(tree, "fast") if tier == "fast" else full
                 phase = protocol.phase_of(subject)
                 verdicts.append(Verdict(commit, phase, run,
-                                        tuple(_judge(previous, known, subject, claimed, run,
-                                                     changed))))
-                previous, known = phase, run
+                                        tuple(_judge(previous, previous_suite, known, subject,
+                                                     claimed, tier, run, full, changed))))
+                previous, previous_suite, known = phase, tier, full
         finally:
             # twice --force: an add interrupted by a signal leaves the worktree locked
             subprocess.run(["git", "worktree", "remove", "--force", "--force", str(tree)], cwd=repo,
@@ -74,18 +76,20 @@ def _checkout(repo, tree, commit):
     _borrow_node_modules(repo, tree)
 
 
-def _judge(previous, known, subject, claimed, run, changed):
-    """Why this commit breaks the protocol, judged from its real run and the tests before it."""
+def _judge(previous, previous_suite, known, subject, claimed, tier, run, full, changed):
+    """Why this commit breaks the protocol, judged from its real runs and the tests before it.
+
+    `run` comes from the tier the commit claims (`tier`), `full` and `known` from the full suite."""
     phase = protocol.phase_of(subject)
     if phase not in protocol.PHASES:
         found = [f"not a TDD phase commit: {subject!r}"]
     else:
-        found = protocol.violations(previous, phase, run, changed)
+        found = protocol.violations(previous, phase, run, changed, tier, previous_suite)
         if claimed != str(run.exit_code):
             found.append(f"the trailer says exit code {claimed or 'nothing'}, "
                          f"but the tests exit with {run.exit_code}")
-    new = run.tests - known.tests
-    removed = (known.tests - known.skipped) - (run.tests - run.skipped)  # gone, or no longer running
+    new = full.tests - known.tests
+    removed = (known.tests - known.skipped) - (full.tests - full.skipped)  # gone, or not running
     if phase == "red" and len(new) != 1:
         found.append(f"red must add exactly one new test, but adds {len(new)}")
     if phase == "red" and run.failing - new:
@@ -107,10 +111,14 @@ def _borrow_node_modules(repo, tree):
             link.symlink_to(installed.resolve())
 
 
-def _run(tree):
+def _trailer(cwd, key, commit):
+    return _git(cwd, "log", "-1", f"--format=%(trailers:key={key},valueonly,separator=%x2C)", commit)
+
+
+def _run(tree, tier="full"):
     """The suite's result; a commit without a test framework is an error run with exit code 2."""
     try:
-        return suite.run(tree)
+        return suite.run(tree, tier)
     except suite.NoFramework as error:
         return suite.Run(2, "error", str(error), 0, 0)
 
