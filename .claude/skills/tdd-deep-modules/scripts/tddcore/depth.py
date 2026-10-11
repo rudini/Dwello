@@ -66,6 +66,7 @@ def _findings(module):
 
 
 def _size(text):
+    text = re.sub(r"/\*.*?\*/", "", text, flags=re.DOTALL)
     return sum(1 for line in text.splitlines() if line.strip() and not line.strip().startswith("//"))
 
 
