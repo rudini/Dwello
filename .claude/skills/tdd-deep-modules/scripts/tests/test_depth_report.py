@@ -199,3 +199,17 @@ export class Ledger {
 
         # load 1+2, pair 1+2
         self.assertTrue(line.startswith("src/load.ts: surface 6,"), line)
+
+    def test_nothing_in_comments_counts(self):
+        module = ("/**\n * Base class for application errors { see below }.\n"
+                  " * old: export function legacy(a) { return run(a); }\n */\n"
+                  "// export function dead(a) { return run(a); }\n"
+                  "// function helper() { return 1; }\n"
+                  "export function run(a: number): number {\n  return a * 2 + 1;\n}\n")
+        repo = Repo(self, {"src/run.ts": module})
+
+        line = report_line(repo.run("depth_report", "src/run.ts"), "src/run.ts")
+
+        self.assertTrue(line.startswith("src/run.ts: surface 2, size 3, ratio 1.5, classitis no, "
+                                        "pass-through 0, tests 0, unused 0,"), line)
+        self.assertNotIn("for", line.split(" -> ", 1)[1])
