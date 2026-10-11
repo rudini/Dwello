@@ -176,3 +176,22 @@ Per module, one line: `<path>: surface S, size N, ratio R, classitis yes|no, pas
 - [x] usage errors (no file, a missing file, a file that is not .ts/.js, outside git) -> exit 2 with a message
 - [x] block comments are not code: neither size nor duplicates count them
 - [x] found by a run on Dwello's own modules: a dotted module name (`apartment.service`) is matched whole; a SvelteKit `$lib/...` import counts as a test import
+
+## Step 3: `scripts/skill_lint [skill-dir]`
+
+Design it twice. Hidden decision: what a valid `tdd-deep-modules` skill must contain (frontmatter rules, the required sections and phrases, their order, the line limit, the reference files).
+- A: `lint.problems(skill_dir) -> [str]`, one message per problem, each naming what is missing; the CLI prints them.
+- B: a `Skill` object with `frontmatter()`, `sections()`, `references()` that the CLI checks against rules it holds.
+- Chosen: A, because the rules then live in one place behind one call, and the CLI and `verify_all` only need "which problems, if any".
+
+Prints `skill_lint: OK` and exits 0, or one `skill_lint: <problem>` line per problem and exits 1; exit 2 when the directory has no SKILL.md. Frontmatter is read with PyYAML.
+
+- [ ] the real skill passes
+- [ ] frontmatter: none, unreadable YAML, missing or non-kebab `name`, `name` other than the directory, missing description, description over 1024 characters or with angle brackets, an unknown key -> each named
+- [ ] the hook: a PreToolUse entry whose matcher covers Write and Edit and whose command runs the skill's `scripts/tdd-guard`, and the script exists and is executable
+- [ ] every required section and phrase present; a missing one is named with its section
+- [ ] order: hard rules first, the six workflow sections in order, design note last
+- [ ] SKILL.md has fewer than 400 lines
+- [ ] every `references/...` link resolves
+- [ ] no SKILL.md -> exit 2
+- [ ] trigger tests with skill-creator's `run_eval.py` (evidence, not part of the suite: they call the model)
