@@ -646,3 +646,9 @@ class TddStepTest(unittest.TestCase):
                 result = repo.run("tdd-step", "red", "adds two numbers")
 
                 self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_upper_case_code_suffixes_are_production_code_in_red(self):
+        repo = bun_repo(self, **{"Legacy.TS": "export const x = 1;\n"})
+        repo.write("calc.test.ts", BUN_TEST)
+        repo.write("Legacy.TS", "export const x = 2;\n")
+        self.assert_refused(repo, "red", "production code changed: Legacy.TS")

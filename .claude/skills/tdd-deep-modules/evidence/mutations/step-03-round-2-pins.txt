@@ -1,0 +1,1 @@
+KILLED   tddcore/protocol.py: 'suffix.lower() in _CODE_SUFFIXES' -> 'suffix in _CODE_SUFFIXES' [test_upper_case_code_suffixes_are_production_code_in_red]
