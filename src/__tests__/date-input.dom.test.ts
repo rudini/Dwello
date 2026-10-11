@@ -242,7 +242,7 @@ describe('Datumsfeld TT.MM.JJJJ', () => {
 			'Kalender für Rechnungsdatum öffnen'
 		);
 
-		fireEvent(calendar, 'change', '2025-03-15');
+		fireEvent(calendar, 'input', '2025-03-15'); // a picker sends input, then change
 		expect(bound.value).toBe('2025-03-15');
 		expect(field().value).toBe('15.03.2025');
 	});

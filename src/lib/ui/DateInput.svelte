@@ -142,7 +142,8 @@
 					class="sr-only"
 					{value}
 					{min}
-					onchange={(event) => {
+					oninput={(event) => {
+						// input, not change: the field's frame takes the error away on input, the date must be in by then
 						value = event.currentTarget.value;
 						text = toText(value);
 					}}

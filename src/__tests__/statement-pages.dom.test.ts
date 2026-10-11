@@ -228,6 +228,26 @@ describe('Abrechnungsliste', () => {
 		expect(field.getAttribute('aria-invalid')).toBe('true');
 	});
 
+	// Erst ein unmögliches Datum, dann ein Tag aus dem Kalender: kein Fehler mehr zu einem gültigen Datum
+	it('nimmt den Fehler weg, wenn ein Tag im Kalender gewählt wird', () => {
+		list([statement({ status: 'sent' })]);
+		click('statement-row-mark-paid');
+		const field = byTestId<HTMLInputElement>('paid-date-input')!;
+		fireEvent(field, 'input', '31.02.2026');
+		field.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+		flushSync();
+		expect(field.getAttribute('aria-invalid')).toBe('true');
+
+		const calendar = document.querySelector<HTMLInputElement>('[role="dialog"] input[type="date"]')!;
+		calendar.value = '2026-10-01';
+		calendar.dispatchEvent(new Event('input', { bubbles: true })); // the picker sends input, then change
+		calendar.dispatchEvent(new Event('change', { bubbles: true }));
+		flushSync();
+
+		expect(field.value).toBe('01.10.2026');
+		expect(field.getAttribute('aria-invalid')).toBeNull();
+	});
+
 	// «01.01.25» mit Enter gesendet: wie beim Verlassen des Felds als 2025 gelesen, nicht abgelehnt
 	it('liest ein zweistelliges Jahr auch, wenn mit Enter bestätigt wird', async () => {
 		const calls = fakeBff();

@@ -106,3 +106,13 @@ Ein ungültiges Datum wird nie mehr gespeichert (Sven-N1 behoben); Grund am Feld
 | Sven-N9 | hoch | Das erste Enter prüfte scheinbar das vorherige Datum: der Fehler verschwand gleich wieder | Ursache: Chrome sendet nach Enter ein `change`-Ereignis, und `Field` blendete bei `change` den eben gesetzten Fehler aus. `Field` blendet Fehler nur noch bei echter Eingabe (`input`, auch bei Auswahlfeldern, Radio und Checkbox) aus. Test mit der Ereignisfolge des Browsers |
 | Sven-N10 | mittel | Nach dem Speichern keine Bestätigung, Fokus auf der Seite | «Abrechnung als bezahlt markiert» und Fokus auf den Titel (wie beim Versenden) |
 | Sven-N5, N7, N11, N12 | mittel / niedrig | Knopf vor dem Feld in der Tab-Reihenfolge; ganze Dialogbeschreibung; nur «Dieses Datum gibt es nicht» als eigene Ansage; einmalig keine Reaktion (nicht reproduzierbar) | offen, `offene-punkte.md` |
+
+## Runde 7 (Review mit Prüfung im echten Chromium auf f6d5702)
+
+Sven-N9 und Sven-N10 bestätigt: beim ersten Enter in allen Fällen der richtige Fehler, auch in einer Kette im selben Dialog; nach dem Speichern Meldung und Fokus auf dem Titel. Auswahlfelder: der Fehler verschwindet weiterhin bei der Wahl (Chrome sendet `input`).
+
+| # | Schwere | Finding | Behandlung |
+|---|---|---|---|
+| R7-F1 | mittel | Nach einem unmöglichen Datum und der Wahl im Kalender blieb ein veralteter Fehler stehen (der Kalender übernahm das Datum erst bei `change`) | Kalender übernimmt das Datum bei `input`; Test mit der Ereignisfolge des Pickers |
+| R7-F3 | niedrig | Liste: nach dem Speichern verschwindet der Knopf der Zeile, der Fokus fiel auf die Seite | Fokus auf den Titel |
+| R7-F2 | niedrig | Desktop: Der Fehler beim Verlassen des Felds vergrössert den zentrierten Dialog, der Knopf rutscht 28 px, der erste Klick geht verloren (erklärt wohl Sven-N12) | offen, `offene-punkte.md` |

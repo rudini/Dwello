@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { flushSync } from 'svelte';
+	import { flushSync, tick } from 'svelte';
 	import { invalidateAll } from '$app/navigation';
 	import { page } from '$app/stores';
 	import type { StatementsListData, StatementWithDetails } from '$lib/types';
@@ -66,6 +66,8 @@
 			addToast('success', `Abrechnung ${paying!.statementNumber} als bezahlt markiert`);
 			paying = null;
 			await invalidateAll();
+			await tick(); // its row's button is gone now: the focus goes to the page title
+			document.querySelector<HTMLElement>('h1')?.focus();
 		} catch {
 			payError = failed;
 		} finally {
