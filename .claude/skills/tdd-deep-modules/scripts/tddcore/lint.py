@@ -47,7 +47,10 @@ def problems(skill):
         return ["frontmatter is not valid YAML"]
     lines = len(text.splitlines())
     length = [f"SKILL.md has {lines} lines (limit: fewer than {LINE_LIMIT})"] if lines >= LINE_LIMIT else []
-    return _frontmatter(front, skill.name) + _hook(front, skill) + _required(text[match.end():]) + length
+    links = sorted(set(re.findall(r"references/[\w./-]+\.md", text)))
+    missing = [f"{link} is linked but does not exist" for link in links if not (skill / link).is_file()]
+    return _frontmatter(front, skill.name) + _hook(front, skill) + _required(text[match.end():]) + length \
+        + missing
 
 
 def _required(body):
