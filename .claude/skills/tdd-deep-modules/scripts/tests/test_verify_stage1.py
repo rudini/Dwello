@@ -85,7 +85,15 @@ class VerifyStage1Test(unittest.TestCase):
                                             "    def test_a(self):\n        self.fail('broken')\n\n"
                                             "    def test_b(self):\n        os._exit(0)\n",
                  "every test skipped": "import unittest\n\n\nclass T(unittest.TestCase):\n"
-                                       "    @unittest.skip('later')\n    def test_a(self):\n        pass\n"}
+                                       "    @unittest.skip('later')\n    def test_a(self):\n        pass\n",
+                 "a failing test skipped": "import unittest\n\n\nclass T(unittest.TestCase):\n"
+                                           "    @unittest.skip('flaky')\n    def test_a(self):\n"
+                                           "        self.fail('broken')\n\n"
+                                           "    def test_b(self):\n        pass\n",
+                 "a failing test expected to fail": "import unittest\n\n\nclass T(unittest.TestCase):\n"
+                                                    "    @unittest.expectedFailure\n    def test_a(self):\n"
+                                                    "        self.fail('broken')\n\n"
+                                                    "    def test_b(self):\n        pass\n"}
         for name, test in cases.items():
             with self.subTest(name):
                 root = skill_dir(self, {"01": ["PASS"], "02": ["PASS"], "03": ["PASS"]}, test=test)
