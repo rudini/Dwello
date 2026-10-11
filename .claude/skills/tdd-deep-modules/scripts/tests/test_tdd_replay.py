@@ -3,7 +3,8 @@ import sys
 import tempfile
 import unittest
 
-from tests.fixture import BUN_TEST, RIGHT_ADD_TS, SCRIPTS, WRONG_ADD_TS, Repo, bun_repo
+from tests.fixture import (BUN_TEST, RIGHT_ADD_JS, RIGHT_ADD_TS, SCRIPTS, VITEST_TEST, WRONG_ADD_TS, Repo,
+                           bun_repo, vitest_repo)
 
 DECIMALS_TEST = 'test("adds decimals", () => {\n  expect(add(0.1, 0.2)).toBe(0.3);\n});\n'
 ROUNDING_ADD_TS = "export const add = (a: number, b: number) => Math.round((a + b) * 1e9) / 1e9;\n"
@@ -133,3 +134,16 @@ class TddReplayTest(unittest.TestCase):
         repo, base = good_history(self)
         repo.commit_phase("refactor", {}, 0, deleted=["package.json"])
         self.assert_rejected(repo, base, "no supported test framework detected")
+
+    def test_a_vitest_history_is_replayed_with_test_discovery(self):
+        repo = vitest_repo(self)
+        base = repo.git("rev-parse", "HEAD")
+        repo.commit_phase("red", {"calc.test.js": VITEST_TEST}, 1)
+        repo.commit_phase("green", {"calc.js": RIGHT_ADD_JS}, 0)
+
+        result = repo.run("tdd_replay", f"{base}..HEAD")
+
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("REPLAY: ACCEPT", result.stdout)
+        repo.commit_phase("refactor", {"more.test.js": VITEST_TEST.replace('"adds"', '"adds again"')}, 0)
+        self.assert_rejected(repo, base, "only red may add tests, but refactor adds 1")
