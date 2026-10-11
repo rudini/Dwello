@@ -293,3 +293,13 @@ export class Ledger {
 
         self.assertIn(", pass-through 1,", line)
         self.assertIn("pass-through: m;", line.split(" -> ", 1)[1])
+
+    def test_a_call_that_changes_an_argument_is_not_a_pass_through(self):
+        module = ("export const amount = (value: unknown) => Number(value ?? 0);\n"
+                  "export const half = (x: number) => round(x / 2);\n"
+                  "export function pick(a: string, b: string) {\n  return choose(a ? b : a, b);\n}\n")
+        repo = Repo(self, {"src/amount.ts": module})
+
+        line = report_line(repo.run("depth_report", "src/amount.ts"), "src/amount.ts")
+
+        self.assertIn(", pass-through 0,", line)
