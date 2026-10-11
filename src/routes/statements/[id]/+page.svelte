@@ -206,6 +206,7 @@
 	confirmTestid="statement-mark-paid-confirm"
 	fields={{ paidDate }}
 	check={checkPaidDate}
+	success="Abrechnung als bezahlt markiert"
 >
 	{#if statement.balance > 0}<p>Danach können Sie keine Mahnung mehr senden.</p>{/if}
 	<DateInput

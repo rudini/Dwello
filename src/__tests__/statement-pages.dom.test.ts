@@ -215,6 +215,19 @@ describe('Abrechnungsliste', () => {
 		}
 	});
 
+	// Chrome sendet nach Enter ein change-Ereignis: es darf den eben gesetzten Fehler nicht wieder ausblenden
+	it('zeigt den Fehler nach Enter, auch wenn der Browser danach «change» meldet', () => {
+		list([statement({ status: 'sent' })]);
+		click('statement-row-mark-paid');
+		const field = byTestId<HTMLInputElement>('paid-date-input')!;
+		fireEvent(field, 'input', '01.01.2099');
+		field.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+		field.dispatchEvent(new Event('change', { bubbles: true }));
+		flushSync();
+
+		expect(field.getAttribute('aria-invalid')).toBe('true');
+	});
+
 	// «01.01.25» mit Enter gesendet: wie beim Verlassen des Felds als 2025 gelesen, nicht abgelehnt
 	it('liest ein zweistelliges Jahr auch, wenn mit Enter bestätigt wird', async () => {
 		const calls = fakeBff();
@@ -584,6 +597,19 @@ describe('Abrechnungsdetail', () => {
 			flushSync();
 			expect(field.getAttribute('aria-invalid'), date).toBe('true');
 		}
+	});
+
+	// Nach dem Speichern: eine Bestätigung, und der Fokus auf dem Titel statt auf der Seite
+	it('bestätigt den Zahlungseingang und setzt den Fokus auf den Titel', async () => {
+		toasts.set([]);
+		detail({ status: 'sent' });
+		click('statement-mark-paid-button');
+		const after = actions.get('?/markPaid')!({ formData: new FormData() }) as (input: unknown) => Promise<void>;
+		await after({ update: async () => {}, result: { type: 'success' } });
+		await settle();
+
+		expect(get(toasts).map((toast) => toast.message)).toEqual(['Abrechnung als bezahlt markiert']);
+		expect(document.activeElement).toBe(document.querySelector('h1'));
 	});
 
 	it('fragt beim Markieren als bezahlt nach dem Zahlungsdatum, heute vorgeschlagen', () => {

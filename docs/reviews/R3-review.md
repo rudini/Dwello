@@ -96,3 +96,13 @@ Kein Finding kritisch oder hoch. Bestätigt: Enter in einem Formular mit Datumsf
 | R6-N1 | mittel | «Zahlungsfrist abgelaufen» in den E2E-Schritten war gestern nach Schweizer Tag; das Backend rechnet «überfällig» in UTC (R5-4): zwischen 22 und 24 Uhr UTC rot | vorgestern: abgelaufen in beiden Zeitzonen |
 | R6 zu R5-1, R5-5 | niedrig | zweiter Versuch im Detaildialog und Enter bei gesperrter Aktion ungetestet | Tests ergänzt |
 | R6 zu R5-7 | niedrig | Szenario «Zahlungseingang mit Datum festhalten» nennt einen Tag vor dem Versand | offen: gültig, solange es keine Untergrenze gibt (R4-N4) |
+
+## Sven, zweiter Wiederholungslauf (auf 3cbd65e)
+
+Ein ungültiges Datum wird nie mehr gespeichert (Sven-N1 behoben); Grund am Feld bei zwei Zukunftsdaten nacheinander, kein stummer Tabstopp, beim Öffnen wieder heute.
+
+| # | Schwere | Finding | Behandlung |
+|---|---|---|---|
+| Sven-N9 | hoch | Das erste Enter prüfte scheinbar das vorherige Datum: der Fehler verschwand gleich wieder | Ursache: Chrome sendet nach Enter ein `change`-Ereignis, und `Field` blendete bei `change` den eben gesetzten Fehler aus. `Field` blendet Fehler nur noch bei echter Eingabe (`input`, auch bei Auswahlfeldern, Radio und Checkbox) aus. Test mit der Ereignisfolge des Browsers |
+| Sven-N10 | mittel | Nach dem Speichern keine Bestätigung, Fokus auf der Seite | «Abrechnung als bezahlt markiert» und Fokus auf den Titel (wie beim Versenden) |
+| Sven-N5, N7, N11, N12 | mittel / niedrig | Knopf vor dem Feld in der Tab-Reihenfolge; ganze Dialogbeschreibung; nur «Dieses Datum gibt es nicht» als eigene Ansage; einmalig keine Reaktion (nicht reproduzierbar) | offen, `offene-punkte.md` |
