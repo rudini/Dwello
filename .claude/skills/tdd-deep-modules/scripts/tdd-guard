@@ -8,19 +8,31 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from tddcore import protocol  # noqa: E402
 
-event = json.load(sys.stdin)
-if "file_path" not in event.get("tool_input", {}):
-    sys.exit(0)  # not a file edit
-target = Path(event["tool_input"]["file_path"])
-existing = next(d for d in target.parents if d.is_dir())  # a Write may create new directories
-root = subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=existing,
-                      capture_output=True, text=True).stdout.strip()
-rel = target.relative_to(root).as_posix()
-subject = subprocess.run(["git", "log", "-1", "--format=%s"], cwd=root,
-                         capture_output=True, text=True).stdout.strip()
-phase = protocol.phase_of(subject)
-# production code may land in the next commit only as green (after red) or refactor
-if protocol.is_production(rel) and phase not in ("red", "green", "refactor"):
-    print(f"tdd-guard: blocked: {rel} is production code and the last TDD phase is {phase}. "
-          "Write one failing test and commit it with `tdd-step red` first.", file=sys.stderr)
-    sys.exit(2)
+
+def main(raw):
+    try:
+        event = json.loads(raw)
+    except json.JSONDecodeError as error:
+        print(f"tdd-guard: cannot read the hook input: {error}", file=sys.stderr)
+        return 1  # a non-blocking error: never stop the user because the hook is broken
+    if "file_path" not in event.get("tool_input", {}):
+        return 0  # not a file edit
+    target = Path(event["tool_input"]["file_path"])
+    existing = next(d for d in target.parents if d.is_dir())  # a Write may create new directories
+    root = subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=existing,
+                          capture_output=True, text=True)
+    if root.returncode != 0:
+        return 0  # outside any git repository: nothing to guard
+    rel = target.relative_to(root.stdout.strip()).as_posix()
+    subject = subprocess.run(["git", "log", "-1", "--format=%s"], cwd=existing,
+                             capture_output=True, text=True).stdout.strip()
+    phase = protocol.phase_of(subject)
+    # production code may land in the next commit only as green (after red) or refactor
+    if protocol.is_production(rel) and phase not in ("red", "green", "refactor"):
+        print(f"tdd-guard: blocked: {rel} is production code and the last TDD phase is {phase}. "
+              "Write one failing test and commit it with `tdd-step red` first.", file=sys.stderr)
+        return 2
+    return 0
+
+
+sys.exit(main(sys.stdin.read()))
