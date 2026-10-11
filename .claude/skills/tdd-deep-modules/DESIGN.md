@@ -1,49 +1,53 @@
 # tdd-deep-modules: design and limits
 
+## Scope
+
+`tdd-step` supports the two test runners Dwello uses: **vitest** (frontend) and **bun test** (backend). Python suites (pytest, unittest) were supported earlier and removed by decision after review step-01 round 6, to keep the classification surface small. A repository without a vitest or bun test setup exits 2.
+
 ## Modules
 
 | Module | Interface | Hides |
 |---|---|---|
-| `scripts/tddcore/suite.py` | `run(root) -> Run(exit_code, outcome, summary, failed, ran, empty)`, `NoFramework` | framework detection, running every detected suite and combining them, parsing JSON/JUnit/text reports, classifying |
+| `scripts/tddcore/suite.py` | `run(root) -> Run(exit_code, outcome, summary, failed, ran)`, `NoFramework` | finding every vitest / bun package, running each, parsing vitest JSON and bun JUnit + summary, classifying, combining |
 | `scripts/tddcore/protocol.py` | `PHASES`, `phase_of(subject)`, `is_production(path)`, `violations(previous, phase, run, changed)` | phase order table, file classification, every refusal rule |
-| `scripts/tdd-step` | CLI | git plumbing (root, changed files, index restore) |
+| `scripts/tdd-step` | CLI | git plumbing: repository root, changed files, working-tree snapshot, index restore |
 
 ## Detection
 
-From the repository root, every framework that applies runs:
-- Every tracked `package.json` (root and nested, e.g. Dwello's `backend/`), run in its own directory: `vitest` listed in dependencies -> vitest (must be installed in that `node_modules`); otherwise a `scripts.test` with a `bun test ...` segment (split on `&&`, `||`, `;`; env prefixes such as `NODE_ENV=test bun test` work) -> that segment through `sh -c` with a JUnit reporter (other parts such as coverage checks are not run; bun must be on PATH, else exit 2); npm's placeholder `echo "Error: no test specified" && exit 1` means no tests; any other `scripts.test` exits 2 (unsupported).
-- pytest: `pytest.ini`, `conftest.py`, `pyproject.toml [tool.pytest`, `setup.cfg [tool:pytest]`, `tox.ini [pytest]`, or a `test_*.py`/`*_test.py` file with a module-level `def test`.
-- unittest: otherwise, when the repository has Python files (`python -m unittest discover` from the root).
+Every tracked `package.json` (root and nested, e.g. Dwello's `backend/`), run in its own directory:
+- `vitest` in dependencies -> vitest (`npx --no-install vitest run` with the JSON reporter); must be installed in that `node_modules`, else exit 2.
+- otherwise a `scripts.test` with a `bun test ...` segment (split on `&&`, `||`, `;`; env prefixes such as `NODE_ENV=test bun test` work) -> that segment through `sh -c` with a JUnit reporter. Other parts of the script (coverage checks, `cd x &&`) are not run; the segment runs in the package.json directory. bun must be on PATH, else exit 2.
+- npm's placeholder `echo "Error: no test specified" && exit 1` means no tests; any other `scripts.test` exits 2 (unsupported). Malformed or oddly shaped package.json exits 2.
 
-A framework that collected no tests at all (`empty`: unittest `NO TESTS RAN`, pytest exit 5, vitest with zero tests and no load error) is left out when another one has tests (Dwello: vitest plus Python files that are not a root-discoverable suite). A framework that wrote no report (crash, missing pytest, broken conftest or preload, `os._exit`) is never left out and is an error whatever its exit code. Combined: outcome is the worst (error > fail > pass), failures and run counts summed over the frameworks kept; the exit code is the highest of every command that ran, including a framework left out for having no tests, so the trailer never hides a failing command. A "pass" in which no test ran (or all were skipped) is an error.
+Every detected framework counts. Combined: outcome is the worst (error > fail > pass), the exit code the highest, failures and run counts summed. A framework that has no tests, writes no report, or crashes makes the run an error. A "pass" in which no test ran (none found, all skipped or todo) is an error.
 
 ## Classification
 
-- `outcome = "fail"` only when every failure is an assertion failure: unittest `FAILED (failures=N)` without `errors=`; pytest JUnit `<failure>` messages starting with `assert`, `AssertionError` or `Failed:` (`pytest.raises`, `pytest.fail`) and no `<error>`; vitest failure messages starting with `AssertionError`, or `Error: expected ...` / `Error: promise resolved|rejected ...` raised inside vitest's assertion chain (`.resolves`, `.rejects`; vitest rewraps anything thrown there, so only chai-worded messages count), no file-level load error and no `Vitest caught N unhandled error(s)` line; bun JUnit `<failure type="AssertionError">` only, and no `N error(s)` in bun's own summary (files that fail to load never reach bun's JUnit report). Everything else that is not a pass is `"error"` (import, syntax, collection, config, other exceptions, no tests).
-- Deliberately strict: a vitest snapshot mismatch, an `expect.assertions(n)` miss, `expect.poll` timeouts or a test that raises a non-assertion exception is not accepted as red. Write the red test so it fails on an assertion.
-- Production file = code suffix (`.py .js .jsx .mjs .cjs .ts .tsx .mts .cts .svelte .vue`) that is not a test file (`test_*.py`, `*_test.py`, `*.test.*`, `*.spec.*`, or under `tests/`, `test/`, `__tests__/`). Test configuration also counts as test files, because it decides which tests run: `conftest.py`, `pytest.ini`, `.pytest.ini`, `pytest.toml`, `pyproject.toml`, `setup.cfg`, `tox.ini`, `package.json`, `vitest.config.*`, `vite.config.*`. So green cannot change it (a green that needs a dependency in `pyproject.toml` must add it in red or refactor). Non-code files (JSON, CSS, SQL, Markdown) are neither and are not policed.
+`outcome = "fail"` (a red) only when every failure is an assertion failure:
+- vitest: failure messages start with `AssertionError`, or `Error: expected ...` / `Error: promise resolved|rejected ...` raised inside vitest's assertion chain (`.resolves`, `.rejects`); no file-level load error; no `Vitest caught N unhandled error(s)` line.
+- bun: every JUnit `<failure>` has `type="AssertionError"`, and bun's closing summary (the counter lines above `Ran N tests across`) reports no `N error(s)`; files that fail to load never reach bun's JUnit report.
+
+Everything else that is not a pass is `"error"` (import, syntax, load, config, thrown errors, unhandled errors, no tests).
+
+Deliberately strict: a vitest snapshot mismatch, an `expect.assertions(n)` miss, `expect.poll` timeouts or a thrown non-assertion error is not accepted as red.
+
+Production file = code suffix (`.py .js .jsx .mjs .cjs .ts .tsx .mts .cts .svelte .vue`) that is not a test file (`test_*.py`, `*_test.py`, `*.test.*`, `*.spec.*`, or under `tests/`, `test/`, `__tests__/`). Test configuration also counts as test files, because it decides which tests run: `package.json`, `vitest.config.*`, `vite.config.*` (and Python's `conftest.py`, `pytest.ini`, `.pytest.ini`, `pytest.toml`, `pyproject.toml`, `setup.cfg`, `tox.ini`). Non-code files (JSON other than package.json, CSS, SQL, Markdown) are neither and are not policed.
 
 ## Rules (`protocol.violations`)
 
 - Order: `test` and `red` follow start/test/green/refactor; `green` only follows `red`; `refactor` follows green/refactor.
 - `test`: no code changes (test list only).
 - `red`: suite fails with exactly one failing assertion; no production file changed.
-- `green`: all tests pass; no test file changed.
+- `green`: all tests pass; no test file or test configuration changed.
 - `refactor`: all tests pass (test and production code may change).
 - Every phase commit needs a change.
-- `tdd-step` itself also refuses when running the tests changed the working tree (the commit would not be what was tested).
+- `tdd-step` also refuses when running the tests changed the working tree, so the commit is exactly what was tested.
 
 ## Known limits
 
 - The previous phase is read from the HEAD subject prefix (`red: ...`), which a hand-made commit can fake; `tdd_replay` (step 2) re-runs history and does not trust subjects or trailers.
 - `tdd-step` cannot tell a new failing test from an existing test that broke; red requires exactly one failing test, and `tdd_replay` checks that exactly one new test was discovered.
-- Refactor can still weaken a test, or skip some (not all) tests, while keeping the suite green.
-- Tests run on the working tree; a gitignored file the tests depend on is not committed. `tdd_replay` re-runs clean checkouts and exposes this.
-- Python suites run with the interpreter that runs `tdd-step` (`sys.executable`); run `tdd-step` from the project's virtualenv. A detected pytest project without pytest installed is refused as an error, not reported as a missing framework.
-- unittest counts each failing `subTest` as a failure, so one new test with two failing subtests is refused as "2 fail".
-- Python tests that root-level `unittest discover` cannot reach (like this skill's own tests under `.claude/`, or `tests/` without `__init__.py`) are not part of the project's suite; in a mixed repository nothing reports that they were skipped.
-- The working-tree snapshot around the test run uses a fresh index, so a test run that modifies a tracked-but-gitignored file is not noticed.
-- pytest `Failed:` messages are accepted as behaviour failures; that includes plugin failures such as pytest-timeout's `Failed: Timeout`.
-- Dwello's backend tests need PostgreSQL (`bun test --preload ./scripts/test-db.ts`). Without a database the bun run fails, so in such an environment every red, green and refactor in Dwello is refused. That is the rule, not a bug.
-- A refactor that deletes every test of one framework in a mixed repository is accepted by `tdd-step` (that framework is left out as empty); its non-zero exit code stays in the trailer, and `tdd_replay` (step 2) rejects refactors that remove tests.
+- Refactor can weaken a test or skip some (not all) tests while the suite stays green.
+- Tests run on the working tree; a gitignored file the tests depend on is not committed. The working-tree snapshot uses a fresh index, so a test run that modifies a tracked-but-gitignored file is not noticed.
+- Dwello's backend tests need PostgreSQL (`bun test --preload ./scripts/test-db.ts`). Without a database the bun run fails, so every red, green and refactor in Dwello is refused there. That is the rule, not a bug.
 - A bun run that exits non-zero with no failing test and no reported error (for example a coverage threshold) is an error, never red.

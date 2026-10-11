@@ -86,3 +86,10 @@ already produced the behavior; each pin was mutation-checked instead.
 - [x] `bun test` found in `NODE_ENV=... bun test`, `bun test || true`, `bun test; ...`
 - [x] npm init placeholder test script means no tests
 - [x] vitest: Error thrown inside a matcher is not red; pins for plain thrown Error, assertion-worded Error, bun assertion + thrown error
+
+### Step 1, scope narrowed to vitest and bun (after review round 6)
+
+- [x] generic behaviours ported to bun fixtures (test refactor)
+- [x] Python test suites are not supported (exit 2)
+- [x] a detected framework without tests makes the run an error
+- [x] bun error counts come only from bun's own closing summary
