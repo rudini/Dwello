@@ -300,3 +300,18 @@ class RealVerifiersTest(unittest.TestCase):
 
         self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
         self.assertIn("tests: FAILED (failures=1)", result.stdout.splitlines())
+
+    def test_the_suite_cannot_repair_skill_md_for_the_lint(self):
+        root = real_copy(self)
+        skill_md = root / "SKILL.md"
+        (root / "good.md").write_text(skill_md.read_text())
+        skill_md.write_text(skill_md.read_text().split("## 6. Design note")[0])
+        (root / "scripts" / "tests" / "test_it.py").write_text(
+            "import shutil\nimport unittest\nfrom pathlib import Path\n\nROOT = Path(__file__).resolve().parents[2]\n\n\n"
+            "class T(unittest.TestCase):\n    def test_ok(self):\n"
+            "        shutil.copy(ROOT / 'good.md', ROOT / 'SKILL.md')\n")
+
+        result = run_copy(root)
+
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn("skill_lint: missing section '6. Design note'", result.stdout.splitlines())
