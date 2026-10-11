@@ -280,3 +280,9 @@ A swarm member is an exported function (`export function f` or `export const f =
 Stage 2b replaces stage 2's pass line: the reviews of steps 01-12 (09 two-tier suite, 10 SKILL.md rules, 11 helper swarm, 12 `verify_all`), the lock tied to step 12's latest passing review, the last line `STAGE2B: PASS` or `STAGE2B: FAIL`. The existing `test_verify_all.py` expectations change with it in one red (its helpers and expected lines all name the steps, the lock step and the pass line).
 
 - [x] everything passing -> one verdict line per step 01-12, `verifiers.lock: OK`, `STAGE2B: PASS`; every failure case ends in `STAGE2B: FAIL`; the lock must name step 12's latest passing review
+
+### Step 09, review round 2 (fixes)
+
+- [x] `test:` commits after a task's last green or refactor (the design note) are no task end
+- [x] `tdd-step test` (and the replay) refuse a test list right after a green on the fast suite
+- [x] fixture repos turn commit signing off

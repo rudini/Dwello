@@ -46,11 +46,11 @@ The decision, both sketches and the sentence go into the design note (section 6)
 
 ## 3. Write the behaviour test list
 
-Write the list into `TESTLIST.md` (or the place the project uses), headed by the hidden decision, both sketches and the chosen design from section 2, so they survive a long session. Commit it with `scripts/tdd-step test "<what>"`; the test phase may not change code.
+Write the list into `TESTLIST.md` (or the place the project uses), headed by the hidden decision, both sketches and the chosen design from section 2, so they survive a long session. Commit it with `scripts/tdd-step test "<what>"`; the test phase may not change code. Every task begins with its own test-list commit: `tdd_replay` finds the end of each task by it.
 
 - One line per behaviour, phrased as an observable outcome through the chosen interface ("rejects an empty name", not "calls validate()").
 - Order: the simplest behaviour that forces the interface into existence first, then the core cases, then edge cases and errors.
-- The list is a plan, not a contract: add lines when a cycle teaches you something; tick lines off as their green commits land.
+- The list is a plan, not a contract: add lines when a cycle teaches you something, in the next red or refactor commit (a `test:` commit after a green starts a new task); tick lines off as their green commits land.
 
 ## 4. Red, green, refactor with tdd-step
 
@@ -88,7 +88,7 @@ Details: [references/depth.md](references/depth.md).
 
 ## 6. Design note
 
-When the test list is done, write a short design note (in the PR description, or `DESIGN.md` next to the module) and commit it as `scripts/tdd-step test "design note"` or with the last refactor:
+When the test list is done, write a short design note (in the PR description, or `DESIGN.md` next to the module) and commit it as `scripts/tdd-step test "design note"` after the task's last refactor or full green, or with the last refactor:
 
 - **Hidden decision:** the one sentence from section 2.
 - **Both designs:** the two sketches, and the chosen one with its one-sentence reason.

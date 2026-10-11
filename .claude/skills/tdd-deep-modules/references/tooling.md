@@ -14,7 +14,7 @@ It refuses (exit 1, nothing committed) when:
 - **test:** code changed;
 - **red:** the suite passes, the failure is not an assertion (import, syntax, setup or unhandled errors), more than one test fails, or production code changed;
 - **green / refactor:** any test fails or errors; green may not change tests or test configuration (`package.json`, `vitest.config.*`, `vite.config.*`);
-- **green** after a red on the full suite without `--suite full`; **refactor** with `--suite fast`;
+- **green** after a red on the full suite without `--suite full`; **refactor** with `--suite fast`; **test** right after a green on the fast suite (a new task needs the last one ended on the full suite);
 - any phase: the test run changed the working tree.
 
 Exit 2 means it could not judge: not a git repository, no supported runner, a runner not installed, or an unknown `--suite`.
@@ -38,7 +38,7 @@ The skill registers a PreToolUse hook on Write, Edit and MultiEdit. It blocks ed
 
 ## tdd_replay
 
-`scripts/tdd_replay <base>..<head>` checks out every commit of the range in a temporary worktree, re-runs the suite in the tier of its `TDD-Suite` trailer (and the full suite, to know which tests exist) and rejects: a commit that is not a phase commit (ordinary and merge commits included), a missing or unknown `TDD-Suite` trailer, a trailer exit code that does not match the real run of that tier, a refactor or the last commit of a task (before the next `test:` commit, and at the end of the range) not run on the full suite or failing it, a red on the fast suite whose new test exists only in the full tier, a green on the fast suite after a red on the full suite, a green that skips red's test, a test that stops running in the fast suite (for example through a changed `test:fast`), production code before red, a red that fails by error, a red that adds other than exactly one test, a red whose failing test is not its new test, a test added outside red, a refactor or green on a red suite, removed or skipped tests, and a history that ends in red. Exit 0 ACCEPT, 1 REJECT, 2 cannot judge.
+`scripts/tdd_replay <base>..<head>` checks out every commit of the range in a temporary worktree, runs both suites (fast and full) of each commit, judges the commit on the tier of its `TDD-Suite` trailer, and rejects: a commit that is not a phase commit (ordinary and merge commits included), a missing or unknown `TDD-Suite` trailer, a trailer exit code that does not match the real run of that tier, a refactor, or the last green or refactor of a task (before the next task's `test:` commit, and the last one of the range), not run on the full suite or failing it, a red on the fast suite whose new test exists only in the full tier, a green on the fast suite after a red on the full suite, a green that skips red's test, a test that stops running in the fast suite (for example through a changed `test:fast`), production code before red, a red that fails by error, a red that adds other than exactly one test, a red whose failing test is not its new test, a test added outside red, a refactor or green on a red suite, removed or skipped tests, and a history that ends in red. Exit 0 ACCEPT, 1 REJECT, 2 cannot judge.
 
 ## depth_report
 

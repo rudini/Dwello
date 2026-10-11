@@ -52,12 +52,12 @@ Production file = code suffix (`.py .js .jsx .mjs .cjs .ts .tsx .mts .cts .svelt
 
 ## Replay (`tdd_replay <commit-range>`)
 
-Every commit of the range (first-parent, oldest first) is checked out in a temporary git worktree (cleaned with `git clean -fdx`, installed `node_modules` linked from the caller's checkout) and both its suites are run (fast and full). The commit before the range is run too, to know which tests already exist. Each commit is judged from its own runs, never from its subject or trailers:
+Every commit of the range (first-parent, oldest first) is checked out in a temporary git worktree (cleaned with `git clean -fdx`, installed `node_modules` linked from the caller's checkout) and both its suites are run (fast and full). The commit before the range is run too, to know which tests already exist. Each commit's phase and tier are read from its subject and `TDD-Suite` trailer; whether it holds them is judged from its own runs, never from what the commit claims about them:
 - the commit must carry a phase prefix and a `TDD-Suite` trailer of `fast` or `full`; the protocol rules above apply with the claimed phase and tier, on the run of the claimed tier;
 - its `TDD-Exit-Code` trailer must equal the real exit code of the claimed tier;
 - which tests are new comes from the full runs; a test that ran in the previous commit's full run, or in its fast run, and no longer runs in the same tier (gone, skipped, todo, or filtered out, for example by a changed `test:fast`) is removed, and no phase may remove tests; red's new test must be in the run of its claimed tier (a red on the fast suite for a test that exists only in the full tier is rejected; such a red also fails the other red rules, so this rule only names the cause);
 - red adds exactly one new test id and its failing tests are exactly that new test; no other phase adds tests; no phase removes tests, and a test that ran before and is now skipped, todo or filtered out counts as removed (test ids come from the frameworks' reports: bun JUnit test cases, vitest assertion results; a repeated name in a file gets a `#n` suffix, so same-named tests do not collapse);
-- the range must not end in red, and the last commit of every task must have run the full suite and passed it. A task ends with the range, and at every green or refactor that a `test:` commit (the next task's test list) follows.
+- the range must not end in red, and the last commit of every task must have run the full suite and passed it. A task ends at every green or refactor that a `test:` commit (the next task's test list) follows, and at the range's last green or refactor (`test:` commits after it, such as the design note, are not held to it; a range without any green or refactor is judged by its last commit). `tdd-step test` refuses a test list right after a green on the fast suite (protocol rule), so the end of a task is known at commit time.
 
 ## Hook (`tdd-guard`)
 
@@ -115,7 +115,9 @@ diff <(tail -n +2 verifiers.lock | cut -c67- | sort) \
 - A green on the fast suite after a red on the fast suite is not checked against the full suite by `tdd-step`; a production change that breaks a database test shows up at the next refactor or the end of the task (both full); `tdd_replay` sees it in that green's full run only as a failure there, not as a violation of the green.
 - A task is recognised by its test list: a task that starts with a red instead of a `test:` commit merges with the task before it for the end-of-task rule.
 - A vitest package's tiers are the same command; a `test:fast` script in a vitest package is not read.
-- `tdd_replay` runs both suites of every commit, so replaying a range needs everything the full suite needs (Dwello: PostgreSQL) and takes about two suite runs per commit.
+- `tdd_replay` runs both suites of every commit, so replaying a range needs everything the full suite needs (Dwello: PostgreSQL) and takes about two suite runs per commit; a vitest package (same command in both tiers) runs twice.
+- Within one task, a full refactor that makes a database test pass again after a fast green broke it changes behaviour and is accepted; only the task's last commit is held to the full suite.
+- A `tdd-step` message whose first word starts with `--` exits 2 (taken for an option); start it with another word.
 - A bun run that exits non-zero with no failing test and no reported error (for example a coverage threshold) is an error, never red.
 - A same-named test inserted before an existing one in the same file takes the existing test's id (`#n` numbering follows report order), so that red is rejected; add same-named tests after the existing ones.
 - Importing a module that does not exist is an import error, which is never red. The first test of a new module therefore imports it dynamically and catches the failure, so the red is an assertion (references/tooling.md); a static import of a missing module is refused.
