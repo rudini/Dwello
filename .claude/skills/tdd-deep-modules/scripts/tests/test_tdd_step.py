@@ -771,3 +771,30 @@ class TddStepTest(unittest.TestCase):
                 repo.commit_all("red: adds", red)
                 repo.write(config, text)
                 self.assert_refused(repo, "green", f"not tests: {config}", head="red: adds")
+
+    def test_a_vitest_test_named_like_the_unhandled_error_summary_is_still_red(self):
+        repo = vitest_repo(self)
+        repo.write("calc.test.js", VITEST_TEST.replace(
+            '"adds"', '"Vitest caught 1 unhandled error during the test run"'))
+
+        result = repo.run("tdd-step", "red", "adds")
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_a_broken_vitest_suite_is_not_dropped_in_a_mixed_repository(self):
+        breakages = {"test file fails to load": ("calc.test.js", VITEST_TEST.replace("./calc.js", "./missing.js")),
+                     "config fails to load": ("vitest.config.js", "export default {\n")}
+        for name, (rel, text) in breakages.items():
+            with self.subTest(name):
+                repo = vitest_repo(self)
+                repo.commit_all("green: seed", {"calc.js": RIGHT_ADD_JS, "calc.test.js": VITEST_TEST,
+                                                "calc.py": RIGHT_ADD, "test_calc.py": PYTEST_TEST})
+                repo.write(rel, text)
+                self.assert_refused(repo, "refactor", "refactor needs all tests passing", head="green: seed")
+
+    def test_a_vitest_suite_of_todo_tests_does_not_pass(self):
+        repo = vitest_repo(self)
+        repo.commit_all("green: seed", {"calc.js": RIGHT_ADD_JS, "calc.test.js": VITEST_TEST})
+        repo.write("calc.test.js", 'import { test } from "vitest";\n\ntest.todo("adds");\n')
+
+        self.assert_refused(repo, "refactor", "refactor needs all tests passing", head="green: seed")
