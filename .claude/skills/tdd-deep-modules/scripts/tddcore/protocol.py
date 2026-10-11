@@ -20,6 +20,8 @@ def phase_of(subject):
 _CODE_SUFFIXES = {".py", ".js", ".jsx", ".mjs", ".cjs", ".ts", ".tsx", ".mts", ".cts",
                   ".svelte", ".vue"}
 _TEST_DIRS = {"tests", "test", "__tests__"}
+# Files that decide which tests run: changing them can hide a failing test.
+_TEST_CONFIG = {"conftest.py", "pytest.ini", "pyproject.toml", "setup.cfg", "tox.ini"}
 
 
 def is_production(path):
@@ -30,7 +32,7 @@ def _is_test(path):
     name = path.name
     return (name.startswith("test_") or name.endswith("_test.py")
             or ".test." in name or ".spec." in name
-            or name == "conftest.py" or name.startswith("vitest.config.")
+            or name in _TEST_CONFIG or name.startswith(("vitest.config.", "vite.config."))
             or not _TEST_DIRS.isdisjoint(path.parts[:-1]))
 
 
@@ -50,7 +52,7 @@ def violations(previous, phase, run, changed):
     code = [f for f in changed if _is_code(f)]
     if phase == "test" and code:
         found.append(f"test phase may only change the test list, not code: {', '.join(code)}")
-    tests = [f for f in code if not is_production(f)]
+    tests = [f for f in changed if _is_test(PurePosixPath(f))]
     if phase == "green" and tests:
         found.append(f"green may only change production code, not tests: {', '.join(tests)}")
     production = [f for f in changed if is_production(f)]
