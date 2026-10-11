@@ -32,9 +32,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-      - run: npm ci
-      - run: npx svelte-kit sync
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - run: bunx svelte-kit sync
       - name: Scan
         env:
           SCAN_PATH: ${{ inputs.path }}
@@ -47,8 +47,8 @@ jobs:
           path=()
           if [ -n "$SCAN_PATH" ]; then path=(-- "$SCAN_PATH"); fi
           mkdir -p deepcheck-report
-          npm run deepcheck:scan -- "${args[@]}" --format markdown --output deepcheck-report/deepcheck.md "${path[@]}"
-          npm run deepcheck:scan -- "${args[@]}" --format json --output deepcheck-report/deepcheck.json "${path[@]}"
+          bun run deepcheck:scan -- "${args[@]}" --format markdown --output deepcheck-report/deepcheck.md "${path[@]}"
+          bun run deepcheck:scan -- "${args[@]}" --format json --output deepcheck-report/deepcheck.json "${path[@]}"
           cat deepcheck-report/deepcheck.md >> "$GITHUB_STEP_SUMMARY"
       - name: Upload report
         if: ${{ !cancelled() }}

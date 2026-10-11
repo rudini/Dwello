@@ -4407,6 +4407,16 @@ Brief: `docs/design/REDESIGN_BRIEF.md`; log and decisions: `docs/design/progress
 - [x] **Map tiles need a CARTO key:** `PUBLIC_CARTO_API_KEY` goes to the tile URL
   (`src/routes/buildings/BuildingMiniMap.svelte`, `src/__tests__/building-mini-map.dom.test.ts`, `vitest.config.ts`,
   `.env.example`, `docker-compose.prod.yml`, `docs/tech-stack.md`)
+- [x] **Bun as the only package manager:** the frontend installs with Bun (`bun.lock` migrated from
+  `package-lock.json`, same versions) and keeps Node as its runtime; stale `backend/package-lock.json` removed
+  (`.github/workflows/ci.yml`, `Dockerfile`, `playwright.config.ts`, `playwright.screenshots.config.ts`, README, CLAUDE.md
+  and docs with `bun run`/`bunx`); after merging `main`, `tools/deepcheck` too (CI job "Deep modules",
+  `deepcheck-scan.yml`, its README and workflow tests, `deepcheck-gate.sh` notice)
+- [x] **Backend image builds and reports health:** uses the image's `bun` user instead of `addgroup` (missing on
+  Debian), health check through `bun` instead of `wget` (missing in the slim image); README and tech stack require
+  Bun >= 1.4 (`backend/Dockerfile`, `docker-compose.prod.yml`, `README.md`, `docs/tech-stack.md`)
+- [x] **Smaller frontend image:** runtime gets production dependencies only and `COPY --chown` instead of a
+  `chown -R` layer; 1.2 GB to 328 MB (`Dockerfile`)
 
 ## Session 11 - October 2026: Open Points, Missing-Invoice Check, Swiss Date Field, Statement PDF
 

@@ -6,18 +6,27 @@
 # ============================================
 FROM node:20-alpine AS deps
 
+# Bun is the package manager; Node stays the runtime
+COPY --from=oven/bun:1-alpine /usr/local/bin/bun /usr/local/bin/bun
+
 WORKDIR /app
 
 # Copy package files
-COPY package.json package-lock.json* ./
+COPY package.json bun.lock ./
 
 # Install dependencies
-RUN npm ci --only=production=false
+RUN bun install --frozen-lockfile
+
+# Runtime dependencies only: adapter-node bundles the devDependencies into build/
+FROM deps AS prod-deps
+RUN rm -rf node_modules && bun install --frozen-lockfile --production
 
 # ============================================
 # Stage 2: Build
 # ============================================
 FROM node:20-alpine AS builder
+
+COPY --from=oven/bun:1-alpine /usr/local/bin/bun /usr/local/bin/bun
 
 WORKDIR /app
 
@@ -27,7 +36,7 @@ COPY . .
 
 # Build the application
 ENV NODE_ENV=production
-RUN npm run build
+RUN bun run build
 
 # ============================================
 # Stage 3: Production Runtime
@@ -43,13 +52,10 @@ ENV PORT=3000
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 sveltekit
 
-# Copy built application
-COPY --from=builder /app/build ./build
-COPY --from=builder /app/package.json ./package.json
-COPY --from=deps /app/node_modules ./node_modules
-
-# Set ownership
-RUN chown -R sveltekit:nodejs /app
+# Copy built application (--chown: a later chown -R would copy node_modules into another layer)
+COPY --from=builder --chown=sveltekit:nodejs /app/build ./build
+COPY --from=builder --chown=sveltekit:nodejs /app/package.json ./package.json
+COPY --from=prod-deps --chown=sveltekit:nodejs /app/node_modules ./node_modules
 
 USER sveltekit
 

@@ -16,7 +16,7 @@ export default defineConfig({
 				...servers,
 				{
 					...frontend,
-					command: `cd "${process.env.UI_BASE_DIR}" && npm run dev -- --port 3200 --strictPort`,
+					command: `cd "${process.env.UI_BASE_DIR}" && bun run dev -- --port 3200 --strictPort`,
 					port: 3200
 				}
 			]

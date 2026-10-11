@@ -21,16 +21,16 @@ describe('GitHub Actions wiring', () => {
 		expect(deepcheck).toContain('runs-on: ubuntu-latest');
 		expect(deepcheck).toContain('fetch-depth: 0');
 		expect(deepcheck).toContain('node-version: ${{ env.NODE_VERSION }}');
-		expect(deepcheck).toContain('cache: npm');
-		expect(deepcheck).toContain('npx svelte-kit sync');
-		expect(deepcheck).toContain('npm run deepcheck:ci -- "origin/${{ github.base_ref }}"');
+		expect(deepcheck).toContain('bun install --frozen-lockfile');
+		expect(deepcheck).toContain('bunx svelte-kit sync');
+		expect(deepcheck).toContain('bun run deepcheck:ci -- "origin/${{ github.base_ref }}"');
 		expect(deepcheck).not.toContain('continue-on-error');
 	});
 
 	it('leaves the existing jobs as they were', () => {
 		const ci = read('.github/workflows/ci.yml');
 		for (const name of ['changes', 'build', 'static-checks', 'unit-tests', 'e2e-tests', 'fallow', 'ui-screenshots']) job(ci, name);
-		expect(job(ci, 'fallow')).toContain('run: npx fallow audit --base');
+		expect(job(ci, 'fallow')).toContain('run: bunx fallow audit --base');
 	});
 
 	it('ships a manual, never-blocking scan workflow with a report summary and artifacts', () => {
@@ -40,7 +40,7 @@ describe('GitHub Actions wiring', () => {
 		expect(scan).toMatch(/^on:\n {2}workflow_dispatch:\n {4}inputs:\n/m);
 		for (const input of ['path:', 'top:', 'min_score:']) expect(scan).toContain(`      ${input}`);
 		expect(scan).toMatch(/^ {2}# schedule:\n {2}# {3}- cron: /m);
-		expect(scan).toContain('npm run deepcheck:scan --');
+		expect(scan).toContain('bun run deepcheck:scan --');
 		expect(scan).toContain('--format markdown');
 		expect(scan).toContain('--format json');
 		expect(scan).toContain('$GITHUB_STEP_SUMMARY');

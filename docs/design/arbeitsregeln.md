@@ -38,15 +38,15 @@ Everything a new session needs to continue the redesign without the original pro
 ## Automated checks (all green before every review, from stage 2)
 
 ```bash
-npm run test:coverage   # frontend unit + DOM tests with coverage floor
-npm run lint
-npm run check
-npm run build
+bun run test:coverage   # frontend unit + DOM tests with coverage floor
+bun run lint
+bun run check
+bun run build
 cd backend && bun run test && bun run type-check   # only when backend/contracts touched
-npm run test:e2e -- --project=chromium --project=api   # E2E incl. the axe check
+bun run test:e2e -- --project=chromium --project=api   # E2E incl. the axe check
 ```
 
-Environment notes for a cloud session: `service postgresql start`, create role/db `dwello`/`dwello` if missing; `npm ci`; `cd backend && bun install`. The pre-installed Chromium (build 1194) is older than the project's Playwright; symlink `/opt/pw-browsers/chromium_headless_shell-1194/chrome-linux/headless_shell` to `/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell` (plus marker files `INSTALLATION_COMPLETE`, `DEPENDENCIES_VALIDATED`). Free ports 3100/3101/3102/3103/2525/2526 before E2E.
+Environment notes for a cloud session: `service postgresql start`, create role/db `dwello`/`dwello` if missing; `bun install --frozen-lockfile`; `cd backend && bun install`. The pre-installed Chromium (build 1194) is older than the project's Playwright; symlink `/opt/pw-browsers/chromium_headless_shell-1194/chrome-linux/headless_shell` to `/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell` (plus marker files `INSTALLATION_COMPLETE`, `DEPENDENCIES_VALIDATED`). Free ports 3100/3101/3102/3103/2525/2526 before E2E.
 
 Axe: `@axe-core/playwright`, tags `wcag2a, wcag2aa, wcag21a, wcag21aa, wcag22aa`; all screens/states of `tests/a11y/screens.json`, desktop and mobile, light and dark. Violations are blockers. No `disableRules`; a single-element exception only for a proven false positive, with a comment and an entry in `offene-punkte.md`.
 
