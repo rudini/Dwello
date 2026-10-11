@@ -63,3 +63,27 @@ class VerifyAllTest(unittest.TestCase):
         self.assertEqual(lines[:2], ["tests: OK", "skill_lint: OK"])
         self.assertEqual(lines[2:10], [f"step {n:02d}: VERDICT: PASS (round 1)" for n in range(1, 9)])
         self.assertEqual(lines[10:], ["verifiers.lock: OK", "STAGE2: PASS"])
+
+    def test_a_failed_or_missing_review_lint_problem_or_failing_suite_is_stage2_fail(self):
+        failing = "import unittest\n\n\nclass T(unittest.TestCase):\n    def test_a(self):\n        self.fail('x')\n"
+        no_step_06 = {step: rounds for step, rounds in ALL_PASS.items() if step != "06"}
+        cases = {
+            "review failed": (lambda: skill_dir(self, {**ALL_PASS, "07": ["PASS", "FAIL"]}),
+                              "step 07: VERDICT: FAIL (round 2)"),
+            "review missing": (lambda: skill_dir(self, no_step_06), "step 06: no review"),
+            "lint problem": (lambda: _broken_lint(skill_dir(self)), "skill_lint: missing section '6. Design note'"),
+            "failing suite": (lambda: skill_dir(self, test=failing), "tests: FAILED (failures=1)"),
+        }
+        for name, (build, line) in cases.items():
+            with self.subTest(name):
+                result = verify(build())
+
+                self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+                self.assertIn(line, result.stdout.splitlines())
+                self.assertEqual(result.stdout.strip().splitlines()[-1], "STAGE2: FAIL")
+
+
+def _broken_lint(root):
+    text = (root / "SKILL.md").read_text()
+    (root / "SKILL.md").write_text(text[:text.index("## 6. Design note")])
+    return root

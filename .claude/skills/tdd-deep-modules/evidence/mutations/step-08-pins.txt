@@ -1,0 +1,3 @@
+KILLED   tddcore/gate.py: 'passed = passed and not problems and all(step_passed for _, step_passed, _ in steps)' -> 'passed = passed and all(step_passed for _, step_passed, _ in steps)' [test_a_failed_or_missing_review_lint_problem_or_failing_suite_is_stage2_fail]
+KILLED   tddcore/gate.py: 'passed = passed and not problems and all(step_passed for _, step_passed, _ in steps)' -> 'passed = passed and not problems' [test_a_failed_or_missing_review_lint_problem_or_failing_suite_is_stage2_fail]
+KILLED   tddcore/gate.py: 'passed = passed and not problems and all(step_passed for _, step_passed, _ in steps)' -> 'passed = not problems and all(step_passed for _, step_passed, _ in steps)' [test_a_failed_or_missing_review_lint_problem_or_failing_suite_is_stage2_fail]
