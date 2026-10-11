@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import type { Snippet } from 'svelte';
 	import Button from './Button.svelte';
 
@@ -7,7 +8,7 @@
 		open = $bindable(false),
 		title,
 		confirmLabel,
-		cancelLabel = 'Abbrechen',
+		cancelLabel = m.ui_cancel(),
 		danger = false,
 		busy = false,
 		busyLabel,

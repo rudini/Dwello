@@ -1,3 +1,4 @@
+import { m } from '$lib/paraglide/messages';
 import type { Cookies } from '@sveltejs/kit';
 import { cookieConfig } from './jwt-config';
 import { isValidProvider, type OAuthProvider } from './oauth';
@@ -5,10 +6,17 @@ import { isValidProvider, type OAuthProvider } from './oauth';
 // Remembers, during the OAuth round trip, which provider was chosen and which page to open afterwards
 const COOKIE = 'dwello_login';
 
+// Getters: read while the login page is rendered, in that request's language
 export const LOGIN_ERRORS = {
-	cancelled: 'Die Anmeldung wurde abgebrochen.',
-	failed: 'Die Anmeldung ist fehlgeschlagen. Bitte versuchen Sie es erneut.',
-	unavailable: 'Diese Anmeldung ist nicht eingerichtet.'
+	get cancelled() {
+		return m.login_error_cancelled();
+	},
+	get failed() {
+		return m.login_error_failed();
+	},
+	get unavailable() {
+		return m.login_error_unavailable();
+	}
 };
 
 export const loginPage = (error: keyof typeof LOGIN_ERRORS) => `/login?error=${error}`;

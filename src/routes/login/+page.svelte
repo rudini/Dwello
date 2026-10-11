@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Icon from '$lib/ui/Icon.svelte';
 	import Illustration from '$lib/ui/Illustration.svelte';
@@ -8,7 +9,7 @@
 </script>
 
 <svelte:head>
-	<title>Anmelden - Dwello</title>
+	<title>{m.login_title()} - Dwello</title>
 </svelte:head>
 
 <div class="flex min-h-screen items-center justify-center px-4 py-12">
@@ -16,10 +17,9 @@
 		<div class="flex flex-col items-center gap-4 text-center">
 			<Illustration name="building" />
 			<p class="text-xl font-bold text-accent">Dwello</p>
-			<h1 class="text-3xl font-bold text-ink">Anmelden</h1>
+			<h1 class="text-3xl font-bold text-ink">{m.login_title()}</h1>
 			<p class="text-ink-muted">
-				Melden Sie sich mit Ihrem bestehenden Konto an. Ein eigenes Passwort für Dwello brauchen Sie
-				nicht.
+				{m.login_intro()}
 			</p>
 		</div>
 
@@ -36,18 +36,18 @@
 					class="flex min-h-12 items-center justify-center gap-2 rounded-control border-2 border-line-strong bg-surface px-6 font-semibold text-accent hover:bg-accent-soft"
 				>
 					<Icon name="user" />
-					Mit {provider.name} anmelden
+					{m.login_with({ provider: provider.name })}
 				</a>
 			{:else}
-				<Alert tone="caution" title="Keine Anmeldung eingerichtet" testid="login-unavailable">
-					<p>Bitte hinterlegen Sie die OAuth-Zugangsdaten für Google oder Microsoft.</p>
+				<Alert tone="caution" title={m.login_unavailable_title()} testid="login-unavailable">
+					<p>{m.login_unavailable_text()}</p>
 				</Alert>
 			{/each}
 		</div>
 
 		<p class="text-center text-ink-muted">
-			Mit der Anmeldung akzeptieren Sie die
-			<a href="/terms" class="text-accent underline underline-offset-4">Nutzungsbedingungen</a>.
+			{m.login_terms_before()}
+			<a href="/terms" class="text-accent underline underline-offset-4">{m.terms_title()}</a>.
 		</p>
 	</div>
 </div>

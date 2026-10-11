@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import '../styles/globals.css';
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
@@ -9,6 +10,7 @@
 	import MobileNav from '$lib/ui/MobileNav.svelte';
 	import Footer from '$lib/ui/Footer.svelte';
 	import ToastRegion from '$lib/ui/ToastRegion.svelte';
+	import LanguageSwitcher from '$lib/ui/LanguageSwitcher.svelte';
 	import { isListSearch } from '$lib/list-url';
 	import type { LayoutData } from './$types';
 	import type { Snippet } from 'svelte';
@@ -71,7 +73,7 @@
 	href="#main-content"
 	class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-control focus:bg-accent focus:px-4 focus:py-2 focus:text-on-accent"
 >
-	Zum Inhalt springen
+	{m.shell_skip_to_content()}
 </a>
 
 {#if showAuthenticatedLayout}
@@ -90,6 +92,10 @@
 	<MobileNav />
 {:else}
 	<div class="min-h-screen bg-canvas">
+		<!-- Without the header the language choice stands alone at the top -->
+		<div class="flex justify-end px-4 pt-4">
+			<LanguageSwitcher />
+		</div>
 		<main id="main-content" tabindex="-1">
 			{@render children()}
 		</main>

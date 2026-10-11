@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import type { Snippet } from 'svelte';
 	import Icon from './Icon.svelte';
 	import type { IconName } from './icons';
@@ -16,7 +17,7 @@
 		onclick,
 		disabled = false,
 		busy = false,
-		busyLabel = 'Bitte warten …',
+		busyLabel = m.ui_please_wait(),
 		icon,
 		full = false,
 		ariaLabel,

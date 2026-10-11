@@ -30,7 +30,8 @@
 		"busy-dialog-open": "A confirmation dialog open while its action is running.",
 		"submit-cleared": "An edit form with its required fields emptied and submitted: all validation errors visible.",
 		"saved-toast": "An edit form saved unchanged: the success message (toast) visible on the page it leads to.",
-		"server-error": "The error page for a failed load (not 404): message and the hint to try again."
+		"server-error": "The error page for a failed load (not 404): message and the hint to try again.",
+		"other-language": "The page in French, chosen with the language selection (it reloads in French)."
 	},
 	"screens": [
 		{
@@ -48,7 +49,8 @@
 			"public": true,
 			"states": [
 				"default",
-				"login-error"
+				"login-error",
+				"other-language"
 			]
 		},
 		{
@@ -73,7 +75,8 @@
 				"default",
 				"first-use",
 				"mobile-menu-open",
-				"user-menu-open"
+				"user-menu-open",
+				"other-language"
 			]
 		},
 		{

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import type { Snippet } from 'svelte';
 	import Icon from './Icon.svelte';
 
@@ -18,7 +19,7 @@
 
 <header class="flex flex-col gap-4">
 	{#if trail.length}
-		<nav aria-label="Brotkrümelnavigation">
+		<nav aria-label={m.ui_breadcrumb()}>
 			<ol class="flex flex-wrap items-center gap-2 text-ink-muted">
 				{#each trail as link (link.href)}
 					<li class="flex items-center gap-2">

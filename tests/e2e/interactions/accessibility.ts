@@ -132,6 +132,14 @@ const states: Record<string, (page: Page, viewport: Viewport) => Promise<unknown
 		await shows(page, '[data-testid="toast-success"]');
 	},
 	'server-error': async (page) => page.getByText('Versuchen Sie es später erneut.').waitFor(),
+	// French chosen with the language selection (the page reloads); later viewports start in French already
+	'other-language': async (page) => {
+		if ((await page.locator('html').getAttribute('lang')) !== 'fr') {
+			await press(page, 'language-button');
+			await Promise.all([page.waitForEvent('load'), page.locator('[data-testid="language-option"][lang="fr"]').click()]);
+		}
+		await shows(page, 'html[lang="fr"] body[data-hydrated]');
+	},
 	'delete-dialog': async (page) => {
 		await page.locator('[data-testid$="-delete-button"]').first().click();
 		await dialog(page);

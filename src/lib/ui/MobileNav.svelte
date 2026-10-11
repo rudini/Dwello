@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import { closeMobileNav, mobileNavOpen } from '$lib/stores/navigation';
 	import { navGroups } from '$lib/navigation';
 	import IconButton from '$lib/ui/IconButton.svelte';
@@ -39,13 +40,13 @@
 		class="fixed inset-y-0 left-0 z-50 flex w-80 max-w-full flex-col bg-surface shadow-overlay lg:hidden"
 		role="dialog"
 		aria-modal="true"
-		aria-label="Hauptnavigation"
+		aria-label={m.nav_main()}
 	>
 		<div class="flex h-16 items-center justify-between border-b border-line px-4">
 			<span class="text-xl font-bold text-ink">Dwello</span>
-			<IconButton icon="close" label="Menü schliessen" onclick={closeMobileNav} />
+			<IconButton icon="close" label={m.nav_close_menu()} onclick={closeMobileNav} />
 		</div>
-		<nav class="flex-1 overflow-y-auto px-4 py-6" aria-label="Hauptnavigation">
+		<nav class="flex-1 overflow-y-auto px-4 py-6" aria-label={m.nav_main()}>
 			<NavList groups={navGroups} onnavigate={closeMobileNav} />
 		</nav>
 	</div>

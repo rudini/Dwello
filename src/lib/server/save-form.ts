@@ -1,3 +1,4 @@
+import { m } from '$lib/paraglide/messages';
 import { error, fail, redirect } from '@sveltejs/kit';
 
 type Saved = { id?: string; error?: string };
@@ -52,7 +53,7 @@ export async function deleteRecord(
 /** Page load body: the record as JSON, or an error page naming what is missing */
 export async function fetchRecord(fetch: typeof globalThis.fetch, url: string, record: string) {
 	const response = await fetch(url);
-	if (response.status === 404) throw error(404, `${record} nicht gefunden`);
-	if (!response.ok) throw error(response.status, `${record} konnte nicht geladen werden`);
+	if (response.status === 404) throw error(404, m.record_not_found({ record }));
+	if (!response.ok) throw error(response.status, m.record_not_loaded({ record }));
 	return response.json();
 }

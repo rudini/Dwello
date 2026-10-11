@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import { enhance } from '$app/forms';
 	import type { Snippet } from 'svelte';
 	import Alert from './Alert.svelte';
@@ -57,13 +58,13 @@
 	{confirmLabel}
 	{danger}
 	{busy}
-	busyLabel="Bitte warten …"
+	busyLabel={m.ui_please_wait()}
 	confirmDisabled={disabled}
 	{confirmTestid}
 	onconfirm={() => form?.requestSubmit()}
 >
 	{@render children()}
 	{#if error}
-		<Alert tone="critical" title="Das hat nicht geklappt" testid="form-error"><p>{error}</p></Alert>
+		<Alert tone="critical" title={m.ui_action_failed()} testid="form-error"><p>{error}</p></Alert>
 	{/if}
 </Dialog>

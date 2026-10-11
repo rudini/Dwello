@@ -1,4 +1,5 @@
 import { json, type Handle, type HandleFetch } from '@sveltejs/kit';
+import { paraglideMiddleware } from '$lib/paraglide/server';
 import { getJwtFromCookie, verifyJwt } from '$lib/server/auth';
 import { cookieConfig } from '$lib/server/jwt-config';
 
@@ -22,7 +23,7 @@ async function sessionUser(cookies: Parameters<typeof getJwtFromCookie>[0]) {
 const redirectTo = (location: string) => new Response(null, { status: 303, headers: { location } });
 
 // Every page needs a valid session; without one, pages lead to the login page and API calls get 401
-export const handle: Handle = async ({ event, resolve }) => {
+const session: Handle = async ({ event, resolve }) => {
 	event.locals.user = await sessionUser(event.cookies);
 	const { pathname, search } = event.url;
 
@@ -32,6 +33,17 @@ export const handle: Handle = async ({ event, resolve }) => {
 		return json({ error: { code: 'JWT_ERROR', message: 'Nicht angemeldet' } }, { status: 401 });
 	return redirectTo(`/login?redirectTo=${encodeURIComponent(pathname + search)}`);
 };
+
+// UI language from the cookie (German without one), around the session check; <html lang> follows it
+export const handle: Handle = ({ event, resolve }) =>
+	paraglideMiddleware(event.request, ({ request, locale }) => {
+		event.request = request;
+		return session({
+			event,
+			resolve: (event) =>
+				resolve(event, { transformPageChunk: ({ html }) => html.replace('%lang%', locale) })
+		});
+	});
 
 // Server-side loads and actions call the backend directly; forward the session JWT, but only to the backend.
 export const handleFetch: HandleFetch = async ({ event, request, fetch }) => {

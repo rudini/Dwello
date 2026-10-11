@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import type { Snippet } from 'svelte';
 	import Alert from './Alert.svelte';
 	import Button from './Button.svelte';
@@ -10,25 +11,19 @@
 		children
 	}: { savedAt: Date | null; ondiscard: () => void; children?: Snippet } = $props(); // null: no draft, no notice
 
-	const when = $derived(
-		savedAt &&
-			`am ${savedAt.toLocaleDateString('de-CH', { day: '2-digit', month: '2-digit', year: 'numeric' })} um ${savedAt.toLocaleTimeString(
-				'de-CH',
-				{
-					hour: '2-digit',
-					minute: '2-digit'
-				}
-			)}`
-	);
+	const when = (at: Date) => ({
+		date: at.toLocaleDateString('de-CH', { day: '2-digit', month: '2-digit', year: 'numeric' }),
+		time: at.toLocaleTimeString('de-CH', { hour: '2-digit', minute: '2-digit' })
+	});
 </script>
 
 {#if savedAt}
-	<Alert title="Entwurf wiederhergestellt" testid="draft-restored">
-		<p>Ihre Angaben, zuletzt {when} bearbeitet, sind wieder da.</p>
+	<Alert title={m.ui_draft_restored()} testid="draft-restored">
+		<p>{m.ui_draft_back(when(savedAt))}</p>
 		{@render children?.()}
 		{#snippet action()}
 			<Button variant="secondary" icon="delete" onclick={ondiscard} testid="draft-discard"
-				>Entwurf verwerfen</Button
+				>{m.ui_draft_discard()}</Button
 			>
 		{/snippet}
 	</Alert>

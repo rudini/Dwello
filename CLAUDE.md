@@ -33,6 +33,7 @@ PostgreSQL on localhost:5432 (user and password `dwello`) is required for backen
 ## Conventions
 
 - **Language:** UI texts, Gherkin scenarios and test names in German (Swiss spelling, "ss" instead of "ß"); code, comments, commits and PR descriptions in English.
+- **UI languages:** every UI text lives in `messages/{de,fr,it,en}.json` (Paraglide JS; German is the base and default, terms per language in `docs/design/i18n-begriffe.md`) and is shown with `m.key()` from `$lib/paraglide/messages`; never call a message at module level in server code (use a getter or function). `bun run i18n` regenerates `src/lib/paraglide/` (not committed).
 - **Domain terms:** use the words from `UBIQUITOUS_LANGUAGE.md` in code and scenarios.
 - **Selectors:** `data-testid` in kebab-case with component context (`building-card-{id}`, `tenant-name-input`); no CSS selectors in tests.
 - **No mock data in the app:** components and pages always use the real backend and database. Test doubles in tests follow `docs/test-pyramid.md`.

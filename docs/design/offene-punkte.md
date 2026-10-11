@@ -248,3 +248,9 @@ Every place in the code is marked `TODO(fachlich prüfen)` (`grep -rn "TODO(fach
 - A Saldo of 0 is settled once sent (status «Bezahlt» on the day it is marked as sent), so it never becomes «Überfällig» (final review, V-1).
 - Left low (final round H, persona Dr. Weber F2): a Nachzahlung or Rückerstattung of CHF 0.05 still gets a payment part or the request for an IBAN; a minimum amount is a product decision (V-2). The detail page says «Gesamtkosten» where the PDF says «Ihre Nebenkosten» (V-5, existed before). `prorateCosts` is only used by its tests; the deepcheck work of session 12 kept it as one of the three exports of `prorating.service.ts` (H-3). The commit subject of bebb4cd is 52 characters (H-4; history is not rewritten, fixable at squash-merge). The preview fee test takes the default rate; the typed rate is covered by the scenario «Die Vorschau nennt die Verwaltungspauschale» (H-8). The wizard's heating profile preset, the «Anteil» column rounding and «Entwurf gespeichert» existed before (Dr. Weber F2).
 
+
+## Session 13 – UI in four languages
+
+- Terms marked ❓ in `docs/design/i18n-begriffe.md` are not settled: «umlagefähig» (imputable / addebitabile / allocable), «Abrechnungslauf», «Konfidenz», «Wiedervermietet» in English – TODO(fachlich prüfen). No native speaker has read the French, Italian or English texts yet.
+- The privacy page says fonts and symbols come from Google Fonts; the app bundles them (design rule: no external fonts). The German wording was kept unchanged; the statement should be corrected – TODO(fachlich prüfen).
+- The scenario «Bevorstehendes Vertragsende» (dashboard.feature) fails when run shortly after midnight Swiss time: the step counts 30 days in UTC, the app in Swiss time (seen on `main` before this work).

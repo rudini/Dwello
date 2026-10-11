@@ -4618,6 +4618,55 @@ subtotal, fee and «Ihre Nebenkosten» stay exact. A row «Rundung auf 5 Rappen�
 - [x] **Decisions** recorded in `docs/design/design-decisions.md` («Decided during the work», Session 12): fee on own
   costs, Saldo to 5 Rappen, Saldo 0 settled when sent, merged migrations.
 
+## Session 13 - October 2026: UI in four languages (Paraglide JS)
+
+Every UI text moves into `messages/{de,fr,it,en}.json` (German is the base and default); a language switcher in the
+header and on pages without it. Branch `claude/optimistic-clarke-nn8u7t` from `main`. Terms per language:
+`docs/design/i18n-begriffe.md`. Reviews: `docs/design/reviews/i18n-<step>-review-<n>.md`.
+
+### Decisions and clarifications
+- Paraglide 2 (`@inlang/paraglide-js`), strategy `cookie` then `baseLocale` (cookie `PARAGLIDE_LOCALE`, 400 days; no URL
+  prefix; no cookie: German, never the browser language). Middleware wraps the unchanged session check in
+  `src/hooks.server.ts`; `<html lang="%lang%">`. Generated code `src/lib/paraglide/` is not committed (`bun run i18n`,
+  run by `prepare` on install, by `check`, and by the Vite plugin in dev, build and Vitest); excluded from ESLint,
+  Fallow (`ignorePatterns`), Deepcheck (`deepcheck.config.json`) and coverage.
+- context7 and paraglidejs.com/inlang.com are not reachable from this container (DNS/proxy); setup follows the
+  package README, `docs/strategy.md` and `examples/sveltekit` of the Paraglide repository (raw GitHub). The
+  message-format plugin is an npm dev dependency loaded by path, so builds need no CDN.
+- Module-level texts (navigation, login errors) are getters, so they are read per request in its language and the
+  existing tests keep their shape.
+- Dates in words (`formatDateLong`) follow the UI language (`<lang>-CH`); numbers, amounts and numeric dates stay `de-CH`.
+- **Backend errors reach the UI** (clarified): the backend answers `{ error: '<text>' }` without a code; German texts
+  (e.g. name taken, formula errors, reminder refusals, «Die KI ist nicht erreichbar…») and English ones («Category not
+  found», «IBAN not configured…») are shown as they are in about a dozen places (`save-form.ts` failure/delete,
+  `buildings/*/+page.server.ts`, `statement-actions.ts`, `statement-generation.ts`, `distribution-key.ts` testFormula,
+  `invoices/[id]` pages, reminder `deliveryError`). Translating them by code needs a backend change: asked before the
+  areas that show them.
+- **Master data names**: categories, distribution keys and heating profiles have `name_de/fr/it/en`; their list and
+  detail endpoints return all four, so the UI shows the UI-language name. Invoice joins return only `name` and
+  `nameDE`, completeness and fuel stock only `nameDE || name`, statement line items only the English key: the BFF maps
+  these by id or key through the category/key lists where it can.
+
+### Steps
+- [x] **Step 1 – setup, switcher, frame and public pages**: Paraglide (`project.inlang/settings.json`, `vite.config.ts`,
+  `vitest.config.ts`, `package.json` scripts `i18n`/`prepare`/`check`), `hooks.server.ts`, `app.html`,
+  `LanguageSwitcher.svelte` (button with the current language as text, read «Sprache: Deutsch», opening a menu of
+  the four languages in their own words with `lang`, current one marked; 48 px, Escape and focus return like the user
+  menu; `setLocale` sets the cookie and reloads the same address. A native select was tried first and dropped: an
+  existing scenario counts the comboboxes of the statement wizard), header and frameless layout, `navigation.ts`, `src/lib/ui/*`, login, error, help and
+  glossary, privacy, terms, `login-flow.ts`, `save-form.ts` (`fetchRecord`), `format.ts`. Tests first:
+  `i18n.test.ts` (same keys in every file, no empty text, `<html lang>`, German despite a French browser),
+  `language-switcher.dom.test.ts`, `format-language.test.ts`; scenarios `sprachen.feature`; axe state `other-language`
+  (login, dashboard) in `screens.json` and `accessibility.feature`.
+- [ ] Step 2 – dashboard and buildings
+- [ ] Step 3 – apartments and tenants
+- [ ] Step 4 – rental contracts
+- [ ] Step 5 – invoices and documents
+- [ ] Step 6 – statements
+- [ ] Step 7 – configuration (categories, distribution keys, heating profiles, settings), gallery, remaining `src/lib`
+- [ ] Proof: no German in fr/it/en on every screen of `screens.json`, 390 px without sideways scrolling
+- [ ] One native-speaker read per message file; persona review in all four languages
+
 ---
 
 # Success Criteria
