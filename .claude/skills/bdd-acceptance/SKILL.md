@@ -13,7 +13,7 @@ playwright-bdd is already set up in this repo. **Extend the existing setup; neve
 
 - Config: `playwright.config.ts` — `defineBddConfig({ paths: ['tests/e2e/features/**/*.feature'], require: ['tests/e2e/fixtures/test.ts', 'tests/e2e/steps/**/*.ts'] })`, `tags: 'not @wip'`
 - Layout: `tests/e2e/features/`, `tests/e2e/steps/`, `tests/e2e/fixtures/test.ts`. Put `tasks/`, `questions/`, `interactions/` under `tests/e2e/` too.
-- Run: `npm run test:e2e` (= `bddgen && playwright test`). The `webServer` config recreates the E2E database `dwello_e2e` from the migrations, then starts the backend (3101) and the frontend (3100), both with the JWT secret from `tests/e2e/fixtures/session.ts` and Google sign-in configured with test credentials. The development servers and database are never touched. PostgreSQL must be running on 5432 (`docker compose -f docker-compose.dev.yml up -d postgres`).
+- Run: `bun run test:e2e` (= `bddgen && playwright test`). The `webServer` config recreates the E2E database `dwello_e2e` from the migrations, then starts the backend (3101) and the frontend (3100), both with the JWT secret from `tests/e2e/fixtures/session.ts` and Google sign-in configured with test credentials. The development servers and database are never touched. PostgreSQL must be running on 5432 (`docker compose -f docker-compose.dev.yml up -d postgres`).
 - Auth: OAuth only (Google/Microsoft), BFF with HTTPOnly cookies. There is no password login and no storageState. `src/hooks.server.ts` requires a valid session JWT for every page except `/login`, `/auth/*` and `/health`; the `page` fixture adds a real session cookie (`fixtures/session.ts`), the `besucher` actor has none. Skip the global-setup login, `.env.test` credentials and per-role projects from Phase 3.
 - Actor: single role **Liegenschaftsverwalter** (see `UBIQUITOUS_LANGUAGE.md`). Use no role tags. Unauthenticated scenarios belong in `authentication.feature`.
 - UI copy is German. Match visible text exactly (e.g. "Neues Gebäude").
@@ -85,14 +85,12 @@ npm install -D playwright-bdd @playwright/test
 ### Directory layout
 ```
 tests/
-  .auth/              ← storageState files per role (gitignored)
   features/           ← .feature files
   steps/              ← step definitions (one file per feature)
   tasks/              ← Actor Tasks (business-level sequences)
   questions/          ← Questions (what the Actor observes)
   interactions/       ← Atomic getByTestId locators
   fixtures/           ← Actor fixture + role fixtures
-  global-setup.ts     ← generates storageState, truncates test DB
 ```
 
 ### Actor class
@@ -135,92 +133,11 @@ export const test = base.extend<Fixtures>({
 export { expect } from '@playwright/test';
 ```
 
-All step files get `Given/When/Then` from `createBdd(test)`. playwright-bdd v8 has no direct `Given` export, and only `createBdd(test)` exposes the custom fixtures.
+All step files get `Given/When/Then` from `createBdd(test)`: playwright-bdd has no direct `Given` export, and only `createBdd(test)` exposes the custom fixtures.
 
-### Global setup — storageState per role + DB truncate
-```typescript
-// tests/global-setup.ts
-import { request } from '@playwright/test';
-import * as fs from 'fs';
+**Tracer run**: write a single trivial `.feature` (one scenario, one step) and run `bun run test:e2e`. Fix any config errors before proceeding.
 
-const BASE_URL = process.env.BASE_URL ?? 'http://localhost:3000';
-
-const ROLES = [
-  { name: 'student',  email: process.env.STUDENT_EMAIL!,  password: process.env.STUDENT_PASSWORD! },
-  { name: 'lecturer', email: process.env.LECTURER_EMAIL!, password: process.env.LECTURER_PASSWORD! },
-  { name: 'expert',   email: process.env.EXPERT_EMAIL!,   password: process.env.EXPERT_PASSWORD! },
-];
-
-export default async function globalSetup() {
-  fs.mkdirSync('tests/.auth', { recursive: true });
-
-  // Truncate test data — adapt to the system's real reset mechanism (endpoint, SQL, seed script)
-  const api = await request.newContext({ baseURL: BASE_URL });
-  await api.post('/api/test/reset');
-  await api.dispose();
-
-  // Generate storageState per role
-  for (const role of ROLES) {
-    const ctx = await request.newContext({ baseURL: BASE_URL });
-    await ctx.post('/api/auth/login', { data: { email: role.email, password: role.password } });
-    await ctx.storageState({ path: `tests/.auth/${role.name}.json` });
-    await ctx.dispose();
-  }
-}
-```
-
-### playwright.config.ts
-```typescript
-import { defineConfig } from '@playwright/test';
-import { defineBddConfig } from 'playwright-bdd';
-
-const testDir = defineBddConfig({
-  features: 'tests/features/**/*.feature',
-  steps: ['tests/steps/**/*.steps.ts', 'tests/fixtures/index.ts'],
-  outputDir: '.bdd',
-});
-
-export default defineConfig({
-  testDir,
-  globalSetup: 'tests/global-setup.ts',
-  use: { baseURL: process.env.BASE_URL ?? 'http://localhost:3000' },
-  projects: [
-    { name: 'student',  use: { storageState: 'tests/.auth/student.json' },  grep: /@student/ },
-    { name: 'lecturer', use: { storageState: 'tests/.auth/lecturer.json' }, grep: /@lecturer/ },
-    { name: 'expert',   use: { storageState: 'tests/.auth/expert.json' },   grep: /@expert/ },
-    { name: 'guest',    grep: /@guest/ },
-  ],
-});
-```
-
-### .gitignore entries
-```
-.bdd/
-tests/.auth/
-```
-
-### package.json scripts
-```json
-{
-  "test:bdd": "bddgen && playwright test",
-  "test:bdd:gen": "bddgen"
-}
-```
-
-### .env.test (never commit)
-```
-BASE_URL=http://localhost:3000
-STUDENT_EMAIL=student@test.com
-STUDENT_PASSWORD=secret
-LECTURER_EMAIL=lecturer@test.com
-LECTURER_PASSWORD=secret
-EXPERT_EMAIL=expert@test.com
-EXPERT_PASSWORD=secret
-```
-
-**Tracer run**: write a single trivial `.feature` (one scenario, one step) and run `npm run test:bdd`. Fix any config errors before proceeding.
-
-**Completion criterion**: `npm run test:bdd` runs without config errors.
+**Completion criterion**: `bun run test:e2e` runs without config errors.
 
 ## Phase 4 — Write Gherkin (page scope, UI systems)
 
@@ -353,7 +270,7 @@ Then('Guest is redirected to the Login page', async ({ guest }) => {
 
 **Browser-only state** (localStorage, sessionStorage — not auth): use `page.addInitScript()` in a `Given` step.
 
-**Completion criterion**: every `Given/When/Then` in every `.feature` has a matching step; every step delegates to Task/Question/Interaction; no `page.locator`/`getByTestId` outside Interactions (web-first `expect(...)` in `Then` steps is allowed); no duplicate step texts across step files; `npm run test:e2e` is green.
+**Completion criterion**: every `Given/When/Then` in every `.feature` has a matching step; every step delegates to Task/Question/Interaction; no `page.locator`/`getByTestId` outside Interactions (web-first `expect(...)` in `Then` steps is allowed); no duplicate step texts across step files; `bun run test:e2e` is green.
 
 ## API-only variant
 
