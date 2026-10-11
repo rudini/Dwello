@@ -582,3 +582,12 @@ class TddStepTest(unittest.TestCase):
                 result = repo.run("tdd-step", "red", "adds two numbers")
 
                 self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_deleting_a_test_file_does_not_crash_detection(self):
+        repo = Repo(self, {"calc.py": RIGHT_ADD, "test_calc.py": ADD_TEST, "test_old.py": ADD_TEST})
+        repo.commit_all("green: seed", {})
+        (repo.path / "test_old.py").unlink()
+
+        result = repo.run("tdd-step", "refactor", "drop duplicate test")
+
+        self.assertEqual(result.returncode, 0, result.stderr)
