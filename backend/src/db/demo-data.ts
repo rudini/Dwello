@@ -47,14 +47,13 @@ async function generateDemoStatement(contractId: string, { buildingId, year, dat
 		periodEnd: `${year}-12-31`,
 		heatingProfileId
 	});
-	// The payment deadline keeps the 30 days the app gives from the statement date
-	await updateStatement(statement.id, { statementDate: date, paymentDeadline: addDays(date, 30) });
-	await generateStatementPdf(statement.id);
-	if (status === 'draft') return;
-	await updateStatementStatus(statement.id, 'sent');
-	if (status === 'paid') {
-		await updateStatementStatus(statement.id, 'paid', { paidDate: addDays(date, 21) });
+	if (status !== 'draft') {
+		await updateStatementStatus(statement.id, 'sent');
+		// Sent back then, not on the day the demo data is loaded; the payment deadline keeps the app's 30 days
+		await updateStatement(statement.id, { statementDate: date, paymentDeadline: addDays(date, 30) });
 	}
+	if (status === 'paid') await updateStatementStatus(statement.id, 'paid', { paidDate: addDays(date, 21) });
+	await generateStatementPdf(statement.id);
 }
 
 export async function loadDemoData() {

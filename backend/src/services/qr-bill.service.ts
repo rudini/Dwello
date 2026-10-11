@@ -63,6 +63,7 @@ export interface QRBillData {
 export interface StatementForQRBill {
 	id: string;
 	statementNumber: string;
+	title?: string; // the message reads "{title} {number}", in the PDF's language
 	balance: string;
 	tenant: {
 		firstName: string;
@@ -359,7 +360,7 @@ export async function generateQRBillForStatement(
 		referenceType: useQRReference ? 'QRR' : 'NON',
 		reference,
 
-		unstructuredMessage: `Nebenkostenabrechnung ${statement.statementNumber}`,
+		unstructuredMessage: `${statement.title ?? 'Nebenkostenabrechnung'} ${statement.statementNumber}`,
 		trailer: 'EPD'
 	};
 

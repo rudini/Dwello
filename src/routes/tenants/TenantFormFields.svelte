@@ -81,7 +81,7 @@
 	id="language"
 	name="language"
 	label="Sprache"
-	help="In dieser Sprache wird die Nebenkostenabrechnung erstellt."
+	help="In dieser Sprache wird die Nebenkostenabrechnung erstellt. Auf Rätoromanisch erstellt Dwello die Abrechnung vorerst auf Deutsch."
 	options={languages}
 	value={tenant.language ?? 'de'}
 	testid="tenant-language-select"

@@ -4484,6 +4484,9 @@ critical/high/medium is open; reviews in `docs/reviews/`.
   derivation from the stored readings; notes on receipts and Art. 8 VMWG; SIX payment part (German for Romansh, QR text
   printed as in the code, sharper QR image); a draft's PDF dates it today with the full deadline; scenario «Das PDF
   erklärt die Verteilung und den Heizölverbrauch». Review round 1: `docs/reviews/D2-review-1.md`.
+  Review round 2 (`docs/reviews/D2-review-2.md`): sending dates the statement (`datedToday` in `statement.service.ts`,
+  `SendDialog.svelte`), demo dates kept (`db/demo-data.ts`), key values stored (`key_values`, migration 0011), mixed key as
+  a formula (`keyShareOf`), Romansh PDF in German (`TenantFormFields.svelte`), paid refund, totals kept together.
 
 
 ---

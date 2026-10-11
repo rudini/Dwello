@@ -7,10 +7,11 @@ import { eq } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { categories, distributionKeys, fuelStocks, tenants, utilityStatements } from '../db/schema';
 import { deleteConfig, getConfig, setConfig } from '../services/config.service';
+import { createApartment, deleteApartment } from '../services/apartment.service';
 import { createFuelStock } from '../services/fuel-stock.service';
 import { getHeatingProfileByName } from '../services/heating-profile.service';
 import { generateStatementPdf, getStatementPdf } from '../services/statement-pdf.service';
-import { deleteStatement, generateStatement } from '../services/statement.service';
+import { deleteStatement, generateStatement, updateStatementStatus } from '../services/statement.service';
 import { readPdf } from './helpers/pdf-text';
 import { insertInvoice } from './helpers/records';
 import { createRental } from './helpers/rental';
@@ -80,7 +81,7 @@ describe('PDF der Nebenkostenabrechnung', () => {
 	it('nennt das Heizprofil und den Anteil der Heizkosten aus den Monaten der Mietdauer', () => {
 		expect(pdf.text).toContain('Heizung Mittelland');
 		expect(pdf.text).toContain('41.50 %');
-		expect(pdf.flowing).toContain('Anteile der Monate Ihres Mietverhältnisses: Jul 0 %, Aug 0 %, Sep 1 %, Okt 10 %, Nov 13.5 %, Dez 17 %');
+		expect(pdf.flowing).toContain('Anteile der Monate Ihres Mietverhältnisses: Jul 0.00 %, Aug 0.00 %, Sep 1.00 %, Okt 10.00 %, Nov 13.50 %, Dez 17.00 %');
 	});
 
 	// Periode Juli bis Dezember, ganz gemietet: das PDF nennt denselben Anteil, den die Abrechnung rechnet
@@ -117,6 +118,16 @@ describe('PDF der Nebenkostenabrechnung', () => {
 	it('nennt je Position den Verteilschlüssel, den Wohnungsanteil und den Zeitanteil', () => {
 		expect(pdf.flowing).toContain('Verteilschlüssel');
 		expect(pdf.flowing).toContain("Hauswart Pro Fläche (m²) 70.00 / 70.00 m² 1'200.00 1'200.00 184/365 Tage 604.93");
+	});
+
+	// Der Bruch gehört zum Betrag, wie er beim Erstellen berechnet wurde, auch wenn später eine Wohnung dazukommt
+	it('druckt den Bruch des Verteilschlüssels wie beim Erstellen der Abrechnung', async () => {
+		const added = await createApartment({ buildingId: rental.building, number: '3.01', floor: 3, area: '30', rooms: '2' });
+		await generateStatementPdf(statementId, 'de');
+		const again = readPdf(Buffer.from((await getStatementPdf(statementId)).pdfBlob!, 'base64'));
+		await deleteApartment(added.id);
+
+		expect(again.flowing).toContain('70.00 / 70.00 m²');
 	});
 
 	it('nummeriert die Seiten und nennt in der Kopfzeile Absender und Abrechnung', () => {
@@ -226,8 +237,36 @@ describe('PDF eines älteren Entwurfs', () => {
 		const [after] = await db.select().from(utilityStatements).where(eq(utilityStatements.id, statement.id));
 		await deleteStatement(statement.id);
 
-		const today = new Date().toLocaleDateString('sv-SE');
+		const today = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Zurich' });
 		expect(after.statementDate).toBe(today);
 		expect(Date.parse(after.paymentDeadline!) - Date.parse(today)).toBe(30 * 86_400_000);
+	});
+});
+
+// Im März angesehen, im Mai versendet: sonst ginge die Abrechnung mit abgelaufener Frist hinaus und wäre sofort überfällig
+describe('Versand einer früher erstellten Abrechnung', () => {
+	const sentWith = async (dates: { statementDate: string; paymentDeadline: string }) => {
+		const statement = await generateStatement({ contractId: rental.contract, buildingId: rental.building, periodStart: '2025-01-01', periodEnd: '2025-12-31', managementFeePercent: 0 });
+		await generateStatementPdf(statement.id, 'de');
+		await db.update(utilityStatements).set(dates).where(eq(utilityStatements.id, statement.id));
+		await updateStatementStatus(statement.id, 'sent');
+		const [after] = await db.select().from(utilityStatements).where(eq(utilityStatements.id, statement.id));
+		await db.update(utilityStatements).set({ status: 'draft' }).where(eq(utilityStatements.id, statement.id));
+		await deleteStatement(statement.id);
+		return after;
+	};
+	const today = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Zurich' });
+
+	it('datiert sie auf den Versandtag, gibt die volle Frist und verwirft das alte PDF', async () => {
+		const after = await sentWith({ statementDate: '2026-03-02', paymentDeadline: '2026-04-01' });
+
+		expect(after.statementDate).toBe(today);
+		expect(Date.parse(after.paymentDeadline!) - Date.parse(today)).toBe(30 * 86_400_000);
+		expect(after.pdfBlob).toBeNull();
+	});
+
+	// Eine vereinbarte längere Frist, z. B. für eine Ratenzahlung, bleibt
+	it('behält eine spätere Zahlungsfrist', async () => {
+		expect((await sentWith({ statementDate: '2026-03-02', paymentDeadline: '2099-06-30' })).paymentDeadline).toBe('2099-06-30');
 	});
 });

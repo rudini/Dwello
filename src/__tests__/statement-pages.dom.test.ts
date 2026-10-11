@@ -370,6 +370,16 @@ describe('Abrechnungsdetail', () => {
 		expect(byTestId('statement-send-confirm')!.textContent).toContain('Als versendet markieren');
 	});
 
+	// Datum und Zahlungsfrist gelten ab dem Tag des Versands: ein früher erstelltes PDF trüge eine abgelaufene Frist
+	it('sagt vor dem Versand, ab wann die Zahlungsfrist läuft', () => {
+		detail();
+		click('statement-send-button');
+
+		expect(document.querySelector('[role="dialog"]')!.textContent!.replace(/\s+/g, ' ')).toContain(
+			'Die Zahlungsfrist läuft ab dem Tag, an dem Sie die Abrechnung als versendet markieren. Stellen Sie das PDF deshalb am selben Tag zu.'
+		);
+	});
+
 	it('sagt genau, welche Adresse für den Versand fehlt', () => {
 		detail({ tenantCorrespondenceChannel: 'email', tenantEmail: '' });
 		click('statement-send-button');

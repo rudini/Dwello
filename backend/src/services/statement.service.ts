@@ -14,11 +14,13 @@ import {
 	type UtilityStatement,
 	type NewUtilityStatement,
 	type UtilityStatementLineItem,
-	type NewUtilityStatementLineItem
+	type NewUtilityStatementLineItem,
+	type KeyValues
 } from '../db/schema';
 import { calculateStatementForContract, generateStatementNumber } from './calculation.service';
 import { getTypedConfig } from './config.service';
 import { fuelStockChange } from './fuel-stock.service';
+import { listApartments } from './apartment.service';
 
 export interface StatementFilters {
 	search?: string;
@@ -309,6 +311,7 @@ export async function generateStatement(
 			heatingProfileId: input.heatingProfileId || null,
 			managementFeeDistributionKeyId: input.managementFeeDistributionKeyId || null,
 			fuelStock: (await fuelStockChange(input.buildingId, input.periodStart, input.periodEnd))[0]?.stock ?? null,
+			keyValues: await keyValuesOf(input.buildingId, calculation.apartmentId),
 			balance: String(calculation.balance),
 			status: 'draft',
 			paymentDeadline: paymentDeadline.toISOString().split('T')[0]
@@ -380,8 +383,10 @@ export async function updateStatement(
 		}
 	}
 
-	// The PDF prints the payment deadline; a changed deadline discards it so it can be generated again
-	const pdfOutdated = data.paymentDeadline !== undefined && data.paymentDeadline !== existing.paymentDeadline;
+	// The PDF prints date and payment deadline; a change discards it so it can be generated again
+	const pdfOutdated =
+		(data.paymentDeadline !== undefined && data.paymentDeadline !== existing.paymentDeadline) ||
+		(data.statementDate !== undefined && data.statementDate !== existing.statementDate);
 
 	// Update the statement
 	const [updated] = await db
@@ -393,6 +398,22 @@ export async function updateStatement(
 	if (!updated) return null;
 
 	return await getStatement(id);
+}
+
+/** The apartment's and the building's area, apartments and rooms: what a simple distribution key divides by */
+export async function keyValuesOf(buildingId: string, apartmentId: string): Promise<KeyValues | null> {
+	const { apartments: all } = await listApartments({ buildingId, limit: 1000 });
+	const own = all.find((apartment) => apartment.id === apartmentId);
+	if (!own) return null;
+	const pair = (value: (apartment: (typeof all)[number]) => number): [number, number] => [value(own), all.reduce((sum, apartment) => sum + value(apartment), 0)];
+	return { area: pair((a) => parseFloat(a.area)), units: pair(() => 1), rooms: pair((a) => parseFloat(a.rooms)) };
+}
+
+/** A statement goes out dated on the day it is sent (Swiss time), with the full payment deadline, never a shorter one */
+export async function datedToday(paymentDeadline: string | null) {
+	const statementDate = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Zurich' });
+	const due = new Date(Date.parse(statementDate) + (await getTypedConfig('payment_deadline_days')) * 86_400_000).toISOString().slice(0, 10);
+	return { statementDate, paymentDeadline: paymentDeadline && paymentDeadline > due ? paymentDeadline : due };
 }
 
 /**
@@ -424,7 +445,8 @@ export async function updateStatementStatus(
 
 	const updateData: Partial<NewUtilityStatement> = {
 		status,
-		...additionalData
+		...additionalData,
+		...(status === 'sent' && (await datedToday(existing.paymentDeadline)))
 	};
 
 	return updateStatement(id, updateData);

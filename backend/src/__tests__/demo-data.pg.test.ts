@@ -31,7 +31,7 @@ beforeAll(async () => {
 	await query('postgres', `CREATE DATABASE "${name}"`);
 	loadDemoData();
 	loadDemoData();
-});
+}, 60_000); // two loads take some seconds
 
 afterAll(async () => {
 	await query('postgres', `DROP DATABASE IF EXISTS "${name}" WITH (FORCE)`);
@@ -86,6 +86,20 @@ describe('Demodaten', () => {
 		);
 
 		expect(rows).toEqual([{ after: true, deadline: true }]);
+	});
+
+	// Wie damals versendet und bezahlt: das Datum hängt nicht vom Tag ab, an dem die Demodaten geladen werden
+	it('behält das Datum der versendeten und bezahlten Abrechnungen', async () => {
+		const rows = await query(
+			name,
+			`SELECT status, statement_date::text AS date, bool_and(paid_date IS NULL OR paid_date > statement_date) AS paid_after
+			FROM utility_statements WHERE status <> 'draft' GROUP BY 1, 2 ORDER BY 1`
+		);
+
+		expect(rows).toEqual([
+			{ status: 'paid', date: '2025-04-14', paid_after: true },
+			{ status: 'sent', date: '2026-09-28', paid_after: true }
+		]);
 	});
 
 	// Ohne Adresse fehlte im PDF und auf der QR-Rechnung der Empfänger

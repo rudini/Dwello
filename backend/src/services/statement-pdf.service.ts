@@ -5,15 +5,14 @@
 
 import { eq, inArray } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { categories, distributionKeys, rentalContracts, utilityStatements } from '../db/schema';
+import { categories, distributionKeys, rentalContracts, utilityStatements, type KeyValues } from '../db/schema';
 import { getHeatingProfile } from './heating-profile.service';
 import { roundToRappen } from './pdf-format';
 import { handleMidYearMoves } from './prorating.service';
 import { getTypedConfig } from './config.service';
 import { generateStatementPDFBase64, type StatementPDFData, type Language } from './pdf.service';
 import { isQRIBAN, statementQRReference, type QRBillConfig } from './qr-bill.service';
-import { listApartments } from './apartment.service';
-import { getStatement, type StatementWithDetails } from './statement.service';
+import { datedToday, getStatement, keyValuesOf, type StatementWithDetails } from './statement.service';
 
 // Creditor of the QR-bill from the company configuration; null without IBAN
 async function qrBillConfig(): Promise<QRBillConfig | null> {
@@ -239,31 +238,33 @@ const UNITS: Record<string, Record<string, string>> = {
 	rooms: { de: 'Zimmer', fr: 'pièces', it: 'locali', en: 'rooms' }
 };
 
-// The apartment's part by a simple key as the tenant can check it: own area / the building's area, 1 / all apartments
-async function keySharesOf(statement: StatementWithDetails, keys: Map<string, Names & { formula: string | null }>, language: Language) {
-	const { apartments } = statement.building ? await listApartments({ buildingId: statement.building.id, limit: 1000 }) : { apartments: [] };
-	const value = (apartment: { area: string; rooms: string }, unit: string) =>
-		unit === 'units' ? 1 : parseFloat(unit === 'area' ? apartment.area : apartment.rooms);
-	const shown = (n: number, unit: string) => (unit === 'units' ? String(n) : unit === 'area' ? n.toFixed(2) : String(n));
-	const own = apartments.find((a) => a.id === statement.apartmentId);
-	const shares = new Map<string, string>();
-	for (const [id, key] of keys) {
-		const unit = key.formula?.trim().match(/^\{(area|units|rooms)\}$/)?.[1];
-		if (!unit || !own) continue;
-		const total = apartments.reduce((sum, a) => sum + value(a, unit), 0);
-		shares.set(id, `${shown(value(own, unit), unit)} / ${shown(total, unit)} ${UNITS[unit][language] ?? UNITS[unit].de}`);
-	}
-	return shares;
+const shown = (n: number, unit: string) => (unit === 'area' ? n.toFixed(2) : String(n));
+const term = /^(?:([\d.]+)\s*\*\s*)?\{(area|units|rooms)\}(\s*\/\s*\{\2_total\})?$/;
+
+/** The apartment's part by the key as the tenant can check it: "75.50 / 492.50 m²", a mixed key as its sum of fractions */
+export function keyShareOf(formula: string | null, values: KeyValues, language: Language) {
+	const terms = (formula ?? '').split('+').map((part) => part.trim().match(term));
+	if (!terms.length || terms.some((match) => !match)) return undefined;
+	const fraction = ([, , unit]: RegExpMatchArray) => {
+		const [own, total] = values[unit as keyof KeyValues];
+		return `${shown(own, unit)} / ${shown(total, unit)} ${UNITS[unit][language] ?? UNITS[unit].de}`;
+	};
+	if (terms.length === 1) return fraction(terms[0]!);
+	// Only fractions of the totals whose weights make 100 % split as written; anything else the app normalises
+	const weights = terms.map((match) => (match![3] ? parseFloat(match![1] ?? '1') : NaN));
+	if (!(Math.abs(weights.reduce((sum, weight) => sum + weight, 0) - 1) < 1e-9)) return undefined; // NaN: a term without its total
+	return terms.map((match, i) => `${Math.round(weights[i] * 10000) / 100} % × ${fraction(match!)}`).join('\n+ ');
 }
 
-// A draft goes out with its PDF: it is dated today and gets the full payment deadline (never a shorter one)
-async function redate(statement: StatementWithDetails) {
-	if (statement.status !== 'draft') return statement;
-	const today = new Date().toLocaleDateString('sv-SE');
-	const due = new Date(Date.parse(today) + (await getTypedConfig('payment_deadline_days')) * 86_400_000).toISOString().slice(0, 10);
-	const paymentDeadline = statement.paymentDeadline && statement.paymentDeadline > due ? statement.paymentDeadline : due;
-	await db.update(utilityStatements).set({ statementDate: today, paymentDeadline, updatedAt: new Date() }).where(eq(utilityStatements.id, statement.id));
-	return { ...statement, statementDate: today, paymentDeadline };
+// The fractions as the statement was created; older statements take the building's apartments as they are now
+async function keySharesOf(statement: StatementWithDetails, keys: Map<string, Names & { formula: string | null }>, language: Language) {
+	const values = statement.keyValues ?? (statement.building ? await keyValuesOf(statement.building.id, statement.apartmentId) : null);
+	const shares = new Map<string, string>();
+	for (const [id, key] of keys) {
+		const share = values && keyShareOf(key.formula, values, language);
+		if (share) shares.set(id, share);
+	}
+	return shares;
 }
 
 /** Render and store the PDF in the language asked for, otherwise the tenant's */
@@ -273,7 +274,9 @@ export async function generateStatementPdf(id: string, language?: string) {
 
 	const qrConfig = await qrBillConfig();
 	if (!qrConfig) return 'no-iban';
-	const statement = await redate(found);
+	// A draft's PDF shows the statement as if sent today; sending dates it again
+	const dates = found.status === 'draft' ? await datedToday(found.paymentDeadline) : {};
+	const statement = { ...found, ...dates };
 
 	const pdfLanguage = (language || statement.tenant?.language || 'de') as Language;
 	const names = await categoryNamesOf(statement);
@@ -288,6 +291,7 @@ export async function generateStatementPdf(id: string, language?: string) {
 	await db
 		.update(utilityStatements)
 		.set({
+			...dates,
 			pdfBlob: pdfBase64,
 			pdfGeneratedAt: new Date(),
 			qrBillReference: qrReference,

@@ -14,8 +14,7 @@ import {
 	generateQRBillForStatement,
 	formatIBANForDisplay,
 	formatQRReferenceForDisplay,
-	type QRBillConfig,
-	type StatementForQRBill
+	type QRBillConfig
 } from './qr-bill.service';
 import { formatCHF, formatSwissDate } from './pdf-format';
 
@@ -30,7 +29,8 @@ export type Language = 'de' | 'fr' | 'it' | 'rm' | 'en';
  * payment part is German (SIX provides German, French, Italian and English only)
  * TODO(fachlich prüfen): "Zeitanteil", "Anfangsbestand", "Endbestand" and "Heizmaterial" are not in the glossary
  */
-const translations: Record<Language, Record<string, string>> = {
+// Romansh is printed in German until all texts are translated: half-translated sentences read badly
+const translations: Record<Exclude<Language, 'rm'>, Record<string, string>> = {
 	de: {
 		title: 'Nebenkostenabrechnung',
 		period: 'Abrechnungsperiode',
@@ -77,11 +77,13 @@ const translations: Record<Language, Record<string, string>> = {
 		payBy: 'Bitte bezahlen Sie den Betrag bis {date} mit dem Zahlteil.',
 		payNoDate: 'Bitte bezahlen Sie den Betrag mit dem Zahlteil.',
 		paidOn: 'Bezahlt am {date}. Vielen Dank.',
+		refundPaidOn: 'Überwiesen am {date}.',
 		refundBy: 'Wir überweisen Ihnen den Betrag bis {date}.',
 		refundNoDate: 'Wir überweisen Ihnen den Betrag.',
 		refundAccount: 'Teilen Sie uns dafür Ihre IBAN mit, falls Sie das noch nicht getan haben.',
 		balancedNote: 'Ihre Nebenkosten und Ihre Akontobeiträge sind gleich hoch. Sie müssen nichts bezahlen.',
 		sharesNote: 'Kosten Liegenschaft: die Rechnungen der Abrechnungsperiode; eine Rechnung mit Leistungszeitraum zählt mit den Tagen, die in die Periode fallen. Wohnungsanteil: Kosten der Liegenschaft nach dem Verteilschlüssel. Zeitanteil: Ihre Mietstage in der Abrechnungsperiode, bei Heizkosten der Anteil nach dem Heizprofil.',
+		sharesNoteFuel: 'Kosten Liegenschaft bei Heizmaterial aus dem Tank: der Verbrauch (siehe Heiz- und Warmwasserkosten).',
 		heatingSection: 'Heiz- und Warmwasserkosten',
 		fuelIntro: 'Abgerechnet wird das verbrauchte Heizmaterial, nicht der Einkauf.',
 		fuelOpening: 'Anfangsbestand am {date}',
@@ -136,15 +138,17 @@ const translations: Record<Language, Record<string, string>> = {
 		days: '{days}/{total} jours',
 		yourCosts: 'Vos frais accessoires',
 		pageOf: 'Page {page} sur {pages}',
-		tenancyLine: 'Votre bail dans cette période : {start} – {end} ({days} jours sur {total})',
-		payBy: 'Veuillez payer le montant d’ici au {date} avec la section paiement.',
+		tenancyLine: 'Votre bail pendant la période : {start} – {end} ({days} jours sur {total})',
+		payBy: 'Veuillez payer le montant jusqu’au {date} avec la section paiement.',
 		payNoDate: 'Veuillez payer le montant avec la section paiement.',
 		paidOn: 'Payé le {date}. Merci.',
-		refundBy: 'Nous vous virons le montant d’ici au {date}.',
+		refundPaidOn: 'Viré le {date}.',
+		refundBy: 'Nous vous virons le montant jusqu’au {date}.',
 		refundNoDate: 'Nous vous virons le montant.',
 		refundAccount: 'Communiquez-nous votre IBAN si vous ne l’avez pas encore fait.',
 		balancedNote: 'Vos frais accessoires et vos acomptes sont égaux. Vous n’avez rien à payer.',
 		sharesNote: 'Coûts de l’immeuble : les factures de la période de décompte ; une facture avec période de prestation compte pour les jours compris dans la période. Part du logement : coûts de l’immeuble selon la clé de répartition. Part temporelle : vos jours de location dans la période de décompte, pour le chauffage la part selon le profil de chauffage.',
+		sharesNoteFuel: 'Coûts de l’immeuble pour le combustible en citerne : la consommation (voir frais de chauffage et d’eau chaude).',
 		heatingSection: 'Frais de chauffage et d’eau chaude',
 		fuelIntro: 'Le décompte porte sur le combustible consommé et non sur les achats.',
 		fuelOpening: 'Stock initial au {date}',
@@ -203,11 +207,13 @@ const translations: Record<Language, Record<string, string>> = {
 		payBy: 'La preghiamo di pagare l’importo entro il {date} con la sezione pagamento.',
 		payNoDate: 'La preghiamo di pagare l’importo con la sezione pagamento.',
 		paidOn: 'Pagato il {date}. Grazie.',
+		refundPaidOn: 'Bonificato il {date}.',
 		refundBy: 'Le bonifichiamo l’importo entro il {date}.',
 		refundNoDate: 'Le bonifichiamo l’importo.',
 		refundAccount: 'Ci comunichi il suo IBAN, se non l’ha già fatto.',
 		balancedNote: 'Le sue spese accessorie e i suoi acconti sono uguali. Non deve pagare nulla.',
 		sharesNote: 'Costi immobile: le fatture del periodo di conteggio; una fattura con periodo di prestazione conta per i giorni compresi nel periodo. Quota appartamento: costi dell’immobile secondo la chiave di riparto. Quota temporale: i suoi giorni di locazione nel periodo di conteggio, per il riscaldamento la quota secondo il profilo di riscaldamento.',
+		sharesNoteFuel: 'Costi immobile per il combustibile in cisterna: il consumo (vedi costi di riscaldamento e acqua calda).',
 		heatingSection: 'Spese di riscaldamento e acqua calda',
 		fuelIntro: 'Si conteggia il combustibile consumato, non quello acquistato.',
 		fuelOpening: 'Scorta iniziale al {date}',
@@ -220,27 +226,6 @@ const translations: Record<Language, Record<string, string>> = {
 		noteStock: 'Può ottenere informazioni sulla scorta iniziale e finale di combustibile (art. 8 cpv. 2 OLAL).',
 		separate: 'Da staccare prima del versamento',
 		additionalInfo: 'Informazioni supplementari'
-	},
-	rm: {
-		title: 'Rendaquint dals custs supplementars',
-		period: 'Perioda da rendaquint',
-		apartment: 'Abitaziun',
-		building: 'Bajetg',
-		costBreakdown: 'Survista dals custs',
-		category: 'Categoria',
-		totalAmount: 'Custs dal bajetg',
-		yourShare: 'Vossa part',
-		subtotal: 'Subtotal',
-		managementFee: 'Custs d\'administraziun',
-		advancePayments: 'Pajaments anticips',
-		amountDue: 'Sum da pajar',
-		refund: 'Remburs',
-		statementNumber: 'Nr. rendaquint',
-		statementDate: 'Data dal rendaquint',
-		heatingNote: 'Custs da stgaudament tenor il profil «{profile}»: {percent} % dals custs da stgaudament da Vossa abitaziun en la perioda da quint',
-		feeBase: '{percent} % da CHF {base}',
-		feeKey: 'repartì tenor {key}',
-		feeDays: ', per Voss {days} da {total} dis'
 	},
 	en: {
 		title: 'Utility Cost Statement',
@@ -287,11 +272,13 @@ const translations: Record<Language, Record<string, string>> = {
 		payBy: 'Please pay the amount by {date} using the payment part.',
 		payNoDate: 'Please pay the amount using the payment part.',
 		paidOn: 'Paid on {date}. Thank you.',
+		refundPaidOn: 'Transferred on {date}.',
 		refundBy: 'We will transfer the amount to you by {date}.',
 		refundNoDate: 'We will transfer the amount to you.',
 		refundAccount: 'Please send us your IBAN if you have not done so yet.',
 		balancedNote: 'Your utility costs equal your advance payments. You do not need to pay anything.',
 		sharesNote: 'Building costs: the invoices of the billing period; an invoice with a service period counts for its days within the period. Apartment share: the building’s costs by the distribution key. Time share: your days rented in the billing period, for heating the share by the heating profile.',
+		sharesNoteFuel: 'Building costs for fuel from a tank: the consumption (see heating and hot water costs).',
 		heatingSection: 'Heating and hot water costs',
 		fuelIntro: 'The fuel consumed is billed, not the fuel purchased.',
 		fuelOpening: 'Opening stock on {date}',
@@ -306,9 +293,6 @@ const translations: Record<Language, Record<string, string>> = {
 		additionalInfo: 'Additional information'
 	}
 };
-
-// The labels of the payment part (SIX): Romansh has none, its payment part is German
-const PAYMENT_KEYS = ['qrBillSection', 'receiptSection', 'currency', 'amount', 'account', 'reference', 'payableTo', 'payableBy', 'acceptancePoint', 'additionalInfo', 'separate'];
 
 /**
  * Statement line item
@@ -506,7 +490,7 @@ function title({ doc, t, data }: Page, y: number) {
 // What the balance asks the tenant to do: pay with the payment part, wait for the refund, or nothing
 function balanceText({ t, data }: Page) {
 	const date = data.paymentDeadline && formatDate(data.paymentDeadline);
-	if (data.paidDate) return fill(t.paidOn, { date: formatDate(data.paidDate) });
+	if (data.paidDate) return fill(data.balance < 0 ? t.refundPaidOn : t.paidOn, { date: formatDate(data.paidDate) });
 	if (data.balance === 0) return t.balancedNote;
 	if (data.balance < 0) return `${date ? fill(t.refundBy, { date }) : t.refundNoDate} ${t.refundAccount}`;
 	return date ? fill(t.payBy, { date }) : t.payNoDate;
@@ -583,30 +567,34 @@ function costTable(page: Page, y: number) {
 		const share = item.apartmentShare == null ? '–' : formatCHF(item.apartmentShare);
 		top = row(doc, [item.category, key, formatCHF(item.totalAmount), share, timeShare(item, data, t), formatCHF(item.tenantShare)], top, { header });
 	}
+	// Subtotal to balance stay on one page: the balance alone on the next page lost its derivation
+	const width = COLUMNS[4].x + COLUMNS[4].width - PAGE.left;
+	const fee = `${t.managementFee}${t.colon}${feeBasis(data, t)}`;
+	doc.font('Helvetica-Bold').fontSize(8.5);
+	const feeHeight = data.managementFee > 0 ? doc.heightOfString(fee, { width }) + 6 : 0;
+	top = room(doc, top, 4 * (doc.heightOfString(t.subtotal) + 8) + feeHeight);
 	top = row(doc, total(t.subtotal, formatCHF(data.subtotal)), top + 2, { bold: true, above: 0.5 });
-	if (data.managementFee > 0) {
-		const width = COLUMNS[4].x + COLUMNS[4].width - PAGE.left;
-		const text = `${t.managementFee}${t.colon}${feeBasis(data, t)}`;
+	if (feeHeight) {
 		doc.font('Helvetica').fontSize(8.5);
-		const height = doc.heightOfString(text, { width });
-		const at = room(doc, top, height + 6);
-		doc.text(text, PAGE.left, at, { width });
-		doc.text(formatCHF(data.managementFee), COLUMNS[5].x, at, { width: COLUMNS[5].width, align: 'right' });
-		top = at + height + 6;
+		doc.text(fee, PAGE.left, top, { width });
+		doc.text(formatCHF(data.managementFee), COLUMNS[5].x, top, { width: COLUMNS[5].width, align: 'right' });
+		top += feeHeight;
 	}
 	top = row(doc, total(t.yourCosts, formatCHF(data.totalCosts)), top + 2, { bold: true, above: 1 });
 	top = row(doc, total(t.advancePayments, `– ${formatCHF(data.totalAdvancePayments)}`), top);
 	top = row(doc, total(balanceLabel(page), formatCHF(Math.abs(data.balance))), top + 2, { bold: true, above: 1 });
+	const note = data.fuel ? `${t.sharesNote} ${t.sharesNoteFuel}` : t.sharesNote;
 	doc.font('Helvetica').fontSize(7.5);
-	const height = doc.heightOfString(t.sharesNote, { width: PAGE.right - PAGE.left });
-	doc.fillColor(COLORS.muted).text(t.sharesNote, PAGE.left, room(doc, top + 4, height), { width: PAGE.right - PAGE.left });
+	const height = doc.heightOfString(note, { width: PAGE.right - PAGE.left });
+	doc.fillColor(COLORS.muted).text(note, PAGE.left, room(doc, top + 4, height), { width: PAGE.right - PAGE.left });
 	return doc.y + 18;
 }
 
+// A long label wraps and pushes the next line down
 function amountLine(doc: Doc, label: string, amount: string, y: number, bold = false) {
 	doc.font(bold ? 'Helvetica-Bold' : 'Helvetica').fontSize(9).fillColor(COLORS.ink);
 	doc.text(label, PAGE.left, y, { width: 340 }).text(amount, PAGE.right - 120, y, { width: 120, align: 'right' });
-	return y + 15;
+	return y + Math.max(15, doc.heightOfString(label, { width: 340 }) + 4);
 }
 
 // The heating profile's share, with the months of a tenancy over part of the period
@@ -616,7 +604,7 @@ function heatingLines({ t, data }: Page) {
 	const names = t.months.split(',');
 	const lines = [fill(t.heatingNote, { profile, percent: (Math.round(percent * 100) / 100).toFixed(2) })];
 	if (months?.length && percent < 100)
-		lines.push(fill(t.heatingMonths, { months: months.map((m) => `${names[m.month - 1]} ${m.percentage} %`).join(', ') }));
+		lines.push(fill(t.heatingMonths, { months: months.map((m) => `${names[m.month - 1]} ${m.percentage.toFixed(2)} %`).join(', ') }));
 	return lines;
 }
 
@@ -626,22 +614,30 @@ function heatingSection(page: Page, y: number) {
 	const { doc, t, data } = page;
 	if (!data.heating && !data.fuel) return y;
 	const lines = heatingLines(page);
+	const fuel = data.fuel;
+	const amounts: [string, number][] = fuel
+		? [
+				[fill(t.fuelOpening, { date: formatDate(fuel.openingDate) }), fuel.opening],
+				[fill(t.fuelInvoices, { category: fuel.category }), fuel.invoices],
+				[fill(t.fuelClosing, { date: formatDate(fuel.closingDate) }), fuel.closing],
+				[t.fuelTotal, fuel.total]
+			]
+		: [];
 	const width = PAGE.right - PAGE.left;
 	doc.font('Helvetica').fontSize(9);
-	const height = [...lines, data.fuel ? t.fuelIntro : ''].reduce((sum, line) => sum + doc.heightOfString(line, { width }) + 8, 0) + (data.fuel ? 66 : 0);
+	const height =
+		[...lines, fuel ? t.fuelIntro : ''].reduce((sum, line) => sum + doc.heightOfString(line, { width }) + 8, 0) +
+		amounts.reduce((sum, [label]) => sum + Math.max(15, doc.heightOfString(label, { width: 340 }) + 4), 0);
 	let top = heading(doc, t.heatingSection, y, height + 30);
 	for (const line of lines) {
 		doc.font('Helvetica').fontSize(9).fillColor(COLORS.ink).text(line, PAGE.left, top, { width });
 		top = doc.y + 8;
 	}
-	const fuel = data.fuel;
 	if (!fuel) return top + 10;
 	doc.text(t.fuelIntro, PAGE.left, top, { width });
 	top = doc.y + 6;
-	top = amountLine(doc, fill(t.fuelOpening, { date: formatDate(fuel.openingDate) }), formatCurrency(fuel.opening), top);
-	top = amountLine(doc, fill(t.fuelInvoices, { category: fuel.category }), formatCurrency(fuel.invoices), top);
-	top = amountLine(doc, fill(t.fuelClosing, { date: formatDate(fuel.closingDate) }), formatCurrency(fuel.closing), top);
-	return amountLine(doc, t.fuelTotal, formatCurrency(fuel.total), top, true) + 12;
+	amounts.forEach(([label, amount], i) => (top = amountLine(doc, label, formatCurrency(amount), top, i === amounts.length - 1)));
+	return top + 12;
 }
 
 // What the tenant may ask for: the receipts (Art. 257b Abs. 2 OR), the detailed heating statement and the stock
@@ -760,11 +756,11 @@ function frame({ doc, t, data, config }: Page, qrPage: number | null) {
 }
 
 // Only an amount still due gets a payment part: not a refund, not a balance of 0, not a statement already paid
-async function qrCodeFor(data: StatementPDFData, config: QRBillConfig): Promise<QRResult | null> {
+async function qrCodeFor(data: StatementPDFData, config: QRBillConfig, t: Record<string, string>): Promise<QRResult | null> {
 	if (data.balance <= 0 || data.paidDate) return null;
 	try {
 		return await generateQRBillForStatement(
-			{ id: data.id, statementNumber: data.statementNumber, balance: data.balance.toString(), tenant: data.tenant },
+			{ id: data.id, statementNumber: data.statementNumber, balance: data.balance.toString(), tenant: data.tenant, title: t.title },
 			config
 		);
 	} catch (qrError) {
@@ -788,9 +784,8 @@ function printableDoc(doc: Doc) {
  * shared, the heating costs and the tenant's rights; the QR-bill at the bottom of the last page for an amount due
  */
 async function generateStatementPDF(data: StatementPDFData, config: QRBillConfig, language: Language = 'de'): Promise<Buffer> {
-	const base = { ...translations.de, ...translations[language] };
-	const t = language === 'rm' ? { ...base, ...Object.fromEntries(PAYMENT_KEYS.map((key) => [key, translations.de[key]])) } : base;
-	const qr = await qrCodeFor(data, config);
+	const t = { ...translations.de, ...(language === 'rm' ? {} : translations[language]) };
+	const qr = await qrCodeFor(data, config, t);
 
 	return new Promise((resolve, reject) => {
 		try {

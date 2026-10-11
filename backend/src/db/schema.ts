@@ -311,6 +311,9 @@ export const invoicesRelations = relations(invoices, ({ one }) => ({
 // ============================================================================
 // Utility Statements Table
 // ============================================================================
+/** Own value and the building's total by unit: the fraction a simple distribution key gives the apartment */
+export type KeyValues = Record<'area' | 'units' | 'rooms', [number, number]>;
+
 export const utilityStatements = pgTable(
 	'utility_statements',
 	{
@@ -337,6 +340,7 @@ export const utilityStatements = pgTable(
 		heatingProfileId: uuid('heating_profile_id').references(() => heatingProfiles.id, { onDelete: 'set null' }),
 		// the Tankbestand readings the statement was created with (migration 0011)
 		fuelStock: jsonb('fuel_stock').$type<{ categoryId: string; openingDate: string; opening: string; closingDate: string; closing: string }>(),
+		keyValues: jsonb('key_values').$type<KeyValues>(),
 		managementFeeDistributionKeyId: uuid('management_fee_distribution_key_id').references(() => distributionKeys.id, {
 			onDelete: 'set null'
 		}),

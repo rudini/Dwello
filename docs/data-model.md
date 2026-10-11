@@ -239,6 +239,8 @@ management_fee         DECIMAL(12,2) DEFAULT 0 -- Verwaltungspauschale
 management_fee_percent DECIMAL(5,2)            -- rate chosen in the Abrechnungslauf
 heating_profile_id     UUID                    -- Heizprofil of the Abrechnungslauf, printed in the PDF (SET NULL)
 management_fee_distribution_key_id UUID        -- Verteilschlüssel of the Verwaltungspauschale (SET NULL; none: equally)
+fuel_stock             JSONB                   -- Tankbestand readings at creation, for the PDF (migration 0011)
+key_values             JSONB                   -- area, apartments, rooms: own and building's total at creation (migration 0011)
 balance                DECIMAL(12,2) NOT NULL  -- Saldo: positive = Nachzahlung, negative = Rückerstattung
 status                 VARCHAR(20)   NOT NULL DEFAULT 'draft'
 payment_deadline       DATE                    -- Zahlungsfrist

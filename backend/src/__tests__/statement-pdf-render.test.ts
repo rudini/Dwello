@@ -62,7 +62,10 @@ describe('PDF einer Nachzahlung', () => {
 
 		expect(rm).toContain('Empfangsschein');
 		expect(rm).toContain('Zahlteil');
-		expect(fr).toContain('Informations supplémentaires Nebenkostenabrechnung NK-1-2025-0001');
+		// Halb übersetzte Sätze wirkten unprofessionell: bis alles übersetzt ist, das ganze PDF deutsch
+		expect(rm).toContain('Nebenkostenabrechnung 01.01.2025 – 31.12.2025');
+		expect(rm).not.toContain('Rendaquint');
+		expect(fr).toContain('Informations supplémentaires Décompte des charges NK-1-2025-0001');
 	});
 
 	// Der QR-Code nennt den Zahlungspflichtigen nur mit vollständiger Adresse
@@ -75,7 +78,10 @@ describe('PDF einer Nachzahlung', () => {
 	it('wiederholt den Tabellenkopf auf jeder Seite der Kostenübersicht', async () => {
 		const many = { ...due, lineItems: Array.from({ length: 45 }, (_, i) => ({ ...refund.lineItems[0], category: `Kategorie ${i + 1}` })) };
 
-		expect((await textOf(many)).flowing.split('Kosten Liegenschaft').length - 1).toBeGreaterThanOrEqual(2);
+		const pdf = await textOf(many);
+
+		expect(pdf.pages).toBeGreaterThanOrEqual(3); // two pages of positions and the payment part
+		expect(pdf.flowing.split('Kategorie Verteilschlüssel').length - 1).toBe(pdf.pages - 1);
 	});
 
 	it('schreibt Zeichen ausserhalb der Schrift lesbar, statt sie zu verstümmeln', async () => {
@@ -107,6 +113,26 @@ describe('PDF ohne Saldo und einer bezahlten Abrechnung', () => {
 		expect(pdf.flowing).not.toContain('Zahlteil');
 	});
 
+	// Bei einer Rückerstattung hat die Verwaltung bezahlt: kein Dank an den Mieter
+	it('nennt bei einer bezahlten Rückerstattung den Tag der Überweisung', async () => {
+		const pdf = await textOf({ ...refund, paidDate: '2026-03-01' });
+
+		expect(pdf.flowing).toContain('Überwiesen am 01.03.2026.');
+		expect(pdf.flowing).not.toContain('Vielen Dank');
+	});
+
+	// Zwischensumme bis Saldo gehören zusammen: der Saldo stand sonst allein auf der nächsten Seite
+	it('hält die Summen bis zum Saldo auf einer Seite', async () => {
+		for (let n = 10; n <= 20; n++) {
+			const items = Array.from({ length: n }, (_, i) => ({ ...refund.lineItems[0], category: `Kategorie ${i + 1}` }));
+			const pages = (await textOf({ ...due, lineItems: items, managementFee: 23.52, managementFeePercent: 3 })).text.split('Seite ');
+			const pageOf = (row: RegExp) => pages.findIndex((page) => row.test(page));
+
+			// die Zeilen der Tabelle, nicht der Saldo-Kasten oben («CHF …»)
+			expect([/Verwaltungspauschale/, /Ihre Nebenkosten\n\d/, /Nachzahlung\n\d/].map(pageOf), `${n} Positionen`).toEqual(Array(3).fill(pageOf(/Zwischensumme/)));
+		}
+	});
+
 	it('nennt bei einer Rückerstattung den Termin', async () => {
 		const pdf = await textOf({ ...refund, paymentDeadline: '2026-03-17' });
 
@@ -122,5 +148,23 @@ describe('QR-Code im Zahlteil', () => {
 
 		expect(width).toBeGreaterThanOrEqual(500);
 		expect(width % 10).toBe(0);
+	});
+});
+
+const heated: StatementPDFData = {
+	...due,
+	heating: { profile: 'Heizung Mittelland', percent: 44.2, months: [{ month: 11, percentage: 10.7 }, { month: 12, percentage: 13 }] },
+	fuel: { category: 'Heizöl und Brennstoffe für die Zentralheizung inklusive Tankreinigung und Tankrevision', openingDate: '2025-01-01', opening: 1000, invoices: 3000, closingDate: '2025-12-31', closing: 500, total: 3500 }
+};
+
+describe('Heiz- und Warmwasserkosten im PDF', () => {
+	it('schreibt die Anteile der Monate einheitlich mit zwei Stellen', async () => {
+		expect((await textOf(heated)).flowing).toContain('Nov 10.70 %, Dez 13.00 %');
+	});
+
+	// Beim Tank zählt nicht die Rechnung, sondern der Verbrauch
+	it('erklärt in der Fussnote, dass beim Tank der Verbrauch zählt', async () => {
+		expect((await textOf(heated)).flowing).toContain('Kosten Liegenschaft bei Heizmaterial aus dem Tank: der Verbrauch');
+		expect((await textOf(due)).flowing).not.toContain('aus dem Tank');
 	});
 });
