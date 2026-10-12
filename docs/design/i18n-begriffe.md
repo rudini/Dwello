@@ -25,6 +25,8 @@ Style: French guillemets with a non-breaking space inside (« Immeubles »), I
 | Mietvertrag | contrat de bail | contratto di locazione | rental contract |
 | Vertragsbeginn / Vertragsende | début du contrat / fin du contrat | inizio del contratto / fine del contratto | contract start / contract end |
 | Vertragsstatus: laufend / künftig / beendet | en cours / futur / terminé | in corso / futuro / terminato | current / future / ended |
+| Befristet / Unbefristet | durée déterminée / durée indéterminée | a tempo determinato / a tempo indeterminato | fixed-term / open-ended |
+| Kündigung / gekündigt / Kündigungstermin / Kündigung aufheben | résiliation / résilié / terme de résiliation / annuler la résiliation ❓ | disdetta / disdetto / scadenza di disdetta / revocare la disdetta ❓ | notice of termination / terminated by notice / termination date / withdraw notice ❓ |
 | Nettomiete (Mietzins) | loyer net (loyer) | pigione netta (pigione) | net rent (rent) |
 | Zusatzmiete | loyer supplémentaire | pigione supplementare | additional rent |
 | Akonto | acompte | acconto | advance payment |

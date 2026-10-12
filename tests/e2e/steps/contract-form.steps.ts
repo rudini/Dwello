@@ -2,6 +2,7 @@ import { expect } from '@playwright/test';
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { visit } from '../interactions/navigation';
+import { contractDuration } from '../interactions/contract-form';
 import {
 	apartmentChoice,
 	chosenApartment,
@@ -16,6 +17,7 @@ import {
 	changeBaseRent,
 	saveEndDate,
 	saveStartDate,
+	withdrawNotice,
 	chooseTenant,
 	chooseTenantAndApartment,
 	chooseTenantWhileLoading,
@@ -185,6 +187,22 @@ When(
 		await verwalter.perform(saveEndDate(date, { confirmPast: true }));
 	}
 );
+
+Given(
+	'der Mietvertrag von {string} ist auf den {string} gekündigt',
+	async ({ seed }, tenant: string, date: string) => {
+		await seed.notice(tenant, date);
+	}
+);
+
+When('der Liegenschaftsverwalter die Kündigung aufhebt', async ({ verwalter }) => {
+	await verwalter.perform(withdrawNotice);
+});
+
+// the chosen option, not just one of the offered ones
+Then('zeigt die Vertragsdauer {string}', async ({ verwalter }, duration: string) => {
+	await expect(contractDuration(verwalter.page).getByRole('radio', { name: duration })).toBeChecked();
+});
 
 When('der Liegenschaftsverwalter den Vertragsbeginn {string} speichert', async ({ verwalter }, date: string) => {
 	await verwalter.perform(saveStartDate(date));

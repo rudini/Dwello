@@ -98,3 +98,33 @@ Funktionalität: Übersicht
     Angenommen der Mietvertrag von "Anna Keller" endet in 30 Tagen
     Wenn der Liegenschaftsverwalter die Übersicht öffnet
     Dann ist die Frist "Vertragsende Anna Keller" "in 30 Tagen"
+
+  Szenario: Erinnerung bleibt nach dem Auszug des letzten Mieters
+    Angenommen das Gebäude "Ahornhof" in "Winterthur" existiert
+    Und im Gebäude "Ahornhof" gibt es die leere Wohnung "2.01"
+    Und der Mieter "Bruno Meier" existiert
+    Und "Bruno Meier" ist im letzten Jahr aus der Wohnung "2.01" ausgezogen
+    Wenn der Liegenschaftsverwalter die Übersicht öffnet
+    Dann nennt die Aufgabe "Nebenkostenabrechnungen erstellen" das Gebäude "Ahornhof"
+
+  Szenario: Erinnerung endet mit der Abrechnung jedes Mietvertrags der Periode
+    Angenommen das Gebäude "Ahornhof" in "Winterthur" existiert
+    Und im Gebäude "Ahornhof" gibt es die leere Wohnung "2.01"
+    Und der Mieter "Bruno Meier" existiert
+    Und "Bruno Meier" ist im letzten Jahr aus der Wohnung "2.01" ausgezogen
+    Und "Bruno Meier" hat die Abrechnung des letzten Jahres für das Gebäude "Ahornhof"
+    Wenn der Liegenschaftsverwalter die Übersicht öffnet
+    Dann nennt die Aufgabe "Nebenkostenabrechnungen erstellen" das Gebäude "Seeblick", aber nicht das Gebäude "Ahornhof"
+
+  # Eine Abrechnung im Gebäude genügt nicht: jeder Mietvertrag der Periode braucht seine eigene
+  Szenario: Erinnerung bleibt, bis jeder Mietvertrag der Periode abgerechnet ist
+    Angenommen das Gebäude "Ahornhof" in "Winterthur" existiert
+    Und im Gebäude "Ahornhof" gibt es die leere Wohnung "2.01"
+    Und im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
+    Und der Mieter "Bruno Meier" existiert
+    Und der Mieter "Carla Huber" existiert
+    Und "Bruno Meier" ist im letzten Jahr aus der Wohnung "2.01" ausgezogen
+    Und "Carla Huber" ist im letzten Jahr aus der Wohnung "2.02" ausgezogen
+    Und "Bruno Meier" hat die Abrechnung des letzten Jahres für das Gebäude "Ahornhof"
+    Wenn der Liegenschaftsverwalter die Übersicht öffnet
+    Dann nennt die Aufgabe "Nebenkostenabrechnungen erstellen" das Gebäude "Ahornhof"

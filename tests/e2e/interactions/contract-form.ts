@@ -6,6 +6,9 @@ export const apartmentOption = (page: Page, apartmentId: string) =>
 	apartmentSelect(page).locator(`option[value="${apartmentId}"]`);
 export const startDateInput = (page: Page) => page.getByTestId('start-date-input');
 export const limitedDuration = (page: Page) => page.getByTestId('contract-duration').getByText('Befristet', { exact: true });
+export const durationChoice = (page: Page, label: string) =>
+	page.getByTestId('contract-duration').getByText(label, { exact: true });
+export const contractDuration = (page: Page) => page.getByTestId('contract-duration');
 export const endDateInput = (page: Page) => page.getByTestId('end-date-input');
 export const pastEndConfirm = (page: Page) => page.getByTestId('contract-end-past-confirm');
 export const baseRentInput = (page: Page) => page.getByTestId('contract-base-rent-input');

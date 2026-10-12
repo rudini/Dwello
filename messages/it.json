@@ -611,7 +611,7 @@
 	"contracts_end_action": "Terminare",
 	"contracts_related": "Elementi collegati",
 	"contracts_building_invoices": "Fatture dell’immobile",
-	"contracts_end_title": "Terminare il contratto di locazione?",
+	"contracts_end_title": "Terminare il contratto di locazione di {name}, appartamento {apartment}?",
 	"contracts_end_confirm": "Terminare il contratto di locazione",
 	"contracts_ends_today_toast": "Il contratto di locazione di {name} termina oggi",
 	"contracts_delete_title": "Eliminare il contratto di locazione?",
@@ -1236,5 +1236,15 @@
 	"contracts_ends_on_toast": "Il contratto di locazione di {name} termina il {date}",
 	"contracts_end_date_help": "L’ultimo giorno della locazione, cioè la scadenza di disdetta. Il contratto di locazione vale fino a questo giorno compreso, anche se l’inquilino trasloca prima.",
 	"contracts_end_notice_hint": "Verifichi termine e scadenza nel contratto di locazione: per gli appartamenti vale un termine di disdetta di almeno 3 mesi. Se la disdetta arriva troppo tardi, vale solo per la prossima scadenza di disdetta. Un nuovo contratto di locazione può iniziare il giorno dopo.",
-	"statements_deadline_missing": "Manca il termine. Inserisca una data."
+	"statements_deadline_missing": "Manca il termine. Inserisca una data.",
+	"contracts_period_range_fixed": "{start} – {end}, a tempo determinato",
+	"contracts_period_range_terminated": "{start} – {end}, disdetto",
+	"contracts_end_fixed": "A tempo determinato fino al {date}",
+	"contracts_end_terminated": "A tempo indeterminato, disdetto per il {date}",
+	"contracts_duration_terminated": "A tempo indeterminato, disdetto",
+	"contracts_duration_terminated_help": "Il contratto di locazione termina con la disdetta. Se la scadenza di disdetta è cambiata, modifichi la fine del contratto.",
+	"contracts_withdraw_notice": "Revocare la disdetta",
+	"contracts_withdraw_notice_help": "Il contratto di locazione prosegue allora senza scadenza.",
+	"contracts_notice_withdrawn_toast": "Disdetta di {name} revocata. Il contratto di locazione prosegue senza scadenza.",
+	"backend_contract_notice_without_end": "Una disdetta richiede una fine del contratto. Inserisca la scadenza di disdetta."
 }

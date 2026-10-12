@@ -77,6 +77,7 @@ export interface RentalContract {
 	tenantId: string;
 	startDate: string;
 	endDate?: string | null;
+	terminated?: boolean; // endDate is a Kündigungstermin of an open-ended contract, not agreed
 	baseRent: string | number; // decimal from DB
 	additionalRent?: string | number | null;
 	monthlyAdvancePayment: string | number; // Akonto
@@ -96,6 +97,7 @@ export interface ContractHistory {
 	apartment?: string;
 	startDate: string;
 	endDate?: string | null;
+	terminated?: boolean;
 }
 
 // Monthly costs breakdown

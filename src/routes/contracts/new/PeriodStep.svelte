@@ -4,12 +4,15 @@
 	import RadioGroup from '$lib/ui/RadioGroup.svelte';
 	import DateInput from '$lib/ui/DateInput.svelte';
 	import { startDateNotice } from '$lib/contract-wizard';
+	import { contractEnd } from '$lib/contract-status';
 
 	// Step 3: from when, and until when or without end; each date is repeated in words
 	let {
 		startDate = $bindable(),
 		endDate = $bindable(),
 		isUnlimited = $bindable(),
+		terminated = $bindable(false),
+		noticed = false,
 		min,
 		today,
 		overlap,
@@ -18,6 +21,8 @@
 		startDate: string;
 		endDate: string;
 		isUnlimited: boolean;
+		terminated?: boolean;
+		noticed?: boolean; // the saved contract is open-ended and ended by notice: it can be withdrawn
 		min?: string;
 		today: string;
 		overlap: string | null;
@@ -27,18 +32,39 @@
 	// TODO(fachlich prüfen): explanations of unbefristet/befristet are not from the glossary
 	const pastStart = $derived(startDateNotice(startDate, today));
 
-	const durations = [
-		{
-			value: 'unlimited',
-			label: m.contracts_unlimited(),
-			description: m.contracts_unlimited_help()
-		},
-		{
-			value: 'limited',
-			label: m.contracts_limited(),
-			description: m.contracts_limited_help()
-		}
-	];
+	const limited = {
+		value: 'limited',
+		label: m.contracts_limited(),
+		description: m.contracts_limited_help()
+	};
+	// a notice keeps the contract open-ended (A-1); withdrawing it is a choice with its consequence
+	// TODO(fachlich prüfen): «Kündigung aufheben» is not from the glossary (offene-punkte.md)
+	const durations = $derived(
+		noticed
+			? [
+					{
+						value: 'terminated',
+						label: endDate ? contractEnd(endDate, true) : m.contracts_duration_terminated(),
+						description: m.contracts_duration_terminated_help()
+					},
+					{
+						value: 'unlimited',
+						label: m.contracts_withdraw_notice(),
+						description: m.contracts_withdraw_notice_help()
+					},
+					limited
+				]
+			: [
+					{
+						value: 'unlimited',
+						label: m.contracts_unlimited(),
+						description: m.contracts_unlimited_help()
+					},
+					limited
+				]
+	);
+	const duration = (unlimited: boolean, noticeGiven: boolean) =>
+		unlimited ? 'unlimited' : noticeGiven ? 'terminated' : 'limited';
 </script>
 
 <DateInput
@@ -63,7 +89,8 @@
 	legend={m.contracts_period()}
 	options={durations}
 	bind:value={
-		() => (isUnlimited ? 'unlimited' : 'limited'), (v) => (isUnlimited = v === 'unlimited')
+		() => duration(isUnlimited, terminated),
+		(v) => ((isUnlimited = v === 'unlimited'), (terminated = v === 'terminated'))
 	}
 	testid="contract-duration"
 />

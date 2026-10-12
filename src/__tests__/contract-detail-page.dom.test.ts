@@ -112,7 +112,11 @@ describe('Mietvertragsdetail', () => {
 		open();
 		click('contract-end-button');
 		const dialog = document.querySelector('[role=dialog]')!;
-		expect(dialog.textContent).toContain('Mietvertrag beenden');
+		// Persona Sven J1: der Titel nennt, welchen Mietvertrag er beendet
+		expect(
+			dialog.getAttribute('aria-labelledby') &&
+				document.getElementById(dialog.getAttribute('aria-labelledby')!)!.textContent
+		).toBe('Mietvertrag von Anna Keller, Wohnung 2.01, beenden?');
 		expect(byTestId<HTMLInputElement>('contract-end-date-input')!.value).toBe('');
 		const submitted = vi.fn();
 		document.querySelector('form[action="?/end"]')!.addEventListener('submit', submitted);

@@ -611,7 +611,7 @@
 	"contracts_end_action": "Beenden",
 	"contracts_related": "Dazu gehört",
 	"contracts_building_invoices": "Rechnungen des Gebäudes",
-	"contracts_end_title": "Mietvertrag beenden?",
+	"contracts_end_title": "Mietvertrag von {name}, Wohnung {apartment}, beenden?",
 	"contracts_end_confirm": "Mietvertrag beenden",
 	"contracts_ends_today_toast": "Der Mietvertrag von {name} endet heute",
 	"contracts_delete_title": "Mietvertrag löschen?",
@@ -1236,5 +1236,15 @@
 	"contracts_ends_on_toast": "Der Mietvertrag von {name} endet am {date}",
 	"contracts_end_date_help": "Der letzte Tag des Mietverhältnisses, also der Kündigungstermin. Bis und mit diesem Tag läuft der Mietvertrag, auch wenn der Mieter früher auszieht.",
 	"contracts_end_notice_hint": "Prüfen Sie Frist und Termin im Mietvertrag: Für Wohnungen gilt eine Kündigungsfrist von mindestens 3 Monaten. Ist die Kündigung zu spät, gilt sie erst auf den nächsten Kündigungstermin. Ein neuer Mietvertrag kann am Tag danach beginnen.",
-	"statements_deadline_missing": "Die Frist fehlt. Bitte geben Sie ein Datum ein."
+	"statements_deadline_missing": "Die Frist fehlt. Bitte geben Sie ein Datum ein.",
+	"contracts_period_range_fixed": "{start} – {end}, befristet",
+	"contracts_period_range_terminated": "{start} – {end}, gekündigt",
+	"contracts_end_fixed": "Befristet bis {date}",
+	"contracts_end_terminated": "Unbefristet, gekündigt auf den {date}",
+	"contracts_duration_terminated": "Unbefristet, gekündigt",
+	"contracts_duration_terminated_help": "Der Mietvertrag endet mit der Kündigung. Hat sich der Kündigungstermin verschoben, ändern Sie das Vertragsende.",
+	"contracts_withdraw_notice": "Kündigung aufheben",
+	"contracts_withdraw_notice_help": "Der Mietvertrag läuft dann ohne Ende weiter.",
+	"contracts_notice_withdrawn_toast": "Kündigung von {name} aufgehoben. Der Mietvertrag läuft ohne Ende weiter.",
+	"backend_contract_notice_without_end": "Eine Kündigung braucht ein Vertragsende. Geben Sie den Kündigungstermin ein."
 }

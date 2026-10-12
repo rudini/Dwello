@@ -611,7 +611,7 @@
 	"contracts_end_action": "End contract",
 	"contracts_related": "Related",
 	"contracts_building_invoices": "Invoices of the building",
-	"contracts_end_title": "End rental contract?",
+	"contracts_end_title": "End the rental contract of {name}, apartment {apartment}?",
 	"contracts_end_confirm": "End rental contract",
 	"contracts_ends_today_toast": "The rental contract of {name} ends today",
 	"contracts_delete_title": "Delete rental contract?",
@@ -1236,5 +1236,15 @@
 	"contracts_ends_on_toast": "The rental contract of {name} ends on {date}",
 	"contracts_end_date_help": "The last day of the tenancy, that is the termination date. The rental contract runs up to and including this day, even if the tenant moves out earlier.",
 	"contracts_end_notice_hint": "Check the notice period and date in the rental contract: for apartments the notice period is at least 3 months. If the notice comes too late, it only applies to the next termination date. A new rental contract can start on the day after.",
-	"statements_deadline_missing": "The deadline is missing. Please enter a date."
+	"statements_deadline_missing": "The deadline is missing. Please enter a date.",
+	"contracts_period_range_fixed": "{start} – {end}, fixed-term",
+	"contracts_period_range_terminated": "{start} – {end}, terminated by notice",
+	"contracts_end_fixed": "Fixed-term until {date}",
+	"contracts_end_terminated": "Open-ended, terminated as of {date}",
+	"contracts_duration_terminated": "Open-ended, terminated by notice",
+	"contracts_duration_terminated_help": "The rental contract ends with the notice of termination. If the termination date has moved, change the contract end.",
+	"contracts_withdraw_notice": "Withdraw notice of termination",
+	"contracts_withdraw_notice_help": "The rental contract then runs on without an end.",
+	"contracts_notice_withdrawn_toast": "Notice of termination of {name} withdrawn. The rental contract runs on without an end.",
+	"backend_contract_notice_without_end": "A notice of termination needs a contract end. Enter the termination date."
 }

@@ -28,7 +28,12 @@
 					>
 					<span><Badge {...statusBadges[contract.status]} /></span>
 					<span class="tabular-nums text-ink sm:flex-1"
-						>{contractPeriod(contract.startDate, contract.endDate, contract.status)}</span
+						>{contractPeriod(
+							contract.startDate,
+							contract.endDate,
+							contract.status,
+							contract.terminated
+						)}</span
 					>
 					<!-- TODO(fachlich prüfen): no glossary term for the monthly total, as in the contract wizard -->
 					<span class="tabular-nums text-ink"

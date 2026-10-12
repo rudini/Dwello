@@ -4846,6 +4846,31 @@ header and on pages without it. Branch `claude/optimistic-clarke-nn8u7t` from `m
   removed; the new states `end-dialog-error` and `past-end-error` are in `sprachen-bildschirme.feature` and their
   setup chooses «Befristet» in the page's language (`tests/e2e/interactions/accessibility.ts`).
 
+## Session 16 - October 2026: Notice vs. Fixed Term, Reminder per Contract (A-1, A-9)
+
+### Done ✅
+- [x] **A-9, reminder per contract**: «Noch nicht abgerechnet» names every building with a Mietvertrag in the last
+  period that has no statement, also when the tenant has moved out (`src/routes/dashboard/+page.server.ts` reads all
+  contracts). Tests first: two scenarios in `dashboard.feature`, `dashboard.test.ts`.
+- [x] **A-1, notice vs. fixed term**: `rental_contracts.terminated` (`0001_schema.sql`, `schema.ts`, contract
+  routes and service; `endDate: null` clears it). «Mietvertrag beenden» sends `terminated: true`; the detail page
+  shows «Befristet bis …» / «Unbefristet, gekündigt auf den …» (`contractEnd` in `src/lib/contract-status.ts`), the
+  lists add «befristet»/«gekündigt»; «Bearbeiten» offers «Kündigung aufheben» (`PeriodStep.svelte`,
+  `ContractForm.svelte`, `contract-form.ts`, edit loader). a11y screen `contract-edit-notice`. Tests first: scenarios
+  in `contract-detail.feature` and `contract-edit.feature`, `contract-end.pg.test.ts`, `contract-status.test.ts`,
+  `contract-edit.dom.test.ts`, `contract-actions.test.ts`, `contract-edit-load.test.ts`. Local databases need
+  `bun run db:reset`.
+- [x] **Review J-1 and personas J1** (`docs/reviews/J-review-1.md`, `docs/design/personas/{helga,anna,sven}-j1.md`):
+  the contract list passes `terminated` (`src/routes/contracts/+page.server.ts`, J-1); a notice without an end is
+  refused with a plain error (`checkNotice` in `contract.service.ts`, J-2); the reminder sorts the buildings (J-3);
+  stricter scenarios and a per-contract scenario (J-5); API samples `contracts.json` and `period-statements.json`
+  (J-6); `TODO(fachlich prüfen)` at the new texts (J-7); the end dialog names tenant and apartment; the message
+  after withdrawing a notice; demo data mark the previous tenants as gekündigt (`demo-data.sql`, J-8).
+- [x] **Review J-2** (`docs/reviews/J-review-2.md`): removing the end withdraws a notice even with `terminated: true`
+  (J2-1); tests for the notice check on POST and for `terminated` in the apartment and tenant history (J2-2); the
+  contract sample is checked with an end and a notice (J2-3); docs name the open points (J2-4, J2-5); comments moved
+  (J2-6).
+
 ---
 
 # Success Criteria

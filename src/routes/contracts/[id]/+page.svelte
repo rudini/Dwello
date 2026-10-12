@@ -112,6 +112,7 @@
 		<ContractTerms
 			startDate={contract.startDate}
 			endDate={contract.endDate}
+			terminated={contract.terminated}
 			{status}
 			rent={data.rentBreakdown}
 		/>
@@ -136,7 +137,7 @@
 <ActionDialog
 	bind:open={ending}
 	action="?/end"
-	title={m.contracts_end_title()}
+	title={m.contracts_end_title({ name, apartment: contract.apartment.number })}
 	confirmLabel={m.contracts_end_confirm()}
 	confirmTestid="contract-end-confirm"
 	error={form?.endError}

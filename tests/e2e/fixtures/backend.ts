@@ -206,6 +206,11 @@ export function testData(request: APIRequestContext, token: string) {
 			await put(`contracts/${ids.get(`Mietvertrag ${tenantTitle}`)}`, { endDate });
 		},
 
+		// an open-ended contract ended by notice, as «Mietvertrag beenden» stores it
+		async notice(tenantTitle: string, endDate: string) {
+			await put(`contracts/${ids.get(`Mietvertrag ${tenantTitle}`)}`, { endDate, terminated: true });
+		},
+
 		async sendStatement(tenantTitle: string, year: number) {
 			await put(`statements/${ids.get(`Abrechnung ${tenantTitle} ${year}`)}/status`, { status: 'sent' });
 		},

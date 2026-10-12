@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import {
 	contractEndError,
+	contractEnd,
 	contractPeriod,
 	contractStatusOn,
 	endedSince,
@@ -114,7 +115,26 @@ describe('Vertragsdauer in Worten', () => {
 	});
 
 	it('nennt bei einem befristeten Mietvertrag Beginn und Ende', () => {
-		expect(contractPeriod('2024-01-01', '2024-12-31', 'ended')).toBe('01.01.2024 – 31.12.2024');
+		expect(contractPeriod('2024-01-01', '2024-12-31', 'ended')).toBe(
+			'01.01.2024 – 31.12.2024, befristet'
+		);
+	});
+
+	// A-1: ein gekündigter Mietvertrag war unbefristet, er ist nicht befristet
+	it('nennt bei einem gekündigten Mietvertrag die Kündigung', () => {
+		expect(contractPeriod('2024-04-01', '2099-03-31', 'active', true)).toBe(
+			'01.04.2024 – 31.03.2099, gekündigt'
+		);
+	});
+});
+
+describe('Vertragsende', () => {
+	it.each([
+		[null, false, 'Unbefristet'],
+		['2099-12-31', false, 'Befristet bis 31.12.2099'],
+		['2099-03-31', true, 'Unbefristet, gekündigt auf den 31.03.2099']
+	])('%s, gekündigt %s: «%s»', (endDate, terminated, text) => {
+		expect(contractEnd(endDate, terminated)).toBe(text);
 	});
 });
 

@@ -4,6 +4,7 @@ import { actions, load } from '../routes/contracts/[id]/+page.server';
 import { load as listLoad } from '../routes/contracts/+page.server';
 import { localToday } from '../lib/contract-status';
 import refused from '../../tests/contracts/contract-end-refused.json';
+import contractList from '../../tests/contracts/contracts.json';
 
 describe('Vertragsstatus', () => {
 	it('gibt Liste und Detail den Tag des Servers mit', async () => {
@@ -22,6 +23,20 @@ describe('Vertragsstatus', () => {
 		expect(list.today).toBe(localToday());
 		expect(detail.today).toBe(localToday());
 		expect(urls[0]).toContain('status=future');
+	});
+
+	// J-1: die Liste nennt eine Kündigung wie die Detailseite, nicht «befristet»
+	it('gibt der Liste weiter, ob ein Mietvertrag gekündigt ist', async () => {
+		const fetch = (async () => Response.json(contractList)) as unknown as typeof globalThis.fetch;
+
+		const list = (await listLoad({
+			url: new URL('http://localhost/contracts'),
+			fetch
+		} as never)) as {
+			contracts: { terminated?: boolean }[];
+		};
+
+		expect(list.contracts[0].terminated).toBe(true);
 	});
 });
 
@@ -42,7 +57,7 @@ describe('Mietvertrag beenden', () => {
 			{
 				method: 'PUT',
 				url: 'http://localhost:3001/api/v1/contracts/c1',
-				body: { endDate: '2099-12-31' }
+				body: { endDate: '2099-12-31', terminated: true }
 			}
 		]);
 	});
@@ -81,7 +96,7 @@ describe('Mietvertrag beenden', () => {
 			{
 				method: 'PUT',
 				url: 'http://localhost:3001/api/v1/contracts/c1',
-				body: { endDate: '2025-03-31' }
+				body: { endDate: '2025-03-31', terminated: true }
 			}
 		]);
 	});

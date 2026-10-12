@@ -154,3 +154,62 @@ describe('Mietvertrag, der in der Periode begann', () => {
 	});
 });
 
+
+// A-1: an end agreed in a fixed-term contract and a notice to an open-ended one are different things
+describe('Gekündigter Mietvertrag', () => {
+	let rental: Awaited<ReturnType<typeof createRental>>;
+	const put = (body: object) => sendJson('PUT', `/api/v1/contracts/${rental.contract}`, body);
+	const stored = async () => (await callApi(`/api/v1/contracts/${rental.contract}`)).json();
+
+	beforeAll(async () => {
+		rental = await createRental(crypto.randomUUID(), {
+			startDate: '2024-04-01',
+			endDate: '2099-12-31',
+			monthlyAdvancePayment: '100'
+		});
+	});
+
+	afterAll(() => rental.remove());
+
+	it('gilt mit vereinbartem Vertragsende als befristet', async () => {
+		expect(await stored()).toMatchObject({ endDate: '2099-12-31', terminated: false });
+	});
+
+	it('merkt sich die Kündigung', async () => {
+		expect((await put({ endDate: '2099-03-31', terminated: true })).status).toBe(200);
+		expect(await stored()).toMatchObject({ endDate: '2099-03-31', terminated: true });
+	});
+
+	it('ist nach dem Aufheben der Kündigung wieder unbefristet ohne Kündigung', async () => {
+		expect((await put({ endDate: null })).status).toBe(200);
+		expect(await stored()).toMatchObject({ endDate: null, terminated: false });
+	});
+
+	// J-2: eine Kündigung braucht ihren Kündigungstermin; die Datenbank meldete sonst rohes SQL
+	it('lehnt eine Kündigung ohne Vertragsende verständlich ab', async () => {
+		const response = await put({ terminated: true });
+		expect(response.status).toBe(400);
+		expect(await response.json()).toMatchObject({ code: 'CONTRACT_NOTICE_WITHOUT_END' });
+		expect(await stored()).toMatchObject({ endDate: null, terminated: false });
+	});
+
+	// J2-1: ohne Vertragsende gibt es keine Kündigung, auch wenn beides zugleich kommt
+	it('hebt die Kündigung auf, wenn das Vertragsende entfernt wird', async () => {
+		expect((await put({ endDate: '2099-03-31', terminated: true })).status).toBe(200);
+		expect((await put({ endDate: null, terminated: true })).status).toBe(200);
+		expect(await stored()).toMatchObject({ endDate: null, terminated: false });
+	});
+
+	it('legt keinen neuen Mietvertrag mit Kündigung ohne Vertragsende an', async () => {
+		const response = await sendJson('POST', '/api/v1/contracts', {
+			apartmentId: rental.apartment,
+			tenantId: rental.tenant,
+			startDate: '2100-01-01',
+			baseRent: '950',
+			monthlyAdvancePayment: '100',
+			terminated: true
+		});
+		expect(response.status).toBe(400);
+		expect(await response.json()).toMatchObject({ code: 'CONTRACT_NOTICE_WITHOUT_END' });
+	});
+});

@@ -129,7 +129,12 @@
 			errors = { form: saveError(response.error) };
 			return focusFirstError(form);
 		}
-		addToast('success', m.contracts_saved_toast({ name: tenantName }), 10_000);
+		// a withdrawn notice says what changed, not only «gespeichert» (personas J1)
+		const saved =
+			contract.terminated && values.isUnlimited
+				? m.contracts_notice_withdrawn_toast({ name: tenantName })
+				: m.contracts_saved_toast({ name: tenantName });
+		addToast('success', saved, 10_000);
 		await goto(back);
 	}
 </script>
@@ -175,6 +180,8 @@
 			bind:startDate={values.startDate}
 			bind:endDate={values.endDate}
 			bind:isUnlimited={values.isUnlimited}
+			bind:terminated={values.terminated}
+			noticed={contract.terminated}
 			min={startLimit.min}
 			today={pastBefore}
 			{overlap}

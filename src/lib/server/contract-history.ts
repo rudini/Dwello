@@ -21,5 +21,6 @@ export const toContractHistory = (c: BackendContract, tenantName: string): Contr
 	rentBrutto: grossRent(c),
 	status: contractStatus(c),
 	startDate: c.startDate,
-	endDate: c.endDate ?? null
+	endDate: c.endDate ?? null,
+	terminated: !!c.terminated
 });

@@ -64,6 +64,7 @@ export async function seedFor(seed: TestData, path: string, state: string) {
 	await seed.apartment('Bergsicht', '2.01', 'vacant');
 	await seed.tenant('Dora');
 	await seed.contract('Dora', '2.01', { startDate: '2015-01-01', baseRent: '1600.00' });
+	await seed.notice('Dora', '2099-03-31'); // open-ended and ended by notice: the form offers to withdraw it
 	await seed.heatingInvoice('Bergsicht', '1200.00', 2025);
 	await seed.category('Gartenpflege', true);
 	await seed.distributionKey('Nach Wohnungen', '{units}');
@@ -72,6 +73,7 @@ export async function seedFor(seed: TestData, path: string, state: string) {
 		apartment: seed.idOf('1.01'),
 		tenant: seed.idOf('Anna'),
 		contract: seed.idOf('Mietvertrag Anna'),
+		noticedContract: seed.idOf('Mietvertrag Dora'),
 		invoice: seed.idOf('Rechnung Hauswart Huber'),
 		billedInvoice,
 		lateInvoice,

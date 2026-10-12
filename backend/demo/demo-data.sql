@@ -81,6 +81,10 @@ INSERT INTO rental_contracts (id, apartment_id, tenant_id, start_date, end_date,
 INSERT INTO rental_contracts (id, apartment_id, tenant_id, start_date, end_date, base_rent, additional_rent, monthly_advance_payment, notes) VALUES
 ('b0000001-0001-0001-0001-000000000099', 'aaaa1111-1111-1111-1111-111111111111', 'a0000001-0001-0001-0001-000000000009', '2018-06-01', '2021-02-28', 1350.00, 100.00, 180.00, 'Vormieter, ausgezogen per 28.02.2021') ON CONFLICT (id) DO NOTHING;
 
+-- Both previous tenants gave notice: their open-ended contracts ended on a Kündigungstermin, not on an agreed day
+UPDATE rental_contracts SET terminated = TRUE
+WHERE id IN ('b0000001-0001-0001-0001-000000000099', 'b0000002-0002-0002-0002-000000000002');
+
 -- ============================================================================
 -- Invoices, dated at the end of the period they cover (the Rechnungsdatum decides the Abrechnungsperiode).
 -- Alpenblick lacks, on purpose, the chimney sweep and the water of the second half of 2025, so the check for

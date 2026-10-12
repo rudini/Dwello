@@ -42,16 +42,31 @@ export const statusBadges: Record<Status, { label: string; tone: Tone }> = {
 };
 
 /** Contract period in words; a contract without end is named by its start, never "bis heute" */
+// TODO(fachlich prüfen): «befristet»/«gekündigt» after the period, see docs/design/offene-punkte.md (A-1)
 export function contractPeriod(
 	startDate: string,
 	endDate: string | null | undefined,
-	status: Status
+	status: Status,
+	terminated = false
 ) {
-	if (endDate) return `${formatDate(startDate)} – ${formatDate(endDate)}`;
-	const date = formatDate(startDate);
+	const start = formatDate(startDate);
+	if (endDate) {
+		const end = formatDate(endDate);
+		return terminated
+			? m.contracts_period_range_terminated({ start, end })
+			: m.contracts_period_range_fixed({ start, end });
+	}
 	return status === 'future'
-		? m.contracts_period_from({ date })
-		: m.contracts_period_since({ date });
+		? m.contracts_period_from({ date: start })
+		: m.contracts_period_since({ date: start });
+}
+
+/** The Vertragsende in words: agreed in a fixed-term contract, or the Kündigungstermin of an open-ended one */
+// TODO(fachlich prüfen): «Unbefristet, gekündigt auf den …» is not from the glossary (offene-punkte.md, A-1)
+export function contractEnd(endDate: string | null | undefined, terminated = false) {
+	if (!endDate) return m.contracts_unlimited();
+	const date = formatDate(endDate);
+	return terminated ? m.contracts_end_terminated({ date }) : m.contracts_end_fixed({ date });
 }
 
 /** A real day as YYYY-MM-DD: not 2025-13-01 or 2025-02-30 */

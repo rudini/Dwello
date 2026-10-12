@@ -7,6 +7,8 @@ const backend: Record<string, unknown> = {
 		tenantId: 't1',
 		apartmentId: 'a1',
 		startDate: '2024-04-01',
+		endDate: '2099-03-31',
+		terminated: true,
 		baseRent: '950.00'
 	},
 	'/api/v1/tenants?limit=1000': {
@@ -30,5 +32,12 @@ describe('Mietvertrag bearbeiten laden', () => {
 			tenants: [{ id: 't1', name: 'Anna Keller' }],
 			apartments: [{ id: 'a1', unit: '2.01', building: 'Ahornhof' }]
 		});
+	});
+
+	// A-1: das Formular bietet bei einer Kündigung «Kündigung aufheben» an
+	it('gibt die Kündigung an das Formular weiter', async () => {
+		const data = await load({ params: { id: 'c1' }, fetch } as never);
+
+		expect(data).toMatchObject({ contract: { endDate: '2099-03-31', terminated: true } });
 	});
 });

@@ -28,7 +28,12 @@
 							>{m.apartments_contract_of({ name: contract.tenantName })}</a
 						>
 						<span class="text-ink-muted"
-							>{contractPeriod(contract.startDate, contract.endDate, contract.status)}</span
+							>{contractPeriod(
+								contract.startDate,
+								contract.endDate,
+								contract.status,
+								contract.terminated
+							)}</span
 						>
 						<!-- TODO(fachlich prüfen): no glossary term for the monthly total, as in the contract wizard -->
 						<span class="tabular-nums text-ink"

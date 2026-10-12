@@ -14,6 +14,7 @@ export interface ContractFormValues {
 	startDate: string;
 	endDate: string;
 	isUnlimited: boolean;
+	terminated?: boolean; // the end is a Kündigungstermin of an open-ended contract (A-1), only when editing
 	baseRent: string;
 	additionalRent: string;
 	advancePayment: string;
@@ -45,6 +46,7 @@ export function initialContractValues(
 		startDate: dateForInput(contract.startDate),
 		endDate: dateForInput(contract.endDate),
 		isUnlimited: !contract.endDate,
+		terminated: !!contract.terminated,
 		baseRent: String(contract.baseRent),
 		additionalRent: String(contract.additionalRent || ''),
 		advancePayment: String(contract.monthlyAdvancePayment || '')
@@ -95,6 +97,7 @@ export const contractBody = (values: ContractFormValues) => ({
 	apartmentId: values.apartmentId,
 	startDate: values.startDate,
 	endDate: values.isUnlimited ? null : values.endDate,
+	terminated: !values.isUnlimited && !!values.terminated,
 	baseRent: String(values.baseRent),
 	additionalRent: String(values.additionalRent || 0),
 	monthlyAdvancePayment: String(values.advancePayment || 0)

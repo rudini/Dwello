@@ -24,6 +24,7 @@ const contractFields = {
 	tenantId: rentalContracts.tenantId,
 	startDate: rentalContracts.startDate,
 	endDate: rentalContracts.endDate,
+	terminated: rentalContracts.terminated,
 	baseRent: rentalContracts.baseRent,
 	additionalRent: rentalContracts.additionalRent,
 	monthlyAdvancePayment: rentalContracts.monthlyAdvancePayment,
@@ -267,10 +268,16 @@ export async function getContractsByPeriod(
 	return contracts as ContractWithDetails[];
 }
 
+/** A notice is given for a Kündigungstermin: without an end there is nothing to give notice for */
+function checkNotice(terminated: boolean | undefined, endDate: string | null | undefined) {
+	if (terminated && !endDate) throw new CodedError('CONTRACT_NOTICE_WITHOUT_END', 'A notice needs an end date');
+}
+
 /**
  * Create a new contract
  */
 export async function createContract(data: NewRentalContract): Promise<RentalContract> {
+	checkNotice(data.terminated, data.endDate);
 	// Check for overlapping contracts
 	const { hasOverlap, overlappingContract } = await checkContractOverlap(
 		data.apartmentId,
@@ -340,11 +347,14 @@ export async function updateContract(
 ): Promise<RentalContract | null> {
 	const current = await getContract(id);
 	if (!current) return null;
+	// removing the end withdraws the notice (below), whatever flag comes with it
+	if (data.endDate !== null) checkNotice(data.terminated, data.endDate ?? current.endDate);
 	await checkNewDates(current, data);
 
 	const [contract] = await db
 		.update(rentalContracts)
-		.set({ ...data, updatedAt: new Date() })
+		// without an end there is no notice: withdrawing it makes the contract open-ended again
+		.set({ ...data, ...(data.endDate === null && { terminated: false }), updatedAt: new Date() })
 		.where(eq(rentalContracts.id, id))
 		.returning();
 
