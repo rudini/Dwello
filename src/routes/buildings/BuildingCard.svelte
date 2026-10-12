@@ -1,5 +1,7 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import { occupancyParts } from '$lib/apartment';
+	import { buildingTypeLabel } from '$lib/building-type';
 	import type { BuildingWithStats } from '$lib/types';
 	import Button from '$lib/ui/Button.svelte';
 	import Icon from '$lib/ui/Icon.svelte';
@@ -12,7 +14,10 @@
 		`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(`${place}, Switzerland`)}`
 	);
 	const details = $derived(
-		[building.buildingType, building.yearBuilt && `Baujahr ${building.yearBuilt}`].filter(Boolean)
+		[
+			building.buildingType && buildingTypeLabel(building.buildingType),
+			building.yearBuilt && m.buildings_year_built_value({ year: building.yearBuilt })
+		].filter(Boolean)
 	);
 </script>
 
@@ -39,13 +44,16 @@
 		<li class="flex items-center gap-2">
 			<span class="text-ink-muted"><Icon name="apartment" /></span>
 			{building.apartmentCount}
-			{building.apartmentCount === 1 ? 'Wohnung' : 'Wohnungen'}
+			{building.apartmentCount === 1 ? m.buildings_apartment_one() : m.buildings_apartment_many()}
 		</li>
 		{#each occupancyParts(building) as part (part)}<li>{part}</li>{/each}
 	</ul>
 	<div class="relative z-10">
 		<Button href={routeUrl} target="_blank" icon="way" testid="building-route-link"
-			>Route planen <span class="sr-only">zu {building.name || building.address}</span></Button
+			>{m.buildings_plan_route()}
+			<span class="sr-only"
+				>{m.buildings_route_to({ name: building.name || building.address })}</span
+			></Button
 		>
 	</div>
 </li>

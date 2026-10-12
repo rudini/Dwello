@@ -17,7 +17,7 @@ const germanOnly = Object.fromEntries(
 );
 
 // Names and places, the same in every language
-const sameEverywhere = ['Dwello', 'Google', 'Microsoft', 'Resend', 'PostgreSQL', 'IBAN', 'CHF', 'PDF', 'XSRF', 'SMTP'];
+const sameEverywhere = ['Graubünden', 'Dwello', 'Google', 'Microsoft', 'Resend', 'PostgreSQL', 'IBAN', 'CHF', 'PDF', 'XSRF', 'SMTP'];
 // A record named by a scenario: up to three words, then a UUID (fixtures/backend.ts)
 const scenarioRecord = /(?:[\p{L}\d.,'’&-]+ ){0,3}[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gu;
 // Fixed values that are user data: seeds (fixtures/backend.ts, the axe seeds) and the operator (playwright.config.ts)
@@ -71,8 +71,8 @@ export async function cutOff(page: Page): Promise<string[]> {
 			const style = getComputedStyle(element);
 			const clips = ['hidden', 'clip'].includes(style.overflowX) && style.textOverflow !== 'ellipsis';
 			const ownText = [...element.childNodes].some((node) => node.nodeType === 3 && node.textContent!.trim());
-			// sr-only boxes are 1 px on purpose; tables and lists scroll inside their own region (Table.svelte)
-			if (!clips || !ownText || element.closest('.sr-only, [role="region"]')) continue;
+			// sr-only boxes and SvelteKit's route announcer are 1 px on purpose; tables and lists scroll inside their own region (Table.svelte)
+			if (!clips || !ownText || element.clientWidth <= 1 || element.closest('.sr-only, [role="region"]')) continue;
 			if (element.scrollWidth > element.clientWidth + 1)
 				found.push(`«${element.textContent!.trim().slice(0, 60)}» cut off (${element.scrollWidth} > ${element.clientWidth} px)`);
 		}

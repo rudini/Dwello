@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import { enhance } from '$app/forms';
 	import { addToast } from '$lib/stores';
 	import Alert from '$lib/ui/Alert.svelte';
@@ -14,11 +15,7 @@
 
 	let form = $state<HTMLFormElement>();
 	let deleting = $state(false);
-	const error = $derived(
-		hasApartments
-			? 'Dieses Gebäude kann nicht gelöscht werden, da es noch Wohnungen enthält. Löschen Sie zuerst seine Wohnungen.'
-			: serverError
-	);
+	const error = $derived(hasApartments ? m.buildings_delete_has_apartments() : serverError);
 </script>
 
 <form
@@ -28,7 +25,7 @@
 	use:enhance={() => {
 		deleting = true;
 		return async ({ result, update }) => {
-			if (result.type === 'redirect') addToast('success', `Gebäude ${name} gelöscht`);
+			if (result.type === 'redirect') addToast('success', m.buildings_deleted_toast({ name }));
 			await update();
 			deleting = false;
 		};
@@ -37,23 +34,23 @@
 
 <Dialog
 	bind:open
-	title="Gebäude löschen?"
-	confirmLabel="Gebäude löschen"
+	title={m.buildings_delete_title()}
+	confirmLabel={m.buildings_delete_confirm()}
 	danger
 	busy={deleting}
-	busyLabel="Wird gelöscht …"
+	busyLabel={m.buildings_deleting()}
 	confirmDisabled={hasApartments}
 	confirmTestid="building-delete-confirm"
 	onconfirm={() => form?.requestSubmit()}
 >
 	{#if !hasApartments}
 		<p>
-			Das Gebäude <strong>{name}</strong> und alle seine Rechnungen werden endgültig gelöscht. Das lässt
-			sich nicht rückgängig machen.
+			{m.buildings_delete_text_before()} <strong>{name}</strong>
+			{m.buildings_delete_text_after()}
 		</p>
 	{/if}
 	{#if error}
-		<Alert tone="critical" title="Löschen nicht möglich" testid="form-error">
+		<Alert tone="critical" title={m.buildings_delete_impossible()} testid="form-error">
 			<p>{error}</p>
 		</Alert>
 	{/if}

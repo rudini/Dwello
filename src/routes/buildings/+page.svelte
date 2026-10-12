@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import type { BuildingsListData } from '$lib/types';
@@ -29,14 +30,14 @@
 </script>
 
 <svelte:head>
-	<title>Gebäude - Dwello</title>
+	<title>{m.nav_buildings()} - Dwello</title>
 </svelte:head>
 
 <div class="flex flex-col gap-8" data-testid="buildings-page">
-	<PageHeader title="Gebäude" purpose="Ihre Gebäude mit Adresse und Wohnungen.">
+	<PageHeader title={m.nav_buildings()} purpose={m.buildings_purpose()}>
 		{#snippet action()}
 			<Button href="/buildings/new" variant="primary" icon="add" testid="building-new-button"
-				>Gebäude erfassen</Button
+				>{m.buildings_add()}</Button
 			>
 		{/snippet}
 	</PageHeader>
@@ -49,25 +50,29 @@
 		<div class="grid gap-4 md:grid-cols-2">
 			<TextInput
 				id="search"
-				label="Suche"
+				label={m.buildings_search()}
 				bind:value={searchTerm}
-				placeholder="Name oder Adresse"
+				placeholder={m.buildings_search_placeholder()}
 				optional
 				testid="building-search-input"
 			/>
 			<TextInput
 				id="city"
-				label="Ort"
+				label={m.buildings_city()}
 				bind:value={cityFilter}
-				placeholder="Zürich"
+				placeholder={m.buildings_city_placeholder()}
 				optional
 				testid="building-city-filter"
 			/>
 		</div>
 		<div class="flex flex-wrap gap-4">
-			<Button type="submit" icon="search" testid="building-search-submit">Suchen</Button>
+			<Button type="submit" icon="search" testid="building-search-submit"
+				>{m.buildings_search_submit()}</Button
+			>
 			{#if searchTerm || cityFilter}
-				<Button variant="ghost" icon="close" onclick={clearFilters}>Filter zurücksetzen</Button>
+				<Button variant="ghost" icon="close" onclick={clearFilters}
+					>{m.buildings_reset_filters()}</Button
+				>
 			{/if}
 		</div>
 	</form>
@@ -76,19 +81,19 @@
 		<section class="rounded-panel border border-line bg-surface">
 			{#if filtered}
 				<EmptyState
-					title="Keine Gebäude gefunden"
-					text="Kein Gebäude passt zu Ihrer Suche. Prüfen Sie die Schreibweise oder zeigen Sie alle Gebäude."
+					title={m.buildings_none_found()}
+					text={m.buildings_none_found_text()}
 					illustration="no-results"
-					actionLabel="Filter zurücksetzen"
+					actionLabel={m.buildings_reset_filters()}
 					actionHref="/buildings"
 					testid="buildings-empty"
 				/>
 			{:else}
 				<EmptyState
-					title="Noch keine Gebäude"
-					text="Erfassen Sie zuerst ein Gebäude. Danach legen Sie seine Wohnungen und Mietverträge an."
+					title={m.buildings_none_yet()}
+					text={m.buildings_none_yet_text()}
 					illustration="building"
-					actionLabel="Gebäude erfassen"
+					actionLabel={m.buildings_add()}
 					actionHref="/buildings/new"
 					testid="buildings-empty"
 				/>
@@ -97,7 +102,7 @@
 	{:else}
 		<section aria-labelledby="buildings-count" class="flex flex-col gap-4">
 			<h2 id="buildings-count" tabindex="-1" data-results class="text-xl font-bold text-ink">
-				{data.total} Gebäude
+				{(data.total === 1 ? m.buildings_count_one : m.buildings_count_many)({ count: data.total })}
 			</h2>
 			<ul class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
 				{#each data.buildings as building (building.id)}

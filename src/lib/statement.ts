@@ -1,12 +1,22 @@
+import { m } from '$lib/paraglide/messages';
 import { localToday } from '$lib/contract-status';
 import type { StatementStatus } from './types';
 import type { Tone } from './ui/tone';
 
+// Getters: read when shown, in the language of the request
 export const statusLabels: Record<StatementStatus, string> = {
-	draft: 'Entwurf',
-	sent: 'Versendet',
-	paid: 'Bezahlt',
-	overdue: 'Überfällig'
+	get draft() {
+		return m.statements_status_draft();
+	},
+	get sent() {
+		return m.statements_status_sent();
+	},
+	get paid() {
+		return m.statements_status_paid();
+	},
+	get overdue() {
+		return m.statements_status_overdue();
+	}
 };
 
 export const statusTones: Record<StatementStatus, Tone> = {

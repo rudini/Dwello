@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import type { BuildingDetailsData } from './+page.server';
 	import type { ActionData } from './$types';
 	import Button from '$lib/ui/Button.svelte';
@@ -26,18 +27,18 @@
 <div class="flex flex-col gap-8">
 	<PageHeader
 		title={name}
-		purpose="Angaben und Wohnungen des Gebäudes"
-		trail={[{ href: '/buildings', label: 'Gebäude' }]}
+		purpose={m.buildings_detail_purpose()}
+		trail={[{ href: '/buildings', label: m.nav_buildings() }]}
 	>
 		{#snippet action()}
 			<Button href="/buildings/{building.id}/edit" icon="edit" testid="building-edit-button"
-				>Bearbeiten</Button
+				>{m.buildings_edit()}</Button
 			>
 			<Button
 				variant="danger-ghost"
 				icon="delete"
 				onclick={() => (deleting = true)}
-				testid="building-delete-button">Löschen</Button
+				testid="building-delete-button">{m.buildings_delete()}</Button
 			>
 		{/snippet}
 	</PageHeader>
@@ -46,10 +47,10 @@
 
 	<section aria-labelledby="apartments-heading" class="flex flex-col gap-4">
 		<div class="flex flex-wrap items-center justify-between gap-4">
-			<h2 id="apartments-heading" class="text-2xl font-bold text-ink">Wohnungen</h2>
+			<h2 id="apartments-heading" class="text-2xl font-bold text-ink">{m.nav_apartments()}</h2>
 			{#if data.apartments.length}
 				<Button href={newApartment} variant="primary" icon="add" testid="apartment-add-button"
-					>Wohnung erfassen</Button
+					>{m.buildings_add_apartment()}</Button
 				>
 			{/if}
 		</div>
@@ -58,10 +59,10 @@
 		{:else}
 			<div class="rounded-panel border border-line bg-surface">
 				<EmptyState
-					title="Noch keine Wohnungen"
-					text="Erfassen Sie die Wohnungen dieses Gebäudes, damit Sie sie vermieten und abrechnen können."
+					title={m.buildings_no_apartments()}
+					text={m.buildings_no_apartments_text()}
 					illustration="apartment"
-					actionLabel="Wohnung erfassen"
+					actionLabel={m.buildings_add_apartment()}
 					actionHref={newApartment}
 					actionTestid="apartment-first-create-button"
 				/>

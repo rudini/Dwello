@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import { searchAddresses, formatAddress, type Address } from '$lib/services/openplz';
 	import Field from '$lib/ui/Field.svelte';
 	import Icon from '$lib/ui/Icon.svelte';
@@ -16,7 +17,7 @@
 
 	let {
 		id = 'address-search',
-		label = 'Adresse suchen',
+		label = m.buildings_address_search(),
 		help,
 		example,
 		placeholder,
@@ -115,14 +116,14 @@
 					{#if isLoading}
 						<span class="flex size-12 items-center justify-center text-ink-muted" role="status">
 							<span class="animate-spin"><Icon name="loading" /></span>
-							<span class="sr-only">Adressen werden gesucht …</span>
+							<span class="sr-only">{m.buildings_address_searching()}</span>
 						</span>
 					{:else if value}
 						<button
 							type="button"
 							onclick={clear}
 							class="flex size-12 items-center justify-center rounded-control text-ink-muted hover:text-ink"
-							aria-label="Suche löschen"
+							aria-label={m.buildings_address_clear()}
 						>
 							<Icon name="close" />
 						</button>
@@ -137,7 +138,7 @@
 			id="{id}-results"
 			class="absolute z-50 mt-2 max-h-80 w-full overflow-auto rounded-control border border-line-strong bg-surface shadow-raised"
 			role="listbox"
-			aria-label="Gefundene Adressen"
+			aria-label={m.buildings_address_results()}
 		>
 			{#each results as address, index (index)}
 				<li

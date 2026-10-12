@@ -1,0 +1,142 @@
+import { afterEach, describe, expect, it } from 'vitest';
+import { baseLocale, overwriteGetLocale } from '$lib/paraglide/runtime';
+import { floorLabel, occupancyParts, statusLabels, statusText } from '$lib/apartment';
+import { contractPeriod, statusBadges } from '$lib/contract-status';
+import { localName } from '$lib/names';
+import { overviewDeadlines, overviewTasks } from '$lib/overview';
+import { parseBuildingForm } from '$lib/server/building-form';
+import { buildingTypeLabel } from '$lib/building-type';
+import {
+	load as detailLoad,
+	type BuildingDetailsData
+} from '../routes/buildings/[id]/+page.server';
+import backendBuilding from '../../tests/contracts/building.json';
+
+afterEach(() => overwriteGetLocale(() => baseLocale));
+
+const french = () => overwriteGetLocale(() => 'fr');
+
+describe('Gebäude und Wohnungen in der gewählten Sprache', () => {
+	it('nennt das Stockwerk wie die Abrechnung', () => {
+		french();
+		expect([-2, 0, 1, 3].map(floorLabel)).toEqual([
+			'sous-sol',
+			'rez-de-chaussée',
+			'1er étage',
+			'3e étage'
+		]);
+		overwriteGetLocale(() => 'en');
+		expect(floorLabel(2)).toBe('floor 2');
+	});
+
+	it('nennt Mietstatus und Belegung auf Französisch', () => {
+		french();
+		expect(statusLabels.vacant).toBe('Vacant');
+		expect(statusText({ status: 'relet', nextContractStart: '2026-11-01' })).toBe(
+			'Reloué dès le 01.11.2026'
+		);
+		expect(occupancyParts({ occupiedCount: 1, vacantCount: 2 })).toEqual(['1 loué', '2 vacants']);
+	});
+
+	it('nennt Vertragsstatus und Vertragsdauer auf Italienisch', () => {
+		overwriteGetLocale(() => 'it');
+		expect(statusBadges.future.label).toBe('Futuro');
+		expect(contractPeriod('2024-04-01', null, 'active')).toBe(
+			'dal 01.04.2024, a tempo indeterminato'
+		);
+	});
+
+	it('zeigt den Gebäudetyp übersetzt und speichert ihn deutsch', () => {
+		overwriteGetLocale(() => 'en');
+		expect(buildingTypeLabel('Mischnutzung')).toBe('Mixed use');
+		expect(buildingTypeLabel('Eigener Typ')).toBe('Eigener Typ');
+	});
+
+	it('meldet fehlende Angaben im Gebäudeformular auf Französisch', () => {
+		french();
+		const { errors } = parseBuildingForm(new FormData());
+		expect(errors.postalCode).toBe('Le NPA est obligatoire');
+	});
+
+	it('nennt Stammdaten mit ihrem Namen in der gewählten Sprache', () => {
+		const category = { name: 'Heating', nameDE: 'Heizung', nameFR: 'Chauffage', nameEN: null };
+		expect(localName(category)).toBe('Heizung');
+		french();
+		expect(localName(category)).toBe('Chauffage');
+		overwriteGetLocale(() => 'en');
+		expect(localName(category)).toBe('Heizung');
+	});
+
+	it('nennt die Kategorie der Tankbestände in der gewählten Sprache', async () => {
+		french();
+		const fetch = (async (url: string) =>
+			Response.json(
+				url.endsWith('/fuel-stocks')
+					? [{ id: 'f1', readingDate: '2024-12-31', amount: '10', categoryId: 'c1' }]
+					: url.includes('/categories')
+						? {
+								categories: [
+									{
+										id: 'c1',
+										name: 'Heating',
+										nameDE: 'Heizung',
+										nameFR: 'Chauffage',
+										isHeatingCost: true,
+										isAllowedUtilityCost: true
+									}
+								]
+							}
+						: url.includes('/apartments')
+							? { apartments: [] }
+							: backendBuilding
+			)) as typeof globalThis.fetch;
+		const data = (await detailLoad({
+			params: { id: 'b1' },
+			fetch
+		} as never)) as BuildingDetailsData;
+		expect(data.fuelStocks![0].categoryName).toBe('Chauffage');
+		expect(data.heatingCategories).toEqual([{ id: 'c1', name: 'Chauffage' }]);
+	});
+});
+
+describe('Übersicht in der gewählten Sprache', () => {
+	const portfolio = {
+		totalBuildings: 0,
+		totalApartments: 0,
+		occupiedApartments: 0,
+		reletApartments: 0
+	};
+	const input = {
+		today: '2026-10-10',
+		portfolio,
+		statementCounts: { draft: 1, sent: 0, paid: 0, overdue: 0 },
+		dueStatements: [{ id: 's1', tenantName: 'Anna Keller', paymentDeadline: '2026-10-05' }],
+		lettersToSend: 2,
+		endingContracts: []
+	};
+
+	it('nennt Aufgaben auf Französisch', () => {
+		french();
+		const tasks = overviewTasks(input);
+		expect(tasks.map((task) => task.title)).toEqual([
+			'Saisir le premier immeuble',
+			'Envoyer les lettres',
+			'Vérifier et envoyer les décomptes'
+		]);
+		expect(tasks[1].text).toMatch(/^2 lettres sont prêtes/);
+		expect(tasks[2].text).toMatch(/^1 décompte des charges est encore/);
+	});
+
+	it('nennt den Abstand einer Frist auf Englisch', () => {
+		overwriteGetLocale(() => 'en');
+		expect(overviewDeadlines(input)[0].when).toBe('passed 5 days ago');
+	});
+});
+
+describe('Abrechnungsstatus auf der Übersicht', () => {
+	it('heisst auf Englisch wie im Begriffsverzeichnis', async () => {
+		const { statusLabels } = await import('$lib/statement');
+		overwriteGetLocale(() => 'en');
+		expect(statusLabels).toEqual({ draft: 'Draft', sent: 'Sent', paid: 'Paid', overdue: 'Overdue' });
+	});
+});

@@ -4658,8 +4658,17 @@ header and on pages without it. Branch `claude/optimistic-clarke-nn8u7t` from `m
   `i18n.test.ts` (same keys in every file, no empty text, `<html lang>`, German despite a French browser),
   `language-switcher.dom.test.ts`, `format-language.test.ts`; scenarios `sprachen.feature`; axe state `other-language`
   (login, dashboard) in `screens.json` and `accessibility.feature`.
-- [ ] Step 2 – dashboard and buildings
+- [x] **Step 2 – dashboard and buildings**: `src/routes/dashboard/**`, `src/routes/buildings/**`, `src/lib/overview.ts`,
+  `apartment.ts` (floors as in the PDF, statuses), `contract-status.ts`, `statement.ts` (status labels),
+  `server/building-form.ts`, new `building-type.ts` (stored German types shown in the UI language), `names.ts`
+  (`localName`), cantons, `Intl.ListFormat` in the UI language. Module-level texts are getters. Test
+  `buildings-i18n.test.ts`. Backend texts still passed through: `buildings/new` and `buildings/[id]/edit` actions
+  (`error.error || error.message`), handled with the error codes.
+  Fallow: `statusLabels`/`statusTones` exist in `apartment.ts` and `statement.ts` since before; with both modules now
+  importing the messages, Fallow groups them as duplicate exports, and line suppressions do not apply to that rule.
+  Renaming would change existing tests, so `.fallowrc.json` `ignoreExports` names exactly these two in `statement.ts`.
 - [ ] Step 3 – apartments and tenants
+- [ ] Backend error codes (decided: add a stable `code` to backend error responses, BFF translates by code)
 - [ ] Step 4 – rental contracts
 - [ ] Step 5 – invoices and documents
 - [ ] Step 6 – statements

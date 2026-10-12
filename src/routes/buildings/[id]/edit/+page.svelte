@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import type { BuildingEditData } from './+page.server';
 	import type { ActionData } from './$types';
 	import BuildingForm from '../../BuildingForm.svelte';
@@ -13,15 +14,15 @@
 </script>
 
 <svelte:head>
-	<title>Gebäude bearbeiten - Dwello</title>
+	<title>{m.buildings_edit_title()} - Dwello</title>
 </svelte:head>
 
 <div class="mx-auto flex max-w-3xl flex-col gap-8">
 	<PageHeader
-		title="Gebäude bearbeiten"
-		purpose="Korrigieren Sie die Angaben von {name}."
+		title={m.buildings_edit_title()}
+		purpose={m.buildings_edit_purpose({ name })}
 		trail={[
-			{ href: '/buildings', label: 'Gebäude' },
+			{ href: '/buildings', label: m.nav_buildings() },
 			{ href: `/buildings/${building.id}`, label: name }
 		]}
 	/>

@@ -2,22 +2,42 @@ import type { ApartmentStatus } from './types';
 import type { IconName } from './ui/icons';
 import type { Tone } from './ui/tone';
 import { formatDate } from './utils/format';
+import { m } from '$lib/paraglide/messages';
 
+// Texts are getters and functions: read when shown, so they are in the language of the request
+
+/** The floor in the words of the statement PDF; the UI shows any floor below ground as one */
 export const floorLabel = (floor: number) =>
-	floor < 0 ? 'UG' : floor === 0 ? 'EG' : `${floor}. OG`;
+	floor < 0
+		? m.apartments_floor_basement()
+		: floor === 0
+			? m.apartments_floor_ground()
+			: floor === 1
+				? m.apartments_floor_first()
+				: m.apartments_floor_upper({ floor });
 
 export const floorOptions = [-1, 0, 1, 2, 3, 4, 5, 6].map((floor) => ({
 	value: String(floor),
-	label: floorLabel(floor)
+	get label() {
+		return floorLabel(floor);
+	}
 }));
 
 export const roomOptions = ['1', '1.5', '2', '2.5', '3', '3.5', '4', '4.5', '5', '5.5', '6', '6.5'];
 
 export const statusLabels: Record<ApartmentStatus, string> = {
-	occupied: 'Vermietet',
-	relet: 'Wiedervermietet',
-	vacant: 'Leer',
-	reserved: 'Gesperrt'
+	get occupied() {
+		return m.apartments_status_occupied();
+	},
+	get relet() {
+		return m.apartments_status_relet();
+	},
+	get vacant() {
+		return m.apartments_status_vacant();
+	},
+	get reserved() {
+		return m.apartments_status_reserved();
+	}
 };
 
 export const statusTones = {
@@ -32,12 +52,19 @@ export const statusIcons: Partial<Record<ApartmentStatus, IconName>> = { vacant:
 
 /** What each Mietstatus means (UBIQUITOUS_LANGUAGE.md, Mietstatus) */
 export const statusHelp: Record<ApartmentStatus, string> = {
-	occupied: 'Ein Mietvertrag läuft.',
-	relet:
-		'Ein künftiger Mietvertrag ist abgeschlossen; die Wohnung ist ab seinem Vertragsbeginn vermietet, auch wenn sie bis dahin leer ist.',
+	get occupied() {
+		return m.apartments_status_help_occupied();
+	},
+	get relet() {
+		return m.apartments_status_help_relet();
+	},
 	// TODO(fachlich prüfen): the glossary names Leer and Gesperrt without explaining them
-	vacant: 'Es läuft kein Mietvertrag, die Wohnung kann vermietet werden.',
-	reserved: 'Sie haben die Wohnung von Hand gesperrt, zum Beispiel während einer Renovation.'
+	get vacant() {
+		return m.apartments_status_help_vacant();
+	},
+	get reserved() {
+		return m.apartments_status_help_reserved();
+	}
 };
 
 /** A building's apartments per Mietstatus so that they add up; relet and reserved only when there are any */
@@ -47,10 +74,18 @@ export function occupancyParts(b: {
 	vacantCount: number;
 	reservedCount?: number;
 }) {
-	const parts = [`${b.occupiedCount} vermietet`];
-	if (b.reletCount) parts.push(`${b.reletCount} wiedervermietet`);
-	parts.push(`${b.vacantCount} leer`);
-	if (b.reservedCount) parts.push(`${b.reservedCount} gesperrt`);
+	const count = (n: number, one: typeof m.apartments_count_occupied_one, many: typeof one) =>
+		(n === 1 ? one : many)({ count: n });
+	const parts = [
+		count(b.occupiedCount, m.apartments_count_occupied_one, m.apartments_count_occupied_many)
+	];
+	if (b.reletCount)
+		parts.push(count(b.reletCount, m.apartments_count_relet_one, m.apartments_count_relet_many));
+	parts.push(count(b.vacantCount, m.apartments_count_vacant_one, m.apartments_count_vacant_many));
+	if (b.reservedCount)
+		parts.push(
+			count(b.reservedCount, m.apartments_count_reserved_one, m.apartments_count_reserved_many)
+		);
 	return parts;
 }
 
@@ -61,5 +96,5 @@ export const countStatus = (apartments: { status: string }[], status: ApartmentS
 /** Status with the day a relet apartment's next tenant moves in */
 export const statusText = (a: { status: ApartmentStatus; nextContractStart?: string | null }) =>
 	a.status === 'relet' && a.nextContractStart
-		? `Wiedervermietet ab ${formatDate(a.nextContractStart)}`
+		? m.apartments_status_relet_from({ date: formatDate(a.nextContractStart) })
 		: statusLabels[a.status];

@@ -1,6 +1,7 @@
 import type { IconName } from './ui/icons';
 import type { IllustrationName } from './ui/illustrations';
 import { formatDate } from './utils/format';
+import { m } from '$lib/paraglide/messages';
 
 /** What the overview knows: the dashboard counts plus the statements, letters and contracts with a date ahead */
 export interface OverviewInput {
@@ -31,54 +32,57 @@ export interface Task {
 	link?: { href: string; label: string }; // a second way, shown as a text link beside the one action
 }
 
-// Set-up in the order a new landlord needs it; only the first missing step is shown
-const setup: { missing: (portfolio: OverviewInput['portfolio']) => boolean; task: Task }[] = [
+// Set-up in the order a new landlord needs it; only the first missing step is shown.
+// Tasks are built when asked for, so their texts are in the language of the request
+const setup: { missing: (portfolio: OverviewInput['portfolio']) => boolean; task: () => Task }[] = [
 	{
 		missing: (p) => p.totalBuildings === 0,
-		task: {
+		task: () => ({
 			id: 'first-building',
-			title: 'Erstes Gebäude erfassen',
-			text: 'Beginnen Sie mit der Adresse Ihrer Liegenschaft. Danach erfassen Sie die Wohnungen.',
+			title: m.dashboard_task_first_building(),
+			text: m.dashboard_task_first_building_text(),
 			href: '/buildings/new',
-			action: 'Gebäude erfassen',
+			action: m.buildings_add(),
 			icon: 'building',
 			illustration: 'building'
-		}
+		})
 	},
 	{
 		missing: (p) => p.totalApartments === 0,
-		task: {
+		task: () => ({
 			id: 'first-apartment',
-			title: 'Wohnungen erfassen',
-			text: 'Erfassen Sie jede Wohnung mit Wohnungsnummer, Stockwerk, Fläche und Zimmeranzahl.',
+			title: m.dashboard_task_first_apartment(),
+			text: m.dashboard_task_first_apartment_text(),
 			href: '/apartments/new',
-			action: 'Wohnung erfassen',
+			action: m.buildings_add_apartment(),
 			icon: 'apartment',
 			illustration: 'apartment'
-		}
+		})
 	},
 	{
 		missing: (p) => p.occupiedApartments + p.reletApartments === 0,
-		task: {
+		task: () => ({
 			id: 'first-contract',
-			title: 'Ersten Mietvertrag erfassen',
-			text: 'Der Mietvertrag verbindet einen Mieter mit einer Wohnung. Den Mieter können Sie dabei gleich erfassen.',
+			title: m.dashboard_task_first_contract(),
+			text: m.dashboard_task_first_contract_text(),
 			href: '/contracts/new',
-			action: 'Mietvertrag erfassen',
+			action: m.dashboard_add_contract(),
 			icon: 'contract',
 			illustration: 'contract'
-		}
+		})
 	}
 ];
 
-const count = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
+type CountMessage = (inputs: { count: number }) => string;
+const count = (n: number, one: CountMessage, many: CountMessage) =>
+	(n === 1 ? one : many)({ count: n });
 
 // The invoices of a period: one calendar year can be filtered, a period across the turn of the year cannot
 function invoicesOf({ start, end }: { start: string; end: string }) {
 	const year = start.slice(0, 4);
 	return start === `${year}-01-01` && end === `${year}-12-31`
-		? { href: `/invoices?year=${year}`, label: `Rechnungen ${year} ansehen` }
-		: { href: '/invoices', label: 'Rechnungen ansehen' };
+		? { href: `/invoices?year=${year}`, label: m.dashboard_invoices_of_year({ year }) }
+		: { href: '/invoices', label: m.dashboard_invoices() };
 }
 
 // Recurring work, most urgent first: money already late, letters waiting at home, statements not yet sent
@@ -87,36 +91,52 @@ function workTasks({ statementCounts, lettersToSend, missingPeriod }: OverviewIn
 		statementCounts.overdue > 0 && {
 			id: 'overdue',
 			// TODO(fachlich prüfen): shown from the Zahlungsfrist on; a Mahnung is customary only after the Mahnfrist
-			title: 'Überfällige Abrechnungen prüfen',
-			text: `${count(statementCounts.overdue, 'Nebenkostenabrechnung ist', 'Nebenkostenabrechnungen sind')} über der Zahlungsfrist. Prüfen Sie, ob das Geld eingegangen ist: Dann markieren Sie die Abrechnung als bezahlt, sonst können Sie eine Mahnung senden. Bei einer Rückerstattung überweisen Sie den Betrag und markieren die Abrechnung danach als bezahlt.`,
+			title: m.dashboard_task_overdue(),
+			text: count(
+				statementCounts.overdue,
+				m.dashboard_task_overdue_text_one,
+				m.dashboard_task_overdue_text_many
+			),
 			href: '/statements?status=overdue',
-			action: 'Überfällige ansehen',
+			action: m.dashboard_task_overdue_action(),
 			icon: 'reminder'
 		},
 		lettersToSend > 0 && {
 			id: 'letters',
-			title: 'Briefe verschicken',
-			text: `${count(lettersToSend, 'Brief ist', 'Briefe sind')} zum Versand bereit. Drucken Sie sie aus, schicken Sie sie per Post und markieren Sie sie danach als versendet.`,
+			title: m.dashboard_task_letters(),
+			text: count(
+				lettersToSend,
+				m.dashboard_task_letters_text_one,
+				m.dashboard_task_letters_text_many
+			),
 			href: '/documents?status=to_send',
-			action: 'Briefe ansehen',
+			action: m.dashboard_task_letters_action(),
 			icon: 'mail'
 		},
 		!!missingPeriod && {
 			// TODO(fachlich prüfen): suggestion without legal deadline, see docs/design/offene-punkte.md
 			id: 'missing-period',
-			title: 'Nebenkostenabrechnungen erstellen',
-			text: `Die Abrechnungsperiode ${formatDate(missingPeriod.start)} – ${formatDate(missingPeriod.end)} ist abgelaufen. Noch nicht abgerechnet: ${missingPeriod.buildings.join(', ')}. Erfassen Sie zuerst alle Rechnungen dieser Periode und erstellen Sie dann die Abrechnungen.`,
+			title: m.dashboard_task_missing_period(),
+			text: m.dashboard_task_missing_period_text({
+				start: formatDate(missingPeriod.start),
+				end: formatDate(missingPeriod.end),
+				buildings: missingPeriod.buildings.join(', ')
+			}),
 			href: '/statements/generate',
-			action: 'Abrechnungen erstellen',
+			action: m.dashboard_create_statements(),
 			icon: 'calculate',
 			link: invoicesOf(missingPeriod)
 		},
 		statementCounts.draft > 0 && {
 			id: 'drafts',
-			title: 'Abrechnungen prüfen und versenden',
-			text: `${count(statementCounts.draft, 'Nebenkostenabrechnung ist', 'Nebenkostenabrechnungen sind')} noch im Entwurf. Prüfen Sie sie und stellen Sie sie den Mietern zu.`,
+			title: m.dashboard_task_drafts(),
+			text: count(
+				statementCounts.draft,
+				m.dashboard_task_drafts_text_one,
+				m.dashboard_task_drafts_text_many
+			),
 			href: '/statements?status=draft',
-			action: 'Entwürfe ansehen',
+			action: m.dashboard_task_drafts_action(),
 			icon: 'statement'
 		}
 	];
@@ -126,10 +146,10 @@ function workTasks({ statementCounts, lettersToSend, missingPeriod }: OverviewIn
 /** Tasks in the order they should be done; set-up comes first */
 export function overviewTasks(input: OverviewInput): Task[] {
 	const step = setup.find(({ missing }) => missing(input.portfolio));
-	return [...(step ? [step.task] : []), ...workTasks(input)];
+	return [...(step ? [step.task()] : []), ...workTasks(input)];
 }
 
-/** A date the landlord should not miss, with how far away it is in words */
+/** A date the landlord should not miss, with how far away it is in words; `kind` is an id, shown via a message */
 export interface Deadline {
 	id: string;
 	kind: 'Zahlungsfrist' | 'Vertragsende';
@@ -148,8 +168,13 @@ const daysFrom = (today: string, date: string) =>
 	Math.round((Date.parse(date.slice(0, 10)) - Date.parse(today)) / 86_400_000);
 
 function when(days: number) {
-	if (days < 0) return `seit ${-days} ${-days === 1 ? 'Tag' : 'Tagen'} abgelaufen`;
-	return days === 0 ? 'heute' : days === 1 ? 'morgen' : `in ${days} Tagen`;
+	if (days < 0)
+		return (-days === 1 ? m.dashboard_passed_one : m.dashboard_passed_many)({ days: -days });
+	return days === 0
+		? m.dashboard_today()
+		: days === 1
+			? m.dashboard_tomorrow()
+			: m.dashboard_in_days({ days });
 }
 
 /** Payment deadlines due soon or passed, and contracts ending soon, earliest first */

@@ -1,6 +1,7 @@
 import type { ContractHistory } from './types';
 import type { Tone } from './ui/tone';
 import { formatDate } from './utils/format';
+import { m } from '$lib/paraglide/messages';
 
 type Status = ContractHistory['status'];
 
@@ -20,9 +21,24 @@ export const localToday = () =>
 
 /** Vertragsstatus in the glossary's words, with its badge tone */
 export const statusBadges: Record<Status, { label: string; tone: Tone }> = {
-	active: { label: 'Laufend', tone: 'positive' },
-	future: { label: 'Künftig', tone: 'info' },
-	ended: { label: 'Beendet', tone: 'neutral' }
+	active: {
+		get label() {
+			return m.contracts_status_active();
+		},
+		tone: 'positive'
+	},
+	future: {
+		get label() {
+			return m.contracts_status_future();
+		},
+		tone: 'info'
+	},
+	ended: {
+		get label() {
+			return m.contracts_status_ended();
+		},
+		tone: 'neutral'
+	}
 };
 
 /** Contract period in words; a contract without end is named by its start, never "bis heute" */
@@ -32,5 +48,8 @@ export function contractPeriod(
 	status: Status
 ) {
 	if (endDate) return `${formatDate(startDate)} – ${formatDate(endDate)}`;
-	return `${status === 'future' ? 'ab' : 'seit'} ${formatDate(startDate)}, unbefristet`;
+	const date = formatDate(startDate);
+	return status === 'future'
+		? m.contracts_period_from({ date })
+		: m.contracts_period_since({ date });
 }

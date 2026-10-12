@@ -1,6 +1,8 @@
+import { m } from '$lib/paraglide/messages';
 import { error, fail, redirect } from '@sveltejs/kit';
 import { countStatus } from '$lib/apartment';
 import { plainAmount } from '$lib/invoice';
+import { localName } from '$lib/names';
 import type { BuildingWithStats, Apartment, ApartmentStatus } from '$lib/types';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -26,12 +28,11 @@ type Fetch = typeof globalThis.fetch;
 
 // Why the backend refused a reading, in words: the day is taken, or the tank's category differs
 async function notSaved(response: Response) {
-	if (response.status !== 409)
-		return 'Der Bestand konnte nicht gespeichert werden. Versuchen Sie es erneut.';
+	if (response.status !== 409) return m.buildings_fuel_not_saved();
 	const { error = '' } = await response.json().catch(() => ({}));
 	return String(error).includes('category')
-		? 'Alle Bestände eines Gebäudes gehören zur selben Kategorie. Wählen Sie die Kategorie der bisherigen Bestände.'
-		: 'Für diesen Stichtag ist schon ein Bestand erfasst. Löschen Sie ihn zuerst.';
+		? m.buildings_fuel_other_category()
+		: m.buildings_fuel_date_taken();
 }
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -46,7 +47,7 @@ async function fuelStockData(fetch: Fetch, buildingId: string) {
 	const categories: Record<string, string | boolean>[] | null = categoriesRes.ok
 		? ((await categoriesRes.json()).categories ?? [])
 		: null;
-	const name = (c: Record<string, string | boolean>) => String(c.nameDE || c.name);
+	const name = (c: Record<string, string | boolean>) => localName(c as never);
 	return {
 		fuelStocks: Array.isArray(stocks)
 			? stocks.map((s: Record<string, string>) => {
@@ -79,9 +80,9 @@ export const load: PageServerLoad = async ({ params, fetch }): Promise<BuildingD
 
 		if (!buildingRes.ok) {
 			if (buildingRes.status === 404) {
-				throw error(404, 'Gebäude nicht gefunden');
+				throw error(404, m.buildings_not_found());
 			}
-			throw error(buildingRes.status, 'Fehler beim Laden des Gebäudes');
+			throw error(buildingRes.status, m.buildings_load_failed());
 		}
 
 		const buildingData = await buildingRes.json();
@@ -128,7 +129,7 @@ export const load: PageServerLoad = async ({ params, fetch }): Promise<BuildingD
 		if (err && typeof err === 'object' && 'status' in err) {
 			throw err;
 		}
-		throw error(500, 'Fehler beim Laden des Gebäudes');
+		throw error(500, m.buildings_load_failed());
 	}
 };
 
@@ -138,7 +139,7 @@ export const actions: Actions = {
 			method: 'DELETE'
 		});
 		if (!response.ok) {
-			return fail(response.status, { deleteError: 'Gebäude konnte nicht gelöscht werden.' });
+			return fail(response.status, { deleteError: m.buildings_delete_failed() });
 		}
 		throw redirect(303, '/buildings');
 	},
@@ -150,9 +151,9 @@ export const actions: Actions = {
 		const amount = plainAmount(String(form.get('amount') ?? ''));
 		const categoryId = String(form.get('categoryId') ?? '');
 		const fuelStockErrors: Record<string, string> = {};
-		if (!readingDate) fuelStockErrors.readingDate = 'Bitte geben Sie den Stichtag ein.';
+		if (!readingDate) fuelStockErrors.readingDate = m.buildings_fuel_date_missing();
 		if (!/^\d+(\.\d{1,2})?$/.test(amount))
-			fuelStockErrors.amount = 'Bitte geben Sie den Wert in Franken ein, zum Beispiel 2650.00.';
+			fuelStockErrors.amount = m.buildings_fuel_amount_invalid();
 		if (Object.keys(fuelStockErrors).length) return fail(400, { fuelStockErrors });
 
 		const response = await fetch(`${BACKEND_URL}/api/v1/buildings/${params.id}/fuel-stocks`, {
@@ -169,7 +170,7 @@ export const actions: Actions = {
 		const stockId = String((await request.formData()).get('stockId'));
 		const notDeleted = (status: number) =>
 			fail(status, {
-				fuelStockDeleteError: 'Der Bestand konnte nicht gelöscht werden. Laden Sie die Seite neu.'
+				fuelStockDeleteError: m.buildings_fuel_not_deleted()
 			});
 		if (!UUID.test(stockId)) return notDeleted(400);
 		const response = await fetch(

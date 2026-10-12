@@ -1,3 +1,4 @@
+import { m } from '$lib/paraglide/messages';
 import { error, redirect } from '@sveltejs/kit';
 import type { BuildingWithStats } from '$lib/types';
 import { formError, parseBuildingForm } from '$lib/server/building-form';
@@ -17,9 +18,9 @@ export const load: PageServerLoad = async ({ params, fetch }): Promise<BuildingE
 
 		if (!response.ok) {
 			if (response.status === 404) {
-				throw error(404, 'Gebäude nicht gefunden');
+				throw error(404, m.buildings_not_found());
 			}
-			throw error(response.status, 'Fehler beim Laden des Gebäudes');
+			throw error(response.status, m.buildings_load_failed());
 		}
 
 		const data = await response.json();
@@ -47,7 +48,7 @@ export const load: PageServerLoad = async ({ params, fetch }): Promise<BuildingE
 		if (err && typeof err === 'object' && 'status' in err) {
 			throw err;
 		}
-		throw error(500, 'Fehler beim Laden des Gebäudes');
+		throw error(500, m.buildings_load_failed());
 	}
 };
 
@@ -68,11 +69,11 @@ export const actions: Actions = {
 
 			if (!response.ok) {
 				const error = await response.json();
-				return formError(error.error || error.message || 'Fehler beim Speichern');
+				return formError(error.error || error.message || m.buildings_save_failed());
 			}
 		} catch (err) {
 			console.error('Failed to update building:', err);
-			return formError('Fehler beim Speichern');
+			return formError(m.buildings_save_failed());
 		}
 
 		throw redirect(303, `/buildings/${params.id}`);

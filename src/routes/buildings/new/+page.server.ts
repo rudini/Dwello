@@ -1,3 +1,4 @@
+import { m } from '$lib/paraglide/messages';
 import { redirect } from '@sveltejs/kit';
 import { formError, parseBuildingForm } from '$lib/server/building-form';
 import type { Actions } from './$types';
@@ -20,12 +21,12 @@ export const actions: Actions = {
 			});
 		} catch (err) {
 			console.error('Failed to create building:', err);
-			return formError('Fehler beim Erstellen');
+			return formError(m.buildings_create_failed());
 		}
 
 		if (!response.ok) {
 			const error = await response.json();
-			return formError(error.error || error.message || 'Fehler beim Erstellen');
+			return formError(error.error || error.message || m.buildings_create_failed());
 		}
 
 		const newBuilding = await response.json();
