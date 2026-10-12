@@ -378,7 +378,7 @@ def _one_caller_exports(text, elsewhere):
 
 
 def _other_production_code(module, top):
-    """The text of every other TypeScript/JavaScript production file in the module's repository."""
+    """The text of every other production code file (`protocol.is_production`) in the module's repository."""
     return tuple(text for path, text in _production_code(top) if path != module.resolve())
 
 
@@ -388,7 +388,7 @@ def _production_code(top):
     listed = subprocess.run(["git", "ls-files", "-z", "-co", "--exclude-standard"], cwd=top, check=True,
                             capture_output=True, text=True).stdout.split("\0")
     return tuple(((top / rel).resolve(), _without_comments((top / rel).read_text(errors="replace"))) for rel in listed
-                 if protocol.is_production(rel) and (top / rel).is_file())  # .svelte and .vue too
+                 if protocol.is_production(rel) and (top / rel).is_file())  # .svelte, .vue and .py too
 
 
 def _body(text, match):
