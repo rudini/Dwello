@@ -1,6 +1,7 @@
 <script lang="ts">
 	import HeatingProfileChart from '$lib/ui/HeatingProfileChart.svelte';
-	import { germanName } from '$lib/names';
+	import { localName } from '$lib/names';
+	import { m } from '$lib/paraglide/messages';
 	import Badge from '$lib/ui/Badge.svelte';
 	import Button from '$lib/ui/Button.svelte';
 	import EmptyState from '$lib/ui/EmptyState.svelte';
@@ -12,30 +13,30 @@
 </script>
 
 <svelte:head>
-	<title>Heizprofile - Dwello</title>
+	<title>{m.nav_heating_profiles()} - Dwello</title>
 </svelte:head>
 
 <div class="flex flex-col gap-8" data-testid="heating-profiles-page">
 	<PageHeader
-		title="Heizprofile"
+		title={m.nav_heating_profiles()}
 		purpose={help.heatingProfile}
-		trail={[{ href: '/config', label: 'Einstellungen' }]}
+		trail={[{ href: '/config', label: m.nav_settings() }]}
 	>
 		{#snippet action()}
 			<Button
 				href="/config/heating-profiles/new"
 				variant="primary"
 				icon="add"
-				testid="heating-profiles-new-button">Heizprofil erfassen</Button
+				testid="heating-profiles-new-button">{m.profiles_add()}</Button
 			>
 		{/snippet}
 	</PageHeader>
 
 	{#if data.profiles.length === 0}
 		<EmptyState
-			title="Noch keine Heizprofile"
-			text="Erfassen Sie ein Heizprofil, damit die Heizkosten bei einem Mieterwechsel nach Monaten verteilt werden."
-			actionLabel="Heizprofil erfassen"
+			title={m.profiles_empty()}
+			text={m.profiles_empty_text()}
+			actionLabel={m.profiles_add()}
 			actionHref="/config/heating-profiles/new"
 			illustration="meter"
 		/>
@@ -52,12 +53,12 @@
 							<a
 								href="/config/heating-profiles/{profile.id}"
 								class="text-accent underline underline-offset-4 after:absolute after:inset-0"
-								>{germanName(profile)}</a
+								>{localName(profile)}</a
 							>
 						</h2>
 						<Badge
 							tone={profile.type === 'custom' ? 'info' : 'neutral'}
-							label={profile.type === 'custom' ? 'Eigenes Heizprofil' : 'Vordefiniert'}
+							label={profile.type === 'custom' ? m.profiles_custom() : m.profiles_predefined()}
 						/>
 					</div>
 					<HeatingProfileChart shares={profile.monthlyPercentages} />

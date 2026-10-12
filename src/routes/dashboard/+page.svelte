@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import Icon from '$lib/ui/Icon.svelte';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import type { IconName } from '$lib/ui/icons';
@@ -11,24 +12,24 @@
 	let { data }: { data: OverviewData } = $props();
 
 	const quickActions: { label: string; href: string; icon: IconName }[] = [
-		{ label: 'Mieter erfassen', href: '/tenants/new', icon: 'user-add' },
-		{ label: 'Mietvertrag erfassen', href: '/contracts/new', icon: 'contract' },
-		{ label: 'Rechnung erfassen', href: '/invoices/new', icon: 'invoice' },
-		{ label: 'Abrechnungen erstellen', href: '/statements/generate', icon: 'statement' }
+		{ label: m.dashboard_add_tenant(), href: '/tenants/new', icon: 'user-add' },
+		{ label: m.dashboard_add_contract(), href: '/contracts/new', icon: 'contract' },
+		{ label: m.dashboard_add_invoice(), href: '/invoices/new', icon: 'invoice' },
+		{ label: m.dashboard_create_statements(), href: '/statements/generate', icon: 'statement' }
 	];
 </script>
 
 <svelte:head>
-	<title>Übersicht - Dwello</title>
+	<title>{m.nav_overview()} - Dwello</title>
 </svelte:head>
 
 <div class="flex flex-col gap-10">
-	<PageHeader title="Übersicht" purpose="Was jetzt zu tun ist und welche Fristen anstehen." />
+	<PageHeader title={m.nav_overview()} purpose={m.dashboard_purpose()} />
 	<TaskList tasks={data.tasks} />
 	<DeadlineList deadlines={data.deadlines} />
 
 	<section aria-labelledby="quick-heading" class="flex flex-col gap-4">
-		<h2 id="quick-heading" class="text-2xl font-bold text-ink">Häufige Arbeiten</h2>
+		<h2 id="quick-heading" class="text-2xl font-bold text-ink">{m.dashboard_quick_heading()}</h2>
 		<ul class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
 			{#each quickActions as action (action.href)}
 				<li>

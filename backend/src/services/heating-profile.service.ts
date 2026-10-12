@@ -8,6 +8,7 @@
 import { eq, sql, asc, ilike, and } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { heatingProfiles, type HeatingProfile, type NewHeatingProfile } from '../db/schema';
+import { CodedError, refusal, type ErrorCode, type Refusal } from './coded-error';
 import { Conflict } from './conflict';
 import { isDefaultSetting } from './default-setting';
 
@@ -122,6 +123,7 @@ export function validatePercentages(percentages: MonthlyPercentages): {
 	isValid: boolean;
 	sum: number;
 	error?: string;
+	errorCode?: ErrorCode;
 } {
 	const sum =
 		percentages.january +
@@ -143,7 +145,8 @@ export function validatePercentages(percentages: MonthlyPercentages): {
 		return {
 			isValid: false,
 			sum,
-			error: `Die Monatsanteile müssen zusammen 100 % ergeben (aktuell ${Number(sum.toFixed(2))} %).`
+			error: `Die Monatsanteile müssen zusammen 100 % ergeben (aktuell ${Number(sum.toFixed(2))} %).`,
+			errorCode: { code: 'HEATING_PROFILE_SHARES_SUM', params: { sum: Number(sum.toFixed(2)) } }
 		};
 	}
 
@@ -153,13 +156,20 @@ export function validatePercentages(percentages: MonthlyPercentages): {
 			return {
 				isValid: false,
 				sum,
-				error: `Der Anteil für ${month} darf nicht negativ sein.`
+				error: `Der Anteil für ${month} darf nicht negativ sein.`,
+				errorCode: { code: 'HEATING_PROFILE_SHARE_NEGATIVE', params: { month } }
 			};
 		}
 	}
 
 	return { isValid: true, sum };
 }
+
+const nameTaken = (name: string) =>
+	new Conflict('HEATING_PROFILE_NAME_TAKEN', `Ein Heizprofil mit dem Namen "${name}" existiert bereits.`, { name });
+
+const invalidShares = ({ error, errorCode }: ReturnType<typeof validatePercentages>) =>
+	new CodedError(errorCode!.code, error!, errorCode!.params);
 
 /**
  * Create a new heating profile
@@ -168,13 +178,13 @@ export async function createHeatingProfile(data: NewHeatingProfile): Promise<Hea
 	// Check for duplicate name
 	const existing = await getHeatingProfileByName(data.name);
 	if (existing) {
-		throw new Conflict(`Ein Heizprofil mit dem Namen "${data.name}" existiert bereits.`);
+		throw nameTaken(data.name);
 	}
 
 	// Validate percentages
 	const validation = validatePercentages(getMonthlyPercentages(data));
 	if (!validation.isValid) {
-		throw new Error(validation.error);
+		throw invalidShares(validation);
 	}
 
 	const [profile] = await db.insert(heatingProfiles).values(data).returning();
@@ -196,19 +206,19 @@ export async function updateHeatingProfile(
 
 	// Don't allow changing type
 	if (data.type && data.type !== existing.type) {
-		throw new Error('Cannot change heating profile type');
+		throw new CodedError('HEATING_PROFILE_TYPE_FIXED', 'Cannot change heating profile type');
 	}
 
 	// Don't allow modifying predefined profiles' percentages
 	if (existing.type === 'predefined' && percentageFields.some((field) => data[field] !== undefined)) {
-		throw new Error('Die Monatsanteile vordefinierter Heizprofile können nicht geändert werden.');
+		throw new CodedError('HEATING_PROFILE_SHARES_FIXED', 'Die Monatsanteile vordefinierter Heizprofile können nicht geändert werden.');
 	}
 
 	// Check for duplicate name if name is being changed
 	if (data.name && data.name !== existing.name) {
 		const duplicate = await getHeatingProfileByName(data.name);
 		if (duplicate && duplicate.id !== id) {
-			throw new Conflict(`Ein Heizprofil mit dem Namen "${data.name}" existiert bereits.`);
+			throw nameTaken(data.name);
 		}
 	}
 
@@ -219,7 +229,7 @@ export async function updateHeatingProfile(
 		) as MonthlyShares;
 		const validation = validatePercentages(getMonthlyPercentages(shares));
 		if (!validation.isValid) {
-			throw new Error(validation.error);
+			throw invalidShares(validation);
 		}
 	}
 
@@ -237,21 +247,25 @@ export async function updateHeatingProfile(
  */
 export async function deleteHeatingProfile(
 	id: string
-): Promise<{ success: boolean; conflict?: boolean; error?: string }> {
+): Promise<{ success: boolean; conflict?: boolean } & Partial<Refusal>> {
 	// Check if profile exists
 	const existing = await getHeatingProfile(id);
 	if (!existing) {
-		return { success: false, error: 'Heating profile not found' };
+		return { success: false, ...refusal('HEATING_PROFILE_NOT_FOUND', 'Heating profile not found') };
 	}
 
 	// Don't allow deleting predefined profiles
 	if (existing.type === 'predefined') {
-		return { success: false, error: 'Vordefinierte Heizprofile können nicht gelöscht werden.' };
+		return { success: false, ...refusal('HEATING_PROFILE_PREDEFINED', 'Vordefinierte Heizprofile können nicht gelöscht werden.') };
 	}
 
 	// New statements propose the default profile of the settings
 	if (await isDefaultSetting('default_heating_profile_id', id)) {
-		return { success: false, conflict: true, error: 'Das Heizprofil ist in den Einstellungen als Standard hinterlegt.' };
+		return {
+			success: false,
+			conflict: true,
+			...refusal('HEATING_PROFILE_IS_DEFAULT', 'Das Heizprofil ist in den Einstellungen als Standard hinterlegt.')
+		};
 	}
 
 	await db.delete(heatingProfiles).where(eq(heatingProfiles.id, id));

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import { floorLabel, statusHelp, statusText, statusIcons, statusTones } from '$lib/apartment';
 	import type { ApartmentStatus } from '$lib/types';
 	import { normalizeDecimal } from '$lib/utils/format';
@@ -19,16 +20,16 @@
 	} = $props();
 
 	const facts = $derived([
-		{ key: 'rooms', label: 'Zimmeranzahl', value: normalizeDecimal(apartment.rooms) },
-		{ key: 'floor', label: 'Stockwerk', value: floorLabel(apartment.floor) },
-		{ key: 'area', label: 'Fläche', value: `${normalizeDecimal(apartment.area)} m²` }
+		{ key: 'rooms', label: m.apartments_rooms(), value: normalizeDecimal(apartment.rooms) },
+		{ key: 'floor', label: m.apartments_floor(), value: floorLabel(apartment.floor) },
+		{ key: 'area', label: m.apartments_area(), value: `${normalizeDecimal(apartment.area)} m²` }
 	]);
 </script>
 
-<Panel title="Angaben zur Wohnung">
+<Panel title={m.apartments_facts_title()}>
 	<dl class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
 		<div class="flex flex-col items-start gap-2 sm:col-span-2" data-testid="apartment-info-status">
-			<dt class="text-ink-muted">Mietstatus</dt>
+			<dt class="text-ink-muted">{m.apartments_status()}</dt>
 			<dd class="flex flex-col items-start gap-2">
 				<Badge
 					tone={statusTones[apartment.status]}

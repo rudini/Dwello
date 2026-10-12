@@ -1,7 +1,9 @@
 <script lang="ts">
+	import { profileLabel } from '$lib/heating-profile';
+	import { m } from '$lib/paraglide/messages';
 	import HeatingProfileChart from '$lib/ui/HeatingProfileChart.svelte';
 	import type { HeatingProfile } from '$lib/types';
-	import { germanName } from '$lib/names';
+	import { localName } from '$lib/names';
 	import { parsePercent } from '$lib/utils/format';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Field from '$lib/ui/Field.svelte';
@@ -50,8 +52,8 @@
 
 <Field
 	id="heatingProfile"
-	label="Heizprofil"
-	help="Verteilt die Heizkosten bei einem Mieterwechsel auf die Monate; wählen Sie das Profil, das Ihre Mietverträge vorsehen. Dwello verteilt nach dem Heizprofil und kann Zählerstände nicht berücksichtigen. Wurden beim Mieterwechsel die Zähler für Heizung oder Warmwasser in der Wohnung abgelesen, gelten diese Werte: Erstellen Sie die Abrechnung dieser Wohnung dann ausserhalb von Dwello und löschen Sie die Entwürfe aller Mietverträge dieser Wohnung, auch wenn Sie die Abrechnungen später neu erstellen. Hat Ihr Gebäude in den Wohnungen Wärme- oder Warmwasserzähler oder Heizkostenverteiler (kleine Geräte an den Heizkörpern), müssen Sie meist nach Verbrauch abrechnen. Das kann Dwello nicht: Erstellen Sie die Abrechnungen dann ausserhalb von Dwello. Nur Heizprofile mit zusammen 100 % lassen sich wählen."
+	label={m.glossary_profile_term()}
+	help={m.statements_heating_help()}
 	error={errors.heatingProfileId}
 >
 	{#snippet children(control)}
@@ -73,9 +75,9 @@
 					selected={profile.id === heatingProfileId}
 					data-testid="heating-profile-option-{profile.id}"
 				>
-					{germanName(profile)} ({+sum(profile).toFixed(1)}%){complete(profile)
+					{profileLabel(localName(profile), +sum(profile).toFixed(1))}{complete(profile)
 						? ''
-						: ' - nicht wählbar'}
+						: ` - ${m.statements_not_selectable()}`}
 				</option>
 			{/each}
 		</select>
@@ -86,9 +88,9 @@
 
 <TextInput
 	id="managementFeePercent"
-	label="Verwaltungspauschale in %"
+	label={m.statements_fee_percent()}
 	inputmode="decimal"
-	help="Prozentsatz der eigenen Nebenkosten jedes Mieters, gilt für alle Abrechnungen dieses Laufs. Üblich sind bis {USUAL_MAXIMUM} %. Verlangen Sie eine Verwaltungspauschale nur, wenn sie im Mietvertrag vereinbart ist. Sonst geben Sie 0 ein. Hat ein Mietvertrag einen anderen Satz, löschen Sie danach seinen Entwurf und erstellen Sie ihn mit diesem Satz neu."
+	help={m.statements_fee_help({ max: USUAL_MAXIMUM })}
 	bind:value={() => feeText, typeFee}
 	error={errors.managementFeePercent}
 	testid="management-fee-input"
@@ -96,11 +98,8 @@
 <!-- announced while typing: the hint appears without the focus moving -->
 <div role="status">
 	{#if managementFeePercent > USUAL_MAXIMUM}
-		<Alert tone="caution" title="Über dem üblichen Richtwert" testid="management-fee-hint">
-			<p>
-				Die Verwaltungspauschale ist höher als der übliche Richtwert von {USUAL_MAXIMUM} %. Prüfen Sie,
-				ob der Mehraufwand begründet ist.
-			</p>
+		<Alert tone="caution" title={m.statements_fee_above_title()} testid="management-fee-hint">
+			<p>{m.statements_fee_above_text({ max: USUAL_MAXIMUM })}</p>
 		</Alert>
 	{/if}
 </div>

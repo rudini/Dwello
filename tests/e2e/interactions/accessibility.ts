@@ -111,12 +111,26 @@ async function previewOf(page: Page, year: string, shown: string, ...others: str
 	await page.getByTestId(shown).waitFor();
 }
 
+// A German text as the page shows it in its current language (messages/<lang>.json); a text not moved there yet,
+// or a German page, gives the text itself. A text with a placeholder matches up to the placeholder.
+const messagesOf = (language: string): Record<string, string> =>
+	JSON.parse(readFileSync(`messages/${language}.json`, 'utf8'));
+const german = messagesOf('de');
+async function say(page: Page, text: string) {
+	const language = (await page.locator('html').getAttribute('lang')) ?? 'de';
+	const key = Object.keys(german).find((key) => german[key] === text) ??
+		Object.keys(german).find((key) => german[key].startsWith(text));
+	if (language === 'de' || !key) return text;
+	const shown = messagesOf(language)[key];
+	return german[key] === text ? shown : shown.split('{')[0].replace(/[,:\s]+$/, '');
+}
+
 // What a user does to reach each state
 const states: Record<string, (page: Page, viewport: Viewport) => Promise<unknown>> = {
 	default: async () => {},
 	'filtered-empty': async (page) => shows(page, '[data-testid$="-empty"]'),
 	empty: async (page) => shows(page, '[data-testid$="-empty"]'),
-	'first-use': async (page) => page.getByText('Erstes Gebäude erfassen').waitFor(),
+	'first-use': async (page) => page.getByText(await say(page, 'Erstes Gebäude erfassen')).waitFor(),
 	'login-error': async (page) => shows(page, '[data-testid="login-error"]'),
 	'submit-empty': async (page) => {
 		await page.locator('main [type=submit]').last().click(); // the save button closes a form
@@ -132,7 +146,15 @@ const states: Record<string, (page: Page, viewport: Viewport) => Promise<unknown
 		await page.locator('main [type=submit]').last().click(); // saved as loaded
 		await shows(page, '[data-testid="toast-success"]');
 	},
-	'server-error': async (page) => page.getByText('Versuchen Sie es später erneut.').waitFor(),
+	'server-error': async (page) => page.getByText(await say(page, 'Versuchen Sie es später erneut.')).waitFor(),
+	// French chosen with the language selection (the page reloads); later viewports start in French already
+	'other-language': async (page) => {
+		if ((await page.locator('html').getAttribute('lang')) !== 'fr') {
+			await press(page, 'language-button');
+			await Promise.all([page.waitForEvent('load'), page.locator('[data-testid="language-option"][lang="fr"]').click()]);
+		}
+		await shows(page, 'html[lang="fr"] body[data-hydrated]');
+	},
 	'delete-dialog': async (page) => {
 		await page.locator('[data-testid$="-delete-button"]').first().click();
 		await dialog(page);
@@ -162,7 +184,7 @@ const states: Record<string, (page: Page, viewport: Viewport) => Promise<unknown
 	// the end dialog on the contract page, the contract form on its edit page
 	'past-end-error': async (page) => {
 		if (page.url().endsWith('/edit')) {
-			await page.getByTestId('contract-duration').getByText('Befristet', { exact: true }).click();
+			await page.getByTestId('contract-duration').getByText(await say(page, 'Befristet'), { exact: true }).click();
 			await typeDate(page.getByTestId('end-date-input'), inDays(-30));
 			await press(page, 'submit-button');
 		} else {
@@ -207,7 +229,11 @@ const states: Record<string, (page: Page, viewport: Viewport) => Promise<unknown
 	'mobile-menu-open': async (page, viewport) => {
 		if (viewport === 'desktop') return; // the sidebar is always open from 1024 px
 		await press(page, 'mobile-menu-button');
-		await shows(page, '[role="dialog"][aria-label="Hauptnavigation"]');
+		await shows(page, `[role="dialog"][aria-label="${await say(page, 'Hauptnavigation')}"]`);
+	},
+	'language-menu-open': async (page) => {
+		await press(page, 'language-button');
+		await shows(page, '[data-testid="language-option"]');
 	},
 	'user-menu-open': async (page) => {
 		await press(page, 'user-menu-button');
@@ -223,7 +249,7 @@ const states: Record<string, (page: Page, viewport: Viewport) => Promise<unknown
 	},
 	'draft-restored': async (page) => {
 		await startDraft[new URL(page.url()).pathname](page); // a draft starts with an input
-		await page.getByTestId('save-status').getByText('Entwurf gespeichert').waitFor();
+		await page.getByTestId('save-status').getByText(await say(page, 'Entwurf gespeichert')).waitFor();
 		await page.reload();
 		await shows(page, '[data-testid="draft-restored"]');
 	},
@@ -238,6 +264,9 @@ const states: Record<string, (page: Page, viewport: Viewport) => Promise<unknown
 		await shows(page, '[data-testid="period-future-warning"]');
 	}
 };
+
+/** What a check finds on the page as it is now, as readable lines ([] when nothing) */
+type Look = (page: Page) => Promise<string[]>;
 
 /** Rule violations axe finds on the page as it is now, as readable lines */
 async function violations(page: Page) {
@@ -256,48 +285,49 @@ export async function check(
 	path: string,
 	state: string,
 	viewport: Viewport,
-	scheme: 'light' | 'dark'
+	scheme: 'light' | 'dark',
+	look: Look = violations
 ) {
 	await page.setViewportSize(screenList.viewports[viewport]);
 	await page.emulateMedia({ colorScheme: scheme, reducedMotion: 'reduce' });
 	await page.evaluate(() => localStorage.clear()).catch(() => {}); // no draft from the previous viewport
 	await visit(page, onEmptyInstance.includes(state) ? EMPTY_INSTANCE + path : path);
-	if (state === 'every-wizard-step') return wizards[new URL(path, 'http://x').pathname](page);
+	if (state === 'every-wizard-step') return wizards[new URL(path, 'http://x').pathname](page, look);
 	await states[state](page, viewport);
-	return violations(page);
+	return look(page);
 }
 
 // Rental contract wizard, tenant and a free apartment from the address: every step up to "Prüfen"
-async function contractWizardSteps(page: Page) {
-	const found = await violations(page); // "Mieter"
+async function contractWizardSteps(page: Page, look: Look) {
+	const found = await look(page); // "Mieter"
 	const nextStep = async (shown: string) => {
 		await press(page, 'wizard-next');
 		await page.getByTestId(shown).first().waitFor();
 	};
 	await nextStep('apartment-select'); // "Wohnung", once the apartments are checked
-	found.push(...(await violations(page)));
+	found.push(...(await look(page)));
 	await nextStep('start-date-input'); // "Vertragsdauer", limited: end date and both dates in words
-	await page.getByTestId('contract-duration').getByText('Befristet', { exact: true }).click();
+	await page.getByTestId('contract-duration').getByText(await say(page, 'Befristet'), { exact: true }).click();
 	await typeDate(page.getByTestId('start-date-input'), '2030-01-01');
 	await typeDate(page.getByTestId('end-date-input'), '2031-12-31');
-	found.push(...(await violations(page)));
+	found.push(...(await look(page)));
 	await nextStep('contract-base-rent-input'); // "Miete"
 	await page.getByTestId('contract-base-rent-input').fill('1500');
-	found.push(...(await violations(page)));
+	found.push(...(await look(page)));
 	await nextStep('contract-review-item'); // "Prüfen"
-	found.push(...(await violations(page)));
+	found.push(...(await look(page)));
 	return found;
 }
 
 // Statement wizard: period, buildings, preview; every step is checked before going on
-async function statementWizardSteps(page: Page) {
-	const found = await violations(page); // "Abrechnungsperiode"
+async function statementWizardSteps(page: Page, look: Look) {
+	const found = await look(page); // "Abrechnungsperiode"
 	// this example's building: another example's may still be seeding, without a contract to preview
 	const building = page.getByTestId(`generate-building-${exampleBuilding}`);
 	const nextStep = async (shown: string) => {
 		await press(page, 'wizard-next');
 		await page.getByTestId(shown).first().waitFor();
-		found.push(...(await violations(page)));
+		found.push(...(await look(page)));
 	};
 	await nextStep('generate-all-buildings'); // "Gebäude"
 	await building.check();
@@ -318,7 +348,7 @@ const startDraft: Record<string, (page: Page) => Promise<unknown>> = {
 	}
 };
 
-const wizards: Record<string, (page: Page) => Promise<string[]>> = {
+const wizards: Record<string, (page: Page, look: Look) => Promise<string[]>> = {
 	'/contracts/new': contractWizardSteps,
 	'/statements/generate': statementWizardSteps
 };

@@ -1,3 +1,21 @@
 {
-	"entry": ["playwright.screenshots.config.ts", "docs/design/tools/persona-kit.mjs"]
+	"entry": [
+		"playwright.screenshots.config.ts",
+		"docs/design/tools/persona-kit.mjs"
+	],
+	"ignorePatterns": [
+		"src/lib/paraglide/**"
+	],
+	"ignoreDependencies": [
+		"@inlang/plugin-message-format"
+	],
+	"ignoreExports": [
+		{
+			"file": "src/lib/statement.ts",
+			"exports": [
+				"statusLabels",
+				"statusTones"
+			]
+		}
+	]
 }

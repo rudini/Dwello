@@ -1,4 +1,4 @@
-import { germanName } from '$lib/names';
+import { localName } from '$lib/names';
 import { toHeatingProfile } from '$lib/server/heating-profile';
 import { saveSettings, toSettings } from '$lib/server/settings';
 import type { DistributionKey } from '$lib/types';
@@ -19,7 +19,7 @@ export const load: PageServerLoad = async ({ fetch }) => {
 		heatingProfiles: heatingProfiles.data.map(toHeatingProfile),
 		distributionKeys: distributionKeys.data.map((key: DistributionKey) => ({
 			id: key.id,
-			name: germanName(key)
+			name: localName(key)
 		}))
 	};
 };

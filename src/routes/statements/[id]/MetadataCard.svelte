@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import Panel from '$lib/ui/Panel.svelte';
 	import { formatDate, formatDateTime } from '$lib/utils/format';
 
@@ -17,16 +18,19 @@
 
 	const dates = $derived(
 		[
-			{ label: 'Erstellt', date: createdAt && formatDateTime(createdAt) },
-			{ label: 'PDF erstellt', date: pdfGeneratedAt && formatDateTime(pdfGeneratedAt) },
-			{ label: 'Versendet', date: sentOn && formatDate(sentOn) },
-			{ label: 'Bezahlt', date: paidOn && formatDate(paidOn) }
+			{ label: m.statements_history_created(), date: createdAt && formatDateTime(createdAt) },
+			{
+				label: m.statements_pdf_created(),
+				date: pdfGeneratedAt && formatDateTime(pdfGeneratedAt)
+			},
+			{ label: m.statements_status_sent(), date: sentOn && formatDate(sentOn) },
+			{ label: m.statements_status_paid(), date: paidOn && formatDate(paidOn) }
 		].filter((row) => row.date)
 	);
 </script>
 
 {#if dates.length}
-	<Panel title="Verlauf" level={2}>
+	<Panel title={m.statements_history()} level={2}>
 		<dl class="flex flex-col gap-2">
 			{#each dates as row (row.label)}
 				<div class="flex justify-between gap-4">

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import type { InvoiceWithDetails } from '$lib/types';
 	import type { Tone } from '$lib/ui/tone';
 	import Badge from '$lib/ui/Badge.svelte';
@@ -9,9 +10,9 @@
 	let { invoice }: { invoice: InvoiceWithDetails } = $props();
 
 	const statusBadges = {
-		'auto-categorized': { tone: 'info', label: 'Automatisch' },
-		manual: { tone: 'neutral', label: 'Manuell' },
-		pending: { tone: 'caution', label: 'Kategorie fehlt' }
+		'auto-categorized': { tone: 'info', label: m.invoices_status_auto() },
+		manual: { tone: 'neutral', label: m.invoices_status_manual() },
+		pending: { tone: 'caution', label: m.invoices_status_pending() }
 	} as const satisfies Record<
 		InvoiceWithDetails['categorizationStatus'],
 		{ tone: Tone; label: string }
@@ -36,11 +37,11 @@
 		<span class="text-ink-muted">{invoice.buildingName}, {formatDate(invoice.invoiceDate)}</span>
 	</a>
 	<p class="break-words text-ink xl:w-40 xl:shrink-0">
-		<span class="sr-only">Kategorie:</span>
+		<span class="sr-only">{m.invoices_category_label()}</span>
 		{#if invoice.category}
 			<span data-testid="invoice-category">{invoice.category.name}</span>
 		{:else}
-			<span class="text-ink-muted">Ohne Kategorie</span>
+			<span class="text-ink-muted">{m.invoices_no_category()}</span>
 		{/if}
 	</p>
 	<p class="font-semibold tabular-nums text-ink xl:w-32 xl:shrink-0 xl:text-right">
@@ -49,7 +50,7 @@
 	<div class="flex flex-wrap gap-2 xl:w-40 xl:shrink-0">
 		<Badge
 			tone={invoice.isValidUtilityCost ? 'positive' : 'caution'}
-			label={invoice.isValidUtilityCost ? 'Umlagefähig' : 'Nicht umlagefähig'}
+			label={invoice.isValidUtilityCost ? m.glossary_allocable_term() : m.invoices_not_allocable()}
 		/>
 		<Badge tone={status.tone} label={status.label} testid="invoice-status" />
 	</div>
@@ -59,8 +60,8 @@
 			href="/invoices/{invoice.id}/edit"
 			variant="ghost"
 			icon="edit"
-			ariaLabel="Bearbeiten: Rechnung von {invoice.billingEntity}"
-			testid="invoice-edit-button">Bearbeiten</Button
+			ariaLabel={m.invoices_edit_aria({ name: invoice.billingEntity })}
+			testid="invoice-edit-button">{m.buildings_edit()}</Button
 		>
 	</div>
 </li>

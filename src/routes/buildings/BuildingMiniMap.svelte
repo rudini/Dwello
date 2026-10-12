@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import { onDestroy, onMount } from 'svelte';
 	import { env } from '$env/dynamic/public';
 	import type { Map } from 'leaflet';
@@ -66,7 +67,7 @@
 <div
 	bind:this={mapContainer}
 	role="img"
-	aria-label={address ? `Karte: ${address}` : 'Karte'}
+	aria-label={address ? m.buildings_map_of({ address }) : m.buildings_map()}
 	class="isolate h-36 w-full overflow-hidden rounded-control border border-line bg-sunken"
 	data-testid="building-mini-map"
 ></div>

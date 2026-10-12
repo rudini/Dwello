@@ -1,6 +1,7 @@
 import type { ContractHistory } from './types';
 import type { Tone } from './ui/tone';
 import { formatDate } from './utils/format';
+import { m } from '$lib/paraglide/messages';
 
 type Status = ContractHistory['status'];
 
@@ -20,9 +21,24 @@ export const localToday = () =>
 
 /** Vertragsstatus in the glossary's words, with its badge tone */
 export const statusBadges: Record<Status, { label: string; tone: Tone }> = {
-	active: { label: 'Laufend', tone: 'positive' },
-	future: { label: 'Künftig', tone: 'info' },
-	ended: { label: 'Beendet', tone: 'neutral' }
+	active: {
+		get label() {
+			return m.contracts_status_active();
+		},
+		tone: 'positive'
+	},
+	future: {
+		get label() {
+			return m.contracts_status_future();
+		},
+		tone: 'info'
+	},
+	ended: {
+		get label() {
+			return m.contracts_status_ended();
+		},
+		tone: 'neutral'
+	}
 };
 
 /** Contract period in words; a contract without end is named by its start, never "bis heute" */
@@ -32,7 +48,10 @@ export function contractPeriod(
 	status: Status
 ) {
 	if (endDate) return `${formatDate(startDate)} – ${formatDate(endDate)}`;
-	return `${status === 'future' ? 'ab' : 'seit'} ${formatDate(startDate)}, unbefristet`;
+	const date = formatDate(startDate);
+	return status === 'future'
+		? m.contracts_period_from({ date })
+		: m.contracts_period_since({ date });
 }
 
 /** A real day as YYYY-MM-DD: not 2025-13-01 or 2025-02-30 */
@@ -45,10 +64,9 @@ function isDay(date: string) {
 
 /** Why a contract cannot be ended on that day (YYYY-MM-DD), or null: never before its start */
 export function contractEndError(endDate: string, startDate: string, today: string): string | null {
-	if (!isDay(endDate))
-		return `Bitte geben Sie das Vertragsende ein, zum Beispiel 31.12.${today.slice(0, 4)}.`;
+	if (!isDay(endDate)) return m.contracts_end_missing({ example: `31.12.${today.slice(0, 4)}` });
 	if (endDate < startDate.slice(0, 10))
-		return `Das Vertragsende kann nicht vor dem Vertragsbeginn am ${formatDate(startDate.slice(0, 10))} liegen.`;
+		return m.contracts_end_before_start_on({ date: formatDate(startDate.slice(0, 10)) });
 	return null;
 }
 
@@ -62,11 +80,13 @@ export function endedSince(endDate: string) {
 /** An end before today, e.g. a notice recorded late, is confirmed with its consequence; null when none is needed */
 export function pastEndConfirmation(endDate: string, today: string): string | null {
 	if (!endDate || endDate >= today) return null;
-	return `Bitte bestätigen Sie, dass der Mietvertrag am ${formatDate(endDate)} endete, oder korrigieren Sie das Vertragsende.`;
+	return m.contracts_end_past_confirm({ date: formatDate(endDate) });
 }
 
 const listed = (numbers: string[]) =>
-	numbers.length === 1 ? numbers[0] : `${numbers.slice(0, -1).join(', ')} und ${numbers.at(-1)}`;
+	numbers.length === 1
+		? numbers[0]
+		: m.contracts_list_and({ rest: numbers.slice(0, -1).join(', '), last: numbers.at(-1)! });
 
 /** New contract dates would change the Mietstage of stored statements (backend 409, tests/contracts/contract-end-refused.json) */
 export function billedDaysError(statements: { statementNumber: string; status: string }[]): string {
@@ -75,18 +95,20 @@ export function billedDaysError(statements: { statementNumber: string; status: s
 		.map((s) => s.statementNumber);
 	const locked = statements
 		.filter((statement) => statement.status !== 'draft')
-		.map((s) => `${s.statementNumber} (${s.status === 'paid' ? 'bezahlt' : 'versendet'})`);
+		.map(
+			(s) =>
+				`${s.statementNumber} (${s.status === 'paid' ? m.contracts_billed_paid() : m.contracts_billed_sent()})`
+		);
 	const one = (locked.length || drafts.length) === 1;
-	const subject = `Die ${one ? 'Nebenkostenabrechnung' : 'Nebenkostenabrechnungen'}`;
-	const computed = `${one ? 'wurde' : 'wurden'} mit den bisherigen Vertragsdaten berechnet.`;
 	if (locked.length)
 		return [
-			`${subject} ${listed(locked)} ${computed}`,
-			'Dwello ändert sie nicht, darum lässt sich das Datum nicht speichern. Prüfen Sie das Datum.',
-			'Stimmt es, klären Sie die Korrektur der Abrechnung direkt mit dem Mieter.',
-			...(drafts.length ? [`Betroffen ist auch der Entwurf ${listed(drafts)}.`] : [])
+			(one ? m.contracts_billed_locked_one : m.contracts_billed_locked_many)({
+				numbers: listed(locked)
+			}),
+			m.contracts_billed_locked_rest(),
+			...(drafts.length ? [m.contracts_billed_also_draft({ numbers: listed(drafts) })] : [])
 		].join(' ');
 	return one
-		? `${subject} ${drafts[0]} (Entwurf) ${computed} Löschen Sie zuerst den Entwurf und erstellen Sie die Nebenkostenabrechnung danach neu.`
-		: `${subject} ${listed(drafts)} (Entwürfe) ${computed} Löschen Sie zuerst die Entwürfe und erstellen Sie die Nebenkostenabrechnungen danach neu.`;
+		? m.contracts_billed_draft_one({ number: drafts[0] })
+		: m.contracts_billed_draft_many({ numbers: listed(drafts) });
 }

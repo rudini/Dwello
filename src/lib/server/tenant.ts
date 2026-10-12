@@ -1,3 +1,4 @@
+import { m } from '$lib/paraglide/messages';
 import { error } from '@sveltejs/kit';
 import type { Tenant } from '$lib/types';
 
@@ -9,8 +10,8 @@ type BackendTenant = Record<string, any>;
 /** The tenant as the pages show it, or a 404/500 page */
 export async function loadTenant(fetch: typeof globalThis.fetch, id: string): Promise<Tenant> {
 	const response = await fetch(`${API}/${id}`);
-	if (response.status === 404) throw error(404, 'Mieter nicht gefunden');
-	if (!response.ok) throw error(response.status, 'Fehler beim Laden des Mieters');
+	if (response.status === 404) throw error(404, m.tenants_not_found());
+	if (!response.ok) throw error(response.status, m.tenants_load_failed());
 	return toTenant(await response.json());
 }
 

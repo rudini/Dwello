@@ -1,3 +1,5 @@
+import { m } from '$lib/paraglide/messages';
+
 export const formError = (form: string) => ({
 	success: false,
 	errors: { form } as Record<string, string>
@@ -17,15 +19,16 @@ export function parseBuildingForm(formData: FormData) {
 	};
 
 	const errors: Record<string, string> = {};
-	if (!building.name) errors.name = 'Gebäudename ist erforderlich';
-	if (!building.address) errors.address = 'Adresse ist erforderlich';
-	if (!building.postalCode) errors.postalCode = 'PLZ ist erforderlich';
-	else if (!/^\d{4}$/.test(building.postalCode)) errors.postalCode = 'PLZ muss 4 Ziffern haben';
-	if (!building.city) errors.city = 'Ort ist erforderlich';
-	if (!building.canton) errors.canton = 'Kanton ist erforderlich';
+	if (!building.name) errors.name = m.buildings_error_name();
+	if (!building.address) errors.address = m.buildings_error_address();
+	if (!building.postalCode) errors.postalCode = m.buildings_error_postal_code();
+	else if (!/^\d{4}$/.test(building.postalCode))
+		errors.postalCode = m.buildings_error_postal_code_digits();
+	if (!building.city) errors.city = m.buildings_error_city();
+	if (!building.canton) errors.canton = m.buildings_error_canton();
 	const year = building.yearBuilt;
 	if (year !== null && !(year >= 1800 && year <= new Date().getFullYear())) {
-		errors.yearBuilt = 'Baujahr muss zwischen 1800 und heute liegen';
+		errors.yearBuilt = m.buildings_error_year_built();
 	}
 
 	return { building, errors };

@@ -1,5 +1,6 @@
 import type { Actions, PageServerLoad } from './$types';
 import { fail, redirect } from '@sveltejs/kit';
+import { m } from '$lib/paraglide/messages';
 import { loadStatement } from '$lib/server/statement';
 import { loadDocuments } from '$lib/server/documents';
 import { markStatementPaid, sendStatementReminder } from '$lib/server/statement-actions';
@@ -48,7 +49,7 @@ const changeStatus = async (fetch: Fetch, id: string, body: object, failure: str
 
 export const actions: Actions = {
 	send: ({ params, fetch }) =>
-		changeStatus(fetch, params.id, { status: 'sent' }, 'Abrechnung konnte nicht versendet werden.'),
+		changeStatus(fetch, params.id, { status: 'sent' }, m.statements_send_failed()),
 	markPaid: async ({ params, fetch, request }) => {
 		// none sent (no dialog field, no JavaScript): today; sent but empty (an invalid date): refused
 		const sent = (await request.formData()).get('paidDate');
@@ -68,8 +69,7 @@ export const actions: Actions = {
 		const response = await fetch(`${BACKEND_URL}/api/v1/statements/${params.id}`, {
 			method: 'DELETE'
 		});
-		if (!response.ok)
-			return fail(response.status, { actionError: 'Abrechnung konnte nicht gelöscht werden.' });
+		if (!response.ok) return fail(response.status, { actionError: m.statements_delete_failed() });
 		throw redirect(303, '/statements');
 	}
 };

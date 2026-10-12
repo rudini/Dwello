@@ -4,6 +4,7 @@
  */
 
 import { Elysia, t } from 'elysia';
+import { refusal } from '../services/coded-error';
 import { authMiddleware } from '../middleware/auth';
 import {
 	listBuildings,
@@ -73,7 +74,7 @@ export const buildingRoutes = new Elysia({ prefix: '/api/v1/buildings' })
 		const building = await getBuilding(params.id);
 		if (!building) {
 			set.status = 404;
-			return { error: 'Building not found' };
+			return refusal('BUILDING_NOT_FOUND', 'Building not found');
 		}
 		return building;
 	})
@@ -82,7 +83,7 @@ export const buildingRoutes = new Elysia({ prefix: '/api/v1/buildings' })
 		const result = await getBuildingWithApartments(params.id);
 		if (!result) {
 			set.status = 404;
-			return { error: 'Building not found' };
+			return refusal('BUILDING_NOT_FOUND', 'Building not found');
 		}
 		return result;
 	})
@@ -110,7 +111,7 @@ export const buildingRoutes = new Elysia({ prefix: '/api/v1/buildings' })
 			const building = await updateBuilding(params.id, body);
 			if (!building) {
 				set.status = 404;
-				return { error: 'Building not found' };
+				return refusal('BUILDING_NOT_FOUND', 'Building not found');
 			}
 			return building;
 		},
@@ -124,7 +125,7 @@ export const buildingRoutes = new Elysia({ prefix: '/api/v1/buildings' })
 		async ({ params, set }) => {
 			if (!(await buildingExists(params.id))) {
 				set.status = 404;
-				return { error: 'Building not found' };
+				return refusal('BUILDING_NOT_FOUND', 'Building not found');
 			}
 			return await listFuelStocks(params.id);
 		},
@@ -135,7 +136,7 @@ export const buildingRoutes = new Elysia({ prefix: '/api/v1/buildings' })
 		async ({ params, body, set }) => {
 			if (!(await buildingExists(params.id))) {
 				set.status = 404;
-				return { error: 'Building not found' };
+				return refusal('BUILDING_NOT_FOUND', 'Building not found');
 			}
 			if (!isRealDate(body.readingDate) || !(await isHeatingCategory(body.categoryId))) {
 				set.status = 400;

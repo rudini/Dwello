@@ -1,15 +1,22 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import Badge from '$lib/ui/Badge.svelte';
 	import { formatDate } from '$lib/utils/format';
 	import type { Deadline } from '$lib/overview';
 
 	// Dates ahead, earliest first; passed ones in red, those within a week in amber
 	let { deadlines }: { deadlines: Deadline[] } = $props();
+	const kinds = {
+		Zahlungsfrist: m.dashboard_kind_payment,
+		Vertragsende: m.dashboard_kind_contract_end
+	};
 	const tone = (days: number) => (days < 0 ? 'critical' : days <= 7 ? 'caution' : 'neutral');
 </script>
 
 <section aria-labelledby="deadlines-heading" class="flex flex-col gap-4">
-	<h2 id="deadlines-heading" class="text-2xl font-bold text-ink">Fristen</h2>
+	<h2 id="deadlines-heading" class="text-2xl font-bold text-ink">
+		{m.dashboard_deadlines_heading()}
+	</h2>
 	{#if deadlines.length}
 		<ul class="flex flex-col divide-y divide-line rounded-panel border border-line bg-surface">
 			{#each deadlines as deadline (deadline.kind + deadline.id)}
@@ -22,7 +29,7 @@
 							>{formatDate(deadline.date)}</span
 						>
 						<span class="flex-1 text-ink">
-							<span class="font-semibold">{deadline.kind}</span>
+							<span class="font-semibold">{kinds[deadline.kind]()}</span>
 							<span class="text-ink-muted">· {deadline.name}</span>
 						</span>
 						<span class="self-start sm:self-auto"
@@ -33,6 +40,6 @@
 			{/each}
 		</ul>
 	{:else}
-		<p class="text-ink-muted">In den nächsten Wochen stehen keine Fristen an.</p>
+		<p class="text-ink-muted">{m.dashboard_no_deadlines()}</p>
 	{/if}
 </section>

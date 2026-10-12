@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
+	import { deliveryErrorText } from '$lib/backend-error';
 	import type { StatementDocument } from '$lib/types';
 	import Alert from '$lib/ui/Alert.svelte';
 
@@ -10,11 +12,12 @@
 		if (!reminder) return '';
 		const { document, deliveryError } = reminder;
 		if (deliveryError) {
-			return `${document.title}: ${deliveryError} Sie liegt in den Dokumenten zum Versand bereit.`;
+			const reason = deliveryErrorText({ ...document, deliveryError });
+			return m.statements_reminder_undelivered({ title: document.title, reason });
 		}
 		return document.channel === 'email'
-			? `${document.title} wurde per E-Mail versendet.`
-			: `${document.title} liegt als Brief zum Ausdrucken in den Dokumenten bereit.`;
+			? m.statements_reminder_emailed({ title: document.title })
+			: m.statements_reminder_letter({ title: document.title });
 	});
 </script>
 
@@ -22,7 +25,9 @@
 	{#if reminder}
 		<Alert
 			tone={reminder.deliveryError ? 'caution' : 'positive'}
-			title={reminder.deliveryError ? 'E-Mail nicht zugestellt' : 'Mahnung erstellt'}
+			title={reminder.deliveryError
+				? m.statements_email_not_delivered()
+				: m.statements_reminder_created()}
 		>
 			<p data-testid="reminder-feedback">{message}</p>
 		</Alert>

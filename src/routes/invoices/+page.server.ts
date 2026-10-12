@@ -1,6 +1,5 @@
 import type { InvoicesListData } from '$lib/types';
-import { toCategory } from '$lib/server/category';
-import { toInvoice } from '$lib/server/invoice';
+import { localCategory, toInvoice } from '$lib/server/invoice';
 import type { PageServerLoad } from './$types';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
@@ -47,8 +46,6 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<InvoicesList
 		const buildingsData = await buildingsRes.json();
 		const categoriesData = await categoriesRes.json();
 
-		const invoices = (invoicesData.invoices || invoicesData.data || []).map(toInvoice);
-
 		const buildings = (buildingsData.buildings || buildingsData.data || []).map(
 			(b: Record<string, unknown>) => ({
 				id: b.id,
@@ -57,7 +54,10 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<InvoicesList
 			})
 		);
 
-		const categories = (categoriesData.categories || categoriesData.data || []).map(toCategory);
+		const categories = (categoriesData.categories || categoriesData.data || []).map(localCategory);
+		const invoices = (invoicesData.invoices || invoicesData.data || []).map(
+			(r: Record<string, unknown>) => toInvoice(r, categories)
+		);
 
 		return {
 			invoices,

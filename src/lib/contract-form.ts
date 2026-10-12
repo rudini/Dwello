@@ -1,3 +1,4 @@
+import { m } from '$lib/paraglide/messages';
 import type { RentalContract } from './types';
 import { formatDate } from './utils/format';
 import {
@@ -52,31 +53,31 @@ export function initialContractValues(
 
 function endDateError({ isUnlimited, startDate, endDate }: ContractFormValues) {
 	if (isUnlimited) return undefined;
-	if (!endDate) return 'Vertragsende ist erforderlich bei befristetem Vertrag';
+	if (!endDate) return m.contracts_error_end_required();
 	if (startDate && new Date(endDate) <= new Date(startDate))
-		return 'Vertragsende muss nach Vertragsbeginn liegen';
+		return m.contracts_error_end_before_start();
 }
 
 // Francs and up to two decimals of Rappen; anything else ("1.450", "1,450.00") would be read as a wrong amount
 const FRANCS = /^\d+(\.\d{1,2})?$/;
-const AMOUNT_HINT = "Bitte geben Sie einen gültigen Betrag ein, zum Beispiel 1450.00 oder 1'450.";
+const amountHint = () => m.contracts_error_amount();
 
 function baseRentError(baseRent: string) {
-	if (!baseRent) return 'Nettomiete ist erforderlich';
-	if (!FRANCS.test(String(baseRent))) return AMOUNT_HINT;
-	if (parseFloat(baseRent) <= 0) return 'Bitte geben Sie eine gültige Miete ein';
+	if (!baseRent) return m.contracts_error_base_rent_required();
+	if (!FRANCS.test(String(baseRent))) return amountHint();
+	if (parseFloat(baseRent) <= 0) return m.contracts_error_rent_invalid();
 }
 
 // Optional amounts may be left empty, but not negative
 const amountError = (amount: string) =>
-	amount && !FRANCS.test(String(amount)) ? AMOUNT_HINT : undefined;
+	amount && !FRANCS.test(String(amount)) ? amountHint() : undefined;
 
 /** Error message per field; empty when the contract can be saved */
 export function validateContract(values: ContractFormValues): Record<string, string> {
 	const errors = {
-		tenantId: values.tenantId ? undefined : 'Bitte wählen Sie einen Mieter aus',
-		apartmentId: values.apartmentId ? undefined : 'Bitte wählen Sie eine Wohnung aus',
-		startDate: values.startDate ? undefined : 'Vertragsbeginn ist erforderlich',
+		tenantId: values.tenantId ? undefined : m.contracts_error_tenant_required(),
+		apartmentId: values.apartmentId ? undefined : m.contracts_error_apartment_required(),
+		startDate: values.startDate ? undefined : m.contracts_error_start_required(),
 		endDate: endDateError(values),
 		baseRent: baseRentError(values.baseRent),
 		additionalRent: amountError(values.additionalRent),
@@ -123,13 +124,16 @@ export function apartmentOption(
 	availability: AvailabilityInfo | undefined,
 	isCurrent: boolean
 ): { label: string; disabled: boolean } {
-	const name = `Wohnung ${apartment.unit} - ${apartment.building}${apartment.size ? `, ${apartment.size}` : ''}`;
-	if (isCurrent) return { label: `${name} (aktuell)`, disabled: false };
+	const name = `${m.buildings_apartment_number({ number: apartment.unit })} - ${apartment.building}${apartment.size ? `, ${apartment.size}` : ''}`;
+	if (isCurrent) return { label: m.contracts_option_current({ name }), disabled: false };
 	if (availability?.hasOngoingContract)
-		return { label: `${name} (nicht verfügbar)`, disabled: true };
+		return { label: m.contracts_option_unavailable({ name }), disabled: true };
 	if (availability?.availableFrom)
 		return {
-			label: `${name} (verfügbar ab ${formatDate(availability.availableFrom)})`,
+			label: m.contracts_option_available_from({
+				name,
+				date: formatDate(availability.availableFrom)
+			}),
 			disabled: false
 		};
 	return { label: name, disabled: false };

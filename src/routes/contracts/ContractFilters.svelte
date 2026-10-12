@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import Button from '$lib/ui/Button.svelte';
 	import Field from '$lib/ui/Field.svelte';
 	import { controlClass } from '$lib/ui/field';
@@ -13,9 +14,9 @@
 	} = $props();
 
 	const statuses = [
-		{ value: 'active', label: 'Laufende Mietverträge' },
-		{ value: 'future', label: 'Künftige Mietverträge' },
-		{ value: 'ended', label: 'Beendete Mietverträge' }
+		{ value: 'active', label: m.contracts_filter_active() },
+		{ value: 'future', label: m.contracts_filter_future() },
+		{ value: 'ended', label: m.contracts_filter_ended() }
 	];
 	const filtered = $derived(Object.values(filters).some(Boolean));
 </script>
@@ -48,7 +49,7 @@
 	class="flex flex-col gap-4 rounded-panel border border-line bg-surface p-6 lg:flex-row lg:items-end"
 >
 	<div class="lg:flex-1">
-		<Field id="search" label="Suche" help="Name des Mieters, Wohnungsnummer oder Gebäude">
+		<Field id="search" label={m.buildings_search()} help={m.contracts_search_help()}>
 			{#snippet children(control)}
 				<input
 					id={control.id}
@@ -62,22 +63,22 @@
 			{/snippet}
 		</Field>
 	</div>
-	<Field id="building" label="Gebäude">
+	<Field id="building" label={m.apartments_building()}>
 		{#snippet children(control)}
 			{@render choice(
 				control,
-				'Alle Gebäude',
+				m.apartments_all_buildings(),
 				buildings.map((b) => ({ value: b.id, label: b.name || b.address })),
 				filters.building,
 				'contract-building-filter'
 			)}
 		{/snippet}
 	</Field>
-	<Field id="status" label="Vertragsstatus">
+	<Field id="status" label={m.contracts_status_label()}>
 		{#snippet children(control)}
 			{@render choice(
 				control,
-				'Alle Mietverträge',
+				m.contracts_filter_all(),
 				statuses,
 				filters.status,
 				'contract-status-filter'
@@ -85,7 +86,10 @@
 		{/snippet}
 	</Field>
 	<div class="flex flex-wrap gap-4">
-		<Button type="submit" icon="search" testid="contract-search-submit">Suchen</Button>
-		{#if filtered}<Button variant="ghost" href="/contracts">Filter zurücksetzen</Button>{/if}
+		<Button type="submit" icon="search" testid="contract-search-submit"
+			>{m.buildings_search_submit()}</Button
+		>
+		{#if filtered}<Button variant="ghost" href="/contracts">{m.buildings_reset_filters()}</Button
+			>{/if}
 	</div>
 </form>

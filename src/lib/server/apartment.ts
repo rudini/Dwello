@@ -1,3 +1,4 @@
+import { m } from '$lib/paraglide/messages';
 import { error } from '@sveltejs/kit';
 import type { ApartmentStatus } from '$lib/types';
 import { contractStatus, grossRent, toContractHistory } from './contract-history';
@@ -7,8 +8,8 @@ const API = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1`;
 /** Apartment with its building, as the detail and edit pages show it */
 export async function fetchApartment(fetch: typeof globalThis.fetch, id: string) {
 	const response = await fetch(`${API}/apartments/${id}`);
-	if (response.status === 404) throw error(404, 'Wohnung nicht gefunden');
-	if (!response.ok) throw error(response.status, 'Fehler beim Laden der Wohnung');
+	if (response.status === 404) throw error(404, m.apartments_not_found());
+	if (!response.ok) throw error(response.status, m.apartments_load_failed());
 	const a = await response.json();
 	return {
 		id: a.id as string,

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import '../styles/globals.css';
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
@@ -9,6 +10,7 @@
 	import MobileNav from '$lib/ui/MobileNav.svelte';
 	import Footer from '$lib/ui/Footer.svelte';
 	import ToastRegion from '$lib/ui/ToastRegion.svelte';
+	import LanguageSwitcher from '$lib/ui/LanguageSwitcher.svelte';
 	import { isListSearch } from '$lib/list-url';
 	import type { LayoutData } from './$types';
 	import type { Snippet } from 'svelte';
@@ -61,6 +63,8 @@
 
 	// Derived state for showing authenticated layout
 	const showAuthenticatedLayout = $derived(!isPublicPath($page.url.pathname) && data.user !== null);
+	const publicLink = 'inline-flex min-h-12 items-center text-accent underline underline-offset-4';
+	const contentPage = $derived(['/help', '/privacy', '/terms'].includes($page.url.pathname));
 </script>
 
 <svelte:head>
@@ -71,7 +75,7 @@
 	href="#main-content"
 	class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-control focus:bg-accent focus:px-4 focus:py-2 focus:text-on-accent"
 >
-	Zum Inhalt springen
+	{m.shell_skip_to_content()}
 </a>
 
 {#if showAuthenticatedLayout}
@@ -89,10 +93,34 @@
 	</div>
 	<MobileNav />
 {:else}
-	<div class="min-h-screen bg-canvas">
-		<main id="main-content" tabindex="-1">
-			{@render children()}
-		</main>
+	<div class="flex min-h-screen flex-col bg-canvas">
+		<!-- Without the header the language choice stands alone at the top; links to signing in and to help, the footer to the legal pages -->
+		<div class="flex items-center justify-end gap-4 px-4 pt-4">
+			<div class="mr-auto flex gap-4">
+				{#if contentPage}
+					<a href="/login" class={publicLink} data-testid="public-login-link">{m.login_title()}</a>
+				{/if}
+				{#if $page.url.pathname !== '/help'}
+					<a href="/help" class={publicLink} data-testid="public-help-link">{m.nav_help()}</a>
+				{/if}
+			</div>
+			<nav aria-label={m.language_choice()}>
+				<LanguageSwitcher />
+			</nav>
+		</div>
+		{#if contentPage}
+			<!-- Help and the legal pages, read before signing in: the same margins as inside the frame -->
+			<main id="main-content" class="flex-1 px-4 py-8 lg:px-10" tabindex="-1">
+				<div class="mx-auto max-w-6xl">
+					{@render children()}
+				</div>
+			</main>
+		{:else}
+			<main id="main-content" class="flex flex-1 flex-col" tabindex="-1">
+				{@render children()}
+			</main>
+		{/if}
+		<Footer />
 	</div>
 {/if}
 

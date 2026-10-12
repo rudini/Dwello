@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { localName } from '$lib/names';
+	import { m } from '$lib/paraglide/messages';
 	import type { CategoryWithUsage } from '$lib/server/category';
 	import Button from '$lib/ui/Button.svelte';
 	import EmptyState from '$lib/ui/EmptyState.svelte';
@@ -20,33 +22,33 @@
 	};
 	const shown = $derived(data.categories.filter(matches[filter]));
 	const filters: { key: Filter; label: string }[] = [
-		{ key: 'all', label: 'Alle' },
-		{ key: 'allowed', label: 'Umlagefähig' },
-		{ key: 'disallowed', label: 'Nicht umlagefähig' }
+		{ key: 'all', label: m.invoices_all() },
+		{ key: 'allowed', label: m.glossary_allocable_term() },
+		{ key: 'disallowed', label: m.invoices_not_allocable() }
 	];
 </script>
 
 <svelte:head>
-	<title>Kategorien - Dwello</title>
+	<title>{m.nav_categories()} - Dwello</title>
 </svelte:head>
 
 <div class="flex flex-col gap-8">
 	<PageHeader
-		title="Kategorien"
-		purpose="Kategorien ordnen Rechnungen nach Kostenart. Nur Kosten aus umlagefähigen Kategorien fliessen in die Nebenkostenabrechnung, die übrigen trägt der Vermieter."
-		trail={[{ href: '/config', label: 'Einstellungen' }]}
+		title={m.nav_categories()}
+		purpose={m.categories_purpose()}
+		trail={[{ href: '/config', label: m.nav_settings() }]}
 	>
 		{#snippet action()}
 			<Button
 				href="/config/categories/new"
 				variant="primary"
 				icon="add"
-				testid="new-category-button">Kategorie erfassen</Button
+				testid="new-category-button">{m.categories_add()}</Button
 			>
 		{/snippet}
 	</PageHeader>
 
-	<div class="flex flex-wrap gap-2" role="group" aria-label="Kategorien anzeigen">
+	<div class="flex flex-wrap gap-2" role="group" aria-label={m.categories_show()}>
 		{#each filters as { key, label } (key)}
 			<button
 				type="button"
@@ -64,12 +66,12 @@
 
 	<div class="flex flex-col gap-4">
 		<p class="text-ink-muted">
-			Kategorien, nach denen schon Rechnungen eingeordnet sind, lassen sich nicht löschen.
+			{m.categories_in_use_note()}
 		</p>
 		{#if shown.length === 0}
 			<EmptyState
-				title="Keine Kategorien in dieser Auswahl"
-				text="Wählen Sie «Alle», um alle Kategorien zu sehen."
+				title={m.categories_empty_filter()}
+				text={m.categories_empty_filter_text()}
 				illustration="no-results"
 				testid="categories-empty"
 			/>
@@ -90,11 +92,11 @@
 			if (!open) toDelete = null;
 		}
 	}
-	record="Kategorie"
-	name={toDelete?.name ?? ''}
+	record="category"
+	name={toDelete ? localName(toDelete) : ''}
 	id={toDelete?.id}
 	error={form?.error}
 	confirmTestid="category-delete-confirm"
 >
-	<p>Die Kategorie verschwindet aus der Auswahl beim Erfassen von Rechnungen.</p>
+	<p>{m.categories_delete_text()}</p>
 </DeleteDialog>

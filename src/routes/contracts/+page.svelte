@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import { page } from '$app/stores';
 	import type { ContractsListData } from '$lib/types';
 	import Button from '$lib/ui/Button.svelte';
@@ -19,17 +20,14 @@
 </script>
 
 <svelte:head>
-	<title>Mietverträge - Dwello</title>
+	<title>{m.nav_contracts()} - Dwello</title>
 </svelte:head>
 
 <div class="flex flex-col gap-8" data-testid="contracts-page">
-	<PageHeader
-		title="Mietverträge"
-		purpose="Wer mietet welche Wohnung, seit wann und zu welcher Miete."
-	>
+	<PageHeader title={m.nav_contracts()} purpose={m.contracts_list_purpose()}>
 		{#snippet action()}
 			<Button href="/contracts/new" variant="primary" icon="contract" testid="contract-new-button"
-				>Mietvertrag erfassen</Button
+				>{m.dashboard_add_contract()}</Button
 			>
 		{/snippet}
 	</PageHeader>
@@ -40,19 +38,19 @@
 		<div class="rounded-panel border border-line bg-surface">
 			{#if filtered}
 				<EmptyState
-					title="Keine Mietverträge gefunden"
-					text="Kein Mietvertrag passt zur Suche und zu den Filtern."
+					title={m.contracts_none_found()}
+					text={m.contracts_none_found_text()}
 					illustration="no-results"
-					actionLabel="Filter zurücksetzen"
+					actionLabel={m.buildings_reset_filters()}
 					actionHref="/contracts"
 					testid="contracts-empty"
 				/>
 			{:else}
 				<EmptyState
-					title="Noch keine Mietverträge"
-					text="Ein Mietvertrag verbindet einen Mieter mit einer Wohnung, ab einem Vertragsbeginn und zu einer Miete."
+					title={m.contracts_none_yet()}
+					text={m.contracts_none_yet_text()}
 					illustration="contract"
-					actionLabel="Mietvertrag erfassen"
+					actionLabel={m.dashboard_add_contract()}
 					actionHref="/contracts/new"
 					testid="contracts-empty"
 				/>
@@ -61,8 +59,9 @@
 	{:else}
 		<section aria-labelledby="contracts-count" class="flex flex-col gap-4">
 			<h2 id="contracts-count" tabindex="-1" data-results class="text-xl font-bold text-ink">
-				{data.total}
-				{data.total === 1 ? 'Mietvertrag' : 'Mietverträge'}
+				{data.total === 1
+					? m.contracts_count_one({ count: data.total })
+					: m.contracts_count({ count: data.total })}
 			</h2>
 			<ul class="flex flex-col divide-y divide-line rounded-panel border border-line bg-surface">
 				{#each data.contracts as contract (contract.id)}

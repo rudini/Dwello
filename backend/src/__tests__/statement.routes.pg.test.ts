@@ -169,7 +169,9 @@ describe('PDF einer Abrechnung, die es nicht gibt oder die noch kein PDF hat', (
 
 		expect(response.status).toBe(400);
 		expect(await response.json()).toEqual({
-			error: 'IBAN not configured. Please set up company configuration first.'
+			error: 'IBAN not configured. Please set up company configuration first.',
+			code: 'IBAN_MISSING',
+			params: {}
 		});
 	});
 
@@ -183,7 +185,11 @@ describe('PDF einer Abrechnung, die es nicht gibt oder die noch kein PDF hat', (
 			expect({ path, status: response.status, body: await response.json() }).toEqual({
 				path,
 				status: 404,
-				body: { error: 'Statement not found' }
+				// the downloads answer from the PDF service, which stays as it is; only generation carries the code
+				body:
+					path === 'generate-pdf'
+						? { error: 'Statement not found', code: 'STATEMENT_NOT_FOUND', params: {} }
+						: { error: 'Statement not found' }
 			});
 		}
 	});

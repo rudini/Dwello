@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import { api } from '$lib/api';
 	import Icon from '$lib/ui/Icon.svelte';
 	import BuildingChoice from './BuildingChoice.svelte';
@@ -51,7 +52,7 @@
 	class="flex min-w-0 flex-col gap-4"
 	aria-describedby={error ? 'buildings-error' : undefined}
 >
-	<legend class="sr-only">Gebäude</legend>
+	<legend class="sr-only">{m.statements_step_buildings()}</legend>
 	<div class="flex flex-wrap items-center justify-between gap-4 border-b border-line pb-4">
 		<label class="flex min-h-12 cursor-pointer items-center gap-4 font-semibold text-ink">
 			<input
@@ -61,10 +62,10 @@
 				class="size-6 shrink-0 cursor-pointer accent-accent"
 				data-testid="generate-all-buildings"
 			/>
-			Alle Gebäude
+			{m.apartments_all_buildings()}
 		</label>
 		<span class="text-ink-muted" aria-live="polite">
-			{selectedBuildingIds.length} von {buildings.length} gewählt
+			{m.statements_selected_of({ selected: selectedBuildingIds.length, total: buildings.length })}
 		</span>
 	</div>
 

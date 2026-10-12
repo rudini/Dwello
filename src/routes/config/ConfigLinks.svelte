@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import Icon from '$lib/ui/Icon.svelte';
 	import type { IconName } from '$lib/ui/icons';
 	import Panel from '$lib/ui/Panel.svelte';
@@ -8,28 +9,28 @@
 		{
 			key: 'categories',
 			href: '/config/categories',
-			label: 'Kategorien',
-			text: 'Kostenarten, nach denen Sie Rechnungen einordnen',
+			label: m.nav_categories(),
+			text: m.settings_link_categories(),
 			icon: 'category'
 		},
 		{
 			key: 'distribution-keys',
 			href: '/config/distribution-keys',
-			label: 'Verteilschlüssel',
-			text: 'Wie die Kosten auf die Wohnungen aufgeteilt werden',
+			label: m.nav_distribution_keys(),
+			text: m.settings_link_keys(),
 			icon: 'sliders'
 		},
 		{
 			key: 'heating-profiles',
 			href: '/config/heating-profiles',
-			label: 'Heizprofile',
-			text: 'Wie die Heizkosten auf die Monate verteilt werden',
+			label: m.nav_heating_profiles(),
+			text: m.settings_link_profiles(),
 			icon: 'heating'
 		}
 	];
 </script>
 
-<Panel title="Stammdaten">
+<Panel title={m.settings_master_data()}>
 	<ul class="grid gap-4 md:grid-cols-3" data-testid="quick-links">
 		{#each links as link (link.key)}
 			<!-- The whole card opens the page; its name is the link -->

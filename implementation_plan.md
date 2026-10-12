@@ -4705,6 +4705,147 @@ A tenant gives notice for a later day: «Mietvertrag beenden» asks for the Vert
   Tests first: scenario "Zahlungsfrist fehlt" (`statement-edit.feature`), `statement-edit-actions.test.ts`,
   `statement-pages.dom.test.ts`, `statement.routes.pg.test.ts`.
 
+## Session 15 - October 2026: UI in four languages (Paraglide JS)
+
+Every UI text moves into `messages/{de,fr,it,en}.json` (German is the base and default); a language switcher in the
+header and on pages without it. Branch `claude/optimistic-clarke-nn8u7t` from `main`. Terms per language:
+`docs/design/i18n-begriffe.md`. Reviews: `docs/design/reviews/i18n-<step>-review-<n>.md`.
+
+### Decisions and clarifications
+- Paraglide 2 (`@inlang/paraglide-js`), strategy `cookie` then `baseLocale` (cookie `PARAGLIDE_LOCALE`, 400 days; no URL
+  prefix; no cookie: German, never the browser language). Middleware wraps the unchanged session check in
+  `src/hooks.server.ts`; `<html lang="%lang%">`. Generated code `src/lib/paraglide/` is not committed (`bun run i18n`,
+  run by `prepare` on install, by `check`, and by the Vite plugin in dev, build and Vitest); excluded from ESLint,
+  Fallow (`ignorePatterns`), Deepcheck (`deepcheck.config.json`) and coverage.
+- context7 and paraglidejs.com/inlang.com are not reachable from this container (DNS/proxy); setup follows the
+  package README, `docs/strategy.md` and `examples/sveltekit` of the Paraglide repository (raw GitHub). The
+  message-format plugin is an npm dev dependency loaded by path, so builds need no CDN.
+- Module-level texts (navigation, login errors) are getters, so they are read per request in its language and the
+  existing tests keep their shape.
+- Dates in words (`formatDateLong`) follow the UI language (`<lang>-CH`); numbers, amounts and numeric dates stay `de-CH`.
+- **Backend errors reach the UI** (clarified): the backend answers `{ error: '<text>' }` without a code; German texts
+  (e.g. name taken, formula errors, reminder refusals, «Die KI ist nicht erreichbar…») and English ones («Category not
+  found», «IBAN not configured…») are shown as they are in about a dozen places (`save-form.ts` failure/delete,
+  `buildings/*/+page.server.ts`, `statement-actions.ts`, `statement-generation.ts`, `distribution-key.ts` testFormula,
+  `invoices/[id]` pages, reminder `deliveryError`). Translating them by code needs a backend change: asked before the
+  areas that show them.
+- **Master data names**: categories, distribution keys and heating profiles have `name_de/fr/it/en`; their list and
+  detail endpoints return all four, so the UI shows the UI-language name. Invoice joins return only `name` and
+  `nameDE`, completeness and fuel stock only `nameDE || name`, statement line items only the English key: the BFF maps
+  these by id or key through the category/key lists where it can.
+
+### Steps
+- [x] **Step 1 – setup, switcher, frame and public pages**: Paraglide (`project.inlang/settings.json`, `vite.config.ts`,
+  `vitest.config.ts`, `package.json` scripts `i18n`/`prepare`/`check`), `hooks.server.ts`, `app.html`,
+  `LanguageSwitcher.svelte` (button with the current language as text, read «Sprache: Deutsch», opening a menu of
+  the four languages in their own words with `lang`, current one marked; 48 px, Escape and focus return like the user
+  menu; `setLocale` sets the cookie and reloads the same address. A native select was tried first and dropped: an
+  existing scenario counts the comboboxes of the statement wizard), header and frameless layout, `navigation.ts`, `src/lib/ui/*`, login, error, help and
+  glossary, privacy, terms, `login-flow.ts`, `save-form.ts` (`fetchRecord`), `format.ts`. Tests first:
+  `i18n.test.ts` (same keys in every file, no empty text, `<html lang>`, German despite a French browser),
+  `language-switcher.dom.test.ts`, `format-language.test.ts`; scenarios `sprachen.feature`; axe state `other-language`
+  (login, dashboard) in `screens.json` and `accessibility.feature`.
+- [x] **Step 2 – dashboard and buildings**: `src/routes/dashboard/**`, `src/routes/buildings/**`, `src/lib/overview.ts`,
+  `apartment.ts` (floors as in the PDF, statuses), `contract-status.ts`, `statement.ts` (status labels),
+  `server/building-form.ts`, new `building-type.ts` (stored German types shown in the UI language), `names.ts`
+  (`localName`), cantons, `Intl.ListFormat` in the UI language. Module-level texts are getters. Test
+  `buildings-i18n.test.ts`. Backend texts still passed through: `buildings/new` and `buildings/[id]/edit` actions
+  (`error.error || error.message`), handled with the error codes.
+  Fallow: `statusLabels`/`statusTones` exist in `apartment.ts` and `statement.ts` since before; since both files are now
+  in the changed scope, Fallow reports them as duplicate exports, and line suppressions do not apply to that rule.
+  Renaming would change existing tests, so `.fallowrc.json` `ignoreExports` names exactly these two in `statement.ts`.
+- [x] **Step 3 – apartments and tenants**: `src/routes/apartments/**`, `src/routes/tenants/**`, `server/apartment-form.ts`,
+  `server/apartment.ts`, `server/tenant-form.ts`, `server/tenant.ts`, `tenant.ts` (tenant language labels as getters,
+  stored codes unchanged), `utils/contract-availability.ts`; 133 keys. Test `tenants-i18n.test.ts`.
+- [x] **Step B – backend error codes** (user's decision): `backend/src/services/coded-error.ts` (`CodedError`, `errorBody`);
+  `Conflict` and `ReminderError` carry codes; services (category, distribution key, formula, heating profile, reminder,
+  document, invoice, contract, calculation, statement) throw coded refusals; routes answer `{ error, code, params }`
+  (text and status unchanged; unexpected errors stay `{ error }`); formula endpoints add `errorCodes`; documents add a
+  derived `deliveryErrorCode` (no migration). 58 codes, `docs/api-specification.md`. BFF: `src/lib/backend-error.ts`
+  (`backendMessage`, `deliveryErrorText`) used in save-form, category, distribution key, heating profile, apartment
+  form, statement actions/generation, building actions, documents, reminder feedback, invoice pages, PDF toast;
+  `api.ts` keeps `code`/`params`. German message per code = the backend's German text; English backend texts got a
+  German sentence. Tests: `error-codes.pg.test.ts`, `formula-codes.test.ts`, `backend-error.test.ts`; backend 511 tests.
+  Still uncoded by design: Elysia 422 bodies, database errors, other SMTP errors, PDF 500s; stored document titles
+  («Zahlungserinnerung») are data.
+- [x] **Step 4 – rental contracts**: `src/routes/contracts/**` (list, detail, edit, end dialog, wizard and its steps),
+  `contract-form.ts`, `contract-wizard.ts` (step names as getters), `statement-wizard.ts` (shared impossible-year
+  error); 106 keys; help-page labels («Mietvertrag erfassen/speichern», step names) as quoted. French guillemets
+  normalised to non-breaking spaces inside in all French texts. Test `contracts-i18n.test.ts`.
+- [x] **Step 5 – invoices and documents**: `src/routes/invoices/**`, `src/routes/documents/**`, `invoice.ts`,
+  `server/invoice.ts` (`invoiceChoices`, names of category, distribution key and AI category by id in the UI
+  language via `localName`; the AI suggestion's English key mapped by id), `server/documents.ts` (reminder titles from
+  type and level in the UI language instead of the stored German title), `server/category.ts`; 129 keys; local example
+  supplier per language. Test `invoices-i18n.test.ts`. Own records without fr/it/en names show their German name.
+- [x] **Step 6 – statements**: `src/routes/statements/**` (list, detail and its panels and dialogs, edit, wizard steps),
+  `statement.ts`, `statement-wizard.ts` (step names as getters, months in the UI language), `server/statement.ts`
+  (line items named in the UI language via `localName`), `server/statement-actions.ts` (new reminder's title via
+  `localTitle`, from review i18n-5), `server/statement-generation.ts` (category names of the year-on-year check by
+  id), heating profiles by `localName`; 210 keys; help-page buttons as quoted. Test `statements-i18n.test.ts`.
+- [x] **Step 7 – configuration, gallery, remaining `src/lib`**: `src/routes/config/**` (settings, categories,
+  distribution keys, heating profiles; delete and save forms by record kind for gender agreement), gallery, reports,
+  analytics, home; `heating-profile.ts` (month labels and `monthName` via Intl in the UI language),
+  `HeatingProfileChart.svelte`, `distribution-key.ts` (variable descriptions as functions), `server/distribution-key.ts`,
+  `server/heating-profile.ts` (keeps nameFR/IT/EN so `localName` works in the statement wizard), `server/settings.ts`,
+  `api.ts` (fallbacks via `backend_*` codes incl. the BFF's own codes), `backend-error.ts` (month param of
+  HEATING_PROFILE_SHARE_NEGATIVE shown in the UI language), PDF proxy fallback coded; 211 keys. Test `config-i18n.test.ts`.
+- [x] **Proof: no German in fr/it/en on every screen of `screens.json`, 390 px without sideways scrolling**:
+  `sprachen-bildschirme.feature` (every screen and state, each in fr, it and en at 390 px: no word that only German
+  texts use, no umlaut word, user data masked; no page wider than the viewport, no clipped text box) passes for all
+  120 examples; `@wip` removed. Local examples per language (street, company, tenant name) instead of German ones.
+- [x] **Native reads and personas**: one subagent per message file read it as a Swiss native speaker
+  (`docs/design/reviews/i18n-native-de.md`, `i18n-native-fr-it-en.md`; German slips existed before and were kept as
+  required, fr/it/en majors fixed); no human native speaker has checked the translations. Personas on the persona stack
+  (`dwello_persona`): Helga (de, desktop zoom 1.5), Marco (it, 390 px), Dr. Weber (fr, desktop), Sven (en, keyboard
+  and screen reader), Anna (fr, 390 px) – reports `docs/design/personas/<name>-i18n.md`. No blocker; the majors
+  (terms/privacy/help behind sign-in, privacy notice content, Art. 257d OR hint, long heating help on phones, mobile
+  menu height, glossary entry point, PDF language not named) existed before the translation and need a decision
+  (`offene-punkte.md`).
+- [x] **Follow-up after the goal check (user's decisions)**: help, privacy and terms are public (`hooks.server.ts`
+  public paths; signed out they show without the app header, with the language row); the backend route
+  `/api/v1/invoices/llm-recipient` (provider and country for the privacy notice) moved before the JWT check in
+  `backend/src/app.ts`; the login page's terms link now works signed out. Language menu: arrow keys, Home and End.
+  Heating-profile choices name «(100%)» only in German (`profileLabel`), so Italian names fit 390 px. Older persona
+  majors stay open by the user's decision; the test additions in `accessibility.feature` and the code checks in
+  existing backend tests were accepted by the user. Tests first: `sprachen.feature` (signed-out pages, terms link),
+  `public-pages.test.ts`, `invoice-categorization.pg.test.ts`, `language-switcher.dom.test.ts`, `config-i18n.test.ts`;
+  screens `help-public`, `privacy-public`, `terms-public` in `screens.json`, `accessibility.feature` and
+  `sprachen-bildschirme.feature`.
+- [x] **Review fixes of the follow-up** (`docs/design/reviews/i18n-follow-up-review-1.md`): signed out, help, privacy
+  and terms keep the frame's margins (`src/routes/+layout.svelte`, test `public-pages-layout.dom.test.ts`); more
+  protected near-miss paths in `public-pages.test.ts`; `docs/api-specification.md` names the public endpoint; the
+  terms-link step retries its URL check (`language.steps.ts`). Review 2: no blocker or major.
+- [x] **Persona reruns Sven and Dr. Weber** (`docs/design/personas/sven-i18n-2.md`, `weber-i18n-2.md`): Dr. Weber's major
+  fixed – every page without the app header (sign-in included) shows the footer with privacy and terms, and help,
+  privacy and terms link to «Anmelden» (rerun `weber-i18n-3.md`; review `i18n-way-back-review-1.md`) (`src/routes/+layout.svelte`,
+  `public-pages-layout.dom.test.ts`, scenarios «Von den Nutzungsbedingungen zurück zur Anmeldung» and «Den Datenschutz von der Anmeldeseite aus lesen» in
+  `sprachen.feature`; the sign-in card centres above the footer, `login/+page.svelte`).
+- [x] **Proof for «no hard-coded UI text»**: `src/__tests__/no-german-in-code.test.ts` scans every `.ts` and `.svelte`
+  under `src` (tests and generated code aside): markup text, `aria-label`/`title`/`placeholder`/`alt` and every string
+  literal must hold no word that only German UI texts use and no ä, ö, ü or ß; nine files list their German
+  identifiers (status values, query parameters, the native name «Deutsch»). Shown to fail on a planted «Anmelden».
+  Three review rounds (`docs/design/reviews/i18n-guard-review-1..3.md`): strings in `{…}` and props, regex literals and
+  `${…}/` no longer put the quote pairing out of step; each file's test plants German at its end and must find it. The
+  user decided against a fourth round. Gallery uses the example name message instead of «Keller».
+  A whole German message copied into the code is caught too («Per E-Mail»).
+- [x] **Persona runs on the final state** (`helga-i18n-2.md`, `marco-i18n-2.md`, `anna-i18n-2.md`, `sven-i18n-3.md`):
+  the user is read again on every navigation (next entry), so privacy and terms no longer show the signed-out user
+  (scenario «Nach dem Abmelden zeigt der Datenschutz niemanden als angemeldet»); pages without
+  the app header link to «Hilfe» (`+layout.svelte`, `public-pages-layout.dom.test.ts`, scenario «Die Hilfe von der
+  Anmeldeseite aus lesen»).
+- [x] **Expired session**: the root layout load reads `url.pathname`, so the user is read again on every navigation and
+  no page keeps showing a signed-out or expired user (`src/routes/+layout.server.ts`, scenario «Nach abgelaufener
+  Anmeldung zeigt der Datenschutz niemanden als angemeldet»; review `i18n-session-review-1.md`). Persona reruns
+  `helga-i18n-3.md`, `marco-i18n-3.md`, `anna-i18n-3.md`: no blocker or major.
+- [x] **Extra persona runs** (approved by the user): `sven-i18n-4.md` (English, keyboard) and `weber-i18n-4.md` (French,
+  desktop and 390 px) checked their last fixes (privacy link on the sign-in page, sign-out): no blocker or major.
+- [x] **Merge of `main` for PR #48**: conflicts resolved (contract service keeps `CONTRACT_OVERLAP` in `checkNewDates`,
+  `apiCall` passes `params` and `details`, `ActionDialog`, `DateInput` with the current year in `ui_date_*` messages,
+  contract page and form, statement edit). The texts new on `main` are in `messages/*.json` (`contract-status.ts`,
+  `PastEndConfirm.svelte`, `contracts/[id]/+page.*`, `statements/[id]/edit/+page.server.ts`); three obsolete keys
+  removed; the new states `end-dialog-error` and `past-end-error` are in `sprachen-bildschirme.feature` and their
+  setup chooses «Befristet» in the page's language (`tests/e2e/interactions/accessibility.ts`).
+
 ---
 
 # Success Criteria

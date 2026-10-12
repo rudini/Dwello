@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import { enhance } from '$app/forms';
 	import type { StatementDocument } from '$lib/types';
 	import Button from '$lib/ui/Button.svelte';
@@ -25,9 +26,9 @@
 			type="submit"
 			icon="send"
 			busy={saving}
-			busyLabel="Wird gespeichert …"
-			ariaLabel="Als versendet markieren: {document.title} an {document.tenantName}"
-			testid="document-mark-sent">Als versendet markieren</Button
+			busyLabel={m.ui_saving()}
+			ariaLabel={m.documents_mark_sent_aria({ title: document.title, name: document.tenantName })}
+			testid="document-mark-sent">{m.documents_mark_sent()}</Button
 		>
 	</form>
 {/if}

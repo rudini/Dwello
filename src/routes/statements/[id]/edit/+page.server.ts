@@ -1,4 +1,5 @@
 import { fail, redirect } from '@sveltejs/kit';
+import { m } from '$lib/paraglide/messages';
 import { loadStatement } from '$lib/server/statement';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -17,7 +18,7 @@ export const actions: Actions = {
 		const form = await request.formData();
 		const paymentDeadline = String(form.get('paymentDeadline') ?? '');
 		if (!paymentDeadline) {
-			return failed(400, { paymentDeadline: 'Die Frist fehlt. Bitte geben Sie ein Datum ein.' });
+			return failed(400, { paymentDeadline: m.statements_deadline_missing() });
 		}
 		const response = await fetch(`${BACKEND_URL}/api/v1/statements/${params.id}`, {
 			method: 'PUT',
@@ -28,7 +29,7 @@ export const actions: Actions = {
 			})
 		});
 		if (!response.ok) {
-			return failed(response.status, { form: 'Abrechnung konnte nicht gespeichert werden.' });
+			return failed(response.status, { form: m.statements_save_failed() });
 		}
 		throw redirect(303, `/statements/${params.id}`);
 	}

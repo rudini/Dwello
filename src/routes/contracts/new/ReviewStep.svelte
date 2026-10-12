@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import { contractSummary } from '$lib/contract-wizard';
 	import type { ContractFormValues } from '$lib/contract-form';
 	import Button from '$lib/ui/Button.svelte';
@@ -17,9 +18,7 @@
 	} = $props();
 </script>
 
-<p class="text-ink-muted">
-	Prüfen Sie die Angaben. Mit «Mietvertrag speichern» wird der Mietvertrag erstellt.
-</p>
+<p class="text-ink-muted">{m.contracts_review_intro()}</p>
 
 <dl class="flex flex-col divide-y divide-line rounded-panel border border-line bg-surface">
 	{#each contractSummary(values, tenants, apartments) as item (item.label)}
@@ -38,7 +37,8 @@
 					<Button
 						variant="ghost"
 						onclick={() => onedit(step, item.field)}
-						ariaLabel="{item.label} ändern">Ändern</Button
+						ariaLabel={m.contracts_change_aria({ label: item.label })}
+						>{m.contracts_change()}</Button
 					>
 				</dd>
 			{/if}

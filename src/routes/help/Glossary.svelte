@@ -1,70 +1,71 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import Panel from '$lib/ui/Panel.svelte';
 
 	// Plain-language explanations derived from the definitions in UBIQUITOUS_LANGUAGE.md
 	const terms = [
 		{
-			term: 'Abrechnungsperiode',
-			text: 'Das Jahr, über das Sie die Nebenkosten abrechnen, zum Beispiel das Kalenderjahr oder Juli bis Juni. Das Rechnungsdatum bestimmt, in welche Abrechnungsperiode eine Rechnung fällt.'
+			term: m.glossary_period_term(),
+			text: m.glossary_period_text()
 		},
 		{
-			term: 'Akonto',
-			text: 'Der monatliche Vorschuss des Mieters für die Nebenkosten. Die Nebenkostenabrechnung verrechnet ihn mit den tatsächlichen Kosten.'
+			term: m.glossary_advance_term(),
+			text: m.glossary_advance_text()
 		},
 		{
-			term: 'Nettomiete',
-			text: 'Die monatliche Grundmiete ohne Nebenkosten, auch Mietzins genannt.'
+			term: m.glossary_net_rent_term(),
+			text: m.glossary_net_rent_text()
 		},
 		{
-			term: 'Zusatzmiete',
-			text: 'Zusätzliche monatliche Miete, zum Beispiel für Garage, Parkplatz oder Keller.'
+			term: m.glossary_additional_rent_term(),
+			text: m.glossary_additional_rent_text()
 		},
 		{
-			term: 'Verteilschlüssel',
-			text: 'Die Regel, nach der die Kosten eines Gebäudes auf die Wohnungen aufgeteilt werden, zum Beispiel nach Fläche, nach Zimmern oder gleich viel pro Wohnung.'
+			term: m.glossary_key_term(),
+			text: m.glossary_key_text()
 		},
 		{
-			term: 'Heizprofil',
-			text: 'Verteilt die Heizkosten in Prozent auf die zwölf Monate. Wechselt der Mieter während der Abrechnungsperiode, teilt Dwello die Heizkosten so nach Monaten statt nach Tagen auf.'
+			term: m.glossary_profile_term(),
+			text: m.glossary_profile_text()
 		},
 		{
-			term: 'Verwaltungspauschale',
+			term: m.glossary_fee_term(),
 			// TODO(fachlich prüfen): the glossary still says of the building's costs, shared by a key (offene-punkte.md)
-			text: 'Die Abgeltung Ihres Verwaltungsaufwands: ein Prozentsatz der eigenen Nebenkosten jedes Mieters. Üblich sind bis 3 %. Den Satz wählen Sie beim Erstellen der Abrechnungen.'
+			text: m.glossary_fee_text()
 		},
 		{
-			term: 'Mietstage',
-			text: 'Die Anzahl Tage, die ein Mietvertrag in der Abrechnungsperiode läuft. Zieht ein Mieter während des Jahres ein oder aus, bezahlt er nur den Anteil seiner Mietstage; Leerstand trägt der Vermieter.'
+			term: m.glossary_days_term(),
+			text: m.glossary_days_text()
 		},
 		{
-			term: 'Umlagefähig',
-			text: 'Eine umlagefähige Rechnung fliesst in die Nebenkostenabrechnung ein, zum Beispiel Heizung, Wasser, Hauswart oder Kehricht. Ob eine Rechnung umlagefähig ist, folgt ihrer Kategorie und lässt sich pro Rechnung anpassen.'
+			term: m.glossary_allocable_term(),
+			text: m.glossary_allocable_text()
 		},
 		{
-			term: 'Saldo',
+			term: m.glossary_balance_term(),
 			// TODO(fachlich prüfen): the glossary does not name the rounding to 5 Rappen (offene-punkte.md)
-			text: 'Der Kostenanteil des Mieters samt Verwaltungspauschale minus seine geleisteten Akontobeiträge, auf 5 Rappen gerundet. Ist der Saldo positiv, zahlt der Mieter nach (Nachzahlung); ist er negativ, erhält er Geld zurück (Rückerstattung).'
+			text: m.glossary_balance_text()
 		},
 		{
-			term: 'Zahlungsfrist',
-			text: 'Das Datum, bis zu dem der Mieter die Abrechnung bezahlt haben muss.'
+			term: m.glossary_deadline_term(),
+			text: m.glossary_deadline_text()
 		},
 		{
-			term: 'Mahnung',
-			text: 'Eine Zahlungsaufforderung, die Sie zu einer versendeten Abrechnung auslösen: zuerst eine Zahlungserinnerung, danach höchstens eine 2. und eine 3. Mahnung.'
+			term: m.glossary_reminder_term(),
+			text: m.glossary_reminder_text()
 		},
 		{
-			term: 'Korrespondenzkanal',
-			text: 'Wie ein Mieter Post von Ihnen erhält: per Brief (Standard) oder per E-Mail. Für E-Mail braucht es eine E-Mail-Adresse.'
+			term: m.glossary_channel_term(),
+			text: m.glossary_channel_text()
 		},
 		{
-			term: 'Mietstatus',
-			text: 'Zeigt, ob eine Wohnung vermietet ist: Vermietet (ein Mietvertrag läuft), Wiedervermietet (ein künftiger Mietvertrag ist abgeschlossen), Leer oder Gesperrt. Vermietet und Wiedervermietet ergeben sich aus den Mietverträgen; Leer und Gesperrt setzen Sie beim Bearbeiten der Wohnung.'
+			term: m.glossary_status_term(),
+			text: m.glossary_status_text()
 		}
 	];
 </script>
 
-<Panel title="Begriffe kurz erklärt" testid="page-section">
+<Panel title={m.glossary_title()} testid="page-section">
 	<dl class="flex flex-col gap-4">
 		{#each terms as { term, text } (term)}
 			<div class="flex flex-col gap-1">

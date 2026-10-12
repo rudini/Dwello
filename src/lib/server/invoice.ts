@@ -1,8 +1,36 @@
+import { localName } from '$lib/names';
 import type { InvoiceWithDetails } from '$lib/types';
 import { toCategory } from './category';
 import { toDistributionKey } from './distribution-key';
 
+const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
+
 type Related = Record<string, unknown> | null | undefined;
+type Named = { id: string; name: string };
+type MasterData = Parameters<typeof localName>[0];
+
+/** A category as offered for invoices: named in the UI language */
+export const localCategory = (c: Record<string, unknown>) => ({
+	...toCategory(c),
+	name: localName(c as MasterData)
+});
+
+/** Categories and distribution keys to choose for an invoice, named in the UI language; a failing call offers none */
+export async function invoiceChoices(fetch: typeof globalThis.fetch) {
+	type List = { categories?: Record<string, unknown>[]; data?: Record<string, unknown>[] };
+	const list = (path: string): Promise<List> =>
+		fetch(`${BACKEND_URL}/api/v1/${path}?limit=100`)
+			.then((response) => (response.ok ? response.json() : {}))
+			.catch(() => ({}));
+	const [categories, keys] = await Promise.all([list('categories'), list('distribution-keys')]);
+	return {
+		categories: (categories.categories || categories.data || []).map(localCategory),
+		distributionKeys: (keys.data || []).map((d) => ({
+			...toDistributionKey(d),
+			name: localName(d as MasterData)
+		}))
+	};
+}
 
 // Who chose the category: nobody yet, the KI (its suggestion kept), or the Liegenschaftsverwalter
 function categorizationStatus(
@@ -14,12 +42,19 @@ function categorizationStatus(
 		: 'manual';
 }
 
-/** Backend invoice as shown in the German interface */
-export function toInvoice(r: Record<string, unknown>): InvoiceWithDetails {
+/**
+ * Backend invoice as shown in the interface: its category and distribution key carry only their German name,
+ * so `names` (categories and keys in the UI language) name them where it has them
+ */
+export function toInvoice(r: Record<string, unknown>, names: Named[] = []): InvoiceWithDetails {
 	const building = r.building as Record<string, string> | null;
 	const category = r.category as Related;
 	const key = r.distributionKey as Related;
 	const suggested = r.llmCategory as Related;
+	const named = <T extends Named>(row: T) => ({
+		...row,
+		name: names.find((n) => n.id === row.id)?.name ?? row.name
+	});
 	return {
 		id: r.id as string,
 		buildingId: r.buildingId as string,
@@ -38,10 +73,12 @@ export function toInvoice(r: Record<string, unknown>): InvoiceWithDetails {
 		updatedAt: r.updatedAt as string | undefined,
 		buildingName: building?.name || '',
 		buildingAddress: building?.address || '',
-		category: category ? toCategory(category) : undefined,
-		distributionKey: key ? { id: key.id as string, name: toDistributionKey(key).name } : undefined,
+		category: category ? named(toCategory(category)) : undefined,
+		distributionKey: key
+			? named({ id: key.id as string, name: toDistributionKey(key).name })
+			: undefined,
 		llmCategory: suggested
-			? { id: suggested.id as string, name: toCategory(suggested).name }
+			? named({ id: suggested.id as string, name: toCategory(suggested).name })
 			: undefined,
 		categorizationStatus: categorizationStatus(r)
 	};

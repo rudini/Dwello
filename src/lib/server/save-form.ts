@@ -1,6 +1,8 @@
+import { backendMessage, type BackendError } from '$lib/backend-error';
+import { m } from '$lib/paraglide/messages';
 import { error, fail, redirect } from '@sveltejs/kit';
 
-type Saved = { id?: string; error?: string };
+type Saved = { id?: string } & BackendError;
 
 /**
  * Form action body: reports the form's errors, or sends the record to the backend
@@ -43,8 +45,8 @@ export async function deleteRecord(
 ) {
 	const response = await fetch(url, { method: 'DELETE' });
 	if (!response.ok) {
-		const { error: message } = await response.json().catch(() => ({}));
-		return fail(response.status, { error: (message as string) ?? failure });
+		const body: BackendError = await response.json().catch(() => ({}));
+		return fail(response.status, { error: backendMessage(body, failure) });
 	}
 	throw redirect(303, location);
 }
@@ -52,7 +54,7 @@ export async function deleteRecord(
 /** Page load body: the record as JSON, or an error page naming what is missing */
 export async function fetchRecord(fetch: typeof globalThis.fetch, url: string, record: string) {
 	const response = await fetch(url);
-	if (response.status === 404) throw error(404, `${record} nicht gefunden`);
-	if (!response.ok) throw error(response.status, `${record} konnte nicht geladen werden`);
+	if (response.status === 404) throw error(404, m.record_not_found({ record }));
+	if (!response.ok) throw error(response.status, m.record_not_loaded({ record }));
 	return response.json();
 }

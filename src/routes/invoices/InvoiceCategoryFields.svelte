@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import type { Snippet } from 'svelte';
 	import type { Category } from '$lib/types';
 	import Alert from '$lib/ui/Alert.svelte';
@@ -28,9 +29,12 @@
 	const nonAllocable = $derived(selectedCategory?.isAllowedUtilityCost === false);
 	// Grouped by whether their costs may be charged to the tenants
 	const groups = $derived([
-		{ label: 'Umlagefähige Kosten', categories: categories.filter((c) => c.isAllowedUtilityCost) },
 		{
-			label: 'Nicht umlagefähige Kosten',
+			label: m.invoices_group_allocable(),
+			categories: categories.filter((c) => c.isAllowedUtilityCost)
+		},
+		{
+			label: m.invoices_group_not_allocable(),
 			categories: categories.filter((c) => !c.isAllowedUtilityCost)
 		}
 	]);
@@ -41,7 +45,7 @@
 	}
 </script>
 
-<Field id="category" label="Kategorie" help="Die Art der Kosten." optional>
+<Field id="category" label={m.buildings_category()} help={m.invoices_category_help()} optional>
 	{#snippet children(control)}
 		<!-- The options are written here, not in a child component, so they are in the page before it is hydrated -->
 		<select
@@ -52,7 +56,7 @@
 			class={controlClass(false)}
 			data-testid="invoice-category-select"
 		>
-			<option value="">Kategorie auswählen</option>
+			<option value="">{m.invoices_choose_category()}</option>
 			{#each groups as group (group.label)}
 				<optgroup label={group.label}>
 					{#each group.categories as category (category.id)}
@@ -68,9 +72,9 @@
      the glossary states it only for the Verwaltungspauschale -->
 <Select
 	id="distributionKey"
-	label="Verteilschlüssel"
-	help="Wie die Kosten auf die Wohnungen des Gebäudes verteilt werden. Ohne Verteilschlüssel werden die Kosten gleichmässig pro Wohnung verteilt."
-	placeholder="Verteilschlüssel auswählen"
+	label={m.glossary_key_term()}
+	help={m.invoices_key_help()}
+	placeholder={m.invoices_choose_key()}
 	optional
 	options={distributionKeys.map((key) => ({ value: key.id, label: key.name }))}
 	bind:value={distributionKeyId}
@@ -81,8 +85,8 @@
 
 <Checkbox
 	id="isValidUtilityCost"
-	label="Umlagefähig"
-	help="Die Rechnung fliesst in die Nebenkostenabrechnung ein."
+	label={m.glossary_allocable_term()}
+	help={m.invoices_allocable_help()}
 	bind:checked={isValidUtilityCost}
 	disabled={nonAllocable}
 	describedby={nonAllocable ? 'invoice-category-warning-text' : undefined}
@@ -91,11 +95,8 @@
 
 {#if nonAllocable}
 	<div data-testid="invoice-category-warning">
-		<Alert tone="caution" title="Nicht umlagefähige Kategorie">
-			<p id="invoice-category-warning-text">
-				Kosten dieser Kategorie (z. B. Reparaturen, Versicherungen) können nicht auf Mieter
-				übertragen werden.
-			</p>
+		<Alert tone="caution" title={m.invoices_category_not_allocable()}>
+			<p id="invoice-category-warning-text">{m.invoices_category_not_allocable_text()}</p>
 		</Alert>
 	</div>
 {/if}

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import HeatingProfileForm from '../HeatingProfileForm.svelte';
 	import type { ActionData } from './$types';
@@ -7,21 +8,21 @@
 </script>
 
 <svelte:head>
-	<title>Neues Heizprofil - Dwello</title>
+	<title>{m.profiles_new()} - Dwello</title>
 </svelte:head>
 
 <div class="mx-auto flex max-w-3xl flex-col gap-8">
 	<PageHeader
-		title="Neues Heizprofil"
-		purpose="Legen Sie fest, wie sich die Heizkosten eines Jahres auf die Monate verteilen, z. B. für ein Gebäude in den Bergen mit langer Heizperiode."
+		title={m.profiles_new()}
+		purpose={m.profiles_new_purpose()}
 		trail={[
-			{ href: '/config', label: 'Einstellungen' },
-			{ href: '/config/heating-profiles', label: 'Heizprofile' }
+			{ href: '/config', label: m.nav_settings() },
+			{ href: '/config/heating-profiles', label: m.nav_heating_profiles() }
 		]}
 	/>
 	<HeatingProfileForm
 		errors={form?.errors}
 		cancelHref="/config/heating-profiles"
-		submitLabel="Heizprofil speichern"
+		submitLabel={m.profiles_save()}
 	/>
 </div>

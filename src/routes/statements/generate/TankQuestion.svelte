@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import Alert from '$lib/ui/Alert.svelte';
 
 	// Buildings with heating costs that never had a Tankbestand: if they heat with oil, pellets or wood, the purchases
@@ -7,19 +8,15 @@
 </script>
 
 <!-- TODO(fachlich prüfen): "Tankbestand" is not in the glossary -->
-<Alert tone="info" title="Heizen Sie mit Öl, Flüssiggas, Pellets oder Holz?" testid="tank-question">
-	<p>
-		Dann erfassen Sie den Tankbestand am Anfang und am Ende der Periode, sonst rechnet Dwello den
-		Einkauf ab statt den Verbrauch. Bei Fernwärme, Erdgas aus der Leitung oder Wärmepumpe ist nichts
-		zu tun.
-	</p>
+<Alert tone="info" title={m.statements_tank_title()} testid="tank-question">
+	<p>{m.statements_tank_text()}</p>
 	<ul class="flex flex-col gap-2">
 		{#each buildings as building (building.buildingId)}
 			<li>
 				<a
 					href="/buildings/{building.buildingId}"
 					class="inline-flex min-h-12 items-center font-semibold text-accent underline underline-offset-4"
-					>Tankbestand erfassen: {building.name}</a
+					>{m.statements_add_stock_for({ name: building.name })}</a
 				>
 			</li>
 		{/each}

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import type { Building, HeatingProfile } from '$lib/types';
 	import StatementWizard from './StatementWizard.svelte';
@@ -20,14 +21,14 @@
 </script>
 
 <svelte:head>
-	<title>Abrechnungen erstellen - Dwello</title>
+	<title>{m.dashboard_create_statements()} - Dwello</title>
 </svelte:head>
 
 <div class="mx-auto flex max-w-3xl flex-col gap-8">
 	<PageHeader
-		title="Abrechnungen erstellen"
-		purpose="Erstellen Sie die Nebenkostenabrechnungen einer Abrechnungsperiode für ganze Gebäude. Es entstehen Entwürfe, die Sie danach prüfen und versenden."
-		trail={[{ href: '/statements', label: 'Nebenkostenabrechnungen' }]}
+		title={m.dashboard_create_statements()}
+		purpose={m.statements_generate_purpose()}
+		trail={[{ href: '/statements', label: m.nav_statements() }]}
 	/>
 	<StatementWizard
 		data={{

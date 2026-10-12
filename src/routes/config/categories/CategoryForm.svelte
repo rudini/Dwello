@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
+	import { m } from '$lib/paraglide/messages';
 	import type { Category } from '$lib/types';
 	import Checkbox from '$lib/ui/Checkbox.svelte';
 	import TextInput from '$lib/ui/TextInput.svelte';
@@ -16,9 +17,9 @@
 	} = $props();
 
 	const translations = [
-		{ key: 'nameFR', label: 'Französisch' },
-		{ key: 'nameIT', label: 'Italienisch' },
-		{ key: 'nameEN', label: 'Englisch' }
+		{ key: 'nameFR', label: m.tenants_language_fr() },
+		{ key: 'nameIT', label: m.tenants_language_it() },
+		{ key: 'nameEN', label: m.tenants_language_en() }
 	] as const;
 	// The record's texts (empty for a new one), its number and the checkbox as the fields hold them
 	let values = $state(
@@ -33,16 +34,17 @@
 </script>
 
 <SaveForm
-	record="Kategorie"
+	record="category"
 	error={errors.form}
 	cancelHref="/config/categories"
 	{submitLabel}
 	submitTestid="category-submit"
 >
+	<!-- The German name, also the key of a new category: its example stays German in every language -->
 	<TextInput
 		id="name"
 		name="name"
-		label="Name"
+		label={m.categories_name_german()}
 		example="Treppenhausreinigung"
 		bind:value={values.name}
 		error={errors.name}
@@ -51,18 +53,16 @@
 	<TextInput
 		id="description"
 		name="description"
-		label="Beschreibung"
-		help={category?.predefined
-			? 'Die Liste zeigt die Beschreibung vordefinierter Kategorien nicht.'
-			: undefined}
+		label={m.invoices_description()}
+		help={category?.predefined ? m.categories_description_predefined() : undefined}
 		optional
 		bind:value={values.description}
 	/>
 	<Checkbox
 		id="isAllowedUtilityCost"
 		name="isAllowedUtilityCost"
-		label="Umlagefähige Nebenkosten"
-		help="Nur umlagefähige Kosten (Art. 257a–257b OR) fliessen in die Nebenkostenabrechnung, z. B. Heizung, Wasser, Hauswart. Reparaturen, Versicherungen und Steuern sind nicht umlagefähig."
+		label={m.categories_allocable()}
+		help={m.categories_allocable_help()}
 		bind:checked={values.allowed}
 		testid="category-allowed-checkbox"
 	/>
@@ -70,8 +70,8 @@
 	<Checkbox
 		id="isHeatingCost"
 		name="isHeatingCost"
-		label="Heizkosten nach dem Heizprofil verteilen"
-		help="Zum Beispiel Heizöl, Fernwärme, Pellets oder Kaminfeger. Zieht ein Mieter während der Abrechnungsperiode ein oder aus, verteilt Dwello diese Kosten nach dem Heizprofil auf die Monate, alle anderen nach Tagen. Separat abgerechnetes Warmwasser wird das ganze Jahr etwa gleich verbraucht: Lassen Sie das Häkchen dort weg."
+		label={m.categories_heating()}
+		help={m.categories_heating_help()}
 		bind:checked={values.heating}
 		testid="category-heating-checkbox"
 	/>
@@ -79,8 +79,8 @@
 		id="sortOrder"
 		name="sortOrder"
 		type="number"
-		label="Reihenfolge"
-		help="Position in den Auswahllisten: kleinere Zahlen stehen weiter oben."
+		label={m.categories_sort_order()}
+		help={m.categories_sort_order_help()}
 		example="4"
 		optional
 		min="0"
@@ -88,7 +88,7 @@
 	/>
 
 	<fieldset class="flex flex-col gap-4">
-		<legend class="text-lg font-semibold text-ink">Übersetzungen</legend>
+		<legend class="text-lg font-semibold text-ink">{m.categories_translations()}</legend>
 		<div class="grid gap-6 md:grid-cols-3">
 			{#each translations as { key, label } (key)}
 				<TextInput id={key} name={key} {label} optional bind:value={values[key]} />

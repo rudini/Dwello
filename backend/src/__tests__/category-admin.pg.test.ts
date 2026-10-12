@@ -25,7 +25,9 @@ describe('Kostenkategorien', () => {
 	it('lehnt einen schon vergebenen Namen verständlich ab', async () => {
 		await create('Treppenhaus');
 
-		await expectRejection(await create('Treppenhaus'), 409, `Eine Kategorie mit dem Namen "Treppenhaus ${token}" existiert bereits.`);
+		await expectRejection(await create('Treppenhaus'), 409, `Eine Kategorie mit dem Namen "Treppenhaus ${token}" existiert bereits.`, 'CATEGORY_NAME_TAKEN', {
+			name: `Treppenhaus ${token}`
+		});
 	});
 
 	it('lehnt beim Umbenennen einen vergebenen deutschen Namen ab', async () => {
@@ -34,7 +36,9 @@ describe('Kostenkategorien', () => {
 
 		const response = await categories.send('PUT', `/${id}`, { nameDE: `Dachrinne ${token}` });
 
-		await expectRejection(response, 409, `Eine Kategorie mit dem Namen "Dachrinne ${token}" existiert bereits.`);
+		await expectRejection(response, 409, `Eine Kategorie mit dem Namen "Dachrinne ${token}" existiert bereits.`, 'CATEGORY_NAME_TAKEN', {
+			name: `Dachrinne ${token}`
+		});
 	});
 
 	// Pellets, Gas, Fernwärme: eigene Heizkosten folgen beim Mieterwechsel dem Heizprofil
@@ -64,7 +68,9 @@ describe('Kostenkategorien', () => {
 		const response = await categories.send('DELETE', `/${id}`);
 
 		expect(Number(category.invoiceCount)).toBe(1);
-		await expectRejection(response, 409, 'Die Kategorie wird von 1 Rechnung verwendet und kann nicht gelöscht werden.');
+		await expectRejection(response, 409, 'Die Kategorie wird von 1 Rechnung verwendet und kann nicht gelöscht werden.', 'CATEGORY_IN_USE_ONE', {
+			count: 1
+		});
 	});
 });
 

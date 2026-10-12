@@ -1,5 +1,6 @@
+import { m } from '$lib/paraglide/messages';
 import type { PageServerLoad } from './$types';
-import { statusLabels } from '$lib/apartment';
+import { roomsLabel, statusLabels } from '$lib/apartment';
 import type { ApartmentStatus } from '$lib/types';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
@@ -44,8 +45,8 @@ export const load: PageServerLoad = async ({ fetch }) => {
 		const apartments = (apartmentsData.apartments || []).map((a: Apartment) => ({
 			id: a.id,
 			unit: a.number,
-			building: a.buildingName || 'Unbekannt',
-			size: `${Number(a.rooms)} Zimmer, ${Number(a.area)} m²`, // to judge the rent in the wizard
+			building: a.buildingName || m.contracts_unknown_building(),
+			size: `${roomsLabel(String(Number(a.rooms)))}, ${Number(a.area)} m²`, // to judge the rent in the wizard
 			status: statusLabels[a.status]
 		}));
 

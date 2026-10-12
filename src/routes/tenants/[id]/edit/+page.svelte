@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import type { Tenant } from '$lib/types';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import TenantForm from '../../TenantForm.svelte';
@@ -10,15 +11,15 @@
 </script>
 
 <svelte:head>
-	<title>{name} bearbeiten - Dwello</title>
+	<title>{m.tenants_edit_page_title({ name })} - Dwello</title>
 </svelte:head>
 
 <div class="mx-auto flex max-w-3xl flex-col gap-8">
 	<PageHeader
-		title="Mieter bearbeiten"
-		purpose="Kontaktdaten, Korrespondenzkanal und Sprache von {name}."
+		title={m.tenants_edit_title()}
+		purpose={m.tenants_edit_purpose({ name })}
 		trail={[
-			{ href: '/tenants', label: 'Mieter' },
+			{ href: '/tenants', label: m.nav_tenants() },
 			{ href: `/tenants/${data.tenant.id}`, label: name }
 		]}
 	/>
@@ -26,7 +27,7 @@
 		tenant={data.tenant}
 		errors={form?.errors}
 		cancelHref="/tenants/{data.tenant.id}"
-		submitLabel="Änderungen speichern"
+		submitLabel={m.buildings_save_changes()}
 		submitIcon="save"
 	/>
 </div>

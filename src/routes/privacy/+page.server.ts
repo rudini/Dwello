@@ -1,3 +1,4 @@
+import { m } from '$lib/paraglide/messages';
 import { fetchRecord } from '$lib/server/save-form';
 import type { PageServerLoad } from './$types';
 
@@ -7,4 +8,4 @@ const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 export const load: PageServerLoad = async ({
 	fetch
 }): Promise<{ recipient: { provider: string; country: string } | null }> =>
-	fetchRecord(fetch, `${BACKEND_URL}/api/v1/invoices/llm-recipient`, 'Datenschutzerklärung');
+	fetchRecord(fetch, `${BACKEND_URL}/api/v1/invoices/llm-recipient`, m.privacy_record());

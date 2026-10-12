@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import { untrack } from 'svelte';
 	import type { Tenant } from '$lib/types';
 	import { languageLabels } from '$lib/tenant';
@@ -17,8 +18,8 @@
 	const channelError = (key: 'email' | 'address' | 'city') =>
 		channelChangedFor === errors ? undefined : errors[key];
 	const channels = [
-		{ value: 'letter', label: 'Per Brief' },
-		{ value: 'email', label: 'Per E-Mail' }
+		{ value: 'letter', label: m.tenants_channel_letter() },
+		{ value: 'email', label: m.tenants_channel_email() }
 	];
 	const languages = Object.entries(languageLabels).map(([code, label]) => ({ value: code, label }));
 </script>
@@ -27,18 +28,18 @@
 	<TextInput
 		id="firstName"
 		name="firstName"
-		label="Vorname"
+		label={m.tenants_first_name()}
 		value={value('firstName')}
-		example="Anna"
+		example={m.tenants_example_first_name()}
 		error={errors.firstName}
 		testid="tenant-first-name-input"
 	/>
 	<TextInput
 		id="lastName"
 		name="lastName"
-		label="Nachname"
+		label={m.tenants_last_name()}
 		value={value('lastName')}
-		example="Keller"
+		example={m.tenants_example_last_name()}
 		error={errors.lastName}
 		testid="tenant-last-name-input"
 	/>
@@ -47,8 +48,8 @@
 <Select
 	id="correspondenceChannel"
 	name="correspondenceChannel"
-	label="Korrespondenzkanal"
-	help="Wie der Mieter Post erhält, zum Beispiel Mahnungen. Per E-Mail braucht eine E-Mail-Adresse, per Brief eine Adresse."
+	label={m.tenants_channel()}
+	help={m.tenants_channel_help()}
 	options={channels}
 	bind:value={channel}
 	onchange={() => (channelChangedFor = errors)}
@@ -59,10 +60,10 @@
 	id="email"
 	name="email"
 	type="email"
-	label="E-Mail"
+	label={m.tenants_email()}
 	value={value('email')}
 	optional={!byEmail}
-	example="anna.keller@example.ch"
+	example={m.tenants_example_email()}
 	error={channelError('email')}
 	testid="tenant-email-input"
 />
@@ -71,7 +72,7 @@
 	id="phone"
 	name="phone"
 	type="tel"
-	label="Telefon"
+	label={m.tenants_phone()}
 	value={value('phone')}
 	optional
 	example="079 123 45 67"
@@ -80,22 +81,22 @@
 <Select
 	id="language"
 	name="language"
-	label="Sprache"
-	help="In dieser Sprache wird die Nebenkostenabrechnung erstellt. Auf Rätoromanisch erstellt Dwello die Abrechnung vorerst auf Deutsch."
+	label={m.tenants_language()}
+	help={m.tenants_language_help()}
 	options={languages}
 	value={tenant.language ?? 'de'}
 	testid="tenant-language-select"
 />
 
 <fieldset class="flex flex-col gap-6">
-	<legend class="pb-6 text-xl font-bold text-ink">Adresse</legend>
+	<legend class="pb-6 text-xl font-bold text-ink">{m.buildings_address()}</legend>
 	<TextInput
 		id="address"
 		name="address"
-		label="Strasse und Hausnummer"
+		label={m.buildings_street()}
 		value={value('address')}
 		optional={byEmail}
-		example="Musterstrasse 12"
+		example={m.buildings_street_example()}
 		error={channelError('address')}
 		testid="tenant-address-input"
 	/>
@@ -103,7 +104,7 @@
 		<TextInput
 			id="postalCode"
 			name="postalCode"
-			label="PLZ"
+			label={m.buildings_postal_code()}
 			value={value('postalCode')}
 			optional={byEmail}
 			example="8400"
@@ -114,7 +115,7 @@
 			<TextInput
 				id="city"
 				name="city"
-				label="Ort"
+				label={m.buildings_city()}
 				value={value('city')}
 				optional={byEmail}
 				example="Winterthur"

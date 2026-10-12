@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import type { Snippet } from 'svelte';
 	import { enhance } from '$app/forms';
 	import { tick } from 'svelte';
@@ -62,7 +63,7 @@
 	{confirmLabel}
 	{danger}
 	{busy}
-	busyLabel="Wird gespeichert …"
+	busyLabel={m.ui_saving()}
 	{confirmTestid}
 	onconfirm={() => check() && form?.requestSubmit()}
 >

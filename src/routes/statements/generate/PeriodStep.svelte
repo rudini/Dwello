@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import Alert from '$lib/ui/Alert.svelte';
 	import DateInput from '$lib/ui/DateInput.svelte';
 	import { localToday } from '$lib/contract-status';
@@ -14,21 +15,19 @@
 	const notOver = $derived(!!periodEnd && periodEnd >= localToday());
 </script>
 
-<p class="text-ink-muted">
-	Vorgeschlagen ist die letzte abgelaufene Abrechnungsperiode aus den Einstellungen.
-</p>
+<p class="text-ink-muted">{m.statements_period_proposed()}</p>
 
 <div class="grid gap-6 md:grid-cols-2">
 	<DateInput
 		id="periodStart"
-		label="Beginn"
+		label={m.statements_period_start()}
 		bind:value={periodStart}
 		error={errors.periodStart}
 		testid="period-start-input"
 	/>
 	<DateInput
 		id="periodEnd"
-		label="Ende"
+		label={m.statements_period_end()}
 		bind:value={periodEnd}
 		min={periodStart || undefined}
 		error={errors.periodEnd}
@@ -37,11 +36,7 @@
 </div>
 
 {#if notOver}
-	<Alert tone="caution" title="Periode läuft noch" testid="period-future-warning">
-		<p>
-			Die Abrechnungsperiode ist noch nicht zu Ende. Die Abrechnungen zählen das Akonto aller Monate,
-			auch der noch nicht bezahlten, und Rechnungen bis zum Ende der Periode fehlen noch. Erstellen Sie
-			die Abrechnungen erst nach dem Ende der Periode.
-		</p>
+	<Alert tone="caution" title={m.statements_period_running()} testid="period-future-warning">
+		<p>{m.statements_period_running_text()}</p>
 	</Alert>
 {/if}

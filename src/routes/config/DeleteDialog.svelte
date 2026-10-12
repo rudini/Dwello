@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import type { Snippet } from 'svelte';
+	import { m } from '$lib/paraglide/messages';
 	import { addToast } from '$lib/stores';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Dialog from '$lib/ui/Dialog.svelte';
@@ -16,13 +17,32 @@
 		children
 	}: {
 		open: boolean;
-		record: string; // e.g. "Kategorie"
+		record: 'category' | 'distributionKey' | 'heatingProfile';
 		name: string;
 		id?: string; // the record to delete, when the page lists several
 		error?: string;
 		confirmTestid: string;
 		children: Snippet;
 	} = $props();
+
+	const texts = {
+		category: {
+			deleted: m.categories_deleted,
+			question: m.categories_delete_question,
+			notDeleted: m.categories_not_deleted
+		},
+		distributionKey: {
+			deleted: m.keys_deleted,
+			question: m.keys_delete_question,
+			notDeleted: m.keys_not_deleted
+		},
+		heatingProfile: {
+			deleted: m.profiles_deleted,
+			question: m.profiles_delete_question,
+			notDeleted: m.profiles_not_deleted
+		}
+	};
+	const text = $derived(texts[record]);
 
 	let form = $state<HTMLFormElement>();
 	let deleting = $state(false);
@@ -36,7 +56,7 @@
 		deleting = true;
 		return async ({ result, update }) => {
 			if (result.type === 'redirect') {
-				addToast('success', `${record} «${name}» gelöscht`);
+				addToast('success', text.deleted({ name }));
 				open = false;
 			}
 			await update();
@@ -49,17 +69,17 @@
 
 <Dialog
 	bind:open
-	title="{record} «{name}» löschen?"
-	confirmLabel="Löschen"
+	title={text.question({ name })}
+	confirmLabel={m.buildings_delete()}
 	danger
 	busy={deleting}
-	busyLabel="Wird gelöscht …"
+	busyLabel={m.buildings_deleting()}
 	{confirmTestid}
 	onconfirm={() => form?.requestSubmit()}
 >
 	{@render children()}
 	{#if error}
-		<Alert tone="critical" title="{record} wurde nicht gelöscht" testid="form-error">
+		<Alert tone="critical" title={text.notDeleted()} testid="form-error">
 			<p>{error}</p>
 		</Alert>
 	{/if}

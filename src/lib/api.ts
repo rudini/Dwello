@@ -5,6 +5,7 @@
 
 import { browser } from '$app/environment';
 import { goto } from '$app/navigation';
+import { m } from '$lib/paraglide/messages';
 
 /**
  * XSRF cookie name constant - must match server-side cookie name
@@ -22,6 +23,7 @@ const MUTATION_METHODS = ['POST', 'PUT', 'DELETE', 'PATCH'] as const;
 interface ApiError {
 	code: string;
 	message: string;
+	params?: Record<string, string | number>;
 	details?: Record<string, unknown>; // the backend's whole answer, e.g. the statements behind a refusal
 }
 
@@ -139,22 +141,27 @@ async function failure(response: Response): Promise<ApiError> {
 		if (browser) await goto('/login');
 		return {
 			code: 'UNAUTHORIZED',
-			message: 'Ihre Anmeldung ist abgelaufen. Bitte melden Sie sich erneut an.'
+			message: m.backend_unauthorized()
 		};
 	}
 	const errorData = await response.json().catch(() => ({
 		error: {
 			code: 'UNKNOWN_ERROR',
-			message: 'Ein unerwarteter Fehler ist aufgetreten. Versuchen Sie es erneut.'
+			message: m.backend_unknown_error()
 		}
 	}));
-	// The backend names its error as text, e.g. { error: 'Invoice not found' }
+	// The backend names its error as text, e.g. { error: 'Invoice not found' }, with a code the UI translates
 	if (typeof errorData.error === 'string')
-		return { code: `HTTP_${response.status}`, message: errorData.error, details: errorData };
+		return {
+			code: errorData.code ?? `HTTP_${response.status}`,
+			message: errorData.error,
+			params: errorData.params,
+			details: errorData
+		};
 	return (
 		errorData.error || {
 			code: `HTTP_${response.status}`,
-			message: 'Ein unerwarteter Fehler ist aufgetreten. Versuchen Sie es erneut.'
+			message: m.backend_unknown_error()
 		}
 	);
 }

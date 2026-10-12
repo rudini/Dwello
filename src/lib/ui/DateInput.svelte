@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import Field from './Field.svelte';
 	import IconButton from './IconButton.svelte';
 	import { controlClass } from './field';
@@ -29,10 +30,8 @@
 		testid: string;
 	} = $props();
 
-	const FORMAT = 'Format TT.MM.JJJJ.';
 	// the example is the last day of this year: never in the past
 	const EXAMPLE = `31.12.${new Date().getFullYear()}`;
-	const NOT_A_DATE = `Dieses Datum gibt es nicht. Bitte geben Sie es als TT.MM.JJJJ ein, zum Beispiel ${EXAMPLE}.`;
 	const toText = (iso: string) => (iso ? formatDate(iso) : '');
 
 	let text = $state(toText(value));
@@ -66,20 +65,21 @@
 	// checked when leaving the field; a half-typed date is no error yet
 	// "1.12" is a real day without its year: say what is missing
 	const NO_YEAR = $derived(
-		`Es fehlt das Jahr. Bitte geben Sie das Datum als TT.MM.JJJJ ein, zum Beispiel ${text.trim().replace(/\.$/, '').split('.').map((n) => n.padStart(2, '0')).join('.')}.${new Date().getFullYear()}.`
+		m.ui_date_no_year({
+			example: `${text.trim().replace(/\.$/, '').split('.').map((n) => n.padStart(2, '0')).join('.')}.${new Date().getFullYear()}`
+		})
 	);
 	// a day that does not exist, a missing year, or another way of writing it (words, slashes)
-	const FORMAT_ONLY = `Bitte geben Sie das Datum in Ziffern als TT.MM.JJJJ ein, zum Beispiel ${EXAMPLE}.`;
 	const wrongDate = $derived(
 		/^\d{1,2}\.\d{1,2}\.?$/.test(text.trim())
 			? NO_YEAR
 			: /^(\d{1,2}\.\d{1,2}\.\d{2,4}|\d{8})$/.test(text.trim())
-				? NOT_A_DATE
-				: FORMAT_ONLY
+				? m.ui_date_not_a_date({ example: EXAMPLE })
+				: m.ui_date_digits_only({ example: EXAMPLE })
 	);
 	const shownError = $derived(invalid && left ? wrongDate : error);
 	const wordsId = $derived(`${id}-words`);
-	const helpText = $derived(help ? `${help} ${FORMAT}` : FORMAT);
+	const helpText = $derived(help ? `${help} ${m.ui_date_format()}` : m.ui_date_format());
 	const words = $derived(value ? formatDateLong(value) : '');
 	// said when the field is left, and an error of the page, also when the field kept the focus (Enter)
 	const announced = $derived(invalid && left ? wrongDate : (error ?? ''));
@@ -131,7 +131,7 @@
 				/>
 				<IconButton
 					icon="calendar"
-					label="Kalender für {label} öffnen"
+					label={m.ui_date_open_calendar({ label })}
 					onclick={() => calendar?.showPicker?.()}
 					testid="{testid}-calendar"
 				/>

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import Icon from '$lib/ui/Icon.svelte';
 	import ProgressBar from '$lib/ui/ProgressBar.svelte';
 
@@ -10,10 +11,10 @@
 
 <div class="flex flex-col gap-2">
 	<p class="flex items-center justify-between gap-4 text-ink">
-		<span>Konfidenz der KI</span>
+		<span>{m.invoices_ki_confidence()}</span>
 		<span class="font-semibold tabular-nums">{percent} %</span>
 	</p>
-	<ProgressBar value={percent} max={100} label="Konfidenz der KI" />
+	<ProgressBar value={percent} max={100} label={m.invoices_ki_confidence()} />
 	{#if reasoning}
 		<p class="flex items-start gap-2 text-ink-muted">
 			<Icon name="hint" />

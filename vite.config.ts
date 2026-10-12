@@ -1,4 +1,5 @@
 import { sveltekit } from '@sveltejs/kit/vite';
+import { paraglideVitePlugin } from '@inlang/paraglide-js';
 import { loadEnv } from 'vite';
 import { defineConfig } from 'vitest/config';
 
@@ -9,7 +10,15 @@ export default defineConfig(({ mode }) => {
 	Object.assign(process.env, { ...loadEnv(mode, process.cwd(), ''), ...process.env });
 
 	return {
-		plugins: [sveltekit()],
+		plugins: [
+			sveltekit(),
+			// UI language from the cookie, German without one (no URL prefix, not the browser language)
+			paraglideVitePlugin({
+				project: './project.inlang',
+				outdir: './src/lib/paraglide',
+				strategy: ['cookie', 'baseLocale']
+			})
+		],
 		test: {
 			include: ['src/**/*.{test,spec}.{js,ts}'],
 			globals: true,

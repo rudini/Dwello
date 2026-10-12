@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import { flushSync, untrack } from 'svelte';
 	import { contractEndError, contractStatusOn, pastEndConfirmation } from '$lib/contract-status';
 	import PastEndConfirm from '../PastEndConfirm.svelte';
@@ -65,39 +66,39 @@
 	}
 	// the toast names the day the tenancy ends, or since when it has ended
 	function endedMessage() {
-		if (pastEnd) return `Der Mietvertrag von ${name} endete am ${formatDate(endDate)}`;
-		if (endDate === data.today) return `Der Mietvertrag von ${name} endet heute`;
-		return `Der Mietvertrag von ${name} endet am ${formatDate(endDate)}`;
+		if (pastEnd) return m.contracts_ended_toast({ name, date: formatDate(endDate) });
+		if (endDate === data.today) return m.contracts_ends_today_toast({ name });
+		return m.contracts_ends_on_toast({ name, date: formatDate(endDate) });
 	}
 	// a refused delete (also without JavaScript) shows the dialog with its reason
 	let deleting = $state(untrack(() => !!form?.deleteError));
 </script>
 
 <svelte:head>
-	<title>Mietvertrag - {name} - Dwello</title>
+	<title>{m.contracts_title()} - {name} - Dwello</title>
 </svelte:head>
 
 <div class="flex flex-col gap-8">
 	<PageHeader
-		title="Mietvertrag von {name}"
-		purpose="Wohnung {contract.apartment.number} · {contract.building.name ||
-			contract.building.address}"
-		trail={[{ href: '/contracts', label: 'Mietverträge' }]}
+		title={m.apartments_contract_of({ name })}
+		purpose="{m.buildings_apartment_number({ number: contract.apartment.number })} · {contract
+			.building.name || contract.building.address}"
+		trail={[{ href: '/contracts', label: m.nav_contracts() }]}
 	>
 		{#snippet action()}
 			<Button href="/contracts/{contract.id}/edit" icon="edit" testid="contract-edit-button"
-				>Bearbeiten</Button
+				>{m.buildings_edit()}</Button
 			>
 			{#if !contract.endDate}
 				<Button onclick={startEnding} icon="calendar-busy" testid="contract-end-button"
-					>Beenden</Button
+					>{m.contracts_end_action()}</Button
 				>
 			{/if}
 			<Button
 				variant="danger-ghost"
 				onclick={() => (deleting = true)}
 				icon="delete"
-				testid="contract-delete-button">Löschen</Button
+				testid="contract-delete-button">{m.buildings_delete()}</Button
 			>
 		{/snippet}
 	</PageHeader>
@@ -116,17 +117,17 @@
 		/>
 	</div>
 
-	<Panel title="Dazu gehört">
+	<Panel title={m.contracts_related()}>
 		<div class="flex flex-wrap gap-4">
 			<Button
 				href="/statements?contract={contract.id}"
 				icon="statement"
-				testid="contract-statements-link">Nebenkostenabrechnungen</Button
+				testid="contract-statements-link">{m.nav_statements()}</Button
 			>
 			<Button
 				href="/invoices?building={contract.building.id}"
 				icon="invoice"
-				testid="contract-invoices-link">Rechnungen des Gebäudes</Button
+				testid="contract-invoices-link">{m.contracts_building_invoices()}</Button
 			>
 		</div>
 	</Panel>
@@ -135,8 +136,8 @@
 <ActionDialog
 	bind:open={ending}
 	action="?/end"
-	title="Mietvertrag beenden?"
-	confirmLabel="Mietvertrag beenden"
+	title={m.contracts_end_title()}
+	confirmLabel={m.contracts_end_confirm()}
 	confirmTestid="contract-end-confirm"
 	error={form?.endError}
 	fields={{ endDate, pastConfirmed: pastConfirmed ? 'on' : '' }}
@@ -146,8 +147,8 @@
 	<!-- TODO(fachlich prüfen): «Kündigungstermin», «Kündigungsfrist» are not in the glossary (offene-punkte.md) -->
 	<DateInput
 		id="endDate"
-		label="Vertragsende"
-		help="Der letzte Tag des Mietverhältnisses, also der Kündigungstermin. Bis und mit diesem Tag läuft der Mietvertrag, auch wenn der Mieter früher auszieht."
+		label={m.dashboard_kind_contract_end()}
+		help={m.contracts_end_date_help()}
 		min={contract.startDate.slice(0, 10)}
 		error={endError}
 		bind:value={endDate}
@@ -160,31 +161,23 @@
 		bind:confirmedDay
 		bind:error={pastError}
 	/>
-	<p class="text-ink-muted">
-		Prüfen Sie Frist und Termin im Mietvertrag: Für Wohnungen gilt eine Kündigungsfrist von
-		mindestens 3 Monaten. Ist die Kündigung zu spät, gilt sie erst auf den nächsten
-		Kündigungstermin. Ein neuer Mietvertrag kann am Tag danach beginnen.
-	</p>
+	<p class="text-ink-muted">{m.contracts_end_notice_hint()}</p>
 </ActionDialog>
 
 <ActionDialog
 	bind:open={deleting}
 	action="?/delete"
-	title="Mietvertrag löschen?"
-	confirmLabel="Mietvertrag löschen"
+	title={m.contracts_delete_title()}
+	confirmLabel={m.contracts_delete_confirm()}
 	danger
 	disabled={status !== 'future'}
 	confirmTestid="contract-delete-confirm"
 	error={form?.deleteError}
-	onsuccess={() => addToast('success', `Mietvertrag von ${name} gelöscht`)}
+	onsuccess={() => addToast('success', m.contracts_deleted_toast({ name }))}
 >
 	{#if status === 'future'}
-		<p>Der Mietvertrag von {name} hat noch nicht begonnen und wird endgültig gelöscht.</p>
+		<p>{m.contracts_delete_future_text({ name })}</p>
 	{:else}
-		<p>
-			Ein Mietvertrag, der begonnen hat, kann nicht gelöscht werden: Die Nebenkostenabrechnung
-			braucht seine Mietstage, also die Tage, an denen er gilt. Ist er falsch erfasst, korrigieren
-			Sie ihn unter «Bearbeiten».
-		</p>
+		<p>{m.contracts_started_not_deletable()} {m.contracts_started_fix_hint()}</p>
 	{/if}
 </ActionDialog>

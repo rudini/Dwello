@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import type { invoiceRows } from '$lib/statement-wizard';
 	import CategoryCheck from './CategoryCheck.svelte';
 	import TankQuestion from './TankQuestion.svelte';
@@ -44,7 +45,7 @@
 		].filter((id): id is string => !!id)
 	);
 	const statements = (count: number) =>
-		count === 1 ? '1 Nebenkostenabrechnung' : `${count} Nebenkostenabrechnungen`;
+		count === 1 ? m.statements_utility_one() : m.statements_utility_many({ count });
 	// The invoice form returns here after saving and warns about a date outside the period;
 	// with one building missing invoices it is preselected
 	const toCapture = $derived([...missing, ...incomplete.filter((row) => !row.missing)]);
@@ -54,25 +55,18 @@
 </script>
 
 {#if notOver}
-	<Alert tone="caution" title="Periode läuft noch" testid="preview-period-warning">
-		<p>
-			Die Abrechnungsperiode ist noch nicht zu Ende. Das Akonto zählt für alle Monate, auch die noch
-			nicht bezahlten, und Rechnungen bis zum Ende der Periode fehlen noch. Erstellen Sie die
-			Abrechnungen erst nach dem Ende der Periode.
-		</p>
+	<Alert tone="caution" title={m.statements_period_running()} testid="preview-period-warning">
+		<p>{m.statements_preview_running_text()}</p>
 	</Alert>
 {/if}
 
 {#if missing.length}
-	<Alert tone="caution" title="Rechnungen fehlen" testid="missing-invoices">
+	<Alert tone="caution" title={m.statements_missing_title()} testid="missing-invoices">
 		<p id="missing-invoices-text">
-			Für {missing.map((row) => row.name).join(', ')} sind in der Abrechnungsperiode keine Rechnungen
-			erfasst. Ohne Rechnungen fehlen deren Kosten in den Abrechnungen, und die Mieter erhalten ihr Akonto
-			weitgehend zurück. Erfassen Sie zuerst die Rechnungen – oder bestätigen Sie unten, dass es keine
-			gibt.
+			{m.statements_missing_text({ names: missing.map((row) => row.name).join(', ') })}
 		</p>
 		{#snippet action()}
-			<Button href={newInvoice} icon="invoice">Rechnung erfassen</Button>
+			<Button href={newInvoice} icon="invoice">{m.dashboard_add_invoice()}</Button>
 		{/snippet}
 	</Alert>
 {/if}
@@ -84,33 +78,27 @@
 {#if tankQuestions.length}<TankQuestion buildings={tankQuestions} />{/if}
 
 {#if existing.length}
-	<Alert tone="caution" title="Es gibt schon Abrechnungen" testid="existing-statements">
+	<Alert tone="caution" title={m.statements_existing_title()} testid="existing-statements">
 		<div id="existing-statements-text" class="flex flex-col gap-2">
 			{#each existing as row (row.buildingId)}
 				<p>
-					Für {row.name} gibt es in dieser Abrechnungsperiode schon {statements(row.existing)}.
+					{m.statements_existing_text({ name: row.name, statements: statements(row.existing) })}
 					<a
 						href="/statements?building={row.buildingId}"
 						class="inline-flex min-h-12 items-center text-accent underline underline-offset-4"
-						>Abrechnungen von {row.name} ansehen</a
+						>{m.statements_view_of({ name: row.name })}</a
 					>
 				</p>
 			{/each}
-			<p>
-				Mietverträge mit einer Abrechnung in dieser Periode erhalten keine neue. Um einen Entwurf
-				neu zu berechnen, löschen Sie ihn und erstellen Sie die Abrechnungen erneut.
-			</p>
+			<p>{m.statements_existing_note()}</p>
 		</div>
 	</Alert>
 {/if}
 
 {#if partial.length}
 	<!-- TODO(fachlich prüfen): a hint only; one oil delivery a year can be complete -->
-	<Alert tone="caution" title="Rechnungen nur für einen Teil der Periode" testid="partial-invoices">
-		<p>
-			Für {partial.map((row) => row.name).join(', ')} gibt es am Anfang oder Ende der Abrechnungsperiode
-			mehr als drei Monate ohne Rechnung. Prüfen Sie, ob noch Rechnungen fehlen.
-		</p>
+	<Alert tone="caution" title={m.statements_partial_title()} testid="partial-invoices">
+		<p>{m.statements_partial_text({ names: partial.map((row) => row.name).join(', ') })}</p>
 	</Alert>
 {/if}
 
@@ -118,7 +106,7 @@
 	<!-- the warnings above are read with the checkbox that confirms them -->
 	<Checkbox
 		id="confirm-missing"
-		label="Die Abrechnungen trotzdem erstellen"
+		label={m.statements_confirm_label()}
 		bind:checked={confirmed}
 		{error}
 		describedby={confirming.join(' ')}

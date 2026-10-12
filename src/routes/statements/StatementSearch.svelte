@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import Button from '$lib/ui/Button.svelte';
 	import EarlySelect from '$lib/ui/EarlySelect.svelte';
 	import TextInput from '$lib/ui/TextInput.svelte';
@@ -27,8 +28,8 @@
 		<TextInput
 			id="search"
 			name="search"
-			label="Suche"
-			help="Mieter, Abrechnungsnummer oder Wohnung"
+			label={m.buildings_search()}
+			help={m.statements_search_help()}
 			optional
 			bind:value={term}
 			testid="statement-search-input"
@@ -38,8 +39,8 @@
 		<EarlySelect
 			id="building"
 			name="building"
-			label="Gebäude"
-			placeholder="Alle Gebäude"
+			label={m.apartments_building()}
+			placeholder={m.apartments_all_buildings()}
 			optional
 			options={buildings.map((b) => ({ value: b.id, label: b.name }))}
 			value={building}
@@ -47,9 +48,11 @@
 		/>
 	</div>
 	<div class="flex flex-wrap gap-4">
-		<Button type="submit" icon="search" testid="statement-search-submit">Suchen</Button>
+		<Button type="submit" icon="search" testid="statement-search-submit"
+			>{m.buildings_search_submit()}</Button
+		>
 		{#if filtered}
-			<Button href="/statements" variant="ghost" icon="close">Filter zurücksetzen</Button>
+			<Button href="/statements" variant="ghost" icon="close">{m.buildings_reset_filters()}</Button>
 		{/if}
 	</div>
 </form>

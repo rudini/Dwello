@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import { listPageUrl } from '$lib/list-url';
 	import Button from './Button.svelte';
 
@@ -10,16 +11,16 @@
 </script>
 
 {#if pages > 1}
-	<nav aria-label="Seiten" class="flex flex-wrap items-center justify-between gap-4">
+	<nav aria-label={m.ui_pages()} class="flex flex-wrap items-center justify-between gap-4">
 		{#if page > 1}
 			<Button href={listPageUrl(url, page - 1)} icon="chevron-left" testid="pagination-prev"
-				>Vorherige Seite</Button
+				>{m.ui_previous_page()}</Button
 			>
 		{/if}
-		<p class="text-ink-muted">Seite {page} von {pages}</p>
+		<p class="text-ink-muted">{m.ui_page_of({ page, pages })}</p>
 		{#if page < pages}
 			<Button href={listPageUrl(url, page + 1)} icon="chevron-right" testid="pagination-next"
-				>Nächste Seite</Button
+				>{m.ui_next_page()}</Button
 			>
 		{/if}
 	</nav>

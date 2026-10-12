@@ -8,7 +8,8 @@
 import { formatQRReferenceForDisplay, isQRIBAN, statementQRReference } from './qr-bill.service';
 import { createMailTransport, MailConfigError } from '../mail';
 import { getTypedConfig } from './config.service';
-import { countReminders, createDocument, markDocumentSent, recordDeliveryError } from './document.service';
+import { CodedError } from './coded-error';
+import { countReminders, createDocument, DELIVERY_ERRORS, markDocumentSent, recordDeliveryError } from './document.service';
 import { reminderLetter } from './reminder-letter';
 import { renderReminderPdf, type PostalAddress } from './reminder-pdf';
 import { getStatement, updateStatement } from './statement.service';
@@ -18,12 +19,13 @@ const MAX_REMINDER_LEVEL = 3;
 const PAYMENT_DAYS = 10; // new payment deadline in each reminder
 
 /** The request cannot be fulfilled (shown to the property manager) */
-export class ReminderError extends Error {
+export class ReminderError extends CodedError {
 	constructor(
+		code: string,
 		message: string,
 		readonly status = 400
 	) {
-		super(message);
+		super(code, message);
 	}
 }
 
@@ -43,18 +45,18 @@ async function sender(): Promise<PostalAddress & { iban: string }> {
 
 async function nextLevel(statementId: string, status: string, balance: number) {
 	if (!['sent', 'overdue'].includes(status)) {
-		throw new ReminderError('Nur versendete Abrechnungen können gemahnt werden.');
+		throw new ReminderError('REMINDER_NOT_SENT', 'Nur versendete Abrechnungen können gemahnt werden.');
 	}
-	if (status !== 'overdue') throw new ReminderError('Gemahnt wird erst nach Ablauf der Zahlungsfrist.');
-	if (!(balance > 0)) throw new ReminderError('Eine Rückerstattung wird nicht gemahnt: Sie schulden dem Mieter den Betrag.');
+	if (status !== 'overdue') throw new ReminderError('REMINDER_NOT_OVERDUE', 'Gemahnt wird erst nach Ablauf der Zahlungsfrist.');
+	if (!(balance > 0)) throw new ReminderError('REMINDER_REFUND', 'Eine Rückerstattung wird nicht gemahnt: Sie schulden dem Mieter den Betrag.');
 	const level = (await countReminders(statementId)) + 1;
-	if (level > MAX_REMINDER_LEVEL) throw new ReminderError('Es wurden bereits 3 Mahnungen versendet.');
+	if (level > MAX_REMINDER_LEVEL) throw new ReminderError('REMINDER_LIMIT', 'Es wurden bereits 3 Mahnungen versendet.');
 	return level;
 }
 
 async function deliverByEmail(document: Document, to: string | null, letter: ReturnType<typeof reminderLetter>, pdf: Buffer) {
 	try {
-		if (!to) throw new Error('Der Mieter hat keine E-Mail-Adresse.');
+		if (!to) throw new Error(DELIVERY_ERRORS.TENANT_NO_EMAIL);
 		await createMailTransport().send({
 			to,
 			subject: letter.subject,
@@ -65,7 +67,7 @@ async function deliverByEmail(document: Document, to: string | null, letter: Ret
 	} catch (error) {
 		const deliveryError =
 			error instanceof MailConfigError
-				? 'Der E-Mail-Versand ist nicht eingerichtet.'
+				? DELIVERY_ERRORS.MAIL_NOT_CONFIGURED
 				: (error as Error).message;
 		return { document: (await recordDeliveryError(document.id, deliveryError))!, deliveryError };
 	}
@@ -73,7 +75,7 @@ async function deliverByEmail(document: Document, to: string | null, letter: Ret
 
 export async function sendReminder(statementId: string) {
 	const statement = await getStatement(statementId);
-	if (!statement) throw new ReminderError('Abrechnung nicht gefunden.', 404);
+	if (!statement) throw new ReminderError('STATEMENT_NOT_FOUND', 'Abrechnung nicht gefunden.', 404);
 	const level = await nextLevel(statementId, statement.status, Number(statement.balance));
 	const tenant = (await getTenant(statement.tenantId))!;
 	const from = await sender();

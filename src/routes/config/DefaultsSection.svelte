@@ -1,5 +1,7 @@
 <script lang="ts">
-	import { germanName } from '$lib/names';
+	import { profileLabel } from '$lib/heating-profile';
+	import { localName } from '$lib/names';
+	import { m } from '$lib/paraglide/messages';
 	import type { Settings } from '$lib/server/settings';
 	import type { HeatingProfile } from '$lib/types';
 	import Field from '$lib/ui/Field.svelte';
@@ -18,12 +20,12 @@
 	} = $props();
 
 	type Option = { value: string; label: string; disabled?: boolean };
-	const NONE: Option = { value: '', label: 'Kein Vorschlag' };
+	const NONE: Option = { value: '', label: m.settings_no_suggestion() };
 
 	const periods: Option[] = [
-		{ value: 'calendar', label: 'Kalenderjahr (Januar – Dezember)' },
-		{ value: 'july-june', label: 'Juli – Juni' },
-		{ value: 'november-october', label: 'November – Oktober' }
+		{ value: 'calendar', label: m.settings_period_calendar() },
+		{ value: 'july-june', label: m.settings_period_july() },
+		{ value: 'november-october', label: m.settings_period_november() }
 	];
 	// Only profiles summing to 100 % distribute all heating costs
 	const profiles = $derived([
@@ -35,7 +37,7 @@
 				) / 100;
 			return {
 				value: profile.id,
-				label: `${germanName(profile)} (${total}%)`,
+				label: profileLabel(localName(profile), total),
 				disabled: total !== 100
 			};
 		})
@@ -69,27 +71,26 @@
 	</Field>
 {/snippet}
 
-<Panel title="Vorschläge für Abrechnungen und Rechnungen">
+<Panel title={m.settings_suggestions()}>
 	<p class="text-ink-muted">
-		Dwello schlägt diese Werte vor. Sie können sie beim Erstellen der Abrechnungen und beim Erfassen
-		von Rechnungen jedes Mal ändern.
+		{m.settings_suggestions_text()}
 	</p>
 	{@render choice(
 		'accountingPeriod',
-		'Abrechnungsperiode',
-		`${help.accountingPeriod} Vorgeschlagen wird jeweils die letzte abgelaufene Periode.`,
+		m.glossary_period_term(),
+		`${help.accountingPeriod} ${m.settings_period_suggested()}`,
 		periods
 	)}
 	{@render choice(
 		'defaultHeatingProfileId',
-		'Standard-Heizprofil',
-		`${help.heatingProfile} Wählbar sind nur Heizprofile, deren Monatsanteile zusammen 100 % ergeben.`,
+		m.settings_default_profile(),
+		`${help.heatingProfile} ${m.settings_profile_complete_only()}`,
 		profiles
 	)}
 	{@render choice(
 		'defaultDistributionKeyId',
-		'Standard-Verteilschlüssel',
-		`${help.distributionKey} Dieser wird beim Erfassen neuer Rechnungen vorgeschlagen.`,
+		m.settings_default_key(),
+		`${help.distributionKey} ${m.settings_key_suggested()}`,
 		keys
 	)}
 </Panel>

@@ -20,9 +20,17 @@ Browser -> SvelteKit BFF (port 3000: /auth/*, /api/*, page loads/actions) -> Ely
 
 ## 2. Conventions (backend)
 
-- **Base path:** `/api/v1`. All endpoints except `GET /health` and `/swagger` require `Authorization: Bearer <jwt>`; otherwise **401** `{ "message": "Missing or invalid authorization header" }` or `{ "message": "Invalid or expired token" }`.
+- **Base path:** `/api/v1`. All endpoints except `GET /health`, `GET /api/v1/invoices/llm-recipient` (provider and country for the public privacy notice) and `/swagger` require `Authorization: Bearer <jwt>`; otherwise **401** `{ "message": "Missing or invalid authorization header" }` or `{ "message": "Invalid or expired token" }`.
 - **No envelope:** successful responses are the bare resource or a plain object, with **camelCase** field names (e.g. `{ "buildings": [...], "total": 1 }`). The list key differs per router (see each section).
-- **Errors:** `{ "error": "<message>" }`. Messages are free text (some English, some German, meant for display); there are no error codes.
+- **Errors:** `{ "error": "<message>", "code"?: "<CODE>", "params"?: { … }, "causes"?: [{ "code", "params" }] }`. `error` is free text (some English, some German). A refusal that can reach the UI also carries a stable `code` and the values in its text as `params` (`backend/src/services/coded-error.ts`); the BFF shows the message `backend_<code in lower case>` from `messages/*.json` in the UI language (`src/lib/backend-error.ts`), otherwise the `error` text. Unexpected errors have no code. Codes:
+  - Not found: `APARTMENT_NOT_FOUND`, `BUILDING_NOT_FOUND`, `CATEGORY_NOT_FOUND`, `CONTRACT_NOT_FOUND`, `DISTRIBUTION_KEY_NOT_FOUND`, `HEATING_PROFILE_NOT_FOUND`, `INVOICE_NOT_FOUND`, `STATEMENT_NOT_FOUND`
+  - Names and numbers taken (409): `APARTMENT_NUMBER_TAKEN {number}`, `CATEGORY_NAME_TAKEN {name}`, `DISTRIBUTION_KEY_NAME_TAKEN {name}`, `HEATING_PROFILE_NAME_TAKEN {name}`
+  - Delete refusals: `CATEGORY_HAS_FUEL_STOCK`, `CATEGORY_IN_USE_ONE` / `CATEGORY_IN_USE {count}`, `DISTRIBUTION_KEY_PREDEFINED`, `DISTRIBUTION_KEY_IN_USE_ONE` / `DISTRIBUTION_KEY_IN_USE {count}`, `DISTRIBUTION_KEY_IS_DEFAULT`, `HEATING_PROFILE_PREDEFINED`, `HEATING_PROFILE_IS_DEFAULT`, `STATEMENT_NOT_DRAFT`
+  - Distribution keys and formulas: `DISTRIBUTION_KEY_TYPE_FIXED`, `DISTRIBUTION_KEY_FORMULA_FIXED`, `FORMULA_INVALID` (every formula error in `causes`: `[{ code, params }]`, in the order of the text), `FORMULA_REQUIRED`, `FORMULA_UNKNOWN_VARIABLE {variable}`, `FORMULA_NO_VARIABLE`, `FORMULA_INVALID_CHARACTERS {characters}`, `FORMULA_UNOPENED_PARENTHESIS`, `FORMULA_UNCLOSED_PARENTHESIS`, `FORMULA_CONSECUTIVE_OPERATORS`, `FORMULA_DIVISION_BY_ZERO`, `FORMULA_VALUE_MISSING {variable}`, `FORMULA_NOT_A_NUMBER`, `FORMULA_NOT_COMPUTABLE {detail}`, `FORMULA_SAMPLE_FAILED {sample, reason, …}`, `FORMULA_SAMPLE_NEGATIVE {sample}` (`sample`: `FORMULA_SAMPLE_SMALL`, `_MEDIUM`, `_LARGE`), `FORMULA_APARTMENT_FAILED {reason, …}`, `FORMULA_NEGATIVE`, `FORMULA_ALL_ZERO`. The params `cause`, `reason` and `sample` may hold a code, shown as that code's message
+  - Heating profiles: `HEATING_PROFILE_SHARES_SUM {sum}`, `HEATING_PROFILE_SHARE_NEGATIVE {month}`, `HEATING_PROFILE_TYPE_FIXED`, `HEATING_PROFILE_SHARES_FIXED`
+  - Contracts and statements: `CONTRACT_OVERLAP {contract}`, `CONTRACT_NOT_IN_PERIOD`, `IBAN_MISSING`
+  - Invoices: `KI_UNAVAILABLE`
+  - Reminders: `REMINDER_NOT_SENT`, `REMINDER_NOT_OVERDUE`, `REMINDER_REFUND`, `REMINDER_LIMIT`; delivery errors as `deliveryErrorCode` of a document: `TENANT_NO_EMAIL`, `MAIL_NOT_CONFIGURED` (null for other delivery errors)
 - **Schema validation:** a body/query that fails the Elysia `t` schema returns **422** with Elysia's validation error body.
 - **Types:** IDs are UUID strings. Money, area, rooms and percentages stored as `numeric` are **strings** (`"450.00"`). Dates are `YYYY-MM-DD`; timestamps ISO 8601.
 - **Pagination:** `limit` and `offset` query parameters (strings parsed as integers). Default `limit` per router is noted below. There is no sorting parameter; each list has a fixed order.
@@ -132,9 +140,9 @@ There is no "predefined" flag on categories.
 |---|---|---|
 | GET | `/` | Query: `search`, `type`, `limit`, `offset`. → `{ data, total, limit, offset }` (default limit 100); items include `invoiceCount` |
 | POST | `/initialize` | Creates missing predefined keys. → `{ message, created, existing }` |
-| POST | `/test-formula` | Body: `formula`. → `{ isValid, results: [{ apartment: { area, rooms }, value, share }], totalValue, errors }` (four sample apartments, CHF 10,000) |
-| POST | `/parse-formula` | Body: `formula`. → `{ isValid, variables, errors, normalizedFormula }` |
-| POST | `/validate-formula` | Body: `formula`. → `{ isValid, errors, warnings }` |
+| POST | `/test-formula` | Body: `formula`. → `{ isValid, results: [{ apartment: { area, rooms }, value, share }], totalValue, errors, errorCodes }` (four sample apartments, CHF 10,000; `errorCodes`: `{ code, params }` per error, same order) |
+| POST | `/parse-formula` | Body: `formula`. → `{ isValid, variables, errors, errorCodes, normalizedFormula }` |
+| POST | `/validate-formula` | Body: `formula`. → `{ isValid, errors, errorCodes, warnings }` |
 | GET | `/:id` | → key with `invoiceCount`. 404 |
 | POST | `/` | Body: `name` required; optional `nameDE`, `nameFR`, `nameIT`, `nameEN`, `type` (default `custom`), `formula`, `description`, `sortOrder`. → 201. 400 custom key without formula or invalid formula; 409 name taken |
 | PUT | `/:id` | Body: optional `name`, `nameDE`, `nameFR`, `nameIT`, `nameEN`, `formula`, `description`, `sortOrder`. → key. 404; 400 formula of a predefined key changed or invalid; 409 name taken |
@@ -219,7 +227,7 @@ Filter `status` in `GET /` and `/counts`: `draft`, `paid`, `sent` (sent, deadlin
 | GET | `/documents/:id/pdf` | → `application/pdf` attachment. 404 |
 | PUT | `/documents/:id/sent` | Marks a printed letter as posted (`status: sent`, `sentAt`). → document. 404 |
 
-Document fields: `id, tenantId, statementId, type ("reminder"), reminderLevel, title, fileName, channel, status, sentAt, deliveryError, createdAt, tenantName, statementNumber` (the PDF itself only via `/pdf`).
+Document fields: `id, tenantId, statementId, type ("reminder"), reminderLevel, title, fileName, channel, status, sentAt, deliveryError, deliveryErrorCode, createdAt, tenantName, statementNumber` (the PDF itself only via `/pdf`).
 
 ## 14. Dashboard `/api/v1/dashboard`
 

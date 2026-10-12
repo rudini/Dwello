@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import type { StatementWithDetails } from '$lib/types';
 	import Button from '$lib/ui/Button.svelte';
 
@@ -21,14 +22,15 @@
 {#if status === 'sent' || status === 'overdue'}
 	<!-- a reminder only once the payment deadline has passed, and only for an amount due -->
 	{#if status === 'overdue' && owes}
-		<Button onclick={onremind} icon="mail" testid="statement-reminder-button">Mahnung senden</Button
+		<Button onclick={onremind} icon="mail" testid="statement-reminder-button"
+			>{m.statements_send_reminder()}</Button
 		>
 	{/if}
 	<Button variant="primary" onclick={onmarkpaid} icon="success" testid="statement-mark-paid-button"
-		>Als bezahlt markieren</Button
+		>{m.statements_mark_paid()}</Button
 	>
 {:else if status === 'draft'}
 	<Button variant="primary" onclick={onsend} icon="send" testid="statement-send-button"
-		>Als versendet markieren</Button
+		>{m.statements_mark_sent()}</Button
 	>
 {/if}

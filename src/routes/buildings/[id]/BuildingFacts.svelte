@@ -1,5 +1,8 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
+	import { getLocale } from '$lib/paraglide/runtime';
 	import { occupancyParts } from '$lib/apartment';
+	import { buildingTypeLabel } from '$lib/building-type';
 	import type { BuildingWithStats } from '$lib/types';
 	import BuildingMiniMap from '../BuildingMiniMap.svelte';
 	import Panel from '$lib/ui/Panel.svelte';
@@ -9,36 +12,38 @@
 
 	const place = $derived(`${building.address}, ${building.postalCode} ${building.city}`);
 	const occupancy = $derived(
-		new Intl.ListFormat('de-CH', { type: 'conjunction' }).format(occupancyParts(building))
+		new Intl.ListFormat(`${getLocale()}-CH`, { type: 'conjunction' }).format(
+			occupancyParts(building)
+		)
 	);
 </script>
 
-<Panel title="Angaben zum Gebäude">
+<Panel title={m.buildings_facts_title()}>
 	<dl class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 		<div>
-			<dt class="text-ink-muted">Adresse</dt>
+			<dt class="text-ink-muted">{m.buildings_address()}</dt>
 			<dd class="font-semibold text-ink" data-testid="building-address">
 				{place}{building.canton ? ` (${building.canton})` : ''}
 			</dd>
 		</div>
 		{#if building.buildingType}
 			<div>
-				<dt class="text-ink-muted">Gebäudetyp</dt>
-				<dd class="font-semibold text-ink">{building.buildingType}</dd>
+				<dt class="text-ink-muted">{m.buildings_type()}</dt>
+				<dd class="font-semibold text-ink">{buildingTypeLabel(building.buildingType)}</dd>
 			</div>
 		{/if}
 		{#if building.yearBuilt}
 			<div>
-				<dt class="text-ink-muted">Baujahr</dt>
+				<dt class="text-ink-muted">{m.buildings_year_built()}</dt>
 				<dd class="font-semibold tabular-nums text-ink" data-testid="building-year-built">
 					{building.yearBuilt}
 				</dd>
 			</div>
 		{/if}
 		<div>
-			<dt class="text-ink-muted">Wohnungen</dt>
+			<dt class="text-ink-muted">{m.nav_apartments()}</dt>
 			<dd class="font-semibold tabular-nums text-ink">
-				{building.apartmentCount}, davon {occupancy}
+				{m.buildings_apartments_of({ count: building.apartmentCount, occupancy })}
 			</dd>
 		</div>
 	</dl>

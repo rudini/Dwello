@@ -5,4 +5,8 @@
 
 import type { LayoutServerLoad } from './$types';
 
-export const load: LayoutServerLoad = async ({ locals }) => ({ user: locals.user ?? null });
+// Read again on every navigation (url): after sign-out or an expired session no page keeps showing the user
+export const load: LayoutServerLoad = async ({ locals, url }) => {
+	void url.pathname;
+	return { user: locals.user ?? null };
+};

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import type { RentalContract } from '$lib/types';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import ContractForm from '../../ContractForm.svelte';
@@ -15,18 +16,18 @@
 </script>
 
 <svelte:head>
-	<title>Mietvertrag bearbeiten - Dwello</title>
+	<title>{m.contracts_edit_title()} - Dwello</title>
 </svelte:head>
 
 <div class="mx-auto flex max-w-3xl flex-col gap-8">
 	<PageHeader
-		title="Mietvertrag bearbeiten"
-		purpose="Ändern Sie Mieter, Wohnung, Vertragsdauer oder Miete dieses Mietvertrags."
+		title={m.contracts_edit_title()}
+		purpose={m.contracts_edit_purpose()}
 		trail={[
-			{ href: '/contracts', label: 'Mietverträge' },
+			{ href: '/contracts', label: m.nav_contracts() },
 			{
 				href: `/contracts/${data.contract.id}`,
-				label: tenant ? `Mietvertrag von ${tenant}` : 'Mietvertrag'
+				label: tenant ? m.apartments_contract_of({ name: tenant }) : m.contracts_title()
 			}
 		]}
 	/>

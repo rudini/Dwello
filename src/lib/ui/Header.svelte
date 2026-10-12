@@ -1,9 +1,11 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import { goto } from '$app/navigation';
 	import { getXsrfTokenFromCookie } from '$lib/api';
 	import { mobileNavOpen, openMobileNav } from '$lib/stores/navigation';
 	import Icon from '$lib/ui/Icon.svelte';
 	import IconButton from '$lib/ui/IconButton.svelte';
+	import LanguageSwitcher from '$lib/ui/LanguageSwitcher.svelte';
 	import type { User } from '$lib/stores';
 	import { browserStorage, clearAllDrafts } from '$lib/wizard-draft';
 
@@ -42,7 +44,7 @@
 			<span class="lg:hidden">
 				<IconButton
 					icon="menu"
-					label="Menü öffnen"
+					label={m.nav_open_menu()}
 					onclick={openMobileNav}
 					expanded={$mobileNavOpen}
 					testid="mobile-menu-button"
@@ -58,63 +60,66 @@
 			</a>
 		</div>
 
-		{#if user}
-			<div
-				class="relative"
-				onfocusout={(event) => {
-					if (!event.currentTarget.contains(event.relatedTarget as Node | null)) menuOpen = false;
-				}}
-			>
-				<button
-					bind:this={menuButton}
-					type="button"
-					onclick={() => (menuOpen = !menuOpen)}
-					aria-expanded={menuOpen}
-					aria-controls="user-menu"
-					class="flex min-h-12 min-w-12 items-center justify-center gap-2 rounded-control px-2 text-ink hover:bg-sunken"
-					data-testid="user-menu-button"
+		<div class="flex items-center gap-2">
+			<LanguageSwitcher />
+			{#if user}
+				<div
+					class="relative"
+					onfocusout={(event) => {
+						if (!event.currentTarget.contains(event.relatedTarget as Node | null)) menuOpen = false;
+					}}
 				>
-					<Icon name="user" size={24} />
-					<span class="hidden max-w-64 truncate md:inline" data-testid="user-name"
-						>{displayName}</span
-					>
-					<span class="sr-only">Benutzermenü</span>
-				</button>
-
-				{#if menuOpen}
 					<button
+						bind:this={menuButton}
 						type="button"
-						class="fixed inset-0 z-10 cursor-default"
-						tabindex="-1"
-						aria-hidden="true"
-						onclick={() => (menuOpen = false)}
-					></button>
-					<div
-						id="user-menu"
-						class="absolute right-0 z-20 mt-2 flex w-64 flex-col rounded-panel border border-line bg-surface py-2 shadow-raised"
+						onclick={() => (menuOpen = !menuOpen)}
+						aria-expanded={menuOpen}
+						aria-controls="user-menu"
+						class="flex min-h-12 min-w-12 items-center justify-center gap-2 rounded-control px-2 text-ink hover:bg-sunken"
+						data-testid="user-menu-button"
 					>
-						<p class="truncate px-4 py-2 text-ink-muted">{user.email}</p>
-						<a
-							href="/config"
-							onclick={() => (menuOpen = false)}
-							class="flex min-h-12 items-center gap-2 px-4 text-ink hover:bg-sunken"
-							data-testid="user-menu-settings"
+						<Icon name="user" size={24} />
+						<span class="hidden max-w-64 truncate md:inline" data-testid="user-name"
+							>{displayName}</span
 						>
-							<Icon name="settings" />
-							Einstellungen
-						</a>
+						<span class="sr-only">{m.header_user_menu()}</span>
+					</button>
+
+					{#if menuOpen}
 						<button
 							type="button"
-							onclick={logout}
-							class="flex min-h-12 items-center gap-2 px-4 text-left text-critical hover:bg-critical-soft"
-							data-testid="logout-button"
+							class="fixed inset-0 z-10 cursor-default"
+							tabindex="-1"
+							aria-hidden="true"
+							onclick={() => (menuOpen = false)}
+						></button>
+						<div
+							id="user-menu"
+							class="absolute right-0 z-20 mt-2 flex w-64 flex-col rounded-panel border border-line bg-surface py-2 shadow-raised"
 						>
-							<Icon name="arrow-back" />
-							Abmelden
-						</button>
-					</div>
-				{/if}
-			</div>
-		{/if}
+							<p class="truncate px-4 py-2 text-ink-muted">{user.email}</p>
+							<a
+								href="/config"
+								onclick={() => (menuOpen = false)}
+								class="flex min-h-12 items-center gap-2 px-4 text-ink hover:bg-sunken"
+								data-testid="user-menu-settings"
+							>
+								<Icon name="settings" />
+								{m.nav_settings()}
+							</a>
+							<button
+								type="button"
+								onclick={logout}
+								class="flex min-h-12 items-center gap-2 px-4 text-left text-critical hover:bg-critical-soft"
+								data-testid="logout-button"
+							>
+								<Icon name="arrow-back" />
+								{m.header_logout()}
+							</button>
+						</div>
+					{/if}
+				</div>
+			{/if}
+		</div>
 	</div>
 </header>
