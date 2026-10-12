@@ -17,7 +17,16 @@ async function answer(result: { type: string; data?: unknown }) {
 
 import GeneratePage from '../routes/statements/generate/+page.svelte';
 import EditStatementPage from '../routes/statements/[id]/edit/+page.svelte';
-import { allByTestId, byTestId, click, fakeBff, fireEvent, settle, show, submit } from './helpers/dom';
+import {
+	allByTestId,
+	byTestId,
+	click,
+	fakeBff,
+	fireEvent,
+	settle,
+	show,
+	submit
+} from './helpers/dom';
 import { statement } from './helpers/statement';
 import { browserStorage, writeDraft } from '$lib/wizard-draft';
 
@@ -71,7 +80,8 @@ const data = {
 	],
 	defaultManagementFeePercent: 3,
 	defaultHeatingProfileId: '',
-	defaultPeriod: { start: '2024-01-01', end: '2024-12-31' }
+	defaultPeriod: { start: '2024-01-01', end: '2024-12-31' },
+	defaultBuildingIds: [] as string[]
 };
 const text = () => document.body.textContent ?? '';
 const heading = () => document.querySelector('h2 [data-step-label]')!.textContent!.trim();
@@ -103,6 +113,41 @@ const open = (form: unknown = null) => show(GeneratePage, { data, form } as neve
 beforeEach(() => localStorage.clear());
 
 describe('Abrechnungen erstellen', () => {
+	// A-10: ein Link wählt Gebäude und Periode; der Assistent beginnt bei Heizprofil und Verwaltungspauschale
+	it('beginnt bei den Einstellungen, wenn ein Link Gebäude und Periode gewählt hat', async () => {
+		// an older draft for other buildings is not restored over the link's choice
+		open();
+		await settle();
+		next();
+		await settle();
+		click('generate-building-b2');
+		await settle();
+		document.body.innerHTML = '';
+		show(GeneratePage, { data: { ...data, defaultBuildingIds: ['b1'] }, form: null } as never);
+		await settle();
+		expect(document.querySelector('h2')!.textContent).toMatch(/Schritt 3 von 5/);
+		expect(byTestId('draft-restored')).toBeNull();
+	});
+
+	// Personas K1: wer über einen Link kommt, sieht Gebäude, Periode und woher die Einstellungen stammen
+	it('nennt die Auswahl des Links und die Herkunft von Heizprofil und Pauschale', async () => {
+		const preset = {
+			building: 'Seeblick',
+			start: '2025-01-01',
+			end: '2025-12-31',
+			fromStatements: true
+		};
+		show(GeneratePage, {
+			data: { ...data, defaultBuildingIds: ['b1'], preset },
+			form: null
+		} as never);
+		await settle();
+		const said = byTestId('wizard-preset')!.textContent!.replace(/\s+/g, ' ');
+		expect(said).toContain('Seeblick');
+		expect(said).toContain('01.01.2025 – 31.12.2025');
+		expect(said).toContain('wie die übrigen Nebenkostenabrechnungen dieser Abrechnungsperiode');
+	});
+
 	it('beginnt mit der vorgeschlagenen Abrechnungsperiode, in Worten wiederholt', () => {
 		open();
 		expect(heading()).toBe('Abrechnungsperiode');
@@ -217,26 +262,36 @@ describe('Abrechnungen erstellen', () => {
 		const fee = byTestId<HTMLInputElement>('management-fee-input')!;
 		fireEvent(fee, 'input', '');
 		await next();
-		expect(text()).toContain('Bitte geben Sie einen Prozentsatz ab 0 mit höchstens zwei Stellen nach dem Komma ein, zum Beispiel 3 oder 2,5.');
+		expect(text()).toContain(
+			'Bitte geben Sie einen Prozentsatz ab 0 mit höchstens zwei Stellen nach dem Komma ein, zum Beispiel 3 oder 2,5.'
+		);
 		fireEvent(fee, 'input', '1e2');
 		await next();
-		expect(text()).toContain('Bitte geben Sie einen Prozentsatz ab 0 mit höchstens zwei Stellen nach dem Komma ein, zum Beispiel 3 oder 2,5.');
+		expect(text()).toContain(
+			'Bitte geben Sie einen Prozentsatz ab 0 mit höchstens zwei Stellen nach dem Komma ein, zum Beispiel 3 oder 2,5.'
+		);
 		fireEvent(fee, 'input', '2,5');
 		expect(fee.value).toBe('2,5');
-		expect(document.querySelector<HTMLInputElement>('input[name="managementFeePercent"]')!.value).toBe('2.5');
+		expect(
+			document.querySelector<HTMLInputElement>('input[name="managementFeePercent"]')!.value
+		).toBe('2.5');
 	});
 
 	// Vor dem Erstellen sieht man, mit welchem Heizprofil und welcher Pauschale gerechnet wurde
 	it('nennt in der Vorschau Heizprofil und Verwaltungspauschale des Laufs', () => {
 		const run = { ...data, defaultHeatingProfileId: 'hp1', defaultManagementFeePercent: 2.5 };
 		show(GeneratePage, { data: run, form: { preview, invoices } } as never);
-		expect(byTestId('preview-fee')!.textContent).toContain('2.5 % der eigenen Nebenkosten jedes Mieters');
+		expect(byTestId('preview-fee')!.textContent).toContain(
+			'2.5 % der eigenen Nebenkosten jedes Mieters'
+		);
 		expect(byTestId('preview-heating-profile')!.textContent).toContain('Gleichmässig');
 	});
 
 	it('nennt einen Saldo von 0 in der Vorschau ausgeglichen', () => {
 		open({ preview: [{ ...preview[0], balance: 0 }], invoices });
-		expect(allByTestId('preview-row')[0].textContent!.replace(/\s+/g, ' ')).toContain('Ausgeglichen CHF 0.00');
+		expect(allByTestId('preview-row')[0].textContent!.replace(/\s+/g, ' ')).toContain(
+			'Ausgeglichen CHF 0.00'
+		);
 	});
 
 	it('erklärt, warum die Kosten aller Abrechnungen kleiner sein können als die Rechnungen', () => {

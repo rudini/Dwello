@@ -9,13 +9,13 @@ Jede Anforderung nennt das Problem, was Dwello tun muss, wie wir es prüfen (Sze
 | A-1 | Befristung und Kündigung unterscheiden | umgesetzt | IF-4, Helga | – |
 | A-2 | Vertragsende unter «Bearbeiten» prüfen | umgesetzt | IF-8, IF-3, Helga, Anna | – |
 | A-3 | Hinweis auf die Kündigungsfrist | mittel | IF-2 | #112 |
-| A-4 | Bevorstehendes Vertragsende sichtbar machen | mittel | IF-5, Anna, Helga | #113 |
+| A-4 | Bevorstehendes Vertragsende sichtbar machen | umgesetzt | IF-5, Anna, Helga | #113 |
 | A-5 | Neue Adresse für die Schlussabrechnung | mittel | IF-6, Anna | #114 |
 | A-6 | Stillschweigend fortgesetzter befristeter Mietvertrag | niedrig | IF-9 | #115 |
 | A-7 | Doppelt erfassten Mietvertrag entfernen | mittel | Anna (I2, M2) | #116 |
 | A-8 | Früheren Mietvertrag als Historie erkennbar machen | mittel | Anna (I2, M3) | #117 |
 | A-9 | «Noch nicht abgerechnet» nach den Mietverträgen der Periode | umgesetzt | Helga (I3 M3, I4 M2) | – |
-| A-10 | Abrechnung nach einem geänderten Vertragsende neu erstellen | mittel | Anna (I2 M1, I3 M1–M3) | #118, #119 |
+| A-10 | Abrechnung nach einem geänderten Vertragsende neu erstellen | umgesetzt | Anna (I2 M1, I3 M1–M3) | #118, #119 |
 | A-11 | Versendete Abrechnung korrigieren | mittel | Anna (I4 M1), Review I-6 | #120 |
 
 Die offenen Fragen jeder Anforderung werden in ihrem Issue entschieden; dieses Dokument bleibt die ausführliche Beschreibung.
@@ -113,7 +113,10 @@ Szenario: Kündigung mit genügend Frist
 
 ---
 
-## A-4 Bevorstehendes Vertragsende sichtbar machen
+## A-4 Bevorstehendes Vertragsende sichtbar machen – umgesetzt
+
+**Umgesetzt** (Session 17, nach Review K-1): Die Übersicht nennt für jeden gekündigten Mietvertrag ohne späteren Vertrag derselben Wohnung die Aufgabe «Nachmieter für Wohnung {Nr} suchen», auch nach dem Vertragsende, solange die Wohnung leer steht (nach den übrigen Aufgaben, das früheste Ende zuerst; «Mietvertrag erfassen» mit vorgewählter Wohnung). Die Frist «Vertragsende» nennt befristete Verträge und gekündigte, für die schon ein Nachmieter erfasst ist (Wohnungsabnahme, Depot). Der Mietstatus heisst «Vermietet bis TT.MM.JJJJ», sobald der laufende Vertrag ein Ende hat (Wohnungsliste, Wohnungs- und Gebäudeseite; auch bei befristeten Verträgen); beginnt der nächste Vertrag am Tag danach, bleibt es bei «Vermietet». Wer unter «Bearbeiten» einem unbefristeten Vertrag ein Ende gibt, sieht den Hinweis auf «Beenden» (Personas K1). Abweichungen: Statt Links in der Meldung (die nach Sekunden verschwindet) zeigt die Seite eines gekündigten Mietvertrags, solange kein Nachmieter erfasst ist, den Abschnitt «Nächste Schritte» mit «Nachmieter erfassen» und «Neue Adresse eintragen» (bis A-5: die Bearbeitung des Mieters); die Meldung nach dem Beenden weist darauf hin. Die Mieterseite nennt das Ende in der Zeile des Mietvertrags («…, gekündigt»), nicht als Mietstatus.
+
 
 **Voraussetzung:** A-1 (nur *gekündigte* Verträge).
 
@@ -274,7 +277,10 @@ Szenario: Erinnerung bleibt nach dem Auszug des letzten Mieters
 
 ---
 
-## A-10 Abrechnung nach einem geänderten Vertragsende neu erstellen
+## A-10 Abrechnung nach einem geänderten Vertragsende neu erstellen – umgesetzt
+
+**Umgesetzt** (Session 17): Die Ablehnung (Dialog «Beenden» und «Bearbeiten») verlinkt jede genannte Abrechnung. Bei genau einer genannten Abrechnung im Entwurf nennt sie die Folge und bietet «Entwurf löschen und Mietvertrag beenden» bzw. «… speichern» an; danach öffnet der Assistent mit diesem Gebäude und dieser Periode bei den Einstellungen (`/statements/generate?building=…&start=…&end=…`). Die Aktion löscht nur einen Entwurf dieses Mietvertrags; lehnt das Backend das neue Datum danach trotzdem ab (z. B. Überschneidung), ist der Entwurf gelöscht. Die Seite des Mietvertrags meldet «Abrechnung {Jahr} fehlt» für die letzte abgeschlossene Periode, in der er Mietstage hat (eine Periode über den Jahreswechsel mit beiden Tagen); die Übersicht nennt das Gebäude schon nach A-9. Der Assistent übernimmt Heizprofil und Verwaltungspauschale einer anderen Abrechnung desselben Gebäudes und derselben Periode, sonst die Einstellungen; die Detailseite einer Abrechnung nennt ihr Heizprofil.
+
 
 **Problem.** Anna (I3) trug einen Auszug per 31.03.2025 nach, für den es einen Entwurf der Abrechnung 2025 gab. Dwello lehnte richtig ab und sagte, was zu tun ist. Der Weg war aber mühsam: Die Entwurfsnummer ist kein Link, sie musste die Abrechnung suchen, löschen, den Vertrag wieder finden und alles neu eintippen. Nach dem Beenden erinnerte nichts an die nun fehlende Abrechnung 2025. Beim Neuerstellen musste sie Heizprofil und Verwaltungspauschale neu wählen, ohne zu wissen, was die gelöschte Abrechnung verwendet hatte.
 

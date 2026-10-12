@@ -117,7 +117,8 @@ export const load: PageServerLoad = async ({ params, fetch }): Promise<BuildingD
 					rooms: a.rooms || '0',
 					area: a.area || '0',
 					status,
-					nextContractStart: (a.nextContractStart as string | null) ?? null
+					nextContractStart: (a.nextContractStart as string | null) ?? null,
+					currentContractEnd: (a.currentContractEnd as string | null) ?? null
 				};
 			}
 		);

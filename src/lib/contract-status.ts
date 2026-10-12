@@ -101,6 +101,16 @@ const listed = (numbers: string[]) =>
 		? numbers[0]
 		: m.contracts_list_and({ rest: numbers.slice(0, -1).join(', '), last: numbers.at(-1)! });
 
+/** A stored statement that refused new contract dates, with where to create it anew (A-10) */
+export type RefusedStatement = {
+	id: string;
+	statementNumber: string;
+	status: string;
+	periodStart: string;
+	periodEnd: string;
+	buildingId: string;
+};
+
 /** New contract dates would change the Mietstage of stored statements (backend 409, tests/contracts/contract-end-refused.json) */
 export function billedDaysError(statements: { statementNumber: string; status: string }[]): string {
 	const drafts = statements

@@ -174,6 +174,31 @@ describe('Wohnungsstatus', () => {
 		expect(statusText({ status, nextContractStart })).toBe(text);
 	});
 
+	// A-4: die Kündigungszeit ist sichtbar, nicht erst der Leerstand
+	// Review K-4: zieht der Nachmieter am Tag danach ein, droht kein Leerstand
+	it('zeigt bei nahtlosem Nachmieter nur «Vermietet»', () => {
+		expect(
+			statusText({
+				status: 'occupied',
+				currentContractEnd: '2099-03-31',
+				nextContractStart: '2099-04-01'
+			})
+		).toBe('Vermietet');
+		expect(
+			statusText({
+				status: 'occupied',
+				currentContractEnd: '2099-03-31',
+				nextContractStart: '2099-05-01'
+			})
+		).toBe('Vermietet bis 31.03.2099');
+	});
+
+	it('zeigt bei einem Vertrag mit Ende, bis wann die Wohnung vermietet ist', () => {
+		expect(statusText({ status: 'occupied', currentContractEnd: '2099-03-31' })).toBe(
+			'Vermietet bis 31.03.2099'
+		);
+	});
+
 	it.each([
 		['occupied', 'Ein Mietvertrag läuft.'],
 		[

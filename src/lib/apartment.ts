@@ -93,11 +93,33 @@ export function occupancyParts(b: {
 export const countStatus = (apartments: { status: string }[], status: ApartmentStatus) =>
 	apartments.filter((a) => a.status === status).length;
 
-/** Status with the day a relet apartment's next tenant moves in */
-export const statusText = (a: { status: ApartmentStatus; nextContractStart?: string | null }) =>
-	a.status === 'relet' && a.nextContractStart
-		? m.apartments_status_relet_from({ date: formatDate(a.nextContractStart) })
-		: statusLabels[a.status];
+// the next contract starts the day after the running one ends
+function followedOn({
+	currentContractEnd,
+	nextContractStart
+}: {
+	currentContractEnd?: string | null;
+	nextContractStart?: string | null;
+}) {
+	if (!currentContractEnd || !nextContractStart) return false;
+	const next = new Date(`${currentContractEnd.slice(0, 10)}T00:00:00Z`);
+	next.setUTCDate(next.getUTCDate() + 1);
+	return next.toISOString().slice(0, 10) === nextContractStart.slice(0, 10);
+}
+
+/** Status with the day a relet apartment's next tenant moves in, or the last day of the running contract (A-4) */
+export function statusText(a: {
+	status: ApartmentStatus;
+	nextContractStart?: string | null;
+	currentContractEnd?: string | null;
+}) {
+	if (a.status === 'relet' && a.nextContractStart)
+		return m.apartments_status_relet_from({ date: formatDate(a.nextContractStart) });
+	// the end matters while a vacancy may follow; a next tenant from the day after closes it (review K-4)
+	if (a.status === 'occupied' && a.currentContractEnd && !followedOn(a))
+		return m.apartments_status_occupied_until({ date: formatDate(a.currentContractEnd) });
+	return statusLabels[a.status];
+}
 
 /** «3.5 Zimmer» in the UI language, singular where its plural rule says so (French: «1.5 pièce») */
 export const roomsLabel = (rooms: string) =>

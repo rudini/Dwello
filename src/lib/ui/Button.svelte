@@ -21,6 +21,7 @@
 		icon,
 		full = false,
 		ariaLabel,
+		describedby,
 		testid
 	}: {
 		children: Snippet;
@@ -37,6 +38,7 @@
 		icon?: IconName;
 		full?: boolean;
 		ariaLabel?: string;
+		describedby?: string; // id of a text that says what the button does, e.g. its consequence
 		testid?: string;
 	} = $props();
 
@@ -86,6 +88,7 @@
 		disabled={disabled || busy}
 		aria-busy={busy || undefined}
 		aria-label={ariaLabel}
+		aria-describedby={describedby}
 		class={classes}
 		data-testid={testid}
 	>

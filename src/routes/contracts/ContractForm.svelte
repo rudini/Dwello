@@ -16,8 +16,11 @@
 		contractStatusOn,
 		localToday,
 		pastEndConfirmation,
-		billedDaysError
+		billedDaysError,
+		type RefusedStatement
 	} from '$lib/contract-status';
+	import { wizardLink } from '$lib/statement-wizard';
+	import { backendMessage } from '$lib/backend-error';
 	import { normalizeAmounts, stepErrors } from '$lib/contract-wizard';
 	import { addToast } from '$lib/stores';
 	import type { RentalContract } from '$lib/types';
@@ -35,6 +38,8 @@
 	import PeriodStep from './new/PeriodStep.svelte';
 	import RentStep from './new/RentStep.svelte';
 	import PastEndConfirm from './PastEndConfirm.svelte';
+	import RefusedStatements from './RefusedStatements.svelte';
+	import NoticeHint from './NoticeHint.svelte';
 
 	// Form of a contract being edited, with the fields, help and checks of the wizard in ./new
 	let {
@@ -51,6 +56,10 @@
 	let values = $state(untrack(() => initialContractValues(contract, $page.url.searchParams)));
 	let errors = $state<Record<string, string>>({});
 	let saving = $state(false);
+	let refused = $state<RefusedStatement[]>([]); // statements that refused the last save
+	// the chosen apartment's contracts, for the overlap check: an overlap shows only once they are loaded
+	let contractsState = $state<'loading' | 'loaded' | 'failed'>('loading');
+	let contractsRequest = 0;
 	let availability = $state<Map<string, AvailabilityInfo> | null>(null);
 	let apartmentContracts = $state<ContractForAvailability[]>([]);
 	let form = $state<HTMLFormElement>();
@@ -74,19 +83,24 @@
 	let confirmedDay = $state('');
 	const overlap = $derived(overlapWarning(values, apartmentContracts, contract.id));
 	const back = $derived(`/contracts/${contract.id}`);
+	// «Befristet» for a contract saved open-ended: a notice is entered with «Beenden» (Sven K1 M1); a saved notice
+	// always has an end (backend `checkNotice`)
+	const noticeHint = $derived(!contract.endDate && !values.isUnlimited && !values.terminated);
 	const tenantName = $derived(tenants.find((t) => t.id === values.tenantId)?.name ?? '');
 
 	async function contractsOf(apartmentId: string) {
 		const response = await apiCall<{ contracts: Parameters<typeof forAvailability>[0] }>(
 			`/contracts?apartmentId=${apartmentId}`
 		);
-		return forAvailability(response.data?.contracts ?? []);
+		// an answer without a list counts as not loaded, like a refused request (Haiku review)
+		const list = response.data?.contracts;
+		return response.error || !Array.isArray(list) ? null : forAvailability(list);
 	}
 
 	// The contract being edited does not block its own apartment
 	async function availabilityOf(apartmentId: string) {
 		const own = apartmentId === contract.apartmentId ? contract.id : undefined;
-		return [apartmentId, computeAvailability(await contractsOf(apartmentId), own)] as const;
+		return [apartmentId, computeAvailability((await contractsOf(apartmentId)) ?? [], own)] as const;
 	}
 
 	$effect(() => {
@@ -98,13 +112,23 @@
 	// Contracts of the chosen apartment, for the overlap check
 	$effect(() => {
 		const apartmentId = values.apartmentId;
-		if (apartmentId) contractsOf(apartmentId).then((list) => (apartmentContracts = list));
-		else apartmentContracts = [];
+		const request = ++contractsRequest; // only the latest answer counts, also after switching back
+		apartmentContracts = []; // the previous apartment's contracts say nothing about this one
+		contractsState = apartmentId ? 'loading' : 'loaded';
+		if (!apartmentId) return;
+		contractsOf(apartmentId).then((list) => {
+			if (request !== contractsRequest) return;
+			apartmentContracts = list ?? [];
+			contractsState = list ? 'loaded' : 'failed';
+		});
 	});
 
 	function edited(event: Event) {
 		const id = (event.target as HTMLElement).id;
 		delete errors[errorKey[id] ?? id];
+		// the offer belongs to the values refused (review K-2); its message points to it below
+		if (refused.length) delete errors.form;
+		refused = [];
 	}
 
 	// the backend answers in English: a valid form is refused for an overlap or a statement after the end
@@ -114,19 +138,25 @@
 		return m.contracts_save_failed();
 	}
 
-	async function save(event: SubmitEvent) {
-		event.preventDefault();
+	// the fields' errors; true when the form may be sent
+	function valid() {
 		Object.assign(values, normalizeAmounts(values)); // "1'450" as typed in Switzerland
 		errors = { ...validateContract(values), ...stepErrors(values, 3) };
 		const unconfirmed = endChanged && confirmedDay !== values.endDate;
 		const pastConfirmed = unconfirmed && pastEndConfirmation(values.endDate, today);
 		if (pastConfirmed) errors.pastConfirmed = pastConfirmed;
-		if (Object.keys(errors).length > 0) return focusFirstError(form);
+		return Object.keys(errors).length === 0;
+	}
+
+	// saves and opens `next`; a refusal names the statements it concerns (A-10)
+	async function put(next: string) {
 		saving = true;
 		const response = await apiCall(back, { method: 'PUT', body: contractBody(values) });
 		saving = false;
 		if (response.error) {
 			errors = { form: saveError(response.error) };
+			const statements = response.error.details?.statements;
+			refused = Array.isArray(statements) ? (statements as RefusedStatement[]) : [];
 			return focusFirstError(form);
 		}
 		// a withdrawn notice says what changed, not only «gespeichert» (personas J1)
@@ -135,7 +165,39 @@
 				? m.contracts_notice_withdrawn_toast({ name: tenantName })
 				: m.contracts_saved_toast({ name: tenantName });
 		addToast('success', saved, 10_000);
-		await goto(back);
+		await goto(next);
+	}
+
+	async function save(event: SubmitEvent) {
+		event.preventDefault();
+		if (!valid()) return focusFirstError(form);
+		await put(back);
+	}
+
+	// the one draft the new dates would change goes first; the wizard then creates it anew (A-10)
+	const contractsMessage = (state: typeof contractsState) =>
+		state === 'loading'
+			? m.contracts_apartment_contracts_loading()
+			: m.contracts_apartment_contracts_unknown();
+
+	async function deleteDraftAndSave(draft: RefusedStatement) {
+		if (!valid()) return focusFirstError(form);
+		// an overlap would refuse the save after the delete: the draft would be gone for nothing (review K-2);
+		// without the apartment's contracts an overlap cannot be ruled out (Haiku review R5)
+		if (overlap || contractsState !== 'loaded') {
+			errors = { form: overlap ? m.backend_contract_overlap() : contractsMessage(contractsState) };
+			refused = [];
+			return focusFirstError(form);
+		}
+		saving = true;
+		const deleted = await apiCall(`/statements/${draft.id}`, { method: 'DELETE' });
+		saving = false;
+		if (deleted.error) {
+			errors = { form: backendMessage(deleted.error, m.contracts_save_failed()) };
+			refused = [];
+			return focusFirstError(form);
+		}
+		await put(wizardLink(draft.buildingId, draft.periodStart, draft.periodEnd));
 	}
 </script>
 
@@ -194,6 +256,7 @@
 			bind:confirmedDay
 			bind:error={() => errors.pastConfirmed ?? '', (error) => (errors.pastConfirmed = error)}
 		/>
+		<NoticeHint shown={noticeHint} href={back} />
 	</Panel>
 
 	<Panel title={m.contracts_rent()}>
@@ -204,6 +267,23 @@
 		<Alert tone="critical" title={m.contracts_not_saved()} testid="form-error">
 			<p>{errors.form}</p>
 		</Alert>
+		{#if refused.length}
+			<RefusedStatements statements={refused}>
+				{#snippet action(draft, consequence)}
+					<div>
+						<Button
+							variant="danger"
+							icon="delete"
+							busy={saving}
+							busyLabel={m.ui_please_wait()}
+							describedby={consequence}
+							onclick={() => deleteDraftAndSave(draft)}
+							testid="delete-draft-and-save">{m.contracts_delete_draft_and_save()}</Button
+						>
+					</div>
+				{/snippet}
+			</RefusedStatements>
+		{/if}
 	{/if}
 
 	<div class="flex flex-col-reverse gap-4 sm:flex-row sm:justify-end">

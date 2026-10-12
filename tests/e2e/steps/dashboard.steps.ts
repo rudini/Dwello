@@ -2,7 +2,7 @@ import { expect } from '@playwright/test';
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { visit } from '../interactions/navigation';
-import { currentNavItem, overviewDeadline, overviewTask } from '../interactions/dashboard';
+import { currentNavItem, occupancyRow, overviewDeadline, overviewTask, overviewTasksOf } from '../interactions/dashboard';
 import { occupancyOf, rentedApartmentsOf, statusFilter, statusFilterFor } from '../questions/dashboard';
 import {
 	chooseQuickAction,
@@ -141,3 +141,30 @@ Then('die Liste zeigt nur {string}', async ({ verwalter }, label: string) => {
 	await expect(verwalter.page).toHaveURL(/status=/);
 	expect(statusFilter(verwalter)).toBe(statusFilterFor(label));
 });
+
+Given('der Mietvertrag von {string} ist in {int} Tagen gekündigt', async ({ seed }, tenant: string, days: number) => {
+	await seed.notice(tenant, inDays(days));
+});
+
+Then(
+	'nennt die Übersicht die Aufgabe {string} für {string}',
+	async ({ verwalter, names }, title: string, tenant: string) => {
+		await expect(overviewTask(verwalter.page, title).filter({ hasText: names.get(tenant)! })).toBeVisible();
+	}
+);
+
+Then(
+	/^nennt die Übersicht keine Frist "([^"]+) ([^"]+ [^"]+)"$/,
+	async ({ verwalter, names }, kind: string, tenant: string) => {
+		await expect(overviewDeadline(verwalter.page, kind, names.get(tenant)!)).toHaveCount(0);
+	}
+);
+
+// anchored on the occupancy of the scenario's building: the overview has loaded its data
+Then(
+	'nennt die Übersicht keine Aufgabe für den Mietvertrag von {string}',
+	async ({ verwalter, names }, tenant: string) => {
+		await expect(occupancyRow(verwalter.page, names.get('Seeblick')!)).toBeVisible();
+		await expect(overviewTasksOf(verwalter.page, names.get(tenant)!)).toHaveCount(0);
+	}
+);

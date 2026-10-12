@@ -11,6 +11,7 @@ import {
 	tenants,
 	apartments,
 	buildings,
+	heatingProfiles,
 	type UtilityStatement,
 	type NewUtilityStatement,
 	type UtilityStatementLineItem,
@@ -52,6 +53,14 @@ export interface StatementWithDetails extends Omit<UtilityStatement, 'pdfBlob'> 
 	apartment: { id: string; number: string; floor: number; area: string } | null;
 	building: { id: string; name: string; address: string; postalCode?: string; city?: string } | null;
 	lineItems: UtilityStatementLineItem[];
+	heatingProfile?: {
+		id: string;
+		name: string;
+		nameDE: string | null;
+		nameFR: string | null;
+		nameIT: string | null;
+		nameEN: string | null;
+	} | null;
 }
 
 /**
@@ -222,12 +231,22 @@ export async function getStatement(id: string): Promise<StatementWithDetails | n
 				address: buildings.address,
 				postalCode: buildings.postalCode,
 				city: buildings.city
+			},
+			// the profile the heating costs were spread with, named in the UI language (A-10)
+			heatingProfile: {
+				id: heatingProfiles.id,
+				name: heatingProfiles.name,
+				nameDE: heatingProfiles.nameDE,
+				nameFR: heatingProfiles.nameFR,
+				nameIT: heatingProfiles.nameIT,
+				nameEN: heatingProfiles.nameEN
 			}
 		})
 		.from(utilityStatements)
 		.leftJoin(tenants, eq(utilityStatements.tenantId, tenants.id))
 		.leftJoin(apartments, eq(utilityStatements.apartmentId, apartments.id))
 		.leftJoin(buildings, eq(apartments.buildingId, buildings.id))
+		.leftJoin(heatingProfiles, eq(utilityStatements.heatingProfileId, heatingProfiles.id))
 		.where(eq(utilityStatements.id, id))
 		.limit(1);
 
@@ -255,6 +274,7 @@ export async function getStatement(id: string): Promise<StatementWithDetails | n
 		tenant: result.tenant,
 		apartment: result.apartment,
 		building: result.building,
+		heatingProfile: result.heatingProfile,
 		lineItems
 	};
 }

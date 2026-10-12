@@ -112,7 +112,8 @@ describe('Übersicht in der gewählten Sprache', () => {
 		statementCounts: { draft: 1, sent: 0, paid: 0, overdue: 0 },
 		dueStatements: [{ id: 's1', tenantName: 'Anna Keller', paymentDeadline: '2026-10-05' }],
 		lettersToSend: 2,
-		endingContracts: []
+		endingContracts: [],
+		noticedContracts: []
 	};
 
 	it('nennt Aufgaben auf Französisch', () => {

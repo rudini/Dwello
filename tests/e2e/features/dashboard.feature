@@ -128,3 +128,22 @@ Funktionalität: Übersicht
     Und "Bruno Meier" hat die Abrechnung des letzten Jahres für das Gebäude "Ahornhof"
     Wenn der Liegenschaftsverwalter die Übersicht öffnet
     Dann nennt die Aufgabe "Nebenkostenabrechnungen erstellen" das Gebäude "Ahornhof"
+
+  # A-4: in der Kündigungszeit ist ein Nachmieter zu suchen; die Frist «Vertragsende» nennt den Vertrag nicht zweimal
+  Szenario: Gekündigter Mietvertrag in der Übersicht
+    Angenommen der Mietvertrag von "Anna Keller" ist auf den "2099-03-31" gekündigt
+    Wenn der Liegenschaftsverwalter die Übersicht öffnet
+    Dann nennt die Übersicht die Aufgabe "Nachmieter für Wohnung 1.01 suchen" für "Anna Keller"
+
+  Szenario: Gekündigter Mietvertrag kurz vor dem Ende
+    Angenommen der Mietvertrag von "Anna Keller" ist in 30 Tagen gekündigt
+    Wenn der Liegenschaftsverwalter die Übersicht öffnet
+    Dann nennt die Übersicht die Aufgabe "Nachmieter für Wohnung 1.01 suchen" für "Anna Keller"
+    Und nennt die Übersicht keine Frist "Vertragsende Anna Keller"
+
+  Szenario: Nachmieter erfasst
+    Angenommen der Mietvertrag von "Anna Keller" ist auf den "2099-03-31" gekündigt
+    Und der Mieter "Bruno Meier" existiert
+    Und "Bruno Meier" mietet die Wohnung "1.01" seit "2099-04-01" für "950" Franken
+    Wenn der Liegenschaftsverwalter die Übersicht öffnet
+    Dann nennt die Übersicht keine Aufgabe für den Mietvertrag von "Anna Keller"

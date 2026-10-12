@@ -19,13 +19,15 @@ import ContractPage from '../routes/contracts/[id]/+page.svelte';
 import { get } from 'svelte/store';
 import { toasts } from '$lib/stores';
 import { byTestId, click, fireEvent, settle, show } from './helpers/dom';
+import refused from '../../tests/contracts/contract-end-refused.json';
 
-const contract = (startDate: string, endDate: string | null) => ({
+const contract = (startDate: string, endDate: string | null, terminated = false) => ({
 	id: 'c1',
 	apartmentId: 'a1',
 	tenantId: 't1',
 	startDate,
 	endDate,
+	terminated,
 	baseRent: '950.00',
 	additionalRent: '50.00',
 	monthlyAdvancePayment: '180.00',
@@ -51,12 +53,16 @@ function open(
 	startDate = '2024-04-01',
 	endDate: string | null = null,
 	form: unknown = null,
-	today = '2026-10-10'
+	today = '2026-10-10',
+	terminated = false,
+	missingStatement: { start: string; end: string; href: string } | null = null
 ) {
 	show(ContractPage, {
 		data: {
 			today,
-			contract: contract(startDate, endDate),
+			missingStatement,
+			nextSteps: terminated ? { successor: false } : null, // the loader decides (review K-1)
+			contract: contract(startDate, endDate, terminated),
 			rentBreakdown: { baseRent: 950, additionalRent: 50, advancePayment: 180, total: 1180 }
 		},
 		form
@@ -71,6 +77,148 @@ const amountOf = (label: string) =>
 		.trim();
 
 describe('Mietvertragsdetail', () => {
+	// A-4: nach der Kündigung den Nachmieter erfassen und die neue Adresse eintragen
+	it('nennt nach einer Kündigung die nächsten Schritte', () => {
+		open('2024-04-01', '2099-03-31', null, '2026-10-10', true);
+		const steps = byTestId('contract-next-steps')!;
+		const links = [...steps.querySelectorAll('a')].map((a) => [
+			a.textContent!.trim(),
+			a.getAttribute('href')
+		]);
+		expect(links).toEqual([
+			['Nachmieter erfassen', '/contracts/new?apartment=a1'],
+			['Neue Adresse eintragen', '/tenants/t1/edit']
+		]);
+	});
+
+	// A-10: die Ablehnung führt zur Abrechnung; der einzige Entwurf lässt sich löschen, mit seiner Folge
+	it('verlinkt die abgelehnte Abrechnung und bietet an, den Entwurf zu löschen', async () => {
+		open('2024-04-01', null, {
+			endError: 'abgelehnt',
+			refused: refused.statements,
+			refusedDay: '2025-03-31'
+		});
+		click('contract-end-button');
+		fireEvent(byTestId<HTMLInputElement>('contract-end-date-input')!, 'input', '31.03.2025');
+		await settle();
+		const link = byTestId('refused-statement-link')!;
+		expect(link.getAttribute('href')).toBe('/statements/s1');
+		expect(link.textContent).toContain('NK-2025-0003');
+		expect(text('refused-statements')).toContain(
+			'Der Entwurf NK-2025-0003 wird gelöscht. Erstellen Sie die Nebenkostenabrechnung danach neu.'
+		);
+		const form = document.querySelector<HTMLFormElement>('form[action="?/endDeletingDraft"]')!;
+		const value = (name: string) => form.querySelector<HTMLInputElement>(`[name="${name}"]`)!.value;
+		expect([value('statementId'), value('endDate')]).toEqual(['s1', '2025-03-31']);
+		expect(form.contains(byTestId('delete-draft-and-end'))).toBe(true);
+		// Review K-3: erst die Meldung, dann der Ausweg; der Knopf nennt seine Folge
+		const order = byTestId('form-error')!.compareDocumentPosition(byTestId('refused-statements')!);
+		expect(order & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+		const described = byTestId('delete-draft-and-end')!.getAttribute('aria-describedby')!;
+		expect(document.getElementById(described)!.textContent).toContain('wird gelöscht');
+	});
+
+	// Personas K1: der Assistent öffnet danach; die Meldung sagt, was vorher geschah
+	it('bestätigt das Löschen und das Vertragsende vor dem Assistenten', async () => {
+		open('2024-04-01', null, {
+			endError: 'abgelehnt',
+			refused: refused.statements,
+			refusedDay: '2025-03-31'
+		});
+		click('contract-end-button');
+		fireEvent(byTestId<HTMLInputElement>('contract-end-date-input')!, 'input', '31.03.2025');
+		await settle();
+		await redirectAfter('?/endDeletingDraft');
+		expect(get(toasts).map((t) => t.message)).toContain(
+			'Entwurf NK-2025-0003 gelöscht. Der Mietvertrag von Anna Keller endet am 31.03.2025. Erstellen Sie jetzt die Nebenkostenabrechnung neu.'
+		);
+	});
+
+	// Haiku-Review R4: lehnt die Aktion ab, nimmt die Meldung den Fokus
+	it('setzt den Fokus auf die Meldung, wenn das Löschen abgelehnt wird', async () => {
+		open('2024-04-01', null, {
+			endError: 'abgelehnt',
+			refused: refused.statements,
+			refusedDay: '2025-03-31'
+		});
+		click('contract-end-button');
+		fireEvent(byTestId<HTMLInputElement>('contract-end-date-input')!, 'input', '31.03.2025');
+		await settle();
+		const after = actions.get('?/endDeletingDraft')!({ formData: new FormData() }) as (
+			input: unknown
+		) => Promise<void>;
+		await after({ update: async () => {}, result: { type: 'failure', status: 409, data: {} } });
+		await settle();
+		expect(document.activeElement).toBe(byTestId('form-error'));
+	});
+
+	// Review K-2: ein anderer Tag ist nicht abgelehnt; das Angebot gehört zum abgelehnten Tag
+	it('nimmt das Angebot zurück, sobald ein anderer Tag eingegeben ist', async () => {
+		open('2024-04-01', null, {
+			endError: 'abgelehnt',
+			refused: refused.statements,
+			refusedDay: '2025-03-31'
+		});
+		click('contract-end-button');
+		fireEvent(byTestId<HTMLInputElement>('contract-end-date-input')!, 'input', '31.03.2099');
+		await settle();
+		expect(byTestId('delete-draft-and-end')).toBeNull();
+		// Haiku-Review P2: die Meldung verweist auf den Knopf unten, sie geht mit ihm
+		expect(byTestId('form-error')).toBeNull();
+	});
+
+	it('bietet bei einer versendeten Abrechnung kein Löschen an', async () => {
+		const sent = refused.statements.map((s) => ({ ...s, status: 'sent' }));
+		open('2024-04-01', null, { endError: 'abgelehnt', refused: sent, refusedDay: '2025-03-31' });
+		click('contract-end-button');
+		fireEvent(byTestId<HTMLInputElement>('contract-end-date-input')!, 'input', '31.03.2025');
+		await settle();
+		expect(byTestId('refused-statement-link')).not.toBeNull();
+		expect(byTestId('delete-draft-and-end')).toBeNull();
+	});
+
+	// A-10: Mietstage in der letzten Abrechnungsperiode ohne Abrechnung
+	it('meldet die fehlende Abrechnung und führt zum Assistenten', () => {
+		const href = '/statements/generate?building=b1&start=2025-01-01&end=2025-12-31';
+		open('2024-04-01', null, null, '2026-10-10', false, {
+			start: '2025-01-01',
+			end: '2025-12-31',
+			href
+		});
+		expect(text('contract-missing-statement')).toContain('Abrechnung 2025 fehlt');
+		expect(byTestId('contract-missing-statement-link')!.getAttribute('href')).toBe(href);
+	});
+
+	it('nennt eine Periode über den Jahreswechsel mit beiden Tagen', () => {
+		const missing = { start: '2024-07-01', end: '2025-06-30', href: '/statements/generate' };
+		open('2024-04-01', null, null, '2026-10-10', false, missing);
+		expect(text('contract-missing-statement')).toContain(
+			'Abrechnung 01.07.2024 – 30.06.2025 fehlt'
+		);
+	});
+
+	it('nennt mit erfasstem Nachmieter nur noch die neue Adresse', () => {
+		show(ContractPage, {
+			data: {
+				today: '2026-10-10',
+				missingStatement: null,
+				nextSteps: { successor: true },
+				contract: contract('2024-04-01', '2099-03-31', true),
+				rentBreakdown: { baseRent: 950, additionalRent: 50, advancePayment: 180, total: 1180 }
+			},
+			form: null
+		} as never);
+		const links = [...byTestId('contract-next-steps')!.querySelectorAll('a')].map((a) =>
+			a.textContent!.trim()
+		);
+		expect(links).toEqual(['Neue Adresse eintragen']);
+	});
+
+	it('nennt ohne Kündigung keine nächsten Schritte', () => {
+		open('2024-04-01', '2099-03-31');
+		expect(byTestId('contract-next-steps')).toBeNull();
+	});
+
 	it('zeigt einen künftigen Mietvertrag als künftig, mit seinem Vertragsbeginn', () => {
 		open('2099-11-01');
 		expect(text('contract-status')).toBe('Künftig');
@@ -316,13 +464,31 @@ describe('Mietvertragsdetail', () => {
 	// der Tag geht mit dem Formular an die Aktion; die Meldung nennt ihn
 	it('sendet das Vertragsende und meldet den Tag, an dem der Mietvertrag endet', async () => {
 		toasts.set([]);
-		open();
+		// after the end the page reloads with the next steps: the message points to them
+		open('2024-04-01', null, null, '2026-10-10', true);
 		click('contract-end-button');
 		fireEvent(byTestId<HTMLInputElement>('contract-end-date-input')!, 'input', '31.03.2027');
 		await settle();
 		const formData = new FormData();
 		const after = actions.get('?/end')!({ formData }) as (input: unknown) => Promise<void>;
 		expect(formData.get('endDate')).toBe('2027-03-31');
+		await after({ update: async () => {}, result: { type: 'success' } });
+		// Haiku-Review R7 (Helga K1 M2): die Meldung sagt, wo es weitergeht
+		expect(get(toasts).map((toast) => toast.message)).toEqual([
+			'Der Mietvertrag von Anna Keller endet am 31.03.2027. Die nächsten Schritte sehen Sie oben auf der Seite.'
+		]);
+	});
+
+	// Haiku-Review N1: ohne Abschnitt «Nächste Schritte» verweist die Meldung nicht darauf
+	it('verweist nicht auf nächste Schritte, die die Seite nicht zeigt', async () => {
+		toasts.set([]);
+		open(); // nextSteps: null
+		click('contract-end-button');
+		fireEvent(byTestId<HTMLInputElement>('contract-end-date-input')!, 'input', '31.03.2027');
+		await settle();
+		const after = actions.get('?/end')!({ formData: new FormData() }) as (
+			input: unknown
+		) => Promise<void>;
 		await after({ update: async () => {}, result: { type: 'success' } });
 		expect(get(toasts).map((toast) => toast.message)).toEqual([
 			'Der Mietvertrag von Anna Keller endet am 31.03.2027'

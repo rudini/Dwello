@@ -16,6 +16,7 @@ import { downloadFrom } from './download';
 export const searchStatements = (term: string) => async (actor: Actor) => {
 	await statementSearchInput(actor.page).fill(term);
 	await statementSearchButton(actor.page).click();
+	await filteredBy(actor.page, { search: term }); // the list shown is the result, not the page before
 };
 
 export const showStatementsOfBuilding = (buildingId: string) => async (actor: Actor) => {

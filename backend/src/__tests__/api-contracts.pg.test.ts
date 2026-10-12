@@ -7,7 +7,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import { eq, sql } from 'drizzle-orm';
 import { join } from 'path';
 import { db } from '../db/connection';
-import { buildings, categories, invoices, tenants } from '../db/schema';
+import { buildings, categories, heatingProfiles, invoices, tenants } from '../db/schema';
 import { deleteStatement } from '../services/statement.service';
 import { callApi, sendJson } from './helpers/auth';
 import { insertInvoice } from './helpers/records';
@@ -58,11 +58,14 @@ beforeAll(async () => {
 		.update(invoices)
 		.set({ llmCategoryId: sql`${invoices.categoryId}`, llmConfidence: '0.86', manualOverrideReason: 'Vertrag geprüft' })
 		.where(eq(invoices.buildingId, rental.building));
+	// a heating profile of the master data: the statement names it (A-10)
+	const [profile] = await db.select({ id: heatingProfiles.id }).from(heatingProfiles).limit(1);
 	const response = await sendJson('POST', '/api/v1/statements/generate', {
 		...period,
 		contractId: rental.contract,
 		buildingId: rental.building,
-		managementFeePercent: 3
+		managementFeePercent: 3,
+		heatingProfileId: profile.id
 	});
 	statementId = ((await response.json()) as { id: string }).id;
 });

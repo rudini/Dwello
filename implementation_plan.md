@@ -2,7 +2,7 @@
 
 Checklist of the current task (`CLAUDE.md`, Workflow step 8): add the items when the task starts, tick them as they are done, note the files changed. Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-functional), see `CLAUDE.md`, "Open work". History (phases 0–22, sessions 1–16): `docs/archive/implementation-plan-verlauf.md`.
 
-## Session 17 - October 2026: Review agents in the workflow
+## Session 18 - October 2026: Review agents, one place for open work
 
 ### Done ✅
 - [x] **Review agents**: `CLAUDE.md` "Workflow" gets a domain check of the scenario before implementing (step 1),
@@ -61,3 +61,8 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8): add the items when
   Leistungszeitraum marker removed; `data-model.md` marker names #71; the CI script reads numbers only inside markers,
   rejects pull requests and fails a PR that closes an issue a marker still names; ESLint block for `tools/**/*.mjs`;
   templates with «Proposed»; former O-1 lives only as #51; issue numbers in `anforderungen-vertragsende.md`.
+- [x] **Merge of main (PR #54, A-4 and A-10)**: conflicts in `src/routes/contracts/[id]/+page.svelte` (main's refusal
+  block, without the marker the glossary settled), `docs/anforderungen-vertragsende.md` (A-4, A-10 umgesetzt),
+  `offene-punkte.md` and this plan (main's session archived as «Session 17 (PR #54)»; this session renamed 18).
+  Main's new open points: functional ones as issues #140 (Nachmieter, Vermietet bis), #141 (A-10c), #142 (A-10d),
+  #143 (B-13), #144 (P-17), #145 (P-18); usability as U-13, U-14; the two new markers name #140.

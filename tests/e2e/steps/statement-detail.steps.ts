@@ -167,6 +167,17 @@ Then('erhält der Liegenschaftsverwalter die Abrechnung als PDF', async ({ verwa
 	expect(file.header).toBe('%PDF-');
 });
 
+// from any page: the list of statements, searched for the tenant
+Then(
+	'findet die Abrechnungsliste keine Abrechnung {int} von {string}',
+	async ({ verwalter, names }, year: number, tenant: string) => {
+		const name = names.get(tenant) ?? tenant;
+		await visit(verwalter.page, '/statements');
+		await verwalter.perform(searchStatements(name));
+		await expect(statementOfYear(verwalter, name, year)).toHaveCount(0);
+	}
+);
+
 Then(
 	'die Abrechnung {int} von {string} ist nicht mehr auffindbar',
 	async ({ verwalter, names }, year: number, tenant: string) => {
@@ -187,4 +198,8 @@ Given('im Gebäude {string} war am {string} Heizöl für {string} Franken im Tan
 
 Then('steht im PDF {string}', async ({ verwalter }, text: string) => {
 	expect(await downloadedPdfText(verwalter)).toContain(text);
+});
+
+Then('nennt die Abrechnung das Heizprofil {string}', async ({ verwalter, names }, profile: string) => {
+	await expect(verwalter.page.getByTestId('statement-heating-profile')).toContainText(names.get(profile)!);
 });
