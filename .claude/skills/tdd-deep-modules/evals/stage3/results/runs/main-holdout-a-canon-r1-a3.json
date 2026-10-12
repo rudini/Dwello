@@ -1,0 +1,79 @@
+{
+ "run_id": "main-holdout-a-canon-r1-a3",
+ "status": "finished",
+ "phase": "main",
+ "slot": 1,
+ "attempt": 3,
+ "fixture": "holdout-a",
+ "fixture_dir": "holdout/holdout-a",
+ "arm": "canon",
+ "started": "2026-10-12T13:14:03Z",
+ "valid": true,
+ "harness": {
+  "commit": "429c342869fefb74c7570bdd8c5f2bf253efc34d",
+  "sha256": "15bb8a6dd4ebf9400008fc77636b6eaf326caefe18b711fbb46aefbb96869fd6"
+ },
+ "base": "2413956e4dd96985fd1421e66b1782e02a07ac9b",
+ "duration_s": 289,
+ "session": {
+  "is_error": false,
+  "num_turns": 108,
+  "total_cost_usd": 1.2785825,
+  "session_id": "f67e4416-1894-415b-943d-ea751a1d55c2",
+  "permission_denials": [
+   {
+    "tool_name": "Bash",
+    "tool_use_id": "toolu_015dZ41bqBmeFWucNXyudXMs",
+    "tool_input": {
+     "command": "cat > src/pickList.test.ts <<'EOF'\nimport { describe, expect, test } from \"bun:test\";\nimport { buildPickList, OrderFormatError, type StockLot } from \"./pickList\";\n\ntest(\"format errors name the line\", () => {\n  const error = new OrderFormatError(7, \"quantity must be positive\");\n  expect(error).toBeInstanceOf(Error);\n  expect(error.line).toBe(7);\n  expect(error.message).toBe(\"Line 7: quantity must be positive\");\n});\n\ndescribe(\"allocation\", () => {\n  test(\"empty orders text gives an empty pick list\", () => {\n    expect(buildPickList(\"\", [])).toEqual({ picks: [], shortages: [] });\n  });\n});\nEOF\nbun test 2>&1 | tail -5"
+    }
+   },
+   {
+    "tool_name": "Bash",
+    "tool_use_id": "toolu_018YCZkTZc9G5whgXM7nFgHv",
+    "tool_input": {
+     "command": "python3 - <<'EOF'\np='src/pickList.ts'\ns=open(p).read()\ns=s.replace(\"\"\"  const picks: Pick[] = [];\n  const lots\"\"\",\"\"\"  const picks: Pick[] = [];\n  const shortages: Shortage[] = [];\n  const lots\"\"\")\ns=s.replace(\"\"\"        picks.push({ bin: lot.bin, sku: item.sku, qty: taken, orderId: order.id });\n      }\n    }\n  }\n  return { picks, shortages: [] };\"\"\",\"\"\"        picks.push({ bin: lot.bin, sku: item.sku, qty: taken, orderId: order.id });\n      }\n      if (wanted > 0) shortages.push({ orderId: order.id, sku: item.sku, missing: wanted });\n    }\n  }\n  return { picks, shortages };\"\"\")\nopen(p,'w').write(s)\nEOF\nbun test 2>&1 | grep -E \"pass|fail\" | tail -3"
+    }
+   }
+  ]
+ },
+ "final_message": "ct TypeScript, and the working tree is clean. The types and the `OrderFormatError` class are unchanged.\n\n**How I worked:** I started with a written test list (`TESTLIST.md`, now all ticked off) and then took one test at a time: write it, watch it fail, make it pass, sometimes tidy up. There are seven commits after `start`. Some tests passed as soon as I wrote them: other SKUs being ignored, no stock at all, stock used up by an earlier order, the order of shortages, not changing `stock`, picks at the same bin keeping their order, and most of the malformed-`ORDER` cases. Those behaviours were already handled, so the tests just lock them in. A few cases came up along the way and went onto the list: lots with `qty: 0` give no pick, and an end-to-end test using the example batch from the brief.\n\n**What the code does:**\n- **Reading the orders text:** two strict patterns, one for `ORDER` lines and one for item lines. Problems are reported from the top down. An order with no items is detected when the next `ORDER` line or the end of the text is reached, and reported at its own `ORDER` line.\n- **Allocation:** it works on copies of the lots, sorted by best-before date, with undated lots last and ties broken by bin. Priority orders are served first, then the rest in text order.\n- **Walking order:** aisles alphabetically; racks go up in the 1st, 3rd, \u2026 aisle that has picks and down in the others; levels always go up. Picks at the same bin stay in the order they were allocated.\n\n**Interpretation calls** (the spec doesn't settle these):\n- In `ORDER 1001` followed by a bad line such as `olive x1`, I report the bad line, not the order as empty. If the `ORDER` line is empty and the problem comes in a later `ORDER` line, as in `ORDER 1001` then `ORDER 1001`, the empty order is reported first (line 1).\n- \"At least one space\" is read as any whitespace, so tabs between the parts are accepted too.\n- A line like `ORDER X1` is read as an order with id `X1`, not as an item with SKU `ORDER`.",
+ "own_tests": {
+  "exit": 0,
+  "pass": 46,
+  "fail": 0
+ },
+ "hidden": {
+  "exit": 0,
+  "pass": 16,
+  "fail": 0,
+  "tail": "bun test v1.4.2 (744846f84)\n\n__acceptance__/pickList.acceptance.test.ts:\n(pass) allocation > an item is taken from the lot with the earliest best-before date [0.87ms]\n(pass) allocation > an item spreads over several lots [0.13ms]\n(pass) allocation > lots without a best-before date are used last [0.21ms]\n(pass) allocation > equal dates are broken by bin code [0.08ms]\n(pass) allocation > missing stock is picked as far as possible and reported [0.25ms]\n(pass) allocation > priority orders are served first, then the rest in text order [0.49ms]\n(pass) allocation > repeated SKUs in one order are added up at their first position [0.25ms]\n(pass) allocation > the stock passed in is left untouched [0.10ms]\n(pass) walking order > aisles alphabetically, racks in a serpentine, levels upwards [0.16ms]\n(pass) walking order > only aisles with picks count for the serpentine [0.13ms]\n(pass) walking order > picks at the same bin keep their allocation order [0.14ms]\n(pass) orders text > comments, blank lines, indentation and CRLF are accepted [0.07ms]\n(pass) orders text > an item before the first order [0.16ms]\n(pass) orders text > an order id used twice [0.04ms]\n(pass) orders text > an order without items [0.12ms]\n(pass) orders text > lines that match neither form [0.14ms]\n\n 16 pass\n 0 fail\n 38 expect() calls\nRan 16 tests across 1 file. [8.00ms]\n"
+ },
+ "production_files": [
+  "src/pickList.ts"
+ ],
+ "skill_loaded": null,
+ "foreign_references": [],
+ "committed": true,
+ "invalid_reasons": [],
+ "commits": 7,
+ "subjects": [
+  "Pick a single item from a single lot",
+  "Allocate by earliest best-before, undated last, ties by bin",
+  "Report shortages and serve priority orders first",
+  "Sum repeated SKUs and ignore comments and blank lines",
+  "Report items before ORDER, duplicate ids and empty orders",
+  "Validate ORDER and item lines with strict patterns",
+  "Return picks in serpentine walking order"
+ ],
+ "depth": {
+  "exit": 1,
+  "lines": [
+   "src/pickList.ts: surface 10, size 125, ratio 12.5, classitis no, pass-through 0, tests 1, unused 0, duplicate 6 -> bloat: 6 duplicated lines"
+  ],
+  "findings": 1,
+  "surface": 10,
+  "size": 125
+ },
+ "replay": null
+}
