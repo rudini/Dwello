@@ -55,17 +55,19 @@ PostgreSQL on localhost:5432 (user and password `dwello`) is required for backen
 2. **`/tdd`:** drive the implementation red-green, one behavior at a time, through public interfaces. A test must fail before the code changes. Every bug fix gets a test that reproduces it first, at the lowest layer that can show it (unit, `*.pg.test.ts` or scenario).
 3. **`/ponytail`:** keep the shortest diff that works; check the finished change against it.
    **Deep modules:** after each implementation step run `bun run deepcheck:audit` (silent when clean) and fix its findings before continuing; run `bun run deepcheck:scan` only when a codebase-wide review is requested (`tools/deepcheck/README.md`).
-4. **Slice review:** after each slice (a green scenario or a coherent group of behaviors), once the checks in step 3 are clean, run subagent `code-reviewer` (fresh context: requirement + diff only). Triage its findings (step 6). Continue only when no Blocker/Major is open.
-5. **Feature review:** when the scenario is green, run in parallel, only where it applies:
+4. **Slice review:** after each slice (a green scenario or a coherent group of behaviors), once lint, the affected tests and `deepcheck:audit` are clean, run subagent `code-reviewer` (fresh context: requirement + diff only). Triage its findings (step 6). Continue only when no Blocker/Major is open (limit: step 7).
+5. **Feature review:** when the scenario is green, start the app once with `docs/design/tools/persona-stack.sh`, then run in parallel, only where it applies, telling each subagent the app is running:
    - UI changed: subagent `persona`, once per affected persona from `docs/design/arbeitsregeln.md`.
    - Domain rules or terms changed: `fach-reviewer`.
-   - Amounts, statements, PDFs or QR-bills changed: `daten-pruefer` recomputes every affected demo record from the database with its own script, to the Rappen, and decodes the QR codes.
-   Each marks what it could not confirm and where it looked.
-6. **Findings:** every reviewer reports severity (Blocker / Major / Minor / Nit) plus evidence (file:line or reproduction steps). Full report in `docs/reviews/<slice>-<reviewer>-<n>.md` (personas: `docs/design/personas/<persona>-<slice>.md`); the latest `## Session` of `implementation_plan.md` lists only ID, severity, status (open / fixed / rejected with reason) and the report path. Check a finding's evidence before acting on it; reject it with a reason when it does not hold. A fix that changes behavior gets a failing test first. Re-review only the delta and the open findings.
-7. **Done:** remove `@wip` once the scenario is green. A feature is done when its scenario passes, not when unit tests pass, and when no Blocker/Major from `code-reviewer`, personas, `fach-reviewer` or `daten-pruefer` is open. Minors/Nits are listed under "Open" in the session. After 3 review rounds with open Blocker/Major: stop, summarize the open findings, ask me.
-8. **Plan:** log the task in `implementation_plan.md` (check the items, note the files changed). The file is long: read only its latest `## Session` section (`grep -n '^## Session' implementation_plan.md`) and add new work there. The phase table at the top is no longer maintained.
+   - Amounts, statements, PDFs or QR-bills changed: `daten-pruefer`.
+   If you cannot start subagents, do not skip the reviews: list the missing ones under "Blocked on me".
+6. **Findings:** every reviewer reports severity (Blocker / Major / Minor / Nit) plus evidence (file:line or reproduction steps). You save each report unchanged to `docs/reviews/<slice>-review-<n>.md`, `<slice>-fachreview-<n>.md` or `<slice>-datenpruefung-<n>.md` (personas write their own to `docs/design/personas/<persona>-<slice>.md`); the latest `## Session` of `implementation_plan.md` lists only ID, severity, status (open / fixed / rejected with reason) and the report path. Check a finding's evidence before acting on it; reject it with a reason when it does not hold. A fix that changes behavior gets a failing test first. Re-review only the delta and the open findings.
+7. **Done:** remove `@wip` once the scenario is green. A feature is done when its scenario passes, not when unit tests pass, and when no Blocker/Major from `code-reviewer`, personas, `fach-reviewer` or `daten-pruefer` is open. Minors/Nits are listed under "Open" in the session. A round is one run of one reviewer on one slice: if the same reviewer still reports an open Blocker/Major on the same slice after its 3rd round, stop, list the open findings under "Blocked on me", ask me.
+8. **Plan:** at the start of a task, add its items as a checklist to the latest `## Session` of `implementation_plan.md`; tick each item when done, add anything new you find, note the files changed. The file is long: read only its latest `## Session` section (`grep -n '^## Session' implementation_plan.md`). The phase table at the top is no longer maintained.
 
-Keep going without asking while no input is needed. Ask only when blocked, or before anything destructive (deleting data, force-push, changes outside this repo).
+Keep going without asking while no input is needed; put status notes in the same message as your next action. Ask only when blocked, or before anything destructive (deleting data, force-push, changes outside this repo). Not destructive: recreating the databases `dwello_persona`, `dwello_test` and `dwello_e2e`, and files in the scratchpad.
+
+End every run with three headings: **Blocked on me** (decisions, open Blocker/Major, new entries in `docs/design/offene-punkte.md`), **Changed** (files, commits), **Found** (findings by ID and status, what could not be confirmed).
 
 Before marking anything complete, all of these pass: `bun run test:coverage`, `bun run lint`, `bun run check`, `cd backend && bun run test && bun run type-check`, and the affected E2E scenarios.
 
@@ -80,7 +82,7 @@ Before marking anything complete, all of these pass: `bun run test:coverage`, `b
 
 ## Coding guidelines
 
-- **Think before coding:** state assumptions; if a request has several readings, name them instead of picking silently; push back when a simpler approach exists.
+- **Before coding:** state assumptions; if a request has several readings, name them instead of picking silently; push back when a simpler approach exists.
 - **Surgical changes:** touch only what the task needs; match the surrounding style; don't reformat or refactor adjacent code. Remove what your change made unused, leave pre-existing dead code unless asked.
 
 ## Documentation (read when relevant)

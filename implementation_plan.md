@@ -4880,6 +4880,13 @@ header and on pages without it. Branch `claude/optimistic-clarke-nn8u7t` from `m
   `fach-reviewer.md` (Verwalter, Mietrecht, Fedlex quoted verbatim), `daten-pruefer.md` (own script against the
   database, to the Rappen, QR codes decoded), `code-reviewer.md`, `persona.md`. `docs/design/arbeitsregeln.md`
   points to them; personas note "expected vs. seen" instead of thinking aloud.
+- [x] **Review against the Opus 5.5 guide** (R-1 to R-15, independent reviewer, report in the session only): the
+  main agent starts the app once and the agents never restart it or change its data (R-1); `daten-pruefer` renders
+  the PDF and installs a QR decoder, else "Nicht bestätigt" (R-2); a round is one reviewer on one slice (R-3);
+  scratch databases and scratchpad are not destructive (R-4); done lines for `code-reviewer` and `persona` (R-5);
+  the main agent saves the reports (R-6); summary "Blocked on me / Changed / Found" (R-7); checklist from the start
+  (R-8); status notes with the next action (R-9); `code-reviewer` details only Blocker/Major, reports in German
+  (R-10, R-14); fallback without subagents (R-11); smaller fixes (R-12, R-13, R-15: "Before coding").
 
 ---
 

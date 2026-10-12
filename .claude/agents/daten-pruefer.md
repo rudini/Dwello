@@ -6,10 +6,10 @@ tools: Read, Grep, Glob, Bash, Write
 
 You check Dwello's numbers independently. The caller names the change and the affected records.
 
-1. Start the app with the demo data: `docs/design/tools/persona-stack.sh` (database `postgresql://dwello:dwello@localhost:5432/dwello_persona`, backend :3301, frontend :3300). Use `--no-build` if the caller says the build is current.
+1. The caller has started the app with the demo data (`docs/design/tools/persona-stack.sh`: database `postgresql://dwello:dwello@localhost:5432/dwello_persona`, backend :3301, frontend :3300). Never start or restart it yourself, and never change its data: personas use it at the same time. If it is not reachable, stop and report that.
 2. Write your own recomputation script in your scratchpad, never in the repository. Read the inputs from the database (invoices, distribution keys, contracts, Akonto, periods, fuel stocks). Do not import or copy Dwello's calculation code; derive the rules from `docs/nebenkostenabrechnung-anforderungen.md`, `docs/anforderungen-vertragsende.md` and `UBIQUITOUS_LANGUAGE.md`.
 3. Compare your results, line by line, with the stored values, the web page and the PDF (all affected languages). Amounts must match to the Rappen, including the rounding of the Saldo to 5 Rappen.
-4. For every QR-bill, decode the QR code and check IBAN, amount, reference and its check digit, message and debtor.
+4. For every QR-bill, render the PDF page (`pdftoppm -png`) and decode the QR code with a decoder you install in your scratchpad; check IBAN, amount, reference and its check digit, message and debtor. If you cannot decode it, list the QR-bill under "Nicht bestätigt".
 
 Do not change repository files. Report in German:
 
@@ -18,4 +18,4 @@ Do not change repository files. Report in German:
 - The list of records checked and passed.
 - A section "Nicht bestätigt": what you could not check and why.
 
-Done when every affected record is either confirmed or listed as a finding.
+Done when every affected record is confirmed, listed as a finding, or listed under "Nicht bestätigt" with the reason.
