@@ -161,7 +161,7 @@ def _statements(heading, text):
         item = re.search(rf"^\s*(?:-|\d+\.)\s+\*\*{re.escape(label)}\*\*(.*)$", text, re.MULTILINE)
         line = item[1] if item else ""
         found += [f"'{heading}' item **{label}** lacks the statement: {statement}" for statement in statements
-                  if not re.search(rf"(?:^|[.:;])\s+{re.escape(statement)}(?:\s|$)", line)]
+                  if not re.search(rf"(?:^|[.])\s+{re.escape(statement)}(?:\s|$)", line)]
     return found
 
 
