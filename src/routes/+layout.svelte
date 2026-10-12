@@ -92,8 +92,8 @@
 	</div>
 	<MobileNav />
 {:else}
-	<div class="min-h-screen bg-canvas">
-		<!-- Without the header the language choice stands alone at the top; help and the legal pages lead back to signing in -->
+	<div class="flex min-h-screen flex-col bg-canvas">
+		<!-- Without the header the language choice stands alone at the top; help and the legal pages lead back to signing in, the footer to the legal pages -->
 		<div class="flex items-center justify-end gap-4 px-4 pt-4">
 			{#if contentPage}
 				<a
@@ -108,17 +108,17 @@
 		</div>
 		{#if contentPage}
 			<!-- Help and the legal pages, read before signing in: the same margins as inside the frame -->
-			<main id="main-content" class="px-4 py-8 lg:px-10" tabindex="-1">
+			<main id="main-content" class="flex-1 px-4 py-8 lg:px-10" tabindex="-1">
 				<div class="mx-auto max-w-6xl">
 					{@render children()}
 				</div>
 			</main>
-			<Footer />
 		{:else}
-			<main id="main-content" tabindex="-1">
+			<main id="main-content" class="flex flex-1 flex-col" tabindex="-1">
 				{@render children()}
 			</main>
 		{/if}
+		<Footer />
 	</div>
 {/if}
 

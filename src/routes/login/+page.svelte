@@ -12,7 +12,7 @@
 	<title>{m.login_title()} - Dwello</title>
 </svelte:head>
 
-<div class="flex min-h-screen items-center justify-center px-4 py-12">
+<div class="flex flex-1 items-center justify-center px-4 py-12">
 	<div class="flex w-full max-w-md flex-col gap-6 rounded-panel border border-line bg-surface p-8">
 		<div class="flex flex-col items-center gap-4 text-center">
 			<Illustration name="building" />

@@ -4729,8 +4729,10 @@ header and on pages without it. Branch `claude/optimistic-clarke-nn8u7t` from `m
   protected near-miss paths in `public-pages.test.ts`; `docs/api-specification.md` names the public endpoint; the
   terms-link step retries its URL check (`language.steps.ts`). Review 2: no blocker or major.
 - [x] **Persona reruns Sven and Dr. Weber** (`docs/design/personas/sven-i18n-2.md`, `weber-i18n-2.md`): Dr. Weber's major
-  fixed – signed out, help, privacy and terms link to «Anmelden» and show the footer (`src/routes/+layout.svelte`,
-  `public-pages-layout.dom.test.ts`, scenario «Von den Nutzungsbedingungen zurück zur Anmeldung» in `sprachen.feature`).
+  fixed – every page without the app header (sign-in included) shows the footer with privacy and terms, and help,
+  privacy and terms link to «Anmelden» (rerun `weber-i18n-3.md`; review `i18n-way-back-review-1.md`) (`src/routes/+layout.svelte`,
+  `public-pages-layout.dom.test.ts`, scenarios «Von den Nutzungsbedingungen zurück zur Anmeldung» and «Den Datenschutz von der Anmeldeseite aus lesen» in
+  `sprachen.feature`; the sign-in card centres above the footer, `login/+page.svelte`).
 
 ---
 

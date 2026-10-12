@@ -4,6 +4,7 @@ import { test } from '../fixtures/test';
 import { sessionCookies } from '../fixtures/session';
 import { visit } from '../interactions/navigation';
 import { chooseLanguage } from '../tasks/language';
+import { chooseInFooter } from '../tasks/app-frame';
 import { address, check, screens, seedFor } from '../interactions/accessibility';
 import { cutOff, germanOnScreen } from '../interactions/german-text';
 import { documentLanguage, useLanguage } from '../interactions/language';
@@ -86,6 +87,10 @@ When('der Besucher den Link zu den Nutzungsbedingungen öffnet', async ({ besuch
 
 When('der Besucher den Link zur Anmeldung öffnet', async ({ besucher }) => {
 	await besucher.page.getByTestId('public-login-link').click();
+});
+
+When('der Besucher in der Fusszeile {string} wählt', async ({ besucher }, label: string) => {
+	await besucher.perform(chooseInFooter(label));
 });
 
 Then('ist der Besucher noch auf der Seite {string}', async ({ besucher }, path: string) => {

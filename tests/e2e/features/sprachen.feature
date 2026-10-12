@@ -67,3 +67,8 @@ Funktionalität: Sprache der Oberfläche
     Angenommen ein Besucher hat die Seite "/terms" geöffnet
     Wenn der Besucher den Link zur Anmeldung öffnet
     Dann ist der Besucher auf der Seite "Anmelden"
+
+  Szenario: Den Datenschutz von der Anmeldeseite aus lesen
+    Angenommen ein Besucher hat die Anmeldeseite geöffnet
+    Wenn der Besucher in der Fusszeile "Datenschutz" wählt
+    Dann ist der Besucher auf der Seite "Datenschutz"
