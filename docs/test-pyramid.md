@@ -30,7 +30,7 @@ The quantities still form a pyramid, with many fast unit tests at the bottom. Th
 | Acceptance (E2E) | `tests/e2e/features/*.feature` | Playwright + playwright-bdd | Browser → SvelteKit build (`node build`) → Elysia → PostgreSQL `dwello_e2e` (migrated fresh before each run) | no API mocks; SMTP mail catcher instead of a mail provider, signed session JWT instead of Google OAuth |
 | Integration | `backend/src/__tests__/*.pg.test.ts` | `bun run test` or `bun run test:pg` (preload `scripts/test-db.ts`) | Elysia app in process (`app.handle`) → PostgreSQL `dwello_test` (migrated fresh before each run) | none; local SMTP server for mail |
 | Unit backend | `backend/src/__tests__/*.test.ts` | `bun run test` (one run together with the pg tests) | pure functions of the services | none; Resend stand-in via `Bun.serve` in `mail.test.ts` |
-| Unit frontend | `src/__tests__`, `src/lib/utils/__tests__`, `tests/unit` | Vitest (`server`: node, `dom`: jsdom) | load functions, actions, BFF, components | fake backend via `fetch` stub / `fakeBff` (from the API contracts in `tests/contracts` where one exists), `vi.mock` for `$app/*` |
+| Unit frontend | `src/__tests__`, `src/lib/utils/__tests__`, `tests/unit` | Vitest (`server`: node, `dom`: jsdom) | load functions, actions, BFF, components | fake backend via `fetch` stub / `fakeBff` (from the API contracts in `tests/contracts` where one exists), a project-owned adapter for `$app/*` (older tests: `vi.mock`, see rules) |
 
 Rules:
 
@@ -38,6 +38,7 @@ Rules:
 - No mocked database: whatever needs SQL is a `*.pg.test.ts`.
 - Negative E2E checks (something is absent) need a positive anchor first (empty-state notice, page title); otherwise they also pass on an error page.
 - Selectors: `data-testid` (see `CLAUDE.md`).
+- `$app/*` (SvelteKit's framework modules): new tests fake a small project-owned adapter around them, not the framework itself; the adapter is written when the first test needs it. Existing tests that `vi.mock('$app/...')` move to the adapter when their file changes anyway, and all of them at the latest with the move from `$app/stores` to `$app/state`. The real behaviour behind the adapter is covered by the E2E scenarios, since SvelteKit does not run in unit tests.
 - Fake backend responses in frontend tests come from `tests/contracts/*.json` where a contract exists; `backend/src/__tests__/api-contracts.pg.test.ts` checks every field against the real API (see `tests/contracts/README.md`).
 
 ## Coverage
