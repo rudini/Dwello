@@ -1,6 +1,6 @@
 # Open points
 
-Points that are still open, each with where it shows and what to decide or do; the history up to October 2026, with settled points and the review and persona details, is in `docs/archive/offene-punkte-verlauf.md`.
+Points that are still open, each with where it shows and what to decide or do; the history up to October 2026, with settled points and the review and persona details, is in `docs/archive/offene-punkte-verlauf.md`. This is the only list of open points: requirements in other documents appear here as one row each, and `implementation_plan.md` holds only the checklist of the current task.
 
 ## Domain (TODO(fachlich prüfen))
 
@@ -25,6 +25,7 @@ Points that are still open, each with where it shows and what to decide or do; t
 | F-18 | July 1.0 % in the predefined profile «Heizung Bergregion» looks like a misprint of the source table. | `backend/migrations/0002_stammdaten.sql` | Check against the source. |
 | F-19 | Privacy page: the sentence on wizard drafts kept in `localStorage`; it says fonts come from Google Fonts (they are bundled) and «Google oder Microsoft» (only Google is set up); the cookie list lacks `PARAGLIDE_LOCALE` and `dwello_login`; controller, right of access, retention and the mail provider's country are missing (review i18n-1, R1-7). | `src/routes/privacy/+page.svelte`, `privacy_*` in `messages/*.json` | Legal wording, then all four languages. |
 | F-20 | The French, Italian and English texts have not been read by a human native speaker; terms marked ❓ (umlagefähig, Abrechnungslauf, Konfidenz, Wiedervermietet in English), the words for the 2nd/3rd Mahnung (R1-8) and the Kündigung terms are not settled. The German native read found older copy issues. | `docs/design/i18n-begriffe.md`, `docs/archive/redesign/reviews/i18n-native-de.md`, `i18n-native-fr-it-en.md` | Native read; term list per step in the history, section «Session 15». |
+| F-21 | «Abrechnungsperiode» has two glossary entries (section Nebenkostenabrechnung and section Konfiguration). | `UBIQUITOUS_LANGUAGE.md` | Merge them or state the difference. |
 
 ## Product decisions
 
@@ -43,6 +44,9 @@ Points that are still open, each with where it shows and what to decide or do; t
 | P-11 | The statement detail does not name the Heizprofil, tenancy period or key fraction (only the PDF does), lines do not link their invoices, and it says «Gesamtkosten» where the PDF says «Ihre Nebenkosten» (V-5). The app does not say that a PDF is in the tenant's language, and the tenant form's «Sprache» can be taken for the screen language (Helga). | `src/routes/statements/[id]`, tenant form | Decide the detail page content and the label. |
 | P-12 | Reminders are German for every tenant (R8-04) and have no payment part; a reminder's own deadline is not stored, so a 2nd reminder can follow the 1st at once (R5-8). | `backend/src/services/reminder-letter.ts` | Translate reminders; store the deadline. |
 | P-13 | The help does not explain «befristet», «Kündigung» or the «Manuell» badge on invoices, has no table of contents on phones, and the glossary has no entry point of its own. | `src/routes/help` | Extend the help. |
+| P-14 | Login page and header always start in German. Paraglide today uses `cookie, baseLocale`; following the browser language needs another strategy (e.g. `preferredLanguage`). | `package.json` (`i18n`), `vite.config.ts`, `src/routes/login` | Decide; then a scenario in `sprachen.feature`. |
+| P-15 | List filters apply only after «Suchen»; applying a select on change would be quicker (E2E tasks click the button). | `src/routes/invoices/InvoiceSearch.svelte` and the other list filters | Decide. |
+| P-16 | Features the PRD marks «planned, not implemented» (e.g. audit log, ZIP export, automatic reminders). | `docs/PRD-Dwello.md` (search «planned, not implemented») | Decide per feature: build, drop from the PRD, or keep as vision. |
 
 ## Bugs and gaps
 
@@ -52,8 +56,8 @@ Points that are still open, each with where it shows and what to decide or do; t
 | B-2 | The contract detail links to `/statements?contract=`, but the statement list ignores that filter. | `src/routes/contracts/[id]/+page.svelte`, `src/routes/statements/+page.server.ts` | Filter or change the link. |
 | B-3 | `src/app.html` links `favicon.png`, but there is no `static/` folder. | `src/app.html` | Add an icon in the new design. |
 | B-4 | The backend computes «today» in UTC («überfällig», contract and tenant status), the app in Swiss time: up to two hours off around midnight (R5-4, I-10). The scenario «Bevorstehendes Vertragsende» fails shortly after midnight for the same reason. | `backend/src/services/statement.service.ts`, `contract.service.ts`, `tenant.service.ts`, `tests/e2e/steps/documents.steps.ts` | Use the Swiss day in the backend and the steps. |
-| B-5 | The fee rate has no upper limit at the API; 1000 % or more fails with a database error (F-11). | `backend/src/routes/statements.ts` | Add a maximum. |
-| B-6 | Raw backend texts still reach the UI: the invoice edit form falls back to the backend message; the PDF downloads answer «Statement not found» without a code (B-3); SMTP `deliveryError`, «Invalid IBAN: …», «Calculation failed», the English detail of `FORMULA_NOT_COMPUTABLE`; Elysia 422 refusals have no code. | `src/routes/invoices/[id]/edit/+page.svelte`, `backend/src/services/statement-pdf.service.ts` | Give each a code and a `backend_<code>` message. |
+| B-5 | The fee rate has no upper limit at the API; 1000 % or more fails with a database error (review F-11). | `backend/src/routes/statements.ts` | Add a maximum. |
+| B-6 | Raw backend texts still reach the UI: the invoice edit form falls back to the backend message; the PDF downloads answer «Statement not found» without a code (review B-3); SMTP `deliveryError`, «Invalid IBAN: …», «Calculation failed», the English detail of `FORMULA_NOT_COMPUTABLE`; Elysia 422 refusals have no code. | `src/routes/invoices/[id]/edit/+page.svelte`, `backend/src/services/statement-pdf.service.ts` | Give each a code and a `backend_<code>` message. |
 | B-7 | The building map never shows for buildings entered in the app: form and address search store no coordinates (only the demo data has them). | `src/routes/buildings`, `BuildingMiniMap.svelte` | Store coordinates or drop the map. |
 | B-8 | Invoice check refinements: a supplier switching from monthly to quarterly invoices shows as gaps (IV2-10); a Leistungszeitraum across two periods is not explained (IV2-9); an invoice for the previous period without a Leistungszeitraum falls into the next one without a hint (MR6-2); outdated drafts and contracts billed outside Dwello are not handled (IV6-5, IV6-10, MR6-6, DP6-1). | `backend/src/services/invoice-completeness.service.ts`, statement wizard | Refine the hints. |
 | B-9 | Statement wizard: a restored draft drops deleted buildings or heating profiles without a notice; existing statements are not shown in step 2; «Entwürfe ansehen» lists all drafts, not those of the run; a running period still asks for the closing stock (IV5-4); with 0 % in the Heizprofil the PDF says «nach Heizprofil» (CR5-6). | `src/routes/statements/generate` | Fix when touching the wizard. |
@@ -65,16 +69,17 @@ Points that are still open, each with where it shows and what to decide or do; t
 
 | ID | Point | Where | Decide / do |
 |---|---|---|---|
-| A-1 | The mobile drawer uses `aria-modal` without `inert`; toast timing (500 ms after navigation) has not been checked with NVDA or VoiceOver. | `src/lib/ui/MobileNav.svelte`, `src/lib/ui/ToastRegion.svelte` | Make the rest inert; manual screen reader check. |
-| A-2 | No error summary at the top of forms; detail-page actions («Bearbeiten», «Löschen», «Beenden») do not name the record; contract list rows have a second link «… bearbeiten» (Sven). | forms, detail pages, contract list | Design decision. |
-| A-3 | Dialogs: the confirm button comes before the field in the tab order, focus starts on «Abbrechen», the whole body is read as description, a date error makes a centred dialog grow under the pointer (R7-F2), no visible scrollbar; the page title is announced again after saving. | `src/lib/ui/Dialog.svelte`, `ActionDialog` | Fix in the shared components. |
-| A-4 | Errors of `Checkbox` and `RadioGroup` stay until the next submit, and radio options read their explanation twice; the calendar button of `DateInput` opens the browser's own picker, whose screen reader use was not checked (CC-9). | `src/lib/ui/Checkbox.svelte`, `RadioGroup.svelte`, `DateInput.svelte` | Fix and check. |
-| A-5 | Name conflicts of heating profiles and distribution keys show as a form error, not at the Name field (categories do). | `src/lib/server/heating-profile.ts`, `distribution-key.ts` (no `conflict` option) | Set `conflict: 'name'`. |
-| A-6 | Language switcher and user menu have no arrow keys; nothing announces the language change and focus starts at the top; the footer does not mark the current page; the «Anmelden» and «Hilfe» links sit outside a landmark. | header, footer | Fix when touching the header. |
-| A-7 | The header fits 390 px with about 7 px to spare and would overflow at 360 px; the login page scrolls by about 64 px (R1-3, R1-4); the mobile menu needs scrolling to reach «Hilfe». | header, login, `MobileNav.svelte` | Layout decision. |
-| A-8 | Layout at mid widths: invoice and statement rows stack below 1280 px; contract list filters and the statement table are cut at 1024 px; a success toast covers content on phones, at 1024 px and at 150 %; the Verlauf labels do not align; the Italian heating profile choice is cut at 390 px. | lists, statement detail, toasts | Design decision. |
-| A-9 | The long heating profile help before the choice hides the warning about meters on phones (Marco; left open by the user's decision). | statement wizard step 3 | Shorten or move the help. |
-| A-10 | Smaller persona and review findings (runs I to J, session 11 rounds 4 to 8, session 15) are listed in the history and not repeated here. | `docs/archive/offene-punkte-verlauf.md` | Take them when touching the screen. |
+| U-1 | The mobile drawer uses `aria-modal` without `inert`; toast timing (500 ms after navigation) has not been checked with NVDA or VoiceOver. | `src/lib/ui/MobileNav.svelte`, `src/lib/ui/ToastRegion.svelte` | Make the rest inert; manual screen reader check. |
+| U-2 | No error summary at the top of forms; detail-page actions («Bearbeiten», «Löschen», «Beenden») do not name the record; contract list rows have a second link «… bearbeiten» (Sven). | forms, detail pages, contract list | Design decision. |
+| U-3 | Dialogs: the confirm button comes before the field in the tab order, focus starts on «Abbrechen», the whole body is read as description, a date error makes a centred dialog grow under the pointer (R7-F2), no visible scrollbar; the page title is announced again after saving. | `src/lib/ui/Dialog.svelte`, `ActionDialog` | Fix in the shared components. |
+| U-4 | Errors of `Checkbox` and `RadioGroup` stay until the next submit, and radio options read their explanation twice; the calendar button of `DateInput` opens the browser's own picker, whose screen reader use was not checked (CC-9). | `src/lib/ui/Checkbox.svelte`, `RadioGroup.svelte`, `DateInput.svelte` | Fix and check. |
+| U-5 | Name conflicts of heating profiles and distribution keys show as a form error, not at the Name field (categories do). | `src/lib/server/heating-profile.ts`, `distribution-key.ts` (no `conflict` option) | Set `conflict: 'name'`. |
+| U-6 | Language switcher and user menu have no arrow keys; nothing announces the language change and focus starts at the top; the footer does not mark the current page; the «Anmelden» and «Hilfe» links sit outside a landmark. | header, footer | Fix when touching the header. |
+| U-7 | The header fits 390 px with about 7 px to spare and would overflow at 360 px; the login page scrolls by about 64 px (R1-3, R1-4); the mobile menu needs scrolling to reach «Hilfe». | header, login, `MobileNav.svelte` | Layout decision. |
+| U-8 | Layout at mid widths: invoice and statement rows stack below 1280 px; contract list filters and the statement table are cut at 1024 px; a success toast covers content on phones, at 1024 px and at 150 %; the Verlauf labels do not align; the Italian heating profile choice is cut at 390 px. | lists, statement detail, toasts | Design decision. |
+| U-9 | The long heating profile help before the choice hides the warning about meters on phones (Marco; left open by the user's decision). | statement wizard step 3 | Shorten or move the help. |
+| U-10 | Smaller persona and review findings (runs I to J, session 11 rounds 4 to 8, session 15) are listed in the history and not repeated here. | `docs/archive/offene-punkte-verlauf.md` | Take them when touching the screen. |
+| U-11 | The mobile navigation drawer has no scenarios (same targets as the sidebar). | `tests/e2e/features/navigation.feature` | Add scenarios. |
 
 ## Housekeeping
 
@@ -85,7 +90,27 @@ Points that are still open, each with where it shows and what to decide or do; t
 | H-3 | The PRD still names svelte-i18n as the translation library. | `docs/PRD-Dwello.md` | Update to Paraglide JS. |
 | H-4 | A manual script uses a CSS class selector for the heating profile sum. | `tests/exploratory-test.ts` | Use a `data-testid`. |
 | H-5 | The Paraglide options are repeated (R1-9). | `vite.config.ts`, `vitest.config.ts`, `package.json` (`i18n`) | Share one definition. |
-| H-6 | `prorateCosts` is only used by its own tests (F-9, H-3). | `backend/src/services/prorating.service.ts` | Delete or use it. |
+| H-6 | `prorateCosts` is only used by its own tests (reviews F-9, H-3). | `backend/src/services/prorating.service.ts` | Delete or use it. |
 | H-7 | The CI screenshot job shoots routes only: no mobile viewport, dark mode, dialog or wizard states. | `.github/workflows/ci.yml` (`ui-screenshots`) | Extend the job. |
 | H-8 | Help texts live in several places; no central registry. | `src/routes/help/Glossary.svelte`, `src/routes/config/help.ts` | Decide whether a registry is worth it. |
 | H-9 | Scenario names «Wohnung hinzufügen» and «Erste Wohnung erstellen», while the buttons read «Wohnung erfassen»; master data key names without unit, US and UK spelling mixed (R8-11). | `tests/e2e/features/building-detail.feature`, `backend/migrations/0002_stammdaten.sql` | Rename. |
+| H-10 | Frontend coverage is below the target in `docs/test-pyramid.md`; the floors in `vitest.config.ts` rise with it. | `vitest.config.ts`, `docs/test-pyramid.md` | Add tests, raise the floor. |
+| H-11 | Major updates without a security reason are pending: SvelteKit 3 / Vite 8, Tailwind 4, Zod 4, TypeScript 7, ESLint 10, jose 6. | `package.json`, `backend/package.json` | Update one at a time, each with all checks. |
+| H-12 | The project skills `.claude/skills/ponytail*` and the user-level ponytail plugin both load and mark shortcuts differently (`ponytail:` vs `shortcut:`). | `.claude/skills/` | Keep one. |
+| H-13 | `bdd-acceptance` says one feature file per page, `tests/e2e/CLAUDE.md` one per area. | `.claude/skills/bdd-acceptance/SKILL.md`, `tests/e2e/CLAUDE.md` | Decide and align. |
+| H-14 | fallow's existing findings (the gate blocks only new ones): 9 unused exports (`verifyJwt`, `optionalAuthMiddleware`, `PREDEFINED_DISTRIBUTION_KEYS`, `getDistributionKeyByName`, `CATEGORIZATION_PROMPT`, `invoiceExists`, `clearCategorizationCache`, `XSRF_COOKIE_NAME`, `toggleMobileNav`), about 590 duplicated lines (e.g. `backend/src/routes/distribution-keys.ts` and `heating-profiles.ts`), 12 functions above the health threshold. | `bunx fallow dead-code`, `bunx fallow dupes`, `bunx fallow health` | Reduce when the file is touched. |
+| H-15 | Deliberate shortcuts marked `ponytail:` in the code (today one: an invoice group summing to 0 over different Leistungszeiträume bills nothing). | `backend/src/services/calculation.service.ts:128`; all markers: `/ponytail-debt` | Revisit when it occurs; each new marker gets a row here. |
+
+## Operations and security
+
+| ID | Point | Where | Decide / do |
+|---|---|---|---|
+| O-1 | Every Google or Microsoft account can sign in: the OAuth callback issues a session for any account, and the data has no owner, so anyone signed in sees and edits all tenants, contracts and the IBAN. | `src/routes/auth/callback/+server.ts` | Allow only configured e-mail addresses (e.g. `ALLOWED_EMAILS`); refuse to start in production without it. |
+| O-2 | No database backup (MVA R2). | `docker-compose.prod.yml` | Daily `pg_dump`, documented restore, first restore drill. |
+| O-3 | Production publishes Postgres (5432), Ollama (11434) and the backend (3001) on the host; the Postgres password defaults to `dwello`; `ollama/ollama:latest` is not pinned. | `docker-compose.prod.yml` | Publish only the frontend or the reverse proxy; require a password; pin the image. |
+| O-4 | Swagger UI is served in production. | `backend/src/app.ts` (`/swagger`) | Only in development. |
+| O-5 | No Content-Security-Policy. | `svelte.config.js` (`kit.csp`) | Set a CSP. |
+| O-6 | The reverse proxy with TLS is only commented out; `COOKIE_SECURE=true` needs HTTPS. | `docker-compose.prod.yml` | Configure the proxy and TLS, document it in the README. |
+| O-7 | `.env.example` lists variables nothing reads: `SENTRY_DSN`, `FEATURE_*`, `UPLOAD_MAX_SIZE`, `UPLOAD_ALLOWED_TYPES`, `QR_REFERENCE_PREFIX`, `DATABASE_POOL_MIN`. | `.env.example` | Remove them. |
+| O-8 | The Minimum Viable Architecture is half done: quality scenarios not confirmed, no ADRs in `docs/adr/` (step 1); no tests for R1 (LLM down while entering an invoice) and S2 (no token readable by scripts); P1 and P2 not measured (step 2; R2 is O-2). Five structural flaws wait until their code is touched («Structural flaws»). | `docs/migration-mva.md` | Steps 1 and 2 and the structural flaws there. |
+| O-9 | No rate limiting on the BFF or the backend; no logging or monitoring for operation (Sentry or similar is not wired up). | `src/hooks.server.ts`, `backend/src/app.ts` | Decide what a single-user installation needs; record it as an ADR (O-8). |

@@ -316,8 +316,6 @@ Szenario: Unter «Bearbeiten» einen Vertragsbeginn nach dem Beginn eines Entwur
 
 ---
 
-## Ebenfalls offen (kleiner, in `docs/design/offene-punkte.md`)
+## Ebenfalls offen
 
-- «Heute» rechnet das Backend in UTC, die App in Schweizer Zeit (IF-10, I-10; B-4).
-- Tab-Reihenfolge im Dialog: Der Bestätigen-Knopf kommt vor dem Feld (Sven; A-3).
-- Gebäude- und Wohnungsseite erklären Leer und Gesperrt widersprüchlich (Anna; erledigt, siehe `docs/archive/offene-punkte-verlauf.md`).
+Kleinere offene Punkte stehen in `docs/design/offene-punkte.md` (B-4, U-3).

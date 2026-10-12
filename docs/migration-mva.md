@@ -123,7 +123,7 @@ Every route belongs to the module of its service; `routes/dashboard.ts` reads ac
 
 - The checklist from `CLAUDE.md` is green (`bun run test:coverage`, `bun run lint`, `bun run check`, `cd backend && bun run test && bun run type-check`, affected E2E scenarios).
 - The column "Status and evidence" is up to date.
-- `implementation_plan.md` is up to date.
+- `docs/design/offene-punkte.md` (O-8) is up to date.
 
 ## Risks
 
