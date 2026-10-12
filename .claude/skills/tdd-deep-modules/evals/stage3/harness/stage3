@@ -602,6 +602,9 @@ def load_runs(phase):
     return runs
 
 
+MAX_ATTEMPTS = 5  # README amendment of 2026-10-12
+
+
 def planned_slots(phase):
     """Pilot rounds (pilot, pilot2, ...) run slot 1; the main phase slots 1, 2 and 3."""
     return {1, 2, 3} if phase == "main" else {1}
@@ -621,6 +624,9 @@ def evaluate(phase):
         if numbers != list(range(1, len(numbers) + 1)):
             ok = False
             notes.append(f"{key}: attempts {numbers} are not 1..n")
+        if len(numbers) > MAX_ATTEMPTS:
+            ok = False
+            notes.append(f"{key}: {len(numbers)} attempts, at most {MAX_ATTEMPTS}")
         chosen = first_valid[key]
         if chosen and any(r["attempt"] > chosen["attempt"] for r in recs):
             ok = False
