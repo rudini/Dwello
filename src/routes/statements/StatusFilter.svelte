@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import type { StatementStatus, StatementsListData } from '$lib/types';
 	import { statusLabels } from '$lib/statement';
 
@@ -16,7 +17,7 @@
 	const statuses: StatementStatus[] = ['draft', 'sent', 'paid', 'overdue'];
 </script>
 
-<nav aria-label="Nach Status filtern">
+<nav aria-label={m.statements_filter_status()}>
 	<ul class="grid grid-cols-2 gap-4 md:grid-cols-4">
 		{#each statuses as status (status)}
 			<li>

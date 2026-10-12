@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import type { StatementWithDetails } from '$lib/types';
 	import Panel from '$lib/ui/Panel.svelte';
 	import { formatCurrency, formatDate } from '$lib/utils/format';
@@ -10,26 +11,28 @@
 	const refund = $derived(statement.balance < 0);
 	const summary = $derived(
 		refund
-			? `Sie erstatten dem Mieter ${amount} zurück.`
+			? m.statements_summary_refund({ amount })
 			: statement.balance > 0
-				? `Der Mieter bezahlt die Nachzahlung von ${amount}.`
-				: 'Es ist nichts zu bezahlen.'
+				? m.statements_summary_due({ amount })
+				: m.statements_summary_settled()
 	);
 	const rows = $derived(
 		[
-			{ label: 'Abrechnungsdatum', date: statement.statementDate },
-			{ label: 'Bezahlt am', date: statement.paidDate },
-			{ label: 'Letzte Mahnung', date: statement.lastReminderDate }
+			{ label: m.statements_statement_date(), date: statement.statementDate },
+			{ label: m.statements_paid_on(), date: statement.paidDate },
+			{ label: m.statements_last_reminder(), date: statement.lastReminderDate }
 		].filter((row) => row.date)
 	);
 </script>
 
-<Panel title="Zahlung">
+<Panel title={m.statements_payment()}>
 	<p class="text-ink">{summary}</p>
 	<dl class="grid gap-4 sm:grid-cols-2">
 		<div class="flex flex-col gap-1">
 			<!-- TODO(fachlich prüfen): the glossary has no term for the date by which a refund is paid out -->
-			<dt class="text-ink-muted">{refund ? 'Rückerstattung bis' : 'Zahlungsfrist'}</dt>
+			<dt class="text-ink-muted">
+				{refund ? m.statements_refund_by() : m.glossary_deadline_term()}
+			</dt>
 			<dd class="font-semibold text-ink" data-testid="statement-payment-deadline">
 				{formatDate(statement.paymentDeadline)}
 			</dd>
@@ -43,7 +46,7 @@
 	</dl>
 	{#if statement.notes}
 		<div class="flex flex-col gap-1">
-			<h3 class="text-ink-muted">Bemerkungen</h3>
+			<h3 class="text-ink-muted">{m.statements_notes()}</h3>
 			<p class="whitespace-pre-line text-ink" data-testid="statement-notes">{statement.notes}</p>
 		</div>
 	{/if}

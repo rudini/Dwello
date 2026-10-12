@@ -1,3 +1,5 @@
+import { m } from '$lib/paraglide/messages';
+import { getLocale } from '$lib/paraglide/runtime';
 import { impossible, impossibleYear } from './contract-wizard';
 import { formatCurrency, formatDate } from './utils/format';
 
@@ -10,30 +12,34 @@ export interface WizardSelection {
 	buildingIds: string[];
 }
 
-export const statementSteps = [
-	'Abrechnungsperiode',
-	'Gebäude',
-	'Heizprofil und Verwaltungspauschale',
-	'Vorschau',
-	'Erstellen'
+// Getters: read when shown, in the language of the request
+const stepNames = [
+	m.statements_step_period,
+	m.statements_step_buildings,
+	m.statements_step_settings,
+	m.statements_step_preview,
+	m.statements_step_create
 ];
+export const statementSteps: string[] = Object.defineProperties(
+	[],
+	Object.fromEntries(stepNames.map((name, i) => [i, { get: () => name(), enumerable: true }]))
+);
 
 function periodErrors({ periodStart, periodEnd }: WizardSelection): Record<string, string> {
-	if (!periodStart) return { periodStart: 'Bitte wählen Sie den Beginn der Abrechnungsperiode.' };
-	if (!periodEnd) return { periodEnd: 'Bitte wählen Sie das Ende der Abrechnungsperiode.' };
+	if (!periodStart) return { periodStart: m.statements_error_period_start() };
+	if (!periodEnd) return { periodEnd: m.statements_error_period_end() };
 	if (impossible(periodStart)) return { periodStart: impossibleYear() };
 	if (impossible(periodEnd)) return { periodEnd: impossibleYear() };
-	if (periodEnd <= periodStart)
-		return { periodEnd: 'Das Ende muss nach dem Beginn der Abrechnungsperiode liegen.' };
+	if (periodEnd <= periodStart) return { periodEnd: m.statements_error_period_order() };
 	return {};
 }
 
 function settingErrors({ heatingProfileId, managementFeePercent }: WizardSelection) {
 	return {
-		...(!heatingProfileId && { heatingProfileId: 'Bitte wählen Sie ein Heizprofil.' }),
+		...(!heatingProfileId && { heatingProfileId: m.statements_error_heating_profile() }),
 		// a rate emptied and restored from the draft is null, not 0 %
 		...(!(Number.isFinite(managementFeePercent) && managementFeePercent >= 0) && {
-			managementFeePercent: 'Bitte geben Sie einen Prozentsatz ab 0 mit höchstens zwei Stellen nach dem Komma ein, zum Beispiel 3 oder 2,5.'
+			managementFeePercent: m.statements_error_fee()
 		})
 	};
 }
@@ -42,7 +48,7 @@ function settingErrors({ heatingProfileId, managementFeePercent }: WizardSelecti
 export function selectionErrors(selection: WizardSelection, step: number): Record<string, string> {
 	if (step === 1) return periodErrors(selection);
 	if (step === 2 && selection.buildingIds.length === 0)
-		return { buildings: 'Bitte wählen Sie mindestens ein Gebäude.' };
+		return { buildings: m.statements_error_buildings() };
 	if (step === 3) return settingErrors(selection);
 	return {};
 }
@@ -74,7 +80,12 @@ type Coverage = {
 	check?: InvoiceCheck;
 };
 
-const invoices = (count: number) => (count === 1 ? '1 Rechnung' : `${count} Rechnungen`);
+const invoices = (count: number) =>
+	count === 1 ? m.statements_invoices_one() : m.statements_invoices_many({ count });
+
+// "a und b und c", as German said it
+const joined = (parts: string[], and: (pair: { first: string; second: string }) => string) =>
+	parts.reduce((first, second) => and({ first, second }));
 
 // A whole calendar month, quarter or half-year by its name; null for other slices
 function calendarName({ start, end }: { start: string; end: string }) {
@@ -86,23 +97,36 @@ function calendarName({ start, end }: { start: string; end: string }) {
 		from.getUTCMonth();
 	const month = from.getUTCMonth();
 	if (from.getUTCDate() !== 1 || after.getUTCDate() !== 1 || month % months !== 0) return null;
-	const names: Record<number, string> = {
-		1: `den ${from.toLocaleDateString('de-CH', { month: 'long', timeZone: 'UTC' })}`,
-		3: `das ${month / 3 + 1}. Quartal`,
-		6: `das ${month / 6 + 1}. Halbjahr`
+	const names: Record<number, () => string> = {
+		1: () =>
+			m.statements_part_month({
+				month: from.toLocaleDateString(`${getLocale()}-CH`, { month: 'long', timeZone: 'UTC' })
+			}),
+		3: () => m.statements_part_quarter({ number: month / 3 + 1 }),
+		6: () => m.statements_part_half({ number: month / 6 + 1 })
 	};
-	return names[months] ?? null;
+	return names[months]?.() ?? null;
 }
 
 // A slice of the period in words: a calendar month, quarter or half-year by its name, otherwise its dates
 const partLabel = (slice: { start: string; end: string }) =>
-	calendarName(slice) ?? `die Zeit vom ${formatDate(slice.start)} bis ${formatDate(slice.end)}`;
+	calendarName(slice) ??
+	m.statements_part_dates({ start: formatDate(slice.start), end: formatDate(slice.end) });
 
 // TODO(fachlich prüfen): "Tankbestand" is not in the glossary
-const stockText = (missingDays: { start: string }[], consumption: number) =>
-	missingDays.length
-		? `Tankbestand am ${missingDays.map((day) => formatDate(day.start)).join(' und am ')} ${missingDays.length > 1 ? 'fehlen' : 'fehlt'}. Ohne Anfangs- und Endbestand rechnet Dwello den Einkauf ab, nicht den Verbrauch. Abrechnen dürfen Sie aber nur den Verbrauch: Erfassen Sie den Bestand auf der Seite des Gebäudes. Bestätigen Sie nur, wenn der Tank am Anfang und am Ende gleich voll war.`
-		: `Der Endbestand ist ${formatCurrency(-consumption)} höher als Anfangsbestand und Einkauf zusammen, der Verbrauch wäre negativ. Prüfen Sie die Tankbestände.`;
+function stockText(missingDays: { start: string }[], consumption: number) {
+	if (!missingDays.length)
+		return m.statements_finding_stock_negative({ amount: formatCurrency(-consumption) });
+	const dates = joined(
+		missingDays.map((day) => formatDate(day.start)),
+		m.statements_stock_dates_and
+	);
+	const missing =
+		missingDays.length > 1
+			? m.statements_finding_stock_missing_many({ dates })
+			: m.statements_finding_stock_missing_one({ dates });
+	return `${missing} ${m.statements_finding_stock_tail()}`;
+}
 
 /** One finding of the check per category in plain words, with what to look at */
 export function findingText({
@@ -114,17 +138,25 @@ export function findingText({
 }: CategoryFinding): string {
 	if (kind === 'stock') return stockText(missingParts, current.total);
 	if (kind === 'missing')
-		return `Keine Rechnung in dieser Kategorie erfasst. Im Vorjahr: Kosten von ${formatCurrency(previous.total)}.`;
-	if (kind === 'new')
-		return `Neu: ${formatCurrency(current.total)}, im Vorjahr keine Kosten. Ist diese Kategorie im Mietvertrag vereinbart? Nur vereinbarte Nebenkosten dürfen Sie abrechnen. Wenn nicht, markieren Sie die Rechnungen als nicht umlagefähig. Neue Nebenkosten führen Sie nur für die Zukunft ein, frühestens auf den nächsten Kündigungstermin: begründet, mit dem amtlichen Formular, beim Mieter mindestens 10 Tage vor Beginn der Kündigungsfrist. Ohne Formular oder Begründung ist die Änderung nichtig. Waren die Kosten bisher in der Nettomiete enthalten, senken Sie diese entsprechend.`;
+		return m.statements_finding_missing({ amount: formatCurrency(previous.total) });
+	if (kind === 'new') return m.statements_finding_new({ amount: formatCurrency(current.total) });
 	if (kind === 'gap') {
-		const parts = missingParts.map(partLabel).join(' und ');
-		const what =
-			missingParts.length === 1 ? `Rechnung für ${parts} fehlt` : `Rechnungen für ${parts} fehlen`;
-		return `${what}. Im Vorjahr: ${invoices(previous.count)}.`;
+		const gap = {
+			parts: joined(missingParts.map(partLabel), m.statements_list_and),
+			invoices: invoices(previous.count)
+		};
+		return missingParts.length === 1
+			? m.statements_finding_gap_one(gap)
+			: m.statements_finding_gap_many(gap);
 	}
-	const direction = (changePercent ?? 0) > 0 ? 'mehr' : 'weniger';
-	return `${formatCurrency(current.total)}, ${Math.abs(changePercent ?? 0)} % ${direction} als im Vorjahr (${formatCurrency(previous.total)}). Prüfen Sie den Betrag und den Zeitraum, für den die Rechnung gilt.`;
+	const change = {
+		amount: formatCurrency(current.total),
+		percent: Math.abs(changePercent ?? 0),
+		previous: formatCurrency(previous.total)
+	};
+	return (changePercent ?? 0) > 0
+		? m.statements_finding_more(change)
+		: m.statements_finding_less(change);
 }
 
 // TODO(fachlich prüfen): costs 15 % above the Akonto suggest raising it, 30 % below suggest missing invoices;
@@ -152,20 +184,19 @@ export function akontoHint({
 	const change = (totalCosts - totalAdvancePayments) / totalAdvancePayments;
 	const amount = formatCurrency(Math.abs(totalCosts - totalAdvancePayments));
 	const percent = Math.round(Math.abs(change) * 100);
-	if (change > AKONTO_ABOVE && movedOut) return `Kosten ${amount} (${percent} %) über dem Akonto.`;
-	if (change > AKONTO_ABOVE)
-		return `Kosten ${amount} (${percent} %) über dem Akonto. Prüfen Sie, ob Sie das Akonto erhöhen. Eine Erhöhung gilt frühestens auf den nächsten Kündigungstermin: begründet, mit dem amtlichen Formular, beim Mieter mindestens 10 Tage vor Beginn der Kündigungsfrist. Ohne Formular oder Begründung ist sie nichtig.`;
+	const above = m.statements_akonto_above({ amount, percent });
+	if (change > AKONTO_ABOVE && movedOut) return above;
+	if (change > AKONTO_ABOVE) return `${above} ${m.statements_akonto_raise()}`;
 	// part of the period: the months rented may carry little heating, low costs are no sign of missing invoices
 	const wholePeriod = !rentalDays || !totalPeriodDays || rentalDays >= totalPeriodDays;
-	if (change < -AKONTO_BELOW && wholePeriod)
-		return `Kosten ${amount} (${percent} %) unter dem Akonto. Fehlen Rechnungen?`;
+	if (change < -AKONTO_BELOW && wholePeriod) return m.statements_akonto_below({ amount, percent });
 	return null;
 }
 
 const coverageText = ({ count, first, last }: Coverage) => {
-	if (count === 0 || !first || !last) return 'Keine Rechnungen erfasst';
-	if (count === 1) return `1 Rechnung vom ${formatDate(first)}`;
-	return `${count} Rechnungen vom ${formatDate(first)} bis ${formatDate(last)}`;
+	if (count === 0 || !first || !last) return m.statements_coverage_none();
+	if (count === 1) return m.statements_coverage_one({ date: formatDate(first) });
+	return m.statements_coverage_many({ count, first: formatDate(first), last: formatDate(last) });
 };
 
 // TODO(fachlich prüfen): three months without any invoice at the start or end of the period is a hint, not a rule

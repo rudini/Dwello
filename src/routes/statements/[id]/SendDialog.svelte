@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import { enhance } from '$app/forms';
 	import { tick } from 'svelte';
 	import { addToast } from '$lib/stores';
@@ -26,7 +27,7 @@
 			sending = false;
 			open = false;
 			if (result.type === 'success') {
-				addToast('success', 'Abrechnung als versendet markiert');
+				addToast('success', m.statements_marked_sent());
 				await tick(); // after the dialog has handed the focus back
 				document.querySelector<HTMLElement>('h1')?.focus(); // "Als versendet markieren" is gone now
 			}
@@ -36,32 +37,26 @@
 
 <Dialog
 	bind:open
-	title="Abrechnung als versendet markieren"
-	confirmLabel="Als versendet markieren"
+	title={m.statements_mark_sent_title()}
+	confirmLabel={m.statements_mark_sent()}
 	busy={sending}
-	busyLabel="Wird gespeichert …"
+	busyLabel={m.ui_saving()}
 	confirmTestid="statement-send-confirm"
 	onconfirm={() => form?.requestSubmit()}
 >
-	<p>
-		Dwello verschickt die Abrechnung nicht selbst. Stellen Sie dem Mieter das PDF zu und markieren
-		Sie die Abrechnung danach als versendet.
-	</p>
-	<p>
-		Dwello datiert die Abrechnung auf den Tag, an dem Sie sie als versendet markieren. Stellen Sie
-		das PDF deshalb am selben Tag zu.
-	</p>
+	<p>{m.statements_send_text_1()}</p>
+	<p>{m.statements_send_text_2()}</p>
 	<dl class="flex flex-col gap-2 rounded-panel bg-sunken p-4" data-testid="send-recipient">
 		<div class="flex flex-wrap gap-x-2">
-			<dt class="text-ink-muted">Empfänger:</dt>
+			<dt class="text-ink-muted">{m.statements_recipient()}</dt>
 			<dd class="font-semibold text-ink">{statement.tenantName}</dd>
 		</div>
 		<div class="flex flex-wrap gap-x-2">
-			<dt class="text-ink-muted">Korrespondenzkanal:</dt>
+			<dt class="text-ink-muted">{m.statements_channel()}</dt>
 			<dd class="text-ink">
-				{byEmail ? 'Per E-Mail' : 'Per Brief'},
+				{byEmail ? m.tenants_channel_email() : m.tenants_channel_letter()},
 				{(byEmail ? statement.tenantEmail : statement.tenantAddress) ||
-					(byEmail ? 'keine E-Mail-Adresse erfasst' : 'keine Postadresse erfasst')}
+					(byEmail ? m.statements_no_email() : m.statements_no_address())}
 			</dd>
 		</div>
 	</dl>
@@ -70,7 +65,7 @@
 			href="/statements/{statement.id}/pdf?ansehen"
 			target="_blank"
 			icon="document"
-			testid="send-pdf-view">PDF ansehen</Button
+			testid="send-pdf-view">{m.statements_view_pdf()}</Button
 		>
 	</div>
 </Dialog>

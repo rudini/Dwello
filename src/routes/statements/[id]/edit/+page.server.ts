@@ -1,4 +1,5 @@
 import { fail, redirect } from '@sveltejs/kit';
+import { m } from '$lib/paraglide/messages';
 import { loadStatement } from '$lib/server/statement';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -22,7 +23,7 @@ export const actions: Actions = {
 		});
 		if (!response.ok) {
 			return fail(response.status, {
-				errors: { form: 'Abrechnung konnte nicht gespeichert werden.' }
+				errors: { form: m.statements_save_failed() }
 			});
 		}
 		throw redirect(303, `/statements/${params.id}`);

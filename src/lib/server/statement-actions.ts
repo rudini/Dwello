@@ -1,12 +1,14 @@
 import { backendMessage } from '$lib/backend-error';
 import { localToday } from '$lib/contract-status';
+import { m } from '$lib/paraglide/messages';
+import { localTitle } from '$lib/server/documents';
 import { paidDateError } from '$lib/statement';
 import type { StatementDocument } from '$lib/types';
 const API = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1/statements`;
 
 type Fetch = typeof globalThis.fetch;
 
-/** Why an action was refused, in German for the user, with the status to answer with */
+/** Why an action was refused, in the UI language, with the status to answer with */
 type Refusal = { status: number; message: string };
 
 /**
@@ -28,7 +30,7 @@ export async function markStatementPaid(
 	if (response.ok) return null;
 	return {
 		status: response.status,
-		message: 'Abrechnung konnte nicht als bezahlt markiert werden. Versuchen Sie es erneut.'
+		message: m.statements_mark_paid_failed()
 	};
 }
 
@@ -41,9 +43,16 @@ export async function sendStatementReminder(
 ): Promise<{ status: number; reminder: Reminder } | { status: number; error: string }> {
 	const response = await fetch(`${API}/${id}/reminders`, { method: 'POST' });
 	const result = await response.json();
-	if (response.ok) return { status: response.status, reminder: result };
+	if (response.ok) {
+		// the backend stores the German title; its level names it in the UI language
+		const { document } = result;
+		const reminder = document
+			? { ...result, document: { ...document, title: localTitle(document) } }
+			: result;
+		return { status: response.status, reminder };
+	}
 	return {
 		status: response.status,
-		error: backendMessage(result, 'Mahnung konnte nicht erstellt werden.')
+		error: backendMessage(result, m.statements_reminder_failed())
 	};
 }

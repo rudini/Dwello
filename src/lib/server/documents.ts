@@ -5,7 +5,7 @@ const API = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1/docume
 
 // The backend stores a reminder's German title; its level names it in the UI language
 const reminderTitles = [m.documents_reminder_1, m.documents_reminder_2, m.documents_reminder_3];
-const localTitle = (document: StatementDocument) =>
+export const localTitle = (document: StatementDocument) =>
 	(document.type === 'reminder' && reminderTitles[(document.reminderLevel ?? 0) - 1]?.()) ||
 	document.title;
 

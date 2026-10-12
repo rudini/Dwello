@@ -28,21 +28,19 @@ export const statusTones: Record<StatementStatus, Tone> = {
 
 /** The Saldo in words: positive, the tenant pays; negative, the tenant gets money back */
 export function balanceLabel(balance: number): string {
-	if (balance > 0) return 'Nachzahlung';
-	if (balance < 0) return 'Rückerstattung';
-	return 'Ausgeglichen';
+	if (balance > 0) return m.statements_balance_due();
+	if (balance < 0) return m.statements_balance_refund();
+	return m.statements_balance_settled();
 }
 
 /** The day the help of «Bezahlt am» asks for: the tenant's payment, or for a refund the landlord's transfer */
 export const paidHelp = (balance: number) =>
-	balance < 0
-		? 'Der Tag, an dem Sie den Betrag überwiesen haben.'
-		: 'Der Tag, an dem das Geld eingegangen ist.';
+	balance < 0 ? m.statements_paid_help_refund() : m.statements_paid_help();
 
 /** Why a payment date cannot be stored: none, or a day in the future */
 export const paidDateError = (paidDate: string) =>
 	!/^\d{4}-\d{2}-\d{2}$/.test(paidDate)
-		? 'Bitte geben Sie das Zahlungsdatum als TT.MM.JJJJ ein.'
+		? m.statements_paid_date_invalid()
 		: paidDate > localToday()
-			? 'Das Zahlungsdatum liegt in der Zukunft. Geben Sie den Tag ein, an dem das Geld eingegangen ist.'
+			? m.statements_paid_date_future()
 			: null;

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';
 	import Illustration from '$lib/ui/Illustration.svelte';
@@ -21,29 +22,19 @@
 	<div class="flex flex-col items-center gap-4 text-center" data-testid="generate-drafts-note">
 		<Illustration name="statement" />
 		<p class="text-lg text-ink">
-			{count === 1
-				? 'Es wird 1 Nebenkostenabrechnung als Entwurf erstellt.'
-				: `Es werden ${count} Nebenkostenabrechnungen als Entwurf erstellt.`}
+			{count === 1 ? m.statements_will_create_one() : m.statements_will_create_many({ count })}
 		</p>
-		<p class="max-w-prose text-ink-muted">
-			Es wird nichts verschickt. Sie prüfen danach jede Abrechnung und versenden sie einzeln.
-		</p>
+		<p class="max-w-prose text-ink-muted">{m.statements_nothing_sent()}</p>
 	</div>
 	{#if withoutInvoices.length}
 		<!-- the confirmed warning once more, right before the final button -->
-		<Alert tone="caution" title="Ohne Rechnungen" testid="generate-warning">
-			<p>
-				{withoutInvoices.join(', ')}: Diese Abrechnungen entstehen ohne Rechnungen. Sie verteilen
-				CHF 0.00 Nebenkosten, und jeder Mieter erhält sein Akonto zurück.
-			</p>
+		<Alert tone="caution" title={m.statements_without_invoices_title()} testid="generate-warning">
+			<p>{m.statements_without_invoices_text({ names: withoutInvoices.join(', ') })}</p>
 		</Alert>
 	{/if}
 	{#if incomplete.length}
-		<Alert tone="caution" title="Möglicherweise fehlen Rechnungen" testid="generate-incomplete">
-			<p>
-				{incomplete.join(', ')}: Ein Entwurf rechnet nur mit den Rechnungen, die jetzt erfasst sind.
-				Fehlt eine Rechnung, fehlen ihre Kosten in jeder Abrechnung des Gebäudes.
-			</p>
+		<Alert tone="caution" title={m.statements_maybe_missing_title()} testid="generate-incomplete">
+			<p>{m.statements_incomplete_text({ names: incomplete.join(', ') })}</p>
 		</Alert>
 	{/if}
 {:else}
@@ -51,19 +42,19 @@
 		<Illustration name="done" />
 		<p class="text-lg font-semibold text-ink" role="status" data-testid="generation-result">
 			{createdCount === 1
-				? '1 Nebenkostenabrechnung ist als Entwurf erstellt.'
-				: `${createdCount} Nebenkostenabrechnungen sind als Entwurf erstellt.`}
+				? m.statements_created_one()
+				: m.statements_created_many({ count: createdCount })}
 		</p>
-		<p class="max-w-prose text-ink-muted">Prüfen Sie die Entwürfe und versenden Sie sie dann.</p>
+		<p class="max-w-prose text-ink-muted">{m.statements_check_drafts()}</p>
 		<div class="flex flex-wrap justify-center gap-4">
 			<Button
 				href="/statements?status=draft"
 				variant="primary"
 				icon="statement"
-				testid="show-statements-button">Entwürfe ansehen</Button
+				testid="show-statements-button">{m.statements_view_drafts()}</Button
 			>
 			<Button href="/statements/generate" reload icon="add" testid="generate-more-button"
-				>Weitere Abrechnungen erstellen</Button
+				>{m.statements_create_more()}</Button
 			>
 		</div>
 	</div>

@@ -1,5 +1,7 @@
 import { backendMessage } from '$lib/backend-error';
 import { localToday } from '$lib/contract-status';
+import { m } from '$lib/paraglide/messages';
+import { namesById } from '$lib/server/statement';
 import type { InvoiceCheck } from '$lib/statement-wizard';
 
 const API = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1`;
@@ -31,7 +33,10 @@ async function call(fetch: Fetch, path: string, body?: object) {
 		}
 	);
 	const data = await response.json();
-	if (!response.ok) throw new Error(backendMessage(data, `${path} antwortet ${response.status}`));
+	if (!response.ok)
+		throw new Error(
+			backendMessage(data, m.statements_backend_failed({ path, status: response.status }))
+		);
 	return data;
 }
 
@@ -111,31 +116,56 @@ export async function invoicesInPeriod(
 	{ buildingIds, periodStart, periodEnd }: GenerationRequest
 ) {
 	const overlaps = (s: Period) => s.periodStart <= periodEnd && s.periodEnd >= periodStart;
-	return Promise.all(
-		buildingIds.map(async (buildingId) => {
-			const building = encodeURIComponent(buildingId);
-			const [invoices, { data: statements }, check] = await Promise.all([
-				// the invoices the statement takes: by Leistungszeitraum, otherwise by Rechnungsdatum
-				call(fetch, `invoices/for-statement/${building}?periodStart=${periodStart}&periodEnd=${periodEnd}`),
-				call(fetch, `statements?buildingId=${building}&limit=1000`),
-				// a hint only: without it the preview still shows
-				call(fetch, `invoices/completeness/${building}?periodStart=${periodStart}&periodEnd=${periodEnd}`).catch(
-					() => undefined
-				)
-			]);
-			// an invoice with a Leistungszeitraum covers its days in the period, not its date
-			type Bill = { invoiceDate: string; servicePeriodEnd?: string | null; inPeriod?: { start: string; end: string } };
-			const dates = (invoices as Bill[])
-				.flatMap((i) => (i.servicePeriodEnd && i.inPeriod ? [i.inPeriod.start, i.inPeriod.end] : [i.invoiceDate]))
-				.sort();
-			return {
-				buildingId,
-				count: invoices.length,
-				first: dates[0] ?? null,
-				last: dates.at(-1) ?? null,
-				statements: (statements as Period[]).filter(overlaps).length,
-				check: check as InvoiceCheck | undefined
-			};
-		})
-	);
+	const [rows, categories] = await Promise.all([
+		Promise.all(
+			buildingIds.map(async (buildingId) => {
+				const building = encodeURIComponent(buildingId);
+				const [invoices, { data: statements }, check] = await Promise.all([
+					// the invoices the statement takes: by Leistungszeitraum, otherwise by Rechnungsdatum
+					call(
+						fetch,
+						`invoices/for-statement/${building}?periodStart=${periodStart}&periodEnd=${periodEnd}`
+					),
+					call(fetch, `statements?buildingId=${building}&limit=1000`),
+					// a hint only: without it the preview still shows
+					call(
+						fetch,
+						`invoices/completeness/${building}?periodStart=${periodStart}&periodEnd=${periodEnd}`
+					).catch(() => undefined)
+				]);
+				// an invoice with a Leistungszeitraum covers its days in the period, not its date
+				type Bill = {
+					invoiceDate: string;
+					servicePeriodEnd?: string | null;
+					inPeriod?: { start: string; end: string };
+				};
+				const dates = (invoices as Bill[])
+					.flatMap((i) =>
+						i.servicePeriodEnd && i.inPeriod ? [i.inPeriod.start, i.inPeriod.end] : [i.invoiceDate]
+					)
+					.sort();
+				return {
+					buildingId,
+					count: invoices.length,
+					first: dates[0] ?? null,
+					last: dates.at(-1) ?? null,
+					statements: (statements as Period[]).filter(overlaps).length,
+					check: check as InvoiceCheck | undefined
+				};
+			})
+		),
+		namesById(fetch, 'categories')
+	]);
+	return rows.map((row) => ({ ...row, check: row.check && localCheck(row.check, categories) }));
 }
+
+// The check names each category in German: here in the UI language
+const localCheck = (check: InvoiceCheck, names: Map<string, string>): InvoiceCheck => ({
+	...check,
+	findings: check.findings?.map((finding) => ({
+		...finding,
+		categoryName: finding.categoryId
+			? (names.get(finding.categoryId) ?? finding.categoryName)
+			: m.invoices_not_categorised()
+	}))
+});

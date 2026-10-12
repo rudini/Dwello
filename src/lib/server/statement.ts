@@ -1,5 +1,6 @@
 import { error } from '@sveltejs/kit';
-import { germanName } from '$lib/names';
+import { localName } from '$lib/names';
+import { m } from '$lib/paraglide/messages';
 import type { StatementLineItem, StatementWithDetails } from '$lib/types';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
@@ -10,7 +11,7 @@ type BackendStatement = Record<string, any>;
 const toLineItem = (item: BackendStatement): StatementLineItem => ({
 	id: item.id,
 	categoryId: item.categoryId,
-	categoryName: item.categoryName || item.description || 'Unbekannt',
+	categoryName: item.categoryName || item.description || m.contracts_unknown_building(),
 	distributionKeyId: item.distributionKeyId,
 	distributionKeyName: item.distributionKeyName || '',
 	totalAmount: Number(item.totalAmount),
@@ -43,7 +44,9 @@ export function toStatement(data: BackendStatement): StatementWithDetails {
 		lastReminderDate: data.reminderSentDate,
 		notes: data.notes,
 		createdAt: data.createdAt,
-		tenantName: data.tenant ? `${tenant.firstName} ${tenant.lastName}` : 'Unbekannt',
+		tenantName: data.tenant
+			? `${tenant.firstName} ${tenant.lastName}`
+			: m.contracts_unknown_building(),
 		tenantEmail: tenant.email || '',
 		tenantCorrespondenceChannel: tenant.correspondenceChannel,
 		apartmentUnit: apartment.number || '',
@@ -54,13 +57,13 @@ export function toStatement(data: BackendStatement): StatementWithDetails {
 	};
 }
 
-// German names of categories or distribution keys by id; the line items only carry ids and the English name
-async function namesById(fetch: typeof globalThis.fetch, list: string) {
+/** Names of categories or distribution keys in the UI language by id; the backend's lists only carry ids and the English or German name */
+export async function namesById(fetch: typeof globalThis.fetch, list: string) {
 	const response = await fetch(`${BACKEND_URL}/api/v1/${list}?limit=100`).catch(() => null);
 	const body = response?.ok ? await response.json() : {};
-	const records: { id: string; name: string; nameDE?: string | null }[] =
+	const records: (Parameters<typeof localName>[0] & { id: string })[] =
 		body.categories ?? body.data ?? [];
-	return new Map(records.map((record) => [record.id, germanName(record)]));
+	return new Map(records.map((record) => [record.id, localName(record)]));
 }
 
 export async function loadStatement(fetch: typeof globalThis.fetch, id: string) {
@@ -69,16 +72,18 @@ export async function loadStatement(fetch: typeof globalThis.fetch, id: string) 
 		namesById(fetch, 'categories'),
 		namesById(fetch, 'distribution-keys')
 	]);
-	if (response.status === 404) throw error(404, 'Abrechnung nicht gefunden');
-	if (!response.ok) throw error(response.status, 'Fehler beim Laden der Abrechnung');
+	if (response.status === 404) throw error(404, m.statements_not_found());
+	if (!response.ok) throw error(response.status, m.statements_load_failed());
 	const statement = toStatement(await response.json());
 	// Without a key the calculation shares the costs equally among the apartments
 	const lineItems = statement.lineItems.map((item) => ({
 		...item,
-		categoryName: categories.get(item.categoryId) ?? item.categoryName,
+		categoryName: item.categoryId
+			? (categories.get(item.categoryId) ?? item.categoryName)
+			: m.invoices_not_categorised(), // the backend names it in German
 		distributionKeyName: item.distributionKeyId
 			? (keys.get(item.distributionKeyId) ?? '')
-			: 'Gleichmässig pro Wohnung'
+			: m.statements_equal_per_apartment()
 	}));
 	return { ...statement, lineItems };
 }
