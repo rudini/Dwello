@@ -15,7 +15,7 @@ const germanWords = (text: string) =>
 
 // A regular expression literal in code: its quotes are no strings
 const regexLiteral =
-	/(^|[=(,:[!&|?{};]|return)(\s*)\/(?![/*])(?:\\.|\[(?:\\.|[^\]\\\n])*\]|[^/\\\n[])+\/[a-z]*/gm;
+	/(^|[=(,:[!&|?{;]|return)(\s*)\/(?![/*])(?:\\.|\[(?:\\.|[^\]\\\n])*\]|[^/\\\n[])+\/[a-z]*/gm;
 const quoted = (code: string) =>
 	[...code.matchAll(/(['"`])((?:\\.|(?!\1)[\s\S])*)\1/g)].map((match) => match[2]);
 
@@ -81,7 +81,12 @@ describe('Keine deutschen Texte im Code', () => {
 			false
 		);
 		const markup = texts(`<p>Don't</p><p>{x ? 'Mieter' : y}</p>`, true);
-		expect([...code, ...markup].flatMap(germanWords).sort()).toEqual(['gespeichert', 'mieter']);
+		const path = texts("const u = `${a}/${b}`, 'x');\nconst v = 'Wohnung';", false);
+		expect([...code, ...markup, ...path].flatMap(germanWords).sort()).toEqual([
+			'gespeichert',
+			'mieter',
+			'wohnung'
+		]);
 	});
 
 	it('übersieht Kommentare und Ausdrücke', () => {
@@ -90,8 +95,18 @@ describe('Keine deutschen Texte im Code', () => {
 	});
 
 	it.each(sources)('%s', (path) => {
+		const source = readFileSync(path, 'utf8');
+		const svelte = path.endsWith('.svelte');
+		// a string planted at the end of the code and of the markup is found: no quote pairing went out of step
+		const end = source.lastIndexOf('</script>');
+		const planted = svelte
+			? `${end < 0 ? source : `${source.slice(0, end)}'Prüfung';${source.slice(end)}`}{x ? 'Änderung' : y}`
+			: `${source}\n'Prüfung';`;
+		const found = texts(planted, svelte).flatMap(germanWords);
+		expect(found).toContain(end < 0 && svelte ? 'änderung' : 'prüfung');
+		if (svelte) expect(found).toContain('änderung');
 		const allowed = (identifiers[path] ?? []).map((word) => word.toLowerCase());
-		const left = texts(readFileSync(path, 'utf8'), path.endsWith('.svelte'))
+		const left = texts(source, svelte)
 			.flatMap(germanWords)
 			.filter((word) => !allowed.includes(word));
 		expect(left).toEqual([]);
