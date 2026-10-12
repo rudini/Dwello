@@ -495,3 +495,17 @@ class HelperSwarmTest(unittest.TestCase):
 
         self.assertIn("classitis: exported helpers with one caller: stripCurrency, splitSign, normaliseFraction, "
                       "toRappen", line)
+
+    def test_a_helper_a_svelte_component_uses_is_no_member(self):
+        component = ('<script lang="ts">\n  import { formatChf, formatDate, formatArea } from "$lib/format";\n'
+                     '  export let row;\n</script>\n\n<p>{formatChf(row.rent)} {formatDate(row.start)} {formatArea(row.m2)}</p>\n')
+        module = ("export const formatChf = (x: number) => `CHF ${x.toFixed(2)}`;\n"
+                  "export const formatDate = (d: string) => d.split('-').reverse().join('.');\n"
+                  "export const formatArea = (m2: number) => `${m2} m²`;\n"
+                  "export const summary = (r: { rent: number; start: string; m2: number }) =>\n"
+                  "  [formatChf(r.rent), formatDate(r.start), formatArea(r.m2)].join(' ');\n")
+        repo = Repo(self, {"src/lib/format.ts": module, "src/lib/Card.svelte": component})
+
+        line = report_line(repo.run("depth_report", "src/lib/format.ts"), "src/lib/format.ts")
+
+        self.assertIn(", classitis no,", line)
