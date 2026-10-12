@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import type { TenantWithOccupancy } from '$lib/types';
 	import Badge from '$lib/ui/Badge.svelte';
 	import { formatDate } from '$lib/utils/format';
@@ -25,10 +26,10 @@
 		{tenant.currentApartment && tenant.currentBuilding
 			? `${tenant.currentApartment} - ${tenant.currentBuilding}`
 			: tenant.nextContractStart
-				? `Mietvertrag ab ${formatDate(tenant.nextContractStart)}`
-				: 'Keine laufende Miete'}
+				? m.tenants_contract_from({ date: formatDate(tenant.nextContractStart) })
+				: m.tenants_no_rent()}
 	</span>
 	{#if tenant.isActive}
-		<span><Badge tone="positive" label="Aktiv" testid="tenant-active" /></span>
+		<span><Badge tone="positive" label={m.tenants_active()} testid="tenant-active" /></span>
 	{/if}
 </li>

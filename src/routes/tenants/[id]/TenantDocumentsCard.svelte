@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import { deliveryErrorText } from '$lib/backend-error';
 	import type { StatementDocument } from '$lib/types';
 	import Panel from '$lib/ui/Panel.svelte';
@@ -10,10 +11,10 @@
 	const heading = (d: StatementDocument) =>
 		[d.title, d.statementNumber].filter(Boolean).join(' · ');
 	const details = (d: StatementDocument) =>
-		`${formatDate(d.createdAt)} · ${d.channel === 'email' ? 'per E-Mail' : 'per Brief'}`;
+		`${formatDate(d.createdAt)} · ${d.channel === 'email' ? m.tenants_document_by_email() : m.tenants_document_by_letter()}`;
 </script>
 
-<Panel title="Dokumente">
+<Panel title={m.nav_documents()}>
 	<ul class="flex flex-col divide-y divide-line" data-testid="tenant-documents">
 		{#each documents as document (document.id)}
 			<li class="flex flex-wrap items-center justify-between gap-4 py-4" data-testid="document-row">
@@ -22,7 +23,9 @@
 					<p class="text-ink-muted">
 						{details(document)} ·
 						<span data-testid="document-status"
-							>{document.status === 'to_send' ? 'Zu versenden' : 'Versendet'}</span
+							>{document.status === 'to_send'
+								? m.tenants_document_to_send()
+								: m.statements_status_sent()}</span
 						>
 					</p>
 					{#if document.deliveryError}<p class="text-caution">{deliveryErrorText(document)}</p>{/if}
@@ -34,7 +37,7 @@
 				>
 			</li>
 		{:else}
-			<li class="text-ink-muted">Noch keine Dokumente.</li>
+			<li class="text-ink-muted">{m.tenants_no_documents()}</li>
 		{/each}
 	</ul>
 </Panel>

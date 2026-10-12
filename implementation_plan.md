@@ -4667,7 +4667,9 @@ header and on pages without it. Branch `claude/optimistic-clarke-nn8u7t` from `m
   Fallow: `statusLabels`/`statusTones` exist in `apartment.ts` and `statement.ts` since before; since both files are now
   in the changed scope, Fallow reports them as duplicate exports, and line suppressions do not apply to that rule.
   Renaming would change existing tests, so `.fallowrc.json` `ignoreExports` names exactly these two in `statement.ts`.
-- [ ] Step 3 – apartments and tenants
+- [x] **Step 3 – apartments and tenants**: `src/routes/apartments/**`, `src/routes/tenants/**`, `server/apartment-form.ts`,
+  `server/apartment.ts`, `server/tenant-form.ts`, `server/tenant.ts`, `tenant.ts` (tenant language labels as getters,
+  stored codes unchanged), `utils/contract-availability.ts`; 133 keys. Test `tenants-i18n.test.ts`.
 - [x] **Step B – backend error codes** (user's decision): `backend/src/services/coded-error.ts` (`CodedError`, `errorBody`);
   `Conflict` and `ReminderError` carry codes; services (category, distribution key, formula, heating profile, reminder,
   document, invoice, contract, calculation, statement) throw coded refusals; routes answer `{ error, code, params }`

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import CurrentTenantCard from './CurrentTenantCard.svelte';
 	import MonthlyCostsCard from './MonthlyCostsCard.svelte';
 	import Button from '$lib/ui/Button.svelte';
@@ -17,21 +18,23 @@
 </script>
 
 <svelte:head>
-	<title>Wohnung {apartment.number}, {building.name} - Dwello</title>
+	<title
+		>{m.buildings_apartment_number({ number: apartment.number })}, {building.name} - Dwello</title
+	>
 </svelte:head>
 
 <div class="flex flex-col gap-8">
 	<PageHeader
-		title="Wohnung {apartment.number}"
+		title={m.buildings_apartment_number({ number: apartment.number })}
 		purpose="{building.address}, {building.postalCode} {building.city}"
 		trail={[
-			{ href: '/apartments', label: 'Wohnungen' },
+			{ href: '/apartments', label: m.nav_apartments() },
 			{ href: `/buildings/${building.id}`, label: building.name }
 		]}
 	>
 		{#snippet action()}
 			<Button href="/apartments/{apartment.id}/edit" icon="edit" testid="apartment-edit-button"
-				>Bearbeiten</Button
+				>{m.buildings_edit()}</Button
 			>
 			{#if !data.currentContract}
 				<!-- a relet apartment is rented from a date on: another contract is no longer the next step -->
@@ -39,7 +42,7 @@
 					href="/contracts/new?apartment={apartment.id}"
 					variant={next ? 'secondary' : 'primary'}
 					icon="contract"
-					testid="apartment-new-contract">Mietvertrag erfassen</Button
+					testid="apartment-new-contract">{m.dashboard_add_contract()}</Button
 				>
 			{/if}
 		{/snippet}
@@ -53,21 +56,21 @@
 				<CurrentTenantCard contract={data.currentContract} />
 				<MonthlyCostsCard costs={data.monthlyCosts} />
 			{:else if next}
-				<Panel title="Künftiger Mieter">
+				<Panel title={m.apartments_next_tenant()}>
 					<p class="text-ink" data-testid="apartment-next-tenant">
-						Ab {formatDate(next.startDate)} vermietet an
+						{m.apartments_let_from_to({ date: formatDate(next.startDate) })}
 						<a
 							href="/tenants/{next.tenantId}"
 							class="font-semibold text-accent underline underline-offset-4 hover:text-accent-strong"
 							>{next.tenantName}</a
 						>.
 					</p>
-					<p class="text-ink-muted">Bis dahin läuft kein Mietvertrag.</p>
+					<p class="text-ink-muted">{m.apartments_no_contract_until()}</p>
 				</Panel>
 			{:else}
-				<Panel title="Aktueller Mieter">
+				<Panel title={m.apartments_current_tenant()}>
 					<p class="text-ink-muted" data-testid="apartment-vacant">
-						Diese Wohnung ist derzeit nicht vermietet.
+						{m.apartments_not_let()}
 					</p>
 				</Panel>
 			{/if}

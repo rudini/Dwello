@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import { enhance } from '$app/forms';
 	import TenantFormFields from './TenantFormFields.svelte';
 	import { confirmSaved } from '$lib/tenant';
@@ -44,20 +45,20 @@
 >
 	{#if forContract}<input type="hidden" name="for" value="contract" />{/if}
 	{#if errors?.form}
-		<Alert tone="critical" title="Der Mieter wurde nicht gespeichert" testid="form-error">
+		<Alert tone="critical" title={m.tenants_not_saved()} testid="form-error">
 			<p>{errors.form}</p>
 		</Alert>
 	{/if}
 	<TenantFormFields {tenant} errors={errors ?? {}} />
 
 	<div class="flex flex-col-reverse gap-4 border-t border-line pt-6 sm:flex-row sm:justify-end">
-		<Button href={cancelHref} testid="form-cancel">Abbrechen</Button>
+		<Button href={cancelHref} testid="form-cancel">{m.ui_cancel()}</Button>
 		<Button
 			type="submit"
 			variant="primary"
 			icon={submitIcon}
 			busy={saving}
-			busyLabel="Wird gespeichert …"
+			busyLabel={m.ui_saving()}
 			testid="tenant-submit">{submitLabel}</Button
 		>
 	</div>

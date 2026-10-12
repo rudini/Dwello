@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import Panel from '$lib/ui/Panel.svelte';
 	import ApartmentForm from '../../ApartmentForm.svelte';
@@ -12,16 +13,19 @@
 </script>
 
 <svelte:head>
-	<title>Wohnung {apartment.number} bearbeiten - Dwello</title>
+	<title>{m.apartments_edit_title({ number: apartment.number })} - Dwello</title>
 </svelte:head>
 
 <div class="mx-auto flex max-w-3xl flex-col gap-8">
 	<PageHeader
-		title="Wohnung {apartment.number} bearbeiten"
+		title={m.apartments_edit_title({ number: apartment.number })}
 		purpose="{apartment.building.name}, {apartment.building.address}"
 		trail={[
-			{ href: '/apartments', label: 'Wohnungen' },
-			{ href: `/apartments/${apartment.id}`, label: `Wohnung ${apartment.number}` }
+			{ href: '/apartments', label: m.nav_apartments() },
+			{
+				href: `/apartments/${apartment.id}`,
+				label: m.buildings_apartment_number({ number: apartment.number })
+			}
 		]}
 	/>
 	<Panel>
@@ -30,7 +34,7 @@
 			{apartment}
 			{errors}
 			cancelHref="/apartments/{apartment.id}"
-			submitLabel="Änderungen speichern"
+			submitLabel={m.buildings_save_changes()}
 		>
 			{#snippet status()}
 				<StatusField {apartment} />

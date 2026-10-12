@@ -1,3 +1,4 @@
+import { m } from '$lib/paraglide/messages';
 import { fail, redirect } from '@sveltejs/kit';
 import { loadDocuments } from '$lib/server/documents';
 import { loadTenant } from '$lib/server/tenant';
@@ -9,7 +10,8 @@ const API = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1`;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- backend JSON
 type BackendContract = Record<string, any>;
 
-const apartmentOf = (c: BackendContract) => `Wohnung ${c.apartmentNumber}`;
+const apartmentOf = (c: BackendContract) =>
+	m.buildings_apartment_number({ number: c.apartmentNumber });
 
 // The running contract, otherwise the next one the tenant moves in with
 function currentRental(contracts: BackendContract[]) {
@@ -54,7 +56,7 @@ export const actions: Actions = {
 		// The backend keeps tenants with rental contracts: statements and documents refer to them
 		if (!response.ok)
 			return fail(response.status, {
-				error: 'Mieter mit Mietverträgen können nicht gelöscht werden.'
+				error: m.tenants_delete_failed()
 			});
 		throw redirect(303, '/tenants');
 	}

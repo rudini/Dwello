@@ -3,6 +3,8 @@
  * Computes apartment availability based on existing contracts
  */
 
+import { m } from '$lib/paraglide/messages';
+
 /**
  * Represents the availability status of an apartment
  */
@@ -13,7 +15,7 @@ export interface AvailabilityInfo {
 	availableFrom: string | null;
 	/** Whether there's an ongoing (unlimited) contract blocking availability */
 	hasOngoingContract: boolean;
-	/** User-friendly message in German */
+	/** User-friendly message in the UI language */
 	message: string;
 	/** Status type for UI styling: 'available' | 'available-from' | 'blocked' */
 	statusType: 'available' | 'available-from' | 'blocked';
@@ -85,7 +87,7 @@ export function computeAvailability(
 			isAvailable: true,
 			availableFrom: null,
 			hasOngoingContract: false,
-			message: 'Wohnung verfügbar',
+			message: m.contracts_availability_available(),
 			statusType: 'available'
 		};
 	}
@@ -109,7 +111,7 @@ export function computeAvailability(
 			isAvailable: false,
 			availableFrom: null,
 			hasOngoingContract: true,
-			message: 'Wohnung nicht verfügbar - laufender unbefristeter Vertrag',
+			message: m.contracts_availability_blocked(),
 			statusType: 'blocked'
 		};
 	}
@@ -137,7 +139,7 @@ export function computeAvailability(
 				isAvailable: true,
 				availableFrom: null,
 				hasOngoingContract: false,
-				message: 'Wohnung verfügbar',
+				message: m.contracts_availability_available(),
 				statusType: 'available'
 			};
 		}
@@ -147,7 +149,7 @@ export function computeAvailability(
 			isAvailable: true,
 			availableFrom: formatDate(availableFromDate),
 			hasOngoingContract: false,
-			message: `Wohnung verfügbar ab ${formatDateDE(availableFromDate)}`,
+			message: m.contracts_availability_from({ date: formatDateDE(availableFromDate) }),
 			statusType: 'available-from'
 		};
 	}
@@ -157,7 +159,7 @@ export function computeAvailability(
 		isAvailable: true,
 		availableFrom: null,
 		hasOngoingContract: false,
-		message: 'Wohnung verfügbar',
+		message: m.contracts_availability_available(),
 		statusType: 'available'
 	};
 }
@@ -201,11 +203,11 @@ export function checkDateRangeOverlap(
 		if (overlaps) {
 			const periodStr = contract.end_date
 				? `${formatDateDE(contractStart)} - ${formatDateDE(contractEnd)}`
-				: `ab ${formatDateDE(contractStart)} (unbefristet)`;
+				: m.contracts_overlap_open_ended({ date: formatDateDE(contractStart) });
 
 			return {
 				hasOverlap: true,
-				message: `Überschneidung mit bestehendem Vertrag: ${periodStr}`
+				message: m.contracts_overlap({ period: periodStr })
 			};
 		}
 	}

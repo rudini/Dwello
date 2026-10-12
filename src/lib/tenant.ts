@@ -1,14 +1,25 @@
+import { m } from '$lib/paraglide/messages';
 import type { ActionResult } from '@sveltejs/kit';
 import { addToast } from './stores';
 import type { Tenant } from './types';
 
-/** Languages a tenant's statements can be written in */
+/** Languages a tenant's statements can be written in, named in the UI language (getters: read when shown) */
 export const languageLabels: Record<Tenant['language'], string> = {
-	de: 'Deutsch',
-	fr: 'Französisch',
-	it: 'Italienisch',
-	rm: 'Rätoromanisch',
-	en: 'Englisch'
+	get de() {
+		return m.tenants_language_de();
+	},
+	get fr() {
+		return m.tenants_language_fr();
+	},
+	get it() {
+		return m.tenants_language_it();
+	},
+	get rm() {
+		return m.tenants_language_rm();
+	},
+	get en() {
+		return m.tenants_language_en();
+	}
 };
 
 /** After saving the tenant form, a confirmation naming the tenant; back in the contract wizard, the wizard confirms */
@@ -17,7 +28,7 @@ export function confirmSaved(formData: FormData) {
 	const name = `${field('firstName')} ${field('lastName')}`;
 	const quiet = field('for') === 'contract';
 	return async ({ result, update }: { result: ActionResult; update: () => Promise<void> }) => {
-		if (result.type === 'redirect' && !quiet) addToast('success', `${name} gespeichert`);
+		if (result.type === 'redirect' && !quiet) addToast('success', m.tenants_saved_toast({ name }));
 		await update();
 	};
 }

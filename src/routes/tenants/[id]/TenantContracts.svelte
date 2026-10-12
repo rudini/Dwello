@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import { contractPeriod, statusBadges } from '$lib/contract-status';
 	import type { ContractHistory } from '$lib/types';
 	import Badge from '$lib/ui/Badge.svelte';
@@ -9,9 +10,9 @@
 	let { contracts }: { contracts: ContractHistory[] } = $props();
 </script>
 
-<Panel title="Mietverträge">
+<Panel title={m.nav_contracts()}>
 	{#if contracts.length === 0}
-		<p class="text-ink-muted" data-testid="contract-history-empty">Noch keine Mietverträge.</p>
+		<p class="text-ink-muted" data-testid="contract-history-empty">{m.common_no_contracts()}</p>
 	{:else}
 		<ul class="flex flex-col divide-y divide-line">
 			{#each contracts as contract (contract.id)}
@@ -22,7 +23,8 @@
 					<a
 						href="/contracts/{contract.id}"
 						class="font-semibold text-accent underline underline-offset-4 after:absolute after:inset-0 sm:w-1/4"
-						data-testid="contract-history-link">Mietvertrag {contract.apartment}</a
+						data-testid="contract-history-link"
+						>{m.tenants_contract_of({ apartment: contract.apartment ?? '' })}</a
 					>
 					<span><Badge {...statusBadges[contract.status]} /></span>
 					<span class="tabular-nums text-ink sm:flex-1"
@@ -31,7 +33,7 @@
 					<!-- TODO(fachlich prüfen): no glossary term for the monthly total, as in the contract wizard -->
 					<span class="tabular-nums text-ink"
 						>{formatCurrency(contract.rentBrutto)}
-						<span class="text-ink-muted">monatlich total</span></span
+						<span class="text-ink-muted">{m.common_monthly_total_suffix()}</span></span
 					>
 				</li>
 			{/each}

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import { floorLabel, statusText, statusIcons, statusTones } from '$lib/apartment';
 	import type { ApartmentWithBuilding } from '$lib/types';
 	import { normalizeDecimal } from '$lib/utils/format';
@@ -10,7 +11,10 @@
 
 	const facts = $derived([
 		{ icon: 'floor', text: floorLabel(apartment.floor) },
-		{ icon: 'rooms', text: `${normalizeDecimal(String(apartment.rooms))} Zimmer` },
+		{
+			icon: 'rooms',
+			text: m.buildings_rooms({ rooms: normalizeDecimal(String(apartment.rooms)) })
+		},
 		{ icon: 'ruler', text: `${normalizeDecimal(String(apartment.area))} m²` }
 	] as const);
 </script>
@@ -24,7 +28,7 @@
 			<a
 				href="/apartments/{apartment.id}"
 				class="text-accent underline underline-offset-4 after:absolute after:inset-0 hover:text-accent-strong"
-				>Wohnung {apartment.number}</a
+				>{m.buildings_apartment_number({ number: apartment.number })}</a
 			>
 		</h2>
 		<Badge

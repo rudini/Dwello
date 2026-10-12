@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import { page } from '$app/stores';
 	import type { TenantsListData } from '$lib/types';
 	import Button from '$lib/ui/Button.svelte';
@@ -18,17 +19,14 @@
 </script>
 
 <svelte:head>
-	<title>Mieter - Dwello</title>
+	<title>{m.nav_tenants()} - Dwello</title>
 </svelte:head>
 
 <div class="flex flex-col gap-8" data-testid="tenants-page">
-	<PageHeader
-		title="Mieter"
-		purpose="Die Personen, die Ihre Wohnungen mieten oder gemietet haben, mit Kontaktdaten und Wohnung."
-	>
+	<PageHeader title={m.nav_tenants()} purpose={m.tenants_purpose()}>
 		{#snippet action()}
 			<Button href="/tenants/new" variant="primary" icon="user-add" testid="tenants-new-button"
-				>Mieter erfassen</Button
+				>{m.dashboard_add_tenant()}</Button
 			>
 		{/snippet}
 	</PageHeader>
@@ -39,19 +37,19 @@
 		<div class="rounded-panel border border-line bg-surface">
 			{#if filtered}
 				<EmptyState
-					title="Keine Mieter gefunden"
-					text="Kein Mieter passt zur Suche und zum Filter."
+					title={m.tenants_none_found()}
+					text={m.tenants_none_found_text()}
 					illustration="no-results"
-					actionLabel="Filter zurücksetzen"
+					actionLabel={m.buildings_reset_filters()}
 					actionHref="/tenants"
 					testid="tenants-empty"
 				/>
 			{:else}
 				<EmptyState
-					title="Noch keine Mieter"
-					text="Erfassen Sie zuerst die Mieter mit ihren Kontaktdaten. Danach verbinden Sie sie mit einem Mietvertrag mit ihrer Wohnung."
+					title={m.tenants_none_yet()}
+					text={m.tenants_none_yet_text()}
 					illustration="apartment"
-					actionLabel="Mieter erfassen"
+					actionLabel={m.dashboard_add_tenant()}
 					actionHref="/tenants/new"
 					testid="tenants-empty"
 				/>
@@ -60,7 +58,7 @@
 	{:else}
 		<section aria-labelledby="tenants-count" class="flex flex-col gap-4">
 			<h2 id="tenants-count" tabindex="-1" data-results class="text-xl font-bold text-ink">
-				{data.total} Mieter
+				{(data.total === 1 ? m.tenants_count_one : m.tenants_count_many)({ count: data.total })}
 			</h2>
 			<ul class="flex flex-col divide-y divide-line rounded-panel border border-line bg-surface">
 				{#each data.tenants as tenant (tenant.id)}

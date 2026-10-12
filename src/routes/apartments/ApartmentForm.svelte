@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import type { Snippet } from 'svelte';
 	import { untrack } from 'svelte';
 	import { enhance } from '$app/forms';
@@ -65,7 +66,8 @@
 	use:enhance={() => {
 		saving = true;
 		return async ({ result, update, formElement }) => {
-			if (result.type === 'redirect') addToast('success', `Wohnung ${number.trim()} gespeichert`);
+			if (result.type === 'redirect')
+				addToast('success', m.apartments_saved_toast({ number: number.trim() }));
 			await update({ reset: false });
 			saving = false;
 			focusFirstError(formElement);
@@ -74,7 +76,7 @@
 	class="flex flex-col gap-6"
 >
 	{#if errors.form}
-		<Alert tone="critical" title="Nicht gespeichert" testid="form-error">
+		<Alert tone="critical" title={m.buildings_not_saved()} testid="form-error">
 			<p>{errors.form}</p>
 		</Alert>
 	{/if}
@@ -86,26 +88,26 @@
 			<TextInput
 				id="number"
 				name="number"
-				label="Wohnungsnummer"
-				help="Bezeichnung der Wohnung im Gebäude, pro Gebäude eindeutig."
+				label={m.apartments_number()}
+				help={m.apartments_number_help()}
 				example="3.01"
 				bind:value={number}
 				error={errors.number}
 				testid="apartment-number-input"
 			/>
 			{#if numberTaken}
-				<Alert tone="caution" title="Nummer schon vergeben" testid="apartment-number-taken">
-					<p>Die Wohnungsnummer "{number.trim()}" existiert bereits in diesem Gebäude.</p>
+				<Alert tone="caution" title={m.apartments_number_taken()} testid="apartment-number-taken">
+					<p>{m.apartments_number_taken_text({ number: number.trim() })}</p>
 				</Alert>
 			{/if}
 		</div>
 		<Select
 			id="floor"
 			name="floor"
-			label="Stockwerk"
-			help="Lage der Wohnung im Gebäude: UG, EG, 1. OG, 2. OG usw."
+			label={m.apartments_floor()}
+			help={m.apartments_floor_help()}
 			options={floorOptions}
-			placeholder="Stockwerk wählen"
+			placeholder={m.apartments_floor_choose()}
 			bind:value={floor}
 			error={errors.floor}
 			testid="apartment-floor-select"
@@ -115,8 +117,8 @@
 	<div class="grid gap-6 sm:grid-cols-2">
 		<Field
 			id="area"
-			label="Fläche (m²)"
-			help="Nettowohnfläche in Quadratmetern. Grundlage für Verteilschlüssel nach Fläche."
+			label={m.apartments_area_label()}
+			help={m.apartments_area_help()}
 			example="85"
 			error={errors.area}
 		>
@@ -139,11 +141,11 @@
 		<Select
 			id="rooms"
 			name="rooms"
-			label="Zimmeranzahl"
-			help="Anzahl Zimmer, nach Schweizer Konvention mit halben Zimmern."
+			label={m.apartments_rooms()}
+			help={m.apartments_rooms_help()}
 			example="3.5"
-			options={roomOptions.map((value) => ({ value, label: `${value} Zimmer` }))}
-			placeholder="Zimmer wählen"
+			options={roomOptions.map((value) => ({ value, label: m.buildings_rooms({ rooms: value }) }))}
+			placeholder={m.apartments_rooms_choose()}
 			bind:value={rooms}
 			error={errors.rooms}
 			testid="apartment-rooms-select"
@@ -153,13 +155,13 @@
 	{@render status?.()}
 
 	<div class="flex flex-col-reverse gap-4 border-t border-line pt-6 sm:flex-row">
-		<Button href={cancelHref} testid="form-cancel">Abbrechen</Button>
+		<Button href={cancelHref} testid="form-cancel">{m.ui_cancel()}</Button>
 		<Button
 			type="submit"
 			variant="primary"
 			icon="save"
 			busy={saving}
-			busyLabel="Wird gespeichert …"
+			busyLabel={m.ui_saving()}
 			testid="apartment-submit">{submitLabel}</Button
 		>
 	</div>
