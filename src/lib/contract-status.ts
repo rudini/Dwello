@@ -53,3 +53,62 @@ export function contractPeriod(
 		? m.contracts_period_from({ date })
 		: m.contracts_period_since({ date });
 }
+
+/** A real day as YYYY-MM-DD: not 2025-13-01 or 2025-02-30 */
+function isDay(date: string) {
+	const day = new Date(`${date}T00:00:00Z`);
+	return (
+		/^\d{4}-\d{2}-\d{2}$/.test(date) && !isNaN(day.getTime()) && day.toISOString().startsWith(date)
+	);
+}
+
+/** Why a contract cannot be ended on that day (YYYY-MM-DD), or null: never before its start */
+export function contractEndError(endDate: string, startDate: string, today: string): string | null {
+	if (!isDay(endDate)) return m.contracts_end_missing({ example: `31.12.${today.slice(0, 4)}` });
+	if (endDate < startDate.slice(0, 10))
+		return m.contracts_end_before_start_on({ date: formatDate(startDate.slice(0, 10)) });
+	return null;
+}
+
+/** The day a contract counts as ended: the day after its last day */
+export function endedSince(endDate: string) {
+	const day = new Date(`${endDate}T00:00:00Z`);
+	day.setUTCDate(day.getUTCDate() + 1);
+	return formatDate(day.toISOString().slice(0, 10));
+}
+
+/** An end before today, e.g. a notice recorded late, is confirmed with its consequence; null when none is needed */
+export function pastEndConfirmation(endDate: string, today: string): string | null {
+	if (!endDate || endDate >= today) return null;
+	return m.contracts_end_past_confirm({ date: formatDate(endDate) });
+}
+
+const listed = (numbers: string[]) =>
+	numbers.length === 1
+		? numbers[0]
+		: m.contracts_list_and({ rest: numbers.slice(0, -1).join(', '), last: numbers.at(-1)! });
+
+/** New contract dates would change the Mietstage of stored statements (backend 409, tests/contracts/contract-end-refused.json) */
+export function billedDaysError(statements: { statementNumber: string; status: string }[]): string {
+	const drafts = statements
+		.filter((statement) => statement.status === 'draft')
+		.map((s) => s.statementNumber);
+	const locked = statements
+		.filter((statement) => statement.status !== 'draft')
+		.map(
+			(s) =>
+				`${s.statementNumber} (${s.status === 'paid' ? m.contracts_billed_paid() : m.contracts_billed_sent()})`
+		);
+	const one = (locked.length || drafts.length) === 1;
+	if (locked.length)
+		return [
+			(one ? m.contracts_billed_locked_one : m.contracts_billed_locked_many)({
+				numbers: listed(locked)
+			}),
+			m.contracts_billed_locked_rest(),
+			...(drafts.length ? [m.contracts_billed_also_draft({ numbers: listed(drafts) })] : [])
+		].join(' ');
+	return one
+		? m.contracts_billed_draft_one({ number: drafts[0] })
+		: m.contracts_billed_draft_many({ numbers: listed(drafts) });
+}

@@ -1,7 +1,11 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
-	import { untrack } from 'svelte';
-	import { contractStatusOn } from '$lib/contract-status';
+	import { flushSync, untrack } from 'svelte';
+	import { contractEndError, contractStatusOn, pastEndConfirmation } from '$lib/contract-status';
+	import PastEndConfirm from '../PastEndConfirm.svelte';
+	import { formatDate } from '$lib/utils/format';
+	import DateInput from '$lib/ui/DateInput.svelte';
+	import { focusFirstError } from '$lib/ui/focus-error';
 	import { addToast } from '$lib/stores';
 	import type { Apartment, Building, RentalContract, Tenant } from '$lib/types';
 	import Button from '$lib/ui/Button.svelte';
@@ -29,6 +33,43 @@
 	const name = $derived(`${contract.tenant.firstName} ${contract.tenant.lastName}`);
 	const status = $derived(contractStatusOn(contract.startDate, contract.endDate, data.today));
 	let ending = $state(false);
+	// the last day of the tenancy, the Kündigungstermin; typed on purpose, no day proposed (a quick confirm must not
+	// end the contract today); a past day, e.g. a notice recorded late, is confirmed with its consequence
+	let endDate = $state('');
+	let endError = $state('');
+	let confirmedDay = $state('');
+	const pastConfirmed = $derived(confirmedDay !== '' && confirmedDay === endDate);
+	let pastError = $state('');
+	const pastEnd = $derived(pastEndConfirmation(endDate, data.today) !== null);
+	function startEnding() {
+		endDate = '';
+		endError = '';
+		confirmedDay = '';
+		pastError = '';
+		ending = true;
+	}
+	// an error at the field names a day: another day typed takes it back
+	let endErrorFor = '';
+	$effect(() => {
+		if (endDate === endErrorFor) return;
+		endErrorFor = endDate;
+		endError = '';
+	});
+	// checked in the dialog before sending: a wrong date is said at the field, which gets the focus
+	function checkEndDate() {
+		endError = pastError = '';
+		flushSync(); // cleared first: the same error set again shows again
+		endError = contractEndError(endDate, contract.startDate, data.today) ?? '';
+		if (!endError && !pastConfirmed) pastError = pastEndConfirmation(endDate, data.today) ?? '';
+		if (endError || pastError) focusFirstError(document.querySelector('[role="dialog"]'));
+		return !endError && !pastError;
+	}
+	// the toast names the day the tenancy ends, or since when it has ended
+	function endedMessage() {
+		if (pastEnd) return m.contracts_ended_toast({ name, date: formatDate(endDate) });
+		if (endDate === data.today) return m.contracts_ends_today_toast({ name });
+		return m.contracts_ends_on_toast({ name, date: formatDate(endDate) });
+	}
 	// a refused delete (also without JavaScript) shows the dialog with its reason
 	let deleting = $state(untrack(() => !!form?.deleteError));
 </script>
@@ -49,7 +90,7 @@
 				>{m.buildings_edit()}</Button
 			>
 			{#if !contract.endDate}
-				<Button onclick={() => (ending = true)} icon="calendar-busy" testid="contract-end-button"
+				<Button onclick={startEnding} icon="calendar-busy" testid="contract-end-button"
 					>{m.contracts_end_action()}</Button
 				>
 			{/if}
@@ -99,9 +140,28 @@
 	confirmLabel={m.contracts_end_confirm()}
 	confirmTestid="contract-end-confirm"
 	error={form?.endError}
-	onsuccess={() => addToast('success', m.contracts_ends_today_toast({ name }))}
+	fields={{ endDate, pastConfirmed: pastConfirmed ? 'on' : '' }}
+	check={checkEndDate}
+	onsuccess={() => addToast('success', endedMessage())}
 >
-	<p>{m.contracts_end_text({ name })}</p>
+	<!-- TODO(fachlich prüfen): «Kündigungstermin», «Kündigungsfrist» are not in the glossary (offene-punkte.md) -->
+	<DateInput
+		id="endDate"
+		label={m.dashboard_kind_contract_end()}
+		help={m.contracts_end_date_help()}
+		min={contract.startDate.slice(0, 10)}
+		error={endError}
+		bind:value={endDate}
+		testid="contract-end-date-input"
+	/>
+	<PastEndConfirm
+		{endDate}
+		startDate={contract.startDate}
+		today={data.today}
+		bind:confirmedDay
+		bind:error={pastError}
+	/>
+	<p class="text-ink-muted">{m.contracts_end_notice_hint()}</p>
 </ActionDialog>
 
 <ActionDialog
@@ -110,14 +170,14 @@
 	title={m.contracts_delete_title()}
 	confirmLabel={m.contracts_delete_confirm()}
 	danger
-	disabled={!contract.endDate}
+	disabled={status !== 'future'}
 	confirmTestid="contract-delete-confirm"
 	error={form?.deleteError}
 	onsuccess={() => addToast('success', m.contracts_deleted_toast({ name }))}
 >
-	{#if contract.endDate}
-		<p>{m.contracts_delete_text({ name })}</p>
+	{#if status === 'future'}
+		<p>{m.contracts_delete_future_text({ name })}</p>
 	{:else}
-		<p>{m.contracts_delete_open_ended()}</p>
+		<p>{m.contracts_started_not_deletable()} {m.contracts_started_fix_hint()}</p>
 	{/if}
 </ActionDialog>

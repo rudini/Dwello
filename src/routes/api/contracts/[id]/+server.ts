@@ -2,7 +2,6 @@
  * Contract Detail API Proxy
  * GET /api/contracts/[id] - Fetch single contract
  * PUT /api/contracts/[id] - Update contract
- * DELETE /api/contracts/[id] - Delete contract
  */
 
 import type { RequestHandler } from './$types';
@@ -31,15 +30,5 @@ export const PUT: RequestHandler = async ({ params, request, cookies }) => {
 		return createProxyResponse(response);
 	} catch (error) {
 		return handleProxyError(error, `PUT /contracts/${params.id}`);
-	}
-};
-
-export const DELETE: RequestHandler = async ({ params, request, cookies }) => {
-	try {
-		validateXsrfForMutation(request, cookies, 'DELETE');
-		const response = await forwardRequest(`/contracts/${params.id}`, 'DELETE', cookies);
-		return createProxyResponse(response);
-	} catch (error) {
-		return handleProxyError(error, `DELETE /contracts/${params.id}`);
 	}
 };

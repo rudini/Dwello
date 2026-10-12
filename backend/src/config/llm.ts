@@ -59,11 +59,11 @@ export const SWISS_UTILITY_CATEGORIES = {
 		{ en: 'TV/Cable', de: 'TV/Kabelgebühren' },
 		{ en: 'Pest Control', de: 'Schädlingsbekämpfung' },
 		{ en: 'Fire Extinguisher Maintenance', de: 'Feuerlöscher-Wartung' },
-		{ en: 'Chimney Sweep', de: 'Kaminfeger' },
-		{ en: 'Administration', de: 'Verwaltungskosten' }
+		{ en: 'Chimney Sweep', de: 'Kaminfeger' }
 	],
 	notAllowed: [
 		{ en: 'Repairs', de: 'Reparaturen' },
+		{ en: 'Administration', de: 'Verwaltungskosten' },
 		{ en: 'Renovation', de: 'Renovationen' },
 		{ en: 'Property Tax', de: 'Grundsteuern' },
 		{ en: 'Mortgage Interest', de: 'Hypothekarzinsen' },
@@ -104,9 +104,13 @@ export function buildCategorizationPrompt(invoice: {
 	description: string;
 	amount: string | number;
 }): string {
-	return CATEGORIZATION_PROMPT.replace('{billing_entity}', invoice.billingEntityName)
-		.replace('{description}', invoice.description)
-		.replace('{amount}', String(invoice.amount));
+	const values: Record<string, string> = {
+		billing_entity: invoice.billingEntityName,
+		description: invoice.description,
+		amount: String(invoice.amount)
+	};
+	// One pass with a function: invoice text is neither scanned for placeholders nor for $ patterns
+	return CATEGORIZATION_PROMPT.replace(/\{(billing_entity|description|amount)\}/g, (_, key: string) => values[key]);
 }
 
 /**

@@ -303,6 +303,8 @@ export async function generateStatement(
 			periodEnd: input.periodEnd,
 			statementDate: statementDate.toISOString().split('T')[0],
 			rentalDays: calculation.rentalDays,
+			rentalStart: calculation.rentalStart,
+			rentalEnd: calculation.rentalEnd,
 			totalCosts: String(calculation.totalCosts),
 			totalAdvancePayments: String(calculation.totalAdvancePayments),
 			managementFee: String(calculation.managementFee),

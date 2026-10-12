@@ -24,6 +24,7 @@ interface ApiError {
 	code: string;
 	message: string;
 	params?: Record<string, string | number>;
+	details?: Record<string, unknown>; // the backend's whole answer, e.g. the statements behind a refusal
 }
 
 /**
@@ -154,7 +155,8 @@ async function failure(response: Response): Promise<ApiError> {
 		return {
 			code: errorData.code ?? `HTTP_${response.status}`,
 			message: errorData.error,
-			params: errorData.params
+			params: errorData.params,
+			details: errorData
 		};
 	return (
 		errorData.error || {

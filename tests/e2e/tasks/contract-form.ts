@@ -6,6 +6,9 @@ import {
 	baseRentInput,
 	contractSubmitButton,
 	discardDraftButton,
+	endDateInput,
+	limitedDuration,
+	pastEndConfirm,
 	finishedStep,
 	newTenantLink,
 	nextButton,
@@ -98,5 +101,19 @@ export const chooseTenantWhileLoading = (tenantId: string) => async (actor: Acto
 
 export const changeBaseRent = (baseRent: string) => async (actor: Actor) => {
 	await baseRentInput(actor.page).fill(baseRent);
+	await contractSubmitButton(actor.page).click();
+};
+
+// «Bearbeiten»: the contract ends on a fixed day; a past day is confirmed with its consequence
+export const saveEndDate = (isoDate: string, { confirmPast = false } = {}) => async (actor: Actor) => {
+	await limitedDuration(actor.page).click();
+	await typeDate(endDateInput(actor.page), isoDate);
+	if (confirmPast) await pastEndConfirm(actor.page).check();
+	await contractSubmitButton(actor.page).click();
+};
+
+// «Bearbeiten»: another Vertragsbeginn
+export const saveStartDate = (isoDate: string) => async (actor: Actor) => {
+	await typeDate(startDateInput(actor.page), isoDate);
 	await contractSubmitButton(actor.page).click();
 };

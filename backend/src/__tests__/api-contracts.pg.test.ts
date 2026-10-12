@@ -126,6 +126,13 @@ describe('API-Verträge des Frontends', () => {
 		expect(drift(await sample('buildings'), actual)).toEqual([]);
 	});
 
+	// the 2024 statement already bills the days after 31.03.2024
+	it('PUT /contracts/:id mit einem Vertragsende vor einer Abrechnung liefert die Felder von contract-end-refused.json', async () => {
+		const response = await sendJson('PUT', `/api/v1/contracts/${rental.contract}`, { endDate: '2024-03-31' });
+		expect(response.status).toBe(409);
+		expect(drift(await sample('contract-end-refused'), await response.json())).toEqual([]);
+	});
+
 	it('GET /tenants liefert die Felder von tenants.json', async () => {
 		const actual = await (await callApi(`/api/v1/tenants?search=${encodeURIComponent(`Keller ${token}`)}`)).json();
 		expect(drift(await sample('tenants'), actual)).toEqual([]);

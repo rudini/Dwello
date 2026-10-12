@@ -12,6 +12,7 @@ import {
 	createContract,
 	updateContract,
 	deleteContract,
+	BilledDaysError,
 	getActiveContract,
 	getContractsByPeriod
 } from '../services/contract.service';
@@ -163,6 +164,10 @@ export const contractRoutes = new Elysia({ prefix: '/api/v1/contracts' })
 				}
 				return contract;
 			} catch (error) {
+				if (error instanceof BilledDaysError) {
+					set.status = 409;
+					return { error: error.message, statements: error.statements };
+				}
 				set.status = 400;
 				return errorBody(error, 'Failed to update contract');
 			}

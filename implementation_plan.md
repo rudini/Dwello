@@ -4618,7 +4618,94 @@ subtotal, fee and «Ihre Nebenkosten» stay exact. A row «Rundung auf 5 Rappen�
 - [x] **Decisions** recorded in `docs/design/design-decisions.md` («Decided during the work», Session 12): fee on own
   costs, Saldo to 5 Rappen, Saldo 0 settled when sent, merged migrations.
 
-## Session 13 - October 2026: UI in four languages (Paraglide JS)
+
+### Follow-up: end a contract on a future day
+
+A tenant gives notice for a later day: «Mietvertrag beenden» asks for the Vertragsende instead of setting today.
+
+- [x] **Scenarios** `tests/e2e/features/contract-detail.feature`: end on a future day (status stays «Laufend»), a day
+  before today refused (both failed first: no date field).
+- [x] **Rule** `contractEndError` in `src/lib/contract-status.ts`: today or later, never before the Vertragsbeginn; an
+  earlier end goes through «Bearbeiten». Checked in the dialog and again in the action (`contracts/[id]/+page.server.ts`).
+- [x] **Dialog** `contracts/[id]/+page.svelte`: `DateInput` «Vertragsende», today proposed, error at the field; toast
+  names the day. `ActionDialog` takes `fields` and `check`; its form handling and `FormDialog`'s share
+  `src/lib/ui/dialog-submit.ts` (fallow duplication).
+- [x] **Tests**: `contract-status.test.ts`, `contract-actions.test.ts`, `contract-detail-page.dom.test.ts`; the
+  `enhance` mocks pass `formData` as SvelteKit does. Open points in `offene-punkte.md` (lines on «Beenden») closed.
+- [x] **Review I** (`docs/reviews/I-review-1.md`, no critical): a running contract with a future Vertragsende can no
+  longer be deleted (only ended ones; the dialog says until when it runs, scenario first); a future contract proposes
+  its start; the action reads the Vertragsbeginn from the backend and checks the format; the toast and the sent date
+  are tested; the field-error state is in the axe check (`end-dialog-error`); lows in `offene-punkte.md`.
+- [x] **Review I round 6, personas Helga I5, Sven I5, Anna I4** (`I-review-6.md`, `helga-i5.md`, `sven-i5.md`,
+  `anna-i4.md`): statements store `rental_start`/`rental_end` (`0001_schema.sql`, `schema.ts`, `calculation.service.ts`,
+  `statement.service.ts`; the PDF reads them); `statementsChanged` refuses any change of the billed days
+  (product owner); `billedDaysError` lists drafts and sent/paid statements apart; `ActionDialog` focuses a refusal;
+  `PastEndConfirm` announces a reset confirmation; the dialog clears a field error on a new date; `Checkbox` reads its
+  error first; scenario «Vertragsbeginn nach dem Beginn einer Abrechnung»; requirements A-10 precise, A-11 added.
+- [x] **Review I round 5, personas Helga I4, Sven I4, Anna I3** (`I-review-5.md`, `helga-i4.md`, `sven-i4.md`,
+  `anna-i3.md`): the backend compares new dates with the billed Mietstage (`statementsOutside`, `BilledDaysError`,
+  `checkNewDates` in `contract.service.ts`; `contract-end.pg.test.ts`), so editing an ended contract with its final
+  statement works again and a later Vertragsbeginn is refused; `billedDaysError` copy for one or several drafts and
+  sent statements; a 409 without statements shows a message; `PastEndConfirm.svelte` has a short live notice with
+  the year warning, the checkbox outside it, its error cleared on a new date, nothing before the Vertragsbeginn;
+  requirements A-7 rewritten, A-10 added.
+- [x] **Review I round 4, personas Helga I3, Sven I3, Anna I2** (`I-review-4.md`, `helga-i3.md`, `sven-i3.md`,
+  `anna-i2.md`): the backend refuses an end before a statement of the contract (`updateContract`, 409 with the
+  statements; `contract-end.pg.test.ts`, contract `tests/contracts/contract-end-refused.json`); the BFF says what to do
+  for a draft or a sent statement (`statementsAfterEndError`); «Bearbeiten» confirms a changed past end like the dialog
+  (`src/routes/contracts/PastEndConfirm.svelte`, `ContractForm.svelte`, `apiCall` passes the error body as `details`);
+  the confirmation holds for the day shown, is announced and names the landlord's consequence; dialogs scroll in a short
+  window (`Dialog.svelte`); impossible days refused; unused `DELETE /api/contracts/[id]` removed; a11y state
+  `past-end-error`. Scenarios first in `contract-edit.feature` and `contract-detail.feature`. Requirements A-2 done,
+  A-7 to A-9 added in `docs/anforderungen-vertragsende.md`.
+- [x] **IF-1, IF-3** (product owner): only a contract that has not started can be deleted (`contracts/[id]/+page.svelte`,
+  `+page.server.ts` `delete`); a past Vertragsende is confirmed with a checkbox naming since when the contract has ended
+  (`pastEndConfirmation`, `endedSince` in `contract-status.ts`; also checked in the action); the action refuses a day
+  before the end of a stored statement of the contract. Scenarios first in `contract-detail.feature` (past end, missing
+  confirmation, statement, ended contract kept, future contract deleted).
+- [x] **Fachreview I** (`docs/reviews/I-fachreview-1.md`, no critical): the end dialog names Kündigungstermin and
+  Kündigungsfrist, says a late notice counts for the next term and that a new contract can start the day after; the
+  error for a past day points to «Bearbeiten» for a passed Kündigungstermin. Product decisions (IF-1, IF-3 to IF-9) and
+  glossary proposals in `offene-punkte.md`.
+- [x] **Review I round 3, persona reruns** (`I-review-3.md`; `helga-i2.md`, `sven-i2.md`): «Löschen» back to its
+  behaviour before this change (product owner: a separate action) except the one guard for a running contract with a
+  future end; the field error is announced by the `DateInput` live region; the example date uses the current year;
+  a sentence says when the apartment is free; `endContract` computes today when the step runs.
+- [x] **Review I round 2 and personas** (`I-review-2.md`; `helga-i.md`, `sven-i.md`, `anna-i.md`): no day proposed;
+  a future contract can be deleted again (scenario first), a running one cannot; delete dialog says a contract is kept
+  for the Nebenkostenabrechnung; the action refuses an existing end and a contract it cannot load; shorter help; the
+  field is focused anew after an error; `FormDialog` reads `ondone` when it fires; scenario precondition via the API.
+  Product points beyond this change in `offene-punkte.md`.
+
+## Session 13 - October 2026: Prompt Audit of the Agent Files and the Categorization Prompt
+
+### Done ✅
+- [x] **Categorization prompt** (`backend/src/config/llm.ts`): `Administration` moved to the non-allocable list, as
+  `0002_stammdaten.sql` seeds it; `GET /utility-rules` follows. `buildCategorizationPrompt` fills the placeholders in
+  one pass, so `$&` or `{description}` in invoice text stays as written. Tests first: `llm-prompt.test.ts`,
+  `utility-validation.service.test.ts`.
+- [x] **3 % note** (`utility-validation.service.ts`): a guideline, not a cap, as in `backend/CLAUDE.md`.
+- [x] **Agent files**: `CLAUDE.md` (LLM no longer "local", `bun test` gotcha, two duplicated guidelines removed);
+  `.claude/skills/bdd-acceptance/SKILL.md` (`bun run test:e2e`, password-login bootstrap removed);
+  `.claude/skills/ponytail/SKILL.md` (test rule matches `CLAUDE.md`); `.claude/skills/tdd/SKILL.md`
+  (`UBIQUITOUS_LANGUAGE.md`). `CLAUDE.md.backup` deleted (`docs/design/offene-punkte.md` updated).
+
+### Open
+- [ ] Project `.claude/skills/ponytail*` and the user-level ponytail plugin both load and mark shortcuts differently
+  (`ponytail:` vs `shortcut:`): keep one.
+- [ ] `bdd-acceptance` says one feature file per page, `tests/e2e/CLAUDE.md` one per area: decide.
+
+## Session 14 - October 2026: Missing Payment Deadline
+
+### Done ✅
+- [x] **Statement edit without a deadline**: an emptied Zahlungsfrist no longer reaches Postgres as `""` (seen in the
+  axe job's log). The edit action (`src/routes/statements/[id]/edit/+page.server.ts`) answers with "Die Frist fehlt.
+  Bitte geben Sie ein Datum ein." at the field (`+page.svelte`) without asking the backend; `PUT /statements/:id`
+  validates `paymentDeadline` as a date (422, `backend/src/routes/statements.ts`, `docs/api-specification.md`).
+  Tests first: scenario "Zahlungsfrist fehlt" (`statement-edit.feature`), `statement-edit-actions.test.ts`,
+  `statement-pages.dom.test.ts`, `statement.routes.pg.test.ts`.
+
+## Session 15 - October 2026: UI in four languages (Paraglide JS)
 
 Every UI text moves into `messages/{de,fr,it,en}.json` (German is the base and default); a language switcher in the
 header and on pages without it. Branch `claude/optimistic-clarke-nn8u7t` from `main`. Terms per language:
@@ -4752,6 +4839,12 @@ header and on pages without it. Branch `claude/optimistic-clarke-nn8u7t` from `m
   `helga-i18n-3.md`, `marco-i18n-3.md`, `anna-i18n-3.md`: no blocker or major.
 - [x] **Extra persona runs** (approved by the user): `sven-i18n-4.md` (English, keyboard) and `weber-i18n-4.md` (French,
   desktop and 390 px) checked their last fixes (privacy link on the sign-in page, sign-out): no blocker or major.
+- [x] **Merge of `main` for PR #48**: conflicts resolved (contract service keeps `CONTRACT_OVERLAP` in `checkNewDates`,
+  `apiCall` passes `params` and `details`, `ActionDialog`, `DateInput` with the current year in `ui_date_*` messages,
+  contract page and form, statement edit). The texts new on `main` are in `messages/*.json` (`contract-status.ts`,
+  `PastEndConfirm.svelte`, `contracts/[id]/+page.*`, `statements/[id]/edit/+page.server.ts`); three obsolete keys
+  removed; the new states `end-dialog-error` and `past-end-error` are in `sprachen-bildschirme.feature` and their
+  setup chooses «Befristet» in the page's language (`tests/e2e/interactions/accessibility.ts`).
 
 ---
 

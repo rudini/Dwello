@@ -11,3 +11,8 @@ export const extendPaymentDeadline = (deadline: string, note: string) => async (
 	await notesInput(actor.page).fill(note);
 	await saveStatementButton(actor.page).click();
 };
+
+export const clearPaymentDeadline = async (actor: Actor) => {
+	await paymentDeadlineInput(actor.page).fill('');
+	await saveStatementButton(actor.page).click();
+};

@@ -30,6 +30,8 @@
 		testid: string;
 	} = $props();
 
+	// the example is the last day of this year: never in the past
+	const EXAMPLE = `31.12.${new Date().getFullYear()}`;
 	const toText = (iso: string) => (iso ? formatDate(iso) : '');
 
 	let text = $state(toText(value));
@@ -72,14 +74,15 @@
 		/^\d{1,2}\.\d{1,2}\.?$/.test(text.trim())
 			? NO_YEAR
 			: /^(\d{1,2}\.\d{1,2}\.\d{2,4}|\d{8})$/.test(text.trim())
-				? m.ui_date_not_a_date()
-				: m.ui_date_digits_only()
+				? m.ui_date_not_a_date({ example: EXAMPLE })
+				: m.ui_date_digits_only({ example: EXAMPLE })
 	);
 	const shownError = $derived(invalid && left ? wrongDate : error);
 	const wordsId = $derived(`${id}-words`);
 	const helpText = $derived(help ? `${help} ${m.ui_date_format()}` : m.ui_date_format());
 	const words = $derived(value ? formatDateLong(value) : '');
-	const announced = $derived(invalid && left ? wrongDate : ''); // said when the field is left
+	// said when the field is left, and an error of the page, also when the field kept the focus (Enter)
+	const announced = $derived(invalid && left ? wrongDate : (error ?? ''));
 
 	function oninput(event: Event & { currentTarget: HTMLInputElement; inputType?: string }) {
 		left = false;
@@ -108,7 +111,7 @@
 </script>
 
 <div bind:this={frame} class="flex flex-col gap-2">
-	<Field {id} {label} help={helpText} example="31.12.2025" error={shownError} {optional}>
+	<Field {id} {label} help={helpText} example={EXAMPLE} error={shownError} {optional}>
 		{#snippet children(control)}
 			<div class="flex gap-2">
 				<input

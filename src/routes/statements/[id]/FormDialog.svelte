@@ -5,6 +5,7 @@
 	import { tick } from 'svelte';
 	import { addToast } from '$lib/stores';
 	import Dialog from '$lib/ui/Dialog.svelte';
+	import { dialogSubmit } from '$lib/ui/dialog-submit';
 
 	// A confirmation whose button runs a form action of the page; closes once the action has answered
 	let {
@@ -41,21 +42,19 @@
 	bind:this={form}
 	method="POST"
 	{action}
-	use:enhance={({ formData }) => {
-		for (const [name, value] of Object.entries(fields)) formData.set(name, value);
-		busy = true;
-		return async ({ result, update }) => {
-			if (result.type === 'redirect') ondone?.();
-			await update();
-			busy = false;
+	use:enhance={dialogSubmit(
+		() => fields,
+		(running) => (busy = running),
+		async (result) => {
 			open = false;
 			if (result.type === 'success' && success) {
 				addToast('success', success);
 				await tick(); // after the dialog has handed the focus back
 				document.querySelector<HTMLElement>('h1')?.focus(); // its button may be gone now
 			}
-		};
-	}}
+		},
+		() => ondone?.()
+	)}
 ></form>
 
 <Dialog

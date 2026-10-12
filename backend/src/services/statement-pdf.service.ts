@@ -5,7 +5,7 @@
 
 import { eq, inArray } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { categories, distributionKeys, rentalContracts, utilityStatements, type KeyValues } from '../db/schema';
+import { categories, distributionKeys, utilityStatements, type KeyValues } from '../db/schema';
 import { getHeatingProfile } from './heating-profile.service';
 import { roundToRappen } from './pdf-format';
 import { handleMidYearMoves } from './prorating.service';
@@ -125,20 +125,6 @@ export function toPdfData(
 	};
 }
 
-// The tenant's part of the period: from moving in or the period start to moving out or the period end
-async function rentalDatesOf(statement: StatementWithDetails) {
-	const [contract] = await db
-		.select({ startDate: rentalContracts.startDate, endDate: rentalContracts.endDate })
-		.from(rentalContracts)
-		.where(eq(rentalContracts.id, statement.contractId));
-	const later = (a: string, b: string) => (a > b ? a : b);
-	const earlier = (a: string, b: string) => (a < b ? a : b);
-	return {
-		rentalStart: later(contract?.startDate ?? statement.periodStart, statement.periodStart),
-		rentalEnd: earlier(contract?.endDate ?? statement.periodEnd, statement.periodEnd)
-	};
-}
-
 // The heating profile and its share of the months rented; the calculation applies it to heating and hot water costs
 async function heatingOf(statement: StatementWithDetails, period: { rentalStart: string; rentalEnd: string }, language: Language, hasHeating: boolean) {
 	const { rentalStart, rentalEnd } = period;
@@ -182,7 +168,8 @@ function fuelOf(statement: StatementWithDetails, names: Map<string, Names>, lang
 
 // What the generation run used, for the PDF: the tenant's dates and the heating profile
 async function runDetailsOf(statement: StatementWithDetails, names: Map<string, Names>, language: Language, hasHeating: boolean): Promise<RunDetails> {
-	const rental = await rentalDatesOf(statement);
+	// the tenant's part of the period, as billed: from moving in or the period start to moving out or the period end
+	const rental = { rentalStart: statement.rentalStart, rentalEnd: statement.rentalEnd };
 	return {
 		...rental,
 		...(await heatingOf(statement, rental, language, hasHeating)),

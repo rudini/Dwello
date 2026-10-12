@@ -90,7 +90,7 @@ Apartment `status` is derived from rental contracts: `occupied` (a contract runs
 | GET | `/apartment/:apartmentId/active` | Query: `date` (default today). → the contract running on that date. 404 if none |
 | GET | `/apartment/:apartmentId/period` | Query: `periodStart`, `periodEnd` (required). → `{ contracts }` overlapping the period (for prorating) |
 | POST | `/` | Body: `apartmentId`, `tenantId` (uuid), `startDate`, `baseRent`, `monthlyAdvancePayment` required; optional `endDate`, `additionalRent`, `referenceIndex`, `contractPdf`, `notes`. → 201 contract. 400 apartment/tenant not found or overlap with another contract of the apartment |
-| PUT | `/:id` | Body: any subset of the POST fields except `apartmentId`/`tenantId`. → contract. 404; 400 overlap |
+| PUT | `/:id` | Body: any subset of the POST fields except `apartmentId`/`tenantId`. → contract. 404; 400 overlap; 409 `{ error, statements: [{ id, statementNumber, status, periodEnd }] }` if the new `startDate`/`endDate` change the rent days billed by a utility statement of the contract (stored as `rental_start`/`rental_end` on the statement) (see `tests/contracts/contract-end-refused.json`) |
 | DELETE | `/:id` | 204. 404; 400 if the contract has utility statements |
 
 ## 7. Categories `/api/v1/categories`
@@ -208,7 +208,7 @@ Filter `status` in `GET /` and `/counts`: `draft`, `paid`, `sent` (sent, deadlin
 | POST | `/preview` | Body: calculation input (below). Stores nothing. → `{ preview: true, contractId, apartmentId, tenantId, periodStart, periodEnd, rentalDays, totalPeriodDays, lineItems, subtotal, managementFee, managementFeePercent, totalCosts, totalAdvancePayments, balance }` (numbers; positive balance = tenant owes). 400 |
 | POST | `/generate` | Body: calculation input + `buildingId`. Synchronous, one contract: calculates and stores a **draft** with line items and a payment deadline of `payment_deadline_days`. → **201** statement. 400 (e.g. contract not found, contract outside the period) |
 | GET | `/:id` | → statement with `tenant`, `apartment`, `building`, `lineItems` (see `tests/contracts/statement.json`). 404 |
-| PUT | `/:id` | Body: optional `notes`, `paymentDeadline`. → statement. 404; 400. A changed deadline discards the stored PDF |
+| PUT | `/:id` | Body: optional `notes`, `paymentDeadline` (date). → statement. 404; 400 date that does not exist; 422 deadline not YYYY-MM-DD. A changed deadline discards the stored PDF |
 | PUT | `/:id/status` | Body: `status` required; optional `paidDate`, `paidAmount`, `reminderSentDate`. → statement. 404; 400 invalid transition |
 | DELETE | `/:id` | 204. 404; 400 not a draft |
 | POST | `/:id/line-items` | Body: `items: [{ description, totalAmount, tenantShare, categoryId?, distributionKeyId?, sharePercentage?, sortOrder? }]` (amounts as strings). → 201 `{ message, items }`. 400 not found or not a draft |

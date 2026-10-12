@@ -69,6 +69,7 @@
 			label={refund ? m.statements_refund_by() : m.glossary_deadline_term()}
 			help={refund ? m.statements_refund_by_help() : m.statements_deadline_help()}
 			bind:value={deadline}
+			error={form?.errors?.paymentDeadline}
 			testid="payment-deadline-input"
 		/>
 		<Textarea

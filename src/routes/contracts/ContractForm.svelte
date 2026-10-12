@@ -12,7 +12,12 @@
 		overlapWarning,
 		validateContract
 	} from '$lib/contract-form';
-	import { contractStatusOn, localToday } from '$lib/contract-status';
+	import {
+		contractStatusOn,
+		localToday,
+		pastEndConfirmation,
+		billedDaysError
+	} from '$lib/contract-status';
 	import { normalizeAmounts, stepErrors } from '$lib/contract-wizard';
 	import { addToast } from '$lib/stores';
 	import type { RentalContract } from '$lib/types';
@@ -29,6 +34,7 @@
 	import ApartmentStep from './new/ApartmentStep.svelte';
 	import PeriodStep from './new/PeriodStep.svelte';
 	import RentStep from './new/RentStep.svelte';
+	import PastEndConfirm from './PastEndConfirm.svelte';
 
 	// Form of a contract being edited, with the fields, help and checks of the wizard in ./new
 	let {
@@ -61,6 +67,11 @@
 			values.apartmentId !== contract.apartmentId
 		)
 	);
+	// a changed Vertragsende in the past is confirmed as in «Beenden»; an unchanged one is not asked again
+	const endChanged = $derived(
+		!values.isUnlimited && values.endDate !== (contract.endDate?.slice(0, 10) ?? '')
+	);
+	let confirmedDay = $state('');
 	const overlap = $derived(overlapWarning(values, apartmentContracts, contract.id));
 	const back = $derived(`/contracts/${contract.id}`);
 	const tenantName = $derived(tenants.find((t) => t.id === values.tenantId)?.name ?? '');
@@ -96,21 +107,26 @@
 		delete errors[errorKey[id] ?? id];
 	}
 
+	// the backend answers in English: a valid form is refused for an overlap or a statement after the end
+	function saveError({ message, details }: { message: string; details?: Record<string, unknown> }) {
+		if (Array.isArray(details?.statements)) return billedDaysError(details.statements);
+		if (/overlap/i.test(message)) return m.backend_contract_overlap();
+		return m.contracts_save_failed();
+	}
+
 	async function save(event: SubmitEvent) {
 		event.preventDefault();
 		Object.assign(values, normalizeAmounts(values)); // "1'450" as typed in Switzerland
 		errors = { ...validateContract(values), ...stepErrors(values, 3) };
+		const unconfirmed = endChanged && confirmedDay !== values.endDate;
+		const pastConfirmed = unconfirmed && pastEndConfirmation(values.endDate, today);
+		if (pastConfirmed) errors.pastConfirmed = pastConfirmed;
 		if (Object.keys(errors).length > 0) return focusFirstError(form);
 		saving = true;
 		const response = await apiCall(back, { method: 'PUT', body: contractBody(values) });
 		saving = false;
 		if (response.error) {
-			// the backend answers in English; a valid form is refused only for an overlap
-			errors = {
-				form: /overlap/i.test(response.error.message)
-					? m.backend_contract_overlap()
-					: m.contracts_save_failed()
-			};
+			errors = { form: saveError(response.error) };
 			return focusFirstError(form);
 		}
 		addToast('success', m.contracts_saved_toast({ name: tenantName }), 10_000);
@@ -163,6 +179,13 @@
 			today={pastBefore}
 			{overlap}
 			{errors}
+		/>
+		<PastEndConfirm
+			endDate={endChanged ? values.endDate : ''}
+			startDate={values.startDate}
+			{today}
+			bind:confirmedDay
+			bind:error={() => errors.pastConfirmed ?? '', (error) => (errors.pastConfirmed = error)}
 		/>
 	</Panel>
 

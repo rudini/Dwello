@@ -9,22 +9,27 @@ export const load: PageServerLoad = async ({ params, fetch }) => ({
 	statement: await loadStatement(fetch, params.id)
 });
 
+// One error per field, or for the whole form
+const failed = (status: number, errors: Record<string, string>) => fail(status, { errors });
+
 // Costs and management fee come from the generation run; only deadline and notes are editable
 export const actions: Actions = {
 	default: async ({ request, params, fetch }) => {
 		const form = await request.formData();
+		const paymentDeadline = String(form.get('paymentDeadline') ?? '');
+		if (!paymentDeadline) {
+			return failed(400, { paymentDeadline: m.statements_deadline_missing() });
+		}
 		const response = await fetch(`${BACKEND_URL}/api/v1/statements/${params.id}`, {
 			method: 'PUT',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({
-				paymentDeadline: String(form.get('paymentDeadline')),
+				paymentDeadline,
 				notes: String(form.get('notes'))
 			})
 		});
 		if (!response.ok) {
-			return fail(response.status, {
-				errors: { form: m.statements_save_failed() }
-			});
+			return failed(response.status, { form: m.statements_save_failed() });
 		}
 		throw redirect(303, `/statements/${params.id}`);
 	}

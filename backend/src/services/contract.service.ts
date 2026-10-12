@@ -198,7 +198,7 @@ export async function getContract(id: string): Promise<ContractWithDetails | nul
 /**
  * Check for overlapping contracts for an apartment
  */
-export async function checkContractOverlap(
+async function checkContractOverlap(
 	apartmentId: string,
 	startDate: string,
 	endDate: string | null,
@@ -290,6 +290,47 @@ export async function createContract(data: NewRentalContract): Promise<RentalCon
 	return contract;
 }
 
+/** The contract's statements whose billed rent days the new dates would change (fewer or more) */
+async function statementsChanged(contractId: string, startDate: string, endDate: string | null) {
+	const from = sql`greatest(${utilityStatements.periodStart}, ${startDate}::date)`;
+	const to = sql`least(${utilityStatements.periodEnd}, coalesce(${endDate}::date, ${utilityStatements.periodEnd}))`;
+	return db
+		.select({
+			id: utilityStatements.id,
+			statementNumber: utilityStatements.statementNumber,
+			status: utilityStatements.status,
+			periodEnd: utilityStatements.periodEnd
+		})
+		.from(utilityStatements)
+		.where(
+			and(
+				eq(utilityStatements.contractId, contractId),
+				or(sql`${from} <> ${utilityStatements.rentalStart}`, sql`${to} <> ${utilityStatements.rentalEnd}`)
+			)
+		);
+}
+
+/** New contract dates that would change the rent days billed by a stored statement of the contract */
+export class BilledDaysError extends Error {
+	constructor(readonly statements: Awaited<ReturnType<typeof statementsChanged>>) {
+		super('Contract dates change the rent days billed by its utility statements');
+	}
+}
+
+/** New dates may neither overlap another contract of the apartment nor change the billed Mietstage of a statement */
+async function checkNewDates(current: RentalContract, data: Partial<NewRentalContract>) {
+	if (!data.startDate && data.endDate === undefined) return;
+	const startDate = data.startDate || current.startDate;
+	const endDate = data.endDate !== undefined ? data.endDate : current.endDate;
+	const { hasOverlap, overlappingContract } = await checkContractOverlap(current.apartmentId, startDate, endDate, current.id);
+	if (hasOverlap)
+		throw new CodedError('CONTRACT_OVERLAP', `Contract would overlap with existing contract ${overlappingContract}`, {
+			contract: overlappingContract!
+		});
+	const statements = await statementsChanged(current.id, startDate, endDate);
+	if (statements.length) throw new BilledDaysError(statements);
+}
+
 /**
  * Update an existing contract
  */
@@ -297,28 +338,9 @@ export async function updateContract(
 	id: string,
 	data: Partial<NewRentalContract>
 ): Promise<RentalContract | null> {
-	// Get current contract to check apartment
 	const current = await getContract(id);
 	if (!current) return null;
-
-	// If dates are being updated, check for overlaps
-	if (data.startDate || data.endDate !== undefined) {
-		const startDate = data.startDate || current.startDate;
-		const endDate = data.endDate !== undefined ? data.endDate : current.endDate;
-
-		const { hasOverlap, overlappingContract } = await checkContractOverlap(
-			current.apartmentId,
-			startDate,
-			endDate,
-			id
-		);
-
-		if (hasOverlap) {
-			throw new CodedError('CONTRACT_OVERLAP', `Contract would overlap with existing contract ${overlappingContract}`, {
-				contract: overlappingContract!
-			});
-		}
-	}
+	await checkNewDates(current, data);
 
 	const [contract] = await db
 		.update(rentalContracts)
@@ -363,17 +385,4 @@ export async function deleteContract(id: string): Promise<{ success: boolean; er
 
 
 	return { success: true };
-}
-
-/**
- * Check if a contract exists
- */
-export async function contractExists(id: string): Promise<boolean> {
-	const [result] = await db
-		.select({ id: rentalContracts.id })
-		.from(rentalContracts)
-		.where(eq(rentalContracts.id, id))
-		.limit(1);
-
-	return !!result;
 }

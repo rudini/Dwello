@@ -1,9 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
 
 // enhance as SvelteKit wires it: the test plays the server's answer to the submit
-const server = vi.hoisted(() => ({ submit: null as null | (() => unknown) }));
+const server = vi.hoisted(() => ({ submit: null as null | ((input: { formData: FormData }) => unknown) }));
 vi.mock('$app/forms', () => ({
-	enhance: (_form: unknown, submit: () => unknown) => {
+	enhance: (_form: unknown, submit: (input: { formData: FormData }) => unknown) => {
 		server.submit = submit;
 		return { destroy() {} };
 	}
@@ -14,7 +14,7 @@ import { byTestId, settle, show } from './helpers/dom';
 import { markup } from './helpers/snippet';
 
 async function answer(type: 'success' | 'failure' | 'redirect') {
-	const after = server.submit!() as (input: unknown) => Promise<void>;
+	const after = server.submit!({ formData: new FormData() }) as (input: unknown) => Promise<void>;
 	await after({ update: async () => {}, result: { type } });
 	await settle();
 }
@@ -67,6 +67,13 @@ describe('Bestätigung einer Seitenaktion', () => {
 		expect(document.querySelector('[role=dialog]')).not.toBeNull();
 		expect(byTestId('form-error')!.textContent).toContain('Mieter mit Mietverträgen');
 		expect(onsuccess).not.toHaveBeenCalled();
+	});
+
+	// die Ablehnung steht unten im Dialog: sie bekommt den Fokus, auch in einem niedrigen Fenster
+	it('setzt den Fokus auf den Grund einer Ablehnung', async () => {
+		open({ error: 'Mieter mit Mietverträgen können nicht gelöscht werden.' });
+		await answer('failure');
+		expect(document.activeElement).toBe(byTestId('form-error'));
 	});
 
 	it('lässt nicht bestätigen, was nicht möglich ist', () => {

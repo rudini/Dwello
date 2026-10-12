@@ -2,7 +2,12 @@ import { m } from '$lib/paraglide/messages';
 import type { RentalContract, Tenant, Apartment, Building, ApartmentStatus } from '$lib/types';
 import type { Actions, PageServerLoad } from './$types';
 import { error, fail, redirect } from '@sveltejs/kit';
-import { localToday } from '$lib/contract-status';
+import {
+	contractEndError,
+	localToday,
+	pastEndConfirmation,
+	billedDaysError
+} from '$lib/contract-status';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
@@ -95,21 +100,58 @@ export const load: PageServerLoad = async ({ params, fetch }): Promise<ContractD
 	}
 };
 
+/** Why the contract cannot end on that day, or null */
+function endRefusal(
+	contract: { startDate?: string; endDate?: string | null },
+	endDate: string,
+	pastConfirmed: boolean
+) {
+	// a stale page: an end already set is changed under «Bearbeiten», not overwritten
+	if (contract.endDate)
+		return fail(409, {
+			endError: m.contracts_end_already_set()
+		});
+	const endError =
+		contractEndError(endDate, String(contract.startDate ?? ''), localToday()) ??
+		(pastConfirmed ? null : pastEndConfirmation(endDate, localToday()));
+	return endError ? fail(400, { endError }) : null;
+}
+
 export const actions: Actions = {
-	end: async ({ params, fetch }) => {
-		const response = await fetch(`${BACKEND_URL}/api/v1/contracts/${params.id}`, {
+	// The last day of the tenancy, the Kündigungstermin; a past day only confirmed, never before a statement's end
+	end: async ({ params, fetch, request }) => {
+		const form = await request.formData();
+		const endDate = String(form.get('endDate') ?? '');
+		const url = `${BACKEND_URL}/api/v1/contracts/${params.id}`;
+		const stored = await fetch(url);
+		if (!stored.ok) return fail(stored.status, { endError: m.contracts_end_failed() });
+		const contract = await stored.json();
+		const refusal = endRefusal(contract, endDate, form.get('pastConfirmed') === 'on');
+		if (refusal) return refusal;
+		const response = await fetch(url, {
 			method: 'PUT',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ endDate: localToday() })
+			body: JSON.stringify({ endDate })
 		});
+		// a stored statement already bills rent days after that day
+		const statements =
+			response.status === 409 && (await response.json().catch(() => ({}))).statements;
+		if (Array.isArray(statements)) return fail(409, { endError: billedDaysError(statements) });
 		if (!response.ok) {
 			return fail(response.status, { endError: m.contracts_end_failed() });
 		}
 	},
+	// only a contract that has not started: the statement needs the rent days of every other one
 	delete: async ({ params, fetch }) => {
-		const response = await fetch(`${BACKEND_URL}/api/v1/contracts/${params.id}`, {
-			method: 'DELETE'
-		});
+		const url = `${BACKEND_URL}/api/v1/contracts/${params.id}`;
+		const stored = await fetch(url);
+		if (!stored.ok) return fail(stored.status, { deleteError: m.contracts_delete_failed() });
+		const { startDate } = await stored.json();
+		if (String(startDate).slice(0, 10) <= localToday())
+			return fail(409, {
+				deleteError: m.contracts_started_not_deletable()
+			});
+		const response = await fetch(url, { method: 'DELETE' });
 		if (!response.ok) {
 			return fail(response.status, { deleteError: m.contracts_delete_failed() });
 		}
