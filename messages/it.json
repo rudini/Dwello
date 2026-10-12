@@ -1221,7 +1221,7 @@
 	"contracts_billed_locked_many": "I conteggi spese accessorie {numbers} sono stati calcolati con le date di contratto precedenti.",
 	"contracts_billed_locked_rest": "Dwello non li modifica, perciò la data non può essere salvata. Verifichi la data. Se è corretta, concordi la correzione del conteggio direttamente con l’inquilino.",
 	"contracts_billed_also_draft": "È interessata anche la bozza {numbers}.",
-	"contracts_billed_draft_one": "Il conteggio spese accessorie {number} (bozza) è stato calcolato con le date di contratto precedenti. Elimini prima la bozza e poi allestisca di nuovo il conteggio spese accessorie.",
+	"contracts_billed_draft_one": "Il conteggio spese accessorie {number} (bozza) è stato calcolato con le date di contratto precedenti. Può eliminare la bozza qui sotto e poi allestire di nuovo il conteggio spese accessorie.",
 	"contracts_billed_draft_many": "I conteggi spese accessorie {numbers} (bozze) sono stati calcolati con le date di contratto precedenti. Elimini prima le bozze e poi allestisca di nuovo i conteggi spese accessorie.",
 	"contracts_end_changed_again": "La fine del contratto è cambiata. La confermi di nuovo con la casella.",
 	"contracts_end_in_past": "La fine del contratto è nel passato. Confermi la fine del contratto con la casella.",
@@ -1270,5 +1270,5 @@
 	"contracts_apartment_contracts_loading": "I contratti di locazione dell’appartamento sono ancora in caricamento. Riprovi tra un momento.",
 	"contracts_notice_hint_title": "L’inquilino ha disdetto?",
 	"contracts_notice_hint_text": "Allora inserisca la fine del contratto nella pagina del contratto di locazione con «Terminare». Così resta a tempo indeterminato e Dwello indica i prossimi passi.",
-	"contracts_notice_hint_link": "Al contratto di locazione"
+	"contracts_notice_hint_link": "Registrare la disdetta con «Terminare»"
 }

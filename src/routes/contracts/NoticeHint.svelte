@@ -9,9 +9,12 @@
 		'inline-flex min-h-12 items-center font-semibold text-accent underline underline-offset-4 hover:text-accent-strong';
 </script>
 
-{#if shown}
-	<Alert tone="info" title={m.contracts_notice_hint_title()} testid="contract-notice-hint">
-		<p>{m.contracts_notice_hint_text()}</p>
-		<a {href} class={link}>{m.contracts_notice_hint_link()}</a>
-	</Alert>
-{/if}
+<!-- the region is there before the hint, so the hint is announced when «Befristet» is chosen (persona Sven K2) -->
+<div aria-live="polite" data-testid="contract-notice-region">
+	{#if shown}
+		<Alert tone="info" title={m.contracts_notice_hint_title()} testid="contract-notice-hint">
+			<p>{m.contracts_notice_hint_text()}</p>
+			<a {href} class={link}>{m.contracts_notice_hint_link()}</a>
+		</Alert>
+	{/if}
+</div>

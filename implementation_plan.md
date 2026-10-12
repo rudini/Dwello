@@ -4904,6 +4904,10 @@ header and on pages without it. Branch `claude/optimistic-clarke-nn8u7t` from `m
   contract form points to «Beenden» when an end is typed into an open-ended contract (`NoticeHint.svelte`,
   Sven M1); tests for «Abrechnung nicht mehr auffindbar», the refused PUT after deleting the draft and the a11y states
   `edit-refused` and `link-preset` (K-8); API documentation (K-9). Haiku review after each step.
+- [x] **Personas K2** (`docs/design/personas/{helga,anna,sven}-k2.md`): the dialog's Tab order goes on from a refusal
+  and skips hidden fields (Sven B1, `src/lib/ui/Dialog.svelte`); a refusal scrolls its way out into view and the text
+  points to it (Anna M1, `ActionDialog.svelte`, `contracts_billed_draft_one`); the «Beenden» hint is announced and its
+  link says what it leads to (Sven M1, `NoticeHint.svelte`). Other findings in `docs/design/offene-punkte.md`.
 
 ---
 

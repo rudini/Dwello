@@ -88,23 +88,24 @@
 		if (!busy && !confirmDisabled) onconfirm();
 	}
 
-	// Tab moves through the dialog's controls only, wrapping at both ends; while busy it stays on the panel
+	// Tab moves through the dialog's controls only, wrapping at both ends; while busy it stays on the panel.
+	// From an element that is not a control (a refusal focused by script) it goes on from where that element is
 	function trapFocus(event: KeyboardEvent) {
 		event.preventDefault();
 		if (busy) return;
 		const focusable = [
 			...(panel?.querySelectorAll<HTMLElement>(
-				'button:not([disabled]), [href], input:not([tabindex="-1"]), select, textarea'
+				'button:not([disabled]), [href], input:not([tabindex="-1"]):not([type="hidden"]), select, textarea'
 			) ?? [])
 		];
-		const at = focusable.indexOf(document.activeElement as HTMLElement);
-		const step = event.shiftKey ? -1 : 1;
-		const target =
-			at === -1
-				? event.shiftKey
-					? focusable.at(-1)
-					: focusable[0]
-				: focusable.at((at + step) % focusable.length);
+		const active = document.activeElement as HTMLElement;
+		const after = (control: HTMLElement) =>
+			!!(active.compareDocumentPosition(control) & Node.DOCUMENT_POSITION_FOLLOWING);
+		const ahead = panel?.contains(active) ? focusable.filter(after) : focusable;
+		const behind = focusable.filter((control) => !ahead.includes(control) && control !== active);
+		const target = event.shiftKey
+			? (behind.at(-1) ?? focusable.at(-1))
+			: (ahead.find((control) => control !== active) ?? focusable[0]);
 		target?.focus();
 	}
 </script>

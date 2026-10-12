@@ -195,7 +195,7 @@ describe('Mietvertrag bearbeiten', () => {
 			await save();
 
 			expect(byTestId('form-error')!.textContent).toContain(
-				'Die Nebenkostenabrechnung NK-2025-0003 (Entwurf) wurde mit den bisherigen Vertragsdaten berechnet. Löschen Sie zuerst den Entwurf und erstellen Sie die Nebenkostenabrechnung danach neu.'
+				'Die Nebenkostenabrechnung NK-2025-0003 (Entwurf) wurde mit den bisherigen Vertragsdaten berechnet. Sie können den Entwurf unten löschen und die Nebenkostenabrechnung danach neu erstellen.'
 			);
 			expect(byTestId('refused-statement-link')!.getAttribute('href')).toBe('/statements/s1');
 			// Haiku-Review R1: der Knopf nennt seine Folge auch unter «Bearbeiten»
@@ -463,6 +463,18 @@ describe('Mietvertrag bearbeiten', () => {
 			const hint = byTestId('contract-notice-hint')!;
 			expect(hint.textContent).toContain('Hat der Mieter gekündigt?');
 			expect(hint.querySelector('a')!.getAttribute('href')).toBe('/contracts/c1');
+		});
+
+		// Persona Sven K2 M1: der Hinweis erscheint erst nach der Wahl; er wird angesagt, der Link sagt, wozu er führt
+		it('sagt den Hinweis an und nennt im Link, was dort zu tun ist', async () => {
+			await open();
+			const region = document.querySelector('[data-testid="contract-notice-region"]')!;
+			expect(region.getAttribute('aria-live')).toBe('polite');
+			await choose('limited');
+			expect(region.contains(byTestId('contract-notice-hint'))).toBe(true);
+			expect(byTestId('contract-notice-hint')!.querySelector('a')!.textContent).toBe(
+				'Kündigung mit «Beenden» eintragen'
+			);
 		});
 
 		it('verweist nicht darauf bei einem befristeten Mietvertrag', async () => {

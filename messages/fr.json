@@ -1221,7 +1221,7 @@
 	"contracts_billed_locked_many": "Les décomptes des charges {numbers} ont été calculés avec les dates de contrat précédentes.",
 	"contracts_billed_locked_rest": "Dwello ne les modifie pas, c’est pourquoi la date ne peut pas être enregistrée. Vérifiez la date. Si elle est correcte, réglez la correction du décompte directement avec le locataire.",
 	"contracts_billed_also_draft": "Le brouillon {numbers} est également concerné.",
-	"contracts_billed_draft_one": "Le décompte des charges {number} (brouillon) a été calculé avec les dates de contrat précédentes. Supprimez d’abord le brouillon, puis établissez à nouveau le décompte des charges.",
+	"contracts_billed_draft_one": "Le décompte des charges {number} (brouillon) a été calculé avec les dates de contrat précédentes. Vous pouvez supprimer le brouillon ci-dessous, puis établir à nouveau le décompte des charges.",
 	"contracts_billed_draft_many": "Les décomptes des charges {numbers} (brouillons) ont été calculés avec les dates de contrat précédentes. Supprimez d’abord les brouillons, puis établissez à nouveau les décomptes des charges.",
 	"contracts_end_changed_again": "La fin du contrat a changé. Confirmez-la à nouveau avec la case à cocher.",
 	"contracts_end_in_past": "La fin du contrat est dans le passé. Confirmez la fin du contrat avec la case à cocher.",
@@ -1270,5 +1270,5 @@
 	"contracts_apartment_contracts_loading": "Les contrats de bail de l’appartement sont encore en cours de chargement. Réessayez dans un instant.",
 	"contracts_notice_hint_title": "Le locataire a-t-il résilié ?",
 	"contracts_notice_hint_text": "Saisissez alors la fin du contrat sur la page du contrat de bail avec « Terminer ». Il reste ainsi de durée indéterminée et Dwello indique les prochaines étapes.",
-	"contracts_notice_hint_link": "Vers le contrat de bail"
+	"contracts_notice_hint_link": "Saisir la résiliation avec « Terminer »"
 }

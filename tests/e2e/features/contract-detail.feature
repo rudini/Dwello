@@ -53,7 +53,7 @@ Funktionalität: Mietvertragsdetail
     Angenommen für "Anna Keller" gibt es die Abrechnung 2025 im Gebäude "Ahornhof"
     Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
     Wenn der Liegenschaftsverwalter den Mietvertrag auf den "2025-03-31" beendet und die Folge bestätigt
-    Dann meldet der Dialog "Löschen Sie zuerst den Entwurf und erstellen Sie die Nebenkostenabrechnung danach neu."
+    Dann meldet der Dialog "Sie können den Entwurf unten löschen und die Nebenkostenabrechnung danach neu erstellen."
     Und ist der Mietvertrag unbefristet
 
   Szenario: Künftiger Mietvertrag

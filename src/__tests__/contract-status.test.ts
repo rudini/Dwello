@@ -85,7 +85,7 @@ describe('Vertragsdaten, die die Mietstage einer Abrechnung ändern', () => {
 
 	it('sagt bei einem Entwurf, dass er zuerst gelöscht und danach neu erstellt wird', () => {
 		expect(billedDaysError([of('NK-2025-0003')])).toBe(
-			'Die Nebenkostenabrechnung NK-2025-0003 (Entwurf) wurde mit den bisherigen Vertragsdaten berechnet. Löschen Sie zuerst den Entwurf und erstellen Sie die Nebenkostenabrechnung danach neu.'
+			'Die Nebenkostenabrechnung NK-2025-0003 (Entwurf) wurde mit den bisherigen Vertragsdaten berechnet. Sie können den Entwurf unten löschen und die Nebenkostenabrechnung danach neu erstellen.'
 		);
 	});
 

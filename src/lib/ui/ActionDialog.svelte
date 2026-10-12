@@ -41,11 +41,15 @@
 	let busy = $state(false);
 	let refusal = $state<HTMLElement>();
 
-	// a refusal shows below the content: it takes the focus, so it is read and scrolled into a short window
+	// a refusal shows below the content: it takes the focus, so it is read and scrolled into a short window;
+	// a way out below it is scrolled in first, then the refusal, so a window big enough shows both (persona Anna K2)
 	async function showRefusal() {
 		await tick();
 		const alert = refusal?.querySelector<HTMLElement>('[data-testid="form-error"]');
 		alert?.focus();
+		[...(refusal?.querySelectorAll<HTMLElement>('button') ?? [])]
+			.at(-1)
+			?.scrollIntoView?.({ block: 'nearest' });
 		alert?.scrollIntoView?.({ block: 'nearest' });
 	}
 </script>

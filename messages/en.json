@@ -1221,7 +1221,7 @@
 	"contracts_billed_locked_many": "The utility cost statements {numbers} were calculated with the previous contract dates.",
 	"contracts_billed_locked_rest": "Dwello does not change them, so the date cannot be saved. Check the date. If it is correct, settle the correction of the statement directly with the tenant.",
 	"contracts_billed_also_draft": "The draft {numbers} is affected too.",
-	"contracts_billed_draft_one": "The utility cost statement {number} (draft) was calculated with the previous contract dates. First delete the draft, then create the utility cost statement again.",
+	"contracts_billed_draft_one": "The utility cost statement {number} (draft) was calculated with the previous contract dates. You can delete the draft below and then create the utility cost statement again.",
 	"contracts_billed_draft_many": "The utility cost statements {numbers} (drafts) were calculated with the previous contract dates. First delete the drafts, then create the utility cost statements again.",
 	"contracts_end_changed_again": "The contract end has changed. Confirm it again with the checkbox.",
 	"contracts_end_in_past": "The contract end is in the past. Confirm the contract end with the checkbox.",
@@ -1270,5 +1270,5 @@
 	"contracts_apartment_contracts_loading": "The apartment’s rental contracts are still loading. Try again in a moment.",
 	"contracts_notice_hint_title": "Has the tenant given notice?",
 	"contracts_notice_hint_text": "Then enter the contract end on the rental contract page with «End contract». It stays open-ended, and Dwello names the next steps.",
-	"contracts_notice_hint_link": "To the rental contract"
+	"contracts_notice_hint_link": "Record the notice with «End contract»"
 }

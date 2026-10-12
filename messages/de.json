@@ -1221,7 +1221,7 @@
 	"contracts_billed_locked_many": "Die Nebenkostenabrechnungen {numbers} wurden mit den bisherigen Vertragsdaten berechnet.",
 	"contracts_billed_locked_rest": "Dwello ändert sie nicht, darum lässt sich das Datum nicht speichern. Prüfen Sie das Datum. Stimmt es, klären Sie die Korrektur der Abrechnung direkt mit dem Mieter.",
 	"contracts_billed_also_draft": "Betroffen ist auch der Entwurf {numbers}.",
-	"contracts_billed_draft_one": "Die Nebenkostenabrechnung {number} (Entwurf) wurde mit den bisherigen Vertragsdaten berechnet. Löschen Sie zuerst den Entwurf und erstellen Sie die Nebenkostenabrechnung danach neu.",
+	"contracts_billed_draft_one": "Die Nebenkostenabrechnung {number} (Entwurf) wurde mit den bisherigen Vertragsdaten berechnet. Sie können den Entwurf unten löschen und die Nebenkostenabrechnung danach neu erstellen.",
 	"contracts_billed_draft_many": "Die Nebenkostenabrechnungen {numbers} (Entwürfe) wurden mit den bisherigen Vertragsdaten berechnet. Löschen Sie zuerst die Entwürfe und erstellen Sie die Nebenkostenabrechnungen danach neu.",
 	"contracts_end_changed_again": "Das Vertragsende hat sich geändert. Bestätigen Sie es erneut mit dem Kästchen.",
 	"contracts_end_in_past": "Das Vertragsende liegt in der Vergangenheit. Bestätigen Sie das Vertragsende mit dem Kästchen.",
@@ -1270,5 +1270,5 @@
 	"contracts_apartment_contracts_loading": "Die Mietverträge der Wohnung werden noch geladen. Versuchen Sie es in einem Moment erneut.",
 	"contracts_notice_hint_title": "Hat der Mieter gekündigt?",
 	"contracts_notice_hint_text": "Dann tragen Sie das Vertragsende auf der Seite des Mietvertrags mit «Beenden» ein. So bleibt er unbefristet, und Dwello nennt die nächsten Schritte.",
-	"contracts_notice_hint_link": "Zum Mietvertrag"
+	"contracts_notice_hint_link": "Kündigung mit «Beenden» eintragen"
 }

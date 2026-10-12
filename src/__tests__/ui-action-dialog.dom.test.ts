@@ -1,7 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
 
 // enhance as SvelteKit wires it: the test plays the server's answer to the submit
-const server = vi.hoisted(() => ({ submit: null as null | ((input: { formData: FormData }) => unknown) }));
+const server = vi.hoisted(() => ({
+	submit: null as null | ((input: { formData: FormData }) => unknown)
+}));
 vi.mock('$app/forms', () => ({
 	enhance: (_form: unknown, submit: (input: { formData: FormData }) => unknown) => {
 		server.submit = submit;
@@ -74,6 +76,22 @@ describe('Bestätigung einer Seitenaktion', () => {
 		open({ error: 'Mieter mit Mietverträgen können nicht gelöscht werden.' });
 		await answer('failure');
 		expect(document.activeElement).toBe(byTestId('form-error'));
+	});
+
+	// Persona Anna K2 M1: in einem niedrigen Fenster lag der Ausweg unter dem sichtbaren Teil des Dialogs
+	it('rollt den Ausweg nach einer Ablehnung ins Bild, der Grund bleibt sichtbar', async () => {
+		const scrolled: string[] = [];
+		// jsdom does not lay out, so it has no scrollIntoView
+		Element.prototype.scrollIntoView = function (this: Element) {
+			scrolled.push(this.id || this.getAttribute('data-testid')!);
+		};
+		open({
+			error: 'Abgelehnt',
+			afterError: markup('<div><button id="way-out">Entwurf löschen</button></div>')
+		});
+		await answer('failure');
+		expect(scrolled).toEqual(['way-out', 'form-error']);
+		delete (Element.prototype as Partial<Element>).scrollIntoView;
 	});
 
 	it('lässt nicht bestätigen, was nicht möglich ist', () => {

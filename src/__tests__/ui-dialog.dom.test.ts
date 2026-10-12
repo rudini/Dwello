@@ -77,6 +77,24 @@ describe('Dialog', () => {
 		expect(document.activeElement).toBe(byTestId('dialog-confirm'));
 	});
 
+	// Persona Sven K2 B1: eine Ablehnung mit Link und Formular, die erst nach dem Öffnen erscheint
+	it('führt mit Tab von einer Meldung weiter und überspringt verborgene Felder', () => {
+		openDialog({
+			children: markup(
+				'<div><div role="alert" tabindex="-1" id="alert">Abgelehnt</div><a href="/s/1" id="link">Entwurf</a>' +
+					'<form><input type="hidden" name="id" value="1" /><button id="delete">Löschen</button></form></div>'
+			)
+		});
+		document.getElementById('alert')!.focus();
+		press('Tab');
+		expect(document.activeElement!.id).toBe('link');
+		press('Tab');
+		expect(document.activeElement!.id).toBe('delete');
+		document.getElementById('alert')!.focus();
+		press('Tab', true);
+		expect(document.activeElement).toBe(byTestId('dialog-confirm'));
+	});
+
 	it('holt den Fokus mit Tab in den Dialog zurück, wenn er draussen liegt', () => {
 		const { opener } = openDialog();
 		opener.focus();

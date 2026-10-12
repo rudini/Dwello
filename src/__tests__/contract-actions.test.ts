@@ -196,7 +196,7 @@ describe('Mietvertrag beenden', () => {
 			status: 409,
 			data: {
 				endError:
-					'Die Nebenkostenabrechnung NK-2025-0003 (Entwurf) wurde mit den bisherigen Vertragsdaten berechnet. Löschen Sie zuerst den Entwurf und erstellen Sie die Nebenkostenabrechnung danach neu.',
+					'Die Nebenkostenabrechnung NK-2025-0003 (Entwurf) wurde mit den bisherigen Vertragsdaten berechnet. Sie können den Entwurf unten löschen und die Nebenkostenabrechnung danach neu erstellen.',
 				// A-10: der Dialog verlinkt die genannten Abrechnungen, für den abgelehnten Tag
 				refused: refused.statements,
 				refusedDay: '2025-03-31'
