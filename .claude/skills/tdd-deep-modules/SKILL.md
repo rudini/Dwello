@@ -72,7 +72,7 @@ Never batch: no second test before the first is green, no clean-up inside green.
 
 ## 5. Depth check in every refactor
 
-In every refactor phase, with all tests green, run `scripts/depth_report <changed production .ts/.js files>` and walk this list. Fix what fails in the same refactor, one change at a time, tests green after each. Where the project has its own depth gate (Dwello: `bun run deepcheck:audit`), run it too, after each green and refactor, before `tdd-step` commits (its hook fires on `git push`, not on `tdd-step` commits): its gate result wins. `depth_report` still adds what that gate leaves out, above all the swarm of exported helpers, which deepcheck does not check, and untested modules.
+In every refactor phase, with all tests green, run `scripts/depth_report <changed production .ts/.js files>` and walk this list. Fix what fails in the same refactor, one change at a time, tests green after each. Where the project has its own depth gate (Dwello: `bun run deepcheck:audit`), run it too, after each green and refactor, before `tdd-step` commits (its hook fires on `git push`, not on `tdd-step` commits): its gate result wins, and a finding after green is fixed in the following refactor, never inside green. `depth_report` still adds what that gate leaves out, above all the swarm of exported helpers, which deepcheck does not check, and untested modules.
 
 - **Interface much simpler than the implementation.** A caller learns few names, parameters and rules; a lot happens behind them. A module about as big as its interface is shallow: merge it into its caller or callee.
 - **No classitis.** Many tiny classes or files that each forward to the next spread one decision over many places. Merge them.
