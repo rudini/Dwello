@@ -16,7 +16,7 @@ const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 interface ContractDetailsData {
 	today: string; // the server's day, for the Vertragsstatus
 	missingStatement: { start: string; end: string; href: string } | null; // A-10
-	nextSteps: boolean; // A-4: a notice still running without a next tenant
+	nextSteps: { successor: boolean } | null; // A-4: a notice still running
 	contract: RentalContract & {
 		tenant: Tenant;
 		apartment: Apartment;
@@ -50,15 +50,17 @@ const rentDaysIn = (contract: Row, { start, end }: { start: string; end: string 
 	String(contract.startDate).slice(0, 10) <= end &&
 	(!contract.endDate || String(contract.endDate).slice(0, 10) >= start);
 
-// A notice still running and no later contract of the apartment yet: a next tenant is to find (A-4, review K-1)
+// A notice still running: the new address is due, the next tenant until a later contract is recorded (A-4,
+// review K-1); null without one, or when the apartment's contracts cannot be read: no hint rather than a wrong one
 async function nextStepsDue(fetch: typeof globalThis.fetch, contract: Row) {
 	const end = contract.endDate ? String(contract.endDate).slice(0, 10) : null;
-	if (!contract.terminated || !end || end < localToday()) return false;
+	if (!contract.terminated || !end || end < localToday()) return null;
 	const response = await fetch(
 		`${BACKEND_URL}/api/v1/contracts?apartmentId=${contract.apartmentId}`
 	).catch(() => null);
-	const others: Row[] = response?.ok ? ((await response.json()).contracts ?? []) : [];
-	return !others.some((o) => String(o.startDate).slice(0, 10) > end);
+	if (!response?.ok) return null;
+	const others: Row[] = (await response.json()).contracts ?? [];
+	return { successor: others.some((o) => String(o.startDate).slice(0, 10) > end) };
 }
 
 // The last ended Abrechnungsperiode if the contract has rent days in it but no statement yet (A-10)

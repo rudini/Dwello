@@ -61,7 +61,7 @@ function open(
 		data: {
 			today,
 			missingStatement,
-			nextSteps: terminated, // the loader decides: a running notice without a next tenant (review K-1)
+			nextSteps: terminated ? { successor: false } : null, // the loader decides (review K-1)
 			contract: contract(startDate, endDate, terminated),
 			rentBreakdown: { baseRent: 950, additionalRent: 50, advancePayment: 180, total: 1180 }
 		},
@@ -134,6 +134,24 @@ describe('Mietvertragsdetail', () => {
 		);
 	});
 
+	// Haiku-Review R4: lehnt die Aktion ab, nimmt die Meldung den Fokus
+	it('setzt den Fokus auf die Meldung, wenn das Löschen abgelehnt wird', async () => {
+		open('2024-04-01', null, {
+			endError: 'abgelehnt',
+			refused: refused.statements,
+			refusedDay: '2025-03-31'
+		});
+		click('contract-end-button');
+		fireEvent(byTestId<HTMLInputElement>('contract-end-date-input')!, 'input', '31.03.2025');
+		await settle();
+		const after = actions.get('?/endDeletingDraft')!({ formData: new FormData() }) as (
+			input: unknown
+		) => Promise<void>;
+		await after({ update: async () => {}, result: { type: 'failure', status: 409, data: {} } });
+		await settle();
+		expect(document.activeElement).toBe(byTestId('form-error'));
+	});
+
 	// Review K-2: ein anderer Tag ist nicht abgelehnt; das Angebot gehört zum abgelehnten Tag
 	it('nimmt das Angebot zurück, sobald ein anderer Tag eingegeben ist', async () => {
 		open('2024-04-01', null, {
@@ -175,6 +193,23 @@ describe('Mietvertragsdetail', () => {
 		expect(text('contract-missing-statement')).toContain(
 			'Abrechnung 01.07.2024 – 30.06.2025 fehlt'
 		);
+	});
+
+	it('nennt mit erfasstem Nachmieter nur noch die neue Adresse', () => {
+		show(ContractPage, {
+			data: {
+				today: '2026-10-10',
+				missingStatement: null,
+				nextSteps: { successor: true },
+				contract: contract('2024-04-01', '2099-03-31', true),
+				rentBreakdown: { baseRent: 950, additionalRent: 50, advancePayment: 180, total: 1180 }
+			},
+			form: null
+		} as never);
+		const links = [...byTestId('contract-next-steps')!.querySelectorAll('a')].map((a) =>
+			a.textContent!.trim()
+		);
+		expect(links).toEqual(['Neue Adresse eintragen']);
 	});
 
 	it('nennt ohne Kündigung keine nächsten Schritte', () => {
@@ -435,8 +470,9 @@ describe('Mietvertragsdetail', () => {
 		const after = actions.get('?/end')!({ formData }) as (input: unknown) => Promise<void>;
 		expect(formData.get('endDate')).toBe('2027-03-31');
 		await after({ update: async () => {}, result: { type: 'success' } });
+		// Haiku-Review R7 (Helga K1 M2): die Meldung sagt, wo es weitergeht
 		expect(get(toasts).map((toast) => toast.message)).toEqual([
-			'Der Mietvertrag von Anna Keller endet am 31.03.2027'
+			'Der Mietvertrag von Anna Keller endet am 31.03.2027. Die nächsten Schritte sehen Sie oben auf der Seite.'
 		]);
 	});
 

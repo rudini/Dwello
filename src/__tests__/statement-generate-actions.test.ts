@@ -97,6 +97,7 @@ describe('Assistent mit gewähltem Gebäude und gewählter Periode', () => {
 	it.each([
 		['?building=b9&start=2025-01-01&end=2025-12-31'],
 		['?building=b1&start=2025-02-30&end=2025-12-31'],
+		['?building=b1&start=2025-13-01&end=2025-12-31'],
 		['?building=b1&start=2025-12-31&end=2025-01-01']
 	])('übernimmt keinen ungültigen Link %s', async (query) => {
 		expect(await open(query)).toMatchObject({ defaultBuildingIds: [], preset: null });

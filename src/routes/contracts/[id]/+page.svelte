@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
-	import { flushSync, untrack } from 'svelte';
+	import { flushSync, tick, untrack } from 'svelte';
 	import {
 		contractEndError,
 		contractStatusOn,
@@ -77,8 +77,18 @@
 
 	function endedMessage() {
 		if (pastEnd) return m.contracts_ended_toast({ name, date: formatDate(endDate) });
-		if (endDate === data.today) return m.contracts_ends_today_toast({ name });
-		return m.contracts_ends_on_toast({ name, date: formatDate(endDate) });
+		// the notice runs: the page now shows what to do next, above (personas K1)
+		const ends =
+			endDate === data.today
+				? m.contracts_ends_today_toast({ name })
+				: m.contracts_ends_on_toast({ name, date: formatDate(endDate) });
+		return `${ends}. ${m.contracts_next_steps_hint()}`;
+	}
+	// a refusal of the draft delete is read like one of the end itself
+	async function focusRefusal(result: { type: string }) {
+		if (result.type !== 'failure') return;
+		await tick();
+		document.querySelector<HTMLElement>('[role="dialog"] [data-testid="form-error"]')?.focus();
 	}
 	// a refused delete (also without JavaScript) shows the dialog with its reason
 	let deleting = $state(untrack(() => !!form?.deleteError));
@@ -172,7 +182,7 @@
 					use:enhance={dialogSubmit(
 						() => ({}),
 						(busy) => (deletingDraft = busy),
-						() => {},
+						focusRefusal,
 						() => addToast('success', draftDeletedMessage(draft.statementNumber))
 					)}
 				>

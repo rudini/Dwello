@@ -56,6 +56,7 @@
 	let errors = $state<Record<string, string>>({});
 	let saving = $state(false);
 	let refused = $state<RefusedStatement[]>([]); // statements that refused the last save
+	let contractsKnown = $state(true); // the chosen apartment's contracts loaded, so an overlap shows
 	let availability = $state<Map<string, AvailabilityInfo> | null>(null);
 	let apartmentContracts = $state<ContractForAvailability[]>([]);
 	let form = $state<HTMLFormElement>();
@@ -85,6 +86,7 @@
 		const response = await apiCall<{ contracts: Parameters<typeof forAvailability>[0] }>(
 			`/contracts?apartmentId=${apartmentId}`
 		);
+		if (apartmentId === values.apartmentId) contractsKnown = !response.error;
 		return forAvailability(response.data?.contracts ?? []);
 	}
 
@@ -159,9 +161,10 @@
 	// the one draft the new dates would change goes first; the wizard then creates it anew (A-10)
 	async function deleteDraftAndSave(draft: RefusedStatement) {
 		if (!valid()) return focusFirstError(form);
-		// an overlap would refuse the save after the delete: the draft would be gone for nothing (review K-2)
-		if (overlap) {
-			errors = { form: m.backend_contract_overlap() };
+		// an overlap would refuse the save after the delete: the draft would be gone for nothing (review K-2);
+		// without the apartment's contracts an overlap cannot be ruled out (Haiku review R5)
+		if (overlap || !contractsKnown) {
+			errors = { form: overlap ? m.backend_contract_overlap() : m.contracts_save_failed() };
 			refused = [];
 			return focusFirstError(form);
 		}
@@ -244,13 +247,14 @@
 		</Alert>
 		{#if refused.length}
 			<RefusedStatements statements={refused}>
-				{#snippet action(draft)}
+				{#snippet action(draft, consequence)}
 					<div>
 						<Button
 							variant="danger"
 							icon="delete"
 							busy={saving}
 							busyLabel={m.ui_please_wait()}
+							describedby={consequence}
 							onclick={() => deleteDraftAndSave(draft)}
 							testid="delete-draft-and-save">{m.contracts_delete_draft_and_save()}</Button
 						>

@@ -1263,5 +1263,7 @@
 	"contracts_draft_deleted_toast": "Entwurf {number} gelöscht. Der Mietvertrag von {name} endet am {date}. Erstellen Sie jetzt die Nebenkostenabrechnung neu.",
 	"statements_preset_title": "Gewählt: {building}, Abrechnungsperiode {period}",
 	"statements_preset_from_statements": "Heizprofil und Verwaltungspauschale sind wie die übrigen Nebenkostenabrechnungen dieser Abrechnungsperiode eingestellt. Prüfen Sie sie und gehen Sie weiter zur Vorschau.",
-	"statements_preset_from_settings": "Heizprofil und Verwaltungspauschale kommen aus den Einstellungen. Prüfen Sie sie und gehen Sie weiter zur Vorschau."
+	"statements_preset_from_settings": "Heizprofil und Verwaltungspauschale kommen aus den Einstellungen. Prüfen Sie sie und gehen Sie weiter zur Vorschau.",
+	"contracts_next_steps_text_successor": "Der Mietvertrag ist gekündigt, der Nachmieter ist erfasst. Für die Schlussabrechnung braucht es die neue Adresse des Mieters.",
+	"contracts_next_steps_hint": "Die nächsten Schritte sehen Sie oben auf der Seite."
 }

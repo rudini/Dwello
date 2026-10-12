@@ -19,11 +19,12 @@ async function json(fetch: typeof globalThis.fetch, path: string): Promise<Row> 
 	return response.ok ? response.json() : {};
 }
 
-// a real day: not 2025-02-30
-const isDay = (value: string | null) =>
-	!!value &&
-	/^\d{4}-\d{2}-\d{2}$/.test(value) &&
-	new Date(`${value}T00:00:00Z`).toISOString().startsWith(value);
+// a real day: not 2025-02-30, not 2025-13-01 (an invalid date has no ISO string)
+function isDay(value: string | null) {
+	if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+	const day = new Date(`${value}T00:00:00Z`);
+	return !isNaN(day.getTime()) && day.toISOString().startsWith(value);
+}
 
 // A link from a contract or a refusal names one building and one period (A-10): its other statements of that
 // period tell which heating profile and management fee to use again. A link to an unknown building or with an

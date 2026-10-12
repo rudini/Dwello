@@ -195,6 +195,23 @@ describe('Mietvertrag bearbeiten', () => {
 				'Die Nebenkostenabrechnung NK-2025-0003 (Entwurf) wurde mit den bisherigen Vertragsdaten berechnet. Löschen Sie zuerst den Entwurf und erstellen Sie die Nebenkostenabrechnung danach neu.'
 			);
 			expect(byTestId('refused-statement-link')!.getAttribute('href')).toBe('/statements/s1');
+			// Haiku-Review R1: der Knopf nennt seine Folge auch unter «Bearbeiten»
+			const described = byTestId('delete-draft-and-save')!.getAttribute('aria-describedby')!;
+			expect(document.getElementById(described)!.textContent).toContain('wird gelöscht');
+		});
+
+		// Haiku-Review R5: ohne die Mietverträge der Wohnung ist eine Überschneidung nicht auszuschliessen
+		it('löscht keinen Entwurf, wenn die Mietverträge der Wohnung nicht geladen werden konnten', async () => {
+			calls = fakeBff(({ method }) => (method === 'PUT' ? [409, refused] : [500, {}]));
+			await open();
+			await endOn('31.03.2025');
+			click('contract-end-past-confirm');
+			await settle();
+			await save();
+			click('delete-draft-and-save');
+			await settle();
+			expect(calls.filter((c) => c.method === 'DELETE')).toEqual([]);
+			expect(byTestId('form-error')).not.toBeNull();
 		});
 
 		// Review K-2: das Angebot gehört zu den abgelehnten Werten

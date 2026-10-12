@@ -1263,5 +1263,7 @@
 	"contracts_draft_deleted_toast": "Draft {number} deleted. The rental contract of {name} ends on {date}. Now create the utility cost statement again.",
 	"statements_preset_title": "Chosen: {building}, billing period {period}",
 	"statements_preset_from_statements": "The heating profile and management fee are set like the other utility cost statements of this billing period. Check them and go on to the preview.",
-	"statements_preset_from_settings": "The heating profile and management fee come from the settings. Check them and go on to the preview."
+	"statements_preset_from_settings": "The heating profile and management fee come from the settings. Check them and go on to the preview.",
+	"contracts_next_steps_text_successor": "The rental contract has been terminated and the new tenant is recorded. The final statement needs the tenant’s new address.",
+	"contracts_next_steps_hint": "You can see the next steps at the top of the page."
 }

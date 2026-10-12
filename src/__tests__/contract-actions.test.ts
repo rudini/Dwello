@@ -42,32 +42,40 @@ describe('Vertragsstatus', () => {
 
 // Review K-1: «Nächste Schritte» nur, solange die Kündigung läuft und kein Nachmieter erfasst ist
 describe('Nächste Schritte nach einer Kündigung', () => {
-	const backend = (contract: Record<string, unknown>, others: unknown[] = []) =>
+	const backend = (contract: Record<string, unknown>, others: unknown[] | null = []) =>
 		(async (url: string) => {
-			if (url.includes('/contracts?apartmentId=')) return Response.json({ contracts: others });
+			if (url.includes('/contracts?apartmentId='))
+				return others ? Response.json({ contracts: others }) : new Response('down', { status: 500 });
 			if (url.includes('/config') || url.includes('/statements?'))
 				return Response.json({ data: [] });
 			return Response.json({ id: 'c1', apartmentId: 'a1', startDate: '2024-04-01', ...contract });
 		}) as typeof globalThis.fetch;
-	const nextSteps = async (contract: Record<string, unknown>, others: unknown[] = []) =>
+	const nextSteps = async (contract: Record<string, unknown>, others: unknown[] | null = []) =>
 		(
 			(await load({ params: { id: 'c1' }, fetch: backend(contract, others) } as never)) as {
-				nextSteps: boolean;
+				nextSteps: { successor: boolean } | null;
 			}
 		).nextSteps;
+	const notice = { endDate: '2099-03-31', terminated: true };
 
 	it('nennt sie bei einer laufenden Kündigung ohne Nachmieter', async () => {
-		expect(await nextSteps({ endDate: '2099-03-31', terminated: true })).toBe(true);
+		expect(await nextSteps(notice)).toEqual({ successor: false });
 	});
 
-	it('nennt sie nicht, wenn ein Nachmieter erfasst ist', async () => {
+	// Haiku-Review R2: die neue Adresse braucht es auch, wenn der Nachmieter schon erfasst ist
+	it('nennt mit erfasstem Nachmieter nur noch die neue Adresse', async () => {
 		const successor = { id: 'c2', startDate: '2099-04-01', endDate: null };
-		expect(await nextSteps({ endDate: '2099-03-31', terminated: true }, [successor])).toBe(false);
+		expect(await nextSteps(notice, [successor])).toEqual({ successor: true });
 	});
 
 	it('nennt sie nicht nach dem Auszug und nicht ohne Kündigung', async () => {
-		expect(await nextSteps({ endDate: '2021-02-28', terminated: true })).toBe(false);
-		expect(await nextSteps({ endDate: '2099-03-31', terminated: false })).toBe(false);
+		expect(await nextSteps({ endDate: '2021-02-28', terminated: true })).toBeNull();
+		expect(await nextSteps({ endDate: '2099-03-31', terminated: false })).toBeNull();
+	});
+
+	// Haiku-Review R6: lieber kein Hinweis als ein falscher
+	it('nennt sie nicht, wenn die Mietverträge der Wohnung nicht geladen werden können', async () => {
+		expect(await nextSteps(notice, null)).toBeNull();
 	});
 });
 
