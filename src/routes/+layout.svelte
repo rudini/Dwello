@@ -93,10 +93,19 @@
 	<MobileNav />
 {:else}
 	<div class="min-h-screen bg-canvas">
-		<!-- Without the header the language choice stands alone at the top -->
-		<nav aria-label={m.language_choice()} class="flex justify-end px-4 pt-4">
-			<LanguageSwitcher />
-		</nav>
+		<!-- Without the header the language choice stands alone at the top; help and the legal pages lead back to signing in -->
+		<div class="flex items-center justify-end gap-4 px-4 pt-4">
+			{#if contentPage}
+				<a
+					href="/login"
+					class="mr-auto inline-flex min-h-12 items-center text-accent underline underline-offset-4"
+					data-testid="public-login-link">{m.login_title()}</a
+				>
+			{/if}
+			<nav aria-label={m.language_choice()}>
+				<LanguageSwitcher />
+			</nav>
+		</div>
 		{#if contentPage}
 			<!-- Help and the legal pages, read before signing in: the same margins as inside the frame -->
 			<main id="main-content" class="px-4 py-8 lg:px-10" tabindex="-1">
@@ -104,6 +113,7 @@
 					{@render children()}
 				</div>
 			</main>
+			<Footer />
 		{:else}
 			<main id="main-content" tabindex="-1">
 				{@render children()}

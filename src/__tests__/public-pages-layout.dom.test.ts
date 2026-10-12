@@ -37,8 +37,18 @@ describe('Hilfe und Rechtliches ohne Anmeldung', () => {
 		}
 	);
 
-	it('die Anmeldeseite bleibt ohne Rand', async () => {
+	it.each(['/help', '/privacy', '/terms'])(
+		'%s führt zur Anmeldung und zu den anderen Seiten',
+		async (path) => {
+			await signedOut(path);
+			const links = [...document.querySelectorAll('a')].map((a) => a.getAttribute('href'));
+			expect(links).toEqual(expect.arrayContaining(['/login', '/privacy', '/terms']));
+		}
+	);
+
+	it('die Anmeldeseite bleibt ohne Rand und ohne Fusszeile', async () => {
 		const main = await signedOut('/login');
 		expect(main.className).not.toMatch(/px-4/);
+		expect(document.querySelector('footer')).toBeNull();
 	});
 });

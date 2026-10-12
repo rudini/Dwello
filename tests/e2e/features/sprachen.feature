@@ -61,5 +61,9 @@ Funktionalität: Sprache der Oberfläche
   Szenario: Die Nutzungsbedingungen von der Anmeldeseite aus lesen
     Angenommen ein Besucher hat die Anmeldeseite geöffnet
     Wenn der Besucher den Link zu den Nutzungsbedingungen öffnet
-    Dann ist der Besucher noch auf der Seite "/terms"
-    Und heisst die Seite "Nutzungsbedingungen - Dwello"
+    Dann ist der Besucher auf der Seite "Nutzungsbedingungen"
+
+  Szenario: Von den Nutzungsbedingungen zurück zur Anmeldung
+    Angenommen ein Besucher hat die Seite "/terms" geöffnet
+    Wenn der Besucher den Link zur Anmeldung öffnet
+    Dann ist der Besucher auf der Seite "Anmelden"

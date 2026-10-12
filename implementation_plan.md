@@ -4728,6 +4728,9 @@ header and on pages without it. Branch `claude/optimistic-clarke-nn8u7t` from `m
   and terms keep the frame's margins (`src/routes/+layout.svelte`, test `public-pages-layout.dom.test.ts`); more
   protected near-miss paths in `public-pages.test.ts`; `docs/api-specification.md` names the public endpoint; the
   terms-link step retries its URL check (`language.steps.ts`). Review 2: no blocker or major.
+- [x] **Persona reruns Sven and Dr. Weber** (`docs/design/personas/sven-i18n-2.md`, `weber-i18n-2.md`): Dr. Weber's major
+  fixed – signed out, help, privacy and terms link to «Anmelden» and show the footer (`src/routes/+layout.svelte`,
+  `public-pages-layout.dom.test.ts`, scenario «Von den Nutzungsbedingungen zurück zur Anmeldung» in `sprachen.feature`).
 
 ---
 

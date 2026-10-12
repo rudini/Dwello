@@ -84,6 +84,10 @@ When('der Besucher den Link zu den Nutzungsbedingungen öffnet', async ({ besuch
 	await besucher.page.getByTestId('login-terms-link').click();
 });
 
+When('der Besucher den Link zur Anmeldung öffnet', async ({ besucher }) => {
+	await besucher.page.getByTestId('public-login-link').click();
+});
+
 Then('ist der Besucher noch auf der Seite {string}', async ({ besucher }, path: string) => {
 	// retried: a link opens the page in the browser, after the click returns
 	await expect(besucher.page).toHaveURL((url) => url.pathname === path);
