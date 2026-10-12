@@ -4746,6 +4746,10 @@ header and on pages without it. Branch `claude/optimistic-clarke-nn8u7t` from `m
   `logout.dom.test.ts`, scenario «Nach dem Abmelden zeigt der Datenschutz niemanden als angemeldet»); pages without
   the app header link to «Hilfe» (`+layout.svelte`, `public-pages-layout.dom.test.ts`, scenario «Die Hilfe von der
   Anmeldeseite aus lesen»).
+- [x] **Expired session**: the root layout load reads `url.pathname`, so the user is read again on every navigation and
+  no page keeps showing a signed-out or expired user (`src/routes/+layout.server.ts`, scenario «Nach abgelaufener
+  Anmeldung zeigt der Datenschutz niemanden als angemeldet»; review `i18n-session-review-1.md`). Persona reruns
+  `helga-i18n-3.md`, `marco-i18n-3.md`, `anna-i18n-3.md`: no blocker or major.
 
 ---
 

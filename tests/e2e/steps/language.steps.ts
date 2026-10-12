@@ -94,6 +94,11 @@ When('der Besucher den Link zur Hilfe öffnet', async ({ besucher }) => {
 	await besucher.page.getByTestId('public-help-link').click();
 });
 
+When('die Anmeldung des Liegenschaftsverwalters abläuft', async ({ verwalter }) => {
+	// the session cookies are gone, the page in the browser stays as it is
+	await verwalter.page.context().clearCookies();
+});
+
 Then('zeigt die Seite kein Benutzermenü', async ({ verwalter }) => {
 	await expect(userMenuButton(verwalter.page)).toHaveCount(0);
 });
