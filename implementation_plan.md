@@ -40,3 +40,7 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8): add the items when
   structural flaws in O-8, «Abrechnungsperiode» twice in the glossary (F-21); `anforderungen-vertragsende.md`,
   `PRD-Dwello.md` and `migration-mva.md` point to the list; CLAUDE.md steps 6 and 8 say where open findings and done
   sessions go; archive holds sessions 1–16 only; old review IDs in rows prefixed with «review».
+- [x] **Persona list**: `docs/design/personas/README.md` lists the five personas with task, viewport and input (from the
+  redesign brief and the last runs); `arbeitsregeln.md`, `.claude/agents/persona.md` and `CLAUDE.md` step 5 point to
+  it; `docs/PRD-Dwello.md` section 3 replaces the persona Michael Keller (professional manager) with the target users
+  and a pointer to the list.

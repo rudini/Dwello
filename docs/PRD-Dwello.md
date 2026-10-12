@@ -59,34 +59,7 @@ Dwello provides:
 
 ## 3. User Personas
 
-### 3.1 Primary User: Property Manager (Liegenschaftsverwalter)
-
-**Name:** Michael Keller
-**Background:** 15 years managing residential properties in Switzerland
-**Portfolio:** 3 buildings, 28 apartments, ~100 tenants across career
-
-**Goals:**
-- Reduce time spent on administrative tasks (currently 40% of workweek)
-- Ensure accurate, legally-compliant utility cost statements
-- Maintain professional relationships with tenants through transparent communications
-- Keep detailed records for audits and legal compliance
-- Understand portfolio financial performance
-
-**Pain Points:**
-- Manually calculating complex distributions (heating, by area, by unit count)
-- Managing multiple accounting periods for different buildings
-- Tracking contract changes and prorated calculations when tenants move mid-year
-- Ensuring invoices meet Swiss utility cost standards (what's allowed vs. not)
-- Generating professional multi-language documents
-- Storing and retrieving historical contracts and statements
-
-**Tech Comfort:** Medium - comfortable with business software, prefers intuitive interfaces
-
-**Success Metrics:**
-- Utility statements generated in <1 hour for all properties
-- Zero calculation errors in prorated distributions
-- Legal compliance confidence (all costs properly categorized)
-- Tenant satisfaction with professional communications
+Dwello is built for private landlords with little experience who use it a few times a year (`CLAUDE.md`, "Design-Regeln"): guidance, plain words and confirmations come before speed for experts. The personas that stand for them (Helga, Marco, Dr. Weber, Sven, Anna), with their tasks, viewports and input, are in `docs/design/personas/README.md`.
 
 ---
 

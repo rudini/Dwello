@@ -1,6 +1,6 @@
 # Working rules for the redesign (resume file)
 
-The redesign is complete (stages 0–9); its brief, analysis, plan, log and reviews are in `docs/archive/redesign/`. Still in use: the automated checks, the personas and "Persona runs: how" (subagent `persona`).
+The redesign is complete (stages 0–9); its brief, analysis, plan, log and reviews are in `docs/archive/redesign/`. Still in use: the automated checks and "Persona runs: how" (subagent `persona`); the personas are in `docs/design/personas/README.md`.
 
 Everything a new session needs to continue the redesign without the original prompt. Source of truth for the requirements: `docs/archive/redesign/REDESIGN_BRIEF.md`; project rules: `CLAUDE.md`; domain terms: `UBIQUITOUS_LANGUAGE.md` (never edit it).
 
@@ -63,11 +63,7 @@ Axe: `@axe-core/playwright`, tags `wcag2a, wcag2aa, wcag21a, wcag21aa, wcag22aa`
 
 One agent per persona operates the running app (dev stack with demo data, Playwright) without reading source code or the glossary, notes at each step what it expected and what it saw, takes screenshots, and reports: task completed (yes/partly/no), effort, confusion (incl. terms), error risks, improvement suggestions → `docs/design/personas/<persona>-<stage>.md`.
 
-1. Helga, 68, heir of an apartment, little computer experience, large font, unsure about terms. Task: create the first tenant and a rental contract.
-2. Marco, 38, smartphone, little time. Task: create the utility bill (Nebenkostenabrechnung) for the previous year, mobile viewport.
-3. Dr. Weber, 52, legally cautious. Task: check the bill, understand warnings, assess the PDF preview.
-4. Sven, 45, screen reader and keyboard only. Task: rental contract wizard by keyboard; check focus, labels, error messages.
-5. Anna, 29, first-time landlord, returns after months. Task: find out what to do next.
+The personas, their default tasks, viewports and input: `docs/design/personas/README.md`.
 
 Unknown terms are fixed with better help texts, never by renaming the glossary term. Fix Blockers/Majors before moving on; repeat the affected persona after larger fixes (max. 2 repetitions).
 

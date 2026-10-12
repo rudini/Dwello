@@ -57,7 +57,7 @@ PostgreSQL on localhost:5432 (user and password `dwello`) is required for backen
    **Deep modules:** after each implementation step run `bun run deepcheck:audit` (silent when clean) and fix its findings before continuing; run `bun run deepcheck:scan` only when a codebase-wide review is requested (`tools/deepcheck/README.md`).
 4. **Slice review:** after each slice (a green scenario or a coherent group of behaviors), once lint, the affected tests and `deepcheck:audit` are clean, run subagent `code-reviewer` (fresh context: requirement + diff only). Triage its findings (step 6). Continue only when no Blocker/Major is open (limit: step 7).
 5. **Feature review:** when the scenario is green, start the app once with `docs/design/tools/persona-stack.sh`, then run in parallel, only where it applies, telling each subagent the app is running:
-   - UI changed: subagent `persona`, once per affected persona from `docs/design/arbeitsregeln.md`.
+   - UI changed: subagent `persona`, once per affected persona from `docs/design/personas/README.md`.
    - Domain rules or terms changed: `fach-reviewer`.
    - Amounts, statements, PDFs or QR-bills changed: `daten-pruefer`.
    If you cannot start subagents, do not skip the reviews: list the missing ones under "Blocked on me".
