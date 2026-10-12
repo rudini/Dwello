@@ -5,6 +5,7 @@ import { sessionCookies } from '../fixtures/session';
 import { visit } from '../interactions/navigation';
 import { chooseLanguage } from '../tasks/language';
 import { chooseInFooter } from '../tasks/app-frame';
+import { userMenuButton } from '../interactions/app-frame';
 import { address, check, screens, seedFor } from '../interactions/accessibility';
 import { cutOff, germanOnScreen } from '../interactions/german-text';
 import { documentLanguage, useLanguage } from '../interactions/language';
@@ -87,6 +88,14 @@ When('der Besucher den Link zu den Nutzungsbedingungen öffnet', async ({ besuch
 
 When('der Besucher den Link zur Anmeldung öffnet', async ({ besucher }) => {
 	await besucher.page.getByTestId('public-login-link').click();
+});
+
+When('der Besucher den Link zur Hilfe öffnet', async ({ besucher }) => {
+	await besucher.page.getByTestId('public-help-link').click();
+});
+
+Then('zeigt die Seite kein Benutzermenü', async ({ verwalter }) => {
+	await expect(userMenuButton(verwalter.page)).toHaveCount(0);
 });
 
 When('der Besucher in der Fusszeile {string} wählt', async ({ besucher }, label: string) => {

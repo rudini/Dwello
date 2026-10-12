@@ -53,4 +53,16 @@ describe('Hilfe und Rechtliches ohne Anmeldung', () => {
 		expect(links).toEqual(expect.arrayContaining(['/privacy', '/terms']));
 		expect(links).not.toContain('/login');
 	});
+
+	it.each(['/login', '/privacy', '/terms'])('%s führt ohne Anmeldung zur Hilfe', async (path) => {
+		await signedOut(path);
+		const links = [...document.querySelectorAll('a')].map((a) => a.getAttribute('href'));
+		expect(links).toContain('/help');
+	});
+
+	it('die Hilfe verweist nicht auf sich selbst', async () => {
+		await signedOut('/help');
+		const links = [...document.querySelectorAll('a')].map((a) => a.getAttribute('href'));
+		expect(links).not.toContain('/help');
+	});
 });

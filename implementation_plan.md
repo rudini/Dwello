@@ -4740,6 +4740,12 @@ header and on pages without it. Branch `claude/optimistic-clarke-nn8u7t` from `m
   Three review rounds (`docs/design/reviews/i18n-guard-review-1..3.md`): strings in `{…}` and props, regex literals and
   `${…}/` no longer put the quote pairing out of step; each file's test plants German at its end and must find it. The
   user decided against a fourth round. Gallery uses the example name message instead of «Keller».
+  A whole German message copied into the code is caught too («Per E-Mail»).
+- [x] **Persona runs on the final state** (`helga-i18n-2.md`, `marco-i18n-2.md`, `anna-i18n-2.md`, `sven-i18n-3.md`):
+  sign-out now reloads the layout data, so privacy and terms no longer show the signed-out user (`Header.svelte`,
+  `logout.dom.test.ts`, scenario «Nach dem Abmelden zeigt der Datenschutz niemanden als angemeldet»); pages without
+  the app header link to «Hilfe» (`+layout.svelte`, `public-pages-layout.dom.test.ts`, scenario «Die Hilfe von der
+  Anmeldeseite aus lesen»).
 
 ---
 

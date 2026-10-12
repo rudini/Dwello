@@ -63,6 +63,7 @@
 
 	// Derived state for showing authenticated layout
 	const showAuthenticatedLayout = $derived(!isPublicPath($page.url.pathname) && data.user !== null);
+	const publicLink = 'inline-flex min-h-12 items-center text-accent underline underline-offset-4';
 	const contentPage = $derived(['/help', '/privacy', '/terms'].includes($page.url.pathname));
 </script>
 
@@ -93,15 +94,16 @@
 	<MobileNav />
 {:else}
 	<div class="flex min-h-screen flex-col bg-canvas">
-		<!-- Without the header the language choice stands alone at the top; help and the legal pages lead back to signing in, the footer to the legal pages -->
+		<!-- Without the header the language choice stands alone at the top; links to signing in and to help, the footer to the legal pages -->
 		<div class="flex items-center justify-end gap-4 px-4 pt-4">
-			{#if contentPage}
-				<a
-					href="/login"
-					class="mr-auto inline-flex min-h-12 items-center text-accent underline underline-offset-4"
-					data-testid="public-login-link">{m.login_title()}</a
-				>
-			{/if}
+			<div class="mr-auto flex gap-4">
+				{#if contentPage}
+					<a href="/login" class={publicLink} data-testid="public-login-link">{m.login_title()}</a>
+				{/if}
+				{#if $page.url.pathname !== '/help'}
+					<a href="/help" class={publicLink} data-testid="public-help-link">{m.nav_help()}</a>
+				{/if}
+			</div>
 			<nav aria-label={m.language_choice()}>
 				<LanguageSwitcher />
 			</nav>

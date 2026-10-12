@@ -28,7 +28,8 @@
 				method: 'POST',
 				headers: xsrfToken ? { 'X-XSRF-TOKEN': xsrfToken } : {}
 			});
-			await goto('/login');
+			// fresh layout data: the public pages must no longer show the signed-out user
+			await goto('/login', { invalidateAll: true });
 		} catch (error) {
 			console.error('Logout failed:', error);
 			window.location.href = '/login'; // leave anyway

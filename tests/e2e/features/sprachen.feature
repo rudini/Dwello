@@ -68,6 +68,18 @@ Funktionalität: Sprache der Oberfläche
     Wenn der Besucher den Link zur Anmeldung öffnet
     Dann ist der Besucher auf der Seite "Anmelden"
 
+  Szenario: Nach dem Abmelden zeigt der Datenschutz niemanden als angemeldet
+    Angenommen der Liegenschaftsverwalter öffnet die Übersicht
+    Wenn der Liegenschaftsverwalter sich abmeldet
+    Und der Liegenschaftsverwalter in der Fusszeile "Datenschutz" wählt
+    Dann ist der Liegenschaftsverwalter auf der Seite "Datenschutz"
+    Und zeigt die Seite kein Benutzermenü
+
+  Szenario: Die Hilfe von der Anmeldeseite aus lesen
+    Angenommen ein Besucher hat die Anmeldeseite geöffnet
+    Wenn der Besucher den Link zur Hilfe öffnet
+    Dann ist der Besucher auf der Seite "Hilfe"
+
   Szenario: Den Datenschutz von der Anmeldeseite aus lesen
     Angenommen ein Besucher hat die Anmeldeseite geöffnet
     Wenn der Besucher in der Fusszeile "Datenschutz" wählt
