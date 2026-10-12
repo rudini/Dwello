@@ -12,3 +12,5 @@ Scope: the fixes for review 2. The reviewer replaced each of the 6625 string lit
 Known limits of the guard: words that also occur in `en.json` or not in `de.json`; a string containing « //»; text inside nested template literals; a `{…}` holding both `>` and `<`. What is shown on screen in fr/it/en is covered by `sprachen-bildschirme.feature`.
 
 The user decided after this third round: no fourth review; the planted-string check proves the fix.
+
+Guard closed: no open blocker or major (finding 1 fixed in e92665e, minors kept as known limits).
