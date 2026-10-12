@@ -22,7 +22,7 @@ from pathlib import Path
 HARNESS = Path(__file__).resolve().parent
 STAGE3 = HARNESS.parent
 SKILL = STAGE3.parent.parent
-RESULTS = STAGE3 / "results"
+RESULTS = Path(os.environ.get("STAGE3_RESULTS", STAGE3 / "results"))
 WORK = Path(os.environ.get("STAGE3_WORK", "/tmp/claude-0/-home-user-Dwello/"
                            "b911e014-6a0a-558d-a301-60af5eecb558/scratchpad/stage3"))
 MODEL = "claude-opus-5-5"
@@ -30,7 +30,7 @@ ARMS = {"baseline": "baseline.md", "canon": "canon-tdd.md", "skill": "tdd-deep-m
 # Identical for every arm. Reads, globs and edits are limited to the run directory by Claude Code's
 # own default (outside the working directory they need an approval nobody gives in -p mode).
 ARM_TOOLS = ["--permission-mode", "acceptEdits", "--disallowedTools", "WebFetch", "WebSearch",
-             "--allowedTools", "Bash(bun *)", "Bash(bunx *)", "Bash(git *)", "Bash(ls *)",
+             "--allowedTools", "Skill", "Bash(bun *)", "Bash(bunx *)", "Bash(git *)", "Bash(ls *)",
              "Bash(mkdir *)", "Bash(.claude/skills/tdd-deep-modules/scripts/*)",
              "Bash(./.claude/skills/tdd-deep-modules/scripts/*)",
              "Bash(python3 .claude/skills/tdd-deep-modules/scripts/*)"]
@@ -101,7 +101,8 @@ def outside_paths(events, inside):
     """Absolute paths in the session's tool calls that point outside its own directory."""
     found = set()
     for e in events:
-        for block in (e.get("message") or {}).get("content") or []:
+        message = e.get("message") if isinstance(e.get("message"), dict) else {}
+        for block in message.get("content") or []:
             if isinstance(block, dict) and block.get("type") == "tool_use":
                 for path in re.findall(r"/(?:home|tmp|root|mnt|etc|opt|var|usr)/[^\s'\"`)]*",
                                        json.dumps(block.get("input"))):
@@ -204,7 +205,7 @@ def run(fixture, arm, run_id):
     (run_dir / "prompt.txt").write_text(prompt)
     started = time.time()
     result, events = claude(repo, prompt, out_dir / f"{run_id}.stream.jsonl.gz", ARM_TOOLS, ARM_TIMEOUT)
-    record = {"run_id": run_id, "fixture": fixture.name, "fixture_dir": str(fixture.relative_to(STAGE3)),
+    record = {"run_id": run_id, "fixture": fixture.name, "fixture_dir": f"{fixture.parent.name}/{fixture.name}",
               "arm": arm, "base": base, "duration_s": round(time.time() - started),
               "session": {k: result.get(k) for k in ("is_error", "num_turns", "total_cost_usd",
                                                     "session_id", "permission_denials")},
@@ -260,15 +261,16 @@ def review_once(group, fixture, runs, control, k):
     out_dir.mkdir(parents=True, exist_ok=True)
     key, labels = bundle_for_review(WORK / "reviews" / group / f"rev{k}", fixture, runs, control)
     prompt = REVIEW_PROMPT.format(n=len(labels), labels=", ".join(labels))
-    result, _ = claude(WORK / "reviews" / group / f"rev{k}", prompt, out_dir / f"rev{k}.stream.jsonl.gz",
-                       REVIEW_TOOLS, REVIEW_TIMEOUT)
+    view = WORK / "reviews" / group / f"rev{k}"
+    result, events = claude(view, prompt, out_dir / f"rev{k}.stream.jsonl.gz", REVIEW_TOOLS, REVIEW_TIMEOUT)
     text = str(result.get("result", ""))
     blocks = re.findall(r"```json\s*(\{.*?\})\s*```", text, re.S)
     scores = json.loads(blocks[-1])["scores"] if blocks else {}
     by_arm = {key[label]: scores.get(label) for label in labels}
     record = {"group": group, "reviewer": k, "key": key, "runs": runs, "scores_by_label": scores,
               "scores": by_arm, "complete": all(isinstance(v, int) for v in by_arm.values()),
-              "cost": result.get("total_cost_usd"), "text": text}
+              "cost": result.get("total_cost_usd"), "permission_denials": result.get("permission_denials"),
+              "outside_paths": outside_paths(events, view), "text": text}
     (out_dir / f"rev{k}.json").write_text(json.dumps(record, indent=1) + "\n")
     return record
 
