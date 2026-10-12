@@ -367,5 +367,6 @@
 	"statements_status_draft": "Brouillon",
 	"statements_status_sent": "Envoyé",
 	"statements_status_paid": "Payé",
-	"statements_status_overdue": "En retard"
+	"statements_status_overdue": "En retard",
+	"dashboard_occupied_one": "loué"
 }

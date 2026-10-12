@@ -367,5 +367,6 @@
 	"statements_status_draft": "Entwurf",
 	"statements_status_sent": "Versendet",
 	"statements_status_paid": "Bezahlt",
-	"statements_status_overdue": "Überfällig"
+	"statements_status_overdue": "Überfällig",
+	"dashboard_occupied_one": "vermietet"
 }

@@ -130,7 +130,9 @@
 							><span data-testid="occupancy-count"
 								>{building.occupiedApartments}/{building.totalApartments}</span
 							>
-							{m.dashboard_occupied()}{reletParts(building.reletStarts)}</span
+							{building.occupiedApartments === 1
+								? m.dashboard_occupied_one()
+								: m.dashboard_occupied()}{reletParts(building.reletStarts)}</span
 						>
 						<span
 							class="w-20 whitespace-nowrap text-right font-semibold tabular-nums text-ink"

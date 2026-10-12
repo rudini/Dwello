@@ -47,7 +47,7 @@ async function fuelStockData(fetch: Fetch, buildingId: string) {
 	const categories: Record<string, string | boolean>[] | null = categoriesRes.ok
 		? ((await categoriesRes.json()).categories ?? [])
 		: null;
-	const name = (c: Record<string, string | boolean>) => localName(c as never);
+	const name = (c: Record<string, string | boolean>) => localName(c as Parameters<typeof localName>[0]);
 	return {
 		fuelStocks: Array.isArray(stocks)
 			? stocks.map((s: Record<string, string>) => {

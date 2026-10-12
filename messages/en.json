@@ -367,5 +367,6 @@
 	"statements_status_draft": "Draft",
 	"statements_status_sent": "Sent",
 	"statements_status_paid": "Paid",
-	"statements_status_overdue": "Overdue"
+	"statements_status_overdue": "Overdue",
+	"dashboard_occupied_one": "let"
 }

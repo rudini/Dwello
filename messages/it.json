@@ -179,7 +179,7 @@
 	"contracts_status_active": "In corso",
 	"contracts_status_future": "Futuro",
 	"contracts_status_ended": "Terminato",
-	"contracts_period_from": "dal {date}, a tempo indeterminato",
+	"contracts_period_from": "a partire dal {date}, a tempo indeterminato",
 	"contracts_period_since": "dal {date}, a tempo indeterminato",
 	"dashboard_purpose": "Cosa c’è da fare ora e quali scadenze si avvicinano.",
 	"dashboard_quick_heading": "Attività frequenti",
@@ -367,5 +367,6 @@
 	"statements_status_draft": "Bozza",
 	"statements_status_sent": "Inviato",
 	"statements_status_paid": "Pagato",
-	"statements_status_overdue": "Scaduto"
+	"statements_status_overdue": "Scaduto",
+	"dashboard_occupied_one": "locato"
 }

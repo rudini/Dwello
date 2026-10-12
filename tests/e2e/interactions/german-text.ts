@@ -17,7 +17,7 @@ const germanOnly = Object.fromEntries(
 );
 
 // Names and places, the same in every language
-const sameEverywhere = ['Graubünden', 'Dwello', 'Google', 'Microsoft', 'Resend', 'PostgreSQL', 'IBAN', 'CHF', 'PDF', 'XSRF', 'SMTP'];
+const sameEverywhere = ['Dwello', 'Google', 'Microsoft', 'Resend', 'PostgreSQL', 'IBAN', 'CHF', 'PDF', 'XSRF', 'SMTP'];
 // A record named by a scenario: up to three words, then a UUID (fixtures/backend.ts)
 const scenarioRecord = /(?:[\p{L}\d.,'’&-]+ ){0,3}[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gu;
 // Fixed values that are user data: seeds (fixtures/backend.ts, the axe seeds) and the operator (playwright.config.ts)
@@ -56,7 +56,8 @@ export async function germanOnScreen(page: Page, language: string, userData: str
 			.replace(scenarioRecord, ' ');
 	return (await pageTexts(page)).flatMap((text) => {
 		// a German word, or one with ä, ö, ü or ß, which French, Italian and English never use
-		const left = words(masked(text)).filter((word) => germanOnly[language].has(word) || /[äöüß]/.test(word));
+		// English names the canton Graubünden as German does
+		const left = words(masked(language === 'en' ? text.split('Graubünden').join(' ') : text)).filter((word) => germanOnly[language].has(word) || /[äöüß]/.test(word));
 		return left.length ? [`«${text}» (${[...new Set(left)].join(', ')})`] : [];
 	});
 }
@@ -72,7 +73,7 @@ export async function cutOff(page: Page): Promise<string[]> {
 			const clips = ['hidden', 'clip'].includes(style.overflowX) && style.textOverflow !== 'ellipsis';
 			const ownText = [...element.childNodes].some((node) => node.nodeType === 3 && node.textContent!.trim());
 			// sr-only boxes and SvelteKit's route announcer are 1 px on purpose; tables and lists scroll inside their own region (Table.svelte)
-			if (!clips || !ownText || element.clientWidth <= 1 || element.closest('.sr-only, [role="region"]')) continue;
+			if (!clips || !ownText || element.closest('.sr-only, [role="region"], #svelte-announcer')) continue;
 			if (element.scrollWidth > element.clientWidth + 1)
 				found.push(`«${element.textContent!.trim().slice(0, 60)}» cut off (${element.scrollWidth} > ${element.clientWidth} px)`);
 		}

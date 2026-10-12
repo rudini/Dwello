@@ -4664,8 +4664,8 @@ header and on pages without it. Branch `claude/optimistic-clarke-nn8u7t` from `m
   (`localName`), cantons, `Intl.ListFormat` in the UI language. Module-level texts are getters. Test
   `buildings-i18n.test.ts`. Backend texts still passed through: `buildings/new` and `buildings/[id]/edit` actions
   (`error.error || error.message`), handled with the error codes.
-  Fallow: `statusLabels`/`statusTones` exist in `apartment.ts` and `statement.ts` since before; with both modules now
-  importing the messages, Fallow groups them as duplicate exports, and line suppressions do not apply to that rule.
+  Fallow: `statusLabels`/`statusTones` exist in `apartment.ts` and `statement.ts` since before; since both files are now
+  in the changed scope, Fallow reports them as duplicate exports, and line suppressions do not apply to that rule.
   Renaming would change existing tests, so `.fallowrc.json` `ignoreExports` names exactly these two in `statement.ts`.
 - [ ] Step 3 – apartments and tenants
 - [ ] Backend error codes (decided: add a stable `code` to backend error responses, BFF translates by code)
