@@ -1,0 +1,29 @@
+{
+ "group": "main-box-office-holds-r1",
+ "reviewer": 3,
+ "key": {
+  "A": "baseline",
+  "B": "skill",
+  "C": "canon"
+ },
+ "runs": {
+  "baseline": "main-box-office-holds-baseline-r1-a1",
+  "canon": "main-box-office-holds-canon-r1-a1",
+  "skill": "main-box-office-holds-skill-r1-a1"
+ },
+ "scores_by_label": {
+  "A": 6,
+  "B": 7,
+  "C": 6
+ },
+ "scores": {
+  "baseline": 6,
+  "skill": 7,
+  "canon": 6
+ },
+ "foreign_references": [],
+ "complete": true,
+ "cost": 0.1109155,
+ "permission_denials": [],
+ "text": "All three use the same design: one `createBoxOffice` closure that hides the hold and order records, ID counters, expiry and pricing behind the five-method `BoxOffice` interface. That shared structure is deep, so the scores differ only in how the internal helpers split up the work.\n\n**A** (`A/src/boxOffice.ts`): `orderTotalCents` hides the discount and the Rappen rounding behind a two-argument call. `taken(matches, now)` hides the \"active hold or non-cancelled order\" rule behind a predicate, and `getOpenHold` hides the lookup plus the `UNKNOWN_HOLD` rule. However, the current time is passed into `taken` and `availableAt` as a parameter, so every caller has to deal with time. `confirm` and `release` each repeat the `now() >= expiresAt` check themselves, so expiry knowledge is spread out instead of kept in one place.\n\n**B** (`B/src/boxOffice.ts`): `takenTickets(belongs)` reads the clock and applies all the \"what counts as taken\" logic itself, so callers only supply a predicate. `openHold` returns `{hold, expired}`, which handles lookup, ended-state checking and expiry in one call; `confirm` and `release` become a few lines each. `totalCents` hides the pricing rules, and `hold` reuses `available`. These helpers are the deepest of the three.\n\n**C** (`C/src/boxOffice.ts`): `isActive` keeps expiry knowledge in one place and is reused by `ticketsWhere`, `confirm` and `release`, which is good. `unendedHold` and `totalCents` also hide their logic well. But `takenIn` and `ticketsOf` are one-line pass-throughs to `ticketsWhere`, which adds interface without hiding anything. The `{hold, ended}` wrapper shape also has to be repeated in several type annotations, so a representation detail leaks into helper signatures.\n\n```json\n{\"scores\": {\"A\": 6, \"B\": 7, \"C\": 6}}\n```"
+}

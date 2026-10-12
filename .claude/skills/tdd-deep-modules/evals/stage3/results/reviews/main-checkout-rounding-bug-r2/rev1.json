@@ -1,0 +1,29 @@
+{
+ "group": "main-checkout-rounding-bug-r2",
+ "reviewer": 1,
+ "key": {
+  "A": "baseline",
+  "B": "canon",
+  "C": "skill"
+ },
+ "runs": {
+  "baseline": "main-checkout-rounding-bug-baseline-r2-a1",
+  "canon": "main-checkout-rounding-bug-canon-r2-a1",
+  "skill": "main-checkout-rounding-bug-skill-r2-a1"
+ },
+ "scores_by_label": {
+  "A": 5,
+  "B": 5,
+  "C": 7
+ },
+ "scores": {
+  "baseline": 5,
+  "canon": 5,
+  "skill": 7
+ },
+ "foreign_references": [],
+ "complete": true,
+ "cost": 0.1408036,
+ "permission_denials": [],
+ "text": "I read TASK.md and all five files in each of A, B and C. Most of the code is the same in all three. `catalog.ts`, `receipt.ts` and `money.ts` (`roundToRappen`, `formatChf`, `vatIncluded`) are essentially identical, and in every version `checkout` splits the VAT itself. So the scores turn on how the coupon logic is divided between `promotions.ts` and `checkout.ts`.\n\n**A:** `promotions.ts` exposes two separate operations, `findPromotion` and `discountFor`. Those are shallow pass-throughs that leave the coupon rules to the caller. `checkout` has to know the minimum-order rule, build the notice text with `formatChf`, cap the discount at the subtotal, and split the discount and VAT across rates. That puts coupon knowledge in two modules. The small helpers in `money.ts` hide little but cost little to use, which is fine.\n\n**B:** It is structurally the same as A. `checkout` still reads `promotion.minSubtotalCents`, builds the notice, applies the `Math.min` cap and splits the VAT, while `promotions.ts` still offers only `findPromotion` and `discountFor`. The only difference is a new `roundHalfUp(numerator, denominator)` in `money.ts`, a small but real helper that hides how halves are rounded. It doesn't change how depth is spread across the modules, so B gets the same score as A.\n\n**C:** `promotions.ts` exposes one function, `applyCoupon(promotions, code, lines) \u2192 { discountCents, notice? }`. It hides the code lookup and the unknown-code error, the minimum-order check, the notice wording, the cap at the subtotal, and each coupon type's rules, with `discountFor` kept private. As a result `checkout` doesn't know about any coupon rule. Its weak spot is the same as the others: the VAT split is still written inline in `checkout` (`grossOf`, `reducedShare`) instead of sitting behind a module of its own.\n\n```json\n{\"scores\": {\"A\": 5, \"B\": 5, \"C\": 7}}\n```"
+}

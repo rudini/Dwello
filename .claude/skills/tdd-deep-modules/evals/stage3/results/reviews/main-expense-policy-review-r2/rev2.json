@@ -1,0 +1,29 @@
+{
+ "group": "main-expense-policy-review-r2",
+ "reviewer": 2,
+ "key": {
+  "A": "skill",
+  "B": "canon",
+  "C": "baseline"
+ },
+ "runs": {
+  "baseline": "main-expense-policy-review-baseline-r2-a1",
+  "canon": "main-expense-policy-review-canon-r2-a1",
+  "skill": "main-expense-policy-review-skill-r2-a1"
+ },
+ "scores_by_label": {
+  "A": 7,
+  "B": 7,
+  "C": 4
+ },
+ "scores": {
+  "skill": 7,
+  "canon": 7,
+  "baseline": 4
+ },
+ "foreign_references": [],
+ "complete": true,
+ "cost": 0.1428507,
+ "permission_denials": [],
+ "text": "I read TASK.md and the one file in each implementation (`A/src/expenseReview.ts`, `B/src/expenseReview.ts`, `C/src/expenseReview.ts`). A and B are equally deep for different reasons; C is mostly one large function.\n\n**A** (7): `readFile(csv)` is the deepest module of the three. It takes one string and returns `Row[]`, hiding line numbering, `\\r` stripping, skipping blank lines, finding the header, the missing-column errors, mapping columns by name, and the field-count check (signalled by `values` being undefined). `readRow(row, policy, fxRates)` has a small interface: it returns either an `Expense` or a rejection reason. `convert(amountCents, rate)` hides the exact decimal arithmetic for the rate behind one call. However, all the policy checks, including the duplicate and running-daily-total state, are written out inside `reviewExpenses`, so that part has no module boundary at all.\n\n**B** (7): `createPolicyChecker(policy)` is a good deep module. The caller gets back a single `(row) => Violation[]` function, and the duplicate set, the daily totals and the order of violations stay hidden inside it. `convertCents`/`rateAsFraction` and `parseCents` are also nicely encapsulated. On the other hand, `readRow(fields, fieldCount, column, policy, fxRates)` exposes header internals (the field count and the column-index map) to its caller. Header parsing and skipping blank lines are also inline in `reviewExpenses`, so the CSV-reading side is shallower than A's `readFile`.\n\n**C** (4): Nearly all the logic is inline in one long `reviewExpenses`: header handling, every row check through a local `reject` closure, duplicate and daily-total tracking, and the totals. The helpers (`parseCsvLine`, `isValidDate`, `parseAmountCents`) are small, single-purpose functions. `rateToFraction` makes the caller handle a `Fraction` and pass it to `convertCents`, so the representation leaks instead of being hidden. There's no module that hides the policy checks or the CSV-to-row step as a whole.\n\n```json\n{\"scores\": {\"A\": 7, \"B\": 7, \"C\": 4}}\n```"
+}

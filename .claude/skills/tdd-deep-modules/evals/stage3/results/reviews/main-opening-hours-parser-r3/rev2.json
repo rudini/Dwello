@@ -1,0 +1,29 @@
+{
+ "group": "main-opening-hours-parser-r3",
+ "reviewer": 2,
+ "key": {
+  "A": "canon",
+  "B": "skill",
+  "C": "baseline"
+ },
+ "runs": {
+  "baseline": "main-opening-hours-parser-baseline-r3-a1",
+  "canon": "main-opening-hours-parser-canon-r3-a1",
+  "skill": "main-opening-hours-parser-skill-r3-a1"
+ },
+ "scores_by_label": {
+  "A": 7,
+  "B": 8,
+  "C": 6
+ },
+ "scores": {
+  "canon": 7,
+  "skill": 8,
+  "baseline": 6
+ },
+ "foreign_references": [],
+ "complete": true,
+ "cost": 0.11583090000000001,
+ "permission_denials": [],
+ "text": "All three use the same two-layer design: a tokenizer feeding a recursive-descent parser behind the single `parseOpeningHours(text)` entry point. They differ mainly in how much token handling and error reporting the lower layer hides from the grammar functions.\n\n**A** \u2014 `tokenize` hides all the lexing in one regex and returns a uniform `Token[]`. The `Parser` class hides cursor movement behind `accept(kind)` and `expect(kind)`, and `unexpected()` is the only place that decides between \"end of text\" and \"bad token\". So grammar methods like `parseRule`, `parseRange` and `parseDayItem` read like the grammar, and `parseDayItem` alone owns wrap-around day expansion. One small leak: the parser has to be given `endColumn` separately, and `parseDayItem` uses it when there is no token left, so it still has to think about the end of the input.\n\n**B** \u2014 `Cursor` is the deepest module of the three. Its constructor does the tokenizing, it adds an end sentinel, and through `next(pattern, expected)`, `accept(text)` and `expectEnd()` it hides token indexing, the end-of-text check and how `UNEXPECTED` errors and their columns are built. The free functions `parseDays`, `parseRanges` and `parseTime` each own one rule: wrap-around and duplicate days, overlap and sorting, and time validity. None of them ever looks at token positions or column arithmetic.\n\n**C** \u2014 `tokenize` is a hand-written loop that does the same job as A's regex. The `Parser` exposes only `peek`/`next`, so callers repeat `if (token.kind !== X) this.unexpected(token)` everywhere, and the \"expected token\" check is never hidden in one place. `parseRule` loops over `peek().kind === \",\"` by hand, and `parseRange(earlier)` makes the caller pass in the list of earlier ranges. The extra `ParsedRange` type with `start`/`end` minute fields leaks out of `parseRange` into `parseRule`'s sorting. The modules are still reasonable, but their interfaces are somewhat wider relative to what they hide.\n\n```json\n{\"scores\": {\"A\": 7, \"B\": 8, \"C\": 6}}\n```"
+}

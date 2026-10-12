@@ -1,0 +1,29 @@
+{
+ "group": "main-expense-policy-review-r2",
+ "reviewer": 1,
+ "key": {
+  "A": "canon",
+  "B": "skill",
+  "C": "baseline"
+ },
+ "runs": {
+  "baseline": "main-expense-policy-review-baseline-r2-a1",
+  "canon": "main-expense-policy-review-canon-r2-a1",
+  "skill": "main-expense-policy-review-skill-r2-a1"
+ },
+ "scores_by_label": {
+  "A": 8,
+  "B": 6,
+  "C": 4
+ },
+ "scores": {
+  "canon": 8,
+  "skill": 6,
+  "baseline": 4
+ },
+ "foreign_references": [],
+ "complete": true,
+ "cost": 0.13755900000000001,
+ "permission_denials": [],
+ "text": "I read TASK.md and the single source file in each directory (`A/src/expenseReview.ts`, `B/src/expenseReview.ts`, `C/src/expenseReview.ts`).\n\n**A:** This is the deepest of the three. `readRow` hides the whole ordered validation sequence, amount parsing and CHF conversion behind one call that returns either a `Row` or a reject reason. `createPolicyChecker` is the strongest module: its interface is just `(row) => Violation[]`, and the duplicate set, the running daily totals and the ordering of violations all stay inside its closure. `convertCents`/`rateAsFraction` hide exact decimal arithmetic behind a simple `(cents, rate) \u2192 number`. That leaves `reviewExpenses` as a thin coordinator that only handles headers, totals and assembling the report.\n\n**B:** `readFile` is a fairly deep module. It hides line splitting, CRLF handling, skipping blank lines, line numbering, parsing the header and mapping columns. But it leaks the field-count check to its caller as `values: undefined`, which `readRow` then has to interpret. `readRow` hides validation and conversion well, and `convert` packs the exact-rate logic into one function. However, all the policy logic sits inline in `reviewExpenses`: the duplicate set, the daily totals map and the violation ordering. So the top-level function still does a lot of the detailed work.\n\n**C:** This implementation has a few well-contained small helpers: `parseCsvLine`, `isValidDate`, `parseAmountCents`, and `rateToFraction`/`convertCents`. Everything else is in one long `reviewExpenses`: header detection, column lookup, every validation step with its own `reject`/`continue`, the duplicate and daily-limit state, the violation rules and the totals bookkeeping. No module bundles a whole design decision such as \"read a row\" or \"apply the policy\". The helpers do little more than their signatures suggest, and most of the complexity sits in the open in one function.\n\n```json\n{\"scores\": {\"A\": 8, \"B\": 6, \"C\": 4}}\n```"
+}

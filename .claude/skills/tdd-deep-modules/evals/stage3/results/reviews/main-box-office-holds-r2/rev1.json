@@ -1,0 +1,29 @@
+{
+ "group": "main-box-office-holds-r2",
+ "reviewer": 1,
+ "key": {
+  "A": "canon",
+  "B": "baseline",
+  "C": "skill"
+ },
+ "runs": {
+  "baseline": "main-box-office-holds-baseline-r2-a1",
+  "canon": "main-box-office-holds-canon-r2-a1",
+  "skill": "main-box-office-holds-skill-r2-a1"
+ },
+ "scores_by_label": {
+  "A": 7,
+  "B": 6,
+  "C": 7
+ },
+ "scores": {
+  "canon": 7,
+  "baseline": 6,
+  "skill": 7
+ },
+ "foreign_references": [],
+ "complete": true,
+ "cost": 0.10709489999999999,
+ "permission_denials": [],
+ "text": "All three use the same structure: a single `createBoxOffice` closure that hides the hold and order records, with a pricing helper and a predicate-based counter for taken tickets. The scores differ only in small details.\n\n**A:** The five-method `BoxOffice` interface hides the internal `ended`/`cancelled` flags, the counting of tickets as they expire, the ID numbering and the pricing rules. `takenTickets(matches)` is the deepest helper. It is one predicate-based query that covers both the per-section availability check and the customer limit across all sections, and it hides the rule that expired holds don't count. `orderTotal` hides the discount and the Rappen rounding behind just `(quantity, priceCents)`. `section` and `openHold` combine lookup with validation, so callers never handle missing records.\n\n**B:** It has the same overall depth as A. It also has a clearer explicit `HoldState` and reads `now()` once per operation. However, several internal helpers are shallower. `toHold` and `toOrder` are field-by-field copies that add interface surface but almost no behaviour. `ticketsTaken(matches, time)` and `availableAt(section, time)` make every caller pass the time, so a decision that `isExpired` hides inside A and C leaks into each call site here. `requireOpenHold` and `orderTotalCents` are still good, deep helpers.\n\n**C:** It is essentially equivalent to A. `takenTickets(matches)` hides how active holds and live orders are combined, and expiry is hidden behind `isExpired`. `unendedHold` and `sectionOf` combine lookup with validation. `totalCents` encapsulates the discount and rounding rules. `hold` reuses the public `office.available` rather than adding a separate internal function, so the internal interface stays very small.\n\n```json\n{\"scores\": {\"A\": 7, \"B\": 6, \"C\": 7}}\n```"
+}

@@ -1,0 +1,29 @@
+{
+ "group": "main-opening-hours-parser-r1",
+ "reviewer": 1,
+ "key": {
+  "A": "baseline",
+  "B": "skill",
+  "C": "canon"
+ },
+ "runs": {
+  "baseline": "main-opening-hours-parser-baseline-r1-a1",
+  "canon": "main-opening-hours-parser-canon-r1-a1",
+  "skill": "main-opening-hours-parser-skill-r1-a1"
+ },
+ "scores_by_label": {
+  "A": 7,
+  "B": 6,
+  "C": 7
+ },
+ "scores": {
+  "baseline": 7,
+  "skill": 6,
+  "canon": 7
+ },
+ "foreign_references": [],
+ "complete": true,
+ "cost": 0.1252741,
+ "permission_denials": [],
+ "text": "All three expose the same one-function interface (`parseOpeningHours`) over a tokenizer plus a recursive-descent parser. The differences are in how deep the internal pieces are.\n\n**A**: `tokenize` hides a lot behind a single call: whitespace skipping, letter and digit runs, Unicode code points, stray characters and the end-of-text column. `timeToMinutes` keeps the whole time format, including the rule that 24:00 is only valid as an end, behind one small signature. Inside the `Parser` class, `parseDays` handles day-range wrapping and duplicate detection in one step, and `parseRanges` does validation, overlap checks and sorting in one step. Each method's interface is much smaller than what it does. The only shallow parts are `peek`/`next`/`unexpected`, which are routine.\n\n**B**: The sticky-regex generator `tokenize` is a deep, compact lexer, though it handles stray characters by throwing directly instead of returning a token. Everything else is closures inside `parseOpeningHours`, so there are no real module boundaries apart from the function itself. `parseDayItem` and `parseRange` are fairly deep (wrap-around arithmetic, overlap detection). `take`, `skip`, `peek` and `next` are thin pass-through helpers, and parsing state is shared across all the closures. Comparing times as strings removes a time-conversion layer, but no module owns the time format the way A's `timeToMinutes` does.\n\n**C**: The `Lexer` class is a clean, deep module: two methods, `peek()` and `next()`, hide whitespace handling, character classes, lookahead state and the end token. `parseTime` hides the full time format and returns a `ParsedTime`. However, the parser splits each concern into pairs, `addDayItem`/`parseDayItem` and `addRange`/`parseRange`. The `add*` methods are thin wrappers that just add one check and a push, so the parser has more, shallower layers than A.\n\n```json\n{\"scores\": {\"A\": 7, \"B\": 6, \"C\": 7}}\n```"
+}

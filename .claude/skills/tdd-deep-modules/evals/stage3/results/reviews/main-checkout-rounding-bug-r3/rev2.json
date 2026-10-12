@@ -1,0 +1,29 @@
+{
+ "group": "main-checkout-rounding-bug-r3",
+ "reviewer": 2,
+ "key": {
+  "A": "canon",
+  "B": "skill",
+  "C": "baseline"
+ },
+ "runs": {
+  "baseline": "main-checkout-rounding-bug-baseline-r3-a1",
+  "canon": "main-checkout-rounding-bug-canon-r3-a1",
+  "skill": "main-checkout-rounding-bug-skill-r3-a1"
+ },
+ "scores_by_label": {
+  "A": 5,
+  "B": 6,
+  "C": 6
+ },
+ "scores": {
+  "canon": 5,
+  "skill": 6,
+  "baseline": 6
+ },
+ "foreign_references": [],
+ "complete": true,
+ "cost": 0.142724,
+ "permission_denials": [],
+ "text": "All three have the same public interface, which the task fixes: `checkout`, `renderReceipt` and `createCatalog`. `catalog.ts` and `receipt.ts` are identical in all three, so the differences come down to how each one splits up the work inside checkout.\n\n**A:** Promotions are split into their own module (`promotions.ts`) with a small interface: `findPromotion` and `discountFor(promotion, lines)`. That interface hides how each promotion kind is calculated, including how multibuy groups are counted. But the rule that the discount is capped at the subtotal is left to the caller (`Math.min(discountFor(...), subtotalCents)` in `checkout`). The proportional VAT split is also written inline in `checkout` instead of being hidden behind a function, so `checkout` handles several separate concerns itself. `money.ts` holds small one-formula helpers (`roundToRappen`, `vatIncluded`).\n\n**B:** Everything sits in `checkout.ts`, but behind private helpers. `vatAfterDiscount(lines, subtotal, discount)` hides the whole VAT allocation (gross per rate, reduced-rate share with halves-up rounding, the standard rate taking the rest), so `checkout` stays a short sequence of steps. `discountFor` takes a `subtotalCents` argument it could work out itself, and its caller still applies the subtotal cap, so that function leaks a little. The public interface is very small compared with what it hides. The weakness is that the promotion types live in the checkout module instead of a module of their own.\n\n**C:** The structure is the same as A, with one design decision moved inside `promotions.ts`. `discountFor` now applies the subtotal cap itself (through the private `uncappedDiscount`), so callers can't forget it and `checkout` uses the result as it is. That makes the promotions module slightly deeper than A's. Like A, though, the VAT discount split is still inline in `checkout`, and `money.ts` is the same set of small helpers.\n\n```json\n{\"scores\": {\"A\": 5, \"B\": 6, \"C\": 6}}\n```"
+}

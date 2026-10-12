@@ -1,0 +1,29 @@
+{
+ "group": "main-box-office-holds-r1",
+ "reviewer": 2,
+ "key": {
+  "A": "baseline",
+  "B": "skill",
+  "C": "canon"
+ },
+ "runs": {
+  "baseline": "main-box-office-holds-baseline-r1-a1",
+  "canon": "main-box-office-holds-canon-r1-a1",
+  "skill": "main-box-office-holds-skill-r1-a1"
+ },
+ "scores_by_label": {
+  "A": 7,
+  "B": 7,
+  "C": 6
+ },
+ "scores": {
+  "baseline": 7,
+  "skill": 7,
+  "canon": 6
+ },
+ "foreign_references": [],
+ "complete": true,
+ "cost": 0.115959,
+ "permission_denials": [],
+ "text": "I read all three implementations. Each is one `src/boxOffice.ts` file with the same structure: a `createBoxOffice` closure behind the five-method `BoxOffice` interface. Hold and order bookkeeping, expiry, the per-customer limit and price rounding are all hidden from callers. The differences are in how deep the internal helpers are.\n\n**A:** Callers only see the narrow interface. The helpers are mostly deep: `taken(matches, now)` is the one counting function behind both `availableAt` (section availability) and the customer limit, and `orderTotalCents` hides the discount and Rappen rounding. Two small leaks: `taken` and `availableAt` make the caller pass `now`, and the expiry rule (`options.now() >= h.expiresAt`) is written out again in both `confirm` and `release` rather than kept inside `getOpenHold`.\n\n**B:** Also deep from the outside. `takenTickets(belongs)` hides the active-hold and non-cancelled-order filtering and reads the clock itself, so callers never deal with time. `openHold` hides the lookup, the \"already ended\" check and the expiry calculation, returning `{hold, expired}`. That leaves `confirm` and `release` with only their own policy to decide. `totalCents` hides the pricing rules. The extra `expired` flag in `openHold`'s return value is a minor addition, but it does remove the duplicated time check that A has.\n\n**C:** The same deep outer interface and the same general `ticketsWhere`, `isActive`, `unendedHold` and `totalCents` helpers. However, `takenIn` and `ticketsOf` are one-line wrappers that just pass a predicate to `ticketsWhere`. They add interface without hiding any decision. Wrapping each record in `{hold, ended}` / `{order, cancelled}` also means the inner code has to unwrap it (`entry.hold`, `.map((h) => h.hold)`) everywhere. Overall it's slightly shallower inside than A and B.\n\n```json\n{\"scores\": {\"A\": 7, \"B\": 7, \"C\": 6}}\n```"
+}

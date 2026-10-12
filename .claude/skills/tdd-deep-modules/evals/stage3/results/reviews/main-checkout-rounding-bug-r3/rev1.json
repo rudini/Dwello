@@ -1,0 +1,29 @@
+{
+ "group": "main-checkout-rounding-bug-r3",
+ "reviewer": 1,
+ "key": {
+  "A": "canon",
+  "B": "baseline",
+  "C": "skill"
+ },
+ "runs": {
+  "baseline": "main-checkout-rounding-bug-baseline-r3-a1",
+  "canon": "main-checkout-rounding-bug-canon-r3-a1",
+  "skill": "main-checkout-rounding-bug-skill-r3-a1"
+ },
+ "scores_by_label": {
+  "A": 5,
+  "B": 6,
+  "C": 7
+ },
+ "scores": {
+  "canon": 5,
+  "baseline": 6,
+  "skill": 7
+ },
+ "foreign_references": [],
+ "complete": true,
+ "cost": 0.141536,
+ "permission_denials": [],
+ "text": "I read all 14 files. A and B are nearly the same code. They differ in only one design decision: which module enforces the cap that keeps a discount from exceeding the subtotal. C takes a different structure and merges the promotion logic into `checkout.ts`.\n\n**A:** `checkout()` in `checkout.ts` hides line pricing, the coupon rules and the VAT split behind a small signature, so it is a reasonably deep entry point. Around it, the modules are thin pass-throughs. `money.ts` exports one-line helpers (`roundToRappen`, `vatIncluded`, `formatChf`). `promotions.ts` exports `findPromotion`, `discountFor` and a separate `PricedLine` type, and `discountFor` is little more than a switch over the promotion kinds. The rule that caps the discount at the subtotal sits in the caller (`Math.min(discountFor(...), subtotalCents)` in `checkout`), so callers of `discountFor` have to know that rule. That leaks a design decision out of the promotions module.\n\n**B:** The module layout and the shallow `money.ts` helpers are the same as A's. The difference is that `promotions.ts`'s `discountFor` works out the subtotal itself and applies the cap internally, delegating to a private `uncappedDiscount`. That puts the whole \"how much discount does this coupon give\" decision behind one function, making `promotions.ts` somewhat deeper than A's version. The VAT split is still written inline in `checkout`, and the many small exports keep the overall depth moderate.\n\n**C:** C exposes very little. `checkout.ts` exports only `checkout`, the data types and `Promotion`, while `findPromotion`, `discountFor`, `vatAfterDiscount`, `vatIncluded` and `roundToRappen` are all private. `money.ts` shrinks to the one function other modules actually need, `formatChf`. `vatAfterDiscount` hides the whole proportional-split and VAT-calculation rule behind one call. The cap still sits in `checkout` rather than in `discountFor`, but because it is private, that knowledge never leaks outside the module. Of the three, C has the smallest interface for the functionality it hides.\n\n```json\n{\"scores\": {\"A\": 5, \"B\": 6, \"C\": 7}}\n```"
+}

@@ -1,0 +1,10 @@
+{
+ "group": "main-expense-policy-review-r3",
+ "fixture": "expense-policy-review",
+ "runs": {
+  "baseline": "main-expense-policy-review-baseline-r3-a1",
+  "canon": "main-expense-policy-review-canon-r3-a1",
+  "skill": "main-expense-policy-review-skill-r3-a1"
+ },
+ "control": null
+}

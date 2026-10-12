@@ -1,0 +1,29 @@
+{
+ "group": "main-box-office-holds-r2",
+ "reviewer": 2,
+ "key": {
+  "A": "baseline",
+  "B": "skill",
+  "C": "canon"
+ },
+ "runs": {
+  "baseline": "main-box-office-holds-baseline-r2-a1",
+  "canon": "main-box-office-holds-canon-r2-a1",
+  "skill": "main-box-office-holds-skill-r2-a1"
+ },
+ "scores_by_label": {
+  "A": 6,
+  "B": 7,
+  "C": 7
+ },
+ "scores": {
+  "baseline": 6,
+  "skill": 7,
+  "canon": 7
+ },
+ "foreign_references": [],
+ "complete": true,
+ "cost": 0.11660039999999999,
+ "permission_denials": [],
+ "text": "All three use the same layout: one `createBoxOffice` closure that sits behind the small five-method `BoxOffice` interface, with a few private helpers. The narrow public interface hides the hold lifecycle, lazy expiry, availability and limit counting, and the Rappen pricing, so none of them is shallow. The differences are in how deep the internal helpers are.\n\n**A** (`A/src/boxOffice.ts`): `ticketsTaken(matches, time)` is a fairly deep helper because it combines holds and orders under one predicate. `orderTotalCents` hides the discount and the 5-cent rounding behind two arguments. However, the caller has to supply the time to `isActive(hold, time)`, `ticketsTaken(\u2026, time)` and `availableAt(section, time)`, so reading the clock once per call is the caller's job and not hidden in the helpers. `toHold` and `toOrder` are shallow field-copy helpers, and `availableAt` is a one-line wrapper. The three-value `HoldState` is a reasonable hidden decision, but A has more small, leaky helpers than the others.\n\n**B** (`B/src/boxOffice.ts`): `isExpired(hold)` keeps `options.now()` inside the helper, so expiry is fully hidden. `takenTickets(matches)` only takes a predicate and hides the rules for what counts as taken. `unendedHold` and `sectionOf` each combine the lookup with the correct error code. `hold()` reuses the public `office.available` for its sold-out check, and `totalCents` hides the pricing rules. There are no pass-through or copy helpers, so each helper does noticeably more than its signature suggests.\n\n**C** (`C/src/boxOffice.ts`): It is almost the same as B. `isExpired`, `takenTickets(matches)`, `openHold` and `section(id)` hide time, counting and error mapping. The `available` function is shared directly between `hold()` and the public interface. `orderTotal` hides the discount and rounding behind named constants. The helpers are just as deep as B's and there is no shallow glue code.\n\n```json\n{\"scores\": {\"A\": 6, \"B\": 7, \"C\": 7}}\n```"
+}

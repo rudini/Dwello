@@ -1,0 +1,29 @@
+{
+ "group": "main-expense-policy-review-r3",
+ "reviewer": 1,
+ "key": {
+  "A": "canon",
+  "B": "baseline",
+  "C": "skill"
+ },
+ "runs": {
+  "baseline": "main-expense-policy-review-baseline-r3-a1",
+  "canon": "main-expense-policy-review-canon-r3-a1",
+  "skill": "main-expense-policy-review-skill-r3-a1"
+ },
+ "scores_by_label": {
+  "A": 5,
+  "B": 3,
+  "C": 7
+ },
+ "scores": {
+  "canon": 5,
+  "baseline": 3,
+  "skill": 7
+ },
+ "foreign_references": [],
+ "complete": true,
+ "cost": 0.1297768,
+ "permission_denials": [],
+ "text": "I read TASK.md and the single source file in each directory (`src/expenseReview.ts`).\n\n**A:** Two pieces hide a lot behind small interfaces. `readRow(fields, column, fieldCount, policy, fxRates) \u2192 AcceptedRow | string` runs the whole ordered validation chain and the CHF conversion. `convertCents`/`toDecimal` hide exact BigInt decimal rounding behind `(cents, rate) \u2192 number`, and `splitFields` handles all the quoting rules behind one call. But reading the header and building the column map, splitting into physical lines, and the policy checks with their duplicate and daily-total state all stay inline in `reviewExpenses`. So the top-level function still exposes most of the design decisions.\n\n**B:** The helpers `parseFields`, `isValidDate`, `parseAmountCents` and `convertCents` are each reasonably deep, but they are small. Everything else is in one long `reviewExpenses` loop: finding the header through a nullable `columns` state variable, every rejection check with its `continue`, the duplicate set, the daily totals and the per-employee totals. Nothing hides how a row is read or how the policy is applied, so the main module is about as complex as the whole task.\n\n**C:** This is the most clearly layered of the three. `readCsv(csv) \u2192 {header, rows}` hides line splitting, skipping blank lines, line numbering, the header errors and splitting fields. `readRow` hides validation and conversion behind a returned `Expense | string`. `policyChecker(policy)` returns an `expense \u2192 Violation[]` closure that holds the duplicate and daily-total state privately. As a result, `reviewExpenses` is a short loop that only puts the pieces together and adds up the totals. `readRow` taking the raw `header` array (and calling `indexOf` for each field) leaks the header format a little.\n\n```json\n{\"scores\": {\"A\": 5, \"B\": 3, \"C\": 7}}\n```"
+}

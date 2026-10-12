@@ -1,0 +1,29 @@
+{
+ "group": "main-expense-policy-review-r2",
+ "reviewer": 3,
+ "key": {
+  "A": "canon",
+  "B": "baseline",
+  "C": "skill"
+ },
+ "runs": {
+  "baseline": "main-expense-policy-review-baseline-r2-a1",
+  "canon": "main-expense-policy-review-canon-r2-a1",
+  "skill": "main-expense-policy-review-skill-r2-a1"
+ },
+ "scores_by_label": {
+  "A": 8,
+  "B": 4,
+  "C": 7
+ },
+ "scores": {
+  "canon": 8,
+  "baseline": 4,
+  "skill": 7
+ },
+ "foreign_references": [],
+ "complete": true,
+ "cost": 0.1328956,
+ "permission_denials": [],
+ "text": "I read TASK.md and the one file in each implementation (`src/expenseReview.ts`).\n\n**A: 8.** The main function only coordinates three deep modules. `readRow(fields, \u2026) \u2192 Row | string` handles the ordered validation, the amount parsing and the conversion to CHF in one step. `createPolicyChecker(policy)` returns a simple `(row) => Violation[]` function and keeps the duplicate set and the per-day running totals hidden inside it. `convertCents` hides how it turns the rate into an exact fraction for rounding. The one weak spot is that the header and column-index resolution sit inline in `reviewExpenses`, so file-format details leak into the coordinating code.\n\n**B: 4.** `reviewExpenses` is one long function containing the header handling, all seven validation checks (each with its own `reject`/`continue`), the four policy checks, the duplicate and daily-total state, and the totals. The helpers (`isValidDate`, `parseAmountCents`, `parseCsvLine`) are small and leaf-level. The conversion is split shallowly: the caller has to call `rateToFraction`, check for null, pass a `Fraction` around and then call `convertCents`, so the fraction representation leaks into the main loop.\n\n**C: 7.** `readFile(csv) \u2192 Row[]` is a deep module. Behind one call it hides line splitting, CR stripping, skipping blank lines while keeping line numbers, header lookup, column mapping and the field-count check. `readRow` hides the ordered validation and produces an `Expense`, and `convert(cents, rate)` hides the exact-decimal arithmetic completely. However, the policy checks and their state are inlined in `reviewExpenses` instead of being a module of their own. Also, the field-count rule is split between the two functions: `readFile` signals it with `values: undefined`, and `readRow` turns that into the rejection reason.\n\n```json\n{\"scores\": {\"A\": 8, \"B\": 4, \"C\": 7}}\n```"
+}

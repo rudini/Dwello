@@ -1,0 +1,29 @@
+{
+ "group": "main-expense-policy-review-r3",
+ "reviewer": 2,
+ "key": {
+  "A": "canon",
+  "B": "baseline",
+  "C": "skill"
+ },
+ "runs": {
+  "baseline": "main-expense-policy-review-baseline-r3-a1",
+  "canon": "main-expense-policy-review-canon-r3-a1",
+  "skill": "main-expense-policy-review-skill-r3-a1"
+ },
+ "scores_by_label": {
+  "A": 6,
+  "B": 3,
+  "C": 8
+ },
+ "scores": {
+  "canon": 6,
+  "baseline": 3,
+  "skill": 8
+ },
+ "foreign_references": [],
+ "complete": true,
+ "cost": 0.1304284,
+ "permission_denials": [],
+ "text": "I read TASK.md and the single source file in each of A, B and C. All three keep the public interface the task requires, a single `reviewExpenses` function, so they differ only in how they divide the work inside it.\n\n**A:** The helpers are reasonably deep. `splitFields` handles the quoting and trimming rules, `parseCents` and `convertCents`/`toDecimal` handle exact decimal-to-cents conversion, and `readRow` returns either an `AcceptedRow` or a rejection reason string. However, `readRow` takes five parameters, including the column map and `fieldCount`, so how the header is laid out leaks into it. Header parsing and all four policy checks are written out inline in `reviewExpenses`. The duplicate set and the running daily totals sit in the main loop instead of behind their own module.\n\n**B:** Most of the logic sits in one large `reviewExpenses`. It parses the header lazily inside the row loop, runs each validation check with its own `reject(...)` and `continue`, works out the policy violations, and adds up the totals, all in one place. Only the small leaf helpers (`parseFields`, `isValidDate`, `parseAmountCents`, `convertCents`) hide anything. Nothing keeps file structure, row validation and policy state apart, so the main function is about as complex as everything it does.\n\n**C:** It is broken into deep modules with small interfaces. `readCsv(csv)` hides line endings, skipping blank lines, line numbering and finding and checking the header, and returns just `{header, rows}`. `policyChecker(policy)` returns a closure, `(expense) => Violation[]`, that keeps the duplicate set and the running daily totals completely hidden. `readRow` hides the order of the validation checks and the currency conversion, so `reviewExpenses` is left as a short composition of these parts.\n\n```json\n{\"scores\": {\"A\": 6, \"B\": 3, \"C\": 8}}\n```"
+}

@@ -1,0 +1,29 @@
+{
+ "group": "main-opening-hours-parser-r3",
+ "reviewer": 1,
+ "key": {
+  "A": "baseline",
+  "B": "canon",
+  "C": "skill"
+ },
+ "runs": {
+  "baseline": "main-opening-hours-parser-baseline-r3-a1",
+  "canon": "main-opening-hours-parser-canon-r3-a1",
+  "skill": "main-opening-hours-parser-skill-r3-a1"
+ },
+ "scores_by_label": {
+  "A": 6,
+  "B": 6,
+  "C": 8
+ },
+ "scores": {
+  "baseline": 6,
+  "canon": 6,
+  "skill": 8
+ },
+ "foreign_references": [],
+ "complete": true,
+ "cost": 0.11555579999999999,
+ "permission_denials": [],
+ "text": "I read TASK.md and all three files (`A/src/openingHours.ts`, `B/src/openingHours.ts`, `C/src/openingHours.ts`). All three use the same basic split: a tokenizer, then a recursive-descent parser behind the single `parseOpeningHours` entry point. The differences in depth come from how well the token-handling layer is hidden and how cleanly the grammar functions divide up the checks.\n\n**A**: `tokenize` is a solid, self-contained module. It adds an explicit `end` token, so the parser never has to handle running out of input. The `Parser` class exposes only `parseSpec`, which hides cursor movement and building the error for a bad token (`unexpected`). However, the grammar methods leak their internal state to each other. `parseRange(earlier)` needs its caller to pass in the earlier ranges so it can check overlap, and `parseDayItem(days)` modifies a set owned by its caller. Also, there is no `expect`/`accept` helper, so each method repeats \"`next()`, then check the kind, then call `unexpected`.\" This makes the parser's internal layers fairly shallow.\n\n**B**: `tokenize` hides the token rules in one regex, and `Parser` adds `accept`, `expect` and `unexpected`. These small helpers absorb the \"wrong token here\" and \"text ended too early\" logic, so `parseRule`, `parseRange` and `parseDayItem` read cleanly. The weak spot is that the end-of-text column is not hidden. The caller has to compute `text.length + 1` and pass it to the `Parser` constructor, and the parser stores it as `endColumn`. `parseDayItem` also has to use `this.peek()?.column ?? this.endColumn` to get its column. Checking for `undefined` tokens is spread across several methods instead of being handled once, unlike A's sentinel token.\n\n**C**: `Cursor` is the deepest module of the three. Its constructor takes the raw text and hides tokenizing, the end sentinel and its column, and the text of UNEXPECTED errors. All of that sits behind four methods: `peek`, `next(pattern, expected)`, `accept` and `expectEnd`. The grammar functions (`parseDays`, `parseDay`, `parseRanges`, `parseTime`) each take only the cursor and return plain values. Each one fully owns its own checks: duplicate days in `parseDays`, overlap and sorting in `parseRanges`. No internal state is shared between them. Callers never deal with token kinds or end-of-text handling.\n\n```json\n{\"scores\": {\"A\": 6, \"B\": 6, \"C\": 8}}\n```"
+}

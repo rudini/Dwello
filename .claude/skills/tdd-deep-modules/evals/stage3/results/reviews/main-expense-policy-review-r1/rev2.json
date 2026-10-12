@@ -1,0 +1,29 @@
+{
+ "group": "main-expense-policy-review-r1",
+ "reviewer": 2,
+ "key": {
+  "A": "canon",
+  "B": "baseline",
+  "C": "skill"
+ },
+ "runs": {
+  "baseline": "main-expense-policy-review-baseline-r1-a1",
+  "canon": "main-expense-policy-review-canon-r1-a1",
+  "skill": "main-expense-policy-review-skill-r1-a1"
+ },
+ "scores_by_label": {
+  "A": 6,
+  "B": 4,
+  "C": 7
+ },
+ "scores": {
+  "canon": 6,
+  "baseline": 4,
+  "skill": 7
+ },
+ "foreign_references": [],
+ "complete": true,
+ "cost": 0.1340328,
+ "permission_denials": [],
+ "text": "All three share the same leaf helpers: a field splitter, a calendar-date check, and exact BigInt currency conversion. Each of these hides a real decision behind a one-line signature. The differences are in how `reviewExpenses` itself is broken up.\n\n**A (6)**: `reviewExpenses` defines a local `readRow` closure. It turns raw fields into either a `Row` or a rejection reason, and hides all seven validation checks, the column lookup and the CHF conversion. The `Row` it returns already carries a `duplicateKey`, so the main loop never has to know how \"12.5 equals 12.50\" is handled. `convertCents` is deep: it takes cents and a rate and hides the decimal/exponent breakdown and the half-up rounding. However, the policy checks, the running daily totals and the per-employee totals all sit inline in the loop, so the main function still shows most of the review logic.\n\n**B (4)**: The leaf helpers are good: `parseFields`, `isValidDate`, `parseAmountCents`, and `convertCents` resting on `toDecimal`. But `reviewExpenses` is one long function that does everything in the open. It handles column indexing, seven reject-and-`continue` blocks, building the duplicate key, the four violation checks, the daily totals and the per-employee totals. No module sits between \"parse a field\" and \"do the whole review\" to hide the row-validation or policy decisions. Splitting `toDecimal` out of `convertCents` adds an extra interface layer without hiding much more.\n\n**C (7)**: This one has the clearest middle layer. `readHeader` returns a small `Header` (column positions and width) and hides name normalization and the missing-column errors. `readRow(text, header, policy, fxRates)` hides splitting, every validation check and conversion, and returns either an `Expense` or a rejection reason. `checkPolicy(expense, policy, history)` hides all four violation rules and their order. That leaves `reviewExpenses` as a short loop that coordinates these pieces. One weak spot: the caller has to build and pass in the `History` structure (`seen`, `dayTotals`), which exposes how `checkPolicy` keeps its state.\n\n```json\n{\"scores\": {\"A\": 6, \"B\": 4, \"C\": 7}}\n```"
+}

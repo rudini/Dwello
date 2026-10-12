@@ -1,0 +1,10 @@
+{
+ "group": "main-box-office-holds-r2",
+ "fixture": "box-office-holds",
+ "runs": {
+  "baseline": "main-box-office-holds-baseline-r2-a1",
+  "canon": "main-box-office-holds-canon-r2-a1",
+  "skill": "main-box-office-holds-skill-r2-a1"
+ },
+ "control": null
+}

@@ -1,0 +1,29 @@
+{
+ "group": "main-expense-policy-review-r1",
+ "reviewer": 1,
+ "key": {
+  "A": "skill",
+  "B": "canon",
+  "C": "baseline"
+ },
+ "runs": {
+  "baseline": "main-expense-policy-review-baseline-r1-a1",
+  "canon": "main-expense-policy-review-canon-r1-a1",
+  "skill": "main-expense-policy-review-skill-r1-a1"
+ },
+ "scores_by_label": {
+  "A": 7,
+  "B": 5,
+  "C": 4
+ },
+ "scores": {
+  "skill": 7,
+  "canon": 5,
+  "baseline": 4
+ },
+ "foreign_references": [],
+ "complete": true,
+ "cost": 0.1334476,
+ "permission_denials": [],
+ "text": "I read TASK.md and the single source file in each implementation (`A/src/expenseReview.ts`, `B/src/expenseReview.ts`, `C/src/expenseReview.ts`). In all three, the public entry point `reviewExpenses(csv, policy, fxRates)` is deep, so the scores reflect how well each one is built inside.\n\n**A:** This one is split into a few modules, each hiding a lot behind a small interface. `readRow(text, header, policy, fxRates)` handles field splitting, the ordered validation chain, amount parsing and CHF conversion, and returns either an `Expense` or a rejection reason. `checkPolicy(expense, policy, history)` keeps the duplicate keys, running daily totals and violation order behind one call, with the state held in a small `History` record. `readHeader` hides column lookup and the missing-column error, and `convertCents` hides exact decimal rate arithmetic. What's left in `reviewExpenses` is a short orchestration loop.\n\n**B:** The low-level helpers are deep: `splitFields` (quoting rules), `isCalendarDate`, `parseAmountCents` and `convertCents` (BigInt rounding). The `readRow` closure hides validation well and nicely packages a precomputed `duplicateKey` inside `Row`. But as a closure it isn't a separate module; it's tied to `reviewExpenses`'s local variables. All the policy-check logic (duplicate set, daily totals, violation ordering) and the totals bookkeeping sit inline in the main loop. So `reviewExpenses` is one large block that mixes header handling, row reading and policy checks.\n\n**C:** The helpers are deep in the same way: `parseFields`, `isValidDate`, `parseAmountCents` and `convertCents`. `toDecimal` is a somewhat shallow intermediate step that only serves `convertCents`. Everything else is inline in one long `reviewExpenses`: header mapping, every validation step with its own `reject(...); continue;`, duplicate and daily-limit tracking, violation ordering and totals. There is no row-reading or policy module, so the design decisions about row reading and policy checks aren't hidden behind any interface below the entry point.\n\n```json\n{\"scores\": {\"A\": 7, \"B\": 5, \"C\": 4}}\n```"
+}

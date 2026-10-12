@@ -1,0 +1,29 @@
+{
+ "group": "main-checkout-rounding-bug-r3",
+ "reviewer": 3,
+ "key": {
+  "A": "baseline",
+  "B": "canon",
+  "C": "skill"
+ },
+ "runs": {
+  "baseline": "main-checkout-rounding-bug-baseline-r3-a1",
+  "canon": "main-checkout-rounding-bug-canon-r3-a1",
+  "skill": "main-checkout-rounding-bug-skill-r3-a1"
+ },
+ "scores_by_label": {
+  "A": 7,
+  "B": 6,
+  "C": 6
+ },
+ "scores": {
+  "baseline": 7,
+  "canon": 6,
+  "skill": 6
+ },
+ "foreign_references": [],
+ "complete": true,
+ "cost": 0.14292480000000002,
+ "permission_denials": [],
+ "text": "I read all the files in A, B and C. All three keep the same narrow public interface: `checkout`, `renderReceipt` and `createCatalog`. `catalog.ts` and `receipt.ts` are identical in all three, and `renderReceipt` is a reasonably deep function. The differences are in where the coupon and VAT rules live.\n\n**A:** `promotions.ts` exposes only `findPromotion` and `discountFor(promotion, lines)`, and `discountFor` handles both the discount rules for each coupon kind and the cap at the subtotal (through a private `uncappedDiscount`). Callers just get a final discount amount without knowing that a cap exists, so that module is deep. The weak spot is that `checkout` contains the VAT split (computing each rate's gross total and its share of the discount) inline instead of hiding it behind a function. `money.ts` holds small, focused helpers.\n\n**B:** It is structurally the same as A, but `discountFor` only returns the uncapped amount. `checkout` has to apply `Math.min(..., subtotalCents)` itself, so the cap leaks out to the caller. As in A, the VAT split sits inline in `checkout`. That makes the promotions module a bit shallower than A's, and `checkout` does work a lower module should own.\n\n**C:** There is no separate promotions module; `findPromotion`, `discountFor`, `vatAfterDiscount`, `vatIncluded` and `roundToRappen` are all private helpers inside `checkout.ts`. `vatAfterDiscount(lines, subtotal, discount)` hides the whole VAT split nicely. However, `discountFor` takes a redundant `subtotalCents` argument and leaves the cap to the caller, like B. Pulling the promotion rules into `checkout.ts` makes it one fairly deep file, but the coupon logic no longer has a deep interface of its own. Overall C trades A's well-encapsulated discount for a well-encapsulated VAT step.\n\n```json\n{\"scores\": {\"A\": 7, \"B\": 6, \"C\": 6}}\n```"
+}

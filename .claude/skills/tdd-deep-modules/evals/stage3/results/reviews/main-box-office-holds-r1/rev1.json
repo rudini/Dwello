@@ -1,0 +1,29 @@
+{
+ "group": "main-box-office-holds-r1",
+ "reviewer": 1,
+ "key": {
+  "A": "canon",
+  "B": "baseline",
+  "C": "skill"
+ },
+ "runs": {
+  "baseline": "main-box-office-holds-baseline-r1-a1",
+  "canon": "main-box-office-holds-canon-r1-a1",
+  "skill": "main-box-office-holds-skill-r1-a1"
+ },
+ "scores_by_label": {
+  "A": 7,
+  "B": 6,
+  "C": 7
+ },
+ "scores": {
+  "canon": 7,
+  "baseline": 6,
+  "skill": 7
+ },
+ "foreign_references": [],
+ "complete": true,
+ "cost": 0.11373629999999998,
+ "permission_denials": [],
+ "text": "All three use the same overall design: one `createBoxOffice` closure with a five-method public interface that hides hold expiry, the per-customer limit, availability arithmetic, ID numbering and price rounding. The differences are in how well the internal helpers hide information, especially time and the expiry rule.\n\n**A:** `ticketsWhere(matches)` hides how active holds and non-cancelled orders are combined, and it reads the time internally, so callers never handle `now`. The expiry rule lives only in `isActive`, which `ticketsWhere`, `confirm` and `release` all reuse. `unendedHold` combines the lookup and the `UNKNOWN_HOLD` check. `takenIn` and `ticketsOf` are thin one-line wrappers that add a little interface without hiding much.\n\n**B:** The helpers' interfaces leak time. `isActive(h, now)`, `taken(matches, now)` and `availableAt(section, now)` all need the caller to fetch and pass `now`. `confirm` and `release` don't use `isActive`; they repeat the expiry comparison `options.now() >= h.expiresAt` inline, so the expiry rule is written in several places. `getOpenHold` and `orderTotalCents` are reasonably deep, but overall the internal modules hide less than A's or C's.\n\n**C:** `takenTickets(belongs)` reads the clock itself and hides the active-hold and active-order filtering behind a single predicate. `openHold` returns `{hold, expired}`, so `confirm` and `release` don't need to know how expiry is computed. The expiry comparison still appears twice, once in `takenTickets` and once in `openHold`, but `available` and `totalCents` are compact and hide their logic well.\n\n```json\n{\"scores\": {\"A\": 7, \"B\": 6, \"C\": 7}}\n```"
+}

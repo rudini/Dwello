@@ -1,0 +1,29 @@
+{
+ "group": "main-opening-hours-parser-r1",
+ "reviewer": 2,
+ "key": {
+  "A": "baseline",
+  "B": "skill",
+  "C": "canon"
+ },
+ "runs": {
+  "baseline": "main-opening-hours-parser-baseline-r1-a1",
+  "canon": "main-opening-hours-parser-canon-r1-a1",
+  "skill": "main-opening-hours-parser-skill-r1-a1"
+ },
+ "scores_by_label": {
+  "A": 7,
+  "B": 6,
+  "C": 7
+ },
+ "scores": {
+  "baseline": 7,
+  "skill": 6,
+  "canon": 7
+ },
+ "foreign_references": [],
+ "complete": true,
+ "cost": 0.12180980000000001,
+ "permission_denials": [],
+ "text": "**A.** `tokenize()` is a solid deep function: it takes the text and returns a token list. All the scanning rules are hidden inside it: letter runs, digit-and-colon runs, single-character punctuation, unknown characters, and the end token with column length+1. The `Parser` class exposes only `parse()`, and each private method owns one complete job. For example, `parseRanges()` handles validation, overlap detection and sorting, and returns plain `TimeRange[]`. `timeToMinutes()` keeps the time rules, including the 24:00 case, in one place. The pieces are cleanly split and each has a narrow interface; only the small `peek`/`next` helpers are thin.\n\n**B.** The public surface is tiny, but almost everything is closures inside one big `parseOpeningHours` function. These closures share the mutable `current` and `hours` state, so they aren't independent modules. The generator `tokenize()` is a nice lazy, deep tokenizer, though it also throws `UNEXPECTED` errors itself, which mixes error handling into lexing. `parseDayItem(named)` and `parseRange(earlier)` hide wraparound and overlap logic well. However, `take`, `skip`, `peek` and `next` are thin wrappers, and the overall structure is less layered than A or C.\n\n**C.** The `Lexer` class is a good deep module. Its interface is just `peek()` and `next()`, and it hides whitespace skipping, run scanning, invalid characters and the end token. The `Parser` class hides `ParsedTime`/`ParsedRange` (times kept with their minutes and column) and converts to plain `TimeRange` only at the end, inside `parseRule`. `addRange(ranges)` and `addDayItem(days)` work by changing arrays passed in by the caller, which makes those interfaces slightly shallower. The shared `expect()` and `unexpected()` helpers keep the `UNEXPECTED` error policy in one place.\n\n```json\n{\"scores\": {\"A\": 7, \"B\": 6, \"C\": 7}}\n```"
+}

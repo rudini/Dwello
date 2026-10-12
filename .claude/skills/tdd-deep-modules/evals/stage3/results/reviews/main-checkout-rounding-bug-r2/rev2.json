@@ -1,0 +1,29 @@
+{
+ "group": "main-checkout-rounding-bug-r2",
+ "reviewer": 2,
+ "key": {
+  "A": "baseline",
+  "B": "skill",
+  "C": "canon"
+ },
+ "runs": {
+  "baseline": "main-checkout-rounding-bug-baseline-r2-a1",
+  "canon": "main-checkout-rounding-bug-canon-r2-a1",
+  "skill": "main-checkout-rounding-bug-skill-r2-a1"
+ },
+ "scores_by_label": {
+  "A": 5,
+  "B": 7,
+  "C": 5
+ },
+ "scores": {
+  "baseline": 5,
+  "skill": 7,
+  "canon": 5
+ },
+ "foreign_references": [],
+ "complete": true,
+ "cost": 0.14128580000000002,
+ "permission_denials": [],
+ "text": "I read all 15 files: TASK.md plus five source files in each of A, B and C. All three share the same `catalog.ts` and `receipt.ts`, and their `money.ts` files are nearly identical. The differences in depth come from how each one splits the coupon logic between `promotions.ts` and `checkout.ts`.\n\n**A:** `promotions.ts` exports two separate small functions: `findPromotion` (look up the code, throw if unknown) and `discountFor` (the discount for one promotion kind). So `checkout` itself has to apply the minimum-order rule, build the notice text, cap the discount at the subtotal, and split the discount between the VAT rates inline. Coupon rules leak into the caller, and `checkout` becomes one long function that doesn't hide much behind smaller abstractions. `money.ts` (`vatIncluded`, `roundToRappen`, `formatChf`) and `renderReceipt` are reasonably deep for their size.\n\n**B:** `promotions.ts` exposes a single function, `applyCoupon(promotions, code, lines)`, which returns a `CouponResult` of `{discountCents, notice?}`. It hides the code lookup, the unknown-code error, the minimum-order check, the notice wording, the cap at the subtotal, and all per-kind rules, because `discountFor` is private. That leaves `checkout` with one line for the whole coupon step. The VAT split is still inline in `checkout`, but it uses a small `grossOf` helper. Of the three, B has the clearest example of a small interface hiding many decisions.\n\n**C:** The structure is essentially the same as A: `findPromotion` and `discountFor` are exported and called in sequence, and `checkout` does the minimum check, notice, cap and VAT split inline. The one addition is `money.roundHalfUp(numerator, denominator)`, which hides the exact half-up rounding rule. That's a small gain in depth but doesn't change the overall shape, where the coupon policy sits in the caller.\n\n```json\n{\"scores\": {\"A\": 5, \"B\": 7, \"C\": 5}}\n```"
+}

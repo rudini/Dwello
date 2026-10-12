@@ -1,0 +1,10 @@
+{
+ "group": "main-checkout-rounding-bug-r3",
+ "fixture": "checkout-rounding-bug",
+ "runs": {
+  "baseline": "main-checkout-rounding-bug-baseline-r3-a1",
+  "canon": "main-checkout-rounding-bug-canon-r3-a1",
+  "skill": "main-checkout-rounding-bug-skill-r3-a1"
+ },
+ "control": null
+}
