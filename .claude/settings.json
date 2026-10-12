@@ -34,6 +34,9 @@
     }
   ],
   "permissions": {
+    "allow": [
+      "Bash(mmx search:*)"
+    ],
     "deny": [
       "Read(node_modules/**)",
       "Read(dist/**)",
