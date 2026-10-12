@@ -451,18 +451,25 @@ describe('Mietvertrag bearbeiten', () => {
 	});
 
 	// Sven K1 M1: wer bei einem unbefristeten Mietvertrag «Befristet» wählt, meint oft eine Kündigung
-	describe('Hinweis auf «Mietvertrag beenden»', () => {
+	describe('Hinweis auf «Beenden»', () => {
 		const choose = async (value: string) => {
 			click(document.querySelector<HTMLInputElement>(`input[name="duration"][value="${value}"]`)!);
 			await settle();
 		};
 
-		it('verweist bei «Befristet» auf «Mietvertrag beenden»', async () => {
+		it('verweist bei «Befristet» auf «Beenden»', async () => {
 			await open();
 			await choose('limited');
 			const hint = byTestId('contract-notice-hint')!;
 			expect(hint.textContent).toContain('Hat der Mieter gekündigt?');
 			expect(hint.querySelector('a')!.getAttribute('href')).toBe('/contracts/c1');
+		});
+
+		// die Kündigung ist schon erfasst: wer dann «Befristet» wählt, ändert sie bewusst
+		it('verweist nicht darauf bei einem schon gekündigten Mietvertrag', async () => {
+			await open(null, true);
+			await choose('limited');
+			expect(byTestId('contract-notice-hint')).toBeNull();
 		});
 
 		it('verweist nicht darauf bei einem befristeten Mietvertrag', async () => {

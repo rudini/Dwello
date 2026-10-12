@@ -84,7 +84,9 @@
 	const overlap = $derived(overlapWarning(values, apartmentContracts, contract.id));
 	const back = $derived(`/contracts/${contract.id}`);
 	// «Befristet» for a contract saved open-ended: a notice is entered with «Mietvertrag beenden» (Sven K1 M1)
-	const noticeHint = $derived(!contract.endDate && !values.isUnlimited && !values.terminated);
+	const noticeHint = $derived(
+		!contract.endDate && !contract.terminated && !values.isUnlimited && !values.terminated
+	);
 	const tenantName = $derived(tenants.find((t) => t.id === values.tenantId)?.name ?? '');
 
 	async function contractsOf(apartmentId: string) {

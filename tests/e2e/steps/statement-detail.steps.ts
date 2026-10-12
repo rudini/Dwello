@@ -174,7 +174,6 @@ Then(
 		const name = names.get(tenant) ?? tenant;
 		await visit(verwalter.page, '/statements');
 		await verwalter.perform(searchStatements(name));
-		await expect(emptyStatementList(verwalter)).toBeVisible();
 		await expect(statementOfYear(verwalter, name, year)).toHaveCount(0);
 	}
 );

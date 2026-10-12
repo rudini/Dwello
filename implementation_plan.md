@@ -4901,7 +4901,7 @@ header and on pages without it. Branch `claude/optimistic-clarke-nn8u7t` from `m
   and ignores an unknown building or impossible period (K-5); «Vermietet» without «bis» when the successor starts the
   next day (K-4, `src/lib/apartment.ts` `followedOn`); the overview task stays after the end until a successor exists,
   the «Vertragsende» deadline returns for a contract given notice that has one (K-6, `dashboard/+page.server.ts`); the
-  contract form points to «Mietvertrag beenden» when an end is typed into an open-ended contract (`NoticeHint.svelte`,
+  contract form points to «Beenden» when an end is typed into an open-ended contract (`NoticeHint.svelte`,
   Sven M1); tests for «Abrechnung nicht mehr auffindbar», the refused PUT after deleting the draft and the a11y states
   `edit-refused` and `link-preset` (K-8); API documentation (K-9). Haiku review after each step.
 
