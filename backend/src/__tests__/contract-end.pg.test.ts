@@ -1,5 +1,5 @@
 /**
- * A contract cannot end before the end of one of its statements: the statement already bills rent days after that day
+ * Contract dates may not change the rent days a stored statement of the contract bills (rental_start, rental_end)
  */
 
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';

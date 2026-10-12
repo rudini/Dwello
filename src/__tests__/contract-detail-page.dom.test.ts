@@ -175,12 +175,15 @@ describe('Mietvertragsdetail', () => {
 		const notice = byTestId('contract-end-past-notice')!;
 		expect(notice.getAttribute('aria-live')).toBe('polite');
 		expect(notice.textContent!.trim()).toBe('');
+		// empty it takes no space in the form, but stays for screen readers
+		expect(notice.classList.contains('sr-only')).toBe(true);
 		fireEvent(byTestId<HTMLInputElement>('contract-end-date-input')!, 'input', '30.09.2026');
 		await settle();
 		expect(text('contract-end-past-notice')).toBe(
 			'Das Vertragsende liegt in der Vergangenheit. Bestätigen Sie das Vertragsende mit dem Kästchen.'
 		);
 		expect(notice.contains(byTestId('contract-end-past-confirm'))).toBe(false);
+		expect(notice.classList.contains('sr-only')).toBe(false);
 	});
 
 	// wird ein angekreuztes Kästchen durch ein neues Datum zurückgesetzt, hört ein Screenreader das

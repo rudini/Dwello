@@ -27,6 +27,15 @@
 	// a day over a year back is often a typo in the year
 	const longAgo = $derived(endDate < `${Number(today.slice(0, 4)) - 1}${today.slice(4)}`);
 
+	// short, with what to do; a confirmation reset by another day is said again
+	const notice = $derived.by(() => {
+		if (!past) return '';
+		if (confirmedDay !== '' && confirmedDay !== endDate)
+			return 'Das Vertragsende hat sich geändert. Bestätigen Sie es erneut mit dem Kästchen.';
+		const when = longAgo ? ', über ein Jahr zurück. Prüfen Sie das Jahr.' : '.';
+		return `Das Vertragsende liegt in der Vergangenheit${when} Bestätigen Sie das Vertragsende mit dem Kästchen.`;
+	});
+
 	// the error names a day: another day typed takes it back
 	let errorFor = untrack(() => endDate);
 	$effect(() => {
@@ -36,15 +45,14 @@
 	});
 </script>
 
-<!-- always present, so screen readers hear the short notice when it appears; the checkbox stays outside -->
-<p aria-live="polite" class="font-semibold text-ink" data-testid="contract-end-past-notice">
-	{#if past && confirmedDay !== '' && confirmedDay !== endDate}
-		Das Vertragsende hat sich geändert. Bestätigen Sie es erneut mit dem Kästchen.
-	{:else if past}
-		Das Vertragsende liegt in der Vergangenheit{longAgo
-			? ', über ein Jahr zurück. Prüfen Sie das Jahr.'
-			: '.'} Bestätigen Sie das Vertragsende mit dem Kästchen.
-	{/if}
+<!-- always present, so screen readers hear the short notice when it appears (empty it takes no space);
+	the checkbox stays outside -->
+<p
+	aria-live="polite"
+	class={['font-semibold text-ink', !notice && 'sr-only']}
+	data-testid="contract-end-past-notice"
+>
+	{notice}
 </p>
 {#if past}
 	<Checkbox
