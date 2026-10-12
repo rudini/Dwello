@@ -189,7 +189,9 @@ describe('Mietvertragsdetail', () => {
 		click('contract-end-button');
 		fireEvent(byTestId<HTMLInputElement>('contract-end-date-input')!, 'input', '31.03.2024');
 		await settle();
-		expect(document.querySelector('[role=dialog]')!.textContent).toContain('Sonntag, 31. März 2024');
+		expect(document.querySelector('[role=dialog]')!.textContent).toContain(
+			'Sonntag, 31. März 2024'
+		);
 		expect(byTestId('contract-end-past-confirm')).toBeNull();
 	});
 
@@ -205,7 +207,9 @@ describe('Mietvertragsdetail', () => {
 		expect(document.querySelector('[role=dialog]')!.textContent).toContain('am 30.09.2025 endete');
 		fireEvent(input, 'input', '30.09.2026');
 		await settle();
-		expect(document.querySelector('[role=dialog]')!.textContent).not.toContain('Bitte bestätigen Sie');
+		expect(document.querySelector('[role=dialog]')!.textContent).not.toContain(
+			'Bitte bestätigen Sie'
+		);
 	});
 
 	// die Bestätigung gilt nur für den Tag, der dabei angezeigt war
