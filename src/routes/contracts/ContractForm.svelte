@@ -20,6 +20,7 @@
 		type RefusedStatement
 	} from '$lib/contract-status';
 	import { wizardLink } from '$lib/statement-wizard';
+	import { backendMessage } from '$lib/backend-error';
 	import { normalizeAmounts, stepErrors } from '$lib/contract-wizard';
 	import { addToast } from '$lib/stores';
 	import type { RentalContract } from '$lib/types';
@@ -109,6 +110,7 @@
 	function edited(event: Event) {
 		const id = (event.target as HTMLElement).id;
 		delete errors[errorKey[id] ?? id];
+		refused = []; // the offer belongs to the values refused (review K-2)
 	}
 
 	// the backend answers in English: a valid form is refused for an overlap or a statement after the end
@@ -157,11 +159,18 @@
 	// the one draft the new dates would change goes first; the wizard then creates it anew (A-10)
 	async function deleteDraftAndSave(draft: RefusedStatement) {
 		if (!valid()) return focusFirstError(form);
+		// an overlap would refuse the save after the delete: the draft would be gone for nothing (review K-2)
+		if (overlap) {
+			errors = { form: m.backend_contract_overlap() };
+			refused = [];
+			return focusFirstError(form);
+		}
 		saving = true;
 		const deleted = await apiCall(`/statements/${draft.id}`, { method: 'DELETE' });
 		saving = false;
 		if (deleted.error) {
-			errors = { form: m.contracts_save_failed() };
+			errors = { form: backendMessage(deleted.error, m.contracts_save_failed()) };
+			refused = [];
 			return focusFirstError(form);
 		}
 		await put(wizardLink(draft.buildingId, draft.periodStart, draft.periodEnd));

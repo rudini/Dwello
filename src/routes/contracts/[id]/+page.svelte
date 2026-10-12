@@ -8,6 +8,7 @@
 		type RefusedStatement
 	} from '$lib/contract-status';
 	import { enhance } from '$app/forms';
+	import { dialogSubmit } from '$lib/ui/dialog-submit';
 	import PastEndConfirm from '../PastEndConfirm.svelte';
 	import RefusedStatements from '../RefusedStatements.svelte';
 	import { formatDate } from '$lib/utils/format';
@@ -63,7 +64,16 @@
 	}
 	// the toast names the day the tenancy ends, or since when it has ended
 	// the statements that refused the end, to open or to delete one (A-10)
-	const refused = $derived(form && 'refused' in form ? (form.refused as RefusedStatement[]) : null);
+	// only for the day refused: another day typed afterwards may not need the draft deleted (review K-2)
+	const refused = $derived(
+		form && 'refusedDay' in form && 'refused' in form && form.refusedDay === endDate
+			? (form.refused as RefusedStatement[])
+			: null
+	);
+	let deletingDraft = $state(false);
+	// the wizard opens next: the message says what happened before (personas K1)
+	const draftDeletedMessage = (number: string) =>
+		m.contracts_draft_deleted_toast({ name, number, date: formatDate(endDate) });
 
 	function endedMessage() {
 		if (pastEnd) return m.contracts_ended_toast({ name, date: formatDate(endDate) });
@@ -153,6 +163,34 @@
 	check={checkEndDate}
 	onsuccess={() => addToast('success', endedMessage())}
 >
+	{#snippet afterError()}
+		<RefusedStatements statements={refused ?? []}>
+			{#snippet action(draft, consequence)}
+				<form
+					method="POST"
+					action="?/endDeletingDraft"
+					use:enhance={dialogSubmit(
+						() => ({}),
+						(busy) => (deletingDraft = busy),
+						() => {},
+						() => addToast('success', draftDeletedMessage(draft.statementNumber))
+					)}
+				>
+					<input type="hidden" name="endDate" value={endDate} />
+					<input type="hidden" name="pastConfirmed" value={pastConfirmed ? 'on' : ''} />
+					<input type="hidden" name="statementId" value={draft.id} />
+					<Button
+						type="submit"
+						variant="danger"
+						icon="delete"
+						busy={deletingDraft}
+						describedby={consequence}
+						testid="delete-draft-and-end">{m.contracts_delete_draft_and_end()}</Button
+					>
+				</form>
+			{/snippet}
+		</RefusedStatements>
+	{/snippet}
 	<!-- TODO(fachlich prüfen): «Kündigungstermin», «Kündigungsfrist» are not in the glossary (offene-punkte.md) -->
 	<DateInput
 		id="endDate"
@@ -171,18 +209,6 @@
 		bind:error={pastError}
 	/>
 	<p class="text-ink-muted">{m.contracts_end_notice_hint()}</p>
-	<RefusedStatements statements={refused ?? []}>
-		{#snippet action(draft)}
-			<form method="POST" action="?/endDeletingDraft" use:enhance>
-				<input type="hidden" name="endDate" value={endDate} />
-				<input type="hidden" name="pastConfirmed" value={pastConfirmed ? 'on' : ''} />
-				<input type="hidden" name="statementId" value={draft.id} />
-				<Button type="submit" variant="danger" icon="delete" testid="delete-draft-and-end"
-					>{m.contracts_delete_draft_and_end()}</Button
-				>
-			</form>
-		{/snippet}
-	</RefusedStatements>
 </ActionDialog>
 
 <ActionDialog

@@ -174,7 +174,12 @@ async function endOn(fetch: typeof globalThis.fetch, id: string, endDate: string
 	const statements =
 		response.status === 409 && (await response.json().catch(() => ({}))).statements;
 	if (Array.isArray(statements))
-		return fail(409, { endError: billedDaysError(statements), refused: statements });
+		// the day goes with the offer: another day typed afterwards is not refused (review K-2)
+		return fail(409, {
+			endError: billedDaysError(statements),
+			refused: statements,
+			refusedDay: endDate
+		});
 	return response.ok ? null : fail(response.status, { endError: m.contracts_end_failed() });
 }
 

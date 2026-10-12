@@ -1259,5 +1259,6 @@
 	"contracts_refused_open": "Nebenkostenabrechnung {number} öffnen",
 	"contracts_delete_draft_consequence": "Der Entwurf {number} wird gelöscht. Erstellen Sie die Nebenkostenabrechnung danach neu.",
 	"contracts_delete_draft_and_end": "Entwurf löschen und Mietvertrag beenden",
-	"contracts_delete_draft_and_save": "Entwurf löschen und Mietvertrag speichern"
+	"contracts_delete_draft_and_save": "Entwurf löschen und Mietvertrag speichern",
+	"contracts_draft_deleted_toast": "Entwurf {number} gelöscht. Der Mietvertrag von {name} endet am {date}. Erstellen Sie jetzt die Nebenkostenabrechnung neu."
 }

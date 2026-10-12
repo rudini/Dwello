@@ -7,7 +7,7 @@
 	let {
 		statements,
 		action
-	}: { statements: RefusedStatement[]; action?: Snippet<[RefusedStatement]> } = $props();
+	}: { statements: RefusedStatement[]; action?: Snippet<[RefusedStatement, string]> } = $props();
 
 	const draft = $derived(
 		statements.length === 1 && statements[0].status === 'draft' ? statements[0] : null
@@ -27,10 +27,11 @@
 			{/each}
 		</ul>
 		{#if draft && action}
-			<p class="text-ink">
+			<!-- the button names this consequence as its description -->
+			<p class="text-ink" id="delete-draft-consequence">
 				{m.contracts_delete_draft_consequence({ number: draft.statementNumber })}
 			</p>
-			{@render action(draft)}
+			{@render action(draft, 'delete-draft-consequence')}
 		{/if}
 	</div>
 {/if}

@@ -197,6 +197,77 @@ describe('Mietvertrag bearbeiten', () => {
 			expect(byTestId('refused-statement-link')!.getAttribute('href')).toBe('/statements/s1');
 		});
 
+		// Review K-2: das Angebot gehört zu den abgelehnten Werten
+		it('nimmt das Angebot zurück, sobald ein Feld geändert ist', async () => {
+			calls = fakeBff(({ method }) =>
+				method === 'PUT' ? [409, refused] : [200, { contracts: [] }]
+			);
+			await open();
+			await endOn('31.03.2025');
+			click('contract-end-past-confirm');
+			await settle();
+			await save();
+			expect(byTestId('delete-draft-and-save')).not.toBeNull();
+			type('contract-base-rent-input', '980');
+			await settle();
+			expect(byTestId('delete-draft-and-save')).toBeNull();
+		});
+
+		// Review K-2: eine Überschneidung lehnte das Speichern nach dem Löschen ab; der Entwurf bleibt
+		it('löscht keinen Entwurf, solange sich der Zeitraum überschneidet', async () => {
+			calls = fakeBff(({ method }) => {
+				if (method === 'PUT') return [409, refused];
+				return [200, { contracts: [{ id: 'c2', startDate: '2025-02-01', endDate: null }] }];
+			});
+			await open();
+			await endOn('31.03.2025');
+			click('contract-end-past-confirm');
+			await settle();
+			await save();
+			click('delete-draft-and-save');
+			await settle();
+			expect(calls.filter((c) => c.method === 'DELETE')).toEqual([]);
+			expect(byTestId('form-error')!.textContent).toContain('überschneidet');
+		});
+
+		// Review K-2: eine Überschneidung lehnte das Speichern nach dem Löschen ab; der Entwurf bleibt
+		it('löscht keinen Entwurf, solange sich der Zeitraum überschneidet', async () => {
+			calls = fakeBff(({ method }) => {
+				if (method === 'PUT') return [409, refused];
+				return [200, { contracts: [{ id: 'c2', startDate: '2025-02-01', endDate: null }] }];
+			});
+			await open();
+			await endOn('31.03.2025');
+			click('contract-end-past-confirm');
+			await settle();
+			await save();
+			click('delete-draft-and-save');
+			await settle();
+			expect(calls.filter((c) => c.method === 'DELETE')).toEqual([]);
+			expect(byTestId('form-error')!.textContent).toContain('überschneidet');
+		});
+
+		// Review K-7: ein inzwischen versendeter Entwurf; die Meldung des Backends, kein zweites Angebot
+		it('nennt den Grund, wenn der Entwurf nicht gelöscht werden kann', async () => {
+			calls = fakeBff(({ method }) => {
+				if (method === 'PUT') return [409, refused];
+				if (method === 'DELETE')
+					return [400, { error: 'not a draft', code: 'STATEMENT_NOT_DRAFT' }];
+				return [200, { contracts: [] }];
+			});
+			await open();
+			await endOn('31.03.2025');
+			click('contract-end-past-confirm');
+			await settle();
+			await save();
+			click('delete-draft-and-save');
+			await settle();
+			expect(byTestId('form-error')!.textContent).toContain(
+				'Die Abrechnung ist kein Entwurf mehr und kann nicht gelöscht werden.'
+			);
+			expect(byTestId('delete-draft-and-save')).toBeNull();
+		});
+
 		// A-10: der einzige Entwurf wird gelöscht, der Mietvertrag gespeichert, danach geht es in den Assistenten
 		it('löscht den Entwurf, speichert und öffnet den Assistenten für Gebäude und Periode', async () => {
 			let refuse = true;

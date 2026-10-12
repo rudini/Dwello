@@ -19,7 +19,8 @@
 		onsuccess,
 		fields = {},
 		check = () => true,
-		children
+		children,
+		afterError
 	}: {
 		open: boolean;
 		action: string;
@@ -33,6 +34,7 @@
 		fields?: Record<string, string>; // values of fields in the dialog, which lies outside the form
 		check?: () => boolean; // false: the dialog shows what is wrong, nothing is sent
 		children: Snippet;
+		afterError?: Snippet; // a way out of a refusal, read after the refusal itself
 	} = $props();
 
 	let form = $state<HTMLFormElement>();
@@ -81,5 +83,6 @@
 		{#if error}
 			<Alert tone="critical" title={m.ui_action_failed()} testid="form-error"><p>{error}</p></Alert>
 		{/if}
+		{@render afterError?.()}
 	</div>
 </Dialog>

@@ -92,7 +92,11 @@ describe('Mietvertragsdetail', () => {
 
 	// A-10: die Ablehnung führt zur Abrechnung; der einzige Entwurf lässt sich löschen, mit seiner Folge
 	it('verlinkt die abgelehnte Abrechnung und bietet an, den Entwurf zu löschen', async () => {
-		open('2024-04-01', null, { endError: 'abgelehnt', refused: refused.statements });
+		open('2024-04-01', null, {
+			endError: 'abgelehnt',
+			refused: refused.statements,
+			refusedDay: '2025-03-31'
+		});
 		click('contract-end-button');
 		fireEvent(byTestId<HTMLInputElement>('contract-end-date-input')!, 'input', '31.03.2025');
 		await settle();
@@ -106,12 +110,47 @@ describe('Mietvertragsdetail', () => {
 		const value = (name: string) => form.querySelector<HTMLInputElement>(`[name="${name}"]`)!.value;
 		expect([value('statementId'), value('endDate')]).toEqual(['s1', '2025-03-31']);
 		expect(form.contains(byTestId('delete-draft-and-end'))).toBe(true);
+		// Review K-3: erst die Meldung, dann der Ausweg; der Knopf nennt seine Folge
+		const order = byTestId('form-error')!.compareDocumentPosition(byTestId('refused-statements')!);
+		expect(order & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+		const described = byTestId('delete-draft-and-end')!.getAttribute('aria-describedby')!;
+		expect(document.getElementById(described)!.textContent).toContain('wird gelöscht');
+	});
+
+	// Personas K1: der Assistent öffnet danach; die Meldung sagt, was vorher geschah
+	it('bestätigt das Löschen und das Vertragsende vor dem Assistenten', async () => {
+		open('2024-04-01', null, {
+			endError: 'abgelehnt',
+			refused: refused.statements,
+			refusedDay: '2025-03-31'
+		});
+		click('contract-end-button');
+		fireEvent(byTestId<HTMLInputElement>('contract-end-date-input')!, 'input', '31.03.2025');
+		await settle();
+		await redirectAfter('?/endDeletingDraft');
+		expect(get(toasts).map((t) => t.message)).toContain(
+			'Entwurf NK-2025-0003 gelöscht. Der Mietvertrag von Anna Keller endet am 31.03.2025. Erstellen Sie jetzt die Nebenkostenabrechnung neu.'
+		);
+	});
+
+	// Review K-2: ein anderer Tag ist nicht abgelehnt; das Angebot gehört zum abgelehnten Tag
+	it('nimmt das Angebot zurück, sobald ein anderer Tag eingegeben ist', async () => {
+		open('2024-04-01', null, {
+			endError: 'abgelehnt',
+			refused: refused.statements,
+			refusedDay: '2025-03-31'
+		});
+		click('contract-end-button');
+		fireEvent(byTestId<HTMLInputElement>('contract-end-date-input')!, 'input', '31.03.2099');
+		await settle();
+		expect(byTestId('delete-draft-and-end')).toBeNull();
 	});
 
 	it('bietet bei einer versendeten Abrechnung kein Löschen an', async () => {
 		const sent = refused.statements.map((s) => ({ ...s, status: 'sent' }));
-		open('2024-04-01', null, { endError: 'abgelehnt', refused: sent });
+		open('2024-04-01', null, { endError: 'abgelehnt', refused: sent, refusedDay: '2025-03-31' });
 		click('contract-end-button');
+		fireEvent(byTestId<HTMLInputElement>('contract-end-date-input')!, 'input', '31.03.2025');
 		await settle();
 		expect(byTestId('refused-statement-link')).not.toBeNull();
 		expect(byTestId('delete-draft-and-end')).toBeNull();

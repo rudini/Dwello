@@ -1259,5 +1259,6 @@
 	"contracts_refused_open": "Ouvrir le décompte des charges {number}",
 	"contracts_delete_draft_consequence": "Le brouillon {number} sera supprimé. Établissez ensuite le décompte des charges à nouveau.",
 	"contracts_delete_draft_and_end": "Supprimer le brouillon et terminer le contrat de bail",
-	"contracts_delete_draft_and_save": "Supprimer le brouillon et enregistrer le contrat de bail"
+	"contracts_delete_draft_and_save": "Supprimer le brouillon et enregistrer le contrat de bail",
+	"contracts_draft_deleted_toast": "Brouillon {number} supprimé. Le contrat de bail de {name} prend fin le {date}. Établissez maintenant le décompte des charges à nouveau."
 }
