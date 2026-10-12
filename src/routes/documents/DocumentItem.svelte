@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import type { Snippet } from 'svelte';
 	import { deliveryErrorText } from '$lib/backend-error';
 	import type { StatementDocument } from '$lib/types';
@@ -16,8 +17,18 @@
 	const heading = $derived(
 		document.statementNumber ? `${document.title} · ${document.statementNumber}` : document.title
 	);
-	const recipient = $derived(showTenant ? `An ${document.tenantName}, ` : '');
-	const channel = $derived(document.channel === 'email' ? 'per E-Mail' : 'per Brief');
+	const channel = $derived(
+		document.channel === 'email' ? m.tenants_document_by_email() : m.tenants_document_by_letter()
+	);
+	const created = $derived(
+		showTenant
+			? m.documents_created_to({
+					name: document.tenantName,
+					date: formatDate(document.createdAt),
+					channel
+				})
+			: m.documents_created({ date: formatDate(document.createdAt), channel })
+	);
 	const toSend = $derived(document.status === 'to_send');
 </script>
 
@@ -27,13 +38,11 @@
 >
 	<div class="flex flex-col gap-1">
 		<p class="font-semibold text-ink">{heading}</p>
-		<p class="text-ink-muted">
-			{recipient}erstellt am {formatDate(document.createdAt)}, {channel}
-		</p>
+		<p class="text-ink-muted">{created}</p>
 		<p>
 			<Badge
 				tone={toSend ? 'caution' : 'positive'}
-				label={toSend ? 'Zu versenden' : 'Versendet'}
+				label={toSend ? m.tenants_document_to_send() : m.statements_status_sent()}
 				testid="document-status"
 			/>
 		</p>
@@ -44,8 +53,8 @@
 		<Button
 			href="/documents/{document.id}/pdf"
 			icon="document-download"
-			ariaLabel="PDF herunterladen: {heading}"
-			testid="document-pdf-link">PDF herunterladen</Button
+			ariaLabel={m.documents_download_aria({ title: heading })}
+			testid="document-pdf-link">{m.documents_download()}</Button
 		>
 	</div>
 </li>

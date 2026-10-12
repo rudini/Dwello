@@ -4685,7 +4685,11 @@ header and on pages without it. Branch `claude/optimistic-clarke-nn8u7t` from `m
   `contract-form.ts`, `contract-wizard.ts` (step names as getters), `statement-wizard.ts` (shared impossible-year
   error); 106 keys; help-page labels («Mietvertrag erfassen/speichern», step names) as quoted. French guillemets
   normalised to non-breaking spaces inside in all French texts. Test `contracts-i18n.test.ts`.
-- [ ] Step 5 – invoices and documents
+- [x] **Step 5 – invoices and documents**: `src/routes/invoices/**`, `src/routes/documents/**`, `invoice.ts`,
+  `server/invoice.ts` (`invoiceChoices`, names of category, distribution key and AI category by id in the UI
+  language via `localName`; the AI suggestion's English key mapped by id), `server/documents.ts` (reminder titles from
+  type and level in the UI language instead of the stored German title), `server/category.ts`; 129 keys; local example
+  supplier per language. Test `invoices-i18n.test.ts`. Own records without fr/it/en names show their German name.
 - [ ] Step 6 – statements
 - [ ] Step 7 – configuration (categories, distribution keys, heating profiles, settings), gallery, remaining `src/lib`
 - [ ] Proof: no German in fr/it/en on every screen of `screens.json`, 390 px without sideways scrolling

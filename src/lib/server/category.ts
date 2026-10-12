@@ -1,4 +1,5 @@
 import { backendMessage, type BackendError } from '$lib/backend-error';
+import { m } from '$lib/paraglide/messages';
 import type { Category } from '$lib/types';
 import { deleteRecord, fetchRecord, saveRecord } from './save-form';
 
@@ -27,12 +28,12 @@ export function toCategory(c: Record<string, unknown>): CategoryWithUsage {
 }
 
 export const fetchCategory = async (fetch: typeof globalThis.fetch, id: string) =>
-	toCategory(await fetchRecord(fetch, `${API}/${id}`, 'Kategorie'));
+	toCategory(await fetchRecord(fetch, `${API}/${id}`, m.buildings_category()));
 
 function parseCategory(formData: FormData) {
 	const field = (key: string) => String(formData.get(key) ?? '').trim();
 	const errors: Record<string, string> = {};
-	if (!field('name')) errors.name = 'Name ist erforderlich';
+	if (!field('name')) errors.name = m.categories_error_name_required();
 	const body = {
 		nameDE: field('name'),
 		description: field('description'),
@@ -48,7 +49,7 @@ function parseCategory(formData: FormData) {
 
 const options = {
 	failure: (_status: number, saved: BackendError) =>
-		backendMessage(saved, 'Kategorie konnte nicht gespeichert werden.'),
+		backendMessage(saved, m.categories_save_failed()),
 	location: () => LIST,
 	conflict: 'name' // the backend refuses only a name another category has
 };
@@ -71,4 +72,4 @@ export async function updateCategory(fetch: typeof globalThis.fetch, request: Re
 }
 
 export const deleteCategory = (fetch: typeof globalThis.fetch, id: string) =>
-	deleteRecord(fetch, `${API}/${id}`, 'Kategorie konnte nicht gelöscht werden.', LIST);
+	deleteRecord(fetch, `${API}/${id}`, m.categories_delete_failed(), LIST);

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import { goto, invalidateAll } from '$app/navigation';
 	import { api } from '$lib/api';
 	import { backendMessage } from '$lib/backend-error';
@@ -34,10 +35,10 @@
 	let recategorizeError = $state('');
 
 	const statusBadge = {
-		'auto-categorized': { tone: 'info', label: 'Automatisch kategorisiert' },
-		manual: { tone: 'neutral', label: 'Manuell kategorisiert' },
+		'auto-categorized': { tone: 'info', label: m.invoices_status_auto_long() },
+		manual: { tone: 'neutral', label: m.invoices_status_manual_long() },
 		// The KI runs while the invoice is saved: without a category nothing is running any more
-		pending: { tone: 'caution', label: 'Nicht kategorisiert – bitte Kategorie wählen' }
+		pending: { tone: 'caution', label: m.invoices_status_pending_long() }
 	} as const;
 	const status = $derived(statusBadge[invoice.categorizationStatus]);
 
@@ -47,10 +48,10 @@
 		const result = await api.delete(`/invoices/${invoice.id}`);
 		deleting = false;
 		if (result.error) {
-			deleteError = 'Die Rechnung konnte nicht gelöscht werden. Versuchen Sie es erneut.';
+			deleteError = m.invoices_delete_failed();
 			return;
 		}
-		addToast('success', `Rechnung von ${invoice.billingEntity} gelöscht`);
+		addToast('success', m.invoices_deleted({ name: invoice.billingEntity }));
 		goto('/invoices');
 	}
 
@@ -65,21 +66,21 @@
 </script>
 
 <svelte:head>
-	<title>{invoice.billingEntity} - Rechnung - Dwello</title>
+	<title>{invoice.billingEntity} - {m.invoices_record()} - Dwello</title>
 </svelte:head>
 
 <div class="flex flex-col gap-8">
 	<PageHeader
 		title={invoice.billingEntity}
 		purpose={invoice.description}
-		trail={[{ href: '/invoices', label: 'Rechnungen' }]}
+		trail={[{ href: '/invoices', label: m.nav_invoices() }]}
 	>
 		{#snippet action()}
 			<Button
 				href="/invoices/{invoice.id}/edit"
 				variant="primary"
 				icon="edit"
-				testid="invoice-edit-button">Rechnung bearbeiten</Button
+				testid="invoice-edit-button">{m.invoices_edit_title()}</Button
 			>
 		{/snippet}
 	</PageHeader>
@@ -101,20 +102,17 @@
 		<div class="flex flex-col gap-8">
 			{#if !invoice.isValidUtilityCost}
 				<div data-testid="invoice-legal-note">
-					<Alert tone="caution" title="Schweizer Mietrecht">
-						<p>
-							Diese Kosten sind gemäss Art. 257a–257b OR nicht auf Mieter umlegbar. Typische nicht
-							umlagefähige Kosten: Reparaturen, Versicherungen, Steuern, Hypothekarzinsen.
-						</p>
+					<Alert tone="caution" title={m.invoices_legal_title()}>
+						<p>{m.invoices_legal_text()}</p>
 					</Alert>
 				</div>
 			{/if}
-			<Panel title="Weitere Aktionen">
+			<Panel title={m.invoices_more_actions()}>
 				<Button
 					variant="danger-ghost"
 					icon="delete"
 					onclick={() => (showDelete = true)}
-					testid="invoice-delete-button">Rechnung löschen</Button
+					testid="invoice-delete-button">{m.invoices_delete()}</Button
 				>
 			</Panel>
 		</div>
@@ -123,29 +121,26 @@
 
 <Dialog
 	bind:open={showDelete}
-	title="Rechnung löschen"
-	confirmLabel="Rechnung löschen"
+	title={m.invoices_delete()}
+	confirmLabel={m.invoices_delete()}
 	danger
 	busy={deleting}
-	busyLabel="Wird gelöscht …"
+	busyLabel={m.buildings_deleting()}
 	confirmTestid="invoice-delete-confirm"
 	onconfirm={remove}
 >
 	<p>
-		Die Rechnung von {invoice.billingEntity} über {formatCurrency(invoice.amount)} wird gelöscht. Sie
-		fliesst dann in keine neue Nebenkostenabrechnung mehr ein. Das lässt sich nicht rückgängig machen.
+		{m.invoices_delete_text({
+			name: invoice.billingEntity,
+			amount: formatCurrency(invoice.amount)
+		})}
 	</p>
 	{#if data.billedIn?.length}
 		<BilledWarning periods={data.billedIn}>
-			<p>
-				Löschen Sie nur falsch erfasste Rechnungen. Die Entwürfe enthalten sie weiter: Löschen Sie
-				danach die Entwürfe und erstellen Sie die Abrechnungen erneut. Versendete oder bezahlte
-				Abrechnungen berichtigen Sie ausserhalb von Dwello gegenüber dem Mieter und zahlen zu viel
-				Bezahltes zurück. Bewahren Sie den Beleg auf: Der Mieter kann Einsicht verlangen.
-			</p>
+			<p>{m.invoices_delete_billed_text()}</p>
 		</BilledWarning>
 	{/if}
 	{#if deleteError}
-		<Alert tone="critical" title="Nicht gelöscht"><p>{deleteError}</p></Alert>
+		<Alert tone="critical" title={m.buildings_not_deleted()}><p>{deleteError}</p></Alert>
 	{/if}
 </Dialog>

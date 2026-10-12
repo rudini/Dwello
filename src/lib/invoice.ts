@@ -1,3 +1,5 @@
+import { m } from '$lib/paraglide/messages';
+
 /** The KI's category for an invoice, with its confidence (0 to 1) and reasoning */
 export type Suggestion = {
 	category: { id: string; name: string; isAllowedUtilityCost: boolean } | null;
@@ -13,20 +15,26 @@ export function suggestionProvenance(suggestion: Suggestion | null) {
 }
 
 /** The Leistungszeitraum as the backend stores it: both dates, or null without one */
-export const servicePeriodOf = (values: { servicePeriodStart: string; servicePeriodEnd: string }) => ({
+export const servicePeriodOf = (values: {
+	servicePeriodStart: string;
+	servicePeriodEnd: string;
+}) => ({
 	servicePeriodStart: values.servicePeriodStart || null,
 	servicePeriodEnd: values.servicePeriodEnd || null
 });
 
 /** An amount as typed in Switzerland ("1'200.50", "1’200,50") in the form the backend reads */
 export const plainAmount = (value: string) =>
-	value.replace(/['’\s]/g, '').replace(',', '.').replace(/\.[-–—]+$/, ''); // «1'450.-»: whole francs
+	value
+		.replace(/['’\s]/g, '')
+		.replace(',', '.')
+		.replace(/\.[-–—]+$/, ''); // «1'450.-»: whole francs
 
 // The Leistungszeitraum is optional, but with both dates and the end not before the start (ISO dates compare as text)
 function servicePeriodErrors(start = '', end = ''): Record<string, string> {
-	if (start && !end) return { servicePeriodEnd: 'Bitte geben Sie auch das Ende des Leistungszeitraums ein.' };
-	if (end && !start) return { servicePeriodStart: 'Bitte geben Sie auch den Beginn des Leistungszeitraums ein.' };
-	if (end < start) return { servicePeriodEnd: 'Das Ende darf nicht vor dem Beginn liegen.' };
+	if (start && !end) return { servicePeriodEnd: m.invoices_error_service_end() };
+	if (end && !start) return { servicePeriodStart: m.invoices_error_service_start() };
+	if (end < start) return { servicePeriodEnd: m.invoices_error_service_order() };
 	return {};
 }
 
@@ -41,14 +49,15 @@ export function validateInvoice(invoice: {
 	servicePeriodEnd?: string;
 }): Record<string, string> {
 	const errors: Record<string, string> = {};
-	if (!invoice.buildingId) errors.buildingId = 'Bitte wählen Sie ein Gebäude';
-	if (!invoice.invoiceDate) errors.invoiceDate = 'Bitte geben Sie ein Datum ein';
-	if (!invoice.billingEntity.trim())
-		errors.billingEntity = 'Bitte geben Sie einen Rechnungssteller ein';
-	if (!invoice.description.trim()) errors.description = 'Bitte geben Sie eine Beschreibung ein';
-	if (!(parseFloat(plainAmount(invoice.amount)) > 0))
-		errors.amount = 'Bitte geben Sie einen gültigen Betrag ein';
-	return { ...errors, ...servicePeriodErrors(invoice.servicePeriodStart, invoice.servicePeriodEnd) };
+	if (!invoice.buildingId) errors.buildingId = m.invoices_error_building();
+	if (!invoice.invoiceDate) errors.invoiceDate = m.invoices_error_date();
+	if (!invoice.billingEntity.trim()) errors.billingEntity = m.invoices_error_billing_entity();
+	if (!invoice.description.trim()) errors.description = m.invoices_error_description();
+	if (!(parseFloat(plainAmount(invoice.amount)) > 0)) errors.amount = m.invoices_error_amount();
+	return {
+		...errors,
+		...servicePeriodErrors(invoice.servicePeriodStart, invoice.servicePeriodEnd)
+	};
 }
 
 /** A path within Dwello to return to (e.g. the statement wizard), never another site */

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import type { InvoiceWithDetails } from '$lib/types';
 	import Panel from '$lib/ui/Panel.svelte';
 	import { formatCurrency, formatDate, formatDateTime } from '$lib/utils/format';
@@ -9,32 +10,32 @@
 	const changed = (iso?: string) => (iso ? formatDateTime(iso) : '–');
 </script>
 
-<Panel title="Rechnung">
+<Panel title={m.invoices_record()}>
 	<dl class="grid gap-4 sm:grid-cols-2">
 		<div class="flex flex-col gap-1">
-			<dt class="text-ink-muted">Rechnungsdatum</dt>
+			<dt class="text-ink-muted">{m.invoices_date()}</dt>
 			<dd class="text-ink">{formatDate(invoice.invoiceDate)}</dd>
 			{#if !invoice.servicePeriodStart}
-				<dd class="text-ink-muted">Bestimmt, in welche Abrechnungsperiode die Rechnung fällt.</dd>
+				<dd class="text-ink-muted">{m.invoices_date_decides()}</dd>
 			{/if}
 		</div>
 		{#if invoice.servicePeriodStart && invoice.servicePeriodEnd}
 			<div class="flex flex-col gap-1">
-				<dt class="text-ink-muted">Leistungszeitraum</dt>
+				<dt class="text-ink-muted">{m.invoices_service_period()}</dt>
 				<dd class="text-ink">
 					{formatDate(invoice.servicePeriodStart)} – {formatDate(invoice.servicePeriodEnd)}
 				</dd>
-				<dd class="text-ink-muted">Nur die Tage in der Abrechnungsperiode zählen.</dd>
+				<dd class="text-ink-muted">{m.invoices_service_period_days()}</dd>
 			</div>
 		{/if}
 		<div class="flex flex-col gap-1">
-			<dt class="text-ink-muted">Betrag</dt>
+			<dt class="text-ink-muted">{m.invoices_amount()}</dt>
 			<dd class="text-xl font-semibold tabular-nums text-ink" data-testid="invoice-amount">
 				{formatCurrency(invoice.amount)}
 			</dd>
 		</div>
 		<div class="flex flex-col gap-1 sm:col-span-2">
-			<dt class="text-ink-muted">Gebäude</dt>
+			<dt class="text-ink-muted">{m.apartments_building()}</dt>
 			<dd>
 				<a
 					href="/buildings/{invoice.buildingId}"
@@ -45,15 +46,15 @@
 			</dd>
 		</div>
 		<div class="flex flex-col gap-1 sm:col-span-2">
-			<dt class="text-ink-muted">Beschreibung</dt>
+			<dt class="text-ink-muted">{m.invoices_description()}</dt>
 			<dd class="text-ink">{invoice.description}</dd>
 		</div>
 		<div class="flex flex-col gap-1">
-			<dt class="text-ink-muted">Erfasst</dt>
+			<dt class="text-ink-muted">{m.invoices_created()}</dt>
 			<dd class="text-ink">{changed(invoice.createdAt)}</dd>
 		</div>
 		<div class="flex flex-col gap-1">
-			<dt class="text-ink-muted">Zuletzt geändert</dt>
+			<dt class="text-ink-muted">{m.invoices_updated()}</dt>
 			<dd class="text-ink">{changed(invoice.updatedAt)}</dd>
 		</div>
 	</dl>

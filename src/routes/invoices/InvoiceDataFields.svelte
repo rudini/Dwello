@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import Alert from '$lib/ui/Alert.svelte';
 	import MoneyInput from '$lib/ui/MoneyInput.svelte';
 	import Select from '$lib/ui/Select.svelte';
@@ -46,8 +47,8 @@
 
 <Select
 	id="building"
-	label="Gebäude"
-	placeholder="Gebäude auswählen"
+	label={m.apartments_building()}
+	placeholder={m.invoices_choose_building()}
 	options={buildings.map((b) => ({ value: b.id, label: `${b.name} – ${b.address}` }))}
 	bind:value={buildingId}
 	error={errors.buildingId}
@@ -56,8 +57,8 @@
 
 <DateInput
 	id="invoiceDate"
-	label="Rechnungsdatum"
-	help="Übernehmen Sie das Datum von der Rechnung, nicht das heutige. Ohne Leistungszeitraum bestimmt es, in welche Abrechnungsperiode die Rechnung fällt."
+	label={m.invoices_date()}
+	help={m.invoices_date_help()}
 	bind:value={invoiceDate}
 	error={errors.invoiceDate}
 	testid="invoice-date-input"
@@ -66,19 +67,13 @@
 <!-- TODO(fachlich prüfen): "Leistungszeitraum" is not in the glossary -->
 <fieldset class="flex flex-col gap-4">
 	<legend class="font-semibold text-ink">
-		Leistungszeitraum <span class="font-normal text-ink-muted">(optional)</span>
+		{m.invoices_service_period()} <span class="font-normal text-ink-muted">{m.ui_optional()}</span>
 	</legend>
-	<p class="text-ink-muted">
-		Für welche Zeit gilt die Rechnung? Geben Sie ihn bei Rechnungen für einen Zeitraum an, zum
-		Beispiel ein Quartal oder ein Jahr. Für das 4. Quartal also 01.10.2024 bis 31.12.2024, auch wenn
-		die Rechnung erst im Januar kommt. Dann zählen nur die Tage, die in die Abrechnungsperiode
-		fallen. Nicht für Lieferungen von Heizöl, Flüssiggas, Pellets oder Holz: Deren Verbrauch zählt
-		über den Tankbestand des Gebäudes.
-	</p>
+	<p class="text-ink-muted">{m.invoices_service_period_help()}</p>
 	<div class="grid gap-4 sm:grid-cols-2">
 		<DateInput
 			id="servicePeriodStart"
-			label="Beginn"
+			label={m.invoices_start()}
 			optional
 			bind:value={servicePeriodStart}
 			error={errors.servicePeriodStart}
@@ -86,7 +81,7 @@
 		/>
 		<DateInput
 			id="servicePeriodEnd"
-			label="Ende"
+			label={m.invoices_end()}
 			optional
 			bind:value={servicePeriodEnd}
 			error={errors.servicePeriodEnd}
@@ -96,18 +91,19 @@
 </fieldset>
 
 {#if outside && period}
-	<Alert tone="caution" title="Ausserhalb der Abrechnungsperiode" testid="invoice-period-warning">
+	<Alert tone="caution" title={m.invoices_outside_period()} testid="invoice-period-warning">
 		<p>
-			{byServicePeriod ? 'Der Leistungszeitraum' : 'Das Rechnungsdatum'} liegt nicht in der Abrechnungsperiode
-			{formatDate(period.start)} – {formatDate(period.end)}. Die Rechnung fliesst dann nicht in
-			diese Nebenkostenabrechnungen ein. Prüfen Sie das Rechnungsdatum und den Leistungszeitraum.
+			{(byServicePeriod ? m.invoices_outside_by_period : m.invoices_outside_by_date)({
+				start: formatDate(period.start),
+				end: formatDate(period.end)
+			})}
 		</p>
 	</Alert>
 {/if}
 
 <MoneyInput
 	id="amount"
-	label="Betrag"
+	label={m.invoices_amount()}
 	example="450.00"
 	bind:value={amount}
 	error={errors.amount}
@@ -116,9 +112,9 @@
 
 <TextInput
 	id="billingEntity"
-	label="Rechnungssteller"
-	help="Firma oder Person, die die Rechnung ausstellt."
-	example="Energie Zürich AG"
+	label={m.invoices_billing_entity()}
+	help={m.invoices_billing_entity_help()}
+	example={m.invoices_example_supplier()}
 	bind:value={billingEntity}
 	{onblur}
 	error={errors.billingEntity}
@@ -127,9 +123,9 @@
 
 <Textarea
 	id="description"
-	label="Beschreibung"
-	help="Welche Leistung die Rechnung verrechnet."
-	example="Heizöllieferung 2025"
+	label={m.invoices_description()}
+	help={m.invoices_description_help()}
+	example={m.invoices_description_example()}
 	rows={3}
 	bind:value={description}
 	{onblur}

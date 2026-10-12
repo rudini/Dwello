@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import Button from '$lib/ui/Button.svelte';
 
 	// Cancel and submit of an invoice form; while saving, the submit button shows `busyLabel`
@@ -18,7 +19,7 @@
 </script>
 
 <div class="flex flex-col-reverse gap-4 sm:flex-row sm:justify-end">
-	<Button href={cancelHref} testid="form-cancel">Abbrechen</Button>
+	<Button href={cancelHref} testid="form-cancel">{m.ui_cancel()}</Button>
 	<Button
 		type="submit"
 		variant="primary"

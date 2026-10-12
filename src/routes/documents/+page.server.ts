@@ -1,4 +1,5 @@
 import { fail } from '@sveltejs/kit';
+import { m } from '$lib/paraglide/messages';
 import { loadDocuments } from '$lib/server/documents';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -14,7 +15,6 @@ export const actions: Actions = {
 	markSent: async ({ request, fetch }) => {
 		const id = String((await request.formData()).get('id'));
 		const response = await fetch(`${API}/${id}/sent`, { method: 'PUT' });
-		if (!response.ok)
-			return fail(response.status, { actionError: 'Dokument konnte nicht aktualisiert werden.' });
+		if (!response.ok) return fail(response.status, { actionError: m.documents_update_failed() });
 	}
 };

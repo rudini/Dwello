@@ -20,6 +20,8 @@ const germanOnly = Object.fromEntries(
 const sameEverywhere = ['Dwello', 'Google', 'Microsoft', 'Resend', 'PostgreSQL', 'IBAN', 'CHF', 'PDF', 'XSRF', 'SMTP'];
 // A record named by a scenario: up to three words, then a UUID (fixtures/backend.ts)
 const scenarioRecord = /(?:[\p{L}\d.,'’&-]+ ){0,3}[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gu;
+// Invoice descriptions the seeds write (fixtures/backend.ts): «Heizöl 2025», «<category> 2025-01-31»
+const seededDescription = /\b(?:Heizöl \d{4}|\p{L}+ \d{4}-\d{2}-\d{2})\b/gu;
 // Fixed values that are user data: seeds (fixtures/backend.ts, the axe seeds) and the operator (playwright.config.ts)
 const seedValues = [
 	'Testweg 1',
@@ -53,7 +55,8 @@ export async function germanOnScreen(page: Page, language: string, userData: str
 	const masked = (text: string) =>
 		[...userData, ...seedValues, ...sameEverywhere]
 			.reduce((rest, value) => rest.split(value).join(' '), text)
-			.replace(scenarioRecord, ' ');
+			.replace(scenarioRecord, ' ')
+			.replace(seededDescription, ' ');
 	return (await pageTexts(page)).flatMap((text) => {
 		// a German word, or one with ä, ö, ü or ß, which French, Italian and English never use
 		// English names the canton Graubünden as German does

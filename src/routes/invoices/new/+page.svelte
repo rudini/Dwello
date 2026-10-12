@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import { goto } from '$app/navigation';
 	import { untrack } from 'svelte';
 	import { localToday } from '$lib/contract-status';
@@ -41,9 +42,7 @@
 
 	let buildingId = $state(untrack(() => data.buildingId));
 	// From the statement wizard the date stays empty: today would fall outside the period being completed
-	let invoiceDate = $state(
-		untrack(() => (data.period ? '' : localToday()))
-	);
+	let invoiceDate = $state(untrack(() => (data.period ? '' : localToday())));
 	let servicePeriodStart = $state('');
 	let servicePeriodEnd = $state('');
 	let billingEntity = $state('');
@@ -75,7 +74,7 @@
 			amount: plainAmount(amount) || '0'
 		});
 		categorizing = false;
-		if (response.error) addToast('error', 'Die KI konnte die Rechnung nicht kategorisieren.');
+		if (response.error) addToast('error', m.invoices_ki_failed());
 		else if (response.data) {
 			suggestion = response.data;
 			if (suggestion.confidence >= 0.7) take(suggestion);
@@ -110,34 +109,32 @@
 		});
 		saving = false;
 		if (response.error) {
-			addToast('error', 'Die Rechnung konnte nicht gespeichert werden. Versuchen Sie es erneut.');
+			addToast('error', m.invoices_save_failed());
 			return;
 		}
-		addToast('success', `Rechnung von ${billingEntity.trim()} gespeichert`);
+		addToast('success', m.invoices_saved({ name: billingEntity.trim() }));
 		goto(back);
 	}
 </script>
 
 <svelte:head>
-	<title>Neue Rechnung - Dwello</title>
+	<title>{m.invoices_new_title()} - Dwello</title>
 </svelte:head>
 
 <form onsubmit={save} class="mx-auto flex max-w-3xl flex-col gap-8" novalidate>
 	<PageHeader
-		title="Neue Rechnung"
-		purpose="Erfassen Sie eine Rechnung, damit ihre Kosten in die Nebenkostenabrechnung einfliessen."
-		trail={[{ href: '/invoices', label: 'Rechnungen' }]}
+		title={m.invoices_new_title()}
+		purpose={m.invoices_new_purpose()}
+		trail={[{ href: '/invoices', label: m.nav_invoices() }]}
 	/>
 
 	{#if data.llmAvailable}
-		<Alert title="KI-Kategorisierung ist aktiv">
-			<p>
-				Sobald Rechnungssteller und Beschreibung erfasst sind, schlägt die KI eine Kategorie vor.
-			</p>
+		<Alert title={m.invoices_ki_active()}>
+			<p>{m.invoices_ki_active_text()}</p>
 		</Alert>
 	{/if}
 
-	<Panel title="Rechnungsdaten">
+	<Panel title={m.invoices_data()}>
 		<InvoiceDataFields
 			bind:buildingId
 			bind:invoiceDate
@@ -154,10 +151,14 @@
 	</Panel>
 
 	{#if categorizing || suggestion}
-		<InvoiceSuggestion {suggestion} onaccept={() => take(suggestion)} />
+		<InvoiceSuggestion
+			{suggestion}
+			categories={data.categories}
+			onaccept={() => take(suggestion)}
+		/>
 	{/if}
 
-	<Panel title="Kategorie und Verteilung">
+	<Panel title={m.invoices_category_and_split()}>
 		<InvoiceCategoryFields
 			bind:categoryId
 			bind:distributionKeyId
@@ -169,8 +170,8 @@
 
 	<InvoiceFormActions
 		cancelHref={back}
-		label="Rechnung speichern"
-		busyLabel="Wird gespeichert …"
+		label={m.invoices_save()}
+		busyLabel={m.ui_saving()}
 		busy={saving}
 	/>
 </form>
