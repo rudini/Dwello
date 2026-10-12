@@ -50,7 +50,7 @@ async function list(fetch: typeof globalThis.fetch, path: string, key: string): 
 	return response?.ok ? ((await response.json())[key] ?? []) : [];
 }
 
-// The last ended Abrechnungsperiode and the buildings that already have Nebenkostenabrechnungen for it
+// The last ended Abrechnungsperiode and the Mietverträge that already have a Nebenkostenabrechnung for it
 async function lastPeriod(fetch: typeof globalThis.fetch) {
 	const config = await fetch(`${BACKEND_URL}/api/v1/config`);
 	if (!config.ok) return null;
@@ -62,15 +62,19 @@ async function lastPeriod(fetch: typeof globalThis.fetch) {
 	);
 	if (!response.ok) return null; // unknown: better no task than every building
 	const statements: Row[] = (await response.json()).data ?? [];
-	return { ...period, done: new Set(statements.map((s) => (s.building as Row | null)?.id)) };
+	return { ...period, done: new Set(statements.map((s) => s.contractId)) };
 }
 
-// Rented buildings without a statement for the last period; only rented apartments get one
-function missingPeriod(period: Awaited<ReturnType<typeof lastPeriod>>, figures: DashboardData) {
+// Buildings with a Mietvertrag in the last period that has no statement yet, also one that has ended since
+function missingPeriod(period: Awaited<ReturnType<typeof lastPeriod>>, contracts: Row[]) {
 	if (!period) return null;
-	const buildings = figures.buildingOccupancy
-		.filter((b) => b.occupiedApartments > 0 && !period.done.has(b.buildingId))
-		.map((b) => b.buildingName);
+	const missing = contracts.filter(
+		(c) =>
+			String(c.startDate) <= period.end &&
+			(!c.endDate || String(c.endDate) >= period.start) &&
+			!period.done.has(c.id)
+	);
+	const buildings = [...new Set(missing.map((c) => String(c.buildingName)))];
 	return buildings.length ? { start: period.start, end: period.end, buildings } : null;
 }
 
@@ -84,15 +88,17 @@ export const load = async ({
 }: {
 	fetch: typeof globalThis.fetch;
 }): Promise<OverviewData> => {
-	const [figures, overdue, sent, letters, contracts, period, apartments] = await Promise.all([
-		fetchRecord(fetch, `${BACKEND_URL}/api/v1/dashboard`, 'Übersicht') as Promise<DashboardData>,
-		list(fetch, 'statements?status=overdue&limit=100', 'data'),
-		list(fetch, 'statements?status=sent&limit=100', 'data'),
-		list(fetch, 'documents?status=to_send', 'data'),
-		list(fetch, 'contracts?status=active&limit=100', 'contracts'),
-		lastPeriod(fetch).catch(() => null),
-		list(fetch, 'apartments?limit=1000', 'apartments')
-	]);
+	const [figures, overdue, sent, letters, contracts, period, apartments, allContracts] =
+		await Promise.all([
+			fetchRecord(fetch, `${BACKEND_URL}/api/v1/dashboard`, 'Übersicht') as Promise<DashboardData>,
+			list(fetch, 'statements?status=overdue&limit=100', 'data'),
+			list(fetch, 'statements?status=sent&limit=100', 'data'),
+			list(fetch, 'documents?status=to_send', 'data'),
+			list(fetch, 'contracts?status=active&limit=100', 'contracts'),
+			lastPeriod(fetch).catch(() => null),
+			list(fetch, 'apartments?limit=1000', 'apartments'),
+			list(fetch, 'contracts?limit=1000', 'contracts')
+		]);
 	const reletStarts = (buildingId: string) =>
 		apartments
 			.filter((a) => a.buildingId === buildingId && a.status === 'relet')
@@ -112,7 +118,7 @@ export const load = async ({
 			paymentDeadline: String(s.paymentDeadline)
 		})),
 		lettersToSend: letters.length,
-		missingPeriod: missingPeriod(period, figures),
+		missingPeriod: missingPeriod(period, allContracts),
 		endingContracts: contracts
 			.filter((c) => c.endDate)
 			.map((c) => ({

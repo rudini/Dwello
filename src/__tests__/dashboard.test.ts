@@ -11,54 +11,65 @@ const figures = {
 		{ buildingId: 'b3', buildingName: 'Leerbau', occupiedApartments: 0 }
 	]
 };
-const both = [{ building: { id: 'b1' } }, { building: { id: 'b2' } }];
+// Contracts of all times; the period is 01.07.2025 – 30.06.2026
+const contracts = [
+	{ id: 'k1', buildingName: 'Seeblick', startDate: '2020-01-01', endDate: null },
+	{ id: 'k2', buildingName: 'Lindenhof', startDate: '2024-01-01', endDate: null },
+	{ id: 'k3', buildingName: 'Lindenhof', startDate: '2025-08-01', endDate: null },
+	{ id: 'k4', buildingName: 'Ahornhof', startDate: '2023-01-01', endDate: '2025-09-30' },
+	{ id: 'k5', buildingName: 'Leerbau', startDate: '2020-01-01', endDate: '2025-06-30' },
+	{ id: 'k6', buildingName: 'Neubau', startDate: '2026-07-01', endDate: null }
+];
+const billed = (...ids: string[]) => ids.map((contractId) => ({ contractId }));
+const both = billed('k1', 'k2', 'k3', 'k4');
 
 // The backend as the overview reads it: counts, plus the lists that carry dates
 function backend(dashboardStatus = 200, statementsOfLastPeriod: unknown[] = both) {
+	const answers: Record<string, unknown> = {
+		'/config': { data: { accounting_period: 'july-june' } },
+		'/statements?periodStart=2025-07-01&periodEnd=2026-06-30&limit=1000': {
+			data: statementsOfLastPeriod,
+			total: statementsOfLastPeriod.length
+		},
+		'/statements?status=overdue&limit=100': {
+			data: [
+				{
+					id: 's1',
+					paymentDeadline: '2026-10-05',
+					tenant: { firstName: 'Anna', lastName: 'Keller' }
+				}
+			]
+		},
+		'/statements?status=sent&limit=100': {
+			data: [
+				{
+					id: 's2',
+					paymentDeadline: '2026-10-20',
+					tenant: { firstName: 'Bruno', lastName: 'Meier' }
+				}
+			]
+		},
+		'/contracts?limit=1000': { contracts, total: contracts.length },
+		'/documents?status=to_send': { data: [{ id: 'd1' }, { id: 'd2' }] },
+		'/contracts?status=active&limit=100': {
+			contracts: [
+				{ id: 'c1', tenantName: 'Eva Frei', endDate: '2026-11-01' },
+				{ id: 'c2', tenantName: 'Ueli Graf', endDate: null }
+			]
+		},
+		'/apartments?limit=1000': {
+			apartments: [
+				{ buildingId: 'b1', status: 'relet', nextContractStart: '2026-12-01' },
+				{ buildingId: 'b1', status: 'relet', nextContractStart: '2026-11-01' },
+				{ buildingId: 'b1', status: 'occupied', nextContractStart: null },
+				{ buildingId: 'b2', status: 'vacant', nextContractStart: null }
+			]
+		}
+	};
 	return (async (url: string) => {
 		const path = url.replace(API, '');
 		if (path === '/dashboard') return Response.json(figures, { status: dashboardStatus });
-		if (path === '/config') return Response.json({ data: { accounting_period: 'july-june' } });
-		if (path === '/statements?periodStart=2025-07-01&periodEnd=2026-06-30&limit=1000')
-			return Response.json({ data: statementsOfLastPeriod, total: statementsOfLastPeriod.length });
-		if (path.startsWith('/statements?status=overdue'))
-			return Response.json({
-				data: [
-					{
-						id: 's1',
-						paymentDeadline: '2026-10-05',
-						tenant: { firstName: 'Anna', lastName: 'Keller' }
-					}
-				]
-			});
-		if (path.startsWith('/statements?status=sent'))
-			return Response.json({
-				data: [
-					{
-						id: 's2',
-						paymentDeadline: '2026-10-20',
-						tenant: { firstName: 'Bruno', lastName: 'Meier' }
-					}
-				]
-			});
-		if (path === '/documents?status=to_send')
-			return Response.json({ data: [{ id: 'd1' }, { id: 'd2' }] });
-		if (path.startsWith('/contracts?status=active'))
-			return Response.json({
-				contracts: [
-					{ id: 'c1', tenantName: 'Eva Frei', endDate: '2026-11-01' },
-					{ id: 'c2', tenantName: 'Ueli Graf', endDate: null }
-				]
-			});
-		if (path === '/apartments?limit=1000')
-			return Response.json({
-				apartments: [
-					{ buildingId: 'b1', status: 'relet', nextContractStart: '2026-12-01' },
-					{ buildingId: 'b1', status: 'relet', nextContractStart: '2026-11-01' },
-					{ buildingId: 'b1', status: 'occupied', nextContractStart: null },
-					{ buildingId: 'b2', status: 'vacant', nextContractStart: null }
-				]
-			});
+		if (path in answers) return Response.json(answers[path]);
 		throw new Error(`unexpected ${url}`);
 	}) as typeof globalThis.fetch;
 }
@@ -91,17 +102,15 @@ describe('Übersicht laden', () => {
 			'drafts'
 		]);
 		expect(data.tasks[2].text).toContain('01.07.2025 – 30.06.2026');
-		expect(data.tasks[2].text).toContain('Seeblick, Lindenhof');
+		expect(data.tasks[2].text).toContain('Seeblick, Lindenhof, Ahornhof.');
 	});
 
-	// A building without rented apartments gets no statement
-	it('nennt nur die vermieteten Gebäude, deren Abrechnungen noch fehlen', async () => {
+	// The tenant who moved out still gets a statement for the days of the period (A-9)
+	it('nennt jedes Gebäude, das in der Periode einen Mietvertrag ohne Abrechnung hatte', async () => {
 		vi.useFakeTimers({ now: new Date('2026-10-10T08:00:00') });
-		const data = await load({ fetch: backend(200, [{ building: { id: 'b1' } }]) } as never);
+		const data = await load({ fetch: backend(200, billed('k1', 'k2')) } as never);
 		const task = data.tasks.find((t) => t.id === 'missing-period')!;
-		expect(task.text).toContain('Lindenhof');
-		expect(task.text).not.toContain('Seeblick');
-		expect(task.text).not.toContain('Leerbau');
+		expect(task.text).toContain('Noch nicht abgerechnet: Lindenhof, Ahornhof.');
 	});
 
 	// The building cards count them too; the overview names when they will be rented

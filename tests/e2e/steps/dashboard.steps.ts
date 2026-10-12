@@ -45,6 +45,25 @@ Given('der Mietvertrag von {string} endet in {int} Tagen', async ({ seed }, tena
 	await seed.contractEnd(tenant, inDays(days));
 });
 
+// Moved out on 30.09. of the last year: the last Abrechnungsperiode still holds rent days
+Given(
+	'{string} ist im letzten Jahr aus der Wohnung {string} ausgezogen',
+	async ({ seed }, tenant: string, apartment: string) => {
+		await seed.contract(tenant, apartment, {
+			startDate: `${lastYear - 1}-04-01`,
+			endDate: `${lastYear}-09-30`,
+			baseRent: '950'
+		});
+	}
+);
+
+Given(
+	'{string} hat die Abrechnung des letzten Jahres für das Gebäude {string}',
+	async ({ seed }, tenant: string, building: string) => {
+		await seed.statement(tenant, building, lastYear);
+	}
+);
+
 When('der Liegenschaftsverwalter die Aufgabe {string} beginnt', async ({ verwalter }, title: string) => {
 	await overviewTask(verwalter.page, title).getByRole('link').click();
 });
@@ -52,6 +71,21 @@ When('der Liegenschaftsverwalter die Aufgabe {string} beginnt', async ({ verwalt
 Then('nennt die Übersicht die Aufgabe {string}', async ({ verwalter }, title: string) => {
 	await expect(overviewTask(verwalter.page, title)).toBeVisible();
 });
+
+Then(
+	'nennt die Aufgabe {string} das Gebäude {string}',
+	async ({ verwalter, names }, title: string, building: string) => {
+		await expect(overviewTask(verwalter.page, title)).toContainText(names.get(building)!);
+	}
+);
+
+Then(
+	'nennt die Aufgabe {string} das Gebäude {string}, aber nicht das Gebäude {string}',
+	async ({ verwalter, names }, title: string, named: string, missing: string) => {
+		await expect(overviewTask(verwalter.page, title)).toContainText(names.get(named)!);
+		await expect(overviewTask(verwalter.page, title)).not.toContainText(names.get(missing)!);
+	}
+);
 
 Then(
 	/^(?:die Frist|ist die Frist) "([^"]+) ([^"]+ [^"]+)" (?:ist )?"([^"]+)"$/,
