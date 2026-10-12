@@ -472,7 +472,9 @@ describe('Mietvertrag bearbeiten', () => {
 			await open();
 			const region = document.querySelector('[data-testid="contract-notice-region"]')!;
 			expect(region.getAttribute('aria-live')).toBe('polite');
+			expect(region.classList.contains('sr-only')).toBe(true); // empty, it takes no gap in the form
 			await choose('limited');
+			expect(region.classList.contains('sr-only')).toBe(false);
 			expect(region.contains(byTestId('contract-notice-hint'))).toBe(true);
 			expect(byTestId('contract-notice-hint')!.querySelector('a')!.textContent).toBe(
 				'Kündigung mit «Beenden» eintragen'
