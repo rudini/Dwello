@@ -13,19 +13,27 @@ const german = vocabulary(de);
 const germanWords = (text: string) =>
 	words(text).filter((word) => /[äöüß]/.test(word) || (german.has(word) && !english.has(word)));
 
-/** Texts a reader could see: markup text and every quoted string, also in attributes, props and {…} expressions */
+// A regular expression literal in code: its quotes are no strings
+const regexLiteral =
+	/(^|[=(,:[!&|?{};]|return)(\s*)\/(?![/*])(?:\\.|\[(?:\\.|[^\]\\\n])*\]|[^/\\\n[])+\/[a-z]*/gm;
+const quoted = (code: string) =>
+	[...code.matchAll(/(['"`])((?:\\.|(?!\1)[\s\S])*)\1/g)].map((match) => match[2]);
+
+/** Texts a reader could see: markup text and the quoted strings of code, attributes, props and {…} expressions */
 function texts(source: string, svelte: boolean) {
 	const plain = source
 		.replace(/<!--[\s\S]*?-->/g, '')
 		.replace(/\/\*[\s\S]*?\*\//g, '')
 		.replace(/(^|\s)\/\/.*$/gm, '$1')
 		.replace(/<style[\s\S]*?<\/style>/g, '');
-	const markup = svelte
-		? plain.replace(/<script[\s\S]*?<\/script>/g, '').replace(/\{[^{}]*\}/g, '')
-		: '';
+	const code = svelte ? (plain.match(/<script[\s\S]*?<\/script>/g) ?? []).join('\n') : plain;
+	const markup = svelte ? plain.replace(/<script[\s\S]*?<\/script>/g, '') : '';
+	// plain text between tags is read as text, so an apostrophe in it cannot pair with a later quote
+	const textNode = />([^<>{}]+)</g;
 	return [
-		...[...markup.matchAll(/>([^<>]+)</g)].map((match) => match[1]),
-		...[...plain.matchAll(/(['"`])((?:\\.|(?!\1)[\s\S])*)\1/g)].map((match) => match[2])
+		...[...markup.replace(/\{[^{}]*\}/g, '').matchAll(/>([^<>]+)</g)].map((match) => match[1]),
+		...quoted(code.replace(regexLiteral, '$1$2')),
+		...quoted(markup.replace(textNode, '><'))
 	];
 }
 
@@ -41,7 +49,6 @@ const identifiers: Record<string, string[]> = {
 	'src/routes/statements/generate/StatementWizard.svelte': ['schritt'],
 	'src/lib/statement-wizard.ts': ['akonto'], // a message's name
 	'src/routes/statements/generate/PreviewStep.svelte': ['akonto'], // test id
-	'src/lib/invoice.ts': ['null'], // code between the quotes of a regular expression
 	'src/lib/wizard-draft.ts': ['null'], // JSON
 	'src/lib/ui/LanguageSwitcher.svelte': ['Deutsch'] // each language in its own words
 };
@@ -66,6 +73,15 @@ describe('Keine deutschen Texte im Code', () => {
 			true
 		).flatMap(germanWords);
 		expect(found.sort()).toEqual(['bitte', 'fehler', 'gespeichert', 'mieter', 'wohnung']);
+	});
+
+	it('kommt mit Anführungszeichen in regulären Ausdrücken und Apostrophen im Text zurecht', () => {
+		const code = texts(
+			`const r = /["']/g;\nconst s = x.replace(/'/g, '');\nconst t = 'Gespeichert';`,
+			false
+		);
+		const markup = texts(`<p>Don't</p><p>{x ? 'Mieter' : y}</p>`, true);
+		expect([...code, ...markup].flatMap(germanWords).sort()).toEqual(['gespeichert', 'mieter']);
 	});
 
 	it('übersieht Kommentare und Ausdrücke', () => {

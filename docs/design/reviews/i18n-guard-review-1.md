@@ -6,7 +6,7 @@ The reviewer's own sweep of `src` (all quoted strings, multi-line text nodes, `<
 
 | # | Severity | Finding | Verified | Handling |
 |---|----------|---------|----------|----------|
-| 1 | major | Strings inside markup `{…}` expressions were not checked. | Yes. | Fixed: every quoted string of the file is checked, in scripts and markup; self-test added. |
+| 1 | major | Strings inside markup `{…}` expressions were not checked. | Yes. | Fixed: quoted strings are checked in scripts and markup, also in `{…}` expressions and props; self-test added (regex literals and apostrophes in text: see review 2). |
 | 2 | major | Component props (`label=`, `help=`, …) and single-quoted attributes were not checked. | Yes. | Fixed with 1. |
 | 3 | minor | The allowlisted `abrechnung` is the download's file name, which users see. | Yes; already an open point (file name stays German). | Allowlist comment says so. |
 | 4 | minor | The UI gallery (dev only) showed a hard-coded «Keller». | Yes. | Fixed: uses `m.tenants_example_last_name()`. |
