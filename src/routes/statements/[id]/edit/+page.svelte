@@ -62,6 +62,7 @@
 				? 'Bis zu diesem Datum erstatten Sie dem Mieter den Betrag zurück.'
 				: 'Bis zu diesem Datum bezahlt der Mieter die Nachzahlung.'}
 			bind:value={deadline}
+			error={form?.errors?.paymentDeadline}
 			testid="payment-deadline-input"
 		/>
 		<Textarea

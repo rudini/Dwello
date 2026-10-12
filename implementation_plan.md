@@ -4677,6 +4677,34 @@ A tenant gives notice for a later day: «Mietvertrag beenden» asks for the Vert
   field is focused anew after an error; `FormDialog` reads `ondone` when it fires; scenario precondition via the API.
   Product points beyond this change in `offene-punkte.md`.
 
+## Session 13 - October 2026: Prompt Audit of the Agent Files and the Categorization Prompt
+
+### Done ✅
+- [x] **Categorization prompt** (`backend/src/config/llm.ts`): `Administration` moved to the non-allocable list, as
+  `0002_stammdaten.sql` seeds it; `GET /utility-rules` follows. `buildCategorizationPrompt` fills the placeholders in
+  one pass, so `$&` or `{description}` in invoice text stays as written. Tests first: `llm-prompt.test.ts`,
+  `utility-validation.service.test.ts`.
+- [x] **3 % note** (`utility-validation.service.ts`): a guideline, not a cap, as in `backend/CLAUDE.md`.
+- [x] **Agent files**: `CLAUDE.md` (LLM no longer "local", `bun test` gotcha, two duplicated guidelines removed);
+  `.claude/skills/bdd-acceptance/SKILL.md` (`bun run test:e2e`, password-login bootstrap removed);
+  `.claude/skills/ponytail/SKILL.md` (test rule matches `CLAUDE.md`); `.claude/skills/tdd/SKILL.md`
+  (`UBIQUITOUS_LANGUAGE.md`). `CLAUDE.md.backup` deleted (`docs/design/offene-punkte.md` updated).
+
+### Open
+- [ ] Project `.claude/skills/ponytail*` and the user-level ponytail plugin both load and mark shortcuts differently
+  (`ponytail:` vs `shortcut:`): keep one.
+- [ ] `bdd-acceptance` says one feature file per page, `tests/e2e/CLAUDE.md` one per area: decide.
+
+## Session 14 - October 2026: Missing Payment Deadline
+
+### Done ✅
+- [x] **Statement edit without a deadline**: an emptied Zahlungsfrist no longer reaches Postgres as `""` (seen in the
+  axe job's log). The edit action (`src/routes/statements/[id]/edit/+page.server.ts`) answers with "Die Frist fehlt.
+  Bitte geben Sie ein Datum ein." at the field (`+page.svelte`) without asking the backend; `PUT /statements/:id`
+  validates `paymentDeadline` as a date (422, `backend/src/routes/statements.ts`, `docs/api-specification.md`).
+  Tests first: scenario "Zahlungsfrist fehlt" (`statement-edit.feature`), `statement-edit-actions.test.ts`,
+  `statement-pages.dom.test.ts`, `statement.routes.pg.test.ts`.
+
 ---
 
 # Success Criteria

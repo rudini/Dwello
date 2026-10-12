@@ -92,25 +92,23 @@ type PeriodCost = Pick<
 	distributionKey: { name: string } | null;
 };
 
+// The group of the invoice's category and distribution key, still without amounts
+const emptyGroup = (invoice: PeriodCost): InvoiceGroup => ({
+	categoryId: invoice.categoryId,
+	categoryName: invoice.category?.name || 'Nicht kategorisiert',
+	distributionKeyId: invoice.distributionKeyId,
+	distributionKeyName: invoice.distributionKey?.name || 'Gleichmässig',
+	totalAmount: 0,
+	invoices: [],
+	isHeatingCost: invoice.category?.isHeatingCost ?? false
+});
+
 function groupInvoicesByCategory(invoices: PeriodCost[]): InvoiceGroup[] {
 	const groups = new Map<string, InvoiceGroup>();
 
 	for (const invoice of invoices) {
 		const key = `${invoice.categoryId || 'uncategorized'}-${invoice.distributionKeyId || 'none'}`;
-
-		if (!groups.has(key)) {
-			groups.set(key, {
-				categoryId: invoice.categoryId,
-				categoryName: invoice.category?.name || 'Nicht kategorisiert',
-				distributionKeyId: invoice.distributionKeyId,
-				distributionKeyName: invoice.distributionKey?.name || 'Gleichmässig',
-				totalAmount: 0,
-				invoices: [],
-				isHeatingCost: invoice.category?.isHeatingCost ?? false
-			});
-		}
-
-		const group = groups.get(key)!;
+		const group = groups.get(key) ?? groups.set(key, emptyGroup(invoice)).get(key)!;
 		group.totalAmount += invoice.inPeriod.amount;
 		group.invoices.push({ id: invoice.id, description: invoice.description, ...invoice.inPeriod });
 	}

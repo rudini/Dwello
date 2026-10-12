@@ -1,3 +1,6 @@
-/** A day relative to today as YYYY-MM-DD, the Swiss day as the app counts it */
-export const inDays = (days: number) =>
-	new Date(Date.now() + days * 86_400_000).toLocaleDateString('sv-SE', { timeZone: 'Europe/Zurich' });
+/** A day relative to today as YYYY-MM-DD, the Swiss day as the app counts it; calendar days, so a DST switch in between does not shift it */
+export const inDays = (days: number) => {
+	const day = new Date(new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Zurich' }));
+	day.setUTCDate(day.getUTCDate() + days);
+	return day.toISOString().slice(0, 10);
+};

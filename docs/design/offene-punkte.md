@@ -159,7 +159,7 @@ Every place in the code is marked `TODO(fachlich prüfen)` (`grep -rn "TODO(fach
 - Step names in the wizards hyphenate with `hyphens-auto`; Chromium without a German hyphenation dictionary (the headless test browser) breaks long words without a hyphen at `xl` ("Vertragsda/uer"). Real browsers load the dictionary; dropping `break-words` would let "Verwaltungspauschale" widen the page instead.
 - `src/app.html` links `favicon.png`, but the project has no `static/` folder (pre-existing broken link). An icon in the new design is a small follow-up.
 - The invoice edit form shows the backend's reason after a failed save ("Fehler beim Speichern: …"); backend messages can be English. Other screens show a fixed German sentence.
-- Historical material of the old design stays in the repository but is not part of the app: `screens/*/code.html` (original HTML mockups with Material Symbols and Google Fonts) and `CLAUDE.md.backup`. They can be deleted when nobody needs them for reference.
+- Historical material of the old design stays in the repository but is not part of the app: `screens/*/code.html` (original HTML mockups with Material Symbols and Google Fonts). They can be deleted when nobody needs them for reference.
 - `docs/PRD-Dwello.md` still describes svelte-i18n as the planned translation library (product vision, not changed).
 - `tests/exploratory-test.ts` (manual script, not in CI) uses a CSS class selector for the heating profile sum.
 
