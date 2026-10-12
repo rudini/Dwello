@@ -4706,7 +4706,14 @@ header and on pages without it. Branch `claude/optimistic-clarke-nn8u7t` from `m
   `sprachen-bildschirme.feature` (every screen and state, each in fr, it and en at 390 px: no word that only German
   texts use, no umlaut word, user data masked; no page wider than the viewport, no clipped text box) passes for all
   120 examples; `@wip` removed. Local examples per language (street, company, tenant name) instead of German ones.
-- [ ] One native-speaker read per message file; persona review in all four languages
+- [x] **Native reads and personas**: one subagent per message file read it as a Swiss native speaker
+  (`docs/design/reviews/i18n-native-de.md`, `i18n-native-fr-it-en.md`; German slips existed before and were kept as
+  required, fr/it/en majors fixed); no human native speaker has checked the translations. Personas on the persona stack
+  (`dwello_persona`): Helga (de, desktop zoom 1.5), Marco (it, 390 px), Dr. Weber (fr, desktop), Sven (en, keyboard
+  and screen reader), Anna (fr, 390 px) – reports `docs/design/personas/<name>-i18n.md`. No blocker; the majors
+  (terms/privacy/help behind sign-in, privacy notice content, Art. 257d OR hint, long heating help on phones, mobile
+  menu height, glossary entry point, PDF language not named) existed before the translation and need a decision
+  (`offene-punkte.md`); no persona rerun was needed for a fix of this work.
 
 ---
 
