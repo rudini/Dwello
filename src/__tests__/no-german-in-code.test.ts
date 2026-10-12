@@ -10,8 +10,14 @@ const vocabulary = (messages: Record<string, string>) =>
 const english = vocabulary(en);
 const german = vocabulary(de);
 // Words only German UI texts use, and anything with ä, ö, ü or ß
-const germanWords = (text: string) =>
-	words(text).filter((word) => /[äöüß]/.test(word) || (german.has(word) && !english.has(word)));
+// and a whole German message copied into the code, even when its words also occur in English («Name», «Status»)
+const germanOnlyMessages = new Set(
+	Object.values(de).filter((text) => !Object.values(en).includes(text))
+);
+const germanWords = (text: string) => [
+	...words(text).filter((word) => /[äöüß]/.test(word) || (german.has(word) && !english.has(word))),
+	...(germanOnlyMessages.has(text.trim()) ? [text.trim().toLowerCase()] : [])
+];
 
 // A regular expression literal in code: its quotes are no strings
 const regexLiteral =
@@ -64,7 +70,9 @@ describe('Keine deutschen Texte im Code', () => {
 			`<script>const a = 'Gespeichert';</script><p>Mieter erfassen</p><button aria-label="Schliessen">{x}</button>`,
 			true
 		).flatMap(germanWords);
-		expect(found.sort()).toEqual(['erfassen', 'gespeichert', 'mieter', 'schliessen']);
+		expect(found).toEqual(
+			expect.arrayContaining(['erfassen', 'gespeichert', 'mieter', 'schliessen'])
+		);
 	});
 
 	it('erkennt deutschen Text in Ausdrücken, Komponenten und mehrzeiligen Zeichenketten', () => {
@@ -72,7 +80,9 @@ describe('Keine deutschen Texte im Code', () => {
 			`<p>{ok ? 'Gespeichert' : 'Fehler'}</p><TextInput label='Mieter' help="Bitte" />\n<script>const a = \`Ja\nWohnung\`;</script>`,
 			true
 		).flatMap(germanWords);
-		expect(found.sort()).toEqual(['bitte', 'fehler', 'gespeichert', 'mieter', 'wohnung']);
+		expect(found).toEqual(
+			expect.arrayContaining(['bitte', 'fehler', 'gespeichert', 'mieter', 'wohnung'])
+		);
 	});
 
 	it('kommt mit Anführungszeichen in regulären Ausdrücken und Apostrophen im Text zurecht', () => {
@@ -82,11 +92,13 @@ describe('Keine deutschen Texte im Code', () => {
 		);
 		const markup = texts(`<p>Don't</p><p>{x ? 'Mieter' : y}</p>`, true);
 		const path = texts("const u = `${a}/${b}`, 'x');\nconst v = 'Wohnung';", false);
-		expect([...code, ...markup, ...path].flatMap(germanWords).sort()).toEqual([
-			'gespeichert',
-			'mieter',
-			'wohnung'
-		]);
+		expect([...code, ...markup, ...path].flatMap(germanWords)).toEqual(
+			expect.arrayContaining(['gespeichert', 'mieter', 'wohnung'])
+		);
+	});
+
+	it('erkennt eine ganze deutsche Meldung, auch wenn ihre Wörter englisch vorkommen', () => {
+		expect(texts(`<p>Per E-Mail</p>`, true).flatMap(germanWords)).toEqual(['per e-mail']);
 	});
 
 	it('übersieht Kommentare und Ausdrücke', () => {

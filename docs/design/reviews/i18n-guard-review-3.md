@@ -9,7 +9,7 @@ Scope: the fixes for review 2. The reviewer replaced each of the 6625 string lit
 | 3 | minor | In nested template literals the inner text is not checked (pairing recovers after it); five places, none with UI text. | Yes. | Kept; known limit. |
 | 4 | minor | Review 2 implied the pairing was in step everywhere and missed limit 3. | Yes. | This file lists the limits. |
 
-Known limits of the guard: words that also occur in `en.json` or not in `de.json`; a string containing « //»; text inside nested template literals; a `{…}` holding both `>` and `<`. What is shown on screen in fr/it/en is covered by `sprachen-bildschirme.feature`.
+Known limits of the guard: single words that also occur in `en.json` or not in `de.json` (a whole German message copied into the code is caught since the follow-up, e.g. «Per E-Mail»); a string containing « //»; text inside nested template literals; a `{…}` holding both `>` and `<`. What is shown on screen in fr/it/en is covered by `sprachen-bildschirme.feature`.
 
 The user decided after this third round: no fourth review; the planted-string check proves the fix.
 
