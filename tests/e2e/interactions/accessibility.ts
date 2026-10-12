@@ -4,6 +4,7 @@ import { expect, type Page } from '@playwright/test';
 import { readFileSync } from 'fs';
 import type { TestData } from '../fixtures/backend';
 import { visit } from './navigation';
+import { inDays } from '../fixtures/dates';
 
 // WCAG levels the check enforces (docs/REDESIGN_BRIEF.md "Automated Checks")
 const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
@@ -151,6 +152,26 @@ const states: Record<string, (page: Page, viewport: Viewport) => Promise<unknown
 	'end-dialog': async (page) => {
 		await press(page, 'contract-end-button');
 		await dialog(page);
+	},
+	'end-dialog-error': async (page) => {
+		await press(page, 'contract-end-button');
+		await dialog(page);
+		await press(page, 'contract-end-confirm');
+		await page.getByRole('dialog').getByTestId('form-error').waitFor();
+	},
+	// the end dialog on the contract page, the contract form on its edit page
+	'past-end-error': async (page) => {
+		if (page.url().endsWith('/edit')) {
+			await page.getByTestId('contract-duration').getByText('Befristet', { exact: true }).click();
+			await typeDate(page.getByTestId('end-date-input'), inDays(-30));
+			await press(page, 'submit-button');
+		} else {
+			await press(page, 'contract-end-button');
+			await dialog(page);
+			await typeDate(page.getByTestId('contract-end-date-input'), inDays(-30));
+			await press(page, 'contract-end-confirm');
+		}
+		await page.getByTestId('contract-end-past-confirm').and(page.locator('[aria-invalid="true"]')).waitFor();
 	},
 	'send-dialog': async (page) => {
 		await press(page, 'statement-send-button');

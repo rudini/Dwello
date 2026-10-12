@@ -31,7 +31,7 @@
 			type="checkbox"
 			bind:checked
 			{disabled}
-			aria-describedby={[describedby, help && `${id}-help`, error && `${id}-error`]
+			aria-describedby={[error && `${id}-error`, describedby, help && `${id}-help`]
 				.filter(Boolean)
 				.join(' ') || undefined}
 			aria-invalid={error ? true : undefined}

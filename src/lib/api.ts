@@ -22,6 +22,7 @@ const MUTATION_METHODS = ['POST', 'PUT', 'DELETE', 'PATCH'] as const;
 interface ApiError {
 	code: string;
 	message: string;
+	details?: Record<string, unknown>; // the backend's whole answer, e.g. the statements behind a refusal
 }
 
 /**
@@ -149,7 +150,7 @@ async function failure(response: Response): Promise<ApiError> {
 	}));
 	// The backend names its error as text, e.g. { error: 'Invoice not found' }
 	if (typeof errorData.error === 'string')
-		return { code: `HTTP_${response.status}`, message: errorData.error };
+		return { code: `HTTP_${response.status}`, message: errorData.error, details: errorData };
 	return (
 		errorData.error || {
 			code: `HTTP_${response.status}`,

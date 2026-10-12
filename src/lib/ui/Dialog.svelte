@@ -122,7 +122,7 @@
 			aria-labelledby="{id}-title"
 			aria-describedby="{id}-body"
 			tabindex="-1"
-			class="flex w-full max-w-lg flex-col gap-6 rounded-panel bg-surface p-6 text-ink shadow-overlay"
+			class="flex max-h-full w-full max-w-lg flex-col gap-6 overflow-y-auto rounded-panel bg-surface p-6 text-ink shadow-overlay"
 		>
 			<h2 id="{id}-title" class="text-xl font-bold leading-tight">{title}</h2>
 			<div id="{id}-body" class="flex flex-col gap-4">{@render children()}</div>

@@ -332,6 +332,9 @@ export const utilityStatements = pgTable(
 		periodEnd: date('period_end').notNull(),
 		statementDate: date('statement_date').notNull(),
 		rentalDays: integer('rental_days').notNull(),
+		// the billed rent days; the contract's dates may not change them (contract.service.ts, statementsChanged)
+		rentalStart: date('rental_start').notNull(),
+		rentalEnd: date('rental_end').notNull(),
 		totalCosts: decimal('total_costs', { precision: 12, scale: 2 }).notNull(),
 		totalAdvancePayments: decimal('total_advance_payments', { precision: 12, scale: 2 }).notNull(),
 		managementFeePercent: decimal('management_fee_percent', { precision: 5, scale: 2 }),

@@ -9,6 +9,8 @@
 		"delete-dialog": "The delete confirmation dialog open.",
 		"fuel-stock-dialog": "Building page with a Tankbestand reading: the confirmation before deleting it open.",
 		"end-dialog": "The dialog that ends a rental contract open.",
+		"end-dialog-error": "The dialog that ends a rental contract confirmed without a Vertragsende: the error at the field.",
+		"past-end-error": "A Vertragsende before today (end dialog or contract form) saved without the confirmation: the checkbox with its error.",
 		"send-dialog": "The confirmation before marking a statement as sent open.",
 		"reminder-dialog": "The Mahnung dialog of a sent statement open.",
 		"mark-paid-dialog": "The dialog that marks a statement as paid open.",
@@ -210,6 +212,8 @@
 			"states": [
 				"default",
 				"end-dialog",
+				"end-dialog-error",
+				"past-end-error",
 				"delete-dialog"
 			]
 		},
@@ -218,7 +222,8 @@
 			"path": "/contracts/{contract}/edit",
 			"states": [
 				"default",
-				"submit-cleared"
+				"submit-cleared",
+				"past-end-error"
 			]
 		},
 		{

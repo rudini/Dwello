@@ -1,0 +1,11 @@
+{
+	"error": "Contract dates leave out rent days billed by its utility statements",
+	"statements": [
+		{
+			"id": "s1",
+			"statementNumber": "NK-2025-0003",
+			"status": "draft",
+			"periodEnd": "2025-12-31"
+		}
+	]
+}

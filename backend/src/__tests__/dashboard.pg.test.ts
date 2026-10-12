@@ -45,6 +45,8 @@ async function statement(n: number, values: Partial<typeof utilityStatements.$in
 			periodEnd: `20${10 + n}-12-31`,
 			statementDate: day(0),
 			rentalDays: 365,
+			rentalStart: `20${10 + n}-01-01`,
+			rentalEnd: `20${10 + n}-12-31`,
 			totalCosts: '0',
 			totalAdvancePayments: '0',
 			balance: '0',

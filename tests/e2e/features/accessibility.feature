@@ -63,9 +63,12 @@ Funktionalität: Barrierefreiheit
       | contract-new           | draft-restored      |
       | contract-detail        | default             |
       | contract-detail        | end-dialog          |
+      | contract-detail        | end-dialog-error    |
+      | contract-detail        | past-end-error      |
       | contract-detail        | delete-dialog       |
       | contract-edit          | default             |
       | contract-edit          | submit-cleared      |
+      | contract-edit          | past-end-error      |
       | invoices               | default             |
       | invoices               | empty               |
       | invoices               | filtered-empty      |
