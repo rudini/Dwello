@@ -253,23 +253,6 @@ describe('Mietvertrag bearbeiten', () => {
 			expect(byTestId('form-error')!.textContent).toContain('überschneidet');
 		});
 
-		// Review K-2: eine Überschneidung lehnte das Speichern nach dem Löschen ab; der Entwurf bleibt
-		it('löscht keinen Entwurf, solange sich der Zeitraum überschneidet', async () => {
-			calls = fakeBff(({ method }) => {
-				if (method === 'PUT') return [409, refused];
-				return [200, { contracts: [{ id: 'c2', startDate: '2025-02-01', endDate: null }] }];
-			});
-			await open();
-			await endOn('31.03.2025');
-			click('contract-end-past-confirm');
-			await settle();
-			await save();
-			click('delete-draft-and-save');
-			await settle();
-			expect(calls.filter((c) => c.method === 'DELETE')).toEqual([]);
-			expect(byTestId('form-error')!.textContent).toContain('überschneidet');
-		});
-
 		// Haiku-Review: solange die Mietverträge der Wohnung laden, wird nichts gelöscht, und die Meldung sagt es
 		it('löscht keinen Entwurf, solange die Mietverträge der Wohnung noch laden', async () => {
 			calls = fakeBff(({ method }) =>
@@ -350,6 +333,22 @@ describe('Mietvertrag bearbeiten', () => {
 			pending[3](overlapping);
 			await settle();
 			expect(byTestId('overlap-warning')).not.toBeNull();
+		});
+
+		// Haiku-Review: eine Antwort ohne Liste gilt als nicht geladen; der Entwurf bleibt
+		it('löscht keinen Entwurf, wenn die Mietverträge der Wohnung keine Liste sind', async () => {
+			calls = fakeBff(({ method }) =>
+				method === 'PUT' ? [409, refused] : [200, { contracts: 'x' }]
+			);
+			await open();
+			await endOn('31.03.2025');
+			click('contract-end-past-confirm');
+			await settle();
+			await save();
+			click('delete-draft-and-save');
+			await settle();
+			expect(calls.filter((c) => c.method === 'DELETE')).toEqual([]);
+			expect(byTestId('form-error')!.textContent).toContain('konnten nicht geladen werden');
 		});
 
 		// Review K-7: ein inzwischen versendeter Entwurf; die Meldung des Backends, kein zweites Angebot

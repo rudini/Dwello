@@ -88,7 +88,9 @@
 		const response = await apiCall<{ contracts: Parameters<typeof forAvailability>[0] }>(
 			`/contracts?apartmentId=${apartmentId}`
 		);
-		return response.error ? null : forAvailability(response.data?.contracts ?? []);
+		// an answer without a list counts as not loaded, like a refused request (Haiku review)
+		const list = response.data?.contracts;
+		return response.error || !Array.isArray(list) ? null : forAvailability(list);
 	}
 
 	// The contract being edited does not block its own apartment
@@ -110,15 +112,11 @@
 		apartmentContracts = []; // the previous apartment's contracts say nothing about this one
 		contractsState = apartmentId ? 'loading' : 'loaded';
 		if (!apartmentId) return;
-		contractsOf(apartmentId)
-			.then((list) => {
-				if (request !== contractsRequest) return;
-				apartmentContracts = list ?? [];
-				contractsState = list ? 'loaded' : 'failed';
-			})
-			.catch(() => {
-				if (request === contractsRequest) contractsState = 'failed'; // an answer that is no list
-			});
+		contractsOf(apartmentId).then((list) => {
+			if (request !== contractsRequest) return;
+			apartmentContracts = list ?? [];
+			contractsState = list ? 'loaded' : 'failed';
+		});
 	});
 
 	function edited(event: Event) {
