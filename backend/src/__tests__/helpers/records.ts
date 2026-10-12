@@ -31,10 +31,11 @@ export async function expectRejection(
 	status: number,
 	error: string,
 	code?: string,
-	params: Record<string, string | number> = {}
+	params: Record<string, string | number> = {},
+	causes?: { code: string; params: Record<string, string | number> }[]
 ) {
 	expect(response.status).toBe(status);
-	expect(await response.json()).toEqual(code ? { error, code, params } : { error });
+	expect(await response.json()).toEqual(code ? { error, code, params, ...(causes && { causes }) } : { error });
 }
 
 /** The first predefined record of a resource, e.g. a predefined heating profile */

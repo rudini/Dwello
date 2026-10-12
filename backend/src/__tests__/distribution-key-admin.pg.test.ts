@@ -55,7 +55,8 @@ describe('Eigene Verteilschlüssel', () => {
 			400,
 			'Die Formel ist ungültig: Unbekannte Variable {persons}. Erlaubt sind {area}, {rooms}, {volume}, {units} und ihre Summen wie {area_total}.',
 			'FORMULA_INVALID',
-			{ cause: 'FORMULA_UNKNOWN_VARIABLE', variable: 'persons' }
+			{},
+			[{ code: 'FORMULA_UNKNOWN_VARIABLE', params: { variable: 'persons' } }]
 		);
 	});
 

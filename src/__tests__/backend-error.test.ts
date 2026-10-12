@@ -57,6 +57,31 @@ describe('Fehler des Backends in der gewählten Sprache', () => {
 		);
 	});
 
+	it('nennt bei mehreren Formelfehlern jeden, auf Deutsch wie das Backend', () => {
+		const body = {
+			error:
+				'Die Formel ist ungültig: Unbekannte Variable {persons}. Erlaubt sind {area}, {rooms}, {volume}, {units} und ihre Summen wie {area_total}. Zwei Rechenzeichen folgen direkt aufeinander.',
+			code: 'FORMULA_INVALID',
+			params: {},
+			causes: [
+				{ code: 'FORMULA_UNKNOWN_VARIABLE', params: { variable: 'persons' } },
+				{ code: 'FORMULA_CONSECUTIVE_OPERATORS' }
+			]
+		};
+
+		expect(backendMessage(body, 'Ersatz')).toBe(body.error);
+	});
+
+	it('setzt Benutzerdaten nie als Code ein', () => {
+		const body = {
+			error: 'Eine Kategorie mit dem Namen "KI_UNAVAILABLE" existiert bereits.',
+			code: 'CATEGORY_NAME_TAKEN',
+			params: { name: 'KI_UNAVAILABLE' }
+		};
+
+		expect(backendMessage(body, 'Ersatz')).toBe(body.error);
+	});
+
 	it('zeigt einen Fehler ohne Code mit seinem Text', () => {
 		french();
 

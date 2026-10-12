@@ -8,8 +8,8 @@ export type ErrorParams = Record<string, string | number>;
 /** One error the UI can name in its language */
 export type ErrorCode = { code: string; params: ErrorParams };
 
-/** Body of a refused request: the backend's text with its code */
-export type Refusal = ErrorCode & { error: string };
+/** Body of a refused request: the backend's text with its code, and the codes of its parts (all formula errors) */
+export type Refusal = ErrorCode & { error: string; causes?: ErrorCode[] };
 
 export const refusal = (code: string, error: string, params: ErrorParams = {}): Refusal => ({ error, code, params });
 
@@ -17,7 +17,8 @@ export class CodedError extends Error {
 	constructor(
 		readonly code: string,
 		message: string,
-		readonly params: ErrorParams = {}
+		readonly params: ErrorParams = {},
+		readonly causes?: ErrorCode[]
 	) {
 		super(message);
 	}
@@ -25,6 +26,7 @@ export class CodedError extends Error {
 
 /** Body for a caught error: its text, with code and params when it has them */
 export function errorBody(error: unknown, fallback: string): { error: string } | Refusal {
-	if (error instanceof CodedError) return refusal(error.code, error.message, error.params);
+	if (error instanceof CodedError)
+		return { ...refusal(error.code, error.message, error.params), ...(error.causes && { causes: error.causes }) };
 	return { error: error instanceof Error ? error.message : fallback };
 }

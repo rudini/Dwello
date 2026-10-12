@@ -421,9 +421,9 @@
 	"backend_contract_not_in_period": "The rental contract does not fall within the billing period. Choose another period.",
 	"backend_iban_missing": "No IBAN is set. Add the IBAN in the settings.",
 	"backend_ki_unavailable": "The AI cannot be reached or did not return a matching category.",
-	"backend_reminder_not_sent": "Only sent statements can be reminded.",
+	"backend_reminder_not_sent": "Reminders can only be sent for statements that have been sent.",
 	"backend_reminder_not_overdue": "A reminder is only possible after the payment deadline has passed.",
-	"backend_reminder_refund": "A refund is not reminded: you owe the tenant the amount.",
+	"backend_reminder_refund": "No reminder is sent for a refund: you owe the tenant the amount.",
 	"backend_reminder_limit": "3 reminders have already been sent.",
 	"backend_tenant_no_email": "The tenant has no email address.",
 	"backend_mail_not_configured": "Email sending is not set up."

@@ -39,6 +39,23 @@ describe('Fehlercodes für die Oberfläche', () => {
 		});
 	});
 
+	it('nennt beim Speichern einer ungültigen Formel jeden Fehler mit Code', async () => {
+		const response = await sendJson('POST', '/api/v1/distribution-keys', {
+			name: `Zwei Fehler ${token}`,
+			type: 'custom',
+			formula: '{persons} ++ {area}'
+		});
+
+		expect(response.status).toBe(400);
+		expect(await response.json()).toMatchObject({
+			code: 'FORMULA_INVALID',
+			causes: [
+				{ code: 'FORMULA_UNKNOWN_VARIABLE', params: { variable: 'persons' } },
+				{ code: 'FORMULA_CONSECUTIVE_OPERATORS' }
+			]
+		});
+	});
+
 	it('verlangt eine Formel für einen eigenen Verteilschlüssel', async () => {
 		const response = await sendJson('POST', '/api/v1/distribution-keys', { name: `Ohne Formel ${token}`, type: 'custom' });
 
@@ -90,6 +107,12 @@ describe('Fehlercodes für die Oberfläche', () => {
 		const response = await sendJson('POST', `/api/v1/statements/${unknown}/reminders`);
 
 		await expectRejection(response, 404, 'Abrechnung nicht gefunden.', 'STATEMENT_NOT_FOUND');
+	});
+
+	it('meldet eine unbekannte Abrechnung beim Erstellen des PDF', async () => {
+		const response = await sendJson('POST', `/api/v1/statements/${unknown}/generate-pdf`, {});
+
+		await expectRejection(response, 404, 'Statement not found', 'STATEMENT_NOT_FOUND');
 	});
 
 	it('meldet eine unbekannte Abrechnung beim Löschen', async () => {

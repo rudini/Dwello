@@ -203,9 +203,8 @@ async function ensureNameIsFree(name: string, id?: string) {
 function ensureValidFormula(formula: string) {
 	const validation = validateFormulaForDistribution(formula);
 	if (!validation.isValid) {
-		// The UI names the first error in its language
-		const [{ code, params }] = validation.errorCodes;
-		throw new CodedError('FORMULA_INVALID', `Die Formel ist ungültig: ${validation.errors.join(' ')}`, { ...params, cause: code });
+		// The UI names every error in its language, in the order of the text
+		throw new CodedError('FORMULA_INVALID', `Die Formel ist ungültig: ${validation.errors.join(' ')}`, {}, validation.errorCodes);
 	}
 }
 

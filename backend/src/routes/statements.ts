@@ -129,7 +129,7 @@ export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 
 			if (!statement) {
 				set.status = 404;
-				return { error: 'Statement not found' };
+				return refusal('STATEMENT_NOT_FOUND', 'Statement not found');
 			}
 
 			return statement;
@@ -153,7 +153,7 @@ export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 
 				if (!statement) {
 					set.status = 404;
-					return { error: 'Statement not found' };
+					return refusal('STATEMENT_NOT_FOUND', 'Statement not found');
 				}
 
 				return statement;
@@ -190,7 +190,7 @@ export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 
 				if (!statement) {
 					set.status = 404;
-					return { error: 'Statement not found' };
+					return refusal('STATEMENT_NOT_FOUND', 'Statement not found');
 				}
 
 				return statement;
@@ -268,7 +268,7 @@ export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 				const result = await generateStatementPdf(params.id, body.language);
 				if (result === 'not-found') {
 					set.status = 404;
-					return { error: 'Statement not found' };
+					return refusal('STATEMENT_NOT_FOUND', 'Statement not found');
 				}
 				if (result === 'no-iban') {
 					set.status = 400;

@@ -177,7 +177,11 @@ describe('PDF einer Abrechnung, die es nicht gibt oder die noch kein PDF hat', (
 			expect({ path, status: response.status, body: await response.json() }).toEqual({
 				path,
 				status: 404,
-				body: { error: 'Statement not found' }
+				// the downloads answer from the PDF service, which stays as it is; only generation carries the code
+				body:
+					path === 'generate-pdf'
+						? { error: 'Statement not found', code: 'STATEMENT_NOT_FOUND', params: {} }
+						: { error: 'Statement not found' }
 			});
 		}
 	});
