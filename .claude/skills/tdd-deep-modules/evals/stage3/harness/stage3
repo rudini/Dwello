@@ -896,6 +896,19 @@ def tables():
             allc = [f["vs_canon"] for fs in per_fixture.values() for f in fs]
             out.append(f"\nAll main groups: skill vs baseline {allb.count(1)}/{allb.count(0)}/{allb.count(-1)}, "
                        f"skill vs canon {allc.count(1)}/{allc.count(0)}/{allc.count(-1)} (wins/ties/losses).")
+    out.append("\n### Per arm, all finished attempts of all phases (sums; validity counts per arm)\n")
+    out.append("| arm | attempts | valid | cost USD | turns | minutes | commits | own tests passing | "
+               "production files per valid main run |")
+    out.append("|" + "---|" * 9)
+    for arm in ARMS:
+        recs = [r for phase in phases for r in load_runs(phase).values()
+                if r["arm"] == arm and r["status"] == "finished"]
+        files = sorted({len(r["production_files"]) for r in recs if r["valid"] and r["phase"] == "main"})
+        out.append(f"| {arm} | {len(recs)} | {sum(r['valid'] for r in recs)} | "
+                   f"{sum(r['session']['total_cost_usd'] or 0 for r in recs):.2f} | "
+                   f"{sum(r['session']['num_turns'] or 0 for r in recs)} | {sum(r['duration_s'] for r in recs) / 60:.0f} | "
+                   f"{sum(r['commits'] for r in recs)} | {sum(r['own_tests']['pass'] for r in recs)} | "
+                   f"{', '.join(map(str, files))} |")
     out.append("\n### Reviewer statistics\n")
     out.append(f"- Groups with a third reviewer (disagreement on a comparison): {disagreements} of {groups_n}.")
     for phase, values in sorted(spreads.items()):
