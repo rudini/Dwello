@@ -276,3 +276,22 @@ class TddReplayTierTest(unittest.TestCase):
 
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn("REPLAY: ACCEPT", result.stdout)
+
+    def test_a_trailing_test_commit_that_breaks_the_suite_is_rejected(self):
+        repo = tiered_repo(self, **{"db.pg.test.ts": DATABASE_TEST.replace('expect("rows")', 'expect(rows())')
+                                    .replace('import { test, expect } from "bun:test";\n',
+                                             'import { test, expect } from "bun:test";\nimport data from "./data.json";\n'
+                                             'const rows = () => data.rows;\n'),
+                                    "data.json": '{"rows": "rows"}\n'})
+        base = repo.git("rev-parse", "HEAD")
+        repo.commit_phase("test", {"TESTLIST.md": "- [ ] adds\n"}, 1, suite="fast")  # no fast tests yet
+        repo.commit_phase("red", {"calc.test.ts": BUN_TEST}, 1, suite="fast")
+        repo.commit_phase("green", {"calc.ts": RIGHT_ADD_TS}, 0, suite="fast")
+        repo.commit_phase("refactor", {"calc.ts": RIGHT_ADD_TS + "// tidy\n"}, 0)
+        repo.commit_phase("test", {"DESIGN.md": "design note\n", "data.json": '{"rows": "none"}\n'}, 0, suite="fast")
+
+        result = self.replay(repo, base)
+
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn("the range must end with the full suite passing, but it says: bun: 1 of 2 tests failed",
+                      result.stdout)
