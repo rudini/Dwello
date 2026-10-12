@@ -20,12 +20,13 @@ import { get } from 'svelte/store';
 import { toasts } from '$lib/stores';
 import { byTestId, click, fireEvent, settle, show } from './helpers/dom';
 
-const contract = (startDate: string, endDate: string | null) => ({
+const contract = (startDate: string, endDate: string | null, terminated = false) => ({
 	id: 'c1',
 	apartmentId: 'a1',
 	tenantId: 't1',
 	startDate,
 	endDate,
+	terminated,
 	baseRent: '950.00',
 	additionalRent: '50.00',
 	monthlyAdvancePayment: '180.00',
@@ -51,12 +52,13 @@ function open(
 	startDate = '2024-04-01',
 	endDate: string | null = null,
 	form: unknown = null,
-	today = '2026-10-10'
+	today = '2026-10-10',
+	terminated = false
 ) {
 	show(ContractPage, {
 		data: {
 			today,
-			contract: contract(startDate, endDate),
+			contract: contract(startDate, endDate, terminated),
 			rentBreakdown: { baseRent: 950, additionalRent: 50, advancePayment: 180, total: 1180 }
 		},
 		form
@@ -71,6 +73,25 @@ const amountOf = (label: string) =>
 		.trim();
 
 describe('Mietvertragsdetail', () => {
+	// A-4: nach der Kündigung den Nachmieter erfassen und die neue Adresse eintragen
+	it('nennt nach einer Kündigung die nächsten Schritte', () => {
+		open('2024-04-01', '2099-03-31', null, '2026-10-10', true);
+		const steps = byTestId('contract-next-steps')!;
+		const links = [...steps.querySelectorAll('a')].map((a) => [
+			a.textContent!.trim(),
+			a.getAttribute('href')
+		]);
+		expect(links).toEqual([
+			['Nachmieter erfassen', '/contracts/new?apartment=a1'],
+			['Neue Adresse eintragen', '/tenants/t1/edit']
+		]);
+	});
+
+	it('nennt ohne Kündigung keine nächsten Schritte', () => {
+		open('2024-04-01', '2099-03-31');
+		expect(byTestId('contract-next-steps')).toBeNull();
+	});
+
 	it('zeigt einen künftigen Mietvertrag als künftig, mit seinem Vertragsbeginn', () => {
 		open('2099-11-01');
 		expect(text('contract-status')).toBe('Künftig');

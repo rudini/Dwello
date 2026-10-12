@@ -9,7 +9,7 @@ Jede Anforderung nennt das Problem, was Dwello tun muss, wie wir es prüfen (Sze
 | A-1 | Befristung und Kündigung unterscheiden | umgesetzt | IF-4, Helga |
 | A-2 | Vertragsende unter «Bearbeiten» prüfen | umgesetzt | IF-8, IF-3, Helga, Anna |
 | A-3 | Hinweis auf die Kündigungsfrist | mittel | IF-2 |
-| A-4 | Bevorstehendes Vertragsende sichtbar machen | mittel | IF-5, Anna, Helga |
+| A-4 | Bevorstehendes Vertragsende sichtbar machen | umgesetzt | IF-5, Anna, Helga |
 | A-5 | Neue Adresse für die Schlussabrechnung | mittel | IF-6, Anna |
 | A-6 | Stillschweigend fortgesetzter befristeter Mietvertrag | niedrig | IF-9 |
 | A-7 | Doppelt erfassten Mietvertrag entfernen | mittel | Anna (I2, M2) |
@@ -111,7 +111,10 @@ Szenario: Kündigung mit genügend Frist
 
 ---
 
-## A-4 Bevorstehendes Vertragsende sichtbar machen
+## A-4 Bevorstehendes Vertragsende sichtbar machen – umgesetzt
+
+**Umgesetzt** (Session 17): Die Übersicht nennt für jeden gekündigten, noch laufenden Mietvertrag ohne späteren Vertrag derselben Wohnung die Aufgabe «Nachmieter für Wohnung {Nr} suchen» (nach den übrigen Aufgaben, das früheste Ende zuerst; «Mietvertrag erfassen» mit vorgewählter Wohnung); die Frist «Vertragsende» nennt nur noch befristete Verträge. Der Mietstatus heisst «Vermietet bis TT.MM.JJJJ», sobald der laufende Vertrag ein Ende hat (Wohnungsliste, Wohnungs- und Gebäudeseite; auch bei befristeten Verträgen). Abweichungen: Statt Links in der Meldung (die nach Sekunden verschwindet) zeigt die Seite eines gekündigten Mietvertrags den Abschnitt «Nächste Schritte» mit «Nachmieter erfassen» und «Neue Adresse eintragen» (bis A-5: die Bearbeitung des Mieters). Die Mieterseite nennt das Ende in der Zeile des Mietvertrags («…, gekündigt»), nicht als Mietstatus.
+
 
 **Voraussetzung:** A-1 (nur *gekündigte* Verträge).
 

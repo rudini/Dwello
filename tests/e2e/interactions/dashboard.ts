@@ -15,3 +15,5 @@ export const overviewDeadline = (page: Page, kind: string, name: string) =>
 	page.getByTestId('overview-deadline').filter({ hasText: kind }).filter({ hasText: name });
 export const currentNavItem = (page: Page) =>
 	page.getByRole('navigation', { name: 'Hauptnavigation' }).locator('[aria-current="page"]');
+// the tasks naming one tenant (a task names the tenant in its text)
+export const overviewTasksOf = (page: Page, name: string) => page.getByTestId('overview-task').filter({ hasText: name });

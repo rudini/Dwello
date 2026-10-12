@@ -1246,5 +1246,12 @@
 	"contracts_withdraw_notice": "Kündigung aufheben",
 	"contracts_withdraw_notice_help": "Der Mietvertrag läuft dann ohne Ende weiter.",
 	"contracts_notice_withdrawn_toast": "Kündigung von {name} aufgehoben. Der Mietvertrag läuft ohne Ende weiter.",
-	"backend_contract_notice_without_end": "Eine Kündigung braucht ein Vertragsende. Geben Sie den Kündigungstermin ein."
+	"backend_contract_notice_without_end": "Eine Kündigung braucht ein Vertragsende. Geben Sie den Kündigungstermin ein.",
+	"apartments_status_occupied_until": "Vermietet bis {date}",
+	"dashboard_task_successor": "Nachmieter für Wohnung {apartment} suchen",
+	"dashboard_task_successor_text": "Der Mietvertrag von {name} endet am {date}. Suchen Sie einen Nachmieter und erfassen Sie seinen Mietvertrag.",
+	"contracts_next_steps": "Nächste Schritte",
+	"contracts_next_steps_text": "Der Mietvertrag ist gekündigt. Erfassen Sie den Mietvertrag des Nachmieters, sobald er unterschrieben ist. Für die Schlussabrechnung braucht es die neue Adresse des Mieters.",
+	"contracts_next_successor": "Nachmieter erfassen",
+	"contracts_next_address": "Neue Adresse eintragen"
 }

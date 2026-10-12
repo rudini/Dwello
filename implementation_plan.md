@@ -4871,6 +4871,19 @@ header and on pages without it. Branch `claude/optimistic-clarke-nn8u7t` from `m
   contract sample is checked with an end and a notice (J2-3); docs name the open points (J2-4, J2-5); comments moved
   (J2-6).
 
+
+## Session 17 - October 2026: Upcoming Contract End, Statements After a Changed End (A-4, A-10)
+
+### Done ✅
+- [x] **A-4, upcoming contract end**: overview task «Nachmieter für Wohnung {Nr} suchen» per contract given notice,
+  running and without a later contract (`src/lib/overview.ts` `successorTasks`, `src/routes/dashboard/+page.server.ts`
+  `noticed`); the «Vertragsende» deadline only for fixed-term contracts; apartments carry `currentContractEnd`
+  (`backend/src/services/apartment.service.ts`) and show «Vermietet bis …» (`statusText` in `src/lib/apartment.ts`);
+  the page of a contract given notice shows «Nächste Schritte» (`src/routes/contracts/[id]/+page.svelte`). Texts in
+  four languages; a11y and language screen `contract-detail-notice`. Tests first: scenarios in `dashboard.feature`,
+  `apartment-detail.feature`, `contract-detail.feature`; `overview.test.ts`, `dashboard.test.ts`, `apartment.test.ts`,
+  `contract-detail-page.dom.test.ts`, `apartment-status.pg.test.ts`.
+
 ---
 
 # Success Criteria

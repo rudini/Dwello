@@ -14,7 +14,11 @@ const figures = {
 	]
 };
 // Contracts of all times, shaped as the backend answers; the period is 01.07.2025 – 30.06.2026
-const contract = (fields: Record<string, unknown>) => ({ ...contractList.contracts[0], ...fields });
+const contract = (fields: Record<string, unknown>) => ({
+	...contractList.contracts[0],
+	terminated: false,
+	...fields
+});
 const contracts = [
 	contract({ id: 'k1', buildingName: 'Seeblick', startDate: '2020-01-01', endDate: null }),
 	contract({ id: 'k2', buildingName: 'Lindenhof', startDate: '2024-01-01', endDate: null }),
@@ -24,7 +28,16 @@ const contracts = [
 	contract({ id: 'k6', buildingName: 'Neubau', startDate: '2026-07-01', endDate: null }),
 	// one day in the period each: its first and its last
 	contract({ id: 'k7', buildingName: 'Erlenhof', startDate: '2024-01-01', endDate: '2025-07-01' }),
-	contract({ id: 'k8', buildingName: 'Birkenhof', startDate: '2026-06-30', endDate: null })
+	contract({ id: 'k8', buildingName: 'Birkenhof', startDate: '2026-06-30', endDate: null }),
+	// A-4, after the period: given notice, running; given notice and ended; given notice with a next tenant
+	...[
+		{ id: 'n1', apartmentId: 'a7', apartmentNumber: '3.01', endDate: '2027-03-31' },
+		{ id: 'n2', apartmentId: 'a8', apartmentNumber: '3.02', endDate: '2026-09-30' },
+		{ id: 'n3', apartmentId: 'a9', apartmentNumber: '3.03', endDate: '2027-01-31' }
+	].map((c) =>
+		contract({ ...c, tenantName: `Mieter ${c.id}`, startDate: '2026-07-01', terminated: true })
+	),
+	contract({ id: 'n4', apartmentId: 'a9', startDate: '2027-02-01', endDate: null })
 ];
 const billed = (...ids: string[]) =>
 	ids.map((contractId) => ({ ...periodStatements.data[0], contractId }));
@@ -61,6 +74,8 @@ function backend(dashboardStatus = 200, statementsOfLastPeriod: unknown[] = both
 		'/contracts?status=active&limit=100': {
 			contracts: [
 				{ id: 'c1', tenantName: 'Eva Frei', endDate: '2026-11-01' },
+				// given notice: a task names it, not the deadline (A-4)
+				{ id: 'c3', tenantName: 'Nora Neu', endDate: '2026-11-15', terminated: true },
 				{ id: 'c2', tenantName: 'Ueli Graf', endDate: null }
 			]
 		},
@@ -89,7 +104,12 @@ describe('Übersicht laden', () => {
 		const data = await load({ fetch: backend() } as never);
 
 		expect(data.portfolio).toEqual(figures.portfolio);
-		expect(data.tasks.map((task) => task.id)).toEqual(['overdue', 'letters', 'drafts']);
+		expect(data.tasks.map((task) => task.id)).toEqual([
+			'overdue',
+			'letters',
+			'drafts',
+			'successor-n1'
+		]);
 		expect(data.tasks[1].text).toContain('2 Briefe sind');
 		expect(data.deadlines.map((d) => [d.kind, d.name, d.when])).toEqual([
 			['Zahlungsfrist', 'Anna Keller', 'seit 5 Tagen abgelaufen'],
@@ -106,7 +126,8 @@ describe('Übersicht laden', () => {
 			'overdue',
 			'letters',
 			'missing-period',
-			'drafts'
+			'drafts',
+			'successor-n1'
 		]);
 		expect(data.tasks[2].text).toContain('01.07.2025 – 30.06.2026');
 		expect(data.tasks[2].text).toContain(

@@ -18,6 +18,14 @@ export interface OverviewInput {
 	// ended Abrechnungsperiode with rented buildings that have no statements yet
 	missingPeriod?: { start: string; end: string; buildings: string[] } | null;
 	endingContracts: { id: string; tenantName: string; endDate: string }[];
+	// ended by notice, still running and without a following contract (A-4)
+	noticedContracts: {
+		id: string;
+		tenantName: string;
+		apartmentId: string;
+		apartmentNumber: string;
+		endDate: string;
+	}[];
 }
 
 /** One thing the landlord should do now, with the page where it is done */
@@ -143,10 +151,24 @@ function workTasks({ statementCounts, lettersToSend, missingPeriod }: OverviewIn
 	return tasks.filter((task): task is Task => !!task);
 }
 
+// A notice gives time to find the next tenant; the earliest end first (A-4)
+// TODO(fachlich prüfen): «Nachmieter» is not in the glossary (offene-punkte.md)
+const successorTasks = ({ noticedContracts }: OverviewInput): Task[] =>
+	[...noticedContracts]
+		.sort((a, b) => a.endDate.localeCompare(b.endDate))
+		.map((c) => ({
+			id: `successor-${c.id}`,
+			title: m.dashboard_task_successor({ apartment: c.apartmentNumber }),
+			text: m.dashboard_task_successor_text({ name: c.tenantName, date: formatDate(c.endDate) }),
+			href: `/contracts/new?apartment=${c.apartmentId}`,
+			action: m.dashboard_add_contract(),
+			icon: 'contract'
+		}));
+
 /** Tasks in the order they should be done; set-up comes first */
 export function overviewTasks(input: OverviewInput): Task[] {
 	const step = setup.find(({ missing }) => missing(input.portfolio));
-	return [...(step ? [step.task()] : []), ...workTasks(input)];
+	return [...(step ? [step.task()] : []), ...workTasks(input), ...successorTasks(input)];
 }
 
 /** A date the landlord should not miss, with how far away it is in words; `kind` is an id, shown via a message */

@@ -149,3 +149,11 @@ Funktionalität: Mietvertragsdetail
     Und "Bruno Meier" mietete die Wohnung "2.02" von "2024-01-01" bis "2099-12-31" für "900" Franken
     Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Bruno Meier"
     Dann zeigt der Mietvertrag "Befristet bis 31.12.2099"
+
+  # A-4: nach der Kündigung zeigt der Mietvertrag, was jetzt zu tun ist
+  Szenario: Nächste Schritte nach der Kündigung
+    Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
+    Wenn der Liegenschaftsverwalter den Mietvertrag auf den "2099-03-31" beendet
+    Und der Liegenschaftsverwalter den nächsten Schritt "Nachmieter erfassen" wählt
+    Dann ist der Liegenschaftsverwalter auf der Seite "Neuer Mietvertrag"
+    Und gilt der neue Mietvertrag für die Wohnung "2.01"

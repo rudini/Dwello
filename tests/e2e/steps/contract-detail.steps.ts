@@ -3,7 +3,7 @@ import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { visit } from '../interactions/navigation';
 import { apartmentOfContract, endDateProblem, endOfContract, statusOfContract, totalRent } from '../questions/contract-detail';
-import { confirmEndContractButton } from '../interactions/contract-detail';
+import { confirmEndContractButton, nextStep } from '../interactions/contract-detail';
 import { emptyContractList, listedContract } from '../questions/contracts';
 import {
 	deleteContract,
@@ -129,4 +129,13 @@ Then('der Mietvertrag von {string} ist nicht mehr auffindbar', async ({ verwalte
 	await verwalter.perform(searchContracts(name));
 	await expect(emptyContractList(verwalter)).toBeVisible();
 	await expect(listedContract(verwalter, name)).toHaveCount(0);
+});
+
+When('der Liegenschaftsverwalter den nächsten Schritt {string} wählt', async ({ verwalter }, label: string) => {
+	await nextStep(verwalter.page, label).click();
+});
+
+// the wizard takes the apartment from the link; it asks for the tenant first and shows the apartment in step 2
+Then('gilt der neue Mietvertrag für die Wohnung {string}', async ({ verwalter, seed }, apartment: string) => {
+	await expect(verwalter.page).toHaveURL(new RegExp(`apartment=${seed.idOf(apartment)}`));
 });

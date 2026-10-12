@@ -174,6 +174,13 @@ describe('Wohnungsstatus', () => {
 		expect(statusText({ status, nextContractStart })).toBe(text);
 	});
 
+	// A-4: die Kündigungszeit ist sichtbar, nicht erst der Leerstand
+	it('zeigt bei einem Vertrag mit Ende, bis wann die Wohnung vermietet ist', () => {
+		expect(statusText({ status: 'occupied', currentContractEnd: '2099-03-31' })).toBe(
+			'Vermietet bis 31.03.2099'
+		);
+	});
+
 	it.each([
 		['occupied', 'Ein Mietvertrag läuft.'],
 		[

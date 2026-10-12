@@ -1246,5 +1246,12 @@
 	"contracts_withdraw_notice": "Withdraw notice of termination",
 	"contracts_withdraw_notice_help": "The rental contract then runs on without an end.",
 	"contracts_notice_withdrawn_toast": "Notice of termination of {name} withdrawn. The rental contract runs on without an end.",
-	"backend_contract_notice_without_end": "A notice of termination needs a contract end. Enter the termination date."
+	"backend_contract_notice_without_end": "A notice of termination needs a contract end. Enter the termination date.",
+	"apartments_status_occupied_until": "Let until {date}",
+	"dashboard_task_successor": "Find a new tenant for apartment {apartment}",
+	"dashboard_task_successor_text": "The rental contract of {name} ends on {date}. Find a new tenant and record their rental contract.",
+	"contracts_next_steps": "Next steps",
+	"contracts_next_steps_text": "The rental contract has been terminated. Record the new tenant’s rental contract as soon as it is signed. The final statement needs the tenant’s new address.",
+	"contracts_next_successor": "Record the new tenant",
+	"contracts_next_address": "Enter the new address"
 }

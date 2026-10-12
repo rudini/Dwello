@@ -118,6 +118,23 @@
 		/>
 	</div>
 
+	{#if contract.terminated}
+		<!-- A-4: what a notice asks for next; TODO(fachlich prüfen): «Nachmieter» is not in the glossary -->
+		<Panel title={m.contracts_next_steps()}>
+			<div class="flex flex-col gap-4" data-testid="contract-next-steps">
+				<p class="text-ink">{m.contracts_next_steps_text()}</p>
+				<div class="flex flex-wrap gap-4">
+					<Button href="/contracts/new?apartment={contract.apartmentId}" icon="contract"
+						>{m.contracts_next_successor()}</Button
+					>
+					<Button href="/tenants/{contract.tenantId}/edit" icon="edit"
+						>{m.contracts_next_address()}</Button
+					>
+				</div>
+			</div>
+		</Panel>
+	{/if}
+
 	<Panel title={m.contracts_related()}>
 		<div class="flex flex-wrap gap-4">
 			<Button

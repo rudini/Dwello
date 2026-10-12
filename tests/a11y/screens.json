@@ -232,6 +232,13 @@
 			]
 		},
 		{
+			"name": "contract-detail-notice",
+			"path": "/contracts/{noticedContract}",
+			"states": [
+				"default"
+			]
+		},
+		{
 			"name": "contract-edit-notice",
 			"path": "/contracts/{noticedContract}/edit",
 			"states": [

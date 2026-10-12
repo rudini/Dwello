@@ -16,3 +16,4 @@ export const contractTenantLink = (page: Page) => page.getByTestId('contract-ten
 export const contractApartmentLink = (page: Page) => page.getByTestId('contract-apartment-link');
 export const contractStatementsLink = (page: Page) => page.getByTestId('contract-statements-link');
 export const contractInvoicesLink = (page: Page) => page.getByTestId('contract-invoices-link');
+export const nextStep = (page: Page, label: string) => page.getByTestId('contract-next-steps').getByRole('link', { name: label });

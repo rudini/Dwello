@@ -81,6 +81,23 @@ function missingPeriod(period: Awaited<ReturnType<typeof lastPeriod>>, contracts
 	return buildings.length ? { start: period.start, end: period.end, buildings } : null;
 }
 
+// Given notice, not yet ended, and no later contract for the apartment yet: a next tenant is still to find (A-4)
+function noticed(contracts: Row[], today: string) {
+	const later = (c: Row) =>
+		contracts.some(
+			(o) => o.apartmentId === c.apartmentId && String(o.startDate) > String(c.endDate)
+		);
+	return contracts
+		.filter((c) => c.terminated && c.endDate && String(c.endDate) >= today && !later(c))
+		.map((c) => ({
+			id: String(c.id),
+			tenantName: String(c.tenantName),
+			apartmentId: String(c.apartmentId),
+			apartmentNumber: String(c.apartmentNumber),
+			endDate: String(c.endDate)
+		}));
+}
+
 const tenantOf = (statement: Row) => {
 	const tenant = statement.tenant as Row | null;
 	return tenant ? `${tenant.firstName} ${tenant.lastName}` : '';
@@ -126,8 +143,10 @@ export const load = async ({
 		})),
 		lettersToSend: letters.length,
 		missingPeriod: missingPeriod(period, allContracts),
+		// a contract given notice is named by its task, not twice (A-4)
+		noticedContracts: noticed(allContracts, localToday()),
 		endingContracts: contracts
-			.filter((c) => c.endDate)
+			.filter((c) => c.endDate && !c.terminated)
 			.map((c) => ({
 				id: String(c.id),
 				tenantName: String(c.tenantName),

@@ -17,10 +17,36 @@ const input = (overrides: Partial<OverviewInput> = {}): OverviewInput => ({
 	dueStatements: [],
 	lettersToSend: 0,
 	endingContracts: [],
+	noticedContracts: [],
 	...overrides
 });
 
 describe('Aufgaben der Übersicht', () => {
+	// A-4: in der Kündigungszeit einen Nachmieter suchen, ab dem Tag, an dem die Kündigung erfasst ist
+	it('nennt für jede Kündigung die Suche nach einem Nachmieter', () => {
+		const tasks = overviewTasks(
+			input({
+				noticedContracts: [
+					{
+						id: 'c1',
+						tenantName: 'Eva Frei',
+						apartmentId: 'a1',
+						apartmentNumber: '2.01',
+						endDate: '2099-03-31'
+					}
+				]
+			})
+		);
+		expect(tasks).toContainEqual(
+			expect.objectContaining({
+				id: 'successor-c1',
+				title: 'Nachmieter für Wohnung 2.01 suchen',
+				text: 'Der Mietvertrag von Eva Frei endet am 31.03.2099. Suchen Sie einen Nachmieter und erfassen Sie seinen Mietvertrag.',
+				href: '/contracts/new?apartment=a1'
+			})
+		);
+	});
+
 	it('beginnt ohne Gebäude mit dem ersten Gebäude', () => {
 		const [first] = overviewTasks(
 			input({

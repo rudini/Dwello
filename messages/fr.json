@@ -1246,5 +1246,12 @@
 	"contracts_withdraw_notice": "Annuler la résiliation",
 	"contracts_withdraw_notice_help": "Le contrat de bail court alors sans date de fin.",
 	"contracts_notice_withdrawn_toast": "Résiliation de {name} annulée. Le contrat de bail court sans date de fin.",
-	"backend_contract_notice_without_end": "Une résiliation nécessite une fin du contrat. Saisissez le terme de résiliation."
+	"backend_contract_notice_without_end": "Une résiliation nécessite une fin du contrat. Saisissez le terme de résiliation.",
+	"apartments_status_occupied_until": "Loué jusqu’au {date}",
+	"dashboard_task_successor": "Chercher un nouveau locataire pour l’appartement {apartment}",
+	"dashboard_task_successor_text": "Le contrat de bail de {name} prend fin le {date}. Cherchez un nouveau locataire et saisissez son contrat de bail.",
+	"contracts_next_steps": "Prochaines étapes",
+	"contracts_next_steps_text": "Le contrat de bail est résilié. Saisissez le contrat de bail du nouveau locataire dès qu’il est signé. Pour le décompte final, il faut la nouvelle adresse du locataire.",
+	"contracts_next_successor": "Saisir le nouveau locataire",
+	"contracts_next_address": "Saisir la nouvelle adresse"
 }

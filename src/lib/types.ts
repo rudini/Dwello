@@ -50,6 +50,7 @@ export interface Apartment {
 	rooms: string | number; // decimal from DB (e.g., 3.5)
 	status: ApartmentStatus;
 	nextContractStart?: string | null;
+	currentContractEnd?: string | null; // last day of the contract running today (A-4)
 	createdAt?: Date | string;
 	updatedAt?: Date | string;
 }
