@@ -312,3 +312,15 @@ class TddReplayTierTest(unittest.TestCase):
         self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
         self.assertIn("the range must end with the full suite passing, but it says: bun: 1 of 2 tests failed",
                       result.stdout)
+
+    def test_the_replay_rejects_a_test_list_after_a_green_on_the_fast_suite(self):
+        repo = tiered_repo(self, **{"db.pg.test.ts": DATABASE_TEST})
+        base = repo.git("rev-parse", "HEAD")
+        repo.commit_phase("red", {"calc.test.ts": BUN_TEST}, 1, suite="fast")
+        repo.commit_phase("green", {"calc.ts": RIGHT_ADD_TS}, 0, suite="fast")
+        repo.commit_phase("test", {"TESTLIST.md": "- [ ] next task\n"}, 0)
+
+        result = self.replay(repo, base)
+
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn("a test list after a green on the fast suite starts a new task", result.stdout)

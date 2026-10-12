@@ -42,7 +42,7 @@ Production file = code suffix (`.py .js .jsx .mjs .cjs .ts .tsx .mts .cts .svelt
 ## Rules (`protocol.violations`)
 
 - Order: `test` and `red` follow start/test/green/refactor; `green` only follows `red`; `refactor` follows green/refactor.
-- `test`: no code changes (test list only).
+- `test`: no code files change (the test list, notes; other non-code files such as `.json` or `.sql` are not policed); after a green or refactor the suite must still pass, and right after a green on the fast suite a `test` commit is refused (it starts a new task, and the task before must end on the full suite).
 - `red`: suite fails with exactly one failing assertion; no production file changed.
 - `green`: all tests pass; no test file or test configuration changed.
 - `refactor`: all tests pass (test and production code may change).
@@ -57,7 +57,7 @@ Every commit of the range (first-parent, oldest first) is checked out in a tempo
 - its `TDD-Exit-Code` trailer must equal the real exit code of the claimed tier;
 - which tests are new comes from the full runs; a test that ran in the previous commit's full run, or in its fast run, and no longer runs in the same tier (gone, skipped, todo, or filtered out, for example by a changed `test:fast`) is removed, and no phase may remove tests; red's new test must be in the run of its claimed tier (a red on the fast suite for a test that exists only in the full tier is rejected; such a red also fails the other red rules, so this rule only names the cause);
 - red adds exactly one new test id and its failing tests are exactly that new test; no other phase adds tests; no phase removes tests, and a test that ran before and is now skipped, todo or filtered out counts as removed (test ids come from the frameworks' reports: bun JUnit test cases, vitest assertion results; a repeated name in a file gets a `#n` suffix, so same-named tests do not collapse);
-- the range must not end in red, and the last commit of every task must have run the full suite and passed it. A task ends at every green or refactor that a `test:` commit (the next task's test list) follows, and at the range's last green or refactor (`test:` commits after it, such as the design note, are not held to it; a range without any green or refactor is judged by its last commit). `tdd-step test` refuses a test list right after a green on the fast suite (protocol rule), so the end of a task is known at commit time.
+- the range must not end in red, its last commit must leave the full suite passing (also when it is a `test:` commit after the task's end), and the last commit of every task must have run the full suite and passed it. A task ends at every green or refactor that a `test:` commit (the next task's test list) follows, and at the range's last green or refactor (`test:` commits after it, such as the design note, are not held to it; a range without any green or refactor is judged by its last commit). `tdd-step test` refuses a test list right after a green on the fast suite (protocol rule), so the end of a task is known at commit time.
 
 ## Hook (`tdd-guard`)
 

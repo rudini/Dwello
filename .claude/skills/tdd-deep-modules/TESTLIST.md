@@ -310,3 +310,9 @@ Stage 2b replaces stage 2's pass line: the reviews of steps 01-12 (09 two-tier s
 - [x] other production files are read without comments: a name in a comment there is no use
 - [x] pin: the twenty-line test uses a 20-line body (cap 19 fails it)
 - no-caller exports, unrelated same-name functions and bracketed `const` expressions: Known limits
+
+### Step 09, review round 3 (fixes, round 4 granted by the user)
+
+- [x] the range's last commit must leave the full suite passing, also a `test:` commit after the task's end
+- [x] `tdd-step test` (and the replay) refuse a test commit after a green or refactor when the suite fails
+- [x] pin: the replay names a test list after a green on the fast suite
