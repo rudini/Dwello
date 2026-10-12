@@ -789,6 +789,15 @@ describe('Abrechnung bearbeiten', () => {
 		);
 	});
 
+	it('meldet eine fehlende Frist am Feld', () => {
+		edit({}, { errors: { paymentDeadline: 'Die Frist fehlt. Bitte geben Sie ein Datum ein.' } });
+
+		expect(byTestId('payment-deadline-input')!.getAttribute('aria-invalid')).toBe('true');
+		expect(byTestId('form-error')!.textContent).toContain(
+			'Die Frist fehlt. Bitte geben Sie ein Datum ein.'
+		);
+	});
+
 	it('meldet, wenn das Speichern scheitert', () => {
 		edit({}, { errors: { form: 'Abrechnung konnte nicht gespeichert werden.' } });
 
