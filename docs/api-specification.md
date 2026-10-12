@@ -20,7 +20,7 @@ Browser -> SvelteKit BFF (port 3000: /auth/*, /api/*, page loads/actions) -> Ely
 
 ## 2. Conventions (backend)
 
-- **Base path:** `/api/v1`. All endpoints except `GET /health` and `/swagger` require `Authorization: Bearer <jwt>`; otherwise **401** `{ "message": "Missing or invalid authorization header" }` or `{ "message": "Invalid or expired token" }`.
+- **Base path:** `/api/v1`. All endpoints except `GET /health`, `GET /api/v1/invoices/llm-recipient` (provider and country for the public privacy notice) and `/swagger` require `Authorization: Bearer <jwt>`; otherwise **401** `{ "message": "Missing or invalid authorization header" }` or `{ "message": "Invalid or expired token" }`.
 - **No envelope:** successful responses are the bare resource or a plain object, with **camelCase** field names (e.g. `{ "buildings": [...], "total": 1 }`). The list key differs per router (see each section).
 - **Errors:** `{ "error": "<message>", "code"?: "<CODE>", "params"?: { … }, "causes"?: [{ "code", "params" }] }`. `error` is free text (some English, some German). A refusal that can reach the UI also carries a stable `code` and the values in its text as `params` (`backend/src/services/coded-error.ts`); the BFF shows the message `backend_<code in lower case>` from `messages/*.json` in the UI language (`src/lib/backend-error.ts`), otherwise the `error` text. Unexpected errors have no code. Codes:
   - Not found: `APARTMENT_NOT_FOUND`, `BUILDING_NOT_FOUND`, `CATEGORY_NOT_FOUND`, `CONTRACT_NOT_FOUND`, `DISTRIBUTION_KEY_NOT_FOUND`, `HEATING_PROFILE_NOT_FOUND`, `INVOICE_NOT_FOUND`, `STATEMENT_NOT_FOUND`

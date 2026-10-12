@@ -63,6 +63,7 @@
 
 	// Derived state for showing authenticated layout
 	const showAuthenticatedLayout = $derived(!isPublicPath($page.url.pathname) && data.user !== null);
+	const contentPage = $derived(['/help', '/privacy', '/terms'].includes($page.url.pathname));
 </script>
 
 <svelte:head>
@@ -96,9 +97,18 @@
 		<nav aria-label={m.language_choice()} class="flex justify-end px-4 pt-4">
 			<LanguageSwitcher />
 		</nav>
-		<main id="main-content" tabindex="-1">
-			{@render children()}
-		</main>
+		{#if contentPage}
+			<!-- Help and the legal pages, read before signing in: the same margins as inside the frame -->
+			<main id="main-content" class="px-4 py-8 lg:px-10" tabindex="-1">
+				<div class="mx-auto max-w-6xl">
+					{@render children()}
+				</div>
+			</main>
+		{:else}
+			<main id="main-content" tabindex="-1">
+				{@render children()}
+			</main>
+		{/if}
 	</div>
 {/if}
 

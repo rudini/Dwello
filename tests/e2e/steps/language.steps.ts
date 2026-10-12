@@ -82,9 +82,9 @@ Given('ein Besucher hat die Seite {string} geöffnet', async ({ besucher }, path
 
 When('der Besucher den Link zu den Nutzungsbedingungen öffnet', async ({ besucher }) => {
 	await besucher.page.getByTestId('login-terms-link').click();
-	await besucher.page.locator('body[data-hydrated]').waitFor({ state: 'attached' });
 });
 
 Then('ist der Besucher noch auf der Seite {string}', async ({ besucher }, path: string) => {
-	expect(new URL(besucher.page.url()).pathname).toBe(path);
+	// retried: a link opens the page in the browser, after the click returns
+	await expect(besucher.page).toHaveURL((url) => url.pathname === path);
 });

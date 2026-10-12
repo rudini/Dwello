@@ -19,7 +19,10 @@ describe('Hilfe und Rechtliches ohne Anmeldung', () => {
 		expect(await visitSignedOut(path)).toBe('Seite');
 	});
 
-	it('schützt andere Seiten weiterhin', async () => {
-		expect(await visitSignedOut('/helpdesk')).toBe('');
-	});
+	it.each(['/helpdesk', '/help/x', '/privacy-foo', '/terms/', '/dashboard'])(
+		'schützt %s weiterhin',
+		async (path) => {
+			expect(await visitSignedOut(path)).toBe('');
+		}
+	);
 });

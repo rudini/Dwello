@@ -4724,6 +4724,10 @@ header and on pages without it. Branch `claude/optimistic-clarke-nn8u7t` from `m
   `public-pages.test.ts`, `invoice-categorization.pg.test.ts`, `language-switcher.dom.test.ts`, `config-i18n.test.ts`;
   screens `help-public`, `privacy-public`, `terms-public` in `screens.json`, `accessibility.feature` and
   `sprachen-bildschirme.feature`.
+- [x] **Review fixes of the follow-up** (`docs/design/reviews/i18n-follow-up-review-1.md`): signed out, help, privacy
+  and terms keep the frame's margins (`src/routes/+layout.svelte`, test `public-pages-layout.dom.test.ts`); more
+  protected near-miss paths in `public-pages.test.ts`; `docs/api-specification.md` names the public endpoint; the
+  terms-link step retries its URL check (`language.steps.ts`). Review 2: no blocker or major.
 
 ---
 
