@@ -4733,6 +4733,10 @@ header and on pages without it. Branch `claude/optimistic-clarke-nn8u7t` from `m
   privacy and terms link to «Anmelden» (rerun `weber-i18n-3.md`; review `i18n-way-back-review-1.md`) (`src/routes/+layout.svelte`,
   `public-pages-layout.dom.test.ts`, scenarios «Von den Nutzungsbedingungen zurück zur Anmeldung» and «Den Datenschutz von der Anmeldeseite aus lesen» in
   `sprachen.feature`; the sign-in card centres above the footer, `login/+page.svelte`).
+- [x] **Proof for «no hard-coded UI text»**: `src/__tests__/no-german-in-code.test.ts` scans every `.ts` and `.svelte`
+  under `src` (tests and generated code aside): markup text, `aria-label`/`title`/`placeholder`/`alt` and every string
+  literal must hold no word that only German UI texts use and no ä, ö, ü or ß; nine files list their German
+  identifiers (status values, query parameters, the native name «Deutsch»). Shown to fail on a planted «Anmelden».
 
 ---
 
