@@ -37,7 +37,7 @@ describe('Fehler des Backends in der gewählten Sprache', () => {
 		};
 
 		expect(backendMessage(body, 'Repli')).toBe(
-			'Petit appartement (50 m², 2 pièces) : La formule ne donne pas de nombre valable.'
+			'Petit appartement (50 m², 2 pièces)\u00a0: La formule ne donne pas de nombre valable.'
 		);
 	});
 

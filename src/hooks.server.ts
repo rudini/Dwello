@@ -30,7 +30,7 @@ const session: Handle = async ({ event, resolve }) => {
 	if (event.locals.user) return pathname === '/login' ? redirectTo('/dashboard') : resolve(event);
 	if (isPublic(pathname)) return resolve(event);
 	if (pathname.startsWith('/api/'))
-		return json({ error: { code: 'JWT_ERROR', message: 'Nicht angemeldet' } }, { status: 401 });
+		return json({ error: { code: 'JWT_ERROR', message: 'Not signed in' } }, { status: 401 });
 	return redirectTo(`/login?redirectTo=${encodeURIComponent(pathname + search)}`);
 };
 

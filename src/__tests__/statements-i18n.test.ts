@@ -71,14 +71,14 @@ describe('Nebenkostenabrechnungen in der gewählten Sprache', () => {
 			changePercent: null
 		};
 		expect(findingText(finding)).toBe(
-			'La facture pour le mois de mars manque. L’année précédente : 2 factures.'
+			'La facture pour le mois de mars manque. L’année précédente\u00a0: 2 factures.'
 		);
 	});
 
 	it('weist auf Englisch auf ein zu tiefes Akonto hin', () => {
 		overwriteGetLocale(() => 'en');
 		expect(akontoHint({ totalCosts: 600, totalAdvancePayments: 1000 })).toBe(
-			`Costs ${formatCurrency(400)} (40 %) below the advance payment. Are invoices missing?`
+			`Costs are ${formatCurrency(400)} (40 %) below the advance payments. Are invoices missing?`
 		);
 	});
 
