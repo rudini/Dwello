@@ -659,6 +659,6 @@
 	"contracts_change": "Modifier",
 	"contracts_change_aria": "Modifier : {label}",
 	"contracts_tenant_created": "Locataire saisi",
-	"contracts_tenant_created_text": "{name} est enregistré et choisi pour ce contrat de bail.",
+	"contracts_tenant_created_text": "Le locataire {name} est enregistré et choisi pour ce contrat de bail.",
 	"contracts_new_tenant": "Saisir un nouveau locataire"
 }

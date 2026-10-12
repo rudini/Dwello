@@ -659,6 +659,6 @@
 	"contracts_change": "Modificare",
 	"contracts_change_aria": "Modificare: {label}",
 	"contracts_tenant_created": "Inquilino registrato",
-	"contracts_tenant_created_text": "{name} è salvato e scelto per questo contratto di locazione.",
+	"contracts_tenant_created_text": "L’inquilino {name} è salvato e scelto per questo contratto di locazione.",
 	"contracts_new_tenant": "Registrare un nuovo inquilino"
 }

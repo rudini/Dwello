@@ -632,7 +632,7 @@
 	"contracts_new_purpose": "Add step by step who rents which apartment, from when and at what rent.",
 	"contracts_unknown_building": "Unknown",
 	"contracts_checking_apartments": "Checking which apartments are free …",
-	"contracts_apartment_help": "Free apartments are listed first. Let apartments are marked «not available» and cannot be chosen.",
+	"contracts_apartment_help": "Free apartments are listed first. Rented apartments are marked «not available» and cannot be chosen.",
 	"contracts_choose_apartment": "Choose apartment",
 	"contracts_free_later": "Apartment becomes free later",
 	"contracts_free_later_text": "{notice}. The rental contract can start on that day at the earliest.",
