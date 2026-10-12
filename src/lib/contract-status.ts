@@ -65,13 +65,28 @@ export function pastEndConfirmation(endDate: string, today: string): string | nu
 	return `Bitte bestätigen Sie, dass der Mietvertrag am ${formatDate(endDate)} endete, oder korrigieren Sie das Vertragsende.`;
 }
 
-/** New contract dates would take billed Mietstage from stored statements (backend 409, tests/contracts/contract-end-refused.json) */
+const listed = (numbers: string[]) =>
+	numbers.length === 1 ? numbers[0] : `${numbers.slice(0, -1).join(', ')} und ${numbers.at(-1)}`;
+
+/** New contract dates would change the Mietstage of stored statements (backend 409, tests/contracts/contract-end-refused.json) */
 export function billedDaysError(statements: { statementNumber: string; status: string }[]): string {
-	const sent = statements.find((statement) => statement.status !== 'draft');
-	if (sent)
-		return `Die Nebenkostenabrechnung ${sent.statementNumber} ist schon versendet und rechnet Mietstage ab, die mit diesem Datum wegfallen. Dwello ändert eine versendete Abrechnung nicht. Prüfen Sie das Datum.`;
-	const numbers = statements.map((statement) => statement.statementNumber);
-	if (numbers.length === 1)
-		return `Die Nebenkostenabrechnung ${numbers[0]} (Entwurf) rechnet Mietstage ab, die mit diesem Datum wegfallen. Löschen Sie zuerst den Entwurf und erstellen Sie die Nebenkostenabrechnung danach neu.`;
-	return `Die Nebenkostenabrechnungen ${numbers.slice(0, -1).join(', ')} und ${numbers.at(-1)} (Entwürfe) rechnen Mietstage ab, die mit diesem Datum wegfallen. Löschen Sie zuerst die Entwürfe und erstellen Sie die Nebenkostenabrechnungen danach neu.`;
+	const drafts = statements
+		.filter((statement) => statement.status === 'draft')
+		.map((s) => s.statementNumber);
+	const locked = statements
+		.filter((statement) => statement.status !== 'draft')
+		.map((s) => `${s.statementNumber} (${s.status === 'paid' ? 'bezahlt' : 'versendet'})`);
+	const one = (locked.length || drafts.length) === 1;
+	const subject = `Die ${one ? 'Nebenkostenabrechnung' : 'Nebenkostenabrechnungen'}`;
+	const computed = `${one ? 'wurde' : 'wurden'} mit den bisherigen Vertragsdaten berechnet.`;
+	if (locked.length)
+		return [
+			`${subject} ${listed(locked)} ${computed}`,
+			'Dwello ändert sie nicht, darum lässt sich das Datum nicht speichern. Prüfen Sie das Datum.',
+			'Stimmt es, klären Sie die Korrektur der Abrechnung direkt mit dem Mieter.',
+			...(drafts.length ? [`Betroffen ist auch der Entwurf ${listed(drafts)}.`] : [])
+		].join(' ');
+	return one
+		? `${subject} ${drafts[0]} (Entwurf) ${computed} Löschen Sie zuerst den Entwurf und erstellen Sie die Nebenkostenabrechnung danach neu.`
+		: `${subject} ${listed(drafts)} (Entwürfe) ${computed} Löschen Sie zuerst die Entwürfe und erstellen Sie die Nebenkostenabrechnungen danach neu.`;
 }

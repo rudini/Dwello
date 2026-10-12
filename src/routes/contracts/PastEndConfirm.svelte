@@ -38,7 +38,9 @@
 
 <!-- always present, so screen readers hear the short notice when it appears; the checkbox stays outside -->
 <p aria-live="polite" class="font-semibold text-ink" data-testid="contract-end-past-notice">
-	{#if past}
+	{#if past && confirmedDay !== '' && confirmedDay !== endDate}
+		Das Vertragsende hat sich geändert. Bestätigen Sie es erneut mit dem Kästchen.
+	{:else if past}
 		Das Vertragsende liegt in der Vergangenheit{longAgo
 			? ', über ein Jahr zurück. Prüfen Sie das Jahr.'
 			: '.'} Bestätigen Sie das Vertragsende mit dem Kästchen.

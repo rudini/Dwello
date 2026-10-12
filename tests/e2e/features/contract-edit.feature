@@ -45,3 +45,9 @@ Funktionalität: Mietvertrag bearbeiten
     Angenommen für "Anna Keller" gibt es die Abrechnung 2025 im Gebäude "Ahornhof"
     Wenn der Liegenschaftsverwalter das Vertragsende "2025-03-31" speichert und die Folge bestätigt
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Löschen Sie zuerst den Entwurf und erstellen Sie die Nebenkostenabrechnung danach neu."
+
+  # Die Abrechnung 2025 rechnet ab dem 01.01.2025: ein späterer Vertragsbeginn änderte ihre Mietstage
+  Szenario: Vertragsbeginn nach dem Beginn einer Abrechnung
+    Angenommen für "Anna Keller" gibt es die Abrechnung 2025 im Gebäude "Ahornhof"
+    Wenn der Liegenschaftsverwalter den Vertragsbeginn "2025-05-01" speichert
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Löschen Sie zuerst den Entwurf und erstellen Sie die Nebenkostenabrechnung danach neu."

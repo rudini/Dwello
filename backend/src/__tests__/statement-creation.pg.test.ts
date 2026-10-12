@@ -46,6 +46,8 @@ describe('Nebenkostenabrechnung erstellen', () => {
 		expect(statement).toMatchObject({
 			status: 'draft',
 			rentalDays: 366,
+			rentalStart: '2024-01-01',
+			rentalEnd: '2024-12-31',
 			totalCosts: '1500.00',
 			totalAdvancePayments: '1200.00',
 			balance: '300.00',
@@ -81,6 +83,8 @@ describe('Nebenkostenabrechnung speichern', () => {
 			periodEnd: '2024-12-31',
 			statementDate: '2025-01-15',
 			rentalDays: 366,
+			rentalStart: '2024-01-01',
+			rentalEnd: '2024-12-31',
 			totalCosts: '100.00',
 			totalAdvancePayments: '1200.00',
 			managementFee: '0.00',

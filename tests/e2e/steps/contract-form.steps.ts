@@ -15,6 +15,7 @@ import { listedContract } from '../questions/contracts';
 import {
 	changeBaseRent,
 	saveEndDate,
+	saveStartDate,
 	chooseTenant,
 	chooseTenantAndApartment,
 	chooseTenantWhileLoading,
@@ -184,6 +185,10 @@ When(
 		await verwalter.perform(saveEndDate(date, { confirmPast: true }));
 	}
 );
+
+When('der Liegenschaftsverwalter den Vertragsbeginn {string} speichert', async ({ verwalter }, date: string) => {
+	await verwalter.perform(saveStartDate(date));
+});
 
 When('der Liegenschaftsverwalter den Mietzins leert', async ({ verwalter }) => {
 	await verwalter.perform(changeBaseRent(''));

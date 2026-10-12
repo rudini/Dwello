@@ -51,6 +51,8 @@ export interface StatementCalculation {
 	periodStart: Date;
 	periodEnd: Date;
 	rentalDays: number;
+	rentalStart: string; // the billed rent days, YYYY-MM-DD
+	rentalEnd: string;
 	totalPeriodDays: number;
 	lineItems: CalculatedLineItem[];
 	subtotal: number;
@@ -356,6 +358,8 @@ export async function calculateStatementForContract(
 		periodStart,
 		periodEnd,
 		rentalDays,
+		rentalStart: isoDay(contractOverlap.overlapStart),
+		rentalEnd: isoDay(contractOverlap.overlapEnd),
 		totalPeriodDays,
 		lineItems,
 		subtotal,

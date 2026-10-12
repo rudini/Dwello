@@ -47,6 +47,13 @@
 		pastError = '';
 		ending = true;
 	}
+	// an error at the field names a day: another day typed takes it back
+	let endErrorFor = '';
+	$effect(() => {
+		if (endDate === endErrorFor) return;
+		endErrorFor = endDate;
+		endError = '';
+	});
 	// checked in the dialog before sending: a wrong date is said at the field, which gets the focus
 	function checkEndDate() {
 		endError = pastError = '';

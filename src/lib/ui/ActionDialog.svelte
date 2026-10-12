@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import type { Snippet } from 'svelte';
+	import { tick, type Snippet } from 'svelte';
 	import Alert from './Alert.svelte';
 	import Dialog from './Dialog.svelte';
 	import { dialogSubmit } from './dialog-submit';
@@ -36,6 +36,15 @@
 
 	let form = $state<HTMLFormElement>();
 	let busy = $state(false);
+	let refusal = $state<HTMLElement>();
+
+	// a refusal shows below the content: it takes the focus, so it is read and scrolled into a short window
+	async function showRefusal() {
+		await tick();
+		const alert = refusal?.querySelector<HTMLElement>('[data-testid="form-error"]');
+		alert?.focus();
+		alert?.scrollIntoView?.({ block: 'nearest' });
+	}
 </script>
 
 <form
@@ -46,6 +55,7 @@
 		() => fields,
 		(running) => (busy = running),
 		(result) => {
+			if (result.type === 'failure') return showRefusal();
 			if (result.type !== 'success') return;
 			open = false;
 			onsuccess?.();
@@ -66,7 +76,11 @@
 	onconfirm={() => check() && form?.requestSubmit()}
 >
 	{@render children()}
-	{#if error}
-		<Alert tone="critical" title="Das hat nicht geklappt" testid="form-error"><p>{error}</p></Alert>
-	{/if}
+	<div bind:this={refusal} class="contents">
+		{#if error}
+			<Alert tone="critical" title="Das hat nicht geklappt" testid="form-error"
+				><p>{error}</p></Alert
+			>
+		{/if}
+	</div>
 </Dialog>

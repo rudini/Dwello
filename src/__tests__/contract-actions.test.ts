@@ -101,7 +101,7 @@ describe('Mietvertrag beenden', () => {
 			status: 409,
 			data: {
 				endError:
-					'Die Nebenkostenabrechnung NK-2025-0003 (Entwurf) rechnet Mietstage ab, die mit diesem Datum wegfallen. Löschen Sie zuerst den Entwurf und erstellen Sie die Nebenkostenabrechnung danach neu.'
+					'Die Nebenkostenabrechnung NK-2025-0003 (Entwurf) wurde mit den bisherigen Vertragsdaten berechnet. Löschen Sie zuerst den Entwurf und erstellen Sie die Nebenkostenabrechnung danach neu.'
 			}
 		});
 	});

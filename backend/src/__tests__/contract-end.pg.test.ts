@@ -6,7 +6,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import { eq } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { utilityStatements } from '../db/schema';
-import { sendJson } from './helpers/auth';
+import { callApi, sendJson } from './helpers/auth';
 import { idOf } from './helpers/records';
 import { createRental } from './helpers/rental';
 
@@ -99,9 +99,15 @@ describe('Beendeter Mietvertrag mit Schlussabrechnung', () => {
 		expect((await put({ baseRent: '980', endDate: '2025-06-30' })).status).toBe(200);
 	});
 
-	it('nimmt ein späteres Vertragsende an', async () => {
-		expect((await put({ endDate: '2025-07-31' })).status).toBe(200);
-		expect((await put({ endDate: '2025-06-30' })).status).toBe(200);
+	it('speichert bei der Abrechnung die abgerechneten Tage', async () => {
+		const statement = await (await callApi(`/api/v1/statements/${final}`)).json();
+		expect(statement).toMatchObject({ rentalStart: '2025-01-01', rentalEnd: '2025-06-30' });
+	});
+
+	// mehr Tage sind auch eine Änderung: die Abrechnung und ihr PDF zeigten sonst andere Tage als der Vertrag
+	it('lehnt auch ein späteres Vertragsende ab', async () => {
+		expect((await put({ endDate: '2025-07-31' })).status).toBe(409);
+		expect((await put({ endDate: null })).status).toBe(409);
 	});
 
 	it('lehnt ein früheres Vertragsende ab', async () => {
@@ -114,6 +120,37 @@ describe('Beendeter Mietvertrag mit Schlussabrechnung', () => {
 	it('lehnt einen Vertragsbeginn nach dem ersten abgerechneten Tag ab', async () => {
 		expect((await put({ startDate: '2025-05-01' })).status).toBe(409);
 		expect((await put({ startDate: '2022-01-01' })).status).toBe(200);
+	});
+});
+
+// der Vertragsbeginn lag in der Periode: auch ein früherer Beginn änderte die abgerechneten Tage
+describe('Mietvertrag, der in der Periode begann', () => {
+	let rental: Awaited<ReturnType<typeof createRental>>;
+	const put = (body: object) => sendJson('PUT', `/api/v1/contracts/${rental.contract}`, body);
+
+	beforeAll(async () => {
+		rental = await createRental(crypto.randomUUID(), { startDate: '2025-03-01', monthlyAdvancePayment: '100' });
+		await sendJson('POST', '/api/v1/statements/generate', {
+			contractId: rental.contract,
+			buildingId: rental.building,
+			periodStart: '2025-01-01',
+			periodEnd: '2025-12-31'
+		});
+	});
+
+	afterAll(async () => {
+		await db.delete(utilityStatements).where(eq(utilityStatements.contractId, rental.contract));
+		await rental.remove();
+	});
+
+	it('lehnt einen früheren Vertragsbeginn ab und nimmt den gleichen an', async () => {
+		expect((await put({ startDate: '2025-02-01' })).status).toBe(409);
+		expect((await put({ startDate: '2025-03-01', baseRent: '990' })).status).toBe(200);
+	});
+
+	it('nimmt ein Vertragsende nach der Periode an', async () => {
+		expect((await put({ endDate: '2026-03-31' })).status).toBe(200);
+		expect((await put({ endDate: '2025-12-15' })).status).toBe(409);
 	});
 });
 

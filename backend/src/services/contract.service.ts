@@ -287,13 +287,10 @@ export async function createContract(data: NewRentalContract): Promise<RentalCon
 	return contract;
 }
 
-/**
- * The contract's statements that bill rent days outside the new dates: each bills its Mietstage from the later of
- * its period start and the Vertragsbeginn on
- */
-async function statementsOutside(current: RentalContract, startDate: string, endDate: string | null) {
-	const billedFrom = sql`greatest(${utilityStatements.periodStart}, ${current.startDate}::date)`;
-	const billedTo = sql`(${billedFrom} + ${utilityStatements.rentalDays} - 1)`;
+/** The contract's statements whose billed rent days the new dates would change (fewer or more) */
+async function statementsChanged(contractId: string, startDate: string, endDate: string | null) {
+	const from = sql`greatest(${utilityStatements.periodStart}, ${startDate}::date)`;
+	const to = sql`least(${utilityStatements.periodEnd}, coalesce(${endDate}::date, ${utilityStatements.periodEnd}))`;
 	return db
 		.select({
 			id: utilityStatements.id,
@@ -304,27 +301,27 @@ async function statementsOutside(current: RentalContract, startDate: string, end
 		.from(utilityStatements)
 		.where(
 			and(
-				eq(utilityStatements.contractId, current.id),
-				or(sql`${startDate}::date > ${billedFrom}`, endDate ? sql`${endDate}::date < ${billedTo}` : sql`false`)
+				eq(utilityStatements.contractId, contractId),
+				or(sql`${from} <> ${utilityStatements.rentalStart}`, sql`${to} <> ${utilityStatements.rentalEnd}`)
 			)
 		);
 }
 
-/** New contract dates that would take rent days away from a stored statement of the contract */
+/** New contract dates that would change the rent days billed by a stored statement of the contract */
 export class BilledDaysError extends Error {
-	constructor(readonly statements: Awaited<ReturnType<typeof statementsOutside>>) {
-		super('Contract dates leave out rent days billed by its utility statements');
+	constructor(readonly statements: Awaited<ReturnType<typeof statementsChanged>>) {
+		super('Contract dates change the rent days billed by its utility statements');
 	}
 }
 
-/** New dates may neither overlap another contract of the apartment nor take billed Mietstage from a statement */
+/** New dates may neither overlap another contract of the apartment nor change the billed Mietstage of a statement */
 async function checkNewDates(current: RentalContract, data: Partial<NewRentalContract>) {
 	if (!data.startDate && data.endDate === undefined) return;
 	const startDate = data.startDate || current.startDate;
 	const endDate = data.endDate !== undefined ? data.endDate : current.endDate;
 	const { hasOverlap, overlappingContract } = await checkContractOverlap(current.apartmentId, startDate, endDate, current.id);
 	if (hasOverlap) throw new Error(`Contract would overlap with existing contract ${overlappingContract}`);
-	const statements = await statementsOutside(current, startDate, endDate);
+	const statements = await statementsChanged(current.id, startDate, endDate);
 	if (statements.length) throw new BilledDaysError(statements);
 }
 

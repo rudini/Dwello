@@ -226,6 +226,8 @@ CREATE TABLE utility_statements (
     period_end DATE NOT NULL,
     statement_date DATE NOT NULL,
     rental_days INTEGER NOT NULL,
+    rental_start DATE NOT NULL, -- the billed rent days: from the later of period start and Vertragsbeginn
+    rental_end DATE NOT NULL,   -- to the earlier of period end and Vertragsende
     total_costs DECIMAL(12, 2) NOT NULL,
     total_advance_payments DECIMAL(12, 2) NOT NULL,
     management_fee DECIMAL(12, 2) DEFAULT 0,

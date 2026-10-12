@@ -78,29 +78,28 @@ describe('Vergangenes Vertragsende', () => {
 	});
 });
 
-// eine gespeicherte Abrechnung rechnet schon Mietstage nach dem neuen Vertragsende ab
-// eine gespeicherte Abrechnung rechnet Mietstage ab, die mit dem neuen Vertragsbeginn oder -ende wegfielen
-describe('Vertragsdaten, die einer Abrechnung Mietstage wegnehmen', () => {
-	const draft = (statementNumber: string) => ({ statementNumber, status: 'draft' });
+// eine gespeicherte Abrechnung wurde mit den bisherigen Vertragsdaten berechnet: neue Daten änderten ihre Mietstage
+describe('Vertragsdaten, die die Mietstage einer Abrechnung ändern', () => {
+	const of = (statementNumber: string, status = 'draft') => ({ statementNumber, status });
 
 	it('sagt bei einem Entwurf, dass er zuerst gelöscht und danach neu erstellt wird', () => {
-		expect(billedDaysError([draft('NK-2025-0003')])).toBe(
-			'Die Nebenkostenabrechnung NK-2025-0003 (Entwurf) rechnet Mietstage ab, die mit diesem Datum wegfallen. Löschen Sie zuerst den Entwurf und erstellen Sie die Nebenkostenabrechnung danach neu.'
+		expect(billedDaysError([of('NK-2025-0003')])).toBe(
+			'Die Nebenkostenabrechnung NK-2025-0003 (Entwurf) wurde mit den bisherigen Vertragsdaten berechnet. Löschen Sie zuerst den Entwurf und erstellen Sie die Nebenkostenabrechnung danach neu.'
 		);
 	});
 
 	it('nennt mehrere Entwürfe in der Mehrzahl', () => {
-		expect(billedDaysError([draft('NK-2024-0002'), draft('NK-2025-0003')])).toBe(
-			'Die Nebenkostenabrechnungen NK-2024-0002 und NK-2025-0003 (Entwürfe) rechnen Mietstage ab, die mit diesem Datum wegfallen. Löschen Sie zuerst die Entwürfe und erstellen Sie die Nebenkostenabrechnungen danach neu.'
+		expect(billedDaysError([of('NK-2024-0002'), of('NK-2025-0003')])).toBe(
+			'Die Nebenkostenabrechnungen NK-2024-0002 und NK-2025-0003 (Entwürfe) wurden mit den bisherigen Vertragsdaten berechnet. Löschen Sie zuerst die Entwürfe und erstellen Sie die Nebenkostenabrechnungen danach neu.'
 		);
 	});
 
-	// eine versendete Abrechnung ändert Dwello nicht
-	it('sagt bei einer versendeten Abrechnung, dass sie bleibt, und was zu tun ist', () => {
+	// eine versendete oder bezahlte Abrechnung ändert Dwello nicht: der Weg führt über den Mieter
+	it('nennt versendete und bezahlte Abrechnungen, die betroffenen Entwürfe und was zu tun ist', () => {
 		expect(
-			billedDaysError([draft('NK-2025-0003'), { statementNumber: 'NK-2024-0001', status: 'sent' }])
+			billedDaysError([of('NK-2025-0003'), of('NK-2024-0003', 'paid'), of('NK-2023-0001', 'sent')])
 		).toBe(
-			'Die Nebenkostenabrechnung NK-2024-0001 ist schon versendet und rechnet Mietstage ab, die mit diesem Datum wegfallen. Dwello ändert eine versendete Abrechnung nicht. Prüfen Sie das Datum.'
+			'Die Nebenkostenabrechnungen NK-2024-0003 (bezahlt) und NK-2023-0001 (versendet) wurden mit den bisherigen Vertragsdaten berechnet. Dwello ändert sie nicht, darum lässt sich das Datum nicht speichern. Prüfen Sie das Datum. Stimmt es, klären Sie die Korrektur der Abrechnung direkt mit dem Mieter. Betroffen ist auch der Entwurf NK-2025-0003.'
 		);
 	});
 });

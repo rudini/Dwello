@@ -16,6 +16,7 @@ Jede Anforderung nennt das Problem, was Dwello tun muss, wie wir es prüfen (Sze
 | A-8 | Früheren Mietvertrag als Historie erkennbar machen | mittel | Anna (I2, M3) |
 | A-9 | «Noch nicht abgerechnet» nach den Mietverträgen der Periode | hoch | Helga (I3 M3, I4 M2) |
 | A-10 | Abrechnung nach einem geänderten Vertragsende neu erstellen | mittel | Anna (I2 M1, I3 M1–M3) |
+| A-11 | Versendete Abrechnung korrigieren | mittel | Anna (I4 M1), Review I-6 |
 
 Priorität: «hoch» heisst vor dem ersten echten Einsatz, weil sonst falsche Daten oder Geldfolgen entstehen. «mittel» verhindert einen wahrscheinlichen Fehler eines Laien. «niedrig» betrifft einen seltenen Fall.
 
@@ -66,7 +67,7 @@ Szenario: Kündigung aufheben
 Umgesetzt nach Review I Runde 4 und den Personas Anna (I2, Blocker B1) und Helga (I3, M4):
 
 - Ein geändertes Vertragsende in der Vergangenheit verlangt im Formular dieselbe Bestätigung wie im Dialog «Beenden» (`src/routes/contracts/PastEndConfirm.svelte`). Ein unverändertes Vertragsende wird nicht nochmals bestätigt.
-- Das Backend lehnt Vertragsdaten ab, die einer gespeicherten Abrechnung des Vertrags Mietstage wegnehmen: ein früheres Vertragsende oder einen späteren Vertragsbeginn als die abgerechneten Tage (`updateContract`, 409 mit den Abrechnungen; seit Review I Runde 5 nach den abgerechneten Mietstagen, nicht nach der Abrechnungsperiode). Bei einem Entwurf sagt Dwello: «Die Nebenkostenabrechnung … (Entwurf) rechnet Mietstage ab, die mit diesem Datum wegfallen. Löschen Sie zuerst den Entwurf und erstellen Sie die Nebenkostenabrechnung danach neu.» Bei einer versendeten Abrechnung sagt Dwello, dass sie bleibt.
+- Jede Abrechnung speichert ihre abgerechneten Tage (`rental_start`, `rental_end`). Das Backend lehnt neue Vertragsdaten ab, die diese Tage ändern würden, kürzer oder länger (`updateContract`, 409 mit den Abrechnungen; Entscheid des Product Owners nach Review I Runde 6). Bei einem Entwurf sagt Dwello: «Die Nebenkostenabrechnung … (Entwurf) wurde mit den bisherigen Vertragsdaten berechnet. Löschen Sie zuerst den Entwurf und erstellen Sie die Nebenkostenabrechnung danach neu.» Bei einer versendeten oder bezahlten Abrechnung sagt Dwello, dass sie bleibt und das Datum sich darum nicht speichern lässt; stimmt es, klärt der Verwalter die Korrektur direkt mit dem Mieter (siehe A-11).
 - Die Bestätigung unter «Bearbeiten» prüft nur der Browser: Das Formular speichert über die BFF-Weiterleitung `PUT /api/contracts/[id]`, nicht über eine Server-Aktion. Die Prüfung gegen die Abrechnungen macht das Backend.
 - Szenarien in `tests/e2e/features/contract-edit.feature` und `contract-detail.feature`, Backend-Test `contract-end.pg.test.ts`.
 
@@ -280,12 +281,32 @@ Szenario: Erinnerung bleibt nach dem Auszug des letzten Mieters
 
 ```gherkin
 Szenario: Entwurf löschen und Mietvertrag beenden
-  Angenommen für "Anna Keller" gibt es die Abrechnung 2025 im Gebäude "Ahornhof"
-  Wenn der Liegenschaftsverwalter den Mietvertrag auf den "2025-03-31" beendet und die Folge bestätigt
-  Und den Entwurf löscht und den Mietvertrag beendet
+  Angenommen für "Anna Keller" gibt es die Abrechnung 2025 im Entwurf im Gebäude "Ahornhof"
+  Wenn der Liegenschaftsverwalter den Mietvertrag auf den "2025-03-31" beenden will und das vergangene Vertragsende bestätigt
+  Und die Aktion «Entwurf löschen und Mietvertrag beenden» bestätigt
   Dann endet der Mietvertrag am "31.03.2025"
+  Und ist die Abrechnung 2025 von "Anna Keller" nicht mehr auffindbar
   Und ist der Liegenschaftsverwalter im Abrechnungsassistenten für 2025 im Gebäude "Ahornhof"
+
+Szenario: Unter «Bearbeiten» einen Vertragsbeginn nach dem Beginn eines Entwurfs speichern
+  Angenommen für "Anna Keller" gibt es die Abrechnung 2025 im Entwurf im Gebäude "Ahornhof"
+  Wenn der Liegenschaftsverwalter den Vertragsbeginn "2025-05-01" speichern will
+  Dann bietet das Formular an, den Entwurf zu löschen und den Mietvertrag zu speichern"
 ```
+
+---
+
+## A-11 Versendete Abrechnung korrigieren
+
+**Problem.** Eine versendete oder bezahlte Abrechnung ändert Dwello nicht. Stellt sich danach heraus, dass Vertragsbeginn oder -ende falsch waren (Anna, I4: Der Mieter zog erst am 01.05.2025 ein, die Abrechnung 2024 ist bezahlt), lässt sich das Datum nicht speichern. Die Meldung sagt, die Korrektur direkt mit dem Mieter zu klären; in Dwello bleibt der Fehler.
+
+**Anforderungen**
+
+1. Eine versendete oder bezahlte Abrechnung lässt sich stornieren: Dwello erstellt eine Gutschrift (Gegenbuchung mit eigener Nummer) und markiert die Abrechnung als storniert. Erst danach lassen sich die Vertragsdaten ändern.
+2. Die neue Abrechnung verrechnet, was der Mieter schon bezahlt hat.
+3. Der Verwalter bestätigt die Folge: «Die Abrechnung NK-… wird storniert. Senden Sie dem Mieter die Gutschrift und die neue Abrechnung.»
+
+**Offene Fragen (fachlich prüfen):** Ist eine Gutschrift mit Gegenbuchung in der Schweizer Praxis üblich, oder genügt eine korrigierte Abrechnung mit Hinweis? Wie lange nach dem Versand ist eine Korrektur zulässig (Verjährung, Art. 128 OR)?
 
 ---
 

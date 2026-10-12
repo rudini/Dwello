@@ -111,3 +111,9 @@ export const saveEndDate = (isoDate: string, { confirmPast = false } = {}) => as
 	if (confirmPast) await pastEndConfirm(actor.page).check();
 	await contractSubmitButton(actor.page).click();
 };
+
+// «Bearbeiten»: another Vertragsbeginn
+export const saveStartDate = (isoDate: string) => async (actor: Actor) => {
+	await typeDate(startDateInput(actor.page), isoDate);
+	await contractSubmitButton(actor.page).click();
+};

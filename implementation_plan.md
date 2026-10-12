@@ -4636,6 +4636,12 @@ A tenant gives notice for a later day: «Mietvertrag beenden» asks for the Vert
   longer be deleted (only ended ones; the dialog says until when it runs, scenario first); a future contract proposes
   its start; the action reads the Vertragsbeginn from the backend and checks the format; the toast and the sent date
   are tested; the field-error state is in the axe check (`end-dialog-error`); lows in `offene-punkte.md`.
+- [x] **Review I round 6, personas Helga I5, Sven I5, Anna I4** (`I-review-6.md`, `helga-i5.md`, `sven-i5.md`,
+  `anna-i4.md`): statements store `rental_start`/`rental_end` (`0001_schema.sql`, `schema.ts`, `calculation.service.ts`,
+  `statement.service.ts`; the PDF reads them); `statementsChanged` refuses any change of the billed days
+  (product owner); `billedDaysError` lists drafts and sent/paid statements apart; `ActionDialog` focuses a refusal;
+  `PastEndConfirm` announces a reset confirmation; the dialog clears a field error on a new date; `Checkbox` reads its
+  error first; scenario «Vertragsbeginn nach dem Beginn einer Abrechnung»; requirements A-10 precise, A-11 added.
 - [x] **Review I round 5, personas Helga I4, Sven I4, Anna I3** (`I-review-5.md`, `helga-i4.md`, `sven-i4.md`,
   `anna-i3.md`): the backend compares new dates with the billed Mietstage (`statementsOutside`, `BilledDaysError`,
   `checkNewDates` in `contract.service.ts`; `contract-end.pg.test.ts`), so editing an ended contract with its final

@@ -183,6 +183,41 @@ describe('Mietvertragsdetail', () => {
 		expect(notice.contains(byTestId('contract-end-past-confirm'))).toBe(false);
 	});
 
+	// wird ein angekreuztes Kästchen durch ein neues Datum zurückgesetzt, hört ein Screenreader das
+	it('sagt an, dass ein neues Datum erneut bestätigt werden muss', async () => {
+		open();
+		click('contract-end-button');
+		const input = byTestId<HTMLInputElement>('contract-end-date-input')!;
+		fireEvent(input, 'input', '31.08.2026');
+		await settle();
+		click('contract-end-past-confirm');
+		await settle();
+		fireEvent(input, 'input', '30.08.2026');
+		await settle();
+		expect(text('contract-end-past-notice')).toBe(
+			'Das Vertragsende hat sich geändert. Bestätigen Sie es erneut mit dem Kästchen.'
+		);
+	});
+
+	// ein behobener Fehler am Feld bleibt nicht in der Ansage stehen
+	it('nimmt den Fehler am Feld zurück, wenn das Datum ändert', async () => {
+		open();
+		click('contract-end-button');
+		const input = byTestId<HTMLInputElement>('contract-end-date-input')!;
+		fireEvent(input, 'input', '31.03.2024');
+		await settle();
+		click('contract-end-confirm');
+		await settle();
+		expect(document.querySelector('[role=dialog]')!.textContent).toContain(
+			'vor dem Vertragsbeginn'
+		);
+		fireEvent(input, 'input', '31.08.2026');
+		await settle();
+		expect(document.querySelector('[role=dialog]')!.textContent).not.toContain(
+			'vor dem Vertragsbeginn'
+		);
+	});
+
 	// ein Tag vor dem Vertragsbeginn ist ein Fehler am Feld, keine Bestätigung
 	it('fragt bei einem Tag vor dem Vertragsbeginn nicht nach einer Bestätigung', async () => {
 		open();

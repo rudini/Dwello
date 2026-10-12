@@ -233,6 +233,8 @@ period_start           DATE          NOT NULL  -- Abrechnungsperiode
 period_end             DATE          NOT NULL
 statement_date         DATE          NOT NULL
 rental_days            INTEGER       NOT NULL  -- Mietstage
+rental_start           DATE          NOT NULL  -- first billed day: later of period start and Vertragsbeginn
+rental_end             DATE          NOT NULL  -- last billed day: earlier of period end and Vertragsende
 total_costs            DECIMAL(12,2) NOT NULL
 total_advance_payments DECIMAL(12,2) NOT NULL  -- Geleistete Akontobeiträge
 management_fee         DECIMAL(12,2) DEFAULT 0 -- Verwaltungspauschale

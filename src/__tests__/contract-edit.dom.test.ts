@@ -141,6 +141,25 @@ describe('Mietvertrag bearbeiten', () => {
 			expect(document.activeElement).toBe(byTestId('contract-end-past-confirm'));
 		});
 
+		// der Fehler am Kästchen wird vor der Hilfe gelesen
+		it('liest den Fehler am Kästchen vor seiner Hilfe', async () => {
+			await open();
+			await endOn('31.03.2025');
+			await save();
+			const described = byTestId('contract-end-past-confirm')!.getAttribute('aria-describedby')!;
+			expect(described.split(' ')[0]).toBe('pastConfirmed-error');
+		});
+
+		it('nimmt die Meldung am Kästchen zurück, wenn das Datum ändert', async () => {
+			await open();
+			await endOn('31.03.2025');
+			await save();
+			type('end-date-input', '30.04.2025');
+			await settle();
+			expect(byTestId('contract-end-past-confirm')).not.toBeNull();
+			expect(document.body.textContent).not.toContain('Bitte bestätigen Sie');
+		});
+
 		it('speichert ein bestätigtes Vertragsende in der Vergangenheit', async () => {
 			await open();
 			await endOn('31.03.2025');
@@ -172,7 +191,7 @@ describe('Mietvertrag bearbeiten', () => {
 			await save();
 
 			expect(byTestId('form-error')!.textContent).toContain(
-				'Die Nebenkostenabrechnung NK-2025-0003 (Entwurf) rechnet Mietstage ab, die mit diesem Datum wegfallen. Löschen Sie zuerst den Entwurf und erstellen Sie die Nebenkostenabrechnung danach neu.'
+				'Die Nebenkostenabrechnung NK-2025-0003 (Entwurf) wurde mit den bisherigen Vertragsdaten berechnet. Löschen Sie zuerst den Entwurf und erstellen Sie die Nebenkostenabrechnung danach neu.'
 			);
 		});
 	});

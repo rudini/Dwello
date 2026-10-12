@@ -69,6 +69,13 @@ describe('Bestätigung einer Seitenaktion', () => {
 		expect(onsuccess).not.toHaveBeenCalled();
 	});
 
+	// die Ablehnung steht unten im Dialog: sie bekommt den Fokus, auch in einem niedrigen Fenster
+	it('setzt den Fokus auf den Grund einer Ablehnung', async () => {
+		open({ error: 'Mieter mit Mietverträgen können nicht gelöscht werden.' });
+		await answer('failure');
+		expect(document.activeElement).toBe(byTestId('form-error'));
+	});
+
 	it('lässt nicht bestätigen, was nicht möglich ist', () => {
 		open({ disabled: true });
 		expect(byTestId<HTMLButtonElement>('tenant-delete-confirm')!.disabled).toBe(true);
