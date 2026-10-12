@@ -528,7 +528,7 @@
 	"tenants_no_email": "Aucune adresse e-mail saisie",
 	"tenants_no_phone": "Aucun numéro de téléphone saisi",
 	"tenants_no_address": "Aucune adresse saisie",
-	"tenants_contract_of": "Contrat de bail {apartment}",
+	"tenants_contract_of": "Contrat de bail – {apartment}",
 	"tenants_document_by_letter": "par lettre",
 	"tenants_document_by_email": "par e-mail",
 	"tenants_document_to_send": "À envoyer",
@@ -562,5 +562,6 @@
 	"contracts_overlap_open_ended": "dès le {date} (durée indéterminée)",
 	"tenants_example_first_name": "Anne",
 	"tenants_example_last_name": "Rochat",
-	"tenants_example_email": "anne.rochat@example.ch"
+	"tenants_example_email": "anne.rochat@example.ch",
+	"buildings_rooms_one": "{rooms} pièce"
 }

@@ -3,7 +3,7 @@
 	import type { Snippet } from 'svelte';
 	import { untrack } from 'svelte';
 	import { enhance } from '$app/forms';
-	import { floorOptions, roomOptions } from '$lib/apartment';
+	import { floorOptions, roomOptions, roomsLabel } from '$lib/apartment';
 	import { addToast } from '$lib/stores';
 	import type { Apartment } from '$lib/types';
 	import { normalizeDecimal } from '$lib/utils/format';
@@ -144,7 +144,7 @@
 			label={m.apartments_rooms()}
 			help={m.apartments_rooms_help()}
 			example="3.5"
-			options={roomOptions.map((value) => ({ value, label: m.buildings_rooms({ rooms: value }) }))}
+			options={roomOptions.map((value) => ({ value, label: roomsLabel(value) }))}
 			placeholder={m.apartments_rooms_choose()}
 			bind:value={rooms}
 			error={errors.rooms}

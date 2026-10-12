@@ -528,7 +528,7 @@
 	"tenants_no_email": "Nessun indirizzo e-mail registrato",
 	"tenants_no_phone": "Nessun numero di telefono registrato",
 	"tenants_no_address": "Nessun indirizzo registrato",
-	"tenants_contract_of": "Contratto di locazione {apartment}",
+	"tenants_contract_of": "Contratto di locazione – {apartment}",
 	"tenants_document_by_letter": "per lettera",
 	"tenants_document_by_email": "per e-mail",
 	"tenants_document_to_send": "Da inviare",
@@ -536,7 +536,7 @@
 	"tenants_rent_upcoming": "Pigione futura",
 	"tenants_rent_current": "Pigione attuale",
 	"tenants_apartment": "Appartamento",
-	"tenants_move_in": "Trasloco il",
+	"tenants_move_in": "Entrata il",
 	"tenants_contract_start": "Inizio del contratto",
 	"tenants_no_rental": "Questo inquilino non ha un contratto di locazione in corso o futuro.",
 	"tenants_edit_page_title": "Modificare {name}",
@@ -562,5 +562,6 @@
 	"contracts_overlap_open_ended": "a partire dal {date} (a tempo indeterminato)",
 	"tenants_example_first_name": "Anna",
 	"tenants_example_last_name": "Bernasconi",
-	"tenants_example_email": "anna.bernasconi@example.ch"
+	"tenants_example_email": "anna.bernasconi@example.ch",
+	"buildings_rooms_one": "{rooms} locale"
 }

@@ -44,3 +44,15 @@ describe('Wohnungen und Mieter in der gewählten Sprache', () => {
 		expect(data!.tenants[0].currentApartment).toBe('Appartement 3.01');
 	});
 });
+
+describe('Zimmer in der Mehrzahl der gewählten Sprache', () => {
+	it('sagt auf Französisch «1.5 pièce» und «3 pièces», auf Englisch «1 room»', async () => {
+		const { roomsLabel } = await import('$lib/apartment');
+		overwriteGetLocale(() => 'fr');
+		expect([roomsLabel('1.5'), roomsLabel('3')]).toEqual(['1.5 pièce', '3 pièces']);
+		overwriteGetLocale(() => 'en');
+		expect([roomsLabel('1'), roomsLabel('1.5')]).toEqual(['1 room', '1.5 rooms']);
+		overwriteGetLocale(() => 'de');
+		expect(roomsLabel('1')).toBe('1 Zimmer');
+	});
+});

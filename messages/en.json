@@ -528,7 +528,7 @@
 	"tenants_no_email": "No email address added",
 	"tenants_no_phone": "No phone number added",
 	"tenants_no_address": "No address added",
-	"tenants_contract_of": "Rental contract {apartment}",
+	"tenants_contract_of": "Rental contract – {apartment}",
 	"tenants_document_by_letter": "by letter",
 	"tenants_document_by_email": "by email",
 	"tenants_document_to_send": "To send",
@@ -562,5 +562,6 @@
 	"contracts_overlap_open_ended": "from {date} (open-ended)",
 	"tenants_example_first_name": "Anna",
 	"tenants_example_last_name": "Meier",
-	"tenants_example_email": "anna.meier@example.ch"
+	"tenants_example_email": "anna.meier@example.ch",
+	"buildings_rooms_one": "{rooms} room"
 }

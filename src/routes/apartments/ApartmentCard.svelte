@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
-	import { floorLabel, statusText, statusIcons, statusTones } from '$lib/apartment';
+	import { floorLabel, roomsLabel, statusText, statusIcons, statusTones } from '$lib/apartment';
 	import type { ApartmentWithBuilding } from '$lib/types';
 	import { normalizeDecimal } from '$lib/utils/format';
 	import Badge from '$lib/ui/Badge.svelte';
@@ -13,7 +13,7 @@
 		{ icon: 'floor', text: floorLabel(apartment.floor) },
 		{
 			icon: 'rooms',
-			text: m.buildings_rooms({ rooms: normalizeDecimal(String(apartment.rooms)) })
+			text: roomsLabel(normalizeDecimal(String(apartment.rooms)))
 		},
 		{ icon: 'ruler', text: `${normalizeDecimal(String(apartment.area))} m²` }
 	] as const);

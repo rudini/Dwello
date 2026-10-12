@@ -562,5 +562,6 @@
 	"contracts_overlap_open_ended": "ab {date} (unbefristet)",
 	"tenants_example_first_name": "Anna",
 	"tenants_example_last_name": "Keller",
-	"tenants_example_email": "anna.keller@example.ch"
+	"tenants_example_email": "anna.keller@example.ch",
+	"buildings_rooms_one": "{rooms} Zimmer"
 }

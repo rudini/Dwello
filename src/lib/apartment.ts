@@ -1,3 +1,4 @@
+import { getLocale } from '$lib/paraglide/runtime';
 import type { ApartmentStatus } from './types';
 import type { IconName } from './ui/icons';
 import type { Tone } from './ui/tone';
@@ -98,3 +99,9 @@ export const statusText = (a: { status: ApartmentStatus; nextContractStart?: str
 	a.status === 'relet' && a.nextContractStart
 		? m.apartments_status_relet_from({ date: formatDate(a.nextContractStart) })
 		: statusLabels[a.status];
+
+/** «3.5 Zimmer» in the UI language, singular where its plural rule says so (French: «1.5 pièce») */
+export const roomsLabel = (rooms: string) =>
+	new Intl.PluralRules(getLocale()).select(Number(rooms)) === 'one'
+		? m.buildings_rooms_one({ rooms })
+		: m.buildings_rooms({ rooms });
