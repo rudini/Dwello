@@ -6,6 +6,7 @@
   stage3 review <group> <fixture-dir> baseline=<run-id> canon=<run-id> skill=<run-id> [--control]
   stage3 gate [--phase pilot|main]                  tables and the STAGE3 verdict
   stage3 validate                                   check every fixture; prints counts only (hold-outs stay unread)
+  stage3 tables                                     Markdown tables of all raw values for REPORT.md
 
 Run ids: <phase>-<fixture>-<arm>-r<slot>-a<attempt> (attempts 1, 2, ...); group names:
 <phase>-<fixture>-r<slot>[.<attempt>] (attempts 2, 3, ...). Nothing is ever overwritten: a run id or review
@@ -830,6 +831,78 @@ def validate():
     return 0 if ok else 1
 
 
+def tables():
+    """Markdown tables of every raw value REPORT.md cites (runs, reviews, tallies, reviewer statistics)."""
+    out = []
+    phases = sorted({json.loads(p.read_text())["phase"] for p in (RESULTS / "runs").glob("*.json")})
+    out.append("### Runs (every attempt)\n")
+    out.append("| run | valid | reasons | hidden pass/fail | own tests | commits | turns | cost USD | minutes | "
+               "production files | size | surface | depth_report findings | replay |")
+    out.append("|" + "---|" * 14)
+    for phase in phases:
+        for rid, rec in sorted(load_runs(phase).items()):
+            if rec["status"] != "finished":
+                out.append(f"| {rid} | no | harness did not finish |" + " |" * 11)
+                continue
+            out.append(f"| {rid} | {'yes' if rec['valid'] else 'no'} | {', '.join(rec['invalid_reasons']) or '-'} | "
+                       f"{rec['hidden']['pass']}/{rec['hidden']['fail']} | {rec['own_tests']['pass']} | "
+                       f"{rec['commits']} | {rec['session']['num_turns']} | "
+                       f"{(rec['session']['total_cost_usd'] or 0):.2f} | {rec['duration_s'] / 60:.1f} | "
+                       f"{len(rec['production_files'])} | {rec['depth']['size']} | {rec['depth']['surface']} | "
+                       f"{rec['depth']['findings']} | {rec['replay']['verdict'] if rec['replay'] else '-'} |")
+    letters, label_dev, spreads, disagreements, groups_n = {}, {}, {}, 0, 0
+    for phase in phases:
+        ok, _, notes, per_fixture = evaluate(phase)
+        out.append(f"\n### Reviewed groups, phase {phase}\n")
+        out.append("| group | reviewer | baseline | canon | skill | control | skill vs baseline | skill vs canon |")
+        out.append("|" + "---|" * 8)
+        for g in sorted(p for p in (RESULTS / "reviews").glob(f"{phase}-*") if p.is_dir()):
+            revs, final = group_verdict(g)
+            if final is None:
+                continue
+            groups_n += 1
+            disagreements += len(revs) == 3
+            for r in revs:
+                sc = r["scores"]
+                out.append(f"| {g.name} | {r['reviewer']} | {sc['baseline']} | {sc['canon']} | {sc['skill']} | "
+                           f"{sc.get('control:baseline', '-')} | | |")
+                mean = sum(r["scores_by_label"].values()) / len(r["scores_by_label"])
+                for label, arm in r["key"].items():
+                    letters.setdefault(arm, {}).setdefault(label, 0)
+                    letters[arm][label] += 1
+                    label_dev.setdefault(label, []).append(r["scores_by_label"][label] - mean)
+            for arm in ("baseline", "canon", "skill"):
+                values = [r["scores"][arm] for r in revs]
+                spreads.setdefault(phase, []).append(max(values) - min(values))
+            out.append(f"| {g.name} | final | | | | | {final['vs_baseline']:+d} | {final['vs_canon']:+d} |")
+        if phase == "main":
+            out.append("\n### Per fixture (main phase): skill vs baseline and vs canon, wins/ties/losses\n")
+            out.append("| fixture | kind | skill vs baseline | skill vs canon | deeper than baseline in a majority, never shallower |")
+            out.append("|---|---|---|---|---|")
+            kinds = fixtures()
+            for fixture, finals in sorted(per_fixture.items()):
+                wb, wc = [f["vs_baseline"] for f in finals], [f["vs_canon"] for f in finals]
+                meta = json.loads((STAGE3 / kinds[fixture] / fixture / "meta.json").read_text())
+                out.append(f"| {fixture} | {kinds[fixture]}/{meta['kind']} | {wb.count(1)}/{wb.count(0)}/{wb.count(-1)} | "
+                           f"{wc.count(1)}/{wc.count(0)}/{wc.count(-1)} | "
+                           f"{'yes' if wb.count(1) * 2 > len(wb) and wb.count(-1) == 0 else 'no'} |")
+            allb = [f["vs_baseline"] for fs in per_fixture.values() for f in fs]
+            allc = [f["vs_canon"] for fs in per_fixture.values() for f in fs]
+            out.append(f"\nAll main groups: skill vs baseline {allb.count(1)}/{allb.count(0)}/{allb.count(-1)}, "
+                       f"skill vs canon {allc.count(1)}/{allc.count(0)}/{allc.count(-1)} (wins/ties/losses).")
+    out.append("\n### Reviewer statistics\n")
+    out.append(f"- Groups with a third reviewer (disagreement on a comparison): {disagreements} of {groups_n}.")
+    for phase, values in sorted(spreads.items()):
+        out.append(f"- {phase}: spread (max - min) of one implementation's scores across its reviewers: "
+                   + ", ".join(f"{d}: {values.count(d)}" for d in sorted(set(values))) + " implementations.")
+    out.append("- Letters per arm (all reviews): " + "; ".join(
+        f"{arm} " + ", ".join(f"{l} {n}" for l, n in sorted(c.items())) for arm, c in sorted(letters.items())))
+    out.append("- Mean deviation of a label's score from its reviewer's mean: " + ", ".join(
+        f"{l} {sum(v) / len(v):+.2f} (n={len(v)})" for l, v in sorted(label_dev.items())))
+    print("\n".join(out))
+    return 0
+
+
 def main(argv):
     if len(argv) == 4 and argv[0] == "run" and argv[2] in ARMS:
         run(argv[1], argv[2], argv[3])
@@ -844,6 +917,8 @@ def main(argv):
             return 2
         review(argv[1], argv[2], runs, "baseline" if "--control" in argv else None)
         return 0
+    if argv == ["tables"]:
+        return tables()
     if argv == ["validate"]:
         return validate()
     if argv[:1] == ["gate"]:
