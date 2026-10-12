@@ -1,0 +1,6 @@
+{
+  "name": "expense-review",
+  "private": true,
+  "type": "module",
+  "scripts": { "test": "bun test" }
+}

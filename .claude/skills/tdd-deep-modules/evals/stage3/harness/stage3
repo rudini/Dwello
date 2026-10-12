@@ -5,6 +5,7 @@
   stage3 batch <jobs> <spec>...                     several runs in parallel; spec = fixture-dir:arm:run-id
   stage3 review <group> <fixture-dir> baseline=<run-id> canon=<run-id> skill=<run-id> [--control]
   stage3 gate [--phase pilot|main]                  tables and the STAGE3 verdict
+  stage3 validate                                   check every fixture; prints counts only (hold-outs stay unread)
 """
 import gzip
 import json
@@ -391,6 +392,36 @@ def gate(phase):
     return 0 if ok else 1
 
 
+def validate():
+    """Starter green; hidden tests red on the starter; starter + reference + hidden all green."""
+    ok = True
+    for fixture_id, kind in fixtures().items():
+        fixture = STAGE3 / kind / fixture_id
+        meta = json.loads((fixture / "meta.json").read_text())
+        counts = []
+        for overlay, hidden in ((False, False), (False, True), (True, True)):
+            tree = WORK / "validate" / fixture_id
+            if tree.exists():
+                shutil.rmtree(tree)
+            shutil.copytree(fixture / "starter", tree)
+            if overlay:
+                shutil.copytree(fixture / "reference", tree, dirs_exist_ok=True)
+            if hidden:
+                shutil.copytree(fixture / "hidden", tree / "__acceptance__")
+            code, out = sh(["bun", "test", *(["./__acceptance__"] if hidden and not overlay else [])], tree)
+            counts.append((code, *bun_counts(out)))
+        good = (counts[0][0] == 0 and counts[0][1] > 0 and counts[1][2] > 0
+                and counts[2][0] == 0 and counts[2][2] == 0 and counts[2][1] > counts[0][1]
+                and meta.get("holdout") == (kind == "holdout") and meta.get("id") == fixture_id
+                and all((fixture / part).exists() for part in ("task.md", "starter", "hidden", "reference")))
+        ok &= good
+        print(f"{kind}/{fixture_id}: kind={meta.get('kind')} interacting={meta.get('interacting_modules')} "
+              f"starter {counts[0][1]}/{counts[0][2]}  starter+hidden {counts[1][1]}/{counts[1][2]}  "
+              f"reference+all {counts[2][1]}/{counts[2][2]}  {'ok' if good else 'BAD'}")
+    print("FIXTURES: OK" if ok else "FIXTURES: BAD")
+    return 0 if ok else 1
+
+
 def main(argv):
     if len(argv) == 4 and argv[0] == "run" and argv[2] in ARMS:
         run(argv[1], argv[2], argv[3])
@@ -405,6 +436,8 @@ def main(argv):
             return 2
         review(argv[1], argv[2], runs, "baseline" if "--control" in argv else None)
         return 0
+    if argv == ["validate"]:
+        return validate()
     if argv[:1] == ["gate"]:
         return gate(argv[argv.index("--phase") + 1] if "--phase" in argv else "main")
     print(__doc__, file=sys.stderr)
