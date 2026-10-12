@@ -136,7 +136,7 @@
 <ActionDialog
 	bind:open={ending}
 	action="?/end"
-	title="Mietvertrag beenden?"
+	title="Mietvertrag von {name}, Wohnung {contract.apartment.number}, beenden?"
 	confirmLabel="Mietvertrag beenden"
 	confirmTestid="contract-end-confirm"
 	error={form?.endError}

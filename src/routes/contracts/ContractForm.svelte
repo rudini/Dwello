@@ -129,7 +129,12 @@
 			errors = { form: saveError(response.error) };
 			return focusFirstError(form);
 		}
-		addToast('success', `Mietvertrag von ${tenantName} gespeichert`, 10_000);
+		// a withdrawn notice says what changed, not only «gespeichert» (personas J1)
+		const saved =
+			contract.terminated && values.isUnlimited
+				? `Kündigung von ${tenantName} aufgehoben. Der Mietvertrag läuft ohne Ende weiter.`
+				: `Mietvertrag von ${tenantName} gespeichert`;
+		addToast('success', saved, 10_000);
 		await goto(back);
 	}
 </script>

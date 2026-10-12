@@ -226,6 +226,9 @@ describe('Mietvertrag bearbeiten', () => {
 			await settle();
 			await save();
 			expect(puts()[0].body).toMatchObject({ endDate: null, terminated: false });
+			expect(get(toasts).map((t) => t.message)).toEqual([
+				'Kündigung von Anna Keller aufgehoben. Der Mietvertrag läuft ohne Ende weiter.'
+			]);
 		});
 
 		it('wird befristet, wenn der Liegenschaftsverwalter «Befristet» wählt', async () => {

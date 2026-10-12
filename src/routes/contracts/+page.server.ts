@@ -39,6 +39,7 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<ContractsLis
 			tenantId: c.tenantId as string,
 			startDate: c.startDate as string,
 			endDate: (c.endDate as string) || null,
+			terminated: !!c.terminated,
 			baseRent: (c.baseRent as string) || '0',
 			additionalRent: (c.additionalRent as string) || null,
 			monthlyAdvancePayment: (c.monthlyAdvancePayment as string) || '0',

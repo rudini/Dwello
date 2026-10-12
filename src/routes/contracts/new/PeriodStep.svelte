@@ -37,6 +37,7 @@
 		description: 'Der Mietvertrag endet an einem festen Tag, ohne Kündigung.'
 	};
 	// a notice keeps the contract open-ended (A-1); withdrawing it is a choice with its consequence
+	// TODO(fachlich prüfen): «Kündigung aufheben» is not from the glossary (offene-punkte.md)
 	const durations = $derived(
 		noticed
 			? [

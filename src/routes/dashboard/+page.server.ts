@@ -74,7 +74,9 @@ function missingPeriod(period: Awaited<ReturnType<typeof lastPeriod>>, contracts
 			(!c.endDate || String(c.endDate) >= period.start) &&
 			!period.done.has(c.id)
 	);
-	const buildings = [...new Set(missing.map((c) => String(c.buildingName)))];
+	const buildings = [...new Set(missing.map((c) => String(c.buildingName)))].sort((a, b) =>
+		a.localeCompare(b, 'de-CH')
+	);
 	return buildings.length ? { start: period.start, end: period.end, buildings } : null;
 }
 

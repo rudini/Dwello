@@ -1,5 +1,7 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { load } from '../routes/dashboard/+page.server';
+import contractList from '../../tests/contracts/contracts.json';
+import periodStatements from '../../tests/contracts/period-statements.json';
 
 const API = 'http://localhost:3001/api/v1';
 const figures = {
@@ -11,17 +13,22 @@ const figures = {
 		{ buildingId: 'b3', buildingName: 'Leerbau', occupiedApartments: 0 }
 	]
 };
-// Contracts of all times; the period is 01.07.2025 – 30.06.2026
+// Contracts of all times, shaped as the backend answers; the period is 01.07.2025 – 30.06.2026
+const contract = (fields: Record<string, unknown>) => ({ ...contractList.contracts[0], ...fields });
 const contracts = [
-	{ id: 'k1', buildingName: 'Seeblick', startDate: '2020-01-01', endDate: null },
-	{ id: 'k2', buildingName: 'Lindenhof', startDate: '2024-01-01', endDate: null },
-	{ id: 'k3', buildingName: 'Lindenhof', startDate: '2025-08-01', endDate: null },
-	{ id: 'k4', buildingName: 'Ahornhof', startDate: '2023-01-01', endDate: '2025-09-30' },
-	{ id: 'k5', buildingName: 'Leerbau', startDate: '2020-01-01', endDate: '2025-06-30' },
-	{ id: 'k6', buildingName: 'Neubau', startDate: '2026-07-01', endDate: null }
+	contract({ id: 'k1', buildingName: 'Seeblick', startDate: '2020-01-01', endDate: null }),
+	contract({ id: 'k2', buildingName: 'Lindenhof', startDate: '2024-01-01', endDate: null }),
+	contract({ id: 'k3', buildingName: 'Lindenhof', startDate: '2025-08-01', endDate: null }),
+	contract({ id: 'k4', buildingName: 'Ahornhof', startDate: '2023-01-01', endDate: '2025-09-30' }),
+	contract({ id: 'k5', buildingName: 'Leerbau', startDate: '2020-01-01', endDate: '2025-06-30' }),
+	contract({ id: 'k6', buildingName: 'Neubau', startDate: '2026-07-01', endDate: null }),
+	// one day in the period each: its first and its last
+	contract({ id: 'k7', buildingName: 'Erlenhof', startDate: '2024-01-01', endDate: '2025-07-01' }),
+	contract({ id: 'k8', buildingName: 'Birkenhof', startDate: '2026-06-30', endDate: null })
 ];
-const billed = (...ids: string[]) => ids.map((contractId) => ({ contractId }));
-const both = billed('k1', 'k2', 'k3', 'k4');
+const billed = (...ids: string[]) =>
+	ids.map((contractId) => ({ ...periodStatements.data[0], contractId }));
+const both = billed('k1', 'k2', 'k3', 'k4', 'k7', 'k8');
 
 // The backend as the overview reads it: counts, plus the lists that carry dates
 function backend(dashboardStatus = 200, statementsOfLastPeriod: unknown[] = both) {
@@ -102,15 +109,17 @@ describe('Übersicht laden', () => {
 			'drafts'
 		]);
 		expect(data.tasks[2].text).toContain('01.07.2025 – 30.06.2026');
-		expect(data.tasks[2].text).toContain('Seeblick, Lindenhof, Ahornhof.');
+		expect(data.tasks[2].text).toContain(
+			'Noch nicht abgerechnet: Ahornhof, Birkenhof, Erlenhof, Lindenhof, Seeblick.'
+		);
 	});
 
 	// The tenant who moved out still gets a statement for the days of the period (A-9)
 	it('nennt jedes Gebäude, das in der Periode einen Mietvertrag ohne Abrechnung hatte', async () => {
 		vi.useFakeTimers({ now: new Date('2026-10-10T08:00:00') });
-		const data = await load({ fetch: backend(200, billed('k1', 'k2')) } as never);
+		const data = await load({ fetch: backend(200, billed('k1', 'k2', 'k7', 'k8')) } as never);
 		const task = data.tasks.find((t) => t.id === 'missing-period')!;
-		expect(task.text).toContain('Noch nicht abgerechnet: Lindenhof, Ahornhof.');
+		expect(task.text).toContain('Noch nicht abgerechnet: Ahornhof, Lindenhof.');
 	});
 
 	// The building cards count them too; the overview names when they will be rented

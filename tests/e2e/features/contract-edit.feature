@@ -38,7 +38,7 @@ Funktionalität: Mietvertrag bearbeiten
   Szenario: Vergangenes Vertragsende bestätigen
     Wenn der Liegenschaftsverwalter das Vertragsende "2025-03-31" speichert und die Folge bestätigt
     Dann ist der Liegenschaftsverwalter auf der Detailseite des Mietvertrags von "Anna Keller"
-    Und endet der Mietvertrag am "31.03.2025"
+    Und zeigt der Mietvertrag "Befristet bis 31.03.2025"
 
   # Die Abrechnung 2025 enthält schon Mietstage bis Ende Jahr
   Szenario: Vertragsende vor dem Ende einer Abrechnung

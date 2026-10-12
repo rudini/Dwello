@@ -31,6 +31,17 @@ Given(
 	}
 );
 
+// the row's period ends with how the contract ends: «…, befristet» or «…, gekündigt»
+Then(
+	'nennt die Mietvertragsliste den Mietvertrag von {string} {string}',
+	async ({ verwalter, names }, tenant: string, kind: string) => {
+		const name = names.get(tenant) ?? tenant;
+		await visit(verwalter.page, '/contracts');
+		await verwalter.perform(searchContracts(name));
+		await expect(listedContract(verwalter, name)).toContainText(`, ${kind}`);
+	}
+);
+
 Given('der Liegenschaftsverwalter ist auf der Mietvertragsliste', async ({ verwalter }) => {
 	await visit(verwalter.page, '/contracts');
 });

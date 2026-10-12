@@ -4719,6 +4719,12 @@ A tenant gives notice for a later day: «Mietvertrag beenden» asks for the Vert
   in `contract-detail.feature` and `contract-edit.feature`, `contract-end.pg.test.ts`, `contract-status.test.ts`,
   `contract-edit.dom.test.ts`, `contract-actions.test.ts`, `contract-edit-load.test.ts`. Local databases need
   `bun run db:reset`.
+- [x] **Review J-1 and personas J1** (`docs/reviews/J-review-1.md`, `docs/design/personas/{helga,anna,sven}-j1.md`):
+  the contract list passes `terminated` (`src/routes/contracts/+page.server.ts`, J-1); a notice without an end is
+  refused with a plain error (`checkNotice` in `contract.service.ts`, J-2); the reminder sorts the buildings (J-3);
+  stricter scenarios and a per-contract scenario (J-5); API samples `contracts.json` and `period-statements.json`
+  (J-6); `TODO(fachlich prüfen)` at the new texts (J-7); the end dialog names tenant and apartment; the message
+  after withdrawing a notice; demo data mark the previous tenants as gekündigt (`demo-data.sql`, J-8).
 
 ---
 

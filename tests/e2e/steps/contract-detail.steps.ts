@@ -105,14 +105,10 @@ Then('hat der Mietvertrag den Status {string}', async ({ verwalter }, status: st
 	await expect(statusOfContract(verwalter)).toHaveText(status);
 });
 
-// The end action sets today's date in Switzerland; the page shows it as formatDate does
+// The end action sets today's date in Switzerland as a notice; the page shows it as formatDate does
 Then('endet der Mietvertrag heute', async ({ verwalter }) => {
 	const today = new Date().toLocaleDateString('de-CH', { timeZone: 'Europe/Zurich' });
-	await expect(endOfContract(verwalter)).toContainText(today);
-});
-
-Then('endet der Mietvertrag am {string}', async ({ verwalter }, date: string) => {
-	await expect(endOfContract(verwalter)).toContainText(date);
+	await expect(endOfContract(verwalter)).toHaveText(`Unbefristet, gekündigt auf den ${today}`);
 });
 
 // the field's error and a refusal of the server use the same frame: the one with the message counts

@@ -199,8 +199,9 @@ When('der Liegenschaftsverwalter die Kündigung aufhebt', async ({ verwalter }) 
 	await verwalter.perform(withdrawNotice);
 });
 
+// the chosen option, not just one of the offered ones
 Then('zeigt die Vertragsdauer {string}', async ({ verwalter }, duration: string) => {
-	await expect(contractDuration(verwalter.page)).toContainText(duration);
+	await expect(contractDuration(verwalter.page).getByRole('radio', { name: duration })).toBeChecked();
 });
 
 When('der Liegenschaftsverwalter den Vertragsbeginn {string} speichert', async ({ verwalter }, date: string) => {

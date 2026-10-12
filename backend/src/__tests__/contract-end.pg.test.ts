@@ -184,4 +184,12 @@ describe('Gekündigter Mietvertrag', () => {
 		expect((await put({ endDate: null })).status).toBe(200);
 		expect(await stored()).toMatchObject({ endDate: null, terminated: false });
 	});
+
+	// J-2: eine Kündigung braucht ihren Kündigungstermin; die Datenbank meldete sonst rohes SQL
+	it('lehnt eine Kündigung ohne Vertragsende verständlich ab', async () => {
+		const response = await put({ terminated: true });
+		expect(response.status).toBe(400);
+		expect(await response.json()).toEqual({ error: 'A notice needs an end date' });
+		expect(await stored()).toMatchObject({ endDate: null, terminated: false });
+	});
 });

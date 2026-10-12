@@ -13,6 +13,8 @@ Optionale Felder sind in den Testdaten gefüllt: Liefert die API `null`, prüft 
 |---|---|
 | `statement.json` | `GET /api/v1/statements/:id` |
 | `building-contracts.json` | `GET /api/v1/contracts?buildingId=…` |
+| `contracts.json` | `GET /api/v1/contracts` (Mietvertragsliste, Übersicht) |
+| `period-statements.json` | `GET /api/v1/statements?periodStart=…&periodEnd=…` (Übersicht) |
 | `statement-preview.json` | `POST /api/v1/statements/preview` |
 | `invoice-completeness.json` | `GET /api/v1/invoices/completeness/:buildingId` |
 | `invoice.json` | `GET /api/v1/invoices/:id` |
