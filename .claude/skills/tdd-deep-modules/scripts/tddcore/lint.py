@@ -158,7 +158,7 @@ def _statements(heading, text):
     """Each required statement on its item's line, starting a sentence and ending as written."""
     found = []
     for label, statements in STATEMENTS.get(heading, {}).items():
-        item = re.search(rf"^\s*(?:-|\d+\.)\s+\*\*{re.escape(label)}\*\*(.*)$", text, re.MULTILINE)
+        item = re.search(rf"^(?:-|\d+\.) +\*\*{re.escape(label)}\*\*(.*)$", text, re.MULTILINE)  # not a sub-item
         line = item[1] if item else ""
         found += [f"'{heading}' item **{label}** lacks the statement: {statement}" for statement in statements
                   if not re.search(rf"(?:^|[.])\s+{re.escape(statement)}(?:\s|$)", line)]
