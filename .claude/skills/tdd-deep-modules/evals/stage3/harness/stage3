@@ -17,6 +17,7 @@ import json
 import os
 import random
 import re
+import fnmatch
 import shlex
 import shutil
 import subprocess
@@ -35,9 +36,9 @@ WORK = Path(os.environ.get("STAGE3_WORK", "/tmp/claude-0/-home-user-Dwello/"
                            "b911e014-6a0a-558d-a301-60af5eecb558/scratchpad/stage3"))
 MODEL = "claude-opus-5-5"
 ARMS = {"baseline": "baseline.md", "canon": "canon-tdd.md", "skill": "tdd-deep-modules.md"}
-RUN_ID = re.compile(r"^(?P<phase>pilot\d*|main)-(?P<fixture>[a-z0-9-]+)-(?P<arm>baseline|canon|skill)"
+RUN_ID = re.compile(r"^(?P<phase>pilot(?:[2-9]|[1-9]\d+)?|main)-(?P<fixture>[a-z0-9-]+)-(?P<arm>baseline|canon|skill)"
                     r"-r(?P<slot>[1-9]\d*)-a(?P<attempt>[1-9]\d*)$")
-GROUP = re.compile(r"^(?P<phase>pilot\d*|main)-(?P<fixture>[a-z0-9-]+)-r(?P<slot>[1-9]\d*)"
+GROUP = re.compile(r"^(?P<phase>pilot(?:[2-9]|[1-9]\d+)?|main)-(?P<fixture>[a-z0-9-]+)-r(?P<slot>[1-9]\d*)"
                    r"(?:\.(?P<attempt>[2-9]|[1-9]\d+))?$")
 # Every session, and every command that runs an arm's code, runs in its own mount and PID namespace
 # (sandbox.sh): it sees only its directory, as /workspace, and cannot unmount what hides the rest.
@@ -62,20 +63,27 @@ KEEP_ENV = ("PATH", "HOME", "SHELL", "TERM", "LANG", "ANTHROPIC_BASE_URL", "HTTP
 SESSION_SHELL = {"BASH_ENV": "/sandbox/env.sh", "ENV": "/sandbox/env.sh", "GIT_CONFIG_GLOBAL": "/dev/null",
                  "GIT_CONFIG_NOSYSTEM": "1", "GIT_ALLOW_PROTOCOL": "file", "GIT_TERMINAL_PROMPT": "0"}
 PROXY_ENV = {"HTTPS_PROXY", "https_proxy", "NO_PROXY", "no_proxy"}
-# Escape signals, checked structurally (escapes()): every path a session's command or read names is normalised
-# (`..`, `~`, `$HOME` resolved; relative paths from /workspace) and must lie in ALLOWED_PATHS; network,
-# process and namespace tools at command position, proxy variables, process environments and the
-# experiment's names are signals too. Such a run is invalid (decided before any run).
-ALLOWED_PATHS = ("/workspace", "/tmp", "/root/.bun", "/root/.claude", "/usr", "/bin", "/sbin", "/lib", "/lib64", "/opt", "/etc",
-                 "/dev/null", "/dev/stdin", "/dev/stdout", "/dev/stderr", "/dev/tty", "/proc/cpuinfo",
-                 "/proc/meminfo", "/proc/version")
+# Escape signals (escapes()): a path whose first component, after normalisation (`..`, `~`, `$HOME`, the cwd
+# a command's `cd`s reach, from /workspace), names a sensitive top-level entry (globs match, so `/h*` counts);
+# `/` itself as an operand of a listing or searching command; network, process and namespace tools at command
+# position; proxy variables, process environments, credential file names and the experiment's names outside
+# heredoc bodies. Ordinary text (`/money`, `/-/g`, `src/*/x.ts`, a `'/'` grep pattern) is no path to anything
+# sensitive. Such a run is invalid (decided before any real run).
+SENSITIVE_TOP = ("home", "root", "proc", "sys", "run", "var", "dev", "mnt", "srv", "boot", "media", "old_root",
+                 "sandbox", "verifier", "lost+found", "container_info.json")
+ALLOWED_UNDER = ("/root/.bun", "/root/.claude", "/dev/null", "/dev/stdin", "/dev/stdout", "/dev/stderr", "/dev/tty",
+                 "/dev/fd", "/dev/urandom", "/dev/random", "/proc/cpuinfo", "/proc/meminfo", "/proc/version")
 SIGNAL_COMMANDS = {"curl", "wget", "nc", "ncat", "netcat", "socat", "ssh", "scp", "sftp", "telnet", "mount",
                    "umount", "unshare", "nsenter", "chroot", "env", "printenv", "ps", "pgrep", "pstree", "top",
-                   "lsof", "ss", "netstat"}
+                   "lsof", "ss", "netstat", "strace", "gdb"}
+LISTERS = {"ls", "find", "du", "tree", "tar", "cp", "rsync", "zip", "ln", "grep", "egrep", "fgrep", "rg"}
+PATTERN_FIRST = {"grep", "egrep", "fgrep", "rg", "sed", "awk", "perl"}
+PREFIXES = {"if", "then", "do", "else", "elif", "while", "until", "{", "}", "!", "time", "nice", "nohup",
+            "command", "builtin", "exec", "sudo", "xargs", "stdbuf", "$"}
 SIGNAL_WORDS = re.compile(r"\b(?:HTTPS?|ALL|NO)_PROXY\b|process\.env|Bun\.env|oauth_token|ingress_token|"
-                          r"\bDwello\b|\bstage3\b|\bholdout\b|/sandbox\b|/verifier\b", re.I)
-EMBEDDED_PATH = re.compile(r"(?<![\w.$:/])(?:~|\$HOME|\$\{HOME\})?/[A-Za-z0-9_.$*{\[~-][^\s'\"`;|&()<>,]*")
-SCANNED_TOOLS = {"Bash", "Read", "Glob", "Grep", "LS", "NotebookRead"}
+                          r"\bDwello\b|\bstage3\b|\bholdout\b", re.I)
+EMBEDDED_PATH = re.compile(r"(?<![\w.$:/*?\])])(?:~|\$HOME|\$\{HOME\})?/[A-Za-z0-9_.$*?{\[~+-][^\s'\"`;|&()<>,]*")
+SCANNED_TOOLS = {"Bash", "Read", "Glob", "Grep", "LS", "NotebookRead", "Write", "Edit", "MultiEdit", "NotebookEdit"}
 CODE = (".ts", ".tsx", ".mts", ".cts", ".js", ".jsx", ".mjs", ".cjs")
 IMPORT = re.compile(r"""(?:\bfrom\s*|\bimport\s*\(\s*|\bimport\s+|\brequire\s*\(\s*)["'](\.{1,2}/[^"']+)["']""")
 ARM_TIMEOUT, TEST_TIMEOUT, REPLAY_TIMEOUT, REVIEW_TIMEOUT = 5400, 600, 3600, 1800
@@ -164,65 +172,117 @@ def blocks(events, kind):
                 yield block
 
 
-def _outside(path):
-    """True when an absolute or relative path, once normalised, leaves the allowed places."""
+def _normal(path, cwd="/workspace"):
     path = re.sub(r"^(?:~|\$HOME|\$\{HOME\})(?=/|$)", "/root", path)
-    full = os.path.normpath(path if path.startswith("/") else os.path.join("/workspace", path))
-    return not any(full == root or full.startswith(root + "/") for root in ALLOWED_PATHS)
+    return os.path.normpath(path if path.startswith("/") else os.path.join(cwd, path))
+
+
+def _sensitive(path, cwd="/workspace", glob=True):
+    """True when a path reaches a sensitive top-level entry (see SENSITIVE_TOP, ALLOWED_UNDER)."""
+    full = _normal(path, cwd)
+    if any(full == allowed or full.startswith(allowed + "/") for allowed in ALLOWED_UNDER):
+        return False
+    first = full.split("/")[1] if full != "/" else ""
+    if "{" in first:
+        return any(name in first for name in SENSITIVE_TOP)
+    return any(fnmatch.fnmatchcase(name, first) if glob else name == first for name in SENSITIVE_TOP)
 
 
 HEREDOC = re.compile(r"<<-?\s*(['\"]?)(\w+)\1[^\n]*\n.*?\n\s*\2\s*(?=\n|$)", re.S)
 
 
-def _command_words(command):
-    """The words of each simple command (quotes respected, heredoc bodies dropped, split at ; & | ( ) newline)."""
-    for line in HEREDOC.sub("", command).splitlines():
-        lexer = shlex.shlex(line, posix=True, punctuation_chars=True)
-        lexer.whitespace_split = True
-        try:
-            tokens = list(lexer)
-        except ValueError:
-            tokens = line.split()
-        words = []
-        for token in tokens + [";"]:
-            if token and set(token) <= set(";&|()"):
-                while words and (re.match(r"^\w+=", words[0]) or words[0] in ("sudo", "exec", "time", "nohup", "xargs", "$")):
+def _unquoted_newlines_to_semicolons(command):
+    out, quote, escaped = [], None, False
+    for ch in command:
+        if escaped:
+            escaped = False
+        elif ch == "\\" and quote != "'":
+            escaped = True
+        elif quote and ch == quote:
+            quote = None
+        elif not quote and ch in "'\"":
+            quote = ch
+        elif not quote and ch == "\n":
+            ch = ";"
+        out.append(ch)
+    return "".join(out)
+
+
+def _simple_commands(command):
+    """The words of each simple command: quotes respected, heredoc bodies dropped, split at ; & | ( ) and
+    unquoted newlines, shell keywords and wrapper commands removed; assignments kept as `NAME=value` words."""
+    lexer = shlex.shlex(_unquoted_newlines_to_semicolons(HEREDOC.sub("", command)), posix=True,
+                        punctuation_chars=True)
+    lexer.whitespace_split = True
+    try:
+        tokens = list(lexer)
+    except ValueError:
+        tokens = command.split()
+    words = []
+    for token in tokens + [";"]:
+        if token and set(token) <= set(";&|()"):
+            assignments = []
+            while words and (re.match(r"^\w+=", words[0]) or words[0] in PREFIXES or words[0] == "timeout"):
+                if words[0] == "timeout" and len(words) > 1:
                     words = words[1:]
-                if words:
-                    yield words
-                words = []
-            elif token not in ("<", ">", ">>", "<<", "<&", ">&"):
-                words.append(token)
+                if re.match(r"^\w+=", words[0]):
+                    assignments.append(words[0])
+                words = words[1:]
+            if words or assignments:
+                yield assignments, words
+            words = []
+        elif token not in ("<", ">", ">>", "<<", "<<<", "<&", ">&", "&>", "2>", "2>&1"):
+            words.append(token)
+
+
+def _bash_escapes(command, depth=0):
+    found, cwd = [], "/workspace"
+    if SIGNAL_WORDS.search(HEREDOC.sub("", command)):
+        found.append(SIGNAL_WORDS.search(HEREDOC.sub("", command)).group(0))
+    for assignments, words in _simple_commands(command):
+        name = os.path.basename(words[0]) if words else ""
+        if name in SIGNAL_COMMANDS:
+            found.append(f"command {name}")
+        if name in ("bash", "sh", "zsh", "dash") and "-c" in words[1:-1] and depth < 3:
+            found += _bash_escapes(words[words.index("-c") + 1], depth + 1)
+        operands = [a.split("=", 1)[1] for a in assignments] + words[1:]
+        skip_pattern = name in PATTERN_FIRST
+        for word in operands:
+            if skip_pattern and not word.startswith("-"):
+                skip_pattern = False
+                continue
+            value = word.split("=", 1)[1] if word.startswith("-") and "=" in word else word
+            pathlike = value.startswith(("/", "~", "$HOME", "${HOME}", "..", "./.."))
+            outside = not (cwd == "/workspace" or cwd.startswith("/workspace/"))
+            if re.search(r"\s", value) or not (pathlike or outside):
+                found += [f"path {p}" for p in EMBEDDED_PATH.findall(value) if _sensitive(p, glob=False)]
+                continue
+            if _normal(value, cwd) in ("/", "/root"):  # listing these shows names only; reading below is caught
+                if name in LISTERS:
+                    found.append(f"path {_normal(value, cwd)} ({name})")
+            elif _sensitive(value, cwd):
+                found.append(f"path {value}")
+        if name == "cd" and words[1:]:
+            cwd = _normal(words[1], cwd)
+    return found
 
 
 def escapes(name, tool_input):
-    """The escape signals of one tool call, or [] (see ALLOWED_PATHS and SIGNAL_*)."""
-    found = []
-    text = json.dumps(tool_input)
-    if SIGNAL_WORDS.search(text):
-        found.append(SIGNAL_WORDS.search(text).group(0))
+    """The escape signals of one tool call, or []."""
     if name == "Bash":
-        command = str(tool_input.get("command", ""))
-        for words in _command_words(command):
-            if words and os.path.basename(words[0]) in SIGNAL_COMMANDS:
-                found.append(f"command {words[0]}")
-            for word in words[1:] if words[0] not in ("echo", "printf") else []:  # echo reads no file
-                if word == "/":
-                    found.append("path /")
-                elif re.search(r"\s", word):  # quoted code or text: only absolute paths inside it count
-                    found += [f"path {p}" for p in EMBEDDED_PATH.findall(word) if _outside(p)]
-                elif word.startswith(("/", "~", "$HOME", "${HOME}")) or "/../" in f"/{word}/":
-                    if _outside(word.split("=", 1)[-1] if word.startswith("-") else word):
-                        found.append(f"path {word}")
-                else:
-                    found += [f"path {p}" for p in EMBEDDED_PATH.findall(word) if _outside(p)]
-    else:
-        for key in ("file_path", "path", "notebook_path"):
-            if isinstance(tool_input.get(key), str) and _outside(tool_input[key]):
-                found.append(f"path {tool_input[key]}")
-        pattern = tool_input.get("pattern") if name == "Glob" else None
-        if isinstance(pattern, str) and pattern.startswith(("/", "~", "..")) and _outside(pattern):
-            found.append(f"path {pattern}")
+        return _bash_escapes(str(tool_input.get("command", "")))
+    found = []
+    for key in ("file_path", "path", "notebook_path"):
+        value = tool_input.get(key)
+        if isinstance(value, str) and (_sensitive(value) or (_normal(value) == "/" and name in ("Glob", "Grep"))):
+            found.append(f"path {value}")
+        if isinstance(value, str) and SIGNAL_WORDS.search(value):
+            found.append(SIGNAL_WORDS.search(value).group(0))
+    pattern = tool_input.get("pattern") if name == "Glob" else None
+    if isinstance(pattern, str):
+        for candidate in re.findall(r"(?:^|[{,])(/[^,{}]*|~[^,{}]*)", pattern):
+            if _sensitive(candidate) or _normal(candidate.split("*")[0] or "/") == "/":
+                found.append(f"path {candidate}")
     return found
 
 
@@ -670,9 +730,9 @@ def gate(phase):
         fx_ok = wb.count(1) * 2 > len(wb) and wb.count(-1) == 0
         attribution &= wc.count(1) * 2 > len(wc)
         print(f"  {fixture:24} n={len(finals)}  baseline {wb.count(1)}/{wb.count(0)}/{wb.count(-1)}"
-              f"  canon {wc.count(1)}/{wc.count(0)}/{wc.count(-1)}" + ("" if phase == "pilot" else
+              f"  canon {wc.count(1)}/{wc.count(0)}/{wc.count(-1)}" + ("" if phase != "main" else
               f"  {'ok' if fx_ok else 'NOT MET'}"))
-        if phase != "pilot":
+        if phase == "main":  # pilot rounds validate harness and reviewers; their depth results are never judged
             ok &= fx_ok
     if phase != "main":
         # A pilot round validates harness and reviewers; its depth results are not judged.
