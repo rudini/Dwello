@@ -15,20 +15,14 @@ export function suggestionProvenance(suggestion: Suggestion | null) {
 }
 
 /** The Leistungszeitraum as the backend stores it: both dates, or null without one */
-export const servicePeriodOf = (values: {
-	servicePeriodStart: string;
-	servicePeriodEnd: string;
-}) => ({
+export const servicePeriodOf = (values: { servicePeriodStart: string; servicePeriodEnd: string }) => ({
 	servicePeriodStart: values.servicePeriodStart || null,
 	servicePeriodEnd: values.servicePeriodEnd || null
 });
 
 /** An amount as typed in Switzerland ("1'200.50", "1’200,50") in the form the backend reads */
 export const plainAmount = (value: string) =>
-	value
-		.replace(/['’\s]/g, '')
-		.replace(',', '.')
-		.replace(/\.[-–—]+$/, ''); // «1'450.-»: whole francs
+	value.replace(/['’\s]/g, '').replace(',', '.').replace(/\.[-–—]+$/, ''); // «1'450.-»: whole francs
 
 // The Leistungszeitraum is optional, but with both dates and the end not before the start (ISO dates compare as text)
 function servicePeriodErrors(start = '', end = ''): Record<string, string> {

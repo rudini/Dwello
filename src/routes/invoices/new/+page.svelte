@@ -42,7 +42,9 @@
 
 	let buildingId = $state(untrack(() => data.buildingId));
 	// From the statement wizard the date stays empty: today would fall outside the period being completed
-	let invoiceDate = $state(untrack(() => (data.period ? '' : localToday())));
+	let invoiceDate = $state(
+		untrack(() => (data.period ? '' : localToday()))
+	);
 	let servicePeriodStart = $state('');
 	let servicePeriodEnd = $state('');
 	let billingEntity = $state('');
