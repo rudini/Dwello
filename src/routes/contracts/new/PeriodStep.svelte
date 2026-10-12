@@ -3,12 +3,15 @@
 	import RadioGroup from '$lib/ui/RadioGroup.svelte';
 	import DateInput from '$lib/ui/DateInput.svelte';
 	import { startDateNotice } from '$lib/contract-wizard';
+	import { contractEnd } from '$lib/contract-status';
 
 	// Step 3: from when, and until when or without end; each date is repeated in words
 	let {
 		startDate = $bindable(),
 		endDate = $bindable(),
 		isUnlimited = $bindable(),
+		terminated = $bindable(false),
+		noticed = false,
 		min,
 		today,
 		overlap,
@@ -17,6 +20,8 @@
 		startDate: string;
 		endDate: string;
 		isUnlimited: boolean;
+		terminated?: boolean;
+		noticed?: boolean; // the saved contract is open-ended and ended by notice: it can be withdrawn
 		min?: string;
 		today: string;
 		overlap: string | null;
@@ -26,18 +31,39 @@
 	// TODO(fachlich prüfen): explanations of unbefristet/befristet are not from the glossary
 	const pastStart = $derived(startDateNotice(startDate, today));
 
-	const durations = [
-		{
-			value: 'unlimited',
-			label: 'Unbefristet',
-			description: 'Der Mietvertrag hat kein Vertragsende. Er läuft, bis er gekündigt wird.'
-		},
-		{
-			value: 'limited',
-			label: 'Befristet',
-			description: 'Der Mietvertrag endet an einem festen Tag, ohne Kündigung.'
-		}
-	];
+	const limited = {
+		value: 'limited',
+		label: 'Befristet',
+		description: 'Der Mietvertrag endet an einem festen Tag, ohne Kündigung.'
+	};
+	// a notice keeps the contract open-ended (A-1); withdrawing it is a choice with its consequence
+	const durations = $derived(
+		noticed
+			? [
+					{
+						value: 'terminated',
+						label: endDate ? contractEnd(endDate, true) : 'Unbefristet, gekündigt',
+						description:
+							'Der Mietvertrag endet mit der Kündigung. Hat sich der Kündigungstermin verschoben, ändern Sie das Vertragsende.'
+					},
+					{
+						value: 'unlimited',
+						label: 'Kündigung aufheben',
+						description: 'Der Mietvertrag läuft dann ohne Ende weiter.'
+					},
+					limited
+				]
+			: [
+					{
+						value: 'unlimited',
+						label: 'Unbefristet',
+						description: 'Der Mietvertrag hat kein Vertragsende. Er läuft, bis er gekündigt wird.'
+					},
+					limited
+				]
+	);
+	const duration = (unlimited: boolean, noticeGiven: boolean) =>
+		unlimited ? 'unlimited' : noticeGiven ? 'terminated' : 'limited';
 </script>
 
 <DateInput
@@ -62,7 +88,8 @@
 	legend="Vertragsdauer"
 	options={durations}
 	bind:value={
-		() => (isUnlimited ? 'unlimited' : 'limited'), (v) => (isUnlimited = v === 'unlimited')
+		() => duration(isUnlimited, terminated),
+		(v) => ((isUnlimited = v === 'unlimited'), (terminated = v === 'terminated'))
 	}
 	testid="contract-duration"
 />

@@ -4705,6 +4705,21 @@ A tenant gives notice for a later day: «Mietvertrag beenden» asks for the Vert
   Tests first: scenario "Zahlungsfrist fehlt" (`statement-edit.feature`), `statement-edit-actions.test.ts`,
   `statement-pages.dom.test.ts`, `statement.routes.pg.test.ts`.
 
+## Session 15 - October 2026: Notice vs. Fixed Term, Reminder per Contract (A-1, A-9)
+
+### Done ✅
+- [x] **A-9, reminder per contract**: «Noch nicht abgerechnet» names every building with a Mietvertrag in the last
+  period that has no statement, also when the tenant has moved out (`src/routes/dashboard/+page.server.ts` reads all
+  contracts). Tests first: two scenarios in `dashboard.feature`, `dashboard.test.ts`.
+- [x] **A-1, notice vs. fixed term**: `rental_contracts.terminated` (`0001_schema.sql`, `schema.ts`, contract
+  routes and service; `endDate: null` clears it). «Mietvertrag beenden» sends `terminated: true`; the detail page
+  shows «Befristet bis …» / «Unbefristet, gekündigt auf den …» (`contractEnd` in `src/lib/contract-status.ts`), the
+  lists add «befristet»/«gekündigt»; «Bearbeiten» offers «Kündigung aufheben» (`PeriodStep.svelte`,
+  `ContractForm.svelte`, `contract-form.ts`, edit loader). a11y screen `contract-edit-notice`. Tests first: scenarios
+  in `contract-detail.feature` and `contract-edit.feature`, `contract-end.pg.test.ts`, `contract-status.test.ts`,
+  `contract-edit.dom.test.ts`, `contract-actions.test.ts`, `contract-edit-load.test.ts`. Local databases need
+  `bun run db:reset`.
+
 ---
 
 # Success Criteria

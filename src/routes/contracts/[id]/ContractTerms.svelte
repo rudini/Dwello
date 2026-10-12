@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { statusBadges } from '$lib/contract-status';
+	import { contractEnd, statusBadges } from '$lib/contract-status';
 	import type { ContractHistory } from '$lib/types';
 	import Badge from '$lib/ui/Badge.svelte';
 	import Panel from '$lib/ui/Panel.svelte';
@@ -9,11 +9,13 @@
 	let {
 		startDate,
 		endDate,
+		terminated,
 		status,
 		rent
 	}: {
 		startDate: string;
 		endDate?: string | null;
+		terminated?: boolean;
 		status: ContractHistory['status'];
 		rent: { baseRent: number; additionalRent: number; advancePayment: number; total: number };
 	} = $props();
@@ -37,7 +39,7 @@
 		<div>
 			<dt class="text-ink-muted">Vertragsende</dt>
 			<dd class="font-semibold text-ink" data-testid="contract-end-date">
-				{endDate ? formatDate(endDate) : 'Unbefristet'}
+				{contractEnd(endDate, terminated)}
 			</dd>
 		</div>
 	</dl>

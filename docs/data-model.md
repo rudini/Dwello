@@ -115,6 +115,7 @@ apartment_id            UUID NOT NULL REFERENCES apartments ON DELETE CASCADE
 tenant_id               UUID NOT NULL REFERENCES tenants ON DELETE RESTRICT
 start_date              DATE NOT NULL           -- Vertragsbeginn
 end_date                DATE                    -- Vertragsende, NULL = unbefristet
+terminated              BOOLEAN NOT NULL DEFAULT FALSE -- end_date is the Kündigungstermin of an open-ended contract, not an agreed end
 base_rent               DECIMAL(10,2) NOT NULL  -- Nettomiete
 additional_rent         DECIMAL(10,2) DEFAULT 0 -- Zusatzmiete (garage, parking)
 monthly_advance_payment DECIMAL(10,2) NOT NULL  -- Akonto
@@ -122,6 +123,7 @@ reference_index         DECIMAL(6,4)            -- Referenzindex
 contract_pdf            TEXT
 notes                   TEXT
 CONSTRAINT contracts_dates_check CHECK (end_date IS NULL OR end_date >= start_date)
+CONSTRAINT contracts_terminated_check CHECK (NOT terminated OR end_date IS NOT NULL)
 ```
 
 Indexes: `contracts_apartment_id_idx`, `contracts_tenant_id_idx`, `contracts_end_date_idx (end_date)`,

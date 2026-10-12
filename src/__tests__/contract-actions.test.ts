@@ -42,7 +42,7 @@ describe('Mietvertrag beenden', () => {
 			{
 				method: 'PUT',
 				url: 'http://localhost:3001/api/v1/contracts/c1',
-				body: { endDate: '2099-12-31' }
+				body: { endDate: '2099-12-31', terminated: true }
 			}
 		]);
 	});
@@ -81,7 +81,7 @@ describe('Mietvertrag beenden', () => {
 			{
 				method: 'PUT',
 				url: 'http://localhost:3001/api/v1/contracts/c1',
-				body: { endDate: '2025-03-31' }
+				body: { endDate: '2025-03-31', terminated: true }
 			}
 		]);
 	});

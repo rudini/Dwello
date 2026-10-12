@@ -60,6 +60,7 @@ describe('initialContractValues', () => {
 			startDate: '2024-04-01',
 			endDate: '2026-03-31',
 			isUnlimited: false,
+			terminated: false,
 			baseRent: '950.00',
 			additionalRent: '',
 			advancePayment: '120.00'
@@ -120,6 +121,7 @@ describe('contractBody', () => {
 			apartmentId: 'a1',
 			startDate: '2025-01-01',
 			endDate: null,
+			terminated: false,
 			baseRent: '950',
 			additionalRent: '0',
 			monthlyAdvancePayment: '120'

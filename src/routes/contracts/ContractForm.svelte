@@ -178,6 +178,8 @@
 			bind:startDate={values.startDate}
 			bind:endDate={values.endDate}
 			bind:isUnlimited={values.isUnlimited}
+			bind:terminated={values.terminated}
+			noticed={contract.terminated}
 			min={startLimit.min}
 			today={pastBefore}
 			{overlap}

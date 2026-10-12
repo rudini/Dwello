@@ -6,7 +6,7 @@ Jede Anforderung nennt das Problem, was Dwello tun muss, wie wir es prüfen (Sze
 
 | ID | Anforderung | Priorität | Quelle |
 |---|---|---|---|
-| A-1 | Befristung und Kündigung unterscheiden | hoch | IF-4, Helga |
+| A-1 | Befristung und Kündigung unterscheiden | umgesetzt | IF-4, Helga |
 | A-2 | Vertragsende unter «Bearbeiten» prüfen | umgesetzt | IF-8, IF-3, Helga, Anna |
 | A-3 | Hinweis auf die Kündigungsfrist | mittel | IF-2 |
 | A-4 | Bevorstehendes Vertragsende sichtbar machen | mittel | IF-5, Anna, Helga |
@@ -14,7 +14,7 @@ Jede Anforderung nennt das Problem, was Dwello tun muss, wie wir es prüfen (Sze
 | A-6 | Stillschweigend fortgesetzter befristeter Mietvertrag | niedrig | IF-9 |
 | A-7 | Doppelt erfassten Mietvertrag entfernen | mittel | Anna (I2, M2) |
 | A-8 | Früheren Mietvertrag als Historie erkennbar machen | mittel | Anna (I2, M3) |
-| A-9 | «Noch nicht abgerechnet» nach den Mietverträgen der Periode | hoch | Helga (I3 M3, I4 M2) |
+| A-9 | «Noch nicht abgerechnet» nach den Mietverträgen der Periode | umgesetzt | Helga (I3 M3, I4 M2) |
 | A-10 | Abrechnung nach einem geänderten Vertragsende neu erstellen | mittel | Anna (I2 M1, I3 M1–M3) |
 | A-11 | Versendete Abrechnung korrigieren | mittel | Anna (I4 M1), Review I-6 |
 
@@ -22,7 +22,10 @@ Priorität: «hoch» heisst vor dem ersten echten Einsatz, weil sonst falsche Da
 
 ---
 
-## A-1 Befristung und Kündigung unterscheiden
+## A-1 Befristung und Kündigung unterscheiden – umgesetzt
+
+**Umgesetzt** (Session 15): Spalte `rental_contracts.terminated` (*gekündigt*; sonst *vereinbart*), «Mietvertrag beenden» setzt sie. Die Detailseite zeigt «Befristet bis …» oder «Unbefristet, gekündigt auf den …», die Listen (Mietverträge, Wohnung, Mieter) hängen «befristet» oder «gekündigt» an den Zeitraum. Unter «Bearbeiten» bietet die Vertragsdauer bei einem gekündigten Vertrag «Unbefristet, gekündigt auf den …», «Kündigung aufheben» («Der Mietvertrag läuft dann ohne Ende weiter.») und «Befristet» an. Offen bleiben Punkt 6 (Glossar, Product Owner) und die offene Frage zur Aufhebungsvereinbarung.
+
 
 **Problem.** Ein befristeter Mietvertrag endet am vereinbarten Tag ohne Kündigung. Ein unbefristeter endet erst durch eine Kündigung auf einen Kündigungstermin *(Glossar fehlt)*. Dwello speichert beides im selben Feld «Vertragsende». Nach «Beenden» zeigt der Assistent unter «Bearbeiten» einen gekündigten unbefristeten Vertrag als «Befristet: Der Mietvertrag endet an einem festen Tag, ohne Kündigung». Das ist rechtlich falsch, und wer «befristet» liest, prüft die Kündigung nicht mehr. Ausserdem passt die Definition im Glossar («leer bei unbefristeten Verträgen») nicht mehr.
 
@@ -245,7 +248,10 @@ Szenario: Früherer Mietvertrag auf der Wohnungsseite
 
 ---
 
-## A-9 «Noch nicht abgerechnet» nach den Mietverträgen der Periode
+## A-9 «Noch nicht abgerechnet» nach den Mietverträgen der Periode – umgesetzt
+
+**Umgesetzt** (Session 15): Die Übersicht liest alle Mietverträge und nennt jedes Gebäude, das in der letzten Periode einen Mietvertrag ohne Abrechnung hatte; die Erinnerung prüft pro Mietvertrag, nicht mehr pro Gebäude.
+
 
 **Problem.** Die Übersicht erinnert an eine nicht abgerechnete Periode eines Gebäudes nur, solange heute eine Wohnung vermietet ist (`missingPeriod` in `src/routes/dashboard/+page.server.ts` prüft die heutige Belegung). Helga (I3) beendete den letzten laufenden Vertrag eines Gebäudes rückwirkend: Die Erinnerung an die Abrechnung 2025 verschwand, obwohl der Mieter für 2025 noch eine Abrechnung bekommen muss. Das bestand schon vorher; mit einem Vertragsende in der Vergangenheit tritt es öfter auf. Folge: Der Mieter erhält keine Abrechnung über sein Akonto.
 

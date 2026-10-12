@@ -134,3 +134,17 @@ Funktionalität: Mietvertragsdetail
     Angenommen "Anna Keller" hat die Telefonnummer "+41 52 123 45 67"
     Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
     Dann kann der Liegenschaftsverwalter "Anna Keller" unter "+41 52 123 45 67" anrufen
+
+  Szenario: Gekündigter Mietvertrag bleibt unbefristet
+    Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
+    Wenn der Liegenschaftsverwalter den Mietvertrag auf den "2099-03-31" beendet
+    Dann zeigt der Mietvertrag "Unbefristet, gekündigt auf den 31.03.2099"
+    Wenn der Liegenschaftsverwalter den Mietvertrag bearbeiten will
+    Dann zeigt die Vertragsdauer "Unbefristet, gekündigt auf den 31.03.2099"
+
+  Szenario: Befristeter Mietvertrag
+    Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
+    Und der Mieter "Bruno Meier" existiert
+    Und "Bruno Meier" mietete die Wohnung "2.02" von "2024-01-01" bis "2099-12-31" für "900" Franken
+    Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Bruno Meier"
+    Dann zeigt der Mietvertrag "Befristet bis 31.12.2099"

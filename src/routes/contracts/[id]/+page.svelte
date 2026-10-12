@@ -111,6 +111,7 @@
 		<ContractTerms
 			startDate={contract.startDate}
 			endDate={contract.endDate}
+			terminated={contract.terminated}
 			{status}
 			rent={data.rentBreakdown}
 		/>

@@ -17,18 +17,19 @@ import { toasts } from '$lib/stores';
 import { byTestId, click, fakeBff, fireEvent, settle, show, submit } from './helpers/dom';
 import refused from '../../tests/contracts/contract-end-refused.json';
 
-const contract = (endDate: string | null = null) => ({
+const contract = (endDate: string | null = null, terminated = false) => ({
 	id: 'c1',
 	tenantId: 't1',
 	apartmentId: 'a1',
 	startDate: '2024-04-01',
 	endDate,
+	terminated,
 	baseRent: '950.00',
 	additionalRent: null,
 	monthlyAdvancePayment: '150.00'
 });
-const data = (endDate: string | null = null) => ({
-	contract: contract(endDate),
+const data = (endDate: string | null = null, terminated = false) => ({
+	contract: contract(endDate, terminated),
 	tenants: [{ id: 't1', name: 'Anna Keller' }],
 	apartments: [{ id: 'a1', unit: '2.01', building: 'Ahornhof', status: 'Vermietet' }]
 });
@@ -45,8 +46,8 @@ beforeEach(() => {
 	);
 });
 
-async function open(endDate: string | null = null) {
-	show(EditPage, { data: data(endDate) } as never);
+async function open(endDate: string | null = null, terminated = false) {
+	show(EditPage, { data: data(endDate, terminated) } as never);
 	await settle();
 }
 
@@ -193,6 +194,54 @@ describe('Mietvertrag bearbeiten', () => {
 			expect(byTestId('form-error')!.textContent).toContain(
 				'Die Nebenkostenabrechnung NK-2025-0003 (Entwurf) wurde mit den bisherigen Vertragsdaten berechnet. Löschen Sie zuerst den Entwurf und erstellen Sie die Nebenkostenabrechnung danach neu.'
 			);
+		});
+	});
+
+	// A-1: ein gekündigter Mietvertrag bleibt unbefristet, bis die Kündigung aufgehoben wird
+	describe('Gekündigter Mietvertrag', () => {
+		const duration = (value: string) =>
+			document.querySelector<HTMLInputElement>(`input[name="duration"][value="${value}"]`)!;
+
+		it('zeigt die Kündigung statt einer Befristung', async () => {
+			await open('2099-03-31', true);
+			expect(duration('terminated').checked).toBe(true);
+			expect(byTestId('contract-duration')!.textContent).toContain(
+				'Unbefristet, gekündigt auf den 31.03.2099'
+			);
+		});
+
+		it('bleibt beim Speichern gekündigt', async () => {
+			await open('2099-03-31', true);
+			type('contract-base-rent-input', '980');
+			await save();
+			expect(puts()[0].body).toMatchObject({ endDate: '2099-03-31', terminated: true });
+		});
+
+		it('hebt die Kündigung auf und nennt die Folge', async () => {
+			await open('2099-03-31', true);
+			expect(byTestId('contract-duration')!.textContent).toContain(
+				'Der Mietvertrag läuft dann ohne Ende weiter.'
+			);
+			click(duration('unlimited'));
+			await settle();
+			await save();
+			expect(puts()[0].body).toMatchObject({ endDate: null, terminated: false });
+		});
+
+		it('wird befristet, wenn der Liegenschaftsverwalter «Befristet» wählt', async () => {
+			await open('2099-03-31', true);
+			click(duration('limited'));
+			await settle();
+			await save();
+			expect(puts()[0].body).toMatchObject({ endDate: '2099-03-31', terminated: false });
+		});
+
+		it('bietet bei einem nicht gekündigten Mietvertrag keine Kündigung an', async () => {
+			await open('2099-03-31');
+			expect(document.querySelector('input[name="duration"][value="terminated"]')).toBeNull();
+			type('contract-base-rent-input', '980');
+			await save();
+			expect(puts()[0].body).toMatchObject({ terminated: false });
 		});
 	});
 });

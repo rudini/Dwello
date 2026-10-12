@@ -14,7 +14,8 @@ import {
 	nextButton,
 	saveStatus,
 	startDateInput,
-	tenantSelect
+	tenantSelect,
+	durationChoice
 } from '../interactions/contract-form';
 import { visit, visitWhileLoading } from '../interactions/navigation';
 import { createTenantByEmail } from './tenants';
@@ -109,6 +110,12 @@ export const saveEndDate = (isoDate: string, { confirmPast = false } = {}) => as
 	await limitedDuration(actor.page).click();
 	await typeDate(endDateInput(actor.page), isoDate);
 	if (confirmPast) await pastEndConfirm(actor.page).check();
+	await contractSubmitButton(actor.page).click();
+};
+
+// «Bearbeiten»: the contract runs on without end
+export const withdrawNotice = async (actor: Actor) => {
+	await durationChoice(actor.page, 'Kündigung aufheben').click();
 	await contractSubmitButton(actor.page).click();
 };
 

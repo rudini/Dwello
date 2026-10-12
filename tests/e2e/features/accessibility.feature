@@ -69,6 +69,7 @@ Funktionalität: Barrierefreiheit
       | contract-edit          | default             |
       | contract-edit          | submit-cleared      |
       | contract-edit          | past-end-error      |
+      | contract-edit-notice   | default             |
       | invoices               | default             |
       | invoices               | empty               |
       | invoices               | filtered-empty      |

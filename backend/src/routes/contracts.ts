@@ -34,6 +34,7 @@ const contractBodySchema = t.Object({
 	tenantId: t.String({ format: 'uuid' }),
 	startDate: t.String({ format: 'date' }),
 	endDate: t.Optional(t.Nullable(t.String({ format: 'date' }))),
+	terminated: t.Optional(t.Boolean()),
 	baseRent: t.String(),
 	additionalRent: t.Optional(t.Nullable(t.String())),
 	monthlyAdvancePayment: t.String(),
@@ -46,6 +47,7 @@ const contractUpdateSchema = t.Partial(
 	t.Object({
 		startDate: t.String({ format: 'date' }),
 		endDate: t.Optional(t.Nullable(t.String({ format: 'date' }))),
+		terminated: t.Boolean(),
 		baseRent: t.String(),
 		additionalRent: t.Optional(t.Nullable(t.String())),
 		monthlyAdvancePayment: t.String(),

@@ -50,6 +50,7 @@ export const load: PageServerLoad = async ({ params, fetch }): Promise<ContractD
 				tenantId: data.tenantId,
 				startDate: data.startDate,
 				endDate: data.endDate || null,
+				terminated: !!data.terminated,
 				baseRent: data.baseRent || '0',
 				additionalRent: data.additionalRent || null,
 				monthlyAdvancePayment: data.monthlyAdvancePayment || '0',
@@ -117,7 +118,7 @@ function endRefusal(
 }
 
 export const actions: Actions = {
-	// The last day of the tenancy, the Kündigungstermin; a past day only confirmed, never before a statement's end
+	// The last day of the tenancy, the Kündigungstermin of an open-ended contract; a past day only confirmed, never before a statement's end
 	end: async ({ params, fetch, request }) => {
 		const form = await request.formData();
 		const endDate = String(form.get('endDate') ?? '');
@@ -131,7 +132,7 @@ export const actions: Actions = {
 		const response = await fetch(url, {
 			method: 'PUT',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ endDate })
+			body: JSON.stringify({ endDate, terminated: true }) // ended by notice, A-1
 		});
 		// a stored statement already bills rent days after that day
 		const statements =

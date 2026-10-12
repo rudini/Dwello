@@ -29,10 +29,19 @@ export const statusBadges: Record<Status, { label: string; tone: Tone }> = {
 export function contractPeriod(
 	startDate: string,
 	endDate: string | null | undefined,
-	status: Status
+	status: Status,
+	terminated = false
 ) {
-	if (endDate) return `${formatDate(startDate)} – ${formatDate(endDate)}`;
+	if (endDate)
+		return `${formatDate(startDate)} – ${formatDate(endDate)}, ${terminated ? 'gekündigt' : 'befristet'}`;
 	return `${status === 'future' ? 'ab' : 'seit'} ${formatDate(startDate)}, unbefristet`;
+}
+
+/** The Vertragsende in words: agreed in a fixed-term contract, or the Kündigungstermin of an open-ended one */
+export function contractEnd(endDate: string | null | undefined, terminated = false) {
+	if (!endDate) return 'Unbefristet';
+	if (terminated) return `Unbefristet, gekündigt auf den ${formatDate(endDate)}`;
+	return `Befristet bis ${formatDate(endDate)}`;
 }
 
 /** A real day as YYYY-MM-DD: not 2025-13-01 or 2025-02-30 */

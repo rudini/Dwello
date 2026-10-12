@@ -227,6 +227,13 @@
 			]
 		},
 		{
+			"name": "contract-edit-notice",
+			"path": "/contracts/{noticedContract}/edit",
+			"states": [
+				"default"
+			]
+		},
+		{
 			"name": "invoices",
 			"path": "/invoices",
 			"states": [

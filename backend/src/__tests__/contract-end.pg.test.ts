@@ -154,3 +154,34 @@ describe('Mietvertrag, der in der Periode begann', () => {
 	});
 });
 
+
+// A-1: an end agreed in a fixed-term contract and a notice to an open-ended one are different things
+describe('Gekündigter Mietvertrag', () => {
+	let rental: Awaited<ReturnType<typeof createRental>>;
+	const put = (body: object) => sendJson('PUT', `/api/v1/contracts/${rental.contract}`, body);
+	const stored = async () => (await callApi(`/api/v1/contracts/${rental.contract}`)).json();
+
+	beforeAll(async () => {
+		rental = await createRental(crypto.randomUUID(), {
+			startDate: '2024-04-01',
+			endDate: '2099-12-31',
+			monthlyAdvancePayment: '100'
+		});
+	});
+
+	afterAll(() => rental.remove());
+
+	it('gilt mit vereinbartem Vertragsende als befristet', async () => {
+		expect(await stored()).toMatchObject({ endDate: '2099-12-31', terminated: false });
+	});
+
+	it('merkt sich die Kündigung', async () => {
+		expect((await put({ endDate: '2099-03-31', terminated: true })).status).toBe(200);
+		expect(await stored()).toMatchObject({ endDate: '2099-03-31', terminated: true });
+	});
+
+	it('ist nach dem Aufheben der Kündigung wieder unbefristet ohne Kündigung', async () => {
+		expect((await put({ endDate: null })).status).toBe(200);
+		expect(await stored()).toMatchObject({ endDate: null, terminated: false });
+	});
+});

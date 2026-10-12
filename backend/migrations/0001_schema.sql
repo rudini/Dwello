@@ -75,6 +75,8 @@ CREATE TABLE rental_contracts (
     tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE RESTRICT,
     start_date DATE NOT NULL,
     end_date DATE,
+    -- the end date is a Kündigungstermin of an open-ended contract, not an end agreed in a fixed-term one
+    terminated BOOLEAN NOT NULL DEFAULT FALSE,
     base_rent DECIMAL(10, 2) NOT NULL,
     additional_rent DECIMAL(10, 2) DEFAULT 0,
     monthly_advance_payment DECIMAL(10, 2) NOT NULL,
@@ -83,7 +85,8 @@ CREATE TABLE rental_contracts (
     notes TEXT,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    CONSTRAINT contracts_dates_check CHECK (end_date IS NULL OR end_date >= start_date)
+    CONSTRAINT contracts_dates_check CHECK (end_date IS NULL OR end_date >= start_date),
+    CONSTRAINT contracts_terminated_check CHECK (NOT terminated OR end_date IS NOT NULL)
 );
 
 CREATE INDEX contracts_apartment_id_idx ON rental_contracts(apartment_id);
