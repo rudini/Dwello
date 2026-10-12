@@ -59,7 +59,7 @@ Axe: `@axe-core/playwright`, tags `wcag2a, wcag2aa, wcag21a, wcag21aa, wcag22aa`
 
 ## Personas (from stage 4, after every stage with operable UI)
 
-One agent per persona operates the running app (dev stack with demo data, Playwright) without reading source code or the glossary, thinks aloud, takes screenshots, and reports: task completed (yes/partly/no), effort, confusion (incl. terms), error risks, improvement suggestions → `docs/design/personas/<persona>-<stage>.md`.
+One agent per persona operates the running app (dev stack with demo data, Playwright) without reading source code or the glossary, notes at each step what it expected and what it saw, takes screenshots, and reports: task completed (yes/partly/no), effort, confusion (incl. terms), error risks, improvement suggestions → `docs/design/personas/<persona>-<stage>.md`.
 
 1. Helga, 68, heir of an apartment, little computer experience, large font, unsure about terms. Task: create the first tenant and a rental contract.
 2. Marco, 38, smartphone, little time. Task: create the utility bill (Nebenkostenabrechnung) for the previous year, mobile viewport.
@@ -77,6 +77,7 @@ If blocked: note it in `offene-punkte.md`, continue with the next stage. Do not 
 
 ## Persona runs: how
 
+- The subagent `persona` (`.claude/agents/persona.md`) runs one persona; the reviews after the redesign follow `CLAUDE.md`, Workflow steps 4 to 7.
 - Start the app for personas with `docs/design/tools/persona-stack.sh` (fresh database `dwello_persona` with the demo data, backend on 3301, production build on 3300; `--no-build` reuses the last build).
 - Personas drive a signed-in Chromium through `docs/design/tools/persona-kit.mjs` (`open({ viewport, zoom })`, `shot`, `readOut` for the accessibility tree); copy it to a scratch directory if the session's scratchpad differs. They write their scripts outside the repository and only their report (plus at most 6 screenshots) into `docs/design/personas/`.
-- Persona prompt essentials: character, task, "operate only like a user, no source code, docs, tests or glossary", report structure (completed yes/partly/no, effort, thinking aloud, confusion incl. terms, error risks, suggestions marked Blocker/Major/Minor).
+- Persona prompt essentials: character, task, "operate only like a user, no source code, docs, tests or glossary", report structure (completed yes/partly/no, effort, expected vs. seen per step, confusion incl. terms, error risks, suggestions marked Blocker/Major/Minor).

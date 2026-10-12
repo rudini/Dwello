@@ -46,16 +46,26 @@ PostgreSQL on localhost:5432 (user and password `dwello`) is required for backen
 - **Tokens are mandatory:** only the token classes from `docs/design/token-referenz.md` (`bg-surface`, `text-ink`, `border-line-strong`, `rounded-control`, `shadow-raised`, 8 px grid …) and the components in `src/lib/ui`. No raw colours, no arbitrary values (`w-[…]`), no `text-xs`, no other radii or shadows; dark mode comes from the tokens. `src/__tests__/design-guard.test.ts` and `tokens.test.ts` enforce this.
 - **Screens:** one primary action per screen, at most two navigation levels, controls at least 48 px high, labels above fields, list rows whose whole area is one link named by the record, no sideways scrolling at 390 px. Irreversible actions confirm with their real consequence.
 - **Anti-patterns:** gradients, glow, blur/glassmorphism, emoji as icons, shadow cards everywhere, decoration without function, external fonts or icon fonts, lorem ipsum, colour as the only carrier of information.
-- **Process:** every UI change goes through `/tdd` (a failing test first) and `/ponytail`; new screens or states go into `tests/a11y/screens.json`, `accessibility.feature` and `sprachen-bildschirme.feature` (no German in fr/it/en) (axe, light and dark, desktop, tablet and mobile, 0 violations, no rule exceptions); changes get an independent review. Decisions and history: `docs/design/design-decisions.md`, `docs/design/progress.md`.
+- **Process:** every UI change goes through `/tdd` (a failing test first) and `/ponytail`; new screens or states go into `tests/a11y/screens.json`, `accessibility.feature` and `sprachen-bildschirme.feature` (no German in fr/it/en) (axe, light and dark, desktop, tablet and mobile, 0 violations, no rule exceptions); reviews as in "Workflow", steps 4 to 7. Decisions and history: `docs/design/design-decisions.md`, `docs/design/progress.md`.
 
 ## Workflow
 
 1. **Acceptance test first (ATDD):** every feature or behavior change starts with a German scenario in `tests/e2e/features/*.feature`, tagged `@wip` (excluded from runs). Watch it fail for the right reason.
+   If the change touches domain rules, amounts, PDFs or domain terms: before implementing, subagent `fach-reviewer` checks the scenario against `UBIQUITOUS_LANGUAGE.md`, `docs/nebenkostenabrechnung-anforderungen.md`, `docs/anforderungen-vertragsende.md` and the law on Fedlex (quoted verbatim). Fix findings first.
 2. **`/tdd`:** drive the implementation red-green, one behavior at a time, through public interfaces. A test must fail before the code changes. Every bug fix gets a test that reproduces it first, at the lowest layer that can show it (unit, `*.pg.test.ts` or scenario).
 3. **`/ponytail`:** keep the shortest diff that works; check the finished change against it.
    **Deep modules:** after each implementation step run `bun run deepcheck:audit` (silent when clean) and fix its findings before continuing; run `bun run deepcheck:scan` only when a codebase-wide review is requested (`tools/deepcheck/README.md`).
-4. **Done:** remove `@wip` once the scenario is green. A feature is done when its scenario passes, not when unit tests pass.
-5. **Plan:** log the task in `implementation_plan.md` (check the items, note the files changed). The file is long: read only its latest `## Session` section (`grep -n '^## Session' implementation_plan.md`) and add new work there. The phase table at the top is no longer maintained.
+4. **Slice review:** after each slice (a green scenario or a coherent group of behaviors), once the checks in step 3 are clean, run subagent `code-reviewer` (fresh context: requirement + diff only). Triage its findings (step 6). Continue only when no Blocker/Major is open.
+5. **Feature review:** when the scenario is green, run in parallel, only where it applies:
+   - UI changed: subagent `persona`, once per affected persona from `docs/design/arbeitsregeln.md`.
+   - Domain rules or terms changed: `fach-reviewer`.
+   - Amounts, statements, PDFs or QR-bills changed: `daten-pruefer` recomputes every affected demo record from the database with its own script, to the Rappen, and decodes the QR codes.
+   Each marks what it could not confirm and where it looked.
+6. **Findings:** every reviewer reports severity (Blocker / Major / Minor / Nit) plus evidence (file:line or reproduction steps). Full report in `docs/reviews/<slice>-<reviewer>-<n>.md` (personas: `docs/design/personas/<persona>-<slice>.md`); the latest `## Session` of `implementation_plan.md` lists only ID, severity, status (open / fixed / rejected with reason) and the report path. Check a finding's evidence before acting on it; reject it with a reason when it does not hold. A fix that changes behavior gets a failing test first. Re-review only the delta and the open findings.
+7. **Done:** remove `@wip` once the scenario is green. A feature is done when its scenario passes, not when unit tests pass, and when no Blocker/Major from `code-reviewer`, personas, `fach-reviewer` or `daten-pruefer` is open. Minors/Nits are listed under "Open" in the session. After 3 review rounds with open Blocker/Major: stop, summarize the open findings, ask me.
+8. **Plan:** log the task in `implementation_plan.md` (check the items, note the files changed). The file is long: read only its latest `## Session` section (`grep -n '^## Session' implementation_plan.md`) and add new work there. The phase table at the top is no longer maintained.
+
+Keep going without asking while no input is needed. Ask only when blocked, or before anything destructive (deleting data, force-push, changes outside this repo).
 
 Before marking anything complete, all of these pass: `bun run test:coverage`, `bun run lint`, `bun run check`, `cd backend && bun run test && bun run type-check`, and the affected E2E scenarios.
 

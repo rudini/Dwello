@@ -4871,6 +4871,16 @@ header and on pages without it. Branch `claude/optimistic-clarke-nn8u7t` from `m
   contract sample is checked with an end and a notice (J2-3); docs name the open points (J2-4, J2-5); comments moved
   (J2-6).
 
+## Session 17 - October 2026: Review agents in the workflow
+
+### Done ✅
+- [x] **Review agents**: `CLAUDE.md` "Workflow" gets a domain check of the scenario before implementing (step 1),
+  a code review per slice (step 4), a feature review by personas, domain and data reviewers (step 5), rules for
+  findings (step 6), done and the stop after 3 rounds (step 7), and a keep-going rule. Subagents in `.claude/agents/`:
+  `fach-reviewer.md` (Verwalter, Mietrecht, Fedlex quoted verbatim), `daten-pruefer.md` (own script against the
+  database, to the Rappen, QR codes decoded), `code-reviewer.md`, `persona.md`. `docs/design/arbeitsregeln.md`
+  points to them; personas note "expected vs. seen" instead of thinking aloud.
+
 ---
 
 # Success Criteria
