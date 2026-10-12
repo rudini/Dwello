@@ -1,0 +1,16 @@
+{
+	"buildingId": "11111111-1111-1111-1111-111111111111",
+	"comparedWith": { "start": "2024-01-01", "end": "2024-12-31" },
+	"hasComparison": true,
+	"findings": [
+		{
+			"categoryId": "c0000000-0000-4000-8000-000000000001",
+			"categoryName": "Hauswart",
+			"kind": "deviation",
+			"current": { "count": 1, "total": 1500 },
+			"previous": { "count": 1, "total": 1000 },
+			"missingParts": [],
+			"changePercent": 50
+		}
+	]
+}

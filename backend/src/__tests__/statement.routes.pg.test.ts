@@ -63,6 +63,14 @@ const json = (method: string, body: object) => ({
 const generatePdf = () => call(`/${statementId}/generate-pdf`, json('POST', {}));
 const pdfGeneratedAt = async () => ((await call(`/${statementId}`)) as { pdfGeneratedAt: string | null }).pdfGeneratedAt;
 
+describe('PUT /api/v1/statements/:id', () => {
+	it('lehnt eine leere Zahlungsfrist ab, bevor sie die Datenbank erreicht', async () => {
+		const response = await callApi(`/api/v1/statements/${statementId}`, json('PUT', { paymentDeadline: '' }));
+
+		expect(response.status).toBe(422);
+	});
+});
+
 describe('POST /api/v1/statements/:id/generate-pdf', () => {
 	it('hält fest, wann das PDF erstellt wurde, damit Liste und Detail es zum Herunterladen anbieten', () =>
 		withIban(async () => {

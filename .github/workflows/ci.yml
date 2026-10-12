@@ -43,13 +43,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: npm
       - uses: oven-sh/setup-bun@v2
-      - run: npm ci
+      - run: bun install --frozen-lockfile
       - run: bun install --frozen-lockfile
         working-directory: backend
       - name: Build frontend
-        run: npm run build
+        run: bun run build
       - name: Build backend
         run: bun run build
         working-directory: backend
@@ -62,14 +61,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: npm
       - uses: oven-sh/setup-bun@v2
-      - run: npm ci
+      - run: bun install --frozen-lockfile
       - run: bun install --frozen-lockfile
         working-directory: backend
       # ESLint covers frontend and backend; svelte-check the frontend types, tsc the backend types
-      - run: npm run lint
-      - run: npm run check
+      - run: bun run lint
+      - run: bun run check
       - run: bun run type-check
         working-directory: backend
 
@@ -96,14 +94,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: npm
       - uses: oven-sh/setup-bun@v2
-      - run: npm ci
+      - run: bun install --frozen-lockfile
       - run: bun install --frozen-lockfile
         working-directory: backend
       - name: Frontend unit tests
         # All tests, so the coverage thresholds in vitest.config.ts apply to the whole frontend
-        run: npm run test:coverage
+        run: bun run test:coverage
       - name: Backend unit tests
         if: ${{ !cancelled() && needs.changes.outputs.backend == 'true' }}
         run: bun run test
@@ -145,16 +142,15 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: npm
       - uses: oven-sh/setup-bun@v2
-      - run: npm ci
+      - run: bun install --frozen-lockfile
       - run: bun install --frozen-lockfile
         working-directory: backend
       # Pull requests: Chromium and the API driver only; pushes to main: every browser and the API driver
       - name: Install Playwright browsers
-        run: npx playwright install --with-deps ${{ (github.event_name == 'pull_request' || matrix.reports == 'a11y-reports') && 'chromium' || '' }}
+        run: bunx playwright install --with-deps ${{ (github.event_name == 'pull_request' || matrix.reports == 'a11y-reports') && 'chromium' || '' }}
       - name: ${{ matrix.name }}
-        run: npm run test:e2e -- ${{ matrix.filter }} ${{ github.event_name == 'pull_request' && matrix.reports == 'e2e-reports' && '--project=chromium --project=api' || '' }}
+        run: bun run test:e2e -- ${{ matrix.filter }} ${{ github.event_name == 'pull_request' && matrix.reports == 'e2e-reports' && '--project=chromium --project=api' || '' }}
       - name: Upload reports
         if: ${{ failure() }}
         uses: actions/upload-artifact@v4
@@ -176,11 +172,32 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-      - run: npm ci
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      # tsconfig.json extends .svelte-kit/tsconfig.json: without it Fallow cannot resolve $lib imports
+      - run: bunx svelte-kit sync
       - name: Fallow audit
         # Pull requests: changes against the target branch; pushes: changes of the pushed commits
-        run: npx fallow audit --base "${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || github.event.before }}"
+        run: bunx fallow audit --base "${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || github.event.before }}"
+
+  # New or worsened shallow modules in the changed code (tools/deepcheck), with annotations and a step summary
+  deepcheck:
+    name: Deep modules
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      # $lib comes from .svelte-kit/tsconfig.json; without it the import graph misses most imports
+      - run: bunx svelte-kit sync
+      - name: Deep-module gate
+        run: bun run deepcheck:ci -- "origin/${{ github.base_ref }}"
 
   ui-screenshots:
     name: UI screenshots
@@ -217,27 +234,37 @@ jobs:
           git diff --name-only "origin/${{ github.base_ref }}...HEAD" | bun tests/ui-screenshots/affected-routes.ts > ui-routes.txt
           cat ui-routes.txt
           echo "any=$(grep -q . ui-routes.txt && echo true || echo false)" >> "$GITHUB_OUTPUT"
+          echo "pages=$(grep -q '^/' ui-routes.txt && echo true || echo false)" >> "$GITHUB_OUTPUT"
+          echo "pdf=$(grep -qx pdf ui-routes.txt && echo true || echo false)" >> "$GITHUB_OUTPUT"
       - uses: actions/setup-node@v4
         if: steps.routes.outputs.any == 'true'
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: npm
       - if: steps.routes.outputs.any == 'true'
-        run: npm ci
+        run: bun install --frozen-lockfile
       - if: steps.routes.outputs.any == 'true'
         run: bun install --frozen-lockfile
         working-directory: backend
       - name: Install Playwright browser
         if: steps.routes.outputs.any == 'true'
-        run: npx playwright install --with-deps chromium
+        run: bunx playwright install --with-deps chromium
       - name: Check out the base branch to mark changes against
         if: steps.routes.outputs.any == 'true'
         run: |
           git worktree add ../base "origin/${{ github.base_ref }}"
-          cd ../base && npm ci
+          cd ../base && bun install --frozen-lockfile
       - name: Take screenshots
-        if: steps.routes.outputs.any == 'true'
-        run: npx playwright test -c playwright.screenshots.config.ts
+        if: steps.routes.outputs.pages == 'true'
+        run: bunx playwright test -c playwright.screenshots.config.ts
+        env:
+          UI_BASE_DIR: ${{ github.workspace }}/../base
+      # The statement PDF is drawn by the backend: a fixed example in German and French, against the base branch's code
+      - name: Take screenshots of the statement PDF
+        if: steps.routes.outputs.pdf == 'true'
+        run: |
+          sudo apt-get update -q && sudo apt-get install -y --no-install-recommends poppler-utils
+          (cd ../base/backend && bun install --frozen-lockfile)
+          bun tests/ui-screenshots/statement-pdf.ts
         env:
           UI_BASE_DIR: ${{ github.workspace }}/../base
       - name: Publish screenshots to branch ui-screenshots
@@ -247,6 +274,8 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # every affected page looks as on the base branch: nothing to publish
+          ls ui-screenshots/*.png >/dev/null 2>&1 || exit 0
           if git fetch origin ui-screenshots; then git worktree add -B ui-screenshots ../shots FETCH_HEAD; else git worktree add --orphan -b ui-screenshots ../shots; fi
           mkdir -p "../shots/$DIR" && cp ui-screenshots/*.png "../shots/$DIR/"
           cd ../shots && git add . && git commit -m "chore(ci): screenshots for $DIR"
@@ -260,14 +289,37 @@ jobs:
             const pr = context.payload.pull_request;
             const base = `https://github.com/${context.repo.owner}/${context.repo.repo}/blob/ui-screenshots/pr-${pr.number}/${pr.head.sha}`;
             const marker = '<!-- ui-screenshots -->';
-            const shots = fs.readFileSync('ui-routes.txt', 'utf8').split('\n').filter(Boolean).map((route) => {
-              const name = route.split(/[/[\]]+/).filter(Boolean).join('_') || 'home';
+            const shot = (title, name) => {
               const before = fs.existsSync(`ui-screenshots/${name}.before.png`)
-                ? `\n<details><summary>Before</summary>\n\n![${route} before](${base}/${name}.before.png?raw=true)\n</details>`
+                ? `\n<details><summary>Before</summary>\n\n![${title} before](${base}/${name}.before.png?raw=true)\n</details>`
                 : '\n_New page, nothing to compare with._';
-              return `### \`${route}\`\n![${route}](${base}/${name}.png?raw=true)${before}`;
+              return `### ${title}\n![${title}](${base}/${name}.png?raw=true)${before}`;
+            };
+            // the statement PDF (statement-pdf.ts): pdf_<language>_<page>.png
+            const pdfPages = fs.readdirSync('ui-screenshots').filter((file) => /^pdf_\w+_\d+\.png$/.test(file)).sort();
+            // PDF pages that look the same (statement-pdf.ts): pdf_<language>_<page>
+            const samePdfPages = fs.existsSync('ui-screenshots/unchanged.txt')
+              ? fs.readFileSync('ui-screenshots/unchanged.txt', 'utf8').split('\n').filter(Boolean).sort()
+              : [];
+            const pdfTitle = (name) => {
+              const [, language, page] = name.match(/^pdf_(\w+)_(\d+)/);
+              return `Statement PDF (${language}), page ${page}`;
+            };
+            // a page that looks the same as on the base branch has no screenshot (looksTheSame)
+            const unchanged = [];
+            const shots = fs.readFileSync('ui-routes.txt', 'utf8').split('\n').filter(Boolean).flatMap((route) => {
+              if (route === 'pdf') {
+                unchanged.push(...samePdfPages.map(pdfTitle));
+                return pdfPages.map((file) => shot(pdfTitle(file), file.replace('.png', '')));
+              }
+              const name = route.split(/[/[\]]+/).filter(Boolean).join('_') || 'home';
+              if (!fs.existsSync(`ui-screenshots/${name}.png`)) return (unchanged.push(`\`${route}\``), []);
+              return [shot(`\`${route}\``, name)];
             });
-            const body = `${marker}\n## UI screenshots\nChanged pages as of ${pr.head.sha.slice(0, 7)}; changes against ${pr.base.ref} are framed in red:\n\n${shots.join('\n\n')}`;
+            const same = unchanged.length ? `\n\nLook the same as on ${pr.base.ref}: ${unchanged.join(', ')}.` : '';
+            const body = shots.length
+              ? `${marker}\n## UI screenshots\nChanged pages as of ${pr.head.sha.slice(0, 7)}; changes against ${pr.base.ref} are framed in red:\n\n${shots.join('\n\n')}${same}`
+              : `${marker}\n## UI screenshots\nNo visible changes as of ${pr.head.sha.slice(0, 7)}.${same}`;
             const comments = await github.paginate(github.rest.issues.listComments, { ...context.repo, issue_number: pr.number });
             const existing = comments.find((comment) => comment.body?.startsWith(marker));
             if (existing) await github.rest.issues.updateComment({ ...context.repo, comment_id: existing.id, body });

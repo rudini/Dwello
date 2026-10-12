@@ -14,6 +14,7 @@
 		optional = false,
 		placeholder,
 		autocomplete,
+		inputmode,
 		min,
 		max,
 		disabled = false,
@@ -24,13 +25,14 @@
 		label: string;
 		value?: string;
 		name?: string;
-		type?: 'text' | 'email' | 'tel' | 'date' | 'number' | 'url';
+		type?: 'text' | 'email' | 'tel' | 'number' | 'url'; // dates: DateInput
 		help?: string;
 		example?: string;
 		error?: string;
 		optional?: boolean;
 		placeholder?: string;
 		autocomplete?: HTMLInputElement['autocomplete'];
+		inputmode?: 'decimal' | 'numeric';
 		min?: string;
 		max?: string;
 		disabled?: boolean;
@@ -48,6 +50,7 @@
 			bind:value
 			{placeholder}
 			{autocomplete}
+			{inputmode}
 			{min}
 			{max}
 			{disabled}

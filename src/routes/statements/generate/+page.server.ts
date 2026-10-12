@@ -1,7 +1,6 @@
 import { fail } from '@sveltejs/kit';
 import type { Building } from '$lib/types';
 import { toHeatingProfile } from '$lib/server/heating-profile';
-import { toDistributionKey } from '$lib/server/distribution-key';
 import {
 	generateStatements,
 	invoicesInPeriod,
@@ -21,10 +20,9 @@ async function json(fetch: typeof globalThis.fetch, path: string): Promise<Row> 
 }
 
 export const load = async ({ fetch }: { fetch: typeof globalThis.fetch }) => {
-	const [buildings, heatingProfiles, distributionKeys, config] = await Promise.all([
+	const [buildings, heatingProfiles, config] = await Promise.all([
 		json(fetch, 'buildings?limit=100'),
 		json(fetch, 'heating-profiles?limit=100'),
-		json(fetch, 'distribution-keys?limit=100'),
 		json(fetch, 'config')
 	]);
 	const settings = (config.data ?? {}) as Record<string, string | null>;
@@ -33,7 +31,6 @@ export const load = async ({ fetch }: { fetch: typeof globalThis.fetch }) => {
 	return {
 		buildings: (buildings.buildings ?? []) as (Building & { apartmentCount: number })[],
 		heatingProfiles: ((heatingProfiles.data ?? []) as Row[]).map(toHeatingProfile),
-		distributionKeys: ((distributionKeys.data ?? []) as Row[]).map(toDistributionKey),
 		defaultManagementFeePercent: Number(settings.management_fee_pct ?? 3),
 		defaultPeriod: lastCompletedPeriod(
 			(settings.accounting_period ?? 'calendar') as AccountingPeriodType
@@ -47,8 +44,7 @@ const generationRequest = (formData: FormData): GenerationRequest => ({
 	periodStart: String(formData.get('periodStart')),
 	periodEnd: String(formData.get('periodEnd')),
 	heatingProfileId: String(formData.get('heatingProfileId')),
-	managementFeePercent: Number(formData.get('managementFeePercent')),
-	managementFeeDistributionKeyId: String(formData.get('managementFeeDistributionKeyId') ?? '')
+	managementFeePercent: Number(formData.get('managementFeePercent'))
 });
 
 const failed = (err: unknown) =>

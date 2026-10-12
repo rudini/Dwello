@@ -39,7 +39,7 @@ Funktionalität: Mietvertragsliste
     Und "Bruno Meier" mietet die Wohnung "2.02" seit "2099-11-01" für "900" Franken
     Wenn der Liegenschaftsverwalter nach dem Mieter "Bruno Meier" sucht
     Dann sieht der Liegenschaftsverwalter den Mietvertrag von "Bruno Meier" mit dem Status "Künftig"
-    Und beginnt der Mietvertrag von "Bruno Meier" laut Liste am "1.11.2099"
+    Und beginnt der Mietvertrag von "Bruno Meier" laut Liste am "01.11.2099"
 
   Szenario: Nettomiete und monatliches Total getrennt
     Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"

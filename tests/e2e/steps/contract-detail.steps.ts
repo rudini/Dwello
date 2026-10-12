@@ -69,9 +69,9 @@ Then('hat der Mietvertrag den Status {string}', async ({ verwalter }, status: st
 	await expect(statusOfContract(verwalter)).toHaveText(status);
 });
 
-// The end action sets today's date as the server sees it (UTC); the page shows it as formatDate does
+// The end action sets today's date in Switzerland; the page shows it as formatDate does
 Then('endet der Mietvertrag heute', async ({ verwalter }) => {
-	const today = new Date(new Date().toISOString().split('T')[0]).toLocaleDateString('de-CH');
+	const today = new Date().toLocaleDateString('de-CH', { timeZone: 'Europe/Zurich' });
 	await expect(endOfContract(verwalter)).toHaveText(today);
 });
 

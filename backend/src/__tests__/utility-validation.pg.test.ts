@@ -6,11 +6,7 @@ import { beforeAll, describe, it, expect } from 'bun:test';
 import { eq } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { categories } from '../db/schema';
-import {
-	isAllowedUtilityCost,
-	validateInvoiceForUtilityStatement,
-	validateInvoicesForStatement
-} from '../services/utility-validation.service';
+import { validateInvoiceForUtilityStatement } from '../services/utility-validation.service';
 
 // Predefined categories (migrations): caretaker costs may be passed on to tenants, repairs may not
 let allowed: string;
@@ -26,23 +22,17 @@ beforeAll(async () => {
 });
 
 describe('Utility Validation Service - Async Functions', () => {
-	describe('isAllowedUtilityCost', () => {
-		it('should return false when category not found', async () => {
-			const result = await isAllowedUtilityCost(unknown);
+	describe('Kategorie der Rechnung', () => {
+		it('lehnt eine Rechnung mit unbekannter Kategorie als nicht umlagefähig ab', async () => {
+			const result = await validateInvoiceForUtilityStatement({
+				categoryId: unknown,
+				amount: 100,
+				isValidUtilityCost: true,
+				description: 'Test invoice'
+			});
 
-			expect(result).toBe(false);
-		});
-
-		it('should return true when category allows utility costs', async () => {
-			const result = await isAllowedUtilityCost(allowed);
-
-			expect(result).toBe(true);
-		});
-
-		it('should return false when category does not allow utility costs', async () => {
-			const result = await isAllowedUtilityCost(notAllowed);
-
-			expect(result).toBe(false);
+			expect(result.isValid).toBe(false);
+			expect(result.errors.some((e) => e.includes('nicht umlagefähig'))).toBe(true);
 		});
 	});
 
@@ -196,153 +186,4 @@ describe('Utility Validation Service - Async Functions', () => {
 		});
 	});
 
-	describe('validateInvoicesForStatement', () => {
-		it('should return empty arrays for no invoices', async () => {
-			const result = await validateInvoicesForStatement([]);
-
-			expect(result.validInvoices).toHaveLength(0);
-			expect(result.invalidInvoices).toHaveLength(0);
-			expect(result.warnings).toHaveLength(0);
-			expect(result.totalValidAmount).toBe(0);
-		});
-
-		it('should separate valid and invalid invoices', async () => {
-			const invoices = [
-				{
-					id: 'inv-1',
-					categoryId: allowed,
-					amount: 100,
-					isValidUtilityCost: true,
-					description: 'Valid invoice'
-				},
-				{
-					id: 'inv-2',
-					categoryId: allowed,
-					amount: 200,
-					isValidUtilityCost: false, // Invalid
-					description: 'Invalid invoice'
-				}
-			];
-
-			const result = await validateInvoicesForStatement(invoices);
-
-			expect(result.validInvoices).toContain('inv-1');
-			expect(result.invalidInvoices.some((i) => i.id === 'inv-2')).toBe(true);
-		});
-
-		it('should calculate total valid amount', async () => {
-			const invoices = [
-				{
-					id: 'inv-1',
-					categoryId: allowed,
-					amount: 100,
-					isValidUtilityCost: true,
-					description: 'Invoice 1'
-				},
-				{
-					id: 'inv-2',
-					categoryId: allowed,
-					amount: 250.5,
-					isValidUtilityCost: true,
-					description: 'Invoice 2'
-				}
-			];
-
-			const result = await validateInvoicesForStatement(invoices);
-
-			expect(result.totalValidAmount).toBe(350.5);
-		});
-
-		it('should handle string amounts', async () => {
-			const invoices = [
-				{
-					id: 'inv-1',
-					categoryId: allowed,
-					amount: '100.25',
-					isValidUtilityCost: true,
-					description: 'Invoice 1'
-				}
-			];
-
-			const result = await validateInvoicesForStatement(invoices);
-
-			expect(result.totalValidAmount).toBe(100.25);
-		});
-
-		it('should collect warnings from all invoices', async () => {
-			const invoices = [
-				{
-					id: 'inv-1',
-					categoryId: allowed,
-					amount: 100,
-					isValidUtilityCost: true,
-					description: 'Reparatur invoice'
-				},
-				{
-					id: 'inv-2',
-					categoryId: allowed,
-					amount: 200,
-					isValidUtilityCost: true,
-					description: 'Renovation invoice'
-				}
-			];
-
-			const result = await validateInvoicesForStatement(invoices);
-
-			expect(result.warnings.length).toBe(2);
-			expect(result.warnings.some((w) => w.id === 'inv-1')).toBe(true);
-			expect(result.warnings.some((w) => w.id === 'inv-2')).toBe(true);
-		});
-
-		it('should include error details for invalid invoices', async () => {
-			const invoices = [
-				{
-					id: 'inv-1',
-					categoryId: unknown,
-					amount: 100,
-					isValidUtilityCost: true,
-					description: 'Invoice'
-				}
-			];
-
-			const result = await validateInvoicesForStatement(invoices);
-
-			expect(result.invalidInvoices).toHaveLength(1);
-			expect(result.invalidInvoices[0].errors.length).toBeGreaterThan(0);
-		});
-
-		it('should handle mixed valid, invalid, and warning invoices', async () => {
-			const invoices = [
-				{
-					id: 'inv-1',
-					categoryId: allowed,
-					amount: 100,
-					isValidUtilityCost: true,
-					description: 'Valid invoice'
-				},
-				{
-					id: 'inv-2',
-					categoryId: notAllowed,
-					amount: 200,
-					isValidUtilityCost: true,
-					description: 'Invalid category'
-				},
-				{
-					id: 'inv-3',
-					categoryId: allowed,
-					amount: 300,
-					isValidUtilityCost: true,
-					description: 'Reparatur warning'
-				}
-			];
-
-			const result = await validateInvoicesForStatement(invoices);
-
-			expect(result.validInvoices).toContain('inv-1');
-			expect(result.validInvoices).toContain('inv-3');
-			expect(result.invalidInvoices.some((i) => i.id === 'inv-2')).toBe(true);
-			expect(result.warnings.some((w) => w.id === 'inv-3')).toBe(true);
-			expect(result.totalValidAmount).toBe(400); // inv-1 + inv-3
-		});
-	});
 });

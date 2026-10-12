@@ -97,6 +97,16 @@ describe('Einstellungen speichern', () => {
 		]);
 	});
 
+	// Wie getippt: mit Komma, gespeichert mit Punkt; mehr als zwei Nachkommastellen werden nicht still gerundet
+	it('nimmt die Verwaltungspauschale mit Komma an', async () => {
+		const { calls, result } = runAction(actions.default, '', 200, { ...valid, managementFeePercent: '2,5' });
+
+		expect(await result).toEqual({ saved: true });
+		expect(calls[0].body).toMatchObject({ management_fee_pct: '2.5' });
+		const rounded = runAction(actions.default, '', 200, { ...valid, managementFeePercent: '2,555' });
+		expect(await rounded.result).toMatchObject({ status: 400 });
+	});
+
 	it('prüft PLZ, IBAN und Verwaltungspauschale', async () => {
 		const { calls, result } = runAction(actions.default, '', 200, {
 			...valid,
@@ -111,7 +121,7 @@ describe('Einstellungen speichern', () => {
 				errors: {
 					companyPostalCode: 'PLZ muss 4 Ziffern haben',
 					iban: 'Bitte geben Sie eine gültige Schweizer IBAN ein',
-					managementFeePercent: 'Die Verwaltungspauschale darf nicht negativ sein'
+					managementFeePercent: 'Bitte geben Sie einen Prozentsatz ab 0 mit höchstens zwei Stellen nach dem Komma ein, zum Beispiel 3 oder 2,5.'
 				}
 			}
 		});

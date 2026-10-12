@@ -59,6 +59,39 @@ describe('calculateApartmentProrating', () => {
 	});
 });
 
+describe('calculateApartmentProrating (Periode über den Jahreswechsel)', () => {
+	it('zählt die Tage vor dem ersten Mietvertrag als Leerstand und nur die Tage in der Periode', async () => {
+		const result = await calculateApartmentProrating(
+			rental.apartment,
+			new Date('2023-07-01'),
+			new Date('2024-03-31')
+		);
+
+		expect(result.totalPeriodDays).toBe(275);
+		expect(result.contracts.map((c) => [c.contract.id, c.overlapDays])).toEqual([[rental.contract, 91]]);
+		expect(result.vacancy.vacantPeriods).toEqual([
+			{ start: new Date('2023-07-01'), end: new Date('2023-12-31') }
+		]);
+		expect(result.vacancy.totalVacantDays).toBe(184);
+	});
+});
+
+describe('calculateApartmentProrating (Auszug ohne Nachmieter in der Periode)', () => {
+	it('weist die Tage nach dem Auszug bis zum Periodenende als Leerstand aus', async () => {
+		const result = await calculateApartmentProrating(
+			rental.apartment,
+			new Date('2024-01-01'),
+			new Date('2024-07-15')
+		);
+
+		expect(result.contracts.map((c) => [c.contract.id, c.overlapDays])).toEqual([[rental.contract, 182]]);
+		expect(result.vacancy.vacantPeriods).toEqual([
+			{ start: new Date('2024-07-01'), end: new Date('2024-07-15') }
+		]);
+		expect(result.vacancy.totalVacantDays).toBe(15);
+	});
+});
+
 describe('handleMidYearMoves', () => {
 	it('verteilt die Heizkosten nach dem Heizprofil statt nach Tagen', async () => {
 		const mittelland = (await getHeatingProfileByName('Heating Mittelland'))!;
@@ -72,8 +105,8 @@ describe('handleMidYearMoves', () => {
 			10000
 		);
 
-		// Januar bis Juni im Mittelland: 28 + 14 + 11 + 5 + 0 + 0 = 58 % der Heizkosten
-		expect(result.share).toBeCloseTo(5800);
+		// Januar bis Juni im Mittelland: 17.5 + 14.5 + 13.5 + 9.5 + 3.5 + 0 = 58.5 % der Heizkosten
+		expect(result.share).toBeCloseTo(5850);
 	});
 
 	it('teilt nach Tagen, wenn das Heizprofil nicht existiert', async () => {

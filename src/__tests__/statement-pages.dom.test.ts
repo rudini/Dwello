@@ -1,11 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { readable } from 'svelte/store';
+import { flushSync } from 'svelte';
+import { SvelteMap } from 'svelte/reactivity';
 
 let url = new URL('http://localhost/statements');
 vi.mock('$app/environment', () => ({ browser: true }));
 vi.mock('$app/navigation', () => ({ goto: vi.fn(), invalidateAll: vi.fn() }));
 // enhance as SvelteKit wires it: the test plays the server's answer to an action of the page
-const actions = vi.hoisted(() => new Map<string, () => unknown>());
+const actions = vi.hoisted(() => new Map<string, (input?: unknown) => unknown>());
 vi.mock('$app/forms', () => ({
 	enhance: (form: HTMLFormElement, submit?: () => unknown) => {
 		if (submit) actions.set(form.getAttribute('action')!, submit);
@@ -22,8 +24,9 @@ import { toasts } from '$lib/stores';
 import StatementsPage from '../routes/statements/+page.svelte';
 import StatementPage from '../routes/statements/[id]/+page.svelte';
 import EditStatementPage from '../routes/statements/[id]/edit/+page.svelte';
-import { allByTestId, byTestId, click, fakeBff, settle, show } from './helpers/dom';
+import { allByTestId, byTestId, click, fakeBff, fireEvent, settle, show } from './helpers/dom';
 import { statement } from './helpers/statement';
+import { localToday } from '$lib/contract-status';
 
 const text = () => document.body.textContent ?? '';
 const counts = { draft: 3, sent: 2, paid: 5, overdue: 1 };
@@ -117,7 +120,10 @@ describe('Abrechnungsliste', () => {
 		click('statement-list-mark-paid-confirm');
 		await settle();
 
-		expect(calls).toEqual([{ method: 'POST', path: '/statements/s1/mark-paid', body: undefined }]);
+		const today = localToday();
+		expect(calls).toEqual([
+			{ method: 'POST', path: '/statements/s1/mark-paid', body: { paidDate: today } }
+		]);
 		expect(invalidateAll).toHaveBeenCalled();
 	});
 
@@ -141,6 +147,17 @@ describe('Abrechnungsliste', () => {
 		expect(document.querySelector('[role="dialog"]')).toBeNull();
 	});
 
+	// Der Knopf der Zeile verschwindet nach dem Speichern: der Fokus geht auf den Titel, nicht auf die Seite
+	it('setzt nach dem Zahlungseingang aus der Liste den Fokus auf den Titel', async () => {
+		fakeBff();
+		list([statement({ status: 'sent' })]);
+		click('statement-row-mark-paid');
+		click('statement-list-mark-paid-confirm');
+		await settle();
+
+		expect(document.activeElement).toBe(document.querySelector('h1'));
+	});
+
 	it('meldet im Dialog, wenn der Zahlungseingang nicht gespeichert wird', async () => {
 		fakeBff(() => [400, { error: 'Invalid status transition' }]);
 		list([statement({ status: 'sent' })]);
@@ -152,6 +169,127 @@ describe('Abrechnungsliste', () => {
 		const dialog = document.querySelector('[role="dialog"]')!;
 		expect(dialog.textContent).toContain('Abrechnung konnte nicht als bezahlt markiert werden.');
 		expect(byTestId<HTMLButtonElement>('statement-list-mark-paid-confirm')!.disabled).toBe(false);
+	});
+
+	// Ein Datum in der Zukunft: die Meldung sagt, was zu tun ist
+	it('zeigt die Meldung zum Zahlungsdatum aus der Prüfung', async () => {
+		fakeBff(() => [
+			400,
+			{
+				message:
+					'Das Zahlungsdatum liegt in der Zukunft. Geben Sie den Tag ein, an dem das Geld eingegangen ist.'
+			}
+		]);
+		list([statement({ status: 'sent' })]);
+
+		click('statement-row-mark-paid');
+		click('statement-list-mark-paid-confirm');
+		await settle();
+
+		expect(document.querySelector('[role="dialog"]')!.textContent).toContain(
+			'Das Zahlungsdatum liegt in der Zukunft.'
+		);
+	});
+
+	it('schlägt beim nächsten Öffnen wieder heute vor', () => {
+		list([statement({ status: 'sent' })]);
+		click('statement-row-mark-paid');
+		fireEvent(byTestId<HTMLInputElement>('paid-date-input')!, 'input', '01.01.2020');
+		click('dialog-cancel');
+		click('statement-row-mark-paid');
+
+		expect(byTestId<HTMLInputElement>('paid-date-input')!.value).toBe(
+			localToday().split('-').reverse().join('.')
+		);
+	});
+
+	// Bei einer Rückerstattung zahlt der Vermieter: keine Mahnung, und der Tag der eigenen Überweisung
+	it('spricht bei einer Rückerstattung von der Überweisung, nicht von einer Mahnung', () => {
+		list([statement({ status: 'sent', balance: -45 })]);
+		click('statement-row-mark-paid');
+		const dialog = document.querySelector('[role="dialog"]')!.textContent!;
+
+		expect(dialog).not.toContain('Mahnung');
+		expect(dialog).toContain('Der Tag, an dem Sie den Betrag überwiesen haben.');
+	});
+
+	// Zweimal ein Datum in der Zukunft: die Meldung erscheint auch beim zweiten Versuch
+	it('meldet ein falsches Zahlungsdatum auch beim zweiten Versuch', () => {
+		list([statement({ status: 'sent' })]);
+		click('statement-row-mark-paid');
+		const field = byTestId<HTMLInputElement>('paid-date-input')!;
+		for (const date of ['01.01.2099', '01.01.2098']) {
+			fireEvent(field, 'input', date);
+			click('statement-list-mark-paid-confirm');
+			flushSync();
+			expect(field.getAttribute('aria-invalid'), date).toBe('true');
+		}
+	});
+
+	// Chrome sendet nach Enter ein change-Ereignis: es darf den eben gesetzten Fehler nicht wieder ausblenden
+	it('zeigt den Fehler nach Enter, auch wenn der Browser danach «change» meldet', () => {
+		list([statement({ status: 'sent' })]);
+		click('statement-row-mark-paid');
+		const field = byTestId<HTMLInputElement>('paid-date-input')!;
+		fireEvent(field, 'input', '01.01.2099');
+		field.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+		field.dispatchEvent(new Event('change', { bubbles: true }));
+		flushSync();
+
+		expect(field.getAttribute('aria-invalid')).toBe('true');
+	});
+
+	// Erst ein unmögliches Datum, dann ein Tag aus dem Kalender: kein Fehler mehr zu einem gültigen Datum
+	it('nimmt den Fehler weg, wenn ein Tag im Kalender gewählt wird', () => {
+		list([statement({ status: 'sent' })]);
+		click('statement-row-mark-paid');
+		const field = byTestId<HTMLInputElement>('paid-date-input')!;
+		fireEvent(field, 'input', '31.02.2026');
+		field.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+		flushSync();
+		expect(field.getAttribute('aria-invalid')).toBe('true');
+
+		const calendar = document.querySelector<HTMLInputElement>(
+			'[role="dialog"] input[type="date"]'
+		)!;
+		calendar.value = '2026-10-01';
+		calendar.dispatchEvent(new Event('input', { bubbles: true })); // the picker sends input, then change
+		calendar.dispatchEvent(new Event('change', { bubbles: true }));
+		flushSync();
+
+		expect(field.value).toBe('01.10.2026');
+		expect(field.getAttribute('aria-invalid')).toBeNull();
+	});
+
+	// «01.01.25» mit Enter gesendet: wie beim Verlassen des Felds als 2025 gelesen, nicht abgelehnt
+	it('liest ein zweistelliges Jahr auch, wenn mit Enter bestätigt wird', async () => {
+		const calls = fakeBff();
+		list([statement({ status: 'sent' })]);
+		click('statement-row-mark-paid');
+		const field = byTestId<HTMLInputElement>('paid-date-input')!;
+		fireEvent(field, 'input', '01.01.25');
+		field.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+		await settle();
+
+		expect(calls).toEqual([
+			{ method: 'POST', path: '/statements/s1/mark-paid', body: { paidDate: '2025-01-01' } }
+		]);
+	});
+
+	// Enter im Feld bestätigt, wie in jedem Formular; der versteckte Kalender ist kein Tabstopp
+	it('bestätigt mit Enter im Datumsfeld und überspringt den versteckten Kalender', async () => {
+		const calls = fakeBff();
+		list([statement({ status: 'sent' })]);
+		click('statement-row-mark-paid');
+		byTestId('paid-date-input-calendar')!.focus();
+		window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
+		expect(document.activeElement).toBe(byTestId('dialog-cancel'));
+
+		byTestId('paid-date-input')!.dispatchEvent(
+			new KeyboardEvent('keydown', { key: 'Enter', bubbles: true })
+		);
+		await settle();
+		expect(calls.map((call) => call.path)).toEqual(['/statements/s1/mark-paid']);
 	});
 
 	it('bleibt nicht beschäftigt, wenn die Verbindung abbricht', async () => {
@@ -227,6 +365,65 @@ describe('Abrechnungsdetail', () => {
 		expect(text()).toContain('366 Mietstage');
 	});
 
+	// Nachzügler: der Entwurf würde ohne die später erfassten Rechnungen versendet
+	const later = (laterInvoices: number, status: 'draft' | 'sent' = 'draft') =>
+		show(StatementPage, {
+			data: { statement: statement({ status }), reminders: [], laterInvoices },
+			form: null
+		} as never);
+
+	it('weist beim Entwurf auf Rechnungen hin, die nach seinem Erstellen erfasst wurden', () => {
+		later(2);
+		expect(byTestId('statement-later-invoices')!.textContent!.replace(/\s+/g, ' ')).toContain(
+			'Seit dem Erstellen dieses Entwurfs wurden 2 Rechnungen für die Abrechnungsperiode erfasst, sie fehlen darin. Löschen Sie ihn und erstellen Sie die Abrechnung erneut.'
+		);
+	});
+
+	it('spricht bei einer später erfassten Rechnung in der Einzahl', () => {
+		later(1);
+		expect(byTestId('statement-later-invoices')!.textContent).toContain(
+			'wurde 1 Rechnung für die Abrechnungsperiode erfasst, sie fehlt darin'
+		);
+	});
+
+	// Versendet: der Mieter hat die Abrechnung ohne die Rechnung erhalten
+	it('weist bei einer versendeten Abrechnung auf später erfasste Rechnungen hin und sagt, wie man berichtigt', () => {
+		later(1, 'sent');
+		expect(byTestId('statement-later-invoices')!.textContent!.replace(/\s+/g, ' ')).toContain(
+			'Seit dem Erstellen dieser Abrechnung wurde 1 Rechnung für die Abrechnungsperiode erfasst, sie fehlt darin. ' +
+				'Versendete Abrechnungen berichtigen Sie ausserhalb von Dwello: Schicken Sie dem Mieter eine berichtigte Abrechnung mit dem Beleg. ' +
+				'Ob Sie die Kosten noch nachverlangen können, ist nicht in jedem Fall sicher: Lassen Sie sich im Zweifel beraten.'
+		);
+	});
+
+	// Versenden oder Bezahlen verwirft ein älteres PDF: die Seite zeigt danach den Stand des Servers
+	it('zeigt nach dem Versand den Stand des PDF, wie ihn der Server liefert', () => {
+		const box = new SvelteMap<string, unknown>([
+			['data', { statement: statement({ pdfGeneratedAt: '2026-10-05T08:00:00Z' }), reminders: [] }]
+		]);
+		show(StatementPage, {
+			get data() {
+				return box.get('data');
+			},
+			form: null
+		} as never);
+		expect(byTestId('statement-pdf-download')).not.toBeNull();
+
+		box.set('data', {
+			statement: statement({ status: 'sent', pdfGeneratedAt: undefined }),
+			reminders: []
+		});
+		flushSync();
+
+		expect(byTestId('statement-pdf-download')).toBeNull();
+	});
+
+	it('zeigt keinen Hinweis ohne später erfasste Rechnungen', () => {
+		detail();
+		expect(byTestId('statement-status')).not.toBeNull();
+		expect(byTestId('statement-later-invoices')).toBeNull();
+	});
+
 	it('sagt, wenn eine Abrechnung keine Positionen hat, statt eine leere Tabelle zu zeigen', () => {
 		detail({ lineItems: [] });
 		expect(text()).toContain(
@@ -283,22 +480,40 @@ describe('Abrechnungsdetail', () => {
 		expect(email.className.split(/\s+/)).toEqual(expect.arrayContaining(['min-w-0', 'break-all']));
 	});
 
-	it('nennt die Verwaltungspauschale mit ihrer Grundlage', () => {
+	// Wie im PDF: ein Anteil der eigenen Kosten
+	it('nennt die Verwaltungspauschale mit ihrer Grundlage wie im PDF', () => {
 		detail();
-
-		expect(byTestId('statement-management-fee')!.textContent).toContain(
-			'3 % der Nebenkosten der Liegenschaft, Anteil dieser Wohnung'
-		);
+		const fee = () => byTestId('statement-management-fee')!.textContent!.replace(/\s+/g, ' ');
+		expect(fee()).toContain('3 % der Zwischensumme');
 		expect(text()).not.toMatch(/Verwaltungsgebühr|Verwaltungskosten/);
 	});
 
-	it('nennt eine Rückerstattung ohne Minuszeichen und ohne Zahlungsfrist für den Mieter', () => {
-		detail({ balance: -83.43 });
+	// Der Saldo ist auf 5 Rappen gerundet; wie im PDF lässt die Zeile «Rundung» die Rechnung aufgehen
+	it('nennt die Rundung des Saldos auf 5 Rappen', () => {
+		detail({ totalCosts: 784.13, totalAdvancePayments: 600, balance: 184.15 });
+		expect(byTestId('statement-rounding')!.textContent!.replace(/\s+/g, ' ')).toContain(
+			'Nachzahlung vor Rundung CHF 184.13 Rundung auf 5 Rappen + CHF 0.02'
+		);
+		document.body.innerHTML = '';
 
-		expect(byTestId('statement-balance')!.textContent).toMatch(/Rückerstattung.*CHF\s83.43/);
-		expect(text()).not.toContain('CHF-83.43');
+		// eine Rückerstattung wird von 93.87 auf 93.85 kleiner: aus ihrer Sicht − 0.02
+		detail({ totalCosts: 784.13, totalAdvancePayments: 878, balance: -93.85 });
+		expect(byTestId('statement-rounding')!.textContent!.replace(/\s+/g, ' ')).toContain(
+			'Rückerstattung vor Rundung CHF 93.87 Rundung auf 5 Rappen − CHF 0.02'
+		);
+		document.body.innerHTML = '';
+
+		detail({ totalCosts: 784.13, totalAdvancePayments: 600.03, balance: 184.1 });
+		expect(byTestId('statement-rounding')).toBeNull();
+	});
+
+	it('nennt eine Rückerstattung ohne Minuszeichen und ohne Zahlungsfrist für den Mieter', () => {
+		detail({ balance: -83.45 });
+
+		expect(byTestId('statement-balance')!.textContent).toMatch(/Rückerstattung.*CHF\s83.45/);
+		expect(text()).not.toContain('CHF-83.45');
 		expect(text()).not.toContain('Zahlungsfrist');
-		expect(byTestId('statement-payment-deadline')!.textContent).toBe('28.2.2025');
+		expect(byTestId('statement-payment-deadline')!.textContent).toBe('28.02.2025');
 	});
 
 	it('bietet einen Entwurf zum Versenden, Bearbeiten und Löschen an', () => {
@@ -314,7 +529,9 @@ describe('Abrechnungsdetail', () => {
 		toasts.set([]);
 		detail();
 		click('statement-delete-button');
-		const after = actions.get('?/delete')!() as (input: unknown) => Promise<void>;
+		const after = actions.get('?/delete')!({ formData: new FormData() }) as (
+			input: unknown
+		) => Promise<void>;
 		await after({ update: async () => {}, result: { type: 'redirect' } });
 		expect(get(toasts).map((toast) => toast.message)).toEqual(['Abrechnung NK-2024-0001 gelöscht']);
 	});
@@ -333,6 +550,16 @@ describe('Abrechnungsdetail', () => {
 		expect(pdf.getAttribute('href')).toBe('/statements/s1/pdf?ansehen');
 		expect(pdf.getAttribute('target')).toBe('_blank');
 		expect(byTestId('statement-send-confirm')!.textContent).toContain('Als versendet markieren');
+	});
+
+	// Datum und Zahlungsfrist gelten ab dem Tag des Versands: ein früher erstelltes PDF trüge eine abgelaufene Frist
+	it('sagt vor dem Versand, ab wann die Zahlungsfrist läuft', () => {
+		detail();
+		click('statement-send-button');
+
+		expect(document.querySelector('[role="dialog"]')!.textContent!.replace(/\s+/g, ' ')).toContain(
+			'Dwello datiert die Abrechnung auf den Tag, an dem Sie sie als versendet markieren. Stellen Sie das PDF deshalb am selben Tag zu.'
+		);
 	});
 
 	it('sagt genau, welche Adresse für den Versand fehlt', () => {
@@ -380,6 +607,102 @@ describe('Abrechnungsdetail', () => {
 
 		expect(byTestId('statement-pdf-download')).toBeNull();
 		expect(byTestId<HTMLButtonElement>('statement-generate-pdf-button')!.disabled).toBe(false);
+	});
+
+	// Das Datumsfeld liegt im Dialog, ausserhalb des Formulars: der gewählte Tag muss mitgesendet werden
+	it('sendet das im Dialog gewählte Zahlungsdatum mit', () => {
+		detail({ status: 'sent' });
+		click('statement-mark-paid-button');
+		fireEvent(byTestId<HTMLInputElement>('paid-date-input')!, 'input', '05.01.2026');
+		const formData = new FormData();
+		actions.get('?/markPaid')!({ formData });
+
+		expect(formData.get('paidDate')).toBe('2026-01-05');
+	});
+
+	// Sven: ein unmögliches Datum wurde angesagt und trotzdem mit leerem Datum gespeichert
+	it('prüft das Zahlungsdatum im Dialog, bevor es gesendet wird', () => {
+		detail({ status: 'sent' });
+		click('statement-mark-paid-button');
+		const field = byTestId<HTMLInputElement>('paid-date-input')!;
+		fireEvent(field, 'input', '01.01.2099');
+		const submitted = vi.fn();
+		document.querySelector('form[action="?/markPaid"]')!.addEventListener('submit', submitted);
+		click('statement-mark-paid-confirm');
+		flushSync();
+
+		expect(submitted).not.toHaveBeenCalled();
+		expect(document.querySelector('[role="dialog"]')).not.toBeNull();
+		expect(field.getAttribute('aria-invalid')).toBe('true');
+		expect(
+			document.getElementById(
+				field
+					.getAttribute('aria-describedby')!
+					.split(' ')
+					.find((id) => id.endsWith('-error'))!
+			)!.textContent
+		).toContain('Das Zahlungsdatum liegt in der Zukunft.');
+	});
+
+	it('meldet im Detaildialog ein falsches Zahlungsdatum auch beim zweiten Versuch', () => {
+		detail({ status: 'sent' });
+		click('statement-mark-paid-button');
+		const field = byTestId<HTMLInputElement>('paid-date-input')!;
+		for (const date of ['01.01.2099', '01.01.2098']) {
+			fireEvent(field, 'input', date);
+			click('statement-mark-paid-confirm');
+			flushSync();
+			expect(field.getAttribute('aria-invalid'), date).toBe('true');
+		}
+	});
+
+	// Nach dem Speichern: eine Bestätigung, und der Fokus auf dem Titel statt auf der Seite
+	it('bestätigt den Zahlungseingang und setzt den Fokus auf den Titel', async () => {
+		toasts.set([]);
+		detail({ status: 'sent' });
+		click('statement-mark-paid-button');
+		const after = actions.get('?/markPaid')!({ formData: new FormData() }) as (
+			input: unknown
+		) => Promise<void>;
+		await after({ update: async () => {}, result: { type: 'success' } });
+		await settle();
+
+		expect(get(toasts).map((toast) => toast.message)).toEqual(['Abrechnung als bezahlt markiert']);
+		expect(document.activeElement).toBe(document.querySelector('h1'));
+	});
+
+	it('fragt beim Markieren als bezahlt nach dem Zahlungsdatum, heute vorgeschlagen', () => {
+		detail({ status: 'sent' });
+		click('statement-mark-paid-button');
+
+		expect(byTestId<HTMLInputElement>('paid-date-input')!.value).toBe(
+			localToday().split('-').reverse().join('.')
+		);
+	});
+
+	// Gemahnt wird erst nach Ablauf der Frist, und nie bei einer Rückerstattung: dann schuldet der Vermieter
+	it('bietet eine Mahnung nur bei einer überfälligen Nachzahlung an', () => {
+		detail({ status: 'sent' });
+		expect(byTestId('statement-reminder-button')).toBeNull();
+		document.body.innerHTML = '';
+		detail({ status: 'overdue', balance: -45 });
+		expect(byTestId('statement-reminder-button')).toBeNull();
+		expect(byTestId('statement-mark-paid-button')).not.toBeNull();
+	});
+
+	// Der Knopf sagt, was er tut: Dwello verschickt nichts selbst
+	it('nennt den Knopf «Als versendet markieren»', () => {
+		detail();
+		expect(byTestId('statement-send-button')!.textContent!.trim()).toBe('Als versendet markieren');
+	});
+
+	// Ab dem Versand läuft die Frist: der Verlauf zeigt, wann versendet und wann bezahlt wurde
+	it('führt im Verlauf Versand und Zahlung', () => {
+		detail({ status: 'paid', statementDate: '2026-09-28', paidDate: '2026-10-05' });
+		const history = text().replace(/\s+/g, ' ');
+
+		expect(history).toContain('Versendet 28.09.2026');
+		expect(history).toContain('Bezahlt 05.10.2026');
 	});
 
 	it('kündigt die nächste Mahnung mit ihrem Versandweg an', () => {
@@ -451,7 +774,7 @@ describe('Abrechnung bearbeiten', () => {
 	it('ändert nur Frist und Bemerkungen, die Kosten bleiben wie berechnet', () => {
 		edit({ notes: 'Ratenzahlung' });
 
-		expect(byTestId<HTMLInputElement>('payment-deadline-input')!.value).toBe('2025-02-28');
+		expect(byTestId<HTMLInputElement>('payment-deadline-input')!.value).toBe('28.02.2025');
 		expect(text()).toContain('Freitag, 28. Februar 2025');
 		expect(byTestId<HTMLTextAreaElement>('statement-notes-input')!.value).toBe('Ratenzahlung');
 		expect(allByTestId('statement-line-item')).toHaveLength(2);
@@ -459,10 +782,19 @@ describe('Abrechnung bearbeiten', () => {
 	});
 
 	it('nennt die Frist einer Rückerstattung nicht Zahlungsfrist', () => {
-		edit({ balance: -83.43 });
+		edit({ balance: -83.45 });
 
 		expect(document.querySelector('label[for="paymentDeadline"]')!.textContent).toContain(
 			'Rückerstattung bis'
+		);
+	});
+
+	it('meldet eine fehlende Frist am Feld', () => {
+		edit({}, { errors: { paymentDeadline: 'Die Frist fehlt. Bitte geben Sie ein Datum ein.' } });
+
+		expect(byTestId('payment-deadline-input')!.getAttribute('aria-invalid')).toBe('true');
+		expect(byTestId('form-error')!.textContent).toContain(
+			'Die Frist fehlt. Bitte geben Sie ein Datum ein.'
 		);
 	});
 

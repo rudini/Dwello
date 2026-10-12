@@ -96,7 +96,7 @@ describe('Wiederhergestellter Entwurf', () => {
 		const ondiscard = vi.fn();
 		show(DraftNotice, { savedAt: new Date('2026-10-09T14:32:00'), ondiscard });
 		expect(byTestId('draft-restored')!.textContent).toContain(
-			'zuletzt am 9.10.2026 um 14:32 bearbeitet'
+			'zuletzt am 09.10.2026 um 14:32 bearbeitet'
 		);
 		byTestId('draft-discard')!.click();
 		expect(ondiscard).toHaveBeenCalled();

@@ -1,0 +1,7 @@
+{
+	"schemaVersion": 1,
+	"tool": "deepcheck",
+	"failThreshold": 65,
+	"fallow": true,
+	"entries": []
+}

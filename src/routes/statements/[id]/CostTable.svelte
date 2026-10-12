@@ -8,6 +8,16 @@
 	let { statement }: { statement: StatementWithDetails } = $props();
 
 	const subtotal = $derived(statement.lineItems.reduce((sum, item) => sum + item.tenantShare, 0));
+	// TODO(fachlich prüfen): «Rundung auf 5 Rappen» is not in the glossary (offene-punkte.md)
+	// The Saldo goes to 5 Rappen. As in the PDF: the amount before, its rounding seen from the amount shown (a refund
+	// that grows gets +), the Saldo; only a real rounding (under 5 Rappen)
+	const cents = (amount: number) => Math.round(amount * 100) / 100;
+	const unrounded = $derived(cents(statement.totalCosts - statement.totalAdvancePayments));
+	const rounding = $derived(
+		Math.abs(statement.balance - unrounded) < 0.05
+			? cents(Math.abs(statement.balance) - Math.abs(unrounded))
+			: 0
+	);
 	const columns = [
 		{ label: 'Kategorie' },
 		{ label: 'Verteilschlüssel' },
@@ -69,10 +79,8 @@
 	<div class="flex justify-between gap-4" data-testid="statement-management-fee">
 		<dt class="flex flex-col text-ink-muted">
 			<span>Verwaltungspauschale</span>
-			<span>
-				{statement.managementFeePercent} % der Nebenkosten der Liegenschaft, Anteil dieser Wohnung für
-				{statement.rentalDays} Mietstage
-			</span>
+			<!-- as the PDF says it: a share of the tenant's own costs -->
+			<span>{statement.managementFeePercent} % der Zwischensumme</span>
 		</dt>
 		<dd class="text-ink">{formatCurrency(statement.managementFee)}</dd>
 	</div>
@@ -84,6 +92,20 @@
 		<dt class="text-ink-muted">Geleistete Akontobeiträge</dt>
 		<dd class="whitespace-nowrap text-ink">− {formatCurrency(statement.totalAdvancePayments)}</dd>
 	</div>
+	{#if rounding}
+		<div class="flex flex-col gap-2" data-testid="statement-rounding">
+			<div class="flex justify-between gap-4">
+				<dt class="text-ink-muted">{balanceLabel(unrounded)} vor Rundung</dt>
+				<dd class="whitespace-nowrap text-ink">{formatCurrency(Math.abs(unrounded))}</dd>
+			</div>
+			<div class="flex justify-between gap-4">
+				<dt class="text-ink-muted">Rundung auf 5 Rappen</dt>
+				<dd class="whitespace-nowrap text-ink">
+					{rounding > 0 ? '+' : '−'} {formatCurrency(Math.abs(rounding))}
+				</dd>
+			</div>
+		</div>
+	{/if}
 	<div
 		class="flex justify-between gap-4 border-t border-line pt-2 text-lg font-bold"
 		data-testid="statement-balance"

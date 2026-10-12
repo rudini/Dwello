@@ -64,3 +64,34 @@ export function changedAreas(before: Buffer, after: Buffer, cell = 16): Area[] {
 	}
 	return areas;
 }
+
+/** Same size and the same pixels, however the PNG files are encoded: a page without any visible change */
+export function looksTheSame(a: Buffer, b: Buffer): boolean {
+	const before = PNG.sync.read(a);
+	const after = PNG.sync.read(b);
+	return before.width === after.width && before.height === after.height && before.data.equals(after.data);
+}
+
+/**
+ * The image with every area framed as the pages are: a red line 3 px wide, 2 px outside the area (#dc2626)
+ */
+export function markAreas(image: Buffer, areas: Area[]): Buffer {
+	const png = PNG.sync.read(image);
+	const paint = (x: number, y: number) => {
+		if (x < 0 || y < 0 || x >= png.width || y >= png.height) return;
+		png.data.set([220, 38, 38, 255], (y * png.width + x) * 4);
+	};
+	for (const { x, y, width, height } of areas) {
+		for (let d = 3; d <= 5; d++) {
+			for (let i = x - d; i < x + width + d; i++) {
+				paint(i, y - d);
+				paint(i, y + height - 1 + d);
+			}
+			for (let j = y - d; j < y + height + d; j++) {
+				paint(x - d, j);
+				paint(x + width - 1 + d, j);
+			}
+		}
+	}
+	return PNG.sync.write(png);
+}

@@ -38,7 +38,8 @@ const rules: [string, RegExp][] = [
 		'Schatten ausserhalb der zwei Tokens',
 		new RegExp(`\\bshadow(?:-(?:sm|md|lg|xl|2xl|inner))?${end}`)
 	],
-	['Verlauf, Unschärfe oder Glühen', /gradient|(?<![:\w-])blur\b|backdrop-blur|drop-shadow|glow/],
+	// «.blur()» is the DOM method, not the CSS filter
+	['Verlauf, Unschärfe oder Glühen', /gradient|(?<![:.\w-])blur\b|backdrop-blur|drop-shadow|glow/],
 	['Material Symbols oder externe Schrift', /material-symbols|fonts\.googleapis|fonts\.gstatic/],
 	['Emoji als Symbol', /(?![©®™])\p{Extended_Pictographic}/u],
 	['Bauteil des alten Designsystems', /\$lib\/components\//]

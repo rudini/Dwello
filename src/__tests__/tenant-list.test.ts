@@ -59,7 +59,7 @@ describe('Mieterliste', () => {
 	it('nennt bei einem aktiven Mieter ohne laufende Miete den künftigen Mietvertrag', () => {
 		const body = row(list([{ ...tenant('t1', true), nextContractStart: '2026-11-01' }]), 't1');
 
-		expect(body).toContain('Mietvertrag ab 1.11.2026');
+		expect(body).toContain('Mietvertrag ab 01.11.2026');
 		expect(body).not.toContain('Keine laufende Miete');
 	});
 

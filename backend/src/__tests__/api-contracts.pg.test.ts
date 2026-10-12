@@ -7,7 +7,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import { eq, sql } from 'drizzle-orm';
 import { join } from 'path';
 import { db } from '../db/connection';
-import { buildings, invoices, tenants } from '../db/schema';
+import { buildings, categories, invoices, tenants } from '../db/schema';
 import { deleteStatement } from '../services/statement.service';
 import { callApi, sendJson } from './helpers/auth';
 import { insertInvoice } from './helpers/records';
@@ -42,7 +42,9 @@ const period = { periodStart: '2024-01-01', periodEnd: '2024-12-31' };
 
 beforeAll(async () => {
 	rental = await createRental(token, { startDate: '2024-01-01', monthlyAdvancePayment: '150' });
-	await insertInvoice(rental.building, { amount: '1000.00', invoiceDate: '2024-06-30' });
+	await insertInvoice(rental.building, { amount: '1000.00', invoiceDate: '2024-03-31' });
+	// A year later 50 % more: the check for missing invoices reports a deviation with its percentage
+	await insertInvoice(rental.building, { amount: '1500.00', invoiceDate: '2025-06-30' });
 	// Optional fields filled, so the contract checks their JSON type too (null is not checked)
 	await db
 		.update(buildings)
@@ -82,6 +84,14 @@ describe('API-Verträge des Frontends', () => {
 		expect(drift(await sample('building-contracts'), actual)).toEqual([]);
 	});
 
+	// The caretaker costs of 2025 against 2024: a finding with all its fields
+	it('GET /invoices/completeness/:buildingId liefert die Felder von invoice-completeness.json', async () => {
+		const actual = await (
+			await callApi(`/api/v1/invoices/completeness/${rental.building}?periodStart=2025-01-01&periodEnd=2025-12-31`)
+		).json();
+		expect(drift(await sample('invoice-completeness'), actual)).toEqual([]);
+	});
+
 	it('POST /statements/preview liefert die Felder von statement-preview.json', async () => {
 		const actual = await (await sendJson('POST', '/api/v1/statements/preview', { ...period, contractId: rental.contract })).json();
 		expect(drift(await sample('statement-preview'), actual)).toEqual([]);
@@ -97,6 +107,13 @@ describe('API-Verträge des Frontends', () => {
 	it('GET /buildings/:id liefert die Felder von building.json', async () => {
 		const actual = await (await callApi(`/api/v1/buildings/${rental.building}`)).json();
 		expect(drift(await sample('building'), actual)).toEqual([]);
+	});
+
+	it('GET /buildings/:id/fuel-stocks liefert die Felder von fuel-stocks.json', async () => {
+		const [heating] = await db.select().from(categories).where(eq(categories.name, 'Heating'));
+		await sendJson('POST', `/api/v1/buildings/${rental.building}/fuel-stocks`, { readingDate: '2024-12-31', amount: '2650.00', categoryId: heating.id });
+		const actual = await (await callApi(`/api/v1/buildings/${rental.building}/fuel-stocks`)).json();
+		expect(drift(await sample('fuel-stocks'), actual)).toEqual([]);
 	});
 
 	it('GET /tenants/:id liefert die Felder von tenant.json', async () => {

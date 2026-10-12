@@ -19,6 +19,7 @@ const form = {
 const saved = {
 	description: 'Reinigung von Treppenhaus und Eingang',
 	isAllowedUtilityCost: true,
+	isHeatingCost: false,
 	sortOrder: 15,
 	nameFR: 'Nettoyage cage d’escalier',
 	nameIT: null,
@@ -98,8 +99,16 @@ describe('Neue Kategorie', () => {
 		const { calls, result } = runAction(newActions.default, '', 201, { name: 'Reparaturen Dach' });
 		await result.catch(() => {});
 
-		expect(calls[0].body).toMatchObject({ isAllowedUtilityCost: false });
+		expect(calls[0].body).toMatchObject({ isAllowedUtilityCost: false, isHeatingCost: false });
 		expect(calls[0].body).not.toHaveProperty('sortOrder');
+	});
+
+	// Heiz- und Warmwasserkosten folgen beim Mieterwechsel dem Heizprofil
+	it('erfasst eine Kategorie als Heiz- und Warmwasserkosten', async () => {
+		const { calls, result } = runAction(newActions.default, '', 201, { name: 'Pellets', isHeatingCost: 'on' });
+		await result.catch(() => {});
+
+		expect(calls[0].body).toMatchObject({ isHeatingCost: true });
 	});
 
 	it('verlangt einen Namen', async () => {

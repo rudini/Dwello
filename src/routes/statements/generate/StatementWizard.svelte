@@ -3,6 +3,7 @@
 	import { onMount, tick, untrack } from 'svelte';
 	import {
 		invoiceRows,
+		needsConfirmation,
 		restoredSelection,
 		selectionErrors,
 		statementSteps,
@@ -27,7 +28,6 @@
 		data: {
 			buildings: (Building & { apartmentCount: number })[];
 			heatingProfiles: HeatingProfile[];
-			distributionKeys: { id: string; name: string }[];
 			defaultManagementFeePercent: number;
 			defaultHeatingProfileId: string;
 			defaultPeriod: { start: string; end: string };
@@ -46,13 +46,13 @@
 		3: 'Vorschau wird berechnet …',
 		5: 'Entwürfe werden erstellt …'
 	};
-	const NOTHING = 'Wählen Sie eine andere Abrechnungsperiode oder andere Gebäude.';
+	const NOTHING =
+		'Wählen Sie eine andere Abrechnungsperiode oder andere Gebäude, oder löschen Sie zuerst die Entwürfe, die Sie neu berechnen wollen.';
 	const fresh = (): WizardSelection => ({
 		periodStart: data.defaultPeriod.start,
 		periodEnd: data.defaultPeriod.end,
 		heatingProfileId: data.defaultHeatingProfileId,
 		managementFeePercent: data.defaultManagementFeePercent,
-		managementFeeDistributionKeyId: '',
 		buildingIds: []
 	});
 
@@ -71,10 +71,7 @@
 	let previewRows = $state(untrack(() => form?.preview ?? []));
 	let invoices = $state(untrack(() => form?.invoices ?? []));
 	let shownError = $state(untrack(() => form?.error ?? '')); // only until the user moves on
-	// No invoices, or statements that already exist: going on needs a confirmation
-	const needsConfirmation = $derived(
-		invoices.some((i) => i.count === 0 || (i.statements ?? 0) > 0)
-	);
+	const confirmationNeeded = $derived(needsConfirmation(invoices));
 	const statusText = $derived(busy ? busyLabels[step] : '');
 	const periodLabel = $derived(
 		`${formatDate(selection.periodStart)} – ${formatDate(selection.periodEnd)}`
@@ -152,7 +149,7 @@
 
 	function previewErrors(): Record<string, string> {
 		if (previewRows.length === 0) return { preview: NOTHING };
-		return needsConfirmation && !confirmed ? { confirm: CONFIRM } : {};
+		return confirmationNeeded && !confirmed ? { confirm: CONFIRM } : {};
 	}
 
 	// A server answer: the preview leads to step 4 (a new preview needs a new confirmation), drafts to the result
@@ -195,11 +192,6 @@
 	<input type="hidden" name="periodEnd" value={selection.periodEnd} />
 	<input type="hidden" name="heatingProfileId" value={selection.heatingProfileId} />
 	<input type="hidden" name="managementFeePercent" value={selection.managementFeePercent} />
-	<input
-		type="hidden"
-		name="managementFeeDistributionKeyId"
-		value={selection.managementFeeDistributionKeyId}
-	/>
 	<input type="hidden" name="buildingIds" value={selection.buildingIds.join(',')} />
 
 	<DraftNotice savedAt={restoredAt} ondiscard={discardDraft}>

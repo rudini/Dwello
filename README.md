@@ -40,8 +40,8 @@ Dwello is a comprehensive web application for managing residential properties in
 
 ### Prerequisites
 
-- Node.js >= 20.0.0
-- Bun >= 1.0.0 (for backend)
+- Node.js >= 20.0.0 (frontend runtime)
+- Bun >= 1.4 (package manager; backend runtime; older versions misread `bun.lock`)
 - PostgreSQL >= 15
 - Docker & Docker Compose (optional, for containerized deployment)
 
@@ -55,7 +55,7 @@ Dwello is a comprehensive web application for managing residential properties in
 
 2. **Install frontend dependencies**
    ```bash
-   npm install
+   bun install
    ```
 
 3. **Install backend dependencies**
@@ -75,7 +75,7 @@ Dwello is a comprehensive web application for managing residential properties in
 
    **Frontend (SvelteKit):**
    ```bash
-   npm run dev
+   bun run dev
    # Runs on http://localhost:3000
    ```
 
@@ -117,8 +117,8 @@ Dwello is a comprehensive web application for managing residential properties in
    starts without it. A demo statement that already exists is kept; delete it in the app to have it generated anew.
 
    A schema change is a new numbered SQL file (e.g. `0003_<what>.sql`), never an edit of a migration that an
-   installation has applied. Until the first installation, `0001_schema.sql` may still be edited; rebuild local
-   databases with `bun run db:reset`. A database from before the October 2026 baseline is refused with a hint to
+   installation has applied. Until the first installation, `0001_schema.sql` and `0002_stammdaten.sql` are edited instead; rebuild local
+   databases with `bun run db:reset`. A database from before a baseline is refused with a hint to
    `bun run db:reset`.
 
 ---
@@ -128,17 +128,17 @@ Dwello is a comprehensive web application for managing residential properties in
 ### Available Scripts
 
 **Frontend** (project root):
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build
-- `npm run test` - Run unit tests (Vitest, watch mode)
-- `npm run test:coverage` - Run all unit tests once, fails below the coverage floors
-- `npm run test:e2e` - Run E2E tests (`-- --project=api` for the API driver only)
-- `npm run test:e2e:ui` - Run E2E tests in the Playwright UI
-- `npm run check` - Type check (svelte-check, also `tests/` and `*.config.ts`)
-- `npm run type-check` - TypeScript type checking (tsc)
-- `npm run lint` - Lint frontend and backend (fails on warnings)
-- `npm run format` - Format code with Prettier
+- `bun run dev` - Start development server
+- `bun run build` - Build for production
+- `bun run preview` - Preview production build
+- `bun run test` - Run unit tests (Vitest, watch mode)
+- `bun run test:coverage` - Run all unit tests once, fails below the coverage floors
+- `bun run test:e2e` - Run E2E tests (`-- --project=api` for the API driver only)
+- `bun run test:e2e:ui` - Run E2E tests in the Playwright UI
+- `bun run check` - Type check (svelte-check, also `tests/` and `*.config.ts`)
+- `bun run type-check` - TypeScript type checking (tsc)
+- `bun run lint` - Lint frontend and backend (fails on warnings)
+- `bun run format` - Format code with Prettier
 
 **Backend** (`backend/`):
 - `bun run dev` - Apply missing migrations, start backend dev server (hot reload)
@@ -156,6 +156,32 @@ Dwello is a comprehensive web application for managing residential properties in
 - `bun run db:generate` - do not use: Drizzle Kit keeps no snapshots and would emit the whole schema again; write a new
   numbered SQL file in `backend/migrations` by hand (see `backend/CLAUDE.md`)
 - `bun run db:push` - Drizzle Kit changes the database directly, without a migration; only for throwaway databases
+
+### Deep modules (deepcheck)
+
+deepcheck finds shallow modules (A Philosophy of Software Design, ch. 4): an interface almost as large as what it hides.
+It is a warning system, not a verdict on design quality.
+
+When it runs:
+- Before every `git commit` and `git push` (Claude Code hook) and in the CI job "Deep modules", on the changed modules only.
+- A changed module fails when it is new or got shallower, scores at least 65 and contains a pass-through (a function
+  that only forwards its parameters) or classitis (one module cut into tiny files). An exception comment without a
+  reason fails too.
+
+Commands (repo root):
+- `bun run deepcheck:audit` - check the changed modules as the hook does; silent when clean
+- `bun run deepcheck:scan` - list the flagged modules of the whole repo; `bun run deepcheck:scan -- --min-score 35`
+  ranks every module scoring 35 or more, a review aid that never fails
+- `bun run deepcheck:ci -- origin/main` - the CI check against a base branch
+- `bun run deepcheck:baseline` - rewrite `.deepcheck-baseline.json` after a deliberate scoring change
+
+When it reports a module:
+1. Read the reason; `node tools/deepcheck/src/cli.ts --explain <path>` shows every metric.
+2. Fix the design: merge forwarders into their callee, pull tiny files together, hide steps behind one function.
+   Do not pad a module to lower its score.
+3. For a deliberate exception put `// deepcheck-ignore-file -- <reason>` at the top of the file; it shows in review.
+
+Metrics, weights, configuration and known false positives: [tools/deepcheck/README.md](tools/deepcheck/README.md).
 
 ### Project Structure
 
@@ -204,7 +230,7 @@ dwello/
 
 ### Unit Tests (Vitest)
 ```bash
-npm run test
+bun run test
 ```
 
 ### Backend Tests (bun)
@@ -218,7 +244,7 @@ The PostgreSQL tests (`*.pg.test.ts`) run against their own database `dwello_tes
 
 ### E2E Tests (Playwright)
 ```bash
-npm run test:e2e
+bun run test:e2e
 ```
 
 The E2E run starts its own stack (backend on 3101, production build of the frontend on 3100) against its own database `dwello_e2e`,
@@ -228,7 +254,7 @@ servers and database are never touched; only PostgreSQL on 5432 is required. Ove
 
 ### Coverage
 ```bash
-npm run test:coverage          # frontend
+bun run test:coverage          # frontend
 cd backend && bun run test     # backend
 ```
 

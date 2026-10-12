@@ -110,10 +110,8 @@ describe('Auswahl vor der Hydration in Erfassungsformularen', () => {
 	it('Abrechnungen erstellen: behält das gewählte Heizprofil', async () => {
 		const props = {
 			heatingProfiles,
-			distributionKeys: [],
 			heatingProfileId: '',
 			managementFeePercent: 3,
-			managementFeeDistributionKeyId: '',
 			errors: {}
 		};
 		await serverRender('routes/statements/generate/SettingsStep.svelte', props as never);
@@ -140,10 +138,8 @@ describe('Heizprofil in den Abrechnungen', () => {
 	it('zeigt den deutschen Namen des Heizprofils', async () => {
 		await serverRender('routes/statements/generate/SettingsStep.svelte', {
 			heatingProfiles: [{ ...profile('h1', 'Mountain', 100 / 12), nameDE: 'Bergregion' }],
-			distributionKeys: [],
 			heatingProfileId: '',
 			managementFeePercent: 3,
-			managementFeeDistributionKeyId: '',
 			errors: {}
 		} as never);
 

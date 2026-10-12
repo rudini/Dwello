@@ -45,6 +45,9 @@ Browser -> SvelteKit BFF (port 3000: /auth/*, /api/*, page loads/actions) -> Ely
 | POST | `/` | Body: `name`, `address`, `postalCode` (4–10 chars), `city`, `canton` (2 chars) required; optional `country`, `latitude`, `longitude` (strings), `buildingType`, `yearBuilt` (number). → 201 building. 400 |
 | PUT | `/:id` | Body: any subset of the POST fields. → building. 404 |
 | DELETE | `/:id` | 204. 404; 400 if the building still has apartments |
+| GET | `/:id/fuel-stocks` | → array of `{ id, buildingId, readingDate, amount, categoryId, createdAt }` by date (Tankbestand, see `tests/contracts/fuel-stocks.json`). 404 building |
+| POST | `/:id/fuel-stocks` | Body: `readingDate` (date), `amount` (string, CHF ≥ 0, two decimals), `categoryId` (uuid of an allocable heating cost category). → 201 reading. 400 date that does not exist or category not allowed; 404 building; 409 a reading on that day exists, or the building's readings are in another category; 422 invalid body |
+| DELETE | `/:id/fuel-stocks/:stockId` | 204. 404; 422 ids not uuids |
 
 ## 4. Apartments `/api/v1/apartments`
 
@@ -104,7 +107,8 @@ There is no "predefined" flag on categories.
 | GET | `/llm-recipient` | → `{ recipient: { provider, country } \| null }`; `null` when the LLM runs on the operator's server (or is disabled). Used by the privacy page |
 | GET | `/utility-rules` | → `{ maxManagementFeePercent, allowedCategories, notAllowedCategories, notes }` (German texts) |
 | POST | `/categorize` | Preview only, stores nothing. Body: `billingEntityName`, `description`, `amount` (string). → `{ category: { id, name, isAllowedUtilityCost } \| null, confidence, isAllowedUtilityCost, reasoning, source: "llm"\|"cache"\|"fallback" }` |
-| GET | `/for-statement/:buildingId` | Query: `periodStart`, `periodEnd` (required). → array of the building's invoices with `isValidUtilityCost = true` dated in the period |
+| GET | `/for-statement/:buildingId` | Query: `periodStart`, `periodEnd` (required). → array of the building's invoices with `isValidUtilityCost = true` whose Leistungszeitraum overlaps the period, or without one, dated in it; each with `inPeriod: { start, end, amount }` (its days and amount in the period) |
+| GET | `/completeness/:buildingId` | Query: `periodStart`, `periodEnd` (dates, required; end not before start, else 400). Compares the allocable invoices per category with the same dates one year earlier → `{ buildingId, comparedWith: { start, end }, hasComparison, findings: [{ categoryId, categoryName, kind: stock \| tank \| missing \| gap \| new \| deviation, current: { count, total }, previous: { count, total }, missingParts, changePercent }] }` |
 | GET | `/:id` | → invoice with `building`, `category`, `distributionKey`, `llmCategory` (see `tests/contracts/invoice.json`). 404 |
 | GET | `/:id/validate` | → `{ isValid, errors, warnings }`; 404 with the same shape if not found |
 | POST | `/:id/recategorize` | No body. Asks the LLM again and stores `llmCategoryId`/`llmConfidence`; from confidence 0.85 the suggestion also becomes `categoryId` (as on create; a non-allocable category makes the invoice non-allocable, an exclusion stays; manual override cleared). → `{ success: true, invoice, categorization: { category (name), confidence, isAllowedUtilityCost, reasoning } }`. 404; **503** LLM unreachable or no matching category; 500 other errors |
@@ -112,7 +116,7 @@ There is no "predefined" flag on categories.
 | PUT | `/:id` | Body: any subset of the POST fields. → invoice. 404; 400 category not found |
 | DELETE | `/:id` | 204. 404 |
 
-**Invoice body:** `buildingId` (uuid), `billingEntityName` (1–255), `description`, `amount` (string), `invoiceDate` required; optional `invoiceNumber`, `billingEntityAddress`, `categoryId`, `llmCategoryId`, `llmConfidence` (string, 0–1), `manualOverrideReason`, `distributionKeyId`, `isValidUtilityCost` (boolean), `dueDate`, `paidDate`, `invoicePdf`, `notes`.
+**Invoice body:** `buildingId` (uuid), `billingEntityName` (1–255), `description`, `amount` (string), `invoiceDate` required; optional `invoiceNumber`, `billingEntityAddress`, `categoryId`, `llmCategoryId`, `llmConfidence` (string, 0–1), `manualOverrideReason`, `distributionKeyId`, `isValidUtilityCost` (boolean), `servicePeriodStart` and `servicePeriodEnd` (dates or null, Leistungszeitraum: both or none, end not before start, else 400), `dueDate`, `paidDate`, `invoicePdf`, `notes`.
 
 **Categorization rules** (`invoice.service.ts`):
 - The LLM runs on create only when no `categoryId` is sent and `skipLlm` is not `true`. LLM failures are logged and the invoice is created without a suggestion.
@@ -122,7 +126,7 @@ There is no "predefined" flag on categories.
 
 ## 9. Distribution keys `/api/v1/distribution-keys`
 
-`type` is `predefined` or `custom`. Formulas use the variables `{area}`, `{rooms}`, `{volume}`, `{units}`.
+`type` is `predefined` or `custom`. Formulas use the variables `{area}`, `{rooms}`, `{volume}`, `{units}` and their building sums `{area_total}`, `{rooms_total}`, `{volume_total}`, `{units_total}`.
 
 | Method | Path | Notes |
 |---|---|---|
@@ -196,7 +200,7 @@ Filter `status` in `GET /` and `/counts`: `draft`, `paid`, `sent` (sent, deadlin
 | POST | `/preview` | Body: calculation input (below). Stores nothing. → `{ preview: true, contractId, apartmentId, tenantId, periodStart, periodEnd, rentalDays, totalPeriodDays, lineItems, subtotal, managementFee, managementFeePercent, totalCosts, totalAdvancePayments, balance }` (numbers; positive balance = tenant owes). 400 |
 | POST | `/generate` | Body: calculation input + `buildingId`. Synchronous, one contract: calculates and stores a **draft** with line items and a payment deadline of `payment_deadline_days`. → **201** statement. 400 (e.g. contract not found, contract outside the period) |
 | GET | `/:id` | → statement with `tenant`, `apartment`, `building`, `lineItems` (see `tests/contracts/statement.json`). 404 |
-| PUT | `/:id` | Body: optional `notes`, `paymentDeadline`. → statement. 404; 400. A changed deadline discards the stored PDF |
+| PUT | `/:id` | Body: optional `notes`, `paymentDeadline` (date). → statement. 404; 400 date that does not exist; 422 deadline not YYYY-MM-DD. A changed deadline discards the stored PDF |
 | PUT | `/:id/status` | Body: `status` required; optional `paidDate`, `paidAmount`, `reminderSentDate`. → statement. 404; 400 invalid transition |
 | DELETE | `/:id` | 204. 404; 400 not a draft |
 | POST | `/:id/line-items` | Body: `items: [{ description, totalAmount, tenantShare, categoryId?, distributionKeyId?, sharePercentage?, sortOrder? }]` (amounts as strings). → 201 `{ message, items }`. 400 not found or not a draft |
@@ -204,7 +208,7 @@ Filter `status` in `GET /` and `/counts`: `draft`, `paid`, `sent` (sent, deadlin
 | GET | `/:id/pdf` | → `application/pdf` attachment `statement-<number>.pdf`. 404 statement not found or PDF not generated yet |
 | GET | `/:id/pdf/base64` | → `{ pdfBase64, mimeType: "application/pdf" }`. 404 as above |
 
-**Calculation input:** `contractId`, `periodStart`, `periodEnd` required; optional `heatingProfileId`, `managementFeePercent` (number ≥ 0, overrides `management_fee_pct`), `managementFeeDistributionKeyId`.
+**Calculation input:** `contractId`, `periodStart`, `periodEnd` required; optional `heatingProfileId`, `managementFeePercent` (number ≥ 0, overrides `management_fee_pct`). The Verwaltungspauschale is that percentage of the tenant's own utility costs.
 
 ## 13. Reminders and documents `/api/v1`
 

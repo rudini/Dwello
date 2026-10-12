@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { clearStores } from '$lib/stores';
 	import { getXsrfTokenFromCookie } from '$lib/api';
 	import { mobileNavOpen, openMobileNav } from '$lib/stores/navigation';
 	import Icon from '$lib/ui/Icon.svelte';
@@ -27,7 +26,6 @@
 				method: 'POST',
 				headers: xsrfToken ? { 'X-XSRF-TOKEN': xsrfToken } : {}
 			});
-			clearStores();
 			await goto('/login');
 		} catch (error) {
 			console.error('Logout failed:', error);

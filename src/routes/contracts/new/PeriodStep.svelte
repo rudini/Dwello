@@ -1,9 +1,8 @@
 <script lang="ts">
 	import Alert from '$lib/ui/Alert.svelte';
 	import RadioGroup from '$lib/ui/RadioGroup.svelte';
-	import TextInput from '$lib/ui/TextInput.svelte';
+	import DateInput from '$lib/ui/DateInput.svelte';
 	import { startDateNotice } from '$lib/contract-wizard';
-	import { formatDateLong } from '$lib/utils/format';
 
 	// Step 3: from when, and until when or without end; each date is repeated in words
 	let {
@@ -41,27 +40,15 @@
 	];
 </script>
 
-{#snippet inWords(date: string, testid: string)}
-	{#if date}
-		<p class="font-semibold text-ink" aria-live="polite" data-testid={testid}>
-			{formatDateLong(date)}
-		</p>
-	{/if}
-{/snippet}
-
-<div class="flex flex-col gap-2">
-	<TextInput
-		id="startDate"
-		label="Vertragsbeginn"
-		type="date"
-		help="Erster Tag des Mietverhältnisses."
-		bind:value={startDate}
-		{min}
-		error={errors.startDate}
-		testid="start-date-input"
-	/>
-	{@render inWords(startDate, 'start-date-words')}
-</div>
+<DateInput
+	id="startDate"
+	label="Vertragsbeginn"
+	help="Erster Tag des Mietverhältnisses."
+	bind:value={startDate}
+	{min}
+	error={errors.startDate}
+	testid="start-date-input"
+/>
 
 <!-- always present, so screen readers hear the hint when it appears -->
 <div role="status" data-testid="start-date-notice">
@@ -81,19 +68,15 @@
 />
 
 {#if !isUnlimited}
-	<div class="flex flex-col gap-2">
-		<TextInput
-			id="endDate"
-			label="Vertragsende"
-			type="date"
-			help="Letzter Tag des Mietverhältnisses."
-			bind:value={endDate}
-			min={startDate || undefined}
-			error={errors.endDate}
-			testid="end-date-input"
-		/>
-		{@render inWords(endDate, 'end-date-words')}
-	</div>
+	<DateInput
+		id="endDate"
+		label="Vertragsende"
+		help="Letzter Tag des Mietverhältnisses."
+		bind:value={endDate}
+		min={startDate || undefined}
+		error={errors.endDate}
+		testid="end-date-input"
+	/>
 {/if}
 
 {#if overlap}

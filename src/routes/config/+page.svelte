@@ -90,7 +90,7 @@
 
 		<Panel title="Verwaltungspauschale">
 			<SettingField
-				type="number"
+				type="decimal"
 				name="managementFeePercent"
 				label="Verwaltungspauschale in %"
 				value={settings.managementFeePercent}

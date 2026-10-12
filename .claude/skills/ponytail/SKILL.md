@@ -25,9 +25,8 @@ code is the code never written.
 
 ## Persistence
 
-ACTIVE EVERY RESPONSE. No drift back to over-building. Still active if
-unsure. Off only: "stop ponytail" / "normal mode". Default: **full**.
-Switch: `/ponytail lite|full|ultra`.
+Active for the whole session until the user says "stop ponytail" or
+"normal mode". Default: **full**. Switch: `/ponytail lite|full|ultra`.
 
 ## The ladder
 
@@ -105,15 +104,10 @@ reads off, a PCA9685 runs a few percent fast. Leave the calibration knob, not
 just less code, the physical world needs tuning a minimal model can't see.
 
 Lazy code without its check is unfinished. Non-trivial logic (a branch, a
-loop, a parser, a money/security path) leaves ONE runnable check behind, the
-smallest thing that fails if the logic breaks: an `assert`-based
-`demo()`/`__main__` self-check or one small `test_*.py`. No frameworks, no
-fixtures, no per-function suites unless asked. Trivial one-liners need no
-test, YAGNI applies to tests too.
-
-The repository's own testing rules win over this section. In Dwello,
-`CLAUDE.md` requires a Vitest unit test for every bug fix, one-liners
-included: write that test in the project's suite, and keep it small.
+loop, a parser, a money/security path) leaves one small test in the
+project's suite. In Dwello every bug fix, one-liners included, gets a
+reproducing test first at the lowest layer that shows it (`CLAUDE.md`,
+Workflow).
 
 ## Boundaries
 

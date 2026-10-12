@@ -11,8 +11,19 @@ import {
 	getBuildingWithApartments,
 	createBuilding,
 	updateBuilding,
-	deleteBuilding
+	deleteBuilding,
+	buildingExists
 } from '../services/building.service';
+import {
+	createFuelStock,
+	deleteFuelStock,
+	isHeatingCategory,
+	listFuelStocks,
+	otherTankCategory
+} from '../services/fuel-stock.service';
+import { isRealDate } from './real-date';
+
+const fuelStockParams = t.Object({ id: t.String({ format: 'uuid' }) });
 
 // Validation schemas
 const buildingQuerySchema = t.Object({
@@ -106,6 +117,62 @@ export const buildingRoutes = new Elysia({ prefix: '/api/v1/buildings' })
 		{
 			body: buildingUpdateSchema
 		}
+	)
+	// Heating oil in the tank on reading days (Tankbestand)
+	.get(
+		'/:id/fuel-stocks',
+		async ({ params, set }) => {
+			if (!(await buildingExists(params.id))) {
+				set.status = 404;
+				return { error: 'Building not found' };
+			}
+			return await listFuelStocks(params.id);
+		},
+		{ params: fuelStockParams }
+	)
+	.post(
+		'/:id/fuel-stocks',
+		async ({ params, body, set }) => {
+			if (!(await buildingExists(params.id))) {
+				set.status = 404;
+				return { error: 'Building not found' };
+			}
+			if (!isRealDate(body.readingDate) || !(await isHeatingCategory(body.categoryId))) {
+				set.status = 400;
+				return { error: 'readingDate must exist and categoryId must be an allocable heating cost category' };
+			}
+			if (await otherTankCategory(params.id, body.categoryId)) {
+				set.status = 409;
+				return { error: 'The building records its fuel stock in another category' };
+			}
+			const stock = await createFuelStock(params.id, body);
+			if (!stock) {
+				set.status = 409;
+				return { error: 'Fuel stock for this day already recorded' };
+			}
+			set.status = 201;
+			return stock;
+		},
+		{
+			params: fuelStockParams,
+			body: t.Object({
+				readingDate: t.String({ format: 'date' }),
+				amount: t.String({ pattern: '^\\d+(\\.\\d{1,2})?$' }),
+				categoryId: t.String({ format: 'uuid' })
+			})
+		}
+	)
+	.delete(
+		'/:id/fuel-stocks/:stockId',
+		async ({ params, set }) => {
+			if (!(await deleteFuelStock(params.id, params.stockId))) {
+				set.status = 404;
+				return { error: 'Fuel stock not found' };
+			}
+			set.status = 204;
+			return null;
+		},
+		{ params: t.Object({ id: t.String({ format: 'uuid' }), stockId: t.String({ format: 'uuid' }) }) }
 	)
 	// Delete building
 	.delete('/:id', async ({ params, set }) => {

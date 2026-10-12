@@ -17,3 +17,5 @@ export const sendDialog = (page: Page) => page.getByRole('dialog');
 export const confirmSendButton = (page: Page) => page.getByTestId('statement-send-confirm');
 export const sendRecipient = (page: Page) => page.getByTestId('send-recipient');
 export const sendPdfLink = (page: Page) => page.getByTestId('send-pdf-view');
+export const paidDateInput = (page: Page) => page.getByTestId('paid-date-input');
+export const statementHistory = (page: Page) => page.getByRole('heading', { name: 'Verlauf' }).locator('xpath=ancestor::*[.//dl][1]');

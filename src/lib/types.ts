@@ -170,6 +170,8 @@ export interface Category {
 	nameIT?: string;
 	nameEN?: string;
 	isAllowedUtilityCost: boolean;
+	// Shared by the heating profile at a tenant change (heating, chimney sweep), not by days
+	isHeatingCost?: boolean;
 	description?: string;
 	sortOrder?: number;
 }
@@ -193,6 +195,9 @@ export interface Invoice {
 	id: string;
 	buildingId: string;
 	invoiceDate: string;
+	/** Leistungszeitraum: the time the invoice bills, if not its date */
+	servicePeriodStart?: string | null;
+	servicePeriodEnd?: string | null;
 	billingEntity: string;
 	description: string;
 	amount: number;

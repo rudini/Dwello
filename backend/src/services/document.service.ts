@@ -38,7 +38,7 @@ function selectSummaries(where?: SQL) {
 		.innerJoin(tenants, eq(documents.tenantId, tenants.id))
 		.leftJoin(utilityStatements, eq(documents.statementId, utilityStatements.id))
 		.where(where)
-		.orderBy(desc(documents.createdAt));
+		.orderBy(desc(documents.createdAt), desc(documents.id));
 }
 
 export async function listDocuments(filters: DocumentFilters = {}) {

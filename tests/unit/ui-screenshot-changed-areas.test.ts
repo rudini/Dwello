@@ -1,6 +1,6 @@
 import { PNG } from 'pngjs';
 import { describe, expect, it } from 'vitest';
-import { changedAreas } from '../ui-screenshots/changed-areas';
+import { changedAreas, looksTheSame, markAreas } from '../ui-screenshots/changed-areas';
 
 // White image of the given size, with black pixels at the given points
 function image(width: number, height: number, ...black: [number, number][]) {
@@ -32,5 +32,35 @@ describe('changedAreas', () => {
 		expect(changedAreas(image(32, 16), image(32, 40))).toEqual([
 			{ x: 0, y: 16, width: 32, height: 24 }
 		]);
+	});
+});
+
+// Without a browser (PDF pages): the changed areas are framed in the image itself
+describe('markAreas', () => {
+	it('frames an area in red, just outside it, and leaves the inside as it is', () => {
+		const marked = PNG.sync.read(markAreas(image(64, 64), [{ x: 16, y: 16, width: 16, height: 16 }]));
+		const pixel = (x: number, y: number) => [...marked.data.subarray((y * 64 + x) * 4, (y * 64 + x) * 4 + 3)];
+
+		expect(pixel(12, 20)).toEqual([220, 38, 38]); // left edge of the frame, 2 px off the area like the pages' outline
+		expect(pixel(20, 20)).toEqual([255, 255, 255]); // inside
+		expect(pixel(2, 2)).toEqual([255, 255, 255]); // far outside
+	});
+});
+
+describe('looksTheSame', () => {
+	it('erkennt gleich aussehende Screenshots, auch wenn die PNG-Datei anders kodiert ist', () => {
+		const png = PNG.sync.read(image(32, 32, [3, 3]));
+		const recoded = PNG.sync.write(png, { deflateLevel: 0 });
+
+		expect(recoded.equals(image(32, 32, [3, 3]))).toBe(false);
+		expect(looksTheSame(image(32, 32, [3, 3]), recoded)).toBe(true);
+	});
+
+	it('sieht einen geänderten Pixel als Änderung', () => {
+		expect(looksTheSame(image(32, 32), image(32, 32, [10, 20]))).toBe(false);
+	});
+
+	it('sieht eine kürzer gewordene Seite als Änderung', () => {
+		expect(looksTheSame(image(32, 48), image(32, 32))).toBe(false);
 	});
 });

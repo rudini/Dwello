@@ -1,6 +1,6 @@
 # Dwello
 
-Web app for Swiss property managers (Liegenschaftsverwalter): buildings, apartments, tenants, contracts, invoices categorized by a local LLM, utility cost statements (Nebenkostenabrechnungen) with Swiss QR-bills. Single-user MVP, under 50 apartments.
+Web app for Swiss property managers (Liegenschaftsverwalter): buildings, apartments, tenants, contracts, invoices categorized by an LLM, utility cost statements (Nebenkostenabrechnungen) with Swiss QR-bills. Single-user MVP, under 50 apartments.
 
 Stack: SvelteKit + TypeScript + Tailwind (frontend and BFF) | ElysiaJS on Bun + Drizzle + PostgreSQL (`backend/`) | an LLM for invoice categorization (any OpenAI-compatible API, by default a local Ollama).
 
@@ -9,13 +9,13 @@ Stack: SvelteKit + TypeScript + Tailwind (frontend and BFF) | ElysiaJS on Bun + 
 Frontend (repo root):
 
 ```bash
-npm run dev                         # dev server; needs the backend running
-npx vitest run                      # all unit tests once (npm run test starts watch mode)
-npx vitest run src/__tests__/x.test.ts   # one file; *.dom.test.ts run in jsdom (mounting, clicking), all others in node
-npm run test:coverage               # with coverage floor, as in CI
-npm run lint                        # ESLint, fails on warnings
-npm run check                       # svelte-check incl. tests/ and *.config.ts
-npm run test:e2e                    # acceptance tests, see tests/e2e/CLAUDE.md
+bun run dev                         # dev server; needs the backend running
+bunx vitest run                      # all unit tests once (bun run test starts watch mode)
+bunx vitest run src/__tests__/x.test.ts   # one file; *.dom.test.ts run in jsdom (mounting, clicking), all others in node
+bun run test:coverage               # with coverage floor, as in CI
+bun run lint                        # ESLint, fails on warnings
+bun run check                       # svelte-check incl. tests/ and *.config.ts
+bun run test:e2e                    # acceptance tests, see tests/e2e/CLAUDE.md
 ```
 
 Backend (`cd backend`): see `backend/CLAUDE.md`. Short form: `bun run dev:demo` (app with demo data), `bun run test`, `bun run type-check`.
@@ -52,23 +52,24 @@ PostgreSQL on localhost:5432 (user and password `dwello`) is required for backen
 1. **Acceptance test first (ATDD):** every feature or behavior change starts with a German scenario in `tests/e2e/features/*.feature`, tagged `@wip` (excluded from runs). Watch it fail for the right reason.
 2. **`/tdd`:** drive the implementation red-green, one behavior at a time, through public interfaces. A test must fail before the code changes. Every bug fix gets a test that reproduces it first, at the lowest layer that can show it (unit, `*.pg.test.ts` or scenario).
 3. **`/ponytail`:** keep the shortest diff that works; check the finished change against it.
+   **Deep modules:** after each implementation step run `bun run deepcheck:audit` (silent when clean) and fix its findings before continuing; run `bun run deepcheck:scan` only when a codebase-wide review is requested (`tools/deepcheck/README.md`).
 4. **Done:** remove `@wip` once the scenario is green. A feature is done when its scenario passes, not when unit tests pass.
 5. **Plan:** log the task in `implementation_plan.md` (check the items, note the files changed). The file is long: read only its latest `## Session` section (`grep -n '^## Session' implementation_plan.md`) and add new work there. The phase table at the top is no longer maintained.
 
-Before marking anything complete, all of these pass: `npm run test:coverage`, `npm run lint`, `npm run check`, `cd backend && bun run test && bun run type-check`, and the affected E2E scenarios.
+Before marking anything complete, all of these pass: `bun run test:coverage`, `bun run lint`, `bun run check`, `cd backend && bun run test && bun run type-check`, and the affected E2E scenarios.
 
 ## Gotchas
 
-- **Fallow gate:** a hook runs `fallow audit` before every `git commit` and `git push` and blocks the whole Bash command on new unused exports or files, duplication, or complexity/CRAP findings. Run git commands on their own, not chained after edits, and fix the reported finding (un-export, delete, split the function) rather than working around it. `npx fallow audit` shows the findings before committing; CI runs the same audit.
+- **Never `bun test` in the repo root:** Bun is the package manager everywhere, but the frontend runs on Node. There `bun test` starts Bun's own test runner instead of Vitest, without `vitest.config.ts` (no jsdom, no coverage floor). Use `bunx vitest run`.
+- **Fallow gate:** a hook runs `fallow audit` before every `git commit` and `git push` and blocks the whole Bash command on new unused exports or files, duplication, or complexity/CRAP findings. Run git commands on their own, not chained after edits, and fix the reported finding (un-export, delete, split the function) rather than working around it. `bunx fallow audit` shows the findings before committing; CI runs the same audit.
+- **Deepcheck gate:** a second hook (`.claude/hooks/deepcheck-gate.sh`) runs the changed-scope deepcheck before every `git commit` and `git push` and blocks new or worsened shallow modules (pass-through layers, thin facades); CI runs the same check (job "Deep modules"). Fix the design, not the numbers; a deliberate exception needs `// deepcheck-ignore-file -- reason`.
 - **API contracts:** frontend tests take backend responses from `tests/contracts/*.json`; `backend/src/__tests__/api-contracts.pg.test.ts` checks them against the real API. Changing an API response means updating its contract.
 - **Coverage floors** in `vitest.config.ts` and `backend/scripts/coverage-check.ts` may not drop; the target is in `docs/test-pyramid.md`.
 
 ## Coding guidelines
 
 - **Think before coding:** state assumptions; if a request has several readings, name them instead of picking silently; push back when a simpler approach exists.
-- **Simplicity first:** the minimum code that solves the problem. No speculative features, abstractions for single use, configurability nobody asked for, or error handling for impossible cases.
 - **Surgical changes:** touch only what the task needs; match the surrounding style; don't reformat or refactor adjacent code. Remove what your change made unused, leave pre-existing dead code unless asked.
-- **Goal-driven:** turn the task into a verifiable check (a failing test) before writing the fix.
 
 ## Documentation (read when relevant)
 

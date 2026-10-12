@@ -7,8 +7,7 @@
 	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import Panel from '$lib/ui/Panel.svelte';
 	import Textarea from '$lib/ui/Textarea.svelte';
-	import TextInput from '$lib/ui/TextInput.svelte';
-	import { formatDateLong } from '$lib/utils/format';
+	import DateInput from '$lib/ui/DateInput.svelte';
 	import CostTable from '../CostTable.svelte';
 	import type { ActionData } from './$types';
 
@@ -55,18 +54,17 @@
 
 	<Panel title="Frist und Bemerkungen">
 		<!-- TODO(fachlich prüfen): the glossary has no term for the date by which a refund is paid out -->
-		<TextInput
+		<DateInput
 			id="paymentDeadline"
 			name="paymentDeadline"
-			type="date"
 			label={refund ? 'Rückerstattung bis' : 'Zahlungsfrist'}
 			help={refund
 				? 'Bis zu diesem Datum erstatten Sie dem Mieter den Betrag zurück.'
 				: 'Bis zu diesem Datum bezahlt der Mieter die Nachzahlung.'}
 			bind:value={deadline}
+			error={form?.errors?.paymentDeadline}
 			testid="payment-deadline-input"
 		/>
-		{#if deadline}<p class="font-semibold text-ink">{formatDateLong(deadline)}</p>{/if}
 		<Textarea
 			id="notes"
 			name="notes"

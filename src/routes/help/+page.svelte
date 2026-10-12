@@ -36,7 +36,7 @@
 				'Unter «Nebenkostenabrechnungen» führt Sie «Abrechnungen erstellen» in fünf Schritten: Abrechnungsperiode, Gebäude, Heizprofil und Verwaltungspauschale, Vorschau und Erstellen.',
 				'In der Vorschau prüfen Sie die Kosten: Dwello verteilt sie nach Verteilschlüssel und rechnet bei Mieterwechsel und Leerstand nach Mietstagen ab. Erst «Entwürfe erstellen» legt die Abrechnungen an.',
 				'Die Abrechnungen liegen danach als Entwurf vor. Zahlungsfrist und Bemerkung können Sie anpassen; falsche Kosten korrigieren Sie, indem Sie die Abrechnungen neu erstellen.',
-				'Dwello verschickt die Abrechnungen nicht selbst. Stellen Sie dem Mieter das PDF per Brief oder E-Mail zu und wählen Sie danach «Versenden». Dwello hält damit fest, dass die Abrechnung versendet ist.'
+				'Dwello verschickt die Abrechnungen nicht selbst. Stellen Sie dem Mieter das PDF per Brief oder E-Mail zu und wählen Sie danach «Als versendet markieren». Ab diesem Tag läuft die Zahlungsfrist.'
 			]
 		},
 		{

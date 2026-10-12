@@ -157,7 +157,7 @@ describe('apartmentOption', () => {
 
 	it('names the day an apartment becomes free', () => {
 		expect(apartmentOption(apartment, freeFrom('2025-04-01'), false).label).toBe(
-			'Wohnung 2.01 - Ahornhof (verfügbar ab 1.4.2025)'
+			'Wohnung 2.01 - Ahornhof (verfügbar ab 01.04.2025)'
 		);
 		expect(apartmentOption(apartment, undefined, false).label).toBe('Wohnung 2.01 - Ahornhof');
 	});

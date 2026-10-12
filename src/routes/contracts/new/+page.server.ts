@@ -8,6 +8,7 @@ interface Tenant {
 	id: string;
 	firstName: string;
 	lastName: string;
+	city?: string | null;
 }
 
 interface Apartment {
@@ -35,7 +36,8 @@ export const load: PageServerLoad = async ({ fetch }) => {
 		// Transform tenants for dropdown
 		const tenants = (tenantsData.tenants || []).map((t: Tenant) => ({
 			id: t.id,
-			name: `${t.firstName} ${t.lastName}`
+			name: `${t.firstName} ${t.lastName}`,
+			place: t.city ?? undefined // two tenants of the same name are told apart by their town
 		}));
 
 		// Transform apartments for dropdown

@@ -146,6 +146,23 @@ describe('Formula Service', () => {
 			expect(result.distributions[2].share).toBeCloseTo(120/250, 4);
 		});
 
+		// Gemischter Heizschlüssel: 70 % nach Fläche, 30 % zu gleichen Teilen, mit den Summen des Gebäudes
+		it('verteilt mit den Gebäudesummen genau 70 % nach Fläche und 30 % pro Wohnung', () => {
+			const result = calculateDistribution(
+				'0.7 * {area} / {area_total} + 0.3 * {units} / {units_total}',
+				apartments,
+				1000
+			);
+			expect(result.isValid).toBe(true);
+			expect(result.distributions[0].share).toBeCloseTo(0.7 * (50 / 250) + 0.3 / 3, 6);
+			expect(result.distributions[2].amount).toBeCloseTo(1000 * (0.7 * (120 / 250) + 0.3 / 3), 6);
+		});
+
+		it('akzeptiert die Gebäudesummen in der Prüfung einer Formel', () => {
+			expect(validateFormulaForDistribution('{rooms} / {rooms_total} + {volume} / {volume_total}').isValid).toBe(true);
+			expect(parseFormula('{area_total}').variables).toEqual(['area_total']);
+		});
+
 		it('should distribute by rooms', () => {
 			const result = calculateDistribution('{rooms}', apartments, 1000);
 			expect(result.isValid).toBe(true);
@@ -234,8 +251,9 @@ describe('Formula Service', () => {
 			expect(FORMULA_VARIABLES).toContain('units');
 		});
 
-		it('should have exactly 4 variables', () => {
-			expect(FORMULA_VARIABLES).toHaveLength(4);
+		it('should have the 4 apartment variables and their building sums', () => {
+			expect(FORMULA_VARIABLES).toHaveLength(8);
+			expect(FORMULA_VARIABLES).toContain('units_total');
 		});
 	});
 

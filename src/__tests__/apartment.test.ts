@@ -167,7 +167,7 @@ describe('Bruttomiete', () => {
 describe('Wohnungsstatus', () => {
 	it.each([
 		['occupied', null, 'Vermietet'],
-		['relet', '2026-11-01', 'Wiedervermietet ab 1.11.2026'],
+		['relet', '2026-11-01', 'Wiedervermietet ab 01.11.2026'],
 		['vacant', null, 'Leer'],
 		['reserved', null, 'Gesperrt']
 	] as const)('zeigt %s (nächster Vertrag ab %s) als %s', (status, nextContractStart, text) => {

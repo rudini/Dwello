@@ -14,8 +14,9 @@ export function contractStatusOn(
 	return endDate && endDate.slice(0, 10) < today ? 'ended' : 'active';
 }
 
-/** Today in this browser or server, as YYYY-MM-DD */
-export const localToday = () => new Date().toLocaleDateString('sv-SE');
+/** Today in Switzerland, as YYYY-MM-DD: the server runs in UTC, two hours behind in summer */
+export const localToday = () =>
+	new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Zurich' });
 
 /** Vertragsstatus in the glossary's words, with its badge tone */
 export const statusBadges: Record<Status, { label: string; tone: Tone }> = {

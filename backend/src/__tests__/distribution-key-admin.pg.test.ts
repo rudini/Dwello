@@ -49,7 +49,7 @@ describe('Eigene Verteilschlüssel', () => {
 		await expectRejection(
 			await create('Personen', '{persons} * 2'),
 			400,
-			'Die Formel ist ungültig: Unbekannte Variable {persons}. Erlaubt sind {area}, {rooms}, {volume} und {units}.'
+			'Die Formel ist ungültig: Unbekannte Variable {persons}. Erlaubt sind {area}, {rooms}, {volume}, {units} und ihre Summen wie {area_total}.'
 		);
 	});
 

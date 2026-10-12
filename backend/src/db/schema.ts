@@ -14,7 +14,8 @@ import {
 	timestamp,
 	date,
 	index,
-	uniqueIndex
+	uniqueIndex,
+	jsonb
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
@@ -149,6 +150,14 @@ export const rentalContractsRelations = relations(rentalContracts, ({ one, many 
 // ============================================================================
 // Categories Table (Utility Cost Categories)
 // ============================================================================
+// Master data shared by categories and distribution keys: a description, a position in lists and timestamps
+const describedAndOrdered = () => ({
+	description: text('description'),
+	sortOrder: integer('sort_order').default(0),
+	createdAt: timestamp('created_at').defaultNow().notNull(),
+	updatedAt: timestamp('updated_at').defaultNow().notNull()
+});
+
 export const categories = pgTable('categories', {
 	id: uuid('id').defaultRandom().primaryKey(),
 	name: varchar('name', { length: 100 }).notNull(),
@@ -157,10 +166,9 @@ export const categories = pgTable('categories', {
 	nameIT: varchar('name_it', { length: 100 }),
 	nameEN: varchar('name_en', { length: 100 }),
 	isAllowedUtilityCost: boolean('is_allowed_utility_cost').notNull().default(true),
-	description: text('description'),
-	sortOrder: integer('sort_order').default(0),
-	createdAt: timestamp('created_at').defaultNow().notNull(),
-	updatedAt: timestamp('updated_at').defaultNow().notNull()
+	// Heating costs (Art. 5 VMWG): shared by the heating profile at a tenant change; separate hot water by days
+	isHeatingCost: boolean('is_heating_cost').notNull().default(false),
+	...describedAndOrdered()
 });
 
 export const categoriesRelations = relations(categories, ({ many }) => ({
@@ -180,10 +188,7 @@ export const distributionKeys = pgTable('distribution_keys', {
 	nameEN: varchar('name_en', { length: 100 }),
 	type: varchar('type', { length: 20 }).notNull().default('predefined'), // predefined, custom
 	formula: text('formula'), // For custom keys: {area}, {rooms}, {units}
-	description: text('description'),
-	sortOrder: integer('sort_order').default(0),
-	createdAt: timestamp('created_at').defaultNow().notNull(),
-	updatedAt: timestamp('updated_at').defaultNow().notNull()
+	...describedAndOrdered()
 });
 
 export const distributionKeysRelations = relations(distributionKeys, ({ many }) => ({
@@ -241,6 +246,9 @@ export const invoices = pgTable(
 		amount: decimal('amount', { precision: 12, scale: 2 }).notNull(), // CHF
 		isValidUtilityCost: boolean('is_valid_utility_cost').notNull().default(true),
 		invoiceDate: date('invoice_date').notNull(),
+		// Leistungszeitraum: the period the invoice bills; without it the Rechnungsdatum decides the Abrechnungsperiode
+		servicePeriodStart: date('service_period_start'),
+		servicePeriodEnd: date('service_period_end'),
 		dueDate: date('due_date'),
 		paidDate: date('paid_date'),
 		// LLM categorization tracking
@@ -260,6 +268,25 @@ export const invoices = pgTable(
 		index('invoices_invoice_date_idx').on(table.invoiceDate),
 		index('invoices_category_id_idx').on(table.categoryId)
 	]
+);
+
+// Heating oil in the tank on a reading day, in CHF; heating costs are stock at the start + purchases − stock at the end
+export const fuelStocks = pgTable(
+	'fuel_stocks',
+	{
+		id: uuid('id').defaultRandom().primaryKey(),
+		buildingId: uuid('building_id')
+			.notNull()
+			.references(() => buildings.id, { onDelete: 'cascade' }),
+		readingDate: date('reading_date').notNull(),
+		amount: decimal('amount', { precision: 12, scale: 2 }).notNull(), // CHF
+		// the heating cost category the consumption is billed in
+		categoryId: uuid('category_id')
+			.notNull()
+			.references(() => categories.id, { onDelete: 'restrict' }),
+		createdAt: timestamp('created_at').defaultNow().notNull()
+	},
+	(table) => [uniqueIndex('fuel_stocks_building_id_reading_date_key').on(table.buildingId, table.readingDate)]
 );
 
 export const invoicesRelations = relations(invoices, ({ one }) => ({
@@ -284,6 +311,9 @@ export const invoicesRelations = relations(invoices, ({ one }) => ({
 // ============================================================================
 // Utility Statements Table
 // ============================================================================
+/** Own value and the building's total by unit: the fraction a simple distribution key gives the apartment */
+export type KeyValues = Record<'area' | 'units' | 'rooms', [number, number]>;
+
 export const utilityStatements = pgTable(
 	'utility_statements',
 	{
@@ -306,6 +336,11 @@ export const utilityStatements = pgTable(
 		totalAdvancePayments: decimal('total_advance_payments', { precision: 12, scale: 2 }).notNull(),
 		managementFeePercent: decimal('management_fee_percent', { precision: 5, scale: 2 }),
 		managementFee: decimal('management_fee', { precision: 12, scale: 2 }).default('0'),
+		// Settings of the generation run, printed in the PDF
+		heatingProfileId: uuid('heating_profile_id').references(() => heatingProfiles.id, { onDelete: 'set null' }),
+		// the Tankbestand readings the statement was created with
+		fuelStock: jsonb('fuel_stock').$type<{ categoryId: string; openingDate: string; opening: string; closingDate: string; closing: string }>(),
+		keyValues: jsonb('key_values').$type<KeyValues>(),
 		balance: decimal('balance', { precision: 12, scale: 2 }).notNull(), // positive = tenant owes, negative = refund
 		status: varchar('status', { length: 20 }).notNull().default('draft'), // draft, sent, paid; overdue is computed from the payment deadline
 		paymentDeadline: date('payment_deadline'),
@@ -363,6 +398,8 @@ export const utilityStatementLineItems = pgTable(
 		totalAmount: decimal('total_amount', { precision: 12, scale: 2 }).notNull(), // Building total
 		tenantShare: decimal('tenant_share', { precision: 12, scale: 2 }).notNull(), // Tenant's portion
 		sharePercentage: decimal('share_percentage', { precision: 8, scale: 4 }), // e.g., 12.5000%
+		apartmentShare: decimal('apartment_share', { precision: 12, scale: 2 }), // the apartment's part of the total by the key
+		periodShare: decimal('period_share', { precision: 8, scale: 4 }), // 0-1: days rented, or the heating profile's share
 		sortOrder: integer('sort_order').default(0),
 		createdAt: timestamp('created_at').defaultNow().notNull()
 	},

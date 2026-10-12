@@ -1,4 +1,5 @@
 import type { Actor } from '../fixtures/actor';
+import { typeDate } from '../interactions/form';
 import { visit } from '../interactions/navigation';
 import { finishedStep, saveStatus } from '../interactions/contract-form';
 import {
@@ -9,7 +10,6 @@ import {
 	generateMoreButton,
 	heatingProfileSelect,
 	managementFeeInput,
-	managementFeeKeySelect,
 	newInvoiceFromWarning,
 	nextButton,
 	periodEndInput,
@@ -18,7 +18,7 @@ import {
 	showStatementsButton
 } from '../interactions/statement-generate';
 
-type RunOptions = { heatingProfileId?: string; managementFeePercent?: number; managementFeeKey?: string };
+type RunOptions = { heatingProfileId?: string; managementFeePercent?: number };
 
 // Steps "Abrechnungsperiode" (default period) and "Gebäude"
 export const chooseBuilding = (buildingId: string) => async (actor: Actor) => {
@@ -33,17 +33,24 @@ export const setManagementFee = (buildingId: string, percent: number) => async (
 	await managementFeeInput(actor.page).fill(String(percent));
 };
 
+// Typed key by key, as a user does: what the field keeps while typing matters
+export const typeManagementFee = (buildingId: string, text: string) => async (actor: Actor) => {
+	await chooseBuilding(buildingId)(actor);
+	await nextButton(actor.page).click();
+	await managementFeeInput(actor.page).clear();
+	await managementFeeInput(actor.page).pressSequentially(text);
+};
+
 export const openPreview =
 	(year: number, buildingId: string, options: RunOptions = {}) =>
 	async (actor: Actor) => {
-		await periodStartInput(actor.page).fill(`${year}-01-01`);
-		await periodEndInput(actor.page).fill(`${year}-12-31`);
+		await typeDate(periodStartInput(actor.page), `${year}-01-01`);
+		await typeDate(periodEndInput(actor.page), `${year}-12-31`);
 		await chooseBuilding(buildingId)(actor);
 		await nextButton(actor.page).click();
 		if (options.heatingProfileId) await heatingProfileSelect(actor.page).selectOption(options.heatingProfileId);
 		if (options.managementFeePercent !== undefined)
 			await managementFeeInput(actor.page).fill(String(options.managementFeePercent));
-		if (options.managementFeeKey) await managementFeeKeySelect(actor.page).selectOption({ label: options.managementFeeKey });
 		await nextButton(actor.page).click();
 		await previewCount(actor.page).waitFor(); // the preview is calculated on the server
 	};

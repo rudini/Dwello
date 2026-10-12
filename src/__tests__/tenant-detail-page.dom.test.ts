@@ -83,7 +83,7 @@ describe('Mieterdetail', () => {
 		open();
 		expect(text('tenant-rental-apartment')).toBe('Wohnung 2.01');
 		expect(byTestId('tenant-rental-apartment-link')!.getAttribute('href')).toBe('/apartments/a2');
-		expect(text('tenant-rental-start')).toBe('1.11.2099');
+		expect(text('tenant-rental-start')).toBe('01.11.2099');
 		expect(text('tenant-rental-rent')).toBe('CHF 950.00');
 		expect(document.body.textContent).toContain('Einzug am');
 	});
@@ -102,8 +102,8 @@ describe('Mieterdetail', () => {
 		const rows = allByTestId('contract-history-row').map((row) =>
 			row.textContent!.replace(/\s+/g, ' ')
 		);
-		expect(rows[0]).toMatch(/Wohnung 2\.01.*Künftig.*ab 1\.11\.2099, unbefristet/);
-		expect(rows[1]).toMatch(/Wohnung 1\.01.*Beendet.*1\.1\.2015 – 31\.12\.2019/);
+		expect(rows[0]).toMatch(/Wohnung 2\.01.*Künftig.*ab 01\.11\.2099, unbefristet/);
+		expect(rows[1]).toMatch(/Wohnung 1\.01.*Beendet.*01\.01\.2015 – 31\.12\.2019/);
 		expect(rows.join()).not.toContain('heute');
 		const link = allByTestId('contract-history-link')[1];
 		expect(link.getAttribute('href')).toBe('/contracts/c1');

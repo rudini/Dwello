@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { germanName } from '$lib/names';
 	import { invoiceRows, type WizardSelection } from '$lib/statement-wizard';
 	import type { Building, HeatingProfile } from '$lib/types';
 	import BuildingStep from './BuildingStep.svelte';
@@ -24,7 +25,6 @@
 		data: {
 			buildings: (Building & { apartmentCount: number })[];
 			heatingProfiles: HeatingProfile[];
-			distributionKeys: { id: string; name: string }[];
 		};
 		selection: WizardSelection;
 		confirmed: boolean;
@@ -34,6 +34,8 @@
 		periodLabel: string;
 		createdCount: number | null;
 	} = $props();
+
+	const heatingProfile = $derived(data.heatingProfiles.find((p) => p.id === selection.heatingProfileId));
 </script>
 
 {#if step === 1}
@@ -52,10 +54,8 @@
 {:else if step === 3}
 	<SettingsStep
 		heatingProfiles={data.heatingProfiles}
-		distributionKeys={data.distributionKeys}
 		bind:heatingProfileId={selection.heatingProfileId}
 		bind:managementFeePercent={selection.managementFeePercent}
-		bind:managementFeeDistributionKeyId={selection.managementFeeDistributionKeyId}
 		{errors}
 	/>
 {:else if step === 4}
@@ -65,6 +65,8 @@
 		buildings={data.buildings}
 		{periodLabel}
 		period={selection}
+		heatingProfile={heatingProfile && germanName(heatingProfile)}
+		feePercent={selection.managementFeePercent}
 		bind:confirmed
 		{errors}
 	/>
@@ -74,6 +76,9 @@
 		{createdCount}
 		withoutInvoices={invoiceRows(invoices, data.buildings, selection)
 			.filter((row) => row.missing)
+			.map((row) => row.name)}
+		incomplete={invoiceRows(invoices, data.buildings, selection)
+			.filter((row) => row.incomplete)
 			.map((row) => row.name)}
 	/>
 {/if}

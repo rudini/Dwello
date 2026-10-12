@@ -24,6 +24,8 @@ export function toInvoice(r: Record<string, unknown>): InvoiceWithDetails {
 		id: r.id as string,
 		buildingId: r.buildingId as string,
 		invoiceDate: r.invoiceDate as string,
+		servicePeriodStart: r.servicePeriodStart as string | undefined,
+		servicePeriodEnd: r.servicePeriodEnd as string | undefined,
 		billingEntity: (r.billingEntityName || r.billingEntity || '') as string,
 		description: (r.description || '') as string,
 		amount: Number(r.amount) || 0,
@@ -42,5 +44,38 @@ export function toInvoice(r: Record<string, unknown>): InvoiceWithDetails {
 			? { id: suggested.id as string, name: toCategory(suggested).name }
 			: undefined,
 		categorizationStatus: categorizationStatus(r)
+	};
+}
+
+type StatementPeriod = { periodStart: string; periodEnd: string; createdAt: string };
+
+const periodsOf = (statements: StatementPeriod[]) =>
+	[...new Set(statements.map((s) => `${s.periodStart}/${s.periodEnd}`))].map((period) => {
+		const [start, end] = period.split('/');
+		return { start, end };
+	});
+
+/**
+ * The periods with statements for this allocable invoice (its Leistungszeitraum, else its Rechnungsdatum, overlaps
+ * them): billedIn took it (created after it was recorded), missedIn were created before and lack it
+ */
+export async function statementPeriods(
+	fetch: typeof globalThis.fetch,
+	backendUrl: string,
+	invoice: Record<string, unknown>
+) {
+	if (invoice.isValidUtilityCost === false) return { billedIn: [], missedIn: [] };
+	const response = await fetch(
+		`${backendUrl}/api/v1/statements?buildingId=${invoice.buildingId}&limit=1000`
+	).catch(() => null);
+	const statements: StatementPeriod[] = response?.ok ? ((await response.json()).data ?? []) : [];
+	const start = (invoice.servicePeriodStart ?? invoice.invoiceDate) as string;
+	const end = (invoice.servicePeriodEnd ?? invoice.invoiceDate) as string;
+	const overlapping = statements.filter((s) => s.periodStart <= end && s.periodEnd >= start);
+	// a period can be in both: drafts created again do not replace the older ones
+	const recordedAt = String(invoice.createdAt);
+	return {
+		billedIn: periodsOf(overlapping.filter((s) => s.createdAt >= recordedAt)),
+		missedIn: periodsOf(overlapping.filter((s) => s.createdAt < recordedAt))
 	};
 }

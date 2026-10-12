@@ -1,3 +1,6 @@
+import { localToday } from '$lib/contract-status';
+import type { InvoiceCheck } from '$lib/statement-wizard';
+
 const API = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1`;
 
 type Fetch = typeof globalThis.fetch;
@@ -15,8 +18,6 @@ export interface GenerationRequest {
 	periodEnd: string;
 	heatingProfileId: string;
 	managementFeePercent: number;
-	// Distributes the management fee to the apartments; none: equally
-	managementFeeDistributionKeyId?: string;
 }
 
 async function call(fetch: Fetch, path: string, body?: object) {
@@ -33,16 +34,26 @@ async function call(fetch: Fetch, path: string, body?: object) {
 	return data;
 }
 
-// Every contract of the selected buildings that overlaps the period gets its own statement (tenant change = two statements)
+// Every contract of the selected buildings that overlaps the period gets its own statement (tenant change = two
+// statements); a contract that already has one in the period gets none, so a deleted draft can be created again
 async function contractsInPeriod(
 	fetch: Fetch,
 	{ buildingIds, periodStart, periodEnd }: GenerationRequest
 ) {
 	const perBuilding = await Promise.all(
 		buildingIds.map(async (buildingId) => {
-			const { contracts } = await call(fetch, `contracts?buildingId=${buildingId}&limit=1000`);
+			const [{ contracts }, { data: statements }] = await Promise.all([
+				call(fetch, `contracts?buildingId=${buildingId}&limit=1000`),
+				call(fetch, `statements?buildingId=${buildingId}&limit=1000`)
+			]);
+			const billed = new Set(
+				(statements as (Period & { contractId: string })[])
+					.filter((s) => s.periodStart <= periodEnd && s.periodEnd >= periodStart)
+					.map((s) => s.contractId)
+			);
 			return (contracts as Contract[])
 				.filter((c) => c.startDate <= periodEnd && (!c.endDate || c.endDate >= periodStart))
+				.filter((c) => !billed.has(c.id))
 				.map((contract) => ({ buildingId, contract }));
 		})
 	);
@@ -51,7 +62,6 @@ async function contractsInPeriod(
 
 export async function previewStatements(fetch: Fetch, request: GenerationRequest) {
 	const { periodStart, periodEnd, heatingProfileId, managementFeePercent } = request;
-	const managementFeeDistributionKeyId = request.managementFeeDistributionKeyId || undefined;
 	const rows = [];
 	for (const { contract } of await contractsInPeriod(fetch, request)) {
 		const preview = await call(fetch, 'statements/preview', {
@@ -59,15 +69,18 @@ export async function previewStatements(fetch: Fetch, request: GenerationRequest
 			periodStart,
 			periodEnd,
 			heatingProfileId,
-			managementFeePercent,
-			managementFeeDistributionKeyId
+			managementFeePercent
 		});
 		rows.push({
 			contractId: contract.id,
 			tenantName: contract.tenantName,
 			apartmentNumber: contract.apartmentNumber,
 			totalCosts: Number(preview.totalCosts),
-			balance: Number(preview.balance)
+			totalAdvancePayments: Number(preview.totalAdvancePayments),
+			balance: Number(preview.balance),
+			rentalDays: Number(preview.rentalDays),
+			totalPeriodDays: Number(preview.totalPeriodDays),
+			movedOut: !!contract.endDate && contract.endDate <= [periodEnd, localToday()].sort()[1] // ended by now
 		});
 	}
 	return rows;
@@ -75,7 +88,6 @@ export async function previewStatements(fetch: Fetch, request: GenerationRequest
 
 export async function generateStatements(fetch: Fetch, request: GenerationRequest) {
 	const { periodStart, periodEnd, heatingProfileId, managementFeePercent } = request;
-	const managementFeeDistributionKeyId = request.managementFeeDistributionKeyId || undefined;
 	const contracts = await contractsInPeriod(fetch, request);
 	for (const { buildingId, contract } of contracts) {
 		await call(fetch, 'statements/generate', {
@@ -84,8 +96,7 @@ export async function generateStatements(fetch: Fetch, request: GenerationReques
 			periodStart,
 			periodEnd,
 			heatingProfileId,
-			managementFeePercent,
-			managementFeeDistributionKeyId
+			managementFeePercent
 		});
 	}
 	return contracts.length;
@@ -93,7 +104,7 @@ export async function generateStatements(fetch: Fetch, request: GenerationReques
 
 type Period = { periodStart: string; periodEnd: string };
 
-/** Per building: the utility invoices dated in the period and the statements whose period overlaps it */
+/** Per building: the utility invoices of the period, the statements whose period overlaps it and the check per category */
 export async function invoicesInPeriod(
 	fetch: Fetch,
 	{ buildingIds, periodStart, periodEnd }: GenerationRequest
@@ -102,20 +113,27 @@ export async function invoicesInPeriod(
 	return Promise.all(
 		buildingIds.map(async (buildingId) => {
 			const building = encodeURIComponent(buildingId);
-			const [{ invoices }, { data: statements }] = await Promise.all([
-				call(
-					fetch,
-					`invoices?buildingId=${building}&dateFrom=${periodStart}&dateTo=${periodEnd}&isValidUtilityCost=true&limit=1000`
-				),
-				call(fetch, `statements?buildingId=${building}&limit=1000`)
+			const [invoices, { data: statements }, check] = await Promise.all([
+				// the invoices the statement takes: by Leistungszeitraum, otherwise by Rechnungsdatum
+				call(fetch, `invoices/for-statement/${building}?periodStart=${periodStart}&periodEnd=${periodEnd}`),
+				call(fetch, `statements?buildingId=${building}&limit=1000`),
+				// a hint only: without it the preview still shows
+				call(fetch, `invoices/completeness/${building}?periodStart=${periodStart}&periodEnd=${periodEnd}`).catch(
+					() => undefined
+				)
 			]);
-			const dates = (invoices as { invoiceDate: string }[]).map((i) => i.invoiceDate).sort();
+			// an invoice with a Leistungszeitraum covers its days in the period, not its date
+			type Bill = { invoiceDate: string; servicePeriodEnd?: string | null; inPeriod?: { start: string; end: string } };
+			const dates = (invoices as Bill[])
+				.flatMap((i) => (i.servicePeriodEnd && i.inPeriod ? [i.inPeriod.start, i.inPeriod.end] : [i.invoiceDate]))
+				.sort();
 			return {
 				buildingId,
-				count: dates.length,
+				count: invoices.length,
 				first: dates[0] ?? null,
 				last: dates.at(-1) ?? null,
-				statements: (statements as Period[]).filter(overlaps).length
+				statements: (statements as Period[]).filter(overlaps).length,
+				check: check as InvoiceCheck | undefined
 			};
 		})
 	);

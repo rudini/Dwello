@@ -22,4 +22,17 @@ describe('Abrechnung bearbeiten', () => {
 			data: { errors: { form: 'Abrechnung konnte nicht gespeichert werden.' } }
 		});
 	});
+
+	it('verlangt eine Frist, bevor das Backend gefragt wird', async () => {
+		const { calls, result } = runAction(actions.default, 's1', 200, {
+			...fields,
+			paymentDeadline: ''
+		});
+
+		expect(await result).toMatchObject({
+			status: 400,
+			data: { errors: { paymentDeadline: 'Die Frist fehlt. Bitte geben Sie ein Datum ein.' } }
+		});
+		expect(calls).toEqual([]);
+	});
 });

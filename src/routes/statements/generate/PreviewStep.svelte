@@ -1,7 +1,10 @@
 <script lang="ts">
-	import { invoiceRows } from '$lib/statement-wizard';
+	import { balanceLabel } from '$lib/statement';
+	import { akontoHint, invoiceRows } from '$lib/statement-wizard';
+	import Icon from '$lib/ui/Icon.svelte';
 	import { formatCurrency } from '$lib/utils/format';
 	import PreviewChecks from './PreviewChecks.svelte';
+	import PreviewEmpty from './PreviewEmpty.svelte';
 	import type { PreviewRow } from './preview';
 
 	// Step 4: what each rental contract will get, and the invoices behind it; missing invoices are flagged
@@ -11,6 +14,8 @@
 		buildings,
 		periodLabel,
 		period,
+		heatingProfile,
+		feePercent,
 		confirmed = $bindable(),
 		errors
 	}: {
@@ -19,15 +24,17 @@
 		buildings: { id: string; name: string }[];
 		periodLabel: string;
 		period: { periodStart: string; periodEnd: string };
+		heatingProfile?: string; // what step 3 chose, to check before creating
+		feePercent: number;
 		confirmed: boolean;
 		errors: Record<string, string>;
 	} = $props();
 
 	const total = $derived(previewRows.reduce((sum, row) => sum + row.totalCosts, 0));
 	const rows = $derived(invoiceRows(invoices, buildings, period));
-	// Saldo > 0: the tenant pays the difference, < 0: the tenant gets it back
-	const saldo = (balance: number) =>
-		`${balance >= 0 ? 'Nachzahlung' : 'Rückerstattung'} ${formatCurrency(Math.abs(balance))}`;
+	const billed = $derived(rows.filter((row) => row.existing > 0));
+	// Saldo > 0: the tenant pays the difference, < 0: the tenant gets it back, 0: Ausgeglichen
+	const saldo = (balance: number) => `${balanceLabel(balance)} ${formatCurrency(Math.abs(balance))}`;
 </script>
 
 <dl class="grid gap-4 sm:grid-cols-3">
@@ -47,6 +54,18 @@
 		<!-- Glossary (Vermieter, Proration): the landlord bears the costs of vacancy -->
 		<dd class="text-ink-muted">
 			Den Anteil leerer Wohnungen trägt der Vermieter; er ist in diesem Betrag nicht enthalten.
+		</dd>
+	</div>
+	{#if heatingProfile}
+		<div class="flex flex-col gap-1 rounded-panel bg-sunken p-4">
+			<dt class="text-ink-muted">Heizprofil</dt>
+			<dd class="font-semibold text-ink" data-testid="preview-heating-profile">{heatingProfile}</dd>
+		</div>
+	{/if}
+	<div class="flex flex-col gap-1 rounded-panel bg-sunken p-4">
+		<dt class="text-ink-muted">Verwaltungspauschale</dt>
+		<dd class="font-semibold text-ink" data-testid="preview-fee">
+			{feePercent} % der eigenen Nebenkosten jedes Mieters
 		</dd>
 	</div>
 </dl>
@@ -74,18 +93,12 @@
 <section aria-labelledby="statements-heading" class="flex flex-col gap-2">
 	<h3 id="statements-heading" class="text-xl font-bold text-ink">Abrechnungen pro Mietvertrag</h3>
 	{#if previewRows.length === 0}
-		<p class="text-ink-muted" data-testid="preview-empty">
-			In dieser Abrechnungsperiode gibt es keine Mietverträge in den gewählten Gebäuden.
-		</p>
-		{#if errors.preview}
-			<p class="font-semibold text-critical" role="alert" data-testid="form-error">
-				{errors.preview}
-			</p>
-		{/if}
+		<PreviewEmpty {billed} error={errors.preview} />
 	{:else}
 		<!-- a list instead of a table: readable on phones without scrolling sideways -->
 		<ul class="flex flex-col divide-y divide-line">
 			{#each previewRows as row (row.contractId)}
+				{@const hint = akontoHint(row)}
 				<li
 					class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 py-2"
 					data-testid="preview-row"
@@ -97,6 +110,11 @@
 					<span class="flex flex-col text-right tabular-nums">
 						<span class="text-ink">Kosten {formatCurrency(row.totalCosts)}</span>
 						<span class="font-semibold text-ink">{saldo(row.balance)}</span>
+						{#if hint}
+							<span class="flex items-center justify-end gap-2 text-caution" data-testid="preview-akonto-hint">
+								<Icon name="warning" />{hint}
+							</span>
+						{/if}
 					</span>
 				</li>
 			{/each}
