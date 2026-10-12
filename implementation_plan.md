@@ -4725,6 +4725,10 @@ A tenant gives notice for a later day: «Mietvertrag beenden» asks for the Vert
   stricter scenarios and a per-contract scenario (J-5); API samples `contracts.json` and `period-statements.json`
   (J-6); `TODO(fachlich prüfen)` at the new texts (J-7); the end dialog names tenant and apartment; the message
   after withdrawing a notice; demo data mark the previous tenants as gekündigt (`demo-data.sql`, J-8).
+- [x] **Review J-2** (`docs/reviews/J-review-2.md`): removing the end withdraws a notice even with `terminated: true`
+  (J2-1); tests for the notice check on POST and for `terminated` in the apartment and tenant history (J2-2); the
+  contract sample is checked with an end and a notice (J2-3); docs name the open points (J2-4, J2-5); comments moved
+  (J2-6).
 
 ---
 

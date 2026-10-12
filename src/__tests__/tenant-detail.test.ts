@@ -109,6 +109,12 @@ describe('Vertragsstatus in der Historie', () => {
 	])('Vertrag von %s bis %s ist %s', (startDate, endDate, status) => {
 		expect(toContractHistory({ id: 'c', startDate, endDate }, 'Anna').status).toBe(status);
 	});
+	// A-1: Wohnungs- und Mieterseite nennen eine Kündigung wie die Detailseite
+	it('gibt weiter, ob der Mietvertrag gekündigt ist', () => {
+		const contract = { id: 'c', startDate: day(-10), endDate: day(10) };
+		expect(toContractHistory({ ...contract, terminated: true }, 'Anna').terminated).toBe(true);
+		expect(toContractHistory(contract, 'Anna').terminated).toBe(false);
+	});
 });
 
 describe('Mieter löschen', () => {

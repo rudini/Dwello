@@ -192,4 +192,24 @@ describe('Gekündigter Mietvertrag', () => {
 		expect(await response.json()).toEqual({ error: 'A notice needs an end date' });
 		expect(await stored()).toMatchObject({ endDate: null, terminated: false });
 	});
+
+	// J2-1: ohne Vertragsende gibt es keine Kündigung, auch wenn beides zugleich kommt
+	it('hebt die Kündigung auf, wenn das Vertragsende entfernt wird', async () => {
+		expect((await put({ endDate: '2099-03-31', terminated: true })).status).toBe(200);
+		expect((await put({ endDate: null, terminated: true })).status).toBe(200);
+		expect(await stored()).toMatchObject({ endDate: null, terminated: false });
+	});
+
+	it('legt keinen neuen Mietvertrag mit Kündigung ohne Vertragsende an', async () => {
+		const response = await sendJson('POST', '/api/v1/contracts', {
+			apartmentId: rental.apartment,
+			tenantId: rental.tenant,
+			startDate: '2100-01-01',
+			baseRent: '950',
+			monthlyAdvancePayment: '100',
+			terminated: true
+		});
+		expect(response.status).toBe(400);
+		expect(await response.json()).toEqual({ error: 'A notice needs an end date' });
+	});
 });

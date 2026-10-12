@@ -126,7 +126,6 @@ describe('Demodaten', () => {
 		]);
 	});
 
-	// Bei einem Mieterwechsel erhält jeder Mietvertrag eine eigene Abrechnung über seine Mietstage
 	// A-1: die Vormieter haben gekündigt; ohne Kennzeichen hiessen ihre Verträge «befristet» (Persona Anna J1)
 	it('kennzeichnet die Verträge der ausgezogenen Vormieter als gekündigt', async () => {
 		const rows = await query(name, 'SELECT end_date::text, terminated FROM rental_contracts WHERE end_date IS NOT NULL ORDER BY end_date');
@@ -136,6 +135,7 @@ describe('Demodaten', () => {
 		]);
 	});
 
+	// Bei einem Mieterwechsel erhält jeder Mietvertrag eine eigene Abrechnung über seine Mietstage
 	it('rechnet den Mieterwechsel in Seepark A2 mit zwei Abrechnungen ab', async () => {
 		const rows = await query(
 			name,

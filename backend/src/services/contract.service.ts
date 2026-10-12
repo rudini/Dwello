@@ -267,14 +267,14 @@ export async function getContractsByPeriod(
 	return contracts as ContractWithDetails[];
 }
 
-/**
- * Create a new contract
- */
 /** A notice is given for a Kündigungstermin: without an end there is nothing to give notice for */
 function checkNotice(terminated: boolean | undefined, endDate: string | null | undefined) {
 	if (terminated && !endDate) throw new Error('A notice needs an end date');
 }
 
+/**
+ * Create a new contract
+ */
 export async function createContract(data: NewRentalContract): Promise<RentalContract> {
 	checkNotice(data.terminated, data.endDate);
 	// Check for overlapping contracts
@@ -341,7 +341,8 @@ export async function updateContract(
 ): Promise<RentalContract | null> {
 	const current = await getContract(id);
 	if (!current) return null;
-	checkNotice(data.terminated, data.endDate !== undefined ? data.endDate : current.endDate);
+	// removing the end withdraws the notice (below), whatever flag comes with it
+	if (data.endDate !== null) checkNotice(data.terminated, data.endDate ?? current.endDate);
 	await checkNewDates(current, data);
 
 	const [contract] = await db

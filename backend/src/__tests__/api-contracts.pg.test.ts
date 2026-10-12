@@ -133,9 +133,17 @@ describe('API-Verträge des Frontends', () => {
 		expect(drift(await sample('contract-end-refused'), await response.json())).toEqual([]);
 	});
 
+	// a contract with an end and a notice: null fields are not checked (J2-3)
 	it('GET /contracts liefert die Felder von contracts.json', async () => {
-		const actual = await (await callApi(`/api/v1/contracts?buildingId=${rental.building}&limit=1000`)).json();
-		expect(drift(await sample('contracts'), actual)).toEqual([]);
+		const noticed = await createRental(crypto.randomUUID(), { startDate: '2024-04-01', monthlyAdvancePayment: '150' });
+		try {
+			await sendJson('PUT', `/api/v1/contracts/${noticed.contract}`, { endDate: '2099-03-31', terminated: true });
+			const actual = await (await callApi(`/api/v1/contracts?buildingId=${noticed.building}&limit=1000`)).json();
+			expect(drift(await sample('contracts'), actual)).toEqual([]);
+			expect(actual).toMatchObject({ contracts: [{ endDate: '2099-03-31', terminated: true }] });
+		} finally {
+			await noticed.remove();
+		}
 	});
 
 	it('GET /statements einer Periode liefert die Felder von period-statements.json', async () => {
