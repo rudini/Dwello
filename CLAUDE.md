@@ -66,6 +66,7 @@ Before marking anything complete, all of these pass: `bun run test:coverage`, `b
 - **Deepcheck gate:** a second hook (`.claude/hooks/deepcheck-gate.sh`) runs the changed-scope deepcheck before every `git commit` and `git push` and blocks new or worsened shallow modules (pass-through layers, thin facades); CI runs the same check (job "Deep modules"). Fix the design, not the numbers; a deliberate exception needs `// deepcheck-ignore-file -- reason`.
 - **API contracts:** frontend tests take backend responses from `tests/contracts/*.json`; `backend/src/__tests__/api-contracts.pg.test.ts` checks them against the real API. Changing an API response means updating its contract.
 - **Coverage floors** in `vitest.config.ts` and `backend/scripts/coverage-check.ts` may not drop; the target is in `docs/test-pyramid.md`.
+- **Web search:** use `mmx search "<query>"` (MiniMax CLI, add `--output json` for parsing; at most 10 results, no paging) for current library docs, Swiss legal or tax rules and error messages. In cloud sessions it needs the environment's setup script (`npm install -g mmx-cli`), `MINIMAX_API_KEY` and `api.minimax.io` in the allowed domains.
 
 ## Coding guidelines
 
