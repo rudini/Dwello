@@ -18,6 +18,7 @@ import os
 import random
 import re
 import fnmatch
+import hashlib
 import shlex
 import shutil
 import subprocess
@@ -447,7 +448,9 @@ def run(fixture, arm, run_id):
     record = {"run_id": run_id, "status": "started", "phase": parsed["phase"], "slot": int(parsed["slot"]),
               "attempt": int(parsed["attempt"]), "fixture": fixture.name,
               "fixture_dir": f"{fixture.parent.name}/{fixture.name}", "arm": arm,
-              "started": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(started)), "valid": False}
+              "started": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(started)), "valid": False,
+              "harness": {"commit": sh(["git", "rev-parse", "HEAD"], STAGE3)[1].strip(),
+                          "sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest()}}
     (out_dir / f"{run_id}.json").write_text(json.dumps(record, indent=1) + "\n")  # a crash stays a failed attempt
     repo, prompt = prepare(fixture, arm, run_dir)
     base = git(repo, "rev-parse", "HEAD")
