@@ -45,7 +45,13 @@
 	let duration = $state('unbefristet');
 
 	onMount(() => {
-		addToast('success', m.gallery_toast_saved({ name: `${m.tenants_example_first_name()} ${m.tenants_example_last_name()}` }), 0);
+		addToast(
+			'success',
+			m.gallery_toast_saved({
+				name: `${m.tenants_example_first_name()} ${m.tenants_example_last_name()}`
+			}),
+			0
+		);
 		addToast('error', m.gallery_toast_error(), 0);
 		addToast('warning', m.gallery_toast_warning(), 0);
 		addToast('info', m.gallery_toast_info(), 0);
@@ -93,7 +99,7 @@
 
 	<Panel title={m.gallery_fields()}>
 		<div class="grid gap-6 md:grid-cols-2">
-			<TextInput id="g-name" label={m.tenants_last_name()} value="Keller" />
+			<TextInput id="g-name" label={m.tenants_last_name()} value={m.tenants_example_last_name()} />
 			<TextInput
 				id="g-number"
 				label={m.apartments_number()}
@@ -319,7 +325,11 @@
 	danger
 	onconfirm={() => (dialogOpen = false)}
 >
-	<p>{m.gallery_delete_tenant_text({ name: `${m.tenants_example_first_name()} ${m.tenants_example_last_name()}` })}</p>
+	<p>
+		{m.gallery_delete_tenant_text({
+			name: `${m.tenants_example_first_name()} ${m.tenants_example_last_name()}`
+		})}
+	</p>
 </Dialog>
 <Dialog
 	bind:open={busyDialogOpen}

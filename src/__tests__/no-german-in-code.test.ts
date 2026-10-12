@@ -13,21 +13,19 @@ const german = vocabulary(de);
 const germanWords = (text: string) =>
 	words(text).filter((word) => /[äöüß]/.test(word) || (german.has(word) && !english.has(word)));
 
-/** Texts a reader could see: markup text, labelling attributes, and every string literal */
+/** Texts a reader could see: markup text and every quoted string, also in attributes, props and {…} expressions */
 function texts(source: string, svelte: boolean) {
 	const plain = source
 		.replace(/<!--[\s\S]*?-->/g, '')
 		.replace(/\/\*[\s\S]*?\*\//g, '')
 		.replace(/(^|\s)\/\/.*$/gm, '$1')
 		.replace(/<style[\s\S]*?<\/style>/g, '');
-	const scripts = svelte ? (plain.match(/<script[\s\S]*?<\/script>/g) ?? []).join('\n') : plain;
 	const markup = svelte
 		? plain.replace(/<script[\s\S]*?<\/script>/g, '').replace(/\{[^{}]*\}/g, '')
 		: '';
 	return [
 		...[...markup.matchAll(/>([^<>]+)</g)].map((match) => match[1]),
-		...[...markup.matchAll(/(?:aria-label|title|placeholder|alt)="([^"]+)"/g)].map((m) => m[1]),
-		...[...scripts.matchAll(/(['"`])((?:\\.|(?!\1).)*)\1/g)].map((match) => match[2])
+		...[...plain.matchAll(/(['"`])((?:\\.|(?!\1)[\s\S])*)\1/g)].map((match) => match[2])
 	];
 }
 
@@ -35,11 +33,15 @@ function texts(source: string, svelte: boolean) {
 const identifiers: Record<string, string[]> = {
 	'src/lib/overview.ts': ['Zahlungsfrist', 'Vertragsende'], // deadline kinds (DeadlineList.svelte)
 	'src/lib/utils/contract-availability.ts': ['Aktiv', 'Beendet'], // contract status of the API
-	'src/routes/gallery/+page.svelte': ['laufend', 'unbefristet'], // tab and option values
-	'src/routes/statements/[id]/pdf/+server.ts': ['ansehen', 'abrechnung'], // query parameter, file name
+	'src/routes/gallery/+page.svelte': ['laufend', 'beendet', 'unbefristet', 'befristet'], // tab and option values
+	// query parameter; the download's file name stays German in every language (offene-punkte.md)
+	'src/routes/statements/[id]/pdf/+server.ts': ['ansehen', 'abrechnung'],
+	'src/routes/statements/[id]/SendDialog.svelte': ['ansehen'], // query parameter
 	'src/routes/statements/generate/PreviewChecks.svelte': ['schritt'], // query parameter
 	'src/routes/statements/generate/StatementWizard.svelte': ['schritt'],
 	'src/lib/statement-wizard.ts': ['akonto'], // a message's name
+	'src/routes/statements/generate/PreviewStep.svelte': ['akonto'], // test id
+	'src/lib/invoice.ts': ['null'], // code between the quotes of a regular expression
 	'src/lib/wizard-draft.ts': ['null'], // JSON
 	'src/lib/ui/LanguageSwitcher.svelte': ['Deutsch'] // each language in its own words
 };
@@ -56,6 +58,14 @@ describe('Keine deutschen Texte im Code', () => {
 			true
 		).flatMap(germanWords);
 		expect(found.sort()).toEqual(['erfassen', 'gespeichert', 'mieter', 'schliessen']);
+	});
+
+	it('erkennt deutschen Text in Ausdrücken, Komponenten und mehrzeiligen Zeichenketten', () => {
+		const found = texts(
+			`<p>{ok ? 'Gespeichert' : 'Fehler'}</p><TextInput label='Mieter' help="Bitte" />\n<script>const a = \`Ja\nWohnung\`;</script>`,
+			true
+		).flatMap(germanWords);
+		expect(found.sort()).toEqual(['bitte', 'fehler', 'gespeichert', 'mieter', 'wohnung']);
 	});
 
 	it('übersieht Kommentare und Ausdrücke', () => {
