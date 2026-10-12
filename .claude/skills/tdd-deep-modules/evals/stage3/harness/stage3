@@ -652,9 +652,10 @@ def evaluate(phase):
         for reason in reasons:
             invalid[(rec["arm"], reason)] = invalid.get((rec["arm"], reason), 0) + 1
         if reasons:
+            last = rec["attempt"] >= MAX_ATTEMPTS
             notes.append(f"invalid run {rec['run_id']}: {', '.join(reasons)}"
                          + (f" {rec['foreign_references'][:3]}" if rec.get("foreign_references") else "")
-                         + " (failure case, slot rerun)")
+                         + (" (failure case, attempt cap reached)" if last else " (failure case, slot rerun)"))
         if rec["status"] == "finished" and rec["arm"] == "skill" and rec["valid"] \
                 and rec["replay"]["verdict"] != "ACCEPT":
             ok = False
@@ -756,9 +757,11 @@ def gate(phase):
         wb, wc = [f["vs_baseline"] for f in finals], [f["vs_canon"] for f in finals]
         fx_ok = wb.count(1) * 2 > len(wb) and wb.count(-1) == 0
         attribution &= wc.count(1) * 2 > len(wc)
+        verdict = "ok" if fx_ok else "NOT MET"
+        if phase == "main" and len(finals) < len(planned_slots(phase)):
+            verdict = f"incomplete ({len(finals)} of {len(planned_slots(phase))} groups)"
         print(f"  {fixture:24} n={len(finals)}  baseline {wb.count(1)}/{wb.count(0)}/{wb.count(-1)}"
-              f"  canon {wc.count(1)}/{wc.count(0)}/{wc.count(-1)}" + ("" if phase != "main" else
-              f"  {'ok' if fx_ok else 'NOT MET'}"))
+              f"  canon {wc.count(1)}/{wc.count(0)}/{wc.count(-1)}" + ("" if phase != "main" else f"  {verdict}"))
         if phase == "main":  # pilot rounds validate harness and reviewers; their depth results are never judged
             ok &= fx_ok
     if phase != "main":
@@ -889,13 +892,24 @@ def tables():
             for fixture, finals in sorted(per_fixture.items()):
                 wb, wc = [f["vs_baseline"] for f in finals], [f["vs_canon"] for f in finals]
                 meta = json.loads((STAGE3 / kinds[fixture] / fixture / "meta.json").read_text())
+                met = "yes" if wb.count(1) * 2 > len(wb) and wb.count(-1) == 0 else "no"
+                if len(finals) < len(planned_slots(phase)):
+                    met = f"incomplete ({len(finals)} of {len(planned_slots(phase))} groups; {met} on these)"
                 out.append(f"| {fixture} | {kinds[fixture]}/{meta['kind']} | {wb.count(1)}/{wb.count(0)}/{wb.count(-1)} | "
-                           f"{wc.count(1)}/{wc.count(0)}/{wc.count(-1)} | "
-                           f"{'yes' if wb.count(1) * 2 > len(wb) and wb.count(-1) == 0 else 'no'} |")
+                           f"{wc.count(1)}/{wc.count(0)}/{wc.count(-1)} | {met} |")
             allb = [f["vs_baseline"] for fs in per_fixture.values() for f in fs]
             allc = [f["vs_canon"] for fs in per_fixture.values() for f in fs]
             out.append(f"\nAll main groups: skill vs baseline {allb.count(1)}/{allb.count(0)}/{allb.count(-1)}, "
                        f"skill vs canon {allc.count(1)}/{allc.count(0)}/{allc.count(-1)} (wins/ties/losses).")
+            cvb = []
+            for g in sorted(p for p in (RESULTS / "reviews").glob("main-*") if p.is_dir()):
+                revs, final = group_verdict(g)
+                if final is not None:  # same majority rule as the gate, applied to canon vs baseline
+                    votes = [sign(r["scores"]["canon"] - r["scores"]["baseline"]) for r in revs]
+                    best = max(set(votes), key=votes.count)
+                    cvb.append(best if votes.count(best) * 2 > len(votes) else 0)
+            out.append(f"Canon vs baseline over the same groups (majority of the group's reviewers, not gated): "
+                       f"{cvb.count(1)}/{cvb.count(0)}/{cvb.count(-1)}.")
     out.append("\n### Per arm, all finished attempts of all phases (sums; validity counts per arm)\n")
     out.append("| arm | attempts | valid | cost USD | turns | minutes | commits | own tests passing | "
                "production files per valid main run |")
@@ -909,6 +923,20 @@ def tables():
                    f"{sum(r['session']['num_turns'] or 0 for r in recs)} | {sum(r['duration_s'] for r in recs) / 60:.0f} | "
                    f"{sum(r['commits'] for r in recs)} | {sum(r['own_tests']['pass'] for r in recs)} | "
                    f"{', '.join(map(str, files))} |")
+    pyc = []
+    for phase in phases:
+        for rid, rec in sorted(load_runs(phase).items()):
+            if rec["arm"] == "skill" and rec["status"] == "finished":
+                history = sgit(WORK / "runs" / rid / "repo", "log", "--name-only", "--format=", f"{rec['base']}..HEAD")
+                head = sgit(WORK / "runs" / rid / "repo", "ls-files")
+                pyc.append((rid, ".pyc" in history, ".pyc" in head))
+    out.append(f"\nArm-3 runs with skill-script .pyc files committed in their history: {sum(h for _, h, _ in pyc)} of "
+               f"{len(pyc)} ({', '.join(r for r, h, _ in pyc if h) or 'none'}); still at HEAD: {sum(x for _, _, x in pyc)}.")
+    sizes = {}
+    for fixture_id, kind in fixtures().items():
+        sizes[fixture_id] = sum(1 for f in (STAGE3 / kind / fixture_id / "reference").rglob("*.ts")
+                                for line in f.read_text().splitlines() if line.strip())
+    out.append("Reference solutions, non-blank lines: " + ", ".join(f"{k} {v}" for k, v in sorted(sizes.items())) + ".")
     out.append("\n### Reviewer statistics\n")
     out.append(f"- Groups with a third reviewer (disagreement on a comparison): {disagreements} of {groups_n}.")
     for phase, values in sorted(spreads.items()):

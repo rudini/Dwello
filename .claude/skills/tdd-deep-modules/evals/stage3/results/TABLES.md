@@ -148,11 +148,12 @@
 | box-office-holds | fixtures/stateful | 2/0/1 | 2/1/0 | no |
 | checkout-rounding-bug | fixtures/bugfix | 2/1/0 | 3/0/0 | yes |
 | expense-policy-review | fixtures/multi-module | 3/0/0 | 2/0/1 | yes |
-| holdout-a | holdout/multi-module | 2/0/0 | 1/0/1 | yes |
+| holdout-a | holdout/multi-module | 2/0/0 | 1/0/1 | incomplete (2 of 3 groups; yes on these) |
 | holdout-b | holdout/stateful | 2/1/0 | 1/0/2 | yes |
 | opening-hours-parser | fixtures/parsing | 2/0/1 | 1/1/1 | no |
 
 All main groups: skill vs baseline 13/2/2, skill vs canon 10/2/5 (wins/ties/losses).
+Canon vs baseline over the same groups (majority of the group's reviewers, not gated): 9/6/2.
 
 ### Reviewed groups, phase pilot
 
@@ -174,6 +175,9 @@ All main groups: skill vs baseline 13/2/2, skill vs canon 10/2/5 (wins/ties/loss
 | baseline | 21 | 20 | 7.82 | 250 | 35 | 21 | 242 | 1, 5 |
 | canon | 30 | 19 | 31.38 | 2634 | 128 | 331 | 1060 | 1, 5 |
 | skill | 24 | 20 | 39.84 | 2531 | 158 | 884 | 427 | 1, 4, 5 |
+
+Arm-3 runs with skill-script .pyc files committed in their history: 14 of 24 (main-box-office-holds-skill-r1-a1, main-box-office-holds-skill-r2-a1, main-box-office-holds-skill-r3-a1, main-checkout-rounding-bug-skill-r1-a1, main-checkout-rounding-bug-skill-r2-a1, main-checkout-rounding-bug-skill-r3-a1, main-expense-policy-review-skill-r1-a1, main-expense-policy-review-skill-r2-a1, main-expense-policy-review-skill-r3-a1, main-opening-hours-parser-skill-r1-a1, main-opening-hours-parser-skill-r2-a1, main-opening-hours-parser-skill-r3-a1, pilot-expense-policy-review-skill-r1-a1, pilot-opening-hours-parser-skill-r1-a1); still at HEAD: 13.
+Reference solutions, non-blank lines: box-office-holds 156, checkout-rounding-bug 137, expense-policy-review 204, holdout-a 129, holdout-b 131, opening-hours-parser 157.
 
 ### Reviewer statistics
 

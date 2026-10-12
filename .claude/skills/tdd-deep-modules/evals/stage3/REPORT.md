@@ -6,7 +6,7 @@ Date: 2026-10-12. Protocol: `README.md`. Every number below comes from `harness/
 
 - **The stage-3 criterion is not met.** The gate requires, for each of the 6 fixtures, that the skill arm is rated deeper than baseline in a majority of its runs and shallower in none. Over all 17 reviewed main-phase groups the skill arm was rated deeper than baseline in 13, equal in 2 and shallower in 2. The two losses fall on two visible fixtures: `box-office-holds` (slot r3) and `opening-hours-parser` (slot r1). In addition, `holdout-a` has only 2 of its 3 groups, because the canon arm produced no valid run in slot r2 within the 5 allowed attempts. The gate therefore prints `STAGE3: FAIL`.
 - **tdd_replay accepted every arm-3 run** (all 24 attempts, the 20 valid ones included, pilot and hold-outs included), and the skill was loaded in every arm-3 attempt.
-- **Against plain Canon TDD the skill is not shown to be better: attribution is unproven.** Skill vs canon over all 17 groups: 10 deeper, 2 equal, 5 shallower. Canon beat the skill in a majority of runs in `holdout-b` (1/0/2) and tied it on `holdout-a` (1/0/1). What separates the TDD arms from baseline is visible; what the skill adds beyond test-first work is not.
+- **Against plain Canon TDD the skill is not shown to be better: attribution is unproven.** Skill vs canon over all 17 groups: 10 deeper, 2 equal, 5 shallower. Canon beat the skill in a majority of runs in `holdout-b` (1/0/2) and tied it on `holdout-a` (1/0/1). Over the same groups, canon vs baseline is 9/6/2 (the same majority rule applied to the reviewers' scores; `tables`, not gated). Both test-first arms are mostly rated deeper than baseline; what the skill adds beyond test-first work is not shown.
 - Effort differs a lot. Summed over all finished attempts, baseline cost 7.82 USD, canon 31.38 USD and the skill 39.84 USD. Skill runs made 884 commits against canon's 331 and baseline's 21.
 
 ## Per fixture (main phase, final comparisons per group; wins/ties/losses for the skill)
@@ -37,28 +37,31 @@ Mean reviewer scores are not given; the per-reviewer scores of every group are i
 | 14 | fixtures (by a separate agent), harness, protocol | 6 | Rounds 1-3 FAIL, and the work stopped after round 3 as the rule requires. The user then ordered a new review cycle: rounds 4-5 FAIL, round 6 PASS. The main issues were isolation of the sessions, a reviewer rubric copied from the skill, selection through reruns, and false positives of the escape check. |
 | 15 | pilot (2 fixtures x 3 arms) | 1 | PASS |
 | 16 | main phase, 4 visible fixtures | 1 | PASS |
-| 17 | hold-out phase, this report, final gate | see `evidence/reviews/step-17-*` | |
+| 17 | hold-out phase, this report, final gate | 1 | PASS (minors applied afterwards: reporting only) |
 
 ## Failure cases
 
 - **Harness defect, arm 3 only (2 attempts).** The skill copy in the run repositories lacked the skill's `.gitignore`. A session's own `tdd_replay` left an untracked `__pycache__`, so two complete arm-3 runs (`main-box-office-holds-skill-r3-a1`, `main-checkout-rounding-bug-skill-r1-a1`; hidden tests all green, replay ACCEPT) counted as "not committed".
   - The `.gitignore` was added after the first main attempts (commit 1ad43d0). Their slots were rerun mechanically under the pre-fixed rule; the replacement was not chosen by depth.
   - The rerun `box-office-holds` r3 is one of the two groups in which the skill lost to baseline.
-  - In 10 of the 12 first-attempt arm-3 runs, `.pyc` files from that defect are committed in the arms' histories. They are not production code and never reached reviewers or the replay.
+  - In 14 of the 24 arm-3 runs (all 12 first main attempts and both pilot runs, i.e. every run without the `.gitignore`), `.pyc` files of the skill scripts are committed in the arms' histories (`tables`). They are not production code and never reached reviewers or the replay.
 - **Escape signal (1 attempt).** `main-opening-hours-parser-skill-r2-a1` ran `ps` to look for a hung test process. `ps` was a signal before any run, so the run is invalid; its slot was rerun.
 - **Ambiguous hold-out assertion (13 attempts).** In `holdout-a`, the task text says the first problem from the top is reported. It does not settle whether `ORDER 1` followed by the invalid line `RICE x0` is an invalid item at line 2 (the hidden test's reading) or an order without items at line 1. 13 attempts read it the second way: canon 11 of 13, baseline 1 of 4, skill 1 of 4.
   - The hidden test was not changed: a verifier is never weakened.
   - During the hold-out phase, before the third attempts' results were known, the attempt cap of 5 per slot was added (README amendment), so rerunning would not select runs by this reading. Canon slot r2 stayed invalid after 5 attempts, and `holdout-a` has 2 reviewed groups.
-  - The reading may correlate with parser structure: a line-by-line validator reports line 2, while an order-grouping parser reports line 1. So the reviewed canon runs in `holdout-a` are a selected sample.
+  - The reading may correlate with parser structure: a line-by-line validator reports line 2, while an order-grouping parser reports line 1. The literal text arguably favours line 1 (the order-without-items problem is reported at the `ORDER` line, which is higher).
+  - So the reviewed `holdout-a` runs are a selected sample: the reviewed canon runs, and also the rerun baseline slot r1 (a2) and skill slot r3 (a2), passed only under the line-2 reading.
+  - Because canon slot r2 is missing, the skill-vs-baseline comparison of slot r2 was never made, although both of those runs are valid. The `holdout-a` tally 2/0/0 therefore leaves out a slot that could have been a loss.
 - **Protocol deviations.**
   - The step-14 round-1 reviewer named abstract categories of the hold-outs in its report. The experimenter saw those words, but no task text, tests or code, before the final run.
   - Twice the cloud worker restarted, and a background batch was relaunched. No run was lost or duplicated: the pilot's records all start at the relaunch.
+  - The hold-out runs carry three harness file hashes, because the `tables` command and the attempt cap were committed while runs were in flight. Neither change touches a measurement.
 
 ## Limits of the metric
 
 - **Reviewers:** LLM sessions of the same model as the arms, rating depth from 1 to 10 under Ousterhout's definition. Ratings are coarse:
-  - One implementation's scores across reviewers differ by 0 points in 24 cases, 1 point in 25 and 2 points in 2.
-  - 9 of 19 groups needed a third reviewer.
+  - In the main phase, one implementation's scores across reviewers differ by 0 points in 24 cases, 1 point in 25 and 2 points in 2.
+  - 9 of 19 groups (pilot included) needed a third reviewer.
   - Many comparisons hinge on a single point, so "shallower in none" is fragile.
 - **Pilot control:** the control copy was byte-identical to the baseline, and reviewers recognised it. Its delta of 0 only shows that identical text gets identical scores; the spread above is the real consistency evidence.
 - **Position:** letters were assigned randomly but ended up uneven. The skill was labelled C 21 times and A 7 times. Label C scored on average +0.13 above its reviewer's mean and B -0.15, so a small position effect in the skill's favour cannot be ruled out.
@@ -67,7 +70,7 @@ Mean reviewer scores are not given; the per-reviewer scores of every group are i
   - The "multi-module" fixtures did not lead any arm to split into several modules.
 - **depth_report favours the skill arm by construction:** that arm is told to run it and fix its findings, and in the pilot it read the tool's source. Its findings are plausibility signals and are not cited as evidence of depth.
 - **Isolation is a tripwire, not a barrier,** against a session that sets out to escape. The network is reachable by re-adding the proxy by hand; a filtering proxy was refused by the environment's safety classifier. Claude Code's credentials stay readable inside the sandbox. No escape was found in any transcript; the one signal was a `ps` call.
-- **Sample size:** 3 runs per fixture and arm, one model, small tasks of 150-400 reference lines. The comparison does not generalise beyond that.
+- **Sample size:** 3 runs per fixture and arm, one model, small tasks (reference solutions of 129 to 204 non-blank lines, `tables`). The comparison does not generalise beyond that.
 
 ## Raw values
 
@@ -223,11 +226,12 @@ The following is the output of `harness/stage3 tables` (also in `results/TABLES.
 | box-office-holds | fixtures/stateful | 2/0/1 | 2/1/0 | no |
 | checkout-rounding-bug | fixtures/bugfix | 2/1/0 | 3/0/0 | yes |
 | expense-policy-review | fixtures/multi-module | 3/0/0 | 2/0/1 | yes |
-| holdout-a | holdout/multi-module | 2/0/0 | 1/0/1 | yes |
+| holdout-a | holdout/multi-module | 2/0/0 | 1/0/1 | incomplete (2 of 3 groups; yes on these) |
 | holdout-b | holdout/stateful | 2/1/0 | 1/0/2 | yes |
 | opening-hours-parser | fixtures/parsing | 2/0/1 | 1/1/1 | no |
 
 All main groups: skill vs baseline 13/2/2, skill vs canon 10/2/5 (wins/ties/losses).
+Canon vs baseline over the same groups (majority of the group's reviewers, not gated): 9/6/2.
 
 ### Reviewed groups, phase pilot
 
@@ -249,6 +253,9 @@ All main groups: skill vs baseline 13/2/2, skill vs canon 10/2/5 (wins/ties/loss
 | baseline | 21 | 20 | 7.82 | 250 | 35 | 21 | 242 | 1, 5 |
 | canon | 30 | 19 | 31.38 | 2634 | 128 | 331 | 1060 | 1, 5 |
 | skill | 24 | 20 | 39.84 | 2531 | 158 | 884 | 427 | 1, 4, 5 |
+
+Arm-3 runs with skill-script .pyc files committed in their history: 14 of 24 (main-box-office-holds-skill-r1-a1, main-box-office-holds-skill-r2-a1, main-box-office-holds-skill-r3-a1, main-checkout-rounding-bug-skill-r1-a1, main-checkout-rounding-bug-skill-r2-a1, main-checkout-rounding-bug-skill-r3-a1, main-expense-policy-review-skill-r1-a1, main-expense-policy-review-skill-r2-a1, main-expense-policy-review-skill-r3-a1, main-opening-hours-parser-skill-r1-a1, main-opening-hours-parser-skill-r2-a1, main-opening-hours-parser-skill-r3-a1, pilot-expense-policy-review-skill-r1-a1, pilot-opening-hours-parser-skill-r1-a1); still at HEAD: 13.
+Reference solutions, non-blank lines: box-office-holds 156, checkout-rounding-bug 137, expense-policy-review 204, holdout-a 129, holdout-b 131, opening-hours-parser 157.
 
 ### Reviewer statistics
 
