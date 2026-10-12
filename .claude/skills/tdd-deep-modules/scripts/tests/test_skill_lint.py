@@ -530,3 +530,14 @@ class SkillLintTest(unittest.TestCase):
 
                 self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
                 self.assertIn("lacks the statement:", result.stdout)
+
+    def test_a_rule_item_demoted_to_an_indented_sub_item_is_named(self):
+        real = (SKILL / "SKILL.md").read_text()
+        rule6 = real[real.index("6. **Doubles only at system boundaries.**"):].split("\n", 1)[0]
+        copy = copy_of_skill(self)
+        (copy / "SKILL.md").write_text(real.replace(rule6, "6. **Optional extras, skip when busy:**\n   - " + rule6[3:]))
+
+        result = lint(copy)
+
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn("lacks the statement:", result.stdout)
