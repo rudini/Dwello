@@ -13,6 +13,7 @@
 		apartment: {
 			status: ApartmentStatus;
 			nextContractStart: string | null;
+			currentContractEnd?: string | null;
 			rooms: string;
 			floor: number;
 			area: string;

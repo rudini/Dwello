@@ -2,6 +2,7 @@ import { expect } from '@playwright/test';
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { visit } from '../interactions/navigation';
+import { heatingProfileSelect } from '../interactions/statement-generate';
 import {
 	allPreviewRows,
 	chosenBuilding,
@@ -283,3 +284,40 @@ Then('beginnt der Liegenschaftsverwalter wieder mit der Wahl der Periode', async
 When('der Liegenschaftsverwalter aus der Warnung eine Rechnung erfassen will', async ({ verwalter }) => {
 	await verwalter.perform(recordInvoiceFromWarning);
 });
+
+Given('es gibt das Heizprofil {string}', async ({ seed }, title: string) => {
+	await seed.heatingProfile(title, [18, 16, 13, 8, 4, 1, 0, 0, 3, 9, 13, 15]);
+});
+
+// the link a contract or a refusal offers: building and period chosen, on the settings step
+When(
+	'der Liegenschaftsverwalter den Assistenten für das Gebäude {string} und {int} öffnet',
+	async ({ verwalter, seed }, building: string, year: number) => {
+		await visit(verwalter.page, `/statements/generate?building=${seed.idOf(building)}&start=${year}-01-01&end=${year}-12-31`);
+	}
+);
+
+Then('schlägt der Assistent das Heizprofil {string} vor', async ({ verwalter, names }, profile: string) => {
+	// the option names the profile and its sum, «Winter … (100%)»
+	await expect(heatingProfileSelect(verwalter.page).locator('option:checked')).toContainText(names.get(profile)!);
+});
+
+const lastYear = new Date().getFullYear() - 1;
+const inWizardFor = async (page: import('@playwright/test').Page, buildingId: string, year: number) => {
+	await expect(page).toHaveURL(new RegExp(`/statements/generate\\?building=${buildingId}&start=${year}-01-01&end=${year}-12-31`));
+	await expect(heatingProfileSelect(page)).toBeVisible();
+};
+
+Then(
+	'ist der Liegenschaftsverwalter im Abrechnungsassistenten für das Gebäude {string} und {int}',
+	async ({ verwalter, seed }, building: string, year: number) => {
+		await inWizardFor(verwalter.page, seed.idOf(building)!, year);
+	}
+);
+
+Then(
+	'ist der Liegenschaftsverwalter im Abrechnungsassistenten für das Gebäude {string} und das letzte Jahr',
+	async ({ verwalter, seed }, building: string) => {
+		await inWizardFor(verwalter.page, seed.idOf(building)!, lastYear);
+	}
+);

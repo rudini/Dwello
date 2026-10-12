@@ -211,3 +211,7 @@ When('der Liegenschaftsverwalter den Vertragsbeginn {string} speichert', async (
 When('der Liegenschaftsverwalter den Mietzins leert', async ({ verwalter }) => {
 	await verwalter.perform(changeBaseRent(''));
 });
+
+When('der Liegenschaftsverwalter den Entwurf löscht und den Mietvertrag speichert', async ({ verwalter }) => {
+	await verwalter.page.getByTestId('delete-draft-and-save').click();
+});

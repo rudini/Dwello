@@ -63,8 +63,8 @@ Apartment `status` is derived from rental contracts: `occupied` (a contract runs
 
 | Method | Path | Notes |
 |---|---|---|
-| GET | `/` | Query: `buildingId`, `status` (`occupied`\|`relet`\|`vacant`\|`reserved`), `floor`, `limit` (default 50), `offset`. → `{ apartments, total }`; items include `status`, `nextContractStart`, `buildingName` |
-| GET | `/:id` | → apartment with `building { id, name, address, postalCode, city }`, `currentTenantName`, `currentContractId`. 404 |
+| GET | `/` | Query: `buildingId`, `status` (`occupied`\|`relet`\|`vacant`\|`reserved`), `floor`, `limit` (default 50), `offset`. → `{ apartments, total }`; items include `status`, `nextContractStart`, `currentContractEnd` (last day of the contract running today, A-4), `buildingName` |
+| GET | `/:id` | → apartment with `building { id, name, address, postalCode, city }`, `currentTenantName`, `currentContractId`, `nextContractStart`, `currentContractEnd` (as in the list). 404 |
 | GET | `/:id/history` | → `{ apartment, contracts: [{ id, tenantName, startDate, endDate, baseRent }] }`. 404 |
 | POST | `/` | Body: `buildingId` (uuid), `number`, `floor` (number), `area` (string), `rooms` (string), optional `status` (`vacant`\|`reserved`). → 201 apartment. 400 building not found; **409** number already exists in the building |
 | PUT | `/:id` | Body: any subset of `number`, `floor`, `area`, `rooms`, `status`. → apartment. 404; 409 duplicate number |
@@ -90,7 +90,7 @@ Apartment `status` is derived from rental contracts: `occupied` (a contract runs
 | GET | `/apartment/:apartmentId/active` | Query: `date` (default today). → the contract running on that date. 404 if none |
 | GET | `/apartment/:apartmentId/period` | Query: `periodStart`, `periodEnd` (required). → `{ contracts }` overlapping the period (for prorating) |
 | POST | `/` | Body: `apartmentId`, `tenantId` (uuid), `startDate`, `baseRent`, `monthlyAdvancePayment` required; optional `endDate`, `terminated` (boolean: `endDate` is the Kündigungstermin of an open-ended contract; default false), `additionalRent`, `referenceIndex`, `contractPdf`, `notes`. → 201 contract. 400 apartment/tenant not found or overlap with another contract of the apartment |
-| PUT | `/:id` | Body: any subset of the POST fields except `apartmentId`/`tenantId`; `terminated: true` needs an end date (stored or sent), else 400 code `CONTRACT_NOTICE_WITHOUT_END` (also on POST); `endDate: null` clears `terminated`, even if `terminated: true` is sent; a new `endDate` without `terminated` keeps the stored flag. → contract. 404; 400 overlap; 409 `{ error, statements: [{ id, statementNumber, status, periodEnd }] }` if the new `startDate`/`endDate` change the rent days billed by a utility statement of the contract (stored as `rental_start`/`rental_end` on the statement) (see `tests/contracts/contract-end-refused.json`) |
+| PUT | `/:id` | Body: any subset of the POST fields except `apartmentId`/`tenantId`; `terminated: true` needs an end date (stored or sent), else 400 code `CONTRACT_NOTICE_WITHOUT_END` (also on POST); `endDate: null` clears `terminated`, even if `terminated: true` is sent; a new `endDate` without `terminated` keeps the stored flag. → contract. 404; 400 overlap; 409 `{ error, statements: [{ id, statementNumber, status, periodStart, periodEnd, buildingId }] }` if the new `startDate`/`endDate` change the rent days billed by a utility statement of the contract (stored as `rental_start`/`rental_end` on the statement) (see `tests/contracts/contract-end-refused.json`) |
 | DELETE | `/:id` | 204. 404; 400 if the contract has utility statements |
 
 ## 7. Categories `/api/v1/categories`
@@ -203,11 +203,11 @@ Filter `status` in `GET /` and `/counts`: `draft`, `paid`, `sent` (sent, deadlin
 
 | Method | Path | Notes |
 |---|---|---|
-| GET | `/` | Query: `search`, `buildingId`, `apartmentId`, `tenantId`, `status`, `periodStart`, `periodEnd`, `limit` (default 20), `offset`. → `{ data, total, limit, offset }`; items include `tenant`, `apartment`, `building`, `lineItems` (no PDF) |
+| GET | `/` | Query: `search`, `buildingId`, `apartmentId`, `tenantId`, `status`, `periodStart`, `periodEnd`, `limit` (default 20), `offset`. → `{ data, total, limit, offset }`; items include `tenant`, `apartment`, `building`, `lineItems`, `heatingProfileId`, `managementFeePercent` (no PDF; see `tests/contracts/period-statements.json`) |
 | GET | `/counts` | Query: `buildingId`. → `{ draft, sent, paid, overdue, total }` |
 | POST | `/preview` | Body: calculation input (below). Stores nothing. → `{ preview: true, contractId, apartmentId, tenantId, periodStart, periodEnd, rentalDays, totalPeriodDays, lineItems, subtotal, managementFee, managementFeePercent, totalCosts, totalAdvancePayments, balance }` (numbers; positive balance = tenant owes). 400 |
 | POST | `/generate` | Body: calculation input + `buildingId`. Synchronous, one contract: calculates and stores a **draft** with line items and a payment deadline of `payment_deadline_days`. → **201** statement. 400 (e.g. contract not found, contract outside the period) |
-| GET | `/:id` | → statement with `tenant`, `apartment`, `building`, `lineItems` (see `tests/contracts/statement.json`). 404 |
+| GET | `/:id` | → statement with `tenant`, `apartment`, `building`, `lineItems`, `heatingProfile { id, name, nameDE, nameFR, nameIT, nameEN } \| null` (see `tests/contracts/statement.json`). 404 |
 | PUT | `/:id` | Body: optional `notes`, `paymentDeadline` (date). → statement. 404; 400 date that does not exist; 422 deadline not YYYY-MM-DD. A changed deadline discards the stored PDF |
 | PUT | `/:id/status` | Body: `status` required; optional `paidDate`, `paidAmount`, `reminderSentDate`. → statement. 404; 400 invalid transition |
 | DELETE | `/:id` | 204. 404; 400 not a draft |

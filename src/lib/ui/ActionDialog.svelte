@@ -19,7 +19,8 @@
 		onsuccess,
 		fields = {},
 		check = () => true,
-		children
+		children,
+		afterError
 	}: {
 		open: boolean;
 		action: string;
@@ -33,17 +34,22 @@
 		fields?: Record<string, string>; // values of fields in the dialog, which lies outside the form
 		check?: () => boolean; // false: the dialog shows what is wrong, nothing is sent
 		children: Snippet;
+		afterError?: Snippet; // a way out of a refusal, read after the refusal itself
 	} = $props();
 
 	let form = $state<HTMLFormElement>();
 	let busy = $state(false);
 	let refusal = $state<HTMLElement>();
 
-	// a refusal shows below the content: it takes the focus, so it is read and scrolled into a short window
+	// a refusal shows below the content: it takes the focus, so it is read and scrolled into a short window;
+	// a way out below it is scrolled in first, then the refusal, so a window big enough shows both (persona Anna K2)
 	async function showRefusal() {
 		await tick();
 		const alert = refusal?.querySelector<HTMLElement>('[data-testid="form-error"]');
 		alert?.focus();
+		[...(refusal?.querySelectorAll<HTMLElement>('button') ?? [])]
+			.at(-1)
+			?.scrollIntoView?.({ block: 'nearest' });
 		alert?.scrollIntoView?.({ block: 'nearest' });
 	}
 </script>
@@ -81,5 +87,6 @@
 		{#if error}
 			<Alert tone="critical" title={m.ui_action_failed()} testid="form-error"><p>{error}</p></Alert>
 		{/if}
+		{@render afterError?.()}
 	</div>
 </Dialog>

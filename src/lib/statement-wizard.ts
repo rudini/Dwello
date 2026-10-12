@@ -254,3 +254,7 @@ export const restoredSelection = (
 		? draft.heatingProfileId
 		: ''
 });
+
+/** The wizard with one building and one period chosen, opened on the settings (A-10) */
+export const wizardLink = (building: string, start: string, end: string) =>
+	`/statements/generate?building=${building}&start=${start}&end=${end}`;

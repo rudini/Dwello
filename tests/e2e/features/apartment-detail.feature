@@ -56,3 +56,9 @@ Funktionalität: Wohnungsdetail
     Angenommen "Beat Huber" hat eine E-Mail-Adresse
     Und der Liegenschaftsverwalter ist auf der Detailseite der Wohnung "3.01"
     Dann kann der Liegenschaftsverwalter "Beat Huber" eine E-Mail schreiben
+
+  # A-4: die Kündigungszeit ist sichtbar, nicht erst der Leerstand
+  Szenario: Wohnung mit gekündigtem Mietvertrag
+    Angenommen der Mietvertrag von "Beat Huber" ist auf den "2099-03-31" gekündigt
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Wohnung "3.01"
+    Dann hat die Wohnung den Status "Vermietet bis 31.03.2099"

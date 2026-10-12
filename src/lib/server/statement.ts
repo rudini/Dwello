@@ -44,15 +44,14 @@ export function toStatement(data: BackendStatement): StatementWithDetails {
 		lastReminderDate: data.reminderSentDate,
 		notes: data.notes,
 		createdAt: data.createdAt,
-		tenantName: data.tenant
-			? `${tenant.firstName} ${tenant.lastName}`
-			: m.common_unknown(),
+		tenantName: data.tenant ? `${tenant.firstName} ${tenant.lastName}` : m.common_unknown(),
 		tenantEmail: tenant.email || '',
 		tenantCorrespondenceChannel: tenant.correspondenceChannel,
 		apartmentUnit: apartment.number || '',
 		apartmentFloor: apartment.floor || '',
 		buildingName: building.name || '',
 		buildingAddress: building.address || '',
+		heatingProfileName: data.heatingProfile ? localName(data.heatingProfile) : '',
 		lineItems: (data.lineItems || []).map(toLineItem)
 	};
 }

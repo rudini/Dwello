@@ -32,7 +32,8 @@ async function call(fetch: Fetch, path: string, body?: object) {
 			body: JSON.stringify(body)
 		}
 	);
-	const data = await response.json();
+	// a refusal is JSON with a code; a crash may answer with plain text (review K-5)
+	const data = await response.json().catch(() => ({}));
 	if (!response.ok)
 		throw new Error(
 			backendMessage(data, m.statements_backend_failed({ path, status: response.status }))

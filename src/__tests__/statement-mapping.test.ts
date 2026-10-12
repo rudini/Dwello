@@ -8,6 +8,12 @@ describe('Abrechnung aus dem Backend', () => {
 		expect(toStatement(backendStatement).managementFeePercent).toBe(3);
 	});
 
+	// A-10: wer neu abrechnet, sieht, welches Heizprofil diese Abrechnung verwendet
+	it('nennt das Heizprofil der Abrechnung', () => {
+		expect(toStatement(backendStatement).heatingProfileName).toBe('Standard');
+		expect(toStatement({ ...backendStatement, heatingProfile: null }).heatingProfileName).toBe('');
+	});
+
 	it('übernimmt Mieter, Wohnung, Bemerkungen und Kostenpositionen', () => {
 		expect(toStatement(backendStatement)).toMatchObject({
 			tenantName: 'Eva Frei',

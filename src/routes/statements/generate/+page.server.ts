@@ -19,23 +19,58 @@ async function json(fetch: typeof globalThis.fetch, path: string): Promise<Row> 
 	return response.ok ? response.json() : {};
 }
 
-export const load = async ({ fetch }: { fetch: typeof globalThis.fetch }) => {
+// a real day: not 2025-02-30, not 2025-13-01 (an invalid date has no ISO string)
+function isDay(value: string | null) {
+	if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+	const day = new Date(`${value}T00:00:00Z`);
+	return !isNaN(day.getTime()) && day.toISOString().startsWith(value);
+}
+
+// A link from a contract or a refusal names one building and one period (A-10): its other statements of that
+// period tell which heating profile and management fee to use again. A link to an unknown building or with an
+// impossible period is ignored: the wizard starts at the beginning (review K-5)
+async function chosen(fetch: typeof globalThis.fetch, url: URL, buildings: Row[]) {
+	const [id, start, end] = ['building', 'start', 'end'].map((key) => url.searchParams.get(key));
+	const building = buildings.find((b) => b.id === id);
+	if (!building || !isDay(start) || !isDay(end) || start! > end!) return null;
+	const statements = await json(
+		fetch,
+		`statements?buildingId=${id}&periodStart=${start}&periodEnd=${end}&limit=1`
+	);
+	const [other] = (statements.data ?? []) as Row[];
+	return { building, period: { start: start!, end: end! }, other };
+}
+
+export const load = async ({ fetch, url }: { fetch: typeof globalThis.fetch; url: URL }) => {
 	const [buildings, heatingProfiles, config] = await Promise.all([
 		json(fetch, 'buildings?limit=100'),
 		json(fetch, 'heating-profiles?limit=100'),
 		json(fetch, 'config')
 	]);
+	const buildingList = (buildings.buildings ?? []) as (Building & { apartmentCount: number })[];
+	const pick = await chosen(fetch, url, buildingList as unknown as Row[]);
 	const settings = (config.data ?? {}) as Record<string, string | null>;
 
 	// Defaults from the settings, adjustable per generation run
 	return {
-		buildings: (buildings.buildings ?? []) as (Building & { apartmentCount: number })[],
+		buildings: buildingList,
 		heatingProfiles: ((heatingProfiles.data ?? []) as Row[]).map(toHeatingProfile),
-		defaultManagementFeePercent: Number(settings.management_fee_pct ?? 3),
-		defaultPeriod: lastCompletedPeriod(
-			(settings.accounting_period ?? 'calendar') as AccountingPeriodType
+		defaultManagementFeePercent: Number(
+			pick?.other?.managementFeePercent ?? settings.management_fee_pct ?? 3
 		),
-		defaultHeatingProfileId: settings.default_heating_profile_id ?? ''
+		defaultPeriod:
+			pick?.period ??
+			lastCompletedPeriod((settings.accounting_period ?? 'calendar') as AccountingPeriodType),
+		defaultHeatingProfileId: String(
+			pick?.other?.heatingProfileId ?? settings.default_heating_profile_id ?? ''
+		),
+		defaultBuildingIds: pick ? [String(pick.building.id)] : [],
+		// what the link chose, said on the settings step (personas K1)
+		preset: pick && {
+			building: String(pick.building.name),
+			...pick.period,
+			fromStatements: !!pick.other
+		}
 	};
 };
 

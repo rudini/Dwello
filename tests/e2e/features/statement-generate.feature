@@ -160,3 +160,10 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Angenommen der Liegenschaftsverwalter hat die Abrechnungen 2024 für das Gebäude "Lindenhof" erstellt
     Wenn der Liegenschaftsverwalter weitere Abrechnungen erstellen will
     Dann beginnt der Liegenschaftsverwalter wieder mit der Wahl der Periode
+
+  # A-10: wer eine Abrechnung neu erstellt, erhält Heizprofil und Verwaltungspauschale der übrigen Abrechnungen
+  Szenario: Neue Abrechnung übernimmt die Einstellungen der Periode
+    Angenommen es gibt das Heizprofil "Winter"
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Wenn der Liegenschaftsverwalter den Assistenten für das Gebäude "Lindenhof" und 2024 öffnet
+    Dann schlägt der Assistent das Heizprofil "Winter" vor

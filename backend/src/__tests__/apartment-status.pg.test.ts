@@ -69,6 +69,18 @@ describe('Wohnungsstatus aus den Mietverträgen', () => {
 		expect(relet.nextContractStart).toBe(day(30));
 	});
 
+	// A-4: «Vermietet bis …»: das Ende des Vertrags, der heute läuft
+	it('nennt das Ende des laufenden Vertrags', async () => {
+		const id = await apartment('1.06');
+		await contractFor(id, day(-30), day(40));
+		await contractFor(id, day(41));
+
+		const occupied = (await getApartment(id))!;
+		expect(occupied.currentContractEnd).toBe(day(40));
+		const listed = (await listApartments({ buildingId: rental.building })).apartments.find((a) => a.id === id)!;
+		expect(listed.currentContractEnd).toBe(day(40));
+	});
+
 	it('ist leer, sobald der Vertrag abgelaufen ist', async () => {
 		const id = await apartment('1.03');
 		await contractFor(id, day(-60), day(-1));

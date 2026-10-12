@@ -4871,6 +4871,44 @@ header and on pages without it. Branch `claude/optimistic-clarke-nn8u7t` from `m
   contract sample is checked with an end and a notice (J2-3); docs name the open points (J2-4, J2-5); comments moved
   (J2-6).
 
+
+## Session 17 - October 2026: Upcoming Contract End, Statements After a Changed End (A-4, A-10)
+
+### Done ✅
+- [x] **A-4, upcoming contract end**: overview task «Nachmieter für Wohnung {Nr} suchen» per contract given notice,
+  running and without a later contract (`src/lib/overview.ts` `successorTasks`, `src/routes/dashboard/+page.server.ts`
+  `noticed`); the «Vertragsende» deadline only for fixed-term contracts; apartments carry `currentContractEnd`
+  (`backend/src/services/apartment.service.ts`) and show «Vermietet bis …» (`statusText` in `src/lib/apartment.ts`);
+  the page of a contract given notice shows «Nächste Schritte» (`src/routes/contracts/[id]/+page.svelte`). Texts in
+  four languages; a11y and language screen `contract-detail-notice`. Tests first: scenarios in `dashboard.feature`,
+  `apartment-detail.feature`, `contract-detail.feature`; `overview.test.ts`, `dashboard.test.ts`, `apartment.test.ts`,
+  `contract-detail-page.dom.test.ts`, `apartment-status.pg.test.ts`.
+- [x] **A-10, statements after a changed end**: the refusal carries `periodStart` and `buildingId` per statement
+  (`contract.service.ts`, `tests/contracts/contract-end-refused.json`); `RefusedStatements.svelte` links them and,
+  for one draft, offers to delete it: action `endDeletingDraft` (`src/routes/contracts/[id]/+page.server.ts`) and
+  `deleteDraftAndSave` (`ContractForm.svelte`), then the wizard via `wizardLink` (`src/lib/statement-wizard.ts`); the
+  wizard takes building and period from the link, starts on the settings and suggests the heating profile and fee of
+  another statement of that building and period (`src/routes/statements/generate/+page.server.ts`,
+  `StatementWizard.svelte`); the contract page reports «Abrechnung {Jahr} fehlt» (`missingStatement`); the statement
+  page names its heating profile (`statement.service.ts` `getStatement`, `CostTable.svelte`). a11y and language state
+  `end-dialog-refused`. Tests first: scenarios in `contract-detail.feature`, `contract-edit.feature`,
+  `statement-detail.feature`, `statement-generate.feature`; `contract-actions.test.ts`, `contract-detail-page.dom.test.ts`,
+  `contract-edit.dom.test.ts`, `statement-generate-actions.test.ts`, `statement-wizard.dom.test.ts`,
+  `statement-mapping.test.ts`, `contract-end.pg.test.ts`, `api-contracts.pg.test.ts`.
+- [x] **Review K-1 and personas K1** (`docs/reviews/K-review-1.md`, `docs/design/personas/*-k1.md`): «Nächste
+  Schritte» only while no successor is recorded (K-1); a refusal stays tied to its day and the delete offer names its
+  consequence, is busy while running and toasts (K-2, K-3, K-7); the wizard says what a link chose (`PresetNotice.svelte`)
+  and ignores an unknown building or impossible period (K-5); «Vermietet» without «bis» when the successor starts the
+  next day (K-4, `src/lib/apartment.ts` `followedOn`); the overview task stays after the end until a successor exists,
+  the «Vertragsende» deadline returns for a contract given notice that has one (K-6, `dashboard/+page.server.ts`); the
+  contract form points to «Beenden» when an end is typed into an open-ended contract (`NoticeHint.svelte`,
+  Sven M1); tests for «Abrechnung nicht mehr auffindbar», the refused PUT after deleting the draft and the a11y states
+  `edit-refused` and `link-preset` (K-8); API documentation (K-9). Haiku review after each step.
+- [x] **Personas K2** (`docs/design/personas/{helga,anna,sven}-k2.md`): the dialog's Tab order goes on from a refusal
+  and skips hidden fields (Sven B1, `src/lib/ui/Dialog.svelte`); a refusal scrolls its way out into view and the text
+  points to it (Anna M1, `ActionDialog.svelte`, `contracts_billed_draft_one`); the «Beenden» hint is announced and its
+  link says what it leads to (Sven M1, `NoticeHint.svelte`). Other findings in `docs/design/offene-punkte.md`.
+
 ---
 
 # Success Criteria

@@ -1,31 +1,29 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
-	import { flushSync, untrack } from 'svelte';
-	import { contractEndError, contractStatusOn, pastEndConfirmation } from '$lib/contract-status';
+	import { flushSync, tick, untrack } from 'svelte';
+	import {
+		contractEndError,
+		contractStatusOn,
+		pastEndConfirmation,
+		type RefusedStatement
+	} from '$lib/contract-status';
+	import { enhance } from '$app/forms';
+	import { dialogSubmit } from '$lib/ui/dialog-submit';
 	import PastEndConfirm from '../PastEndConfirm.svelte';
+	import RefusedStatements from '../RefusedStatements.svelte';
 	import { formatDate } from '$lib/utils/format';
 	import DateInput from '$lib/ui/DateInput.svelte';
 	import { focusFirstError } from '$lib/ui/focus-error';
 	import { addToast } from '$lib/stores';
-	import type { Apartment, Building, RentalContract, Tenant } from '$lib/types';
 	import Button from '$lib/ui/Button.svelte';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import Panel from '$lib/ui/Panel.svelte';
 	import ActionDialog from '$lib/ui/ActionDialog.svelte';
 	import ContractParties from './ContractParties.svelte';
 	import ContractTerms from './ContractTerms.svelte';
-	import type { ActionData } from './$types';
-
-	interface PageData {
-		today: string;
-		contract: RentalContract & { tenant: Tenant; apartment: Apartment; building: Building };
-		rentBreakdown: {
-			baseRent: number;
-			additionalRent: number;
-			advancePayment: number;
-			total: number;
-		};
-	}
+	import MissingStatement from './MissingStatement.svelte';
+	import NextSteps from './NextSteps.svelte';
+	import type { ActionData, PageData } from './$types';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 
@@ -65,10 +63,37 @@
 		return !endError && !pastError;
 	}
 	// the toast names the day the tenancy ends, or since when it has ended
+	// the statements that refused the end, to open or to delete one (A-10)
+	// only for the day refused: another day typed afterwards may not need the draft deleted (review K-2)
+	const refused = $derived(
+		form && 'refusedDay' in form && 'refused' in form && form.refusedDay === endDate
+			? (form.refused as RefusedStatement[])
+			: null
+	);
+	// a refusal of another day points to an offer no longer shown (Haiku review of the K2 fixes)
+	const refusal = $derived(
+		form && 'refusedDay' in form && form.refusedDay !== endDate ? undefined : form?.endError
+	);
+	let deletingDraft = $state(false);
+	// the wizard opens next: the message says what happened before (personas K1)
+	const draftDeletedMessage = (number: string) =>
+		m.contracts_draft_deleted_toast({ name, number, date: formatDate(endDate) });
+
 	function endedMessage() {
 		if (pastEnd) return m.contracts_ended_toast({ name, date: formatDate(endDate) });
-		if (endDate === data.today) return m.contracts_ends_today_toast({ name });
-		return m.contracts_ends_on_toast({ name, date: formatDate(endDate) });
+		// the notice runs: the page now shows what to do next, above (personas K1)
+		const ends =
+			endDate === data.today
+				? m.contracts_ends_today_toast({ name })
+				: m.contracts_ends_on_toast({ name, date: formatDate(endDate) });
+		// only when the reloaded page shows them (Haiku review N1)
+		return data.nextSteps ? `${ends}. ${m.contracts_next_steps_hint()}` : ends;
+	}
+	// a refusal of the draft delete is read like one of the end itself
+	async function focusRefusal(result: { type: string }) {
+		if (result.type !== 'failure') return;
+		await tick();
+		document.querySelector<HTMLElement>('[role="dialog"] [data-testid="form-error"]')?.focus();
 	}
 	// a refused delete (also without JavaScript) shows the dialog with its reason
 	let deleting = $state(untrack(() => !!form?.deleteError));
@@ -102,6 +127,14 @@
 			>
 		{/snippet}
 	</PageHeader>
+
+	<!-- first what a notice asks for next, then a missing statement: personas K1 read the yellow hint as the notice's -->
+	<NextSteps
+		shown={data.nextSteps}
+		apartmentId={contract.apartmentId}
+		tenantId={contract.tenantId}
+	/>
+	<MissingStatement missing={data.missingStatement} />
 
 	<div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
 		<ContractParties
@@ -140,11 +173,39 @@
 	title={m.contracts_end_title({ name, apartment: contract.apartment.number })}
 	confirmLabel={m.contracts_end_confirm()}
 	confirmTestid="contract-end-confirm"
-	error={form?.endError}
+	error={refusal}
 	fields={{ endDate, pastConfirmed: pastConfirmed ? 'on' : '' }}
 	check={checkEndDate}
 	onsuccess={() => addToast('success', endedMessage())}
 >
+	{#snippet afterError()}
+		<RefusedStatements statements={refused ?? []}>
+			{#snippet action(draft, consequence)}
+				<form
+					method="POST"
+					action="?/endDeletingDraft"
+					use:enhance={dialogSubmit(
+						() => ({}),
+						(busy) => (deletingDraft = busy),
+						focusRefusal,
+						() => addToast('success', draftDeletedMessage(draft.statementNumber))
+					)}
+				>
+					<input type="hidden" name="endDate" value={endDate} />
+					<input type="hidden" name="pastConfirmed" value={pastConfirmed ? 'on' : ''} />
+					<input type="hidden" name="statementId" value={draft.id} />
+					<Button
+						type="submit"
+						variant="danger"
+						icon="delete"
+						busy={deletingDraft}
+						describedby={consequence}
+						testid="delete-draft-and-end">{m.contracts_delete_draft_and_end()}</Button
+					>
+				</form>
+			{/snippet}
+		</RefusedStatements>
+	{/snippet}
 	<!-- TODO(fachlich prüfen): «Kündigungstermin», «Kündigungsfrist» are not in the glossary (offene-punkte.md) -->
 	<DateInput
 		id="endDate"
