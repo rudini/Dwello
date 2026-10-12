@@ -17,6 +17,7 @@ import json
 import os
 import random
 import re
+import shlex
 import shutil
 import subprocess
 import sys
@@ -34,9 +35,9 @@ WORK = Path(os.environ.get("STAGE3_WORK", "/tmp/claude-0/-home-user-Dwello/"
                            "b911e014-6a0a-558d-a301-60af5eecb558/scratchpad/stage3"))
 MODEL = "claude-opus-5-5"
 ARMS = {"baseline": "baseline.md", "canon": "canon-tdd.md", "skill": "tdd-deep-modules.md"}
-RUN_ID = re.compile(r"^(?P<phase>pilot|main)-(?P<fixture>[a-z0-9-]+)-(?P<arm>baseline|canon|skill)"
+RUN_ID = re.compile(r"^(?P<phase>pilot\d*|main)-(?P<fixture>[a-z0-9-]+)-(?P<arm>baseline|canon|skill)"
                     r"-r(?P<slot>[1-9]\d*)-a(?P<attempt>[1-9]\d*)$")
-GROUP = re.compile(r"^(?P<phase>pilot|main)-(?P<fixture>[a-z0-9-]+)-r(?P<slot>[1-9]\d*)"
+GROUP = re.compile(r"^(?P<phase>pilot\d*|main)-(?P<fixture>[a-z0-9-]+)-r(?P<slot>[1-9]\d*)"
                    r"(?:\.(?P<attempt>[2-9]|[1-9]\d+))?$")
 # Every session, and every command that runs an arm's code, runs in its own mount and PID namespace
 # (sandbox.sh): it sees only its directory, as /workspace, and cannot unmount what hides the rest.
@@ -61,14 +62,19 @@ KEEP_ENV = ("PATH", "HOME", "SHELL", "TERM", "LANG", "ANTHROPIC_BASE_URL", "HTTP
 SESSION_SHELL = {"BASH_ENV": "/sandbox/env.sh", "ENV": "/sandbox/env.sh", "GIT_CONFIG_GLOBAL": "/dev/null",
                  "GIT_CONFIG_NOSYSTEM": "1", "GIT_ALLOW_PROTOCOL": "file", "GIT_TERMINAL_PROMPT": "0"}
 PROXY_ENV = {"HTTPS_PROXY", "https_proxy", "NO_PROXY", "no_proxy"}
-# Escape signals in a session's commands and reads: other places, the network, the host's secrets or
-# namespaces, the experiment's names. Such a run is invalid (decided before any run). The session's own
-# places (/workspace, its scratchpad and tool-result files, bun's cache) are removed before matching.
-FOREIGN = re.compile(r"/home/|/tmp\b|/root\b|/mnt\b|/srv\b|/proc/(?:\d|self|\*|\[)|/sys/|/sandbox|/verifier|"
-                     r"\$HOME|~/|\bDwello\b|\bstage3\b|\bholdout\b|\bevals/|https?://|\bgithub\b|"
-                     r"\b(?:HTTPS?|ALL)_PROXY\b|\b(?:curl|wget|nc|socat|ssh|scp)\s|"
-                     r"\b(?:u?mount|unshare|nsenter|chroot)\s|oauth_token|ingress_token", re.I)
-OWN_PLACES = ("/root/.claude/projects/-workspace", "/tmp/claude-0/-workspace", "/workspace", "/root/.bun")
+# Escape signals, checked structurally (escapes()): every path a session's command or read names is normalised
+# (`..`, `~`, `$HOME` resolved; relative paths from /workspace) and must lie in ALLOWED_PATHS; network,
+# process and namespace tools at command position, proxy variables, process environments and the
+# experiment's names are signals too. Such a run is invalid (decided before any run).
+ALLOWED_PATHS = ("/workspace", "/tmp", "/root/.bun", "/root/.claude", "/usr", "/bin", "/sbin", "/lib", "/lib64", "/opt", "/etc",
+                 "/dev/null", "/dev/stdin", "/dev/stdout", "/dev/stderr", "/dev/tty", "/proc/cpuinfo",
+                 "/proc/meminfo", "/proc/version")
+SIGNAL_COMMANDS = {"curl", "wget", "nc", "ncat", "netcat", "socat", "ssh", "scp", "sftp", "telnet", "mount",
+                   "umount", "unshare", "nsenter", "chroot", "env", "printenv", "ps", "pgrep", "pstree", "top",
+                   "lsof", "ss", "netstat"}
+SIGNAL_WORDS = re.compile(r"\b(?:HTTPS?|ALL|NO)_PROXY\b|process\.env|Bun\.env|oauth_token|ingress_token|"
+                          r"\bDwello\b|\bstage3\b|\bholdout\b|/sandbox\b|/verifier\b", re.I)
+EMBEDDED_PATH = re.compile(r"(?<![\w.$:/])(?:~|\$HOME|\$\{HOME\})?/[A-Za-z0-9_.$*{\[~-][^\s'\"`;|&()<>,]*")
 SCANNED_TOOLS = {"Bash", "Read", "Glob", "Grep", "LS", "NotebookRead"}
 CODE = (".ts", ".tsx", ".mts", ".cts", ".js", ".jsx", ".mjs", ".cjs")
 IMPORT = re.compile(r"""(?:\bfrom\s*|\bimport\s*\(\s*|\bimport\s+|\brequire\s*\(\s*)["'](\.{1,2}/[^"']+)["']""")
@@ -158,17 +164,76 @@ def blocks(events, kind):
                 yield block
 
 
+def _outside(path):
+    """True when an absolute or relative path, once normalised, leaves the allowed places."""
+    path = re.sub(r"^(?:~|\$HOME|\$\{HOME\})(?=/|$)", "/root", path)
+    full = os.path.normpath(path if path.startswith("/") else os.path.join("/workspace", path))
+    return not any(full == root or full.startswith(root + "/") for root in ALLOWED_PATHS)
+
+
+HEREDOC = re.compile(r"<<-?\s*(['\"]?)(\w+)\1[^\n]*\n.*?\n\s*\2\s*(?=\n|$)", re.S)
+
+
+def _command_words(command):
+    """The words of each simple command (quotes respected, heredoc bodies dropped, split at ; & | ( ) newline)."""
+    for line in HEREDOC.sub("", command).splitlines():
+        lexer = shlex.shlex(line, posix=True, punctuation_chars=True)
+        lexer.whitespace_split = True
+        try:
+            tokens = list(lexer)
+        except ValueError:
+            tokens = line.split()
+        words = []
+        for token in tokens + [";"]:
+            if token and set(token) <= set(";&|()"):
+                while words and (re.match(r"^\w+=", words[0]) or words[0] in ("sudo", "exec", "time", "nohup", "xargs", "$")):
+                    words = words[1:]
+                if words:
+                    yield words
+                words = []
+            elif token not in ("<", ">", ">>", "<<", "<&", ">&"):
+                words.append(token)
+
+
+def escapes(name, tool_input):
+    """The escape signals of one tool call, or [] (see ALLOWED_PATHS and SIGNAL_*)."""
+    found = []
+    text = json.dumps(tool_input)
+    if SIGNAL_WORDS.search(text):
+        found.append(SIGNAL_WORDS.search(text).group(0))
+    if name == "Bash":
+        command = str(tool_input.get("command", ""))
+        for words in _command_words(command):
+            if words and os.path.basename(words[0]) in SIGNAL_COMMANDS:
+                found.append(f"command {words[0]}")
+            for word in words[1:] if words[0] not in ("echo", "printf") else []:  # echo reads no file
+                if word == "/":
+                    found.append("path /")
+                elif re.search(r"\s", word):  # quoted code or text: only absolute paths inside it count
+                    found += [f"path {p}" for p in EMBEDDED_PATH.findall(word) if _outside(p)]
+                elif word.startswith(("/", "~", "$HOME", "${HOME}")) or "/../" in f"/{word}/":
+                    if _outside(word.split("=", 1)[-1] if word.startswith("-") else word):
+                        found.append(f"path {word}")
+                else:
+                    found += [f"path {p}" for p in EMBEDDED_PATH.findall(word) if _outside(p)]
+    else:
+        for key in ("file_path", "path", "notebook_path"):
+            if isinstance(tool_input.get(key), str) and _outside(tool_input[key]):
+                found.append(f"path {tool_input[key]}")
+        pattern = tool_input.get("pattern") if name == "Glob" else None
+        if isinstance(pattern, str) and pattern.startswith(("/", "~", "..")) and _outside(pattern):
+            found.append(f"path {pattern}")
+    return found
+
+
 def foreign_references(events):
-    """Commands and reads with an escape signal (FOREIGN), after removing the session's own places."""
-    own = [e["scratchpad_path"] for e in events if isinstance(e.get("scratchpad_path"), str)] + list(OWN_PLACES)
+    """Commands and reads with an escape signal, as '<tool>: <signals> <input>'."""
     found = set()
     for b in blocks(events, "tool_use"):
-        if b.get("name") in SCANNED_TOOLS:
-            text = json.dumps(b.get("input"))
-            for place in own:
-                text = text.replace(place, "")
-            if FOREIGN.search(text):
-                found.add(f"{b.get('name')}: {json.dumps(b.get('input'))[:300]}")
+        if b.get("name") in SCANNED_TOOLS and isinstance(b.get("input"), dict):
+            signals = escapes(b["name"], b["input"])
+            if signals:
+                found.add(f"{b['name']}: {sorted(set(signals))} {json.dumps(b['input'])[:240]}")
     return sorted(found)
 
 
@@ -255,7 +320,7 @@ def prepare(fixture, arm, run_dir):
 def depth(repo, files):
     if not files:
         return {"exit": None, "lines": [], "findings": 0, "surface": 0, "size": 0}
-    code, out = sh([str(SKILL / "scripts/depth_report"), *files], repo)
+    code, out = in_sandbox(["/verifier/depth_report", *files], repo, verifier=True)  # it runs git in the repo
     lines = [line for line in out.splitlines() if line.strip()]
     total = lambda word: sum(int(m.group(1)) for line in lines if (m := re.search(rf"{word} (\d+)", line)))
     findings = sum(len(line.split(" -> ", 1)[1].split("; ")) for line in lines if " -> " in line)
@@ -270,6 +335,8 @@ def measure(fixture, arm, repo, base, events):
             shutil.copy2(repo / rel, check / rel, follow_symlinks=False)
     code, out = in_sandbox(["bun", "test"], check)
     own = {"exit": code, "pass": bun_counts(out)[0], "fail": bun_counts(out)[1]}
+    for config in ("bunfig.toml", ".bunfig.toml"):  # the arm's test config (preloads) must not touch the hidden run
+        (check / config).unlink(missing_ok=True)
     shutil.copytree(fixture / "hidden", check / "__acceptance__")
     code, out = in_sandbox(["bun", "test", "./__acceptance__"], check)
     hidden = {"exit": code, "pass": bun_counts(out)[0], "fail": bun_counts(out)[1], "tail": out[-1500:]}
@@ -458,7 +525,9 @@ def load_runs(phase):
     return runs
 
 
-SLOTS = {"pilot": {1}, "main": {1, 2, 3}}
+def planned_slots(phase):
+    """Pilot rounds (pilot, pilot2, ...) run slot 1; the main phase slots 1, 2 and 3."""
+    return {1, 2, 3} if phase == "main" else {1}
 
 
 def evaluate(phase):
@@ -479,15 +548,15 @@ def evaluate(phase):
         if chosen and any(r["attempt"] > chosen["attempt"] for r in recs):
             ok = False
             notes.append(f"{key}: attempts after the first valid one ({chosen['run_id']})")
-        if key[2] not in SLOTS[phase]:
+        if key[2] not in planned_slots(phase):
             ok = False
-            notes.append(f"{key}: slot {key[2]} is outside the planned slots {sorted(SLOTS[phase])}")
+            notes.append(f"{key}: slot {key[2]} is outside the planned slots {sorted(planned_slots(phase))}")
     for fixture in {k[0] for k in slots}:
         for arm in ARMS:
             present = {k[2] for k in slots if k[0] == fixture and k[1] == arm}
-            if present != SLOTS[phase]:
+            if present != planned_slots(phase):
                 ok = False
-                notes.append(f"{fixture} {arm}: slots {sorted(present)}, planned {sorted(SLOTS[phase])}")
+                notes.append(f"{fixture} {arm}: slots {sorted(present)}, planned {sorted(planned_slots(phase))}")
     recorded = set(all_runs)
     orphans = sorted({p.name for p in (WORK / "runs").glob(f"{phase}-*")} - recorded) + sorted(
         {p.name[:-len(".stream.jsonl.gz")] for p in (RESULTS / "runs").glob(f"{phase}-*.stream.jsonl.gz")} - recorded)
@@ -535,7 +604,7 @@ def evaluate(phase):
         runs = revs[0]["runs"]
         records = {arm: all_runs.get(rid) for arm, rid in runs.items()}
         problems = []
-        if int(meta["slot"]) not in SLOTS[phase]:
+        if int(meta["slot"]) not in planned_slots(phase):
             problems.append(f"slot {meta['slot']} is outside the planned slots")
         if set(runs) != set(ARMS) or len(set(runs.values())) != 3 or any(r is None for r in records.values()):
             problems.append("runs are not three distinct recorded runs of this phase")
@@ -567,10 +636,10 @@ def evaluate(phase):
         rows.append(f"{g.name:34} {scores:40} vs_base {final['vs_baseline']:+d} vs_canon {final['vs_canon']:+d}"
                     f"  replay {replay:6} depth_report findings/files {depth}")
     for fixture in {k[0] for k in slots} | set(per_fixture):
-        if reviewed_slots.get(fixture, set()) != SLOTS[phase]:
+        if reviewed_slots.get(fixture, set()) != planned_slots(phase):
             ok = False
             notes.append(f"{fixture}: reviewed slots {sorted(reviewed_slots.get(fixture, set()))}, "
-                         f"planned {sorted(SLOTS[phase])}")
+                         f"planned {sorted(planned_slots(phase))}")
     out.append("scores per reviewer (b=baseline c=canon s=skill k=control copy of baseline)")
     out += rows
     out.append("")
@@ -581,6 +650,14 @@ def evaluate(phase):
     if any("UNRELIABLE" in c for c in controls):
         ok = False
     return ok, out, notes, per_fixture
+
+
+def pilot_round_ok(phase, per_fixture, notes):
+    visible = {f for f, kind in fixtures().items() if kind == "fixtures"}
+    good = len(per_fixture) >= 2 and set(per_fixture) <= visible
+    if not good:
+        notes.append(f"{phase} reviewed {sorted(per_fixture)}; 2 or more visible fixtures (never hold-outs) required")
+    return good
 
 
 def gate(phase):
@@ -597,18 +674,20 @@ def gate(phase):
               f"  {'ok' if fx_ok else 'NOT MET'}"))
         if phase != "pilot":
             ok &= fx_ok
-    if phase == "pilot":
-        # The pilot validates harness and reviewers; its depth results are not judged.
-        fixtures_seen = len(per_fixture)
-        ok &= fixtures_seen >= 2
-        if fixtures_seen < 2:
-            notes.append(f"pilot reviewed {fixtures_seen} fixtures, 2 required")
+    if phase != "main":
+        # A pilot round validates harness and reviewers; its depth results are not judged.
+        ok &= pilot_round_ok(phase, per_fixture, notes)
         print("\n".join(notes))
         print("PILOT: OK" if ok else "PILOT: NOT OK")
         return 0 if ok else 1
-    pilot_ok, _, _, pilot_fixtures = evaluate("pilot")
-    pilot_ok &= len(pilot_fixtures) >= 2
-    print(f"pilot (2 fixtures, harness and reviewers valid, no unreliable control): {'ok' if pilot_ok else 'NOT OK'}")
+    rounds = sorted({json.loads(p.read_text())["phase"] for p in (RESULTS / "runs").glob("pilot*.json")},
+                    key=lambda name: int(name[5:] or 1))
+    pilot_ok = False
+    if rounds:
+        pilot_ok, _, pilot_notes, pilot_fixtures = evaluate(rounds[-1])
+        pilot_ok &= pilot_round_ok(rounds[-1], pilot_fixtures, [])
+    print(f"latest pilot round {rounds[-1] if rounds else '-'} (2 visible fixtures, every planned run reviewed, "
+          f"no unreliable control): {'ok' if pilot_ok else 'NOT OK'}")
     ok &= pilot_ok
     expected = fixtures()
     for fixture, kind in expected.items():
