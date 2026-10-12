@@ -23,9 +23,12 @@ export const POST: RequestHandler = async ({ params, fetch }) => {
 		});
 	} catch (error) {
 		console.error('PDF generation proxy error:', error);
-		return new Response(JSON.stringify({ error: 'Failed to generate PDF' }), {
-			status: 500,
-			headers: { 'Content-Type': 'application/json' }
-		});
+		return new Response(
+			JSON.stringify({ error: 'Failed to generate PDF', code: 'UNKNOWN_ERROR' }),
+			{
+				status: 500,
+				headers: { 'Content-Type': 'application/json' }
+			}
+		);
 	}
 };

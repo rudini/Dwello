@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { localName } from '$lib/names';
+	import { m } from '$lib/paraglide/messages';
 	import type { CategoryWithUsage } from '$lib/server/category';
 	import Badge from '$lib/ui/Badge.svelte';
 	import Button from '$lib/ui/Button.svelte';
@@ -6,7 +8,10 @@
 	let { category, ondelete }: { category: CategoryWithUsage; ondelete: () => void } = $props();
 
 	const count = $derived(category.usageCount);
-	const usage = $derived(`${count} ${count === 1 ? 'Rechnung' : 'Rechnungen'}`);
+	const usage = $derived(
+		count === 1 ? m.common_invoices_one({ count }) : m.invoices_count({ count })
+	);
+	const name = $derived(localName(category));
 </script>
 
 <!-- The whole row opens the category; its name is the link -->
@@ -18,7 +23,7 @@
 		<a
 			href="/config/categories/{category.id}/edit"
 			class="font-semibold text-accent underline underline-offset-4 after:absolute after:inset-0"
-			data-testid="category-edit-button"><span data-testid="category-name">{category.name}</span></a
+			data-testid="category-edit-button"><span data-testid="category-name">{name}</span></a
 		>
 		<!-- The predefined categories' descriptions are English; only own ones are shown -->
 		{#if category.description && !category.predefined}
@@ -28,7 +33,9 @@
 	<div class="flex flex-wrap items-center gap-4">
 		<Badge
 			tone={category.isAllowedUtilityCost ? 'positive' : 'neutral'}
-			label={category.isAllowedUtilityCost ? 'Umlagefähig' : 'Nicht umlagefähig'}
+			label={category.isAllowedUtilityCost
+				? m.glossary_allocable_term()
+				: m.invoices_not_allocable()}
 			testid="category-allowed"
 		/>
 		<p class="text-ink-muted tabular-nums" data-testid="category-usage">{usage}</p>
@@ -39,8 +46,8 @@
 				icon="delete"
 				onclick={ondelete}
 				disabled={count > 0}
-				ariaLabel="Kategorie «{category.name}» löschen"
-				testid="category-delete-button">Löschen</Button
+				ariaLabel={m.categories_delete_aria({ name })}
+				testid="category-delete-button">{m.buildings_delete()}</Button
 			>
 		</div>
 	</div>

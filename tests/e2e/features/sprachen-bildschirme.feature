@@ -1,5 +1,5 @@
 # language: de
-@i18n @wip
+@i18n
 Funktionalität: Jeder Bildschirm in jeder Sprache
   Als Liegenschaftsverwalter, der Französisch, Italienisch oder Englisch gewählt hat,
   möchte ich auf keinem Bildschirm mehr deutsche Texte sehen, ausser meinen eigenen Daten,

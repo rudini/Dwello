@@ -28,6 +28,7 @@ const seedValues = [
 	'Ahornweg 3',
 	'Winterthur',
 	'Treppenhausreinigung Q1',
+	'Muster AG',
 	'Muster Hosting AG',
 	'Bahnhofstrasse 1, 8001 Zürich',
 	'betrieb@muster-hosting.ch'

@@ -2,6 +2,7 @@
 	import { untrack } from 'svelte';
 	import HeatingProfileChart from '$lib/ui/HeatingProfileChart.svelte';
 	import { MONTHS, profileTotal } from '$lib/heating-profile';
+	import { m } from '$lib/paraglide/messages';
 	import type { HeatingProfile } from '$lib/types';
 	import Field from '$lib/ui/Field.svelte';
 	import Icon from '$lib/ui/Icon.svelte';
@@ -34,15 +35,15 @@
 	// What is still missing to 100 %, in words, so the sum does not speak by colour alone
 	const remainder = $derived(
 		complete
-			? 'stimmt'
+			? m.profiles_total_ok()
 			: total < 100
-				? `es fehlen noch ${+(100 - total).toFixed(2)} %`
-				: `${+(total - 100).toFixed(2)} % zu viel`
+				? m.profiles_total_missing({ missing: +(100 - total).toFixed(2) })
+				: m.profiles_total_excess({ excess: +(total - 100).toFixed(2) })
 	);
 </script>
 
 <SaveForm
-	record="Heizprofil"
+	record="heatingProfile"
 	error={errors.form}
 	{cancelHref}
 	{submitLabel}
@@ -51,8 +52,8 @@
 	<TextInput
 		id="name"
 		name="name"
-		label="Name"
-		example="Heizung Altbau"
+		label={m.contracts_name()}
+		example={m.profiles_name_example()}
 		bind:value={name}
 		error={errors.name}
 		testid="heating-profile-name-input"
@@ -60,16 +61,15 @@
 	<TextInput
 		id="description"
 		name="description"
-		label="Beschreibung"
+		label={m.invoices_description()}
 		optional
 		bind:value={description}
 	/>
 
 	<fieldset class="flex flex-col gap-4" aria-describedby="shares-help">
-		<legend class="text-lg font-semibold text-ink">Anteil der Heizkosten pro Monat in %</legend>
+		<legend class="text-lg font-semibold text-ink">{m.profiles_shares_legend()}</legend>
 		<p id="shares-help" class="text-ink-muted">
-			Die Monatsanteile verteilen die Heizkosten eines Jahres und ergeben zusammen 100 %. Im Winter
-			wird mehr geheizt als im Sommer.
+			{m.profiles_shares_help()}
 		</p>
 		<div class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
 			{#each MONTHS as month (month.key)}
@@ -98,7 +98,7 @@
 			data-testid="heating-profile-form-total"
 		>
 			<Icon name={complete ? 'success' : 'warning'} />
-			Summe: {total} % – {remainder}
+			{m.profiles_form_total({ total, remainder })}
 		</p>
 		{#if errors.total}
 			<p class="flex items-start gap-2 font-semibold text-critical" data-testid="form-error">

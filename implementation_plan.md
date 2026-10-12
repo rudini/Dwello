@@ -4695,8 +4695,17 @@ header and on pages without it. Branch `claude/optimistic-clarke-nn8u7t` from `m
   (line items named in the UI language via `localName`), `server/statement-actions.ts` (new reminder's title via
   `localTitle`, from review i18n-5), `server/statement-generation.ts` (category names of the year-on-year check by
   id), heating profiles by `localName`; 210 keys; help-page buttons as quoted. Test `statements-i18n.test.ts`.
-- [ ] Step 7 – configuration (categories, distribution keys, heating profiles, settings), gallery, remaining `src/lib`
-- [ ] Proof: no German in fr/it/en on every screen of `screens.json`, 390 px without sideways scrolling
+- [x] **Step 7 – configuration, gallery, remaining `src/lib`**: `src/routes/config/**` (settings, categories,
+  distribution keys, heating profiles; delete and save forms by record kind for gender agreement), gallery, reports,
+  analytics, home; `heating-profile.ts` (month labels and `monthName` via Intl in the UI language),
+  `HeatingProfileChart.svelte`, `distribution-key.ts` (variable descriptions as functions), `server/distribution-key.ts`,
+  `server/heating-profile.ts` (keeps nameFR/IT/EN so `localName` works in the statement wizard), `server/settings.ts`,
+  `api.ts` (fallbacks via `backend_*` codes incl. the BFF's own codes), `backend-error.ts` (month param of
+  HEATING_PROFILE_SHARE_NEGATIVE shown in the UI language), PDF proxy fallback coded; 211 keys. Test `config-i18n.test.ts`.
+- [x] **Proof: no German in fr/it/en on every screen of `screens.json`, 390 px without sideways scrolling**:
+  `sprachen-bildschirme.feature` (every screen and state, each in fr, it and en at 390 px: no word that only German
+  texts use, no umlaut word, user data masked; no page wider than the viewport, no clipped text box) passes for all
+  120 examples; `@wip` removed. Local examples per language (street, company, tenant name) instead of German ones.
 - [ ] One native-speaker read per message file; persona review in all four languages
 
 ---

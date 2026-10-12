@@ -1,5 +1,7 @@
 <script lang="ts">
 	import type { DistributionKeyRow as Key } from '$lib/distribution-key';
+	import { localName } from '$lib/names';
+	import { m } from '$lib/paraglide/messages';
 	import Button from '$lib/ui/Button.svelte';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import DeleteDialog from '../DeleteDialog.svelte';
@@ -14,29 +16,28 @@
 </script>
 
 <svelte:head>
-	<title>Verteilschlüssel - Dwello</title>
+	<title>{m.nav_distribution_keys()} - Dwello</title>
 </svelte:head>
 
 <div class="flex flex-col gap-8">
 	<PageHeader
-		title="Verteilschlüssel"
+		title={m.nav_distribution_keys()}
 		purpose={help.distributionKey}
-		trail={[{ href: '/config', label: 'Einstellungen' }]}
+		trail={[{ href: '/config', label: m.nav_settings() }]}
 	>
 		{#snippet action()}
 			<Button
 				href="/config/distribution-keys/new"
 				variant="primary"
 				icon="add"
-				testid="new-distribution-key-button">Verteilschlüssel erfassen</Button
+				testid="new-distribution-key-button">{m.keys_add()}</Button
 			>
 		{/snippet}
 	</PageHeader>
 
 	<div class="flex flex-col gap-4">
 		<p class="text-ink-muted">
-			Vordefinierte Verteilschlüssel lassen sich nicht ändern. Eigene Verteilschlüssel, nach denen
-			schon Rechnungen verteilt werden, lassen sich nicht löschen.
+			{m.keys_note()}
 		</p>
 		<ul class="flex flex-col gap-4">
 			{#each data.keys as key (key.id)}
@@ -55,11 +56,11 @@
 			if (!open) toDelete = null;
 		}
 	}
-	record="Verteilschlüssel"
-	name={toDelete?.name ?? ''}
+	record="distributionKey"
+	name={toDelete ? localName(toDelete) : ''}
 	id={toDelete?.id}
 	error={form?.error}
 	confirmTestid="distribution-key-delete-confirm"
 >
-	<p>Der Verteilschlüssel verschwindet aus der Auswahl beim Erfassen von Rechnungen.</p>
+	<p>{m.keys_delete_text()}</p>
 </DeleteDialog>

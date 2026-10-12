@@ -1,22 +1,27 @@
-// Variables the backend formula engine knows (backend/src/services/formula.service.ts)
+import { m } from '$lib/paraglide/messages';
+
+// Variables the backend formula engine knows (backend/src/services/formula.service.ts), described in the UI language
 export const FORMULA_VARIABLES = [
-	{ name: 'area', description: 'Wohnfläche in m²' },
-	{ name: 'rooms', description: 'Anzahl Zimmer' },
-	{ name: 'volume', description: 'Raumvolumen in m³' },
-	{ name: 'units', description: '1 für jede Wohnung, alle tragen gleich viel' }
+	{ name: 'area', description: m.keys_var_area },
+	{ name: 'rooms', description: m.keys_var_rooms },
+	{ name: 'volume', description: m.keys_var_volume },
+	{ name: 'units', description: m.keys_var_units }
 ];
 
 // Sums over all apartments of the building, for keys that split in fixed parts (e.g. 70 % by area, 30 % equally)
 export const BUILDING_TOTALS = [
-	{ name: 'area_total', description: 'Summe der Wohnflächen aller Wohnungen' },
-	{ name: 'rooms_total', description: 'Summe der Zimmer aller Wohnungen' },
-	{ name: 'volume_total', description: 'Summe der Raumvolumen aller Wohnungen' },
-	{ name: 'units_total', description: 'Anzahl Wohnungen im Gebäude' }
+	{ name: 'area_total', description: m.keys_total_area },
+	{ name: 'rooms_total', description: m.keys_total_rooms },
+	{ name: 'volume_total', description: m.keys_total_volume },
+	{ name: 'units_total', description: m.keys_total_units }
 ];
 
 export type DistributionKeyRow = {
 	id: string;
 	name: string;
+	nameFR?: string | null;
+	nameIT?: string | null;
+	nameEN?: string | null;
 	type: 'predefined' | 'custom';
 	formula: string;
 	description: string;

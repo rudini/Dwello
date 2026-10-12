@@ -5,6 +5,7 @@
 
 import { browser } from '$app/environment';
 import { goto } from '$app/navigation';
+import { m } from '$lib/paraglide/messages';
 
 /**
  * XSRF cookie name constant - must match server-side cookie name
@@ -139,13 +140,13 @@ async function failure(response: Response): Promise<ApiError> {
 		if (browser) await goto('/login');
 		return {
 			code: 'UNAUTHORIZED',
-			message: 'Ihre Anmeldung ist abgelaufen. Bitte melden Sie sich erneut an.'
+			message: m.backend_unauthorized()
 		};
 	}
 	const errorData = await response.json().catch(() => ({
 		error: {
 			code: 'UNKNOWN_ERROR',
-			message: 'Ein unerwarteter Fehler ist aufgetreten. Versuchen Sie es erneut.'
+			message: m.backend_unknown_error()
 		}
 	}));
 	// The backend names its error as text, e.g. { error: 'Invoice not found' }, with a code the UI translates
@@ -158,7 +159,7 @@ async function failure(response: Response): Promise<ApiError> {
 	return (
 		errorData.error || {
 			code: `HTTP_${response.status}`,
-			message: 'Ein unerwarteter Fehler ist aufgetreten. Versuchen Sie es erneut.'
+			message: m.backend_unknown_error()
 		}
 	);
 }

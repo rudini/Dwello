@@ -1,5 +1,6 @@
 import { backendMessage, type BackendError } from '$lib/backend-error';
 import { error } from '@sveltejs/kit';
+import { m } from '$lib/paraglide/messages';
 import type { DistributionKeyRow, FormulaTest } from '$lib/distribution-key';
 import { deleteRecord, fetchRecord, saveRecord } from './save-form';
 
@@ -11,6 +12,9 @@ export function toDistributionKey(d: Record<string, unknown>): DistributionKeyRo
 	return {
 		id: d.id as string,
 		name: (d.nameDE || d.name || '') as string,
+		nameFR: d.nameFR as string | null,
+		nameIT: d.nameIT as string | null,
+		nameEN: d.nameEN as string | null,
 		type: d.type === 'custom' ? 'custom' : 'predefined',
 		formula: (d.formula || '') as string,
 		description: (d.description || '') as string,
@@ -23,16 +27,15 @@ export async function listDistributionKeys(
 	fetch: typeof globalThis.fetch
 ): Promise<DistributionKeyRow[]> {
 	const response = await fetch(`${API}?limit=100`);
-	if (!response.ok) throw error(response.status, 'Fehler beim Laden der Verteilschlüssel');
+	if (!response.ok) throw error(response.status, m.keys_load_failed());
 	const { data = [] }: { data?: Record<string, unknown>[] } = await response.json();
 	return data.map(toDistributionKey);
 }
 
 /** Only custom keys can be edited; the predefined ones follow Swiss practice */
 export async function fetchCustomKey(fetch: typeof globalThis.fetch, id: string) {
-	const key = toDistributionKey(await fetchRecord(fetch, `${API}/${id}`, 'Verteilschlüssel'));
-	if (key.type === 'predefined')
-		throw error(403, 'Vordefinierte Verteilschlüssel können nicht bearbeitet werden');
+	const key = toDistributionKey(await fetchRecord(fetch, `${API}/${id}`, m.glossary_key_term()));
+	if (key.type === 'predefined') throw error(403, m.keys_predefined_not_editable());
 	return key;
 }
 
@@ -40,8 +43,8 @@ async function parseKey(request: Request) {
 	const formData = await request.formData();
 	const field = (key: string) => String(formData.get(key) ?? '').trim();
 	const errors: Record<string, string> = {};
-	if (!field('name')) errors.name = 'Name ist erforderlich';
-	if (!field('formula')) errors.formula = 'Bitte geben Sie eine Formel ein.';
+	if (!field('name')) errors.name = m.categories_error_name_required();
+	if (!field('formula')) errors.formula = m.backend_formula_required();
 	return {
 		name: field('name'),
 		body: { description: field('description'), formula: field('formula') },
@@ -50,8 +53,7 @@ async function parseKey(request: Request) {
 }
 
 const options = {
-	failure: (_status: number, saved: BackendError) =>
-		backendMessage(saved, 'Verteilschlüssel konnte nicht gespeichert werden.'),
+	failure: (_status: number, saved: BackendError) => backendMessage(saved, m.keys_save_failed()),
 	location: () => LIST
 };
 
@@ -78,7 +80,7 @@ export async function updateDistributionKey(
 }
 
 export const deleteDistributionKey = (fetch: typeof globalThis.fetch, id: string) =>
-	deleteRecord(fetch, `${API}/${id}`, 'Verteilschlüssel konnte nicht gelöscht werden.', LIST);
+	deleteRecord(fetch, `${API}/${id}`, m.keys_delete_failed(), LIST);
 
 type Sample = { apartment: { area: number; rooms: number }; share: string };
 
@@ -104,7 +106,7 @@ export async function testFormula(
 		test: {
 			errors: errors.map((error, i) => backendMessage({ ...errorCodes[i], error }, error)),
 			results: results.map(({ apartment, share }) => ({
-				apartment: `${apartment.area} m², ${apartment.rooms} Zimmer`,
+				apartment: m.keys_sample_apartment(apartment),
 				share
 			}))
 		}

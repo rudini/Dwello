@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { m } from '$lib/paraglide/messages';
 	import { addToast } from '$lib/stores';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Badge from '$lib/ui/Badge.svelte';
@@ -27,16 +28,16 @@
 
 	// Every component of the design system in every state, so the axe check sees them in a real browser
 	const motifs: Record<IllustrationName, string> = {
-		building: 'Gebäude',
-		apartment: 'Wohnung',
-		contract: 'Mietvertrag',
-		meter: 'Zähler',
-		receipts: 'Rechnungen',
-		statement: 'Nebenkostenabrechnung',
-		envelope: 'Versand',
-		done: 'Erledigt',
-		'no-results': 'Keine Treffer',
-		problem: 'Fehler'
+		building: m.apartments_building(),
+		apartment: m.tenants_apartment(),
+		contract: m.contracts_title(),
+		meter: m.gallery_meter(),
+		receipts: m.nav_invoices(),
+		statement: m.gallery_statement(),
+		envelope: m.gallery_dispatch(),
+		done: m.gallery_done(),
+		'no-results': m.gallery_no_results(),
+		problem: m.error_title()
 	};
 	let dialogOpen = $state(false);
 	let busyDialogOpen = $state(false);
@@ -44,240 +45,248 @@
 	let duration = $state('unbefristet');
 
 	onMount(() => {
-		addToast('success', 'Mieter Anna Keller gespeichert', 0);
-		addToast(
-			'error',
-			'Die Abrechnung konnte nicht gespeichert werden. Bitte versuchen Sie es erneut.',
-			0
-		);
-		addToast('warning', 'Die Verwaltungspauschale liegt über dem üblichen Richtwert von 3 %.', 0);
-		addToast('info', 'Entwurf gespeichert.', 0);
+		addToast('success', m.gallery_toast_saved({ name: `${m.tenants_example_first_name()} ${m.tenants_example_last_name()}` }), 0);
+		addToast('error', m.gallery_toast_error(), 0);
+		addToast('warning', m.gallery_toast_warning(), 0);
+		addToast('info', m.gallery_toast_info(), 0);
 	});
 </script>
 
 <svelte:head>
-	<title>Bauteile - Dwello</title>
+	<title>{m.gallery_title()} - Dwello</title>
 </svelte:head>
 
 <div class="flex flex-col gap-12 bg-canvas p-4 text-ink md:p-8" data-testid="gallery">
 	<PageHeader
-		title="Bauteile"
-		purpose="Alle Bauteile des Designsystems in allen Zuständen."
-		trail={[{ href: '/dashboard', label: 'Übersicht' }]}
+		title={m.gallery_title()}
+		purpose={m.gallery_purpose()}
+		trail={[{ href: '/dashboard', label: m.nav_overview() }]}
 	>
-		{#snippet action()}<Button variant="primary" icon="check">Hauptaktion</Button>{/snippet}
+		{#snippet action()}<Button variant="primary" icon="check">{m.gallery_primary_action()}</Button
+			>{/snippet}
 	</PageHeader>
-	<Panel title="Dialoge">
+	<Panel title={m.gallery_dialogs()}>
 		<div class="flex flex-wrap gap-4">
-			<Button onclick={() => (dialogOpen = true)} testid="gallery-open-dialog">Dialog öffnen</Button
+			<Button onclick={() => (dialogOpen = true)} testid="gallery-open-dialog"
+				>{m.gallery_open_dialog()}</Button
 			>
 			<Button onclick={() => (busyDialogOpen = true)} testid="gallery-open-busy-dialog"
-				>Dialog beim Speichern</Button
+				>{m.gallery_busy_dialog()}</Button
 			>
 		</div>
 	</Panel>
 
-	<Panel title="Schaltflächen">
+	<Panel title={m.gallery_buttons()}>
 		<div class="flex flex-wrap gap-4">
-			<Button variant="primary">Mietvertrag speichern</Button>
-			<Button>Zurück</Button>
-			<Button variant="ghost">Entwurf verwerfen</Button>
-			<Button variant="danger">Mieter löschen</Button>
-			<Button variant="danger-ghost">Löschen</Button>
-			<Button variant="primary" disabled>Weiter</Button>
-			<Button variant="primary" busy busyLabel="Wird gespeichert …">Speichern</Button>
-			<Button href="/tenants/new" icon="check">Mieter erfassen</Button>
-			<IconButton icon="close" label="Schliessen" onclick={() => {}} />
-			<IconButton icon="close" label="Menü schliessen" expanded onclick={() => {}} />
+			<Button variant="primary">{m.contracts_save()}</Button>
+			<Button>{m.ui_back()}</Button>
+			<Button variant="ghost">{m.ui_draft_discard()}</Button>
+			<Button variant="danger">{m.tenants_delete_confirm()}</Button>
+			<Button variant="danger-ghost">{m.buildings_delete()}</Button>
+			<Button variant="primary" disabled>{m.ui_next()}</Button>
+			<Button variant="primary" busy busyLabel={m.ui_saving()}>{m.gallery_save()}</Button>
+			<Button href="/tenants/new" icon="check">{m.dashboard_add_tenant()}</Button>
+			<IconButton icon="close" label={m.gallery_close()} onclick={() => {}} />
+			<IconButton icon="close" label={m.nav_close_menu()} expanded onclick={() => {}} />
 		</div>
 	</Panel>
 
-	<Panel title="Formularfelder">
+	<Panel title={m.gallery_fields()}>
 		<div class="grid gap-6 md:grid-cols-2">
-			<TextInput id="g-name" label="Nachname" value="Keller" />
+			<TextInput id="g-name" label={m.tenants_last_name()} value="Keller" />
 			<TextInput
 				id="g-number"
-				label="Wohnungsnummer"
-				help="Bezeichnung der Wohnung im Gebäude, pro Gebäude eindeutig."
+				label={m.apartments_number()}
+				help={m.apartments_number_help()}
 				example="3.01"
 				value=""
 			/>
-			<TextInput id="g-phone" label="Telefon" optional value="" />
+			<TextInput id="g-phone" label={m.tenants_phone()} optional value="" />
 			<TextInput
 				id="g-street"
-				label="Strasse"
-				error="Bitte geben Sie die Strasse ein, zum Beispiel Musterstrasse 12."
+				label={m.gallery_street()}
+				error={m.gallery_street_error()}
 				value=""
 			/>
 			<DateInput
 				id="g-date"
-				label="Vertragsbeginn"
+				label={m.tenants_contract_start()}
 				value="2026-04-01"
 				testid="gallery-date-input"
 			/>
 			<TextInput
 				id="g-disabled"
-				label="Gebäude"
-				value="Musterstrasse 12, 8400 Winterthur"
+				label={m.apartments_building()}
+				value="{m.buildings_street_example()}, 8400 Winterthur"
 				disabled
 			/>
 			<MoneyInput
 				id="g-rent"
-				label="Nettomiete"
-				help="Die monatliche Miete ohne Nebenkosten, in CHF."
+				label={m.common_net_rent()}
+				help={m.gallery_rent_help()}
 				example="1'650.00"
 				value="1650.00"
 			/>
 			<MoneyInput
 				id="g-advance"
-				label="Akonto"
-				error="Bitte geben Sie einen Betrag ein."
+				label={m.common_advance_payment()}
+				error={m.gallery_amount_error()}
 				value=""
 			/>
 			<Select
 				id="g-channel"
-				label="Korrespondenzkanal"
-				placeholder="Bitte wählen"
+				label={m.tenants_channel()}
+				placeholder={m.gallery_please_choose()}
 				options={[
-					{ value: 'letter', label: 'Brief' },
-					{ value: 'email', label: 'E-Mail' }
+					{ value: 'letter', label: m.gallery_letter() },
+					{ value: 'email', label: m.tenants_email() }
 				]}
 				value="letter"
 			/>
 			<Select
 				id="g-building"
-				label="Gebäude"
-				placeholder="Bitte wählen"
-				options={[{ value: 'b1', label: 'Musterstrasse 12' }]}
-				error="Bitte wählen Sie ein Gebäude."
+				label={m.apartments_building()}
+				placeholder={m.gallery_please_choose()}
+				options={[{ value: 'b1', label: m.buildings_street_example() }]}
+				error={m.gallery_building_error()}
 				value=""
 			/>
-			<Textarea id="g-notes" label="Bemerkungen" optional value="" />
+			<Textarea id="g-notes" label={m.statements_notes()} optional value="" />
 			<Textarea
 				id="g-reason"
-				label="Grund der Änderung"
-				error="Bitte nennen Sie den Grund der Änderung."
+				label={m.invoices_override_reason()}
+				error={m.gallery_reason_error()}
 				value=""
 			/>
 			<Select
 				id="g-language"
-				label="Sprache"
-				options={[{ value: 'de', label: 'Deutsch' }]}
+				label={m.tenants_language()}
+				options={[{ value: 'de', label: m.tenants_language_de() }]}
 				value="de"
 				disabled
 			/>
 			<div class="flex flex-col gap-4">
 				<Checkbox
 					id="g-allocable"
-					label="Umlagefähig"
-					help="Die Rechnung fliesst in die Nebenkostenabrechnung ein."
+					label={m.glossary_allocable_term()}
+					help={m.invoices_allocable_help()}
 					checked
 				/>
-				<Checkbox id="g-unchecked" label="Unbefristeter Mietvertrag" />
-				<Checkbox id="g-disabled-box" label="Vordefiniert" checked disabled />
+				<Checkbox id="g-unchecked" label={m.gallery_unlimited_contract()} />
+				<Checkbox id="g-disabled-box" label={m.keys_predefined()} checked disabled />
 			</div>
 			<RadioGroup
 				name="g-duration"
-				legend="Wie lange läuft der Mietvertrag?"
+				legend={m.gallery_duration_question()}
 				options={[
 					{
 						value: 'unbefristet',
-						label: 'Unbefristet',
-						description: 'Der Mietvertrag hat kein Vertragsende.'
+						label: m.contracts_unlimited(),
+						description: m.gallery_unlimited_text()
 					},
 					{
 						value: 'befristet',
-						label: 'Befristet',
-						description: 'Der Mietvertrag endet an einem festen Datum.'
+						label: m.contracts_limited(),
+						description: m.gallery_limited_text()
 					}
 				]}
 				bind:value={duration}
 			/>
 			<RadioGroup
 				name="g-channel-radio"
-				legend="Korrespondenzkanal"
+				legend={m.tenants_channel()}
 				options={[
-					{ value: 'letter', label: 'Brief' },
-					{ value: 'email', label: 'E-Mail' }
+					{ value: 'letter', label: m.gallery_letter() },
+					{ value: 'email', label: m.tenants_email() }
 				]}
-				error="Bitte wählen Sie, wie der Mieter Post erhält."
+				error={m.gallery_channel_error()}
 				value=""
 			/>
 		</div>
 	</Panel>
 
-	<Panel title="Hinweise und Status">
-		<Alert tone="info" title="Gut zu wissen">
-			<p>Die Abrechnungen werden als Entwurf erstellt. Sie können sie vor dem Versenden prüfen.</p>
+	<Panel title={m.gallery_notices()}>
+		<Alert tone="info" title={m.gallery_good_to_know()}>
+			<p>{m.gallery_drafts_text()}</p>
 		</Alert>
-		<Alert tone="positive" title="Mietvertrag gespeichert" />
-		<Alert tone="caution" title="Keine Rechnungen erfasst">
-			<p>Für die Abrechnungsperiode 2025 sind keine Rechnungen erfasst.</p>
-			{#snippet action()}<Button href="/invoices/new">Rechnung erfassen</Button>{/snippet}
+		<Alert tone="positive" title={m.gallery_contract_saved()} />
+		<Alert tone="caution" title={m.statements_coverage_none()}>
+			<p>{m.gallery_no_invoices_text({ year: 2025 })}</p>
+			{#snippet action()}<Button href="/invoices/new">{m.dashboard_add_invoice()}</Button>{/snippet}
 		</Alert>
-		<Alert tone="critical" title="Speichern fehlgeschlagen">
-			<p>Bitte prüfen Sie die Angaben und versuchen Sie es erneut.</p>
+		<Alert tone="critical" title={m.gallery_save_failed()}>
+			<p>{m.gallery_check_text()}</p>
 		</Alert>
 		<div class="flex flex-wrap gap-4">
-			<Badge label="Entwurf" />
-			<Badge tone="info" label="Versendet" />
-			<Badge tone="positive" label="Bezahlt" />
-			<Badge tone="critical" label="Überfällig" />
-			<Badge tone="caution" label="Leer" />
+			<Badge label={m.statements_status_draft()} />
+			<Badge tone="info" label={m.statements_status_sent()} />
+			<Badge tone="positive" label={m.statements_status_paid()} />
+			<Badge tone="critical" label={m.statements_status_overdue()} />
+			<Badge tone="caution" label={m.apartments_status_vacant()} />
 		</div>
 		<SaveStatus savedAt={new Date('2026-10-09T14:32:00')} />
-		<ProgressBar value={2} max={5} label="Schritt 2 von 5" />
+		<ProgressBar value={2} max={5} label={m.ui_step_of({ current: 2, total: 5 })} />
 	</Panel>
 
-	<Panel title="Schrittanzeige und Registerkarten">
+	<Panel title={m.gallery_steps_tabs()}>
 		<Stepper
-			steps={['Mieter', 'Wohnung', 'Vertragsdauer', 'Miete', 'Prüfen']}
+			steps={[
+				m.contracts_tenant(),
+				m.tenants_apartment(),
+				m.contracts_period(),
+				m.contracts_rent(),
+				m.contracts_step_review()
+			]}
 			current={3}
 			onselect={() => {}}
 		/>
 		<Tabs
-			label="Mietverträge"
+			label={m.nav_contracts()}
 			tabs={[
-				{ id: 'laufend', label: 'Laufend' },
-				{ id: 'beendet', label: 'Beendet' }
+				{ id: 'laufend', label: m.contracts_status_active() },
+				{ id: 'beendet', label: m.contracts_status_ended() }
 			]}
 			bind:selected={tab}
 		>
-			<p>{tab === 'laufend' ? 'Laufende Mietverträge' : 'Beendete Mietverträge'}</p>
+			<p>{tab === 'laufend' ? m.contracts_filter_active() : m.contracts_filter_ended()}</p>
 		</Tabs>
 	</Panel>
 
 	<Table
-		caption="Abrechnungspositionen"
+		caption={m.statements_lines()}
 		columns={[
-			{ label: 'Kategorie' },
-			{ label: 'Verteilschlüssel' },
-			{ label: 'Betrag', numeric: true },
-			{ label: 'Aktionen', hidden: true }
+			{ label: m.buildings_category() },
+			{ label: m.glossary_key_term() },
+			{ label: m.invoices_amount(), numeric: true },
+			{ label: m.gallery_actions(), hidden: true }
 		]}
 	>
 		<tr>
-			<td>Wasser</td><td>Pro Fläche (m²)</td><td class="text-right">CHF 412.50</td>
-			<td><a href="/invoices" class="text-accent underline">Rechnungen ansehen</a></td>
+			<td>{m.gallery_water()}</td><td>{m.gallery_per_area()}</td><td class="text-right"
+				>CHF 412.50</td
+			>
+			<td><a href="/invoices" class="text-accent underline">{m.dashboard_invoices()}</a></td>
 		</tr>
 		<tr>
-			<td>Kehricht</td><td>Pro Einheit</td><td class="text-right">CHF 96.00</td>
-			<td><a href="/invoices" class="text-accent underline">Rechnungen ansehen</a></td>
+			<td>{m.gallery_refuse()}</td><td>{m.gallery_per_unit()}</td><td class="text-right"
+				>CHF 96.00</td
+			>
+			<td><a href="/invoices" class="text-accent underline">{m.dashboard_invoices()}</a></td>
 		</tr>
 	</Table>
 
-	<Panel title="Leerer Zustand">
-		<Illustration name="done" title="Alles erledigt" />
+	<Panel title={m.gallery_empty_state()}>
+		<Illustration name="done" title={m.dashboard_all_done()} />
 		<EmptyState
-			title="Noch keine Mieter"
-			text="Erfassen Sie Ihren ersten Mieter. Danach können Sie einen Mietvertrag erstellen."
-			actionLabel="Mieter erfassen"
+			title={m.tenants_none_yet()}
+			text={m.gallery_first_tenant()}
+			actionLabel={m.dashboard_add_tenant()}
 			actionHref="/tenants/new"
 			illustration="contract"
 		/>
 	</Panel>
 
-	<Panel title="Illustrationen">
+	<Panel title={m.gallery_illustrations()}>
 		<ul class="grid grid-cols-2 gap-6 md:grid-cols-5">
 			{#each Object.entries(motifs) as [name, label] (name)}
 				<li class="flex flex-col items-center gap-2">
@@ -288,14 +297,14 @@
 		</ul>
 	</Panel>
 
-	<Panel title="Navigation">
+	<Panel title={m.gallery_navigation()}>
 		<NavList
 			groups={[
 				{
-					label: 'Verwalten',
+					label: m.nav_group_manage(),
 					items: [
-						{ label: 'Gebäude', href: '/buildings', icon: 'building' },
-						{ label: 'Bauteile', href: '/gallery', icon: 'check' }
+						{ label: m.nav_buildings(), href: '/buildings', icon: 'building' },
+						{ label: m.gallery_title(), href: '/gallery', icon: 'check' }
 					]
 				}
 			]}
@@ -305,20 +314,20 @@
 
 <Dialog
 	bind:open={dialogOpen}
-	title="Mieter löschen?"
-	confirmLabel="Mieter löschen"
+	title={m.gallery_delete_tenant_question()}
+	confirmLabel={m.tenants_delete_confirm()}
 	danger
 	onconfirm={() => (dialogOpen = false)}
 >
-	<p>Anna Keller wird gelöscht. Das lässt sich nicht rückgängig machen.</p>
+	<p>{m.gallery_delete_tenant_text({ name: `${m.tenants_example_first_name()} ${m.tenants_example_last_name()}` })}</p>
 </Dialog>
 <Dialog
 	bind:open={busyDialogOpen}
-	title="Abrechnung als versendet markieren?"
-	confirmLabel="Als versendet markieren"
+	title={m.gallery_mark_sent_question()}
+	confirmLabel={m.statements_mark_sent()}
 	busy
-	busyLabel="Wird gespeichert …"
+	busyLabel={m.ui_saving()}
 	onconfirm={() => {}}
 >
-	<p>Danach können Sie die Abrechnung nicht mehr bearbeiten oder löschen.</p>
+	<p>{m.gallery_mark_sent_text()}</p>
 </Dialog>
