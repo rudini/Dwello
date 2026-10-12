@@ -13,7 +13,7 @@
 
 **Vision:** Comprehensive, user-friendly Swiss property management system designed to streamline the management of residential properties, tenant relationships, and utility cost distribution for small property portfolios.
 
-**Target Users:** Property managers (Liegenschaftsverwalter) managing 1-5 buildings with up to 50 apartments in Switzerland.
+**Target Users:** Private landlords in Switzerland with little experience who manage their own 1-5 buildings with up to 50 apartments (in the app: Liegenschaftsverwalter); see section 3.
 
 **Primary Goal:** Enable property managers to efficiently handle property administration, tenant contracts, invoice management, and annual utility cost statement generation while ensuring compliance with Swiss legal requirements.
 
@@ -50,7 +50,7 @@ Dwello provides:
 - Secure data storage with automated backups
 
 ### 2.4 Target Market
-- **Primary:** Property managers in Switzerland managing small to mid-size portfolios
+- **Primary:** Private landlords in Switzerland who manage their own property and use Dwello a few times a year
 - **Portfolio Size:** 1-5 residential buildings
 - **Tenant Base:** Up to 50 apartments
 - **User Type:** Single property manager (no multi-user requirement for MVP)
@@ -59,34 +59,7 @@ Dwello provides:
 
 ## 3. User Personas
 
-### 3.1 Primary User: Property Manager (Liegenschaftsverwalter)
-
-**Name:** Michael Keller
-**Background:** 15 years managing residential properties in Switzerland
-**Portfolio:** 3 buildings, 28 apartments, ~100 tenants across career
-
-**Goals:**
-- Reduce time spent on administrative tasks (currently 40% of workweek)
-- Ensure accurate, legally-compliant utility cost statements
-- Maintain professional relationships with tenants through transparent communications
-- Keep detailed records for audits and legal compliance
-- Understand portfolio financial performance
-
-**Pain Points:**
-- Manually calculating complex distributions (heating, by area, by unit count)
-- Managing multiple accounting periods for different buildings
-- Tracking contract changes and prorated calculations when tenants move mid-year
-- Ensuring invoices meet Swiss utility cost standards (what's allowed vs. not)
-- Generating professional multi-language documents
-- Storing and retrieving historical contracts and statements
-
-**Tech Comfort:** Medium - comfortable with business software, prefers intuitive interfaces
-
-**Success Metrics:**
-- Utility statements generated in <1 hour for all properties
-- Zero calculation errors in prorated distributions
-- Legal compliance confidence (all costs properly categorized)
-- Tenant satisfaction with professional communications
+Dwello is built for private landlords with little experience who use it a few times a year (`CLAUDE.md`, "Design-Regeln"): guidance, plain words and confirmations come before speed for experts. The personas that stand for them (Helga, Marco, Dr. Weber, Sven, Anna), with their tasks, viewports and input, are in `docs/design/personas/README.md`.
 
 ---
 
@@ -1887,4 +1860,4 @@ Key Legal Requirements Addressed (see the status note below for what is implemen
 
 ---
 
-*This PRD is the original product vision for the Dwello MVP. It describes intended features, not what is built: items marked "planned, not implemented" do not exist, and other features may not be implemented either. The implementation status lives in `implementation_plan.md` and `docs/migration-mva.md`. Future enhancements are documented in Section 12.*
+*This PRD is the original product vision for the Dwello MVP. It describes intended features, not what is built: items marked "planned, not implemented" do not exist, and other features may not be implemented either. Open work is listed as GitHub issues (functional) and in `docs/design/offene-punkte.md` (non-functional); the architecture status is in `docs/migration-mva.md`. Future enhancements are documented in Section 12.*

@@ -9,7 +9,6 @@
 	let { statement }: { statement: StatementWithDetails } = $props();
 
 	const subtotal = $derived(statement.lineItems.reduce((sum, item) => sum + item.tenantShare, 0));
-	// TODO(fachlich prüfen): «Rundung auf 5 Rappen» is not in the glossary (offene-punkte.md)
 	// The Saldo goes to 5 Rappen. As in the PDF: the amount before, its rounding seen from the amount shown (a refund
 	// that grows gets +), the Saldo; only a real rounding (under 5 Rappen)
 	const cents = (amount: number) => Math.round(amount * 100) / 100;

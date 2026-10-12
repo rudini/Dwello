@@ -28,7 +28,7 @@
 	);
 </script>
 
-<!-- TODO(fachlich prüfen): a hint against the year before; a supplier may bill differently -->
+<!-- TODO(fachlich prüfen, #65, #130): a hint against the year before; a supplier may bill differently -->
 <Alert
 	tone="caution"
 	title={confirm ? m.statements_maybe_missing_title() : m.statements_compared_title()}
@@ -46,7 +46,7 @@
 		{/each}
 		{#if confirm && invoicesMissing}
 			<p>
-				<!-- TODO(fachlich prüfen): whether a paid statement can be corrected later is not settled -->
+				<!-- TODO(fachlich prüfen, #70, #120): whether a paid statement can be corrected later is not settled -->
 				{m.statements_missing_consequence()}
 			</p>
 			<p>{m.statements_add_missing()}</p>

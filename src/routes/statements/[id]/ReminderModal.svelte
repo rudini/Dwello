@@ -38,7 +38,7 @@
 		</p>
 	</FormDialog>
 {:else}
-	<!-- TODO(fachlich prüfen): what follows after the 3rd Mahnung (e.g. Betreibung) is not part of Dwello -->
+	<!-- TODO(fachlich prüfen, #59): what follows after the 3rd Mahnung (e.g. Betreibung) is not part of Dwello -->
 	<Dialog
 		bind:open
 		title={m.statements_no_more_reminders_title()}

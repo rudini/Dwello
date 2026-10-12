@@ -23,7 +23,6 @@
 				<dd class="text-ink-muted">{rental.building}</dd>
 			</div>
 			<div>
-				<!-- TODO(fachlich prüfen): no glossary term for the monthly total, as in the contract wizard -->
 				<dt class="text-ink-muted">{m.common_monthly_total()}</dt>
 				<dd class="text-lg font-semibold text-ink" data-testid="tenant-rental-rent">
 					{formatCurrency(rental.rent)}

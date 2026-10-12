@@ -113,7 +113,6 @@ const partLabel = (slice: { start: string; end: string }) =>
 	calendarName(slice) ??
 	m.statements_part_dates({ start: formatDate(slice.start), end: formatDate(slice.end) });
 
-// TODO(fachlich prüfen): "Tankbestand" is not in the glossary
 function stockText(missingDays: { start: string }[], consumption: number) {
 	if (!missingDays.length)
 		return m.statements_finding_stock_negative({ amount: formatCurrency(-consumption) });
@@ -159,7 +158,7 @@ export function findingText({
 		: m.statements_finding_less(change);
 }
 
-// TODO(fachlich prüfen): costs 15 % above the Akonto suggest raising it, 30 % below suggest missing invoices;
+// TODO(fachlich prüfen, #65, #76): costs 15 % above the Akonto suggest raising it, 30 % below suggest missing invoices;
 // a fixed-term contract has no termination date before its end, for the Akonto and new costs alike (review B, MR4-4, MR5-2)
 const AKONTO_ABOVE = 0.15;
 const AKONTO_BELOW = 0.3;
@@ -199,7 +198,7 @@ const coverageText = ({ count, first, last }: Coverage) => {
 	return m.statements_coverage_many({ count, first: formatDate(first), last: formatDate(last) });
 };
 
-// TODO(fachlich prüfen): three months without any invoice at the start or end of the period is a hint, not a rule
+// TODO(fachlich prüfen, #65): three months without any invoice at the start or end of the period is a hint, not a rule
 const GAP_DAYS = 90;
 const daysBetween = (from: string, to: string) =>
 	(new Date(to).getTime() - new Date(from).getTime()) / 86_400_000;

@@ -206,7 +206,6 @@
 			{/snippet}
 		</RefusedStatements>
 	{/snippet}
-	<!-- TODO(fachlich prüfen): «Kündigungstermin», «Kündigungsfrist» are not in the glossary (offene-punkte.md) -->
 	<DateInput
 		id="endDate"
 		label={m.dashboard_kind_contract_end()}

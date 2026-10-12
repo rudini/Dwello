@@ -4,7 +4,7 @@
 	import Panel from '$lib/ui/Panel.svelte';
 
 	// What a notice asks for next (A-4): the next tenant until one is recorded, always the new address for the
-	// final statement; TODO(fachlich prüfen): «Nachmieter» is not in the glossary
+	// final statement; TODO(fachlich prüfen, #140): «Nachmieter» is not in the glossary
 	let {
 		shown,
 		apartmentId,

@@ -1,6 +1,6 @@
 # Dwello
 
-Web app for Swiss property managers (Liegenschaftsverwalter): buildings, apartments, tenants, contracts, invoices categorized by an LLM, utility cost statements (Nebenkostenabrechnungen) with Swiss QR-bills. Single-user MVP, under 50 apartments.
+Web app for Swiss private landlords who manage their own rented property (in the app the Liegenschaftsverwalter; target users in "Design-Regeln"): buildings, apartments, tenants, contracts, invoices categorized by an LLM, utility cost statements (Nebenkostenabrechnungen) with Swiss QR-bills. Single-user MVP, under 50 apartments.
 
 Stack: SvelteKit + TypeScript + Tailwind (frontend and BFF) | ElysiaJS on Bun + Drizzle + PostgreSQL (`backend/`) | an LLM for invoice categorization (any OpenAI-compatible API, by default a local Ollama).
 
@@ -33,7 +33,7 @@ PostgreSQL on localhost:5432 (user and password `dwello`) is required for backen
 ## Conventions
 
 - **Language:** UI texts, Gherkin scenarios and test names in German (Swiss spelling, "ss" instead of "ß"); code, comments, commits and PR descriptions in English.
-- **UI languages:** every UI text lives in `messages/{de,fr,it,en}.json` (Paraglide JS; German is the base and default, terms per language in `docs/design/i18n-begriffe.md`) and is shown with `m.key()` from `$lib/paraglide/messages`; never call a message at module level in server code (use a getter or function). `bun run i18n` regenerates `src/lib/paraglide/` (not committed). Every new or changed text goes into all four files in the same change: formal address (Sie, vous, Lei), verbs on buttons, Swiss terms; an unsure term gets an entry in `docs/design/offene-punkte.md`. A backend refusal the UI shows carries a code (`backend/src/services/coded-error.ts`) and a message `backend_<code>`, shown with `backendMessage()` from `$lib/backend-error`; never the backend's own text.
+- **UI languages:** every UI text lives in `messages/{de,fr,it,en}.json` (Paraglide JS; German is the base and default, terms per language in `docs/design/i18n-begriffe.md`) and is shown with `m.key()` from `$lib/paraglide/messages`; never call a message at module level in server code (use a getter or function). `bun run i18n` regenerates `src/lib/paraglide/` (not committed). Every new or changed text goes into all four files in the same change: formal address (Sie, vous, Lei), verbs on buttons, Swiss terms; an unsure term gets an issue (labels `fachlich`, `entscheiden`; see "Open work"). A backend refusal the UI shows carries a code (`backend/src/services/coded-error.ts`) and a message `backend_<code>`, shown with `backendMessage()` from `$lib/backend-error`; never the backend's own text.
 - **Domain terms:** use the words from `UBIQUITOUS_LANGUAGE.md` in code and scenarios.
 - **Selectors:** `data-testid` in kebab-case with component context (`building-card-{id}`, `tenant-name-input`); no CSS selectors in tests.
 - **No mock data in the app:** components and pages always use the real backend and database. Test doubles in tests follow `docs/test-pyramid.md`.
@@ -42,22 +42,42 @@ PostgreSQL on localhost:5432 (user and password `dwello`) is required for backen
 ## Design-Regeln
 
 - **Target users:** private landlords with little experience who use Dwello a few times a year. Prefer guidance, plain words and confirmations over speed for experts.
-- **Copy:** German, formal "Sie", Swiss "ss", short sentences, verbs on buttons; errors say what happened and what to do. Domain terms only from `UBIQUITOUS_LANGUAGE.md` (never edit it); missing terms get `TODO(fachlich prüfen)` and an entry in `docs/design/offene-punkte.md`. Explain terms with visible help text at the field, not tooltips.
+- **Copy:** German, formal "Sie", Swiss "ss", short sentences, verbs on buttons; errors say what happened and what to do. Domain terms only from `UBIQUITOUS_LANGUAGE.md` (never edit it); missing terms get `TODO(fachlich prüfen, #<issue>)` and an issue (see "Open work"). Explain terms with visible help text at the field, not tooltips.
 - **Tokens are mandatory:** only the token classes from `docs/design/token-referenz.md` (`bg-surface`, `text-ink`, `border-line-strong`, `rounded-control`, `shadow-raised`, 8 px grid …) and the components in `src/lib/ui`. No raw colours, no arbitrary values (`w-[…]`), no `text-xs`, no other radii or shadows; dark mode comes from the tokens. `src/__tests__/design-guard.test.ts` and `tokens.test.ts` enforce this.
 - **Screens:** one primary action per screen, at most two navigation levels, controls at least 48 px high, labels above fields, list rows whose whole area is one link named by the record, no sideways scrolling at 390 px. Irreversible actions confirm with their real consequence.
 - **Anti-patterns:** gradients, glow, blur/glassmorphism, emoji as icons, shadow cards everywhere, decoration without function, external fonts or icon fonts, lorem ipsum, colour as the only carrier of information.
-- **Process:** every UI change goes through `/tdd` (a failing test first) and `/ponytail`; new screens or states go into `tests/a11y/screens.json`, `accessibility.feature` and `sprachen-bildschirme.feature` (no German in fr/it/en) (axe, light and dark, desktop, tablet and mobile, 0 violations, no rule exceptions); changes get an independent review. Decisions and history: `docs/design/design-decisions.md`, `docs/design/progress.md`.
+- **Process:** every UI change goes through `/tdd` (a failing test first) and `/ponytail`; new screens or states go into `tests/a11y/screens.json`, `accessibility.feature` and `sprachen-bildschirme.feature` (no German in fr/it/en) (axe, light and dark, desktop, tablet and mobile, 0 violations, no rule exceptions); reviews as in "Workflow", steps 4 to 7. Decisions and history: `docs/design/design-decisions.md`, `docs/archive/redesign/progress.md`.
 
 ## Workflow
 
 1. **Acceptance test first (ATDD):** every feature or behavior change starts with a German scenario in `tests/e2e/features/*.feature`, tagged `@wip` (excluded from runs). Watch it fail for the right reason.
+   If the change touches domain rules, amounts, PDFs or domain terms: before implementing, subagent `fach-reviewer` checks the scenario against `UBIQUITOUS_LANGUAGE.md`, `docs/nebenkostenabrechnung-anforderungen.md`, `docs/anforderungen-vertragsende.md` and the law on Fedlex (quoted verbatim). Fix findings first.
 2. **`/tdd`:** drive the implementation red-green, one behavior at a time, through public interfaces. A test must fail before the code changes. Every bug fix gets a test that reproduces it first, at the lowest layer that can show it (unit, `*.pg.test.ts` or scenario).
 3. **`/ponytail`:** keep the shortest diff that works; check the finished change against it.
    **Deep modules:** after each implementation step run `bun run deepcheck:audit` (silent when clean) and fix its findings before continuing; run `bun run deepcheck:scan` only when a codebase-wide review is requested (`tools/deepcheck/README.md`).
-4. **Done:** remove `@wip` once the scenario is green. A feature is done when its scenario passes, not when unit tests pass.
-5. **Plan:** log the task in `implementation_plan.md` (check the items, note the files changed). The file is long: read only its latest `## Session` section (`grep -n '^## Session' implementation_plan.md`) and add new work there. The phase table at the top is no longer maintained.
+4. **Slice review:** after each slice (a green scenario or a coherent group of behaviors), once lint, the affected tests and `deepcheck:audit` are clean, run subagent `code-reviewer` (fresh context: requirement + diff only). Triage its findings (step 6). Continue only when no Blocker/Major is open (limit: step 7).
+5. **Feature review:** when the scenario is green, start the app once with `docs/design/tools/persona-stack.sh`, then run in parallel, only where it applies, telling each subagent the app is running:
+   - UI changed: subagent `persona`, once per affected persona from `docs/design/personas/README.md`.
+   - Domain rules or terms changed: `fach-reviewer`.
+   - Amounts, statements, PDFs or QR-bills changed: `daten-pruefer`.
+   If you cannot start subagents, do not skip the reviews: list the missing ones under "Blocked on me".
+6. **Findings:** every reviewer reports severity (Blocker / Major / Minor / Nit) plus evidence (file:line or reproduction steps). You save each report unchanged to `docs/reviews/<slice>-review-<n>.md`, `<slice>-fachreview-<n>.md` or `<slice>-datenpruefung-<n>.md` (personas write their own to `docs/design/personas/<persona>-<slice>.md`); the latest `## Session` of `implementation_plan.md` lists only ID, severity, status (open / fixed / rejected with reason) and the report path. Check a finding's evidence before acting on it; reject it with a reason when it does not hold. A fix that changes behavior gets a failing test first. Re-review only the delta and the open findings. Findings still open when the task ends become open work (see "Open work").
+7. **Done:** remove `@wip` once the scenario is green. A feature is done when its scenario passes, not when unit tests pass, and when no Blocker/Major from `code-reviewer`, personas, `fach-reviewer` or `daten-pruefer` is open. Minors/Nits left unfixed become open work (see "Open work"). A round is one run of one reviewer on one slice: if the same reviewer still reports an open Blocker/Major on the same slice after its 3rd round, stop, list the open findings under "Blocked on me", ask me.
+8. **Plan:** at the start of a task, add its items as a checklist to the latest `## Session` of `implementation_plan.md` (a new session for a new task); tick each item when done, add anything new you find, note the files changed. When the task is done, move its session to `docs/archive/implementation-plan-verlauf.md`.
+
+Keep going without asking while no input is needed; put status notes in the same message as your next action. Ask only when blocked, or before anything destructive (deleting data, force-push, changes outside this repo). Not destructive: recreating the databases `dwello_persona`, `dwello_test` and `dwello_e2e`, and files in the scratchpad.
+
+End every run with three headings: **Blocked on me** (decisions, open Blocker/Major, new issues and rows in `docs/design/offene-punkte.md`), **Changed** (files, commits), **Found** (findings by ID and status, issues closed and opened, what could not be confirmed).
 
 Before marking anything complete, all of these pass: `bun run test:coverage`, `bun run lint`, `bun run check`, `cd backend && bun run test && bun run type-check`, and the affected E2E scenarios.
+
+## Open work
+
+- **Functional points** (domain, features, bugs) are GitHub issues in `rudini/Dwello`, one finishable task each, written with a template from `.github/ISSUE_TEMPLATE/`: topic label `fachlich`, `produkt` or `bug` (`betrieb` only on #51, written before this rule), plus `entscheiden` while a product-owner decision is missing. **Non-functional points** (security, operations, reliability, performance, usability and accessibility, maintainability) stay in `docs/design/offene-punkte.md` until the quality requirements are set up. There is no other list.
+- A point you find but do not fix becomes an issue (or, if non-functional, a row in `offene-punkte.md`) in the same task. A code marker names its issue: `TODO(fachlich prüfen, #42)`; find an issue's markers with `grep -rn "#42" src backend tests` (line numbers in issues drift). `src/__tests__/open-work.test.ts` checks markers in code, tests, migrations and demo data, not in prose docs; CI (`tools/open-work/check-issues.mjs`) checks that they name open issues and that a PR does not close an issue a marker still names.
+- An issue is ready when its decisions are in its text. For an `entscheiden` issue: ask, do not start. When the product owner confirms a section "Proposed (confirm before starting)", rename it "Decided (product owner)" and remove the label. A decision issue (template "Decision") is closed once the decision is recorded in it and, if code must change, its implementation issue exists.
+- Working on an issue ("Setze #n um"): its "Done means" plus this workflow is the finish line; its bullets become the checklist in `implementation_plan.md` and the scenarios of step 1. The commit or PR says `Fixes #n`; the issue closes on merge.
+- Read and write issues with the GitHub MCP tools; in cloud sessions `gh issue view` can fail, `gh api repos/rudini/Dwello/issues/<n>` works.
 
 ## Gotchas
 
@@ -70,7 +90,7 @@ Before marking anything complete, all of these pass: `bun run test:coverage`, `b
 
 ## Coding guidelines
 
-- **Think before coding:** state assumptions; if a request has several readings, name them instead of picking silently; push back when a simpler approach exists.
+- **Before coding:** state assumptions; if a request has several readings, name them instead of picking silently; push back when a simpler approach exists.
 - **Surgical changes:** touch only what the task needs; match the surrounding style; don't reformat or refactor adjacent code. Remove what your change made unused, leave pre-existing dead code unless asked.
 
 ## Documentation (read when relevant)
@@ -83,4 +103,4 @@ Before marking anything complete, all of these pass: `bun run test:coverage`, `b
 - `docs/test-pyramid.md`: test layers, runners, rules, coverage target
 - `docs/migration-mva.md`: Minimum Viable Architecture: quality scenarios, their status, deferred decisions
 - `docs/design/token-referenz.md`: design tokens (colors, typography, spacing, radius, shadow) and components
-- `docs/design/design-decisions.md`: design decisions of the 2026 redesign; open points in `docs/design/offene-punkte.md`
+- `docs/design/design-decisions.md`: design decisions of the 2026 redesign; open work in GitHub issues (functional) and `docs/design/offene-punkte.md` (non-functional)

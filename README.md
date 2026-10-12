@@ -8,10 +8,11 @@
 
 ## Overview
 
-Dwello is a comprehensive web application for managing residential properties in Switzerland, specifically designed for property managers (Liegenschaftsverwalter). The system handles building management, tenant relationships, rental contracts, invoice management, and most importantly, complex utility cost statement generation (Nebenkostenabrechnungen) with Swiss legal compliance.
+Dwello is a comprehensive web application for managing residential properties in Switzerland, specifically designed for private landlords who manage their own rented property (in the app: Liegenschaftsverwalter). The system handles building management, tenant relationships, rental contracts, invoice management, and most importantly, complex utility cost statement generation (Nebenkostenabrechnungen) with Swiss legal compliance.
 
 ### Target Users
-- Property managers managing 1-5 buildings with <50 apartments
+- Private landlords with little experience who use Dwello a few times a year, with 1-5 buildings and fewer than 50 apartments
+- Guidance, plain words and confirmations come before speed for experts; personas in `docs/design/personas/README.md`
 - Single user initially (no multi-user support in MVP)
 
 ### Key Features
@@ -20,7 +21,7 @@ Dwello is a comprehensive web application for managing residential properties in
 3. Invoice Management with LLM-powered categorization
 4. Utility Cost Statement Generation with complex prorating
 5. Swiss QR-bill Generation
-6. Statements for tenants in five languages (German, French, Italian, Romansh, English); the app itself is in German
+6. Statements for tenants in German, French, Italian and English (Romansh can be chosen, the PDF is then in German); the app in German, French, Italian and English
 
 ---
 
@@ -32,7 +33,7 @@ Dwello is a comprehensive web application for managing residential properties in
 - **LLM:** any OpenAI-compatible API, by default a self-hosted Ollama (`qwen2.5:3b`)
 - **Deployment:** Docker Compose
 - **Maps:** OpenStreetMap + Leaflet
-- **Language:** German UI (de-CH)
+- **Language:** UI in German (de-CH, default), French, Italian and English (Paraglide JS)
 
 ---
 

@@ -210,7 +210,7 @@
 	class="flex flex-col gap-6"
 >
 	{#if running}
-		<!-- TODO(fachlich prüfen): the hint on legal notice periods is not from the glossary -->
+		<!-- TODO(fachlich prüfen, #66): the hint on legal notice periods is not from the glossary -->
 		<Alert tone="caution" title={m.contracts_running_title()}>
 			<p>{m.contracts_running_text()}</p>
 		</Alert>

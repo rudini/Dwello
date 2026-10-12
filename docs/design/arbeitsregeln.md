@@ -1,12 +1,14 @@
 # Working rules for the redesign (resume file)
 
-Everything a new session needs to continue the redesign without the original prompt. Source of truth for the requirements: `docs/REDESIGN_BRIEF.md`; project rules: `CLAUDE.md`; domain terms: `UBIQUITOUS_LANGUAGE.md` (never edit it).
+The redesign is complete (stages 0–9); its brief, analysis, plan, log and reviews are in `docs/archive/redesign/`. Still in use: the automated checks and "Persona runs: how" (subagent `persona`); the personas are in `docs/design/personas/README.md`.
+
+Everything a new session needs to continue the redesign without the original prompt. Source of truth for the requirements: `docs/archive/redesign/REDESIGN_BRIEF.md`; project rules: `CLAUDE.md`; domain terms: `UBIQUITOUS_LANGUAGE.md` (never edit it).
 
 ## Where things are
 
-- Status and next step: `docs/design/progress.md` (update before each stage and after each commit).
-- Analysis `00-analyse.md`, plan `01-plan.md`, decisions `design-decisions.md`, tokens `token-referenz.md`, open points `offene-punkte.md`.
-- Reviews: `docs/design/reviews/<stage>-review-<n>.md`. Personas: `docs/design/personas/<persona>-<stage>.md`.
+- Status and next step: `docs/archive/redesign/progress.md` (update before each stage and after each commit).
+- Analysis and plan in `docs/archive/redesign/`, decisions `design-decisions.md`, tokens `token-referenz.md`, open work in GitHub issues (functional) and `offene-punkte.md` (non-functional).
+- Reviews: `docs/archive/redesign/reviews/<stage>-review-<n>.md`. Personas: `docs/design/personas/<persona>-<stage>.md`.
 - Axe screen list: `tests/a11y/screens.json`; axe test: `tests/a11y/` (from stage 2).
 
 ## Git and CI
@@ -20,7 +22,7 @@ Everything a new session needs to continue the redesign without the original pro
 ## Language and terms
 
 - UI copy German (Swiss spelling, "ss"), formal "Sie", friendly, short, concrete; error messages say what happened and what to do. Code, comments, commits, docs in English.
-- Domain terms only from `UBIQUITOUS_LANGUAGE.md`, exact spelling, no synonyms, no mixing (e.g. "Gebäude", not "Liegenschaft"). Help texts derived from the definitions. Missing terms/explanations: `TODO(fachlich prüfen)` in code + entry in `offene-punkte.md`.
+- Domain terms only from `UBIQUITOUS_LANGUAGE.md`, exact spelling, no synonyms, no mixing (e.g. "Gebäude", not "Liegenschaft"). Help texts derived from the definitions. Missing terms/explanations: `TODO(fachlich prüfen, #<issue>)` in code + an issue (`CLAUDE.md`, "Open work").
 
 ## Safety
 
@@ -52,20 +54,16 @@ Axe: `@axe-core/playwright`, tags `wcag2a, wcag2aa, wcag21a, wcag21aa, wcag22aa`
 
 ## Review cycle (after every stage)
 
-1. Finish, checks green, commit, push, wait for `ui-screenshots`, update `progress.md`.
+1. Finish, checks green, commit, push, wait for `ui-screenshots`, update `docs/archive/redesign/progress.md`.
 2. Start an independent read-only reviewer agent with fresh context (Plan for analysis/plan, general-purpose for code/design, Explore for remnant searches). Give it: stage goal, changed files/diff, brief requirements, glossary, axe result, ui-screenshots result, review criteria (correctness, tests, readability, tokens only, a11y incl. contrast/focus/roles/keyboard/touch size, consistency, no logic changes, old-design remnants, terminology).
-3. Wait for it. Findings: Blocker / Major / Minor. Fix all Blockers and Majors (with /tdd + /ponytail), Minors if cheap else `offene-punkte.md`. Rerun checks. Follow-up review after large changes, max. 3 rounds.
-4. Write `docs/design/reviews/<stage>-review-<n>.md`: findings, changes, deliberate non-changes.
+3. Wait for it. Findings: Blocker / Major / Minor. Fix all Blockers and Majors (with /tdd + /ponytail), Minors if cheap, else open work (`CLAUDE.md`, "Open work": functional points as issues, non-functional ones in `offene-punkte.md`). Rerun checks. Follow-up review after large changes, max. 3 rounds.
+4. Write `docs/archive/redesign/reviews/<stage>-review-<n>.md`: findings, changes, deliberate non-changes.
 
 ## Personas (from stage 4, after every stage with operable UI)
 
-One agent per persona operates the running app (dev stack with demo data, Playwright) without reading source code or the glossary, thinks aloud, takes screenshots, and reports: task completed (yes/partly/no), effort, confusion (incl. terms), error risks, improvement suggestions → `docs/design/personas/<persona>-<stage>.md`.
+One agent per persona operates the running app (dev stack with demo data, Playwright) without reading source code or the glossary, notes at each step what it expected and what it saw, takes screenshots, and reports: task completed (yes/partly/no), effort, confusion (incl. terms), error risks, improvement suggestions → `docs/design/personas/<persona>-<stage>.md`.
 
-1. Helga, 68, heir of an apartment, little computer experience, large font, unsure about terms. Task: create the first tenant and a rental contract.
-2. Marco, 38, smartphone, little time. Task: create the utility bill (Nebenkostenabrechnung) for the previous year, mobile viewport.
-3. Dr. Weber, 52, legally cautious. Task: check the bill, understand warnings, assess the PDF preview.
-4. Sven, 45, screen reader and keyboard only. Task: rental contract wizard by keyboard; check focus, labels, error messages.
-5. Anna, 29, first-time landlord, returns after months. Task: find out what to do next.
+The personas, their default tasks, viewports and input: `docs/design/personas/README.md`.
 
 Unknown terms are fixed with better help texts, never by renaming the glossary term. Fix Blockers/Majors before moving on; repeat the affected persona after larger fixes (max. 2 repetitions).
 
@@ -73,10 +71,11 @@ Unknown terms are fixed with better help texts, never by renaming the glossary t
 
 0 analysis · 1 plan · 2 tokens + base components + axe test · 3 icons + illustrations (≥ 8) · 4 shell, navigation, dashboard (+ Anna, Helga) · 5 rental contract wizard (+ all personas) · 6 statement wizard (+ all personas, checkpoint summary in progress.md) · 7 remaining screens (+ personas) · 8 remove old design system (Explore remnant review) · 9 final docs, CLAUDE.md "Design-Regeln", final review, all personas, axe over all screens.
 
-If blocked: note it in `offene-punkte.md`, continue with the next stage. Do not stop early.
+If blocked: record it as open work (`CLAUDE.md`, "Open work"), continue with the next stage. Do not stop early.
 
 ## Persona runs: how
 
+- The subagent `persona` (`.claude/agents/persona.md`) runs one persona; the reviews after the redesign follow `CLAUDE.md`, Workflow steps 4 to 7.
 - Start the app for personas with `docs/design/tools/persona-stack.sh` (fresh database `dwello_persona` with the demo data, backend on 3301, production build on 3300; `--no-build` reuses the last build).
-- Personas drive a signed-in Chromium through `docs/design/tools/persona-kit.mjs` (`open({ viewport, zoom })`, `shot`, `readOut` for the accessibility tree); copy it to a scratch directory if the session's scratchpad differs. They write their scripts outside the repository and only their report (plus at most 6 screenshots) into `docs/design/personas/`.
-- Persona prompt essentials: character, task, "operate only like a user, no source code, docs, tests or glossary", report structure (completed yes/partly/no, effort, thinking aloud, confusion incl. terms, error risks, suggestions marked Blocker/Major/Minor).
+- Personas drive a signed-in Chromium through `docs/design/tools/persona-kit.mjs` (`open({ viewport, zoom })`, `shot`, `readOut` for the accessibility tree); copy it to a scratch directory if the session's scratchpad differs. They write their scripts and screenshots outside the repository and only their report into `docs/design/personas/`. Only the screenshots of the last redesign and i18n round are kept in `docs/design/personas/screens/`; earlier ones are in the git history.
+- Persona prompt essentials: character, task, "operate only like a user, no source code, docs, tests or glossary", report structure (completed yes/partly/no, effort, expected vs. seen per step, confusion incl. terms, error risks, suggestions marked Blocker/Major/Minor).

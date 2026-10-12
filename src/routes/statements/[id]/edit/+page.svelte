@@ -62,7 +62,6 @@
 	{/if}
 
 	<Panel title={m.statements_deadline_notes()}>
-		<!-- TODO(fachlich prüfen): the glossary has no term for the date by which a refund is paid out -->
 		<DateInput
 			id="paymentDeadline"
 			name="paymentDeadline"

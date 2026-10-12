@@ -30,7 +30,6 @@
 		},
 		{
 			term: m.glossary_fee_term(),
-			// TODO(fachlich prüfen): the glossary still says of the building's costs, shared by a key (offene-punkte.md)
 			text: m.glossary_fee_text()
 		},
 		{
@@ -43,7 +42,6 @@
 		},
 		{
 			term: m.glossary_balance_term(),
-			// TODO(fachlich prüfen): the glossary does not name the rounding to 5 Rappen (offene-punkte.md)
 			text: m.glossary_balance_text()
 		},
 		{

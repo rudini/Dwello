@@ -276,7 +276,6 @@ describe('Rechnungsdetail', () => {
 		);
 	});
 
-	// TODO(fachlich prüfen): the glossary names the equal split only for the Verwaltungspauschale
 	it('erklärt eine Rechnung ohne Verteilschlüssel, statt einen Fehler anzudeuten', () => {
 		show(InvoicePage, { data: { invoice: invoice({ distributionKey: undefined }) } });
 
@@ -531,7 +530,6 @@ describe('Rechnung erfassen', () => {
 		expect(goto).toHaveBeenCalledWith('/statements/generate');
 	});
 
-	// TODO(fachlich prüfen): the glossary names the equal split only for the Verwaltungspauschale
 	it('sagt, wie eine Rechnung ohne Verteilschlüssel verteilt wird', () => {
 		show(NewInvoicePage, { data: data(false) } as never);
 		expect(document.querySelector('#distributionKey-help')!.textContent).toContain(

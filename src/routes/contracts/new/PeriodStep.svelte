@@ -29,7 +29,6 @@
 		errors: Record<string, string>;
 	} = $props();
 
-	// TODO(fachlich prüfen): explanations of unbefristet/befristet are not from the glossary
 	const pastStart = $derived(startDateNotice(startDate, today));
 
 	const limited = {
@@ -38,7 +37,7 @@
 		description: m.contracts_limited_help()
 	};
 	// a notice keeps the contract open-ended (A-1); withdrawing it is a choice with its consequence
-	// TODO(fachlich prüfen): «Kündigung aufheben» is not from the glossary (offene-punkte.md)
+	// TODO(fachlich prüfen, #52): the help must say when a notice can be withdrawn
 	const durations = $derived(
 		noticed
 			? [

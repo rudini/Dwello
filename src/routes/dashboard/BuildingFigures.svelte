@@ -116,7 +116,7 @@
 
 	{#if data.buildingOccupancy.length}
 		<Panel title={m.dashboard_occupancy_heading()} level={3}>
-			<!-- TODO(fachlich prüfen): share of rented apartments has no glossary term ("Belegungsrate") -->
+			<!-- TODO(fachlich prüfen, #55): share of rented apartments has no glossary term ("Belegungsrate") -->
 			<ul class="flex flex-col divide-y divide-line">
 				{#each data.buildingOccupancy as building (building.buildingId)}
 					<li data-testid="occupancy-row" class="flex min-h-12 flex-wrap items-center gap-4 py-2">

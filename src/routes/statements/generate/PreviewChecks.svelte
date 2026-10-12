@@ -96,7 +96,7 @@
 {/if}
 
 {#if partial.length}
-	<!-- TODO(fachlich prüfen): a hint only; one oil delivery a year can be complete -->
+	<!-- TODO(fachlich prüfen, #65): a hint only; one oil delivery a year can be complete -->
 	<Alert tone="caution" title={m.statements_partial_title()} testid="partial-invoices">
 		<p>{m.statements_partial_text({ names: partial.map((row) => row.name).join(', ') })}</p>
 	</Alert>

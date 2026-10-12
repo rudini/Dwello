@@ -55,7 +55,9 @@ const sources = readdirSync('src', { recursive: true, encoding: 'utf8' })
 
 function findingsIn(source: string, smallTextOk = false) {
 	const small = smallTextOk ? [] : [['Schrift 14 px', /\btext-sm\b/] as const];
-	return [...rules, ...small].filter(([, pattern]) => pattern.test(source)).map(([name]) => name);
+	// issue numbers in TODO(fachlich prüfen, #n) markers are not colours
+	const code = source.replace(/(TODO\(fachlich prüfen)(?:, #\d+)+\)/g, '$1)');
+	return [...rules, ...small].filter(([, pattern]) => pattern.test(code)).map(([name]) => name);
 }
 const findings = (file: string) =>
 	findingsIn(readFileSync(file, 'utf8'), smallTextAllowed.includes(file));
@@ -91,7 +93,9 @@ describe('Wächter des Designsystems', () => {
 		'<Button variant="primary">',
 		'class="text-ink-muted min-h-12 size-12 rounded-panel shadow-overlay"',
 		'href="#main-content"',
-		'<input on:blur={check} onblur={check} />'
+		'<input on:blur={check} onblur={check} />',
+		// built so that tools/open-work/check-issues.mjs does not read it as a real marker
+		'<!-- TODO(fachlich prüfen, #' + '134, #' + '120): Begriff fehlt im Glossar -->'
 	])('lässt %s zu', (sample) => {
 		expect(findingsIn(sample)).toEqual([]);
 	});
