@@ -236,7 +236,7 @@ def _simple_commands(command):
 
 
 def _bash_escapes(command, depth=0):
-    found, cwd = [], "/workspace"
+    found, cwd, previous = [], "/workspace", "/workspace"
     if SIGNAL_WORDS.search(HEREDOC.sub("", command)):
         found.append(SIGNAL_WORDS.search(HEREDOC.sub("", command)).group(0))
     for assignments, words in _simple_commands(command):
@@ -262,11 +262,20 @@ def _bash_escapes(command, depth=0):
                     found.append(f"path {_normal(value, cwd)} ({name})")
             elif _sensitive(value, cwd):
                 found.append(f"path {value}")
-        if name in LISTERS and not [w for w in words[1:] if not w.startswith("-")] and \
-                (cwd in ("/", "/root") or _sensitive(cwd)):
+        rest = [w for w in words[1:] if not w.startswith("-")]
+        if name in PATTERN_FIRST:
+            rest = rest[1:]  # the pattern is no operand
+        if name == "find":
+            rest = []
+            for w in words[1:]:
+                if w.startswith(("-", "(", "!")):
+                    break
+                rest.append(w)
+        if name in LISTERS and not rest and (cwd in ("/", "/root") or _sensitive(cwd)):
             found.append(f"path {cwd} ({name})")  # a lister without operands lists its cwd
-        if name in ("cd", "pushd"):
-            cwd = _normal(words[1], cwd) if words[1:] and words[1] != "-" else "/root"
+        if name in ("cd", "pushd") and not (name == "pushd" and not words[1:]):
+            target = previous if words[1:2] == ["-"] else (_normal(words[1], cwd) if words[1:] else "/root")
+            previous, cwd = cwd, target
     return found
 
 
