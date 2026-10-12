@@ -32,7 +32,7 @@ Expected rule: for every **complete** group of `buy` items of that product, `buy
 3 chewing gums at CHF 0.99 each: the receipt line shows CHF 3.00 and the total is CHF 3.00.
 Expected: the line shows CHF 2.97 (`lineCents` 297, `subtotalCents` 297) and the customer pays CHF 2.95.
 
-Expected rule: line amounts, the subtotal and the discount are exact to the cent. Only the amount to pay, `totalCents`, is rounded to the nearest 5 Rappen.
+Expected rule: line amounts, the subtotal and the discount are exact to the cent. Only the amount to pay, `totalCents`, is rounded to the nearest 5 Rappen. A percent coupon's discount stays as it is today: that percentage of the subtotal, rounded to the nearest cent (halves up).
 
 ### 3. Negative totals with large vouchers
 

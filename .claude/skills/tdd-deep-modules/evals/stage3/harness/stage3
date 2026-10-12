@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 """stage3: run the arms, review them blind and judge the stage-3 depth experiment (see ../README.md).
 
-  stage3 run <fixture-dir> <arm> <run-id>          one isolated arm run, then all measurements
+  stage3 run <fixture-dir> <arm> <run-id>          one sandboxed arm run, then all measurements
   stage3 batch <jobs> <spec>...                     several runs in parallel; spec = fixture-dir:arm:run-id
   stage3 review <group> <fixture-dir> baseline=<run-id> canon=<run-id> skill=<run-id> [--control]
   stage3 gate [--phase pilot|main]                  tables and the STAGE3 verdict
   stage3 validate                                   check every fixture; prints counts only (hold-outs stay unread)
+
+Run ids: <phase>-<fixture>-<arm>-r<slot>-a<attempt>; group names: <phase>-<fixture>-r<slot>[.<attempt>].
+Nothing is ever overwritten: a run id or review group that exists is refused.
 """
 import gzip
 import json
@@ -24,23 +27,34 @@ HARNESS = Path(__file__).resolve().parent
 STAGE3 = HARNESS.parent
 SKILL = STAGE3.parent.parent
 RESULTS = Path(os.environ.get("STAGE3_RESULTS", STAGE3 / "results"))
+# Must lie under a directory sandbox.sh hides, so no session can see another run.
 WORK = Path(os.environ.get("STAGE3_WORK", "/tmp/claude-0/-home-user-Dwello/"
                            "b911e014-6a0a-558d-a301-60af5eecb558/scratchpad/stage3"))
 MODEL = "claude-opus-5-5"
 ARMS = {"baseline": "baseline.md", "canon": "canon-tdd.md", "skill": "tdd-deep-modules.md"}
-# Identical for every arm. Reads, globs and edits are limited to the run directory by Claude Code's
-# own default (outside the working directory they need an approval nobody gives in -p mode).
-ARM_TOOLS = ["--permission-mode", "acceptEdits", "--disallowedTools", "WebFetch", "WebSearch",
+RUN_ID = re.compile(r"^(?P<phase>pilot|main)-(?P<fixture>[a-z0-9-]+)-(?P<arm>baseline|canon|skill)"
+                    r"-r(?P<slot>\d+)-a(?P<attempt>\d+)$")
+GROUP = re.compile(r"^(?P<phase>pilot|main)-(?P<fixture>[a-z0-9-]+)-r(?P<slot>\d+)(?:\.(?P<attempt>\d+))?$")
+# Every session runs in its own mount namespace (sandbox.sh) and sees only its directory, as /workspace.
+SANDBOX = ["unshare", "-m", "--propagation", "private", str(HARNESS / "sandbox.sh")]
+# Tools that add side channels or variance, refused identically for arms and reviewers.
+NO_EXTRAS = ["WebFetch", "WebSearch", "Agent", "Task", "Workflow", "Artifact", "SendMessage", "CronCreate",
+             "CronDelete", "CronList", "PushNotification", "ScheduleWakeup", "RemoteTrigger", "Monitor"]
+ARM_TOOLS = ["--permission-mode", "acceptEdits", "--disallowedTools", *NO_EXTRAS,
              "--allowedTools", "Skill", "Bash(bun *)", "Bash(bunx *)", "Bash(git *)", "Bash(ls *)",
              "Bash(mkdir *)", "Bash(.claude/skills/tdd-deep-modules/scripts/*)",
              "Bash(./.claude/skills/tdd-deep-modules/scripts/*)",
              "Bash(python3 .claude/skills/tdd-deep-modules/scripts/*)"]
 REVIEW_TOOLS = ["--permission-mode", "default", "--disallowedTools", "Bash", "Edit", "Write",
-                "NotebookEdit", "WebFetch", "WebSearch", "Agent", "Task"]
+                "NotebookEdit", "Skill", *NO_EXTRAS]
 # The parent session's identity and extra directories must not leak into a child session.
 DROP_ENV = {"CLAUDE_CODE_SESSION_ID", "CLAUDE_CODE_REMOTE_SESSION_ID", "CLAUDECODE",
             "CLAUDE_ADDITIONAL_DIRECTORIES", "CLAUDE_CODE_ADDITIONAL_DIRECTORIES_CLAUDE_MD"}
-CODE = {".js", ".jsx", ".mjs", ".cjs", ".ts", ".tsx", ".mts", ".cts"}
+# Places a session has no business naming; it cannot read them (sandbox.sh), the attempt is reported.
+FOREIGN = re.compile(r"/home/|/tmp/claude-0|/root/\.claude|/mnt/|Dwello|evals/|stage3|"
+                     r"(?:^|[\s=('\"])/(?=[\s'\")]|$)|(?:^|[\s'\"(])\.\./\.\.")
+CODE = (".ts", ".tsx", ".mts", ".cts", ".js", ".jsx", ".mjs", ".cjs")
+IMPORT = re.compile(r"""(?:\bfrom\s*|\bimport\s*\(\s*|\bimport\s+|\brequire\s*\(\s*)["'](\.{1,2}/[^"']+)["']""")
 ARM_TIMEOUT, TEST_TIMEOUT, REPLAY_TIMEOUT, REVIEW_TIMEOUT = 5400, 600, 3600, 1800
 REVIEW_PROMPT = """You are reviewing the design of {n} independent implementations of the same task. TASK.md \
 describes the task. The directories {labels} each contain one implementation's production source code; \
@@ -48,23 +62,20 @@ comments were removed and the code was reformatted mechanically, and tests are n
 file of every implementation before you rate.
 
 Rate each implementation's module depth in John Ousterhout's sense (A Philosophy of Software Design) on an \
-integer scale from 1 to 10. 10: modules have small, simple interfaces that hide substantial functionality \
-and design decisions; callers need to know little. 1: shallow modules: interfaces nearly as complex as \
-their implementations, pass-through functions or wrappers, many tiny classes or exported helpers that each \
-do little (classitis), information leakage (the same decision or format knowledge spread over several \
-modules or exposed to callers), complexity pushed up to callers. Judge depth only, not correctness, naming \
-style, size or performance. A small solution with one module can be deep; judge the decomposition that \
-exists. Rate each implementation on its own merits; equal scores are allowed.
+integer scale from 1 to 10. A deep module offers an interface that is small and simple compared with the \
+functionality and the design decisions it hides; a shallow module's interface is about as complex as what \
+it does. 10: the implementation is built from deep modules; 1: it is built from shallow ones. Judge depth \
+only, not correctness, naming style, size or performance. Rate each implementation on its own merits; equal \
+scores are allowed.
 
 Give a short justification per implementation (2 to 4 sentences naming concrete modules and functions), \
 then end your answer with exactly one fenced json block of the form {{"scores": {{"A": 5, ...}}}} \
 covering every directory."""
 
 
-def sh(cmd, cwd, timeout=TEST_TIMEOUT, env=None, stdin=None):
+def sh(cmd, cwd, timeout=TEST_TIMEOUT):
     try:
-        p = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True, timeout=timeout, env=env,
-                           input=stdin)
+        p = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True, timeout=timeout)
         return p.returncode, p.stdout + p.stderr
     except subprocess.TimeoutExpired as e:
         return 124, f"timeout after {timeout}s: {e}"
@@ -77,70 +88,97 @@ def git(repo, *args):
     return out.strip()
 
 
-def child_env():
-    return {k: v for k, v in os.environ.items() if k not in DROP_ENV}
-
-
-def claude(cwd, prompt, out_path, tools, timeout):
-    """Run a fresh headless Claude Code session in cwd; return its final result event."""
-    cmd = ["claude", "-p", "--output-format", "stream-json", "--verbose", "--model", MODEL, *tools]
+def claude(directory, prompt, out_path, tools, timeout):
+    """Run a fresh headless Claude Code session that sees only `directory` (as /workspace)."""
+    if out_path.exists():
+        raise RuntimeError(f"{out_path} exists; nothing is overwritten")
+    env = {k: v for k, v in os.environ.items() if k not in DROP_ENV}
+    cmd = [*SANDBOX, str(directory), "claude", "-p", "--output-format", "stream-json", "--verbose",
+           "--model", MODEL, *tools]
+    try:
+        p = subprocess.run(cmd, env=env, input=prompt, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                           text=True, timeout=timeout)
+        text = p.stdout
+    except subprocess.TimeoutExpired as e:
+        text = e.stdout.decode() if isinstance(e.stdout, bytes) else (e.stdout or "")
+        text += '\n{"type": "result", "is_error": true, "result": "harness timeout"}\n'
     with gzip.open(out_path, "wt") as out:
-        try:
-            p = subprocess.run(cmd, cwd=cwd, env=child_env(), input=prompt, stdout=subprocess.PIPE,
-                               stderr=subprocess.STDOUT, text=True, timeout=timeout)
-            text = p.stdout
-        except subprocess.TimeoutExpired as e:
-            text = (e.stdout or b"").decode() if isinstance(e.stdout, bytes) else (e.stdout or "")
-            text += '\n{"type": "result", "is_error": true, "result": "harness timeout"}\n'
         out.write(text)
-    events = [json.loads(line) for line in text.splitlines() if line.startswith("{")]
-    result = next((e for e in reversed(events) if e.get("type") == "result"), {"is_error": True})
-    return result, events
+    events = []
+    for line in text.splitlines():
+        try:
+            events.append(json.loads(line))
+        except ValueError:
+            pass
+    result = next((e for e in reversed(events) if isinstance(e, dict) and e.get("type") == "result"),
+                  {"is_error": True})
+    return result, [e for e in events if isinstance(e, dict)]
 
 
-def outside_paths(events, inside):
-    """Absolute paths in the session's tool calls that point outside its own directory."""
-    found = set()
+def blocks(events, kind):
     for e in events:
         message = e.get("message") if isinstance(e.get("message"), dict) else {}
         for block in message.get("content") or []:
-            if isinstance(block, dict) and block.get("type") == "tool_use":
-                for path in re.findall(r"/(?:home|tmp|root|mnt|etc|opt|var|usr)/[^\s'\"`)]*",
-                                       json.dumps(block.get("input"))):
-                    if not path.startswith(str(inside)) and not path.startswith("/root/.bun"):
-                        found.add(path)
-    return sorted(found)
+            if isinstance(block, dict) and block.get("type") == kind:
+                yield block
+
+
+def foreign_references(events):
+    """Tool calls that name a place outside the session's own directory (they could not read it)."""
+    return sorted({json.dumps(b.get("input"))[:300] for b in blocks(events, "tool_use")
+                   if FOREIGN.search(json.dumps(b.get("input")))})
+
+
+def skill_loaded(events):
+    """The session called the Skill tool for tdd-deep-modules and the call succeeded."""
+    calls = {b.get("id") for b in blocks(events, "tool_use")
+             if b.get("name") == "Skill" and "tdd-deep-modules" in json.dumps(b.get("input"))}
+    return any(b.get("tool_use_id") in calls and not b.get("is_error") for b in blocks(events, "tool_result"))
 
 
 def tree_files(repo):
     return [f for f in git(repo, "ls-files", "-co", "--exclude-standard", "-z").split("\0") if f]
 
 
-def is_production(rel):
-    parts = Path(rel).parts
-    name = parts[-1]
-    if parts[0] in (".claude", "__acceptance__", "node_modules") or Path(rel).suffix not in CODE:
-        return False
-    if any(p in ("tests", "test", "__tests__") for p in parts[:-1]):
-        return False
-    return not (".test." in name or ".spec." in name or name.startswith("test_") or "_test." in name)
+def resolve(repo, files, spec, importer_dir):
+    base = os.path.normpath(os.path.join(importer_dir, spec))
+    stem = re.sub(r"\.(?:m|c)?js$", "", base)
+    for candidate in (base, *(stem + s for s in CODE), *(f"{base}/index{s}" for s in CODE)):
+        if candidate in files:
+            return candidate
+    return None
+
+
+def production_files(repo, fixture):
+    """The import closure of the modules the hidden tests import: what the product consists of."""
+    files = set(tree_files(repo))
+    todo = []
+    for test in (fixture / "hidden").glob("*"):
+        for spec in IMPORT.findall(test.read_text()):
+            found = resolve(repo, files, spec, "__acceptance__")
+            if found:
+                todo.append(found)
+    seen = set()
+    while todo:
+        rel = todo.pop()
+        if rel in seen or not rel.endswith(CODE):
+            continue
+        seen.add(rel)
+        for spec in IMPORT.findall((repo / rel).read_text(errors="replace")):
+            found = resolve(repo, files, spec, os.path.dirname(rel))
+            if found:
+                todo.append(found)
+    return sorted(seen)
 
 
 def bun_counts(out):
-    count = lambda word: int(m.group(1)) if (m := re.search(rf"^\s*(\d+) {word}\b", out, re.M)) else 0
+    def count(word):
+        m = re.search(rf"^\s*(\d+) {word}\b", out, re.M)
+        return int(m.group(1)) if m else 0
     return count("pass"), count("fail")
 
 
-def copy_tree(repo, dest, keep=lambda rel: True):
-    for rel in tree_files(repo):
-        if keep(rel) and (repo / rel).is_file():
-            (dest / rel).parent.mkdir(parents=True, exist_ok=True)
-            shutil.copy2(repo / rel, dest / rel)
-
-
 def prepare(fixture, arm, run_dir):
-    if run_dir.exists():
-        shutil.rmtree(run_dir)
     repo = run_dir / "repo"
     shutil.copytree(fixture / "starter", repo)
     if arm == "skill":
@@ -151,8 +189,8 @@ def prepare(fixture, arm, run_dir):
         shutil.copytree(SKILL / "scripts", target / "scripts",
                         ignore=shutil.ignore_patterns("tests", "__pycache__", ".fallow"))
     git(repo, "init", "-q", "-b", "main")
-    git(repo, "config", "user.name", "Stage3 Run")
-    git(repo, "config", "user.email", "stage3@example.invalid")
+    git(repo, "config", "user.name", "Developer")
+    git(repo, "config", "user.email", "dev@example.invalid")
     git(repo, "add", "-A")
     git(repo, "commit", "-q", "-m", "start")
     preamble = (STAGE3 / "arms" / ARMS[arm]).read_text().strip()
@@ -165,26 +203,28 @@ def depth(repo, files):
     if not files:
         return {"exit": None, "lines": [], "findings": 0, "surface": 0, "size": 0}
     code, out = sh([str(SKILL / "scripts/depth_report"), *files], repo)
-    lines = [l for l in out.splitlines() if l.strip()]
-    surface = sum(int(m.group(1)) for l in lines if (m := re.search(r"surface (\d+)", l)))
-    size = sum(int(m.group(1)) for l in lines if (m := re.search(r"size (\d+)", l)))
-    findings = sum(len(l.split(" -> ", 1)[1].split("; ")) for l in lines if " -> " in l)
-    return {"exit": code, "lines": lines, "findings": findings, "surface": surface, "size": size}
+    lines = [line for line in out.splitlines() if line.strip()]
+    total = lambda word: sum(int(m.group(1)) for line in lines if (m := re.search(rf"{word} (\d+)", line)))
+    findings = sum(len(line.split(" -> ", 1)[1].split("; ")) for line in lines if " -> " in line)
+    return {"exit": code, "lines": lines, "findings": findings, "surface": total("surface"), "size": total("size")}
 
 
-def measure(fixture, arm, repo, base):
+def measure(fixture, arm, repo, base, events):
     check = repo.parent / "check"
-    if check.exists():
-        shutil.rmtree(check)
-    copy_tree(repo, check, keep=lambda rel: not rel.startswith(".claude/"))
+    for rel in tree_files(repo):
+        if not rel.startswith(".claude/") and (repo / rel).is_file():
+            (check / rel).parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(repo / rel, check / rel)
     code, out = sh(["bun", "test"], check)
     own = {"exit": code, "pass": bun_counts(out)[0], "fail": bun_counts(out)[1]}
     shutil.copytree(fixture / "hidden", check / "__acceptance__")
     code, out = sh(["bun", "test", "./__acceptance__"], check)
     hidden = {"exit": code, "pass": bun_counts(out)[0], "fail": bun_counts(out)[1], "tail": out[-1500:]}
-    production = sorted(f for f in tree_files(repo) if is_production(f))
-    m = {"own_tests": own, "hidden": hidden, "production_files": production,
-         "valid": hidden["exit"] == 0 and hidden["fail"] == 0 and hidden["pass"] > 0,
+    production = production_files(repo, fixture)
+    loaded = skill_loaded(events) if arm == "skill" else None
+    passed = hidden["exit"] == 0 and hidden["fail"] == 0 and hidden["pass"] > 0
+    m = {"own_tests": own, "hidden": hidden, "production_files": production, "skill_loaded": loaded,
+         "valid": passed and loaded is not False,
          "committed": git(repo, "status", "--porcelain") == "",
          "commits": int(git(repo, "rev-list", "--count", f"{base}..HEAD")),
          "subjects": git(repo, "log", "--format=%s", f"{base}..HEAD").splitlines()[::-1],
@@ -198,21 +238,28 @@ def measure(fixture, arm, repo, base):
 
 def run(fixture, arm, run_id):
     fixture = Path(fixture).resolve()
-    run_dir = WORK / "runs" / run_id
+    parsed = RUN_ID.match(run_id)
+    if not parsed or parsed["arm"] != arm or parsed["fixture"] != fixture.name:
+        raise ValueError(f"run id {run_id} does not match <phase>-{fixture.name}-{arm}-r<slot>-a<attempt>")
+    run_dir, out_dir = WORK / "runs" / run_id, RESULTS / "runs"
+    if run_dir.exists() or (out_dir / f"{run_id}.json").exists():
+        raise RuntimeError(f"{run_id} exists; nothing is overwritten, use the next attempt number")
+    out_dir.mkdir(parents=True, exist_ok=True)
     repo, prompt = prepare(fixture, arm, run_dir)
     base = git(repo, "rev-parse", "HEAD")
-    out_dir = RESULTS / "runs"
-    out_dir.mkdir(parents=True, exist_ok=True)
     (run_dir / "prompt.txt").write_text(prompt)
     started = time.time()
     result, events = claude(repo, prompt, out_dir / f"{run_id}.stream.jsonl.gz", ARM_TOOLS, ARM_TIMEOUT)
-    record = {"run_id": run_id, "fixture": fixture.name, "fixture_dir": f"{fixture.parent.name}/{fixture.name}",
-              "arm": arm, "base": base, "duration_s": round(time.time() - started),
+    record = {"run_id": run_id, "phase": parsed["phase"], "slot": int(parsed["slot"]),
+              "attempt": int(parsed["attempt"]), "fixture": fixture.name,
+              "fixture_dir": f"{fixture.parent.name}/{fixture.name}", "arm": arm, "base": base,
+              "started": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(started)),
+              "duration_s": round(time.time() - started),
               "session": {k: result.get(k) for k in ("is_error", "num_turns", "total_cost_usd",
                                                     "session_id", "permission_denials")},
               "final_message": str(result.get("result", ""))[-2000:],
-              "outside_paths": outside_paths(events, run_dir)}
-    record.update(measure(fixture, arm, repo, base))
+              "foreign_references": foreign_references(events)}
+    record.update(measure(fixture, arm, repo, base, events))
     sh(["git", "bundle", "create", str(out_dir / f"{run_id}.bundle"), "--all"], repo)
     with tarfile.open(out_dir / f"{run_id}.tree.tgz", "w:gz") as tar:
         for rel in tree_files(repo):
@@ -220,9 +267,10 @@ def run(fixture, arm, run_id):
                 tar.add(repo / rel, arcname=rel)
     (out_dir / f"{run_id}.json").write_text(json.dumps(record, indent=1) + "\n")
     replay = record["replay"]["verdict"] if record["replay"] else "-"
-    print(f"{run_id}: valid={record['valid']} hidden={record['hidden']['pass']}/"
-          f"{record['hidden']['fail']} replay={replay} findings={record['depth']['findings']} "
-          f"committed={record['committed']} {record['duration_s']}s", flush=True)
+    print(f"{run_id}: valid={record['valid']} hidden={record['hidden']['pass']}/{record['hidden']['fail']} "
+          f"skill_loaded={record['skill_loaded']} replay={replay} findings={record['depth']['findings']} "
+          f"foreign={len(record['foreign_references'])} committed={record['committed']} "
+          f"{record['duration_s']}s", flush=True)
     return record
 
 
@@ -237,41 +285,40 @@ def batch(jobs, specs):
         list(pool.map(one, specs))
 
 
-def bundle_for_review(group_dir, fixture, runs, control):
+def bundle_for_review(view, fixture, runs, control):
     """One reviewer's view: TASK.md plus each arm's stripped production code under a random letter."""
     entries = list(runs.items()) + ([(f"control:{control}", runs[control])] if control else [])
     random.SystemRandom().shuffle(entries)
     labels = [chr(ord("A") + i) for i in range(len(entries))]
-    if group_dir.exists():
-        shutil.rmtree(group_dir)
-    group_dir.mkdir(parents=True)
-    shutil.copy2(fixture / "task.md", group_dir / "TASK.md")
+    view.mkdir(parents=True)
+    shutil.copy2(fixture / "task.md", view / "TASK.md")
     for label, (arm, run_id) in zip(labels, entries):
         repo = WORK / "runs" / run_id / "repo"
         record = json.loads((RESULTS / "runs" / f"{run_id}.json").read_text())
         for rel in record["production_files"]:
-            code, out = sh(["node", str(HARNESS / "strip.cjs"), str(repo / rel), str(group_dir / label / rel)],
-                           STAGE3)
+            code, out = sh(["node", str(HARNESS / "strip.cjs"), str(repo / rel), str(view / label / rel)], STAGE3)
             if code:
                 raise RuntimeError(f"strip {rel}: {out}")
     return dict(zip(labels, [arm for arm, _ in entries])), labels
 
 
 def review_once(group, fixture, runs, control, k):
-    out_dir = RESULTS / "reviews" / group
-    out_dir.mkdir(parents=True, exist_ok=True)
-    key, labels = bundle_for_review(WORK / "reviews" / group / f"rev{k}", fixture, runs, control)
-    prompt = REVIEW_PROMPT.format(n=len(labels), labels=", ".join(labels))
     view = WORK / "reviews" / group / f"rev{k}"
+    key, labels = bundle_for_review(view, fixture, runs, control)
+    prompt = REVIEW_PROMPT.format(n=len(labels), labels=", ".join(labels))
+    out_dir = RESULTS / "reviews" / group
     result, events = claude(view, prompt, out_dir / f"rev{k}.stream.jsonl.gz", REVIEW_TOOLS, REVIEW_TIMEOUT)
     text = str(result.get("result", ""))
-    blocks = re.findall(r"```json\s*(\{.*?\})\s*```", text, re.S)
-    scores = json.loads(blocks[-1])["scores"] if blocks else {}
+    found = re.findall(r"```json\s*(\{.*?\})\s*```", text, re.S)
+    try:
+        scores = json.loads(found[-1])["scores"] if found else {}
+    except (ValueError, KeyError, TypeError):
+        scores = {}
     by_arm = {key[label]: scores.get(label) for label in labels}
     record = {"group": group, "reviewer": k, "key": key, "runs": runs, "scores_by_label": scores,
-              "scores": by_arm, "complete": all(isinstance(v, int) for v in by_arm.values()),
+              "scores": by_arm, "complete": all(type(v) is int and 1 <= v <= 10 for v in by_arm.values()),
               "cost": result.get("total_cost_usd"), "permission_denials": result.get("permission_denials"),
-              "outside_paths": outside_paths(events, view), "text": text}
+              "foreign_references": foreign_references(events), "text": text}
     (out_dir / f"rev{k}.json").write_text(json.dumps(record, indent=1) + "\n")
     return record
 
@@ -287,37 +334,50 @@ def comparisons(scores):
 
 def review(group, fixture, runs, control):
     fixture = Path(fixture).resolve()
+    if not GROUP.match(group):
+        raise ValueError(f"group {group} does not match <phase>-<fixture>-r<slot>[.<attempt>]")
+    out_dir = RESULTS / "reviews" / group
+    if out_dir.exists() or (WORK / "reviews" / group).exists():
+        raise RuntimeError(f"{group} exists; nothing is overwritten, use <group>.<attempt>")
+    out_dir.mkdir(parents=True)
+    (out_dir / "group.json").write_text(json.dumps({"group": group, "fixture": fixture.name, "runs": runs,
+                                                    "control": control}, indent=1) + "\n")
     with ThreadPoolExecutor(2) as pool:
         first = list(pool.map(lambda k: review_once(group, fixture, runs, control, k), (1, 2)))
     if not all(r["complete"] for r in first):
-        raise RuntimeError(f"{group}: a reviewer gave no complete score set; rerun the review")
+        raise RuntimeError(f"{group}: a reviewer gave no complete score set; review again as <group>.<attempt>")
     a, b = (comparisons(r["scores"]) for r in first)
-    if a != b:
-        third = review_once(group, fixture, runs, control, 3)
-        if not third["complete"]:
-            raise RuntimeError(f"{group}: reviewer 3 gave no complete score set; rerun the review")
+    if a != b and not review_once(group, fixture, runs, control, 3)["complete"]:
+        raise RuntimeError(f"{group}: reviewer 3 gave no complete score set; review again as <group>.<attempt>")
     print(f"{group}: " + "  ".join(f"rev{r['reviewer']} {r['scores']}" for r in first) +
           ("" if a == b else "  -> disagreement, rev3 added"), flush=True)
 
 
-def verdict(group_dir):
+def group_verdict(group_dir):
+    """(reviews, final comparisons) of a complete group, or (reviews, None) when it is incomplete."""
     revs = [json.loads(p.read_text()) for p in sorted(group_dir.glob("rev[0-9].json"))]
+    if len(revs) < 2 or not (revs[0]["complete"] and revs[1]["complete"]):
+        return revs, None
     comps = [comparisons(r["scores"]) for r in revs]
+    disagree = comps[0] != comps[1]
+    if disagree and (len(revs) < 3 or not revs[2]["complete"]):
+        return revs, None
     final = {}
     for name in ("vs_baseline", "vs_canon"):
-        votes = [c[name] for c in comps[:2]] if comps[0][name] == comps[1][name] else [c[name] for c in comps]
-        final[name] = max(set(votes), key=votes.count) if any(votes.count(v) * 2 > len(votes) for v in votes) else 0
-    return revs, final
+        votes = [c[name] for c in comps[:3]] if disagree else [comps[0][name]]
+        best = max(set(votes), key=votes.count)
+        final[name] = best if votes.count(best) * 2 > len(votes) else 0
+    return revs[:3] if disagree else revs[:2], final
 
 
 def latest_review(step):
-    rounds = sorted(SKILL.glob(f"evidence/reviews/step-{step:02d}-round-*.md"),
-                    key=lambda p: int(re.search(r"round-(\d+)\.md$", p.name).group(1)))
-    rounds = [p for p in rounds if not p.name.endswith("-response.md")]
+    rounds = [p for p in SKILL.glob(f"evidence/reviews/step-{step:02d}-round-*.md")
+              if re.search(r"round-\d+\.md$", p.name)]
     if not rounds:
         return None, None
-    last = rounds[-1].read_text().rstrip().splitlines()[-1]
-    return rounds[-1].name, last == "VERDICT: PASS"
+    last = max(rounds, key=lambda p: int(re.search(r"round-(\d+)\.md$", p.name).group(1)))
+    lines = last.read_text().rstrip().splitlines()
+    return last.name, bool(lines) and lines[-1] == "VERDICT: PASS"
 
 
 def fixtures():
@@ -328,43 +388,96 @@ def fixtures():
     return found
 
 
+def load_runs(phase):
+    runs = {}
+    for p in (RESULTS / "runs").glob(f"{phase}-*.json"):
+        rec = json.loads(p.read_text())
+        runs[rec["run_id"]] = rec
+    return runs
+
+
 def gate(phase):
-    groups = sorted(p for p in (RESULTS / "reviews").glob(f"{phase}-*") if p.is_dir())
-    rows, ok, notes = [], True, []
-    per_fixture = {}
-    for g in groups:
-        revs, final = verdict(g)
-        runs = revs[0]["runs"]
-        records = {arm: json.loads((RESULTS / "runs" / f"{rid}.json").read_text()) for arm, rid in runs.items()}
-        fixture = records["skill"]["fixture"]
-        per_fixture.setdefault(fixture, []).append(final)
-        for arm, rec in records.items():
-            if not rec["valid"]:
-                ok = False
-                notes.append(f"{g.name}: {arm} run {rec['run_id']} failed its hidden tests but was reviewed")
-        replay = records["skill"]["replay"]["verdict"]
-        if replay != "ACCEPT":
+    ok, notes, rows, per_fixture = True, [], [], {}
+    all_runs = load_runs(phase)
+    slots = {}
+    for rec in all_runs.values():
+        slots.setdefault((rec["fixture"], rec["arm"], rec["slot"]), []).append(rec)
+    first_valid = {key: next((r for r in sorted(recs, key=lambda r: r["attempt"]) if r["valid"]), None)
+                   for key, recs in slots.items()}
+    for rec in sorted(all_runs.values(), key=lambda r: r["run_id"]):
+        if not rec["valid"]:
+            notes.append(f"invalid run {rec['run_id']}: hidden {rec['hidden']['pass']}/{rec['hidden']['fail']}"
+                         f" skill_loaded={rec['skill_loaded']} (failure case, slot rerun)")
+        if rec["arm"] == "skill" and rec["valid"] and rec["replay"]["verdict"] != "ACCEPT":
             ok = False
-            notes.append(f"{g.name}: tdd_replay {replay} for {records['skill']['run_id']}")
+            notes.append(f"tdd_replay {rec['replay']['verdict']} for valid arm-3 run {rec['run_id']}")
+        if rec["foreign_references"]:
+            notes.append(f"{rec['run_id']}: {len(rec['foreign_references'])} tool call(s) naming places outside "
+                         f"its sandbox (unreadable there): {rec['foreign_references'][:2]}")
+    attempts = {}
+    for g in (RESULTS / "reviews").glob(f"{phase}-*"):
+        m = GROUP.match(g.name)
+        if g.is_dir() and m:
+            attempts.setdefault(f"{m['phase']}-{m['fixture']}-r{m['slot']}", []).append((int(m["attempt"] or 1), g))
+    controls = []
+    for name, tries in sorted(attempts.items()):
+        tries.sort()
+        chosen = next(((g, *group_verdict(g)) for _, g in tries if group_verdict(g)[1] is not None), None)
+        if len(tries) > 1:
+            notes.append(f"{name}: {len(tries)} review attempts; incomplete ones: "
+                         f"{[g.name for _, g in tries if group_verdict(g)[1] is None]}")
+        if not chosen:
+            ok = False
+            notes.append(f"{name}: no complete review")
+            continue
+        g, revs, final = chosen
+        meta = GROUP.match(name)
+        runs = revs[0]["runs"]
+        records = {arm: all_runs.get(rid) for arm, rid in runs.items()}
+        problems = []
+        if set(runs) != set(ARMS) or len(set(runs.values())) != 3 or any(r is None for r in records.values()):
+            problems.append("runs are not three distinct recorded runs of this phase")
+        else:
+            for arm, rec in records.items():
+                if rec["arm"] != arm or rec["fixture"] != meta["fixture"] or rec["slot"] != int(meta["slot"]):
+                    problems.append(f"{rec['run_id']} is not the {arm} run of this fixture and slot")
+                elif first_valid.get((rec["fixture"], arm, rec["slot"])) is not rec:
+                    problems.append(f"{rec['run_id']} is not the first valid attempt of its slot")
+        if any(r["runs"] != runs for r in revs):
+            problems.append("reviewers saw different runs")
+        if problems:
+            ok = False
+            notes += [f"{name}: {p}" for p in problems]
+            continue
+        replay = records["skill"]["replay"]["verdict"]
+        per_fixture.setdefault(meta["fixture"], []).append(final)
         scores = " | ".join(" ".join(f"{arm[0]}{r['scores'][arm]}" for arm in ("baseline", "canon", "skill"))
-                            + (f" c{r['scores']['control:baseline']}" if "control:baseline" in r["scores"] else "")
+                            + (f" k{r['scores']['control:baseline']}" if "control:baseline" in r["scores"] else "")
                             for r in revs)
+        for r in revs:
+            if "control:baseline" in r["scores"]:
+                delta = abs(r["scores"]["control:baseline"] - r["scores"]["baseline"])
+                controls.append(f"{g.name} rev{r['reviewer']}: control delta {delta}"
+                                + (" UNRELIABLE" if delta > 1 else ""))
+            if r["foreign_references"]:
+                notes.append(f"{g.name} rev{r['reviewer']}: names places outside its sandbox")
         depth = " ".join(f"{arm[0]}:{records[arm]['depth']['findings']}/{len(records[arm]['production_files'])}"
                          for arm in ("baseline", "canon", "skill"))
-        rows.append(f"{g.name:28} {scores:44} vs_base {final['vs_baseline']:+d} vs_canon {final['vs_canon']:+d}"
+        rows.append(f"{g.name:34} {scores:40} vs_base {final['vs_baseline']:+d} vs_canon {final['vs_canon']:+d}"
                     f"  replay {replay:6} depth_report findings/files {depth}")
-    print(f"group{'':23} scores per reviewer (b=baseline c=canon s=skill){'':0}")
+    print("scores per reviewer (b=baseline c=canon s=skill k=control copy of baseline)")
     print("\n".join(rows))
-    attribution = True
-    print("\nper fixture: skill vs baseline (wins/ties/losses), skill vs canon (wins/ties/losses)")
+    attribution = bool(per_fixture)
+    print("\nper fixture: skill vs baseline, skill vs canon (wins/ties/losses)")
     for fixture, finals in sorted(per_fixture.items()):
-        wb = [f["vs_baseline"] for f in finals]
-        wc = [f["vs_canon"] for f in finals]
+        wb, wc = [f["vs_baseline"] for f in finals], [f["vs_canon"] for f in finals]
         fx_ok = wb.count(1) * 2 > len(wb) and wb.count(-1) == 0
         attribution &= wc.count(1) * 2 > len(wc)
         print(f"  {fixture:24} n={len(finals)}  baseline {wb.count(1)}/{wb.count(0)}/{wb.count(-1)}"
               f"  canon {wc.count(1)}/{wc.count(0)}/{wc.count(-1)}  {'ok' if fx_ok else 'NOT MET'}")
         ok &= fx_ok
+    if controls:
+        print("\n" + "\n".join(controls))
     if phase == "pilot":
         print("\n" + "\n".join(notes))
         return 0
@@ -382,8 +495,7 @@ def gate(phase):
         name, passed = latest_review(step)
         print(f"step {step}: {name or 'no review'} {'VERDICT: PASS' if passed else 'not passed'}")
         ok &= bool(passed)
-    report = STAGE3 / "REPORT.md"
-    if not report.is_file():
+    if not (STAGE3 / "REPORT.md").is_file():
         ok = False
         notes.append("REPORT.md missing")
     print("attribution to the skill over plain TDD: " + ("supported" if attribution else "unproven"))
@@ -393,11 +505,11 @@ def gate(phase):
 
 
 def validate():
-    """Starter green; hidden tests red on the starter; starter + reference + hidden all green."""
-    ok = True
+    """Starter green; hidden tests red on the starter; starter + reference + hidden all green; coverage."""
+    ok, metas = True, {}
     for fixture_id, kind in fixtures().items():
         fixture = STAGE3 / kind / fixture_id
-        meta = json.loads((fixture / "meta.json").read_text())
+        meta = metas[fixture_id] = json.loads((fixture / "meta.json").read_text())
         counts = []
         for overlay, hidden in ((False, False), (False, True), (True, True)):
             tree = WORK / "validate" / fixture_id
@@ -418,6 +530,14 @@ def validate():
         print(f"{kind}/{fixture_id}: kind={meta.get('kind')} interacting={meta.get('interacting_modules')} "
               f"starter {counts[0][1]}/{counts[0][2]}  starter+hidden {counts[1][1]}/{counts[1][2]}  "
               f"reference+all {counts[2][1]}/{counts[2][2]}  {'ok' if good else 'BAD'}")
+    visible = [m for m in metas.values() if not m.get("holdout")]
+    kinds = {m.get("kind") for m in visible}
+    interacting = sum(bool(m.get("interacting_modules")) for m in visible)
+    holdouts = len(metas) - len(visible)
+    covered = kinds >= {"stateful", "parsing", "bugfix", "multi-module"} and interacting >= 2 and holdouts == 2
+    print(f"visible kinds {sorted(kinds)}, visible with interacting modules {interacting}, hold-outs {holdouts}"
+          f"  {'ok' if covered else 'BAD'}")
+    ok &= covered
     print("FIXTURES: OK" if ok else "FIXTURES: BAD")
     return 0 if ok else 1
 

@@ -1,1 +1,1 @@
-{"id": "box-office-holds", "kind": "stateful", "interacting_modules": true, "holdout": false}
+{"id": "box-office-holds", "kind": "stateful", "interacting_modules": false, "holdout": false}
