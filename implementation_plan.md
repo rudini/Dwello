@@ -4636,6 +4636,11 @@ A tenant gives notice for a later day: «Mietvertrag beenden» asks for the Vert
   longer be deleted (only ended ones; the dialog says until when it runs, scenario first); a future contract proposes
   its start; the action reads the Vertragsbeginn from the backend and checks the format; the toast and the sent date
   are tested; the field-error state is in the axe check (`end-dialog-error`); lows in `offene-punkte.md`.
+- [x] **IF-1, IF-3** (product owner): only a contract that has not started can be deleted (`contracts/[id]/+page.svelte`,
+  `+page.server.ts` `delete`); a past Vertragsende is confirmed with a checkbox naming since when the contract has ended
+  (`pastEndConfirmation`, `endedSince` in `contract-status.ts`; also checked in the action); the action refuses a day
+  before the end of a stored statement of the contract. Scenarios first in `contract-detail.feature` (past end, missing
+  confirmation, statement, ended contract kept, future contract deleted).
 - [x] **Fachreview I** (`docs/reviews/I-fachreview-1.md`, no critical): the end dialog names Kündigungstermin and
   Kündigungsfrist, says a late notice counts for the next term and that a new contract can start the day after; the
   error for a past day points to «Bearbeiten» for a passed Kündigungstermin. Product decisions (IF-1, IF-3 to IF-9) and

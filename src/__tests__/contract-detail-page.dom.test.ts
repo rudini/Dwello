@@ -132,18 +132,48 @@ describe('Mietvertragsdetail', () => {
 		expect(byTestId('contract-end-confirm')!.textContent).toContain('Mietvertrag beenden');
 	});
 
-	it('sagt am Feld, wenn das Vertragsende vor heute liegt, und sendet nichts', async () => {
+	// ein nachträglich erfasster Kündigungstermin: die Folge wird bestätigt, sonst geht nichts weg
+	it('verlangt bei einem Vertragsende vor heute die Bestätigung der Folge und sendet ohne sie nichts', async () => {
 		open();
 		click('contract-end-button');
 		const submitted = vi.fn();
 		document.querySelector('form[action="?/end"]')!.addEventListener('submit', submitted);
-		fireEvent(byTestId<HTMLInputElement>('contract-end-date-input')!, 'input', '31.01.2024');
+		fireEvent(byTestId<HTMLInputElement>('contract-end-date-input')!, 'input', '31.03.2025');
+		await settle();
+		const dialog = document.querySelector('[role=dialog]')!;
+		expect(dialog.textContent).toContain('Der Mietvertrag ist seit dem 01.04.2025 beendet.');
 		click('contract-end-confirm');
 		await settle();
-		expect(document.querySelector('[role=dialog]')!.textContent).toContain(
-			'Das Vertragsende liegt vor heute.'
+		expect(dialog.textContent).toContain(
+			'Bitte bestätigen Sie, dass der Mietvertrag seit dem 01.04.2025 beendet ist.'
 		);
 		expect(submitted).not.toHaveBeenCalled();
+	});
+
+	it('fragt bei heute und späteren Tagen nicht nach einer Bestätigung', async () => {
+		open();
+		click('contract-end-button');
+		fireEvent(byTestId<HTMLInputElement>('contract-end-date-input')!, 'input', '31.03.2027');
+		await settle();
+		expect(byTestId('contract-end-past-confirm')).toBeNull();
+	});
+
+	it('sendet die Bestätigung mit und meldet, seit wann der Mietvertrag beendet ist', async () => {
+		toasts.set([]);
+		open();
+		click('contract-end-button');
+		fireEvent(byTestId<HTMLInputElement>('contract-end-date-input')!, 'input', '31.03.2025');
+		await settle();
+		click('contract-end-past-confirm');
+		await settle();
+		const formData = new FormData();
+		const after = actions.get('?/end')!({ formData }) as (input: unknown) => Promise<void>;
+		expect(formData.get('endDate')).toBe('2025-03-31');
+		expect(formData.get('pastConfirmed')).toBe('on');
+		await after({ update: async () => {}, result: { type: 'success' } });
+		expect(get(toasts).map((toast) => toast.message)).toEqual([
+			'Der Mietvertrag von Anna Keller ist seit dem 01.04.2025 beendet'
+		]);
 	});
 
 	// der Tag geht mit dem Formular an die Aktion; die Meldung nennt ihn
@@ -173,38 +203,32 @@ describe('Mietvertragsdetail', () => {
 		expect(byTestId<HTMLInputElement>('contract-end-date-input')!.value).toBe('');
 	});
 
-	// gekündigt, aber laufend: gelöscht werden kann er erst nach dem Vertragsende
-	it('lässt einen laufenden Mietvertrag mit künftigem Vertragsende nicht löschen und sagt bis wann', () => {
-		open('2024-04-01', '2027-03-31');
+	// noch nicht begonnen, z.B. irrtümlich erfasst: er hat keine Mietstage
+	it('lässt einen künftigen Mietvertrag löschen', () => {
+		open('2099-11-01');
 		click('contract-delete-button');
-		expect(byTestId<HTMLButtonElement>('contract-delete-confirm')!.disabled).toBe(true);
+		expect(byTestId<HTMLButtonElement>('contract-delete-confirm')!.disabled).toBe(false);
 		expect(document.querySelector('[role=dialog]')!.textContent!.replace(/\s+/g, ' ')).toContain(
-			'Der Mietvertrag läuft bis am 31.03.2027 und kann bis dahin nicht gelöscht werden.'
+			'Der Mietvertrag von Anna Keller hat noch nicht begonnen und wird endgültig gelöscht.'
 		);
 	});
 
-	it('lässt einen Mietvertrag ohne Vertragsende nicht löschen und sagt warum', () => {
-		open();
-		click('contract-delete-button');
-		expect(byTestId<HTMLButtonElement>('contract-delete-confirm')!.disabled).toBe(true);
-		expect(document.querySelector('[role=dialog]')!.textContent).toContain(
-			'Beenden Sie ihn zuerst'
-		);
-	});
-
-	it('sagt vor dem Löschen, dass ein Mietvertrag mit Abrechnungen bleibt', () => {
-		open('2024-01-01', '2024-12-31');
-		click('contract-delete-button');
-		const words = document.querySelector('[role=dialog]')!.textContent!.replace(/\s+/g, ' ');
-		expect(words).toContain(
-			'Ein Mietvertrag mit Nebenkostenabrechnungen kann nicht gelöscht werden.'
-		);
-		expect(words).not.toContain('bleiben erhalten');
-	});
+	// laufend oder beendet: die Nebenkostenabrechnung braucht seine Mietstage
+	it.each([null, '2027-03-31', '2024-12-31'])(
+		'lässt einen Mietvertrag, der begonnen hat, nicht löschen und sagt, wie er korrigiert wird (Ende %s)',
+		(end) => {
+			open('2024-01-01', end);
+			click('contract-delete-button');
+			expect(byTestId<HTMLButtonElement>('contract-delete-confirm')!.disabled).toBe(true);
+			expect(document.querySelector('[role=dialog]')!.textContent!.replace(/\s+/g, ' ')).toContain(
+				'Ein Mietvertrag, der begonnen hat, kann nicht gelöscht werden: Die Nebenkostenabrechnung braucht seine Mietstage. Ist er falsch erfasst, korrigieren Sie ihn unter «Bearbeiten».'
+			);
+		}
+	);
 
 	it('bestätigt das Löschen mit dem Namen des Mieters', async () => {
 		toasts.set([]);
-		open('2024-01-01', '2024-12-31');
+		open('2099-11-01');
 		click('contract-delete-button');
 		await redirectAfter('?/delete');
 		expect(get(toasts).map((toast) => toast.message)).toEqual([
@@ -213,7 +237,7 @@ describe('Mietvertragsdetail', () => {
 	});
 
 	it('zeigt im Löschdialog, warum das Backend das Löschen ablehnt', () => {
-		open('2024-01-01', '2024-12-31', {
+		open('2099-11-01', null, {
 			deleteError: 'Mietvertrag konnte nicht gelöscht werden.'
 		});
 		expect(document.querySelector('[role=dialog]')!.textContent).toContain(

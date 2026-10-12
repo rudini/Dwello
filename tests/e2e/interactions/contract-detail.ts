@@ -7,6 +7,7 @@ export const contractEndDate = (page: Page) => page.getByTestId('contract-end-da
 export const endContractButton = (page: Page) => page.getByTestId('contract-end-button');
 export const confirmEndContractButton = (page: Page) => page.getByTestId('contract-end-confirm');
 export const contractEndInput = (page: Page) => page.getByTestId('contract-end-date-input');
+export const contractEndPastConfirm = (page: Page) => page.getByTestId('contract-end-past-confirm');
 export const contractEndError = (page: Page) => page.getByRole('dialog').getByTestId('form-error');
 export const deleteContractButton = (page: Page) => page.getByTestId('contract-delete-button');
 export const confirmDeleteContractButton = (page: Page) => page.getByTestId('contract-delete-confirm');

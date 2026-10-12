@@ -20,6 +20,13 @@ import { searchContracts } from '../tasks/contracts';
 const { Given, When, Then } = createBdd(test);
 
 Given(
+	'für {string} gibt es die Abrechnung {int} im Gebäude {string}',
+	async ({ seed }, tenant: string, year: number, building: string) => {
+		await seed.statement(tenant, building, year);
+	}
+);
+
+Given(
 	'der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von {string}',
 	async ({ verwalter, seed }, tenant: string) => {
 		await visit(verwalter.page, `/contracts/${seed.idOf(`Mietvertrag ${tenant}`)}`);
@@ -33,6 +40,13 @@ When('der Liegenschaftsverwalter den Mietvertrag beendet', async ({ verwalter })
 When('der Liegenschaftsverwalter den Mietvertrag auf den {string} beendet', async ({ verwalter }, date: string) => {
 	await verwalter.perform(endContractOn(date));
 });
+
+When(
+	'der Liegenschaftsverwalter den Mietvertrag auf den {string} beendet und die Folge bestätigt',
+	async ({ verwalter }, date: string) => {
+		await verwalter.perform(endContractOn(date, { confirmPast: true }));
+	}
+);
 
 // The same steps; the dialog refuses the date and stays open
 When('der Liegenschaftsverwalter den Mietvertrag auf den {string} beenden will', async ({ verwalter }, date: string) => {

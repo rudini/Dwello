@@ -1,6 +1,12 @@
 <script lang="ts">
 	import { flushSync, untrack } from 'svelte';
-	import { contractEndError, contractStatusOn } from '$lib/contract-status';
+	import {
+		contractEndError,
+		contractStatusOn,
+		endedSince,
+		pastEndConfirmation
+	} from '$lib/contract-status';
+	import Checkbox from '$lib/ui/Checkbox.svelte';
 	import { formatDate } from '$lib/utils/format';
 	import DateInput from '$lib/ui/DateInput.svelte';
 	import { focusFirstError } from '$lib/ui/focus-error';
@@ -31,23 +37,34 @@
 	const name = $derived(`${contract.tenant.firstName} ${contract.tenant.lastName}`);
 	const status = $derived(contractStatusOn(contract.startDate, contract.endDate, data.today));
 	let ending = $state(false);
-	// the last day of the tenancy, e.g. the day the tenant gave notice for; typed on purpose, no day proposed (a quick
-	// confirm must not end the contract today); the calendar starts at today, a future contract at its start
-	const earliestEnd = $derived([data.today, contract.startDate.slice(0, 10)].sort()[1]);
+	// the last day of the tenancy, the Kündigungstermin; typed on purpose, no day proposed (a quick confirm must not
+	// end the contract today); a past day, e.g. a notice recorded late, is confirmed with its consequence
 	let endDate = $state('');
 	let endError = $state('');
+	let pastConfirmed = $state(false);
+	let pastError = $state('');
+	const pastEnd = $derived(pastEndConfirmation(endDate, data.today) !== null);
 	function startEnding() {
 		endDate = '';
 		endError = '';
+		pastConfirmed = false;
+		pastError = '';
 		ending = true;
 	}
 	// checked in the dialog before sending: a wrong date is said at the field, which gets the focus
 	function checkEndDate() {
-		endError = '';
+		endError = pastError = '';
 		flushSync(); // cleared first: the same error set again shows again
 		endError = contractEndError(endDate, contract.startDate, data.today) ?? '';
-		if (endError) focusFirstError(document.querySelector('[role="dialog"]'));
-		return !endError;
+		if (!endError && !pastConfirmed) pastError = pastEndConfirmation(endDate, data.today) ?? '';
+		if (endError || pastError) focusFirstError(document.querySelector('[role="dialog"]'));
+		return !endError && !pastError;
+	}
+	// the toast names the day the tenancy ends, or since when it has ended
+	function endedMessage() {
+		if (pastEnd) return `Der Mietvertrag von ${name} ist seit dem ${endedSince(endDate)} beendet`;
+		if (endDate === data.today) return `Der Mietvertrag von ${name} endet heute`;
+		return `Der Mietvertrag von ${name} endet am ${formatDate(endDate)}`;
 	}
 	// a refused delete (also without JavaScript) shows the dialog with its reason
 	let deleting = $state(untrack(() => !!form?.deleteError));
@@ -119,26 +136,30 @@
 	confirmLabel="Mietvertrag beenden"
 	confirmTestid="contract-end-confirm"
 	error={form?.endError}
-	fields={{ endDate }}
+	fields={{ endDate, pastConfirmed: pastConfirmed ? 'on' : '' }}
 	check={checkEndDate}
-	onsuccess={() =>
-		addToast(
-			'success',
-			endDate === data.today
-				? `Der Mietvertrag von ${name} endet heute`
-				: `Der Mietvertrag von ${name} endet am ${formatDate(endDate)}`
-		)}
+	onsuccess={() => addToast('success', endedMessage())}
 >
 	<!-- TODO(fachlich prüfen): «Kündigungstermin», «Kündigungsfrist» are not in the glossary (offene-punkte.md) -->
 	<DateInput
 		id="endDate"
 		label="Vertragsende"
 		help="Der letzte Tag des Mietverhältnisses, also der Kündigungstermin. Bis und mit diesem Tag läuft der Mietvertrag, auch wenn der Mieter früher auszieht."
-		min={earliestEnd}
+		min={contract.startDate.slice(0, 10)}
 		error={endError}
 		bind:value={endDate}
 		testid="contract-end-date-input"
 	/>
+	{#if pastEnd}
+		<Checkbox
+			id="pastConfirmed"
+			label="Der Mietvertrag ist seit dem {endedSince(endDate)} beendet."
+			help="Ab diesem Tag gilt die Wohnung als leer, wenn kein neuer Mietvertrag beginnt. Das Akonto des Mieters zählt nur bis zum Vertragsende."
+			error={pastError}
+			bind:checked={pastConfirmed}
+			testid="contract-end-past-confirm"
+		/>
+	{/if}
 	<p class="text-ink-muted">
 		Prüfen Sie Frist und Termin im Mietvertrag: Für Wohnungen gilt eine Kündigungsfrist von
 		mindestens 3 Monaten. Ist die Kündigung zu spät, gilt sie erst auf den nächsten
@@ -152,22 +173,17 @@
 	title="Mietvertrag löschen?"
 	confirmLabel="Mietvertrag löschen"
 	danger
-	disabled={!contract.endDate || status === 'active'}
+	disabled={status !== 'future'}
 	confirmTestid="contract-delete-confirm"
 	error={form?.deleteError}
 	onsuccess={() => addToast('success', `Mietvertrag von ${name} gelöscht`)}
 >
-	{#if !contract.endDate}
-		<p>Ein Mietvertrag ohne Vertragsende kann nicht gelöscht werden. Beenden Sie ihn zuerst.</p>
-	{:else if status === 'active'}
-		<p>
-			Der Mietvertrag läuft bis am {formatDate(contract.endDate.slice(0, 10))} und kann bis dahin nicht
-			gelöscht werden.
-		</p>
+	{#if status === 'future'}
+		<p>Der Mietvertrag von {name} hat noch nicht begonnen und wird endgültig gelöscht.</p>
 	{:else}
 		<p>
-			Der Mietvertrag von {name} wird endgültig gelöscht. Ein Mietvertrag mit Nebenkostenabrechnungen
-			kann nicht gelöscht werden.
+			Ein Mietvertrag, der begonnen hat, kann nicht gelöscht werden: Die Nebenkostenabrechnung
+			braucht seine Mietstage. Ist er falsch erfasst, korrigieren Sie ihn unter «Bearbeiten».
 		</p>
 	{/if}
 </ActionDialog>

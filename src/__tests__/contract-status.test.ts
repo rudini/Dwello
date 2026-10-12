@@ -4,6 +4,7 @@ import {
 	contractPeriod,
 	contractStatusOn,
 	localToday,
+	pastEndConfirmation,
 	statusBadges
 } from '../lib/contract-status';
 
@@ -30,11 +31,12 @@ describe('Vertragsstatus', () => {
 	});
 });
 
-// Beenden auf den Tag, auf den der Mieter gekündigt hat: heute oder später, nie vor dem Vertragsbeginn
+// Beenden auf den Kündigungstermin: auch nachträglich, nie vor dem Vertragsbeginn
 describe('Vertragsende beim Beenden', () => {
-	it('nimmt heute und spätere Tage an', () => {
+	it('nimmt heute, spätere und frühere Tage an', () => {
 		expect(contractEndError('2026-10-10', '2024-04-01', today)).toBeNull();
 		expect(contractEndError('2027-03-31', '2024-04-01', today)).toBeNull();
+		expect(contractEndError('2025-03-31', '2024-04-01', today)).toBeNull();
 	});
 
 	it('verlangt ein Datum als Tag', () => {
@@ -44,16 +46,26 @@ describe('Vertragsende beim Beenden', () => {
 			);
 	});
 
-	it('lehnt einen Tag vor heute ab und sagt, wo ein früheres Ende hingehört', () => {
-		expect(contractEndError('2026-10-09', '2024-04-01', today)).toBe(
-			'Das Vertragsende liegt vor heute. Liegt der Kündigungstermin schon zurück, tragen Sie ihn unter «Bearbeiten» ein.'
-		);
-	});
-
 	it('lehnt bei einem künftigen Mietvertrag einen Tag vor dem Vertragsbeginn ab', () => {
 		expect(contractEndError('2099-10-31', '2099-11-01', today)).toBe(
 			'Das Vertragsende kann nicht vor dem Vertragsbeginn am 01.11.2099 liegen.'
 		);
+	});
+});
+
+// ein nachträglich erfasster Kündigungstermin: die Folge wird bestätigt, ein Tippfehler im Jahr fällt auf
+describe('Vergangenes Vertragsende', () => {
+	it('verlangt eine Bestätigung mit dem Tag, ab dem der Mietvertrag beendet ist', () => {
+		expect(pastEndConfirmation('2025-03-31', today)).toBe(
+			'Bitte bestätigen Sie, dass der Mietvertrag seit dem 01.04.2025 beendet ist.'
+		);
+		expect(pastEndConfirmation('2024-12-31', today)).toContain('seit dem 01.01.2025');
+	});
+
+	it('verlangt für heute und spätere Tage keine Bestätigung', () => {
+		expect(pastEndConfirmation('2026-10-10', today)).toBeNull();
+		expect(pastEndConfirmation('2027-03-31', today)).toBeNull();
+		expect(pastEndConfirmation('', today)).toBeNull();
 	});
 });
 

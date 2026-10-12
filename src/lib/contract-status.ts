@@ -35,13 +35,24 @@ export function contractPeriod(
 	return `${status === 'future' ? 'ab' : 'seit'} ${formatDate(startDate)}, unbefristet`;
 }
 
-/** Why a contract cannot be ended on that day (YYYY-MM-DD), or null: today or later, never before its start */
+/** Why a contract cannot be ended on that day (YYYY-MM-DD), or null: never before its start */
 export function contractEndError(endDate: string, startDate: string, today: string): string | null {
 	if (!/^\d{4}-\d{2}-\d{2}$/.test(endDate))
 		return `Bitte geben Sie das Vertragsende ein, zum Beispiel 31.12.${today.slice(0, 4)}.`;
-	if (endDate < today)
-		return 'Das Vertragsende liegt vor heute. Liegt der Kündigungstermin schon zurück, tragen Sie ihn unter «Bearbeiten» ein.';
 	if (endDate < startDate.slice(0, 10))
 		return `Das Vertragsende kann nicht vor dem Vertragsbeginn am ${formatDate(startDate.slice(0, 10))} liegen.`;
 	return null;
+}
+
+/** The day a contract counts as ended: the day after its last day */
+export function endedSince(endDate: string) {
+	const day = new Date(`${endDate}T00:00:00Z`);
+	day.setUTCDate(day.getUTCDate() + 1);
+	return formatDate(day.toISOString().slice(0, 10));
+}
+
+/** An end before today, e.g. a notice recorded late, is confirmed with its consequence; null when none is needed */
+export function pastEndConfirmation(endDate: string, today: string): string | null {
+	if (!endDate || endDate >= today) return null;
+	return `Bitte bestätigen Sie, dass der Mietvertrag seit dem ${endedSince(endDate)} beendet ist.`;
 }
