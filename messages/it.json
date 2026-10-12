@@ -1265,5 +1265,6 @@
 	"statements_preset_from_statements": "Il profilo di riscaldamento e le spese di gestione sono impostati come negli altri conteggi spese accessorie di questo periodo di conteggio. Li verifichi e passi all’anteprima.",
 	"statements_preset_from_settings": "Il profilo di riscaldamento e le spese di gestione provengono dalle impostazioni. Li verifichi e passi all’anteprima.",
 	"contracts_next_steps_text_successor": "Il contratto di locazione è disdetto, il nuovo inquilino è registrato. Per il conteggio finale serve il nuovo indirizzo dell’inquilino.",
-	"contracts_next_steps_hint": "Vede i prossimi passi in alto nella pagina."
+	"contracts_next_steps_hint": "Vede i prossimi passi in alto nella pagina.",
+	"contracts_apartment_contracts_unknown": "Non è stato possibile caricare i contratti di locazione dell’appartamento. Ricarichi la pagina e riprovi."
 }

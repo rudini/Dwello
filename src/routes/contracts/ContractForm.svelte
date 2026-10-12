@@ -56,7 +56,7 @@
 	let errors = $state<Record<string, string>>({});
 	let saving = $state(false);
 	let refused = $state<RefusedStatement[]>([]); // statements that refused the last save
-	let contractsKnown = $state(true); // the chosen apartment's contracts loaded, so an overlap shows
+	let contractsKnown = $state(false); // the chosen apartment's contracts loaded, so an overlap shows
 	let availability = $state<Map<string, AvailabilityInfo> | null>(null);
 	let apartmentContracts = $state<ContractForAvailability[]>([]);
 	let form = $state<HTMLFormElement>();
@@ -105,6 +105,7 @@
 	// Contracts of the chosen apartment, for the overlap check
 	$effect(() => {
 		const apartmentId = values.apartmentId;
+		contractsKnown = false; // until this apartment's contracts have answered (Haiku review N3)
 		if (apartmentId) contractsOf(apartmentId).then((list) => (apartmentContracts = list));
 		else apartmentContracts = [];
 	});
@@ -164,7 +165,9 @@
 		// an overlap would refuse the save after the delete: the draft would be gone for nothing (review K-2);
 		// without the apartment's contracts an overlap cannot be ruled out (Haiku review R5)
 		if (overlap || !contractsKnown) {
-			errors = { form: overlap ? m.backend_contract_overlap() : m.contracts_save_failed() };
+			errors = {
+				form: overlap ? m.backend_contract_overlap() : m.contracts_apartment_contracts_unknown()
+			};
 			refused = [];
 			return focusFirstError(form);
 		}

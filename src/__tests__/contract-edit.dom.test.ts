@@ -211,7 +211,10 @@ describe('Mietvertrag bearbeiten', () => {
 			click('delete-draft-and-save');
 			await settle();
 			expect(calls.filter((c) => c.method === 'DELETE')).toEqual([]);
-			expect(byTestId('form-error')).not.toBeNull();
+			// Haiku-Review N2: die Meldung sagt, was fehlt und was zu tun ist
+			expect(byTestId('form-error')!.textContent).toContain(
+				'Die Mietverträge der Wohnung konnten nicht geladen werden. Laden Sie die Seite neu und versuchen Sie es erneut.'
+			);
 		});
 
 		// Review K-2: das Angebot gehört zu den abgelehnten Werten

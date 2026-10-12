@@ -82,7 +82,8 @@
 			endDate === data.today
 				? m.contracts_ends_today_toast({ name })
 				: m.contracts_ends_on_toast({ name, date: formatDate(endDate) });
-		return `${ends}. ${m.contracts_next_steps_hint()}`;
+		// only when the reloaded page shows them (Haiku review N1)
+		return data.nextSteps ? `${ends}. ${m.contracts_next_steps_hint()}` : ends;
 	}
 	// a refusal of the draft delete is read like one of the end itself
 	async function focusRefusal(result: { type: string }) {

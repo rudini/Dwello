@@ -462,7 +462,8 @@ describe('Mietvertragsdetail', () => {
 	// der Tag geht mit dem Formular an die Aktion; die Meldung nennt ihn
 	it('sendet das Vertragsende und meldet den Tag, an dem der Mietvertrag endet', async () => {
 		toasts.set([]);
-		open();
+		// after the end the page reloads with the next steps: the message points to them
+		open('2024-04-01', null, null, '2026-10-10', true);
 		click('contract-end-button');
 		fireEvent(byTestId<HTMLInputElement>('contract-end-date-input')!, 'input', '31.03.2027');
 		await settle();
@@ -473,6 +474,22 @@ describe('Mietvertragsdetail', () => {
 		// Haiku-Review R7 (Helga K1 M2): die Meldung sagt, wo es weitergeht
 		expect(get(toasts).map((toast) => toast.message)).toEqual([
 			'Der Mietvertrag von Anna Keller endet am 31.03.2027. Die nächsten Schritte sehen Sie oben auf der Seite.'
+		]);
+	});
+
+	// Haiku-Review N1: ohne Abschnitt «Nächste Schritte» verweist die Meldung nicht darauf
+	it('verweist nicht auf nächste Schritte, die die Seite nicht zeigt', async () => {
+		toasts.set([]);
+		open(); // nextSteps: null
+		click('contract-end-button');
+		fireEvent(byTestId<HTMLInputElement>('contract-end-date-input')!, 'input', '31.03.2027');
+		await settle();
+		const after = actions.get('?/end')!({ formData: new FormData() }) as (
+			input: unknown
+		) => Promise<void>;
+		await after({ update: async () => {}, result: { type: 'success' } });
+		expect(get(toasts).map((toast) => toast.message)).toEqual([
+			'Der Mietvertrag von Anna Keller endet am 31.03.2027'
 		]);
 	});
 
