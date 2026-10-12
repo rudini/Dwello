@@ -1,6 +1,6 @@
 # Dwello
 
-Web app for Swiss property managers (Liegenschaftsverwalter): buildings, apartments, tenants, contracts, invoices categorized by an LLM, utility cost statements (Nebenkostenabrechnungen) with Swiss QR-bills. Single-user MVP, under 50 apartments.
+Web app for Swiss private landlords who manage their own rented property (in the app the Liegenschaftsverwalter; target users in "Design-Regeln"): buildings, apartments, tenants, contracts, invoices categorized by an LLM, utility cost statements (Nebenkostenabrechnungen) with Swiss QR-bills. Single-user MVP, under 50 apartments.
 
 Stack: SvelteKit + TypeScript + Tailwind (frontend and BFF) | ElysiaJS on Bun + Drizzle + PostgreSQL (`backend/`) | an LLM for invoice categorization (any OpenAI-compatible API, by default a local Ollama).
 

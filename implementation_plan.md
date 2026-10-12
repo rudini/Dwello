@@ -44,3 +44,5 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8): add the items when
   redesign brief and the last runs); `arbeitsregeln.md`, `.claude/agents/persona.md` and `CLAUDE.md` step 5 point to
   it; `docs/PRD-Dwello.md` section 3 replaces the persona Michael Keller (professional manager) with the target users
   and a pointer to the list.
+- [x] **Target users aligned**: `CLAUDE.md` intro, `README.md` (Overview, Target Users) and `docs/PRD-Dwello.md`
+  (summary, 2.4) name private landlords with little experience, as the design rules and personas do.

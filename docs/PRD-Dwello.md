@@ -13,7 +13,7 @@
 
 **Vision:** Comprehensive, user-friendly Swiss property management system designed to streamline the management of residential properties, tenant relationships, and utility cost distribution for small property portfolios.
 
-**Target Users:** Property managers (Liegenschaftsverwalter) managing 1-5 buildings with up to 50 apartments in Switzerland.
+**Target Users:** Private landlords in Switzerland with little experience who manage their own 1-5 buildings with up to 50 apartments (in the app: Liegenschaftsverwalter); see section 3.
 
 **Primary Goal:** Enable property managers to efficiently handle property administration, tenant contracts, invoice management, and annual utility cost statement generation while ensuring compliance with Swiss legal requirements.
 
@@ -50,7 +50,7 @@ Dwello provides:
 - Secure data storage with automated backups
 
 ### 2.4 Target Market
-- **Primary:** Property managers in Switzerland managing small to mid-size portfolios
+- **Primary:** Private landlords in Switzerland who manage their own property and use Dwello a few times a year
 - **Portfolio Size:** 1-5 residential buildings
 - **Tenant Base:** Up to 50 apartments
 - **User Type:** Single property manager (no multi-user requirement for MVP)

@@ -8,10 +8,11 @@
 
 ## Overview
 
-Dwello is a comprehensive web application for managing residential properties in Switzerland, specifically designed for property managers (Liegenschaftsverwalter). The system handles building management, tenant relationships, rental contracts, invoice management, and most importantly, complex utility cost statement generation (Nebenkostenabrechnungen) with Swiss legal compliance.
+Dwello is a comprehensive web application for managing residential properties in Switzerland, specifically designed for private landlords who manage their own rented property (in the app: Liegenschaftsverwalter). The system handles building management, tenant relationships, rental contracts, invoice management, and most importantly, complex utility cost statement generation (Nebenkostenabrechnungen) with Swiss legal compliance.
 
 ### Target Users
-- Property managers managing 1-5 buildings with <50 apartments
+- Private landlords with little experience who use Dwello a few times a year, with 1-5 buildings and fewer than 50 apartments
+- Guidance, plain words and confirmations come before speed for experts; personas in `docs/design/personas/README.md`
 - Single user initially (no multi-user support in MVP)
 
 ### Key Features
