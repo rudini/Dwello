@@ -1,0 +1,29 @@
+{
+ "group": "main-holdout-a-r3",
+ "reviewer": 1,
+ "key": {
+  "A": "baseline",
+  "B": "canon",
+  "C": "skill"
+ },
+ "runs": {
+  "baseline": "main-holdout-a-baseline-r3-a1",
+  "canon": "main-holdout-a-canon-r3-a5",
+  "skill": "main-holdout-a-skill-r3-a2"
+ },
+ "scores_by_label": {
+  "A": 6,
+  "B": 5,
+  "C": 7
+ },
+ "scores": {
+  "baseline": 6,
+  "canon": 5,
+  "skill": 7
+ },
+ "foreign_references": [],
+ "complete": true,
+ "cost": 0.0981468,
+ "permission_denials": [],
+ "text": "All three use the same structure: a parser that turns text into orders, a lot comparator, an allocation loop and a walking-order sort. The differences are about where the allocation logic lives and how many small, shallow helpers each one adds.\n\n**A:** `parseOrders` is a deep function: one call hides the line rules, the regexes, duplicate-id tracking, merging repeated SKUs in a `Map` and the \"order without items\" check (through the private `closeCurrent` closure). `sortByWalk` hides the parsing of bin codes, the alternating rack direction per aisle and keeping same-bin picks in allocation order behind `picks \u2192 picks`. However, the allocation step (grouping lots by SKU, tracking what is left, creating picks and shortages) is written out inline in `buildPickList` rather than being its own module. So the entry point mixes high-level steps with low-level details.\n\n**B:** It has the same deep `parseOrders` and `inWalkingOrder`, and allocation is also inline in `buildPickList`. B adds a few very shallow helpers. `compareStrings` is barely more than the `<` operator. `requireItems` is a separate top-level function that exposes the parser's internal \"no items\" check. The `line` field, which only parsing needs, is kept in the shared `Order` type, so a parsing detail leaks into the data that allocation uses.\n\n**C:** `buildPickList` is just `allocate(parseOrders(text), stock)`, so it is built from two deep modules with very small interfaces. `allocate` hides the priority ordering, the best-before sort, the remaining-stock map that leaves `stock` unmodified, and the walking order. `parseOrders` keeps the `line` field private (`Order & {line}` is used only inside the parser), so the shared `Order` type stays minimal. `inWalkingOrder` hides the serpentine rule inside a local `walkKey` function. This is the cleanest information hiding of the three.\n\n```json\n{\"scores\": {\"A\": 6, \"B\": 5, \"C\": 7}}\n```"
+}

@@ -1,0 +1,97 @@
+{
+ "run_id": "main-holdout-a-canon-r2-a5",
+ "status": "finished",
+ "phase": "main",
+ "slot": 2,
+ "attempt": 5,
+ "fixture": "holdout-a",
+ "fixture_dir": "holdout/holdout-a",
+ "arm": "canon",
+ "started": "2026-10-12T13:24:01Z",
+ "valid": false,
+ "harness": {
+  "commit": "e4e5e2184eeeae71aa277a6f8a6cd8c5ddd95908",
+  "sha256": "1d61c912cd86acfffadd6dc76568ca5beddd76579d149b5fc6cb9845386161dd"
+ },
+ "base": "1c3df75e57be4cae9f55ec4fcf0bce18b8b81eeb",
+ "duration_s": 213,
+ "session": {
+  "is_error": false,
+  "num_turns": 71,
+  "total_cost_usd": 0.8680642999999999,
+  "session_id": "a603556c-b42e-4ee3-a2b8-0e608e8fa196",
+  "permission_denials": [
+   {
+    "tool_name": "Bash",
+    "tool_use_id": "toolu_01LZWhhiAb2gdTQKtyjWQF54",
+    "tool_input": {
+     "command": "cat >> src/pickList.test.ts <<'EOF'\n\nimport { buildPickList, type StockLot } from \"./pickList\";\n\nconst lot = (bin: string, sku: string, qty: number, expires: string | null = null): StockLot => ({ bin, sku, qty, expires });\n\ntest(\"empty orders text gives an empty pick list\", () => {\n  expect(buildPickList(\"\", [])).toEqual({ picks: [], shortages: [] });\n});\nEOF\nbun test 2>&1 | tail -5"
+    }
+   },
+   {
+    "tool_name": "Bash",
+    "tool_use_id": "toolu_01Wa3g4k8naatjoZXywwE1Nn",
+    "tool_input": {
+     "command": "cat >> src/pickList.test.ts <<'EOF'\n\ntest(\"a single item is picked from its lot\", () => {\n  const result = buildPickList(\"ORDER 1001\\n  OLIVE-500 x3\", [lot(\"A-01-1\", \"OLIVE-500\", 10)]);\n  expect(result).toEqual({\n    picks: [{ bin: \"A-01-1\", sku: \"OLIVE-500\", qty: 3, orderId: \"1001\" }],\n    shortages: [],\n  });\n});\nEOF\nbun test 2>&1 | grep -E \"pass|fail\" | tail -2"
+    }
+   },
+   {
+    "tool_name": "Bash",
+    "tool_use_id": "toolu_01KgLmMPiyUGX6HMMkBoXSGk",
+    "tool_input": {
+     "command": "python3 - <<'PY'\np='src/pickList.ts'\ns=open(p).read()\ns=s.replace(\"\"\"  id: string;\n  items\"\"\",\"\"\"  id: string;\n  priority: boolean;\n  items\"\"\")\ns=s.replace(\"/^ORDER +([A-Za-z0-9-]+)$/\",\"/^ORDER +([A-Za-z0-9-]+)( +!)?$/\")\ns=s.replace(\"orders.push({ id: orderMatch[1], items: [] });\",\"orders.push({ id: orderMatch[1], priority: orderMatch[2] !== undefined, items: [] });\")\ns=s.replace(\"\"\"  for (const order of parseOrders(ordersText)) {\"\"\",\"\"\"  const orders = parseOrders(ordersText);\n  const serving = [...orders.filter((o) => o.priority), ...orders.filter((o) => !o.priority)];\n  for (const order of serving) {\"\"\")\nopen(p,'w').write(s)\nPY\nbun test 2>&1 | grep -E \"^ *[0-9]+ (pass|fail)\" && git commit -qam \"Serve priority orders first\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\" && echo ok"
+    }
+   }
+  ]
+ },
+ "final_message": " tests pass with `bun test`, and the work is committed, one commit per TDD cycle.\n\n**How I worked:** I wrote the test list first, then turned one scenario at a time into a test, watched it fail, made it pass, and committed. The list was: empty input, a single pick, comments and blank lines, earliest expiry first, undated lots last with ties broken by bin, shortages, stock used up by earlier orders, priority orders first, repeated SKUs added up, `stock` left unchanged, the format errors, the serpentine walk, and the example from your brief run end to end. Two of these passed as soon as I wrote them (stock used up by earlier orders, and `stock` left unchanged). I kept them because they guard rules from the spec.\n\n**Design:**\n- **Parsing:** `parseOrders` doesn't stop at the first bad line. It reads the whole text and collects every problem, then throws the one with the lowest line number. It has to work this way because whether an order is empty is only known after reading the lines below it.\n- **Allocation:** it works on a sorted copy of the lots that tracks the remaining quantity, so the input array and its objects are never changed.\n- **Walking order:** `inWalkingOrder` does one stable sort. Within each aisle, the direction depends on where that aisle comes among the aisles that actually have picks, so picks at the same bin keep their allocation order.\n\n**Decisions where the spec was ambiguous:**\n- **`ORDER 1` followed directly by a bad line:** the error is reported at line 1. That order has no item lines, and line 1 is the topmost problem. If a valid item for that order comes after the bad line, the bad line is reported instead.\n- **Spaces:** I accept one or more spaces between `ORDER` and the id, and before `!`. The spec only says \"one or more\" for item lines.\n- **A line like `ORDER X1`** would also fit the item form (SKU `ORDER`, quantity 1). I always read it as an order header.\n- **Lots with quantity 0** are skipped, so they never produce a pick with quantity 0.",
+ "own_tests": {
+  "exit": 0,
+  "pass": 29,
+  "fail": 0
+ },
+ "hidden": {
+  "exit": 1,
+  "pass": 15,
+  "fail": 1,
+  "tail": "pass) allocation > missing stock is picked as far as possible and reported [0.12ms]\n(pass) allocation > priority orders are served first, then the rest in text order [0.28ms]\n(pass) allocation > repeated SKUs in one order are added up at their first position [0.17ms]\n(pass) allocation > the stock passed in is left untouched [0.18ms]\n(pass) walking order > aisles alphabetically, racks in a serpentine, levels upwards [0.23ms]\n(pass) walking order > only aisles with picks count for the serpentine [0.15ms]\n(pass) walking order > picks at the same bin keep their allocation order [0.37ms]\n(pass) orders text > comments, blank lines, indentation and CRLF are accepted [0.13ms]\n(pass) orders text > an item before the first order [0.37ms]\n(pass) orders text > an order id used twice [0.08ms]\n(pass) orders text > an order without items [0.10ms]\n156 |     expect(errorLine(orders(\"ORDER 1\", \"# nothing\", \"ORDER 2\", \"RICE x1\"))).toBe(1);\n157 |     expect(errorLine(orders(\"ORDER 1\", \"RICE x1\", \"ORDER 2\", \"\"))).toBe(3);\n158 |   });\n159 | \n160 |   test(\"lines that match neither form\", () => {\n161 |     expect(errorLine(orders(\"ORDER 1\", \"RICE x0\"))).toBe(2);\n                                                          ^\nerror: expect(received).toBe(expected)\n\nExpected: 2\nReceived: 1\n\n      at <anonymous> (/workspace/__acceptance__/pickList.acceptance.test.ts:161:53)\n(fail) orders text > lines that match neither form [0.33ms]\n\n 15 pass\n 1 fail\n 26 expect() calls\nRan 16 tests across 1 file. [9.00ms]\n"
+ },
+ "production_files": [
+  "src/pickList.ts"
+ ],
+ "skill_loaded": null,
+ "foreign_references": [],
+ "committed": true,
+ "invalid_reasons": [
+  "hidden tests fail"
+ ],
+ "commits": 16,
+ "subjects": [
+  "Empty orders give empty pick list",
+  "Pick a single item from its lot",
+  "Ignore comments and blank lines",
+  "Allocate from earliest expiring lots first",
+  "Undated lots last, ties broken by bin",
+  "Report shortages",
+  "Pin down stock consumption and immutability",
+  "Serve priority orders first",
+  "Use a readable sentinel for undated lots",
+  "Sum repeated SKUs within an order",
+  "Reject unrecognised lines",
+  "Reject items before the first ORDER",
+  "Reject reused order ids",
+  "Reject empty orders and report the topmost problem",
+  "Return picks in serpentine walking order",
+  "Add end-to-end example test"
+ ],
+ "depth": {
+  "exit": 1,
+  "lines": [
+   "src/pickList.ts: surface 10, size 121, ratio 12.1, classitis no, pass-through 0, tests 1, unused 0, duplicate 5 -> bloat: 5 duplicated lines"
+  ],
+  "findings": 1,
+  "surface": 10,
+  "size": 121
+ },
+ "replay": null
+}

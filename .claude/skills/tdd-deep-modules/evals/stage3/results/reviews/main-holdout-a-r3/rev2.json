@@ -1,0 +1,29 @@
+{
+ "group": "main-holdout-a-r3",
+ "reviewer": 2,
+ "key": {
+  "A": "baseline",
+  "B": "skill",
+  "C": "canon"
+ },
+ "runs": {
+  "baseline": "main-holdout-a-baseline-r3-a1",
+  "canon": "main-holdout-a-canon-r3-a5",
+  "skill": "main-holdout-a-skill-r3-a2"
+ },
+ "scores_by_label": {
+  "A": 7,
+  "B": 8,
+  "C": 7
+ },
+ "scores": {
+  "baseline": 7,
+  "skill": 8,
+  "canon": 7
+ },
+ "foreign_references": [],
+ "complete": true,
+ "cost": 0.09991149999999999,
+ "permission_denials": [],
+ "text": "All three split the work the same way: parse the orders, allocate stock in best-before order, then sort the picks into walking order. Each piece has a narrow interface. The differences are in how cleanly the allocation step is separated from the rest and how many tiny helpers there are.\n\n**A:** `parseOrders(text) \u2192 Order[]` is a deep module. It hides the regex grammar, the duplicate-id check, the empty-order check (`closeCurrent`) and the adding-up of repeated SKUs (via `Map`) behind one call. `sortByWalk(picks)` is also deep: it hides the bin parsing, the serpentine rule (odd/even visited aisles) and keeping allocation order at the same bin. However, the allocation logic sits inline inside `buildPickList`, mixed in with orchestration, so that step isn't wrapped in its own module. `compareLots` and `parseBin` are small but well-focused.\n\n**B:** This has the clearest structure: `buildPickList` just delegates to `parseOrders` and `allocate(orders, stock) \u2192 PickList`. Each of those, along with `inWalkingOrder(picks)`, hides a whole set of design decisions behind a one- or two-argument interface. `allocate` keeps the remaining-quantity tracking in a private `Map`, so the input is never modified and callers never see that bookkeeping. The pass-through `buildPickList` is a little shallow, but it's the required public entry point and costs almost nothing.\n\n**C:** `parseOrders` and `inWalkingOrder` are deep in the same way as A's. `inWalkingOrder` hides the aisle visit order (`visit` map) and the direction rule. As in A, allocation is written inline in `buildPickList` (copying the lots and decrementing their quantities) rather than living in its own module. It also adds some very thin helpers (`compareStrings`, `requireItems`) whose interfaces are nearly as large as what they do, which makes it a bit shallower overall.\n\n```json\n{\"scores\": {\"A\": 7, \"B\": 8, \"C\": 7}}\n```"
+}
