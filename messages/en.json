@@ -1000,5 +1000,6 @@
 	"statements_created_many": "{count} utility cost statements have been created as drafts.",
 	"statements_check_drafts": "Check the drafts and then send them.",
 	"statements_view_drafts": "View drafts",
-	"statements_create_more": "Create more statements"
+	"statements_create_more": "Create more statements",
+	"common_unknown": "Unknown"
 }

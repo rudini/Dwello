@@ -1000,5 +1000,6 @@
 	"statements_created_many": "{count} Nebenkostenabrechnungen sind als Entwurf erstellt.",
 	"statements_check_drafts": "Prüfen Sie die Entwürfe und versenden Sie sie dann.",
 	"statements_view_drafts": "Entwürfe ansehen",
-	"statements_create_more": "Weitere Abrechnungen erstellen"
+	"statements_create_more": "Weitere Abrechnungen erstellen",
+	"common_unknown": "Unbekannt"
 }

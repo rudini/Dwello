@@ -56,7 +56,7 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<StatementsLi
 				lastReminderDate: s.reminderSentDate,
 				tenantName: tenant
 					? `${tenant.firstName} ${tenant.lastName}`
-					: m.contracts_unknown_building(),
+					: m.common_unknown(),
 				tenantEmail: (tenant?.email as string) || '',
 				apartmentUnit: (apartment?.number as string) || '',
 				apartmentFloor: apartment?.floor || '',

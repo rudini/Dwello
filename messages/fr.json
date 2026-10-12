@@ -890,7 +890,7 @@
 	"statements_no_more_reminders_title": "Aucun autre rappel possible",
 	"statements_understood": "Compris",
 	"statements_no_more_reminders_text": "3 rappels ont déjà été envoyés. Dwello n’en crée pas d’autre. Convenez de la suite directement avec le locataire.",
-	"statements_reminder_undelivered": "{title} : {reason} Le document est prêt à être envoyé dans les documents.",
+	"statements_reminder_undelivered": "{title} : {reason} Il est prêt à l’envoi sous « Documents ».",
 	"statements_reminder_emailed": "{title} : envoyé par e-mail.",
 	"statements_reminder_letter": "{title} : prêt à être imprimé comme lettre dans les documents.",
 	"statements_email_not_delivered": "E-mail non distribué",
@@ -1000,5 +1000,6 @@
 	"statements_created_many": "{count} décomptes des charges ont été établis comme brouillons.",
 	"statements_check_drafts": "Vérifiez les brouillons, puis envoyez-les.",
 	"statements_view_drafts": "Voir les brouillons",
-	"statements_create_more": "Établir d’autres décomptes"
+	"statements_create_more": "Établir d’autres décomptes",
+	"common_unknown": "Inconnu"
 }

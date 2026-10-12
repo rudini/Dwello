@@ -11,7 +11,7 @@ type BackendStatement = Record<string, any>;
 const toLineItem = (item: BackendStatement): StatementLineItem => ({
 	id: item.id,
 	categoryId: item.categoryId,
-	categoryName: item.categoryName || item.description || m.contracts_unknown_building(),
+	categoryName: item.categoryName || item.description || m.common_unknown(),
 	distributionKeyId: item.distributionKeyId,
 	distributionKeyName: item.distributionKeyName || '',
 	totalAmount: Number(item.totalAmount),
@@ -46,7 +46,7 @@ export function toStatement(data: BackendStatement): StatementWithDetails {
 		createdAt: data.createdAt,
 		tenantName: data.tenant
 			? `${tenant.firstName} ${tenant.lastName}`
-			: m.contracts_unknown_building(),
+			: m.common_unknown(),
 		tenantEmail: tenant.email || '',
 		tenantCorrespondenceChannel: tenant.correspondenceChannel,
 		apartmentUnit: apartment.number || '',
