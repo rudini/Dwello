@@ -1,0 +1,93 @@
+{
+ "run_id": "main-holdout-b-canon-r2-a1",
+ "status": "finished",
+ "phase": "main",
+ "slot": 2,
+ "attempt": 1,
+ "fixture": "holdout-b",
+ "fixture_dir": "holdout/holdout-b",
+ "arm": "canon",
+ "started": "2026-10-12T12:58:11Z",
+ "valid": true,
+ "harness": {
+  "commit": "5451bcd7288c8960ce8e8ab51fc24aa9cccb7717",
+  "sha256": "15bb8a6dd4ebf9400008fc77636b6eaf326caefe18b711fbb46aefbb96869fd6"
+ },
+ "base": "32d25537da8c2249a7cd946d85a5d70d34ea359f",
+ "duration_s": 220,
+ "session": {
+  "is_error": false,
+  "num_turns": 92,
+  "total_cost_usd": 0.9484502,
+  "session_id": "70719afa-e544-4dc6-8af9-b6b6cd822cb9",
+  "permission_denials": [
+   {
+    "tool_name": "Bash",
+    "tool_use_id": "toolu_01A3Ek2ZTyU1vCYXrB2tcpsK",
+    "tool_input": {
+     "command": "cat >> src/board.test.ts <<'EOF'\n\nimport { createBoard, type BoardErrorCode, type BoardOptions } from \"./board\";\n\nfunction setup(columns: BoardOptions[\"columns\"] = [\n  { name: \"Backlog\" }, { name: \"Doing\" }, { name: \"Review\" }, { name: \"Done\" },\n]) {\n  const clock = { t: 1000 };\n  const board = createBoard({ columns, now: () => clock.t });\n  return { board, clock };\n}\n\nfunction expectCode(fn: () => unknown, code: BoardErrorCode) {\n  try {\n    fn();\n  } catch (e) {\n    expect(e).toBeInstanceOf(BoardError);\n    expect((e as BoardError).code).toBe(code);\n    return;\n  }\n  throw new Error(`expected BoardError ${code}`);\n}\n\ntest(\"addCard returns sequential ids and appends to the first column\", () => {\n  const { board } = setup();\n  expect(board.addCard(\"a\")).toBe(\"C1\");\n  expect(board.addCard(\"b\")).toBe(\"C2\");\n  expect(board.cardsIn(\"Backlog\")).toEqual([\"C1\", \"C2\"]);\n  expect(board.cardsIn(\"Doing\")).toEqual([]);\n});\nEOF\nbun test 2>&1 | tail -5"
+    }
+   },
+   {
+    "tool_name": "Bash",
+    "tool_use_id": "toolu_01Fw3KDrxQzHV6ZUyFciXVB1",
+    "tool_input": {
+     "command": "cat >> src/board.test.ts <<'EOF'\n\ntest(\"addCard fails when the first column is at its WIP limit\", () => {\n  const { board } = setup([{ name: \"Backlog\", wipLimit: 2 }, { name: \"Done\" }]);\n  board.addCard(\"a\");\n  board.addCard(\"b\");\n  expectCode(() => board.addCard(\"c\"), \"WIP_LIMIT\");\n  expect(board.cardsIn(\"Backlog\")).toEqual([\"C1\", \"C2\"]);\n});\nEOF\nbun test 2>&1 | grep -E \"pass|fail\" | tail -2"
+    }
+   },
+   {
+    "tool_name": "Bash",
+    "tool_use_id": "toolu_01C4prRG6o14DL8Cjc1MMELe",
+    "tool_input": {
+     "command": "sed -i 's/{ column: number }/{ column: number; blocked: boolean }/; s/cards.set(id, { column: 0 })/cards.set(id, { column: 0, blocked: false })/' src/board.ts && bun test 2>&1 | grep -E \"pass|fail\" | tail -2 && git commit -qam \"block and unblock cards\" && echo ok"
+    }
+   }
+  ]
+ },
+ "final_message": "The board library is built in `src/board.ts`, all of it is committed, and `bun test` passes (19 tests, 0 failures).\n\n**How I worked:** I put the test list in `TESTS.md` first. Then for each item I wrote one test, watched it fail, wrote the smallest change to pass it, and committed. That gave one commit per step. The one refactor was storing each column's cards by column position instead of by name, done once the tests were green.\n\n**Tests that passed as soon as I wrote them,** because earlier code already covered them:\n- Blocked cards counting toward WIP limits.\n- The order in which `move` checks its rules.\n- A trip back to the first column not changing the start time.\n- Blocks during rework counting toward `blockedMs`.\n\n**Items I added to the list along the way:**\n- **Blocks during rework count.** If a finished card goes back to an earlier column and is blocked there, or was blocked during an earlier stay in the last column, that time falls between start and the latest finish. So it counts toward `blockedMs`.\n- **A failed add doesn't use up an id.** When `addCard` hits the WIP limit, the next successful add still gets the next number.\n- **`cardsIn` returns a copy,** so changing the returned list can't change the board.\n\n**How cycle time works:** each card records its start time, its finish time and its finished blocked periods. `blockedMs` adds up only the parts of those periods that fall between start and finish. A blocked card can't move, so a block can never span the move that starts or finishes a card. That means a block still running when you ask for cycle time can never fall inside the interval, so it's safely ignored.\n\n**Two small things:**\n- `block` accepts a `reason` but doesn't store it, because nothing in the spec reads it back.\n- I left the required Co-Authored-By line off the commit messages at first. I added it to every commit afterwards by rewriting the local history; nothing had been pushed.",
+ "own_tests": {
+  "exit": 0,
+  "pass": 19,
+  "fail": 0
+ },
+ "hidden": {
+  "exit": 0,
+  "pass": 13,
+  "fail": 0,
+  "tail": "bun test v1.4.2 (744846f84)\n\n__acceptance__/board.acceptance.test.ts:\n(pass) cards and columns > new cards arrive at the end of the first column [0.51ms]\n(pass) cards and columns > a card needs a title [0.16ms]\n(pass) cards and columns > the first column's WIP limit applies to new cards [0.17ms]\n(pass) cards and columns > moved cards go to the end of the target column [0.06ms]\n(pass) cards and columns > cards move forward one column at a time but may go back any distance [0.18ms]\n(pass) cards and columns > WIP limits count blocked cards too [0.19ms]\n(pass) cards and columns > blocked cards cannot move until unblocked [0.38ms]\n(pass) cards and columns > move checks run in the documented order [0.18ms]\n(pass) cards and columns > blocking errors [0.28ms]\n(pass) cycle time > is null until the card is done, and for unknown cards an error [0.16ms]\n(pass) cycle time > runs from leaving the first column to arriving in the last [0.20ms]\n(pass) cycle time > counts only the blocked time between start and finish [0.18ms]\n(pass) cycle time > a card taken back out of done has no cycle time until it returns [0.09ms]\n\n 13 pass\n 0 fail\n 52 expect() calls\nRan 13 tests across 1 file. [7.00ms]\n"
+ },
+ "production_files": [
+  "src/board.ts"
+ ],
+ "skill_loaded": null,
+ "foreign_references": [],
+ "committed": true,
+ "invalid_reasons": [],
+ "commits": 14,
+ "subjects": [
+  "Add test list; addCard assigns sequential ids",
+  "addCard validates title and WIP limit",
+  "move cards between columns",
+  "move rejects unknown card/column",
+  "move rejects same column",
+  "move rejects skipping forward",
+  "move respects WIP limits",
+  "block and unblock cards",
+  "cardsIn rejects unknown columns; index columns by position",
+  "cycleTime rejects unknown cards",
+  "cycleTime total duration",
+  "cycleTime sums blocked periods",
+  "blockedMs only counts time between start and finish",
+  "Cover rework blocks and id allocation after WIP failure; complete test list"
+ ],
+ "depth": {
+  "exit": 1,
+  "lines": [
+   "src/board.ts: surface 10, size 119, ratio 11.9, classitis no, pass-through 0, tests 1, unused 0, duplicate 3 -> bloat: 3 duplicated lines"
+  ],
+  "findings": 1,
+  "surface": 10,
+  "size": 119
+ },
+ "replay": null
+}

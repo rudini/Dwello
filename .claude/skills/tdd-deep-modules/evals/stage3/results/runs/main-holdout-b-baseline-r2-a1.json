@@ -1,0 +1,66 @@
+{
+ "run_id": "main-holdout-b-baseline-r2-a1",
+ "status": "finished",
+ "phase": "main",
+ "slot": 2,
+ "attempt": 1,
+ "fixture": "holdout-b",
+ "fixture_dir": "holdout/holdout-b",
+ "arm": "baseline",
+ "started": "2026-10-12T12:57:48Z",
+ "valid": true,
+ "harness": {
+  "commit": "5451bcd7288c8960ce8e8ab51fc24aa9cccb7717",
+  "sha256": "15bb8a6dd4ebf9400008fc77636b6eaf326caefe18b711fbb46aefbb96869fd6"
+ },
+ "base": "ee85899864ff70f9066aeb6f1781893d2e8a9b4a",
+ "duration_s": 61,
+ "session": {
+  "is_error": false,
+  "num_turns": 9,
+  "total_cost_usd": 0.24501169999999997,
+  "session_id": "047cf8fc-9c39-44fc-b85c-b2a8868259f9",
+  "permission_denials": [
+   {
+    "tool_name": "Bash",
+    "tool_use_id": "toolu_01H3uqHxxrckQGAcgz3jSsxq",
+    "tool_input": {
+     "command": "python3 - <<'EOF'\np='src/board.ts'\ns=open(p).read()\ni=s.index('export function createBoard')\ns=s[:i]+'''interface BlockInterval {\n  from: number;\n  /** End of the block; null while the card is still blocked. */\n  to: number | null;\n}\n\ninterface Card {\n  id: string;\n  title: string;\n  column: number;\n  blockedReason: string | null;\n  blocks: BlockInterval[];\n  startedAt: number | null;\n  finishedAt: number | null;\n}\n\nexport function createBoard(options: BoardOptions): Board {\n  const columns = options.columns.map((c) => ({ ...c }));\n  const now = options.now;\n  const lists: string[][] = columns.map(() => []);\n  const cards = new Map<string, Card>();\n  const lastIndex = columns.length - 1;\n  let nextId = 1;\n\n  function getCard(cardId: string): Card {\n    const card = cards.get(cardId);\n    if (!card) throw new BoardError(\"UNKNOWN_CARD\", `Unknown card ${cardId}`);\n    return card;\n  }\n\n  function columnIndex(name: string): number {\n    const index = columns.findIndex((c) => c.name === name);\n    if (index < 0) throw new BoardError(\"UNKNOWN_COLUMN\", `Unknown column ${name}`);\n    return index;\n  }\n\n  function isFull(index: number): boolean {\n    const limit = columns[index].wipLimit;\n    return limit !== undefined && lists[index].length >= limit;\n  }\n\n  return {\n    addCard(title) {\n      if (title.trim() === \"\") throw new BoardError(\"EMPTY_TITLE\", \"Title must not be empty\");\n      if (isFull(0)) throw new BoardError(\"WIP_LIMIT\", `Column ${columns[0].name} is full`);\n      const id = `C${nextId++}`;\n      cards.set(id, {\n        id,\n        title,\n        column: 0,\n        blockedReason: null,\n        blocks: [],\n        startedAt: null,\n        finishedAt: null,\n      });\n      lists[0].push(id);\n      return id;\n    },\n\n    move(cardId, toColumn) {\n      const card = getCard(cardId);\n      const to = columnIndex(toColumn);\n      const from = card.column;\n      if (to === from) throw new BoardError(\"SAME_COLUMN\", `Card ${cardId} is already in ${toColumn}`);\n      if (card.blockedReason !== null) throw new BoardError(\"BLOCKED\", `Card ${cardId} is blocked`);\n      if (to > from + 1) throw new BoardError(\"SKIP_NOT_ALLOWED\", `Card ${cardId} cannot skip columns`);\n      if (isFull(to)) throw new BoardError(\"WIP_LIMIT\", `Column ${toColumn} is full`);\n\n      const time = now();\n      lists[from].splice(lists[from].indexOf(cardId), 1);\n      lists[to].push(cardId);\n      card.column = to;\n      if (from === 0 && card.startedAt === null) card.startedAt = time;\n      if (to === lastIndex) card.finishedAt = time;\n    },\n\n    block(cardId, reason) {\n      const card = getCard(cardId);\n      if (card.blockedReason !== null) throw new BoardError(\"ALREADY_BLOCKED\", `Card ${cardId} is already blocked`);\n      card.blockedReason = reason;\n      card.blocks.push({ from: now(), to: null });\n    },\n\n    unblock(cardId) {\n      const card = getCard(cardId);\n      if (card.blockedReason === null) throw new BoardError(\"NOT_BLOCKED\", `Card ${cardId} is not blocked`);\n      card.blockedReason = null;\n      card.blocks[card.blocks.length - 1].to = now();\n    },\n\n    cardsIn(column) {\n      return [...lists[columnIndex(column)]];\n    },\n\n    cycleTime(cardId) {\n      const card = getCard(cardId);\n      if (card.column !== lastIndex || card.startedAt === null || card.finishedAt === null) return null;\n      const start = card.startedAt;\n      const end = card.finishedAt;\n      let blockedMs = 0;\n      for (const block of card.blocks) {\n        const from = Math.max(block.from, start);\n        const to = Math.min(block.to ?? Infinity, end);\n        if (to > from) blockedMs += to - from;\n      }\n      return { totalMs: end - start, blockedMs };\n    },\n  };\n}\n'''\nopen(p,'w').write(s)\nEOF"
+    }
+   }
+  ]
+ },
+ "final_message": "I've written the board in `src/board.ts` and left the types and error class as they were. `bun test` passes (10 tests) and everything is committed.\n\n- **Failures:** every check runs before anything changes, so a failed call throws `BoardError` and leaves the board exactly as it was. Card ids only advance when a card is actually added.\n- **Moving:** the six `move` checks run in the order you specified, and a moved card goes to the end of the target column.\n- **Cycle time:** the board records when a card first leaves the first column and updates the finish time each time it arrives in the last column. Each card keeps a list of the periods it was blocked. `blockedMs` counts only the parts of those periods that fall between start and finish. A card that is still blocked counts as blocked up to its finish time.\n\n`src/board.test.ts` now has tests for:\n- id order, including after a failed add\n- the first column's WIP limit\n- the order of the `move` errors\n- blocked cards counting toward a WIP limit\n- moving backwards\n- the blocking errors\n- blocked time being counted only between start and finish, including:\n  - blocks before the card started and after it finished\n  - trips back to the first column\n  - re-finishing after moving out of the last column\n\nTwo behaviours the spec doesn't cover:\n- **Duplicate column names:** if two columns have the same name, the first one is used.\n- **Block reason:** it is stored but nothing reads it, because the interface has no method that returns it.",
+ "own_tests": {
+  "exit": 0,
+  "pass": 10,
+  "fail": 0
+ },
+ "hidden": {
+  "exit": 0,
+  "pass": 13,
+  "fail": 0,
+  "tail": "bun test v1.4.2 (744846f84)\n\n__acceptance__/board.acceptance.test.ts:\n(pass) cards and columns > new cards arrive at the end of the first column [0.61ms]\n(pass) cards and columns > a card needs a title [0.19ms]\n(pass) cards and columns > the first column's WIP limit applies to new cards [0.17ms]\n(pass) cards and columns > moved cards go to the end of the target column [0.06ms]\n(pass) cards and columns > cards move forward one column at a time but may go back any distance [0.15ms]\n(pass) cards and columns > WIP limits count blocked cards too [0.20ms]\n(pass) cards and columns > blocked cards cannot move until unblocked [0.30ms]\n(pass) cards and columns > move checks run in the documented order [0.37ms]\n(pass) cards and columns > blocking errors [0.34ms]\n(pass) cycle time > is null until the card is done, and for unknown cards an error [0.30ms]\n(pass) cycle time > runs from leaving the first column to arriving in the last [0.17ms]\n(pass) cycle time > counts only the blocked time between start and finish [0.10ms]\n(pass) cycle time > a card taken back out of done has no cycle time until it returns [0.05ms]\n\n 13 pass\n 0 fail\n 52 expect() calls\nRan 13 tests across 1 file. [7.00ms]\n"
+ },
+ "production_files": [
+  "src/board.ts"
+ ],
+ "skill_loaded": null,
+ "foreign_references": [],
+ "committed": true,
+ "invalid_reasons": [],
+ "commits": 1,
+ "subjects": [
+  "Implement team board with WIP limits, blocking and cycle time"
+ ],
+ "depth": {
+  "exit": 1,
+  "lines": [
+   "src/board.ts: surface 10, size 136, ratio 13.6, classitis no, pass-through 0, tests 1, unused 0, duplicate 3 -> bloat: 3 duplicated lines"
+  ],
+  "findings": 1,
+  "surface": 10,
+  "size": 136
+ },
+ "replay": null
+}

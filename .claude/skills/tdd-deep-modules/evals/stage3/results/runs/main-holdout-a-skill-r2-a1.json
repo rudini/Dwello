@@ -1,0 +1,119 @@
+{
+ "run_id": "main-holdout-a-skill-r2-a1",
+ "status": "finished",
+ "phase": "main",
+ "slot": 2,
+ "attempt": 1,
+ "fixture": "holdout-a",
+ "fixture_dir": "holdout/holdout-a",
+ "arm": "skill",
+ "started": "2026-10-12T12:56:38Z",
+ "valid": true,
+ "harness": {
+  "commit": "224c51aa3820af454c4d845443751e023c36a75a",
+  "sha256": "a32af44cf00957c0545fd3b46b9738682606399282f18719daccb58d54817354"
+ },
+ "base": "08473fa2739a2839b0df082891f6148625c3cf69",
+ "duration_s": 378,
+ "session": {
+  "is_error": false,
+  "num_turns": 88,
+  "total_cost_usd": 1.2641356,
+  "session_id": "c17daf47-8d47-4736-8f42-402c92a03820",
+  "permission_denials": [
+   {
+    "tool_name": "Bash",
+    "tool_use_id": "toolu_01Fd15XnFjG7pJ43nf66J7XF",
+    "tool_input": {
+     "command": "cat >> src/pickList.test.ts <<'EOF'\n\nimport { buildPickList, type StockLot } from \"./pickList\";\n\nconst lot = (bin: string, sku: string, qty: number, expires: string | null = null): StockLot => ({\n  bin,\n  sku,\n  qty,\n  expires,\n});\n\ntest(\"a single order with one item from one lot yields one pick\", () => {\n  const result = buildPickList(\"ORDER 1001\\n  OLIVE-500 x3\", [lot(\"A-01-1\", \"OLIVE-500\", 10)]);\n  expect(result).toEqual({\n    picks: [{ bin: \"A-01-1\", sku: \"OLIVE-500\", qty: 3, orderId: \"1001\" }],\n    shortages: [],\n  });\n});\nEOF\n.claude/skills/tdd-deep-modules/scripts/tdd-step red \"single order single lot\" 2>&1 | tail -3"
+    }
+   },
+   {
+    "tool_name": "Bash",
+    "tool_use_id": "toolu_01QxV6NJbMQt56XjtRka8mRG",
+    "tool_input": {
+     "command": "python3 - <<'EOF'\np='src/pickList.ts'; s=open(p).read()\ns=s.replace(\"\"\"  const picks: Pick[] = [];\n  for\"\"\",\"\"\"  const picks: Pick[] = [];\n  const shortages: Shortage[] = [];\n  for\"\"\")\ns=s.replace(\"\"\"        picks.push({ bin: source.bin, sku: item.sku, qty: taken, orderId: order.id });\n      }\n\"\"\",\"\"\"        picks.push({ bin: source.bin, sku: item.sku, qty: taken, orderId: order.id });\n      }\n      if (wanted > 0) shortages.push({ orderId: order.id, sku: item.sku, missing: wanted });\n\"\"\")\ns=s.replace(\"return { picks, shortages: [] };\",\"return { picks, shortages };\")\nopen(p,'w').write(s)\nEOF\n.claude/skills/tdd-deep-modules/scripts/tdd-step green \"shortages\" 2>&1 | tail -3; git log --oneline -1"
+    }
+   },
+   {
+    "tool_name": "Bash",
+    "tool_use_id": "toolu_01MNQQYFa84yiQNBcgCLFhCJ",
+    "tool_input": {
+     "command": "sed -n 410,435p .claude/skills/tdd-deep-modules/scripts/tddcore/depth.py; grep -n \"\" src/pickList.ts | awk -F: '{l=$0; sub(/^[0-9]+:[ \\t]*/,\"\",l); if (length(l)>=12) print l}' | sort | uniq -d"
+    }
+   },
+   {
+    "tool_name": "Bash",
+    "tool_use_id": "toolu_01BwfdxbDLAeRZf5RTg5HE3E",
+    "tool_input": {
+     "command": "python3 -I -c \"\nimport collections,sys\nL=[l.strip() for l in open('src/pickList.ts')]\nL=[l for l in L if len(l)>=12 and not l.endswith((',','({','['))]\nprint([k for k,v in collections.Counter(L).items() if v>1])\""
+    }
+   }
+  ]
+ },
+ "final_message": "s (reported at its `ORDER` line, including the last order), or any line that matches neither form.\n- **Allocating stock:** priority orders are served first, then the rest, each group in text order. Each item takes from the lot with the earliest best-before date first; lots without a date come after all dated ones, and ties go to the bin code in plain string order. What is available is still picked when stock runs short, and the rest is reported as a shortage. The function works on copies, so `stock` is not changed.\n- **Walking order:** aisles are visited alphabetically, counting only aisles that have picks. Racks go ascending in the 1st, 3rd, \u2026 aisle and descending in the others, and levels go ascending. Picks at the same bin keep the order they were allocated in.\n\n**TDD process:** I made one red/green commit per behaviour, then one refactor that split the code into private parse, allocate and walk steps. Only `buildPickList` is exported. The first test had to be an error case: the stub throws, so a test on the return value would have failed with an exception rather than an assertion, which the skill's tool rejects.\n\n**Gaps and open points**\n- Three behaviours have no test of their own because earlier steps already made them work, so a new test would have passed immediately and the tool won't accept that as a failing test:\n  - only aisles with picks count for the up/down pattern;\n  - picks at one bin keep their allocation order (only touched indirectly by another test);\n  - `stock` is not modified.\n- An `ORDER` line must have exactly one space before the id. The spec doesn't say whether more are allowed.\n- Bin codes aren't validated; they are assumed to look like `A-03-2`.\n- The depth report flags 6 duplicated lines. At least 5 are the repeated field declarations in the stub's types, which must stay as given. I couldn't run a command to confirm what the sixth is.\n\nThe reasoning behind the design is in `DESIGN.md`, and the checklist of behaviours is in `TESTLIST.md`.",
+ "own_tests": {
+  "exit": 0,
+  "pass": 14,
+  "fail": 0
+ },
+ "hidden": {
+  "exit": 0,
+  "pass": 16,
+  "fail": 0,
+  "tail": "bun test v1.4.2 (744846f84)\n\n__acceptance__/pickList.acceptance.test.ts:\n(pass) allocation > an item is taken from the lot with the earliest best-before date [0.91ms]\n(pass) allocation > an item spreads over several lots [0.12ms]\n(pass) allocation > lots without a best-before date are used last [0.19ms]\n(pass) allocation > equal dates are broken by bin code [0.07ms]\n(pass) allocation > missing stock is picked as far as possible and reported [0.15ms]\n(pass) allocation > priority orders are served first, then the rest in text order [0.20ms]\n(pass) allocation > repeated SKUs in one order are added up at their first position [0.16ms]\n(pass) allocation > the stock passed in is left untouched [0.11ms]\n(pass) walking order > aisles alphabetically, racks in a serpentine, levels upwards [0.20ms]\n(pass) walking order > only aisles with picks count for the serpentine [0.17ms]\n(pass) walking order > picks at the same bin keep their allocation order [0.12ms]\n(pass) orders text > comments, blank lines, indentation and CRLF are accepted [0.04ms]\n(pass) orders text > an item before the first order [0.18ms]\n(pass) orders text > an order id used twice [0.10ms]\n(pass) orders text > an order without items [0.05ms]\n(pass) orders text > lines that match neither form [0.12ms]\n\n 16 pass\n 0 fail\n 38 expect() calls\nRan 16 tests across 1 file. [7.00ms]\n"
+ },
+ "production_files": [
+  "src/pickList.ts"
+ ],
+ "skill_loaded": true,
+ "foreign_references": [],
+ "committed": true,
+ "invalid_reasons": [],
+ "commits": 29,
+ "subjects": [
+  "test: pick list test list",
+  "red: item before ORDER is rejected",
+  "green: item before ORDER is rejected",
+  "red: single order single lot",
+  "green: single order single lot",
+  "red: spanning two lots, FEFO",
+  "green: spanning two lots, FEFO",
+  "red: null expiry last",
+  "green: null expiry last",
+  "red: expiry ties broken by bin",
+  "green: expiry ties broken by bin",
+  "red: shortages",
+  "green: shortages",
+  "red: priority first",
+  "green: priority first",
+  "red: duplicate SKUs summed",
+  "green: duplicate SKUs summed",
+  "red: serpentine walk",
+  "green: serpentine walk",
+  "red: duplicate order id",
+  "green: duplicate order id",
+  "red: empty order",
+  "green: empty order",
+  "red: empty last order",
+  "green: empty last order",
+  "red: malformed lines",
+  "green: malformed lines",
+  "refactor: split into private parse, allocate and walk steps",
+  "test: design note"
+ ],
+ "depth": {
+  "exit": 1,
+  "lines": [
+   "src/pickList.ts: surface 10, size 112, ratio 11.2, classitis no, pass-through 0, tests 1, unused 0, duplicate 6 -> bloat: 6 duplicated lines"
+  ],
+  "findings": 1,
+  "surface": 10,
+  "size": 112
+ },
+ "replay": {
+  "exit": 0,
+  "verdict": "ACCEPT",
+  "out": "f7b785a test     pass  exit=0 ok\n29f8a95 red      fail  exit=1 ok\n7e92613 green    pass  exit=0 ok\n67d3cb9 red      fail  exit=1 ok\n63b99cc green    pass  exit=0 ok\n47a70f3 red      fail  exit=1 ok\n2e4a1c7 green    pass  exit=0 ok\n0d8b865 red      fail  exit=1 ok\nd86d14a green    pass  exit=0 ok\n76a5566 red      fail  exit=1 ok\n0c69a4e green    pass  exit=0 ok\ncaddbf8 red      fail  exit=1 ok\ne6f016b green    pass  exit=0 ok\ned5e2f3 red      fail  exit=1 ok\n94dc0fd green    pass  exit=0 ok\n88b9f58 red      fail  exit=1 ok\n71d5ca5 green    pass  exit=0 ok\n66f4c2d red      fail  exit=1 ok\nd0b2011 green    pass  exit=0 ok\n290c1fb red      fail  exit=1 ok\n374f5bf green    pass  exit=0 ok\n6eb3dfa red      fail  exit=1 ok\ncba514e green    pass  exit=0 ok\n3408853 red      fail  exit=1 ok\nfe1777f green    pass  exit=0 ok\n6113161 red      fail  exit=1 ok\n0dad5c6 green    pass  exit=0 ok\n06ff883 refactor pass  exit=0 ok\n747d95a test     pass  exit=0 ok\nREPLAY: ACCEPT\n"
+ }
+}

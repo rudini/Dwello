@@ -1,0 +1,79 @@
+{
+ "run_id": "main-holdout-b-canon-r3-a1",
+ "status": "finished",
+ "phase": "main",
+ "slot": 3,
+ "attempt": 1,
+ "fixture": "holdout-b",
+ "fixture_dir": "holdout/holdout-b",
+ "arm": "canon",
+ "started": "2026-10-12T13:00:32Z",
+ "valid": true,
+ "harness": {
+  "commit": "5451bcd7288c8960ce8e8ab51fc24aa9cccb7717",
+  "sha256": "15bb8a6dd4ebf9400008fc77636b6eaf326caefe18b711fbb46aefbb96869fd6"
+ },
+ "base": "edfedea6ba799858dcb8297d63e32ef7d0ffd19c",
+ "duration_s": 213,
+ "session": {
+  "is_error": false,
+  "num_turns": 75,
+  "total_cost_usd": 0.8095605999999999,
+  "session_id": "71b0df65-2706-468c-bd89-29b31fec9357",
+  "permission_denials": [
+   {
+    "tool_name": "Bash",
+    "tool_use_id": "toolu_017FjVkJpYeNEvnsnBSm63H6",
+    "tool_input": {
+     "command": "cat > src/board.test.ts <<'EOF'\nimport { describe, expect, test } from \"bun:test\";\nimport { BoardError, createBoard, type BoardErrorCode, type ColumnConfig } from \"./board\";\n\ntest(\"board errors carry a code\", () => {\n  const error = new BoardError(\"WIP_LIMIT\", \"Column Review is full\");\n  expect(error).toBeInstanceOf(Error);\n  expect(error.code).toBe(\"WIP_LIMIT\");\n});\n\nconst defaultColumns: ColumnConfig[] = [\n  { name: \"Backlog\" },\n  { name: \"Doing\" },\n  { name: \"Review\" },\n  { name: \"Done\" },\n];\n\nfunction setup(columns: ColumnConfig[] = defaultColumns) {\n  const clock = { t: 1_000 };\n  const board = createBoard({ columns, now: () => clock.t });\n  return { board, clock };\n}\n\nfunction expectBoardError(fn: () => unknown, code: BoardErrorCode) {\n  let caught: unknown;\n  try {\n    fn();\n  } catch (e) {\n    caught = e;\n  }\n  expect(caught).toBeInstanceOf(BoardError);\n  expect((caught as BoardError).code).toBe(code);\n}\n\ndescribe(\"adding\", () => {\n  test(\"addCard returns sequential ids and appends to the first column\", () => {\n    const { board } = setup();\n    expect(board.addCard(\"first\")).toBe(\"C1\");\n    expect(board.addCard(\"second\")).toBe(\"C2\");\n    expect(board.cardsIn(\"Backlog\")).toEqual([\"C1\", \"C2\"]);\n    expect(board.cardsIn(\"Doing\")).toEqual([]);\n  });\n});\nEOF\nbun test 2>&1 | tail -5"
+    }
+   },
+   {
+    "tool_name": "Bash",
+    "tool_use_id": "toolu_013FG7nDhTmVqDc7aS7xBuCd",
+    "tool_input": {
+     "command": "python3 - <<'EOF'\np='src/board.ts'\ns=open(p).read()\ns=s.replace(\"\"\"interface Card {\n  column: number;\n}\"\"\",\"\"\"interface Card {\n  column: number;\n  blocked: boolean;\n}\"\"\")\ns=s.replace(\"cards.set(id, { column: 0 });\",\"cards.set(id, { column: 0, blocked: false });\")\ns=s.replace(\"\"\"is already in ${toColumn}`);\n      ensureRoom(to);\"\"\",\"\"\"is already in ${toColumn}`);\n      if (card.blocked) throw new BoardError(\"BLOCKED\", `${cardId} is blocked`);\n      ensureRoom(to);\"\"\")\ns=s.replace(\"\"\"    block() {},\"\"\",\"\"\"    block(cardId, _reason) {\n      getCard(cardId).blocked = true;\n    },\"\"\")\nopen(p,'w').write(s)\nEOF\nbun test 2>&1 | grep -E \"^\\(fail\\)|pass$|fail$|Received\""
+    }
+   }
+  ]
+ },
+ "final_message": "I've built the board library in `src/board.ts` test-first, and all of it is committed to git. `bun test` passes: 25 tests, 0 failures. I left the types and `BoardError` from the stub unchanged.\n\n**How it went:** I started with a test list (`TESTLIST.md`), then went one test at a time: watch it fail, write the code to make it pass, commit. I bent the one-test-at-a-time rule in two places:\n- I added the `UNKNOWN_COLUMN` listing test together with the first-column WIP-limit test. That WIP test also needed a basic `move`, so I wrote that in the same step.\n- About half the tests passed as soon as I wrote them, because earlier code already handled the case. That includes moving backwards, WIP limits on moves, the trip-back rules for cycle time, and ignoring blocked time outside the start\u2013finish window. I kept them as regression tests.\n\nI added two scenarios to the list while working: a two-column board, where one move both starts and finishes a card, and a card that is blocked after reaching Done, reopened and finished again.\n\n**How it works:**\n- **Moves:** `move` runs all six checks in the order you specified before it changes anything, so a failed move leaves the board exactly as it was. A test checks that a rejected move doesn't start a card's clock.\n- **Start and finish:** each card records when it first left the first column and when it most recently arrived in the last column.\n- **Blocked time:** each card keeps a list of the periods it was blocked; a block that is still active counts as running until the finish time. `blockedMs` adds up only the parts of those periods that fall between start and finish. Blocking before a card starts, after it finishes, or a block that is still active all come out right.\n\n`block` accepts the `reason` argument but doesn't store it, because nothing in the interface reads it back.",
+ "own_tests": {
+  "exit": 0,
+  "pass": 25,
+  "fail": 0
+ },
+ "hidden": {
+  "exit": 0,
+  "pass": 13,
+  "fail": 0,
+  "tail": "bun test v1.4.2 (744846f84)\n\n__acceptance__/board.acceptance.test.ts:\n(pass) cards and columns > new cards arrive at the end of the first column [0.55ms]\n(pass) cards and columns > a card needs a title [0.15ms]\n(pass) cards and columns > the first column's WIP limit applies to new cards [0.20ms]\n(pass) cards and columns > moved cards go to the end of the target column [0.06ms]\n(pass) cards and columns > cards move forward one column at a time but may go back any distance [0.20ms]\n(pass) cards and columns > WIP limits count blocked cards too [0.23ms]\n(pass) cards and columns > blocked cards cannot move until unblocked [0.40ms]\n(pass) cards and columns > move checks run in the documented order [0.18ms]\n(pass) cards and columns > blocking errors [0.21ms]\n(pass) cycle time > is null until the card is done, and for unknown cards an error [0.25ms]\n(pass) cycle time > runs from leaving the first column to arriving in the last [0.17ms]\n(pass) cycle time > counts only the blocked time between start and finish [0.10ms]\n(pass) cycle time > a card taken back out of done has no cycle time until it returns [0.05ms]\n\n 13 pass\n 0 fail\n 52 expect() calls\nRan 13 tests across 1 file. [6.00ms]\n"
+ },
+ "production_files": [
+  "src/board.ts"
+ ],
+ "skill_loaded": null,
+ "foreign_references": [],
+ "committed": true,
+ "invalid_reasons": [],
+ "commits": 7,
+ "subjects": [
+  "Add cards to the first column with sequential ids",
+  "Validate titles, enforce WIP limit on add, reject unknown columns",
+  "Move cards with UNKNOWN_CARD, SAME_COLUMN and BLOCKED checks",
+  "Reject skipping columns; block/unblock validation",
+  "Compute total cycle time",
+  "Track blocked periods and report blocked time within the cycle",
+  "Cover clipping of blocked time and rejected operations"
+ ],
+ "depth": {
+  "exit": 1,
+  "lines": [
+   "src/board.ts: surface 10, size 118, ratio 11.8, classitis no, pass-through 0, tests 1, unused 0, duplicate 3 -> bloat: 3 duplicated lines"
+  ],
+  "findings": 1,
+  "surface": 10,
+  "size": 118
+ },
+ "replay": null
+}

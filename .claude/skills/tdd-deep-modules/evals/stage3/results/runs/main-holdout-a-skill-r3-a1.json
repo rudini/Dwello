@@ -1,0 +1,126 @@
+{
+ "run_id": "main-holdout-a-skill-r3-a1",
+ "status": "finished",
+ "phase": "main",
+ "slot": 3,
+ "attempt": 1,
+ "fixture": "holdout-a",
+ "fixture_dir": "holdout/holdout-a",
+ "arm": "skill",
+ "started": "2026-10-12T13:00:28Z",
+ "valid": false,
+ "harness": {
+  "commit": "5451bcd7288c8960ce8e8ab51fc24aa9cccb7717",
+  "sha256": "15bb8a6dd4ebf9400008fc77636b6eaf326caefe18b711fbb46aefbb96869fd6"
+ },
+ "base": "8a6fd67639735bda6827d27a5a02115f41142172",
+ "duration_s": 305,
+ "session": {
+  "is_error": false,
+  "num_turns": 101,
+  "total_cost_usd": 1.3722519000000004,
+  "session_id": "df1b1a08-930a-481f-9150-fdaf701e0203",
+  "permission_denials": [
+   {
+    "tool_name": "Bash",
+    "tool_use_id": "toolu_01J1BjHfogTL28rHmc2jRAzq",
+    "tool_input": {
+     "command": "cat >> src/pickList.test.ts <<'EOF'\n\ntest(\"does not modify the stock array or its objects\", () => {\n  const stock = [lot(\"A-01-1\", \"OLIVE-500\", 2, \"2026-11-01\"), lot(\"A-01-2\", \"OLIVE-500\", 5)];\n  buildPickList(\"ORDER 1001\\nOLIVE-500 x4\", stock);\n  expect(stock).toEqual([lot(\"A-01-1\", \"OLIVE-500\", 2, \"2026-11-01\"), lot(\"A-01-2\", \"OLIVE-500\", 5)]);\n});\nEOF\n.claude/skills/tdd-deep-modules/scripts/tdd-step red \"does not modify stock\" 2>&1 | tail -5"
+    }
+   },
+   {
+    "tool_name": "Bash",
+    "tool_use_id": "toolu_01NurTq9zYiDJ4ohghma8eXN",
+    "tool_input": {
+     "command": "python3 - <<'EOF'\np='src/pickList.ts'; s=open(p).read()\ns=s.replace(\"\"\"  const picks: Pick[] = [];\n\"\"\",\"\"\"  const picks: Pick[] = [];\n  const shortages: Shortage[] = [];\n\"\"\",1)\ns=s.replace(\"\"\"      picks.push({ bin: lot.bin, sku, qty: taken, orderId });\n    }\n  }\"\"\",\"\"\"      picks.push({ bin: lot.bin, sku, qty: taken, orderId });\n    }\n    if (qty > 0) shortages.push({ orderId, sku, missing: qty });\n  }\"\"\",1)\ns=s.replace(\"return { picks, shortages: [] };\",\"return { picks, shortages };\")\nopen(p,'w').write(s)\nEOF\n.claude/skills/tdd-deep-modules/scripts/tdd-step green \"shortage reported with partial picks\" 2>&1 | tail -5"
+    }
+   },
+   {
+    "tool_name": "Bash",
+    "tool_use_id": "toolu_01LRVkAJiaH67aE1nBwzNxQm",
+    "tool_input": {
+     "command": "sed 's/^ *//' src/pickList.ts | awk 'length>=12' | sort | uniq -c | awk '$1>1'"
+    }
+   },
+   {
+    "tool_name": "Bash",
+    "tool_use_id": "toolu_013DFGc7WEHs7zc5JTtmptPr",
+    "tool_input": {
+     "command": "sed -i 's/^- \\[ \\]/- [x]/' TESTLIST.md && sed -i 's/^- \\[x\\] stock taken by an earlier order is not available to a later one/- [x] stock taken by an earlier order is not available to a later one (covered by the undated-lots test)/; s/^- \\[x\\] several picks at the same bin keep allocation order/- [x] several picks at the same bin keep allocation order (covered by the priority test; stable sort)/' TESTLIST.md && tail -17 TESTLIST.md"
+    }
+   }
+  ]
+ },
+ "final_message": "one order is added up and keeps the position where it first appears.\n- **Allocating stock:** priority orders are served first, then the rest, each group in text order. Each item takes from the lot with the earliest best-before date first, undated lots last, and equal dates are decided by bin code. Whatever is missing goes into the shortage list.\n- **Walking order:** picks are sorted in the serpentine walk. Only aisles with picks count; racks go up in every odd aisle and down in every even one, and levels go up. Several picks at the same bin keep the order they were allocated in.\n- **Stock:** it works on a copy, so the `stock` array you pass in is not changed.\n- The given types and error class are unchanged.\n\n**Two choices where the spec was open**\n- If an `ORDER` is followed only by an unreadable line, I report the `ORDER` line (\"order without items\"), not the unreadable line. That line is higher up, and the unreadable line doesn't count as an item line.\n- `ORDER` and its id must be separated by exactly one space. Bin codes are assumed to be well formed.\n\n**Notes on the tests and the depth check**\n- The first test catches the stub's \"Not implemented\" error, and the test for comments and blank lines also checks that the call doesn't throw. Both were needed so the first failing run of each test failed on a check rather than a crash. The catch in the first test was removed in the next refactor.\n- Two items on the test list have no test of their own because they already passed (a test that passes straight away can't start a cycle). \"Stock taken by an earlier order is not available to a later one\" is covered by the undated-lots test. \"Picks at the same bin keep allocation order\" is covered by the priority test.\n- The depth report flags 7 duplicated lines. They are the field declarations in the given types, which have to stay, plus three calls to the same internal empty-order check, so I left them.\n\nThe design note is in `src/DESIGN.md` and the test list in `TESTLIST.md`.",
+ "own_tests": {
+  "exit": 0,
+  "pass": 15,
+  "fail": 0
+ },
+ "hidden": {
+  "exit": 1,
+  "pass": 15,
+  "fail": 1,
+  "tail": "pass) allocation > missing stock is picked as far as possible and reported [0.26ms]\n(pass) allocation > priority orders are served first, then the rest in text order [0.32ms]\n(pass) allocation > repeated SKUs in one order are added up at their first position [0.11ms]\n(pass) allocation > the stock passed in is left untouched [0.26ms]\n(pass) walking order > aisles alphabetically, racks in a serpentine, levels upwards [0.23ms]\n(pass) walking order > only aisles with picks count for the serpentine [0.13ms]\n(pass) walking order > picks at the same bin keep their allocation order [0.16ms]\n(pass) orders text > comments, blank lines, indentation and CRLF are accepted [0.09ms]\n(pass) orders text > an item before the first order [0.24ms]\n(pass) orders text > an order id used twice [0.07ms]\n(pass) orders text > an order without items [0.11ms]\n156 |     expect(errorLine(orders(\"ORDER 1\", \"# nothing\", \"ORDER 2\", \"RICE x1\"))).toBe(1);\n157 |     expect(errorLine(orders(\"ORDER 1\", \"RICE x1\", \"ORDER 2\", \"\"))).toBe(3);\n158 |   });\n159 | \n160 |   test(\"lines that match neither form\", () => {\n161 |     expect(errorLine(orders(\"ORDER 1\", \"RICE x0\"))).toBe(2);\n                                                          ^\nerror: expect(received).toBe(expected)\n\nExpected: 2\nReceived: 1\n\n      at <anonymous> (/workspace/__acceptance__/pickList.acceptance.test.ts:161:53)\n(fail) orders text > lines that match neither form [0.23ms]\n\n 15 pass\n 1 fail\n 26 expect() calls\nRan 16 tests across 1 file. [7.00ms]\n"
+ },
+ "production_files": [
+  "src/pickList.ts"
+ ],
+ "skill_loaded": true,
+ "foreign_references": [],
+ "committed": true,
+ "invalid_reasons": [
+  "hidden tests fail"
+ ],
+ "commits": 34,
+ "subjects": [
+  "test: pick list test list and design",
+  "red: one order one item one lot",
+  "green: one order one item one lot",
+  "refactor: call buildPickList directly in the first test",
+  "red: does not modify stock",
+  "green: does not modify stock",
+  "red: FEFO with split across lots",
+  "green: FEFO with split across lots",
+  "red: undated lots last, ties by bin",
+  "green: undated lots last, ties by bin",
+  "refactor: explicit expiry and bin comparators",
+  "red: shortage reported with partial picks",
+  "green: shortage reported with partial picks",
+  "red: priority orders first",
+  "green: priority orders first",
+  "refactor: separate parsing from allocation",
+  "red: repeated SKU summed",
+  "green: repeated SKU summed",
+  "red: comments, blank lines, trimming",
+  "green: comments, blank lines, trimming",
+  "red: serpentine walk order",
+  "green: serpentine walk order",
+  "red: item before first ORDER",
+  "green: item before first ORDER",
+  "red: duplicate order id",
+  "green: duplicate order id",
+  "red: empty order",
+  "green: empty order",
+  "red: malformed lines",
+  "green: malformed lines",
+  "red: first problem from the top",
+  "green: first problem from the top",
+  "refactor: tidy order parser",
+  "test: design note"
+ ],
+ "depth": {
+  "exit": 1,
+  "lines": [
+   "src/pickList.ts: surface 10, size 119, ratio 11.9, classitis no, pass-through 0, tests 1, unused 0, duplicate 7 -> bloat: 7 duplicated lines"
+  ],
+  "findings": 1,
+  "surface": 10,
+  "size": 119
+ },
+ "replay": {
+  "exit": 0,
+  "verdict": "ACCEPT",
+  "out": "51f56eb test     pass  exit=0 ok\na7ffa17 red      fail  exit=1 ok\n85d3e26 green    pass  exit=0 ok\n75c36b5 refactor pass  exit=0 ok\nb00694e red      fail  exit=1 ok\n9a94fc5 green    pass  exit=0 ok\nbd52ea0 red      fail  exit=1 ok\ncb98e35 green    pass  exit=0 ok\n41c5894 red      fail  exit=1 ok\n91c1ff4 green    pass  exit=0 ok\necc355f refactor pass  exit=0 ok\n2810131 red      fail  exit=1 ok\n1362f75 green    pass  exit=0 ok\n89b9f8f red      fail  exit=1 ok\n1291d15 green    pass  exit=0 ok\n1907241 refactor pass  exit=0 ok\n7c44063 red      fail  exit=1 ok\n9f44c27 green    pass  exit=0 ok\ne565e74 red      fail  exit=1 ok\n8c335b0 green    pass  exit=0 ok\n8eec9df red      fail  exit=1 ok\n2b64c9a green    pass  exit=0 ok\n12344c7 red      fail  exit=1 ok\nb0652e1 green    pass  exit=0 ok\nf2aefbd red      fail  exit=1 ok\n1944812 green    pass  exit=0 ok\ncfced66 red      fail  exit=1 ok\nf8c2c39 green    pass  exit=0 ok\ne55e2f2 red      fail  exit=1 ok\n3273bec green    pass  exit=0 ok\n8de1c53 red      fail  exit=1 ok\n0a44348 green    pass  exit=0 ok\n3dddcd3 refactor pass  exit=0 ok\n494c319 test     pass  exit=0 ok\nREPLAY: ACCEPT\n"
+ }
+}
