@@ -4750,6 +4750,8 @@ header and on pages without it. Branch `claude/optimistic-clarke-nn8u7t` from `m
   no page keeps showing a signed-out or expired user (`src/routes/+layout.server.ts`, scenario «Nach abgelaufener
   Anmeldung zeigt der Datenschutz niemanden als angemeldet»; review `i18n-session-review-1.md`). Persona reruns
   `helga-i18n-3.md`, `marco-i18n-3.md`, `anna-i18n-3.md`: no blocker or major.
+- [x] **Extra persona runs** (approved by the user): `sven-i18n-4.md` (English, keyboard) and `weber-i18n-4.md` (French,
+  desktop and 390 px) checked their last fixes (privacy link on the sign-in page, sign-out): no blocker or major.
 
 ---
 
