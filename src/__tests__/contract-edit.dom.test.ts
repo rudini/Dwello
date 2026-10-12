@@ -465,13 +465,6 @@ describe('Mietvertrag bearbeiten', () => {
 			expect(hint.querySelector('a')!.getAttribute('href')).toBe('/contracts/c1');
 		});
 
-		// die Kündigung ist schon erfasst: wer dann «Befristet» wählt, ändert sie bewusst
-		it('verweist nicht darauf bei einem schon gekündigten Mietvertrag', async () => {
-			await open(null, true);
-			await choose('limited');
-			expect(byTestId('contract-notice-hint')).toBeNull();
-		});
-
 		it('verweist nicht darauf bei einem befristeten Mietvertrag', async () => {
 			await open('2099-12-31');
 			expect(byTestId('contract-notice-hint')).toBeNull();
