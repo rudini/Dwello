@@ -126,7 +126,9 @@
 	function edited(event: Event) {
 		const id = (event.target as HTMLElement).id;
 		delete errors[errorKey[id] ?? id];
-		refused = []; // the offer belongs to the values refused (review K-2)
+		// the offer belongs to the values refused (review K-2); its message points to it below
+		if (refused.length) delete errors.form;
+		refused = [];
 	}
 
 	// the backend answers in English: a valid form is refused for an overlap or a statement after the end

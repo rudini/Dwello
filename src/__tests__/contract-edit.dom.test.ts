@@ -234,6 +234,8 @@ describe('Mietvertrag bearbeiten', () => {
 			type('contract-base-rent-input', '980');
 			await settle();
 			expect(byTestId('delete-draft-and-save')).toBeNull();
+			// Haiku-Review P1: die Meldung verweist auf den Knopf unten, sie geht mit ihm
+			expect(byTestId('form-error')).toBeNull();
 		});
 
 		// Review K-2: eine Überschneidung lehnte das Speichern nach dem Löschen ab; der Entwurf bleibt

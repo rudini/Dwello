@@ -70,6 +70,10 @@
 			? (form.refused as RefusedStatement[])
 			: null
 	);
+	// a refusal of another day points to an offer no longer shown (Haiku review of the K2 fixes)
+	const refusal = $derived(
+		form && 'refusedDay' in form && form.refusedDay !== endDate ? undefined : form?.endError
+	);
 	let deletingDraft = $state(false);
 	// the wizard opens next: the message says what happened before (personas K1)
 	const draftDeletedMessage = (number: string) =>
@@ -169,7 +173,7 @@
 	title={m.contracts_end_title({ name, apartment: contract.apartment.number })}
 	confirmLabel={m.contracts_end_confirm()}
 	confirmTestid="contract-end-confirm"
-	error={form?.endError}
+	error={refusal}
 	fields={{ endDate, pastConfirmed: pastConfirmed ? 'on' : '' }}
 	check={checkEndDate}
 	onsuccess={() => addToast('success', endedMessage())}

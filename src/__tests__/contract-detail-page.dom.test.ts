@@ -163,6 +163,8 @@ describe('Mietvertragsdetail', () => {
 		fireEvent(byTestId<HTMLInputElement>('contract-end-date-input')!, 'input', '31.03.2099');
 		await settle();
 		expect(byTestId('delete-draft-and-end')).toBeNull();
+		// Haiku-Review P2: die Meldung verweist auf den Knopf unten, sie geht mit ihm
+		expect(byTestId('form-error')).toBeNull();
 	});
 
 	it('bietet bei einer versendeten Abrechnung kein Löschen an', async () => {

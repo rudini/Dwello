@@ -85,13 +85,16 @@ describe('Bestätigung einer Seitenaktion', () => {
 		Element.prototype.scrollIntoView = function (this: Element) {
 			scrolled.push(this.id || this.getAttribute('data-testid')!);
 		};
-		open({
-			error: 'Abgelehnt',
-			afterError: markup('<div><button id="way-out">Entwurf löschen</button></div>')
-		});
-		await answer('failure');
-		expect(scrolled).toEqual(['way-out', 'form-error']);
-		delete (Element.prototype as Partial<Element>).scrollIntoView;
+		try {
+			open({
+				error: 'Abgelehnt',
+				afterError: markup('<div><button id="way-out">Entwurf löschen</button></div>')
+			});
+			await answer('failure');
+			expect(scrolled).toEqual(['way-out', 'form-error']);
+		} finally {
+			delete (Element.prototype as Partial<Element>).scrollIntoView;
+		}
 	});
 
 	it('lässt nicht bestätigen, was nicht möglich ist', () => {
