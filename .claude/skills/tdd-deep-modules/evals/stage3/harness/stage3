@@ -41,17 +41,15 @@ GROUP = re.compile(r"^(?P<phase>pilot|main)-(?P<fixture>[a-z0-9-]+)-r(?P<slot>[1
 # Every session, and every command that runs an arm's code, runs in its own mount and PID namespace
 # (sandbox.sh): it sees only its directory, as /workspace, and cannot unmount what hides the rest.
 SANDBOX = ["unshare", "-m", "-p", "-f", "--mount-proc", "--propagation", "private", str(HARNESS / "sandbox.sh")]
-# Tools that add side channels or variance, refused identically for arms and reviewers.
-NO_EXTRAS = ["WebFetch", "WebSearch", "Agent", "Task", "Workflow", "Artifact", "SendMessage", "CronCreate",
-             "CronDelete", "CronList", "PushNotification", "ScheduleWakeup", "RemoteTrigger", "Monitor"]
-ARM_TOOLS = ["--permission-mode", "acceptEdits", "--disallowedTools", *NO_EXTRAS,
-             "--allowedTools", "Skill", "Bash(bun *)", "Bash(bunx *)", "Bash(git *)", "Bash(ls *)",
+# Explicit tool sets, identical for every arm: nothing else exists in a session (no web, subagents,
+# artifacts, messaging, plugin or connector search), and no MCP server is loaded.
+ARM_TOOLS = ["--tools", "Read,Write,Edit,Glob,Grep,Bash,Skill", "--strict-mcp-config",
+             "--permission-mode", "acceptEdits", "--allowedTools", "Skill", "Bash(bun *)", "Bash(bunx *)", "Bash(git *)", "Bash(ls *)",
              "Bash(mkdir *)", "Bash(cat *)", "Bash(head *)", "Bash(tail *)", "Bash(wc *)", "Bash(grep *)",
              "Bash(echo *)", "Bash(pwd)", "Bash(diff *)", "Bash(.claude/skills/tdd-deep-modules/scripts/*)",
              "Bash(./.claude/skills/tdd-deep-modules/scripts/*)",
              "Bash(python3 .claude/skills/tdd-deep-modules/scripts/*)"]
-REVIEW_TOOLS = ["--permission-mode", "default", "--disallowedTools", "Bash", "Edit", "Write",
-                "NotebookEdit", "Skill", *NO_EXTRAS]
+REVIEW_TOOLS = ["--tools", "Read,Glob,Grep", "--strict-mcp-config", "--permission-mode", "default"]
 # A child session gets only what it needs to run; no tokens, git credentials or parent-session identity.
 # Its shells source /sandbox/env.sh (sandbox-env/env.sh): no proxy for commands, git only for local repos.
 KEEP_ENV = ("PATH", "HOME", "SHELL", "TERM", "LANG", "ANTHROPIC_BASE_URL", "HTTPS_PROXY", "https_proxy",
@@ -63,12 +61,14 @@ KEEP_ENV = ("PATH", "HOME", "SHELL", "TERM", "LANG", "ANTHROPIC_BASE_URL", "HTTP
 SESSION_SHELL = {"BASH_ENV": "/sandbox/env.sh", "ENV": "/sandbox/env.sh", "GIT_CONFIG_GLOBAL": "/dev/null",
                  "GIT_CONFIG_NOSYSTEM": "1", "GIT_ALLOW_PROTOCOL": "file", "GIT_TERMINAL_PROMPT": "0"}
 PROXY_ENV = {"HTTPS_PROXY", "https_proxy", "NO_PROXY", "no_proxy"}
-# What a session's commands and reads have no business naming: other places, the network, the host.
-# Such a run is invalid (decided before any run); nothing outside /workspace is readable anyway.
-FOREIGN = re.compile(r"/home/|/tmp\b|/root/|/mnt/|/srv/|/proc/|/sys/|/sandbox|/verifier|~/|\$HOME|\bDwello\b|"
-                     r"\bevals\b|\bstage3\b|https?://|\bgithub|\bproxy|\bcurl\b|\bwget\b|\bfetch\(|"
-                     r"\b(?:u?mount|unshare|nsenter|chroot)\b|"
-                     r"(?:^|[\s=('\"])/(?=[\s'\")]|$)|(?:^|[\s'\"(])\.\./\.\.", re.I)
+# Escape signals in a session's commands and reads: other places, the network, the host's secrets or
+# namespaces, the experiment's names. Such a run is invalid (decided before any run). The session's own
+# places (/workspace, its scratchpad and tool-result files, bun's cache) are removed before matching.
+FOREIGN = re.compile(r"/home/|/tmp\b|/root\b|/mnt\b|/srv\b|/proc/(?:\d|self|\*|\[)|/sys/|/sandbox|/verifier|"
+                     r"\$HOME|~/|\bDwello\b|\bstage3\b|\bholdout\b|\bevals/|https?://|\bgithub\b|"
+                     r"\b(?:HTTPS?|ALL)_PROXY\b|\b(?:curl|wget|nc|socat|ssh|scp)\s|"
+                     r"\b(?:u?mount|unshare|nsenter|chroot)\s|oauth_token|ingress_token", re.I)
+OWN_PLACES = ("/root/.claude/projects/-workspace", "/tmp/claude-0/-workspace", "/workspace", "/root/.bun")
 SCANNED_TOOLS = {"Bash", "Read", "Glob", "Grep", "LS", "NotebookRead"}
 CODE = (".ts", ".tsx", ".mts", ".cts", ".js", ".jsx", ".mjs", ".cjs")
 IMPORT = re.compile(r"""(?:\bfrom\s*|\bimport\s*\(\s*|\bimport\s+|\brequire\s*\(\s*)["'](\.{1,2}/[^"']+)["']""")
@@ -110,7 +110,7 @@ def session_env(proxy=True, verifier=False):
     env = {k: os.environ[k] for k in KEEP_ENV if k in os.environ and (proxy or k not in PROXY_ENV)}
     env.update(SESSION_SHELL)
     if verifier:
-        env["STAGE3_VERIFIER"] = str(SKILL)
+        env["STAGE3_VERIFIER"] = str(SKILL / "scripts")  # only the locked scripts, never evals/ or results/
     return env
 
 
@@ -159,9 +159,17 @@ def blocks(events, kind):
 
 
 def foreign_references(events):
-    """Commands and reads that name a place outside the session's directory, the network or the host."""
-    return sorted({f"{b.get('name')}: {json.dumps(b.get('input'))[:300]}" for b in blocks(events, "tool_use")
-                   if b.get("name") in SCANNED_TOOLS and FOREIGN.search(json.dumps(b.get("input")))})
+    """Commands and reads with an escape signal (FOREIGN), after removing the session's own places."""
+    own = [e["scratchpad_path"] for e in events if isinstance(e.get("scratchpad_path"), str)] + list(OWN_PLACES)
+    found = set()
+    for b in blocks(events, "tool_use"):
+        if b.get("name") in SCANNED_TOOLS:
+            text = json.dumps(b.get("input"))
+            for place in own:
+                text = text.replace(place, "")
+            if FOREIGN.search(text):
+                found.add(f"{b.get('name')}: {json.dumps(b.get('input'))[:300]}")
+    return sorted(found)
 
 
 def skill_loaded(events):
@@ -171,8 +179,18 @@ def skill_loaded(events):
     return any(b.get("tool_use_id") in calls and not b.get("is_error") for b in blocks(events, "tool_result"))
 
 
+def sgit(repo, *args):
+    """git on an arm's repository, inside the sandbox: its config (filters, hooks) cannot reach the host."""
+    code, out = in_sandbox(["git", *args], repo)
+    if code:
+        raise RuntimeError(f"git {' '.join(args)}: {out}")
+    return out.strip()
+
+
 def tree_files(repo):
-    return [f for f in git(repo, "ls-files", "-co", "--exclude-standard", "-z").split("\0") if f]
+    """Regular files git tracks or would add; symbolic links are never followed or copied."""
+    return [f for f in sgit(repo, "ls-files", "-co", "--exclude-standard", "-z").split("\0")
+            if f and (repo / f).is_file() and not (repo / f).is_symlink()]
 
 
 def resolve(repo, files, spec, importer_dir):
@@ -247,9 +265,9 @@ def depth(repo, files):
 def measure(fixture, arm, repo, base, events):
     check = repo.parent / "check"
     for rel in tree_files(repo):
-        if not rel.startswith(".claude/") and (repo / rel).is_file():
+        if not rel.startswith(".claude/"):
             (check / rel).parent.mkdir(parents=True, exist_ok=True)
-            shutil.copy2(repo / rel, check / rel)
+            shutil.copy2(repo / rel, check / rel, follow_symlinks=False)
     code, out = in_sandbox(["bun", "test"], check)
     own = {"exit": code, "pass": bun_counts(out)[0], "fail": bun_counts(out)[1]}
     shutil.copytree(fixture / "hidden", check / "__acceptance__")
@@ -258,16 +276,18 @@ def measure(fixture, arm, repo, base, events):
     production = production_files(repo, fixture)
     loaded = skill_loaded(events) if arm == "skill" else None
     passed = hidden["exit"] == 0 and hidden["fail"] == 0 and hidden["pass"] > 0
-    committed = git(repo, "status", "--porcelain") == ""
+    committed = sgit(repo, "status", "--porcelain") == ""
     foreign = foreign_references(events)
+    reasons = [reason for reason, failed in (("hidden tests fail", not passed), ("not committed", not committed),
+                                             ("skill not loaded", loaded is False), ("foreign reference", foreign))
+               if failed]
     m = {"own_tests": own, "hidden": hidden, "production_files": production, "skill_loaded": loaded,
-         "foreign_references": foreign, "committed": committed,
-         "valid": passed and committed and loaded is not False and not foreign,
-         "commits": int(git(repo, "rev-list", "--count", f"{base}..HEAD")),
-         "subjects": git(repo, "log", "--format=%s", f"{base}..HEAD").splitlines()[::-1],
+         "foreign_references": foreign, "committed": committed, "invalid_reasons": reasons, "valid": not reasons,
+         "commits": int(sgit(repo, "rev-list", "--count", f"{base}..HEAD")),
+         "subjects": sgit(repo, "log", "--format=%s", f"{base}..HEAD").splitlines()[::-1],
          "depth": depth(repo, production), "replay": None}
     if arm == "skill":
-        code, out = in_sandbox(["/verifier/scripts/tdd_replay", f"{base}..HEAD"], repo, REPLAY_TIMEOUT,
+        code, out = in_sandbox(["/verifier/tdd_replay", f"{base}..HEAD"], repo, REPLAY_TIMEOUT,
                                verifier=True)
         verdict = "ACCEPT" if "REPLAY: ACCEPT" in out else "REJECT" if "REPLAY: REJECT" in out else "ERROR"
         m["replay"] = {"exit": code, "verdict": verdict, "out": out[-4000:]}
@@ -298,7 +318,8 @@ def run(fixture, arm, run_id):
                                                          "session_id", "permission_denials")},
                    "final_message": str(result.get("result", ""))[-2000:]})
     record.update(measure(fixture, arm, repo, base, events))
-    git(repo, "bundle", "create", str(out_dir / f"{run_id}.bundle"), "--all")
+    sgit(repo, "bundle", "create", "/workspace/.git/stage3.bundle", "--all")
+    shutil.move(repo / ".git/stage3.bundle", out_dir / f"{run_id}.bundle")
     with tarfile.open(out_dir / f"{run_id}.tree.tgz", "w:gz") as tar:
         for rel in tree_files(repo):
             if not rel.startswith(".claude/"):
@@ -353,10 +374,13 @@ def review_once(group, fixture, runs, control, k):
     except (ValueError, KeyError, TypeError):
         scores = {}
     by_arm = {key[label]: scores.get(label) for label in labels}
+    foreign = foreign_references(events)
     record = {"group": group, "reviewer": k, "key": key, "runs": runs, "scores_by_label": scores,
-              "scores": by_arm, "complete": all(type(v) is int and 1 <= v <= 10 for v in by_arm.values()),
+              "scores": by_arm, "foreign_references": foreign,
+              # a reviewer with an escape signal counts as no review: the group is reviewed again
+              "complete": not foreign and all(type(v) is int and 1 <= v <= 10 for v in by_arm.values()),
               "cost": result.get("total_cost_usd"), "permission_denials": result.get("permission_denials"),
-              "foreign_references": foreign_references(events), "text": text}
+              "text": text}
     (out_dir / f"rev{k}.json").write_text(json.dumps(record, indent=1) + "\n")
     return record
 
@@ -434,8 +458,12 @@ def load_runs(phase):
     return runs
 
 
-def gate(phase):
-    ok, notes, rows, per_fixture = True, [], [], {}
+SLOTS = {"pilot": {1}, "main": {1, 2, 3}}
+
+
+def evaluate(phase):
+    """All checks of one phase: (ok, printed lines, per-fixture comparisons, control lines)."""
+    ok, notes, rows, per_fixture, out = True, [], [], {}, []
     all_runs = load_runs(phase)
     slots = {}
     for rec in all_runs.values():
@@ -451,21 +479,32 @@ def gate(phase):
         if chosen and any(r["attempt"] > chosen["attempt"] for r in recs):
             ok = False
             notes.append(f"{key}: attempts after the first valid one ({chosen['run_id']})")
+        if key[2] not in SLOTS[phase]:
+            ok = False
+            notes.append(f"{key}: slot {key[2]} is outside the planned slots {sorted(SLOTS[phase])}")
+    for fixture in {k[0] for k in slots}:
+        for arm in ARMS:
+            present = {k[2] for k in slots if k[0] == fixture and k[1] == arm}
+            if present != SLOTS[phase]:
+                ok = False
+                notes.append(f"{fixture} {arm}: slots {sorted(present)}, planned {sorted(SLOTS[phase])}")
     recorded = set(all_runs)
     orphans = sorted({p.name for p in (WORK / "runs").glob(f"{phase}-*")} - recorded) + sorted(
         {p.name[:-len(".stream.jsonl.gz")] for p in (RESULTS / "runs").glob(f"{phase}-*.stream.jsonl.gz")} - recorded)
     if orphans:
         ok = False
         notes.append(f"run directories or transcripts without a record: {orphans}")
+    invalid = {}
     for rec in sorted(all_runs.values(), key=lambda r: r["run_id"]):
-        if rec["status"] != "finished":
-            notes.append(f"invalid run {rec['run_id']}: harness did not finish it (failure case, slot rerun)")
-            continue
-        if not rec["valid"]:
-            notes.append(f"invalid run {rec['run_id']}: hidden {rec['hidden']['pass']}/{rec['hidden']['fail']}"
-                         f" committed={rec['committed']} skill_loaded={rec['skill_loaded']}"
-                         f" foreign={rec['foreign_references'][:3]} (failure case, slot rerun)")
-        if rec["arm"] == "skill" and rec["valid"] and rec["replay"]["verdict"] != "ACCEPT":
+        reasons = rec.get("invalid_reasons", []) if rec["status"] == "finished" else ["harness did not finish"]
+        for reason in reasons:
+            invalid[(rec["arm"], reason)] = invalid.get((rec["arm"], reason), 0) + 1
+        if reasons:
+            notes.append(f"invalid run {rec['run_id']}: {', '.join(reasons)}"
+                         + (f" {rec['foreign_references'][:3]}" if rec.get("foreign_references") else "")
+                         + " (failure case, slot rerun)")
+        if rec["status"] == "finished" and rec["arm"] == "skill" and rec["valid"] \
+                and rec["replay"]["verdict"] != "ACCEPT":
             ok = False
             notes.append(f"tdd_replay {rec['replay']['verdict']} for valid arm-3 run {rec['run_id']}")
     attempts = {}
@@ -473,7 +512,7 @@ def gate(phase):
         m = GROUP.match(g.name)
         if g.is_dir() and m:
             attempts.setdefault(f"{m['phase']}-{m['fixture']}-r{m['slot']}", []).append((int(m["attempt"] or 1), g))
-    controls = []
+    controls, reviewed_slots = [], {}
     for name, tries in sorted(attempts.items()):
         tries.sort()
         complete = [n for n, g in tries if group_verdict(g)[1] is not None]
@@ -496,6 +535,8 @@ def gate(phase):
         runs = revs[0]["runs"]
         records = {arm: all_runs.get(rid) for arm, rid in runs.items()}
         problems = []
+        if int(meta["slot"]) not in SLOTS[phase]:
+            problems.append(f"slot {meta['slot']} is outside the planned slots")
         if set(runs) != set(ARMS) or len(set(runs.values())) != 3 or any(r is None for r in records.values()):
             problems.append("runs are not three distinct recorded runs of this phase")
         else:
@@ -510,6 +551,7 @@ def gate(phase):
             ok = False
             notes += [f"{name}: {p}" for p in problems]
             continue
+        reviewed_slots.setdefault(meta["fixture"], set()).add(int(meta["slot"]))
         replay = records["skill"]["replay"]["verdict"]
         per_fixture.setdefault(meta["fixture"], []).append(final)
         scores = " | ".join(" ".join(f"{arm[0]}{r['scores'][arm]}" for arm in ("baseline", "canon", "skill"))
@@ -520,15 +562,30 @@ def gate(phase):
                 delta = abs(r["scores"]["control:baseline"] - r["scores"]["baseline"])
                 controls.append(f"{g.name} rev{r['reviewer']}: control delta {delta}"
                                 + (" UNRELIABLE" if delta > 1 else ""))
-            if r["foreign_references"]:
-                ok = False
-                notes.append(f"{g.name} rev{r['reviewer']}: names places outside its sandbox")
         depth = " ".join(f"{arm[0]}:{records[arm]['depth']['findings']}/{len(records[arm]['production_files'])}"
                          for arm in ("baseline", "canon", "skill"))
         rows.append(f"{g.name:34} {scores:40} vs_base {final['vs_baseline']:+d} vs_canon {final['vs_canon']:+d}"
                     f"  replay {replay:6} depth_report findings/files {depth}")
-    print("scores per reviewer (b=baseline c=canon s=skill k=control copy of baseline)")
-    print("\n".join(rows))
+    for fixture in {k[0] for k in slots} | set(per_fixture):
+        if reviewed_slots.get(fixture, set()) != SLOTS[phase]:
+            ok = False
+            notes.append(f"{fixture}: reviewed slots {sorted(reviewed_slots.get(fixture, set()))}, "
+                         f"planned {sorted(SLOTS[phase])}")
+    out.append("scores per reviewer (b=baseline c=canon s=skill k=control copy of baseline)")
+    out += rows
+    out.append("")
+    out.append("invalid attempts per arm and reason: " + (", ".join(
+        f"{arm} {reason}: {n}" for (arm, reason), n in sorted(invalid.items())) or "none"))
+    if controls:
+        out += [""] + controls
+    if any("UNRELIABLE" in c for c in controls):
+        ok = False
+    return ok, out, notes, per_fixture
+
+
+def gate(phase):
+    ok, out, notes, per_fixture = evaluate(phase)
+    print("\n".join(out))
     attribution = bool(per_fixture)
     print("\nper fixture: skill vs baseline, skill vs canon (wins/ties/losses)")
     for fixture, finals in sorted(per_fixture.items()):
@@ -536,13 +593,23 @@ def gate(phase):
         fx_ok = wb.count(1) * 2 > len(wb) and wb.count(-1) == 0
         attribution &= wc.count(1) * 2 > len(wc)
         print(f"  {fixture:24} n={len(finals)}  baseline {wb.count(1)}/{wb.count(0)}/{wb.count(-1)}"
-              f"  canon {wc.count(1)}/{wc.count(0)}/{wc.count(-1)}  {'ok' if fx_ok else 'NOT MET'}")
-        ok &= fx_ok
-    if controls:
-        print("\n" + "\n".join(controls))
+              f"  canon {wc.count(1)}/{wc.count(0)}/{wc.count(-1)}" + ("" if phase == "pilot" else
+              f"  {'ok' if fx_ok else 'NOT MET'}"))
+        if phase != "pilot":
+            ok &= fx_ok
     if phase == "pilot":
-        print("\n" + "\n".join(notes))
-        return 0
+        # The pilot validates harness and reviewers; its depth results are not judged.
+        fixtures_seen = len(per_fixture)
+        ok &= fixtures_seen >= 2
+        if fixtures_seen < 2:
+            notes.append(f"pilot reviewed {fixtures_seen} fixtures, 2 required")
+        print("\n".join(notes))
+        print("PILOT: OK" if ok else "PILOT: NOT OK")
+        return 0 if ok else 1
+    pilot_ok, _, _, pilot_fixtures = evaluate("pilot")
+    pilot_ok &= len(pilot_fixtures) >= 2
+    print(f"pilot (2 fixtures, harness and reviewers valid, no unreliable control): {'ok' if pilot_ok else 'NOT OK'}")
+    ok &= pilot_ok
     expected = fixtures()
     for fixture, kind in expected.items():
         n = len(per_fixture.get(fixture, []))
