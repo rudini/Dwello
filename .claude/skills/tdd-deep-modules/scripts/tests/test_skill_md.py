@@ -89,9 +89,11 @@ class SkillMdTest(unittest.TestCase):
     def test_the_depth_check_defers_to_the_project_s_deepcheck(self):
         text = dict(sections())["5. Depth check in every refactor"]
 
-        for element in ("`bun run deepcheck:audit`", "its verdict wins",
-                        "the swarm of exported helpers, which deepcheck does not check"):
+        for element in ("`bun run deepcheck:audit`", "after each green and refactor, before `tdd-step` commits",
+                        "its gate result wins", "not on `tdd-step` commits",
+                        "the swarm of exported helpers, which deepcheck does not check", "untested modules"):
             self.assertIn(element, text)
+        self.assertNotIn("before every commit", text)
 
     def test_the_depth_check_keeps_tests_where_they_are(self):
         text = dict(sections())["5. Depth check in every refactor"]
