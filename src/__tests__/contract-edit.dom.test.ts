@@ -31,7 +31,10 @@ const contract = (endDate: string | null = null, terminated = false) => ({
 const data = (endDate: string | null = null, terminated = false) => ({
 	contract: contract(endDate, terminated),
 	tenants: [{ id: 't1', name: 'Anna Keller' }],
-	apartments: [{ id: 'a1', unit: '2.01', building: 'Ahornhof', status: 'Vermietet' }]
+	apartments: [
+		{ id: 'a1', unit: '2.01', building: 'Ahornhof', status: 'Vermietet' },
+		{ id: 'a2', unit: '2.02', building: 'Ahornhof', status: 'Leer' }
+	]
 });
 
 let calls: ReturnType<typeof fakeBff>;
@@ -288,6 +291,29 @@ describe('Mietvertrag bearbeiten', () => {
 			expect(byTestId('form-error')!.textContent).toContain(
 				'Die Mietverträge der Wohnung werden noch geladen.'
 			);
+		});
+
+		// Haiku-Review: beim Wechsel der Wohnung gilt die Überschneidung der vorigen nicht mehr
+		it('nennt nach dem Wechsel der Wohnung keine Überschneidung der vorigen', async () => {
+			calls = fakeBff(() => [
+				200,
+				{ contracts: [{ id: 'c2', startDate: '2025-02-01', endDate: null }] }
+			]);
+			const answer = globalThis.fetch;
+			let switched = false; // once switched, the new apartment's contracts keep loading
+			globalThis.fetch = ((url: string, init?: RequestInit) =>
+				switched && String(url).includes('/contracts?apartmentId=a2')
+					? new Promise(() => {})
+					: answer(url, init)) as typeof fetch;
+			await open();
+			await endOn('31.03.2025');
+			expect(byTestId('overlap-warning')).not.toBeNull();
+			switched = true;
+			const select = byTestId<HTMLSelectElement>('apartment-select')!;
+			select.value = 'a2';
+			select.dispatchEvent(new Event('change', { bubbles: true }));
+			await settle();
+			expect(byTestId('overlap-warning')).toBeNull();
 		});
 
 		// Review K-7: ein inzwischen versendeter Entwurf; die Meldung des Backends, kein zweites Angebot

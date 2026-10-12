@@ -58,6 +58,7 @@
 	let refused = $state<RefusedStatement[]>([]); // statements that refused the last save
 	// the chosen apartment's contracts, for the overlap check: an overlap shows only once they are loaded
 	let contractsState = $state<'loading' | 'loaded' | 'failed'>('loading');
+	let contractsRequest = 0;
 	let availability = $state<Map<string, AvailabilityInfo> | null>(null);
 	let apartmentContracts = $state<ContractForAvailability[]>([]);
 	let form = $state<HTMLFormElement>();
@@ -105,10 +106,12 @@
 	// Contracts of the chosen apartment, for the overlap check
 	$effect(() => {
 		const apartmentId = values.apartmentId;
-		contractsState = 'loading'; // until this apartment's contracts have answered (Haiku review N3)
-		if (!apartmentId) return void (apartmentContracts = []);
+		const request = ++contractsRequest; // only the latest answer counts, also after switching back
+		apartmentContracts = []; // the previous apartment's contracts say nothing about this one
+		contractsState = apartmentId ? 'loading' : 'loaded';
+		if (!apartmentId) return;
 		contractsOf(apartmentId).then((list) => {
-			if (apartmentId !== values.apartmentId) return; // an answer for an apartment chosen before
+			if (request !== contractsRequest) return;
 			apartmentContracts = list ?? [];
 			contractsState = list ? 'loaded' : 'failed';
 		});
@@ -164,17 +167,17 @@
 	}
 
 	// the one draft the new dates would change goes first; the wizard then creates it anew (A-10)
-	const contractsMessage: Record<string, string> = {
-		loading: m.contracts_apartment_contracts_loading(),
-		failed: m.contracts_apartment_contracts_unknown()
-	};
+	const contractsMessage = (state: typeof contractsState) =>
+		state === 'loading'
+			? m.contracts_apartment_contracts_loading()
+			: m.contracts_apartment_contracts_unknown();
 
 	async function deleteDraftAndSave(draft: RefusedStatement) {
 		if (!valid()) return focusFirstError(form);
 		// an overlap would refuse the save after the delete: the draft would be gone for nothing (review K-2);
 		// without the apartment's contracts an overlap cannot be ruled out (Haiku review R5)
 		if (overlap || contractsState !== 'loaded') {
-			errors = { form: overlap ? m.backend_contract_overlap() : contractsMessage[contractsState] };
+			errors = { form: overlap ? m.backend_contract_overlap() : contractsMessage(contractsState) };
 			refused = [];
 			return focusFirstError(form);
 		}
