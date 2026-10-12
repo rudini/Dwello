@@ -384,11 +384,11 @@ def _other_production_code(module, top):
 
 @functools.lru_cache(maxsize=None)
 def _production_code(top):
-    """[(path, text)] of the production source files of the repository at `top`, read once per run."""
+    """[(path, text)] of the production code files (`protocol.is_production`) of the repository at `top`."""
     listed = subprocess.run(["git", "ls-files", "-z", "-co", "--exclude-standard"], cwd=top, check=True,
                             capture_output=True, text=True).stdout.split("\0")
     return tuple(((top / rel).resolve(), _without_comments((top / rel).read_text(errors="replace"))) for rel in listed
-                 if Path(rel).suffix in _SOURCE and protocol.is_production(rel) and (top / rel).is_file())
+                 if protocol.is_production(rel) and (top / rel).is_file())  # .svelte and .vue too
 
 
 def _body(text, match):
