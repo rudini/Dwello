@@ -37,6 +37,22 @@ describe('Vorschau der Abrechnungen', () => {
 
 // A-10: ein Link vom Mietvertrag oder aus einer Ablehnung wählt Gebäude und Periode; Heizprofil und
 // Verwaltungspauschale kommen von den übrigen Abrechnungen dieses Gebäudes in dieser Periode
+// Review K-5: das Backend antwortet mit Klartext statt JSON; die Seite nennt den Fehler in der UI-Sprache
+describe('Vorschau bei einem Fehler des Backends ohne JSON', () => {
+	it('meldet den Fehler, nicht «is not valid JSON»', async () => {
+		const form = new FormData();
+		for (const [name, value] of Object.entries(run)) form.append(name, value);
+		const request = new Request('http://localhost:3000', { method: 'POST', body: form });
+		const fetch = async () => new Response('Failed query: select …', { status: 500 });
+		const result = (await (actions.preview as (event: unknown) => Promise<unknown>)({
+			fetch,
+			request
+		})) as { data: { error: string } };
+		expect(result.data.error).not.toContain('JSON');
+		expect(result.data.error).toContain('500');
+	});
+});
+
 describe('Assistent mit gewähltem Gebäude und gewählter Periode', () => {
 	const urls: string[] = [];
 	const fetch = async (url: string) => {
@@ -51,7 +67,7 @@ describe('Assistent mit gewähltem Gebäude und gewählter Periode', () => {
 					{ ...periodStatements.data[0], heatingProfileId: 'hp9', managementFeePercent: '2.50' }
 				]
 			});
-		return Response.json({ buildings: [], data: [] });
+		return Response.json({ buildings: [{ id: 'b1', name: 'Lindenhof' }], data: [] });
 	};
 	const open = (query: string) =>
 		load({ fetch, url: new URL(`http://localhost/statements/generate${query}`) } as never);
@@ -61,13 +77,29 @@ describe('Assistent mit gewähltem Gebäude und gewählter Periode', () => {
 			defaultPeriod: { start: '2025-01-01', end: '2025-12-31' },
 			defaultBuildingIds: ['b1'],
 			defaultHeatingProfileId: 'hp9',
-			defaultManagementFeePercent: 2.5
+			defaultManagementFeePercent: 2.5,
+			// personas K1: der Assistent sagt, was gewählt ist und woher Heizprofil und Pauschale kommen
+			preset: {
+				building: 'Lindenhof',
+				start: '2025-01-01',
+				end: '2025-12-31',
+				fromStatements: true
+			}
 		});
 		expect(urls).toContainEqual(
 			expect.stringContaining(
 				'/statements?buildingId=b1&periodStart=2025-01-01&periodEnd=2025-12-31'
 			)
 		);
+	});
+
+	// Review K-5: ein abgeschnittener Link oder ein gelöschtes Gebäude führt zum Anfang, nicht zu einem Fehler
+	it.each([
+		['?building=b9&start=2025-01-01&end=2025-12-31'],
+		['?building=b1&start=2025-02-30&end=2025-12-31'],
+		['?building=b1&start=2025-12-31&end=2025-01-01']
+	])('übernimmt keinen ungültigen Link %s', async (query) => {
+		expect(await open(query)).toMatchObject({ defaultBuildingIds: [], preset: null });
 	});
 
 	it('nimmt ohne Auswahl die Einstellungen', async () => {

@@ -16,6 +16,7 @@
 			defaultHeatingProfileId: string;
 			defaultPeriod: { start: string; end: string };
 			defaultBuildingIds: string[];
+			preset: { building: string; start: string; end: string; fromStatements: boolean } | null;
 		};
 		form: ActionData;
 	} = $props();
@@ -38,7 +39,8 @@
 			defaultManagementFeePercent: data.defaultManagementFeePercent,
 			defaultHeatingProfileId: data.defaultHeatingProfileId,
 			defaultPeriod: data.defaultPeriod,
-			defaultBuildingIds: data.defaultBuildingIds
+			defaultBuildingIds: data.defaultBuildingIds,
+			preset: data.preset
 		}}
 		{form}
 	/>

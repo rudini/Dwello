@@ -1260,5 +1260,8 @@
 	"contracts_delete_draft_consequence": "The draft {number} will be deleted. Then create the utility cost statement again.",
 	"contracts_delete_draft_and_end": "Delete draft and end rental contract",
 	"contracts_delete_draft_and_save": "Delete draft and save rental contract",
-	"contracts_draft_deleted_toast": "Draft {number} deleted. The rental contract of {name} ends on {date}. Now create the utility cost statement again."
+	"contracts_draft_deleted_toast": "Draft {number} deleted. The rental contract of {name} ends on {date}. Now create the utility cost statement again.",
+	"statements_preset_title": "Chosen: {building}, billing period {period}",
+	"statements_preset_from_statements": "The heating profile and management fee are set like the other utility cost statements of this billing period. Check them and go on to the preview.",
+	"statements_preset_from_settings": "The heating profile and management fee come from the settings. Check them and go on to the preview."
 }

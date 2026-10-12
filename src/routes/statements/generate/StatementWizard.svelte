@@ -18,6 +18,7 @@
 	import WizardNav from '$lib/ui/WizardNav.svelte';
 	import { formatDate } from '$lib/utils/format';
 	import { browserStorage, clearDraft, readDraft, writeDraft } from '$lib/wizard-draft';
+	import PresetNotice from './PresetNotice.svelte';
 	import StatementStep from './StatementStep.svelte';
 	import type { PreviewRow } from './preview';
 
@@ -33,6 +34,7 @@
 			defaultHeatingProfileId: string;
 			defaultPeriod: { start: string; end: string };
 			defaultBuildingIds: string[]; // chosen by the link that opened the wizard (A-10)
+			preset?: { building: string; start: string; end: string; fromStatements: boolean } | null;
 		};
 		form: {
 			preview?: PreviewRow[];
@@ -222,6 +224,7 @@
 			>
 			<span data-step-label>{statementSteps[step - 1]}</span>
 		</h2>
+		<PresetNotice preset={data.preset} {step} />
 		{#if shownError}
 			<Alert tone="critical" title={m.ui_action_failed()} testid="server-error">
 				<p>{shownError}</p>

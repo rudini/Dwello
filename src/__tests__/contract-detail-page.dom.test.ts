@@ -61,6 +61,7 @@ function open(
 		data: {
 			today,
 			missingStatement,
+			nextSteps: terminated, // the loader decides: a running notice without a next tenant (review K-1)
 			contract: contract(startDate, endDate, terminated),
 			rentBreakdown: { baseRent: 950, additionalRent: 50, advancePayment: 180, total: 1180 }
 		},

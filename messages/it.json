@@ -1260,5 +1260,8 @@
 	"contracts_delete_draft_consequence": "La bozza {number} viene eliminata. Allestisca poi di nuovo il conteggio spese accessorie.",
 	"contracts_delete_draft_and_end": "Eliminare la bozza e terminare il contratto di locazione",
 	"contracts_delete_draft_and_save": "Eliminare la bozza e salvare il contratto di locazione",
-	"contracts_draft_deleted_toast": "Bozza {number} eliminata. Il contratto di locazione di {name} termina il {date}. Allestisca ora di nuovo il conteggio spese accessorie."
+	"contracts_draft_deleted_toast": "Bozza {number} eliminata. Il contratto di locazione di {name} termina il {date}. Allestisca ora di nuovo il conteggio spese accessorie.",
+	"statements_preset_title": "Selezione: {building}, periodo di conteggio {period}",
+	"statements_preset_from_statements": "Il profilo di riscaldamento e le spese di gestione sono impostati come negli altri conteggi spese accessorie di questo periodo di conteggio. Li verifichi e passi all’anteprima.",
+	"statements_preset_from_settings": "Il profilo di riscaldamento e le spese di gestione provengono dalle impostazioni. Li verifichi e passi all’anteprima."
 }

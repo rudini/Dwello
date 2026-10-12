@@ -113,6 +113,12 @@
 		{/snippet}
 	</PageHeader>
 
+	<!-- first what a notice asks for next, then a missing statement: personas K1 read the yellow hint as the notice's -->
+	<NextSteps
+		shown={data.nextSteps}
+		apartmentId={contract.apartmentId}
+		tenantId={contract.tenantId}
+	/>
 	<MissingStatement missing={data.missingStatement} />
 
 	<div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
@@ -129,12 +135,6 @@
 			rent={data.rentBreakdown}
 		/>
 	</div>
-
-	<NextSteps
-		terminated={contract.terminated}
-		apartmentId={contract.apartmentId}
-		tenantId={contract.tenantId}
-	/>
 
 	<Panel title={m.contracts_related()}>
 		<div class="flex flex-wrap gap-4">

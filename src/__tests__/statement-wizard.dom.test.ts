@@ -129,6 +129,25 @@ describe('Abrechnungen erstellen', () => {
 		expect(byTestId('draft-restored')).toBeNull();
 	});
 
+	// Personas K1: wer über einen Link kommt, sieht Gebäude, Periode und woher die Einstellungen stammen
+	it('nennt die Auswahl des Links und die Herkunft von Heizprofil und Pauschale', async () => {
+		const preset = {
+			building: 'Seeblick',
+			start: '2025-01-01',
+			end: '2025-12-31',
+			fromStatements: true
+		};
+		show(GeneratePage, {
+			data: { ...data, defaultBuildingIds: ['b1'], preset },
+			form: null
+		} as never);
+		await settle();
+		const said = byTestId('wizard-preset')!.textContent!.replace(/\s+/g, ' ');
+		expect(said).toContain('Seeblick');
+		expect(said).toContain('01.01.2025 – 31.12.2025');
+		expect(said).toContain('wie die übrigen Nebenkostenabrechnungen dieser Abrechnungsperiode');
+	});
+
 	it('beginnt mit der vorgeschlagenen Abrechnungsperiode, in Worten wiederholt', () => {
 		open();
 		expect(heading()).toBe('Abrechnungsperiode');

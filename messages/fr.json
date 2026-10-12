@@ -1260,5 +1260,8 @@
 	"contracts_delete_draft_consequence": "Le brouillon {number} sera supprimé. Établissez ensuite le décompte des charges à nouveau.",
 	"contracts_delete_draft_and_end": "Supprimer le brouillon et terminer le contrat de bail",
 	"contracts_delete_draft_and_save": "Supprimer le brouillon et enregistrer le contrat de bail",
-	"contracts_draft_deleted_toast": "Brouillon {number} supprimé. Le contrat de bail de {name} prend fin le {date}. Établissez maintenant le décompte des charges à nouveau."
+	"contracts_draft_deleted_toast": "Brouillon {number} supprimé. Le contrat de bail de {name} prend fin le {date}. Établissez maintenant le décompte des charges à nouveau.",
+	"statements_preset_title": "Sélection : {building}, période de décompte {period}",
+	"statements_preset_from_statements": "Le profil de chauffage et les frais de gestion sont réglés comme pour les autres décomptes des charges de cette période de décompte. Vérifiez-les et passez à l’aperçu.",
+	"statements_preset_from_settings": "Le profil de chauffage et les frais de gestion proviennent des paramètres. Vérifiez-les et passez à l’aperçu."
 }

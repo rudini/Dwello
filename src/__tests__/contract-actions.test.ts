@@ -40,6 +40,37 @@ describe('Vertragsstatus', () => {
 	});
 });
 
+// Review K-1: «Nächste Schritte» nur, solange die Kündigung läuft und kein Nachmieter erfasst ist
+describe('Nächste Schritte nach einer Kündigung', () => {
+	const backend = (contract: Record<string, unknown>, others: unknown[] = []) =>
+		(async (url: string) => {
+			if (url.includes('/contracts?apartmentId=')) return Response.json({ contracts: others });
+			if (url.includes('/config') || url.includes('/statements?'))
+				return Response.json({ data: [] });
+			return Response.json({ id: 'c1', apartmentId: 'a1', startDate: '2024-04-01', ...contract });
+		}) as typeof globalThis.fetch;
+	const nextSteps = async (contract: Record<string, unknown>, others: unknown[] = []) =>
+		(
+			(await load({ params: { id: 'c1' }, fetch: backend(contract, others) } as never)) as {
+				nextSteps: boolean;
+			}
+		).nextSteps;
+
+	it('nennt sie bei einer laufenden Kündigung ohne Nachmieter', async () => {
+		expect(await nextSteps({ endDate: '2099-03-31', terminated: true })).toBe(true);
+	});
+
+	it('nennt sie nicht, wenn ein Nachmieter erfasst ist', async () => {
+		const successor = { id: 'c2', startDate: '2099-04-01', endDate: null };
+		expect(await nextSteps({ endDate: '2099-03-31', terminated: true }, [successor])).toBe(false);
+	});
+
+	it('nennt sie nicht nach dem Auszug und nicht ohne Kündigung', async () => {
+		expect(await nextSteps({ endDate: '2021-02-28', terminated: true })).toBe(false);
+		expect(await nextSteps({ endDate: '2099-03-31', terminated: false })).toBe(false);
+	});
+});
+
 // A-10: Mietstage in der letzten Abrechnungsperiode ohne Abrechnung
 describe('Fehlende Abrechnung am Mietvertrag', () => {
 	const backend = (statements: unknown[]) =>

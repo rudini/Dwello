@@ -4,14 +4,11 @@
 	import Panel from '$lib/ui/Panel.svelte';
 
 	// What a notice asks for next (A-4); TODO(fachlich prüfen): «Nachmieter» is not in the glossary
-	let {
-		terminated,
-		apartmentId,
-		tenantId
-	}: { terminated?: boolean; apartmentId: string; tenantId: string } = $props();
+	let { shown, apartmentId, tenantId }: { shown: boolean; apartmentId: string; tenantId: string } =
+		$props();
 </script>
 
-{#if terminated}
+{#if shown}
 	<Panel title={m.contracts_next_steps()}>
 		<div class="flex flex-col gap-4" data-testid="contract-next-steps">
 			<p class="text-ink">{m.contracts_next_steps_text()}</p>
