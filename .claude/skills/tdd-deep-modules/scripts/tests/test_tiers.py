@@ -135,6 +135,23 @@ class TddStepTierTest(unittest.TestCase):
         self.assertEqual(repo.subject(), "green: green step")
 
 
+    def test_a_test_commit_that_fails_the_suite_after_a_green_or_refactor_is_refused(self):
+        repo = tiered_repo(self, RIGHT_ADD_TS, **{"db.pg.test.ts": DATABASE_TEST, "calc.test.ts": BUN_TEST,
+                                                  "expected.json": '{"sum": 3}\n'})
+        repo.write("calc.test.ts", BUN_TEST.replace('import { add } from "./calc";\n',
+                                                    'import { add } from "./calc";\nimport expected from "./expected.json";\n')
+                   .replace("toBe(3)", "toBe(expected.sum)"))
+        repo.commit_phase("refactor", {}, 0)
+        repo.write("expected.json", '{"sum": 4}\n')
+        repo.write("DESIGN.md", "design note\n")
+
+        result = repo.run("tdd-step", "test", "design note")
+
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn("a test commit after a green or refactor must leave the tests passing", result.stderr)
+        self.assertEqual(repo.subject(), "refactor: refactor step")
+
+
 class TddReplayTierTest(unittest.TestCase):
     def replay(self, repo, base):
         return repo.run("tdd_replay", f"{base}..HEAD")
