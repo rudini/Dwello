@@ -510,3 +510,23 @@ class SkillLintTest(unittest.TestCase):
 
                 self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
                 self.assertIn("lacks the statement:", result.stdout)
+
+    def test_a_qualifier_ending_in_a_colon_or_semicolon_before_a_statement_is_named(self):
+        real = (SKILL / "SKILL.md").read_text()
+        attacks = {
+            "colon": real.replace("Every fake of a boundary has a contract test suite",
+                                  "Myth: Every fake of a boundary has a contract test suite"),
+            "semicolon": real.replace("No mocks or spies of your own logic;", "Rarely true; No mocks or spies of your own logic;"),
+            "boundary": real.replace("The test boundary is the public interface", "Not true: The test boundary is the public interface"),
+            "swarm": real.replace("A functional core is fine as internal structure", "Wrong: A functional core is fine as internal structure"),
+        }
+        for name, text in attacks.items():
+            with self.subTest(name):
+                self.assertNotEqual(text, real)
+                copy = copy_of_skill(self)
+                (copy / "SKILL.md").write_text(text)
+
+                result = lint(copy)
+
+                self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+                self.assertIn("lacks the statement:", result.stdout)
