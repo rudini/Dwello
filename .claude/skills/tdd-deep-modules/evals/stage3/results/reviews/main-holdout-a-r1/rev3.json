@@ -1,0 +1,29 @@
+{
+ "group": "main-holdout-a-r1",
+ "reviewer": 3,
+ "key": {
+  "A": "skill",
+  "B": "baseline",
+  "C": "canon"
+ },
+ "runs": {
+  "baseline": "main-holdout-a-baseline-r1-a2",
+  "canon": "main-holdout-a-canon-r1-a3",
+  "skill": "main-holdout-a-skill-r1-a1"
+ },
+ "scores_by_label": {
+  "A": 8,
+  "B": 6,
+  "C": 8
+ },
+ "scores": {
+  "skill": 8,
+  "baseline": 6,
+  "canon": 8
+ },
+ "foreign_references": [],
+ "complete": true,
+ "cost": 0.1017691,
+ "permission_denials": [],
+ "text": "All three are single-file designs with the same small public interface: `buildPickList(ordersText, stock)` plus the fixed types. The scores therefore depend on how well each one's internal modules hide their design decisions behind narrow signatures.\n\n**A:** `buildPickList` is a three-step pipeline over `parseOrders(text) \u2192 Order[]`, `allocate(orders, stock) \u2192 PickList` and `walkOrder(picks) \u2192 Pick[]`. Each step has a one- or two-argument interface and hides one substantial decision:\n- `parseOrders` hides the grammar, duplicate-id and empty-order checks, and SKU merging.\n- `allocate` hides the earliest-expiry-first sort and the `left` Map, which tracks remaining stock without mutating the input.\n- `walkOrder` hides bin parsing and the serpentine rule.\n\n`compareExpiry` is a small helper that captures the \"null lots last\" rule. The modules are deep and cleanly separated.\n\n**B:** `parseOrders` and `inWalkingOrder` are deep: walking order hides bin parsing, aisle ranking, direction and a stable tie-break behind `Pick[] \u2192 Pick[]`. Allocation, however, is not its own module. `buildPickList` itself builds `lotsBySku`, maps input to the internal `Lot` record, sorts and runs the allocation loop, so the top-level function mixes several concerns instead of hiding them. The parser also tracks redundant state (`current.hasContent` alongside `items`), and `parseBin`/`compareLots` are thin helpers. The design is somewhat less layered than A or C.\n\n**C:** Its structure is almost the same as A's. `parseOrders`, `allocate` and `inWalkingOrder` each sit behind a narrow signature. `allocate` also absorbs the priority-first serving order, so `buildPickList` is reduced to two calls, and the copied lots keep the input unmodified. `assertLastOrderHasItems` is a shallow helper that gives callers little beyond its name, but overall the modules are deep.\n\n```json\n{\"scores\": {\"A\": 8, \"B\": 6, \"C\": 8}}\n```"
+}

@@ -1,0 +1,29 @@
+{
+ "group": "main-holdout-a-r1",
+ "reviewer": 1,
+ "key": {
+  "A": "baseline",
+  "B": "canon",
+  "C": "skill"
+ },
+ "runs": {
+  "baseline": "main-holdout-a-baseline-r1-a2",
+  "canon": "main-holdout-a-canon-r1-a3",
+  "skill": "main-holdout-a-skill-r1-a1"
+ },
+ "scores_by_label": {
+  "A": 6,
+  "B": 7,
+  "C": 6
+ },
+ "scores": {
+  "baseline": 6,
+  "canon": 7,
+  "skill": 6
+ },
+ "foreign_references": [],
+ "complete": true,
+ "cost": 0.10090640000000001,
+ "permission_denials": [],
+ "text": "All three are single-file designs with the same overall structure: the public `buildPickList(ordersText, stock)` sits on top of a parser, an allocation step and a walking-order sort. That top-level interface is narrow and hides a lot. The differences are in how well the internal modules hide their own decisions.\n\n**A:** `parseOrders` is deep: one string goes in, and the trimming, comments, regexes, duplicate IDs, empty orders, SKU merging and error line numbers all stay inside it. `inWalkingOrder` hides the whole serpentine rule behind `Pick[] \u2192 Pick[]`. Allocation has no module of its own. Lot grouping by SKU, FEFO sorting through `compareLots`, priority ordering and the take-from-lots loop are all written inline in `buildPickList`, so that function does several jobs instead of hiding one decision. `parseBin` is a small, shallow helper.\n\n**B:** `parseOrders` and `inWalkingOrder` are deep in the same way as in A. `allocate(orders, stock)` is the most complete module of the three. It owns serving priority, FEFO ordering, copying the lots so `stock` isn't modified, and shortage reporting, which leaves `buildPickList` as a two-line composition. `assertLastOrderHasItems` and the comparators are small helpers, but they don't leak anything.\n\n**C:** The structure is nearly the same as B, and `parseOrders`, `walkOrder` (which hides the serpentine rule) and `allocate` (which tracks remaining stock in a side `Map` so the input is never changed) are all reasonably deep. However, the priority ordering is done in `buildPickList`, so `allocate` relies on the caller to pass orders already in serving order. That pushes part of the allocation policy out of the module that should own it, which makes it a little shallower than B's.\n\n```json\n{\"scores\": {\"A\": 6, \"B\": 7, \"C\": 6}}\n```"
+}

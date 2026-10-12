@@ -1,0 +1,29 @@
+{
+ "group": "main-holdout-a-r1",
+ "reviewer": 2,
+ "key": {
+  "A": "canon",
+  "B": "baseline",
+  "C": "skill"
+ },
+ "runs": {
+  "baseline": "main-holdout-a-baseline-r1-a2",
+  "canon": "main-holdout-a-canon-r1-a3",
+  "skill": "main-holdout-a-skill-r1-a1"
+ },
+ "scores_by_label": {
+  "A": 7,
+  "B": 5,
+  "C": 6
+ },
+ "scores": {
+  "canon": 7,
+  "baseline": 5,
+  "skill": 6
+ },
+ "foreign_references": [],
+ "complete": true,
+ "cost": 0.100358,
+ "permission_denials": [],
+ "text": "All three are one file each, so depth here means how well each one hides its decisions behind its internal functions. All three hide the parser well; they differ in how cleanly they hide allocation and walking order.\n\n**A** has the cleanest pipeline: `buildPickList` is two lines over `parseOrders` \u2192 `allocate` \u2192 `inWalkingOrder`. Each function has a tiny signature and hides a whole policy. `parseOrders` hides the line grammar, merging repeated SKUs, line numbers and the order of error checks. `allocate` hides copying the stock, sorting oldest-expiry-first (via `compareExpiry`/`compareStrings`), putting priority orders first, and recording shortages. `inWalkingOrder` hides how bins are decoded and how racks alternate direction by aisle. Callers know nothing of these choices, so these are deep modules.\n\n**B** has a deep `parseOrders` and a deep `inWalkingOrder` (with `parseBin` and `compareLots` hiding the bin layout and the lot ordering). The drawback is that allocation never becomes its own module. Grouping lots by SKU, sorting them, putting priority orders first and the take-from-lots loop all sit inline in `buildPickList`, which mixes several policies at one level. `parseOrders` also tracks a redundant `hasContent` flag and a separate `current` record next to `orders`, which adds state without hiding anything new.\n\n**C** decomposes much like A (`parseOrders`, `allocate`, `walkOrder`), and the small interfaces each hide real policy. But the serving-order decision (priority orders first) has moved out of `allocate` into `buildPickList`. So `allocate` only works if the caller has already put the orders in the right order, which spreads one allocation rule across two places. `walkOrder` hides the serpentine route well, with `place` decoding the bin locally.\n\n```json\n{\"scores\": {\"A\": 7, \"B\": 5, \"C\": 6}}\n```"
+}
