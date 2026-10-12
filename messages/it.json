@@ -1266,5 +1266,6 @@
 	"statements_preset_from_settings": "Il profilo di riscaldamento e le spese di gestione provengono dalle impostazioni. Li verifichi e passi all’anteprima.",
 	"contracts_next_steps_text_successor": "Il contratto di locazione è disdetto, il nuovo inquilino è registrato. Per il conteggio finale serve il nuovo indirizzo dell’inquilino.",
 	"contracts_next_steps_hint": "Vede i prossimi passi in alto nella pagina.",
-	"contracts_apartment_contracts_unknown": "Non è stato possibile caricare i contratti di locazione dell’appartamento. Ricarichi la pagina e riprovi."
+	"contracts_apartment_contracts_unknown": "Non è stato possibile caricare i contratti di locazione dell’appartamento. Ricarichi la pagina e riprovi.",
+	"contracts_apartment_contracts_loading": "I contratti di locazione dell’appartamento sono ancora in caricamento. Riprovi tra un momento."
 }

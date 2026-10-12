@@ -267,6 +267,29 @@ describe('Mietvertrag bearbeiten', () => {
 			expect(byTestId('form-error')!.textContent).toContain('überschneidet');
 		});
 
+		// Haiku-Review: solange die Mietverträge der Wohnung laden, wird nichts gelöscht, und die Meldung sagt es
+		it('löscht keinen Entwurf, solange die Mietverträge der Wohnung noch laden', async () => {
+			calls = fakeBff(({ method }) =>
+				method === 'PUT' ? [409, refused] : [200, { contracts: [] }]
+			);
+			const answer = globalThis.fetch;
+			globalThis.fetch = ((url: string, init?: RequestInit) =>
+				String(url).includes('/contracts?apartmentId=a1')
+					? new Promise(() => {}) // still loading
+					: answer(url, init)) as typeof fetch;
+			await open();
+			await endOn('31.03.2025');
+			click('contract-end-past-confirm');
+			await settle();
+			await save();
+			click('delete-draft-and-save');
+			await settle();
+			expect(calls.filter((c) => c.method === 'DELETE')).toEqual([]);
+			expect(byTestId('form-error')!.textContent).toContain(
+				'Die Mietverträge der Wohnung werden noch geladen.'
+			);
+		});
+
 		// Review K-7: ein inzwischen versendeter Entwurf; die Meldung des Backends, kein zweites Angebot
 		it('nennt den Grund, wenn der Entwurf nicht gelöscht werden kann', async () => {
 			calls = fakeBff(({ method }) => {

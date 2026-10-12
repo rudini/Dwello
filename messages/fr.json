@@ -1266,5 +1266,6 @@
 	"statements_preset_from_settings": "Le profil de chauffage et les frais de gestion proviennent des paramètres. Vérifiez-les et passez à l’aperçu.",
 	"contracts_next_steps_text_successor": "Le contrat de bail est résilié, le nouveau locataire est saisi. Pour le décompte final, il faut la nouvelle adresse du locataire.",
 	"contracts_next_steps_hint": "Vous voyez les prochaines étapes en haut de la page.",
-	"contracts_apartment_contracts_unknown": "Les contrats de bail de l’appartement n’ont pas pu être chargés. Rechargez la page et réessayez."
+	"contracts_apartment_contracts_unknown": "Les contrats de bail de l’appartement n’ont pas pu être chargés. Rechargez la page et réessayez.",
+	"contracts_apartment_contracts_loading": "Les contrats de bail de l’appartement sont encore en cours de chargement. Réessayez dans un instant."
 }

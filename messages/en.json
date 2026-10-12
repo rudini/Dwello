@@ -1266,5 +1266,6 @@
 	"statements_preset_from_settings": "The heating profile and management fee come from the settings. Check them and go on to the preview.",
 	"contracts_next_steps_text_successor": "The rental contract has been terminated and the new tenant is recorded. The final statement needs the tenant’s new address.",
 	"contracts_next_steps_hint": "You can see the next steps at the top of the page.",
-	"contracts_apartment_contracts_unknown": "The apartment’s rental contracts could not be loaded. Reload the page and try again."
+	"contracts_apartment_contracts_unknown": "The apartment’s rental contracts could not be loaded. Reload the page and try again.",
+	"contracts_apartment_contracts_loading": "The apartment’s rental contracts are still loading. Try again in a moment."
 }

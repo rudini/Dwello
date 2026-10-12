@@ -56,7 +56,8 @@
 	let errors = $state<Record<string, string>>({});
 	let saving = $state(false);
 	let refused = $state<RefusedStatement[]>([]); // statements that refused the last save
-	let contractsKnown = $state(false); // the chosen apartment's contracts loaded, so an overlap shows
+	// the chosen apartment's contracts, for the overlap check: an overlap shows only once they are loaded
+	let contractsState = $state<'loading' | 'loaded' | 'failed'>('loading');
 	let availability = $state<Map<string, AvailabilityInfo> | null>(null);
 	let apartmentContracts = $state<ContractForAvailability[]>([]);
 	let form = $state<HTMLFormElement>();
@@ -86,14 +87,13 @@
 		const response = await apiCall<{ contracts: Parameters<typeof forAvailability>[0] }>(
 			`/contracts?apartmentId=${apartmentId}`
 		);
-		if (apartmentId === values.apartmentId) contractsKnown = !response.error;
-		return forAvailability(response.data?.contracts ?? []);
+		return response.error ? null : forAvailability(response.data?.contracts ?? []);
 	}
 
 	// The contract being edited does not block its own apartment
 	async function availabilityOf(apartmentId: string) {
 		const own = apartmentId === contract.apartmentId ? contract.id : undefined;
-		return [apartmentId, computeAvailability(await contractsOf(apartmentId), own)] as const;
+		return [apartmentId, computeAvailability((await contractsOf(apartmentId)) ?? [], own)] as const;
 	}
 
 	$effect(() => {
@@ -105,9 +105,13 @@
 	// Contracts of the chosen apartment, for the overlap check
 	$effect(() => {
 		const apartmentId = values.apartmentId;
-		contractsKnown = false; // until this apartment's contracts have answered (Haiku review N3)
-		if (apartmentId) contractsOf(apartmentId).then((list) => (apartmentContracts = list));
-		else apartmentContracts = [];
+		contractsState = 'loading'; // until this apartment's contracts have answered (Haiku review N3)
+		if (!apartmentId) return void (apartmentContracts = []);
+		contractsOf(apartmentId).then((list) => {
+			if (apartmentId !== values.apartmentId) return; // an answer for an apartment chosen before
+			apartmentContracts = list ?? [];
+			contractsState = list ? 'loaded' : 'failed';
+		});
 	});
 
 	function edited(event: Event) {
@@ -160,14 +164,17 @@
 	}
 
 	// the one draft the new dates would change goes first; the wizard then creates it anew (A-10)
+	const contractsMessage: Record<string, string> = {
+		loading: m.contracts_apartment_contracts_loading(),
+		failed: m.contracts_apartment_contracts_unknown()
+	};
+
 	async function deleteDraftAndSave(draft: RefusedStatement) {
 		if (!valid()) return focusFirstError(form);
 		// an overlap would refuse the save after the delete: the draft would be gone for nothing (review K-2);
 		// without the apartment's contracts an overlap cannot be ruled out (Haiku review R5)
-		if (overlap || !contractsKnown) {
-			errors = {
-				form: overlap ? m.backend_contract_overlap() : m.contracts_apartment_contracts_unknown()
-			};
+		if (overlap || contractsState !== 'loaded') {
+			errors = { form: overlap ? m.backend_contract_overlap() : contractsMessage[contractsState] };
 			refused = [];
 			return focusFirstError(form);
 		}
