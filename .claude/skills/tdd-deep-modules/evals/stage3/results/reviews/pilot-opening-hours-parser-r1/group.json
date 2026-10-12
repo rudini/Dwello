@@ -1,0 +1,10 @@
+{
+ "group": "pilot-opening-hours-parser-r1",
+ "fixture": "opening-hours-parser",
+ "runs": {
+  "baseline": "pilot-opening-hours-parser-baseline-r1-a1",
+  "canon": "pilot-opening-hours-parser-canon-r1-a1",
+  "skill": "pilot-opening-hours-parser-skill-r1-a1"
+ },
+ "control": "baseline"
+}

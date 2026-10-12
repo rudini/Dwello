@@ -1,0 +1,32 @@
+{
+ "group": "pilot-expense-policy-review-r1",
+ "reviewer": 3,
+ "key": {
+  "A": "skill",
+  "B": "canon",
+  "C": "baseline",
+  "D": "control:baseline"
+ },
+ "runs": {
+  "baseline": "pilot-expense-policy-review-baseline-r1-a1",
+  "canon": "pilot-expense-policy-review-canon-r1-a1",
+  "skill": "pilot-expense-policy-review-skill-r1-a1"
+ },
+ "scores_by_label": {
+  "A": 6,
+  "B": 7,
+  "C": 4,
+  "D": 4
+ },
+ "scores": {
+  "skill": 6,
+  "canon": 7,
+  "baseline": 4,
+  "control:baseline": 4
+ },
+ "foreign_references": [],
+ "complete": true,
+ "cost": 0.1715469,
+ "permission_denials": [],
+ "text": "I read TASK.md and all four implementations. **C and D are identical, byte for byte**, so they get the same score.\n\n**A:** `readRows` is a fairly deep module: one call hides line splitting, skipping blank lines, line numbering, finding the header, checking columns and mapping fields to columns. `policyChecker` is a closure that keeps the duplicate set and the daily running totals out of sight, and `toChfCents`/`decimal` hide the exact decimal arithmetic behind `(amount, rate) \u2192 cents`. The weak spot is the boundary between modules. `readRows` returns raw strings plus a `complete` flag that only `rejection` interprets. `rejection` checks the row but returns just a reason, not a parsed value. So the checker has to re-derive things: it re-parses the amount through `toChfCents(amount, 1)` for the duplicate key and lowercases `receipt` again.\n\n**B:** `readRow` validates and parses in one step and returns either a typed `Expense` (`amountCents` as a bigint, `hasReceipt`, `amountChfCents`) or a reason string. This hides all the row-reading decisions behind one small contract. `policyChecker` then takes only an `Expense` and keeps its state private, so knowledge isn't scattered across the code the way it is in A. `parseAmountCents` and `convertCents` are small but deep. Two weaker points: the header and line handling sits inline in `reviewExpenses`, and `ReadContext` is mostly a bag of values passed straight through.\n\n**C:** Nearly everything sits in one long `reviewExpenses`: the header, the seven checks one after another, the conversion, all four policy checks with their state, and the totals. Only the leaf helpers are factored out. `splitLine`, `isValidDate` and `parseAmountCents` are fine, and `convertCents`/`toDecimal` do hide real complexity (exact decimal handling of the rate). But the main design decisions, such as the check order, the duplicate key and the daily totals, aren't wrapped in any module.\n\n**D:** The code is identical to C: a monolithic `reviewExpenses` with the same `splitLine`, `isValidDate`, `parseAmountCents` and `convertCents` helpers. It gets the same score for the same reasons.\n\n```json\n{\"scores\": {\"A\": 6, \"B\": 7, \"C\": 4, \"D\": 4}}\n```"
+}

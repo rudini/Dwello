@@ -1,0 +1,32 @@
+{
+ "group": "pilot-expense-policy-review-r1",
+ "reviewer": 1,
+ "key": {
+  "A": "control:baseline",
+  "B": "baseline",
+  "C": "canon",
+  "D": "skill"
+ },
+ "runs": {
+  "baseline": "pilot-expense-policy-review-baseline-r1-a1",
+  "canon": "pilot-expense-policy-review-canon-r1-a1",
+  "skill": "pilot-expense-policy-review-skill-r1-a1"
+ },
+ "scores_by_label": {
+  "A": 4,
+  "B": 4,
+  "C": 7,
+  "D": 6
+ },
+ "scores": {
+  "control:baseline": 4,
+  "baseline": 4,
+  "canon": 7,
+  "skill": 6
+ },
+ "foreign_references": [],
+ "complete": true,
+ "cost": 0.16504970000000002,
+ "permission_denials": [],
+ "text": "**A** \u2014 `reviewExpenses` is one long function that does everything else inline: it finds the header, maps columns, runs the seven rejection checks in sequence, keeps the duplicate and daily-total state, works out violations and adds up totals. Some helpers are reasonably deep: `splitLine` handles CSV quoting, `convertCents`/`toDecimal` do exact BigInt rounding behind a `(cents, rate)` signature, and `isValidDate` checks calendar dates. But there is no module for reading a row or for the policy rules, so the main function shows all of the design decisions directly and is about as complex as what it does.\n\n**B** \u2014 This is the same code as A, character for character: the same `splitLine`, `isValidDate`, `parseAmountCents`, `convertCents` and the same monolithic `reviewExpenses`. It gets the same assessment and score.\n\n**C** \u2014 The work is split into deep units. `readRow(fields, ctx)` returns either an `Expense` or a reason string, which hides the whole ordered validation and the CHF conversion behind one call. `policyChecker(policy)` returns a closure that keeps the duplicate set and daily totals private and answers \"which violations does this expense have?\" With `parseFields` and `convertCents` doing the low-level work, `reviewExpenses` is a short loop that wires these together. The `ReadContext` bundle is a minor weakness: it is a loose grab-bag of parameters passed through to `readRow`.\n\n**D** \u2014 `readRows` is a fairly deep module: it hides line splitting, header detection, the missing-column errors and column mapping. `toChfCents` hides decimal arithmetic for both the amount and the rate. However, information leaks between modules. `readRows` exposes a `complete` flag that only `rejection` uses. `rejection` validates fields but does not return parsed values, so `policyChecker` gets raw `Row` strings and parses them again: it re-normalises the amount with `toChfCents(amount, 1)` and lowercases `receipt` again. As a result, knowledge of the field formats is spread across several functions.\n\n```json\n{\"scores\": {\"A\": 4, \"B\": 4, \"C\": 7, \"D\": 6}}\n```"
+}

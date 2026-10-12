@@ -1,0 +1,32 @@
+{
+ "group": "pilot-opening-hours-parser-r1",
+ "reviewer": 2,
+ "key": {
+  "A": "control:baseline",
+  "B": "canon",
+  "C": "baseline",
+  "D": "skill"
+ },
+ "runs": {
+  "baseline": "pilot-opening-hours-parser-baseline-r1-a1",
+  "canon": "pilot-opening-hours-parser-canon-r1-a1",
+  "skill": "pilot-opening-hours-parser-skill-r1-a1"
+ },
+ "scores_by_label": {
+  "A": 7,
+  "B": 8,
+  "C": 7,
+  "D": 8
+ },
+ "scores": {
+  "control:baseline": 7,
+  "canon": 8,
+  "baseline": 7,
+  "skill": 8
+ },
+ "foreign_references": [],
+ "complete": true,
+ "cost": 0.1450517,
+ "permission_denials": [],
+ "text": "A and C are the same code. All four use the same overall shape: one small public function, `parseOpeningHours`, which runs a private tokenizer and then a recursive-descent parser. The scores differ mainly in how well the token-stream helpers hide the details of reading tokens, especially reaching the end of the text.\n\n**A:** `parseOpeningHours(text)` is a narrow entry point over a lot of hidden logic: `tokenize`, the `Parser` class, wrap-around `dayRange`, time checks, and overlap and duplicate checks. The weak spot is the token-stream layer. `peek()` and `next()` return `Token | undefined`, so every caller (`parseRule`, `parseDays`, `parseRanges`) must deal with end of text itself through `?.`, manual `this.pos++` and an `expected` string passed to `unexpected`. Mechanics that could be hidden are spread across the grammar methods. `parseDay` and `parseTime` do bundle reading, checking and error reporting into one call each, which is good.\n\n**B:** It has the same structure, but the stream layer is deeper. `tokenize` adds a sentinel `end` token, so `peek()` never returns undefined, and `accept(kind)` and `expect(kind)` handle moving forward and reporting UNEXPECTED, including the end-of-text column. As a result, `parseRule`, `parseHours`, `parseRange` and `parseDayItem` read almost like the grammar. `expectTime(isEnd)` and `expectDay()` each hide a full rule (24:00 handling, the list of valid days) behind one call.\n\n**C:** Same code as A, so same assessment. The parser's helpers expose `undefined` tokens and require manual position updates, which makes the stream abstraction fairly shallow, though the top-level interface is still small and hides a lot.\n\n**D:** The `Cursor` class is a small, deep abstraction. `next(fits)`, `accept(text)`, `peekColumn()` and `expectEnd()` hide the position, the end-of-text column and all UNEXPECTED reporting. The grammar functions (`readDay`, `readDays`, `readTime`, `readRanges`) never touch indexes or `undefined`. The rule loop sits inline in `parseOpeningHours`, and `readDays` uses a local `name` closure for duplicate checks, but both are compact and hide their logic well.\n\n```json\n{\"scores\": {\"A\": 7, \"B\": 8, \"C\": 7, \"D\": 8}}\n```"
+}

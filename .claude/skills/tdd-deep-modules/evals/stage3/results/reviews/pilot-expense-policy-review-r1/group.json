@@ -1,0 +1,10 @@
+{
+ "group": "pilot-expense-policy-review-r1",
+ "fixture": "expense-policy-review",
+ "runs": {
+  "baseline": "pilot-expense-policy-review-baseline-r1-a1",
+  "canon": "pilot-expense-policy-review-canon-r1-a1",
+  "skill": "pilot-expense-policy-review-skill-r1-a1"
+ },
+ "control": "baseline"
+}

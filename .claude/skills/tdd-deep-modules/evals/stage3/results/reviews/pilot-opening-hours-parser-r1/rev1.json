@@ -1,0 +1,32 @@
+{
+ "group": "pilot-opening-hours-parser-r1",
+ "reviewer": 1,
+ "key": {
+  "A": "baseline",
+  "B": "skill",
+  "C": "canon",
+  "D": "control:baseline"
+ },
+ "runs": {
+  "baseline": "pilot-opening-hours-parser-baseline-r1-a1",
+  "canon": "pilot-opening-hours-parser-canon-r1-a1",
+  "skill": "pilot-opening-hours-parser-skill-r1-a1"
+ },
+ "scores_by_label": {
+  "A": 6,
+  "B": 8,
+  "C": 7,
+  "D": 6
+ },
+ "scores": {
+  "baseline": 6,
+  "skill": 8,
+  "canon": 7,
+  "control:baseline": 6
+ },
+ "foreign_references": [],
+ "complete": true,
+ "cost": 0.1452986,
+ "permission_denials": [],
+ "text": "**A** (`A/src/openingHours.ts`): The public interface is just `parseOpeningHours`. `tokenize` hides all of the lexing rules well, and `parse()` hides how rules are applied left to right. Inside `Parser`, though, `peek()` and `next()` return `Token | undefined`, so every grammar method has to handle the end of the text itself and move the cursor by hand with `this.pos++` (in `parseRule`, `parseDays` and `parseRanges`). Because of that, the cursor never becomes its own abstraction. `parseDay` returns a `{day, token}` pair just so callers can get a column, which also exposes token details.\n\n**B** (`B/src/openingHours.ts`): `Cursor` is a small, deep module. `next(fits)` handles end of text, the end-of-text column and `UNEXPECTED` errors in one place. `accept(text)` makes optional tokens a one-line check, including `\"off\"`, `-`, `,` and `;`. With that in place, `readDays`, `readTime` and `readRanges` are short functions that just follow the grammar and contain no token bookkeeping. The inner `name` closure in `readDays` also handles duplicate days and the wrap-around in one spot.\n\n**C** (`C/src/openingHours.ts`): `tokenize` adds an `end` sentinel token, which removes the end-of-text special case completely. `expect(kind)` and `accept(kind)` then hide all `UNEXPECTED` reporting, so `parseSpec`, `parseRule`, `parseRange` and `expectTime` read like the grammar. Two small leaks: `parseHours` checks for `off` and does `position++` by hand, and `parseRule` writes into the `hours` object it is passed instead of returning its result. It is still clearly a deep design.\n\n**D** (`D/src/openingHours.ts`): This is the same code as A, token for token: the same `tokenize`, the same `Parser` with `peek`/`next` that can return `undefined`, and the same manual `pos++` in `parseDays` and `parseRanges`. It has the same strengths and leaks as A, so it gets the same score.\n\n```json\n{\"scores\": {\"A\": 6, \"B\": 8, \"C\": 7, \"D\": 6}}\n```"
+}

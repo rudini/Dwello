@@ -1,0 +1,32 @@
+{
+ "group": "pilot-expense-policy-review-r1",
+ "reviewer": 2,
+ "key": {
+  "A": "baseline",
+  "B": "control:baseline",
+  "C": "skill",
+  "D": "canon"
+ },
+ "runs": {
+  "baseline": "pilot-expense-policy-review-baseline-r1-a1",
+  "canon": "pilot-expense-policy-review-canon-r1-a1",
+  "skill": "pilot-expense-policy-review-skill-r1-a1"
+ },
+ "scores_by_label": {
+  "A": 5,
+  "B": 5,
+  "C": 7,
+  "D": 7
+ },
+ "scores": {
+  "baseline": 5,
+  "control:baseline": 5,
+  "skill": 7,
+  "canon": 7
+ },
+ "foreign_references": [],
+ "complete": true,
+ "cost": 0.1652979,
+ "permission_denials": [],
+ "text": "**A**: `splitLine`, `isValidDate`, `parseAmountCents` and `toDecimal`/`convertCents` are reasonably deep helpers. Each has a one-argument interface and hides quote handling, leap-year logic or exact BigInt rounding. Everything else sits inside one long `reviewExpenses`: header lookup, the seven row checks, duplicate and daily-total tracking, violation rules and totals. None of those decisions is behind its own interface, so the main function is a broad, flat procedure.\n\n**B**: B's file is identical to A's, line for line: the same deep low-level helpers and the same monolithic `reviewExpenses` that mixes file handling, validation, policy state and totals. It gets the same score.\n\n**C**: `readRows(csv)` hides line splitting, the header search, column matching and the `ExpenseFileError` cases behind one call that returns numbered rows. `rejection()` keeps the ordered validation rules in one function that returns a reason. `policyChecker(policy)` returns a closure that hides the duplicate set and daily running totals, and `toChfCents` hides the decimal arithmetic. Two things make it shallower: the `complete` flag leaks a parsing detail into the validation step, and rows stay as raw strings. Because of that, the amount gets parsed again (`toChfCents(amount, 1)`) inside the checker and receipt casing is handled in several places.\n\n**D**: `readRow(fields, context)` turns raw fields into a typed `Expense` (with `amountCents`, `hasReceipt` and `amountChfCents`) or a reason string. That hides validation and conversion together, so later code never handles raw text. `policyChecker` works on that clean `Expense` and hides all the state it keeps between rows. `parseFields`, `parseAmountCents` and `convertCents` are compact, deep helpers. The weaker spots are that header parsing stays inline in `reviewExpenses`, and the `ReadContext` parameter bundle is fairly wide for what it carries.\n\n```json\n{\"scores\": {\"A\": 5, \"B\": 5, \"C\": 7, \"D\": 7}}\n```"
+}

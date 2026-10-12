@@ -1,0 +1,32 @@
+{
+ "group": "pilot-opening-hours-parser-r1",
+ "reviewer": 3,
+ "key": {
+  "A": "control:baseline",
+  "B": "canon",
+  "C": "skill",
+  "D": "baseline"
+ },
+ "runs": {
+  "baseline": "pilot-opening-hours-parser-baseline-r1-a1",
+  "canon": "pilot-opening-hours-parser-canon-r1-a1",
+  "skill": "pilot-opening-hours-parser-skill-r1-a1"
+ },
+ "scores_by_label": {
+  "A": 6,
+  "B": 7,
+  "C": 7,
+  "D": 6
+ },
+ "scores": {
+  "control:baseline": 6,
+  "canon": 7,
+  "skill": 7,
+  "baseline": 6
+ },
+ "foreign_references": [],
+ "complete": true,
+ "cost": 0.1431327,
+ "permission_denials": [],
+ "text": "I read TASK.md and all four `src/openingHours.ts` files. **A and D are identical, character for character**, so they get the same score. All four share the same overall shape: one small entry point `parseOpeningHours(text)` that hides a tokenizer and a recursive-descent parser. That entry point is deep in every case. The differences are in how well the internal modules hide the token stream's edge cases, such as the end of the text and \"unexpected token\" errors.\n\n**A:** `tokenize` is a simple loop that hides how tokens are classified. The `Parser` class's `peek()` and `next()` return `Token | undefined`, so the end of the text leaks into every parse method. `parseRule`, `parseDay`, `parseRanges` and `parseTime` each check the token kind and call `this.unexpected(token, expected)` themselves. There is no `expect`/`accept` abstraction, so moving through the tokens (`this.pos++`, `?.kind !== \",\"`) is spread across the methods. The modules are reasonably deep, but the parser's internal layer is thin.\n\n**B:** `tokenize` appends an `end` sentinel token, so no special case for the end of the text exists anywhere else. `Parser.expect(kind)` and `accept(kind)` are small, general primitives that hide both moving through the tokens and the creation of `UNEXPECTED` errors. That lets `parseRule`, `parseHours`, `parseRange` and `expectDay` read almost like the grammar. `expectTime` and `expectDay` hide their checks (time format, day name) behind single calls.\n\n**C:** The `Cursor` class has a narrow interface (`next(fits)`, `accept(text)`, `peekColumn()`, `expectEnd()`). It hides position tracking, the end-of-text column and `UNEXPECTED` errors in one place. The free functions `readDay`, `readDays`, `readTime` and `readRanges` each hide one grammar rule and its error rules. For example, `readDays` hides wrap-around day ranges and duplicate-day detection. The tokenizer is a single regex. This is about as deep as B, with the cursor concern cleanly separated from the grammar.\n\n**D:** Identical to A: the same `Parser`, where `Token | undefined` leaks the end of the text and each method repeats its own checks and `unexpected` calls. It gets the same score for the same reasons.\n\n```json\n{\"scores\": {\"A\": 6, \"B\": 7, \"C\": 7, \"D\": 6}}\n```"
+}
