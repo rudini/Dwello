@@ -306,9 +306,12 @@ async function statementsChanged(contractId: string, startDate: string, endDate:
 			id: utilityStatements.id,
 			statementNumber: utilityStatements.statementNumber,
 			status: utilityStatements.status,
-			periodEnd: utilityStatements.periodEnd
+			periodStart: utilityStatements.periodStart,
+			periodEnd: utilityStatements.periodEnd,
+			buildingId: apartments.buildingId // to create the statement anew in the wizard (A-10)
 		})
 		.from(utilityStatements)
+		.innerJoin(apartments, eq(utilityStatements.apartmentId, apartments.id))
 		.where(
 			and(
 				eq(utilityStatements.contractId, contractId),

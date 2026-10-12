@@ -71,6 +71,12 @@
 {/if}
 
 <dl class="flex flex-col gap-2 tabular-nums">
+	{#if statement.heatingProfileName}
+		<div class="flex justify-between gap-4" data-testid="statement-heating-profile">
+			<dt class="text-ink-muted">{m.glossary_profile_term()}</dt>
+			<dd class="text-ink">{statement.heatingProfileName}</dd>
+		</div>
+	{/if}
 	<div class="flex justify-between gap-4">
 		<dt class="text-ink-muted">{m.statements_subtotal()}</dt>
 		<dd class="text-ink">{formatCurrency(subtotal)}</dd>

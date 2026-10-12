@@ -40,6 +40,45 @@ describe('Vertragsstatus', () => {
 	});
 });
 
+// A-10: Mietstage in der letzten Abrechnungsperiode ohne Abrechnung
+describe('Fehlende Abrechnung am Mietvertrag', () => {
+	const backend = (statements: unknown[]) =>
+		(async (url: string) => {
+			if (url.endsWith('/config'))
+				return Response.json({ data: { accounting_period: 'calendar' } });
+			if (url.includes('/statements?'))
+				return Response.json({ data: statements, total: statements.length });
+			return Response.json({
+				id: 'c1',
+				startDate: '2024-04-01',
+				endDate: null,
+				apartmentId: 'a1',
+				apartment: { id: 'a1', buildingId: 'b1' },
+				building: { id: 'b1' }
+			});
+		}) as typeof globalThis.fetch;
+	const lastYear = new Date().getFullYear() - 1;
+
+	it('nennt die Periode und führt zum Assistenten für dieses Gebäude', async () => {
+		const data = (await load({ params: { id: 'c1' }, fetch: backend([]) } as never)) as {
+			missingStatement: { start: string; end: string; href: string } | null;
+		};
+		expect(data.missingStatement).toEqual({
+			start: `${lastYear}-01-01`,
+			end: `${lastYear}-12-31`,
+			href: `/statements/generate?building=b1&start=${lastYear}-01-01&end=${lastYear}-12-31`
+		});
+	});
+
+	it('schweigt, wenn der Mietvertrag seine Abrechnung hat', async () => {
+		const data = (await load({
+			params: { id: 'c1' },
+			fetch: backend([{ contractId: 'c1' }])
+		} as never)) as { missingStatement: unknown };
+		expect(data.missingStatement).toBeNull();
+	});
+});
+
 describe('Mietvertrag beenden', () => {
 	// den Vertragsbeginn liest die Aktion beim Backend, nicht aus dem Formular
 	it('setzt das Vertragsende im Backend auf den eingegebenen Tag', async () => {
@@ -116,7 +155,9 @@ describe('Mietvertrag beenden', () => {
 			status: 409,
 			data: {
 				endError:
-					'Die Nebenkostenabrechnung NK-2025-0003 (Entwurf) wurde mit den bisherigen Vertragsdaten berechnet. Löschen Sie zuerst den Entwurf und erstellen Sie die Nebenkostenabrechnung danach neu.'
+					'Die Nebenkostenabrechnung NK-2025-0003 (Entwurf) wurde mit den bisherigen Vertragsdaten berechnet. Löschen Sie zuerst den Entwurf und erstellen Sie die Nebenkostenabrechnung danach neu.',
+				// A-10: der Dialog verlinkt die genannten Abrechnungen
+				refused: refused.statements
 			}
 		});
 	});
@@ -181,6 +222,78 @@ describe('Mietvertrag beenden', () => {
 			data: { endError: 'Das Vertragsende kann nicht vor dem Vertragsbeginn am 01.11.2099 liegen.' }
 		});
 		expect(calls.filter((call) => call.method === 'PUT')).toEqual([]);
+	});
+});
+
+// A-10: der einzige Entwurf wird gelöscht, der Mietvertrag beendet, danach geht es in den Assistenten
+describe('Entwurf löschen und Mietvertrag beenden', () => {
+	type Call = { method?: string; url: string; body?: unknown };
+	function run(fields: Record<string, string>, statement: Record<string, unknown>) {
+		const calls: Call[] = [];
+		const fetch = (async (url: string, init?: RequestInit) => {
+			calls.push({ method: init?.method, url, body: init?.body && JSON.parse(String(init.body)) });
+			if (url.includes('/statements/')) {
+				return init?.method === 'DELETE'
+					? new Response(null, { status: 204 })
+					: Response.json(statement);
+			}
+			return Response.json(
+				init?.method === 'PUT' ? {} : { startDate: '2024-04-01', endDate: null }
+			);
+		}) as typeof globalThis.fetch;
+		const form = new FormData();
+		for (const [name, value] of Object.entries(fields)) form.append(name, value);
+		const request = new Request('http://localhost:3000', { method: 'POST', body: form });
+		const result = (actions.endDeletingDraft as (event: never) => Promise<unknown>)({
+			params: { id: 'c1' },
+			fetch,
+			request
+		} as never);
+		return { calls, result };
+	}
+	const draft = {
+		id: 's1',
+		contractId: 'c1',
+		status: 'draft',
+		periodStart: '2025-01-01',
+		periodEnd: '2025-12-31',
+		building: { id: 'b1' }
+	};
+	const fields = { endDate: '2025-03-31', pastConfirmed: 'on', statementId: 's1' };
+
+	it('löscht den Entwurf, beendet den Mietvertrag und öffnet den Assistenten', async () => {
+		const { calls, result } = run(fields, draft);
+
+		await expect(result).rejects.toMatchObject({
+			status: 303,
+			location: '/statements/generate?building=b1&start=2025-01-01&end=2025-12-31'
+		});
+		expect(calls.filter((call) => call.method).map((c) => [c.method, c.url, c.body])).toEqual([
+			['DELETE', 'http://localhost:3001/api/v1/statements/s1', undefined],
+			[
+				'PUT',
+				'http://localhost:3001/api/v1/contracts/c1',
+				{ endDate: '2025-03-31', terminated: true }
+			]
+		]);
+	});
+
+	// aus einem alten Fenster oder einem fremden Formular: nur ein Entwurf dieses Mietvertrags
+	it('löscht keine Abrechnung eines anderen Mietvertrags und keine versendete', async () => {
+		for (const statement of [
+			{ ...draft, contractId: 'c2' },
+			{ ...draft, status: 'sent' }
+		]) {
+			const { calls, result } = run(fields, statement);
+			expect(await result).toMatchObject({ status: 409 });
+			expect(calls.filter((call) => call.method)).toEqual([]);
+		}
+	});
+
+	it('verlangt auch hier die Bestätigung eines vergangenen Vertragsendes', async () => {
+		const { calls, result } = run({ endDate: '2025-03-31', statementId: 's1' }, draft);
+		expect(await result).toMatchObject({ status: 400 });
+		expect(calls.filter((call) => call.method)).toEqual([]);
 	});
 });
 

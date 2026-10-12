@@ -1253,5 +1253,11 @@
 	"contracts_next_steps": "Prochaines étapes",
 	"contracts_next_steps_text": "Le contrat de bail est résilié. Saisissez le contrat de bail du nouveau locataire dès qu’il est signé. Pour le décompte final, il faut la nouvelle adresse du locataire.",
 	"contracts_next_successor": "Saisir le nouveau locataire",
-	"contracts_next_address": "Saisir la nouvelle adresse"
+	"contracts_next_address": "Saisir la nouvelle adresse",
+	"contracts_statement_missing": "Décompte {period} manquant",
+	"contracts_statement_missing_text": "Le contrat de bail a des jours de location dans cette période de décompte, mais pas encore de décompte des charges. Établissez-le dans l’assistant.",
+	"contracts_refused_open": "Ouvrir le décompte des charges {number}",
+	"contracts_delete_draft_consequence": "Le brouillon {number} sera supprimé. Établissez ensuite le décompte des charges à nouveau.",
+	"contracts_delete_draft_and_end": "Supprimer le brouillon et terminer le contrat de bail",
+	"contracts_delete_draft_and_save": "Supprimer le brouillon et enregistrer le contrat de bail"
 }

@@ -4,7 +4,9 @@
 			"id": "s1",
 			"contractId": "c1",
 			"periodStart": "2024-01-01",
-			"periodEnd": "2024-12-31"
+			"periodEnd": "2024-12-31",
+			"heatingProfileId": "hp1",
+			"managementFeePercent": "3.00"
 		}
 	],
 	"total": 1

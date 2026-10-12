@@ -32,6 +32,7 @@
 			defaultManagementFeePercent: number;
 			defaultHeatingProfileId: string;
 			defaultPeriod: { start: string; end: string };
+			defaultBuildingIds: string[]; // chosen by the link that opened the wizard (A-10)
 		};
 		form: {
 			preview?: PreviewRow[];
@@ -53,11 +54,15 @@
 		periodEnd: data.defaultPeriod.end,
 		heatingProfileId: data.defaultHeatingProfileId,
 		managementFeePercent: data.defaultManagementFeePercent,
-		buildingIds: []
+		buildingIds: [...data.defaultBuildingIds]
 	});
 
 	let selection = $state(untrack(fresh));
-	let step = $state(untrack(() => (form?.created != null ? 5 : form?.preview ? 4 : 1)));
+	// a link that chose building and period opens the settings, the step before the preview
+	const chosen = untrack(() => data.defaultBuildingIds.length > 0);
+	let step = $state(
+		untrack(() => (form?.created != null ? 5 : form?.preview ? 4 : chosen ? 3 : 1))
+	);
 	let errors = $state<Record<string, string>>({});
 	let confirmed = $state(false); // statements despite buildings without invoices, for this preview only
 	let busy = $state(false); // the server is calculating the preview or creating the drafts
@@ -78,7 +83,7 @@
 	);
 
 	onMount(() => {
-		if (form) return; // coming back from the server, not a new visit
+		if (form || chosen) return; // coming back from the server, or a link chose for this visit
 		const draft = readDraft<WizardSelection>(browserStorage(), DRAFT);
 		if (!draft) return;
 		selection = restoredSelection(draft.values, {
@@ -212,7 +217,9 @@
 		class="flex flex-col gap-6 rounded-panel border border-line bg-surface p-6"
 	>
 		<h2 id="step-heading" tabindex="-1" class="text-2xl font-bold text-ink">
-			<span class="sr-only">{m.contracts_step_of({ current: step, total: statementSteps.length })}</span>
+			<span class="sr-only"
+				>{m.contracts_step_of({ current: step, total: statementSteps.length })}</span
+			>
 			<span data-step-label>{statementSteps[step - 1]}</span>
 		</h2>
 		{#if shownError}

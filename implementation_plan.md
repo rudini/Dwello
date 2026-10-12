@@ -4883,6 +4883,18 @@ header and on pages without it. Branch `claude/optimistic-clarke-nn8u7t` from `m
   four languages; a11y and language screen `contract-detail-notice`. Tests first: scenarios in `dashboard.feature`,
   `apartment-detail.feature`, `contract-detail.feature`; `overview.test.ts`, `dashboard.test.ts`, `apartment.test.ts`,
   `contract-detail-page.dom.test.ts`, `apartment-status.pg.test.ts`.
+- [x] **A-10, statements after a changed end**: the refusal carries `periodStart` and `buildingId` per statement
+  (`contract.service.ts`, `tests/contracts/contract-end-refused.json`); `RefusedStatements.svelte` links them and,
+  for one draft, offers to delete it: action `endDeletingDraft` (`src/routes/contracts/[id]/+page.server.ts`) and
+  `deleteDraftAndSave` (`ContractForm.svelte`), then the wizard via `wizardLink` (`src/lib/statement-wizard.ts`); the
+  wizard takes building and period from the link, starts on the settings and suggests the heating profile and fee of
+  another statement of that building and period (`src/routes/statements/generate/+page.server.ts`,
+  `StatementWizard.svelte`); the contract page reports «Abrechnung {Jahr} fehlt» (`missingStatement`); the statement
+  page names its heating profile (`statement.service.ts` `getStatement`, `CostTable.svelte`). a11y and language state
+  `end-dialog-refused`. Tests first: scenarios in `contract-detail.feature`, `contract-edit.feature`,
+  `statement-detail.feature`, `statement-generate.feature`; `contract-actions.test.ts`, `contract-detail-page.dom.test.ts`,
+  `contract-edit.dom.test.ts`, `statement-generate-actions.test.ts`, `statement-wizard.dom.test.ts`,
+  `statement-mapping.test.ts`, `contract-end.pg.test.ts`, `api-contracts.pg.test.ts`.
 
 ---
 

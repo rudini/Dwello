@@ -19,6 +19,7 @@ import ContractPage from '../routes/contracts/[id]/+page.svelte';
 import { get } from 'svelte/store';
 import { toasts } from '$lib/stores';
 import { byTestId, click, fireEvent, settle, show } from './helpers/dom';
+import refused from '../../tests/contracts/contract-end-refused.json';
 
 const contract = (startDate: string, endDate: string | null, terminated = false) => ({
 	id: 'c1',
@@ -53,11 +54,13 @@ function open(
 	endDate: string | null = null,
 	form: unknown = null,
 	today = '2026-10-10',
-	terminated = false
+	terminated = false,
+	missingStatement: { start: string; end: string; href: string } | null = null
 ) {
 	show(ContractPage, {
 		data: {
 			today,
+			missingStatement,
 			contract: contract(startDate, endDate, terminated),
 			rentBreakdown: { baseRent: 950, additionalRent: 50, advancePayment: 180, total: 1180 }
 		},
@@ -85,6 +88,53 @@ describe('Mietvertragsdetail', () => {
 			['Nachmieter erfassen', '/contracts/new?apartment=a1'],
 			['Neue Adresse eintragen', '/tenants/t1/edit']
 		]);
+	});
+
+	// A-10: die Ablehnung führt zur Abrechnung; der einzige Entwurf lässt sich löschen, mit seiner Folge
+	it('verlinkt die abgelehnte Abrechnung und bietet an, den Entwurf zu löschen', async () => {
+		open('2024-04-01', null, { endError: 'abgelehnt', refused: refused.statements });
+		click('contract-end-button');
+		fireEvent(byTestId<HTMLInputElement>('contract-end-date-input')!, 'input', '31.03.2025');
+		await settle();
+		const link = byTestId('refused-statement-link')!;
+		expect(link.getAttribute('href')).toBe('/statements/s1');
+		expect(link.textContent).toContain('NK-2025-0003');
+		expect(text('refused-statements')).toContain(
+			'Der Entwurf NK-2025-0003 wird gelöscht. Erstellen Sie die Nebenkostenabrechnung danach neu.'
+		);
+		const form = document.querySelector<HTMLFormElement>('form[action="?/endDeletingDraft"]')!;
+		const value = (name: string) => form.querySelector<HTMLInputElement>(`[name="${name}"]`)!.value;
+		expect([value('statementId'), value('endDate')]).toEqual(['s1', '2025-03-31']);
+		expect(form.contains(byTestId('delete-draft-and-end'))).toBe(true);
+	});
+
+	it('bietet bei einer versendeten Abrechnung kein Löschen an', async () => {
+		const sent = refused.statements.map((s) => ({ ...s, status: 'sent' }));
+		open('2024-04-01', null, { endError: 'abgelehnt', refused: sent });
+		click('contract-end-button');
+		await settle();
+		expect(byTestId('refused-statement-link')).not.toBeNull();
+		expect(byTestId('delete-draft-and-end')).toBeNull();
+	});
+
+	// A-10: Mietstage in der letzten Abrechnungsperiode ohne Abrechnung
+	it('meldet die fehlende Abrechnung und führt zum Assistenten', () => {
+		const href = '/statements/generate?building=b1&start=2025-01-01&end=2025-12-31';
+		open('2024-04-01', null, null, '2026-10-10', false, {
+			start: '2025-01-01',
+			end: '2025-12-31',
+			href
+		});
+		expect(text('contract-missing-statement')).toContain('Abrechnung 2025 fehlt');
+		expect(byTestId('contract-missing-statement-link')!.getAttribute('href')).toBe(href);
+	});
+
+	it('nennt eine Periode über den Jahreswechsel mit beiden Tagen', () => {
+		const missing = { start: '2024-07-01', end: '2025-06-30', href: '/statements/generate' };
+		open('2024-04-01', null, null, '2026-10-10', false, missing);
+		expect(text('contract-missing-statement')).toContain(
+			'Abrechnung 01.07.2024 – 30.06.2025 fehlt'
+		);
 	});
 
 	it('nennt ohne Kündigung keine nächsten Schritte', () => {

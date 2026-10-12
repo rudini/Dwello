@@ -11,6 +11,7 @@
 		"end-dialog": "The dialog that ends a rental contract open.",
 		"end-dialog-error": "The dialog that ends a rental contract confirmed without a Vertragsende: the error at the field.",
 		"past-end-error": "A Vertragsende before today (end dialog or contract form) saved without the confirmation: the checkbox with its error.",
+		"end-dialog-refused": "The end dialog refused because a draft statement already bills later rent days: the link to the draft and the offer to delete it.",
 		"send-dialog": "The confirmation before marking a statement as sent open.",
 		"reminder-dialog": "The Mahnung dialog of a sent statement open.",
 		"mark-paid-dialog": "The dialog that marks a statement as paid open.",
@@ -219,6 +220,7 @@
 				"end-dialog",
 				"end-dialog-error",
 				"past-end-error",
+				"end-dialog-refused",
 				"delete-dialog"
 			]
 		},

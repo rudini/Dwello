@@ -58,3 +58,10 @@ Funktionalität: Mietvertrag bearbeiten
     Wenn der Liegenschaftsverwalter die Kündigung aufhebt
     Dann ist der Liegenschaftsverwalter auf der Detailseite des Mietvertrags von "Anna Keller"
     Und ist der Mietvertrag unbefristet
+
+  # A-10: auch unter «Bearbeiten» führt der Weg über das Löschen des Entwurfs
+  Szenario: Entwurf löschen und Mietvertrag speichern
+    Angenommen für "Anna Keller" gibt es die Abrechnung 2025 im Gebäude "Ahornhof"
+    Wenn der Liegenschaftsverwalter den Vertragsbeginn "2025-05-01" speichert
+    Und der Liegenschaftsverwalter den Entwurf löscht und den Mietvertrag speichert
+    Dann ist der Liegenschaftsverwalter im Abrechnungsassistenten für das Gebäude "Ahornhof" und 2025

@@ -1,31 +1,28 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
 	import { flushSync, untrack } from 'svelte';
-	import { contractEndError, contractStatusOn, pastEndConfirmation } from '$lib/contract-status';
+	import {
+		contractEndError,
+		contractStatusOn,
+		pastEndConfirmation,
+		type RefusedStatement
+	} from '$lib/contract-status';
+	import { enhance } from '$app/forms';
 	import PastEndConfirm from '../PastEndConfirm.svelte';
+	import RefusedStatements from '../RefusedStatements.svelte';
 	import { formatDate } from '$lib/utils/format';
 	import DateInput from '$lib/ui/DateInput.svelte';
 	import { focusFirstError } from '$lib/ui/focus-error';
 	import { addToast } from '$lib/stores';
-	import type { Apartment, Building, RentalContract, Tenant } from '$lib/types';
 	import Button from '$lib/ui/Button.svelte';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import Panel from '$lib/ui/Panel.svelte';
 	import ActionDialog from '$lib/ui/ActionDialog.svelte';
 	import ContractParties from './ContractParties.svelte';
 	import ContractTerms from './ContractTerms.svelte';
-	import type { ActionData } from './$types';
-
-	interface PageData {
-		today: string;
-		contract: RentalContract & { tenant: Tenant; apartment: Apartment; building: Building };
-		rentBreakdown: {
-			baseRent: number;
-			additionalRent: number;
-			advancePayment: number;
-			total: number;
-		};
-	}
+	import MissingStatement from './MissingStatement.svelte';
+	import NextSteps from './NextSteps.svelte';
+	import type { ActionData, PageData } from './$types';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 
@@ -65,6 +62,9 @@
 		return !endError && !pastError;
 	}
 	// the toast names the day the tenancy ends, or since when it has ended
+	// the statements that refused the end, to open or to delete one (A-10)
+	const refused = $derived(form && 'refused' in form ? (form.refused as RefusedStatement[]) : null);
+
 	function endedMessage() {
 		if (pastEnd) return m.contracts_ended_toast({ name, date: formatDate(endDate) });
 		if (endDate === data.today) return m.contracts_ends_today_toast({ name });
@@ -103,6 +103,8 @@
 		{/snippet}
 	</PageHeader>
 
+	<MissingStatement missing={data.missingStatement} />
+
 	<div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
 		<ContractParties
 			tenant={contract.tenant}
@@ -118,22 +120,11 @@
 		/>
 	</div>
 
-	{#if contract.terminated}
-		<!-- A-4: what a notice asks for next; TODO(fachlich prüfen): «Nachmieter» is not in the glossary -->
-		<Panel title={m.contracts_next_steps()}>
-			<div class="flex flex-col gap-4" data-testid="contract-next-steps">
-				<p class="text-ink">{m.contracts_next_steps_text()}</p>
-				<div class="flex flex-wrap gap-4">
-					<Button href="/contracts/new?apartment={contract.apartmentId}" icon="contract"
-						>{m.contracts_next_successor()}</Button
-					>
-					<Button href="/tenants/{contract.tenantId}/edit" icon="edit"
-						>{m.contracts_next_address()}</Button
-					>
-				</div>
-			</div>
-		</Panel>
-	{/if}
+	<NextSteps
+		terminated={contract.terminated}
+		apartmentId={contract.apartmentId}
+		tenantId={contract.tenantId}
+	/>
 
 	<Panel title={m.contracts_related()}>
 		<div class="flex flex-wrap gap-4">
@@ -180,6 +171,18 @@
 		bind:error={pastError}
 	/>
 	<p class="text-ink-muted">{m.contracts_end_notice_hint()}</p>
+	<RefusedStatements statements={refused ?? []}>
+		{#snippet action(draft)}
+			<form method="POST" action="?/endDeletingDraft" use:enhance>
+				<input type="hidden" name="endDate" value={endDate} />
+				<input type="hidden" name="pastConfirmed" value={pastConfirmed ? 'on' : ''} />
+				<input type="hidden" name="statementId" value={draft.id} />
+				<Button type="submit" variant="danger" icon="delete" testid="delete-draft-and-end"
+					>{m.contracts_delete_draft_and_end()}</Button
+				>
+			</form>
+		{/snippet}
+	</RefusedStatements>
 </ActionDialog>
 
 <ActionDialog

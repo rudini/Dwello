@@ -1253,5 +1253,11 @@
 	"contracts_next_steps": "Prossimi passi",
 	"contracts_next_steps_text": "Il contratto di locazione è disdetto. Registri il contratto di locazione del nuovo inquilino appena è firmato. Per il conteggio finale serve il nuovo indirizzo dell’inquilino.",
 	"contracts_next_successor": "Registrare il nuovo inquilino",
-	"contracts_next_address": "Inserire il nuovo indirizzo"
+	"contracts_next_address": "Inserire il nuovo indirizzo",
+	"contracts_statement_missing": "Conteggio {period} mancante",
+	"contracts_statement_missing_text": "Il contratto di locazione ha giorni di locazione in questo periodo di conteggio, ma ancora nessun conteggio spese accessorie. Lo allestisca nell’assistente.",
+	"contracts_refused_open": "Aprire il conteggio spese accessorie {number}",
+	"contracts_delete_draft_consequence": "La bozza {number} viene eliminata. Allestisca poi di nuovo il conteggio spese accessorie.",
+	"contracts_delete_draft_and_end": "Eliminare la bozza e terminare il contratto di locazione",
+	"contracts_delete_draft_and_save": "Eliminare la bozza e salvare il contratto di locazione"
 }

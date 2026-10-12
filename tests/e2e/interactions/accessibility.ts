@@ -197,6 +197,15 @@ const states: Record<string, (page: Page, viewport: Viewport) => Promise<unknown
 		}
 		await page.getByTestId('contract-end-past-confirm').and(page.locator('[aria-invalid="true"]')).waitFor();
 	},
+	// the 2025 draft already bills rent days after 31.03.2025: the dialog links it and offers to delete it (A-10)
+	'end-dialog-refused': async (page) => {
+		await press(page, 'contract-end-button');
+		await dialog(page);
+		await typeDate(page.getByTestId('contract-end-date-input'), '2025-03-31');
+		await page.getByTestId('contract-end-past-confirm').check();
+		await press(page, 'contract-end-confirm');
+		await page.getByTestId('refused-statements').waitFor();
+	},
 	'send-dialog': async (page) => {
 		await press(page, 'statement-send-button');
 		await dialog(page);

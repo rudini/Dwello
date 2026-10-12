@@ -69,6 +69,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | contract-detail        | end-dialog          |
       | contract-detail        | end-dialog-error    |
       | contract-detail        | past-end-error      |
+      | contract-detail        | end-dialog-refused  |
       | contract-detail        | delete-dialog       |
       | contract-edit          | default             |
       | contract-edit          | submit-cleared      |

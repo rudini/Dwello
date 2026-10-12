@@ -157,3 +157,25 @@ Funktionalität: Mietvertragsdetail
     Und der Liegenschaftsverwalter den nächsten Schritt "Nachmieter erfassen" wählt
     Dann ist der Liegenschaftsverwalter auf der Seite "Neuer Mietvertrag"
     Und gilt der neue Mietvertrag für die Wohnung "2.01"
+
+  # A-10: die Ablehnung führt zum Entwurf und bietet den Weg über das Löschen an
+  Szenario: Abgelehnter Entwurf ist verlinkt
+    Angenommen für "Anna Keller" gibt es die Abrechnung 2025 im Gebäude "Ahornhof"
+    Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
+    Wenn der Liegenschaftsverwalter den Mietvertrag auf den "2025-03-31" beendet und die Folge bestätigt
+    Und der Liegenschaftsverwalter den genannten Entwurf öffnet
+    Dann ist der Liegenschaftsverwalter auf der Detailseite der Abrechnung 2025 von "Anna Keller"
+
+  Szenario: Entwurf löschen und Mietvertrag beenden
+    Angenommen für "Anna Keller" gibt es die Abrechnung 2025 im Gebäude "Ahornhof"
+    Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
+    Wenn der Liegenschaftsverwalter den Mietvertrag auf den "2025-03-31" beendet und die Folge bestätigt
+    Und der Liegenschaftsverwalter den Entwurf löscht und den Mietvertrag beendet
+    Dann ist der Liegenschaftsverwalter im Abrechnungsassistenten für das Gebäude "Ahornhof" und 2025
+    Und endet der Mietvertrag von "Anna Keller" am "31.03.2025"
+
+  # A-10: Mietstage in der letzten Abrechnungsperiode ohne Abrechnung
+  Szenario: Fehlende Abrechnung am Mietvertrag
+    Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
+    Wenn der Liegenschaftsverwalter die fehlende Abrechnung des letzten Jahres erstellen will
+    Dann ist der Liegenschaftsverwalter im Abrechnungsassistenten für das Gebäude "Ahornhof" und das letzte Jahr

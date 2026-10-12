@@ -139,3 +139,20 @@ When('der Liegenschaftsverwalter den nächsten Schritt {string} wählt', async (
 Then('gilt der neue Mietvertrag für die Wohnung {string}', async ({ verwalter, seed }, apartment: string) => {
 	await expect(verwalter.page).toHaveURL(new RegExp(`apartment=${seed.idOf(apartment)}`));
 });
+
+When('der Liegenschaftsverwalter den genannten Entwurf öffnet', async ({ verwalter }) => {
+	await verwalter.page.getByTestId('refused-statement-link').first().click();
+});
+
+When('der Liegenschaftsverwalter den Entwurf löscht und den Mietvertrag beendet', async ({ verwalter }) => {
+	await verwalter.page.getByTestId('delete-draft-and-end').click();
+});
+
+When('der Liegenschaftsverwalter die fehlende Abrechnung des letzten Jahres erstellen will', async ({ verwalter }) => {
+	await verwalter.page.getByTestId('contract-missing-statement-link').click();
+});
+
+Then('endet der Mietvertrag von {string} am {string}', async ({ verwalter, seed }, tenant: string, date: string) => {
+	await visit(verwalter.page, `/contracts/${seed.idOf(`Mietvertrag ${tenant}`)}`);
+	await expect(endOfContract(verwalter)).toContainText(date);
+});

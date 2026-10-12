@@ -32,5 +32,6 @@
 			"tenantShare": "1000.00",
 			"sharePercentage": "100.0000"
 		}
-	]
+	],
+	"heatingProfile": { "id": "h1", "name": "Standard" }
 }

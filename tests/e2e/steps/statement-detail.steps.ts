@@ -188,3 +188,7 @@ Given('im Gebäude {string} war am {string} Heizöl für {string} Franken im Tan
 Then('steht im PDF {string}', async ({ verwalter }, text: string) => {
 	expect(await downloadedPdfText(verwalter)).toContain(text);
 });
+
+Then('nennt die Abrechnung das Heizprofil {string}', async ({ verwalter, names }, profile: string) => {
+	await expect(verwalter.page.getByTestId('statement-heating-profile')).toContainText(names.get(profile)!);
+});

@@ -194,6 +194,33 @@ describe('Mietvertrag bearbeiten', () => {
 			expect(byTestId('form-error')!.textContent).toContain(
 				'Die Nebenkostenabrechnung NK-2025-0003 (Entwurf) wurde mit den bisherigen Vertragsdaten berechnet. Löschen Sie zuerst den Entwurf und erstellen Sie die Nebenkostenabrechnung danach neu.'
 			);
+			expect(byTestId('refused-statement-link')!.getAttribute('href')).toBe('/statements/s1');
+		});
+
+		// A-10: der einzige Entwurf wird gelöscht, der Mietvertrag gespeichert, danach geht es in den Assistenten
+		it('löscht den Entwurf, speichert und öffnet den Assistenten für Gebäude und Periode', async () => {
+			let refuse = true;
+			calls = fakeBff(({ method }) => {
+				if (method === 'PUT') return refuse ? [409, refused] : [200, {}];
+				if (method === 'DELETE') return ((refuse = false), [204]);
+				return [200, { contracts: [] }];
+			});
+			await open();
+			await endOn('31.03.2025');
+			click('contract-end-past-confirm');
+			await settle();
+			await save();
+			click('delete-draft-and-save');
+			await settle();
+
+			expect(calls.filter((c) => c.method !== 'GET').map((c) => [c.method, c.path])).toEqual([
+				['PUT', '/contracts/c1'],
+				['DELETE', '/statements/s1'],
+				['PUT', '/contracts/c1']
+			]);
+			expect(goto).toHaveBeenCalledWith(
+				'/statements/generate?building=b1&start=2025-01-01&end=2025-12-31'
+			);
 		});
 	});
 

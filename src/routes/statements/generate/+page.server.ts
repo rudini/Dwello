@@ -19,11 +19,27 @@ async function json(fetch: typeof globalThis.fetch, path: string): Promise<Row> 
 	return response.ok ? response.json() : {};
 }
 
-export const load = async ({ fetch }: { fetch: typeof globalThis.fetch }) => {
-	const [buildings, heatingProfiles, config] = await Promise.all([
+const isDay = (value: string | null) => !!value && /^\d{4}-\d{2}-\d{2}$/.test(value);
+
+// A link from a contract or a refusal names one building and one period (A-10): its other statements of that
+// period tell which heating profile and management fee to use again
+async function chosen(fetch: typeof globalThis.fetch, url: URL) {
+	const [building, start, end] = ['building', 'start', 'end'].map((key) => url.searchParams.get(key));
+	if (!building || !isDay(start) || !isDay(end)) return null;
+	const statements = await json(
+		fetch,
+		`statements?buildingId=${building}&periodStart=${start}&periodEnd=${end}&limit=1`
+	);
+	const [other] = (statements.data ?? []) as Row[];
+	return { building, period: { start: start!, end: end! }, other };
+}
+
+export const load = async ({ fetch, url }: { fetch: typeof globalThis.fetch; url: URL }) => {
+	const [buildings, heatingProfiles, config, pick] = await Promise.all([
 		json(fetch, 'buildings?limit=100'),
 		json(fetch, 'heating-profiles?limit=100'),
-		json(fetch, 'config')
+		json(fetch, 'config'),
+		chosen(fetch, url)
 	]);
 	const settings = (config.data ?? {}) as Record<string, string | null>;
 
@@ -31,11 +47,16 @@ export const load = async ({ fetch }: { fetch: typeof globalThis.fetch }) => {
 	return {
 		buildings: (buildings.buildings ?? []) as (Building & { apartmentCount: number })[],
 		heatingProfiles: ((heatingProfiles.data ?? []) as Row[]).map(toHeatingProfile),
-		defaultManagementFeePercent: Number(settings.management_fee_pct ?? 3),
-		defaultPeriod: lastCompletedPeriod(
-			(settings.accounting_period ?? 'calendar') as AccountingPeriodType
+		defaultManagementFeePercent: Number(
+			pick?.other?.managementFeePercent ?? settings.management_fee_pct ?? 3
 		),
-		defaultHeatingProfileId: settings.default_heating_profile_id ?? ''
+		defaultPeriod:
+			pick?.period ??
+			lastCompletedPeriod((settings.accounting_period ?? 'calendar') as AccountingPeriodType),
+		defaultHeatingProfileId: String(
+			pick?.other?.heatingProfileId ?? settings.default_heating_profile_id ?? ''
+		),
+		defaultBuildingIds: pick ? [pick.building] : []
 	};
 };
 

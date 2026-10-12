@@ -15,7 +15,7 @@ Jede Anforderung nennt das Problem, was Dwello tun muss, wie wir es prüfen (Sze
 | A-7 | Doppelt erfassten Mietvertrag entfernen | mittel | Anna (I2, M2) |
 | A-8 | Früheren Mietvertrag als Historie erkennbar machen | mittel | Anna (I2, M3) |
 | A-9 | «Noch nicht abgerechnet» nach den Mietverträgen der Periode | umgesetzt | Helga (I3 M3, I4 M2) |
-| A-10 | Abrechnung nach einem geänderten Vertragsende neu erstellen | mittel | Anna (I2 M1, I3 M1–M3) |
+| A-10 | Abrechnung nach einem geänderten Vertragsende neu erstellen | umgesetzt | Anna (I2 M1, I3 M1–M3) |
 | A-11 | Versendete Abrechnung korrigieren | mittel | Anna (I4 M1), Review I-6 |
 
 Priorität: «hoch» heisst vor dem ersten echten Einsatz, weil sonst falsche Daten oder Geldfolgen entstehen. «mittel» verhindert einen wahrscheinlichen Fehler eines Laien. «niedrig» betrifft einen seltenen Fall.
@@ -275,7 +275,10 @@ Szenario: Erinnerung bleibt nach dem Auszug des letzten Mieters
 
 ---
 
-## A-10 Abrechnung nach einem geänderten Vertragsende neu erstellen
+## A-10 Abrechnung nach einem geänderten Vertragsende neu erstellen – umgesetzt
+
+**Umgesetzt** (Session 17): Die Ablehnung (Dialog «Beenden» und «Bearbeiten») verlinkt jede genannte Abrechnung. Bei genau einer genannten Abrechnung im Entwurf nennt sie die Folge und bietet «Entwurf löschen und Mietvertrag beenden» bzw. «… speichern» an; danach öffnet der Assistent mit diesem Gebäude und dieser Periode bei den Einstellungen (`/statements/generate?building=…&start=…&end=…`). Die Aktion löscht nur einen Entwurf dieses Mietvertrags; lehnt das Backend das neue Datum danach trotzdem ab (z. B. Überschneidung), ist der Entwurf gelöscht. Die Seite des Mietvertrags meldet «Abrechnung {Jahr} fehlt» für die letzte abgeschlossene Periode, in der er Mietstage hat (eine Periode über den Jahreswechsel mit beiden Tagen); die Übersicht nennt das Gebäude schon nach A-9. Der Assistent übernimmt Heizprofil und Verwaltungspauschale einer anderen Abrechnung desselben Gebäudes und derselben Periode, sonst die Einstellungen; die Detailseite einer Abrechnung nennt ihr Heizprofil.
+
 
 **Problem.** Anna (I3) trug einen Auszug per 31.03.2025 nach, für den es einen Entwurf der Abrechnung 2025 gab. Dwello lehnte richtig ab und sagte, was zu tun ist. Der Weg war aber mühsam: Die Entwurfsnummer ist kein Link, sie musste die Abrechnung suchen, löschen, den Vertrag wieder finden und alles neu eintippen. Nach dem Beenden erinnerte nichts an die nun fehlende Abrechnung 2025. Beim Neuerstellen musste sie Heizprofil und Verwaltungspauschale neu wählen, ohne zu wissen, was die gelöschte Abrechnung verwendet hatte.
 

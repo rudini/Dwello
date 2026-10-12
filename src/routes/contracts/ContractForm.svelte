@@ -16,8 +16,10 @@
 		contractStatusOn,
 		localToday,
 		pastEndConfirmation,
-		billedDaysError
+		billedDaysError,
+		type RefusedStatement
 	} from '$lib/contract-status';
+	import { wizardLink } from '$lib/statement-wizard';
 	import { normalizeAmounts, stepErrors } from '$lib/contract-wizard';
 	import { addToast } from '$lib/stores';
 	import type { RentalContract } from '$lib/types';
@@ -35,6 +37,7 @@
 	import PeriodStep from './new/PeriodStep.svelte';
 	import RentStep from './new/RentStep.svelte';
 	import PastEndConfirm from './PastEndConfirm.svelte';
+	import RefusedStatements from './RefusedStatements.svelte';
 
 	// Form of a contract being edited, with the fields, help and checks of the wizard in ./new
 	let {
@@ -51,6 +54,7 @@
 	let values = $state(untrack(() => initialContractValues(contract, $page.url.searchParams)));
 	let errors = $state<Record<string, string>>({});
 	let saving = $state(false);
+	let refused = $state<RefusedStatement[]>([]); // statements that refused the last save
 	let availability = $state<Map<string, AvailabilityInfo> | null>(null);
 	let apartmentContracts = $state<ContractForAvailability[]>([]);
 	let form = $state<HTMLFormElement>();
@@ -114,19 +118,25 @@
 		return m.contracts_save_failed();
 	}
 
-	async function save(event: SubmitEvent) {
-		event.preventDefault();
+	// the fields' errors; true when the form may be sent
+	function valid() {
 		Object.assign(values, normalizeAmounts(values)); // "1'450" as typed in Switzerland
 		errors = { ...validateContract(values), ...stepErrors(values, 3) };
 		const unconfirmed = endChanged && confirmedDay !== values.endDate;
 		const pastConfirmed = unconfirmed && pastEndConfirmation(values.endDate, today);
 		if (pastConfirmed) errors.pastConfirmed = pastConfirmed;
-		if (Object.keys(errors).length > 0) return focusFirstError(form);
+		return Object.keys(errors).length === 0;
+	}
+
+	// saves and opens `next`; a refusal names the statements it concerns (A-10)
+	async function put(next: string) {
 		saving = true;
 		const response = await apiCall(back, { method: 'PUT', body: contractBody(values) });
 		saving = false;
 		if (response.error) {
 			errors = { form: saveError(response.error) };
+			const statements = response.error.details?.statements;
+			refused = Array.isArray(statements) ? (statements as RefusedStatement[]) : [];
 			return focusFirstError(form);
 		}
 		// a withdrawn notice says what changed, not only «gespeichert» (personas J1)
@@ -135,7 +145,26 @@
 				? m.contracts_notice_withdrawn_toast({ name: tenantName })
 				: m.contracts_saved_toast({ name: tenantName });
 		addToast('success', saved, 10_000);
-		await goto(back);
+		await goto(next);
+	}
+
+	async function save(event: SubmitEvent) {
+		event.preventDefault();
+		if (!valid()) return focusFirstError(form);
+		await put(back);
+	}
+
+	// the one draft the new dates would change goes first; the wizard then creates it anew (A-10)
+	async function deleteDraftAndSave(draft: RefusedStatement) {
+		if (!valid()) return focusFirstError(form);
+		saving = true;
+		const deleted = await apiCall(`/statements/${draft.id}`, { method: 'DELETE' });
+		saving = false;
+		if (deleted.error) {
+			errors = { form: m.contracts_save_failed() };
+			return focusFirstError(form);
+		}
+		await put(wizardLink(draft.buildingId, draft.periodStart, draft.periodEnd));
 	}
 </script>
 
@@ -204,6 +233,22 @@
 		<Alert tone="critical" title={m.contracts_not_saved()} testid="form-error">
 			<p>{errors.form}</p>
 		</Alert>
+		{#if refused.length}
+			<RefusedStatements statements={refused}>
+				{#snippet action(draft)}
+					<div>
+						<Button
+							variant="danger"
+							icon="delete"
+							busy={saving}
+							busyLabel={m.ui_please_wait()}
+							onclick={() => deleteDraftAndSave(draft)}
+							testid="delete-draft-and-save">{m.contracts_delete_draft_and_save()}</Button
+						>
+					</div>
+				{/snippet}
+			</RefusedStatements>
+		{/if}
 	{/if}
 
 	<div class="flex flex-col-reverse gap-4 sm:flex-row sm:justify-end">

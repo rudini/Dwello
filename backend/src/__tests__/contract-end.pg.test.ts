@@ -44,8 +44,11 @@ describe('Vertragsende und Nebenkostenabrechnungen', () => {
 		const response = await end('2024-03-31');
 
 		expect(response.status).toBe(409);
+		// A-10: Periode und Gebäude, damit die UI in den Assistenten führen kann
 		expect(await response.json()).toMatchObject({
-			statements: [{ id: draft, status: 'draft', periodEnd: '2024-12-31' }]
+			statements: [
+				{ id: draft, status: 'draft', periodStart: '2024-01-01', periodEnd: '2024-12-31', buildingId: rental.building }
+			]
 		});
 	});
 

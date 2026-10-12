@@ -1253,5 +1253,11 @@
 	"contracts_next_steps": "Next steps",
 	"contracts_next_steps_text": "The rental contract has been terminated. Record the new tenant’s rental contract as soon as it is signed. The final statement needs the tenant’s new address.",
 	"contracts_next_successor": "Record the new tenant",
-	"contracts_next_address": "Enter the new address"
+	"contracts_next_address": "Enter the new address",
+	"contracts_statement_missing": "Statement {period} missing",
+	"contracts_statement_missing_text": "The rental contract has days rented in this billing period but no utility cost statement yet. Create it in the wizard.",
+	"contracts_refused_open": "Open utility cost statement {number}",
+	"contracts_delete_draft_consequence": "The draft {number} will be deleted. Then create the utility cost statement again.",
+	"contracts_delete_draft_and_end": "Delete draft and end rental contract",
+	"contracts_delete_draft_and_save": "Delete draft and save rental contract"
 }

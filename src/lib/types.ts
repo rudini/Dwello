@@ -302,6 +302,7 @@ export interface Statement {
 
 export interface StatementWithDetails extends Statement {
 	tenantName: string;
+	heatingProfileName?: string; // the profile the heating costs were spread with (A-10)
 	tenantEmail?: string;
 	tenantCorrespondenceChannel?: 'email' | 'letter';
 	tenantAddress?: string;

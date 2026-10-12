@@ -1253,5 +1253,11 @@
 	"contracts_next_steps": "Nächste Schritte",
 	"contracts_next_steps_text": "Der Mietvertrag ist gekündigt. Erfassen Sie den Mietvertrag des Nachmieters, sobald er unterschrieben ist. Für die Schlussabrechnung braucht es die neue Adresse des Mieters.",
 	"contracts_next_successor": "Nachmieter erfassen",
-	"contracts_next_address": "Neue Adresse eintragen"
+	"contracts_next_address": "Neue Adresse eintragen",
+	"contracts_statement_missing": "Abrechnung {period} fehlt",
+	"contracts_statement_missing_text": "Der Mietvertrag hat Mietstage in dieser Abrechnungsperiode, aber noch keine Nebenkostenabrechnung. Erstellen Sie sie im Assistenten.",
+	"contracts_refused_open": "Nebenkostenabrechnung {number} öffnen",
+	"contracts_delete_draft_consequence": "Der Entwurf {number} wird gelöscht. Erstellen Sie die Nebenkostenabrechnung danach neu.",
+	"contracts_delete_draft_and_end": "Entwurf löschen und Mietvertrag beenden",
+	"contracts_delete_draft_and_save": "Entwurf löschen und Mietvertrag speichern"
 }
