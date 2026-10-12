@@ -1,4 +1,5 @@
 import { fail } from '@sveltejs/kit';
+import { m } from '$lib/paraglide/messages';
 import { parsePercent } from '$lib/utils/format';
 
 const API = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1/config`;
@@ -35,14 +36,14 @@ export function toSettings(stored: Record<string, string | null>): Settings {
 function settingsErrors(s: Settings) {
 	const errors: Record<string, string> = {};
 	if (s.companyPostalCode && !/^\d{4}$/.test(s.companyPostalCode)) {
-		errors.companyPostalCode = 'PLZ muss 4 Ziffern haben';
+		errors.companyPostalCode = m.buildings_error_postal_code_digits();
 	}
 	const iban = compact(s.iban);
 	if (iban && !(/^CH\d{19}$/.test(iban) && ibanChecksumValid(iban))) {
-		errors.iban = 'Bitte geben Sie eine gültige Schweizer IBAN ein';
+		errors.iban = m.settings_error_iban();
 	}
 	if (s.managementFeePercent && Number.isNaN(parsePercent(s.managementFeePercent))) {
-		errors.managementFeePercent = 'Bitte geben Sie einen Prozentsatz ab 0 mit höchstens zwei Stellen nach dem Komma ein, zum Beispiel 3 oder 2,5.';
+		errors.managementFeePercent = m.statements_error_fee();
 	}
 	return errors;
 }
@@ -57,9 +58,11 @@ export async function saveSettings(fetch: typeof globalThis.fetch, request: Requ
 	if (Object.keys(errors).length > 0) return fail(400, { errors });
 
 	const fee = settings.managementFeePercent && String(parsePercent(settings.managementFeePercent));
-	const entries = Object.entries({ ...settings, iban: compact(settings.iban), managementFeePercent: fee }).map(
-		([field, value]) => [KEYS[field as keyof Settings], value] as const
-	);
+	const entries = Object.entries({
+		...settings,
+		iban: compact(settings.iban),
+		managementFeePercent: fee
+	}).map(([field, value]) => [KEYS[field as keyof Settings], value] as const);
 	const filled = Object.fromEntries(entries.filter(([, value]) => value));
 	const saved = await fetch(API, {
 		method: 'PUT',
@@ -76,10 +79,7 @@ export async function saveSettings(fetch: typeof globalThis.fetch, request: Requ
 		: [];
 	if (![saved, ...resets].every((response) => response.ok)) {
 		return fail(400, {
-			errors: { form: 'Die Einstellungen konnten nicht gespeichert werden.' } as Record<
-				string,
-				string
-			>
+			errors: { form: m.settings_save_failed() } as Record<string, string>
 		});
 	}
 	return { saved: true };

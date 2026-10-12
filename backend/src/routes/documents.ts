@@ -5,6 +5,7 @@
 import { Elysia, t } from 'elysia';
 import { authMiddleware } from '../middleware/auth';
 import { getDocument, getDocumentPdf, listDocuments, markDocumentSent } from '../services/document.service';
+import { errorBody } from '../services/coded-error';
 import { ReminderError, sendReminder } from '../services/reminder.service';
 
 export const documentRoutes = new Elysia({ prefix: '/api/v1' })
@@ -18,7 +19,7 @@ export const documentRoutes = new Elysia({ prefix: '/api/v1' })
 		} catch (error) {
 			if (!(error instanceof ReminderError)) throw error;
 			set.status = error.status;
-			return { error: error.message };
+			return errorBody(error, '');
 		}
 	})
 	.get('/documents', async ({ query }) => ({ data: await listDocuments(query) }), {

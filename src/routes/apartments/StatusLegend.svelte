@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import { statusHelp, statusLabels, statusIcons, statusTones } from '$lib/apartment';
 	import type { ApartmentStatus } from '$lib/types';
 	import Badge from '$lib/ui/Badge.svelte';
@@ -8,7 +9,7 @@
 	const statuses = Object.keys(statusLabels) as ApartmentStatus[];
 </script>
 
-<Panel title="Was bedeutet der Mietstatus?" testid="apartment-status-legend">
+<Panel title={m.apartments_legend_title()} testid="apartment-status-legend">
 	<dl class="grid gap-4 md:grid-cols-2">
 		{#each statuses as status (status)}
 			<div class="flex flex-col items-start gap-2">
@@ -24,7 +25,6 @@
 		{/each}
 	</dl>
 	<p class="text-ink-muted">
-		Vermietet und Wiedervermietet ergeben sich aus den Mietverträgen. Leer und Gesperrt setzen Sie
-		beim Bearbeiten der Wohnung.
+		{m.apartments_legend_text()}
 	</p>
 </Panel>

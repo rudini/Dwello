@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import { untrack } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { listSearchUrl } from '$lib/list-url';
@@ -46,16 +47,16 @@
 <form onsubmit={search} class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
 	<TextInput
 		id="search"
-		label="Suche"
-		help="Rechnungssteller oder Beschreibung"
+		label={m.buildings_search()}
+		help={m.invoices_search_help()}
 		optional
 		bind:value={filters.search}
 		testid="invoice-search-input"
 	/>
 	<Select
 		id="building"
-		label="Gebäude"
-		placeholder="Alle Gebäude"
+		label={m.apartments_building()}
+		placeholder={m.apartments_all_buildings()}
 		optional
 		options={buildings.map((b) => ({ value: b.id, label: b.name || b.address }))}
 		bind:value={filters.building}
@@ -63,8 +64,8 @@
 	/>
 	<Select
 		id="category"
-		label="Kategorie"
-		placeholder="Alle Kategorien"
+		label={m.buildings_category()}
+		placeholder={m.invoices_all_categories()}
 		optional
 		options={categories.map((c) => ({ value: c.id, label: c.name }))}
 		bind:value={filters.categoryId}
@@ -72,30 +73,32 @@
 	/>
 	<Select
 		id="validity"
-		label="Umlagefähigkeit"
-		placeholder="Alle"
+		label={m.invoices_allocability()}
+		placeholder={m.invoices_all()}
 		optional
 		options={[
-			{ value: 'valid', label: 'Umlagefähig' },
-			{ value: 'invalid', label: 'Nicht umlagefähig' }
+			{ value: 'valid', label: m.glossary_allocable_term() },
+			{ value: 'invalid', label: m.invoices_not_allocable() }
 		]}
 		bind:value={filters.validity}
 		testid="invoice-validity-filter"
 	/>
 	<Select
 		id="year"
-		label="Jahr"
-		help="Jahr des Rechnungsdatums"
-		placeholder="Alle Jahre"
+		label={m.invoices_year()}
+		help={m.invoices_year_help()}
+		placeholder={m.invoices_all_years()}
 		optional
 		options={years.map((year) => ({ value: year, label: year }))}
 		bind:value={filters.year}
 		testid="invoice-year-filter"
 	/>
 	<div class="flex flex-wrap gap-4 md:col-span-2 xl:col-span-4">
-		<Button type="submit" icon="search" testid="invoice-search-submit">Suchen</Button>
+		<Button type="submit" icon="search" testid="invoice-search-submit"
+			>{m.buildings_search_submit()}</Button
+		>
 		{#if filtered}
-			<Button variant="ghost" icon="close" onclick={clear}>Filter zurücksetzen</Button>
+			<Button variant="ghost" icon="close" onclick={clear}>{m.buildings_reset_filters()}</Button>
 		{/if}
 	</div>
 </form>

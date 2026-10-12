@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import { enhance } from '$app/forms';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';
@@ -30,20 +31,14 @@
 </script>
 
 <!-- TODO(fachlich prüfen): "Tankbestand", "Stichtag" and the valuation are not in the glossary -->
-<Panel title="Brennstoff im Tank oder Lager" testid="fuel-stocks">
+<Panel title={m.buildings_fuel_title()} testid="fuel-stocks">
 	<p class="text-ink-muted">
-		Nur für Gebäude, die mit Öl, Flüssiggas, Pellets oder Holz heizen. Abgerechnet wird, was
-		verbraucht wurde: Anfangsbestand + Einkauf − Endbestand. Erfassen Sie dafür am letzten Tag jeder
-		Abrechnungsperiode, zum Beispiel am 31.12., den Wert im Tank oder Lager in Franken. Der Wert vom 31.12.2024
-		ist der Endbestand 2024 und der Anfangsbestand 2025. Den Wert berechnen Sie so: Menge im Tank
-		oder Lager mal Preis pro Einheit (Liter, kg oder Ster) der letzten Lieferung. Ist mehr im Tank oder Lager als die letzte Lieferung, rechnen
-		Sie den Rest zum Preis der Lieferung davor. Lesen Sie erst Anfang Januar ab, erfassen Sie den
-		Wert trotzdem per 31.12.
+		{m.buildings_fuel_intro()}
 	</p>
 
 	{#if stocks === null}
-		<Alert tone="critical" title="Nicht geladen" testid="fuel-stock-load-error">
-			<p>Die Tankbestände konnten nicht geladen werden. Laden Sie die Seite neu.</p>
+		<Alert tone="critical" title={m.buildings_not_loaded()} testid="fuel-stock-load-error">
+			<p>{m.buildings_fuel_load_failed()}</p>
 		</Alert>
 	{:else if stocks.length}
 		<FuelStockList {stocks} {deleteError} />
@@ -54,31 +49,31 @@
 			<DateInput
 				id="fuelStockDate"
 				name="readingDate"
-				label="Stichtag"
+				label={m.buildings_fuel_date()}
 				error={errors.readingDate}
 				testid="fuel-stock-date-input"
 			/>
 			<MoneyInput
 				id="fuelStockAmount"
 				name="amount"
-				label="Wert in Franken"
+				label={m.buildings_fuel_amount()}
 				example="2650.00"
 				error={errors.amount}
 				testid="fuel-stock-amount-input"
 			/>
 		</div>
 		{#if categories === null}
-			<Alert tone="critical" title="Nicht geladen" testid="fuel-stock-categories-error">
-				<p>Die Kategorien konnten nicht geladen werden. Laden Sie die Seite neu.</p>
+			<Alert tone="critical" title={m.buildings_not_loaded()} testid="fuel-stock-categories-error">
+				<p>{m.buildings_categories_load_failed()}</p>
 			</Alert>
 		{:else if categories.length === 0}
-			<Alert tone="caution" title="Keine Kategorie" testid="fuel-stock-no-category">
+			<Alert tone="caution" title={m.buildings_no_category()} testid="fuel-stock-no-category">
 				<p>
-					Es gibt keine Kategorie, die Heizkosten nach dem Heizprofil verteilt.
+					{m.buildings_no_category_text()}
 					<a
 						href="/config/categories"
 						class="inline-flex min-h-12 items-center font-semibold text-accent underline underline-offset-4"
-						data-testid="fuel-stock-categories-link">Kategorien ansehen</a
+						data-testid="fuel-stock-categories-link">{m.buildings_view_categories()}</a
 					>
 				</p>
 			</Alert>
@@ -86,22 +81,24 @@
 		<Select
 			id="fuelStockCategory"
 			name="categoryId"
-			label="Kategorie"
-			help="In dieser Kategorie wird der Verbrauch abgerechnet."
+			label={m.buildings_category()}
+			help={m.buildings_fuel_category_help()}
 			options={choice.map((c) => ({ value: c.id, label: c.name }))}
 			value={category}
 			testid="fuel-stock-category-select"
 		/>
 		{#if errors.form}
-			<Alert tone="critical" title="Nicht gespeichert" testid="fuel-stock-error">
+			<Alert tone="critical" title={m.buildings_not_saved()} testid="fuel-stock-error">
 				<p>{errors.form}</p>
 			</Alert>
 		{/if}
 		<p role="status" class="text-ink" data-testid="fuel-stock-status">
-			{saved ? 'Bestand gespeichert.' : ''}
+			{saved ? m.buildings_fuel_saved() : ''}
 		</p>
 		<div>
-			<Button type="submit" icon="add" testid="fuel-stock-save-button">Bestand speichern</Button>
+			<Button type="submit" icon="add" testid="fuel-stock-save-button"
+				>{m.buildings_fuel_save()}</Button
+			>
 		</div>
 	</form>
 </Panel>

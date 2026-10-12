@@ -1,7 +1,9 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import { goto } from '$app/navigation';
 	import { untrack } from 'svelte';
 	import { api } from '$lib/api';
+	import { backendMessage } from '$lib/backend-error';
 	import type { DistributionKeyRow } from '$lib/distribution-key';
 	import { plainAmount, servicePeriodOf, validateInvoice } from '$lib/invoice';
 	import { addToast } from '$lib/stores';
@@ -60,8 +62,7 @@
 	async function save(event: Event) {
 		event.preventDefault();
 		errors = validateInvoice(values);
-		if (needsReason && !overrideReason.trim())
-			errors.overrideReason = 'Bitte geben Sie einen Grund für die Änderung an';
+		if (needsReason && !overrideReason.trim()) errors.overrideReason = m.invoices_error_reason();
 		if (Object.keys(errors).length) return focusFirstError(event.target as Element);
 
 		saving = true;
@@ -80,25 +81,25 @@
 		});
 		saving = false;
 		if (result.error) {
-			saveError = result.error.message;
+			saveError = backendMessage(result.error, result.error.message);
 			focusFirstError(event.target as Element);
 			return;
 		}
-		addToast('success', `Rechnung von ${values.billingEntity.trim()} gespeichert`);
+		addToast('success', m.invoices_saved({ name: values.billingEntity.trim() }));
 		goto(`/invoices/${invoice.id}`);
 	}
 </script>
 
 <svelte:head>
-	<title>Rechnung bearbeiten - Dwello</title>
+	<title>{m.invoices_edit_title()} - Dwello</title>
 </svelte:head>
 
 <form onsubmit={save} class="mx-auto flex max-w-3xl flex-col gap-8" novalidate>
 	<PageHeader
-		title="Rechnung bearbeiten"
-		purpose="Korrigieren Sie die Rechnung von {invoice.billingEntity}. Bestehende Abrechnungen ändern sich dadurch nicht."
+		title={m.invoices_edit_title()}
+		purpose={m.invoices_edit_purpose({ name: invoice.billingEntity })}
 		trail={[
-			{ href: '/invoices', label: 'Rechnungen' },
+			{ href: '/invoices', label: m.nav_invoices() },
 			{ href: `/invoices/${invoice.id}`, label: invoice.billingEntity }
 		]}
 	/>
@@ -107,15 +108,11 @@
 
 	{#if data.billedIn?.length}
 		<BilledWarning periods={data.billedIn}>
-			<p>
-				Ändern Sie diese Rechnung, stimmen diese Abrechnungen nicht mehr. Löschen Sie danach die
-				Entwürfe und erstellen Sie die Abrechnungen erneut. Versendete oder bezahlte Abrechnungen
-				berichtigen Sie ausserhalb von Dwello gegenüber dem Mieter.
-			</p>
+			<p>{m.invoices_edit_billed_text()}</p>
 		</BilledWarning>
 	{/if}
 
-	<Panel title="Rechnungsdaten">
+	<Panel title={m.invoices_data()}>
 		<InvoiceDataFields
 			bind:buildingId={values.buildingId}
 			bind:invoiceDate={values.invoiceDate}
@@ -133,7 +130,7 @@
 		<OriginalSuggestion {invoice} />
 	{/if}
 
-	<Panel title="Kategorie und Verteilung">
+	<Panel title={m.invoices_category_and_split()}>
 		<InvoiceCategoryFields
 			bind:categoryId={values.categoryId}
 			bind:distributionKeyId={values.distributionKeyId}
@@ -145,8 +142,8 @@
 				{#if needsReason}
 					<Textarea
 						id="overrideReason"
-						label="Grund der Änderung"
-						help="Warum passt die Kategorie der KI nicht? Der Grund wird mit der Rechnung gespeichert."
+						label={m.invoices_override_reason()}
+						help={m.invoices_override_reason_help()}
 						rows={2}
 						bind:value={overrideReason}
 						error={errors.overrideReason}
@@ -158,17 +155,17 @@
 	</Panel>
 
 	{#if saveError}
-		<Alert tone="critical" title="Nicht gespeichert">
-			<p>Fehler beim Speichern: {saveError}</p>
+		<Alert tone="critical" title={m.buildings_not_saved()}>
+			<p>{m.invoices_save_error({ error: saveError })}</p>
 		</Alert>
 	{/if}
 
 	<div class="flex flex-col gap-4">
-		<p class="text-ink-muted" role="status">{changed ? 'Ungespeicherte Änderungen' : ''}</p>
+		<p class="text-ink-muted" role="status">{changed ? m.invoices_unsaved() : ''}</p>
 		<InvoiceFormActions
 			cancelHref="/invoices/{invoice.id}"
-			label="Änderungen speichern"
-			busyLabel="Wird gespeichert …"
+			label={m.buildings_save_changes()}
+			busyLabel={m.ui_saving()}
 			busy={saving}
 			disabled={!changed}
 		/>

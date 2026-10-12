@@ -41,7 +41,9 @@ describe('Eigene Heizprofile', () => {
 
 		expect(response.status).toBe(409);
 		expect(await response.json()).toEqual({
-			error: `Ein Heizprofil mit dem Namen "Bergtal ${token}" existiert bereits.`
+			error: `Ein Heizprofil mit dem Namen "Bergtal ${token}" existiert bereits.`,
+			code: 'HEATING_PROFILE_NAME_TAKEN',
+			params: { name: `Bergtal ${token}` }
 		});
 	});
 
@@ -50,7 +52,9 @@ describe('Eigene Heizprofile', () => {
 
 		expect(response.status).toBe(400);
 		expect(await response.json()).toEqual({
-			error: 'Die Monatsanteile müssen zusammen 100 % ergeben (aktuell 90 %).'
+			error: 'Die Monatsanteile müssen zusammen 100 % ergeben (aktuell 90 %).',
+			code: 'HEATING_PROFILE_SHARES_SUM',
+			params: { sum: 90 }
 		});
 	});
 
@@ -68,14 +72,16 @@ describe('Eigene Heizprofile', () => {
 
 		expect(response.status).toBe(409);
 		expect(await response.json()).toEqual({
-			error: 'Das Heizprofil ist in den Einstellungen als Standard hinterlegt.'
+			error: 'Das Heizprofil ist in den Einstellungen als Standard hinterlegt.',
+			code: 'HEATING_PROFILE_IS_DEFAULT',
+			params: {}
 		});
 	});
 
 	it('behält vordefinierte Heizprofile', async () => {
 		const response = await send('DELETE', `/${await firstPredefined('heating-profiles')}`);
 
-		await expectRejection(response, 400, 'Vordefinierte Heizprofile können nicht gelöscht werden.');
+		await expectRejection(response, 400, 'Vordefinierte Heizprofile können nicht gelöscht werden.', 'HEATING_PROFILE_PREDEFINED');
 	});
 });
 
@@ -86,13 +92,15 @@ describe('Heizprofil bearbeiten', () => {
 		// Januar von 12 auf 2 %, die übrigen elf Monate je 8 %
 		const response = await send('PUT', `/${id}`, { januaryPct: 2 });
 
-		await expectRejection(response, 400, 'Die Monatsanteile müssen zusammen 100 % ergeben (aktuell 90 %).');
+		await expectRejection(response, 400, 'Die Monatsanteile müssen zusammen 100 % ergeben (aktuell 90 %).', 'HEATING_PROFILE_SHARES_SUM', {
+			sum: 90
+		});
 	});
 
 	// Die Oberfläche bietet das Bearbeiten nicht an; die API lehnt es verständlich ab
 	it('behält die Monatsanteile vordefinierter Heizprofile', async () => {
 		const response = await send('PUT', `/${await firstPredefined('heating-profiles')}`, shares());
 
-		await expectRejection(response, 400, 'Die Monatsanteile vordefinierter Heizprofile können nicht geändert werden.');
+		await expectRejection(response, 400, 'Die Monatsanteile vordefinierter Heizprofile können nicht geändert werden.', 'HEATING_PROFILE_SHARES_FIXED');
 	});
 });

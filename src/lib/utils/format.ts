@@ -1,3 +1,5 @@
+import { getLocale } from '$lib/paraglide/runtime';
+
 /**
  * Format Utilities
  * Helper functions for normalizing and formatting values
@@ -27,9 +29,9 @@ export function formatCurrency(amount: number): string {
 		.replace(/'/g, '’');
 }
 
-/** Date in words, so a wrong pick shows, e.g. "Mittwoch, 1. Januar 2025" */
+/** Date in words, so a wrong pick shows, e.g. "Mittwoch, 1. Januar 2025"; the words follow the UI language */
 export function formatDateLong(isoDate: string): string {
-	return new Date(isoDate).toLocaleDateString('de-CH', {
+	return new Date(isoDate).toLocaleDateString(`${getLocale()}-CH`, {
 		weekday: 'long',
 		day: 'numeric',
 		month: 'long',

@@ -18,6 +18,7 @@ import { validateInvoiceForUtilityStatement } from './utility-validation.service
 import { buildingExists } from './building.service';
 import { getCategory } from './category.service';
 import { roundToRappen } from './pdf-format';
+import { CodedError, refusal, type Refusal } from './coded-error';
 
 export interface InvoiceFilters {
 	search?: string;
@@ -210,7 +211,7 @@ async function categorizeWithKi(data: NewInvoice): Promise<Pick<NewInvoice, 'llm
 async function applyCategory(data: Partial<NewInvoice>, categoryId: string | null | undefined) {
 	if (!categoryId) return;
 	const category = await getCategory(categoryId);
-	if (!category) throw new Error('Category not found');
+	if (!category) throw new CodedError('CATEGORY_NOT_FOUND', 'Category not found');
 	if (!category.isAllowedUtilityCost) data.isValidUtilityCost = false;
 }
 
@@ -223,7 +224,7 @@ export async function createInvoice(
 ): Promise<InvoiceWithDetails> {
 	// Validate building exists
 	if (!(await buildingExists(data.buildingId))) {
-		throw new Error('Building not found');
+		throw new CodedError('BUILDING_NOT_FOUND', 'Building not found');
 	}
 
 	await applyCategory(data, data.categoryId);
@@ -329,11 +330,10 @@ export async function recategorizeInvoiceById(id: string): Promise<{
 		isAllowedUtilityCost: boolean;
 		reasoning?: string;
 	};
-	error?: string;
-}> {
+} & Partial<Refusal>> {
 	const invoice = await getInvoice(id);
 	if (!invoice) {
-		return { success: false, error: 'Invoice not found' };
+		return { success: false, ...refusal('INVOICE_NOT_FOUND', 'Invoice not found') };
 	}
 
 	try {
@@ -344,7 +344,7 @@ export async function recategorizeInvoiceById(id: string): Promise<{
 		});
 
 		if (!result.category) {
-			return { success: false, error: KI_UNAVAILABLE };
+			return { success: false, ...refusal('KI_UNAVAILABLE', KI_UNAVAILABLE) };
 		}
 
 		// As when entering an invoice, a sure suggestion becomes its category; a non-allocable one makes the invoice

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import { navigating } from '$app/stores';
 	import { dismissToast, toasts, type Toast } from '$lib/stores';
 	import IconButton from './IconButton.svelte';
@@ -46,7 +47,7 @@
 	>
 		<span class={style.text}><Icon name={style.icon} size={24} /></span>
 		<p class="flex-1 font-semibold">{toast.message}</p>
-		<IconButton icon="close" label="Meldung schliessen" onclick={() => dismissToast(toast.id)} />
+		<IconButton icon="close" label={m.ui_close_message()} onclick={() => dismissToast(toast.id)} />
 	</div>
 {/snippet}
 

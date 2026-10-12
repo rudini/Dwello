@@ -1,3 +1,5 @@
+import { backendMessage } from '$lib/backend-error';
+import { m } from '$lib/paraglide/messages';
 import type { HeatingProfile } from '$lib/types';
 import { MONTHS, profileTotal } from '$lib/heating-profile';
 import { deleteRecord, fetchRecord, saveRecord } from './save-form';
@@ -10,6 +12,9 @@ export function toHeatingProfile(hp: Record<string, unknown>): HeatingProfile {
 		id: hp.id,
 		name: hp.name || '',
 		nameDE: hp.nameDE || '',
+		nameFR: hp.nameFR,
+		nameIT: hp.nameIT,
+		nameEN: hp.nameEN,
 		type: hp.type || 'predefined',
 		description: hp.description || '',
 		isActive: hp.isActive ?? true,
@@ -20,7 +25,7 @@ export function toHeatingProfile(hp: Record<string, unknown>): HeatingProfile {
 }
 
 export const fetchHeatingProfile = async (fetch: typeof globalThis.fetch, id: string) =>
-	toHeatingProfile(await fetchRecord(fetch, `${API}/${id}`, 'Heizprofil'));
+	toHeatingProfile(await fetchRecord(fetch, `${API}/${id}`, m.glossary_profile_term()));
 
 function parseHeatingProfile(formData: FormData) {
 	const field = (key: string) => String(formData.get(key) ?? '').trim();
@@ -28,10 +33,10 @@ function parseHeatingProfile(formData: FormData) {
 	const total = profileTotal(shares);
 
 	const errors: Record<string, string> = {};
-	if (!field('name')) errors.name = 'Name ist erforderlich';
+	if (!field('name')) errors.name = m.categories_error_name_required();
 	// Same rule as the backend: the year distributes all heating costs
 	if (Math.abs(total - 100) > 0.1) {
-		errors.total = `Die Monatsanteile müssen zusammen 100 % ergeben (aktuell ${total} %).`;
+		errors.total = m.backend_heating_profile_shares_sum({ sum: total });
 	}
 	const body = {
 		name: field('name'),
@@ -48,15 +53,10 @@ export async function saveHeatingProfile(
 	id?: string
 ) {
 	return saveRecord(fetch, API, parseHeatingProfile(await request.formData()), id, {
-		failure: (_status, saved) => saved.error ?? 'Heizprofil konnte nicht gespeichert werden.',
+		failure: (_status, saved) => backendMessage(saved, m.profiles_save_failed()),
 		location: (saved) => `/config/heating-profiles/${saved}`
 	});
 }
 
 export const deleteHeatingProfile = (fetch: typeof globalThis.fetch, id: string) =>
-	deleteRecord(
-		fetch,
-		`${API}/${id}`,
-		'Heizprofil konnte nicht gelöscht werden.',
-		'/config/heating-profiles'
-	);
+	deleteRecord(fetch, `${API}/${id}`, m.profiles_delete_failed(), '/config/heating-profiles');

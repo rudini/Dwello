@@ -1,13 +1,14 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import type { Snippet } from 'svelte';
+	import { m } from '$lib/paraglide/messages';
 	import { addToast } from '$lib/stores';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';
 	import { focusFirstError } from '$lib/ui/focus-error';
 
 	// Form of a master data record: the reason it was not saved on top, cancel and save at the bottom;
-	// once saved, a message names the record (`record`, e.g. "Kategorie") and the name the user gave it
+	// once saved, a message names the kind of record (`record`) and the name the user gave it
 	let {
 		action,
 		record,
@@ -18,13 +19,20 @@
 		children
 	}: {
 		action?: string;
-		record: string;
+		record: 'category' | 'distributionKey' | 'heatingProfile';
 		error?: string;
 		cancelHref: string;
 		submitLabel: string;
 		submitTestid: string;
 		children: Snippet;
 	} = $props();
+
+	const texts = {
+		category: { saved: m.categories_saved, notSaved: m.categories_not_saved },
+		distributionKey: { saved: m.keys_saved, notSaved: m.keys_not_saved },
+		heatingProfile: { saved: m.profiles_saved, notSaved: m.profiles_not_saved }
+	};
+	const text = $derived(texts[record]);
 
 	let saving = $state(false);
 </script>
@@ -36,7 +44,7 @@
 		saving = !submitter?.hasAttribute('formaction'); // another action, e.g. "Formel testen", saves nothing
 		const name = String(formData.get('name') ?? '').trim();
 		return async ({ result, update, formElement }) => {
-			if (result.type === 'redirect') addToast('success', `${record} «${name}» gespeichert`);
+			if (result.type === 'redirect') addToast('success', text.saved({ name }));
 			await update({ reset: false });
 			saving = false;
 			focusFirstError(formElement);
@@ -46,7 +54,7 @@
 	novalidate
 >
 	{#if error}
-		<Alert tone="critical" title="{record} wurde nicht gespeichert" testid="form-error">
+		<Alert tone="critical" title={text.notSaved()} testid="form-error">
 			<p>{error}</p>
 		</Alert>
 	{/if}
@@ -54,13 +62,13 @@
 	{@render children()}
 
 	<div class="flex flex-col-reverse gap-4 border-t border-line pt-6 sm:flex-row">
-		<Button href={cancelHref} testid="form-cancel">Abbrechen</Button>
+		<Button href={cancelHref} testid="form-cancel">{m.ui_cancel()}</Button>
 		<Button
 			type="submit"
 			variant="primary"
 			icon="save"
 			busy={saving}
-			busyLabel="Wird gespeichert …"
+			busyLabel={m.ui_saving()}
 			testid={submitTestid}>{submitLabel}</Button
 		>
 	</div>

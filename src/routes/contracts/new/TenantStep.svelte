@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import { keepEarlyChoice } from '$lib/early-choice';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';
@@ -24,17 +25,12 @@
 </script>
 
 {#if createdName}
-	<Alert tone="positive" title="Mieter erfasst" testid="tenant-created">
-		<p>{createdName} ist gespeichert und für diesen Mietvertrag gewählt.</p>
+	<Alert tone="positive" title={m.contracts_tenant_created()} testid="tenant-created">
+		<p>{m.contracts_tenant_created_text({ name: createdName })}</p>
 	</Alert>
 {/if}
 
-<Field
-	id="tenant"
-	label="Mieter"
-	help="Die Person, die die Wohnung mietet. Steht sie noch nicht in der Liste, erfassen Sie sie zuerst."
-	{error}
->
+<Field id="tenant" label={m.contracts_tenant()} help={m.contracts_tenant_help()} {error}>
 	{#snippet children(control)}
 		<!-- selected options instead of bind:value: a choice made before the page is live survives hydration -->
 		<select
@@ -47,7 +43,7 @@
 			class={controlClass(control.invalid)}
 			data-testid="contract-tenant-select"
 		>
-			<option value="" selected={!tenantId}>Mieter wählen</option>
+			<option value="" selected={!tenantId}>{m.contracts_choose_tenant()}</option>
 			{#each tenants as tenant (tenant.id)}
 				<option value={tenant.id} selected={tenant.id === tenantId}
 					>{tenant.place ? `${tenant.name}, ${tenant.place}` : tenant.name}</option
@@ -59,6 +55,6 @@
 
 <div>
 	<Button href="/tenants/new?for=contract" icon="user-add" testid="contract-new-tenant"
-		>Neuen Mieter erfassen</Button
+		>{m.contracts_new_tenant()}</Button
 	>
 </div>

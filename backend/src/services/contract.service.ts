@@ -15,6 +15,7 @@ import {
 	type NewRentalContract
 } from '../db/schema';
 import { apartmentStatus } from './apartment.service';
+import { CodedError } from './coded-error';
 
 /** Contract with the names of its tenant, apartment and building; selected with those three tables joined */
 const contractFields = {
@@ -269,7 +270,7 @@ export async function getContractsByPeriod(
 
 /** A notice is given for a Kündigungstermin: without an end there is nothing to give notice for */
 function checkNotice(terminated: boolean | undefined, endDate: string | null | undefined) {
-	if (terminated && !endDate) throw new Error('A notice needs an end date');
+	if (terminated && !endDate) throw new CodedError('CONTRACT_NOTICE_WITHOUT_END', 'A notice needs an end date');
 }
 
 /**
@@ -285,7 +286,9 @@ export async function createContract(data: NewRentalContract): Promise<RentalCon
 	);
 
 	if (hasOverlap) {
-		throw new Error(`Contract overlaps with existing contract ${overlappingContract}`);
+		throw new CodedError('CONTRACT_OVERLAP', `Contract overlaps with existing contract ${overlappingContract}`, {
+			contract: overlappingContract!
+		});
 	}
 
 	const [contract] = await db.insert(rentalContracts).values(data).returning();
@@ -327,7 +330,10 @@ async function checkNewDates(current: RentalContract, data: Partial<NewRentalCon
 	const startDate = data.startDate || current.startDate;
 	const endDate = data.endDate !== undefined ? data.endDate : current.endDate;
 	const { hasOverlap, overlappingContract } = await checkContractOverlap(current.apartmentId, startDate, endDate, current.id);
-	if (hasOverlap) throw new Error(`Contract would overlap with existing contract ${overlappingContract}`);
+	if (hasOverlap)
+		throw new CodedError('CONTRACT_OVERLAP', `Contract would overlap with existing contract ${overlappingContract}`, {
+			contract: overlappingContract!
+		});
 	const statements = await statementsChanged(current.id, startDate, endDate);
 	if (statements.length) throw new BilledDaysError(statements);
 }

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import { formatDate } from '$lib/utils/format';
 	import Button from '$lib/ui/Button.svelte';
 	import Icon from '$lib/ui/Icon.svelte';
@@ -15,12 +16,14 @@
 	let { contract }: { contract: CurrentContract } = $props();
 </script>
 
-<Panel title="Aktueller Mieter">
+<Panel title={m.apartments_current_tenant()}>
 	<div class="flex flex-col gap-2">
 		<p class="text-lg font-semibold text-ink" data-testid="current-tenant-name">
 			{contract.tenantName}
 		</p>
-		<p class="text-ink-muted">Mietvertrag seit {formatDate(contract.startDate)}</p>
+		<p class="text-ink-muted">
+			{m.apartments_contract_since({ date: formatDate(contract.startDate) })}
+		</p>
 		{#if contract.tenantEmail}
 			<p class="flex items-center gap-2">
 				<span class="text-ink-muted"><Icon name="mail" /></span>
@@ -34,7 +37,7 @@
 	</div>
 	<div>
 		<Button href="/tenants/{contract.tenantId}" icon="user" testid="current-tenant-profile"
-			>Mieter {contract.tenantName} öffnen</Button
+			>{m.apartments_open_tenant({ name: contract.tenantName })}</Button
 		>
 	</div>
 </Panel>

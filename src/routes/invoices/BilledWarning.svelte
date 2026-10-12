@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import Alert from '$lib/ui/Alert.svelte';
 	import { formatDate } from '$lib/utils/format';
 	import type { Snippet } from 'svelte';
@@ -8,11 +9,10 @@
 		$props();
 </script>
 
-<Alert tone="caution" title="Rechnung schon abgerechnet" testid="invoice-billed-warning">
+<Alert tone="caution" title={m.invoices_billed_title()} testid="invoice-billed-warning">
 	{#each periods as period (`${period.start}-${period.end}`)}
 		<p>
-			Für die Abrechnungsperiode {formatDate(period.start)} – {formatDate(period.end)} gibt es schon Abrechnungen
-			mit dieser Rechnung.
+			{m.invoices_billed_period({ start: formatDate(period.start), end: formatDate(period.end) })}
 		</p>
 	{/each}
 	{@render children()}

@@ -1,3 +1,4 @@
+import { m } from '$lib/paraglide/messages';
 import { fetchRecord } from '$lib/server/save-form';
 import { lastCompletedPeriod, type AccountingPeriodType } from '$lib/accounting-period';
 import { overviewDeadlines, overviewTasks, type Deadline, type Task } from '$lib/overview';
@@ -92,7 +93,11 @@ export const load = async ({
 }): Promise<OverviewData> => {
 	const [figures, overdue, sent, letters, contracts, period, apartments, allContracts] =
 		await Promise.all([
-			fetchRecord(fetch, `${BACKEND_URL}/api/v1/dashboard`, 'Übersicht') as Promise<DashboardData>,
+			fetchRecord(
+				fetch,
+				`${BACKEND_URL}/api/v1/dashboard`,
+				m.nav_overview()
+			) as Promise<DashboardData>,
 			list(fetch, 'statements?status=overdue&limit=100', 'data'),
 			list(fetch, 'statements?status=sent&limit=100', 'data'),
 			list(fetch, 'documents?status=to_send', 'data'),

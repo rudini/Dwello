@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import { untrack } from 'svelte';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import Panel from '$lib/ui/Panel.svelte';
@@ -15,29 +16,25 @@
 	const trail = $derived(
 		preset
 			? [
-					{ href: '/buildings', label: 'Gebäude' },
+					{ href: '/buildings', label: m.nav_buildings() },
 					{ href: `/buildings/${preset.id}`, label: preset.name }
 				]
-			: [{ href: '/apartments', label: 'Wohnungen' }]
+			: [{ href: '/apartments', label: m.nav_apartments() }]
 	);
 </script>
 
 <svelte:head>
-	<title>Neue Wohnung - Dwello</title>
+	<title>{m.apartments_new_title()} - Dwello</title>
 </svelte:head>
 
 <div class="mx-auto flex max-w-3xl flex-col gap-8">
-	<PageHeader
-		title="Neue Wohnung"
-		purpose="Die Wohnung ist zunächst leer. Mit einem Mietvertrag weisen Sie ihr später einen Mieter zu."
-		{trail}
-	/>
+	<PageHeader title={m.apartments_new_title()} purpose={m.apartments_new_purpose()} {trail} />
 	<Panel>
 		<ApartmentForm
 			{buildingId}
 			{errors}
 			cancelHref={trail[trail.length - 1].href}
-			submitLabel="Wohnung erfassen"
+			submitLabel={m.buildings_add_apartment()}
 		>
 			{#snippet building()}
 				<BuildingField

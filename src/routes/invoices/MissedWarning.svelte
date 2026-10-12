@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import Alert from '$lib/ui/Alert.svelte';
 	import { formatDate } from '$lib/utils/format';
 
@@ -7,17 +8,11 @@
 </script>
 
 <!-- TODO(fachlich prüfen): how far costs can still be claimed after a statement was sent is not settled -->
-<Alert tone="caution" title="Nicht in den Abrechnungen" testid="invoice-missed-warning">
+<Alert tone="caution" title={m.invoices_missed_title()} testid="invoice-missed-warning">
 	{#each periods as period (`${period.start}-${period.end}`)}
 		<p>
-			Für die Abrechnungsperiode {formatDate(period.start)} – {formatDate(period.end)} gibt es schon Abrechnungen
-			ohne diese Rechnung.
+			{m.invoices_missed_period({ start: formatDate(period.start), end: formatDate(period.end) })}
 		</p>
 	{/each}
-	<p>
-		Löschen Sie die Entwürfe dieser Periode und erstellen Sie die Abrechnungen erneut, dann ist sie
-		dabei. Versendete Abrechnungen berichtigen Sie ausserhalb von Dwello: Schicken Sie dem Mieter
-		eine berichtigte Abrechnung mit dem Beleg. Ob Sie die Kosten noch nachverlangen können, ist nicht
-		in jedem Fall sicher: Lassen Sie sich im Zweifel beraten.
-	</p>
+	<p>{m.invoices_missed_text()}</p>
 </Alert>

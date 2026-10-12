@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import type { Building } from '$lib/types';
 
 	// One building to choose in step 2, with its utility invoices in the Abrechnungsperiode once they are counted
@@ -18,8 +19,10 @@
 
 	const invoicesText = $derived(
 		invoices === 0
-			? 'Keine Rechnungen in der Abrechnungsperiode erfasst'
-			: `${invoices} ${invoices === 1 ? 'Rechnung' : 'Rechnungen'} in der Abrechnungsperiode`
+			? m.statements_building_no_invoices()
+			: invoices === 1
+				? m.statements_building_invoices_one({ count: invoices })
+				: m.statements_building_invoices_many({ count: invoices ?? 0 })
 	);
 </script>
 
@@ -48,6 +51,7 @@
 		{/if}
 	</span>
 	<span class="text-right text-ink-muted">
-		<span class="font-semibold tabular-nums text-ink">{building.apartmentCount}</span> Wohnungen
+		<span class="font-semibold tabular-nums text-ink">{building.apartmentCount}</span>
+		{m.buildings_apartment_many()}
 	</span>
 </label>

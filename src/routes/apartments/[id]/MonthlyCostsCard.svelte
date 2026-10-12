@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import type { MonthlyCosts } from '$lib/types';
 	import { formatCurrency } from '$lib/utils/format';
 	import Panel from '$lib/ui/Panel.svelte';
@@ -7,13 +8,17 @@
 	let { costs }: { costs: MonthlyCosts } = $props();
 
 	const costItems = $derived([
-		{ label: 'Nettomiete', value: costs.baseRent },
-		...(costs.advancePayment ? [{ label: 'Akonto', value: costs.advancePayment }] : []),
-		...(costs.additionalRent ? [{ label: 'Zusatzmiete', value: costs.additionalRent }] : [])
+		{ label: m.common_net_rent(), value: costs.baseRent },
+		...(costs.advancePayment
+			? [{ label: m.common_advance_payment(), value: costs.advancePayment }]
+			: []),
+		...(costs.additionalRent
+			? [{ label: m.common_additional_rent(), value: costs.additionalRent }]
+			: [])
 	]);
 </script>
 
-<Panel title="Monatliche Miete">
+<Panel title={m.apartments_monthly_rent()}>
 	<dl class="flex flex-col gap-2 tabular-nums">
 		{#each costItems as item (item.label)}
 			<div class="flex justify-between gap-4">
@@ -23,7 +28,7 @@
 		{/each}
 		<div class="flex justify-between gap-4 border-t border-line pt-2">
 			<!-- TODO(fachlich prüfen): no glossary term for the monthly total, see docs/design/offene-punkte.md -->
-			<dt class="font-semibold text-ink">Monatlich total</dt>
+			<dt class="font-semibold text-ink">{m.common_monthly_total()}</dt>
 			<dd class="font-bold text-ink" data-testid="monthly-costs-total">
 				{formatCurrency(costs.totalBrutto)}
 			</dd>

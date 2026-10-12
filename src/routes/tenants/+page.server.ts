@@ -1,3 +1,4 @@
+import { m } from '$lib/paraglide/messages';
 import type { TenantsListData, TenantWithOccupancy } from '$lib/types';
 import type { PageServerLoad } from './$types';
 
@@ -43,7 +44,9 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<TenantsListD
 				address: (t.address as string) || null,
 				postalCode: (t.postalCode as string) || null,
 				city: (t.city as string) || null,
-				currentApartment: t.currentApartment ? `Wohnung ${t.currentApartment}` : null,
+				currentApartment: t.currentApartment
+					? m.buildings_apartment_number({ number: String(t.currentApartment) })
+					: null,
 				currentBuilding: (t.currentBuilding as string) || null,
 				nextContractStart: nextStart(t.id),
 				isActive: t.isActive === true

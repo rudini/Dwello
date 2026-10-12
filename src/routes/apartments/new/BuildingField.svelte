@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import EarlySelect from '$lib/ui/EarlySelect.svelte';
 
 	type Building = { id: string; name: string; address: string };
@@ -16,7 +17,7 @@
 {#if preset}
 	<input type="hidden" name="buildingId" value={preset.id} />
 	<div class="flex flex-col gap-2">
-		<p class="font-semibold text-ink">Gebäude</p>
+		<p class="font-semibold text-ink">{m.apartments_building()}</p>
 		<p class="rounded-control bg-sunken px-4 py-2 text-ink" data-testid="apartment-building">
 			{preset.name}
 			<span class="block text-ink-muted">{preset.address}</span>
@@ -26,9 +27,9 @@
 	<EarlySelect
 		id="building"
 		name="buildingId"
-		label="Gebäude"
-		help="Das Gebäude, zu dem die Wohnung gehört."
-		placeholder="Gebäude wählen"
+		label={m.apartments_building()}
+		help={m.apartments_building_help()}
+		placeholder={m.apartments_building_choose()}
 		options={buildings.map((b) => ({ value: b.id, label: b.name }))}
 		{error}
 		testid="apartment-building-select"

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import { enhance } from '$app/forms';
 	import { onMount, tick, untrack } from 'svelte';
 	import {
@@ -41,13 +42,12 @@
 	} = $props();
 
 	const DRAFT = 'statements';
-	const CONFIRM = 'Bestätigen Sie, dass die Abrechnungen trotzdem erstellt werden sollen.';
+	const CONFIRM = m.statements_confirm_needed();
 	const busyLabels: Record<number, string> = {
-		3: 'Vorschau wird berechnet …',
-		5: 'Entwürfe werden erstellt …'
+		3: m.statements_preview_busy(),
+		5: m.statements_drafts_busy()
 	};
-	const NOTHING =
-		'Wählen Sie eine andere Abrechnungsperiode oder andere Gebäude, oder löschen Sie zuerst die Entwürfe, die Sie neu berechnen wollen.';
+	const NOTHING = m.statements_nothing();
 	const fresh = (): WizardSelection => ({
 		periodStart: data.defaultPeriod.start,
 		periodEnd: data.defaultPeriod.end,
@@ -197,7 +197,7 @@
 	<DraftNotice savedAt={restoredAt} ondiscard={discardDraft}>
 		<!-- Back from "Rechnung erfassen": why the wizard shows the step before the preview -->
 		<p class:hidden={!resumed || step !== 3} data-testid="resume-notice">
-			Mit «Weiter» berechnet Dwello die Vorschau mit der neuen Rechnung.
+			{m.statements_resume()}
 		</p>
 	</DraftNotice>
 
@@ -212,11 +212,11 @@
 		class="flex flex-col gap-6 rounded-panel border border-line bg-surface p-6"
 	>
 		<h2 id="step-heading" tabindex="-1" class="text-2xl font-bold text-ink">
-			<span class="sr-only">Schritt {step} von {statementSteps.length}:</span>
+			<span class="sr-only">{m.contracts_step_of({ current: step, total: statementSteps.length })}</span>
 			<span data-step-label>{statementSteps[step - 1]}</span>
 		</h2>
 		{#if shownError}
-			<Alert tone="critical" title="Das hat nicht geklappt" testid="server-error">
+			<Alert tone="critical" title={m.ui_action_failed()} testid="server-error">
 				<p>{shownError}</p>
 			</Alert>
 		{/if}
@@ -239,7 +239,7 @@
 			{step}
 			last={statementSteps.length}
 			onback={() => goTo(step - 1)}
-			finalLabel="Entwürfe erstellen"
+			finalLabel={m.statements_create_drafts()}
 			finalTestid="generate-statements-button"
 			{busy}
 			busyLabel={busyLabels[step]}

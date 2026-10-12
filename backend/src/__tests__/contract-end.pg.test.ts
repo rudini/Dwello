@@ -189,7 +189,7 @@ describe('Gekündigter Mietvertrag', () => {
 	it('lehnt eine Kündigung ohne Vertragsende verständlich ab', async () => {
 		const response = await put({ terminated: true });
 		expect(response.status).toBe(400);
-		expect(await response.json()).toEqual({ error: 'A notice needs an end date' });
+		expect(await response.json()).toMatchObject({ code: 'CONTRACT_NOTICE_WITHOUT_END' });
 		expect(await stored()).toMatchObject({ endDate: null, terminated: false });
 	});
 
@@ -210,6 +210,6 @@ describe('Gekündigter Mietvertrag', () => {
 			terminated: true
 		});
 		expect(response.status).toBe(400);
-		expect(await response.json()).toEqual({ error: 'A notice needs an end date' });
+		expect(await response.json()).toMatchObject({ code: 'CONTRACT_NOTICE_WITHOUT_END' });
 	});
 });

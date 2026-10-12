@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import Icon from './Icon.svelte';
 	import ProgressBar from './ProgressBar.svelte';
 
@@ -10,11 +11,15 @@
 	}: { steps: string[]; current: number; onselect: (step: number) => void } = $props();
 </script>
 
-<nav aria-label="Fortschritt" class="flex flex-col gap-4">
+<nav aria-label={m.ui_progress()} class="flex flex-col gap-4">
 	<p class="font-semibold text-ink-muted">
-		Schritt {current} von {steps.length}: {steps[current - 1]}
+		{m.ui_step_of_named({ current, total: steps.length, name: steps[current - 1] })}
 	</p>
-	<ProgressBar value={current} max={steps.length} label="Schritt {current} von {steps.length}" />
+	<ProgressBar
+		value={current}
+		max={steps.length}
+		label={m.ui_step_of({ current, total: steps.length })}
+	/>
 	<!-- Up to xl only the numbers: five names do not fit next to the sidebar (the current one is named above).
 	     min-w-0 and hyphenation keep long names inside their step instead of widening the page -->
 	<ol class="hidden gap-2 md:flex">
@@ -36,7 +41,7 @@
 						<span
 							data-testid="wizard-step-label"
 							class="sr-only min-w-0 hyphens-auto break-words xl:not-sr-only">{step}</span
-						><span class="sr-only">(erledigt)</span>
+						><span class="sr-only">{m.ui_step_done()}</span>
 					</button>
 				{:else}
 					<span

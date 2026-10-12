@@ -18,6 +18,7 @@ Funktionalität: Barrierefreiheit
       | gallery                | busy-dialog-open    |
       | login                  | default             |
       | login                  | login-error         |
+      | login                  | other-language      |
       | error-404              | default             |
       | error-server           | default             |
       | error-server           | server-error        |
@@ -25,6 +26,8 @@ Funktionalität: Barrierefreiheit
       | dashboard              | first-use           |
       | dashboard              | mobile-menu-open    |
       | dashboard              | user-menu-open      |
+      | dashboard              | other-language      |
+      | dashboard              | language-menu-open  |
       | buildings              | default             |
       | buildings              | empty               |
       | buildings              | filtered-empty      |
@@ -134,3 +137,6 @@ Funktionalität: Barrierefreiheit
       | terms                  | default             |
       | analytics              | default             |
       | reports                | default             |
+      | help-public            | default             |
+      | privacy-public         | default             |
+      | terms-public           | default             |

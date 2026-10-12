@@ -1,3 +1,4 @@
+import { m } from '$lib/paraglide/messages';
 import type { RentalContract, Tenant, Apartment, Building, ApartmentStatus } from '$lib/types';
 import type { Actions, PageServerLoad } from './$types';
 import { error, fail, redirect } from '@sveltejs/kit';
@@ -31,9 +32,9 @@ export const load: PageServerLoad = async ({ params, fetch }): Promise<ContractD
 
 		if (!response.ok) {
 			if (response.status === 404) {
-				throw error(404, 'Vertrag nicht gefunden');
+				throw error(404, m.contracts_not_found());
 			}
-			throw error(response.status, 'Fehler beim Laden des Vertrags');
+			throw error(response.status, m.contracts_load_failed());
 		}
 
 		const data = await response.json();
@@ -96,7 +97,7 @@ export const load: PageServerLoad = async ({ params, fetch }): Promise<ContractD
 		if (err && typeof err === 'object' && 'status' in err) {
 			throw err;
 		}
-		throw error(500, 'Fehler beim Laden des Vertrags');
+		throw error(500, m.contracts_load_failed());
 	}
 };
 
@@ -109,7 +110,7 @@ function endRefusal(
 	// a stale page: an end already set is changed under «Bearbeiten», not overwritten
 	if (contract.endDate)
 		return fail(409, {
-			endError: 'Der Mietvertrag hat schon ein Vertragsende. Ändern Sie es unter «Bearbeiten».'
+			endError: m.contracts_end_already_set()
 		});
 	const endError =
 		contractEndError(endDate, String(contract.startDate ?? ''), localToday()) ??
@@ -124,8 +125,7 @@ export const actions: Actions = {
 		const endDate = String(form.get('endDate') ?? '');
 		const url = `${BACKEND_URL}/api/v1/contracts/${params.id}`;
 		const stored = await fetch(url);
-		if (!stored.ok)
-			return fail(stored.status, { endError: 'Mietvertrag konnte nicht beendet werden.' });
+		if (!stored.ok) return fail(stored.status, { endError: m.contracts_end_failed() });
 		const contract = await stored.json();
 		const refusal = endRefusal(contract, endDate, form.get('pastConfirmed') === 'on');
 		if (refusal) return refusal;
@@ -139,24 +139,22 @@ export const actions: Actions = {
 			response.status === 409 && (await response.json().catch(() => ({}))).statements;
 		if (Array.isArray(statements)) return fail(409, { endError: billedDaysError(statements) });
 		if (!response.ok) {
-			return fail(response.status, { endError: 'Mietvertrag konnte nicht beendet werden.' });
+			return fail(response.status, { endError: m.contracts_end_failed() });
 		}
 	},
 	// only a contract that has not started: the statement needs the rent days of every other one
 	delete: async ({ params, fetch }) => {
 		const url = `${BACKEND_URL}/api/v1/contracts/${params.id}`;
 		const stored = await fetch(url);
-		if (!stored.ok)
-			return fail(stored.status, { deleteError: 'Mietvertrag konnte nicht gelöscht werden.' });
+		if (!stored.ok) return fail(stored.status, { deleteError: m.contracts_delete_failed() });
 		const { startDate } = await stored.json();
 		if (String(startDate).slice(0, 10) <= localToday())
 			return fail(409, {
-				deleteError:
-					'Ein Mietvertrag, der begonnen hat, kann nicht gelöscht werden: Die Nebenkostenabrechnung braucht seine Mietstage, also die Tage, an denen er gilt.'
+				deleteError: m.contracts_started_not_deletable()
 			});
 		const response = await fetch(url, { method: 'DELETE' });
 		if (!response.ok) {
-			return fail(response.status, { deleteError: 'Mietvertrag konnte nicht gelöscht werden.' });
+			return fail(response.status, { deleteError: m.contracts_delete_failed() });
 		}
 		throw redirect(303, '/contracts');
 	}

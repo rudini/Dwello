@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import { enhance } from '$app/forms';
 	import type { StatementWithDetails } from '$lib/types';
 	import Alert from '$lib/ui/Alert.svelte';
@@ -22,7 +23,7 @@
 </script>
 
 <svelte:head>
-	<title>Abrechnung bearbeiten - {statement.statementNumber} - Dwello</title>
+	<title>{m.statements_edit_title()} - {statement.statementNumber} - Dwello</title>
 </svelte:head>
 
 <form
@@ -38,29 +39,35 @@
 	class="mx-auto flex max-w-3xl flex-col gap-8"
 >
 	<PageHeader
-		title="Abrechnung bearbeiten"
-		purpose="{statement.statementNumber}: {statement.tenantName}, {statement.buildingName}, Wohnung {statement.apartmentUnit}"
+		title={m.statements_edit_title()}
+		purpose={m.statements_edit_purpose({
+			number: statement.statementNumber,
+			tenant: statement.tenantName,
+			building: statement.buildingName,
+			apartment: m.buildings_apartment_number({ number: statement.apartmentUnit })
+		})}
 		trail={[
-			{ href: '/statements', label: 'Nebenkostenabrechnungen' },
-			{ href: `/statements/${statement.id}`, label: `Abrechnung ${statement.statementNumber}` }
+			{ href: '/statements', label: m.nav_statements() },
+			{
+				href: `/statements/${statement.id}`,
+				label: m.statements_title({ number: statement.statementNumber })
+			}
 		]}
 	/>
 
 	{#if form?.errors?.form}
-		<Alert tone="critical" title="Nicht gespeichert">
+		<Alert tone="critical" title={m.buildings_not_saved()}>
 			<p data-testid="form-error">{form.errors.form}</p>
 		</Alert>
 	{/if}
 
-	<Panel title="Frist und Bemerkungen">
+	<Panel title={m.statements_deadline_notes()}>
 		<!-- TODO(fachlich prüfen): the glossary has no term for the date by which a refund is paid out -->
 		<DateInput
 			id="paymentDeadline"
 			name="paymentDeadline"
-			label={refund ? 'Rückerstattung bis' : 'Zahlungsfrist'}
-			help={refund
-				? 'Bis zu diesem Datum erstatten Sie dem Mieter den Betrag zurück.'
-				: 'Bis zu diesem Datum bezahlt der Mieter die Nachzahlung.'}
+			label={refund ? m.statements_refund_by() : m.glossary_deadline_term()}
+			help={refund ? m.statements_refund_by_help() : m.statements_deadline_help()}
 			bind:value={deadline}
 			error={form?.errors?.paymentDeadline}
 			testid="payment-deadline-input"
@@ -68,32 +75,30 @@
 		<Textarea
 			id="notes"
 			name="notes"
-			label="Bemerkungen"
-			help="Zum Beispiel eine Absprache mit dem Mieter."
+			label={m.statements_notes()}
+			help={m.statements_notes_help()}
 			optional
 			value={statement.notes ?? ''}
 			testid="statement-notes-input"
 		/>
 	</Panel>
 
-	<Panel title="Kostenaufstellung">
+	<Panel title={m.statements_cost_breakdown()}>
 		<p class="text-ink-muted" data-testid="statement-recalculate-hint">
-			Kosten und Verwaltungspauschale werden beim Erstellen der Abrechnungen berechnet und lassen
-			sich hier nicht ändern. Für eine Korrektur löschen Sie den Entwurf und erstellen die
-			Abrechnungen des Gebäudes neu.
+			{m.statements_recalculate_hint()}
 		</p>
 		<CostTable {statement} />
 	</Panel>
 
 	<div class="flex flex-col-reverse gap-4 sm:flex-row sm:justify-end">
-		<Button href="/statements/{statement.id}" testid="form-cancel">Abbrechen</Button>
+		<Button href="/statements/{statement.id}" testid="form-cancel">{m.ui_cancel()}</Button>
 		<Button
 			type="submit"
 			variant="primary"
 			icon="save"
 			busy={saving}
-			busyLabel="Wird gespeichert …"
-			testid="statement-save-button">Änderungen speichern</Button
+			busyLabel={m.ui_saving()}
+			testid="statement-save-button">{m.buildings_save_changes()}</Button
 		>
 	</div>
 </form>

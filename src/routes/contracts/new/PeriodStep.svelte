@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import Alert from '$lib/ui/Alert.svelte';
 	import RadioGroup from '$lib/ui/RadioGroup.svelte';
 	import DateInput from '$lib/ui/DateInput.svelte';
@@ -33,8 +34,8 @@
 
 	const limited = {
 		value: 'limited',
-		label: 'Befristet',
-		description: 'Der Mietvertrag endet an einem festen Tag, ohne Kündigung.'
+		label: m.contracts_limited(),
+		description: m.contracts_limited_help()
 	};
 	// a notice keeps the contract open-ended (A-1); withdrawing it is a choice with its consequence
 	// TODO(fachlich prüfen): «Kündigung aufheben» is not from the glossary (offene-punkte.md)
@@ -43,22 +44,21 @@
 			? [
 					{
 						value: 'terminated',
-						label: endDate ? contractEnd(endDate, true) : 'Unbefristet, gekündigt',
-						description:
-							'Der Mietvertrag endet mit der Kündigung. Hat sich der Kündigungstermin verschoben, ändern Sie das Vertragsende.'
+						label: endDate ? contractEnd(endDate, true) : m.contracts_duration_terminated(),
+						description: m.contracts_duration_terminated_help()
 					},
 					{
 						value: 'unlimited',
-						label: 'Kündigung aufheben',
-						description: 'Der Mietvertrag läuft dann ohne Ende weiter.'
+						label: m.contracts_withdraw_notice(),
+						description: m.contracts_withdraw_notice_help()
 					},
 					limited
 				]
 			: [
 					{
 						value: 'unlimited',
-						label: 'Unbefristet',
-						description: 'Der Mietvertrag hat kein Vertragsende. Er läuft, bis er gekündigt wird.'
+						label: m.contracts_unlimited(),
+						description: m.contracts_unlimited_help()
 					},
 					limited
 				]
@@ -69,8 +69,8 @@
 
 <DateInput
 	id="startDate"
-	label="Vertragsbeginn"
-	help="Erster Tag des Mietverhältnisses."
+	label={m.tenants_contract_start()}
+	help={m.contracts_start_help()}
 	bind:value={startDate}
 	{min}
 	error={errors.startDate}
@@ -80,13 +80,13 @@
 <!-- always present, so screen readers hear the hint when it appears -->
 <div role="status" data-testid="start-date-notice">
 	{#if pastStart}
-		<Alert tone="caution" title="Vertragsbeginn prüfen"><p>{pastStart}</p></Alert>
+		<Alert tone="caution" title={m.contracts_check_start()}><p>{pastStart}</p></Alert>
 	{/if}
 </div>
 
 <RadioGroup
 	name="duration"
-	legend="Vertragsdauer"
+	legend={m.contracts_period()}
 	options={durations}
 	bind:value={
 		() => duration(isUnlimited, terminated),
@@ -98,8 +98,8 @@
 {#if !isUnlimited}
 	<DateInput
 		id="endDate"
-		label="Vertragsende"
-		help="Letzter Tag des Mietverhältnisses."
+		label={m.dashboard_kind_contract_end()}
+		help={m.contracts_end_help()}
 		bind:value={endDate}
 		min={startDate || undefined}
 		error={errors.endDate}
@@ -108,9 +108,7 @@
 {/if}
 
 {#if overlap}
-	<Alert tone="caution" title="Zeitraum überschneidet sich" testid="overlap-warning">
-		<p>
-			{overlap}. Pro Wohnung darf sich kein Mietvertrag mit einem anderen überschneiden.
-		</p>
+	<Alert tone="caution" title={m.contracts_overlap_title()} testid="overlap-warning">
+		<p>{m.contracts_overlap_text({ overlap })}</p>
 	</Alert>
 {/if}

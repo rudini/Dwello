@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { untrack } from 'svelte';
@@ -109,9 +110,8 @@
 	// the backend answers in English: a valid form is refused for an overlap or a statement after the end
 	function saveError({ message, details }: { message: string; details?: Record<string, unknown> }) {
 		if (Array.isArray(details?.statements)) return billedDaysError(details.statements);
-		if (/overlap/i.test(message))
-			return 'Der Zeitraum überschneidet sich mit einem anderen Mietvertrag dieser Wohnung.';
-		return 'Beim Speichern ist ein Fehler aufgetreten. Versuchen Sie es später erneut.';
+		if (/overlap/i.test(message)) return m.backend_contract_overlap();
+		return m.contracts_save_failed();
 	}
 
 	async function save(event: SubmitEvent) {
@@ -132,8 +132,8 @@
 		// a withdrawn notice says what changed, not only «gespeichert» (personas J1)
 		const saved =
 			contract.terminated && values.isUnlimited
-				? `Kündigung von ${tenantName} aufgehoben. Der Mietvertrag läuft ohne Ende weiter.`
-				: `Mietvertrag von ${tenantName} gespeichert`;
+				? m.contracts_notice_withdrawn_toast({ name: tenantName })
+				: m.contracts_saved_toast({ name: tenantName });
 		addToast('success', saved, 10_000);
 		await goto(back);
 	}
@@ -149,22 +149,19 @@
 >
 	{#if running}
 		<!-- TODO(fachlich prüfen): the hint on legal notice periods is not from the glossary -->
-		<Alert tone="caution" title="Laufender Mietvertrag">
-			<p>
-				Änderungen an einem laufenden Mietvertrag gelten sofort. Bei Mietanpassungen sollten Sie die
-				gesetzlichen Kündigungsfristen beachten.
-			</p>
+		<Alert tone="caution" title={m.contracts_running_title()}>
+			<p>{m.contracts_running_text()}</p>
 		</Alert>
 	{/if}
 
-	<Panel title="Mieter und Wohnung">
+	<Panel title={m.contracts_tenant_and_apartment()}>
 		<Select
 			id="tenant"
-			label="Mieter"
-			help="Die Person, die die Wohnung mietet."
+			label={m.contracts_tenant()}
+			help={m.contracts_tenant_help_short()}
 			options={tenants.map((t) => ({ value: t.id, label: t.name }))}
 			bind:value={values.tenantId}
-			placeholder="Mieter wählen"
+			placeholder={m.contracts_choose_tenant()}
 			error={errors.tenantId}
 			testid="contract-tenant-select"
 		/>
@@ -178,7 +175,7 @@
 		/>
 	</Panel>
 
-	<Panel title="Vertragsdauer">
+	<Panel title={m.contracts_period()}>
 		<PeriodStep
 			bind:startDate={values.startDate}
 			bind:endDate={values.endDate}
@@ -199,25 +196,25 @@
 		/>
 	</Panel>
 
-	<Panel title="Miete">
+	<Panel title={m.contracts_rent()}>
 		<RentStep bind:values {errors} />
 	</Panel>
 
 	{#if errors.form}
-		<Alert tone="critical" title="Der Mietvertrag wurde nicht gespeichert" testid="form-error">
+		<Alert tone="critical" title={m.contracts_not_saved()} testid="form-error">
 			<p>{errors.form}</p>
 		</Alert>
 	{/if}
 
 	<div class="flex flex-col-reverse gap-4 sm:flex-row sm:justify-end">
-		<Button href={back} testid="form-cancel">Abbrechen</Button>
+		<Button href={back} testid="form-cancel">{m.ui_cancel()}</Button>
 		<Button
 			type="submit"
 			variant="primary"
 			icon="save"
 			busy={saving}
-			busyLabel="Wird gespeichert …"
-			testid="submit-button">Änderungen speichern</Button
+			busyLabel={m.ui_saving()}
+			testid="submit-button">{m.buildings_save_changes()}</Button
 		>
 	</div>
 </form>

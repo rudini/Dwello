@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import { untrack } from 'svelte';
 	import { endedSince, pastEndConfirmation } from '$lib/contract-status';
 	import Checkbox from '$lib/ui/Checkbox.svelte';
@@ -30,10 +31,8 @@
 	// short, with what to do; a confirmation reset by another day is said again
 	const notice = $derived.by(() => {
 		if (!past) return '';
-		if (confirmedDay !== '' && confirmedDay !== endDate)
-			return 'Das Vertragsende hat sich geändert. Bestätigen Sie es erneut mit dem Kästchen.';
-		const when = longAgo ? ', über ein Jahr zurück. Prüfen Sie das Jahr.' : '.';
-		return `Das Vertragsende liegt in der Vergangenheit${when} Bestätigen Sie das Vertragsende mit dem Kästchen.`;
+		if (confirmedDay !== '' && confirmedDay !== endDate) return m.contracts_end_changed_again();
+		return longAgo ? m.contracts_end_in_past_long() : m.contracts_end_in_past();
 	});
 
 	// the error names a day: another day typed takes it back
@@ -57,10 +56,8 @@
 {#if past}
 	<Checkbox
 		id="pastConfirmed"
-		label="Der Mietvertrag endete am {formatDate(endDate)}."
-		help="Seit dem {endedSince(
-			endDate
-		)} gilt die Wohnung als nicht vermietet, wenn kein neuer Mietvertrag begonnen hat. Die Nebenkosten dieser Zeit trägt der Vermieter, das Akonto des Mieters zählt nur bis zum Vertragsende."
+		label={m.contracts_end_confirm_label({ date: formatDate(endDate) })}
+		help={m.contracts_end_confirm_help({ date: endedSince(endDate) })}
 		{error}
 		bind:checked={
 			() => confirmedDay !== '' && confirmedDay === endDate,

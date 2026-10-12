@@ -31,14 +31,24 @@ const summary = {
 	statementNumber: utilityStatements.statementNumber
 };
 
-function selectSummaries(where?: SQL) {
-	return db
+/** The delivery errors the backend writes itself, by their code for the UI */
+export const DELIVERY_ERRORS = {
+	TENANT_NO_EMAIL: 'Der Mieter hat keine E-Mail-Adresse.',
+	MAIL_NOT_CONFIGURED: 'Der E-Mail-Versand ist nicht eingerichtet.'
+} as const;
+
+const deliveryErrorCode = (deliveryError: string | null) =>
+	Object.entries(DELIVERY_ERRORS).find(([, text]) => text === deliveryError)?.[0] ?? null;
+
+async function selectSummaries(where?: SQL) {
+	const rows = await db
 		.select(summary)
 		.from(documents)
 		.innerJoin(tenants, eq(documents.tenantId, tenants.id))
 		.leftJoin(utilityStatements, eq(documents.statementId, utilityStatements.id))
 		.where(where)
 		.orderBy(desc(documents.createdAt), desc(documents.id));
+	return rows.map((row) => ({ ...row, deliveryErrorCode: deliveryErrorCode(row.deliveryError) }));
 }
 
 export async function listDocuments(filters: DocumentFilters = {}) {

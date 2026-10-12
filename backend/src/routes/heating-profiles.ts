@@ -4,6 +4,7 @@
  */
 
 import { Elysia, t } from 'elysia';
+import { errorBody, refusal } from '../services/coded-error';
 import { deleteResponse } from './delete-response';
 import {
 	listHeatingProfiles,
@@ -52,7 +53,7 @@ export const heatingProfileRoutes = new Elysia({ prefix: '/api/v1/heating-profil
 
 			if (!profile) {
 				set.status = 404;
-				return { error: 'Heating profile not found' };
+				return refusal('HEATING_PROFILE_NOT_FOUND', 'Heating profile not found');
 			}
 
 			return {
@@ -98,7 +99,7 @@ export const heatingProfileRoutes = new Elysia({ prefix: '/api/v1/heating-profil
 				return profile;
 			} catch (error) {
 				set.status = error instanceof Conflict ? 409 : 400;
-				return { error: error instanceof Error ? error.message : 'Failed to create heating profile' };
+				return errorBody(error, 'Failed to create heating profile');
 			}
 		},
 		{
@@ -156,13 +157,13 @@ export const heatingProfileRoutes = new Elysia({ prefix: '/api/v1/heating-profil
 
 				if (!profile) {
 					set.status = 404;
-					return { error: 'Heating profile not found' };
+					return refusal('HEATING_PROFILE_NOT_FOUND', 'Heating profile not found');
 				}
 
 				return profile;
 			} catch (error) {
 				set.status = error instanceof Conflict ? 409 : 400;
-				return { error: error instanceof Error ? error.message : 'Failed to update heating profile' };
+				return errorBody(error, 'Failed to update heating profile');
 			}
 		},
 		{

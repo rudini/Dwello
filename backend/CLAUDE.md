@@ -19,6 +19,7 @@ Never run `bun test` without the preload: `*.pg.test.ts` would write into the de
 ## Layout
 
 - `src/routes/*.ts`: HTTP only (validation, status codes); logic goes into `src/services/*.service.ts`.
+- Refusals the UI shows: throw `CodedError` or return `refusal()` (`src/services/coded-error.ts`) with a stable code and its values as `params`; the frontend needs a message `backend_<code>` in `messages/*.json` (checked by `src/__tests__/backend-codes.test.ts` in the repo root).
 - `src/db/schema.ts`: Drizzle schema. Only the pg tests catch drift from `migrations/`, and only in the columns they use; keep both in sync by hand.
 - `migrations/`: plain SQL, applied in file order by `src/db/migrate.ts` and recorded in `schema_migrations`. `0001_schema.sql` is the schema, `0002_stammdaten.sql` the master data (cost categories, distribution keys, heating profiles). Schema changes go into a new numbered SQL file written by hand (`db:generate` has no snapshots and would emit the whole schema again; `db:push` bypasses `schema_migrations`); also update `src/db/schema.ts` and `docs/data-model.md`. Until the first installation, changes go into `0001_schema.sql` and `0002_stammdaten.sql` instead of a new file; local databases then need `bun run db:reset`.
 - `demo/demo-data.sql` and `src/db/demo-data.ts`: demo data, never part of the migrations. Demo statements are generated through the real statement service.

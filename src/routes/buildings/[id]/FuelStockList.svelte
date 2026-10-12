@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import { enhance } from '$app/forms';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';
@@ -25,16 +26,16 @@
 			<Button
 				variant="danger-ghost"
 				icon="delete"
-				ariaLabel="Bestand vom {formatDate(stock.readingDate)} löschen"
+				ariaLabel={m.buildings_fuel_delete_label({ date: formatDate(stock.readingDate) })}
 				onclick={() => (deleting = stock)}
-				testid="fuel-stock-delete-{stock.id}">Löschen</Button
+				testid="fuel-stock-delete-{stock.id}">{m.buildings_delete()}</Button
 			>
 		</li>
 	{/each}
 </ul>
 
 {#if deleteError}
-	<Alert tone="critical" title="Nicht gelöscht" testid="fuel-stock-delete-error">
+	<Alert tone="critical" title={m.buildings_not_deleted()} testid="fuel-stock-delete-error">
 		<p>{deleteError}</p>
 	</Alert>
 {/if}
@@ -45,8 +46,10 @@
 
 <Dialog
 	open={!!deleting}
-	title="Bestand vom {deleting ? formatDate(deleting.readingDate) : ''} löschen?"
-	confirmLabel="Bestand löschen"
+	title={m.buildings_fuel_delete_title({
+		date: deleting ? formatDate(deleting.readingDate) : ''
+	})}
+	confirmLabel={m.buildings_fuel_delete_confirm()}
 	danger
 	confirmTestid="fuel-stock-delete-confirm"
 	onconfirm={() => {
@@ -56,9 +59,6 @@
 	onclose={() => (deleting = null)}
 >
 	<p>
-		Abrechnungen, die am Tag danach beginnen oder an diesem Tag enden, rechnen dann den Einkauf ab,
-		nicht den Verbrauch. Bestehende Abrechnungen ändern sich nicht: Löschen Sie danach die Entwürfe
-		beider Perioden und erstellen Sie die Abrechnungen erneut. Versendete Abrechnungen berichtigen
-		Sie ausserhalb von Dwello.
+		{m.buildings_fuel_delete_text()}
 	</p>
 </Dialog>

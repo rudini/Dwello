@@ -5,6 +5,7 @@
 		type DistributionKeyRow,
 		type FormulaTest
 	} from '$lib/distribution-key';
+	import { m } from '$lib/paraglide/messages';
 	import Button from '$lib/ui/Button.svelte';
 	import Field from '$lib/ui/Field.svelte';
 	import TextInput from '$lib/ui/TextInput.svelte';
@@ -32,7 +33,7 @@
 
 <SaveForm
 	action="?/save"
-	record="Verteilschlüssel"
+	record="distributionKey"
 	error={errors.form}
 	cancelHref="/config/distribution-keys"
 	{submitLabel}
@@ -41,8 +42,8 @@
 	<TextInput
 		id="name"
 		name="name"
-		label="Name"
-		example="Fläche und Zimmer"
+		label={m.contracts_name()}
+		example={m.keys_name_example()}
 		bind:value={name}
 		error={errors.name}
 		testid="distribution-key-name-input"
@@ -50,17 +51,12 @@
 	<TextInput
 		id="description"
 		name="description"
-		label="Beschreibung"
+		label={m.invoices_description()}
 		optional
 		bind:value={description}
 	/>
 
-	<Field
-		id="formula"
-		label="Formel"
-		help="Bestimmt den Anteil jeder Wohnung an den Kosten. Fügen Sie Bausteine mit den Knöpfen ein und rechnen Sie mit + - * / und Klammern."
-		error={errors.formula}
-	>
+	<Field id="formula" label={m.keys_formula()} help={m.keys_formula_help()} error={errors.formula}>
 		{#snippet children(control)}
 			<input
 				id={control.id}
@@ -77,12 +73,12 @@
 		{/snippet}
 	</Field>
 	<div class="flex flex-col gap-2">
-		<p class="font-semibold text-ink">Baustein einfügen</p>
+		<p class="font-semibold text-ink">{m.keys_insert_block()}</p>
 		<div class="flex flex-wrap gap-2">
 			{#each FORMULA_VARIABLES as variable (variable.name)}
 				<Button onclick={() => (formula += `{${variable.name}}`)}>
 					<span class="font-mono">{`{${variable.name}}`}</span>
-					<span class="font-normal">{variable.description}</span>
+					<span class="font-normal">{variable.description()}</span>
 				</Button>
 			{/each}
 		</div>
@@ -91,7 +87,7 @@
 	<div class="flex flex-col gap-4">
 		<div>
 			<Button type="submit" formaction="?/test" icon="test" testid="distribution-key-test-button"
-				>Formel testen</Button
+				>{m.keys_test()}</Button
 			>
 		</div>
 		{#if test}

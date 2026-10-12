@@ -2,6 +2,7 @@
  * Categorizing invoices: without a running KI, and overriding its suggestion with a reason (real PostgreSQL database)
  */
 
+import { app } from '../app';
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import { llmConfig } from '../config/llm';
 import { createBuilding, deleteBuilding } from '../services/building.service';
@@ -69,7 +70,8 @@ describe('Neu kategorisieren', () => {
 		await expectRejection(
 			response,
 			503,
-			'Die KI ist nicht erreichbar oder hat keine passende Kategorie geliefert.'
+			'Die KI ist nicht erreichbar oder hat keine passende Kategorie geliefert.',
+			'KI_UNAVAILABLE'
 		);
 		const detail = (await (await callApi(`/api/v1/invoices/${invoice.id}`)).json()) as Invoice;
 		expect(detail).toMatchObject({ categoryId: invoice.categoryId, llmCategoryId: null });
@@ -221,6 +223,13 @@ describe('Empfänger der Rechnungsdaten für die Datenschutzerklärung', () => {
 	it('nennt keinen, solange das Modell auf dem Server des Betreibers läuft', async () => {
 		const response = await callApi('/api/v1/invoices/llm-recipient');
 
+		expect(await response.json()).toEqual({ recipient: null });
+	});
+
+	it('ist ohne Anmeldung lesbar, weil die Datenschutzerklärung öffentlich ist', async () => {
+		const response = await app.handle(new Request('http://localhost/api/v1/invoices/llm-recipient'));
+
+		expect(response.status).toBe(200);
 		expect(await response.json()).toEqual({ recipient: null });
 	});
 

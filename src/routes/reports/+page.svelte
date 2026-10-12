@@ -1,22 +1,23 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import EmptyState from '$lib/ui/EmptyState.svelte';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import Panel from '$lib/ui/Panel.svelte';
 </script>
 
 <svelte:head>
-	<title>Berichte - Dwello</title>
+	<title>{m.reports_title()} - Dwello</title>
 </svelte:head>
 
 <div class="flex flex-col gap-8">
-	<PageHeader title="Berichte" purpose="Jahresberichte und Exporte zu Ihren Gebäuden." />
+	<PageHeader title={m.reports_title()} purpose={m.reports_purpose()} />
 	<Panel>
 		<EmptyState
 			testid="coming-soon"
 			illustration="statement"
-			title="Berichte sind in Vorbereitung"
-			text="Jahresberichte und Exporte als Excel oder PDF sind für eine spätere Version geplant. Fristen und Zahlen zu Ihren Gebäuden finden Sie schon heute in der Übersicht."
-			actionLabel="Zur Übersicht"
+			title={m.reports_soon()}
+			text={m.reports_soon_text()}
+			actionLabel={m.error_to_overview()}
 			actionHref="/dashboard"
 		/>
 	</Panel>

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { untrack } from 'svelte';
@@ -39,16 +40,16 @@
 	<div class="grid gap-4 md:grid-cols-3">
 		<TextInput
 			id="search"
-			label="Suche"
+			label={m.buildings_search()}
 			bind:value={filters.search}
-			placeholder="Wohnungsnummer oder Gebäude"
+			placeholder={m.apartments_search_placeholder()}
 			optional
 			testid="apartments-search-input"
 		/>
 		<EarlySelect
 			id="building"
-			label="Gebäude"
-			placeholder="Alle Gebäude"
+			label={m.apartments_building()}
+			placeholder={m.apartments_all_buildings()}
 			options={buildingOptions}
 			value={filters.building}
 			optional
@@ -57,8 +58,8 @@
 		/>
 		<EarlySelect
 			id="status"
-			label="Mietstatus"
-			placeholder="Alle"
+			label={m.apartments_status()}
+			placeholder={m.apartments_all_statuses()}
 			options={statusOptions}
 			value={filters.status}
 			optional
@@ -67,9 +68,11 @@
 		/>
 	</div>
 	<div class="flex flex-wrap gap-4">
-		<Button type="submit" icon="search" testid="apartments-search-submit">Suchen</Button>
+		<Button type="submit" icon="search" testid="apartments-search-submit"
+			>{m.buildings_search_submit()}</Button
+		>
 		{#if filtered}
-			<Button variant="ghost" icon="close" onclick={clear}>Filter zurücksetzen</Button>
+			<Button variant="ghost" icon="close" onclick={clear}>{m.buildings_reset_filters()}</Button>
 		{/if}
 	</div>
 </form>

@@ -5,6 +5,7 @@
 
 import { isRealDate } from './real-date';
 import { Elysia, t } from 'elysia';
+import { errorBody, refusal } from '../services/coded-error';
 import { authMiddleware } from '../middleware/auth';
 import {
 	listInvoices,
@@ -17,7 +18,6 @@ import {
 	validateInvoice,
 	getInvoicesForStatement
 } from '../services/invoice.service';
-import { llmRecipient } from '../config/llm';
 import { isLlmAvailable, getCacheStats, categorizeInvoice } from '../services/llm.service';
 import { getUtilityCostRules } from '../services/utility-validation.service';
 import { checkBuildingInvoices } from '../services/invoice-completeness.service';
@@ -105,8 +105,6 @@ export const invoiceRoutes = new Elysia({ prefix: '/api/v1/invoices' })
 			cache: cacheStats
 		};
 	})
-	// Who receives invoice data for categorization, for the privacy statement
-	.get('/llm-recipient', () => ({ recipient: llmRecipient() }))
 	// Get Swiss utility cost rules
 	.get('/utility-rules', async () => {
 		return getUtilityCostRules();
@@ -177,7 +175,7 @@ export const invoiceRoutes = new Elysia({ prefix: '/api/v1/invoices' })
 		const invoice = await getInvoice(params.id);
 		if (!invoice) {
 			set.status = 404;
-			return { error: 'Invoice not found' };
+			return refusal('INVOICE_NOT_FOUND', 'Invoice not found');
 		}
 		return invoice;
 	})
@@ -194,7 +192,7 @@ export const invoiceRoutes = new Elysia({ prefix: '/api/v1/invoices' })
 		const result = await recategorizeInvoiceById(params.id);
 		if (!result.success) {
 			set.status = result.error === 'Invoice not found' ? 404 : result.error === KI_UNAVAILABLE ? 503 : 500;
-			return { error: result.error };
+			return { error: result.error, code: result.code, params: result.params };
 		}
 		return result;
 	})
@@ -209,7 +207,7 @@ export const invoiceRoutes = new Elysia({ prefix: '/api/v1/invoices' })
 				return invoice;
 			} catch (error) {
 				set.status = 400;
-				return { error: error instanceof Error ? error.message : 'Failed to create invoice' };
+				return errorBody(error, 'Failed to create invoice');
 			}
 		},
 		{
@@ -227,12 +225,12 @@ export const invoiceRoutes = new Elysia({ prefix: '/api/v1/invoices' })
 				const invoice = await updateInvoice(params.id, body, { logOverride: true });
 				if (!invoice) {
 					set.status = 404;
-					return { error: 'Invoice not found' };
+					return refusal('INVOICE_NOT_FOUND', 'Invoice not found');
 				}
 				return invoice;
 			} catch (error) {
 				set.status = 400;
-				return { error: error instanceof Error ? error.message : 'Failed to update invoice' };
+				return errorBody(error, 'Failed to update invoice');
 			}
 		},
 		{

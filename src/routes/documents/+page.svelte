@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import type { StatementDocument } from '$lib/types';
 	import Alert from '$lib/ui/Alert.svelte';
 	import EmptyState from '$lib/ui/EmptyState.svelte';
@@ -14,10 +15,15 @@
 		$props();
 
 	const filters = $derived([
-		{ href: '/documents', label: 'Alle', testid: 'documents-filter-all', active: !data.status },
+		{
+			href: '/documents',
+			label: m.documents_all(),
+			testid: 'documents-filter-all',
+			active: !data.status
+		},
 		{
 			href: '/documents?status=to_send',
-			label: 'Zu versenden',
+			label: m.tenants_document_to_send(),
 			testid: 'documents-filter-to-send',
 			active: data.status === 'to_send'
 		}
@@ -25,16 +31,13 @@
 </script>
 
 <svelte:head>
-	<title>Dokumente - Dwello</title>
+	<title>{m.nav_documents()} - Dwello</title>
 </svelte:head>
 
 <div class="flex flex-col gap-8">
-	<PageHeader
-		title="Dokumente"
-		purpose="Mahnungen und andere Schreiben an Mieter. Drucken Sie Briefe, die noch zu versenden sind, schicken Sie sie per Post und markieren Sie sie dann als versendet."
-	/>
+	<PageHeader title={m.nav_documents()} purpose={m.documents_purpose()} />
 
-	<nav aria-label="Dokumente filtern">
+	<nav aria-label={m.documents_filter()}>
 		<ul class="flex flex-wrap gap-4">
 			{#each filters as filter (filter.testid)}
 				<li>
@@ -52,7 +55,7 @@
 	</nav>
 
 	{#if form?.actionError}
-		<Alert tone="critical" title="Nicht gespeichert">
+		<Alert tone="critical" title={m.buildings_not_saved()}>
 			<p data-testid="form-error">{form.actionError}</p>
 		</Alert>
 	{/if}
@@ -69,9 +72,9 @@
 		<div data-testid="documents-empty">
 			<EmptyState
 				illustration="envelope"
-				title={data.status ? 'Keine Briefe zu versenden' : 'Noch keine Dokumente'}
-				text="Mahnungen, die Sie bei einer Nebenkostenabrechnung senden, erscheinen hier."
-				actionLabel="Zu den Nebenkostenabrechnungen"
+				title={data.status ? m.documents_none_to_send() : m.documents_empty()}
+				text={m.documents_empty_text()}
+				actionLabel={m.documents_to_statements()}
 				actionHref="/statements"
 			/>
 		</div>

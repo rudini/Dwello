@@ -33,7 +33,9 @@ describe('Eigene Verteilschlüssel', () => {
 
 		const response = await create('Fläche und Zimmer');
 
-		await expectRejection(response, 409, `Ein Verteilschlüssel mit dem Namen "Fläche und Zimmer ${token}" existiert bereits.`);
+		await expectRejection(response, 409, `Ein Verteilschlüssel mit dem Namen "Fläche und Zimmer ${token}" existiert bereits.`, 'DISTRIBUTION_KEY_NAME_TAKEN', {
+			name: `Fläche und Zimmer ${token}`
+		});
 	});
 
 	it('lehnt beim Umbenennen einen vergebenen deutschen Namen ab', async () => {
@@ -42,14 +44,19 @@ describe('Eigene Verteilschlüssel', () => {
 
 		const response = await keys.send('PUT', `/${id}`, { nameDE: `Treppenhaus ${token}` });
 
-		await expectRejection(response, 409, `Ein Verteilschlüssel mit dem Namen "Treppenhaus ${token}" existiert bereits.`);
+		await expectRejection(response, 409, `Ein Verteilschlüssel mit dem Namen "Treppenhaus ${token}" existiert bereits.`, 'DISTRIBUTION_KEY_NAME_TAKEN', {
+			name: `Treppenhaus ${token}`
+		});
 	});
 
 	it('erklärt, warum eine Formel ungültig ist', async () => {
 		await expectRejection(
 			await create('Personen', '{persons} * 2'),
 			400,
-			'Die Formel ist ungültig: Unbekannte Variable {persons}. Erlaubt sind {area}, {rooms}, {volume}, {units} und ihre Summen wie {area_total}.'
+			'Die Formel ist ungültig: Unbekannte Variable {persons}. Erlaubt sind {area}, {rooms}, {volume}, {units} und ihre Summen wie {area_total}.',
+			'FORMULA_INVALID',
+			{},
+			[{ code: 'FORMULA_UNKNOWN_VARIABLE', params: { variable: 'persons' } }]
 		);
 	});
 
@@ -70,7 +77,9 @@ describe('Eigene Verteilschlüssel', () => {
 		const response = await keys.send('DELETE', `/${id}`);
 
 		expect(Number(key.invoiceCount)).toBe(1);
-		await expectRejection(response, 409, 'Nach dem Verteilschlüssel wird 1 Rechnung verteilt, er kann nicht gelöscht werden.');
+		await expectRejection(response, 409, 'Nach dem Verteilschlüssel wird 1 Rechnung verteilt, er kann nicht gelöscht werden.', 'DISTRIBUTION_KEY_IN_USE_ONE', {
+			count: 1
+		});
 	});
 
 	it('behält den Standard-Verteilschlüssel der Einstellungen', async () => {
@@ -79,12 +88,12 @@ describe('Eigene Verteilschlüssel', () => {
 
 		const response = await keys.send('DELETE', `/${id}`);
 
-		await expectRejection(response, 409, 'Der Verteilschlüssel ist in den Einstellungen als Standard hinterlegt.');
+		await expectRejection(response, 409, 'Der Verteilschlüssel ist in den Einstellungen als Standard hinterlegt.', 'DISTRIBUTION_KEY_IS_DEFAULT');
 	});
 
 	it('behält vordefinierte Verteilschlüssel', async () => {
 		const response = await keys.send('DELETE', `/${await firstPredefined('distribution-keys')}`);
 
-		await expectRejection(response, 400, 'Vordefinierte Verteilschlüssel können nicht gelöscht werden.');
+		await expectRejection(response, 400, 'Vordefinierte Verteilschlüssel können nicht gelöscht werden.', 'DISTRIBUTION_KEY_PREDEFINED');
 	});
 });

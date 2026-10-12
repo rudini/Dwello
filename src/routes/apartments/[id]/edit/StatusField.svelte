@@ -1,6 +1,7 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import type { ApartmentStatus } from '$lib/types';
-	import { statusHelp, statusText } from '$lib/apartment';
+	import { statusHelp, statusLabels, statusText } from '$lib/apartment';
 	import EarlySelect from '$lib/ui/EarlySelect.svelte';
 
 	let { apartment }: { apartment: { status: ApartmentStatus; nextContractStart: string | null } } =
@@ -11,9 +12,9 @@
 
 {#if rented}
 	<div class="flex flex-col gap-2">
-		<p class="font-semibold text-ink">Mietstatus</p>
+		<p class="font-semibold text-ink">{m.apartments_status()}</p>
 		<p class="text-ink-muted">
-			Der Mietstatus ergibt sich aus den Mietverträgen der Wohnung und lässt sich hier nicht ändern.
+			{m.apartments_status_fixed()}
 		</p>
 		<p class="rounded-control bg-sunken px-4 py-2 text-ink" data-testid="apartment-status-rented">
 			{statusText(apartment)}
@@ -23,11 +24,14 @@
 	<EarlySelect
 		id="status"
 		name="status"
-		label="Mietstatus"
-		help="Leer: {statusHelp.vacant} Gesperrt: {statusHelp.reserved} Vermietet wird die Wohnung mit einem Mietvertrag."
+		label={m.apartments_status()}
+		help={m.apartments_status_select_help({
+			vacant: statusHelp.vacant,
+			reserved: statusHelp.reserved
+		})}
 		options={[
-			{ value: 'vacant', label: 'Leer' },
-			{ value: 'reserved', label: 'Gesperrt' }
+			{ value: 'vacant', label: statusLabels.vacant },
+			{ value: 'reserved', label: statusLabels.reserved }
 		]}
 		value={apartment.status}
 		testid="apartment-status-select"

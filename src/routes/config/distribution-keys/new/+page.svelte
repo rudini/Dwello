@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import DistributionKeyForm from '../DistributionKeyForm.svelte';
 	import type { ActionData } from './$types';
@@ -10,17 +11,17 @@
 </script>
 
 <svelte:head>
-	<title>Neuer Verteilschlüssel - Dwello</title>
+	<title>{m.keys_new()} - Dwello</title>
 </svelte:head>
 
 <div class="mx-auto flex max-w-3xl flex-col gap-8">
 	<PageHeader
-		title="Neuer Verteilschlüssel"
-		purpose="Eine eigene Formel, nach der Kosten auf die Wohnungen eines Gebäudes verteilt werden."
+		title={m.keys_new()}
+		purpose={m.keys_new_purpose()}
 		trail={[
-			{ href: '/config', label: 'Einstellungen' },
-			{ href: '/config/distribution-keys', label: 'Verteilschlüssel' }
+			{ href: '/config', label: m.nav_settings() },
+			{ href: '/config/distribution-keys', label: m.nav_distribution_keys() }
 		]}
 	/>
-	<DistributionKeyForm {errors} {test} submitLabel="Verteilschlüssel speichern" />
+	<DistributionKeyForm {errors} {test} submitLabel={m.keys_save()} />
 </div>

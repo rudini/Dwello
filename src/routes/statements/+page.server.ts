@@ -1,3 +1,4 @@
+import { m } from '$lib/paraglide/messages';
 import type { StatementsListData } from '$lib/types';
 import type { PageServerLoad } from './$types';
 
@@ -53,7 +54,9 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<StatementsLi
 				paidDate: s.paidDate,
 				pdfGeneratedAt: s.pdfGeneratedAt,
 				lastReminderDate: s.reminderSentDate,
-				tenantName: tenant ? `${tenant.firstName} ${tenant.lastName}` : 'Unbekannt',
+				tenantName: tenant
+					? `${tenant.firstName} ${tenant.lastName}`
+					: m.common_unknown(),
 				tenantEmail: (tenant?.email as string) || '',
 				apartmentUnit: (apartment?.number as string) || '',
 				apartmentFloor: apartment?.floor || '',

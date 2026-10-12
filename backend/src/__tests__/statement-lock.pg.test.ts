@@ -58,7 +58,8 @@ describe('Überfällige Abrechnung', () => {
 		await expectRejection(
 			await callApi(`/api/v1/statements/${statementId}`, { method: 'DELETE' }),
 			400,
-			'Cannot delete a statement that is no longer a draft'
+			'Cannot delete a statement that is no longer a draft',
+			'STATEMENT_NOT_DRAFT'
 		);
 		expect((await callApi(`/api/v1/statements/${statementId}`)).status).toBe(200);
 	});

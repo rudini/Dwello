@@ -1,5 +1,7 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import { flushSync } from 'svelte';
+	import { backendMessage } from '$lib/backend-error';
 	import type { StatementDocument, StatementWithDetails } from '$lib/types';
 	import { addToast } from '$lib/stores';
 	import { balanceLabel, paidDateError, paidHelp, statusLabels, statusTones } from '$lib/statement';
@@ -41,8 +43,8 @@
 	// invoices of the period recorded after the draft was created: it lacks them
 	const laterInvoices = $derived(
 		data.laterInvoices === 1
-			? 'wurde 1 Rechnung für die Abrechnungsperiode erfasst, sie fehlt darin'
-			: `wurden ${data.laterInvoices} Rechnungen für die Abrechnungsperiode erfasst, sie fehlen darin`
+			? m.statements_later_one()
+			: m.statements_later_many({ count: data.laterInvoices ?? 0 })
 	);
 	let showMarkPaid = $state(false);
 	let showReminder = $state(false);
@@ -70,16 +72,18 @@
 			});
 			if (response.ok) {
 				pdfGeneratedAt = new Date().toISOString();
-				addToast('success', 'PDF erstellt');
+				addToast('success', m.statements_pdf_created());
 			} else {
 				const error = await response.json();
 				addToast(
 					'error',
-					`PDF konnte nicht erstellt werden: ${error.error || 'unbekannter Fehler'}`
+					m.statements_pdf_failed_reason({
+						reason: backendMessage(error, m.statements_unknown_error())
+					})
 				);
 			}
 		} catch {
-			addToast('error', 'PDF konnte nicht erstellt werden. Versuchen Sie es erneut.');
+			addToast('error', m.statements_pdf_failed());
 		} finally {
 			generatingPdf = false;
 		}
@@ -94,14 +98,16 @@
 </script>
 
 <svelte:head>
-	<title>Abrechnung {statement.statementNumber} - Dwello</title>
+	<title>{m.statements_title({ number: statement.statementNumber })} - Dwello</title>
 </svelte:head>
 
 <div class="flex flex-col gap-8">
 	<PageHeader
-		title="Abrechnung {statement.statementNumber}"
-		purpose="{statement.tenantName}, {statement.buildingName}, Wohnung {statement.apartmentUnit} · Abrechnungsperiode {period}"
-		trail={[{ href: '/statements', label: 'Nebenkostenabrechnungen' }]}
+		title={m.statements_title({ number: statement.statementNumber })}
+		purpose="{statement.tenantName}, {statement.buildingName}, {m.buildings_apartment_number({
+			number: statement.apartmentUnit
+		})} · {m.glossary_period_term()} {period}"
+		trail={[{ href: '/statements', label: m.nav_statements() }]}
 	>
 		{#snippet action()}
 			<PdfAction
@@ -121,7 +127,7 @@
 	</PageHeader>
 
 	<p class="flex flex-wrap items-center gap-2 text-ink">
-		Status:
+		{m.statements_status_label()}
 		<Badge
 			tone={statusTones[statement.status]}
 			label={statusLabels[statement.status]}
@@ -131,29 +137,17 @@
 
 	{#if data.laterInvoices}
 		<!-- a draft is created again; a sent statement is corrected outside Dwello (it cannot be deleted) -->
-		<Alert
-			tone="caution"
-			title="Rechnungen fehlen in der Abrechnung"
-			testid="statement-later-invoices"
-		>
+		<Alert tone="caution" title={m.statements_later_title()} testid="statement-later-invoices">
 			{#if statement.status === 'draft'}
-				<p>
-					Seit dem Erstellen dieses Entwurfs {laterInvoices}. Löschen Sie ihn und erstellen Sie die
-					Abrechnung erneut.
-				</p>
+				<p>{m.statements_later_draft({ later: laterInvoices })}</p>
 			{:else}
-				<p>
-					Seit dem Erstellen dieser Abrechnung {laterInvoices}. Versendete Abrechnungen berichtigen
-					Sie ausserhalb von Dwello: Schicken Sie dem Mieter eine berichtigte Abrechnung mit dem
-					Beleg. Ob Sie die Kosten noch nachverlangen können, ist nicht in jedem Fall sicher: Lassen
-					Sie sich im Zweifel beraten.
-				</p>
+				<p>{m.statements_later_sent({ later: laterInvoices })}</p>
 			{/if}
 		</Alert>
 	{/if}
 
 	{#if form?.actionError}
-		<Alert tone="critical" title="Das hat nicht geklappt">
+		<Alert tone="critical" title={m.ui_action_failed()}>
 			<p data-testid="form-error">{form.actionError}</p>
 		</Alert>
 	{/if}
@@ -161,7 +155,7 @@
 
 	<!-- Full width so every amount is visible; min-w-0: if still too wide it scrolls inside, not the page -->
 	<div class="min-w-0">
-		<Panel title="Kostenaufstellung">
+		<Panel title={m.statements_cost_breakdown()}>
 			<CostTable {statement} />
 		</Panel>
 	</div>
@@ -172,10 +166,10 @@
 		</div>
 		<div class="flex min-w-0 flex-col gap-8">
 			<PartiesPanel {statement} />
-			<Panel title="Weitere Aktionen">
+			<Panel title={m.statements_more_actions()}>
 				<div class="flex flex-col gap-4">
 					<Button href="/statements/{statement.id}/edit" icon="edit" testid="statement-edit-button"
-						>Frist und Bemerkungen bearbeiten</Button
+						>{m.statements_edit_button()}</Button
 					>
 					<!-- Only a draft can be deleted; once sent, the statement stays as the tenant received it -->
 					{#if statement.status === 'draft'}
@@ -183,7 +177,7 @@
 							variant="danger-ghost"
 							icon="delete"
 							onclick={() => (showDelete = true)}
-							testid="statement-delete-button">Abrechnung löschen</Button
+							testid="statement-delete-button">{m.statements_delete()}</Button
 						>
 					{/if}
 				</div>
@@ -201,17 +195,17 @@
 <FormDialog
 	bind:open={showMarkPaid}
 	action="?/markPaid"
-	title="Abrechnung als bezahlt markieren"
-	confirmLabel="Als bezahlt markieren"
+	title={m.statements_mark_paid_title()}
+	confirmLabel={m.statements_mark_paid()}
 	confirmTestid="statement-mark-paid-confirm"
 	fields={{ paidDate }}
 	check={checkPaidDate}
-	success="Abrechnung als bezahlt markiert"
+	success={m.statements_marked_paid()}
 >
-	{#if statement.balance > 0}<p>Danach können Sie keine Mahnung mehr senden.</p>{/if}
+	{#if statement.balance > 0}<p>{m.statements_no_reminder_after()}</p>{/if}
 	<DateInput
 		id="paidDate"
-		label="Bezahlt am"
+		label={m.statements_paid_on()}
 		help={paidHelp(statement.balance)}
 		error={paidError}
 		bind:value={paidDate}
@@ -225,15 +219,14 @@
 <FormDialog
 	bind:open={showDelete}
 	action="?/delete"
-	title="Abrechnung löschen"
-	confirmLabel="Abrechnung löschen"
+	title={m.statements_delete()}
+	confirmLabel={m.statements_delete()}
 	confirmTestid="statement-delete-confirm"
 	danger
-	ondone={() => addToast('success', `Abrechnung ${statement.statementNumber} gelöscht`)}
+	ondone={() => addToast('success', m.statements_deleted({ number: statement.statementNumber }))}
 >
 	<p>
-		Die Abrechnung {statement.statementNumber} von {statement.tenantName} wird gelöscht. Das lässt sich
-		nicht rückgängig machen.
+		{m.statements_delete_text({ number: statement.statementNumber, tenant: statement.tenantName })}
 	</p>
 </FormDialog>
 

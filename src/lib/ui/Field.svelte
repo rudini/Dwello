@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import type { Snippet } from 'svelte';
 	import Icon from './Icon.svelte';
 	import type { FieldControl } from './field';
@@ -49,12 +50,12 @@
 <div bind:this={frame} class="flex flex-col gap-2" oninput={change}>
 	<label for={id} class="font-semibold text-ink">
 		{label}
-		{#if optional}<span class="font-normal text-ink-muted">(optional)</span>{/if}
+		{#if optional}<span class="font-normal text-ink-muted">{m.ui_optional()}</span>{/if}
 	</label>
 	{#if help || example}
 		<p id={helpId} class="text-ink-muted">
 			{help ?? ''}
-			{#if example}<span class="whitespace-nowrap">Beispiel: {example}</span>{/if}
+			{#if example}<span class="whitespace-nowrap">{m.ui_example({ example })}</span>{/if}
 		</p>
 	{/if}
 	{@render children({ id, describedBy, invalid: !!shown })}

@@ -24,6 +24,7 @@ import {
 import { getApartment, listApartments } from './apartment.service';
 import { getContract } from './contract.service';
 import { roundTo5Rappen, roundToRappen } from './pdf-format';
+import { CodedError } from './coded-error';
 
 /**
  * Line item for statement
@@ -235,13 +236,13 @@ export async function calculateStatementForContract(
 	// Get contract details
 	const contract = await getContract(contractId);
 	if (!contract) {
-		throw new Error('Contract not found');
+		throw new CodedError('CONTRACT_NOT_FOUND', 'Contract not found');
 	}
 
 	// Get apartment and building details
 	const apartment = await getApartment(contract.apartmentId);
 	if (!apartment) {
-		throw new Error('Apartment not found');
+		throw new CodedError('APARTMENT_NOT_FOUND', 'Apartment not found');
 	}
 
 	const buildingId = apartment.buildingId;
@@ -256,7 +257,7 @@ export async function calculateStatementForContract(
 	// Find this contract's overlap in the prorating result
 	const contractOverlap = prorating.contracts.find((c) => c.contract.id === contractId);
 	if (!contractOverlap) {
-		throw new Error('Contract does not overlap with the specified period');
+		throw new CodedError('CONTRACT_NOT_IN_PERIOD', 'Contract does not overlap with the specified period');
 	}
 
 	const rentalDays = contractOverlap.overlapDays;

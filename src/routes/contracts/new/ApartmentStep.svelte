@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import { apartmentChoices } from '$lib/contract-wizard';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Select from '$lib/ui/Select.svelte';
@@ -23,22 +24,22 @@
 </script>
 
 {#if loading}
-	<p role="status" class="text-ink-muted">Es wird geprüft, welche Wohnungen frei sind …</p>
+	<p role="status" class="text-ink-muted">{m.contracts_checking_apartments()}</p>
 {:else}
 	<Select
 		id="apartment"
-		label="Wohnung"
-		help="Freie Wohnungen stehen zuoberst. Vermietete Wohnungen sind mit «nicht verfügbar» markiert und lassen sich nicht wählen."
+		label={m.tenants_apartment()}
+		help={m.contracts_apartment_help()}
 		options={apartmentChoices(apartments, availability)}
 		bind:value={apartmentId}
-		placeholder="Wohnung wählen"
+		placeholder={m.contracts_choose_apartment()}
 		{error}
 		testid="apartment-select"
 	/>
 {/if}
 
 {#if notice}
-	<Alert title="Wohnung wird später frei" testid="availability-info">
-		<p>{notice}. Der Mietvertrag kann frühestens an diesem Tag beginnen.</p>
+	<Alert title={m.contracts_free_later()} testid="availability-info">
+		<p>{m.contracts_free_later_text({ notice })}</p>
 	</Alert>
 {/if}

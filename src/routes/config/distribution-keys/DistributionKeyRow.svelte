@@ -1,5 +1,7 @@
 <script lang="ts">
 	import type { DistributionKeyRow } from '$lib/distribution-key';
+	import { localName } from '$lib/names';
+	import { m } from '$lib/paraglide/messages';
 	import Badge from '$lib/ui/Badge.svelte';
 	import Button from '$lib/ui/Button.svelte';
 
@@ -8,6 +10,7 @@
 	// Predefined keys follow Swiss practice: not editable, and their descriptions are English
 	const custom = $derived(key.type === 'custom');
 	const count = $derived(key.usageCount);
+	const name = $derived(localName(key));
 </script>
 
 <li
@@ -21,14 +24,15 @@
 				href="/config/distribution-keys/{key.id}/edit"
 				class="font-semibold text-accent underline underline-offset-4 after:absolute after:inset-0"
 				data-testid="distribution-key-edit-button"
-				><span data-testid="distribution-key-name">{key.name}</span></a
+				><span data-testid="distribution-key-name">{name}</span></a
 			>
 			{#if key.description}<p class="text-ink-muted">{key.description}</p>{/if}
 		{:else}
-			<span class="font-semibold text-ink" data-testid="distribution-key-name">{key.name}</span>
+			<span class="font-semibold text-ink" data-testid="distribution-key-name">{name}</span>
 		{/if}
 		<p class="text-ink-muted">
-			Formel: <code class="break-words font-mono text-ink" data-testid="distribution-key-formula"
+			{m.keys_formula_label()}
+			<code class="break-words font-mono text-ink" data-testid="distribution-key-formula"
 				>{key.formula}</code
 			>
 		</p>
@@ -36,10 +40,10 @@
 	<div class="flex flex-wrap items-center gap-4">
 		<Badge
 			tone={custom ? 'info' : 'neutral'}
-			label={custom ? 'Eigener Verteilschlüssel' : 'Vordefiniert'}
+			label={custom ? m.keys_custom() : m.keys_predefined()}
 		/>
 		<p class="text-ink-muted tabular-nums" data-testid="distribution-key-usage">
-			{`${count} ${count === 1 ? 'Rechnung' : 'Rechnungen'}`}
+			{count === 1 ? m.common_invoices_one({ count }) : m.invoices_count({ count })}
 		</p>
 		{#if custom}
 			<!-- Above the row's link -->
@@ -49,8 +53,8 @@
 					icon="delete"
 					onclick={ondelete}
 					disabled={count > 0}
-					ariaLabel="Verteilschlüssel «{key.name}» löschen"
-					testid="distribution-key-delete-button">Löschen</Button
+					ariaLabel={m.keys_delete_aria({ name })}
+					testid="distribution-key-delete-button">{m.buildings_delete()}</Button
 				>
 			</div>
 		{/if}

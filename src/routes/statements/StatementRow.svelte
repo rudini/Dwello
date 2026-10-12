@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import type { StatementWithDetails } from '$lib/types';
 	import { balanceLabel, statusLabels, statusTones } from '$lib/statement';
 	import Badge from '$lib/ui/Badge.svelte';
@@ -12,7 +13,9 @@
 	}: { statement: StatementWithDetails; onmarkpaid: (statement: StatementWithDetails) => void } =
 		$props();
 
-	const name = $derived(`Abrechnung ${statement.statementNumber} von ${statement.tenantName}`);
+	const name = $derived(
+		m.statements_row_name({ number: statement.statementNumber, tenant: statement.tenantName })
+	);
 	const open = $derived(statement.status === 'sent' || statement.status === 'overdue');
 </script>
 
@@ -33,7 +36,11 @@
 			<span class="text-ink-muted">{statement.statementNumber}</span>
 		</a>
 		<p class="flex flex-col text-ink">
-			<span>{statement.buildingName}, Wohnung {statement.apartmentUnit}</span>
+			<span
+				>{statement.buildingName}, {m.buildings_apartment_number({
+					number: statement.apartmentUnit
+				})}</span
+			>
 			<span class="text-ink-muted"
 				>{formatDate(statement.periodStart)} – {formatDate(statement.periodEnd)}</span
 			>
@@ -46,7 +53,9 @@
 	<div class="flex flex-col items-start gap-1 xl:w-40 xl:shrink-0">
 		<Badge tone={statusTones[statement.status]} label={statusLabels[statement.status]} />
 		{#if statement.status === 'overdue' && statement.lastReminderDate}
-			<span class="text-ink-muted">Gemahnt am {formatDate(statement.lastReminderDate)}</span>
+			<span class="text-ink-muted"
+				>{m.statements_reminded_on({ date: formatDate(statement.lastReminderDate) })}</span
+			>
 		{/if}
 	</div>
 	<!-- Above the row link, so these stay their own buttons -->
@@ -56,7 +65,7 @@
 				href="/api/statements/{statement.id}/pdf"
 				variant="ghost"
 				icon="document-download"
-				ariaLabel="PDF herunterladen: {name}"
+				ariaLabel={m.statements_pdf_download_of({ name })}
 				testid="statement-pdf-link">PDF</Button
 			>
 		{/if}
@@ -65,8 +74,8 @@
 			<Button
 				icon="success"
 				onclick={() => onmarkpaid(statement)}
-				ariaLabel="Als bezahlt markieren: {name}"
-				testid="statement-row-mark-paid">Als bezahlt markieren</Button
+				ariaLabel={m.statements_mark_paid_of({ name })}
+				testid="statement-row-mark-paid">{m.statements_mark_paid()}</Button
 			>
 		{/if}
 	</div>

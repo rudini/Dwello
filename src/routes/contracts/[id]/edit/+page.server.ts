@@ -1,3 +1,4 @@
+import { m } from '$lib/paraglide/messages';
 import type { RentalContract } from '$lib/types';
 import type { PageServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
@@ -20,9 +21,9 @@ export const load: PageServerLoad = async ({ params, fetch }): Promise<ContractE
 
 		if (!contractRes.ok) {
 			if (contractRes.status === 404) {
-				throw error(404, 'Vertrag nicht gefunden');
+				throw error(404, m.contracts_not_found());
 			}
-			throw error(contractRes.status, 'Fehler beim Laden des Vertrags');
+			throw error(contractRes.status, m.contracts_load_failed());
 		}
 
 		const data = await contractRes.json();
@@ -59,6 +60,6 @@ export const load: PageServerLoad = async ({ params, fetch }): Promise<ContractE
 		if (err && typeof err === 'object' && 'status' in err) {
 			throw err;
 		}
-		throw error(500, 'Fehler beim Laden des Vertrags');
+		throw error(500, m.contracts_load_failed());
 	}
 };

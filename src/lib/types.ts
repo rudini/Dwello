@@ -238,6 +238,9 @@ export interface HeatingProfile {
 	id: string;
 	name: string;
 	nameDE?: string;
+	nameFR?: string | null;
+	nameIT?: string | null;
+	nameEN?: string | null;
 	type: 'predefined' | 'custom';
 	description?: string;
 	isActive: boolean;
@@ -335,6 +338,7 @@ export interface StatementDocument {
 	status: 'sent' | 'to_send';
 	sentAt: string | null;
 	deliveryError: string | null;
+	deliveryErrorCode?: string | null;
 	createdAt: string;
 	tenantName: string;
 	statementNumber: string | null;

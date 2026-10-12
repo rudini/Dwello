@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import ContractWizard from './ContractWizard.svelte';
 
@@ -10,14 +11,14 @@
 </script>
 
 <svelte:head>
-	<title>Neuer Mietvertrag - Dwello</title>
+	<title>{m.contracts_new_title()} - Dwello</title>
 </svelte:head>
 
 <div class="mx-auto flex max-w-3xl flex-col gap-8">
 	<PageHeader
-		title="Neuer Mietvertrag"
-		purpose="Erfassen Sie Schritt für Schritt, wer welche Wohnung ab wann zu welcher Miete mietet."
-		trail={[{ href: '/contracts', label: 'Mietverträge' }]}
+		title={m.contracts_new_title()}
+		purpose={m.contracts_new_purpose()}
+		trail={[{ href: '/contracts', label: m.nav_contracts() }]}
 	/>
 	<ContractWizard tenants={data.tenants} apartments={data.apartments} />
 </div>

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import { untrack } from 'svelte';
 	import { addToast } from '$lib/stores';
 	import ActionDialog from '$lib/ui/ActionDialog.svelte';
@@ -26,24 +27,24 @@
 <div class="flex flex-col gap-8">
 	<PageHeader
 		title={name}
-		purpose="Kontaktdaten, Miete, Mietverträge und Dokumente dieses Mieters."
-		trail={[{ href: '/tenants', label: 'Mieter' }]}
+		purpose={m.tenants_detail_purpose()}
+		trail={[{ href: '/tenants', label: m.nav_tenants() }]}
 	>
 		{#snippet action()}
 			<Button href="/tenants/{tenant.id}/edit" icon="edit" testid="tenant-edit-button"
-				>Bearbeiten</Button
+				>{m.buildings_edit()}</Button
 			>
 			<Button
 				href="/contracts/new?tenant={tenant.id}"
 				variant="primary"
 				icon="contract"
-				testid="tenant-new-contract-button">Mietvertrag erfassen</Button
+				testid="tenant-new-contract-button">{m.dashboard_add_contract()}</Button
 			>
 			<Button
 				variant="danger-ghost"
 				onclick={() => (deleting = true)}
 				icon="delete"
-				testid="tenant-delete-button">Löschen</Button
+				testid="tenant-delete-button">{m.buildings_delete()}</Button
 			>
 		{/snippet}
 	</PageHeader>
@@ -63,17 +64,15 @@
 <ActionDialog
 	bind:open={deleting}
 	action="?/delete"
-	title="{name} löschen?"
-	confirmLabel="Mieter löschen"
+	title={m.tenants_delete_title({ name })}
+	confirmLabel={m.tenants_delete_confirm()}
 	danger
 	disabled={hasContracts}
 	confirmTestid="tenant-delete-confirm"
 	error={form?.error}
-	onsuccess={() => addToast('success', `Mieter «${name}» gelöscht`)}
+	onsuccess={() => addToast('success', m.tenants_deleted_toast({ name }))}
 >
 	<p data-testid="delete-dialog-message">
-		{hasContracts
-			? 'Mieter mit Mietverträgen bleiben erhalten, weil Abrechnungen und Dokumente auf sie verweisen.'
-			: `${name} wird endgültig gelöscht. Das lässt sich nicht rückgängig machen.`}
+		{hasContracts ? m.tenants_delete_has_contracts() : m.tenants_delete_text({ name })}
 	</p>
 </ActionDialog>

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import Button from '$lib/ui/Button.svelte';
 	import Icon from '$lib/ui/Icon.svelte';
 	import Illustration from '$lib/ui/Illustration.svelte';
@@ -20,7 +21,7 @@
 		<span class="text-accent"><Icon name={task.icon} size={32} /></span>
 	{/if}
 	<div class="flex flex-1 flex-col gap-1">
-		{#if next}<p class="font-semibold text-accent">Nächster Schritt</p>{/if}
+		{#if next}<p class="font-semibold text-accent">{m.dashboard_next_step()}</p>{/if}
 		<h3 class="text-xl font-bold text-ink">{task.title}</h3>
 		<p class="text-ink-muted">{task.text}</p>
 		{#if task.link}

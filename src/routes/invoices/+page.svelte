@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import { page } from '$app/stores';
 	import type { InvoicesListData } from '$lib/types';
 	import Button from '$lib/ui/Button.svelte';
@@ -24,17 +25,14 @@
 </script>
 
 <svelte:head>
-	<title>Rechnungen - Dwello</title>
+	<title>{m.nav_invoices()} - Dwello</title>
 </svelte:head>
 
 <div class="flex flex-col gap-8">
-	<PageHeader
-		title="Rechnungen"
-		purpose="Die Rechnungen Ihrer Gebäude. Umlagefähige Rechnungen fliessen in die Nebenkostenabrechnung ein."
-	>
+	<PageHeader title={m.nav_invoices()} purpose={m.invoices_purpose()}>
 		{#snippet action()}
 			<Button href="/invoices/new" variant="primary" icon="add" testid="invoice-new-button"
-				>Rechnung erfassen</Button
+				>{m.dashboard_add_invoice()}</Button
 			>
 		{/snippet}
 	</PageHeader>
@@ -51,23 +49,23 @@
 			{#if onlyYear}
 				<EmptyState
 					illustration="receipts"
-					title="Für {onlyYear} sind noch keine Rechnungen erfasst"
-					text="Erfassen Sie die Rechnungen dieses Jahres, damit sie in die Nebenkostenabrechnung einfliessen."
-					actionLabel="Rechnung erfassen"
+					title={m.invoices_empty_year_title({ year: onlyYear })}
+					text={m.invoices_empty_year_text()}
+					actionLabel={m.dashboard_add_invoice()}
 					actionHref="/invoices/new"
 				/>
 			{:else if filtered}
 				<EmptyState
 					illustration="no-results"
-					title="Keine Rechnungen gefunden"
-					text="Versuchen Sie es mit anderen Filtern."
+					title={m.invoices_none_found()}
+					text={m.invoices_none_found_text()}
 				/>
 			{:else}
 				<EmptyState
 					illustration="receipts"
-					title="Noch keine Rechnungen"
-					text="Erfassen Sie Ihre erste Rechnung, damit sie in die Nebenkostenabrechnung einfliesst."
-					actionLabel="Rechnung erfassen"
+					title={m.invoices_empty_title()}
+					text={m.invoices_empty_text()}
+					actionLabel={m.dashboard_add_invoice()}
 					actionHref="/invoices/new"
 				/>
 			{/if}
@@ -75,7 +73,7 @@
 	{:else}
 		<section class="flex flex-col gap-4" aria-labelledby="invoices-count">
 			<h2 id="invoices-count" tabindex="-1" data-results class="text-xl font-bold text-ink">
-				{data.total === 1 ? '1 Rechnung' : `${data.total} Rechnungen`}
+				{data.total === 1 ? m.invoices_count_one() : m.invoices_count({ count: data.total })}
 			</h2>
 			<ul class="divide-y divide-line rounded-panel border border-line bg-surface">
 				{#each data.invoices as invoice (invoice.id)}

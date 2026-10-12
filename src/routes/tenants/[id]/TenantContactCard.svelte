@@ -1,20 +1,25 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import type { Tenant } from '$lib/types';
 	import { languageLabels } from '$lib/tenant';
 	import Panel from '$lib/ui/Panel.svelte';
 
 	let { tenant }: { tenant: Tenant } = $props();
 
-	const channel = $derived(tenant.correspondenceChannel === 'email' ? 'Per E-Mail' : 'Per Brief');
+	const channel = $derived(
+		tenant.correspondenceChannel === 'email'
+			? m.tenants_channel_email()
+			: m.tenants_channel_letter()
+	);
 	const address = $derived(
 		[tenant.address, [tenant.postalCode, tenant.city].filter(Boolean).join(' ')].filter(Boolean)
 	);
 </script>
 
-<Panel title="Kontaktdaten">
+<Panel title={m.tenants_contact_title()}>
 	<dl class="flex flex-col gap-4">
 		<div>
-			<dt class="text-ink-muted">E-Mail</dt>
+			<dt class="text-ink-muted">{m.tenants_email()}</dt>
 			<dd class="break-words text-ink">
 				{#if tenant.email}
 					<a
@@ -23,27 +28,27 @@
 						data-testid="tenant-email-link">{tenant.email}</a
 					>
 				{:else}
-					Keine E-Mail-Adresse erfasst
+					{m.tenants_no_email()}
 				{/if}
 			</dd>
 		</div>
 		<div>
-			<dt class="text-ink-muted">Korrespondenzkanal</dt>
+			<dt class="text-ink-muted">{m.tenants_channel()}</dt>
 			<dd class="text-ink" data-testid="tenant-channel">{channel}</dd>
 		</div>
 		<div>
-			<dt class="text-ink-muted">Sprache</dt>
+			<dt class="text-ink-muted">{m.tenants_language()}</dt>
 			<dd class="text-ink" data-testid="tenant-language">
 				{languageLabels[tenant.language] ?? languageLabels.de}
 			</dd>
 		</div>
 		<div>
-			<dt class="text-ink-muted">Telefon</dt>
-			<dd class="text-ink">{tenant.phone ?? 'Keine Telefonnummer erfasst'}</dd>
+			<dt class="text-ink-muted">{m.tenants_phone()}</dt>
+			<dd class="text-ink">{tenant.phone ?? m.tenants_no_phone()}</dd>
 		</div>
 		<div>
-			<dt class="text-ink-muted">Adresse</dt>
-			<dd class="whitespace-pre-line text-ink">{address.join('\n') || 'Keine Adresse erfasst'}</dd>
+			<dt class="text-ink-muted">{m.buildings_address()}</dt>
+			<dd class="whitespace-pre-line text-ink">{address.join('\n') || m.tenants_no_address()}</dd>
 		</div>
 	</dl>
 </Panel>

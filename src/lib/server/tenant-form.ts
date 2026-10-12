@@ -1,3 +1,4 @@
+import { m } from '$lib/paraglide/messages';
 import { fail, redirect } from '@sveltejs/kit';
 import { languageLabels } from '$lib/tenant';
 
@@ -22,12 +23,13 @@ function readFields(formData: FormData) {
 
 function contactErrors(t: TenantFields) {
 	const errors: Record<string, string> = {};
-	if (!t.firstName) errors.firstName = 'Vorname ist erforderlich';
-	if (!t.lastName) errors.lastName = 'Nachname ist erforderlich';
+	if (!t.firstName) errors.firstName = m.tenants_error_first_name();
+	if (!t.lastName) errors.lastName = m.tenants_error_last_name();
 	if (t.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(t.email)) {
-		errors.email = 'Bitte geben Sie eine gültige E-Mail-Adresse ein';
+		errors.email = m.tenants_error_email_invalid();
 	}
-	if (t.postalCode && !/^\d{4}$/.test(t.postalCode)) errors.postalCode = 'PLZ muss 4 Ziffern haben';
+	if (t.postalCode && !/^\d{4}$/.test(t.postalCode))
+		errors.postalCode = m.buildings_error_postal_code_digits();
 	return errors;
 }
 
@@ -35,14 +37,13 @@ function contactErrors(t: TenantFields) {
 function channelErrors(t: TenantFields) {
 	const errors: Record<string, string> = {};
 	if (t.correspondenceChannel === 'email' && !t.email) {
-		errors.email = 'Für die Korrespondenz per E-Mail ist eine E-Mail-Adresse erforderlich';
+		errors.email = m.tenants_error_email_required();
 	}
 	if (t.correspondenceChannel === 'letter' && !t.address)
-		errors.address = 'Für Briefe ist eine Adresse erforderlich';
+		errors.address = m.tenants_error_address_letter();
 	if (t.correspondenceChannel === 'letter' && !t.postalCode)
-		errors.postalCode = 'Für Briefe ist eine PLZ erforderlich';
-	if (t.correspondenceChannel === 'letter' && !t.city)
-		errors.city = 'Für Briefe ist ein Ort erforderlich';
+		errors.postalCode = m.tenants_error_postal_code_letter();
+	if (t.correspondenceChannel === 'letter' && !t.city) errors.city = m.tenants_error_city_letter();
 	return errors;
 }
 
@@ -72,7 +73,7 @@ export async function saveTenant(fetch: typeof globalThis.fetch, request: Reques
 		body: JSON.stringify(tenant)
 	});
 	if (!response.ok) {
-		return fail(response.status, { errors: { form: 'Mieter konnte nicht gespeichert werden.' } });
+		return fail(response.status, { errors: { form: m.tenants_save_failed() } });
 	}
 	const saved = await response.json();
 	// Created from the rental contract wizard: back there, with the new tenant chosen

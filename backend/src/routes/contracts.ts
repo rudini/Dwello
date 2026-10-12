@@ -4,6 +4,7 @@
  */
 
 import { Elysia, t } from 'elysia';
+import { errorBody } from '../services/coded-error';
 import { authMiddleware } from '../middleware/auth';
 import {
 	listContracts,
@@ -146,7 +147,7 @@ export const contractRoutes = new Elysia({ prefix: '/api/v1/contracts' })
 				return contract;
 			} catch (error) {
 				set.status = 400;
-				return { error: error instanceof Error ? error.message : 'Failed to create contract' };
+				return errorBody(error, 'Failed to create contract');
 			}
 		},
 		{
@@ -170,7 +171,7 @@ export const contractRoutes = new Elysia({ prefix: '/api/v1/contracts' })
 					return { error: error.message, statements: error.statements };
 				}
 				set.status = 400;
-				return { error: error instanceof Error ? error.message : 'Failed to update contract' };
+				return errorBody(error, 'Failed to update contract');
 			}
 		},
 		{

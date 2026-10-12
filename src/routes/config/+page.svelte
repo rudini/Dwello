@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { m } from '$lib/paraglide/messages';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';
 	import { focusFirstError } from '$lib/ui/focus-error';
@@ -21,14 +22,11 @@
 </script>
 
 <svelte:head>
-	<title>Einstellungen - Dwello</title>
+	<title>{m.nav_settings()} - Dwello</title>
 </svelte:head>
 
 <div class="mx-auto flex max-w-3xl flex-col gap-8" data-testid="config-page">
-	<PageHeader
-		title="Einstellungen"
-		purpose="Absender für Abrechnungen und Mahnungen, Vorschläge für neue Abrechnungen und Rechnungen und die Stammdaten."
-	/>
+	<PageHeader title={m.nav_settings()} purpose={m.settings_purpose()} />
 
 	<ConfigLinks />
 
@@ -45,26 +43,26 @@
 		class="flex flex-col gap-8"
 		novalidate
 	>
-		<Panel title="Absender">
+		<Panel title={m.settings_sender()}>
 			<p class="text-ink-muted">
-				Steht auf jeder Abrechnung und jeder Mahnung. Mit der IBAN erstellt Dwello die QR-Rechnung.
+				{m.settings_sender_text()}
 			</p>
 			<SettingField
 				name="companyName"
-				label="Firmenname"
+				label={m.settings_company_name()}
 				value={settings.companyName}
-				example="Muster Immobilien AG"
+				example={m.settings_company_name_example()}
 			/>
 			<SettingField
 				name="companyAddress"
-				label="Strasse und Hausnummer"
+				label={m.buildings_street()}
 				value={settings.companyAddress}
-				example="Bahnhofstrasse 1"
+				example={m.settings_example_street()}
 			/>
 			<div class="grid gap-6 sm:grid-cols-3">
 				<SettingField
 					name="companyPostalCode"
-					label="PLZ"
+					label={m.buildings_postal_code()}
 					value={settings.companyPostalCode}
 					error={errors.companyPostalCode}
 					example="8001"
@@ -72,9 +70,9 @@
 				<div class="sm:col-span-2">
 					<SettingField
 						name="companyCity"
-						label="Ort"
+						label={m.buildings_city()}
 						value={settings.companyCity}
-						example="Zürich"
+						example={m.settings_city_example()}
 					/>
 				</div>
 			</div>
@@ -83,19 +81,19 @@
 				label="IBAN"
 				value={settings.iban}
 				error={errors.iban}
-				help="Konto, auf das Ihre Mieter Nachzahlungen überweisen; es steht auf der QR-Rechnung."
+				help={m.settings_iban_help()}
 				example="CH93 0076 2011 6238 5295 7"
 			/>
 		</Panel>
 
-		<Panel title="Verwaltungspauschale">
+		<Panel title={m.glossary_fee_term()}>
 			<SettingField
 				type="decimal"
 				name="managementFeePercent"
-				label="Verwaltungspauschale in %"
+				label={m.settings_fee_label()}
 				value={settings.managementFeePercent}
 				error={errors.managementFeePercent}
-				help="{help.managementFee} Vorschlag beim Erstellen der Abrechnungen, dort für jeden Lauf anpassbar."
+				help="{help.managementFee} {m.settings_fee_suggestion()}"
 				example="3"
 			/>
 		</Panel>
@@ -107,14 +105,14 @@
 		/>
 
 		{#if errors.form}
-			<Alert tone="critical" title="Die Einstellungen wurden nicht gespeichert" testid="form-error">
+			<Alert tone="critical" title={m.settings_not_saved()} testid="form-error">
 				<p>{errors.form}</p>
 			</Alert>
 		{/if}
 		<div role="status">
 			{#if saved}
-				<Alert tone="positive" title="Einstellungen gespeichert" testid="settings-saved">
-					<p>Absender, Verwaltungspauschale und Vorschläge gespeichert.</p>
+				<Alert tone="positive" title={m.settings_saved()} testid="settings-saved">
+					<p>{m.settings_saved_text()}</p>
 				</Alert>
 			{/if}
 		</div>
@@ -124,8 +122,8 @@
 				variant="primary"
 				icon="save"
 				busy={saving}
-				busyLabel="Wird gespeichert …"
-				testid="settings-submit">Einstellungen speichern</Button
+				busyLabel={m.ui_saving()}
+				testid="settings-submit">{m.settings_save()}</Button
 			>
 		</div>
 	</form>

@@ -15,7 +15,7 @@ import { callApi } from './helpers/auth';
 import { createRental } from './helpers/rental';
 
 type Document = { id: string; reminderLevel: number; channel: string; status: string; title: string };
-type ReminderResult = { document: Document; deliveryError?: string; error?: string };
+type ReminderResult = { document: Document & { deliveryErrorCode?: string }; deliveryError?: string; error?: string; code?: string };
 
 const token = crypto.randomUUID();
 const mails: ParsedMail[] = [];
@@ -117,6 +117,7 @@ describe('Mahnung per E-Mail', () => {
 
 		expect(result.document).toMatchObject({ channel: 'email', status: 'to_send' });
 		expect(result.deliveryError).toBe('Der E-Mail-Versand ist nicht eingerichtet.');
+		expect(result.document.deliveryErrorCode).toBe('MAIL_NOT_CONFIGURED');
 		expect(mails.length).toBe(before);
 	});
 });
@@ -169,6 +170,7 @@ describe('Mahnung per Brief', () => {
 
 		expect(result.status).toBe(400);
 		expect(result.error).toBe('Es wurden bereits 3 Mahnungen versendet.');
+		expect(result.code).toBe('REMINDER_LIMIT');
 	});
 });
 
@@ -178,6 +180,7 @@ describe('Mahnbare Abrechnungen', () => {
 
 		expect(result.status).toBe(400);
 		expect(result.error).toBe('Nur versendete Abrechnungen können gemahnt werden.');
+		expect(result.code).toBe('REMINDER_NOT_SENT');
 	});
 
 	// Vor Ablauf der Zahlungsfrist ist eine Mahnung verfrüht, auch über einen alten Tab
@@ -188,6 +191,7 @@ describe('Mahnbare Abrechnungen', () => {
 
 		expect(result.status).toBe(400);
 		expect(result.error).toBe('Gemahnt wird erst nach Ablauf der Zahlungsfrist.');
+		expect(result.code).toBe('REMINDER_NOT_OVERDUE');
 	});
 
 	// Bei einer Rückerstattung schuldet der Vermieter: eine Zahlungsaufforderung an den Mieter wäre falsch
@@ -198,5 +202,6 @@ describe('Mahnbare Abrechnungen', () => {
 
 		expect(result.status).toBe(400);
 		expect(result.error).toBe('Eine Rückerstattung wird nicht gemahnt: Sie schulden dem Mieter den Betrag.');
+		expect(result.code).toBe('REMINDER_REFUND');
 	});
 });

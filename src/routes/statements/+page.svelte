@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import { flushSync, tick } from 'svelte';
 	import { invalidateAll } from '$app/navigation';
 	import { page } from '$app/stores';
@@ -52,7 +53,7 @@
 		if (paidError) return focusFirstError(document.querySelector('[role="dialog"]'));
 		saving = true;
 		payError = '';
-		const failed = 'Abrechnung konnte nicht als bezahlt markiert werden. Versuchen Sie es erneut.';
+		const failed = m.statements_mark_paid_failed();
 		try {
 			const response = await fetch(`/statements/${paying!.id}/mark-paid`, {
 				method: 'POST',
@@ -63,7 +64,7 @@
 				payError = (await response.json().catch(() => ({}))).message ?? failed;
 				return;
 			}
-			addToast('success', `Abrechnung ${paying!.statementNumber} als bezahlt markiert`);
+			addToast('success', m.statements_marked_paid_number({ number: paying!.statementNumber }));
 			paying = null;
 			await invalidateAll();
 			await tick(); // its row's button is gone now: the focus goes to the page title
@@ -77,20 +78,17 @@
 </script>
 
 <svelte:head>
-	<title>Nebenkostenabrechnungen - Dwello</title>
+	<title>{m.nav_statements()} - Dwello</title>
 </svelte:head>
 
 <div class="flex flex-col gap-8" data-testid="statements-page">
-	<PageHeader
-		title="Nebenkostenabrechnungen"
-		purpose="Prüfen, versenden und verfolgen Sie die Abrechnungen Ihrer Mieter."
-	>
+	<PageHeader title={m.nav_statements()} purpose={m.statements_purpose()}>
 		{#snippet action()}
 			<Button
 				href="/statements/generate"
 				variant="primary"
 				icon="add"
-				testid="statements-generate-button">Abrechnungen erstellen</Button
+				testid="statements-generate-button">{m.dashboard_create_statements()}</Button
 			>
 		{/snippet}
 	</PageHeader>
@@ -107,17 +105,17 @@
 			{#if filtered}
 				<EmptyState
 					illustration="no-results"
-					title="Keine Abrechnungen gefunden"
-					text="Versuchen Sie, Ihre Filter anzupassen."
-					actionLabel="Filter zurücksetzen"
+					title={m.statements_none_found()}
+					text={m.statements_adjust_filters()}
+					actionLabel={m.buildings_reset_filters()}
 					actionHref="/statements"
 				/>
 			{:else}
 				<EmptyState
 					illustration="statement"
-					title="Noch keine Abrechnungen"
-					text="Erstellen Sie Ihre erste Nebenkostenabrechnung."
-					actionLabel="Abrechnungen erstellen"
+					title={m.statements_empty_title()}
+					text={m.statements_empty_text()}
+					actionLabel={m.dashboard_create_statements()}
 					actionHref="/statements/generate"
 				/>
 			{/if}
@@ -125,7 +123,9 @@
 	{:else}
 		<section class="flex flex-col gap-4" aria-labelledby="statements-count">
 			<h2 id="statements-count" tabindex="-1" data-results class="text-xl font-bold text-ink">
-				{data.total === 1 ? '1 Abrechnung' : `${data.total} Abrechnungen`}
+				{data.total === 1
+					? m.statements_count_one()
+					: m.statements_count_many({ count: data.total })}
 			</h2>
 			<ul class="divide-y divide-line rounded-panel border border-line bg-surface">
 				{#each data.statements as statement (statement.id)}
@@ -146,10 +146,10 @@
 
 <Dialog
 	open={!!paying}
-	title="Abrechnung als bezahlt markieren"
-	confirmLabel="Als bezahlt markieren"
+	title={m.statements_mark_paid_title()}
+	confirmLabel={m.statements_mark_paid()}
 	busy={saving}
-	busyLabel="Wird gespeichert …"
+	busyLabel={m.ui_saving()}
 	confirmTestid="statement-list-mark-paid-confirm"
 	onconfirm={markPaid}
 	onclose={() => {
@@ -158,10 +158,10 @@
 	}}
 >
 	{#if paying}
-		{#if paying.balance > 0}<p>Danach können Sie keine Mahnung mehr senden.</p>{/if}
+		{#if paying.balance > 0}<p>{m.statements_no_reminder_after()}</p>{/if}
 		<DateInput
 			id="paidDate"
-			label="Bezahlt am"
+			label={m.statements_paid_on()}
 			help={paidHelp(paying.balance)}
 			error={paidError}
 			bind:value={paidDate}
@@ -172,7 +172,7 @@
 			{formatCurrency(Math.abs(paying.balance))}
 		</p>
 		{#if payError}
-			<Alert tone="critical" title="Nicht gespeichert"><p>{payError}</p></Alert>
+			<Alert tone="critical" title={m.buildings_not_saved()}><p>{payError}</p></Alert>
 		{/if}
 	{/if}
 </Dialog>
