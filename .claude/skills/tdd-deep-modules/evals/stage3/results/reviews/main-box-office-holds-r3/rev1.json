@@ -1,0 +1,29 @@
+{
+ "group": "main-box-office-holds-r3",
+ "reviewer": 1,
+ "key": {
+  "A": "canon",
+  "B": "baseline",
+  "C": "skill"
+ },
+ "runs": {
+  "baseline": "main-box-office-holds-baseline-r3-a1",
+  "canon": "main-box-office-holds-canon-r3-a1",
+  "skill": "main-box-office-holds-skill-r3-a2"
+ },
+ "scores_by_label": {
+  "A": 6,
+  "B": 7,
+  "C": 7
+ },
+ "scores": {
+  "canon": 6,
+  "baseline": 7,
+  "skill": 7
+ },
+ "foreign_references": [],
+ "complete": true,
+ "cost": 0.11044799999999999,
+ "permission_denials": [],
+ "text": "I read TASK.md and the single source file in each implementation. All three share the same structure: `createBoxOffice` keeps the hold and order records private and exposes the five-method `BoxOffice` interface. Ticket counting is hidden in one helper, and price rounding is hidden in a small pure function. That five-method interface is deep: it hides lazy expiry, ID numbering, the customer limit across sections, discounts and Rappen rounding, and cancellation fees. The differences between them are small and come down to how well the internal helpers hide the expiry and time rules.\n\n**A (6):** `takenTickets(now)` is a generator that hides which holds and orders count as live. It is wrapped by two near-identical helpers, `available(sectionId, now)` and `ticketsOf(customerId, now)`. That gives more small pieces than needed, and callers have to read the time themselves and pass `now` in. The expiry rule `now < expiresAt` is repeated in `takenTickets`, `confirm` and `release`, so that decision is spread across the module rather than kept in one place. `orderTotal` and `openHold` hide their logic well.\n\n**B (7):** `isActive(hold, now)` holds the expiry rule in one place, and `takenTickets`, `confirm` and `release` all use it. One general helper, `taken(matches, now)`, serves both the section-availability count and the customer-limit count. `availableAt`, `requireSection` and `requireOpenHold` are thin, but each hides one rule. The internal records (`HoldRecord`/`OrderRecord`) are kept separate from the returned `Hold`/`Order` values. Callers still have to pass `now` in.\n\n**C (7):** `takenTickets(belongs)` is the deepest helper of the three. It reads the clock itself, filters out expired holds and cancelled orders, and sums quantities, so callers only supply a predicate. `available` and `sectionOf` are simple and reused, and the public `available` is that same internal function. The downside is that the expiry comparison is repeated in `confirm` and `release`, and `openHold` hides little beyond the `UNKNOWN_HOLD` check.\n\n```json\n{\"scores\": {\"A\": 6, \"B\": 7, \"C\": 7}}\n```"
+}

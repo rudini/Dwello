@@ -1,0 +1,29 @@
+{
+ "group": "main-opening-hours-parser-r2",
+ "reviewer": 2,
+ "key": {
+  "A": "baseline",
+  "B": "skill",
+  "C": "canon"
+ },
+ "runs": {
+  "baseline": "main-opening-hours-parser-baseline-r2-a1",
+  "canon": "main-opening-hours-parser-canon-r2-a1",
+  "skill": "main-opening-hours-parser-skill-r2-a2"
+ },
+ "scores_by_label": {
+  "A": 6,
+  "B": 7,
+  "C": 7
+ },
+ "scores": {
+  "baseline": 6,
+  "skill": 7,
+  "canon": 7
+ },
+ "foreign_references": [],
+ "complete": true,
+ "cost": 0.12058200000000001,
+ "permission_denials": [],
+ "text": "All three take the same basic approach: a tokenizer feeds a recursive-descent parser, and the only public entry point is `parseOpeningHours`. That entry point is very narrow compared with what it hides: tokenizing, wrap-around day ranges, time validation, overlap checks and error columns. So all three score fairly well. They differ in how well the internal pieces hide their own details.\n\n**A**: The tokenizer, the error helper `unexpected()` and `parseTime()` are reasonably deep helpers. `parseTime` hides the parsing of `HH:MM` into minutes and the rule that `24:00` is only allowed as an end. But the whole parser is a set of closures inside one large `parseOpeningHours` (`expectDay`, `expectTime`, `parseDays`, `parseRanges`). Low-level token handling leaks into the grammar code: `parseRanges` checks the dash by hand with `next()`/`kind !== \"-\"`, and the main loop checks the `;`/end separator inline. The extra `ParsedRange` type, which stores both the original text and the minutes, adds another representation that callers inside the function have to deal with.\n\n**B**: A `Parser` class has one public method, `spec()`. Its token cursor is wrapped in three methods: `accept(kind, text?)`, `next(kind)` and `peek()`. `next` hides the end-of-text case and the `UNEXPECTED` error, so the grammar methods (`rule`, `days`, `dayItem`, `range`, `time`) read like the grammar. The generic `list<T>(item, check)` hides the comma loop and how the error column is found, for both day lists and time ranges. That is real reuse, but its callback interface (item, earlier, column) is a bit more complex than what it saves. The tokenizer is a single regex behind `tokenize()`.\n\n**C**: A `Parser` class takes the raw text, runs the tokenizer inside its constructor and exposes only `parseSpec()`. Its last token is a special end marker, so `peek`, `next`, `expect` and `accept` never need an \"out of tokens\" special case. End-of-text errors come out of `expect(\"end\")` and `unexpected()` with no extra code. Each grammar rule gets one small method (`parseRule`, `parseDays`, `parseDayItem`, `parseRanges`, `parseRange`, `parseTime`), each hiding one rule. There is some duplication of the comma loops, but every interface is minimal.\n\n```json\n{\"scores\": {\"A\": 6, \"B\": 7, \"C\": 7}}\n```"
+}

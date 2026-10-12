@@ -1,0 +1,29 @@
+{
+ "group": "main-box-office-holds-r3",
+ "reviewer": 2,
+ "key": {
+  "A": "canon",
+  "B": "skill",
+  "C": "baseline"
+ },
+ "runs": {
+  "baseline": "main-box-office-holds-baseline-r3-a1",
+  "canon": "main-box-office-holds-canon-r3-a1",
+  "skill": "main-box-office-holds-skill-r3-a2"
+ },
+ "scores_by_label": {
+  "A": 6,
+  "B": 6,
+  "C": 7
+ },
+ "scores": {
+  "canon": 6,
+  "skill": 6,
+  "baseline": 7
+ },
+ "foreign_references": [],
+ "complete": true,
+ "cost": 0.1087648,
+ "permission_denials": [],
+ "text": "I read all four files. All three implementations have the same overall shape. Each has a single `createBoxOffice` closure behind the five-method `BoxOffice` interface, plus a pure pricing function and a few private helpers. So the scores are close, and they differ only in how well the helpers hide the \"what counts as taken\" and \"what counts as active\" rules.\n\n**A:** `createBoxOffice` gives a small interface over all the hold, order, expiry and limit logic. `orderTotal` hides the discount and Rappen rounding behind `(quantity, priceCents)`. The generator `takenTickets(now)` is a good deep helper: it merges active holds and live orders into one stream, so `available` and `ticketsOf` are thin filters over it. However, the expiry rule `now < expiresAt` is written out again inside `confirm` and `release`, so that decision isn't kept in one place.\n\n**B:** `takenTickets(belongs)` is the deepest helper of the three. It reads `options.now()` itself, filters active holds and live orders, and sums them, so callers pass only a predicate and never deal with time. `available` is a one-liner on top of it, and `totalCents` hides the pricing as A's `orderTotal` does. Like A, it repeats the expiry check in `confirm` and `release`, and hold IDs come from the array length (`holds.length`) rather than being a hidden counter.\n\n**C:** `isActive(hold, now)` keeps the active-hold rule in one place, and `taken`, `confirm` and `release` all reuse it. `taken(matches, now)` hides the merge-and-sum over holds and orders, and `orderTotalCents` hides the pricing. Dedicated counters (`nextHoldNumber`, `nextOrderNumber`) and the `HoldRecord`/`OrderRecord` types keep internal state out of the returned objects. `availableAt` and `requireSection` are fairly shallow, but overall C hides each design decision once.\n\n```json\n{\"scores\": {\"A\": 6, \"B\": 6, \"C\": 7}}\n```"
+}

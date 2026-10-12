@@ -1,0 +1,29 @@
+{
+ "group": "main-checkout-rounding-bug-r1",
+ "reviewer": 2,
+ "key": {
+  "A": "canon",
+  "B": "baseline",
+  "C": "skill"
+ },
+ "runs": {
+  "baseline": "main-checkout-rounding-bug-baseline-r1-a1",
+  "canon": "main-checkout-rounding-bug-canon-r1-a1",
+  "skill": "main-checkout-rounding-bug-skill-r1-a2"
+ },
+ "scores_by_label": {
+  "A": 5,
+  "B": 5,
+  "C": 6
+ },
+ "scores": {
+  "canon": 5,
+  "baseline": 5,
+  "skill": 6
+ },
+ "foreign_references": [],
+ "complete": true,
+ "cost": 0.1426831,
+ "permission_denials": [],
+ "text": "All three implementations are nearly identical in structure. Each has the same `catalog.ts` (`createCatalog`/`findProduct`) and the same `receipt.ts`. Each also has the same `promotions.ts` design: one function, `discountFor(promotion, lines)`, hides the different promotion kinds. That function is the deepest piece in every version. In all three, the new minimum-order rule sits in `checkout()` rather than in `promotions.ts`, so the coupon-validity policy spreads into the caller. Depth differs only in how the VAT/discount split and the money helpers are organised.\n\n**A:** `checkout()` in `checkout.ts` does several jobs in one long function: it builds the lines, applies the coupon and the minimum-order rule, splits the discount between VAT rates, and loops over the rates to compute VAT. The VAT split is written inline as integer arithmetic, not behind any abstraction. `money.ts` exports three tiny functions (`roundToRappen`, `formatChf`, `vatIncluded`), each about as complex as its interface. Apart from `discountFor`, the modules are fairly shallow.\n\n**B:** The structure is the same as A. `checkout()` computes `reducedDiscount`, `standardDiscount` and both VAT values inline. `money.ts` again exposes the same three one-line helpers. The proportional VAT-split decision is not encapsulated anywhere, so B's depth matches A's.\n\n**C:** Again the same overall shape, with two small improvements. The discount allocation and VAT calculation are pulled into `vatAfterDiscount(gross, subtotal, discount)`, a function with a narrow interface. `roundToRappen` and `vatIncluded` are private to `checkout.ts`, so `money.ts` exports only `formatChf`. Hiding these details gives a slightly smaller public surface. Still, `checkout()` handles the coupon policy itself, and the extracted helper is only modestly deep.\n\n```json\n{\"scores\": {\"A\": 5, \"B\": 5, \"C\": 6}}\n```"
+}

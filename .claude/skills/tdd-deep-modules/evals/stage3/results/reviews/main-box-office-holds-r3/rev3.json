@@ -1,0 +1,29 @@
+{
+ "group": "main-box-office-holds-r3",
+ "reviewer": 3,
+ "key": {
+  "A": "baseline",
+  "B": "canon",
+  "C": "skill"
+ },
+ "runs": {
+  "baseline": "main-box-office-holds-baseline-r3-a1",
+  "canon": "main-box-office-holds-canon-r3-a1",
+  "skill": "main-box-office-holds-skill-r3-a2"
+ },
+ "scores_by_label": {
+  "A": 7,
+  "B": 5,
+  "C": 6
+ },
+ "scores": {
+  "baseline": 7,
+  "canon": 5,
+  "skill": 6
+ },
+ "foreign_references": [],
+ "complete": true,
+ "cost": 0.11023070000000001,
+ "permission_denials": [],
+ "text": "All three use the same design: one `createBoxOffice` closure behind the five-method `BoxOffice` interface, with private helpers and a pure pricing function. The public interface is the same small one in each, so the scores turn on how well the internal helpers hide the design decisions: the expiry rule, how taken tickets are counted, and how the clock is read.\n\n**A.** The `taken(matches, now)` helper is the deepest piece. It hides which holds and orders count as taken (active holds and non-cancelled orders) behind a single predicate. Both `availableAt` and the customer-limit check reuse it. The expiry rule lives in one place, `isActive`, which `taken`, `confirm` and `release` all use, so the meaning of \"expired\" never leaks out. `requireSection`/`requireOpenHold` combine lookup and validation, and `orderTotalCents` hides the discount and Rappen-rounding rules behind `(quantity, price)`. The record types (`HoldRecord`/`OrderRecord`) have their internal flags stripped before results are returned, which keeps internal state hidden.\n\n**B.** The `takenTickets(now)` generator hides the active/non-cancelled filtering, which is good. But `available` and `ticketsOf` are nearly identical summing loops on top of it, so the summing logic is duplicated rather than hidden. The expiry comparison `now < hold.expiresAt` / `options.now() >= hold.expiresAt` appears in three places (the generator, `confirm` and `release`), so that rule isn't encapsulated. `section`, `openHold` and `orderTotal` are reasonably deep small helpers.\n\n**C.** `takenTickets(belongs)` is a deep helper. It reads the clock itself and hides both the filtering and the summing behind one predicate, and `available` is just a one-line use of it. As in B, the expiry rule is written out separately in `takenTickets`, `confirm` and `release`. Also, `takenTickets` reads the clock internally while `hold` reads it again separately, so the time a single operation uses isn't one consistent value. `sectionOf`, `openHold` and `totalCents` are fine helpers.\n\n```json\n{\"scores\": {\"A\": 7, \"B\": 5, \"C\": 6}}\n```"
+}

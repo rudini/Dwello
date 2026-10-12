@@ -1,0 +1,29 @@
+{
+ "group": "main-opening-hours-parser-r2",
+ "reviewer": 1,
+ "key": {
+  "A": "baseline",
+  "B": "canon",
+  "C": "skill"
+ },
+ "runs": {
+  "baseline": "main-opening-hours-parser-baseline-r2-a1",
+  "canon": "main-opening-hours-parser-canon-r2-a1",
+  "skill": "main-opening-hours-parser-skill-r2-a2"
+ },
+ "scores_by_label": {
+  "A": 6,
+  "B": 7,
+  "C": 6
+ },
+ "scores": {
+  "baseline": 6,
+  "canon": 7,
+  "skill": 6
+ },
+ "foreign_references": [],
+ "complete": true,
+ "cost": 0.1179845,
+ "permission_denials": [],
+ "text": "I read TASK.md and the one source file in each implementation (`A/src/openingHours.ts`, `B/src/openingHours.ts`, `C/src/openingHours.ts`). All three hide the whole grammar, tokenizer and error-column rules behind the single `parseOpeningHours(text)` entry point. So the difference in depth lies in how each one splits the work inside.\n\n**A (6).** `tokenize` is a good deep helper: it hides the lexical rules and adds an `end` sentinel token whose column is the text length + 1. That sentinel lets `unexpected(token)` handle \"text ended too early\" with no special cases. `parseTime(text, isEnd)` is also deep, turning a raw string into minutes and hiding the `24:00` rule. However, most of the logic sits in one large `parseOpeningHours` body made of closures (`expectDay`, `expectTime`, `parseDays`, `parseRanges`) that share a mutable `pos`. Their boundaries are informal, and the rule loop handles separators by hand.\n\n**B (7).** This one also uses `tokenize` with an `end` sentinel. A `Parser` class has a one-call interface (`new Parser(text).parseSpec()`) and wraps the token cursor in `expect` and `accept`. These two small, general helpers hide all `UNEXPECTED`-error handling, so methods like `parseRange` and `parseTime` read as plain grammar code with checks attached. A few methods are thin pass-throughs (`parseRule`, and `parseDayItem` versus `parseDay`), but overall it hides the most behind the simplest internal interfaces.\n\n**C (6).** The regex-based `tokenize` is compact. The generic `list(item, check)` combinator hides the comma-separated iteration and works out the column for checks on later items. However, its callback signature `(item, earlier, column)` is fairly wide, which makes the DUPLICATE_DAY and OVERLAP callers awkward (for example, `earlier.flat()`). Because there is no end sentinel, `endColumn` has to be passed into the parser, and `peek` and `next` have to handle `undefined`, so end-of-input knowledge leaks into several places. `emptyWeek` is a shallow helper.\n\n```json\n{\"scores\": {\"A\": 6, \"B\": 7, \"C\": 6}}\n```"
+}

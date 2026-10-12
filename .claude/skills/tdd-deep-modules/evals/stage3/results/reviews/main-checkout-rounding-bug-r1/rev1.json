@@ -1,0 +1,29 @@
+{
+ "group": "main-checkout-rounding-bug-r1",
+ "reviewer": 1,
+ "key": {
+  "A": "canon",
+  "B": "skill",
+  "C": "baseline"
+ },
+ "runs": {
+  "baseline": "main-checkout-rounding-bug-baseline-r1-a1",
+  "canon": "main-checkout-rounding-bug-canon-r1-a1",
+  "skill": "main-checkout-rounding-bug-skill-r1-a2"
+ },
+ "scores_by_label": {
+  "A": 6,
+  "B": 7,
+  "C": 6
+ },
+ "scores": {
+  "canon": 6,
+  "skill": 7,
+  "baseline": 6
+ },
+ "foreign_references": [],
+ "complete": true,
+ "cost": 0.1429048,
+ "permission_denials": [],
+ "text": "I read all 15 source files plus TASK.md. The three versions have nearly the same structure. `catalog.ts`, `receipt.ts` and the `findPromotion`/`discountFor` part of `promotions.ts` are essentially the same in all three. All three also keep the public interface small: `checkout(...)` and `renderReceipt(...)` hide pricing, coupon checks, discount capping, VAT and 5-Rappen rounding. The scores only differ because of how the new discount-splitting logic is placed.\n\n**A:** `checkout` handles everything inline: building the lines, checking the coupon's minimum, capping the discount, splitting the discount between VAT rates, and the per-rate VAT loop (using a local `grossFor` closure). `discountFor` is a fairly deep function: one call hides the rules for all three promotion kinds, including multibuy groups added up across lines. `money.ts` exports three tiny helpers (`roundToRappen`, `vatIncluded`, `formatChf`), and the first two are thin wrappers around a single formula. The VAT split is a separate design decision, but it isn't wrapped in its own unit, so `checkout` mixes several concerns.\n\n**B:** Same overall layout, but the VAT logic is pulled out into a private `vatAfterDiscount(gross, subtotal, discount)`. That one call hides how the discount is split between rates, the rounding rule for the reduced share, and the VAT formula. `roundToRappen` and `vatIncluded` are private to `checkout.ts`, so `money.ts` exports only `formatChf`. Gross per rate is added up once into a single record. The total surface area is the smallest of the three, and the split rule is hidden behind one narrow interface. It's still a small shallow-ish helper, but it's the cleanest separation here.\n\n**C:** Almost the same as A: the discount split and VAT are worked out inline in `checkout` (`grossOf`, `reducedDiscount`, `standardDiscount`, then a hand-written `vat` record), and `money.ts` exports the same thin helpers. `discountFor` is the same fairly deep function as in A. It has no extracted unit for the VAT rule, so `checkout` is a long sequence of steps rather than a composition of deep parts.\n\n```json\n{\"scores\": {\"A\": 6, \"B\": 7, \"C\": 6}}\n```"
+}

@@ -1,0 +1,29 @@
+{
+ "group": "main-opening-hours-parser-r2",
+ "reviewer": 3,
+ "key": {
+  "A": "skill",
+  "B": "baseline",
+  "C": "canon"
+ },
+ "runs": {
+  "baseline": "main-opening-hours-parser-baseline-r2-a1",
+  "canon": "main-opening-hours-parser-canon-r2-a1",
+  "skill": "main-opening-hours-parser-skill-r2-a2"
+ },
+ "scores_by_label": {
+  "A": 7,
+  "B": 5,
+  "C": 7
+ },
+ "scores": {
+  "skill": 7,
+  "baseline": 5,
+  "canon": 7
+ },
+ "foreign_references": [],
+ "complete": true,
+ "cost": 0.115543,
+ "permission_denials": [],
+ "text": "I read TASK.md and the one source file in each implementation. All three hide a lot behind a single public function, `parseOpeningHours(text)`. They differ in how well the internal modules divide that work between them.\n\n**A (7):** The private parts are well layered. `tokenize` uses one regex to hide all token-boundary rules, and the `Parser` methods `accept`, `next` and `unexpected` hide cursor handling and the end-of-text column (`endColumn`). The generic `list(item, check)` helper combines the comma-loop and the column capture for both the DUPLICATE_DAY and OVERLAP checks. This removes duplication, but its three-argument callback interface is almost as complex as the loop it replaces, so that helper is fairly shallow. `rule` and `dayItem` are small, focused, and hide their own details.\n\n**B (5):** `tokenize` (with an `end` sentinel token) and `parseTime` are reasonably deep. `parseTime` hides the HH:MM checks, the 24:00-only-as-end rule and the conversion to minutes behind a single `number | undefined` result. Everything else sits in one large `parseOpeningHours` function full of closures (`expectDay`, `expectTime`, `parseDays`, `parseRanges`). That function mixes cursor handling, the grammar, building the weekly result, and deciding where a rule ends (`separator.kind === \"end\"`). The pieces share mutable `pos` state instead of having clean interfaces, and the `ParsedRange` type exposes how ranges are represented internally.\n\n**C (7):** It has a clean recursive-descent `Parser` class whose constructor does the tokenizing internally, so `parseOpeningHours` is a one-line call. The `end` sentinel token makes the parser simpler: `expect`/`accept` never need to handle end-of-input, and `unexpected` reports the end-of-text column automatically. Each grammar rule has its own method (`parseRule`, `parseDays`, `parseDayItem`, `parseRange`, `parseTime`), and each hides one concern behind a narrow return value. Depth is about the same as A: some of these methods are thin, but overall it hides well.\n\n```json\n{\"scores\": {\"A\": 7, \"B\": 5, \"C\": 7}}\n```"
+}

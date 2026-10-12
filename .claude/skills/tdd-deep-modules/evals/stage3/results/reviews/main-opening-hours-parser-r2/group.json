@@ -1,0 +1,10 @@
+{
+ "group": "main-opening-hours-parser-r2",
+ "fixture": "opening-hours-parser",
+ "runs": {
+  "baseline": "main-opening-hours-parser-baseline-r2-a1",
+  "canon": "main-opening-hours-parser-canon-r2-a1",
+  "skill": "main-opening-hours-parser-skill-r2-a2"
+ },
+ "control": null
+}
