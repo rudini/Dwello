@@ -1,0 +1,142 @@
+{
+ "run_id": "main-holdout-a-skill-r3-a2",
+ "status": "finished",
+ "phase": "main",
+ "slot": 3,
+ "attempt": 2,
+ "fixture": "holdout-a",
+ "fixture_dir": "holdout/holdout-a",
+ "arm": "skill",
+ "started": "2026-10-12T13:08:06Z",
+ "valid": true,
+ "harness": {
+  "commit": "5451bcd7288c8960ce8e8ab51fc24aa9cccb7717",
+  "sha256": "15bb8a6dd4ebf9400008fc77636b6eaf326caefe18b711fbb46aefbb96869fd6"
+ },
+ "base": "450df2e5fcb177094aed8226841445941e86d58e",
+ "duration_s": 337,
+ "session": {
+  "is_error": false,
+  "num_turns": 104,
+  "total_cost_usd": 1.5831452999999998,
+  "session_id": "aa854ef5-564c-45f9-8cee-4eb224177ada",
+  "permission_denials": [
+   {
+    "tool_name": "Bash",
+    "tool_use_id": "toolu_014frAQS6o4HWFHeNTifpEvL",
+    "tool_input": {
+     "command": "cat > src/pickList.test.ts <<'EOF'\nimport { expect, test } from \"bun:test\";\nimport { buildPickList, OrderFormatError, type StockLot } from \"./pickList\";\n\nconst lot = (bin: string, sku: string, qty: number, expires: string | null = null): StockLot => ({\n  bin,\n  sku,\n  qty,\n  expires,\n});\n\ntest(\"format errors name the line\", () => {\n  const error = new OrderFormatError(7, \"quantity must be positive\");\n  expect(error).toBeInstanceOf(Error);\n  expect(error.line).toBe(7);\n  expect(error.message).toBe(\"Line 7: quantity must be positive\");\n});\n\ntest(\"one order, one item, one lot: one pick\", () => {\n  const result = buildPickList(\"ORDER 1001\\n  OLIVE-500 x3\", [lot(\"A-01-1\", \"OLIVE-500\", 10)]);\n  expect(result).toEqual({\n    picks: [{ bin: \"A-01-1\", sku: \"OLIVE-500\", qty: 3, orderId: \"1001\" }],\n    shortages: [],\n  });\n});\nEOF\n.claude/skills/tdd-deep-modules/scripts/tdd-step red \"one order, one item, one lot\" 2>&1 | tail -5"
+    }
+   },
+   {
+    "tool_name": "Bash",
+    "tool_use_id": "toolu_013WCmrGtts7gDkP5oHWVBv3",
+    "tool_input": {
+     "command": "python3 - <<'EOF'\np='src/pickList.test.ts'\ns=open(p).read()\ns=s.replace('''  expires,\n});\n''','''  expires,\n});\n\n// Returns the pick list, or the thrown error, so that every outcome is checked by an assertion.\nconst outcome = (ordersText: string, stock: StockLot[]): unknown => {\n  try {\n    return buildPickList(ordersText, stock);\n  } catch (error) {\n    return error;\n  }\n};\n''',1)\ns=s.replace('const result = buildPickList(\"ORDER 1001\\\\n  OLIVE-500 x3\", [lot(\"A-01-1\", \"OLIVE-500\", 10)]);\\n  expect(result)','expect(outcome(\"ORDER 1001\\\\n  OLIVE-500 x3\", [lot(\"A-01-1\", \"OLIVE-500\", 10)]))')\nopen(p,'w').write(s)\nEOF\ngrep -n outcome src/pickList.test.ts; .claude/skills/tdd-deep-modules/scripts/tdd-step red \"one order, one item, one lot\" 2>&1 | tail -5; git log --oneline | head -1"
+    }
+   },
+   {
+    "tool_name": "Bash",
+    "tool_use_id": "toolu_0195iX8LT66PQM1jjLpJahiM",
+    "tool_input": {
+     "command": "cat >> src/pickList.test.ts <<'EOF'\n\ntest(\"an item takes from several lots, earliest best-before first\", () => {\n  const stock = [\n    lot(\"A-01-1\", \"OLIVE-500\", 4, \"2026-12-01\"),\n    lot(\"A-02-1\", \"OLIVE-500\", 2, \"2026-11-01\"),\n    lot(\"A-03-1\", \"OLIVE-500\", 9, \"2027-01-15\"),\n  ];\n  expect(outcome(\"ORDER 1001\\n  OLIVE-500 x7\", stock)).toEqual({\n    picks: [\n      { bin: \"A-01-1\", sku: \"OLIVE-500\", qty: 4, orderId: \"1001\" },\n      { bin: \"A-02-1\", sku: \"OLIVE-500\", qty: 2, orderId: \"1001\" },\n      { bin: \"A-03-1\", sku: \"OLIVE-500\", qty: 1, orderId: \"1001\" },\n    ],\n    shortages: [],\n  });\n});\nEOF\n.claude/skills/tdd-deep-modules/scripts/tdd-step red \"several lots, earliest best-before first\" 2>&1 | tail -5; git log --oneline | head -1"
+    }
+   },
+   {
+    "tool_name": "Bash",
+    "tool_use_id": "toolu_01V5VGmHVgRm23YMCyhf37zV",
+    "tool_input": {
+     "command": "cat >> src/pickList.test.ts <<'EOF'\n\ntest(\"an item line before the first ORDER is an error\", () => {\n  expectFormatErrorAt(\"# export\\n\\n  OLIVE-500 x1\\nORDER 1001\\n  OLIVE-500 x1\", 3);\n});\nEOF\n.claude/skills/tdd-deep-modules/scripts/tdd-step red \"item before first ORDER\" 2>&1 | tail -5; git log --oneline | head -1"
+    }
+   },
+   {
+    "tool_name": "Bash",
+    "tool_use_id": "toolu_017LgNH3JvjMr5FRetexdpqV",
+    "tool_input": {
+     "command": "S=.claude/skills/tdd-deep-modules/scripts; bun test 2>&1 | tail -3; bunx tsc --noEmit --strict src/pickList.ts 2>&1 | head; $S/depth_report src/pickList.ts"
+    }
+   },
+   {
+    "tool_name": "Bash",
+    "tool_use_id": "toolu_01JBbB4p1AmoKhH8F8Ti7iEo",
+    "tool_input": {
+     "command": "grep -n \"^DUPLICATE_LENGTH\" .claude/skills/tdd-deep-modules/scripts/tddcore/depth.py; sed 's/^ *//' src/pickList.ts | awk 'length>=10' | sort | uniq -d"
+    }
+   },
+   {
+    "tool_name": "Bash",
+    "tool_use_id": "toolu_01TB2aNzZsbNe2fJdyB5USYw",
+    "tool_input": {
+     "command": "python3 -c \"\nimport collections\nL=[l.strip() for l in open('src/pickList.ts')]\nc=collections.Counter(l for l in L if len(l)>=8 and not l.endswith((',','({','[')))\nprint([ (k,v) for k,v in c.items() if v>1])\""
+    }
+   }
+  ]
+ },
+ "final_message": "d `OrderFormatError` are unchanged from the stub.\n\nRunning the example from your spec gives the right result: the priority order 1002 is served first, the dated lot leaves before the undated one, and the second aisle is walked with racks in descending order.\n\n**How it works:** `buildPickList` is the only function exported. Behind it are three private steps:\n- **Parsing:** reads the text top to bottom and throws `OrderFormatError` at the first problem.\n- **Allocation:** serves priority orders first. Lots are taken earliest best-before first, undated lots last, ties by bin code. Remaining quantities are tracked separately, so the `stock` array and its objects are never changed.\n- **Walking order:** sorts the picks into the serpentine route. Picks at the same bin keep their allocation order.\n\n**Spec gaps I filled in** (also listed in `DESIGN.md`):\n- An empty order is only detected when the next `ORDER` line or the end of the text is reached. So `ORDER 1` followed by a bad line reports the bad line's number, while `ORDER 1` followed directly by `ORDER 2` reports line 1.\n- `ORDER x3` is read as an order with id `x3`, not as an item line for an article called `ORDER`.\n- Lots with quantity 0 never produce a pick.\n\n**Behaviours without their own test:** three behaviours were already working before they had a test, so the skill's rules didn't allow adding one for them:\n- **Ignored comment and blank lines:** covered by the line numbers checked in the error tests.\n- **Same-bin picks keep their allocation order:** covered by the priority and earlier-order tests.\n- **First problem from the top is reported:** follows from the parser stopping at the first error.\n\nThe check that `stock` is left unchanged is part of the walking-order test. `TESTLIST.md` marks each of these.\n\n`DESIGN.md` also has the two interface designs I compared and the depth report. The report flags 6 \"duplicate\" lines; they are repeated field declarations in the given types and closing braces, not copied logic.",
+ "own_tests": {
+  "exit": 0,
+  "pass": 14,
+  "fail": 0
+ },
+ "hidden": {
+  "exit": 0,
+  "pass": 16,
+  "fail": 0,
+  "tail": "bun test v1.4.2 (744846f84)\n\n__acceptance__/pickList.acceptance.test.ts:\n(pass) allocation > an item is taken from the lot with the earliest best-before date [1.21ms]\n(pass) allocation > an item spreads over several lots [0.22ms]\n(pass) allocation > lots without a best-before date are used last [0.25ms]\n(pass) allocation > equal dates are broken by bin code [0.12ms]\n(pass) allocation > missing stock is picked as far as possible and reported [0.21ms]\n(pass) allocation > priority orders are served first, then the rest in text order [0.23ms]\n(pass) allocation > repeated SKUs in one order are added up at their first position [0.11ms]\n(pass) allocation > the stock passed in is left untouched [0.20ms]\n(pass) walking order > aisles alphabetically, racks in a serpentine, levels upwards [0.43ms]\n(pass) walking order > only aisles with picks count for the serpentine [0.34ms]\n(pass) walking order > picks at the same bin keep their allocation order [0.30ms]\n(pass) orders text > comments, blank lines, indentation and CRLF are accepted [0.13ms]\n(pass) orders text > an item before the first order [0.35ms]\n(pass) orders text > an order id used twice [0.07ms]\n(pass) orders text > an order without items [0.14ms]\n(pass) orders text > lines that match neither form [0.20ms]\n\n 16 pass\n 0 fail\n 38 expect() calls\nRan 16 tests across 1 file. [10.00ms]\n"
+ },
+ "production_files": [
+  "src/pickList.ts"
+ ],
+ "skill_loaded": true,
+ "foreign_references": [],
+ "committed": true,
+ "invalid_reasons": [],
+ "commits": 31,
+ "subjects": [
+  "test: pick list test list",
+  "red: one order, one item, one lot",
+  "green: one order, one item, one lot",
+  "red: several lots, earliest best-before first",
+  "green: several lots, earliest best-before first",
+  "red: undated lots last, ties by bin",
+  "green: undated lots last, ties by bin",
+  "red: shortage reported",
+  "green: shortage reported",
+  "red: stock consumed by earlier orders",
+  "green: stock consumed by earlier orders",
+  "red: priority orders first",
+  "green: priority orders first",
+  "refactor: split parsing from allocation",
+  "red: repeated SKU summed",
+  "green: repeated SKU summed",
+  "red: serpentine walking order",
+  "green: serpentine walking order",
+  "red: serpentine counts visited aisles only",
+  "green: serpentine counts visited aisles only",
+  "refactor: walking order in its own function",
+  "red: item before first ORDER",
+  "green: item before first ORDER",
+  "red: duplicate order id",
+  "green: duplicate order id",
+  "red: ORDER without items",
+  "green: ORDER without items",
+  "red: malformed lines",
+  "green: malformed lines",
+  "refactor: parser reads one current order, named captures",
+  "test: design note"
+ ],
+ "depth": {
+  "exit": 1,
+  "lines": [
+   "src/pickList.ts: surface 10, size 112, ratio 11.2, classitis no, pass-through 0, tests 1, unused 0, duplicate 6 -> bloat: 6 duplicated lines"
+  ],
+  "findings": 1,
+  "surface": 10,
+  "size": 112
+ },
+ "replay": {
+  "exit": 0,
+  "verdict": "ACCEPT",
+  "out": "f35789b test     pass  exit=0 ok\n44fe869 red      fail  exit=1 ok\n9e9e4b6 green    pass  exit=0 ok\n4f0dcd0 red      fail  exit=1 ok\n6498d82 green    pass  exit=0 ok\ne135cf3 red      fail  exit=1 ok\n9b56294 green    pass  exit=0 ok\n819728b red      fail  exit=1 ok\n53ba908 green    pass  exit=0 ok\nd1feda9 red      fail  exit=1 ok\nc905c2a green    pass  exit=0 ok\ne0da819 red      fail  exit=1 ok\n25fd56b green    pass  exit=0 ok\n9f322a4 refactor pass  exit=0 ok\n538b8b9 red      fail  exit=1 ok\n053000c green    pass  exit=0 ok\n788f55f red      fail  exit=1 ok\ndf25e2e green    pass  exit=0 ok\n1c9bf26 red      fail  exit=1 ok\n3ff2f0e green    pass  exit=0 ok\n62553fe refactor pass  exit=0 ok\nf976064 red      fail  exit=1 ok\naa29184 green    pass  exit=0 ok\n0d90d6c red      fail  exit=1 ok\naa6add0 green    pass  exit=0 ok\nfeb436f red      fail  exit=1 ok\n6bc3fce green    pass  exit=0 ok\nea8450e red      fail  exit=1 ok\nfce5861 green    pass  exit=0 ok\n6757bf2 refactor pass  exit=0 ok\nb2a8b53 test     pass  exit=0 ok\nREPLAY: ACCEPT\n"
+ }
+}
