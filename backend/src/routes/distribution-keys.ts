@@ -4,6 +4,7 @@
  */
 
 import { Elysia, t } from 'elysia';
+import { errorBody, refusal } from '../services/coded-error';
 import { deleteResponse } from './delete-response';
 import { Conflict } from '../services/conflict';
 import {
@@ -106,7 +107,7 @@ export const distributionKeyRoutes = new Elysia({ prefix: '/api/v1/distribution-
 
 			if (!key) {
 				set.status = 404;
-				return { error: 'Distribution key not found' };
+				return refusal('DISTRIBUTION_KEY_NOT_FOUND', 'Distribution key not found');
 			}
 
 			return key;
@@ -139,7 +140,7 @@ export const distributionKeyRoutes = new Elysia({ prefix: '/api/v1/distribution-
 				return key;
 			} catch (error) {
 				set.status = error instanceof Conflict ? 409 : 400;
-				return { error: error instanceof Error ? error.message : 'Failed to create distribution key' };
+				return errorBody(error, 'Failed to create distribution key');
 			}
 		},
 		{
@@ -175,13 +176,13 @@ export const distributionKeyRoutes = new Elysia({ prefix: '/api/v1/distribution-
 
 				if (!key) {
 					set.status = 404;
-					return { error: 'Distribution key not found' };
+					return refusal('DISTRIBUTION_KEY_NOT_FOUND', 'Distribution key not found');
 				}
 
 				return key;
 			} catch (error) {
 				set.status = error instanceof Conflict ? 409 : 400;
-				return { error: error instanceof Error ? error.message : 'Failed to update distribution key' };
+				return errorBody(error, 'Failed to update distribution key');
 			}
 		},
 		{

@@ -4,6 +4,7 @@
  */
 
 import { Elysia, t } from 'elysia';
+import { errorBody, refusal } from '../services/coded-error';
 import { authMiddleware } from '../middleware/auth';
 import {
 	listCategories,
@@ -68,7 +69,7 @@ export const categoryRoutes = new Elysia({ prefix: '/api/v1/categories' })
 		const category = await getCategory(params.id);
 		if (!category) {
 			set.status = 404;
-			return { error: 'Category not found' };
+			return refusal('CATEGORY_NOT_FOUND', 'Category not found');
 		}
 		return category;
 	})
@@ -82,7 +83,7 @@ export const categoryRoutes = new Elysia({ prefix: '/api/v1/categories' })
 				return category;
 			} catch (error) {
 				set.status = error instanceof Conflict ? 409 : 400;
-				return { error: error instanceof Error ? error.message : 'Failed to create category' };
+				return errorBody(error, 'Failed to create category');
 			}
 		},
 		{
@@ -97,12 +98,12 @@ export const categoryRoutes = new Elysia({ prefix: '/api/v1/categories' })
 				const category = await updateCategory(params.id, body);
 				if (!category) {
 					set.status = 404;
-					return { error: 'Category not found' };
+					return refusal('CATEGORY_NOT_FOUND', 'Category not found');
 				}
 				return category;
 			} catch (error) {
 				set.status = error instanceof Conflict ? 409 : 400;
-				return { error: error instanceof Error ? error.message : 'Failed to update category' };
+				return errorBody(error, 'Failed to update category');
 			}
 		},
 		{

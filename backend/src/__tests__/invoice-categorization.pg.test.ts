@@ -69,7 +69,8 @@ describe('Neu kategorisieren', () => {
 		await expectRejection(
 			response,
 			503,
-			'Die KI ist nicht erreichbar oder hat keine passende Kategorie geliefert.'
+			'Die KI ist nicht erreichbar oder hat keine passende Kategorie geliefert.',
+			'KI_UNAVAILABLE'
 		);
 		const detail = (await (await callApi(`/api/v1/invoices/${invoice.id}`)).json()) as Invoice;
 		expect(detail).toMatchObject({ categoryId: invoice.categoryId, llmCategoryId: null });

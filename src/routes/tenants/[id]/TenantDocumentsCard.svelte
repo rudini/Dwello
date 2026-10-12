@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { deliveryErrorText } from '$lib/backend-error';
 	import type { StatementDocument } from '$lib/types';
 	import Panel from '$lib/ui/Panel.svelte';
 	import { formatDate } from '$lib/utils/format';
@@ -24,7 +25,7 @@
 							>{document.status === 'to_send' ? 'Zu versenden' : 'Versendet'}</span
 						>
 					</p>
-					{#if document.deliveryError}<p class="text-caution">{document.deliveryError}</p>{/if}
+					{#if document.deliveryError}<p class="text-caution">{deliveryErrorText(document)}</p>{/if}
 				</div>
 				<a
 					href="/documents/{document.id}/pdf"

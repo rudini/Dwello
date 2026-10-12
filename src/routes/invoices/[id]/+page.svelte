@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto, invalidateAll } from '$app/navigation';
 	import { api } from '$lib/api';
+	import { backendMessage } from '$lib/backend-error';
 	import { addToast } from '$lib/stores';
 	import type { InvoiceWithDetails } from '$lib/types';
 	import Alert from '$lib/ui/Alert.svelte';
@@ -57,7 +58,7 @@
 		recategorizing = true;
 		recategorizeError = '';
 		const result = await api.post(`/invoices/${invoice.id}/recategorize`);
-		if (result.error) recategorizeError = result.error.message;
+		if (result.error) recategorizeError = backendMessage(result.error, result.error.message);
 		else await invalidateAll();
 		recategorizing = false;
 	}

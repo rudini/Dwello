@@ -1,3 +1,4 @@
+import { backendMessage } from '$lib/backend-error';
 import { localToday } from '$lib/contract-status';
 import { paidDateError } from '$lib/statement';
 import type { StatementDocument } from '$lib/types';
@@ -43,6 +44,6 @@ export async function sendStatementReminder(
 	if (response.ok) return { status: response.status, reminder: result };
 	return {
 		status: response.status,
-		error: result.error ?? 'Mahnung konnte nicht erstellt werden.'
+		error: backendMessage(result, 'Mahnung konnte nicht erstellt werden.')
 	};
 }

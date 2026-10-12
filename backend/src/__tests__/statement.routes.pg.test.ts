@@ -161,7 +161,9 @@ describe('PDF einer Abrechnung, die es nicht gibt oder die noch kein PDF hat', (
 
 		expect(response.status).toBe(400);
 		expect(await response.json()).toEqual({
-			error: 'IBAN not configured. Please set up company configuration first.'
+			error: 'IBAN not configured. Please set up company configuration first.',
+			code: 'IBAN_MISSING',
+			params: {}
 		});
 	});
 

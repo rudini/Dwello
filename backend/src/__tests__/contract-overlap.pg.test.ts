@@ -40,7 +40,9 @@ describe('POST /api/v1/contracts', () => {
 		const response = await letTo('2025-01-01', '2025-12-31');
 
 		expect(response.status).toBe(400);
-		expect(((await response.json()) as { error: string }).error).toContain(rental.contract);
+		const body = (await response.json()) as { error: string; code: string; params: object };
+		expect(body.error).toContain(rental.contract);
+		expect(body).toMatchObject({ code: 'CONTRACT_OVERLAP', params: { contract: rental.contract } });
 	});
 
 	it('lehnt einen früheren Vertrag ab, der am Starttag des laufenden Vertrags endet', async () => {

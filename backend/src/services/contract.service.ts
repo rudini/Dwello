@@ -15,6 +15,7 @@ import {
 	type NewRentalContract
 } from '../db/schema';
 import { apartmentStatus } from './apartment.service';
+import { CodedError } from './coded-error';
 
 /** Contract with the names of its tenant, apartment and building; selected with those three tables joined */
 const contractFields = {
@@ -278,7 +279,9 @@ export async function createContract(data: NewRentalContract): Promise<RentalCon
 	);
 
 	if (hasOverlap) {
-		throw new Error(`Contract overlaps with existing contract ${overlappingContract}`);
+		throw new CodedError('CONTRACT_OVERLAP', `Contract overlaps with existing contract ${overlappingContract}`, {
+			contract: overlappingContract!
+		});
 	}
 
 	const [contract] = await db.insert(rentalContracts).values(data).returning();
@@ -311,7 +314,9 @@ export async function updateContract(
 		);
 
 		if (hasOverlap) {
-			throw new Error(`Contract would overlap with existing contract ${overlappingContract}`);
+			throw new CodedError('CONTRACT_OVERLAP', `Contract would overlap with existing contract ${overlappingContract}`, {
+				contract: overlappingContract!
+			});
 		}
 	}
 

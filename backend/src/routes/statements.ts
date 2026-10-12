@@ -4,6 +4,7 @@
  */
 
 import { Elysia, t } from 'elysia';
+import { errorBody, refusal } from '../services/coded-error';
 import { deleteResponse } from './delete-response';
 import {
 	listStatements,
@@ -93,7 +94,7 @@ export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 				};
 			} catch (error) {
 				set.status = 400;
-				return { error: error instanceof Error ? error.message : 'Calculation failed' };
+				return errorBody(error, 'Calculation failed');
 			}
 		},
 		{
@@ -112,7 +113,7 @@ export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 				return statement;
 			} catch (error) {
 				set.status = 400;
-				return { error: error instanceof Error ? error.message : 'Statement generation failed' };
+				return errorBody(error, 'Statement generation failed');
 			}
 		},
 		{
@@ -271,7 +272,7 @@ export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 				}
 				if (result === 'no-iban') {
 					set.status = 400;
-					return { error: 'IBAN not configured. Please set up company configuration first.' };
+					return refusal('IBAN_MISSING', 'IBAN not configured. Please set up company configuration first.');
 				}
 
 				return {

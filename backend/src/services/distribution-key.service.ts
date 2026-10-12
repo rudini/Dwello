@@ -11,6 +11,7 @@ import {
 	calculateDistribution,
 	type FormulaVariables
 } from './formula.service';
+import { CodedError, refusal, type ErrorCode, type Refusal } from './coded-error';
 import { Conflict } from './conflict';
 import { isDefaultSetting } from './default-setting';
 
@@ -195,13 +196,17 @@ export async function getDistributionKeyByName(name: string): Promise<Distributi
 async function ensureNameIsFree(name: string, id?: string) {
 	const existing = await getDistributionKeyByName(name);
 	if (existing && existing.id !== id) {
-		throw new Conflict(`Ein Verteilschlüssel mit dem Namen "${name}" existiert bereits.`);
+		throw new Conflict('DISTRIBUTION_KEY_NAME_TAKEN', `Ein Verteilschlüssel mit dem Namen "${name}" existiert bereits.`, { name });
 	}
 }
 
 function ensureValidFormula(formula: string) {
 	const validation = validateFormulaForDistribution(formula);
-	if (!validation.isValid) throw new Error(`Die Formel ist ungültig: ${validation.errors.join(' ')}`);
+	if (!validation.isValid) {
+		// The UI names the first error in its language
+		const [{ code, params }] = validation.errorCodes;
+		throw new CodedError('FORMULA_INVALID', `Die Formel ist ungültig: ${validation.errors.join(' ')}`, { ...params, cause: code });
+	}
 }
 
 /**
@@ -213,7 +218,7 @@ export async function createDistributionKey(data: NewDistributionKey): Promise<D
 
 	// Validate formula if provided (required for custom keys)
 	if (data.type === 'custom' && !data.formula) {
-		throw new Error('Bitte geben Sie eine Formel ein.');
+		throw new CodedError('FORMULA_REQUIRED', 'Bitte geben Sie eine Formel ein.');
 	}
 	if (data.formula) ensureValidFormula(data.formula);
 
@@ -236,12 +241,12 @@ export async function updateDistributionKey(
 
 	// Don't allow changing predefined keys to custom or vice versa
 	if (data.type && data.type !== existing.type) {
-		throw new Error('Die Art des Verteilschlüssels kann nicht geändert werden.');
+		throw new CodedError('DISTRIBUTION_KEY_TYPE_FIXED', 'Die Art des Verteilschlüssels kann nicht geändert werden.');
 	}
 
 	// Don't allow modifying predefined formulas
 	if (existing.type === 'predefined' && data.formula && data.formula !== existing.formula) {
-		throw new Error('Die Formel vordefinierter Verteilschlüssel kann nicht geändert werden.');
+		throw new CodedError('DISTRIBUTION_KEY_FORMULA_FIXED', 'Die Formel vordefinierter Verteilschlüssel kann nicht geändert werden.');
 	}
 
 	if (data.name) await ensureNameIsFree(data.name, id);
@@ -261,16 +266,21 @@ export async function updateDistributionKey(
  * Delete a distribution key
  * Returns false if key is used by invoices
  */
-export async function deleteDistributionKey(id: string): Promise<{ success: boolean; conflict?: boolean; error?: string }> {
+export async function deleteDistributionKey(
+	id: string
+): Promise<{ success: boolean; conflict?: boolean } & Partial<Refusal>> {
 	// Check if key exists
 	const existing = await getDistributionKey(id);
 	if (!existing) {
-		return { success: false, error: 'Distribution key not found' };
+		return { success: false, ...refusal('DISTRIBUTION_KEY_NOT_FOUND', 'Distribution key not found') };
 	}
 
 	// Don't allow deleting predefined keys
 	if (existing.type === 'predefined') {
-		return { success: false, error: 'Vordefinierte Verteilschlüssel können nicht gelöscht werden.' };
+		return {
+			success: false,
+			...refusal('DISTRIBUTION_KEY_PREDEFINED', 'Vordefinierte Verteilschlüssel können nicht gelöscht werden.')
+		};
 	}
 
 	const count = Number(existing.invoiceCount);
@@ -278,13 +288,21 @@ export async function deleteDistributionKey(id: string): Promise<{ success: bool
 		return {
 			success: false,
 			conflict: true,
-			error: `Nach dem Verteilschlüssel ${count === 1 ? 'wird 1 Rechnung' : `werden ${count} Rechnungen`} verteilt, er kann nicht gelöscht werden.`
+			...refusal(
+				count === 1 ? 'DISTRIBUTION_KEY_IN_USE_ONE' : 'DISTRIBUTION_KEY_IN_USE',
+				`Nach dem Verteilschlüssel ${count === 1 ? 'wird 1 Rechnung' : `werden ${count} Rechnungen`} verteilt, er kann nicht gelöscht werden.`,
+				{ count }
+			)
 		};
 	}
 
 	// New invoices propose the default key of the settings
 	if (await isDefaultSetting('default_distribution_key_id', id)) {
-		return { success: false, conflict: true, error: 'Der Verteilschlüssel ist in den Einstellungen als Standard hinterlegt.' };
+		return {
+			success: false,
+			conflict: true,
+			...refusal('DISTRIBUTION_KEY_IS_DEFAULT', 'Der Verteilschlüssel ist in den Einstellungen als Standard hinterlegt.')
+		};
 	}
 
 	await db.delete(distributionKeys).where(eq(distributionKeys.id, id));
@@ -317,6 +335,7 @@ export function testFormulaWithSamples(formula: string): {
 	}>;
 	totalValue: number;
 	errors: string[];
+	errorCodes: ErrorCode[];
 } {
 	const validation = validateFormulaForDistribution(formula);
 	if (!validation.isValid) {
@@ -324,7 +343,8 @@ export function testFormulaWithSamples(formula: string): {
 			isValid: false,
 			results: [],
 			totalValue: 0,
-			errors: validation.errors
+			errors: validation.errors,
+			errorCodes: validation.errorCodes
 		};
 	}
 
@@ -343,7 +363,8 @@ export function testFormulaWithSamples(formula: string): {
 			isValid: false,
 			results: [],
 			totalValue: 0,
-			errors: [distribution.error || 'Unknown error']
+			errors: [distribution.error || 'Unknown error'],
+			errorCodes: [distribution.errorCode!]
 		};
 	}
 
@@ -360,7 +381,8 @@ export function testFormulaWithSamples(formula: string): {
 			share: `${(d.share * 100).toFixed(2)}%`
 		})),
 		totalValue,
-		errors: []
+		errors: [],
+		errorCodes: []
 	};
 }
 

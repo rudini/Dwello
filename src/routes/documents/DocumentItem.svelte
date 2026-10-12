@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
+	import { deliveryErrorText } from '$lib/backend-error';
 	import type { StatementDocument } from '$lib/types';
 	import Badge from '$lib/ui/Badge.svelte';
 	import Button from '$lib/ui/Button.svelte';
@@ -36,7 +37,7 @@
 				testid="document-status"
 			/>
 		</p>
-		{#if document.deliveryError}<p class="text-caution">{document.deliveryError}</p>{/if}
+		{#if document.deliveryError}<p class="text-caution">{deliveryErrorText(document)}</p>{/if}
 	</div>
 	<div class="flex flex-wrap gap-4">
 		{@render children?.()}

@@ -22,6 +22,7 @@ const MUTATION_METHODS = ['POST', 'PUT', 'DELETE', 'PATCH'] as const;
 interface ApiError {
 	code: string;
 	message: string;
+	params?: Record<string, string | number>;
 }
 
 /**
@@ -147,9 +148,13 @@ async function failure(response: Response): Promise<ApiError> {
 			message: 'Ein unerwarteter Fehler ist aufgetreten. Versuchen Sie es erneut.'
 		}
 	}));
-	// The backend names its error as text, e.g. { error: 'Invoice not found' }
+	// The backend names its error as text, e.g. { error: 'Invoice not found' }, with a code the UI translates
 	if (typeof errorData.error === 'string')
-		return { code: `HTTP_${response.status}`, message: errorData.error };
+		return {
+			code: errorData.code ?? `HTTP_${response.status}`,
+			message: errorData.error,
+			params: errorData.params
+		};
 	return (
 		errorData.error || {
 			code: `HTTP_${response.status}`,

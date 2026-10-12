@@ -1,3 +1,4 @@
+import { backendMessage } from '$lib/backend-error';
 import type { HeatingProfile } from '$lib/types';
 import { MONTHS, profileTotal } from '$lib/heating-profile';
 import { deleteRecord, fetchRecord, saveRecord } from './save-form';
@@ -48,7 +49,8 @@ export async function saveHeatingProfile(
 	id?: string
 ) {
 	return saveRecord(fetch, API, parseHeatingProfile(await request.formData()), id, {
-		failure: (_status, saved) => saved.error ?? 'Heizprofil konnte nicht gespeichert werden.',
+		failure: (_status, saved) =>
+			backendMessage(saved, 'Heizprofil konnte nicht gespeichert werden.'),
 		location: (saved) => `/config/heating-profiles/${saved}`
 	});
 }

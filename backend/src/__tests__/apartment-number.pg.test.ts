@@ -52,7 +52,9 @@ describe('Wohnungsnummer pro Gebäude', () => {
 
 		expect(response.status).toBe(409);
 		expect(await response.json()).toEqual({
-			error: 'Die Wohnungsnummer 2.01 existiert bereits in diesem Gebäude.'
+			error: 'Die Wohnungsnummer 2.01 existiert bereits in diesem Gebäude.',
+			code: 'APARTMENT_NUMBER_TAKEN',
+			params: { number: '2.01' }
 		});
 	});
 
@@ -61,7 +63,9 @@ describe('Wohnungsnummer pro Gebäude', () => {
 
 		expect(response.status).toBe(409);
 		expect(await response.json()).toEqual({
-			error: 'Die Wohnungsnummer 2.01 existiert bereits in diesem Gebäude.'
+			error: 'Die Wohnungsnummer 2.01 existiert bereits in diesem Gebäude.',
+			code: 'APARTMENT_NUMBER_TAKEN',
+			params: { number: '2.01' }
 		});
 	});
 });

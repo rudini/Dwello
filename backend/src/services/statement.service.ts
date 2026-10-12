@@ -21,6 +21,7 @@ import { calculateStatementForContract, generateStatementNumber } from './calcul
 import { getTypedConfig } from './config.service';
 import { fuelStockChange } from './fuel-stock.service';
 import { listApartments } from './apartment.service';
+import { refusal, type Refusal } from './coded-error';
 
 export interface StatementFilters {
 	search?: string;
@@ -456,15 +457,15 @@ export async function updateStatementStatus(
 /**
  * Delete a statement
  */
-export async function deleteStatement(id: string): Promise<{ success: boolean; error?: string }> {
+export async function deleteStatement(id: string): Promise<{ success: boolean } & Partial<Refusal>> {
 	const existing = await getStatement(id);
 	if (!existing) {
-		return { success: false, error: 'Statement not found' };
+		return { success: false, ...refusal('STATEMENT_NOT_FOUND', 'Statement not found') };
 	}
 
 	// Only a draft may be deleted; once sent, the statement stays as the tenant received it
 	if (existing.status !== 'draft') {
-		return { success: false, error: 'Cannot delete a statement that is no longer a draft' };
+		return { success: false, ...refusal('STATEMENT_NOT_DRAFT', 'Cannot delete a statement that is no longer a draft') };
 	}
 
 	// Delete line items first (cascade should handle this, but be explicit)

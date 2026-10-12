@@ -1,3 +1,4 @@
+import { backendMessage } from '$lib/backend-error';
 import { localToday } from '$lib/contract-status';
 import type { InvoiceCheck } from '$lib/statement-wizard';
 
@@ -30,7 +31,7 @@ async function call(fetch: Fetch, path: string, body?: object) {
 		}
 	);
 	const data = await response.json();
-	if (!response.ok) throw new Error(data.error ?? `${path} antwortet ${response.status}`);
+	if (!response.ok) throw new Error(backendMessage(data, `${path} antwortet ${response.status}`));
 	return data;
 }
 

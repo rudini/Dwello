@@ -4,6 +4,7 @@
  */
 
 import { Elysia, t } from 'elysia';
+import { refusal } from '../services/coded-error';
 import { authMiddleware } from '../middleware/auth';
 import {
 	listApartments,
@@ -21,9 +22,8 @@ const numberTaken = (error: unknown) => {
 	const { code, cause } = error as { code?: string; cause?: { code?: string } };
 	return (code ?? cause?.code) === '23505';
 };
-const numberTakenError = (number: string) => ({
-	error: `Die Wohnungsnummer ${number} existiert bereits in diesem Gebäude.`
-});
+const numberTakenError = (number: string) =>
+	refusal('APARTMENT_NUMBER_TAKEN', `Die Wohnungsnummer ${number} existiert bereits in diesem Gebäude.`, { number });
 
 // Validation schemas
 // "occupied" follows from the rental contracts, the property manager sets only vacant or reserved

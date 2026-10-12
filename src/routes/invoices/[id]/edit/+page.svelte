@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { untrack } from 'svelte';
 	import { api } from '$lib/api';
+	import { backendMessage } from '$lib/backend-error';
 	import type { DistributionKeyRow } from '$lib/distribution-key';
 	import { plainAmount, servicePeriodOf, validateInvoice } from '$lib/invoice';
 	import { addToast } from '$lib/stores';
@@ -80,7 +81,7 @@
 		});
 		saving = false;
 		if (result.error) {
-			saveError = result.error.message;
+			saveError = backendMessage(result.error, result.error.message);
 			focusFirstError(event.target as Element);
 			return;
 		}

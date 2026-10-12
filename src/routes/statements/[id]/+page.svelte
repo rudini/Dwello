@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { flushSync } from 'svelte';
+	import { backendMessage } from '$lib/backend-error';
 	import type { StatementDocument, StatementWithDetails } from '$lib/types';
 	import { addToast } from '$lib/stores';
 	import { balanceLabel, paidDateError, paidHelp, statusLabels, statusTones } from '$lib/statement';
@@ -75,7 +76,7 @@
 				const error = await response.json();
 				addToast(
 					'error',
-					`PDF konnte nicht erstellt werden: ${error.error || 'unbekannter Fehler'}`
+					`PDF konnte nicht erstellt werden: ${backendMessage(error, 'unbekannter Fehler')}`
 				);
 			}
 		} catch {

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { deliveryErrorText } from '$lib/backend-error';
 	import type { StatementDocument } from '$lib/types';
 	import Alert from '$lib/ui/Alert.svelte';
 
@@ -10,7 +11,8 @@
 		if (!reminder) return '';
 		const { document, deliveryError } = reminder;
 		if (deliveryError) {
-			return `${document.title}: ${deliveryError} Sie liegt in den Dokumenten zum Versand bereit.`;
+			const reason = deliveryErrorText({ ...document, deliveryError });
+			return `${document.title}: ${reason} Sie liegt in den Dokumenten zum Versand bereit.`;
 		}
 		return document.channel === 'email'
 			? `${document.title} wurde per E-Mail versendet.`

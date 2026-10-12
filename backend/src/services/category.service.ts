@@ -6,6 +6,7 @@
 import { eq, sql, asc, ilike, and, or } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { categories, invoices, type Category, type NewCategory } from '../db/schema';
+import { refusal, type Refusal } from './coded-error';
 import { Conflict } from './conflict';
 import { categoryHasFuelStocks } from './fuel-stock.service';
 
@@ -151,7 +152,7 @@ export async function getAllowedCategories(): Promise<Category[]> {
 async function ensureNameIsFree(name: string, id?: string) {
 	const existing = await getCategoryByName(name);
 	if (existing && existing.id !== id) {
-		throw new Conflict(`Eine Kategorie mit dem Namen "${name}" existiert bereits.`);
+		throw new Conflict('CATEGORY_NAME_TAKEN', `Eine Kategorie mit dem Namen "${name}" existiert bereits.`, { name });
 	}
 }
 
@@ -191,7 +192,7 @@ export async function updateCategory(id: string, data: Partial<NewCategory>): Pr
  * Delete a category
  * Returns false if category is used by invoices
  */
-export async function deleteCategory(id: string): Promise<{ success: boolean; conflict?: boolean; error?: string }> {
+export async function deleteCategory(id: string): Promise<{ success: boolean; conflict?: boolean } & Partial<Refusal>> {
 	// Check for invoices using this category
 	const [invoiceCount] = await db
 		.select({ count: sql<number>`count(*)` })
@@ -200,20 +201,28 @@ export async function deleteCategory(id: string): Promise<{ success: boolean; co
 
 	const count = Number(invoiceCount.count);
 	if (count === 0 && (await categoryHasFuelStocks(id))) {
-		return { success: false, conflict: true, error: 'Die Kategorie hat Tankbestände und kann nicht gelöscht werden.' };
+		return {
+			success: false,
+			conflict: true,
+			...refusal('CATEGORY_HAS_FUEL_STOCK', 'Die Kategorie hat Tankbestände und kann nicht gelöscht werden.')
+		};
 	}
 	if (count > 0) {
 		return {
 			success: false,
 			conflict: true,
-			error: `Die Kategorie wird von ${count} ${count === 1 ? 'Rechnung' : 'Rechnungen'} verwendet und kann nicht gelöscht werden.`
+			...refusal(
+				count === 1 ? 'CATEGORY_IN_USE_ONE' : 'CATEGORY_IN_USE',
+				`Die Kategorie wird von ${count} ${count === 1 ? 'Rechnung' : 'Rechnungen'} verwendet und kann nicht gelöscht werden.`,
+				{ count }
+			)
 		};
 	}
 
 	const result = await db.delete(categories).where(eq(categories.id, id)).returning();
 
 	if (result.length === 0) {
-		return { success: false, error: 'Category not found' };
+		return { success: false, ...refusal('CATEGORY_NOT_FOUND', 'Category not found') };
 	}
 
 	return { success: true };

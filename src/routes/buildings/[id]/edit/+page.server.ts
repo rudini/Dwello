@@ -1,4 +1,5 @@
 import { m } from '$lib/paraglide/messages';
+import { backendMessage } from '$lib/backend-error';
 import { error, redirect } from '@sveltejs/kit';
 import type { BuildingWithStats } from '$lib/types';
 import { formError, parseBuildingForm } from '$lib/server/building-form';
@@ -69,7 +70,7 @@ export const actions: Actions = {
 
 			if (!response.ok) {
 				const error = await response.json();
-				return formError(error.error || error.message || m.buildings_save_failed());
+				return formError(backendMessage(error, m.buildings_save_failed()));
 			}
 		} catch (err) {
 			console.error('Failed to update building:', err);

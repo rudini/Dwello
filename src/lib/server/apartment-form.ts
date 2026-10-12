@@ -1,3 +1,4 @@
+import { backendMessage } from '$lib/backend-error';
 import { saveRecord } from './save-form';
 
 const API = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1/apartments`;
@@ -29,7 +30,9 @@ export async function saveApartment(fetch: typeof globalThis.fetch, request: Req
 	return saveRecord(fetch, API, parseApartmentForm(await request.formData(), !id), id, {
 		// 409: the apartment number is taken, the backend says which one
 		failure: (status, saved) =>
-			status === 409 ? saved.error! : 'Wohnung konnte nicht gespeichert werden.',
+			status === 409
+				? backendMessage(saved, 'Wohnung konnte nicht gespeichert werden.')
+				: 'Wohnung konnte nicht gespeichert werden.',
 		location: (saved) => `/apartments/${saved}`
 	});
 }

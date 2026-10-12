@@ -1,3 +1,4 @@
+import { backendMessage, type BackendError } from '$lib/backend-error';
 import { error } from '@sveltejs/kit';
 import type { DistributionKeyRow, FormulaTest } from '$lib/distribution-key';
 import { deleteRecord, fetchRecord, saveRecord } from './save-form';
@@ -49,8 +50,8 @@ async function parseKey(request: Request) {
 }
 
 const options = {
-	failure: (_status: number, saved: { error?: string }) =>
-		saved.error ?? 'Verteilschlüssel konnte nicht gespeichert werden.',
+	failure: (_status: number, saved: BackendError) =>
+		backendMessage(saved, 'Verteilschlüssel konnte nicht gespeichert werden.'),
 	location: () => LIST
 };
 
@@ -92,12 +93,16 @@ export async function testFormula(
 		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify({ formula })
 	});
-	const { results = [], errors = [] }: { results?: Sample[]; errors?: string[] } = await response
+	const {
+		results = [],
+		errors = [],
+		errorCodes = []
+	}: { results?: Sample[]; errors?: string[]; errorCodes?: BackendError[] } = await response
 		.json()
 		.catch(() => ({}));
 	return {
 		test: {
-			errors,
+			errors: errors.map((error, i) => backendMessage({ ...errorCodes[i], error }, error)),
 			results: results.map(({ apartment, share }) => ({
 				apartment: `${apartment.area} m², ${apartment.rooms} Zimmer`,
 				share

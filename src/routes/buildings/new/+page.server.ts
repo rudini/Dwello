@@ -1,4 +1,5 @@
 import { m } from '$lib/paraglide/messages';
+import { backendMessage } from '$lib/backend-error';
 import { redirect } from '@sveltejs/kit';
 import { formError, parseBuildingForm } from '$lib/server/building-form';
 import type { Actions } from './$types';
@@ -26,7 +27,7 @@ export const actions: Actions = {
 
 		if (!response.ok) {
 			const error = await response.json();
-			return formError(error.error || error.message || m.buildings_create_failed());
+			return formError(backendMessage(error, m.buildings_create_failed()));
 		}
 
 		const newBuilding = await response.json();

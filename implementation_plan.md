@@ -4668,7 +4668,17 @@ header and on pages without it. Branch `claude/optimistic-clarke-nn8u7t` from `m
   in the changed scope, Fallow reports them as duplicate exports, and line suppressions do not apply to that rule.
   Renaming would change existing tests, so `.fallowrc.json` `ignoreExports` names exactly these two in `statement.ts`.
 - [ ] Step 3 – apartments and tenants
-- [ ] Backend error codes (decided: add a stable `code` to backend error responses, BFF translates by code)
+- [x] **Step B – backend error codes** (user's decision): `backend/src/services/coded-error.ts` (`CodedError`, `errorBody`);
+  `Conflict` and `ReminderError` carry codes; services (category, distribution key, formula, heating profile, reminder,
+  document, invoice, contract, calculation, statement) throw coded refusals; routes answer `{ error, code, params }`
+  (text and status unchanged; unexpected errors stay `{ error }`); formula endpoints add `errorCodes`; documents add a
+  derived `deliveryErrorCode` (no migration). 58 codes, `docs/api-specification.md`. BFF: `src/lib/backend-error.ts`
+  (`backendMessage`, `deliveryErrorText`) used in save-form, category, distribution key, heating profile, apartment
+  form, statement actions/generation, building actions, documents, reminder feedback, invoice pages, PDF toast;
+  `api.ts` keeps `code`/`params`. German message per code = the backend's German text; English backend texts got a
+  German sentence. Tests: `error-codes.pg.test.ts`, `formula-codes.test.ts`, `backend-error.test.ts`; backend 511 tests.
+  Still uncoded by design: Elysia 422 bodies, database errors, other SMTP errors, PDF 500s; stored document titles
+  («Zahlungserinnerung») are data.
 - [ ] Step 4 – rental contracts
 - [ ] Step 5 – invoices and documents
 - [ ] Step 6 – statements

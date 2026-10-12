@@ -1,3 +1,4 @@
+import { backendMessage, type BackendError } from '$lib/backend-error';
 import type { Category } from '$lib/types';
 import { deleteRecord, fetchRecord, saveRecord } from './save-form';
 
@@ -46,8 +47,8 @@ function parseCategory(formData: FormData) {
 }
 
 const options = {
-	failure: (_status: number, saved: { error?: string }) =>
-		saved.error ?? 'Kategorie konnte nicht gespeichert werden.',
+	failure: (_status: number, saved: BackendError) =>
+		backendMessage(saved, 'Kategorie konnte nicht gespeichert werden.'),
 	location: () => LIST,
 	conflict: 'name' // the backend refuses only a name another category has
 };

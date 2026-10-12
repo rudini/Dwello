@@ -25,9 +25,16 @@ export function apiRecords(resource: string) {
 
 export const idOf = async (response: Response) => ((await response.json()) as { id: string }).id;
 
-export async function expectRejection(response: Response, status: number, error: string) {
+/** The refusal's status and text; with `code` also the code and its values that the UI translates */
+export async function expectRejection(
+	response: Response,
+	status: number,
+	error: string,
+	code?: string,
+	params: Record<string, string | number> = {}
+) {
 	expect(response.status).toBe(status);
-	expect(await response.json()).toEqual({ error });
+	expect(await response.json()).toEqual(code ? { error, code, params } : { error });
 }
 
 /** The first predefined record of a resource, e.g. a predefined heating profile */
