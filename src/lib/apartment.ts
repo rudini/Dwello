@@ -59,7 +59,6 @@ export const statusHelp: Record<ApartmentStatus, string> = {
 	get relet() {
 		return m.apartments_status_help_relet();
 	},
-	// TODO(fachlich prüfen): the glossary names Leer and Gesperrt without explaining them
 	get vacant() {
 		return m.apartments_status_help_vacant();
 	},

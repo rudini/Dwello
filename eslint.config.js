@@ -9,6 +9,11 @@ import globals from 'globals';
 export default [
 	js.configs.recommended,
 	{
+		// plain Node scripts: no TypeScript, so no-undef stays on
+		files: ['tools/**/*.mjs'],
+		languageOptions: { ecmaVersion: 2022, sourceType: 'module', globals: { ...globals.node } }
+	},
+	{
 		files: ['**/*.ts', '**/*.js'],
 		languageOptions: {
 			parser: tsParser,

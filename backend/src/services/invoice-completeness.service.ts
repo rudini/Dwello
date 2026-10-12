@@ -40,10 +40,10 @@ export interface CategoryFinding {
 	changePercent: number | null; // change of the costs against the year before (deviation), otherwise null
 }
 
-// TODO(fachlich prüfen): a change of more than 25 % and at least CHF 100 against the year before is worth a look
+// TODO(fachlich prüfen, #65): a change of more than 25 % and at least CHF 100 against the year before is worth a look
 const DEVIATION_SHARE = 0.25;
 const DEVIATION_MINIMUM = 100;
-// TODO(fachlich prüfen): the year before counts as recorded when the building's first invoice lies in its first three months
+// TODO(fachlich prüfen, #65): the year before counts as recorded when the building's first invoice lies in its first three months
 const RECORDED_FROM_START_DAYS = 92;
 
 const toDate = (iso: string) => new Date(`${iso.slice(0, 10)}T00:00:00Z`);

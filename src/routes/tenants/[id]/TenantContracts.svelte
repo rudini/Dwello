@@ -35,7 +35,6 @@
 							contract.terminated
 						)}</span
 					>
-					<!-- TODO(fachlich prüfen): no glossary term for the monthly total, as in the contract wizard -->
 					<span class="tabular-nums text-ink"
 						>{formatCurrency(contract.rentBrutto)}
 						<span class="text-ink-muted">{m.common_monthly_total_suffix()}</span></span

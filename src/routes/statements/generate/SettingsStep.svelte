@@ -25,7 +25,7 @@
 	} = $props();
 
 	// 3 % is the usual guideline for Swiss utility statements (glossary), not a limit;
-	// TODO(fachlich prüfen): sources name 3 to 5 % depending on the region (review B, MR2-N2); the MV leaflet 2026 names
+	// TODO(fachlich prüfen, #60): sources name 3 to 5 % depending on the region (review B, MR2-N2); the MV leaflet 2026 names
 	// at most 3 % as usual (cantonal decisions, BWO 32 Nr. 12)
 	const USUAL_MAXIMUM = 3;
 
@@ -41,7 +41,6 @@
 	const selected = $derived(heatingProfiles.find((p) => p.id === heatingProfileId));
 	// The predefined profiles' descriptions are English; only an own profile's is shown
 	const ownDescription = $derived(selected?.type === 'custom' ? selected.description : '');
-	// TODO(fachlich prüfen): the glossary says of the building's costs; the fee is of each tenant's own (docs/archive/offene-punkte-verlauf.md)
 	// The text as typed (a half-typed «4,» stays), the number for the run: comma or point, empty is no rate
 	let feeText = $state(Number.isFinite(managementFeePercent) ? String(managementFeePercent) : '');
 	const typeFee = (text: string) => {

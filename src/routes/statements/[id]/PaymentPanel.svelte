@@ -29,7 +29,6 @@
 	<p class="text-ink">{summary}</p>
 	<dl class="grid gap-4 sm:grid-cols-2">
 		<div class="flex flex-col gap-1">
-			<!-- TODO(fachlich prüfen): the glossary has no term for the date by which a refund is paid out -->
 			<dt class="text-ink-muted">
 				{refund ? m.statements_refund_by() : m.glossary_deadline_term()}
 			</dt>

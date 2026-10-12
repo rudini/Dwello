@@ -7,7 +7,6 @@
 	let { buildings }: { buildings: { buildingId: string; name: string }[] } = $props();
 </script>
 
-<!-- TODO(fachlich prüfen): "Tankbestand" is not in the glossary -->
 <Alert tone="info" title={m.statements_tank_title()} testid="tank-question">
 	<p>{m.statements_tank_text()}</p>
 	<ul class="flex flex-col gap-2">

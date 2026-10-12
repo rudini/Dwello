@@ -56,6 +56,9 @@ jobs:
   static-checks:
     name: Lint and types
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: read
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -70,6 +73,11 @@ jobs:
       - run: bun run check
       - run: bun run type-check
         working-directory: backend
+      # Every TODO(fachlich prüfen, #n) marker names an open issue (CLAUDE.md, "Open work")
+      - run: node tools/open-work/check-issues.mjs
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          PR_BODY: ${{ github.event.pull_request.body }}
 
   unit-tests:
     name: Unit tests

@@ -1,7 +1,8 @@
 {
 	"entry": [
 		"playwright.screenshots.config.ts",
-		"docs/design/tools/persona-kit.mjs"
+		"docs/design/tools/persona-kit.mjs",
+		"tools/open-work/check-issues.mjs"
 	],
 	"ignorePatterns": [
 		"src/lib/paraglide/**"

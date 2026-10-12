@@ -1860,4 +1860,4 @@ Key Legal Requirements Addressed (see the status note below for what is implemen
 
 ---
 
-*This PRD is the original product vision for the Dwello MVP. It describes intended features, not what is built: items marked "planned, not implemented" do not exist, and other features may not be implemented either. Open work is listed in `docs/design/offene-punkte.md`; the architecture status is in `docs/migration-mva.md`. Future enhancements are documented in Section 12.*
+*This PRD is the original product vision for the Dwello MVP. It describes intended features, not what is built: items marked "planned, not implemented" do not exist, and other features may not be implemented either. Open work is listed as GitHub issues (functional) and in `docs/design/offene-punkte.md` (non-functional); the architecture status is in `docs/migration-mva.md`. Future enhancements are documented in Section 12.*

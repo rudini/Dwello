@@ -4,19 +4,21 @@ Stand: 12.10.2026. Quelle: Fachreview I (`docs/reviews/I-fachreview-1.md`, Findi
 
 Jede Anforderung nennt das Problem, was Dwello tun muss, wie wir es prüfen (Szenarien in der Sprache von `tests/e2e/features`), was nicht dazugehört und welche Fragen der Product Owner oder eine Fachperson klären muss. Begriffe, die nicht im Glossar stehen, sind mit *(Glossar fehlt)* markiert und in `docs/archive/offene-punkte-verlauf.md` vorgeschlagen.
 
-| ID | Anforderung | Priorität | Quelle |
-|---|---|---|---|
-| A-1 | Befristung und Kündigung unterscheiden | umgesetzt | IF-4, Helga |
-| A-2 | Vertragsende unter «Bearbeiten» prüfen | umgesetzt | IF-8, IF-3, Helga, Anna |
-| A-3 | Hinweis auf die Kündigungsfrist | mittel | IF-2 |
-| A-4 | Bevorstehendes Vertragsende sichtbar machen | mittel | IF-5, Anna, Helga |
-| A-5 | Neue Adresse für die Schlussabrechnung | mittel | IF-6, Anna |
-| A-6 | Stillschweigend fortgesetzter befristeter Mietvertrag | niedrig | IF-9 |
-| A-7 | Doppelt erfassten Mietvertrag entfernen | mittel | Anna (I2, M2) |
-| A-8 | Früheren Mietvertrag als Historie erkennbar machen | mittel | Anna (I2, M3) |
-| A-9 | «Noch nicht abgerechnet» nach den Mietverträgen der Periode | umgesetzt | Helga (I3 M3, I4 M2) |
-| A-10 | Abrechnung nach einem geänderten Vertragsende neu erstellen | mittel | Anna (I2 M1, I3 M1–M3) |
-| A-11 | Versendete Abrechnung korrigieren | mittel | Anna (I4 M1), Review I-6 |
+| ID | Anforderung | Priorität | Quelle | Issue |
+|---|---|---|---|---|
+| A-1 | Befristung und Kündigung unterscheiden | umgesetzt | IF-4, Helga | – |
+| A-2 | Vertragsende unter «Bearbeiten» prüfen | umgesetzt | IF-8, IF-3, Helga, Anna | – |
+| A-3 | Hinweis auf die Kündigungsfrist | mittel | IF-2 | #112 |
+| A-4 | Bevorstehendes Vertragsende sichtbar machen | mittel | IF-5, Anna, Helga | #113 |
+| A-5 | Neue Adresse für die Schlussabrechnung | mittel | IF-6, Anna | #114 |
+| A-6 | Stillschweigend fortgesetzter befristeter Mietvertrag | niedrig | IF-9 | #115 |
+| A-7 | Doppelt erfassten Mietvertrag entfernen | mittel | Anna (I2, M2) | #116 |
+| A-8 | Früheren Mietvertrag als Historie erkennbar machen | mittel | Anna (I2, M3) | #117 |
+| A-9 | «Noch nicht abgerechnet» nach den Mietverträgen der Periode | umgesetzt | Helga (I3 M3, I4 M2) | – |
+| A-10 | Abrechnung nach einem geänderten Vertragsende neu erstellen | mittel | Anna (I2 M1, I3 M1–M3) | #118, #119 |
+| A-11 | Versendete Abrechnung korrigieren | mittel | Anna (I4 M1), Review I-6 | #120 |
+
+Die offenen Fragen jeder Anforderung werden in ihrem Issue entschieden; dieses Dokument bleibt die ausführliche Beschreibung.
 
 Priorität: «hoch» heisst vor dem ersten echten Einsatz, weil sonst falsche Daten oder Geldfolgen entstehen. «mittel» verhindert einen wahrscheinlichen Fehler eines Laien. «niedrig» betrifft einen seltenen Fall.
 
@@ -318,4 +320,4 @@ Szenario: Unter «Bearbeiten» einen Vertragsbeginn nach dem Beginn eines Entwur
 
 ## Ebenfalls offen
 
-Kleinere offene Punkte stehen in `docs/design/offene-punkte.md` (B-4, U-3).
+Kleinere offene Punkte: Issue #123 (B-4) und `docs/design/offene-punkte.md` (U-3). Die Anforderungen A-3 bis A-11 sind als Issues erfasst (Titel beginnen mit ihrer ID).

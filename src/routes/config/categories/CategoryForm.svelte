@@ -66,7 +66,6 @@
 		bind:checked={values.allowed}
 		testid="category-allowed-checkbox"
 	/>
-	<!-- TODO(fachlich prüfen): which costs follow the heating profile is not in the glossary -->
 	<Checkbox
 		id="isHeatingCost"
 		name="isHeatingCost"

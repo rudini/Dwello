@@ -42,7 +42,6 @@ export const statusBadges: Record<Status, { label: string; tone: Tone }> = {
 };
 
 /** Contract period in words; a contract without end is named by its start, never "bis heute" */
-// TODO(fachlich prüfen): «befristet»/«gekündigt» after the period, see docs/archive/offene-punkte-verlauf.md (A-1)
 export function contractPeriod(
 	startDate: string,
 	endDate: string | null | undefined,
@@ -62,7 +61,6 @@ export function contractPeriod(
 }
 
 /** The Vertragsende in words: agreed in a fixed-term contract, or the Kündigungstermin of an open-ended one */
-// TODO(fachlich prüfen): «Unbefristet, gekündigt auf den …» is not from the glossary (docs/archive/offene-punkte-verlauf.md, A-1)
 export function contractEnd(endDate: string | null | undefined, terminated = false) {
 	if (!endDate) return m.contracts_unlimited();
 	const date = formatDate(endDate);

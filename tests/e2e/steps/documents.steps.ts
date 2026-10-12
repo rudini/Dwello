@@ -75,7 +75,7 @@ Then(
 );
 
 // Set after sending, which dates the statement and its deadline from that day; two days ago, so it has passed both
-// in Switzerland and in the backend's UTC day (offene-punkte.md, B-4)
+// in Switzerland and in the backend's UTC day (issue #123)
 Given('die Zahlungsfrist der Abrechnung {int} von {string} ist abgelaufen', async ({ seed }, year: number, tenant: string) => {
 	await seed.paymentDeadline(tenant, year, inDays(-2));
 });

@@ -8,7 +8,6 @@ export const help = {
 	get distributionKey() {
 		return m.config_help_distribution_key();
 	},
-	// TODO(fachlich prüfen): the glossary still says of the building's costs (docs/archive/offene-punkte-verlauf.md)
 	get managementFee() {
 		return m.config_help_management_fee();
 	},

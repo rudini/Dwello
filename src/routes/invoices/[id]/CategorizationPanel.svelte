@@ -47,8 +47,6 @@
 					{invoice.distributionKey.name}
 				</dd>
 			{:else}
-				<!-- TODO(fachlich prüfen): the equal split without a key is what the statement calculation does;
-				     the glossary states it only for the Verwaltungspauschale -->
 				<dd class="text-ink-muted">{m.invoices_no_key()}</dd>
 			{/if}
 		</div>

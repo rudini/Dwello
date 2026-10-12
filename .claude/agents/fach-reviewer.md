@@ -20,7 +20,7 @@ Do not change files. Report in German:
 
 - One table: ID (`V-n`, `M-n`), role, severity (Blocker / Major / Minor / Nit), short finding.
 - Per finding: evidence (file:line, scenario line or Fedlex quote), why it is wrong, what would fix it.
-- Missing terms: propose a wording marked `TODO(fachlich prüfen)` for `docs/design/offene-punkte.md`.
+- Missing terms: propose a wording; the caller opens an issue for it (labels `fachlich`, `entscheiden`).
 - A section "Nicht bestätigt": what you could not confirm and where you looked.
 
 Done when every rule, term and formula in the subject is either confirmed with a source or listed as a finding or as not confirmed.

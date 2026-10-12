@@ -90,7 +90,7 @@ function workTasks({ statementCounts, lettersToSend, missingPeriod }: OverviewIn
 	const tasks: (Task | false)[] = [
 		statementCounts.overdue > 0 && {
 			id: 'overdue',
-			// TODO(fachlich prüfen): shown from the Zahlungsfrist on; a Mahnung is customary only after the Mahnfrist
+			// TODO(fachlich prüfen, #64): shown from the Zahlungsfrist on; a Mahnung is customary only after the Mahnfrist
 			title: m.dashboard_task_overdue(),
 			text: count(
 				statementCounts.overdue,
@@ -114,7 +114,7 @@ function workTasks({ statementCounts, lettersToSend, missingPeriod }: OverviewIn
 			icon: 'mail'
 		},
 		!!missingPeriod && {
-			// TODO(fachlich prüfen): suggestion without legal deadline, see docs/design/offene-punkte.md (F-10)
+			// TODO(fachlich prüfen, #64): suggestion without legal deadline
 			id: 'missing-period',
 			title: m.dashboard_task_missing_period(),
 			text: m.dashboard_task_missing_period_text({
@@ -160,7 +160,7 @@ export interface Deadline {
 	href: string;
 }
 
-// How far ahead the overview looks – TODO(fachlich prüfen): windows chosen for usability, no legal basis
+// How far ahead the overview looks – TODO(fachlich prüfen, #64): windows chosen for usability, no legal basis
 const PAYMENT_WINDOW_DAYS = 30; // the payment deadline the app gives: every open one shows
 const CONTRACT_END_WINDOW_DAYS = 60;
 

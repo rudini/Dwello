@@ -68,8 +68,6 @@
 	{/snippet}
 </Field>
 
-<!-- TODO(fachlich prüfen): the equal split without a key is what the statement calculation does;
-     the glossary states it only for the Verwaltungspauschale -->
 <Select
 	id="distributionKey"
 	label={m.glossary_key_term()}

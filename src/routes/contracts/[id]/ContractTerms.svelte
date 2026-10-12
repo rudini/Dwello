@@ -55,7 +55,6 @@
 			</div>
 		{/each}
 		<div class="flex justify-between gap-4 py-2 text-lg">
-			<!-- TODO(fachlich prüfen): no glossary term for the monthly total, as in the contract wizard -->
 			<dt class="font-semibold text-ink">{m.common_monthly_total()}</dt>
 			<dd class="font-bold text-ink" data-testid="contract-total-rent">
 				{formatCurrency(rent.total)}

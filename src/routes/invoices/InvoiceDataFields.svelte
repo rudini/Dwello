@@ -64,7 +64,6 @@
 	testid="invoice-date-input"
 />
 
-<!-- TODO(fachlich prüfen): "Leistungszeitraum" is not in the glossary -->
 <fieldset class="flex flex-col gap-4">
 	<legend class="font-semibold text-ink">
 		{m.invoices_service_period()} <span class="font-normal text-ink-muted">{m.ui_optional()}</span>

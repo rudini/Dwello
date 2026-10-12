@@ -39,7 +39,6 @@
 			<dd class="font-semibold text-ink">{formatCurrency(Number(contract.baseRent))}</dd>
 		</div>
 		<div class="flex gap-2">
-			<!-- TODO(fachlich prüfen): no glossary term for the monthly total, as in the contract wizard -->
 			<dt class="text-ink-muted">{m.common_monthly_total()}</dt>
 			<dd class="text-ink">{formatCurrency(contract.totalRent)}</dd>
 		</div>

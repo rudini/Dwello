@@ -48,7 +48,7 @@ const identifiers: Record<string, string[]> = {
 	'src/lib/overview.ts': ['Zahlungsfrist', 'Vertragsende'], // deadline kinds (DeadlineList.svelte)
 	'src/lib/utils/contract-availability.ts': ['Aktiv', 'Beendet'], // contract status of the API
 	'src/routes/gallery/+page.svelte': ['laufend', 'beendet', 'unbefristet', 'befristet'], // tab and option values
-	// query parameter; the download's file name stays German in every language (offene-punkte.md, P-10)
+	// query parameter; the download's file name stays German in every language (issue #101)
 	'src/routes/statements/[id]/pdf/+server.ts': ['ansehen', 'abrechnung'],
 	'src/routes/statements/[id]/SendDialog.svelte': ['ansehen'], // query parameter
 	'src/routes/statements/generate/PreviewChecks.svelte': ['schritt'], // query parameter

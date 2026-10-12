@@ -1,6 +1,6 @@
 # Dwello implementation plan
 
-Checklist of the current task (`CLAUDE.md`, Workflow step 8): add the items when the task starts, tick them as they are done, note the files changed. Open points: `docs/design/offene-punkte.md`. History (phases 0–22, sessions 1–16): `docs/archive/implementation-plan-verlauf.md`.
+Checklist of the current task (`CLAUDE.md`, Workflow step 8): add the items when the task starts, tick them as they are done, note the files changed. Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-functional), see `CLAUDE.md`, "Open work". History (phases 0–22, sessions 1–16): `docs/archive/implementation-plan-verlauf.md`.
 
 ## Session 17 - October 2026: Review agents in the workflow
 
@@ -46,3 +46,18 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8): add the items when
   and a pointer to the list.
 - [x] **Target users aligned**: `CLAUDE.md` intro, `README.md` (Overview, Target Users) and `docs/PRD-Dwello.md`
   (summary, 2.4) name private landlords with little experience, as the design rules and personas do.
+- [x] **Functional open work as GitHub issues**: 87 issues in `rudini/Dwello` (#51–#53 probes, #55–#138; titles keep
+  the old ID; labels `fachlich`, `produkt`, `bug`, `entscheiden`), each with "Done means"; drafted from
+  `offene-punkte.md` and `anforderungen-vertragsende.md`, checked against the code by three reviewers before creation.
+  `offene-punkte.md` keeps only non-functional rows (U, H, O; P-15, B-10, B-12 renamed U-12, H-16, H-17).
+  `CLAUDE.md` "Open work" (issues, `entscheiden`, "Proposed" → "Decided", `Fixes #n`, `gh` note); issue templates
+  `.github/ISSUE_TEMPLATE/{task,decision}.md`. 26 `TODO(fachlich prüfen)` markers settled by the glossary removed, 21
+  name their issue. Guard `src/__tests__/open-work.test.ts`; CI step `tools/open-work/check-issues.mjs` (markers name
+  open issues; `issues: read`); design guard ignores issue numbers in markers; ESLint covers `tools/**/*.mjs`.
+- [x] **Final review of the migration** (R-1 to R-18, independent reviewer, report in the session only): the guard
+  sample no longer looks like a real marker to CI; the plan may hold no session; `arbeitsregeln.md`, PRD,
+  design decisions and this plan point to issues; #112 (A-3, Art. 266m OR wording) and #116 (A-7) moved their answers
+  to «Proposed» with `entscheiden`; #52, #63, #65, #68, #76, #79 corrected; stale marker texts shortened, the
+  Leistungszeitraum marker removed; `data-model.md` marker names #71; the CI script reads numbers only inside markers,
+  rejects pull requests and fails a PR that closes an issue a marker still names; ESLint block for `tools/**/*.mjs`;
+  templates with «Proposed»; former O-1 lives only as #51; issue numbers in `anforderungen-vertragsende.md`.

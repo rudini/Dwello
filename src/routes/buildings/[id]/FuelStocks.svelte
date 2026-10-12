@@ -30,7 +30,7 @@
 	const category = $derived(stocks?.at(-1)?.categoryId ?? choice[0]?.id ?? '');
 </script>
 
-<!-- TODO(fachlich prüfen): "Tankbestand", "Stichtag" and the valuation are not in the glossary -->
+<!-- TODO(fachlich prüfen, #61): valuation of the Tankbestand (price of the last delivery) -->
 <Panel title={m.buildings_fuel_title()} testid="fuel-stocks">
 	<p class="text-ink-muted">
 		{m.buildings_fuel_intro()}

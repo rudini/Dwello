@@ -222,7 +222,7 @@ Rounding in a statement: each invoice's part in the period (Leistungszeitraum) a
 are rounded to the Rappen first, then the tenant's part of the days or of the heating profile; the subtotal is the
 sum of the rounded lines. A heating profile share is the profile percentage of the tenant's months divided by that of
 the period's months (a period under a year). The profile applies to the whole group, also to an invoice with a
-Leistungszeitraum (TODO(fachlich prüfen), review B CR2-N2).
+Leistungszeitraum (TODO(fachlich prüfen, #71), review B CR2-N2).
 
 ### utility_statements (Nebenkostenabrechnung)
 
