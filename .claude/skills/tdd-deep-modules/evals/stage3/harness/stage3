@@ -81,7 +81,7 @@ PATTERN_FIRST = {"grep", "egrep", "fgrep", "rg", "sed", "awk", "perl"}
 PREFIXES = {"if", "then", "do", "else", "elif", "while", "until", "{", "}", "!", "time", "nice", "nohup",
             "command", "builtin", "exec", "sudo", "xargs", "stdbuf", "$"}
 SIGNAL_WORDS = re.compile(r"\b(?:HTTPS?|ALL|NO)_PROXY\b|process\.env|Bun\.env|oauth_token|ingress_token|"
-                          r"\bDwello\b|\bstage3\b|\bholdout\b", re.I)
+                          r"\bstage3\b|\bholdout\b|os\.environ", re.I)
 EMBEDDED_PATH = re.compile(r"(?<![\w.$:/*?\])])(?:~|\$HOME|\$\{HOME\})?/[A-Za-z0-9_.$*?{\[~+-][^\s'\"`;|&()<>,]*")
 SCANNED_TOOLS = {"Bash", "Read", "Glob", "Grep", "LS", "NotebookRead", "Write", "Edit", "MultiEdit", "NotebookEdit"}
 CODE = (".ts", ".tsx", ".mts", ".cts", ".js", ".jsx", ".mjs", ".cjs")
@@ -173,7 +173,7 @@ def blocks(events, kind):
 
 
 def _normal(path, cwd="/workspace"):
-    path = re.sub(r"^(?:~|\$HOME|\$\{HOME\})(?=/|$)", "/root", path)
+    path = re.sub(r"^/{2,}", "/", re.sub(r"^(?:~|\$HOME|\$\{HOME\})(?=/|$)", "/root", path))
     return os.path.normpath(path if path.startswith("/") else os.path.join(cwd, path))
 
 
@@ -262,8 +262,11 @@ def _bash_escapes(command, depth=0):
                     found.append(f"path {_normal(value, cwd)} ({name})")
             elif _sensitive(value, cwd):
                 found.append(f"path {value}")
-        if name == "cd" and words[1:]:
-            cwd = _normal(words[1], cwd)
+        if name in LISTERS and not [w for w in words[1:] if not w.startswith("-")] and \
+                (cwd in ("/", "/root") or _sensitive(cwd)):
+            found.append(f"path {cwd} ({name})")  # a lister without operands lists its cwd
+        if name in ("cd", "pushd"):
+            cwd = _normal(words[1], cwd) if words[1:] and words[1] != "-" else "/root"
     return found
 
 
@@ -717,7 +720,11 @@ def pilot_round_ok(phase, per_fixture, notes):
     good = len(per_fixture) >= 2 and set(per_fixture) <= visible
     if not good:
         notes.append(f"{phase} reviewed {sorted(per_fixture)}; 2 or more visible fixtures (never hold-outs) required")
-    return good
+    without = [p.parent.name + "/" + p.name for p in (RESULTS / "reviews").glob(f"{phase}-*/rev[0-9].json")
+               if "control:baseline" not in json.loads(p.read_text()).get("scores", {})]
+    if without:
+        notes.append(f"{phase}: reviews without the control copy: {without}")
+    return good and not without
 
 
 def gate(phase):
