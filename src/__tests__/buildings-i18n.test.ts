@@ -137,6 +137,53 @@ describe('Abrechnungsstatus auf der Übersicht', () => {
 	it('heisst auf Englisch wie im Begriffsverzeichnis', async () => {
 		const { statusLabels } = await import('$lib/statement');
 		overwriteGetLocale(() => 'en');
-		expect(statusLabels).toEqual({ draft: 'Draft', sent: 'Sent', paid: 'Paid', overdue: 'Overdue' });
+		expect(statusLabels).toEqual({
+			draft: 'Draft',
+			sent: 'Sent',
+			paid: 'Paid',
+			overdue: 'Overdue'
+		});
+	});
+});
+
+describe('Belegung auf der Übersicht', () => {
+	it('sagt auf Französisch «loué» für eine und «loués» für mehrere Wohnungen', async () => {
+		const { render } = await import('svelte/server');
+		const { default: BuildingFigures } = await import('../routes/dashboard/BuildingFigures.svelte');
+		french();
+		const shown = (occupiedApartments: number) =>
+			render(BuildingFigures, {
+				props: {
+					data: {
+						portfolio: {
+							totalBuildings: 1,
+							totalApartments: 4,
+							occupiedApartments,
+							reletApartments: 0,
+							vacantApartments: 0,
+							reservedApartments: 0
+						},
+						financial: {
+							outstandingStatements: 0,
+							totalPending: 0,
+							overdueAmount: 0,
+							paidThisMonth: 0
+						},
+						statements: { draft: 0, sent: 0, paid: 0, overdue: 0 },
+						buildingOccupancy: [
+							{
+								buildingId: 'b1',
+								buildingName: 'Seeblick',
+								totalApartments: 4,
+								occupiedApartments,
+								occupancyRate: 25
+							}
+						]
+					}
+				} as never
+			}).body.replace(/<[^>]*>/g, '');
+		expect(shown(1)).toContain('1/4 loué');
+		expect(shown(1)).not.toContain('1/4 loués');
+		expect(shown(3)).toContain('3/4 loués');
 	});
 });
