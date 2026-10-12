@@ -86,6 +86,13 @@ class SkillMdTest(unittest.TestCase):
                         "package.json"):
             self.assertIn(element, text)
 
+    def test_the_depth_check_defers_to_the_project_s_deepcheck(self):
+        text = dict(sections())["5. Depth check in every refactor"]
+
+        for element in ("`bun run deepcheck:audit`", "its verdict wins",
+                        "the swarm of exported helpers, which deepcheck does not check"):
+            self.assertIn(element, text)
+
     def test_the_depth_check_keeps_tests_where_they_are(self):
         text = dict(sections())["5. Depth check in every refactor"]
 
