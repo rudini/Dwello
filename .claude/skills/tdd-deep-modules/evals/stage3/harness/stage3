@@ -375,6 +375,7 @@ def prepare(fixture, arm, run_dir):
         target = repo / ".claude/skills/tdd-deep-modules"
         target.mkdir(parents=True)
         shutil.copy2(SKILL / "SKILL.md", target / "SKILL.md")
+        shutil.copy2(SKILL / ".gitignore", target / ".gitignore")  # the scripts' __pycache__ is no work of the arm
         shutil.copytree(SKILL / "references", target / "references")
         shutil.copytree(SKILL / "scripts", target / "scripts",
                         ignore=shutil.ignore_patterns("tests", "__pycache__", ".fallow"))

@@ -1,0 +1,116 @@
+{
+ "run_id": "main-checkout-rounding-bug-skill-r1-a1",
+ "status": "finished",
+ "phase": "main",
+ "slot": 1,
+ "attempt": 1,
+ "fixture": "checkout-rounding-bug",
+ "fixture_dir": "fixtures/checkout-rounding-bug",
+ "arm": "skill",
+ "started": "2026-10-12T12:19:22Z",
+ "valid": false,
+ "base": "6f8898f56a117a967fd734e2ebad912ddf660060",
+ "duration_s": 221,
+ "session": {
+  "is_error": false,
+  "num_turns": 72,
+  "total_cost_usd": 1.0047906,
+  "session_id": "8ddc0af7-085f-428d-b3c6-0b99bacaebea",
+  "permission_denials": [
+   {
+    "tool_name": "Bash",
+    "tool_use_id": "toolu_014SSmbKsHk88Z9Y6T7iFkaZ",
+    "tool_input": {
+     "command": "for f in src/*.ts; do echo \"=== $f\"; cat $f; done; find . -name \"*.test.ts\" -not -path ./node_modules/\\* | head"
+    }
+   },
+   {
+    "tool_name": "Bash",
+    "tool_use_id": "toolu_01Myc2Gt4t6xncd7Qo1XrD6U",
+    "tool_input": {
+     "command": "python3 - <<'EOF'\np='src/checkout.test.ts'\ns=open(p).read()\ns=s.replace('''  { sku: \"TASSE\", name: \"Espressotasse\", priceCents: 1500, vat: \"standard\" },\n]);''','''  { sku: \"TASSE\", name: \"Espressotasse\", priceCents: 1500, vat: \"standard\" },\n  { sku: \"KAUGUMMI\", name: \"Kaugummi\", priceCents: 99, vat: \"reduced\" },\n]);''')\ns=s.replace('''  test(\"rejects unknown products and coupons\", () => {''','''  test(\"keeps lines exact to the cent and rounds only the total to 5 Rappen\", () => {\n    const receipt = checkout([{ sku: \"KAUGUMMI\", qty: 3 }], catalog);\n    expect(receipt.lines[0]!.lineCents).toBe(297);\n    expect(receipt.subtotalCents).toBe(297);\n    expect(receipt.totalCents).toBe(295);\n  });\n\n  test(\"rejects unknown products and coupons\", () => {''')\nopen(p,'w').write(s)\nEOF\n.claude/skills/tdd-deep-modules/scripts/tdd-step red \"lines exact to the cent, total rounded to 5 Rappen\" 2>&1 | tail -5; git log --oneline -1"
+    }
+   },
+   {
+    "tool_name": "Bash",
+    "tool_use_id": "toolu_016J43ndV7wwShGy8csMqQy5",
+    "tool_input": {
+     "command": "npx tsc --noEmit -p . 2>/dev/null | head -3; .claude/skills/tdd-deep-modules/scripts/tdd-step refactor \"move coupon rules behind checkout\" 2>&1 | tail -5; git log --oneline -1; .claude/skills/tdd-deep-modules/scripts/depth_report src/checkout.ts src/promotions.ts"
+    }
+   },
+   {
+    "tool_name": "Bash",
+    "tool_use_id": "toolu_01V2opkoWzaDCGMcyeBvGWct",
+    "tool_input": {
+     "command": "cat >> src/receipt.test.ts <<'EOF'\n\ntest(\"prints a notice as the last line\", () => {\n  const catalog = createCatalog([\n    { sku: \"KAFFEE\", name: \"Kaffeebohnen 500g\", priceCents: 1250, vat: \"reduced\" },\n  ]);\n  const receipt = checkout([{ sku: \"KAFFEE\", qty: 1 }], catalog, [\n    { code: \"ZEHN50\", kind: \"percent\", percent: 10, minSubtotalCents: 5000 },\n  ], \"ZEHN50\");\n  expect(renderReceipt(receipt)).toBe(\n    [\n      \"1 x Kaffeebohnen 500g      CHF 12.50\",\n      \"Total                      CHF 12.50\",\n      \"inkl. MWST 2.6%             CHF 0.32\",\n      \"Coupon ZEHN50 requires a minimum order of CHF 50.00\",\n    ].join(\"\\n\"),\n  );\n});\nEOF\n.claude/skills/tdd-deep-modules/scripts/tdd-step red \"receipt prints the notice last\" 2>&1 | tail -8; git log --oneline -1"
+    }
+   }
+  ]
+ },
+ "final_message": "tted and `bun test` passes (14 tests). `tdd_replay` checked the whole history and accepted it.\n\n**Fixes**\n1. **Buy 3, pay 2:** only complete groups count now. 2 cups get no discount and 4 cups get one free.\n2. **Rounding:** line amounts, the subtotal and the discount are exact to the cent. Only the amount to pay is rounded to 5 Rappen, so 3 \u00d7 0.99 shows CHF 2.97 and the customer pays CHF 2.95. A percent discount was also being rounded to 5 Rappen; it is now rounded to the cent (10 % of 5.94 is 0.59, not 0.60).\n3. **Large vouchers:** the discount is capped at the subtotal. The CHF 50 voucher on a CHF 5.80 cart gives a discount of 5.80 and a total of CHF 0.00. The cap applies to every coupon kind.\n4. **VAT:** VAT is now calculated after the discount, split between the two rates the way accounting described. The 10 % example now shows CHF 4.05. Without a coupon, VAT is calculated as before.\n\n**Minimum order for coupons:** any promotion can have `minSubtotalCents`. Below that amount there is no discount, `couponCode` is still set, and `notice` reads e.g. \"Coupon ZEHN50 requires a minimum order of CHF 50.00\". `renderReceipt` prints it as the last line. At or above the minimum the coupon works as usual, and `notice` is absent otherwise. Unknown coupon codes still throw.\n\n**Design changes:** the coupon logic (finding the coupon, checking the minimum, capping) used to be exported from `src/promotions.ts`. It is now private inside `src/checkout.ts`, so `promotions.ts` only holds the `Promotion` type. The public signatures are unchanged. The reasoning is in `DESIGN.md`, and the test list with what was covered is in `TESTLIST.md`.\n\n**Two cases without their own test:** \"4 cups \u2192 one free\" and \"coupon exactly at the minimum works\". Each already passed after the fix before it, and the test-first workflow only accepts a new test that fails first.\n\nRunning `tdd_replay` created a cache file under `.claude/skills/tdd-deep-modules/scripts/tddcore/__pycache__/`. I left it uncommitted.",
+ "own_tests": {
+  "exit": 0,
+  "pass": 14,
+  "fail": 0
+ },
+ "hidden": {
+  "exit": 0,
+  "pass": 16,
+  "fail": 0,
+  "tail": "bun test v1.4.2 (744846f84)\n\n__acceptance__/checkout.acceptance.test.ts:\n(pass) buy 3, pay 2 > two cups get no discount [0.84ms]\n(pass) buy 3, pay 2 > only complete groups of three count [0.10ms]\n(pass) rounding > lines and subtotal are exact, only the amount to pay is rounded to 5 Rappen [0.04ms]\n(pass) rounding > several odd lines are summed before rounding [0.09ms]\n(pass) rounding > the discount is exact to the cent [0.04ms]\n(pass) vouchers larger than the order > the discount is capped and the customer pays nothing [0.06ms]\n(pass) VAT after discount > a coupon on standard-rate goods lowers the standard VAT [0.03ms]\n(pass) VAT after discount > the discount is split between rates by their share of the subtotal [0.04ms]\n(pass) VAT after discount > multibuy discounts are split the same way [0.02ms]\n(pass) VAT after discount > without a coupon VAT is computed on the full amounts [0.03ms]\n(pass) minimum order value > below the minimum no discount is given and a notice explains why [0.07ms]\n(pass) minimum order value > exactly at the minimum the coupon applies [0.03ms]\n(pass) minimum order value > works for fixed coupons too [0.11ms]\n(pass) minimum order value > there is no notice without a coupon [0.06ms]\n(pass) minimum order value > the printed receipt ends with the notice [0.23ms]\n(pass) minimum order value > unknown coupons are still rejected [0.06ms]\n\n 16 pass\n 0 fail\n 39 expect() calls\nRan 16 tests across 1 file. [6.00ms]\n"
+ },
+ "production_files": [
+  "src/catalog.ts",
+  "src/checkout.ts",
+  "src/money.ts",
+  "src/promotions.ts",
+  "src/receipt.ts"
+ ],
+ "skill_loaded": true,
+ "foreign_references": [],
+ "committed": false,
+ "invalid_reasons": [
+  "not committed"
+ ],
+ "commits": 20,
+ "subjects": [
+  "test: checkout fixes test list",
+  "red: multibuy gives nothing for an incomplete group",
+  "green: multibuy counts only complete groups",
+  "red: lines exact to the cent, total rounded to 5 Rappen",
+  "green: exact lines, total rounded to 5 Rappen",
+  "red: percent discount rounded to the cent",
+  "green: discount exact to the cent",
+  "red: voucher capped at the subtotal",
+  "green: cap discount at subtotal",
+  "red: VAT on the discounted amount",
+  "green: VAT on discounted standard amount",
+  "red: discount split between VAT rates",
+  "green: split discount between VAT rates",
+  "refactor: compute VAT split in one private helper",
+  "refactor: move coupon rules behind checkout",
+  "red: coupon below its minimum order",
+  "green: minimum order for coupons",
+  "red: receipt prints the notice last",
+  "green: print the notice last",
+  "test: design note"
+ ],
+ "depth": {
+  "exit": 1,
+  "lines": [
+   "src/catalog.ts: surface 9, size 20, ratio 2.2, classitis no, pass-through 0, tests 2, unused 0, duplicate 0 -> shallow: ratio 2.2 < 4",
+   "src/checkout.ts: surface 8, size 95, ratio 11.9, classitis no, pass-through 0, tests 2, unused 0, duplicate 2 -> deep",
+   "src/money.ts: surface 7, size 11, ratio 1.6, classitis no, pass-through 0, tests 0, unused 0, duplicate 0 -> shallow: ratio 1.6 < 4; untested: no test file imports it",
+   "src/promotions.ts: surface 1, size 5, ratio 5.0, classitis no, pass-through 0, tests 1, unused 0, duplicate 0 -> deep",
+   "src/receipt.ts: surface 2, size 21, ratio 10.5, classitis no, pass-through 0, tests 1, unused 0, duplicate 0 -> deep"
+  ],
+  "findings": 6,
+  "surface": 27,
+  "size": 152
+ },
+ "replay": {
+  "exit": 0,
+  "verdict": "ACCEPT",
+  "out": "fe0b657 test     pass  exit=0 ok\n86d684d red      fail  exit=1 ok\n141c671 green    pass  exit=0 ok\n15c29be red      fail  exit=1 ok\nf739258 green    pass  exit=0 ok\n9a78895 red      fail  exit=1 ok\nbef9b73 green    pass  exit=0 ok\n2ca7d61 red      fail  exit=1 ok\n63117da green    pass  exit=0 ok\n4d71878 red      fail  exit=1 ok\n9594af8 green    pass  exit=0 ok\naa5b3a0 red      fail  exit=1 ok\n8b1e7b9 green    pass  exit=0 ok\ncd89564 refactor pass  exit=0 ok\ndea7fdf refactor pass  exit=0 ok\n8c13f0c red      fail  exit=1 ok\n03aacea green    pass  exit=0 ok\nfb2b491 red      fail  exit=1 ok\n35dd6be green    pass  exit=0 ok\n1107225 test     pass  exit=0 ok\nREPLAY: ACCEPT\n"
+ }
+}

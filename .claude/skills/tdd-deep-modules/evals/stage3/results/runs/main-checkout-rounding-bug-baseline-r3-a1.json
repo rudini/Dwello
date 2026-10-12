@@ -1,0 +1,84 @@
+{
+ "run_id": "main-checkout-rounding-bug-baseline-r3-a1",
+ "status": "finished",
+ "phase": "main",
+ "slot": 3,
+ "attempt": 1,
+ "fixture": "checkout-rounding-bug",
+ "fixture_dir": "fixtures/checkout-rounding-bug",
+ "arm": "baseline",
+ "started": "2026-10-12T12:30:58Z",
+ "valid": true,
+ "base": "561310cc2df383d0191dfbba46ce0ab13d1e12f7",
+ "duration_s": 75,
+ "session": {
+  "is_error": false,
+  "num_turns": 16,
+  "total_cost_usd": 0.32851559999999996,
+  "session_id": "0dd4d3f7-5911-4c82-b94e-36e886377555",
+  "permission_denials": [
+   {
+    "tool_name": "Bash",
+    "tool_use_id": "toolu_01NixWBUemcUegE6hKTGYQYY",
+    "tool_input": {
+     "command": "git status && git log --oneline | head && find . -type f -not -path './.git/*' -not -path './node_modules/*' | head -50 && cat package.json && for f in src/*.ts; do echo \"=== $f\"; cat $f; done"
+    }
+   },
+   {
+    "tool_name": "Bash",
+    "tool_use_id": "toolu_01UMTWHcRUzttxeT2w2UY8qg",
+    "tool_input": {
+     "command": "cat > src/promotions.ts <<'EOF'\nexport type Promotion = (\n  | { code: string; kind: \"percent\"; percent: number }\n  | { code: string; kind: \"fixed\"; amountCents: number }\n  | { code: string; kind: \"multibuy\"; sku: string; buy: number; pay: number }\n) & {\n  /** Coupon is only valid when the subtotal is at least this amount. */\n  minSubtotalCents?: number;\n};\n\nexport interface PricedLine {\n  sku: string;\n  qty: number;\n  unitCents: number;\n  lineCents: number;\n}\n\nexport function findPromotion(promotions: Promotion[], code: string): Promotion {\n  const promotion = promotions.find((p) => p.code === code);\n  if (!promotion) throw new Error(`Unknown coupon code: ${code}`);\n  return promotion;\n}\n\n/** Discount in cents that a promotion grants on the given lines (never more than their sum). */\nexport function discountFor(promotion: Promotion, lines: PricedLine[]): number {\n  const subtotal = lines.reduce((sum, l) => sum + l.lineCents, 0);\n  return Math.min(rawDiscount(promotion, lines, subtotal), subtotal);\n}\n\nfunction rawDiscount(promotion: Promotion, lines: PricedLine[], subtotal: number): number {\n  switch (promotion.kind) {\n    case \"percent\":\n      return Math.round((subtotal * promotion.percent) / 100);\n    case \"fixed\":\n      return promotion.amountCents;\n    case \"multibuy\": {\n      const matching = lines.filter((l) => l.sku === promotion.sku);\n      if (matching.length === 0) return 0;\n      const qty = matching.reduce((sum, l) => sum + l.qty, 0);\n      const groups = Math.floor(qty / promotion.buy);\n      return groups * (promotion.buy - promotion.pay) * matching[0].unitCents;\n    }\n  }\n}\nEOF"
+    }
+   },
+   {
+    "tool_name": "Bash",
+    "tool_use_id": "toolu_01RFyoLNu2DdbFZNTJ7v6urX",
+    "tool_input": {
+     "command": "python3 - <<'EOF'\np='src/checkout.ts'\ns=open(p).read()\ns=s.replace('import { roundToRappen, vatIncluded } from \"./money\";','import { formatChf, roundToRappen, vatIncluded } from \"./money\";')\ns=s.replace('''  vat: Record<VatCategory, number>;\n}''','''  vat: Record<VatCategory, number>;\n  /** Message for the customer, e.g. a coupon that could not be applied. */\n  notice?: string;\n}''')\ns=s.replace('lineCents: roundToRappen(product.priceCents * qty),','lineCents: product.priceCents * qty,')\nold=s[s.index('  let discountCents = 0;'):]\nnew='''  let discountCents = 0;\n  let notice: string | undefined;\n  if (couponCode !== undefined) {\n    const promotion = findPromotion(promotions, couponCode);\n    if (promotion.minSubtotalCents !== undefined && subtotalCents < promotion.minSubtotalCents) {\n      notice = `Coupon ${couponCode} requires a minimum order of ${formatChf(promotion.minSubtotalCents)}`;\n    } else {\n      discountCents = discountFor(promotion, lines);\n    }\n  }\n\n  const gross: Record<VatCategory, number> = { standard: 0, reduced: 0 };\n  for (const l of lines) gross[l.vat] += l.lineCents;\n\n  // Split the discount between the rates in proportion to their share of the subtotal.\n  const reducedDiscount =\n    subtotalCents > 0 ? Math.round((discountCents * gross.reduced) / subtotalCents) : 0;\n  const discountShare: Record<VatCategory, number> = {\n    reduced: reducedDiscount,\n    standard: discountCents - reducedDiscount,\n  };\n\n  const vat: Record<VatCategory, number> = { standard: 0, reduced: 0 };\n  for (const category of Object.keys(vat) as VatCategory[]) {\n    vat[category] = vatIncluded(gross[category] - discountShare[category], VAT_RATES[category]);\n  }\n\n  return {\n    lines,\n    subtotalCents,\n    couponCode,\n    discountCents,\n    totalCents: roundToRappen(subtotalCents - discountCents),\n    vat,\n    ...(notice !== undefined && { notice }),\n  };\n}\n'''\ns=s.replace(old,new)\nopen(p,'w').write(s)\n\np='src/receipt.ts'\ns=open(p).read()\ns=s.replace('''  return out.join(\"\\\\n\");''','''  if (receipt.notice !== undefined) out.push(receipt.notice);\n  return out.join(\"\\\\n\");''')\nopen(p,'w').write(s)\nEOF\ngit diff src/receipt.ts | tail -5"
+    }
+   }
+  ]
+ },
+ "final_message": "I fixed all four receipt problems and added the minimum-order-value feature for coupons. `bun test` passes (13 tests), and everything is committed in one commit (`727e8ac`).\n\n**Fixes**\n1. **Buy 3, pay 2:** only complete groups of `buy` items now count. 2 cups get no discount, 4 cups get one free and 6 cups get two free. If the same product appears on several cart lines, the quantities are added together.\n2. **Rounding:** line amounts, the subtotal and the discount are now exact to the cent. Only `totalCents` is rounded to 5 Rappen, so 3 \u00d7 CHF 0.99 shows CHF 2.97 on the line and the customer pays CHF 2.95.\n3. **Large vouchers:** the discount can never be more than the subtotal, whatever the coupon type. The CHF 50 voucher on a CHF 5.80 cart gives a discount of 580 and a total of CHF 0.00.\n4. **VAT with a coupon:** the discount is split between the two VAT rates as accounting described, and VAT is calculated on the reduced amounts. 4 cups with the 10 % coupon now show VAT of CHF 4.05. Without a coupon, VAT is the same as before.\n\n**Feature**\n- Any promotion can now have an optional `minSubtotalCents`.\n- If the subtotal is below it, there is no discount, but `couponCode` is still on the receipt. The receipt also gets a `notice`, for example `\"Coupon ZEHN50 requires a minimum order of CHF 50.00\"`, which `renderReceipt` prints as the last line.\n- When there is nothing to report, the receipt has no `notice` field at all. An unknown coupon code still throws an error, as before.\n\nThe bug fixes are in `src/promotions.ts` and `src/checkout.ts`; `src/receipt.ts` only gained the notice line. I added tests for each reported case, the VAT split on a cart with both rates, the minimum-order coupon (below and exactly at the minimum), and printing the notice.",
+ "own_tests": {
+  "exit": 0,
+  "pass": 13,
+  "fail": 0
+ },
+ "hidden": {
+  "exit": 0,
+  "pass": 16,
+  "fail": 0,
+  "tail": "bun test v1.4.2 (744846f84)\n\n__acceptance__/checkout.acceptance.test.ts:\n(pass) buy 3, pay 2 > two cups get no discount [0.67ms]\n(pass) buy 3, pay 2 > only complete groups of three count [0.10ms]\n(pass) rounding > lines and subtotal are exact, only the amount to pay is rounded to 5 Rappen [0.05ms]\n(pass) rounding > several odd lines are summed before rounding [0.13ms]\n(pass) rounding > the discount is exact to the cent [0.04ms]\n(pass) vouchers larger than the order > the discount is capped and the customer pays nothing [0.04ms]\n(pass) VAT after discount > a coupon on standard-rate goods lowers the standard VAT [0.03ms]\n(pass) VAT after discount > the discount is split between rates by their share of the subtotal [0.04ms]\n(pass) VAT after discount > multibuy discounts are split the same way [0.03ms]\n(pass) VAT after discount > without a coupon VAT is computed on the full amounts [0.02ms]\n(pass) minimum order value > below the minimum no discount is given and a notice explains why [0.20ms]\n(pass) minimum order value > exactly at the minimum the coupon applies [0.06ms]\n(pass) minimum order value > works for fixed coupons too [0.16ms]\n(pass) minimum order value > there is no notice without a coupon [0.12ms]\n(pass) minimum order value > the printed receipt ends with the notice [0.35ms]\n(pass) minimum order value > unknown coupons are still rejected [0.09ms]\n\n 16 pass\n 0 fail\n 39 expect() calls\nRan 16 tests across 1 file. [9.00ms]\n"
+ },
+ "production_files": [
+  "src/catalog.ts",
+  "src/checkout.ts",
+  "src/money.ts",
+  "src/promotions.ts",
+  "src/receipt.ts"
+ ],
+ "skill_loaded": null,
+ "foreign_references": [],
+ "committed": true,
+ "invalid_reasons": [],
+ "commits": 1,
+ "subjects": [
+  "Fix receipt amounts (multibuy, rounding, voucher cap, VAT after discount); add coupon minimum order value"
+ ],
+ "depth": {
+  "exit": 1,
+  "lines": [
+   "src/catalog.ts: surface 9, size 20, ratio 2.2, classitis no, pass-through 0, tests 2, unused 0, duplicate 0 -> shallow: ratio 2.2 < 4",
+   "src/checkout.ts: surface 8, size 74, ratio 9.2, classitis no, pass-through 0, tests 2, unused 0, duplicate 2 -> deep",
+   "src/money.ts: surface 7, size 11, ratio 1.6, classitis no, pass-through 0, tests 0, unused 0, duplicate 0 -> shallow: ratio 1.6 < 4; untested: no test file imports it",
+   "src/promotions.ts: surface 8, size 37, ratio 4.6, classitis no, pass-through 0, tests 1, unused 0, duplicate 0 -> deep",
+   "src/receipt.ts: surface 2, size 21, ratio 10.5, classitis no, pass-through 0, tests 1, unused 0, duplicate 0 -> deep"
+  ],
+  "findings": 6,
+  "surface": 34,
+  "size": 163
+ },
+ "replay": null
+}

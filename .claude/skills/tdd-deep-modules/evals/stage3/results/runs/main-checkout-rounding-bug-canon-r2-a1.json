@@ -1,0 +1,71 @@
+{
+ "run_id": "main-checkout-rounding-bug-canon-r2-a1",
+ "status": "finished",
+ "phase": "main",
+ "slot": 2,
+ "attempt": 1,
+ "fixture": "checkout-rounding-bug",
+ "fixture_dir": "fixtures/checkout-rounding-bug",
+ "arm": "canon",
+ "started": "2026-10-12T12:26:24Z",
+ "valid": true,
+ "base": "45fb5e20b3c6ea36810dd668491e2a488d838520",
+ "duration_s": 140,
+ "session": {
+  "is_error": false,
+  "num_turns": 58,
+  "total_cost_usd": 0.6080384000000001,
+  "session_id": "80da9921-90ad-4ce3-85dd-554ac6111a26",
+  "permission_denials": [
+   {
+    "tool_name": "Bash",
+    "tool_use_id": "toolu_01HFqAQGjQorJSH1khQ64SW2",
+    "tool_input": {
+     "command": "python3 - <<'EOF'\np='src/checkout.ts'\ns=open(p).read()\ns=s.replace(\"lineCents: roundToRappen(product.priceCents * qty),\",\"lineCents: product.priceCents * qty,\")\ns=s.replace(\"discountCents = roundToRappen(discountFor(promotion, lines));\",\"discountCents = discountFor(promotion, lines);\")\ns=s.replace(\"totalCents: subtotalCents - discountCents,\",\"totalCents: roundToRappen(subtotalCents - discountCents),\")\nopen(p,'w').write(s)\nEOF\nbun test 2>&1 | tail -4"
+    }
+   }
+  ]
+ },
+ "final_message": "alue for coupons is in. `bun test` passes (18 tests) and the work is in two commits on top of `start`: the bug fixes, then the feature.\n\n**Bug fixes**\n1. **\"Buy 3, pay 2\":** only complete groups now count, so 2 cups get no discount and 4 cups get one free (`src/promotions.ts`). While testing I found a related case: the same product on two cart lines (2 + 2 cups) wasn't counted together. It now is, so that cart also gets one cup free.\n2. **Rounding to 5 Rappen:** line amounts, subtotal and discount are now exact to the cent. Only `totalCents` is rounded to 5 Rappen, so 3 \u00d7 0.99 shows CHF 2.97 and the customer pays CHF 2.95. The old code also rounded the discount to 5 Rappen, which the \"exact to the cent\" rule rules out, so I removed that too.\n3. **Large vouchers:** the discount is capped at the subtotal, so the CHF 50 voucher on CHF 5.80 gives a discount of 580 and a total of CHF 0.00.\n4. **VAT with a coupon:** the discount is split between the two VAT rates as accounting described, and each rate's VAT is computed on its reduced amount. 4 cups with 10 % off now show VAT of CHF 4.05. Without a coupon, VAT is unchanged.\n\n**Feature:** any promotion can now have an optional `minSubtotalCents`. Below that value the discount is 0, `couponCode` is still set, and the receipt gets the notice text (e.g. `Coupon ZEHN50 requires a minimum order of CHF 50.00`), printed as its last line. At or above the minimum the coupon works as usual. When there's nothing to report, the receipt has no `notice` field at all. Unknown coupon codes still throw.\n\n**Test gap:** I couldn't build a cart from the test products where rounding the reduced-rate discount share up from exactly .5 changes the VAT on the receipt. So the halves-up rule is covered only by a unit test of the new rounding helper in `src/money.test.ts`, not by a full checkout test.\n\nI couldn't run a TypeScript type check here because the Bun type definitions aren't installed, so the code has only been verified by running the tests.",
+ "own_tests": {
+  "exit": 0,
+  "pass": 18,
+  "fail": 0
+ },
+ "hidden": {
+  "exit": 0,
+  "pass": 16,
+  "fail": 0,
+  "tail": "bun test v1.4.2 (744846f84)\n\n__acceptance__/checkout.acceptance.test.ts:\n(pass) buy 3, pay 2 > two cups get no discount [0.50ms]\n(pass) buy 3, pay 2 > only complete groups of three count [0.08ms]\n(pass) rounding > lines and subtotal are exact, only the amount to pay is rounded to 5 Rappen [0.04ms]\n(pass) rounding > several odd lines are summed before rounding [0.15ms]\n(pass) rounding > the discount is exact to the cent [0.05ms]\n(pass) vouchers larger than the order > the discount is capped and the customer pays nothing [0.03ms]\n(pass) VAT after discount > a coupon on standard-rate goods lowers the standard VAT [0.02ms]\n(pass) VAT after discount > the discount is split between rates by their share of the subtotal [0.03ms]\n(pass) VAT after discount > multibuy discounts are split the same way [0.02ms]\n(pass) VAT after discount > without a coupon VAT is computed on the full amounts [0.02ms]\n(pass) minimum order value > below the minimum no discount is given and a notice explains why [0.07ms]\n(pass) minimum order value > exactly at the minimum the coupon applies [0.03ms]\n(pass) minimum order value > works for fixed coupons too [0.14ms]\n(pass) minimum order value > there is no notice without a coupon [0.07ms]\n(pass) minimum order value > the printed receipt ends with the notice [0.36ms]\n(pass) minimum order value > unknown coupons are still rejected [0.06ms]\n\n 16 pass\n 0 fail\n 39 expect() calls\nRan 16 tests across 1 file. [7.00ms]\n"
+ },
+ "production_files": [
+  "src/catalog.ts",
+  "src/checkout.ts",
+  "src/money.ts",
+  "src/promotions.ts",
+  "src/receipt.ts"
+ ],
+ "skill_loaded": null,
+ "foreign_references": [],
+ "committed": true,
+ "invalid_reasons": [],
+ "commits": 2,
+ "subjects": [
+  "Fix till receipt amounts: multibuy groups, exact lines, voucher cap, VAT after discount",
+  "Add minimum order value for coupons with receipt notice"
+ ],
+ "depth": {
+  "exit": 1,
+  "lines": [
+   "src/catalog.ts: surface 9, size 20, ratio 2.2, classitis no, pass-through 0, tests 2, unused 0, duplicate 0 -> shallow: ratio 2.2 < 4",
+   "src/checkout.ts: surface 8, size 75, ratio 9.4, classitis no, pass-through 0, tests 2, unused 0, duplicate 2 -> deep",
+   "src/money.ts: surface 10, size 14, ratio 1.4, classitis no, pass-through 0, tests 1, unused 0, duplicate 0 -> shallow: ratio 1.4 < 4",
+   "src/promotions.ts: surface 8, size 33, ratio 4.1, classitis no, pass-through 0, tests 1, unused 0, duplicate 0 -> deep",
+   "src/receipt.ts: surface 2, size 21, ratio 10.5, classitis no, pass-through 0, tests 1, unused 0, duplicate 0 -> deep"
+  ],
+  "findings": 5,
+  "surface": 37,
+  "size": 163
+ },
+ "replay": null
+}

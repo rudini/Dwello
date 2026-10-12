@@ -1,0 +1,104 @@
+{
+ "run_id": "main-opening-hours-parser-skill-r2-a1",
+ "status": "finished",
+ "phase": "main",
+ "slot": 2,
+ "attempt": 1,
+ "fixture": "opening-hours-parser",
+ "fixture_dir": "fixtures/opening-hours-parser",
+ "arm": "skill",
+ "started": "2026-10-12T12:24:55Z",
+ "valid": false,
+ "base": "df30a4fa9702fdc5d1b6f65e8480d962e3f566b4",
+ "duration_s": 893,
+ "session": {
+  "is_error": false,
+  "num_turns": 2,
+  "total_cost_usd": 2.165864300000001,
+  "session_id": "0841eac0-c883-482a-8397-9e715f09d740",
+  "permission_denials": []
+ },
+ "final_message": "The test run that hung earlier hit its time limit and was stopped. It didn't commit anything or change any files: the working tree is clean and the last commit is still `a3e143e test: design note`. I'm not restarting it, since that test was committed properly later in the session.",
+ "own_tests": {
+  "exit": 0,
+  "pass": 20,
+  "fail": 0
+ },
+ "hidden": {
+  "exit": 0,
+  "pass": 20,
+  "fail": 0,
+  "tail": "that no rule names are closed [0.06ms]\n(pass) valid opening hours > ranges are sorted by start time [0.05ms]\n(pass) valid opening hours > day lists and day ranges, including ranges that wrap around the week [0.24ms]\n(pass) valid opening hours > a later rule replaces the hours of the days it names [0.11ms]\n(pass) valid opening hours > spaces between tokens carry no meaning [0.32ms]\n(pass) valid opening hours > ranges may touch and may end at 24:00 [0.14ms]\n(pass) rejected opening hours > empty text [0.21ms]\n(pass) rejected opening hours > unknown days, including wrong case [0.12ms]\n(pass) rejected opening hours > invalid times [0.16ms]\n(pass) rejected opening hours > 24:00 is only allowed as an end time [0.09ms]\n(pass) rejected opening hours > ranges must end after they start [0.07ms]\n(pass) rejected opening hours > overlapping ranges are reported at the later-written range [0.13ms]\n(pass) rejected opening hours > a day named twice in one rule [0.25ms]\n(pass) rejected opening hours > text that ends too early [0.18ms]\n(pass) rejected opening hours > tokens that do not fit the format [0.24ms]\n(pass) rejected opening hours > characters that belong to no token [0.07ms]\n(pass) rejected opening hours > columns count from the start of the whole text [0.11ms]\n(pass) rejected opening hours > the first problem from the left is reported [0.09ms]\n(pass) rejected opening hours > the message names the column [0.09ms]\n\n 20 pass\n 0 fail\n 80 expect() calls\nRan 20 tests across 1 file. [8.00ms]\n"
+ },
+ "production_files": [
+  "src/openingHours.ts"
+ ],
+ "skill_loaded": true,
+ "foreign_references": [
+  "Bash: ['command ps'] {\"command\": \"ps -eo pid,etime,cmd | grep -E \\\"bun|tdd\\\" | grep -v grep\"}"
+ ],
+ "committed": true,
+ "invalid_reasons": [
+  "foreign reference"
+ ],
+ "commits": 43,
+ "subjects": [
+  "test: test list for parseOpeningHours",
+  "red: single day with one range",
+  "green: single day with one range",
+  "red: day range",
+  "green: day range",
+  "red: several ranges sorted",
+  "green: several ranges sorted",
+  "red: rules separated by semicolons",
+  "green: rules separated by semicolons",
+  "red: off closes days",
+  "green: off closes days",
+  "red: day list",
+  "green: day list",
+  "red: day range wraps around",
+  "green: day range wraps around",
+  "refactor: bounded day-range walk, one array per day",
+  "red: later rule replaces",
+  "green: later rule replaces",
+  "red: spaces are ignored",
+  "green: spaces are ignored",
+  "red: EMPTY",
+  "green: EMPTY",
+  "red: UNKNOWN_DAY",
+  "green: UNKNOWN_DAY",
+  "refactor: accept helper for optional tokens",
+  "red: INVALID_TIME",
+  "green: INVALID_TIME",
+  "red: 24:00 only as an end",
+  "green: 24:00 only as an end",
+  "red: END_BEFORE_START",
+  "green: END_BEFORE_START",
+  "red: OVERLAP",
+  "green: OVERLAP",
+  "red: DUPLICATE_DAY",
+  "green: DUPLICATE_DAY",
+  "red: text ending too early",
+  "green: text ending too early",
+  "red: empty rule",
+  "green: empty rule",
+  "red: character outside any token",
+  "green: character outside any token",
+  "refactor: take and separated helpers; one UNEXPECTED constructor",
+  "test: design note"
+ ],
+ "depth": {
+  "exit": 0,
+  "lines": [
+   "src/openingHours.ts: surface 10, size 114, ratio 11.4, classitis no, pass-through 0, tests 1, unused 0, duplicate 2 -> deep"
+  ],
+  "findings": 1,
+  "surface": 10,
+  "size": 114
+ },
+ "replay": {
+  "exit": 0,
+  "verdict": "ACCEPT",
+  "out": "0b055ce test     pass  exit=0 ok\n0e027b0 red      fail  exit=1 ok\n6949011 green    pass  exit=0 ok\n63e8468 red      fail  exit=1 ok\ncec6807 green    pass  exit=0 ok\n5d27b37 red      fail  exit=1 ok\n08cb9aa green    pass  exit=0 ok\neadf63c red      fail  exit=1 ok\n998dc5f green    pass  exit=0 ok\n39758f5 red      fail  exit=1 ok\nf30fd80 green    pass  exit=0 ok\nde1f408 red      fail  exit=1 ok\n68363df green    pass  exit=0 ok\ne866a4a red      fail  exit=1 ok\n95e09c4 green    pass  exit=0 ok\n7c9ece9 refactor pass  exit=0 ok\n4aae977 red      fail  exit=1 ok\nfe6a2e8 green    pass  exit=0 ok\n975b720 red      fail  exit=1 ok\n93ede90 green    pass  exit=0 ok\n4864e49 red      fail  exit=1 ok\n9556d70 green    pass  exit=0 ok\n7d119f9 red      fail  exit=1 ok\n8a74edf green    pass  exit=0 ok\n2332994 refactor pass  exit=0 ok\nd8208f6 red      fail  exit=1 ok\n3889ddf green    pass  exit=0 ok\n417e6ac red      fail  exit=1 ok\nfb18170 green    pass  exit=0 ok\n5e32171 red      fail  exit=1 ok\n4eea77a green    pass  exit=0 ok\nec6587a red      fail  exit=1 ok\nc29cf5d green    pass  exit=0 ok\ne05e8aa red      fail  exit=1 ok\n52585a6 green    pass  exit=0 ok\ne01d276 red      fail  exit=1 ok\n835881a green    pass  exit=0 ok\n8be28ba red      fail  exit=1 ok\n059f2d4 green    pass  exit=0 ok\n212d0e6 red      fail  exit=1 ok\n6d3272e green    pass  exit=0 ok\ne08b6e8 refactor pass  exit=0 ok\na3e143e test     pass  exit=0 ok\nREPLAY: ACCEPT\n"
+ }
+}

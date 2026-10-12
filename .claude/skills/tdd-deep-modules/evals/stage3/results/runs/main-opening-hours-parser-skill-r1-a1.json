@@ -1,0 +1,95 @@
+{
+ "run_id": "main-opening-hours-parser-skill-r1-a1",
+ "status": "finished",
+ "phase": "main",
+ "slot": 1,
+ "attempt": 1,
+ "fixture": "opening-hours-parser",
+ "fixture_dir": "fixtures/opening-hours-parser",
+ "arm": "skill",
+ "started": "2026-10-12T12:19:22Z",
+ "valid": true,
+ "base": "fcc447a1f33cdd9410fc1e78cf3ee088daea8b7a",
+ "duration_s": 825,
+ "session": {
+  "is_error": false,
+  "num_turns": 2,
+  "total_cost_usd": 1.7847045,
+  "session_id": "79420a59-d3ef-49e0-998c-ed75c2d04450",
+  "permission_denials": []
+ },
+ "final_message": "The `tdd-step` run that hung earlier has now been stopped at its time limit. It committed nothing and changed nothing: the last commit is still the design note, the working tree is clean, and `bun test` still passes all 17 tests. I redid that cycle by hand once the parser could no longer loop, so it doesn't need restarting.",
+ "own_tests": {
+  "exit": 0,
+  "pass": 17,
+  "fail": 0
+ },
+ "hidden": {
+  "exit": 0,
+  "pass": 20,
+  "fail": 0,
+  "tail": "that no rule names are closed [0.08ms]\n(pass) valid opening hours > ranges are sorted by start time [0.08ms]\n(pass) valid opening hours > day lists and day ranges, including ranges that wrap around the week [0.17ms]\n(pass) valid opening hours > a later rule replaces the hours of the days it names [0.34ms]\n(pass) valid opening hours > spaces between tokens carry no meaning [0.08ms]\n(pass) valid opening hours > ranges may touch and may end at 24:00 [0.04ms]\n(pass) rejected opening hours > empty text [0.18ms]\n(pass) rejected opening hours > unknown days, including wrong case [0.08ms]\n(pass) rejected opening hours > invalid times [0.09ms]\n(pass) rejected opening hours > 24:00 is only allowed as an end time [0.16ms]\n(pass) rejected opening hours > ranges must end after they start [0.08ms]\n(pass) rejected opening hours > overlapping ranges are reported at the later-written range [0.10ms]\n(pass) rejected opening hours > a day named twice in one rule [0.09ms]\n(pass) rejected opening hours > text that ends too early [0.07ms]\n(pass) rejected opening hours > tokens that do not fit the format [0.15ms]\n(pass) rejected opening hours > characters that belong to no token [0.08ms]\n(pass) rejected opening hours > columns count from the start of the whole text [0.04ms]\n(pass) rejected opening hours > the first problem from the left is reported [0.05ms]\n(pass) rejected opening hours > the message names the column [0.05ms]\n\n 20 pass\n 0 fail\n 80 expect() calls\nRan 20 tests across 1 file. [7.00ms]\n"
+ },
+ "production_files": [
+  "src/openingHours.ts"
+ ],
+ "skill_loaded": true,
+ "foreign_references": [],
+ "committed": true,
+ "invalid_reasons": [],
+ "commits": 38,
+ "subjects": [
+  "test: opening hours test list",
+  "red: single day single range",
+  "green: single day single range",
+  "red: ranges sorted by start",
+  "green: ranges sorted by start",
+  "red: day range",
+  "green: day range",
+  "red: wrapping day range",
+  "green: wrapping day range",
+  "refactor: bounded day walk, one array per day",
+  "red: comma-separated day items",
+  "green: comma-separated day items",
+  "red: off closes days",
+  "green: off closes days",
+  "red: later rule replaces",
+  "green: later rule replaces",
+  "red: spaces are ignored",
+  "green: spaces are ignored",
+  "refactor: tokenizer and recursive-descent parser",
+  "red: EMPTY",
+  "green: EMPTY",
+  "refactor: blank means spaces only, as tokenize treats it",
+  "red: UNKNOWN_DAY",
+  "green: UNKNOWN_DAY",
+  "red: INVALID_TIME",
+  "green: INVALID_TIME",
+  "red: END_BEFORE_START",
+  "green: END_BEFORE_START",
+  "red: OVERLAP",
+  "green: OVERLAP",
+  "red: DUPLICATE_DAY",
+  "green: DUPLICATE_DAY",
+  "red: UNEXPECTED token or early end",
+  "green: UNEXPECTED token or early end",
+  "red: UNEXPECTED stray character",
+  "green: UNEXPECTED stray character",
+  "refactor: skip() folds the repeated separator handling",
+  "test: design note, ticked test list, ignore pycache"
+ ],
+ "depth": {
+  "exit": 0,
+  "lines": [
+   "src/openingHours.ts: surface 10, size 129, ratio 12.9, classitis no, pass-through 0, tests 1, unused 0, duplicate 2 -> deep"
+  ],
+  "findings": 1,
+  "surface": 10,
+  "size": 129
+ },
+ "replay": {
+  "exit": 0,
+  "verdict": "ACCEPT",
+  "out": "334d3b9 test     pass  exit=0 ok\n9898db4 red      fail  exit=1 ok\n0bb7d10 green    pass  exit=0 ok\n73d3e66 red      fail  exit=1 ok\nee0620a green    pass  exit=0 ok\n725832c red      fail  exit=1 ok\nd14d6c4 green    pass  exit=0 ok\n4c61e88 red      fail  exit=1 ok\n43ec4cb green    pass  exit=0 ok\n5ee3998 refactor pass  exit=0 ok\na3bf4f2 red      fail  exit=1 ok\n29aadcd green    pass  exit=0 ok\nabdb61e red      fail  exit=1 ok\n2ab6369 green    pass  exit=0 ok\nb853536 red      fail  exit=1 ok\ne72e20d green    pass  exit=0 ok\n454133f red      fail  exit=1 ok\n7acbc60 green    pass  exit=0 ok\nfe3790a refactor pass  exit=0 ok\n5cf50de red      fail  exit=1 ok\n7e65a50 green    pass  exit=0 ok\nc41f94d refactor pass  exit=0 ok\n80f14ba red      fail  exit=1 ok\ne37ebca green    pass  exit=0 ok\nd325d5b red      fail  exit=1 ok\n761440a green    pass  exit=0 ok\n6241caa red      fail  exit=1 ok\n9eac4f5 green    pass  exit=0 ok\nbcd4af6 red      fail  exit=1 ok\n1d09a55 green    pass  exit=0 ok\ncb28f85 red      fail  exit=1 ok\ne9c0caa green    pass  exit=0 ok\n33944f3 red      fail  exit=1 ok\ne36d01d green    pass  exit=0 ok\n778e711 red      fail  exit=1 ok\n95ecbd6 green    pass  exit=0 ok\nf9d7e4b refactor pass  exit=0 ok\n24124de test     pass  exit=0 ok\nREPLAY: ACCEPT\n"
+ }
+}
