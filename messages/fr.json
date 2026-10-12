@@ -1212,7 +1212,7 @@
 	"settings_city_example": "Zurich",
 	"settings_example_street": "Rue de la Gare 1",
 	"contracts_end_missing": "Veuillez saisir la fin du contrat, par exemple {example}.",
-	"contracts_end_before_start_on": "La fin du contrat ne peut pas précéder le début du contrat le {date}.",
+	"contracts_end_before_start_on": "La fin du contrat ne peut pas précéder le début du contrat, le {date}.",
 	"contracts_end_past_confirm": "Veuillez confirmer que le contrat de bail a pris fin le {date}, ou corrigez la fin du contrat.",
 	"contracts_list_and": "{rest} et {last}",
 	"contracts_billed_paid": "payé",
