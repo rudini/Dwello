@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import { untrack } from 'svelte';
 	import { contractStatusOn } from '$lib/contract-status';
 	import { addToast } from '$lib/stores';
@@ -33,30 +34,30 @@
 </script>
 
 <svelte:head>
-	<title>Mietvertrag - {name} - Dwello</title>
+	<title>{m.contracts_title()} - {name} - Dwello</title>
 </svelte:head>
 
 <div class="flex flex-col gap-8">
 	<PageHeader
-		title="Mietvertrag von {name}"
-		purpose="Wohnung {contract.apartment.number} · {contract.building.name ||
-			contract.building.address}"
-		trail={[{ href: '/contracts', label: 'Mietverträge' }]}
+		title={m.apartments_contract_of({ name })}
+		purpose="{m.buildings_apartment_number({ number: contract.apartment.number })} · {contract
+			.building.name || contract.building.address}"
+		trail={[{ href: '/contracts', label: m.nav_contracts() }]}
 	>
 		{#snippet action()}
 			<Button href="/contracts/{contract.id}/edit" icon="edit" testid="contract-edit-button"
-				>Bearbeiten</Button
+				>{m.buildings_edit()}</Button
 			>
 			{#if !contract.endDate}
 				<Button onclick={() => (ending = true)} icon="calendar-busy" testid="contract-end-button"
-					>Beenden</Button
+					>{m.contracts_end_action()}</Button
 				>
 			{/if}
 			<Button
 				variant="danger-ghost"
 				onclick={() => (deleting = true)}
 				icon="delete"
-				testid="contract-delete-button">Löschen</Button
+				testid="contract-delete-button">{m.buildings_delete()}</Button
 			>
 		{/snippet}
 	</PageHeader>
@@ -75,17 +76,17 @@
 		/>
 	</div>
 
-	<Panel title="Dazu gehört">
+	<Panel title={m.contracts_related()}>
 		<div class="flex flex-wrap gap-4">
 			<Button
 				href="/statements?contract={contract.id}"
 				icon="statement"
-				testid="contract-statements-link">Nebenkostenabrechnungen</Button
+				testid="contract-statements-link">{m.nav_statements()}</Button
 			>
 			<Button
 				href="/invoices?building={contract.building.id}"
 				icon="invoice"
-				testid="contract-invoices-link">Rechnungen des Gebäudes</Button
+				testid="contract-invoices-link">{m.contracts_building_invoices()}</Button
 			>
 		</div>
 	</Panel>
@@ -94,35 +95,29 @@
 <ActionDialog
 	bind:open={ending}
 	action="?/end"
-	title="Mietvertrag beenden?"
-	confirmLabel="Mietvertrag beenden"
+	title={m.contracts_end_title()}
+	confirmLabel={m.contracts_end_confirm()}
 	confirmTestid="contract-end-confirm"
 	error={form?.endError}
-	onsuccess={() => addToast('success', `Der Mietvertrag von ${name} endet heute`)}
+	onsuccess={() => addToast('success', m.contracts_ends_today_toast({ name }))}
 >
-	<p>
-		Das Vertragsende wird auf heute gesetzt. Heute ist der letzte Tag des Mietverhältnisses von {name};
-		ab morgen gilt der Mietvertrag als beendet.
-	</p>
+	<p>{m.contracts_end_text({ name })}</p>
 </ActionDialog>
 
 <ActionDialog
 	bind:open={deleting}
 	action="?/delete"
-	title="Mietvertrag löschen?"
-	confirmLabel="Mietvertrag löschen"
+	title={m.contracts_delete_title()}
+	confirmLabel={m.contracts_delete_confirm()}
 	danger
 	disabled={!contract.endDate}
 	confirmTestid="contract-delete-confirm"
 	error={form?.deleteError}
-	onsuccess={() => addToast('success', `Mietvertrag von ${name} gelöscht`)}
+	onsuccess={() => addToast('success', m.contracts_deleted_toast({ name }))}
 >
 	{#if contract.endDate}
-		<p>
-			Der Mietvertrag von {name} wird endgültig gelöscht. Ein Mietvertrag mit Nebenkostenabrechnungen
-			kann nicht gelöscht werden.
-		</p>
+		<p>{m.contracts_delete_text({ name })}</p>
 	{:else}
-		<p>Ein Mietvertrag ohne Vertragsende kann nicht gelöscht werden. Beenden Sie ihn zuerst.</p>
+		<p>{m.contracts_delete_open_ended()}</p>
 	{/if}
 </ActionDialog>

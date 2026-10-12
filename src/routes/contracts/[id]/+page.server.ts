@@ -1,3 +1,4 @@
+import { m } from '$lib/paraglide/messages';
 import type { RentalContract, Tenant, Apartment, Building, ApartmentStatus } from '$lib/types';
 import type { Actions, PageServerLoad } from './$types';
 import { error, fail, redirect } from '@sveltejs/kit';
@@ -26,9 +27,9 @@ export const load: PageServerLoad = async ({ params, fetch }): Promise<ContractD
 
 		if (!response.ok) {
 			if (response.status === 404) {
-				throw error(404, 'Vertrag nicht gefunden');
+				throw error(404, m.contracts_not_found());
 			}
-			throw error(response.status, 'Fehler beim Laden des Vertrags');
+			throw error(response.status, m.contracts_load_failed());
 		}
 
 		const data = await response.json();
@@ -90,7 +91,7 @@ export const load: PageServerLoad = async ({ params, fetch }): Promise<ContractD
 		if (err && typeof err === 'object' && 'status' in err) {
 			throw err;
 		}
-		throw error(500, 'Fehler beim Laden des Vertrags');
+		throw error(500, m.contracts_load_failed());
 	}
 };
 
@@ -102,7 +103,7 @@ export const actions: Actions = {
 			body: JSON.stringify({ endDate: localToday() })
 		});
 		if (!response.ok) {
-			return fail(response.status, { endError: 'Mietvertrag konnte nicht beendet werden.' });
+			return fail(response.status, { endError: m.contracts_end_failed() });
 		}
 	},
 	delete: async ({ params, fetch }) => {
@@ -110,7 +111,7 @@ export const actions: Actions = {
 			method: 'DELETE'
 		});
 		if (!response.ok) {
-			return fail(response.status, { deleteError: 'Mietvertrag konnte nicht gelöscht werden.' });
+			return fail(response.status, { deleteError: m.contracts_delete_failed() });
 		}
 		throw redirect(303, '/contracts');
 	}

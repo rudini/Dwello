@@ -2,7 +2,7 @@
 
 One French, Italian and English term per German domain term from `UBIQUITOUS_LANGUAGE.md` (which stays German and unchanged). The UI texts in `messages/{fr,it,en}.json` use exactly these words. Where the statement PDF (`backend/src/services/pdf.service.ts`) already translates a term, the UI reuses its translation. Terms marked with ❓ are not settled; they are listed in `offene-punkte.md`.
 
-Style: formal address (vous, Lei), buttons start with a verb (French and Italian in the infinitive: «Enregistrer», «Salvare»), Swiss conventions (CHF, «NPA», Italian «pigione»).
+Style: French guillemets with a non-breaking space inside (« Immeubles »), Italian and German without; formal address (vous, Lei), buttons start with a verb (French and Italian in the infinitive: «Enregistrer», «Salvare»), Swiss conventions (CHF, «NPA», Italian «pigione»).
 
 | German | Français | Italiano | English |
 |---|---|---|---|

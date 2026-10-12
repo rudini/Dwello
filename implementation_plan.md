@@ -4681,7 +4681,10 @@ header and on pages without it. Branch `claude/optimistic-clarke-nn8u7t` from `m
   German sentence. Tests: `error-codes.pg.test.ts`, `formula-codes.test.ts`, `backend-error.test.ts`; backend 511 tests.
   Still uncoded by design: Elysia 422 bodies, database errors, other SMTP errors, PDF 500s; stored document titles
   («Zahlungserinnerung») are data.
-- [ ] Step 4 – rental contracts
+- [x] **Step 4 – rental contracts**: `src/routes/contracts/**` (list, detail, edit, end dialog, wizard and its steps),
+  `contract-form.ts`, `contract-wizard.ts` (step names as getters), `statement-wizard.ts` (shared impossible-year
+  error); 106 keys; help-page labels («Mietvertrag erfassen/speichern», step names) as quoted. French guillemets
+  normalised to non-breaking spaces inside in all French texts. Test `contracts-i18n.test.ts`.
 - [ ] Step 5 – invoices and documents
 - [ ] Step 6 – statements
 - [ ] Step 7 – configuration (categories, distribution keys, heating profiles, settings), gallery, remaining `src/lib`

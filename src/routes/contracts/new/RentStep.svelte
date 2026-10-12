@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import { advancePaymentNotice, normalizeAmounts } from '$lib/contract-wizard';
 	import type { ContractFormValues } from '$lib/contract-form';
 	import Alert from '$lib/ui/Alert.svelte';
@@ -23,8 +24,8 @@
 
 <MoneyInput
 	id="baseRent"
-	label="Nettomiete pro Monat"
-	help="Monatliche Grundmiete ohne Nebenkosten."
+	label={m.contracts_base_rent_label()}
+	help={m.contracts_base_rent_help()}
 	example="1500.00"
 	bind:value={values.baseRent}
 	error={errors.baseRent}
@@ -34,8 +35,8 @@
 <!-- TODO(fachlich prüfen): the examples "Heizung, Wasser usw." go beyond the glossary definition -->
 <MoneyInput
 	id="advancePayment"
-	label="Akonto pro Monat"
-	help="Monatlicher Vorschuss des Mieters für Nebenkosten (Heizung, Wasser usw.). Wird mit der Nebenkostenabrechnung verrechnet."
+	label={m.contracts_advance_label()}
+	help={m.contracts_advance_help()}
 	example="180.00"
 	optional
 	bind:value={values.advancePayment}
@@ -44,13 +45,13 @@
 />
 
 {#if notice}
-	<Alert title="Kein Akonto" testid="advance-payment-notice"><p>{notice}</p></Alert>
+	<Alert title={m.contracts_no_advance()} testid="advance-payment-notice"><p>{notice}</p></Alert>
 {/if}
 
 <MoneyInput
 	id="additionalRent"
-	label="Zusatzmiete pro Monat"
-	help="Zusätzliche monatliche Kosten, zum Beispiel für Garage, Parkplatz oder Keller."
+	label={m.contracts_additional_label()}
+	help={m.contracts_additional_help()}
 	optional
 	bind:value={values.additionalRent}
 	error={errors.additionalRent}
@@ -59,7 +60,7 @@
 
 <p class="flex items-baseline justify-between gap-4 border-t border-line pt-4 text-lg">
 	<!-- TODO(fachlich prüfen): no glossary term for the monthly total, see docs/design/offene-punkte.md -->
-	<span class="font-semibold text-ink">Monatlich total</span>
+	<span class="font-semibold text-ink">{m.common_monthly_total()}</span>
 	<span class="font-bold tabular-nums text-ink" data-testid="contract-monthly-total"
 		>{formatCurrency(total)}</span
 	>

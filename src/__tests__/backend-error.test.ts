@@ -15,7 +15,7 @@ describe('Fehler des Backends in der gewählten Sprache', () => {
 			params: { name: 'Lift' }
 		};
 
-		expect(backendMessage(body, 'Repli')).toBe('Une catégorie nommée « Lift » existe déjà.');
+		expect(backendMessage(body, 'Repli')).toBe('Une catégorie nommée «\u00a0Lift\u00a0» existe déjà.');
 	});
 
 	it('zeigt auf Deutsch denselben Text wie das Backend', () => {

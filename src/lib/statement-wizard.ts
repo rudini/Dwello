@@ -1,4 +1,4 @@
-import { IMPOSSIBLE, impossible } from './contract-wizard';
+import { impossible, impossibleYear } from './contract-wizard';
 import { formatCurrency, formatDate } from './utils/format';
 
 /** What the Liegenschaftsverwalter chooses in the first three steps of "Abrechnungen erstellen" */
@@ -21,8 +21,8 @@ export const statementSteps = [
 function periodErrors({ periodStart, periodEnd }: WizardSelection): Record<string, string> {
 	if (!periodStart) return { periodStart: 'Bitte wählen Sie den Beginn der Abrechnungsperiode.' };
 	if (!periodEnd) return { periodEnd: 'Bitte wählen Sie das Ende der Abrechnungsperiode.' };
-	if (impossible(periodStart)) return { periodStart: IMPOSSIBLE };
-	if (impossible(periodEnd)) return { periodEnd: IMPOSSIBLE };
+	if (impossible(periodStart)) return { periodStart: impossibleYear() };
+	if (impossible(periodEnd)) return { periodEnd: impossibleYear() };
 	if (periodEnd <= periodStart)
 		return { periodEnd: 'Das Ende muss nach dem Beginn der Abrechnungsperiode liegen.' };
 	return {};
@@ -33,7 +33,8 @@ function settingErrors({ heatingProfileId, managementFeePercent }: WizardSelecti
 		...(!heatingProfileId && { heatingProfileId: 'Bitte wählen Sie ein Heizprofil.' }),
 		// a rate emptied and restored from the draft is null, not 0 %
 		...(!(Number.isFinite(managementFeePercent) && managementFeePercent >= 0) && {
-			managementFeePercent: 'Bitte geben Sie einen Prozentsatz ab 0 mit höchstens zwei Stellen nach dem Komma ein, zum Beispiel 3 oder 2,5.'
+			managementFeePercent:
+				'Bitte geben Sie einen Prozentsatz ab 0 mit höchstens zwei Stellen nach dem Komma ein, zum Beispiel 3 oder 2,5.'
 		})
 	};
 }

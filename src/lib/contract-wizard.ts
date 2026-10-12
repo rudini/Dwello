@@ -1,3 +1,4 @@
+import { m } from '$lib/paraglide/messages';
 import { plainAmount } from './invoice';
 import {
 	apartmentOption,
@@ -12,11 +13,36 @@ type Field = keyof ContractFormValues;
 
 /** The steps of "Mietvertrag erfassen" and the fields each one asks for */
 export const contractSteps: { label: string; fields: Field[] }[] = [
-	{ label: 'Mieter', fields: ['tenantId'] },
-	{ label: 'Wohnung', fields: ['apartmentId'] },
-	{ label: 'Vertragsdauer', fields: ['startDate', 'endDate'] },
-	{ label: 'Miete', fields: ['baseRent', 'additionalRent', 'advancePayment'] },
-	{ label: 'Prüfen', fields: [] }
+	{
+		get label() {
+			return m.contracts_tenant();
+		},
+		fields: ['tenantId']
+	},
+	{
+		get label() {
+			return m.tenants_apartment();
+		},
+		fields: ['apartmentId']
+	},
+	{
+		get label() {
+			return m.contracts_period();
+		},
+		fields: ['startDate', 'endDate']
+	},
+	{
+		get label() {
+			return m.contracts_rent();
+		},
+		fields: ['baseRent', 'additionalRent', 'advancePayment']
+	},
+	{
+		get label() {
+			return m.contracts_step_review();
+		},
+		fields: []
+	}
 ];
 
 /** Errors of one step (counted from 1), checked when the user goes on */
@@ -30,13 +56,13 @@ export function stepErrors(values: ContractFormValues, step: number): Record<str
 }
 
 // A date field typed over can end up in year 12026; such a date is surely a typing mistake
-export const IMPOSSIBLE = 'Bitte prüfen Sie das Datum: Das Jahr ist nicht möglich.';
+export const impossibleYear = () => m.common_error_impossible_year();
 export const impossible = (date: string) => !!date && !/^(19|20)\d\d-/.test(date);
 
 function dateErrors({ startDate, endDate, isUnlimited }: ContractFormValues) {
 	return {
-		...(impossible(startDate) && { startDate: IMPOSSIBLE }),
-		...(!isUnlimited && impossible(endDate) && { endDate: IMPOSSIBLE })
+		...(impossible(startDate) && { startDate: impossibleYear() }),
+		...(!isUnlimited && impossible(endDate) && { endDate: impossibleYear() })
 	};
 }
 
@@ -48,9 +74,7 @@ export function firstStepWithError(errors: Record<string, string>): number | nul
 
 /** Plausibility hint: a contract without Akonto is allowed, but its consequence is easy to miss */
 export function advancePaymentNotice(values: ContractFormValues): string | null {
-	return parseFloat(values.advancePayment) > 0
-		? null
-		: 'Ohne Akonto bezahlt der Mieter alle Nebenkosten erst mit der Nebenkostenabrechnung.';
+	return parseFloat(values.advancePayment) > 0 ? null : m.contracts_no_advance_text();
 }
 
 const amount = (value: string) => parseFloat(value) || 0;
@@ -66,7 +90,7 @@ export const normalizeAmounts = (values: ContractFormValues): ContractFormValues
 /** Plausibility hint: a start in the past is allowed (recording an old contract) but often a mistyped date */
 export function startDateNotice(startDate: string, today: string): string | null {
 	return startDate && !impossible(startDate) && startDate < today
-		? `Der Vertragsbeginn ${formatDateLong(startDate)} liegt in der Vergangenheit. Stimmt das Datum?`
+		? m.contracts_start_in_past({ date: formatDateLong(startDate) })
 		: null;
 }
 
@@ -81,48 +105,50 @@ export function contractSummary(
 		amount(values.baseRent) + amount(values.advancePayment) + amount(values.additionalRent);
 	return [
 		{
-			label: 'Mieter',
+			label: m.contracts_tenant(),
 			value: tenants.find((t) => t.id === values.tenantId)?.name ?? '',
 			step: 1 as number | null,
 			field: 'tenant'
 		},
 		{
-			label: 'Wohnung',
-			value: apartment ? `Wohnung ${apartment.unit} - ${apartment.building}` : '',
+			label: m.tenants_apartment(),
+			value: apartment
+				? `${m.buildings_apartment_number({ number: apartment.unit })} - ${apartment.building}`
+				: '',
 			step: 2,
 			field: 'apartment'
 		},
 		{
-			label: 'Vertragsbeginn',
+			label: m.tenants_contract_start(),
 			value: formatDateLong(values.startDate),
 			step: 3,
 			field: 'startDate'
 		},
 		{
-			label: 'Vertragsende',
-			value: values.isUnlimited ? 'Unbefristet' : formatDateLong(values.endDate),
+			label: m.dashboard_kind_contract_end(),
+			value: values.isUnlimited ? m.contracts_unlimited() : formatDateLong(values.endDate),
 			step: 3,
 			field: values.isUnlimited ? 'duration' : 'endDate'
 		},
 		{
-			label: 'Nettomiete',
+			label: m.common_net_rent(),
 			value: formatCurrency(amount(values.baseRent)),
 			step: 4,
 			field: 'baseRent'
 		},
 		{
-			label: 'Akonto',
+			label: m.common_advance_payment(),
 			value: formatCurrency(amount(values.advancePayment)),
 			step: 4,
 			field: 'advancePayment'
 		},
 		{
-			label: 'Zusatzmiete',
+			label: m.common_additional_rent(),
 			value: formatCurrency(amount(values.additionalRent)),
 			step: 4,
 			field: 'additionalRent'
 		},
-		{ label: 'Monatlich total', value: formatCurrency(gross), step: null, field: '' }
+		{ label: m.common_monthly_total(), value: formatCurrency(gross), step: null, field: '' }
 	];
 }
 

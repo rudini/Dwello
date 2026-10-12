@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '$lib/paraglide/messages';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { onMount, tick, untrack } from 'svelte';
@@ -49,8 +50,7 @@
 	} = $props();
 
 	const DRAFT = 'contract';
-	const OVERLAP =
-		'Der Zeitraum überschneidet sich mit einem anderen Mietvertrag dieser Wohnung. Ändern Sie den Vertragsbeginn oder wählen Sie «Befristet» mit einem früheren Vertragsende.';
+	const OVERLAP = m.contracts_overlap_wizard();
 	// Error keys of the fields whose id differs from the value's name
 	const errorKey: Record<string, string> = { tenant: 'tenantId', apartment: 'apartmentId' };
 	const params = untrack(() => $page.url.searchParams);
@@ -172,13 +172,13 @@
 			// the backend answers in English; the only refusal a valid form can meet is an overlap
 			errors = /overlap/i.test(response.error.message)
 				? { form: OVERLAP }
-				: { form: 'Beim Speichern ist ein Fehler aufgetreten. Versuchen Sie es später erneut.' };
+				: { form: m.contracts_save_failed() };
 			return;
 		}
 		touched = false;
 		clearDraft(browserStorage(), DRAFT);
 		const tenant = tenants.find((t) => t.id === values.tenantId)?.name;
-		addToast('success', `Mietvertrag von ${tenant} gespeichert`, 10_000); // long enough to read at large zoom
+		addToast('success', m.contracts_saved_toast({ name: String(tenant) }), 10_000); // long enough to read at large zoom
 		await goto('/contracts');
 	}
 
@@ -188,7 +188,7 @@
 		const past = startDateNotice(values.startDate, today);
 		if (!past || confirmedPastStart === values.startDate) return {};
 		confirmedPastStart = values.startDate;
-		return { startDate: `${past} Wenn es stimmt, klicken Sie nochmals auf «Weiter».` };
+		return { startDate: m.contracts_confirm_past({ notice: past }) };
 	}
 
 	function submitStep(event: SubmitEvent) {
@@ -213,10 +213,7 @@
 	{#if restored}
 		<DraftNotice savedAt={restored.at} ondiscard={discardDraft}>
 			{#if restored.dropped}
-				<p>
-					Der gewählte Mieter oder die gewählte Wohnung ist nicht mehr vorhanden. Bitte wählen Sie
-					neu.
-				</p>
+				<p>{m.contracts_draft_dropped()}</p>
 			{/if}
 		</DraftNotice>
 	{/if}
@@ -230,7 +227,9 @@
 	>
 		<!-- focused on every step change: screen readers hear where they are -->
 		<h2 id="step-heading" tabindex="-1" class="text-2xl font-bold text-ink">
-			<span class="sr-only">Schritt {step} von {contractSteps.length}:</span>
+			<span class="sr-only"
+				>{m.contracts_step_of({ current: step, total: contractSteps.length })}</span
+			>
 			<span data-step-label>{contractSteps[step - 1].label}</span>
 		</h2>
 		{#if step === 1}
@@ -264,7 +263,7 @@
 		{:else}
 			<ReviewStep {values} {tenants} {apartments} onedit={editField} />
 			{#if errors.form}
-				<Alert tone="critical" title="Der Mietvertrag wurde nicht gespeichert" testid="form-error">
+				<Alert tone="critical" title={m.contracts_not_saved()} testid="form-error">
 					<p>{errors.form}</p>
 				</Alert>
 			{/if}
@@ -276,7 +275,7 @@
 		{step}
 		last={contractSteps.length}
 		onback={() => goTo(step - 1)}
-		finalLabel="Mietvertrag speichern"
+		finalLabel={m.contracts_save()}
 		busy={saving}
 		cancelHref="/contracts"
 	/>
