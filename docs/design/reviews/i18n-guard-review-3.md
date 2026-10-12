@@ -10,3 +10,5 @@ Scope: the fixes for review 2. The reviewer replaced each of the 6625 string lit
 | 4 | minor | Review 2 implied the pairing was in step everywhere and missed limit 3. | Yes. | This file lists the limits. |
 
 Known limits of the guard: words that also occur in `en.json` or not in `de.json`; a string containing « //»; text inside nested template literals; a `{…}` holding both `>` and `<`. What is shown on screen in fr/it/en is covered by `sprachen-bildschirme.feature`.
+
+The user decided after this third round: no fourth review; the planted-string check proves the fix.

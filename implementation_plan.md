@@ -4737,6 +4737,9 @@ header and on pages without it. Branch `claude/optimistic-clarke-nn8u7t` from `m
   under `src` (tests and generated code aside): markup text, `aria-label`/`title`/`placeholder`/`alt` and every string
   literal must hold no word that only German UI texts use and no ä, ö, ü or ß; nine files list their German
   identifiers (status values, query parameters, the native name «Deutsch»). Shown to fail on a planted «Anmelden».
+  Three review rounds (`docs/design/reviews/i18n-guard-review-1..3.md`): strings in `{…}` and props, regex literals and
+  `${…}/` no longer put the quote pairing out of step; each file's test plants German at its end and must find it. The
+  user decided against a fourth round. Gallery uses the example name message instead of «Keller».
 
 ---
 
