@@ -158,21 +158,54 @@ describe('Mietvertragsdetail', () => {
 		await settle();
 		const dialog = () => document.querySelector('[role=dialog]')!.textContent!.replace(/\s+/g, ' ');
 		expect(dialog()).toContain(
-			'Das Vertragsende liegt in der Vergangenheit. Seit dem 01.10.2026 gilt die Wohnung als nicht vermietet, wenn kein neuer Mietvertrag begonnen hat. Die Nebenkosten dieser Zeit trägt der Vermieter.'
+			'Seit dem 01.10.2026 gilt die Wohnung als nicht vermietet, wenn kein neuer Mietvertrag begonnen hat. Die Nebenkosten dieser Zeit trägt der Vermieter, das Akonto des Mieters zählt nur bis zum Vertragsende.'
 		);
 		expect(dialog()).not.toContain('Prüfen Sie das Jahr.');
 		fireEvent(byTestId<HTMLInputElement>('contract-end-date-input')!, 'input', '30.09.2025');
 		await settle();
-		expect(dialog()).toContain('Das ist über ein Jahr her. Prüfen Sie das Jahr.');
+		expect(text('contract-end-past-notice')).toBe(
+			'Das Vertragsende liegt in der Vergangenheit, über ein Jahr zurück. Prüfen Sie das Jahr. Bestätigen Sie das Vertragsende mit dem Kästchen.'
+		);
 	});
 
-	// ein Screenreader hört, dass jetzt eine Bestätigung nötig ist
-	it('sagt das Kästchen an, sobald es erscheint', async () => {
+	// ein Screenreader hört einen kurzen Satz mit Aufforderung, den Fehler am Kästchen nur einmal
+	it('sagt mit einem kurzen Satz an, dass eine Bestätigung nötig ist', async () => {
 		open();
 		click('contract-end-button');
-		fireEvent(byTestId<HTMLInputElement>('contract-end-date-input')!, 'input', '31.03.2025');
+		const notice = byTestId('contract-end-past-notice')!;
+		expect(notice.getAttribute('aria-live')).toBe('polite');
+		expect(notice.textContent!.trim()).toBe('');
+		fireEvent(byTestId<HTMLInputElement>('contract-end-date-input')!, 'input', '30.09.2026');
 		await settle();
-		expect(byTestId('contract-end-past-confirm')!.closest('[aria-live="polite"]')).not.toBeNull();
+		expect(text('contract-end-past-notice')).toBe(
+			'Das Vertragsende liegt in der Vergangenheit. Bestätigen Sie das Vertragsende mit dem Kästchen.'
+		);
+		expect(notice.contains(byTestId('contract-end-past-confirm'))).toBe(false);
+	});
+
+	// ein Tag vor dem Vertragsbeginn ist ein Fehler am Feld, keine Bestätigung
+	it('fragt bei einem Tag vor dem Vertragsbeginn nicht nach einer Bestätigung', async () => {
+		open();
+		click('contract-end-button');
+		fireEvent(byTestId<HTMLInputElement>('contract-end-date-input')!, 'input', '31.03.2024');
+		await settle();
+		expect(document.querySelector('[role=dialog]')!.textContent).toContain('Sonntag, 31. März 2024');
+		expect(byTestId('contract-end-past-confirm')).toBeNull();
+	});
+
+	// nach der Korrektur des Datums nennt keine Meldung mehr den alten Tag
+	it('nimmt die Meldung am Kästchen zurück, wenn das Datum ändert', async () => {
+		open();
+		click('contract-end-button');
+		const input = byTestId<HTMLInputElement>('contract-end-date-input')!;
+		fireEvent(input, 'input', '30.09.2025');
+		await settle();
+		click('contract-end-confirm');
+		await settle();
+		expect(document.querySelector('[role=dialog]')!.textContent).toContain('am 30.09.2025 endete');
+		fireEvent(input, 'input', '30.09.2026');
+		await settle();
+		expect(document.querySelector('[role=dialog]')!.textContent).not.toContain('Bitte bestätigen Sie');
 	});
 
 	// die Bestätigung gilt nur für den Tag, der dabei angezeigt war
@@ -210,7 +243,9 @@ describe('Mietvertragsdetail', () => {
 		click('contract-end-button');
 		fireEvent(byTestId<HTMLInputElement>('contract-end-date-input')!, 'input', '31.03.2027');
 		await settle();
-		expect(document.querySelector('[role=dialog]')!.textContent).toContain('Mittwoch, 31. März 2027');
+		expect(document.querySelector('[role=dialog]')!.textContent).toContain(
+			'Mittwoch, 31. März 2027'
+		);
 		expect(byTestId('contract-end-past-confirm')).toBeNull();
 	});
 

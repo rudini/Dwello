@@ -60,7 +60,8 @@ describe('Mietvertrag beenden', () => {
 		expect(await result).toMatchObject({
 			status: 400,
 			data: {
-				endError: 'Bitte bestätigen Sie, dass der Mietvertrag am 31.03.2025 endete, oder korrigieren Sie das Vertragsende.'
+				endError:
+					'Bitte bestätigen Sie, dass der Mietvertrag am 31.03.2025 endete, oder korrigieren Sie das Vertragsende.'
 			}
 		});
 		expect(calls.filter((call) => call.method === 'PUT')).toEqual([]);
@@ -100,8 +101,25 @@ describe('Mietvertrag beenden', () => {
 			status: 409,
 			data: {
 				endError:
-					'Der Entwurf NK-2025-0003 enthält schon Mietstage nach diesem Tag. Löschen Sie zuerst den Entwurf und erstellen Sie die Nebenkostenabrechnung danach neu.'
+					'Die Nebenkostenabrechnung NK-2025-0003 (Entwurf) rechnet Mietstage ab, die mit diesem Datum wegfallen. Löschen Sie zuerst den Entwurf und erstellen Sie die Nebenkostenabrechnung danach neu.'
 			}
+		});
+	});
+
+	// eine andere Ablehnung ohne Abrechnungen zeigt eine Meldung, keine Fehlerseite
+	it('meldet eine Ablehnung ohne Abrechnungen im Dialog', async () => {
+		const { result } = runAction(
+			actions.end,
+			'c1',
+			200,
+			{ endDate: '2099-12-31' },
+			{ startDate: '2024-04-01' },
+			{ status: 409, answer: 'kein JSON' }
+		);
+
+		expect(await result).toMatchObject({
+			status: 409,
+			data: { endError: 'Mietvertrag konnte nicht beendet werden.' }
 		});
 	});
 

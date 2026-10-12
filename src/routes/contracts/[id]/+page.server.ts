@@ -5,7 +5,7 @@ import {
 	contractEndError,
 	localToday,
 	pastEndConfirmation,
-	statementsAfterEndError
+	billedDaysError
 } from '$lib/contract-status';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
@@ -134,8 +134,9 @@ export const actions: Actions = {
 			body: JSON.stringify({ endDate })
 		});
 		// a stored statement already bills rent days after that day
-		if (response.status === 409)
-			return fail(409, { endError: statementsAfterEndError((await response.json()).statements) });
+		const statements =
+			response.status === 409 && (await response.json().catch(() => ({}))).statements;
+		if (Array.isArray(statements)) return fail(409, { endError: billedDaysError(statements) });
 		if (!response.ok) {
 			return fail(response.status, { endError: 'Mietvertrag konnte nicht beendet werden.' });
 		}

@@ -14,7 +14,8 @@ Jede Anforderung nennt das Problem, was Dwello tun muss, wie wir es prüfen (Sze
 | A-6 | Stillschweigend fortgesetzter befristeter Mietvertrag | niedrig | IF-9 |
 | A-7 | Doppelt erfassten Mietvertrag entfernen | mittel | Anna (I2, M2) |
 | A-8 | Früheren Mietvertrag als Historie erkennbar machen | mittel | Anna (I2, M3) |
-| A-9 | «Noch nicht abgerechnet» nach den Mietverträgen der Periode | hoch | Helga (I3, M3) |
+| A-9 | «Noch nicht abgerechnet» nach den Mietverträgen der Periode | hoch | Helga (I3 M3, I4 M2) |
+| A-10 | Abrechnung nach einem geänderten Vertragsende neu erstellen | mittel | Anna (I2 M1, I3 M1–M3) |
 
 Priorität: «hoch» heisst vor dem ersten echten Einsatz, weil sonst falsche Daten oder Geldfolgen entstehen. «mittel» verhindert einen wahrscheinlichen Fehler eines Laien. «niedrig» betrifft einen seltenen Fall.
 
@@ -65,10 +66,11 @@ Szenario: Kündigung aufheben
 Umgesetzt nach Review I Runde 4 und den Personas Anna (I2, Blocker B1) und Helga (I3, M4):
 
 - Ein geändertes Vertragsende in der Vergangenheit verlangt im Formular dieselbe Bestätigung wie im Dialog «Beenden» (`src/routes/contracts/PastEndConfirm.svelte`). Ein unverändertes Vertragsende wird nicht nochmals bestätigt.
-- Das Backend lehnt ein Vertragsende vor dem Ende einer gespeicherten Abrechnung des Vertrags ab (`updateContract`, 409 mit den Abrechnungen). Bei einem Entwurf sagt Dwello: «Der Entwurf … enthält schon Mietstage nach diesem Tag. Löschen Sie zuerst den Entwurf und erstellen Sie die Nebenkostenabrechnung danach neu.» Bei einer versandten Abrechnung nennt Dwello, bis wann sie abrechnet.
+- Das Backend lehnt Vertragsdaten ab, die einer gespeicherten Abrechnung des Vertrags Mietstage wegnehmen: ein früheres Vertragsende oder einen späteren Vertragsbeginn als die abgerechneten Tage (`updateContract`, 409 mit den Abrechnungen; seit Review I Runde 5 nach den abgerechneten Mietstagen, nicht nach der Abrechnungsperiode). Bei einem Entwurf sagt Dwello: «Die Nebenkostenabrechnung … (Entwurf) rechnet Mietstage ab, die mit diesem Datum wegfallen. Löschen Sie zuerst den Entwurf und erstellen Sie die Nebenkostenabrechnung danach neu.» Bei einer versendeten Abrechnung sagt Dwello, dass sie bleibt.
+- Die Bestätigung unter «Bearbeiten» prüft nur der Browser: Das Formular speichert über die BFF-Weiterleitung `PUT /api/contracts/[id]`, nicht über eine Server-Aktion. Die Prüfung gegen die Abrechnungen macht das Backend.
 - Szenarien in `tests/e2e/features/contract-edit.feature` und `contract-detail.feature`, Backend-Test `contract-end.pg.test.ts`.
 
-**Offen:** Die Meldung nennt den Entwurf, verlinkt ihn aber nicht (Anna, I2 M1).
+**Offen:** siehe A-10.
 
 ---
 
@@ -201,22 +203,22 @@ Szenario: Befristeten Mietvertrag unbefristet weiterführen
 
 **Anforderungen**
 
-1. Ein Mietvertrag, der begonnen hat, aber in keiner Nebenkostenabrechnung vorkommt, lässt sich löschen, wenn für dieselbe Wohnung im selben Zeitraum ein anderer Mietvertrag besteht oder der Verwalter ausdrücklich bestätigt: «Dieser Mietvertrag wurde irrtümlich erfasst. Seine Mietstage zählen danach als Leerstand, wenn kein anderer Mietvertrag die Zeit abdeckt.»
+1. Ein Mietvertrag, der begonnen hat, aber in keiner Nebenkostenabrechnung vorkommt, lässt sich löschen, wenn der Verwalter ausdrücklich bestätigt: «Dieser Mietvertrag wurde irrtümlich erfasst. Seine Mietstage zählen danach als Leerstand, wenn kein anderer Mietvertrag die Zeit abdeckt.» Zwei Mietverträge derselben Wohnung im selben Zeitraum lässt das Backend nicht zu (Überschneidung); ein «Duplikat» ist darum meist ein zweiter Vertrag für eine falsche Wohnung, einen falschen Mieter oder einen falschen Zeitraum.
 2. Ein Mietvertrag mit einer Abrechnung bleibt gesperrt.
-3. Der Trick über einen künftigen Vertragsbeginn ist gesperrt: Unter «Bearbeiten» lässt sich der Vertragsbeginn eines begonnenen Vertrags nicht in die Zukunft verschieben, wenn er Mietstage in einer Abrechnung hat.
+3. Der Trick über einen künftigen Vertragsbeginn ist für Verträge mit Abrechnung schon gesperrt (seit Review I Runde 5: ein Vertragsbeginn nach den abgerechneten Mietstagen wird abgelehnt). Für Verträge ohne Abrechnung genügt Punkt 1.
 4. Das Backend setzt die Löschregel selbst durch (heute nur BFF und Dialog). Die Testbereinigung (`tests/e2e/fixtures/backend.ts`, Backend-Hilfen) räumt dann über die Wohnung oder direkt in der Datenbank auf.
 
 **Akzeptanzkriterien**
 
 ```gherkin
-Szenario: Doppelt erfassten Mietvertrag löschen
+Szenario: Irrtümlich erfassten Mietvertrag löschen
   Angenommen "Anna Keller" mietet die Wohnung "2.01" seit "2024-04-01" für "950" Franken
-  Und derselbe Mietvertrag ist ein zweites Mal erfasst
-  Wenn der Liegenschaftsverwalter den zweiten Mietvertrag löscht und bestätigt, dass er irrtümlich erfasst wurde
-  Dann ist der zweite Mietvertrag nicht mehr auffindbar
+  Und "Anna Keller" mietet irrtümlich auch die Wohnung "2.02" seit "2024-04-01" für "950" Franken
+  Wenn der Liegenschaftsverwalter den Mietvertrag der Wohnung "2.02" löscht und bestätigt, dass er irrtümlich erfasst wurde
+  Dann ist der Mietvertrag der Wohnung "2.02" nicht mehr auffindbar
 ```
 
-**Offene Fragen:** Genügt die Bestätigung, oder soll Dwello das Löschen nur bei einem echten Duplikat (gleiche Wohnung, gleicher Mieter, gleicher Zeitraum) anbieten?
+**Offene Fragen:** Genügt die Bestätigung, oder soll Dwello das Löschen eines begonnenen Vertrags nur innerhalb einer Frist nach dem Erfassen anbieten?
 
 ---
 
@@ -259,6 +261,30 @@ Szenario: Erinnerung bleibt nach dem Auszug des letzten Mieters
   Und die Wohnung "2.01" ist die einzige Wohnung des Gebäudes "Ahornhof"
   Wenn der Liegenschaftsverwalter die Übersicht öffnet
   Dann nennt die Übersicht die Aufgabe "Noch nicht abgerechnet: Ahornhof"
+```
+
+---
+
+## A-10 Abrechnung nach einem geänderten Vertragsende neu erstellen
+
+**Problem.** Anna (I3) trug einen Auszug per 31.03.2025 nach, für den es einen Entwurf der Abrechnung 2025 gab. Dwello lehnte richtig ab und sagte, was zu tun ist. Der Weg war aber mühsam: Die Entwurfsnummer ist kein Link, sie musste die Abrechnung suchen, löschen, den Vertrag wieder finden und alles neu eintippen. Nach dem Beenden erinnerte nichts an die nun fehlende Abrechnung 2025. Beim Neuerstellen musste sie Heizprofil und Verwaltungspauschale neu wählen, ohne zu wissen, was die gelöschte Abrechnung verwendet hatte.
+
+**Anforderungen**
+
+1. Die Ablehnung verlinkt jeden genannten Entwurf.
+2. Bei genau einem Entwurf bietet die Ablehnung eine Aktion an: «Entwurf löschen und Mietvertrag beenden». Sie bestätigt die Folge («Der Entwurf NK-… wird gelöscht. Erstellen Sie die Nebenkostenabrechnung danach neu.») und führt danach in den Abrechnungsassistenten für dieses Gebäude und diese Periode.
+3. Hat ein Mietvertrag Mietstage in einer abgeschlossenen Periode ohne Abrechnung, zeigt die Detailseite des Mietvertrags «Abrechnung {Jahr} fehlt» mit Link zum Assistenten; die Übersicht nennt es als Aufgabe (zusammen mit A-9).
+4. Der Assistent schlägt Heizprofil und Verwaltungspauschale vor, die die übrigen Abrechnungen derselben Periode und desselben Gebäudes verwenden. Die Detailseite einer Abrechnung nennt ihr Heizprofil.
+
+**Akzeptanzkriterien**
+
+```gherkin
+Szenario: Entwurf löschen und Mietvertrag beenden
+  Angenommen für "Anna Keller" gibt es die Abrechnung 2025 im Gebäude "Ahornhof"
+  Wenn der Liegenschaftsverwalter den Mietvertrag auf den "2025-03-31" beendet und die Folge bestätigt
+  Und den Entwurf löscht und den Mietvertrag beendet
+  Dann endet der Mietvertrag am "31.03.2025"
+  Und ist der Liegenschaftsverwalter im Abrechnungsassistenten für 2025 im Gebäude "Ahornhof"
 ```
 
 ---

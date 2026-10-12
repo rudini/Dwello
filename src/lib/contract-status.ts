@@ -65,13 +65,13 @@ export function pastEndConfirmation(endDate: string, today: string): string | nu
 	return `Bitte bestätigen Sie, dass der Mietvertrag am ${formatDate(endDate)} endete, oder korrigieren Sie das Vertragsende.`;
 }
 
-/** A stored statement already bills rent days after the new Vertragsende (backend 409, tests/contracts/contract-end-refused.json) */
-export function statementsAfterEndError(
-	statements: { statementNumber: string; status: string; periodEnd: string }[]
-): string {
+/** New contract dates would take billed Mietstage from stored statements (backend 409, tests/contracts/contract-end-refused.json) */
+export function billedDaysError(statements: { statementNumber: string; status: string }[]): string {
 	const sent = statements.find((statement) => statement.status !== 'draft');
 	if (sent)
-		return `Die Nebenkostenabrechnung ${sent.statementNumber} ist schon versandt und rechnet Mietstage bis ${formatDate(sent.periodEnd.slice(0, 10))} ab. Das Vertragsende kann nicht davor liegen. Prüfen Sie das Datum.`;
-	const drafts = statements.map((statement) => statement.statementNumber).join(', ');
-	return `Der Entwurf ${drafts} enthält schon Mietstage nach diesem Tag. Löschen Sie zuerst den Entwurf und erstellen Sie die Nebenkostenabrechnung danach neu.`;
+		return `Die Nebenkostenabrechnung ${sent.statementNumber} ist schon versendet und rechnet Mietstage ab, die mit diesem Datum wegfallen. Dwello ändert eine versendete Abrechnung nicht. Prüfen Sie das Datum.`;
+	const numbers = statements.map((statement) => statement.statementNumber);
+	if (numbers.length === 1)
+		return `Die Nebenkostenabrechnung ${numbers[0]} (Entwurf) rechnet Mietstage ab, die mit diesem Datum wegfallen. Löschen Sie zuerst den Entwurf und erstellen Sie die Nebenkostenabrechnung danach neu.`;
+	return `Die Nebenkostenabrechnungen ${numbers.slice(0, -1).join(', ')} und ${numbers.at(-1)} (Entwürfe) rechnen Mietstage ab, die mit diesem Datum wegfallen. Löschen Sie zuerst die Entwürfe und erstellen Sie die Nebenkostenabrechnungen danach neu.`;
 }

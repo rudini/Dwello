@@ -120,6 +120,15 @@ describe('Mietvertrag bearbeiten', () => {
 			await settle();
 		}
 
+		// die Live-Region steht schon vor «Befristet», sonst sagt ein Screenreader das Kästchen nicht an
+		it('sagt das Kästchen auch bei einem unbefristeten Mietvertrag an', async () => {
+			await open();
+			const notice = byTestId('contract-end-past-notice')!;
+			expect(notice.getAttribute('aria-live')).toBe('polite');
+			await endOn('31.03.2025');
+			expect(notice.textContent).toContain('Bestätigen Sie das Vertragsende mit dem Kästchen.');
+		});
+
 		it('speichert ohne Bestätigung nicht und sagt am Kästchen, was zu tun ist', async () => {
 			await open();
 			await endOn('31.03.2025');
@@ -163,7 +172,7 @@ describe('Mietvertrag bearbeiten', () => {
 			await save();
 
 			expect(byTestId('form-error')!.textContent).toContain(
-				'Der Entwurf NK-2025-0003 enthält schon Mietstage nach diesem Tag. Löschen Sie zuerst den Entwurf und erstellen Sie die Nebenkostenabrechnung danach neu.'
+				'Die Nebenkostenabrechnung NK-2025-0003 (Entwurf) rechnet Mietstage ab, die mit diesem Datum wegfallen. Löschen Sie zuerst den Entwurf und erstellen Sie die Nebenkostenabrechnung danach neu.'
 			);
 		});
 	});

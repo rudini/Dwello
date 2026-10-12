@@ -146,7 +146,13 @@
 		bind:value={endDate}
 		testid="contract-end-date-input"
 	/>
-	<PastEndConfirm {endDate} today={data.today} bind:confirmedDay bind:error={pastError} />
+	<PastEndConfirm
+		{endDate}
+		startDate={contract.startDate}
+		today={data.today}
+		bind:confirmedDay
+		bind:error={pastError}
+	/>
 	<p class="text-ink-muted">
 		Prüfen Sie Frist und Termin im Mietvertrag: Für Wohnungen gilt eine Kündigungsfrist von
 		mindestens 3 Monaten. Ist die Kündigung zu spät, gilt sie erst auf den nächsten

@@ -15,7 +15,7 @@
 		contractStatusOn,
 		localToday,
 		pastEndConfirmation,
-		statementsAfterEndError
+		billedDaysError
 	} from '$lib/contract-status';
 	import { normalizeAmounts, stepErrors } from '$lib/contract-wizard';
 	import { addToast } from '$lib/stores';
@@ -108,7 +108,7 @@
 
 	// the backend answers in English: a valid form is refused for an overlap or a statement after the end
 	function saveError({ message, details }: { message: string; details?: Record<string, unknown> }) {
-		if (Array.isArray(details?.statements)) return statementsAfterEndError(details.statements);
+		if (Array.isArray(details?.statements)) return billedDaysError(details.statements);
 		if (/overlap/i.test(message))
 			return 'Der Zeitraum überschneidet sich mit einem anderen Mietvertrag dieser Wohnung.';
 		return 'Beim Speichern ist ein Fehler aufgetreten. Versuchen Sie es später erneut.';
@@ -183,14 +183,13 @@
 			{overlap}
 			{errors}
 		/>
-		{#if endChanged}
-			<PastEndConfirm
-				endDate={values.endDate}
-				{today}
-				bind:confirmedDay
-				bind:error={() => errors.pastConfirmed ?? '', (error) => (errors.pastConfirmed = error)}
-			/>
-		{/if}
+		<PastEndConfirm
+			endDate={endChanged ? values.endDate : ''}
+			startDate={values.startDate}
+			{today}
+			bind:confirmedDay
+			bind:error={() => errors.pastConfirmed ?? '', (error) => (errors.pastConfirmed = error)}
+		/>
 	</Panel>
 
 	<Panel title="Miete">

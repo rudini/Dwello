@@ -67,3 +67,53 @@ describe('Vertragsende und Nebenkostenabrechnungen', () => {
 		expect((await end(null)).status).toBe(200);
 	});
 });
+
+// the billed rent days, not the statement period: a contract that ended mid-year keeps its final statement
+describe('Beendeter Mietvertrag mit Schlussabrechnung', () => {
+	let ended: Awaited<ReturnType<typeof createRental>>;
+	let final: string;
+	const put = (body: object) => sendJson('PUT', `/api/v1/contracts/${ended.contract}`, body);
+
+	beforeAll(async () => {
+		ended = await createRental(crypto.randomUUID(), {
+			startDate: '2023-01-01',
+			endDate: '2025-06-30',
+			monthlyAdvancePayment: '100'
+		});
+		final = await idOf(
+			await sendJson('POST', '/api/v1/statements/generate', {
+				contractId: ended.contract,
+				buildingId: ended.building,
+				periodStart: '2025-01-01',
+				periodEnd: '2025-12-31'
+			})
+		);
+	});
+
+	afterAll(async () => {
+		await db.delete(utilityStatements).where(eq(utilityStatements.contractId, ended.contract));
+		await ended.remove();
+	});
+
+	it('lässt die Miete ändern, wenn das Vertragsende gleich bleibt', async () => {
+		expect((await put({ baseRent: '980', endDate: '2025-06-30' })).status).toBe(200);
+	});
+
+	it('nimmt ein späteres Vertragsende an', async () => {
+		expect((await put({ endDate: '2025-07-31' })).status).toBe(200);
+		expect((await put({ endDate: '2025-06-30' })).status).toBe(200);
+	});
+
+	it('lehnt ein früheres Vertragsende ab', async () => {
+		const response = await put({ endDate: '2025-05-31' });
+		expect(response.status).toBe(409);
+		expect(await response.json()).toMatchObject({ statements: [{ id: final }] });
+	});
+
+	// die Abrechnung rechnet ab dem 01.01.2025: ein späterer Vertragsbeginn nähme ihr Mietstage weg
+	it('lehnt einen Vertragsbeginn nach dem ersten abgerechneten Tag ab', async () => {
+		expect((await put({ startDate: '2025-05-01' })).status).toBe(409);
+		expect((await put({ startDate: '2022-01-01' })).status).toBe(200);
+	});
+});
+

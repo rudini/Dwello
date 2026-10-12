@@ -3,7 +3,7 @@
  * Business logic for rental contract operations
  */
 
-import { eq, and, or, sql, desc, gt, gte, lte, isNull, ilike } from 'drizzle-orm';
+import { eq, and, or, sql, desc, gte, lte, isNull, ilike } from 'drizzle-orm';
 import { db } from '../db/connection';
 import {
 	rentalContracts,
@@ -197,7 +197,7 @@ export async function getContract(id: string): Promise<ContractWithDetails | nul
 /**
  * Check for overlapping contracts for an apartment
  */
-export async function checkContractOverlap(
+async function checkContractOverlap(
 	apartmentId: string,
 	startDate: string,
 	endDate: string | null,
@@ -287,8 +287,13 @@ export async function createContract(data: NewRentalContract): Promise<RentalCon
 	return contract;
 }
 
-/** The contract's statements that bill rent days after that day */
-async function statementsAfter(contractId: string, endDate: string) {
+/**
+ * The contract's statements that bill rent days outside the new dates: each bills its Mietstage from the later of
+ * its period start and the Vertragsbeginn on
+ */
+async function statementsOutside(current: RentalContract, startDate: string, endDate: string | null) {
+	const billedFrom = sql`greatest(${utilityStatements.periodStart}, ${current.startDate}::date)`;
+	const billedTo = sql`(${billedFrom} + ${utilityStatements.rentalDays} - 1)`;
 	return db
 		.select({
 			id: utilityStatements.id,
@@ -297,14 +302,30 @@ async function statementsAfter(contractId: string, endDate: string) {
 			periodEnd: utilityStatements.periodEnd
 		})
 		.from(utilityStatements)
-		.where(and(eq(utilityStatements.contractId, contractId), gt(utilityStatements.periodEnd, endDate)));
+		.where(
+			and(
+				eq(utilityStatements.contractId, current.id),
+				or(sql`${startDate}::date > ${billedFrom}`, endDate ? sql`${endDate}::date < ${billedTo}` : sql`false`)
+			)
+		);
 }
 
-/** A Vertragsende before the end of a stored statement: the statement already bills the days after it */
-export class StatementsAfterEndError extends Error {
-	constructor(readonly statements: Awaited<ReturnType<typeof statementsAfter>>) {
-		super('Contract end before the end of its utility statements');
+/** New contract dates that would take rent days away from a stored statement of the contract */
+export class BilledDaysError extends Error {
+	constructor(readonly statements: Awaited<ReturnType<typeof statementsOutside>>) {
+		super('Contract dates leave out rent days billed by its utility statements');
 	}
+}
+
+/** New dates may neither overlap another contract of the apartment nor take billed Mietstage from a statement */
+async function checkNewDates(current: RentalContract, data: Partial<NewRentalContract>) {
+	if (!data.startDate && data.endDate === undefined) return;
+	const startDate = data.startDate || current.startDate;
+	const endDate = data.endDate !== undefined ? data.endDate : current.endDate;
+	const { hasOverlap, overlappingContract } = await checkContractOverlap(current.apartmentId, startDate, endDate, current.id);
+	if (hasOverlap) throw new Error(`Contract would overlap with existing contract ${overlappingContract}`);
+	const statements = await statementsOutside(current, startDate, endDate);
+	if (statements.length) throw new BilledDaysError(statements);
 }
 
 /**
@@ -314,31 +335,9 @@ export async function updateContract(
 	id: string,
 	data: Partial<NewRentalContract>
 ): Promise<RentalContract | null> {
-	// Get current contract to check apartment
 	const current = await getContract(id);
 	if (!current) return null;
-
-	// If dates are being updated, check for overlaps
-	if (data.startDate || data.endDate !== undefined) {
-		const startDate = data.startDate || current.startDate;
-		const endDate = data.endDate !== undefined ? data.endDate : current.endDate;
-
-		const { hasOverlap, overlappingContract } = await checkContractOverlap(
-			current.apartmentId,
-			startDate,
-			endDate,
-			id
-		);
-
-		if (hasOverlap) {
-			throw new Error(`Contract would overlap with existing contract ${overlappingContract}`);
-		}
-	}
-
-	if (data.endDate) {
-		const statements = await statementsAfter(id, data.endDate);
-		if (statements.length) throw new StatementsAfterEndError(statements);
-	}
+	await checkNewDates(current, data);
 
 	const [contract] = await db
 		.update(rentalContracts)
@@ -383,17 +382,4 @@ export async function deleteContract(id: string): Promise<{ success: boolean; er
 
 
 	return { success: true };
-}
-
-/**
- * Check if a contract exists
- */
-export async function contractExists(id: string): Promise<boolean> {
-	const [result] = await db
-		.select({ id: rentalContracts.id })
-		.from(rentalContracts)
-		.where(eq(rentalContracts.id, id))
-		.limit(1);
-
-	return !!result;
 }

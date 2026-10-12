@@ -4636,6 +4636,13 @@ A tenant gives notice for a later day: «Mietvertrag beenden» asks for the Vert
   longer be deleted (only ended ones; the dialog says until when it runs, scenario first); a future contract proposes
   its start; the action reads the Vertragsbeginn from the backend and checks the format; the toast and the sent date
   are tested; the field-error state is in the axe check (`end-dialog-error`); lows in `offene-punkte.md`.
+- [x] **Review I round 5, personas Helga I4, Sven I4, Anna I3** (`I-review-5.md`, `helga-i4.md`, `sven-i4.md`,
+  `anna-i3.md`): the backend compares new dates with the billed Mietstage (`statementsOutside`, `BilledDaysError`,
+  `checkNewDates` in `contract.service.ts`; `contract-end.pg.test.ts`), so editing an ended contract with its final
+  statement works again and a later Vertragsbeginn is refused; `billedDaysError` copy for one or several drafts and
+  sent statements; a 409 without statements shows a message; `PastEndConfirm.svelte` has a short live notice with
+  the year warning, the checkbox outside it, its error cleared on a new date, nothing before the Vertragsbeginn;
+  requirements A-7 rewritten, A-10 added.
 - [x] **Review I round 4, personas Helga I3, Sven I3, Anna I2** (`I-review-4.md`, `helga-i3.md`, `sven-i3.md`,
   `anna-i2.md`): the backend refuses an end before a statement of the contract (`updateContract`, 409 with the
   statements; `contract-end.pg.test.ts`, contract `tests/contracts/contract-end-refused.json`); the BFF says what to do
