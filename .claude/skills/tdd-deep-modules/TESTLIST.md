@@ -321,3 +321,8 @@ Stage 2b replaces stage 2's pass line: the reviews of steps 01-12 (09 two-tier s
 
 - [x] a qualifier ending in a colon or semicolon in front of a statement is named (statements start right after the label or after a period)
 - [x] a rule item demoted to an indented sub-item is named (statement items must be top-level)
+
+### Step 11, review round 3 (fixes, round 4 granted by the user)
+
+- [x] a helper that a `.svelte` (or `.vue`) component names is no member: the "other production code" check reads every production code file
+- rare return-type forms (type predicates, function types, conditional types with object types) and HTML comments: Known limits
