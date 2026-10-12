@@ -273,7 +273,7 @@ A swarm member is an exported function (`export function f` or `export const f =
 
 - [x] the known-bad swarm is flagged as classitis, naming the helpers
 - [x] the known-good functional core (private helpers, one exported entry point) stays deep
-- [x] only small, one-caller exports count: an export with two callers, with no caller in the module, or with a body over 10 lines is no member; two members are no swarm
+- [x] only small, one-caller exports count: an export with two callers, with no caller in the module, or with a body over 10 lines (20 since review round 1) is no member; two members are no swarm
 
 ## Step 12: `verify_all` checks stage 2b
 
@@ -316,3 +316,8 @@ Stage 2b replaces stage 2's pass line: the reviews of steps 01-12 (09 two-tier s
 - [x] the range's last commit must leave the full suite passing, also a `test:` commit after the task's end
 - [x] `tdd-step test` (and the replay) refuse a test commit after a green or refactor when the suite fails
 - [x] pin: the replay names a test list after a green on the fast suite
+
+### Step 10, review round 3 (fixes, round 4 granted by the user)
+
+- [x] a qualifier ending in a colon or semicolon in front of a statement is named (statements start right after the label or after a period)
+- [x] a rule item demoted to an indented sub-item is named (statement items must be top-level)

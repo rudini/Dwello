@@ -46,7 +46,7 @@ The decision, both sketches and the sentence go into the design note (section 6)
 
 ## 3. Write the behaviour test list
 
-Write the list into `TESTLIST.md` (or the place the project uses), headed by the hidden decision, both sketches and the chosen design from section 2, so they survive a long session. Commit it with `scripts/tdd-step test "<what>"`; the test phase may not change code. Every task begins with its own test-list commit: `tdd_replay` finds the end of each task by it.
+Write the list into `TESTLIST.md` (or the place the project uses), headed by the hidden decision, both sketches and the chosen design from section 2, so they survive a long session. Commit it with `scripts/tdd-step test "<what>"`; the test phase may not change code. Every task begins with its own test-list commit: `tdd_replay` finds the end of each task by it. After a green or refactor, `tdd-step test` refuses when the tests fail, and right after a green on the fast suite (details in references/tooling.md); when a project's fast suite has no tests yet, commit the test phase with `--suite full`.
 
 - One line per behaviour, phrased as an observable outcome through the chosen interface ("rejects an empty name", not "calls validate()").
 - Order: the simplest behaviour that forces the interface into existence first, then the core cases, then edge cases and errors.
