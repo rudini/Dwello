@@ -212,7 +212,7 @@
 		class="flex flex-col gap-6 rounded-panel border border-line bg-surface p-6"
 	>
 		<h2 id="step-heading" tabindex="-1" class="text-2xl font-bold text-ink">
-			<span class="sr-only">{m.ui_step_of({ current: step, total: statementSteps.length })}:</span>
+			<span class="sr-only">{m.contracts_step_of({ current: step, total: statementSteps.length })}</span>
 			<span data-step-label>{statementSteps[step - 1]}</span>
 		</h2>
 		{#if shownError}
