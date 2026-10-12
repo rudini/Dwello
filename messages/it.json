@@ -97,7 +97,7 @@
 	"glossary_allocable_term": "Addebitabile",
 	"glossary_allocable_text": "Una fattura addebitabile confluisce nel conteggio spese accessorie, per esempio riscaldamento, acqua, custode o rifiuti. Se una fattura è addebitabile dipende dalla sua categoria e si può adattare per ogni fattura.",
 	"glossary_balance_term": "Saldo",
-	"glossary_balance_text": "La quota dei costi dell’inquilino, spese di gestione comprese, meno i suoi acconti versati, arrotondata a 5 centesimi. Se il saldo è positivo, l’inquilino paga la differenza (importo dovuto); se è negativo, riceve un rimborso (rimborso).",
+	"glossary_balance_text": "La quota dei costi dell’inquilino, spese di gestione comprese, meno i suoi acconti versati, arrotondata a 5 centesimi. Se il saldo è positivo, l’inquilino paga la differenza (importo dovuto); se è negativo, la differenza le viene rimborsata (rimborso).",
 	"glossary_deadline_term": "Termine di pagamento",
 	"glossary_deadline_text": "La data entro cui l’inquilino deve aver pagato il conteggio.",
 	"glossary_reminder_term": "Sollecito",

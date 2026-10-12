@@ -112,7 +112,7 @@
 	"login_intro": "Sign in with your existing account. You do not need a separate password for Dwello.",
 	"login_with": "Sign in with {provider}",
 	"login_unavailable_title": "No sign-in set up",
-	"login_unavailable_text": "The operator has not set up sign-in with Google or Microsoft yet.",
+	"login_unavailable_text": "Please add the OAuth credentials for Google or Microsoft.",
 	"login_terms_before": "By signing in you accept the",
 	"login_error_cancelled": "Sign-in was cancelled.",
 	"login_error_failed": "Sign-in failed. Please try again.",
