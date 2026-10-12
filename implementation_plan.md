@@ -4690,7 +4690,7 @@ header and on pages without it. Branch `claude/optimistic-clarke-nn8u7t` from `m
   language via `localName`; the AI suggestion's English key mapped by id), `server/documents.ts` (reminder titles from
   type and level in the UI language instead of the stored German title), `server/category.ts`; 129 keys; local example
   supplier per language. Test `invoices-i18n.test.ts`. Own records without fr/it/en names show their German name.
-- [ ] Step 6 – statements
+- [ ] Step 6 – statements (incl. the reminder title in the feedback after «Mahnung senden», by type and level as in `server/documents.ts`; handed over from review i18n-5)
 - [ ] Step 7 – configuration (categories, distribution keys, heating profiles, settings), gallery, remaining `src/lib`
 - [ ] Proof: no German in fr/it/en on every screen of `screens.json`, 390 px without sideways scrolling
 - [ ] One native-speaker read per message file; persona review in all four languages

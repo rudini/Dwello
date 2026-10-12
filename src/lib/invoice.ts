@@ -48,10 +48,7 @@ export function validateInvoice(invoice: {
 	if (!invoice.billingEntity.trim()) errors.billingEntity = m.invoices_error_billing_entity();
 	if (!invoice.description.trim()) errors.description = m.invoices_error_description();
 	if (!(parseFloat(plainAmount(invoice.amount)) > 0)) errors.amount = m.invoices_error_amount();
-	return {
-		...errors,
-		...servicePeriodErrors(invoice.servicePeriodStart, invoice.servicePeriodEnd)
-	};
+	return { ...errors, ...servicePeriodErrors(invoice.servicePeriodStart, invoice.servicePeriodEnd) };
 }
 
 /** A path within Dwello to return to (e.g. the statement wizard), never another site */
