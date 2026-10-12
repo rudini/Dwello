@@ -7,8 +7,10 @@
   stage3 gate [--phase pilot|main]                  tables and the STAGE3 verdict
   stage3 validate                                   check every fixture; prints counts only (hold-outs stay unread)
 
-Run ids: <phase>-<fixture>-<arm>-r<slot>-a<attempt>; group names: <phase>-<fixture>-r<slot>[.<attempt>].
-Nothing is ever overwritten: a run id or review group that exists is refused.
+Run ids: <phase>-<fixture>-<arm>-r<slot>-a<attempt> (attempts 1, 2, ...); group names:
+<phase>-<fixture>-r<slot>[.<attempt>] (attempts 2, 3, ...). Nothing is ever overwritten: a run id or review
+group that exists is refused, and the gate fails on gaps, on attempts after a slot's first valid run or a
+group's first complete review, and on run directories or transcripts without a record.
 """
 import gzip
 import json
@@ -33,26 +35,41 @@ WORK = Path(os.environ.get("STAGE3_WORK", "/tmp/claude-0/-home-user-Dwello/"
 MODEL = "claude-opus-5-5"
 ARMS = {"baseline": "baseline.md", "canon": "canon-tdd.md", "skill": "tdd-deep-modules.md"}
 RUN_ID = re.compile(r"^(?P<phase>pilot|main)-(?P<fixture>[a-z0-9-]+)-(?P<arm>baseline|canon|skill)"
-                    r"-r(?P<slot>\d+)-a(?P<attempt>\d+)$")
-GROUP = re.compile(r"^(?P<phase>pilot|main)-(?P<fixture>[a-z0-9-]+)-r(?P<slot>\d+)(?:\.(?P<attempt>\d+))?$")
-# Every session runs in its own mount namespace (sandbox.sh) and sees only its directory, as /workspace.
-SANDBOX = ["unshare", "-m", "--propagation", "private", str(HARNESS / "sandbox.sh")]
+                    r"-r(?P<slot>[1-9]\d*)-a(?P<attempt>[1-9]\d*)$")
+GROUP = re.compile(r"^(?P<phase>pilot|main)-(?P<fixture>[a-z0-9-]+)-r(?P<slot>[1-9]\d*)"
+                   r"(?:\.(?P<attempt>[2-9]|[1-9]\d+))?$")
+# Every session, and every command that runs an arm's code, runs in its own mount and PID namespace
+# (sandbox.sh): it sees only its directory, as /workspace, and cannot unmount what hides the rest.
+SANDBOX = ["unshare", "-m", "-p", "-f", "--mount-proc", "--propagation", "private", str(HARNESS / "sandbox.sh")]
 # Tools that add side channels or variance, refused identically for arms and reviewers.
 NO_EXTRAS = ["WebFetch", "WebSearch", "Agent", "Task", "Workflow", "Artifact", "SendMessage", "CronCreate",
              "CronDelete", "CronList", "PushNotification", "ScheduleWakeup", "RemoteTrigger", "Monitor"]
 ARM_TOOLS = ["--permission-mode", "acceptEdits", "--disallowedTools", *NO_EXTRAS,
              "--allowedTools", "Skill", "Bash(bun *)", "Bash(bunx *)", "Bash(git *)", "Bash(ls *)",
-             "Bash(mkdir *)", "Bash(.claude/skills/tdd-deep-modules/scripts/*)",
+             "Bash(mkdir *)", "Bash(cat *)", "Bash(head *)", "Bash(tail *)", "Bash(wc *)", "Bash(grep *)",
+             "Bash(echo *)", "Bash(pwd)", "Bash(diff *)", "Bash(.claude/skills/tdd-deep-modules/scripts/*)",
              "Bash(./.claude/skills/tdd-deep-modules/scripts/*)",
              "Bash(python3 .claude/skills/tdd-deep-modules/scripts/*)"]
 REVIEW_TOOLS = ["--permission-mode", "default", "--disallowedTools", "Bash", "Edit", "Write",
                 "NotebookEdit", "Skill", *NO_EXTRAS]
-# The parent session's identity and extra directories must not leak into a child session.
-DROP_ENV = {"CLAUDE_CODE_SESSION_ID", "CLAUDE_CODE_REMOTE_SESSION_ID", "CLAUDECODE",
-            "CLAUDE_ADDITIONAL_DIRECTORIES", "CLAUDE_CODE_ADDITIONAL_DIRECTORIES_CLAUDE_MD"}
-# Places a session has no business naming; it cannot read them (sandbox.sh), the attempt is reported.
-FOREIGN = re.compile(r"/home/|/tmp/claude-0|/root/\.claude|/mnt/|Dwello|evals/|stage3|"
-                     r"(?:^|[\s=('\"])/(?=[\s'\")]|$)|(?:^|[\s'\"(])\.\./\.\.")
+# A child session gets only what it needs to run; no tokens, git credentials or parent-session identity.
+# Its shells source /sandbox/env.sh (sandbox-env/env.sh): no proxy for commands, git only for local repos.
+KEEP_ENV = ("PATH", "HOME", "SHELL", "TERM", "LANG", "ANTHROPIC_BASE_URL", "HTTPS_PROXY", "https_proxy",
+            "NO_PROXY", "no_proxy", "SSL_CERT_FILE", "NODE_EXTRA_CA_CERTS", "REQUESTS_CA_BUNDLE",
+            "CURL_CA_BUNDLE", "BUN_INSTALL", "CLAUDE_SESSION_INGRESS_TOKEN_FILE", "SESSION_INGRESS_URL",
+            "CLAUDE_CODE_PROVIDER_MANAGED_BY_HOST", "CLAUDE_CODE_PROXY_RESOLVES_HOSTS", "CLAUDE_CODE_REMOTE",
+            "CLAUDE_CODE_ENTRYPOINT", "CLAUDE_EFFORT", "MAX_THINKING_TOKENS", "DISABLE_AUTOUPDATER",
+            "IS_SANDBOX", "NODE_OPTIONS", "CLAUDE_CODE_USE_CCR_V2")
+SESSION_SHELL = {"BASH_ENV": "/sandbox/env.sh", "ENV": "/sandbox/env.sh", "GIT_CONFIG_GLOBAL": "/dev/null",
+                 "GIT_CONFIG_NOSYSTEM": "1", "GIT_ALLOW_PROTOCOL": "file", "GIT_TERMINAL_PROMPT": "0"}
+PROXY_ENV = {"HTTPS_PROXY", "https_proxy", "NO_PROXY", "no_proxy"}
+# What a session's commands and reads have no business naming: other places, the network, the host.
+# Such a run is invalid (decided before any run); nothing outside /workspace is readable anyway.
+FOREIGN = re.compile(r"/home/|/tmp\b|/root/|/mnt/|/srv/|/proc/|/sys/|/sandbox|/verifier|~/|\$HOME|\bDwello\b|"
+                     r"\bevals\b|\bstage3\b|https?://|\bgithub|\bproxy|\bcurl\b|\bwget\b|\bfetch\(|"
+                     r"\b(?:u?mount|unshare|nsenter|chroot)\b|"
+                     r"(?:^|[\s=('\"])/(?=[\s'\")]|$)|(?:^|[\s'\"(])\.\./\.\.", re.I)
+SCANNED_TOOLS = {"Bash", "Read", "Glob", "Grep", "LS", "NotebookRead"}
 CODE = (".ts", ".tsx", ".mts", ".cts", ".js", ".jsx", ".mjs", ".cjs")
 IMPORT = re.compile(r"""(?:\bfrom\s*|\bimport\s*\(\s*|\bimport\s+|\brequire\s*\(\s*)["'](\.{1,2}/[^"']+)["']""")
 ARM_TIMEOUT, TEST_TIMEOUT, REPLAY_TIMEOUT, REVIEW_TIMEOUT = 5400, 600, 3600, 1800
@@ -82,21 +99,39 @@ def sh(cmd, cwd, timeout=TEST_TIMEOUT):
 
 
 def git(repo, *args):
-    code, out = sh(["git", *args], repo)
+    # An arm's repository config must not run anything on the host (fsmonitor, hooks).
+    code, out = sh(["git", "-c", "core.fsmonitor=false", "-c", "core.hooksPath=/dev/null", *args], repo)
     if code:
         raise RuntimeError(f"git {' '.join(args)}: {out}")
     return out.strip()
+
+
+def session_env(proxy=True, verifier=False):
+    env = {k: os.environ[k] for k in KEEP_ENV if k in os.environ and (proxy or k not in PROXY_ENV)}
+    env.update(SESSION_SHELL)
+    if verifier:
+        env["STAGE3_VERIFIER"] = str(SKILL)
+    return env
+
+
+def in_sandbox(cmd, directory, timeout=TEST_TIMEOUT, verifier=False):
+    """Run an arm's code (its tests, the hidden tests, the replay) where it sees nothing but `directory`."""
+    try:
+        p = subprocess.run([*SANDBOX, str(directory), *cmd], env=session_env(proxy=False, verifier=verifier),
+                           capture_output=True, text=True, timeout=timeout)
+        return p.returncode, p.stdout + p.stderr
+    except subprocess.TimeoutExpired as e:
+        return 124, f"timeout after {timeout}s: {e}"
 
 
 def claude(directory, prompt, out_path, tools, timeout):
     """Run a fresh headless Claude Code session that sees only `directory` (as /workspace)."""
     if out_path.exists():
         raise RuntimeError(f"{out_path} exists; nothing is overwritten")
-    env = {k: v for k, v in os.environ.items() if k not in DROP_ENV}
     cmd = [*SANDBOX, str(directory), "claude", "-p", "--output-format", "stream-json", "--verbose",
            "--model", MODEL, *tools]
     try:
-        p = subprocess.run(cmd, env=env, input=prompt, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+        p = subprocess.run(cmd, env=session_env(), input=prompt, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                            text=True, timeout=timeout)
         text = p.stdout
     except subprocess.TimeoutExpired as e:
@@ -124,9 +159,9 @@ def blocks(events, kind):
 
 
 def foreign_references(events):
-    """Tool calls that name a place outside the session's own directory (they could not read it)."""
-    return sorted({json.dumps(b.get("input"))[:300] for b in blocks(events, "tool_use")
-                   if FOREIGN.search(json.dumps(b.get("input")))})
+    """Commands and reads that name a place outside the session's directory, the network or the host."""
+    return sorted({f"{b.get('name')}: {json.dumps(b.get('input'))[:300]}" for b in blocks(events, "tool_use")
+                   if b.get("name") in SCANNED_TOOLS and FOREIGN.search(json.dumps(b.get("input")))})
 
 
 def skill_loaded(events):
@@ -215,22 +250,25 @@ def measure(fixture, arm, repo, base, events):
         if not rel.startswith(".claude/") and (repo / rel).is_file():
             (check / rel).parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(repo / rel, check / rel)
-    code, out = sh(["bun", "test"], check)
+    code, out = in_sandbox(["bun", "test"], check)
     own = {"exit": code, "pass": bun_counts(out)[0], "fail": bun_counts(out)[1]}
     shutil.copytree(fixture / "hidden", check / "__acceptance__")
-    code, out = sh(["bun", "test", "./__acceptance__"], check)
+    code, out = in_sandbox(["bun", "test", "./__acceptance__"], check)
     hidden = {"exit": code, "pass": bun_counts(out)[0], "fail": bun_counts(out)[1], "tail": out[-1500:]}
     production = production_files(repo, fixture)
     loaded = skill_loaded(events) if arm == "skill" else None
     passed = hidden["exit"] == 0 and hidden["fail"] == 0 and hidden["pass"] > 0
+    committed = git(repo, "status", "--porcelain") == ""
+    foreign = foreign_references(events)
     m = {"own_tests": own, "hidden": hidden, "production_files": production, "skill_loaded": loaded,
-         "valid": passed and loaded is not False,
-         "committed": git(repo, "status", "--porcelain") == "",
+         "foreign_references": foreign, "committed": committed,
+         "valid": passed and committed and loaded is not False and not foreign,
          "commits": int(git(repo, "rev-list", "--count", f"{base}..HEAD")),
          "subjects": git(repo, "log", "--format=%s", f"{base}..HEAD").splitlines()[::-1],
          "depth": depth(repo, production), "replay": None}
     if arm == "skill":
-        code, out = sh([str(SKILL / "scripts/tdd_replay"), f"{base}..HEAD"], repo, REPLAY_TIMEOUT)
+        code, out = in_sandbox(["/verifier/scripts/tdd_replay", f"{base}..HEAD"], repo, REPLAY_TIMEOUT,
+                               verifier=True)
         verdict = "ACCEPT" if "REPLAY: ACCEPT" in out else "REJECT" if "REPLAY: REJECT" in out else "ERROR"
         m["replay"] = {"exit": code, "verdict": verdict, "out": out[-4000:]}
     return m
@@ -245,22 +283,22 @@ def run(fixture, arm, run_id):
     if run_dir.exists() or (out_dir / f"{run_id}.json").exists():
         raise RuntimeError(f"{run_id} exists; nothing is overwritten, use the next attempt number")
     out_dir.mkdir(parents=True, exist_ok=True)
+    started = time.time()
+    record = {"run_id": run_id, "status": "started", "phase": parsed["phase"], "slot": int(parsed["slot"]),
+              "attempt": int(parsed["attempt"]), "fixture": fixture.name,
+              "fixture_dir": f"{fixture.parent.name}/{fixture.name}", "arm": arm,
+              "started": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(started)), "valid": False}
+    (out_dir / f"{run_id}.json").write_text(json.dumps(record, indent=1) + "\n")  # a crash stays a failed attempt
     repo, prompt = prepare(fixture, arm, run_dir)
     base = git(repo, "rev-parse", "HEAD")
     (run_dir / "prompt.txt").write_text(prompt)
-    started = time.time()
     result, events = claude(repo, prompt, out_dir / f"{run_id}.stream.jsonl.gz", ARM_TOOLS, ARM_TIMEOUT)
-    record = {"run_id": run_id, "phase": parsed["phase"], "slot": int(parsed["slot"]),
-              "attempt": int(parsed["attempt"]), "fixture": fixture.name,
-              "fixture_dir": f"{fixture.parent.name}/{fixture.name}", "arm": arm, "base": base,
-              "started": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(started)),
-              "duration_s": round(time.time() - started),
-              "session": {k: result.get(k) for k in ("is_error", "num_turns", "total_cost_usd",
-                                                    "session_id", "permission_denials")},
-              "final_message": str(result.get("result", ""))[-2000:],
-              "foreign_references": foreign_references(events)}
+    record.update({"status": "finished", "base": base, "duration_s": round(time.time() - started),
+                   "session": {k: result.get(k) for k in ("is_error", "num_turns", "total_cost_usd",
+                                                         "session_id", "permission_denials")},
+                   "final_message": str(result.get("result", ""))[-2000:]})
     record.update(measure(fixture, arm, repo, base, events))
-    sh(["git", "bundle", "create", str(out_dir / f"{run_id}.bundle"), "--all"], repo)
+    git(repo, "bundle", "create", str(out_dir / f"{run_id}.bundle"), "--all")
     with tarfile.open(out_dir / f"{run_id}.tree.tgz", "w:gz") as tar:
         for rel in tree_files(repo):
             if not rel.startswith(".claude/"):
@@ -404,16 +442,32 @@ def gate(phase):
         slots.setdefault((rec["fixture"], rec["arm"], rec["slot"]), []).append(rec)
     first_valid = {key: next((r for r in sorted(recs, key=lambda r: r["attempt"]) if r["valid"]), None)
                    for key, recs in slots.items()}
+    for key, recs in sorted(slots.items()):
+        numbers = sorted(r["attempt"] for r in recs)
+        if numbers != list(range(1, len(numbers) + 1)):
+            ok = False
+            notes.append(f"{key}: attempts {numbers} are not 1..n")
+        chosen = first_valid[key]
+        if chosen and any(r["attempt"] > chosen["attempt"] for r in recs):
+            ok = False
+            notes.append(f"{key}: attempts after the first valid one ({chosen['run_id']})")
+    recorded = set(all_runs)
+    orphans = sorted({p.name for p in (WORK / "runs").glob(f"{phase}-*")} - recorded) + sorted(
+        {p.name[:-len(".stream.jsonl.gz")] for p in (RESULTS / "runs").glob(f"{phase}-*.stream.jsonl.gz")} - recorded)
+    if orphans:
+        ok = False
+        notes.append(f"run directories or transcripts without a record: {orphans}")
     for rec in sorted(all_runs.values(), key=lambda r: r["run_id"]):
+        if rec["status"] != "finished":
+            notes.append(f"invalid run {rec['run_id']}: harness did not finish it (failure case, slot rerun)")
+            continue
         if not rec["valid"]:
             notes.append(f"invalid run {rec['run_id']}: hidden {rec['hidden']['pass']}/{rec['hidden']['fail']}"
-                         f" skill_loaded={rec['skill_loaded']} (failure case, slot rerun)")
+                         f" committed={rec['committed']} skill_loaded={rec['skill_loaded']}"
+                         f" foreign={rec['foreign_references'][:3]} (failure case, slot rerun)")
         if rec["arm"] == "skill" and rec["valid"] and rec["replay"]["verdict"] != "ACCEPT":
             ok = False
             notes.append(f"tdd_replay {rec['replay']['verdict']} for valid arm-3 run {rec['run_id']}")
-        if rec["foreign_references"]:
-            notes.append(f"{rec['run_id']}: {len(rec['foreign_references'])} tool call(s) naming places outside "
-                         f"its sandbox (unreadable there): {rec['foreign_references'][:2]}")
     attempts = {}
     for g in (RESULTS / "reviews").glob(f"{phase}-*"):
         m = GROUP.match(g.name)
@@ -422,6 +476,13 @@ def gate(phase):
     controls = []
     for name, tries in sorted(attempts.items()):
         tries.sort()
+        complete = [n for n, g in tries if group_verdict(g)[1] is not None]
+        if [n for n, _ in tries] != list(range(1, len(tries) + 1)):
+            ok = False
+            notes.append(f"{name}: review attempts {[n for n, _ in tries]} are not 1..n")
+        if complete and tries[-1][0] > complete[0]:
+            ok = False
+            notes.append(f"{name}: review attempts after the first complete one")
         chosen = next(((g, *group_verdict(g)) for _, g in tries if group_verdict(g)[1] is not None), None)
         if len(tries) > 1:
             notes.append(f"{name}: {len(tries)} review attempts; incomplete ones: "
@@ -460,6 +521,7 @@ def gate(phase):
                 controls.append(f"{g.name} rev{r['reviewer']}: control delta {delta}"
                                 + (" UNRELIABLE" if delta > 1 else ""))
             if r["foreign_references"]:
+                ok = False
                 notes.append(f"{g.name} rev{r['reviewer']}: names places outside its sandbox")
         depth = " ".join(f"{arm[0]}:{records[arm]['depth']['findings']}/{len(records[arm]['production_files'])}"
                          for arm in ("baseline", "canon", "skill"))
@@ -527,16 +589,16 @@ def validate():
                 and meta.get("holdout") == (kind == "holdout") and meta.get("id") == fixture_id
                 and all((fixture / part).exists() for part in ("task.md", "starter", "hidden", "reference")))
         ok &= good
-        print(f"{kind}/{fixture_id}: kind={meta.get('kind')} interacting={meta.get('interacting_modules')} "
-              f"starter {counts[0][1]}/{counts[0][2]}  starter+hidden {counts[1][1]}/{counts[1][2]}  "
-              f"reference+all {counts[2][1]}/{counts[2][2]}  {'ok' if good else 'BAD'}")
+        about = "" if kind == "holdout" else f"kind={meta.get('kind')} interacting={meta.get('interacting_modules')} "
+        print(f"{kind}/{fixture_id}: {about}starter {counts[0][1]}/{counts[0][2]}  starter+hidden "
+              f"{counts[1][1]}/{counts[1][2]}  reference+all {counts[2][1]}/{counts[2][2]}  {'ok' if good else 'BAD'}")
     visible = [m for m in metas.values() if not m.get("holdout")]
     kinds = {m.get("kind") for m in visible}
     interacting = sum(bool(m.get("interacting_modules")) for m in visible)
     holdouts = len(metas) - len(visible)
     covered = kinds >= {"stateful", "parsing", "bugfix", "multi-module"} and interacting >= 2 and holdouts == 2
     print(f"visible kinds {sorted(kinds)}, visible with interacting modules {interacting}, hold-outs {holdouts}"
-          f"  {'ok' if covered else 'BAD'}")
+          f" (hold-out kinds not printed)  {'ok' if covered else 'BAD'}")
     ok &= covered
     print("FIXTURES: OK" if ok else "FIXTURES: BAD")
     return 0 if ok else 1
