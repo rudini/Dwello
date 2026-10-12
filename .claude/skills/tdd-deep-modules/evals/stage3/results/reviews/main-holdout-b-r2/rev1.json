@@ -1,0 +1,29 @@
+{
+ "group": "main-holdout-b-r2",
+ "reviewer": 1,
+ "key": {
+  "A": "canon",
+  "B": "skill",
+  "C": "baseline"
+ },
+ "runs": {
+  "baseline": "main-holdout-b-baseline-r2-a1",
+  "canon": "main-holdout-b-canon-r2-a1",
+  "skill": "main-holdout-b-skill-r2-a1"
+ },
+ "scores_by_label": {
+  "A": 7,
+  "B": 8,
+  "C": 6
+ },
+ "scores": {
+  "canon": 7,
+  "skill": 8,
+  "baseline": 6
+ },
+ "foreign_references": [],
+ "complete": true,
+ "cost": 0.096094,
+ "permission_denials": [],
+ "text": "All three files are about the same size, and all put a small six-method `Board` interface over one `createBoard` closure. Validation order, WIP enforcement, column bookkeeping and the clipping of blocked time to the cycle-time interval all stay hidden behind that interface. The differences are in how well the internal helpers hide decisions.\n\n**A.** `createBoard` hides everything behind `Board`. Each internal helper handles one decision fully: `assertRoom` checks the limit and throws `WIP_LIMIT`, `getCard` throws `UNKNOWN_CARD`, and `columnIndex` throws `UNKNOWN_COLUMN`. The card's state is kept small: an open `blockedSince` plus a list of closed `blockedPeriods`, with the clipping done in a single `reduce` inside `cycleTime`. The weak spot is that the column state is split across parallel structures (`options.columns` and the `columns` arrays, matched by index). So `move` and `assertRoom` must keep indices and lists in step by hand.\n\n**B.** This has the deepest internals. A `Column` record bundles name, index, limit and cards, so `assertRoom(column)` and `move` work on one object instead of matching indices. `isBlocked(card)` hides how blocked state is stored: it is derived from the open last entry in `blocks`, so there is no second flag to keep in sync. `blockedWithin(card, started, finished)` contains all of the interval-clipping logic behind a three-argument call. Each public method is a short combination of these deep helpers.\n\n**C.** The public interface is the same, but the internals are shallower. `isFull` only returns a boolean, so both `addCard` and `move` have to build and throw the `WIP_LIMIT` error themselves. Blocked state is stored twice (`blockedReason` and `blocks` with an open `to`), and `block` and `unblock` must update both by hand. The blocked-time clipping is written inline in `cycleTime` instead of being hidden in a helper, and columns use parallel `columns` and `lists` arrays, as in A.\n\n```json\n{\"scores\": {\"A\": 7, \"B\": 8, \"C\": 6}}\n```"
+}

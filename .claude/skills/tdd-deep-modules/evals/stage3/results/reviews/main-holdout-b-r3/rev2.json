@@ -1,0 +1,29 @@
+{
+ "group": "main-holdout-b-r3",
+ "reviewer": 2,
+ "key": {
+  "A": "canon",
+  "B": "baseline",
+  "C": "skill"
+ },
+ "runs": {
+  "baseline": "main-holdout-b-baseline-r3-a1",
+  "canon": "main-holdout-b-canon-r3-a1",
+  "skill": "main-holdout-b-skill-r3-a1"
+ },
+ "scores_by_label": {
+  "A": 7,
+  "B": 6,
+  "C": 6
+ },
+ "scores": {
+  "canon": 7,
+  "baseline": 6,
+  "skill": 6
+ },
+ "foreign_references": [],
+ "complete": true,
+ "cost": 0.09315160000000001,
+ "permission_denials": [],
+ "text": "All three files are almost the same design: one `createBoard` closure behind the 6-method `Board` interface. That interface hides column storage, card ordering, WIP checks, the start/finish rules and the clipping of blocked intervals. So all three are fairly deep at the top level. The differences are in the small internal helpers and in how block state is stored.\n\n**A.** `createBoard` hides a lot behind the small `Board` interface. Its helpers do more of the work themselves: `ensureRoom` both checks the WIP limit and throws `WIP_LIMIT`, so callers don't repeat that. Blocked state has a single source: `isBlocked()` is worked out from `blockedPeriods` (an open period ends at `Infinity`), so no separate flag needs to be kept in sync. `cycleTime` then clips every period the same way, open ones included.\n\n**B.** It has the same deep outer shape. Internally, `isFull` only returns a boolean, so `addCard` and `move` each build the `WIP_LIMIT` error themselves. Block state is stored twice, as `card.blocked` and as an open interval with `end: null`. That makes `block` and `unblock` keep both in step, and `cycleTime` has to handle `null` ends. The internal pieces are a bit shallower than A's.\n\n**C.** It has the same outer structure, with `cardOf`, `positionOfColumn` and `isFull` similar to B's. `setBlocked(cardId, blocked)` takes a boolean flag that joins two opposite operations, so it is one function in name only. `block` and `unblock` are pass-throughs to it. Because block state is split between `blockedSince` and `blockedPeriods`, `cycleTime` has to rebuild the open period itself. That spreads one design decision over several places.\n\n```json\n{\"scores\": {\"A\": 7, \"B\": 6, \"C\": 6}}\n```"
+}

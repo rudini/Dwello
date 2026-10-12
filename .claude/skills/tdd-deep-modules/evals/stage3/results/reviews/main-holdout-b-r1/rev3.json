@@ -1,0 +1,29 @@
+{
+ "group": "main-holdout-b-r1",
+ "reviewer": 3,
+ "key": {
+  "A": "skill",
+  "B": "canon",
+  "C": "baseline"
+ },
+ "runs": {
+  "baseline": "main-holdout-b-baseline-r1-a1",
+  "canon": "main-holdout-b-canon-r1-a1",
+  "skill": "main-holdout-b-skill-r1-a1"
+ },
+ "scores_by_label": {
+  "A": 6,
+  "B": 7,
+  "C": 5
+ },
+ "scores": {
+  "skill": 6,
+  "canon": 7,
+  "baseline": 5
+ },
+ "foreign_references": [],
+ "complete": true,
+ "cost": 0.09532080000000001,
+ "permission_denials": [],
+ "text": "All three put a narrow facade, `createBoard`, over a small amount of internal state. The differences are in how well the internal helpers hide decisions about blocking and capacity.\n\n**A.** `createBoard` hides the column order, the per-column card lists and the start/finish timestamps behind the six-method `Board` interface. `checkRoom` handles the WIP check and its error in one place, and `card`/`column` combine lookup with the unknown-id error. Blocking is stored in two fields, `blockedSince` and `blockedSpans`, and `block`/`unblock` keep them in sync by hand. The overlap calculation is written inline in `cycleTime` instead of being a separate abstraction. These are solid but ordinary helpers.\n\n**B.** This has the same facade, plus two module-level helpers that each hide a real decision. `currentBlock` works out whether a card is blocked from its list of blocked periods, so there is only one record of blocked state and `block`/`unblock`/`move` all ask the same question through it. `blockedWithin(card, start, end)` hides the interval-clipping logic behind a simple query, and `cycleTime` ends up as a few lines. `assertRoom` and `getColumn` (map-backed) wrap the capacity and lookup rules the way A's helpers do. Of the three, this is the most cleanly layered internally.\n\n**C.** The facade is the same, but the internals are shallower. `isFull` only returns a boolean, so `addCard` and `move` each build their own `WIP_LIMIT` error. Columns are bare indices into parallel arrays (`columns`, `lists`), which spreads index handling across the methods. Blocking is stored twice, as a `blocked` flag and a `blocks` list, and `block`/`unblock` update both by hand. `cycleTime` computes the overlaps inline.\n\n```json\n{\"scores\": {\"A\": 6, \"B\": 7, \"C\": 5}}\n```"
+}

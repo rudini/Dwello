@@ -1,0 +1,29 @@
+{
+ "group": "main-holdout-b-r2",
+ "reviewer": 2,
+ "key": {
+  "A": "canon",
+  "B": "skill",
+  "C": "baseline"
+ },
+ "runs": {
+  "baseline": "main-holdout-b-baseline-r2-a1",
+  "canon": "main-holdout-b-canon-r2-a1",
+  "skill": "main-holdout-b-skill-r2-a1"
+ },
+ "scores_by_label": {
+  "A": 7,
+  "B": 8,
+  "C": 6
+ },
+ "scores": {
+  "canon": 7,
+  "skill": 8,
+  "baseline": 6
+ },
+ "foreign_references": [],
+ "complete": true,
+ "cost": 0.0982024,
+ "permission_denials": [],
+ "text": "I read TASK.md and the one file in each implementation (`A/src/board.ts`, `B/src/board.ts`, `C/src/board.ts`). All three use the same overall design: `createBoard` returns a closure behind the six-method `Board` interface from the task. That interface is already deep. It hides how columns are stored, the order of the move checks, WIP enforcement and the interval arithmetic for cycle time. So the scores differ only in how well the internal helpers hide their own decisions.\n\n**A.** The `assertRoom(column)` helper is deep: it hides both the WIP-limit check and the error it throws. `getCard` and `columnIndex` neatly hide lookup plus failure. But \"blocked\" is stored in two fields, `blockedSince` and `blockedPeriods`. `move`, `block` and `unblock` each test `card.blockedSince !== undefined` directly, so that storage choice is visible in several places. `cycleTime` also does the clipping to the start\u2013finish window inline, in one dense `reduce`, instead of handing it to a helper.\n\n**B.** This is the deepest of the three. Columns are `Column` objects that carry their own index, limit and card list, so `assertRoom(column)` and the comparisons in `move` don't need index lookups. `isBlocked(card)` hides how blocked state is stored, an open last entry in `blocks`, and is the only place that knows it. `blockedWithin(card, started, finished)` hides the clipping logic, so `cycleTime` stays a short high-level step. Each helper has a one-line interface and owns a single decision.\n\n**C.** The board's interface is still deep, but the helpers are shallower. `isFull` only returns a boolean, so `addCard` and `move` each build and throw the `WIP_LIMIT` error themselves. Blocked state is kept twice, in `blockedReason` and in the open entry of `blocks`, and `block` and `unblock` must update both by hand. The clipping logic is written inline in `cycleTime`. Compared with A and B, more design decisions are visible in the method bodies instead of hidden behind helpers.\n\n```json\n{\"scores\": {\"A\": 7, \"B\": 8, \"C\": 6}}\n```"
+}

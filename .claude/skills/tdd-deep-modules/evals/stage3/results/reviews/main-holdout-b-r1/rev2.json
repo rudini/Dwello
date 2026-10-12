@@ -1,0 +1,29 @@
+{
+ "group": "main-holdout-b-r1",
+ "reviewer": 2,
+ "key": {
+  "A": "skill",
+  "B": "baseline",
+  "C": "canon"
+ },
+ "runs": {
+  "baseline": "main-holdout-b-baseline-r1-a1",
+  "canon": "main-holdout-b-canon-r1-a1",
+  "skill": "main-holdout-b-skill-r1-a1"
+ },
+ "scores_by_label": {
+  "A": 7,
+  "B": 6,
+  "C": 8
+ },
+ "scores": {
+  "skill": 7,
+  "baseline": 6,
+  "canon": 8
+ },
+ "foreign_references": [],
+ "complete": true,
+ "cost": 0.09778600000000001,
+ "permission_denials": [],
+ "text": "All three share the same overall shape: one `createBoard` closure exposes the six-method `Board` interface over hidden state. That interface is narrow compared with what it hides: the ordering of checks, WIP limits, start/finish timestamps and clipping blocked time to the cycle window. So all three score fairly well, and the differences come from how well the internal helpers hide their decisions.\n\n**A.** The internal `Column` objects carry their own `index` and `cards`, so `move` compares positions directly and `cardsIn` needs no separate lookup structure. `checkRoom(to)` owns the whole WIP rule, including throwing `WIP_LIMIT`, and `card()`/`column()` own the \"unknown\" errors. Blocking is kept as `blockedSince` plus closed `blockedSpans`, which is clear. However, the blocked-overlap calculation is written inline in `cycleTime` rather than hidden behind a helper.\n\n**B.** Card lists are kept in a parallel `lists[][]` array indexed by column position, so callers handle raw indices instead of a column abstraction. `isFull()` only returns a boolean, so both `addCard` and `move` have to repeat the `WIP_LIMIT` throw: that knowledge leaks out to the callers. Each card stores both a `blocked` flag and an open-ended `blocks` entry, which are two representations of the same fact. `block`/`unblock` must keep them in sync by hand, making the module somewhat shallower.\n\n**C.** It has the same strong helpers as A (`getCard`, `getColumn`, and `assertRoom`, which owns the WIP rule). It also hides the blocked-period representation behind two functions. `currentBlock(card)` works out \"is blocked\" from the period list, so there is only one source of truth. `blockedWithin(card, start, end)` hides the interval-clipping logic, which leaves `cycleTime` as a one-line call. Those are the deepest helpers of the three.\n\n```json\n{\"scores\": {\"A\": 7, \"B\": 6, \"C\": 8}}\n```"
+}

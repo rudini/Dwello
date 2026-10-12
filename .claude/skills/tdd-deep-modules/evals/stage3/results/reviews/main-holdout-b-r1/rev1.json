@@ -1,0 +1,29 @@
+{
+ "group": "main-holdout-b-r1",
+ "reviewer": 1,
+ "key": {
+  "A": "baseline",
+  "B": "skill",
+  "C": "canon"
+ },
+ "runs": {
+  "baseline": "main-holdout-b-baseline-r1-a1",
+  "canon": "main-holdout-b-canon-r1-a1",
+  "skill": "main-holdout-b-skill-r1-a1"
+ },
+ "scores_by_label": {
+  "A": 6,
+  "B": 7,
+  "C": 7
+ },
+ "scores": {
+  "baseline": 6,
+  "skill": 7,
+  "canon": 7
+ },
+ "foreign_references": [],
+ "complete": true,
+ "cost": 0.09878920000000001,
+ "permission_denials": [],
+ "text": "I read TASK.md and the single source file in each directory (`A/src/board.ts`, `B/src/board.ts`, `C/src/board.ts`). All three share the same structure: one `createBoard` closure behind the six-method `Board` interface. That interface is already deep, since it hides WIP limits, the order of validation checks, column order, start and finish timestamps, and blocked-time overlap. So the scores differ only by how well each one's internal helpers hide their decisions.\n\n**A (6):** `createBoard` hides the column lists and card records behind the small interface. Its helpers are thin, though. `isFull` returns a boolean, so `addCard` and `move` each build the `WIP_LIMIT` error themselves. Blocked state is stored twice, as a `blocked` flag and an open entry in `blocks`, and `block` and `unblock` must keep the two in step. The interval-clipping maths for blocked time sits inline in `cycleTime` rather than in its own helper.\n\n**B (7):** `Column` objects carry their own `index` and `cards`, so nothing else has to look up positions. `checkRoom` handles the whole WIP rule, including throwing the error. Blocked state is a single `blockedSince` value plus closed `blockedSpans`, so nothing has to be kept in sync. The overlap calculation is still written inline in `cycleTime`, and `move` handles start and finish timestamps directly.\n\n**C (7):** It pulls the time logic into standalone helpers. `blockedWithin(card, start, end)` hides the clipping of open and closed blocked periods to a window. `currentBlock(card)` is the only way blocked state is read, so there is no separate flag to keep in sync. `assertRoom` handles the whole WIP rule, the same way `checkRoom` does in B. One weakness: `move` works out column order with `columnList.indexOf` itself instead of a column knowing its own position, and the start and finish timestamp updates are still written inline in `move`.\n\n```json\n{\"scores\": {\"A\": 6, \"B\": 7, \"C\": 7}}\n```"
+}

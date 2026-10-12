@@ -1,0 +1,29 @@
+{
+ "group": "main-holdout-b-r3",
+ "reviewer": 1,
+ "key": {
+  "A": "baseline",
+  "B": "canon",
+  "C": "skill"
+ },
+ "runs": {
+  "baseline": "main-holdout-b-baseline-r3-a1",
+  "canon": "main-holdout-b-canon-r3-a1",
+  "skill": "main-holdout-b-skill-r3-a1"
+ },
+ "scores_by_label": {
+  "A": 6,
+  "B": 7,
+  "C": 6
+ },
+ "scores": {
+  "baseline": 6,
+  "canon": 7,
+  "skill": 6
+ },
+ "foreign_references": [],
+ "complete": true,
+ "cost": 0.0945044,
+ "permission_denials": [],
+ "text": "All three use the same overall design. `createBoard` returns a closure that hides the column lanes, the card map, id generation and the blocked-time bookkeeping behind the six-method `Board` interface. That interface is small compared with what it hides: the ordered validation rules, WIP checks, start/finish timestamps and clipping blocked intervals to the cycle. So all three are fairly deep, and the differences come from how well the internal helpers and card representation hide details.\n\n**A:** `getCard`, `columnIndex` and `isFull` are small helpers that each hide a lookup together with its error. But `Card` stores the blocked state twice: a `blocked` boolean and an open interval in `blockedIntervals` (`end: null`). `block` and `unblock` have to update both, so that decision isn't hidden in one place. `cycleTime` then has to handle the `null` end itself, which spreads knowledge of the representation into more code.\n\n**B:** This is the most cohesive of the three. `isBlocked` works out the blocked state from `blockedPeriods`, with an open period ending at `Infinity`, so there is one source of truth. As a result, `cycleTime` uses the same clipping formula for open and closed periods without a special case. `ensureRoom` combines the WIP check with its `WIP_LIMIT` error, so `addCard` and `move` don't have to repeat that rule.\n\n**C:** `cardOf` and `positionOfColumn` hide lookups and errors well, and `setBlocked` puts block and unblock in one place. However, the boolean flag argument and the conditional error choice make `setBlocked` two operations joined together, rather than one deeper abstraction. Splitting the state into `blockedSince` and `blockedPeriods` means `cycleTime` must know about the open period and add it in by hand. That leaks the representation into the time calculation.\n\n```json\n{\"scores\": {\"A\": 6, \"B\": 7, \"C\": 6}}\n```"
+}

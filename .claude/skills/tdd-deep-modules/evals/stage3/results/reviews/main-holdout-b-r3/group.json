@@ -1,0 +1,10 @@
+{
+ "group": "main-holdout-b-r3",
+ "fixture": "holdout-b",
+ "runs": {
+  "baseline": "main-holdout-b-baseline-r3-a1",
+  "canon": "main-holdout-b-canon-r3-a1",
+  "skill": "main-holdout-b-skill-r3-a1"
+ },
+ "control": null
+}
