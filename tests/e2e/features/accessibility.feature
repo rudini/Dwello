@@ -73,6 +73,7 @@ Funktionalität: Barrierefreiheit
       | contract-edit          | default             |
       | contract-edit          | submit-cleared      |
       | contract-edit          | past-end-error      |
+      | contract-edit          | edit-refused        |
       | contract-detail-notice | default             |
       | contract-edit-notice   | default             |
       | invoices               | default             |
@@ -100,6 +101,7 @@ Funktionalität: Barrierefreiheit
       | statement-generate     | tank-question       |
       | statement-generate     | preview-all-billed  |
       | statement-generate     | draft-restored      |
+      | statement-generate     | link-preset         |
       | statement-detail       | default             |
       | statement-detail       | send-dialog         |
       | statement-detail       | delete-dialog       |

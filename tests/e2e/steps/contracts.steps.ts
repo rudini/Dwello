@@ -53,6 +53,17 @@ Then(
 	}
 );
 
+// from any page: a running contract reads «seit TT.MM.JJJJ, unbefristet» in the list
+Then(
+	'beginnt der Mietvertrag von {string} laut Liste seit {string}',
+	async ({ verwalter, names }, tenant: string, date: string) => {
+		const name = names.get(tenant) ?? tenant;
+		await visit(verwalter.page, '/contracts');
+		await verwalter.perform(searchContracts(name));
+		await expect(listedContract(verwalter, name)).toContainText(`seit ${date}`);
+	}
+);
+
 Then(
 	'beginnt der Mietvertrag von {string} laut Liste am {string}',
 	async ({ verwalter, names }, tenant: string, date: string) => {

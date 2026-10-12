@@ -39,6 +39,7 @@
 	import RentStep from './new/RentStep.svelte';
 	import PastEndConfirm from './PastEndConfirm.svelte';
 	import RefusedStatements from './RefusedStatements.svelte';
+	import NoticeHint from './NoticeHint.svelte';
 
 	// Form of a contract being edited, with the fields, help and checks of the wizard in ./new
 	let {
@@ -82,6 +83,8 @@
 	let confirmedDay = $state('');
 	const overlap = $derived(overlapWarning(values, apartmentContracts, contract.id));
 	const back = $derived(`/contracts/${contract.id}`);
+	// «Befristet» for a contract saved open-ended: a notice is entered with «Mietvertrag beenden» (Sven K1 M1)
+	const noticeHint = $derived(!contract.endDate && !values.isUnlimited && !values.terminated);
 	const tenantName = $derived(tenants.find((t) => t.id === values.tenantId)?.name ?? '');
 
 	async function contractsOf(apartmentId: string) {
@@ -250,6 +253,7 @@
 			bind:confirmedDay
 			bind:error={() => errors.pastConfirmed ?? '', (error) => (errors.pastConfirmed = error)}
 		/>
+		<NoticeHint shown={noticeHint} href={back} />
 	</Panel>
 
 	<Panel title={m.contracts_rent()}>

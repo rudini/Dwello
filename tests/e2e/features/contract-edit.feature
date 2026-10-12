@@ -65,3 +65,5 @@ Funktionalität: Mietvertrag bearbeiten
     Wenn der Liegenschaftsverwalter den Vertragsbeginn "2025-05-01" speichert
     Und der Liegenschaftsverwalter den Entwurf löscht und den Mietvertrag speichert
     Dann ist der Liegenschaftsverwalter im Abrechnungsassistenten für das Gebäude "Ahornhof" und 2025
+    Und beginnt der Mietvertrag von "Anna Keller" laut Liste seit "01.05.2025"
+    Und findet die Abrechnungsliste keine Abrechnung 2025 von "Anna Keller"

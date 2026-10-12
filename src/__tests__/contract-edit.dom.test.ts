@@ -449,4 +449,25 @@ describe('Mietvertrag bearbeiten', () => {
 			expect(puts()[0].body).toMatchObject({ terminated: false });
 		});
 	});
+
+	// Sven K1 M1: wer bei einem unbefristeten Mietvertrag «Befristet» wählt, meint oft eine Kündigung
+	describe('Hinweis auf «Mietvertrag beenden»', () => {
+		const choose = async (value: string) => {
+			click(document.querySelector<HTMLInputElement>(`input[name="duration"][value="${value}"]`)!);
+			await settle();
+		};
+
+		it('verweist bei «Befristet» auf «Mietvertrag beenden»', async () => {
+			await open();
+			await choose('limited');
+			const hint = byTestId('contract-notice-hint')!;
+			expect(hint.textContent).toContain('Hat der Mieter gekündigt?');
+			expect(hint.querySelector('a')!.getAttribute('href')).toBe('/contracts/c1');
+		});
+
+		it('verweist nicht darauf bei einem befristeten Mietvertrag', async () => {
+			await open('2099-12-31');
+			expect(byTestId('contract-notice-hint')).toBeNull();
+		});
+	});
 });

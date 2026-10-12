@@ -167,6 +167,18 @@ Then('erhält der Liegenschaftsverwalter die Abrechnung als PDF', async ({ verwa
 	expect(file.header).toBe('%PDF-');
 });
 
+// from any page: the list of statements, searched for the tenant
+Then(
+	'findet die Abrechnungsliste keine Abrechnung {int} von {string}',
+	async ({ verwalter, names }, year: number, tenant: string) => {
+		const name = names.get(tenant) ?? tenant;
+		await visit(verwalter.page, '/statements');
+		await verwalter.perform(searchStatements(name));
+		await expect(emptyStatementList(verwalter)).toBeVisible();
+		await expect(statementOfYear(verwalter, name, year)).toHaveCount(0);
+	}
+);
+
 Then(
 	'die Abrechnung {int} von {string} ist nicht mehr auffindbar',
 	async ({ verwalter, names }, year: number, tenant: string) => {

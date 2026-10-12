@@ -81,14 +81,15 @@ function missingPeriod(period: Awaited<ReturnType<typeof lastPeriod>>, contracts
 	return buildings.length ? { start: period.start, end: period.end, buildings } : null;
 }
 
-// Given notice, not yet ended, and no later contract for the apartment yet: a next tenant is still to find (A-4)
-function noticed(contracts: Row[], today: string) {
+// Given notice and no later contract for the apartment yet: a next tenant is still to find, also after the end
+// (A-4.1, review K-6)
+function noticed(contracts: Row[]) {
 	const later = (c: Row) =>
 		contracts.some(
 			(o) => o.apartmentId === c.apartmentId && String(o.startDate) > String(c.endDate)
 		);
 	return contracts
-		.filter((c) => c.terminated && c.endDate && String(c.endDate) >= today && !later(c))
+		.filter((c) => c.terminated && c.endDate && !later(c))
 		.map((c) => ({
 			id: String(c.id),
 			tenantName: String(c.tenantName),
@@ -132,6 +133,7 @@ export const load = async ({
 		...b,
 		reletStarts: reletStarts(b.buildingId)
 	}));
+	const noticedContracts = noticed(allContracts);
 	const input = {
 		today: localToday(), // the day in Switzerland
 		portfolio: figures.portfolio,
@@ -143,10 +145,11 @@ export const load = async ({
 		})),
 		lettersToSend: letters.length,
 		missingPeriod: missingPeriod(period, allContracts),
-		// a contract given notice is named by its task, not twice (A-4)
-		noticedContracts: noticed(allContracts, localToday()),
+		noticedContracts,
+		// a contract with a task is named by it, not twice (A-4.4); one given notice with a next tenant keeps its
+		// deadline (review K-6)
 		endingContracts: contracts
-			.filter((c) => c.endDate && !c.terminated)
+			.filter((c) => c.endDate && !noticedContracts.some((n) => n.id === c.id))
 			.map((c) => ({
 				id: String(c.id),
 				tenantName: String(c.tenantName),

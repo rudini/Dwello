@@ -4895,6 +4895,15 @@ header and on pages without it. Branch `claude/optimistic-clarke-nn8u7t` from `m
   `statement-detail.feature`, `statement-generate.feature`; `contract-actions.test.ts`, `contract-detail-page.dom.test.ts`,
   `contract-edit.dom.test.ts`, `statement-generate-actions.test.ts`, `statement-wizard.dom.test.ts`,
   `statement-mapping.test.ts`, `contract-end.pg.test.ts`, `api-contracts.pg.test.ts`.
+- [x] **Review K-1 and personas K1** (`docs/reviews/K-review-1.md`, `docs/design/personas/*-k1.md`): «Nächste
+  Schritte» only while no successor is recorded (K-1); a refusal stays tied to its day and the delete offer names its
+  consequence, is busy while running and toasts (K-2, K-3, K-7); the wizard says what a link chose (`PresetNotice.svelte`)
+  and ignores an unknown building or impossible period (K-5); «Vermietet» without «bis» when the successor starts the
+  next day (K-4, `src/lib/apartment.ts` `followedOn`); the overview task stays after the end until a successor exists,
+  the «Vertragsende» deadline returns for a contract given notice that has one (K-6, `dashboard/+page.server.ts`); the
+  contract form points to «Mietvertrag beenden» when an end is typed into an open-ended contract (`NoticeHint.svelte`,
+  Sven M1); tests for «Abrechnung nicht mehr auffindbar», the refused PUT after deleting the draft and the a11y states
+  `edit-refused` and `link-preset` (K-8); API documentation (K-9). Haiku review after each step.
 
 ---
 

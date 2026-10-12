@@ -206,6 +206,16 @@ const states: Record<string, (page: Page, viewport: Viewport) => Promise<unknown
 		await press(page, 'contract-end-confirm');
 		await page.getByTestId('refused-statements').waitFor();
 	},
+	// the same refusal from the contract form: the 2025 draft bills rent days after 31.03.2025 (A-10)
+	'edit-refused': async (page) => {
+		await page.getByTestId('contract-duration').getByText(await say(page, 'Befristet'), { exact: true }).click();
+		await typeDate(page.getByTestId('end-date-input'), '2025-03-31');
+		await page.getByTestId('contract-end-past-confirm').check();
+		await press(page, 'submit-button');
+		await page.getByTestId('refused-statements').waitFor();
+	},
+	// the link opens the wizard at the settings step with the building and period it names
+	'link-preset': async (page) => page.getByTestId('wizard-preset').waitFor(),
 	'send-dialog': async (page) => {
 		await press(page, 'statement-send-button');
 		await dialog(page);

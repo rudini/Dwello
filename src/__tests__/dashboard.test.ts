@@ -33,11 +33,16 @@ const contracts = [
 	...[
 		{ id: 'n1', apartmentId: 'a7', apartmentNumber: '3.01', endDate: '2027-03-31' },
 		{ id: 'n2', apartmentId: 'a8', apartmentNumber: '3.02', endDate: '2026-09-30' },
-		{ id: 'n3', apartmentId: 'a9', apartmentNumber: '3.03', endDate: '2027-01-31' }
+		{ id: 'n3', apartmentId: 'a9', apartmentNumber: '3.03', endDate: '2027-01-31' },
+		// review K-6: ends today, the boundary of a running notice
+		{ id: 'n5', apartmentId: 'a5', apartmentNumber: '3.05', endDate: '2026-10-10' },
+		// review K-6: given notice with a next tenant soon: no task, but the deadline
+		{ id: 'n6', apartmentId: 'a6', apartmentNumber: '3.06', endDate: '2026-11-20' }
 	].map((c) =>
 		contract({ ...c, tenantName: `Mieter ${c.id}`, startDate: '2026-07-01', terminated: true })
 	),
-	contract({ id: 'n4', apartmentId: 'a9', startDate: '2027-02-01', endDate: null })
+	contract({ id: 'n4', apartmentId: 'a9', startDate: '2027-02-01', endDate: null }),
+	contract({ id: 'n7', apartmentId: 'a6', startDate: '2026-11-21', endDate: null })
 ];
 const billed = (...ids: string[]) =>
 	ids.map((contractId) => ({ ...periodStatements.data[0], contractId }));
@@ -75,7 +80,9 @@ function backend(dashboardStatus = 200, statementsOfLastPeriod: unknown[] = both
 			contracts: [
 				{ id: 'c1', tenantName: 'Eva Frei', endDate: '2026-11-01' },
 				// given notice: a task names it, not the deadline (A-4)
-				{ id: 'c3', tenantName: 'Nora Neu', endDate: '2026-11-15', terminated: true },
+				{ id: 'n5', tenantName: 'Mieter n5', endDate: '2026-10-10', terminated: true },
+				// given notice with a next tenant: no task, so the deadline (review K-6)
+				{ id: 'n6', tenantName: 'Mieter n6', endDate: '2026-11-20', terminated: true },
 				{ id: 'c2', tenantName: 'Ueli Graf', endDate: null }
 			]
 		},
@@ -108,13 +115,17 @@ describe('Übersicht laden', () => {
 			'overdue',
 			'letters',
 			'drafts',
+			// review K-6: also after the end, until a next tenant is recorded; the earliest end first
+			'successor-n2',
+			'successor-n5',
 			'successor-n1'
 		]);
 		expect(data.tasks[1].text).toContain('2 Briefe sind');
 		expect(data.deadlines.map((d) => [d.kind, d.name, d.when])).toEqual([
 			['Zahlungsfrist', 'Anna Keller', 'seit 5 Tagen abgelaufen'],
 			['Zahlungsfrist', 'Bruno Meier', 'in 10 Tagen'],
-			['Vertragsende', 'Eva Frei', 'in 22 Tagen']
+			['Vertragsende', 'Eva Frei', 'in 22 Tagen'],
+			['Vertragsende', 'Mieter n6', 'in 41 Tagen']
 		]);
 	});
 
@@ -127,6 +138,9 @@ describe('Übersicht laden', () => {
 			'letters',
 			'missing-period',
 			'drafts',
+			// review K-6: also after the end, until a next tenant is recorded; the earliest end first
+			'successor-n2',
+			'successor-n5',
 			'successor-n1'
 		]);
 		expect(data.tasks[2].text).toContain('01.07.2025 – 30.06.2026');

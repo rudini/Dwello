@@ -135,7 +135,7 @@ When('der Liegenschaftsverwalter den nächsten Schritt {string} wählt', async (
 	await nextStep(verwalter.page, label).click();
 });
 
-// the wizard takes the apartment from the link; it asks for the tenant first and shows the apartment in step 2
+// the link names the apartment; that the wizard preselects it from `?apartment=` is tested in contract-new-load.test.ts
 Then('gilt der neue Mietvertrag für die Wohnung {string}', async ({ verwalter, seed }, apartment: string) => {
 	await expect(verwalter.page).toHaveURL(new RegExp(`apartment=${seed.idOf(apartment)}`));
 });

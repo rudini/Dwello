@@ -173,6 +173,7 @@ Funktionalität: Mietvertragsdetail
     Und der Liegenschaftsverwalter den Entwurf löscht und den Mietvertrag beendet
     Dann ist der Liegenschaftsverwalter im Abrechnungsassistenten für das Gebäude "Ahornhof" und 2025
     Und endet der Mietvertrag von "Anna Keller" am "31.03.2025"
+    Und findet die Abrechnungsliste keine Abrechnung 2025 von "Anna Keller"
 
   # A-10: Mietstage in der letzten Abrechnungsperiode ohne Abrechnung
   Szenario: Fehlende Abrechnung am Mietvertrag

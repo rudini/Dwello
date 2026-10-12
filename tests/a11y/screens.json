@@ -12,6 +12,8 @@
 		"end-dialog-error": "The dialog that ends a rental contract confirmed without a Vertragsende: the error at the field.",
 		"past-end-error": "A Vertragsende before today (end dialog or contract form) saved without the confirmation: the checkbox with its error.",
 		"end-dialog-refused": "The end dialog refused because a draft statement already bills later rent days: the link to the draft and the offer to delete it.",
+		"edit-refused": "The contract form saved with a Vertragsende before rent days a draft statement already bills: the refusal, the link to the draft and the offer to delete it.",
+		"link-preset": "Statement wizard opened from a link that names a building and a period (after a changed Vertragsende): it starts at the settings step and says what the link chose.",
 		"send-dialog": "The confirmation before marking a statement as sent open.",
 		"reminder-dialog": "The Mahnung dialog of a sent statement open.",
 		"mark-paid-dialog": "The dialog that marks a statement as paid open.",
@@ -230,7 +232,8 @@
 			"states": [
 				"default",
 				"submit-cleared",
-				"past-end-error"
+				"past-end-error",
+				"edit-refused"
 			]
 		},
 		{
@@ -326,8 +329,12 @@
 				"period-not-over",
 				"tank-question",
 				"preview-all-billed",
-				"draft-restored"
-			]
+				"draft-restored",
+				"link-preset"
+			],
+			"queries": {
+				"link-preset": "?building={building}&start=2025-01-01&end=2025-12-31"
+			}
 		},
 		{
 			"name": "statement-detail",

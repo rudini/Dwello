@@ -45,7 +45,9 @@ describe('Nächste Schritte nach einer Kündigung', () => {
 	const backend = (contract: Record<string, unknown>, others: unknown[] | null = []) =>
 		(async (url: string) => {
 			if (url.includes('/contracts?apartmentId='))
-				return others ? Response.json({ contracts: others }) : new Response('down', { status: 500 });
+				return others
+					? Response.json({ contracts: others })
+					: new Response('down', { status: 500 });
 			if (url.includes('/config') || url.includes('/statements?'))
 				return Response.json({ data: [] });
 			return Response.json({ id: 'c1', apartmentId: 'a1', startDate: '2024-04-01', ...contract });
@@ -268,7 +270,7 @@ describe('Mietvertrag beenden', () => {
 // A-10: der einzige Entwurf wird gelöscht, der Mietvertrag beendet, danach geht es in den Assistenten
 describe('Entwurf löschen und Mietvertrag beenden', () => {
 	type Call = { method?: string; url: string; body?: unknown };
-	function run(fields: Record<string, string>, statement: Record<string, unknown>) {
+	function run(fields: Record<string, string>, statement: Record<string, unknown>, put = 200) {
 		const calls: Call[] = [];
 		const fetch = (async (url: string, init?: RequestInit) => {
 			calls.push({ method: init?.method, url, body: init?.body && JSON.parse(String(init.body)) });
@@ -277,9 +279,8 @@ describe('Entwurf löschen und Mietvertrag beenden', () => {
 					? new Response(null, { status: 204 })
 					: Response.json(statement);
 			}
-			return Response.json(
-				init?.method === 'PUT' ? {} : { startDate: '2024-04-01', endDate: null }
-			);
+			if (init?.method === 'PUT') return Response.json({}, { status: put });
+			return Response.json({ startDate: '2024-04-01', endDate: null });
 		}) as typeof globalThis.fetch;
 		const form = new FormData();
 		for (const [name, value] of Object.entries(fields)) form.append(name, value);
@@ -316,6 +317,16 @@ describe('Entwurf löschen und Mietvertrag beenden', () => {
 				{ endDate: '2025-03-31', terminated: true }
 			]
 		]);
+	});
+
+	// der Entwurf ist gelöscht, der Mietvertrag nicht beendet: kein Assistent, die Ablehnung bleibt im Dialog
+	it('öffnet den Assistenten nicht, wenn das Beenden danach abgelehnt wird', async () => {
+		const { result } = run(fields, draft, 500);
+
+		expect(await result).toMatchObject({
+			status: 500,
+			data: { endError: 'Mietvertrag konnte nicht beendet werden.' }
+		});
 	});
 
 	// aus einem alten Fenster oder einem fremden Formular: nur ein Entwurf dieses Mietvertrags

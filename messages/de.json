@@ -1267,5 +1267,8 @@
 	"contracts_next_steps_text_successor": "Der Mietvertrag ist gekündigt, der Nachmieter ist erfasst. Für die Schlussabrechnung braucht es die neue Adresse des Mieters.",
 	"contracts_next_steps_hint": "Die nächsten Schritte sehen Sie oben auf der Seite.",
 	"contracts_apartment_contracts_unknown": "Die Mietverträge der Wohnung konnten nicht geladen werden. Laden Sie die Seite neu und versuchen Sie es erneut.",
-	"contracts_apartment_contracts_loading": "Die Mietverträge der Wohnung werden noch geladen. Versuchen Sie es in einem Moment erneut."
+	"contracts_apartment_contracts_loading": "Die Mietverträge der Wohnung werden noch geladen. Versuchen Sie es in einem Moment erneut.",
+	"contracts_notice_hint_title": "Hat der Mieter gekündigt?",
+	"contracts_notice_hint_text": "Dann tragen Sie das Vertragsende auf der Seite des Mietvertrags mit «Beenden» ein. So bleibt er unbefristet, und Dwello nennt die nächsten Schritte.",
+	"contracts_notice_hint_link": "Zum Mietvertrag"
 }
