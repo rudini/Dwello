@@ -1,0 +1,122 @@
+{
+ "run_id": "pilot-opening-hours-parser-skill-r1-a1",
+ "status": "finished",
+ "phase": "pilot",
+ "slot": 1,
+ "attempt": 1,
+ "fixture": "opening-hours-parser",
+ "fixture_dir": "fixtures/opening-hours-parser",
+ "arm": "skill",
+ "started": "2026-10-12T12:04:43Z",
+ "valid": true,
+ "base": "d083a1a1345e09d5cb13a5727cddaec18995d028",
+ "duration_s": 385,
+ "session": {
+  "is_error": false,
+  "num_turns": 117,
+  "total_cost_usd": 1.8206129000000004,
+  "session_id": "8a63c03b-5de4-44d5-b6e7-f6ae3eb43c90",
+  "permission_denials": [
+   {
+    "tool_name": "Bash",
+    "tool_use_id": "toolu_013kuHexiPQo829AnYheYW6p",
+    "tool_input": {
+     "command": "git log --oneline | head -3 && cat >> src/openingHours.test.ts <<'EOF'\n\nconst closedWeek = () => ({ Mo: [], Tu: [], We: [], Th: [], Fr: [], Sa: [], Su: [] });\n\ntest(\"a single day with one range opens only that day\", () => {\n  expect(parseOpeningHours(\"Mo 08:00-12:00\")).toEqual({\n    ...closedWeek(),\n    Mo: [{ from: \"08:00\", to: \"12:00\" }],\n  });\n});\nEOF\nsed -i 's/import { OpeningHoursError } from/import { OpeningHoursError, parseOpeningHours } from/' src/openingHours.test.ts\nbun test 2>&1 | tail -8"
+    }
+   },
+   {
+    "tool_name": "Bash",
+    "tool_use_id": "toolu_01L6Pn32EYFBosZvr6ut2nzo",
+    "tool_input": {
+     "command": "cat >> src/openingHours.test.ts <<'EOF'\n\ntest(\"a day list with commas opens each listed day\", () => {\n  expect(outcome(\"Mo,We,Su 08:00-12:00\")).toEqual({\n    ...closedWeek(),\n    Mo: [range(\"08:00\", \"12:00\")],\n    We: [range(\"08:00\", \"12:00\")],\n    Su: [range(\"08:00\", \"12:00\")],\n  });\n});\nEOF\n.claude/skills/tdd-deep-modules/scripts/tdd-step red \"a day list with commas\" 2>&1 | tail -3; git log --oneline -1"
+    }
+   },
+   {
+    "tool_name": "Bash",
+    "tool_use_id": "toolu_01JEPgfv74jKdoPDVK4Nkcj3",
+    "tool_input": {
+     "command": "python3 - <<'EOF'\np='src/openingHours.ts'\ns=open(p).read()\ns=s.replace('''function readDay(cursor: Cursor): number {\n  const token = cursor.next();''','''function readDay(cursor: Cursor): number {\n  const token = cursor.nextOf(\"word\");''')\ns=s.replace('''function readTime(cursor: Cursor, isEnd: boolean): string {\n  const token = cursor.next();''','''function readTime(cursor: Cursor, isEnd: boolean): string {\n  const token = cursor.nextOf(\"time\");''')\ns=s.replace('''    cursor.next(); // \"-\"''','''    cursor.expect(\"-\");''')\ns=s.replace('''  if (text.trim() === \"\")''','''  if (/^ *$/.test(text))''')\ns=s.replace('''  } while (cursor.accept(\";\"));\n  return hours;''','''  } while (cursor.accept(\";\"));\n  cursor.expectEnd();\n  return hours;''')\nopen(p,'w').write(s)\nEOF\nbun test 2>&1 | grep -E \"fail|pass|Expected|Received\" | head -20"
+    }
+   },
+   {
+    "tool_name": "Bash",
+    "tool_use_id": "toolu_01PCGuMGJ8smhzppTeJ7dU1F",
+    "tool_input": {
+     "command": "sed 's/^ *//' src/openingHours.ts | awk 'length>=12' | sort | uniq -d"
+    }
+   }
+  ]
+ },
+ "final_message": "bun test` passes (17 tests). The skill's replay check accepted the whole history.\n\n**What it does:**\n- It returns all seven days, and a day no rule names is `[]`.\n- Day lists and day ranges work, including ranges that wrap around the week (`Fr-Mo`) and `Mo-Mo`.\n- Ranges are sorted by start time. Ranges that touch are allowed.\n- `off` closes the named days, and a later rule replaces the hours of every day it names.\n- Spaces anywhere carry no meaning.\n- `24:00` is accepted only as the end of a range.\n- All seven error codes are reported with the column of the token at fault. When the text ends too early, the column is the text length + 1.\n\nThe example from the brief (`Mo-Fr 08:00-12:00,13:30-18:30; Sa 09:00-16:00; Su off`) parses correctly. Your three error examples give the expected columns 4, 10 and 8.\n\n**Where the spec was ambiguous, I chose:**\n- **Unknown words:** `UNKNOWN_DAY` only where a day is expected. A word anywhere else is `UNEXPECTED`, so `Mo Tu \u2026` and `Mo Off` both give `UNEXPECTED`. `off` where a day should be gives `UNKNOWN_DAY`.\n- **Times:** a time is checked only where a time is expected; a time in a day position is `UNEXPECTED`. `Mo 08.00-12:00` gives `INVALID_TIME` at column 4.\n- **Duplicate days:** a day item's first day is checked as soon as it is read, so `Mo,Mo-Fx` gives `DUPLICATE_DAY` at column 4, not `UNKNOWN_DAY` at `Fx`.\n- **Spaces:** only the space character counts. A tab is `UNEXPECTED`, and text made only of tabs is `UNEXPECTED`, not `EMPTY`.\n\n**Notes:**\n- The behaviour \"the first problem from the left is reported\" has no test of its own. Every check already ran as soon as its token was read, so such a test couldn't fail first, which the process requires. The error tests do include several cases with more than one problem in the text.\n- The commits were made by the skill's commit script, which writes its own messages, so they don't have the `Co-Authored-By` line.\n\nThe test list is in `TESTLIST.md` and the design note in `src/DESIGN.md`.",
+ "own_tests": {
+  "exit": 0,
+  "pass": 17,
+  "fail": 0
+ },
+ "hidden": {
+  "exit": 0,
+  "pass": 20,
+  "fail": 0,
+  "tail": "that no rule names are closed [0.09ms]\n(pass) valid opening hours > ranges are sorted by start time [0.04ms]\n(pass) valid opening hours > day lists and day ranges, including ranges that wrap around the week [0.55ms]\n(pass) valid opening hours > a later rule replaces the hours of the days it names [0.12ms]\n(pass) valid opening hours > spaces between tokens carry no meaning [0.09ms]\n(pass) valid opening hours > ranges may touch and may end at 24:00 [0.07ms]\n(pass) rejected opening hours > empty text [0.24ms]\n(pass) rejected opening hours > unknown days, including wrong case [0.15ms]\n(pass) rejected opening hours > invalid times [0.26ms]\n(pass) rejected opening hours > 24:00 is only allowed as an end time [0.07ms]\n(pass) rejected opening hours > ranges must end after they start [0.12ms]\n(pass) rejected opening hours > overlapping ranges are reported at the later-written range [0.28ms]\n(pass) rejected opening hours > a day named twice in one rule [0.12ms]\n(pass) rejected opening hours > text that ends too early [0.13ms]\n(pass) rejected opening hours > tokens that do not fit the format [0.32ms]\n(pass) rejected opening hours > characters that belong to no token [0.06ms]\n(pass) rejected opening hours > columns count from the start of the whole text [0.06ms]\n(pass) rejected opening hours > the first problem from the left is reported [0.12ms]\n(pass) rejected opening hours > the message names the column [0.09ms]\n\n 20 pass\n 0 fail\n 80 expect() calls\nRan 20 tests across 1 file. [8.00ms]\n"
+ },
+ "production_files": [
+  "src/openingHours.ts"
+ ],
+ "skill_loaded": true,
+ "foreign_references": [],
+ "committed": true,
+ "invalid_reasons": [],
+ "commits": 36,
+ "subjects": [
+  "test: opening hours test list",
+  "red: a single day with one range",
+  "green: a single day with one range",
+  "red: a day list with commas",
+  "green: a day list with commas",
+  "red: a day range opens every day in it",
+  "green: a day range opens every day in it",
+  "red: a day range wraps around the week",
+  "green: a day range wraps around the week",
+  "red: several ranges sorted by start",
+  "green: several ranges sorted by start",
+  "red: off closes the named days",
+  "green: off closes the named days",
+  "red: a later rule replaces earlier hours",
+  "green: a later rule replaces earlier hours",
+  "red: spaces carry no meaning",
+  "green: spaces carry no meaning",
+  "red: empty text",
+  "green: empty text",
+  "red: unknown day",
+  "green: unknown day",
+  "refactor: cursor-based recursive descent parser",
+  "red: invalid time",
+  "green: invalid time",
+  "red: end before start",
+  "green: end before start",
+  "red: overlap",
+  "green: overlap",
+  "red: duplicate day",
+  "green: duplicate day",
+  "red: text ends too early",
+  "green: text ends too early",
+  "red: unexpected token or character",
+  "green: unexpected token or character",
+  "refactor: simplify day and time reading, copy ranges per day, tick test list",
+  "test: design note"
+ ],
+ "depth": {
+  "exit": 0,
+  "lines": [
+   "src/openingHours.ts: surface 10, size 125, ratio 12.5, classitis no, pass-through 0, tests 1, unused 0, duplicate 1 -> deep"
+  ],
+  "findings": 1,
+  "surface": 10,
+  "size": 125
+ },
+ "replay": {
+  "exit": 0,
+  "verdict": "ACCEPT",
+  "out": "e562614 test     pass  exit=0 ok\nab9098e red      fail  exit=1 ok\n18b5dec green    pass  exit=0 ok\n51017e7 red      fail  exit=1 ok\n553e1b9 green    pass  exit=0 ok\n0aedfb4 red      fail  exit=1 ok\nc2ed666 green    pass  exit=0 ok\n4fce361 red      fail  exit=1 ok\n8102211 green    pass  exit=0 ok\n34c4b3d red      fail  exit=1 ok\n7d5b2d3 green    pass  exit=0 ok\n3d21218 red      fail  exit=1 ok\n61d010c green    pass  exit=0 ok\n423fb4c red      fail  exit=1 ok\n86c2e27 green    pass  exit=0 ok\n0723521 red      fail  exit=1 ok\n9cb097a green    pass  exit=0 ok\nb1def5b red      fail  exit=1 ok\na131fe8 green    pass  exit=0 ok\nd17af60 red      fail  exit=1 ok\n4da3ba4 green    pass  exit=0 ok\n0367351 refactor pass  exit=0 ok\n7ccc904 red      fail  exit=1 ok\n0f26f61 green    pass  exit=0 ok\n454628c red      fail  exit=1 ok\na636084 green    pass  exit=0 ok\nc2de2cd red      fail  exit=1 ok\n1bda2fb green    pass  exit=0 ok\n53562c3 red      fail  exit=1 ok\n0d956c2 green    pass  exit=0 ok\n03243e7 red      fail  exit=1 ok\n0bf076f green    pass  exit=0 ok\n6c94643 red      fail  exit=1 ok\n2c97ba6 green    pass  exit=0 ok\n107b38e refactor pass  exit=0 ok\ne952f76 test     pass  exit=0 ok\nREPLAY: ACCEPT\n"
+ }
+}
