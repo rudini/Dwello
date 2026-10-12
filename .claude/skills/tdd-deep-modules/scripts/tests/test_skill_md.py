@@ -91,7 +91,8 @@ class SkillMdTest(unittest.TestCase):
 
         for element in ("`bun run deepcheck:audit`", "after each green and refactor, before `tdd-step` commits",
                         "its gate result wins", "not on `tdd-step` commits",
-                        "the swarm of exported helpers, which deepcheck does not check", "untested modules"):
+                        "the swarm of exported helpers, which deepcheck does not check", "untested modules",
+                        "a finding after green is fixed in the following refactor, never inside green"):
             self.assertIn(element, text)
         self.assertNotIn("before every commit", text)
 
