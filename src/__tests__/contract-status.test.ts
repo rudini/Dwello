@@ -3,8 +3,10 @@ import {
 	contractEndError,
 	contractPeriod,
 	contractStatusOn,
+	endedSince,
 	localToday,
 	pastEndConfirmation,
+	statementsAfterEndError,
 	statusBadges
 } from '../lib/contract-status';
 
@@ -40,7 +42,7 @@ describe('Vertragsende beim Beenden', () => {
 	});
 
 	it('verlangt ein Datum als Tag', () => {
-		for (const wrong of ['', '31.03.2027', '2027-3-31'])
+		for (const wrong of ['', '31.03.2027', '2027-3-31', '2025-13-01', '2025-02-30'])
 			expect(contractEndError(wrong, '2024-04-01', today)).toBe(
 				'Bitte geben Sie das Vertragsende ein, zum Beispiel 31.12.2026.'
 			);
@@ -55,17 +57,52 @@ describe('Vertragsende beim Beenden', () => {
 
 // ein nachträglich erfasster Kündigungstermin: die Folge wird bestätigt, ein Tippfehler im Jahr fällt auf
 describe('Vergangenes Vertragsende', () => {
-	it('verlangt eine Bestätigung mit dem Tag, ab dem der Mietvertrag beendet ist', () => {
+	it('verlangt eine Bestätigung mit dem Tag, an dem der Mietvertrag endete', () => {
 		expect(pastEndConfirmation('2025-03-31', today)).toBe(
-			'Bitte bestätigen Sie, dass der Mietvertrag seit dem 01.04.2025 beendet ist.'
+			'Bitte bestätigen Sie, dass der Mietvertrag am 31.03.2025 endete, oder korrigieren Sie das Vertragsende.'
 		);
-		expect(pastEndConfirmation('2024-12-31', today)).toContain('seit dem 01.01.2025');
+		expect(pastEndConfirmation('2024-12-31', today)).toContain('am 31.12.2024 endete');
+	});
+
+	it('nennt den Tag nach dem Vertragsende auch über Monats-, Jahres- und Schaltjahresende', () => {
+		expect(endedSince('2024-02-28')).toBe('29.02.2024');
+		expect(endedSince('2024-02-29')).toBe('01.03.2024');
+		expect(endedSince('2025-02-28')).toBe('01.03.2025');
+		expect(endedSince('2025-12-31')).toBe('01.01.2026');
 	});
 
 	it('verlangt für heute und spätere Tage keine Bestätigung', () => {
 		expect(pastEndConfirmation('2026-10-10', today)).toBeNull();
 		expect(pastEndConfirmation('2027-03-31', today)).toBeNull();
 		expect(pastEndConfirmation('', today)).toBeNull();
+	});
+});
+
+// eine gespeicherte Abrechnung rechnet schon Mietstage nach dem neuen Vertragsende ab
+describe('Vertragsende vor dem Ende einer Abrechnung', () => {
+	const statement = (statementNumber: string, status: string) => ({
+		id: statementNumber,
+		statementNumber,
+		status,
+		periodEnd: '2025-12-31'
+	});
+
+	it('sagt bei Entwürfen, dass sie zuerst gelöscht und danach neu erstellt werden', () => {
+		expect(statementsAfterEndError([statement('NK-2025-0003', 'draft')])).toBe(
+			'Der Entwurf NK-2025-0003 enthält schon Mietstage nach diesem Tag. Löschen Sie zuerst den Entwurf und erstellen Sie die Nebenkostenabrechnung danach neu.'
+		);
+	});
+
+	// eine versandte Abrechnung ändert Dwello nicht: das Vertragsende kann nicht davor liegen
+	it('sagt bei einer versandten Abrechnung, bis wann sie abrechnet', () => {
+		expect(
+			statementsAfterEndError([
+				statement('NK-2025-0003', 'draft'),
+				statement('NK-2024-0001', 'sent')
+			])
+		).toBe(
+			'Die Nebenkostenabrechnung NK-2024-0001 ist schon versandt und rechnet Mietstage bis 31.12.2025 ab. Das Vertragsende kann nicht davor liegen. Prüfen Sie das Datum.'
+		);
 	});
 });
 

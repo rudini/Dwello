@@ -141,13 +141,68 @@ describe('Mietvertragsdetail', () => {
 		fireEvent(byTestId<HTMLInputElement>('contract-end-date-input')!, 'input', '31.03.2025');
 		await settle();
 		const dialog = document.querySelector('[role=dialog]')!;
-		expect(dialog.textContent).toContain('Der Mietvertrag ist seit dem 01.04.2025 beendet.');
+		expect(dialog.textContent).toContain('Der Mietvertrag endete am 31.03.2025.');
 		click('contract-end-confirm');
 		await settle();
 		expect(dialog.textContent).toContain(
-			'Bitte bestätigen Sie, dass der Mietvertrag seit dem 01.04.2025 beendet ist.'
+			'Bitte bestätigen Sie, dass der Mietvertrag am 31.03.2025 endete, oder korrigieren Sie das Vertragsende.'
 		);
 		expect(submitted).not.toHaveBeenCalled();
+	});
+
+	// die Folge für den Vermieter steht am Kästchen; ein Tag über ein Jahr zurück ist oft ein Tippfehler im Jahr
+	it('nennt am Kästchen die Folge und warnt bei einem Tag über ein Jahr zurück', async () => {
+		open();
+		click('contract-end-button');
+		fireEvent(byTestId<HTMLInputElement>('contract-end-date-input')!, 'input', '30.09.2026');
+		await settle();
+		const dialog = () => document.querySelector('[role=dialog]')!.textContent!.replace(/\s+/g, ' ');
+		expect(dialog()).toContain(
+			'Das Vertragsende liegt in der Vergangenheit. Seit dem 01.10.2026 gilt die Wohnung als nicht vermietet, wenn kein neuer Mietvertrag begonnen hat. Die Nebenkosten dieser Zeit trägt der Vermieter.'
+		);
+		expect(dialog()).not.toContain('Prüfen Sie das Jahr.');
+		fireEvent(byTestId<HTMLInputElement>('contract-end-date-input')!, 'input', '30.09.2025');
+		await settle();
+		expect(dialog()).toContain('Das ist über ein Jahr her. Prüfen Sie das Jahr.');
+	});
+
+	// ein Screenreader hört, dass jetzt eine Bestätigung nötig ist
+	it('sagt das Kästchen an, sobald es erscheint', async () => {
+		open();
+		click('contract-end-button');
+		fireEvent(byTestId<HTMLInputElement>('contract-end-date-input')!, 'input', '31.03.2025');
+		await settle();
+		expect(byTestId('contract-end-past-confirm')!.closest('[aria-live="polite"]')).not.toBeNull();
+	});
+
+	// die Bestätigung gilt nur für den Tag, der dabei angezeigt war
+	it('nimmt die Bestätigung zurück, wenn das Vertragsende danach ändert', async () => {
+		open();
+		click('contract-end-button');
+		const input = byTestId<HTMLInputElement>('contract-end-date-input')!;
+		fireEvent(input, 'input', '31.03.2025');
+		await settle();
+		click('contract-end-past-confirm');
+		await settle();
+		fireEvent(input, 'input', '30.04.2025');
+		await settle();
+		expect(byTestId<HTMLInputElement>('contract-end-past-confirm')!.checked).toBe(false);
+	});
+
+	// angekreuzt ist der Fehler behoben: er verschwindet am Kästchen
+	it('nimmt den Fehler am Kästchen zurück, sobald es angekreuzt ist', async () => {
+		open();
+		click('contract-end-button');
+		fireEvent(byTestId<HTMLInputElement>('contract-end-date-input')!, 'input', '31.03.2025');
+		await settle();
+		click('contract-end-confirm');
+		await settle();
+		click('contract-end-past-confirm');
+		await settle();
+		expect(byTestId('contract-end-past-confirm')!.getAttribute('aria-invalid')).toBeNull();
+		expect(document.querySelector('[role=dialog]')!.textContent).not.toContain(
+			'Bitte bestätigen Sie'
+		);
 	});
 
 	it('fragt bei heute und späteren Tagen nicht nach einer Bestätigung', async () => {
@@ -155,10 +210,11 @@ describe('Mietvertragsdetail', () => {
 		click('contract-end-button');
 		fireEvent(byTestId<HTMLInputElement>('contract-end-date-input')!, 'input', '31.03.2027');
 		await settle();
+		expect(document.querySelector('[role=dialog]')!.textContent).toContain('Mittwoch, 31. März 2027');
 		expect(byTestId('contract-end-past-confirm')).toBeNull();
 	});
 
-	it('sendet die Bestätigung mit und meldet, seit wann der Mietvertrag beendet ist', async () => {
+	it('sendet die Bestätigung mit und meldet, wann der Mietvertrag endete', async () => {
 		toasts.set([]);
 		open();
 		click('contract-end-button');
@@ -172,7 +228,7 @@ describe('Mietvertragsdetail', () => {
 		expect(formData.get('pastConfirmed')).toBe('on');
 		await after({ update: async () => {}, result: { type: 'success' } });
 		expect(get(toasts).map((toast) => toast.message)).toEqual([
-			'Der Mietvertrag von Anna Keller ist seit dem 01.04.2025 beendet'
+			'Der Mietvertrag von Anna Keller endete am 31.03.2025'
 		]);
 	});
 
@@ -221,7 +277,7 @@ describe('Mietvertragsdetail', () => {
 			click('contract-delete-button');
 			expect(byTestId<HTMLButtonElement>('contract-delete-confirm')!.disabled).toBe(true);
 			expect(document.querySelector('[role=dialog]')!.textContent!.replace(/\s+/g, ' ')).toContain(
-				'Ein Mietvertrag, der begonnen hat, kann nicht gelöscht werden: Die Nebenkostenabrechnung braucht seine Mietstage. Ist er falsch erfasst, korrigieren Sie ihn unter «Bearbeiten».'
+				'Ein Mietvertrag, der begonnen hat, kann nicht gelöscht werden: Die Nebenkostenabrechnung braucht seine Mietstage, also die Tage, an denen er gilt. Ist er falsch erfasst, korrigieren Sie ihn unter «Bearbeiten».'
 			);
 		}
 	);

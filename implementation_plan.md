@@ -4636,6 +4636,15 @@ A tenant gives notice for a later day: «Mietvertrag beenden» asks for the Vert
   longer be deleted (only ended ones; the dialog says until when it runs, scenario first); a future contract proposes
   its start; the action reads the Vertragsbeginn from the backend and checks the format; the toast and the sent date
   are tested; the field-error state is in the axe check (`end-dialog-error`); lows in `offene-punkte.md`.
+- [x] **Review I round 4, personas Helga I3, Sven I3, Anna I2** (`I-review-4.md`, `helga-i3.md`, `sven-i3.md`,
+  `anna-i2.md`): the backend refuses an end before a statement of the contract (`updateContract`, 409 with the
+  statements; `contract-end.pg.test.ts`, contract `tests/contracts/contract-end-refused.json`); the BFF says what to do
+  for a draft or a sent statement (`statementsAfterEndError`); «Bearbeiten» confirms a changed past end like the dialog
+  (`src/routes/contracts/PastEndConfirm.svelte`, `ContractForm.svelte`, `apiCall` passes the error body as `details`);
+  the confirmation holds for the day shown, is announced and names the landlord's consequence; dialogs scroll in a short
+  window (`Dialog.svelte`); impossible days refused; unused `DELETE /api/contracts/[id]` removed; a11y state
+  `past-end-error`. Scenarios first in `contract-edit.feature` and `contract-detail.feature`. Requirements A-2 done,
+  A-7 to A-9 added in `docs/anforderungen-vertragsende.md`.
 - [x] **IF-1, IF-3** (product owner): only a contract that has not started can be deleted (`contracts/[id]/+page.svelte`,
   `+page.server.ts` `delete`); a past Vertragsende is confirmed with a checkbox naming since when the contract has ended
   (`pastEndConfirmation`, `endedSince` in `contract-status.ts`; also checked in the action); the action refuses a day

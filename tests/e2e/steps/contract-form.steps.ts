@@ -14,6 +14,7 @@ import {
 import { listedContract } from '../questions/contracts';
 import {
 	changeBaseRent,
+	saveEndDate,
 	chooseTenant,
 	chooseTenantAndApartment,
 	chooseTenantWhileLoading,
@@ -172,6 +173,17 @@ Given(
 When('der Liegenschaftsverwalter den Mietzins auf {string} Franken ändert', async ({ verwalter }, baseRent: string) => {
 	await verwalter.perform(changeBaseRent(baseRent));
 });
+
+When('der Liegenschaftsverwalter das Vertragsende {string} speichern will', async ({ verwalter }, date: string) => {
+	await verwalter.perform(saveEndDate(date));
+});
+
+When(
+	'der Liegenschaftsverwalter das Vertragsende {string} speichert und die Folge bestätigt',
+	async ({ verwalter }, date: string) => {
+		await verwalter.perform(saveEndDate(date, { confirmPast: true }));
+	}
+);
 
 When('der Liegenschaftsverwalter den Mietzins leert', async ({ verwalter }) => {
 	await verwalter.perform(changeBaseRent(''));

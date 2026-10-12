@@ -1,17 +1,20 @@
 # Anforderungen: Vertragsende und Kündigung
 
-Stand: 12.10.2026. Quelle: Fachreview I (`docs/reviews/I-fachreview-1.md`, Findings IF-2, IF-4, IF-5, IF-6, IF-8, IF-9) und die Personas Helga, Sven und Anna (Lauf I). Die Funktionen «Mietvertrag beenden» auf ein künftiges oder vergangenes Datum, die Bestätigung eines vergangenen Vertragsendes und die Löschregel (nur vor dem Vertragsbeginn) sind umgesetzt. Dieses Dokument beschreibt, was danach noch fehlt.
+Stand: 12.10.2026. Quelle: Fachreview I (`docs/reviews/I-fachreview-1.md`, Findings IF-2, IF-4, IF-5, IF-6, IF-8, IF-9), Review I Runde 4 (`docs/reviews/I-review-4.md`) und die Personas Helga, Sven und Anna (Läufe I, I2, I3). Umgesetzt sind: «Mietvertrag beenden» auf ein künftiges oder vergangenes Datum, die Bestätigung eines vergangenen Vertragsendes (auch unter «Bearbeiten»), die Ablehnung eines Vertragsendes vor dem Ende einer gespeicherten Abrechnung (im Backend) und die Löschregel (nur vor dem Vertragsbeginn). Dieses Dokument beschreibt, was danach noch fehlt.
 
 Jede Anforderung nennt das Problem, was Dwello tun muss, wie wir es prüfen (Szenarien in der Sprache von `tests/e2e/features`), was nicht dazugehört und welche Fragen der Product Owner oder eine Fachperson klären muss. Begriffe, die nicht im Glossar stehen, sind mit *(Glossar fehlt)* markiert und in `docs/design/offene-punkte.md` vorgeschlagen.
 
 | ID | Anforderung | Priorität | Quelle |
 |---|---|---|---|
 | A-1 | Befristung und Kündigung unterscheiden | hoch | IF-4, Helga |
-| A-2 | Vertragsende unter «Bearbeiten» prüfen | hoch | IF-8, IF-3, Helga |
+| A-2 | Vertragsende unter «Bearbeiten» prüfen | umgesetzt | IF-8, IF-3, Helga, Anna |
 | A-3 | Hinweis auf die Kündigungsfrist | mittel | IF-2 |
 | A-4 | Bevorstehendes Vertragsende sichtbar machen | mittel | IF-5, Anna, Helga |
 | A-5 | Neue Adresse für die Schlussabrechnung | mittel | IF-6, Anna |
 | A-6 | Stillschweigend fortgesetzter befristeter Mietvertrag | niedrig | IF-9 |
+| A-7 | Doppelt erfassten Mietvertrag entfernen | mittel | Anna (I2, M2) |
+| A-8 | Früheren Mietvertrag als Historie erkennbar machen | mittel | Anna (I2, M3) |
+| A-9 | «Noch nicht abgerechnet» nach den Mietverträgen der Periode | hoch | Helga (I3, M3) |
 
 Priorität: «hoch» heisst vor dem ersten echten Einsatz, weil sonst falsche Daten oder Geldfolgen entstehen. «mittel» verhindert einen wahrscheinlichen Fehler eines Laien. «niedrig» betrifft einen seltenen Fall.
 
@@ -29,7 +32,7 @@ Priorität: «hoch» heisst vor dem ersten echten Einsatz, weil sonst falsche Da
    - befristet: «Befristet bis TT.MM.JJJJ»,
    - gekündigt: «Unbefristet, gekündigt auf den TT.MM.JJJJ».
 4. Im Assistenten kann man bei einem gekündigten Vertrag die Kündigung zurücknehmen («Kündigung aufheben»). Der Vertrag ist danach wieder unbefristet ohne Vertragsende. Die Aktion nennt ihre Folge: «Der Mietvertrag läuft dann ohne Ende weiter.»
-5. Bestehende Verträge mit Vertragsende gelten als *vereinbart*. Eine Datenmigration ist nicht nötig, solange es keine produktive Datenbank gibt; die Spalte kommt in `0001_schema.sql`.
+5. Bestehende Verträge mit Vertragsende gelten als *vereinbart*. Eine Datenmigration ist nicht nötig, solange es keine produktive Datenbank gibt; die Spalte kommt in `0001_schema.sql`. Zu A-6: Die Aufgabe dort gilt nur für Verträge, deren vereinbartes Ende nach der Einführung von A-1 liegt; sonst fragt die Übersicht nach jedem alten befristeten Vertrag.
 6. Der Product Owner passt die Definition von «Vertragsende» im Glossar an. Vorschlag: «Letzter Tag des Mietverhältnisses: bei befristeten Verträgen vereinbart, bei unbefristeten der Kündigungstermin. Leer, solange ein unbefristeter Vertrag nicht gekündigt ist.»
 
 **Akzeptanzkriterien**
@@ -57,37 +60,15 @@ Szenario: Kündigung aufheben
 
 ---
 
-## A-2 Vertragsende unter «Bearbeiten» prüfen
+## A-2 Vertragsende unter «Bearbeiten» prüfen – umgesetzt
 
-**Problem.** «Beenden» prüft das Vertragsende jetzt, «Bearbeiten» nicht. Im Assistenten lässt sich ein Vertragsende setzen, das
-- vor dem Ende einer schon gespeicherten Nebenkostenabrechnung des Vertrags liegt (die Abrechnung behält ihre alten Mietstage, der Nachmieter könnte dieselben Tage nochmals bezahlen),
-- in der Vergangenheit liegt, ohne dass die Folge bestätigt wird (ein Tippfehler im Jahr beendet den Vertrag rückwirkend, die Wohnung gilt als leer).
+Umgesetzt nach Review I Runde 4 und den Personas Anna (I2, Blocker B1) und Helga (I3, M4):
 
-**Anforderungen**
+- Ein geändertes Vertragsende in der Vergangenheit verlangt im Formular dieselbe Bestätigung wie im Dialog «Beenden» (`src/routes/contracts/PastEndConfirm.svelte`). Ein unverändertes Vertragsende wird nicht nochmals bestätigt.
+- Das Backend lehnt ein Vertragsende vor dem Ende einer gespeicherten Abrechnung des Vertrags ab (`updateContract`, 409 mit den Abrechnungen). Bei einem Entwurf sagt Dwello: «Der Entwurf … enthält schon Mietstage nach diesem Tag. Löschen Sie zuerst den Entwurf und erstellen Sie die Nebenkostenabrechnung danach neu.» Bei einer versandten Abrechnung nennt Dwello, bis wann sie abrechnet.
+- Szenarien in `tests/e2e/features/contract-edit.feature` und `contract-detail.feature`, Backend-Test `contract-end.pg.test.ts`.
 
-1. Der Assistent wendet dieselben Regeln an wie «Beenden» (`contractEndError`, `pastEndConfirmation`, die Prüfung gegen gespeicherte Abrechnungen), auch ohne JavaScript in der Server-Aktion.
-2. Ein Vertragsende vor dem Ende einer Abrechnung des Vertrags lehnt Dwello ab:
-   - bei einem Entwurf: «Die Nebenkostenabrechnung bis TT.MM.JJJJ enthält schon Mietstage nach diesem Tag. Löschen Sie den Entwurf und erstellen Sie ihn danach neu.» mit Link zum Entwurf;
-   - bei einer versandten oder bezahlten Abrechnung: «… Wählen Sie den TT.MM.JJJJ oder einen späteren Tag.»
-3. Ein Vertragsende vor heute verlangt im Assistenten dieselbe Bestätigung wie im Dialog («Der Mietvertrag ist seit dem TT.MM.JJJJ beendet.»).
-4. Das Backend setzt Regel 2 selbst durch (`updateContract`), damit kein anderer Weg sie umgeht. Antwort 409 mit einer Meldung, die die BFF übersetzt.
-
-**Akzeptanzkriterien**
-
-```gherkin
-Szenario: Vertragsende im Assistenten vor dem Ende einer Abrechnung
-  Angenommen für "Anna Keller" gibt es die Abrechnung 2025 im Gebäude "Ahornhof"
-  Wenn der Liegenschaftsverwalter im Assistenten das Vertragsende "2025-03-31" speichert
-  Dann meldet der Assistent "Die Nebenkostenabrechnung bis 31.12.2025 enthält schon Mietstage nach diesem Tag."
-
-Szenario: Vergangenes Vertragsende im Assistenten
-  Wenn der Liegenschaftsverwalter im Assistenten das Vertragsende "2025-03-31" speichert, ohne die Folge zu bestätigen
-  Dann meldet der Assistent "Bitte bestätigen Sie, dass der Mietvertrag seit dem 01.04.2025 beendet ist."
-```
-
-Dazu ein `*.pg.test.ts` für Regel 4.
-
-**Nicht dazu:** eine gespeicherte Abrechnung automatisch neu berechnen.
+**Offen:** Die Meldung nennt den Entwurf, verlinkt ihn aber nicht (Anna, I2 M1).
 
 ---
 
@@ -97,8 +78,8 @@ Dazu ein `*.pg.test.ts` für Regel 4.
 
 **Anforderungen**
 
-1. Der Dialog «Mietvertrag beenden» fragt zusätzlich: «Kündigung erhalten am» (Datum, optional, vorgeschlagen ist heute). Hilfe am Feld: «Der Tag, an dem das Kündigungsschreiben angekommen ist.»
-2. Liegen zwischen «Kündigung erhalten am» und dem Vertragsende weniger als 3 Monate, zeigt Dwello einen Hinweis, keine Sperre: «Zwischen Eingang und Vertragsende liegen weniger als 3 Monate. Dann gilt die Kündigung wohl erst auf den nächsten Kündigungstermin. Ausnahme: Ein Ersatzmieter übernimmt den Mietvertrag, oder Sie haben das Ende mit dem Mieter vereinbart.»
+1. Der Dialog «Mietvertrag beenden» fragt zusätzlich: «Kündigung erhalten am» (Datum, optional, leer). Kein Vorschlag: Heute wäre bei jeder spät erfassten Kündigung falsch und löste den Hinweis aus Punkt 2 grundlos aus. Hilfe am Feld: «Der Tag, an dem das Kündigungsschreiben angekommen ist.»
+2. Ist «Kündigung erhalten am» ausgefüllt und liegen bis zum Vertragsende weniger als 3 Monate, zeigt Dwello einen Hinweis, keine Sperre: «Zwischen Eingang und Vertragsende liegen weniger als 3 Monate. Dann gilt die Kündigung wohl erst auf den nächsten Kündigungstermin. Ausnahme: Ein Ersatzmieter übernimmt den Mietvertrag, oder Sie haben das Ende mit dem Mieter vereinbart.»
 3. Der Verwalter kann trotzdem speichern. Dwello prüft keine ortsüblichen Termine und keine Formvorschriften; das wäre Rechtsberatung und je nach Gemeinde falsch.
 4. «Kündigung erhalten am» wird beim Mietvertrag gespeichert und auf der Detailseite gezeigt.
 5. Die Hilfe nennt die Form: «Die Kündigung des Mieters muss schriftlich sein. Bei einer Familienwohnung braucht es die Unterschrift beider Ehegatten.» (Art. 266l, 266m OR; Wortlaut fachlich prüfen.)
@@ -126,14 +107,16 @@ Szenario: Kündigung mit genügend Frist
 
 ## A-4 Bevorstehendes Vertragsende sichtbar machen
 
+**Voraussetzung:** A-1 (nur *gekündigte* Verträge).
+
 **Problem.** Die Übersicht nennt ein Vertragsende erst 60 Tage vorher als Frist. Die Wohnung zeigt bis zum letzten Tag «Vermietet», ohne Hinweis. In der Kündigungszeit fallen aber Aufgaben an: Wiedervermietung (sonst Leerstand zulasten des Vermieters), Wohnungsabnahme, Rückgabe des Mietzinsdepots, neue Adresse (A-5). Ein Laie, der Dwello wenige Male im Jahr öffnet, verpasst sie.
 
 **Anforderungen**
 
-1. Die Übersicht nennt jedes gekündigte Vertragsende ab dem Tag, an dem es erfasst ist, als Aufgabe: «Der Mietvertrag von {Name}, Wohnung {Nr}, endet am TT.MM.JJJJ. Suchen Sie einen Nachmieter.» Die Aufgabe verschwindet, sobald für die Wohnung ein Mietvertrag ab dem Tag danach erfasst ist.
+1. Die Übersicht nennt jedes gekündigte Vertragsende ab dem Tag, an dem es erfasst ist, als Aufgabe «Nachmieter für Wohnung {Nr} suchen» mit dem Text: «Der Mietvertrag von {Name} endet am TT.MM.JJJJ. Suchen Sie einen Nachmieter *(Glossar fehlt)*.» Die Aufgabe verschwindet, sobald für die Wohnung ein Mietvertrag ab dem Tag danach erfasst ist.
 2. Wohnungsliste, Wohnungsseite und Mieterseite zeigen neben «Vermietet» das Ende: «Vermietet bis TT.MM.JJJJ».
 3. Nach dem Beenden zeigt die Meldung, was jetzt zu tun ist, mit Links: neuen Mietvertrag erfassen, neue Adresse eintragen (A-5).
-4. Die bestehende Frist «Vertragsende» (60 Tage) bleibt.
+4. Für einen Vertrag mit dieser Aufgabe entfällt die bestehende Frist «Vertragsende» (60 Tage, `src/lib/overview.ts`), damit derselbe Vertrag nicht zweimal erscheint. Für befristete Verträge bleibt die Frist.
 
 **Akzeptanzkriterien**
 
@@ -212,9 +195,76 @@ Szenario: Befristeten Mietvertrag unbefristet weiterführen
 
 ---
 
+## A-7 Doppelt erfassten Mietvertrag entfernen
+
+**Problem.** Seit der Löschregel lässt sich ein Mietvertrag nur vor seinem Beginn löschen. Ein Vertrag, der irrtümlich doppelt erfasst wurde und schon begonnen hat, bleibt stehen. Anna (I2) fand nur einen Trick: den Vertragsbeginn in die Zukunft schieben und dann löschen.
+
+**Anforderungen**
+
+1. Ein Mietvertrag, der begonnen hat, aber in keiner Nebenkostenabrechnung vorkommt, lässt sich löschen, wenn für dieselbe Wohnung im selben Zeitraum ein anderer Mietvertrag besteht oder der Verwalter ausdrücklich bestätigt: «Dieser Mietvertrag wurde irrtümlich erfasst. Seine Mietstage zählen danach als Leerstand, wenn kein anderer Mietvertrag die Zeit abdeckt.»
+2. Ein Mietvertrag mit einer Abrechnung bleibt gesperrt.
+3. Der Trick über einen künftigen Vertragsbeginn ist gesperrt: Unter «Bearbeiten» lässt sich der Vertragsbeginn eines begonnenen Vertrags nicht in die Zukunft verschieben, wenn er Mietstage in einer Abrechnung hat.
+4. Das Backend setzt die Löschregel selbst durch (heute nur BFF und Dialog). Die Testbereinigung (`tests/e2e/fixtures/backend.ts`, Backend-Hilfen) räumt dann über die Wohnung oder direkt in der Datenbank auf.
+
+**Akzeptanzkriterien**
+
+```gherkin
+Szenario: Doppelt erfassten Mietvertrag löschen
+  Angenommen "Anna Keller" mietet die Wohnung "2.01" seit "2024-04-01" für "950" Franken
+  Und derselbe Mietvertrag ist ein zweites Mal erfasst
+  Wenn der Liegenschaftsverwalter den zweiten Mietvertrag löscht und bestätigt, dass er irrtümlich erfasst wurde
+  Dann ist der zweite Mietvertrag nicht mehr auffindbar
+```
+
+**Offene Fragen:** Genügt die Bestätigung, oder soll Dwello das Löschen nur bei einem echten Duplikat (gleiche Wohnung, gleicher Mieter, gleicher Zeitraum) anbieten?
+
+---
+
+## A-8 Früheren Mietvertrag als Historie erkennbar machen
+
+**Problem.** Anna (I2) hielt einen beendeten Mietvertrag von 2018–2021 in derselben Wohnung für ein Duplikat. Nichts zeigt, dass er die Historie der Wohnung ist und für alte Abrechnungen gebraucht wird.
+
+**Anforderungen**
+
+1. Die Wohnungsseite zeigt die Mietverträge der Wohnung nach Zeit geordnet, der laufende oben, darunter «Frühere Mietverträge».
+2. Ein beendeter Mietvertrag zeigt neben «Beendet» die Hilfe: «Bleibt als Historie erhalten: Nebenkostenabrechnungen brauchen seine Mietstage.»
+3. Der Löschdialog eines beendeten Vertrags nennt, ob es Abrechnungen dazu gibt, und verlinkt sie.
+
+**Akzeptanzkriterien**
+
+```gherkin
+Szenario: Früherer Mietvertrag auf der Wohnungsseite
+  Angenommen "Bruno Meier" mietete die Wohnung "2.01" von "2018-01-01" bis "2021-12-31" für "900" Franken
+  Und "Anna Keller" mietet die Wohnung "2.01" seit "2022-01-01" für "950" Franken
+  Wenn der Liegenschaftsverwalter die Wohnung "2.01" öffnet
+  Dann steht der Mietvertrag von "Bruno Meier" unter "Frühere Mietverträge"
+```
+
+---
+
+## A-9 «Noch nicht abgerechnet» nach den Mietverträgen der Periode
+
+**Problem.** Die Übersicht erinnert an eine nicht abgerechnete Periode eines Gebäudes nur, solange heute eine Wohnung vermietet ist (`missingPeriod` in `src/routes/dashboard/+page.server.ts` prüft die heutige Belegung). Helga (I3) beendete den letzten laufenden Vertrag eines Gebäudes rückwirkend: Die Erinnerung an die Abrechnung 2025 verschwand, obwohl der Mieter für 2025 noch eine Abrechnung bekommen muss. Das bestand schon vorher; mit einem Vertragsende in der Vergangenheit tritt es öfter auf. Folge: Der Mieter erhält keine Abrechnung über sein Akonto.
+
+**Anforderungen**
+
+1. Die Erinnerung «Noch nicht abgerechnet» gilt für jedes Gebäude, das in der Periode einen Mietvertrag hatte, nicht nur für Gebäude mit heutiger Belegung.
+2. Sie verschwindet, wenn jeder Mietvertrag der Periode eine Abrechnung hat.
+
+**Akzeptanzkriterien**
+
+```gherkin
+Szenario: Erinnerung bleibt nach dem Auszug des letzten Mieters
+  Angenommen "Anna Keller" mietete die Wohnung "2.01" von "2024-04-01" bis "2025-09-30" für "950" Franken
+  Und die Wohnung "2.01" ist die einzige Wohnung des Gebäudes "Ahornhof"
+  Wenn der Liegenschaftsverwalter die Übersicht öffnet
+  Dann nennt die Übersicht die Aufgabe "Noch nicht abgerechnet: Ahornhof"
+```
+
+---
+
 ## Ebenfalls offen (kleiner, in `docs/design/offene-punkte.md`)
 
-- Das Backend löscht über die API jeden Mietvertrag ohne Abrechnung; die Regel «nur vor dem Vertragsbeginn» setzen Dialog und BFF durch. Für das Backend müsste die Testbereinigung (`tests/e2e/fixtures/backend.ts`, Backend-Hilfen) anders aufräumen.
 - «Heute» rechnet das Backend in UTC, die App in Schweizer Zeit (IF-10, I-10).
 - Tab-Reihenfolge im Dialog: Der Bestätigen-Knopf kommt vor dem Feld (Sven).
 - Gebäude- und Wohnungsseite erklären Leer und Gesperrt widersprüchlich (Anna).

@@ -3,7 +3,7 @@
  * Business logic for rental contract operations
  */
 
-import { eq, and, or, sql, desc, gte, lte, isNull, ilike } from 'drizzle-orm';
+import { eq, and, or, sql, desc, gt, gte, lte, isNull, ilike } from 'drizzle-orm';
 import { db } from '../db/connection';
 import {
 	rentalContracts,
@@ -287,6 +287,26 @@ export async function createContract(data: NewRentalContract): Promise<RentalCon
 	return contract;
 }
 
+/** The contract's statements that bill rent days after that day */
+async function statementsAfter(contractId: string, endDate: string) {
+	return db
+		.select({
+			id: utilityStatements.id,
+			statementNumber: utilityStatements.statementNumber,
+			status: utilityStatements.status,
+			periodEnd: utilityStatements.periodEnd
+		})
+		.from(utilityStatements)
+		.where(and(eq(utilityStatements.contractId, contractId), gt(utilityStatements.periodEnd, endDate)));
+}
+
+/** A Vertragsende before the end of a stored statement: the statement already bills the days after it */
+export class StatementsAfterEndError extends Error {
+	constructor(readonly statements: Awaited<ReturnType<typeof statementsAfter>>) {
+		super('Contract end before the end of its utility statements');
+	}
+}
+
 /**
  * Update an existing contract
  */
@@ -313,6 +333,11 @@ export async function updateContract(
 		if (hasOverlap) {
 			throw new Error(`Contract would overlap with existing contract ${overlappingContract}`);
 		}
+	}
+
+	if (data.endDate) {
+		const statements = await statementsAfter(id, data.endDate);
+		if (statements.length) throw new StatementsAfterEndError(statements);
 	}
 
 	const [contract] = await db

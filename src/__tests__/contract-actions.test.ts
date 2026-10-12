@@ -3,6 +3,7 @@ import { runAction } from './helpers/action';
 import { actions, load } from '../routes/contracts/[id]/+page.server';
 import { load as listLoad } from '../routes/contracts/+page.server';
 import { localToday } from '../lib/contract-status';
+import refused from '../../tests/contracts/contract-end-refused.json';
 
 describe('Vertragsstatus', () => {
 	it('gibt Liste und Detail den Tag des Servers mit', async () => {
@@ -32,17 +33,12 @@ describe('Mietvertrag beenden', () => {
 			'c1',
 			200,
 			{ endDate: '2099-12-31' },
-			{ startDate: '2024-04-01', tenantId: 't1' }
+			{ startDate: '2024-04-01' }
 		);
 		await result;
 
 		expect(calls).toEqual([
 			{ method: undefined, url: 'http://localhost:3001/api/v1/contracts/c1', body: undefined },
-			{
-				method: undefined,
-				url: 'http://localhost:3001/api/v1/statements?tenantId=t1&limit=100',
-				body: undefined
-			},
 			{
 				method: 'PUT',
 				url: 'http://localhost:3001/api/v1/contracts/c1',
@@ -51,7 +47,7 @@ describe('Mietvertrag beenden', () => {
 		]);
 	});
 
-	// auch ohne JavaScript: ein nachträglich erfasster Kündigungstermin braucht die Bestätigung seiner Folge
+	// die Aktion prüft selbst (ein Formular ohne JavaScript): ein nachträglich erfasster Kündigungstermin braucht die Bestätigung seiner Folge
 	it('lehnt ein Vertragsende vor heute ohne Bestätigung ab, ohne den Mietvertrag zu ändern', async () => {
 		const { calls, result } = runAction(
 			actions.end,
@@ -64,7 +60,7 @@ describe('Mietvertrag beenden', () => {
 		expect(await result).toMatchObject({
 			status: 400,
 			data: {
-				endError: 'Bitte bestätigen Sie, dass der Mietvertrag seit dem 01.04.2025 beendet ist.'
+				endError: 'Bitte bestätigen Sie, dass der Mietvertrag am 31.03.2025 endete, oder korrigieren Sie das Vertragsende.'
 			}
 		});
 		expect(calls.filter((call) => call.method === 'PUT')).toEqual([]);
@@ -76,7 +72,7 @@ describe('Mietvertrag beenden', () => {
 			'c1',
 			200,
 			{ endDate: '2025-03-31', pastConfirmed: 'on' },
-			{ startDate: '2024-04-01', tenantId: 't1', data: [] }
+			{ startDate: '2024-04-01' }
 		);
 		await result;
 
@@ -89,31 +85,24 @@ describe('Mietvertrag beenden', () => {
 		]);
 	});
 
-	// eine gespeicherte Nebenkostenabrechnung enthält schon Mietstage nach dem neuen Ende
-	it('lehnt ein Vertragsende vor dem Ende einer Abrechnung des Mietvertrags ab', async () => {
-		const { calls, result } = runAction(
+	// eine gespeicherte Nebenkostenabrechnung enthält schon Mietstage nach dem neuen Ende: das Backend lehnt ab
+	it('sagt bei einem Entwurf, der schon Mietstage nach dem Tag enthält, was zu tun ist', async () => {
+		const { result } = runAction(
 			actions.end,
 			'c1',
 			200,
 			{ endDate: '2025-03-31', pastConfirmed: 'on' },
-			{
-				startDate: '2024-04-01',
-				tenantId: 't1',
-				data: [
-					{ contractId: 'c1', periodEnd: '2025-12-31' },
-					{ contractId: 'c2', periodEnd: '2026-12-31' }
-				]
-			}
+			{ startDate: '2024-04-01' },
+			{ status: 409, answer: refused }
 		);
 
 		expect(await result).toMatchObject({
 			status: 409,
 			data: {
 				endError:
-					'Die Nebenkostenabrechnung bis 31.12.2025 enthält schon Mietstage nach diesem Tag. Wählen Sie den 31.12.2025 oder einen späteren Tag.'
+					'Der Entwurf NK-2025-0003 enthält schon Mietstage nach diesem Tag. Löschen Sie zuerst den Entwurf und erstellen Sie die Nebenkostenabrechnung danach neu.'
 			}
 		});
-		expect(calls.filter((call) => call.method === 'PUT')).toEqual([]);
 	});
 
 	// aus einem alten Fenster: ein schon gesetztes Vertragsende ändert man unter «Bearbeiten»
@@ -187,7 +176,7 @@ describe('Mietvertrag löschen', () => {
 			status: 409,
 			data: {
 				deleteError:
-					'Ein Mietvertrag, der begonnen hat, kann nicht gelöscht werden: Die Nebenkostenabrechnung braucht seine Mietstage.'
+					'Ein Mietvertrag, der begonnen hat, kann nicht gelöscht werden: Die Nebenkostenabrechnung braucht seine Mietstage, also die Tage, an denen er gilt.'
 			}
 		});
 		expect(calls.filter((call) => call.method === 'DELETE')).toEqual([]);

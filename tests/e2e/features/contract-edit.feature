@@ -29,3 +29,19 @@ Funktionalität: Mietvertrag bearbeiten
   Szenario: Bearbeitung abbrechen
     Wenn der Liegenschaftsverwalter die Bearbeitung abbricht
     Dann ist der Liegenschaftsverwalter auf der Detailseite des Mietvertrags von "Anna Keller"
+
+  # Ein Tippfehler im Jahr soll den Mietvertrag nicht rückwirkend beenden
+  Szenario: Vergangenes Vertragsende verlangt eine Bestätigung
+    Wenn der Liegenschaftsverwalter das Vertragsende "2025-03-31" speichern will
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Bitte bestätigen Sie, dass der Mietvertrag am 31.03.2025 endete, oder korrigieren Sie das Vertragsende."
+
+  Szenario: Vergangenes Vertragsende bestätigen
+    Wenn der Liegenschaftsverwalter das Vertragsende "2025-03-31" speichert und die Folge bestätigt
+    Dann ist der Liegenschaftsverwalter auf der Detailseite des Mietvertrags von "Anna Keller"
+    Und endet der Mietvertrag am "31.03.2025"
+
+  # Die Abrechnung 2025 enthält schon Mietstage bis Ende Jahr
+  Szenario: Vertragsende vor dem Ende einer Abrechnung
+    Angenommen für "Anna Keller" gibt es die Abrechnung 2025 im Gebäude "Ahornhof"
+    Wenn der Liegenschaftsverwalter das Vertragsende "2025-03-31" speichert und die Folge bestätigt
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Löschen Sie zuerst den Entwurf und erstellen Sie die Nebenkostenabrechnung danach neu."

@@ -35,9 +35,17 @@ export function contractPeriod(
 	return `${status === 'future' ? 'ab' : 'seit'} ${formatDate(startDate)}, unbefristet`;
 }
 
+/** A real day as YYYY-MM-DD: not 2025-13-01 or 2025-02-30 */
+function isDay(date: string) {
+	const day = new Date(`${date}T00:00:00Z`);
+	return (
+		/^\d{4}-\d{2}-\d{2}$/.test(date) && !isNaN(day.getTime()) && day.toISOString().startsWith(date)
+	);
+}
+
 /** Why a contract cannot be ended on that day (YYYY-MM-DD), or null: never before its start */
 export function contractEndError(endDate: string, startDate: string, today: string): string | null {
-	if (!/^\d{4}-\d{2}-\d{2}$/.test(endDate))
+	if (!isDay(endDate))
 		return `Bitte geben Sie das Vertragsende ein, zum Beispiel 31.12.${today.slice(0, 4)}.`;
 	if (endDate < startDate.slice(0, 10))
 		return `Das Vertragsende kann nicht vor dem Vertragsbeginn am ${formatDate(startDate.slice(0, 10))} liegen.`;
@@ -54,5 +62,16 @@ export function endedSince(endDate: string) {
 /** An end before today, e.g. a notice recorded late, is confirmed with its consequence; null when none is needed */
 export function pastEndConfirmation(endDate: string, today: string): string | null {
 	if (!endDate || endDate >= today) return null;
-	return `Bitte bestätigen Sie, dass der Mietvertrag seit dem ${endedSince(endDate)} beendet ist.`;
+	return `Bitte bestätigen Sie, dass der Mietvertrag am ${formatDate(endDate)} endete, oder korrigieren Sie das Vertragsende.`;
+}
+
+/** A stored statement already bills rent days after the new Vertragsende (backend 409, tests/contracts/contract-end-refused.json) */
+export function statementsAfterEndError(
+	statements: { statementNumber: string; status: string; periodEnd: string }[]
+): string {
+	const sent = statements.find((statement) => statement.status !== 'draft');
+	if (sent)
+		return `Die Nebenkostenabrechnung ${sent.statementNumber} ist schon versandt und rechnet Mietstage bis ${formatDate(sent.periodEnd.slice(0, 10))} ab. Das Vertragsende kann nicht davor liegen. Prüfen Sie das Datum.`;
+	const drafts = statements.map((statement) => statement.statementNumber).join(', ');
+	return `Der Entwurf ${drafts} enthält schon Mietstage nach diesem Tag. Löschen Sie zuerst den Entwurf und erstellen Sie die Nebenkostenabrechnung danach neu.`;
 }

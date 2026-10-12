@@ -3,6 +3,7 @@ import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { visit } from '../interactions/navigation';
 import { apartmentOfContract, endDateProblem, endOfContract, statusOfContract, totalRent } from '../questions/contract-detail';
+import { confirmEndContractButton } from '../interactions/contract-detail';
 import { emptyContractList, listedContract } from '../questions/contracts';
 import {
 	deleteContract,
@@ -51,6 +52,17 @@ When(
 // The same steps; the dialog refuses the date and stays open
 When('der Liegenschaftsverwalter den Mietvertrag auf den {string} beenden will', async ({ verwalter }, date: string) => {
 	await verwalter.perform(endContractOn(date));
+});
+
+Given('das Browserfenster ist {int} auf {int} Pixel gross', async ({ verwalter }, width: number, height: number) => {
+	await verwalter.page.setViewportSize({ width, height });
+});
+
+// the confirm button can be scrolled into view inside the dialog, not cut off by the window
+Then('kann der Liegenschaftsverwalter den Mietvertrag im Dialog beenden', async ({ verwalter }) => {
+	const confirm = confirmEndContractButton(verwalter.page);
+	await confirm.scrollIntoViewIfNeeded();
+	await expect(confirm).toBeInViewport({ ratio: 1 });
 });
 
 When('der Liegenschaftsverwalter den Mietvertrag löschen will', async ({ verwalter }) => {

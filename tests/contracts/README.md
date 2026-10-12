@@ -21,3 +21,4 @@ Optionale Felder sind in den Testdaten gefüllt: Liefert die API `null`, prüft 
 | `tenant.json` | `GET /api/v1/tenants/:id` |
 | `buildings.json` | `GET /api/v1/buildings` |
 | `tenants.json` | `GET /api/v1/tenants` |
+| `contract-end-refused.json` | `PUT /api/v1/contracts/:id` mit einem Vertragsende vor dem Ende einer Abrechnung (409) |

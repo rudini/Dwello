@@ -1,12 +1,7 @@
 <script lang="ts">
 	import { flushSync, untrack } from 'svelte';
-	import {
-		contractEndError,
-		contractStatusOn,
-		endedSince,
-		pastEndConfirmation
-	} from '$lib/contract-status';
-	import Checkbox from '$lib/ui/Checkbox.svelte';
+	import { contractEndError, contractStatusOn, pastEndConfirmation } from '$lib/contract-status';
+	import PastEndConfirm from '../PastEndConfirm.svelte';
 	import { formatDate } from '$lib/utils/format';
 	import DateInput from '$lib/ui/DateInput.svelte';
 	import { focusFirstError } from '$lib/ui/focus-error';
@@ -41,13 +36,14 @@
 	// end the contract today); a past day, e.g. a notice recorded late, is confirmed with its consequence
 	let endDate = $state('');
 	let endError = $state('');
-	let pastConfirmed = $state(false);
+	let confirmedDay = $state('');
+	const pastConfirmed = $derived(confirmedDay !== '' && confirmedDay === endDate);
 	let pastError = $state('');
 	const pastEnd = $derived(pastEndConfirmation(endDate, data.today) !== null);
 	function startEnding() {
 		endDate = '';
 		endError = '';
-		pastConfirmed = false;
+		confirmedDay = '';
 		pastError = '';
 		ending = true;
 	}
@@ -62,7 +58,7 @@
 	}
 	// the toast names the day the tenancy ends, or since when it has ended
 	function endedMessage() {
-		if (pastEnd) return `Der Mietvertrag von ${name} ist seit dem ${endedSince(endDate)} beendet`;
+		if (pastEnd) return `Der Mietvertrag von ${name} endete am ${formatDate(endDate)}`;
 		if (endDate === data.today) return `Der Mietvertrag von ${name} endet heute`;
 		return `Der Mietvertrag von ${name} endet am ${formatDate(endDate)}`;
 	}
@@ -150,16 +146,7 @@
 		bind:value={endDate}
 		testid="contract-end-date-input"
 	/>
-	{#if pastEnd}
-		<Checkbox
-			id="pastConfirmed"
-			label="Der Mietvertrag ist seit dem {endedSince(endDate)} beendet."
-			help="Ab diesem Tag gilt die Wohnung als leer, wenn kein neuer Mietvertrag beginnt. Das Akonto des Mieters zählt nur bis zum Vertragsende."
-			error={pastError}
-			bind:checked={pastConfirmed}
-			testid="contract-end-past-confirm"
-		/>
-	{/if}
+	<PastEndConfirm {endDate} today={data.today} bind:confirmedDay bind:error={pastError} />
 	<p class="text-ink-muted">
 		Prüfen Sie Frist und Termin im Mietvertrag: Für Wohnungen gilt eine Kündigungsfrist von
 		mindestens 3 Monaten. Ist die Kündigung zu spät, gilt sie erst auf den nächsten
@@ -183,7 +170,8 @@
 	{:else}
 		<p>
 			Ein Mietvertrag, der begonnen hat, kann nicht gelöscht werden: Die Nebenkostenabrechnung
-			braucht seine Mietstage. Ist er falsch erfasst, korrigieren Sie ihn unter «Bearbeiten».
+			braucht seine Mietstage, also die Tage, an denen er gilt. Ist er falsch erfasst, korrigieren
+			Sie ihn unter «Bearbeiten».
 		</p>
 	{/if}
 </ActionDialog>

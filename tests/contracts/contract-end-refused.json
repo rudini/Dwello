@@ -1,0 +1,11 @@
+{
+	"error": "Contract end before the end of its utility statements",
+	"statements": [
+		{
+			"id": "s1",
+			"statementNumber": "NK-2025-0003",
+			"status": "draft",
+			"periodEnd": "2025-12-31"
+		}
+	]
+}

@@ -82,7 +82,7 @@ Apartment `status` is derived from rental contracts: `occupied` (a contract runs
 | GET | `/apartment/:apartmentId/active` | Query: `date` (default today). → the contract running on that date. 404 if none |
 | GET | `/apartment/:apartmentId/period` | Query: `periodStart`, `periodEnd` (required). → `{ contracts }` overlapping the period (for prorating) |
 | POST | `/` | Body: `apartmentId`, `tenantId` (uuid), `startDate`, `baseRent`, `monthlyAdvancePayment` required; optional `endDate`, `additionalRent`, `referenceIndex`, `contractPdf`, `notes`. → 201 contract. 400 apartment/tenant not found or overlap with another contract of the apartment |
-| PUT | `/:id` | Body: any subset of the POST fields except `apartmentId`/`tenantId`. → contract. 404; 400 overlap |
+| PUT | `/:id` | Body: any subset of the POST fields except `apartmentId`/`tenantId`. → contract. 404; 400 overlap; 409 `{ error, statements: [{ id, statementNumber, status, periodEnd }] }` if `endDate` lies before the end of a utility statement of the contract (see `tests/contracts/contract-end-refused.json`) |
 | DELETE | `/:id` | 204. 404; 400 if the contract has utility statements |
 
 ## 7. Categories `/api/v1/categories`

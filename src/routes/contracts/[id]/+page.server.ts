@@ -1,8 +1,12 @@
 import type { RentalContract, Tenant, Apartment, Building, ApartmentStatus } from '$lib/types';
 import type { Actions, PageServerLoad } from './$types';
 import { error, fail, redirect } from '@sveltejs/kit';
-import { contractEndError, localToday, pastEndConfirmation } from '$lib/contract-status';
-import { formatDate } from '$lib/utils/format';
+import {
+	contractEndError,
+	localToday,
+	pastEndConfirmation,
+	statementsAfterEndError
+} from '$lib/contract-status';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
@@ -95,23 +99,11 @@ export const load: PageServerLoad = async ({ params, fetch }): Promise<ContractD
 	}
 };
 
-/** The last day of the contract's stored statements, or '': their rent days are billed up to there */
-async function billedTo(fetch: typeof globalThis.fetch, tenantId: string, contractId: string) {
-	const response = await fetch(`${BACKEND_URL}/api/v1/statements?tenantId=${tenantId}&limit=100`);
-	const statements: { contractId: string; periodEnd: string }[] =
-		(await response.json()).data ?? [];
-	return statements
-		.filter((statement) => statement.contractId === contractId)
-		.map((statement) => statement.periodEnd.slice(0, 10))
-		.reduce((last, day) => (day > last ? day : last), '');
-}
-
-/** Why the contract cannot end on that day, with its status, or null */
+/** Why the contract cannot end on that day, or null */
 function endRefusal(
 	contract: { startDate?: string; endDate?: string | null },
 	endDate: string,
-	pastConfirmed: boolean,
-	billed: () => Promise<string>
+	pastConfirmed: boolean
 ) {
 	// a stale page: an end already set is changed under «Bearbeiten», not overwritten
 	if (contract.endDate)
@@ -121,15 +113,7 @@ function endRefusal(
 	const endError =
 		contractEndError(endDate, String(contract.startDate ?? ''), localToday()) ??
 		(pastConfirmed ? null : pastEndConfirmation(endDate, localToday()));
-	if (endError) return fail(400, { endError });
-	// a stored statement already has rent days after that day
-	return billed().then((last) =>
-		last > endDate
-			? fail(409, {
-					endError: `Die Nebenkostenabrechnung bis ${formatDate(last)} enthält schon Mietstage nach diesem Tag. Wählen Sie den ${formatDate(last)} oder einen späteren Tag.`
-				})
-			: null
-	);
+	return endError ? fail(400, { endError }) : null;
 }
 
 export const actions: Actions = {
@@ -142,15 +126,16 @@ export const actions: Actions = {
 		if (!stored.ok)
 			return fail(stored.status, { endError: 'Mietvertrag konnte nicht beendet werden.' });
 		const contract = await stored.json();
-		const refusal = await endRefusal(contract, endDate, form.get('pastConfirmed') === 'on', () =>
-			billedTo(fetch, contract.tenantId, params.id)
-		);
+		const refusal = endRefusal(contract, endDate, form.get('pastConfirmed') === 'on');
 		if (refusal) return refusal;
 		const response = await fetch(url, {
 			method: 'PUT',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({ endDate })
 		});
+		// a stored statement already bills rent days after that day
+		if (response.status === 409)
+			return fail(409, { endError: statementsAfterEndError((await response.json()).statements) });
 		if (!response.ok) {
 			return fail(response.status, { endError: 'Mietvertrag konnte nicht beendet werden.' });
 		}
@@ -165,7 +150,7 @@ export const actions: Actions = {
 		if (String(startDate).slice(0, 10) <= localToday())
 			return fail(409, {
 				deleteError:
-					'Ein Mietvertrag, der begonnen hat, kann nicht gelöscht werden: Die Nebenkostenabrechnung braucht seine Mietstage.'
+					'Ein Mietvertrag, der begonnen hat, kann nicht gelöscht werden: Die Nebenkostenabrechnung braucht seine Mietstage, also die Tage, an denen er gilt.'
 			});
 		const response = await fetch(url, { method: 'DELETE' });
 		if (!response.ok) {
