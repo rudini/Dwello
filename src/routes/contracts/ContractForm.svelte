@@ -110,11 +110,15 @@
 		apartmentContracts = []; // the previous apartment's contracts say nothing about this one
 		contractsState = apartmentId ? 'loading' : 'loaded';
 		if (!apartmentId) return;
-		contractsOf(apartmentId).then((list) => {
-			if (request !== contractsRequest) return;
-			apartmentContracts = list ?? [];
-			contractsState = list ? 'loaded' : 'failed';
-		});
+		contractsOf(apartmentId)
+			.then((list) => {
+				if (request !== contractsRequest) return;
+				apartmentContracts = list ?? [];
+				contractsState = list ? 'loaded' : 'failed';
+			})
+			.catch(() => {
+				if (request === contractsRequest) contractsState = 'failed'; // an answer that is no list
+			});
 	});
 
 	function edited(event: Event) {

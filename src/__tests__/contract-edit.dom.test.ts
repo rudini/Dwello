@@ -316,6 +316,42 @@ describe('Mietvertrag bearbeiten', () => {
 			expect(byTestId('overlap-warning')).toBeNull();
 		});
 
+		// Haiku-Review: nur die letzte Antwort zählt; die Überschneidung der gewählten Wohnung erscheint mit ihr
+		it('nimmt nur die letzte Antwort zu den Mietverträgen der Wohnung', async () => {
+			calls = fakeBff(() => [200, { contracts: [] }]);
+			const answer = globalThis.fetch;
+			const pending: ((contracts: unknown[]) => void)[] = [];
+			let held = false;
+			globalThis.fetch = ((url: string, init?: RequestInit) =>
+				held && String(url).includes('/contracts?apartmentId=')
+					? new Promise((resolve) =>
+							pending.push((contracts) => resolve(Response.json({ contracts })))
+						)
+					: answer(url, init)) as typeof fetch;
+			await open();
+			await endOn('31.03.2025');
+			held = true;
+			const select = byTestId<HTMLSelectElement>('apartment-select')!;
+			const choose = async (id: string) => {
+				select.value = id;
+				select.dispatchEvent(new Event('change', { bubbles: true }));
+				await settle();
+			};
+			await choose('a2'); // pending[0]: a2, will answer late
+			await choose('a1'); // pending[1]
+			await choose('a2'); // pending[2]: the latest
+			const overlapping = [{ id: 'c2', startDate: '2025-02-01', endDate: null }];
+			pending[2]([]);
+			await settle();
+			pending[0](overlapping); // a stale answer for the same apartment
+			await settle();
+			expect(byTestId('overlap-warning')).toBeNull();
+			await choose('a1'); // pending[3]
+			pending[3](overlapping);
+			await settle();
+			expect(byTestId('overlap-warning')).not.toBeNull();
+		});
+
 		// Review K-7: ein inzwischen versendeter Entwurf; die Meldung des Backends, kein zweites Angebot
 		it('nennt den Grund, wenn der Entwurf nicht gelöscht werden kann', async () => {
 			calls = fakeBff(({ method }) => {
