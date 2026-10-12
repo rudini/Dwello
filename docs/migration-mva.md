@@ -51,6 +51,8 @@ Already done: statement generation moved from `routes/statements.ts` into `state
 
 ### Step 1: confirm the scenarios, record the decisions
 
+Status October 2026: open; `docs/adr/` does not exist yet.
+
 - Confirm, extend or drop quality scenarios; fix the target value for P1.
 - Decide whether an invoice that is part of a statement may be deleted. `deleteInvoice` does not check it, and statement line items do not reference invoices. If not: add it as a scenario.
 - One short ADR per decision in `docs/adr/`. Initial set:

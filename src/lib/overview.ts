@@ -114,7 +114,7 @@ function workTasks({ statementCounts, lettersToSend, missingPeriod }: OverviewIn
 			icon: 'mail'
 		},
 		!!missingPeriod && {
-			// TODO(fachlich prüfen): suggestion without legal deadline, see docs/design/offene-punkte.md
+			// TODO(fachlich prüfen): suggestion without legal deadline, see docs/design/offene-punkte.md (F-10)
 			id: 'missing-period',
 			title: m.dashboard_task_missing_period(),
 			text: m.dashboard_task_missing_period_text({

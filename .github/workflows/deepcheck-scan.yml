@@ -14,7 +14,7 @@ on:
         required: false
         default: '50'
       min_score:
-        description: Lowest score to list (35 lists the modules worth a look; empty lists flagged modules only, see docs/deepcheck-validation.md)
+        description: Lowest score to list (35 lists the modules worth a look; empty lists flagged modules only, see tools/deepcheck/deepcheck-validation.md)
         required: false
         default: '35'
   # schedule:

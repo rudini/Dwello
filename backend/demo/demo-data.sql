@@ -1,7 +1,7 @@
 -- ============================================================================
 -- Demo data for trying Dwello and showing it: bun run db:demo (never in production, not a migration)
 -- Fixed ids, so loading it again adds nothing. Two complete billing years (2024, 2025) with the invoices a
--- Swiss property manager receives; what changed and why: docs/seed-daten-aenderungen.md
+-- Swiss property manager receives; what changed and why: docs/archive/seed-daten-aenderungen.md
 -- ============================================================================
 
 -- ============================================================================

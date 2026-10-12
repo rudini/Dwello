@@ -134,7 +134,7 @@ Prove the results are meaningful before the PR gate is trusted. Only scoring, th
 - X4.4 Gaming tests: padding a shallow module with dead internals, splitting a deep module into tiny files (score must go up), inlining pass-throughs (score must go down). Mitigate or document each weakness.
 - X4.5 Ablation per metric; noisy metrics dropped or down-weighted, stated explicitly.
 - X4.6 Recommended `failThreshold` and `tolerance` chosen from data, with the number of modules above it.
-- X4.7 Report `docs/deepcheck-validation.md` with the labeled table, numbers, limits (small sample, one codebase, judgment labels) and a verdict: "ready to gate on changed code", "usable as scan only", or "not ready".
+- X4.7 Report `tools/deepcheck/deepcheck-validation.md` with the labeled table, numbers, limits (small sample, one codebase, judgment labels) and a verdict: "ready to gate on changed code", "usable as scan only", or "not ready".
 
 ### Consequences of the Phase 4 verdict
 - "not ready": stop; do not do Phase 3; report what must improve.
@@ -302,7 +302,7 @@ Append one entry per session: date, phase, result of each exit gate (done / not 
 
 ### 2026-10-10, Phase 4 (validation and calibration): done. Verdict: ready to gate on changed code (narrow, conservative gate)
 
-The full report is `docs/deepcheck-validation.md`.
+The full report is `tools/deepcheck/deepcheck-validation.md`.
 
 **Exit gates**
 - X4.1 done, with caveats. Sample: the top 25, 15 drawn from the middle (Mulberry32, seed 20261010) and the 15 lowest eligible modules; 3 more were added after calibration. 58 labels in total: 14 shallow, 31 deep, 13 flat by design.
@@ -331,7 +331,7 @@ The full report is `docs/deepcheck-validation.md`.
   - Benign one-edit score deltas: p90 4, max 6–7.
   - **0 modules are flagged** of 71 eligible (124 analyzed); the baseline was regenerated with 0 entries.
   - Flagging also needs a structural sign (pass-through or classitis), because depth and complexity saturate at 60 for flat modules.
-- X4.7 done. `docs/deepcheck-validation.md` has the labelled table, numbers, limits and verdict.
+- X4.7 done. `tools/deepcheck/deepcheck-validation.md` has the labelled table, numbers, limits and verdict.
 - XC.1 done. Each fix had a regression test seen failing first:
   - `calibration.test.ts`: operations, mostly-types, re-exports, the flat constants and copy false positives, facades through export lists and shorthand.
   - `gaming.test.ts`: padding, destructuring, shadowing.
@@ -438,7 +438,7 @@ The last Phase 4 fixes had only been verified by me. A fresh independent reviewe
 - **New false positive:** a directory of five or more one-constant files (one translation table per language, one icon per file) scored 70 through classitis.
   - Fixed with a regression test first: only function or class exports count as tiny classitis pieces.
   - Also fixed, test first: a `typeof` use in a type position kept dead padding alive.
-- **Known evasions, documented in `docs/deepcheck-validation.md`:**
+- **Known evasions, documented in `tools/deepcheck/deepcheck-validation.md`:**
   - a forwarder with a constant extra argument;
   - a forwarder through a closure or a destructured parameter object;
   - a factory of forwarders;
@@ -528,7 +528,7 @@ An independent reviewer re-ran X3.1 to X3.4 on the current state; all temp files
 
 ### 2026-10-11, follow-up on request: other TypeScript codebases
 The user asked to include other TypeScript codebases to improve accuracy.
-- Six codebases cloned (hono, zod, date-fns, umami, nestjs-realworld, angular-realworld); 113 modules labelled blind once (split over four agents), the 41 flagged ones a second time by two more (agreement 82 %). Details: `docs/deepcheck-validation.md`, "Cross-codebase validation".
+- Six codebases cloned (hono, zod, date-fns, umami, nestjs-realworld, angular-realworld); 113 modules labelled blind once (split over four agents), the 41 flagged ones a second time by two more (agreement 82 %). Details: `tools/deepcheck/deepcheck-validation.md`, "Cross-codebase validation".
 - Ranking mostly carries over: pooled AUC on the new codebases 0.828 with the unchanged weights (Dwello 0.828), 0.770 on the random draws alone; the two realworld apps have one shallow module each. Leave-one-codebase-out tuning is worse by 0.063 on average, so the weights stay.
 - Gate precision measured on real code for the first time: first real positives (11 umami query hooks, `password.ts`, two hono adapters). 14 of 38 flagged are shallow for both labellers, 27 for at least one; on application code 12 of 13, but 11 of them are one repeated umami pattern.
 - Fixed test-first (red, then green): a data-only class alone is no longer a structural sign (3 NestJS DTO false positives). The 0.5 data-only weighting stays, so DTOs do not climb in `scan` (review: dropping it raised a DTO to 75).

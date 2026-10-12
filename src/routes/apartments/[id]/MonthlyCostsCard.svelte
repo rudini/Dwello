@@ -27,7 +27,7 @@
 			</div>
 		{/each}
 		<div class="flex justify-between gap-4 border-t border-line pt-2">
-			<!-- TODO(fachlich prüfen): no glossary term for the monthly total, see docs/design/offene-punkte.md -->
+			<!-- TODO(fachlich prüfen): no glossary term for the monthly total, see docs/archive/offene-punkte-verlauf.md -->
 			<dt class="font-semibold text-ink">{m.common_monthly_total()}</dt>
 			<dd class="font-bold text-ink" data-testid="monthly-costs-total">
 				{formatCurrency(costs.totalBrutto)}

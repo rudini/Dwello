@@ -59,7 +59,7 @@
 />
 
 <p class="flex items-baseline justify-between gap-4 border-t border-line pt-4 text-lg">
-	<!-- TODO(fachlich prüfen): no glossary term for the monthly total, see docs/design/offene-punkte.md -->
+	<!-- TODO(fachlich prüfen): no glossary term for the monthly total, see docs/archive/offene-punkte-verlauf.md -->
 	<span class="font-semibold text-ink">{m.common_monthly_total()}</span>
 	<span class="font-bold tabular-nums text-ink" data-testid="contract-monthly-total"
 		>{formatCurrency(total)}</span

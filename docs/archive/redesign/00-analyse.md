@@ -1,6 +1,6 @@
 # 00 – Analysis of the current UI
 
-Stage 0 of the redesign (brief: `docs/REDESIGN_BRIEF.md`). Inventory of what exists today, what users struggle with, and how the CI screenshot job works. The design documents are written in English like the rest of `docs/`; UI copy is quoted in German.
+Stage 0 of the redesign (brief: `docs/archive/redesign/REDESIGN_BRIEF.md`). Inventory of what exists today, what users struggle with, and how the CI screenshot job works. The design documents are written in English like the rest of `docs/`; UI copy is quoted in German.
 
 ## 1. Stack and current design system
 

@@ -137,8 +137,8 @@ That contracts of one apartment must not overlap is enforced in the application,
 name                    VARCHAR(100) NOT NULL   -- internal English name
 name_de, name_fr, name_it, name_en VARCHAR(100) -- display names
 is_allowed_utility_cost BOOLEAN NOT NULL DEFAULT true  -- umlagefähig (OR 257a)
-is_heating_cost         BOOLEAN NOT NULL DEFAULT false -- distributed by the heating profile at a tenant change (0006):
-                                                       -- Heating, Chimney Sweep; Hot Water by days since 0009
+is_heating_cost         BOOLEAN NOT NULL DEFAULT false -- distributed by the heating profile at a tenant change:
+                                                       -- Heating, Chimney Sweep; Hot Water by days
 description             TEXT
 sort_order              INTEGER DEFAULT 0
 ```
@@ -183,7 +183,7 @@ distribution_key_id     UUID REFERENCES distribution_keys ON DELETE SET NULL
 amount                  DECIMAL(12,2) NOT NULL -- Betrag
 is_valid_utility_cost   BOOLEAN NOT NULL DEFAULT true  -- umlagefähige Rechnung
 invoice_date            DATE NOT NULL          -- Rechnungsdatum, decides the Abrechnungsperiode without a Leistungszeitraum
-service_period_start    DATE                   -- Leistungszeitraum (0007): both or none, end >= start (CHECK);
+service_period_start    DATE                   -- Leistungszeitraum: both or none, end >= start (CHECK);
 service_period_end      DATE                   --   a statement takes the share of its days that falls into the period
 due_date                DATE                   -- Fälligkeitsdatum
 paid_date               DATE                   -- Zahlungsdatum
@@ -198,7 +198,7 @@ notes                   TEXT
 Indexes: `invoices_building_id_idx`, `invoices_invoice_date_idx`, `invoices_category_id_idx`.
 No CHECK on `amount`.
 
-### fuel_stocks (Tankbestand, migrations 0008, 0009)
+### fuel_stocks (Tankbestand)
 
 ```sql
 building_id   UUID NOT NULL REFERENCES buildings ON DELETE CASCADE

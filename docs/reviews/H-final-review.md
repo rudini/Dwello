@@ -37,9 +37,9 @@ Ich habe keinen Korrektheitsfehler in Rechnung, Rundung, PDF, Assistent oder Ein
 
 ### Mittel
 
-**H-1 (mittel) `docs/seed-daten-aenderungen.md` beschreibt den entfernten Schlüssel als gültig**
+**H-1 (mittel) `docs/archive/seed-daten-aenderungen.md` beschreibt den entfernten Schlüssel als gültig**
 - **Stellen:**
-  - `docs/seed-daten-aenderungen.md:54` (P8)
+  - `docs/archive/seed-daten-aenderungen.md:54` (P8)
   - `:56` (P10)
   - `:3`
 - **Fehler:**

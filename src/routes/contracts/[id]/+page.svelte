@@ -145,7 +145,7 @@
 	check={checkEndDate}
 	onsuccess={() => addToast('success', endedMessage())}
 >
-	<!-- TODO(fachlich prüfen): «Kündigungstermin», «Kündigungsfrist» are not in the glossary (offene-punkte.md) -->
+	<!-- TODO(fachlich prüfen): «Kündigungstermin», «Kündigungsfrist» are not in the glossary (docs/archive/offene-punkte-verlauf.md) -->
 	<DateInput
 		id="endDate"
 		label={m.dashboard_kind_contract_end()}

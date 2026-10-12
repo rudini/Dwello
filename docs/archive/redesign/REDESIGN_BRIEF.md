@@ -76,7 +76,7 @@ Procedure per stage:
 3. WAIT until the reviewer is finished. Do not proceed to the next stage in parallel.
 4. The reviewer classifies findings as Blocker, Major, Minor. Fix all Blockers and Majors; Minors if cheap, otherwise into offene-punkte.md. Code fixes again with /tdd and /ponytail, then rerun all automated checks.
 5. After large changes start a follow-up review (max. 3 rounds per stage). If Blockers remain after round 3, document them in offene-punkte.md and move on.
-6. Document in docs/design/reviews/<stage>-review-<n>.md: findings, what was changed, what deliberately was not.
+6. Document in docs/archive/redesign/reviews/<stage>-review-<n>.md: findings, what was changed, what deliberately was not.
 
 Code reviewers check: correctness, test coverage, readability, adherence to tokens (no hardcoded colors/spacing), accessibility (contrast, focus, roles, keyboard, touch size, axe result), consistency, unintended logic changes, remnants of the old design system, terminology (all domain terms match UBIQUITOUS_LANGUAGE.md, no synonyms, no invented explanations).
 
@@ -120,8 +120,8 @@ Terms that personas do not understand are solved with better help texts (based o
 
 ## Stages (each with commit, push, checks and review cycle)
 
-0. Analysis: docs/design/00-analyse.md (inventory of all screens, components, states, core flows, 5 biggest comprehension barriers, term inventory: terms used in the UI checked against UBIQUITOUS_LANGUAGE.md, deviations and gaps, summary of cy.yml/ui-screenshots). Create the screen list for the axe check. Then create the draft PR. -> Review
-1. Plan: docs/design/01-plan.md (design decisions with rationale, token proposal, migration strategy, test strategy incl. axe, concept for help texts and term usage). -> Review
+0. Analysis: docs/archive/redesign/00-analyse.md (inventory of all screens, components, states, core flows, 5 biggest comprehension barriers, term inventory: terms used in the UI checked against UBIQUITOUS_LANGUAGE.md, deviations and gaps, summary of cy.yml/ui-screenshots). Create the screen list for the axe check. Then create the draft PR. -> Review
+1. Plan: docs/archive/redesign/01-plan.md (design decisions with rationale, token proposal, migration strategy, test strategy incl. axe, concept for help texts and term usage). -> Review
 2. Tokens + base components (Button, Input, Select, Checkbox, Radio, Textarea, Table, Modal, Toast, Tabs, Navigation, Alert, Empty State, Stepper, Progress indicator, field help text component) with all states. Set up axe test. -> Axe + Code review
 3. Icon and illustration system (at least 8 motifs). -> Axe + Design/Code review
 4. App shell, navigation, dashboard. -> Axe + Code review + personas Anna, Helga
@@ -133,7 +133,7 @@ Terms that personas do not understand are solved with better help texts (based o
 
 ## Logging
 
-Maintain docs/design/progress.md: per stage status, decisions with rationale, axe result, ui-screenshots result, review rounds, open points. Update after every stage.
+Maintain docs/archive/redesign/progress.md: per stage status, decisions with rationale, axe result, ui-screenshots result, review rounds, open points. Update after every stage.
 
 ## Definition of Done (ALL must be true)
 

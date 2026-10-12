@@ -1,6 +1,6 @@
 # deepcheck validation (Phase 4)
 
-How meaningful are deepcheck's results on this codebase, and can it gate changed code? Brief: `docs/DEEP-MODULE_BRIEF.md` (X4.1–X4.7). Tool docs: `tools/deepcheck/README.md`. Date: 2026-10-10; repo state before calibration 8d05b55, after e7ca4fb.
+How meaningful are deepcheck's results on this codebase, and can it gate changed code? Brief: `tools/deepcheck/DEEP-MODULE_BRIEF.md` (X4.1–X4.7). Tool docs: `tools/deepcheck/README.md`. Date: 2026-10-10; repo state before calibration 8d05b55, after e7ca4fb.
 
 ## Verdict: ready to gate on changed code (narrow, conservative gate)
 

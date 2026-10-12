@@ -2,7 +2,7 @@
 
 Stand: 12.10.2026. Quelle: Fachreview I (`docs/reviews/I-fachreview-1.md`, Findings IF-2, IF-4, IF-5, IF-6, IF-8, IF-9), Review I Runde 4 (`docs/reviews/I-review-4.md`) und die Personas Helga, Sven und Anna (Läufe I, I2, I3). Umgesetzt sind: «Mietvertrag beenden» auf ein künftiges oder vergangenes Datum, die Bestätigung eines vergangenen Vertragsendes (auch unter «Bearbeiten»), die Ablehnung eines Vertragsendes vor dem Ende einer gespeicherten Abrechnung (im Backend) und die Löschregel (nur vor dem Vertragsbeginn). Dieses Dokument beschreibt, was danach noch fehlt.
 
-Jede Anforderung nennt das Problem, was Dwello tun muss, wie wir es prüfen (Szenarien in der Sprache von `tests/e2e/features`), was nicht dazugehört und welche Fragen der Product Owner oder eine Fachperson klären muss. Begriffe, die nicht im Glossar stehen, sind mit *(Glossar fehlt)* markiert und in `docs/design/offene-punkte.md` vorgeschlagen.
+Jede Anforderung nennt das Problem, was Dwello tun muss, wie wir es prüfen (Szenarien in der Sprache von `tests/e2e/features`), was nicht dazugehört und welche Fragen der Product Owner oder eine Fachperson klären muss. Begriffe, die nicht im Glossar stehen, sind mit *(Glossar fehlt)* markiert und in `docs/archive/offene-punkte-verlauf.md` vorgeschlagen.
 
 | ID | Anforderung | Priorität | Quelle |
 |---|---|---|---|
@@ -318,6 +318,6 @@ Szenario: Unter «Bearbeiten» einen Vertragsbeginn nach dem Beginn eines Entwur
 
 ## Ebenfalls offen (kleiner, in `docs/design/offene-punkte.md`)
 
-- «Heute» rechnet das Backend in UTC, die App in Schweizer Zeit (IF-10, I-10).
-- Tab-Reihenfolge im Dialog: Der Bestätigen-Knopf kommt vor dem Feld (Sven).
-- Gebäude- und Wohnungsseite erklären Leer und Gesperrt widersprüchlich (Anna).
+- «Heute» rechnet das Backend in UTC, die App in Schweizer Zeit (IF-10, I-10; B-4).
+- Tab-Reihenfolge im Dialog: Der Bestätigen-Knopf kommt vor dem Feld (Sven; A-3).
+- Gebäude- und Wohnungsseite erklären Leer und Gesperrt widersprüchlich (Anna; erledigt, siehe `docs/archive/offene-punkte-verlauf.md`).

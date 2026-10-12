@@ -1,6 +1,6 @@
 # Migration guide (stage 7)
 
-How a legacy screen moves to the new design system. Read together with `CLAUDE.md`, `docs/design/arbeitsregeln.md` and `docs/design/01-plan.md`.
+How a legacy screen moves to the new design system. Read together with `CLAUDE.md`, `docs/design/arbeitsregeln.md` and `docs/archive/redesign/01-plan.md`.
 
 ## Rules
 

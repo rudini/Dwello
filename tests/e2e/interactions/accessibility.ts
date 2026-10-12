@@ -6,7 +6,7 @@ import type { TestData } from '../fixtures/backend';
 import { visit } from './navigation';
 import { inDays } from '../fixtures/dates';
 
-// WCAG levels the check enforces (docs/REDESIGN_BRIEF.md "Automated Checks")
+// WCAG levels the check enforces (docs/archive/redesign/REDESIGN_BRIEF.md "Automated Checks")
 const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
 
 const screenList: typeof import('../../a11y/screens.json') = JSON.parse(

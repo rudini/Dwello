@@ -20,7 +20,7 @@ Dwello is a comprehensive web application for managing residential properties in
 3. Invoice Management with LLM-powered categorization
 4. Utility Cost Statement Generation with complex prorating
 5. Swiss QR-bill Generation
-6. Statements for tenants in five languages (German, French, Italian, Romansh, English); the app itself is in German
+6. Statements for tenants in German, French, Italian and English (Romansh can be chosen, the PDF is then in German); the app in German, French, Italian and English
 
 ---
 
@@ -32,7 +32,7 @@ Dwello is a comprehensive web application for managing residential properties in
 - **LLM:** any OpenAI-compatible API, by default a self-hosted Ollama (`qwen2.5:3b`)
 - **Deployment:** Docker Compose
 - **Maps:** OpenStreetMap + Leaflet
-- **Language:** German UI (de-CH)
+- **Language:** UI in German (de-CH, default), French, Italian and English (Paraglide JS)
 
 ---
 

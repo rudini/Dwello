@@ -1,6 +1,6 @@
 # deepcheck
 
-Finds shallow modules in this TypeScript codebase (internal tool, never published). Brief and status log: `docs/DEEP-MODULE_BRIEF.md`.
+Finds shallow modules in this TypeScript codebase (internal tool, never published). Brief and status log: `tools/deepcheck/DEEP-MODULE_BRIEF.md`.
 
 - **Deep module:** a small, simple interface hiding a lot of implementation.
 - **Shallow module:** an interface that is large relative to the functionality behind it.
@@ -23,7 +23,7 @@ node tools/deepcheck/src/cli.ts suppressions                 # all inline suppre
 
 The path argument may be relative, `./`-prefixed or absolute; a path that matches no source file is an error (exit 2).
 
-With the calibrated `failThreshold` of 65 no module of this repo is flagged (the highest scores 60); the threshold is set to catch pass-through layers and thin facades, not to rank. Use `--min-score` to see the ranking, e.g. `--min-score 35` for the modules worth a look (`docs/deepcheck-validation.md`).
+With the calibrated `failThreshold` of 65 no module of this repo is flagged (the highest scores 60); the threshold is set to catch pass-through layers and thin facades, not to rank. Use `--min-score` to see the ranking, e.g. `--min-score 35` for the modules worth a look (`tools/deepcheck/deepcheck-validation.md`).
 
 Options: `--format human|json|markdown|github`, `--output <file>`, `--top <n>` (default 50), `--min-score <n>` (default: list flagged modules, i.e. score >= `failThreshold`), `--group-by directory|package`, `--fail-on-score <n>` (scan exits 1 if an eligible module in the path scores at least n), `--fallow auto|off|<path>`.
 
@@ -139,9 +139,9 @@ Default weights:
 | `coupling` | 5 |
 | `unusedExports` | 5 |
 
-`leaky` is measured and explained in findings but not scored: alone it cannot rank modules (ablation in `docs/deepcheck-validation.md`), and its weight moved to `classitis` so that tiny classitis pieces reach `failThreshold`.
+`leaky` is measured and explained in findings but not scored: alone it cannot rank modules (ablation in `tools/deepcheck/deepcheck-validation.md`), and its weight moved to `classitis` so that tiny classitis pieces reach `failThreshold`.
 
-A module is **eligible** when `interfaceSize >= minInterfaceSize`, or it has a pass-through, or a classitis component; tiny legitimate utilities (e.g. `clamp`) are never flagged. A module is **flagged** when it is eligible, `shallowScore >= failThreshold` (per-path overrides apply) and it has a structural sign of shallowness: a pass-through or tiny-file classitis. A data-only class alone raises the score but does not flag: DTO classes are contracts, judged flat by design on other codebases. Depth and complexity alone reach at most 60 for flat-by-design modules (constants, types), so they rank modules in `scan` but never fail the gate by themselves (Phase 4, `docs/deepcheck-validation.md`).
+A module is **eligible** when `interfaceSize >= minInterfaceSize`, or it has a pass-through, or a classitis component; tiny legitimate utilities (e.g. `clamp`) are never flagged. A module is **flagged** when it is eligible, `shallowScore >= failThreshold` (per-path overrides apply) and it has a structural sign of shallowness: a pass-through or tiny-file classitis. A data-only class alone raises the score but does not flag: DTO classes are contracts, judged flat by design on other codebases. Depth and complexity alone reach at most 60 for flat-by-design modules (constants, types), so they rank modules in `scan` but never fail the gate by themselves (Phase 4, `tools/deepcheck/deepcheck-validation.md`).
 
 Each finding names the metrics that are high (component >= 0.5) with a concrete fix in Ousterhout's terms: shrink the exported surface, merge pass-throughs into the callee, hide internal types, combine tiny modules, move behaviour into data-only classes.
 
@@ -160,7 +160,7 @@ Fallow is optional enrichment in one adapter (`src/fallow.ts`): `fallow health -
 | `tests` | see above | test files (replaces the default) |
 | `generated` | see above | generated files (replaces the default) |
 | `entries` | see above | framework entry modules (replaces the default) |
-| `failThreshold` | 65 | score at which an eligible module is flagged (calibrated in Phase 4, see `docs/deepcheck-validation.md`) |
+| `failThreshold` | 65 | score at which an eligible module is flagged (calibrated in Phase 4, see `tools/deepcheck/deepcheck-validation.md`) |
 | `tolerance` | 5 | score points a baselined module may worsen (calibrated in Phase 4) |
 | `minInterfaceSize` | 5 | smaller modules are not flagged (unless pass-through or classitis) |
 | `depthTarget` | 8 | (statements + operations) per interface unit at which the depth component reaches 0 |

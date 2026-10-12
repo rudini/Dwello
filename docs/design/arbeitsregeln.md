@@ -1,12 +1,14 @@
 # Working rules for the redesign (resume file)
 
-Everything a new session needs to continue the redesign without the original prompt. Source of truth for the requirements: `docs/REDESIGN_BRIEF.md`; project rules: `CLAUDE.md`; domain terms: `UBIQUITOUS_LANGUAGE.md` (never edit it).
+The redesign is complete (stages 0–9); its brief, analysis, plan, log and reviews are in `docs/archive/redesign/`. Still in use: the automated checks, the personas and "Persona runs: how" (subagent `persona`).
+
+Everything a new session needs to continue the redesign without the original prompt. Source of truth for the requirements: `docs/archive/redesign/REDESIGN_BRIEF.md`; project rules: `CLAUDE.md`; domain terms: `UBIQUITOUS_LANGUAGE.md` (never edit it).
 
 ## Where things are
 
-- Status and next step: `docs/design/progress.md` (update before each stage and after each commit).
-- Analysis `00-analyse.md`, plan `01-plan.md`, decisions `design-decisions.md`, tokens `token-referenz.md`, open points `offene-punkte.md`.
-- Reviews: `docs/design/reviews/<stage>-review-<n>.md`. Personas: `docs/design/personas/<persona>-<stage>.md`.
+- Status and next step: `docs/archive/redesign/progress.md` (update before each stage and after each commit).
+- Analysis and plan in `docs/archive/redesign/`, decisions `design-decisions.md`, tokens `token-referenz.md`, open points `offene-punkte.md`.
+- Reviews: `docs/archive/redesign/reviews/<stage>-review-<n>.md`. Personas: `docs/design/personas/<persona>-<stage>.md`.
 - Axe screen list: `tests/a11y/screens.json`; axe test: `tests/a11y/` (from stage 2).
 
 ## Git and CI
@@ -52,10 +54,10 @@ Axe: `@axe-core/playwright`, tags `wcag2a, wcag2aa, wcag21a, wcag21aa, wcag22aa`
 
 ## Review cycle (after every stage)
 
-1. Finish, checks green, commit, push, wait for `ui-screenshots`, update `progress.md`.
+1. Finish, checks green, commit, push, wait for `ui-screenshots`, update `docs/archive/redesign/progress.md`.
 2. Start an independent read-only reviewer agent with fresh context (Plan for analysis/plan, general-purpose for code/design, Explore for remnant searches). Give it: stage goal, changed files/diff, brief requirements, glossary, axe result, ui-screenshots result, review criteria (correctness, tests, readability, tokens only, a11y incl. contrast/focus/roles/keyboard/touch size, consistency, no logic changes, old-design remnants, terminology).
 3. Wait for it. Findings: Blocker / Major / Minor. Fix all Blockers and Majors (with /tdd + /ponytail), Minors if cheap else `offene-punkte.md`. Rerun checks. Follow-up review after large changes, max. 3 rounds.
-4. Write `docs/design/reviews/<stage>-review-<n>.md`: findings, changes, deliberate non-changes.
+4. Write `docs/archive/redesign/reviews/<stage>-review-<n>.md`: findings, changes, deliberate non-changes.
 
 ## Personas (from stage 4, after every stage with operable UI)
 
@@ -79,5 +81,5 @@ If blocked: note it in `offene-punkte.md`, continue with the next stage. Do not 
 
 - The subagent `persona` (`.claude/agents/persona.md`) runs one persona; the reviews after the redesign follow `CLAUDE.md`, Workflow steps 4 to 7.
 - Start the app for personas with `docs/design/tools/persona-stack.sh` (fresh database `dwello_persona` with the demo data, backend on 3301, production build on 3300; `--no-build` reuses the last build).
-- Personas drive a signed-in Chromium through `docs/design/tools/persona-kit.mjs` (`open({ viewport, zoom })`, `shot`, `readOut` for the accessibility tree); copy it to a scratch directory if the session's scratchpad differs. They write their scripts outside the repository and only their report (plus at most 6 screenshots) into `docs/design/personas/`.
+- Personas drive a signed-in Chromium through `docs/design/tools/persona-kit.mjs` (`open({ viewport, zoom })`, `shot`, `readOut` for the accessibility tree); copy it to a scratch directory if the session's scratchpad differs. They write their scripts and screenshots outside the repository and only their report into `docs/design/personas/`. Only the screenshots of the last redesign and i18n round are kept in `docs/design/personas/screens/`; earlier ones are in the git history.
 - Persona prompt essentials: character, task, "operate only like a user, no source code, docs, tests or glossary", report structure (completed yes/partly/no, effort, expected vs. seen per step, confusion incl. terms, error risks, suggestions marked Blocker/Major/Minor).

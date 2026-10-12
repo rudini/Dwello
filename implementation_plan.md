@@ -4376,8 +4376,8 @@ reviewed independently afterwards.
 
 ## Session 10 - October 2026: UI Redesign (branch feature/new-design)
 
-Brief: `docs/design/REDESIGN_BRIEF.md`; log and decisions: `docs/design/progress.md`, open points:
-`docs/design/offene-punkte.md`, reviews: `docs/design/reviews/`, persona runs: `docs/design/personas/`.
+Brief: `docs/archive/redesign/REDESIGN_BRIEF.md`; log and decisions: `docs/archive/redesign/progress.md`, open points:
+`docs/design/offene-punkte.md`, reviews: `docs/archive/redesign/reviews/`, persona runs: `docs/design/personas/`.
 
 ### Done ✅
 - [x] **Stages 0-3:** analysis, plan, design tokens (`src/styles/tokens.css`, `tailwind.config.js`), base components
@@ -4394,14 +4394,14 @@ Brief: `docs/design/REDESIGN_BRIEF.md`; log and decisions: `docs/design/progress
   components removed, German master data names (`src/lib/names.ts`); review round 1 and persona fixes: row layouts
   without sideways scrolling, shared `focusFirstError` (`src/lib/ui/focus-error.ts`), announced toasts
   (`ToastRegion`), consistent Mietstatus for relet apartments (`src/lib/apartment.ts`, BFF loaders), invoice period
-  notice (`docs/design/reviews/7-review-1.md`); review round 2: header wraps actions, Stepper names from `xl`, cost
+  notice (`docs/archive/redesign/reviews/7-review-1.md`); review round 2: header wraps actions, Stepper names from `xl`, cost
   lines as cards on phones, delete toasts, `Field` hides corrected errors, focus on list results after filtering
-  (`src/lib/list-url.ts` `isListSearch`) (`docs/design/reviews/7-review-2.md`)
+  (`src/lib/list-url.ts` `isListSearch`) (`docs/archive/redesign/reviews/7-review-2.md`)
 - [x] **Stage 8:** old design system removed (`src/lib/components`, old palette, legacy utilities, svelte-i18n,
   `docs/design_system.md`), Tailwind theme from tokens only, dark mode on, axe light and dark
-  (`docs/design/reviews/8-review-1.md`)
+  (`docs/archive/redesign/reviews/8-review-1.md`)
 - [x] **Stage 9:** `docs/design/design-decisions.md`, token reference, open points with the glossary table, CLAUDE.md
-  "Design-Regeln"; final review and final persona round with fixes (`docs/design/reviews/9-review-1.md`)
+  "Design-Regeln"; final review and final persona round with fixes (`docs/archive/redesign/reviews/9-review-1.md`)
 - [x] **Axe as its own CI check:** the `@a11y` scenarios run in the job "Accessibility (axe)", the job "E2E tests"
   runs the rest, so the axe check can be required on `main` (`.github/workflows/ci.yml`, `docs/test-pyramid.md`)
 - [x] **Map tiles need a CARTO key:** `PUBLIC_CARTO_API_KEY` goes to the tile URL
@@ -4424,7 +4424,7 @@ Order A → B → C → D1 → D2, each step reviewed by an independent agent un
 critical/high/medium is open; reviews in `docs/reviews/`.
 
 ### Done ✅
-- [x] **A: seed and master data, PDF content** (`docs/seed-daten-aenderungen.md`): demo data with two complete billing
+- [x] **A: seed and master data, PDF content** (`docs/archive/seed-daten-aenderungen.md`): demo data with two complete billing
   years, tenant addresses, a tenant change, realistic Akonto and statement dates (`backend/demo/demo-data.sql`,
   `backend/src/db/demo-data.ts`); migration `0003_stammdaten_korrektur.sql` (Swiss monthly heating shares, 70/30 key
   with the new building sums `{area_total}` … in `formula.service.ts`, formula help in the settings); PDF with tenant
@@ -4448,7 +4448,7 @@ critical/high/medium is open; reviews in `docs/reviews/`.
   `tests/contracts/fuel-stocks.json`, `FuelStocks.svelte` on the building page, demo readings for Musterhaus Zentrum).
   Scenarios "Eine Rechnung gilt für ihren Leistungszeitraum …", "Heizöl wird nach Verbrauch abgerechnet …". Tests:
   `service-period.pg.test.ts`, `fuel-stock.pg.test.ts`, `building-actions.test.ts`, `buildings-pages.dom.test.ts`,
-  `invoice-pages.dom.test.ts`; demo recalculation in `docs/seed-daten-aenderungen.md`.
+  `invoice-pages.dom.test.ts`; demo recalculation in `docs/archive/seed-daten-aenderungen.md`.
 - [x] **B, review round 2** (`docs/reviews/B-review-2.md`): Tankbestand with its heating cost category (migration
   `0009`, select on the building page), key fallback, reported in the check when a reading day is missing or the
   consumption is negative (kind `stock`, confirmation in the wizard, link to the building), consumption compared with
@@ -4520,7 +4520,7 @@ critical/high/medium is open; reviews in `docs/reviews/`.
 
 ## Session 12 - October 2026: Deeper Modules from the deepcheck Scan
 
-The nine modules that blind reviewers labelled shallow with high or medium confidence (`docs/deepcheck-validation.md`),
+The nine modules that blind reviewers labelled shallow with high or medium confidence (`tools/deepcheck/deepcheck-validation.md`),
 except the security-sensitive `auth.ts` and `api-proxy.ts`, made deeper without changing what users see; one commit each.
 
 ### Done ✅
@@ -4587,7 +4587,7 @@ column. No installation exists yet, so the migrations were merged: `0001_schema.
   personas Marco, Dr. Weber, Sven (`docs/design/personas/*-f.md`, Sven rerun `sven-f2.md`), round 3
   (`docs/reviews/F-review-3.md`). A first migration that rewrote the rate of keyed statements was withdrawn (overflow,
   rates that do not add up); it became moot with the merged migrations. Open product points and the low findings left:
-  `offene-punkte.md`, section «Session 12».
+  `docs/archive/offene-punkte-verlauf.md`, section «Session 12».
 - [x] **Docs**: `offene-punkte.md`, `nebenkostenabrechnung-anforderungen.md`, `data-model.md`, `api-specification.md`,
   `PRD-Dwello.md`, `seed-daten-aenderungen.md`, `README.md`, `backend/CLAUDE.md`.
 
@@ -4709,7 +4709,7 @@ A tenant gives notice for a later day: «Mietvertrag beenden» asks for the Vert
 
 Every UI text moves into `messages/{de,fr,it,en}.json` (German is the base and default); a language switcher in the
 header and on pages without it. Branch `claude/optimistic-clarke-nn8u7t` from `main`. Terms per language:
-`docs/design/i18n-begriffe.md`. Reviews: `docs/design/reviews/i18n-<step>-review-<n>.md`.
+`docs/design/i18n-begriffe.md`. Reviews: `docs/archive/redesign/reviews/i18n-<step>-review-<n>.md`.
 
 ### Decisions and clarifications
 - Paraglide 2 (`@inlang/paraglide-js`), strategy `cookie` then `baseLocale` (cookie `PARAGLIDE_LOCALE`, 400 days; no URL
@@ -4794,7 +4794,7 @@ header and on pages without it. Branch `claude/optimistic-clarke-nn8u7t` from `m
   texts use, no umlaut word, user data masked; no page wider than the viewport, no clipped text box) passes for all
   120 examples; `@wip` removed. Local examples per language (street, company, tenant name) instead of German ones.
 - [x] **Native reads and personas**: one subagent per message file read it as a Swiss native speaker
-  (`docs/design/reviews/i18n-native-de.md`, `i18n-native-fr-it-en.md`; German slips existed before and were kept as
+  (`docs/archive/redesign/reviews/i18n-native-de.md`, `i18n-native-fr-it-en.md`; German slips existed before and were kept as
   required, fr/it/en majors fixed); no human native speaker has checked the translations. Personas on the persona stack
   (`dwello_persona`): Helga (de, desktop zoom 1.5), Marco (it, 390 px), Dr. Weber (fr, desktop), Sven (en, keyboard
   and screen reader), Anna (fr, 390 px) – reports `docs/design/personas/<name>-i18n.md`. No blocker; the majors
@@ -4811,7 +4811,7 @@ header and on pages without it. Branch `claude/optimistic-clarke-nn8u7t` from `m
   `public-pages.test.ts`, `invoice-categorization.pg.test.ts`, `language-switcher.dom.test.ts`, `config-i18n.test.ts`;
   screens `help-public`, `privacy-public`, `terms-public` in `screens.json`, `accessibility.feature` and
   `sprachen-bildschirme.feature`.
-- [x] **Review fixes of the follow-up** (`docs/design/reviews/i18n-follow-up-review-1.md`): signed out, help, privacy
+- [x] **Review fixes of the follow-up** (`docs/archive/redesign/reviews/i18n-follow-up-review-1.md`): signed out, help, privacy
   and terms keep the frame's margins (`src/routes/+layout.svelte`, test `public-pages-layout.dom.test.ts`); more
   protected near-miss paths in `public-pages.test.ts`; `docs/api-specification.md` names the public endpoint; the
   terms-link step retries its URL check (`language.steps.ts`). Review 2: no blocker or major.
@@ -4824,7 +4824,7 @@ header and on pages without it. Branch `claude/optimistic-clarke-nn8u7t` from `m
   under `src` (tests and generated code aside): markup text, `aria-label`/`title`/`placeholder`/`alt` and every string
   literal must hold no word that only German UI texts use and no ä, ö, ü or ß; nine files list their German
   identifiers (status values, query parameters, the native name «Deutsch»). Shown to fail on a planted «Anmelden».
-  Three review rounds (`docs/design/reviews/i18n-guard-review-1..3.md`): strings in `{…}` and props, regex literals and
+  Three review rounds (`docs/archive/redesign/reviews/i18n-guard-review-1..3.md`): strings in `{…}` and props, regex literals and
   `${…}/` no longer put the quote pairing out of step; each file's test plants German at its end and must find it. The
   user decided against a fourth round. Gallery uses the example name message instead of «Keller».
   A whole German message copied into the code is caught too («Per E-Mail»).
@@ -4887,6 +4887,18 @@ header and on pages without it. Branch `claude/optimistic-clarke-nn8u7t` from `m
   the main agent saves the reports (R-6); summary "Blocked on me / Changed / Found" (R-7); checklist from the start
   (R-8); status notes with the next action (R-9); `code-reviewer` details only Blocker/Major, reports in German
   (R-10, R-14); fallback without subagents (R-11); smaller fixes (R-12, R-13, R-15: "Before coding").
+- [x] **Glossary** (`UBIQUITOUS_LANGUAGE.md`, approved by the product owner): Verwaltungspauschale of the tenant's own
+  costs without key, no "Nur Warmwasser", Rechnungsdatum vs. Leistungszeitraum, Heizung 70/30 formula with sums; new
+  terms Befristet/Unbefristet, Kündigungstermin, Kündigung aufheben, Kündigungsfrist, Monatlich total, Leistungszeitraum,
+  Heizkosten (Kategorie), Gleichmässig pro Wohnung, Tankbestand, Stichtag, Eigene Nebenkosten, Rundung auf 5 Rappen;
+  Zahlungsfrist from sending, also for refunds; UI languages, Romansh PDF in German. Fachreview (V-1 to V-11, M-1 to
+  M-5, report in the session only) applied; open domain points in `docs/design/offene-punkte.md` F-1 to F-20.
+- [x] **Docs housekeeping**: redesign brief, analysis, plan, migration guide, progress and reviews to
+  `docs/archive/redesign/`; deepcheck brief and validation to `tools/deepcheck/`; session-11 report, seed data notes and
+  the old open points (`offene-punkte-verlauf.md`) to `docs/archive/`; new short `docs/design/offene-punkte.md` (open
+  points only, IDs F/P/B/A/H; comments in code and docs repointed); persona screenshots of earlier rounds removed
+  (40 MB to 8 MB), new ones stay out of the repo; README languages, migration numbers in `docs/data-model.md`, MVA
+  step 1 status.
 
 ---
 

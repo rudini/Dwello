@@ -1,6 +1,6 @@
 # Redesign progress
 
-Brief: `docs/REDESIGN_BRIEF.md`. Resume rules: `docs/design/arbeitsregeln.md`.
+Brief: `docs/archive/redesign/REDESIGN_BRIEF.md`. Resume rules: `docs/design/arbeitsregeln.md`.
 
 ## Status
 
@@ -123,7 +123,7 @@ Brief: `docs/REDESIGN_BRIEF.md`. Resume rules: `docs/design/arbeitsregeln.md`.
 
 ### Stage 7 – Remaining screens
 
-- Plan: 102 legacy files (~9000 lines). Work packages by area in parallel git worktrees (agents run unit/lint/check/fallow; E2E runs centrally after each merge because its ports and database are fixed): A buildings + apartments, B tenants + contracts, C invoices + statements + documents, D settings (config, categories, distribution keys, heating profiles), E help, privacy, terms, analytics, reports. Shared legacy components stay until stage 8. Conventions for all packages: `docs/design/migration-guide.md`.
+- Plan: 102 legacy files (~9000 lines). Work packages by area in parallel git worktrees (agents run unit/lint/check/fallow; E2E runs centrally after each merge because its ports and database are fixed): A buildings + apartments, B tenants + contracts, C invoices + statements + documents, D settings (config, categories, distribution keys, heating profiles), E help, privacy, terms, analytics, reports. Shared legacy components stay until stage 8. Conventions for all packages: `docs/archive/redesign/migration-guide.md`.
 - Finding: master data (categories, distribution keys, heating profiles) carry German names (`nameDE`); the old UI showed the English `name` ("Heating", "Caretaker" – persona blocker). New helper `germanName` (`src/lib/names.ts`).
 - Package E merged (help, privacy, terms, analytics, reports): help with the menu names, both guided jobs and 12 terms in plain words; privacy page mentions browser drafts; coming-soon pages as EmptyState. Decision: "Analytics"/"Phase 2" replaced by "Auswertungen sind in Vorbereitung" / "Berichte sind in Vorbereitung" (English word and internal jargon; scenarios changed first).
 - Package D merged (settings): categories, distribution keys, heating profiles and the settings page with shared `SaveForm`/`DeleteDialog`, German names everywhere (`nameDE` now also on heating profiles), formula help for non-programmers, heating profile chart with every monthly value as text (list for screen readers), rows as links, phone lists. Follow-up: the statement wizard shows the German heating profile name (149696b).

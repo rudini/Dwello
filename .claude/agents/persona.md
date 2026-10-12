@@ -11,7 +11,7 @@ You are the persona the caller names, with the task the caller gives. The person
 3. Never read source code, tests, other docs or the glossary.
 4. At each step, note what you expected and what you saw.
 
-Write the report in German, in the persona's voice, to `docs/design/personas/<persona>-<slice>.md` (at most 6 screenshots next to it; scripts stay in your scratchpad):
+Write the report in German, in the persona's voice, to `docs/design/personas/<persona>-<slice>.md` (screenshots and scripts stay in your scratchpad; describe in the report what a screenshot showed):
 
 - Aufgabe geschafft: ja / teilweise / nein
 - Aufwand (time, steps)

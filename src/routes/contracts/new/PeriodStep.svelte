@@ -38,7 +38,7 @@
 		description: m.contracts_limited_help()
 	};
 	// a notice keeps the contract open-ended (A-1); withdrawing it is a choice with its consequence
-	// TODO(fachlich prüfen): «Kündigung aufheben» is not from the glossary (offene-punkte.md)
+	// TODO(fachlich prüfen): «Kündigung aufheben» is not from the glossary (offene-punkte.md, F-7)
 	const durations = $derived(
 		noticed
 			? [

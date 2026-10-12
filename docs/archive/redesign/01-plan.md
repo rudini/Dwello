@@ -1,6 +1,6 @@
 # 01 – Plan
 
-Design decisions for the redesign, with rationale; token proposal; migration, test and terminology strategy. Builds on `00-analyse.md`. Binding requirements: `docs/REDESIGN_BRIEF.md`.
+Design decisions for the redesign, with rationale; token proposal; migration, test and terminology strategy. Builds on `00-analyse.md`. Binding requirements: `docs/archive/redesign/REDESIGN_BRIEF.md`.
 
 ## 1. Guiding principles
 

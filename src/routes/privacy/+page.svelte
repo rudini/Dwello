@@ -26,7 +26,7 @@
 		{ id: 'cookies', title: m.privacy_cookies_title(), paragraphs: [m.privacy_cookies_1()] }
 	];
 
-	// TODO(fachlich prüfen): legal wording of the draft notice (docs/design/offene-punkte.md, Privacy)
+	// TODO(fachlich prüfen): legal wording of the draft notice (docs/design/offene-punkte.md, F-19)
 	const draftNotice = m.privacy_draft_notice();
 </script>
 

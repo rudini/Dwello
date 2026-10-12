@@ -1,6 +1,6 @@
 # Stage 9 – final review and final persona round
 
-Final reviewer: independent general-purpose agent, read-only, against the Definition of Done of `docs/REDESIGN_BRIEF.md` (HEAD 832d9a7), live in light/dark and desktop/mobile. Personas: all five with the brief's tasks (`personas/*-final.md`).
+Final reviewer: independent general-purpose agent, read-only, against the Definition of Done of `docs/archive/redesign/REDESIGN_BRIEF.md` (HEAD 832d9a7), live in light/dark and desktop/mobile. Personas: all five with the brief's tasks (`personas/*-final.md`).
 
 ## Definition of Done (reviewer's verdict, then the state after the fixes)
 

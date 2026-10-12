@@ -41,7 +41,7 @@
 	const selected = $derived(heatingProfiles.find((p) => p.id === heatingProfileId));
 	// The predefined profiles' descriptions are English; only an own profile's is shown
 	const ownDescription = $derived(selected?.type === 'custom' ? selected.description : '');
-	// TODO(fachlich prüfen): the glossary says of the building's costs; the fee is of each tenant's own (offene-punkte.md)
+	// TODO(fachlich prüfen): the glossary says of the building's costs; the fee is of each tenant's own (docs/archive/offene-punkte-verlauf.md)
 	// The text as typed (a half-typed «4,» stays), the number for the run: comma or point, empty is no rate
 	let feeText = $state(Number.isFinite(managementFeePercent) ? String(managementFeePercent) : '');
 	const typeFee = (text: string) => {
