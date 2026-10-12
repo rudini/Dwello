@@ -34,9 +34,11 @@ export function backendMessage(body: BackendError | null | undefined, fallback: 
 	const message = messageOf(body?.code);
 	const causes = body?.causes?.map(({ code, params = {} }) => {
 		const cause = messageOf(code);
-		return cause ? render(cause, params) : code;
+		return cause && render(cause, params);
 	});
-	if (message) return render(message, { ...body?.params, ...(causes && { cause: causes.join(' ') }) });
+	// a part without a known code: the backend's own text says it all
+	if (message && !causes?.some((cause) => !cause))
+		return render(message, { ...body?.params, ...(causes && { cause: causes.join(' ') }) });
 	const text = typeof body?.error === 'string' ? body.error : body?.message;
 	return text || fallback;
 }

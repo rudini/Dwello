@@ -72,6 +72,13 @@ describe('Fehler des Backends in der gewählten Sprache', () => {
 		expect(backendMessage(body, 'Ersatz')).toBe(body.error);
 	});
 
+	it('zeigt den Text des Backends, wenn ein Teil keinen bekannten Code hat', () => {
+		overwriteGetLocale(() => 'fr');
+		const body = { error: 'Die Formel ist ungültig: Neu.', code: 'FORMULA_INVALID', params: {}, causes: [{ code: 'FORMULA_NEW_THING' }] };
+
+		expect(backendMessage(body, 'Repli')).toBe(body.error);
+	});
+
 	it('setzt Benutzerdaten nie als Code ein', () => {
 		const body = {
 			error: 'Eine Kategorie mit dem Namen "KI_UNAVAILABLE" existiert bereits.',
