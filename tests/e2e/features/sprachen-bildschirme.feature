@@ -134,3 +134,6 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | terms                  | default             |
       | analytics              | default             |
       | reports                | default             |
+      | help-public            | default             |
+      | privacy-public         | default             |
+      | terms-public           | default             |

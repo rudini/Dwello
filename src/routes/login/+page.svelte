@@ -47,7 +47,7 @@
 
 		<p class="text-center text-ink-muted">
 			{m.login_terms_before()}
-			<a href="/terms" class="text-accent underline underline-offset-4">{m.terms_title()}</a>.
+			<a href="/terms" data-testid="login-terms-link" class="text-accent underline underline-offset-4">{m.terms_title()}</a>.
 		</p>
 	</div>
 </div>

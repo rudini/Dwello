@@ -39,3 +39,7 @@ export const MONTHS = KEYS.map((key) => ({
 /** Sum of the monthly shares in percent, to the hundredth */
 export const profileTotal = (shares: Record<string, number>) =>
 	Math.round(Object.values(shares).reduce((sum, share) => sum + share, 0) * 100) / 100;
+
+/** A heating profile in a choice: name and monthly sum; 100 % only in German, so the longer names fit a phone */
+export const profileLabel = (name: string, total: number) =>
+	total === 100 && getLocale() !== 'de' ? name : `${name} (${total}%)`;

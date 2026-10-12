@@ -5,9 +5,9 @@ import { cookieConfig } from '$lib/server/jwt-config';
 
 const BACKEND_ORIGIN = new URL(process.env.BACKEND_URL || 'http://localhost:3001').origin;
 
-// Reachable without signing in: the login page, the OAuth round trip and the health check
+// Reachable without signing in: the login page, the OAuth round trip, the health check, help and the legal pages
 const isPublic = (path: string) =>
-	path === '/login' || path.startsWith('/auth/') || path === '/health';
+	['/login', '/health', '/help', '/privacy', '/terms'].includes(path) || path.startsWith('/auth/');
 
 async function sessionUser(cookies: Parameters<typeof getJwtFromCookie>[0]) {
 	const jwt = getJwtFromCookie(cookies);

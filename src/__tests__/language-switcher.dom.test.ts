@@ -64,6 +64,23 @@ describe('Sprachwahl', () => {
 		expect(document.activeElement).toBe(button());
 	});
 
+	it('wechselt mit den Pfeiltasten zwischen den Sprachen, auch von der Schaltfläche aus', () => {
+		show(LanguageSwitcher, {});
+		button().focus();
+		press('ArrowDown'); // opens the menu on the current language
+		expect(document.activeElement).toBe(allByTestId('language-option')[0]);
+		press('ArrowDown');
+		expect(document.activeElement).toBe(allByTestId('language-option')[1]);
+		press('End');
+		expect(document.activeElement).toBe(allByTestId('language-option')[3]);
+		press('ArrowDown'); // wraps around
+		expect(document.activeElement).toBe(allByTestId('language-option')[0]);
+		press('ArrowUp');
+		expect(document.activeElement).toBe(allByTestId('language-option')[3]);
+		press('Home');
+		expect(document.activeElement).toBe(allByTestId('language-option')[0]);
+	});
+
 	it('schliesst bei einem Klick daneben', () => {
 		show(LanguageSwitcher, {});
 		click(button());

@@ -18,7 +18,6 @@ import {
 	validateInvoice,
 	getInvoicesForStatement
 } from '../services/invoice.service';
-import { llmRecipient } from '../config/llm';
 import { isLlmAvailable, getCacheStats, categorizeInvoice } from '../services/llm.service';
 import { getUtilityCostRules } from '../services/utility-validation.service';
 import { checkBuildingInvoices } from '../services/invoice-completeness.service';
@@ -106,8 +105,6 @@ export const invoiceRoutes = new Elysia({ prefix: '/api/v1/invoices' })
 			cache: cacheStats
 		};
 	})
-	// Who receives invoice data for categorization, for the privacy statement
-	.get('/llm-recipient', () => ({ recipient: llmRecipient() }))
 	// Get Swiss utility cost rules
 	.get('/utility-rules', async () => {
 		return getUtilityCostRules();

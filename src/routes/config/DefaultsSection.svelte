@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { profileLabel } from '$lib/heating-profile';
 	import { localName } from '$lib/names';
 	import { m } from '$lib/paraglide/messages';
 	import type { Settings } from '$lib/server/settings';
@@ -36,7 +37,7 @@
 				) / 100;
 			return {
 				value: profile.id,
-				label: `${localName(profile)} (${total}%)`,
+				label: profileLabel(localName(profile), total),
 				disabled: total !== 100
 			};
 		})

@@ -44,3 +44,22 @@ Funktionalität: Sprache der Oberfläche
     Dann ist der Liegenschaftsverwalter noch auf der Seite "/gibt-es-nicht"
     Und ist die Seite auf "English"
     Und heisst die Seite "Error - Dwello"
+
+  Szenariogrundriss: Hilfe, Datenschutz und Nutzungsbedingungen ohne Anmeldung lesen und die Sprache wechseln
+    Angenommen ein Besucher hat die Seite "<Seite>" geöffnet
+    Wenn der Besucher die Sprache "English" wählt
+    Dann ist der Besucher noch auf der Seite "<Seite>"
+    Und ist die Seite auf "English"
+    Und heisst die Seite "<Titel>"
+
+    Beispiele:
+      | Seite    | Titel                 |
+      | /help    | Help - Dwello         |
+      | /privacy | Privacy - Dwello      |
+      | /terms   | Terms of use - Dwello |
+
+  Szenario: Die Nutzungsbedingungen von der Anmeldeseite aus lesen
+    Angenommen ein Besucher hat die Anmeldeseite geöffnet
+    Wenn der Besucher den Link zu den Nutzungsbedingungen öffnet
+    Dann ist der Besucher noch auf der Seite "/terms"
+    Und heisst die Seite "Nutzungsbedingungen - Dwello"

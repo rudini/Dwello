@@ -472,6 +472,30 @@
 			"states": [
 				"default"
 			]
+		},
+		{
+			"name": "help-public",
+			"path": "/help",
+			"public": true,
+			"states": [
+				"default"
+			]
+		},
+		{
+			"name": "privacy-public",
+			"path": "/privacy",
+			"public": true,
+			"states": [
+				"default"
+			]
+		},
+		{
+			"name": "terms-public",
+			"path": "/terms",
+			"public": true,
+			"states": [
+				"default"
+			]
 		}
 	],
 	"viewports": {

@@ -133,3 +133,6 @@ Funktionalität: Barrierefreiheit
       | terms                  | default             |
       | analytics              | default             |
       | reports                | default             |
+      | help-public            | default             |
+      | privacy-public         | default             |
+      | terms-public           | default             |

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { profileLabel } from '$lib/heating-profile';
 	import { m } from '$lib/paraglide/messages';
 	import HeatingProfileChart from '$lib/ui/HeatingProfileChart.svelte';
 	import type { HeatingProfile } from '$lib/types';
@@ -74,7 +75,7 @@
 					selected={profile.id === heatingProfileId}
 					data-testid="heating-profile-option-{profile.id}"
 				>
-					{localName(profile)} ({+sum(profile).toFixed(1)}%){complete(profile)
+					{profileLabel(localName(profile), +sum(profile).toFixed(1))}{complete(profile)
 						? ''
 						: ` - ${m.statements_not_selectable()}`}
 				</option>

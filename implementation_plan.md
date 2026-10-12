@@ -4713,7 +4713,17 @@ header and on pages without it. Branch `claude/optimistic-clarke-nn8u7t` from `m
   and screen reader), Anna (fr, 390 px) – reports `docs/design/personas/<name>-i18n.md`. No blocker; the majors
   (terms/privacy/help behind sign-in, privacy notice content, Art. 257d OR hint, long heating help on phones, mobile
   menu height, glossary entry point, PDF language not named) existed before the translation and need a decision
-  (`offene-punkte.md`); no persona rerun was needed for a fix of this work.
+  (`offene-punkte.md`).
+- [x] **Follow-up after the goal check (user's decisions)**: help, privacy and terms are public (`hooks.server.ts`
+  public paths; signed out they show without the app header, with the language row); the backend route
+  `/api/v1/invoices/llm-recipient` (provider and country for the privacy notice) moved before the JWT check in
+  `backend/src/app.ts`; the login page's terms link now works signed out. Language menu: arrow keys, Home and End.
+  Heating-profile choices name «(100%)» only in German (`profileLabel`), so Italian names fit 390 px. Older persona
+  majors stay open by the user's decision; the test additions in `accessibility.feature` and the code checks in
+  existing backend tests were accepted by the user. Tests first: `sprachen.feature` (signed-out pages, terms link),
+  `public-pages.test.ts`, `invoice-categorization.pg.test.ts`, `language-switcher.dom.test.ts`, `config-i18n.test.ts`;
+  screens `help-public`, `privacy-public`, `terms-public` in `screens.json`, `accessibility.feature` and
+  `sprachen-bildschirme.feature`.
 
 ---
 

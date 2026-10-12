@@ -97,3 +97,14 @@ describe('Einstellungen und Stammdaten in der gewählten Sprache', () => {
 		);
 	});
 });
+
+describe('Heizprofil in der Auswahl', () => {
+	it('nennt 100 % nur auf Deutsch, damit der Name auf 390 Pixel passt; eine andere Summe immer', async () => {
+		const { profileLabel } = await import('$lib/heating-profile');
+		overwriteGetLocale(() => 'it');
+		expect(profileLabel('Riscaldamento + acqua calda', 100)).toBe('Riscaldamento + acqua calda');
+		expect(profileLabel('Proprio', 90)).toBe('Proprio (90%)');
+		overwriteGetLocale(() => 'de');
+		expect(profileLabel('Heizung + Warmwasser', 100)).toBe('Heizung + Warmwasser (100%)');
+	});
+});

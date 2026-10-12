@@ -75,3 +75,16 @@ Then(
 Given('der Browser des Liegenschaftsverwalters bevorzugt Englisch', async ({ verwalter }) => {
 	await verwalter.page.setExtraHTTPHeaders({ 'Accept-Language': 'en-GB,en;q=0.9' });
 });
+
+Given('ein Besucher hat die Seite {string} geöffnet', async ({ besucher }, path: string) => {
+	await visit(besucher.page, path);
+});
+
+When('der Besucher den Link zu den Nutzungsbedingungen öffnet', async ({ besucher }) => {
+	await besucher.page.getByTestId('login-terms-link').click();
+	await besucher.page.locator('body[data-hydrated]').waitFor({ state: 'attached' });
+});
+
+Then('ist der Besucher noch auf der Seite {string}', async ({ besucher }, path: string) => {
+	expect(new URL(besucher.page.url()).pathname).toBe(path);
+});
