@@ -1,14 +1,15 @@
-import { expect } from '@playwright/test';
 import { createBdd, type DataTable } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { visit } from '../interactions/navigation';
-import { manualStatusChoice, numberTaken, statusFromContracts } from '../questions/apartment-form';
+import { manualStatusChoices, numberTaken, statusFromContracts } from '../questions/apartment-form';
 import {
 	blockApartment,
 	changeArea,
 	changeNumber,
 	chooseBuilding,
 	enterNumber,
+	openApartmentEdit,
+	openNewApartment,
+	openNewApartmentInBuilding,
 	registerApartment,
 	saveApartment
 } from '../tasks/apartment-form';
@@ -21,66 +22,65 @@ const apartmentFrom = (table: DataTable) => {
 };
 
 Given('der Liegenschaftsverwalter ist auf der Seite "Neue Wohnung"', async ({ verwalter }) => {
-	await visit(verwalter.page, '/apartments/new');
+	await verwalter.attemptsTo(openNewApartment);
 });
 
 Given(
 	'der Liegenschaftsverwalter erfasst eine neue Wohnung im Gebäude {string}',
 	async ({ verwalter, seed }, building: string) => {
-		await visit(verwalter.page, `/apartments/new?building=${seed.idOf(building)}`);
+		await verwalter.attemptsTo(openNewApartmentInBuilding(seed.idOf(building)!));
 	}
 );
 
 Given(
 	'der Liegenschaftsverwalter ist auf der Bearbeitungsseite der Wohnung {string}',
 	async ({ verwalter, seed }, number: string) => {
-		await visit(verwalter.page, `/apartments/${seed.idOf(number)}/edit`);
+		await verwalter.attemptsTo(openApartmentEdit(seed.idOf(number)!));
 	}
 );
 
 When(
 	'der Liegenschaftsverwalter im Gebäude {string} folgende Wohnung erfasst:',
 	async ({ verwalter, seed }, building: string, table: DataTable) => {
-		await verwalter.perform(chooseBuilding(seed.idOf(building)!));
-		await verwalter.perform(registerApartment(apartmentFrom(table)));
+		await verwalter.attemptsTo(chooseBuilding(seed.idOf(building)!), registerApartment(apartmentFrom(table)));
 	}
 );
 
 When('der Liegenschaftsverwalter folgende Wohnung erfasst:', async ({ verwalter }, table: DataTable) => {
-	await verwalter.perform(registerApartment(apartmentFrom(table)));
+	await verwalter.attemptsTo(registerApartment(apartmentFrom(table)));
 });
 
 When('der Liegenschaftsverwalter die Wohnung ohne Angaben speichert', async ({ verwalter }) => {
-	await verwalter.perform(saveApartment);
+	await verwalter.attemptsTo(saveApartment);
 });
 
 When('der Liegenschaftsverwalter die Wohnungsnummer {string} eingibt', async ({ verwalter }, number: string) => {
-	await verwalter.perform(enterNumber(number));
+	await verwalter.attemptsTo(enterNumber(number));
 });
 
 When('der Liegenschaftsverwalter die Wohnungsnummer auf {string} ändert', async ({ verwalter }, number: string) => {
-	await verwalter.perform(changeNumber(number));
+	await verwalter.attemptsTo(changeNumber(number));
 });
 
 When('der Liegenschaftsverwalter die Fläche auf {string} ändert', async ({ verwalter }, area: string) => {
-	await verwalter.perform(changeArea(area));
+	await verwalter.attemptsTo(changeArea(area));
 });
 
 When('der Liegenschaftsverwalter die Wohnung sperrt', async ({ verwalter }) => {
-	await verwalter.perform(blockApartment);
+	await verwalter.attemptsTo(blockApartment);
 });
 
 Then(
 	'warnt das Formular, dass die Wohnungsnummer {string} vergeben ist',
 	async ({ verwalter }, number: string) => {
-		await expect(numberTaken(verwalter)).toContainText(`"${number}" existiert bereits`);
+		await verwalter.sees(numberTaken).toContain(`"${number}" existiert bereits`);
 	}
 );
 
 Then(
 	'kann der Liegenschaftsverwalter den Status {string} nicht von Hand ändern',
 	async ({ verwalter }, status: string) => {
-		await expect(statusFromContracts(verwalter)).toHaveText(status);
-		await expect(manualStatusChoice(verwalter)).toHaveCount(0);
+		await verwalter.sees(statusFromContracts).toBe(status);
+		await verwalter.sees(manualStatusChoices).toBe(0);
 	}
 );

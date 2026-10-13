@@ -1,5 +1,5 @@
-import type { Actor } from '../fixtures/actor';
-import { tenantChannel, tenantLanguage } from '../interactions/tenant-form';
+import { Text } from '../screenplay/questions';
+import { tenantChannel, tenantLanguage } from '../targets/tenant-form';
 
-export const correspondenceOf = (actor: Actor) => tenantChannel(actor.page);
-export const languageOf = (actor: Actor) => tenantLanguage(actor.page);
+export const correspondence = Text.of(tenantChannel);
+export const correspondenceLanguage = Text.of(tenantLanguage);

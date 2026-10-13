@@ -1,14 +1,10 @@
-import type { Actor } from '../fixtures/actor';
-import { editButton, historyLink, tenantProfileButton } from '../interactions/apartment-detail';
+import { Click, Navigate } from '../screenplay/interactions';
+import { editButton, historyLink, tenantProfileButton } from '../targets/apartment-detail';
 
-export const editApartment = async (actor: Actor) => {
-	await editButton(actor.page).click();
-};
+export const openApartmentDetail = (apartmentId: string) => Navigate.to(`/apartments/${apartmentId}`);
 
-export const openTenantProfile = async (actor: Actor) => {
-	await tenantProfileButton(actor.page).click();
-};
+export const editApartment = Click.on(editButton);
 
-export const openContractFromHistory = (tenantName: string) => async (actor: Actor) => {
-	await historyLink(actor.page, tenantName).click();
-};
+export const openTenantProfile = Click.on(tenantProfileButton);
+
+export const openContractFromHistory = (tenantName: string) => Click.on(historyLink(tenantName));

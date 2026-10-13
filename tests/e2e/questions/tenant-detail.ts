@@ -1,6 +1,6 @@
-import type { Actor } from '../fixtures/actor';
-import { rentalApartment, rentalRent, rentalStart } from '../interactions/tenant-detail';
+import { Text } from '../screenplay/questions';
+import { rentalApartment, rentalRent, rentalStart } from '../targets/tenant-detail';
 
-export const rentedApartment = (actor: Actor) => rentalApartment(actor.page);
-export const monthlyRent = (actor: Actor) => rentalRent(actor.page);
-export const rentalStartDate = (actor: Actor) => rentalStart(actor.page);
+export const rentedApartment = Text.of(rentalApartment);
+export const monthlyRent = Text.of(rentalRent);
+export const rentalStartDate = Text.of(rentalStart);
