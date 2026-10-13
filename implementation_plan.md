@@ -64,3 +64,17 @@ Review round 3 (`docs/reviews/screenplay-e2e-review-3.md`, last round allowed by
 Final checks at 294aebf: E2E chromium + api 629 passed (same 629 test names as the baseline); `bun run lint` clean;
 `bun run check` 0 errors; backend 539 pass, type-check clean, coverage 90.4 %; `test:coverage` 2232 passed, 1 failed
 only locally (`open-work.test.ts` finds the agent worktrees under `.claude/worktrees/`, not part of the repo).
+
+### Branch claude/screenplay-e2e-v2 (the commits of this session only, on main)
+
+- [x] Expert review (`docs/reviews/screenplay-e2e-expertenreview-1.md`): M-1 questions answer values (amounts in francs,
+  created count, heating share, contract history), the same for UI and API - fixed; M-2 the API driver calls the
+  BFF's `previewStatements`/`generateStatements` instead of copying the contract selection - fixed; M-3 (structure test)
+  does not exist on this branch
+- [x] Whole-state review round 1 (`docs/reviews/screenplay-e2e-v2-review-1.md`): B-1 `test:e2e` runs `svelte-kit sync`
+  first (CI had no `.svelte-kit` for the `$lib` imports) - fixed; M-1 driver branching not linted - fixed; Minors fixed
+  (steps without `answer`, fixture handlers, contract history) or open work; the round-3 M-1 (fixtures) confirmed closed
+- [x] Round 2 (`docs/reviews/screenplay-e2e-v2-review-2.md`): no Blocker, no Major; Minor fixtures driving the UI through
+  tasks or interactions - fixed (only `Cookies`); Minor plain `fetch` past `CallTheApi` - open work H-19; Nit NaN in
+  `signedFrancs` - fixed; Nit test name - fixed; Nit `$testInfo.project.name` branch - rejected (deliberate bypass, not a
+  realistic pattern)

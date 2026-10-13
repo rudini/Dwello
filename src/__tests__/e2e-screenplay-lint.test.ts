@@ -105,13 +105,21 @@ describe('Screenplay-Schichten der Akzeptanztests', () => {
 		['tests/e2e/questions/example.ts', 'export const q = (actor) => actor.can(CallTheApi);'],
 		['tests/e2e/steps/example.steps.ts', "Then('x', async ({ verwalter }) => { if ((await verwalter.answer(q)) !== 'a') throw new Error(); });"],
 		['tests/e2e/fixtures/example.ts', "export const acceptDialogs = (p) => p.on('dialog', (d) => d.accept());"]
-	])('lehnt Treiber-Weichen und Prüfungen ohne sees in %s ab: %s', async (filePath, code) => {
+	])('lehnt Treiber-Weichen, Prüfungen ohne sees und Handler auf der Page in %s ab: %s', async (filePath, code) => {
 		expect(await problems(filePath, code)).toContain('no-restricted-syntax');
 	});
 
-	it('lässt Fixtures keine Targets nutzen: Vorbedingungen laufen über die API', async () => {
-		const code = "import { saveButton } from '../targets/form';";
+	it.each([
+		"import { saveButton } from '../targets/form';",
+		"import { openStatementDetail } from '../tasks/statement-detail';",
+		"import { Navigate } from '../screenplay/interactions';"
+	])('lässt Fixtures die Oberfläche nicht bedienen, Vorbedingungen laufen über die API: %s', async (code) => {
 		expect(await problems('tests/e2e/fixtures/example.ts', code)).toContain('no-restricted-imports');
+	});
+
+	it('lässt Fixtures die Session als Cookie setzen', async () => {
+		const code = "import { Cookies } from '../screenplay/interactions';\nexport const leave = Cookies.clear;";
+		expect(await problems('tests/e2e/fixtures/example.ts', code)).toEqual([]);
 	});
 
 	it('lehnt Playwright-Importe in Tasks und Questions ab', async () => {

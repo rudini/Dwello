@@ -190,7 +190,12 @@ export default [
 				{
 					patterns: [
 						{ ...playwrightImports[0], allowTypeImports: true }, // fixtures create the abilities
-						{ group: ['**/targets/**'], message: 'Preconditions go through the backend API, never through the UI (tests/e2e/CLAUDE.md)' }
+						{ group: ['**/targets/**', '**/tasks/**'], message: 'Preconditions go through the backend API, never through the UI (tests/e2e/CLAUDE.md)' },
+						{
+							group: ['**/screenplay/interactions*'],
+							importNamePattern: '^(?!Cookies$)',
+							message: 'Fixtures only set the session (Cookies); preconditions go through the backend API (tests/e2e/CLAUDE.md)'
+						}
 					]
 				}
 			],
