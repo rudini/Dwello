@@ -56,19 +56,17 @@ export const Enter = {
 			on(target, async (elements) => {
 				for (const element of await elements.all()) await element.fill(value);
 			})
-	})
-};
-
-/** Types into the emptied field key by key, as a person on a phone's number pad does, then leaves the field */
-export const Type = {
-	theText: (text: string) => ({
-		into: (target: Target) =>
+	}),
+	/** Empties the field and types key by key, as a user does: for fields that react to each key */
+	keyByKey: (text: string) => {
+		const type = (leave: boolean) => (target: Target) =>
 			on(target, async (field) => {
 				await field.fill('');
 				await field.pressSequentially(text);
-				await field.blur();
-			})
-	})
+				if (leave) await field.blur();
+			});
+		return { into: type(false), intoAndLeave: type(true) };
+	}
 };
 
 /** Types a date the Swiss way (TT.MM.JJJJ) into a date field; scenarios keep JJJJ-MM-TT, or '' to empty the field */

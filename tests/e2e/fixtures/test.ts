@@ -1,5 +1,5 @@
 import { test as base } from 'playwright-bdd';
-import { Actor } from './actor';
+import { Actor } from '../screenplay/actor';
 import { BrowseTheWeb, CallTheApi } from '../screenplay/abilities';
 import { testData, type TestData } from './backend';
 import { sessionCookies, sessionToken } from './session';

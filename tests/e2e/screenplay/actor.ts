@@ -1,5 +1,4 @@
 import { expect } from '@playwright/test';
-import { BrowseTheWeb } from './abilities';
 
 /** A task or an interaction: something the actor does */
 export type Activity = (actor: Actor) => Promise<unknown>;
@@ -47,15 +46,6 @@ export class Actor {
 	/** An assertion on the answer, asked again until it holds or the expect timeout ends */
 	sees<T>(question: Question<T>, options: { timeout?: number } = {}) {
 		return expect.poll(() => this.answer(question), { message: `${this.name} sees ${question}`, ...options });
-	}
-
-	// Transitional: for steps, tasks and questions not yet moved to Screenplay; removed with the last one
-	get page() {
-		return this.abilityTo(BrowseTheWeb).page;
-	}
-
-	perform(task: Activity) {
-		return task(this);
 	}
 
 	remember(key: string, value: unknown) {

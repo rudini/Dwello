@@ -61,6 +61,11 @@ describe('Screenplay-Schichten der Akzeptanztests', () => {
 		expect(await problems('tests/e2e/targets/example.ts', act)).toContain('no-restricted-syntax');
 	});
 
+	it('lässt keine Ausnahme per Kommentar zu', async () => {
+		const code = '/* eslint-disable no-restricted-syntax */\nawait verwalter.page.goto("/");';
+		expect(await problems('tests/e2e/steps/example.steps.ts', code)).toContain('no-restricted-syntax');
+	});
+
 	it('lässt Playwright im Screenplay-Kern zu', async () => {
 		expect(
 			await problems('tests/e2e/screenplay/example.ts', 'await page.getByTestId("x").click();')

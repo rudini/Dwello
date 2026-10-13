@@ -1,5 +1,5 @@
 import type { Activity } from '../screenplay/actor';
-import { Click, Enter, EnterDate, Navigate, Select, Type } from '../screenplay/interactions';
+import { Click, Enter, EnterDate, Navigate, Select } from '../screenplay/interactions';
 import {
 	amountInput,
 	buildingSelect,
@@ -40,6 +40,6 @@ export const overrideCategory = (category: string, reason: string): Activity => 
 export const clearSupplier: Activity = (actor) => actor.attemptsTo(Enter.theValue('').into(supplierInput), saveInvoice);
 
 // Types key by key, as a person on a phone's number pad does, then leaves the field
-export const typeInvoiceDate = (text: string) => Type.theText(text).into(invoiceDateInput);
+export const typeInvoiceDate = (text: string) => Enter.keyByKey(text).intoAndLeave(invoiceDateInput);
 
 export const enterInvoiceDate = (date: string) => EnterDate.of(date).into(invoiceDateInput);

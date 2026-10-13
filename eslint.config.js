@@ -25,12 +25,6 @@ const noPlaywright = [
 const playwrightImports = [
 	{ group: ['@playwright/test', 'playwright', 'playwright-core', '@axe-core/*'], message: outsideScreenplay }
 ];
-// Ratchet while the acceptance tests move to Screenplay: files listed here still break the layer rules; the list only shrinks
-const notYetScreenplay = [
-	'tests/e2e/questions/statement-generate.ts',
-	'tests/e2e/steps/statement-generate.steps.ts',
-	'tests/e2e/tasks/statement-generate.ts',
-];
 
 export default [
 	js.configs.recommended,
@@ -116,9 +110,13 @@ export default [
 		}
 	},
 	{
+		// No exceptions: comments cannot switch the layer rules off
+		files: ['tests/e2e/**/*.ts'],
+		linterOptions: { noInlineConfig: true }
+	},
+	{
 		// Steps speak the domain: tasks, questions and fixtures only; assertions through actor.sees(question)
 		files: ['tests/e2e/steps/**/*.ts'],
-		ignores: notYetScreenplay,
 		rules: {
 			'no-restricted-imports': [
 				'error',
@@ -142,7 +140,6 @@ export default [
 	{
 		// Tasks compose interactions, questions compose web questions; neither drives Playwright itself
 		files: ['tests/e2e/tasks/**/*.ts', 'tests/e2e/questions/**/*.ts'],
-		ignores: notYetScreenplay,
 		rules: {
 			'no-restricted-imports': [
 				'error',
