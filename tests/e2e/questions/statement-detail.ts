@@ -9,7 +9,7 @@ import {
 	sendRecipient,
 	statementHeatingProfile,
 	statementHistory,
-	statementLineItem,
+	statementLineItemCells,
 	statementStatus
 } from '../targets/statement-detail';
 import { francs } from '../tasks/statement-generate-api';
@@ -31,10 +31,9 @@ type LineItem = { description: string; sharePercentage: string; tenantShare: str
 /** The heating costs of the statement: the tenant's share in % and in francs */
 export const heatingCosts = throughUiOrApi(
 	question('the heating costs of the statement', async (actor) => {
-		const text = await actor.answer(Text.of(statementLineItem('Heizung')));
-		const share = text?.match(/([\d.]+) %/);
-		const amounts = [...(text ?? '').matchAll(/CHF\s*([\d’'.]+)/g)];
-		return share && amounts.length ? { share: Number(share[1]), amount: francs(amounts[amounts.length - 1][1]) } : null;
+		// the cells one by one: the row's text runs them together ("CHF 1’000.0043 %")
+		const [, , , share, amount] = await actor.answer(Text.ofAll(statementLineItemCells('Heizung')));
+		return share && amount ? { share: Number(share.replace(/[^\d.]/g, '')), amount: francs(amount) } : null;
 	}),
 	question('the heating costs the statement charges', (actor) => {
 		const { lineItems } = actor.recall<{ lineItems: LineItem[] }>(STATEMENT);

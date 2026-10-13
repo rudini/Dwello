@@ -5165,7 +5165,8 @@ fulfilled, 2 not yet):
 - Nit `docs/test-pyramid.md` API path - fixed
 
 Final review round 10 (`docs/reviews/screenplay-e2e-review-10.md`, the whole end state 654d854; points 1 and 3
-fulfilled, 2 not yet). From here on the layers use allowlists instead of ever longer ban lists:
+fulfilled, 2 not yet). From here on allowlists replace growing ban lists where the code allows (step imports, the
+  core's page methods and selectors, `target.ts`; round 13 adds the imports of every layer):
 - M-1 Major the core finding elements through selector strings of the page API (`page.click(sel)`,
   `textContent(sel)` …) - fixed: on the page the core may call only page-wide methods (`goto`, `reload`, `route`,
   `evaluate`, `waitFor{Event,Request,Response,URL}`, viewport, headers, `title`, `url`, `context`); `querySelector`
@@ -5222,7 +5223,8 @@ fulfilled, 2 not yet):
 
 Screenplay expert review (`docs/reviews/screenplay-e2e-expertenreview-1.md`, written in the Screenplay session at
 c632714, merged in 3c58bfa):
-- M-1 Major yes/no questions lose the actual value (Saldo, costs, created statements, heating costs) - fixed: they
+- M-1 Major yes/no questions lose the actual value (Saldo, costs, created statements, heating costs) - fixed in round
+  13 (the first fix read the heating share from the run-together row text and missed the singular of «erstellt»): they
   answer the amount in francs (`saldoOf`, `totalCostsOf`, `statementsCreated`, `heatingCosts`), both drivers in the
   same form; rule added to `tests/e2e/CLAUDE.md`
 - M-2 Major the API driver chooses contracts with a copy of the BFF rule and reports its own count - partly fixed:
@@ -5231,3 +5233,20 @@ c632714, merged in 3c58bfa):
   `git ls-files --cached --others --exclude-standard` (reproduced red with a self-ignoring cache folder first)
 - Minors m-1 to m-9 and the nits - recorded in H-20, except m-8 in part (the sign of a Saldo moved from the step into
   `signedFrancs` next to the questions)
+
+Final review round 13 (`docs/reviews/screenplay-e2e-review-13.md`, the whole end state fdfa6ef; points 1 and 2
+fulfilled, 3 not yet):
+- B-1 Blocker `heatingCosts` read the share from the row text, which Svelte renders without space between cells
+  («CHF 1’000.0043 %»): 0.0043 instead of 43, three scenarios red in chromium (confirmed by the E2E run on fdfa6ef) -
+  fixed: the cells are read one by one (target `statementLineItemCells`)
+- the same E2E run showed a fourth failure the review had not named: `statementsCreated` missed the singular
+  («1 Nebenkostenabrechnung ist …») - fixed; the four features run green in chromium and api (68 scenarios)
+- Minor `seed` in `Step(` handlers - fixed; a handler passed by name - recorded in H-19
+- Minor web questions in the core reading with auto-waiting calls or acting - fixed (`textContent`, `inputValue` …
+  banned, state reads only with a timeout, no actions)
+- Minor ban lists for the imports of tasks, questions, fixtures and targets - fixed: each layer has an import
+  allowlist
+- Minor archive wording «from here on allowlists» and «M-1 fixed» - corrected
+- Minor `contractHistoryLists` folded texts into yes/no - fixed: `contractHistoryNaming` answers the rows
+- Nit `screens.json` read from outside tests/e2e - named in `tests/e2e/CLAUDE.md`; Nit `void`/unawaited `sees`
+  assigned to a variable - fixed

@@ -3,7 +3,7 @@ import { test } from '../fixtures/test';
 import {
 	apartmentInfo,
 	buildingOfApartmentShown,
-	contractHistoryLists,
+	contractHistoryNaming,
 	currentTenant,
 	grossMonthlyRent,
 	nextTenant,
@@ -79,6 +79,7 @@ Then(
 Then(
 	'enthält die Vertragshistorie die Mietverträge von {string} und {string}',
 	async ({ verwalter, names }, current: string, former: string) => {
-		await verwalter.sees(contractHistoryLists(names.get(current)!, names.get(former)!)).toBe(true);
+		const [now, before] = [names.get(current)!, names.get(former)!];
+		await verwalter.sees(contractHistoryNaming(now, before)).toEqual([now, before]);
 	}
 );

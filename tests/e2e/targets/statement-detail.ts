@@ -1,9 +1,10 @@
 import { target } from '../screenplay/target';
 
 export const statementStatus = target('Status der Abrechnung', (page) => page.getByTestId('statement-status'));
-export const statementLineItem = (category: string) =>
-	target(`Position «${category}» der Abrechnung`, (page) =>
-		page.getByTestId('statement-line-item').filter({ hasText: category })
+// Kategorie, Verteilschlüssel, Gesamtbetrag, Anteil in %, Anteil des Mieters (CostTable.svelte)
+export const statementLineItemCells = (category: string) =>
+	target(`Zellen der Position «${category}» der Abrechnung`, (page) =>
+		page.getByTestId('statement-line-item').filter({ hasText: category }).locator('td')
 	);
 export const statementHeatingProfile = target('Heizprofil der Abrechnung', (page) =>
 	page.getByTestId('statement-heating-profile')

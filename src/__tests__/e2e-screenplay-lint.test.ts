@@ -278,6 +278,8 @@ describe('Screenplay-Schichten der Akzeptanztests', () => {
 		['tests/e2e/steps/example.steps.ts', 'await Promise.allSettled([verwalter.sees(q).toBe(1)]);'],
 		['tests/e2e/steps/example.steps.ts', "verwalter.sees(confirmation).toContain('x');"],
 		['tests/e2e/steps/example.steps.ts', "verwalter.sees(confirmation).not.toContain('x');"],
+		['tests/e2e/steps/example.steps.ts', "void verwalter.sees(confirmation).toContain('x');"],
+		['tests/e2e/steps/example.steps.ts', "const check = verwalter.sees(confirmation).toContain('x');"],
 		['tests/e2e/steps/example.steps.ts', "When('x', async ({ browserName }) => browserName);"],
 		['tests/e2e/steps/example.steps.ts', "test.skip(true, 'flaky');"],
 		['tests/e2e/screenplay/questions.ts', "await expect(locate(actor, x)).toBeVisible();"],
@@ -291,6 +293,29 @@ describe('Screenplay-Schichten der Akzeptanztests', () => {
 	it('lässt seed in Given-Steps und Namen überall zu', async () => {
 		const given = "Given('x', async ({ seed }) => { await seed.statement('a', 'b', 2024); });\nWhen('y', async ({ seed, verwalter }) => { await verwalter.attemptsTo(open(seed.idOf('a'), seed.unique('b'))); });";
 		expect(await restricted('tests/e2e/steps/example.steps.ts', given)).toEqual([]);
+	});
+
+	// Schluss-Review Endstand 7: seed ausserhalb jedes Given, Web-Questions ohne Warten, Freigabelisten der Importe
+	it.each([
+		['tests/e2e/steps/example.steps.ts', "Step('x', async ({ seed }) => { await seed.sendStatement('a', 2024); });"],
+		['tests/e2e/screenplay/questions.ts', 'const text = await one.textContent();'],
+		['tests/e2e/screenplay/questions.ts', 'const on = await one.isChecked();'],
+		['tests/e2e/screenplay/questions.ts', 'await one.click();'],
+		['tests/e2e/tasks/example.ts', "import axios from 'axios';\nexport const x = axios;"],
+		['tests/e2e/questions/example.ts', "import { request } from 'node:http';\nexport const x = request;"],
+		['tests/e2e/fixtures/example.ts', "import postgres from 'postgres';\nexport const x = postgres;"],
+		['tests/e2e/targets/example.ts', "import { x } from '../tasks/dashboard';\nexport const y = x;"]
+	])('lehnt in %s ab: %s', async (filePath, code) => {
+		expect(await restricted(filePath, code)).not.toEqual([]);
+	});
+
+	it('lässt die Importe zu, die die Schichten heute brauchen', async () => {
+		const fixture = "import { randomUUID } from 'crypto';\nimport { SignJWT } from 'jose';\nimport { readFileSync } from 'fs';\nimport { test } from 'playwright-bdd';\nimport { CallTheApi } from '../screenplay/abilities';\nimport { x } from './backend';\nexport const y = [randomUUID, SignJWT, readFileSync, test, CallTheApi, x];";
+		expect(await restricted('tests/e2e/fixtures/example.ts', fixture)).toEqual([]);
+		const task = "import { a } from '../screenplay/interactions';\nimport { b } from '../targets/x';\nimport { c } from '../questions/x';\nimport { d } from '../fixtures/x';\nimport { e } from './x';\nexport const y = [a, b, c, d, e];";
+		expect(await restricted('tests/e2e/tasks/example.ts', task)).toEqual([]);
+		const target = "import { target } from '../screenplay/target';\nexport const y = target;";
+		expect(await restricted('tests/e2e/targets/example.ts', target)).toEqual([]);
 	});
 
 	it('lässt die bestehenden Importe zu', async () => {

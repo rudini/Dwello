@@ -72,6 +72,12 @@ const insideE2e = {
 	regex: '^(?!\\.\\./\\.\\./\\.\\./backend/src/__tests__/helpers/pdf-text$)(\\$|src/|(.*/)?\\.\\./\\.\\./)',
 	message: 'The layers import nothing from outside tests/e2e (tests/e2e/CLAUDE.md)'
 };
+// What a layer may import at all; everything else fails (an HTTP client, a database driver, app code …)
+const onlyImports = (allowed, layer) => ({
+	regex: `^(?!(${allowed})$)`,
+	message: `${layer} import only ${allowed.replaceAll('|', ', ').replaceAll('\\', '')} (tests/e2e/CLAUDE.md)`
+});
+const layerPath = (layers) => `\\.\\./(${layers})/[\\w.-]+|\\./[\\w.-]+`;
 // Tasks and questions sit below the steps
 const belowSteps = [
 	insideE2e,
@@ -256,9 +262,15 @@ export default [
 				'error',
 				...coreSyntax,
 				{
-					selector: "CallExpression[callee.name='expect'], MemberExpression[object.name='expect'], CallExpression[callee.property.name=/^waitFor/]",
+					selector:
+						"CallExpression[callee.name='expect'], MemberExpression[object.name='expect'], CallExpression[callee.property.name=/^waitFor/], CallExpression[callee.property.name=/^(textContent|innerText|innerHTML|inputValue|allTextContents|allInnerTexts)$/], CallExpression[callee.property.name=/^(isEnabled|isDisabled|isChecked|isEditable|isHidden|boundingBox)$/][arguments.length=0]",
 					message: 'Web questions answer at once and never wait; sees() retries them (tests/e2e/CLAUDE.md)'
-				}
+				},
+				// reading a download (its name and path) is no action
+				call(
+					playwrightActions.replace(/\|?(evaluate|evaluateAll|waitFor|path|suggestedFilename)\b/g, ''),
+					'Web questions only read; actions are interactions (tests/e2e/CLAUDE.md)'
+				)
 			]
 		}
 	},
@@ -286,7 +298,7 @@ export default [
 				noFetch,
 				{
 					selector:
-						"WhileStatement, DoWhileStatement, TryStatement, CallExpression[callee.property.name=/^(answer|answeredBy|then|catch|finally)$/], MemberExpression[object.name='Promise'], ExpressionStatement > CallExpression > MemberExpression.callee > CallExpression.object[callee.property.name='sees'], ExpressionStatement > CallExpression > MemberExpression.callee > MemberExpression.object > CallExpression.object[callee.property.name='sees']",
+						"WhileStatement, DoWhileStatement, TryStatement, CallExpression[callee.property.name=/^(answer|answeredBy|then|catch|finally)$/], MemberExpression[object.name='Promise'], ExpressionStatement > CallExpression > MemberExpression.callee > CallExpression.object[callee.property.name='sees'], ExpressionStatement > CallExpression > MemberExpression.callee > MemberExpression.object > CallExpression.object[callee.property.name='sees'], UnaryExpression[operator='void'], VariableDeclarator > CallExpression > MemberExpression.callee CallExpression[callee.property.name='sees']",
 					message: 'Steps do not poll or check answers themselves: actor.sees retries until the expectation holds (tests/e2e/CLAUDE.md)'
 				},
 				{
@@ -305,7 +317,7 @@ export default [
 				},
 				{
 					selector:
-						"CallExpression[callee.name=/^(When|Then)$/] CallExpression[callee.object.name='seed']:not([callee.property.name=/^(idOf|unique)$/])",
+						"CallExpression[callee.name=/^(When|Then|Step)$/] CallExpression[callee.object.name='seed']:not([callee.property.name=/^(idOf|unique)$/])",
 					message: 'In When and Then the actor acts through tasks; seed only prepares Given preconditions (tests/e2e/CLAUDE.md)'
 				},
 				{
@@ -324,7 +336,10 @@ export default [
 		// Tasks compose interactions, questions compose web questions; neither drives Playwright itself
 		files: ['tests/e2e/tasks/**/*.ts'],
 		rules: {
-			'no-restricted-imports': ['error', { patterns: belowSteps }],
+			'no-restricted-imports': [
+				'error',
+				{ patterns: [...belowSteps, onlyImports(layerPath('screenplay|targets|tasks|questions|fixtures'), 'Tasks')] }
+			],
 			'no-restricted-syntax': [
 				'error',
 				...noPlaywright,
@@ -341,7 +356,11 @@ export default [
 				{
 					patterns: [
 						...belowSteps,
-						{ group: ['**/screenplay/interactions*'], message: 'Questions only ask; actions belong in tasks (tests/e2e/CLAUDE.md)' }
+						{ group: ['**/screenplay/interactions*'], message: 'Questions only ask; actions belong in tasks (tests/e2e/CLAUDE.md)' },
+						onlyImports(
+							`${layerPath('screenplay|targets|tasks|questions|fixtures')}|fs|node:fs|\\.\\./\\.\\./\\.\\./backend/src/__tests__/helpers/pdf-text`,
+							'Questions'
+						)
 					]
 				}
 			],
@@ -374,6 +393,7 @@ export default [
 					patterns: [
 						{ ...playwrightImports[0], allowTypeImports: true }, // fixtures create the abilities
 						insideE2e,
+						onlyImports(`${layerPath('screenplay')}|crypto|node:crypto|fs|node:fs|jose|playwright-bdd|@playwright/test`, 'Fixtures'),
 						{ group: ['**/targets/**'], message: 'Fixtures wire actors; targets belong to interactions and questions (tests/e2e/CLAUDE.md)' },
 						{ group: ['**/tasks/**', '**/questions/**'], message: 'Fixtures wire actors; steps perform tasks and ask questions (tests/e2e/CLAUDE.md)' }
 					]

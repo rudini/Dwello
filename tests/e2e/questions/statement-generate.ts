@@ -66,7 +66,7 @@ export const noContractsInPeriod = throughUiOrApi(
 export const statementsCreated = throughUiOrApi(
 	question('how many statements are reported as created', async (actor) => {
 		const found = (await actor.answer(Text.of(generationResult)))?.match(
-			/(\d+) Nebenkostenabrechnungen? (?:ist|sind) als Entwurf erstellt/
+			/(\d+) Nebenkostenabrechnung(?:en)? (?:ist|sind) als Entwurf erstellt/
 		);
 		return found ? Number(found[1]) : null;
 	}),

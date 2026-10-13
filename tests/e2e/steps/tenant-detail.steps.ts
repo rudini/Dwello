@@ -1,6 +1,6 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { contractHistoryLists } from '../questions/apartment-detail';
+import { contractHistoryNaming } from '../questions/apartment-detail';
 import { monthlyRent, rentalStartDate, rentedApartment } from '../questions/tenant-detail';
 import { emptyTenantListShown, listedTenantCount } from '../questions/tenants';
 import {
@@ -69,7 +69,8 @@ Then(
 Then(
 	'enthält die Vertragshistorie die Wohnungen {string} und {string}',
 	async ({ verwalter }, current: string, former: string) => {
-		await verwalter.sees(contractHistoryLists(`Wohnung ${current}`, `Wohnung ${former}`)).toBe(true);
+		const [now, before] = [`Wohnung ${current}`, `Wohnung ${former}`];
+		await verwalter.sees(contractHistoryNaming(now, before)).toEqual([now, before]);
 	}
 );
 

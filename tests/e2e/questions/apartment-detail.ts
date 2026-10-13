@@ -18,9 +18,8 @@ export const vacancyShown = Visibility.of(vacancyNote);
 export const nextTenant = Text.of(nextTenantNote);
 export const buildingOfApartmentShown = (buildingName: string) => Visibility.of(breadcrumbLink(buildingName));
 
-/** Whether the contract history lists exactly these contracts, in this order, each row naming its text */
-export const contractHistoryLists = (...expected: string[]) =>
-	question(`whether the contract history lists ${expected.join(', ')}`, async (actor) => {
-		const rows = await actor.answer(Text.ofAll(historyRows));
-		return rows.length === expected.length && rows.every((row, i) => new RegExp(expected[i]).test(row));
-	});
+/** The contract history in its order: per row the first of these texts it names, or the row's own text */
+export const contractHistoryNaming = (...names: string[]) =>
+	question(`the contract history, by ${names.join(', ')}`, async (actor) =>
+		(await actor.answer(Text.ofAll(historyRows))).map((row) => names.find((name) => row.includes(name)) ?? row)
+	);
