@@ -9,6 +9,7 @@ import {
 	confirmation,
 	draftRestoredShown,
 	durationChosen,
+	enteredBaseRent,
 	reviewHint,
 	reviewed,
 	startHint
@@ -26,6 +27,9 @@ import {
 	chooseTenantAndApartment,
 	chooseTenantWhileLoading,
 	contractsCannotBeLoaded,
+	contractsLoadAgain,
+	enterBaseRent,
+	retryContracts,
 	createTenantForContract,
 	discardDraft,
 	goBackToStep,
@@ -235,4 +239,24 @@ Then('sieht der Liegenschaftsverwalter beim Vertragsbeginn den Hinweis {string}'
 
 Then('sieht der Liegenschaftsverwalter in der Prüfung den Hinweis {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(reviewHint).toContain(text);
+});
+
+When('der Liegenschaftsverwalter die Nettomiete {string} einträgt', async ({ verwalter }, baseRent: string) => {
+	await verwalter.attemptsTo(enterBaseRent(baseRent));
+});
+
+When('die Mietverträge der Wohnung {string} sich wieder laden lassen', async ({ verwalter }) => {
+	await verwalter.attemptsTo(contractsLoadAgain);
+});
+
+When('der Liegenschaftsverwalter die Mietverträge der Wohnung erneut lädt', async ({ verwalter }) => {
+	await verwalter.attemptsTo(retryContracts);
+});
+
+Then('ist die Nettomiete {string} noch eingetragen', async ({ verwalter }, baseRent: string) => {
+	await verwalter.sees(enteredBaseRent).toContain(baseRent);
+});
+
+Then('sieht der Liegenschaftsverwalter bei der Wohnung keinen Hinweis mehr', async ({ verwalter }) => {
+	await verwalter.sees(apartmentHint).toBeNull();
 });

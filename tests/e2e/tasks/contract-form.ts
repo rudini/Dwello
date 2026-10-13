@@ -10,6 +10,7 @@ import {
 	endDateInput,
 	newTenantLink,
 	pastEndConfirm,
+	retryContractsButton,
 	startDateInput,
 	tenantSelect
 } from '../targets/contract-form';
@@ -33,6 +34,9 @@ export const goToNextStep = Click.on(nextButton);
 
 // The contracts of the apartment, which the contract pages load in the browser, cannot be loaded
 export const contractsCannotBeLoaded = (apartmentId: string) => FailRequests.to('/api/contracts', { apartmentId });
+export const contractsLoadAgain = FailRequests.noLonger;
+export const retryContracts = Click.on(retryContractsButton);
+export const enterBaseRent = (baseRent: string) => Enter.theValue(baseRent).into(baseRentInput);
 
 // Step "Mieter"
 export const chooseTenant = (tenantId: string): Activity => (actor) =>
