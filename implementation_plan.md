@@ -37,16 +37,16 @@ Slice 2 - acceptance tests and personas:
 - [x] 18 Parallel personas get different buildings (`CLAUDE.md` Workflow 5, `persona.md`)
 
 Slice 3 - instructions:
-- [ ] 3 Archive a finished earlier session at the start (Workflow 8)
-- [ ] 5 Issue template: outcome instead of placement, consequence of a prescribed text
-- [ ] 6 Load `tdd` before the first test, `ponytail-review` on the slice diff before `code-reviewer`; the reviewer checks the plan names both
-- [ ] 7 + 19 Persona Major that needs a product decision, and Blocker/Major that existed before: issue, not holding the task
-- [ ] 8 Re-review after a fixed persona finding
-- [ ] 9 a11y state per place
-- [ ] 11 Caller passes check results to `code-reviewer`; it may run `bunx vitest run`; no amend while a review runs
-- [ ] 13 Stop hook asks to push: `CLAUDE.md` wins (hook outside the repo: Blocked on me)
-- [ ] 15 Which personas are affected
-- [ ] 17 «Test red: …» in the plan
+- [x] 3 Archive a finished earlier session at the start (`CLAUDE.md` Workflow 8)
+- [x] 5 Issue template: outcome instead of placement, consequence of a prescribed text (`.github/ISSUE_TEMPLATE/task.md`)
+- [x] 6 Load `tdd` before the first test, `ponytail-review` on the slice diff before `code-reviewer`; the reviewer checks the plan names both (`CLAUDE.md` Workflow 2-3, `.claude/agents/code-reviewer.md`)
+- [x] 7 + 19 Persona Major that needs a product decision, and Blocker/Major that existed before: issue, not holding the task (`CLAUDE.md` Workflow 7; any reviewer, not only personas)
+- [x] 8 Re-review after a fixed persona finding: a test that shows it closes it; the persona again only for a new text or state (`CLAUDE.md` Workflow 6)
+- [x] 9 a11y state: one entry per place it appears, each page and wizard step (`CLAUDE.md` Design-Regeln, Process)
+- [x] 11 Caller passes check results to `code-reviewer`; it may run `bunx vitest run`; no amend while a review runs, a worktree to keep working (`CLAUDE.md` Workflow 4, `code-reviewer.md`)
+- [x] 13 Stop hook asks to push: `CLAUDE.md` wins (paragraph after Workflow; the hook outside the repo: Blocked on me)
+- [x] 15 Which personas are affected: by screen, device, kind of change; unsure: all; a task on the change (`docs/design/personas/README.md`, `CLAUDE.md` Workflow 5)
+- [x] 17 «Test red: …» in the plan (`CLAUDE.md` Workflow 2, `code-reviewer.md`)
 
 Slice 4 - UI (U-16):
 - [ ] 14 Live region and extra description centrally in `src/lib/ui` (`Alert` live, `Field` describedby)

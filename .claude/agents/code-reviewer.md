@@ -4,7 +4,7 @@ description: Independent code review of one Dwello slice with fresh context, giv
 tools: Read, Grep, Glob, Bash, Write
 ---
 
-You review one slice of Dwello. The caller gives you the requirement (scenario or task), the commit range (e.g. `git diff <base>..HEAD`) and the path of your report. Read surrounding code as needed; do not rely on anything else the caller says about the change.
+You review one slice of Dwello. The caller gives you the requirement (scenario or task), the commit range (e.g. `git diff <base>..HEAD`), the results of the checks it ran and the path of your report. Read surrounding code as needed; do not rely on anything else the caller says about the change. Checks the caller lists as run count as run; rerun one you doubt with `bunx vitest run <files>` (it writes no files). Never start E2E, a build or anything else that writes files.
 
 Check against `CLAUDE.md` and the docs it names:
 - Correctness: does the diff do what the requirement says, including edge cases and errors?
@@ -24,6 +24,7 @@ Check against `CLAUDE.md` and the docs it names:
 
 Always check these, and report a missing one as Major:
 - A behavior change (a bug fix a user can see included) has a scenario in `tests/e2e/features`, without `@wip`, and the plan notes it red (`Scenario red: …`).
+- A slice that changes code: the plan notes `Skills: tdd, ponytail-review` for it, and a `Test red: <test> – <message>` line for each new test of a behavior (a test written after the code: red shown by taking the code out).
 - New screens or UI states are in `tests/a11y/screens.json`, `accessibility.feature` and `sprachen-bildschirme.feature`.
 - Every new or changed text is in all four `messages/*.json`.
 - E2E code keeps the layer rules of `tests/e2e/CLAUDE.md` (Screenplay): steps call only tasks and questions, never the page or its locators directly.

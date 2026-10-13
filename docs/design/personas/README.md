@@ -12,6 +12,14 @@ Personas are AI agents that operate the running app with the demo data, not real
 | Sven, 45 | Blind; screen reader and keyboard only. | Go through the rental contract wizard by keyboard; check focus, labels and error messages. | Desktop 1440 × 900, keyboard only, judged by the accessibility tree. |
 | Anna, 29 | First-time landlord, returns after months without remembering anything. | Find out what to do next. | Desktop 1440 × 900, some screens on mobile 390 × 844. |
 
-The caller of a run may give a persona another task that fits the change under review; the profile stays the same.
+The caller of a run gives each persona a task on the change under review instead of its default task; the profile stays the same.
+
+## Which personas
+
+A persona is affected by a change (`CLAUDE.md`, Workflow 5) when one of these holds; when unsure, run all five:
+
+- **Screen:** the persona's default task uses the changed screen.
+- **Device:** every changed view is also checked on a phone: Marco.
+- **Kind of change:** new statements, texts or anything with legal weight: Dr. Weber; keyboard, focus or what a screen reader announces: Sven; finding the way in, first use or a return after months: Anna; forms and terms for beginners: Helga.
 
 Unknown terms are fixed with better help texts, never by renaming the glossary term.

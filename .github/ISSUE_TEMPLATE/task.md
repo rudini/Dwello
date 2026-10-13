@@ -16,7 +16,8 @@ Decisions this task rests on.
 Values or rules the author suggests but the product owner has not confirmed (optional). While this section exists, the issue carries the label `entscheiden`. If the whole task depends on an open question, use the "Decision" template instead.
 
 ## Done means
-- The outcome the landlord sees or the data shows; the UI placement only where the product owner decided it.
+- The outcome the landlord sees or the data shows (e.g. «before saving, the Liegenschaftsverwalter knows the overlap was not checked»), not where it shows; the UI placement only where the product owner decided it.
+- A prescribed text: what happens when the landlord follows it (e.g. «Laden Sie die Seite neu» loses the input of a form).
 - Scenario: «<title>» in `tests/e2e/features/<area>.feature`, or `none: <reason>` (e.g. a refactoring without new behaviour).
 - Lower-layer tests in addition: unit, DOM or `*.pg.test.ts`, at the lowest layer that shows each rule.
 - UI texts in all four languages (`messages/{de,fr,it,en}.json`).
