@@ -253,6 +253,22 @@ describe('Prüfungen im Mietvertrag', () => {
 		expect(byTestId('apartment-contracts-unknown')!.closest('[role="status"]')).not.toBeNull();
 	});
 
+	// Persona Helga B-13 H1: the review before saving still says that the apartment could not be checked
+	it('sagt auch in der Prüfung, dass die Mietverträge der Wohnung nicht geladen werden konnten', async () => {
+		fakeBff(({ path }) =>
+			path.endsWith('=a3') ? [500, {}] : [200, { contracts: contractsOf[path.split('=')[1]] ?? [] }]
+		);
+		await toPeriod('a3');
+		type('start-date-input', '01.01.2027');
+		next();
+		await settle();
+		type('contract-base-rent-input', '950');
+		next();
+		await settle();
+		expect(heading()).toBe('Prüfen');
+		expect(byTestId('review-contracts-unknown')!.textContent).toContain(UNKNOWN);
+	});
+
 	it('fragt nach, wenn der Vertragsbeginn in der Vergangenheit liegt, und geht erst beim zweiten Mal weiter', async () => {
 		await toPeriod();
 		type('start-date-input', '11.01.2020');

@@ -9,6 +9,7 @@ import {
 	confirmation,
 	draftRestoredShown,
 	durationChosen,
+	reviewHint,
 	reviewed,
 	startHint
 } from '../questions/contract-form';
@@ -230,4 +231,8 @@ Then('sieht der Liegenschaftsverwalter bei der Wohnung den Hinweis {string}', as
 
 Then('sieht der Liegenschaftsverwalter beim Vertragsbeginn den Hinweis {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(startHint).toContain(text);
+});
+
+Then('sieht der Liegenschaftsverwalter in der Prüfung den Hinweis {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(reviewHint).toContain(text);
 });

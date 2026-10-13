@@ -265,7 +265,7 @@
 		{:else if step === 4}
 			<RentStep bind:values {errors} />
 		{:else}
-			<ReviewStep {values} {tenants} {apartments} onedit={editField} />
+			<ReviewStep {values} {tenants} {apartments} {unknown} onedit={editField} />
 			{#if errors.form}
 				<Alert tone="critical" title={m.contracts_not_saved()} testid="form-error">
 					<p>{errors.form}</p>

@@ -136,9 +136,9 @@ describe('Mietvertrag bearbeiten', () => {
 		const calendar =
 			byTestId('start-date-input')!.parentElement!.querySelector('input[type="date"]');
 		expect((calendar as HTMLInputElement).min).toBe('');
-		// Review M3: both hints are read out when they appear
+		// Review M3: the hint is read out when it appears; once only, not again at the start (Sven B-13 Minor 3)
 		expect(byTestId('apartment-contracts-unknown')!.closest('[role="status"]')).not.toBeNull();
-		expect(byTestId('start-contracts-unknown')!.closest('[role="status"]')).not.toBeNull();
+		expect(byTestId('start-contracts-unknown')!.closest('[role="status"]')).toBeNull();
 	});
 
 	// Review M1: the availability of all apartments and the chosen one's contracts are two requests

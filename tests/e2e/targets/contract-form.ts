@@ -12,6 +12,9 @@ export const apartmentContractsUnknown = target('Hinweis bei der Wohnung', (page
 export const startContractsUnknown = target('Hinweis beim Vertragsbeginn', (page) =>
 	page.getByTestId('start-contracts-unknown')
 );
+export const reviewContractsUnknown = target('Hinweis in der Prüfung', (page) =>
+	page.getByTestId('review-contracts-unknown')
+);
 export const startDateInput = target('Vertragsbeginn', (page) => page.getByTestId('start-date-input'));
 export const durationChoice = (label: string) =>
 	target(`Vertragsdauer «${label}»`, (page) => page.getByTestId('contract-duration').getByText(label, { exact: true }));

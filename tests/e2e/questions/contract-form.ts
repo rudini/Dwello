@@ -4,6 +4,7 @@ import {
 	apartmentOption,
 	apartmentSelect,
 	durationOption,
+	reviewContractsUnknown,
 	reviewItem,
 	startContractsUnknown,
 	tenantSelect
@@ -21,3 +22,4 @@ export const confirmation = Text.of(successToast);
 export const durationChosen = (label: string) => Checked.of(durationOption(label));
 export const apartmentHint = Text.of(apartmentContractsUnknown);
 export const startHint = Text.of(startContractsUnknown);
+export const reviewHint = Text.of(reviewContractsUnknown);
