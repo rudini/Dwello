@@ -67,8 +67,14 @@ const playwrightImports = [
 		message: `${outsideScreenplay}: the page stays in the abilities`
 	}
 ];
+// Nothing from outside tests/e2e but the backend's PDF reader (questions/download.ts)
+const insideE2e = {
+	regex: '^\\.\\./\\.\\./(?!\\.\\./backend/src/__tests__/helpers/pdf-text$)',
+	message: 'The layers import nothing from outside tests/e2e (tests/e2e/CLAUDE.md)'
+};
 // Tasks and questions sit below the steps
 const belowSteps = [
+	insideE2e,
 	...playwrightImports,
 	{ group: ['playwright-bdd', '**/steps/**'], message: 'Tasks and questions sit below the steps (tests/e2e/CLAUDE.md)' }
 ];
@@ -167,7 +173,7 @@ export default [
 		files: ['tests/e2e/**/*.ts'],
 		ignores: ['tests/e2e/screenplay/**', 'tests/e2e/targets/**'],
 		rules: {
-			'no-restricted-imports': ['error', { patterns: playwrightImports }],
+			'no-restricted-imports': ['error', { patterns: [...playwrightImports, insideE2e] }],
 			'no-restricted-syntax': ['error', ...noPlaywright, noFetch]
 		}
 	},
@@ -175,6 +181,18 @@ export default [
 		files: ['tests/e2e/screenplay/target.ts'],
 		rules: {
 			'no-restricted-imports': ['error', { patterns: [{ group: ['./*', '../*'], message: 'target.ts depends on Playwright only' }] }]
+		}
+	},
+	{
+		// Interactions act on targets; they never look elements up in the page themselves
+		files: ['tests/e2e/screenplay/interactions.ts'],
+		rules: {
+			'no-restricted-properties': [
+				'error',
+				...['querySelector', 'querySelectorAll', 'getElementById', 'getElementsByClassName', 'getElementsByTagName'].map(
+					(property) => ({ property, message: 'Interactions act on targets (tests/e2e/CLAUDE.md)' })
+				)
+			]
 		}
 	},
 	{
@@ -187,6 +205,16 @@ export default [
 				{
 					selector: 'CallExpression[callee.property.name=/^(getBy[A-Za-z]+|locator|frameLocator|\\$|\\$\\$|\\$eval|\\$\\$eval)$/]',
 					message: 'The core finds elements only through targets: describe the place in screenplay/target.ts or targets/ (tests/e2e/CLAUDE.md)'
+				},
+				{
+					// the page itself is used for the page as a whole; elements only through targets
+					selector:
+						"CallExpression[callee.object.callee.name='pageOf']:not([callee.property.name=/^(context|emulateMedia|evaluate|goto|reload|route|unroute|setExtraHTTPHeaders|setViewportSize|waitForEvent|waitForRequest|waitForResponse|waitForURL|title|url)$/]), CallExpression[callee.object.name='page']:not([callee.property.name=/^(context|emulateMedia|evaluate|goto|reload|route|unroute|setExtraHTTPHeaders|setViewportSize|waitForEvent|waitForRequest|waitForResponse|waitForURL|title|url)$/])",
+					message: 'The core uses the page only as a whole (navigation, viewport, evaluate …); elements through targets (tests/e2e/CLAUDE.md)'
+				},
+				{
+					selector: "CallExpression[callee.property.name=/^(querySelector|querySelectorAll|closest)$/][arguments.0.value=/data-testid/]",
+					message: 'The core finds elements only through targets (tests/e2e/CLAUDE.md)'
 				}
 			],
 			'no-restricted-imports': [
@@ -212,6 +240,10 @@ export default [
 					patterns: [
 						...playwrightImports,
 						{ group: ['**/screenplay/**', '**/targets/**'], message: 'Steps use tasks/ and questions/ only (tests/e2e/CLAUDE.md)' },
+						{
+							regex: '^(?!playwright-bdd$|\\.\\./(tasks|questions|fixtures)/[\\w.-]+$)',
+							message: 'Steps import only playwright-bdd, tasks/, questions/ and fixtures/ (tests/e2e/CLAUDE.md)'
+						},
 						{ group: ['vitest', 'node:assert', 'assert', 'chai'], message: 'Assert with actor.sees(question) (tests/e2e/CLAUDE.md)' }
 					]
 				}
@@ -221,8 +253,8 @@ export default [
 				...noPlaywright,
 				noFetch,
 				{
-					selector: 'WhileStatement, DoWhileStatement',
-					message: 'Steps do not poll: actor.sees retries until the expectation holds (tests/e2e/CLAUDE.md)'
+					selector: "WhileStatement, DoWhileStatement, CallExpression[callee.property.name='answer']",
+					message: 'Steps do not poll or check answers themselves: actor.sees retries until the expectation holds (tests/e2e/CLAUDE.md)'
 				},
 				{
 					selector: "ObjectPattern > Property[key.name='driver'], MemberExpression[property.name='driver']",
@@ -298,6 +330,7 @@ export default [
 				{
 					patterns: [
 						{ ...playwrightImports[0], allowTypeImports: true }, // fixtures create the abilities
+						insideE2e,
 						{ group: ['**/targets/**'], message: 'Fixtures wire actors; targets belong to interactions and questions (tests/e2e/CLAUDE.md)' },
 						{ group: ['**/tasks/**', '**/questions/**'], message: 'Fixtures wire actors; steps perform tasks and ask questions (tests/e2e/CLAUDE.md)' }
 					]
@@ -349,6 +382,11 @@ export default [
 				{
 					selector: 'MemberExpression[object.name="page"]:not([property.name=/^(getBy[A-Za-z]+|locator|frameLocator)$/])',
 					message: 'Targets only locate: page.getBy… or page.locator'
+				},
+				noFetch,
+				{
+					selector: "CallExpression[callee.name=/^(setTimeout|setInterval)$/], CallExpression[callee.property.name='info']",
+					message: 'Targets only locate (tests/e2e/CLAUDE.md)'
 				}
 			]
 		}

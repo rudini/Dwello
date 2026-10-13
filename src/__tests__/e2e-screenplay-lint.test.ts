@@ -1,4 +1,4 @@
-import { readdirSync } from 'fs';
+import { readdirSync, readFileSync } from 'fs';
 import { ESLint } from 'eslint';
 import { describe, expect, it } from 'vitest';
 
@@ -204,6 +204,35 @@ describe('Screenplay-Schichten der Akzeptanztests', () => {
 		expect(nested.map((entry) => `${entry.parentPath}/${entry.name}`)).toEqual([]);
 		const top = readdirSync('tests/e2e', { withFileTypes: true }).filter((entry) => entry.isFile());
 		expect(top.map((entry) => entry.name)).toEqual(['CLAUDE.md']);
+	});
+
+	// Schluss-Review Endstand 4: Freigabelisten statt Sperrlisten
+	it('lässt in target.ts nur die Fundstellen-Bausteine des Kerns zu', () => {
+		const exported = [...readFileSync('tests/e2e/screenplay/target.ts', 'utf8').matchAll(/^export (?:type|const|function) (\w+)/gm)];
+		expect(exported.map(([, name]) => name).sort()).toEqual(['Target', 'hydratedPage', 'target']);
+	});
+
+	it.each([
+		['tests/e2e/screenplay/interactions.ts', "await pageOf(actor).click('[data-testid=\"save\"]');"],
+		['tests/e2e/screenplay/questions.ts', 'await page.textContent(sel);'],
+		['tests/e2e/screenplay/interactions.ts', "await pageOf(actor).evaluate(() => document.querySelector('x').click());"],
+		['tests/e2e/screenplay/questions.ts', "await page.evaluate(() => document.body.querySelector('[data-testid=x]'));"],
+		['tests/e2e/steps/example.steps.ts', 'for (let i = 0; i < 5; i++) if (await verwalter.answer(confirmation)) break;'],
+		['tests/e2e/steps/example.steps.ts', "import { save } from '../../support/web';\nexport const x = save;"],
+		['tests/e2e/steps/example.steps.ts', "import { save } from 'some-helper';\nexport const x = save;"],
+		['tests/e2e/tasks/example.ts', "import { save } from '../../support/web';\nexport const x = save;"],
+		['tests/e2e/questions/example.ts', "import { save } from '../../support/web';\nexport const x = save;"],
+		['tests/e2e/targets/example.ts', 'await new Promise((r) => setTimeout(r, 1));'],
+		['tests/e2e/targets/example.ts', "await fetch('http://localhost:3101');"]
+	])('lehnt in %s ab: %s', async (filePath, code) => {
+		expect(await restricted(filePath, code)).not.toEqual([]);
+	});
+
+	it('lässt die bestehenden Importe zu', async () => {
+		const step = "import { createBdd } from 'playwright-bdd';\nimport { test } from '../fixtures/test';\nimport { open } from '../tasks/x';\nimport { shown } from '../questions/x';\nexport const x = [createBdd, test, open, shown];";
+		expect(await restricted('tests/e2e/steps/example.steps.ts', step)).toEqual([]);
+		const question = "import { readPdf } from '../../../backend/src/__tests__/helpers/pdf-text';\nexport const x = readPdf;";
+		expect(await restricted('tests/e2e/questions/example.ts', question)).toEqual([]);
 	});
 
 	// Schluss-Review Endstand 3: M-1 Kern, M-2 test.info(), M-3 fetch, Minors

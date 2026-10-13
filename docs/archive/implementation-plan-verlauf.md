@@ -5150,10 +5150,11 @@ fulfilled, 2 not yet):
   `screenplay/` holds exactly its five files (structure test), depends on no layer above it, and finds elements only
   through targets (locator calls only in `target.ts`; the hydration check became the core target `hydratedPage`)
 - M-2 Major a step or task choosing UI or API through `test.info().project` - fixed: `info()` and `.project` banned
-  in every layer
-- M-3 Major `fetch` passed in steps, fixtures and other files - fixed: banned everywhere but questions (mail
-  catcher, H-19)
-- Minor `setTimeout` in tasks - fixed: clock timers banned in every layer (`$testInfo.setTimeout` stays)
+  in every layer below the steps and in the steps (targets and the core: round 10)
+- M-3 Major `fetch` passed in steps, fixtures and other files - fixed: banned in steps, tasks, fixtures and other
+  files (questions keep it for the mail catcher, H-19; targets: round 10)
+- Minor `setTimeout` in tasks - fixed: clock timers banned in steps, tasks, questions and fixtures (`$testInfo.setTimeout`
+  stays; targets: round 10)
 - Minor local re-export `export { Click }` - fixed: every export without a declaration is banned (round 8 had
   covered only `export … from`)
 - Minor polling loop in a step - fixed (`while`, `do … while`; a `for` loop over preconditions stays)
@@ -5162,3 +5163,26 @@ fulfilled, 2 not yet):
   subfolders
 - Minors under H-19 (fixture alias of `page`, question parameter not named `actor`, `fetch` in questions) - recorded
 - Nit `docs/test-pyramid.md` API path - fixed
+
+Final review round 10 (`docs/reviews/screenplay-e2e-review-10.md`, the whole end state 654d854; points 1 and 3
+fulfilled, 2 not yet). From here on the layers use allowlists instead of ever longer ban lists:
+- M-1 Major the core finding elements through selector strings of the page API (`page.click(sel)`,
+  `textContent(sel)` …) - fixed: on the page the core may call only page-wide methods (`goto`, `reload`, `route`,
+  `evaluate`, `waitFor{Event,Request,Response,URL}`, viewport, headers, `title`, `url`, `context`); `querySelector`
+  on `data-testid` banned in the core, every element lookup banned in `interactions.ts`
+- M-2 Major a `for` polling loop in a step - fixed: steps may not call `answer` (only `sees`)
+- M-3 Major page code outside tests/e2e imported by steps and tasks - fixed: steps import only from
+  `playwright-bdd`, `tasks/`, `questions/`, `fixtures/`; no layer imports from outside tests/e2e but the backend's PDF
+  reader
+- Minor domain targets in `screenplay/target.ts` - fixed: it exports only `target`, `Target`, `hydratedPage`
+  (structure test)
+- Minor `document.querySelector` in an interaction's `evaluate` - fixed (see M-1)
+- Minor re-export by declaration (`export const clickOn = Click.on`) - recorded in H-19
+- Minor timers, `info()` and `fetch` in targets - fixed
+- Minor round-9 statements in this archive too broad - corrected above
+- Minor a step importing an `*-api` task directly - rejected: it fails at once in the UI project (no `CallTheApi`),
+  and steps rightly import the helper `francs` from there
+- Minor question parameter `verwalter` handing the actor to a task - recorded in H-19
+- Minor commit subjects over 50 characters - as before (squash title)
+- Nit `tests/e2e/CLAUDE.md` core rule is only a convention - fixed by M-1
+- E2E chromium + api on 654d854: 629 passed
