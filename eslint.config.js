@@ -213,6 +213,20 @@ export default [
 					message: 'The core uses the page only as a whole (navigation, viewport, evaluate …); elements through targets (tests/e2e/CLAUDE.md)'
 				},
 				{
+					selector:
+						"CallExpression[callee.object.property.name='page']:not([callee.property.name=/^(context|emulateMedia|evaluate|goto|reload|route|unroute|setExtraHTTPHeaders|setViewportSize|waitForEvent|waitForRequest|waitForResponse|waitForURL|title|url)$/]), MemberExpression[property.name=/^(mouse|keyboard|touchscreen)$/]",
+					message: 'The core uses the page only as a whole; elements through targets (tests/e2e/CLAUDE.md)'
+				},
+				{
+					selector: 'ExportNamedDeclaration:not([declaration]), ExportAllDeclaration',
+					message: 'No re-exports: the core exports only what it defines (tests/e2e/CLAUDE.md)'
+				},
+				{
+					selector:
+						"CallExpression[callee.name=/^(setTimeout|setInterval)$/], MemberExpression[property.name=/^(setTimeout|setInterval)$/], CallExpression[callee.property.name='info'], MemberExpression[property.name='project']",
+					message: 'The core neither waits by the clock nor looks at the test run (tests/e2e/CLAUDE.md)'
+				},
+				{
 					selector: "CallExpression[callee.property.name=/^(querySelector|querySelectorAll|closest)$/][arguments.0.value=/data-testid/]",
 					message: 'The core finds elements only through targets (tests/e2e/CLAUDE.md)'
 				}
@@ -224,7 +238,9 @@ export default [
 						{
 							group: ['**/steps/**', '**/tasks/**', '**/questions/**', '**/fixtures/**', '**/targets/**'],
 							message: 'The Screenplay core depends on no layer above it (tests/e2e/CLAUDE.md)'
-						}
+						},
+						insideE2e,
+						playwrightImports[1]
 					]
 				}
 			]
@@ -253,7 +269,8 @@ export default [
 				...noPlaywright,
 				noFetch,
 				{
-					selector: "WhileStatement, DoWhileStatement, CallExpression[callee.property.name='answer']",
+					selector:
+						"WhileStatement, DoWhileStatement, TryStatement, CallExpression[callee.property.name=/^(answer|then|catch|finally)$/]",
 					message: 'Steps do not poll or check answers themselves: actor.sees retries until the expectation holds (tests/e2e/CLAUDE.md)'
 				},
 				{
@@ -367,7 +384,9 @@ export default [
 						{
 							group: ['**/tasks/**', '**/questions/**', '**/steps/**', '**/fixtures/**', '**/screenplay/*', '!**/screenplay/target'],
 							message: 'Targets depend on nothing but screenplay/target.ts'
-						}
+						},
+						insideE2e,
+						playwrightImports[1]
 					]
 				}
 			],

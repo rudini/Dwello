@@ -5186,3 +5186,20 @@ fulfilled, 2 not yet). From here on the layers use allowlists instead of ever lo
 - Minor commit subjects over 50 characters - as before (squash title)
 - Nit `tests/e2e/CLAUDE.md` core rule is only a convention - fixed by M-1
 - E2E chromium + api on 654d854: 629 passed
+
+Final review round 11 (`docs/reviews/screenplay-e2e-review-11.md`, the whole end state c632714; points 1 and 3
+fulfilled, 2 not yet):
+- M-1 Major polling in a step through `try`/`catch` or `.catch`/`.then` around `sees` - fixed: no `try`, `then`,
+  `catch`, `finally` in steps
+- Minor page methods through `actor.abilityTo(BrowseTheWeb).page` in the core - fixed (any `.page` receiver), and
+  `mouse`/`keyboard` banned in the core
+- Minor element lookups in the browser with a template literal or another selector - fixed: the core uses only its
+  six fixed general selectors (structure test); round 10's "querySelector on data-testid" covered only literals
+- Minor the export test of `target.ts` saw only `export const` - fixed: it compares the module's runtime exports
+- Minor core and targets importing from outside tests/e2e, the core re-exporting - fixed (`insideE2e` and the
+  re-export ban there too)
+- Minor timers and `test.info()` in the core, timer modules in targets - fixed; round 9/10 wording about "every
+  layer" now holds for the core and targets too
+- Minor commit subjects over 50 characters - as before (squash title)
+- Nit `mouse`/`keyboard` in the core - fixed (see above); Nit `Width.of` answers `null` - wording in
+  `tests/e2e/CLAUDE.md` fixed

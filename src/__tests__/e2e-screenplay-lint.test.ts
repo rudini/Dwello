@@ -207,9 +207,28 @@ describe('Screenplay-Schichten der Akzeptanztests', () => {
 	});
 
 	// Schluss-Review Endstand 4: Freigabelisten statt Sperrlisten
-	it('lässt in target.ts nur die Fundstellen-Bausteine des Kerns zu', () => {
-		const exported = [...readFileSync('tests/e2e/screenplay/target.ts', 'utf8').matchAll(/^export (?:type|const|function) (\w+)/gm)];
-		expect(exported.map(([, name]) => name).sort()).toEqual(['Target', 'hydratedPage', 'target']);
+	it('lässt in target.ts nur die Fundstellen-Bausteine des Kerns zu', async () => {
+		const core = await import('../../tests/e2e/screenplay/target');
+		expect(Object.keys(core).sort()).toEqual(['hydratedPage', 'target']);
+		expect(readFileSync('tests/e2e/screenplay/target.ts', 'utf8')).not.toMatch(/^export (?!type Target |const (target|hydratedPage) )/m);
+	});
+
+	// Schluss-Review Endstand 5, m-2: der Kern sucht im Browser nur mit festen, allgemeinen Selektoren
+	it('sucht im Kern nur mit den freigegebenen Selektoren', () => {
+		const allowed = [
+			"':scope > legend'",
+			"'[aria-label], [title], [placeholder], [alt]'",
+			"'input[type=submit], input[type=button]'",
+			"'*'",
+			"'script, style, noscript, #language-menu'",
+			`'.sr-only, [role="region"], #svelte-announcer'`
+		];
+		const used = readdirSync('tests/e2e/screenplay').flatMap((file) =>
+			[...readFileSync(`tests/e2e/screenplay/${file}`, 'utf8').matchAll(/\b(?:querySelector(?:All)?|closest)(?:<[^>]*>)?\(([^)]*)\)/g)].map(
+				([, argument]) => argument.trim()
+			)
+		);
+		expect(used.filter((argument) => !allowed.includes(argument))).toEqual([]);
 	});
 
 	it.each([
@@ -224,6 +243,23 @@ describe('Screenplay-Schichten der Akzeptanztests', () => {
 		['tests/e2e/questions/example.ts', "import { save } from '../../support/web';\nexport const x = save;"],
 		['tests/e2e/targets/example.ts', 'await new Promise((r) => setTimeout(r, 1));'],
 		['tests/e2e/targets/example.ts', "await fetch('http://localhost:3101');"]
+	])('lehnt in %s ab: %s', async (filePath, code) => {
+		expect(await restricted(filePath, code)).not.toEqual([]);
+	});
+
+	// Schluss-Review Endstand 5: M-1 Nachfragen über try/catch, m-1, m-4, m-5
+	it.each([
+		['tests/e2e/steps/example.steps.ts', "try { await verwalter.sees(confirmation).toContain('x'); } catch { await verwalter.attemptsTo(reloadPage); }"],
+		['tests/e2e/steps/example.steps.ts', 'await verwalter.sees(confirmation).toContain("x").catch(() => verwalter.attemptsTo(reloadPage));'],
+		['tests/e2e/steps/example.steps.ts', 'await verwalter.sees(confirmation).toContain("x").then(() => true, () => false);'],
+		['tests/e2e/screenplay/interactions.ts', 'await actor.abilityTo(BrowseTheWeb).page.click(sel);'],
+		['tests/e2e/screenplay/interactions.ts', 'await pageOf(actor).mouse.click(1, 2);'],
+		['tests/e2e/screenplay/interactions.ts', "export { clickSave } from '../../zzsupport/web';"],
+		['tests/e2e/screenplay/questions.ts', "import { x } from '../../zzsupport/web';\nexport const y = x;"],
+		['tests/e2e/screenplay/questions.ts', 'if (test.info().project.name === "api") return;'],
+		['tests/e2e/screenplay/interactions.ts', 'await new Promise((r) => setTimeout(r, 1));'],
+		['tests/e2e/targets/example.ts', "import { setTimeout as pause } from 'node:timers/promises';\nexport const x = pause;"],
+		['tests/e2e/targets/example.ts', "import { x } from '../../zzsupport/web';\nexport const y = x;"]
 	])('lehnt in %s ab: %s', async (filePath, code) => {
 		expect(await restricted(filePath, code)).not.toEqual([]);
 	});
