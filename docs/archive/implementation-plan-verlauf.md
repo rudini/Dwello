@@ -5203,3 +5203,19 @@ fulfilled, 2 not yet):
 - Minor commit subjects over 50 characters - as before (squash title)
 - Nit `mouse`/`keyboard` in the core - fixed (see above); Nit `Width.of` answers `null` - wording in
   `tests/e2e/CLAUDE.md` fixed
+
+Final review round 12 (`docs/reviews/screenplay-e2e-review-12.md`, the whole end state 6d687c1; points 1 and 3
+fulfilled, 2 not yet):
+- M-1 Major a When or Then step acting through `seed` (e.g. `seed.sendStatement`) past the UI - fixed: in When and
+  Then steps `seed` may only name things (`idOf`, `unique`)
+- Minor `answeredBy` and `Promise.*` around `sees` in steps - fixed
+- Minor `getElementById` with other ids, `getElementsBy…`, `elementFromPoint` in the core; web questions waiting with
+  `expect` or `waitFor…` - fixed (structure test covers every DOM lookup; `questions.ts` may not wait)
+- Minor `$lib`/`src/` imports and `./../../` paths - fixed (`insideE2e` matches them)
+- Minor `sees` without `await` (also with `.not`) - fixed (syntactic rule; round 7 had rejected it as needing type
+  information)
+- Minor `browserName` and `test.skip` in steps - fixed
+- Minor archive wording of rounds 10 and 11 too broad - holds now with the fixes above
+- Minor commit subjects over 50 characters - as before (squash title)
+- Nit `docs/test-pyramid.md` lacks `statement-rounding.feature` - fixed; Nit lint test grouped by review round -
+  rejected: the grouping records why each rule exists

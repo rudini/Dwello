@@ -69,7 +69,7 @@ const playwrightImports = [
 ];
 // Nothing from outside tests/e2e but the backend's PDF reader (questions/download.ts)
 const insideE2e = {
-	regex: '^\\.\\./\\.\\./(?!\\.\\./backend/src/__tests__/helpers/pdf-text$)',
+	regex: '^(?!\\.\\./\\.\\./\\.\\./backend/src/__tests__/helpers/pdf-text$)(\\$|src/|(.*/)?\\.\\./\\.\\./)',
 	message: 'The layers import nothing from outside tests/e2e (tests/e2e/CLAUDE.md)'
 };
 // Tasks and questions sit below the steps
@@ -77,6 +77,38 @@ const belowSteps = [
 	insideE2e,
 	...playwrightImports,
 	{ group: ['playwright-bdd', '**/steps/**'], message: 'Tasks and questions sit below the steps (tests/e2e/CLAUDE.md)' }
+];
+
+// The Screenplay core: the page only as a whole, elements only through targets
+const coreSyntax = [
+			{
+				selector: 'CallExpression[callee.property.name=/^(getBy[A-Za-z]+|locator|frameLocator|\\$|\\$\\$|\\$eval|\\$\\$eval)$/]',
+				message: 'The core finds elements only through targets: describe the place in screenplay/target.ts or targets/ (tests/e2e/CLAUDE.md)'
+			},
+			{
+				// the page itself is used for the page as a whole; elements only through targets
+				selector:
+					"CallExpression[callee.object.callee.name='pageOf']:not([callee.property.name=/^(context|emulateMedia|evaluate|goto|reload|route|unroute|setExtraHTTPHeaders|setViewportSize|waitForEvent|waitForRequest|waitForResponse|waitForURL|title|url)$/]), CallExpression[callee.object.name='page']:not([callee.property.name=/^(context|emulateMedia|evaluate|goto|reload|route|unroute|setExtraHTTPHeaders|setViewportSize|waitForEvent|waitForRequest|waitForResponse|waitForURL|title|url)$/])",
+				message: 'The core uses the page only as a whole (navigation, viewport, evaluate …); elements through targets (tests/e2e/CLAUDE.md)'
+			},
+			{
+				selector:
+					"CallExpression[callee.object.property.name='page']:not([callee.property.name=/^(context|emulateMedia|evaluate|goto|reload|route|unroute|setExtraHTTPHeaders|setViewportSize|waitForEvent|waitForRequest|waitForResponse|waitForURL|title|url)$/]), MemberExpression[property.name=/^(mouse|keyboard|touchscreen)$/]",
+				message: 'The core uses the page only as a whole; elements through targets (tests/e2e/CLAUDE.md)'
+			},
+			{
+				selector: 'ExportNamedDeclaration:not([declaration]), ExportAllDeclaration',
+				message: 'No re-exports: the core exports only what it defines (tests/e2e/CLAUDE.md)'
+			},
+			{
+				selector:
+					"CallExpression[callee.name=/^(setTimeout|setInterval)$/], MemberExpression[property.name=/^(setTimeout|setInterval)$/], CallExpression[callee.property.name='info'], MemberExpression[property.name='project']",
+				message: 'The core neither waits by the clock nor looks at the test run (tests/e2e/CLAUDE.md)'
+			},
+			{
+				selector: "CallExpression[callee.property.name=/^(querySelector|querySelectorAll|closest)$/][arguments.0.value=/data-testid/]",
+				message: 'The core finds elements only through targets (tests/e2e/CLAUDE.md)'
+			}
 ];
 
 export default [
@@ -200,37 +232,7 @@ export default [
 		files: ['tests/e2e/screenplay/**/*.ts'],
 		ignores: ['tests/e2e/screenplay/target.ts'],
 		rules: {
-			'no-restricted-syntax': [
-				'error',
-				{
-					selector: 'CallExpression[callee.property.name=/^(getBy[A-Za-z]+|locator|frameLocator|\\$|\\$\\$|\\$eval|\\$\\$eval)$/]',
-					message: 'The core finds elements only through targets: describe the place in screenplay/target.ts or targets/ (tests/e2e/CLAUDE.md)'
-				},
-				{
-					// the page itself is used for the page as a whole; elements only through targets
-					selector:
-						"CallExpression[callee.object.callee.name='pageOf']:not([callee.property.name=/^(context|emulateMedia|evaluate|goto|reload|route|unroute|setExtraHTTPHeaders|setViewportSize|waitForEvent|waitForRequest|waitForResponse|waitForURL|title|url)$/]), CallExpression[callee.object.name='page']:not([callee.property.name=/^(context|emulateMedia|evaluate|goto|reload|route|unroute|setExtraHTTPHeaders|setViewportSize|waitForEvent|waitForRequest|waitForResponse|waitForURL|title|url)$/])",
-					message: 'The core uses the page only as a whole (navigation, viewport, evaluate …); elements through targets (tests/e2e/CLAUDE.md)'
-				},
-				{
-					selector:
-						"CallExpression[callee.object.property.name='page']:not([callee.property.name=/^(context|emulateMedia|evaluate|goto|reload|route|unroute|setExtraHTTPHeaders|setViewportSize|waitForEvent|waitForRequest|waitForResponse|waitForURL|title|url)$/]), MemberExpression[property.name=/^(mouse|keyboard|touchscreen)$/]",
-					message: 'The core uses the page only as a whole; elements through targets (tests/e2e/CLAUDE.md)'
-				},
-				{
-					selector: 'ExportNamedDeclaration:not([declaration]), ExportAllDeclaration',
-					message: 'No re-exports: the core exports only what it defines (tests/e2e/CLAUDE.md)'
-				},
-				{
-					selector:
-						"CallExpression[callee.name=/^(setTimeout|setInterval)$/], MemberExpression[property.name=/^(setTimeout|setInterval)$/], CallExpression[callee.property.name='info'], MemberExpression[property.name='project']",
-					message: 'The core neither waits by the clock nor looks at the test run (tests/e2e/CLAUDE.md)'
-				},
-				{
-					selector: "CallExpression[callee.property.name=/^(querySelector|querySelectorAll|closest)$/][arguments.0.value=/data-testid/]",
-					message: 'The core finds elements only through targets (tests/e2e/CLAUDE.md)'
-				}
-			],
+			'no-restricted-syntax': ['error', ...coreSyntax],
 			'no-restricted-imports': [
 				'error',
 				{
@@ -242,6 +244,20 @@ export default [
 						insideE2e,
 						playwrightImports[1]
 					]
+				}
+			]
+		}
+	},
+	{
+		// Web questions answer at once: sees() in the step retries them
+		files: ['tests/e2e/screenplay/questions.ts'],
+		rules: {
+			'no-restricted-syntax': [
+				'error',
+				...coreSyntax,
+				{
+					selector: "CallExpression[callee.name='expect'], MemberExpression[object.name='expect'], CallExpression[callee.property.name=/^waitFor/]",
+					message: 'Web questions answer at once and never wait; sees() retries them (tests/e2e/CLAUDE.md)'
 				}
 			]
 		}
@@ -270,7 +286,7 @@ export default [
 				noFetch,
 				{
 					selector:
-						"WhileStatement, DoWhileStatement, TryStatement, CallExpression[callee.property.name=/^(answer|then|catch|finally)$/]",
+						"WhileStatement, DoWhileStatement, TryStatement, CallExpression[callee.property.name=/^(answer|answeredBy|then|catch|finally)$/], MemberExpression[object.name='Promise'], ExpressionStatement > CallExpression > MemberExpression.callee > CallExpression.object[callee.property.name='sees'], ExpressionStatement > CallExpression > MemberExpression.callee > MemberExpression.object > CallExpression.object[callee.property.name='sees']",
 					message: 'Steps do not poll or check answers themselves: actor.sees retries until the expectation holds (tests/e2e/CLAUDE.md)'
 				},
 				{
@@ -286,6 +302,16 @@ export default [
 					selector:
 						"CallExpression[callee.name=/^(setTimeout|setInterval)$/], MemberExpression[property.name=/^(setTimeout|setInterval)$/]:not([object.name='$testInfo']), MemberExpression[object.name='scheduler']",
 					message: 'Steps do not wait by the clock: actor.sees retries until the expectation holds (tests/e2e/CLAUDE.md)'
+				},
+				{
+					selector:
+						"CallExpression[callee.name=/^(When|Then)$/] CallExpression[callee.object.name='seed']:not([callee.property.name=/^(idOf|unique)$/])",
+					message: 'In When and Then the actor acts through tasks; seed only prepares Given preconditions (tests/e2e/CLAUDE.md)'
+				},
+				{
+					selector:
+						"ObjectPattern > Property[key.name=/^(browserName|isMobile|channel|headless)$/], MemberExpression[object.name='test'][property.name=/^(skip|fixme|fail|slow|only)$/]",
+					message: 'Steps run the same in every browser and project; no skipping (tests/e2e/CLAUDE.md)'
 				},
 				{
 					selector: "MemberExpression[object.name='$testInfo']:not([property.name='setTimeout']), CallExpression[callee.property.name=/^(can|abilityTo|whoCan)$/]",

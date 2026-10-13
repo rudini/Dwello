@@ -71,7 +71,7 @@ A floor applies: today's coverage, rounded down to whole percent. If coverage dr
 
 The same scenario can run through the browser or directly against the backend API. The fixture option `driver` (`ui` | `api`, `fixtures/test.ts`) gives the actor the matching ability; tasks and questions built with `throughUiOrApi` pick their path by it, so steps never branch. Scenarios tagged `@api` additionally run in the Playwright project `api`, without page visits.
 
-- What `@api` is for: business rules and calculations that do not depend on the UI. Today: management fee (`statement-management-fee.feature`), preview, generation and a period without rental contracts (`statement-generate.feature`), heating costs on a tenant change (`statement-detail.feature`).
+- What `@api` is for: business rules and calculations that do not depend on the UI. Today: management fee (`statement-management-fee.feature`), preview, generation and a period without rental contracts (`statement-generate.feature`), heating costs on a tenant change (`statement-detail.feature`), rounding of the Saldo (`statement-rounding.feature`).
 - UI only: interaction flows, navigation, forms.
 - A new `@api` step needs both paths: a task or question built with `throughUiOrApi` (the API path in `tasks/<area>-api.ts` or next to the UI path).
 

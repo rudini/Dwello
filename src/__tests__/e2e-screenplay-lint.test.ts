@@ -221,10 +221,11 @@ describe('Screenplay-Schichten der Akzeptanztests', () => {
 			"'input[type=submit], input[type=button]'",
 			"'*'",
 			"'script, style, noscript, #language-menu'",
-			`'.sr-only, [role="region"], #svelte-announcer'`
+			`'.sr-only, [role="region"], #svelte-announcer'`,
+			'id' // getElementById for the ids an aria-labelledby or aria-describedby names
 		];
 		const used = readdirSync('tests/e2e/screenplay').flatMap((file) =>
-			[...readFileSync(`tests/e2e/screenplay/${file}`, 'utf8').matchAll(/\b(?:querySelector(?:All)?|closest)(?:<[^>]*>)?\(([^)]*)\)/g)].map(
+			[...readFileSync(`tests/e2e/screenplay/${file}`, 'utf8').matchAll(/\b(?:querySelector(?:All)?|closest|getElementById|getElementsBy\w+|elementFromPoint|elementsFromPoint)(?:<[^>]*>)?\(([^)]*)\)/g)].map(
 				([, argument]) => argument.trim()
 			)
 		);
@@ -262,6 +263,29 @@ describe('Screenplay-Schichten der Akzeptanztests', () => {
 		['tests/e2e/targets/example.ts', "import { x } from '../../zzsupport/web';\nexport const y = x;"]
 	])('lehnt in %s ab: %s', async (filePath, code) => {
 		expect(await restricted(filePath, code)).not.toEqual([]);
+	});
+
+	// Schluss-Review Endstand 6: M-1 Handlung über seed im When/Then, Minors
+	it.each([
+		['tests/e2e/steps/example.steps.ts', "When('x', async ({ seed }) => { await seed.sendStatement('a', 2024); });"],
+		['tests/e2e/steps/example.steps.ts', "Then('x', async ({ seed }) => { await seed.statement('a', 'b', 2024); });"],
+		['tests/e2e/steps/example.steps.ts', 'await confirmation.answeredBy(verwalter);'],
+		['tests/e2e/steps/example.steps.ts', 'await Promise.allSettled([verwalter.sees(q).toBe(1)]);'],
+		['tests/e2e/steps/example.steps.ts', "verwalter.sees(confirmation).toContain('x');"],
+		['tests/e2e/steps/example.steps.ts', "verwalter.sees(confirmation).not.toContain('x');"],
+		['tests/e2e/steps/example.steps.ts', "When('x', async ({ browserName }) => browserName);"],
+		['tests/e2e/steps/example.steps.ts', "test.skip(true, 'flaky');"],
+		['tests/e2e/screenplay/questions.ts', "await expect(locate(actor, x)).toBeVisible();"],
+		['tests/e2e/screenplay/questions.ts', "await pageOf(actor).waitForURL('/x');"],
+		['tests/e2e/tasks/example.ts', "import { m } from '$lib/paraglide/messages';\nexport const x = m;"],
+		['tests/e2e/questions/example.ts', "import { x } from './../../ui-screenshots/helpers';\nexport const y = x;"]
+	])('lehnt in %s ab: %s', async (filePath, code) => {
+		expect(await restricted(filePath, code)).not.toEqual([]);
+	});
+
+	it('lässt seed in Given-Steps und Namen überall zu', async () => {
+		const given = "Given('x', async ({ seed }) => { await seed.statement('a', 'b', 2024); });\nWhen('y', async ({ seed, verwalter }) => { await verwalter.attemptsTo(open(seed.idOf('a'), seed.unique('b'))); });";
+		expect(await restricted('tests/e2e/steps/example.steps.ts', given)).toEqual([]);
 	});
 
 	it('lässt die bestehenden Importe zu', async () => {
