@@ -20,6 +20,6 @@ A persona is affected by a change (`CLAUDE.md`, Workflow 5) when one of these ho
 
 - **Screen:** the persona's default task uses the changed screen.
 - **Device:** every changed view is also checked on a phone: Marco.
-- **Kind of change:** new statements, texts or anything with legal weight: Dr. Weber; keyboard, focus or what a screen reader announces: Sven; finding the way in, first use or a return after months: Anna; forms and terms for beginners: Helga.
+- **Kind of change:** new claims, texts or anything with legal weight: Dr. Weber; keyboard, focus or what a screen reader announces: Sven; finding the way in, first use or a return after months: Anna; forms and terms for beginners: Helga.
 
 Unknown terms are fixed with better help texts, never by renaming the glossary term.

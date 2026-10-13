@@ -61,6 +61,20 @@ Slice 3 - instructions:
 - [x] 15 Which personas are affected: by screen, device, kind of change; unsure: all; a task on the change (`docs/design/personas/README.md`, `CLAUDE.md` Workflow 5)
 - [x] 17 «Test red: …» in the plan (`CLAUDE.md` Workflow 2, `code-reviewer.md`)
 
+Findings slice 3 (`docs/reviews/b13-workflow-rules-review-1.md`), no Blocker/Major:
+- C-1 earlier Major «issue under Found» clashed with "Open work" and the closing headings; no proof «existed before» - Minor - fixed (open work, «Blocked on me», shows on the base commit)
+- C-2 «statements» means Nebenkostenabrechnungen in Dwello - Minor - fixed («claims»)
+- C-3 `ponytail-review` for every slice, checked only for code - Minor - fixed (slices that change code)
+- C-4 the stop hook also asks to amend; «commit» on its call bypasses Workflow 4 - Minor - fixed
+- C-5 `bunx vitest run` writes `src/lib/paraglide/` - Minor - fixed (wording)
+- C-6 a test after the code read like an equal option - Minor - fixed
+- C-7 the template line was a question - Minor - fixed (a condition)
+- C-8 a review worktree is detached - Nit - fixed (only commits must be on a branch)
+- C-9 «its items» - Nit - fixed
+- C-10 two parentheses in a row - Nit - fixed
+- C-11 `/ponytail` and `ponytail-review` - Nit - rejected: two skills, one for writing, one for checking the diff
+- C-12 checks passed to the reviewer differ from the precondition - Nit - fixed
+
 Slice 4 - UI (U-16):
 - [x] 14 Not done here, deferred to U-16 (`docs/design/offene-punkte.md`, refined): it changes `Field`, `Select`, `DateInput` and two contract screens and needs its own scenario, a Sven run and a11y states; the proposed `live` option on `Alert` cannot work (the region must exist before the hint), so the component needs a design decision. Blocked on me
 
