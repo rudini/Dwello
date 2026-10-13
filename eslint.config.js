@@ -27,11 +27,6 @@ const playwrightImports = [
 ];
 // Ratchet while the acceptance tests move to Screenplay: files listed here still break the layer rules; the list only shrinks
 const notYetScreenplay = [
-	'tests/e2e/questions/apartment-detail.ts',
-	'tests/e2e/questions/apartment-form.ts',
-	'tests/e2e/questions/apartments.ts',
-	'tests/e2e/questions/building-detail.ts',
-	'tests/e2e/questions/buildings.ts',
 	'tests/e2e/questions/categories.ts',
 	'tests/e2e/questions/distribution-keys.ts',
 	'tests/e2e/questions/documents.ts',
@@ -41,15 +36,6 @@ const notYetScreenplay = [
 	'tests/e2e/questions/invoices.ts',
 	'tests/e2e/questions/settings.ts',
 	'tests/e2e/questions/statement-generate.ts',
-	'tests/e2e/questions/tenant-detail.ts',
-	'tests/e2e/questions/tenant-form.ts',
-	'tests/e2e/questions/tenants.ts',
-	'tests/e2e/steps/apartment-detail.steps.ts',
-	'tests/e2e/steps/apartment-form.steps.ts',
-	'tests/e2e/steps/apartment-list.steps.ts',
-	'tests/e2e/steps/building-detail.steps.ts',
-	'tests/e2e/steps/building-form.steps.ts',
-	'tests/e2e/steps/buildings.steps.ts',
 	'tests/e2e/steps/categories.steps.ts',
 	'tests/e2e/steps/distribution-keys.steps.ts',
 	'tests/e2e/steps/documents.steps.ts',
@@ -59,15 +45,6 @@ const notYetScreenplay = [
 	'tests/e2e/steps/invoices.steps.ts',
 	'tests/e2e/steps/settings.steps.ts',
 	'tests/e2e/steps/statement-generate.steps.ts',
-	'tests/e2e/steps/tenant-detail.steps.ts',
-	'tests/e2e/steps/tenant-form.steps.ts',
-	'tests/e2e/steps/tenants.steps.ts',
-	'tests/e2e/tasks/apartment-detail.ts',
-	'tests/e2e/tasks/apartment-form.ts',
-	'tests/e2e/tasks/apartments.ts',
-	'tests/e2e/tasks/building-detail.ts',
-	'tests/e2e/tasks/building-form.ts',
-	'tests/e2e/tasks/buildings.ts',
 	'tests/e2e/tasks/categories.ts',
 	'tests/e2e/tasks/distribution-keys.ts',
 	'tests/e2e/tasks/documents.ts',
@@ -77,9 +54,6 @@ const notYetScreenplay = [
 	'tests/e2e/tasks/invoices.ts',
 	'tests/e2e/tasks/settings.ts',
 	'tests/e2e/tasks/statement-generate.ts',
-	'tests/e2e/tasks/tenant-detail.ts',
-	'tests/e2e/tasks/tenant-form.ts',
-	'tests/e2e/tasks/tenants.ts',
 ];
 
 export default [

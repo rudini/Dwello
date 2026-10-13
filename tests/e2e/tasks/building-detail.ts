@@ -1,5 +1,6 @@
-import type { Actor } from '../fixtures/actor';
-import { typeDate } from '../interactions/form';
+import type { Activity } from '../screenplay/actor';
+import { Click, Enter, EnterDate, Navigate, Wait } from '../screenplay/interactions';
+import { Count } from '../screenplay/questions';
 import {
 	addApartmentButton,
 	apartmentRow,
@@ -9,41 +10,32 @@ import {
 	firstApartmentButton,
 	fuelStockAmount,
 	fuelStockDate,
+	fuelStockRow,
 	fuelStockRows,
 	saveFuelStockButton
-} from '../interactions/building-detail';
-import { expect } from '@playwright/test';
+} from '../targets/building-detail';
 
-export const startDeletingBuilding = async (actor: Actor) => {
-	await deleteButton(actor.page).click();
-};
+export const openBuildingDetail = (buildingId: string) => Navigate.to(`/buildings/${buildingId}`);
 
-export const deleteBuilding = async (actor: Actor) => {
-	await startDeletingBuilding(actor);
-	await confirmDeleteButton(actor.page).click();
-};
+export const startDeletingBuilding = Click.on(deleteButton);
 
-export const startEditing = async (actor: Actor) => {
-	await editButton(actor.page).click();
-};
+export const deleteBuilding: Activity = (actor) => actor.attemptsTo(startDeletingBuilding, Click.on(confirmDeleteButton));
 
-export const startNewApartment = async (actor: Actor) => {
-	await addApartmentButton(actor.page).click();
-};
+export const startEditing = Click.on(editButton);
 
-export const startFirstApartment = async (actor: Actor) => {
-	await firstApartmentButton(actor.page).click();
-};
+export const startNewApartment = Click.on(addApartmentButton);
 
-export const openApartment = (number: string) => async (actor: Actor) => {
-	await apartmentRow(actor.page, number).click();
-};
+export const startFirstApartment = Click.on(firstApartmentButton);
+
+export const openApartment = (number: string) => Click.on(apartmentRow(number));
 
 // Value of the heating oil in the tank on a reading day; waits until the page lists it
-export const recordFuelStock = (date: string, amount: string) => async (actor: Actor) => {
-	const listed = await fuelStockRows(actor.page).count();
-	await typeDate(fuelStockDate(actor.page), date);
-	await fuelStockAmount(actor.page).fill(amount);
-	await saveFuelStockButton(actor.page).click();
-	await expect(fuelStockRows(actor.page)).toHaveCount(listed + 1);
+export const recordFuelStock = (date: string, amount: string): Activity => async (actor) => {
+	const listed = await actor.answer(Count.of(fuelStockRows));
+	await actor.attemptsTo(
+		EnterDate.of(date).into(fuelStockDate),
+		Enter.theValue(amount).into(fuelStockAmount),
+		Click.on(saveFuelStockButton),
+		Wait.until(fuelStockRow(listed + 1))
+	);
 };

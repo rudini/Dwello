@@ -1,9 +1,10 @@
 import { createBdd, type DataTable } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { visit } from '../interactions/navigation';
 import {
 	changePostalCode,
 	changeYearBuilt,
+	openBuildingEdit,
+	openNewBuilding,
 	registerBuilding,
 	saveBuilding
 } from '../tasks/building-form';
@@ -11,14 +12,14 @@ import {
 const { Given, When } = createBdd(test);
 
 Given('der Liegenschaftsverwalter ist auf der Seite "Neues Gebäude"', async ({ verwalter }) => {
-	await visit(verwalter.page, '/buildings/new');
+	await verwalter.attemptsTo(openNewBuilding);
 });
 
 When(
 	'der Liegenschaftsverwalter folgendes Gebäude erfasst:',
 	async ({ verwalter, seed }, table: DataTable) => {
 		const fields = table.rowsHash();
-		await verwalter.perform(
+		await verwalter.attemptsTo(
 			registerBuilding({
 				name: seed.unique(fields.Name),
 				address: fields.Adresse,
@@ -31,20 +32,20 @@ When(
 );
 
 When('der Liegenschaftsverwalter das Gebäude ohne Angaben speichert', async ({ verwalter }) => {
-	await verwalter.perform(saveBuilding);
+	await verwalter.attemptsTo(saveBuilding);
 });
 
 Given(
 	'der Liegenschaftsverwalter ist auf der Bearbeitungsseite von {string}',
 	async ({ verwalter, seed }, title: string) => {
-		await visit(verwalter.page, `/buildings/${seed.idOf(title)}/edit`);
+		await verwalter.attemptsTo(openBuildingEdit(seed.idOf(title)!));
 	}
 );
 
 When('der Liegenschaftsverwalter das Baujahr auf {string} ändert', async ({ verwalter }, year: string) => {
-	await verwalter.perform(changeYearBuilt(year));
+	await verwalter.attemptsTo(changeYearBuilt(year));
 });
 
 When('der Liegenschaftsverwalter die PLZ auf {string} ändert', async ({ verwalter }, postalCode: string) => {
-	await verwalter.perform(changePostalCode(postalCode));
+	await verwalter.attemptsTo(changePostalCode(postalCode));
 });

@@ -1,19 +1,26 @@
-import type { Actor } from '../fixtures/actor';
+import { question } from '../screenplay/actor';
+import { Text, Visibility } from '../screenplay/questions';
 import {
+	type ApartmentInfo,
 	currentTenantName,
 	historyRows,
 	infoCard,
 	monthlyTotal,
 	nextTenantNote,
 	vacancyNote
-} from '../interactions/apartment-detail';
-import { breadcrumbLink } from '../interactions/navigation';
+} from '../targets/apartment-detail';
+import { breadcrumbLink } from '../targets/navigation';
 
-export const apartmentInfo = (actor: Actor, info: 'status' | 'rooms' | 'floor' | 'area') =>
-	infoCard(actor.page, info);
-export const currentTenant = (actor: Actor) => currentTenantName(actor.page);
-export const grossMonthlyRent = (actor: Actor) => monthlyTotal(actor.page);
-export const vacancy = (actor: Actor) => vacancyNote(actor.page);
-export const nextTenant = (actor: Actor) => nextTenantNote(actor.page);
-export const contractHistory = (actor: Actor) => historyRows(actor.page);
-export const buildingOfApartment = (actor: Actor, buildingName: string) => breadcrumbLink(actor.page, buildingName);
+export const apartmentInfo = (info: ApartmentInfo) => Text.of(infoCard(info));
+export const currentTenant = Text.of(currentTenantName);
+export const grossMonthlyRent = Text.of(monthlyTotal);
+export const vacancyShown = Visibility.of(vacancyNote);
+export const nextTenant = Text.of(nextTenantNote);
+export const buildingOfApartmentShown = (buildingName: string) => Visibility.of(breadcrumbLink(buildingName));
+
+/** Whether the contract history lists exactly these contracts, in this order, each row naming its text */
+export const contractHistoryLists = (...expected: string[]) =>
+	question(`whether the contract history lists ${expected.join(', ')}`, async (actor) => {
+		const rows = await actor.answer(Text.ofAll(historyRows));
+		return rows.length === expected.length && rows.every((row, i) => new RegExp(expected[i]).test(row));
+	});

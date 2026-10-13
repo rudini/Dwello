@@ -1,12 +1,11 @@
-import { expect } from '@playwright/test';
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { visit } from '../interactions/navigation';
 import { buildingAddress, listedApartment, yearBuilt } from '../questions/building-detail';
-import { emptyList, listedBuilding } from '../questions/buildings';
+import { emptyListShown, listedBuildingCount } from '../questions/buildings';
 import {
 	deleteBuilding,
 	openApartment,
+	openBuildingDetail,
 	recordFuelStock,
 	startDeletingBuilding,
 	startEditing,
@@ -34,61 +33,59 @@ Given(
 Given(
 	'der Liegenschaftsverwalter ist auf der Detailseite von {string}',
 	async ({ verwalter, seed }, title: string) => {
-		await visit(verwalter.page, `/buildings/${seed.idOf(title)}`);
+		await verwalter.attemptsTo(openBuildingDetail(seed.idOf(title)!));
 	}
 );
 
 When('der Liegenschaftsverwalter das Gebäude löscht', async ({ verwalter }) => {
-	await verwalter.perform(deleteBuilding);
+	await verwalter.attemptsTo(deleteBuilding);
 });
 
 When('der Liegenschaftsverwalter das Gebäude löschen will', async ({ verwalter }) => {
-	await verwalter.perform(startDeletingBuilding);
+	await verwalter.attemptsTo(startDeletingBuilding);
 });
 
 When('der Liegenschaftsverwalter das Gebäude bearbeiten will', async ({ verwalter }) => {
-	await verwalter.perform(startEditing);
+	await verwalter.attemptsTo(startEditing);
 });
 
 When('der Liegenschaftsverwalter eine Wohnung hinzufügen will', async ({ verwalter }) => {
-	await verwalter.perform(startNewApartment);
+	await verwalter.attemptsTo(startNewApartment);
 });
 
 When('der Liegenschaftsverwalter die erste Wohnung erstellen will', async ({ verwalter }) => {
-	await verwalter.perform(startFirstApartment);
+	await verwalter.attemptsTo(startFirstApartment);
 });
 
 When('der Liegenschaftsverwalter die Wohnung {string} öffnet', async ({ verwalter }, number: string) => {
-	await verwalter.perform(openApartment(number));
+	await verwalter.attemptsTo(openApartment(number));
 });
 
 Then(
 	'sieht der Liegenschaftsverwalter die Wohnung {string} mit dem Status {string}',
 	async ({ verwalter }, number: string, status: string) => {
-		await expect(listedApartment(verwalter, number)).toContainText(status);
+		await verwalter.sees(listedApartment(number)).toContain(status);
 	}
 );
 
 Then('das Gebäude {string} ist nicht mehr in der Liste', async ({ verwalter, names }, title: string) => {
 	const name = names.get(title) ?? title;
-	await verwalter.perform(searchBuildings(name));
-	await expect(emptyList(verwalter)).toBeVisible();
-	await expect(listedBuilding(verwalter, name)).toHaveCount(0);
+	await verwalter.attemptsTo(searchBuildings(name));
+	await verwalter.sees(emptyListShown).toBe(true);
+	await verwalter.sees(listedBuildingCount(name)).toBe(0);
 });
 
 Then('sieht der Liegenschaftsverwalter das Baujahr {string}', async ({ verwalter }, year: string) => {
-	await expect(yearBuilt(verwalter)).toHaveText(year);
+	await verwalter.sees(yearBuilt).toBe(year);
 });
 
-
 Then('sieht der Liegenschaftsverwalter die Adresse {string}', async ({ verwalter }, address: string) => {
-	await expect(buildingAddress(verwalter)).toContainText(address);
+	await verwalter.sees(buildingAddress).toContain(address);
 });
 
 When(
 	'der Liegenschaftsverwalter für das Gebäude {string} den Tankbestand vom {string} mit {string} Franken erfasst',
 	async ({ verwalter, seed }, title: string, date: string, amount: string) => {
-		await visit(verwalter.page, `/buildings/${seed.idOf(title)}`);
-		await verwalter.perform(recordFuelStock(date, amount));
+		await verwalter.attemptsTo(openBuildingDetail(seed.idOf(title)!), recordFuelStock(date, amount));
 	}
 );
