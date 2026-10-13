@@ -26,6 +26,7 @@
 		"tank-question": "Statement wizard preview with a building that has heating costs but never had a Tankbestand: the question about a tank visible.",
 		"overlap-warning": "Rental contract wizard with a start date that overlaps another contract of the apartment.",
 		"contracts-unknown": "Rental contract wizard or form whose apartments' rental contracts cannot be loaded (that request answered with an error): the hint at the apartment, in the form also at the start (#143).",
+		"contracts-unknown-review": "Rental contract wizard at the step before saving, the apartment's rental contracts not loaded (that request answered with an error): the hint above the review (#143).",
 		"draft-restored": "A wizard reopened with a draft saved in the browser: restore notice and save status visible.",
 		"formula-tested": "Distribution key form after testing a formula.",
 		"profile-sum-invalid": "Heating profile form whose monthly shares do not add up to 100 %.",
@@ -208,11 +209,13 @@
 				"every-wizard-step",
 				"overlap-warning",
 				"draft-restored",
-				"contracts-unknown"
+				"contracts-unknown",
+				"contracts-unknown-review"
 			],
 			"queries": {
 				"every-wizard-step": "?tenant={tenant}&apartment={freeApartment}",
 				"contracts-unknown": "?tenant={tenant}&apartment={freeApartment}",
+				"contracts-unknown-review": "?tenant={tenant}&apartment={freeApartment}",
 				"overlap-warning": "?tenant={tenant}&apartment={limitedApartment}",
 				"draft-restored": "?tenant={tenant}"
 			}

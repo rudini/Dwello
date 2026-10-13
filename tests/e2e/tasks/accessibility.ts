@@ -35,6 +35,7 @@ import {
 	contractSubmitButton,
 	durationChoice,
 	endDateInput,
+	reviewContractsUnknown,
 	startDateInput,
 	tenantSelect
 } from '../targets/contract-form';
@@ -181,6 +182,20 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 		if ((await actor.answer(pageAddress)).includes('/contracts/new')) await actor.attemptsTo(Click.on(nextButton));
 		await actor.attemptsTo(Wait.until(apartmentContractsUnknown));
 	},
+	// the same, at the step before saving: tenant and apartment come from the address
+	'contracts-unknown-review': () => (actor) =>
+		actor.attemptsTo(
+			FailRequests.to('/api/contracts', {}),
+			Navigate.reload,
+			Click.on(nextButton),
+			Wait.until(apartmentContractsUnknown),
+			Click.on(nextButton),
+			EnterDate.of('2030-01-01').into(startDateInput),
+			Click.on(nextButton),
+			Enter.theValue('1500').into(baseRentInput),
+			Click.on(nextButton),
+			Wait.until(reviewContractsUnknown)
+		),
 	'draft-restored': () => async (actor) => {
 		await actor.attemptsTo(startDraft[new URL(await actor.answer(pageAddress)).pathname]); // a draft starts with an input
 		await actor.attemptsTo(Wait.until(saveStatus(await say(actor, 'Entwurf gespeichert'))), Navigate.reload, Wait.until(draftRestored));

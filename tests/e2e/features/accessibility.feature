@@ -65,6 +65,7 @@ Funktionalität: Barrierefreiheit
       | contract-new           | overlap-warning     |
       | contract-new           | draft-restored      |
       | contract-new           | contracts-unknown   |
+      | contract-new           | contracts-unknown-review |
       | contract-detail        | default             |
       | contract-detail        | end-dialog          |
       | contract-detail        | end-dialog-error    |
