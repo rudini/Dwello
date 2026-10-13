@@ -5050,7 +5050,7 @@ Baseline before the change: `bun run test:e2e -- --project=chromium --project=ap
 Files: `tests/e2e/{screenplay,targets,tasks,questions,steps,fixtures}/**`, `tests/e2e/interactions/` and
 `fixtures/actor.ts` removed, `tests/e2e/CLAUDE.md`, `eslint.config.js`, `src/__tests__/e2e-screenplay-lint.test.ts`,
 `docs/test-pyramid.md`, `playwright.config.ts` (comment), `.claude/skills/bdd-acceptance/SKILL.md`,
-`docs/design/offene-punkte.md` (H-18).
+`docs/design/offene-punkte.md` (H-18, H-19).
 
 Review round 1 (`docs/reviews/screenplay-e2e-review-1.md`):
 - M-1 Major: lint gap (page via destructuring, `$eval`, mouse/keyboard chains, computed calls) - fixed
@@ -5109,3 +5109,21 @@ Final review round 6 (`docs/reviews/screenplay-e2e-review-6.md`, delta b57241f..
 - Minor plan lacks rounds 4-6 and H-19 - fixed (this entry)
 - Nit the question rule hangs on the parameter name `actor` - covered by H-19
 - Nit a fixture re-exporting a task - rejected: steps may import tasks anyway
+
+Final review round 7 (`docs/reviews/screenplay-e2e-review-7.md`, the whole end state 04f3780, not a delta; points 1
+and 3 fulfilled, 2 not yet):
+- M-1 Major files outside the layer folders (a helper folder, a file at the top of tests/e2e) had no layer rules -
+  fixed: a base block holds every other file in tests/e2e to the limits of the layers, and
+  `e2e-screenplay-lint.test.ts` fails on any folder besides the layers
+- Minor Playwright `expect` through `test.expect` or destructuring in tasks/questions - fixed
+- Minor questions blocking through `sees` or a loop - fixed
+- Minor `fetch` in tasks/ - fixed (backend through `CallTheApi`)
+- Minor `setTimeout` in steps - fixed (`$testInfo.setTimeout` stays allowed)
+- Minor fixtures performing tasks - fixed (no imports from tasks/ or questions/)
+- Minor `tests/e2e/CLAUDE.md` "May use" column incomplete, no word on other folders - fixed
+- Minor no lint for a missing `await` before `sees` - rejected: needs type information (H-19 kind); all 234 calls
+  are awaited today
+- Nit `docs/test-pyramid.md` names only `tasks/*-api.ts` as API driver - fixed; Nit H-19 missing under Files - fixed
+- Nits `statementPath` in questions/, the axe question scrolling, the `'findings'` literal, `{ verwalter: viewer }`,
+  a target with a renamed parameter - rejected: no layer rule broken (the scroll is part of reading the page from the
+  top), naming only; the renamed parameter is H-19

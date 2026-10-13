@@ -34,7 +34,11 @@ const noPlaywright = [
 	},
 	{ selector: "ImportExpression, CallExpression[callee.name='require']", message: `${outsideScreenplay}: static imports only` },
 	{ selector: 'TSImportType', message: outsideScreenplay },
-	{ selector: "CallExpression[callee.name='expect'], MemberExpression[object.name='expect']", message: 'Assert with actor.sees(question) (tests/e2e/CLAUDE.md)' }
+	{ selector: "CallExpression[callee.name='expect'], MemberExpression[object.name='expect']", message: 'Assert with actor.sees(question) (tests/e2e/CLAUDE.md)' },
+	{
+		selector: "MemberExpression[property.name='expect'], ObjectPattern > Property[key.name='expect']",
+		message: 'Assert with actor.sees(question) (tests/e2e/CLAUDE.md)'
+	}
 ];
 const playwrightImports = [
 	{ group: ['@playwright/test', 'playwright', 'playwright-core', '@axe-core/*'], message: outsideScreenplay },
@@ -139,6 +143,16 @@ export default [
 		linterOptions: { noInlineConfig: true }
 	},
 	{
+		// Any other file in tests/e2e (a helper folder, a file at the top) is held to the same limits as the layers;
+		// the layer blocks below replace these rules with their own
+		files: ['tests/e2e/**/*.ts'],
+		ignores: ['tests/e2e/screenplay/**', 'tests/e2e/targets/**'],
+		rules: {
+			'no-restricted-imports': ['error', { patterns: playwrightImports }],
+			'no-restricted-syntax': ['error', ...noPlaywright]
+		}
+	},
+	{
 		// Steps speak the domain: tasks, questions and fixtures only; assertions through actor.sees(question)
 		files: ['tests/e2e/steps/**/*.ts'],
 		rules: {
@@ -163,7 +177,11 @@ export default [
 					selector: 'MemberExpression[property.name=/^(backend|expect)$/], ObjectPattern > Property[key.name=/^(backend|expect)$/]',
 					message: 'Steps reach the system through tasks and assert with actor.sees(question) (tests/e2e/CLAUDE.md)'
 				},
-				{ selector: 'ThrowStatement', message: 'Assert with actor.sees(question), not with a check of its own (tests/e2e/CLAUDE.md)' }
+				{ selector: 'ThrowStatement', message: 'Assert with actor.sees(question), not with a check of its own (tests/e2e/CLAUDE.md)' },
+				{
+					selector: "CallExpression[callee.name=/^(setTimeout|setInterval)$/]",
+					message: 'Steps do not wait by the clock: actor.sees retries until the expectation holds (tests/e2e/CLAUDE.md)'
+				}
 			]
 		}
 	},
@@ -172,7 +190,14 @@ export default [
 		files: ['tests/e2e/tasks/**/*.ts'],
 		rules: {
 			'no-restricted-imports': ['error', { patterns: belowSteps }],
-			'no-restricted-syntax': ['error', ...noPlaywright]
+			'no-restricted-syntax': [
+				'error',
+				...noPlaywright,
+				{
+					selector: "CallExpression[callee.name='fetch']",
+					message: 'Tasks reach the backend through the ability CallTheApi (tests/e2e/CLAUDE.md)'
+				}
+			]
 		}
 	},
 	{
@@ -196,6 +221,10 @@ export default [
 					message: 'Questions only ask; actions belong in tasks (tests/e2e/CLAUDE.md)'
 				},
 				{
+					selector: "CallExpression[callee.property.name='sees'], WhileStatement, DoWhileStatement",
+					message: 'Questions answer at once; sees() in the step retries them (tests/e2e/CLAUDE.md)'
+				},
+				{
 					selector: "CallExpression[callee.name=/^(setTimeout|setInterval)$/], MemberExpression[property.name=/^(setTimeout|setInterval)$/]",
 					message: 'Questions answer at once; sees() retries them (tests/e2e/CLAUDE.md)'
 				}
@@ -211,7 +240,8 @@ export default [
 				{
 					patterns: [
 						{ ...playwrightImports[0], allowTypeImports: true }, // fixtures create the abilities
-						{ group: ['**/targets/**'], message: 'Fixtures wire actors; targets belong to interactions and questions (tests/e2e/CLAUDE.md)' }
+						{ group: ['**/targets/**'], message: 'Fixtures wire actors; targets belong to interactions and questions (tests/e2e/CLAUDE.md)' },
+						{ group: ['**/tasks/**', '**/questions/**'], message: 'Fixtures wire actors; steps perform tasks and ask questions (tests/e2e/CLAUDE.md)' }
 					]
 				}
 			],

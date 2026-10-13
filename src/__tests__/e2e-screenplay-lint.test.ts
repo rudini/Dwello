@@ -1,3 +1,4 @@
+import { readdirSync } from 'fs';
 import { ESLint } from 'eslint';
 import { describe, expect, it } from 'vitest';
 
@@ -162,6 +163,35 @@ describe('Screenplay-Schichten der Akzeptanztests', () => {
 		['tests/e2e/fixtures/example.ts', "import * as I from '../screenplay/interactions';\nexport const x = I;"],
 		['tests/e2e/fixtures/example.ts', "export { Click } from '../screenplay/interactions';"],
 		['tests/e2e/fixtures/example.ts', "export * from '../screenplay/interactions';"]
+	])('lehnt in %s ab: %s', async (filePath, code) => {
+		expect(await restricted(filePath, code)).not.toEqual([]);
+	});
+
+	// Schluss-Review Endstand, M-1: ausserhalb der Schichtordner gelten dieselben Grenzen
+	it.each([
+		"import { expect } from '@playwright/test';\nexport const x = expect;",
+		'export const clickSave = async (actor) => { const { page } = actor.abilityTo(Web); await page.getByTestId("s").click(); };'
+	])('lehnt in einem Helfer-Ordner ab: %s', async (code) => {
+		expect(await restricted('tests/e2e/helpers/example.ts', code)).not.toEqual([]);
+	});
+
+	it('hat in tests/e2e nur die Schichtordner', () => {
+		const layers = ['features', 'fixtures', 'questions', 'screenplay', 'steps', 'targets', 'tasks'];
+		const dirs = readdirSync('tests/e2e', { withFileTypes: true })
+			.filter((entry) => entry.isDirectory())
+			.map((entry) => entry.name);
+		expect(dirs.filter((dir) => !layers.includes(dir))).toEqual([]);
+	});
+
+	// Schluss-Review Endstand, Minors
+	it.each([
+		['tests/e2e/tasks/example.ts', 'await test.expect.poll(() => 1).toBe(1);'],
+		['tests/e2e/questions/example.ts', 'const { expect: check } = test;'],
+		['tests/e2e/questions/example.ts', 'export const q = async (actor) => actor.sees(other).toBe(1);'],
+		['tests/e2e/questions/example.ts', 'while (!(await actor.answer(ready))) {}'],
+		['tests/e2e/tasks/example.ts', "await fetch('http://localhost:3101/api/v1/buildings');"],
+		['tests/e2e/steps/example.steps.ts', 'await new Promise((r) => setTimeout(r, 1000));'],
+		['tests/e2e/fixtures/example.ts', "import { openDashboard } from '../tasks/dashboard';\nexport const x = openDashboard;"]
 	])('lehnt in %s ab: %s', async (filePath, code) => {
 		expect(await restricted(filePath, code)).not.toEqual([]);
 	});
