@@ -36,6 +36,13 @@ export class CallTheApi {
 		return this.request.put(`${BACKEND_API}/${path}`, { data, headers: this.headers }).then(body);
 	}
 
+	/** The backend API as `fetch` for the BFF's own server code (`src/lib/server`), which builds its URLs itself */
+	readonly fetch: typeof globalThis.fetch = (input, init) =>
+		globalThis.fetch(`${BACKEND_API}/${String(input).replace(/^.*?\/api\/v1\//, '')}`, {
+			...init,
+			headers: { ...(init?.headers as Record<string, string> | undefined), ...this.headers }
+		});
+
 	/** Removes a record; a record that is already gone is no error */
 	remove(path: string) {
 		return this.request.delete(`${BACKEND_API}/${path}`, { headers: this.headers });

@@ -1,7 +1,7 @@
+import { type GenerationRequest, generateStatements, previewStatements } from '../../../src/lib/server/statement-generation';
 import { CallTheApi } from '../screenplay/abilities';
-import type { Activity, Actor } from '../screenplay/actor';
+import type { Activity } from '../screenplay/actor';
 
-type Contract = { id: string; startDate: string; endDate: string | null; tenantName: string };
 export type RunOptions = { heatingProfileId?: string; managementFeePercent?: number };
 
 // What the API protocol driver remembers for the questions in questions/statement-generate.ts
@@ -9,60 +9,31 @@ export const PREVIEW_TOTALS = 'preview';
 export const PREVIEW_BALANCES = 'balances';
 export const CREATED_STATEMENTS = 'created';
 
-// API protocol driver for a generation run: the backend calculates the statement of every contract of the building
-// in the year without a statement in it, like the generation wizard does through the BFF
-async function run(actor: Actor, year: number, buildingId: string, options: RunOptions) {
-	const backend = actor.abilityTo(CallTheApi);
-	const [periodStart, periodEnd] = [`${year}-01-01`, `${year}-12-31`];
-	const { contracts } = (await backend.get(`contracts?buildingId=${buildingId}&limit=1000`)) as {
-		contracts: Contract[];
-	};
-	const { data: statements } = (await backend.get(`statements?buildingId=${buildingId}&limit=1000`)) as {
-		data: { contractId: string; periodStart: string; periodEnd: string }[];
-	};
-	const billed = new Set(
-		statements.filter((s) => s.periodStart <= periodEnd && s.periodEnd >= periodStart).map((s) => s.contractId)
-	);
-	return {
-		backend,
-		contracts: contracts.filter(
-			(c) => c.startDate <= periodEnd && (!c.endDate || c.endDate >= periodStart) && !billed.has(c.id)
-		),
-		body: {
-			periodStart,
-			periodEnd,
-			heatingProfileId: options.heatingProfileId,
-			managementFeePercent: options.managementFeePercent
-		}
-	};
-}
+// API protocol driver for a generation run: the BFF's own server code (src/lib/server/statement-generation.ts), the
+// one the generation wizard calls, picks the contracts of the building and the year and asks the backend; so the
+// API run checks the system's selection, not a copy of it in the test
+const run = (year: number, buildingId: string, options: RunOptions) =>
+	({
+		buildingIds: [buildingId],
+		periodStart: `${year}-01-01`,
+		periodEnd: `${year}-12-31`,
+		...options // a profile or fee the scenario does not name stays out of the request
+	}) as GenerationRequest;
 
 /** Preview: remembers the total costs and the Saldo per tenant */
 export const openPreviewViaApi =
 	(year: number, buildingId: string, options: RunOptions = {}): Activity =>
 	async (actor) => {
-		const { backend, contracts, body } = await run(actor, year, buildingId, options);
-		const totals = new Map<string, number>();
-		const balances = new Map<string, number>();
-		for (const contract of contracts) {
-			const preview = await backend.post('statements/preview', { ...body, contractId: contract.id });
-			totals.set(contract.tenantName, Number(preview.totalCosts));
-			balances.set(contract.tenantName, Number(preview.balance));
-		}
-		actor.remember(PREVIEW_TOTALS, totals);
-		actor.remember(PREVIEW_BALANCES, balances);
+		const rows = await previewStatements(actor.abilityTo(CallTheApi).fetch, run(year, buildingId, options));
+		actor.remember(PREVIEW_TOTALS, new Map(rows.map((row) => [row.tenantName, row.totalCosts])));
+		actor.remember(PREVIEW_BALANCES, new Map(rows.map((row) => [row.tenantName, row.balance])));
 	};
 
-/** Generation: remembers how many statements were created */
+/** Generation: remembers how many statements the system reports as created */
 export const generateStatementsViaApi =
 	(year: number, buildingId: string): Activity =>
-	async (actor) => {
-		const { backend, contracts, body } = await run(actor, year, buildingId, {});
-		for (const contract of contracts) {
-			await backend.post('statements/generate', { ...body, contractId: contract.id, buildingId });
-		}
-		actor.remember(CREATED_STATEMENTS, contracts.length);
-	};
-
-// "CHF 1’250.50" → 1250.5
-export const francs = (amount: string) => Number(amount.replace(/[^\d.]/g, ''));
+	async (actor) =>
+		actor.remember(
+			CREATED_STATEMENTS,
+			await generateStatements(actor.abilityTo(CallTheApi).fetch, run(year, buildingId, {}))
+		);

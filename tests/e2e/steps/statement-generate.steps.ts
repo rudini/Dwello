@@ -3,7 +3,7 @@ import { test } from '../fixtures/test';
 import { pageAddress } from '../questions/navigation';
 import {
 	announcedFeeHint,
-	balanceShown,
+	balanceOf,
 	buildingChosen,
 	categoryFindingOf,
 	draftsOnly,
@@ -24,9 +24,9 @@ import {
 	proposedHeatingProfile,
 	settingsChoiceCount,
 	settingsChoiceName,
-	statementsCreated,
+	createdStatements,
 	statementsInPreview,
-	totalCostsShown
+	totalCostsOf
 } from '../questions/statement-generate';
 import {
 	chooseBuilding,
@@ -46,7 +46,7 @@ import {
 	tryNextWithoutConfirmation,
 	typeManagementFee
 } from '../tasks/statement-generate';
-import { francs } from '../tasks/statement-generate-api';
+import { francs, signedFrancs } from '../questions/amounts';
 
 const { Given, When, Then } = createBdd(test);
 
@@ -97,11 +97,11 @@ Then('meldet die Vorschau, dass es in der Periode keine Mietverträge gibt', asy
 });
 
 Then('wurde 1 Nebenkostenabrechnung erstellt', async ({ verwalter }) => {
-	await verwalter.sees(statementsCreated(1)).toBe(true);
+	await verwalter.sees(createdStatements).toBe(1);
 });
 
 Then('wurden {int} Nebenkostenabrechnungen erstellt', async ({ verwalter }, count: number) => {
-	await verwalter.sees(statementsCreated(count)).toBe(true);
+	await verwalter.sees(createdStatements).toBe(count);
 });
 
 When(
@@ -207,12 +207,11 @@ Then('ist für die Abrechnungen das Gebäude {string} gewählt', async ({ verwal
 });
 
 Then('beträgt der Saldo von {string} {string}', async ({ verwalter, names }, tenant: string, saldo: string) => {
-	const signed = (saldo.startsWith('Rückerstattung') ? -1 : 1) * francs(saldo);
-	await verwalter.sees(balanceShown(names.get(tenant) ?? tenant, saldo, signed)).toBe(true);
+	await verwalter.sees(balanceOf(names.get(tenant) ?? tenant)).toBe(signedFrancs(saldo));
 });
 
 Then('kostet die Abrechnung von {string} {string}', async ({ verwalter, names }, tenant: string, amount: string) => {
-	await verwalter.sees(totalCostsShown(names.get(tenant) ?? tenant, amount, francs(amount))).toBe(true);
+	await verwalter.sees(totalCostsOf(names.get(tenant) ?? tenant)).toBe(francs(amount));
 });
 
 Then(

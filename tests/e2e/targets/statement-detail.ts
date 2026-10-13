@@ -5,6 +5,13 @@ export const statementLineItem = (category: string) =>
 	target(`Position «${category}» der Abrechnung`, (page) =>
 		page.getByTestId('statement-line-item').filter({ hasText: category })
 	);
+// Columns of a position: Kategorie, Schlüssel, Kosten Gebäude, Anteil, Betrag
+const lineItemCell = (category: string, column: number, name: string) =>
+	target(`${name} der Position «${category}»`, (page) =>
+		statementLineItem(category).locate(page).locator('td').nth(column)
+	);
+export const lineItemShare = (category: string) => lineItemCell(category, 3, 'Anteil');
+export const lineItemAmount = (category: string) => lineItemCell(category, 4, 'Betrag');
 export const statementHeatingProfile = target('Heizprofil der Abrechnung', (page) =>
 	page.getByTestId('statement-heating-profile')
 );
