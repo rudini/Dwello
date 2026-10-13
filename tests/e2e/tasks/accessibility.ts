@@ -29,6 +29,7 @@ import {
 	endContractButton
 } from '../targets/contract-detail';
 import {
+	apartmentContractsUnknown,
 	apartmentSelect,
 	baseRentInput,
 	contractSubmitButton,
@@ -178,7 +179,7 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	'contracts-unknown': () => async (actor) => {
 		await actor.attemptsTo(FailRequests.to('/api/contracts', {}), Navigate.reload);
 		if ((await actor.answer(pageAddress)).includes('/contracts/new')) await actor.attemptsTo(Click.on(nextButton));
-		await actor.attemptsTo(Wait.until(on.contractsUnknown));
+		await actor.attemptsTo(Wait.until(apartmentContractsUnknown));
 	},
 	'draft-restored': () => async (actor) => {
 		await actor.attemptsTo(startDraft[new URL(await actor.answer(pageAddress)).pathname]); // a draft starts with an input

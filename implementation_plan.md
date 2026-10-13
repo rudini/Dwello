@@ -32,6 +32,10 @@ Findings (`docs/reviews/b13-contracts-unknown-review-1.md`):
 - N3 «Remove @wip» not ticked - Nit - fixed
 - N4 «(Haiku review)» in a comment - Nit - fixed
 
+Findings round 2 (`docs/reviews/b13-contracts-unknown-review-2.md`): round 1 resolved, M5 and N2 rejections hold.
+- N5 the always-present empty live region adds a flex gap - Nit - rejected: an always-present `role="status"` is the pattern of `start-date-notice`; hiding it (`display:none`/`contents`) makes screen readers miss the hint (M3)
+- ponytail-review: `contractsUnknown` target duplicated `apartmentContractsUnknown` - fixed
+
 Files: `src/lib/contract-form.ts`, `src/routes/contracts/{ContractForm,new/ContractWizard,new/ApartmentStep,new/PeriodStep}.svelte`,
 `src/__tests__/contract-{edit,wizard}.dom.test.ts`, `tests/e2e/{features,steps,tasks,targets,questions,screenplay}/…`,
 `tests/a11y/screens.json`, `docs/archive/implementation-plan-verlauf.md`, `docs/design/offene-punkte.md`

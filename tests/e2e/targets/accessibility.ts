@@ -52,7 +52,6 @@ export const mainNavigationDialog = (label: string) =>
 export const languageOptions = bySelector('Sprachauswahl', '[data-testid="language-option"]');
 export const userMenuSettings = byTestId('Einstellungen im Benutzermenü', 'user-menu-settings');
 export const overlapWarning = byTestId('Überschneidung', 'overlap-warning');
-export const contractsUnknown = byTestId('Mietverträge der Wohnung unbekannt', 'apartment-contracts-unknown');
 export const periodStartInput = byTestId('Periodenbeginn', 'period-start-input');
 export const periodEndInput = byTestId('Periodenende', 'period-end-input');
 export const periodFutureWarning = byTestId('Periode nicht vorbei', 'period-future-warning');
