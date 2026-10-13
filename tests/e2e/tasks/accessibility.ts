@@ -1,0 +1,272 @@
+import { inDays } from '../fixtures/dates';
+import { type Example, type Viewport, variants, viewports } from '../fixtures/screens';
+import { accessibilityViolations } from '../questions/accessibility';
+import { inPageLanguage, languageFindings, pageLanguage } from '../questions/language';
+import { pageAddress } from '../questions/navigation';
+import type { Activity, Actor, Question } from '../screenplay/actor';
+import {
+	Browser,
+	Check,
+	Click,
+	Cookies,
+	Enter,
+	EnterDate,
+	Navigate,
+	PostFormAction,
+	Press,
+	Select,
+	Wait
+} from '../screenplay/interactions';
+import { Visibility } from '../screenplay/questions';
+import type { Target } from '../screenplay/target';
+import * as on from '../targets/accessibility';
+import { userMenuButton } from '../targets/app-frame';
+import {
+	confirmEndContractButton,
+	contractEndInput,
+	contractEndPastConfirm,
+	endContractButton
+} from '../targets/contract-detail';
+import {
+	apartmentSelect,
+	baseRentInput,
+	contractSubmitButton,
+	durationChoice,
+	endDateInput,
+	startDateInput,
+	tenantSelect
+} from '../targets/contract-form';
+import { languageButton } from '../targets/language';
+import { draftRestored, nextButton, saveStatus } from '../targets/wizard';
+
+// How the axe check and the language check bring each screen of tests/a11y/screens.json into its state
+
+const FINDINGS = 'findings';
+
+/** Adds what the actor finds on the page now to the findings of the check (`findings` in questions/accessibility.ts) */
+const note =
+	(look: Question<string[]>, prefix: string): Activity =>
+	async (actor) =>
+		actor.remember(FINDINGS, [
+			...(actor.recall<string[]>(FINDINGS) ?? []),
+			...(await actor.answer(look)).map((finding) => `${prefix}${finding}`)
+		]);
+
+// What the page shows in its own language
+const say = (actor: Actor, text: string) => actor.answer(inPageLanguage(text));
+const clickOnShown = async (actor: Actor, text: string, place: (shown: string) => Target) =>
+	actor.attemptsTo(Click.on(place(await say(actor, text))));
+const openDialog = (button: Target): Activity => (actor) => actor.attemptsTo(Click.on(button), Wait.until(on.dialogConfirm));
+
+// The statement wizard's preview of a calendar year for this example's building (and others), heating profile and fee
+// as proposed
+const previewOf =
+	(year: string, shown: string) =>
+	(example: Example, ...others: string[]): Activity =>
+	async (actor) => {
+		await actor.attemptsTo(
+			EnterDate.of(`${year}-01-01`).into(on.periodStartInput),
+			EnterDate.of(`${year}-12-31`).into(on.periodEndInput),
+			Click.on(nextButton)
+		);
+		for (const building of [example.building, ...others]) await actor.attemptsTo(Check.the(on.generateBuilding(building)));
+		await actor.attemptsTo(Click.on(nextButton), Click.on(nextButton), Wait.until(on.shown(shown)));
+	};
+
+// The first input of each wizard, which starts its draft
+const startDraft: Record<string, Activity> = {
+	'/contracts/new': Select.option({ index: 1 }).from(tenantSelect),
+	'/statements/generate': (actor) => actor.attemptsTo(Click.on(nextButton), Check.the(on.firstGenerateBuilding))
+};
+
+const endWithPastDate: Activity = async (actor) => {
+	if ((await actor.answer(pageAddress)).endsWith('/edit')) {
+		await clickOnShown(actor, 'Befristet', durationChoice);
+		await actor.attemptsTo(EnterDate.of(inDays(-30)).into(endDateInput), Click.on(contractSubmitButton));
+	} else {
+		await actor.attemptsTo(
+			openDialog(endContractButton),
+			EnterDate.of(inDays(-30)).into(contractEndInput),
+			Click.on(confirmEndContractButton)
+		);
+	}
+	await actor.attemptsTo(Wait.until(on.invalidPastEndConfirm));
+};
+
+// What a user does to reach each state
+const states: Record<string, (example: Example, viewport: Viewport) => Activity> = {
+	default: () => async () => {},
+	'filtered-empty': () => Wait.until(on.emptyHint),
+	empty: () => Wait.until(on.emptyHint),
+	'first-use': () => async (actor) => actor.attemptsTo(Wait.until(on.text(await say(actor, 'Erstes Gebäude erfassen')))),
+	'login-error': () => Wait.until(on.loginError),
+	'submit-empty': () => (actor) => actor.attemptsTo(Click.on(on.saveButton), Wait.until(on.formProblem)),
+	'submit-cleared': () => (actor) =>
+		actor.attemptsTo(Enter.theValue('').intoEach(on.requiredFields), Click.on(on.saveButton), Wait.until(on.formProblem)),
+	// saved as loaded
+	'saved-toast': () => (actor) => actor.attemptsTo(Click.on(on.saveButton), Wait.until(on.savedToast)),
+	'server-error': () => async (actor) =>
+		actor.attemptsTo(Wait.until(on.text(await say(actor, 'Versuchen Sie es später erneut.')))),
+	// French chosen with the language selection (the page reloads); later viewports start in French already
+	'other-language': () => async (actor) => {
+		if ((await actor.answer(pageLanguage)) !== 'fr')
+			await actor.attemptsTo(Click.on(languageButton), Click.toReload(on.frenchOption));
+		await actor.attemptsTo(Wait.until(on.frenchPage));
+	},
+	'delete-dialog': () => openDialog(on.firstDeleteButton),
+	'fuel-stock-dialog': () => openDialog(on.firstFuelStockDelete),
+	// by keyboard: the gallery's toasts cover the page
+	'dialog-open': () => (actor) => actor.attemptsTo(Press.theKey('Enter').on(on.galleryDialogButton), Wait.until(on.dialog)),
+	'busy-dialog-open': () => (actor) =>
+		actor.attemptsTo(Press.theKey('Enter').on(on.galleryBusyDialogButton), Wait.until(on.labelledDialog)),
+	'end-dialog': () => openDialog(endContractButton),
+	'end-dialog-error': () => (actor) =>
+		actor.attemptsTo(openDialog(endContractButton), Click.on(confirmEndContractButton), Wait.until(on.dialogError)),
+	// the end dialog on the contract page, the contract form on its edit page
+	'past-end-error': () => endWithPastDate,
+	// the 2025 draft already bills rent days after 31.03.2025: the dialog links it and offers to delete it (A-10)
+	'end-dialog-refused': () => (actor) =>
+		actor.attemptsTo(
+			openDialog(endContractButton),
+			EnterDate.of('2025-03-31').into(contractEndInput),
+			Check.the(contractEndPastConfirm),
+			Click.on(confirmEndContractButton),
+			Wait.until(on.refusedStatements)
+		),
+	// the same refusal from the contract form: the 2025 draft bills rent days after 31.03.2025 (A-10)
+	'edit-refused': () => async (actor) => {
+		await clickOnShown(actor, 'Befristet', durationChoice);
+		await actor.attemptsTo(
+			EnterDate.of('2025-03-31').into(endDateInput),
+			Check.the(contractEndPastConfirm),
+			Click.on(contractSubmitButton),
+			Wait.until(on.refusedStatements)
+		);
+	},
+	// the link opens the wizard at the settings step with the building and period it names
+	'link-preset': () => Wait.until(on.wizardPreset),
+	'send-dialog': () => openDialog(on.sendButton),
+	// As from a tab that still shows the draft: deleting the sent statement is refused by the server
+	'action-error': () => (actor) => actor.attemptsTo(PostFormAction('?/delete'), Wait.until(on.formProblem)),
+	'reminder-dialog': () => openDialog(on.reminderButton),
+	'mark-paid-dialog': () => openDialog(on.markPaidButton),
+	'formula-tested': () => (actor) =>
+		actor.attemptsTo(
+			Enter.theValue('{area}').into(on.formulaInput),
+			Click.on(on.formulaTestButton),
+			Wait.until(on.formulaTestOutcome)
+		),
+	'profile-sum-invalid': () => (actor) =>
+		actor.attemptsTo(Enter.theValue('50').into(on.januaryShare), Wait.until(on.invalidProfileTotal)),
+	'mobile-menu-open': (_, viewport) => async (actor) => {
+		if (viewport === 'desktop') return; // the sidebar is always open from 1024 px
+		await actor.attemptsTo(Click.on(on.mobileMenuButton));
+		await actor.attemptsTo(Wait.until(on.mainNavigationDialog(await say(actor, 'Hauptnavigation'))));
+	},
+	'language-menu-open': () => (actor) => actor.attemptsTo(Click.on(languageButton), Wait.until(on.languageOptions)),
+	'user-menu-open': () => (actor) => actor.attemptsTo(Click.on(userMenuButton), Wait.until(on.userMenuSettings)),
+	'overlap-warning': () => (actor) =>
+		actor.attemptsTo(
+			Click.on(nextButton), // tenant and apartment come from the address
+			Click.on(nextButton),
+			Wait.forValue(startDateInput, '01.01.2100'), // the suggestion arrived, it cannot land in the typed date
+			EnterDate.of('2020-01-01').into(startDateInput), // the apartment is rented until 2099
+			Wait.until(on.overlapWarning)
+		),
+	'draft-restored': () => async (actor) => {
+		await actor.attemptsTo(startDraft[new URL(await actor.answer(pageAddress)).pathname]); // a draft starts with an input
+		await actor.attemptsTo(Wait.until(saveStatus(await say(actor, 'Entwurf gespeichert'))), Navigate.reload, Wait.until(draftRestored));
+	},
+	// 2026 against 2025: the heating invoice of 2025 has no successor yet
+	'category-check': (example) => previewOf('2026', 'category-check')(example),
+	'preview-empty': (example) => previewOf('2000', 'preview-empty')(example),
+	'preview-all-billed': (example) => previewOf('2024', 'preview-all-billed')(example),
+	// 2025 with a second building that has heating costs but never had a Tankbestand
+	'tank-question': (example) => previewOf('2025', 'tank-question')(example, example.tankBuilding),
+	'period-not-over': () => (actor) =>
+		actor.attemptsTo(EnterDate.of('2099-12-31').into(on.periodEndInput), Wait.until(on.periodFutureWarning))
+};
+
+// Rental contract wizard, tenant and a free apartment from the address: every step up to "Prüfen"
+const contractWizardSteps = (look: Activity): Activity => async (actor) => {
+	const nextStep = (shown: Target) => actor.attemptsTo(Click.on(nextButton), Wait.until(shown));
+	await actor.attemptsTo(look); // "Mieter"
+	await nextStep(apartmentSelect); // "Wohnung", once the apartments are checked
+	await actor.attemptsTo(look);
+	await nextStep(startDateInput); // "Vertragsdauer", limited: end date and both dates in words
+	await clickOnShown(actor, 'Befristet', durationChoice);
+	await actor.attemptsTo(EnterDate.of('2030-01-01').into(startDateInput), EnterDate.of('2031-12-31').into(endDateInput), look);
+	await nextStep(baseRentInput); // "Miete"
+	await actor.attemptsTo(Enter.theValue('1500').into(baseRentInput), look);
+	await nextStep(on.shown('contract-review-item')); // "Prüfen"
+	await actor.attemptsTo(look);
+};
+
+// Statement wizard: period, buildings, preview; every step is checked before going on
+const statementWizardSteps =
+	(look: Activity, example: Example): Activity =>
+	async (actor) => {
+		const nextStep = (shown: string) => actor.attemptsTo(Click.on(nextButton), Wait.until(on.shown(shown)), look);
+		await actor.attemptsTo(look); // "Abrechnungsperiode"
+		await nextStep('generate-all-buildings'); // "Gebäude"
+		// this example's building: another example's may still be seeding, without a contract to preview
+		await actor.attemptsTo(Check.the(on.generateBuilding(example.building)));
+		await nextStep('heating-profile-select'); // "Heizprofil und Verwaltungspauschale"
+		await nextStep('preview-count'); // "Vorschau", calculated on the server
+		// a building without invoices must be confirmed
+		if (await actor.answer(Visibility.of(on.confirmMissingInvoices))) await actor.attemptsTo(Check.the(on.confirmMissingInvoices));
+		await nextStep('generate-drafts-note'); // "Erstellen"
+	};
+
+// 'empty' and 'first-use' need a database without records: the empty instance of the stack (playwright.config.ts)
+const EMPTY_INSTANCE = 'http://localhost:3102';
+const onEmptyInstance = ['empty', 'first-use'];
+
+/** Public screens are looked at without a session */
+const leaveSessionFor =
+	(example: Example): Activity =>
+	async (actor) => {
+		if (example.public) await actor.attemptsTo(Cookies.clear);
+	};
+
+/** The language the app and its empty instance show (the cookie the language selection sets) */
+const useLanguage = (language: string) =>
+	Cookies.add(
+		['http://localhost:3100', 'http://localhost:3102'].map((url) => ({ name: 'PARAGLIDE_LOCALE', value: language, url }))
+	);
+
+/** Opens the example's screen in its state for one viewport and colour scheme and notes what `look` finds there,
+ * at every step of a wizard for 'every-wizard-step' */
+const lookAt =
+	(example: Example, viewport: Viewport, scheme: 'light' | 'dark', look: Question<string[]>, prefix = ''): Activity =>
+	async (actor) => {
+		await actor.attemptsTo(
+			Browser.resizeTo(viewports[viewport]),
+			Browser.useColorScheme(scheme),
+			Browser.clearLocalStorage, // no draft from the previous viewport
+			Navigate.to(onEmptyInstance.includes(example.state) ? EMPTY_INSTANCE + example.path : example.path)
+		);
+		const noted = note(look, prefix);
+		if (example.state !== 'every-wizard-step')
+			return actor.attemptsTo(states[example.state](example, viewport), noted);
+		const wizard = new URL(example.path, 'http://x').pathname;
+		await actor.attemptsTo(
+			wizard === '/contracts/new' ? contractWizardSteps(noted) : statementWizardSteps(noted, example)
+		);
+	};
+
+/** axe on the example in every viewport and colour scheme */
+export const checkAccessibilityOf = (example: Example): Activity => async (actor) => {
+	await actor.attemptsTo(leaveSessionFor(example));
+	for (const { viewport, scheme } of variants)
+		await actor.attemptsTo(lookAt(example, viewport, scheme, accessibilityViolations, `${viewport}, ${scheme}: `));
+};
+
+/** The example on a phone in French, Italian and English: German left and text that does not fit; scenario records
+ * (`userData`) are no UI text */
+export const checkLanguagesOf = (example: Example, userData: string[]): Activity => async (actor) => {
+	await actor.attemptsTo(leaveSessionFor(example));
+	// 'other-language' chooses French itself
+	for (const language of example.state === 'other-language' ? ['fr'] : ['fr', 'it', 'en'])
+		await actor.attemptsTo(useLanguage(language), lookAt(example, 'mobile', 'light', languageFindings(language, userData)));
+};

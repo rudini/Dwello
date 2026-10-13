@@ -50,7 +50,13 @@ export const Click = {
 };
 
 export const Enter = {
-	theValue: (value: string) => ({ into: (target: Target) => on(target, (element) => element.fill(value)) })
+	theValue: (value: string) => ({
+		into: (target: Target) => on(target, (element) => element.fill(value)),
+		intoEach: (target: Target) =>
+			on(target, async (elements) => {
+				for (const element of await elements.all()) await element.fill(value);
+			})
+	})
 };
 
 /** Types a date the Swiss way (TT.MM.JJJJ) into a date field; scenarios keep JJJJ-MM-TT, or '' to empty the field */
@@ -88,6 +94,8 @@ export const Upload = {
 export const Wait = {
 	/** until the target is shown: a state reached before the next step looks */
 	until: (target: Target) => on(target, (element) => element.first().waitFor()),
+	/** until a field shows the value, e.g. a suggestion that arrives after the page */
+	forValue: (target: Target, value: string) => on(target, (element) => expect(element).toHaveValue(value)),
 	forUrl: (matches: (url: URL) => boolean): Activity => (actor) => pageOf(actor).waitForURL(matches)
 };
 
@@ -101,7 +109,10 @@ export const DOWNLOAD = 'download';
 
 /** Notices the next request the browser sends to a matching URL, for `RequestedUrl` under the same key */
 export const NoticeRequest = (url: RegExp, key: string): Activity => async (actor) => {
-	actor.remember(key, pageOf(actor).waitForRequest(url));
+	void pageOf(actor)
+		.waitForRequest(url)
+		.then((request) => actor.remember(key, request.url()))
+		.catch(() => {}); // no such request: `RequestedUrl` answers null
 };
 
 export const Cookies = {

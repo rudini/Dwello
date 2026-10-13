@@ -1,113 +1,104 @@
-import { expect, type Page } from '@playwright/test';
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { sessionCookies } from '../fixtures/session';
-import { visit } from '../interactions/navigation';
-import { chooseLanguage } from '../tasks/language';
-import { chooseInFooter } from '../tasks/app-frame';
-import { userMenuButton } from '../interactions/app-frame';
-import { address, check, screens, seedFor } from '../interactions/accessibility';
-import { cutOff, germanOnScreen } from '../interactions/german-text';
-import { documentLanguage, useLanguage } from '../interactions/language';
+import { exampleOf } from '../fixtures/screens';
+import { findings } from '../questions/accessibility';
+import { userMenuCount } from '../questions/app-frame';
 import { languageCode, pageLanguage, shownLanguage } from '../questions/language';
+import { pagePath, pageTitle } from '../questions/navigation';
+import { checkLanguagesOf } from '../tasks/accessibility';
+import {
+	chooseInFooter,
+	openHelpFromPublicPage,
+	openLoginFromPublicPage,
+	openTermsFromLogin
+} from '../tasks/app-frame';
+import { loseSession, signInAgain } from '../tasks/authentication';
+import { chooseLanguage, preferEnglishInTheBrowser } from '../tasks/language';
+import { openPage, reloadPage } from '../tasks/navigation';
 
 const { Given, When, Then } = createBdd(test);
 
 Given('ein Besucher hat die Anmeldeseite geöffnet', async ({ besucher }) => {
-	await visit(besucher.page, '/login');
+	await besucher.attemptsTo(openPage('/login'));
 });
 
 Given('der Liegenschaftsverwalter öffnet eine Seite, die es nicht gibt', async ({ verwalter }) => {
-	await visit(verwalter.page, '/gibt-es-nicht');
+	await verwalter.attemptsTo(openPage('/gibt-es-nicht'));
 });
 
 When('der Liegenschaftsverwalter die Sprache {string} wählt', async ({ verwalter }, language: string) => {
-	await verwalter.perform(chooseLanguage(language));
+	await verwalter.attemptsTo(chooseLanguage(language));
 });
 
 When('der Besucher die Sprache {string} wählt', async ({ besucher }, language: string) => {
-	await besucher.perform(chooseLanguage(language));
+	await besucher.attemptsTo(chooseLanguage(language));
 });
 
 When('der Liegenschaftsverwalter die Seite neu lädt', async ({ verwalter }) => {
-	await verwalter.page.reload();
+	await verwalter.attemptsTo(reloadPage);
 });
 
 When('der Liegenschaftsverwalter sich wieder anmeldet', async ({ verwalter, baseURL }) => {
-	await verwalter.page.context().addCookies(await sessionCookies(baseURL!));
-	await visit(verwalter.page, '/dashboard');
+	await verwalter.attemptsTo(signInAgain(baseURL!));
 });
 
-Then('ist die Seite auf {string}', async ({ page }, language: string) => {
-	await expect(pageLanguage({ page })).toHaveAttribute('lang', languageCode(language));
-	await expect(shownLanguage({ page })).toContainText(language);
+// asked of whoever looks at the page, signed in or not: Liegenschaftsverwalter and Besucher share the browser
+Then('ist die Seite auf {string}', async ({ verwalter: viewer }, language: string) => {
+	await viewer.sees(pageLanguage).toBe(languageCode(language));
+	await viewer.sees(shownLanguage).toContain(language);
 });
 
 Then('ist der Liegenschaftsverwalter noch auf der Seite {string}', async ({ verwalter }, path: string) => {
-	expect(new URL(verwalter.page.url()).pathname).toBe(path);
+	await verwalter.sees(pagePath).toBe(path);
 });
 
-Then('heisst die Seite {string}', async ({ page }, title: string) => {
-	await expect(page).toHaveTitle(title);
+Then('heisst die Seite {string}', async ({ verwalter: viewer }, title: string) => {
+	await viewer.sees(pageTitle).toBe(title);
 });
 
 Then(
 	'zeigt der Bildschirm {string} im Zustand {string} auf Französisch, Italienisch und Englisch kein Deutsch und passt in 390 Pixel',
-	async ({ page, seed, $testInfo }, name: string, state: string) => {
+	async ({ verwalter, seed, $testInfo }, name: string, state: string) => {
 		$testInfo.setTimeout(180_000); // three languages, each with its own visit
-		const screen = screens.find((candidate) => candidate.name === name)!;
-		if (screen.public) await page.context().clearCookies();
-		const path = await seedFor(seed, address(screen, state), state);
-		const userData = [...seed.names.values()];
-		const found: string[] = [];
-		// 'other-language' chooses French itself
-		for (const language of state === 'other-language' ? ['fr'] : ['fr', 'it', 'en']) {
-			await useLanguage(page, language);
-			const look = async (shownPage: Page) => {
-				const shown = (await documentLanguage(shownPage).getAttribute('lang'))!;
-				const german = shown === 'de' ? ['page shown in German'] : await germanOnScreen(shownPage, shown, userData);
-				return [...german, ...(await cutOff(shownPage))].map((finding) => `${language}: ${finding}`);
-			};
-			found.push(...(await check(page, path, state, 'mobile', 'light', look)));
-		}
-		expect(found).toEqual([]);
+		const example = await exampleOf(seed, name, state);
+		await verwalter.attemptsTo(checkLanguagesOf(example, [...seed.names.values()]));
+		await verwalter.sees(findings).toEqual([]);
 	}
 );
 
 Given('der Browser des Liegenschaftsverwalters bevorzugt Englisch', async ({ verwalter }) => {
-	await verwalter.page.setExtraHTTPHeaders({ 'Accept-Language': 'en-GB,en;q=0.9' });
+	await verwalter.attemptsTo(preferEnglishInTheBrowser);
 });
 
 Given('ein Besucher hat die Seite {string} geöffnet', async ({ besucher }, path: string) => {
-	await visit(besucher.page, path);
+	await besucher.attemptsTo(openPage(path));
 });
 
 When('der Besucher den Link zu den Nutzungsbedingungen öffnet', async ({ besucher }) => {
-	await besucher.page.getByTestId('login-terms-link').click();
+	await besucher.attemptsTo(openTermsFromLogin);
 });
 
 When('der Besucher den Link zur Anmeldung öffnet', async ({ besucher }) => {
-	await besucher.page.getByTestId('public-login-link').click();
+	await besucher.attemptsTo(openLoginFromPublicPage);
 });
 
 When('der Besucher den Link zur Hilfe öffnet', async ({ besucher }) => {
-	await besucher.page.getByTestId('public-help-link').click();
+	await besucher.attemptsTo(openHelpFromPublicPage);
 });
 
 When('die Anmeldung des Liegenschaftsverwalters abläuft', async ({ verwalter }) => {
-	// the session cookies are gone, the page in the browser stays as it is
-	await verwalter.page.context().clearCookies();
+	await verwalter.attemptsTo(loseSession);
 });
 
 Then('zeigt die Seite kein Benutzermenü', async ({ verwalter }) => {
-	await expect(userMenuButton(verwalter.page)).toHaveCount(0);
+	await verwalter.sees(userMenuCount).toBe(0);
 });
 
 When('der Besucher in der Fusszeile {string} wählt', async ({ besucher }, label: string) => {
-	await besucher.perform(chooseInFooter(label));
+	await besucher.attemptsTo(chooseInFooter(label));
 });
 
 Then('ist der Besucher noch auf der Seite {string}', async ({ besucher }, path: string) => {
 	// retried: a link opens the page in the browser, after the click returns
-	await expect(besucher.page).toHaveURL((url) => url.pathname === path);
+	await besucher.sees(pagePath).toBe(path);
 });

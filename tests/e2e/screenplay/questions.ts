@@ -1,5 +1,5 @@
 import AxeBuilder from '@axe-core/playwright';
-import type { Download, Locator, Request } from '@playwright/test';
+import type { Download, Locator } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
 import { type Actor, type Question, question } from './actor';
 import { BrowseTheWeb } from './abilities';
@@ -179,6 +179,9 @@ export const DownloadedFile: Question<{ name: string; content: Buffer }> = quest
 	return { name: download.suggestedFilename(), content: await readFile(await download.path()) };
 });
 
-/** The address of the request noticed under the key (`NoticeRequest`) */
+/** The address of the request noticed under the key (`NoticeRequest`); null while none was sent */
 export const RequestedUrl = (key: string) =>
-	question(`the address of the request ${key}`, async (actor) => new URL((await actor.recall<Promise<Request>>(key)).url()));
+	question(`the address of the request ${key}`, (actor) => {
+		const url = actor.recall<string | undefined>(key);
+		return url ? new URL(url) : null;
+	});
