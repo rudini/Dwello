@@ -1,7 +1,7 @@
-import type { Actor } from '../fixtures/actor';
-import { deleteButton, editButton, monthShare, profileCard, profileTotal } from '../interactions/heating-profiles';
+import { Count, Text } from '../screenplay/questions';
+import { monthShare, profileActions, profileCard, profileTotal } from '../targets/heating-profiles';
 
-export const shareOf = (actor: Actor, month: string) => monthShare(actor.page, month);
-export const totalShare = (actor: Actor) => profileTotal(actor.page);
-export const listedProfile = (actor: Actor, name: string) => profileCard(actor.page, name);
-export const profileActions = (actor: Actor) => editButton(actor.page).or(deleteButton(actor.page));
+export const shareOf = (month: string) => Text.of(monthShare(month));
+export const totalShare = Text.of(profileTotal);
+export const listedProfilesNamed = (name: string) => Count.of(profileCard(name));
+export const profileActionCount = Count.of(profileActions);

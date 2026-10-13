@@ -1,9 +1,24 @@
-import { expect } from '@playwright/test';
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { visit } from '../interactions/navigation';
-import { deletion, formulaOf, invoicesBy, keyActions, listedKey, sampleShare } from '../questions/distribution-keys';
-import { changeFormula, createDistributionKey, deleteDistributionKey, testFormula } from '../tasks/distribution-keys';
+import {
+	formulaOf,
+	invoicesBy,
+	keyActionCount,
+	keyDeletable,
+	keyListed,
+	listedKeysNamed,
+	shareOfSample
+} from '../questions/distribution-keys';
+import { pageTitle } from '../questions/navigation';
+import {
+	changeFormula,
+	createDistributionKey,
+	deleteDistributionKey,
+	openDistributionKeyEdit,
+	openDistributionKeys,
+	openNewDistributionKey,
+	testFormula
+} from '../tasks/distribution-keys';
 
 const { Given, When, Then } = createBdd(test);
 
@@ -22,82 +37,82 @@ Given(
 );
 
 Given('der Liegenschaftsverwalter ist auf der Seite "Verteilschlüssel"', async ({ verwalter }) => {
-	await visit(verwalter.page, '/config/distribution-keys');
+	await verwalter.attemptsTo(openDistributionKeys);
 });
 
 Given('der Liegenschaftsverwalter ist auf der Seite "Neuer Verteilschlüssel"', async ({ verwalter }) => {
-	await visit(verwalter.page, '/config/distribution-keys/new');
+	await verwalter.attemptsTo(openNewDistributionKey);
 });
 
 Given(
 	'der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Verteilschlüssels {string}',
 	async ({ verwalter, seed }, key: string) => {
-		await visit(verwalter.page, `/config/distribution-keys/${seed.idOf(key)}/edit`);
+		await verwalter.attemptsTo(openDistributionKeyEdit(seed.idOf(key)!));
 	}
 );
 
 When('der Liegenschaftsverwalter die Formel {string} testet', async ({ verwalter }, formula: string) => {
-	await verwalter.perform(testFormula(formula));
+	await verwalter.attemptsTo(testFormula(formula));
 });
 
 When(
 	'der Liegenschaftsverwalter den Verteilschlüssel {string} mit der Formel {string} erfasst',
 	async ({ verwalter, seed }, title: string, formula: string) => {
-		await verwalter.perform(createDistributionKey(seed.unique(title), formula));
+		await verwalter.attemptsTo(createDistributionKey(seed.unique(title), formula));
 	}
 );
 
 When(
 	'der Liegenschaftsverwalter die Formel des Verteilschlüssels {string} auf {string} ändert',
 	async ({ verwalter, names }, title: string, formula: string) => {
-		await verwalter.perform(changeFormula(names.get(title)!, formula));
+		await verwalter.attemptsTo(changeFormula(names.get(title)!, formula));
 	}
 );
 
 When('der Liegenschaftsverwalter den Verteilschlüssel {string} löscht', async ({ verwalter, names }, title: string) => {
-	await verwalter.perform(deleteDistributionKey(names.get(title)!));
+	await verwalter.attemptsTo(deleteDistributionKey(names.get(title)!));
 });
 
 Then(
 	'trägt die Beispielwohnung mit {string} {string} der Kosten',
 	async ({ verwalter }, apartment: string, share: string) => {
-		await expect(sampleShare(verwalter, apartment)).toHaveText(share);
+		await verwalter.sees(shareOfSample(apartment)).toBe(share);
 	}
 );
 
 Then(
 	'verteilt der Verteilschlüssel {string} nach der Formel {string}',
 	async ({ verwalter, names }, title: string, formula: string) => {
-		await expect(formulaOf(verwalter, names.get(title)!)).toHaveText(formula);
+		await verwalter.sees(formulaOf(names.get(title)!)).toBe(formula);
 	}
 );
 
 Then(
 	'sieht der Liegenschaftsverwalter den Verteilschlüssel {string} nicht mehr',
 	async ({ verwalter, names }, title: string) => {
-		await expect(verwalter.page).toHaveTitle('Verteilschlüssel - Dwello');
-		await expect(listedKey(verwalter, names.get(title)!)).toHaveCount(0);
+		await verwalter.sees(pageTitle).toBe('Verteilschlüssel - Dwello');
+		await verwalter.sees(listedKeysNamed(names.get(title)!)).toBe(0);
 	}
 );
 
 Then(
 	'wird/werden {int} Rechnung(en) nach dem Verteilschlüssel {string} verteilt',
 	async ({ verwalter, names }, count: number, title: string) => {
-		await expect(invoicesBy(verwalter, names.get(title)!)).toHaveText(`${count} ${count === 1 ? 'Rechnung' : 'Rechnungen'}`);
+		await verwalter.sees(invoicesBy(names.get(title)!)).toBe(`${count} ${count === 1 ? 'Rechnung' : 'Rechnungen'}`);
 	}
 );
 
 Then(
 	'kann der Liegenschaftsverwalter den Verteilschlüssel {string} nicht löschen',
 	async ({ verwalter, names }, title: string) => {
-		await expect(deletion(verwalter, names.get(title)!)).toBeDisabled();
+		await verwalter.sees(keyDeletable(names.get(title)!)).toBe(false);
 	}
 );
 
 Then(
 	'kann der Liegenschaftsverwalter den Verteilschlüssel {string} weder bearbeiten noch löschen',
 	async ({ verwalter }, name: string) => {
-		await expect(listedKey(verwalter, name)).toBeVisible();
-		await expect(keyActions(verwalter, name)).toHaveCount(0);
+		await verwalter.sees(keyListed(name)).toBe(true);
+		await verwalter.sees(keyActionCount(name)).toBe(0);
 	}
 );

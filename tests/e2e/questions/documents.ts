@@ -1,14 +1,20 @@
-import type { APIRequestContext } from '@playwright/test';
-import type { Actor } from '../fixtures/actor';
-import { documentRow, documentStatus, reminderFeedback } from '../interactions/documents';
+import { question } from '../screenplay/actor';
+import { Count, Text } from '../screenplay/questions';
+import { documentRow, documentStatus, reminderButton, reminderFeedback } from '../targets/documents';
 
 type Mail = { to: string; subject: string; attachments: string[] };
 
-export const reminderOutcome = (actor: Actor) => reminderFeedback(actor.page);
-export const deliveryOf = (actor: Actor, title: string) => documentStatus(actor.page, title);
-export const documentFor = (actor: Actor, title: string, tenantName: string) =>
-	documentRow(actor.page, title, tenantName);
+export const reminderOutcome = Text.of(reminderFeedback);
+export const reminderOffers = Count.of(reminderButton);
+export const deliveryOf = (title: string) => Text.of(documentStatus(title));
+export const documentFor = (title: string, tenantName: string) => Text.of(documentRow(title, tenantName));
+export const documentsFor = (title: string, tenantName: string) => Count.of(documentRow(title, tenantName));
 
-// Mail received by the mail catcher the backend sends to in E2E runs (playwright.config.ts)
-export const mailsTo = async (request: APIRequestContext, address: string) =>
-	((await (await request.get('http://localhost:2526/messages')).json()) as Mail[]).filter((m) => m.to === address);
+// Mail received by the mail catcher the backend sends to in E2E runs (playwright.config.ts): per mail its subject
+// before « – » and whether each attachment is a PDF
+export const mailsTo = (address: string) =>
+	question(`the mails to ${address}`, async () =>
+		((await (await fetch('http://localhost:2526/messages')).json()) as Mail[])
+			.filter((mail) => mail.to === address)
+			.map((mail) => [mail.subject.split(' – ')[0], mail.attachments.map((name) => /\.pdf$/.test(name))])
+	);

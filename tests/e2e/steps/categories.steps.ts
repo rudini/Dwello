@@ -1,10 +1,23 @@
-import { expect } from '@playwright/test';
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { visit } from '../interactions/navigation';
 import { errorMessageShown } from '../questions/form';
-import { deletion, invoicesOf, isAllowed, listedCategory } from '../questions/categories';
-import { createCategory, deleteCategory, saveAsNotAllowed, showAllowedCategories } from '../tasks/categories';
+import { pageTitle } from '../questions/navigation';
+import {
+	allowance,
+	categoryDeletable,
+	categoryListed,
+	invoicesOf,
+	listedCategoriesNamed
+} from '../questions/categories';
+import {
+	createCategory,
+	deleteCategory,
+	openCategories,
+	openCategoryEdit,
+	openNewCategory,
+	saveAsNotAllowed,
+	showAllowedCategories
+} from '../tasks/categories';
 
 const { Given, When, Then } = createBdd(test);
 
@@ -24,64 +37,64 @@ Given(
 );
 
 Given('der Liegenschaftsverwalter ist auf der Seite "Kategorien"', async ({ verwalter }) => {
-	await visit(verwalter.page, '/config/categories');
+	await verwalter.attemptsTo(openCategories);
 });
 
 Given('der Liegenschaftsverwalter ist auf der Seite "Neue Kategorie"', async ({ verwalter }) => {
-	await visit(verwalter.page, '/config/categories/new');
+	await verwalter.attemptsTo(openNewCategory);
 });
 
 Given(
 	'der Liegenschaftsverwalter ist auf der Bearbeitungsseite der Kategorie {string}',
 	async ({ verwalter, seed }, category: string) => {
-		await visit(verwalter.page, `/config/categories/${seed.idOf(category)}/edit`);
+		await verwalter.attemptsTo(openCategoryEdit(seed.idOf(category)!));
 	}
 );
 
 When('der Liegenschaftsverwalter nur die umlagefähigen Kategorien anzeigt', async ({ verwalter }) => {
-	await verwalter.perform(showAllowedCategories);
+	await verwalter.attemptsTo(showAllowedCategories);
 });
 
 When(
 	'der Liegenschaftsverwalter die umlagefähige Kategorie {string} erfasst',
 	async ({ verwalter, seed, names }, title: string) => {
-		await verwalter.perform(createCategory(names.get(title) ?? seed.unique(title), true));
+		await verwalter.attemptsTo(createCategory(names.get(title) ?? seed.unique(title), true));
 	}
 );
 
 When(
 	'der Liegenschaftsverwalter die nicht umlagefähige Kategorie {string} erfasst',
 	async ({ verwalter, seed, names }, title: string) => {
-		await verwalter.perform(createCategory(names.get(title) ?? seed.unique(title), false));
+		await verwalter.attemptsTo(createCategory(names.get(title) ?? seed.unique(title), false));
 	}
 );
 
 When(
 	'der Liegenschaftsverwalter die Kategorie {string} als nicht umlagefähig speichert',
 	async ({ verwalter, names }, title: string) => {
-		await verwalter.perform(saveAsNotAllowed(names.get(title)!));
+		await verwalter.attemptsTo(saveAsNotAllowed(names.get(title)!));
 	}
 );
 
 When('der Liegenschaftsverwalter die Kategorie {string} löscht', async ({ verwalter, names }, title: string) => {
-	await verwalter.perform(deleteCategory(names.get(title)!));
+	await verwalter.attemptsTo(deleteCategory(names.get(title)!));
 });
 
 Then('sieht der Liegenschaftsverwalter die Kategorie {string}', async ({ verwalter, names }, title: string) => {
-	await expect(listedCategory(verwalter, names.get(title)!)).toBeVisible();
+	await verwalter.sees(categoryListed(names.get(title)!)).toBe(true);
 });
 
 Then('nicht die Kategorie {string}', async ({ verwalter, names }, title: string) => {
-	await expect(listedCategory(verwalter, names.get(title)!)).toHaveCount(0);
+	await verwalter.sees(listedCategoriesNamed(names.get(title)!)).toBe(0);
 });
 
 Then('sieht der Liegenschaftsverwalter die Kategorie {string} nicht mehr', async ({ verwalter, names }, title: string) => {
-	await expect(verwalter.page).toHaveTitle('Kategorien - Dwello');
-	await expect(listedCategory(verwalter, names.get(title)!)).toHaveCount(0);
+	await verwalter.sees(pageTitle).toBe('Kategorien - Dwello');
+	await verwalter.sees(listedCategoriesNamed(names.get(title)!)).toBe(0);
 });
 
 Then('ist die Kategorie {string} nicht umlagefähig', async ({ verwalter, names }, title: string) => {
-	await expect(isAllowed(verwalter, names.get(title)!)).toHaveText('Nicht umlagefähig');
+	await verwalter.sees(allowance(names.get(title)!)).toBe('Nicht umlagefähig');
 });
 
 Then(
@@ -95,13 +108,13 @@ Then(
 Then(
 	'wird die Kategorie {string} von {int} Rechnung(en) verwendet',
 	async ({ verwalter, names }, title: string, count: number) => {
-		await expect(invoicesOf(verwalter, names.get(title)!)).toHaveText(`${count} ${count === 1 ? 'Rechnung' : 'Rechnungen'}`);
+		await verwalter.sees(invoicesOf(names.get(title)!)).toBe(`${count} ${count === 1 ? 'Rechnung' : 'Rechnungen'}`);
 	}
 );
 
 Then(
 	'kann der Liegenschaftsverwalter die Kategorie {string} nicht löschen',
 	async ({ verwalter, names }, title: string) => {
-		await expect(deletion(verwalter, names.get(title)!)).toBeDisabled();
+		await verwalter.sees(categoryDeletable(names.get(title)!)).toBe(false);
 	}
 );
