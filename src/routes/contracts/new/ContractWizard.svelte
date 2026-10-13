@@ -95,13 +95,16 @@
 	}
 
 	// also «Erneut versuchen» when the chosen apartment's contracts could not be loaded; the input stays (#151)
-	const loadContracts = () =>
-		Promise.all(apartments.map((a) => contractsOf(a.id))).then(
-			(entries) => (contracts = new Map(entries))
-		);
+	let loads = 0; // only the latest load counts (review #151 R2-4); true when this one is it
+	async function loadContracts() {
+		const load = ++loads;
+		const entries = await Promise.all(apartments.map((a) => contractsOf(a.id)));
+		if (load === loads) contracts = new Map(entries);
+		return load === loads;
+	}
 
 	async function retry() {
-		await loadContracts();
+		if (!(await loadContracts())) return;
 		await tick();
 		retried(unknown, section?.querySelector('h2'));
 	}

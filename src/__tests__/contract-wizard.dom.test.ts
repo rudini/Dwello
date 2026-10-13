@@ -248,6 +248,8 @@ describe('Prüfungen im Mietvertrag', () => {
 		expect(minOfStart()).toBe('');
 		click('wizard-back');
 		expect(byTestId('apartment-contracts-unknown')!.textContent).toContain(UNKNOWN);
+		// Dr. Weber #151 W-01: in the choice too (review R2-1)
+		expect(document.querySelector('option[value="a3"]')!.textContent).toContain('(nicht geprüft)');
 		expect(byTestId('availability-info')).toBeNull();
 		// Review M3: the hint is read out when it appears
 		expect(byTestId('apartment-contracts-unknown')!.closest('[role="status"]')).not.toBeNull();
@@ -274,6 +276,44 @@ describe('Prüfungen im Mietvertrag', () => {
 			'Die Mietverträge der Wohnung sind geladen.'
 		);
 		expect(document.activeElement).toBe(document.querySelector('h2'));
+	});
+
+	// review #151 R2-6: a retry that fails again says so; the hint stays
+	it('sagt, wenn die Mietverträge wieder nicht geladen werden konnten', async () => {
+		fakeBff(({ path }) =>
+			path.endsWith('=a3') ? [500, {}] : [200, { contracts: contractsOf[path.split('=')[1]] ?? [] }]
+		);
+		await toPeriod('a3');
+		click('contracts-retry');
+		await settle();
+		expect(get(toasts).map((t) => t.type)).toEqual(['error']);
+		expect(byTestId('start-contracts-unknown')).not.toBeNull();
+	});
+
+	// review #151 R2-4: only the latest attempt counts, an older answer arriving late does not overwrite it
+	it('nimmt nur die Antwort des letzten Versuchs', async () => {
+		let call = 0;
+		let releaseFirst = () => {};
+		fakeBff(({ path }) => [200, { contracts: contractsOf[path.split('=')[1]] ?? [] }]);
+		const answer = globalThis.fetch;
+		globalThis.fetch = (async (url: string, init?: RequestInit) => {
+			if (!String(url).endsWith('=a3')) return answer(url, init);
+			call++;
+			if (call === 1) return new Response('{}', { status: 500 }); // on opening
+			if (call === 2) {
+				await new Promise<void>((resolve) => (releaseFirst = resolve)); // first retry, slow
+				return new Response('{}', { status: 500 });
+			}
+			return answer(url, init); // second retry
+		}) as typeof fetch;
+		await toPeriod('a3');
+		click('contracts-retry');
+		click('contracts-retry');
+		await settle();
+		expect(byTestId('start-contracts-unknown')).toBeNull();
+		releaseFirst();
+		await settle();
+		expect(byTestId('start-contracts-unknown')).toBeNull();
 	});
 
 	// Persona Helga B-13 H1: the review before saving still says that the apartment could not be checked

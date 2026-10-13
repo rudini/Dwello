@@ -10,7 +10,7 @@ import {
 	startContractsUnknown,
 	tenantSelect
 } from '../targets/contract-form';
-import { successToast } from '../targets/form';
+import { errorToast, successToast } from '../targets/form';
 import { draftRestored } from '../targets/wizard';
 
 export const apartmentSelectable = (apartmentId: string) => Enabled.of(apartmentOption(apartmentId));
@@ -25,3 +25,5 @@ export const apartmentHint = Text.of(apartmentContractsUnknown);
 export const startHint = Text.of(startContractsUnknown);
 export const reviewHint = Text.of(reviewContractsUnknown);
 export const enteredBaseRent = Value.of(baseRentInput);
+export const apartmentChoiceLabel = (apartmentId: string) => Text.of(apartmentOption(apartmentId));
+export const failure = Text.of(errorToast);

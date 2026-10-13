@@ -14,7 +14,7 @@ import {
 	startDateInput,
 	tenantSelect
 } from '../targets/contract-form';
-import { successToast } from '../targets/form';
+import { errorToast, successToast } from '../targets/form';
 import { discardDraftButton, finishedStep, nextButton, saveStatus } from '../targets/wizard';
 import { createTenantByEmail } from './tenants';
 
@@ -38,6 +38,8 @@ export const contractsCannotBeLoaded = (apartmentId: string) => FailRequests.to(
 export const contractsLoadAgain = FailRequests.noLonger;
 // waits for the confirmation that they are loaded (review #151 R-4)
 export const retryContracts: Activity = (actor) => actor.attemptsTo(Click.on(retryContractsButton), Wait.until(successToast));
+// still failing: waits for the message that says so
+export const retryContractsInVain: Activity = (actor) => actor.attemptsTo(Click.on(retryContractsButton), Wait.until(errorToast));
 export const enterBaseRent = (baseRent: string) => Enter.theValue(baseRent).into(baseRentInput);
 
 // Step "Mieter"

@@ -188,6 +188,21 @@ describe('Mietvertrag bearbeiten', () => {
 			expect(document.activeElement).toBe(document.getElementById('apartment'));
 		});
 
+		// review #151 R2-2: an attempt overtaken by a newer one says nothing
+		it('meldet nichts für einen überholten Versuch', async () => {
+			await open();
+			failing = false;
+			click('contracts-retry');
+			const select = byTestId<HTMLSelectElement>('apartment-select')!;
+			select.value = 'a2'; // its contracts are still loading when the first attempt ends
+			const answer = globalThis.fetch;
+			globalThis.fetch = ((url: string, init?: RequestInit) =>
+				String(url).includes('=a2') ? new Promise(() => {}) : answer(url, init)) as typeof fetch;
+			select.dispatchEvent(new Event('change', { bubbles: true }));
+			await settle();
+			expect(said()).toEqual([]);
+		});
+
 		it('sagt, wenn es wieder nicht geklappt hat', async () => {
 			await open();
 			click('contracts-retry');

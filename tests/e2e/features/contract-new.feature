@@ -65,6 +65,14 @@ Funktionalität: Neuen Mietvertrag erfassen
     Wenn der Liegenschaftsverwalter "Anna Keller" die Wohnung "2.01" ab "2027-01-01" für "950" Franken mit "180" Franken Akonto bis zur Prüfung erfasst
     Dann sieht der Liegenschaftsverwalter in der Prüfung den Hinweis "Überschneidung noch nicht geprüft"
 
+  # Ohne ihre Mietverträge sieht die Wohnung nicht wie eine freie aus (#151, Dr. Weber W-01)
+  @wip
+  Szenario: Wohnung mit nicht geladenen Mietverträgen ist nicht geprüft
+    Angenommen die Mietverträge der Wohnung "2.01" lassen sich nicht laden
+    Und der Liegenschaftsverwalter ist auf der Seite "Neuer Mietvertrag"
+    Wenn der Liegenschaftsverwalter den Mieter "Anna Keller" wählt
+    Dann steht bei der Wohnung "2.01" in der Auswahl "(nicht geprüft)"
+
   Szenario: Angefangenen Mietvertrag später fortsetzen
     Wenn der Liegenschaftsverwalter den Mieter "Anna Keller" und die Wohnung "2.01" wählt
     Und der Liegenschaftsverwalter die Seite "Neuer Mietvertrag" später wieder öffnet

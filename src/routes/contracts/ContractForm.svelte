@@ -132,6 +132,7 @@
 	// «Erneut versuchen»: both requests again, the input stays (#151)
 	async function retry() {
 		await Promise.all([loadAvailability(), loadChosen(values.apartmentId)]);
+		if (contractsState === 'loading') return; // overtaken by a newer request: it decides (review R2-2)
 		await tick();
 		retried(unknown, document.getElementById('apartment'));
 	}

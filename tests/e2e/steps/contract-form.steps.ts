@@ -1,6 +1,7 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import {
+	apartmentChoiceLabel,
 	apartmentHint,
 	apartmentSelectable,
 	chosenApartmentId,
@@ -10,6 +11,7 @@ import {
 	draftRestoredShown,
 	durationChosen,
 	enteredBaseRent,
+	failure,
 	reviewHint,
 	reviewed,
 	startHint
@@ -30,6 +32,7 @@ import {
 	contractsLoadAgain,
 	enterBaseRent,
 	retryContracts,
+	retryContractsInVain,
 	createTenantForContract,
 	discardDraft,
 	goBackToStep,
@@ -263,4 +266,19 @@ Then('sieht der Liegenschaftsverwalter bei der Wohnung keinen Hinweis mehr', asy
 
 Then('sieht der Liegenschaftsverwalter beim Vertragsbeginn keinen Hinweis mehr', async ({ verwalter }) => {
 	await verwalter.sees(startHint).toBeNull();
+});
+
+When('der Liegenschaftsverwalter die Mietverträge der Wohnung erneut zu laden versucht', async ({ verwalter }) => {
+	await verwalter.attemptsTo(retryContractsInVain);
+});
+
+Then(
+	'steht bei der Wohnung {string} in der Auswahl {string}',
+	async ({ verwalter, seed }, apartment: string, text: string) => {
+		await verwalter.sees(apartmentChoiceLabel(seed.idOf(apartment)!)).toContain(text);
+	}
+);
+
+Then('meldet Dwello {string}', async ({ verwalter }, message: string) => {
+	await verwalter.sees(failure).toContain(message);
 });

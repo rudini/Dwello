@@ -23,7 +23,10 @@ Lauf vom 13.10.2026, Branch `claude/b13-contracts-unknown` (auf Wunsch aus `clau
 | Offene Arbeit als Issue/Zeile (Open work) | ja | Issue #151 (`bug`, `entscheiden`), U-15, U-16 |
 | Alle Checks vor «fertig» | ja | Coverage 2252 Tests, lint, check, Backend 539 Tests + type-check, E2E-Routinelauf 635/635, betroffene Szenarien erneut |
 | Push nur auf Anweisung | ja | nichts gepusht; Stop-Hook verlangt Push, CLAUDE.md hat Vorrang |
-| Fertig = kein offener Blocker/Major (Workflow 7) | nein | Helga H2/H3 (Major) brauchen einen Entscheid: Issue #151 |
+| Fertig = kein offener Blocker/Major (Workflow 7) | nach Entscheid | Helga H2/H3 brauchten einen Entscheid (#151); der Product Owner entschied «jetzt umsetzen»; danach Reviews bis ohne offenen Major |
+| `/tdd` bei #151 | ja, mit Lücken | Skill geladen; zweimal den Assistenten zusammen mit dem Formular umgesetzt (horizontal) und den roten Schritt danach durch Zurücknehmen des Codes nachgewiesen |
+| `fach-reviewer` vor neuen Texten (#151) | ja | `docs/reviews/b13-retry-fachreview-1.md`, 2 Major vor der Umsetzung behoben |
+| Betroffene Personas (Workflow 5) | erst auf Nachfrage vollständig | nur Helga und Sven nach Standardaufgabe gewählt; Marco und Dr. Weber erst auf Ihre Frage; Dr. Weber fand den Major W-01, Marco vier Textpunkte |
 
 ## Verbesserungen an Instruktionen, Skills, Hooks
 
@@ -41,3 +44,8 @@ Lauf vom 13.10.2026, Branch `claude/b13-contracts-unknown` (auf Wunsch aus `clau
 12. **Build-Konflikt E2E und Personas** (`docs/design/tools/persona-stack.sh`, Workflow 5): Beide bauen nach `build/`; nicht parallel starten. Als Gotcha notieren.
 13. **Stop-Hook vs. Push-Regel**: Der Stop-Hook verlangt «commit and push», CLAUDE.md erlaubt Push nur auf Anweisung. Hook-Text anpassen («commit; push only when asked») oder in CLAUDE.md erwähnen, dass der Hook in diesem Punkt nicht gilt.
 14. **Live-Region als Komponente** (`src/lib/ui`): Hinweise, die beim Erscheinen angesagt werden, brauchen heute ein handgemachtes `<div role="status">` (Muster in `PeriodStep`), das leer einen Flex-Abstand erzeugt (N5), und `Field` kann keine zusätzliche Beschreibung verknüpfen (Sven 1). Eine `live`-Option an `Alert` und ein `describedby` an `Field` lösen beides zentral (U-16).
+15. **Betroffene Personas bestimmen** (CLAUDE.md, Workflow 5; `docs/design/personas/README.md`): «pro betroffene Persona» ohne Regel führte zur Wahl nach Standardaufgabe (nur Helga, Sven). Vorschlag: betroffen nach Bildschirm (wer ihn benutzt), Gerät (jede geänderte Ansicht auch mobil: Marco) und Art der Änderung (neue Aussagen, Texte, Rechtliches: Dr. Weber; Tastatur/Ansage: Sven; Einstieg/Orientierung: Anna). Im Zweifel alle; der Aufrufer gibt passende Aufgaben statt der Standardaufgabe.
+16. **E2E-Läufe hängen und laufen veraltet** (`tests/e2e/CLAUDE.md`, `playwright.config.ts`): Ein Klick auf ein fehlendes Element wartete ohne `--timeout` über 10 Minuten. Scheitert `bddgen --tags "@wip"`, führt Playwright still die alten Dateien in `.features-gen` aus (626 grüne Tests statt eines roten). Vorschlag: `actionTimeout` setzen; im Befehl für `@wip` zuerst `rm -rf .features-gen` und auf den Exit-Code von `bddgen` achten.
+17. **Roten Schritt der DOM-Tests belegen** (Workflow 2, code-reviewer): Der Reviewer konnte in jeder Runde nicht bestätigen, dass die Tests vor dem Code rot waren. Vorschlag: wie «Scenario red» auch «Test red: <Test> – <Meldung>» im Plan notieren; bei nachträglich geschriebenen Tests den Nachweis durch Zurücknehmen des Codes.
+18. **Personas teilen eine Datenbank** (`persona-stack.sh`): Bei parallelen Läufen mit Speichern sah Dr. Weber den Mietvertrag, den Marco eben erfasst hatte. Vorschlag: pro Persona ein eigener Mandant oder eine eigene DB, oder Speichern nur in einer Persona pro Lauf.
+19. **Vorbestehende Majors aus Reviews** (Workflow 7): Helga H9 / Dr. Weber W-02 (Wohnungswechsel wird verworfen) hat mit der Änderung nichts zu tun. Regel ergänzen: «Ein Blocker/Major, der schon vor der Änderung bestand, wird ein Issue und hält die Aufgabe nicht auf.» (#152)

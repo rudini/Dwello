@@ -33,7 +33,9 @@ Branch `claude/b13-contracts-unknown` (from `claude/workflow-improvements`, on t
 - [x] axe and language states still cover the hint with the button
 - [x] Code review of the delta; personas Helga, Sven, Marco, Dr. Weber (the user asked for Marco and Dr. Weber too)
 - [x] Review fixes: R-1 draft button stays; result of «Erneut versuchen» said (toast) and focus on the field or step (tests first)
-- [ ] Re-review of the fixes (code-reviewer round 2)
+- [x] Re-review of the fixes (code-reviewer round 2): 1 Major (R2-1)
+- [ ] Scenarios `@wip` «Wohnung mit nicht geladenen Mietverträgen ist nicht geprüft», «… lassen sich auch beim zweiten Mal nicht laden»; seen failing
+- [ ] Code review round 3 (delta)
 - [ ] All checks; #151 closes with the merge (`Fixes #151`)
 
 Findings domain review #151 (`docs/reviews/b13-retry-fachreview-1.md`):
@@ -53,6 +55,14 @@ Findings code review #151 (`docs/reviews/b13-retry-review-1.md`):
 - R-5 `FailRequests.noLonger` lifts every route, the step ignores its apartment - Nit - rejected: a scenario fails one route; the doc comment says so
 - R-6 rent compared with `toContain` - Nit - fixed (`toBe`)
 - R-7 no guard against an older wizard answer - Nit - rejected: both answers load the same contracts
+
+Findings code review #151 round 2 (`docs/reviews/b13-retry-review-2.md`):
+- R2-1 «(nicht geprüft)» and the failed retry have no scenario; the wizard wiring only a unit test - Major - fixed (two scenarios; DOM tests, red shown by reverting the code)
+- R2-2 an overtaken retry in the form says «geladen» - Minor - fixed (test first)
+- R2-3 the new messages are in no axe/language state - Minor - fixed for the failed retry (state `contracts-unknown`); the success toast stays unchecked there (same component as every success toast)
+- R2-4 (= R-7) older wizard answer can overwrite a newer one - Nit - fixed (test first); R-7 rejection withdrawn
+- R2-5 the draft refusal stays after a successful retry - Nit - rejected: it still says what to do next (press «Entwurf löschen und Mietvertrag speichern» again)
+- R2-6 the wizard's failed retry untested - Nit - fixed
 
 Findings personas #151 (`docs/design/personas/{helga,sven,marco,weber}-b13-retry.md`):
 - Helga H2, H3 - resolved (confirmed by Helga)
