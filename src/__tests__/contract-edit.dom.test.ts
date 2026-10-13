@@ -115,7 +115,6 @@ describe('Mietvertrag bearbeiten', () => {
 		expect(byTestId('form-cancel')!.getAttribute('href')).toBe('/contracts/c1');
 	});
 
-	// wie beim Beenden: ein Tippfehler im Jahr soll den Mietvertrag nicht rückwirkend beenden
 	// Fehler behoben (#143): ohne ihre Mietverträge galt die Wohnung als frei, der Vertragsbeginn ohne Untergrenze
 	it('zeigt eine Wohnung, deren Mietverträge nicht geladen werden konnten, nicht als frei', async () => {
 		fakeBff(({ path }) =>
@@ -137,8 +136,40 @@ describe('Mietvertrag bearbeiten', () => {
 		const calendar =
 			byTestId('start-date-input')!.parentElement!.querySelector('input[type="date"]');
 		expect((calendar as HTMLInputElement).min).toBe('');
+		// Review M3: both hints are read out when they appear
+		expect(byTestId('apartment-contracts-unknown')!.closest('[role="status"]')).not.toBeNull();
+		expect(byTestId('start-contracts-unknown')!.closest('[role="status"]')).not.toBeNull();
 	});
 
+	// Review M1: the availability of all apartments and the chosen one's contracts are two requests
+	describe('wenn nur eine der beiden Anfragen zu den Mietverträgen scheitert', () => {
+		const later = [{ id: 'c2', startDate: '2015-01-01', endDate: '2099-12-31' }]; // free from 2100
+		async function chooseA2(failing: number) {
+			let a2 = 0;
+			fakeBff(({ path }) =>
+				path.endsWith('=a2') && ++a2 === failing ? [500, {}] : [200, { contracts: later }]
+			);
+			await open();
+			const select = byTestId<HTMLSelectElement>('apartment-select')!;
+			select.value = 'a2';
+			select.dispatchEvent(new Event('change', { bubbles: true }));
+			await settle();
+		}
+
+		it('zeigt die Wohnung nicht als frei, wenn ihre Verfügbarkeit nicht geladen werden konnte', async () => {
+			await chooseA2(1);
+			expect(byTestId('apartment-contracts-unknown')).not.toBeNull();
+			expect(byTestId('availability-info')).toBeNull();
+		});
+
+		it('nennt kein «frei ab», wenn die Mietverträge der gewählten Wohnung nicht geladen werden konnten', async () => {
+			await chooseA2(2);
+			expect(byTestId('apartment-contracts-unknown')).not.toBeNull();
+			expect(byTestId('availability-info')).toBeNull();
+		});
+	});
+
+	// wie beim Beenden: ein Tippfehler im Jahr soll den Mietvertrag nicht rückwirkend beenden
 	describe('Vertragsende in der Vergangenheit', () => {
 		async function endOn(day: string) {
 			document.querySelector<HTMLInputElement>('input[value="limited"]')!.click();

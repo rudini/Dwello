@@ -14,12 +14,24 @@ Branch `claude/b13-contracts-unknown` (from `claude/workflow-improvements`, on t
 - [x] Wizard and form: the chosen apartment's unknown contracts show the message at the apartment choice and the start field;
   `forAvailability` answers null for contracts not loaded, for both (`src/lib/contract-form.ts`)
 - [x] New screen state `contracts-unknown` in `tests/a11y/screens.json`, `accessibility.feature`, `sprachen-bildschirme.feature`
-- [ ] Slice review `code-reviewer`; findings triaged
+- [x] Slice review `code-reviewer`; findings triaged (round 1)
 - [ ] Feature review: personas Helga and Sven (UI changed)
-- [ ] Remove `@wip`; all checks of `CLAUDE.md` pass
+- [x] Remove `@wip`
+- [ ] All checks of `CLAUDE.md` pass
 - [x] Archive the finished Session 21 (`open-work.test.ts` allows one session)
 - [ ] Final check: instructions followed, list of improvements to instructions and skills
 
+Findings (`docs/reviews/b13-contracts-unknown-review-1.md`):
+- M1 form takes «unknown» and the start limit from two requests - Minor - fixed (tests first)
+- M2 the choice labels an apartment with unknown contracts like a free one - Minor - open work U-15 (`docs/design/offene-punkte.md`)
+- M3 hints not announced (no live region) - Minor - fixed (tests first)
+- M4 new test between a comment and its describe - Minor - fixed
+- M5 the a11y state fails every `/api/contracts` request - Minor - rejected: one endpoint, answered only with an error status, as `docs/test-pyramid.md` allows; the edit page asks it once per apartment
+- N1 `forAvailability` reads the list untyped - Nit - fixed
+- N2 «no start suggested» and empty `min` also held before the fix - Nit - rejected: the test as a whole fails before the fix (the hints)
+- N3 «Remove @wip» not ticked - Nit - fixed
+- N4 «(Haiku review)» in a comment - Nit - fixed
+
 Files: `src/lib/contract-form.ts`, `src/routes/contracts/{ContractForm,new/ContractWizard,new/ApartmentStep,new/PeriodStep}.svelte`,
 `src/__tests__/contract-{edit,wizard}.dom.test.ts`, `tests/e2e/{features,steps,tasks,targets,questions,screenplay}/…`,
-`tests/a11y/screens.json`, `docs/archive/implementation-plan-verlauf.md`
+`tests/a11y/screens.json`, `docs/archive/implementation-plan-verlauf.md`, `docs/design/offene-punkte.md`

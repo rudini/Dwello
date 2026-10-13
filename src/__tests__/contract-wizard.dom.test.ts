@@ -249,6 +249,8 @@ describe('Prüfungen im Mietvertrag', () => {
 		click('wizard-back');
 		expect(byTestId('apartment-contracts-unknown')!.textContent).toContain(UNKNOWN);
 		expect(byTestId('availability-info')).toBeNull();
+		// Review M3: the hint is read out when it appears
+		expect(byTestId('apartment-contracts-unknown')!.closest('[role="status"]')).not.toBeNull();
 	});
 
 	it('fragt nach, wenn der Vertragsbeginn in der Vergangenheit liegt, und geht erst beim zweiten Mal weiter', async () => {

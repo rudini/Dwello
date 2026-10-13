@@ -40,13 +40,16 @@
 	/>
 {/if}
 
-{#if unknown}
-	<Alert
-		tone="caution"
-		title={m.contracts_apartment_contracts_unknown()}
-		testid="apartment-contracts-unknown"
-	/>
-{/if}
+<!-- always present, so screen readers hear the hint when it appears -->
+<div role="status">
+	{#if unknown}
+		<Alert
+			tone="caution"
+			title={m.contracts_apartment_contracts_unknown()}
+			testid="apartment-contracts-unknown"
+		/>
+	{/if}
+</div>
 
 {#if notice}
 	<Alert title={m.contracts_free_later()} testid="availability-info">

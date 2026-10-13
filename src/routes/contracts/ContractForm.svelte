@@ -70,11 +70,14 @@
 	const running = $derived(
 		contractStatusOn(contract.startDate, contract.endDate, today) === 'active'
 	);
-	// the chosen apartment's contracts could not be loaded: it is not shown as free (#143)
-	const unknown = $derived(contractsState === 'failed');
+	// the chosen apartment's contracts could not be loaded, by either request: it is not shown as free (#143)
+	const unknown = $derived(
+		contractsState === 'failed' ||
+			(!!availability && !!values.apartmentId && !availability.has(values.apartmentId))
+	);
 	const startLimit = $derived(
 		availableFrom(
-			availability?.get(values.apartmentId),
+			unknown ? undefined : availability?.get(values.apartmentId),
 			values.apartmentId !== contract.apartmentId
 		)
 	);
