@@ -19,12 +19,22 @@ Slice 1 - hooks:
 - [x] 2 Commit subject checked before `git commit` (type, scope, ≤ 50 characters, no period): `.claude/hooks/commit-msg-gate.mjs`, `.claude/settings.json`, `eslint.config.js` (node globals), `CLAUDE.md` Gotchas
   Test red: `tools/claude-hooks/commit-msg-gate.test.ts` – all cases, the hook did not exist (node exit 1); 24 of the last 300 non-merge subjects break the rule
 
+Findings slice 1 (`docs/reviews/b13-workflow-hooks-review-1.md`):
+- C-1 the advice `git fetch origin main` creates no `origin/main` in a single-branch clone - Major - fixed (`main:refs/remotes/origin/main`; the test runs the advice in a single-branch clone, red with the old advice)
+- C-2 `git -C <path> commit` not matched - Minor - fixed in `commit-msg-gate.mjs` (test first); the other two gates: open work H-20
+- C-3 only the first `git commit` of a command checked - Minor - fixed (test first)
+- C-4 the test checked only the advice text - Minor - fixed with C-1
+- C-5 a git `commit-msg` hook via `core.hooksPath` would see the final message - Minor - rejected: it needs git setup per clone and in every local checkout, while the PreToolUse hook works in every Claude session; the unchecked forms (-F, editor) are not what agents use
+- C-6 `feat(api)!:` gets the message «write type(scope)» - Nit - rejected: CLAUDE.md has no `!`, the message names the form it expects
+- Found while fixing: the hooks also fire on text in a heredoc that writes a file - open work H-20
+
 Slice 2 - acceptance tests and personas:
-- [ ] 4 «a failing request» = one endpoint, all its calls, error status only; `FailRequests` and the a11y state with a failure in `tests/e2e/CLAUDE.md`
-- [ ] 10 Personas may save (`.claude/agents/persona.md`)
-- [ ] 12 E2E and `persona-stack.sh` both build into `build/`: not in parallel (Gotcha)
-- [ ] 16 `actionTimeout`; `test:e2e:wip` for the `@wip` run
-- [ ] 18 Parallel personas get different buildings
+- [x] 4 «a failing request» = one endpoint, all its calls, error status only; `FailRequests` and the a11y state with a failure in `tests/e2e/CLAUDE.md` (also `docs/test-pyramid.md`, `CLAUDE.md` Workflow 1)
+- [x] 10 Personas may save (`.claude/agents/persona.md`)
+- [x] 12 E2E and `persona-stack.sh` both build into `build/`: not in parallel (`CLAUDE.md` Gotchas «One build», Workflow 5); docs only, as the point asks
+- [x] 16 `actionTimeout` 10 s (`playwright.config.ts`); `test:e2e:wip` (`package.json`, `tests/e2e/CLAUDE.md`, `docs/test-pyramid.md`)
+  Reproduction: a click on a missing element in a scratch config with the project's timeouts failed after 32 s («Test timeout of 30000ms exceeded»), with `actionTimeout` after 12 s («locator.click: Timeout 10000ms exceeded»). The wait of over 10 minutes in the B-13 run was not reproduced (the test timeout ends a stuck click). `bunx bddgen --tags @nonexistent` without `svelte-kit sync` exits 1, so a `&&` chain stops
+- [x] 18 Parallel personas get different buildings (`CLAUDE.md` Workflow 5, `persona.md`)
 
 Slice 3 - instructions:
 - [ ] 3 Archive a finished earlier session at the start (Workflow 8)

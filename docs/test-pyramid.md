@@ -27,7 +27,7 @@ The quantities still form a pyramid, with many fast unit tests at the bottom. Th
 
 | Layer | Location | Runner | Against | Test doubles |
 |---|---|---|---|---|
-| Acceptance (E2E) | `tests/e2e/features/*.feature` | Playwright + playwright-bdd | Browser → SvelteKit build (`node build`) → Elysia → PostgreSQL `dwello_e2e` (migrated fresh before each run) | no API mocks, except one: to reach a state that only a failing request produces, a scenario may answer that one request with an error at the browser boundary (`page.route` answering with an error status, e.g. 500, through an interaction in `tests/e2e/screenplay/`), never with invented data; only requests the browser makes, so not in `@api` scenarios; SMTP mail catcher instead of a mail provider, signed session JWT instead of Google OAuth |
+| Acceptance (E2E) | `tests/e2e/features/*.feature` | Playwright + playwright-bdd | Browser → SvelteKit build (`node build`) → Elysia → PostgreSQL `dwello_e2e` (migrated fresh before each run) | no API mocks, except one: to reach a state that only a failing request produces, a scenario may answer that one endpoint (all its calls, e.g. one per apartment) with an error at the browser boundary (an error status only, e.g. 500, through `FailRequests` in `tests/e2e/screenplay/`), never with invented data; only requests the browser makes, so not in `@api` scenarios; SMTP mail catcher instead of a mail provider, signed session JWT instead of Google OAuth |
 | Integration | `backend/src/__tests__/*.pg.test.ts` | `bun run test` or `bun run test:pg` (preload `scripts/test-db.ts`) | Elysia app in process (`app.handle`) → PostgreSQL `dwello_test` (migrated fresh before each run) | none; local SMTP server for mail |
 | Unit backend | `backend/src/__tests__/*.test.ts` | `bun run test` (one run together with the pg tests) | pure functions of the services | none; Resend stand-in via `Bun.serve` in `mail.test.ts` |
 | Unit frontend | `src/__tests__`, `src/lib/utils/__tests__`, `tests/unit` | Vitest (`server`: node, `dom`: jsdom) | load functions, actions, BFF, components | fake backend via `fetch` stub / `fakeBff` (from the API contracts in `tests/contracts` where one exists), `vi.mock` for `$app/*` |
@@ -85,7 +85,7 @@ Isolation as Farley describes it:
 
 1. **Clarify examples:** phrase the acceptance criteria as concrete examples in the property manager's language.
 2. **Scenario first:** write it into the matching `.feature` file and tag it `@wip` (excluded by `playwright.config.ts`, so the pipeline stays green).
-3. **See red:** `bunx bddgen --tags "@wip"` and `bunx playwright test`; add missing steps through the existing DSL until the scenario fails for the right reason.
+3. **See red:** `bun run test:e2e:wip`; add missing steps through the existing DSL until the scenario fails for the right reason.
 4. **Inner loop:** drive the behavior with TDD (unit tests; pg tests only for SQL, routing, mail).
 5. **Green:** remove `@wip`. From now on the scenario is a regression test and a gate in the pipeline.
 

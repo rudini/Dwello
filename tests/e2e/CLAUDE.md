@@ -9,8 +9,10 @@ bun run test:e2e -- --project=chromium --project=api   # routine run, as in PR C
 bun run test:e2e                                   # all browsers (Firefox and WebKit too, as on main)
 bunx bddgen && bunx playwright test --project=chromium -g "Szenarioname"   # one scenario
 bunx bddgen && bunx playwright test --project=api    # only the @api scenarios through the backend API
-bunx bddgen --tags "@wip" && bunx playwright test --project=chromium      # a new @wip scenario, to see it fail
+bun run test:e2e:wip                               # the @wip scenarios, to see them fail (-- -g "Szenarioname" for one)
 ```
+
+Run `@wip` only through `test:e2e:wip`: when `bddgen` fails (a missing step, `$lib` not synced), a separate `playwright test` runs the old files in `.features-gen` and reports them green. Give a run a Bash timeout anyway; a step waiting for a missing element fails after 10 s (`actionTimeout`).
 
 `bddgen` loads the steps, and the API driver imports BFF server code with `$lib` paths: on a fresh checkout run `bunx svelte-kit sync` once before calling `bddgen` directly (`bun run test:e2e` does it).
 
@@ -27,7 +29,7 @@ An actor (`verwalter`, `besucher`) has abilities, performs activities and answer
 | `tasks/` | domain activities (`chooseTenant(id)`, `registerContract(…)`): compose interactions and other tasks | `screenplay/` (interactions), `targets/`, other tasks; no Playwright calls |
 | `questions/` | what the actor finds out, as values (`confirmation`, `listedContract(name)`): compose web questions and memory | `screenplay/` (web questions), `targets/`; no Playwright calls |
 | `targets/` | named places on the page: `target('Mieterauswahl', (page) => page.getByTestId('contract-tenant-select'))`, parametrized ones as functions | `screenplay/target.ts`; locators only, no actions |
-| `screenplay/` | the core: `Actor`, abilities, interactions (`Navigate`, `Click`, `Enter`, `Select`, `EnterDate`, …), web questions (`Text`, `Value`, `Visibility`, `Count`, …) | Playwright; a failing request (`page.route` answering with an error status, never invented data) only to reach a failure state, see `docs/test-pyramid.md` |
+| `screenplay/` | the core: `Actor`, abilities, interactions (`Navigate`, `Click`, `Enter`, `Select`, `EnterDate`, …), web questions (`Text`, `Value`, `Visibility`, `Count`, …) | Playwright; a failing request only to reach a failure state, through `FailRequests` (below) |
 | `fixtures/` | wiring: `test.ts` (actors, `seed`, `names`, `driver`; its `page` fixture signs the page in through `Cookies.add`), `backend.ts` (preconditions always through the backend API via `CallTheApi`, never through the UI), `screens.ts` (screens and records of the axe and language checks), session cookies, dates | Playwright fixtures and types as parameters, handed on unchanged to an ability (`BrowseTheWeb`, `CallTheApi`); no Playwright calls |
 
 - **Actor** (`screenplay/actor.ts`): `attemptsTo(...activities)`, `answer(question)`, `sees(question)` (an assertion retried with `expect.poll` until the expect timeout: `await verwalter.sees(confirmation).toContain('gespeichert')`), `remember`/`recall` for what a task noticed for a later question.
@@ -59,4 +61,5 @@ Then('ist im Mietvertrag der Mieter {string} gewählt', async ({ verwalter, name
 
 - **Isolation:** every scenario creates its own data and removes it; `seed.names` appends a UUID to each name ("Lindenhof" becomes "Lindenhof 3f2a…"), so scenarios run in parallel. Never rely on data from another scenario or from the demo data.
 - **Negative checks** ("X is not shown") need a positive anchor first (an empty-state hint or the page title); otherwise they also pass on an error page.
+- **Failure states** (`docs/test-pyramid.md`): `FailRequests.to(path, query)` answers every call of that endpoint with those query values with status 500 and no data, `FailRequests.noLonger` lifts it. "One failing request" means one endpoint with all its calls (a page that loads contracts per apartment sends several). Set it before the page sends the calls; an axe or language state with a failure (`tasks/accessibility.ts`) sets it on the open page and then `Navigate.reload`.
 - `@api` is for business rules and calculations that do not depend on the UI; workflows, navigation and forms stay UI-only.
