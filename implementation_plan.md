@@ -78,3 +78,8 @@ only locally (`open-work.test.ts` finds the agent worktrees under `.claude/workt
   tasks or interactions - fixed (only `Cookies`); Minor plain `fetch` past `CallTheApi` - open work H-19; Nit NaN in
   `signedFrancs` - fixed; Nit test name - fixed; Nit `$testInfo.project.name` branch - rejected (deliberate bypass, not a
   realistic pattern)
+
+Final checks on claude/screenplay-e2e-v2 at 8528772: E2E chromium + api 629 passed (same 629 test names as the
+baseline); `bun run lint` clean; `bun run check` 0 errors; backend 539 pass, type-check clean; `test:coverage` 2242
+passed, 1 failed only locally (`open-work.test.ts` finds old agent worktrees under `.claude/worktrees/`, not in the repo);
+`bun run test:e2e -- --list` works on a clean checkout without `.svelte-kit`.
