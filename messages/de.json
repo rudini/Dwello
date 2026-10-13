@@ -1269,6 +1269,8 @@
 	"contracts_apartment_contracts_unknown": "Überschneidung noch nicht geprüft",
 	"contracts_apartment_contracts_unknown_text": "Dwello konnte die Mietverträge dieser Wohnung nicht laden. Wählen Sie «Erneut versuchen»; Ihre Eingaben bleiben erhalten. Beim Speichern prüft Dwello in jedem Fall, ob sich der Zeitraum mit einem anderen Mietvertrag dieser Wohnung überschneidet.",
 	"contracts_apartment_contracts_retry": "Erneut versuchen",
+	"contracts_apartment_contracts_loaded": "Die Mietverträge der Wohnung sind geladen.",
+	"contracts_apartment_contracts_retry_failed": "Die Mietverträge der Wohnung konnten wieder nicht geladen werden. Versuchen Sie es später erneut; Ihre Eingaben bleiben erhalten.",
 	"contracts_apartment_contracts_see_apartment": "Die Mietverträge dieser Wohnung fehlen noch, siehe oben bei der Wohnung.",
 	"contracts_delete_draft_contracts_unknown": "Dwello hat den Entwurf nicht gelöscht: Ohne die Mietverträge dieser Wohnung lässt sich eine Überschneidung nicht ausschliessen. Wählen Sie bei der Wohnung «Erneut versuchen» und danach noch einmal «Entwurf löschen und Mietvertrag speichern».",
 	"contracts_apartment_contracts_loading": "Die Mietverträge der Wohnung werden noch geladen. Versuchen Sie es in einem Moment erneut.",

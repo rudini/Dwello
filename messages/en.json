@@ -1269,6 +1269,8 @@
 	"contracts_apartment_contracts_unknown": "Overlap not checked yet",
 	"contracts_apartment_contracts_unknown_text": "Dwello could not load the rental contracts for this apartment. Choose «Try again»; your entries are kept. When you save, Dwello always checks whether the period overlaps with another rental contract for this apartment.",
 	"contracts_apartment_contracts_retry": "Try again",
+	"contracts_apartment_contracts_loaded": "The apartment’s rental contracts are loaded.",
+	"contracts_apartment_contracts_retry_failed": "The apartment’s rental contracts still could not be loaded. Try again later; your entries are kept.",
 	"contracts_apartment_contracts_see_apartment": "The rental contracts for this apartment are still missing, see the apartment above.",
 	"contracts_delete_draft_contracts_unknown": "Dwello did not delete the draft: without the rental contracts for this apartment an overlap cannot be ruled out. Choose «Try again» at the apartment, then «Delete draft and save rental contract» again.",
 	"contracts_apartment_contracts_loading": "The apartment’s rental contracts are still loading. Try again in a moment.",

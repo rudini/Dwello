@@ -166,6 +166,39 @@ describe('Mietvertrag bearbeiten', () => {
 		expect(byTestId<HTMLInputElement>('contract-base-rent-input')!.value).toBe('980');
 	});
 
+	// Sven/Helga #151: the result of «Erneut versuchen» is said, and the focus does not fall to the page
+	describe('nach «Erneut versuchen»', () => {
+		let failing: boolean;
+		beforeEach(() => {
+			failing = true;
+			fakeBff(() =>
+				failing
+					? [500, {}]
+					: [200, { contracts: [{ id: 'c1', startDate: '2024-04-01', endDate: null }] }]
+			);
+		});
+		const said = () => get(toasts).map((t) => [t.type, t.message]);
+
+		it('bestätigt das Laden und setzt den Fokus auf die Wohnung', async () => {
+			await open();
+			failing = false;
+			click('contracts-retry');
+			await settle();
+			expect(said()).toContainEqual(['success', 'Die Mietverträge der Wohnung sind geladen.']);
+			expect(document.activeElement).toBe(document.getElementById('apartment'));
+		});
+
+		it('sagt, wenn es wieder nicht geklappt hat', async () => {
+			await open();
+			click('contracts-retry');
+			await settle();
+			expect(said()).toContainEqual([
+				'error',
+				'Die Mietverträge der Wohnung konnten wieder nicht geladen werden. Versuchen Sie es später erneut; Ihre Eingaben bleiben erhalten.'
+			]);
+		});
+	});
+
 	// Review M1: the availability of all apartments and the chosen one's contracts are two requests
 	describe('wenn nur eine der beiden Anfragen zu den Mietverträgen scheitert', () => {
 		const later = [{ id: 'c2', startDate: '2015-01-01', endDate: '2099-12-31' }]; // free from 2100
@@ -297,6 +330,8 @@ describe('Mietvertrag bearbeiten', () => {
 			expect(byTestId('form-error')!.textContent).toContain(
 				'Dwello hat den Entwurf nicht gelöscht: Ohne die Mietverträge dieser Wohnung lässt sich eine Überschneidung nicht ausschliessen.'
 			);
+			// review #151 R-1: the text sends the landlord back to this button after «Erneut versuchen»
+			expect(byTestId('delete-draft-and-save')).not.toBeNull();
 		});
 
 		// Review K-2: das Angebot gehört zu den abgelehnten Werten

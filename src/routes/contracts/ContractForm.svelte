@@ -2,7 +2,7 @@
 	import { m } from '$lib/paraglide/messages';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import { untrack } from 'svelte';
+	import { tick, untrack } from 'svelte';
 	import { apiCall } from '$lib/api';
 	import {
 		availableFrom,
@@ -35,6 +35,7 @@
 		type ContractForAvailability
 	} from '$lib/utils/contract-availability';
 	import ApartmentStep from './new/ApartmentStep.svelte';
+	import { retried } from './new/ContractsUnknown.svelte';
 	import PeriodStep from './new/PeriodStep.svelte';
 	import RentStep from './new/RentStep.svelte';
 	import PastEndConfirm from './PastEndConfirm.svelte';
@@ -60,7 +61,6 @@
 	// the chosen apartment's contracts, for the overlap check: an overlap shows only once they are loaded
 	let contractsState = $state<'loading' | 'loaded' | 'failed'>('loading');
 	let contractsRequest = 0;
-	let attempt = $state(0); // «Erneut versuchen» loads the contracts again, the input stays (#151)
 	let availability = $state<Map<string, AvailabilityInfo> | null>(null);
 	let apartmentContracts = $state<ContractForAvailability[]>([]);
 	let form = $state<HTMLFormElement>();
@@ -104,27 +104,38 @@
 		return list ? [[apartmentId, computeAvailability(list, own)] as const] : [];
 	}
 
-	$effect(() => {
-		void attempt;
+	const loadAvailability = () =>
 		Promise.all(apartments.map((a) => availabilityOf(a.id))).then(
 			(entries) => (availability = new Map(entries.flat()))
 		);
+
+	$effect(() => {
+		loadAvailability();
 	});
 
 	// Contracts of the chosen apartment, for the overlap check
-	$effect(() => {
-		const apartmentId = values.apartmentId;
-		void attempt;
+	async function loadChosen(apartmentId: string) {
 		const request = ++contractsRequest; // only the latest answer counts, also after switching back
 		apartmentContracts = []; // the previous apartment's contracts say nothing about this one
 		contractsState = apartmentId ? 'loading' : 'loaded';
 		if (!apartmentId) return;
-		contractsOf(apartmentId).then((list) => {
-			if (request !== contractsRequest) return;
-			apartmentContracts = list ?? [];
-			contractsState = list ? 'loaded' : 'failed';
-		});
+		const list = await contractsOf(apartmentId);
+		if (request !== contractsRequest) return;
+		apartmentContracts = list ?? [];
+		contractsState = list ? 'loaded' : 'failed';
+	}
+
+	$effect(() => {
+		const apartmentId = values.apartmentId;
+		untrack(() => loadChosen(apartmentId));
 	});
+
+	// «Erneut versuchen»: both requests again, the input stays (#151)
+	async function retry() {
+		await Promise.all([loadAvailability(), loadChosen(values.apartmentId)]);
+		await tick();
+		retried(unknown, document.getElementById('apartment'));
+	}
 
 	function edited(event: Event) {
 		const id = (event.target as HTMLElement).id;
@@ -189,7 +200,8 @@
 		// without the apartment's contracts an overlap cannot be ruled out (Haiku review R5)
 		if (overlap || contractsState !== 'loaded') {
 			errors = { form: overlap ? m.backend_contract_overlap() : contractsMessage(contractsState) };
-			refused = [];
+			// once the contracts are loaded, the same draft can be deleted (review #151 R-1)
+			if (overlap) refused = [];
 			return focusFirstError(form);
 		}
 		saving = true;
@@ -237,7 +249,7 @@
 			loading={!availability}
 			notice={startLimit.notice}
 			{unknown}
-			onretry={() => attempt++}
+			onretry={retry}
 			error={errors.apartmentId}
 		/>
 	</Panel>
