@@ -21,7 +21,7 @@ export const STATEMENT = 'statement';
 
 export const openStatementDetail = (statementPath: string) =>
 	throughUiOrApi(Navigate.to(statementPath), async (actor) =>
-		actor.remember(STATEMENT, await actor.abilityTo(CallTheApi).backend.get(statementPath.slice(1)))
+		actor.remember(STATEMENT, await actor.abilityTo(CallTheApi).get(statementPath.slice(1)))
 	);
 
 export const openSendConfirmation = Click.on(sendStatementButton);

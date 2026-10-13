@@ -248,7 +248,7 @@ const lookAt =
 		);
 		const noted = note(look, prefix);
 		if (example.state !== 'every-wizard-step') {
-			const reachState = states[example.state];
+			const reachState = states[example.state]; // a lookup, then a call: lint refuses calls by computed name
 			return actor.attemptsTo(reachState(example, viewport), noted);
 		}
 		const wizard = new URL(example.path, 'http://x').pathname;

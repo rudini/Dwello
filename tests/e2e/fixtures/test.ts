@@ -29,7 +29,7 @@ export const test = base.extend<{
 	verwalter: async ({ driver, page, seed }, use) =>
 		use(
 			new Actor('Liegenschaftsverwalter').whoCan(
-				driver === 'api' ? new CallTheApi(seed.backend) : new BrowseTheWeb(page)
+				driver === 'api' ? seed.backend : new BrowseTheWeb(page)
 			)
 		),
 
@@ -41,7 +41,7 @@ export const test = base.extend<{
 	},
 
 	seed: async ({ request }, use) => {
-		const data = testData(request, await sessionToken());
+		const data = testData(new CallTheApi(request, await sessionToken()));
 		await use(data);
 		await data.cleanUp();
 	},

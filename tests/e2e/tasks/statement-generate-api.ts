@@ -12,7 +12,7 @@ export const CREATED_STATEMENTS = 'created';
 // API protocol driver for a generation run: the backend calculates the statement of every contract of the building
 // in the year without a statement in it, like the generation wizard does through the BFF
 async function run(actor: Actor, year: number, buildingId: string, options: RunOptions) {
-	const { backend } = actor.abilityTo(CallTheApi);
+	const backend = actor.abilityTo(CallTheApi);
 	const [periodStart, periodEnd] = [`${year}-01-01`, `${year}-12-31`];
 	const { contracts } = (await backend.get(`contracts?buildingId=${buildingId}&limit=1000`)) as {
 		contracts: Contract[];

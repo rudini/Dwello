@@ -47,3 +47,15 @@ Review round 2 (`docs/reviews/screenplay-e2e-review-2.md`):
 - Minor CLAUDE.md names an unchecked exception - fixed (there is none any more)
 - Minor `quick` timeout throws for direct `actor.answer` - fixed (comment says so)
 - Nit blank line in `tasks/building-detail.ts` - fixed
+
+Review round 3 (`docs/reviews/screenplay-e2e-review-3.md`, last round allowed by CLAUDE.md step 7):
+- M-1 Major (rest in fixtures/): calls on Playwright fixture parameters and Playwright `APIRequestContext` in
+  `fixtures/backend.ts` - fixed after the round: fixtures may only hand Playwright fixtures on (any member access and
+  renaming fail lint), the HTTP calls moved into the ability `CallTheApi`; not re-reviewed (round limit), listed
+  under "Blocked on me"
+- Minor targets: `page.on`, `page.request` - fixed (only `page.getBy…`/`page.locator`/`page.frameLocator`)
+- Minor `reachState` workaround - comment added
+- Nit computed string access hits e.g. `headers['content-type']` - rejected: no such code in tests/e2e; dotted access
+  or a variable key is the way
+- Nit `all` in the targets read list hits `Promise.all` - rejected: targets have no reason to await anything
+- Nit `Download.url()/failure()/delete()` from memory - rejected: not realistic, `DownloadedFile` is the way

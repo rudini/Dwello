@@ -75,6 +75,10 @@ describe('Screenplay-Schichten der Akzeptanztests', () => {
 		['tests/e2e/questions/example.ts', 'await actor.recall(DOWNLOAD).path();'],
 		['tests/e2e/questions/example.ts', 'await api.request.post("x");'],
 		['tests/e2e/fixtures/example.ts', 'export const save = (page) => page.getByTestId("save").click();'],
+		['tests/e2e/fixtures/example.ts', "export const f = async ({ page }) => page.on('dialog', (d) => d.accept());"],
+		['tests/e2e/fixtures/example.ts', "export const f = async ({ request }) => request.get('/api/buildings');"],
+		['tests/e2e/fixtures/example.ts', 'export const f = async ({ page: browserPage }) => browserPage;'],
+		['tests/e2e/targets/example.ts', "export const x = target('X', (page) => { page.on('dialog', () => {}); return page.getByTestId('x'); });"],
 		['tests/e2e/targets/example.ts', "export const x = target('X', (page) => { page.url(); return page.getByTestId('x'); });"]
 	])('lehnt weitere Umwege in %s ab: %s', async (filePath, code) => {
 		expect(await problems(filePath, code)).toContain('no-restricted-syntax');

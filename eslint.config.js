@@ -176,7 +176,15 @@ export default [
 			],
 			'no-restricted-syntax': [
 				'error',
-				...noPlaywright.filter(({ selector }) => !/ObjectPattern|TSImportType/.test(selector))
+				...noPlaywright.filter(({ selector }) => !/ObjectPattern|TSImportType/.test(selector)),
+				{
+					selector: 'MemberExpression[object.name=/^(page|context|browser|request)$/]',
+					message: `${outsideScreenplay}: fixtures hand Playwright fixtures on (to an ability), they do not use them`
+				},
+				{
+					selector: 'ObjectPattern > Property[key.name=/^(page|context|browser|request)$/][value.type="Identifier"]:not([value.name=/^(page|context|browser|request)$/])',
+					message: `${outsideScreenplay}: keep the names of Playwright fixtures`
+				}
 			]
 		}
 	},
@@ -202,7 +210,11 @@ export default [
 					'textContent|innerText|innerHTML|inputValue|getAttribute|isVisible|isHidden|isChecked|isEnabled|isDisabled|isEditable|allTextContents|allInnerTexts|boundingBox|ariaSnapshot|count|all|url|title|context',
 					'Targets only locate; reading is a web question in screenplay/questions.ts'
 				),
-				...noPlaywright.slice(2).filter(({ selector }) => !/property.name=|ObjectPattern/.test(selector))
+				...noPlaywright.slice(2).filter(({ selector }) => !/property.name=|ObjectPattern/.test(selector)),
+				{
+					selector: 'MemberExpression[object.name="page"]:not([property.name=/^(getBy[A-Za-z]+|locator|frameLocator)$/])',
+					message: 'Targets only locate: page.getBy… or page.locator'
+				}
 			]
 		}
 	},

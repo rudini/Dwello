@@ -2,6 +2,7 @@ import { test } from '@playwright/test';
 import { mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { changedAreas, looksTheSame } from './changed-areas';
 import { testData } from '../e2e/fixtures/backend';
+import { CallTheApi } from '../e2e/screenplay/abilities';
 import { sessionCookies, sessionToken } from '../e2e/fixtures/session';
 
 // Routes to capture, one per line (written by affected-routes.ts); «pdf» is captured by statement-pdf.ts
@@ -19,7 +20,7 @@ let ids: Record<string, string | undefined> = {};
 test.describe.configure({ mode: 'serial' });
 
 test.beforeAll(async ({ request }) => {
-	const seed = testData(request, await sessionToken());
+	const seed = testData(new CallTheApi(request, await sessionToken()));
 	await seed.building('Seeblick', 'Winterthur');
 	await seed.apartment('Seeblick', '1.01', 'vacant');
 	await seed.tenant('Anna');
