@@ -122,6 +122,8 @@ export default defineConfig<{ driver: Driver }>({
 	],
 	use: {
 		baseURL: 'http://localhost:3100',
+		// A click on a missing element fails after 10 s naming the action, not only at the test timeout
+		actionTimeout: 10000,
 		locale: 'de-CH',
 		screenshot: 'only-on-failure',
 		video: 'off',

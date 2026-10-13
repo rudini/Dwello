@@ -53,7 +53,7 @@ export default [
 	js.configs.recommended,
 	{
 		// plain Node scripts: no TypeScript, so no-undef stays on
-		files: ['tools/**/*.mjs'],
+		files: ['tools/**/*.mjs', '.claude/hooks/*.mjs'],
 		languageOptions: { ecmaVersion: 2022, sourceType: 'module', globals: { ...globals.node } }
 	},
 	{

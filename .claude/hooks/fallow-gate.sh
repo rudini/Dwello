@@ -5,7 +5,7 @@ set -euo pipefail
 # Installer version: 2.102.0
 # Requires bash and jq. On Windows run via git-bash or WSL.
 # Blocks Claude Code git commit and git push when fallow audit returns verdict fail.
-# Runtime errors fail open with a single stderr notice so skips stay visible.
+# Runtime errors block (see below); other failures fail open with a single stderr notice.
 #
 # Version floor (FALLOW_GATE_MIN_VERSION, default 2.85.0). The gate passes
 # --gate-marker agent (added in v2.85.0) so Impact can record containment;
@@ -80,14 +80,15 @@ if [ "$VERDICT" = "fail" ]; then
   exit 2
 fi
 
+# Changed for Dwello (keep when regenerating): a runtime error blocks, so an audit that did not run is never
+# taken for a pass. The usual one is a clone without main, origin/main and upstream (fallow finds no base).
 if [ "$STATUS" -eq 2 ] || [ "$IS_ERROR" = "true" ]; then
   MSG="$(jq -r '.message // empty' <"$TMP_JSON" 2>/dev/null || true)"
-  if [ -n "$MSG" ]; then
-    echo "fallow-gate: fallow audit runtime error ($MSG), skipping." >&2
-  else
-    echo "fallow-gate: fallow audit runtime error, skipping." >&2
-  fi
-  exit 0
+  {
+    echo "fallow-gate: blocked: fallow audit did not run (${MSG:-runtime error})."
+    echo "fallow-gate: without a base branch run git fetch origin main:refs/remotes/origin/main, then commit again."
+  } >&2
+  exit 2
 fi
 
 if [ "$STATUS" -ne 0 ]; then

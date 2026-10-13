@@ -10,6 +10,7 @@
 		"test": "vitest",
 		"test:coverage": "vitest run --coverage",
 		"test:e2e": "svelte-kit sync && bddgen && playwright test",
+		"test:e2e:wip": "svelte-kit sync && bddgen --tags @wip && playwright test --project=chromium",
 		"test:e2e:ui": "svelte-kit sync && bddgen && playwright test --ui",
 		"bddgen": "bddgen",
 		"check": "bun run i18n && svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
