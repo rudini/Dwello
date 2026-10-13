@@ -318,6 +318,19 @@ describe('Screenplay-Schichten der Akzeptanztests', () => {
 		expect(await restricted('tests/e2e/targets/example.ts', target)).toEqual([]);
 	});
 
+	// Schluss-Review Endstand 8: seed und das Backend nur für Vorbedingungen, Targets mit Freigabeliste
+	it.each([
+		['tests/e2e/steps/example.steps.ts', "When('x', async ({ verwalter, seed }) => verwalter.attemptsTo(sendStatementOf(seed, 'a')));"],
+		['tests/e2e/steps/example.steps.ts', "Then('x', async ({ seed }) => { await sent({ seed }); });"],
+		['tests/e2e/tasks/example.ts', "import type { TestData } from '../fixtures/backend';\nexport const send = (seed: TestData) => seed;"],
+		['tests/e2e/questions/example.ts', "export const q = (data) => data.backend.get('statements');"],
+		['tests/e2e/tasks/example.ts', "export const t = (actor) => actor.sees(shown).toBe(true);"],
+		['tests/e2e/targets/example.ts', "import { expect } from '@playwright/test';\nexport const x = expect;"],
+		['tests/e2e/targets/example.ts', "import axios from 'axios';\nexport const x = axios;"]
+	])('lehnt in %s ab: %s', async (filePath, code) => {
+		expect(await restricted(filePath, code)).not.toEqual([]);
+	});
+
 	it('lässt die bestehenden Importe zu', async () => {
 		const step = "import { createBdd } from 'playwright-bdd';\nimport { test } from '../fixtures/test';\nimport { open } from '../tasks/x';\nimport { shown } from '../questions/x';\nexport const x = [createBdd, test, open, shown];";
 		expect(await restricted('tests/e2e/steps/example.steps.ts', step)).toEqual([]);

@@ -1,6 +1,5 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { exampleOf } from '../fixtures/screens';
 import { findings } from '../questions/accessibility';
 import { userMenuCount } from '../questions/app-frame';
 import { languageCode, pageLanguage, shownLanguage } from '../questions/language';
@@ -58,10 +57,9 @@ Then('heisst die Seite {string}', async ({ verwalter: viewer }, title: string) =
 
 Then(
 	'zeigt der Bildschirm {string} im Zustand {string} auf Französisch, Italienisch und Englisch kein Deutsch und passt in 390 Pixel',
-	async ({ verwalter, seed, $testInfo }, name: string, state: string) => {
+	async ({ verwalter, examples, names, $testInfo }, name: string, state: string) => {
 		$testInfo.setTimeout(180_000); // three languages, each with its own visit
-		const example = await exampleOf(seed, name, state);
-		await verwalter.attemptsTo(checkLanguagesOf(example, [...seed.names.values()]));
+		await verwalter.attemptsTo(checkLanguagesOf(await examples(name, state), [...names.values()]));
 		await verwalter.sees(findings).toEqual([]);
 	}
 );

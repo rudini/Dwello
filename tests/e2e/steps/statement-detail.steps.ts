@@ -71,7 +71,7 @@ Given('die Abrechnung {int} von {string} ist versendet', async ({ seed }, year: 
 Given(
 	'der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung {int} von {string}',
 	async ({ verwalter, seed }, year: number, tenant: string) => {
-		await verwalter.attemptsTo(openStatementDetail(statementPath(seed, tenant, year)));
+		await verwalter.attemptsTo(openStatementDetail(statementPath(seed.idOf(`Abrechnung ${tenant} ${year}`)!)));
 	}
 );
 
@@ -150,7 +150,7 @@ Then('hat die Abrechnung den Status {string}', async ({ verwalter }, status: str
 Then(
 	'ist der Liegenschaftsverwalter auf der Bearbeitungsseite der Abrechnung {int} von {string}',
 	async ({ verwalter, seed }, year: number, tenant: string) => {
-		await verwalter.sees(pageAddressInApp).toBe(`${statementPath(seed, tenant, year)}/edit`);
+		await verwalter.sees(pageAddressInApp).toBe(`${statementPath(seed.idOf(`Abrechnung ${tenant} ${year}`)!)}/edit`);
 	}
 );
 

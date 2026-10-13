@@ -100,7 +100,7 @@ Then('die Abrechnungsliste enthält genau {int} Abrechnung', async ({ verwalter 
 Then(
 	'ist der Liegenschaftsverwalter auf der Detailseite der Abrechnung {int} von {string}',
 	async ({ verwalter, seed }, year: number, tenant: string) => {
-		await verwalter.sees(pageAddressInApp).toBe(statementPath(seed, tenant, year));
+		await verwalter.sees(pageAddressInApp).toBe(statementPath(seed.idOf(`Abrechnung ${tenant} ${year}`)!));
 	}
 );
 

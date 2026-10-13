@@ -5250,3 +5250,20 @@ fulfilled, 3 not yet):
 - Minor `contractHistoryLists` folded texts into yes/no - fixed: `contractHistoryNaming` answers the rows
 - Nit `screens.json` read from outside tests/e2e - named in `tests/e2e/CLAUDE.md`; Nit `void`/unawaited `sees`
   assigned to a variable - fixed
+
+Final review round 14 (`docs/reviews/screenplay-e2e-review-14.md`, the whole end state 6734ba2; points 1 and 3
+fulfilled, 2 not yet):
+- M-1 Major a When/Then step acting through `seed` by handing it to a task, a question or a step helper - fixed:
+  tasks and questions may not import `TestData` nor use `.backend`; in When/Then/Step `seed` is never handed on;
+  `statementPath` takes the statement's id; the axe and language checks get their examples from a fixture
+  (`examples`) instead of `exampleOf(seed, …)` in a Then step (also m-7)
+- Minor targets had a ban list for imports - fixed: an allowlist (`screenplay/target` only); round 13's «each layer
+  has an import allowlist» now holds for every layer but the core, which may use Playwright
+- Minor core web questions with `getAttribute`/`evaluate` without timeout - recorded in H-20 (indistinguishable by
+  name from the browser-side DOM calls in `questions.ts`)
+- Minor heating row chosen by «Heizung» anywhere in its text - fixed: by the exact category cell
+- Minor share in % rounded on the page, not over the API - fixed: the API answer is rounded to two places too
+- Minor yes/no over values (`mailsTo`, sideways overflow, end confirmation in the window) - fixed: file types,
+  pixels and the share in the window are answered
+- Minor stale JSDoc in `questions/statement-detail.ts` - fixed
+- Nit tasks polling or using `sees` - `sees` banned in tasks; polling recorded in H-20 as undecided

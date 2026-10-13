@@ -1,4 +1,3 @@
-import { question } from '../screenplay/actor';
 import { Count, Text, ThePage, Visibility, Width } from '../screenplay/questions';
 import { draftNotice, llmRecipient, operatorNotice, pageSection, pageTitle, userMenuButton } from '../targets/app-frame';
 
@@ -8,8 +7,6 @@ export const draftNoticeText = (heading: string) => Text.of(draftNotice(heading)
 export const operatorNoticeText = (heading: string) => Text.of(operatorNotice(heading));
 /** Width the page title gets on screen, in pixels */
 export const pageTitleWidth = Width.of(pageTitle);
-export const pageOverflowsSideways = question(
-	'whether the page scrolls sideways',
-	async (actor) => (await actor.answer(ThePage.sidewaysOverflow)) > 0
-);
+/** How far the page scrolls sideways, in pixels */
+export const pageSidewaysOverflow = ThePage.sidewaysOverflow;
 export const userMenuCount = Count.of(userMenuButton);

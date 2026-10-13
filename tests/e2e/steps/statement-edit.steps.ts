@@ -15,7 +15,7 @@ const { Given, When, Then } = createBdd(test);
 Given(
 	'der Liegenschaftsverwalter ist auf der Bearbeitungsseite der Abrechnung {int} von {string}',
 	async ({ verwalter, seed }, year: number, tenant: string) => {
-		await verwalter.attemptsTo(openStatementEdit(statementPath(seed, tenant, year)));
+		await verwalter.attemptsTo(openStatementEdit(statementPath(seed.idOf(`Abrechnung ${tenant} ${year}`)!)));
 	}
 );
 

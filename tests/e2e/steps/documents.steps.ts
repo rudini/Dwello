@@ -42,7 +42,7 @@ Then('meldet die Abrechnung {string}', async ({ verwalter }, message: string) =>
 Then(
 	'{string} hat die Zahlungserinnerung per E-Mail mit PDF erhalten',
 	async ({ verwalter, names }, tenant: string) => {
-		await verwalter.sees(mailsTo(names.get(`E-Mail ${tenant}`)!)).toEqual([['Zahlungserinnerung', [true]]]);
+		await verwalter.sees(mailsTo(names.get(`E-Mail ${tenant}`)!)).toEqual([['Zahlungserinnerung', ['pdf']]]);
 	}
 );
 

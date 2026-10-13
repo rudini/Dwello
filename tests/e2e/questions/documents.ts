@@ -11,10 +11,10 @@ export const documentFor = (title: string, tenantName: string) => Text.of(docume
 export const documentsFor = (title: string, tenantName: string) => Count.of(documentRow(title, tenantName));
 
 // Mail received by the mail catcher the backend sends to in E2E runs (playwright.config.ts): per mail its subject
-// before « – » and whether each attachment is a PDF
+// before « – » and the file type of each attachment
 export const mailsTo = (address: string) =>
 	question(`the mails to ${address}`, async () =>
 		((await (await fetch('http://localhost:2526/messages')).json()) as Mail[])
 			.filter((mail) => mail.to === address)
-			.map((mail) => [mail.subject.split(' – ')[0], mail.attachments.map((name) => /\.pdf$/.test(name))])
+			.map((mail) => [mail.subject.split(' – ')[0], mail.attachments.map((name) => name.split('.').pop())])
 	);

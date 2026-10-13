@@ -4,7 +4,7 @@ import {
 	draftNoticeText,
 	llmRecipientNotice,
 	operatorNoticeText,
-	pageOverflowsSideways,
+	pageSidewaysOverflow,
 	pageTitleWidth,
 	sectionShown
 } from '../questions/app-frame';
@@ -97,5 +97,5 @@ Then('ist der Seitentitel lesbar', async ({ verwalter }) => {
 });
 
 Then('scrollt die Seite nicht seitwärts', async ({ verwalter }) => {
-	await verwalter.sees(pageOverflowsSideways).toBe(false);
+	await verwalter.sees(pageSidewaysOverflow).toBeLessThanOrEqual(0);
 });

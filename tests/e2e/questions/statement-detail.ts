@@ -27,7 +27,6 @@ export const heatingProfileOfStatement = Text.of(statementHeatingProfile);
 
 type LineItem = { description: string; sharePercentage: string; tenantShare: string };
 
-/** Whether the tenant bears the share of the heating costs, i.e. the amount: on the page, or in the backend's statement */
 /** The heating costs of the statement: the tenant's share in % and in francs */
 export const heatingCosts = throughUiOrApi(
 	question('the heating costs of the statement', async (actor) => {
@@ -38,6 +37,9 @@ export const heatingCosts = throughUiOrApi(
 	question('the heating costs the statement charges', (actor) => {
 		const { lineItems } = actor.recall<{ lineItems: LineItem[] }>(STATEMENT);
 		const heating = lineItems.find((item) => item.description === 'Heating');
-		return heating ? { share: Number(heating.sharePercentage), amount: Number(heating.tenantShare) } : null;
+		// the page shows the share rounded to two places (src/lib/server/statement.ts)
+		return heating
+			? { share: Math.round(Number(heating.sharePercentage) * 100) / 100, amount: Number(heating.tenantShare) }
+			: null;
 	})
 );

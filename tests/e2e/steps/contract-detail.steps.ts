@@ -2,7 +2,7 @@ import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import {
 	apartmentOfContract,
-	endConfirmationInWindow,
+	endConfirmationShareInWindow,
 	endDateProblemShown,
 	endOfContract,
 	statusOfContract,
@@ -73,7 +73,7 @@ Given('das Browserfenster ist {int} auf {int} Pixel gross', async ({ verwalter }
 // the confirm button can be scrolled into view inside the dialog, not cut off by the window
 Then('kann der Liegenschaftsverwalter den Mietvertrag im Dialog beenden', async ({ verwalter }) => {
 	await verwalter.attemptsTo(scrollToEndConfirmation);
-	await verwalter.sees(endConfirmationInWindow).toBe(true);
+	await verwalter.sees(endConfirmationShareInWindow).toBeGreaterThan(1 - 1e-9);
 });
 
 When('der Liegenschaftsverwalter den Mietvertrag löschen will', async ({ verwalter }) => {

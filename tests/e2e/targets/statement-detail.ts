@@ -4,7 +4,10 @@ export const statementStatus = target('Status der Abrechnung', (page) => page.ge
 // Kategorie, Verteilschlüssel, Gesamtbetrag, Anteil in %, Anteil des Mieters (CostTable.svelte)
 export const statementLineItemCells = (category: string) =>
 	target(`Zellen der Position «${category}» der Abrechnung`, (page) =>
-		page.getByTestId('statement-line-item').filter({ hasText: category }).locator('td')
+		page
+			.getByTestId('statement-line-item')
+			.filter({ has: page.getByRole('cell', { name: category, exact: true }) })
+			.locator('td')
 	);
 export const statementHeatingProfile = target('Heizprofil der Abrechnung', (page) =>
 	page.getByTestId('statement-heating-profile')

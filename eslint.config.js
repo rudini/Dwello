@@ -81,6 +81,11 @@ const layerPath = (layers) => `\\.\\./(${layers})/[\\w.-]+|\\./[\\w.-]+`;
 // Tasks and questions sit below the steps
 const belowSteps = [
 	insideE2e,
+	{
+		group: ['**/fixtures/backend'],
+		importNames: ['TestData', 'testData'],
+		message: 'Tasks and questions reach the system through the actor, not through the test data (tests/e2e/CLAUDE.md)'
+	},
 	...playwrightImports,
 	{ group: ['playwright-bdd', '**/steps/**'], message: 'Tasks and questions sit below the steps (tests/e2e/CLAUDE.md)' }
 ];
@@ -317,7 +322,7 @@ export default [
 				},
 				{
 					selector:
-						"CallExpression[callee.name=/^(When|Then|Step)$/] CallExpression[callee.object.name='seed']:not([callee.property.name=/^(idOf|unique)$/])",
+						"CallExpression[callee.name=/^(When|Then|Step)$/] CallExpression[callee.object.name='seed']:not([callee.property.name=/^(idOf|unique)$/]), CallExpression[callee.name=/^(When|Then|Step)$/] CallExpression > Identifier[name='seed'], CallExpression[callee.name=/^(When|Then|Step)$/] ObjectExpression > Property > Identifier.value[name='seed']",
 					message: 'In When and Then the actor acts through tasks; seed only prepares Given preconditions (tests/e2e/CLAUDE.md)'
 				},
 				{
@@ -343,7 +348,11 @@ export default [
 			'no-restricted-syntax': [
 				'error',
 				...noPlaywright,
-				noFetch
+				noFetch,
+				{
+					selector: "MemberExpression[property.name='backend'], CallExpression[callee.property.name='sees']",
+					message: 'Tasks act through the actor and its abilities; seed and sees belong to the steps (tests/e2e/CLAUDE.md)'
+				}
 			]
 		}
 	},
@@ -370,6 +379,10 @@ export default [
 				{
 					selector: "CallExpression[callee.property.name='attemptsTo'], CallExpression[arguments.0.name='actor']:not([callee.type='MemberExpression'])",
 					message: 'Questions only ask; actions belong in tasks (tests/e2e/CLAUDE.md)'
+				},
+				{
+					selector: "MemberExpression[property.name='backend']",
+					message: 'Questions ask through the actor and its abilities, not the test data (tests/e2e/CLAUDE.md)'
 				},
 				{
 					selector:
@@ -431,6 +444,7 @@ export default [
 							group: ['**/tasks/**', '**/questions/**', '**/steps/**', '**/fixtures/**', '**/screenplay/*', '!**/screenplay/target'],
 							message: 'Targets depend on nothing but screenplay/target.ts'
 						},
+						onlyImports('\\.\\./screenplay/target', 'Targets'),
 						insideE2e,
 						playwrightImports[1]
 					]

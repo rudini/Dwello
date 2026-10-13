@@ -3,6 +3,7 @@ import { Actor } from '../screenplay/actor';
 import { BrowseTheWeb, CallTheApi } from '../screenplay/abilities';
 import { Cookies } from '../screenplay/interactions';
 import { testData, type TestData } from './backend';
+import { exampleOf, type Example } from './screens';
 import { sessionCookies, sessionToken } from './session';
 
 // Protocol driver the scenarios talk to the system through (Dave Farley): the browser, or the backend API.
@@ -16,6 +17,8 @@ export const test = base.extend<{
 	besucher: Actor;
 	seed: TestData;
 	names: Map<string, string>;
+	// a record of the screen and state the axe and language checks visit, seeded for the example
+	examples: (name: string, state: string) => Promise<Example>;
 }>({
 	driver: ['ui', { option: true }],
 
@@ -45,6 +48,8 @@ export const test = base.extend<{
 		await use(data);
 		await data.cleanUp();
 	},
+
+	examples: async ({ seed }, use) => use((name, state) => exampleOf(seed, name, state)),
 
 	names: async ({ seed }, use) => use(seed.names)
 });
