@@ -98,6 +98,22 @@ describe('Screenplay-Schichten der Akzeptanztests', () => {
 		expect(await problems('tests/e2e/fixtures/example.ts', value)).toContain('no-restricted-imports');
 	});
 
+	it.each([
+		['tests/e2e/steps/example.steps.ts', "When('x', async ({ verwalter, driver }) => { if (driver === 'api') await verwalter.attemptsTo(a); });"],
+		['tests/e2e/steps/example.steps.ts', "When('x', async (fixtures) => fixtures.driver);"],
+		['tests/e2e/tasks/example.ts', 'export const a = (actor) => (actor.can(CallTheApi) ? api(actor) : ui(actor));'],
+		['tests/e2e/questions/example.ts', 'export const q = (actor) => actor.can(CallTheApi);'],
+		['tests/e2e/steps/example.steps.ts', "Then('x', async ({ verwalter }) => { if ((await verwalter.answer(q)) !== 'a') throw new Error(); });"],
+		['tests/e2e/fixtures/example.ts', "export const acceptDialogs = (p) => p.on('dialog', (d) => d.accept());"]
+	])('lehnt Treiber-Weichen und Prüfungen ohne sees in %s ab: %s', async (filePath, code) => {
+		expect(await problems(filePath, code)).toContain('no-restricted-syntax');
+	});
+
+	it('lässt Fixtures keine Targets nutzen: Vorbedingungen laufen über die API', async () => {
+		const code = "import { saveButton } from '../targets/form';";
+		expect(await problems('tests/e2e/fixtures/example.ts', code)).toContain('no-restricted-imports');
+	});
+
 	it('lehnt Playwright-Importe in Tasks und Questions ab', async () => {
 		const code = "import type { Page } from '@playwright/test';";
 		expect(await problems('tests/e2e/tasks/example.ts', code)).toContain('no-restricted-imports');

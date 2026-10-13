@@ -64,7 +64,7 @@ A floor applies: today's coverage, rounded down to whole percent. If coverage dr
 |---|---|---|
 | Test cases (executable specifications) | *What* the business wants, in domain language | `tests/e2e/features/*.feature` (German, role "Liegenschaftsverwalter", terms from `UBIQUITOUS_LANGUAGE.md`) |
 | Domain-specific language | Reusable domain language | `tests/e2e/steps/`, Screenplay: `tasks/`, `questions/`, the actor in `screenplay/actor.ts` (layers and lint rules: `tests/e2e/CLAUDE.md`) |
-| Protocol drivers | Translate the DSL into interactions | UI driver: ability `BrowseTheWeb` with `screenplay/interactions.ts`, `screenplay/questions.ts` and `targets/` (browser via Playwright). API driver: ability `CallTheApi` (backend API), used by `tasks/*-api.ts`. Preconditions always go through the API (`fixtures/backend.ts`) |
+| Protocol drivers | Translate the DSL into interactions | UI driver: ability `BrowseTheWeb` with `screenplay/interactions.ts`, `screenplay/questions.ts` and `targets/` (browser via Playwright). API driver: ability `CallTheApi` (backend API), used by `tasks/*-api.ts`; where the BFF holds a rule, the API driver calls that BFF server code (`src/lib/server`) instead of copying it. Preconditions always go through the API (`fixtures/backend.ts`) |
 | System under test | Deployed like production | `bun run build && node build` + backend + its own database (`playwright.config.ts`) |
 
 ### Two protocol drivers

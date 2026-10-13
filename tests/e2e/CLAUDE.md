@@ -12,6 +12,8 @@ bunx bddgen && bunx playwright test --project=api    # only the @api scenarios t
 bunx bddgen --tags "@wip" && bunx playwright test --project=chromium      # a new @wip scenario, to see it fail
 ```
 
+`bddgen` loads the steps, and the API driver imports BFF server code with `$lib` paths: on a fresh checkout run `bunx svelte-kit sync` once before calling `bddgen` directly (`bun run test:e2e` does it).
+
 The run starts its own stack: mail catcher, backend on 3101 and a production build of the frontend on 3100, against `dwello_e2e`, recreated from `backend/migrations` before every run. Only PostgreSQL on 5432 must be running. `E2E_DATABASE_URL` overrides the database. Locally a frontend already listening on 3100 is reused, so stop it after code changes or the tests run an old build; 3101 must be free. A second, empty instance (backend 3103 on `dwello_e2e_empty`, the same build on 3102) serves the axe check's `empty` and `first-use` states; 3102 and 3103 must be free as well.
 
 ## Layers (Screenplay, after Dave Farley)

@@ -8,7 +8,7 @@ import globals from 'globals';
 
 // Screenplay layers of the acceptance tests (tests/e2e/CLAUDE.md): Playwright is driven only in screenplay/ and targets/
 const playwrightActions =
-	'click|dblclick|tap|fill|clear|type|press|pressSequentially|selectOption|check|uncheck|setChecked|setInputFiles|hover|focus|blur|dragTo|scrollIntoViewIfNeeded|dispatchEvent|selectText|goto|reload|goBack|goForward|route|unroute|waitFor|waitForEvent|waitForURL|waitForRequest|waitForResponse|waitForLoadState|waitForTimeout|waitForSelector|waitForFunction|evaluate|evaluateAll|evaluateHandle|setViewportSize|emulateMedia|addCookies|clearCookies|setExtraHTTPHeaders|addInitScript|exposeFunction|screenshot|setContent|dragAndDrop|waitForNavigation|\\$|\\$\\$|\\$eval|\\$\\$eval|path|suggestedFilename|saveAs|createReadStream|pdf|content';
+	'click|dblclick|tap|fill|clear|type|press|pressSequentially|selectOption|check|uncheck|setChecked|setInputFiles|hover|focus|blur|dragTo|scrollIntoViewIfNeeded|dispatchEvent|selectText|goto|reload|goBack|goForward|route|unroute|waitFor|waitForEvent|waitForURL|waitForRequest|waitForResponse|waitForLoadState|waitForTimeout|waitForSelector|waitForFunction|evaluate|evaluateAll|evaluateHandle|setViewportSize|emulateMedia|addCookies|clearCookies|setExtraHTTPHeaders|addInitScript|exposeFunction|screenshot|setContent|dragAndDrop|waitForNavigation|\\$|\\$\\$|\\$eval|\\$\\$eval|path|suggestedFilename|saveAs|createReadStream|pdf|content|setDefaultTimeout|setDefaultNavigationTimeout';
 const playwrightReads =
 	'getByRole|getByText|getByTestId|getByLabel|getByPlaceholder|getByAltText|getByTitle|locator|frameLocator|textContent|innerText|innerHTML|inputValue|getAttribute|isVisible|isHidden|isChecked|isEnabled|isDisabled|isEditable|allTextContents|allInnerTexts|boundingBox|ariaSnapshot|locate|context|keyboard|mouse';
 const call = (methods, message) => ({
@@ -34,6 +34,10 @@ const noPlaywright = [
 	},
 	{ selector: "ImportExpression, CallExpression[callee.name='require']", message: `${outsideScreenplay}: static imports only` },
 	{ selector: 'TSImportType', message: outsideScreenplay },
+	{
+		selector: "CallExpression[callee.property.name='can']",
+		message: 'Pick the protocol driver with throughUiOrApi (screenplay/abilities.ts), not by asking the actor (tests/e2e/CLAUDE.md)'
+	},
 	{ selector: "CallExpression[callee.name='expect'], MemberExpression[object.name='expect']", message: 'Assert with actor.sees(question) (tests/e2e/CLAUDE.md)' }
 ];
 const playwrightImports = [
@@ -147,7 +151,18 @@ export default [
 					]
 				}
 			],
-			'no-restricted-syntax': ['error', ...noPlaywright]
+			'no-restricted-syntax': [
+				'error',
+				...noPlaywright,
+				{
+					selector: "ObjectPattern > Property[key.name='driver'], MemberExpression[property.name='driver']",
+					message: 'Steps never branch on the driver: build the task or question with throughUiOrApi (tests/e2e/CLAUDE.md)'
+				},
+				{
+					selector: "CallExpression[callee.property.name='answer']",
+					message: 'Steps check with actor.sees(question), which retries and names the question (tests/e2e/CLAUDE.md)'
+				}
+			]
 		}
 	},
 	{
@@ -172,7 +187,12 @@ export default [
 		rules: {
 			'no-restricted-imports': [
 				'error',
-				{ patterns: [{ ...playwrightImports[0], allowTypeImports: true }] } // fixtures create the abilities
+				{
+					patterns: [
+						{ ...playwrightImports[0], allowTypeImports: true }, // fixtures create the abilities
+						{ group: ['**/targets/**'], message: 'Preconditions go through the backend API, never through the UI (tests/e2e/CLAUDE.md)' }
+					]
+				}
 			],
 			'no-restricted-syntax': [
 				'error',
@@ -184,7 +204,9 @@ export default [
 				{
 					selector: 'ObjectPattern > Property[key.name=/^(page|context|browser|request)$/][value.type="Identifier"]:not([value.name=/^(page|context|browser|request)$/])',
 					message: `${outsideScreenplay}: keep the names of Playwright fixtures`
-				}
+				},
+				// event handlers on a page: fixtures have no Click.on and the like that would share the name
+				call('on|once|off|addListener|removeListener', `${outsideScreenplay}: no handlers on Playwright fixtures`)
 			]
 		}
 	},

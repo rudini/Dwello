@@ -16,7 +16,7 @@ import {
 	statementTenantLink
 } from '../targets/statement-detail';
 
-/** The API path keeps the statement as the backend returns it for `heatingCostsShared` */
+/** The API path keeps the statement as the backend returns it for `heatingCostsOfTenant` */
 export const STATEMENT = 'statement';
 
 export const openStatementDetail = (statementPath: string) =>
