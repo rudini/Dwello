@@ -10,7 +10,7 @@ export const apartmentContractsUnknown = target('Hinweis bei der Wohnung', (page
 	page.getByTestId('apartment-contracts-unknown')
 );
 export const retryContractsButton = target('Mietverträge erneut laden', (page) =>
-	page.getByTestId('apartment-contracts-retry')
+	page.getByTestId('contracts-retry')
 );
 export const startContractsUnknown = target('Hinweis beim Vertragsbeginn', (page) =>
 	page.getByTestId('start-contracts-unknown')

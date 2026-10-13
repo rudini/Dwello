@@ -245,7 +245,7 @@ When('der Liegenschaftsverwalter die Nettomiete {string} einträgt', async ({ ve
 	await verwalter.attemptsTo(enterBaseRent(baseRent));
 });
 
-When('die Mietverträge der Wohnung {string} sich wieder laden lassen', async ({ verwalter }) => {
+When('die Mietverträge der Wohnung {string} sich wieder laden lassen', async ({ verwalter }, _apartment: string) => {
 	await verwalter.attemptsTo(contractsLoadAgain);
 });
 
@@ -259,4 +259,8 @@ Then('ist die Nettomiete {string} noch eingetragen', async ({ verwalter }, baseR
 
 Then('sieht der Liegenschaftsverwalter bei der Wohnung keinen Hinweis mehr', async ({ verwalter }) => {
 	await verwalter.sees(apartmentHint).toBeNull();
+});
+
+Then('sieht der Liegenschaftsverwalter beim Vertragsbeginn keinen Hinweis mehr', async ({ verwalter }) => {
+	await verwalter.sees(startHint).toBeNull();
 });
