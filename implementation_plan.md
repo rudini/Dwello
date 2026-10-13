@@ -13,7 +13,8 @@ Review in the chat of 13.10.2026 (findings R-1 to R-7); the product owner chose 
 - [x] R-5 `code-reviewer` and `persona` report one findings table (`.claude/agents/code-reviewer.md`, `.claude/agents/persona.md`)
 - [x] R-6 ponytail's three-line limit does not shorten the run summary (`.claude/skills/ponytail/SKILL.md`)
 - [x] Review of the slice by `code-reviewer`; findings fixed (`.claude/settings.json`, `.claude/agents/code-reviewer.md`, `.claude/agents/persona.md`, `.claude/skills/tdd/SKILL.md`)
-- [ ] Re-review of the delta by `code-reviewer`
+- [x] Re-review of the delta by `code-reviewer` (round 2); findings fixed (`.claude/settings.json`)
+- [ ] Re-review of the delta by `code-reviewer` (round 3)
 
 Findings (`docs/reviews/opus-instructions-review-1.md`):
 - C-1 `db:reset` drops the dev database without asking - Major - fixed
@@ -25,3 +26,12 @@ Findings (`docs/reviews/opus-instructions-review-1.md`):
 - C-7 `dropdb` asks for the test databases too - Nit - fixed (only `dwello`)
 - C-8 `git clean` asks for a dry run too - Nit - rejected: a prompt on a rare dry run costs less than a narrower rule that misses `-df`
 - C-9 "the issue" assumes every task has one - Nit - fixed
+
+Findings round 2 (`docs/reviews/opus-instructions-review-2.md`):
+- C-10 `docker-compose` with a hyphen (the form README and compose files use) not covered - Major - fixed
+- C-11 `checkout HEAD -- <path>`, `checkout -f`, `switch -f`/`--discard-changes`, `worktree remove -f` - Minor - fixed
+- C-12 `dropdb dwello --if-exists`, `su postgres -c "dropdb …"`, `psql -c "DROP DATABASE dwello"` - Minor - partly fixed (`--if-exists`); rejected for wrapped forms: a shell wrapper can hide any command from prefix rules, the ask rules are a safety net and `persona-stack.sh` only drops `dwello_persona`
+- C-13 remote branch deletion - Minor - fixed for `--delete`/`-d`; `git push origin :<branch>` rejected: a ` :*` rule ends in the legacy prefix syntax `:*` and would prompt on every push
+- C-14 `*db:reset*` also prompts on grep and commit messages - Nit - rejected: a prompt costs less than missing `cd backend && bun run db:reset`
+- C-15 `git restore --staged` prompts - Nit - rejected: ask rules cannot be narrowed by allow rules; rare command
+- C-16 `dropdb * dwello` prompts on `dropdb dwello_e2e -U dwello` - Nit - rejected: rare form, a prompt is harmless
