@@ -16,7 +16,8 @@ Baseline before the change: `bun run test:e2e -- --project=chromium --project=ap
   authentication/dashboard/contact/coming soon
 - [x] Ratchet list and transitional `Actor.page`/`perform`, `fixtures/actor.ts`, `interactions/` removed
 - [x] Full E2E suite chromium + api green with the same 629 tests (identical names); finish checks
-- [ ] Independent review (`code-reviewer`), findings fixed
+- [x] Independent review (`code-reviewer`), three rounds; findings fixed or rejected with reason; M-1 fixed after the
+  last allowed round, confirmation by the product owner pending
 
 Files: `tests/e2e/{screenplay,targets,tasks,questions,steps,fixtures}/**`, `tests/e2e/interactions/` and
 `fixtures/actor.ts` removed, `tests/e2e/CLAUDE.md`, `eslint.config.js`, `src/__tests__/e2e-screenplay-lint.test.ts`,
@@ -59,3 +60,7 @@ Review round 3 (`docs/reviews/screenplay-e2e-review-3.md`, last round allowed by
   or a variable key is the way
 - Nit `all` in the targets read list hits `Promise.all` - rejected: targets have no reason to await anything
 - Nit `Download.url()/failure()/delete()` from memory - rejected: not realistic, `DownloadedFile` is the way
+
+Final checks at 294aebf: E2E chromium + api 629 passed (same 629 test names as the baseline); `bun run lint` clean;
+`bun run check` 0 errors; backend 539 pass, type-check clean, coverage 90.4 %; `test:coverage` 2232 passed, 1 failed
+only locally (`open-work.test.ts` finds the agent worktrees under `.claude/worktrees/`, not part of the repo).
