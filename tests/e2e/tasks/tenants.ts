@@ -1,45 +1,44 @@
-import type { Actor } from '../fixtures/actor';
-import {
-	newTenantButton,
-	tenantCard,
-	tenantSearchButton,
-	tenantSearchInput,
-	tenantStatusFilter
-} from '../interactions/tenants';
+import type { Activity } from '../screenplay/actor';
+import { Click, Enter, Navigate, Select, Wait } from '../screenplay/interactions';
 import {
 	channelSelect,
 	emailInput,
 	firstNameInput,
 	lastNameInput,
 	submitTenantButton
-} from '../interactions/tenant-form';
+} from '../targets/tenant-form';
+import {
+	newTenantButton,
+	tenantCard,
+	tenantSearchButton,
+	tenantSearchInput,
+	tenantStatusFilter
+} from '../targets/tenants';
 
-export const searchTenant =
-	(name: string, status = '') =>
-	async (actor: Actor) => {
-		await tenantSearchInput(actor.page).fill(name);
-		await tenantStatusFilter(actor.page).selectOption(status);
-		await tenantSearchButton(actor.page).click();
-		await actor.page.waitForURL((url) => url.searchParams.get('search') === name);
-	};
+export const openTenantList = Navigate.to('/tenants');
+export const openNewTenant = Navigate.to('/tenants/new');
 
-export const startNewTenant = async (actor: Actor) => {
-	await newTenantButton(actor.page).click();
-};
+export const searchTenant = (name: string, status = ''): Activity => (actor) =>
+	actor.attemptsTo(
+		Enter.theValue(name).into(tenantSearchInput),
+		Select.option(status).from(tenantStatusFilter),
+		Click.on(tenantSearchButton),
+		Wait.forUrl((url) => url.searchParams.get('search') === name)
+	);
 
-export const openTenant = (name: string) => async (actor: Actor) => {
-	await tenantCard(actor.page, name).click();
-};
+export const startNewTenant = Click.on(newTenantButton);
 
-export const createTenantByEmail = (fullName: string) => async (actor: Actor) => {
+export const openTenant = (name: string) => Click.on(tenantCard(name));
+
+export const createTenantByEmail = (fullName: string): Activity => (actor) => {
 	const [firstName, ...lastName] = fullName.split(' ');
-	await firstNameInput(actor.page).fill(firstName);
-	await lastNameInput(actor.page).fill(lastName.join(' '));
-	await emailInput(actor.page).fill(`${lastName.at(-1)}@dwello.test`);
-	await channelSelect(actor.page).selectOption('email');
-	await submitTenantButton(actor.page).click();
+	return actor.attemptsTo(
+		Enter.theValue(firstName).into(firstNameInput),
+		Enter.theValue(lastName.join(' ')).into(lastNameInput),
+		Enter.theValue(`${lastName.at(-1)}@dwello.test`).into(emailInput),
+		Select.option('email').from(channelSelect),
+		Click.on(submitTenantButton)
+	);
 };
 
-export const submitEmptyTenant = async (actor: Actor) => {
-	await submitTenantButton(actor.page).click();
-};
+export const submitEmptyTenant = Click.on(submitTenantButton);

@@ -1,35 +1,108 @@
-import type { Actor } from '../fixtures/actor';
+import { throughUiOrApi } from '../screenplay/abilities';
+import { type Question, question } from '../screenplay/actor';
+import { Accessible, Checked, Count, Text, Value, Visibility } from '../screenplay/questions';
 import {
-	announcements,
+	announcement,
 	buildingCheckbox,
 	buildingInvoices,
-	categoryFindings,
+	categoryFinding,
 	draftsOnlyNote,
 	generationResult,
-	missingInvoices,
+	heatingProfileSelect,
 	managementFeeHint,
 	managementFeeInput,
+	missingInvoices,
 	periodStartInput,
 	previewEmpty,
 	previewFee,
+	previewRow,
 	previewRows,
 	wizardChoices
-} from '../interactions/statement-generate';
+} from '../targets/statement-generate';
+import { CREATED_STATEMENTS, PREVIEW_BALANCES, PREVIEW_TOTALS } from '../tasks/statement-generate-api';
+import { amountAfter, signedFrancs } from './amounts';
 
-export const previewRow = (actor: Actor, tenantName: string) =>
-	previewRows(actor.page).filter({ hasText: tenantName });
-export const allPreviewRows = (actor: Actor) => previewRows(actor.page);
-export const noContractsInPeriod = (actor: Actor) => previewEmpty(actor.page);
-export const generationOutcome = (actor: Actor) => generationResult(actor.page);
-export const feeAboveGuideline = (actor: Actor) => managementFeeHint(actor.page);
-export const feeOfRun = (actor: Actor) => previewFee(actor.page);
-export const feeField = (actor: Actor) => managementFeeInput(actor.page);
-export const announcedFeeHint = (actor: Actor) => announcements(actor.page).filter({ hasText: 'Über dem üblichen Richtwert' });
+// The API protocol driver's answers: what the run through the backend API remembered
+const remembered = (key: string) =>
+	question(`the ${key} per tenant`, (actor) => {
+		const answers = actor.recall<Map<string, number> | undefined>(key);
+		if (!answers) throw new Error(`no ${key}: the preview was not opened through the API`);
+		return answers;
+	});
+
+export const previewHasStatementOf = (tenantName: string) =>
+	throughUiOrApi(
+		Visibility.of(previewRow(tenantName)),
+		question(`whether the preview has ${tenantName}`, async (actor) =>
+			(await actor.answer(remembered(PREVIEW_TOTALS))).has(tenantName)
+		)
+	);
+
+export const statementsInPreview = throughUiOrApi(
+	Count.of(previewRows),
+	question('how many statements the preview has', async (actor) => (await actor.answer(remembered(PREVIEW_TOTALS))).size)
+);
+
+export const noContractsInPeriod = throughUiOrApi(
+	Visibility.of(previewEmpty),
+	question('whether the preview is empty', async (actor) => (await actor.answer(remembered(PREVIEW_TOTALS))).size === 0)
+);
+
+// «1 Nebenkostenabrechnung ist als Entwurf erstellt», «3 Nebenkostenabrechnungen sind als Entwurf erstellt»
+const CREATED = /(\d+) (Nebenkostenabrechnung ist|Nebenkostenabrechnungen sind) als Entwurf erstellt/;
+
+/** How many statements the run created as drafts; on the page the whole text when it does not say so in good German */
+export const createdStatements = throughUiOrApi<Question<number | string | null>>(
+	question('how many statements are reported as created', async (actor) => {
+		const text = await actor.answer(Text.of(generationResult));
+		const [, count, words] = text?.match(CREATED) ?? [];
+		return count && (Number(count) === 1) === words.endsWith('ist') ? Number(count) : text;
+	}),
+	question('how many statements the system created', (actor) => actor.recall<number>(CREATED_STATEMENTS))
+);
+
+const rowOf = (tenantName: string) => Text.of(previewRow(tenantName));
+
+/** The Saldo of the tenant's statement in the preview, in francs (a refund negative) */
+export const balanceOf = (tenantName: string) =>
+	throughUiOrApi<Question<number | string | null | undefined>>(
+		question(`the Saldo of ${tenantName} in the preview`, async (actor) =>
+			amountAfter('(?:Nachzahlung|Rückerstattung|Ausgeglichen)', await actor.answer(rowOf(tenantName)), signedFrancs)
+		),
+		question(`the Saldo of ${tenantName} in the preview`, async (actor) =>
+			(await actor.answer(remembered(PREVIEW_BALANCES))).get(tenantName)
+		)
+	);
+
+/** The total costs of the tenant's statement in the preview, in francs */
+export const totalCostsOf = (tenantName: string) =>
+	throughUiOrApi<Question<number | string | null | undefined>>(
+		question(`the costs of ${tenantName} in the preview`, async (actor) =>
+			amountAfter('Kosten', await actor.answer(rowOf(tenantName)))
+		),
+		question(`the costs of ${tenantName} in the preview`, async (actor) =>
+			(await actor.answer(remembered(PREVIEW_TOTALS))).get(tenantName)
+		)
+	);
+
+export const generationOutcomeShown = Visibility.of(generationResult);
+export const generationOutcomeCount = Count.of(generationResult);
+export const feeAboveGuideline = Visibility.of(managementFeeHint);
+export const feeOfRun = Text.of(previewFee);
+export const feeFieldValue = Value.of(managementFeeInput);
+export const feeFieldShown = Visibility.of(managementFeeInput);
+export const feeFieldDescription = Accessible.descriptionOf(managementFeeInput);
+export const announcedFeeHint = Visibility.of(announcement('Über dem üblichen Richtwert'));
 // Step 3 offers one choice, the Heizprofil: the fee has no distribution key
-export const settingsChoices = (actor: Actor) => wizardChoices(actor.page);
-export const periodChoice = (actor: Actor) => periodStartInput(actor.page);
-export const missingInvoicesWarning = (actor: Actor) => missingInvoices(actor.page);
-export const invoicesOfBuilding = (actor: Actor, buildingName: string) => buildingInvoices(actor.page, buildingName);
-export const draftsOnly = (actor: Actor) => draftsOnlyNote(actor.page);
-export const chosenBuilding = (actor: Actor, buildingId: string) => buildingCheckbox(actor.page, buildingId);
-export const categoryFinding = (actor: Actor, category: string) => categoryFindings(actor.page).filter({ hasText: category });
+export const settingsChoiceCount = Count.of(wizardChoices);
+export const settingsChoiceName = Accessible.nameOf(wizardChoices);
+export const periodChoiceShown = Visibility.of(periodStartInput);
+export const missingInvoicesWarning = Text.of(missingInvoices);
+export const missingInvoicesWarnings = Count.of(missingInvoices);
+export const invoicesOfBuilding = (buildingName: string) => Text.of(buildingInvoices(buildingName));
+export const draftsOnly = Text.of(draftsOnlyNote);
+export const buildingChosen = (buildingId: string) => Checked.of(buildingCheckbox(buildingId));
+export const categoryFindingOf = (category: string) => Text.of(categoryFinding(category));
+// the option names the profile and its sum, «Winter … (100%)»
+export const proposedHeatingProfile = Value.chosenIn(heatingProfileSelect);
+export const heatingProfileOffered = Visibility.of(heatingProfileSelect);

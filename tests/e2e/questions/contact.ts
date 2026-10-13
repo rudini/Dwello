@@ -1,5 +1,6 @@
-import type { Actor } from '../fixtures/actor';
-import { tenantEmailLink, tenantPhoneLink } from '../interactions/contact';
+import { Attribute, Count } from '../screenplay/questions';
+import { tenantEmailLink, tenantPhoneLink } from '../targets/contact';
 
-export const emailLink = (actor: Actor) => tenantEmailLink(actor.page);
-export const phoneLink = (actor: Actor) => tenantPhoneLink(actor.page);
+export const emailLinkAddress = Attribute.named('href').of(tenantEmailLink);
+export const emailLinks = Count.of(tenantEmailLink);
+export const phoneLinkAddress = Attribute.named('href').of(tenantPhoneLink);

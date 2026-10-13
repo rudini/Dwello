@@ -1,5 +1,5 @@
-import type { Actor } from '../fixtures/actor';
-import { typeDate } from '../interactions/form';
+import type { Activity } from '../screenplay/actor';
+import { Click, Enter, EnterDate, Navigate, Select } from '../screenplay/interactions';
 import {
 	amountInput,
 	buildingSelect,
@@ -9,55 +9,37 @@ import {
 	invoiceSubmitButton,
 	overrideReasonInput,
 	supplierInput
-} from '../interactions/invoice-form';
+} from '../targets/invoice-form';
 
 export type InvoiceData = { buildingId: string; supplier: string; amount: string; description: string; category: string };
 
-export const chooseCategory = (category: string) => async (actor: Actor) => {
-	await categorySelect(actor.page).selectOption({ label: category });
-};
+export const openNewInvoice = Navigate.to('/invoices/new');
+export const openInvoiceEdit = (invoiceId: string) => Navigate.to(`/invoices/${invoiceId}/edit`);
 
-export const saveInvoice = async (actor: Actor) => {
-	await invoiceSubmitButton(actor.page).click();
-};
+export const chooseCategory = (category: string) => Select.option({ label: category }).from(categorySelect);
+export const saveInvoice = Click.on(invoiceSubmitButton);
 
-export const registerInvoice = (invoice: InvoiceData) => async (actor: Actor) => {
-	await buildingSelect(actor.page).selectOption(invoice.buildingId);
-	await amountInput(actor.page).fill(invoice.amount);
-	await supplierInput(actor.page).fill(invoice.supplier);
-	await descriptionInput(actor.page).fill(invoice.description);
-	await actor.perform(chooseCategory(invoice.category));
-	await actor.perform(saveInvoice);
-};
+export const registerInvoice = (invoice: InvoiceData): Activity => (actor) =>
+	actor.attemptsTo(
+		Select.option(invoice.buildingId).from(buildingSelect),
+		Enter.theValue(invoice.amount).into(amountInput),
+		Enter.theValue(invoice.supplier).into(supplierInput),
+		Enter.theValue(invoice.description).into(descriptionInput),
+		chooseCategory(invoice.category),
+		saveInvoice
+	);
 
-export const correctAmount = (amount: string) => async (actor: Actor) => {
-	await amountInput(actor.page).fill(amount);
-	await actor.perform(saveInvoice);
-};
+export const correctAmount = (amount: string): Activity => (actor) =>
+	actor.attemptsTo(Enter.theValue(amount).into(amountInput), saveInvoice);
 
-export const recategorize = (category: string) => async (actor: Actor) => {
-	await actor.perform(chooseCategory(category));
-	await actor.perform(saveInvoice);
-};
+export const recategorize = (category: string): Activity => (actor) => actor.attemptsTo(chooseCategory(category), saveInvoice);
 
-export const overrideCategory = (category: string, reason: string) => async (actor: Actor) => {
-	await actor.perform(chooseCategory(category));
-	await overrideReasonInput(actor.page).fill(reason);
-	await actor.perform(saveInvoice);
-};
+export const overrideCategory = (category: string, reason: string): Activity => (actor) =>
+	actor.attemptsTo(chooseCategory(category), Enter.theValue(reason).into(overrideReasonInput), saveInvoice);
 
-export const clearSupplier = async (actor: Actor) => {
-	await supplierInput(actor.page).fill('');
-	await actor.perform(saveInvoice);
-};
+export const clearSupplier: Activity = (actor) => actor.attemptsTo(Enter.theValue('').into(supplierInput), saveInvoice);
 
 // Types key by key, as a person on a phone's number pad does, then leaves the field
-export const typeInvoiceDate = (text: string) => async (actor: Actor) => {
-	await invoiceDateInput(actor.page).fill('');
-	await invoiceDateInput(actor.page).pressSequentially(text);
-	await invoiceDateInput(actor.page).blur();
-};
+export const typeInvoiceDate = (text: string) => Enter.keyByKey(text).intoAndLeave(invoiceDateInput);
 
-export const enterInvoiceDate = (date: string) => async (actor: Actor) => {
-	await typeDate(invoiceDateInput(actor.page), date);
-};
+export const enterInvoiceDate = (date: string) => EnterDate.of(date).into(invoiceDateInput);

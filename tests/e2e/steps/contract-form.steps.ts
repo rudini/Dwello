@@ -1,20 +1,21 @@
-import { expect } from '@playwright/test';
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { visit } from '../interactions/navigation';
-import { contractDuration } from '../interactions/contract-form';
 import {
-	apartmentChoice,
-	chosenApartment,
-	chosenTenant,
+	apartmentSelectable,
+	chosenApartmentId,
+	chosenTenantId,
 	chosenTenantName,
 	confirmation,
-	restoredDraft,
+	draftRestoredShown,
+	durationChosen,
 	reviewed
 } from '../questions/contract-form';
-import { listedContract } from '../questions/contracts';
+import { contractListed } from '../questions/contracts';
 import {
 	changeBaseRent,
+	deleteDraftAndSave,
+	openContractEdit,
+	openNewContract,
 	saveEndDate,
 	saveStartDate,
 	withdrawNotice,
@@ -35,27 +36,27 @@ import { searchContracts } from '../tasks/contracts';
 const { Given, When, Then } = createBdd(test);
 
 Given('der Liegenschaftsverwalter ist auf der Seite "Neuer Mietvertrag"', async ({ verwalter }) => {
-	await visit(verwalter.page, '/contracts/new');
+	await verwalter.attemptsTo(openNewContract);
 });
 
 When(
 	'der Liegenschaftsverwalter den Mieter {string} wählt, bevor die Seite fertig geladen ist',
 	async ({ verwalter, seed }, tenant: string) => {
-		await verwalter.perform(chooseTenantWhileLoading(seed.idOf(tenant)!));
+		await verwalter.attemptsTo(chooseTenantWhileLoading(seed.idOf(tenant)!));
 	}
 );
 
 When(
 	'der Liegenschaftsverwalter die Wohnung {string} ab {string} für {string} Franken vermietet',
 	async ({ verwalter, seed }, apartment: string, startDate: string, baseRent: string) => {
-		await verwalter.perform(rentApartment({ apartmentId: seed.idOf(apartment)!, startDate, baseRent }));
+		await verwalter.attemptsTo(rentApartment({ apartmentId: seed.idOf(apartment)!, startDate, baseRent }));
 	}
 );
 
 When(
 	'der Liegenschaftsverwalter {string} die Wohnung {string} ab {string} für {string} Franken vermietet',
 	async ({ verwalter, seed }, tenant: string, apartment: string, startDate: string, baseRent: string) => {
-		await verwalter.perform(
+		await verwalter.attemptsTo(
 			registerContract({ tenantId: seed.idOf(tenant)!, apartmentId: seed.idOf(apartment)!, startDate, baseRent })
 		);
 	}
@@ -64,7 +65,7 @@ When(
 When(
 	'der Liegenschaftsverwalter {string} die Wohnung {string} ab {string} für {string} Franken mit {string} Franken Akonto bis zur Prüfung erfasst',
 	async ({ verwalter, seed }, tenant: string, apartment: string, startDate: string, baseRent: string, advancePayment: string) => {
-		await verwalter.perform(
+		await verwalter.attemptsTo(
 			reviewContract({ tenantId: seed.idOf(tenant)!, apartmentId: seed.idOf(apartment)!, startDate, baseRent, advancePayment })
 		);
 	}
@@ -73,7 +74,7 @@ When(
 When(
 	'der Liegenschaftsverwalter {string} die Wohnung {string} ab {string} für {string} Franken vermietet und den Vertragsbeginn bestätigt',
 	async ({ verwalter, seed }, tenant: string, apartment: string, startDate: string, baseRent: string) => {
-		await verwalter.perform(
+		await verwalter.attemptsTo(
 			registerContract({ tenantId: seed.idOf(tenant)!, apartmentId: seed.idOf(apartment)!, startDate, baseRent, confirmPastStart: true })
 		);
 	}
@@ -82,109 +83,109 @@ When(
 When(
 	'der Liegenschaftsverwalter {string} die Wohnung {string} ab {string} ohne Nettomiete vermieten will',
 	async ({ verwalter, seed }, tenant: string, apartment: string, startDate: string) => {
-		await verwalter.perform(
+		await verwalter.attemptsTo(
 			reviewContract({ tenantId: seed.idOf(tenant)!, apartmentId: seed.idOf(apartment)!, startDate, baseRent: '' })
 		);
 	}
 );
 
 When('der Liegenschaftsverwalter ohne Angaben weitergeht', async ({ verwalter }) => {
-	await verwalter.perform(goToNextStep);
+	await verwalter.attemptsTo(goToNextStep);
 });
 
 When('der Liegenschaftsverwalter weitergeht', async ({ verwalter }) => {
-	await verwalter.perform(goToNextStep);
+	await verwalter.attemptsTo(goToNextStep);
 });
 
 When('der Liegenschaftsverwalter den Mieter {string} wählt', async ({ verwalter, seed }, tenant: string) => {
-	await verwalter.perform(chooseTenant(seed.idOf(tenant)!));
+	await verwalter.attemptsTo(chooseTenant(seed.idOf(tenant)!));
 });
 
 When(
 	'der Liegenschaftsverwalter den Mieter {string} und die Wohnung {string} wählt',
 	async ({ verwalter, seed }, tenant: string, apartment: string) => {
-		await verwalter.perform(chooseTenantAndApartment(seed.idOf(tenant)!, seed.idOf(apartment)!));
+		await verwalter.attemptsTo(chooseTenantAndApartment(seed.idOf(tenant)!, seed.idOf(apartment)!));
 	}
 );
 
 When('der Liegenschaftsverwalter zum Schritt {string} zurückgeht', async ({ verwalter }, step: string) => {
-	await verwalter.perform(goBackToStep(step));
+	await verwalter.attemptsTo(goBackToStep(step));
 });
 
 When('der Liegenschaftsverwalter die Seite "Neuer Mietvertrag" später wieder öffnet', async ({ verwalter }) => {
-	await verwalter.perform(reopenNewContract);
+	await verwalter.attemptsTo(reopenNewContract);
 });
 
 When('der Liegenschaftsverwalter den Entwurf verwirft', async ({ verwalter }) => {
-	await verwalter.perform(discardDraft);
+	await verwalter.attemptsTo(discardDraft);
 });
 
 When(
 	'der Liegenschaftsverwalter im Mietvertrag den neuen Mieter {string} erfasst',
 	async ({ verwalter, seed }, tenant: string) => {
-		await verwalter.perform(createTenantForContract(seed.unique(tenant)));
+		await verwalter.attemptsTo(createTenantForContract(seed.unique(tenant)));
 	}
 );
 
 Then(
 	'sieht der Liegenschaftsverwalter die Bestätigung, dass der Mietvertrag von {string} gespeichert ist',
 	async ({ verwalter, names }, tenant: string) => {
-		await expect(confirmation(verwalter)).toContainText(`Mietvertrag von ${names.get(tenant) ?? tenant} gespeichert`);
+		await verwalter.sees(confirmation).toContain(`Mietvertrag von ${names.get(tenant) ?? tenant} gespeichert`);
 	}
 );
 
 Then('zeigt die Prüfung {string} mit {string}', async ({ verwalter, names }, label: string, value: string) => {
-	await expect(reviewed(verwalter, label)).toContainText(names.get(value) ?? value);
+	await verwalter.sees(reviewed(label)).toContain(names.get(value) ?? value);
 });
 
 Then('ist im Mietvertrag der Mieter {string} gewählt', async ({ verwalter, names }, tenant: string) => {
-	await expect.poll(() => chosenTenantName(verwalter)).toBe(names.get(tenant) ?? tenant);
+	await verwalter.sees(chosenTenantName).toBe(names.get(tenant) ?? tenant);
 });
 
 Then('ist im Mietvertrag die Wohnung {string} gewählt', async ({ verwalter, seed }, apartment: string) => {
-	await expect(chosenApartment(verwalter)).toHaveValue(seed.idOf(apartment)!);
+	await verwalter.sees(chosenApartmentId).toBe(seed.idOf(apartment)!);
 });
 
 Then('ist im Mietvertrag kein Mieter gewählt', async ({ verwalter }) => {
-	await expect(chosenTenant(verwalter)).toHaveValue('');
+	await verwalter.sees(chosenTenantId).toBe('');
 });
 
 Then('sieht der Liegenschaftsverwalter, dass sein Entwurf wiederhergestellt ist', async ({ verwalter }) => {
-	await expect(restoredDraft(verwalter)).toBeVisible();
+	await verwalter.sees(draftRestoredShown).toBe(true);
 });
 
 Then('der Mietvertrag von {string} ist in der Liste auffindbar', async ({ verwalter, names }, tenant: string) => {
 	const name = names.get(tenant) ?? tenant;
-	await verwalter.perform(searchContracts(name));
-	await expect(listedContract(verwalter, name)).toBeVisible();
+	await verwalter.attemptsTo(searchContracts(name));
+	await verwalter.sees(contractListed(name)).toBe(true);
 });
 
 Then(
 	'kann der Liegenschaftsverwalter die Wohnung {string} nicht auswählen',
 	async ({ verwalter, seed }, apartment: string) => {
-		await expect(apartmentChoice(verwalter, seed.idOf(apartment)!)).toBeDisabled();
+		await verwalter.sees(apartmentSelectable(seed.idOf(apartment)!)).toBe(false);
 	}
 );
 
 Given(
 	'der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Mietvertrags von {string}',
 	async ({ verwalter, seed }, tenant: string) => {
-		await visit(verwalter.page, `/contracts/${seed.idOf(`Mietvertrag ${tenant}`)}/edit`);
+		await verwalter.attemptsTo(openContractEdit(seed.idOf(`Mietvertrag ${tenant}`)!));
 	}
 );
 
 When('der Liegenschaftsverwalter den Mietzins auf {string} Franken ändert', async ({ verwalter }, baseRent: string) => {
-	await verwalter.perform(changeBaseRent(baseRent));
+	await verwalter.attemptsTo(changeBaseRent(baseRent));
 });
 
 When('der Liegenschaftsverwalter das Vertragsende {string} speichern will', async ({ verwalter }, date: string) => {
-	await verwalter.perform(saveEndDate(date));
+	await verwalter.attemptsTo(saveEndDate(date));
 });
 
 When(
 	'der Liegenschaftsverwalter das Vertragsende {string} speichert und die Folge bestätigt',
 	async ({ verwalter }, date: string) => {
-		await verwalter.perform(saveEndDate(date, { confirmPast: true }));
+		await verwalter.attemptsTo(saveEndDate(date, { confirmPast: true }));
 	}
 );
 
@@ -196,22 +197,22 @@ Given(
 );
 
 When('der Liegenschaftsverwalter die Kündigung aufhebt', async ({ verwalter }) => {
-	await verwalter.perform(withdrawNotice);
+	await verwalter.attemptsTo(withdrawNotice);
 });
 
 // the chosen option, not just one of the offered ones
 Then('zeigt die Vertragsdauer {string}', async ({ verwalter }, duration: string) => {
-	await expect(contractDuration(verwalter.page).getByRole('radio', { name: duration })).toBeChecked();
+	await verwalter.sees(durationChosen(duration)).toBe(true);
 });
 
 When('der Liegenschaftsverwalter den Vertragsbeginn {string} speichert', async ({ verwalter }, date: string) => {
-	await verwalter.perform(saveStartDate(date));
+	await verwalter.attemptsTo(saveStartDate(date));
 });
 
 When('der Liegenschaftsverwalter den Mietzins leert', async ({ verwalter }) => {
-	await verwalter.perform(changeBaseRent(''));
+	await verwalter.attemptsTo(changeBaseRent(''));
 });
 
 When('der Liegenschaftsverwalter den Entwurf löscht und den Mietvertrag speichert', async ({ verwalter }) => {
-	await verwalter.page.getByTestId('delete-draft-and-save').click();
+	await verwalter.attemptsTo(deleteDraftAndSave);
 });

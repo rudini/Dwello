@@ -1,8 +1,9 @@
-import type { Actor } from '../fixtures/actor';
-import { contractAmount, contractRow, contractRows, contractsEmptyNotice } from '../interactions/contracts';
+import { Count, Text, Visibility } from '../screenplay/questions';
+import { contractAmount, contractRow, contractRows, contractsEmptyNotice } from '../targets/contracts';
 
-export const listedContract = (actor: Actor, tenantName: string) => contractRow(actor.page, tenantName);
-export const allListedContracts = (actor: Actor) => contractRows(actor.page);
-export const emptyContractList = (actor: Actor) => contractsEmptyNotice(actor.page);
-export const listedAmount = (actor: Actor, tenantName: string, label: string) =>
-	contractAmount(actor.page, tenantName, label);
+export const contractListed = (tenantName: string) => Visibility.of(contractRow(tenantName));
+export const listedContract = (tenantName: string) => Text.of(contractRow(tenantName));
+export const listedContractCount = Count.of(contractRows);
+export const listedContractsOf = (tenantName: string) => Count.of(contractRow(tenantName));
+export const contractListEmpty = Visibility.of(contractsEmptyNotice);
+export const listedAmount = (tenantName: string, label: string) => Text.of(contractAmount(tenantName, label));

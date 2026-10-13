@@ -1,4 +1,5 @@
-import type { Actor } from '../fixtures/actor';
+import type { Activity } from '../screenplay/actor';
+import { Click, Enter, Navigate, Select } from '../screenplay/interactions';
 import {
 	areaInput,
 	buildingSelect,
@@ -7,41 +8,33 @@ import {
 	roomsSelect,
 	statusSelect,
 	submitButton
-} from '../interactions/apartment-form';
+} from '../targets/apartment-form';
 
 export type ApartmentData = { number: string; floor: string; area: string; rooms: string };
 
-export const chooseBuilding = (buildingId: string) => async (actor: Actor) => {
-	await buildingSelect(actor.page).selectOption(buildingId);
-};
+export const openNewApartment = Navigate.to('/apartments/new');
+export const openNewApartmentInBuilding = (buildingId: string) => Navigate.to(`/apartments/new?building=${buildingId}`);
+export const openApartmentEdit = (apartmentId: string) => Navigate.to(`/apartments/${apartmentId}/edit`);
 
-export const registerApartment = (apartment: ApartmentData) => async (actor: Actor) => {
-	await numberInput(actor.page).fill(apartment.number);
-	await floorSelect(actor.page).selectOption(apartment.floor);
-	await areaInput(actor.page).fill(apartment.area);
-	await roomsSelect(actor.page).selectOption(apartment.rooms);
-	await submitButton(actor.page).click();
-};
+export const chooseBuilding = (buildingId: string) => Select.option(buildingId).from(buildingSelect);
 
-export const saveApartment = async (actor: Actor) => {
-	await submitButton(actor.page).click();
-};
+export const saveApartment = Click.on(submitButton);
 
-export const enterNumber = (number: string) => async (actor: Actor) => {
-	await numberInput(actor.page).fill(number);
-};
+export const registerApartment = (apartment: ApartmentData): Activity => (actor) =>
+	actor.attemptsTo(
+		Enter.theValue(apartment.number).into(numberInput),
+		Select.option(apartment.floor).from(floorSelect),
+		Enter.theValue(apartment.area).into(areaInput),
+		Select.option(apartment.rooms).from(roomsSelect),
+		saveApartment
+	);
 
-export const changeNumber = (number: string) => async (actor: Actor) => {
-	await numberInput(actor.page).fill(number);
-	await submitButton(actor.page).click();
-};
+export const enterNumber = (number: string) => Enter.theValue(number).into(numberInput);
 
-export const changeArea = (area: string) => async (actor: Actor) => {
-	await areaInput(actor.page).fill(area);
-	await submitButton(actor.page).click();
-};
+export const changeNumber = (number: string): Activity => (actor) => actor.attemptsTo(enterNumber(number), saveApartment);
 
-export const blockApartment = async (actor: Actor) => {
-	await statusSelect(actor.page).selectOption('reserved');
-	await submitButton(actor.page).click();
-};
+export const changeArea = (area: string): Activity => (actor) =>
+	actor.attemptsTo(Enter.theValue(area).into(areaInput), saveApartment);
+
+export const blockApartment: Activity = (actor) =>
+	actor.attemptsTo(Select.option('reserved').from(statusSelect), saveApartment);

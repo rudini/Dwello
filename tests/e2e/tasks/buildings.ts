@@ -1,26 +1,15 @@
-import type { Actor } from '../fixtures/actor';
-import {
-	buildingCard,
-	cityFilterInput,
-	newBuildingButton,
-	searchButton,
-	searchInput
-} from '../interactions/buildings';
+import type { Activity } from '../screenplay/actor';
+import { Click, Enter, Navigate } from '../screenplay/interactions';
+import { buildingCard, cityFilterInput, newBuildingButton, searchButton, searchInput } from '../targets/buildings';
 
-export const searchBuildings = (term: string) => async (actor: Actor) => {
-	await searchInput(actor.page).fill(term);
-	await searchButton(actor.page).click();
-};
+export const openBuildingList = Navigate.to('/buildings');
 
-export const filterByCity = (city: string) => async (actor: Actor) => {
-	await cityFilterInput(actor.page).fill(city);
-	await searchButton(actor.page).click();
-};
+export const searchBuildings = (term: string): Activity => (actor) =>
+	actor.attemptsTo(Enter.theValue(term).into(searchInput), Click.on(searchButton));
 
-export const startNewBuilding = async (actor: Actor) => {
-	await newBuildingButton(actor.page).click();
-};
+export const filterByCity = (city: string): Activity => (actor) =>
+	actor.attemptsTo(Enter.theValue(city).into(cityFilterInput), Click.on(searchButton));
 
-export const openBuilding = (name: string) => async (actor: Actor) => {
-	await buildingCard(actor.page, name).click();
-};
+export const startNewBuilding = Click.on(newBuildingButton);
+
+export const openBuilding = (name: string) => Click.on(buildingCard(name));

@@ -1,20 +1,32 @@
-import { expect } from '@playwright/test';
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { visit } from '../interactions/navigation';
-import { apartmentOfContract, endDateProblem, endOfContract, statusOfContract, totalRent } from '../questions/contract-detail';
-import { confirmEndContractButton, nextStep } from '../interactions/contract-detail';
-import { emptyContractList, listedContract } from '../questions/contracts';
 import {
+	apartmentOfContract,
+	endConfirmationInWindow,
+	endDateProblemShown,
+	endOfContract,
+	statusOfContract,
+	totalRent
+} from '../questions/contract-detail';
+import { contractListEmpty, listedContractsOf } from '../questions/contracts';
+import { pageAddress } from '../questions/navigation';
+import {
+	chooseNextStep,
+	createMissingStatement,
 	deleteContract,
+	deleteDraftAndEndContract,
 	editContractFromDetail,
 	endContract,
 	endContractOn,
+	openContract,
 	openContractApartment,
 	openContractTenant,
+	openRefusedStatement,
+	scrollToEndConfirmation,
 	showBuildingInvoices,
 	showContractStatements,
-	startDeletingContract
+	startDeletingContract,
+	useWindowOf
 } from '../tasks/contract-detail';
 import { searchContracts } from '../tasks/contracts';
 
@@ -30,129 +42,128 @@ Given(
 Given(
 	'der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von {string}',
 	async ({ verwalter, seed }, tenant: string) => {
-		await visit(verwalter.page, `/contracts/${seed.idOf(`Mietvertrag ${tenant}`)}`);
+		await verwalter.attemptsTo(openContract(seed.idOf(`Mietvertrag ${tenant}`)!));
 	}
 );
 
 When('der Liegenschaftsverwalter den Mietvertrag beendet', async ({ verwalter }) => {
-	await verwalter.perform(endContract);
+	await verwalter.attemptsTo(endContract);
 });
 
 When('der Liegenschaftsverwalter den Mietvertrag auf den {string} beendet', async ({ verwalter }, date: string) => {
-	await verwalter.perform(endContractOn(date));
+	await verwalter.attemptsTo(endContractOn(date));
 });
 
 When(
 	'der Liegenschaftsverwalter den Mietvertrag auf den {string} beendet und die Folge bestätigt',
 	async ({ verwalter }, date: string) => {
-		await verwalter.perform(endContractOn(date, { confirmPast: true }));
+		await verwalter.attemptsTo(endContractOn(date, { confirmPast: true }));
 	}
 );
 
 // The same steps; the dialog refuses the date and stays open
 When('der Liegenschaftsverwalter den Mietvertrag auf den {string} beenden will', async ({ verwalter }, date: string) => {
-	await verwalter.perform(endContractOn(date));
+	await verwalter.attemptsTo(endContractOn(date));
 });
 
 Given('das Browserfenster ist {int} auf {int} Pixel gross', async ({ verwalter }, width: number, height: number) => {
-	await verwalter.page.setViewportSize({ width, height });
+	await verwalter.attemptsTo(useWindowOf(width, height));
 });
 
 // the confirm button can be scrolled into view inside the dialog, not cut off by the window
 Then('kann der Liegenschaftsverwalter den Mietvertrag im Dialog beenden', async ({ verwalter }) => {
-	const confirm = confirmEndContractButton(verwalter.page);
-	await confirm.scrollIntoViewIfNeeded();
-	await expect(confirm).toBeInViewport({ ratio: 1 });
+	await verwalter.attemptsTo(scrollToEndConfirmation);
+	await verwalter.sees(endConfirmationInWindow).toBe(true);
 });
 
 When('der Liegenschaftsverwalter den Mietvertrag löschen will', async ({ verwalter }) => {
-	await verwalter.perform(startDeletingContract);
+	await verwalter.attemptsTo(startDeletingContract);
 });
 
 When('der Liegenschaftsverwalter den Mietvertrag löscht', async ({ verwalter }) => {
-	await verwalter.perform(deleteContract);
+	await verwalter.attemptsTo(deleteContract);
 });
 
 When('der Liegenschaftsverwalter den Mietvertrag bearbeiten will', async ({ verwalter }) => {
-	await verwalter.perform(editContractFromDetail);
+	await verwalter.attemptsTo(editContractFromDetail);
 });
 
 When('der Liegenschaftsverwalter den Mieter öffnet', async ({ verwalter }) => {
-	await verwalter.perform(openContractTenant);
+	await verwalter.attemptsTo(openContractTenant);
 });
 
 When('der Liegenschaftsverwalter die Wohnung des Mietvertrags öffnet', async ({ verwalter }) => {
-	await verwalter.perform(openContractApartment);
+	await verwalter.attemptsTo(openContractApartment);
 });
 
 When('der Liegenschaftsverwalter die Nebenkostenabrechnungen des Mietvertrags anzeigt', async ({ verwalter }) => {
-	await verwalter.perform(showContractStatements);
+	await verwalter.attemptsTo(showContractStatements);
 });
 
 When('der Liegenschaftsverwalter die Rechnungen des Gebäudes anzeigt', async ({ verwalter }) => {
-	await verwalter.perform(showBuildingInvoices);
+	await verwalter.attemptsTo(showBuildingInvoices);
 });
 
 Then('sieht der Liegenschaftsverwalter die Wohnung {string} im Mietvertrag', async ({ verwalter }, number: string) => {
-	await expect(apartmentOfContract(verwalter)).toContainText(`Wohnung ${number}`);
+	await verwalter.sees(apartmentOfContract).toContain(`Wohnung ${number}`);
 });
 
 Then('sieht der Liegenschaftsverwalter den monatlichen Mietzins {string}', async ({ verwalter }, amount: string) => {
-	await expect(totalRent(verwalter)).toHaveText(amount);
+	await verwalter.sees(totalRent).toBe(amount);
 });
 
 Then('hat der Mietvertrag den Status {string}', async ({ verwalter }, status: string) => {
-	await expect(statusOfContract(verwalter)).toHaveText(status);
+	await verwalter.sees(statusOfContract).toBe(status);
 });
 
 // The end action sets today's date in Switzerland as a notice; the page shows it as formatDate does
 Then('endet der Mietvertrag heute', async ({ verwalter }) => {
 	const today = new Date().toLocaleDateString('de-CH', { timeZone: 'Europe/Zurich' });
-	await expect(endOfContract(verwalter)).toHaveText(`Unbefristet, gekündigt auf den ${today}`);
+	await verwalter.sees(endOfContract).toBe(`Unbefristet, gekündigt auf den ${today}`);
 });
 
 // the field's error and a refusal of the server use the same frame: the one with the message counts
 Then('meldet der Dialog {string}', async ({ verwalter }, message: string) => {
-	await expect(endDateProblem(verwalter).filter({ hasText: message })).toBeVisible();
+	await verwalter.sees(endDateProblemShown(message)).toBe(true);
 });
 
 Then('zeigt der Mietvertrag {string}', async ({ verwalter }, end: string) => {
-	await expect(endOfContract(verwalter)).toHaveText(end);
+	await verwalter.sees(endOfContract).toBe(end);
 });
 
 Then('ist der Mietvertrag unbefristet', async ({ verwalter }) => {
-	await expect(endOfContract(verwalter)).toHaveText('Unbefristet');
+	await verwalter.sees(endOfContract).toBe('Unbefristet');
 });
 
 Then('der Mietvertrag von {string} ist nicht mehr auffindbar', async ({ verwalter, names }, tenant: string) => {
 	const name = names.get(tenant) ?? tenant;
-	await verwalter.perform(searchContracts(name));
-	await expect(emptyContractList(verwalter)).toBeVisible();
-	await expect(listedContract(verwalter, name)).toHaveCount(0);
+	await verwalter.attemptsTo(searchContracts(name));
+	await verwalter.sees(contractListEmpty).toBe(true);
+	await verwalter.sees(listedContractsOf(name)).toBe(0);
 });
 
 When('der Liegenschaftsverwalter den nächsten Schritt {string} wählt', async ({ verwalter }, label: string) => {
-	await nextStep(verwalter.page, label).click();
+	await verwalter.attemptsTo(chooseNextStep(label));
 });
 
 // the link names the apartment; that the wizard preselects it from `?apartment=` is tested in contract-new-load.test.ts
 Then('gilt der neue Mietvertrag für die Wohnung {string}', async ({ verwalter, seed }, apartment: string) => {
-	await expect(verwalter.page).toHaveURL(new RegExp(`apartment=${seed.idOf(apartment)}`));
+	await verwalter.sees(pageAddress).toMatch(new RegExp(`apartment=${seed.idOf(apartment)}`));
 });
 
 When('der Liegenschaftsverwalter den genannten Entwurf öffnet', async ({ verwalter }) => {
-	await verwalter.page.getByTestId('refused-statement-link').first().click();
+	await verwalter.attemptsTo(openRefusedStatement);
 });
 
 When('der Liegenschaftsverwalter den Entwurf löscht und den Mietvertrag beendet', async ({ verwalter }) => {
-	await verwalter.page.getByTestId('delete-draft-and-end').click();
+	await verwalter.attemptsTo(deleteDraftAndEndContract);
 });
 
 When('der Liegenschaftsverwalter die fehlende Abrechnung des letzten Jahres erstellen will', async ({ verwalter }) => {
-	await verwalter.page.getByTestId('contract-missing-statement-link').click();
+	await verwalter.attemptsTo(createMissingStatement);
 });
 
 Then('endet der Mietvertrag von {string} am {string}', async ({ verwalter, seed }, tenant: string, date: string) => {
-	await visit(verwalter.page, `/contracts/${seed.idOf(`Mietvertrag ${tenant}`)}`);
-	await expect(endOfContract(verwalter)).toContainText(date);
+	await verwalter.attemptsTo(openContract(seed.idOf(`Mietvertrag ${tenant}`)!));
+	await verwalter.sees(endOfContract).toContain(date);
 });

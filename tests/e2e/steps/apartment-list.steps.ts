@@ -1,10 +1,9 @@
-import { expect } from '@playwright/test';
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { visit } from '../interactions/navigation';
-import { allListedApartments, occupancyOf } from '../questions/apartments';
+import { apartmentCount, occupancyOf } from '../questions/apartments';
 import {
 	openApartment,
+	openApartmentList,
 	showApartmentsOfBuilding,
 	showApartmentsOfBuildingWhileLoading,
 	startNewApartment
@@ -13,49 +12,49 @@ import {
 const { Given, When, Then } = createBdd(test);
 
 Given('der Liegenschaftsverwalter ist auf der Wohnungsliste', async ({ verwalter }) => {
-	await visit(verwalter.page, '/apartments');
+	await verwalter.attemptsTo(openApartmentList);
 });
 
 Given(
 	'der Liegenschaftsverwalter zeigt die Wohnungen im Gebäude {string} an',
 	async ({ verwalter, seed }, building: string) => {
-		await verwalter.perform(showApartmentsOfBuilding(seed.idOf(building)!));
+		await verwalter.attemptsTo(showApartmentsOfBuilding(seed.idOf(building)!));
 	}
 );
 
 When(
 	'der Liegenschaftsverwalter die Wohnungen im Gebäude {string} anzeigt',
 	async ({ verwalter, seed }, building: string) => {
-		await verwalter.perform(showApartmentsOfBuilding(seed.idOf(building)!));
+		await verwalter.attemptsTo(showApartmentsOfBuilding(seed.idOf(building)!));
 	}
 );
 
 When(
 	'der Liegenschaftsverwalter nur die leeren Wohnungen im Gebäude {string} anzeigt',
 	async ({ verwalter, seed }, building: string) => {
-		await verwalter.perform(showApartmentsOfBuilding(seed.idOf(building)!, 'vacant'));
+		await verwalter.attemptsTo(showApartmentsOfBuilding(seed.idOf(building)!, 'vacant'));
 	}
 );
 
 When(
 	'der Liegenschaftsverwalter das Gebäude {string} wählt, bevor die Wohnungsliste fertig geladen ist, und sucht',
 	async ({ verwalter, seed }, building: string) => {
-		await verwalter.perform(showApartmentsOfBuildingWhileLoading(seed.idOf(building)!));
+		await verwalter.attemptsTo(showApartmentsOfBuildingWhileLoading(seed.idOf(building)!));
 	}
 );
 
 When('der Liegenschaftsverwalter eine neue Wohnung erfassen will', async ({ verwalter }) => {
-	await verwalter.perform(startNewApartment);
+	await verwalter.attemptsTo(startNewApartment);
 });
 
 When('der Liegenschaftsverwalter die Wohnung {string} aus der Liste öffnet', async ({ verwalter }, number: string) => {
-	await verwalter.perform(openApartment(number));
+	await verwalter.attemptsTo(openApartment(number));
 });
 
 Then('ist die Wohnung {string} {string}', async ({ verwalter }, number: string, occupancy: string) => {
-	await expect(occupancyOf(verwalter, number)).toHaveText(occupancy);
+	await verwalter.sees(occupancyOf(number)).toBe(occupancy);
 });
 
 Then('die Wohnungsliste enthält genau {int} Wohnung(en)', async ({ verwalter }, count: number) => {
-	await expect(allListedApartments(verwalter)).toHaveCount(count);
+	await verwalter.sees(apartmentCount).toBe(count);
 });

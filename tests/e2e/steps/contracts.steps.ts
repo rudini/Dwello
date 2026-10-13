@@ -1,11 +1,11 @@
-import { expect } from '@playwright/test';
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { visit } from '../interactions/navigation';
-import { allListedContracts, listedAmount, listedContract } from '../questions/contracts';
+import { listedAmount, listedContract, listedContractCount } from '../questions/contracts';
+import { pageAddress, pageTitle } from '../questions/navigation';
 import {
 	editContract,
 	filterContracts,
+	openContractList,
 	searchContracts,
 	startNewContract,
 	viewContract
@@ -36,20 +36,20 @@ Then(
 	'nennt die Mietvertragsliste den Mietvertrag von {string} {string}',
 	async ({ verwalter, names }, tenant: string, kind: string) => {
 		const name = names.get(tenant) ?? tenant;
-		await visit(verwalter.page, '/contracts');
-		await verwalter.perform(searchContracts(name));
-		await expect(listedContract(verwalter, name)).toContainText(`, ${kind}`);
+		await verwalter.attemptsTo(openContractList);
+		await verwalter.attemptsTo(searchContracts(name));
+		await verwalter.sees(listedContract(name)).toContain(`, ${kind}`);
 	}
 );
 
 Given('der Liegenschaftsverwalter ist auf der Mietvertragsliste', async ({ verwalter }) => {
-	await visit(verwalter.page, '/contracts');
+	await verwalter.attemptsTo(openContractList);
 });
 
 Then(
 	'sieht der Liegenschaftsverwalter den Mietvertrag von {string} mit dem Status {string}',
 	async ({ verwalter, names }, tenant: string, status: string) => {
-		await expect(listedContract(verwalter, names.get(tenant) ?? tenant)).toContainText(status);
+		await verwalter.sees(listedContract(names.get(tenant) ?? tenant)).toContain(status);
 	}
 );
 
@@ -58,16 +58,16 @@ Then(
 	'beginnt der Mietvertrag von {string} laut Liste seit {string}',
 	async ({ verwalter, names }, tenant: string, date: string) => {
 		const name = names.get(tenant) ?? tenant;
-		await visit(verwalter.page, '/contracts');
-		await verwalter.perform(searchContracts(name));
-		await expect(listedContract(verwalter, name)).toContainText(`seit ${date}`);
+		await verwalter.attemptsTo(openContractList);
+		await verwalter.attemptsTo(searchContracts(name));
+		await verwalter.sees(listedContract(name)).toContain(`seit ${date}`);
 	}
 );
 
 Then(
 	'beginnt der Mietvertrag von {string} laut Liste am {string}',
 	async ({ verwalter, names }, tenant: string, date: string) => {
-		await expect(listedContract(verwalter, names.get(tenant) ?? tenant)).toContainText(`ab ${date}`);
+		await verwalter.sees(listedContract(names.get(tenant) ?? tenant)).toContain(`ab ${date}`);
 	}
 );
 
@@ -75,55 +75,55 @@ Then(
 	'nennt die Mietvertragsliste für {string} die Nettomiete {string} und monatlich total {string}',
 	async ({ verwalter, names }, tenant: string, baseRent: string, total: string) => {
 		const name = names.get(tenant) ?? tenant;
-		await expect(listedAmount(verwalter, name, 'Nettomiete')).toHaveText(baseRent);
-		await expect(listedAmount(verwalter, name, 'Monatlich total')).toHaveText(total);
+		await verwalter.sees(listedAmount(name, 'Nettomiete')).toBe(baseRent);
+		await verwalter.sees(listedAmount(name, 'Monatlich total')).toBe(total);
 	}
 );
 
 When('der Liegenschaftsverwalter nach dem Mieter {string} sucht', async ({ verwalter, names }, tenant: string) => {
-	await verwalter.perform(searchContracts(names.get(tenant) ?? tenant));
+	await verwalter.attemptsTo(searchContracts(names.get(tenant) ?? tenant));
 });
 
 Then('die Mietvertragsliste enthält genau {int} Mietvertrag', async ({ verwalter }, count: number) => {
-	await expect(allListedContracts(verwalter)).toHaveCount(count);
+	await verwalter.sees(listedContractCount).toBe(count);
 });
 
 When(
 	'der Liegenschaftsverwalter die Mietverträge nach dem Gebäude {string} filtert',
 	async ({ verwalter, seed }, building: string) => {
-		await verwalter.perform(filterContracts({ buildingId: seed.idOf(building) }));
+		await verwalter.attemptsTo(filterContracts({ buildingId: seed.idOf(building) }));
 	}
 );
 
 When(
 	'der Liegenschaftsverwalter die beendeten Mietverträge im Gebäude {string} anzeigt',
 	async ({ verwalter, seed }, building: string) => {
-		await verwalter.perform(filterContracts({ buildingId: seed.idOf(building), status: 'ended' }));
+		await verwalter.attemptsTo(filterContracts({ buildingId: seed.idOf(building), status: 'ended' }));
 	}
 );
 
 When('der Liegenschaftsverwalter einen neuen Mietvertrag erfassen will', async ({ verwalter }) => {
-	await verwalter.perform(startNewContract);
+	await verwalter.attemptsTo(startNewContract);
 });
 
 When('der Liegenschaftsverwalter den Mietvertrag von {string} ansieht', async ({ verwalter, names }, tenant: string) => {
-	await verwalter.perform(viewContract(names.get(tenant) ?? tenant));
+	await verwalter.attemptsTo(viewContract(names.get(tenant) ?? tenant));
 });
 
 When(
 	'der Liegenschaftsverwalter den Mietvertrag von {string} bearbeiten will',
 	async ({ verwalter, names }, tenant: string) => {
-		await verwalter.perform(editContract(names.get(tenant) ?? tenant));
+		await verwalter.attemptsTo(editContract(names.get(tenant) ?? tenant));
 	}
 );
 
 Then(
 	'ist der Liegenschaftsverwalter auf der Detailseite des Mietvertrags von {string}',
 	async ({ verwalter, names }, tenant: string) => {
-		await expect(verwalter.page).toHaveTitle(`Mietvertrag - ${names.get(tenant) ?? tenant} - Dwello`);
+		await verwalter.sees(pageTitle).toBe(`Mietvertrag - ${names.get(tenant) ?? tenant} - Dwello`);
 	}
 );
 
 Then('ist der Liegenschaftsverwalter auf der Mietvertragsliste', async ({ verwalter }) => {
-	await expect(verwalter.page).toHaveURL(/\/contracts$/);
+	await verwalter.sees(pageAddress).toMatch(/\/contracts$/);
 });

@@ -1,24 +1,23 @@
-import type { Actor } from '../fixtures/actor';
-import { deleteConfirmButton } from '../interactions/form';
-import { allowedCheckbox, allowedFilter, deleteButton, editButton, nameInput, submitButton } from '../interactions/categories';
+import type { Activity } from '../screenplay/actor';
+import { Check, Click, Enter, Navigate, Uncheck } from '../screenplay/interactions';
+import { allowedCheckbox, allowedFilter, deleteButton, editButton, nameInput, submitButton } from '../targets/categories';
+import { deleteConfirmButton } from '../targets/form';
 
-export const showAllowedCategories = async (actor: Actor) => {
-	await allowedFilter(actor.page).click();
-};
+export const openCategories = Navigate.to('/config/categories');
+export const openNewCategory = Navigate.to('/config/categories/new');
+export const openCategoryEdit = (categoryId: string) => Navigate.to(`/config/categories/${categoryId}/edit`);
 
-export const createCategory = (name: string, allowed: boolean) => async (actor: Actor) => {
-	await allowedCheckbox(actor.page).setChecked(allowed);
-	await nameInput(actor.page).fill(name);
-	await submitButton(actor.page).click();
-};
+export const showAllowedCategories = Click.on(allowedFilter);
 
-export const saveAsNotAllowed = (name: string) => async (actor: Actor) => {
-	await editButton(actor.page, name).click();
-	await allowedCheckbox(actor.page).uncheck();
-	await submitButton(actor.page).click();
-};
+export const createCategory = (name: string, allowed: boolean): Activity => (actor) =>
+	actor.attemptsTo(
+		allowed ? Check.the(allowedCheckbox) : Uncheck.the(allowedCheckbox),
+		Enter.theValue(name).into(nameInput),
+		Click.on(submitButton)
+	);
 
-export const deleteCategory = (name: string) => async (actor: Actor) => {
-	await deleteButton(actor.page, name).click();
-	await deleteConfirmButton(actor.page).click();
-};
+export const saveAsNotAllowed = (name: string): Activity => (actor) =>
+	actor.attemptsTo(Click.on(editButton(name)), Uncheck.the(allowedCheckbox), Click.on(submitButton));
+
+export const deleteCategory = (name: string): Activity => (actor) =>
+	actor.attemptsTo(Click.on(deleteButton(name)), Click.on(deleteConfirmButton));

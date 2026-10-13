@@ -1,11 +1,6 @@
-import type { Actor } from '../fixtures/actor';
-import { cancelButton } from '../interactions/form';
-import { breadcrumbLink } from '../interactions/navigation';
+import { Click } from '../screenplay/interactions';
+import { cancelButton } from '../targets/form';
+import { breadcrumbLink } from '../targets/navigation';
 
-export const cancelEditing = async (actor: Actor) => {
-	await cancelButton(actor.page).click();
-};
-
-export const chooseBreadcrumb = (label: string) => async (actor: Actor) => {
-	await breadcrumbLink(actor.page, label).click();
-};
+export const cancelEditing = Click.on(cancelButton);
+export const chooseBreadcrumb = (label: string) => Click.on(breadcrumbLink(label));

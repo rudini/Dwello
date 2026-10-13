@@ -1,4 +1,4 @@
-import type { Actor } from '../fixtures/actor';
+import { Text } from '../screenplay/questions';
 import {
 	amount,
 	category,
@@ -7,12 +7,12 @@ import {
 	overrideReason,
 	recategorizeError,
 	utilityCost
-} from '../interactions/invoice-detail';
+} from '../targets/invoice-detail';
 
-export const amountOfInvoice = (actor: Actor) => amount(actor.page);
-export const categoryOfInvoice = (actor: Actor) => category(actor.page);
-export const distributionKeyOfInvoice = (actor: Actor) => distributionKey(actor.page);
-export const utilityCostOfInvoice = (actor: Actor) => utilityCost(actor.page);
-export const tenancyLawNote = (actor: Actor) => legalNote(actor.page);
-export const recategorizationFailure = (actor: Actor) => recategorizeError(actor.page);
-export const reasonForOverride = (actor: Actor) => overrideReason(actor.page);
+export const amountOfInvoice = Text.of(amount);
+export const categoryOfInvoice = Text.of(category);
+export const distributionKeyOfInvoice = Text.of(distributionKey);
+export const utilityCostOfInvoice = Text.of(utilityCost);
+export const tenancyLawNote = Text.of(legalNote);
+export const recategorizationFailure = Text.of(recategorizeError);
+export const reasonForOverride = Text.of(overrideReason);
