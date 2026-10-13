@@ -105,10 +105,10 @@ export const contractBody = (values: ContractFormValues) => ({
 
 /**
  * An apartment's contracts as the contract list answers them, in the shape the availability check reads; null when
- * they could not be loaded, also for an answer without a list (Haiku review): the apartment is then not free (#143)
+ * they could not be loaded, also for an answer without a list: the apartment is then not free (#143)
  */
 export function forAvailability(response: {
-	data?: { contracts?: unknown };
+	data?: { contracts?: { id: string; startDate: string; endDate: string | null }[] };
 	error?: unknown;
 }): ContractForAvailability[] | null {
 	const list = response.data?.contracts;
