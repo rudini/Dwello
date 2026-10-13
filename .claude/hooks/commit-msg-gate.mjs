@@ -5,8 +5,7 @@
 import { readFileSync } from 'node:fs';
 
 const command = JSON.parse(readFileSync(0, 'utf8')).tool_input?.command ?? '';
-const call = /(^|[\s;|&()])git\s+commit(?=\s|$)/.exec(command);
-if (!call) process.exit(0);
+const calls = [...command.matchAll(/(^|[\s;|&()])git(\s+-C\s+\S+)?\s+commit(?=\s|$)/g)];
 
 /** The shell words up to the end of the git call; a `"$(cat <<'EOF' … EOF )"` message is one word */
 function* words(s) {
@@ -38,23 +37,28 @@ function messageOf(args) {
 	}
 }
 
-const message = messageOf([...words(command.slice(call.index + call[0].length))]);
-if (message === undefined) process.exit(0);
+const messages = calls.map((call) => messageOf([...words(command.slice(call.index + call[0].length))]));
+if (messages.every((message) => message === undefined)) process.exit(0);
 
 const rules = readFileSync(new URL('../../CLAUDE.md', import.meta.url), 'utf8');
 const listed = (name) => [...(new RegExp(`${name}: (.+?)\\.`).exec(rules)?.[1] ?? '').matchAll(/`([\w-]+)`/g)].map((m) => m[1]);
 const types = listed('Types');
 const scopes = listed('Scopes');
 
-const subject = message.trim().split('\n')[0].trim();
-const form = /^(\w+)\(([\w-]+)\): \S/.exec(subject);
-const problems = [];
-if (!form || !types.includes(form[1])) problems.push(`write type(scope): subject, with type one of ${types.join(', ')}`);
-else if (!scopes.includes(form[2])) problems.push(`scope «${form[2]}» is not one of ${scopes.join(', ')}`);
-if (subject.length > 50) problems.push(`${subject.length} characters, at most 50`);
-if (subject.endsWith('.')) problems.push('ends with a period');
+/** What breaks the rules in the subject (first line) of `message` */
+function problemsOf(message) {
+	const subject = message.trim().split('\n')[0].trim();
+	const form = /^(\w+)\(([\w-]+)\): \S/.exec(subject);
+	const problems = [];
+	if (!form || !types.includes(form[1])) problems.push(`write type(scope): subject, with type one of ${types.join(', ')}`);
+	else if (!scopes.includes(form[2])) problems.push(`scope «${form[2]}» is not one of ${scopes.join(', ')}`);
+	if (subject.length > 50) problems.push(`${subject.length} characters, at most 50`);
+	if (subject.endsWith('.')) problems.push('ends with a period');
+	return problems.length ? [`«${subject}»: ${problems.join('; ')}`] : [];
+}
 
-if (problems.length) {
-	console.error(`commit-msg-gate: blocked: «${subject}»: ${problems.join('; ')} (CLAUDE.md, Conventions: Commits).`);
+const found = messages.flatMap((message) => (message === undefined ? [] : problemsOf(message)));
+if (found.length) {
+	console.error(`commit-msg-gate: blocked: ${found.join(' | ')} (CLAUDE.md, Conventions: Commits).`);
 	process.exit(2);
 }

@@ -16,22 +16,31 @@ const hook = (root: string, command: string) =>
 		timeout: 60_000
 	});
 
-/** A repository with only the branch `feature`: no `main`, no `origin/main`, no upstream for fallow to compare with */
-function featureOnly(): string {
-	const root = writeProject({
+/** A clone of only the branch `feature` (no `main`, no `origin/main`), from a remote that has `main` */
+function singleBranchClone(): string {
+	const origin = writeProject({
 		'package.json': '{ "name": "x", "type": "module", "main": "src/index.ts" }\n',
 		'src/index.ts': "import { a } from './a.ts';\nconsole.log(a);\n",
 		'src/a.ts': 'export const a = 1;\n'
 	});
-	git(root, 'init', '-q', '-b', 'feature');
-	commitAll(root, 'initial');
+	git(origin, 'init', '-q', '-b', 'main');
+	commitAll(origin, 'initial');
+	git(origin, 'branch', 'feature');
+	const root = `${writeProject({})}/clone`;
+	git(origin, 'clone', '-q', '--single-branch', '--branch', 'feature', origin, root);
+	git(root, 'remote', 'set-head', 'origin', '-d');
+	git(root, 'switch', '-q', '-c', 'work');
 	return root;
 }
 
 describe('fallow gate without a base branch', () => {
-	it('blocks and says how to get a base when there is none, instead of skipping the audit', () => {
-		const result = hook(featureOnly(), 'git commit -m x');
-		expect(result.stderr).toContain('git fetch origin main');
-		expect(result.status).toBe(2);
+	it('blocks instead of skipping the audit, and the fetch it names makes the audit run', () => {
+		const root = singleBranchClone();
+		const blocked = hook(root, 'git commit -m x');
+		expect(blocked.stderr).toContain('could not detect base branch');
+		expect(blocked.status).toBe(2);
+		const advice = /run (git fetch [^,]+)/.exec(blocked.stderr)?.[1] ?? '';
+		git(root, ...advice.split(' ').slice(1));
+		expect(hook(root, 'git commit -m x')).toMatchObject({ status: 0 });
 	});
 });

@@ -34,7 +34,9 @@ describe('commit subject gate (CLAUDE.md, Conventions: Commits)', () => {
 		['git commit -m "fix: guard retries"', 'type(scope)'],
 		['git commit -m "feature(contracts): guard retries"', 'type(scope)'],
 		['git commit -m "fix(wizard): guard retries"', 'scope «wizard»'],
-		[heredoc('fix(contracts): guard retries.\n\nBody.'), 'period']
+		[heredoc('fix(contracts): guard retries.\n\nBody.'), 'period'],
+		['git -C /home/user/Dwello commit -m "fix: guard retries"', 'type(scope)'],
+		['git commit -m "fix(contracts): guard retries" && git commit --amend -m "fix: guard"', 'type(scope)']
 	])('blocks %j: %s', (command, problem) => {
 		const result = hook(command);
 		expect(result.status).toBe(2);

@@ -86,7 +86,7 @@ if [ "$STATUS" -eq 2 ] || [ "$IS_ERROR" = "true" ]; then
   MSG="$(jq -r '.message // empty' <"$TMP_JSON" 2>/dev/null || true)"
   {
     echo "fallow-gate: blocked: fallow audit did not run (${MSG:-runtime error})."
-    echo "fallow-gate: without a base branch run git fetch origin main, then bunx fallow audit --base origin/main."
+    echo "fallow-gate: without a base branch run git fetch origin main:refs/remotes/origin/main, then commit again."
   } >&2
   exit 2
 fi
