@@ -128,10 +128,17 @@ describe('Mietvertrag bearbeiten', () => {
 		select.value = 'a2';
 		select.dispatchEvent(new Event('change', { bubbles: true }));
 		await settle();
-		const unknown =
-			'Die Mietverträge der Wohnung konnten nicht geladen werden. Laden Sie die Seite neu und versuchen Sie es erneut.';
-		expect(byTestId('apartment-contracts-unknown')!.textContent).toContain(unknown);
-		expect(byTestId('start-contracts-unknown')!.textContent).toContain(unknown);
+		// #151: what was not checked and what to do; the start points to the apartment, one button per page
+		expect(byTestId('apartment-contracts-unknown')!.textContent).toContain(
+			'Überschneidung noch nicht geprüft'
+		);
+		expect(byTestId('apartment-contracts-unknown')!.textContent).toContain(
+			'Wählen Sie «Erneut versuchen»; Ihre Eingaben bleiben erhalten.'
+		);
+		expect(byTestId('start-contracts-unknown')!.textContent).toContain(
+			'Die Mietverträge dieser Wohnung fehlen noch, siehe oben bei der Wohnung.'
+		);
+		expect(document.querySelectorAll('[data-testid="contracts-retry"]')).toHaveLength(1);
 		expect(byTestId('availability-info')).toBeNull();
 		const calendar =
 			byTestId('start-date-input')!.parentElement!.querySelector('input[type="date"]');
@@ -139,6 +146,24 @@ describe('Mietvertrag bearbeiten', () => {
 		// Review M3: the hint is read out when it appears; once only, not again at the start (Sven B-13 Minor 3)
 		expect(byTestId('apartment-contracts-unknown')!.closest('[role="status"]')).not.toBeNull();
 		expect(byTestId('start-contracts-unknown')!.closest('[role="status"]')).toBeNull();
+	});
+
+	// #151: «Erneut versuchen» loads the contracts again; the input stays (Helga B-13 H2)
+	it('lädt die Mietverträge der Wohnung erneut und behält die Eingabe', async () => {
+		let failing = true;
+		fakeBff(() =>
+			failing
+				? [500, {}]
+				: [200, { contracts: [{ id: 'c1', startDate: '2024-04-01', endDate: null }] }]
+		);
+		await open();
+		type('contract-base-rent-input', '980');
+		expect(byTestId('apartment-contracts-unknown')).not.toBeNull();
+		failing = false;
+		click('contracts-retry');
+		await settle();
+		expect(byTestId('apartment-contracts-unknown')).toBeNull();
+		expect(byTestId<HTMLInputElement>('contract-base-rent-input')!.value).toBe('980');
 	});
 
 	// Review M1: the availability of all apartments and the chosen one's contracts are two requests
@@ -270,7 +295,7 @@ describe('Mietvertrag bearbeiten', () => {
 			expect(calls.filter((c) => c.method === 'DELETE')).toEqual([]);
 			// Haiku-Review N2: die Meldung sagt, was fehlt und was zu tun ist
 			expect(byTestId('form-error')!.textContent).toContain(
-				'Die Mietverträge der Wohnung konnten nicht geladen werden. Laden Sie die Seite neu und versuchen Sie es erneut.'
+				'Dwello hat den Entwurf nicht gelöscht: Ohne die Mietverträge dieser Wohnung lässt sich eine Überschneidung nicht ausschliessen.'
 			);
 		});
 
@@ -404,7 +429,9 @@ describe('Mietvertrag bearbeiten', () => {
 			click('delete-draft-and-save');
 			await settle();
 			expect(calls.filter((c) => c.method === 'DELETE')).toEqual([]);
-			expect(byTestId('form-error')!.textContent).toContain('konnten nicht geladen werden');
+			expect(byTestId('form-error')!.textContent).toContain(
+				'Dwello hat den Entwurf nicht gelöscht'
+			);
 		});
 
 		// Review K-7: ein inzwischen versendeter Entwurf; die Meldung des Backends, kein zweites Angebot

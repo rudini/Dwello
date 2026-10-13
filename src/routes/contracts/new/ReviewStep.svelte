@@ -2,7 +2,7 @@
 	import { m } from '$lib/paraglide/messages';
 	import { contractSummary } from '$lib/contract-wizard';
 	import type { ContractFormValues } from '$lib/contract-form';
-	import Alert from '$lib/ui/Alert.svelte';
+	import ContractsUnknown from './ContractsUnknown.svelte';
 	import Button from '$lib/ui/Button.svelte';
 
 	// Step 5: the whole contract in words before it is saved; each fact leads back to its step
@@ -11,12 +11,14 @@
 		tenants,
 		apartments,
 		unknown = false,
+		onretry,
 		onedit
 	}: {
 		values: ContractFormValues;
 		tenants: { id: string; name: string }[];
 		apartments: { id: string; unit: string; building: string }[];
 		unknown?: boolean; // the apartment's contracts could not be loaded: whether it is free is not checked
+		onretry: () => void; // loads them again
 		onedit: (step: number, field: string) => void;
 	} = $props();
 </script>
@@ -24,11 +26,7 @@
 <p class="text-ink-muted">{m.contracts_review_intro()}</p>
 
 {#if unknown}
-	<Alert
-		tone="caution"
-		title={m.contracts_apartment_contracts_unknown()}
-		testid="review-contracts-unknown"
-	/>
+	<ContractsUnknown {onretry} testid="review-contracts-unknown" />
 {/if}
 
 <dl class="flex flex-col divide-y divide-line rounded-panel border border-line bg-surface">

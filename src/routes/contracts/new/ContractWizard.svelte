@@ -97,11 +97,15 @@
 		restored = { at: draft.savedAt, dropped: start.dropped };
 	}
 
-	onMount(() => {
-		restoreDraft();
+	// also «Erneut versuchen» when the chosen apartment's contracts could not be loaded; the input stays (#151)
+	const loadContracts = () =>
 		Promise.all(apartments.map((a) => contractsOf(a.id))).then(
 			(entries) => (contracts = new Map(entries))
 		);
+
+	onMount(() => {
+		restoreDraft();
+		loadContracts();
 		// A notice shown right after a page change is read out only when it takes the focus
 		tick().then(() =>
 			document
@@ -249,6 +253,7 @@
 				loading={!contracts}
 				notice={startLimit.notice}
 				{unknown}
+				onretry={loadContracts}
 				error={errors.apartmentId}
 			/>
 		{:else if step === 3}
@@ -258,6 +263,7 @@
 				bind:isUnlimited={values.isUnlimited}
 				min={startLimit.min}
 				{unknown}
+				onretry={loadContracts}
 				{today}
 				{overlap}
 				{errors}
@@ -265,7 +271,14 @@
 		{:else if step === 4}
 			<RentStep bind:values {errors} />
 		{:else}
-			<ReviewStep {values} {tenants} {apartments} {unknown} onedit={editField} />
+			<ReviewStep
+				{values}
+				{tenants}
+				{apartments}
+				{unknown}
+				onretry={loadContracts}
+				onedit={editField}
+			/>
 			{#if errors.form}
 				<Alert tone="critical" title={m.contracts_not_saved()} testid="form-error">
 					<p>{errors.form}</p>

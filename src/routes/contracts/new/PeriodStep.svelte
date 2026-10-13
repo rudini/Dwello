@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
 	import Alert from '$lib/ui/Alert.svelte';
+	import ContractsUnknown from './ContractsUnknown.svelte';
 	import RadioGroup from '$lib/ui/RadioGroup.svelte';
 	import DateInput from '$lib/ui/DateInput.svelte';
 	import { startDateNotice } from '$lib/contract-wizard';
@@ -15,6 +16,7 @@
 		noticed = false,
 		min,
 		unknown = false,
+		onretry,
 		today,
 		overlap,
 		errors
@@ -26,6 +28,7 @@
 		noticed?: boolean; // the saved contract is open-ended and ended by notice: it can be withdrawn
 		min?: string;
 		unknown?: boolean; // the apartment's contracts could not be loaded: no earliest start is known
+		onretry?: () => void; // loads them again; without it the hint points to the apartment's
 		today: string;
 		overlap: string | null;
 		errors: Record<string, string>;
@@ -80,11 +83,7 @@
 
 <!-- read out at the apartment choice already; a second live region would say it twice (Sven B-13) -->
 {#if unknown}
-	<Alert
-		tone="caution"
-		title={m.contracts_apartment_contracts_unknown()}
-		testid="start-contracts-unknown"
-	/>
+	<ContractsUnknown {onretry} testid="start-contracts-unknown" />
 {/if}
 
 <!-- always present, so screen readers hear the hint when it appears -->

@@ -48,7 +48,7 @@ const type = (testid: string, value: string) =>
 const next = () => submit('wizard-next');
 
 const UNKNOWN =
-	'Die Mietverträge der Wohnung konnten nicht geladen werden. Laden Sie die Seite neu und versuchen Sie es erneut.';
+	'Dwello konnte die Mietverträge dieser Wohnung nicht laden. Wählen Sie «Erneut versuchen»; Ihre Eingaben bleiben erhalten.';
 // the earliest start, as the calendar of the start field takes it
 const minOfStart = () =>
 	byTestId('start-date-input')!.parentElement!.querySelector<HTMLInputElement>(
@@ -251,6 +251,24 @@ describe('Prüfungen im Mietvertrag', () => {
 		expect(byTestId('availability-info')).toBeNull();
 		// Review M3: the hint is read out when it appears
 		expect(byTestId('apartment-contracts-unknown')!.closest('[role="status"]')).not.toBeNull();
+	});
+
+	// #151: «Erneut versuchen» loads the contracts again; the start already typed stays
+	it('lädt die Mietverträge der Wohnung erneut und behält die Eingabe', async () => {
+		let failing = true;
+		fakeBff(({ path }) =>
+			failing && path.endsWith('=a3')
+				? [500, {}]
+				: [200, { contracts: contractsOf[path.split('=')[1]] ?? [] }]
+		);
+		await toPeriod('a3');
+		type('start-date-input', '01.01.2101');
+		failing = false;
+		click('contracts-retry');
+		await settle();
+		expect(byTestId('start-contracts-unknown')).toBeNull();
+		expect(byTestId<HTMLInputElement>('start-date-input')!.value).toBe('01.01.2101');
+		expect(minOfStart()).toBe('2100-01-01'); // a3 is free from 2100
 	});
 
 	// Persona Helga B-13 H1: the review before saving still says that the apartment could not be checked

@@ -25,13 +25,23 @@ Branch `claude/b13-contracts-unknown` (from `claude/workflow-improvements`, on t
 - [x] Final check: instructions followed, list of improvements to instructions and skills
 
 #151 (Helga H2/H3, decided by the product owner on 13.10.2026: implement now, on this branch):
-- [ ] Scenario `@wip` «Mietverträge der Wohnung erneut laden» (`contract-edit.feature`): first contracts request fails, the second not; seen failing
-- [ ] `fach-reviewer` on the scenario and the new text (domain term «Überschneidung», consequence of saving)
-- [ ] DOM tests: «Erneut versuchen» loads the contracts again, input stays (form and wizard)
-- [ ] Hint text with consequence and action, button «Erneut versuchen» (all four languages)
-- [ ] axe and language states still cover the hint with the button
+- [x] Scenario `@wip` «Mietverträge der Wohnung erneut laden» (`contract-edit.feature`): first contracts request fails, the second not; seen failing
+  Scenario red: «… die Mietverträge der Wohnung erneut lädt», `waiting for getByTestId('apartment-contracts-retry')`
+- [x] `fach-reviewer` on the scenario and the new text (domain term «Überschneidung», consequence of saving)
+- [x] DOM tests: «Erneut versuchen» loads the contracts again, input stays (form and wizard)
+- [x] Hint text with consequence and action, button «Erneut versuchen» (all four languages); `ContractsUnknown.svelte`, one button per page; the draft refusal gets its own text
+- [x] axe and language states still cover the hint with the button
 - [ ] Code review of the delta; persona Helga on H2/H3
 - [ ] All checks; #151 closes with the merge (`Fixes #151`)
+
+Findings domain review #151 (`docs/reviews/b13-retry-fachreview-1.md`):
+- V-1 title named «frei ab», wrong on the edit page - Major - fixed (title «Überschneidung noch nicht geprüft»)
+- V-2 the draft refusal would say «beim Speichern prüft Dwello» - Major - fixed (own key `contracts_delete_draft_contracts_unknown`)
+- V-3 text repeats the button and omits that the input stays - Minor - fixed (wording of the review)
+- V-4 scenario checks only the apartment - Minor - fixed
+- V-5 four scenarios quote the old text - Minor - fixed
+- V-6 two equal buttons on the edit page - Nit - fixed (pointer at the start)
+- V-7 «Nettomiete» and «Mietzins» - Nit - rejected: both in the glossary, the field says «Nettomiete»
 
 Findings (`docs/reviews/b13-contracts-unknown-review-1.md`):
 - M1 form takes «unknown» and the start limit from two requests - Minor - fixed (tests first)

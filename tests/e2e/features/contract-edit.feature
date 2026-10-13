@@ -56,11 +56,10 @@ Funktionalität: Mietvertrag bearbeiten
   Szenario: Mietverträge der Wohnung lassen sich nicht laden
     Angenommen die Mietverträge der Wohnung "2.01" lassen sich nicht laden
     Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Mietvertrags von "Anna Keller"
-    Dann sieht der Liegenschaftsverwalter bei der Wohnung den Hinweis "Die Mietverträge der Wohnung konnten nicht geladen werden. Laden Sie die Seite neu und versuchen Sie es erneut."
-    Und sieht der Liegenschaftsverwalter beim Vertragsbeginn den Hinweis "Die Mietverträge der Wohnung konnten nicht geladen werden. Laden Sie die Seite neu und versuchen Sie es erneut."
+    Dann sieht der Liegenschaftsverwalter bei der Wohnung den Hinweis "Überschneidung noch nicht geprüft"
+    Und sieht der Liegenschaftsverwalter beim Vertragsbeginn den Hinweis "Die Mietverträge dieser Wohnung fehlen noch, siehe oben bei der Wohnung."
 
   # Statt die Seite neu zu laden, bleibt die Eingabe erhalten (#151)
-  @wip
   Szenario: Mietverträge der Wohnung erneut laden
     Angenommen die Mietverträge der Wohnung "2.01" lassen sich nicht laden
     Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Mietvertrags von "Anna Keller"
@@ -69,6 +68,7 @@ Funktionalität: Mietvertrag bearbeiten
     Und der Liegenschaftsverwalter die Mietverträge der Wohnung erneut lädt
     Dann ist die Nettomiete "980" noch eingetragen
     Und sieht der Liegenschaftsverwalter bei der Wohnung keinen Hinweis mehr
+    Und sieht der Liegenschaftsverwalter beim Vertragsbeginn keinen Hinweis mehr
 
   Szenario: Kündigung aufheben
     Angenommen der Mietvertrag von "Anna Keller" ist auf den "2099-03-31" gekündigt

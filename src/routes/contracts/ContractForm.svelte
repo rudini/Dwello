@@ -60,6 +60,7 @@
 	// the chosen apartment's contracts, for the overlap check: an overlap shows only once they are loaded
 	let contractsState = $state<'loading' | 'loaded' | 'failed'>('loading');
 	let contractsRequest = 0;
+	let attempt = $state(0); // «Erneut versuchen» loads the contracts again, the input stays (#151)
 	let availability = $state<Map<string, AvailabilityInfo> | null>(null);
 	let apartmentContracts = $state<ContractForAvailability[]>([]);
 	let form = $state<HTMLFormElement>();
@@ -104,6 +105,7 @@
 	}
 
 	$effect(() => {
+		void attempt;
 		Promise.all(apartments.map((a) => availabilityOf(a.id))).then(
 			(entries) => (availability = new Map(entries.flat()))
 		);
@@ -112,6 +114,7 @@
 	// Contracts of the chosen apartment, for the overlap check
 	$effect(() => {
 		const apartmentId = values.apartmentId;
+		void attempt;
 		const request = ++contractsRequest; // only the latest answer counts, also after switching back
 		apartmentContracts = []; // the previous apartment's contracts say nothing about this one
 		contractsState = apartmentId ? 'loading' : 'loaded';
@@ -178,7 +181,7 @@
 	const contractsMessage = (state: typeof contractsState) =>
 		state === 'loading'
 			? m.contracts_apartment_contracts_loading()
-			: m.contracts_apartment_contracts_unknown();
+			: m.contracts_delete_draft_contracts_unknown();
 
 	async function deleteDraftAndSave(draft: RefusedStatement) {
 		if (!valid()) return focusFirstError(form);
@@ -234,6 +237,7 @@
 			loading={!availability}
 			notice={startLimit.notice}
 			{unknown}
+			onretry={() => attempt++}
 			error={errors.apartmentId}
 		/>
 	</Panel>

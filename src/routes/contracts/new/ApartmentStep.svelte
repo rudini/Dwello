@@ -2,6 +2,7 @@
 	import { m } from '$lib/paraglide/messages';
 	import { apartmentChoices } from '$lib/contract-wizard';
 	import Alert from '$lib/ui/Alert.svelte';
+	import ContractsUnknown from './ContractsUnknown.svelte';
 	import Select from '$lib/ui/Select.svelte';
 	import type { AvailabilityInfo } from '$lib/utils/contract-availability';
 
@@ -13,6 +14,7 @@
 		loading,
 		notice,
 		unknown = false,
+		onretry,
 		error
 	}: {
 		apartmentId: string;
@@ -21,6 +23,7 @@
 		loading: boolean;
 		notice: string | null; // when the chosen apartment becomes free
 		unknown?: boolean; // the chosen apartment's contracts could not be loaded
+		onretry: () => void; // loads them again
 		error?: string;
 	} = $props();
 </script>
@@ -43,11 +46,7 @@
 <!-- always present, so screen readers hear the hint when it appears -->
 <div role="status">
 	{#if unknown}
-		<Alert
-			tone="caution"
-			title={m.contracts_apartment_contracts_unknown()}
-			testid="apartment-contracts-unknown"
-		/>
+		<ContractsUnknown {onretry} testid="apartment-contracts-unknown" />
 	{/if}
 </div>
 
