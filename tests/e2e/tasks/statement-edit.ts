@@ -1,18 +1,15 @@
-import type { Actor } from '../fixtures/actor';
-import { typeDate } from '../interactions/form';
-import {
-	notesInput,
-	paymentDeadlineInput,
-	saveStatementButton
-} from '../interactions/statement-edit';
+import type { Activity } from '../screenplay/actor';
+import { Click, Enter, EnterDate, Navigate } from '../screenplay/interactions';
+import { notesInput, paymentDeadlineInput, saveStatementButton } from '../targets/statement-edit';
 
-export const extendPaymentDeadline = (deadline: string, note: string) => async (actor: Actor) => {
-	await typeDate(paymentDeadlineInput(actor.page), deadline);
-	await notesInput(actor.page).fill(note);
-	await saveStatementButton(actor.page).click();
-};
+export const openStatementEdit = (statementPath: string) => Navigate.to(`${statementPath}/edit`);
 
-export const clearPaymentDeadline = async (actor: Actor) => {
-	await paymentDeadlineInput(actor.page).fill('');
-	await saveStatementButton(actor.page).click();
-};
+export const extendPaymentDeadline = (deadline: string, note: string): Activity => (actor) =>
+	actor.attemptsTo(
+		EnterDate.of(deadline).into(paymentDeadlineInput),
+		Enter.theValue(note).into(notesInput),
+		Click.on(saveStatementButton)
+	);
+
+export const clearPaymentDeadline: Activity = (actor) =>
+	actor.attemptsTo(Enter.theValue('').into(paymentDeadlineInput), Click.on(saveStatementButton));
