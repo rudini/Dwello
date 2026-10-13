@@ -14,6 +14,7 @@ Decisions where points overlap or read two ways:
 - 16: `bddgen` stops a `&&` chain (exit 1), so the stale run came from calling Playwright separately; a script `test:e2e:wip` runs both in one command.
 
 Slice 1 - hooks:
+- Skills: tdd not loaded for slice 1 (red-green kept by hand, before rule 6 existed); ponytail-review applied afterwards on the slice diff: «Lean already»
 - [x] 1 Fallow gate blocks instead of skipping when no base is found (`.claude/hooks/fallow-gate.sh`, `CLAUDE.md` Gotchas)
   Test red: `tools/claude-hooks/fallow-gate.test.ts` «blocks and says how to get a base …» – received «fallow audit runtime error (could not detect base branch …), skipping.»
 - [x] 2 Commit subject checked before `git commit` (type, scope, ≤ 50 characters, no period): `.claude/hooks/commit-msg-gate.mjs`, `.claude/settings.json`, `eslint.config.js` (node globals), `CLAUDE.md` Gotchas
@@ -28,6 +29,9 @@ Findings slice 1 (`docs/reviews/b13-workflow-hooks-review-1.md`):
 - C-6 `feat(api)!:` gets the message «write type(scope)» - Nit - rejected: CLAUDE.md has no `!`, the message names the form it expects
 - Found while fixing: the hooks also fire on text in a heredoc that writes a file - open work H-20
 
+Findings slice 1 round 2 (`docs/reviews/b13-workflow-hooks-review-2.md`): C-1 to C-4 fixed, rejections of C-5 and C-6 hold.
+- C-7 `git -C "<path with spaces>"`, `git -C/x`, `git -c key=val` before `commit` not matched - Nit - open work H-20 (review of the slice ended: no Blocker/Major)
+
 Slice 2 - acceptance tests and personas:
 - [x] 4 «a failing request» = one endpoint, all its calls, error status only; `FailRequests` and the a11y state with a failure in `tests/e2e/CLAUDE.md` (also `docs/test-pyramid.md`, `CLAUDE.md` Workflow 1)
 - [x] 10 Personas may save (`.claude/agents/persona.md`)
@@ -35,6 +39,15 @@ Slice 2 - acceptance tests and personas:
 - [x] 16 `actionTimeout` 10 s (`playwright.config.ts`); `test:e2e:wip` (`package.json`, `tests/e2e/CLAUDE.md`, `docs/test-pyramid.md`)
   Reproduction: a click on a missing element in a scratch config with the project's timeouts failed after 32 s («Test timeout of 30000ms exceeded»), with `actionTimeout` after 12 s («locator.click: Timeout 10000ms exceeded»). The wait of over 10 minutes in the B-13 run was not reproduced (the test timeout ends a stuck click). `bunx bddgen --tags @nonexistent` without `svelte-kit sync` exits 1, so a `&&` chain stops
 - [x] 18 Parallel personas get different buildings (`CLAUDE.md` Workflow 5, `persona.md`)
+
+Findings slice 2 (`docs/reviews/b13-workflow-docs-review-1.md`):
+- C-1 three demo buildings, up to five personas: «its own building» cannot hold - Major - fixed (only personas with a building save, the others only look)
+- C-2 `code-reviewer.md` and the skill `bdd-acceptance` still say «a failing request» - Minor - fixed
+- C-3 a persona without a building - Minor - fixed (it does not save; other personas' records are no findings)
+- C-4 `FailRequests.noLonger` lifts every route - Nit - fixed (wording)
+- C-5 `test:e2e:wip` does not delete `.features-gen` - Nit - rejected: the reviewer confirmed that `bddgen` empties it and that a failing `bddgen` stops the chain
+- C-6 type `docs` for a commit that also changes `playwright.config.ts` - Nit - rejected: test configuration, no app behaviour; rewriting would change commits under review
+- Not confirmed: `actionTimeout` also caps `Wait.until` (`locator.waitFor`) and the download wait; the E2E run of all browsers decides (below)
 
 Slice 3 - instructions:
 - [x] 3 Archive a finished earlier session at the start (`CLAUDE.md` Workflow 8)
@@ -49,7 +62,7 @@ Slice 3 - instructions:
 - [x] 17 «Test red: …» in the plan (`CLAUDE.md` Workflow 2, `code-reviewer.md`)
 
 Slice 4 - UI (U-16):
-- [ ] 14 Live region and extra description centrally in `src/lib/ui` (`Alert` live, `Field` describedby)
+- [x] 14 Not done here, deferred to U-16 (`docs/design/offene-punkte.md`, refined): it changes `Field`, `Select`, `DateInput` and two contract screens and needs its own scenario, a Sven run and a11y states; the proposed `live` option on `Alert` cannot work (the region must exist before the hint), so the component needs a design decision. Blocked on me
 
 Finish:
 - [ ] All checks of `CLAUDE.md` pass

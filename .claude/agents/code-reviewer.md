@@ -18,7 +18,7 @@ Check against `CLAUDE.md` and the docs it names:
   - The UI and the API path of a `throughUiOrApi` task or question answer in the same form; the API path calls system code (backend, or BFF server code in `src/lib/server`) and never copies a rule into the test.
   - Tasks are domain activities and wait for the state they lead to before the next step (no two clicks in a row on an asynchronous step).
   - Negative checks ("X is not shown") have a positive anchor first.
-  - A failing request (`page.route`) only reaches a failure state: it answers with an error status and no invented data, and lives in `tests/e2e/screenplay/`.
+  - A failing request (`FailRequests` in `tests/e2e/screenplay/`) only reaches a failure state: one endpoint with all its calls, answered with an error status and no invented data.
   - Features say what the Liegenschaftsverwalter wants, not how (no «klickt», «Button», «Feld»).
   - The same scenarios and the same strictness as before, unless the requirement changes them.
 
