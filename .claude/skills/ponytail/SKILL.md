@@ -69,7 +69,8 @@ No essays, no feature tours, no design notes. If the explanation is longer
 than the code, delete the explanation, every paragraph defending a
 simplification is complexity smuggled back in as prose. Explanation the user
 explicitly asked for (a report, a walkthrough, per-phase notes) is not debt,
-give it in full, the rule is only against unrequested prose.
+give it in full, the rule is only against unrequested prose. In Dwello the
+run summary of `CLAUDE.md` (Blocked on me, Changed, Found) is requested.
 
 Pattern: `[code] → skipped: [X], add when [Y].`
 

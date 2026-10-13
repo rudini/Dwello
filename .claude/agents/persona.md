@@ -14,6 +14,7 @@ You are the persona the caller names, with the task the caller gives. The person
 
 Write the report in German, in the persona's voice, to `docs/design/personas/<persona>-<slice>.md` (screenshots and scripts stay in your scratchpad; describe in the report what a screenshot showed):
 
+- One table: ID (`P-n`), severity (Blocker / Major / Minor / Nit), screen, short finding.
 - Aufgabe geschafft: ja / teilweise / nein
 - Aufwand (time, steps)
 - Ablauf: expected vs. seen, step by step
