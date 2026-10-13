@@ -24,6 +24,15 @@ Branch `claude/b13-contracts-unknown` (from `claude/workflow-improvements`, on t
 - [x] Archive the finished Session 21 (`open-work.test.ts` allows one session)
 - [x] Final check: instructions followed, list of improvements to instructions and skills
 
+#151 (Helga H2/H3, decided by the product owner on 13.10.2026: implement now, on this branch):
+- [ ] Scenario `@wip` «Mietverträge der Wohnung erneut laden» (`contract-edit.feature`): first contracts request fails, the second not; seen failing
+- [ ] `fach-reviewer` on the scenario and the new text (domain term «Überschneidung», consequence of saving)
+- [ ] DOM tests: «Erneut versuchen» loads the contracts again, input stays (form and wizard)
+- [ ] Hint text with consequence and action, button «Erneut versuchen» (all four languages)
+- [ ] axe and language states still cover the hint with the button
+- [ ] Code review of the delta; persona Helga on H2/H3
+- [ ] All checks; #151 closes with the merge (`Fixes #151`)
+
 Findings (`docs/reviews/b13-contracts-unknown-review-1.md`):
 - M1 form takes «unknown» and the start limit from two requests - Minor - fixed (tests first)
 - M2 the choice labels an apartment with unknown contracts like a free one - Minor - open work U-15 (`docs/design/offene-punkte.md`)

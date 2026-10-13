@@ -136,7 +136,9 @@ export const FailRequests = {
 		pageOf(actor).route(
 			(url) => url.pathname === path && Object.entries(query).every(([key, value]) => url.searchParams.get(key) === value),
 			(route) => route.fulfill({ status: 500 })
-		)
+		),
+	/** The requests answer again as the system does */
+	noLonger: (async (actor) => pageOf(actor).unrouteAll()) as Activity
 };
 
 export const Cookies = {

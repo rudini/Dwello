@@ -3,6 +3,7 @@ import {
 	apartmentContractsUnknown,
 	apartmentOption,
 	apartmentSelect,
+	baseRentInput,
 	durationOption,
 	reviewContractsUnknown,
 	reviewItem,
@@ -23,3 +24,4 @@ export const durationChosen = (label: string) => Checked.of(durationOption(label
 export const apartmentHint = Text.of(apartmentContractsUnknown);
 export const startHint = Text.of(startContractsUnknown);
 export const reviewHint = Text.of(reviewContractsUnknown);
+export const enteredBaseRent = Value.of(baseRentInput);

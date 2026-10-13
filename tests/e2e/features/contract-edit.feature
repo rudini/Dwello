@@ -59,6 +59,17 @@ Funktionalität: Mietvertrag bearbeiten
     Dann sieht der Liegenschaftsverwalter bei der Wohnung den Hinweis "Die Mietverträge der Wohnung konnten nicht geladen werden. Laden Sie die Seite neu und versuchen Sie es erneut."
     Und sieht der Liegenschaftsverwalter beim Vertragsbeginn den Hinweis "Die Mietverträge der Wohnung konnten nicht geladen werden. Laden Sie die Seite neu und versuchen Sie es erneut."
 
+  # Statt die Seite neu zu laden, bleibt die Eingabe erhalten (#151)
+  @wip
+  Szenario: Mietverträge der Wohnung erneut laden
+    Angenommen die Mietverträge der Wohnung "2.01" lassen sich nicht laden
+    Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Mietvertrags von "Anna Keller"
+    Wenn der Liegenschaftsverwalter die Nettomiete "980" einträgt
+    Und die Mietverträge der Wohnung "2.01" sich wieder laden lassen
+    Und der Liegenschaftsverwalter die Mietverträge der Wohnung erneut lädt
+    Dann ist die Nettomiete "980" noch eingetragen
+    Und sieht der Liegenschaftsverwalter bei der Wohnung keinen Hinweis mehr
+
   Szenario: Kündigung aufheben
     Angenommen der Mietvertrag von "Anna Keller" ist auf den "2099-03-31" gekündigt
     Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Mietvertrags von "Anna Keller"
