@@ -1,9 +1,10 @@
 import { createBdd, type DataTable } from 'playwright-bdd';
 import { test } from '../fixtures/test';
+import { francs } from '../tasks/statement-generate-api';
 import { downloadedFileHeader, downloadedFileName, downloadedPdfText, downloadedPdfTitle } from '../questions/download';
 import {
 	deleteOffers,
-	heatingCostsShared,
+	heatingCosts,
 	heatingProfileOfStatement,
 	history,
 	paidDateInvalid,
@@ -138,7 +139,7 @@ When('der Liegenschaftsverwalter die Wohnung der Abrechnung öffnet', async ({ v
 Then(
 	'trägt {string} {int} % der Heizkosten, also {string}',
 	async ({ verwalter }, _tenant: string, share: number, amount: string) => {
-		await verwalter.sees(heatingCostsShared(share, amount)).toBe(true);
+		await verwalter.sees(heatingCosts).toEqual({ share, amount: francs(amount) });
 	}
 );
 

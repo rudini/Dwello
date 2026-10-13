@@ -1,4 +1,5 @@
-import { readdirSync, readFileSync } from 'fs';
+import { execFileSync } from 'child_process';
+import { readFileSync } from 'fs';
 import { ESLint } from 'eslint';
 import { describe, expect, it } from 'vitest';
 
@@ -8,6 +9,15 @@ const problems = async (filePath: string, code: string) => {
 	const [result] = await eslint.lintText(code, { filePath });
 	return result.messages.map((message) => message.ruleId);
 };
+
+// The files git knows or will know below tests/e2e, split into their parts; ignored tool caches (fallow's .fallow/
+// carries its own .gitignore) are not part of the layers
+const e2eFiles = execFileSync('git', ['ls-files', '--cached', '--others', '--exclude-standard', 'tests/e2e'], {
+	encoding: 'utf8'
+})
+	.split('\n')
+	.filter(Boolean)
+	.map((path) => path.split('/').slice(2));
 
 describe('Screenplay-Schichten der Akzeptanztests', () => {
 	it('lässt einen Step zu, der nur Tasks und Questions über den Actor nutzt', async () => {
@@ -177,33 +187,28 @@ describe('Screenplay-Schichten der Akzeptanztests', () => {
 
 	it('hat in tests/e2e nur die Schichtordner', () => {
 		const layers = ['features', 'fixtures', 'questions', 'screenplay', 'steps', 'targets', 'tasks'];
-		const dirs = readdirSync('tests/e2e', { withFileTypes: true })
-			.filter((entry) => entry.isDirectory())
-			.map((entry) => entry.name);
-		expect(dirs.filter((dir) => !layers.includes(dir))).toEqual([]);
+		const dirs = new Set(e2eFiles.filter((parts) => parts.length > 1).map(([dir]) => dir));
+		expect([...dirs].filter((dir) => !layers.includes(dir))).toEqual([]);
 	});
 
 	// Schluss-Review Endstand 2, M-1: der Lint prüft nur .ts, also gibt es nur .ts (neben Szenarien und Doku)
 	it('hat in tests/e2e nur TypeScript, Szenarien und Doku', () => {
-		const files = readdirSync('tests/e2e', { recursive: true, withFileTypes: true }).filter((entry) => entry.isFile());
-		expect(files.map((file) => file.name).filter((name) => !/\.(ts|feature|md)$/.test(name) || /\.d\.ts$/.test(name))).toEqual([]);
+		const names = e2eFiles.map((parts) => parts.join('/'));
+		expect(names.filter((name) => !/\.(ts|feature|md)$/.test(name) || /\.d\.ts$/.test(name))).toEqual([]);
 	});
 
 	// Schluss-Review Endstand 3, M-1: der Kern ist kein Helfer-Ordner; oben in tests/e2e liegt nur die Doku
 	it('hält den Screenplay-Kern bei seinen fünf Dateien und die Schichten flach', () => {
-		expect(readdirSync('tests/e2e/screenplay').sort()).toEqual([
+		const core = e2eFiles.filter(([dir]) => dir === 'screenplay').map((parts) => parts.slice(1).join('/'));
+		expect(core.sort()).toEqual([
 			'abilities.ts',
 			'actor.ts',
 			'interactions.ts',
 			'questions.ts',
 			'target.ts'
 		]);
-		const nested = readdirSync('tests/e2e', { recursive: true, withFileTypes: true }).filter(
-			(entry) => entry.isDirectory() && entry.parentPath !== 'tests/e2e'
-		);
-		expect(nested.map((entry) => `${entry.parentPath}/${entry.name}`)).toEqual([]);
-		const top = readdirSync('tests/e2e', { withFileTypes: true }).filter((entry) => entry.isFile());
-		expect(top.map((entry) => entry.name)).toEqual(['CLAUDE.md']);
+		expect(e2eFiles.filter((parts) => parts.length > 2).map((parts) => parts.join('/'))).toEqual([]);
+		expect(e2eFiles.filter((parts) => parts.length === 1).map(([name]) => name)).toEqual(['CLAUDE.md']);
 	});
 
 	// Schluss-Review Endstand 4: Freigabelisten statt Sperrlisten
@@ -224,7 +229,7 @@ describe('Screenplay-Schichten der Akzeptanztests', () => {
 			`'.sr-only, [role="region"], #svelte-announcer'`,
 			'id' // getElementById for the ids an aria-labelledby or aria-describedby names
 		];
-		const used = readdirSync('tests/e2e/screenplay').flatMap((file) =>
+		const used = e2eFiles.filter(([dir]) => dir === 'screenplay').map(([, file]) => file).flatMap((file) =>
 			[...readFileSync(`tests/e2e/screenplay/${file}`, 'utf8').matchAll(/\b(?:querySelector(?:All)?|closest|getElementById|getElementsBy\w+|elementFromPoint|elementsFromPoint)(?:<[^>]*>)?\(([^)]*)\)/g)].map(
 				([, argument]) => argument.trim()
 			)

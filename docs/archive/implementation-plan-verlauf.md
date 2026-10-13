@@ -5219,3 +5219,15 @@ fulfilled, 2 not yet):
 - Minor commit subjects over 50 characters - as before (squash title)
 - Nit `docs/test-pyramid.md` lacks `statement-rounding.feature` - fixed; Nit lint test grouped by review round -
   rejected: the grouping records why each rule exists
+
+Screenplay expert review (`docs/reviews/screenplay-e2e-expertenreview-1.md`, written in the Screenplay session at
+c632714, merged in 3c58bfa):
+- M-1 Major yes/no questions lose the actual value (Saldo, costs, created statements, heating costs) - fixed: they
+  answer the amount in francs (`saldoOf`, `totalCostsOf`, `statementsCreated`, `heatingCosts`), both drivers in the
+  same form; rule added to `tests/e2e/CLAUDE.md`
+- M-2 Major the API driver chooses contracts with a copy of the BFF rule and reports its own count - partly fixed:
+  the number of created statements is read from the system; moving the selection into a backend endpoint is H-20
+- M-3 Major structure tests failing on an ignored tool cache (`tests/e2e/.fallow/`) - fixed: they list files through
+  `git ls-files --cached --others --exclude-standard` (reproduced red with a self-ignoring cache folder first)
+- Minors m-1 to m-9 and the nits - recorded in H-20, except m-8 in part (the sign of a Saldo moved from the step into
+  `signedFrancs` next to the questions)

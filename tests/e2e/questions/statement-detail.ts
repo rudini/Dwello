@@ -28,15 +28,17 @@ export const heatingProfileOfStatement = Text.of(statementHeatingProfile);
 type LineItem = { description: string; sharePercentage: string; tenantShare: string };
 
 /** Whether the tenant bears the share of the heating costs, i.e. the amount: on the page, or in the backend's statement */
-export const heatingCostsShared = (share: number, amount: string) =>
-	throughUiOrApi(
-		question(`whether the heating costs show ${share} %, ${amount}`, async (actor) => {
-			const text = await actor.answer(Text.of(statementLineItem('Heizung')));
-			return text !== null && text.includes(`${share} %`) && text.includes(amount);
-		}),
-		question(`whether the statement charges ${share} % of the heating costs, ${amount}`, (actor) => {
-			const { lineItems } = actor.recall<{ lineItems: LineItem[] }>(STATEMENT);
-			const heating = lineItems.find((item) => item.description === 'Heating')!;
-			return Number(heating.sharePercentage) === share && Number(heating.tenantShare) === francs(amount);
-		})
-	);
+/** The heating costs of the statement: the tenant's share in % and in francs */
+export const heatingCosts = throughUiOrApi(
+	question('the heating costs of the statement', async (actor) => {
+		const text = await actor.answer(Text.of(statementLineItem('Heizung')));
+		const share = text?.match(/([\d.]+) %/);
+		const amounts = [...(text ?? '').matchAll(/CHF\s*([\d’'.]+)/g)];
+		return share && amounts.length ? { share: Number(share[1]), amount: francs(amounts[amounts.length - 1][1]) } : null;
+	}),
+	question('the heating costs the statement charges', (actor) => {
+		const { lineItems } = actor.recall<{ lineItems: LineItem[] }>(STATEMENT);
+		const heating = lineItems.find((item) => item.description === 'Heating');
+		return heating ? { share: Number(heating.sharePercentage), amount: Number(heating.tenantShare) } : null;
+	})
+);

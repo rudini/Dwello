@@ -19,7 +19,7 @@ import {
 	previewRows,
 	wizardChoices
 } from '../targets/statement-generate';
-import { CREATED_STATEMENTS, PREVIEW_BALANCES, PREVIEW_TOTALS } from '../tasks/statement-generate-api';
+import { CREATED_STATEMENTS, francs, PREVIEW_BALANCES, PREVIEW_TOTALS } from '../tasks/statement-generate-api';
 
 // The API protocol driver's answers: what the run through the backend API remembered
 const remembered = (key: string) =>
@@ -29,10 +29,20 @@ const remembered = (key: string) =>
 		return answers;
 	});
 
-const textOfRowContains = (tenantName: string, text: string) =>
-	question(`whether the preview row of ${tenantName} says ${text}`, async (actor) =>
-		Boolean((await actor.answer(Text.of(previewRow(tenantName))))?.includes(text))
-	);
+// The amounts a preview row shows, in francs: "Kosten CHF 1’250.50" and the Saldo "Nachzahlung/Rückerstattung CHF 12.50"
+const amountAfter = (text: string | null, label: string) => {
+	const found = text?.match(new RegExp(`${label}\\s*CHF\\s*([\\d’'.]+)`));
+	return found ? francs(found[1]) : null;
+};
+const saldoIn = (text: string | null) => {
+	if (text?.includes('Ausgeglichen')) return 0;
+	const due = amountAfter(text, 'Nachzahlung');
+	const refund = amountAfter(text, 'Rückerstattung');
+	return due ?? (refund === null ? null : -refund);
+};
+
+/** A Saldo as the scenario writes it ("Rückerstattung CHF 3.00"), in signed francs as the questions answer it */
+export const signedFrancs = (saldo: string) => (saldo.startsWith('Rückerstattung') ? -1 : 1) * francs(saldo);
 
 export const previewHasStatementOf = (tenantName: string) =>
 	throughUiOrApi(
@@ -52,35 +62,36 @@ export const noContractsInPeriod = throughUiOrApi(
 	question('whether the preview is empty', async (actor) => (await actor.answer(remembered(PREVIEW_TOTALS))).size === 0)
 );
 
-/** Whether the run created that many statements as drafts */
-export const statementsCreated = (count: number) =>
-	throughUiOrApi(
-		question(`whether ${count} statements are reported as created`, async (actor) =>
-			Boolean(
-				(await actor.answer(Text.of(generationResult)))?.includes(
-					count === 1
-						? '1 Nebenkostenabrechnung ist als Entwurf erstellt'
-						: `${count} Nebenkostenabrechnungen sind als Entwurf erstellt`
-				)
-			)
-		),
-		question(`whether ${count} statements were created`, (actor) => actor.recall<number>(CREATED_STATEMENTS) === count)
-	);
+/** How many statements the run created as drafts */
+export const statementsCreated = throughUiOrApi(
+	question('how many statements are reported as created', async (actor) => {
+		const found = (await actor.answer(Text.of(generationResult)))?.match(
+			/(\d+) Nebenkostenabrechnungen? (?:ist|sind) als Entwurf erstellt/
+		);
+		return found ? Number(found[1]) : null;
+	}),
+	question('how many statements were created', (actor) => actor.recall<number>(CREATED_STATEMENTS))
+);
 
-/** The Saldo as the preview shows it ("Nachzahlung CHF 12.50", "Rückerstattung CHF 3.00"); signed francs for the API */
-export const balanceShown = (tenantName: string, saldo: string, signedFrancs: number) =>
+/** The Saldo of the tenant's statement in signed francs: positive for a Nachzahlung, negative for a Rückerstattung */
+export const saldoOf = (tenantName: string) =>
 	throughUiOrApi(
-		textOfRowContains(tenantName, saldo),
-		question(`whether the Saldo of ${tenantName} is ${signedFrancs}`, async (actor) =>
-			(await actor.answer(remembered(PREVIEW_BALANCES))).get(tenantName) === signedFrancs
+		question(`the Saldo of ${tenantName} in the preview`, async (actor) =>
+			saldoIn(await actor.answer(Text.of(previewRow(tenantName))))
+		),
+		question(`the Saldo of ${tenantName}`, async (actor) =>
+			(await actor.answer(remembered(PREVIEW_BALANCES))).get(tenantName) ?? null
 		)
 	);
 
-export const totalCostsShown = (tenantName: string, amount: string, inFrancs: number) =>
+/** The total costs of the tenant's statement in francs */
+export const totalCostsOf = (tenantName: string) =>
 	throughUiOrApi(
-		textOfRowContains(tenantName, amount),
-		question(`whether the statement of ${tenantName} costs ${inFrancs}`, async (actor) =>
-			(await actor.answer(remembered(PREVIEW_TOTALS))).get(tenantName) === inFrancs
+		question(`the costs of ${tenantName} in the preview`, async (actor) =>
+			amountAfter(await actor.answer(Text.of(previewRow(tenantName))), 'Kosten')
+		),
+		question(`the costs of ${tenantName}`, async (actor) =>
+			(await actor.answer(remembered(PREVIEW_TOTALS))).get(tenantName) ?? null
 		)
 	);
 

@@ -25,6 +25,7 @@ async function run(actor: Actor, year: number, buildingId: string, options: RunO
 	);
 	return {
 		backend,
+		billed: billed.size,
 		contracts: contracts.filter(
 			(c) => c.startDate <= periodEnd && (!c.endDate || c.endDate >= periodStart) && !billed.has(c.id)
 		),
@@ -53,15 +54,16 @@ export const openPreviewViaApi =
 		actor.remember(PREVIEW_BALANCES, balances);
 	};
 
-/** Generation: remembers how many statements were created */
+/** Generation: remembers how many statements the system holds for the period afterwards that it did not before */
 export const generateStatementsViaApi =
 	(year: number, buildingId: string): Activity =>
 	async (actor) => {
-		const { backend, contracts, body } = await run(actor, year, buildingId, {});
+		const { backend, billed, contracts, body } = await run(actor, year, buildingId, {});
 		for (const contract of contracts) {
 			await backend.post('statements/generate', { ...body, contractId: contract.id, buildingId });
 		}
-		actor.remember(CREATED_STATEMENTS, contracts.length);
+		const after = await run(actor, year, buildingId, {});
+		actor.remember(CREATED_STATEMENTS, after.billed - billed);
 	};
 
 // "CHF 1’250.50" → 1250.5
