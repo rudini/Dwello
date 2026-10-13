@@ -43,7 +43,9 @@
       "Bash(git push * -f*)",
       "Bash(git push * +*)",
       "Bash(git push *--delete*)",
+      "Bash(git push -d *)",
       "Bash(git push * -d *)",
+      "Bash(git push * -d)",
       "Bash(git reset *--hard*)",
       "Bash(git clean *)",
       "Bash(git checkout .)",
@@ -70,9 +72,7 @@
       "Bash(*db:reset*)",
       "Bash(*db:push*)",
       "Bash(docker compose *down*-v*)",
-      "Bash(docker compose *down*--volumes*)",
-      "Bash(docker-compose *down*-v*)",
-      "Bash(docker-compose *down*--volumes*)"
+      "Bash(docker-compose *down*-v*)"
     ],
     "deny": [
       "Read(node_modules/**)",
