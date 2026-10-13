@@ -576,6 +576,7 @@
 	"contracts_option_current": "{name} (current)",
 	"contracts_option_unavailable": "{name} (not available)",
 	"contracts_option_available_from": "{name} (available from {date})",
+	"contracts_option_unchecked": "{name} (not checked)",
 	"contracts_tenant": "Tenant",
 	"contracts_period": "Contract term",
 	"contracts_rent": "Rent",

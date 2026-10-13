@@ -61,7 +61,7 @@
 	// the chosen apartment's contracts, for the overlap check: an overlap shows only once they are loaded
 	let contractsState = $state<'loading' | 'loaded' | 'failed'>('loading');
 	let contractsRequest = 0;
-	let availability = $state<Map<string, AvailabilityInfo> | null>(null);
+	let availability = $state<Map<string, AvailabilityInfo | null> | null>(null);
 	let apartmentContracts = $state<ContractForAvailability[]>([]);
 	let form = $state<HTMLFormElement>();
 
@@ -73,8 +73,7 @@
 	);
 	// the chosen apartment's contracts could not be loaded, by either request: it is not shown as free (#143)
 	const unknown = $derived(
-		contractsState === 'failed' ||
-			(!!availability && !!values.apartmentId && !availability.has(values.apartmentId))
+		contractsState === 'failed' || availability?.get(values.apartmentId) === null
 	);
 	const startLimit = $derived(
 		availableFrom(
@@ -97,16 +96,16 @@
 	const contractsOf = async (apartmentId: string) =>
 		forAvailability(await apiCall(`/contracts?apartmentId=${apartmentId}`));
 
-	// The contract being edited does not block its own apartment; an apartment whose contracts are unknown is left out
+	// The contract being edited does not block its own apartment; null when its contracts could not be loaded
 	async function availabilityOf(apartmentId: string) {
 		const own = apartmentId === contract.apartmentId ? contract.id : undefined;
 		const list = await contractsOf(apartmentId);
-		return list ? [[apartmentId, computeAvailability(list, own)] as const] : [];
+		return [apartmentId, list && computeAvailability(list, own)] as const;
 	}
 
 	const loadAvailability = () =>
 		Promise.all(apartments.map((a) => availabilityOf(a.id))).then(
-			(entries) => (availability = new Map(entries.flat()))
+			(entries) => (availability = new Map(entries))
 		);
 
 	$effect(() => {
