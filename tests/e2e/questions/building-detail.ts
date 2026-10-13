@@ -1,6 +1,6 @@
-import type { Actor } from '../fixtures/actor';
-import { addressLine, apartmentRow, yearBuiltValue } from '../interactions/building-detail';
+import { Text } from '../screenplay/questions';
+import { addressLine, apartmentRow, yearBuiltValue } from '../targets/building-detail';
 
-export const listedApartment = (actor: Actor, number: string) => apartmentRow(actor.page, number);
-export const yearBuilt = (actor: Actor) => yearBuiltValue(actor.page);
-export const buildingAddress = (actor: Actor) => addressLine(actor.page);
+export const listedApartment = (number: string) => Text.of(apartmentRow(number));
+export const yearBuilt = Text.of(yearBuiltValue);
+export const buildingAddress = Text.of(addressLine);

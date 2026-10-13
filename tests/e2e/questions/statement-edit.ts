@@ -1,12 +1,13 @@
-import type { Actor } from '../fixtures/actor';
+import { Accessible, Attribute, Text, Visibility } from '../screenplay/questions';
 import {
 	paymentDeadlineInput,
 	recalculateHint,
 	statementNotes,
 	statementPaymentDeadline
-} from '../interactions/statement-edit';
+} from '../targets/statement-edit';
 
-export const paymentDeadline = (actor: Actor) => statementPaymentDeadline(actor.page);
-export const notes = (actor: Actor) => statementNotes(actor.page);
-export const costsAreRecalculated = (actor: Actor) => recalculateHint(actor.page);
-export const paymentDeadlineField = (actor: Actor) => paymentDeadlineInput(actor.page);
+export const paymentDeadline = Text.of(statementPaymentDeadline);
+export const notes = Text.of(statementNotes);
+export const costsAreRecalculated = Visibility.of(recalculateHint);
+export const paymentDeadlineInvalid = Attribute.named('aria-invalid').of(paymentDeadlineInput);
+export const paymentDeadlineProblem = Accessible.descriptionOf(paymentDeadlineInput);

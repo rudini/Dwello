@@ -1,45 +1,50 @@
-import type { Locator } from '@playwright/test';
-import type { Actor } from '../fixtures/actor';
 import { inDays } from '../fixtures/dates';
-import { typeDate } from '../interactions/form';
+import type { Activity } from '../screenplay/actor';
+import { Browser, Check, Click, EnterDate, Navigate, Scroll } from '../screenplay/interactions';
 import {
 	confirmDeleteContractButton,
 	confirmEndContractButton,
 	contractApartmentLink,
+	contractEditButton,
 	contractEndInput,
 	contractEndPastConfirm,
-	contractEditButton,
 	contractInvoicesLink,
 	contractStatementsLink,
 	contractTenantLink,
 	deleteContractButton,
-	endContractButton
-} from '../interactions/contract-detail';
+	deleteDraftAndEndButton,
+	endContractButton,
+	missingStatementLink,
+	nextStep,
+	refusedStatementLink
+} from '../targets/contract-detail';
 
-const click = (target: (page: Actor['page']) => Locator) => async (actor: Actor) => {
-	await target(actor.page).click();
-};
+export const openContract = (contractId: string) => Navigate.to(`/contracts/${contractId}`);
 
 // The tenant gave notice for a day: that day is typed in the dialog; a past day is confirmed with its consequence
-export const endContractOn = (isoDate: string, { confirmPast = false } = {}) => async (actor: Actor) => {
-	await endContractButton(actor.page).click();
-	await typeDate(contractEndInput(actor.page), isoDate);
-	if (confirmPast) await contractEndPastConfirm(actor.page).check();
-	await confirmEndContractButton(actor.page).click();
+export const endContractOn = (isoDate: string, { confirmPast = false } = {}): Activity => async (actor) => {
+	await actor.attemptsTo(Click.on(endContractButton), EnterDate.of(isoDate).into(contractEndInput));
+	if (confirmPast) await actor.attemptsTo(Check.the(contractEndPastConfirm));
+	await actor.attemptsTo(Click.on(confirmEndContractButton));
 };
 
 // Today as the last day: no day is proposed, it is typed like any other
-export const endContract = (actor: Actor) => endContractOn(inDays(0))(actor);
+export const endContract: Activity = (actor) => actor.attemptsTo(endContractOn(inDays(0)));
 
-export const startDeletingContract = click(deleteContractButton);
+export const startDeletingContract = Click.on(deleteContractButton);
+export const deleteContract: Activity = (actor) =>
+	actor.attemptsTo(Click.on(deleteContractButton), Click.on(confirmDeleteContractButton));
 
-export const deleteContract = async (actor: Actor) => {
-	await deleteContractButton(actor.page).click();
-	await confirmDeleteContractButton(actor.page).click();
-};
+export const editContractFromDetail = Click.on(contractEditButton);
+export const openContractTenant = Click.on(contractTenantLink);
+export const openContractApartment = Click.on(contractApartmentLink);
+export const showContractStatements = Click.on(contractStatementsLink);
+export const showBuildingInvoices = Click.on(contractInvoicesLink);
+export const chooseNextStep = (label: string) => Click.on(nextStep(label));
+export const openRefusedStatement = Click.on(refusedStatementLink);
+export const deleteDraftAndEndContract = Click.on(deleteDraftAndEndButton);
+export const createMissingStatement = Click.on(missingStatementLink);
 
-export const editContractFromDetail = click(contractEditButton);
-export const openContractTenant = click(contractTenantLink);
-export const openContractApartment = click(contractApartmentLink);
-export const showContractStatements = click(contractStatementsLink);
-export const showBuildingInvoices = click(contractInvoicesLink);
+export const useWindowOf = (width: number, height: number) => Browser.resizeTo({ width, height });
+// the confirm button scrolled into view inside the dialog
+export const scrollToEndConfirmation = Scroll.to(confirmEndContractButton);

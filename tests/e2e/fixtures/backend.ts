@@ -1,22 +1,14 @@
 import { randomUUID } from 'crypto';
-import type { APIRequestContext, APIResponse } from '@playwright/test';
-
-const BACKEND_API = 'http://localhost:3101/api/v1'; // E2E backend (playwright.config.ts)
-
-async function body(response: APIResponse) {
-	if (!response.ok()) throw new Error(`${response.url()} antwortet ${response.status()}: ${await response.text()}`);
-	return response.json();
-}
+import type { CallTheApi } from '../screenplay/abilities';
 
 // Scenario-scoped test data: Gherkin names map to UUID-namespaced names, and everything is removed afterwards.
-export function testData(request: APIRequestContext, token: string) {
+export function testData(api: CallTheApi) {
 	const names = new Map<string, string>();
 	const ids = new Map<string, string>();
-	const headers = { Authorization: `Bearer ${token}` };
-	const post = (path: string, data: object) => request.post(`${BACKEND_API}/${path}`, { data, headers }).then(body);
-	const get = (path: string) => request.get(`${BACKEND_API}/${path}`, { headers }).then(body);
-	const put = (path: string, data: object) => request.put(`${BACKEND_API}/${path}`, { data, headers }).then(body);
-	const remove = (path: string) => request.delete(`${BACKEND_API}/${path}`, { headers });
+	const post = (path: string, data: object) => api.post(path, data);
+	const get = (path: string) => api.get(path);
+	const put = (path: string, data: object) => api.put(path, data);
+	const remove = (path: string) => api.remove(path);
 	const extras: string[] = []; // invoices and configuration records, removed before their building
 	const unique = (title: string) => {
 		const name = `${title} ${randomUUID()}`;
@@ -98,7 +90,7 @@ export function testData(request: APIRequestContext, token: string) {
 	return {
 		names,
 		idOf: (key: string) => ids.get(key),
-		backend: { get, post }, // the backend API as the signed-in Liegenschaftsverwalter (API protocol driver)
+		backend: api, // the backend API as the signed-in Liegenschaftsverwalter (API protocol driver)
 		unique,
 
 		async building(title: string, city: string) {

@@ -1,11 +1,13 @@
-import type { Actor } from '../fixtures/actor';
-import { apartmentOption, apartmentSelect, draftRestored, reviewItem, successToast, tenantSelect } from '../interactions/contract-form';
+import { Checked, Enabled, Text, Value, Visibility } from '../screenplay/questions';
+import { apartmentOption, apartmentSelect, durationOption, reviewItem, tenantSelect } from '../targets/contract-form';
+import { successToast } from '../targets/form';
+import { draftRestored } from '../targets/wizard';
 
-export const apartmentChoice = (actor: Actor, apartmentId: string) => apartmentOption(actor.page, apartmentId);
-export const chosenApartment = (actor: Actor) => apartmentSelect(actor.page);
-export const chosenTenant = (actor: Actor) => tenantSelect(actor.page);
-export const chosenTenantName = (actor: Actor) =>
-	tenantSelect(actor.page).evaluate((select: HTMLSelectElement) => select.selectedOptions[0]?.text.trim() ?? '');
-export const reviewed = (actor: Actor, label: string) => reviewItem(actor.page, label);
-export const restoredDraft = (actor: Actor) => draftRestored(actor.page);
-export const confirmation = (actor: Actor) => successToast(actor.page);
+export const apartmentSelectable = (apartmentId: string) => Enabled.of(apartmentOption(apartmentId));
+export const chosenApartmentId = Value.of(apartmentSelect);
+export const chosenTenantId = Value.of(tenantSelect);
+export const chosenTenantName = Value.chosenIn(tenantSelect);
+export const reviewed = (label: string) => Text.of(reviewItem(label));
+export const draftRestoredShown = Visibility.of(draftRestored);
+export const confirmation = Text.of(successToast);
+export const durationChosen = (label: string) => Checked.of(durationOption(label));

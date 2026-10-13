@@ -1,5 +1,5 @@
-import type { Actor } from '../fixtures/actor';
-import { deleteConfirmButton, formError } from '../interactions/form';
+import { Enabled, Visibility } from '../screenplay/questions';
+import { deleteConfirmButton, formError } from '../targets/form';
 
-export const errorMessage = (actor: Actor, text: string) => formError(actor.page, text);
-export const deleteConfirmation = (actor: Actor) => deleteConfirmButton(actor.page);
+export const errorMessageShown = (text: string) => Visibility.of(formError(text));
+export const deletionConfirmable = Enabled.of(deleteConfirmButton);

@@ -1,7 +1,8 @@
-import type { Actor } from '../fixtures/actor';
-import { allowedBadge, categoryRow, deleteButton, usage } from '../interactions/categories';
+import { Count, Enabled, Text, Visibility } from '../screenplay/questions';
+import { allowedBadge, categoryRow, deleteButton, usage } from '../targets/categories';
 
-export const listedCategory = (actor: Actor, name: string) => categoryRow(actor.page, name);
-export const isAllowed = (actor: Actor, name: string) => allowedBadge(actor.page, name);
-export const invoicesOf = (actor: Actor, name: string) => usage(actor.page, name);
-export const deletion = (actor: Actor, name: string) => deleteButton(actor.page, name);
+export const categoryListed = (name: string) => Visibility.of(categoryRow(name));
+export const listedCategoriesNamed = (name: string) => Count.of(categoryRow(name));
+export const allowance = (name: string) => Text.of(allowedBadge(name));
+export const invoicesOf = (name: string) => Text.of(usage(name));
+export const categoryDeletable = (name: string) => Enabled.of(deleteButton(name));

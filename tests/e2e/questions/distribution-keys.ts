@@ -1,9 +1,10 @@
-import type { Actor } from '../fixtures/actor';
-import { deleteButton, editButton, formula, keyRow, sampleRow, usage } from '../interactions/distribution-keys';
+import { Count, Enabled, Text, Visibility } from '../screenplay/questions';
+import { deleteButton, formula, keyActions, keyRow, sampleShare, usage } from '../targets/distribution-keys';
 
-export const listedKey = (actor: Actor, name: string) => keyRow(actor.page, name);
-export const formulaOf = (actor: Actor, name: string) => formula(actor.page, name);
-export const invoicesBy = (actor: Actor, name: string) => usage(actor.page, name);
-export const deletion = (actor: Actor, name: string) => deleteButton(actor.page, name);
-export const keyActions = (actor: Actor, name: string) => editButton(actor.page, name).or(deleteButton(actor.page, name));
-export const sampleShare = (actor: Actor, apartment: string) => sampleRow(actor.page, apartment).getByTestId('formula-test-share');
+export const keyListed = (name: string) => Visibility.of(keyRow(name));
+export const listedKeysNamed = (name: string) => Count.of(keyRow(name));
+export const formulaOf = (name: string) => Text.of(formula(name));
+export const invoicesBy = (name: string) => Text.of(usage(name));
+export const keyDeletable = (name: string) => Enabled.of(deleteButton(name));
+export const keyActionCount = (name: string) => Count.of(keyActions(name));
+export const shareOfSample = (apartment: string) => Text.of(sampleShare(apartment));

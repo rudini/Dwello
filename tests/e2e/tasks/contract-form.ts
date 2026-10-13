@@ -1,23 +1,19 @@
-import type { Actor } from '../fixtures/actor';
-import { typeDate } from '../interactions/form';
+import type { Activity } from '../screenplay/actor';
+import { Check, Click, Enter, EnterDate, Navigate, Select, Wait } from '../screenplay/interactions';
 import {
 	advancePaymentInput,
 	apartmentSelect,
 	baseRentInput,
 	contractSubmitButton,
-	discardDraftButton,
+	deleteDraftAndSaveButton,
+	durationChoice,
 	endDateInput,
-	limitedDuration,
-	pastEndConfirm,
-	finishedStep,
 	newTenantLink,
-	nextButton,
-	saveStatus,
+	pastEndConfirm,
 	startDateInput,
-	tenantSelect,
-	durationChoice
-} from '../interactions/contract-form';
-import { visit, visitWhileLoading } from '../interactions/navigation';
+	tenantSelect
+} from '../targets/contract-form';
+import { discardDraftButton, finishedStep, nextButton, saveStatus } from '../targets/wizard';
 import { createTenantByEmail } from './tenants';
 
 export type ContractData = {
@@ -29,98 +25,77 @@ export type ContractData = {
 	confirmPastStart?: boolean; // the wizard asks once about a start in the past
 };
 
+const NEW_CONTRACT = '/contracts/new';
+export const openNewContract = Navigate.to(NEW_CONTRACT);
+export const openContractEdit = (contractId: string) => Navigate.to(`/contracts/${contractId}/edit`);
+
+export const goToNextStep = Click.on(nextButton);
+
 // Step "Mieter"
-export const chooseTenant = (tenantId: string) => async (actor: Actor) => {
-	await tenantSelect(actor.page).selectOption(tenantId);
-	await nextButton(actor.page).click();
-};
+export const chooseTenant = (tenantId: string): Activity => (actor) =>
+	actor.attemptsTo(Select.option(tenantId).from(tenantSelect), goToNextStep);
 
 // From step "Wohnung" to "Prüfen", the tenant chosen before
-export const fillContract = (contract: Omit<ContractData, 'tenantId'>) => async (actor: Actor) => {
-	await apartmentSelect(actor.page).selectOption(contract.apartmentId);
-	await nextButton(actor.page).click();
-	await typeDate(startDateInput(actor.page), contract.startDate);
-	await nextButton(actor.page).click();
-	if (contract.confirmPastStart) await nextButton(actor.page).click();
-	await baseRentInput(actor.page).fill(contract.baseRent);
-	if (contract.advancePayment) await advancePaymentInput(actor.page).fill(contract.advancePayment);
-	await nextButton(actor.page).click();
+const fillContract = (contract: Omit<ContractData, 'tenantId'>): Activity => async (actor) => {
+	await actor.attemptsTo(
+		Select.option(contract.apartmentId).from(apartmentSelect),
+		goToNextStep,
+		EnterDate.of(contract.startDate).into(startDateInput),
+		goToNextStep
+	);
+	if (contract.confirmPastStart) await actor.attemptsTo(goToNextStep);
+	await actor.attemptsTo(Enter.theValue(contract.baseRent).into(baseRentInput));
+	if (contract.advancePayment) await actor.attemptsTo(Enter.theValue(contract.advancePayment).into(advancePaymentInput));
+	await actor.attemptsTo(goToNextStep);
 };
 
 // The tenant chosen before, still on step "Mieter"
-export const rentApartment = (contract: Omit<ContractData, 'tenantId'>) => async (actor: Actor) => {
-	await nextButton(actor.page).click();
-	await fillContract(contract)(actor);
-	await contractSubmitButton(actor.page).click();
-};
+export const rentApartment = (contract: Omit<ContractData, 'tenantId'>): Activity => (actor) =>
+	actor.attemptsTo(goToNextStep, fillContract(contract), Click.on(contractSubmitButton));
 
-export const registerContract = (contract: ContractData) => async (actor: Actor) => {
-	await tenantSelect(actor.page).selectOption(contract.tenantId);
-	await rentApartment(contract)(actor);
-};
+export const registerContract = (contract: ContractData): Activity => (actor) =>
+	actor.attemptsTo(Select.option(contract.tenantId).from(tenantSelect), rentApartment(contract));
 
-export const reviewContract = (contract: ContractData) => async (actor: Actor) => {
-	await chooseTenant(contract.tenantId)(actor);
-	await fillContract(contract)(actor);
-};
+export const reviewContract = (contract: ContractData): Activity => (actor) =>
+	actor.attemptsTo(chooseTenant(contract.tenantId), fillContract(contract));
 
-export const chooseTenantAndApartment = (tenantId: string, apartmentId: string) => async (actor: Actor) => {
-	await chooseTenant(tenantId)(actor);
-	await apartmentSelect(actor.page).selectOption(apartmentId);
-	await nextButton(actor.page).click();
-};
+export const chooseTenantAndApartment = (tenantId: string, apartmentId: string): Activity => (actor) =>
+	actor.attemptsTo(chooseTenant(tenantId), Select.option(apartmentId).from(apartmentSelect), goToNextStep);
 
-export const goBackToStep = (label: string) => async (actor: Actor) => {
-	await finishedStep(actor.page, label).click();
-};
+export const goBackToStep = (label: string) => Click.on(finishedStep(label));
 
 // The draft is kept in the browser; the wizard says when it is saved
-export const reopenNewContract = async (actor: Actor) => {
-	await saveStatus(actor.page).getByText('Entwurf gespeichert').waitFor();
-	await visit(actor.page, '/contracts/new');
-};
+export const reopenNewContract: Activity = (actor) =>
+	actor.attemptsTo(Wait.until(saveStatus('Entwurf gespeichert')), openNewContract);
 
-export const discardDraft = async (actor: Actor) => {
-	await discardDraftButton(actor.page).click();
-};
+export const discardDraft = Click.on(discardDraftButton);
+export const deleteDraftAndSave = Click.on(deleteDraftAndSaveButton);
 
-export const createTenantForContract = (fullName: string) => async (actor: Actor) => {
-	await newTenantLink(actor.page).click();
-	await createTenantByEmail(fullName)(actor);
-};
-
-export const goToNextStep = async (actor: Actor) => {
-	await nextButton(actor.page).click();
-};
+export const createTenantForContract = (fullName: string): Activity => (actor) =>
+	actor.attemptsTo(Click.on(newTenantLink), createTenantByEmail(fullName));
 
 // The tenant is chosen before the page is hydrated
-export const chooseTenantWhileLoading = (tenantId: string) => async (actor: Actor) => {
-	const loaded = await visitWhileLoading(actor.page, '/contracts/new');
-	await tenantSelect(actor.page).selectOption(tenantId);
-	await loaded();
-};
+export const chooseTenantWhileLoading = (tenantId: string): Activity => (actor) =>
+	actor.attemptsTo(
+		Navigate.toWithScriptsHeldBack(NEW_CONTRACT),
+		Select.option(tenantId).from(tenantSelect),
+		Navigate.releaseScripts
+	);
 
-export const changeBaseRent = (baseRent: string) => async (actor: Actor) => {
-	await baseRentInput(actor.page).fill(baseRent);
-	await contractSubmitButton(actor.page).click();
-};
+export const changeBaseRent = (baseRent: string): Activity => (actor) =>
+	actor.attemptsTo(Enter.theValue(baseRent).into(baseRentInput), Click.on(contractSubmitButton));
 
 // «Bearbeiten»: the contract ends on a fixed day; a past day is confirmed with its consequence
-export const saveEndDate = (isoDate: string, { confirmPast = false } = {}) => async (actor: Actor) => {
-	await limitedDuration(actor.page).click();
-	await typeDate(endDateInput(actor.page), isoDate);
-	if (confirmPast) await pastEndConfirm(actor.page).check();
-	await contractSubmitButton(actor.page).click();
+export const saveEndDate = (isoDate: string, { confirmPast = false } = {}): Activity => async (actor) => {
+	await actor.attemptsTo(Click.on(durationChoice('Befristet')), EnterDate.of(isoDate).into(endDateInput));
+	if (confirmPast) await actor.attemptsTo(Check.the(pastEndConfirm));
+	await actor.attemptsTo(Click.on(contractSubmitButton));
 };
 
 // «Bearbeiten»: the contract runs on without end
-export const withdrawNotice = async (actor: Actor) => {
-	await durationChoice(actor.page, 'Kündigung aufheben').click();
-	await contractSubmitButton(actor.page).click();
-};
+export const withdrawNotice: Activity = (actor) =>
+	actor.attemptsTo(Click.on(durationChoice('Kündigung aufheben')), Click.on(contractSubmitButton));
 
 // «Bearbeiten»: another Vertragsbeginn
-export const saveStartDate = (isoDate: string) => async (actor: Actor) => {
-	await typeDate(startDateInput(actor.page), isoDate);
-	await contractSubmitButton(actor.page).click();
-};
+export const saveStartDate = (isoDate: string): Activity => (actor) =>
+	actor.attemptsTo(EnterDate.of(isoDate).into(startDateInput), Click.on(contractSubmitButton));

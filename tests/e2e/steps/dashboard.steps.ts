@@ -1,14 +1,25 @@
-import { expect } from '@playwright/test';
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { visit } from '../interactions/navigation';
-import { currentNavItem, occupancyRow, overviewDeadline, overviewTask, overviewTasksOf } from '../interactions/dashboard';
-import { occupancyOf, rentedApartmentsOf, statusFilter, statusFilterFor } from '../questions/dashboard';
+import {
+	deadlineText,
+	deadlines,
+	markedNavItems,
+	occupancyOf,
+	occupancyShown,
+	overviewTaskShown,
+	overviewTaskShownFor,
+	overviewTaskText,
+	overviewTasksNaming,
+	rentedApartmentsOf,
+	statusFilterShown
+} from '../questions/dashboard';
 import {
 	chooseQuickAction,
 	openBuildingFromOccupancy,
+	openDashboard,
 	openStatementsWithStatus,
-	openTile
+	openTile,
+	startOverviewTask
 } from '../tasks/dashboard';
 import type { TestData } from '../fixtures/backend';
 import { inDays } from '../fixtures/dates';
@@ -65,81 +76,79 @@ Given(
 );
 
 When('der Liegenschaftsverwalter die Aufgabe {string} beginnt', async ({ verwalter }, title: string) => {
-	await overviewTask(verwalter.page, title).getByRole('link').click();
+	await verwalter.attemptsTo(startOverviewTask(title));
 });
 
 Then('nennt die Übersicht die Aufgabe {string}', async ({ verwalter }, title: string) => {
-	await expect(overviewTask(verwalter.page, title)).toBeVisible();
+	await verwalter.sees(overviewTaskShown(title)).toBe(true);
 });
 
 Then(
 	'nennt die Aufgabe {string} das Gebäude {string}',
 	async ({ verwalter, names }, title: string, building: string) => {
-		await expect(overviewTask(verwalter.page, title)).toContainText(names.get(building)!);
+		await verwalter.sees(overviewTaskText(title)).toContain(names.get(building)!);
 	}
 );
 
 Then(
 	'nennt die Aufgabe {string} das Gebäude {string}, aber nicht das Gebäude {string}',
 	async ({ verwalter, names }, title: string, named: string, missing: string) => {
-		await expect(overviewTask(verwalter.page, title)).toContainText(names.get(named)!);
-		await expect(overviewTask(verwalter.page, title)).not.toContainText(names.get(missing)!);
+		await verwalter.sees(overviewTaskText(title)).toContain(names.get(named)!);
+		await verwalter.sees(overviewTaskText(title)).not.toContain(names.get(missing)!);
 	}
 );
 
 Then(
 	/^(?:die Frist|ist die Frist) "([^"]+) ([^"]+ [^"]+)" (?:ist )?"([^"]+)"$/,
 	async ({ verwalter, names }, kind: string, tenant: string, when: string) => {
-		await expect(overviewDeadline(verwalter.page, kind, names.get(tenant)!)).toContainText(when);
+		await verwalter.sees(deadlineText(kind, names.get(tenant)!)).toContain(when);
 	}
 );
 
 Then('ist in der Hauptnavigation nur {string} markiert', async ({ verwalter }, label: string) => {
-	await expect(currentNavItem(verwalter.page)).toHaveCount(1);
-	await expect(currentNavItem(verwalter.page)).toHaveText(label);
+	await verwalter.sees(markedNavItems).toEqual([label]);
 });
 
 Given('der Liegenschaftsverwalter öffnet die Übersicht', async ({ verwalter }) => {
-	await visit(verwalter.page, '/dashboard');
+	await verwalter.attemptsTo(openDashboard);
 });
 
 When('der Liegenschaftsverwalter die Übersicht öffnet', async ({ verwalter }) => {
-	await visit(verwalter.page, '/dashboard');
+	await verwalter.attemptsTo(openDashboard);
 });
 
 When(
 	'der Liegenschaftsverwalter in der Belegung das Gebäude {string} öffnet',
 	async ({ verwalter, names }, building: string) => {
-		await verwalter.perform(openBuildingFromOccupancy(names.get(building)!));
+		await verwalter.attemptsTo(openBuildingFromOccupancy(names.get(building)!));
 	}
 );
 
 When('der Liegenschaftsverwalter die Kennzahl {string} öffnet', async ({ verwalter }, label: string) => {
-	await verwalter.perform(openTile(label));
+	await verwalter.attemptsTo(openTile(label));
 });
 
 When('der Liegenschaftsverwalter die Abrechnungen {string} öffnet', async ({ verwalter }, label: string) => {
-	await verwalter.perform(openStatementsWithStatus(label));
+	await verwalter.attemptsTo(openStatementsWithStatus(label));
 });
 
 When('der Liegenschaftsverwalter die Schnellaktion {string} wählt', async ({ verwalter }, label: string) => {
-	await verwalter.perform(chooseQuickAction(label));
+	await verwalter.attemptsTo(chooseQuickAction(label));
 });
 
 Then('ist das Gebäude {string} zu {string} belegt', async ({ verwalter, names }, building: string, rate: string) => {
-	await expect(occupancyOf(verwalter, names.get(building)!)).toHaveText(rate);
+	await verwalter.sees(occupancyOf(names.get(building)!)).toBe(rate);
 });
 
 Then(
 	'sind im Gebäude {string} {string} Wohnungen vermietet',
 	async ({ verwalter, names }, building: string, count: string) => {
-		await expect(rentedApartmentsOf(verwalter, names.get(building)!)).toHaveText(count);
+		await verwalter.sees(rentedApartmentsOf(names.get(building)!)).toBe(count);
 	}
 );
 
 Then('die Liste zeigt nur {string}', async ({ verwalter }, label: string) => {
-	await expect(verwalter.page).toHaveURL(/status=/);
-	expect(statusFilter(verwalter)).toBe(statusFilterFor(label));
+	await verwalter.sees(statusFilterShown).toBe(label);
 });
 
 Given('der Mietvertrag von {string} ist in {int} Tagen gekündigt', async ({ seed }, tenant: string, days: number) => {
@@ -149,14 +158,14 @@ Given('der Mietvertrag von {string} ist in {int} Tagen gekündigt', async ({ see
 Then(
 	'nennt die Übersicht die Aufgabe {string} für {string}',
 	async ({ verwalter, names }, title: string, tenant: string) => {
-		await expect(overviewTask(verwalter.page, title).filter({ hasText: names.get(tenant)! })).toBeVisible();
+		await verwalter.sees(overviewTaskShownFor(title, names.get(tenant)!)).toBe(true);
 	}
 );
 
 Then(
 	/^nennt die Übersicht keine Frist "([^"]+) ([^"]+ [^"]+)"$/,
 	async ({ verwalter, names }, kind: string, tenant: string) => {
-		await expect(overviewDeadline(verwalter.page, kind, names.get(tenant)!)).toHaveCount(0);
+		await verwalter.sees(deadlines(kind, names.get(tenant)!)).toBe(0);
 	}
 );
 
@@ -164,7 +173,7 @@ Then(
 Then(
 	'nennt die Übersicht keine Aufgabe für den Mietvertrag von {string}',
 	async ({ verwalter, names }, tenant: string) => {
-		await expect(occupancyRow(verwalter.page, names.get('Seeblick')!)).toBeVisible();
-		await expect(overviewTasksOf(verwalter.page, names.get(tenant)!)).toHaveCount(0);
+		await verwalter.sees(occupancyShown(names.get('Seeblick')!)).toBe(true);
+		await verwalter.sees(overviewTasksNaming(names.get(tenant)!)).toBe(0);
 	}
 );

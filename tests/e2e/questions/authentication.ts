@@ -1,13 +1,15 @@
-import type { Actor } from '../fixtures/actor';
-import type { Request } from '@playwright/test';
-import { loginButton, loginError, userName } from '../interactions/authentication';
+import { question } from '../screenplay/actor';
+import { Count, RequestedUrl, Text, Visibility } from '../screenplay/questions';
+import { loginButton, loginError, userName } from '../targets/authentication';
+import { GOOGLE_SIGN_IN } from '../tasks/authentication';
 
-export const signInOption = (actor: Actor, provider: string) => loginButton(actor.page, provider);
-export const loginHint = (actor: Actor) => loginError(actor.page);
-export const shownUserName = (actor: Actor) => userName(actor.page);
+export const signInOffered = (provider: string) => Visibility.of(loginButton(provider));
+export const signInOptions = (provider: string) => Count.of(loginButton(provider));
+export const loginHint = Text.of(loginError);
+export const shownUserName = Text.of(userName);
 
-// The Google sign-in request, with what Dwello sent along
-export async function googleSignInRequest(actor: Actor) {
-	const request = await actor.recall<Promise<Request>>('Anmeldung bei Google');
-	return new URL(request.url()).searchParams;
-}
+/** A parameter Dwello sent along with the Google sign-in request */
+export const googleSignInParameter = (name: string) =>
+	question(`the parameter ${name} of the Google sign-in`, async (actor) =>
+		(await actor.answer(RequestedUrl(GOOGLE_SIGN_IN)))?.searchParams.get(name) ?? null
+	);

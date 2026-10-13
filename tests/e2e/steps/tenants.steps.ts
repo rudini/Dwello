@@ -1,12 +1,13 @@
-import { expect } from '@playwright/test';
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { visit } from '../interactions/navigation';
 import { confirmation } from '../questions/contract-form';
-import { activeBadge, allListedTenants, listedTenant } from '../questions/tenants';
+import { pageTitle } from '../questions/navigation';
+import { activeBadges, listedTenant, tenantCount, tenantListed } from '../questions/tenants';
 import {
 	createTenantByEmail,
+	openNewTenant,
 	openTenant,
+	openTenantList,
 	searchTenant,
 	startNewTenant,
 	submitEmptyTenant
@@ -15,78 +16,78 @@ import {
 const { Given, When, Then } = createBdd(test);
 
 Given('der Liegenschaftsverwalter ist auf der Mieterliste', async ({ verwalter }) => {
-	await visit(verwalter.page, '/tenants');
+	await verwalter.attemptsTo(openTenantList);
 });
 
 Given('der Liegenschaftsverwalter ist auf der Seite "Neuer Mieter"', async ({ verwalter }) => {
-	await visit(verwalter.page, '/tenants/new');
+	await verwalter.attemptsTo(openNewTenant);
 });
 
 Given('der Liegenschaftsverwalter sucht den Mieter {string}', async ({ verwalter, names }, tenant: string) => {
-	await verwalter.perform(searchTenant(names.get(tenant) ?? tenant));
+	await verwalter.attemptsTo(searchTenant(names.get(tenant) ?? tenant));
 });
 
 When('der Liegenschaftsverwalter den Mieter {string} sucht', async ({ verwalter, names }, tenant: string) => {
-	await verwalter.perform(searchTenant(names.get(tenant) ?? tenant));
+	await verwalter.attemptsTo(searchTenant(names.get(tenant) ?? tenant));
 });
 
 When('der Liegenschaftsverwalter einen neuen Mieter erfassen will', async ({ verwalter }) => {
-	await verwalter.perform(startNewTenant);
+	await verwalter.attemptsTo(startNewTenant);
 });
 
 When('der Liegenschaftsverwalter den Mieter {string} öffnet', async ({ verwalter, names }, tenant: string) => {
-	await verwalter.perform(openTenant(names.get(tenant) ?? tenant));
+	await verwalter.attemptsTo(openTenant(names.get(tenant) ?? tenant));
 });
 
 When(
 	'der Liegenschaftsverwalter den Mieter {string} mit Korrespondenz per E-Mail erfasst',
 	async ({ verwalter, seed }, tenant: string) => {
-		await verwalter.perform(createTenantByEmail(seed.unique(tenant)));
+		await verwalter.attemptsTo(createTenantByEmail(seed.unique(tenant)));
 	}
 );
 
 When('der Liegenschaftsverwalter den Mieter ohne Namen erfassen will', async ({ verwalter }) => {
-	await verwalter.perform(submitEmptyTenant);
+	await verwalter.attemptsTo(submitEmptyTenant);
 });
 
 Then('sieht der Liegenschaftsverwalter den Mieter {string}', async ({ verwalter, names }, tenant: string) => {
-	await expect(listedTenant(verwalter, names.get(tenant) ?? tenant)).toBeVisible();
+	await verwalter.sees(tenantListed(names.get(tenant) ?? tenant)).toBe(true);
 });
 
 Then('die Mieterliste enthält genau {int} Mieter', async ({ verwalter }, count: number) => {
-	await expect(allListedTenants(verwalter)).toHaveCount(count);
+	await verwalter.sees(tenantCount).toBe(count);
 });
 
 Then(
 	'wohnt {string} laut Mieterliste in der Wohnung {string}',
 	async ({ verwalter, names }, tenant: string, apartment: string) => {
-		await expect(listedTenant(verwalter, names.get(tenant) ?? tenant)).toContainText(`${apartment} - `);
+		await verwalter.sees(listedTenant(names.get(tenant) ?? tenant)).toContain(`${apartment} - `);
 	}
 );
 
 Then('ist der Liegenschaftsverwalter auf der Mieterliste', async ({ verwalter }) => {
-	await expect(verwalter.page).toHaveTitle('Mieter - Dwello');
+	await verwalter.sees(pageTitle).toBe('Mieter - Dwello');
 });
 
 When(
 	'der Liegenschaftsverwalter die {word} Mieter mit dem Namen {string} sucht',
 	async ({ verwalter, names }, kind: string, tenant: string) => {
 		const status = { aktiven: 'active', ehemaligen: 'inactive' }[kind]!;
-		await verwalter.perform(searchTenant(names.get(tenant) ?? tenant, status));
+		await verwalter.attemptsTo(searchTenant(names.get(tenant) ?? tenant, status));
 	}
 );
 
 Then(
 	'sieht der Liegenschaftsverwalter den Mieter {string} als {word} Mieter',
 	async ({ verwalter, names }, tenant: string, kind: string) => {
-		await expect(listedTenant(verwalter, names.get(tenant)!)).toBeVisible();
-		await expect(activeBadge(verwalter, names.get(tenant)!)).toHaveCount(kind === 'aktiven' ? 1 : 0);
+		await verwalter.sees(tenantListed(names.get(tenant)!)).toBe(true);
+		await verwalter.sees(activeBadges(names.get(tenant)!)).toBe(kind === 'aktiven' ? 1 : 0);
 	}
 );
 
 Then(
 	'sieht der Liegenschaftsverwalter die Bestätigung, dass {string} gespeichert ist',
 	async ({ verwalter, names }, tenant: string) => {
-		await expect(confirmation(verwalter)).toContainText(`${names.get(tenant) ?? tenant} gespeichert`);
+		await verwalter.sees(confirmation).toContain(`${names.get(tenant) ?? tenant} gespeichert`);
 	}
 );

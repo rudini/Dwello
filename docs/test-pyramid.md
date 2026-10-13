@@ -63,13 +63,13 @@ A floor applies: today's coverage, rounded down to whole percent. If coverage dr
 | Layer | Purpose | In Dwello |
 |---|---|---|
 | Test cases (executable specifications) | *What* the business wants, in domain language | `tests/e2e/features/*.feature` (German, role "Liegenschaftsverwalter", terms from `UBIQUITOUS_LANGUAGE.md`) |
-| Domain-specific language | Reusable domain language | `tests/e2e/steps/`, Screenplay: `fixtures/actor.ts`, `tasks/`, `questions/` |
-| Protocol drivers | Translate the DSL into interactions | UI driver: `tests/e2e/interactions/` (browser via Playwright). API driver: `tasks/*-api.ts` via `seed.backend` (backend API). Preconditions always go through the API (`fixtures/backend.ts`) |
+| Domain-specific language | Reusable domain language | `tests/e2e/steps/`, Screenplay: `tasks/`, `questions/`, the actor in `screenplay/actor.ts` (layers and lint rules: `tests/e2e/CLAUDE.md`) |
+| Protocol drivers | Translate the DSL into interactions | UI driver: ability `BrowseTheWeb` with `screenplay/interactions.ts`, `screenplay/questions.ts` and `targets/` (browser via Playwright). API driver: ability `CallTheApi` (backend API), used by `tasks/*-api.ts`; where the BFF holds a rule, the API driver calls that BFF server code (`src/lib/server`) instead of copying it. Preconditions always go through the API (`fixtures/backend.ts`) |
 | System under test | Deployed like production | `bun run build && node build` + backend + its own database (`playwright.config.ts`) |
 
 ### Two protocol drivers
 
-The same scenario can run through the browser or directly against the backend API. The fixture option `driver` (`ui` | `api`, `fixtures/test.ts`) chooses the path; only steps that talk to the system branch on it. Scenarios tagged `@api` additionally run in the Playwright project `api`, without page visits.
+The same scenario can run through the browser or directly against the backend API. The fixture option `driver` (`ui` | `api`, `fixtures/test.ts`) gives the actor the matching ability; tasks and questions built with `throughUiOrApi` pick their path by it, so steps never branch. Scenarios tagged `@api` additionally run in the Playwright project `api`, without page visits.
 
 - What `@api` is for: business rules and calculations that do not depend on the UI. Today: management fee (`statement-management-fee.feature`), preview, generation and a period without rental contracts (`statement-generate.feature`), heating costs on a tenant change (`statement-detail.feature`).
 - UI only: interaction flows, navigation, forms.
