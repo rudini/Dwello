@@ -66,7 +66,6 @@ Funktionalität: Neuen Mietvertrag erfassen
     Dann sieht der Liegenschaftsverwalter in der Prüfung den Hinweis "Überschneidung noch nicht geprüft"
 
   # Ohne ihre Mietverträge sieht die Wohnung nicht wie eine freie aus (#151, Dr. Weber W-01)
-  @wip
   Szenario: Wohnung mit nicht geladenen Mietverträgen ist nicht geprüft
     Angenommen die Mietverträge der Wohnung "2.01" lassen sich nicht laden
     Und der Liegenschaftsverwalter ist auf der Seite "Neuer Mietvertrag"

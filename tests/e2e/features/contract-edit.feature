@@ -70,7 +70,6 @@ Funktionalität: Mietvertrag bearbeiten
     Und sieht der Liegenschaftsverwalter bei der Wohnung keinen Hinweis mehr
     Und sieht der Liegenschaftsverwalter beim Vertragsbeginn keinen Hinweis mehr
 
-  @wip
   Szenario: Mietverträge der Wohnung lassen sich auch beim zweiten Mal nicht laden
     Angenommen die Mietverträge der Wohnung "2.01" lassen sich nicht laden
     Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Mietvertrags von "Anna Keller"
