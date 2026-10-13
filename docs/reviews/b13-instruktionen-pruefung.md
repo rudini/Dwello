@@ -7,7 +7,7 @@ Lauf vom 13.10.2026, Branch `claude/b13-contracts-unknown` (auf Wunsch aus `clau
 | Regel (Quelle) | Umgesetzt | Beleg / Abweichung |
 |---|---|---|
 | Issue lesen, `entscheiden` prüfen (CLAUDE.md, Open work) | ja | #143 hat nur `bug`; via GitHub MCP gelesen |
-| Plan-Session mit Checkliste (Workflow 8) | ja | Session 22 in `implementation_plan.md` |
+| Plan-Session mit Checkliste (Workflow 8) | ja | Session 23 (jetzt im Archiv `docs/archive/implementation-plan-verlauf.md`) |
 | Szenario zuerst, `@wip`, rot aus dem richtigen Grund, Zeile notiert (Workflow 1) | ja | zwei Szenarien rot (`Received has value: null`), später ein drittes (H1); `Scenario red:` im Plan |
 | Fehlerzustand nur über eine scheiternde Anfrage mit Fehlerstatus (Workflow 1, test-pyramid) | ja | neue Interaktion `FailRequests` (Status 500, keine Daten) |
 | `fach-reviewer` vor der Umsetzung, wenn Fachregeln/Begriffe betroffen | bewusst nicht | keine Fachregel, kein neuer Begriff, Text existierte; im Plan begründet |
@@ -29,6 +29,8 @@ Lauf vom 13.10.2026, Branch `claude/b13-contracts-unknown` (auf Wunsch aus `clau
 | Betroffene Personas (Workflow 5) | erst auf Nachfrage vollständig | nur Helga und Sven nach Standardaufgabe gewählt; Marco und Dr. Weber erst auf Ihre Frage; Dr. Weber fand den Major W-01, Marco vier Textpunkte |
 
 ## Verbesserungen an Instruktionen, Skills, Hooks
+
+Gegen `main` nach PR #150 geprüft (13.10.2026): Keiner der folgenden Punkte ist dort schon umgesetzt.
 
 1. **Fallow-Gate schlägt still durch** (`.claude/hooks/fallow-gate.sh`): Auf einem Branch ohne Upstream bricht `fallow audit` mit Exit 2 ab («could not detect base branch»), und der Hook schreibt nur «skipping». Meine Commits wurden so nicht geprüft. Vorschlag: wie `deepcheck-gate.sh` auf `--base origin/main` zurückfallen und bei Exit 2 blockieren; in CLAUDE.md, Gotchas, `bunx fallow audit --base origin/main` nennen.
 2. **Commit-Betreff automatisch prüfen**: Die 50-Zeichen-Regel prüft nichts; ein `commit-msg`-Check im Gate-Hook (Typ, Scope, Länge) fängt das vor dem Review ab.
