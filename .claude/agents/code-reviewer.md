@@ -31,6 +31,7 @@ Always check these, and report a missing one as Major:
 
 Change no file except your report. Write it in German to the path the caller names:
 
+- One table: ID (`C-n`), severity (Blocker / Major / Minor / Nit), file:line, short finding.
 - Blocker/Major: only problems you would block the merge for, each with file:line, why it is wrong, and how to show it fails.
 - Minor/Nit: at most one line each, file:line and the problem.
 - A section "Nicht bestätigt": what you could not verify and where you looked.

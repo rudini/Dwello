@@ -48,15 +48,14 @@ When exploring the codebase, read `UBIQUITOUS_LANGUAGE.md` so that test names an
 
 Before writing any code:
 
-- [ ] Confirm with user what interface changes are needed
-- [ ] Confirm with user which behaviors to test (prioritize)
-- [ ] Identify opportunities for deep modules (small interface, deep implementation) — run the `/codebase-design` skill for the vocabulary and the testability checks
-- [ ] List the behaviors to test (not implementation steps)
-- [ ] Get user approval on the plan
+- [ ] Decide what interface changes are needed
+- [ ] Decide which behaviors to test (prioritize)
+- [ ] Identify opportunities for deep modules (small interface, deep implementation) — see `tools/deepcheck/README.md`; `bun run deepcheck:audit` checks them after each step
+- [ ] List the behaviors to test (not implementation steps) in the checklist of `implementation_plan.md`
 
-Ask: "What should the public interface look like? Which behaviors are most important to test?"
+Do not wait for approval of this plan: the scenario and the issue already say what to build (`CLAUDE.md`, Workflow). Ask only when the requirement has several readings.
 
-**You can't test everything.** Confirm with the user exactly which behaviors matter most. Focus testing effort on critical paths and complex logic, not every possible edge case.
+**You can't test everything.** Focus testing effort on the behaviors the scenario and the issue name, critical paths and complex logic, not every possible edge case.
 
 ### 2. Tracer Bullet
 
