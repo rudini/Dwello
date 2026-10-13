@@ -8,7 +8,7 @@ import globals from 'globals';
 
 // Screenplay layers of the acceptance tests (tests/e2e/CLAUDE.md): Playwright is driven only in screenplay/ and targets/
 const playwrightActions =
-	'click|dblclick|tap|fill|clear|type|press|pressSequentially|selectOption|check|uncheck|setChecked|setInputFiles|hover|focus|blur|dragTo|scrollIntoViewIfNeeded|dispatchEvent|selectText|goto|reload|goBack|goForward|route|unroute|waitFor|waitForEvent|waitForURL|waitForRequest|waitForResponse|waitForLoadState|waitForTimeout|waitForSelector|waitForFunction|evaluate|evaluateAll|evaluateHandle|setViewportSize|emulateMedia|addCookies|clearCookies|setExtraHTTPHeaders|addInitScript|exposeFunction|screenshot';
+	'click|dblclick|tap|fill|clear|type|press|pressSequentially|selectOption|check|uncheck|setChecked|setInputFiles|hover|focus|blur|dragTo|scrollIntoViewIfNeeded|dispatchEvent|selectText|goto|reload|goBack|goForward|route|unroute|waitFor|waitForEvent|waitForURL|waitForRequest|waitForResponse|waitForLoadState|waitForTimeout|waitForSelector|waitForFunction|evaluate|evaluateAll|evaluateHandle|setViewportSize|emulateMedia|addCookies|clearCookies|setExtraHTTPHeaders|addInitScript|exposeFunction|screenshot|setContent|dragAndDrop|waitForNavigation|\\$|\\$\\$|\\$eval|\\$\\$eval';
 const playwrightReads =
 	'getByRole|getByText|getByTestId|getByLabel|getByPlaceholder|getByAltText|getByTitle|locator|frameLocator|textContent|innerText|innerHTML|inputValue|getAttribute|isVisible|isHidden|isChecked|isEnabled|isDisabled|isEditable|allTextContents|allInnerTexts|boundingBox|ariaSnapshot|locate|context|keyboard|mouse';
 const call = (methods, message) => ({
@@ -19,11 +19,21 @@ const outsideScreenplay = 'Playwright is driven only in tests/e2e/screenplay/ an
 const noPlaywright = [
 	call(playwrightActions, `${outsideScreenplay}: use an Interaction from screenplay/interactions.ts`),
 	call(playwrightReads, `${outsideScreenplay}: use a Target from targets/ and a web question from screenplay/questions.ts`),
-	{ selector: "MemberExpression[property.name='page']", message: `${outsideScreenplay}: no page outside the abilities` },
+	{
+		selector: 'MemberExpression[property.name=/^(page|context|mouse|keyboard)$/]',
+		message: `${outsideScreenplay}: no page outside the abilities`
+	},
+	{
+		selector: 'ObjectPattern > Property[key.name=/^(page|context|browser|request|mouse|keyboard)$/]',
+		message: `${outsideScreenplay}: reach the system through an actor, not through the page or Playwright fixtures`
+	},
+	{ selector: "CallExpression > MemberExpression.callee[computed=true][property.type='Literal']", message: `${outsideScreenplay}: no calls by computed name` },
+	{ selector: 'TSImportType', message: outsideScreenplay },
 	{ selector: "CallExpression[callee.name='expect'], MemberExpression[object.name='expect']", message: 'Assert with actor.sees(question) (tests/e2e/CLAUDE.md)' }
 ];
 const playwrightImports = [
-	{ group: ['@playwright/test', 'playwright', 'playwright-core', '@axe-core/*'], message: outsideScreenplay }
+	{ group: ['@playwright/test', 'playwright', 'playwright-core', '@axe-core/*'], message: outsideScreenplay },
+	{ group: ['**/screenplay/abilities'], importNames: ['BrowseTheWeb'], message: `${outsideScreenplay}: the page stays in the abilities` }
 ];
 
 export default [
@@ -123,18 +133,12 @@ export default [
 				{
 					patterns: [
 						...playwrightImports,
-						{ group: ['**/screenplay/**', '**/targets/**', '**/interactions/**'], message: 'Steps use tasks/ and questions/ only (tests/e2e/CLAUDE.md)' }
+						{ group: ['**/screenplay/**', '**/targets/**'], message: 'Steps use tasks/ and questions/ only (tests/e2e/CLAUDE.md)' },
+						{ group: ['vitest', 'node:assert', 'assert', 'chai'], message: 'Assert with actor.sees(question) (tests/e2e/CLAUDE.md)' }
 					]
 				}
 			],
-			'no-restricted-syntax': [
-				'error',
-				...noPlaywright,
-				{
-					selector: 'ObjectPattern > Property[key.name=/^(page|context|browser|request)$/]',
-					message: 'Steps reach the system through an actor, not through Playwright fixtures (tests/e2e/CLAUDE.md)'
-				}
-			]
+			'no-restricted-syntax': ['error', ...noPlaywright]
 		}
 	},
 	{
@@ -146,7 +150,7 @@ export default [
 				{
 					patterns: [
 						...playwrightImports,
-						{ group: ['playwright-bdd', '**/steps/**', '**/interactions/**'], message: 'Tasks and questions sit below the steps (tests/e2e/CLAUDE.md)' }
+						{ group: ['playwright-bdd', '**/steps/**'], message: 'Tasks and questions sit below the steps (tests/e2e/CLAUDE.md)' }
 					]
 				}
 			],
@@ -159,7 +163,14 @@ export default [
 		rules: {
 			'no-restricted-imports': [
 				'error',
-				{ patterns: [{ group: ['**/tasks/**', '**/questions/**', '**/steps/**', '**/fixtures/**'], message: 'Targets depend on nothing but screenplay/target.ts' }] }
+				{
+					patterns: [
+						{
+							group: ['**/tasks/**', '**/questions/**', '**/steps/**', '**/fixtures/**', '**/screenplay/*', '!**/screenplay/target'],
+							message: 'Targets depend on nothing but screenplay/target.ts'
+						}
+					]
+				}
 			],
 			'no-restricted-syntax': [
 				'error',

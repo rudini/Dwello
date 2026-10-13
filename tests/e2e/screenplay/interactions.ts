@@ -106,6 +106,8 @@ export const Wait = {
 	until: (target: Target) => on(target, (element) => element.first().waitFor()),
 	/** until a field shows the value, e.g. a suggestion that arrives after the page */
 	forValue: (target: Target, value: string) => on(target, (element) => expect(element).toHaveValue(value)),
+	/** until the target finds exactly that many elements */
+	forCount: (target: Target, count: number) => on(target, (elements) => expect(elements).toHaveCount(count)),
 	forUrl: (matches: (url: URL) => boolean): Activity => (actor) => pageOf(actor).waitForURL(matches)
 };
 

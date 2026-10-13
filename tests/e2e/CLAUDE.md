@@ -26,11 +26,12 @@ An actor (`verwalter`, `besucher`) has abilities, performs activities and answer
 | `questions/` | what the actor finds out, as values (`confirmation`, `listedContract(name)`): compose web questions and memory | `screenplay/` (web questions), `targets/`; no Playwright calls |
 | `targets/` | named places on the page: `target('Mieterauswahl', (page) => page.getByTestId('contract-tenant-select'))`, parametrized ones as functions | `screenplay/target.ts`; locators only, no actions |
 | `screenplay/` | the core: `Actor`, abilities, interactions (`Navigate`, `Click`, `Enter`, `Select`, `EnterDate`, …), web questions (`Text`, `Value`, `Visibility`, `Count`, …) | Playwright |
-| `fixtures/` | wiring: `test.ts` (actors, `seed`, `names`, `driver`), `backend.ts` (preconditions always through the backend API, never through the UI), session cookies, dates | Playwright fixtures |
+| `fixtures/` | wiring: `test.ts` (actors, `seed`, `names`, `driver`; its `page` fixture sets the session cookie, the only Playwright call outside `screenplay/` and `targets/`), `backend.ts` (preconditions always through the backend API, never through the UI), `screens.ts` (screens and records of the axe and language checks), session cookies, dates | Playwright fixtures |
 
 - **Actor** (`screenplay/actor.ts`): `attemptsTo(...activities)`, `answer(question)`, `sees(question)` (an assertion retried with `expect.poll` until the expect timeout: `await verwalter.sees(confirmation).toContain('gespeichert')`), `remember`/`recall` for what a task noticed for a later question.
 - **Abilities** (`screenplay/abilities.ts`): `BrowseTheWeb` (the page, the UI protocol driver) and `CallTheApi` (the backend API, the API protocol driver). The fixture `driver` (`ui` | `api`) gives the Liegenschaftsverwalter one of them; the project `api` runs the `@api` scenarios once more with `CallTheApi`. A task or question that works through both is built with `throughUiOrApi(ui, api)` and picks by ability, so steps never branch on the driver; a new `@api` step needs both paths.
 - **Activities** are functions `(actor) => Promise`: interactions from `screenplay/interactions.ts` and tasks built from them (`Click.on(nextButton)`, or `(actor) => actor.attemptsTo(Select.option(id).from(tenantSelect), goToNextStep)`). A task may ask a question to decide what to do next.
+- No exceptions: `eslint.config.js` has no exception list and ignores `eslint-disable` comments in `tests/e2e`.
 - **Questions** answer values, never locators, and never wait for the page: `actor.sees` asks again until the expectation holds. A target that is not there answers `null`, `false` or `0`; `Text.of` normalizes whitespace like `toHaveText` and refuses several matches like Playwright's strict mode.
 
 Example:

@@ -16,6 +16,9 @@ const about = <T>(target: Target, description: string, answer: (element: Locator
 // Whitespace as Playwright's toHaveText normalizes it
 const normalized = (text: string) => text.replace(/\u200b/g, '').trim().replace(/\s+/g, ' ');
 
+// Counted just before: an element that vanishes in between fails fast instead of waiting, and the poll asks again
+const quick = { timeout: 1000 };
+
 /** The one element the target finds, as toHaveText expects it: none answers null, several fail */
 async function single<T>(element: Locator, answer: (element: Locator) => Promise<T>): Promise<T | null> {
 	const count = await element.count();
@@ -35,13 +38,13 @@ export const Text = {
 export const Value = {
 	of: (target: Target) =>
 		about(target, 'the value of', (element) =>
-			single(element, async (one) => one.evaluate((field) => (field as HTMLInputElement).value))
+			single(element, async (one) => one.evaluate((field) => (field as HTMLInputElement).value, undefined, quick))
 		),
 	/** The label of the chosen option of a select */
 	chosenIn: (target: Target) =>
 		about(target, 'the chosen option of', (element) =>
 			single(element, (one) =>
-				one.evaluate((select: HTMLSelectElement) => select.selectedOptions[0]?.text.trim() ?? '')
+				one.evaluate((select: HTMLSelectElement) => select.selectedOptions[0]?.text.trim() ?? '', undefined, quick)
 			)
 		)
 };
@@ -49,16 +52,16 @@ export const Value = {
 export const Visibility = { of: (target: Target) => about(target, 'whether shown:', (element) => element.isVisible()) };
 export const Count = { of: (target: Target) => about(target, 'how many of', (element) => element.count()) };
 export const Enabled = {
-	of: (target: Target) => about(target, 'whether enabled:', (element) => single(element, (one) => one.isEnabled()))
+	of: (target: Target) => about(target, 'whether enabled:', (element) => single(element, (one) => one.isEnabled(quick)))
 };
 export const Checked = {
-	of: (target: Target) => about(target, 'whether checked:', (element) => single(element, (one) => one.isChecked()))
+	of: (target: Target) => about(target, 'whether checked:', (element) => single(element, (one) => one.isChecked(quick)))
 };
 
 export const Attribute = {
 	named: (name: string) => ({
 		of: (target: Target) =>
-			about(target, `the attribute ${name} of`, (element) => single(element, (one) => one.getAttribute(name)))
+			about(target, `the attribute ${name} of`, (element) => single(element, (one) => one.getAttribute(name, quick)))
 	})
 };
 
@@ -76,7 +79,7 @@ export const Accessible = {
 						const legend = field.querySelector(':scope > legend');
 						const labels = (field as HTMLInputElement).labels;
 						return legend?.textContent ?? [...(labels ?? [])].map((label) => label.textContent).join(' ');
-					})
+					}, undefined, quick)
 				)
 			)
 		),
@@ -88,13 +91,13 @@ export const Accessible = {
 						const ids = (field.getAttribute('aria-describedby') ?? '').split(/\s+/).filter(Boolean);
 						const described = ids.map((id) => document.getElementById(id)?.textContent ?? '').join(' ');
 						return described || field.getAttribute('aria-description') || '';
-					})
+					}, undefined, quick)
 				)
 			)
 		)
 };
 
-/** Share of the element inside the window, 0 to 1 */
+/** Share of the element inside the window, 0 to 1, as toBeInViewport measures it */
 export const ShareInViewport = {
 	of: (target: Target) =>
 		about(target, 'the share in the window of', (element) =>
@@ -104,10 +107,12 @@ export const ShareInViewport = {
 						new Promise<number>((resolve) => {
 							const observer = new IntersectionObserver(([entry]) => {
 								observer.disconnect();
-								resolve(Math.round(entry.intersectionRatio * 100) / 100);
+								resolve(entry.intersectionRatio);
 							});
 							observer.observe(node);
-						})
+						}),
+					undefined,
+					quick
 				)
 			)
 		)
@@ -115,7 +120,7 @@ export const ShareInViewport = {
 
 export const Width = {
 	of: (target: Target) =>
-		about(target, 'the width of', (element) => single(element, async (one) => (await one.boundingBox())?.width ?? 0))
+		about(target, 'the width of', (element) => single(element, async (one) => (await one.boundingBox(quick))?.width ?? 0))
 };
 
 export const ThePage = {

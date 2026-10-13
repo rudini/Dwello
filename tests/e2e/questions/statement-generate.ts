@@ -23,7 +23,11 @@ import { CREATED_STATEMENTS, PREVIEW_BALANCES, PREVIEW_TOTALS } from '../tasks/s
 
 // The API protocol driver's answers: what the run through the backend API remembered
 const remembered = (key: string) =>
-	question(`the ${key} per tenant`, (actor) => actor.recall<Map<string, number>>(key) ?? new Map<string, number>());
+	question(`the ${key} per tenant`, (actor) => {
+		const answers = actor.recall<Map<string, number> | undefined>(key);
+		if (!answers) throw new Error(`no ${key}: the preview was not opened through the API`);
+		return answers;
+	});
 
 const textOfRowContains = (tenantName: string, text: string) =>
 	question(`whether the preview row of ${tenantName} says ${text}`, async (actor) =>

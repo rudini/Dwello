@@ -73,7 +73,7 @@ Given('das Browserfenster ist {int} auf {int} Pixel gross', async ({ verwalter }
 // the confirm button can be scrolled into view inside the dialog, not cut off by the window
 Then('kann der Liegenschaftsverwalter den Mietvertrag im Dialog beenden', async ({ verwalter }) => {
 	await verwalter.attemptsTo(scrollToEndConfirmation);
-	await verwalter.sees(endConfirmationInWindow).toBe(1);
+	await verwalter.sees(endConfirmationInWindow).toBe(true);
 });
 
 When('der Liegenschaftsverwalter den Mietvertrag löschen will', async ({ verwalter }) => {

@@ -10,7 +10,7 @@ import {
 	firstApartmentButton,
 	fuelStockAmount,
 	fuelStockDate,
-	fuelStockRow,
+	
 	fuelStockRows,
 	saveFuelStockButton
 } from '../targets/building-detail';
@@ -36,6 +36,6 @@ export const recordFuelStock = (date: string, amount: string): Activity => async
 		EnterDate.of(date).into(fuelStockDate),
 		Enter.theValue(amount).into(fuelStockAmount),
 		Click.on(saveFuelStockButton),
-		Wait.until(fuelStockRow(listed + 1))
+		Wait.forCount(fuelStockRows, listed + 1)
 	);
 };

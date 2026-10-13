@@ -45,6 +45,26 @@ describe('Screenplay-Schichten der Akzeptanztests', () => {
 		expect(await problems(filePath, code)).toContain('no-restricted-syntax');
 	});
 
+	it.each([
+		['tests/e2e/tasks/example.ts', 'const { page } = actor.abilityTo(BrowseTheWeb);'],
+		['tests/e2e/questions/example.ts', 'await page.$eval("x", () => 1);'],
+		['tests/e2e/tasks/example.ts', 'await browser.mouse.wheel(0, 10);'],
+		['tests/e2e/tasks/example.ts', 'await browser.keyboard.insertText("x");'],
+		['tests/e2e/steps/example.steps.ts', 'await element["click"]();'],
+		['tests/e2e/tasks/example.ts', "type P = import('@playwright/test').Page;"]
+	])('lehnt Umwege zur Page in %s ab: %s', async (filePath, code) => {
+		expect(await problems(filePath, code)).toContain('no-restricted-syntax');
+	});
+
+	it.each([
+		['tests/e2e/tasks/example.ts', "import { BrowseTheWeb } from '../screenplay/abilities';"],
+		['tests/e2e/steps/example.steps.ts', "import { expect as check } from 'vitest';"],
+		['tests/e2e/steps/example.steps.ts', "import assert from 'node:assert';"],
+		['tests/e2e/targets/example.ts', "import { Click } from '../screenplay/interactions';"]
+	])('lehnt den Import in %s ab: %s', async (filePath, code) => {
+		expect(await problems(filePath, code)).toContain('no-restricted-imports');
+	});
+
 	it('lehnt Playwright-Importe in Tasks und Questions ab', async () => {
 		const code = "import type { Page } from '@playwright/test';";
 		expect(await problems('tests/e2e/tasks/example.ts', code)).toContain('no-restricted-imports');

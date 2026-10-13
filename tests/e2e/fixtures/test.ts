@@ -1,6 +1,7 @@
 import { test as base } from 'playwright-bdd';
 import { Actor } from '../screenplay/actor';
 import { BrowseTheWeb, CallTheApi } from '../screenplay/abilities';
+import { Cookies } from '../screenplay/interactions';
 import { testData, type TestData } from './backend';
 import { sessionCookies, sessionToken } from './session';
 
@@ -33,8 +34,9 @@ export const test = base.extend<{
 
 	// Someone who has not signed in: same browser, no session cookies
 	besucher: async ({ page }, use) => {
-		await page.context().clearCookies();
-		await use(new Actor('Besucher').whoCan(new BrowseTheWeb(page)));
+		const besucher = new Actor('Besucher').whoCan(new BrowseTheWeb(page));
+		await besucher.attemptsTo(Cookies.clear);
+		await use(besucher);
 	},
 
 	seed: async ({ request }, use) => {

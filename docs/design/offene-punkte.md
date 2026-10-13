@@ -41,6 +41,7 @@ Non-functional open points (security, operations, reliability, performance, usab
 | H-15 | Deliberate shortcuts marked `ponytail:` in the code (today one: an invoice group summing to 0 over different Leistungszeiträume bills nothing). | `backend/src/services/calculation.service.ts:128`; all markers: `/ponytail-debt` | Revisit when it occurs. A new `ponytail:` marker gets a row here when it is about maintainability, an issue when it changes what the landlord sees. |
 | H-16 | The E2E step «sieht den monatlichen Mietzins» reads the monthly total, while the glossary defines Mietzins as Nettomiete. | `tests/e2e/features/contract-detail.feature`, `contract-edit.feature` | Rename the step. |
 | H-17 | Demo data: `paid_amount` empty, no invoice with a Leistungszeitraum across the year end (R8-12, DP8-F2, DP8-F3), «Wohnung EG, EG» (DIV2-08), statements sent before they were created. | `backend/demo/demo-data.sql` | Fix the demo data. |
+| H-18 | Some scenarios still name UI elements, against the feature rule in `tests/e2e/CLAUDE.md` («Feld» and the like; review screenplay-e2e-review-1, Minor): e.g. `statement-edit.feature:31`, `statement-management-fee.feature:38`, `invoice-new.feature:32,35`, `statement-detail.feature:88`. No lint checks feature wording. | `tests/e2e/features/` | Reword the steps in domain language; consider a check for UI words in features. |
 
 ## Operations and security
 
