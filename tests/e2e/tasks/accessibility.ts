@@ -35,10 +35,12 @@ import {
 	contractSubmitButton,
 	durationChoice,
 	endDateInput,
+	retryContractsButton,
 	reviewContractsUnknown,
 	startDateInput,
 	tenantSelect
 } from '../targets/contract-form';
+import { errorToast } from '../targets/form';
 import { languageButton } from '../targets/language';
 import { draftRestored, nextButton, saveStatus } from '../targets/wizard';
 
@@ -180,7 +182,8 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	'contracts-unknown': () => async (actor) => {
 		await actor.attemptsTo(FailRequests.to('/api/contracts', {}), Navigate.reload);
 		if ((await actor.answer(pageAddress)).includes('/contracts/new')) await actor.attemptsTo(Click.on(nextButton));
-		await actor.attemptsTo(Wait.until(apartmentContractsUnknown));
+		// once more, still failing: the message that says so is checked too (#151, review R2-3)
+		await actor.attemptsTo(Wait.until(apartmentContractsUnknown), Click.on(retryContractsButton), Wait.until(errorToast));
 	},
 	// the same, at the step before saving: tenant and apartment come from the address
 	'contracts-unknown-review': () => (actor) =>
