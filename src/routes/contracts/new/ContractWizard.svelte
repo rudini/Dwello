@@ -70,11 +70,7 @@
 	let contracts = $state<Map<string, ContractForAvailability[] | null> | null>(null);
 
 	const availability = $derived(
-		new Map(
-			[...(contracts ?? [])].flatMap(([id, list]) =>
-				list ? [[id, computeAvailability(list)] as const] : []
-			)
-		)
+		new Map([...(contracts ?? [])].map(([id, list]) => [id, list && computeAvailability(list)]))
 	);
 	const unknown = $derived(contracts?.get(values.apartmentId) === null);
 	const startLimit = $derived(availableFrom(availability.get(values.apartmentId), true));

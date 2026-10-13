@@ -62,11 +62,13 @@ Findings personas #151 (`docs/design/personas/{helga,sven,marco,weber}-b13-retry
 - Sven Nits (button inside the live region, focus after «Bearbeiten») - open work U-16
 - Helga H11, Marco 2 no confirmation, the page jumps - Minor - fixed (toast, focus on the field)
 - Helga H12, Marco 3-6 wording - Minor/Nit - open work U-17
-- Helga H4 - open work U-15
+- Helga H4, Dr. Weber W-01 the choice shows an apartment with unknown contracts like a free one - Major - fixed: «(nicht geprüft)» (test first); U-15 removed
+- Dr. Weber: the promise «Beim Speichern prüft Dwello in jedem Fall …» holds (3 overlapping saves refused while the request failed)
+- Dr. Weber W-02 = Helga H9 - issue #152; W-05 fixed; W-06 = U-17; W-09 marked (#66); W-03, W-04, W-07, W-08, W-10 - Minor/Nit, existed before or wording - open work U-18
 
 Findings (`docs/reviews/b13-contracts-unknown-review-1.md`):
 - M1 form takes «unknown» and the start limit from two requests - Minor - fixed (tests first)
-- M2 the choice labels an apartment with unknown contracts like a free one - Minor - open work U-15 (`docs/design/offene-punkte.md`)
+- M2 the choice labels an apartment with unknown contracts like a free one - Minor - open work U-15, later fixed with #151 (W-01)
 - M3 hints not announced (no live region) - Minor - fixed (tests first)
 - M4 new test between a comment and its describe - Minor - fixed
 - M5 the a11y state fails every `/api/contracts` request - Minor - rejected: one endpoint, answered only with an error status, as `docs/test-pyramid.md` allows; the edit page asks it once per apartment

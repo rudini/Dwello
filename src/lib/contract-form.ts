@@ -128,14 +128,19 @@ export function overlapWarning(
 	return result.hasOverlap ? result.message : null;
 }
 
-/** Choice of an apartment: rented apartments cannot be chosen, except the one of the contract being edited */
+/**
+ * Choice of an apartment: rented apartments cannot be chosen, except the one of the contract being edited; null for
+ * an apartment whose contracts could not be loaded: it is not shown as free (#151, W-01)
+ */
 export function apartmentOption(
 	apartment: { unit: string; building: string; size?: string },
-	availability: AvailabilityInfo | undefined,
+	availability: AvailabilityInfo | null | undefined,
 	isCurrent: boolean
 ): { label: string; disabled: boolean } {
 	const name = `${m.buildings_apartment_number({ number: apartment.unit })} - ${apartment.building}${apartment.size ? `, ${apartment.size}` : ''}`;
 	if (isCurrent) return { label: m.contracts_option_current({ name }), disabled: false };
+	if (availability === null)
+		return { label: m.contracts_option_unchecked({ name }), disabled: false };
 	if (availability?.hasOngoingContract)
 		return { label: m.contracts_option_unavailable({ name }), disabled: true };
 	if (availability?.availableFrom)

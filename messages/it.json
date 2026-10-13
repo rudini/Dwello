@@ -576,6 +576,7 @@
 	"contracts_option_current": "{name} (attuale)",
 	"contracts_option_unavailable": "{name} (non disponibile)",
 	"contracts_option_available_from": "{name} (disponibile dal {date})",
+	"contracts_option_unchecked": "{name} (non verificato)",
 	"contracts_tenant": "Inquilino",
 	"contracts_period": "Durata del contratto",
 	"contracts_rent": "Pigione",

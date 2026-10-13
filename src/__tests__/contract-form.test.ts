@@ -163,6 +163,14 @@ describe('apartmentOption', () => {
 		);
 		expect(apartmentOption(apartment, undefined, false).label).toBe('Wohnung 2.01 - Ahornhof');
 	});
+
+	// Dr. Weber #151 W-01: an apartment whose contracts could not be loaded does not look free in the choice
+	it('marks an apartment whose contracts could not be loaded', () => {
+		expect(apartmentOption(apartment, null, false)).toEqual({
+			label: 'Wohnung 2.01 - Ahornhof (nicht geprüft)',
+			disabled: false
+		});
+	});
 });
 
 describe('availableFrom', () => {

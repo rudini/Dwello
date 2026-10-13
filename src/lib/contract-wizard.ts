@@ -176,7 +176,7 @@ export function startValues(
 /** Apartments to choose from: free ones first, rented ones shown but not selectable */
 export function apartmentChoices(
 	apartments: { id: string; unit: string; building: string; size?: string }[],
-	availability: Map<string, AvailabilityInfo>
+	availability: Map<string, AvailabilityInfo | null>
 ) {
 	return apartments
 		.map((apartment) => ({

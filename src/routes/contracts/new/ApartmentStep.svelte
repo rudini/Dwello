@@ -19,7 +19,7 @@
 	}: {
 		apartmentId: string;
 		apartments: { id: string; unit: string; building: string; size?: string }[];
-		availability: Map<string, AvailabilityInfo>;
+		availability: Map<string, AvailabilityInfo | null>; // null: the contracts could not be loaded
 		loading: boolean;
 		notice: string | null; // when the chosen apartment becomes free
 		unknown?: boolean; // the chosen apartment's contracts could not be loaded

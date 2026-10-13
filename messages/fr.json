@@ -576,6 +576,7 @@
 	"contracts_option_current": "{name} (actuel)",
 	"contracts_option_unavailable": "{name} (non disponible)",
 	"contracts_option_available_from": "{name} (disponible dès le {date})",
+	"contracts_option_unchecked": "{name} (non vérifié)",
 	"contracts_tenant": "Locataire",
 	"contracts_period": "Durée du contrat",
 	"contracts_rent": "Loyer",
