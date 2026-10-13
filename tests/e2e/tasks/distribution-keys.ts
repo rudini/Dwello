@@ -1,25 +1,20 @@
-import type { Actor } from '../fixtures/actor';
-import { deleteConfirmButton } from '../interactions/form';
-import { deleteButton, editButton, formulaInput, nameInput, submitButton, testButton } from '../interactions/distribution-keys';
+import type { Activity } from '../screenplay/actor';
+import { Click, Enter, Navigate } from '../screenplay/interactions';
+import { deleteButton, editButton, formulaInput, nameInput, submitButton, testButton } from '../targets/distribution-keys';
+import { deleteConfirmButton } from '../targets/form';
 
-export const testFormula = (formula: string) => async (actor: Actor) => {
-	await formulaInput(actor.page).fill(formula);
-	await testButton(actor.page).click();
-};
+export const openDistributionKeys = Navigate.to('/config/distribution-keys');
+export const openNewDistributionKey = Navigate.to('/config/distribution-keys/new');
+export const openDistributionKeyEdit = (keyId: string) => Navigate.to(`/config/distribution-keys/${keyId}/edit`);
 
-export const createDistributionKey = (name: string, formula: string) => async (actor: Actor) => {
-	await formulaInput(actor.page).fill(formula);
-	await nameInput(actor.page).fill(name);
-	await submitButton(actor.page).click();
-};
+export const testFormula = (formula: string): Activity => (actor) =>
+	actor.attemptsTo(Enter.theValue(formula).into(formulaInput), Click.on(testButton));
 
-export const changeFormula = (name: string, formula: string) => async (actor: Actor) => {
-	await editButton(actor.page, name).click();
-	await formulaInput(actor.page).fill(formula);
-	await submitButton(actor.page).click();
-};
+export const createDistributionKey = (name: string, formula: string): Activity => (actor) =>
+	actor.attemptsTo(Enter.theValue(formula).into(formulaInput), Enter.theValue(name).into(nameInput), Click.on(submitButton));
 
-export const deleteDistributionKey = (name: string) => async (actor: Actor) => {
-	await deleteButton(actor.page, name).click();
-	await deleteConfirmButton(actor.page).click();
-};
+export const changeFormula = (name: string, formula: string): Activity => (actor) =>
+	actor.attemptsTo(Click.on(editButton(name)), Enter.theValue(formula).into(formulaInput), Click.on(submitButton));
+
+export const deleteDistributionKey = (name: string): Activity => (actor) =>
+	actor.attemptsTo(Click.on(deleteButton(name)), Click.on(deleteConfirmButton));

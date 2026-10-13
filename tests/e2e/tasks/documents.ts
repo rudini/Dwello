@@ -1,11 +1,10 @@
-import type { Actor } from '../fixtures/actor';
-import { confirmReminderButton, markSentButton, reminderButton } from '../interactions/documents';
+import type { Activity } from '../screenplay/actor';
+import { Click, Navigate } from '../screenplay/interactions';
+import { confirmReminderButton, markSentButton, reminderButton } from '../targets/documents';
 
-export const sendReminder = async (actor: Actor) => {
-	await reminderButton(actor.page).click();
-	await confirmReminderButton(actor.page).click();
-};
+export const openDocumentsToSend = Navigate.to('/documents?status=to_send');
+export const openDocuments = Navigate.to('/documents');
 
-export const markLetterSent = (title: string, tenantName: string) => async (actor: Actor) => {
-	await markSentButton(actor.page, title, tenantName).click();
-};
+export const sendReminder: Activity = (actor) => actor.attemptsTo(Click.on(reminderButton), Click.on(confirmReminderButton));
+
+export const markLetterSent = (title: string, tenantName: string) => Click.on(markSentButton(title, tenantName));

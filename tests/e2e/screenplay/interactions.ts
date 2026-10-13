@@ -59,6 +59,18 @@ export const Enter = {
 	})
 };
 
+/** Types into the emptied field key by key, as a person on a phone's number pad does, then leaves the field */
+export const Type = {
+	theText: (text: string) => ({
+		into: (target: Target) =>
+			on(target, async (field) => {
+				await field.fill('');
+				await field.pressSequentially(text);
+				await field.blur();
+			})
+	})
+};
+
 /** Types a date the Swiss way (TT.MM.JJJJ) into a date field; scenarios keep JJJJ-MM-TT, or '' to empty the field */
 export const EnterDate = {
 	of: (isoDate: string) => ({

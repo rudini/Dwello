@@ -1,16 +1,15 @@
-import { expect } from '@playwright/test';
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { visit } from '../interactions/navigation';
 import {
-	allListedInvoices,
 	amountOfListedInvoice,
 	categoryOfListedInvoice,
-	emptyInvoiceList,
-	listedInvoice,
+	invoiceListEmpty,
+	listedInvoiceCount,
+	listedInvoicesOf,
 	statusOfListedInvoice
 } from '../questions/invoices';
-import { editInvoice, filterInvoices, searchInvoices, startNewInvoice, viewInvoice } from '../tasks/invoices';
+import { pageAddress, pageTitle } from '../questions/navigation';
+import { editInvoice, filterInvoices, openInvoiceList, searchInvoices, startNewInvoice, viewInvoice } from '../tasks/invoices';
 
 const { Given, When, Then } = createBdd(test);
 
@@ -22,46 +21,46 @@ Given(
 );
 
 Given('der Liegenschaftsverwalter ist auf der Rechnungsliste', async ({ verwalter }) => {
-	await visit(verwalter.page, '/invoices');
+	await verwalter.attemptsTo(openInvoiceList);
 });
 
 When('der Liegenschaftsverwalter nach dem Rechnungssteller {string} sucht', async ({ verwalter, names }, supplier: string) => {
-	await verwalter.perform(searchInvoices(names.get(supplier) ?? supplier));
+	await verwalter.attemptsTo(searchInvoices(names.get(supplier) ?? supplier));
 });
 
 When(
 	'der Liegenschaftsverwalter die Rechnungen des Jahres {int} im Gebäude {string} anzeigt',
 	async ({ verwalter, seed }, year: number, building: string) => {
-		await verwalter.perform(filterInvoices({ buildingId: seed.idOf(building)!, year: String(year) }));
+		await verwalter.attemptsTo(filterInvoices({ buildingId: seed.idOf(building)!, year: String(year) }));
 	}
 );
 
 When(
 	'der Liegenschaftsverwalter die Rechnungen nach dem Gebäude {string} filtert',
 	async ({ verwalter, seed }, building: string) => {
-		await verwalter.perform(filterInvoices({ buildingId: seed.idOf(building)! }));
+		await verwalter.attemptsTo(filterInvoices({ buildingId: seed.idOf(building)! }));
 	}
 );
 
 When(
 	'der Liegenschaftsverwalter die nicht umlagefähigen Rechnungen im Gebäude {string} anzeigt',
 	async ({ verwalter, seed }, building: string) => {
-		await verwalter.perform(filterInvoices({ buildingId: seed.idOf(building)!, validity: 'invalid' }));
+		await verwalter.attemptsTo(filterInvoices({ buildingId: seed.idOf(building)!, validity: 'invalid' }));
 	}
 );
 
 When('der Liegenschaftsverwalter eine neue Rechnung erfassen will', async ({ verwalter }) => {
-	await verwalter.perform(startNewInvoice);
+	await verwalter.attemptsTo(startNewInvoice);
 });
 
 When('der Liegenschaftsverwalter die Rechnung von {string} ansieht', async ({ verwalter, names }, supplier: string) => {
-	await verwalter.perform(viewInvoice(names.get(supplier) ?? supplier));
+	await verwalter.attemptsTo(viewInvoice(names.get(supplier) ?? supplier));
 });
 
 When(
 	'der Liegenschaftsverwalter die Rechnung von {string} bearbeiten will',
 	async ({ verwalter, names }, supplier: string) => {
-		await verwalter.perform(editInvoice(names.get(supplier) ?? supplier));
+		await verwalter.attemptsTo(editInvoice(names.get(supplier) ?? supplier));
 	}
 );
 
@@ -69,30 +68,30 @@ Then(
 	'sieht der Liegenschaftsverwalter die Rechnung von {string} über {string} in der Kategorie {string}',
 	async ({ verwalter, names }, supplier: string, amount: string, category: string) => {
 		const name = names.get(supplier) ?? supplier;
-		await expect(amountOfListedInvoice(verwalter, name)).toHaveText(amount);
-		await expect(categoryOfListedInvoice(verwalter, name)).toHaveText(category);
+		await verwalter.sees(amountOfListedInvoice(name)).toBe(amount);
+		await verwalter.sees(categoryOfListedInvoice(name)).toBe(category);
 	}
 );
 
 Then('die Rechnungsliste enthält genau {int} Rechnung', async ({ verwalter }, count: number) => {
-	await expect(allListedInvoices(verwalter)).toHaveCount(count);
+	await verwalter.sees(listedInvoiceCount).toBe(count);
 });
 
 Then(
 	'ist die Rechnung von {string} als {string} kategorisiert',
 	async ({ verwalter, names }, supplier: string, status: string) => {
-		await expect(statusOfListedInvoice(verwalter, names.get(supplier) ?? supplier)).toHaveText(status);
+		await verwalter.sees(statusOfListedInvoice(names.get(supplier) ?? supplier)).toBe(status);
 	}
 );
 
 Then('ist der Liegenschaftsverwalter auf der Rechnungsliste', async ({ verwalter }) => {
-	await expect(verwalter.page).toHaveURL(/\/invoices(\?.*)?$/);
+	await verwalter.sees(pageAddress).toMatch(/\/invoices(\?.*)?$/);
 });
 
 Then(
 	'ist der Liegenschaftsverwalter auf der Detailseite der Rechnung von {string}',
 	async ({ verwalter, names }, supplier: string) => {
-		await expect(verwalter.page).toHaveTitle(`${names.get(supplier) ?? supplier} - Rechnung - Dwello`);
+		await verwalter.sees(pageTitle).toBe(`${names.get(supplier) ?? supplier} - Rechnung - Dwello`);
 	}
 );
 
@@ -100,8 +99,8 @@ Then(
 	'die Rechnung von {string} ist nicht mehr auffindbar',
 	async ({ verwalter, names }, supplier: string) => {
 		const name = names.get(supplier) ?? supplier;
-		await verwalter.perform(searchInvoices(name));
-		await expect(emptyInvoiceList(verwalter)).toBeVisible();
-		await expect(listedInvoice(verwalter, name)).toHaveCount(0);
+		await verwalter.attemptsTo(searchInvoices(name));
+		await verwalter.sees(invoiceListEmpty).toBe(true);
+		await verwalter.sees(listedInvoicesOf(name)).toBe(0);
 	}
 );

@@ -1,11 +1,13 @@
-import type { Actor } from '../fixtures/actor';
-import { masterDataLink, saveSettingsButton, settingField } from '../interactions/settings';
+import type { Activity } from '../screenplay/actor';
+import { Click, Enter, Navigate } from '../screenplay/interactions';
+import { masterDataLink, saveSettingsButton, settingField } from '../targets/settings';
 
-export const saveSettings = (fields: Record<string, string>) => async (actor: Actor) => {
-	for (const [name, value] of Object.entries(fields)) await settingField(actor.page, name).fill(value);
-	await saveSettingsButton(actor.page).click();
-};
+export const openSettings = Navigate.to('/config');
 
-export const openMasterData = (label: string) => async (actor: Actor) => {
-	await masterDataLink(actor.page, label).click();
-};
+export const saveSettings = (fields: Record<string, string>): Activity => (actor) =>
+	actor.attemptsTo(
+		...Object.entries(fields).map(([name, value]) => Enter.theValue(value).into(settingField(name))),
+		Click.on(saveSettingsButton)
+	);
+
+export const openMasterData = (label: string) => Click.on(masterDataLink(label));

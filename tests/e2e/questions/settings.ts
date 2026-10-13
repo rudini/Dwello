@@ -1,5 +1,5 @@
-import type { Actor } from '../fixtures/actor';
-import { savedNotice, settingField } from '../interactions/settings';
+import { Value, Visibility } from '../screenplay/questions';
+import { savedNotice, settingField } from '../targets/settings';
 
-export const settingsSaved = (actor: Actor) => savedNotice(actor.page);
-export const storedSetting = (actor: Actor, name: string) => settingField(actor.page, name);
+export const settingsSaved = Visibility.of(savedNotice);
+export const storedSetting = (name: string) => Value.of(settingField(name));
