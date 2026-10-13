@@ -50,7 +50,15 @@ export const Click = {
 };
 
 export const Enter = {
-	theValue: (value: string) => ({ into: (target: Target) => on(target, (element) => element.fill(value)) })
+	theValue: (value: string) => ({ into: (target: Target) => on(target, (element) => element.fill(value)) }),
+	/** Empties the field and types key by key, as a user does: for fields that react to each key */
+	keyByKey: (text: string) => ({
+		into: (target: Target) =>
+			on(target, async (element) => {
+				await element.clear();
+				await element.pressSequentially(text);
+			})
+	})
 };
 
 /** Types a date the Swiss way (TT.MM.JJJJ) into a date field; scenarios keep JJJJ-MM-TT, or '' to empty the field */
