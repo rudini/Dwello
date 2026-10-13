@@ -2,7 +2,7 @@ import { expect } from '@playwright/test';
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import { visit } from '../interactions/navigation';
-import { errorMessage } from '../questions/form';
+import { errorMessageShown } from '../questions/form';
 import { deletion, invoicesOf, isAllowed, listedCategory } from '../questions/categories';
 import { createCategory, deleteCategory, saveAsNotAllowed, showAllowedCategories } from '../tasks/categories';
 
@@ -88,7 +88,7 @@ Then(
 	'erfährt der Liegenschaftsverwalter, dass es die Kategorie {string} schon gibt',
 	async ({ verwalter, names }, title: string) => {
 		const message = `Eine Kategorie mit dem Namen "${names.get(title)}" existiert bereits.`;
-		await expect(errorMessage(verwalter, message)).toBeVisible();
+		await verwalter.sees(errorMessageShown(message)).toBe(true);
 	}
 );
 

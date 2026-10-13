@@ -87,6 +87,6 @@ Then(
 Then(
 	'sieht der Liegenschaftsverwalter die Bestätigung, dass {string} gespeichert ist',
 	async ({ verwalter, names }, tenant: string) => {
-		await expect(confirmation(verwalter)).toContainText(`${names.get(tenant) ?? tenant} gespeichert`);
+		await verwalter.sees(confirmation).toContain(`${names.get(tenant) ?? tenant} gespeichert`);
 	}
 );

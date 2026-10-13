@@ -1,14 +1,16 @@
-import type { Actor } from '../fixtures/actor';
+import { ShareInViewport, Text, Visibility } from '../screenplay/questions';
 import {
+	confirmEndContractButton,
 	contractApartment,
 	contractEndDate,
 	contractEndError,
 	contractStatus,
 	contractTotalRent
-} from '../interactions/contract-detail';
+} from '../targets/contract-detail';
 
-export const apartmentOfContract = (actor: Actor) => contractApartment(actor.page);
-export const totalRent = (actor: Actor) => contractTotalRent(actor.page);
-export const statusOfContract = (actor: Actor) => contractStatus(actor.page);
-export const endOfContract = (actor: Actor) => contractEndDate(actor.page);
-export const endDateProblem = (actor: Actor) => contractEndError(actor.page);
+export const apartmentOfContract = Text.of(contractApartment);
+export const totalRent = Text.of(contractTotalRent);
+export const statusOfContract = Text.of(contractStatus);
+export const endOfContract = Text.of(contractEndDate);
+export const endDateProblemShown = (message: string) => Visibility.of(contractEndError(message));
+export const endConfirmationInWindow = ShareInViewport.of(confirmEndContractButton);
