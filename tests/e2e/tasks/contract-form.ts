@@ -14,6 +14,7 @@ import {
 	startDateInput,
 	tenantSelect
 } from '../targets/contract-form';
+import { successToast } from '../targets/form';
 import { discardDraftButton, finishedStep, nextButton, saveStatus } from '../targets/wizard';
 import { createTenantByEmail } from './tenants';
 
@@ -35,7 +36,8 @@ export const goToNextStep = Click.on(nextButton);
 // The contracts of the apartment, which the contract pages load in the browser, cannot be loaded
 export const contractsCannotBeLoaded = (apartmentId: string) => FailRequests.to('/api/contracts', { apartmentId });
 export const contractsLoadAgain = FailRequests.noLonger;
-export const retryContracts = Click.on(retryContractsButton);
+// waits for the confirmation that they are loaded (review #151 R-4)
+export const retryContracts: Activity = (actor) => actor.attemptsTo(Click.on(retryContractsButton), Wait.until(successToast));
 export const enterBaseRent = (baseRent: string) => Enter.theValue(baseRent).into(baseRentInput);
 
 // Step "Mieter"

@@ -1269,6 +1269,8 @@
 	"contracts_apartment_contracts_unknown": "Sovrapposizione non ancora verificata",
 	"contracts_apartment_contracts_unknown_text": "Dwello non ha potuto caricare i contratti di locazione di questo appartamento. Scelga «Riprovare»; i dati inseriti restano invariati. Al salvataggio Dwello verifica in ogni caso se il periodo si sovrappone a un altro contratto di locazione di questo appartamento.",
 	"contracts_apartment_contracts_retry": "Riprovare",
+	"contracts_apartment_contracts_loaded": "I contratti di locazione dell’appartamento sono caricati.",
+	"contracts_apartment_contracts_retry_failed": "Non è stato ancora possibile caricare i contratti di locazione dell’appartamento. Riprovi più tardi; i dati inseriti restano invariati.",
 	"contracts_apartment_contracts_see_apartment": "Mancano ancora i contratti di locazione di questo appartamento, vedere sopra presso l’appartamento.",
 	"contracts_delete_draft_contracts_unknown": "Dwello non ha eliminato la bozza: senza i contratti di locazione di questo appartamento non si può escludere una sovrapposizione. Scelga «Riprovare» presso l’appartamento e poi di nuovo «Eliminare la bozza e salvare il contratto di locazione».",
 	"contracts_apartment_contracts_loading": "I contratti di locazione dell’appartamento sono ancora in caricamento. Riprovi tra un momento.",

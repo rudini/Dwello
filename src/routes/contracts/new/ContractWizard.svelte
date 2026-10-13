@@ -35,6 +35,7 @@
 	} from '$lib/utils/contract-availability';
 	import { browserStorage, clearDraft, readDraft, writeDraft } from '$lib/wizard-draft';
 	import ApartmentStep from './ApartmentStep.svelte';
+	import { retried } from './ContractsUnknown.svelte';
 	import PeriodStep from './PeriodStep.svelte';
 	import RentStep from './RentStep.svelte';
 	import ReviewStep from './ReviewStep.svelte';
@@ -102,6 +103,12 @@
 		Promise.all(apartments.map((a) => contractsOf(a.id))).then(
 			(entries) => (contracts = new Map(entries))
 		);
+
+	async function retry() {
+		await loadContracts();
+		await tick();
+		retried(unknown, section?.querySelector('h2'));
+	}
 
 	onMount(() => {
 		restoreDraft();
@@ -253,7 +260,7 @@
 				loading={!contracts}
 				notice={startLimit.notice}
 				{unknown}
-				onretry={loadContracts}
+				onretry={retry}
 				error={errors.apartmentId}
 			/>
 		{:else if step === 3}
@@ -263,7 +270,7 @@
 				bind:isUnlimited={values.isUnlimited}
 				min={startLimit.min}
 				{unknown}
-				onretry={loadContracts}
+				onretry={retry}
 				{today}
 				{overlap}
 				{errors}
@@ -271,14 +278,7 @@
 		{:else if step === 4}
 			<RentStep bind:values {errors} />
 		{:else}
-			<ReviewStep
-				{values}
-				{tenants}
-				{apartments}
-				{unknown}
-				onretry={loadContracts}
-				onedit={editField}
-			/>
+			<ReviewStep {values} {tenants} {apartments} {unknown} onretry={retry} onedit={editField} />
 			{#if errors.form}
 				<Alert tone="critical" title={m.contracts_not_saved()} testid="form-error">
 					<p>{errors.form}</p>

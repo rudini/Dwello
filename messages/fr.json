@@ -1269,6 +1269,8 @@
 	"contracts_apartment_contracts_unknown": "Chevauchement pas encore vérifié",
 	"contracts_apartment_contracts_unknown_text": "Dwello n’a pas pu charger les contrats de bail de cet appartement. Choisissez « Réessayer » ; vos saisies sont conservées. Lors de l’enregistrement, Dwello vérifie dans tous les cas si la période chevauche un autre contrat de bail de cet appartement.",
 	"contracts_apartment_contracts_retry": "Réessayer",
+	"contracts_apartment_contracts_loaded": "Les contrats de bail de l’appartement sont chargés.",
+	"contracts_apartment_contracts_retry_failed": "Les contrats de bail de l’appartement n’ont de nouveau pas pu être chargés. Réessayez plus tard ; vos saisies sont conservées.",
 	"contracts_apartment_contracts_see_apartment": "Les contrats de bail de cet appartement manquent encore, voir plus haut à l’appartement.",
 	"contracts_delete_draft_contracts_unknown": "Dwello n’a pas supprimé le brouillon : sans les contrats de bail de cet appartement, un chevauchement ne peut pas être exclu. Choisissez « Réessayer » à l’appartement, puis à nouveau « Supprimer le brouillon et enregistrer le contrat de bail ».",
 	"contracts_apartment_contracts_loading": "Les contrats de bail de l’appartement sont encore en cours de chargement. Réessayez dans un instant.",

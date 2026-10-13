@@ -269,6 +269,11 @@ describe('Prüfungen im Mietvertrag', () => {
 		expect(byTestId('start-contracts-unknown')).toBeNull();
 		expect(byTestId<HTMLInputElement>('start-date-input')!.value).toBe('01.01.2101');
 		expect(minOfStart()).toBe('2100-01-01'); // a3 is free from 2100
+		// Sven #151: said, and the focus goes to the step, not to the page
+		expect(get(toasts).map((t) => t.message)).toContain(
+			'Die Mietverträge der Wohnung sind geladen.'
+		);
+		expect(document.activeElement).toBe(document.querySelector('h2'));
 	});
 
 	// Persona Helga B-13 H1: the review before saving still says that the apartment could not be checked

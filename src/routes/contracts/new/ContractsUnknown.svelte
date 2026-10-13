@@ -1,5 +1,16 @@
-<script lang="ts">
+<script module lang="ts">
 	import { m } from '$lib/paraglide/messages';
+	import { addToast } from '$lib/stores';
+
+	/** After «Erneut versuchen»: says how it went; on success the button is gone, so the focus goes to `next` */
+	export function retried(stillUnknown: boolean, next: HTMLElement | null | undefined) {
+		if (stillUnknown) return addToast('error', m.contracts_apartment_contracts_retry_failed());
+		addToast('success', m.contracts_apartment_contracts_loaded());
+		next?.focus();
+	}
+</script>
+
+<script lang="ts">
 	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';
 

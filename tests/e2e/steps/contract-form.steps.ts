@@ -254,7 +254,7 @@ When('der Liegenschaftsverwalter die Mietverträge der Wohnung erneut lädt', as
 });
 
 Then('ist die Nettomiete {string} noch eingetragen', async ({ verwalter }, baseRent: string) => {
-	await verwalter.sees(enteredBaseRent).toContain(baseRent);
+	await verwalter.sees(enteredBaseRent).toBe(baseRent);
 });
 
 Then('sieht der Liegenschaftsverwalter bei der Wohnung keinen Hinweis mehr', async ({ verwalter }) => {

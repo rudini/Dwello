@@ -31,7 +31,9 @@ Branch `claude/b13-contracts-unknown` (from `claude/workflow-improvements`, on t
 - [x] DOM tests: «Erneut versuchen» loads the contracts again, input stays (form and wizard)
 - [x] Hint text with consequence and action, button «Erneut versuchen» (all four languages); `ContractsUnknown.svelte`, one button per page; the draft refusal gets its own text
 - [x] axe and language states still cover the hint with the button
-- [ ] Code review of the delta; persona Helga on H2/H3
+- [x] Code review of the delta; personas Helga, Sven, Marco, Dr. Weber (the user asked for Marco and Dr. Weber too)
+- [x] Review fixes: R-1 draft button stays; result of «Erneut versuchen» said (toast) and focus on the field or step (tests first)
+- [ ] Re-review of the fixes (code-reviewer round 2)
 - [ ] All checks; #151 closes with the merge (`Fixes #151`)
 
 Findings domain review #151 (`docs/reviews/b13-retry-fachreview-1.md`):
@@ -42,6 +44,25 @@ Findings domain review #151 (`docs/reviews/b13-retry-fachreview-1.md`):
 - V-5 four scenarios quote the old text - Minor - fixed
 - V-6 two equal buttons on the edit page - Nit - fixed (pointer at the start)
 - V-7 «Nettomiete» and «Mietzins» - Nit - rejected: both in the glossary, the field says «Nettomiete»
+
+Findings code review #151 (`docs/reviews/b13-retry-review-1.md`):
+- R-1 the draft refusal points to a button that is gone - Major - fixed (test first)
+- R-2 focus falls to `body` after a retry - Minor - fixed (= Sven)
+- R-3 no feedback when the retry fails again - Minor - fixed (error toast)
+- R-4 the scenario's rent check holds before the retry - Minor - fixed (the retry task waits for the confirmation)
+- R-5 `FailRequests.noLonger` lifts every route, the step ignores its apartment - Nit - rejected: a scenario fails one route; the doc comment says so
+- R-6 rent compared with `toContain` - Nit - fixed (`toBe`)
+- R-7 no guard against an older wizard answer - Nit - rejected: both answers load the same contracts
+
+Findings personas #151 (`docs/design/personas/{helga,sven,marco,weber}-b13-retry.md`):
+- Helga H2, H3 - resolved (confirmed by Helga)
+- Helga H9 changing the apartment of a contract is silently dropped - Major - existed before: issue #152 (`entscheiden`)
+- Sven: focus to `body` after a retry - Major - fixed; nothing said after a retry - Major - fixed (toast)
+- Sven: no feedback when it fails again - Minor - fixed (= H10, Marco 1); hint not linked to the field - Minor - open work U-16
+- Sven Nits (button inside the live region, focus after «Bearbeiten») - open work U-16
+- Helga H11, Marco 2 no confirmation, the page jumps - Minor - fixed (toast, focus on the field)
+- Helga H12, Marco 3-6 wording - Minor/Nit - open work U-17
+- Helga H4 - open work U-15
 
 Findings (`docs/reviews/b13-contracts-unknown-review-1.md`):
 - M1 form takes «unknown» and the start limit from two requests - Minor - fixed (tests first)
