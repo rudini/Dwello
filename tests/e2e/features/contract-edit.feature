@@ -74,7 +74,7 @@ Funktionalität: Mietvertrag bearbeiten
     Angenommen die Mietverträge der Wohnung "2.01" lassen sich nicht laden
     Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Mietvertrags von "Anna Keller"
     Wenn der Liegenschaftsverwalter die Mietverträge der Wohnung erneut zu laden versucht
-    Dann meldet Dwello "Die Mietverträge der Wohnung konnten wieder nicht geladen werden."
+    Dann meldet Dwello den Fehler "Die Mietverträge der Wohnung konnten wieder nicht geladen werden."
 
   Szenario: Kündigung aufheben
     Angenommen der Mietvertrag von "Anna Keller" ist auf den "2099-03-31" gekündigt

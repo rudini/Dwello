@@ -279,6 +279,6 @@ Then(
 	}
 );
 
-Then('meldet Dwello {string}', async ({ verwalter }, message: string) => {
+Then('meldet Dwello den Fehler {string}', async ({ verwalter }, message: string) => {
 	await verwalter.sees(failure).toContain(message);
 });
