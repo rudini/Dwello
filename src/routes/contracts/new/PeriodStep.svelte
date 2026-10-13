@@ -14,6 +14,7 @@
 		terminated = $bindable(false),
 		noticed = false,
 		min,
+		unknown = false,
 		today,
 		overlap,
 		errors
@@ -24,6 +25,7 @@
 		terminated?: boolean;
 		noticed?: boolean; // the saved contract is open-ended and ended by notice: it can be withdrawn
 		min?: string;
+		unknown?: boolean; // the apartment's contracts could not be loaded: no earliest start is known
 		today: string;
 		overlap: string | null;
 		errors: Record<string, string>;
@@ -75,6 +77,14 @@
 	error={errors.startDate}
 	testid="start-date-input"
 />
+
+{#if unknown}
+	<Alert
+		tone="caution"
+		title={m.contracts_apartment_contracts_unknown()}
+		testid="start-contracts-unknown"
+	/>
+{/if}
 
 <!-- always present, so screen readers hear the hint when it appears -->
 <div role="status" data-testid="start-date-notice">

@@ -52,6 +52,13 @@ Funktionalität: Mietvertrag bearbeiten
     Wenn der Liegenschaftsverwalter den Vertragsbeginn "2025-05-01" speichert
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Sie können den Entwurf unten löschen und die Nebenkostenabrechnung danach neu erstellen."
 
+  # Ohne die Mietverträge der Wohnung ist eine Überschneidung nicht auszuschliessen (#143)
+  Szenario: Mietverträge der Wohnung lassen sich nicht laden
+    Angenommen die Mietverträge der Wohnung "2.01" lassen sich nicht laden
+    Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Mietvertrags von "Anna Keller"
+    Dann sieht der Liegenschaftsverwalter bei der Wohnung den Hinweis "Die Mietverträge der Wohnung konnten nicht geladen werden. Laden Sie die Seite neu und versuchen Sie es erneut."
+    Und sieht der Liegenschaftsverwalter beim Vertragsbeginn den Hinweis "Die Mietverträge der Wohnung konnten nicht geladen werden. Laden Sie die Seite neu und versuchen Sie es erneut."
+
   Szenario: Kündigung aufheben
     Angenommen der Mietvertrag von "Anna Keller" ist auf den "2099-03-31" gekündigt
     Und der Liegenschaftsverwalter ist auf der Bearbeitungsseite des Mietvertrags von "Anna Keller"

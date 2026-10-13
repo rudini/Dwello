@@ -1,6 +1,7 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import {
+	apartmentHint,
 	apartmentSelectable,
 	chosenApartmentId,
 	chosenTenantId,
@@ -8,7 +9,8 @@ import {
 	confirmation,
 	draftRestoredShown,
 	durationChosen,
-	reviewed
+	reviewed,
+	startHint
 } from '../questions/contract-form';
 import { contractListed } from '../questions/contracts';
 import {
@@ -22,6 +24,7 @@ import {
 	chooseTenant,
 	chooseTenantAndApartment,
 	chooseTenantWhileLoading,
+	contractsCannotBeLoaded,
 	createTenantForContract,
 	discardDraft,
 	goBackToStep,
@@ -215,4 +218,16 @@ When('der Liegenschaftsverwalter den Mietzins leert', async ({ verwalter }) => {
 
 When('der Liegenschaftsverwalter den Entwurf löscht und den Mietvertrag speichert', async ({ verwalter }) => {
 	await verwalter.attemptsTo(deleteDraftAndSave);
+});
+
+Given('die Mietverträge der Wohnung {string} lassen sich nicht laden', async ({ verwalter, seed }, apartment: string) => {
+	await verwalter.attemptsTo(contractsCannotBeLoaded(seed.idOf(apartment)!));
+});
+
+Then('sieht der Liegenschaftsverwalter bei der Wohnung den Hinweis {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(apartmentHint).toContain(text);
+});
+
+Then('sieht der Liegenschaftsverwalter beim Vertragsbeginn den Hinweis {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(startHint).toContain(text);
 });

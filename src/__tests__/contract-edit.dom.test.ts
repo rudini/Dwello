@@ -116,6 +116,29 @@ describe('Mietvertrag bearbeiten', () => {
 	});
 
 	// wie beim Beenden: ein Tippfehler im Jahr soll den Mietvertrag nicht rückwirkend beenden
+	// Fehler behoben (#143): ohne ihre Mietverträge galt die Wohnung als frei, der Vertragsbeginn ohne Untergrenze
+	it('zeigt eine Wohnung, deren Mietverträge nicht geladen werden konnten, nicht als frei', async () => {
+		fakeBff(({ path }) =>
+			path.endsWith('=a2')
+				? [500, {}]
+				: [200, { contracts: [{ id: 'c1', startDate: '2024-04-01', endDate: null }] }]
+		);
+		await open();
+		expect(byTestId('apartment-contracts-unknown')).toBeNull();
+		const select = byTestId<HTMLSelectElement>('apartment-select')!;
+		select.value = 'a2';
+		select.dispatchEvent(new Event('change', { bubbles: true }));
+		await settle();
+		const unknown =
+			'Die Mietverträge der Wohnung konnten nicht geladen werden. Laden Sie die Seite neu und versuchen Sie es erneut.';
+		expect(byTestId('apartment-contracts-unknown')!.textContent).toContain(unknown);
+		expect(byTestId('start-contracts-unknown')!.textContent).toContain(unknown);
+		expect(byTestId('availability-info')).toBeNull();
+		const calendar =
+			byTestId('start-date-input')!.parentElement!.querySelector('input[type="date"]');
+		expect((calendar as HTMLInputElement).min).toBe('');
+	});
+
 	describe('Vertragsende in der Vergangenheit', () => {
 		async function endOn(day: string) {
 			document.querySelector<HTMLInputElement>('input[value="limited"]')!.click();

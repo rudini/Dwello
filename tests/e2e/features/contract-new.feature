@@ -52,6 +52,13 @@ Funktionalität: Neuen Mietvertrag erfassen
     Wenn der Liegenschaftsverwalter den Mieter "Anna Keller" wählt
     Dann kann der Liegenschaftsverwalter die Wohnung "2.02" nicht auswählen
 
+  # Ohne die Mietverträge der Wohnung ist unbekannt, ab wann sie frei ist (#143)
+  Szenario: Mietverträge der Wohnung lassen sich nicht laden
+    Angenommen die Mietverträge der Wohnung "2.01" lassen sich nicht laden
+    Und der Liegenschaftsverwalter ist auf der Seite "Neuer Mietvertrag"
+    Wenn der Liegenschaftsverwalter den Mieter "Anna Keller" und die Wohnung "2.01" wählt
+    Dann sieht der Liegenschaftsverwalter beim Vertragsbeginn den Hinweis "Die Mietverträge der Wohnung konnten nicht geladen werden. Laden Sie die Seite neu und versuchen Sie es erneut."
+
   Szenario: Angefangenen Mietvertrag später fortsetzen
     Wenn der Liegenschaftsverwalter den Mieter "Anna Keller" und die Wohnung "2.01" wählt
     Und der Liegenschaftsverwalter die Seite "Neuer Mietvertrag" später wieder öffnet
