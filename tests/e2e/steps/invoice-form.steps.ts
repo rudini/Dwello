@@ -1,14 +1,15 @@
-import { expect } from '@playwright/test';
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { visit } from '../interactions/navigation';
 import {
+	billedWarningText,
 	dateOutsidePeriodWarning,
-	billedWarning,
+	dateOutsidePeriodWarnings,
 	invoiceDate,
 	invoiceDateInWords,
+	invoiceDateShown,
+	markedAsUtilityCost,
 	nonAllocableCategoryWarning,
-	utilityCostChoice
+	utilityCostMarkable
 } from '../questions/invoice-form';
 import { amountOfListedInvoice, categoryOfListedInvoice } from '../questions/invoices';
 import {
@@ -16,6 +17,8 @@ import {
 	clearSupplier,
 	correctAmount,
 	enterInvoiceDate,
+	openInvoiceEdit,
+	openNewInvoice,
 	overrideCategory,
 	recategorize,
 	registerInvoice,
@@ -27,7 +30,7 @@ import { searchInvoices } from '../tasks/invoices';
 const { Given, When, Then } = createBdd(test);
 
 Given('der Liegenschaftsverwalter ist auf der Seite "Neue Rechnung"', async ({ verwalter }) => {
-	await visit(verwalter.page, '/invoices/new');
+	await verwalter.attemptsTo(openNewInvoice);
 });
 
 Given('die KI hat die Kategorie der Rechnung von {string} vorgeschlagen', async ({ seed }, supplier: string) => {
@@ -35,108 +38,108 @@ Given('die KI hat die Kategorie der Rechnung von {string} vorgeschlagen', async 
 });
 
 Given('der Liegenschaftsverwalter bearbeitet die Rechnung von {string}', async ({ verwalter, seed }, supplier: string) => {
-	await visit(verwalter.page, `/invoices/${seed.idOf(`Rechnung ${supplier}`)}/edit`);
+	await verwalter.attemptsTo(openInvoiceEdit(seed.idOf(`Rechnung ${supplier}`)!));
 });
 
 When(
 	'der Liegenschaftsverwalter die Rechnung von {string} über {string} Franken für {string} im Gebäude {string} in der Kategorie {string} erfasst',
 	async ({ verwalter, seed }, supplier: string, amount: string, description: string, building: string, category: string) => {
-		await verwalter.perform(
+		await verwalter.attemptsTo(
 			registerInvoice({ buildingId: seed.idOf(building)!, supplier: seed.unique(supplier), amount, description, category })
 		);
 	}
 );
 
 When('der Liegenschaftsverwalter die Kategorie {string} wählt', async ({ verwalter }, category: string) => {
-	await verwalter.perform(chooseCategory(category));
+	await verwalter.attemptsTo(chooseCategory(category));
 });
 
 When('der Liegenschaftsverwalter die Rechnung ohne Angaben speichert', async ({ verwalter }) => {
-	await verwalter.perform(saveInvoice);
+	await verwalter.attemptsTo(saveInvoice);
 });
 
 When('der Liegenschaftsverwalter den Betrag auf {string} Franken korrigiert', async ({ verwalter }, amount: string) => {
-	await verwalter.perform(correctAmount(amount));
+	await verwalter.attemptsTo(correctAmount(amount));
 });
 
 When('der Liegenschaftsverwalter die Rechnung der Kategorie {string} zuordnet', async ({ verwalter }, category: string) => {
-	await verwalter.perform(recategorize(category));
+	await verwalter.attemptsTo(recategorize(category));
 });
 
 When(
 	'der Liegenschaftsverwalter die Rechnung mit dem Grund {string} der Kategorie {string} zuordnet',
 	async ({ verwalter }, reason: string, category: string) => {
-		await verwalter.perform(overrideCategory(category, reason));
+		await verwalter.attemptsTo(overrideCategory(category, reason));
 	}
 );
 
 When('der Liegenschaftsverwalter die Rechnung ohne Rechnungssteller speichert', async ({ verwalter }) => {
-	await verwalter.perform(clearSupplier);
+	await verwalter.attemptsTo(clearSupplier);
 });
 
 Then(
 	'die Rechnung von {string} über {string} in der Kategorie {string} ist auffindbar',
 	async ({ verwalter, names }, supplier: string, amount: string, category: string) => {
 		const name = names.get(supplier) ?? supplier;
-		await verwalter.perform(searchInvoices(name));
-		await expect(amountOfListedInvoice(verwalter, name)).toHaveText(amount);
-		await expect(categoryOfListedInvoice(verwalter, name)).toHaveText(category);
+		await verwalter.attemptsTo(searchInvoices(name));
+		await verwalter.sees(amountOfListedInvoice(name)).toBe(amount);
+		await verwalter.sees(categoryOfListedInvoice(name)).toBe(category);
 	}
 );
 
 Then('ist die Rechnung nicht als umlagefähig markiert', async ({ verwalter }) => {
-	await expect(utilityCostChoice(verwalter)).not.toBeChecked();
+	await verwalter.sees(markedAsUtilityCost).toBe(false);
 });
 
 Then('lässt sich die Rechnung nicht als umlagefähig markieren', async ({ verwalter }) => {
-	await expect(utilityCostChoice(verwalter)).toBeDisabled();
+	await verwalter.sees(utilityCostMarkable).toBe(false);
 });
 
 Then(
 	'weist ein Hinweis darauf hin, dass die Kosten nicht auf die Mieter umgelegt werden können',
 	async ({ verwalter }) => {
-		await expect(nonAllocableCategoryWarning(verwalter)).toContainText('nicht auf Mieter übertragen');
+		await verwalter.sees(nonAllocableCategoryWarning).toContain('nicht auf Mieter übertragen');
 	}
 );
 
 When('der Liegenschaftsverwalter das Rechnungsdatum {string} einträgt', async ({ verwalter }, date: string) => {
-	await verwalter.perform(enterInvoiceDate(date));
+	await verwalter.attemptsTo(enterInvoiceDate(date));
 });
 
 Then(
 	'warnt das Rechnungsformular, dass das Rechnungsdatum nicht in der Abrechnungsperiode {string} liegt',
 	async ({ verwalter }, period: string) => {
-		await expect(dateOutsidePeriodWarning(verwalter)).toContainText(
-			`Das Rechnungsdatum liegt nicht in der Abrechnungsperiode ${period}`
-		);
+		await verwalter
+			.sees(dateOutsidePeriodWarning)
+			.toContain(`Das Rechnungsdatum liegt nicht in der Abrechnungsperiode ${period}`);
 	}
 );
 
 When('der Liegenschaftsverwalter als Rechnungsdatum {string} eintippt', async ({ verwalter }, text: string) => {
-	await verwalter.perform(typeInvoiceDate(text));
+	await verwalter.attemptsTo(typeInvoiceDate(text));
 });
 
 Then('zeigt das Feld Rechnungsdatum {string}', async ({ verwalter }, text: string) => {
-	await expect(invoiceDate(verwalter)).toHaveValue(text);
+	await verwalter.sees(invoiceDate).toBe(text);
 });
 
 Then('steht unter dem Rechnungsdatum {string}', async ({ verwalter }, words: string) => {
-	await expect(invoiceDateInWords(verwalter)).toHaveText(words);
+	await verwalter.sees(invoiceDateInWords).toBe(words);
 });
 
 When('der Liegenschaftsverwalter die Rechnung von {string} bearbeitet', async ({ verwalter, seed }, supplier: string) => {
-	await visit(verwalter.page, `/invoices/${seed.idOf(`Rechnung ${supplier}`)}/edit`);
+	await verwalter.attemptsTo(openInvoiceEdit(seed.idOf(`Rechnung ${supplier}`)!));
 });
 
 Then('warnt das Formular, dass es mit dieser Rechnung schon Abrechnungen gibt', async ({ verwalter }) => {
-	await expect(billedWarning(verwalter)).toContainText('gibt es schon Abrechnungen mit dieser Rechnung');
+	await verwalter.sees(billedWarningText).toContain('gibt es schon Abrechnungen mit dieser Rechnung');
 });
 
 Then('ist das Rechnungsdatum leer, damit es bewusst gewählt wird', async ({ verwalter }) => {
-	await expect(invoiceDate(verwalter)).toHaveValue('');
+	await verwalter.sees(invoiceDate).toBe('');
 });
 
 Then('warnt das Rechnungsformular nicht vor dem Rechnungsdatum', async ({ verwalter }) => {
-	await expect(invoiceDate(verwalter)).toBeVisible(); // the form is shown
-	await expect(dateOutsidePeriodWarning(verwalter)).toHaveCount(0);
+	await verwalter.sees(invoiceDateShown).toBe(true); // the form is shown
+	await verwalter.sees(dateOutsidePeriodWarnings).toBe(0);
 });

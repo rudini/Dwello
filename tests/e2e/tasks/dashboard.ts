@@ -1,5 +1,5 @@
-import type { Actor } from '../fixtures/actor';
-import { occupancyBuilding, quickAction, statementsTile, statTile } from '../interactions/dashboard';
+import { Click, Navigate } from '../screenplay/interactions';
+import { occupancyBuilding, overviewTaskLink, quickAction, statementsTile, statTile } from '../targets/dashboard';
 
 // Labels contain each other ("Vermietet" / "Wiedervermietet"), so tiles are found by their test id
 const tiles: Record<string, string> = {
@@ -13,18 +13,9 @@ const tiles: Record<string, string> = {
 };
 const statementStatuses: Record<string, string> = { Entwürfe: 'draft', Versendet: 'sent', Bezahlt: 'paid', Überfällig: 'overdue' };
 
-export const openBuildingFromOccupancy = (building: string) => async (actor: Actor) => {
-	await occupancyBuilding(actor.page, building).click();
-};
-
-export const openTile = (label: string) => async (actor: Actor) => {
-	await statTile(actor.page, tiles[label]).click();
-};
-
-export const openStatementsWithStatus = (label: string) => async (actor: Actor) => {
-	await statementsTile(actor.page, statementStatuses[label]).click();
-};
-
-export const chooseQuickAction = (label: string) => async (actor: Actor) => {
-	await quickAction(actor.page, label).click();
-};
+export const openDashboard = Navigate.to('/dashboard');
+export const openBuildingFromOccupancy = (building: string) => Click.on(occupancyBuilding(building));
+export const openTile = (label: string) => Click.on(statTile(tiles[label]));
+export const openStatementsWithStatus = (label: string) => Click.on(statementsTile(statementStatuses[label]));
+export const chooseQuickAction = (label: string) => Click.on(quickAction(label));
+export const startOverviewTask = (title: string) => Click.on(overviewTaskLink(title));

@@ -5027,3 +5027,243 @@ header and on pages without it. Branch `claude/optimistic-clarke-nn8u7t` from `m
 - 📖 [PRD](./docs/PRD-Dwello.md)
 - 🗄️ [Database Schema](./docs/data-model.md)
 - 🔌 [API Spec](./docs/api-specification.md)
+
+## Session 19 - October 2026: Acceptance tests on a lean Screenplay pattern
+
+Baseline before the change: `bun run test:e2e -- --project=chromium --project=api` 629 passed (617 chromium, 12 api).
+
+- [x] Core `tests/e2e/screenplay/`: `Actor` with abilities (`BrowseTheWeb`, `CallTheApi`), `attemptsTo`, `answer`,
+  `sees` (`expect.poll`), memory; interactions; web questions answering values; `target()`; `throughUiOrApi`
+- [x] Template area: contract form, contract list, contract detail, common steps (`targets/`, tasks, questions, steps)
+- [x] Lint rules for the layers in `eslint.config.js` with a ratchet list; proof `src/__tests__/e2e-screenplay-lint.test.ts`
+- [x] `tests/e2e/CLAUDE.md`: layers, rules, example
+- [x] Areas moved to Screenplay, ratchet list shrinking: buildings/apartments/tenants; invoices/categories/keys/
+  heating profiles/documents/settings; statements (incl. API driver, download); accessibility/language/app frame/
+  authentication/dashboard/contact/coming soon
+- [x] Ratchet list and transitional `Actor.page`/`perform`, `fixtures/actor.ts`, `interactions/` removed
+- [x] Full E2E suite chromium + api green with the same 629 tests (identical names); finish checks
+- [x] Independent review (`code-reviewer`), three rounds; findings fixed or rejected with reason; M-1 fixed after the
+  last allowed round
+- [x] Final independent review of all three points of the goal, asked for by the product owner (rounds 4-6, run from
+  the parent session): all three fulfilled, no Blocker/Major open
+
+Files: `tests/e2e/{screenplay,targets,tasks,questions,steps,fixtures}/**`, `tests/e2e/interactions/` and
+`fixtures/actor.ts` removed, `tests/e2e/CLAUDE.md`, `eslint.config.js`, `src/__tests__/e2e-screenplay-lint.test.ts`,
+`docs/test-pyramid.md`, `playwright.config.ts` (comment), `.claude/skills/bdd-acceptance/SKILL.md`,
+`docs/design/offene-punkte.md` (H-18, H-19).
+
+Review round 1 (`docs/reviews/screenplay-e2e-review-1.md`):
+- M-1 Major: lint gap (page via destructuring, `$eval`, mouse/keyboard chains, computed calls) - fixed
+- Minor lint: assertion libraries and type imports in steps, targets importing the core - fixed
+- Minor fixtures without layer rule - fixed for `besucher` (interaction); rejected for the `page` fixture: it is the
+  Playwright fixture wiring itself and steps cannot destructure `page`/`context`/`browser`/`request`
+- Minor mail check with raw `fetch` - rejected: the mail catcher is not Playwright and not the system under test's UI
+- Minor fuel stock wait weaker - fixed (`Wait.forCount`)
+- Minor API preview memory defaulting to empty - fixed (throws)
+- Minor waiting calls in `single()` - fixed (1 s timeouts after counting)
+- Minor `ShareInViewport` rounding - fixed (as toBeInViewport)
+- Minor stale docs - fixed
+- Minor UI words in features - open work H-18 (pre-existing wording)
+- Nit `Wait.until` takes the first match - rejected: it only waits for a state, the checks stay strict
+- Nit `**/interactions/**` patterns - fixed; Nit plan ticks - fixed
+
+Review round 2 (`docs/reviews/screenplay-e2e-review-2.md`):
+- M-1 Major (still open): fixtures without layer rule, dynamic `import()`/`require`, path variants of the abilities
+  import, calls and access by computed name, `request` chains - fixed (fixtures get the rules, may take Playwright
+  fixtures and types as parameters; the `page` fixture signs in through `Cookies.add`)
+- Minor download object reachable from memory (`path()` etc.) - fixed (calls banned)
+- Minor targets may read (`textContent`, `url` ...) - fixed
+- Minor CLAUDE.md names an unchecked exception - fixed (there is none any more)
+- Minor `quick` timeout throws for direct `actor.answer` - fixed (comment says so)
+- Nit blank line in `tasks/building-detail.ts` - fixed
+
+Review round 3 (`docs/reviews/screenplay-e2e-review-3.md`, last round allowed by CLAUDE.md step 7):
+- M-1 Major (rest in fixtures/): calls on Playwright fixture parameters and Playwright `APIRequestContext` in
+  `fixtures/backend.ts` - fixed after the round: fixtures may only hand Playwright fixtures on (any member access and
+  renaming fail lint), the HTTP calls moved into the ability `CallTheApi`; confirmed in round 4
+- Minor targets: `page.on`, `page.request` - fixed (only `page.getBy…`/`page.locator`/`page.frameLocator`)
+- Minor `reachState` workaround - comment added
+- Nit computed string access hits e.g. `headers['content-type']` - rejected: no such code in tests/e2e; dotted access
+  or a variable key is the way
+- Nit `all` in the targets read list hits `Promise.all` - rejected: targets have no reason to await anything
+- Nit `Download.url()/failure()/delete()` from memory - rejected: not realistic, `DownloadedFile` is the way
+
+Final checks at 294aebf: E2E chromium + api 629 passed (same 629 test names as the baseline); `bun run lint` clean;
+`bun run check` 0 errors; backend 539 pass, type-check clean, coverage 90.4 %; `test:coverage` 2232 passed, 1 failed
+only locally (`open-work.test.ts` finds the agent worktrees under `.claude/worktrees/`, not part of the repo).
+
+Final review round 4 (`docs/reviews/screenplay-e2e-review-4.md`, at 0f55450; points 1 and 3 fulfilled, 2 not yet):
+- M-1 Major steps: driver switch, `seed.backend`, `test.expect` pass lint - fixed in b57241f
+- M-2 Major questions act and wait through interactions; fixtures hand interactions and targets on - fixed in b57241f
+- Minor `throw` as a check in steps - fixed in b57241f
+- Minor alias of Playwright fixtures in fixtures/, `fetch` in questions/ - open work H-19 (`docs/design/offene-punkte.md`)
+- Minor four commit subjects over 50 characters - not rewritten (would need a force-push); choose a conforming title
+  when merging
+- Nit spacing in `tasks/invoices.ts` - fixed in 89a83eb
+
+Final review round 5 (`docs/reviews/screenplay-e2e-review-5.md`, delta 0f55450..b57241f; all three points fulfilled):
+- Minor variants `fx.driver`, destructured `backend`/`expect`, a question calling a task with the actor,
+  `globalThis.setTimeout`, namespace import and re-export of interactions in fixtures - fixed in 89a83eb
+
+Final review round 6 (`docs/reviews/screenplay-e2e-review-6.md`, delta b57241f..89a83eb; all three points fulfilled):
+- Minor plan lacks rounds 4-6 and H-19 - fixed (this entry)
+- Nit the question rule hangs on the parameter name `actor` - covered by H-19
+- Nit a fixture re-exporting a task - rejected: steps may import tasks anyway
+
+Final review round 7 (`docs/reviews/screenplay-e2e-review-7.md`, the whole end state 04f3780, not a delta; points 1
+and 3 fulfilled, 2 not yet):
+- M-1 Major files outside the layer folders (a helper folder, a file at the top of tests/e2e) had no layer rules -
+  fixed: a base block holds every other file in tests/e2e to the limits of the layers, and
+  `e2e-screenplay-lint.test.ts` fails on any folder besides the layers
+- Minor Playwright `expect` through `test.expect` or destructuring in tasks/questions - fixed
+- Minor questions blocking through `sees` or a loop - fixed
+- Minor `fetch` in tasks/ - fixed (backend through `CallTheApi`)
+- Minor `setTimeout` in steps - fixed (`$testInfo.setTimeout` stays allowed)
+- Minor fixtures performing tasks - fixed (no imports from tasks/ or questions/)
+- Minor `tests/e2e/CLAUDE.md` "May use" column incomplete, no word on other folders - fixed
+- Minor no lint for a missing `await` before `sees` - rejected: needs type information (H-19 kind); all 234 calls
+  are awaited today
+- Nit `docs/test-pyramid.md` names only `tasks/*-api.ts` as API driver - fixed; Nit H-19 missing under Files - fixed
+- Nits `statementPath` in questions/, the axe question scrolling, the `'findings'` literal, `{ verwalter: viewer }`,
+  a target with a renamed parameter - rejected: no layer rule broken (the scroll is part of reading the page from the
+  top), naming only; the renamed parameter is H-19
+
+Final review round 8 (`docs/reviews/screenplay-e2e-review-8.md`, the whole end state 7bdad9d; points 1 and 3
+fulfilled, 2 not yet):
+- M-1 Major only `.ts` files are linted; a `.js` file in a layer passed - fixed: tests/e2e may hold only `.ts`,
+  `.feature` and `.md` (lint test)
+- M-2 Major a step choosing UI or API through `$testInfo.project` - fixed: of `$testInfo` steps may use only
+  `setTimeout`; steps may not ask for abilities (`can`, `abilityTo`)
+- M-3 Major `for` loops in questions (round 7 closed only `while`) - fixed: every loop kind
+- Minor timers in steps through `globalThis`, `scheduler` or `node:timers` - fixed (timer modules banned in every
+  layer)
+- Minor `globalThis.fetch` in tasks - fixed
+- Minor re-exports from tasks/fixtures handing interactions, targets or `CallTheApi` to steps - fixed: no layer
+  re-exports
+- Minor a question writing through `CallTheApi` (`post`, `put`, `remove` …) - fixed
+- Minor H-19 lacks the renamed `actor` parameter and a renamed `seed.backend` in fixtures - fixed (both added)
+- Nits `'findings'` literal, commit subjects - rejected as in round 7
+
+Final review round 9 (`docs/reviews/screenplay-e2e-review-9.md`, the whole end state ee8279a; points 1 and 3
+fulfilled, 2 not yet):
+- M-1 Major `screenplay/` had no rules: page code with its own locators could move into the core - fixed:
+  `screenplay/` holds exactly its five files (structure test), depends on no layer above it, and finds elements only
+  through targets (locator calls only in `target.ts`; the hydration check became the core target `hydratedPage`)
+- M-2 Major a step or task choosing UI or API through `test.info().project` - fixed: `info()` and `.project` banned
+  in every layer below the steps and in the steps (targets and the core: round 10)
+- M-3 Major `fetch` passed in steps, fixtures and other files - fixed: banned in steps, tasks, fixtures and other
+  files (questions keep it for the mail catcher, H-19; targets: round 10)
+- Minor `setTimeout` in tasks - fixed: clock timers banned in steps, tasks, questions and fixtures (`$testInfo.setTimeout`
+  stays; targets: round 10)
+- Minor local re-export `export { Click }` - fixed: every export without a declaration is banned (round 8 had
+  covered only `export … from`)
+- Minor polling loop in a step - fixed (`while`, `do … while`; a `for` loop over preconditions stays)
+- Minor recursion in a question - recorded in H-19
+- Minor a `.ts` file at the top of tests/e2e - fixed: only `CLAUDE.md` there (structure test); layers have no
+  subfolders
+- Minors under H-19 (fixture alias of `page`, question parameter not named `actor`, `fetch` in questions) - recorded
+- Nit `docs/test-pyramid.md` API path - fixed
+
+Final review round 10 (`docs/reviews/screenplay-e2e-review-10.md`, the whole end state 654d854; points 1 and 3
+fulfilled, 2 not yet). From here on allowlists replace growing ban lists where the code allows (step imports, the
+  core's page methods and selectors, `target.ts`; round 13 adds the imports of every layer):
+- M-1 Major the core finding elements through selector strings of the page API (`page.click(sel)`,
+  `textContent(sel)` …) - fixed: on the page the core may call only page-wide methods (`goto`, `reload`, `route`,
+  `evaluate`, `waitFor{Event,Request,Response,URL}`, viewport, headers, `title`, `url`, `context`); `querySelector`
+  on `data-testid` banned in the core, every element lookup banned in `interactions.ts`
+- M-2 Major a `for` polling loop in a step - fixed: steps may not call `answer` (only `sees`)
+- M-3 Major page code outside tests/e2e imported by steps and tasks - fixed: steps import only from
+  `playwright-bdd`, `tasks/`, `questions/`, `fixtures/`; no layer imports from outside tests/e2e but the backend's PDF
+  reader
+- Minor domain targets in `screenplay/target.ts` - fixed: it exports only `target`, `Target`, `hydratedPage`
+  (structure test)
+- Minor `document.querySelector` in an interaction's `evaluate` - fixed (see M-1)
+- Minor re-export by declaration (`export const clickOn = Click.on`) - recorded in H-19
+- Minor timers, `info()` and `fetch` in targets - fixed
+- Minor round-9 statements in this archive too broad - corrected above
+- Minor a step importing an `*-api` task directly - rejected: it fails at once in the UI project (no `CallTheApi`),
+  and steps rightly import the helper `francs` from there
+- Minor question parameter `verwalter` handing the actor to a task - recorded in H-19
+- Minor commit subjects over 50 characters - as before (squash title)
+- Nit `tests/e2e/CLAUDE.md` core rule is only a convention - fixed by M-1
+- E2E chromium + api on 654d854: 629 passed
+
+Final review round 11 (`docs/reviews/screenplay-e2e-review-11.md`, the whole end state c632714; points 1 and 3
+fulfilled, 2 not yet):
+- M-1 Major polling in a step through `try`/`catch` or `.catch`/`.then` around `sees` - fixed: no `try`, `then`,
+  `catch`, `finally` in steps
+- Minor page methods through `actor.abilityTo(BrowseTheWeb).page` in the core - fixed (any `.page` receiver), and
+  `mouse`/`keyboard` banned in the core
+- Minor element lookups in the browser with a template literal or another selector - fixed: the core uses only its
+  six fixed general selectors (structure test); round 10's "querySelector on data-testid" covered only literals
+- Minor the export test of `target.ts` saw only `export const` - fixed: it compares the module's runtime exports
+- Minor core and targets importing from outside tests/e2e, the core re-exporting - fixed (`insideE2e` and the
+  re-export ban there too)
+- Minor timers and `test.info()` in the core, timer modules in targets - fixed; round 9/10 wording about "every
+  layer" now holds for the core and targets too
+- Minor commit subjects over 50 characters - as before (squash title)
+- Nit `mouse`/`keyboard` in the core - fixed (see above); Nit `Width.of` answers `null` - wording in
+  `tests/e2e/CLAUDE.md` fixed
+
+Final review round 12 (`docs/reviews/screenplay-e2e-review-12.md`, the whole end state 6d687c1; points 1 and 3
+fulfilled, 2 not yet):
+- M-1 Major a When or Then step acting through `seed` (e.g. `seed.sendStatement`) past the UI - fixed: in When and
+  Then steps `seed` may only name things (`idOf`, `unique`)
+- Minor `answeredBy` and `Promise.*` around `sees` in steps - fixed
+- Minor `getElementById` with other ids, `getElementsBy…`, `elementFromPoint` in the core; web questions waiting with
+  `expect` or `waitFor…` - fixed (structure test covers every DOM lookup; `questions.ts` may not wait)
+- Minor `$lib`/`src/` imports and `./../../` paths - fixed (`insideE2e` matches them)
+- Minor `sees` without `await` (also with `.not`) - fixed (syntactic rule; round 7 had rejected it as needing type
+  information)
+- Minor `browserName` and `test.skip` in steps - fixed
+- Minor archive wording of rounds 10 and 11 too broad - holds now with the fixes above
+- Minor commit subjects over 50 characters - as before (squash title)
+- Nit `docs/test-pyramid.md` lacks `statement-rounding.feature` - fixed; Nit lint test grouped by review round -
+  rejected: the grouping records why each rule exists
+
+Screenplay expert review (`docs/reviews/screenplay-e2e-expertenreview-1.md`, written in the Screenplay session at
+c632714, merged in 3c58bfa):
+- M-1 Major yes/no questions lose the actual value (Saldo, costs, created statements, heating costs) - fixed in round
+  13 (the first fix read the heating share from the run-together row text and missed the singular of «erstellt»): they
+  answer the amount in francs (`saldoOf`, `totalCostsOf`, `statementsCreated`, `heatingCosts`), both drivers in the
+  same form; rule added to `tests/e2e/CLAUDE.md`
+- M-2 Major the API driver chooses contracts with a copy of the BFF rule and reports its own count - partly fixed:
+  the number of created statements is read from the system; moving the selection into a backend endpoint is H-20
+- M-3 Major structure tests failing on an ignored tool cache (`tests/e2e/.fallow/`) - fixed: they list files through
+  `git ls-files --cached --others --exclude-standard` (reproduced red with a self-ignoring cache folder first)
+- Minors m-1 to m-9 and the nits - recorded in H-20, except m-8 in part (the sign of a Saldo moved from the step into
+  `signedFrancs` next to the questions)
+
+Final review round 13 (`docs/reviews/screenplay-e2e-review-13.md`, the whole end state fdfa6ef; points 1 and 2
+fulfilled, 3 not yet):
+- B-1 Blocker `heatingCosts` read the share from the row text, which Svelte renders without space between cells
+  («CHF 1’000.0043 %»): 0.0043 instead of 43, three scenarios red in chromium (confirmed by the E2E run on fdfa6ef) -
+  fixed: the cells are read one by one (target `statementLineItemCells`)
+- the same E2E run showed a fourth failure the review had not named: `statementsCreated` missed the singular
+  («1 Nebenkostenabrechnung ist …») - fixed; the four features run green in chromium and api (68 scenarios)
+- Minor `seed` in `Step(` handlers - fixed; a handler passed by name - recorded in H-19
+- Minor web questions in the core reading with auto-waiting calls or acting - fixed (`textContent`, `inputValue` …
+  banned, state reads only with a timeout, no actions)
+- Minor ban lists for the imports of tasks, questions, fixtures and targets - fixed: each layer has an import
+  allowlist
+- Minor archive wording «from here on allowlists» and «M-1 fixed» - corrected
+- Minor `contractHistoryLists` folded texts into yes/no - fixed: `contractHistoryNaming` answers the rows
+- Nit `screens.json` read from outside tests/e2e - named in `tests/e2e/CLAUDE.md`; Nit `void`/unawaited `sees`
+  assigned to a variable - fixed
+
+Final review round 14 (`docs/reviews/screenplay-e2e-review-14.md`, the whole end state 6734ba2; points 1 and 3
+fulfilled, 2 not yet):
+- M-1 Major a When/Then step acting through `seed` by handing it to a task, a question or a step helper - fixed:
+  tasks and questions may not import `TestData` nor use `.backend`; in When/Then/Step `seed` is never handed on;
+  `statementPath` takes the statement's id; the axe and language checks get their examples from a fixture
+  (`examples`) instead of `exampleOf(seed, …)` in a Then step (also m-7)
+- Minor targets had a ban list for imports - fixed: an allowlist (`screenplay/target` only); round 13's «each layer
+  has an import allowlist» now holds for every layer but the core, which may use Playwright
+- Minor core web questions with `getAttribute`/`evaluate` without timeout - recorded in H-20 (indistinguishable by
+  name from the browser-side DOM calls in `questions.ts`)
+- Minor heating row chosen by «Heizung» anywhere in its text - fixed: by the exact category cell
+- Minor share in % rounded on the page, not over the API - fixed: the API answer is rounded to two places too
+- Minor yes/no over values (`mailsTo`, sideways overflow, end confirmation in the window) - fixed: file types,
+  pixels and the share in the window are answered
+- Minor stale JSDoc in `questions/statement-detail.ts` - fixed
+- Nit tasks polling or using `sees` - `sees` banned in tasks; polling recorded in H-20 as undecided

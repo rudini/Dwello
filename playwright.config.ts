@@ -94,7 +94,7 @@ export default defineConfig<{ driver: Driver }>({
 			env: frontendEnv
 		},
 		{
-			// Empty backend for the axe check of 'empty' and 'first-use' (tests/e2e/interactions/accessibility.ts)
+			// Empty backend for the axe check of 'empty' and 'first-use' (tests/e2e/tasks/accessibility.ts)
 			command: 'cd backend && bun run e2e-db && bun run src/index.ts',
 			port: 3103,
 			reuseExistingServer: false,

@@ -1,11 +1,16 @@
-import { expect } from '@playwright/test';
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { visit } from '../interactions/navigation';
-import { allListedStatements, listedStatement, statementOfYear, statementPath } from '../questions/statements';
+import {
+	listedStatement,
+	listedStatementCount,
+	pageAddressInApp,
+	statementOfYearListed,
+	statementPath
+} from '../questions/statements';
 import {
 	downloadStatementPdfFromList,
 	openStatement,
+	openStatementList,
 	searchStatements,
 	showDraftsOfBuilding,
 	showStatementsOfBuilding,
@@ -38,13 +43,13 @@ Given(
 );
 
 Given('der Liegenschaftsverwalter ist auf der Abrechnungsliste', async ({ verwalter }) => {
-	await visit(verwalter.page, '/statements');
+	await verwalter.attemptsTo(openStatementList);
 });
 
 Then(
 	'sieht der Liegenschaftsverwalter die Abrechnung von {string} mit dem Status {string}',
 	async ({ verwalter, names }, tenant: string, status: string) => {
-		await expect(listedStatement(verwalter, names.get(tenant) ?? tenant)).toContainText(status);
+		await verwalter.sees(listedStatement(names.get(tenant) ?? tenant)).toContain(status);
 	}
 );
 
@@ -56,67 +61,67 @@ Given(
 );
 
 When('der Liegenschaftsverwalter die Abrechnungen von {string} sucht', async ({ verwalter, names }, tenant: string) => {
-	await verwalter.perform(searchStatements(names.get(tenant) ?? tenant));
+	await verwalter.attemptsTo(searchStatements(names.get(tenant) ?? tenant));
 });
 
 When('der Liegenschaftsverwalter zur nächsten Seite blättert', async ({ verwalter }) => {
-	await verwalter.perform(turnToNextPage);
+	await verwalter.attemptsTo(turnToNextPage);
 });
 
 When(
 	'der Liegenschaftsverwalter nur die Entwürfe im Gebäude {string} anzeigt',
 	async ({ verwalter, seed }, building: string) => {
-		await verwalter.perform(showDraftsOfBuilding(seed.idOf(building)!));
+		await verwalter.attemptsTo(showDraftsOfBuilding(seed.idOf(building)!));
 	}
 );
 
 When('der Liegenschaftsverwalter neue Abrechnungen erstellen will', async ({ verwalter }) => {
-	await verwalter.perform(startGeneratingStatements);
+	await verwalter.attemptsTo(startGeneratingStatements);
 });
 
 When(
 	'der Liegenschaftsverwalter die Abrechnung {int} von {string} öffnet',
 	async ({ verwalter, names }, year: number, tenant: string) => {
-		await verwalter.perform(openStatement(names.get(tenant) ?? tenant, year));
+		await verwalter.attemptsTo(openStatement(names.get(tenant) ?? tenant, year));
 	}
 );
 
 Then(
 	'sieht der Liegenschaftsverwalter die Abrechnung {int} von {string}',
 	async ({ verwalter, names }, year: number, tenant: string) => {
-		await expect(statementOfYear(verwalter, names.get(tenant) ?? tenant, year)).toBeVisible();
+		await verwalter.sees(statementOfYearListed(names.get(tenant) ?? tenant, year)).toBe(true);
 	}
 );
 
 Then('die Abrechnungsliste enthält genau {int} Abrechnung', async ({ verwalter }, count: number) => {
-	await expect(allListedStatements(verwalter)).toHaveCount(count);
+	await verwalter.sees(listedStatementCount).toBe(count);
 });
 
 Then(
 	'ist der Liegenschaftsverwalter auf der Detailseite der Abrechnung {int} von {string}',
 	async ({ verwalter, seed }, year: number, tenant: string) => {
-		await expect(verwalter.page).toHaveURL(statementPath(seed, tenant, year));
+		await verwalter.sees(pageAddressInApp).toBe(statementPath(seed.idOf(`Abrechnung ${tenant} ${year}`)!));
 	}
 );
 
 When(
 	'der Liegenschaftsverwalter die Abrechnungen im Gebäude {string} anzeigt',
 	async ({ verwalter, seed }, building: string) => {
-		await verwalter.perform(showStatementsOfBuilding(seed.idOf(building)!));
+		await verwalter.attemptsTo(showStatementsOfBuilding(seed.idOf(building)!));
 	}
 );
 
 When(
 	'der Liegenschaftsverwalter das Gebäude {string} wählt, bevor die Abrechnungsliste fertig geladen ist, und sucht',
 	async ({ verwalter, seed }, building: string) => {
-		await verwalter.perform(showStatementsOfBuildingWhileLoading(seed.idOf(building)!));
+		await verwalter.attemptsTo(showStatementsOfBuildingWhileLoading(seed.idOf(building)!));
 	}
 );
 
 Given(
 	'der Liegenschaftsverwalter zeigt die Abrechnungen im Gebäude {string} an',
 	async ({ verwalter, seed }, building: string) => {
-		await verwalter.perform(showStatementsOfBuilding(seed.idOf(building)!));
+		await verwalter.attemptsTo(showStatementsOfBuilding(seed.idOf(building)!));
 	}
 );
 
@@ -131,6 +136,6 @@ Given('für die Abrechnung {int} von {string} gibt es ein PDF', async ({ seed },
 When(
 	'der Liegenschaftsverwalter das PDF der Abrechnung {int} von {string} herunterlädt',
 	async ({ verwalter, names }, year: number, tenant: string) => {
-		await verwalter.perform(downloadStatementPdfFromList(names.get(tenant) ?? tenant, year));
+		await verwalter.attemptsTo(downloadStatementPdfFromList(names.get(tenant) ?? tenant, year));
 	}
 );

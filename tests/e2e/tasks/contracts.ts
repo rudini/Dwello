@@ -1,4 +1,5 @@
-import type { Actor } from '../fixtures/actor';
+import type { Activity } from '../screenplay/actor';
+import { Click, Enter, Navigate, Select } from '../screenplay/interactions';
 import {
 	contractBuildingFilter,
 	contractSearchButton,
@@ -7,27 +8,21 @@ import {
 	editContractButton,
 	newContractButton,
 	viewContractButton
-} from '../interactions/contracts';
+} from '../targets/contracts';
 
-export const searchContracts = (term: string) => async (actor: Actor) => {
-	await contractSearchInput(actor.page).fill(term);
-	await contractSearchButton(actor.page).click();
-};
+export const openContractList = Navigate.to('/contracts');
 
-export const filterContracts = (filter: { buildingId?: string; status?: 'active' | 'ended' }) => async (actor: Actor) => {
-	if (filter.buildingId) await contractBuildingFilter(actor.page).selectOption(filter.buildingId);
-	if (filter.status) await contractStatusFilter(actor.page).selectOption(filter.status);
-	await contractSearchButton(actor.page).click();
-};
+export const searchContracts = (term: string): Activity => (actor) =>
+	actor.attemptsTo(Enter.theValue(term).into(contractSearchInput), Click.on(contractSearchButton));
 
-export const startNewContract = async (actor: Actor) => {
-	await newContractButton(actor.page).click();
-};
+export const filterContracts =
+	(filter: { buildingId?: string; status?: 'active' | 'ended' }): Activity =>
+	async (actor) => {
+		if (filter.buildingId) await actor.attemptsTo(Select.option(filter.buildingId).from(contractBuildingFilter));
+		if (filter.status) await actor.attemptsTo(Select.option(filter.status).from(contractStatusFilter));
+		await actor.attemptsTo(Click.on(contractSearchButton));
+	};
 
-export const viewContract = (tenantName: string) => async (actor: Actor) => {
-	await viewContractButton(actor.page, tenantName).click();
-};
-
-export const editContract = (tenantName: string) => async (actor: Actor) => {
-	await editContractButton(actor.page, tenantName).click();
-};
+export const startNewContract = Click.on(newContractButton);
+export const viewContract = (tenantName: string) => Click.on(viewContractButton(tenantName));
+export const editContract = (tenantName: string) => Click.on(editContractButton(tenantName));

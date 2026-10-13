@@ -1,19 +1,10 @@
-import type { Actor } from '../fixtures/actor';
-import { buildingLink, deleteButton, deleteConfirm, editButton, recategorizeButton } from '../interactions/invoice-detail';
+import type { Activity } from '../screenplay/actor';
+import { Click, Navigate } from '../screenplay/interactions';
+import { buildingLink, deleteButton, deleteConfirm, editButton, recategorizeButton } from '../targets/invoice-detail';
 
-export const deleteInvoice = async (actor: Actor) => {
-	await deleteButton(actor.page).click();
-	await deleteConfirm(actor.page).click();
-};
+export const openInvoice = (invoiceId: string) => Navigate.to(`/invoices/${invoiceId}`);
 
-export const startEditingInvoice = async (actor: Actor) => {
-	await editButton(actor.page).click();
-};
-
-export const openBuildingOfInvoice = async (actor: Actor) => {
-	await buildingLink(actor.page).click();
-};
-
-export const recategorizeInvoice = async (actor: Actor) => {
-	await recategorizeButton(actor.page).click();
-};
+export const deleteInvoice: Activity = (actor) => actor.attemptsTo(Click.on(deleteButton), Click.on(deleteConfirm));
+export const startEditingInvoice = Click.on(editButton);
+export const openBuildingOfInvoice = Click.on(buildingLink);
+export const recategorizeInvoice = Click.on(recategorizeButton);

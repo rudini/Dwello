@@ -1,4 +1,4 @@
-import type { Actor } from '../fixtures/actor';
-import { comingSoonNotice } from '../interactions/coming-soon';
+import { Text } from '../screenplay/questions';
+import { comingSoonNotice } from '../targets/coming-soon';
 
-export const announcement = (actor: Actor) => comingSoonNotice(actor.page);
+export const announcement = Text.of(comingSoonNotice);

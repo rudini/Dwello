@@ -1,29 +1,22 @@
-import type { Actor } from '../fixtures/actor';
+import type { Activity } from '../screenplay/actor';
+import { Browser, Click } from '../screenplay/interactions';
 import {
 	footerLink,
 	logo,
 	mainNavLink,
+	publicHelpLink,
+	publicLoginLink,
+	termsLinkOnLogin,
 	userMenuButton,
 	userMenuSettings
-} from '../interactions/app-frame';
+} from '../targets/app-frame';
 
-export const chooseInMainNav = (label: string) => async (actor: Actor) => {
-	await mainNavLink(actor.page, label).click();
-};
-
-export const chooseLogo = async (actor: Actor) => {
-	await logo(actor.page).click();
-};
-
-export const openSettingsFromUserMenu = async (actor: Actor) => {
-	await userMenuButton(actor.page).click();
-	await userMenuSettings(actor.page).click();
-};
-
-export const chooseInFooter = (label: string) => async (actor: Actor) => {
-	await footerLink(actor.page, label).click();
-};
-
-export const useWindowWidth = (width: number) => async (actor: Actor) => {
-	await actor.page.setViewportSize({ width, height: 768 });
-};
+export const chooseInMainNav = (label: string) => Click.on(mainNavLink(label));
+export const chooseLogo = Click.on(logo);
+export const openSettingsFromUserMenu: Activity = (actor) =>
+	actor.attemptsTo(Click.on(userMenuButton), Click.on(userMenuSettings));
+export const chooseInFooter = (label: string) => Click.on(footerLink(label));
+export const useWindowWidth = (width: number) => Browser.resizeTo({ width, height: 768 });
+export const openTermsFromLogin = Click.on(termsLinkOnLogin);
+export const openLoginFromPublicPage = Click.on(publicLoginLink);
+export const openHelpFromPublicPage = Click.on(publicHelpLink);

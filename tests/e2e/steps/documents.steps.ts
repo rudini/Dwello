@@ -1,11 +1,8 @@
-import { expect } from '@playwright/test';
 import { createBdd } from 'playwright-bdd';
 import { inDays } from '../fixtures/dates';
 import { test } from '../fixtures/test';
-import { reminderButton } from '../interactions/documents';
-import { visit } from '../interactions/navigation';
-import { deliveryOf, documentFor, mailsTo, reminderOutcome } from '../questions/documents';
-import { markLetterSent, sendReminder } from '../tasks/documents';
+import { deliveryOf, documentFor, documentsFor, mailsTo, reminderOffers, reminderOutcome } from '../questions/documents';
+import { markLetterSent, openDocuments, openDocumentsToSend, sendReminder } from '../tasks/documents';
 
 const { Given, When, Then } = createBdd(test);
 
@@ -23,54 +20,52 @@ Given(
 );
 
 Given('der Liegenschaftsverwalter ist bei den zu versendenden Dokumenten', async ({ verwalter }) => {
-	await visit(verwalter.page, '/documents?status=to_send');
+	await verwalter.attemptsTo(openDocumentsToSend);
 });
 
 When('der Liegenschaftsverwalter eine Mahnung sendet', async ({ verwalter }) => {
-	await verwalter.perform(sendReminder);
+	await verwalter.attemptsTo(sendReminder);
 });
 
 When(
 	'der Liegenschaftsverwalter die {string} an {string} als versendet markiert',
 	async ({ verwalter, names }, title: string, tenant: string) => {
-		await verwalter.perform(markLetterSent(title, names.get(tenant) ?? tenant));
+		await verwalter.attemptsTo(markLetterSent(title, names.get(tenant) ?? tenant));
 	}
 );
 
 Then('meldet die Abrechnung {string}', async ({ verwalter }, message: string) => {
-	await expect(reminderOutcome(verwalter)).toHaveText(message);
+	await verwalter.sees(reminderOutcome).toBe(message);
 });
 
+// one mail «Zahlungserinnerung – …» with one PDF attached
 Then(
 	'{string} hat die Zahlungserinnerung per E-Mail mit PDF erhalten',
-	async ({ request, names }, tenant: string) => {
-		const address = names.get(`E-Mail ${tenant}`)!;
-		await expect
-			.poll(async () => (await mailsTo(request, address)).map((m) => [m.subject.split(' – ')[0], m.attachments]))
-			.toEqual([['Zahlungserinnerung', [expect.stringMatching(/\.pdf$/)]]]);
+	async ({ verwalter, names }, tenant: string) => {
+		await verwalter.sees(mailsTo(names.get(`E-Mail ${tenant}`)!)).toEqual([['Zahlungserinnerung', ['pdf']]]);
 	}
 );
 
 Then('die Abrechnung führt die {string} als {string}', async ({ verwalter }, title: string, delivery: string) => {
-	await expect(deliveryOf(verwalter, title)).toHaveText(delivery);
+	await verwalter.sees(deliveryOf(title)).toBe(delivery);
 });
 
 Then('ist die {string} an {string} zu versenden', async ({ verwalter, names }, title: string, tenant: string) => {
-	await expect(documentFor(verwalter, title, names.get(tenant) ?? tenant)).toContainText('Zu versenden');
+	await verwalter.sees(documentFor(title, names.get(tenant) ?? tenant)).toContain('Zu versenden');
 });
 
 Then(
 	'ist die {string} an {string} nicht mehr zu versenden',
 	async ({ verwalter, names }, title: string, tenant: string) => {
-		await expect(documentFor(verwalter, title, names.get(tenant) ?? tenant)).toHaveCount(0);
+		await verwalter.sees(documentsFor(title, names.get(tenant) ?? tenant)).toBe(0);
 	}
 );
 
 Then(
 	'ist die {string} an {string} als versendet festgehalten',
 	async ({ verwalter, names }, title: string, tenant: string) => {
-		await visit(verwalter.page, '/documents');
-		await expect(documentFor(verwalter, title, names.get(tenant) ?? tenant)).toContainText('Versendet');
+		await verwalter.attemptsTo(openDocuments);
+		await verwalter.sees(documentFor(title, names.get(tenant) ?? tenant)).toContain('Versendet');
 	}
 );
 
@@ -85,5 +80,5 @@ Given('die Zahlungsfrist der Abrechnung {int} von {string} läuft noch', async (
 });
 
 Then('bietet die Abrechnung keine Mahnung an', async ({ verwalter }) => {
-	await expect(reminderButton(verwalter.page)).toHaveCount(0);
+	await verwalter.sees(reminderOffers).toBe(0);
 });

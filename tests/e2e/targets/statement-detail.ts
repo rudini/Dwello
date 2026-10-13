@@ -1,0 +1,36 @@
+import { target } from '../screenplay/target';
+
+export const statementStatus = target('Status der Abrechnung', (page) => page.getByTestId('statement-status'));
+// Kategorie, Verteilschlüssel, Gesamtbetrag, Anteil in %, Anteil des Mieters (CostTable.svelte)
+export const statementLineItemCells = (category: string) =>
+	target(`Zellen der Position «${category}» der Abrechnung`, (page) =>
+		page
+			.getByTestId('statement-line-item')
+			.filter({ has: page.getByRole('cell', { name: category, exact: true }) })
+			.locator('td')
+	);
+export const statementHeatingProfile = target('Heizprofil der Abrechnung', (page) =>
+	page.getByTestId('statement-heating-profile')
+);
+export const sendStatementButton = target('Abrechnung versenden', (page) => page.getByTestId('statement-send-button'));
+export const markPaidButton = target('Als bezahlt markieren', (page) => page.getByTestId('statement-mark-paid-button'));
+export const confirmMarkPaidButton = target('Bezahlt bestätigen', (page) => page.getByTestId('statement-mark-paid-confirm'));
+export const deleteStatementButton = target('Abrechnung löschen', (page) => page.getByTestId('statement-delete-button'));
+export const confirmDeleteStatementButton = target('Löschen bestätigen', (page) =>
+	page.getByTestId('statement-delete-confirm')
+);
+export const statementEditButton = target('Abrechnung bearbeiten', (page) => page.getByTestId('statement-edit-button'));
+export const statementTenantLink = target('Mieter der Abrechnung', (page) => page.getByTestId('statement-tenant-link'));
+export const statementApartmentLink = target('Wohnung der Abrechnung', (page) =>
+	page.getByTestId('statement-apartment-link')
+);
+export const generatePdfButton = target('PDF erstellen', (page) => page.getByTestId('statement-generate-pdf-button'));
+export const downloadPdfLink = target('PDF herunterladen', (page) => page.getByTestId('statement-pdf-download'));
+export const sendDialog = target('Bestätigung des Versands', (page) => page.getByRole('dialog'));
+export const confirmSendButton = target('Versand bestätigen', (page) => page.getByTestId('statement-send-confirm'));
+export const sendRecipient = target('Empfänger', (page) => page.getByTestId('send-recipient'));
+export const sendPdfLink = target('PDF ansehen', (page) => page.getByTestId('send-pdf-view'));
+export const paidDateInput = target('Bezahlt am', (page) => page.getByTestId('paid-date-input'));
+export const statementHistory = target('Verlauf', (page) =>
+	page.getByRole('heading', { name: 'Verlauf' }).locator('xpath=ancestor::*[.//dl][1]')
+);
