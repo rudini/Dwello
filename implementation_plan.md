@@ -15,8 +15,11 @@ Branch `claude/b13-contracts-unknown` (from `claude/workflow-improvements`, on t
   `forAvailability` answers null for contracts not loaded, for both (`src/lib/contract-form.ts`)
 - [x] New screen state `contracts-unknown` in `tests/a11y/screens.json`, `accessibility.feature`, `sprachen-bildschirme.feature`
 - [x] Slice review `code-reviewer`; findings triaged (round 1)
-- [ ] Feature review: personas Helga and Sven (UI changed)
+- [x] Feature review: personas Helga and Sven (UI changed), round 1
 - [x] Remove `@wip`
+- [x] H1: hint also at «Prüfen»; scenario «Die Prüfung nennt die nicht geladenen Mietverträge»
+  Scenario red: `contract-form.steps.ts` «sees the text of Hinweis in der Prüfung», received null (fix stashed)
+- [ ] Code review of the persona fixes (round 3, delta)
 - [ ] All checks of `CLAUDE.md` pass
 - [x] Archive the finished Session 21 (`open-work.test.ts` allows one session)
 - [ ] Final check: instructions followed, list of improvements to instructions and skills
@@ -36,6 +39,18 @@ Findings round 2 (`docs/reviews/b13-contracts-unknown-review-2.md`): round 1 res
 - N5 the always-present empty live region adds a flex gap - Nit - rejected: an always-present `role="status"` is the pattern of `start-date-notice`; hiding it (`display:none`/`contents`) makes screen readers miss the hint (M3)
 - ponytail-review: `contractsUnknown` target duplicated `apartmentContractsUnknown` - fixed
 
+Findings personas (`docs/design/personas/helga-b13.md`, `docs/design/personas/sven-b13.md`):
+- Helga H1 no hint at «Prüfen», save active - Major - fixed (DOM test and scenario first)
+- Helga H2 «Seite neu laden» loses the edit form's input - Major - open: issue #151 (`entscheiden`), the advice is the text #143 decided
+- Helga H3 the hint does not say the consequence, no «Erneut versuchen» - Major - open: issue #151
+- Helga H4 the choice shows the apartment like a free one - Minor - open work U-15 (= review M2)
+- Helga H5 the same hint twice on the edit page - Minor - rejected: «Done means» of #143 names both places; announced once only (Sven 3)
+- Helga H6, H7, H8; Sven 6, 7 - Minor/Nit - open work U-16 (existed before)
+- Sven 1, 2 hint not linked to the fields - Minor - open work U-16 (needs an extra description in `Field.svelte`)
+- Sven 3 hint announced twice in the edit form - Minor - fixed (test first)
+- Sven 4 no hint at «Prüfen» - Minor - fixed (= H1)
+- Sven 5 the hint omits the consequence - Minor - open: issue #151
+
 Files: `src/lib/contract-form.ts`, `src/routes/contracts/{ContractForm,new/ContractWizard,new/ApartmentStep,new/PeriodStep}.svelte`,
 `src/__tests__/contract-{edit,wizard}.dom.test.ts`, `tests/e2e/{features,steps,tasks,targets,questions,screenplay}/…`,
-`tests/a11y/screens.json`, `docs/archive/implementation-plan-verlauf.md`, `docs/design/offene-punkte.md`
+`tests/a11y/screens.json`, `docs/archive/implementation-plan-verlauf.md`, `docs/design/offene-punkte.md`, `src/routes/contracts/new/ReviewStep.svelte`, persona reports

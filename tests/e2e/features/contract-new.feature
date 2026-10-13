@@ -59,6 +59,12 @@ Funktionalität: Neuen Mietvertrag erfassen
     Wenn der Liegenschaftsverwalter den Mieter "Anna Keller" und die Wohnung "2.01" wählt
     Dann sieht der Liegenschaftsverwalter beim Vertragsbeginn den Hinweis "Die Mietverträge der Wohnung konnten nicht geladen werden. Laden Sie die Seite neu und versuchen Sie es erneut."
 
+  Szenario: Die Prüfung nennt die nicht geladenen Mietverträge
+    Angenommen die Mietverträge der Wohnung "2.01" lassen sich nicht laden
+    Und der Liegenschaftsverwalter ist auf der Seite "Neuer Mietvertrag"
+    Wenn der Liegenschaftsverwalter "Anna Keller" die Wohnung "2.01" ab "2027-01-01" für "950" Franken mit "180" Franken Akonto bis zur Prüfung erfasst
+    Dann sieht der Liegenschaftsverwalter in der Prüfung den Hinweis "Die Mietverträge der Wohnung konnten nicht geladen werden. Laden Sie die Seite neu und versuchen Sie es erneut."
+
   Szenario: Angefangenen Mietvertrag später fortsetzen
     Wenn der Liegenschaftsverwalter den Mieter "Anna Keller" und die Wohnung "2.01" wählt
     Und der Liegenschaftsverwalter die Seite "Neuer Mietvertrag" später wieder öffnet

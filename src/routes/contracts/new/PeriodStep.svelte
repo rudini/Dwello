@@ -78,15 +78,17 @@
 	testid="start-date-input"
 />
 
+<!-- read out at the apartment choice already; a second live region would say it twice (Sven B-13) -->
+{#if unknown}
+	<Alert
+		tone="caution"
+		title={m.contracts_apartment_contracts_unknown()}
+		testid="start-contracts-unknown"
+	/>
+{/if}
+
 <!-- always present, so screen readers hear the hint when it appears -->
 <div role="status" data-testid="start-date-notice">
-	{#if unknown}
-		<Alert
-			tone="caution"
-			title={m.contracts_apartment_contracts_unknown()}
-			testid="start-contracts-unknown"
-		/>
-	{/if}
 	{#if pastStart}
 		<Alert tone="caution" title={m.contracts_check_start()}><p>{pastStart}</p></Alert>
 	{/if}
