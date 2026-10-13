@@ -19,10 +19,10 @@ Branch `claude/b13-contracts-unknown` (from `claude/workflow-improvements`, on t
 - [x] Remove `@wip`
 - [x] H1: hint also at «Prüfen»; scenario «Die Prüfung nennt die nicht geladenen Mietverträge»
   Scenario red: `contract-form.steps.ts` «sees the text of Hinweis in der Prüfung», received null (fix stashed)
-- [ ] Code review of the persona fixes (round 3, delta)
+- [x] Code review of the persona fixes (round 3, delta); new state `contracts-unknown-review` (axe, languages)
 - [ ] All checks of `CLAUDE.md` pass
 - [x] Archive the finished Session 21 (`open-work.test.ts` allows one session)
-- [ ] Final check: instructions followed, list of improvements to instructions and skills
+- [x] Final check: instructions followed, list of improvements to instructions and skills
 
 Findings (`docs/reviews/b13-contracts-unknown-review-1.md`):
 - M1 form takes «unknown» and the start limit from two requests - Minor - fixed (tests first)
@@ -50,6 +50,14 @@ Findings personas (`docs/design/personas/helga-b13.md`, `docs/design/personas/sv
 - Sven 3 hint announced twice in the edit form - Minor - fixed (test first)
 - Sven 4 no hint at «Prüfen» - Minor - fixed (= H1)
 - Sven 5 the hint omits the consequence - Minor - open: issue #151
+
+Findings round 3 (`docs/reviews/b13-contracts-unknown-review-3.md`):
+- M1 the hint at «Prüfen» has no axe and language state - Major - fixed (`contracts-unknown-review`)
+- hint at «Vertragsbeginn» not announced when the request fails only after step 2 - Minor - open work U-16
+- `unknown = false` default in `ReviewStep` unused - Nit - rejected: same prop shape as the sibling steps
+- H2/H3 open - see «Blocked on me» (issue #151)
+
+Final check of the instructions: `docs/reviews/b13-instruktionen-pruefung.md`
 
 Files: `src/lib/contract-form.ts`, `src/routes/contracts/{ContractForm,new/ContractWizard,new/ApartmentStep,new/PeriodStep}.svelte`,
 `src/__tests__/contract-{edit,wizard}.dom.test.ts`, `tests/e2e/{features,steps,tasks,targets,questions,screenplay}/…`,
