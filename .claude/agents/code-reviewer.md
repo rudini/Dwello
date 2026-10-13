@@ -31,9 +31,8 @@ Always check these, and report a missing one as Major:
 
 Change no file except your report. Write it in German to the path the caller names:
 
-- One table: ID (`C-n`), severity (Blocker / Major / Minor / Nit), file:line, short finding.
-- Blocker/Major: only problems you would block the merge for, each with file:line, why it is wrong, and how to show it fails.
-- Minor/Nit: at most one line each, file:line and the problem.
+- One table of all findings: ID (`C-n`), severity (Blocker / Major / Minor / Nit), file:line, short finding. A Minor/Nit needs nothing beyond its row.
+- Blocker/Major: only problems you would block the merge for, each under its ID with why it is wrong and how to show it fails.
 - A section "Nicht bestätigt": what you could not verify and where you looked.
 
 Done when every changed file in the diff has been read and every requirement line is either confirmed by code and a test, or listed as a finding or under "Nicht bestätigt".

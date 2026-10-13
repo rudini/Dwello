@@ -53,9 +53,9 @@ Before writing any code:
 - [ ] Identify opportunities for deep modules (small interface, deep implementation) — see `tools/deepcheck/README.md`; `bun run deepcheck:audit` checks them after each step
 - [ ] List the behaviors to test (not implementation steps) in the checklist of `implementation_plan.md`
 
-Do not wait for approval of this plan: the scenario and the issue already say what to build (`CLAUDE.md`, Workflow). Ask only when the requirement has several readings.
+Do not wait for approval of this plan: the scenario and the task or issue already say what to build (`CLAUDE.md`, Workflow). Ask only when the requirement has several readings.
 
-**You can't test everything.** Focus testing effort on the behaviors the scenario and the issue name, critical paths and complex logic, not every possible edge case.
+**You can't test everything.** Focus testing effort on the behaviors the scenario and the task or issue name, critical paths and complex logic, not every possible edge case.
 
 ### 2. Tracer Bullet
 
