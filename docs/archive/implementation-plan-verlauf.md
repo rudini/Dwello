@@ -5027,3 +5027,16 @@ header and on pages without it. Branch `claude/optimistic-clarke-nn8u7t` from `m
 - 📖 [PRD](./docs/PRD-Dwello.md)
 - 🗄️ [Database Schema](./docs/data-model.md)
 - 🔌 [API Spec](./docs/api-specification.md)
+
+## Session 19: workflow improvements from the B-13 run
+
+Proposals of the B-13 report (S1–S11), except B2 (Screenplay lint, done on `claude/screenplay-e2e`).
+
+- [x] A1 task template: scenario line, outcome instead of UI placement (`.github/ISSUE_TEMPLATE/task.md`)
+- [x] A2–A5, A9, A10 in `CLAUDE.md` (bug fix = behavior change, red line in the plan, conflicts named, commit before review, failure states for personas, push rule)
+- [x] A6 reviewers write their own reports; A7 code-reviewer checklist (`.claude/agents/*.md`)
+- [x] B1 CI: a PR closing an issue with app changes needs a scenario or `No scenario:` (`tools/open-work/check-issues.mjs`, `ci.yml`), tried with four cases
+- [x] B3 Prettier only on changed files (`CLAUDE.md`, Gotchas)
+- [x] B4 design guard ignores comments (`src/__tests__/design-guard.test.ts`, tests first)
+- [x] B5 SessionStart hook: dependencies, PostgreSQL and role, Playwright shim (`.claude/hooks/session-start.sh`, `.claude/settings.json`); `persona-stack.sh` returns under a pipe
+- [x] Finish checks (lint, check, coverage, backend, E2E «Neuen Mietvertrag erfassen» via the shim), commit, push branch for the fresh session

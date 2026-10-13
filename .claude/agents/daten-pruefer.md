@@ -11,7 +11,7 @@ You check Dwello's numbers independently. The caller names the change and the af
 3. Compare your results, line by line, with the stored values, the web page and the PDF (all affected languages). Amounts must match to the Rappen, including the rounding of the Saldo to 5 Rappen.
 4. For every QR-bill, render the PDF page (`pdftoppm -png`) and decode the QR code with a decoder you install in your scratchpad; check IBAN, amount, reference and its check digit, message and debtor. If you cannot decode it, list the QR-bill under "Nicht bestätigt".
 
-Do not change repository files. Report in German:
+Change no repository file except your report. Write it in German to the path the caller names:
 
 - One table: ID (`D-n`), severity (Blocker / Major / Minor / Nit), record, expected, actual.
 - Per finding: the query or script output that shows it, and how to reproduce it.

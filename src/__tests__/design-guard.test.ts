@@ -55,8 +55,8 @@ const sources = readdirSync('src', { recursive: true, encoding: 'utf8' })
 
 function findingsIn(source: string, smallTextOk = false) {
 	const small = smallTextOk ? [] : [['Schrift 14 px', /\btext-sm\b/] as const];
-	// issue numbers in TODO(fachlich prüfen, #n) markers are not colours
-	const code = source.replace(/(TODO\(fachlich prüfen)(?:, #\d+)+\)/g, '$1)');
+	// comments are not code: an issue number there (#143, TODO(fachlich prüfen, #n)) is not a colour
+	const code = source.replace(/<!--[\s\S]*?-->|\/\*[\s\S]*?\*\/|(^|[^:])\/\/.*$/gm, '$1');
 	return [...rules, ...small].filter(([, pattern]) => pattern.test(code)).map(([name]) => name);
 }
 const findings = (file: string) =>
@@ -83,7 +83,8 @@ describe('Wächter des Designsystems', () => {
 		'class="text-xs"',
 		'class="p-3"',
 		'class="material-symbols-outlined"',
-		"import Header from '$lib/components/Header.svelte'"
+		"import Header from '$lib/components/Header.svelte'",
+		"const accent = '#143'"
 	])('meldet %s', (sample) => {
 		expect(findingsIn(sample)).not.toEqual([]);
 	});
@@ -95,7 +96,11 @@ describe('Wächter des Designsystems', () => {
 		'href="#main-content"',
 		'<input on:blur={check} onblur={check} />',
 		// built so that tools/open-work/check-issues.mjs does not read it as a real marker
-		'<!-- TODO(fachlich prüfen, #' + '134, #' + '120): Begriff fehlt im Glossar -->'
+		'<!-- TODO(fachlich prüfen, #' + '134, #' + '120): Begriff fehlt im Glossar -->',
+		// an issue named in a comment is not a colour
+		'let shown = false; // no hint until the contracts are loaded (#143)',
+		'<!-- the region is there before the hint (#143) -->',
+		"/* see #143 */ const url = 'https://example.com/a#b';"
 	])('lässt %s zu', (sample) => {
 		expect(findingsIn(sample)).toEqual([]);
 	});

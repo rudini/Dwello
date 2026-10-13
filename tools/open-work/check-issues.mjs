@@ -1,6 +1,7 @@
-// Fails when a `TODO(fachlich prüfen, #n)` marker names an issue that is closed, missing or a pull request, and when a
-// pull request closes an issue (`Fixes #n`) that a marker still names (CLAUDE.md, "Open work").
-// CI runs it with GITHUB_TOKEN, GITHUB_REPOSITORY and PR_BODY; locally: GITHUB_TOKEN=… node tools/open-work/check-issues.mjs
+// Fails when a `TODO(fachlich prüfen, #n)` marker names an issue that is closed, missing or a pull request, when a
+// pull request closes an issue (`Fixes #n`) that a marker still names (CLAUDE.md, "Open work"), and when it closes an
+// issue and changes what the app does without changing a scenario (CLAUDE.md, "Workflow" step 1).
+// CI runs it with GITHUB_TOKEN, GITHUB_REPOSITORY, PR_BODY and BASE_REF; locally: GITHUB_TOKEN=… node tools/open-work/check-issues.mjs
 import { execFileSync } from 'node:child_process';
 
 const repo = process.env.GITHUB_REPOSITORY ?? 'rudini/Dwello';
@@ -27,6 +28,17 @@ const failures = [];
 const closing = [...(process.env.PR_BODY ?? '').matchAll(/\b(?:fix(?:es|ed)?|close[sd]?|resolve[sd]?)\s+#(\d+)/gi)];
 for (const [, n] of closing) {
 	if (refs.has(n)) failures.push(`This pull request closes #${n}, but markers still name it: ${refs.get(n).join(', ')}`);
+}
+
+// `No scenario: <reason>` in the pull request text where none applies, e.g. a refactoring without new behaviour
+const base = process.env.BASE_REF;
+if (base && closing.length && !/\bno scenario:/i.test(process.env.PR_BODY ?? '')) {
+	const changed = execFileSync('git', ['diff', '--name-only', `origin/${base}...HEAD`], { encoding: 'utf8' }).split('\n');
+	const app = changed.some((file) => /^(src\/(routes|lib)|backend\/src)\//.test(file) && !/__tests__|\.test\.ts$/.test(file));
+	if (app && !changed.some((file) => /^tests\/e2e\/features\/.+\.feature$/.test(file)))
+		failures.push(
+			`This pull request closes ${closing.map(([, n]) => `#${n}`).join(', ')} and changes the app, but no scenario in tests/e2e/features; add one, or say "No scenario: <reason>" in its text`
+		);
 }
 
 if (!process.env.GITHUB_TOKEN) {
