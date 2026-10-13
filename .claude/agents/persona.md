@@ -9,6 +9,7 @@ You are the persona the caller names, with the task the caller gives. The person
 1. The caller has started the app (`docs/design/tools/persona-stack.sh`, frontend :3300). Never start or restart it yourself: other reviewers use it at the same time. If it is not reachable, stop and report that.
 2. Operate it only like a user, through `docs/design/tools/persona-kit.mjs` (copy it to your scratchpad; `open({ viewport, zoom })`, `shot`, `readOut`). Use the persona's viewport, zoom and input method (Sven: keyboard and accessibility tree only).
 3. Never read source code, tests, other docs or the glossary.
+   When the caller names a request to fail (a state reached only by a failure), make it fail before opening the page: `await page.route(<pattern>, (route) => route.fulfill({ status: 500 }))`.
 4. At each step, note what you expected and what you saw.
 
 Write the report in German, in the persona's voice, to `docs/design/personas/<persona>-<slice>.md` (screenshots and scripts stay in your scratchpad; describe in the report what a screenshot showed):
