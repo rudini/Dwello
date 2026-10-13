@@ -38,10 +38,15 @@ const noPlaywright = [
 	{
 		selector: "MemberExpression[property.name='expect'], ObjectPattern > Property[key.name='expect']",
 		message: 'Assert with actor.sees(question) (tests/e2e/CLAUDE.md)'
+	},
+	{
+		selector: 'ExportNamedDeclaration[source], ExportAllDeclaration',
+		message: 'No re-exports: each layer exports only what it defines (tests/e2e/CLAUDE.md)'
 	}
 ];
 const playwrightImports = [
 	{ group: ['@playwright/test', 'playwright', 'playwright-core', '@axe-core/*'], message: outsideScreenplay },
+	{ group: ['timers', 'timers/*', 'node:timers', 'node:timers/*'], message: 'No waiting by the clock: actor.sees retries (tests/e2e/CLAUDE.md)' },
 	{
 		group: ['**/screenplay/abilities*', '**/screenplay/**/abilities*'],
 		importNames: ['BrowseTheWeb'],
@@ -179,8 +184,13 @@ export default [
 				},
 				{ selector: 'ThrowStatement', message: 'Assert with actor.sees(question), not with a check of its own (tests/e2e/CLAUDE.md)' },
 				{
-					selector: "CallExpression[callee.name=/^(setTimeout|setInterval)$/]",
+					selector:
+						"CallExpression[callee.name=/^(setTimeout|setInterval)$/], MemberExpression[property.name=/^(setTimeout|setInterval)$/]:not([object.name='$testInfo']), MemberExpression[object.name='scheduler']",
 					message: 'Steps do not wait by the clock: actor.sees retries until the expectation holds (tests/e2e/CLAUDE.md)'
+				},
+				{
+					selector: "MemberExpression[object.name='$testInfo']:not([property.name='setTimeout']), CallExpression[callee.property.name=/^(can|abilityTo|whoCan)$/]",
+					message: 'Steps do not look at the test run (project, title …): tasks and questions choose by the ability (tests/e2e/CLAUDE.md)'
 				}
 			]
 		}
@@ -194,7 +204,7 @@ export default [
 				'error',
 				...noPlaywright,
 				{
-					selector: "CallExpression[callee.name='fetch']",
+					selector: "CallExpression[callee.name='fetch'], MemberExpression[property.name='fetch']",
 					message: 'Tasks reach the backend through the ability CallTheApi (tests/e2e/CLAUDE.md)'
 				}
 			]
@@ -221,7 +231,8 @@ export default [
 					message: 'Questions only ask; actions belong in tasks (tests/e2e/CLAUDE.md)'
 				},
 				{
-					selector: "CallExpression[callee.property.name='sees'], WhileStatement, DoWhileStatement",
+					selector:
+						"CallExpression[callee.property.name='sees'], WhileStatement, DoWhileStatement, ForStatement, ForOfStatement, ForInStatement, MemberExpression[property.name=/^(post|put|patch|remove|delete)$/], MemberExpression[object.name='scheduler']",
 					message: 'Questions answer at once; sees() in the step retries them (tests/e2e/CLAUDE.md)'
 				},
 				{

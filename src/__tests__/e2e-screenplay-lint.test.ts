@@ -183,6 +183,31 @@ describe('Screenplay-Schichten der Akzeptanztests', () => {
 		expect(dirs.filter((dir) => !layers.includes(dir))).toEqual([]);
 	});
 
+	// Schluss-Review Endstand 2, M-1: der Lint prüft nur .ts, also gibt es nur .ts (neben Szenarien und Doku)
+	it('hat in tests/e2e nur TypeScript, Szenarien und Doku', () => {
+		const files = readdirSync('tests/e2e', { recursive: true, withFileTypes: true }).filter((entry) => entry.isFile());
+		expect(files.map((file) => file.name).filter((name) => !/\.(ts|feature|md)$/.test(name) || /\.d\.ts$/.test(name))).toEqual([]);
+	});
+
+	// Schluss-Review Endstand 2: M-2 Weiche über das Projekt, M-3 Schleifen, und die Minors als Klassen
+	it.each([
+		['tests/e2e/steps/example.steps.ts', "if ($testInfo.project.name === 'api') return;"],
+		['tests/e2e/steps/example.steps.ts', 'if (verwalter.can(Api)) await verwalter.abilityTo(Api).post("x", {});'],
+		['tests/e2e/steps/example.steps.ts', 'await new Promise((r) => globalThis.setTimeout(r, 1000));'],
+		['tests/e2e/steps/example.steps.ts', 'await scheduler.wait(1000);'],
+		['tests/e2e/steps/example.steps.ts', "import { setTimeout as pause } from 'node:timers/promises';\nawait pause(1);"],
+		['tests/e2e/questions/example.ts', 'for (let i = 0; i < 9; i++) await actor.answer(ready);'],
+		['tests/e2e/questions/example.ts', 'for (const x of xs) await actor.answer(x);'],
+		['tests/e2e/questions/example.ts', "import { setTimeout as pause } from 'timers/promises';\nawait pause(1);"],
+		['tests/e2e/questions/example.ts', "await actor.abilityTo(CallTheApi).post('buildings', {});"],
+		['tests/e2e/tasks/example.ts', "await globalThis.fetch('http://localhost:3101/api/v1/buildings');"],
+		['tests/e2e/tasks/example.ts', "export { Click } from '../screenplay/interactions';"],
+		['tests/e2e/tasks/example.ts', "export * from '../targets/contract-form';"],
+		['tests/e2e/fixtures/example.ts', "export { CallTheApi } from '../screenplay/abilities';"]
+	])('lehnt in %s ab: %s', async (filePath, code) => {
+		expect(await restricted(filePath, code)).not.toEqual([]);
+	});
+
 	// Schluss-Review Endstand, Minors
 	it.each([
 		['tests/e2e/tasks/example.ts', 'await test.expect.poll(() => 1).toBe(1);'],

@@ -5127,3 +5127,19 @@ and 3 fulfilled, 2 not yet):
 - Nits `statementPath` in questions/, the axe question scrolling, the `'findings'` literal, `{ verwalter: viewer }`,
   a target with a renamed parameter - rejected: no layer rule broken (the scroll is part of reading the page from the
   top), naming only; the renamed parameter is H-19
+
+Final review round 8 (`docs/reviews/screenplay-e2e-review-8.md`, the whole end state 7bdad9d; points 1 and 3
+fulfilled, 2 not yet):
+- M-1 Major only `.ts` files are linted; a `.js` file in a layer passed - fixed: tests/e2e may hold only `.ts`,
+  `.feature` and `.md` (lint test)
+- M-2 Major a step choosing UI or API through `$testInfo.project` - fixed: of `$testInfo` steps may use only
+  `setTimeout`; steps may not ask for abilities (`can`, `abilityTo`)
+- M-3 Major `for` loops in questions (round 7 closed only `while`) - fixed: every loop kind
+- Minor timers in steps through `globalThis`, `scheduler` or `node:timers` - fixed (timer modules banned in every
+  layer)
+- Minor `globalThis.fetch` in tasks - fixed
+- Minor re-exports from tasks/fixtures handing interactions, targets or `CallTheApi` to steps - fixed: no layer
+  re-exports
+- Minor a question writing through `CallTheApi` (`post`, `put`, `remove` …) - fixed
+- Minor H-19 lacks the renamed `actor` parameter and a renamed `seed.backend` in fixtures - fixed (both added)
+- Nits `'findings'` literal, commit subjects - rejected as in round 7
