@@ -12,4 +12,16 @@ Review in the chat of 13.10.2026 (findings R-1 to R-7); the product owner chose 
 - [x] R-4 ask before destructive git and database commands (`.claude/settings.json`)
 - [x] R-5 `code-reviewer` and `persona` report one findings table (`.claude/agents/code-reviewer.md`, `.claude/agents/persona.md`)
 - [x] R-6 ponytail's three-line limit does not shorten the run summary (`.claude/skills/ponytail/SKILL.md`)
-- [ ] Review of the slice by `code-reviewer`
+- [x] Review of the slice by `code-reviewer`; findings fixed (`.claude/settings.json`, `.claude/agents/code-reviewer.md`, `.claude/agents/persona.md`, `.claude/skills/tdd/SKILL.md`)
+- [ ] Re-review of the delta by `code-reviewer`
+
+Findings (`docs/reviews/opus-instructions-review-1.md`):
+- C-1 `db:reset` drops the dev database without asking - Major - fixed
+- C-2 prefix rules miss `-f … down -v`, `push origin x --force`, `rm -fr` - Major - fixed (wildcards in the middle, per the Claude Code permissions docs)
+- C-3 more commands that discard work - Minor - fixed
+- C-4 code-reviewer lists Minor/Nit twice - Minor - fixed
+- C-5 persona lists findings twice - Minor - fixed
+- C-6 plugin copy of ponytail lacks the Dwello sentence - Minor - rejected: `/ponytail` resolves to the project skill `.claude/skills/ponytail`; the plugin's skill is namespaced (`ponytail:ponytail`), and the project copy already carried Dwello-only lines before
+- C-7 `dropdb` asks for the test databases too - Nit - fixed (only `dwello`)
+- C-8 `git clean` asks for a dry run too - Nit - rejected: a prompt on a rare dry run costs less than a narrower rule that misses `-df`
+- C-9 "the issue" assumes every task has one - Nit - fixed

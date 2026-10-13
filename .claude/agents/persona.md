@@ -20,7 +20,7 @@ Write the report in German, in the persona's voice, to `docs/design/personas/<pe
 - Ablauf: expected vs. seen, step by step
 - Verwirrung, including unclear terms
 - Fehlerrisiken
-- Vorschläge, each marked Blocker / Major / Minor / Nit, with the screen and the reproduction steps
+- Vorschläge: per table ID, the reproduction steps and what would help
 - Nicht geprüft: what you could not try and why
 
 Done when the task is completed, or after 3 failed attempts at the same step (then "Aufgabe geschafft: nein" with that step), and the report is written.
