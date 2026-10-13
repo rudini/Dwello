@@ -65,20 +65,22 @@
 	let confirmedPastStart = ''; // a start in the past the user confirmed by pressing "Weiter" again
 	let startEdited = false; // the suggestion never overwrites a start date being typed
 	let section = $state<HTMLElement>();
-	let contracts = $state<Map<string, ContractForAvailability[]> | null>(null); // per apartment
+	// per apartment; null for an apartment whose contracts could not be loaded: it is not shown as free (#143)
+	let contracts = $state<Map<string, ContractForAvailability[] | null> | null>(null);
 
 	const availability = $derived(
-		new Map([...(contracts ?? [])].map(([id, list]) => [id, computeAvailability(list)]))
+		new Map(
+			[...(contracts ?? [])].flatMap(([id, list]) =>
+				list ? [[id, computeAvailability(list)] as const] : []
+			)
+		)
 	);
+	const unknown = $derived(contracts?.get(values.apartmentId) === null);
 	const startLimit = $derived(availableFrom(availability.get(values.apartmentId), true));
 	const overlap = $derived(overlapWarning(values, contracts?.get(values.apartmentId) ?? []));
 
-	async function contractsOf(apartmentId: string) {
-		const response = await apiCall<{ contracts: Parameters<typeof forAvailability>[0] }>(
-			`/contracts?apartmentId=${apartmentId}`
-		);
-		return [apartmentId, forAvailability(response.data?.contracts ?? [])] as const;
-	}
+	const contractsOf = async (apartmentId: string) =>
+		[apartmentId, forAvailability(await apiCall(`/contracts?apartmentId=${apartmentId}`))] as const;
 
 	function restoreDraft() {
 		const draft = readDraft<ContractFormValues>(browserStorage(), DRAFT);
@@ -246,6 +248,7 @@
 				{availability}
 				loading={!contracts}
 				notice={startLimit.notice}
+				{unknown}
 				error={errors.apartmentId}
 			/>
 		{:else if step === 3}
@@ -254,6 +257,7 @@
 				bind:endDate={values.endDate}
 				bind:isUnlimited={values.isUnlimited}
 				min={startLimit.min}
+				{unknown}
 				{today}
 				{overlap}
 				{errors}

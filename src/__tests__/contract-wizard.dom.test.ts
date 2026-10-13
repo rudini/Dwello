@@ -47,6 +47,14 @@ const type = (testid: string, value: string) =>
 	fireEvent(byTestId<HTMLInputElement>(testid)!, 'input', value);
 const next = () => submit('wizard-next');
 
+const UNKNOWN =
+	'Die Mietverträge der Wohnung konnten nicht geladen werden. Laden Sie die Seite neu und versuchen Sie es erneut.';
+// the earliest start, as the calendar of the start field takes it
+const minOfStart = () =>
+	byTestId('start-date-input')!.parentElement!.querySelector<HTMLInputElement>(
+		'input[type="date"]'
+	)!.min;
+
 async function open() {
 	show(NewContractPage, { data } as never);
 	await settle();
@@ -228,6 +236,20 @@ describe('Prüfungen im Mietvertrag', () => {
 		next();
 		await settle();
 	}
+
+	// Fehler behoben (#143): ohne ihre Mietverträge galt die Wohnung als frei, der Vertragsbeginn ohne Untergrenze
+	it('zeigt eine Wohnung, deren Mietverträge nicht geladen werden konnten, nicht als frei', async () => {
+		fakeBff(({ path }) =>
+			path.endsWith('=a3') ? [500, {}] : [200, { contracts: contractsOf[path.split('=')[1]] ?? [] }]
+		);
+		await toPeriod('a3'); // a3 is free only from 2100
+		expect(byTestId('start-contracts-unknown')!.textContent).toContain(UNKNOWN);
+		expect(byTestId<HTMLInputElement>('start-date-input')!.value).toBe(''); // no start suggested
+		expect(minOfStart()).toBe('');
+		click('wizard-back');
+		expect(byTestId('apartment-contracts-unknown')!.textContent).toContain(UNKNOWN);
+		expect(byTestId('availability-info')).toBeNull();
+	});
 
 	it('fragt nach, wenn der Vertragsbeginn in der Vergangenheit liegt, und geht erst beim zweiten Mal weiter', async () => {
 		await toPeriod();

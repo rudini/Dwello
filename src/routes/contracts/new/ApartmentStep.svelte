@@ -12,6 +12,7 @@
 		availability,
 		loading,
 		notice,
+		unknown = false,
 		error
 	}: {
 		apartmentId: string;
@@ -19,6 +20,7 @@
 		availability: Map<string, AvailabilityInfo>;
 		loading: boolean;
 		notice: string | null; // when the chosen apartment becomes free
+		unknown?: boolean; // the chosen apartment's contracts could not be loaded
 		error?: string;
 	} = $props();
 </script>
@@ -35,6 +37,14 @@
 		placeholder={m.contracts_choose_apartment()}
 		{error}
 		testid="apartment-select"
+	/>
+{/if}
+
+{#if unknown}
+	<Alert
+		tone="caution"
+		title={m.contracts_apartment_contracts_unknown()}
+		testid="apartment-contracts-unknown"
 	/>
 {/if}
 

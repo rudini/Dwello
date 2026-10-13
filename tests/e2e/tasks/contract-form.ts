@@ -1,5 +1,5 @@
 import type { Activity } from '../screenplay/actor';
-import { Check, Click, Enter, EnterDate, Navigate, Select, Wait } from '../screenplay/interactions';
+import { Check, Click, Enter, EnterDate, FailRequests, Navigate, Select, Wait } from '../screenplay/interactions';
 import {
 	advancePaymentInput,
 	apartmentSelect,
@@ -30,6 +30,9 @@ export const openNewContract = Navigate.to(NEW_CONTRACT);
 export const openContractEdit = (contractId: string) => Navigate.to(`/contracts/${contractId}/edit`);
 
 export const goToNextStep = Click.on(nextButton);
+
+// The contracts of the apartment, which the contract pages load in the browser, cannot be loaded
+export const contractsCannotBeLoaded = (apartmentId: string) => FailRequests.to('/api/contracts', { apartmentId });
 
 // Step "Mieter"
 export const chooseTenant = (tenantId: string): Activity => (actor) =>

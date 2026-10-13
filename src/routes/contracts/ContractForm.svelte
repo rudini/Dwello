@@ -70,6 +70,8 @@
 	const running = $derived(
 		contractStatusOn(contract.startDate, contract.endDate, today) === 'active'
 	);
+	// the chosen apartment's contracts could not be loaded: it is not shown as free (#143)
+	const unknown = $derived(contractsState === 'failed');
 	const startLimit = $derived(
 		availableFrom(
 			availability?.get(values.apartmentId),
@@ -88,24 +90,19 @@
 	const noticeHint = $derived(!contract.endDate && !values.isUnlimited && !values.terminated);
 	const tenantName = $derived(tenants.find((t) => t.id === values.tenantId)?.name ?? '');
 
-	async function contractsOf(apartmentId: string) {
-		const response = await apiCall<{ contracts: Parameters<typeof forAvailability>[0] }>(
-			`/contracts?apartmentId=${apartmentId}`
-		);
-		// an answer without a list counts as not loaded, like a refused request (Haiku review)
-		const list = response.data?.contracts;
-		return response.error || !Array.isArray(list) ? null : forAvailability(list);
-	}
+	const contractsOf = async (apartmentId: string) =>
+		forAvailability(await apiCall(`/contracts?apartmentId=${apartmentId}`));
 
-	// The contract being edited does not block its own apartment
+	// The contract being edited does not block its own apartment; an apartment whose contracts are unknown is left out
 	async function availabilityOf(apartmentId: string) {
 		const own = apartmentId === contract.apartmentId ? contract.id : undefined;
-		return [apartmentId, computeAvailability((await contractsOf(apartmentId)) ?? [], own)] as const;
+		const list = await contractsOf(apartmentId);
+		return list ? [[apartmentId, computeAvailability(list, own)] as const] : [];
 	}
 
 	$effect(() => {
 		Promise.all(apartments.map((a) => availabilityOf(a.id))).then(
-			(entries) => (availability = new Map(entries))
+			(entries) => (availability = new Map(entries.flat()))
 		);
 	});
 
@@ -233,6 +230,7 @@
 			availability={availability ?? new Map()}
 			loading={!availability}
 			notice={startLimit.notice}
+			{unknown}
 			error={errors.apartmentId}
 		/>
 	</Panel>
@@ -245,6 +243,7 @@
 			bind:terminated={values.terminated}
 			noticed={contract.terminated}
 			min={startLimit.min}
+			{unknown}
 			today={pastBefore}
 			{overlap}
 			{errors}

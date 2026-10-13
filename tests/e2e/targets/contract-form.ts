@@ -6,6 +6,12 @@ export const apartmentOption = (apartmentId: string) =>
 	target(`Wohnung ${apartmentId} in der Auswahl`, (page) =>
 		apartmentSelect.locate(page).locator(`option[value="${apartmentId}"]`)
 	);
+export const apartmentContractsUnknown = target('Hinweis bei der Wohnung', (page) =>
+	page.getByTestId('apartment-contracts-unknown')
+);
+export const startContractsUnknown = target('Hinweis beim Vertragsbeginn', (page) =>
+	page.getByTestId('start-contracts-unknown')
+);
 export const startDateInput = target('Vertragsbeginn', (page) => page.getByTestId('start-date-input'));
 export const durationChoice = (label: string) =>
 	target(`Vertragsdauer «${label}»`, (page) => page.getByTestId('contract-duration').getByText(label, { exact: true }));

@@ -127,6 +127,18 @@ export const NoticeRequest = (url: RegExp, key: string): Activity => async (acto
 		.catch(() => {}); // no such request: `RequestedUrl` answers null
 };
 
+/**
+ * Answers the browser's requests to `path` with these query values with an error status: only to reach a state a
+ * failing request produces, never with invented data (docs/test-pyramid.md). Set before the page that sends them.
+ */
+export const FailRequests = {
+	to: (path: string, query: Record<string, string>): Activity => (actor) =>
+		pageOf(actor).route(
+			(url) => url.pathname === path && Object.entries(query).every(([key, value]) => url.searchParams.get(key) === value),
+			(route) => route.fulfill({ status: 500 })
+		)
+};
+
 export const Cookies = {
 	add: (cookies: Parameters<BrowserContext['addCookies']>[0]): Activity => (actor) =>
 		pageOf(actor).context().addCookies(cookies),

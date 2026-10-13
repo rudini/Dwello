@@ -11,6 +11,7 @@ import {
 	Cookies,
 	Enter,
 	EnterDate,
+	FailRequests,
 	Navigate,
 	PostFormAction,
 	Press,
@@ -173,6 +174,12 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 			EnterDate.of('2020-01-01').into(startDateInput), // the apartment is rented until 2099
 			Wait.until(on.overlapWarning)
 		),
+	// the apartments' rental contracts cannot be loaded (#143); the wizard shows it from the step "Wohnung"
+	'contracts-unknown': () => async (actor) => {
+		await actor.attemptsTo(FailRequests.to('/api/contracts', {}), Navigate.reload);
+		if ((await actor.answer(pageAddress)).includes('/contracts/new')) await actor.attemptsTo(Click.on(nextButton));
+		await actor.attemptsTo(Wait.until(on.contractsUnknown));
+	},
 	'draft-restored': () => async (actor) => {
 		await actor.attemptsTo(startDraft[new URL(await actor.answer(pageAddress)).pathname]); // a draft starts with an input
 		await actor.attemptsTo(Wait.until(saveStatus(await say(actor, 'Entwurf gespeichert'))), Navigate.reload, Wait.until(draftRestored));

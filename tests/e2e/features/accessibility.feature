@@ -64,6 +64,7 @@ Funktionalität: Barrierefreiheit
       | contract-new           | every-wizard-step   |
       | contract-new           | overlap-warning     |
       | contract-new           | draft-restored      |
+      | contract-new           | contracts-unknown   |
       | contract-detail        | default             |
       | contract-detail        | end-dialog          |
       | contract-detail        | end-dialog-error    |
@@ -74,6 +75,7 @@ Funktionalität: Barrierefreiheit
       | contract-edit          | submit-cleared      |
       | contract-edit          | past-end-error      |
       | contract-edit          | edit-refused        |
+      | contract-edit          | contracts-unknown   |
       | contract-detail-notice | default             |
       | contract-edit-notice   | default             |
       | invoices               | default             |

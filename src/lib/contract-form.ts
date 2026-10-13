@@ -103,11 +103,18 @@ export const contractBody = (values: ContractFormValues) => ({
 	monthlyAdvancePayment: String(values.advancePayment || 0)
 });
 
-/** Contracts as the contract list returns them, in the shape the availability check reads */
-export const forAvailability = (
-	contracts: { id: string; startDate: string; endDate: string | null }[]
-): ContractForAvailability[] =>
-	contracts.map((c) => ({ id: c.id, start_date: c.startDate, end_date: c.endDate }));
+/**
+ * An apartment's contracts as the contract list answers them, in the shape the availability check reads; null when
+ * they could not be loaded, also for an answer without a list (Haiku review): the apartment is then not free (#143)
+ */
+export function forAvailability(response: {
+	data?: { contracts?: unknown };
+	error?: unknown;
+}): ContractForAvailability[] | null {
+	const list = response.data?.contracts;
+	if (response.error || !Array.isArray(list)) return null;
+	return list.map((c) => ({ id: c.id, start_date: c.startDate, end_date: c.endDate }));
+}
 
 /** Warning when the contract overlaps another contract of the apartment */
 export function overlapWarning(
