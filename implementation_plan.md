@@ -47,6 +47,7 @@ Findings slice 2 (`docs/reviews/b13-workflow-docs-review-1.md`):
 - C-4 `FailRequests.noLonger` lifts every route - Nit - fixed (wording)
 - C-5 `test:e2e:wip` does not delete `.features-gen` - Nit - rejected: the reviewer confirmed that `bddgen` empties it and that a failing `bddgen` stops the chain
 - C-6 type `docs` for a commit that also changes `playwright.config.ts` - Nit - rejected: test configuration, no app behaviour; rewriting would change commits under review
+- Round 2 (`docs/reviews/b13-workflow-docs-review-2.md`): C-1 to C-4 fixed, rejections of C-5 and C-6 hold; C-7 «there are three» goes stale with the demo data - Nit - fixed; review of the slice ended
 - Not confirmed: `actionTimeout` also caps `Wait.until` (`locator.waitFor`) and the download wait; the E2E run of all browsers decides (below)
 
 Slice 3 - instructions:
