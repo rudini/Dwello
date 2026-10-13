@@ -34,7 +34,8 @@ Branch `claude/b13-contracts-unknown` (from `claude/workflow-improvements`, on t
 - [x] Code review of the delta; personas Helga, Sven, Marco, Dr. Weber (the user asked for Marco and Dr. Weber too)
 - [x] Review fixes: R-1 draft button stays; result of «Erneut versuchen» said (toast) and focus on the field or step (tests first)
 - [x] Re-review of the fixes (code-reviewer round 2): 1 Major (R2-1)
-- [ ] Scenarios `@wip` «Wohnung mit nicht geladenen Mietverträgen ist nicht geprüft», «… lassen sich auch beim zweiten Mal nicht laden»; seen failing
+- [x] Scenarios «Wohnung mit nicht geladenen Mietverträgen ist nicht geprüft», «… lassen sich auch beim zweiten Mal nicht laden»; seen failing with the code taken out
+  Scenario red: «… in der Auswahl» expected «(nicht geprüft)», received «Wohnung 2.01 - Ahornhof …»; «… erneut zu laden versucht» `waitFor` timeout on the error message
 - [ ] Code review round 3 (delta)
 - [ ] All checks; #151 closes with the merge (`Fixes #151`)
 
