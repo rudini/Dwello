@@ -8,7 +8,7 @@ import globals from 'globals';
 
 // Screenplay layers of the acceptance tests (tests/e2e/CLAUDE.md): Playwright is driven only in screenplay/ and targets/
 const playwrightActions =
-	'click|dblclick|tap|fill|clear|type|press|pressSequentially|selectOption|check|uncheck|setChecked|setInputFiles|hover|focus|blur|dragTo|scrollIntoViewIfNeeded|dispatchEvent|selectText|goto|reload|goBack|goForward|route|unroute|waitFor|waitForEvent|waitForURL|waitForRequest|waitForResponse|waitForLoadState|waitForTimeout|waitForSelector|waitForFunction|evaluate|evaluateAll|evaluateHandle|setViewportSize|emulateMedia|addCookies|clearCookies|setExtraHTTPHeaders|addInitScript|exposeFunction|screenshot|setContent|dragAndDrop|waitForNavigation|\\$|\\$\\$|\\$eval|\\$\\$eval';
+	'click|dblclick|tap|fill|clear|type|press|pressSequentially|selectOption|check|uncheck|setChecked|setInputFiles|hover|focus|blur|dragTo|scrollIntoViewIfNeeded|dispatchEvent|selectText|goto|reload|goBack|goForward|route|unroute|waitFor|waitForEvent|waitForURL|waitForRequest|waitForResponse|waitForLoadState|waitForTimeout|waitForSelector|waitForFunction|evaluate|evaluateAll|evaluateHandle|setViewportSize|emulateMedia|addCookies|clearCookies|setExtraHTTPHeaders|addInitScript|exposeFunction|screenshot|setContent|dragAndDrop|waitForNavigation|\\$|\\$\\$|\\$eval|\\$\\$eval|path|suggestedFilename|saveAs|createReadStream|pdf|content';
 const playwrightReads =
 	'getByRole|getByText|getByTestId|getByLabel|getByPlaceholder|getByAltText|getByTitle|locator|frameLocator|textContent|innerText|innerHTML|inputValue|getAttribute|isVisible|isHidden|isChecked|isEnabled|isDisabled|isEditable|allTextContents|allInnerTexts|boundingBox|ariaSnapshot|locate|context|keyboard|mouse';
 const call = (methods, message) => ({
@@ -20,20 +20,29 @@ const noPlaywright = [
 	call(playwrightActions, `${outsideScreenplay}: use an Interaction from screenplay/interactions.ts`),
 	call(playwrightReads, `${outsideScreenplay}: use a Target from targets/ and a web question from screenplay/questions.ts`),
 	{
-		selector: 'MemberExpression[property.name=/^(page|context|mouse|keyboard)$/]',
+		selector: 'MemberExpression[property.name=/^(page|context|mouse|keyboard|request)$/]',
 		message: `${outsideScreenplay}: no page outside the abilities`
 	},
 	{
 		selector: 'ObjectPattern > Property[key.name=/^(page|context|browser|request|mouse|keyboard)$/]',
 		message: `${outsideScreenplay}: reach the system through an actor, not through the page or Playwright fixtures`
 	},
-	{ selector: "CallExpression > MemberExpression.callee[computed=true][property.type='Literal']", message: `${outsideScreenplay}: no calls by computed name` },
+	{ selector: 'CallExpression > MemberExpression.callee[computed=true]', message: `${outsideScreenplay}: no calls by computed name` },
+	{
+		selector: "MemberExpression[computed=true][property.type=/^(Literal|TemplateLiteral)$/]:not([property.raw=/^[0-9]+$/])",
+		message: `${outsideScreenplay}: no access by computed name`
+	},
+	{ selector: "ImportExpression, CallExpression[callee.name='require']", message: `${outsideScreenplay}: static imports only` },
 	{ selector: 'TSImportType', message: outsideScreenplay },
 	{ selector: "CallExpression[callee.name='expect'], MemberExpression[object.name='expect']", message: 'Assert with actor.sees(question) (tests/e2e/CLAUDE.md)' }
 ];
 const playwrightImports = [
 	{ group: ['@playwright/test', 'playwright', 'playwright-core', '@axe-core/*'], message: outsideScreenplay },
-	{ group: ['**/screenplay/abilities'], importNames: ['BrowseTheWeb'], message: `${outsideScreenplay}: the page stays in the abilities` }
+	{
+		group: ['**/screenplay/abilities*', '**/screenplay/**/abilities*'],
+		importNames: ['BrowseTheWeb'],
+		message: `${outsideScreenplay}: the page stays in the abilities`
+	}
 ];
 
 export default [
@@ -158,6 +167,20 @@ export default [
 		}
 	},
 	{
+		// Fixtures wire actors, test data and sessions; they take Playwright fixtures as parameters but drive nothing
+		files: ['tests/e2e/fixtures/**/*.ts'],
+		rules: {
+			'no-restricted-imports': [
+				'error',
+				{ patterns: [{ ...playwrightImports[0], allowTypeImports: true }] } // fixtures create the abilities
+			],
+			'no-restricted-syntax': [
+				'error',
+				...noPlaywright.filter(({ selector }) => !/ObjectPattern|TSImportType/.test(selector))
+			]
+		}
+	},
+	{
 		// Targets only describe where something is on the page
 		files: ['tests/e2e/targets/**/*.ts'],
 		rules: {
@@ -174,7 +197,12 @@ export default [
 			],
 			'no-restricted-syntax': [
 				'error',
-				call(playwrightActions, 'Targets only locate; actions are Interactions in screenplay/interactions.ts')
+				call(playwrightActions, 'Targets only locate; actions are Interactions in screenplay/interactions.ts'),
+				call(
+					'textContent|innerText|innerHTML|inputValue|getAttribute|isVisible|isHidden|isChecked|isEnabled|isDisabled|isEditable|allTextContents|allInnerTexts|boundingBox|ariaSnapshot|count|all|url|title|context',
+					'Targets only locate; reading is a web question in screenplay/questions.ts'
+				),
+				...noPlaywright.slice(2).filter(({ selector }) => !/property.name=|ObjectPattern/.test(selector))
 			]
 		}
 	},

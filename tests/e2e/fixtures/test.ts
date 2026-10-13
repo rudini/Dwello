@@ -21,7 +21,8 @@ export const test = base.extend<{
 
 	// Every page belongs to the signed-in Liegenschaftsverwalter
 	page: async ({ page, baseURL }, use) => {
-		await page.context().addCookies(await sessionCookies(baseURL!));
+		const signedIn = new Actor('Liegenschaftsverwalter').whoCan(new BrowseTheWeb(page));
+		await signedIn.attemptsTo(Cookies.add(await sessionCookies(baseURL!)));
 		await use(page);
 	},
 

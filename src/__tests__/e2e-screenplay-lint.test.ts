@@ -65,6 +65,35 @@ describe('Screenplay-Schichten der Akzeptanztests', () => {
 		expect(await problems(filePath, code)).toContain('no-restricted-imports');
 	});
 
+	it.each([
+		['tests/e2e/tasks/example.ts', 'const { BrowseTheWeb } = await import("../screenplay/abilities");'],
+		['tests/e2e/steps/example.steps.ts', 'const { expect } = await import("@playwright/test");'],
+		['tests/e2e/questions/example.ts', 'const playwright = require("@playwright/test");'],
+		['tests/e2e/tasks/example.ts', 'const page = ability["page"];'],
+		['tests/e2e/tasks/example.ts', 'await element[act]();'],
+		['tests/e2e/tasks/example.ts', 'await element[`click`]();'],
+		['tests/e2e/questions/example.ts', 'await actor.recall(DOWNLOAD).path();'],
+		['tests/e2e/questions/example.ts', 'await api.request.post("x");'],
+		['tests/e2e/fixtures/example.ts', 'export const save = (page) => page.getByTestId("save").click();'],
+		['tests/e2e/targets/example.ts', "export const x = target('X', (page) => { page.url(); return page.getByTestId('x'); });"]
+	])('lehnt weitere Umwege in %s ab: %s', async (filePath, code) => {
+		expect(await problems(filePath, code)).toContain('no-restricted-syntax');
+	});
+
+	it.each([
+		"import { BrowseTheWeb } from '../screenplay/./abilities';",
+		"import { BrowseTheWeb } from '../screenplay/abilities.js';"
+	])('lehnt die Ability des Browsers in Tasks auch über Pfadvarianten ab: %s', async (code) => {
+		expect(await problems('tests/e2e/tasks/example.ts', code)).toContain('no-restricted-imports');
+	});
+
+	it('lässt in Fixtures Playwright-Typen und die page als Parameter zu, aber keine Playwright-Werte', async () => {
+		const wiring = "import type { Page } from '@playwright/test';\nexport const f = async ({ page }: { page: Page }) => page;";
+		expect(await problems('tests/e2e/fixtures/example.ts', wiring)).toEqual([]);
+		const value = "import { chromium } from '@playwright/test';\nexport const browser = chromium;";
+		expect(await problems('tests/e2e/fixtures/example.ts', value)).toContain('no-restricted-imports');
+	});
+
 	it('lehnt Playwright-Importe in Tasks und Questions ab', async () => {
 		const code = "import type { Page } from '@playwright/test';";
 		expect(await problems('tests/e2e/tasks/example.ts', code)).toContain('no-restricted-imports');

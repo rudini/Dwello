@@ -16,7 +16,8 @@ const about = <T>(target: Target, description: string, answer: (element: Locator
 // Whitespace as Playwright's toHaveText normalizes it
 const normalized = (text: string) => text.replace(/\u200b/g, '').trim().replace(/\s+/g, ' ');
 
-// Counted just before: an element that vanishes in between fails fast instead of waiting, and the poll asks again
+// Counted just before: an element that vanishes in between fails within a second instead of waiting; `actor.sees`
+// asks again, a task asking directly gets the error
 const quick = { timeout: 1000 };
 
 /** The one element the target finds, as toHaveText expects it: none answers null, several fail */

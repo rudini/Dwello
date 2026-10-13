@@ -10,7 +10,6 @@ import {
 	firstApartmentButton,
 	fuelStockAmount,
 	fuelStockDate,
-	
 	fuelStockRows,
 	saveFuelStockButton
 } from '../targets/building-detail';

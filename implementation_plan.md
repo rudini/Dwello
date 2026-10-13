@@ -37,3 +37,13 @@ Review round 1 (`docs/reviews/screenplay-e2e-review-1.md`):
 - Minor UI words in features - open work H-18 (pre-existing wording)
 - Nit `Wait.until` takes the first match - rejected: it only waits for a state, the checks stay strict
 - Nit `**/interactions/**` patterns - fixed; Nit plan ticks - fixed
+
+Review round 2 (`docs/reviews/screenplay-e2e-review-2.md`):
+- M-1 Major (still open): fixtures without layer rule, dynamic `import()`/`require`, path variants of the abilities
+  import, calls and access by computed name, `request` chains - fixed (fixtures get the rules, may take Playwright
+  fixtures and types as parameters; the `page` fixture signs in through `Cookies.add`)
+- Minor download object reachable from memory (`path()` etc.) - fixed (calls banned)
+- Minor targets may read (`textContent`, `url` ...) - fixed
+- Minor CLAUDE.md names an unchecked exception - fixed (there is none any more)
+- Minor `quick` timeout throws for direct `actor.answer` - fixed (comment says so)
+- Nit blank line in `tasks/building-detail.ts` - fixed

@@ -247,8 +247,10 @@ const lookAt =
 			Navigate.to(onEmptyInstance.includes(example.state) ? EMPTY_INSTANCE + example.path : example.path)
 		);
 		const noted = note(look, prefix);
-		if (example.state !== 'every-wizard-step')
-			return actor.attemptsTo(states[example.state](example, viewport), noted);
+		if (example.state !== 'every-wizard-step') {
+			const reachState = states[example.state];
+			return actor.attemptsTo(reachState(example, viewport), noted);
+		}
 		const wizard = new URL(example.path, 'http://x').pathname;
 		await actor.attemptsTo(
 			wizard === '/contracts/new' ? contractWizardSteps(noted) : statementWizardSteps(noted, example)
