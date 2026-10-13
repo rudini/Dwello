@@ -5143,3 +5143,22 @@ fulfilled, 2 not yet):
 - Minor a question writing through `CallTheApi` (`post`, `put`, `remove` …) - fixed
 - Minor H-19 lacks the renamed `actor` parameter and a renamed `seed.backend` in fixtures - fixed (both added)
 - Nits `'findings'` literal, commit subjects - rejected as in round 7
+
+Final review round 9 (`docs/reviews/screenplay-e2e-review-9.md`, the whole end state ee8279a; points 1 and 3
+fulfilled, 2 not yet):
+- M-1 Major `screenplay/` had no rules: page code with its own locators could move into the core - fixed:
+  `screenplay/` holds exactly its five files (structure test), depends on no layer above it, and finds elements only
+  through targets (locator calls only in `target.ts`; the hydration check became the core target `hydratedPage`)
+- M-2 Major a step or task choosing UI or API through `test.info().project` - fixed: `info()` and `.project` banned
+  in every layer
+- M-3 Major `fetch` passed in steps, fixtures and other files - fixed: banned everywhere but questions (mail
+  catcher, H-19)
+- Minor `setTimeout` in tasks - fixed: clock timers banned in every layer (`$testInfo.setTimeout` stays)
+- Minor local re-export `export { Click }` - fixed: every export without a declaration is banned (round 8 had
+  covered only `export … from`)
+- Minor polling loop in a step - fixed (`while`, `do … while`; a `for` loop over preconditions stays)
+- Minor recursion in a question - recorded in H-19
+- Minor a `.ts` file at the top of tests/e2e - fixed: only `CLAUDE.md` there (structure test); layers have no
+  subfolders
+- Minors under H-19 (fixture alias of `page`, question parameter not named `actor`, `fetch` in questions) - recorded
+- Nit `docs/test-pyramid.md` API path - fixed

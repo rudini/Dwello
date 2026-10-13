@@ -7,3 +7,6 @@ export const target = (description: string, locate: (page: Page) => Locator): Ta
 	locate,
 	toString: () => description
 });
+
+// The page once its client JS has taken over: SSR pages only react to input after hydration
+export const hydratedPage = target('die geladene Seite', (page) => page.locator('body[data-hydrated]'));

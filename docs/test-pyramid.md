@@ -73,7 +73,7 @@ The same scenario can run through the browser or directly against the backend AP
 
 - What `@api` is for: business rules and calculations that do not depend on the UI. Today: management fee (`statement-management-fee.feature`), preview, generation and a period without rental contracts (`statement-generate.feature`), heating costs on a tenant change (`statement-detail.feature`).
 - UI only: interaction flows, navigation, forms.
-- A new `@api` step needs both paths; the API path lives in `tasks/<area>-api.ts`.
+- A new `@api` step needs both paths: a task or question built with `throughUiOrApi` (the API path in `tasks/<area>-api.ts` or next to the UI path).
 
 Isolation as Farley describes it:
 

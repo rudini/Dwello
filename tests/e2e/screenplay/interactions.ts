@@ -1,7 +1,7 @@
 import { expect, type BrowserContext, type Locator, type Page } from '@playwright/test';
 import type { Activity, Actor } from './actor';
 import { BrowseTheWeb } from './abilities';
-import type { Target } from './target';
+import { hydratedPage, type Target } from './target';
 
 // The Playwright layer under the tasks: the only place, with targets/, that drives the page
 
@@ -10,7 +10,7 @@ const locate = (actor: Actor, target: Target) => target.locate(pageOf(actor));
 const on = (target: Target, act: (element: Locator) => Promise<unknown>): Activity => (actor) => act(locate(actor, target));
 
 // SSR pages only react to input once hydrated; hydration resets fields changed before it (seen on WebKit in CI)
-const hydrated = (page: Page) => page.locator('body[data-hydrated]').waitFor({ state: 'attached' });
+const hydrated = (page: Page) => hydratedPage.locate(page).waitFor({ state: 'attached' });
 const SCRIPTS_HELD_BACK = 'scripts held back';
 
 export const Navigate = {

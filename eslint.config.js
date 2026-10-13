@@ -40,10 +40,24 @@ const noPlaywright = [
 		message: 'Assert with actor.sees(question) (tests/e2e/CLAUDE.md)'
 	},
 	{
-		selector: 'ExportNamedDeclaration[source], ExportAllDeclaration',
+		selector: 'ExportNamedDeclaration:not([declaration]), ExportAllDeclaration',
 		message: 'No re-exports: each layer exports only what it defines (tests/e2e/CLAUDE.md)'
+	},
+	{
+		selector:
+			"CallExpression[callee.name=/^(setTimeout|setInterval)$/], MemberExpression[property.name=/^(setTimeout|setInterval)$/]:not([object.name='$testInfo']), MemberExpression[object.name='scheduler']",
+		message: 'No waiting by the clock: actor.sees retries until the expectation holds (tests/e2e/CLAUDE.md)'
+	},
+	{
+		selector: "CallExpression[callee.property.name='info'], MemberExpression[property.name='project']",
+		message: 'No look at the test run: tasks and questions choose UI or API by the ability (tests/e2e/CLAUDE.md)'
 	}
 ];
+// The backend only through the ability CallTheApi; questions keep fetch for the mail catcher (H-19)
+const noFetch = {
+	selector: "CallExpression[callee.name='fetch'], MemberExpression[property.name='fetch']",
+	message: 'The backend only through the ability CallTheApi (tests/e2e/CLAUDE.md)'
+};
 const playwrightImports = [
 	{ group: ['@playwright/test', 'playwright', 'playwright-core', '@axe-core/*'], message: outsideScreenplay },
 	{ group: ['timers', 'timers/*', 'node:timers', 'node:timers/*'], message: 'No waiting by the clock: actor.sees retries (tests/e2e/CLAUDE.md)' },
@@ -154,7 +168,38 @@ export default [
 		ignores: ['tests/e2e/screenplay/**', 'tests/e2e/targets/**'],
 		rules: {
 			'no-restricted-imports': ['error', { patterns: playwrightImports }],
-			'no-restricted-syntax': ['error', ...noPlaywright]
+			'no-restricted-syntax': ['error', ...noPlaywright, noFetch]
+		}
+	},
+	{
+		files: ['tests/e2e/screenplay/target.ts'],
+		rules: {
+			'no-restricted-imports': ['error', { patterns: [{ group: ['./*', '../*'], message: 'target.ts depends on Playwright only' }] }]
+		}
+	},
+	{
+		// The core drives Playwright but depends on no layer above it; where things are, only target.ts describes
+		files: ['tests/e2e/screenplay/**/*.ts'],
+		ignores: ['tests/e2e/screenplay/target.ts'],
+		rules: {
+			'no-restricted-syntax': [
+				'error',
+				{
+					selector: 'CallExpression[callee.property.name=/^(getBy[A-Za-z]+|locator|frameLocator|\\$|\\$\\$|\\$eval|\\$\\$eval)$/]',
+					message: 'The core finds elements only through targets: describe the place in screenplay/target.ts or targets/ (tests/e2e/CLAUDE.md)'
+				}
+			],
+			'no-restricted-imports': [
+				'error',
+				{
+					patterns: [
+						{
+							group: ['**/steps/**', '**/tasks/**', '**/questions/**', '**/fixtures/**', '**/targets/**'],
+							message: 'The Screenplay core depends on no layer above it (tests/e2e/CLAUDE.md)'
+						}
+					]
+				}
+			]
 		}
 	},
 	{
@@ -174,6 +219,11 @@ export default [
 			'no-restricted-syntax': [
 				'error',
 				...noPlaywright,
+				noFetch,
+				{
+					selector: 'WhileStatement, DoWhileStatement',
+					message: 'Steps do not poll: actor.sees retries until the expectation holds (tests/e2e/CLAUDE.md)'
+				},
 				{
 					selector: "ObjectPattern > Property[key.name='driver'], MemberExpression[property.name='driver']",
 					message: 'Steps do not choose between UI and API: tasks and questions choose by the ability (tests/e2e/CLAUDE.md)'
@@ -203,10 +253,7 @@ export default [
 			'no-restricted-syntax': [
 				'error',
 				...noPlaywright,
-				{
-					selector: "CallExpression[callee.name='fetch'], MemberExpression[property.name='fetch']",
-					message: 'Tasks reach the backend through the ability CallTheApi (tests/e2e/CLAUDE.md)'
-				}
+				noFetch
 			]
 		}
 	},
@@ -259,6 +306,7 @@ export default [
 			'no-restricted-syntax': [
 				'error',
 				...noPlaywright.filter(({ selector }) => !/ObjectPattern|TSImportType/.test(selector)),
+				noFetch,
 				{
 					selector:
 						"ImportDeclaration[source.value=/screenplay\\/interactions$/] > :matches(ImportSpecifier:not([imported.name='Cookies']), ImportNamespaceSpecifier), :matches(ExportNamedDeclaration, ExportAllDeclaration)[source.value=/screenplay\\/interactions$/]",

@@ -189,6 +189,37 @@ describe('Screenplay-Schichten der Akzeptanztests', () => {
 		expect(files.map((file) => file.name).filter((name) => !/\.(ts|feature|md)$/.test(name) || /\.d\.ts$/.test(name))).toEqual([]);
 	});
 
+	// Schluss-Review Endstand 3, M-1: der Kern ist kein Helfer-Ordner; oben in tests/e2e liegt nur die Doku
+	it('hält den Screenplay-Kern bei seinen fünf Dateien und die Schichten flach', () => {
+		expect(readdirSync('tests/e2e/screenplay').sort()).toEqual([
+			'abilities.ts',
+			'actor.ts',
+			'interactions.ts',
+			'questions.ts',
+			'target.ts'
+		]);
+		const nested = readdirSync('tests/e2e', { recursive: true, withFileTypes: true }).filter(
+			(entry) => entry.isDirectory() && entry.parentPath !== 'tests/e2e'
+		);
+		expect(nested.map((entry) => `${entry.parentPath}/${entry.name}`)).toEqual([]);
+		const top = readdirSync('tests/e2e', { withFileTypes: true }).filter((entry) => entry.isFile());
+		expect(top.map((entry) => entry.name)).toEqual(['CLAUDE.md']);
+	});
+
+	// Schluss-Review Endstand 3: M-1 Kern, M-2 test.info(), M-3 fetch, Minors
+	it.each([
+		['tests/e2e/screenplay/example.ts', "import { openDashboard } from '../tasks/dashboard';\nexport const x = openDashboard;"],
+		['tests/e2e/steps/example.steps.ts', "if (test.info().project.name === 'api') return;"],
+		['tests/e2e/tasks/example.ts', "if (test.info().project.name === 'api') return;"],
+		['tests/e2e/steps/example.steps.ts', "await fetch('http://localhost:3101/api/v1/buildings');"],
+		['tests/e2e/fixtures/example.ts', "await fetch('http://localhost:3101/api/v1/buildings');"],
+		['tests/e2e/tasks/example.ts', 'await new Promise((r) => setTimeout(r, 1000));'],
+		['tests/e2e/tasks/example.ts', "import { Click } from '../screenplay/interactions';\nexport { Click };"],
+		['tests/e2e/steps/example.steps.ts', 'while (!(await verwalter.answer(ready))) {}']
+	])('lehnt in %s ab: %s', async (filePath, code) => {
+		expect(await restricted(filePath, code)).not.toEqual([]);
+	});
+
 	// Schluss-Review Endstand 2: M-2 Weiche über das Projekt, M-3 Schleifen, und die Minors als Klassen
 	it.each([
 		['tests/e2e/steps/example.steps.ts', "if ($testInfo.project.name === 'api') return;"],
@@ -233,7 +264,15 @@ describe('Screenplay-Schichten der Akzeptanztests', () => {
 
 	it('lässt Playwright im Screenplay-Kern zu', async () => {
 		expect(
-			await problems('tests/e2e/screenplay/example.ts', 'await page.getByTestId("x").click();')
+			await problems('tests/e2e/screenplay/interactions.ts', 'await target.locate(page).click();')
 		).toEqual([]);
+	});
+
+	// Schluss-Review Endstand 3, M-1: Fundstellen beschreibt im Kern nur target.ts, sonst wird der Kern ein Helfer-Ordner
+	it('lässt im Kern Locators nur in target.ts zu', async () => {
+		const code = 'await page.getByTestId("contract-tenant-select").selectOption("x");';
+		expect(await restricted('tests/e2e/screenplay/interactions.ts', code)).not.toEqual([]);
+		const where = "export const body = target('Seite', (page) => page.locator('body'));";
+		expect(await restricted('tests/e2e/screenplay/target.ts', where)).toEqual([]);
 	});
 });
