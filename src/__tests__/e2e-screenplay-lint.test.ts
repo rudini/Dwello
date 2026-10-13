@@ -152,6 +152,20 @@ describe('Screenplay-Schichten der Akzeptanztests', () => {
 		expect(await restricted(filePath, code)).not.toEqual([]);
 	});
 
+	// Re-Review, Minor: dieselben Umwege ohne Destrukturieren, über globalThis oder über einen Namespace
+	it.each([
+		['tests/e2e/steps/example.steps.ts', "When('a', async (fx) => fx.driver);"],
+		['tests/e2e/steps/example.steps.ts', 'const { backend } = seed;'],
+		['tests/e2e/steps/example.steps.ts', 'const { expect: e } = test;'],
+		['tests/e2e/questions/example.ts', 'await new Promise((r) => globalThis.setTimeout(r, 5000));'],
+		['tests/e2e/questions/example.ts', 'export const q = async (actor) => { await goToNextStep(actor); };'],
+		['tests/e2e/fixtures/example.ts', "import * as I from '../screenplay/interactions';\nexport const x = I;"],
+		['tests/e2e/fixtures/example.ts', "export { Click } from '../screenplay/interactions';"],
+		['tests/e2e/fixtures/example.ts', "export * from '../screenplay/interactions';"]
+	])('lehnt in %s ab: %s', async (filePath, code) => {
+		expect(await restricted(filePath, code)).not.toEqual([]);
+	});
+
 	it('lässt in Fixtures aus den Interactions nur die Cookies zu', async () => {
 		const code = "import { Cookies } from '../screenplay/interactions';\nexport const x = Cookies;";
 		expect(await restricted('tests/e2e/fixtures/example.ts', code)).toEqual([]);

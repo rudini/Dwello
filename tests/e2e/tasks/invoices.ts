@@ -13,7 +13,7 @@ import {
 
 export const openInvoiceList = Navigate.to('/invoices');
 
-export const searchInvoices =(term: string): Activity => (actor) =>
+export const searchInvoices = (term: string): Activity => (actor) =>
 	actor.attemptsTo(
 		Enter.theValue(term).into(invoiceSearchInput),
 		Click.on(invoiceSearchButton),

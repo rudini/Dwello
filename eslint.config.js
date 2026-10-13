@@ -156,11 +156,11 @@ export default [
 				'error',
 				...noPlaywright,
 				{
-					selector: "ObjectPattern > Property[key.name='driver']",
+					selector: "ObjectPattern > Property[key.name='driver'], MemberExpression[property.name='driver']",
 					message: 'Steps do not choose between UI and API: tasks and questions choose by the ability (tests/e2e/CLAUDE.md)'
 				},
 				{
-					selector: 'MemberExpression[property.name=/^(backend|expect)$/]',
+					selector: 'MemberExpression[property.name=/^(backend|expect)$/], ObjectPattern > Property[key.name=/^(backend|expect)$/]',
 					message: 'Steps reach the system through tasks and assert with actor.sees(question) (tests/e2e/CLAUDE.md)'
 				},
 				{ selector: 'ThrowStatement', message: 'Assert with actor.sees(question), not with a check of its own (tests/e2e/CLAUDE.md)' }
@@ -192,11 +192,11 @@ export default [
 				'error',
 				...noPlaywright,
 				{
-					selector: "CallExpression[callee.property.name='attemptsTo']",
+					selector: "CallExpression[callee.property.name='attemptsTo'], CallExpression[arguments.0.name='actor']:not([callee.type='MemberExpression'])",
 					message: 'Questions only ask; actions belong in tasks (tests/e2e/CLAUDE.md)'
 				},
 				{
-					selector: "CallExpression[callee.name=/^(setTimeout|setInterval)$/]",
+					selector: "CallExpression[callee.name=/^(setTimeout|setInterval)$/], MemberExpression[property.name=/^(setTimeout|setInterval)$/]",
 					message: 'Questions answer at once; sees() retries them (tests/e2e/CLAUDE.md)'
 				}
 			]
@@ -219,7 +219,8 @@ export default [
 				'error',
 				...noPlaywright.filter(({ selector }) => !/ObjectPattern|TSImportType/.test(selector)),
 				{
-					selector: "ImportDeclaration[source.value=/screenplay\\/interactions$/] > ImportSpecifier:not([imported.name='Cookies'])",
+					selector:
+						"ImportDeclaration[source.value=/screenplay\\/interactions$/] > :matches(ImportSpecifier:not([imported.name='Cookies']), ImportNamespaceSpecifier), :matches(ExportNamedDeclaration, ExportAllDeclaration)[source.value=/screenplay\\/interactions$/]",
 					message: 'Fixtures hand no interactions to steps; only the session cookies are set here (tests/e2e/CLAUDE.md)'
 				},
 				{
