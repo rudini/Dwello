@@ -114,6 +114,49 @@ describe('Screenplay-Schichten der Akzeptanztests', () => {
 		expect(await problems('tests/e2e/targets/example.ts', act)).toContain('no-restricted-syntax');
 	});
 
+	// Schluss-Review M-1: kein Wechsel zwischen UI und API im Step, kein Backend und kein expect am Actor vorbei
+	it.each([
+		["When('a', async ({ driver }) => { if (driver === 'api') return; });", 'no-restricted-syntax'],
+		["await seed.backend.post('statements/generate', {});", 'no-restricted-syntax'],
+		['test.expect(1).toBe(1);', 'no-restricted-syntax']
+	])('lehnt im Step ab: %s', async (code, rule) => {
+		expect(await problems('tests/e2e/steps/example.steps.ts', code)).toContain(rule);
+	});
+
+	// Schluss-Review M-2: Questions fragen nur, Fixtures reichen keine Handlungen an Steps weiter
+	const restricted = async (filePath: string, code: string) =>
+		(await problems(filePath, code)).filter((rule) => rule?.startsWith('no-restricted-'));
+	it.each([
+		[
+			'tests/e2e/questions/example.ts',
+			"import { Click } from '../screenplay/interactions';\nexport const x = Click;"
+		],
+		['tests/e2e/questions/example.ts', 'export const x = (actor) => actor.attemptsTo(open);'],
+		[
+			'tests/e2e/fixtures/example.ts',
+			"import { saveButton } from '../targets/contract-form';\nexport const x = saveButton;"
+		],
+		[
+			'tests/e2e/fixtures/example.ts',
+			"import { Click } from '../screenplay/interactions';\nexport const x = Click;"
+		]
+	])('lehnt in %s ab: %s', async (filePath, code) => {
+		expect(await restricted(filePath, code)).not.toEqual([]);
+	});
+
+	// Schluss-Review, Minor: eine Prüfung per throw im Step, eine Question, die wartet
+	it.each([
+		['tests/e2e/steps/example.steps.ts', "if (!text) throw new Error('missing');"],
+		['tests/e2e/questions/example.ts', 'await new Promise((r) => setTimeout(r, 5000));']
+	])('lehnt in %s ab: %s', async (filePath, code) => {
+		expect(await restricted(filePath, code)).not.toEqual([]);
+	});
+
+	it('lässt in Fixtures aus den Interactions nur die Cookies zu', async () => {
+		const code = "import { Cookies } from '../screenplay/interactions';\nexport const x = Cookies;";
+		expect(await restricted('tests/e2e/fixtures/example.ts', code)).toEqual([]);
+	});
+
 	it('lässt keine Ausnahme per Kommentar zu', async () => {
 		const code = '/* eslint-disable no-restricted-syntax */\nawait verwalter.page.goto("/");';
 		expect(await problems('tests/e2e/steps/example.steps.ts', code)).toContain('no-restricted-syntax');

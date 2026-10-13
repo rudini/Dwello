@@ -44,6 +44,11 @@ const playwrightImports = [
 		message: `${outsideScreenplay}: the page stays in the abilities`
 	}
 ];
+// Tasks and questions sit below the steps
+const belowSteps = [
+	...playwrightImports,
+	{ group: ['playwright-bdd', '**/steps/**'], message: 'Tasks and questions sit below the steps (tests/e2e/CLAUDE.md)' }
+];
 
 export default [
 	js.configs.recommended,
@@ -147,23 +152,54 @@ export default [
 					]
 				}
 			],
-			'no-restricted-syntax': ['error', ...noPlaywright]
+			'no-restricted-syntax': [
+				'error',
+				...noPlaywright,
+				{
+					selector: "ObjectPattern > Property[key.name='driver']",
+					message: 'Steps do not choose between UI and API: tasks and questions choose by the ability (tests/e2e/CLAUDE.md)'
+				},
+				{
+					selector: 'MemberExpression[property.name=/^(backend|expect)$/]',
+					message: 'Steps reach the system through tasks and assert with actor.sees(question) (tests/e2e/CLAUDE.md)'
+				},
+				{ selector: 'ThrowStatement', message: 'Assert with actor.sees(question), not with a check of its own (tests/e2e/CLAUDE.md)' }
+			]
 		}
 	},
 	{
 		// Tasks compose interactions, questions compose web questions; neither drives Playwright itself
-		files: ['tests/e2e/tasks/**/*.ts', 'tests/e2e/questions/**/*.ts'],
+		files: ['tests/e2e/tasks/**/*.ts'],
+		rules: {
+			'no-restricted-imports': ['error', { patterns: belowSteps }],
+			'no-restricted-syntax': ['error', ...noPlaywright]
+		}
+	},
+	{
+		// Questions only ask: no interactions, no tasks performed
+		files: ['tests/e2e/questions/**/*.ts'],
 		rules: {
 			'no-restricted-imports': [
 				'error',
 				{
 					patterns: [
-						...playwrightImports,
-						{ group: ['playwright-bdd', '**/steps/**'], message: 'Tasks and questions sit below the steps (tests/e2e/CLAUDE.md)' }
+						...belowSteps,
+						{ group: ['**/screenplay/interactions*'], message: 'Questions only ask; actions belong in tasks (tests/e2e/CLAUDE.md)' }
 					]
 				}
 			],
-			'no-restricted-syntax': ['error', ...noPlaywright]
+			'no-restricted-syntax': [
+				'error',
+				...noPlaywright,
+				{
+					selector: "CallExpression[callee.property.name='attemptsTo']",
+					message: 'Questions only ask; actions belong in tasks (tests/e2e/CLAUDE.md)'
+				},
+				{
+					selector: "CallExpression[callee.name=/^(setTimeout|setInterval)$/]",
+					message: 'Questions answer at once; sees() retries them (tests/e2e/CLAUDE.md)'
+				}
+			]
 		}
 	},
 	{
@@ -172,11 +208,20 @@ export default [
 		rules: {
 			'no-restricted-imports': [
 				'error',
-				{ patterns: [{ ...playwrightImports[0], allowTypeImports: true }] } // fixtures create the abilities
+				{
+					patterns: [
+						{ ...playwrightImports[0], allowTypeImports: true }, // fixtures create the abilities
+						{ group: ['**/targets/**'], message: 'Fixtures wire actors; targets belong to interactions and questions (tests/e2e/CLAUDE.md)' }
+					]
+				}
 			],
 			'no-restricted-syntax': [
 				'error',
 				...noPlaywright.filter(({ selector }) => !/ObjectPattern|TSImportType/.test(selector)),
+				{
+					selector: "ImportDeclaration[source.value=/screenplay\\/interactions$/] > ImportSpecifier:not([imported.name='Cookies'])",
+					message: 'Fixtures hand no interactions to steps; only the session cookies are set here (tests/e2e/CLAUDE.md)'
+				},
 				{
 					selector: 'MemberExpression[object.name=/^(page|context|browser|request)$/]',
 					message: `${outsideScreenplay}: fixtures hand Playwright fixtures on (to an ability), they do not use them`
