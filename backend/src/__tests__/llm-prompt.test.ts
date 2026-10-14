@@ -50,6 +50,13 @@ describe('Rechtsgrundlage und Kategorien im Prompt', () => {
 		expect(prompt).toContain('Art. 5 und 6 VMWG gelten nur für Heizungs- und Warmwasserkosten');
 	});
 
+	it('setzt Platzhalter in Kategorienamen nicht ein', () => {
+		const prompt = buildCategorizationPrompt(invoice, [
+			{ name: '{amount} $& AG', nameDE: null, description: '{description}', isAllowedUtilityCost: true }
+		]);
+		expect(prompt).toContain('- {amount} $& AG: {description}\n');
+	});
+
 	it('bietet die Kategorien der Stammdaten an, auch eigene', () => {
 		const prompt = buildCategorizationPrompt(invoice, categories);
 		expect(prompt).toContain('- Heating (Heizung): Kosten für das Heizen\n');

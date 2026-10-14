@@ -43,7 +43,6 @@ These points blur the layering without violating a scenario themselves. They are
 - `db/demo-data.ts` imports `statement.service` and `statement-pdf.service`. That is intended for the demo data, but it belongs with the scripts, not under `db/`.
 - `routes/dashboard.ts` queries the database itself instead of going through a service.
 - `reminder-pdf.ts` (rendering) imports its type from `reminder-letter.ts` (business logic of the payment reminder).
-- `config/llm.ts` keeps the categories for the prompt (`SWISS_UTILITY_CATEGORIES`) as a second list next to the table `categories`; `utility-validation.service.ts` uses it as well.
 
 ## Implementation
 

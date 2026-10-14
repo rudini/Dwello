@@ -69,10 +69,10 @@ VMWG Art. 6a: Bezieht der Vermieter Heizenergie oder Warmwasser aus einer nicht 
 VMWG Art. 6b: Der Vermieter kann im Rahmen eines Zusammenschlusses gemäss Artikel 17 des Energiegesetzes vom 30. September 2016 die Kosten nach Artikel 16a und 16b der Energieverordnung vom 1. November 2017 als Nebenkosten in Rechnung stellen.
 VMWG Art. 6c Abs. 3: Der Vermieter kann die im Rahmen eines Energiespar-Contractings anfallenden Kosten während höchstens 10 Jahren als Nebenkosten in Rechnung stellen.
 
-Art. 5 und 6 VMWG gelten nur für Heizungs- und Warmwasserkosten; für andere Kosten begründen Sie mit Art. 257a Abs. 1 oder Art. 257b Abs. 1 OR. Zitieren Sie Artikel mit Absatz.`;
+Art. 5 und 6 VMWG gelten nur für Heizungs- und Warmwasserkosten; für andere Kosten begründe mit Art. 257a Abs. 1 oder Art. 257b Abs. 1 OR. Zitiere Artikel mit Absatz.`;
 
 /** A category as the prompt offers it: the English key the KI answers with, the German name, what it covers */
-export type PromptCategory = {
+type PromptCategory = {
 	name: string;
 	nameDE: string | null;
 	description: string | null;
@@ -104,7 +104,7 @@ Rechnungssteller: {billing_entity}
 Beschreibung: {description}
 Betrag: CHF {amount}
 
-WICHTIG: Der "category" Wert muss EXAKT einer der Kategorienamen vor der Klammer sein (z.B. "Heating", "Cold Water", "Repairs").
+WICHTIG: Der "category" Wert muss EXAKT einer der Kategorienamen sein, so wie er nach «- » am Zeilenanfang steht, ohne den deutschen Namen in Klammern und ohne Beschreibung (z.B. "Heating", "Cold Water", "Repairs").
 
 Antworte NUR im folgenden JSON-Format:
 {
