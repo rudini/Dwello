@@ -38,13 +38,13 @@ describe('Datenschutzerklärung der öffentlichen Demo', () => {
 			section.querySelector('h2')?.textContent?.includes('Öffentliche Demo')
 		);
 
-	it('sagt, dass alle dieselben Daten sehen, alles jede Nacht gelöscht und jede Anmeldung protokolliert wird', () => {
+	it('sagt, dass alle dieselben Daten sehen, alles jede Nacht gelöscht wird und andere Besucher Name und E-Mail nicht sehen', () => {
 		show(PrivacyPage, { data: { recipient: null, demo: true } } as never);
 
 		const text = demoSection()?.textContent;
 		expect(text).toContain('sehen und ändern dieselben Daten');
 		expect(text).toContain('jede Nacht werden alle Änderungen gelöscht');
-		expect(text).toContain('mit der E-Mail-Adresse des Kontos im Protokoll des Servers');
+		expect(text).toContain('Ihren Namen und Ihre E-Mail-Adresse sehen andere Besucher nicht');
 	});
 
 	it('hat in einer eigenen Installation keinen Abschnitt zur Demo', () => {
@@ -52,5 +52,19 @@ describe('Datenschutzerklärung der öffentlichen Demo', () => {
 
 		expect(document.querySelectorAll('[data-testid="page-section"]').length).toBeGreaterThan(0);
 		expect(demoSection()).toBeUndefined();
+	});
+});
+
+describe('Datenschutzerklärung zur Anmeldung', () => {
+	it('sagt, dass jede Anmeldung und jede Verlängerung der Sitzung mit der E-Mail-Adresse protokolliert wird', () => {
+		show(PrivacyPage, { data: { recipient: null, demo: false } } as never);
+
+		const login = [...document.querySelectorAll('[data-testid="page-section"]')].find((section) =>
+			section.querySelector('h2')?.textContent?.includes('Anmeldung')
+		);
+		expect(login?.textContent).toContain(
+			'Jede Anmeldung und jede Verlängerung der Sitzung wird mit der E-Mail-Adresse im Protokoll des Servers festgehalten'
+		);
+		expect(login?.textContent).not.toContain('verwendet sie nur');
 	});
 });

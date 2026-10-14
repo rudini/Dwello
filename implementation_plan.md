@@ -33,7 +33,15 @@ Decided (product owner, #162): option 1. `DEMO=on` shows a notice on every page 
 - [x] `deploy/demo/docker-compose.yml` sets `DEMO=on`, README names it
 - [x] a11y and language rows: state `demo` (login, dashboard, privacy) on the demo instance (`tasks/accessibility.ts`)
 - [x] Scenarios green, `@wip` removed: 61 chromium cases (demo, a11y and language rows of login, dashboard, privacy, authentication, privacy) passed
-- [ ] Code review, personas
-- Skills: tdd, ponytail (ponytail-review before the review)
+- [x] Code review round 1, personas round 1 (Weber, Marco, Anna, Sven, Helga)
+- [x] Fixes after round 1: privacy «Anmeldung» names the server log of sign-ins and session extensions (#165; replaces the demo section's log sentence, `privacy_demo_2` removed); notice gives the reason («deshalb»), names e-mail addresses and phone numbers, «erfundene Beispieldaten»; demo section says other visitors do not see name and e-mail; notice is a region named «Öffentliche Demo»; E2E: domain-named demo tasks, `sectionText` in `questions/app-frame.ts`. Test red: `public-pages-layout.dom.test.ts` (region, reason) and `privacy-page.dom.test.ts` (demo section, «Anmeldung»): 4 failed; scenarios red: «Datenschutzerklärung der Demo» (expected «Ihren Namen und Ihre E-Mail-Adresse sehen andere Besucher nicht») and new «Anmeldungen im Protokoll des Servers» (`privacy.feature`); then 53 chromium cases green
+- [ ] Code review round 2, personas Weber and Helga round 2 (new texts)
+- Skills: tdd, ponytail, ponytail-review (on be0b235 before review round 1: nothing to cut)
 - Files: `src/routes/+layout.svelte`, `src/routes/+layout.server.ts`, `src/routes/privacy/+page.svelte`, `messages/*.json`, `src/__tests__/{layout-load.test.ts,public-pages-layout.dom.test.ts,privacy-page.dom.test.ts}`, `tests/e2e/{features/demo.feature,steps,tasks,questions,targets}/demo.*`, `tests/e2e/tasks/accessibility.ts`, `tests/a11y/screens.json`, `tests/e2e/features/{accessibility,sprachen-bildschirme}.feature`, `playwright.config.ts`, `deploy/demo/{docker-compose.yml,README.md}`
 - [ ] Checks: test:coverage, lint, check, backend test + type-check, deepcheck:audit, affected E2E
+- code-reviewer round 1 (`docs/reviews/b162-review-1.md`): fixed C-1 (Minor, session extension named), C-2 (Minor, #165), C-3 (Minor), C-4 (Minor), C-5 (Nit), C-6 (Nit), C-7 (Nit)
+- persona Weber round 1 (`docs/design/personas/weber-b162.md`): fixed P-1 (Major, #165), P-8 (Minor); open P-2, P-3 (Major, existed before: #82), P-4, P-5, P-6, P-7 (Minor: #82), P-10, P-11 (Nit, existed before: wording of `privacy_third_1` in French and of the terms, added to #82); rejected P-9: the time is the operator's cron, the app does not know it
+- persona Marco round 1 (`docs/design/personas/marco-b162.md`): fixed P-3 (Minor, privacy demo section); open P-1, P-2 (Minor: U-23), P-4 (Nit: U-23); rejected P-5: as Weber P-9
+- persona Anna round 1 (`docs/design/personas/anna-b162.md`): fixed P-1 (Minor, privacy demo section), P-3 (Minor); open P-2, P-6, P-7 (U-23), P-4, P-5 (Minor: #82)
+- persona Sven round 1 (`docs/design/personas/sven-b162.md`): fixed P-2 (Minor, named region); open P-1 (Minor: U-23), P-4 (Nit: existed before, U-6), P-5 (Minor: #82); rejected P-3: the notice is the same on every page, the section explains it in the privacy statement's own terms
+- persona Helga round 1 (`docs/design/personas/helga-b162.md`): fixed P-1, P-2 (Minor), P-6 (Nit, privacy demo section; Microsoft: #82); open P-4, P-5 (Minor: U-23); rejected P-3: as Weber P-9

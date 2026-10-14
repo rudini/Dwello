@@ -6,7 +6,8 @@ import {
 	operatorNoticeText,
 	pageOverflowsSideways,
 	pageTitleWidth,
-	sectionShown
+	sectionShown,
+	sectionText
 } from '../questions/app-frame';
 import { openPage } from '../tasks/navigation';
 import {
@@ -67,6 +68,15 @@ Then(
 	'erfährt der Liegenschaftsverwalter unter {string}, dass Rechnungsdaten für die KI-Kategorisierung den Server nicht verlassen',
 	async ({ verwalter }, heading: string) => {
 		await verwalter.sees(llmRecipientNotice(heading)).toContain('verlassen dafür den Server nicht');
+	}
+);
+
+Then(
+	'erfährt der Liegenschaftsverwalter unter {string}, dass jede Anmeldung und jede Verlängerung der Sitzung mit der E-Mail-Adresse protokolliert wird',
+	async ({ verwalter }, heading: string) => {
+		await verwalter.sees(sectionText(heading)).toContain(
+			'Jede Anmeldung und jede Verlängerung der Sitzung wird mit der E-Mail-Adresse im Protokoll des Servers festgehalten'
+		);
 	}
 );
 

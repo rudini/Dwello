@@ -1,20 +1,21 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { demoNoticeShown, demoNoticeText, sectionText } from '../questions/demo';
-import { openDemoPage } from '../tasks/demo';
+import { sectionText } from '../questions/app-frame';
+import { demoNoticeShown, demoNoticeText } from '../questions/demo';
+import { openDemoOverview, openDemoPrivacy, openDemoSignIn } from '../tasks/demo';
 
 const { When, Then } = createBdd(test);
 
 When('ein Besucher die Anmeldeseite der Demo öffnet', async ({ besucher }) => {
-	await besucher.attemptsTo(openDemoPage('/login'));
+	await besucher.attemptsTo(openDemoSignIn);
 });
 
 When('der Liegenschaftsverwalter die Übersicht der Demo öffnet', async ({ verwalter }) => {
-	await verwalter.attemptsTo(openDemoPage('/dashboard'));
+	await verwalter.attemptsTo(openDemoOverview);
 });
 
 When('der Liegenschaftsverwalter die Datenschutzerklärung der Demo liest', async ({ verwalter }) => {
-	await verwalter.attemptsTo(openDemoPage('/privacy'));
+	await verwalter.attemptsTo(openDemoPrivacy);
 });
 
 // The two sentences together: shared data, then the nightly reset
@@ -35,11 +36,11 @@ Then(
 );
 
 Then(
-	'erfährt der Liegenschaftsverwalter unter {string}, dass alle Besucher dieselben Daten sehen, jede Nacht alles gelöscht wird und jede Anmeldung mit der E-Mail-Adresse protokolliert wird',
+	'erfährt der Liegenschaftsverwalter unter {string}, dass alle Besucher dieselben Daten sehen, jede Nacht alles gelöscht wird und andere Besucher seinen Namen und seine E-Mail-Adresse nicht sehen',
 	async ({ verwalter }, heading: string) => {
 		await verwalter.sees(sectionText(heading)).toContain('dieselben Daten');
 		await verwalter.sees(sectionText(heading)).toContain('jede Nacht');
-		await verwalter.sees(sectionText(heading)).toContain('E-Mail-Adresse');
+		await verwalter.sees(sectionText(heading)).toContain('Ihren Namen und Ihre E-Mail-Adresse sehen andere Besucher nicht');
 	}
 );
 

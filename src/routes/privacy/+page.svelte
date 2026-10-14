@@ -40,7 +40,6 @@
 	{#if data.demo}
 		<Panel title={m.demo_notice_title()} testid="page-section">
 			<p class="text-ink">{m.privacy_demo_1()}</p>
-			<p class="text-ink">{m.privacy_demo_2()}</p>
 		</Panel>
 	{/if}
 

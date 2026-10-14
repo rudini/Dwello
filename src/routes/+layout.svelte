@@ -75,11 +75,12 @@
 <!-- Public demo (DEMO=on): every visitor shares the data, reset every night; at the top of every page -->
 {#snippet demoNotice(spacing: string)}
 	{#if data.demo}
-		<div class={spacing}>
+		<!-- a named region: found with landmark navigation, also before signing in -->
+		<section class={spacing} aria-label={m.demo_notice_title()}>
 			<Alert tone="caution" title={m.demo_notice_title()} testid="demo-notice">
 				<p>{m.demo_notice_text()}</p>
 			</Alert>
-		</div>
+		</section>
 	{/if}
 {/snippet}
 

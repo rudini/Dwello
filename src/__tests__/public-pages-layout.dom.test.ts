@@ -93,6 +93,19 @@ describe('Öffentliche Demo', () => {
 		expect(await shown(path, { user: null, demo: true })).not.toBeNull();
 	});
 
+	it('ist ein Bereich namens «Öffentliche Demo», den man mit der Landmarken-Navigation findet', async () => {
+		const notice = await shown('/login', { user: null, demo: true });
+		expect(notice?.closest('section')?.getAttribute('aria-label')).toBe('Öffentliche Demo');
+	});
+
+	it('begründet, warum keine echten Daten eingegeben werden dürfen, und nennt auch Kontaktdaten', async () => {
+		const text = (await shown('/login', { user: null, demo: true }))?.textContent;
+		expect(text).toContain('erfundenen Beispieldaten');
+		expect(text).toContain(
+			'Geben Sie deshalb keine echten Daten ein, auch keine E-Mail-Adressen oder Telefonnummern'
+		);
+	});
+
 	it('zeigt in einer eigenen Installation keinen Demo-Hinweis', async () => {
 		expect(await shown('/login', { user: null, demo: false })).toBeNull();
 		expect(document.querySelector('main h1')).not.toBeNull();
