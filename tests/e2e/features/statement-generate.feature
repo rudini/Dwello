@@ -153,7 +153,7 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Dann ist der Liegenschaftsverwalter auf der Seite "Nebenkostenabrechnungen"
 
   @wip
-  Szenario: Nur die Entwürfe des Abrechnungslaufs anzeigen
+  Szenario: Nach dem Erstellen die Entwürfe der Abrechnungsperiode anzeigen
     Angenommen im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
     Und der Mieter "Lea Graf" existiert
     Und "Lea Graf" mietete die Wohnung "3.02" von "2023-01-01" bis "2023-12-31" für "900" Franken

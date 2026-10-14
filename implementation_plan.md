@@ -58,4 +58,10 @@ Task: work off the open `bug` issues one by one (PR merged before the next). Ski
 Slice 1 (contract filter), slice 2 (period filter, «Entwürfe ansehen»). Texts name Mietvertrag, Wohnung and Abrechnungsperiode: `fach-reviewer` on the `@wip` scenarios first (Workflow 1).
 
 - [x] `@wip` scenarios «Abrechnungen eines Mietvertrags anzeigen» (`contract-detail.feature`), «Nur die Entwürfe des Abrechnungslaufs anzeigen» (`statement-generate.feature`)
-- [ ] fach-reviewer on the scenarios
+- fach-reviewer round 1 (`docs/reviews/b2-fachreview-1.md`): fixed V-1 (Minor, scenario renamed «Nach dem Erstellen die Entwürfe der Abrechnungsperiode anzeigen»), V-2 (Nit, «Sie sehen …»), V-3 (Nit, Vertragsbeginn in the sentence; the glossary term, not «Mietbeginn»)
+- [x] Slice 1 Test red: `statement-list-contract.pg.test.ts` – both contracts' statements listed; `statement-list-load.test.ts` (2, plus the unloadable contract) – no `contractId`, `scope` undefined; `statement-pages.dom.test.ts` (3) – no sentence, no hidden `contract`, contract not counted as filter
+- [x] Slice 1: backend `contractId` filter; load passes it and builds the sentence from `GET /contracts/:id` (contract `contract.json`); page shows it with «Alle Abrechnungen anzeigen», counts `contract` as filter, the search form keeps it. Scenario red (code taken out again, steps written after): `erfährt …, dass die Liste nur die Abrechnungen des Mietvertrags …` – Received null; green
+- [ ] Slice 1 checks, code-reviewer
+- [ ] Slice 2: period filter, sentence, «Entwürfe ansehen» link. Scenario red: `… der Abrechnungsperiode "01.01.2024 – 31.12.2024" zeigt` – Received null
+- Skills: tdd, ponytail, ponytail-review
+- Files: `backend/src/{routes/statements.ts,services/statement.service.ts,__tests__/statement-list-contract.pg.test.ts}`, `src/routes/statements/{+page.server.ts,+page.svelte,StatementSearch.svelte}`, `src/lib/types.ts`, `messages/{de,fr,it,en}.json`, `src/__tests__/{statement-list-load.test.ts,statement-pages.dom.test.ts}`, `tests/e2e/{features/contract-detail.feature,features/statement-generate.feature,steps/statements.steps.ts,questions/statements.ts,targets/statements.ts}`, `docs/reviews/b2-fachreview-1.md`

@@ -847,6 +847,8 @@
 	"statements_load_failed": "Error loading the statement",
 	"statements_equal_per_apartment": "Equally per apartment",
 	"statements_purpose": "Check, send and track your tenants’ statements.",
+	"statements_scope_contract": "You are seeing the statements of the rental contract of {tenant}, apartment {apartment} ({building}), contract start {start}.",
+	"statements_scope_all": "Show all statements",
 	"statements_none_found": "No statements found",
 	"statements_adjust_filters": "Try adjusting your filters.",
 	"statements_empty_title": "No statements yet",

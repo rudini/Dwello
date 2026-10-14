@@ -37,7 +37,12 @@ beforeEach(() => {
 });
 
 describe('Abrechnungsliste', () => {
-	const list = (statements: ReturnType<typeof statement>[], total = statements.length, page = 1) =>
+	const list = (
+		statements: ReturnType<typeof statement>[],
+		total = statements.length,
+		page = 1,
+		scope: string | null = null
+	) =>
 		show(StatementsPage, {
 			data: {
 				statements,
@@ -45,9 +50,44 @@ describe('Abrechnungsliste', () => {
 				page,
 				pageSize: 10,
 				buildings: [{ id: 'b1', name: 'Ahornhof' }],
+				scope,
 				statusCounts: counts
 			}
 		} as never);
+
+	const contractScope =
+		'Sie sehen die Abrechnungen des Mietvertrags von Anna Keller, Wohnung 2.01 (Ahornhof), Vertragsbeginn 01.04.2024.';
+
+	it('sagt über der Liste, wessen Abrechnungen sie zeigt, mit einem Link zu allen', () => {
+		url = new URL('http://localhost/statements?contract=c1');
+		list([statement()], 1, 1, contractScope);
+
+		expect(byTestId('statements-scope')?.textContent).toContain(contractScope);
+		const all = byTestId('statements-scope')?.querySelector('a');
+		expect(all?.textContent?.trim()).toBe('Alle Abrechnungen anzeigen');
+		expect(all?.getAttribute('href')).toBe('/statements');
+	});
+
+	it('behält den Mietvertrag in den Statuslinks und in der Suche', () => {
+		url = new URL('http://localhost/statements?contract=c1');
+		list([statement()], 1, 1, contractScope);
+
+		const statusLinks = [
+			...document.querySelectorAll<HTMLAnchorElement>('a[href^="/statements?"]')
+		];
+		expect(statusLinks.length).toBeGreaterThan(0);
+		expect(statusLinks.every((a) => a.getAttribute('href')!.includes('contract=c1'))).toBe(true);
+		expect(document.querySelector<HTMLInputElement>('form input[name="contract"]')?.value).toBe(
+			'c1'
+		);
+	});
+
+	it('bietet bei einem Mietvertrag ohne Abrechnungen «Filter zurücksetzen» an', () => {
+		url = new URL('http://localhost/statements?contract=c1');
+		list([], 0, 1, contractScope);
+
+		expect(text()).toContain('Keine Abrechnungen gefunden');
+	});
 
 	// After a search the focus moves here, so the number of results is read out
 	it('nennt die Treffer in einer Überschrift, die den Fokus nach der Suche nimmt', () => {

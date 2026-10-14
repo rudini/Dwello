@@ -847,6 +847,8 @@
 	"statements_load_failed": "Fehler beim Laden der Abrechnung",
 	"statements_equal_per_apartment": "Gleichmässig pro Wohnung",
 	"statements_purpose": "Prüfen, versenden und verfolgen Sie die Abrechnungen Ihrer Mieter.",
+	"statements_scope_contract": "Sie sehen die Abrechnungen des Mietvertrags von {tenant}, Wohnung {apartment} ({building}), Vertragsbeginn {start}.",
+	"statements_scope_all": "Alle Abrechnungen anzeigen",
 	"statements_none_found": "Keine Abrechnungen gefunden",
 	"statements_adjust_filters": "Versuchen Sie, Ihre Filter anzupassen.",
 	"statements_empty_title": "Noch keine Abrechnungen",

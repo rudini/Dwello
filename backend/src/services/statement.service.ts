@@ -26,6 +26,7 @@ import { refusal, type Refusal } from './coded-error';
 
 export interface StatementFilters {
 	search?: string;
+	contractId?: string;
 	buildingId?: string;
 	apartmentId?: string;
 	tenantId?: string;
@@ -87,13 +88,14 @@ export function statusCondition(status: string) {
  * Where conditions for listStatements; tenant and building columns come from its joins
  */
 function statementFilterConditions(filters: StatementFilters) {
-	const { search, buildingId, apartmentId, tenantId, status, periodStart, periodEnd } = filters;
+	const { search, contractId, buildingId, apartmentId, tenantId, status, periodStart, periodEnd } = filters;
 	return [
 		search &&
 			or(
 				ilike(utilityStatements.statementNumber, `%${search}%`),
 				ilike(sql`${tenants.firstName} || ' ' || ${tenants.lastName}`, `%${search}%`)
 			),
+		contractId && eq(utilityStatements.contractId, contractId),
 		apartmentId && eq(utilityStatements.apartmentId, apartmentId),
 		tenantId && eq(utilityStatements.tenantId, tenantId),
 		buildingId && eq(apartments.buildingId, buildingId),

@@ -319,6 +319,8 @@ export interface StatementsListData {
 	page: number;
 	pageSize: number;
 	buildings: { id: string; name: string }[];
+	/** Which statements a contract or period filter shows, as a sentence; null without such a filter */
+	scope: string | null;
 	statusCounts: {
 		draft: number;
 		sent: number;

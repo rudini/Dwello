@@ -3,6 +3,7 @@ import { test } from '../fixtures/test';
 import {
 	listedStatement,
 	listedStatementCount,
+	listScope,
 	pageAddressInApp,
 	statementOfYearListed,
 	statementPath
@@ -137,5 +138,23 @@ When(
 	'der Liegenschaftsverwalter das PDF der Abrechnung {int} von {string} herunterlädt',
 	async ({ verwalter, names }, year: number, tenant: string) => {
 		await verwalter.attemptsTo(downloadStatementPdfFromList(names.get(tenant) ?? tenant, year));
+	}
+);
+
+Then(
+	'erfährt der Liegenschaftsverwalter, dass die Liste nur die Abrechnungen des Mietvertrags von {string} in der Wohnung {string} zeigt',
+	async ({ verwalter, names }, tenant: string, apartment: string) => {
+		await verwalter.sees(listScope).toContain(`Mietvertrags von ${names.get(tenant) ?? tenant}, Wohnung ${apartment}`);
+	}
+);
+
+Then('nicht die Abrechnung {int} von {string}', async ({ verwalter, names }, year: number, tenant: string) => {
+	await verwalter.sees(statementOfYearListed(names.get(tenant) ?? tenant, year)).toBe(false);
+});
+
+Then(
+	'erfährt der Liegenschaftsverwalter, dass die Liste nur die Abrechnungen der Abrechnungsperiode {string} zeigt',
+	async ({ verwalter }, period: string) => {
+		await verwalter.sees(listScope).toContain(`Abrechnungsperiode ${period}`);
 	}
 );

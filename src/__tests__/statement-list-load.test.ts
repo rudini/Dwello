@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { load } from '../routes/statements/+page.server';
 import type { StatementsListData } from '$lib/types';
 import { GET as downloadPdf } from '../routes/statements/[id]/pdf/+server';
+import backendContract from '../../tests/contracts/contract.json';
 
 const API = 'http://localhost:3001/api/v1';
 
@@ -106,5 +107,52 @@ describe('PDF einer Abrechnung herunterladen', () => {
 		});
 
 		expect(response.status).toBe(500);
+	});
+});
+
+describe('Abrechnungsliste eines Mietvertrags', () => {
+	it('fragt nur die Abrechnungen des Mietvertrags ab und sagt, wessen Abrechnungen sie zeigt', async () => {
+		const urls: string[] = [];
+		const fetch = (async (url: string) => {
+			urls.push(url);
+			if (url.endsWith('/contracts/c1')) return Response.json(backendContract);
+			return Response.json({ data: [], total: 0 });
+		}) as typeof globalThis.fetch;
+
+		const data = (await load({
+			url: new URL('http://localhost/statements?contract=c1'),
+			fetch
+		} as never)) as StatementsListData & { scope: string | null };
+
+		expect(urls[0]).toBe(`${API}/statements?limit=10&offset=0&contractId=c1`);
+		expect(data.scope).toBe(
+			'Sie sehen die Abrechnungen des Mietvertrags von Anna Keller, Wohnung 2.01 (Ahornhof), Vertragsbeginn 01.04.2024.'
+		);
+	});
+
+	it('zeigt die Liste ohne Satz, wenn der Mietvertrag nicht geladen werden kann', async () => {
+		const fetch = (async (url: string) =>
+			url.endsWith('/contracts/c1')
+				? new Response(null, { status: 404 })
+				: Response.json({ data: [], total: 0 })) as typeof globalThis.fetch;
+
+		const data = (await load({
+			url: new URL('http://localhost/statements?contract=c1'),
+			fetch
+		} as never)) as {
+			scope: string | null;
+		};
+
+		expect(data.scope).toBeNull();
+	});
+
+	it('sagt nichts über die Auswahl, solange kein Mietvertrag gewählt ist', async () => {
+		const fetch = (async () => Response.json({ data: [], total: 0 })) as typeof globalThis.fetch;
+
+		const data = (await load({ url: new URL('http://localhost/statements'), fetch } as never)) as {
+			scope: string | null;
+		};
+
+		expect(data.scope).toBeNull();
 	});
 });

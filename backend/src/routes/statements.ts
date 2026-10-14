@@ -35,6 +35,7 @@ export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 		async ({ query }) => {
 			const { statements, total } = await listStatements({
 				search: query.search,
+				contractId: query.contractId,
 				buildingId: query.buildingId,
 				apartmentId: query.apartmentId,
 				tenantId: query.tenantId,
@@ -55,6 +56,7 @@ export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 		{
 			query: t.Object({
 				search: t.Optional(t.String()),
+				contractId: t.Optional(t.String()),
 				buildingId: t.Optional(t.String()),
 				apartmentId: t.Optional(t.String()),
 				tenantId: t.Optional(t.String()),

@@ -26,7 +26,8 @@
 	const search = $derived(params.get('search') || '');
 	const building = $derived(params.get('building') || '');
 	const status = $derived(params.get('status') || '');
-	const filtered = $derived(!!(search || building || status));
+	const contract = $derived(params.get('contract') || '');
+	const filtered = $derived(!!(search || building || status || contract));
 
 	// Filters and paging live in the URL so the server filters across all statements
 	function linkWith(changes: Record<string, string>): string {
@@ -98,7 +99,16 @@
 		active={status}
 		href={(value) => linkWith({ status: value })}
 	/>
-	<StatementSearch {search} {building} {status} buildings={data.buildings} />
+	<StatementSearch {search} {building} {status} {contract} buildings={data.buildings} />
+
+	{#if data.scope}
+		<p class="text-ink" data-testid="statements-scope">
+			{data.scope}
+			<a href="/statements" class="text-accent underline underline-offset-4"
+				>{m.statements_scope_all()}</a
+			>
+		</p>
+	{/if}
 
 	{#if data.statements.length === 0}
 		<div data-testid="statements-empty">
