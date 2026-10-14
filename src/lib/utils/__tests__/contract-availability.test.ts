@@ -83,24 +83,6 @@ describe('computeAvailability', () => {
 		expect(result.message).toContain('01.04.2026');
 	});
 
-	it('excludes contract by ID when editing', () => {
-		const contracts: ContractForAvailability[] = [
-			{
-				id: 'contract-1',
-				start_date: '2025-06-01',
-				end_date: null,
-				status: 'Aktiv'
-			}
-		];
-
-		const result = computeAvailability(contracts, 'contract-1');
-
-		// Should be available because the only contract is excluded
-		expect(result.isAvailable).toBe(true);
-		expect(result.hasOngoingContract).toBe(false);
-		expect(result.statusType).toBe('available');
-	});
-
 	it('handles multiple contracts and returns latest end date', () => {
 		const contracts: ContractForAvailability[] = [
 			{

@@ -46,6 +46,8 @@ const contractBodySchema = t.Object({
 
 const contractUpdateSchema = t.Partial(
 	t.Object({
+		apartmentId: t.String({ format: 'uuid' }), // only the stored one: a move is a new contract (#152)
+		tenantId: t.String({ format: 'uuid' }),
 		startDate: t.String({ format: 'date' }),
 		endDate: t.Optional(t.Nullable(t.String({ format: 'date' }))),
 		terminated: t.Boolean(),

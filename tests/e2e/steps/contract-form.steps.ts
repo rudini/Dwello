@@ -2,6 +2,7 @@ import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import {
 	apartmentChoiceLabel,
+	apartmentChoices,
 	apartmentHint,
 	apartmentSelectable,
 	chosenApartmentId,
@@ -12,9 +13,13 @@ import {
 	durationChosen,
 	enteredBaseRent,
 	failure,
+	fixedApartmentName,
+	fixedTenantName,
+	partiesHelpText,
 	reviewHint,
 	reviewed,
-	startHint
+	startHint,
+	tenantChoices
 } from '../questions/contract-form';
 import { contractListed } from '../questions/contracts';
 import {
@@ -282,3 +287,25 @@ Then(
 Then('meldet Dwello den Fehler {string}', async ({ verwalter }, message: string) => {
 	await verwalter.sees(failure).toContain(message);
 });
+Then(
+	'nennt der Mietvertrag den Mieter {string} und die Wohnung {string}',
+	async ({ verwalter, names }, tenant: string, number: string) => {
+		await verwalter.sees(fixedTenantName).toBe(names.get(tenant) ?? tenant);
+		await verwalter.sees(fixedApartmentName).toContain(`Wohnung ${number}`);
+	}
+);
+
+// after the names above, so an error page does not pass
+Then('kann der Liegenschaftsverwalter Mieter und Wohnung nicht ändern', async ({ verwalter }) => {
+	await verwalter.sees(tenantChoices).toBe(0);
+	await verwalter.sees(apartmentChoices).toBe(0);
+});
+
+Then(
+	'erfährt der Liegenschaftsverwalter, dass er bei einem Mieterwechsel einen neuen Mietvertrag erfasst',
+	async ({ verwalter }) => {
+		await verwalter.sees(partiesHelpText).toContain('Bei einem Mieterwechsel');
+		// the place where it goes on, not only the rule (code review m-5)
+		await verwalter.sees(partiesHelpText).toContain('mit «Beenden»');
+	}
+);

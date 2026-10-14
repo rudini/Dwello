@@ -350,6 +350,10 @@ export async function updateContract(
 ): Promise<RentalContract | null> {
 	const current = await getContract(id);
 	if (!current) return null;
+	// a move or a Mieterwechsel is a new contract: refused rather than silently dropped (#152)
+	const moved = (data.apartmentId ?? current.apartmentId) !== current.apartmentId;
+	if (moved || (data.tenantId ?? current.tenantId) !== current.tenantId)
+		throw new CodedError('CONTRACT_PARTIES_FIXED', 'Tenant and apartment of a contract cannot be changed');
 	// removing the end withdraws the notice (below), whatever flag comes with it
 	if (data.endDate !== null) checkNotice(data.terminated, data.endDate ?? current.endDate);
 	await checkNewDates(current, data);

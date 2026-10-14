@@ -5,7 +5,6 @@
 	import { tick, untrack } from 'svelte';
 	import { apiCall } from '$lib/api';
 	import {
-		availableFrom,
 		contractBody,
 		forAvailability,
 		initialContractValues,
@@ -20,6 +19,7 @@
 		type RefusedStatement
 	} from '$lib/contract-status';
 	import { wizardLink } from '$lib/statement-wizard';
+	import { formatDate } from '$lib/utils/format';
 	import { backendMessage } from '$lib/backend-error';
 	import { normalizeAmounts, stepErrors } from '$lib/contract-wizard';
 	import { addToast } from '$lib/stores';
@@ -28,40 +28,29 @@
 	import Button from '$lib/ui/Button.svelte';
 	import { focusFirstError } from '$lib/ui/focus-error';
 	import Panel from '$lib/ui/Panel.svelte';
-	import Select from '$lib/ui/Select.svelte';
-	import {
-		computeAvailability,
-		type AvailabilityInfo,
-		type ContractForAvailability
-	} from '$lib/utils/contract-availability';
-	import ApartmentStep from './new/ApartmentStep.svelte';
-	import { retried } from './new/ContractsUnknown.svelte';
+	import type { ContractForAvailability } from '$lib/utils/contract-availability';
+	import ContractsUnknown, { retried } from './new/ContractsUnknown.svelte';
 	import PeriodStep from './new/PeriodStep.svelte';
 	import RentStep from './new/RentStep.svelte';
 	import PastEndConfirm from './PastEndConfirm.svelte';
 	import RefusedStatements from './RefusedStatements.svelte';
 	import NoticeHint from './NoticeHint.svelte';
 
-	// Form of a contract being edited, with the fields, help and checks of the wizard in ./new
+	// Form of a contract being edited, with the fields, help and checks of the wizard in ./new;
+	// tenant and apartment are fixed (#152): a move or a Mieterwechsel is a new contract
 	let {
 		contract,
-		tenants,
-		apartments
-	}: {
-		contract: RentalContract;
-		tenants: { id: string; name: string }[];
-		apartments: { id: string; unit: string; building: string }[];
-	} = $props();
+		tenant,
+		apartment
+	}: { contract: RentalContract; tenant: string; apartment: string } = $props();
 
-	const errorKey: Record<string, string> = { tenant: 'tenantId', apartment: 'apartmentId' };
 	let values = $state(untrack(() => initialContractValues(contract, $page.url.searchParams)));
 	let errors = $state<Record<string, string>>({});
 	let saving = $state(false);
 	let refused = $state<RefusedStatement[]>([]); // statements that refused the last save
-	// the chosen apartment's contracts, for the overlap check: an overlap shows only once they are loaded
+	// the apartment's contracts, for the overlap check: an overlap shows only once they are loaded
 	let contractsState = $state<'loading' | 'loaded' | 'failed'>('loading');
 	let contractsRequest = 0;
-	let availability = $state<Map<string, AvailabilityInfo | null> | null>(null);
 	let apartmentContracts = $state<ContractForAvailability[]>([]);
 	let form = $state<HTMLFormElement>();
 
@@ -71,16 +60,9 @@
 	const running = $derived(
 		contractStatusOn(contract.startDate, contract.endDate, today) === 'active'
 	);
-	// the chosen apartment's contracts could not be loaded, by either request: it is not shown as free (#143)
-	const unknown = $derived(
-		contractsState === 'failed' || availability?.get(values.apartmentId) === null
-	);
-	const startLimit = $derived(
-		availableFrom(
-			unknown ? undefined : availability?.get(values.apartmentId),
-			values.apartmentId !== contract.apartmentId
-		)
-	);
+	// the apartment's contracts could not be loaded: an overlap cannot be ruled out (#143); it stays during a
+	// retry, so «Erneut versuchen» keeps the focus (review b15-merge M-1)
+	let unknown = $state(false);
 	// a changed Vertragsende in the past is confirmed as in «Beenden»; an unchanged one is not asked again
 	const endChanged = $derived(
 		!values.isUnlimited && values.endDate !== (contract.endDate?.slice(0, 10) ?? '')
@@ -88,58 +70,41 @@
 	let confirmedDay = $state('');
 	const overlap = $derived(overlapWarning(values, apartmentContracts, contract.id));
 	const back = $derived(`/contracts/${contract.id}`);
+	const link =
+		'inline-flex min-h-12 items-center font-semibold text-accent underline underline-offset-4 hover:text-accent-strong';
+	// the earliest start of a new contract after this one (YYYY-MM-DD is midnight UTC)
+	const dayAfter = (end: string) =>
+		formatDate(new Date(Date.parse(end.slice(0, 10)) + 86_400_000).toISOString().slice(0, 10));
 	// «Befristet» for a contract saved open-ended: a notice is entered with «Beenden» (Sven K1 M1); a saved notice
 	// always has an end (backend `checkNotice`)
 	const noticeHint = $derived(!contract.endDate && !values.isUnlimited && !values.terminated);
-	const tenantName = $derived(tenants.find((t) => t.id === values.tenantId)?.name ?? '');
 
-	const contractsOf = async (apartmentId: string) =>
-		forAvailability(await apiCall(`/contracts?apartmentId=${apartmentId}`));
-
-	// The contract being edited does not block its own apartment; null when its contracts could not be loaded
-	async function availabilityOf(apartmentId: string) {
-		const own = apartmentId === contract.apartmentId ? contract.id : undefined;
-		const list = await contractsOf(apartmentId);
-		return [apartmentId, list && computeAvailability(list, own)] as const;
-	}
-
-	const loadAvailability = () =>
-		Promise.all(apartments.map((a) => availabilityOf(a.id))).then(
-			(entries) => (availability = new Map(entries))
-		);
-
-	$effect(() => {
-		loadAvailability();
-	});
-
-	// Contracts of the chosen apartment, for the overlap check
-	async function loadChosen(apartmentId: string) {
-		const request = ++contractsRequest; // only the latest answer counts, also after switching back
-		apartmentContracts = []; // the previous apartment's contracts say nothing about this one
-		contractsState = apartmentId ? 'loading' : 'loaded';
-		if (!apartmentId) return;
-		const list = await contractsOf(apartmentId);
-		if (request !== contractsRequest) return;
+	// Contracts of the apartment, for the overlap check
+	async function loadContracts() {
+		const request = ++contractsRequest; // only the latest answer counts
+		contractsState = 'loading';
+		const list = forAvailability(await apiCall(`/contracts?apartmentId=${contract.apartmentId}`));
+		if (request !== contractsRequest) return false;
 		apartmentContracts = list ?? [];
 		contractsState = list ? 'loaded' : 'failed';
+		unknown = !list;
+		return true; // this answer decided
 	}
 
 	$effect(() => {
-		const apartmentId = values.apartmentId;
-		untrack(() => loadChosen(apartmentId));
+		untrack(loadContracts);
 	});
 
-	// «Erneut versuchen»: both requests again, the input stays (#151)
+	// «Erneut versuchen»: the request again, the input stays (#151)
 	async function retry() {
-		await Promise.all([loadAvailability(), loadChosen(values.apartmentId)]);
-		if (contractsState === 'loading') return; // overtaken by a newer request: it decides (review R2-2)
+		if (!(await loadContracts())) return; // overtaken by a newer request: it decides (review R2-2)
 		await tick();
-		retried(unknown, document.getElementById('apartment'));
+		retried(unknown, document.getElementById('startDate'));
 	}
 
 	function edited(event: Event) {
 		const id = (event.target as HTMLElement).id;
-		delete errors[errorKey[id] ?? id];
+		delete errors[id];
 		// the offer belongs to the values refused (review K-2); its message points to it below
 		if (refused.length) delete errors.form;
 		refused = [];
@@ -176,8 +141,8 @@
 		// a withdrawn notice says what changed, not only «gespeichert» (personas J1)
 		const saved =
 			contract.terminated && values.isUnlimited
-				? m.contracts_notice_withdrawn_toast({ name: tenantName })
-				: m.contracts_saved_toast({ name: tenantName });
+				? m.contracts_notice_withdrawn_toast({ name: tenant })
+				: m.contracts_saved_toast({ name: tenant });
 		addToast('success', saved, 10_000);
 		await goto(next);
 	}
@@ -232,26 +197,38 @@
 	{/if}
 
 	<Panel title={m.contracts_tenant_and_apartment()}>
-		<Select
-			id="tenant"
-			label={m.contracts_tenant()}
-			help={m.contracts_tenant_help_short()}
-			options={tenants.map((t) => ({ value: t.id, label: t.name }))}
-			bind:value={values.tenantId}
-			placeholder={m.contracts_choose_tenant()}
-			error={errors.tenantId}
-			testid="contract-tenant-select"
-		/>
-		<ApartmentStep
-			bind:apartmentId={values.apartmentId}
-			{apartments}
-			availability={availability ?? new Map()}
-			loading={!availability}
-			notice={startLimit.notice}
-			{unknown}
-			onretry={retry}
-			error={errors.apartmentId}
-		/>
+		<dl class="flex flex-col gap-4">
+			<div>
+				<dt class="text-ink-muted">{m.contracts_tenant()}</dt>
+				<dd class="text-ink" data-testid="contract-form-tenant">{tenant}</dd>
+			</div>
+			<div>
+				<dt class="text-ink-muted">{m.tenants_apartment()}</dt>
+				<dd class="text-ink" data-testid="contract-form-apartment">{apartment}</dd>
+			</div>
+		</dl>
+		<!-- always present, so screen readers hear the hint when it appears -->
+		<div role="status">
+			{#if unknown}
+				<ContractsUnknown onretry={retry} testid="apartment-contracts-unknown" />
+			{/if}
+		</div>
+		<div class="flex flex-col gap-2 text-ink-muted" data-testid="contract-parties-help">
+			<p>
+				{contract.endDate
+					? m.contracts_parties_fixed_ended({ date: dayAfter(contract.endDate) })
+					: m.contracts_parties_fixed_open()}
+			</p>
+			<p>{m.contracts_parties_fixed_mistake()}</p>
+			<a href={back} class={link} data-testid="contract-parties-link"
+				>{m.contracts_parties_fixed_link({ name: tenant })}</a
+			>
+			{#if contract.endDate}
+				<a href="/contracts/new" class={link} data-testid="contract-parties-new"
+					>{m.contracts_parties_fixed_new()}</a
+				>
+			{/if}
+		</div>
 	</Panel>
 
 	<Panel title={m.contracts_period()}>
@@ -261,7 +238,6 @@
 			bind:isUnlimited={values.isUnlimited}
 			bind:terminated={values.terminated}
 			noticed={contract.terminated}
-			min={startLimit.min}
 			{unknown}
 			today={pastBefore}
 			{overlap}

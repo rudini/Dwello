@@ -6,13 +6,11 @@
 
 	interface PageData {
 		contract: RentalContract;
-		tenants: { id: string; name: string }[];
-		apartments: { id: string; unit: string; building: string; status: string }[];
+		tenant: string;
+		apartment: string;
 	}
 
 	let { data }: { data: PageData } = $props();
-
-	const tenant = $derived(data.tenants.find((t) => t.id === data.contract.tenantId)?.name);
 </script>
 
 <svelte:head>
@@ -27,9 +25,9 @@
 			{ href: '/contracts', label: m.nav_contracts() },
 			{
 				href: `/contracts/${data.contract.id}`,
-				label: tenant ? m.apartments_contract_of({ name: tenant }) : m.contracts_title()
+				label: m.apartments_contract_of({ name: data.tenant })
 			}
 		]}
 	/>
-	<ContractForm contract={data.contract} tenants={data.tenants} apartments={data.apartments} />
+	<ContractForm contract={data.contract} tenant={data.tenant} apartment={data.apartment} />
 </div>

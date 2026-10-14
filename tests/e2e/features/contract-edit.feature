@@ -91,3 +91,9 @@ Funktionalität: Mietvertrag bearbeiten
     Dann ist der Liegenschaftsverwalter im Abrechnungsassistenten für das Gebäude "Ahornhof" und 2025
     Und beginnt der Mietvertrag von "Anna Keller" laut Liste seit "01.05.2025"
     Und findet die Abrechnungsliste keine Abrechnung 2025 von "Anna Keller"
+
+  # B-15 (#152): ein Mieterwechsel oder ein Wechsel der Wohnung ist ein neuer Mietvertrag
+  Szenario: Mieter und Wohnung stehen im Mietvertrag fest
+    Dann nennt der Mietvertrag den Mieter "Anna Keller" und die Wohnung "2.01"
+    Und kann der Liegenschaftsverwalter Mieter und Wohnung nicht ändern
+    Und erfährt der Liegenschaftsverwalter, dass er bei einem Mieterwechsel einen neuen Mietvertrag erfasst

@@ -119,6 +119,11 @@ describe('API-Verträge des Frontends', () => {
 		expect(drift(await sample('fuel-stocks'), actual)).toEqual([]);
 	});
 
+	it('GET /contracts/:id liefert die Felder von contract.json', async () => {
+		const actual = await (await callApi(`/api/v1/contracts/${rental.contract}`)).json();
+		expect(drift(await sample('contract'), actual)).toEqual([]);
+	});
+
 	it('GET /tenants/:id liefert die Felder von tenant.json', async () => {
 		const actual = await (await callApi(`/api/v1/tenants/${rental.tenant}`)).json();
 		expect(drift(await sample('tenant'), actual)).toEqual([]);
