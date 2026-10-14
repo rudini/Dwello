@@ -329,10 +329,10 @@
 			"name": "statements-period",
 			"path": "/statements",
 			"queries": {
-				"list-scoped": "?status=draft&periodStart=2025-01-01&periodEnd=2025-12-31"
+				"default": "?status=draft&periodStart=2025-01-01&periodEnd=2025-12-31"
 			},
 			"states": [
-				"list-scoped"
+				"default"
 			]
 		},
 		{
