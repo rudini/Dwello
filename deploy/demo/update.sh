@@ -16,6 +16,6 @@ git fetch -q origin main
 echo "$(date -Is) updating to $(git log -1 --format='%h %s' origin/main)"
 git merge -q --ff-only origin/main
 docker compose -f docker-compose.prod.yml -f deploy/demo/docker-compose.yml --env-file deploy/demo/.env up -d --build
-docker image prune -f > /dev/null
 git rev-parse HEAD > .git/demo-deployed
+docker image prune -f > /dev/null
 echo "$(date -Is) done"
