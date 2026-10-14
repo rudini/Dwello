@@ -27,9 +27,10 @@ beforeAll(async () => {
 			canton: 'ZH'
 		})
 	).id;
-	for (const number of ['2.01', '2.02', '3.01']) {
+	for (const number of ['2.01', '2.02']) {
 		await createApartment({ buildingId, number, floor: 2, area: '70', rooms: '3.5' });
 	}
+	await createApartment({ buildingId, number: '3.01', floor: 3, area: '70', rooms: '3.5', status: 'reserved' });
 	otherId = (
 		await createBuilding({
 			name: `Birkenweg ${crypto.randomUUID()}`,
@@ -67,6 +68,12 @@ describe('Wohnungssuche', () => {
 	it('findet Wohnungen nach Gebäudename, ohne Gross- und Kleinschreibung', async () => {
 		const result = await search(`search=${encodeURIComponent(name.toUpperCase())}`);
 		expect(result.apartments.map((a) => a.number)).toEqual(['2.01', '2.02', '3.01']);
+	});
+
+	it('lässt sich mit dem Statusfilter kombinieren', async () => {
+		const result = await search(`search=${encodeURIComponent(name)}&status=reserved`);
+		expect(result.apartments.map((a) => a.number)).toEqual(['3.01']);
+		expect(result.total).toBe(1);
 	});
 
 	it('zählt nur die Treffer, auch über mehrere Seiten', async () => {
