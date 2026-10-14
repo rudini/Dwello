@@ -14,7 +14,7 @@ const answers = [
 		answer: {
 			isAllowedUtilityCost: false,
 			confidence: 0.9,
-			reasoning: 'Erhalt und Erneuerung des Gebäudes hängen nicht mit dem Gebrauch zusammen (Art. 257a OR).'
+			reasoning: 'Erhalt und Erneuerung des Gebäudes hängen nicht mit dem Gebrauch zusammen (Art. 257a Abs. 1 OR).'
 		}
 	},
 	{
@@ -22,7 +22,7 @@ const answers = [
 		answer: {
 			isAllowedUtilityCost: true,
 			confidence: 0.9,
-			reasoning: 'Laufende Betriebskosten aus dem Gebrauch der Mietsache (Art. 257b OR).'
+			reasoning: 'Laufende Betriebskosten aus dem Gebrauch der Mietsache (Art. 257b Abs. 1 OR).'
 		}
 	}
 ];

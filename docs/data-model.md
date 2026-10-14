@@ -356,11 +356,11 @@ The IBAN is stored in plain text.
 ### Categories
 
 Allocable (`is_allowed_utility_cost = true`, sort order 1–14): Heizung, Warmwasser, Kaltwasser, Abwasser,
-Allgemeinstrom, Lift, Hauswart, Gartenpflege, Schneeräumung, Kehricht, TV/Kabelanschluss,
-Schädlingsbekämpfung, Feuerlöscher-Wartung, Kaminfeger.
+Allgemeinstrom, Lift, Hauswart, Gartenpflege, Schneeräumung, Kehricht, TV/Kabelanschluss, Kaminfeger.
 
-Not allocable (`false`, sort order 100–106): Reparaturen, Gebäudeversicherung, Liegenschaftssteuer,
-Hypothekarzinsen, Verwaltung, Renovation, Wertvermehrende Investitionen. The management effort is billed
+Not allocable (`false`, sort order 100–108): Reparaturen, Gebäudeversicherung, Liegenschaftssteuer,
+Hypothekarzinsen, Verwaltung, Renovation, Wertvermehrende Investitionen, Schädlingsbekämpfung,
+Feuerlöscher-Wartung (#176). `allocable-categories.pg.test.ts` pins every seeded category's flag. The management effort is billed
 through the Verwaltungspauschale, not through invoices in Verwaltung.
 
 ### Distribution keys (all `predefined`)

@@ -14,17 +14,15 @@
 INSERT INTO categories (name, name_de, name_fr, name_it, name_en, is_allowed_utility_cost, is_heating_cost, description, sort_order) VALUES
 ('Heating', 'Heizung', 'Chauffage', 'Riscaldamento', 'Heating', true, true, 'Kosten für das Heizen des Gebäudes', 1),
 ('Hot Water', 'Warmwasser', 'Eau chaude', 'Acqua calda', 'Hot Water', true, false, 'Kosten für die Aufbereitung von Warmwasser', 2),
-('Cold Water', 'Kaltwasser', 'Eau froide', 'Acqua fredda', 'Cold Water', true, false, 'Kosten für die Versorgung mit Kaltwasser', 3),
-('Wastewater', 'Abwasser', 'Eaux usées', 'Acque reflue', 'Wastewater', true, false, 'Abwasser und Kanalisation', 4),
+('Cold Water', 'Kaltwasser', 'Eau froide', 'Acqua fredda', 'Cold Water', true, false, 'Wasser nach Verbrauch; ohne Grundgebühren, die vom Wert der Liegenschaft abhängen', 3),
+('Wastewater', 'Abwasser', 'Eaux usées', 'Acque reflue', 'Wastewater', true, false, 'Verbrauchsgebühr für Abwasser; ohne Meteorabwasser und Grundgebühren, die vom Wert der Liegenschaft abhängen', 4),
 ('Electricity Common Areas', 'Allgemeinstrom', 'Électricité parties communes', 'Elettricità parti comuni', 'Common Area Electricity', true, false, 'Strom für Treppenhaus, Keller, Garage und Aussenbeleuchtung', 5),
-('Elevator', 'Lift', 'Ascenseur', 'Ascensore', 'Elevator', true, false, 'Betrieb und Wartung des Lifts', 6),
-('Caretaker', 'Hauswart', 'Concierge', 'Portiere', 'Caretaker', true, false, 'Lohn und Leistungen des Hauswarts', 7),
+('Elevator', 'Lift', 'Ascenseur', 'Ascensore', 'Elevator', true, false, 'Strom, Notruftelefon und reine Wartung des Lifts; ohne Reparaturen, Ersatzteile und Serviceabos mit Reparaturen', 6),
+('Caretaker', 'Hauswart', 'Concierge', 'Portiere', 'Caretaker', true, false, 'Lohn für Reinigung, Bedienung der Heizung und kleine Instandhaltung; ohne Verwaltung, Wohnungsübergaben und Reparaturen', 7),
 ('Garden Maintenance', 'Gartenpflege', 'Entretien jardin', 'Manutenzione giardino', 'Garden Maintenance', true, false, 'Pflege von Garten und Umgebung', 8),
 ('Snow Removal', 'Schneeräumung', 'Déneigement', 'Sgombero neve', 'Snow Removal', true, false, 'Schneeräumung und Glatteisbekämpfung', 9),
 ('Waste Disposal', 'Kehricht', 'Ordures', 'Rifiuti', 'Waste Disposal', true, false, 'Kehrichtabfuhr und Entsorgung', 10),
 ('TV/Cable', 'TV/Kabelanschluss', 'TV/Câble', 'TV/Cavo', 'TV/Cable', true, false, 'Gebühren für den Kabelanschluss', 11),
-('Pest Control', 'Schädlingsbekämpfung', 'Lutte antiparasitaire', 'Controllo dei parassiti', 'Pest Control', true, false, 'Schädlingsbekämpfung', 12),
-('Fire Extinguisher Maintenance', 'Feuerlöscher-Wartung', 'Entretien extincteurs', 'Manutenzione estintori', 'Fire Extinguisher', true, false, 'Wartung der Feuerlöscher und Brandschutzeinrichtungen', 13),
 ('Chimney Sweep', 'Kaminfeger', 'Ramoneur', 'Spazzacamino', 'Chimney Sweep', true, true, 'Reinigung und Kontrolle von Kamin und Heizanlage', 14);
 
 -- Not allowed as utility costs (Nebenkosten - nicht zulässig)
@@ -35,7 +33,10 @@ INSERT INTO categories (name, name_de, name_fr, name_it, name_en, is_allowed_uti
 ('Mortgage Interest', 'Hypothekarzinsen', 'Intérêts hypothécaires', 'Interessi ipotecari', 'Mortgage Interest', false, false, 'Hypothekar- und Finanzierungskosten', 103),
 ('Administration', 'Verwaltung', 'Administration', 'Amministrazione', 'Administration', false, false, 'Allgemeine Verwaltungskosten (ohne Verwaltungspauschale)', 104),
 ('Renovation', 'Renovation', 'Rénovation', 'Ristrutturazione', 'Renovation', false, false, 'Grössere Renovationen', 105),
-('Capital Improvements', 'Wertvermehrende Investitionen', 'Investissements valorisants', 'Investimenti di valorizzazione', 'Capital Improvements', false, false, 'Wertvermehrende Investitionen', 106);
+('Capital Improvements', 'Wertvermehrende Investitionen', 'Investissements valorisants', 'Investimenti di valorizzazione', 'Capital Improvements', false, false, 'Wertvermehrende Investitionen', 106),
+-- Preserve the building, needed even when it stands empty: not linked to its use (Art. 257a Abs. 1 OR, #176)
+('Pest Control', 'Schädlingsbekämpfung', 'Lutte antiparasitaire', 'Controllo dei parassiti', 'Pest Control', false, false, 'Schädlingsbekämpfung (trägt der Vermieter)', 107),
+('Fire Extinguisher Maintenance', 'Feuerlöscher-Wartung', 'Entretien extincteurs', 'Manutenzione estintori', 'Fire Extinguisher', false, false, 'Wartung der Feuerlöscher und Brandschutzeinrichtungen (trägt der Vermieter)', 108);
 
 -- ============================================================================
 -- Distribution Keys

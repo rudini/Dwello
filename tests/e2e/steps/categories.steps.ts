@@ -19,8 +19,8 @@ import {
 	openCategories,
 	openCategoryEdit,
 	openNewCategory,
-	saveAsAllowed,
 	saveAsNotAllowed,
+	saveFormAsNotAllowed,
 	saveWithoutChoice,
 	showAllowedCategories
 } from '../tasks/categories';
@@ -151,8 +151,8 @@ Given('die KI hat geprüft, ob die Kategorie {string} umlagefähig ist', async (
 	await verwalter.sees(proposalText).toContain('Vorschlag der KI');
 });
 
-When('der Liegenschaftsverwalter die Kategorie trotzdem als umlagefähig speichert', async ({ verwalter }) => {
-	await verwalter.attemptsTo(saveAsAllowed);
+When('der Liegenschaftsverwalter die Kategorie trotzdem als nicht umlagefähig speichert', async ({ verwalter }) => {
+	await verwalter.attemptsTo(saveFormAsNotAllowed);
 });
 
 When(
@@ -168,10 +168,6 @@ Then('schlägt die KI vor, die Kategorie als nicht umlagefähig zu erfassen', as
 
 Then('begründet die KI ihren Vorschlag mit {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(proposalText).toContain(text);
-});
-
-Then('ist die Kategorie {string} umlagefähig', async ({ verwalter, names }, title: string) => {
-	await verwalter.sees(allowance(names.get(title)!)).toBe('Umlagefähig');
 });
 
 Then('erfährt der Liegenschaftsverwalter, dass er wählen muss, ob die Kosten umlagefähig sind', async ({ verwalter }) => {

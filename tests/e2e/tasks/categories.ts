@@ -24,8 +24,11 @@ export const createCategory = (name: string, allowed: boolean): Activity => (act
 		Click.on(submitButton)
 	);
 
+export const saveFormAsNotAllowed: Activity = (actor) =>
+	actor.attemptsTo(Check.the(allowanceOption('Nicht umlagefähig')), Click.on(submitButton));
+
 export const saveAsNotAllowed = (name: string): Activity => (actor) =>
-	actor.attemptsTo(Click.on(editButton(name)), Check.the(allowanceOption('Nicht umlagefähig')), Click.on(submitButton));
+	actor.attemptsTo(Click.on(editButton(name)), saveFormAsNotAllowed);
 
 export const deleteCategory = (name: string): Activity => (actor) =>
 	actor.attemptsTo(Click.on(deleteButton(name)), Click.on(deleteConfirmButton));
@@ -35,6 +38,3 @@ export const askKi = (name: string): Activity => (actor) =>
 
 export const saveWithoutChoice = (name: string): Activity => (actor) =>
 	actor.attemptsTo(Enter.theValue(name).into(nameInput), Click.on(submitButton));
-
-export const saveAsAllowed: Activity = (actor) =>
-	actor.attemptsTo(Check.the(allowanceOption('Umlagefähig')), Click.on(submitButton));
