@@ -175,14 +175,10 @@ describe('apartmentOption', () => {
 
 describe('availableFrom', () => {
 	it('limits the start to the day the chosen apartment becomes free', () => {
-		expect(availableFrom(freeFrom('2025-04-01'), true)).toEqual({
+		expect(availableFrom(freeFrom('2025-04-01'))).toEqual({
 			min: '2025-04-01',
 			notice: 'Verfügbar ab 2025-04-01'
 		});
-	});
-
-	it('does not limit the edited contract on its own apartment', () => {
-		expect(availableFrom(freeFrom('2025-04-01'), false)).toEqual({ min: undefined, notice: null });
 	});
 });
 

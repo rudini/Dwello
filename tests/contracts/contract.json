@@ -1,0 +1,14 @@
+{
+	"id": "c1",
+	"apartmentId": "a1",
+	"tenantId": "t1",
+	"startDate": "2024-04-01",
+	"endDate": "2099-03-31",
+	"terminated": true,
+	"baseRent": "950.00",
+	"additionalRent": "0.00",
+	"monthlyAdvancePayment": "150.00",
+	"tenant": { "id": "t1", "firstName": "Anna", "lastName": "Keller" },
+	"apartment": { "id": "a1", "number": "2.01" },
+	"building": { "id": "b1", "name": "Ahornhof", "address": "Ahornweg 1" }
+}

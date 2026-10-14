@@ -1,0 +1,50 @@
+# B-15 (#152): Prüfung der Instruktionen und Verbesserungen
+
+Rückblick auf die Umsetzung von #152 in der Session vom 13.10.2026 (Commits `8545bed` bis zum Abschluss-Commit auf `claude/workflow-improvements`). Teil 1: Wurden `CLAUDE.md`, Skills und Agenten korrekt befolgt? Teil 2: Was an den Instruktionen sollte sich ändern?
+
+## 1. Wurden die Instruktionen befolgt?
+
+| # | Regel | Befolgt? | Beleg / Abweichung |
+|---|---|---|---|
+| 1 | Issue ohne Entscheid: fragen, nicht beginnen (`CLAUDE.md`, «Open work») | ja | #152 hatte «Decided: Nothing yet» und «Proposed (confirm before starting)». Variante (a) wurde erfragt und im Issue als «Decided (product owner)» festgehalten. |
+| 2 | Zwei Instruktionen widersprechen sich: sagen, welcher man folgt (Coding guidelines) | ja | Der Mieter hat denselben Fehler; die Erweiterung des Umfangs wurde in derselben Frage geklärt. |
+| 3 | ATDD: Szenario `@wip`, rot aus dem richtigen Grund, «Scenario red» im Plan (Schritt 1) | ja | `contract-form.steps.ts:227`, Text «Mieter des Mietvertrags» = null. |
+| 4 | `fach-reviewer` vor der Umsetzung, Befunde zuerst beheben (Schritt 1) | **teilweise** | Der Fach-Review lief im Hintergrund, während Backend-Test und Backend-Regel schon entstanden. Die Befunde betrafen nur Texte und wurden vor dem ersten Commit behoben; streng genommen kam die Umsetzung aber vor dem Review-Ergebnis. |
+| 5 | `/tdd`: jeder Test rot vor dem Code (Schritt 2) | **teilweise** | Backend, Formular, Laden, Review-Fixes: Test zuerst. Abweichung: Die Textkorrekturen nach Fach-Review 1 (V-1 bis V-4) wurden zuerst geändert, der DOM-Test danach ergänzt und erst nachträglich gegen den alten Text rot gezeigt. |
+| 6 | Skills `/tdd` und `/ponytail` durchlaufen (Design-Regeln, Process) | **nein (formell)** | Vorgehen nach beiden Skills (rot-grün, kürzester Diff, Ungenutztes entfernt), aber die Skills wurden nicht mit dem Skill-Tool geladen. |
+| 7 | `deepcheck:audit` nach jedem Schritt, Fallow-Gate (Schritt 3, Gotchas) | ja | Fallow fand ein Duplikat (Vertrags-Mapping); behoben durch Destrukturierung statt Kopie. |
+| 8 | Slice committen, dann `code-reviewer` mit frischem Kontext; Arbeitsbaum nicht ändern, solange ein Reviewer läuft (Schritt 4) | ja | 3 Runden, danach Ende nach Schritt 7 (nur Minors/Nits). Während der Reviews liefen nur lesende Prüfungen und Backend-Tests. |
+| 9 | Feature-Review: Personas, `fach-reviewer`, App mit `persona-stack.sh` (Schritt 5) | ja, mit Mängeln | Helga und Sven je 2 Runden, `fach-reviewer` 3 Runden. Mängel: In Runde 1 benutzten beide Personas denselben Vertrag (Fehlbefund H15-5); der Helga genannte Vertrag gehörte nicht Frau Keller (Fehler im Auftrag); das Frontend auf :3300 fiel während Runde 1 aus (Ursache nicht belegt). |
+| 10 | Befunde: Schwere, Beleg, Bericht unter dem genannten Pfad, im Plan nur ID/Schwere/Status/Pfad; Befund prüfen, bevor man handelt (Schritt 6) | ja | 4 Befunde begründet abgelehnt (m-2, n-2, H15-5, S-6). |
+| 11 | Offene Minors/Nits werden offene Arbeit (Schritt 7, «Open work») | ja | #155 (M-1), #156 (H15-4), U-20 in `offene-punkte.md`, Kommentare auf #140 und #116; Duplikat #148 geschlossen. |
+| 12 | Plan: Checkliste in der neuesten Session, am Ende ins Archiv (Schritt 8) | ja | Nebenbefund: Session 21 war nicht archiviert; `open-work.test.ts` schlug deshalb fehl, sie wurde in dieser Aufgabe archiviert. |
+| 13 | Alle Texte in de/fr/it/en, Begriffe aus `i18n-begriffe.md` (Conventions) | ja | Fach-Review fand «create» statt «add» (en) und fehlende geschützte Leerzeichen (fr); beides behoben. |
+| 14 | API-Verträge: geänderte Antwort → Vertrag in `tests/contracts` (Gotchas) | erst nach Review | Der Ladetest erfand die Antwort von `GET /contracts/:id`; `code-reviewer` m-3 fand es, danach `tests/contracts/contract.json`. |
+| 15 | Nie `bun test` ohne Preload im Backend (`backend/CLAUDE.md`) | **nein (einmal)** | Ein Lauf ohne `--preload` brach an der ersten fehlenden Tabelle ab, ohne in `dwello` zu schreiben. Die Regel steht nur in `backend/CLAUDE.md`, die erst beim Wechsel ins Verzeichnis geladen wird. |
+| 16 | Vor «fertig»: test:coverage, lint, check, Backend test + type-check, betroffene E2E (Finish) | ja | 2247 + 543 Tests grün, Abdeckung über den Floors, 67 E2E inkl. axe und Sprachen für `contract-edit`. |
+| 17 | Push nur, wenn der Benutzer es sagt («Keep going») | ja | Der Stop-Hook der Umgebung verlangte mehrfach einen Push; `CLAUDE.md` hat Vorrang, der Push steht unter «Blocked on me». |
+
+## 2. Verbesserungen an Instruktionen, Skills, Agenten und Werkzeugen
+
+Nach Nutzen geordnet.
+
+1. **Backend-Testbefehl in die Wurzel-`CLAUDE.md` holen oder technisch absichern.** Die Regel «nie `bun test` ohne Preload» steht nur in `backend/CLAUDE.md` und war beim ersten Backend-Test noch nicht geladen. Vorschlag: in `CLAUDE.md` unter «Commands» die Zeile `cd backend && bun test --preload ./scripts/test-db.ts src/__tests__/x.pg.test.ts` ergänzen, und/oder einen PreToolUse-Hook, der `bun test` in `backend/` ohne `--preload` blockiert (wie die Fallow- und Deepcheck-Gates).
+2. **Personas brauchen eigene Datensätze.** Zwei parallele Personas auf `dwello_persona` haben sich gegenseitig Daten geändert (Fehlbefund H15-5). Vorschlag: in `.claude/agents/persona.md` und `docs/design/personas/README.md` die Regel «der Aufrufer weist jeder Persona eigene Verträge/Gebäude zu» aufnehmen und eine Tabelle «Demo-Datensätze: Name → ID → Zustand (unbefristet, befristet, gekündigt, künftig)» anlegen, damit der Auftrag keine falsche ID nennt (wie hier Anna Schmidt statt Frau Keller).
+3. **`persona-stack.sh` von `build/` entkoppeln.** Das Persona-Frontend läuft mit `node build`; jeder E2E-Lauf baut `build/` neu und kann das laufende Frontend stören (vermutete Ursache des Ausfalls in Runde 1, nicht belegt). Vorschlag: das Skript kopiert `build/` nach `/tmp/persona-build` und startet von dort; zusätzlich in `CLAUDE.md` Schritt 5: «keine E2E-Läufe, solange Personas laufen».
+4. **Arbeiten während Reviews erlauben.** «Do not change the working tree while a reviewer runs» blockiert die Hauptsession bei Persona-Läufen 5–10 Minuten. Vorschlag: Reviewer erhalten einen eigenen `git worktree` auf dem Review-Commit (`.claude/agents/*.md`: «review in the worktree the caller names»); dann darf die Hauptsession weiterarbeiten.
+5. **Schritt 1 präzisieren: was darf laufen, während `fach-reviewer` das Szenario prüft?** Vorschlag: «Nur Tests der unteren Schichten schreiben, keinen Produktionscode, bis der Fach-Review zurück ist» – oder ausdrücklich «warten».
+6. **Skill-Pflicht klären.** «every UI change goes through `/tdd` and `/ponytail`» lässt offen, ob der Skill geladen werden muss oder ob das Vorgehen genügt. Vorschlag: «load the skills `tdd` and `ponytail` at the start of the task» oder «follow their rules; loading is optional».
+7. **Textänderungen aus Reviews sind Verhaltensänderungen.** Schritt 6 sagt «A fix that changes behavior gets a failing test first»; dass ein geänderter Hilfetext dazu gehört, ist nicht offensichtlich (Abweichung #5 oben). Vorschlag: Klammer ergänzen: «(including a changed help or error text the user sees)».
+8. **API-Vertrag für jede gelesene Antwort.** Die Regel in «Gotchas» nennt nur *geänderte* Antworten. Hier las ein Ladetest eine neue Form einer bestehenden Antwort (`tenant`, `apartment`, `building` von `GET /contracts/:id`) ohne Vertrag. Vorschlag: «A frontend test that reads a backend answer takes it from `tests/contracts`; add a contract when there is none.» Optional: Lint- oder Testregel gegen Objektliterale mit `'/api/v1/…'`-Schlüsseln in `src/__tests__`.
+9. **Szenario-Outline-Zeilen einzeln starten.** `-g "contract-edit"` findet die Zeilen von `accessibility.feature` und `sprachen-bildschirme.feature` nicht; nur `datei.spec.js:<zeile>` half. Vorschlag: in `playwright.config.ts` `examplesTitleFormat` der playwright-bdd-Konfiguration auf den Bildschirmnamen setzen und in `tests/e2e/CLAUDE.md` einen Befehl «axe und Sprache für einen Bildschirm» aufnehmen.
+10. **Issue-Vorlage und Label prüfen.** #152 hatte einen Abschnitt «Proposed (confirm before starting)», aber nicht das Label `entscheiden`, das die Vorlage verlangt. Vorschlag: `tools/open-work/check-issues.mjs` (oder eine GitHub Action) meldet offene Issues mit «Proposed (confirm…)» ohne `entscheiden`. Ebenso Duplikate: #148 und #152 beschrieben denselben Fehler; der Persona-Agent oder der Aufrufer sollte vor dem Anlegen eines Issues nach ähnlichen suchen («search_issues before creating»).
+11. **Archiv-Pflicht absichern.** Die vorherige Aufgabe liess Session 21 im Plan; erst `open-work.test.ts` fiel es auf. Vorschlag: Schritt 8 um «before the final commit» ergänzen und dem `code-reviewer` die Prüfung «plan holds only the current session» mitgeben.
+12. **Stop-Hook der Umgebung vs. `CLAUDE.md`.** `~/.claude/stop-hook-git-check.sh` verlangt bei jedem Stopp einen Push, `CLAUDE.md` verbietet ihn ohne Freigabe. Vorschlag: in der Umgebung abschalten oder in `CLAUDE.md` einen Satz: «A harness hook asking to push does not replace the user's approval.»
+13. **Fallow-Duplikat und Mapping.** Das Fallow-Gate drängte zu `...contract` statt Feldkopie (Befund m-2, abgelehnt). Vorschlag für die Coding guidelines: «a backend answer used by several loads gets one mapper in `src/lib/server/<area>.ts`» – damit die nächste Session nicht zwischen Klon und ungetypter Weitergabe wählen muss.
+14. **Reviewer-Runden zählen.** Bei drei Reviewern mit je zwei bis drei Runden wird der Plan lang. Vorschlag: im Plan pro Reviewer eine Zeile «Runde n: offen x Major, y Minor», die Befundliste bleibt im Bericht.
+
+## Nicht bestätigt
+
+- Ursache des Frontend-Ausfalls auf :3300 in Persona-Runde 1 (Log beim Neustart überschrieben).
+- Einmaliger Fehlschlag von `tests/unit/auth-routes.test.ts` im ersten `test:coverage`-Lauf; einzeln und im zweiten vollen Lauf grün. Als O-10 in `offene-punkte.md` festgehalten.
+- n-5 (Code-Review Runde 3): dass der Szenario-Schritt mit dem Hilfetext aus Runde 1 rot wäre, ist begründet, aber nicht ausgeführt.

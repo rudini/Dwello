@@ -5401,3 +5401,64 @@ Findings:
 - O-4 stop and keep-going rules in several places - Minor - rejected: the new sentences sit in the existing paragraph and in step 7, where «done» is defined; moving the older rules is outside the request
 - O-5 which ponytail skills are required - Minor - fixed (`ponytail` while writing, `ponytail-review` on the diff)
 - O-6 an earlier Major under «Blocked on me» waits on nobody - Nit - rejected: the closing headings list new issues and rows under «Blocked on me» (slice 3 review C-1)
+
+## Session 26 - October 2026: B-15 (#152) tenant and apartment of a contract are fixed
+
+Decided by the product owner in the chat of 13.10.2026: variant (a), for the tenant too (same defect).
+
+- [x] Plan and decision recorded in #152
+- [x] Scenario `@wip` in `tests/e2e/features/contract-edit.feature`, red for the right reason (Scenario red: `contract-form.steps.ts:227` text of «Mieter des Mietvertrags» is null: the page still offers a choice)
+- [x] `fach-reviewer` on scenario and new copy (domain terms)
+- [x] Backend: PUT with another tenant or apartment refused with code `CONTRACT_PARTIES_FIXED` (`contract-parties.pg.test.ts` first)
+- [x] Form shows tenant and apartment as text with help, no choice (DOM test first); load reads names from the contract
+- [x] Remove what became unused (apartment switching, availability map, `availableFrom` flag, `contracts_tenant_help_short`)
+- [x] Messages in de/fr/it/en; `docs/api-specification.md`
+- [x] Duplicate #148 closed; open work #155 (M-1), comments on #140 («Mieterwechsel») and #116 (started contract entered by mistake)
+- [x] Slice review `code-reviewer` round 1 (`docs/reviews/b15-review-1.md`)
+- [x] Feature review round 1: personas Helga, Sven; `fach-reviewer` round 2
+- [x] Fixes from the reviews (tests first): page intro, help by contract state with link, separator «·», backend text, API contract `contract.json`, unused `excludeContractId`
+- [x] Re-review of the delta: `code-reviewer` round 2, personas Helga and Sven round 2, `fach-reviewer` round 3: no Blocker/Major open
+- [x] Fixes from round 2 (tests first): earliest date and change of apartment in the help, link names, link «Neuen Mietvertrag erfassen», scenario checks «Beenden», backend text, fr spaces
+- [ ] Finish: test:coverage, lint, check, backend test + type-check, E2E contract scenarios, a11y/language checks of the edit screen
+- [x] `code-reviewer` round 3: no Blocker/Major; review of the slice ended (step 7)
+- [x] Brought onto `main` after PR #150 had been merged: the B-15 changes applied once to `origin/main` and merged with the B-13 fix (#143, #151) in `ContractForm.svelte`: the «nicht geladen» hint with «Erneut versuchen» stays under «Mieter und Wohnung», the focus after loading goes to the Vertragsbeginn; #151 DOM tests adapted, the two tests of a chosen apartment removed; U-19 removed (no `loadAvailability` any more, the one request has a counter); open-work IDs renamed U-20, H-21
+- [x] Review of how the instructions were followed; list of improvements to instructions and skills (`docs/reviews/b15-instruktionen-pruefung.md`)
+
+Findings:
+- V-1 Major: help named no path for a contract entered with the wrong tenant or apartment - fixed for a contract not yet started; started contracts wait for #116 (commented) - `docs/reviews/b15-fachreview-1.md`
+- V-2 Minor: «beenden» although «Beenden» shows only without Vertragsende - fixed («geben Sie … ein Vertragsende») - same report
+- M-1 Minor: contracts that continue by law (death, Art. 263 OR, Art. 121 ZGB) - open work #155 - same report
+- V-3 Minor: scenario did not check the help - fixed - same report
+- V-4 Nit: en «create» instead of «add» - fixed - same report
+- V-5 Nit: #148 still open - fixed (closed as duplicate of #152) - same report
+- V-6 Minor: «falsch erfasst» reads like a typo in the name - fixed - `docs/reviews/b15-fachreview-2.md`
+- m-1 Minor: `excludeContractId` unused - fixed - `docs/reviews/b15-review-1.md`
+- m-2 Minor: whole backend row passed to the page - rejected: the landlord's own contract on the landlord's own page; the field-by-field copy was the clone fallow flagged - same report
+- m-3 Minor: `GET /contracts/:id` answer invented in the test - fixed (`tests/contracts/contract.json`, checked in `api-contracts.pg.test.ts`) - same report
+- m-4 Minor: backend text still «Beenden Sie» - fixed - same report
+- n-1 Nit: long line - fixed - same report
+- n-2 Nit: scenario checks only the apartment number - rejected: the building part is covered by the load test - same report
+- n-3 Nit: fallback to the building address untested - fixed - same report
+- S-1 / H15-1 Major: page intro offers tenant and apartment - fixed - `docs/design/personas/sven-b15.md`, `helga-b15.md`
+- H15-2 Major / S-2 Minor: help names no place to go - fixed (text by contract state, link to the contract page) - same reports
+- H15-3 Minor, S-3 Minor, S-4 Nit, S-7 Nit: open work U-20 in `docs/design/offene-punkte.md` - same reports
+- H15-4 Minor: «Nächste Schritte» do not fit a move - open work #156 - `helga-b15.md`
+- H15-5 Minor: rent changed after «Beenden» - rejected: Sven's run changed it on the same contract (his report) - `helga-b15.md`
+- S-5 / H15-6 Nit: «-» instead of «·» - fixed - same reports
+- S-6 Nit: tenant and apartment are not links - rejected: the form now links to the contract page; more links would lead away from unsaved changes - `sven-b15.md`
+- m-5 Minor: scenario passed with the old help - fixed (checks «mit «Beenden»») - `docs/reviews/b15-review-2.md`
+- N-3 Minor / n-4 Nit: links leave the form without asking - open work U-20 (as «Abbrechen» today) - `docs/design/personas/sven-b15-2.md`, `b15-review-2.md`
+- N-1 Minor / H15-8 Minor / V-7 Minor / V-8 Minor: help with a Vertragsende names no date, not «frühestens», no path for an earlier end, rule also for another apartment - fixed - `sven-b15-2.md`, `helga-b15-2.md`, `docs/reviews/b15-fachreview-3.md`
+- H15-7 Minor: no link to add the new contract - fixed («Neuen Mietvertrag erfassen») - `helga-b15-2.md`
+- N-2 Nit: link name without the tenant - fixed - `sven-b15-2.md`
+- V-9 Nit: backend text without the Vertragsende step - fixed - `b15-fachreview-3.md`
+- V-10 Nit: fr guillemets without non-breaking spaces - fixed - same report
+- H15-9 Nit, H15-10 Nit: wizard separator, toast at 150 % - open work U-20 - `helga-b15-2.md`
+- m-6 Minor: «Neuen Mietvertrag erfassen» also shown before «Beenden» - fixed (only with a Vertragsende; after «Beenden» see #156) - `docs/reviews/b15-review-3.md`
+- m-7 Minor: earliest date and links only in the DOM test - rejected: the scenario holds the rule, the variants are cheaper and exact one layer down (`docs/test-pyramid.md`) - same report
+- n-5 Nit: no «Scenario red» for the m-5 check - noted: not run red; the round-1 help lacked «mit «Beenden»», so the step would fail on it (reasoned by `b15-review-3.md`, not run) - same report
+- n-6 Nit: day-after computed inline a third time - open work H-21 - same report
+- n-7 Nit: backend text asks for a Vertragsende the contract may have - rejected: reached only by a stale page or a direct API call - same report
+- Flaky `auth-routes.test.ts` once in `test:coverage` - open work O-10
+
+Files changed: `backend/src/routes/contracts.ts`, `backend/src/services/contract.service.ts`, `backend/src/__tests__/contract-parties.pg.test.ts`, `src/routes/contracts/ContractForm.svelte`, `src/routes/contracts/[id]/edit/+page.server.ts`, `src/routes/contracts/[id]/edit/+page.svelte`, `src/routes/contracts/new/ContractWizard.svelte`, `src/lib/contract-form.ts`, `messages/{de,fr,it,en}.json`, `docs/api-specification.md`, tests (`contract-edit*.test.ts`, `contract-form.test.ts`, `tests/e2e/…/contract-form.ts`, `contract-edit.feature`)

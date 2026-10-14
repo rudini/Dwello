@@ -30,11 +30,8 @@ const contract = (endDate: string | null = null, terminated = false) => ({
 });
 const data = (endDate: string | null = null, terminated = false) => ({
 	contract: contract(endDate, terminated),
-	tenants: [{ id: 't1', name: 'Anna Keller' }],
-	apartments: [
-		{ id: 'a1', unit: '2.01', building: 'Ahornhof', status: 'Vermietet' },
-		{ id: 'a2', unit: '2.02', building: 'Ahornhof', status: 'Leer' }
-	]
+	tenant: 'Anna Keller',
+	apartment: 'Wohnung 2.01 · Ahornhof'
 });
 
 let calls: ReturnType<typeof fakeBff>;
@@ -110,25 +107,64 @@ describe('Mietvertrag bearbeiten', () => {
 		expect(document.body.textContent).toContain('Laufender Mietvertrag');
 	});
 
+	// B-15 (#152): eine Änderung ging still verloren; ein Mieterwechsel oder Umzug ist ein neuer Mietvertrag
+	it('nennt Mieter und Wohnung, ohne sie zur Auswahl anzubieten', async () => {
+		await open();
+		expect(byTestId('contract-form-tenant')!.textContent).toBe('Anna Keller');
+		expect(byTestId('contract-form-apartment')!.textContent).toBe('Wohnung 2.01 · Ahornhof');
+		expect(byTestId('contract-tenant-select')).toBeNull();
+		expect(byTestId('apartment-select')).toBeNull();
+		// Personas S-1, H15-1: die Einleitung bietet nicht an, was das Formular nicht kann
+		expect(document.body.textContent).toContain(
+			'Ändern Sie Vertragsdauer oder Miete dieses Mietvertrags.'
+		);
+	});
+
+	// Persona H15-2: die Hilfe nennt den Ort, an dem es weitergeht
+	it('führt bei einem unbefristeten Mietvertrag zu «Beenden» auf der Seite des Mietvertrags', async () => {
+		await open();
+		const help = byTestId('contract-parties-help')!.textContent!;
+		expect(help).toContain('Mieter und Wohnung lassen sich nicht ändern.');
+		expect(help).toContain('mit «Beenden»');
+		// Fachreview V-1, V-6: ein Erfassungsfehler ist kein Mieterwechsel
+		expect(help).toContain(
+			'Haben Sie den falschen Mieter oder die falsche Wohnung gewählt und hat der Mietvertrag noch nicht begonnen'
+		);
+		// Persona Sven N-2: der Link nennt den Mietvertrag wie die anderen Links zur selben Seite
+		expect(byTestId('contract-parties-link')!.textContent).toBe(
+			'Zur Seite des Mietvertrags von Anna Keller'
+		);
+		expect(byTestId('contract-parties-link')!.getAttribute('href')).toBe('/contracts/c1');
+		// Code-Review m-6: zuerst «Beenden», dann der neue Mietvertrag (dazu #156)
+		expect(byTestId('contract-parties-new')).toBeNull();
+	});
+
+	// Fachreview V-2: mit Vertragsende gibt es kein «Beenden» mehr
+	it('nennt bei einem Mietvertrag mit Vertragsende den frühesten Tag des neuen Mietvertrags', async () => {
+		await open('2099-03-31');
+		const help = byTestId('contract-parties-help')!.textContent!;
+		// Personas N-1, H15-8; Fachreview V-7, V-8: frühestens, mit Datum, und nicht für eine andere Wohnung
+		expect(help).toContain(
+			'Bei einem Mieterwechsel erfassen Sie einen neuen Mietvertrag, frühestens ab 01.04.2099.'
+		);
+		expect(help).toContain(
+			'Bei einem Wechsel der Wohnung erfassen Sie einen neuen Mietvertrag für die andere Wohnung.'
+		);
+		expect(help).toContain('ändern Sie zuerst unten unter «Vertragsdauer» das Vertragsende.');
+		expect(help).not.toContain('«Beenden»');
+		// Persona H15-7: der neue Mietvertrag ist einen Klick entfernt
+		expect(byTestId('contract-parties-new')!.getAttribute('href')).toBe('/contracts/new');
+	});
+
 	it('kehrt beim Abbrechen zum Mietvertrag zurück', async () => {
 		await open();
 		expect(byTestId('form-cancel')!.getAttribute('href')).toBe('/contracts/c1');
 	});
 
-	// Fehler behoben (#143): ohne ihre Mietverträge galt die Wohnung als frei, der Vertragsbeginn ohne Untergrenze
-	it('zeigt eine Wohnung, deren Mietverträge nicht geladen werden konnten, nicht als frei', async () => {
-		fakeBff(({ path }) =>
-			path.endsWith('=a2')
-				? [500, {}]
-				: [200, { contracts: [{ id: 'c1', startDate: '2024-04-01', endDate: null }] }]
-		);
+	// #143, #151: ohne die Mietverträge der Wohnung ist eine Überschneidung nicht geprüft; ein Knopf pro Seite
+	it('sagt, dass die Mietverträge der Wohnung nicht geladen werden konnten', async () => {
+		fakeBff(() => [500, {}]);
 		await open();
-		expect(byTestId('apartment-contracts-unknown')).toBeNull();
-		const select = byTestId<HTMLSelectElement>('apartment-select')!;
-		select.value = 'a2';
-		select.dispatchEvent(new Event('change', { bubbles: true }));
-		await settle();
-		// #151: what was not checked and what to do; the start points to the apartment, one button per page
 		expect(byTestId('apartment-contracts-unknown')!.textContent).toContain(
 			'Überschneidung noch nicht geprüft'
 		);
@@ -139,10 +175,6 @@ describe('Mietvertrag bearbeiten', () => {
 			'Die Mietverträge dieser Wohnung fehlen noch, siehe oben bei der Wohnung.'
 		);
 		expect(document.querySelectorAll('[data-testid="contracts-retry"]')).toHaveLength(1);
-		expect(byTestId('availability-info')).toBeNull();
-		const calendar =
-			byTestId('start-date-input')!.parentElement!.querySelector('input[type="date"]');
-		expect((calendar as HTMLInputElement).min).toBe('');
 		// Review M3: the hint is read out when it appears; once only, not again at the start (Sven B-13 Minor 3)
 		expect(byTestId('apartment-contracts-unknown')!.closest('[role="status"]')).not.toBeNull();
 		expect(byTestId('start-contracts-unknown')!.closest('[role="status"]')).toBeNull();
@@ -179,26 +211,25 @@ describe('Mietvertrag bearbeiten', () => {
 		});
 		const said = () => get(toasts).map((t) => [t.type, t.message]);
 
-		it('bestätigt das Laden und setzt den Fokus auf die Wohnung', async () => {
+		// B-15: the apartment is fixed (#152), so the focus goes to the first field, the Vertragsbeginn
+		it('bestätigt das Laden und setzt den Fokus auf den Vertragsbeginn', async () => {
 			await open();
 			failing = false;
 			click('contracts-retry');
 			await settle();
 			expect(said()).toContainEqual(['success', 'Die Mietverträge der Wohnung sind geladen.']);
-			expect(document.activeElement).toBe(document.getElementById('apartment'));
+			expect(document.activeElement).toBe(document.getElementById('startDate'));
 		});
 
-		// review #151 R2-2: an attempt overtaken by a newer one says nothing
-		it('meldet nichts für einen überholten Versuch', async () => {
+		// review #151 R2-2: an attempt that has not ended says nothing
+		it('meldet nichts, solange die Mietverträge noch laden', async () => {
 			await open();
 			failing = false;
-			click('contracts-retry');
-			const select = byTestId<HTMLSelectElement>('apartment-select')!;
-			select.value = 'a2'; // its contracts are still loading when the first attempt ends
 			const answer = globalThis.fetch;
+			let calls = 0; // the first retry answers late, after the second one has started
 			globalThis.fetch = ((url: string, init?: RequestInit) =>
-				String(url).includes('=a2') ? new Promise(() => {}) : answer(url, init)) as typeof fetch;
-			select.dispatchEvent(new Event('change', { bubbles: true }));
+				++calls === 1 ? new Promise(() => {}) : answer(url, init)) as typeof fetch;
+			click('contracts-retry'); // still loading: no answer yet
 			await settle();
 			expect(said()).toEqual([]);
 		});
@@ -211,34 +242,6 @@ describe('Mietvertrag bearbeiten', () => {
 				'error',
 				'Die Mietverträge der Wohnung konnten wieder nicht geladen werden. Versuchen Sie es später erneut; Ihre Eingaben bleiben erhalten.'
 			]);
-		});
-	});
-
-	// Review M1: the availability of all apartments and the chosen one's contracts are two requests
-	describe('wenn nur eine der beiden Anfragen zu den Mietverträgen scheitert', () => {
-		const later = [{ id: 'c2', startDate: '2015-01-01', endDate: '2099-12-31' }]; // free from 2100
-		async function chooseA2(failing: number) {
-			let a2 = 0;
-			fakeBff(({ path }) =>
-				path.endsWith('=a2') && ++a2 === failing ? [500, {}] : [200, { contracts: later }]
-			);
-			await open();
-			const select = byTestId<HTMLSelectElement>('apartment-select')!;
-			select.value = 'a2';
-			select.dispatchEvent(new Event('change', { bubbles: true }));
-			await settle();
-		}
-
-		it('zeigt die Wohnung nicht als frei, wenn ihre Verfügbarkeit nicht geladen werden konnte', async () => {
-			await chooseA2(1);
-			expect(byTestId('apartment-contracts-unknown')).not.toBeNull();
-			expect(byTestId('availability-info')).toBeNull();
-		});
-
-		it('nennt kein «frei ab», wenn die Mietverträge der gewählten Wohnung nicht geladen werden konnten', async () => {
-			await chooseA2(2);
-			expect(byTestId('apartment-contracts-unknown')).not.toBeNull();
-			expect(byTestId('availability-info')).toBeNull();
 		});
 	});
 
@@ -405,65 +408,6 @@ describe('Mietvertrag bearbeiten', () => {
 			expect(byTestId('form-error')!.textContent).toContain(
 				'Die Mietverträge der Wohnung werden noch geladen.'
 			);
-		});
-
-		// Haiku-Review: beim Wechsel der Wohnung gilt die Überschneidung der vorigen nicht mehr
-		it('nennt nach dem Wechsel der Wohnung keine Überschneidung der vorigen', async () => {
-			calls = fakeBff(() => [
-				200,
-				{ contracts: [{ id: 'c2', startDate: '2025-02-01', endDate: null }] }
-			]);
-			const answer = globalThis.fetch;
-			let switched = false; // once switched, the new apartment's contracts keep loading
-			globalThis.fetch = ((url: string, init?: RequestInit) =>
-				switched && String(url).includes('/contracts?apartmentId=a2')
-					? new Promise(() => {})
-					: answer(url, init)) as typeof fetch;
-			await open();
-			await endOn('31.03.2025');
-			expect(byTestId('overlap-warning')).not.toBeNull();
-			switched = true;
-			const select = byTestId<HTMLSelectElement>('apartment-select')!;
-			select.value = 'a2';
-			select.dispatchEvent(new Event('change', { bubbles: true }));
-			await settle();
-			expect(byTestId('overlap-warning')).toBeNull();
-		});
-
-		// Haiku-Review: nur die letzte Antwort zählt; die Überschneidung der gewählten Wohnung erscheint mit ihr
-		it('nimmt nur die letzte Antwort zu den Mietverträgen der Wohnung', async () => {
-			calls = fakeBff(() => [200, { contracts: [] }]);
-			const answer = globalThis.fetch;
-			const pending: ((contracts: unknown[]) => void)[] = [];
-			let held = false;
-			globalThis.fetch = ((url: string, init?: RequestInit) =>
-				held && String(url).includes('/contracts?apartmentId=')
-					? new Promise((resolve) =>
-							pending.push((contracts) => resolve(Response.json({ contracts })))
-						)
-					: answer(url, init)) as typeof fetch;
-			await open();
-			await endOn('31.03.2025');
-			held = true;
-			const select = byTestId<HTMLSelectElement>('apartment-select')!;
-			const choose = async (id: string) => {
-				select.value = id;
-				select.dispatchEvent(new Event('change', { bubbles: true }));
-				await settle();
-			};
-			await choose('a2'); // pending[0]: a2, will answer late
-			await choose('a1'); // pending[1]
-			await choose('a2'); // pending[2]: the latest
-			const overlapping = [{ id: 'c2', startDate: '2025-02-01', endDate: null }];
-			pending[2]([]);
-			await settle();
-			pending[0](overlapping); // a stale answer for the same apartment
-			await settle();
-			expect(byTestId('overlap-warning')).toBeNull();
-			await choose('a1'); // pending[3]
-			pending[3](overlapping);
-			await settle();
-			expect(byTestId('overlap-warning')).not.toBeNull();
 		});
 
 		// Haiku-Review: eine Antwort ohne Liste gilt als nicht geladen; der Entwurf bleibt
