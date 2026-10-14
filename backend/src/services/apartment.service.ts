@@ -3,7 +3,7 @@
  * Business logic for apartment operations
  */
 
-import { eq, and, sql, desc } from 'drizzle-orm';
+import { eq, and, ilike, or, sql, desc } from 'drizzle-orm';
 import { db } from '../db/connection';
 import {
 	apartments,
@@ -49,6 +49,7 @@ export const apartmentStatus = sql<ApartmentStatus>`(case
 end)`;
 
 export interface ApartmentFilters {
+	search?: string;
 	buildingId?: string;
 	status?: ApartmentStatus;
 	floor?: number;
@@ -78,10 +79,14 @@ export async function listApartments(filters: ApartmentFilters = {}): Promise<{
 	apartments: ApartmentWithDetails[];
 	total: number;
 }> {
-	const { buildingId, status, floor, limit = 50, offset = 0 } = filters;
+	const { search, buildingId, status, floor, limit = 50, offset = 0 } = filters;
 
 	// Build conditions
 	const conditions = [];
+
+	if (search) {
+		conditions.push(or(ilike(apartments.number, `%${search}%`), ilike(buildings.name, `%${search}%`)));
+	}
 
 	if (buildingId) {
 		conditions.push(eq(apartments.buildingId, buildingId));
@@ -121,9 +126,11 @@ export async function listApartments(filters: ApartmentFilters = {}): Promise<{
 		.offset(offset);
 
 	// Get total count
-	const countQuery = db.select({ count: sql<number>`count(*)` }).from(apartments);
-
-	const [{ count: total }] = await countQuery.where(whereClause);
+	const [{ count: total }] = await db
+		.select({ count: sql<number>`count(*)` })
+		.from(apartments)
+		.leftJoin(buildings, eq(apartments.buildingId, buildings.id))
+		.where(whereClause);
 
 	return {
 		apartments: results as ApartmentWithDetails[],

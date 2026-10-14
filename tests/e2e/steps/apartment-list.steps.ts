@@ -1,9 +1,10 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { apartmentCount, occupancyOf } from '../questions/apartments';
+import { apartmentCount, apartmentEmptyHint, occupancyOf } from '../questions/apartments';
 import {
 	openApartment,
 	openApartmentList,
+	searchApartments,
 	showApartmentsOfBuilding,
 	showApartmentsOfBuildingWhileLoading,
 	startNewApartment
@@ -57,4 +58,19 @@ Then('ist die Wohnung {string} {string}', async ({ verwalter }, number: string, 
 
 Then('die Wohnungsliste enthält genau {int} Wohnung(en)', async ({ verwalter }, count: number) => {
 	await verwalter.sees(apartmentCount).toBe(count);
+});
+
+When('der Liegenschaftsverwalter nach Wohnungen mit {string} sucht', async ({ verwalter, names }, term: string) => {
+	await verwalter.attemptsTo(searchApartments(names.get(term) ?? term));
+});
+
+When(
+	'der Liegenschaftsverwalter im Gebäude {string} nach der Wohnung {string} sucht',
+	async ({ verwalter, seed }, building: string, number: string) => {
+		await verwalter.attemptsTo(searchApartments(number, seed.idOf(building)!));
+	}
+);
+
+Then('sieht der Liegenschaftsverwalter in der Wohnungsliste den Hinweis {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(apartmentEmptyHint).toContain(text);
 });
