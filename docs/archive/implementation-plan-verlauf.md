@@ -5560,3 +5560,28 @@ Branch `claude/b15-instruction-improvements` (PR #158). The user asked for an in
 
 Findings:
 - reviewer round 1 (`docs/reviews/b15-instructions-opus55-review-1.md`): fixed O-1 (Major: «Keep going» is a short stop rule again, the pull request flow is Workflow 9), O-2 (pushing the branch and its pull request is not a change outside the repo), O-3 (check runs and open findings read again right before the merge), O-4 (restart only when `merge-base --is-ancestor` holds, with `git switch -C`), O-5 (reviewer agents stop without a worktree), O-6 (a pull request the session cannot wait for goes under «Blocked on me»), O-7 (the link command), O-8 (skill rule said once)
+
+## Session 29 - October 2026: demo deployment on demo.dwello.ch
+
+Decided by the user: Oracle Cloud VM, subdomain `demo.dwello.ch` (DNS at Infomaniak), no data isolation per user, reset to the demo data every night, self-hosting with `docker-compose.prod.yml` stays as it is. No scenario: deployment configuration only, no app behavior changes.
+
+- [x] `deploy/demo/docker-compose.yml`: override on `docker-compose.prod.yml` with Caddy (HTTPS), only ports 80/443 published
+- [x] `deploy/demo/Caddyfile`, `deploy/demo/.env.example`
+- [x] `deploy/demo/reset-demo.sh`: stop backend, recreate the database, load the demo data, start backend
+- [x] `deploy/demo/README.md`: VM, firewall, DNS at Infomaniak, Google OAuth, start, cron
+- [x] README "Deployment" points to the demo guide
+- [x] Fix the frontend `Dockerfile`: `bun install` ran `prepare` (Paraglide) before `project.inlang` exists; `--ignore-scripts`, Paraglide compiles in `vite build`. Test red: `docker build -f Dockerfile .` – `ENOENT: no such file or directory, open '/app/project.inlang/settings.json'`; green after the fix
+- [x] Stack started locally (domain `localhost`, images built with the sandbox proxy CA, Ollama left out): only Caddy publishes ports (80, 443); `/login` 200 over HTTPS, http redirects with 308; a form POST with the own origin passes the origin check, a foreign origin gets 403 (also without `ORIGIN`: adapter-node assumes https, so the override sets none); reset in 17 s, a tenant added before the reset is gone after it (11 → 10)
+- [x] O-3, O-6 updated, O-11 added (CI builds no Docker image) in `docs/design/offene-punkte.md`
+- [x] Comment on #51: once it is done, the demo needs a way to allow every account
+- [x] Code review round 1; fixes: C-2 to C-10 (log rotation, required Postgres password, HSTS, trap on INT/TERM, README: Pay As You Go step, failed reset, image prune, firewall wording); C-1 becomes an issue (visitor notice, product decision)
+- [x] ponytail-review on the diff: `COOKIE_SECURE` (prod default) and the `caddy_config` volume removed
+- [x] Merged `origin/main` (#161; conflict only in this plan)
+- [x] Before marking complete: test:coverage, lint, check, backend test and type-check (after the merge)
+- [x] Session archived
+
+Files: `deploy/demo/*`, `Dockerfile`, `README.md`, `docs/design/offene-punkte.md`, `docs/reviews/demo-review-{1,2}.md`, `implementation_plan.md`.
+Skills: ponytail-review (after review round 1; tdd and ponytail not loaded: deployment configuration and one Dockerfile line, no app code; the Dockerfile fix was shown red and green with `docker build`).
+
+code-reviewer round 1 (docs/reviews/demo-review-1.md): open C-1 (Major, product decision: #162), fixed C-2, C-3, C-4, C-5, C-7, C-8, C-9, C-10, rejected C-6 (round 2, reason there), C-11: browsers fall back to HTTP/2 over TCP, opening UDP 443 adds a port and an Oracle rule for no visible gain
+code-reviewer round 2 (docs/reviews/demo-review-2.md): open C-1 (Major, #162), fixed C-12 (Nit), rejected C-6: no app code changed, so `tdd` and `ponytail` had nothing to drive; the one code fix (Dockerfile) was shown red and green with `docker build`, ponytail-review ran on the diff
