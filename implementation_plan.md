@@ -42,10 +42,12 @@ Task: work off the open `bug` issues one by one (PR merged before the next). Ski
 ### #99 P-9b: Category «predefined» stored instead of guessed
 
 - [x] Scenario «Eigene Kategorie mit gleichem englischem Namen zeigt ihre Beschreibung» (`tests/e2e/features/categories.feature`). Scenario red: `sieht … bei der Kategorie "Internet" die Beschreibung …` – Expected the description, Received null
-- [x] Test red: `category-type.pg.test.ts` (2) – `type` undefined; `category-predefined.dom.test.ts` (3) – own «Internet» predefined, description hidden, predefined help shown; `api-contracts.pg.test.ts` «GET /categories/:id» – `.type: fehlt`
+- [x] Test red: `category-type.pg.test.ts` (2) – `type` undefined; `category-predefined.dom.test.ts` (3 of 4; the 4th guards the predefined help) – own «Internet» predefined, description hidden, predefined help shown; `api-contracts.pg.test.ts` «GET /categories/:id» – `.type: fehlt`
 - [x] `categories.type` (`predefined` default for the seeded rows, `custom` from `createCategory`) in `0001_schema.sql` and `schema.ts`; list and detail return it; `toCategory` reads it; obsolete name-guess test in `categories.test.ts` removed
 - [x] Contract `tests/contracts/category.json` (new) with README row; `docs/data-model.md` names the column
 - [x] Scenarios green (24 incl. axe/i18n rows `categories`, `category-new`, `category-edit`)
-- [ ] Checks, `code-reviewer`, PR, merge
+- [x] Checks: `test:coverage` (2294), `check`, `lint`, backend `test` (550) + `type-check`, `deepcheck:audit`, fallow clean
+- code-reviewer round 1 (`docs/reviews/p9b-review-1.md`): fixed C-1 (Minor, `categories_type_check`; Test red: `category-type.pg.test.ts` «lässt nur … zu» – insert of `other` accepted), C-3 (Minor, Prettier hunk outside #99 reverted), C-4 (Nit, count in plan); open C-2 (Minor, existed before: no contract for `GET /categories`, `offene-punkte.md` O-11); rejected C-5: the issue asks for the pattern of `distribution_keys.type`, and only `createCategory` inserts categories in app code
+- [ ] Persona Helga, PR, merge
 - Skills: tdd, ponytail, ponytail-review
 - Files: `backend/migrations/0001_schema.sql`, `backend/src/db/schema.ts`, `backend/src/services/category.service.ts`, `backend/src/__tests__/{category-type,api-contracts}.pg.test.ts`, `src/lib/server/category.ts`, `src/routes/config/categories/CategoryRow.svelte`, `src/__tests__/{category-predefined.dom,categories}.test.ts`, `tests/contracts/{category.json,README.md}`, `docs/data-model.md`, `tests/e2e/{features/categories.feature,fixtures/backend.ts,steps/categories.steps.ts,targets/categories.ts,questions/categories.ts}`

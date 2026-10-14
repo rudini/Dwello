@@ -79,10 +79,7 @@ describe('Neue Kategorie', () => {
 
 	// Heiz- und Warmwasserkosten folgen beim Mieterwechsel dem Heizprofil
 	it('erfasst eine Kategorie als Heiz- und Warmwasserkosten', async () => {
-		const { calls, result } = runAction(newActions.default, '', 201, {
-			name: 'Pellets',
-			isHeatingCost: 'on'
-		});
+		const { calls, result } = runAction(newActions.default, '', 201, { name: 'Pellets', isHeatingCost: 'on' });
 		await result.catch(() => {});
 
 		expect(calls[0].body).toMatchObject({ isHeatingCost: true });

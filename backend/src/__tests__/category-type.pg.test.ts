@@ -4,6 +4,8 @@
  */
 
 import { afterAll, describe, expect, it } from 'bun:test';
+import { db } from '../db/connection';
+import { categories } from '../db/schema';
 import { callApi, sendJson } from './helpers/auth';
 
 const created: string[] = [];
@@ -28,5 +30,10 @@ describe('Herkunft einer Kategorie', () => {
 		const { categories } = (await (await callApi('/api/v1/categories?search=Caretaker')).json()) as { categories: { type: string }[] };
 
 		expect(categories[0].type).toBe('predefined');
+	});
+
+	it('lässt nur «predefined» und «custom» zu', async () => {
+		const name = `Ungültig ${crypto.randomUUID()}`;
+		await expect(db.insert(categories).values({ name, type: 'other' }).execute()).rejects.toThrow();
 	});
 });

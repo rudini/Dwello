@@ -112,7 +112,8 @@ CREATE TABLE categories (
     description TEXT,
     sort_order INTEGER DEFAULT 0,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    CONSTRAINT categories_type_check CHECK (type IN ('predefined', 'custom'))
 );
 
 -- ============================================================================
