@@ -5649,8 +5649,19 @@ Request: apply W-1 excluded, W-2, W-5/W-17, W-11, W-15/W-20/W-23, W-22, W-24, W-
   - C-1 Prettier diff command; C-2 3rd-round rule without contradiction; C-3/C-4 where "Beobachtungen" go (`CLAUDE.md`, `docs/design/arbeitsregeln.md`); C-5/C-8 `fach-reviewer` role "Rechtstexte" with FMG 45c and terms of use; C-6 contracts README narrowed; C-9 "domain terms"; C-10 narrowed to the noun, reverted in round 2 (C-12): the broad check stays, the adjective is accepted
 - [x] W-6, W-19 test notes (`backend/CLAUDE.md`)
 - [x] W-18 SQL counts as strings (`tests/contracts/README.md`)
-- [x] code-reviewer round 2 (`docs/reviews/workflow-rules-review-7.md`): fixed C-12 (broad Italian check again), C-13 (Beobachtungen checked on the base commit), C-14, C-16 (UWG named, consumer check); C-3, C-10 fixed with them; open C-7 (Minor: no skills loaded, stays as recorded), C-15 (Nit; fixed in session 31: text-only fixes confirmed by a delta review, H-24 removed)
+- [x] code-reviewer round 2 (`docs/reviews/workflow-rules-review-7.md`): fixed C-12 (broad Italian check again), C-13 (Beobachtungen checked on the base commit), C-14, C-16 (UWG named, consumer check), C-15 (in session 31: text-only fixes confirmed by a delta review, H-24 removed); C-3, C-10 fixed with them; open C-7 (Minor: no skills loaded, stays as recorded)
 - [x] Legal sources checked on Fedlex (filestore HTML): DSG (SR 235.1, version 2023-09-01) Art. 16 «Grundsätze», 17 «Ausnahmen», 19 «Informationspflicht bei der Beschaffung von Personendaten», 20 «Ausnahmen von der Informationspflicht und Einschränkungen»; FMG (SR 784.10, version 2023-09-01) Art. 45c «Daten auf fremden Geräten» (in force since 2007-04-01)
 - [x] Checks: `bun run test:coverage` 2309/2310 (the failure: `tools/claude-hooks/fallow-gate.test.ts` timed out on a network `git fetch`, green alone; not touched by this change → `offene-punkte.md` O-13), `bun run lint` clean, `bun run check` 0 errors, backend `bun run test` 554 green (coverage 91.8 % lines), `type-check` clean; E2E not run: no scenario asserts the four changed French texts (whitespace only)
 - Files: `CLAUDE.md`, `.claude/agents/{persona,fach-reviewer}.md`, `backend/CLAUDE.md`, `docs/design/arbeitsregeln.md`, `docs/design/offene-punkte.md` (U-26, H-24, O-13), `messages/fr.json`, `src/__tests__/i18n.test.ts`, `tests/contracts/README.md`, `docs/reviews/workflow-rules-review-{6,7}.md`
+- [x] Session archived
+
+## Session 31 - October 2026: C-15, text-only fixes in the 3rd review round
+
+Request: fix C-15 (`docs/reviews/workflow-rules-review-7.md`, `offene-punkte.md` H-24) as decided: a fix that changes no behavior is confirmed by a delta review, not a test; push; review independently against the Opus 5.5 guide.
+
+- [x] `CLAUDE.md` step 7: such a fix counts when one delta review by the same reviewer confirms it and raises no new Blocker/Major; no 4th round; H-24 removed (commit 2f8b7ba)
+- [x] code-reviewer round 1 (`docs/reviews/workflow-rules-review-{8,9}.md`): fixed C-1 (Major: user-visible texts stay behavior, step 6), C-2 (stop condition covers an unconfirmed delta review), C-3 ("agent instructions" instead of "rules"), C-4 (report named in the 3rd round's plan line), C-5 (status of C-15 in session 30's line), C-6 (`.claude/agents/code-reviewer.md` done criterion)
+- [x] code-reviewer round 2 (`docs/reviews/workflow-rules-review-9.md`): C-1 to C-6 confirmed fixed; fixed C-7 (Nit: C-15 moved to "fixed" in session 30's line)
+- Checks: no code changed; `open-work.test.ts` run for the plan
+- Files: `CLAUDE.md`, `.claude/agents/code-reviewer.md`, `docs/design/offene-punkte.md`, `docs/archive/implementation-plan-verlauf.md`, `docs/reviews/workflow-rules-review-{8,9}.md`
 - [x] Session archived
