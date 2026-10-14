@@ -125,6 +125,6 @@ Then('scrollt die Seite nicht seitwärts', async ({ verwalter }) => {
 	await verwalter.sees(pageOverflowsSideways).toBe(false);
 });
 
-Then('zeigt die Fusszeile {string}', async ({ verwalter }, text: string) => {
-	await verwalter.sees(footerVersionText).toBe(text);
+Then('zeigt die Fusszeile die Version {string}', async ({ verwalter }, version: string) => {
+	await verwalter.sees(footerVersionText).toBe(`Version ${version}`);
 });

@@ -50,4 +50,4 @@ Funktionalität: Navigation
     Dann ist in der Hauptnavigation nur "Heizprofile" markiert
 
   Szenario: Die Fusszeile zeigt die Version der App
-    Dann zeigt die Fusszeile "Version 1.4.0"
+    Dann zeigt die Fusszeile die Version "1.4.0"

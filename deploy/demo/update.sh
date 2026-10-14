@@ -11,7 +11,7 @@ flock -n 9 || exit 0
 [ "$(git branch --show-current)" = main ] || { echo "$(date -Is) not on main, no update"; exit 1; }
 git fetch -q --tags origin main
 # Only a tagged main, so the footer shows a clean version: the release workflow tags it seconds after the merge
-git describe --tags --exact-match --match 'v*' origin/main > /dev/null 2>&1 || exit 0
+git describe --tags --exact-match --match 'v*' origin/main > /dev/null 2>&1 || { echo "$(date -Is) main not tagged yet, no update"; exit 0; }
 # The commit of the last successful build: a failed build is tried again on the next run
 [ "$(git rev-parse origin/main)" = "$(cat .git/demo-deployed 2>/dev/null)" ] && exit 0
 

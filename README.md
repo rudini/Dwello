@@ -272,14 +272,14 @@ docker-compose -f docker-compose.dev.yml up
 
 **Production:**
 ```bash
-APP_VERSION=$(git describe --tags) docker-compose -f docker-compose.prod.yml up --build
+APP_VERSION=$(git describe --tags --match 'v*') docker-compose -f docker-compose.prod.yml up --build
 ```
 
 **Public demo** (demo.dwello.ch, shared data reset every night): [deploy/demo/README.md](./deploy/demo/README.md).
 
 ### Versions
 
-Every merge to `main` gets the next version as a tag and a GitHub Release (`.github/workflows/release.yml`): a `feat` commit raises the minor version, anything else the patch version; a breaking change (`feat!:`, `BREAKING CHANGE:`) raises the minor version before 1.0 and the major version after. A manual run of the workflow sets a version by hand (e.g. 1.0.0). The footer shows the version the build was made from (`git describe --tags`, or `APP_VERSION` for a Docker build, which has no `.git`). The `version` field in `package.json` is not maintained.
+Every merge to `main` gets the next version as a tag and a GitHub Release (`.github/workflows/release.yml`): a `feat` commit raises the minor version, anything else the patch version; a breaking change (`feat!:`, `BREAKING CHANGE:`) raises the minor version before 1.0 and the major version after. Merges that land while a release still runs share the next version. A manual run of the workflow on `main` sets a version by hand (e.g. 1.0.0) in place of the one the last merge got. The footer shows the version the build was made from (`git describe --tags`, or `APP_VERSION` for a Docker build, which has no `.git`). The `version` field in `package.json` is not maintained.
 
 ### Environment Variables
 

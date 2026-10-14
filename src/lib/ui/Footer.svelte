@@ -7,7 +7,7 @@
 		class="flex flex-col gap-2 px-4 py-6 text-ink-muted sm:flex-row sm:items-center sm:justify-between lg:px-6"
 	>
 		<p>
-			© {new Date().getFullYear()} Dwello ·
+			© {new Date().getFullYear()} Dwello <span aria-hidden="true">·</span>
 			<span data-testid="footer-version"
 				>{__APP_VERSION__
 					? m.footer_version({ version: __APP_VERSION__ })

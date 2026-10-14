@@ -70,7 +70,7 @@ chmod 600 ~/.ssh/config
 ```bash
 git clone git@github.com:rudini/Dwello.git && cd Dwello
 cp deploy/demo/.env.example deploy/demo/.env    # fill in: secrets, Google client, operator
-APP_VERSION=$(git describe --tags) docker compose -f docker-compose.prod.yml -f deploy/demo/docker-compose.yml --env-file deploy/demo/.env up -d --build
+APP_VERSION=$(git describe --tags --match 'v*') docker compose -f docker-compose.prod.yml -f deploy/demo/docker-compose.yml --env-file deploy/demo/.env up -d --build
 docker exec dwello-ollama ollama pull qwen2.5:3b
 deploy/demo/reset-demo.sh                       # loads the demo data the first time
 ```

@@ -16,3 +16,6 @@ Decisions: issue #173 (grill-me with the product owner). The E2E build gets `APP
 - [ ] Baseline tag `v0.1.0` on ba76d45
 Skills: tdd, ponytail, ponytail-review
 - [ ] code-reviewer, persona (footer text), checks of "Before marking anything complete"
+- code-reviewer round 1 (`docs/reviews/app-version-review-1.md`): open –, fixed C-1 (Major; reproduced in a scratch repo: two tags on one commit, describe names v0.5.0; the manual run now replaces the merge's tag, simulated with a stubbed gh), C-3, C-4, C-5, C-6, C-7; open work C-2 (`offene-punkte.md` O-15)
+- persona Marco (`docs/design/personas/marco-app-version.md`): fixed –, rejected P-1: «Version unbekannt» decided in #173; open work P-2 (`offene-punkte.md` U-28)
+- persona Sven (`docs/design/personas/sven-app-version.md`): fixed P-1 (Test red: shell.dom.test.ts «lässt den Trennpunkt vor der Version nicht vorlesen» – Received undefined)
