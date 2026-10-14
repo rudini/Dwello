@@ -54,6 +54,11 @@ Funktionalität: Kostenkategorien
     Und der Liegenschaftsverwalter ist auf der Seite "Kategorien"
     Dann sieht der Liegenschaftsverwalter bei der Kategorie "Internet" die Beschreibung "Glasfaseranschluss im Keller"
 
+  Szenario: Vordefinierte Kategorien, deren Kosten der Vermieter trägt
+    Angenommen der Liegenschaftsverwalter ist auf der Seite "Kategorien"
+    Dann ist die vordefinierte Kategorie "Schädlingsbekämpfung" nicht umlagefähig
+    Und ist die vordefinierte Kategorie "Feuerlöscher-Wartung" nicht umlagefähig
+
   @wip
   Szenario: KI schlägt vor, ob eine neue Kategorie umlagefähig ist
     Angenommen der Liegenschaftsverwalter ist auf der Seite "Neue Kategorie"

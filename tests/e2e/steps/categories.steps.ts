@@ -106,6 +106,10 @@ Then('sieht der Liegenschaftsverwalter die Kategorie {string} nicht mehr', async
 	await verwalter.sees(listedCategoriesNamed(names.get(title)!)).toBe(0);
 });
 
+Then('ist die vordefinierte Kategorie {string} nicht umlagefähig', async ({ verwalter }, name: string) => {
+	await verwalter.sees(allowance(name)).toBe('Nicht umlagefähig');
+});
+
 Then('ist die Kategorie {string} nicht umlagefähig', async ({ verwalter, names }, title: string) => {
 	await verwalter.sees(allowance(names.get(title)!)).toBe('Nicht umlagefähig');
 });

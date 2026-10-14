@@ -56,7 +56,7 @@ export default defineConfig<{ driver: Driver }>({
 	],
 	// Run against the full stack on its own ports and its own database (dwello_e2e), recreated before every run,
 	// so the development servers and the development database are never touched.
-	// Expects: PostgreSQL on 5432; starts the mail catcher, the backend on 3101 and the frontend on 3100
+	// Expects: PostgreSQL on 5432; starts the mail catcher, the KI stand-in, the backend on 3101 and the frontend on 3100
 	webServer: [
 		{
 			// Mail catcher: real SMTP server that keeps reminders sent by e-mail for the tests to read

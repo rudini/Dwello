@@ -51,9 +51,9 @@ async function create(resource: string, body: object, post = resource) {
 
 beforeAll(async () => {
 	seeded = (
-		(await (await sendJson('GET', '/api/v1/categories')).json()) as { categories: typeof seeded }
+		(await (await sendJson('GET', '/api/v1/categories?limit=1000')).json()) as { categories: typeof seeded }
 	)
-		// Tests running at the same time add their own, with a UUID in the name
+		// Earlier test files leave their own behind, with a UUID in the name
 		.categories.filter((c) => c.type === 'predefined' && !/[0-9a-f]{8}-[0-9a-f]{4}-/.test(c.name));
 	buildingId = await create('buildings', {
 		name: `Umlagehof ${token}`,
