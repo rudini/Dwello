@@ -32,6 +32,9 @@ Funktionalität: Navigation
     Wenn der Liegenschaftsverwalter das Logo wählt
     Dann ist der Liegenschaftsverwalter auf der Seite "Übersicht"
 
+  Szenario: Das Browser-Tab zeigt das Dwello-Symbol
+    Dann zeigt das Browser-Tab das Dwello-Symbol
+
   Szenario: Einstellungen über das Benutzermenü öffnen
     Wenn der Liegenschaftsverwalter im Benutzermenü die Einstellungen wählt
     Dann ist der Liegenschaftsverwalter auf der Seite "Einstellungen"

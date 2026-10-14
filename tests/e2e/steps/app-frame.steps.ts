@@ -7,7 +7,8 @@ import {
 	pageOverflowsSideways,
 	pageTitleWidth,
 	sectionShown,
-	sectionText
+	sectionText,
+	tabIcon
 } from '../questions/app-frame';
 import { openPage } from '../tasks/navigation';
 import {
@@ -122,4 +123,8 @@ Then('ist der Seitentitel lesbar', async ({ verwalter }) => {
 
 Then('scrollt die Seite nicht seitwärts', async ({ verwalter }) => {
 	await verwalter.sees(pageOverflowsSideways).toBe(false);
+});
+
+Then('zeigt das Browser-Tab das Dwello-Symbol', async ({ verwalter }) => {
+	await verwalter.sees(tabIcon).toBe('image/svg+xml');
 });
