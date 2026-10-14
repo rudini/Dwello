@@ -5665,3 +5665,12 @@ Request: fix C-15 (`docs/reviews/workflow-rules-review-7.md`, `offene-punkte.md`
 - Checks: no code changed; `open-work.test.ts` run for the plan
 - Files: `CLAUDE.md`, `.claude/agents/code-reviewer.md`, `docs/design/offene-punkte.md`, `docs/archive/implementation-plan-verlauf.md`, `docs/reviews/workflow-rules-review-{8,9}.md`
 - [x] Session archived
+
+## Session 32 - October 2026: merge duplicate issues
+
+Task: find open issues that describe the same thing and merge the real duplicates.
+
+- [x] #70 (F-12) merged into #120 (A-11): problem, options (Nachtragsabrechnung, reopening an unpaid statement), legal sources and «Where» moved; markers `TODO(fachlich prüfen, #70)` now name #120
+- [x] #95 (P-8a) merged into #132 (B-8c): IV5-2, «Neu berechnen» on a single draft; #95 closed as duplicate (no markers)
+- [x] Checks: `test:coverage`, `lint`, `check`, backend `test` + `type-check`; no scenario affected (comment markers only)
+- Files: `src/routes/invoices/MissedWarning.svelte`, `src/routes/statements/generate/CategoryCheck.svelte`
