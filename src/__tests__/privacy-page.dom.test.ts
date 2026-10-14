@@ -66,3 +66,24 @@ describe('Datenschutzerklärung zu Anmeldung, Dritten und Cookies', () => {
 		}
 	});
 });
+
+describe('Datenschutzerklärung: Grenzen der genannten Dienste', () => {
+	const text = () => {
+		show(PrivacyPage, { data: { recipient: null, providers: ['Google'] } } as never);
+		return document.body.textContent ?? '';
+	};
+
+	it('nennt die Adresssuche nur beim Erfassen eines Gebäudes, wo es sie gibt', () => {
+		expect(text()).toContain('Die Adresssuche beim Erfassen eines Gebäudes');
+		expect(text()).not.toContain('Bearbeiten eines Gebäudes');
+	});
+
+	it('nennt Google Maps beim Planen einer Route und keine Weitergabe ausser den genannten', () => {
+		expect(text()).toContain('Google Maps');
+		expect(text()).not.toContain('Darüber hinaus gibt Dwello keine Daten an Dritte weiter.');
+	});
+
+	it('sagt nicht, das Sprach-Cookie entstehe erst mit einer Wahl', () => {
+		expect(text()).toContain('«PARAGLIDE_LOCALE» speichert die Sprache der Oberfläche');
+	});
+});

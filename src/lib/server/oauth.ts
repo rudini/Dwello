@@ -211,15 +211,15 @@ export function isValidProvider(provider: string): provider is OAuthProvider {
 	return provider === 'google' || provider === 'microsoft';
 }
 
-/**
- * Get list of configured OAuth providers
- */
 /** How the login page and the privacy page name a provider */
 export const PROVIDER_NAMES: Record<OAuthProvider, string> = {
 	google: 'Google',
 	microsoft: 'Microsoft'
 };
 
+/**
+ * Get list of configured OAuth providers
+ */
 export function getConfiguredProviders(): OAuthProvider[] {
 	const providers: OAuthProvider[] = [];
 

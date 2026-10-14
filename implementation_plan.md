@@ -28,6 +28,10 @@ Task: work off the open `bug` issues one by one (PR merged before the next). Ski
 - [x] Load returns the configured providers (`PROVIDER_NAMES` shared with the login page); page joins them per language (`Intl.ListFormat`, disjunction)
 - [x] Texts in four languages: Google Fonts removed; CARTO (map on a building's page) and OpenPLZ (address search) named with what they receive; cookies `dwello_session`, `dwello_xsrf`, `dwello_oauth_state`, `dwello_login`, `PARAGLIDE_LOCALE` (400 days, readable by JavaScript)
 - [x] Scenarios green (17 incl. language scenarios; axe/i18n rows `privacy`, `privacy-public`)
-- [ ] Checks, `code-reviewer`, persona Dr. Weber, PR, merge
+- [x] Checks: `test:coverage` (2286), `check`, `lint`, backend `test` (547) + `type-check`, `deepcheck:audit`, fallow clean
+- code-reviewer round 1 (`docs/reviews/f19a-review-1.md`): fixed C-1 (Minor, it «immobile», «mappa»), C-2 (Minor, fr guillemets with no-break space), C-4 (Minor, Google Maps named), C-5 (Nit, comment placement), C-6 (Nit, no gendered address in fr/it); rejected C-3: without a configured provider there is no sign-in at all, the login page says so
+- persona Dr. Weber round 1 (`docs/design/personas/weber-f19a.md`): fixed P-2 (Minor, address search only when adding), P-4 (Minor, Google Maps and closing sentence), P-9 (Nit, language cookie without a choice); open P-1 (Major, existed before, needs decision: added to #82), P-3, P-5, P-6, P-10 (#82), P-7, P-8, P-11, P-12 (`offene-punkte.md` U-23)
+- Test red (findings): `privacy-page.dom.test.ts` (3 tests) – «Erfassen und Bearbeiten», no Google Maps, «gewählte Sprache»; `privacy-i18n.dom.test.ts` (2 tests) – no no-break space, «stabile», «carta», «vous garde connecté»
+- [ ] Re-review delta, PR, merge
 - Skills: tdd, ponytail, ponytail-review
-- Files: `src/routes/privacy/+page.{svelte,server.ts}`, `src/routes/login/+page.server.ts`, `src/lib/server/oauth.ts`, `messages/{de,fr,it,en}.json`, `src/__tests__/privacy{.test.ts,-page.dom.test.ts}`, `tests/e2e/{features/privacy.feature,steps/app-frame.steps.ts,questions/app-frame.ts}`
+- Files: `src/routes/privacy/+page.{svelte,server.ts}`, `src/routes/login/+page.server.ts`, `src/lib/server/oauth.ts`, `messages/{de,fr,it,en}.json`, `src/__tests__/privacy{.test.ts,-page.dom.test.ts}`, `tests/e2e/{features/privacy.feature,steps/app-frame.steps.ts,questions/app-frame.ts}`, `src/__tests__/privacy-i18n.dom.test.ts`, `docs/reviews/f19a-review-1.md`, `docs/design/personas/weber-f19a.md`, `docs/design/offene-punkte.md`
