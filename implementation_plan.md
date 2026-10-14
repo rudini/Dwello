@@ -22,9 +22,9 @@ Slice 1 notes:
 - Skills: tdd, ponytail-review
 
 Slice 2 - instructions:
-- [x] 2 Personas get their own records; table of demo records (name, ID, state) in `docs/design/personas/README.md`
+- [x] 2 Personas get their own records; table of demo records (name, ID, state) in `docs/design/personas/demo-records.md`
 - [x] 4 Every reviewer reads its own worktree; the main session keeps working
-- [x] 5 While `fach-reviewer` checks the scenario: only lower-layer tests, no production code
+- [x] 5 While `fach-reviewer` checks the committed scenario: at most the first lower-layer test, no production code
 - [x] 6 Skills `tdd` and `ponytail` are loaded, not only followed
 - [x] 7 A changed text the user sees is a behavior change
 - [x] 8 Every backend answer a frontend test reads comes from `tests/contracts`
@@ -54,6 +54,8 @@ Slice 2 notes:
 
 Slice 2 review:
 - code-reviewer round 1 (`docs/reviews/b15-instructions-slice2-review-1.md`): fixed C-1 (Major: `fach-reviewer` gets a worktree of the committed `@wip` scenario), C-2 (Major: `docs/test-pyramid.md` no longer says «where one exists»), C-3 (at most the first red test), C-4, C-5 (report path in the scratchpad, copied by the caller), C-6, C-7 (table in its own file personas do not read), C-8 (ask before the force-push), C-9 (`Skills: tdd, ponytail, ponytail-review`), C-10 (`review-<slice>-<reviewer>`)
+- code-reviewer round 2 (`docs/reviews/b15-instructions-slice2-review-2.md`): C-1..C-10 confirmed fixed; fixed C-11 (no force-push needed: a merge-commit merge leaves the old branch in `origin/main`), C-12, C-13, C-14
+- Not confirmed: process-spawning tests (`tools/claude-hooks/fallow-gate.test.ts`, `tools/deepcheck/test/*`) timed out after 5 s once in my run and in the reviewer's runs while E2E ran in parallel; three reruns without load green
 
 Slice 3 - added by the user during the task:
 - [x] 17 After a finished task: push, open a pull request, resolve conflicts by merging `origin/main`, fix red CI, merge once green (the session itself; no auto-merge in the repository). Still asked: a push to `main`, force-push, merging red or with an open Blocker/Major, and a task where the user said to only commit (as this one). Merge method: merge commit (no squash, so the slice commits stay; #149 was merged so). File: `CLAUDE.md` («Keep going»)

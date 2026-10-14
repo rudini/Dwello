@@ -1,6 +1,6 @@
 # Demo records for persona tasks
 
-For the caller of a persona run, not for the persona: it reads only `README.md` and must not see IDs or states set up on purpose.
+For the caller of a persona run, not for the persona: it reads only `README.md` and one section of `docs/design/arbeitsregeln.md`, and must not see IDs or states set up on purpose.
 
 `persona-stack.sh` loads the demo data (`backend/demo/demo-data.sql`, statements from `backend/src/db/demo-data.ts`) with fixed IDs. Before naming a record in a persona's task, look it up here, so the task names the tenant who really holds that contract. Personas that save at the same time each get their own building (`CLAUDE.md`, Workflow 5); with three buildings, at most three personas save at once, the others only look.
 
