@@ -21,6 +21,8 @@ From issue #174 (decisions confirmed by the product owner on 2026-10-14): the Li
 - [x] Docs: `docs/data-model.md`, `docs/api-specification.md`, help `help_tenants_5` (Test red: `help-page.dom` – text missing)
 - [x] Scenarios green, `@wip` removed; scenario «Mieter mit hochgeladenen Dokumenten löschen» confirms in the open dialog (step «das Löschen bestätigt»)
 
+- [x] Open work: #178 (fachlich, entscheiden): how long uploaded tenant documents are kept (F-7, automatic deletion)
+
 Skills: tdd, ponytail, ponytail-review (cut: the unused title round trip of `deleteDocument`).
 
 fach-reviewer round 1 (`docs/reviews/upload-scenarios-fachreview-1.md`): open F-1 (Major, product owner: glossary); fixed F-2 (Major), F-3, F-4, F-5, F-6, F-7, F-8, F-9, F-10 (Minor), F-12 (Nit); rejected F-11: `formatDate` already shows a point in time in Europe/Zurich (`src/lib/utils/format.ts:50`)
