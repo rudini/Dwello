@@ -3,6 +3,7 @@ import { Count, Text, ThePage, Visibility, Width } from '../screenplay/questions
 import { draftNotice, llmRecipient, operatorNotice, pageSection, pageTitle, userMenuButton } from '../targets/app-frame';
 
 export const sectionShown = (heading: string) => Visibility.of(pageSection(heading));
+export const sectionText = (heading: string) => Text.of(pageSection(heading));
 export const llmRecipientNotice = (heading: string) => Text.of(llmRecipient(heading));
 export const draftNoticeText = (heading: string) => Text.of(draftNotice(heading));
 export const operatorNoticeText = (heading: string) => Text.of(operatorNotice(heading));
