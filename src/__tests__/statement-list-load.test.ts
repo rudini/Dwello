@@ -2,6 +2,8 @@ import { describe, it, expect } from 'vitest';
 import { load } from '../routes/statements/+page.server';
 import type { StatementsListData } from '$lib/types';
 import { GET as downloadPdf } from '../routes/statements/[id]/pdf/+server';
+import backendContract from '../../tests/contracts/contract.json';
+import periodStatements from '../../tests/contracts/period-statements.json';
 
 const API = 'http://localhost:3001/api/v1';
 
@@ -106,5 +108,105 @@ describe('PDF einer Abrechnung herunterladen', () => {
 		});
 
 		expect(response.status).toBe(500);
+	});
+});
+
+describe('Abrechnungsliste eines Mietvertrags', () => {
+	it('fragt nur die Abrechnungen des Mietvertrags ab und sagt, wessen Abrechnungen sie zeigt', async () => {
+		const urls: string[] = [];
+		const fetch = (async (url: string) => {
+			urls.push(url);
+			if (url.endsWith('/contracts/c1')) return Response.json(backendContract);
+			return Response.json(periodStatements);
+		}) as typeof globalThis.fetch;
+
+		const data = (await load({
+			url: new URL('http://localhost/statements?contract=c1'),
+			fetch
+		} as never)) as StatementsListData;
+
+		expect(urls[0]).toBe(`${API}/statements?limit=10&offset=0&contractId=c1`);
+		expect(urls[1]).toBe(`${API}/statements/counts?contractId=c1`);
+		expect(data.scope).toBe(
+			'Sie sehen die Abrechnungen des Mietvertrags von Anna Keller, Wohnung 2.01 (Ahornhof), Vertragsbeginn 01.04.2024.'
+		);
+	});
+
+	it('zeigt die Liste ohne Satz, wenn der Mietvertrag nicht geladen werden kann', async () => {
+		const fetch = (async (url: string) =>
+			url.endsWith('/contracts/c1')
+				? new Response(null, { status: 404 })
+				: Response.json(periodStatements)) as typeof globalThis.fetch;
+
+		const data = (await load({
+			url: new URL('http://localhost/statements?contract=c1'),
+			fetch
+		} as never)) as {
+			scope: string | null;
+		};
+
+		expect(data.scope).toBeNull();
+	});
+
+	it('fragt den Mietvertrag unter seiner kodierten Kennung ab', async () => {
+		const urls: string[] = [];
+		const fetch = (async (url: string) => {
+			urls.push(url);
+			return Response.json(periodStatements);
+		}) as typeof globalThis.fetch;
+
+		await load({
+			url: new URL('http://localhost/statements?contract=..%2Fbuildings'),
+			fetch
+		} as never);
+
+		expect(urls).toContain(`${API}/contracts/..%2Fbuildings`);
+	});
+
+	it('sagt nichts über die Auswahl, solange kein Mietvertrag gewählt ist', async () => {
+		const fetch = (async () => Response.json(periodStatements)) as typeof globalThis.fetch;
+
+		const data = (await load({ url: new URL('http://localhost/statements'), fetch } as never)) as {
+			scope: string | null;
+		};
+
+		expect(data.scope).toBeNull();
+	});
+});
+
+describe('Abrechnungsliste einer Abrechnungsperiode', () => {
+	it('fragt nur die Abrechnungen der Periode ab und nennt die Periode', async () => {
+		const urls: string[] = [];
+		const fetch = (async (url: string) => {
+			urls.push(url);
+			return Response.json(periodStatements);
+		}) as typeof globalThis.fetch;
+
+		const data = (await load({
+			url: new URL(
+				'http://localhost/statements?status=draft&periodStart=2024-07-01&periodEnd=2025-06-30'
+			),
+			fetch
+		} as never)) as { scope: string | null };
+
+		expect(urls[0]).toBe(
+			`${API}/statements?limit=10&offset=0&status=draft&periodStart=2024-07-01&periodEnd=2025-06-30`
+		);
+		expect(data.scope).toBe(
+			'Sie sehen die Abrechnungen der Abrechnungsperiode 01.07.2024 – 30.06.2025.'
+		);
+	});
+});
+
+describe('Abrechnungsperiode aus einer Adresse von Hand', () => {
+	it('nennt keine Periode, wenn ein Datum keines ist', async () => {
+		const fetch = (async () => Response.json(periodStatements)) as typeof globalThis.fetch;
+
+		const data = (await load({
+			url: new URL('http://localhost/statements?periodStart=2024-13-45&periodEnd=2024-12-31'),
+			fetch
+		} as never)) as { scope: string | null };
+
+		expect(data.scope).toBeNull();
 	});
 });

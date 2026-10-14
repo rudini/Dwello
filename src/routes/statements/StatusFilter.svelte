@@ -29,7 +29,9 @@
 						: 'border-line bg-surface hover:border-line-strong'}"
 					data-testid="filter-{status}"
 				>
-					<span class="text-2xl font-bold tabular-nums text-ink">{counts[status]}</span>
+					<span class="text-2xl font-bold tabular-nums text-ink" data-testid="filter-count"
+						>{counts[status]}</span
+					>
 					<span class="text-ink">{statusLabels[status]}</span>
 				</a>
 			</li>

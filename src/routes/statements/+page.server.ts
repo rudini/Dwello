@@ -1,29 +1,73 @@
 import { m } from '$lib/paraglide/messages';
+import { formatDate } from '$lib/utils/format';
 import type { StatementsListData } from '$lib/types';
 import type { PageServerLoad } from './$types';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
+// Whose statements a contract filter shows: tenant, Wohnung and Vertragsbeginn, so two contracts never read alike
+async function contractScope(fetch: typeof globalThis.fetch, id: string): Promise<string | null> {
+	const response = await fetch(`${BACKEND_URL}/api/v1/contracts/${encodeURIComponent(id)}`);
+	if (!response.ok) return null;
+	const { tenant, apartment, building, startDate } = await response.json();
+	return m.statements_scope_contract({
+		tenant: `${tenant.firstName} ${tenant.lastName}`,
+		apartment: apartment.number,
+		building: building.name,
+		start: formatDate(startDate)
+	});
+}
+
+/** A calendar day as YYYY-MM-DD that exists (not 2024-13-45 or 2024-02-30) */
+const isDate = (value: string | null): value is string =>
+	!!value &&
+	/^\d{4}-\d{2}-\d{2}$/.test(value) &&
+	!Number.isNaN(Date.parse(value)) &&
+	new Date(value).toISOString().startsWith(value);
+
+// The list's filters from the page URL, as the backend names them
+const FILTERS = {
+	status: 'status',
+	building: 'buildingId',
+	search: 'search',
+	contract: 'contractId',
+	periodStart: 'periodStart',
+	periodEnd: 'periodEnd'
+};
+
+function backendQuery(url: URL, page: number, pageSize: number) {
+	const params = new URLSearchParams({
+		limit: String(pageSize),
+		offset: String((page - 1) * pageSize)
+	});
+	for (const [name, backendName] of Object.entries(FILTERS)) {
+		const value = url.searchParams.get(name);
+		if (value) params.set(backendName, value);
+	}
+	return params;
+}
+
 export const load: PageServerLoad = async ({ url, fetch }): Promise<StatementsListData> => {
 	const page = parseInt(url.searchParams.get('page') || '1');
 	const pageSize = 10;
-	const status = url.searchParams.get('status') || undefined;
-	const buildingId = url.searchParams.get('building') || undefined;
-	const search = url.searchParams.get('search') || undefined;
+	const contractId = url.searchParams.get('contract');
+	const [periodStart, periodEnd] = [url.searchParams.get('periodStart'), url.searchParams.get('periodEnd')];
+	// only a real date range is named; a hand-made address with another value gets no sentence
+	const periodScope =
+		isDate(periodStart) && isDate(periodEnd)
+			? m.statements_scope_period({ start: formatDate(periodStart), end: formatDate(periodEnd) })
+			: null;
 
 	try {
-		// Fetch statements from backend
-		const params = new URLSearchParams();
-		params.set('limit', String(pageSize));
-		params.set('offset', String((page - 1) * pageSize));
-		if (status) params.set('status', status);
-		if (buildingId) params.set('buildingId', buildingId);
-		if (search) params.set('search', search);
-
-		const [statementsRes, countsRes, buildingsRes] = await Promise.all([
+		const params = backendQuery(url, page, pageSize);
+		// the status tabs count over the same filters as the list, all but the status itself
+		const counted = new URLSearchParams(params);
+		for (const key of ['limit', 'offset', 'status']) counted.delete(key);
+		const [statementsRes, countsRes, buildingsRes, scope] = await Promise.all([
 			fetch(`${BACKEND_URL}/api/v1/statements?${params}`),
-			fetch(`${BACKEND_URL}/api/v1/statements/counts`),
-			fetch(`${BACKEND_URL}/api/v1/buildings?limit=100`)
+			fetch(`${BACKEND_URL}/api/v1/statements/counts${counted.size ? `?${counted}` : ''}`),
+			fetch(`${BACKEND_URL}/api/v1/buildings?limit=100`),
+			contractId ? contractScope(fetch, contractId) : periodScope
 		]);
 
 		const statementsData = await statementsRes.json();
@@ -79,6 +123,7 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<StatementsLi
 			page,
 			pageSize,
 			buildings,
+			scope,
 			statusCounts: {
 				draft: countsData.draft || 0,
 				sent: countsData.sent || 0,
@@ -95,6 +140,7 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<StatementsLi
 			page,
 			pageSize,
 			buildings: [],
+			scope: null,
 			statusCounts: {
 				draft: 0,
 				sent: 0,

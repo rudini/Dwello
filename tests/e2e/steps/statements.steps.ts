@@ -2,7 +2,9 @@ import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import {
 	listedStatement,
+	countedStatements,
 	listedStatementCount,
+	listScope,
 	pageAddressInApp,
 	statementOfYearListed,
 	statementPath
@@ -139,3 +141,26 @@ When(
 		await verwalter.attemptsTo(downloadStatementPdfFromList(names.get(tenant) ?? tenant, year));
 	}
 );
+
+Then(
+	'erfährt der Liegenschaftsverwalter, dass die Liste nur die Abrechnungen des Mietvertrags von {string} in der Wohnung {string} zeigt',
+	async ({ verwalter, names }, tenant: string, apartment: string) => {
+		await verwalter.sees(listScope).toContain(`Mietvertrags von ${names.get(tenant) ?? tenant}, Wohnung ${apartment}`);
+	}
+);
+
+Then('nicht die Abrechnung {int} von {string}', async ({ verwalter, names }, year: number, tenant: string) => {
+	await verwalter.sees(statementOfYearListed(names.get(tenant) ?? tenant, year)).toBe(false);
+});
+
+Then(
+	'erfährt der Liegenschaftsverwalter, dass die Liste nur die Abrechnungen der Abrechnungsperiode {string} zeigt',
+	async ({ verwalter }, period: string) => {
+		await verwalter.sees(listScope).toContain(`Abrechnungsperiode ${period}`);
+	}
+);
+
+// the status tabs count what the list can show, not every statement
+Then('zählt die Liste {int} Entwurf/Entwürfe', async ({ verwalter }, count: number) => {
+	await verwalter.sees(countedStatements('draft')).toBe(String(count));
+});

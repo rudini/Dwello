@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
 	akontoHint,
+	draftsLink,
 	findingText,
 	needsConfirmation,
 	invoiceRows,
@@ -359,5 +360,27 @@ describe('Entwurf der Abrechnungen', () => {
 				known
 			)
 		).toEqual({ ...selection, buildingIds: ['b1'], heatingProfileId: '' });
+	});
+});
+
+describe('Entwürfe nach dem Abrechnungslauf ansehen', () => {
+	const selection = {
+		periodStart: '2024-07-01',
+		periodEnd: '2025-06-30',
+		heatingProfileId: 'hp1',
+		managementFeePercent: 3,
+		buildingIds: ['b1']
+	};
+
+	it('zeigt die Entwürfe der Abrechnungsperiode des Laufs und seines einzigen Gebäudes', () => {
+		expect(draftsLink(selection)).toBe(
+			'/statements?status=draft&periodStart=2024-07-01&periodEnd=2025-06-30&building=b1'
+		);
+	});
+
+	it('zeigt nach einem Lauf über mehrere Gebäude die Entwürfe der Periode in allen Gebäuden', () => {
+		expect(draftsLink({ ...selection, buildingIds: ['b1', 'b2'] })).toBe(
+			'/statements?status=draft&periodStart=2024-07-01&periodEnd=2025-06-30'
+		);
 	});
 });
