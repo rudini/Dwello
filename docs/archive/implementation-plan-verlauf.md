@@ -5674,3 +5674,12 @@ Task: find open issues that describe the same thing and merge the real duplicate
 - [x] #95 (P-8a) merged into #132 (B-8c): IV5-2, «Neu berechnen» on a single draft; #95 closed as duplicate (no markers)
 - [x] Checks: `test:coverage`, `lint`, `check`, backend `test` + `type-check`; no scenario affected (comment markers only)
 - Files: `src/routes/invoices/MissedWarning.svelte`, `src/routes/statements/generate/CategoryCheck.svelte`
+
+## Session 33 - October 2026: merge duplicate open points
+
+Task: find duplicates in `docs/design/offene-punkte.md` and merge them.
+
+- [x] U-22 (Helga P-5, Marco P-4: filters apply only after «Suchen») merged into U-12; U-22 points to U-12
+- [x] U-25 (Helga P-4: «Entwurf gespeichert» read as statement drafts) moved to issue #57 (comment); U-25 points to #57
+- [x] Checks: `bunx vitest run`, `bun run lint`; docs only, no scenario
+- Files: `docs/design/offene-punkte.md`
