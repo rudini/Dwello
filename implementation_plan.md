@@ -2,7 +2,7 @@
 
 Checklist of the current task (`CLAUDE.md`, Workflow step 8): add the items when the task starts, tick them as they are done, note the files changed. Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-functional), see `CLAUDE.md`, "Open work". History (phases 0–22 and every finished session): `docs/archive/implementation-plan-verlauf.md`.
 
-## Session 35 - October 2026: upload documents to a tenant (#174)
+## Session 37 - October 2026: upload documents to a tenant (#174)
 
 From issue #174 (decisions confirmed by the product owner on 2026-10-14): the Liegenschaftsverwalter adds own files (PDF, JPG, PNG, at most 10 MB, with a title) to a tenant, opens and deletes them; uploads show no Versandstatus. Assumptions: the upload form sits inline in the card «Dokumente» (works without JavaScript, secondary action next to the page's primary «Mietvertrag erfassen»); delete only on the tenant page; the schema change goes into `0001_schema.sql` (no installation yet, README); the glossary entries **Dokument** (extended) and **Hochgeladenes Dokument** (new) are added by the product owner before the merge (fach-reviewer F-1; wording in `docs/reviews/upload-scenarios-fachreview-1.md`).
 

@@ -5774,3 +5774,50 @@ Skills: none (no code changed).
 
 code-reviewer round 1 (`docs/reviews/workflow-review-rule-review-1.md`): fixed C-1 (Major), C-2, C-3, C-4, C-6 (Minor), C-5, C-7 (Nit)
 code-reviewer round 2 (`docs/reviews/workflow-review-rule-review-2.md`): fixed C-8, C-9 (Nit)
+
+## Session 35 - October 2026: nightly issue triage
+
+From the user: an agent that categorizes each new issue and points out duplicates. Decided in the session: it only suggests (never closes), fills missing labels only (topic label, `entscheiden`), runs as a nightly cloud routine on Haiku, marks checked issues with `triaged`, at most 20 per night oldest first, reports duplicates on the newer issue and up to 3 related issues in one `Triage:` comment, rules live in a skill. No scenario: agent instructions only, no app behavior changes.
+
+- [x] Skill `.claude/skills/issue-triage/SKILL.md`
+- [x] code-reviewer round 1; fixes: no `entscheiden` for «Options» issues (C-1), `issue_write` update with a fresh read and a check after it (C-2), topic labels defined in the skill, not attributed to CLAUDE.md (C-3), one rule for doubt (C-4), step reference (C-5), heading named exactly (C-8), `bug` wording (C-7)
+- [x] Independent review of the skill against "Getting the most out of Opus 5.5" (claude.dev blog, 22 Sep 2026), round 1; fixes: report under the three CLAUDE.md headings (G-1, G-9), "When to stop" section (G-2), label write checked (G-3), CLAUDE.md code workflow out of scope (G-4), never stop to ask (G-5), finish line instead of a cap (G-6), skipped issues go to the label step (G-7), placeholders instead of real numbers (G-8), non-functional points (G-10), step reference (G-11), comment lines that apply (G-12)
+- [x] Round 2 (delta) of both reviews; fixes: labels set before the comment, `triaged` last, a resumed run fills the gaps again (C-9, G-14, G-7), comment and template line for non-functional points (C-10, G-18), the kinds as listed in CLAUDE.md (C-14), any heading level for «Proposed» (C-11, G-19), exact label check (G-15), stop report names issue and labels (G-16), finish line allows a stopped run (C-13, G-17)
+- [x] Label `triaged`: created by the first run, checked by its label check (C-6, after the merge)
+- [x] Checks (coverage, lint, check, backend test and type-check green), push, pull request
+- [x] Routine `trig_019PJ6PHwvy3KwuHDo5vX7hM`: nightly 02:13 Europe/Zurich, Haiku, prompt "run the skill issue-triage"; the repository is attached by the owner in the routines UI (the tool that created it cannot attach one)
+- [x] Session archived
+
+Files: `.claude/skills/issue-triage/SKILL.md`, `implementation_plan.md`, `docs/reviews/issue-triage-{review,guide-review}-{1,2}.md`.
+Skills: none (no code changed).
+
+code-reviewer round 1 (`docs/reviews/issue-triage-review-1.md`): fixed C-1 (Major), C-2, C-3, C-4, C-5 (Minor), C-7, C-8 (Nit); open C-6 (Minor, plan item)
+guide review round 1 (`docs/reviews/issue-triage-guide-review-1.md`): fixed G-1, G-2, G-3, G-4, G-5 (Major), G-6, G-7, G-8, G-9, G-10 (Minor), G-11, G-12 (Nit); G-13 (Nit) rejected: the owner chose Haiku; Sonnet stays the fallback if duplicate suggestions turn out wrong
+code-reviewer round 2 (`docs/reviews/issue-triage-review-2.md`): fixed C-9, C-10 (Minor), C-11, C-13, C-14 (Nit); rejected C-12: G-13 is a rejected finding, not open work
+guide review round 2 (`docs/reviews/issue-triage-guide-review-2.md`): fixed G-14, G-16, G-18 (Minor), G-15, G-17, G-19 (Nit)
+
+## Session 36 - October 2026: app version and release tags (#173)
+
+Decisions: issue #173 (grill-me with the product owner). The E2E build gets `APP_VERSION=v1.4.0` (playwright.config.ts), so the scenario can name the version.
+
+- [x] Scenario «Die Fusszeile zeigt die Version der App» (`navigation.feature`, @wip). Scenario red: `zeigt die Fusszeile "Version 1.4.0"` – Received: null; green, @wip removed
+- [x] Version string from `git describe` (`src/lib/version.ts`). Test red: version.test.ts «zeigt nach einem Tag die Commits seither …» – Received "0.4.0-3-gabc1234"; «kennt ohne Tag keine Version» – Received ""
+- [x] Footer shows «Version …» in de/fr/it/en (`Footer.svelte`, `vite.config.ts` define, `vitest.config.ts`, `src/app.d.ts`, `eslint.config.js`). Test red: shell.dom.test.ts «zeigt die Version der App» – Cannot read properties of null
+- [x] Next version from commit messages (`tools/release/next-version.mjs`). Test red: «erhöht bei einer neuen Funktion …» – Received "0.4.3"; «zählt einen Breaking Change vor 1.0 …» – Received "0.4.3"; «erhöht ab 1.0 …» – Received "1.3.0"
+- [x] Release workflow `.github/workflows/release.yml`: tag + GitHub Release on push to main, manual version by `workflow_dispatch`
+- [x] Docker build arg `APP_VERSION` (`Dockerfile`, `docker-compose.prod.yml`); demo `update.sh` waits for the tag and passes it
+- [x] README and `deploy/demo/README.md`
+- [x] Baseline tag `v0.1.0` on ba76d45: this session cannot push tags (the git proxy drops the push, the GitHub tools create no tags); the product owner pushes it before the merge (pull request text)
+- [x] Merged origin/main (docs only, no conflict)
+- [x] Workflow review: `docs/reviews/workflow-rules-review-issue-173.md`
+- [x] code-reviewer (3 rounds), personas Marco and Sven, checks of "Before marking anything complete"
+- [x] Session archived
+
+Files: `.github/workflows/release.yml`, `tools/release/{release.sh,next-version.mjs,*.test.ts}`, `src/lib/version.ts`, `src/lib/ui/Footer.svelte`, `src/app.d.ts`, `vite.config.ts`, `vitest.config.ts`, `eslint.config.js`, `playwright.config.ts`, `messages/*.json`, `src/__tests__/{version.test.ts,shell.dom.test.ts}`, `tests/e2e/{features/navigation.feature,steps,questions,targets}/app-frame*`, `Dockerfile`, `docker-compose.prod.yml`, `deploy/demo/{update.sh,README.md}`, `README.md`, `docs/design/offene-punkte.md`, `docs/reviews/app-version-review-{1,2,3}.md`, `docs/reviews/workflow-rules-review-issue-173.md`, `docs/design/personas/{marco,sven}-app-version.md`.
+Skills: tdd, ponytail, ponytail-review
+
+- code-reviewer round 1 (`docs/reviews/app-version-review-1.md`): open –, fixed C-1 (Major; reproduced in a scratch repo: two tags on one commit, describe names v0.5.0; the manual run now replaces the merge's tag, simulated with a stubbed gh), C-3, C-4, C-5, C-6, C-7; open work C-2 (`offene-punkte.md` O-15)
+- code-reviewer round 2 (`docs/reviews/app-version-review-2.md`): fixed C-8 (Test red: demo-update.test.ts «baut neu, wenn eine Version von Hand die Version von main ersetzt» – Received ["v0.5.0"]), C-9 (Test red: release.test.ts «lehnt eine Version von Hand ab, die es schon gibt …» – Received ["v0.1.0"]), C-10 (workflow logic moved to `tools/release/release.sh` with `release.test.ts`; C-1's test shown red with the fix taken out – Received v0.2.0 still on the remote)
+- code-reviewer round 3 (`docs/reviews/app-version-review-3.md`): fixed C-11 (the release tests «gibt einem Merge die nächste Version …», «lässt einen schon getaggten Merge …», «lehnt eine Version von Hand in falscher Form ab» and demo-update «baut main erst, wenn es getaggt ist» pin behaviour that existed before the move to `tools/release`; they were green on their first run, no red to show), C-12; open work C-13 (`offene-punkte.md` O-16)
+- persona Marco (`docs/design/personas/marco-app-version.md`): fixed –, rejected P-1: «Version unbekannt» decided in #173; open work P-2 (`offene-punkte.md` U-28)
+- persona Sven (`docs/design/personas/sven-app-version.md`): fixed P-1 (Test red: shell.dom.test.ts «lässt den Trennpunkt vor der Version nicht vorlesen» – Received undefined)

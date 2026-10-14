@@ -2,6 +2,7 @@ import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import {
 	draftNoticeText,
+	footerVersionText,
 	llmRecipientNotice,
 	operatorNoticeText,
 	pageOverflowsSideways,
@@ -130,3 +131,7 @@ Then(
 		await verwalter.sees(sectionText(heading)).toContain('Dokumente, die Sie zu Mietern hochladen');
 	}
 );
+
+Then('zeigt die Fusszeile die Version {string}', async ({ verwalter }, version: string) => {
+	await verwalter.sees(footerVersionText).toBe(`Version ${version}`);
+});

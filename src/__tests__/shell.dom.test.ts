@@ -122,4 +122,14 @@ describe('Fusszeile', () => {
 		);
 		expect(links).toEqual(['/privacy', '/terms']);
 	});
+
+	it('zeigt die Version der App', () => {
+		show(Footer, {});
+		expect(byTestId('footer-version')!.textContent).toBe('Version 1.4.0');
+	});
+
+	it('lässt den Trennpunkt vor der Version nicht vorlesen', () => {
+		show(Footer, {});
+		expect(document.querySelector('footer p [aria-hidden="true"]')?.textContent).toBe('·');
+	});
 });
