@@ -5468,3 +5468,7 @@ Review of the merge onto `main` (`docs/reviews/b15-merge-review-1.md`, commit `5
 - m-1 Minor: request counter could never trigger - fixed: needed again (two clicks possible); covered by a test
 - m-2 Minor: test «meldet nichts, solange …» passed trivially - fixed: replaced by «nimmt nur die letzte Antwort, wenn zweimal versucht wird» (the former U-19 case)
 - n-1 Nit: comment «chosen apartment» in `ContractsUnknown.svelte` - fixed
+- Test red: «behält den Knopf mit dem Fokus, …» - focus on `BODY` before the fix (M-1)
+- Test red: «nimmt nur die letzte Antwort, wenn zweimal versucht wird» - before the fix the hint came back; after making `unknown` a state, still red with a second «geladen» toast from the overtaken attempt; green once `retry` speaks only for the latest request
+- C-1 Minor: these red lines were missing - fixed - `docs/reviews/b15-merge-review-2.md`
+- Finish after the merge fixes: lint, check, deepcheck, fallow clean; `test:coverage` 2279 tests; E2E `contract-edit` with its axe and language rows 26 passed; backend unchanged since `5c93452` (543 tests, type-check)
