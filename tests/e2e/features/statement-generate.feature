@@ -152,6 +152,17 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Wenn der Liegenschaftsverwalter die erstellten Abrechnungen anzeigt
     Dann ist der Liegenschaftsverwalter auf der Seite "Nebenkostenabrechnungen"
 
+  Szenario: Nach dem Erstellen die Entwürfe der Abrechnungsperiode anzeigen
+    Angenommen im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
+    Und der Mieter "Lea Graf" existiert
+    Und "Lea Graf" mietete die Wohnung "3.02" von "2023-01-01" bis "2023-12-31" für "900" Franken
+    Und für "Lea Graf" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2023
+    Und der Liegenschaftsverwalter hat die Abrechnungen 2024 für das Gebäude "Lindenhof" erstellt
+    Wenn der Liegenschaftsverwalter die erstellten Abrechnungen anzeigt
+    Dann erfährt der Liegenschaftsverwalter, dass die Liste nur die Abrechnungen der Abrechnungsperiode "01.01.2024 – 31.12.2024" zeigt
+    Und sieht der Liegenschaftsverwalter die Abrechnung 2024 von "Marc Huber"
+    Aber nicht die Abrechnung 2023 von "Lea Graf"
+
   Szenario: Zurück zur Abrechnungsliste
     Wenn der Liegenschaftsverwalter zur Abrechnungsliste zurückkehrt
     Dann ist der Liegenschaftsverwalter auf der Seite "Nebenkostenabrechnungen"

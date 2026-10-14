@@ -37,7 +37,12 @@ beforeEach(() => {
 });
 
 describe('Abrechnungsliste', () => {
-	const list = (statements: ReturnType<typeof statement>[], total = statements.length, page = 1) =>
+	const list = (
+		statements: ReturnType<typeof statement>[],
+		total = statements.length,
+		page = 1,
+		scope: string | null = null
+	) =>
 		show(StatementsPage, {
 			data: {
 				statements,
@@ -45,9 +50,78 @@ describe('Abrechnungsliste', () => {
 				page,
 				pageSize: 10,
 				buildings: [{ id: 'b1', name: 'Ahornhof' }],
+				scope,
 				statusCounts: counts
 			}
 		} as never);
+
+	const contractScope =
+		'Sie sehen die Abrechnungen des Mietvertrags von Anna Keller, Wohnung 2.01 (Ahornhof), Vertragsbeginn 01.04.2024.';
+
+	it('sagt über der Liste, wessen Abrechnungen sie zeigt, mit einem Link zu allen', () => {
+		url = new URL('http://localhost/statements?contract=c1');
+		list([statement()], 1, 1, contractScope);
+
+		expect(byTestId('statements-scope')?.textContent).toContain(contractScope);
+		const all = byTestId('statements-scope')?.querySelector('a');
+		expect(all?.textContent?.trim()).toBe('Alle Abrechnungen anzeigen');
+		expect(all?.getAttribute('href')).toBe('/statements');
+	});
+
+	// on a phone the sentence must be on the first screen, before the tabs and the search
+	it('sagt vor den Statusfiltern, wessen Abrechnungen die Liste zeigt', () => {
+		url = new URL('http://localhost/statements?contract=c1');
+		list([statement()], 1, 1, contractScope);
+
+		const scope = byTestId('statements-scope')!;
+		const firstTab = document.querySelector('[data-testid^="filter-"]')!;
+		expect(scope.compareDocumentPosition(firstTab) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+	});
+
+	it('behält den Mietvertrag in den Statuslinks und in der Suche', () => {
+		url = new URL('http://localhost/statements?contract=c1');
+		list([statement()], 1, 1, contractScope);
+
+		const statusLinks = [
+			...document.querySelectorAll<HTMLAnchorElement>('a[href^="/statements?"]')
+		];
+		expect(statusLinks.length).toBeGreaterThan(0);
+		expect(statusLinks.every((a) => a.getAttribute('href')!.includes('contract=c1'))).toBe(true);
+		expect(document.querySelector<HTMLInputElement>('form input[name="contract"]')?.value).toBe(
+			'c1'
+		);
+	});
+
+	it('behält die Abrechnungsperiode in der Suche und zählt sie als Filter', () => {
+		url = new URL('http://localhost/statements?periodStart=2024-01-01&periodEnd=2024-12-31');
+		list([], 0, 1, 'Sie sehen die Abrechnungen der Abrechnungsperiode 01.01.2024 – 31.12.2024.');
+
+		expect(document.querySelector<HTMLInputElement>('form input[name="periodStart"]')?.value).toBe(
+			'2024-01-01'
+		);
+		expect(document.querySelector<HTMLInputElement>('form input[name="periodEnd"]')?.value).toBe(
+			'2024-12-31'
+		);
+		expect(text()).toContain('Keine Abrechnungen gefunden');
+	});
+
+	it('zählt auch ein Periodenende allein als Filter', () => {
+		url = new URL('http://localhost/statements?periodEnd=2024-12-31');
+		list([], 0, 1);
+
+		expect(text()).toContain('Keine Abrechnungen gefunden');
+	});
+
+	it('bietet bei einem Mietvertrag ohne Abrechnungen «Filter zurücksetzen» an', () => {
+		url = new URL('http://localhost/statements?contract=c1');
+		list([], 0, 1, contractScope);
+
+		const reset = [...document.querySelectorAll('a')].filter(
+			(a) => a.textContent?.trim() === 'Filter zurücksetzen'
+		);
+		expect(reset.length).toBeGreaterThan(0);
+		expect(reset.every((a) => a.getAttribute('href') === '/statements')).toBe(true);
+	});
 
 	// After a search the focus moves here, so the number of results is read out
 	it('nennt die Treffer in einer Überschrift, die den Fokus nach der Suche nimmt', () => {

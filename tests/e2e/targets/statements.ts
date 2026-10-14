@@ -26,3 +26,6 @@ export const statementPdfLink = (tenantName: string, year: number) =>
 		statementRowForYear(tenantName, year).locate(page).getByTestId('statement-pdf-link')
 	);
 export const statementsEmptyNotice = target('Hinweis keine Abrechnungen', (page) => page.getByTestId('statements-empty'));
+export const statementsScope = target('Auswahl der Abrechnungsliste', (page) => page.getByTestId('statements-scope'));
+export const statusCount = (status: string) =>
+	target(`Anzahl im Statusfilter ${status}`, (page) => page.getByTestId(`filter-${status}`).getByTestId('filter-count'));

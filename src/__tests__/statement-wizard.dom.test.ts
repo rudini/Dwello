@@ -781,7 +781,7 @@ describe('Abrechnungen erstellen', () => {
 			'2 Nebenkostenabrechnungen sind als Entwurf erstellt'
 		);
 		expect(byTestId('show-statements-button')!.getAttribute('href')).toBe(
-			'/statements?status=draft'
+			'/statements?status=draft&periodStart=2024-01-01&periodEnd=2024-12-31'
 		);
 		expect(byTestId('wizard-next')).toBeNull();
 	});

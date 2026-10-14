@@ -99,6 +99,8 @@ Funktionalität: Barrierefreiheit
       | statements             | empty               |
       | statements             | filtered-empty      |
       | statements             | mark-paid-dialog    |
+      | statements             | list-scoped         |
+      | statements-period      | default             |
       | statement-generate     | default             |
       | statement-generate     | every-wizard-step   |
       | statement-generate     | preview-empty       |

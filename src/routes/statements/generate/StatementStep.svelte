@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { localName } from '$lib/names';
-	import { invoiceRows, type WizardSelection } from '$lib/statement-wizard';
+	import { draftsLink, invoiceRows, type WizardSelection } from '$lib/statement-wizard';
 	import type { Building, HeatingProfile } from '$lib/types';
 	import BuildingStep from './BuildingStep.svelte';
 	import GenerationStep from './GenerationStep.svelte';
@@ -76,6 +76,7 @@
 	<GenerationStep
 		count={previewRows.length}
 		{createdCount}
+		draftsHref={draftsLink(selection)}
 		withoutInvoices={invoiceRows(invoices, data.buildings, selection)
 			.filter((row) => row.missing)
 			.map((row) => row.name)}

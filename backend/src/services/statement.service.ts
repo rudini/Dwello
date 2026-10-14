@@ -26,6 +26,7 @@ import { refusal, type Refusal } from './coded-error';
 
 export interface StatementFilters {
 	search?: string;
+	contractId?: string;
 	buildingId?: string;
 	apartmentId?: string;
 	tenantId?: string;
@@ -87,13 +88,14 @@ export function statusCondition(status: string) {
  * Where conditions for listStatements; tenant and building columns come from its joins
  */
 function statementFilterConditions(filters: StatementFilters) {
-	const { search, buildingId, apartmentId, tenantId, status, periodStart, periodEnd } = filters;
+	const { search, contractId, buildingId, apartmentId, tenantId, status, periodStart, periodEnd } = filters;
 	return [
 		search &&
 			or(
 				ilike(utilityStatements.statementNumber, `%${search}%`),
 				ilike(sql`${tenants.firstName} || ' ' || ${tenants.lastName}`, `%${search}%`)
 			),
+		contractId && eq(utilityStatements.contractId, contractId),
 		apartmentId && eq(utilityStatements.apartmentId, apartmentId),
 		tenantId && eq(utilityStatements.tenantId, tenantId),
 		buildingId && eq(apartments.buildingId, buildingId),
@@ -538,99 +540,36 @@ export async function addLineItems(
 }
 
 /**
- * Get statement count by status for a building
- * Note: overdue is calculated dynamically (status='sent' AND payment_deadline < today)
- * Note: sent count excludes overdue statements
+ * Statements per status, over the same filters as the list (all but the status itself),
+ * so the status tabs count what the list can show
  */
-export async function getStatementCountsByStatus(buildingId?: string): Promise<{
+export async function getStatementCountsByStatus(filters: Omit<StatementFilters, 'status'> = {}): Promise<{
 	draft: number;
 	sent: number;
 	paid: number;
 	overdue: number;
 	total: number;
 }> {
-	const today = new Date().toISOString().split('T')[0];
+	const counted = (status: string) => sql<number>`count(*) filter (where ${statusCondition(status)})`;
+	const [row] = await db
+		.select({
+			draft: counted('draft'),
+			sent: counted('sent'),
+			paid: counted('paid'),
+			overdue: counted('overdue'),
+			total: sql<number>`count(*)`
+		})
+		.from(utilityStatements)
+		.leftJoin(tenants, eq(utilityStatements.tenantId, tenants.id))
+		.leftJoin(apartments, eq(utilityStatements.apartmentId, apartments.id))
+		.where(and(...statementFilterConditions(filters)));
 
-	const counts = {
-		draft: 0,
-		sent: 0,
-		paid: 0,
-		overdue: 0,
-		total: 0
+	return {
+		draft: Number(row.draft),
+		sent: Number(row.sent),
+		paid: Number(row.paid),
+		overdue: Number(row.overdue),
+		total: Number(row.total)
 	};
-
-	// Base condition for building filter
-	const buildingCondition = buildingId
-		? eq(apartments.buildingId, buildingId)
-		: undefined;
-
-	// Query for draft and paid (straightforward status counts)
-	const baseQuery = buildingId
-		? db.select({ status: utilityStatements.status, count: sql<number>`count(*)` })
-				.from(utilityStatements)
-				.leftJoin(apartments, eq(utilityStatements.apartmentId, apartments.id))
-				.where(buildingCondition)
-				.groupBy(utilityStatements.status)
-		: db.select({ status: utilityStatements.status, count: sql<number>`count(*)` })
-				.from(utilityStatements)
-				.groupBy(utilityStatements.status);
-
-	const results = await baseQuery;
-
-	for (const row of results) {
-		if (row.status === 'draft' || row.status === 'paid') {
-			counts[row.status] = Number(row.count);
-		}
-		counts.total += Number(row.count);
-	}
-
-	// Calculate overdue count (sent statements past payment deadline)
-	const overdueConditions = [
-		eq(utilityStatements.status, 'sent'),
-		lt(utilityStatements.paymentDeadline, today)
-	];
-	if (buildingCondition) overdueConditions.push(buildingCondition);
-
-	const overdueQuery = buildingId
-		? db.select({ count: sql<number>`count(*)` })
-				.from(utilityStatements)
-				.leftJoin(apartments, eq(utilityStatements.apartmentId, apartments.id))
-				.where(and(...overdueConditions))
-		: db.select({ count: sql<number>`count(*)` })
-				.from(utilityStatements)
-				.where(and(eq(utilityStatements.status, 'sent'), lt(utilityStatements.paymentDeadline, today)));
-
-	const [overdueResult] = await overdueQuery;
-	counts.overdue = Number(overdueResult?.count ?? 0);
-
-	// Calculate sent count (sent statements NOT past deadline)
-	const sentConditions = [
-		eq(utilityStatements.status, 'sent'),
-		or(
-			gte(utilityStatements.paymentDeadline, today),
-			sql`${utilityStatements.paymentDeadline} IS NULL`
-		)
-	];
-	if (buildingCondition) sentConditions.push(buildingCondition);
-
-	const sentQuery = buildingId
-		? db.select({ count: sql<number>`count(*)` })
-				.from(utilityStatements)
-				.leftJoin(apartments, eq(utilityStatements.apartmentId, apartments.id))
-				.where(and(...sentConditions))
-		: db.select({ count: sql<number>`count(*)` })
-				.from(utilityStatements)
-				.where(and(
-					eq(utilityStatements.status, 'sent'),
-					or(
-						gte(utilityStatements.paymentDeadline, today),
-						sql`${utilityStatements.paymentDeadline} IS NULL`
-					)
-				));
-
-	const [sentResult] = await sentQuery;
-	counts.sent = Number(sentResult?.count ?? 0);
-
-	return counts;
 }
 
