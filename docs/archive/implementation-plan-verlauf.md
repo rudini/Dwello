@@ -5821,3 +5821,25 @@ Skills: tdd, ponytail, ponytail-review
 - code-reviewer round 3 (`docs/reviews/app-version-review-3.md`): fixed C-11 (the release tests «gibt einem Merge die nächste Version …», «lässt einen schon getaggten Merge …», «lehnt eine Version von Hand in falscher Form ab» and demo-update «baut main erst, wenn es getaggt ist» pin behaviour that existed before the move to `tools/release`; they were green on their first run, no red to show), C-12; open work C-13 (`offene-punkte.md` O-16)
 - persona Marco (`docs/design/personas/marco-app-version.md`): fixed –, rejected P-1: «Version unbekannt» decided in #173; open work P-2 (`offene-punkte.md` U-28)
 - persona Sven (`docs/design/personas/sven-app-version.md`): fixed P-1 (Test red: shell.dom.test.ts «lässt den Trennpunkt vor der Version nicht vorlesen» – Received undefined)
+
+## Session 2026-10-14: open bugs, starting with #122 (favicon)
+
+Task: work off the open `bug` issues one by one (issue, PR, merge, next). Skipped while labelled `entscheiden`: #93, #124, #130, #131, #136, #138, #141.
+
+### #122 Favicon link points to a missing file
+
+- [x] Scenario `Das Browser-Tab zeigt das Dwello-Symbol` (`navigation.feature`). Scenario red: `zeigt das Browser-Tab das Dwello-Symbol` – expected "image/svg+xml", received "HTTP 404"
+- [x] Test red: `app-html.test.ts` «verlinkt nur Dateien, die unter static/ liegen» – received ["favicon.png"]; «verlinkt das Seitensymbol als SVG» – favicon.png link
+- [x] `static/favicon.svg` (Lucide House, stroke 1.75, accent light/dark), `src/app.html` links it as SVG; production build (E2E) serves `/favicon.svg`, Docker copies `build/` with it
+- [x] `docs/design/design-decisions.md` D7a
+- [x] Skills: tdd, ponytail, ponytail-review
+- [x] Checks: test:coverage, lint, check, backend test + type-check, deepcheck:audit
+- [x] code-reviewer
+  - code-reviewer round 1 (`docs/reviews/issue-122-review-1.md`): open none, fixed C-1 (Minor; `app-html.test.ts` «zeigt im Seitensymbol das Haus aus dem Header», red with a changed path), C-2 (Minor), rejected C-3: a missing href fails the question, `actor.sees` reports it; C-4: the link is written once in our own file, attribute order does not drift
+- [x] Personas Marco (phone), Anna (finding the way in)
+  - persona marco round 1 (`docs/design/personas/marco-issue-122.md`): open P-1 (Minor), P-2 (Nit) as `offene-punkte.md` O-17; Beobachtungen in O-18 («Version unbekannt»: O-15)
+  - persona anna round 1 (`docs/design/personas/anna-issue-122.md`): open P-1 (Minor), P-2 (Nit) as O-17 (the issue decided the outline house and the scheme by system; a filled mark is a product decision); Beobachtungen in O-18
+- [x] Workflow review `docs/reviews/workflow-rules-review-issue-122.md`
+- [x] PR, CI, merge (pull request opened after archiving; merge follows green CI)
+
+Files: `src/app.html`, `static/favicon.svg`, `src/__tests__/app-html.test.ts`, `tests/e2e/features/navigation.feature`, `tests/e2e/steps/app-frame.steps.ts`, `tests/e2e/questions/app-frame.ts`, `tests/e2e/screenplay/questions.ts`, `docs/design/design-decisions.md`, `docs/design/offene-punkte.md`

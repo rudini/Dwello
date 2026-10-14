@@ -22,4 +22,5 @@ export const pageOverflowsSideways = question(
 	async (actor) => (await actor.answer(ThePage.sidewaysOverflow)) > 0
 );
 export const userMenuCount = Count.of(userMenuButton);
+export const tabIcon = ThePage.tabIcon;
 export const footerVersionText = Text.of(footerVersion);
