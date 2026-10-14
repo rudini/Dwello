@@ -1,0 +1,38 @@
+name: Release
+
+# Every merge to main gets the next version as a tag and a GitHub Release (issue #173); the app shows it in the
+# footer (vite.config.ts). A manual run sets a version by hand, e.g. 1.0.0.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version to release instead of the computed one, e.g. 1.0.0
+        required: true
+
+# One release at a time; GitHub keeps only the newest waiting run, so of three quick merges the last two share a version
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Tag and release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ inputs.version }}
+        run: |
+          # A merge already tagged (a re-run) keeps its version, unless one is set by hand
+          [ -z "$VERSION" ] && git describe --tags --exact-match --match 'v*' HEAD 2>/dev/null && exit 0
+          last=$(git describe --tags --abbrev=0 --match 'v*')
+          next=${VERSION:-$(git log --format=%B%x00 "$last"..HEAD | node tools/release/next-version.mjs "$last")}
+          gh release create "v${next#v}" --target "$GITHUB_SHA" --title "v${next#v}" --generate-notes

@@ -34,7 +34,8 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Build the application
+# Build the application; APP_VERSION is `git describe --tags` of the checkout (.git is not in the context), shown in the footer
+ARG APP_VERSION=
 ENV NODE_ENV=production
 RUN bun run build
 

@@ -70,7 +70,7 @@ chmod 600 ~/.ssh/config
 ```bash
 git clone git@github.com:rudini/Dwello.git && cd Dwello
 cp deploy/demo/.env.example deploy/demo/.env    # fill in: secrets, Google client, operator
-docker compose -f docker-compose.prod.yml -f deploy/demo/docker-compose.yml --env-file deploy/demo/.env up -d --build
+APP_VERSION=$(git describe --tags) docker compose -f docker-compose.prod.yml -f deploy/demo/docker-compose.yml --env-file deploy/demo/.env up -d --build
 docker exec dwello-ollama ollama pull qwen2.5:3b
 deploy/demo/reset-demo.sh                       # loads the demo data the first time
 ```
@@ -93,7 +93,7 @@ If the reset fails halfway (the log ends with an error, the app shows no data), 
 
 ## 7. Automatic updates
 
-`update.sh` checks every 5 minutes whether `main` has a commit that is not built yet; only then it pulls, rebuilds and restarts the app, migrations included. Building takes 3 to 5 minutes while the old version keeps running; switching takes about a minute without the app (the new backend migrates and must report healthy before the frontend starts). A failed build is tried again on the next run; the first run after adding the cron line builds once, since no build is recorded yet (`.git/demo-deployed`). It needs the clone on `main` (`git checkout main`) and no local changes to tracked files; otherwise `git merge --ff-only` fails on every run and says so in the log. It and the nightly reset share a lock, so they never run at the same time. Add to `crontab -e`:
+`update.sh` checks every 5 minutes whether `main` has a commit that is not built yet and already has its version tag (the release workflow tags each merge within a minute; an untagged `main` waits for the next run); only then it pulls, rebuilds and restarts the app, migrations included. Building takes 3 to 5 minutes while the old version keeps running; switching takes about a minute without the app (the new backend migrates and must report healthy before the frontend starts). A failed build is tried again on the next run; the first run after adding the cron line builds once, since no build is recorded yet (`.git/demo-deployed`). It needs the clone on `main` (`git checkout main`) and no local changes to tracked files; otherwise `git merge --ff-only` fails on every run and says so in the log. It and the nightly reset share a lock, so they never run at the same time. Add to `crontab -e`:
 
 ```cron
 */5 * * * * /home/ubuntu/Dwello/deploy/demo/update.sh >> /home/ubuntu/demo-update.log 2>&1

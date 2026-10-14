@@ -122,4 +122,9 @@ describe('Fusszeile', () => {
 		);
 		expect(links).toEqual(['/privacy', '/terms']);
 	});
+
+	it('zeigt die Version der App', () => {
+		show(Footer, {});
+		expect(byTestId('footer-version')!.textContent).toBe('Version 1.4.0');
+	});
 });

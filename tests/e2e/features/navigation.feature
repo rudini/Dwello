@@ -48,3 +48,6 @@ Funktionalität: Navigation
   Szenario: Nur der aktuelle Bereich ist markiert
     Wenn der Liegenschaftsverwalter in der Hauptnavigation "Heizprofile" wählt
     Dann ist in der Hauptnavigation nur "Heizprofile" markiert
+
+  Szenario: Die Fusszeile zeigt die Version der App
+    Dann zeigt die Fusszeile "Version 1.4.0"
