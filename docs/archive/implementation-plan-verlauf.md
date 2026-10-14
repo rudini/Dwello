@@ -5759,3 +5759,13 @@ Skills: ponytail, ponytail-review (on the scripts after round 2: nothing to cut)
 
 code-reviewer round 1 (`docs/reviews/demo-update-review-1.md`): fixed C-1 (Major), C-2, C-3, C-4, C-6 (Minor), C-7 (Nit); rejected C-5: wanted, a clone off main must stay loud in the log
 code-reviewer round 2 (`docs/reviews/demo-update-review-2.md`): fixed C-8 (Minor), C-9, C-10 (Nit)
+
+## Session 2026-10-14: workflow review after each feature
+
+From the user: after each feature, review whether instructions, skills, agents or hooks should change, write the findings to `docs/reviews/workflow-rules-review-*.md`, implement none of them. No scenario: agent instructions only, no app behavior changes.
+
+- [x] `CLAUDE.md` Workflow step 7: paragraph "Workflow review" (scope, evidence, report path, review only, no issues or rows for its findings)
+- [x] Session archived
+
+Files: `CLAUDE.md`, `docs/archive/implementation-plan-verlauf.md`.
+Skills: none (no code changed).
