@@ -22,19 +22,28 @@ Slice 1 notes:
 - Skills: tdd, ponytail-review
 
 Slice 2 - instructions:
-- [ ] 2 Personas get their own records; table of demo records (name, ID, state) in `docs/design/personas/README.md`
-- [ ] 4 Every reviewer reads its own worktree; the main session keeps working
-- [ ] 5 While `fach-reviewer` checks the scenario: only lower-layer tests, no production code
-- [ ] 6 Skills `tdd` and `ponytail` are loaded, not only followed
-- [ ] 7 A changed text the user sees is a behavior change
-- [ ] 8 Every backend answer a frontend test reads comes from `tests/contracts`
-- [ ] 10 Search for a similar issue before opening one
-- [ ] 11 Archive the finished session before the final commit; `code-reviewer` checks the plan holds only the current session
-- [ ] 12 Stop hook vs. push approval: already on `main` (`CLAUDE.md`, «Keep going»); check the wording only
-- [ ] 13 One mapper per backend answer used by several loads
-- [ ] 14 Plan: one line per reviewer round, findings stay in the report
-- [ ] 15 Branch check at the start of a task; `code-reviewer` on a merge commit with conflicts in app code
-- [ ] 16 The caller tells a persona that saving in `dwello_persona` is part of its task
+- [x] 2 Personas get their own records; table of demo records (name, ID, state) in `docs/design/personas/README.md`
+- [x] 4 Every reviewer reads its own worktree; the main session keeps working
+- [x] 5 While `fach-reviewer` checks the scenario: only lower-layer tests, no production code
+- [x] 6 Skills `tdd` and `ponytail` are loaded, not only followed
+- [x] 7 A changed text the user sees is a behavior change
+- [x] 8 Every backend answer a frontend test reads comes from `tests/contracts`
+- [x] 10 Search for a similar issue before opening one
+- [x] 11 Archive the finished session before the final commit; `code-reviewer` checks the plan holds only the current session
+- [x] 12 Stop hook vs. push approval: already on `main` (`CLAUDE.md`, «Keep going»); check the wording only
+- [x] 13 One mapper per backend answer used by several loads
+- [x] 14 Plan: one line per reviewer round, findings stay in the report
+- [x] 15 Branch check at the start of a task; `code-reviewer` on a merge commit with conflicts in app code
+- [x] 16 The caller tells a persona that saving in `dwello_persona` is part of its task
+
+Slice 2 notes:
+- 2 table «Demo records for a task» (from `backend/demo/demo-data.sql` and `backend/src/db/demo-data.ts`; the demo data has no fixed-term and no future contract, said so); `CLAUDE.md` step 5 names it
+- 4 `CLAUDE.md` step 4: a worktree for every reviewer subagent; the three reviewer agents read only there; step 5: keep working during persona runs (they use the copy from point 3), no E2E
+- 8 the optional lint rule became H-22 in `docs/design/offene-punkte.md` (H-21 is taken on PR #157)
+- 12 no change: `CLAUDE.md` («Keep going») already says the stop hook does not override Workflow 4 or the push rule
+- 16 `CLAUDE.md` step 5 and `.claude/agents/persona.md`: saving in the persona app is part of the task
+- Files: `CLAUDE.md`, `.claude/agents/{code-reviewer,fach-reviewer,daten-pruefer,persona}.md`, `docs/design/personas/README.md`, `docs/design/offene-punkte.md`
+- No code changed: no `Test red`, no `ponytail-review`
 
 Finish:
 - [ ] Slice reviews (`code-reviewer`), findings triaged
