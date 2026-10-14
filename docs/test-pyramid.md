@@ -30,7 +30,7 @@ The quantities still form a pyramid, with many fast unit tests at the bottom. Th
 | Acceptance (E2E) | `tests/e2e/features/*.feature` | Playwright + playwright-bdd | Browser → SvelteKit build (`node build`) → Elysia → PostgreSQL `dwello_e2e` (migrated fresh before each run) | no API mocks, except one: to reach a state that only a failing request produces, a scenario may answer that one endpoint (all its calls, e.g. one per apartment) with an error at the browser boundary (an error status only, e.g. 500, through `FailRequests` in `tests/e2e/screenplay/`), never with invented data; only requests the browser makes, so not in `@api` scenarios; SMTP mail catcher instead of a mail provider, signed session JWT instead of Google OAuth |
 | Integration | `backend/src/__tests__/*.pg.test.ts` | `bun run test` or `bun run test:pg` (preload `scripts/test-db.ts`, set in `bunfig.toml`) | Elysia app in process (`app.handle`) → PostgreSQL `dwello_test` (migrated fresh before each run) | none; local SMTP server for mail |
 | Unit backend | `backend/src/__tests__/*.test.ts` | `bun run test` (one run together with the pg tests) | pure functions of the services | none; Resend stand-in via `Bun.serve` in `mail.test.ts` |
-| Unit frontend | `src/__tests__`, `src/lib/utils/__tests__`, `tests/unit` | Vitest (`server`: node, `dom`: jsdom) | load functions, actions, BFF, components | fake backend via `fetch` stub / `fakeBff` (from the API contracts in `tests/contracts` where one exists), `vi.mock` for `$app/*` |
+| Unit frontend | `src/__tests__`, `src/lib/utils/__tests__`, `tests/unit` | Vitest (`server`: node, `dom`: jsdom) | load functions, actions, BFF, components | fake backend via `fetch` stub / `fakeBff` (from the API contracts in `tests/contracts`; add one when there is none), `vi.mock` for `$app/*` |
 
 Rules:
 
@@ -38,7 +38,7 @@ Rules:
 - No mocked database: whatever needs SQL is a `*.pg.test.ts`.
 - Negative E2E checks (something is absent) need a positive anchor first (empty-state notice, page title); otherwise they also pass on an error page.
 - Selectors: `data-testid` (see `CLAUDE.md`).
-- Fake backend responses in frontend tests come from `tests/contracts/*.json` where a contract exists; `backend/src/__tests__/api-contracts.pg.test.ts` checks every field against the real API (see `tests/contracts/README.md`).
+- Fake backend responses in frontend tests come from `tests/contracts/*.json`; a test that reads a response without a contract adds one; `backend/src/__tests__/api-contracts.pg.test.ts` checks every field against the real API (see `tests/contracts/README.md`).
 
 ## Coverage
 

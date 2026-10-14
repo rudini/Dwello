@@ -43,13 +43,16 @@ Slice 1 review:
 - C-5 red of the label check itself: the check taken out, «meldet ein offenes Issue …» expected 0 to be 1; the 14 open issues with a proposal all match the heading pattern
 
 Slice 2 notes:
-- 2 table «Demo records for a task» (from `backend/demo/demo-data.sql` and `backend/src/db/demo-data.ts`; the demo data has no fixed-term and no future contract, said so); `CLAUDE.md` step 5 names it
+- 2 table in `docs/design/personas/demo-records.md` (moved out of the persona README after review C-7; from `backend/demo/demo-data.sql` and `backend/src/db/demo-data.ts`; the demo data has no fixed-term and no future contract, said so); `CLAUDE.md` step 5 names it
 - 4 `CLAUDE.md` step 4: a worktree for every reviewer subagent; the three reviewer agents read only there; step 5: keep working during persona runs (they use the copy from point 3), no E2E
 - 8 the optional lint rule became H-22 in `docs/design/offene-punkte.md` (H-21 is taken on PR #157)
 - 12 no change: `CLAUDE.md` («Keep going») already says the stop hook does not override Workflow 4 or the push rule
 - 16 `CLAUDE.md` step 5 and `.claude/agents/persona.md`: saving in the persona app is part of the task
 - Files: `CLAUDE.md`, `.claude/agents/{code-reviewer,fach-reviewer,daten-pruefer,persona}.md`, `docs/design/personas/README.md`, `docs/design/offene-punkte.md`
 - No code changed: no `Test red`, no `ponytail-review`
+
+Slice 2 review:
+- code-reviewer round 1 (`docs/reviews/b15-instructions-slice2-review-1.md`): fixed C-1 (Major: `fach-reviewer` gets a worktree of the committed `@wip` scenario), C-2 (Major: `docs/test-pyramid.md` no longer says «where one exists»), C-3 (at most the first red test), C-4, C-5 (report path in the scratchpad, copied by the caller), C-6, C-7 (table in its own file personas do not read), C-8 (ask before the force-push), C-9 (`Skills: tdd, ponytail, ponytail-review`), C-10 (`review-<slice>-<reviewer>`)
 
 Slice 3 - added by the user during the task:
 - [x] 17 After a finished task: push, open a pull request, turn on auto-merge, resolve conflicts by merging `origin/main`, fix red CI; it merges once green. Still asked: a push to `main`, force-push, merging red or with an open Blocker/Major, and a task where the user said to only commit (as this one). Merge method: merge commit (no squash, so the slice commits stay; #149 was merged so). File: `CLAUDE.md` («Keep going»)
