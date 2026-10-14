@@ -11,6 +11,7 @@ Funktionalität: Barrierefreiheit
   Szenariogrundriss: Bildschirm ohne Barrieren
     Dann ist der Bildschirm "<Bildschirm>" im Zustand "<Zustand>" in allen Ansichten barrierefrei
 
+    # title-format: <Bildschirm> <Zustand>
     Beispiele:
       | Bildschirm             | Zustand             |
       | gallery                | default             |

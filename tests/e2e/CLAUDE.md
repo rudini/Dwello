@@ -9,6 +9,7 @@ bun run test:e2e -- --project=chromium --project=api   # routine run, as in PR C
 bun run test:e2e                                   # all browsers (Firefox and WebKit too, as on main)
 bunx bddgen && bunx playwright test --project=chromium -g "Szenarioname"   # one scenario
 bunx bddgen && bunx playwright test --project=api    # only the @api scenarios through the backend API
+bunx bddgen && bunx playwright test --project=chromium -g "Bildschirm ohne .* contract-edit "   # axe and language rows of one screen (trailing space: not contract-edit-notice)
 bun run test:e2e:wip                               # the @wip scenarios, to see them fail (-- -g "Szenarioname" for one)
 ```
 

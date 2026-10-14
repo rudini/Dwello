@@ -5,6 +5,14 @@ set -euo pipefail
 [ "${CLAUDE_CODE_REMOTE:-}" = "true" ] || exit 0
 cd "$CLAUDE_PROJECT_DIR"
 
+# A branch behind main (or one whose pull request is merged) is noticed before the first change, not at the push
+# (CLAUDE.md, "Branches"); the output reaches the session
+if git fetch -q origin main 2>/dev/null; then
+	behind=$(git rev-list --count HEAD..origin/main)
+	[ "$behind" -eq 0 ] || echo "session-start: branch $(git branch --show-current) is $behind commits behind origin/main;" \
+		"before the first change, start it anew from origin/main if its pull request is merged, else merge origin/main (CLAUDE.md, Branches)."
+fi
+
 bun install >/dev/null 2>&1
 (cd backend && bun install >/dev/null 2>&1)
 
