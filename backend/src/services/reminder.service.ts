@@ -14,6 +14,8 @@ import { reminderLetter } from './reminder-letter';
 import { renderReminderPdf, type PostalAddress } from './reminder-pdf';
 import { getStatement, updateStatement } from './statement.service';
 import { getTenant } from './tenant.service';
+import { formatSwissDate } from './pdf-format';
+import { daysAfter, swissToday } from './today';
 
 const MAX_REMINDER_LEVEL = 3;
 const PAYMENT_DAYS = 10; // new payment deadline in each reminder
@@ -30,8 +32,6 @@ export class ReminderError extends CodedError {
 }
 
 type Document = NonNullable<Awaited<ReturnType<typeof markDocumentSent>>>;
-
-const isoDate = (date: Date) => date.toISOString().split('T')[0];
 
 async function sender(): Promise<PostalAddress & { iban: string }> {
 	return {
@@ -79,7 +79,7 @@ export async function sendReminder(statementId: string) {
 	const level = await nextLevel(statementId, statement.status, Number(statement.balance));
 	const tenant = (await getTenant(statement.tenantId))!;
 	const from = await sender();
-	const today = new Date();
+	const today = swissToday();
 
 	const letter = reminderLetter({
 		level,
@@ -87,13 +87,13 @@ export async function sendReminder(statementId: string) {
 		periodStart: statement.periodStart,
 		periodEnd: statement.periodEnd,
 		balance: Number(statement.balance),
-		deadline: isoDate(new Date(today.getTime() + PAYMENT_DAYS * 86_400_000)),
+		deadline: daysAfter(today, PAYMENT_DAYS),
 		tenant,
 		sender: { name: from.name, iban: from.iban },
 		reference: isQRIBAN(from.iban) ? formatQRReferenceForDisplay(statementQRReference(statementId)) : undefined
 	});
 	const recipient = { ...tenant, name: `${tenant.firstName} ${tenant.lastName}` };
-	const pdf = await renderReminderPdf(letter, from, recipient, today.toLocaleDateString('de-CH'));
+	const pdf = await renderReminderPdf(letter, from, recipient, formatSwissDate(today));
 
 	const document = await createDocument({
 		tenantId: tenant.id,
@@ -106,7 +106,7 @@ export async function sendReminder(statementId: string) {
 		channel: tenant.correspondenceChannel,
 		status: 'to_send'
 	});
-	await updateStatement(statementId, { reminderSentDate: isoDate(today) });
+	await updateStatement(statementId, { reminderSentDate: today });
 
 	if (tenant.correspondenceChannel !== 'email') return { document };
 	return deliverByEmail(document, tenant.email, letter, pdf);
