@@ -1,11 +1,12 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
 	import { enhance } from '$app/forms';
-	import { untrack } from 'svelte';
+	import { tick, untrack } from 'svelte';
 	import { addToast } from '$lib/stores';
 	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';
 	import Field from '$lib/ui/Field.svelte';
+	import { focusFirstError } from '$lib/ui/focus-error';
 	import { controlClass } from '$lib/ui/field';
 	import TextInput from '$lib/ui/TextInput.svelte';
 
@@ -23,6 +24,14 @@
 	let failed = $state<string>();
 	let uploading = $state(false);
 	let uploadForm = $state<HTMLFormElement>();
+
+	async function uploaded(title_: string) {
+		uploadForm?.reset();
+		title = '';
+		addToast('success', m.tenants_document_uploaded_toast({ title: title_ }));
+		await tick();
+		uploadForm?.querySelector<HTMLElement>('input[type="file"]')?.focus();
+	}
 </script>
 
 <form
@@ -37,24 +46,18 @@
 		// a file over the limit would only reach the server to be refused, or not at all (BODY_SIZE_LIMIT)
 		if (((formData.get('file') as File | null)?.size ?? 0) > MAX_BYTES) {
 			failed = m.backend_document_too_large({ megabytes: MAX_MEGABYTES });
+			focusFirstError(uploadForm);
 			return cancel();
 		}
 		uploading = true;
 		return async ({ result, update }) => {
 			uploading = false;
 			// the page could not answer: nothing was saved, the form keeps what was entered
-			if (result.type === 'error') {
-				failed = m.tenants_document_upload_failed();
-				return;
-			}
-			await update({ reset: false });
-			if (result.type !== 'success') return;
-			uploadForm?.reset();
-			title = '';
-			addToast(
-				'success',
-				m.tenants_document_uploaded_toast({ title: String(result.data?.uploaded) })
-			);
+			if (result.type === 'error') failed = m.tenants_document_upload_failed();
+			else await update({ reset: false });
+			if (result.type === 'success') uploaded(String(result.data?.uploaded));
+			// a refusal is read out at its field; after saving the focus stays at the form, below the new document
+			else focusFirstError(uploadForm);
 		};
 	}}
 >

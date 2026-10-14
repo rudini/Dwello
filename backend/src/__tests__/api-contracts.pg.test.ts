@@ -7,7 +7,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import { eq, sql } from 'drizzle-orm';
 import { join } from 'path';
 import { db } from '../db/connection';
-import { buildings, categories, heatingProfiles, invoices, tenants } from '../db/schema';
+import { buildings, categories, documents, heatingProfiles, invoices, tenants } from '../db/schema';
 import { deleteStatement } from '../services/statement.service';
 import { callApi, sendJson } from './helpers/auth';
 import { insertInvoice } from './helpers/records';
@@ -166,6 +166,26 @@ describe('API-Verträge des Frontends', () => {
 		}
 		const refused = await (await upload(Buffer.alloc(10 * 1024 * 1024 + 1))).json();
 		expect(drift(await sample('document-refused'), refused)).toEqual([]);
+	});
+
+	it('GET /documents liefert die Felder von documents.json, DELETE einer Mahnung die von document-not-deletable.json', async () => {
+		const jpg = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 1, 2]).toString('base64');
+		const uploaded = (await (
+			await sendJson('POST', `/api/v1/tenants/${rental.tenant}/documents`, { title: 'Ausweiskopie', fileName: 'ausweis.jpg', content: jpg })
+		).json()) as { id: string };
+		const [reminder] = await db
+			.insert(documents)
+			.values({ tenantId: rental.tenant, type: 'reminder', reminderLevel: 1, title: 'Zahlungserinnerung', fileName: 'z.pdf', content: jpg, channel: 'letter', status: 'to_send' })
+			.returning({ id: documents.id });
+		try {
+			const actual = await (await callApi(`/api/v1/documents?tenantId=${rental.tenant}`)).json();
+			expect(drift(await sample('documents'), actual)).toEqual([]);
+			const refused = await (await callApi(`/api/v1/documents/${reminder.id}`, { method: 'DELETE' })).json();
+			expect(drift(await sample('document-not-deletable'), refused)).toEqual([]);
+		} finally {
+			await callApi(`/api/v1/documents/${uploaded.id}`, { method: 'DELETE' });
+			await db.delete(documents).where(eq(documents.id, reminder.id));
+		}
 	});
 
 	it('GET /buildings liefert die Felder von buildings.json', async () => {

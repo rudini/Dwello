@@ -53,7 +53,7 @@ describe('Hilfe', () => {
 		const contract = section('Mieter und Mietverträge verwalten')?.textContent;
 		expect(contract).toContain('«Mietvertrag erfassen»');
 		expect(contract).toContain('Mieter, Wohnung, Vertragsdauer, Miete und Prüfen');
-		expect(contract).toContain('Unter «Dokumente» auf der Seite eines Mieters laden Sie Dateien hoch');
+		expect(contract).toContain('Auf der Seite eines Mieters laden Sie unter «Dokument hochladen» Dateien hoch');
 		const statements = section('Nebenkostenabrechnungen erstellen')?.textContent;
 		expect(statements).toContain('«Abrechnungen erstellen»');
 		expect(statements).toContain(

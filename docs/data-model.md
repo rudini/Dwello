@@ -303,7 +303,7 @@ No `updated_at`. Index: `line_items_statement_id_idx`.
 ### documents (Dokument)
 
 Letters and e-mails to a tenant with a PDF (payment reminders, Mahnungen), and files the property manager uploaded
-to a tenant (`type = upload`: PDF, JPEG or PNG up to 10 MB, without channel and Versandstatus; deletable, and deleted
+to a tenant (`type = upload`: PDF, JPEG or PNG up to 10 MB = 10 × 1024 × 1024 bytes, without channel and Versandstatus; deletable, and deleted
 with a tenant who has no contracts).
 
 ```sql

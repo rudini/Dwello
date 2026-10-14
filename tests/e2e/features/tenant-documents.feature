@@ -44,14 +44,14 @@ Funktionalität: Dokumente eines Mieters
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mieters "Lea Frei"
     Und das Hochladen von Dokumenten zu "Lea Frei" ist gestört
     Wenn der Liegenschaftsverwalter die PDF-Datei "betreibung.pdf" als "Betreibungsauszug" hochladen will
-    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Das Dokument wurde nicht gespeichert. Laden Sie die Datei erneut hoch."
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Das Dokument wurde nicht gespeichert, weil Dwello nicht geantwortet hat. Wählen Sie noch einmal «Dokument hochladen»."
     Und steht als Titel des Dokuments weiterhin "Betreibungsauszug"
 
   Szenario: Liegenschaftsverwalter löscht ein hochgeladenes Dokument
     Angenommen "Lea Frei" hat das hochgeladene Dokument "Ausweiskopie"
     Und der Liegenschaftsverwalter ist auf der Detailseite des Mieters "Lea Frei"
     Wenn der Liegenschaftsverwalter das Dokument "Ausweiskopie" löschen will
-    Dann sagt die Bestätigung "Ausweiskopie wird endgültig gelöscht. Das lässt sich nicht rückgängig machen."
+    Dann sagt die Bestätigung "Dokument «Ausweiskopie» wird endgültig gelöscht. Das lässt sich nicht rückgängig machen."
     Wenn der Liegenschaftsverwalter das Löschen bestätigt
     Dann liegen beim Mieter noch keine Dokumente
 

@@ -115,4 +115,33 @@ describe('Hochgeladene Dokumente', () => {
 		expect(file.status).toBe(200);
 		expect(file.headers.get('content-disposition')).toContain(`filename*=UTF-8''${encodeURIComponent('Übergabe – 1.10.pdf')}`);
 	});
+
+	it('hat keinen Versandstatus, den man setzen könnte', async () => {
+		const id = await idOf(await upload('Ausweiskopie', 'ausweis.pdf', pdf));
+		expect((await callApi(`/api/v1/documents/${id}/sent`, { method: 'PUT' })).status).toBe(404);
+		expect(await documentsOf()).toContainEqual(expect.objectContaining({ id, status: null }));
+	});
+
+	it('lehnt einen Titel über 255 Zeichen mit Code ab und kürzt einen langen Dateinamen vorne', async () => {
+		const tooLong = await upload('T'.repeat(256), 'scan.pdf', pdf);
+		expect(tooLong.status).toBe(400);
+		expect(await tooLong.json()).toMatchObject({ code: 'DOCUMENT_TITLE_TOO_LONG', params: { max: 255 } });
+
+		const id = await idOf(await upload('Scan', `${'n'.repeat(300)}.pdf`, pdf));
+		const file = await callApi(`/api/v1/documents/${id}/pdf`);
+		expect(file.headers.get('content-disposition')).toContain(`filename="${'n'.repeat(251)}.pdf"`);
+	});
+
+	it('lehnt ein Dokument zu einem unbekannten Mieter mit Code ab', async () => {
+		const response = await upload('Scan', 'scan.pdf', pdf, crypto.randomUUID());
+		expect(response.status).toBe(404);
+		expect(await response.json()).toMatchObject({ code: 'TENANT_NOT_FOUND' });
+	});
+
+	it('kodiert den Dateinamen im Download nach RFC 5987 und RFC 6266', async () => {
+		const id = await idOf(await upload('Protokoll', `Übergabe (Kopie) 'a'*\\b.pdf`, pdf));
+		const header = (await callApi(`/api/v1/documents/${id}/pdf`)).headers.get('content-disposition');
+		expect(header).toContain(`filename*=UTF-8''%C3%9Cbergabe%20%28Kopie%29%20%27a%27%2A%5Cb.pdf`);
+		expect(header).toContain('filename="_bergabe (Kopie) \'a\'*_b.pdf"');
+	});
 });

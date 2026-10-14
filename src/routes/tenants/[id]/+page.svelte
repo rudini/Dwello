@@ -18,6 +18,8 @@
 	const hasContracts = $derived(data.contractHistory.length > 0);
 	// without contracts there are no Mahnungen: every document is an upload, deleted with the tenant
 	const hasDocuments = $derived(data.documents.length > 0);
+	// with contracts the tenant stays, and so do the files uploaded to them
+	const hasUploads = $derived(data.documents.some((document) => document.type === 'upload'));
 	// a refused delete (also without JavaScript) shows the dialog with its reason
 	let deleting = $state(untrack(() => !!form?.error));
 </script>
@@ -76,7 +78,9 @@
 >
 	<p data-testid="delete-dialog-message">
 		{hasContracts
-			? m.tenants_delete_has_contracts()
+			? hasUploads
+				? m.tenants_delete_has_contracts_documents()
+				: m.tenants_delete_has_contracts()
 			: hasDocuments
 				? m.tenants_delete_text_with_documents({ name })
 				: m.tenants_delete_text({ name })}

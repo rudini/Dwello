@@ -18,6 +18,7 @@ import { flushSync } from 'svelte';
 import { get } from 'svelte/store';
 import { toasts } from '$lib/stores';
 import { allByTestId, byTestId, click, show } from './helpers/dom';
+import documentList from '../../tests/contracts/documents.json';
 
 const tenant = {
 	id: 't1',
@@ -57,17 +58,8 @@ const document_ = {
 	deliveryError: null
 };
 
-const upload = {
-	id: 'd2',
-	type: 'upload',
-	title: 'Ausweiskopie',
-	statementNumber: null,
-	createdAt: '2026-10-13T22:30:00Z', // 00:30 on 14.10. in Switzerland
-	mimeType: 'image/jpeg',
-	channel: null,
-	status: null,
-	deliveryError: null
-};
+// as the backend lists it (00:30 on 14.10. in Switzerland)
+const [upload] = documentList.data;
 
 function open(contracts: unknown[] = [], form: unknown = null, documents: unknown[] = [document_], demo = false) {
 	show(TenantPage, {
@@ -129,7 +121,7 @@ describe('Mieterdetail', () => {
 		open();
 		expect(text('tenant-documents')).toContain('Zahlungserinnerung · NK-2024-001');
 		expect(text('document-status')).toBe('Zu versenden');
-		expect(byTestId('document-pdf-link')!.textContent).toContain('Zahlungserinnerung');
+		expect(byTestId('document-pdf-link')!.getAttribute('aria-label')).toContain('Zahlungserinnerung');
 	});
 
 	it('lässt einen Mieter mit Mietverträgen nicht löschen und sagt warum', () => {
@@ -156,13 +148,12 @@ describe('Mieterdetail', () => {
 		);
 	});
 
-	it('nennt ein hochgeladenes Dokument mit Datum, ohne Versandstatus, mit seiner Dateiart', () => {
+	it('nennt ein hochgeladenes Dokument mit Datum, ohne Versandstatus', () => {
 		open([], null, [upload]);
 		const row = byTestId('document-row')!.textContent!.replace(/\s+/g, ' ');
 		expect(row).toContain('Ausweiskopie');
 		expect(row).toContain('Hochgeladen am 14.10.2026');
 		expect(byTestId('document-status')).toBeNull();
-		expect(byTestId('document-pdf-link')!.textContent).toContain('JPG');
 		expect(byTestId('document-delete-button')!.getAttribute('aria-label')).toBe('Löschen: Ausweiskopie');
 	});
 
@@ -178,7 +169,7 @@ describe('Mieterdetail', () => {
 		const form = byTestId('tenant-document-upload')!.textContent!;
 		expect(form).toContain('PDF, JPG oder PNG, höchstens 10 MB.');
 		expect(form).toContain('Löschen Sie Ausweiskopien und Betreibungsauszüge');
-		expect(form).toContain('Ohne Titel heisst das Dokument wie die Datei.');
+		expect(form).toContain('Ohne Titel heisst das Dokument wie die Datei, ohne Endung.');
 		expect(byTestId('tenant-document-demo')).toBeNull();
 	});
 
@@ -202,9 +193,11 @@ describe('Mieterdetail', () => {
 		const update = vi.fn();
 		await after({ update, result: { type: 'error', error: new Error('500') } });
 		flushSync();
-		expect(text('form-error')).toBe('Das Dokument wurde nicht gespeichert. Laden Sie die Datei erneut hoch.');
+		expect(text('form-error')).toBe('Das Dokument wurde nicht gespeichert, weil Dwello nicht geantwortet hat. Wählen Sie noch einmal «Dokument hochladen».');
 		expect(title.value).toBe('Betreibungsauszug');
 		expect(update).not.toHaveBeenCalled();
+		// read out: the focus goes to the field with the message
+		await vi.waitFor(() => expect(document.activeElement).toBe(byTestId('tenant-document-file-input')));
 	});
 
 	it('meldet ein hochgeladenes Dokument', async () => {
@@ -213,6 +206,8 @@ describe('Mieterdetail', () => {
 		const after = actions.get('?/upload')!({ formData: new FormData() }) as (input: unknown) => Promise<void>;
 		await after({ update: async () => {}, result: { type: 'success', data: { uploaded: 'Ausweiskopie' } } });
 		expect(get(toasts).map((toast) => toast.message)).toEqual(['Dokument «Ausweiskopie» hochgeladen']);
+		// stays where it was: at the form, below the new document
+		await vi.waitFor(() => expect(document.activeElement).toBe(byTestId('tenant-document-file-input')));
 	});
 
 	it('nennt beim Löschen eines Dokuments seine Folge und meldet es danach', async () => {
@@ -220,12 +215,13 @@ describe('Mieterdetail', () => {
 		open([], null, [upload]);
 		click('document-delete-button');
 		expect(text('document-delete-message')).toBe(
-			'Ausweiskopie wird endgültig gelöscht. Das lässt sich nicht rückgängig machen.'
+			'Dokument «Ausweiskopie» wird endgültig gelöscht. Das lässt sich nicht rückgängig machen.'
 		);
 		const after = actions.get('?/deleteDocument')!({ formData: new FormData() }) as (input: unknown) => Promise<void>;
 		await after({ update: async () => {}, result: { type: 'success' } });
 		flushSync();
 		expect(get(toasts).map((toast) => toast.message)).toEqual(['Dokument «Ausweiskopie» gelöscht']);
+		await vi.waitFor(() => expect(document.activeElement).toBe(byTestId('tenant-documents')));
 	});
 
 	it('sagt, dass hochgeladene Dokumente mit dem Mieter gelöscht werden', () => {
@@ -236,7 +232,7 @@ describe('Mieterdetail', () => {
 		);
 	});
 
-	it('lehnt eine Datei über 10 MB ab, bevor sie gesendet wird', () => {
+	it('lehnt eine Datei über 10 MB ab, bevor sie gesendet wird', async () => {
 		open([], null, []);
 		const formData = new FormData();
 		formData.set('file', new File([new Uint8Array(10 * 1024 * 1024 + 1)], 'scan.pdf'));
@@ -247,6 +243,7 @@ describe('Mieterdetail', () => {
 		expect(text('form-error')).toBe(
 			'Die Datei ist grösser als 10 MB. Wählen Sie eine kleinere Datei oder verkleinern Sie den Scan.'
 		);
+		await vi.waitFor(() => expect(document.activeElement).toBe(byTestId('tenant-document-file-input')));
 	});
 
 	it('sendet eine Datei bis 10 MB', () => {
@@ -256,5 +253,22 @@ describe('Mieterdetail', () => {
 		const cancel = vi.fn();
 		actions.get('?/upload')!({ formData, cancel } as never);
 		expect(cancel).not.toHaveBeenCalled();
+	});
+
+	it('bietet jede Datei mit einem Knopf zum Herunterladen an, der das Dokument nennt', () => {
+		open([], null, [document_, upload]);
+		const [letter, file] = allByTestId('document-pdf-link');
+		expect(letter.textContent!.trim()).toBe('PDF herunterladen');
+		expect(letter.getAttribute('aria-label')).toBe('PDF herunterladen: Zahlungserinnerung · NK-2024-001');
+		expect(file.textContent!.trim()).toBe('Datei herunterladen');
+		expect(file.getAttribute('aria-label')).toBe('Datei herunterladen: Ausweiskopie');
+	});
+
+	it('sagt bei einem Mieter mit Mietverträgen, dass hochgeladene Dokumente einzeln gelöscht werden', () => {
+		open([history('c1', 'Wohnung 1.01', '2015-01-01', '2019-12-31', 'ended')], null, [upload]);
+		click('tenant-delete-button');
+		expect(text('delete-dialog-message')).toContain(
+			'Löschen Sie sie einzeln unter «Dokumente» auf dieser Seite, sobald Sie sie nicht mehr brauchen.'
+		);
 	});
 });

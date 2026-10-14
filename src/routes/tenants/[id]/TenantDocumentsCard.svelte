@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
-	import { untrack } from 'svelte';
+	import { tick } from 'svelte';
 	import { addToast } from '$lib/stores';
 	import type { StatementDocument } from '$lib/types';
 	import ActionDialog from '$lib/ui/ActionDialog.svelte';
@@ -21,12 +21,19 @@
 	} = $props();
 
 	let deleting = $state<Pick<StatementDocument, 'id' | 'title'>>({ id: '', title: '' });
-	let deleteOpen = $state(untrack(() => !!form?.deleteError));
+	let deleteOpen = $state(false);
+	let list = $state<HTMLElement>();
 </script>
 
 <Panel title={m.nav_documents()}>
 	<div class="flex flex-col gap-6">
-		<ul class="flex flex-col divide-y divide-line" data-testid="tenant-documents">
+		<ul
+			bind:this={list}
+			tabindex="-1"
+			aria-label={m.nav_documents()}
+			class="flex flex-col divide-y divide-line"
+			data-testid="tenant-documents"
+		>
 			{#each documents as document (document.id)}
 				<TenantDocumentRow
 					{document}
@@ -55,7 +62,12 @@
 	confirmTestid="document-delete-confirm"
 	error={form?.deleteError}
 	fields={{ id: deleting.id }}
-	onsuccess={() => addToast('success', m.tenants_document_deleted_toast({ title: deleting.title }))}
+	onsuccess={async () => {
+		addToast('success', m.tenants_document_deleted_toast({ title: deleting.title }));
+		// the deleted row held the focus: it goes to the list the row was in
+		await tick();
+		list?.focus();
+	}}
 >
 	<p data-testid="document-delete-message">
 		{m.tenants_document_delete_text({ title: deleting.title })}

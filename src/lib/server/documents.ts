@@ -48,7 +48,9 @@ export async function uploadDocument(fetch: typeof globalThis.fetch, tenantId: s
 
 /** Deletes an uploaded document of the tenant page; the backend keeps Mahnungen and says why */
 export async function deleteDocument(fetch: typeof globalThis.fetch, form: FormData) {
-	const response = await fetch(`${API}/${form.get('id')}`, { method: 'DELETE' });
+	const response = await fetch(`${API}/${encodeURIComponent(String(form.get('id')))}`, {
+		method: 'DELETE'
+	});
 	if (!response.ok)
 		return fail(response.status, {
 			deleteError: backendMessage(

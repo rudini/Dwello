@@ -3,10 +3,11 @@
  * Stored letters (payment reminders) per tenant, sent by e-mail or kept for printing
  */
 
-import { and, count, desc, eq, sql, type SQL } from 'drizzle-orm';
+import { and, count, desc, eq, ne, sql, type SQL } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { documents, tenants, utilityStatements, type NewDocument } from '../db/schema';
 import { CodedError } from './coded-error';
+import { tenantExists } from './tenant.service';
 
 export interface DocumentFilters {
 	tenantId?: string;
@@ -62,7 +63,7 @@ export async function listDocuments(filters: DocumentFilters = {}) {
 	return selectSummaries(and(...conditions));
 }
 
-export async function getDocument(id: string) {
+async function getDocument(id: string) {
 	const [document] = await selectSummaries(eq(documents.id, id));
 	return document ?? null;
 }
@@ -87,6 +88,7 @@ const KINDS = [
 	{ mimeType: 'image/png', start: '\x89PNG\r\n\x1a\n' }
 ];
 
+const MAX_NAME = 255; // the columns title and file_name
 const MAX_MEGABYTES = 10; // 10 × 1024 × 1024 bytes, as Windows counts a megabyte
 
 /** A file the property manager adds to a tenant: no channel, no Versandstatus */
@@ -96,9 +98,13 @@ export async function uploadDocument(tenantId: string, upload: { title: string; 
 		throw new CodedError('DOCUMENT_TOO_LARGE', `The file is larger than ${MAX_MEGABYTES} MB`, { megabytes: MAX_MEGABYTES });
 	const kind = KINDS.find(({ start }) => file.subarray(0, start.length).toString('latin1') === start);
 	if (!kind) throw new CodedError('DOCUMENT_TYPE_NOT_ALLOWED', 'Only PDF, JPG and PNG files are accepted');
+	if (upload.title.trim().length > MAX_NAME)
+		throw new CodedError('DOCUMENT_TITLE_TOO_LONG', `The title is longer than ${MAX_NAME} characters`, { max: MAX_NAME });
+	if (!(await tenantExists(tenantId))) throw new CodedError('TENANT_NOT_FOUND', 'Tenant not found');
+	const fileName = upload.fileName.slice(-MAX_NAME); // the end keeps the extension
 	// without a title it is named like its file
-	const title = upload.title.trim() || upload.fileName.replace(/\.[^.]*$/, '');
-	return createDocument({ tenantId, type: 'upload', ...upload, title, mimeType: kind.mimeType });
+	const title = upload.title.trim() || fileName.replace(/\.[^.]*$/, '');
+	return createDocument({ tenantId, type: 'upload', title, fileName, content: upload.content, mimeType: kind.mimeType });
 }
 
 /** Only an upload: a Mahnung stays as proof that the tenant was reminded */
@@ -120,13 +126,14 @@ export async function countReminders(statementId: string) {
 	return result.value;
 }
 
-/** E-mailed, or printed and posted by the property manager */
+/** E-mailed, or printed and posted by the property manager; an upload has no Versandstatus: null */
 export async function markDocumentSent(id: string) {
-	await db
+	const [sent] = await db
 		.update(documents)
 		.set({ status: 'sent', sentAt: new Date(), deliveryError: null })
-		.where(eq(documents.id, id));
-	return getDocument(id);
+		.where(and(eq(documents.id, id), ne(documents.type, 'upload')))
+		.returning({ id: documents.id });
+	return sent ? getDocument(id) : null;
 }
 
 export async function recordDeliveryError(id: string, deliveryError: string) {

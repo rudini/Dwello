@@ -8,7 +8,7 @@
 	// A letter with its date, way and Versandstatus, or an uploaded file with its date, which can be deleted
 	let { document, ondelete }: { document: StatementDocument; ondelete: () => void } = $props();
 
-	const KINDS = { 'application/pdf': 'PDF', 'image/jpeg': 'JPG', 'image/png': 'PNG' };
+	const upload = $derived(document.type === 'upload');
 	const heading = (d: StatementDocument) =>
 		[d.title, d.statementNumber].filter(Boolean).join(' · ');
 	const details = (d: StatementDocument) =>
@@ -22,7 +22,7 @@
 		<p class="font-semibold text-ink">{heading(document)}</p>
 		<p class="text-ink-muted">
 			{details(document)}
-			{#if document.type !== 'upload'}
+			{#if !upload}
 				·
 				<span data-testid="document-status"
 					>{document.status === 'to_send'
@@ -36,13 +36,15 @@
 			</p>{/if}
 	</div>
 	<div class="flex flex-wrap items-center gap-4">
-		<a
+		<Button
 			href="/documents/{document.id}/pdf"
-			class="text-accent underline underline-offset-4 hover:text-accent-strong"
-			data-testid="document-pdf-link"
-			>{KINDS[document.mimeType] ?? 'PDF'}<span class="sr-only"> {heading(document)}</span></a
+			icon="document-download"
+			ariaLabel={upload
+				? m.documents_download_file_aria({ title: heading(document) })
+				: m.documents_download_aria({ title: heading(document) })}
+			testid="document-pdf-link">{upload ? m.documents_download_file() : m.documents_download()}</Button
 		>
-		{#if document.type === 'upload'}
+		{#if upload}
 			<Button
 				variant="danger-ghost"
 				icon="delete"

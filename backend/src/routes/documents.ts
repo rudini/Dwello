@@ -6,7 +6,6 @@ import { Elysia, t } from 'elysia';
 import { authMiddleware } from '../middleware/auth';
 import {
 	deleteDocument,
-	getDocument,
 	getDocumentPdf,
 	listDocuments,
 	markDocumentSent,
@@ -39,7 +38,7 @@ export const documentRoutes = new Elysia({ prefix: '/api/v1' })
 				return document;
 			} catch (error) {
 				if (!(error instanceof CodedError)) throw error;
-				set.status = 400;
+				set.status = error.code === 'TENANT_NOT_FOUND' ? 404 : 400;
 				return errorBody(error, '');
 			}
 		},
@@ -59,10 +58,10 @@ export const documentRoutes = new Elysia({ prefix: '/api/v1' })
 			return { error: 'Document not found' };
 		}
 		set.headers['content-type'] = pdf.mimeType;
-		// an ASCII name for old clients, the real one (umlauts, dashes) per RFC 6266
-		const ascii = pdf.fileName.replace(/[^\x20-\x7e]|"/g, '_');
-		set.headers['content-disposition'] =
-			`attachment; filename="${ascii}"; filename*=UTF-8''${encodeURIComponent(pdf.fileName)}`;
+		// an ASCII name for old clients, the real one (umlauts, dashes) per RFC 6266 and RFC 5987
+		const ascii = pdf.fileName.replace(/[^\x20-\x7e]|["\\]/g, '_');
+		const utf8 = encodeURIComponent(pdf.fileName).replace(/['()*]/g, (c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`);
+		set.headers['content-disposition'] = `attachment; filename="${ascii}"; filename*=UTF-8''${utf8}`;
 		return pdf.content;
 	})
 	.delete('/documents/:id', async ({ params, set }) => {
@@ -78,9 +77,8 @@ export const documentRoutes = new Elysia({ prefix: '/api/v1' })
 	})
 	// The property manager printed and posted the letter
 	.put('/documents/:id/sent', async ({ params, set }) => {
-		if (!(await getDocument(params.id))) {
-			set.status = 404;
-			return { error: 'Document not found' };
-		}
-		return markDocumentSent(params.id);
+		const sent = await markDocumentSent(params.id);
+		if (sent) return sent;
+		set.status = 404;
+		return { error: 'Document not found' };
 	});

@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { actions } from '../routes/tenants/[id]/+page.server';
 import uploaded from '../../tests/contracts/document-uploaded.json';
 import refused from '../../tests/contracts/document-refused.json';
+import notDeletable from '../../tests/contracts/document-not-deletable.json';
 
 const API = 'http://localhost:3001/api/v1';
 type Call = { method?: string; url: string; body?: unknown };
@@ -79,8 +80,7 @@ describe('Dokument löschen', () => {
 	});
 
 	it('sagt, warum eine Mahnung bleibt', async () => {
-		const refusal = { error: 'Payment reminders cannot be deleted', code: 'DOCUMENT_NOT_DELETABLE', params: {} };
-		const { result } = run(actions.deleteDocument, { id: 'd1' }, 409, refusal);
+		const { result } = run(actions.deleteDocument, { id: 'd1' }, 409, notDeletable);
 
 		expect(await result).toMatchObject({
 			status: 409,
