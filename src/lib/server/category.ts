@@ -21,9 +21,8 @@ export function toCategory(c: Record<string, unknown>): CategoryWithUsage {
 		description: (c.description || '') as string,
 		sortOrder: Number(c.sortOrder) || 0,
 		usageCount: Number(c.invoiceCount) || 0,
-		// Dwello's own categories keep their English key (and English description), which is their
-		// English name or differs from the German one; one recorded here is keyed by its German name
-		predefined: c.name === c.nameEN || (!!c.nameDE && c.name !== c.nameDE)
+		// Dwello's own categories (English key and description) as the backend stores them
+		predefined: c.type === 'predefined'
 	};
 }
 

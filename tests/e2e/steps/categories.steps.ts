@@ -7,6 +7,7 @@ import {
 	categoryDeletable,
 	categoryListed,
 	invoicesOf,
+	descriptionOf,
 	listedCategoriesNamed
 } from '../questions/categories';
 import {
@@ -24,6 +25,13 @@ const { Given, When, Then } = createBdd(test);
 Given('es gibt die umlagefähige Kategorie {string}', async ({ seed }, title: string) => {
 	await seed.category(title, true);
 });
+
+Given(
+	'es gibt die eigene Kategorie {string} mit gleichem englischem Namen und der Beschreibung {string}',
+	async ({ seed }, title: string, text: string) => {
+		await seed.categoryNamedAlikeInEnglish(title, text);
+	}
+);
 
 Given('es gibt die nicht umlagefähige Kategorie {string}', async ({ seed }, title: string) => {
 	await seed.category(title, false);
@@ -116,5 +124,12 @@ Then(
 	'kann der Liegenschaftsverwalter die Kategorie {string} nicht löschen',
 	async ({ verwalter, names }, title: string) => {
 		await verwalter.sees(categoryDeletable(names.get(title)!)).toBe(false);
+	}
+);
+
+Then(
+	'sieht der Liegenschaftsverwalter bei der Kategorie {string} die Beschreibung {string}',
+	async ({ verwalter, names }, title: string, text: string) => {
+		await verwalter.sees(descriptionOf(names.get(title)!)).toBe(text);
 	}
 );

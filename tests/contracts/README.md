@@ -23,4 +23,5 @@ Optionale Felder sind in den Testdaten gefüllt: Liefert die API `null`, prüft 
 | `tenant.json` | `GET /api/v1/tenants/:id` |
 | `buildings.json` | `GET /api/v1/buildings` |
 | `tenants.json` | `GET /api/v1/tenants` |
+| `category.json` | `GET /api/v1/categories/:id` (eigene Kategorie) |
 | `contract-end-refused.json` | `PUT /api/v1/contracts/:id` mit Vertragsdaten, die die abgerechneten Tage einer Abrechnung ändern (409) |
