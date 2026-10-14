@@ -203,7 +203,7 @@ Filter `status` in `GET /` and `/counts`: `draft`, `paid`, `sent` (sent, deadlin
 
 | Method | Path | Notes |
 |---|---|---|
-| GET | `/` | Query: `search`, `buildingId`, `apartmentId`, `tenantId`, `status`, `periodStart`, `periodEnd`, `limit` (default 20), `offset`. → `{ data, total, limit, offset }`; items include `tenant`, `apartment`, `building`, `lineItems`, `heatingProfileId`, `managementFeePercent` (no PDF; see `tests/contracts/period-statements.json`) |
+| GET | `/` | Query: `search`, `contractId`, `buildingId`, `apartmentId`, `tenantId`, `status`, `periodStart`, `periodEnd`, `limit` (default 20), `offset`. → `{ data, total, limit, offset }`; items include `tenant`, `apartment`, `building`, `lineItems`, `heatingProfileId`, `managementFeePercent` (no PDF; see `tests/contracts/period-statements.json`) |
 | GET | `/counts` | Query: `buildingId`. → `{ draft, sent, paid, overdue, total }` |
 | POST | `/preview` | Body: calculation input (below). Stores nothing. → `{ preview: true, contractId, apartmentId, tenantId, periodStart, periodEnd, rentalDays, totalPeriodDays, lineItems, subtotal, managementFee, managementFeePercent, totalCosts, totalAdvancePayments, balance }` (numbers; positive balance = tenant owes). 400 |
 | POST | `/generate` | Body: calculation input + `buildingId`. Synchronous, one contract: calculates and stores a **draft** with line items and a payment deadline of `payment_deadline_days`. → **201** statement. 400 (e.g. contract not found, contract outside the period) |

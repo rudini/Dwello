@@ -152,7 +152,6 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Wenn der Liegenschaftsverwalter die erstellten Abrechnungen anzeigt
     Dann ist der Liegenschaftsverwalter auf der Seite "Nebenkostenabrechnungen"
 
-  @wip
   Szenario: Nach dem Erstellen die Entwürfe der Abrechnungsperiode anzeigen
     Angenommen im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
     Und der Mieter "Lea Graf" existiert

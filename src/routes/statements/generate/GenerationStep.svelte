@@ -9,10 +9,12 @@
 		count,
 		createdCount,
 		withoutInvoices = [],
-		incomplete = []
+		incomplete = [],
+		draftsHref
 	}: {
 		count: number;
 		createdCount: number | null;
+		draftsHref: string;
 		withoutInvoices?: string[];
 		incomplete?: string[];
 	} = $props();
@@ -47,11 +49,8 @@
 		</p>
 		<p class="max-w-prose text-ink-muted">{m.statements_check_drafts()}</p>
 		<div class="flex flex-wrap justify-center gap-4">
-			<Button
-				href="/statements?status=draft"
-				variant="primary"
-				icon="statement"
-				testid="show-statements-button">{m.statements_view_drafts()}</Button
+			<Button href={draftsHref} variant="primary" icon="statement" testid="show-statements-button"
+				>{m.statements_view_drafts()}</Button
 			>
 			<Button href="/statements/generate" reload icon="add" testid="generate-more-button"
 				>{m.statements_create_more()}</Button

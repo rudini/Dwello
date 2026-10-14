@@ -150,6 +150,7 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	},
 	// the link opens the wizard at the settings step with the building and period it names
 	'link-preset': () => Wait.until(on.wizardPreset),
+	'list-scoped': () => Wait.until(on.listScope),
 	'send-dialog': () => openDialog(on.sendButton),
 	// As from a tab that still shows the draft: deleting the sent statement is refused by the server
 	'action-error': () => (actor) => actor.attemptsTo(PostFormAction('?/delete'), Wait.until(on.formProblem)),

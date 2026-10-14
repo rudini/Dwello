@@ -82,11 +82,28 @@ describe('Abrechnungsliste', () => {
 		);
 	});
 
+	it('behält die Abrechnungsperiode in der Suche und zählt sie als Filter', () => {
+		url = new URL('http://localhost/statements?periodStart=2024-01-01&periodEnd=2024-12-31');
+		list([], 0, 1, 'Sie sehen die Abrechnungen der Abrechnungsperiode 01.01.2024 – 31.12.2024.');
+
+		expect(document.querySelector<HTMLInputElement>('form input[name="periodStart"]')?.value).toBe(
+			'2024-01-01'
+		);
+		expect(document.querySelector<HTMLInputElement>('form input[name="periodEnd"]')?.value).toBe(
+			'2024-12-31'
+		);
+		expect(text()).toContain('Keine Abrechnungen gefunden');
+	});
+
 	it('bietet bei einem Mietvertrag ohne Abrechnungen «Filter zurücksetzen» an', () => {
 		url = new URL('http://localhost/statements?contract=c1');
 		list([], 0, 1, contractScope);
 
-		expect(text()).toContain('Keine Abrechnungen gefunden');
+		const reset = [...document.querySelectorAll('a')].filter(
+			(a) => a.textContent?.trim() === 'Filter zurücksetzen'
+		);
+		expect(reset.length).toBeGreaterThan(0);
+		expect(reset.every((a) => a.getAttribute('href') === '/statements')).toBe(true);
 	});
 
 	// After a search the focus moves here, so the number of results is read out

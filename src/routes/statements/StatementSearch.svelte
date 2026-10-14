@@ -10,23 +10,29 @@
 		building,
 		status,
 		contract = '',
+		periodStart = '',
+		periodEnd = '',
 		buildings
 	}: {
 		search: string;
 		building: string;
 		status: string;
 		contract?: string;
+		periodStart?: string;
+		periodEnd?: string;
 		buildings: { id: string; name: string }[];
 	} = $props();
 
 	// Bound, so what is typed before hydration is kept; EarlySelect keeps an early building choice
 	let term = $derived(search);
-	const filtered = $derived(!!(search || building || status || contract));
+	const filtered = $derived(!!(search || building || status || contract || periodStart));
 </script>
 
 <form method="GET" action="/statements" class="flex flex-col gap-4 md:flex-row md:items-end">
 	{#if status}<input type="hidden" name="status" value={status} />{/if}
 	{#if contract}<input type="hidden" name="contract" value={contract} />{/if}
+	{#if periodStart}<input type="hidden" name="periodStart" value={periodStart} />{/if}
+	{#if periodEnd}<input type="hidden" name="periodEnd" value={periodEnd} />{/if}
 	<div class="flex-1">
 		<TextInput
 			id="search"

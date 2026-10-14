@@ -12,6 +12,13 @@ export interface WizardSelection {
 	buildingIds: string[];
 }
 
+/** The drafts a run created, among others of the same period: in its building when it had only one */
+export function draftsLink({ periodStart, periodEnd, buildingIds }: WizardSelection): string {
+	const params = new URLSearchParams({ status: 'draft', periodStart, periodEnd });
+	if (buildingIds.length === 1) params.set('building', buildingIds[0]);
+	return `/statements?${params}`;
+}
+
 // Getters: read when shown, in the language of the request
 const stepNames = [
 	m.statements_step_period,

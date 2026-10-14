@@ -7,7 +7,7 @@ const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
 // Whose statements a contract filter shows: tenant, Wohnung and Vertragsbeginn, so two contracts never read alike
 async function contractScope(fetch: typeof globalThis.fetch, id: string): Promise<string | null> {
-	const response = await fetch(`${BACKEND_URL}/api/v1/contracts/${id}`);
+	const response = await fetch(`${BACKEND_URL}/api/v1/contracts/${encodeURIComponent(id)}`);
 	if (!response.ok) return null;
 	const { tenant, apartment, building, startDate } = await response.json();
 	return m.statements_scope_contract({
@@ -23,7 +23,9 @@ const FILTERS = {
 	status: 'status',
 	building: 'buildingId',
 	search: 'search',
-	contract: 'contractId'
+	contract: 'contractId',
+	periodStart: 'periodStart',
+	periodEnd: 'periodEnd'
 };
 
 function backendQuery(url: URL, page: number, pageSize: number) {
@@ -42,6 +44,14 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<StatementsLi
 	const page = parseInt(url.searchParams.get('page') || '1');
 	const pageSize = 10;
 	const contractId = url.searchParams.get('contract');
+	const [periodStart, periodEnd] = [
+		url.searchParams.get('periodStart'),
+		url.searchParams.get('periodEnd')
+	];
+	const periodScope =
+		periodStart && periodEnd
+			? m.statements_scope_period({ start: formatDate(periodStart), end: formatDate(periodEnd) })
+			: null;
 
 	try {
 		const params = backendQuery(url, page, pageSize);
@@ -49,7 +59,7 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<StatementsLi
 			fetch(`${BACKEND_URL}/api/v1/statements?${params}`),
 			fetch(`${BACKEND_URL}/api/v1/statements/counts`),
 			fetch(`${BACKEND_URL}/api/v1/buildings?limit=100`),
-			contractId ? contractScope(fetch, contractId) : null
+			contractId ? contractScope(fetch, contractId) : periodScope
 		]);
 
 		const statementsData = await statementsRes.json();
@@ -80,7 +90,9 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<StatementsLi
 				paidDate: s.paidDate,
 				pdfGeneratedAt: s.pdfGeneratedAt,
 				lastReminderDate: s.reminderSentDate,
-				tenantName: tenant ? `${tenant.firstName} ${tenant.lastName}` : m.common_unknown(),
+				tenantName: tenant
+					? `${tenant.firstName} ${tenant.lastName}`
+					: m.common_unknown(),
 				tenantEmail: (tenant?.email as string) || '',
 				apartmentUnit: (apartment?.number as string) || '',
 				apartmentFloor: apartment?.floor || '',

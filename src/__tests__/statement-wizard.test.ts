@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
 	akontoHint,
+	draftsLink,
 	findingText,
 	needsConfirmation,
 	invoiceRows,
@@ -57,7 +58,8 @@ describe('Abrechnungen Schritt für Schritt', () => {
 			selectionErrors({ ...selection, heatingProfileId: '', managementFeePercent: -1 }, 3)
 		).toEqual({
 			heatingProfileId: 'Bitte wählen Sie ein Heizprofil.',
-			managementFeePercent: 'Bitte geben Sie einen Prozentsatz ab 0 mit höchstens zwei Stellen nach dem Komma ein, zum Beispiel 3 oder 2,5.'
+			managementFeePercent:
+				'Bitte geben Sie einen Prozentsatz ab 0 mit höchstens zwei Stellen nach dem Komma ein, zum Beispiel 3 oder 2,5.'
 		});
 		expect(selectionErrors({ ...selection, managementFeePercent: NaN }, 3)).toHaveProperty(
 			'managementFeePercent'
@@ -164,10 +166,12 @@ describe('Rechnungen pro Kategorie', () => {
 				})
 			)
 		).toBe('Rechnungen für das 1. Quartal und das 3. Quartal fehlen. Im Vorjahr: 4 Rechnungen.');
-		expect(findingText(finding('gap', { missingParts: [part('2025-03-01', '2025-03-31')] }))).toContain('für den März fehlt');
-		expect(findingText(finding('gap', { missingParts: [part('2026-01-14', '2026-07-15')] }))).toContain(
-			'für die Zeit vom 14.01.2026 bis 15.07.2026 fehlt'
-		);
+		expect(
+			findingText(finding('gap', { missingParts: [part('2025-03-01', '2025-03-31')] }))
+		).toContain('für den März fehlt');
+		expect(
+			findingText(finding('gap', { missingParts: [part('2026-01-14', '2026-07-15')] }))
+		).toContain('für die Zeit vom 14.01.2026 bis 15.07.2026 fehlt');
 	});
 
 	it('nennt Kosten, die deutlich vom Vorjahr abweichen, mit dem nächsten Schritt', () => {
@@ -359,5 +363,27 @@ describe('Entwurf der Abrechnungen', () => {
 				known
 			)
 		).toEqual({ ...selection, buildingIds: ['b1'], heatingProfileId: '' });
+	});
+});
+
+describe('Entwürfe nach dem Abrechnungslauf ansehen', () => {
+	const selection = {
+		periodStart: '2024-07-01',
+		periodEnd: '2025-06-30',
+		heatingProfileId: 'hp1',
+		managementFeePercent: 3,
+		buildingIds: ['b1']
+	};
+
+	it('zeigt die Entwürfe der Abrechnungsperiode des Laufs und seines einzigen Gebäudes', () => {
+		expect(draftsLink(selection)).toBe(
+			'/statements?status=draft&periodStart=2024-07-01&periodEnd=2025-06-30&building=b1'
+		);
+	});
+
+	it('zeigt nach einem Lauf über mehrere Gebäude die Entwürfe der Periode in allen Gebäuden', () => {
+		expect(draftsLink({ ...selection, buildingIds: ['b1', 'b2'] })).toBe(
+			'/statements?status=draft&periodStart=2024-07-01&periodEnd=2025-06-30'
+		);
 	});
 });
