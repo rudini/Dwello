@@ -18,6 +18,24 @@ describe('Sprachdateien', () => {
 		const empty = Object.entries(messages).filter(([, text]) => text === '');
 		expect(empty).toEqual([]);
 	});
+
+	// Style from docs/design/i18n-begriffe.md
+	it('Französisch setzt Guillemets mit geschütztem Leerzeichen innen', () => {
+		const messages = JSON.parse(readFileSync('messages/fr.json', 'utf8'));
+		const wrong = Object.entries(messages).filter(
+			([, text]) => typeof text === 'string' && /«(?!\u00a0)|(?<!\u00a0)»/.test(text)
+		);
+		expect(wrong).toEqual([]);
+	});
+
+	it('Italienisch sagt «immobile», nicht «stabile»', () => {
+		const messages = JSON.parse(readFileSync('messages/it.json', 'utf8'));
+		const wrong = Object.entries(messages).filter(
+			// Also flags the adjective («connessione stabile»); none is used today
+			([, text]) => typeof text === 'string' && /\bstabil[ei]\b/i.test(text)
+		);
+		expect(wrong).toEqual([]);
+	});
 });
 
 // Renders a page through the server hook; the page template carries %lang%
