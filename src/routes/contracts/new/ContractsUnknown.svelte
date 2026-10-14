@@ -14,7 +14,7 @@
 	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';
 
-	// The chosen apartment's contracts could not be loaded (#143): with `onretry` the hint loads them again, the
+	// The apartment's contracts could not be loaded (#143): with `onretry` the hint loads them again, the
 	// input stays (#151); without it, it points to the hint at the apartment, so a page has one such button
 	let { onretry, testid }: { onretry?: () => void; testid: string } = $props();
 </script>

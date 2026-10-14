@@ -154,12 +154,9 @@ export function apartmentOption(
 	return { label: name, disabled: false };
 }
 
-/** Earliest start and its notice for an apartment that becomes free later; not for the edited contract's own apartment */
-export function availableFrom(
-	availability: AvailabilityInfo | null | undefined,
-	apartmentChanged: boolean
-) {
-	if (!availability || !apartmentChanged) return { min: undefined, notice: null };
+/** Earliest start and its notice for an apartment that becomes free later */
+export function availableFrom(availability: AvailabilityInfo | null | undefined) {
+	if (!availability) return { min: undefined, notice: null };
 	return {
 		min: availability.availableFrom || undefined,
 		notice: availability.statusType === 'available-from' ? availability.message : null

@@ -69,20 +69,11 @@ function formatDateDE(date: Date): string {
  * Computes the availability of an apartment based on existing contracts
  *
  * @param contracts - Array of contracts for the apartment
- * @param excludeContractId - Optional contract ID to exclude (for edit form)
  * @returns AvailabilityInfo object with availability status and details
  */
-export function computeAvailability(
-	contracts: ContractForAvailability[],
-	excludeContractId?: string
-): AvailabilityInfo {
-	// Filter out the excluded contract (for edit mode)
-	const relevantContracts = excludeContractId
-		? contracts.filter((c) => c.id !== excludeContractId)
-		: contracts;
-
+export function computeAvailability(contracts: ContractForAvailability[]): AvailabilityInfo {
 	// No contracts means fully available
-	if (relevantContracts.length === 0) {
+	if (contracts.length === 0) {
 		return {
 			isAvailable: true,
 			availableFrom: null,
@@ -93,7 +84,7 @@ export function computeAvailability(
 	}
 
 	// Check for ongoing contracts (no end date or active status)
-	const ongoingContracts = relevantContracts.filter((c) => {
+	const ongoingContracts = contracts.filter((c) => {
 		// No end date means ongoing
 		if (!c.end_date) return true;
 
@@ -118,7 +109,7 @@ export function computeAvailability(
 
 	// Find the latest end date among all contracts
 	let latestEndDate: Date | null = null;
-	for (const contract of relevantContracts) {
+	for (const contract of contracts) {
 		if (contract.end_date) {
 			const endDate = parseDate(contract.end_date);
 			if (!latestEndDate || endDate > latestEndDate) {

@@ -1,10 +1,13 @@
-import { Checked, Enabled, Text, Value, Visibility } from '../screenplay/questions';
+import { Checked, Count, Enabled, Text, Value, Visibility } from '../screenplay/questions';
 import {
 	apartmentContractsUnknown,
 	apartmentOption,
 	apartmentSelect,
 	baseRentInput,
 	durationOption,
+	fixedApartment,
+	fixedTenant,
+	partiesHelp,
 	reviewContractsUnknown,
 	reviewItem,
 	startContractsUnknown,
@@ -27,3 +30,8 @@ export const reviewHint = Text.of(reviewContractsUnknown);
 export const enteredBaseRent = Value.of(baseRentInput);
 export const apartmentChoiceLabel = (apartmentId: string) => Text.of(apartmentOption(apartmentId));
 export const failure = Text.of(errorToast);
+export const fixedTenantName = Text.of(fixedTenant);
+export const fixedApartmentName = Text.of(fixedApartment);
+export const tenantChoices = Count.of(tenantSelect);
+export const apartmentChoices = Count.of(apartmentSelect);
+export const partiesHelpText = Text.of(partiesHelp);

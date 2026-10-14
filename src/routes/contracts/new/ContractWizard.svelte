@@ -73,7 +73,7 @@
 		new Map([...(contracts ?? [])].map(([id, list]) => [id, list && computeAvailability(list)]))
 	);
 	const unknown = $derived(contracts?.get(values.apartmentId) === null);
-	const startLimit = $derived(availableFrom(availability.get(values.apartmentId), true));
+	const startLimit = $derived(availableFrom(availability.get(values.apartmentId)));
 	const overlap = $derived(overlapWarning(values, contracts?.get(values.apartmentId) ?? []));
 
 	const contractsOf = async (apartmentId: string) =>

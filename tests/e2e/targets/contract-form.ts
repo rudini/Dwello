@@ -1,6 +1,9 @@
 import { target } from '../screenplay/target';
 
 export const tenantSelect = target('Mieterauswahl', (page) => page.getByTestId('contract-tenant-select'));
+export const fixedTenant = target('Mieter des Mietvertrags', (page) => page.getByTestId('contract-form-tenant'));
+export const fixedApartment = target('Wohnung des Mietvertrags', (page) => page.getByTestId('contract-form-apartment'));
+export const partiesHelp = target('Hilfe zu Mieter und Wohnung', (page) => page.getByTestId('contract-parties-help'));
 export const apartmentSelect = target('Wohnungsauswahl', (page) => page.getByTestId('apartment-select'));
 export const apartmentOption = (apartmentId: string) =>
 	target(`Wohnung ${apartmentId} in der Auswahl`, (page) =>
