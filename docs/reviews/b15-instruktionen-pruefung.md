@@ -1,6 +1,6 @@
 # B-15 (#152): Prüfung der Instruktionen und Verbesserungen
 
-Rückblick auf die Umsetzung von #152 in der Session vom 13.10.2026 (Commits `8545bed` bis zum Abschluss-Commit auf `claude/workflow-improvements`). Teil 1: Wurden `CLAUDE.md`, Skills und Agenten korrekt befolgt? Teil 2: Was an den Instruktionen sollte sich ändern?
+Rückblick auf die Umsetzung von #152 in der Session vom 13./14.10.2026. Endstand: Commit `5c93452` auf `claude/workflow-improvements`, direkt auf `main` (`2efcd56`); die vier Arbeits-Commits (`8545bed` … `f706e49`) wurden nach dem Merge von PR #150 zu diesem einen Commit auf `main` zusammengeführt (Verbesserung 15, Tabellenzeile 18). Teil 1: Wurden `CLAUDE.md`, Skills und Agenten korrekt befolgt? Teil 2: Was an den Instruktionen sollte sich ändern?
 
 ## 1. Wurden die Instruktionen befolgt?
 
@@ -21,8 +21,9 @@ Rückblick auf die Umsetzung von #152 in der Session vom 13.10.2026 (Commits `85
 | 13 | Alle Texte in de/fr/it/en, Begriffe aus `i18n-begriffe.md` (Conventions) | ja | Fach-Review fand «create» statt «add» (en) und fehlende geschützte Leerzeichen (fr); beides behoben. |
 | 14 | API-Verträge: geänderte Antwort → Vertrag in `tests/contracts` (Gotchas) | erst nach Review | Der Ladetest erfand die Antwort von `GET /contracts/:id`; `code-reviewer` m-3 fand es, danach `tests/contracts/contract.json`. |
 | 15 | Nie `bun test` ohne Preload im Backend (`backend/CLAUDE.md`) | **nein (einmal)** | Ein Lauf ohne `--preload` brach an der ersten fehlenden Tabelle ab, ohne in `dwello` zu schreiben. Die Regel steht nur in `backend/CLAUDE.md`, die erst beim Wechsel ins Verzeichnis geladen wird. |
-| 16 | Vor «fertig»: test:coverage, lint, check, Backend test + type-check, betroffene E2E (Finish) | ja | 2247 + 543 Tests grün, Abdeckung über den Floors, 67 E2E inkl. axe und Sprachen für `contract-edit`. |
+| 16 | Vor «fertig»: test:coverage, lint, check, Backend test + type-check, betroffene E2E (Finish) | ja | Vor dem Merge auf `main`: 2247 + 543 Tests, 67 E2E. Nach dem Merge auf `main` erneut: 2278 + 543 Tests grün, Abdeckung über den Floors, 75 E2E inkl. aller axe- und Sprachzeilen für `contract-edit`. |
 | 17 | Push nur, wenn der Benutzer es sagt («Keep going») | ja | Der Stop-Hook der Umgebung verlangte mehrfach einen Push; `CLAUDE.md` hat Vorrang, der Push steht unter «Blocked on me». |
+| 18 | Branch-Regeln: Arbeit auf dem genannten Branch; ist dessen PR gemergt, neu ab `main` beginnen (Session-Vorgaben, «Branches») | **erst spät** | Erst beim Push bemerkt. Danach: B-15 einmal auf `origin/main` angewendet, mit dem B-13-Fix (#143/#151) in `ContractForm.svelte` zusammengeführt, 4 #151-Tests angepasst, 2 entfernt, U-19 entfallen, IDs zu U-20/H-21 umbenannt; Remote-Branch mit `--force-with-lease` ersetzt (nur der eigene Push von kurz zuvor). Push mit Freigabe des Benutzers; ein `git rebase` wurde vom Auto-Modus abgelehnt, darum der Weg über einen neuen Branch. |
 
 ## 2. Verbesserungen an Instruktionen, Skills, Agenten und Werkzeugen
 
