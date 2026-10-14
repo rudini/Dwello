@@ -180,3 +180,16 @@ Funktionalität: Mietvertragsdetail
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
     Wenn der Liegenschaftsverwalter die fehlende Abrechnung des letzten Jahres erstellen will
     Dann ist der Liegenschaftsverwalter im Abrechnungsassistenten für das Gebäude "Ahornhof" und das letzte Jahr
+
+  @wip
+  Szenario: Abrechnungen eines Mietvertrags anzeigen
+    Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
+    Und der Mieter "Ben Meier" existiert
+    Und "Ben Meier" mietet die Wohnung "2.02" seit "2024-04-01" für "900" Franken
+    Und für "Anna Keller" gibt es die Abrechnung 2025 im Gebäude "Ahornhof"
+    Und für "Ben Meier" gibt es die Abrechnung 2025 im Gebäude "Ahornhof"
+    Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
+    Wenn der Liegenschaftsverwalter die Abrechnungen des Mietvertrags anzeigt
+    Dann erfährt der Liegenschaftsverwalter, dass die Liste nur die Abrechnungen des Mietvertrags von "Anna Keller" in der Wohnung "2.01" zeigt
+    Und sieht der Liegenschaftsverwalter die Abrechnung 2025 von "Anna Keller"
+    Aber nicht die Abrechnung 2025 von "Ben Meier"

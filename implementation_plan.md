@@ -49,6 +49,13 @@ Task: work off the open `bug` issues one by one (PR merged before the next). Ski
 - [x] Checks: `test:coverage` (2294), `check`, `lint`, backend `test` (550) + `type-check`, `deepcheck:audit`, fallow clean
 - code-reviewer round 1 (`docs/reviews/p9b-review-1.md`): fixed C-1 (Minor, `categories_type_check`; Test red: `category-type.pg.test.ts` «lässt nur … zu» – insert of `other` accepted), C-3 (Minor, Prettier hunk outside #99 reverted), C-4 (Nit, count in plan); open C-2 (Minor, existed before: no contract for `GET /categories`, `offene-punkte.md` O-11); rejected C-5: the issue asks for the pattern of `distribution_keys.type`, and only `createCategory` inserts categories in app code
 - persona Helga round 1 (`docs/design/personas/helga-p9b.md`): open P-1, P-2 (Major, existed before, need a decision: #166), P-3 to P-7, P-9 (Minor/Nit: `offene-punkte.md` U-24), P-8 (Nit, toast: U-8)
-- [ ] PR, CI, merge (workflow review `docs/reviews/workflow-rules-review-4.md`)
+- [x] PR #167, CI green, merged (fe34de6); workflow review `docs/reviews/workflow-rules-review-4.md`
 - Skills: tdd, ponytail, ponytail-review
 - Files: `backend/migrations/0001_schema.sql`, `backend/src/db/schema.ts`, `backend/src/services/category.service.ts`, `backend/src/__tests__/{category-type,api-contracts}.pg.test.ts`, `src/lib/server/category.ts`, `src/routes/config/categories/CategoryRow.svelte`, `src/__tests__/{category-predefined.dom,categories}.test.ts`, `tests/contracts/{category.json,README.md}`, `docs/data-model.md`, `tests/e2e/{features/categories.feature,fixtures/backend.ts,steps/categories.steps.ts,targets/categories.ts,questions/categories.ts}`, `docs/reviews/p9b-review-1.md`, `docs/design/personas/helga-p9b.md`, `docs/design/offene-punkte.md`
+
+### #121 B-2: Statement list ignores contract and period filters
+
+Slice 1 (contract filter), slice 2 (period filter, «Entwürfe ansehen»). Texts name Mietvertrag, Wohnung and Abrechnungsperiode: `fach-reviewer` on the `@wip` scenarios first (Workflow 1).
+
+- [x] `@wip` scenarios «Abrechnungen eines Mietvertrags anzeigen» (`contract-detail.feature`), «Nur die Entwürfe des Abrechnungslaufs anzeigen» (`statement-generate.feature`)
+- [ ] fach-reviewer on the scenarios
