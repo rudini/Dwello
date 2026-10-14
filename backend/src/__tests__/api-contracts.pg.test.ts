@@ -124,6 +124,28 @@ describe('API-Verträge des Frontends', () => {
 		expect(drift(await sample('contract'), actual)).toEqual([]);
 	});
 
+	it('GET /categories/:id liefert die Felder von category.json', async () => {
+		const name = `Internet ${token}`;
+		const own = (await (
+			await sendJson('POST', '/api/v1/categories', {
+				name,
+				nameDE: name,
+				nameFR: name,
+				nameIT: name,
+				nameEN: name,
+				isAllowedUtilityCost: true,
+				description: 'Glasfaseranschluss im Keller',
+				sortOrder: 40
+			})
+		).json()) as { id: string };
+		try {
+			const actual = await (await callApi(`/api/v1/categories/${own.id}`)).json();
+			expect(drift(await sample('category'), actual)).toEqual([]);
+		} finally {
+			await callApi(`/api/v1/categories/${own.id}`, { method: 'DELETE' });
+		}
+	});
+
 	it('GET /tenants/:id liefert die Felder von tenant.json', async () => {
 		const actual = await (await callApi(`/api/v1/tenants/${rental.tenant}`)).json();
 		expect(drift(await sample('tenant'), actual)).toEqual([]);

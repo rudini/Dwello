@@ -107,6 +107,8 @@ CREATE TABLE categories (
     is_allowed_utility_cost BOOLEAN NOT NULL DEFAULT true,
     -- heating costs (Art. 5 VMWG) follow the heating profile at a tenant change
     is_heating_cost BOOLEAN NOT NULL DEFAULT false,
+    -- predefined (seeded in 0002_stammdaten.sql) or custom (recorded by the property manager)
+    type VARCHAR(20) NOT NULL DEFAULT 'predefined',
     description TEXT,
     sort_order INTEGER DEFAULT 0,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),

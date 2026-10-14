@@ -14,3 +14,5 @@ export const allowedBadge = (name: string) =>
 	target(`Umlagefähigkeit der Kategorie ${name}`, (page) => categoryRow(name).locate(page).getByTestId('category-allowed'));
 export const usage = (name: string) =>
 	target(`Verwendung der Kategorie ${name}`, (page) => categoryRow(name).locate(page).getByTestId('category-usage'));
+export const description = (name: string) =>
+	target(`Beschreibung der Kategorie ${name}`, (page) => categoryRow(name).locate(page).getByTestId('category-description'));

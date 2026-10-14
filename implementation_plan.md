@@ -35,6 +35,17 @@ Task: work off the open `bug` issues one by one (PR merged before the next). Ski
 - code-reviewer round 2 (`docs/reviews/f19a-review-2.md`): fixed C-7 (Minor, scenario names Google Maps), C-8 (Nit, it «quando Lei sceglie»), C-10 (Nit, closing sentence tested); C-9 (Nit, what Google learns at sign-in) moved to #82
 - persona Dr. Weber round 2 (`docs/design/personas/weber-f19a-2.md`): fixed P-2 (Nit, Google Maps receives the IP too; `Referer` to U-23), P-3 (Nit, it «registrazione»); rejected P-1: the text no longer says the language was chosen
 - Test red (round 2): `privacy-page.dom.test.ts` – Google Maps sentence without IP; `privacy-i18n.dom.test.ts` – «sceglie il link» without «Lei», «inserimento»
-- [ ] PR, CI, merge (workflow review `docs/reviews/workflow-rules-review-3.md`)
+- [x] PR #164, CI green, merged (34d18a9); workflow review `docs/reviews/workflow-rules-review-3.md`
 - Skills: tdd, ponytail, ponytail-review
 - Files: `src/routes/privacy/+page.{svelte,server.ts}`, `src/routes/login/+page.server.ts`, `src/lib/server/oauth.ts`, `messages/{de,fr,it,en}.json`, `src/__tests__/privacy{.test.ts,-page.dom.test.ts}`, `tests/e2e/{features/privacy.feature,steps/app-frame.steps.ts,questions/app-frame.ts}`, `src/__tests__/privacy-i18n.dom.test.ts`, `docs/reviews/f19a-review-{1,2}.md`, `docs/design/personas/weber-f19a{,-2}.md`, `docs/design/offene-punkte.md`
+
+### #99 P-9b: Category «predefined» stored instead of guessed
+
+- [x] Scenario «Eigene Kategorie mit gleichem englischem Namen zeigt ihre Beschreibung» (`tests/e2e/features/categories.feature`). Scenario red: `sieht … bei der Kategorie "Internet" die Beschreibung …` – Expected the description, Received null
+- [x] Test red: `category-type.pg.test.ts` (2) – `type` undefined; `category-predefined.dom.test.ts` (3) – own «Internet» predefined, description hidden, predefined help shown; `api-contracts.pg.test.ts` «GET /categories/:id» – `.type: fehlt`
+- [x] `categories.type` (`predefined` default for the seeded rows, `custom` from `createCategory`) in `0001_schema.sql` and `schema.ts`; list and detail return it; `toCategory` reads it; obsolete name-guess test in `categories.test.ts` removed
+- [x] Contract `tests/contracts/category.json` (new) with README row; `docs/data-model.md` names the column
+- [x] Scenarios green (24 incl. axe/i18n rows `categories`, `category-new`, `category-edit`)
+- [ ] Checks, `code-reviewer`, PR, merge
+- Skills: tdd, ponytail, ponytail-review
+- Files: `backend/migrations/0001_schema.sql`, `backend/src/db/schema.ts`, `backend/src/services/category.service.ts`, `backend/src/__tests__/{category-type,api-contracts}.pg.test.ts`, `src/lib/server/category.ts`, `src/routes/config/categories/CategoryRow.svelte`, `src/__tests__/{category-predefined.dom,categories}.test.ts`, `tests/contracts/{category.json,README.md}`, `docs/data-model.md`, `tests/e2e/{features/categories.feature,fixtures/backend.ts,steps/categories.steps.ts,targets/categories.ts,questions/categories.ts}`
