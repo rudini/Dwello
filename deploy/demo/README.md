@@ -77,7 +77,7 @@ deploy/demo/reset-demo.sh                       # loads the demo data the first 
 
 Then open https://demo.dwello.ch. The model runs on the VM's CPU: categorizing an invoice takes a while, and invoice data never leaves the VM.
 
-**Update** to a newer version: `git pull`, then the same `up -d --build` command, then `docker image prune -f` to remove the replaced images.
+**Update** by hand: `git pull`, then the same `up -d --build` command, then `docker image prune -f` to remove the replaced images. Section 7 does this on every merge.
 
 ## 6. Nightly reset
 
@@ -90,3 +90,13 @@ Then open https://demo.dwello.ch. The model runs on the VM's CPU: categorizing a
 At 03:00 (Zurich time, step 1.4) the script stops the backend, recreates the database from the migrations, loads the demo data and starts the backend again; for these 20 to 30 seconds the app answers with an error. Sessions stay valid, since they live in cookies.
 
 If the reset fails halfway (the log ends with an error, the app shows no data), run `deploy/demo/reset-demo.sh` again by hand; nothing else notices. Keep the log small with `logrotate` or by replacing `>>` with `>` in the cron line.
+
+## 7. Automatic updates
+
+`update.sh` checks every 5 minutes whether `main` has a new commit; only then it pulls, rebuilds and restarts the app (3 to 5 minutes of building, a few seconds without the app), migrations included. It needs the clone on `main` (`git checkout main`). It and the nightly reset share a lock, so they never run at the same time. Add to `crontab -e`:
+
+```cron
+*/5 * * * * /home/ubuntu/Dwello/deploy/demo/update.sh >> /home/ubuntu/demo-update.log 2>&1
+```
+
+The log names each update and its commit. A new variable in `.env.example` is not added for you: compare it with your `.env` after an update that needs one.
