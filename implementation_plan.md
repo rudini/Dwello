@@ -39,5 +39,5 @@ persona Anna (`docs/design/personas/anna-upload174.md`): fixed P-1, P-2 (Minor),
 - [x] Open work: `docs/design/offene-punkte.md` U-29 (persona findings left: duplicates, list «Dokumente», busy button) and O-17 (global `BODY_SIZE_LIMIT`, C-4, F2-2)
 - [ ] Slice review (code-reviewer), feature review (personas, fach-reviewer)
 - [ ] Before marking complete: coverage, lint, check, backend test and type-check, affected E2E
-- [ ] Workflow review `docs/reviews/workflow-rules-review-issue-174.md`
+- [x] Workflow review `docs/reviews/workflow-rules-review-issue-174.md` (W-1 to W-9)
 - [ ] Session archived, pull request
