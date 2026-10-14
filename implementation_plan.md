@@ -50,12 +50,17 @@ Slice 2 notes:
 - 16 `CLAUDE.md` step 5 and `.claude/agents/persona.md`: saving in the persona app is part of the task
 - Files: `CLAUDE.md`, `.claude/agents/{code-reviewer,fach-reviewer,daten-pruefer,persona}.md`, `docs/design/personas/README.md`, `docs/design/offene-punkte.md`
 - No code changed: no `Test red`, no `ponytail-review`
+- code-reviewer round 2 (`docs/reviews/b15-instructions-slice1-review-2.md`): C-1..C-8 confirmed fixed; fixed C-9 (Nit: «branch HEAD» on a detached HEAD instead of an empty name; probe: detached single-branch clone prints «branch HEAD is 1 commits behind», then the next line)
 
 Slice 2 review:
 - code-reviewer round 1 (`docs/reviews/b15-instructions-slice2-review-1.md`): fixed C-1 (Major: `fach-reviewer` gets a worktree of the committed `@wip` scenario), C-2 (Major: `docs/test-pyramid.md` no longer says «where one exists»), C-3 (at most the first red test), C-4, C-5 (report path in the scratchpad, copied by the caller), C-6, C-7 (table in its own file personas do not read), C-8 (ask before the force-push), C-9 (`Skills: tdd, ponytail, ponytail-review`), C-10 (`review-<slice>-<reviewer>`)
 
 Slice 3 - added by the user during the task:
-- [x] 17 After a finished task: push, open a pull request, turn on auto-merge, resolve conflicts by merging `origin/main`, fix red CI; it merges once green. Still asked: a push to `main`, force-push, merging red or with an open Blocker/Major, and a task where the user said to only commit (as this one). Merge method: merge commit (no squash, so the slice commits stay; #149 was merged so). File: `CLAUDE.md` («Keep going»)
+- [x] 17 After a finished task: push, open a pull request, resolve conflicts by merging `origin/main`, fix red CI, merge once green (the session itself; no auto-merge in the repository). Still asked: a push to `main`, force-push, merging red or with an open Blocker/Major, and a task where the user said to only commit (as this one). Merge method: merge commit (no squash, so the slice commits stay; #149 was merged so). File: `CLAUDE.md` («Keep going»)
+- No code changed: no `Test red`, no `ponytail-review`
+
+Slice 3 review:
+- code-reviewer round 1 (`docs/reviews/b15-instructions-slice3-review-1.md`): fixed C-1 (Major: checks again and a `code-reviewer` round before each push to the open pull request), C-2 (Major: the end state «say so once under Blocked on me and stop» is back; no merge while a finding is under «Blocked on me»), C-3 (subscribe where possible; red also on `main` or a fourth fix round: ask), C-4 (ask rules in `.claude/settings.json` for a push to `main` and `gh pr merge --admin`), C-5 (only the session holding the task), C-6 (a push or pull request), C-7 (no auto-merge: the repository has `allow_auto_merge: false`, the session merges itself once green), C-8 (the CI screenshot comment is named in the closing report), C-9
 
 Finish:
 - [ ] Slice reviews (`code-reviewer`), findings triaged
