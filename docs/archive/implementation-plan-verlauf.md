@@ -5585,3 +5585,38 @@ Skills: ponytail-review (after review round 1; tdd and ponytail not loaded: depl
 
 code-reviewer round 1 (docs/reviews/demo-review-1.md): open C-1 (Major, product decision: #162), fixed C-2, C-3, C-4, C-5, C-7, C-8, C-9, C-10, rejected C-6 (round 2, reason there), C-11: browsers fall back to HTTP/2 over TCP, opening UDP 443 adds a port and an Oracle rule for no visible gain
 code-reviewer round 2 (docs/reviews/demo-review-2.md): open C-1 (Major, #162), fixed C-12 (Nit), rejected C-6: no app code changed, so `tdd` and `ponytail` had nothing to drive; the one code fix (Dockerfile) was shown red and green with `docker build`, ponytail-review ran on the diff
+
+## Session 30 - October 2026: demo notice (#162, #165; branch `ccr-3bc253a8-1qvu31`, PR #163)
+
+Decided (product owner, #162): option 1. `DEMO=on` shows a notice on every page and a demo section in the privacy statement.
+
+- [x] Scenarios `tests/e2e/features/demo.feature` (demo instance on 3104 in `playwright.config.ts`). Scenario red: `sagt der Demo-Hinweis dem Besucher …` – Besucher sees the text of Demo-Hinweis, Received has value: null (also dashboard and the privacy section «Öffentliche Demo»); «Kein Demo-Hinweis in einer eigenen Installation» green already (guard)
+- [x] Layout: notice (`Alert`, tone caution) at the top of `main` on the sign-in page, the app pages and the content pages when `demo` is set. Test red: `public-pages-layout.dom.test.ts` «warnt auf der Anmeldeseite …» – notice undefined; the other three cases (app page, `/help`, `/privacy`, `/terms`, no notice without demo) written with the code, shown red by taking the renders out (4 failed) and by `{#if true}` (1 failed)
+- [x] `+layout.server.ts`: `demo` from `DEMO=on`. Test red: `layout-load.test.ts` (2) – expected { user: null } to deeply equal { user: null, demo: true }
+- [x] Privacy: section «Öffentliche Demo» in demo mode. Test red: `privacy-page.dom.test.ts` «sagt, dass alle dieselben Daten sehen …» – section missing
+- [x] Texts in `messages/{de,fr,it,en}.json` (`demo_notice_title`, `demo_notice_text`, `privacy_demo_1`; `privacy_login_1` changed after round 1)
+- [x] `deploy/demo/docker-compose.yml` sets `DEMO=on`, README names it
+- [x] a11y and language rows: state `demo` (login, dashboard, privacy) on the demo instance (`tasks/accessibility.ts`)
+- [x] Scenarios green, `@wip` removed: 61 chromium cases (demo, a11y and language rows of login, dashboard, privacy, authentication, privacy) passed
+- [x] Code review round 1, personas round 1 (Weber, Marco, Anna, Sven, Helga)
+- [x] Fixes after round 1: privacy «Anmeldung» names the server log of sign-ins and session extensions (#165; replaces the demo section's log sentence, the demo section's own log sentence removed); notice gives the reason («deshalb»), names e-mail addresses and phone numbers, «erfundene Beispieldaten»; demo section says other visitors do not see name and e-mail; notice is a region named «Öffentliche Demo»; E2E: domain-named demo tasks, `sectionText` in `questions/app-frame.ts`. Test red: `public-pages-layout.dom.test.ts` (region, reason) and `privacy-page.dom.test.ts` (demo section, «Anmeldung»): 4 failed; scenarios red: «Datenschutzerklärung der Demo» (expected «Ihren Namen und Ihre E-Mail-Adresse sehen andere Besucher nicht») and new «Anmeldungen im Protokoll des Servers» (`privacy.feature`); then 53 chromium cases green
+- [x] Code review round 2, personas Weber and Helga round 2 (new texts)
+- [x] Fixes after round 2: «nur erfundene Daten …, auch bei E-Mail-Adressen und Telefonnummern»; demo section «… nur der Betreiber im Protokoll des Servers (siehe «Anmeldung»)»; session extension «etwa alle 50 Minuten, solange Dwello offen ist» (the refresh interval in `+layout.svelte`); French partitive. Test red: 3 DOM tests (notice, demo section, «Anmeldung»); then 53 chromium cases green. ponytail-review on 14c9790 and this delta: nothing to cut
+- [x] Code review round 3 (round-2 fixes and the merge), persona Weber round 3 (changed legal texts)
+- [x] Fix after round 3: non-breaking spaces in the French guillemets of `privacy_demo_1`. Test red: `privacy-i18n.dom.test.ts` «setzt auch im Abschnitt der öffentlichen Demo geschützte Leerzeichen …»
+- [x] Checks on the merge: lint, deepcheck:audit, test:coverage, check, backend test + type-check green; affected E2E after the last fix (below)
+- Skills: tdd, ponytail, ponytail-review (on be0b235 before review round 1: nothing to cut)
+- Files: `src/routes/+layout.svelte`, `src/routes/+layout.server.ts`, `src/routes/privacy/+page.svelte`, `messages/*.json`, `src/__tests__/{layout-load.test.ts,public-pages-layout.dom.test.ts,privacy-page.dom.test.ts}`, `tests/e2e/{features/demo.feature,steps,tasks,questions,targets}/demo.*`, `tests/e2e/tasks/accessibility.ts`, `tests/a11y/screens.json`, `tests/e2e/features/{accessibility,sprachen-bildschirme}.feature`, `playwright.config.ts`, `deploy/demo/{docker-compose.yml,README.md}`
+- code-reviewer round 1 (`docs/reviews/b162-review-1.md`): fixed C-1 (Minor, session extension named), C-2 (Minor, #165), C-3 (Minor), C-4 (Minor), C-5 (Nit), C-6 (Nit), C-7 (Nit)
+- persona Weber round 1 (`docs/design/personas/weber-b162.md`): fixed P-1 (Major, #165), P-8 (Minor); open P-2, P-3 (Major, existed before: #82), P-4, P-5, P-6, P-7 (Minor: #82), P-10, P-11 (Nit, existed before: wording of `privacy_third_1` in French and of the terms, added to #82); rejected P-9: the time is the operator's cron, the app does not know it
+- persona Marco round 1 (`docs/design/personas/marco-b162.md`): fixed P-3 (Minor, privacy demo section); open P-1, P-2 (Minor: U-25), P-4 (Nit: U-25); rejected P-5: as Weber P-9
+- persona Anna round 1 (`docs/design/personas/anna-b162.md`): fixed P-1 (Minor, privacy demo section), P-3 (Minor); open P-2, P-6, P-7 (U-25), P-4, P-5 (Minor: #82)
+- persona Sven round 1 (`docs/design/personas/sven-b162.md`): fixed P-2 (Minor, named region); open P-1 (Minor: U-25), P-4 (Nit: existed before, U-6), P-5 (Minor: #82); rejected P-3: the notice is the same on every page, the section explains it in the privacy statement's own terms
+- persona Helga round 1 (`docs/design/personas/helga-b162.md`): fixed P-1, P-2 (Minor), P-6 (Nit, privacy demo section; Microsoft: #82); open P-4, P-5 (Minor: U-25); rejected P-3: as Weber P-9
+- code-reviewer round 2 (`docs/reviews/b162-review-2.md`): fixed C-9 (Nit), C-12 (Nit); open C-8 (Minor: retention, #82), C-10 (Nit: purpose, #82), C-11 (Nit: U-25)
+- persona Weber round 2 (`docs/design/personas/weber-b162-2.md`): fixed P-1, P-3 (Minor), P-5 (Nit); open P-2, P-4 (Minor: #82)
+- persona Helga round 2 (`docs/design/personas/helga-b162-2.md`): fixed P-7 (Minor), P-8 (Nit); open P-9 (Nit: sign-in page, U-25; Microsoft: #82)
+- [x] Merged `origin/main` (#164, #167): `privacy_login_1` takes main's `{providers}` with this branch's log sentences; open points renumbered U-25, O-12 (main took U-23, O-11); Google Fonts and Microsoft (#82 comment) fixed on main by #81
+- code-reviewer round 3 (`docs/reviews/b162-review-3.md`): fixed C-13 (Minor), C-14 (Nit); rejected C-15: the sentence's claim (every extension is logged) holds for every tab, the interval is given as «etwa»
+- persona Weber round 3 (`docs/design/personas/weber-b162-3.md`): no Blocker, Major or Minor; open P-1, P-2 (Nit, texts from #81: profile picture purpose, lifetime of the session cookies: added to #82)
+- [x] Session archived

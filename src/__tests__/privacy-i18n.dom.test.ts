@@ -19,6 +19,12 @@ describe('Datenschutzerklärung auf Französisch und Italienisch', () => {
 		expect(text).not.toContain('vous garde connecté');
 	});
 
+	it('setzt auch im Abschnitt der öffentlichen Demo geschützte Leerzeichen in die Guillemets', () => {
+		overwriteGetLocale(() => 'fr');
+		show(PrivacyPage, { data: { recipient: null, providers: ['Google'], demo: true } } as never);
+		expect(document.body.textContent).toContain('(voir «\u00a0Connexion\u00a0»)');
+	});
+
 	it('verwendet die festgelegten italienischen Begriffe für Gebäude und Karte', () => {
 		const text = page('it');
 		expect(text).toContain('Google o Microsoft');
