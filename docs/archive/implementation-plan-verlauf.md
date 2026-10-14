@@ -5472,3 +5472,10 @@ Review of the merge onto `main` (`docs/reviews/b15-merge-review-1.md`, commit `5
 - Test red: «nimmt nur die letzte Antwort, wenn zweimal versucht wird» - before the fix the hint came back; after making `unknown` a state, still red with a second «geladen» toast from the overtaken attempt; green once `retry` speaks only for the latest request
 - C-1 Minor: these red lines were missing - fixed - `docs/reviews/b15-merge-review-2.md`
 - Finish after the merge fixes: lint, check, deepcheck, fallow clean; `test:coverage` 2279 tests; E2E `contract-edit` with its axe and language rows 26 passed; backend unchanged since `5c93452` (543 tests, type-check)
+
+Personas on the final state (`d04fda3`, after the merge with B-13), reports `docs/design/personas/sven-b15-3.md`, `helga-b15-3.md`: no Blocker or Major; focus after «Erneut versuchen» on the Vertragsbeginn, input kept (Sven); help with and without Vertragsende, wizard to «Prüfen», reload hint clear (Helga; saving was refused by her run's permission check, the save path is unchanged since her round 2, where she saved the move).
+- Sven P-1, P-3, P-4; Helga P-1, P-2, P-5 (#151 toasts and hint) - open work U-21
+- Sven P-2 (hint at the Vertragsbeginn not linked to the field) - already U-16
+- Helga P-3 (wizard does not mention the tenant's running contract), P-4 (new-contract link opens an empty wizard) - added to #156
+- Helga P-6 (hyphen in the wizard) - already U-20
+- Helga P-7 «Mietstage» - rejected: glossary term (`UBIQUITOUS_LANGUAGE.md`)
