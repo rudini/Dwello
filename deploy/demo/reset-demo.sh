@@ -6,7 +6,7 @@ cd "$(dirname "$0")/../.."
 compose() { docker compose -f docker-compose.prod.yml -f deploy/demo/docker-compose.yml --env-file deploy/demo/.env "$@"; }
 
 # Waits while update.sh rebuilds the app (same lock)
-exec 9>/tmp/dwello-demo.lock
+exec 9>.git/demo.lock
 flock 9
 
 # The backend's pool does not survive its database being dropped: stop it for the reset

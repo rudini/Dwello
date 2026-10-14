@@ -93,10 +93,10 @@ If the reset fails halfway (the log ends with an error, the app shows no data), 
 
 ## 7. Automatic updates
 
-`update.sh` checks every 5 minutes whether `main` has a new commit; only then it pulls, rebuilds and restarts the app (3 to 5 minutes of building, a few seconds without the app), migrations included. It needs the clone on `main` (`git checkout main`). It and the nightly reset share a lock, so they never run at the same time. Add to `crontab -e`:
+`update.sh` checks every 5 minutes whether `main` has a commit that is not built yet; only then it pulls, rebuilds and restarts the app, migrations included. Building takes 3 to 5 minutes while the old version keeps running; switching takes about a minute without the app (the new backend migrates and must report healthy before the frontend starts). A failed build is tried again on the next run; the first run after adding the cron line builds once, since no build is recorded yet (`.git/demo-deployed`). It needs the clone on `main` (`git checkout main`) and no local changes to tracked files: then `git merge --ff-only` fails on every run and says so in the log. It and the nightly reset share a lock, so they never run at the same time. Add to `crontab -e`:
 
 ```cron
 */5 * * * * /home/ubuntu/Dwello/deploy/demo/update.sh >> /home/ubuntu/demo-update.log 2>&1
 ```
 
-The log names each update and its commit. A new variable in `.env.example` is not added for you: compare it with your `.env` after an update that needs one.
+The log holds each update with its commit and the build output, and a line per run while GitHub cannot be reached; keep it small with `logrotate`. A new variable in `.env.example` is not added for you: compare it with your `.env` after an update that needs one.
