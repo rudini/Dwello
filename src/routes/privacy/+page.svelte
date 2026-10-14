@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
+	import { getLocale } from '$lib/paraglide/runtime';
 	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import Panel from '$lib/ui/Panel.svelte';
 	import type { PageData } from './$types';
@@ -11,20 +12,44 @@
 		data.recipient ? m.privacy_llm_external(data.recipient) : m.privacy_llm_local()
 	);
 
-	const sections = [
+	const sections = $derived([
 		{
 			id: 'stored',
 			title: m.privacy_stored_title(),
 			paragraphs: [m.privacy_stored_1(), m.privacy_stored_2()]
 		},
-		{ id: 'login', title: m.privacy_login_title(), paragraphs: [m.privacy_login_1()] },
+		{
+			id: 'login',
+			title: m.privacy_login_title(),
+			paragraphs: [
+				m.privacy_login_1({
+					providers: new Intl.ListFormat(getLocale(), { type: 'disjunction' }).format(
+						data.providers
+					)
+				})
+			]
+		},
 		{
 			id: 'third',
 			title: m.privacy_third_title(),
-			paragraphs: [m.privacy_third_1(), m.privacy_third_2(), m.privacy_third_3()]
+			paragraphs: [
+				m.privacy_third_1(),
+				m.privacy_third_2(),
+				m.privacy_third_3(),
+				m.privacy_third_4()
+			]
 		},
-		{ id: 'cookies', title: m.privacy_cookies_title(), paragraphs: [m.privacy_cookies_1()] }
-	];
+		{
+			id: 'cookies',
+			title: m.privacy_cookies_title(),
+			paragraphs: [
+				m.privacy_cookies_1(),
+				m.privacy_cookies_2(),
+				m.privacy_cookies_3(),
+				m.privacy_cookies_4()
+			]
+		}
+	]);
 
 	// TODO(fachlich prüfen, #82): legal wording of the draft notice
 	const draftNotice = m.privacy_draft_notice();

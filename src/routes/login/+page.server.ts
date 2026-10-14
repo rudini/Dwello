@@ -1,8 +1,6 @@
-import { getConfiguredProviders } from '$lib/server/oauth';
+import { getConfiguredProviders, PROVIDER_NAMES } from '$lib/server/oauth';
 import { LOGIN_ERRORS } from '$lib/server/login-flow';
 import type { PageServerLoad } from './$types';
-
-const NAMES = { google: 'Google', microsoft: 'Microsoft' };
 
 // Signed-in users never get here (hooks.server.ts sends them to the dashboard)
 export const load: PageServerLoad = ({ url }) => {
@@ -11,7 +9,7 @@ export const load: PageServerLoad = ({ url }) => {
 	return {
 		providers: getConfiguredProviders().map((id) => ({
 			id,
-			name: NAMES[id],
+			name: PROVIDER_NAMES[id],
 			href: `/auth/login?provider=${id}${redirectTo ? `&redirectTo=${encodeURIComponent(redirectTo)}` : ''}`
 		})),
 		error:
