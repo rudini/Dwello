@@ -8,4 +8,5 @@ compose() { docker compose -f docker-compose.prod.yml -f deploy/demo/docker-comp
 # The backend's pool does not survive its database being dropped: stop it for the reset
 compose stop backend
 trap 'compose start backend' EXIT
+trap 'exit 1' INT TERM
 compose run --rm --no-deps backend sh -c 'bun scripts/e2e-db.ts && bun scripts/demo-data.ts'
