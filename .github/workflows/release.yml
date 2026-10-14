@@ -1,0 +1,36 @@
+name: Release
+
+# Every merge to main gets the next version as a tag and a GitHub Release (issue #173); the app shows it in the
+# footer (vite.config.ts). A manual run on main sets a version by hand, e.g. 1.0.0, in place of the one main's last
+# merge got.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version to release instead of the computed one, e.g. 1.0.0
+        required: true
+
+# One release at a time; GitHub keeps only the newest waiting run, so of three quick merges the last two share a version
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Tag and release
+    # A manual run on another branch would tag a commit outside main
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ inputs.version }}
+        run: tools/release/release.sh

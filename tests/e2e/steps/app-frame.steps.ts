@@ -2,6 +2,7 @@ import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import {
 	draftNoticeText,
+	footerVersionText,
 	llmRecipientNotice,
 	operatorNoticeText,
 	pageOverflowsSideways,
@@ -122,4 +123,8 @@ Then('ist der Seitentitel lesbar', async ({ verwalter }) => {
 
 Then('scrollt die Seite nicht seitwärts', async ({ verwalter }) => {
 	await verwalter.sees(pageOverflowsSideways).toBe(false);
+});
+
+Then('zeigt die Fusszeile die Version {string}', async ({ verwalter }, version: string) => {
+	await verwalter.sees(footerVersionText).toBe(`Version ${version}`);
 });

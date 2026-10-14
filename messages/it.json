@@ -25,6 +25,8 @@
 	"footer_legal": "Note legali",
 	"footer_privacy": "Protezione dei dati",
 	"footer_terms": "Condizioni d’uso",
+	"footer_version": "Versione {version}",
+	"footer_version_unknown": "Versione sconosciuta",
 	"ui_breadcrumb": "Percorso di navigazione",
 	"ui_pages": "Pagine",
 	"ui_previous_page": "Pagina precedente",
