@@ -31,6 +31,7 @@ Funktionalität: Datenschutz
   Szenario: Dienste Dritter, die der Browser aufruft
     Dann nennt die Datenschutzerklärung unter "Weitergabe an Dritte" "CARTO"
     Und nennt die Datenschutzerklärung unter "Weitergabe an Dritte" "OpenPLZ"
+    Und nennt die Datenschutzerklärung unter "Weitergabe an Dritte" "Google Maps"
     Und nennt die Datenschutzerklärung unter "Weitergabe an Dritte" nicht "Google Fonts"
 
   Szenario: Alle Cookies, die Dwello setzt

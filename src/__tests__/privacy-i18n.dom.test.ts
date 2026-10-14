@@ -25,5 +25,7 @@ describe('Datenschutzerklärung auf Französisch und Italienisch', () => {
 		expect(text).toContain('immobile');
 		expect(text).not.toMatch(/stabile|\bcarta\b/);
 		expect(text).not.toContain('La mantiene connessa');
+		expect(text).toContain('quando Lei sceglie il link');
+		expect(text).toContain('durante la registrazione di un immobile');
 	});
 });

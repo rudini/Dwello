@@ -138,7 +138,7 @@
 	"privacy_third_1": "Payment reminders and further reminders sent by email are delivered through the mail service set up by the operator (its own SMTP server or Resend). The tenant’s name and email address and the content of the message are transmitted.",
 	"privacy_third_2": "The map on a building’s page loads its images from CARTO. CARTO receives the browser’s IP address and the map area around the building.",
 	"privacy_third_3": "The address search when you add a building asks OpenPLZ (openplzapi.org) for matching addresses. OpenPLZ receives the browser’s IP address and the search term you enter.",
-	"privacy_third_4": "«Plan route» in the building list opens Google Maps with the building’s address. Google receives the address only when you choose the link.",
+	"privacy_third_4": "«Plan route» in the building list opens Google Maps with the building’s address. Google receives the address and the browser’s IP address only when you choose the link.",
 	"privacy_third_5": "Apart from the services named here and under «Sign-in», no one receives data from Dwello.",
 	"privacy_cookies_title": "Cookies",
 	"privacy_cookies_1": "Dwello sets only technically necessary cookies. No tracking or advertising cookies are used.",

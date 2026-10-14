@@ -138,7 +138,7 @@
 	"privacy_third_1": "Les rappels par e-mail passent par le service d’envoi configuré par l’exploitant (serveur SMTP propre ou Resend). Le nom et l’adresse e-mail du locataire ainsi que le contenu du message sont alors transmis.",
 	"privacy_third_2": "La carte sur la page d’un immeuble charge ses images depuis CARTO. CARTO reçoit alors l’adresse IP du navigateur et la portion de carte autour de l’immeuble.",
 	"privacy_third_3": "La recherche d’adresse lors de la saisie d’un immeuble interroge OpenPLZ (openplzapi.org). OpenPLZ reçoit alors l’adresse IP du navigateur et le terme de recherche saisi.",
-	"privacy_third_4": "« Planifier l’itinéraire » dans la liste des immeubles ouvre Google Maps avec l’adresse de l’immeuble. Google ne reçoit l’adresse que lorsque vous choisissez le lien.",
+	"privacy_third_4": "« Planifier l’itinéraire » dans la liste des immeubles ouvre Google Maps avec l’adresse de l’immeuble. Google ne reçoit l’adresse et l’adresse IP du navigateur que lorsque vous choisissez le lien.",
 	"privacy_third_5": "En dehors des services nommés ici et sous « Connexion », personne ne reçoit de données de Dwello.",
 	"privacy_cookies_title": "Cookies",
 	"privacy_cookies_1": "Dwello n’utilise que des cookies techniquement nécessaires. Aucun cookie de suivi ou publicitaire n’est utilisé.",

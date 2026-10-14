@@ -79,8 +79,13 @@ describe('Datenschutzerklärung: Grenzen der genannten Dienste', () => {
 	});
 
 	it('nennt Google Maps beim Planen einer Route und keine Weitergabe ausser den genannten', () => {
-		expect(text()).toContain('Google Maps');
+		expect(text()).toContain(
+			'Google erhält die Adresse und die IP-Adresse des Browsers erst, wenn Sie den Link wählen.'
+		);
 		expect(text()).not.toContain('Darüber hinaus gibt Dwello keine Daten an Dritte weiter.');
+		expect(text()).toContain(
+			'Ausser den hier und unter «Anmeldung» genannten Diensten erhält niemand Daten von Dwello.'
+		);
 	});
 
 	it('sagt nicht, das Sprach-Cookie entstehe erst mit einer Wahl', () => {

@@ -138,7 +138,7 @@
 	"privacy_third_1": "Zahlungserinnerungen und Mahnungen per E-Mail werden über den vom Betreiber eingerichteten Mailversand zugestellt (eigener SMTP-Server oder Resend). Dabei werden Name und E-Mail-Adresse des Mieters sowie der Inhalt der Nachricht übermittelt.",
 	"privacy_third_2": "Die Karte auf der Seite eines Gebäudes lädt ihre Kartenbilder von CARTO. Dabei erhält CARTO die IP-Adresse des Browsers und den Kartenausschnitt um das Gebäude.",
 	"privacy_third_3": "Die Adresssuche beim Erfassen eines Gebäudes fragt OpenPLZ (openplzapi.org) nach passenden Adressen. Dabei erhält OpenPLZ die IP-Adresse des Browsers und den eingegebenen Suchbegriff.",
-	"privacy_third_4": "«Route planen» in der Gebäudeliste öffnet Google Maps mit der Adresse des Gebäudes. Google erhält die Adresse erst, wenn Sie den Link wählen.",
+	"privacy_third_4": "«Route planen» in der Gebäudeliste öffnet Google Maps mit der Adresse des Gebäudes. Google erhält die Adresse und die IP-Adresse des Browsers erst, wenn Sie den Link wählen.",
 	"privacy_third_5": "Ausser den hier und unter «Anmeldung» genannten Diensten erhält niemand Daten von Dwello.",
 	"privacy_cookies_title": "Cookies",
 	"privacy_cookies_1": "Dwello setzt nur technisch notwendige Cookies. Tracking- oder Werbe-Cookies werden nicht verwendet.",
