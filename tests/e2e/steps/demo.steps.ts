@@ -40,7 +40,7 @@ Then(
 	async ({ verwalter }, heading: string) => {
 		await verwalter.sees(sectionText(heading)).toContain('dieselben Daten');
 		await verwalter.sees(sectionText(heading)).toContain('jede Nacht');
-		await verwalter.sees(sectionText(heading)).toContain('Ihren Namen und Ihre E-Mail-Adresse sehen andere Besucher nicht');
+		await verwalter.sees(sectionText(heading)).toContain('Ihren Namen und Ihre E-Mail-Adresse sehen andere Besucher nicht, nur der Betreiber');
 	}
 );
 

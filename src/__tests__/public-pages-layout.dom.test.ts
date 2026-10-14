@@ -98,11 +98,11 @@ describe('Öffentliche Demo', () => {
 		expect(notice?.closest('section')?.getAttribute('aria-label')).toBe('Öffentliche Demo');
 	});
 
-	it('begründet, warum keine echten Daten eingegeben werden dürfen, und nennt auch Kontaktdaten', async () => {
+	it('begründet, warum nur erfundene Daten eingegeben werden dürfen, auch bei Kontaktdaten', async () => {
 		const text = (await shown('/login', { user: null, demo: true }))?.textContent;
 		expect(text).toContain('erfundenen Beispieldaten');
 		expect(text).toContain(
-			'Geben Sie deshalb keine echten Daten ein, auch keine E-Mail-Adressen oder Telefonnummern'
+			'Geben Sie deshalb nur erfundene Daten ein, auch bei E-Mail-Adressen und Telefonnummern'
 		);
 	});
 

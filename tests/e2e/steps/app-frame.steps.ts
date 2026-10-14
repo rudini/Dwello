@@ -75,7 +75,7 @@ Then(
 	'erfährt der Liegenschaftsverwalter unter {string}, dass jede Anmeldung und jede Verlängerung der Sitzung mit der E-Mail-Adresse protokolliert wird',
 	async ({ verwalter }, heading: string) => {
 		await verwalter.sees(sectionText(heading)).toContain(
-			'Jede Anmeldung und jede Verlängerung der Sitzung wird mit der E-Mail-Adresse im Protokoll des Servers festgehalten'
+			'Jede Anmeldung und jede Verlängerung der Sitzung (etwa alle 50 Minuten, solange Dwello offen ist) wird mit der E-Mail-Adresse im Protokoll des Servers festgehalten'
 		);
 	}
 );

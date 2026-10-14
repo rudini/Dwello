@@ -44,7 +44,9 @@ describe('Datenschutzerklärung der öffentlichen Demo', () => {
 		const text = demoSection()?.textContent;
 		expect(text).toContain('sehen und ändern dieselben Daten');
 		expect(text).toContain('jede Nacht werden alle Änderungen gelöscht');
-		expect(text).toContain('Ihren Namen und Ihre E-Mail-Adresse sehen andere Besucher nicht');
+		expect(text).toContain(
+			'Ihren Namen und Ihre E-Mail-Adresse sehen andere Besucher nicht, nur der Betreiber im Protokoll des Servers'
+		);
 	});
 
 	it('hat in einer eigenen Installation keinen Abschnitt zur Demo', () => {
@@ -63,7 +65,7 @@ describe('Datenschutzerklärung zur Anmeldung', () => {
 			section.querySelector('h2')?.textContent?.includes('Anmeldung')
 		);
 		expect(login?.textContent).toContain(
-			'Jede Anmeldung und jede Verlängerung der Sitzung wird mit der E-Mail-Adresse im Protokoll des Servers festgehalten'
+			'Jede Anmeldung und jede Verlängerung der Sitzung (etwa alle 50 Minuten, solange Dwello offen ist) wird mit der E-Mail-Adresse im Protokoll des Servers festgehalten'
 		);
 		expect(login?.textContent).not.toContain('verwendet sie nur');
 	});
