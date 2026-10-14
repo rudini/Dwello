@@ -1,6 +1,14 @@
 import { question } from '../screenplay/actor';
 import { Count, Text, ThePage, Visibility, Width } from '../screenplay/questions';
-import { draftNotice, llmRecipient, operatorNotice, pageSection, pageTitle, userMenuButton } from '../targets/app-frame';
+import {
+	draftNotice,
+	footerVersion,
+	llmRecipient,
+	operatorNotice,
+	pageSection,
+	pageTitle,
+	userMenuButton
+} from '../targets/app-frame';
 
 export const sectionShown = (heading: string) => Visibility.of(pageSection(heading));
 export const sectionText = (heading: string) => Text.of(pageSection(heading));
@@ -15,3 +23,4 @@ export const pageOverflowsSideways = question(
 );
 export const userMenuCount = Count.of(userMenuButton);
 export const tabIcon = ThePage.tabIcon;
+export const footerVersionText = Text.of(footerVersion);

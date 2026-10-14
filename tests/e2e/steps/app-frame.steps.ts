@@ -2,6 +2,7 @@ import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import {
 	draftNoticeText,
+	footerVersionText,
 	llmRecipientNotice,
 	operatorNoticeText,
 	pageOverflowsSideways,
@@ -127,4 +128,8 @@ Then('scrollt die Seite nicht seitwärts', async ({ verwalter }) => {
 
 Then('zeigt das Browser-Tab das Dwello-Symbol', async ({ verwalter }) => {
 	await verwalter.sees(tabIcon).toBe('image/svg+xml');
+});
+
+Then('zeigt die Fusszeile die Version {string}', async ({ verwalter }, version: string) => {
+	await verwalter.sees(footerVersionText).toBe(`Version ${version}`);
 });

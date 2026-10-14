@@ -13,6 +13,7 @@ export const userMenuButton = target('Benutzermenü', (page) => page.getByTestId
 export const userMenuSettings = target('Einstellungen', (page) => page.getByTestId('user-menu-settings'));
 export const footerLink = (label: string) =>
 	target(`Fusszeile «${label}»`, (page) => page.getByTestId('footer-link').filter({ hasText: label }));
+export const footerVersion = target('Version in der Fusszeile', (page) => page.getByTestId('footer-version'));
 export const pageSection = (heading: string) =>
 	target(`Abschnitt «${heading}»`, (page) =>
 		page.getByTestId('page-section').filter({ has: page.getByRole('heading', { name: heading, exact: true }) })
