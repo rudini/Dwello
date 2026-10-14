@@ -25,7 +25,9 @@
 
 	// Bound, so what is typed before hydration is kept; EarlySelect keeps an early building choice
 	let term = $derived(search);
-	const filtered = $derived(!!(search || building || status || contract || periodStart));
+	const filtered = $derived(
+		!!(search || building || status || contract || periodStart || periodEnd)
+	);
 </script>
 
 <form method="GET" action="/statements" class="flex flex-col gap-4 md:flex-row md:items-end">

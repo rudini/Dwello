@@ -48,4 +48,13 @@ describe('Abrechnungen eines Mietvertrags', () => {
 		expect(data.map((s) => s.contractId)).toEqual([rental.contract]);
 		expect(total).toBe(1);
 	});
+
+	it('zählt die Status nur über die Abrechnungen dieses Mietvertrags', async () => {
+		const counts = (await (await callApi(`/api/v1/statements/counts?contractId=${rental.contract}`)).json()) as {
+			draft: number;
+			total: number;
+		};
+
+		expect(counts).toMatchObject({ draft: 1, total: 1 });
+	});
 });

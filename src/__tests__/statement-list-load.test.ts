@@ -126,6 +126,7 @@ describe('Abrechnungsliste eines Mietvertrags', () => {
 		} as never)) as StatementsListData;
 
 		expect(urls[0]).toBe(`${API}/statements?limit=10&offset=0&contractId=c1`);
+		expect(urls[1]).toBe(`${API}/statements/counts?contractId=c1`);
 		expect(data.scope).toBe(
 			'Sie sehen die Abrechnungen des Mietvertrags von Anna Keller, Wohnung 2.01 (Ahornhof), Vertragsbeginn 01.04.2024.'
 		);
@@ -194,5 +195,18 @@ describe('Abrechnungsliste einer Abrechnungsperiode', () => {
 		expect(data.scope).toBe(
 			'Sie sehen die Abrechnungen der Abrechnungsperiode 01.07.2024 – 30.06.2025.'
 		);
+	});
+});
+
+describe('Abrechnungsperiode aus einer Adresse von Hand', () => {
+	it('nennt keine Periode, wenn ein Datum keines ist', async () => {
+		const fetch = (async () => Response.json(periodStatements)) as typeof globalThis.fetch;
+
+		const data = (await load({
+			url: new URL('http://localhost/statements?periodStart=gestern&periodEnd=2024-12-31'),
+			fetch
+		} as never)) as { scope: string | null };
+
+		expect(data.scope).toBeNull();
 	});
 });

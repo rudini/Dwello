@@ -73,12 +73,15 @@ export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 	.get(
 		'/counts',
 		async ({ query }) => {
-			const counts = await getStatementCountsByStatus(query.buildingId);
-			return counts;
+			return getStatementCountsByStatus(query);
 		},
 		{
 			query: t.Object({
-				buildingId: t.Optional(t.String())
+				search: t.Optional(t.String()),
+				contractId: t.Optional(t.String()),
+				buildingId: t.Optional(t.String()),
+				periodStart: t.Optional(t.String()),
+				periodEnd: t.Optional(t.String())
 			})
 		}
 	)

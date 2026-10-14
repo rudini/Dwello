@@ -58,8 +58,7 @@ describe('Abrechnungen Schritt für Schritt', () => {
 			selectionErrors({ ...selection, heatingProfileId: '', managementFeePercent: -1 }, 3)
 		).toEqual({
 			heatingProfileId: 'Bitte wählen Sie ein Heizprofil.',
-			managementFeePercent:
-				'Bitte geben Sie einen Prozentsatz ab 0 mit höchstens zwei Stellen nach dem Komma ein, zum Beispiel 3 oder 2,5.'
+			managementFeePercent: 'Bitte geben Sie einen Prozentsatz ab 0 mit höchstens zwei Stellen nach dem Komma ein, zum Beispiel 3 oder 2,5.'
 		});
 		expect(selectionErrors({ ...selection, managementFeePercent: NaN }, 3)).toHaveProperty(
 			'managementFeePercent'
@@ -166,12 +165,10 @@ describe('Rechnungen pro Kategorie', () => {
 				})
 			)
 		).toBe('Rechnungen für das 1. Quartal und das 3. Quartal fehlen. Im Vorjahr: 4 Rechnungen.');
-		expect(
-			findingText(finding('gap', { missingParts: [part('2025-03-01', '2025-03-31')] }))
-		).toContain('für den März fehlt');
-		expect(
-			findingText(finding('gap', { missingParts: [part('2026-01-14', '2026-07-15')] }))
-		).toContain('für die Zeit vom 14.01.2026 bis 15.07.2026 fehlt');
+		expect(findingText(finding('gap', { missingParts: [part('2025-03-01', '2025-03-31')] }))).toContain('für den März fehlt');
+		expect(findingText(finding('gap', { missingParts: [part('2026-01-14', '2026-07-15')] }))).toContain(
+			'für die Zeit vom 14.01.2026 bis 15.07.2026 fehlt'
+		);
 	});
 
 	it('nennt Kosten, die deutlich vom Vorjahr abweichen, mit dem nächsten Schritt', () => {

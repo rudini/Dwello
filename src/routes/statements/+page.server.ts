@@ -44,20 +44,20 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<StatementsLi
 	const page = parseInt(url.searchParams.get('page') || '1');
 	const pageSize = 10;
 	const contractId = url.searchParams.get('contract');
-	const [periodStart, periodEnd] = [
-		url.searchParams.get('periodStart'),
-		url.searchParams.get('periodEnd')
-	];
-	const periodScope =
-		periodStart && periodEnd
-			? m.statements_scope_period({ start: formatDate(periodStart), end: formatDate(periodEnd) })
-			: null;
+	const [periodStart, periodEnd] = [url.searchParams.get('periodStart'), url.searchParams.get('periodEnd')];
+	// only a real date range is named; a hand-made address with another value gets no sentence
+	const periodScope = [periodStart, periodEnd].every((date) => /^\d{4}-\d{2}-\d{2}$/.test(date ?? ''))
+		? m.statements_scope_period({ start: formatDate(periodStart!), end: formatDate(periodEnd!) })
+		: null;
 
 	try {
 		const params = backendQuery(url, page, pageSize);
+		// the status tabs count over the same filters as the list, all but the status itself
+		const counted = new URLSearchParams(params);
+		for (const key of ['limit', 'offset', 'status']) counted.delete(key);
 		const [statementsRes, countsRes, buildingsRes, scope] = await Promise.all([
 			fetch(`${BACKEND_URL}/api/v1/statements?${params}`),
-			fetch(`${BACKEND_URL}/api/v1/statements/counts`),
+			fetch(`${BACKEND_URL}/api/v1/statements/counts${counted.size ? `?${counted}` : ''}`),
 			fetch(`${BACKEND_URL}/api/v1/buildings?limit=100`),
 			contractId ? contractScope(fetch, contractId) : periodScope
 		]);

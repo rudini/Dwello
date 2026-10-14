@@ -68,6 +68,16 @@ describe('Abrechnungsliste', () => {
 		expect(all?.getAttribute('href')).toBe('/statements');
 	});
 
+	// on a phone the sentence must be on the first screen, before the tabs and the search
+	it('sagt vor den Statusfiltern, wessen Abrechnungen die Liste zeigt', () => {
+		url = new URL('http://localhost/statements?contract=c1');
+		list([statement()], 1, 1, contractScope);
+
+		const scope = byTestId('statements-scope')!;
+		const firstTab = document.querySelector('[data-testid^="filter-"]')!;
+		expect(scope.compareDocumentPosition(firstTab) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+	});
+
 	it('behält den Mietvertrag in den Statuslinks und in der Suche', () => {
 		url = new URL('http://localhost/statements?contract=c1');
 		list([statement()], 1, 1, contractScope);
@@ -92,6 +102,13 @@ describe('Abrechnungsliste', () => {
 		expect(document.querySelector<HTMLInputElement>('form input[name="periodEnd"]')?.value).toBe(
 			'2024-12-31'
 		);
+		expect(text()).toContain('Keine Abrechnungen gefunden');
+	});
+
+	it('zählt auch ein Periodenende allein als Filter', () => {
+		url = new URL('http://localhost/statements?periodEnd=2024-12-31');
+		list([], 0, 1);
+
 		expect(text()).toContain('Keine Abrechnungen gefunden');
 	});
 

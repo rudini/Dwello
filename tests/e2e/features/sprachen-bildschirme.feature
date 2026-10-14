@@ -99,6 +99,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | statements             | filtered-empty      |
       | statements             | mark-paid-dialog    |
       | statements             | list-scoped         |
+      | statements-period      | list-scoped         |
       | statement-generate     | default             |
       | statement-generate     | every-wizard-step   |
       | statement-generate     | preview-empty       |
