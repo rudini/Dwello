@@ -25,3 +25,17 @@ Funktionalität: Dokumente
     Wenn der Liegenschaftsverwalter die "Zahlungserinnerung" an "Anna Keller" als versendet markiert
     Dann ist die "Zahlungserinnerung" an "Anna Keller" nicht mehr zu versenden
     Und ist die "Zahlungserinnerung" an "Anna Keller" als versendet festgehalten
+
+  @wip
+  Szenario: Hochgeladenes Dokument ist nie zu versenden
+    Angenommen "Anna Keller" hat das hochgeladene Dokument "Ausweiskopie"
+    Wenn der Liegenschaftsverwalter alle Dokumente ansieht
+    Dann liegt das Dokument "Ausweiskopie" zu "Anna Keller" ohne Versandstatus vor
+    Wenn der Liegenschaftsverwalter die zu versendenden Dokumente ansieht
+    Dann ist die "Zahlungserinnerung" an "Anna Keller" zu versenden
+    Und ist das Dokument "Ausweiskopie" zu "Anna Keller" nicht zu versenden
+
+  @wip
+  Szenario: Eine Mahnung lässt sich nicht löschen
+    Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mieters "Anna Keller"
+    Dann kann der Liegenschaftsverwalter die "Zahlungserinnerung" nicht löschen

@@ -184,6 +184,12 @@ export function testData(api: CallTheApi) {
 			names.set(`E-Mail ${tenantTitle}`, email);
 		},
 
+		// A PDF the Liegenschaftsverwalter uploaded to the tenant
+		async upload(tenantTitle: string, title: string) {
+			const content = Buffer.from('%PDF-1.4\n%%EOF\n').toString('base64');
+			await post(`tenants/${ids.get(tenantTitle)}/documents`, { title, fileName: `${title}.pdf`, content });
+		},
+
 		async remind(tenantTitle: string, year: number) {
 			await post(`statements/${ids.get(`Abrechnung ${tenantTitle} ${year}`)}/reminders`, {});
 		},

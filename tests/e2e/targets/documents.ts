@@ -13,3 +13,15 @@ export const markSentButton = (title: string, tenantName: string) =>
 	target(`«${title}» an ${tenantName} als versendet markieren`, (page) =>
 		documentRow(title, tenantName).locate(page).getByTestId('document-mark-sent')
 	);
+export const documentFileInput = target('Datei des Dokuments', (page) => page.getByTestId('tenant-document-file-input'));
+export const documentTitleInput = target('Titel des Dokuments', (page) => page.getByTestId('tenant-document-title-input'));
+export const uploadDocumentButton = target('Dokument hochladen', (page) => page.getByTestId('tenant-document-upload-button'));
+export const noDocumentsHint = target('Hinweis keine Dokumente', (page) => page.getByTestId('tenant-documents-empty'));
+export const openDocumentLink = (title: string) =>
+	target(`«${title}» öffnen`, (page) => documentRow(title).locate(page).getByTestId('document-pdf-link'));
+export const deleteDocumentButton = (title: string) =>
+	target(`«${title}» löschen`, (page) => documentRow(title).locate(page).getByTestId('document-delete-button'));
+export const confirmDeleteDocumentButton = target('Dokument löschen bestätigen', (page) =>
+	page.getByTestId('document-delete-confirm')
+);
+export const deleteTenantMessage = target('Bestätigung Mieter löschen', (page) => page.getByTestId('delete-dialog-message'));
