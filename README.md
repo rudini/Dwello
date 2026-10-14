@@ -275,6 +275,8 @@ docker-compose -f docker-compose.dev.yml up
 docker-compose -f docker-compose.prod.yml up
 ```
 
+**Public demo** (demo.dwello.ch, shared data reset every night): [deploy/demo/README.md](./deploy/demo/README.md).
+
 ### Environment Variables
 
 See [.env.example](./.env.example) for all required environment variables.

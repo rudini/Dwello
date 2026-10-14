@@ -1,0 +1,68 @@
+# Demo deployment (demo.dwello.ch)
+
+The public demo runs on one Oracle Cloud "Always Free" VM: `docker-compose.prod.yml` plus `deploy/demo/docker-compose.yml`, which adds Caddy for HTTPS and publishes no port but 80 and 443. Self-hosting stays as in the main README (`docker-compose.prod.yml` on its own); nothing here changes it.
+
+**Every visitor shares the same data.** Anyone with a Google account can sign in and sees and edits the same demo landlord. A cron job resets the database to the demo data every night (`reset-demo.sh`). Do not enter real data.
+
+## 1. VM (Oracle Cloud)
+
+1. Create an Always Free account; home region **Switzerland North (Zurich)**, so the data stays in Switzerland (the home region cannot be changed later).
+2. Compute, Instances, Create: image **Ubuntu 24.04** (aarch64), shape **VM.Standard.A1.Flex** with 2 OCPU and 12 GB (the Always Free limit since August 2026), boot volume 50 GB. Add your SSH key.
+3. Networking: in the VCN's security list (or a network security group on the instance), add ingress rules for TCP 80 and 443 from `0.0.0.0/0`.
+4. Oracle's Ubuntu images also block these ports in the VM's own firewall. On the VM:
+
+   ```bash
+   sudo iptables -I INPUT 6 -m state --state NEW -p tcp --dport 80 -j ACCEPT
+   sudo iptables -I INPUT 6 -m state --state NEW -p tcp --dport 443 -j ACCEPT
+   sudo netfilter-persistent save
+   sudo timedatectl set-timezone Europe/Zurich
+   ```
+
+5. Install Docker: `curl -fsSL https://get.docker.com | sudo sh`, then `sudo usermod -aG docker $USER` and log in again. Compose 2.24 or newer is needed (`!reset` in the demo file); the script installs a current one.
+
+Oracle may reclaim an Always Free instance that stays idle for 7 days (low CPU, network and memory use); a demo with visitors and the nightly reset is usually enough, an upgrade to a pay-as-you-go account (still free within the limits) ends this.
+
+## 2. DNS (Infomaniak)
+
+In the Infomaniak Manager, Domains, `dwello.ch`, DNS zone, add a record:
+
+| Type | Source | Target | TTL |
+|---|---|---|---|
+| A | `demo` | public IPv4 of the VM | 1 hour |
+
+Check with `dig +short demo.dwello.ch` before starting Caddy: it requests the certificate as soon as it starts, and Let's Encrypt limits failed attempts. The domain stays at Infomaniak; only this subdomain points to the VM.
+
+## 3. Google sign-in
+
+In the Google Cloud Console, APIs & Services, Credentials: an OAuth client of type "Web application" with
+
+- authorized JavaScript origin `https://demo.dwello.ch`
+- authorized redirect URI `https://demo.dwello.ch/auth/callback`
+
+On the OAuth consent screen, set the publishing status to **In production**: in "Testing", only the listed test users (at most 100) can sign in. Dwello asks only for e-mail and profile, which needs no Google verification.
+
+Microsoft sign-in is not wired into `docker-compose.prod.yml`; the demo uses Google only.
+
+## 4. Start
+
+```bash
+git clone https://github.com/rudini/Dwello.git && cd Dwello
+cp deploy/demo/.env.example deploy/demo/.env    # fill in: secrets, Google client, operator
+docker compose -f docker-compose.prod.yml -f deploy/demo/docker-compose.yml --env-file deploy/demo/.env up -d --build
+docker exec dwello-ollama ollama pull qwen2.5:3b
+deploy/demo/reset-demo.sh                       # loads the demo data the first time
+```
+
+Then open https://demo.dwello.ch. The model runs on the VM's CPU: categorizing an invoice takes a while, and invoice data never leaves the VM.
+
+**Update** to a newer version: `git pull`, then the same `up -d --build` command.
+
+## 5. Nightly reset
+
+`crontab -e` on the VM, with the path of your clone:
+
+```cron
+0 3 * * * /home/ubuntu/Dwello/deploy/demo/reset-demo.sh >> /home/ubuntu/demo-reset.log 2>&1
+```
+
+At 03:00 (Zurich time, step 1.4) the script stops the backend, recreates the database from the migrations, loads the demo data and starts the backend again; for these about 30 seconds the app answers with an error. Sessions stay valid, since they live in cookies.
