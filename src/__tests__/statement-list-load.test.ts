@@ -203,7 +203,7 @@ describe('Abrechnungsperiode aus einer Adresse von Hand', () => {
 		const fetch = (async () => Response.json(periodStatements)) as typeof globalThis.fetch;
 
 		const data = (await load({
-			url: new URL('http://localhost/statements?periodStart=gestern&periodEnd=2024-12-31'),
+			url: new URL('http://localhost/statements?periodStart=2024-13-45&periodEnd=2024-12-31'),
 			fetch
 		} as never)) as { scope: string | null };
 

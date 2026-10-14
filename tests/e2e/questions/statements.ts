@@ -1,7 +1,7 @@
 import type { TestData } from '../fixtures/backend';
 import { question } from '../screenplay/actor';
 import { Count, Text, ThePage, Visibility } from '../screenplay/questions';
-import { statementRow, statementRowForYear, statementRows, statementsEmptyNotice, statementsScope } from '../targets/statements';
+import { statementRow, statementRowForYear, statementRows, statementsEmptyNotice, statementsScope, statusCount } from '../targets/statements';
 
 export const listedStatement = (tenantName: string) => Text.of(statementRow(tenantName));
 export const statementOfYearListed = (tenantName: string, year: number) =>
@@ -19,3 +19,4 @@ export const pageAddressInApp = question('the address of the page in the app', a
 	return `${pathname}${search}${hash}`;
 });
 export const listScope = Text.of(statementsScope);
+export const countedStatements = (status: string) => Text.of(statusCount(status));

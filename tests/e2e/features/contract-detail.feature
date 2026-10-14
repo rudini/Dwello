@@ -192,3 +192,4 @@ Funktionalität: Mietvertragsdetail
     Dann erfährt der Liegenschaftsverwalter, dass die Liste nur die Abrechnungen des Mietvertrags von "Anna Keller" in der Wohnung "2.01" zeigt
     Und sieht der Liegenschaftsverwalter die Abrechnung 2025 von "Anna Keller"
     Aber nicht die Abrechnung 2025 von "Ben Meier"
+    Und zählt die Liste 1 Entwurf

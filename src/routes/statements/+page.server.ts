@@ -18,6 +18,13 @@ async function contractScope(fetch: typeof globalThis.fetch, id: string): Promis
 	});
 }
 
+/** A calendar day as YYYY-MM-DD that exists (not 2024-13-45 or 2024-02-30) */
+const isDate = (value: string | null): value is string =>
+	!!value &&
+	/^\d{4}-\d{2}-\d{2}$/.test(value) &&
+	!Number.isNaN(Date.parse(value)) &&
+	new Date(value).toISOString().startsWith(value);
+
 // The list's filters from the page URL, as the backend names them
 const FILTERS = {
 	status: 'status',
@@ -46,9 +53,10 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<StatementsLi
 	const contractId = url.searchParams.get('contract');
 	const [periodStart, periodEnd] = [url.searchParams.get('periodStart'), url.searchParams.get('periodEnd')];
 	// only a real date range is named; a hand-made address with another value gets no sentence
-	const periodScope = [periodStart, periodEnd].every((date) => /^\d{4}-\d{2}-\d{2}$/.test(date ?? ''))
-		? m.statements_scope_period({ start: formatDate(periodStart!), end: formatDate(periodEnd!) })
-		: null;
+	const periodScope =
+		isDate(periodStart) && isDate(periodEnd)
+			? m.statements_scope_period({ start: formatDate(periodStart), end: formatDate(periodEnd) })
+			: null;
 
 	try {
 		const params = backendQuery(url, page, pageSize);

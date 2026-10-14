@@ -7,6 +7,9 @@ import { createApartment, deleteApartment } from '../services/apartment.service'
 import { createContract, deleteContract } from '../services/contract.service';
 import { deleteStatement, generateStatement } from '../services/statement.service';
 import { createTenant, deleteTenant } from '../services/tenant.service';
+import { eq } from 'drizzle-orm';
+import { db } from '../db/connection';
+import { utilityStatements } from '../db/schema';
 import { callApi } from './helpers/auth';
 import { createRental } from './helpers/rental';
 
@@ -56,5 +59,16 @@ describe('Abrechnungen eines Mietvertrags', () => {
 		};
 
 		expect(counts).toMatchObject({ draft: 1, total: 1 });
+	});
+
+	it('zählt eine versendete Abrechnung mit vergangener Frist als überfällig, nicht als versendet', async () => {
+		await db
+			.update(utilityStatements)
+			.set({ status: 'sent', paymentDeadline: '2025-03-31' })
+			.where(eq(utilityStatements.contractId, other.contract));
+
+		const counts = (await (await callApi(`/api/v1/statements/counts?contractId=${other.contract}`)).json()) as object;
+
+		expect(counts).toMatchObject({ draft: 0, sent: 0, overdue: 1, total: 1 });
 	});
 });

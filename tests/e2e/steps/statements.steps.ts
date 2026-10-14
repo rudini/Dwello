@@ -2,6 +2,7 @@ import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
 import {
 	listedStatement,
+	countedStatements,
 	listedStatementCount,
 	listScope,
 	pageAddressInApp,
@@ -158,3 +159,8 @@ Then(
 		await verwalter.sees(listScope).toContain(`Abrechnungsperiode ${period}`);
 	}
 );
+
+// the status tabs count what the list can show, not every statement
+Then('zählt die Liste {int} Entwurf/Entwürfe', async ({ verwalter }, count: number) => {
+	await verwalter.sees(countedStatements('draft')).toBe(String(count));
+});
