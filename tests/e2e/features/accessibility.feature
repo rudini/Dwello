@@ -20,6 +20,7 @@ Funktionalität: Barrierefreiheit
       | login                  | default             |
       | login                  | login-error         |
       | login                  | other-language      |
+      | login                  | demo                |
       | error-404              | default             |
       | error-server           | default             |
       | error-server           | server-error        |
@@ -29,6 +30,7 @@ Funktionalität: Barrierefreiheit
       | dashboard              | user-menu-open      |
       | dashboard              | other-language      |
       | dashboard              | language-menu-open  |
+      | dashboard              | demo                |
       | buildings              | default             |
       | buildings              | empty               |
       | buildings              | filtered-empty      |
@@ -144,6 +146,7 @@ Funktionalität: Barrierefreiheit
       | heating-profile-edit   | submit-cleared      |
       | help                   | default             |
       | privacy                | default             |
+      | privacy                | demo                |
       | terms                  | default             |
       | analytics              | default             |
       | reports                | default             |

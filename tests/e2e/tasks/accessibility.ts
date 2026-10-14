@@ -42,7 +42,9 @@ import {
 } from '../targets/contract-form';
 import { errorToast } from '../targets/form';
 import { languageButton } from '../targets/language';
+import { demoNotice } from '../targets/demo';
 import { draftRestored, nextButton, saveStatus } from '../targets/wizard';
+import { DEMO_INSTANCE } from './demo';
 
 // How the axe check and the language check bring each screen of tests/a11y/screens.json into its state
 
@@ -105,6 +107,7 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	empty: () => Wait.until(on.emptyHint),
 	'first-use': () => async (actor) => actor.attemptsTo(Wait.until(on.text(await say(actor, 'Erstes Gebäude erfassen')))),
 	'login-error': () => Wait.until(on.loginError),
+	demo: () => Wait.until(demoNotice),
 	'submit-empty': () => (actor) => actor.attemptsTo(Click.on(on.saveButton), Wait.until(on.formProblem)),
 	'submit-cleared': () => (actor) =>
 		actor.attemptsTo(Enter.theValue('').intoEach(on.requiredFields), Click.on(on.saveButton), Wait.until(on.formProblem)),
@@ -245,9 +248,11 @@ const statementWizardSteps =
 		await nextStep('generate-drafts-note'); // "Erstellen"
 	};
 
-// 'empty' and 'first-use' need a database without records: the empty instance of the stack (playwright.config.ts)
+// 'empty' and 'first-use' need a database without records: the empty instance of the stack (playwright.config.ts);
+// 'demo' the instance with DEMO=on
 const EMPTY_INSTANCE = 'http://localhost:3102';
-const onEmptyInstance = ['empty', 'first-use'];
+const instanceOf = (state: string) =>
+	['empty', 'first-use'].includes(state) ? EMPTY_INSTANCE : state === 'demo' ? DEMO_INSTANCE : '';
 
 /** Public screens are looked at without a session */
 const leaveSessionFor =
@@ -271,7 +276,7 @@ const lookAt =
 			Browser.resizeTo(viewports[viewport]),
 			Browser.useColorScheme(scheme),
 			Browser.clearLocalStorage, // no draft from the previous viewport
-			Navigate.to(onEmptyInstance.includes(example.state) ? EMPTY_INSTANCE + example.path : example.path)
+			Navigate.to(instanceOf(example.state) + example.path)
 		);
 		const noted = note(look, prefix);
 		if (example.state !== 'every-wizard-step') {

@@ -118,6 +118,14 @@ export default defineConfig<{ driver: Driver }>({
 				ORIGIN: 'http://localhost:3102',
 				BACKEND_URL: 'http://localhost:3103'
 			}
+		},
+		{
+			// The same build as the public demo (DEMO=on), talking to the main backend: tests/e2e/features/demo.feature
+			command: 'node build',
+			port: 3104,
+			reuseExistingServer: !process.env.CI,
+			timeout: 60000,
+			env: { ...frontendEnv, PORT: '3104', ORIGIN: 'http://localhost:3104', DEMO: 'on' }
 		}
 	],
 	use: {

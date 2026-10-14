@@ -1,0 +1,57 @@
+# Demo deployment: docker-compose.prod.yml plus HTTPS and no published ports except 80/443.
+# Self-hosters keep using docker-compose.prod.yml on its own; this file only adds to it.
+# Usage (repo root): docker compose -f docker-compose.prod.yml -f deploy/demo/docker-compose.yml --env-file deploy/demo/.env up -d --build
+# Setup and nightly reset: deploy/demo/README.md
+
+# The frontend logs each sign-in with the visitor's e-mail: keep at most 30 MB per container
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: 10m
+    max-file: "3"
+
+services:
+  frontend:
+    # Only Caddy talks to the app; Postgres, backend and Ollama stay inside the Docker network
+    ports: !reset []
+    logging: *logging
+    environment:
+      # The demo notice on every page and the demo section of the privacy statement (#162)
+      - DEMO=on
+
+  backend:
+    ports: !reset []
+    logging: *logging
+
+  postgres:
+    ports: !reset []
+    logging: *logging
+    environment:
+      # docker-compose.prod.yml falls back to the password dwello; the demo refuses to start without one
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in deploy/demo/.env}
+
+  ollama:
+    ports: !reset []
+    logging: *logging
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: dwello-caddy
+    restart: unless-stopped
+    logging: *logging
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - DEMO_DOMAIN=${DEMO_DOMAIN}
+    volumes:
+      # Relative paths resolve against the first compose file, the repo root
+      - ./deploy/demo/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+    depends_on:
+      - frontend
+    networks:
+      - dwello-network
+
+volumes:
+  caddy_data:

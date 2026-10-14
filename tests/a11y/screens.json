@@ -1,5 +1,5 @@
 {
-	"$comment": "Screens and states the axe check visits (tests/e2e/features/accessibility.feature, one example per screen and state). {building} etc. (also in 'queries') are ids of records the check seeds itself. Every new or changed screen is added here; every state must be one of stateMeanings. 'empty' and 'first-use' run on the empty instance of the E2E stack (playwright.config.ts). Every state is checked light and dark (docs/archive/redesign/docs/archive/redesign/01-plan.md D4). A screen may override the query string of a state in 'queries'.",
+	"$comment": "Screens and states the axe check visits (tests/e2e/features/accessibility.feature, one example per screen and state). {building} etc. (also in 'queries') are ids of records the check seeds itself. Every new or changed screen is added here; every state must be one of stateMeanings. 'empty' and 'first-use' run on the empty instance of the E2E stack, 'demo' on its demo instance (playwright.config.ts). Every state is checked light and dark (docs/archive/redesign/docs/archive/redesign/01-plan.md D4). A screen may override the query string of a state in 'queries'.",
 	"stateMeanings": {
 		"default": "The page as loaded with the seeded records.",
 		"empty": "A list with no records at all, on the empty instance of the E2E stack (second backend on an empty database).",
@@ -40,7 +40,8 @@
 		"saved-toast": "An edit form saved unchanged: the success message (toast) visible on the page it leads to.",
 		"server-error": "The error page for a failed load (not 404): message and the hint to try again.",
 		"other-language": "The page in French, chosen with the language selection (it reloads in French).",
-		"language-menu-open": "The language menu in the header open."
+		"language-menu-open": "The language menu in the header open.",
+		"demo": "The page on the demo instance of the E2E stack (DEMO=on): the demo notice at the top of the page; on the privacy statement also its section on the demo."
 	},
 	"screens": [
 		{
@@ -59,7 +60,8 @@
 			"states": [
 				"default",
 				"login-error",
-				"other-language"
+				"other-language",
+				"demo"
 			]
 		},
 		{
@@ -86,7 +88,8 @@
 				"mobile-menu-open",
 				"user-menu-open",
 				"other-language",
-				"language-menu-open"
+				"language-menu-open",
+				"demo"
 			]
 		},
 		{
@@ -494,7 +497,8 @@
 			"name": "privacy",
 			"path": "/privacy",
 			"states": [
-				"default"
+				"default",
+				"demo"
 			]
 		},
 		{

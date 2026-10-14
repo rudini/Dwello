@@ -24,6 +24,9 @@ Funktionalität: Datenschutz
   Szenario: Ungespeicherte Eingaben bleiben als Entwurf im Browser
     Dann erfährt der Liegenschaftsverwalter unter "Welche Daten Dwello speichert", dass ungespeicherte Eingaben bis zum Speichern, Verwerfen oder Abmelden als Entwurf in diesem Browser bleiben
 
+  Szenario: Anmeldungen im Protokoll des Servers
+    Dann erfährt der Liegenschaftsverwalter unter "Anmeldung", dass jede Anmeldung und jede Verlängerung der Sitzung mit der E-Mail-Adresse protokolliert wird
+
   Szenario: Anmeldung nur über die eingerichteten Anbieter
     Dann nennt die Datenschutzerklärung unter "Anmeldung" "Google"
     Und nennt die Datenschutzerklärung unter "Anmeldung" nicht "Microsoft"

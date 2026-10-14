@@ -32,6 +32,45 @@ describe('Datenschutzerklärung zu Entwürfen im Browser', () => {
 	});
 });
 
+describe('Datenschutzerklärung der öffentlichen Demo', () => {
+	const demoSection = () =>
+		[...document.querySelectorAll('[data-testid="page-section"]')].find((section) =>
+			section.querySelector('h2')?.textContent?.includes('Öffentliche Demo')
+		);
+
+	it('sagt, dass alle dieselben Daten sehen, alles jede Nacht gelöscht wird und andere Besucher Name und E-Mail nicht sehen', () => {
+		show(PrivacyPage, { data: { recipient: null, demo: true, providers: ['Google'] } } as never);
+
+		const text = demoSection()?.textContent;
+		expect(text).toContain('sehen und ändern dieselben Daten');
+		expect(text).toContain('jede Nacht werden alle Änderungen gelöscht');
+		expect(text).toContain(
+			'Ihren Namen und Ihre E-Mail-Adresse sehen andere Besucher nicht, nur der Betreiber im Protokoll des Servers'
+		);
+	});
+
+	it('hat in einer eigenen Installation keinen Abschnitt zur Demo', () => {
+		show(PrivacyPage, { data: { recipient: null, demo: false, providers: ['Google'] } } as never);
+
+		expect(document.querySelectorAll('[data-testid="page-section"]').length).toBeGreaterThan(0);
+		expect(demoSection()).toBeUndefined();
+	});
+});
+
+describe('Datenschutzerklärung zur Anmeldung', () => {
+	it('sagt, dass jede Anmeldung und jede Verlängerung der Sitzung mit der E-Mail-Adresse protokolliert wird', () => {
+		show(PrivacyPage, { data: { recipient: null, demo: false, providers: ['Google'] } } as never);
+
+		const login = [...document.querySelectorAll('[data-testid="page-section"]')].find((section) =>
+			section.querySelector('h2')?.textContent?.includes('Anmeldung')
+		);
+		expect(login?.textContent).toContain(
+			'Jede Anmeldung und jede Verlängerung der Sitzung (etwa alle 50 Minuten, solange Dwello offen ist) wird mit der E-Mail-Adresse im Protokoll des Servers festgehalten'
+		);
+		expect(login?.textContent).not.toContain('verwendet sie nur');
+	});
+});
+
 describe('Datenschutzerklärung zu Anmeldung, Dritten und Cookies', () => {
 	const page = (providers: string[]) => {
 		show(PrivacyPage, { data: { recipient: null, providers } } as never);

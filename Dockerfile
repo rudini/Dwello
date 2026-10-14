@@ -14,12 +14,12 @@ WORKDIR /app
 # Copy package files
 COPY package.json bun.lock ./
 
-# Install dependencies
-RUN bun install --frozen-lockfile
+# Install dependencies; --ignore-scripts skips "prepare" (Paraglide), which needs the sources and runs in vite build
+RUN bun install --frozen-lockfile --ignore-scripts
 
 # Runtime dependencies only: adapter-node bundles the devDependencies into build/
 FROM deps AS prod-deps
-RUN rm -rf node_modules && bun install --frozen-lockfile --production
+RUN rm -rf node_modules && bun install --frozen-lockfile --production --ignore-scripts
 
 # ============================================
 # Stage 2: Build
