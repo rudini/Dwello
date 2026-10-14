@@ -5639,7 +5639,7 @@ Decided by the user: Oracle Cloud VM, subdomain `demo.dwello.ch` (DNS at Infoman
 - [x] README "Deployment" points to the demo guide
 - [x] Fix the frontend `Dockerfile`: `bun install` ran `prepare` (Paraglide) before `project.inlang` exists; `--ignore-scripts`, Paraglide compiles in `vite build`. Test red: `docker build -f Dockerfile .` – `ENOENT: no such file or directory, open '/app/project.inlang/settings.json'`; green after the fix
 - [x] Stack started locally (domain `localhost`, images built with the sandbox proxy CA, Ollama left out): only Caddy publishes ports (80, 443); `/login` 200 over HTTPS, http redirects with 308; a form POST with the own origin passes the origin check, a foreign origin gets 403 (also without `ORIGIN`: adapter-node assumes https, so the override sets none); reset in 17 s, a tenant added before the reset is gone after it (11 → 10)
-- [x] O-3, O-6 updated, O-11 added (CI builds no Docker image; renumbered O-13 when merging main with #167 and #168) in `docs/design/offene-punkte.md`
+- [x] O-3, O-6 updated, O-11 added (CI builds no Docker image; renumbered O-14 when merging main with #167 to #171) in `docs/design/offene-punkte.md`
 - [x] Comment on #51: once it is done, the demo needs a way to allow every account
 - [x] Code review round 1; fixes: C-2 to C-10 (log rotation, required Postgres password, HSTS, trap on INT/TERM, README: Pay As You Go step, failed reset, image prune, firewall wording); C-1 becomes an issue (visitor notice, product decision)
 - [x] ponytail-review on the diff: `COOKIE_SECURE` (prod default) and the `caddy_config` volume removed
@@ -5676,14 +5676,69 @@ Decided (product owner, #162): option 1. `DEMO=on` shows a notice on every page 
 - Files: `src/routes/+layout.svelte`, `src/routes/+layout.server.ts`, `src/routes/privacy/+page.svelte`, `messages/*.json`, `src/__tests__/{layout-load.test.ts,public-pages-layout.dom.test.ts,privacy-page.dom.test.ts}`, `tests/e2e/{features/demo.feature,steps,tasks,questions,targets}/demo.*`, `tests/e2e/tasks/accessibility.ts`, `tests/a11y/screens.json`, `tests/e2e/features/{accessibility,sprachen-bildschirme}.feature`, `playwright.config.ts`, `deploy/demo/{docker-compose.yml,README.md}`
 - code-reviewer round 1 (`docs/reviews/b162-review-1.md`): fixed C-1 (Minor, session extension named), C-2 (Minor, #165), C-3 (Minor), C-4 (Minor), C-5 (Nit), C-6 (Nit), C-7 (Nit)
 - persona Weber round 1 (`docs/design/personas/weber-b162.md`): fixed P-1 (Major, #165), P-8 (Minor); open P-2, P-3 (Major, existed before: #82), P-4, P-5, P-6, P-7 (Minor: #82), P-10, P-11 (Nit, existed before: wording of `privacy_third_1` in French and of the terms, added to #82); rejected P-9: the time is the operator's cron, the app does not know it
-- persona Marco round 1 (`docs/design/personas/marco-b162.md`): fixed P-3 (Minor, privacy demo section); open P-1, P-2 (Minor: U-26), P-4 (Nit: U-26); rejected P-5: as Weber P-9
-- persona Anna round 1 (`docs/design/personas/anna-b162.md`): fixed P-1 (Minor, privacy demo section), P-3 (Minor); open P-2, P-6, P-7 (U-26), P-4, P-5 (Minor: #82)
-- persona Sven round 1 (`docs/design/personas/sven-b162.md`): fixed P-2 (Minor, named region); open P-1 (Minor: U-26), P-4 (Nit: existed before, U-6), P-5 (Minor: #82); rejected P-3: the notice is the same on every page, the section explains it in the privacy statement's own terms
-- persona Helga round 1 (`docs/design/personas/helga-b162.md`): fixed P-1, P-2 (Minor), P-6 (Nit, privacy demo section; Microsoft: #82); open P-4, P-5 (Minor: U-26); rejected P-3: as Weber P-9
-- code-reviewer round 2 (`docs/reviews/b162-review-2.md`): fixed C-9 (Nit), C-12 (Nit); open C-8 (Minor: retention, #82), C-10 (Nit: purpose, #82), C-11 (Nit: U-26)
+- persona Marco round 1 (`docs/design/personas/marco-b162.md`): fixed P-3 (Minor, privacy demo section); open P-1, P-2 (Minor: U-27), P-4 (Nit: U-27); rejected P-5: as Weber P-9
+- persona Anna round 1 (`docs/design/personas/anna-b162.md`): fixed P-1 (Minor, privacy demo section), P-3 (Minor); open P-2, P-6, P-7 (U-27), P-4, P-5 (Minor: #82)
+- persona Sven round 1 (`docs/design/personas/sven-b162.md`): fixed P-2 (Minor, named region); open P-1 (Minor: U-27), P-4 (Nit: existed before, U-6), P-5 (Minor: #82); rejected P-3: the notice is the same on every page, the section explains it in the privacy statement's own terms
+- persona Helga round 1 (`docs/design/personas/helga-b162.md`): fixed P-1, P-2 (Minor), P-6 (Nit, privacy demo section; Microsoft: #82); open P-4, P-5 (Minor: U-27); rejected P-3: as Weber P-9
+- code-reviewer round 2 (`docs/reviews/b162-review-2.md`): fixed C-9 (Nit), C-12 (Nit); open C-8 (Minor: retention, #82), C-10 (Nit: purpose, #82), C-11 (Nit: U-27)
 - persona Weber round 2 (`docs/design/personas/weber-b162-2.md`): fixed P-1, P-3 (Minor), P-5 (Nit); open P-2, P-4 (Minor: #82)
-- persona Helga round 2 (`docs/design/personas/helga-b162-2.md`): fixed P-7 (Minor), P-8 (Nit); open P-9 (Nit: sign-in page, U-26; Microsoft: #82)
-- [x] Merged `origin/main` (#164, #167): `privacy_login_1` takes main's `{providers}` with this branch's log sentences; open points renumbered U-26, O-12 (main took U-23, O-11); Google Fonts and Microsoft (#82 comment) fixed on main by #81
+- persona Helga round 2 (`docs/design/personas/helga-b162-2.md`): fixed P-7 (Minor), P-8 (Nit); open P-9 (Nit: sign-in page, U-27; Microsoft: #82)
+- [x] Merged `origin/main` (#164, #167): `privacy_login_1` takes main's `{providers}` with this branch's log sentences; open points renumbered U-27, O-12 (main took U-23, O-11); Google Fonts and Microsoft (#82 comment) fixed on main by #81
 - code-reviewer round 3 (`docs/reviews/b162-review-3.md`): fixed C-13 (Minor), C-14 (Nit); rejected C-15: the sentence's claim (every extension is logged) holds for every tab, the interval is given as «etwa»
 - persona Weber round 3 (`docs/design/personas/weber-b162-3.md`): no Blocker, Major or Minor; open P-1, P-2 (Nit, texts from #81: profile picture purpose, lifetime of the session cookies: added to #82)
 - [x] Session archived
+
+## Session 30 - October 2026: workflow rules from reviews 2–5
+
+Request: apply W-1 excluded, W-2, W-5/W-17, W-11, W-15/W-20/W-23, W-22, W-24, W-26, W-12, W-6, W-19, W-18 from `docs/reviews/workflow-rules-review-{2..5}.md`. Not committed on request.
+
+- [x] W-20/W-23 Prettier only on own lines (`CLAUDE.md` Formatting)
+- [x] W-5/W-17 personas rate only the change, rest as "Beobachtungen"; "existed before" not when the change makes it worse (`CLAUDE.md` steps 5, 7; `.claude/agents/persona.md`)
+- [x] W-22 never chain edits and `git commit` (`CLAUDE.md` Fallow gate)
+- [x] W-2 "what a screen shows changed" triggers personas (`CLAUDE.md` step 5, `persona.md`)
+- [x] W-11 legal texts go to `fach-reviewer` with DSG (`CLAUDE.md` steps 1, 5; `.claude/agents/fach-reviewer.md`)
+- [x] W-24 fixed 3rd-round Major needs no 4th round (`CLAUDE.md` step 7)
+- [x] W-26 own scratchpad folder per persona (`persona.md`)
+- [x] W-12 test for French guillemets and Italian «immobile» (`src/__tests__/i18n.test.ts`); fixed 4 texts in `messages/fr.json`
+  - Test red: Französisch setzt Guillemets mit geschütztem Leerzeichen innen – 4 texts with a plain space
+  - Test red: Italienisch sagt «immobile», nicht «stabile» – shown by inserting «Stabile» and «stabile» into `messages/it.json`, then reverted
+  - No scenario: only the space inside four French guillemets changes, no behavior
+- Skills: none loaded (instruction text and one guard test); red phases shown as above
+- [x] code-reviewer round 1 (`docs/reviews/workflow-rules-review-6.md`): fixed C-1 (Major), C-2, C-3, C-4, C-5, C-6, C-7, C-8, C-9, C-10; open C-11 (Nit, pre-existing: French PDF guillemets) → `offene-punkte.md` U-26
+  - C-1 Prettier diff command; C-2 3rd-round rule without contradiction; C-3/C-4 where "Beobachtungen" go (`CLAUDE.md`, `docs/design/arbeitsregeln.md`); C-5/C-8 `fach-reviewer` role "Rechtstexte" with FMG 45c and terms of use; C-6 contracts README narrowed; C-9 "domain terms"; C-10 narrowed to the noun, reverted in round 2 (C-12): the broad check stays, the adjective is accepted
+- [x] W-6, W-19 test notes (`backend/CLAUDE.md`)
+- [x] W-18 SQL counts as strings (`tests/contracts/README.md`)
+- [x] code-reviewer round 2 (`docs/reviews/workflow-rules-review-7.md`): fixed C-12 (broad Italian check again), C-13 (Beobachtungen checked on the base commit), C-14, C-16 (UWG named, consumer check), C-15 (in session 31: text-only fixes confirmed by a delta review, H-24 removed); C-3, C-10 fixed with them; open C-7 (Minor: no skills loaded, stays as recorded)
+- [x] Legal sources checked on Fedlex (filestore HTML): DSG (SR 235.1, version 2023-09-01) Art. 16 «Grundsätze», 17 «Ausnahmen», 19 «Informationspflicht bei der Beschaffung von Personendaten», 20 «Ausnahmen von der Informationspflicht und Einschränkungen»; FMG (SR 784.10, version 2023-09-01) Art. 45c «Daten auf fremden Geräten» (in force since 2007-04-01)
+- [x] Checks: `bun run test:coverage` 2309/2310 (the failure: `tools/claude-hooks/fallow-gate.test.ts` timed out on a network `git fetch`, green alone; not touched by this change → `offene-punkte.md` O-13), `bun run lint` clean, `bun run check` 0 errors, backend `bun run test` 554 green (coverage 91.8 % lines), `type-check` clean; E2E not run: no scenario asserts the four changed French texts (whitespace only)
+- Files: `CLAUDE.md`, `.claude/agents/{persona,fach-reviewer}.md`, `backend/CLAUDE.md`, `docs/design/arbeitsregeln.md`, `docs/design/offene-punkte.md` (U-26, H-24, O-13), `messages/fr.json`, `src/__tests__/i18n.test.ts`, `tests/contracts/README.md`, `docs/reviews/workflow-rules-review-{6,7}.md`
+- [x] Session archived
+
+## Session 31 - October 2026: C-15, text-only fixes in the 3rd review round
+
+Request: fix C-15 (`docs/reviews/workflow-rules-review-7.md`, `offene-punkte.md` H-24) as decided: a fix that changes no behavior is confirmed by a delta review, not a test; push; review independently against the Opus 5.5 guide.
+
+- [x] `CLAUDE.md` step 7: such a fix counts when one delta review by the same reviewer confirms it and raises no new Blocker/Major; no 4th round; H-24 removed (commit 2f8b7ba)
+- [x] code-reviewer round 1 (`docs/reviews/workflow-rules-review-{8,9}.md`): fixed C-1 (Major: user-visible texts stay behavior, step 6), C-2 (stop condition covers an unconfirmed delta review), C-3 ("agent instructions" instead of "rules"), C-4 (report named in the 3rd round's plan line), C-5 (status of C-15 in session 30's line), C-6 (`.claude/agents/code-reviewer.md` done criterion)
+- [x] code-reviewer round 2 (`docs/reviews/workflow-rules-review-9.md`): C-1 to C-6 confirmed fixed; fixed C-7 (Nit: C-15 moved to "fixed" in session 30's line)
+- Checks: no code changed; `open-work.test.ts` run for the plan
+- Files: `CLAUDE.md`, `.claude/agents/code-reviewer.md`, `docs/design/offene-punkte.md`, `docs/archive/implementation-plan-verlauf.md`, `docs/reviews/workflow-rules-review-{8,9}.md`
+- [x] Session archived
+
+## Session 32 - October 2026: merge duplicate issues
+
+Task: find open issues that describe the same thing and merge the real duplicates.
+
+- [x] #70 (F-12) merged into #120 (A-11): problem, options (Nachtragsabrechnung, reopening an unpaid statement), legal sources and «Where» moved; markers `TODO(fachlich prüfen, #70)` now name #120
+- [x] #95 (P-8a) merged into #132 (B-8c): IV5-2, «Neu berechnen» on a single draft; #95 closed as duplicate (no markers)
+- [x] Checks: `test:coverage`, `lint`, `check`, backend `test` + `type-check`; no scenario affected (comment markers only)
+- Files: `src/routes/invoices/MissedWarning.svelte`, `src/routes/statements/generate/CategoryCheck.svelte`
+
+## Session 33 - October 2026: merge duplicate open points
+
+Task: find duplicates in `docs/design/offene-punkte.md` and merge them.
+
+- [x] U-22 (Helga P-5, Marco P-4: filters apply only after «Suchen») merged into U-12; U-22 points to U-12
+- [x] U-25 (Helga P-4: «Entwurf gespeichert» read as statement drafts) moved to issue #57 (comment); U-25 points to #57
+- [x] Checks: `bunx vitest run`, `bun run lint`; docs only, no scenario
+- Files: `docs/design/offene-punkte.md`

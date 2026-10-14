@@ -7,6 +7,8 @@ Jede Datei ist eine Beispielantwort des Backends mit genau den Feldern, die das 
 
 Optionale Felder sind in den Testdaten gefüllt: Liefert die API `null`, prüft der Test den Typ nicht.
 
+Eine Zählung mit `count(*)` in Drizzles `sql<number>` liefert PostgreSQL als String, trotz des Typs. Wandelt der Service sie nicht mit `Number()` (wie `building.service.ts`), steht sie im Beispiel als String (`category.json`), und das Frontend wandelt sie.
+
 Ändert das Backend ein Feld, scheitert der Vertragstest; braucht das Frontend ein neues Feld, kommt es zuerst ins Beispiel.
 
 | Datei | Endpunkt |

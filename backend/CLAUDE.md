@@ -29,6 +29,8 @@ Every `bun test` started in `backend/` itself loads the preload `scripts/test-db
 - `src/__tests__/*.test.ts`: unit tests of pure service functions.
 - `src/__tests__/*.pg.test.ts`: against a real PostgreSQL database `dwello_test`, which the preload (`scripts/test-db.ts`, set in `bunfig.toml`) recreates from the migrations. The app runs in-process; reuse the helpers in `src/__tests__/helpers/` (`auth.ts`: `callApi`, `sendJson`; `records.ts`, `rental.ts`: test data). Never mock the database.
 - Each test creates its own data with unique names (`crypto.randomUUID()`) and removes it in `afterAll`; tests run against a shared database.
+- A test of a filter or search also creates a record that must not match; without one it stays green even when the filter does nothing.
+- Drizzle query builders are thenable, not promises: `expect(db.insert(…).values(…).execute()).rejects…` needs the `.execute()`.
 - External systems are replaced at the boundary: a local `Bun.serve` stands in for the OpenAI-compatible LLM provider and Resend, a local SMTP server for mail.
 
 ## Swiss domain rules
