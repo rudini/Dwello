@@ -12,6 +12,7 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
   Szenariogrundriss: Bildschirm ohne deutschen Text
     Dann zeigt der Bildschirm "<Bildschirm>" im Zustand "<Zustand>" auf Französisch, Italienisch und Englisch kein Deutsch und passt in 390 Pixel
 
+    # title-format: <Bildschirm> <Zustand>
     Beispiele:
       | Bildschirm             | Zustand             |
       | gallery                | default             |

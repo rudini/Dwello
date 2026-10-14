@@ -1,4 +1,7 @@
 [test]
+# Every `bun test` recreates dwello_test and points the tests at it, so none writes into the dev database
+preload = ["./scripts/test-db.ts"]
+
 # Coverage configuration
 # Coverage only with --coverage, as in `bun run test` (minimum checked by scripts/coverage-check.ts)
 coverageDir = "coverage"

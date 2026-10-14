@@ -1,10 +1,12 @@
 // Fails when a `TODO(fachlich prüfen, #n)` marker names an issue that is closed, missing or a pull request, when a
 // pull request closes an issue (`Fixes #n`) that a marker still names (CLAUDE.md, "Open work"), and when it closes an
-// issue and changes what the app does without changing a scenario (CLAUDE.md, "Workflow" step 1).
+// issue and changes what the app does without changing a scenario (CLAUDE.md, "Workflow" step 1), and when an open issue
+// waits for a decision («Proposed (confirm before starting)») without the label `entscheiden` (CLAUDE.md, "Open work").
 // CI runs it with GITHUB_TOKEN, GITHUB_REPOSITORY, PR_BODY and BASE_REF; locally: GITHUB_TOKEN=… node tools/open-work/check-issues.mjs
 import { execFileSync } from 'node:child_process';
 
 const repo = process.env.GITHUB_REPOSITORY ?? 'rudini/Dwello';
+const api = process.env.GITHUB_API_URL ?? 'https://api.github.com';
 const dirs = ['src', 'backend/src', 'backend/migrations', 'backend/demo', 'tests'];
 
 const grep = () => {
@@ -44,17 +46,35 @@ if (base && closing.length && !/\bno scenario:/i.test(process.env.PR_BODY ?? '')
 if (!process.env.GITHUB_TOKEN) {
 	console.log(`Skipped the issue lookup: GITHUB_TOKEN is not set (CI sets it); ${refs.size} issues named by markers`);
 } else {
-	for (const [n, places] of refs) {
-		const response = await fetch(`https://api.github.com/repos/${repo}/issues/${n}`, {
+	const get = async (path) => {
+		const response = await fetch(`${api}/repos/${repo}/${path}`, {
 			headers: { authorization: `Bearer ${process.env.GITHUB_TOKEN}`, accept: 'application/vnd.github+json' }
 		});
 		if (response.status === 401 || response.status === 403) {
 			console.error(`Cannot read issues of ${repo} (HTTP ${response.status}): check GITHUB_TOKEN`);
 			process.exit(1);
 		}
+		return response;
+	};
+	for (const [n, places] of refs) {
+		const response = await get(`issues/${n}`);
 		const issue = response.ok ? await response.json() : null;
 		const state = !issue ? `missing (HTTP ${response.status})` : issue.pull_request ? 'a pull request' : issue.state;
 		if (state !== 'open') failures.push(`#${n} is ${state}; remove or repoint these markers: ${places.join(', ')}`);
+	}
+	for (let page = 1; ; page++) {
+		const response = await get(`issues?state=open&per_page=100&page=${page}`);
+		if (!response.ok) {
+			failures.push(`Cannot list open issues (HTTP ${response.status})`);
+			break;
+		}
+		const issues = await response.json();
+		if (!issues.length) break;
+		for (const issue of issues) {
+			const deciding = issue.labels.some((label) => label.name === 'entscheiden');
+			if (!issue.pull_request && !deciding && /^#+ *Proposed \(confirm before starting\)/m.test(issue.body ?? ''))
+				failures.push(`#${issue.number} has "Proposed (confirm before starting)" but not the label entscheiden`);
+		}
 	}
 }
 

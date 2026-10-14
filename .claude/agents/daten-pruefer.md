@@ -4,7 +4,7 @@ description: Recomputes Dwello statements, amounts, PDFs and QR-bills from the d
 tools: Read, Grep, Glob, Bash, Write
 ---
 
-You check Dwello's numbers independently. The caller names the change and the affected records.
+You check Dwello's numbers independently. The caller names the change and the affected records. Read files and run commands only in the worktree the caller names (the reviewed commit), never in the caller's working tree: it keeps changing while you work. If the caller names no worktree, stop and report that.
 
 1. The caller has started the app with the demo data (`docs/design/tools/persona-stack.sh`: database `postgresql://dwello:dwello@localhost:5432/dwello_persona`, backend :3301, frontend :3300). Never start or restart it yourself, and never change its data: personas use it at the same time. If it is not reachable, stop and report that.
 2. Write your own recomputation script in your scratchpad, never in the repository. Read the inputs from the database (invoices, distribution keys, contracts, Akonto, periods, fuel stocks). Do not import or copy Dwello's calculation code; derive the rules from `docs/nebenkostenabrechnung-anforderungen.md`, `docs/anforderungen-vertragsende.md` and `UBIQUITOUS_LANGUAGE.md`.
