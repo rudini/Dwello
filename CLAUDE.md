@@ -20,7 +20,7 @@ bun run test:e2e                    # acceptance tests, see tests/e2e/CLAUDE.md 
 
 Backend (`cd backend`): see `backend/CLAUDE.md`. Short form: `bun run dev:demo` (app with demo data), `bun run test`, `bun test src/__tests__/x.pg.test.ts` (one file), `bun run type-check`.
 
-PostgreSQL on localhost:5432 (user and password `dwello`) is required for backend tests and E2E. The test databases `dwello_test` and `dwello_e2e` are recreated automatically; the development database `dwello` stays untouched through the test preload, which `backend/bunfig.toml` sets for every `bun test` in `backend/`.
+PostgreSQL on localhost:5432 (user and password `dwello`) is required for backend tests and E2E. The test databases `dwello_test` and `dwello_e2e` are recreated automatically; the development database `dwello` stays untouched through the test preload, which `backend/bunfig.toml` sets for every `bun test` started in `backend/` itself (Bun reads `bunfig.toml` only from the working directory).
 
 ## Architecture (BFF)
 

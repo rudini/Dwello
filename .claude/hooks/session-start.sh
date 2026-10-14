@@ -6,9 +6,10 @@ set -euo pipefail
 cd "$CLAUDE_PROJECT_DIR"
 
 # A branch behind main (or one whose pull request is merged) is noticed before the first change, not at the push
-# (CLAUDE.md, "Branches"); the output reaches the session
-if git fetch -q origin main 2>/dev/null; then
-	behind=$(git rev-list --count HEAD..origin/main)
+# (CLAUDE.md, "Branches"); the output reaches the session. Compared with what the fetch brought
+# (FETCH_HEAD, since a single-branch clone keeps no origin/main); a failing check never stops the hook
+if timeout 20 git fetch -q origin main 2>/dev/null; then
+	behind=$(git rev-list --count HEAD..FETCH_HEAD 2>/dev/null || echo 0)
 	[ "$behind" -eq 0 ] || echo "session-start: branch $(git branch --show-current) is $behind commits behind origin/main;" \
 		"before the first change, start it anew from origin/main if its pull request is merged, else merge origin/main (CLAUDE.md, Branches)."
 fi

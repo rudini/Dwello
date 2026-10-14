@@ -63,11 +63,16 @@ if (!process.env.GITHUB_TOKEN) {
 		if (state !== 'open') failures.push(`#${n} is ${state}; remove or repoint these markers: ${places.join(', ')}`);
 	}
 	for (let page = 1; ; page++) {
-		const issues = await (await get(`issues?state=open&per_page=100&page=${page}`)).json();
+		const response = await get(`issues?state=open&per_page=100&page=${page}`);
+		if (!response.ok) {
+			failures.push(`Cannot list open issues (HTTP ${response.status})`);
+			break;
+		}
+		const issues = await response.json();
 		if (!issues.length) break;
 		for (const issue of issues) {
 			const deciding = issue.labels.some((label) => label.name === 'entscheiden');
-			if (!issue.pull_request && !deciding && issue.body?.includes('Proposed (confirm before starting)'))
+			if (!issue.pull_request && !deciding && /^#+ *Proposed \(confirm before starting\)/m.test(issue.body ?? ''))
 				failures.push(`#${issue.number} has "Proposed (confirm before starting)" but not the label entscheiden`);
 		}
 	}

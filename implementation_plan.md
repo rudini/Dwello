@@ -9,7 +9,7 @@ Branch `claude/b15-instruction-improvements` (from `origin/main` `2efcd56`). Sou
 Slice 1 - tools:
 - [x] 1 Backend tests: `preload` in `backend/bunfig.toml`, so every `bun test` in `backend/` recreates `dwello_test`; one-file command in the root `CLAUDE.md`; probe run
 - [x] 3 `persona-stack.sh` serves a copy of `build/`; probe run
-- [x] 9 Scenario outline rows named by screen (`examplesTitleFormat`); command for one screen's axe and language rows in `tests/e2e/CLAUDE.md`
+- [x] 9 Scenario outline rows named by screen (`# title-format:` comment); command for one screen's axe and language rows in `tests/e2e/CLAUDE.md`
 - [x] 10 `check-issues.mjs` reports open issues with «Proposed (confirm before starting)» but without `entscheiden`; test
 - [x] 15 `session-start.sh` reports a branch behind `origin/main`; probe run
 
@@ -35,6 +35,12 @@ Slice 2 - instructions:
 - [x] 14 Plan: one line per reviewer round, findings stay in the report
 - [x] 15 Branch check at the start of a task; `code-reviewer` on a merge commit with conflicts in app code
 - [x] 16 The caller tells a persona that saving in `dwello_persona` is part of its task
+
+Slice 1 review:
+- code-reviewer round 1 (`docs/reviews/b15-instructions-slice1-review-1.md`): fixed C-1 (Major), C-2, C-3, C-4, C-5, C-7, C-8; C-6 fixed by slice 2 (the rule in `CLAUDE.md`, Branches)
+- C-1 Scenario/probe red: a single-branch clone, the hook's block under `set -euo pipefail`: «ambiguous argument 'HEAD..origin/main'», exit 128; after the fix (FETCH_HEAD, `timeout 20`, `|| echo 0`) the notice and the next line run, also without a remote
+- Test red: `check-issues.test.ts` – «scheitert, wenn die offenen Issues nicht lesbar sind»: expected 0 to be 1; «lässt … durch» (#11, the phrase in prose): expected code 1 to be 0
+- C-5 red of the label check itself: the check taken out, «meldet ein offenes Issue …» expected 0 to be 1; the 14 open issues with a proposal all match the heading pattern
 
 Slice 2 notes:
 - 2 table «Demo records for a task» (from `backend/demo/demo-data.sql` and `backend/src/db/demo-data.ts`; the demo data has no fixed-term and no future contract, said so); `CLAUDE.md` step 5 names it

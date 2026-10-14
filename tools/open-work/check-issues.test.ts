@@ -11,11 +11,13 @@ let close = () => {};
 afterEach(() => close());
 
 /** Runs the script against a stand-in GitHub API that lists `open` and answers every single issue as open */
-async function check(open: object[]) {
+async function check(open: object[], listStatus = 200) {
 	const server = createServer((request, response) => {
 		const url = new URL(request.url ?? '/', 'http://localhost');
 		const page = Number(url.searchParams.get('page') ?? 1);
-		const body = url.pathname.endsWith('/issues') ? (page === 1 ? open : []) : { state: 'open' };
+		const list = url.pathname.endsWith('/issues');
+		const body = list ? (page === 1 ? open : []) : { state: 'open' };
+		response.statusCode = list ? listStatus : 200;
 		response.setHeader('content-type', 'application/json');
 		response.end(JSON.stringify(body));
 	});
@@ -46,8 +48,15 @@ describe('Issues mit Vorschlag brauchen das Label entscheiden (CLAUDE.md, Open w
 			{ number: 7, body: proposed, labels: [{ name: 'entscheiden' }] },
 			{ number: 8, body: 'Decided (product owner)', labels: [] },
 			{ number: 9, body: proposed, labels: [], pull_request: {} },
-			{ number: 10, body: null, labels: [] }
+			{ number: 10, body: null, labels: [] },
+			{ number: 11, body: 'Siehe Proposed (confirm before starting) in #7', labels: [] }
 		]);
 		expect(result).toMatchObject({ code: 0 });
+	});
+
+	it('scheitert, wenn die offenen Issues nicht lesbar sind', async () => {
+		const result = await check([], 500);
+		expect(result.code).toBe(1);
+		expect(result.out).toContain('Cannot list open issues (HTTP 500)');
 	});
 });

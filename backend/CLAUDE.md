@@ -14,7 +14,7 @@ bun run db:reset        # recreate the local dev database (refuses non-local hos
 bun run db:demo         # load demo data; running it twice adds nothing
 ```
 
-Every `bun test` here loads the preload `scripts/test-db.ts` (`bunfig.toml`), so no test writes into the dev database. One backend test run at a time: each run drops and recreates `dwello_test` (`TEST_DATABASE_URL` overrides it).
+Every `bun test` started in `backend/` itself loads the preload `scripts/test-db.ts` (`bunfig.toml`), so no test writes into the dev database; from a subdirectory Bun skips `bunfig.toml` and the preload. One backend test run at a time: each run drops and recreates `dwello_test` (`TEST_DATABASE_URL` overrides it).
 
 ## Layout
 
