@@ -23,6 +23,7 @@ const configured = { ...llmConfig };
 // A provider with an OpenAI-compatible API that only answers with the configured key; like OpenAI's
 // reasoning models it rejects max_tokens and a temperature other than the default
 function openAiCompatible(answer: object) {
+	const prompts: string[] = [];
 	const server = Bun.serve({
 		port: 0,
 		fetch: async (request) => {
@@ -30,13 +31,15 @@ function openAiCompatible(answer: object) {
 			const path = new URL(request.url).pathname;
 			if (path === '/v1/models') return Response.json({ data: [{ id: 'test-model' }] });
 			if (path !== '/v1/chat/completions') return new Response(null, { status: 404 });
-			const body = (await request.json()) as object;
+			const body = (await request.json()) as { messages: { content: string }[] };
 			if ('max_tokens' in body || 'temperature' in body) return new Response(null, { status: 400 });
+			prompts.push(body.messages[0].content);
 			return Response.json({ choices: [{ message: { role: 'assistant', content: JSON.stringify(answer) } }] });
 		}
 	});
 	Object.assign(llmConfig, { baseUrl: `http://127.0.0.1:${server.port}/v1`, apiKey: 'test-key' });
 	return {
+		prompts,
 		stop: () => {
 			server.stop();
 			Object.assign(llmConfig, { baseUrl: 'http://127.0.0.1:9', apiKey: '' });
@@ -215,6 +218,28 @@ describe('KI-Anbieter', () => {
 			expect(status).toMatchObject({ llmAvailable: true });
 		} finally {
 			llm.stop();
+		}
+	});
+});
+
+describe('Kategorien im Prompt', () => {
+	it('bietet der KI auch eigene Kategorien an', async () => {
+		const name = `Treppenhausreinigung ${token}`;
+		const category = (await (
+			await sendJson('POST', '/api/v1/categories', { name, nameDE: name, isAllowedUtilityCost: true })
+		).json()) as { id: string };
+		const llm = openAiCompatible({});
+		try {
+			await sendJson('POST', '/api/v1/invoices/categorize', {
+				billingEntityName: 'Putz AG',
+				description: `Reinigung ${token}`,
+				amount: '120.00'
+			});
+
+			expect(llm.prompts[0]).toContain(`- ${name}\n`);
+		} finally {
+			llm.stop();
+			await sendJson('DELETE', `/api/v1/categories/${category.id}`);
 		}
 	});
 });

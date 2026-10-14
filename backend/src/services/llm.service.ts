@@ -9,7 +9,7 @@ import {
 	parseLLMResponse,
 	type LLMCategorizationResult
 } from '../config/llm';
-import { getCategoryByName } from './category.service';
+import { getCategoryByName, listCategories } from './category.service';
 import type { Category } from '../db/schema';
 
 // Simple in-memory cache for categorization results
@@ -158,7 +158,10 @@ export async function categorizeInvoice(invoice: {
 
 	try {
 		// Build prompt and call the LLM
-		const prompt = buildCategorizationPrompt(invoice);
+		const prompt = buildCategorizationPrompt(
+			invoice,
+			(await listCategories({ limit: 1000 })).categories
+		);
 		const response = await callLlm(prompt);
 
 		// Parse the response
