@@ -35,6 +35,6 @@ Task: work off the open `bug` issues one by one (PR merged before the next). Ski
 - code-reviewer round 2 (`docs/reviews/f19a-review-2.md`): fixed C-7 (Minor, scenario names Google Maps), C-8 (Nit, it «quando Lei sceglie»), C-10 (Nit, closing sentence tested); C-9 (Nit, what Google learns at sign-in) moved to #82
 - persona Dr. Weber round 2 (`docs/design/personas/weber-f19a-2.md`): fixed P-2 (Nit, Google Maps receives the IP too; `Referer` to U-23), P-3 (Nit, it «registrazione»); rejected P-1: the text no longer says the language was chosen
 - Test red (round 2): `privacy-page.dom.test.ts` – Google Maps sentence without IP; `privacy-i18n.dom.test.ts` – «sceglie il link» without «Lei», «inserimento»
-- [ ] PR, CI, merge
+- [ ] PR, CI, merge (workflow review `docs/reviews/workflow-rules-review-3.md`)
 - Skills: tdd, ponytail, ponytail-review
 - Files: `src/routes/privacy/+page.{svelte,server.ts}`, `src/routes/login/+page.server.ts`, `src/lib/server/oauth.ts`, `messages/{de,fr,it,en}.json`, `src/__tests__/privacy{.test.ts,-page.dom.test.ts}`, `tests/e2e/{features/privacy.feature,steps/app-frame.steps.ts,questions/app-frame.ts}`, `src/__tests__/privacy-i18n.dom.test.ts`, `docs/reviews/f19a-review-{1,2}.md`, `docs/design/personas/weber-f19a{,-2}.md`, `docs/design/offene-punkte.md`
