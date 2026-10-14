@@ -29,6 +29,7 @@ const numberTakenError = (number: string) =>
 // "occupied" follows from the rental contracts, the property manager sets only vacant or reserved
 const manualStatus = t.Union([t.Literal('vacant'), t.Literal('reserved')]);
 const apartmentQuerySchema = t.Object({
+	search: t.Optional(t.String()),
 	buildingId: t.Optional(t.String()),
 	status: t.Optional(
 		t.Union([t.Literal('occupied'), t.Literal('relet'), t.Literal('vacant'), t.Literal('reserved')])
@@ -64,6 +65,7 @@ export const apartmentRoutes = new Elysia({ prefix: '/api/v1/apartments' })
 		'/',
 		async ({ query }) => {
 			const filters = {
+				search: query.search,
 				buildingId: query.buildingId,
 				status: query.status,
 				floor: query.floor ? parseInt(query.floor, 10) : undefined,

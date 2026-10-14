@@ -1,9 +1,10 @@
 import type { Activity } from '../screenplay/actor';
-import { Click, Navigate, Select, Wait } from '../screenplay/interactions';
+import { Click, Enter, Navigate, Select, Wait } from '../screenplay/interactions';
 import {
 	apartmentBuildingFilter,
 	apartmentCard,
 	apartmentSearchButton,
+	apartmentSearchInput,
 	apartmentStatusFilter,
 	newApartmentButton
 } from '../targets/apartments';
@@ -30,6 +31,14 @@ export const showApartmentsOfBuildingWhileLoading = (buildingId: string): Activi
 		Navigate.releaseScripts,
 		Click.on(apartmentSearchButton),
 		filteredBy(buildingId)
+	);
+
+export const searchApartments = (term: string, buildingId = ''): Activity => (actor) =>
+	actor.attemptsTo(
+		Enter.theValue(term).into(apartmentSearchInput),
+		Select.option(buildingId).from(apartmentBuildingFilter),
+		Click.on(apartmentSearchButton),
+		Wait.forUrl((url) => url.searchParams.get('search') === term)
 	);
 
 export const startNewApartment = Click.on(newApartmentButton);

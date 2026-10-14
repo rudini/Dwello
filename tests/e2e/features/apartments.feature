@@ -30,6 +30,17 @@ Funktionalität: Wohnungsliste
     Dann ist die Wohnung "2.01" "Leer"
     Und die Wohnungsliste enthält genau 1 Wohnung
 
+  Szenario: Wohnungen nach Gebäude und Wohnungsnummer suchen
+    Wenn der Liegenschaftsverwalter nach Wohnungen mit "Ahornhof" sucht
+    Dann die Wohnungsliste enthält genau 2 Wohnungen
+    Wenn der Liegenschaftsverwalter im Gebäude "Ahornhof" nach der Wohnung "2.01" sucht
+    Dann ist die Wohnung "2.01" "Leer"
+    Und die Wohnungsliste enthält genau 1 Wohnung
+
+  Szenario: Wohnungssuche ohne Treffer
+    Wenn der Liegenschaftsverwalter nach Wohnungen mit "Gibt es nicht" sucht
+    Dann sieht der Liegenschaftsverwalter in der Wohnungsliste den Hinweis "Keine Wohnungen gefunden"
+
   Szenario: Neue Wohnung erfassen
     Wenn der Liegenschaftsverwalter eine neue Wohnung erfassen will
     Dann ist der Liegenschaftsverwalter auf der Seite "Neue Wohnung"
