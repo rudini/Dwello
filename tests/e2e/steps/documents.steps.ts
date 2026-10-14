@@ -54,8 +54,9 @@ Then('ist die {string} an {string} zu versenden', async ({ verwalter, names }, t
 	await verwalter.sees(documentFor(title, names.get(tenant) ?? tenant)).toContain('Zu versenden');
 });
 
+// a letter once it was sent; an uploaded document never
 Then(
-	'ist die {string} an {string} nicht mehr zu versenden',
+	/^ist (?:die|das Dokument) "([^"]+)" (?:an|zu) "([^"]+)" nicht (?:mehr )?zu versenden$/,
 	async ({ verwalter, names }, title: string, tenant: string) => {
 		await verwalter.sees(documentsFor(title, names.get(tenant) ?? tenant)).toBe(0);
 	}

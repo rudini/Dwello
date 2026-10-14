@@ -5,6 +5,10 @@
 
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import { callApi, sendJson } from './helpers/auth';
+import { eq } from 'drizzle-orm';
+import { db } from '../db/connection';
+import { documents } from '../db/schema';
+import { createDocument } from '../services/document.service';
 import { idOf } from './helpers/records';
 
 const token = crypto.randomUUID();
@@ -38,5 +42,77 @@ describe('Hochgeladene Dokumente', () => {
 		expect(file.headers.get('content-type')).toBe('application/pdf');
 		expect(file.headers.get('content-disposition')).toContain('betreibung.pdf');
 		expect(Buffer.from(await file.arrayBuffer())).toEqual(pdf);
+	});
+
+	it('heisst ohne Titel wie die Datei ohne Endung', async () => {
+		const id = await idOf(await upload('  ', 'Übergabe protokoll.2026.pdf', pdf));
+		expect(await documentsOf()).toContainEqual(expect.objectContaining({ id, title: 'Übergabe protokoll.2026' }));
+	});
+
+	it('nimmt Fotos als JPG und PNG an und liefert sie mit ihrer Art zurück', async () => {
+		const jpg = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 1, 2, 3]);
+		const png = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 1, 2]);
+		for (const [file, content, type] of [['ausweis.jpg', jpg, 'image/jpeg'], ['plan.png', png, 'image/png']] as const) {
+			const id = await idOf(await upload('Foto', file, content));
+			expect((await callApi(`/api/v1/documents/${id}/pdf`)).headers.get('content-type')).toBe(type);
+		}
+	});
+
+	it('lehnt eine Datei ab, die weder PDF noch JPG noch PNG ist, auch mit der Endung .pdf', async () => {
+		const word = Buffer.concat([Buffer.from('PK\x03\x04'), Buffer.alloc(16)]);
+		const before = (await documentsOf()).length;
+		for (const fileName of ['notizen.docx', 'notizen.pdf']) {
+			const response = await upload('Notizen', fileName, word);
+			expect(response.status).toBe(400);
+			expect(await response.json()).toMatchObject({ code: 'DOCUMENT_TYPE_NOT_ALLOWED' });
+		}
+		expect(await documentsOf()).toHaveLength(before);
+	});
+
+	it('nimmt eine Datei bis 10 MB an (10 × 1024 × 1024 Bytes) und lehnt jede grössere ab', async () => {
+		const ofSize = (bytes: number) => Buffer.concat([Buffer.from('%PDF-'), Buffer.alloc(bytes - 5)]);
+		expect((await upload('Grenze', 'scan.pdf', ofSize(10 * 1024 * 1024))).status).toBe(201);
+		const response = await upload('Zu gross', 'scan.pdf', ofSize(10 * 1024 * 1024 + 1));
+		expect(response.status).toBe(400);
+		expect(await response.json()).toMatchObject({ code: 'DOCUMENT_TOO_LARGE', params: { megabytes: 10 } });
+	});
+
+	it('lässt sich löschen, eine Mahnung nicht', async () => {
+		const id = await idOf(await upload('Ausweiskopie', 'ausweis.pdf', pdf));
+		const reminder = await createDocument({
+			tenantId,
+			type: 'reminder',
+			reminderLevel: 1,
+			title: 'Zahlungserinnerung',
+			fileName: 'zahlungserinnerung.pdf',
+			content: pdf.toString('base64'),
+			channel: 'letter',
+			status: 'to_send'
+		});
+
+		expect((await callApi(`/api/v1/documents/${id}`, { method: 'DELETE' })).status).toBe(200);
+		const refused = await callApi(`/api/v1/documents/${reminder.id}`, { method: 'DELETE' });
+		expect(refused.status).toBe(409);
+		expect(await refused.json()).toMatchObject({ code: 'DOCUMENT_NOT_DELETABLE' });
+		const left = (await documentsOf()).map((document) => document.id);
+		expect(left).not.toContain(id);
+		expect(left).toContain(reminder.id);
+		await db.delete(documents).where(eq(documents.id, reminder.id));
+	});
+
+	it('geht mit dem Mieter, der keine Mietverträge hat', async () => {
+		const other = await idOf(await sendJson('POST', '/api/v1/tenants', { firstName: 'Ohne Vertrag', lastName: token }));
+		await upload('Ausweiskopie', 'ausweis.pdf', pdf, other);
+
+		expect((await callApi(`/api/v1/tenants/${other}`, { method: 'DELETE' })).status).toBe(204);
+		expect(await documentsOf(other)).toEqual([]);
+		expect(await documentsOf()).not.toHaveLength(0); // the other tenant's documents stay
+	});
+
+	it('lädt eine Datei herunter, deren Name Zeichen ausserhalb von Latin-1 hat', async () => {
+		const id = await idOf(await upload('Protokoll', 'Übergabe – 1.10.pdf', pdf));
+		const file = await callApi(`/api/v1/documents/${id}/pdf`);
+		expect(file.status).toBe(200);
+		expect(file.headers.get('content-disposition')).toContain(`filename*=UTF-8''${encodeURIComponent('Übergabe – 1.10.pdf')}`);
 	});
 });

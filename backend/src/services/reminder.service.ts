@@ -102,7 +102,7 @@ export async function sendReminder(statementId: string) {
 		reminderLevel: level,
 		title: letter.title,
 		fileName: `${letter.title} ${statement.statementNumber}.pdf`.replace(/[^\w. -]/g, '_'),
-		pdf: pdf.toString('base64'),
+		content: pdf.toString('base64'),
 		channel: tenant.correspondenceChannel,
 		status: 'to_send'
 	});

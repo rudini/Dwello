@@ -1,7 +1,10 @@
+import { fail } from '@sveltejs/kit';
+import { backendMessage } from '$lib/backend-error';
 import { m } from '$lib/paraglide/messages';
 import type { StatementDocument } from '$lib/types';
 
-const API = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1/documents`;
+const BACKEND = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1`;
+const API = `${BACKEND}/documents`;
 
 // The backend stores a reminder's German title; its level names it in the UI language
 const reminderTitles = [m.documents_reminder_1, m.documents_reminder_2, m.documents_reminder_3];
@@ -17,4 +20,40 @@ export async function loadDocuments(
 	const response = await fetch(query ? `${API}?${query}` : API);
 	const documents: StatementDocument[] = response.ok ? (await response.json()).data : [];
 	return documents.map((document) => ({ ...document, title: localTitle(document) }));
+}
+
+/** The upload form of the tenant page: the chosen file goes to the tenant, Base64 encoded; a refusal keeps the title */
+export async function uploadDocument(fetch: typeof globalThis.fetch, tenantId: string, form: FormData) {
+	const title = String(form.get('title') ?? '');
+	const file = form.get('file');
+	if (!(file instanceof File) || !file.size)
+		return fail(400, { title, uploadError: m.tenants_document_file_missing() });
+	const response = await fetch(`${BACKEND}/tenants/${tenantId}/documents`, {
+		method: 'POST',
+		headers: { 'content-type': 'application/json' },
+		body: JSON.stringify({
+			title,
+			fileName: file.name,
+			content: Buffer.from(await file.arrayBuffer()).toString('base64')
+		})
+	});
+	const body = await response.json().catch(() => null);
+	if (!response.ok)
+		return fail(response.status, {
+			title,
+			uploadError: backendMessage(body, m.tenants_document_upload_failed())
+		});
+	return { uploaded: body.title as string };
+}
+
+/** Deletes an uploaded document of the tenant page; the backend keeps Mahnungen and says why */
+export async function deleteDocument(fetch: typeof globalThis.fetch, form: FormData) {
+	const response = await fetch(`${API}/${form.get('id')}`, { method: 'DELETE' });
+	if (!response.ok)
+		return fail(response.status, {
+			deleteError: backendMessage(
+				await response.json().catch(() => null),
+				m.tenants_document_delete_failed()
+			)
+		});
 }

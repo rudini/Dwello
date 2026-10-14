@@ -1,7 +1,7 @@
 import type { Activity } from '../screenplay/actor';
 import { Click, DownloadFrom, Enter, FailRequests, Upload } from '../screenplay/interactions';
+import { deleteConfirmButton } from '../targets/form';
 import {
-	confirmDeleteDocumentButton,
 	deleteDocumentButton,
 	documentFileInput,
 	documentTitleInput,
@@ -38,7 +38,8 @@ export const uploadDocument = (file: File, title: string): Activity => (actor) =
 	);
 
 export const startDeletingDocument = (title: string) => Click.on(deleteDocumentButton(title));
-export const confirmDeletingDocument = Click.on(confirmDeleteDocumentButton);
+// the open delete dialog, of a document or of the tenant
+export const confirmDeleting = Click.on(deleteConfirmButton);
 
 export const openDocument = (title: string) => DownloadFrom(openDocumentLink(title));
 

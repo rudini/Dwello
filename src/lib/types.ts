@@ -334,12 +334,13 @@ export interface StatementDocument {
 	id: string;
 	tenantId: string;
 	statementId: string | null;
-	type: 'reminder';
+	type: 'reminder' | 'upload'; // an upload has no channel and no Versandstatus
 	reminderLevel: number | null;
 	title: string;
 	fileName: string;
-	channel: 'email' | 'letter';
-	status: 'sent' | 'to_send';
+	mimeType: 'application/pdf' | 'image/jpeg' | 'image/png';
+	channel: 'email' | 'letter' | null;
+	status: 'sent' | 'to_send' | null;
 	sentAt: string | null;
 	deliveryError: string | null;
 	deliveryErrorCode?: string | null;

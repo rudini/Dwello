@@ -302,18 +302,21 @@ No `updated_at`. Index: `line_items_statement_id_idx`.
 
 ### documents (Dokument)
 
-Letters and e-mails to a tenant with a PDF; currently payment reminders (Mahnungen).
+Letters and e-mails to a tenant with a PDF (payment reminders, Mahnungen), and files the property manager uploaded
+to a tenant (`type = upload`: PDF, JPEG or PNG up to 10 MB, without channel and Versandstatus; deletable, and deleted
+with a tenant who has no contracts).
 
 ```sql
 tenant_id      UUID NOT NULL REFERENCES tenants ON DELETE RESTRICT
 statement_id   UUID REFERENCES utility_statements ON DELETE RESTRICT
-type           VARCHAR(30)  NOT NULL   -- reminder
+type           VARCHAR(30)  NOT NULL   -- reminder | upload
 reminder_level INTEGER                 -- Mahnstufe: 1 = Zahlungserinnerung, 2 and 3 = Mahnung
 title          VARCHAR(255) NOT NULL
 file_name      VARCHAR(255) NOT NULL
-pdf            TEXT         NOT NULL   -- Base64
-channel        VARCHAR(10)  NOT NULL   -- email | letter
-status         VARCHAR(20)  NOT NULL   -- Versandstatus: sent | to_send
+content        TEXT         NOT NULL   -- the file, Base64
+mime_type      VARCHAR(50)  NOT NULL DEFAULT 'application/pdf'  -- application/pdf | image/jpeg | image/png
+channel        VARCHAR(10)             -- email | letter; NULL for an upload
+status         VARCHAR(20)             -- Versandstatus: sent | to_send; NULL for an upload
 sent_at        TIMESTAMP
 delivery_error TEXT                    -- why an e-mail could not be sent
 ```

@@ -69,4 +69,34 @@ describe('Dokumente', () => {
 			'Dokument konnte nicht aktualisiert werden.'
 		);
 	});
+
+	it('nennt bei einem hochgeladenen Dokument Mieter und Datum, ohne Versandstatus und ohne Markieren', () => {
+		documents([
+			letter({
+				id: 'd3',
+				type: 'upload',
+				statementId: null,
+				reminderLevel: null,
+				title: 'Ausweiskopie',
+				channel: null,
+				status: null,
+				statementNumber: null,
+				createdAt: '2026-10-13T22:30:00Z' // 00:30 on 14.10. in Switzerland
+			})
+		]);
+
+		const row = byTestId('document-row')!;
+		expect(row.textContent).toContain('Zu Anna Keller, hochgeladen am 14.10.2026');
+		expect(byTestId('document-status')).toBeNull();
+		expect(byTestId('document-mark-sent')).toBeNull();
+		expect(byTestId('document-pdf-link')!.textContent).toContain('Datei herunterladen');
+		expect(byTestId('document-pdf-link')!.getAttribute('aria-label')).toBe('Datei herunterladen: Ausweiskopie');
+	});
+
+	it('nennt hochgeladene Dokumente, wenn noch keine Dokumente da sind', () => {
+		documents([]);
+		expect(byTestId('documents-empty')!.textContent).toContain(
+			'Mahnungen und Dokumente, die Sie zu einem Mieter hochladen, erscheinen hier.'
+		);
+	});
 });

@@ -1,7 +1,7 @@
 import { createBdd } from 'playwright-bdd';
 import { inDays } from '../fixtures/dates';
 import { test } from '../fixtures/test';
-import { documentFor, documentsFor } from '../questions/documents';
+import { documentFor } from '../questions/documents';
 import { downloadedFileMagic, downloadedFileName } from '../questions/download';
 import {
 	deleteDocumentConsequence,
@@ -14,7 +14,7 @@ import {
 } from '../questions/tenant-documents';
 import { openDocuments, openDocumentsToSend } from '../tasks/documents';
 import {
-	confirmDeletingDocument,
+	confirmDeleting,
 	imageFile,
 	openDocument,
 	pdfFile,
@@ -70,7 +70,7 @@ When('der Liegenschaftsverwalter das Dokument {string} löschen will', async ({ 
 });
 
 When('der Liegenschaftsverwalter das Löschen bestätigt', async ({ verwalter }) => {
-	await verwalter.attemptsTo(confirmDeletingDocument);
+	await verwalter.attemptsTo(confirmDeleting);
 });
 
 When('der Liegenschaftsverwalter alle Dokumente ansieht', async ({ verwalter }) => {
@@ -133,13 +133,6 @@ Then(
 			.sees(documentFor(title, names.get(tenant) ?? tenant))
 			.toContain(`Zu ${names.get(tenant)}, hochgeladen am ${swissDate(inDays(0))}`);
 		await verwalter.sees(deliveryStatesOf(title)).toBe(0);
-	}
-);
-
-Then(
-	'ist das Dokument {string} zu {string} nicht zu versenden',
-	async ({ verwalter, names }, title: string, tenant: string) => {
-		await verwalter.sees(documentsFor(title, names.get(tenant) ?? tenant)).toBe(0);
 	}
 );
 

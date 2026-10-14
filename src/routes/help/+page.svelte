@@ -12,7 +12,13 @@
 		},
 		{
 			title: m.help_tenants_title(),
-			steps: [m.help_tenants_1(), m.help_tenants_2(), m.help_tenants_3(), m.help_tenants_4()]
+			steps: [
+				m.help_tenants_1(),
+				m.help_tenants_2(),
+				m.help_tenants_3(),
+				m.help_tenants_4(),
+				m.help_tenants_5()
+			]
 		},
 		{
 			title: m.help_invoices_title(),

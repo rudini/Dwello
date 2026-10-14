@@ -6,6 +6,7 @@
 import { and, count, desc, eq, sql, type SQL } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { documents, tenants, utilityStatements, type NewDocument } from '../db/schema';
+import { CodedError } from './coded-error';
 
 export interface DocumentFilters {
 	tenantId?: string;
@@ -22,6 +23,7 @@ const summary = {
 	reminderLevel: documents.reminderLevel,
 	title: documents.title,
 	fileName: documents.fileName,
+	mimeType: documents.mimeType,
 	channel: documents.channel,
 	status: documents.status,
 	sentAt: documents.sentAt,
@@ -67,15 +69,47 @@ export async function getDocument(id: string) {
 
 export async function getDocumentPdf(id: string) {
 	const [document] = await db
-		.select({ pdf: documents.pdf, fileName: documents.fileName })
+		.select({ content: documents.content, fileName: documents.fileName, mimeType: documents.mimeType })
 		.from(documents)
 		.where(eq(documents.id, id));
-	return document ? { fileName: document.fileName, content: Buffer.from(document.pdf, 'base64') } : null;
+	return document && { ...document, content: Buffer.from(document.content, 'base64') };
 }
 
 export async function createDocument(document: NewDocument) {
 	const [created] = await db.insert(documents).values(document).returning({ id: documents.id });
 	return (await getDocument(created.id))!;
+}
+
+// The kinds of file a tenant's document may be, told by their first bytes, not by the file name
+const KINDS = [
+	{ mimeType: 'application/pdf', start: '%PDF-' },
+	{ mimeType: 'image/jpeg', start: '\xff\xd8\xff' },
+	{ mimeType: 'image/png', start: '\x89PNG\r\n\x1a\n' }
+];
+
+const MAX_MEGABYTES = 10; // 10 × 1024 × 1024 bytes, as Windows counts a megabyte
+
+/** A file the property manager adds to a tenant: no channel, no Versandstatus */
+export async function uploadDocument(tenantId: string, upload: { title: string; fileName: string; content: string }) {
+	const file = Buffer.from(upload.content, 'base64');
+	if (file.length > MAX_MEGABYTES * 1024 * 1024)
+		throw new CodedError('DOCUMENT_TOO_LARGE', `The file is larger than ${MAX_MEGABYTES} MB`, { megabytes: MAX_MEGABYTES });
+	const kind = KINDS.find(({ start }) => file.subarray(0, start.length).toString('latin1') === start);
+	if (!kind) throw new CodedError('DOCUMENT_TYPE_NOT_ALLOWED', 'Only PDF, JPG and PNG files are accepted');
+	// without a title it is named like its file
+	const title = upload.title.trim() || upload.fileName.replace(/\.[^.]*$/, '');
+	return createDocument({ tenantId, type: 'upload', ...upload, title, mimeType: kind.mimeType });
+}
+
+/** Only an upload: a Mahnung stays as proof that the tenant was reminded */
+export async function deleteDocument(id: string) {
+	const [deleted] = await db
+		.delete(documents)
+		.where(and(eq(documents.id, id), eq(documents.type, 'upload')))
+		.returning({ id: documents.id });
+	if (!deleted && (await getDocument(id)))
+		throw new CodedError('DOCUMENT_NOT_DELETABLE', 'Payment reminders cannot be deleted');
+	return deleted ?? null;
 }
 
 export async function countReminders(statementId: string) {

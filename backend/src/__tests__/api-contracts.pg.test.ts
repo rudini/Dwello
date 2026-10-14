@@ -151,6 +151,23 @@ describe('API-Verträge des Frontends', () => {
 		expect(drift(await sample('tenant'), actual)).toEqual([]);
 	});
 
+	it('POST /tenants/:id/documents liefert die Felder von document-uploaded.json, abgelehnt die von document-refused.json', async () => {
+		const upload = (content: Buffer) =>
+			sendJson('POST', `/api/v1/tenants/${rental.tenant}/documents`, {
+				title: 'Betreibungsauszug',
+				fileName: 'betreibung.pdf',
+				content: content.toString('base64')
+			});
+		const uploaded = (await (await upload(Buffer.from('%PDF-1.4'))).json()) as { id: string };
+		try {
+			expect(drift(await sample('document-uploaded'), uploaded)).toEqual([]);
+		} finally {
+			await callApi(`/api/v1/documents/${uploaded.id}`, { method: 'DELETE' });
+		}
+		const refused = await (await upload(Buffer.alloc(10 * 1024 * 1024 + 1))).json();
+		expect(drift(await sample('document-refused'), refused)).toEqual([]);
+	});
+
 	it('GET /buildings liefert die Felder von buildings.json', async () => {
 		const actual = await (await callApi(`/api/v1/buildings?search=${encodeURIComponent(`Ahornhof ${token}`)}`)).json();
 		expect(drift(await sample('buildings'), actual)).toEqual([]);

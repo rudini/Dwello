@@ -18,6 +18,7 @@ const E2E_EMPTY_DATABASE_URL = (() => {
 const frontendEnv = {
 	PORT: '3100',
 	ORIGIN: 'http://localhost:3100',
+	BODY_SIZE_LIMIT: '11M', // as the Dockerfile: uploaded documents of up to 10 MB
 	BACKEND_URL: E2E_BACKEND_URL,
 	JWT_SECRET: E2E_JWT_SECRET,
 	OAUTH_GOOGLE_CLIENT_ID: 'e2e-google-client',

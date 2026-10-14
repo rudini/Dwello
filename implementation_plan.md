@@ -9,17 +9,21 @@ From issue #174 (decisions confirmed by the product owner on 2026-10-14): the Li
 - [x] `@wip` scenarios in `tests/e2e/features/tenant-documents.feature` and `documents.feature`; Scenario red: upload scenarios `locator.setInputFiles: waiting for getByTestId('tenant-document-file-input')`; seeded ones `…/tenants/<id>/documents antwortet 404`; «Eine Mahnung lässt sich nicht löschen» green before the change (a guard: no delete exists yet)
 - [x] fach-reviewer on the scenarios (domain term Dokument); scenarios changed after it: photo upload (F-5), delete confirmation (F-3), message of a failed upload (F-4), «Zu {name}, hochgeladen am …» on `/documents` (F-10), example in the description (F-12), privacy scenario (F-2, `privacy.feature`); Scenario red again: `privacy.feature` «Hochgeladene Dokumente der Mieter»: expected substring «Dokumente, die Sie zu Mietern hochladen»
 - [x] Test red: `tenant-documents.pg.test.ts` «liegt beim Mieter ohne Versandstatus …» – Expected 201, Received 404
-- [ ] Privacy statement `privacy_stored_1` names uploaded documents, all four languages (F-2)
-- [ ] Help text at the file field: kinds, 10 MB, delete copies of ID and Betreibungsauszüge once no longer needed (F-6, F-7); demo notice at the upload in the public demo (F-8)
-- [ ] Limit 10 × 1024 × 1024 bytes, tests at 10,485,760 and 10,485,761 bytes; body limits with headroom for Base64 (F-9)
-- [ ] Texts on `/documents` for uploads: row «Zu {name}, hochgeladen am {date}», empty text, «Datei herunterladen» instead of «PDF herunterladen» for uploads (F-5, F-10)
-- [ ] Backend: schema (`content`, `mime_type`, nullable `channel`/`status`), create upload (type and size check by content, coded refusals), delete upload (Mahnung refused), list without content, tenant delete takes uploads along; `*.pg.test.ts`
-- [ ] BFF and UI: upload form and delete in `TenantDocumentsCard`, rows without Versandstatus on the tenant page and `/documents`, failing request kept in the form, `BODY_SIZE_LIMIT`; DOM/unit tests; texts in de/fr/it/en
-- [ ] API contracts in `tests/contracts/`
-- [ ] Demo data: one uploaded PDF for one demo tenant
-- [ ] a11y and language rows for the new states (`tests/a11y/screens.json`, `accessibility.feature`, `sprachen-bildschirme.feature`)
-- [ ] Docs: `docs/data-model.md`, `docs/api-specification.md`, help text
-fach-reviewer round 1 (`docs/reviews/upload-scenarios-fachreview-1.md`): open F-1 (Major, product owner: glossary), F-2 (Major), F-3, F-4, F-5, F-6, F-7, F-8, F-9, F-10 (Minor), F-12 (Nit); rejected F-11: `formatDate` already shows a point in time in Europe/Zurich (`src/lib/utils/format.ts:50`)
+- [x] Privacy statement `privacy_stored_1` names uploaded documents, all four languages (F-2); scenario green
+- [x] Help text at the file field: kinds, 10 MB, delete copies of ID and Betreibungsauszüge once no longer needed (F-6, F-7); demo notice at the upload in the public demo (F-8). Test red: `tenant-detail-page.dom` «sagt am Feld, welche Dateien …», «warnt in der öffentlichen Demo …» – element not found
+- [x] Limit 10 × 1024 × 1024 bytes, tests at 10,485,760 and 10,485,761 bytes (F-9). Test red: `tenant-documents.pg` «nimmt eine Datei bis 10 MB an …» – Expected 400, Received 201. Browser check before sending (a file over `BODY_SIZE_LIMIT` would never reach the action): Test red «lehnt eine Datei über 10 MB ab …» – form-error missing; «sendet eine Datei bis 10 MB» red on a precedence bug (`size ?? 0 > MAX`), fixed. `BODY_SIZE_LIMIT=11M` in `Dockerfile`, `playwright.config.ts`, `persona-stack.sh`
+- [x] Texts on `/documents` for uploads: row «Zu {name}, hochgeladen am {date}», empty text, «Datei herunterladen» (F-5, F-10). Test red: `documents.dom` «nennt bei einem hochgeladenen Dokument …» – text missing; «nennt hochgeladene Dokumente, wenn noch keine …» written after the text change, red shown by reverting the text
+- [x] Backend: schema in `0001_schema.sql` (`pdf` → `content`, `mime_type`, nullable `channel`/`status`), upload with kind by first bytes and size, default title, coded refusals `DOCUMENT_TYPE_NOT_ALLOWED`, `DOCUMENT_TOO_LARGE`, delete upload (`DOCUMENT_NOT_DELETABLE` for a Mahnung), tenant delete takes uploads along, file name outside Latin-1 in the download header. Tests red: default title – title was «  »; JPG/PNG – Expected image/jpeg, Received application/pdf; Word – Expected 400, Received 201; delete – Expected 200, Received 404; tenant delete – Expected 200, Received 500; header – «Header 'Content-Disposition' has invalid value». The redundant active-contract check in `deleteTenant` removed (fallow duplication with `apartment.service.ts`; its text was not read anywhere)
+- [x] BFF and UI: actions `upload`, `deleteDocument` (`src/lib/server/documents.ts`), `TenantDocumentsCard` split into `TenantDocumentRow` and `TenantDocumentUpload` (fallow complexity); tenant delete text with uploads. Tests red: `tenant-documents.test` «schickt Titel …» – action is not a function; refusal and missing file – status undefined; delete – action is not a function; `tenant-detail-page.dom` 8 tests – elements missing
+- [x] API contracts `document-uploaded.json`, `document-refused.json`
+- [x] Demo data: «Übergabeprotokoll Wohnung B2» for Marco Bernasconi (`demo-data.sql`). Test red: `demo-data.pg` – Expected 1 upload, Received none
+- [x] a11y and language rows `tenant-detail` `document-delete-dialog`, `upload-refused`, `demo` (18 checks green)
+- [x] Docs: `docs/data-model.md`, `docs/api-specification.md`, help `help_tenants_5` (Test red: `help-page.dom` – text missing)
+- [x] Scenarios green, `@wip` removed; scenario «Mieter mit hochgeladenen Dokumenten löschen» confirms in the open dialog (step «das Löschen bestätigt»)
+
+Skills: tdd, ponytail, ponytail-review (cut: the unused title round trip of `deleteDocument`).
+
+fach-reviewer round 1 (`docs/reviews/upload-scenarios-fachreview-1.md`): open F-1 (Major, product owner: glossary); fixed F-2 (Major), F-3, F-4, F-5, F-6, F-7, F-8, F-9, F-10 (Minor), F-12 (Nit); rejected F-11: `formatDate` already shows a point in time in Europe/Zurich (`src/lib/utils/format.ts:50`)
 
 - [ ] Slice review (code-reviewer), feature review (personas, fach-reviewer)
 - [ ] Before marking complete: coverage, lint, check, backend test and type-check, affected E2E

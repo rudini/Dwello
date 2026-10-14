@@ -47,6 +47,8 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 ENV PORT=3000
+# Uploaded documents of up to 10 MB plus the form around them (adapter-node refuses more than 512 KB by default)
+ENV BODY_SIZE_LIMIT=11M
 
 # Create non-root user for security
 RUN addgroup --system --gid 1001 nodejs

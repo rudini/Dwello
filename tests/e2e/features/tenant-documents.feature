@@ -1,5 +1,5 @@
 # language: de
-@tenants @wip
+@tenants
 Funktionalität: Dokumente eines Mieters
   Als Liegenschaftsverwalter
   möchte ich Unterlagen eines Mieters, etwa das Übergabeprotokoll oder einen Betreibungsauszug, in Dwello ablegen
@@ -60,5 +60,5 @@ Funktionalität: Dokumente eines Mieters
     Und der Liegenschaftsverwalter ist auf der Detailseite des Mieters "Lea Frei"
     Wenn der Liegenschaftsverwalter den Mieter löschen will
     Dann sagt die Bestätigung, dass "Lea Frei" zusammen mit den hochgeladenen Dokumenten endgültig gelöscht wird
-    Wenn der Liegenschaftsverwalter den Mieter löscht
+    Wenn der Liegenschaftsverwalter das Löschen bestätigt
     Dann findet der Liegenschaftsverwalter den Mieter "Lea Frei" nicht mehr

@@ -16,6 +16,8 @@
 	const tenant = $derived(data.tenant);
 	const name = $derived(`${tenant.firstName} ${tenant.lastName}`);
 	const hasContracts = $derived(data.contractHistory.length > 0);
+	// without contracts there are no Mahnungen: every document is an upload, deleted with the tenant
+	const hasDocuments = $derived(data.documents.length > 0);
 	// a refused delete (also without JavaScript) shows the dialog with its reason
 	let deleting = $state(untrack(() => !!form?.error));
 </script>
@@ -56,7 +58,7 @@
 		</div>
 		<div class="flex flex-col gap-6 lg:col-span-2">
 			<TenantContracts contracts={data.contractHistory} />
-			<TenantDocumentsCard documents={data.documents} />
+			<TenantDocumentsCard documents={data.documents} {form} demo={data.demo} />
 		</div>
 	</div>
 </div>
@@ -73,6 +75,10 @@
 	onsuccess={() => addToast('success', m.tenants_deleted_toast({ name }))}
 >
 	<p data-testid="delete-dialog-message">
-		{hasContracts ? m.tenants_delete_has_contracts() : m.tenants_delete_text({ name })}
+		{hasContracts
+			? m.tenants_delete_has_contracts()
+			: hasDocuments
+				? m.tenants_delete_text_with_documents({ name })
+				: m.tenants_delete_text({ name })}
 	</p>
 </ActionDialog>

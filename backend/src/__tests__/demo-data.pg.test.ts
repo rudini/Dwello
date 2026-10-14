@@ -49,6 +49,19 @@ describe('Demodaten', () => {
 		).toEqual([{ buildings: 3, apartments: 13, tenants: 10, contracts: 11, invoices: 83, statements: 17 }]);
 	});
 
+	// Zeigt in der Demo, dass sich Dokumente zu einem Mieter ablegen lassen
+	it('legt ein hochgeladenes PDF bei Marco Bernasconi ab, auch ein zweites Mal nur einmal', async () => {
+		const uploads = await query(
+			name,
+			`SELECT t.last_name, d.title, d.mime_type, substring(decode(d.content, 'base64') from 1 for 5) = '%PDF-'::bytea AS pdf
+			FROM documents d JOIN tenants t ON t.id = d.tenant_id WHERE d.type = 'upload'`
+		);
+
+		expect(uploads).toEqual([
+			{ last_name: 'Bernasconi', title: 'Übergabeprotokoll Wohnung B2', mime_type: 'application/pdf', pdf: true }
+		]);
+	});
+
 	// Wie eine echte Abrechnung: mit Positionen und PDF samt QR-Rechnung, in den Status, die die App kennt
 	it('erstellt die Abrechnungen wie die App, mit Positionen und PDF', async () => {
 		const statements = await query(

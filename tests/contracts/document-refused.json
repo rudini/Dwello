@@ -1,0 +1,5 @@
+{
+	"error": "The file is larger than 10 MB",
+	"code": "DOCUMENT_TOO_LARGE",
+	"params": { "megabytes": 10 }
+}

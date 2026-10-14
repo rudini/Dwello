@@ -24,7 +24,6 @@ Funktionalität: Datenschutz
   Szenario: Ungespeicherte Eingaben bleiben als Entwurf im Browser
     Dann erfährt der Liegenschaftsverwalter unter "Welche Daten Dwello speichert", dass ungespeicherte Eingaben bis zum Speichern, Verwerfen oder Abmelden als Entwurf in diesem Browser bleiben
 
-  @wip
   Szenario: Hochgeladene Dokumente der Mieter
     Dann erfährt der Liegenschaftsverwalter unter "Welche Daten Dwello speichert", dass Dwello die zu Mietern hochgeladenen Dokumente speichert
 

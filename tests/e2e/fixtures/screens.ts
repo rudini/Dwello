@@ -30,6 +30,9 @@ export async function exampleOf(seed: TestData, name: string, state: string): Pr
 	return { state, public: 'public' in screen && !!screen.public, ...(await seedFor(seed, address(screen, state), state)) };
 }
 
+/** Title of the document uploaded to the tenant Anna: a file name, not a German word the language check would flag */
+export const UPLOADED = 'IMG_0412';
+
 /** Records every screen with an id in its address needs */
 async function seedFor(seed: TestData, path: string, state: string) {
 	if (!path.includes('{') && !['delete-dialog', 'mark-paid-dialog', 'category-check', 'preview-empty', 'fuel-stock-dialog', 'tank-question', 'every-wizard-step', 'preview-all-billed'].includes(state)) return { path, building: '', tankBuilding: '' };
@@ -41,6 +44,7 @@ async function seedFor(seed: TestData, path: string, state: string) {
 	await seed.tenant('Anna');
 	await seed.tenant('Bruno');
 	await seed.tenant('Carla');
+	await seed.upload('Anna', UPLOADED);
 	await seed.contract('Anna', '1.01', { startDate: '2015-01-01', baseRent: '1800.00', monthlyAdvancePayment: '200.00' });
 	await seed.contract('Bruno', '1.02', { startDate: '2015-01-01', baseRent: '1500.00', monthlyAdvancePayment: '150.00' });
 	await seed.contract('Carla', '1.04', { startDate: '2015-01-01', endDate: '2099-12-31', baseRent: '1400.00' });
