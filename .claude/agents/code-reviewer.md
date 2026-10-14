@@ -36,4 +36,4 @@ Change no file except your report. Write it in German to the path the caller nam
 - Blocker/Major: only problems you would block the merge for, each under its ID with why it is wrong and how to show it fails.
 - A section "Nicht bestätigt": what you could not verify and where you looked.
 
-Done when every changed file in the diff has been read and every requirement line is either confirmed by code and a test, or listed as a finding or under "Nicht bestätigt".
+Done when every changed file in the diff has been read and every requirement line is either confirmed by code and a test (for a change that alters no behavior, such as docs or agent instructions: by the changed text), or listed as a finding or under "Nicht bestätigt".
