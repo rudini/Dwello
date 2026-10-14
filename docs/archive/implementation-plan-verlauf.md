@@ -5628,3 +5628,12 @@ Slice 1 (contract filter), slice 2 (period filter, «Entwürfe ansehen»). Texts
 - Skills: tdd, ponytail, ponytail-review
 - Files: `backend/src/{routes/statements.ts,services/statement.service.ts,__tests__/statement-list-contract.pg.test.ts}`, `src/routes/statements/{+page.server.ts,+page.svelte,StatementSearch.svelte}`, `src/lib/types.ts`, `messages/{de,fr,it,en}.json`, `src/__tests__/{statement-list-load.test.ts,statement-pages.dom.test.ts}`, `tests/e2e/{features/contract-detail.feature,features/statement-generate.feature,steps/statements.steps.ts,questions/statements.ts,targets/statements.ts}`, `docs/reviews/b2-fachreview-1.md`, `docs/reviews/b2-review-1.md`, `src/lib/statement-wizard.ts`, `src/routes/statements/generate/{GenerationStep,StatementStep}.svelte`, `src/__tests__/{statement-wizard.test.ts,statement-wizard.dom.test.ts,generation-step.test.ts}`, `tests/a11y/screens.json`, `tests/e2e/{features/accessibility.feature,features/sprachen-bildschirme.feature,tasks/accessibility.ts,targets/accessibility.ts}`, `docs/api-specification.md`, `docs/reviews/b2-review-{2,3}.md`, `src/routes/statements/StatusFilter.svelte`, `docs/design/personas/{helga,marco}-b2.md`, `docs/design/offene-punkte.md`
 - [x] Session archived
+
+## Session 30 - October 2026: merge duplicate issues
+
+Task: find open issues that describe the same thing and merge the real duplicates.
+
+- [x] #70 (F-12) merged into #120 (A-11): problem, options (Nachtragsabrechnung, reopening an unpaid statement), legal sources and «Where» moved; markers `TODO(fachlich prüfen, #70)` now name #120
+- [x] #95 (P-8a) merged into #132 (B-8c): IV5-2, «Neu berechnen» on a single draft; #95 closed as duplicate (no markers)
+- [x] Checks: `test:coverage`, `lint`, `check`, backend `test` + `type-check`; no scenario affected (comment markers only)
+- Files: `src/routes/invoices/MissedWarning.svelte`, `src/routes/statements/generate/CategoryCheck.svelte`
