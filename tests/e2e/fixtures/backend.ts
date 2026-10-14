@@ -16,6 +16,13 @@ export function testData(api: CallTheApi) {
 		return name;
 	};
 
+	async function addCategory(title: string, fields: (name: string) => object) {
+		const name = unique(title);
+		const category = await post('categories', { name, nameDE: name, ...fields(name) });
+		ids.set(title, category.id);
+		extras.push(`categories/${category.id}`);
+	}
+
 	async function removeContracts(filter: string) {
 		for (const contract of (await get(`contracts?${filter}&limit=100`)).contracts) {
 			await remove(`contracts/${contract.id}`);
@@ -237,12 +244,11 @@ export function testData(api: CallTheApi) {
 			return invoice(buildingTitle, { categoryId: category.id, ...period }, `${categoryName} ${date}`, amount, date);
 		},
 
-		async category(title: string, isAllowedUtilityCost: boolean) {
-			const name = unique(title);
-			const category = await post('categories', { name, nameDE: name, isAllowedUtilityCost });
-			ids.set(title, category.id);
-			extras.push(`categories/${category.id}`);
-		},
+		category: (title: string, isAllowedUtilityCost: boolean) => addCategory(title, () => ({ isAllowedUtilityCost })),
+
+		// An own category whose English name is its German one, as an own «Internet» would have
+		categoryNamedAlikeInEnglish: (title: string, description: string) =>
+			addCategory(title, (name) => ({ nameEN: name, description, isAllowedUtilityCost: true })),
 
 		async invoiceInCategory(buildingTitle: string, categoryTitle: string) {
 			await invoice(buildingTitle, { categoryId: ids.get(categoryTitle) }, 'Reinigung Q1', '450.00', '2026-03-31');

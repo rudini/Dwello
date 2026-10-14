@@ -52,6 +52,7 @@ export async function listCategories(filters: CategoryFilters = {}): Promise<{
 			nameEN: categories.nameEN,
 			isAllowedUtilityCost: categories.isAllowedUtilityCost,
 			isHeatingCost: categories.isHeatingCost,
+			type: categories.type,
 			description: categories.description,
 			sortOrder: categories.sortOrder,
 			createdAt: categories.createdAt,
@@ -98,6 +99,7 @@ export async function getCategory(id: string): Promise<CategoryWithUsage | null>
 			nameEN: categories.nameEN,
 			isAllowedUtilityCost: categories.isAllowedUtilityCost,
 			isHeatingCost: categories.isHeatingCost,
+			type: categories.type,
 			description: categories.description,
 			sortOrder: categories.sortOrder,
 			createdAt: categories.createdAt,
@@ -163,7 +165,7 @@ export async function createCategory(data: NewCategory): Promise<Category> {
 	await ensureNameIsFree(data.name);
 	if (data.nameDE) await ensureNameIsFree(data.nameDE);
 
-	const [category] = await db.insert(categories).values(data).returning();
+	const [category] = await db.insert(categories).values({ ...data, type: 'custom' }).returning();
 	return category;
 }
 

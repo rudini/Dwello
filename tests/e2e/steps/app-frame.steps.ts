@@ -65,6 +65,20 @@ Then(
 );
 
 Then(
+	'nennt die Datenschutzerklärung unter {string} {string}',
+	async ({ verwalter }, heading: string, name: string) => {
+		await verwalter.sees(sectionText(heading)).toContain(name);
+	}
+);
+
+Then(
+	'nennt die Datenschutzerklärung unter {string} nicht {string}',
+	async ({ verwalter }, heading: string, name: string) => {
+		await verwalter.sees(sectionText(heading)).not.toContain(name);
+	}
+);
+
+Then(
 	'erfährt der Liegenschaftsverwalter unter {string}, dass Rechnungsdaten für die KI-Kategorisierung den Server nicht verlassen',
 	async ({ verwalter }, heading: string) => {
 		await verwalter.sees(llmRecipientNotice(heading)).toContain('verlassen dafür den Server nicht');

@@ -1,0 +1,14 @@
+{
+	"id": "5f0c2a7e-3b1d-4c8e-9a6f-2d4e8b1c7a90",
+	"name": "Internet",
+	"nameDE": "Internet",
+	"nameFR": "Internet",
+	"nameIT": "Internet",
+	"nameEN": "Internet",
+	"isAllowedUtilityCost": true,
+	"isHeatingCost": false,
+	"type": "custom",
+	"description": "Glasfaseranschluss im Keller",
+	"sortOrder": 40,
+	"invoiceCount": "2"
+}

@@ -48,3 +48,8 @@ Funktionalität: Kostenkategorien
     Und der Liegenschaftsverwalter ist auf der Seite "Kategorien"
     Dann wird die Kategorie "Treppenhausreinigung" von 1 Rechnung verwendet
     Und kann der Liegenschaftsverwalter die Kategorie "Treppenhausreinigung" nicht löschen
+
+  Szenario: Eigene Kategorie mit gleichem englischem Namen zeigt ihre Beschreibung
+    Angenommen es gibt die eigene Kategorie "Internet" mit gleichem englischem Namen und der Beschreibung "Glasfaseranschluss im Keller"
+    Und der Liegenschaftsverwalter ist auf der Seite "Kategorien"
+    Dann sieht der Liegenschaftsverwalter bei der Kategorie "Internet" die Beschreibung "Glasfaseranschluss im Keller"

@@ -26,3 +26,20 @@ Funktionalität: Datenschutz
 
   Szenario: Anmeldungen im Protokoll des Servers
     Dann erfährt der Liegenschaftsverwalter unter "Anmeldung", dass jede Anmeldung und jede Verlängerung der Sitzung mit der E-Mail-Adresse protokolliert wird
+
+  Szenario: Anmeldung nur über die eingerichteten Anbieter
+    Dann nennt die Datenschutzerklärung unter "Anmeldung" "Google"
+    Und nennt die Datenschutzerklärung unter "Anmeldung" nicht "Microsoft"
+
+  Szenario: Dienste Dritter, die der Browser aufruft
+    Dann nennt die Datenschutzerklärung unter "Weitergabe an Dritte" "CARTO"
+    Und nennt die Datenschutzerklärung unter "Weitergabe an Dritte" "OpenPLZ"
+    Und nennt die Datenschutzerklärung unter "Weitergabe an Dritte" "Google Maps"
+    Und nennt die Datenschutzerklärung unter "Weitergabe an Dritte" nicht "Google Fonts"
+
+  Szenario: Alle Cookies, die Dwello setzt
+    Dann nennt die Datenschutzerklärung unter "Cookies" "dwello_session"
+    Und nennt die Datenschutzerklärung unter "Cookies" "dwello_xsrf"
+    Und nennt die Datenschutzerklärung unter "Cookies" "dwello_oauth_state"
+    Und nennt die Datenschutzerklärung unter "Cookies" "dwello_login"
+    Und nennt die Datenschutzerklärung unter "Cookies" "PARAGLIDE_LOCALE"

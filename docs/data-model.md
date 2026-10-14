@@ -139,6 +139,7 @@ name_de, name_fr, name_it, name_en VARCHAR(100) -- display names
 is_allowed_utility_cost BOOLEAN NOT NULL DEFAULT true  -- umlagefähig (OR 257a)
 is_heating_cost         BOOLEAN NOT NULL DEFAULT false -- distributed by the heating profile at a tenant change:
                                                        -- Heating, Chimney Sweep; Hot Water by days
+type                    VARCHAR(20) NOT NULL DEFAULT 'predefined' -- predefined (seeded), custom (recorded)
 description             TEXT
 sort_order              INTEGER DEFAULT 0
 ```

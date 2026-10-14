@@ -5572,7 +5572,7 @@ Decided by the user: Oracle Cloud VM, subdomain `demo.dwello.ch` (DNS at Infoman
 - [x] README "Deployment" points to the demo guide
 - [x] Fix the frontend `Dockerfile`: `bun install` ran `prepare` (Paraglide) before `project.inlang` exists; `--ignore-scripts`, Paraglide compiles in `vite build`. Test red: `docker build -f Dockerfile .` – `ENOENT: no such file or directory, open '/app/project.inlang/settings.json'`; green after the fix
 - [x] Stack started locally (domain `localhost`, images built with the sandbox proxy CA, Ollama left out): only Caddy publishes ports (80, 443); `/login` 200 over HTTPS, http redirects with 308; a form POST with the own origin passes the origin check, a foreign origin gets 403 (also without `ORIGIN`: adapter-node assumes https, so the override sets none); reset in 17 s, a tenant added before the reset is gone after it (11 → 10)
-- [x] O-3, O-6 updated, O-11 added (CI builds no Docker image) in `docs/design/offene-punkte.md`
+- [x] O-3, O-6 updated, O-11 added (CI builds no Docker image; renumbered O-12 when merging main with #167) in `docs/design/offene-punkte.md`
 - [x] Comment on #51: once it is done, the demo needs a way to allow every account
 - [x] Code review round 1; fixes: C-2 to C-10 (log rotation, required Postgres password, HSTS, trap on INT/TERM, README: Pay As You Go step, failed reset, image prune, firewall wording); C-1 becomes an issue (visitor notice, product decision)
 - [x] ponytail-review on the diff: `COOKIE_SECURE` (prod default) and the `caddy_config` volume removed

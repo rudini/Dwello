@@ -27,7 +27,7 @@
 		>
 		<!-- The predefined categories' descriptions are English; only own ones are shown -->
 		{#if category.description && !category.predefined}
-			<p class="text-ink-muted">{category.description}</p>
+			<p class="text-ink-muted" data-testid="category-description">{category.description}</p>
 		{/if}
 	</div>
 	<div class="flex flex-wrap items-center gap-4">
