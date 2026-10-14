@@ -57,7 +57,6 @@ Non-functional open points (security, operations, reliability, performance, usab
 | H-21 | The day after a date is computed inline in three places (`src/routes/contracts/ContractForm.svelte`, `src/lib/statement-wizard.ts` `calendarName`, private `addDays` in `src/lib/utils/contract-availability.ts`); code review B-15 n-6. | those files | One exported helper when one of them is touched. |
 | H-22 | Nothing checks that a frontend test takes a backend response from `tests/contracts` (`CLAUDE.md`, Gotchas: API contracts); a test can still invent one in an object literal (B-15 check, point 8). | `src/__tests__`, `tests/unit` | A lint or test rule against object literals keyed by `'/api/v1/…'` in tests, after counting today's hits. |
 | H-23 | The ask rules for a push to `main` match the command text: a bare `git push` with `main` checked out passes, `mcp__github__push_files`/`create_or_update_file` ask on every branch, `*:main*` and `refs/heads/main*` also match `main-fix` (review b15-instructions-slice3 C-16 to C-18). | `.claude/settings.json` | A PreToolUse hook that resolves the push target, or a branch protection on `main`. |
-| H-24 | A Blocker/Major of a reviewer's 3rd round whose fix changes no behavior (a text or doc fix) cannot be shown with a red and green test, so `CLAUDE.md` step 7 always stops and asks (code review C-15 in `docs/reviews/workflow-rules-review-7.md`) | `CLAUDE.md`, Workflow step 7 | Decide whether such a fix may instead be checked by a delta review named in the plan line |
 
 ## Operations and security
 
