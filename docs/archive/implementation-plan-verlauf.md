@@ -5462,3 +5462,9 @@ Findings:
 - Flaky `auth-routes.test.ts` once in `test:coverage` - open work O-10
 
 Files changed: `backend/src/routes/contracts.ts`, `backend/src/services/contract.service.ts`, `backend/src/__tests__/contract-parties.pg.test.ts`, `src/routes/contracts/ContractForm.svelte`, `src/routes/contracts/[id]/edit/+page.server.ts`, `src/routes/contracts/[id]/edit/+page.svelte`, `src/routes/contracts/new/ContractWizard.svelte`, `src/lib/contract-form.ts`, `messages/{de,fr,it,en}.json`, `docs/api-specification.md`, tests (`contract-edit*.test.ts`, `contract-form.test.ts`, `tests/e2e/…/contract-form.ts`, `contract-edit.feature`)
+
+Review of the merge onto `main` (`docs/reviews/b15-merge-review-1.md`, commit `5c93452`):
+- M-1 Major: the hint with «Erneut versuchen» disappeared while loading, the focus fell to the page - fixed (test first): the hint stays until an answer decides
+- m-1 Minor: request counter could never trigger - fixed: needed again (two clicks possible); covered by a test
+- m-2 Minor: test «meldet nichts, solange …» passed trivially - fixed: replaced by «nimmt nur die letzte Antwort, wenn zweimal versucht wird» (the former U-19 case)
+- n-1 Nit: comment «chosen apartment» in `ContractsUnknown.svelte` - fixed

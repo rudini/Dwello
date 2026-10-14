@@ -221,17 +221,35 @@ describe('Mietvertrag bearbeiten', () => {
 			expect(document.activeElement).toBe(document.getElementById('startDate'));
 		});
 
-		// review #151 R2-2: an attempt that has not ended says nothing
-		it('meldet nichts, solange die Mietverträge noch laden', async () => {
+		// Review b15-merge M-1: the hint and its button stay while loading, so the focus does not fall to the page
+		it('behält den Knopf mit dem Fokus, solange geladen wird und wenn es wieder scheitert', async () => {
 			await open();
-			failing = false;
-			const answer = globalThis.fetch;
-			let calls = 0; // the first retry answers late, after the second one has started
-			globalThis.fetch = ((url: string, init?: RequestInit) =>
-				++calls === 1 ? new Promise(() => {}) : answer(url, init)) as typeof fetch;
-			click('contracts-retry'); // still loading: no answer yet
+			byTestId<HTMLButtonElement>('contracts-retry')!.focus();
+			click('contracts-retry');
+			expect(document.activeElement).toBe(byTestId('contracts-retry'));
 			await settle();
-			expect(said()).toEqual([]);
+			expect(document.activeElement).toBe(byTestId('contracts-retry'));
+		});
+
+		// review #151 R2-2, former U-19: a late answer of an older attempt neither speaks nor brings the hint back
+		it('nimmt nur die letzte Antwort, wenn zweimal versucht wird', async () => {
+			await open();
+			const answer = globalThis.fetch;
+			let late: (() => void) | undefined;
+			let calls = 0;
+			globalThis.fetch = ((url: string, init?: RequestInit) =>
+				++calls === 1
+					? new Promise((resolve) => (late = () => resolve(new Response('{}', { status: 500 }))))
+					: answer(url, init)) as typeof fetch;
+			click('contracts-retry'); // first attempt: answers late, with an error
+			failing = false;
+			click('contracts-retry'); // second attempt: loads
+			await settle();
+			expect(byTestId('apartment-contracts-unknown')).toBeNull();
+			late!();
+			await settle();
+			expect(byTestId('apartment-contracts-unknown')).toBeNull();
+			expect(said()).toEqual([['success', 'Die Mietverträge der Wohnung sind geladen.']]);
 		});
 
 		it('sagt, wenn es wieder nicht geklappt hat', async () => {

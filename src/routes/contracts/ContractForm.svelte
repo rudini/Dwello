@@ -60,8 +60,9 @@
 	const running = $derived(
 		contractStatusOn(contract.startDate, contract.endDate, today) === 'active'
 	);
-	// the apartment's contracts could not be loaded: an overlap cannot be ruled out (#143)
-	const unknown = $derived(contractsState === 'failed');
+	// the apartment's contracts could not be loaded: an overlap cannot be ruled out (#143); it stays during a
+	// retry, so «Erneut versuchen» keeps the focus (review b15-merge M-1)
+	let unknown = $state(false);
 	// a changed Vertragsende in the past is confirmed as in «Beenden»; an unchanged one is not asked again
 	const endChanged = $derived(
 		!values.isUnlimited && values.endDate !== (contract.endDate?.slice(0, 10) ?? '')
@@ -83,9 +84,11 @@
 		const request = ++contractsRequest; // only the latest answer counts
 		contractsState = 'loading';
 		const list = forAvailability(await apiCall(`/contracts?apartmentId=${contract.apartmentId}`));
-		if (request !== contractsRequest) return;
+		if (request !== contractsRequest) return false;
 		apartmentContracts = list ?? [];
 		contractsState = list ? 'loaded' : 'failed';
+		unknown = !list;
+		return true; // this answer decided
 	}
 
 	$effect(() => {
@@ -94,8 +97,7 @@
 
 	// «Erneut versuchen»: the request again, the input stays (#151)
 	async function retry() {
-		await loadContracts();
-		if (contractsState === 'loading') return; // overtaken by a newer request: it decides (review R2-2)
+		if (!(await loadContracts())) return; // overtaken by a newer request: it decides (review R2-2)
 		await tick();
 		retried(unknown, document.getElementById('startDate'));
 	}
