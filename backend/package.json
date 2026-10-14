@@ -21,6 +21,7 @@
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "mail-catcher": "bun scripts/mail-catcher.ts",
+    "llm-stub": "bun scripts/llm-stub.ts",
     "e2e-db": "bun scripts/e2e-db.ts"
   },
   "dependencies": {

@@ -66,6 +66,13 @@ export default defineConfig<{ driver: Driver }>({
 			timeout: 30000
 		},
 		{
+			// KI stand-in: answers only the allocability check of a new category (backend/scripts/llm-stub.ts)
+			command: 'cd backend && bun run llm-stub',
+			port: 2527,
+			reuseExistingServer: true,
+			timeout: 30000
+		},
+		{
 			// Backend server (ElysiaJS) on a fresh E2E database, sending e-mail to the mail catcher
 			command: 'cd backend && bun run e2e-db && bun run src/index.ts',
 			port: 3101,
@@ -79,8 +86,8 @@ export default defineConfig<{ driver: Driver }>({
 				MAIL_FROM: 'verwaltung@dwello.test',
 				SMTP_HOST: '127.0.0.1',
 				SMTP_PORT: '2525',
-				// No KI, as in CI, whatever the developer's .env sets: nothing listens on port 9
-				LLM_BASE_URL: 'http://127.0.0.1:9/v1'
+				// The KI stand-in, whatever the developer's .env sets: invoices still find no KI
+				LLM_BASE_URL: 'http://127.0.0.1:2527/v1'
 			}
 		},
 		{
