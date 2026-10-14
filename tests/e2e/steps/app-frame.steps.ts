@@ -123,3 +123,10 @@ Then('ist der Seitentitel lesbar', async ({ verwalter }) => {
 Then('scrollt die Seite nicht seitwärts', async ({ verwalter }) => {
 	await verwalter.sees(pageOverflowsSideways).toBe(false);
 });
+
+Then(
+	'erfährt der Liegenschaftsverwalter unter {string}, dass Dwello die zu Mietern hochgeladenen Dokumente speichert',
+	async ({ verwalter }, heading: string) => {
+		await verwalter.sees(sectionText(heading)).toContain('Dokumente, die Sie zu Mietern hochladen');
+	}
+);

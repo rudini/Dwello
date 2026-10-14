@@ -2,8 +2,9 @@ import { createBdd } from 'playwright-bdd';
 import { inDays } from '../fixtures/dates';
 import { test } from '../fixtures/test';
 import { documentFor, documentsFor } from '../questions/documents';
-import { downloadedFileHeader, downloadedFileName } from '../questions/download';
+import { downloadedFileMagic, downloadedFileName } from '../questions/download';
 import {
+	deleteDocumentConsequence,
 	deleteOffersFor,
 	deleteTenantConsequence,
 	deliveryStatesOf,
@@ -12,7 +13,16 @@ import {
 	noDocumentsNote
 } from '../questions/tenant-documents';
 import { openDocuments, openDocumentsToSend } from '../tasks/documents';
-import { deleteDocument, openDocument, pdfFile, uploadDocument, uploadsFail, wordFile } from '../tasks/tenant-documents';
+import {
+	confirmDeletingDocument,
+	imageFile,
+	openDocument,
+	pdfFile,
+	startDeletingDocument,
+	uploadDocument,
+	uploadsFail,
+	wordFile
+} from '../tasks/tenant-documents';
 
 const { Given, When, Then } = createBdd(test);
 
@@ -51,8 +61,16 @@ When(
 	}
 );
 
-When('der Liegenschaftsverwalter das Dokument {string} löscht', async ({ verwalter }, title: string) => {
-	await verwalter.attemptsTo(deleteDocument(title));
+When('der Liegenschaftsverwalter das Foto {string} als {string} hochlädt', async ({ verwalter }, file: string, title: string) => {
+	await verwalter.attemptsTo(uploadDocument(imageFile(file), title));
+});
+
+When('der Liegenschaftsverwalter das Dokument {string} löschen will', async ({ verwalter }, title: string) => {
+	await verwalter.attemptsTo(startDeletingDocument(title));
+});
+
+When('der Liegenschaftsverwalter das Löschen bestätigt', async ({ verwalter }) => {
+	await verwalter.attemptsTo(confirmDeletingDocument);
 });
 
 When('der Liegenschaftsverwalter alle Dokumente ansieht', async ({ verwalter }) => {
@@ -72,12 +90,15 @@ Then('hat das Dokument {string} keinen Versandstatus', async ({ verwalter }, tit
 	await verwalter.sees(deliveryStatesOf(title)).toBe(0);
 });
 
+// The first bytes of each kind, as Dwello checks them
+const MAGIC: Record<string, string> = { PDF: '255044', JPG: 'ffd8ff' };
+
 Then(
-	'öffnet das Dokument {string} die PDF-Datei {string}',
-	async ({ verwalter }, title: string, file: string) => {
+	/^öffnet das Dokument "([^"]+)" die (PDF|JPG)-Datei "([^"]+)"$/,
+	async ({ verwalter }, title: string, kind: string, file: string) => {
 		await verwalter.attemptsTo(openDocument(title));
 		await verwalter.sees(downloadedFileName).toBe(file);
-		await verwalter.sees(downloadedFileHeader).toBe('%PDF-');
+		await verwalter.sees(downloadedFileMagic).toBe(MAGIC[kind]);
 	}
 );
 
@@ -88,6 +109,10 @@ Then('steht als Titel des Dokuments weiterhin {string}', async ({ verwalter }, t
 Then('liegen beim Mieter noch keine Dokumente', async ({ verwalter }) => {
 	await verwalter.sees(noDocumentsNote).toBe('Noch keine Dokumente.');
 	await verwalter.sees(listedDocuments).toBe(0);
+});
+
+Then('sagt die Bestätigung {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(deleteDocumentConsequence).toBe(text);
 });
 
 Then(
@@ -102,9 +127,11 @@ Then(
 );
 
 Then(
-	'liegt das Dokument {string} zu {string} ohne Versandstatus vor',
+	'liegt das Dokument {string} zu {string}, heute hochgeladen, ohne Versandstatus vor',
 	async ({ verwalter, names }, title: string, tenant: string) => {
-		await verwalter.sees(documentFor(title, names.get(tenant) ?? tenant)).toContain('Hochgeladen am');
+		await verwalter
+			.sees(documentFor(title, names.get(tenant) ?? tenant))
+			.toContain(`Zu ${names.get(tenant)}, hochgeladen am ${swissDate(inDays(0))}`);
 		await verwalter.sees(deliveryStatesOf(title)).toBe(0);
 	}
 );

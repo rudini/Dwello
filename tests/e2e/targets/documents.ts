@@ -25,3 +25,6 @@ export const confirmDeleteDocumentButton = target('Dokument löschen bestätigen
 	page.getByTestId('document-delete-confirm')
 );
 export const deleteTenantMessage = target('Bestätigung Mieter löschen', (page) => page.getByTestId('delete-dialog-message'));
+export const deleteDocumentMessage = target('Bestätigung Dokument löschen', (page) =>
+	page.getByTestId('document-delete-message')
+);

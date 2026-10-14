@@ -17,6 +17,12 @@ export const pdfFile = (name: string, bytes = 1024): File => ({
 	mimeType: 'application/pdf',
 	buffer: Buffer.concat([Buffer.from('%PDF-1.4\n'), Buffer.alloc(bytes)])
 });
+// A photo as phones save it: the JPEG start of image marker
+export const imageFile = (name: string): File => ({
+	name,
+	mimeType: 'image/jpeg',
+	buffer: Buffer.concat([Buffer.from([0xff, 0xd8, 0xff, 0xe0]), Buffer.alloc(1024)])
+});
 // A Word file starts like any zip archive
 export const wordFile = (name: string): File => ({
 	name,
@@ -31,8 +37,8 @@ export const uploadDocument = (file: File, title: string): Activity => (actor) =
 		Click.on(uploadDocumentButton)
 	);
 
-export const deleteDocument = (title: string): Activity => (actor) =>
-	actor.attemptsTo(Click.on(deleteDocumentButton(title)), Click.on(confirmDeleteDocumentButton));
+export const startDeletingDocument = (title: string) => Click.on(deleteDocumentButton(title));
+export const confirmDeletingDocument = Click.on(confirmDeleteDocumentButton);
 
 export const openDocument = (title: string) => DownloadFrom(openDocumentLink(title));
 

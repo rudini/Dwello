@@ -2,7 +2,7 @@
 @tenants @wip
 Funktionalität: Dokumente eines Mieters
   Als Liegenschaftsverwalter
-  möchte ich Unterlagen eines Mieters, etwa den unterschriebenen Mietvertrag, in Dwello ablegen
+  möchte ich Unterlagen eines Mieters, etwa das Übergabeprotokoll oder einen Betreibungsauszug, in Dwello ablegen
   damit ich sie beim Mieter wiederfinde
 
   Grundlage:
@@ -19,6 +19,12 @@ Funktionalität: Dokumente eines Mieters
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mieters "Lea Frei"
     Wenn der Liegenschaftsverwalter die PDF-Datei "Uebergabeprotokoll.pdf" ohne Titel hochlädt
     Dann liegt beim Mieter das Dokument "Uebergabeprotokoll", heute hochgeladen
+
+  Szenario: Ein Foto als Dokument hochladen
+    Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mieters "Lea Frei"
+    Wenn der Liegenschaftsverwalter das Foto "ausweis.jpg" als "Ausweiskopie" hochlädt
+    Dann liegt beim Mieter das Dokument "Ausweiskopie", heute hochgeladen
+    Und öffnet das Dokument "Ausweiskopie" die JPG-Datei "ausweis.jpg"
 
   Szenario: Eine zu grosse Datei wird abgelehnt
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mieters "Lea Frei"
@@ -38,13 +44,15 @@ Funktionalität: Dokumente eines Mieters
     Angenommen der Liegenschaftsverwalter ist auf der Detailseite des Mieters "Lea Frei"
     Und das Hochladen von Dokumenten zu "Lea Frei" ist gestört
     Wenn der Liegenschaftsverwalter die PDF-Datei "betreibung.pdf" als "Betreibungsauszug" hochladen will
-    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Das Dokument wurde nicht gespeichert. Prüfen Sie die Internetverbindung und laden Sie die Datei erneut hoch."
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Das Dokument wurde nicht gespeichert. Laden Sie die Datei erneut hoch."
     Und steht als Titel des Dokuments weiterhin "Betreibungsauszug"
 
   Szenario: Liegenschaftsverwalter löscht ein hochgeladenes Dokument
     Angenommen "Lea Frei" hat das hochgeladene Dokument "Ausweiskopie"
     Und der Liegenschaftsverwalter ist auf der Detailseite des Mieters "Lea Frei"
-    Wenn der Liegenschaftsverwalter das Dokument "Ausweiskopie" löscht
+    Wenn der Liegenschaftsverwalter das Dokument "Ausweiskopie" löschen will
+    Dann sagt die Bestätigung "Ausweiskopie wird endgültig gelöscht. Das lässt sich nicht rückgängig machen."
+    Wenn der Liegenschaftsverwalter das Löschen bestätigt
     Dann liegen beim Mieter noch keine Dokumente
 
   Szenario: Mieter mit hochgeladenen Dokumenten löschen

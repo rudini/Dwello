@@ -30,7 +30,7 @@ Funktionalität: Dokumente
   Szenario: Hochgeladenes Dokument ist nie zu versenden
     Angenommen "Anna Keller" hat das hochgeladene Dokument "Ausweiskopie"
     Wenn der Liegenschaftsverwalter alle Dokumente ansieht
-    Dann liegt das Dokument "Ausweiskopie" zu "Anna Keller" ohne Versandstatus vor
+    Dann liegt das Dokument "Ausweiskopie" zu "Anna Keller", heute hochgeladen, ohne Versandstatus vor
     Wenn der Liegenschaftsverwalter die zu versendenden Dokumente ansieht
     Dann ist die "Zahlungserinnerung" an "Anna Keller" zu versenden
     Und ist das Dokument "Ausweiskopie" zu "Anna Keller" nicht zu versenden
