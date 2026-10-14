@@ -45,6 +45,9 @@ Slice 2 notes:
 - Files: `CLAUDE.md`, `.claude/agents/{code-reviewer,fach-reviewer,daten-pruefer,persona}.md`, `docs/design/personas/README.md`, `docs/design/offene-punkte.md`
 - No code changed: no `Test red`, no `ponytail-review`
 
+Slice 3 - added by the user during the task:
+- [x] 17 After a finished task: push, open a pull request, turn on auto-merge, resolve conflicts by merging `origin/main`, fix red CI; it merges once green. Still asked: a push to `main`, force-push, merging red or with an open Blocker/Major, and a task where the user said to only commit (as this one). Merge method: merge commit (no squash, so the slice commits stay; #149 was merged so). File: `CLAUDE.md` («Keep going»)
+
 Finish:
 - [ ] Slice reviews (`code-reviewer`), findings triaged
 - [ ] All checks of `CLAUDE.md` pass
