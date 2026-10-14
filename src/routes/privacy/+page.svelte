@@ -37,6 +37,13 @@
 <div class="flex max-w-3xl flex-col gap-8">
 	<PageHeader title={m.privacy_title()} purpose={m.privacy_purpose()} />
 
+	{#if data.demo}
+		<Panel title={m.demo_notice_title()} testid="page-section">
+			<p class="text-ink">{m.privacy_demo_1()}</p>
+			<p class="text-ink">{m.privacy_demo_2()}</p>
+		</Panel>
+	{/if}
+
 	{#each sections as section (section.id)}
 		<Panel title={section.title} testid="page-section">
 			{#if section.id === 'third'}

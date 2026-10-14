@@ -66,3 +66,35 @@ describe('Hilfe und Rechtliches ohne Anmeldung', () => {
 		expect(links).not.toContain('/help');
 	});
 });
+
+async function shown(path: string, data: { user: object | null; demo: boolean }) {
+	const { default: Layout } = await import('../routes/+layout.svelte');
+	const children = createRawSnippet(() => ({ render: () => '<h1>Seite</h1>' }));
+	show(Layout, { data, children } as never);
+	page.go(path);
+	flushSync();
+	return document.querySelector('main [data-testid="demo-notice"]');
+}
+
+const user = { id: 'u1', sub: 'u1', name: 'Vera Verwalter', email: 'vera@example.ch' };
+
+describe('Öffentliche Demo', () => {
+	it('warnt auf der Anmeldeseite, dass alle Besucher dieselben Daten sehen', async () => {
+		const notice = await shown('/login', { user: null, demo: true });
+		expect(notice?.textContent).toContain('Alle Besucher sehen und ändern dieselben Daten');
+	});
+
+	it('warnt nach der Anmeldung auf jeder Seite der App', async () => {
+		const notice = await shown('/tenants', { user, demo: true });
+		expect(notice?.textContent).toContain('Jede Nacht werden alle Änderungen gelöscht');
+	});
+
+	it.each(['/help', '/privacy', '/terms'])('warnt auch auf %s ohne Anmeldung', async (path) => {
+		expect(await shown(path, { user: null, demo: true })).not.toBeNull();
+	});
+
+	it('zeigt in einer eigenen Installation keinen Demo-Hinweis', async () => {
+		expect(await shown('/login', { user: null, demo: false })).toBeNull();
+		expect(document.querySelector('main h1')).not.toBeNull();
+	});
+});

@@ -31,3 +31,26 @@ describe('Datenschutzerklärung zu Entwürfen im Browser', () => {
 		expect(draft).toContain('bis Sie sie speichern, verwerfen oder sich abmelden');
 	});
 });
+
+describe('Datenschutzerklärung der öffentlichen Demo', () => {
+	const demoSection = () =>
+		[...document.querySelectorAll('[data-testid="page-section"]')].find((section) =>
+			section.querySelector('h2')?.textContent?.includes('Öffentliche Demo')
+		);
+
+	it('sagt, dass alle dieselben Daten sehen, alles jede Nacht gelöscht und jede Anmeldung protokolliert wird', () => {
+		show(PrivacyPage, { data: { recipient: null, demo: true } } as never);
+
+		const text = demoSection()?.textContent;
+		expect(text).toContain('sehen und ändern dieselben Daten');
+		expect(text).toContain('jede Nacht werden alle Änderungen gelöscht');
+		expect(text).toContain('mit der E-Mail-Adresse des Kontos im Protokoll des Servers');
+	});
+
+	it('hat in einer eigenen Installation keinen Abschnitt zur Demo', () => {
+		show(PrivacyPage, { data: { recipient: null, demo: false } } as never);
+
+		expect(document.querySelectorAll('[data-testid="page-section"]').length).toBeGreaterThan(0);
+		expect(demoSection()).toBeUndefined();
+	});
+});

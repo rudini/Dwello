@@ -2,7 +2,7 @@
 
 The public demo runs on one Oracle Cloud "Always Free" VM: `docker-compose.prod.yml` plus `deploy/demo/docker-compose.yml`, which adds Caddy for HTTPS and publishes no port but 80 and 443. Self-hosting stays as in the main README (`docker-compose.prod.yml` on its own); nothing here changes it.
 
-**Every visitor shares the same data.** Anyone with a Google account can sign in and sees and edits the same demo landlord. A cron job resets the database to the demo data every night (`reset-demo.sh`). Do not enter real data.
+**Every visitor shares the same data.** Anyone with a Google account can sign in and sees and edits the same demo landlord. A cron job resets the database to the demo data every night (`reset-demo.sh`). `DEMO=on` (set in `docker-compose.yml`) tells visitors so: a notice at the top of every page and a section in the privacy statement.
 
 ## 1. VM (Oracle Cloud)
 

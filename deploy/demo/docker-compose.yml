@@ -15,6 +15,9 @@ services:
     # Only Caddy talks to the app; Postgres, backend and Ollama stay inside the Docker network
     ports: !reset []
     logging: *logging
+    environment:
+      # The demo notice on every page and the demo section of the privacy statement (#162)
+      - DEMO=on
 
   backend:
     ports: !reset []
