@@ -43,10 +43,32 @@ On the OAuth consent screen, set the publishing status to **In production**: in 
 
 Microsoft sign-in is not wired into `docker-compose.prod.yml`; the demo uses Google only.
 
-## 4. Start
+## 4. Access to the repository
+
+`rudini/Dwello` is private, and GitHub takes no passwords for `git clone`. The VM reads it with a deploy key: an SSH key that may only read this one repository.
 
 ```bash
-git clone https://github.com/rudini/Dwello.git && cd Dwello
+ssh-keygen -t ed25519 -C "dwello-demo-vm" -f ~/.ssh/dwello_deploy -N ""
+cat ~/.ssh/dwello_deploy.pub
+```
+
+On GitHub, repository **Settings, Deploy keys, Add deploy key**: title `dwello-demo-vm`, paste the printed line, leave **Allow write access** unticked. Then, on the VM:
+
+```bash
+cat >> ~/.ssh/config <<'CONF'
+Host github.com
+  IdentityFile ~/.ssh/dwello_deploy
+  IdentitiesOnly yes
+CONF
+chmod 600 ~/.ssh/config
+```
+
+`git pull` uses the same key later. Deleting the deploy key on GitHub ends the VM's access at once.
+
+## 5. Start
+
+```bash
+git clone git@github.com:rudini/Dwello.git && cd Dwello
 cp deploy/demo/.env.example deploy/demo/.env    # fill in: secrets, Google client, operator
 docker compose -f docker-compose.prod.yml -f deploy/demo/docker-compose.yml --env-file deploy/demo/.env up -d --build
 docker exec dwello-ollama ollama pull qwen2.5:3b
@@ -57,7 +79,7 @@ Then open https://demo.dwello.ch. The model runs on the VM's CPU: categorizing a
 
 **Update** to a newer version: `git pull`, then the same `up -d --build` command, then `docker image prune -f` to remove the replaced images.
 
-## 5. Nightly reset
+## 6. Nightly reset
 
 `crontab -e` on the VM, with the path of your clone:
 
