@@ -5548,3 +5548,15 @@ Finish:
 - [x] Slice reviews (`code-reviewer`), findings triaged: slice 1 two rounds, slice 2 two rounds, slice 3 three rounds; no Blocker/Major open; open work H-22, H-23
 - [x] All checks of `CLAUDE.md` pass on `dcf2dd3`: `bun run test:coverage` 2283 pass (lines 90.11 %), `bun run lint`, `bun run check` 0 errors, backend 539 pass (90.4 % lines) and `type-check`; E2E: every axe and language row in Chromium, 268 passed (the only scenarios this changes: their titles)
 - [x] Session archived; pull request #158 opened with the user's approval (point 17 applied to this task)
+
+## Session 28 - October 2026: review of PR #158 against the Opus 5.5 guide
+
+Branch `claude/b15-instruction-improvements` (PR #158). The user asked for an independent review of the changes against https://claude.dev/blog/getting-the-most-out-of-opus-5-5/; merging waits for the user.
+
+- [x] Independent reviewer (fresh context, read the article itself, own worktree on `3f59f04`): `docs/reviews/b15-instructions-opus55-review-1.md`
+- [x] Findings triaged and fixed (`CLAUDE.md`, `.claude/agents/{code-reviewer,daten-pruefer,fach-reviewer}.md`)
+- [x] Checks: lint, the tests reading `CLAUDE.md` and the plan
+- [x] Session archived
+
+Findings:
+- reviewer round 1 (`docs/reviews/b15-instructions-opus55-review-1.md`): fixed O-1 (Major: «Keep going» is a short stop rule again, the pull request flow is Workflow 9), O-2 (pushing the branch and its pull request is not a change outside the repo), O-3 (check runs and open findings read again right before the merge), O-4 (restart only when `merge-base --is-ancestor` holds, with `git switch -C`), O-5 (reviewer agents stop without a worktree), O-6 (a pull request the session cannot wait for goes under «Blocked on me»), O-7 (the link command), O-8 (skill rule said once)
