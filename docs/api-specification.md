@@ -29,7 +29,7 @@ Browser -> SvelteKit BFF (port 3000: /auth/*, /api/*, page loads/actions) -> Ely
   - Distribution keys and formulas: `DISTRIBUTION_KEY_TYPE_FIXED`, `DISTRIBUTION_KEY_FORMULA_FIXED`, `FORMULA_INVALID` (every formula error in `causes`: `[{ code, params }]`, in the order of the text), `FORMULA_REQUIRED`, `FORMULA_UNKNOWN_VARIABLE {variable}`, `FORMULA_NO_VARIABLE`, `FORMULA_INVALID_CHARACTERS {characters}`, `FORMULA_UNOPENED_PARENTHESIS`, `FORMULA_UNCLOSED_PARENTHESIS`, `FORMULA_CONSECUTIVE_OPERATORS`, `FORMULA_DIVISION_BY_ZERO`, `FORMULA_VALUE_MISSING {variable}`, `FORMULA_NOT_A_NUMBER`, `FORMULA_NOT_COMPUTABLE {detail}`, `FORMULA_SAMPLE_FAILED {sample, reason, …}`, `FORMULA_SAMPLE_NEGATIVE {sample}` (`sample`: `FORMULA_SAMPLE_SMALL`, `_MEDIUM`, `_LARGE`), `FORMULA_APARTMENT_FAILED {reason, …}`, `FORMULA_NEGATIVE`, `FORMULA_ALL_ZERO`. The params `cause`, `reason` and `sample` may hold a code, shown as that code's message
   - Heating profiles: `HEATING_PROFILE_SHARES_SUM {sum}`, `HEATING_PROFILE_SHARE_NEGATIVE {month}`, `HEATING_PROFILE_TYPE_FIXED`, `HEATING_PROFILE_SHARES_FIXED`
   - Contracts and statements: `CONTRACT_OVERLAP {contract}`, `CONTRACT_NOTICE_WITHOUT_END`, `CONTRACT_PARTIES_FIXED`, `CONTRACT_NOT_IN_PERIOD`, `IBAN_MISSING`
-  - Invoices: `KI_UNAVAILABLE`
+  - Invoices: `KI_UNAVAILABLE`; categories: `KI_NO_PROPOSAL`
   - Reminders: `REMINDER_NOT_SENT`, `REMINDER_NOT_OVERDUE`, `REMINDER_REFUND`, `REMINDER_LIMIT`; delivery errors as `deliveryErrorCode` of a document: `TENANT_NO_EMAIL`, `MAIL_NOT_CONFIGURED` (null for other delivery errors)
 - **Schema validation:** a body/query that fails the Elysia `t` schema returns **422** with Elysia's validation error body.
 - **Types:** IDs are UUID strings. Money, area, rooms and percentages stored as `numeric` are **strings** (`"450.00"`). Dates are `YYYY-MM-DD`; timestamps ISO 8601.
@@ -100,6 +100,7 @@ Apartment `status` is derived from rental contracts: `occupied` (a contract runs
 | GET | `/` | Query: `search`, `isAllowedUtilityCost` (`true`\|`false`), `limit` (default 100), `offset`. → `{ categories, total }`; items include `invoiceCount` |
 | GET | `/allowed` | → array of categories with `isAllowedUtilityCost = true` |
 | GET | `/:id` | → category with `invoiceCount`. 404 |
+| POST | `/propose` | Body: `name` (1–100) required; optional `description`, `language` (`de`\|`fr`\|`it`\|`en`, the language of `reasoning`, default `de`). The KI's proposal for a new category (#176): → `{ isAllowedUtilityCost, reasoning }` from a confidence of 0.7; **503** `KI_NO_PROPOSAL` without a sure answer (no KI, error, unusable answer, lower confidence). The prompt quotes OR and VMWG verbatim (`LEGAL_BASIS` in `backend/src/config/llm.ts`) |
 | POST | `/` | Body: `name` (1–100), `isAllowedUtilityCost` (boolean) required; optional `nameDE`, `nameFR`, `nameIT`, `nameEN`, `description`, `sortOrder`. → 201. **409** `name` or `nameDE` already used |
 | PUT | `/:id` | Body: any subset. → category. 404; 409. Setting `isAllowedUtilityCost: false` also sets `isValidUtilityCost = false` on its invoices (OR 257a) |
 | DELETE | `/:id` | 204. 404; **409** if invoices use it |

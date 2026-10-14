@@ -59,14 +59,12 @@ Funktionalität: Kostenkategorien
     Dann ist die vordefinierte Kategorie "Schädlingsbekämpfung" nicht umlagefähig
     Und ist die vordefinierte Kategorie "Feuerlöscher-Wartung" nicht umlagefähig
 
-  @wip
   Szenario: KI schlägt vor, ob eine neue Kategorie umlagefähig ist
     Angenommen der Liegenschaftsverwalter ist auf der Seite "Neue Kategorie"
     Wenn der Liegenschaftsverwalter die KI prüfen lässt, ob die Kategorie "Dachsanierung" umlagefähig ist
     Dann schlägt die KI vor, die Kategorie als nicht umlagefähig zu erfassen
     Und begründet die KI ihren Vorschlag mit "Art. 257a"
 
-  @wip
   Szenario: Liegenschaftsverwalter übersteuert den Vorschlag der KI
     Angenommen der Liegenschaftsverwalter ist auf der Seite "Neue Kategorie"
     Und die KI hat geprüft, ob die Kategorie "Fassadenreinigung" umlagefähig ist
@@ -74,7 +72,12 @@ Funktionalität: Kostenkategorien
     Dann ist der Liegenschaftsverwalter auf der Seite "Kategorien"
     Und ist die Kategorie "Fassadenreinigung" nicht umlagefähig
 
-  @wip
+  Szenario: Ohne sichere Antwort der KI wählt der Liegenschaftsverwalter selbst
+    Angenommen der Liegenschaftsverwalter ist auf der Seite "Neue Kategorie"
+    Wenn der Liegenschaftsverwalter die KI prüfen lässt, ob die Kategorie "Bewachung" umlagefähig ist
+    Dann erfährt der Liegenschaftsverwalter, dass er selbst wählen muss, ob die Kosten umlagefähig sind
+    Und ist weder umlagefähig noch nicht umlagefähig gewählt
+
   Szenario: Neue Kategorie ohne Wahl der Umlagefähigkeit
     Angenommen der Liegenschaftsverwalter ist auf der Seite "Neue Kategorie"
     Wenn der Liegenschaftsverwalter die Kategorie "Fassadenreinigung" speichert, ohne zu wählen, ob sie umlagefähig ist

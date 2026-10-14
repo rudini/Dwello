@@ -135,6 +135,55 @@ export function buildCategorizationPrompt(
 	);
 }
 
+// Prompt for a new category: whether its costs may be passed on; {name} and {description} come from the form
+const ALLOCABILITY_PROMPT = `Du bist ein Experte für Schweizer Nebenkostenabrechnungen. Ein Vermieter erfasst eine neue Kostenkategorie. Prüfe, ob ihre Kosten auf die Mieter umgelegt werden dürfen.
+
+${LEGAL_BASIS}
+
+Kategorie: {name}
+Beschreibung: {description}
+Sprache der Begründung: {language}
+
+Antworte NUR im folgenden JSON-Format:
+{
+  "isAllowedUtilityCost": false,
+  "confidence": 0.9,
+  "reasoning": "Ein bis zwei Sätze in der Sprache der Begründung mit dem Artikel, z.B. (Art. 257a Abs. 1 OR)"
+}`;
+
+// The interface languages, named as the German prompt names them
+const LANGUAGES = { de: 'Deutsch', fr: 'Französisch', it: 'Italienisch', en: 'Englisch' };
+
+export function buildAllocabilityPrompt(category: {
+	name: string;
+	description?: string | null;
+	language?: keyof typeof LANGUAGES;
+}): string {
+	const values: Record<string, string> = {
+		name: category.name,
+		description: category.description || '-',
+		language: LANGUAGES[category.language ?? 'de']
+	};
+	return ALLOCABILITY_PROMPT.replace(/\{(name|description|language)\}/g, (_, key: string) => values[key]);
+}
+
+/** The KI's answer for a new category, or null when it is not JSON of that shape */
+export function parseAllocabilityResponse(
+	response: string
+): { isAllowedUtilityCost: boolean; confidence: number; reasoning: string } | null {
+	try {
+		const parsed = JSON.parse(response.match(/\{[\s\S]*\}/)?.[0] ?? '');
+		if (typeof parsed.isAllowedUtilityCost !== 'boolean' || typeof parsed.confidence !== 'number') return null;
+		return {
+			isAllowedUtilityCost: parsed.isAllowedUtilityCost,
+			confidence: parsed.confidence,
+			reasoning: typeof parsed.reasoning === 'string' ? parsed.reasoning : ''
+		};
+	} catch {
+		return null;
+	}
+}
+
 /**
  * Parse LLM response to extract categorization
  */

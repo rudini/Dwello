@@ -64,6 +64,12 @@ const say = (actor: Actor, text: string) => actor.answer(inPageLanguage(text));
 const clickOnShown = async (actor: Actor, text: string, place: (shown: string) => Target) =>
 	actor.attemptsTo(Click.on(place(await say(actor, text))));
 const openDialog = (button: Target): Activity => (actor) => actor.attemptsTo(Click.on(button), Wait.until(on.dialogConfirm));
+const askKi = (name: string): Activity => (actor) =>
+	actor.attemptsTo(
+		Enter.theValue(name).into(on.categoryNameInput),
+		Click.on(on.categoryProposeButton),
+		Wait.until(on.categoryProposal)
+	);
 
 // The statement wizard's preview of a calendar year for this example's building (and others), heating profile and fee
 // as proposed
@@ -165,6 +171,9 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 			Click.on(on.formulaTestButton),
 			Wait.until(on.formulaTestOutcome)
 		),
+	// The KI stand-in (backend/scripts/llm-stub.ts) is sure about a renovation, not about guarding the building
+	'ki-proposal': () => askKi('Dachsanierung'),
+	'ki-no-proposal': () => askKi('Bewachung'),
 	'profile-sum-invalid': () => (actor) =>
 		actor.attemptsTo(Enter.theValue('50').into(on.januaryShare), Wait.until(on.invalidProfileTotal)),
 	'mobile-menu-open': (_, viewport) => async (actor) => {

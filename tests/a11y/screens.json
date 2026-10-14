@@ -30,6 +30,8 @@
 		"contracts-unknown-review": "Rental contract wizard at the step before saving, the apartment's rental contracts not loaded (that request answered with an error): the hint above the review (#143).",
 		"draft-restored": "A wizard reopened with a draft saved in the browser: restore notice and save status visible.",
 		"formula-tested": "Distribution key form after testing a formula.",
+		"ki-proposal": "New category form after «Von der KI prüfen lassen»: the KI's proposal with its reasoning, the choice preset (#176).",
+		"ki-no-proposal": "New category form after the KI gave no sure answer: the hint to choose oneself, nothing preset (#176).",
 		"profile-sum-invalid": "Heating profile form whose monthly shares do not add up to 100 %.",
 		"login-error": "Login page showing a sign-in error (?error=failed).",
 		"mobile-menu-open": "Navigation drawer open (mobile and tablet viewport).",
@@ -418,7 +420,9 @@
 			"path": "/config/categories/new",
 			"states": [
 				"default",
-				"submit-empty"
+				"submit-empty",
+				"ki-proposal",
+				"ki-no-proposal"
 			]
 		},
 		{

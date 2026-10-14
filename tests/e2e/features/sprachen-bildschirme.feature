@@ -127,6 +127,8 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | categories             | default             |
       | category-new           | default             |
       | category-new           | submit-empty        |
+      | category-new           | ki-proposal         |
+      | category-new           | ki-no-proposal      |
       | category-edit          | default             |
       | category-edit          | submit-cleared      |
       | category-edit          | saved-toast         |

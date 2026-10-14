@@ -175,6 +175,62 @@ describe('Kategorie erfassen', () => {
 	});
 });
 
+describe('Umlagefähigkeit einer neuen Kategorie', () => {
+	const choice = (label: string) =>
+		[...document.querySelectorAll<HTMLInputElement>('[data-testid="category-allowance"] input')].find(
+			(input) => input.closest('label')!.textContent!.trim().startsWith(label)
+		)!;
+
+	it('wählt nichts vor und bietet die Prüfung durch die KI an', () => {
+		show(NewCategoryPage, { form: null } as never);
+
+		expect(choice('Umlagefähig').checked).toBe(false);
+		expect(choice('Nicht umlagefähig').checked).toBe(false);
+		expect(byTestId('category-propose-button')!.textContent).toContain('Von der KI prüfen lassen');
+	});
+
+	// Art. 257a Absatz 2 OR: umlagefähig heisst noch nicht, dass der Mieter sie schuldet
+	it('erklärt, wann der Mieter umlagefähige Kosten bezahlt', () => {
+		show(NewCategoryPage, { form: null } as never);
+
+		expect(text()).toContain('wenn der Mietvertrag sie als Nebenkosten nennt (Art. 257a Absatz 2 OR)');
+		expect(text()).toContain('Gebäudeversicherung');
+	});
+
+	it('übernimmt den Vorschlag der KI und zeigt ihre Begründung', () => {
+		const reasoning = 'Erneuerung des Gebäudes (Art. 257a Abs. 1 OR).';
+		show(NewCategoryPage, { form: { proposal: { isAllowedUtilityCost: false, reasoning } } } as never);
+
+		expect(choice('Nicht umlagefähig').checked).toBe(true);
+		expect(byTestId('category-proposal')!.textContent).toContain('Vorschlag der KI: Nicht umlagefähig');
+		expect(byTestId('category-proposal')!.textContent).toContain(reasoning);
+	});
+
+	it('lässt ohne Antwort der KI nichts vorgewählt und sagt, dass Sie selbst wählen', () => {
+		const error = 'Die KI ist nicht erreichbar oder ist sich nicht sicher. Wählen Sie selbst, ob die Kosten umlagefähig sind.';
+		show(NewCategoryPage, { form: { proposal: { error } } } as never);
+
+		expect(choice('Umlagefähig').checked).toBe(false);
+		expect(choice('Nicht umlagefähig').checked).toBe(false);
+		expect(byTestId('category-proposal')!.textContent).toContain(error);
+	});
+
+	it('meldet die fehlende Wahl an der Wahl', () => {
+		show(NewCategoryPage, {
+			form: { errors: { isAllowedUtilityCost: 'Wählen Sie, ob die Kosten umlagefähig sind.' } }
+		} as never);
+
+		expect(byTestId('category-allowance')!.textContent).toContain('Wählen Sie, ob die Kosten umlagefähig sind.');
+	});
+
+	it('zeigt beim Bearbeiten die gespeicherte Wahl, ohne die KI anzubieten', () => {
+		show(EditCategoryPage, { data: { category: category('c2', 'Reparaturen', false) }, form: null } as never);
+
+		expect(choice('Nicht umlagefähig').checked).toBe(true);
+		expect(byTestId('category-propose-button')).toBeNull();
+	});
+});
+
 describe('Kategorie bearbeiten', () => {
 	// The list hides the (English) descriptions of the predefined categories
 	it('sagt bei vordefinierten Kategorien, dass die Beschreibung nicht in der Liste steht', () => {

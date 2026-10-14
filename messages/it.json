@@ -1084,7 +1084,7 @@
 	"categories_name_german": "Nome (tedesco)",
 	"categories_description_predefined": "L’elenco non mostra la descrizione delle categorie predefinite.",
 	"categories_allocable": "Spese accessorie addebitabili",
-	"categories_allocable_help": "Solo i costi addebitabili (art. 257a–257b CO) confluiscono nel conteggio spese accessorie, p. es. riscaldamento, acqua, custode. Riparazioni, assicurazioni e imposte non sono addebitabili.",
+	"categories_allocable_help": "Sono addebitabili i costi legati all’uso dell’immobile (art. 257a–257b CO), p. es. riscaldamento, acqua, portineria. Riparazioni, rinnovi, assicurazione dell’edificio e imposte sono a carico del locatore; per ascensore e portineria contano solo esercizio e manutenzione. Il conduttore paga i costi addebitabili solo se il contratto di locazione li indica come spese accessorie (art. 257a cpv. 2 CO).",
 	"categories_heating": "Ripartire le spese di riscaldamento secondo il profilo di riscaldamento",
 	"categories_heating_help": "Per esempio olio combustibile, teleriscaldamento, pellet o spazzacamino. Se un inquilino entra o lascia l’appartamento durante il periodo di conteggio, Dwello ripartisce questi costi sui mesi secondo il profilo di riscaldamento, tutti gli altri per giorni. L’acqua calda conteggiata separatamente si consuma più o meno allo stesso modo tutto l’anno: in quel caso non metta la spunta.",
 	"categories_sort_order": "Ordine",
@@ -1293,5 +1293,12 @@
 	"contracts_apartment_contracts_loading": "I contratti di locazione dell’appartamento sono ancora in caricamento. Riprovi tra un momento.",
 	"contracts_notice_hint_title": "L’inquilino ha disdetto?",
 	"contracts_notice_hint_text": "Allora inserisca la fine del contratto nella pagina del contratto di locazione con «Terminare». Così resta a tempo indeterminato e Dwello indica i prossimi passi.",
-	"contracts_notice_hint_link": "Registrare la disdetta con «Terminare»"
+	"contracts_notice_hint_link": "Registrare la disdetta con «Terminare»",
+	"categories_error_allocable_required": "Indichi se i costi sono addebitabili.",
+	"backend_ki_no_proposal": "L’IA non è raggiungibile o non è sicura. Indichi Lei se i costi sono addebitabili.",
+	"categories_allocable_yes": "I costi entrano nel conteggio spese accessorie.",
+	"categories_allocable_no": "I costi sono a carico del locatore.",
+	"categories_propose": "Far verificare dall’IA",
+	"categories_proposal": "Proposta dell’IA: {choice}",
+	"categories_proposal_none": "Nessuna proposta dell’IA"
 }

@@ -8,6 +8,7 @@ import {
 	categoryListed,
 	invoicesOf,
 	descriptionOf,
+	allowedChosen,
 	listedCategoriesNamed,
 	notAllowedChosen,
 	proposalText
@@ -176,4 +177,16 @@ Then('begründet die KI ihren Vorschlag mit {string}', async ({ verwalter }, tex
 
 Then('erfährt der Liegenschaftsverwalter, dass er wählen muss, ob die Kosten umlagefähig sind', async ({ verwalter }) => {
 	await verwalter.sees(errorMessageShown('Wählen Sie, ob die Kosten umlagefähig sind.')).toBe(true);
+});
+
+Then(
+	'erfährt der Liegenschaftsverwalter, dass er selbst wählen muss, ob die Kosten umlagefähig sind',
+	async ({ verwalter }) => {
+		await verwalter.sees(proposalText).toContain('Wählen Sie selbst, ob die Kosten umlagefähig sind.');
+	}
+);
+
+Then('ist weder umlagefähig noch nicht umlagefähig gewählt', async ({ verwalter }) => {
+	await verwalter.sees(allowedChosen).toBe(false);
+	await verwalter.sees(notAllowedChosen).toBe(false);
 });

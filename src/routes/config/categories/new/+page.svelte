@@ -20,5 +20,10 @@
 			{ href: '/config/categories', label: m.nav_categories() }
 		]}
 	/>
-	<CategoryForm errors={form?.errors} submitLabel={m.categories_save()} />
+	<CategoryForm
+		action="?/save"
+		errors={form && 'errors' in form ? form.errors : undefined}
+		proposal={form && 'proposal' in form ? form.proposal : undefined}
+		submitLabel={m.categories_save()}
+	/>
 </div>

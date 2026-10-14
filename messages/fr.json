@@ -1084,7 +1084,7 @@
 	"categories_name_german": "Nom (allemand)",
 	"categories_description_predefined": "La liste n’affiche pas la description des catégories prédéfinies.",
 	"categories_allocable": "Frais accessoires imputables",
-	"categories_allocable_help": "Seuls les coûts imputables (art. 257a–257b CO) entrent dans le décompte des charges, p. ex. chauffage, eau, concierge. Les réparations, les assurances et les impôts ne sont pas imputables.",
+	"categories_allocable_help": "Sont imputables les frais liés à l’usage de l’immeuble (art. 257a–257b CO), p. ex. chauffage, eau, conciergerie. Les réparations, les renouvellements, l’assurance du bâtiment et les impôts sont à la charge du bailleur ; pour l’ascenseur et la conciergerie, seuls l’exploitation et l’entretien comptent. Le locataire ne paie les frais imputables que si le contrat de bail les mentionne comme frais accessoires (art. 257a al. 2 CO).",
 	"categories_heating": "Répartir les frais de chauffage selon le profil de chauffage",
 	"categories_heating_help": "Par exemple le mazout, le chauffage à distance, les pellets ou le ramoneur. Si un locataire emménage ou déménage pendant la période de décompte, Dwello répartit ces coûts sur les mois selon le profil de chauffage, tous les autres par jours. L’eau chaude décomptée séparément est consommée à peu près autant toute l’année : ne cochez pas la case pour elle.",
 	"categories_sort_order": "Ordre",
@@ -1293,5 +1293,12 @@
 	"contracts_apartment_contracts_loading": "Les contrats de bail de l’appartement sont encore en cours de chargement. Réessayez dans un instant.",
 	"contracts_notice_hint_title": "Le locataire a-t-il résilié ?",
 	"contracts_notice_hint_text": "Saisissez alors la fin du contrat sur la page du contrat de bail avec « Terminer ». Il reste ainsi de durée indéterminée et Dwello indique les prochaines étapes.",
-	"contracts_notice_hint_link": "Saisir la résiliation avec « Terminer »"
+	"contracts_notice_hint_link": "Saisir la résiliation avec « Terminer »",
+	"categories_error_allocable_required": "Indiquez si les frais sont imputables.",
+	"backend_ki_no_proposal": "L’IA n’est pas joignable ou n’est pas sûre. Indiquez vous-même si les frais sont imputables.",
+	"categories_allocable_yes": "Les frais entrent dans le décompte des charges.",
+	"categories_allocable_no": "Les frais sont à la charge du bailleur.",
+	"categories_propose": "Faire vérifier par l’IA",
+	"categories_proposal": "Proposition de l’IA : {choice}",
+	"categories_proposal_none": "Aucune proposition de l’IA"
 }

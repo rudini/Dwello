@@ -1,18 +1,27 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
 	import { m } from '$lib/paraglide/messages';
+	import type { Proposal } from '$lib/server/category';
 	import type { Category } from '$lib/types';
+	import Alert from '$lib/ui/Alert.svelte';
+	import Button from '$lib/ui/Button.svelte';
 	import Checkbox from '$lib/ui/Checkbox.svelte';
+	import RadioGroup from '$lib/ui/RadioGroup.svelte';
 	import TextInput from '$lib/ui/TextInput.svelte';
 	import SaveForm from '../SaveForm.svelte';
 
+	// `proposal` only on a new category: the KI's answer to «Von der KI prüfen lassen»
 	let {
+		action,
 		category,
 		errors = {},
+		proposal,
 		submitLabel
 	}: {
+		action?: string;
 		category?: Category & { predefined?: boolean };
 		errors?: Record<string, string>;
+		proposal?: Proposal | null;
 		submitLabel: string;
 	} = $props();
 
@@ -27,13 +36,23 @@
 			...{ name: '', description: '', nameFR: '', nameIT: '', nameEN: '' },
 			...category,
 			sortOrder: String(category?.sortOrder || ''),
-			allowed: category?.isAllowedUtilityCost ?? true,
+			// A new category starts without a choice (#176)
+			allowed: category ? String(category.isAllowedUtilityCost) : '',
 			heating: category?.isHeatingCost ?? false
 		}))
 	);
+	const allowance = [
+		{ value: 'true', label: m.glossary_allocable_term(), description: m.categories_allocable_yes() },
+		{ value: 'false', label: m.invoices_not_allocable(), description: m.categories_allocable_no() }
+	];
+	// The KI's answer becomes the choice; the Liegenschaftsverwalter can still change it
+	$effect(() => {
+		if (proposal && 'reasoning' in proposal) values.allowed = String(proposal.isAllowedUtilityCost);
+	});
 </script>
 
 <SaveForm
+	{action}
 	record="category"
 	error={errors.form}
 	cancelHref="/config/categories"
@@ -58,14 +77,39 @@
 		optional
 		bind:value={values.description}
 	/>
-	<Checkbox
-		id="isAllowedUtilityCost"
-		name="isAllowedUtilityCost"
-		label={m.categories_allocable()}
-		help={m.categories_allocable_help()}
-		bind:checked={values.allowed}
-		testid="category-allowed-checkbox"
-	/>
+	<div class="flex flex-col gap-4">
+		<RadioGroup
+			name="isAllowedUtilityCost"
+			legend={m.categories_allocable()}
+			help={m.categories_allocable_help()}
+			options={allowance}
+			bind:value={values.allowed}
+			error={errors.isAllowedUtilityCost}
+			testid="category-allowance"
+		/>
+		{#if action}
+			<div>
+				<Button type="submit" formaction="?/propose" icon="ai-suggestion" testid="category-propose-button"
+					>{m.categories_propose()}</Button
+				>
+			</div>
+		{/if}
+		{#if proposal}
+			<Alert
+				tone={'error' in proposal ? 'caution' : 'info'}
+				title={'error' in proposal
+					? m.categories_proposal_none()
+					: m.categories_proposal({
+							choice: proposal.isAllowedUtilityCost
+								? m.glossary_allocable_term()
+								: m.invoices_not_allocable()
+						})}
+				testid="category-proposal"
+			>
+				<p>{'error' in proposal ? proposal.error : proposal.reasoning}</p>
+			</Alert>
+		{/if}
+	</div>
 	<Checkbox
 		id="isHeatingCost"
 		name="isHeatingCost"

@@ -5,7 +5,9 @@
 
 import {
 	llmConfig,
+	buildAllocabilityPrompt,
 	buildCategorizationPrompt,
+	parseAllocabilityResponse,
 	parseLLMResponse,
 	type LLMCategorizationResult
 } from '../config/llm';
@@ -196,6 +198,24 @@ export async function categorizeInvoice(invoice: {
 			isAllowedUtilityCost: true,
 			source: 'fallback'
 		};
+	}
+}
+
+/**
+ * Whether a new category's costs may be passed on, as the KI judges it with its reasoning;
+ * null without a sure answer (no KI, error, unusable answer, confidence below 0.7), so nothing is preset
+ */
+export async function proposeAllocability(
+	category: Parameters<typeof buildAllocabilityPrompt>[0]
+): Promise<{ isAllowedUtilityCost: boolean; reasoning: string } | null> {
+	if (!llmConfig.enabled) return null;
+	try {
+		const answer = parseAllocabilityResponse(await callLlm(buildAllocabilityPrompt(category)));
+		if (!answer || answer.confidence < 0.7) return null;
+		return { isAllowedUtilityCost: answer.isAllowedUtilityCost, reasoning: answer.reasoning };
+	} catch (error) {
+		console.warn('KI proposal for a category failed:', error);
+		return null;
 	}
 }
 

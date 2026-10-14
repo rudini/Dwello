@@ -1084,7 +1084,7 @@
 	"categories_name_german": "Name",
 	"categories_description_predefined": "Die Liste zeigt die Beschreibung vordefinierter Kategorien nicht.",
 	"categories_allocable": "Umlagefähige Nebenkosten",
-	"categories_allocable_help": "Nur umlagefähige Kosten (Art. 257a–257b OR) fliessen in die Nebenkostenabrechnung, z. B. Heizung, Wasser, Hauswart. Reparaturen, Versicherungen und Steuern sind nicht umlagefähig.",
+	"categories_allocable_help": "Umlagefähig sind Kosten, die mit dem Gebrauch der Liegenschaft zusammenhängen (Art. 257a–257b OR), z. B. Heizung, Wasser, Hauswart. Reparaturen, Erneuerungen, Gebäudeversicherung und Steuern trägt der Vermieter; bei Lift und Hauswart zählen nur Betrieb und Wartung. Der Mieter bezahlt umlagefähige Kosten nur, wenn der Mietvertrag sie als Nebenkosten nennt (Art. 257a Absatz 2 OR).",
 	"categories_heating": "Heizkosten nach dem Heizprofil verteilen",
 	"categories_heating_help": "Zum Beispiel Heizöl, Fernwärme, Pellets oder Kaminfeger. Zieht ein Mieter während der Abrechnungsperiode ein oder aus, verteilt Dwello diese Kosten nach dem Heizprofil auf die Monate, alle anderen nach Tagen. Separat abgerechnetes Warmwasser wird das ganze Jahr etwa gleich verbraucht: Lassen Sie das Häkchen dort weg.",
 	"categories_sort_order": "Reihenfolge",
@@ -1293,5 +1293,12 @@
 	"contracts_apartment_contracts_loading": "Die Mietverträge der Wohnung werden noch geladen. Versuchen Sie es in einem Moment erneut.",
 	"contracts_notice_hint_title": "Hat der Mieter gekündigt?",
 	"contracts_notice_hint_text": "Dann tragen Sie das Vertragsende auf der Seite des Mietvertrags mit «Beenden» ein. So bleibt er unbefristet, und Dwello nennt die nächsten Schritte.",
-	"contracts_notice_hint_link": "Kündigung mit «Beenden» eintragen"
+	"contracts_notice_hint_link": "Kündigung mit «Beenden» eintragen",
+	"categories_error_allocable_required": "Wählen Sie, ob die Kosten umlagefähig sind.",
+	"backend_ki_no_proposal": "Die KI ist nicht erreichbar oder ist sich nicht sicher. Wählen Sie selbst, ob die Kosten umlagefähig sind.",
+	"categories_allocable_yes": "Die Kosten fliessen in die Nebenkostenabrechnung.",
+	"categories_allocable_no": "Die Kosten trägt der Vermieter.",
+	"categories_propose": "Von der KI prüfen lassen",
+	"categories_proposal": "Vorschlag der KI: {choice}",
+	"categories_proposal_none": "Kein Vorschlag der KI"
 }

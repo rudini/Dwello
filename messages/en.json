@@ -1084,7 +1084,7 @@
 	"categories_name_german": "Name (German)",
 	"categories_description_predefined": "The list does not show the description of predefined categories.",
 	"categories_allocable": "Allocable utility costs",
-	"categories_allocable_help": "Only allocable costs (Art. 257a–257b CO) go into the utility cost statement, e.g. heating, water, caretaker. Repairs, insurance and taxes are not allocable.",
+	"categories_allocable_help": "Costs linked to the use of the property are allocable (Art. 257a–257b CO), e.g. heating, water, caretaker. Repairs, renewals, building insurance and taxes are borne by the landlord; for the lift and the caretaker only operation and maintenance count. The tenant pays allocable costs only if the rental contract names them as utility costs (Art. 257a para. 2 CO).",
 	"categories_heating": "Spread heating costs by the heating profile",
 	"categories_heating_help": "For example heating oil, district heating, pellets or the chimney sweep. If a tenant moves in or out during the billing period, Dwello spreads these costs over the months by the heating profile, all others by day. Separately billed hot water is used about evenly all year: leave the box unticked for it.",
 	"categories_sort_order": "Order",
@@ -1293,5 +1293,12 @@
 	"contracts_apartment_contracts_loading": "The apartment’s rental contracts are still loading. Try again in a moment.",
 	"contracts_notice_hint_title": "Has the tenant given notice?",
 	"contracts_notice_hint_text": "Then enter the contract end on the rental contract page with «End contract». It stays open-ended, and Dwello names the next steps.",
-	"contracts_notice_hint_link": "Record the notice with «End contract»"
+	"contracts_notice_hint_link": "Record the notice with «End contract»",
+	"categories_error_allocable_required": "Choose whether the costs are allocable.",
+	"backend_ki_no_proposal": "The AI cannot be reached or is not sure. Choose yourself whether the costs are allocable.",
+	"categories_allocable_yes": "The costs go into the utility cost statement.",
+	"categories_allocable_no": "The costs are borne by the landlord.",
+	"categories_propose": "Have the AI check",
+	"categories_proposal": "AI suggestion: {choice}",
+	"categories_proposal_none": "No AI suggestion"
 }

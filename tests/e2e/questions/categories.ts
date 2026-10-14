@@ -8,4 +8,5 @@ export const invoicesOf = (name: string) => Text.of(usage(name));
 export const categoryDeletable = (name: string) => Enabled.of(deleteButton(name));
 export const descriptionOf = (name: string) => Text.of(description(name));
 export const notAllowedChosen = Checked.of(allowanceOption('Nicht umlagefähig'));
+export const allowedChosen = Checked.of(allowanceOption('Umlagefähig'));
 export const proposalText = Text.of(proposal);
