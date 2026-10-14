@@ -5759,3 +5759,18 @@ Skills: ponytail, ponytail-review (on the scripts after round 2: nothing to cut)
 
 code-reviewer round 1 (`docs/reviews/demo-update-review-1.md`): fixed C-1 (Major), C-2, C-3, C-4, C-6 (Minor), C-7 (Nit); rejected C-5: wanted, a clone off main must stay loud in the log
 code-reviewer round 2 (`docs/reviews/demo-update-review-2.md`): fixed C-8 (Minor), C-9, C-10 (Nit)
+
+## Session 34 - October 2026: workflow review after each feature
+
+From the user: after each feature, review whether instructions, skills, agents or hooks should change, write the findings to `docs/reviews/workflow-rules-review-*.md`, implement none of them. No scenario: agent instructions only, no app behavior changes.
+
+- [x] `CLAUDE.md` Workflow step 7: paragraph "Workflow review" (scope, evidence, report path, review only, no issues or rows for its findings)
+- [x] code-reviewer round 1; fixes: review named under "Found" and does not hold up step 9 (C-1), report name `workflow-rules-review-<task>.md` clear of the old numbered reports (C-2), which tasks it covers (C-3), cross-reference in "Open work" (C-4), committed with the task, plan item, before archiving (C-5), session back in the plan until the reviews end (C-6), binding documents in scope (C-7)
+- [x] code-reviewer round 2 (delta); fixes: when the review is due for a task that ends blocked (C-8), Files line (C-9)
+- [x] Session archived
+
+Files: `CLAUDE.md`, `implementation_plan.md`, `docs/archive/implementation-plan-verlauf.md`, `docs/reviews/workflow-review-rule-review-{1,2}.md`.
+Skills: none (no code changed).
+
+code-reviewer round 1 (`docs/reviews/workflow-review-rule-review-1.md`): fixed C-1 (Major), C-2, C-3, C-4, C-6 (Minor), C-5, C-7 (Nit)
+code-reviewer round 2 (`docs/reviews/workflow-review-rule-review-2.md`): fixed C-8, C-9 (Nit)
