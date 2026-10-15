@@ -117,10 +117,10 @@ Dwello is a comprehensive web application for managing residential properties in
    payment (QR-bill in the PDF), one draft and one paid. Demo data never goes into a migration, so production
    starts without it. A demo statement that already exists is kept; delete it in the app to have it generated anew.
 
-   A schema change is a new numbered SQL file (e.g. `0003_<what>.sql`), never an edit of a migration that an
-   installation has applied. Until the first installation, `0001_schema.sql` and `0002_stammdaten.sql` are edited instead; rebuild local
-   databases with `bun run db:reset`. A database from before a baseline is refused with a hint to
-   `bun run db:reset`.
+   A change to the schema or the master data is a new numbered SQL file (e.g. `0003_<what>.sql`), never an edit,
+   rename or deletion of a migration on `main`: an installation has applied it and would not see the change. CI
+   refuses a pull request that changes one. A database from before the October 2026 baseline is refused; set up a
+   local one anew with `bun run db:reset`, never an installation (it deletes all records).
 
 ---
 
