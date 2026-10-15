@@ -415,7 +415,7 @@
 	"backend_formula_division_by_zero": "The formula divides by zero.",
 	"backend_formula_value_missing": "The value for \\{{variable}\\} is missing.",
 	"backend_formula_not_a_number": "The formula does not give a valid number.",
-	"backend_formula_not_computable": "The formula cannot be calculated: {detail}",
+	"backend_formula_not_computable": "The formula cannot be calculated. Check the operators (+, -, *, /), the parentheses and the variables \\{area\\}, \\{rooms\\}, \\{volume\\} and \\{units\\}.",
 	"backend_formula_sample_failed": "{sample}: {reason}",
 	"backend_formula_sample_negative": "The formula gives a negative value for the example \"{sample}\".",
 	"backend_formula_sample_small": "Small apartment (50 m², 2 rooms)",

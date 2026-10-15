@@ -415,7 +415,7 @@
 	"backend_formula_division_by_zero": "Die Formel teilt durch null.",
 	"backend_formula_value_missing": "Der Wert für \\{{variable}\\} fehlt.",
 	"backend_formula_not_a_number": "Die Formel ergibt keine gültige Zahl.",
-	"backend_formula_not_computable": "Die Formel kann nicht berechnet werden: {detail}",
+	"backend_formula_not_computable": "Die Formel kann nicht berechnet werden. Prüfen Sie die Rechenzeichen (+, -, *, /), die Klammern und die Variablen \\{area\\}, \\{rooms\\}, \\{volume\\} und \\{units\\}.",
 	"backend_formula_sample_failed": "{sample}: {reason}",
 	"backend_formula_sample_negative": "Die Formel ergibt für die {sample} einen negativen Wert.",
 	"backend_formula_sample_small": "Kleine Wohnung (50 m², 2 Zimmer)",

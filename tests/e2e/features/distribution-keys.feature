@@ -24,6 +24,12 @@ Funktionalität: Verteilschlüssel
     Wenn der Liegenschaftsverwalter den Verteilschlüssel "Nach Personen" mit der Formel "{persons}" erfasst
     Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Die Formel ist ungültig: Unbekannte Variable {persons}."
 
+  # #128: der englische Text der Rechenbibliothek stand mitten in der deutschen Meldung
+  Szenario: Formel, die sich nicht berechnen lässt
+    Angenommen der Liegenschaftsverwalter ist auf der Seite "Neuer Verteilschlüssel"
+    Wenn der Liegenschaftsverwalter den Verteilschlüssel "Fläche doppelt" mit der Formel "{area} 2" erfasst
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Die Formel kann nicht berechnet werden. Prüfen Sie die Rechenzeichen (+, -, *, /), die Klammern und die Variablen {area}, {rooms}, {volume} und {units}."
+
   Szenario: Formel anpassen
     Angenommen der Liegenschaftsverwalter ist auf der Seite "Verteilschlüssel"
     Wenn der Liegenschaftsverwalter die Formel des Verteilschlüssels "Fläche und Zimmer" auf "{area} * 0.5 + {rooms} * 0.5" ändert

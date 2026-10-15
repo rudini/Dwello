@@ -245,7 +245,8 @@ export function evaluateFormula(formula: string, variables: FormulaVariables): E
 		return {
 			isValid: false,
 			value: 0,
-			...coded('FORMULA_NOT_COMPUTABLE', `Die Formel kann nicht berechnet werden: ${detail}`, { detail })
+			// the engine's own (English) text stays in `error` for the log; the UI shows what to check
+			...coded('FORMULA_NOT_COMPUTABLE', `Die Formel kann nicht berechnet werden: ${detail}`)
 		};
 	}
 }

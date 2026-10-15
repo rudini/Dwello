@@ -3,7 +3,7 @@
  */
 
 import { describe, expect, it } from 'bun:test';
-import { parseFormula, validateFormulaForDistribution } from '../services/formula.service';
+import { evaluateFormula, parseFormula, validateFormulaForDistribution } from '../services/formula.service';
 
 describe('Fehlercodes der Formel', () => {
 	it('nennt zu jedem Fehler beim Lesen der Formel den Code', () => {
@@ -42,5 +42,13 @@ describe('Fehlercodes der Formel', () => {
 			params: { sample: 'FORMULA_SAMPLE_SMALL' }
 		});
 		expect(result.errorCodes).toHaveLength(result.errors.length);
+	});
+
+	// #128: the JavaScript engine's English message went into the params and on to the UI
+	it('nennt eine Formel, die sich nicht berechnen lässt, ohne den englischen Text der Rechenmaschine', () => {
+		const result = evaluateFormula('{area} 2', { area: 50, rooms: 2, volume: 150, units: 1 });
+
+		expect(result.errorCode).toEqual({ code: 'FORMULA_NOT_COMPUTABLE', params: {} });
+		expect(result.error).toContain('Unexpected number'); // for the log, never shown
 	});
 });
