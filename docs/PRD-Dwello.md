@@ -325,8 +325,8 @@ Dwello is built for private landlords with little experience who use it a few ti
 **LLM-Powered Auto-Categorization:**
 - Automatically analyzes invoice description and categorizes
 - Predefined categories (seeded by `backend/migrations/0002_stammdaten.sql`):
-  - Allowed: **Heizung**, **Warmwasser**, **Kaltwasser**, **Abwasser**, **Allgemeinstrom**, **Lift**, **Hauswart**, **Gartenpflege**, **Schneeräumung**, **Kehricht**, **TV/Kabelanschluss**, **Schädlingsbekämpfung**, **Feuerlöscher-Wartung**, **Kaminfeger**
-  - Not allowed: **Reparaturen**, **Gebäudeversicherung**, **Liegenschaftssteuer**, **Hypothekarzinsen**, **Verwaltung**, **Renovation**, **Wertvermehrende Investitionen**
+  - Allowed: **Heizung**, **Warmwasser**, **Kaltwasser**, **Abwasser**, **Allgemeinstrom**, **Lift**, **Hauswart**, **Gartenpflege**, **Schneeräumung**, **Kehricht**, **TV/Kabelanschluss**, **Kaminfeger**
+  - Not allowed: **Reparaturen**, **Gebäudeversicherung**, **Liegenschaftssteuer**, **Hypothekarzinsen**, **Verwaltung**, **Renovation**, **Wertvermehrende Investitionen**, **Schädlingsbekämpfung**, **Feuerlöscher-Wartung**
 - **Verwaltung** (general administration costs) is not allowable; the manager's administrative effort for the utility costs is charged through the separate **Verwaltungspauschale** (see section 5.8), not as an invoice
 
 **Automatic Validity Checking:**

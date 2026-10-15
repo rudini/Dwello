@@ -34,4 +34,18 @@ describe('Datenschutzerklärung auf Französisch und Italienisch', () => {
 		expect(text).toContain('quando Lei sceglie il link');
 		expect(text).toContain('durante la registrazione di un immobile');
 	});
+
+	// «proposer si» ist kein Französisch, «proponga se» kein gutes Italienisch (#176, E-22, F-21)
+	it('sagt idiomatisch, dass die KI angibt, ob die Kosten umlagefähig sind', () => {
+		for (const [locale, text] of [
+			['fr', 'pour que l’IA indique si ses frais sont imputables'],
+			['it', 'affinché l’IA indichi se i suoi costi sono addebitabili']
+		] as const) {
+			overwriteGetLocale(() => locale);
+			show(PrivacyPage, {
+				data: { recipient: { provider: 'Beispiel AG', country: 'Schweiz' }, providers: ['Google'] }
+			} as never);
+			expect(document.body.textContent).toContain(text);
+		}
+	});
 });

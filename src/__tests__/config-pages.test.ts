@@ -114,15 +114,18 @@ describe('Einstellungen', () => {
 	});
 });
 
-// The whole <input> tag of the checkbox, whatever the order of its attributes
-const checkbox = (body: string) =>
-	body.match(/<input[^>]*data-testid="category-allowed-checkbox"[^>]*>/)![0];
+// The values of the checked choices «umlagefähig» ('true') and «nicht umlagefähig» ('false')
+const chosenAllowance = (body: string) =>
+	(body.match(/<input[^>]*name="isAllowedUtilityCost"[^>]*>/g) ?? [])
+		.filter((radio) => / checked/.test(radio))
+		.map((radio) => radio.match(/value="(\w+)"/)![1]);
 
 describe('Kategorie erfassen und bearbeiten', () => {
-	it('beginnt eine neue Kategorie als umlagefähig', () => {
+	// Eine Kategorie ist nie umlagefähig, nur weil niemand hingeschaut hat (#176)
+	it('beginnt eine neue Kategorie ohne Wahl der Umlagefähigkeit', () => {
 		const body = render(NewCategoryPage, { props: { form: null } as never }).body;
 
-		expect(checkbox(body)).toContain('checked');
+		expect(chosenAllowance(body)).toEqual([]);
 		expect(body).toContain('Kategorie speichern');
 	});
 
@@ -142,7 +145,7 @@ describe('Kategorie erfassen und bearbeiten', () => {
 		expect(body).toContain('value="Hauswartung"');
 		expect(body).toContain('value="Conciergerie"');
 		expect(body).toContain('value="4"');
-		expect(checkbox(body)).not.toContain('checked');
+		expect(chosenAllowance(body)).toEqual(['false']);
 		expect(body).toContain('Name ist schon vergeben');
 	});
 });

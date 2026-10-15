@@ -17,6 +17,9 @@ export const formProblem = bySelector('Fehlermeldung im Formular', '[data-testid
 export const savedToast = bySelector('Erfolgsmeldung', '[data-testid="toast-success"]');
 export const frenchOption = bySelector('Sprache Français', '[data-testid="language-option"][lang="fr"]');
 export const frenchPage = bySelector('Seite auf Französisch', 'html[lang="fr"] body[data-hydrated]');
+// by its value, so the language rows find it in every language
+export const notAllowedOption = byTestId('Nicht umlagefähig', 'category-allowance-false');
+export const proposalChecking = byTestId('Die KI prüft', 'category-proposal-checking');
 export const firstDeleteButton = bySelector('Erstes Löschen', '[data-testid$="-delete-button"]');
 export const firstFuelStockDelete = bySelector('Ersten Tankbestand löschen', '[data-testid^="fuel-stock-delete-"]');
 // Confirmation dialogs end with a button whose test id ends in -confirm

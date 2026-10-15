@@ -10,6 +10,7 @@ import { db } from '../db/connection';
 import { buildings, categories, documents, heatingProfiles, invoices, tenants } from '../db/schema';
 import { deleteStatement } from '../services/statement.service';
 import { callApi, sendJson } from './helpers/auth';
+import { openAiCompatible } from './helpers/llm';
 import { insertInvoice } from './helpers/records';
 import { createRental } from './helpers/rental';
 
@@ -143,6 +144,16 @@ describe('API-Verträge des Frontends', () => {
 			expect(drift(await sample('category'), actual)).toEqual([]);
 		} finally {
 			await callApi(`/api/v1/categories/${own.id}`, { method: 'DELETE' });
+		}
+	});
+
+	it('POST /categories/propose liefert die Felder von category-proposal.json', async () => {
+		const llm = openAiCompatible({ isAllowedUtilityCost: false, confidence: 0.9, reasoning: 'Erneuerung' });
+		try {
+			const actual = await (await sendJson('POST', '/api/v1/categories/propose', { name: 'Dachsanierung' })).json();
+			expect(drift(await sample('category-proposal'), actual)).toEqual([]);
+		} finally {
+			llm.stop();
 		}
 	});
 

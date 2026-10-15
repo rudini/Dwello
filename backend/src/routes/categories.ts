@@ -15,6 +15,7 @@ import {
 	deleteCategory
 } from '../services/category.service';
 import { Conflict } from '../services/conflict';
+import { proposeAllocability } from '../services/llm.service';
 import { deleteResponse } from './delete-response';
 
 // Validation schemas
@@ -64,6 +65,23 @@ export const categoryRoutes = new Elysia({ prefix: '/api/v1/categories' })
 	.get('/allowed', async () => {
 		return await getAllowedCategories();
 	})
+	// The KI's proposal whether a new category is umlagefähig; without a sure answer the user chooses alone
+	.post(
+		'/propose',
+		async ({ body, set }) => {
+			const proposal = await proposeAllocability(body);
+			if (proposal) return proposal;
+			set.status = 503;
+			return refusal('KI_NO_PROPOSAL', 'Die KI ist nicht erreichbar oder ist sich nicht sicher.');
+		},
+		{
+			body: t.Object({
+				name: t.String({ minLength: 1, maxLength: 100 }),
+				description: t.Optional(t.Nullable(t.String())),
+				language: t.Optional(t.UnionEnum(['de', 'fr', 'it', 'en']))
+			})
+		}
+	)
 	// Get single category
 	.get('/:id', async ({ params, set }) => {
 		const category = await getCategory(params.id);

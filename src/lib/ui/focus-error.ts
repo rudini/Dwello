@@ -7,8 +7,9 @@ import { tick } from 'svelte';
 export async function focusFirstError(form: Element | null | undefined): Promise<void> {
 	await tick();
 	const target =
-		form?.querySelector<HTMLElement>(':is(input, select, textarea)[aria-invalid="true"]') ??
-		form?.querySelector<HTMLElement>('[role="alert"]');
+		form?.querySelector<HTMLElement>(
+			':is(input, select, textarea)[aria-invalid="true"], [role="radiogroup"][aria-invalid="true"] input'
+		) ?? form?.querySelector<HTMLElement>('[role="alert"]');
 	// already focused (sent with Enter in that field): focus it anew, or nothing is read out
 	if (target && target === document.activeElement) target.blur();
 	target?.focus();

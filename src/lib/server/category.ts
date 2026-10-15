@@ -1,5 +1,7 @@
+import { fail } from '@sveltejs/kit';
 import { backendMessage, type BackendError } from '$lib/backend-error';
 import { m } from '$lib/paraglide/messages';
+import { getLocale } from '$lib/paraglide/runtime';
 import type { Category } from '$lib/types';
 import { deleteRecord, fetchRecord, saveRecord } from './save-form';
 
@@ -33,10 +35,14 @@ function parseCategory(formData: FormData) {
 	const field = (key: string) => String(formData.get(key) ?? '').trim();
 	const errors: Record<string, string> = {};
 	if (!field('name')) errors.name = m.categories_error_name_required();
+	// No default: a category is never umlagefähig just because nobody looked (#176)
+	const allowed = field('isAllowedUtilityCost');
+	if (allowed !== 'true' && allowed !== 'false')
+		errors.isAllowedUtilityCost = m.categories_error_allocable_required();
 	const body = {
 		nameDE: field('name'),
 		description: field('description'),
-		isAllowedUtilityCost: formData.get('isAllowedUtilityCost') === 'on',
+		isAllowedUtilityCost: allowed === 'true',
 		isHeatingCost: formData.get('isHeatingCost') === 'on',
 		...(field('sortOrder') && { sortOrder: Number(field('sortOrder')) }),
 		nameFR: field('nameFR') || null,
@@ -63,6 +69,38 @@ export async function createCategory(fetch: typeof globalThis.fetch, request: Re
 		undefined,
 		options
 	);
+}
+
+/** The KI's proposal whether a new category is umlagefähig, or why there is none, for what it checked */
+export type Proposal = { name: string; description: string } & (
+	{ isAllowedUtilityCost: boolean; reasoning: string } | { error: string }
+);
+
+/** "Von der KI prüfen lassen": asks the KI with the name and description the form holds */
+export async function proposeAllocability(fetch: typeof globalThis.fetch, request: Request) {
+	const { body, errors } = parseCategory(await request.formData());
+	if (errors.name) return fail(400, { errors: { name: errors.name } });
+	const response = await fetch(`${API}/propose`, {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({
+			name: body.nameDE,
+			description: body.description,
+			language: getLocale()
+		})
+	});
+	const answer = await response.json().catch(() => null);
+	// Without a proposal the backend can only answer KI_NO_PROPOSAL, or a schema refusal in its own words
+	const proposal: Proposal =
+		response.ok && answer
+			? {
+					name: body.nameDE,
+					description: body.description,
+					isAllowedUtilityCost: answer.isAllowedUtilityCost === true,
+					reasoning: String(answer.reasoning ?? '')
+				}
+			: { name: body.nameDE, description: body.description, error: m.backend_ki_no_proposal() };
+	return { proposal };
 }
 
 /** "Kategorie bearbeiten": renames only the German name, the key stays */

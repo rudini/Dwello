@@ -5,22 +5,24 @@
 
 import {
 	llmConfig,
+	buildAllocabilityPrompt,
 	buildCategorizationPrompt,
+	parseAllocabilityResponse,
 	parseLLMResponse,
 	type LLMCategorizationResult
 } from '../config/llm';
-import { getCategoryByName } from './category.service';
+import { getCategoryByName, listCategories } from './category.service';
 import type { Category } from '../db/schema';
 
 // Simple in-memory cache for categorization results
 const categorizationCache = new Map<string, { result: LLMCategorizationResult; timestamp: number }>();
 
-/**
- * Generate a cache key for invoice data
- */
-function getCacheKey(invoice: { billingEntityName: string; description: string }): string {
-	return `${invoice.billingEntityName.toLowerCase().trim()}:${invoice.description.toLowerCase().trim()}`;
-}
+/** The prompt for an invoice, also its cache key: a new or changed category asks the KI anew */
+const promptFor = async (invoice: {
+	billingEntityName: string;
+	description: string;
+	amount: string | number;
+}) => buildCategorizationPrompt(invoice, (await listCategories({ limit: 1000 })).categories);
 
 /**
  * Check if cached result is still valid
@@ -142,8 +144,8 @@ export async function categorizeInvoice(invoice: {
 	}
 
 	// Check cache first
-	const cacheKey = getCacheKey(invoice);
-	const cached = getCachedResult(cacheKey);
+	const prompt = await promptFor(invoice);
+	const cached = getCachedResult(prompt);
 
 	if (cached) {
 		const category = await getCategoryByName(cached.category);
@@ -157,8 +159,6 @@ export async function categorizeInvoice(invoice: {
 	}
 
 	try {
-		// Build prompt and call the LLM
-		const prompt = buildCategorizationPrompt(invoice);
 		const response = await callLlm(prompt);
 
 		// Parse the response
@@ -175,7 +175,7 @@ export async function categorizeInvoice(invoice: {
 		}
 
 		// Cache the result
-		cacheResult(cacheKey, result);
+		cacheResult(prompt, result);
 
 		// Find the matching category in database
 		const category = await getCategoryByName(result.category);
@@ -202,6 +202,24 @@ export async function categorizeInvoice(invoice: {
 }
 
 /**
+ * Whether a new category's costs may be passed on, as the KI judges it with its reasoning;
+ * null without a sure answer (no KI, error, unusable answer, confidence below 0.7), so nothing is preset
+ */
+export async function proposeAllocability(
+	category: Parameters<typeof buildAllocabilityPrompt>[0]
+): Promise<{ isAllowedUtilityCost: boolean; reasoning: string } | null> {
+	if (!llmConfig.enabled) return null;
+	try {
+		const answer = parseAllocabilityResponse(await callLlm(buildAllocabilityPrompt(category)));
+		if (!answer || answer.confidence < 0.7) return null;
+		return { isAllowedUtilityCost: answer.isAllowedUtilityCost, reasoning: answer.reasoning };
+	} catch (error) {
+		console.warn('KI proposal for a category failed:', error);
+		return null;
+	}
+}
+
+/**
  * Re-categorize an invoice (bypass cache)
  */
 export async function recategorizeInvoice(invoice: {
@@ -216,8 +234,7 @@ export async function recategorizeInvoice(invoice: {
 	source: 'llm' | 'fallback';
 }> {
 	// Clear cache for this invoice
-	const cacheKey = getCacheKey(invoice);
-	categorizationCache.delete(cacheKey);
+	categorizationCache.delete(await promptFor(invoice));
 
 	// Call categorize without cache
 	const result = await categorizeInvoice(invoice);

@@ -4,7 +4,11 @@ export const categoryRow = (name: string) =>
 	target(`Kategorie ${name} in der Liste`, (page) => page.getByTestId('category-row').filter({ hasText: name }));
 export const allowedFilter = target('Filter umlagefähig', (page) => page.getByTestId('category-filter-allowed'));
 export const nameInput = target('Name', (page) => page.getByTestId('category-name-input'));
-export const allowedCheckbox = target('Umlagefähig', (page) => page.getByTestId('category-allowed-checkbox'));
+// The radio's name starts with its label and goes on with its description
+export const allowanceOption = (label: 'Umlagefähig' | 'Nicht umlagefähig') =>
+	target(`Wahl ${label}`, (page) => page.getByTestId('category-allowance').getByRole('radio', { name: new RegExp(`^${label} `) }));
+export const proposeButton = target('Von der KI prüfen lassen', (page) => page.getByTestId('category-propose-button'));
+export const proposal = target('Vorschlag der KI', (page) => page.getByTestId('category-proposal'));
 export const submitButton = target('Kategorie speichern', (page) => page.getByTestId('category-submit'));
 export const editButton = (name: string) =>
 	target(`Kategorie ${name} bearbeiten`, (page) => categoryRow(name).locate(page).getByTestId('category-edit-button'));

@@ -39,6 +39,7 @@ Style: French guillemets with a non-breaking space inside (« Immeubles »), I
 | Betrag | montant | importo | amount |
 | Fälligkeitsdatum / Zahlungsdatum | date d’échéance / date de paiement | data di scadenza / data di pagamento | due date / payment date |
 | Umlagefähig | imputable ❓ | addebitabile ❓ | allocable ❓ |
+| Wartung (umlagefähig, Art. 5 Abs. 2 lit. g VMWG; nicht «Unterhalt» nach Art. 256 OR) | maintenance (nicht «entretien») | manutenzione | servicing (nicht «maintenance») |
 | Kategorie / Kategorisierung | catégorie / catégorisation | categoria / categorizzazione | category / categorisation |
 | KI / KI-Kategorie | IA / catégorie proposée par l’IA | IA / categoria proposta dall’IA | AI / AI category |
 | Konfidenz | fiabilité ❓ | affidabilità ❓ | confidence |

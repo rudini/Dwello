@@ -131,6 +131,10 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | categories             | default             |
       | category-new           | default             |
       | category-new           | submit-empty        |
+      | category-new           | ki-proposal         |
+      | category-new           | ki-no-proposal      |
+      | category-new           | ki-proposal-kept    |
+      | category-new           | ki-checking         |
       | category-edit          | default             |
       | category-edit          | submit-cleared      |
       | category-edit          | saved-toast         |
