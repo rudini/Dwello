@@ -27,6 +27,7 @@
 				: m.statements_building_invoices_many({ count: invoices ?? 0 })
 	);
 
+	const billedId = $derived(`building-billed-${building.id}`);
 	// Said only when some contract of the period has a statement already
 	const billedText = $derived.by(() => {
 		if (!billed?.billed) return '';
@@ -37,41 +38,52 @@
 				: m.statements_building_billed_many({ billed: count, total });
 		return total === 1
 			? m.statements_building_billed_all_one()
-			: m.statements_building_billed_all_many({ total });
+			: m.statements_building_billed_all_many();
 	});
+	const describedBy = $derived(
+		[error && 'buildings-error', billedText && billedId].filter(Boolean).join(' ') || undefined
+	);
 </script>
 
-<label
-	class="flex min-h-12 cursor-pointer items-center gap-4 rounded-control border-2 p-4 {selected
+<!-- The note on existing statements describes the checkbox instead of naming it (persona Sven P-1) and takes the
+     card's whole width below (persona Marco P-1) -->
+<div
+	class="flex flex-col gap-2 rounded-control border-2 p-4 {selected
 		? 'border-accent bg-accent-soft'
 		: 'border-line-strong bg-surface'}"
 >
-	<input
-		type="checkbox"
-		checked={selected}
-		onchange={ontoggle}
-		aria-invalid={error ? true : undefined}
-		aria-describedby={error ? 'buildings-error' : undefined}
-		class="size-6 shrink-0 cursor-pointer accent-accent"
-		data-testid="generate-building-{building.id}"
-	/>
-	<span class="flex flex-1 flex-col gap-1">
-		<span class="font-semibold text-ink">{building.name}</span>
-		<span class="text-ink-muted">{building.address}, {building.postalCode} {building.city}</span>
-		{#if invoices !== undefined}
-			<span
-				class={invoices === 0 ? 'font-semibold text-caution' : 'text-ink-muted'}
-				data-testid="generate-building-invoices-{building.id}">{invoicesText}</span
-			>
-		{/if}
-		{#if billedText}
-			<span class="text-ink-muted" data-testid="generate-building-billed-{building.id}"
-				>{billedText}</span
-			>
-		{/if}
-	</span>
-	<span class="text-right text-ink-muted">
-		<span class="font-semibold tabular-nums text-ink">{building.apartmentCount}</span>
-		{m.buildings_apartment_many()}
-	</span>
-</label>
+	<label class="flex min-h-12 cursor-pointer items-center gap-4">
+		<input
+			type="checkbox"
+			checked={selected}
+			onchange={ontoggle}
+			aria-invalid={error ? true : undefined}
+			aria-describedby={describedBy}
+			class="size-6 shrink-0 cursor-pointer accent-accent"
+			data-testid="generate-building-{building.id}"
+		/>
+		<span class="flex flex-1 flex-col gap-1">
+			<span class="font-semibold text-ink">{building.name}</span>
+			<span class="text-ink-muted">{building.address}, {building.postalCode} {building.city}</span>
+			{#if invoices !== undefined}
+				<span
+					class={invoices === 0 ? 'font-semibold text-caution' : 'text-ink-muted'}
+					data-testid="generate-building-invoices-{building.id}">{invoicesText}</span
+				>
+			{/if}
+		</span>
+		<span class="text-right text-ink-muted">
+			<span class="font-semibold tabular-nums text-ink">{building.apartmentCount}</span>
+			{m.buildings_apartment_many()}
+		</span>
+	</label>
+	{#if billedText}
+		<p
+			id={billedId}
+			class="pl-10 font-semibold text-ink"
+			data-testid="generate-building-billed-{building.id}"
+		>
+			{billedText}
+		</p>
+	{/if}
+</div>

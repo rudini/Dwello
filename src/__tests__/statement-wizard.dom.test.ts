@@ -829,8 +829,8 @@ describe('Wiederhergestellte Angaben, die es nicht mehr gibt', () => {
 		open();
 		await settle();
 		expect(notes()).toEqual([
-			'Ein Gebäude aus Ihren Angaben gibt es nicht mehr. Prüfen Sie die gewählten Gebäude.',
-			'Das Heizprofil aus Ihren Angaben gibt es nicht mehr. Wählen Sie ein Heizprofil.'
+			'Ein Gebäude aus Ihren Angaben gibt es nicht mehr. Dwello hat es aus der Auswahl entfernt. Prüfen Sie die Gebäude im Schritt «Gebäude».',
+			'Das Heizprofil aus Ihren Angaben gibt es nicht mehr. Wählen Sie im Schritt «Heizprofil und Verwaltungspauschale» ein anderes.'
 		]);
 	});
 
@@ -839,7 +839,7 @@ describe('Wiederhergestellte Angaben, die es nicht mehr gibt', () => {
 		open();
 		await settle();
 		expect(notes()).toEqual([
-			'2 Gebäude aus Ihren Angaben gibt es nicht mehr. Prüfen Sie die gewählten Gebäude.'
+			'2 Gebäude aus Ihren Angaben gibt es nicht mehr. Dwello hat sie aus der Auswahl entfernt. Prüfen Sie die Gebäude im Schritt «Gebäude».'
 		]);
 
 		document.body.innerHTML = '';
@@ -852,6 +852,29 @@ describe('Wiederhergestellte Angaben, die es nicht mehr gibt', () => {
 });
 
 describe('Zurück vom Erfassen einer Rechnung', () => {
+	it('überspringt die Wahl der Gebäude nicht, wenn ein gewähltes Gebäude inzwischen fehlt', async () => {
+		writeDraft(
+			browserStorage(),
+			'statements',
+			{
+				periodStart: '2024-01-01',
+				periodEnd: '2024-12-31',
+				heatingProfileId: 'hp1',
+				managementFeePercent: 3,
+				buildingIds: ['b1', 'weg']
+			},
+			new Date()
+		);
+		history.replaceState(null, '', '/statements/generate?schritt=3');
+		open();
+		await settle();
+		history.replaceState(null, '', '/');
+
+		// the notice asks to check the buildings: the wizard does not skip their step (code review C-5)
+		expect(heading()).toBe('Abrechnungsperiode');
+		expect(byTestId('resume-notice')!.className).toContain('hidden');
+	});
+
 	it('führt zum Schritt vor der Vorschau, damit diese mit der neuen Rechnung neu berechnet wird', async () => {
 		writeDraft(
 			browserStorage(),
@@ -917,10 +940,17 @@ describe('Verwaltungspauschale', () => {
 describe('Rechnungen schon bei der Wahl der Gebäude', () => {
 	it('sagt bei jedem Gebäude, ob für die Abrechnungsperiode Rechnungen erfasst sind', async () => {
 		// one request for the whole period, counted per building in the browser
-		const calls = fakeBff(() => [
-			200,
-			{ invoices: [{ buildingId: 'b1' }, { buildingId: 'b1' }, { buildingId: 'b1' }], total: 3 }
-		]);
+		const calls = fakeBff((call) =>
+			call.path.startsWith('/statements/billed')
+				? [200, []]
+				: [
+						200,
+						{
+							invoices: [{ buildingId: 'b1' }, { buildingId: 'b1' }, { buildingId: 'b1' }],
+							total: 3
+						}
+					]
+		);
 		open();
 		await settle();
 		next();
@@ -946,7 +976,8 @@ describe('Schon abgerechnete Mietverträge bei der Wahl der Gebäude', () => {
 		fakeBff((call) =>
 			call.path.startsWith('/statements/billed') ? [200, rows] : [200, { invoices: [], total: 0 }]
 		);
-	const billedText = (id: string) => byTestId(`generate-building-billed-${id}`)?.textContent?.trim();
+	const billedText = (id: string) =>
+		byTestId(`generate-building-billed-${id}`)?.textContent?.trim();
 
 	it('nennt, wie viele Mietverträge der Abrechnungsperiode schon eine Abrechnung haben', async () => {
 		const calls = billed([
@@ -959,9 +990,15 @@ describe('Schon abgerechnete Mietverträge bei der Wahl der Gebäude', () => {
 		await settle();
 
 		expect(billedText('b1')).toBe(
-			'2 von 3 Mietverträgen haben schon eine Abrechnung, die in diese Abrechnungsperiode fällt.'
+			'2 von 3 Mietverträgen haben schon eine Abrechnung, die diese Abrechnungsperiode ganz oder teilweise abdeckt.'
 		);
 		expect(billedText('b2')).toBeUndefined();
+		// read after the building's name, not as part of it (persona Sven P-1)
+		const checkbox = byTestId('generate-building-b1')!;
+		expect(checkbox.closest('label')!.textContent).not.toContain('Mietverträgen');
+		expect(checkbox.getAttribute('aria-describedby')).toBe(
+			byTestId('generate-building-billed-b1')!.id
+		);
 		// one request for all buildings and the period of step 1
 		const [call] = calls.filter((c) => c.path.startsWith('/statements/billed'));
 		expect(call.path).toBe(
@@ -980,10 +1017,10 @@ describe('Schon abgerechnete Mietverträge bei der Wahl der Gebäude', () => {
 		await settle();
 
 		expect(billedText('b1')).toBe(
-			'Alle 2 Mietverträge haben schon eine Abrechnung, die in diese Abrechnungsperiode fällt. Für dieses Gebäude entsteht keine neue.'
+			'Alle Mietverträge dieses Gebäudes haben schon eine Abrechnung, die diese Abrechnungsperiode ganz oder teilweise abdeckt. Für dieses Gebäude entsteht keine neue Abrechnung. Sie müssen es nicht wählen.'
 		);
 		expect(billedText('b2')).toBe(
-			'Der Mietvertrag hat schon eine Abrechnung, die in diese Abrechnungsperiode fällt. Für dieses Gebäude entsteht keine neue.'
+			'Der Mietvertrag hat schon eine Abrechnung, die diese Abrechnungsperiode ganz oder teilweise abdeckt. Für dieses Gebäude entsteht keine neue Abrechnung. Sie müssen es nicht wählen.'
 		);
 	});
 
@@ -995,7 +1032,7 @@ describe('Schon abgerechnete Mietverträge bei der Wahl der Gebäude', () => {
 		await settle();
 
 		expect(billedText('b1')).toBe(
-			'1 von 2 Mietverträgen hat schon eine Abrechnung, die in diese Abrechnungsperiode fällt.'
+			'1 von 2 Mietverträgen hat schon eine Abrechnung, die diese Abrechnungsperiode ganz oder teilweise abdeckt.'
 		);
 	});
 });

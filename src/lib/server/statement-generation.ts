@@ -41,17 +41,16 @@ async function call(fetch: Fetch, path: string, body?: object) {
 	return data;
 }
 
-// Every contract of the selected buildings that overlaps the period gets its own statement (tenant change = two
-// statements); a contract that already has one in the period gets none, so a deleted draft can be created again
-// TODO(fachlich prüfen, #199): an overlapping statement counts as billed, the dashboard counts only one inside the period
 type Run = Pick<GenerationRequest, 'buildingIds' | 'periodStart' | 'periodEnd'>;
 
+// Per building: its contracts that overlap the period, and those of them with a statement in the period already
+// TODO(fachlich prüfen, #199): an overlapping statement counts as billed, the dashboard counts only one inside the period
 async function contractsOf(fetch: Fetch, { buildingIds, periodStart, periodEnd }: Run) {
 	return Promise.all(
 		buildingIds.map(async (buildingId) => {
 			const [{ contracts }, { data: statements }] = await Promise.all([
-				call(fetch, `contracts?buildingId=${buildingId}&limit=1000`),
-				call(fetch, `statements?buildingId=${buildingId}&limit=1000`)
+				call(fetch, `contracts?buildingId=${encodeURIComponent(buildingId)}&limit=1000`),
+				call(fetch, `statements?buildingId=${encodeURIComponent(buildingId)}&limit=1000`)
 			]);
 			const billed = new Set(
 				(statements as (Period & { contractId: string })[])
@@ -66,6 +65,8 @@ async function contractsOf(fetch: Fetch, { buildingIds, periodStart, periodEnd }
 	);
 }
 
+// Every contract of the selected buildings that overlaps the period gets its own statement (tenant change = two
+// statements); a contract that already has one in the period gets none, so a deleted draft can be created again
 async function contractsInPeriod(fetch: Fetch, request: GenerationRequest) {
 	return (await contractsOf(fetch, request)).flatMap(({ buildingId, inPeriod, billed }) =>
 		inPeriod.filter((c) => !billed.includes(c)).map((contract) => ({ buildingId, contract }))

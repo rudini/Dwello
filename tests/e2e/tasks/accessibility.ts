@@ -251,9 +251,14 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 			Navigate.reload,
 			Wait.until(on.shown('draft-note'))
 		),
-	// 2025: Anna and Bruno have their statements, Carla not
+	// 2025, not the suggested period, which moves with today: Anna and Bruno have their statements, Carla not
 	'buildings-billed': (example) => (actor) =>
-		actor.attemptsTo(Click.on(nextButton), Wait.until(on.shown(`generate-building-billed-${example.building}`))),
+		actor.attemptsTo(
+			EnterDate.of('2025-01-01').into(on.periodStartInput),
+			EnterDate.of('2025-12-31').into(on.periodEndInput),
+			Click.on(nextButton),
+			Wait.until(on.shown(`generate-building-billed-${example.building}`))
+		),
 	'period-not-over': () => (actor) =>
 		actor.attemptsTo(EnterDate.of('2099-12-31').into(on.periodEndInput), Wait.until(on.periodFutureWarning))
 };

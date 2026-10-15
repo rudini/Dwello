@@ -96,7 +96,9 @@
 		}));
 		restoredAt = draft.savedAt;
 		// Back from "Rechnung erfassen": the step before the preview, so "Weiter" calculates it anew
-		const complete = [1, 2].every((n) => !Object.keys(selectionErrors(selection, n)).length);
+		// a building gone meanwhile is checked first, in step 2 (code review C-5)
+		const complete =
+			!dropped.buildings && [1, 2].every((n) => !Object.keys(selectionErrors(selection, n)).length);
 		if (new URL(location.href).searchParams.get('schritt') === '3' && complete) {
 			step = 3;
 			resumed = true;
