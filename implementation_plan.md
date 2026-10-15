@@ -23,7 +23,8 @@ Task: «Setze #180, #184, #185 und #186 um». #184 is a decision issue, closed w
 - [x] `code-reviewer` per slice; `fach-reviewer` feature review
 - [x] Personas Helga, Dr. Weber, Marco; open work U-31 (`offene-punkte.md`) and #221
 - [ ] Before marking complete: coverage, lint, check, backend test + type-check, affected E2E
-- [ ] Workflow review `docs/reviews/workflow-rules-review-issue-186.md`
+- [x] Workflow review `docs/reviews/workflow-rules-review-issue-186.md` (W-1 to W-10)
+- [x] Merged `origin/main` (19 commits; conflict only in this plan). New rule «one pull request per issue» (Workflow 8) arrived after all slices were committed: one pull request for all four issues, see W-1
 - [ ] Archive session, push, PR (Fixes #180, #185, #186, #216), merge when green
 
 Also: `invoices_legal_text` uses «Absatz» (guard `no-german-in-code.test.ts`).
