@@ -1,0 +1,5 @@
+{
+	"error": "Payment reminders cannot be deleted",
+	"code": "DOCUMENT_NOT_DELETABLE",
+	"params": {}
+}

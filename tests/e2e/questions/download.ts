@@ -25,3 +25,8 @@ export const downloadedPdfText = question(
 	'the text of the downloaded PDF',
 	async (actor) => readPdf((await actor.answer(DownloadedFile)).content).flowing
 );
+
+// The first three bytes of the downloaded file in hex: what tells a PDF (255044) from a JPEG (ffd8ff)
+export const downloadedFileMagic = question('the kind of the downloaded file', async (actor) =>
+	(await actor.answer(DownloadedFile)).content.subarray(0, 3).toString('hex')
+);

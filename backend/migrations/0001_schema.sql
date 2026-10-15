@@ -292,19 +292,20 @@ CREATE TABLE utility_statement_line_items (
 CREATE INDEX line_items_statement_id_idx ON utility_statement_line_items(statement_id);
 
 -- ============================================================================
--- Documents Table (payment reminders sent or to send)
+-- Documents Table (payment reminders sent or to send, files uploaded to a tenant)
 -- ============================================================================
 CREATE TABLE documents (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE RESTRICT,
     statement_id UUID REFERENCES utility_statements(id) ON DELETE RESTRICT,
-    type VARCHAR(30) NOT NULL,                -- reminder
+    type VARCHAR(30) NOT NULL,                -- reminder | upload
     reminder_level INTEGER,                   -- 1 = Zahlungserinnerung, 2 and 3 = Mahnung
     title VARCHAR(255) NOT NULL,
     file_name VARCHAR(255) NOT NULL,
-    pdf TEXT NOT NULL,                        -- Base64 encoded PDF
-    channel VARCHAR(10) NOT NULL,             -- email | letter
-    status VARCHAR(20) NOT NULL,              -- sent | to_send
+    content TEXT NOT NULL,                    -- Base64 encoded file
+    mime_type VARCHAR(50) NOT NULL DEFAULT 'application/pdf', -- application/pdf | image/jpeg | image/png
+    channel VARCHAR(10),                      -- email | letter; NULL for an upload
+    status VARCHAR(20),                       -- sent | to_send; NULL for an upload
     sent_at TIMESTAMP,
     delivery_error TEXT,                      -- why an e-mail could not be sent
     created_at TIMESTAMP NOT NULL DEFAULT NOW()

@@ -126,6 +126,13 @@ Then('scrollt die Seite nicht seitwärts', async ({ verwalter }) => {
 	await verwalter.sees(pageOverflowsSideways).toBe(false);
 });
 
+Then(
+	'erfährt der Liegenschaftsverwalter unter {string}, dass Dwello die zu Mietern hochgeladenen Dokumente speichert',
+	async ({ verwalter }, heading: string) => {
+		await verwalter.sees(sectionText(heading)).toContain('Dokumente, die Sie zu Mietern hochladen');
+	}
+);
+
 Then('zeigt das Browser-Tab das Dwello-Symbol', async ({ verwalter }) => {
 	await verwalter.sees(tabIcon).toBe('image/svg+xml');
 });

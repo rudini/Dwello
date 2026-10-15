@@ -156,7 +156,8 @@ Verwaltung, Reparaturen, Renovation, Liegenschaftssteuer, Hypothekarzinsen, Geb�
 | **Mahnung** | Vom Liegenschaftsverwalter ausgelöste Zahlungsaufforderung zu einer versendeten Abrechnung, als PDF in den Dokumenten, per E-Mail oder Brief gemäss Korrespondenzkanal. | `documents` Tabelle |
 | **Mahnstufe** | Zahlungserinnerung (1. Stufe), 2. Mahnung, 3. Mahnung. Mehr als 3 Mahnungen sind nicht möglich. | `reminder_level` Feld |
 | **Mahnfrist** | Anzahl Tage nach Ablauf der Zahlungsfrist bis zur Mahnung. | `reminder_after_days` Config (Standard 14) |
-| **Dokument** | Brief oder E-Mail an einen Mieter (z.B. Mahnung) mit PDF. | `documents` Tabelle |
+| **Dokument** | Brief oder E-Mail an einen Mieter (z.B. Mahnung) mit PDF, oder vom Liegenschaftsverwalter hochgeladene Datei zu einem Mieter. | `documents` Tabelle |
+| **Hochgeladenes Dokument** | Datei, die der Liegenschaftsverwalter zu einem Mieter ablegt, z.B. Übergabeprotokoll oder Betreibungsauszug. | `documents.type = 'upload'` |
 | **Versandstatus** | Zu versenden (`to_send`, Brief noch zu verschicken) oder Versendet (`sent`). | `status` Feld |
 
 ---
