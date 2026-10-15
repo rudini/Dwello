@@ -61,6 +61,7 @@ Die Ubiquitous Language (nach Eric Evans, Domain-Driven Design) definiert ein ge
 | **Zahlungsdatum** | Datum der tatsächlichen Bezahlung. | `paid_date` Feld |
 | **Beschreibung** | Beschreibung der erbrachten Leistung auf der Rechnung. | `description` Feld |
 | **Umlagefähige Rechnung** | Die Rechnung fliesst in die Nebenkostenabrechnung ein. | `is_valid_utility_cost` Feld |
+| **Beleg** | Hochgeladene Originaldatei einer Rechnung (PDF, JPEG oder PNG), höchstens eine pro Rechnung. Wird mit der Rechnung gelöscht. Dient der Belegeinsicht des Mieters (Art. 257b Abs. 2 OR). | `invoice_documents` Tabelle |
 
 ---
 
