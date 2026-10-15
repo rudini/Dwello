@@ -19,6 +19,7 @@ import { configRoutes } from './routes/config';
 import { documentRoutes } from './routes/documents';
 import { statementRoutes } from './routes/statements';
 import { authMiddleware } from './middleware/auth';
+import { refusal } from './services/coded-error';
 
 export const app = new Elysia()
 	.use(
@@ -52,6 +53,12 @@ export const app = new Elysia()
 			exclude: ['/swagger', '/swagger/json']
 		})
 	)
+	// Every schema refusal (body, query, params) with a code the UI translates, instead of Elysia's own text
+	.onError({ as: 'global' }, ({ code, set }) => {
+		if (code !== 'VALIDATION') return;
+		set.status = 422;
+		return refusal('VALIDATION_ERROR', 'Invalid request');
+	})
 	// Health check endpoint
 	.get('/health', () => ({
 		status: 'ok',

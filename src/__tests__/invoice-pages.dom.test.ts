@@ -276,6 +276,20 @@ describe('Rechnungsdetail', () => {
 		);
 	});
 
+	// #127: a refusal without a code the UI knows showed the server's own (English) text
+	it('meldet ein misslungenes Neu-Kategorisieren ohne Code in Worten der Oberfläche', async () => {
+		fakeBff(() => [500, { error: 'Failed to recategorize invoice' }]);
+		show(InvoicePage, { data: { invoice: invoice() } });
+
+		click(button('Neu kategorisieren'));
+		await settle();
+
+		expect(byTestId('invoice-recategorize-error')!.textContent).toContain(
+			'Ein unerwarteter Fehler ist aufgetreten. Versuchen Sie es erneut.'
+		);
+		expect(text()).not.toContain('Failed to recategorize invoice');
+	});
+
 	it('erklärt eine Rechnung ohne Verteilschlüssel, statt einen Fehler anzudeuten', () => {
 		show(InvoicePage, { data: { invoice: invoice({ distributionKey: undefined }) } });
 
@@ -314,10 +328,7 @@ describe('Rechnungsdetail', () => {
 	});
 
 	it('nennt den Grund, wenn die KI nicht kategorisieren konnte', async () => {
-		fakeBff(() => [
-			503,
-			{ error: 'Die KI ist nicht erreichbar oder hat keine passende Kategorie geliefert.' }
-		]);
+		fakeBff(() => [503, { error: 'KI unavailable', code: 'KI_UNAVAILABLE', params: {} }]);
 		show(InvoicePage, { data: { invoice: invoice() } });
 
 		click(button('Neu kategorisieren'));
@@ -726,7 +737,8 @@ describe('Rechnung bearbeiten', () => {
 		});
 	});
 
-	it('zeigt einen Fehler beim Speichern', async () => {
+	// #127: a refusal without a code the UI knows showed the server's own text
+	it('zeigt einen Fehler beim Speichern in Worten der Oberfläche, nicht den Text des Servers', async () => {
 		fakeBff(() => [500, { error: { code: 'ERR', message: 'Datenbank nicht erreichbar' } }]);
 		edit();
 
@@ -734,7 +746,21 @@ describe('Rechnung bearbeiten', () => {
 		submit('submit-button');
 		await settle();
 
-		expect(text()).toContain('Fehler beim Speichern: Datenbank nicht erreichbar');
+		expect(text()).toContain('Die Rechnung konnte nicht gespeichert werden. Versuchen Sie es erneut.');
+		expect(text()).not.toContain('Datenbank nicht erreichbar');
 		expect(allByTestId('submit-button')).toHaveLength(1);
+	});
+
+	it('nennt beim Speichern den Grund, den das Backend mit Code angibt', async () => {
+		fakeBff(() => [422, { error: 'Invalid request', code: 'VALIDATION_ERROR', params: {} }]);
+		edit();
+
+		fireEvent(byTestId<HTMLInputElement>('invoice-amount-input')!, 'input', '480');
+		submit('submit-button');
+		await settle();
+
+		expect(text()).toContain(
+			'Fehler beim Speichern: Die Anfrage war ungültig. Laden Sie die Seite neu und versuchen Sie es erneut.'
+		);
 	});
 });

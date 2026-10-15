@@ -164,4 +164,12 @@ describe('Fehlercodes für die Oberfläche', () => {
 			'CALCULATION_FAILED'
 		);
 	});
+
+	// #127: Elysia's own validation body had no code, the UI showed its English text
+	it('meldet eine Anfrage, die das Schema verletzt, mit Code', async () => {
+		const response = await sendJson('POST', '/api/v1/statements/preview', { contractId: 42 });
+
+		expect(response.status).toBe(422);
+		expect(await response.json()).toMatchObject({ code: 'VALIDATION_ERROR', params: {} });
+	});
 });

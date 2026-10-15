@@ -59,7 +59,12 @@
 		recategorizing = true;
 		recategorizeError = '';
 		const result = await api.post(`/invoices/${invoice.id}/recategorize`);
-		if (result.error) recategorizeError = backendMessage(result.error, result.error.message);
+		// the message of a code the UI knows, never the server's own text
+		if (result.error)
+			recategorizeError = backendMessage(
+				{ code: result.error.code, params: result.error.params },
+				m.backend_unknown_error()
+			);
 		else await invalidateAll();
 		recategorizing = false;
 	}
