@@ -16,6 +16,8 @@ const answers: {
 	confidence: number;
 	reasoning: Record<Language, string>;
 	delay?: number;
+	// Answers only when the whole prompt also matches
+	when?: (prompt: string) => boolean;
 }[] = [
 	// A slow KI: the screen checks see «Die KI prüft die Kategorie …» while it answers, 25 s, below the
 	// backend's LLM_TIMEOUT of 30 s
@@ -35,6 +37,31 @@ const answers: {
 			Französisch: 'L’entretien et la rénovation du bâtiment ne sont pas liés à son usage (art. 257a, al. 1, CO).',
 			Italienisch: 'Il mantenimento e il rinnovo dell’edificio non sono legati al suo uso (art. 257a cpv. 1 CO).',
 			Englisch: 'Preserving and renewing the building is not linked to its use (Art. 257a para. 1 CO).'
+		}
+	},
+	// A cleaning judged like the predefined Hauswart when the prompt lists it as umlagefähig, else wrong as the
+	// default model judged «Treppenhausreinigung» without the Kategorien (#202)
+	{
+		match: /reinigung/i,
+		when: (prompt) => /^ERLAUBTE KATEGORIEN[^]*?^- Caretaker \(Hauswart\)[^]*?^NICHT ERLAUBTE/m.test(prompt),
+		isAllowedUtilityCost: true,
+		confidence: 0.9,
+		reasoning: {
+			Deutsch: 'Reinigung wie beim Hauswart: laufende Betriebskosten (Art. 257b Abs. 1 OR).',
+			Französisch: 'Nettoyage comme pour le Concierge: frais d’exploitation courants (art. 257b, al. 1, CO).',
+			Italienisch: 'Pulizia come per il Portiere: costi d’esercizio correnti (art. 257b cpv. 1 CO).',
+			Englisch: 'Cleaning as for the Caretaker: running operating costs (Art. 257b para. 1 CO).'
+		}
+	},
+	{
+		match: /reinigung/i,
+		isAllowedUtilityCost: false,
+		confidence: 0.9,
+		reasoning: {
+			Deutsch: 'Hängt nicht mit dem Gebrauch zusammen (Art. 257a Abs. 1 OR).',
+			Französisch: 'Pas lié à l’usage (art. 257a, al. 1, CO).',
+			Italienisch: 'Non legato all’uso (art. 257a cpv. 1 CO).',
+			Englisch: 'Not linked to the use (Art. 257a para. 1 CO).'
 		}
 	},
 	// Contested in practice (leaflet of the Mieterverband): the KI is not sure, so it proposes nothing
@@ -64,7 +91,7 @@ function reply(prompt: string) {
 	const name = line(prompt, 'Kategorie');
 	if (!name) return new Response(null, { status: 503 });
 	const language = (line(prompt, 'Sprache der Begründung') ?? 'Deutsch') as Language;
-	const { isAllowedUtilityCost, confidence, reasoning, delay = 0 } = answers.find(({ match }) => match.test(name))!;
+	const { isAllowedUtilityCost, confidence, reasoning, delay = 0 } = answers.find(({ match, when }) => match.test(name) && (when?.(prompt) ?? true))!;
 	const answer = { isAllowedUtilityCost, confidence, reasoning: reasoning[language] };
 	return Bun.sleep(delay).then(() => Response.json({ choices: [{ message: { content: JSON.stringify(answer) } }] }));
 }
