@@ -28,7 +28,7 @@ Funktionalität: Verteilschlüssel
   Szenario: Formel, die sich nicht berechnen lässt
     Angenommen der Liegenschaftsverwalter ist auf der Seite "Neuer Verteilschlüssel"
     Wenn der Liegenschaftsverwalter den Verteilschlüssel "Fläche doppelt" mit der Formel "{area} 2" erfasst
-    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Die Formel kann nicht berechnet werden. Prüfen Sie die Rechenzeichen (+, -, *, /), die Klammern und die Variablen {area}, {rooms}, {volume} und {units}."
+    Dann sieht der Liegenschaftsverwalter die Fehlermeldung "Die Formel kann nicht berechnet werden. Prüfen Sie die Rechenzeichen (+, -, *, /, %), die Klammern und die Variablen {area}, {rooms}, {volume}, {units} und ihre Summen wie {area_total}."
 
   Szenario: Formel anpassen
     Angenommen der Liegenschaftsverwalter ist auf der Seite "Verteilschlüssel"

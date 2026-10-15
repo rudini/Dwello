@@ -389,6 +389,12 @@ export function validateFormulaForDistribution(formula: string): {
 
 	// Test with default cases, which together stand for a building
 	const cases = getDefaultTestCases();
+	// A formula the engine cannot read fails for any values: say so once, not per sample apartment
+	const firstTry = evaluateFormula(formula, withTotals(cases.map((tc) => tc.variables))[0]);
+	if (firstTry.errorCode?.code === 'FORMULA_NOT_COMPUTABLE') {
+		fail(firstTry);
+		return { isValid: false, errors, errorCodes, warnings };
+	}
 	const testResults = testFormula(
 		formula,
 		withTotals(cases.map((tc) => tc.variables)).map((variables, i) => ({ ...cases[i], variables }))

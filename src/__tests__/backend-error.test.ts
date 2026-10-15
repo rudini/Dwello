@@ -139,7 +139,7 @@ describe('Formel, die sich nicht berechnen lässt', () => {
 		};
 
 		expect(backendMessage(body, '')).toBe(
-			'Die Formel kann nicht berechnet werden. Prüfen Sie die Rechenzeichen (+, -, *, /), die Klammern und die Variablen {area}, {rooms}, {volume} und {units}.'
+			'Die Formel kann nicht berechnet werden. Prüfen Sie die Rechenzeichen (+, -, *, /, %), die Klammern und die Variablen {area}, {rooms}, {volume}, {units} und ihre Summen wie {area_total}.'
 		);
 	});
 });

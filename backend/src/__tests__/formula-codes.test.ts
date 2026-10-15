@@ -51,4 +51,12 @@ describe('Fehlercodes der Formel', () => {
 		expect(result.errorCode).toEqual({ code: 'FORMULA_NOT_COMPUTABLE', params: {} });
 		expect(result.error).toContain('Unexpected number'); // for the log, never shown
 	});
+
+	// persona Helga (#128): the same sentence stood four times, once per sample apartment and once more
+	it('nennt eine Formel, die sich nicht berechnen lässt, beim Prüfen nur einmal', () => {
+		const result = validateFormulaForDistribution('{area} 2');
+
+		expect(result.errorCodes).toEqual([{ code: 'FORMULA_NOT_COMPUTABLE', params: {} }]);
+		expect(result.errors).toHaveLength(1);
+	});
 });
