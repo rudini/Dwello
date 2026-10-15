@@ -1,3 +1,20 @@
 # Dwello implementation plan
 
 Checklist of the current task (`CLAUDE.md`, Workflow step 8): add the items when the task starts, tick them as they are done, note the files changed. Open work: GitHub issues (functional) and `docs/design/offene-punkte.md` (non-functional), see `CLAUDE.md`, "Open work". History (phases 0–22 and every finished session): `docs/archive/implementation-plan-verlauf.md`.
+
+## Session 2026-10-16 (12): #208 PDF shows a percentage where the Zeitanteil is a ratio of days
+
+Request (chat): work through the open bug issues one by one (sessions 10 and 11 in the archive); this is the third, #159 merged in #224. Next: #209.
+
+Causes: D-2: `handleMidYearMoves` (`prorating.service.ts`) shares heating by the profile also for a contract over the whole period, though rule 5 asks for the profile only on a move in or out; the calculation and the PDF's `heatingOf` both use it, so one change there fixes the amount's basis and the PDF note; the amount stays the same (100 % either way). D-3: the PDF knows only the stored share, not the days an invoice bills in the period; the line items store the tenant's days and the days billed (new columns, migration), the PDF prints them when the line is a ratio of days (all invoices of the line bill the same days), else the percentage.
+
+- [x] Scenarios «Heizkosten eines Mietvertrags über die ganze Periode stehen im PDF nach Mietstagen», «Eine Rechnung mit Leistungszeitraum steht im PDF mit ihren Tagen in der Periode» (`statement-detail.feature`, `@wip`) red
+  Scenario red: D-2 `steht im PDF "366/366 Tage"` – the heating line prints «100.00 %»; D-3 `steht im PDF "48/62 Tage"` – the Hauswart line prints «77.42 %» (run together, D-2 first failed at setting the IBAN, a parallel write of the same configuration key; alone it fails at the assertion)
+- [ ] fach-reviewer on the `@wip` scenarios before implementing
+- [ ] D-2: test first (`handleMidYearMoves` or calculation), fix in `prorating.service.ts`
+- [ ] D-3: test first (`statement-pdf.pg.test.ts`), columns `rented_days`, `billed_days` on line items (migration, `schema.ts`, `docs/data-model.md`), calculation stores them, PDF prints them
+- [ ] Checks: test:coverage, lint, check, backend test + type-check, deepcheck:audit, affected E2E
+- [ ] code-reviewer round(s)
+- [ ] Feature review: fach-reviewer, daten-pruefer (PDF, amounts), persona Dr. Weber (PDF text)
+- [ ] Workflow review `docs/reviews/workflow-rules-review-issue-208.md`
+- [ ] Archive session, push, PR `Fixes #208`, CI, merge
