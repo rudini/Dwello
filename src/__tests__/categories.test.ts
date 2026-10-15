@@ -5,6 +5,7 @@ import { actions as editActions } from '../routes/config/categories/[id]/edit/+p
 import { runAction } from './helpers/action';
 import proposal from '../../tests/contracts/category-proposal.json';
 import unsure from '../../tests/contracts/category-proposal-refused.json';
+import invalid from '../../tests/contracts/validation-refused.json';
 
 const API = 'http://localhost:3001/api/v1/categories';
 
@@ -178,7 +179,7 @@ describe('Vorschlag der KI', () => {
 
 	// Nie der eigene Text des Backends, z. B. Elysias Meldung zu einem zu langen Namen (E-6)
 	it('zeigt bei einer anderen Ablehnung des Backends den Hinweis «nicht erreichbar»', async () => {
-		expect(await hint(422, { type: 'validation', message: 'Expected string length less or equal to 100' })).toBe(UNAVAILABLE);
+		expect(await hint(422, invalid)).toBe(UNAVAILABLE);
 	});
 
 	it('zeigt den Hinweis auch, wenn eine Antwort ohne Inhalt kommt', async () => {

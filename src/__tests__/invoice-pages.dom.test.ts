@@ -196,6 +196,16 @@ describe('Rechnungsdetail', () => {
 		expect(text()).toContain('Vertrag geprüft');
 	});
 
+	// Auch eine Rechnung, die der Liegenschaftsverwalter selbst ausgeschlossen hat: der Hinweis nennt nicht das Gesetz als
+	// Grund, und nur die Gebäudeversicherung, nicht Versicherungen allgemein (#185, Fachreview H-11)
+	it('erklärt, dass eine nicht umlagefähige Rechnung nicht abgerechnet wird', () => {
+		show(InvoicePage, { data: { invoice: invoice({ isValidUtilityCost: false }) } });
+
+		expect(byTestId('invoice-legal-note')!.textContent).toContain(
+			'Diese Rechnung fliesst nicht in die Nebenkostenabrechnung ein. Typische nicht umlagefähige Kosten: Reparaturen, Gebäudeversicherung, Liegenschaftssteuer, Hypothekarzinsen (Art. 256 Abs. 1, 256b und 257a OR).'
+		);
+	});
+
 	it('zeigt den Leistungszeitraum, der statt des Rechnungsdatums die Periode bestimmt', () => {
 		show(InvoicePage, {
 			data: {
@@ -518,6 +528,10 @@ describe('Rechnung erfassen', () => {
 		await settle();
 
 		expect(byTestId<HTMLInputElement>('invoice-utility-cost-checkbox')!.disabled).toBe(true);
+		// Versicherungsprämien der Heizung sind umlagefähig (Art. 5 Abs. 2 Bst. h VMWG), nur die Gebäudeversicherung nicht (#185)
+		expect(byTestId('invoice-category-warning')!.textContent).toContain(
+			'Kosten dieser Kategorie (z. B. Reparaturen, Gebäudeversicherung) können nicht auf Mieter umgelegt werden.'
+		);
 	});
 
 	it('sagt, dass ohne Leistungszeitraum das Rechnungsdatum die Abrechnungsperiode bestimmt', () => {

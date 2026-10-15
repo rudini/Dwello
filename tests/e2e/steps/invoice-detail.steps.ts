@@ -63,9 +63,9 @@ Then('ist die Rechnung nicht umlagefähig', async ({ verwalter }) => {
 });
 
 Then(
-	'erklärt ein Hinweis, dass die Kosten nach Mietrecht nicht auf die Mieter umlegbar sind',
+	'erklärt ein Hinweis, dass die Rechnung nicht in die Nebenkostenabrechnung einfliesst',
 	async ({ verwalter }) => {
-		await verwalter.sees(tenancyLawNote).toContain('nicht auf Mieter umlegbar');
+		await verwalter.sees(tenancyLawNote).toContain('Diese Rechnung fliesst nicht in die Nebenkostenabrechnung ein.');
 	}
 );
 

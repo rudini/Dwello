@@ -138,6 +138,19 @@ describe('Vorschlag der KI für eine neue Kategorie', () => {
 		}
 	});
 
+	// Eine abgeschaltete KI wird nie gefragt (#216), auch wenn ein Anbieter antworten würde
+	it('schlägt nichts vor, wenn die KI abgeschaltet ist', async () => {
+		const llm = openAiCompatible({ isAllowedUtilityCost: true, confidence: 0.9, reasoning: 'Betrieb' });
+		llmConfig.enabled = false;
+		try {
+			await expectRejection(await propose(), 503, ...UNAVAILABLE);
+			expect(llm.prompts).toEqual([]);
+		} finally {
+			llmConfig.enabled = configured.enabled;
+			llm.stop();
+		}
+	});
+
 	it('schlägt nichts vor, wenn die KI nicht erreichbar ist', async () => {
 		await expectRejection(await propose(), 503, ...UNAVAILABLE);
 	});
