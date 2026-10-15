@@ -5985,3 +5985,20 @@ code-reviewer persona fixes round 1 (`docs/reviews/176-p-review-1.md`): fixed G-
 code-reviewer persona fixes round 2 (`docs/reviews/176-p-review-2.md`): confirmed fixed G-1, G-4 to G-7, rejection of G-2 holds; fixed G-3 (Major, rest: screen state `ki-checking`, reached through the KI stand-in answering names with «langsam» after a minute, no browser interception), G-9 (Nit: each radio option has the test id `<group>-<value>`, test red: «gibt jeder Option eine Test-ID …»), G-10 (Nit: assertion added, the behaviour held already)
 Merge of origin/main (`6fd5b2c`): conflicts in `messages/*.json` (merged key by key, nothing changed on both sides), docs and `persona-stack.sh` (both sides kept); U-29 of main kept, this task's row renumbered U-30
 code-reviewer persona fixes round 3 and merge `6fd5b2c` (`docs/reviews/176-p-review-3.md`): confirmed fixed G-3, G-9, G-10, the merge lost nothing; fixed G-11 (Minor: the slow stand-in answer is 25 s with Bun's `idleTimeout` at 60 s, below the backend's 30 s timeout; comments corrected); G-12 (Nit) noted: the merge also carried the round 2 report and the U-30 renumbering, both listed in the merge line above
+
+## Session 2026-10-15: migrations frozen since the first installation
+
+No issue (task from chat). No scenario: server-side failure (migration errors only show at backend start, not in the app).
+
+- [x] Rule: `backend/CLAUDE.md`, `README.md`, `docs/data-model.md` and `docs/anforderungen-vertragsende.md` drop "until the first installation" (`docs/design/design-decisions.md` keeps the Session 12 row as history and gets a new row); every schema or master data change is a new file, a migration on `main` is never edited, renamed, deleted or merged into a new baseline
+- [x] CI: "Lint and types" fails when a pull request modifies, renames or deletes a file in `backend/migrations` (`.github/workflows/ci.yml`; checked locally: an edit of `0001` red, a new `0003` and the clean branch green)
+- [x] `migrate.ts`: the refusals no longer advise `db:reset` for an installation (`backend/src/db/migrate.ts`, `migrations.pg.test.ts`). Test red: migrations.pg.test.ts "lehnt eine Datenbank ab, die Migrationen kennt …" and "… ohne Buchführung …" – received "Bitte neu aufsetzen: bun run db:reset". Skills: tdd, ponytail, ponytail-review
+- [x] Review against the Opus 5.5 article (product owner, chat), fixes and delta review
+- [x] Checks (test:coverage, lint, check, backend test and type-check, deepcheck:audit; no E2E scenario affected), `code-reviewer`, workflow review (`docs/reviews/workflow-rules-review-migrations-frozen.md`), archive session, pull request
+
+Reviews:
+
+- general-purpose (Opus 5.5 article) round 1 (`docs/reviews/migrations-frozen-blogreview-1.md`): fixed B-1 (Major), B-2 (Minor), B-3 (Minor), B-4 (Nit) in `docs/data-model.md`, `docs/anforderungen-vertragsende.md`, `backend/CLAUDE.md`, the workflow review; no behavior change, confirmed by round 2
+- code-reviewer round 1 (`docs/reviews/migrations-frozen-review-1.md`): fixed C-1 (Major, same as B-1), C-2 (Minor; Test red: migrations.pg.test.ts both refusals – received "… sonst gehen ihre Daten verloren."), C-3, C-4, C-5 (Nits)
+- code-reviewer round 2 (`docs/reviews/migrations-frozen-review-2.md`): open none, confirmed C-1…C-5 fixed
+- general-purpose (Opus 5.5 article) round 2 (`docs/reviews/migrations-frozen-blogreview-2.md`): confirmed B-1…B-4 fixed; fixed N-1 (Nit, `name` as the key of master data rows in `backend/CLAUDE.md`), N-2 (Nit, these plan lines)
