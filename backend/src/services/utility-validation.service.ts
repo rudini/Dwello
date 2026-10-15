@@ -3,8 +3,7 @@
  * Swiss utility cost validation and compliance checking
  */
 
-import { SWISS_UTILITY_CATEGORIES } from '../config/llm';
-import { getCategory } from './category.service';
+import { getCategory, listCategories } from './category.service';
 
 /**
  * Customary management fee percentage (a guideline, not a cap)
@@ -22,13 +21,16 @@ export interface UtilityCostRules {
 }
 
 /**
- * Get Swiss utility cost compliance rules
+ * Get Swiss utility cost compliance rules; the categories as the master data holds them
  */
-export function getUtilityCostRules(): UtilityCostRules {
+export async function getUtilityCostRules(): Promise<UtilityCostRules> {
+	const { categories } = await listCategories({ limit: 1000 });
+	const names = (allowed: boolean) =>
+		categories.filter((c) => c.isAllowedUtilityCost === allowed).map((c) => c.nameDE || c.name);
 	return {
 		maxManagementFeePercent: MAX_MANAGEMENT_FEE_PERCENT,
-		allowedCategories: SWISS_UTILITY_CATEGORIES.allowed.map((c) => c.de),
-		notAllowedCategories: SWISS_UTILITY_CATEGORIES.notAllowed.map((c) => c.de),
+		allowedCategories: names(true),
+		notAllowedCategories: names(false),
 		notes: [
 			'Nebenkosten müssen verbrauchsabhängig oder nach Fläche verteilt werden',
 			'Die Verwaltungspauschale beträgt üblicherweise 3% der Nebenkosten (Richtwert, keine Obergrenze)',

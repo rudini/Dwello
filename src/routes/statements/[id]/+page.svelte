@@ -75,11 +75,14 @@
 				addToast('success', m.statements_pdf_created());
 			} else {
 				const error = await response.json();
+				// PDF_FAILED already says the PDF could not be made
 				addToast(
 					'error',
-					m.statements_pdf_failed_reason({
-						reason: backendMessage(error, m.statements_unknown_error())
-					})
+					error.code === 'PDF_FAILED'
+						? backendMessage(error, m.statements_pdf_failed())
+						: m.statements_pdf_failed_reason({
+								reason: backendMessage(error, m.statements_unknown_error())
+							})
 				);
 			}
 		} catch {

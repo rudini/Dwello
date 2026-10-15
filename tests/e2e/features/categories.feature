@@ -53,3 +53,32 @@ Funktionalität: Kostenkategorien
     Angenommen es gibt die eigene Kategorie "Internet" mit gleichem englischem Namen und der Beschreibung "Glasfaseranschluss im Keller"
     Und der Liegenschaftsverwalter ist auf der Seite "Kategorien"
     Dann sieht der Liegenschaftsverwalter bei der Kategorie "Internet" die Beschreibung "Glasfaseranschluss im Keller"
+
+  Szenario: Vordefinierte Kategorien, deren Kosten der Vermieter trägt
+    Angenommen der Liegenschaftsverwalter ist auf der Seite "Kategorien"
+    Dann ist die vordefinierte Kategorie "Schädlingsbekämpfung" nicht umlagefähig
+    Und ist die vordefinierte Kategorie "Feuerlöscher-Wartung" nicht umlagefähig
+
+  Szenario: KI schlägt vor, ob eine neue Kategorie umlagefähig ist
+    Angenommen der Liegenschaftsverwalter ist auf der Seite "Neue Kategorie"
+    Wenn der Liegenschaftsverwalter die KI prüfen lässt, ob die Kategorie "Dachsanierung" umlagefähig ist
+    Dann schlägt die KI vor, die Kategorie als nicht umlagefähig zu erfassen
+    Und begründet die KI ihren Vorschlag mit "Art. 257a"
+
+  Szenario: Liegenschaftsverwalter übersteuert den Vorschlag der KI
+    Angenommen der Liegenschaftsverwalter ist auf der Seite "Neue Kategorie"
+    Und die KI hat geprüft, ob die Kategorie "Fassadenreinigung" umlagefähig ist
+    Wenn der Liegenschaftsverwalter die Kategorie trotzdem als nicht umlagefähig speichert
+    Dann ist der Liegenschaftsverwalter auf der Seite "Kategorien"
+    Und ist die Kategorie "Fassadenreinigung" nicht umlagefähig
+
+  Szenario: Ohne sichere Antwort der KI wählt der Liegenschaftsverwalter selbst
+    Angenommen der Liegenschaftsverwalter ist auf der Seite "Neue Kategorie"
+    Wenn der Liegenschaftsverwalter die KI prüfen lässt, ob die Kategorie "Bewachung" umlagefähig ist
+    Dann erfährt der Liegenschaftsverwalter, dass er selbst wählen muss, ob die Kosten umlagefähig sind
+    Und ist weder umlagefähig noch nicht umlagefähig gewählt
+
+  Szenario: Neue Kategorie ohne Wahl der Umlagefähigkeit
+    Angenommen der Liegenschaftsverwalter ist auf der Seite "Neue Kategorie"
+    Wenn der Liegenschaftsverwalter die Kategorie "Fassadenreinigung" speichert, ohne zu wählen, ob sie umlagefähig ist
+    Dann erfährt der Liegenschaftsverwalter, dass er wählen muss, ob die Kosten umlagefähig sind

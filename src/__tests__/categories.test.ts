@@ -3,13 +3,14 @@ import { actions as listActions, load } from '../routes/config/categories/+page.
 import { actions as newActions } from '../routes/config/categories/new/+page.server';
 import { actions as editActions } from '../routes/config/categories/[id]/edit/+page.server';
 import { runAction } from './helpers/action';
+import proposal from '../../tests/contracts/category-proposal.json';
 
 const API = 'http://localhost:3001/api/v1/categories';
 
 const form = {
 	name: ' Treppenhausreinigung ',
 	description: 'Reinigung von Treppenhaus und Eingang',
-	isAllowedUtilityCost: 'on',
+	isAllowedUtilityCost: 'true',
 	sortOrder: '15',
 	nameFR: 'Nettoyage cage d’escalier',
 	nameIT: '',
@@ -57,7 +58,7 @@ describe('Kategorien anzeigen', () => {
 
 describe('Neue Kategorie', () => {
 	it('erfasst die Kategorie unter ihrem deutschen Namen und zeigt die Kategorien', async () => {
-		const { calls, result } = runAction(newActions.default, '', 201, form, { id: 'c9' });
+		const { calls, result } = runAction(newActions.save, '', 201, form, { id: 'c9' });
 
 		await expect(result).rejects.toMatchObject({ status: 303, location: '/config/categories' });
 		expect(calls).toEqual([
@@ -70,7 +71,10 @@ describe('Neue Kategorie', () => {
 	});
 
 	it('erfasst nicht umlagefähige Kategorien', async () => {
-		const { calls, result } = runAction(newActions.default, '', 201, { name: 'Reparaturen Dach' });
+		const { calls, result } = runAction(newActions.save, '', 201, {
+			name: 'Reparaturen Dach',
+			isAllowedUtilityCost: 'false'
+		});
 		await result.catch(() => {});
 
 		expect(calls[0].body).toMatchObject({ isAllowedUtilityCost: false, isHeatingCost: false });
@@ -79,14 +83,18 @@ describe('Neue Kategorie', () => {
 
 	// Heiz- und Warmwasserkosten folgen beim Mieterwechsel dem Heizprofil
 	it('erfasst eine Kategorie als Heiz- und Warmwasserkosten', async () => {
-		const { calls, result } = runAction(newActions.default, '', 201, { name: 'Pellets', isHeatingCost: 'on' });
+		const { calls, result } = runAction(newActions.save, '', 201, {
+			name: 'Pellets',
+			isAllowedUtilityCost: 'true',
+			isHeatingCost: 'on'
+		});
 		await result.catch(() => {});
 
 		expect(calls[0].body).toMatchObject({ isHeatingCost: true });
 	});
 
 	it('verlangt einen Namen', async () => {
-		const { calls, result } = runAction(newActions.default, '', 201, { ...form, name: ' ' });
+		const { calls, result } = runAction(newActions.save, '', 201, { ...form, name: ' ' });
 
 		expect(await result).toMatchObject({
 			status: 400,
@@ -95,9 +103,21 @@ describe('Neue Kategorie', () => {
 		expect(calls).toEqual([]);
 	});
 
+	// Eine Kategorie ist nie umlagefähig, nur weil niemand hingeschaut hat (#176)
+	it('verlangt die Wahl, ob die Kosten umlagefähig sind', async () => {
+		const { isAllowedUtilityCost: _, ...unchosen } = form;
+		const { calls, result } = runAction(newActions.save, '', 201, unchosen);
+
+		expect(await result).toMatchObject({
+			status: 400,
+			data: { errors: { isAllowedUtilityCost: 'Wählen Sie, ob die Kosten umlagefähig sind.' } }
+		});
+		expect(calls).toEqual([]);
+	});
+
 	it('zeigt die Meldung des Backends beim Namen, wenn der Name vergeben ist', async () => {
 		const message = 'Eine Kategorie mit dem Namen "Treppenhausreinigung" existiert bereits.';
-		const { result } = runAction(newActions.default, '', 409, form, { error: message });
+		const { result } = runAction(newActions.save, '', 409, form, { error: message });
 
 		expect(await result).toEqual(
 			expect.objectContaining({ status: 409, data: { errors: { name: message } } })
@@ -105,12 +125,74 @@ describe('Neue Kategorie', () => {
 	});
 
 	it('meldet andere Fehler des Backends für das ganze Formular', async () => {
-		const { result } = runAction(newActions.default, '', 500, form, {});
+		const { result } = runAction(newActions.save, '', 500, form, {});
 
 		expect(await result).toMatchObject({
 			status: 500,
 			data: { errors: { form: 'Kategorie konnte nicht gespeichert werden.' } }
 		});
+	});
+});
+
+describe('Vorschlag der KI', () => {
+	it('fragt die KI mit Name und Beschreibung und zeigt ihre Einstufung', async () => {
+		const { calls, result } = runAction(newActions.propose, '', 200, form, proposal);
+
+		// The proposal holds for the name the KI checked
+		expect(await result).toEqual({
+			proposal: { name: 'Treppenhausreinigung', description: 'Reinigung von Treppenhaus und Eingang', ...proposal }
+		});
+		expect(calls).toEqual([
+			{
+				method: 'POST',
+				url: `${API}/propose`,
+				// The KI answers in the language of the interface
+				body: {
+					name: 'Treppenhausreinigung',
+					description: 'Reinigung von Treppenhaus und Eingang',
+					language: 'de'
+				}
+			}
+		]);
+	});
+
+	it('sagt, dass der Liegenschaftsverwalter selbst wählt, wenn die KI keine Einstufung liefert', async () => {
+		const refused = { error: 'Die KI ist nicht erreichbar oder ist sich nicht sicher.', code: 'KI_NO_PROPOSAL', params: {} };
+		const { result } = runAction(newActions.propose, '', 503, form, refused);
+
+		expect(await result).toEqual({
+			proposal: {
+				name: 'Treppenhausreinigung',
+				description: 'Reinigung von Treppenhaus und Eingang',
+				error: 'Die KI ist nicht erreichbar oder ist sich nicht sicher. Wählen Sie selbst, ob die Kosten umlagefähig sind.'
+			}
+		});
+	});
+
+	// Nie der eigene Text des Backends, z. B. Elysias Meldung zu einem zu langen Namen (E-6)
+	it('zeigt bei einer anderen Ablehnung des Backends denselben Hinweis', async () => {
+		const { result } = runAction(newActions.propose, '', 422, form, { type: 'validation', message: 'Expected string length less or equal to 100' });
+
+		expect(await result).toEqual({
+			proposal: {
+				name: 'Treppenhausreinigung',
+				description: 'Reinigung von Treppenhaus und Eingang',
+				error: 'Die KI ist nicht erreichbar oder ist sich nicht sicher. Wählen Sie selbst, ob die Kosten umlagefähig sind.'
+			}
+		});
+	});
+
+	it('zeigt den Hinweis auch, wenn eine Antwort ohne Inhalt kommt', async () => {
+		const { result } = runAction(newActions.propose, '', 200, form, null);
+
+		expect(await result).toMatchObject({ proposal: { error: expect.stringContaining('Wählen Sie selbst') } });
+	});
+
+	it('verlangt zuerst einen Namen', async () => {
+		const { calls, result } = runAction(newActions.propose, '', 200, { ...form, name: ' ' });
+
+		expect(await result).toMatchObject({ status: 400, data: { errors: { name: 'Name ist erforderlich' } } });
+		expect(calls).toEqual([]);
 	});
 });
 

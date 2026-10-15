@@ -8,6 +8,7 @@ import { llmConfig } from '../config/llm';
 import { createBuilding, deleteBuilding } from '../services/building.service';
 import { createInvoice, deleteInvoice } from '../services/invoice.service';
 import { callApi, sendJson } from './helpers/auth';
+import { openAiCompatible } from './helpers/llm';
 import { expectRejection, invoicedBuilding } from './helpers/records';
 
 type Invoice = {
@@ -20,29 +21,6 @@ type Invoice = {
 const token = crypto.randomUUID();
 const configured = { ...llmConfig };
 
-// A provider with an OpenAI-compatible API that only answers with the configured key; like OpenAI's
-// reasoning models it rejects max_tokens and a temperature other than the default
-function openAiCompatible(answer: object) {
-	const server = Bun.serve({
-		port: 0,
-		fetch: async (request) => {
-			if (request.headers.get('authorization') !== 'Bearer test-key') return new Response(null, { status: 401 });
-			const path = new URL(request.url).pathname;
-			if (path === '/v1/models') return Response.json({ data: [{ id: 'test-model' }] });
-			if (path !== '/v1/chat/completions') return new Response(null, { status: 404 });
-			const body = (await request.json()) as object;
-			if ('max_tokens' in body || 'temperature' in body) return new Response(null, { status: 400 });
-			return Response.json({ choices: [{ message: { role: 'assistant', content: JSON.stringify(answer) } }] });
-		}
-	});
-	Object.assign(llmConfig, { baseUrl: `http://127.0.0.1:${server.port}/v1`, apiKey: 'test-key' });
-	return {
-		stop: () => {
-			server.stop();
-			Object.assign(llmConfig, { baseUrl: 'http://127.0.0.1:9', apiKey: '' });
-		}
-	};
-}
 let removeBuilding = async () => {};
 let invoice: Invoice;
 
@@ -215,6 +193,48 @@ describe('KI-Anbieter', () => {
 			expect(status).toMatchObject({ llmAvailable: true });
 		} finally {
 			llm.stop();
+		}
+	});
+});
+
+describe('Kategorien im Prompt', () => {
+	it('bietet der KI auch eigene Kategorien an', async () => {
+		const name = `Treppenhausreinigung ${token}`;
+		const category = (await (
+			await sendJson('POST', '/api/v1/categories', { name, nameDE: name, isAllowedUtilityCost: true })
+		).json()) as { id: string };
+		const llm = openAiCompatible({});
+		try {
+			await sendJson('POST', '/api/v1/invoices/categorize', {
+				billingEntityName: 'Putz AG',
+				description: `Reinigung ${token}`,
+				amount: '120.00'
+			});
+
+			expect(llm.prompts[0]).toContain(`- ${name}\n`);
+		} finally {
+			llm.stop();
+			await sendJson('DELETE', `/api/v1/categories/${category.id}`);
+		}
+	});
+});
+
+describe('Kategorien im Prompt nach einer Änderung', () => {
+	it('fragt die KI neu, sobald es eine neue Kategorie gibt', async () => {
+		const llm = openAiCompatible({ category: 'Caretaker', confidence: 0.9, isAllowedUtilityCost: true });
+		const invoice = { billingEntityName: 'Putz AG', description: `Treppenhaus ${token}`, amount: '80.00' };
+		const name = `Treppenhaus ${token}`;
+		let id = '';
+		try {
+			await sendJson('POST', '/api/v1/invoices/categorize', invoice);
+			id = ((await (await sendJson('POST', '/api/v1/categories', { name, nameDE: name, isAllowedUtilityCost: true })).json()) as { id: string }).id;
+			await sendJson('POST', '/api/v1/invoices/categorize', invoice);
+
+			expect(llm.prompts).toHaveLength(2);
+			expect(llm.prompts[1]).toContain(`- ${name}\n`);
+		} finally {
+			llm.stop();
+			await sendJson('DELETE', `/api/v1/categories/${id}`);
 		}
 	});
 });

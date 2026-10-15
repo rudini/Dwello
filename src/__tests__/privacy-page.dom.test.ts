@@ -19,6 +19,31 @@ describe('Datenschutzerklärung zur KI-Kategorisierung', () => {
 		expect(notice).toContain('Rechnungssteller (auch Einzelpersonen), Beschreibung und Betrag');
 		expect(notice).not.toContain('verlassen dafür den Server nicht');
 	});
+
+	// #176: «Von der KI prüfen lassen» sendet Name und Beschreibung einer neuen Kategorie
+	it('nennt auch Name und Beschreibung einer neuen Kategorie, die die KI prüft', () => {
+		show(PrivacyPage, {
+			data: { recipient: { provider: 'Beispiel AG', country: 'Schweiz' }, providers: ['Google'] }
+		} as never);
+
+		expect(byTestId('llm-recipient')?.textContent).toContain('Name und Beschreibung der Kategorie');
+		expect(byTestId('llm-recipient')?.textContent).toContain('damit die KI vorschlägt, ob ihre Kosten umlagefähig sind');
+	});
+
+	// Seit #176 bietet jede Kategorisierung einer Rechnung der KI alle Kategorien an (F-12)
+	it('nennt Name und Beschreibung aller Kategorien bei der Kategorisierung einer Rechnung', () => {
+		show(PrivacyPage, {
+			data: { recipient: { provider: 'Beispiel AG', country: 'Schweiz' }, providers: ['Google'] }
+		} as never);
+
+		expect(byTestId('llm-recipient')?.textContent).toContain('Name und Beschreibung aller Kategorien');
+	});
+
+	it('sagt, dass auch neue Kategorien den Server nicht verlassen, wenn das Modell beim Betreiber läuft', () => {
+		show(PrivacyPage, { data: { recipient: null, providers: ['Google'] } } as never);
+
+		expect(byTestId('llm-recipient')?.textContent).toContain('neue Kategorien');
+	});
 });
 
 describe('Datenschutzerklärung zu Entwürfen im Browser', () => {

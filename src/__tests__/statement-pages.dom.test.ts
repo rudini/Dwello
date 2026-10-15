@@ -27,6 +27,7 @@ import EditStatementPage from '../routes/statements/[id]/edit/+page.svelte';
 import { allByTestId, byTestId, click, fakeBff, fireEvent, settle, show } from './helpers/dom';
 import { statement } from './helpers/statement';
 import { localToday } from '$lib/contract-status';
+import pdfFailed from '../../tests/contracts/statement-pdf-failed.json';
 
 const text = () => document.body.textContent ?? '';
 const counts = { draft: 3, sent: 2, paid: 5, overdue: 1 };
@@ -681,6 +682,20 @@ describe('Abrechnungsdetail', () => {
 
 		expect(byTestId('statement-pdf-download')).toBeNull();
 		expect(byTestId<HTMLButtonElement>('statement-generate-pdf-button')!.disabled).toBe(false);
+	});
+
+	// code review C-2 (#125): «PDF konnte nicht erstellt werden: Das PDF konnte nicht erstellt werden …»
+	it('nennt den Grund ohne Wiederholung, wenn das PDF aus einem unerwarteten Grund nicht entsteht', async () => {
+		fakeBff(() => [500, pdfFailed]);
+		toasts.set([]);
+		detail();
+
+		click('statement-generate-pdf-button');
+		await settle();
+
+		expect(get(toasts).map((toast) => toast.message)).toEqual([
+			'Das PDF konnte nicht erstellt werden. Versuchen Sie es später erneut.'
+		]);
 	});
 
 	// Das Datumsfeld liegt im Dialog, ausserhalb des Formulars: der gewählte Tag muss mitgesendet werden

@@ -19,6 +19,7 @@ import {
 	Wait
 } from '../screenplay/interactions';
 import { Visibility } from '../screenplay/questions';
+import { nameInput, proposal, proposeButton } from '../targets/categories';
 import type { Target } from '../screenplay/target';
 import * as on from '../targets/accessibility';
 import { userMenuButton } from '../targets/app-frame';
@@ -67,6 +68,12 @@ const say = (actor: Actor, text: string) => actor.answer(inPageLanguage(text));
 const clickOnShown = async (actor: Actor, text: string, place: (shown: string) => Target) =>
 	actor.attemptsTo(Click.on(place(await say(actor, text))));
 const openDialog = (button: Target): Activity => (actor) => actor.attemptsTo(Click.on(button), Wait.until(on.dialogConfirm));
+const askKi = (name: string): Activity => (actor) =>
+	actor.attemptsTo(
+		Enter.theValue(name).into(nameInput),
+		Click.on(proposeButton),
+		Wait.until(proposal)
+	);
 
 // The statement wizard's preview of a calendar year for this example's building (and others), heating profile and fee
 // as proposed
@@ -173,6 +180,19 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 			Click.on(on.formulaTestButton),
 			Wait.until(on.formulaTestOutcome)
 		),
+	// The KI stand-in (backend/scripts/llm-stub.ts) is sure about a renovation, not about guarding the building
+	'ki-proposal': () => askKi('Dachsanierung'),
+	'ki-no-proposal': () => askKi('Bewachung'),
+	// the stand-in answers names with «langsam» after 25 s: the check is still running
+	'ki-checking': () => (actor) =>
+		actor.attemptsTo(
+			Enter.theValue('Langsame Prüfung').into(nameInput),
+			Click.on(proposeButton),
+			Wait.until(on.proposalChecking)
+		),
+	// chosen first: the stand-in finds stairwell cleaning umlagefähig, the own choice stays
+	'ki-proposal-kept': () => (actor) =>
+		actor.attemptsTo(Check.the(on.notAllowedOption), askKi('Treppenhausreinigung')),
 	'profile-sum-invalid': () => (actor) =>
 		actor.attemptsTo(Enter.theValue('50').into(on.januaryShare), Wait.until(on.invalidProfileTotal)),
 	'mobile-menu-open': (_, viewport) => async (actor) => {

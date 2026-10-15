@@ -10,6 +10,7 @@ import { db } from '../db/connection';
 import { buildings, categories, documents, heatingProfiles, invoices, tenants } from '../db/schema';
 import { deleteStatement } from '../services/statement.service';
 import { callApi, sendJson } from './helpers/auth';
+import { openAiCompatible } from './helpers/llm';
 import { insertInvoice } from './helpers/records';
 import { createRental } from './helpers/rental';
 
@@ -146,6 +147,16 @@ describe('API-Verträge des Frontends', () => {
 		}
 	});
 
+	it('POST /categories/propose liefert die Felder von category-proposal.json', async () => {
+		const llm = openAiCompatible({ isAllowedUtilityCost: false, confidence: 0.9, reasoning: 'Erneuerung' });
+		try {
+			const actual = await (await sendJson('POST', '/api/v1/categories/propose', { name: 'Dachsanierung' })).json();
+			expect(drift(await sample('category-proposal'), actual)).toEqual([]);
+		} finally {
+			llm.stop();
+		}
+	});
+
 	it('GET /tenants/:id liefert die Felder von tenant.json', async () => {
 		const actual = await (await callApi(`/api/v1/tenants/${rental.tenant}`)).json();
 		expect(drift(await sample('tenant'), actual)).toEqual([]);
@@ -192,6 +203,28 @@ describe('API-Verträge des Frontends', () => {
 	it('GET /buildings liefert die Felder von buildings.json', async () => {
 		const actual = await (await callApi(`/api/v1/buildings?search=${encodeURIComponent(`Ahornhof ${token}`)}`)).json();
 		expect(drift(await sample('buildings'), actual)).toEqual([]);
+	});
+
+	it('POST /statements/preview, die scheitert, liefert die Felder von statement-calculation-refused.json', async () => {
+		const response = await sendJson('POST', '/api/v1/statements/preview', {
+			contractId: 'keine-id',
+			periodStart: '2024-01-01',
+			periodEnd: '2024-12-31'
+		});
+		expect(response.status).toBe(400);
+		expect(drift(await sample('statement-calculation-refused'), await response.json())).toEqual([]);
+	});
+
+	it('POST /statements/:id/generate-pdf, das scheitert, liefert die Felder von statement-pdf-failed.json', async () => {
+		const response = await sendJson('POST', '/api/v1/statements/keine-id/generate-pdf', {});
+		expect(response.status).toBe(500);
+		expect(drift(await sample('statement-pdf-failed'), await response.json())).toEqual([]);
+	});
+
+	it('GET /statements/:id/pdf einer unbekannten Abrechnung liefert die Felder von statement-pdf-refused.json', async () => {
+		const response = await callApi(`/api/v1/statements/${crypto.randomUUID()}/pdf`);
+		expect(response.status).toBe(404);
+		expect(drift(await sample('statement-pdf-refused'), await response.json())).toEqual([]);
 	});
 
 	// the 2024 statement already bills the days after 31.03.2024

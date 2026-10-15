@@ -13,7 +13,9 @@ su postgres -c "dropdb --if-exists dwello_persona" && su postgres -c "createdb -
 # package.json (ES modules) and a link to node_modules
 rm -rf /tmp/persona-app && cp -r build /tmp/persona-app && cp package.json /tmp/persona-app/ && ln -s "$PWD/node_modules" /tmp/persona-app/node_modules
 # the servers keep none of the script's output open, so a caller that pipes it gets its end when the script exits
-(cd backend && PORT=3301 DATABASE_URL=$DB LLM_BASE_URL=http://127.0.0.1:9/v1 MAIL_TRANSPORT=smtp SMTP_HOST=127.0.0.1 SMTP_PORT=2525 nohup bun run src/index.ts > /tmp/persona-backend.log 2>&1 &) < /dev/null > /dev/null 2>&1
+# the KI stand-in of the acceptance tests: it answers the check of a new category, invoices still find no KI
+curl -s -o /dev/null http://127.0.0.1:2527/ || (cd backend && nohup bun run llm-stub > /tmp/persona-llm.log 2>&1 &) < /dev/null > /dev/null 2>&1
+(cd backend && PORT=3301 DATABASE_URL=$DB LLM_BASE_URL=http://127.0.0.1:2527/v1 MAIL_TRANSPORT=smtp SMTP_HOST=127.0.0.1 SMTP_PORT=2525 nohup bun run src/index.ts > /tmp/persona-backend.log 2>&1 &) < /dev/null > /dev/null 2>&1
 PORT=3300 ORIGIN=http://localhost:3300 BODY_SIZE_LIMIT=11M BACKEND_URL=http://localhost:3301 OAUTH_GOOGLE_CLIENT_ID=x OAUTH_GOOGLE_CLIENT_SECRET=x OAUTH_GOOGLE_REDIRECT_URI=http://localhost:3300/auth/callback nohup node /tmp/persona-app < /dev/null > /tmp/persona-frontend.log 2>&1 &
 for i in $(seq 1 60); do curl -s -o /dev/null http://localhost:3300/login && curl -s -o /dev/null http://localhost:3301/health && echo ready && exit 0; sleep 1; done
 echo "not ready"; tail -5 /tmp/persona-backend.log /tmp/persona-frontend.log

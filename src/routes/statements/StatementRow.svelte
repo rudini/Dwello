@@ -63,6 +63,7 @@
 		{#if statement.pdfGeneratedAt}
 			<Button
 				href="/api/statements/{statement.id}/pdf"
+				reload
 				variant="ghost"
 				icon="document-download"
 				ariaLabel={m.statements_pdf_download_of({ name })}

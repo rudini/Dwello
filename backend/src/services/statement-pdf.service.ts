@@ -13,6 +13,7 @@ import { getTypedConfig } from './config.service';
 import { generateStatementPDFBase64, type StatementPDFData, type Language } from './pdf.service';
 import { isQRIBAN, statementQRReference, type QRBillConfig } from './qr-bill.service';
 import { datedToday, getStatement, keyValuesOf, type StatementWithDetails } from './statement.service';
+import { refusal } from './coded-error';
 
 // Creditor of the QR-bill from the company configuration; null without IBAN
 async function qrBillConfig(): Promise<QRBillConfig | null> {
@@ -292,12 +293,12 @@ const storedPdf = async (id: string) =>
  */
 export async function getStatementPdf(id: string) {
 	let result = await storedPdf(id);
-	if (!result) return { error: 'Statement not found' };
+	if (!result) return { status: 404, refusal: refusal('STATEMENT_NOT_FOUND', 'Statement not found') };
 	const stale = result.status === 'draft' && result.statementDate !== (await datedToday(null)).statementDate;
 	if (!result.pdfBlob || stale) {
-		await generateStatementPdf(id);
+		if ((await generateStatementPdf(id)) === 'no-iban')
+			return { status: 400, refusal: refusal('IBAN_MISSING', 'IBAN not configured. Please set up company configuration first.') };
 		result = (await storedPdf(id))!;
 	}
-	if (!result.pdfBlob) return { error: 'PDF not generated yet. Call POST /:id/generate-pdf first.' };
-	return { pdfBlob: result.pdfBlob, statementNumber: result.statementNumber };
+	return { pdfBlob: result.pdfBlob!, statementNumber: result.statementNumber };
 }

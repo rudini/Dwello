@@ -8,15 +8,21 @@ import {
 	categoryListed,
 	invoicesOf,
 	descriptionOf,
-	listedCategoriesNamed
+	allowedChosen,
+	listedCategoriesNamed,
+	notAllowedChosen,
+	proposalText
 } from '../questions/categories';
 import {
+	askKi,
 	createCategory,
 	deleteCategory,
 	openCategories,
 	openCategoryEdit,
 	openNewCategory,
 	saveAsNotAllowed,
+	saveFormAsNotAllowed,
+	saveWithoutChoice,
 	showAllowedCategories
 } from '../tasks/categories';
 
@@ -101,6 +107,10 @@ Then('sieht der Liegenschaftsverwalter die Kategorie {string} nicht mehr', async
 	await verwalter.sees(listedCategoriesNamed(names.get(title)!)).toBe(0);
 });
 
+Then('ist die vordefinierte Kategorie {string} nicht umlagefähig', async ({ verwalter }, name: string) => {
+	await verwalter.sees(allowance(name)).toBe('Nicht umlagefähig');
+});
+
 Then('ist die Kategorie {string} nicht umlagefähig', async ({ verwalter, names }, title: string) => {
 	await verwalter.sees(allowance(names.get(title)!)).toBe('Nicht umlagefähig');
 });
@@ -133,3 +143,50 @@ Then(
 		await verwalter.sees(descriptionOf(names.get(title)!)).toBe(text);
 	}
 );
+
+When(
+	'der Liegenschaftsverwalter die KI prüfen lässt, ob die Kategorie {string} umlagefähig ist',
+	async ({ verwalter, seed }, title: string) => {
+		await verwalter.attemptsTo(askKi(seed.unique(title)));
+	}
+);
+
+Given('die KI hat geprüft, ob die Kategorie {string} umlagefähig ist', async ({ verwalter, seed }, title: string) => {
+	await verwalter.attemptsTo(askKi(seed.unique(title)));
+	await verwalter.sees(proposalText).toContain('Vorschlag der KI');
+});
+
+When('der Liegenschaftsverwalter die Kategorie trotzdem als nicht umlagefähig speichert', async ({ verwalter }) => {
+	await verwalter.attemptsTo(saveFormAsNotAllowed);
+});
+
+When(
+	'der Liegenschaftsverwalter die Kategorie {string} speichert, ohne zu wählen, ob sie umlagefähig ist',
+	async ({ verwalter, seed }, title: string) => {
+		await verwalter.attemptsTo(saveWithoutChoice(seed.unique(title)));
+	}
+);
+
+Then('schlägt die KI vor, die Kategorie als nicht umlagefähig zu erfassen', async ({ verwalter }) => {
+	await verwalter.sees(notAllowedChosen).toBe(true);
+});
+
+Then('begründet die KI ihren Vorschlag mit {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(proposalText).toContain(text);
+});
+
+Then('erfährt der Liegenschaftsverwalter, dass er wählen muss, ob die Kosten umlagefähig sind', async ({ verwalter }) => {
+	await verwalter.sees(errorMessageShown('Wählen Sie, ob die Kosten umlagefähig sind.')).toBe(true);
+});
+
+Then(
+	'erfährt der Liegenschaftsverwalter, dass er selbst wählen muss, ob die Kosten umlagefähig sind',
+	async ({ verwalter }) => {
+		await verwalter.sees(proposalText).toContain('Wählen Sie selbst, ob die Kosten umlagefähig sind.');
+	}
+);
+
+Then('ist weder umlagefähig noch nicht umlagefähig gewählt', async ({ verwalter }) => {
+	await verwalter.sees(allowedChosen).toBe(false);
+	await verwalter.sees(notAllowedChosen).toBe(false);
+});

@@ -174,13 +174,13 @@ describe('Prüfung pro Kategorie', () => {
 	// Nebenkosten dürfen nur abgerechnet werden, wenn sie im Mietvertrag vereinbart sind (Art. 257a Abs. 2 OR)
 	it('meldet eine Kategorie, die es im Vorjahr nicht gab', () => {
 		const { findings } = checkCategories(
-			[invoice('Hauswart', '2025-06-30', 900), invoice('Schädlingsbekämpfung', '2025-05-20', 400)],
+			[invoice('Hauswart', '2025-06-30', 900), invoice('Schneeräumung', '2025-05-20', 400)],
 			[invoice('Hauswart', '2024-06-30', 900)],
 			year2025
 		);
 
 		expect(findings).toMatchObject([
-			{ categoryName: 'Schädlingsbekämpfung', kind: 'new', current: { count: 1, total: 400 }, previous: { count: 0, total: 0 } }
+			{ categoryName: 'Schneeräumung', kind: 'new', current: { count: 1, total: 400 }, previous: { count: 0, total: 0 } }
 		]);
 	});
 

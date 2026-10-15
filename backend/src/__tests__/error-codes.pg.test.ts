@@ -4,8 +4,12 @@
  */
 
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
+import { eq } from 'drizzle-orm';
+import { db } from '../db/connection';
+import { configuration, utilityStatements } from '../db/schema';
+import { deleteConfig, getConfig, setConfig } from '../services/config.service';
 import { deleteStatement } from '../services/statement.service';
-import { sendJson } from './helpers/auth';
+import { callApi, sendJson } from './helpers/auth';
 import { expectRejection } from './helpers/records';
 import { createRental } from './helpers/rental';
 
@@ -119,5 +123,45 @@ describe('Fehlercodes für die Oberfläche', () => {
 		const response = await sendJson('DELETE', `/api/v1/statements/${unknown}`);
 
 		await expectRejection(response, 404, 'Statement not found', 'STATEMENT_NOT_FOUND');
+	});
+
+	it('meldet eine IBAN mit falscher Prüfziffer beim Erstellen und Herunterladen des PDF', async () => {
+		const iban = await getConfig('iban');
+		// written past the settings' own check, as by an older version
+		await setConfig('iban', 'CH9300762011623852957');
+		await db.update(configuration).set({ value: 'CH9300762011623852958' }).where(eq(configuration.key, 'iban'));
+		// the tenant owes an amount, so the PDF carries a QR-bill with the IBAN
+		await db.update(utilityStatements).set({ balance: '120.00' }).where(eq(utilityStatements.id, statementId));
+		try {
+			for (const response of [
+				await sendJson('POST', `/api/v1/statements/${statementId}/generate-pdf`, {}),
+				await callApi(`/api/v1/statements/${statementId}/pdf`)
+			])
+				await expectRejection(response, 400, 'Invalid IBAN: Invalid IBAN checksum', 'IBAN_INVALID');
+		} finally {
+			if (iban) await setConfig('iban', iban);
+			else await deleteConfig('iban');
+		}
+	});
+
+	it('meldet ein PDF, das aus einem unerwarteten Grund nicht entsteht, mit Code', async () => {
+		for (const response of [
+			await sendJson('POST', '/api/v1/statements/keine-id/generate-pdf', {}),
+			await callApi('/api/v1/statements/keine-id/pdf'),
+			await callApi('/api/v1/statements/keine-id/pdf/base64')
+		])
+			await expectRejection(response, 500, 'PDF generation failed', 'PDF_FAILED');
+	});
+
+	it('meldet eine Berechnung, die aus einem unerwarteten Grund scheitert, mit Code', async () => {
+		const input = { contractId: 'keine-id', buildingId: rental.building, periodStart: '2024-01-01', periodEnd: '2024-12-31' };
+
+		await expectRejection(await sendJson('POST', '/api/v1/statements/preview', input), 400, 'Calculation failed', 'CALCULATION_FAILED');
+		await expectRejection(
+			await sendJson('POST', '/api/v1/statements/generate', input),
+			400,
+			'Statement generation failed',
+			'CALCULATION_FAILED'
+		);
 	});
 });

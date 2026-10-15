@@ -73,11 +73,11 @@ Die Ubiquitous Language (nach Eric Evans, Domain-Driven Design) definiert ein ge
 
 ### Umlagefähig
 
-Heizung, Warmwasser, Kaltwasser, Abwasser, Allgemeinstrom, Hauswart, Lift, Gartenpflege, Schneeräumung, Kehricht, TV/Kabelanschluss, Kaminfeger, Schädlingsbekämpfung, Feuerlöscher-Wartung, sowie eigene Kategorien, die als umlagefähig erfasst sind.
+Heizung, Warmwasser, Kaltwasser, Abwasser, Allgemeinstrom, Hauswart, Lift, Gartenpflege, Schneeräumung, Kehricht, TV/Kabelanschluss, Kaminfeger, sowie eigene Kategorien, die als umlagefähig erfasst sind.
 
 ### Nicht umlagefähig
 
-Verwaltung, Reparaturen, Renovation, Liegenschaftssteuer, Hypothekarzinsen, Gebäudeversicherung, Wertvermehrende Investitionen. Diese Kosten trägt der Vermieter. Der Verwaltungsaufwand für die Nebenkosten wird nicht als Rechnung, sondern über die **Verwaltungspauschale** abgerechnet.
+Verwaltung, Reparaturen, Renovation, Liegenschaftssteuer, Hypothekarzinsen, Gebäudeversicherung, Wertvermehrende Investitionen, Schädlingsbekämpfung, Feuerlöscher-Wartung. Diese Kosten trägt der Vermieter. Der Verwaltungsaufwand für die Nebenkosten wird nicht als Rechnung, sondern über die **Verwaltungspauschale** abgerechnet.
 
 ---
 

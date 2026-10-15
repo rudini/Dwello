@@ -13,6 +13,6 @@ From issue #188 (decision #187, option A): rules of groups 1 and 2 move from `UB
 - [ ] fach-reviewer on the diff (no rule lost, no definition changed in meaning)
   fach-reviewer round 1 (`docs/reviews/glossary-fachreview-1.md`): open GF-2 (Major, existed before, product decision: #89), fixed GF-1, GF-3, GF-5, GF-6, GF-7, GF-8, GF-9, GF-10, GF-4 described as the code is and opened #191, GF-11 noted (no change)
 - [x] code-reviewer round (docs only)
-  code-reviewer round 1 (`docs/reviews/glossary-review-1.md`): fixed GR-1, GR-2, GR-3 (missing update test: `offene-punkte.md` O-20), GR-4, GR-5, GR-6, GR-8; GR-7 named in the pull request
+  code-reviewer round 1 (`docs/reviews/glossary-review-1.md`): fixed GR-1, GR-2, GR-3 (missing update test: `offene-punkte.md` O-22), GR-4, GR-5, GR-6, GR-8; GR-7 named in the pull request
 - [ ] Workflow review not needed (no app changes, `CLAUDE.md` Workflow 7)
 - [ ] Session archived, pull request

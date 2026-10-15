@@ -11,6 +11,7 @@ import {
 } from '../questions/statements';
 import {
 	downloadStatementPdfFromList,
+	requestStatementPdfFromList,
 	openStatement,
 	openStatementList,
 	searchStatements,
@@ -165,3 +166,14 @@ Then(
 Then('zählt die Liste {int} Entwurf/Entwürfe', async ({ verwalter }, count: number) => {
 	await verwalter.sees(countedStatements('draft')).toBe(String(count));
 });
+
+Given('die Abrechnung {int} von {string} wurde inzwischen gelöscht', async ({ seed }, year: number, tenant: string) => {
+	await seed.removeStatement(tenant, year);
+});
+
+When(
+	'der Liegenschaftsverwalter in der Liste das PDF der Abrechnung {int} von {string} anfordert',
+	async ({ verwalter, names }, year: number, tenant: string) => {
+		await verwalter.attemptsTo(requestStatementPdfFromList(names.get(tenant) ?? tenant, year));
+	}
+);

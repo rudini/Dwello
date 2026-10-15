@@ -16,6 +16,7 @@
 		cancelHref,
 		submitLabel,
 		submitTestid,
+		checking = $bindable(false),
 		children
 	}: {
 		action?: string;
@@ -24,6 +25,7 @@
 		cancelHref: string;
 		submitLabel: string;
 		submitTestid: string;
+		checking?: boolean; // while another action runs, e.g. «Von der KI prüfen lassen»
 		children: Snippet;
 	} = $props();
 
@@ -41,13 +43,25 @@
 	method="POST"
 	{action}
 	use:enhance={({ formData, submitter }) => {
-		saving = !submitter?.hasAttribute('formaction'); // another action, e.g. "Formel testen", saves nothing
+		// another action, e.g. "Formel testen", saves nothing; each answer ends only its own request
+		const check = !!submitter?.hasAttribute('formaction');
+		if (check) checking = true;
+		else saving = true;
 		const name = String(formData.get('name') ?? '').trim();
 		return async ({ result, update, formElement }) => {
+			const focused = document.activeElement;
 			if (result.type === 'redirect') addToast('success', text.saved({ name }));
 			await update({ reset: false });
-			saving = false;
-			focusFirstError(formElement);
+			if (check) checking = false;
+			else saving = false;
+			await focusFirstError(formElement);
+			// the button was disabled while it ran: without an error to show, the focus goes back to where
+			// the user went meanwhile, or to the button
+			if (check && document.activeElement === document.body)
+				(focused instanceof HTMLElement && focused !== document.body
+					? focused
+					: submitter
+				)?.focus();
 		};
 	}}
 	class="flex flex-col gap-8"

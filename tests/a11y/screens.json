@@ -32,6 +32,10 @@
 		"contracts-unknown-review": "Rental contract wizard at the step before saving, the apartment's rental contracts not loaded (that request answered with an error): the hint above the review (#143).",
 		"draft-restored": "A wizard reopened with a draft saved in the browser: restore notice and save status visible.",
 		"formula-tested": "Distribution key form after testing a formula.",
+		"ki-proposal": "New category form after «Von der KI prüfen lassen»: the KI's proposal with its reasoning, the choice preset (#176).",
+		"ki-no-proposal": "New category form after the KI gave no sure answer: the hint to choose oneself, nothing preset (#176).",
+		"ki-checking": "New category form while the KI checks: the button busy, «Die KI prüft die Kategorie …» in the status region (#176, code review G-3).",
+		"ki-proposal-kept": "New category form where the Liegenschaftsverwalter chose before «Von der KI prüfen lassen»: the proposal says the own choice stays (#176, persona review).",
 		"profile-sum-invalid": "Heating profile form whose monthly shares do not add up to 100 %.",
 		"login-error": "Login page showing a sign-in error (?error=failed).",
 		"mobile-menu-open": "Navigation drawer open (mobile and tablet viewport).",
@@ -388,6 +392,13 @@
 			]
 		},
 		{
+			"name": "statement-pdf-refused",
+			"path": "/statements/00000000-0000-4000-8000-000000000000/pdf",
+			"states": [
+				"default"
+			]
+		},
+		{
 			"name": "statement-edit",
 			"path": "/statements/{statement}/edit",
 			"states": [
@@ -423,7 +434,11 @@
 			"path": "/config/categories/new",
 			"states": [
 				"default",
-				"submit-empty"
+				"submit-empty",
+				"ki-proposal",
+				"ki-no-proposal",
+				"ki-proposal-kept",
+				"ki-checking"
 			]
 		},
 		{
