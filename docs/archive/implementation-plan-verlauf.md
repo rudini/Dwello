@@ -6060,3 +6060,24 @@ Task: open `bug` issues one by one (#122, #123, #125, #126 merged in rudini/Dwel
 - [x] PR, CI, merge (pull request opened after archiving; merge follows green CI)
 
 Files: `backend/src/app.ts`, `backend/src/__tests__/error-codes.pg.test.ts`, `src/routes/invoices/[id]/edit/+page.svelte`, `src/routes/invoices/[id]/+page.svelte`, `src/__tests__/invoice-pages.dom.test.ts`, `docs/api-specification.md`, `tests/contracts/validation-refused.json`, `tests/contracts/README.md`, `backend/src/__tests__/api-contracts.pg.test.ts`, `docs/reviews/issue-127-review-1.md`, `docs/reviews/workflow-rules-review-issue-127.md`
+
+## Session 2026-10-15 (4): bug #128, FORMULA_NOT_COMPUTABLE shows the engine's English detail
+
+Task: open `bug` issues one by one (#122, #123, #125, #126, #127 merged in rudini/Dwello#181, #182, #189, #196, #197); now #128. Skipped while labelled `entscheiden`: #93, #124, #130, #131, #136, #138, #141, #193, #194.
+
+- [x] Scenario «Formel, die sich nicht berechnen lässt» (`distribution-keys.feature`, formula «{area} 2», which passes validation and fails when evaluated). Scenario red: the alert showed «… Die Formel kann nicht berechnet werden: Unexpected number '2'. Expected ')' to end a compound expression.» four times
+- [x] `backend_formula_not_computable` without `{detail}`, saying what to check, in de/fr/it/en; the detail stays in the backend's `error` text only
+- [x] Backend unit test (`formula-codes.test.ts`) with «{area} 2»; frontend unit test that `backendMessage` gives the text without the detail. Test red: «nennt eine Formel, die sich nicht berechnen lässt, ohne den englischen Text …» – params held `detail`; «sagt, was zu prüfen ist, ohne den englischen Text …» – received the old text with the detail
+- [x] Skills: tdd, ponytail, ponytail-review
+- [x] Checks: test:coverage (2419), lint, check, backend test + type-check, deepcheck:audit, E2E chromium + api distribution-keys (9 passed)
+- [x] Single report: `validateFormulaForDistribution` names `FORMULA_NOT_COMPUTABLE` once instead of once per sample apartment. Test red: «meldet eine Formel, die sich nicht berechnen lässt, nur einmal» – received four codes
+- [x] code-reviewer
+  - code-reviewer round 1 (`docs/reviews/issue-128-review-1.md`): open none, fixed C-1 (Major; totals named in the text), C-2 (single report), C-3 (docs), C-5 (`%` named), rejected C-4: the unit tests show the English text is gone; the scenario checks the sentence the user reads
+  - code-reviewer round 2 (`docs/reviews/issue-128-review-2.md`): open none, fixed C-6 (these plan lines), C-7 (O-24 wording), C-8 (totals computed once)
+- [x] Personas
+  - persona helga round 1 (`docs/design/personas/helga-issue-128.md`): open P-2, P-3, P-4 (Minor) and her observations as O-24, fixed P-1 (Major; single report), P-5 (Nit; totals)
+  - persona helga round 2 (`docs/design/personas/helga-issue-128-2.md`): open P-6 (Minor: `%` unexplained on the page), P-7 (Nit: double opening) and her observations as O-24
+- [x] Workflow review `docs/reviews/workflow-rules-review-issue-128.md`
+- [x] PR, CI, merge (pull request opened after archiving; merge follows green CI). Final checks: test:coverage, lint, check, backend test + type-check, deepcheck:audit, E2E chromium + api distribution-keys
+
+Files: `docs/api-specification.md`, `docs/design/offene-punkte.md` (O-24), `backend/src/services/formula.service.ts`, `backend/src/__tests__/formula-codes.test.ts`, `src/__tests__/backend-error.test.ts`, `messages/*.json`, `tests/e2e/features/distribution-keys.feature`
