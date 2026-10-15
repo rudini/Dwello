@@ -990,7 +990,7 @@ describe('Schon abgerechnete Mietverträge bei der Wahl der Gebäude', () => {
 		await settle();
 
 		expect(billedText('b1')).toBe(
-			'Von 3 Mietverträgen in dieser Abrechnungsperiode haben 2 schon eine Abrechnung, die diesen Zeitraum ganz oder teilweise abdeckt.'
+			'Von 3 Mietverträgen in dieser Abrechnungsperiode haben 2 schon eine Abrechnung, die diese Abrechnungsperiode ganz oder teilweise abdeckt.'
 		);
 		expect(billedText('b2')).toBeUndefined();
 		// read after the building's name, not as part of it (persona Sven P-1), and a tap on it still chooses the
@@ -1021,10 +1021,10 @@ describe('Schon abgerechnete Mietverträge bei der Wahl der Gebäude', () => {
 		await settle();
 
 		expect(billedText('b1')).toBe(
-			'Alle Mietverträge in dieser Abrechnungsperiode haben schon eine Abrechnung, die diesen Zeitraum ganz oder teilweise abdeckt. Für dieses Gebäude entsteht keine neue Abrechnung. Sie müssen es nicht wählen.'
+			'Alle Mietverträge in dieser Abrechnungsperiode haben schon eine Abrechnung, die diese Abrechnungsperiode ganz oder teilweise abdeckt. Für dieses Gebäude entsteht keine neue Abrechnung. Sie müssen es nicht wählen.'
 		);
 		expect(billedText('b2')).toBe(
-			'Der einzige Mietvertrag in dieser Abrechnungsperiode hat schon eine Abrechnung, die diesen Zeitraum ganz oder teilweise abdeckt. Für dieses Gebäude entsteht keine neue Abrechnung. Sie müssen es nicht wählen.'
+			'Der einzige Mietvertrag in dieser Abrechnungsperiode hat schon eine Abrechnung, die diese Abrechnungsperiode ganz oder teilweise abdeckt. Für dieses Gebäude entsteht keine neue Abrechnung. Sie müssen es nicht wählen.'
 		);
 	});
 
@@ -1036,7 +1036,7 @@ describe('Schon abgerechnete Mietverträge bei der Wahl der Gebäude', () => {
 		await settle();
 
 		expect(billedText('b1')).toBe(
-			'Von 2 Mietverträgen in dieser Abrechnungsperiode hat 1 schon eine Abrechnung, die diesen Zeitraum ganz oder teilweise abdeckt.'
+			'Von 2 Mietverträgen in dieser Abrechnungsperiode hat 1 schon eine Abrechnung, die diese Abrechnungsperiode ganz oder teilweise abdeckt.'
 		);
 	});
 });
