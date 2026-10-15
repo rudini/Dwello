@@ -8,6 +8,7 @@ import {
 import buildingContracts from '../../tests/contracts/building-contracts.json';
 import statementPreview from '../../tests/contracts/statement-preview.json';
 import invoiceCompleteness from '../../tests/contracts/invoice-completeness.json';
+import calculationRefused from '../../tests/contracts/statement-calculation-refused.json';
 
 const API = 'http://localhost:3001/api/v1';
 const period = {
@@ -143,16 +144,15 @@ describe('Abrechnungen erstellen', () => {
 		expect(posts.map((post) => post.body.contractId)).toEqual(['einzug', 'einzug']);
 	});
 
-	it('meldet einen Fehler, wenn das Backend die Berechnung ablehnt', async () => {
+	it('meldet in Worten, wenn das Backend die Berechnung ablehnt', async () => {
 		const fetch = (async (url: string) =>
 			url.includes('contracts')
 				? Response.json({ contracts: [contract('auszug', '2020-01-01', null)] })
-				: Response.json(
-						{ error: 'Calculation failed' },
-						{ status: 400 }
-					)) as typeof globalThis.fetch;
+				: Response.json(calculationRefused, { status: 400 })) as typeof globalThis.fetch;
 
-		await expect(previewStatements(fetch, period)).rejects.toThrow('Calculation failed');
+		await expect(previewStatements(fetch, period)).rejects.toThrow(
+			'Die Abrechnung konnte nicht berechnet werden. Versuchen Sie es später erneut.'
+		);
 	});
 });
 

@@ -1,6 +1,8 @@
 import { error } from '@sveltejs/kit';
+import { backendMessage, type BackendError } from '$lib/backend-error';
 import { localName } from '$lib/names';
 import { m } from '$lib/paraglide/messages';
+import { getLocale } from '$lib/paraglide/runtime';
 import type { StatementLineItem, StatementWithDetails } from '$lib/types';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
@@ -85,4 +87,36 @@ export async function loadStatement(fetch: typeof globalThis.fetch, id: string) 
 			: m.statements_equal_per_apartment()
 	}));
 	return { ...statement, lineItems };
+}
+
+const escaped = (text: string) => text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+/**
+ * A statement PDF the backend refused, as a page in the UI language for the tab it opens in: the message of its
+ * code (else `fallback`, never the backend's own text or JSON) and the way back to the list. Outside the app, so
+ * without its styles: readable on a phone and in dark mode through the browser's own colours (the link in `CanvasText`, underlined); without scripts it is
+ * ready at once (`data-hydrated`, which the app's pages set once they react to input)
+ */
+export function pdfRefusal(status: number, body: unknown, fallback = m.backend_pdf_failed()) {
+	const sentence = backendMessage({ code: (body as BackendError | null)?.code }, fallback);
+	const page = `<!doctype html>
+<html lang="${getLocale()}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>${escaped(m.nav_statements())} - Dwello</title>
+<style>
+body { font-family: system-ui, sans-serif; font-size: 1rem; line-height: 1.5; margin: 1.5rem }
+a { display: inline-block; padding: 0.75rem 0; color: CanvasText }
+</style>
+</head>
+<body data-hydrated>
+<main>
+<p data-testid="pdf-refusal-message">${escaped(sentence)}</p>
+<a href="/statements" data-testid="pdf-refusal-back">${escaped(m.documents_to_statements())}</a>
+</main>
+</body>
+</html>`;
+	return new Response(page, { status, headers: { 'Content-Type': 'text/html; charset=utf-8' } });
 }

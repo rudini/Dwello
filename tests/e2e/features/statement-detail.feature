@@ -143,6 +143,18 @@ Funktionalität: Abrechnungsdetail
     Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
     Dann erhält der Liegenschaftsverwalter die Abrechnung als PDF
 
+  # Ein zweiter Tab mit einer Abrechnung, die inzwischen gelöscht ist: ein Satz statt technischer Daten
+  Szenario: PDF einer inzwischen gelöschten Abrechnung anfordern
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und für "Eva Frei" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024 mit dem Heizprofil "Winter"
+    Und für die Abrechnung 2024 von "Eva Frei" gibt es ein PDF
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Eva Frei"
+    Und die Abrechnung 2024 von "Eva Frei" wurde inzwischen gelöscht
+    Wenn der Liegenschaftsverwalter das PDF der Abrechnung anfordert
+    Dann liest der Liegenschaftsverwalter "Abrechnung nicht gefunden."
+    Wenn der Liegenschaftsverwalter von dort zu den Nebenkostenabrechnungen zurückkehrt
+    Dann ist der Liegenschaftsverwalter auf der Seite "Nebenkostenabrechnungen"
+
   # Der Mieter prüft die Abrechnung nach: Verteilschlüssel und Anteile je Position, Heizöl nach Verbrauch
   # (Art. 5 VMWG), Recht auf Belegeinsicht und detaillierte Heizkostenabrechnung (Art. 257b OR, Art. 8 VMWG)
   Szenario: Das PDF erklärt die Verteilung und den Heizölverbrauch

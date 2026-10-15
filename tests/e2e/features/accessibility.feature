@@ -121,6 +121,7 @@ Funktionalität: Barrierefreiheit
       | statement-sent-detail  | mark-paid-dialog    |
       | statement-sent-detail  | action-error        |
       | statement-empty-detail | default             |
+      | statement-pdf-refused  | default             |
       | statement-edit         | default             |
       | statement-edit         | submit-cleared      |
       | documents              | default             |

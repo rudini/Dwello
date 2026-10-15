@@ -1,0 +1,5 @@
+{
+	"error": "PDF generation failed",
+	"code": "PDF_FAILED",
+	"params": {}
+}

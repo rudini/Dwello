@@ -9,6 +9,7 @@ import {
 	history,
 	paidDateInvalid,
 	paidDateProblem,
+	pdfRefusalText,
 	pdfToView,
 	recipient,
 	sendConfirmation,
@@ -19,6 +20,8 @@ import { openStatementList, searchStatements } from '../tasks/statements';
 import {
 	deleteStatement,
 	downloadStatementPdf,
+	requestStatementPdf,
+	leavePdfRefusal,
 	editStatementFromDetail,
 	generateStatementPdf,
 	markStatementPaid,
@@ -201,4 +204,16 @@ Then('steht im PDF {string}', async ({ verwalter }, text: string) => {
 
 Then('nennt die Abrechnung das Heizprofil {string}', async ({ verwalter, names }, profile: string) => {
 	await verwalter.sees(heatingProfileOfStatement).toContain(names.get(profile)!);
+});
+
+When('der Liegenschaftsverwalter das PDF der Abrechnung anfordert', async ({ verwalter }) => {
+	await verwalter.attemptsTo(requestStatementPdf);
+});
+
+When('der Liegenschaftsverwalter von dort zu den Nebenkostenabrechnungen zurückkehrt', async ({ verwalter }) => {
+	await verwalter.attemptsTo(leavePdfRefusal);
+});
+
+Then('liest der Liegenschaftsverwalter {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(pdfRefusalText).toBe(text);
 });
