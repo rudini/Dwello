@@ -14,6 +14,9 @@ import { deleteConfirmButton } from '../targets/form';
 export const openCategories = Navigate.to('/config/categories');
 export const openNewCategory = Navigate.to('/config/categories/new');
 export const openCategoryEdit = (categoryId: string) => Navigate.to(`/config/categories/${categoryId}/edit`);
+// A predefined category has no seeded id: open it from the list
+export const openPredefinedCategory = (name: string): Activity => (actor) =>
+	actor.attemptsTo(openCategories, Click.on(editButton(name)));
 
 export const showAllowedCategories = Click.on(allowedFilter);
 

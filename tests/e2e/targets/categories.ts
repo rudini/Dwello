@@ -20,3 +20,7 @@ export const usage = (name: string) =>
 	target(`Verwendung der Kategorie ${name}`, (page) => categoryRow(name).locate(page).getByTestId('category-usage'));
 export const description = (name: string) =>
 	target(`Beschreibung der Kategorie ${name}`, (page) => categoryRow(name).locate(page).getByTestId('category-description'));
+// Why a predefined category is or is not umlagefähig (#186), in its row and on its edit page
+export const reason = (name: string) =>
+	target(`Grund der Umlagefähigkeit von ${name}`, (page) => categoryRow(name).locate(page).getByTestId('category-reason'));
+export const formReason = target('Grund der Umlagefähigkeit', (page) => page.getByTestId('category-reason'));

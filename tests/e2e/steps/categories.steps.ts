@@ -8,6 +8,8 @@ import {
 	categoryListed,
 	invoicesOf,
 	descriptionOf,
+	formReasonText,
+	reasonOf,
 	allowedChosen,
 	listedCategoriesNamed,
 	notAllowedChosen,
@@ -20,6 +22,7 @@ import {
 	openCategories,
 	openCategoryEdit,
 	openNewCategory,
+	openPredefinedCategory,
 	saveAsNotAllowed,
 	saveFormAsNotAllowed,
 	saveWithoutChoice,
@@ -62,6 +65,13 @@ Given(
 	'der Liegenschaftsverwalter ist auf der Bearbeitungsseite der Kategorie {string}',
 	async ({ verwalter, seed }, category: string) => {
 		await verwalter.attemptsTo(openCategoryEdit(seed.idOf(category)!));
+	}
+);
+
+Given(
+	'der Liegenschaftsverwalter ist auf der Bearbeitungsseite der vordefinierten Kategorie {string}',
+	async ({ verwalter }, name: string) => {
+		await verwalter.attemptsTo(openPredefinedCategory(name));
 	}
 );
 
@@ -194,3 +204,28 @@ Then('ist weder umlagefähig noch nicht umlagefähig gewählt', async ({ verwalt
 	await verwalter.sees(allowedChosen).toBe(false);
 	await verwalter.sees(notAllowedChosen).toBe(false);
 });
+
+Then(
+	'erfährt der Liegenschaftsverwalter bei der vordefinierten Kategorie {string}, dass ihre Kosten nicht mit dem Gebrauch zusammenhängen',
+	async ({ verwalter }, name: string) => {
+		await verwalter.sees(reasonOf(name)).toContain('nicht mit dem Gebrauch zusammen');
+	}
+);
+
+Then(
+	'erfährt der Liegenschaftsverwalter, dass die Kosten der Kategorie nicht mit dem Gebrauch zusammenhängen',
+	async ({ verwalter }) => {
+		await verwalter.sees(formReasonText).toContain('nicht mit dem Gebrauch zusammen');
+	}
+);
+
+Then('erfährt der Liegenschaftsverwalter, dass die KI sich nicht sicher ist', async ({ verwalter }) => {
+	await verwalter.sees(proposalText).toContain('Die KI ist sich nicht sicher.');
+});
+
+Then(
+	'erfährt der Liegenschaftsverwalter, dass die KI nicht erreichbar ist und er es später nochmals versuchen kann',
+	async ({ verwalter }) => {
+		await verwalter.sees(proposalText).toContain('Die KI ist nicht erreichbar. Versuchen Sie es später nochmals');
+	}
+);
