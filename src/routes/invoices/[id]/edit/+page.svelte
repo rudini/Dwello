@@ -81,7 +81,9 @@
 		});
 		saving = false;
 		if (result.error) {
-			saveError = backendMessage(result.error, result.error.message);
+			// the message of a code the UI knows, never the server's own text
+			const reason = backendMessage({ code: result.error.code, params: result.error.params }, '');
+			saveError = reason ? m.invoices_save_error({ error: reason }) : m.invoices_save_failed();
 			focusFirstError(event.target as Element);
 			return;
 		}
@@ -156,7 +158,7 @@
 
 	{#if saveError}
 		<Alert tone="critical" title={m.buildings_not_saved()}>
-			<p>{m.invoices_save_error({ error: saveError })}</p>
+			<p>{saveError}</p>
 		</Alert>
 	{/if}
 
