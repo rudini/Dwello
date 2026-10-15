@@ -39,11 +39,13 @@ const answers: {
 			Englisch: 'Preserving and renewing the building is not linked to its use (Art. 257a para. 1 CO).'
 		}
 	},
-	// «Treppenhausreinigung» judged like the predefined Hauswart when the prompt lists it as umlagefähig, else wrong
-	// as the default model judged it without the predefined Kategorien (#202)
+	// «Treppenhausreinigung» judged like the predefined Hauswart when the prompt lists it as umlagefähig and says the
+	// lists are not exhaustive, else wrong as the default model judged it without them (#202, #212)
 	{
 		match: /treppenhaus/i,
-		when: (prompt) => /^VORDEFINIERTE UMLAGEFÄHIGE KATEGORIEN[^]*?^- Caretaker \(Hauswart\)[^]*?^VORDEFINIERTE NICHT UMLAGEFÄHIGE/m.test(prompt),
+		when: (prompt) =>
+			/^VORDEFINIERTE UMLAGEFÄHIGE KATEGORIEN[^]*?^- Caretaker \(Hauswart\)[^]*?^VORDEFINIERTE NICHT UMLAGEFÄHIGE/m.test(prompt) &&
+			prompt.includes('Die Listen sind Beispiele und nicht abschliessend.'),
 		isAllowedUtilityCost: true,
 		confidence: 0.9,
 		reasoning: {
