@@ -12,10 +12,10 @@ Task: open `bug` issues one by one (#122, #123, #125, #126, #127, #128, #135, #1
 - [x] `MissingStatement.svelte`: one period as before; several: «{count} Abrechnungen fehlen» and one «Abrechnung {period} erstellen» per period. DOM test red: «nennt mehrere fehlende Abrechnungen …» – no such links
 - [x] Texts in de/fr/it/en; a11y and language rows of `contract-detail` unchanged (its default state now shows several periods)
 - [x] Skills: tdd, ponytail, ponytail-review
-- [x] Checks: lint, check, deepcheck:audit, fallow, unit and DOM tests, E2E chromium + api contract-detail (28 passed), axe and language rows of contract-detail (12 passed)
+- [x] Checks: lint, check, deepcheck:audit, fallow, test:coverage (2434; two page tests needed `missingStatements: []` in their data), E2E chromium + api contract-detail (28 passed), axe and language rows of contract-detail (12 passed)
 - [ ] code-reviewer
 - [ ] Personas
 - [ ] Workflow review `docs/reviews/workflow-rules-review-issue-142.md`
 - [ ] PR, CI, merge
 
-Files: `src/lib/accounting-period.ts`, `src/routes/contracts/[id]/+page.server.ts`, `+page.svelte`, `MissingStatement.svelte`, `messages/*.json`, tests (`settings.test.ts`, `contract-actions.test.ts`, `contract-detail-page.dom.test.ts`, `contract-detail.feature` and its steps, targets, tasks, questions)
+Files: `src/lib/accounting-period.ts`, `src/routes/contracts/[id]/+page.server.ts`, `+page.svelte`, `MissingStatement.svelte`, `messages/*.json`, tests (`settings.test.ts`, `contract-actions.test.ts`, `contract-detail-page.dom.test.ts`, `contract-rent-labels.test.ts`, `tenant-email-link.test.ts`, `contract-detail.feature` and its steps, targets, tasks, questions)

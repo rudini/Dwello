@@ -25,7 +25,8 @@ describe('Miete im Mietvertrag', () => {
 					city: 'Winterthur'
 				}
 			},
-			rentBreakdown: { baseRent: 950, additionalRent: 50, advancePayment: 180, total: 1180 }
+			rentBreakdown: { baseRent: 950, additionalRent: 50, advancePayment: 180, total: 1180 },
+			missingStatements: []
 		};
 		const body = render(ContractPage, { props: { data, form: null } as never }).body.replace(
 			/\s+/g,
