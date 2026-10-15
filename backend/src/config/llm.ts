@@ -136,7 +136,8 @@ export function buildCategorizationPrompt(
 }
 
 // Prompt for a new category: whether its costs may be passed on; {name} and {description} come from the form,
-// {categories_*} from the predefined categories only, so a landlord's own choice does not teach the KI (#202)
+// {categories_*} from the predefined categories only, so a landlord's own choice does not teach the KI (#202).
+// The rules and the JSON without example values are for small models, which copy an example answer (#212)
 const ALLOCABILITY_PROMPT = `Du bist ein Experte für Schweizer Nebenkostenabrechnungen. Ein Vermieter erfasst eine neue Kostenkategorie. Prüfe, ob ihre Kosten auf die Mieter umgelegt werden dürfen.
 
 ${LEGAL_BASIS}
@@ -149,15 +150,21 @@ VORDEFINIERTE UMLAGEFÄHIGE KATEGORIEN (dürfen auf Mieter umgelegt werden, wenn
 VORDEFINIERTE NICHT UMLAGEFÄHIGE KATEGORIEN (dürfen NICHT auf Mieter umgelegt werden):
 {categories_not_allowed}
 
+SO PRÜFST DU, der Reihe nach:
+1. Reparatur, Ersatz, Erneuerung, Renovation, Anschaffung und wertvermehrende Investitionen trägt immer der Vermieter, auch wenn sie eine umlagefähige Kategorie betreffen, z.B. den Lift, die Heizung oder den Garten (Art. 256 Abs. 1 OR; für Heizung und Warmwasser Art. 6 VMWG). Ebenso die mit der Sache verbundenen Lasten und öffentlichen Abgaben, z.B. die Liegenschaftssteuer (Art. 256b OR).
+2. Die vordefinierten Kategorien sind nicht vollständig. Ist die neue Kategorie eine Leistung derselben Art wie eine vordefinierte Kategorie, gilt deren Einstufung; was deren Beschreibung mit «ohne» ausschliesst, gehört nicht dazu. Beispiel: Die Reinigung der Waschküche ist eine Reinigung wie beim «Hauswart» und damit umlagefähig; die Reparatur der Waschküchentür ist eine Reparatur und nicht umlagefähig. Wartung von Brandschutzeinrichtungen gilt wie «Feuerlöscher-Wartung», Bekämpfung von Ungeziefer wie «Schädlingsbekämpfung».
+3. Art. 5 und 6 VMWG nur anwenden, wenn die Kategorie Heizung oder Warmwasser betrifft.
+4. Passt keine vordefinierte Kategorie: Laufende Kosten für Leistungen, die mit dem Gebrauch zusammenhängen (Betrieb, Reinigung, Verbrauch), und öffentliche Abgaben, die sich aus dem Gebrauch ergeben (z.B. Gebühren nach Verbrauch), sind umlagefähig, wenn im Mietvertrag vereinbart (Art. 257b Abs. 1, Art. 257a Abs. 2 OR). Abgaben, die vom Wert der Liegenschaft abhängen, trägt der Vermieter (Art. 256b OR).
+
 Kategorie: {name}
 Beschreibung: {description}
 Sprache der Begründung: {language}
 
 Antworte NUR im folgenden JSON-Format:
 {
-  "isAllowedUtilityCost": false,
-  "confidence": 0.9,
-  "reasoning": "Ein bis zwei Sätze in der Sprache der Begründung mit dem Artikel, z.B. (Art. 257a Abs. 1 OR)"
+  "isAllowedUtilityCost": <true oder false>,
+  "confidence": <Zahl von 0 bis 1>,
+  "reasoning": "Ein bis zwei Sätze in der Sprache der Begründung mit dem Artikel, der deine Antwort trägt"
 }`;
 
 // The interface languages, named as the German prompt names them

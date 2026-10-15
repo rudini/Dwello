@@ -78,6 +78,24 @@ describe('Vorschlag der KI für eine neue Kategorie', () => {
 		}
 	});
 
+	it('sagt der KI, dass die vordefinierten Kategorien nicht vollständig sind, ohne eine Antwort vorzugeben (#212)', async () => {
+		const llm = openAiCompatible({ isAllowedUtilityCost: true, confidence: 0.9, reasoning: '' });
+		try {
+			await sendJson('POST', '/api/v1/categories/propose', { name: 'Treppenhausreinigung' });
+
+			expect(llm.prompts[0]).toContain('Die vordefinierten Kategorien sind nicht vollständig.');
+			// Reparaturen gehen vor, sonst ordnet ein kleines Modell die Liftreparatur dem Lift zu
+			expect(llm.prompts[0]).toContain(
+				'1. Reparatur, Ersatz, Erneuerung, Renovation, Anschaffung und wertvermehrende Investitionen trägt immer der Vermieter'
+			);
+			// Ein kleines Modell übernimmt die Werte des Beispiels
+			expect(llm.prompts[0]).toContain('"isAllowedUtilityCost": <true oder false>');
+			expect(llm.prompts[0]).not.toContain('z.B. (Art. 257a Abs. 1 OR)');
+		} finally {
+			llm.stop();
+		}
+	});
+
 	it('verlangt die Begründung in der Sprache der Oberfläche', async () => {
 		const llm = openAiCompatible({ isAllowedUtilityCost: false, confidence: 0.9, reasoning: '' });
 		try {
