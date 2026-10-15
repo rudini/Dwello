@@ -39,7 +39,7 @@ Priorität: «hoch» heisst vor dem ersten echten Einsatz, weil sonst falsche Da
    - befristet: «Befristet bis TT.MM.JJJJ»,
    - gekündigt: «Unbefristet, gekündigt auf den TT.MM.JJJJ».
 4. Im Assistenten kann man bei einem gekündigten Vertrag die Kündigung zurücknehmen («Kündigung aufheben»). Der Vertrag ist danach wieder unbefristet ohne Vertragsende. Die Aktion nennt ihre Folge: «Der Mietvertrag läuft dann ohne Ende weiter.»
-5. Bestehende Verträge mit Vertragsende gelten als *vereinbart*. Eine Datenmigration ist nicht nötig, solange es keine produktive Datenbank gibt; die Spalte kommt in `0001_schema.sql`. Zu A-6: Die Aufgabe dort gilt nur für Verträge, deren vereinbartes Ende nach der Einführung von A-1 liegt; sonst fragt die Übersicht nach jedem alten befristeten Vertrag.
+5. Bestehende Verträge mit Vertragsende gelten als *vereinbart*. Die Spalte kam vor der ersten Installation in `0001_schema.sql`; seither braucht jede solche Änderung eine neue Migration (`backend/CLAUDE.md`). Zu A-6: Die Aufgabe dort gilt nur für Verträge, deren vereinbartes Ende nach der Einführung von A-1 liegt; sonst fragt die Übersicht nach jedem alten befristeten Vertrag.
 6. Der Product Owner passt die Definition von «Vertragsende» im Glossar an. Vorschlag: «Letzter Tag des Mietverhältnisses: bei befristeten Verträgen vereinbart, bei unbefristeten der Kündigungstermin. Leer, solange ein unbefristeter Vertrag nicht gekündigt ist.»
 
 **Akzeptanzkriterien**

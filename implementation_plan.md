@@ -9,4 +9,9 @@ No issue (task from chat). No scenario: server-side failure (migration errors on
 - [x] Rule: `backend/CLAUDE.md`, `README.md` and `docs/design/design-decisions.md` drop "until the first installation"; every schema or master data change is a new file, a migration on `main` is never edited, renamed, deleted or merged into a new baseline
 - [x] CI: "Lint and types" fails when a pull request modifies, renames or deletes a file in `backend/migrations` (`.github/workflows/ci.yml`; checked locally: an edit of `0001` red, a new `0003` and the clean branch green)
 - [x] `migrate.ts`: the refusals no longer advise `db:reset` for an installation (`backend/src/db/migrate.ts`, `migrations.pg.test.ts`). Test red: migrations.pg.test.ts "lehnt eine Datenbank ab, die Migrationen kennt …" and "… ohne Buchführung …" – received "Bitte neu aufsetzen: bun run db:reset". Skills: tdd, ponytail, ponytail-review
+- [ ] Review against the Opus 5.5 article (product owner, chat), fixes and delta review
 - [ ] Checks, `code-reviewer`, workflow review, archive session, pull request
+
+Reviews:
+
+- general-purpose (Opus 5.5 article) round 1 (`docs/reviews/migrations-frozen-blogreview-1.md`): fixed B-1 (Major), B-2 (Minor), B-3 (Minor), B-4 (Nit) in `docs/data-model.md`, `docs/anforderungen-vertragsende.md`, `backend/CLAUDE.md`, the workflow review; no behavior change, confirmed by delta review
