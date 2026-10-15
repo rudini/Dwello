@@ -22,7 +22,7 @@ import {
 	listFuelStocks,
 	otherTankCategory
 } from '../services/fuel-stock.service';
-import { isRealDate } from './real-date';
+import { isRealDate } from '../services/real-date';
 
 const fuelStockParams = t.Object({ id: t.String({ format: 'uuid' }) });
 

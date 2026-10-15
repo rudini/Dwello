@@ -28,6 +28,7 @@ Branch `feat/invoice-upload-217`. Issue #217 "Done means" plus `CLAUDE.md`, "Wor
 - [ ] Slice reviews (`code-reviewer`), feature review (personas, `fach-reviewer`)
   Slice 1 (backend, 90631a2..f63afb6) Skills: tdd, ponytail, ponytail-review (reuse: one mapping of the KI suggestion)
   code-reviewer round 1 (docs/reviews/upload-backend-review-1.md): fixed C-1 (Major; test «lässt ein Datum mit unmöglichem Monat leer …» red, `isRealDate` no longer throws), C-2, C-3 (tests), C-4 (code EXTRACTION_UNAVAILABLE), C-5 (code BELEG_NOT_FOUND, invoice checked before the file), C-6 (transaction; no test: a failing insert after the file check cannot be produced), C-7, C-8, C-9, C-10, C-11
+  code-reviewer round 2 (docs/reviews/upload-backend-review-2.md): C-1..C-11 confirmed fixed; fixed C-13 (test), C-14 (`isRealDate` moved to `services/real-date.ts`), C-15 (test red: `-2`, `1.5`, `true` counted); C-12: the texts of the dialog and the privacy statement stay in this branch, their tests come with slice 2 (frontend)
 - [ ] Before marking complete: all checks in `CLAUDE.md`
 - [ ] Workflow review `docs/reviews/workflow-rules-review-issue-217.md`
 - Found: `swiss-today.pg.test.ts` fails in its cleanup on `origin/main` too (utility_statements still reference the apartment) → row O-29 in `docs/design/offene-punkte.md`

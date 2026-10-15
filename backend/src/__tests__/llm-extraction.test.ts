@@ -79,6 +79,7 @@ describe('Antwort der KI zu einem Beleg', () => {
 		);
 		expect(parsed?.fields).toMatchObject({ servicePeriodStart: null, servicePeriodEnd: null });
 		expect(parsed?.invoiceCount).toBe(2);
+		for (const invoiceCount of [-2, 1.5, true]) expect(parseExtractionResponse(answer({ invoiceCount }))?.invoiceCount).toBe(1);
 	});
 
 	it('meldet abgezogene Beträge, Mahnungen, Gutschriften und gemischte Kosten', () => {

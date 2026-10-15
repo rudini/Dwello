@@ -88,6 +88,7 @@ describe('Datei auslesen', () => {
 		llmConfig.enabled = false;
 		const response = await extract();
 		expect(response.status).toBe(503);
+		expect(await response.json()).toMatchObject({ code: 'EXTRACTION_UNAVAILABLE' });
 		expect(server.prompts).toEqual([]);
 	});
 

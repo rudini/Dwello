@@ -3,7 +3,7 @@
  * CRUD endpoints for invoice management with LLM categorization
  */
 
-import { isRealDate } from './real-date';
+import { isRealDate } from '../services/real-date';
 import { Elysia, t } from 'elysia';
 import { CodedError, errorBody, refusal } from '../services/coded-error';
 import { authMiddleware } from '../middleware/auth';

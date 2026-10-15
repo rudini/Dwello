@@ -1,4 +1,4 @@
-import { isRealDate } from '../routes/real-date';
+import { isRealDate } from '../services/real-date';
 import { roundToRappen } from '../services/pdf-format';
 
 /**
@@ -323,6 +323,11 @@ const date = (value: unknown) => {
 };
 const francs = (value: unknown) => (typeof value === 'number' && value > 0 ? roundToRappen(value).toFixed(2) : null);
 const DOCUMENT_TYPES = ['invoice', 'reminder', 'credit_note'] as const;
+// How many invoices a file holds, also when the KI writes the number as text; anything else counts as one
+const count = (value: unknown) => {
+	const n = typeof value === 'string' || typeof value === 'number' ? Number(value) : NaN;
+	return Number.isInteger(n) && n > 0 ? n : 1;
+};
 // The confidence of a field by its name in the answer
 const ANSWERED_AS: Record<string, string> = { amount: 'totalAmount', servicePeriodEnd: 'servicePeriodStart' };
 
@@ -354,7 +359,7 @@ export function parseExtractionResponse(response: string): Extraction | null {
 		})
 		.map(([field]) => field);
 	return {
-		invoiceCount: Number(parsed.invoiceCount) || 1,
+		invoiceCount: count(parsed.invoiceCount),
 		documentType: DOCUMENT_TYPES.find((type) => type === parsed.documentType) ?? 'invoice',
 		fields,
 		deductedAmount: francs(parsed.deductedAmount),
