@@ -87,4 +87,15 @@ describe('Beleg einer Rechnung', () => {
 		const [left] = await db.select().from(invoiceDocuments).where(eq(invoiceDocuments.invoiceId, id));
 		expect(left).toBeUndefined();
 	});
+
+	it('meldet eine unbekannte Rechnung, auch mit einer Datei, die Dwello nicht nimmt', async () => {
+		const unknown = crypto.randomUUID();
+		const word = Buffer.from('PK\x03\x04').toString('base64');
+		const put = await sendJson('PUT', `/api/v1/invoices/${unknown}/beleg`, { fileName: 'x.docx', content: word });
+		expect(put.status).toBe(404);
+		expect(await put.json()).toMatchObject({ code: 'INVOICE_NOT_FOUND' });
+		const get = await callApi(`/api/v1/invoices/${unknown}/beleg`);
+		expect(get.status).toBe(404);
+		expect(await get.json()).toMatchObject({ code: 'BELEG_NOT_FOUND' });
+	});
 });

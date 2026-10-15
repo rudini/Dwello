@@ -1,3 +1,6 @@
+import { isRealDate } from '../routes/real-date';
+import { roundToRappen } from '../services/pdf-format';
+
 /**
  * LLM Configuration
  * Any provider with an OpenAI-compatible API (/chat/completions, /models); by default the local Ollama
@@ -316,9 +319,9 @@ const text = (value: unknown) => (typeof value === 'string' && value.trim() ? va
 // An existing date in ISO form; anything else is no proposal
 const date = (value: unknown) => {
 	const iso = text(value);
-	return iso && /^\d{4}-\d{2}-\d{2}$/.test(iso) && new Date(iso).toISOString().startsWith(iso) ? iso : null;
+	return iso && isRealDate(iso) ? iso : null;
 };
-const francs = (value: unknown) => (typeof value === 'number' && value > 0 ? value.toFixed(2) : null);
+const francs = (value: unknown) => (typeof value === 'number' && value > 0 ? roundToRappen(value).toFixed(2) : null);
 const DOCUMENT_TYPES = ['invoice', 'reminder', 'credit_note'] as const;
 // The confidence of a field by its name in the answer
 const ANSWERED_AS: Record<string, string> = { amount: 'totalAmount', servicePeriodEnd: 'servicePeriodStart' };
@@ -351,7 +354,7 @@ export function parseExtractionResponse(response: string): Extraction | null {
 		})
 		.map(([field]) => field);
 	return {
-		invoiceCount: typeof parsed.invoiceCount === 'number' ? parsed.invoiceCount : 1,
+		invoiceCount: Number(parsed.invoiceCount) || 1,
 		documentType: DOCUMENT_TYPES.find((type) => type === parsed.documentType) ?? 'invoice',
 		fields,
 		deductedAmount: francs(parsed.deductedAmount),

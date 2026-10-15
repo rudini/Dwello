@@ -244,16 +244,19 @@ export async function createInvoice(
 	// Without a category the KI categorizes the invoice; a suggestion taken in the form arrives in data
 	const suggestion = !data.categoryId && !options.skipLlmCategorization ? await categorizeWithKi(data) : {};
 
-	// Insert the invoice
-	const [invoice] = await db
-		.insert(invoices)
-		.values({
-			...data,
-			...suggestion,
-			wasManuallyOverridden: false
-		})
-		.returning();
-	if (file) await db.insert(invoiceDocuments).values({ invoiceId: invoice.id, ...file });
+	// Insert the invoice, with its Beleg or not at all
+	const invoice = await db.transaction(async (tx) => {
+		const [created] = await tx
+			.insert(invoices)
+			.values({
+				...data,
+				...suggestion,
+				wasManuallyOverridden: false
+			})
+			.returning();
+		if (file) await tx.insert(invoiceDocuments).values({ invoiceId: created.id, ...file });
+		return created;
+	});
 
 	// Fetch and return with details
 	const result = await getInvoice(invoice.id);
@@ -272,8 +275,8 @@ export async function getBeleg(invoiceId: string) {
 
 /** Adds or replaces the Beleg of an invoice; null when there is no such invoice */
 export async function setBeleg(invoiceId: string, upload: BelegUpload) {
-	const file = checkedFile(upload);
 	if (!(await getInvoice(invoiceId))) return null;
+	const file = checkedFile(upload);
 	await db
 		.insert(invoiceDocuments)
 		.values({ invoiceId, ...file })

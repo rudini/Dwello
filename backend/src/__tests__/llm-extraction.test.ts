@@ -57,6 +57,30 @@ describe('Antwort der KI zu einem Beleg', () => {
 		});
 	});
 
+	it('lässt ein Datum mit unmöglichem Monat leer, statt den ganzen Vorschlag zu verwerfen', () => {
+		const parsed = parseExtractionResponse(answer({ invoiceDate: '2026-13-01', dueDate: '2026-01-32' }));
+		expect(parsed?.fields).toMatchObject({ invoiceDate: null, dueDate: null, billingEntityName: 'Elektro Blitz AG' });
+	});
+
+	it('nennt einen unsicheren Betrag und einen unsicheren Leistungszeitraum unter ihren Feldern', () => {
+		const parsed = parseExtractionResponse(
+			answer({
+				servicePeriodStart: '2026-01-01',
+				servicePeriodEnd: '2026-03-31',
+				confidence: { totalAmount: 0.5, servicePeriodStart: 0.6 }
+			})
+		);
+		expect(parsed?.unsure).toEqual(['amount', 'servicePeriodStart', 'servicePeriodEnd']);
+	});
+
+	it('verwirft einen Leistungszeitraum, der vor seinem Beginn endet, und liest die Zahl der Rechnungen auch als Text', () => {
+		const parsed = parseExtractionResponse(
+			answer({ servicePeriodStart: '2026-03-31', servicePeriodEnd: '2026-01-01', invoiceCount: '2' })
+		);
+		expect(parsed?.fields).toMatchObject({ servicePeriodStart: null, servicePeriodEnd: null });
+		expect(parsed?.invoiceCount).toBe(2);
+	});
+
 	it('meldet abgezogene Beträge, Mahnungen, Gutschriften und gemischte Kosten', () => {
 		expect(parseExtractionResponse(answer({ deductedAmount: 1000, nonAllocableItems: true }))).toMatchObject({
 			deductedAmount: '1000.00',

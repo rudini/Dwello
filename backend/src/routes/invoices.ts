@@ -26,6 +26,7 @@ import { fileResponse } from './file-response';
 import { isLlmAvailable, getCacheStats, categorizeInvoice } from '../services/llm.service';
 import { getUtilityCostRules } from '../services/utility-validation.service';
 import { checkBuildingInvoices } from '../services/invoice-completeness.service';
+import { buildingExists } from '../services/building.service';
 
 // Validation schemas
 const invoiceQuerySchema = t.Object({
@@ -140,15 +141,19 @@ export const invoiceRoutes = new Elysia({ prefix: '/api/v1/invoices' })
 	.post(
 		'/extract',
 		async ({ body, set }) => {
+			if (!(await buildingExists(body.buildingId))) {
+				set.status = 404;
+				return refusal('BUILDING_NOT_FOUND', 'Building not found');
+			}
 			const proposal = await extractFromFile(body.buildingId, body.fileName, body.pages);
 			if (proposal) return proposal;
 			set.status = 503;
-			return refusal('KI_UNAVAILABLE', KI_UNAVAILABLE);
+			return refusal('EXTRACTION_UNAVAILABLE', 'The KI is disabled, unreachable or read nothing');
 		},
 		{
 			body: t.Object({
 				buildingId: t.String({ format: 'uuid' }),
-				fileName: t.String(),
+				fileName: t.String({ maxLength: 255 }),
 				// at most a few pages, each an image as a data URL
 				pages: t.Array(t.String({ pattern: '^data:image/(png|jpeg);base64,' }), { minItems: 1, maxItems: 3 })
 			})
@@ -197,7 +202,7 @@ export const invoiceRoutes = new Elysia({ prefix: '/api/v1/invoices' })
 		const beleg = await getBeleg(params.id);
 		if (!beleg) {
 			set.status = 404;
-			return { error: 'Beleg not found' };
+			return refusal('BELEG_NOT_FOUND', 'Beleg not found');
 		}
 		return fileResponse(set, beleg);
 	})

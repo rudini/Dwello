@@ -77,7 +77,7 @@ Dwello is a full-stack TypeScript application: a SvelteKit frontend that doubles
 ┌───────────────┐    ┌──────────────────────────┐
 │ PostgreSQL    │    │ LLM (OpenAI-compatible)  │
 │ Database      │    │ Default: local Ollama    │
-│               │    │ - qwen2.5vl:7b             │
+│               │    │ - qwen2.5vl:7b           │
 │ Schema:       │    │ - Port 11434             │
 │ backend/src/  │    │ Or an external provider  │
 │ db/schema.ts  │    │ via LLM_BASE_URL         │

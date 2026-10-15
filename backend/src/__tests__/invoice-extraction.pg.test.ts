@@ -80,7 +80,26 @@ describe('Datei auslesen', () => {
 		llmConfig.baseUrl = 'http://127.0.0.1:9'; // nothing listens there
 		const response = await extract();
 		expect(response.status).toBe(503);
-		expect(await response.json()).toMatchObject({ code: 'KI_UNAVAILABLE' });
+		expect(await response.json()).toMatchObject({ code: 'EXTRACTION_UNAVAILABLE' });
+	});
+
+	it('fragt eine abgeschaltete KI nicht', async () => {
+		const server = ki();
+		llmConfig.enabled = false;
+		const response = await extract();
+		expect(response.status).toBe(503);
+		expect(server.prompts).toEqual([]);
+	});
+
+	it('kennt kein unbekanntes Gebäude', async () => {
+		ki();
+		const response = await sendJson('POST', '/api/v1/invoices/extract', {
+			buildingId: crypto.randomUUID(),
+			fileName: 'r.pdf',
+			pages: [page]
+		});
+		expect(response.status).toBe(404);
+		expect(await response.json()).toMatchObject({ code: 'BUILDING_NOT_FOUND' });
 	});
 
 	it('nennt eine schon erfasste Rechnung mit gleichem Rechnungssteller und gleicher Rechnungsnummer im Gebäude', async () => {
