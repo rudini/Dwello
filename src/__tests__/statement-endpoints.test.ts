@@ -170,9 +170,7 @@ describe('GET /api/statements/[id]/pdf (PDF aus der Liste)', () => {
 		});
 		const response = await get();
 		expect(response.status).toBe(503);
-		expect(await sentenceOf(response)).toBe(
-			'Das PDF konnte nicht erstellt werden. Versuchen Sie es später erneut.'
-		);
+		expect(await sentenceOf(response)).toBe('Das PDF konnte nicht erstellt werden. Versuchen Sie es später erneut.');
 	});
 });
 

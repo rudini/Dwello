@@ -153,7 +153,7 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Wenn der Liegenschaftsverwalter das Gebäude "Ahornhof" für die Abrechnungen wählt
     Und das Gebäude "Ahornhof" wird inzwischen gelöscht
     Und der Liegenschaftsverwalter die Seite zum Erstellen von Abrechnungen später wieder öffnet
-    Dann sagt der wiederhergestellte Entwurf "Ein Gebäude aus Ihren Angaben gibt es nicht mehr. Dwello hat es aus der Auswahl entfernt. Prüfen Sie die Gebäude im Schritt «Gebäude»."
+    Dann sagt der wiederhergestellte Entwurf "Ein Gebäude aus Ihren Angaben gibt es nicht mehr. Dwello hat es aus der Auswahl entfernt. Prüfen Sie die Gebäude im Schritt 2 «Gebäude»."
 
   Szenario: Schon abgerechnete Mietverträge zeigen sich bei der Wahl der Gebäude
     Angenommen für "Marc Huber" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024

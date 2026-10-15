@@ -829,8 +829,8 @@ describe('Wiederhergestellte Angaben, die es nicht mehr gibt', () => {
 		open();
 		await settle();
 		expect(notes()).toEqual([
-			'Ein Gebäude aus Ihren Angaben gibt es nicht mehr. Dwello hat es aus der Auswahl entfernt. Prüfen Sie die Gebäude im Schritt «Gebäude».',
-			'Das Heizprofil aus Ihren Angaben gibt es nicht mehr. Wählen Sie im Schritt «Heizprofil und Verwaltungspauschale» ein anderes.'
+			'Ein Gebäude aus Ihren Angaben gibt es nicht mehr. Dwello hat es aus der Auswahl entfernt. Prüfen Sie die Gebäude im Schritt 2 «Gebäude».',
+			'Das Heizprofil aus Ihren Angaben gibt es nicht mehr. Wählen Sie im Schritt 3 «Heizprofil und Verwaltungspauschale» ein anderes.'
 		]);
 	});
 
@@ -839,7 +839,7 @@ describe('Wiederhergestellte Angaben, die es nicht mehr gibt', () => {
 		open();
 		await settle();
 		expect(notes()).toEqual([
-			'2 Gebäude aus Ihren Angaben gibt es nicht mehr. Dwello hat sie aus der Auswahl entfernt. Prüfen Sie die Gebäude im Schritt «Gebäude».'
+			'2 Gebäude aus Ihren Angaben gibt es nicht mehr. Dwello hat sie aus der Auswahl entfernt. Prüfen Sie die Gebäude im Schritt 2 «Gebäude».'
 		]);
 
 		document.body.innerHTML = '';
@@ -993,12 +993,15 @@ describe('Schon abgerechnete Mietverträge bei der Wahl der Gebäude', () => {
 			'2 von 3 Mietverträgen haben schon eine Abrechnung, die diese Abrechnungsperiode ganz oder teilweise abdeckt.'
 		);
 		expect(billedText('b2')).toBeUndefined();
-		// read after the building's name, not as part of it (persona Sven P-1)
+		// read after the building's name, not as part of it (persona Sven P-1), and a tap on it still chooses the
+		// building (persona Marco P-3)
 		const checkbox = byTestId('generate-building-b1')!;
-		expect(checkbox.closest('label')!.textContent).not.toContain('Mietverträgen');
-		expect(checkbox.getAttribute('aria-describedby')).toBe(
-			byTestId('generate-building-billed-b1')!.id
-		);
+		const note = byTestId('generate-building-billed-b1')!;
+		expect(checkbox.getAttribute('aria-describedby')).toBe(note.id);
+		expect(note.getAttribute('aria-hidden')).toBe('true');
+		click('generate-building-billed-b1');
+		await settle();
+		expect(byTestId<HTMLInputElement>('generate-building-b1')!.checked).toBe(true);
 		// one request for all buildings and the period of step 1
 		const [call] = calls.filter((c) => c.path.startsWith('/statements/billed'));
 		expect(call.path).toBe(

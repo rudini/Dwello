@@ -272,9 +272,13 @@ export const droppedNotes = (dropped: { buildings: number; heatingProfile: boole
 	[
 		dropped.buildings > 0 &&
 			(dropped.buildings === 1
-				? m.statements_draft_dropped_building_one()
-				: m.statements_draft_dropped_building_many({ count: dropped.buildings })),
-		dropped.heatingProfile && m.statements_draft_dropped_heating_profile()
+				? m.statements_draft_dropped_building_one({ step: m.statements_step_buildings() })
+				: m.statements_draft_dropped_building_many({
+						count: dropped.buildings,
+						step: m.statements_step_buildings()
+					})),
+		dropped.heatingProfile &&
+			m.statements_draft_dropped_heating_profile({ step: m.statements_step_settings() })
 	].filter((note) => note !== false);
 
 /** The wizard with one building and one period chosen, opened on the settings (A-10) */
