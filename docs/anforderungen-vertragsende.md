@@ -28,7 +28,7 @@ Priorität: «hoch» heisst vor dem ersten echten Einsatz, weil sonst falsche Da
 
 Aus dem Glossar hierher verschoben (#188); das Glossar sagt nur, was die Begriffe bedeuten.
 
-1. **Keine Überschneidung.** Pro Wohnung darf sich kein Mietvertrag mit einem anderen überschneiden; Dwello lehnt einen neuen oder geänderten Vertrag ab, der es täte (`CONTRACT_OVERLAP`; Szenarien in `contract-new.feature`, `contract-edit.feature`).
+1. **Keine Überschneidung.** Pro Wohnung darf sich kein Mietvertrag mit einem anderen überschneiden; Dwello lehnt einen neuen oder geänderten Vertrag ab, der es täte (`CONTRACT_OVERLAP` in `contract.service.ts`; für neue Verträge belegt durch `contract-new.feature` und `backend/src/__tests__/contract-overlap.pg.test.ts`).
 2. **Kündigungstermin als Vertragsende.** Ist ein unbefristeter Mietvertrag gekündigt, erfasst Dwello den Kündigungstermin als Vertragsende und merkt sich, dass er gekündigt ist (A-1).
 3. **Kündigungsfrist.** Dwello prüft die Kündigungsfrist nicht; geplant ist ein Hinweis ohne Sperre (A-3, #112).
 

@@ -22,7 +22,7 @@ Die Ubiquitous Language (nach Eric Evans, Domain-Driven Design) definiert ein ge
 | **Mietstatus** | Status einer Wohnung: Vermietet (`occupied`, ein Vertrag läuft), Wiedervermietet (`relet`, ein künftiger Vertrag ist abgeschlossen), Leer (`vacant`), Gesperrt (`reserved`). **Leer:** Es gibt keinen laufenden und keinen künftigen Mietvertrag; die Wohnung kann vermietet werden. **Gesperrt:** Der Vermieter hat die Wohnung gesperrt, z.B. während einer Renovation. | `status` Feld |
 | **Mieter** | Person, die eine Wohnung mietet. Enthält Name, Kontaktdaten, Adresse, Korrespondenzkanal und Sprache. Aktiv mit laufendem oder künftigem Mietvertrag, sonst ehemalig. | `tenants` Tabelle |
 | **Korrespondenzkanal** | Wie der Mieter Post erhält: Brief (`letter`) oder E-Mail (`email`). | `correspondence_channel` Feld |
-| **Vermieter** | Eigentümer oder Liegenschaftsverwalter, der die Wohnung vermietet. Trägt die Kosten des Leerstands. | — |
+| **Vermieter** | Eigentümer oder Liegenschaftsverwalter, der die Wohnung vermietet. | — |
 | **Liegenschaftsverwalter** | Person oder Firma, die Gebäude im Auftrag des Eigentümers verwaltet. Primärer Benutzer von Dwello. | — |
 
 ---

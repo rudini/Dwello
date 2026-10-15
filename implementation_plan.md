@@ -9,6 +9,7 @@ From issue #188 (decision #187, option A): rules of groups 1 and 2 move from `UB
 - [x] Map every rule of groups 1 and 2 to its place in `docs/nebenkostenabrechnung-anforderungen.md`, `docs/anforderungen-vertragsende.md` or `docs/PRD-Dwello.md` (and the scenario that shows it); add the missing ones there (new sections «Regeln in Dwello» in both requirement docs; stale PRD lines aligned to the code as decided on #188)
 - [x] Reduce the glossary entries of groups 1 to 3 to their definitions; settings entry «Verwaltungspauschale»
   Files: `UBIQUITOUS_LANGUAGE.md`, `docs/nebenkostenabrechnung-anforderungen.md`, `docs/anforderungen-vertragsende.md`, `docs/PRD-Dwello.md`, `implementation_plan.md`
+- [ ] Pull request lists each rule with its new place and names the help texts that quote a moved rule (`glossary_*_text`, `config_help_*`)
 - [ ] fach-reviewer on the diff (no rule lost, no definition changed in meaning)
 - [ ] code-reviewer round (docs only)
 - [ ] Workflow review not needed (no app changes, `CLAUDE.md` Workflow 7)

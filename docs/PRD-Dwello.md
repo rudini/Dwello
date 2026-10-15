@@ -1057,7 +1057,7 @@ BALANCE (refund): CHF 30
   - Custom profile: checkbox to enable custom percentages
 
 **Tab 4: Payment Settings**
-- Payment deadline (X days from statement date, default 30)
+- Payment deadline (X days after the statement is sent, default 30)
 - Reminder deadline (Y days after payment deadline, default 14; not applied, see section 5.9 «Reminders»)
 - Default currency (CHF)
 
