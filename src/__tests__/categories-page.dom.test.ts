@@ -213,7 +213,7 @@ describe('Umlagefähigkeit einer neuen Kategorie', () => {
 	}
 
 	it('übernimmt den Vorschlag der KI und zeigt ihre Begründung', () => {
-		const reasoning = 'Erneuerung des Gebäudes (Art. 257a Abs. 1 OR).';
+		const reasoning = 'Erneuerung des Gebäudes (Art. 256 Abs. 1 OR).';
 		checked('Dachsanierung', { isAllowedUtilityCost: false, reasoning });
 
 		expect(choice('Nicht umlagefähig').checked).toBe(true);

@@ -33,17 +33,19 @@ const answers: {
 		isAllowedUtilityCost: false,
 		confidence: 0.9,
 		reasoning: {
-			Deutsch: 'Erhalt und Erneuerung des Gebäudes hängen nicht mit dem Gebrauch zusammen (Art. 257a Abs. 1 OR).',
-			Französisch: 'L’entretien et la rénovation du bâtiment ne sont pas liés à son usage (art. 257a, al. 1, CO).',
-			Italienisch: 'Il mantenimento e il rinnovo dell’edificio non sono legati al suo uso (art. 257a cpv. 1 CO).',
-			Englisch: 'Preserving and renewing the building is not linked to its use (Art. 257a para. 1 CO).'
+			Deutsch: 'Erhalt und Erneuerung des Gebäudes trägt der Vermieter (Art. 256 Abs. 1 OR).',
+			Französisch: 'L’entretien et la rénovation du bâtiment sont à la charge du bailleur (art. 256, al. 1, CO).',
+			Italienisch: 'Il mantenimento e il rinnovo dell’edificio sono a carico del locatore (art. 256 cpv. 1 CO).',
+			Englisch: 'Preserving and renewing the building is borne by the landlord (Art. 256 para. 1 CO).'
 		}
 	},
-	// «Treppenhausreinigung» judged like the predefined Hauswart when the prompt lists it as umlagefähig, else wrong
-	// as the default model judged it without the predefined Kategorien (#202)
+	// «Treppenhausreinigung» judged like the predefined Hauswart when the prompt lists it as umlagefähig and says the
+	// predefined Kategorien are not complete, else wrong as the default model judged it without them (#202, #212)
 	{
 		match: /treppenhaus/i,
-		when: (prompt) => /^VORDEFINIERTE UMLAGEFÄHIGE KATEGORIEN[^]*?^- Caretaker \(Hauswart\)[^]*?^VORDEFINIERTE NICHT UMLAGEFÄHIGE/m.test(prompt),
+		when: (prompt) =>
+			/^VORDEFINIERTE UMLAGEFÄHIGE KATEGORIEN[^]*?^- Caretaker \(Hauswart\)[^]*?^VORDEFINIERTE NICHT UMLAGEFÄHIGE/m.test(prompt) &&
+			prompt.includes('Die vordefinierten Kategorien sind nicht vollständig.'),
 		isAllowedUtilityCost: true,
 		confidence: 0.9,
 		reasoning: {
