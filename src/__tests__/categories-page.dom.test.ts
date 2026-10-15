@@ -207,7 +207,7 @@ describe('Umlagefähigkeit einer neuen Kategorie', () => {
 		const props = reactiveProps({ form: null as unknown });
 		show(NewCategoryPage, props as never);
 		fireEvent(byTestId<HTMLInputElement>('category-name-input')!, 'input', name);
-		props.form = { proposal: { name, ...proposal } };
+		props.form = { proposal: { name, description: '', ...proposal } };
 		flushSync();
 		return props;
 	}
@@ -228,13 +228,52 @@ describe('Umlagefähigkeit einer neuen Kategorie', () => {
 		expect(byTestId('category-proposal')!.textContent).toContain('Dwello hat diese Wahl vorgewählt. Sie entscheiden');
 	});
 
+	// Helga P-8 (Runde 2): nach dem Umwählen ist es die eigene Wahl, nicht mehr die der KI
+	it('sagt nach dem Umwählen nicht mehr, Dwello habe die Wahl vorgewählt', () => {
+		checked('Dachsanierung', { isAllowedUtilityCost: false, reasoning: 'Erneuerung' });
+		click(choice('Umlagefähig'));
+
+		expect(byTestId('category-proposal')!.textContent).not.toContain('Dwello hat diese Wahl vorgewählt');
+		expect(byTestId('category-proposal')!.textContent).toContain('Ihre Wahl bleibt');
+	});
+
+	// G-1: eine Ablehnung beim Speichern (z. B. Name vergeben) nimmt Vorschlag und Wahl der KI nicht weg
+	it('behält Vorschlag und Wahl der KI, wenn das Speichern abgelehnt wird', () => {
+		const props = checked('Dachsanierung', { isAllowedUtilityCost: false, reasoning: 'Erneuerung' });
+		props.form = { errors: { name: 'Eine Kategorie mit dem Namen "Dachsanierung" existiert bereits.' } };
+		flushSync();
+
+		expect(choice('Nicht umlagefähig').checked).toBe(true);
+		expect(byTestId('category-proposal')!.textContent).toContain('Erneuerung');
+	});
+
+	// G-4: wählt der Liegenschaftsverwalter selbst wieder denselben Wert, ist es seine Wahl
+	it('lässt eine selbst wieder gewählte Wahl beim Umbenennen stehen', () => {
+		checked('Dachsanierung', { isAllowedUtilityCost: false, reasoning: 'Erneuerung' });
+		click(choice('Umlagefähig'));
+		click(choice('Nicht umlagefähig'));
+		fireEvent(byTestId<HTMLInputElement>('category-name-input')!, 'input', 'Dachsanierung Ost');
+		flushSync();
+
+		expect(choice('Nicht umlagefähig').checked).toBe(true);
+	});
+
+	// G-5: die KI hat Name und Beschreibung geprüft
+	it('nimmt den Vorschlag zurück, sobald die Beschreibung ändert', () => {
+		checked('Dachsanierung', { isAllowedUtilityCost: false, reasoning: 'Erneuerung', description: '' });
+		fireEvent(document.querySelector<HTMLInputElement>('#description')!, 'input', 'Nur Dachrinne reinigen');
+		flushSync();
+
+		expect(byTestId('category-proposal')).toBeNull();
+	});
+
 	// Sven P-2: eine eigene Wahl überschreibt die KI nicht
 	it('lässt eine eigene Wahl vor der Prüfung stehen und sagt das', () => {
 		const props = reactiveProps({ form: null as unknown });
 		show(NewCategoryPage, props as never);
 		fireEvent(byTestId<HTMLInputElement>('category-name-input')!, 'input', 'Gartenpflege');
 		click(choice('Nicht umlagefähig'));
-		props.form = { proposal: { name: 'Gartenpflege', isAllowedUtilityCost: true, reasoning: 'Betrieb' } };
+		props.form = { proposal: { name: 'Gartenpflege', description: '', isAllowedUtilityCost: true, reasoning: 'Betrieb' } };
 		flushSync();
 
 		expect(choice('Nicht umlagefähig').checked).toBe(true);
@@ -263,7 +302,7 @@ describe('Umlagefähigkeit einer neuen Kategorie', () => {
 	// Eine Wahl der KI gilt nur für den Namen, den sie geprüft hat (#176, E-1)
 	it('nimmt die Wahl der KI zurück, wenn eine spätere Prüfung keine sichere Antwort bringt', () => {
 		const props = checked('Dachsanierung', { isAllowedUtilityCost: false, reasoning: 'Erneuerung' });
-		props.form = { proposal: { name: 'Dachsanierung', error: 'Die KI ist sich nicht sicher.' } };
+		props.form = { proposal: { name: 'Dachsanierung', description: '', error: 'Die KI ist sich nicht sicher.' } };
 		flushSync();
 
 		expect(choice('Nicht umlagefähig').checked).toBe(false);
@@ -272,7 +311,7 @@ describe('Umlagefähigkeit einer neuen Kategorie', () => {
 	it('lässt eine eigene Wahl stehen, wenn eine spätere Prüfung keine sichere Antwort bringt', () => {
 		const props = checked('Dachsanierung', { isAllowedUtilityCost: false, reasoning: 'Erneuerung' });
 		click(choice('Umlagefähig'));
-		props.form = { proposal: { name: 'Dachsanierung', error: 'Die KI ist sich nicht sicher.' } };
+		props.form = { proposal: { name: 'Dachsanierung', description: '', error: 'Die KI ist sich nicht sicher.' } };
 		flushSync();
 
 		expect(choice('Umlagefähig').checked).toBe(true);

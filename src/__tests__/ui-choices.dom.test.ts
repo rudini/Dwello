@@ -91,4 +91,19 @@ describe('Auswahlgruppe', () => {
 			document.getElementById(fieldset.getAttribute('aria-describedby')!)!.textContent
 		).toContain('Bitte wählen Sie die Dauer.');
 	});
+
+	// Ein Screenreader liest die Fehlermeldung vor der Hilfe (G-6, Sven P-6 auf #176)
+	it('nennt die Fehlermeldung vor Hilfe und Beschreibung', () => {
+		show(RadioGroup, {
+			name: 'duration',
+			legend: 'Dauer',
+			help: 'Befristet endet von selbst.',
+			options,
+			value: '',
+			error: 'Bitte wählen Sie die Dauer.'
+		});
+		const first = (element: Element) => element.getAttribute('aria-describedby')!.split(' ')[0];
+		expect(first(document.querySelector('fieldset')!)).toBe('duration-error');
+		expect(first(document.querySelector('input[type="radio"]')!)).toBe('duration-error');
+	});
 });

@@ -71,8 +71,8 @@ export async function createCategory(fetch: typeof globalThis.fetch, request: Re
 	);
 }
 
-/** The KI's proposal whether a new category is umlagefähig, or why there is none, for the name it checked */
-export type Proposal = { name: string } & (
+/** The KI's proposal whether a new category is umlagefähig, or why there is none, for what it checked */
+export type Proposal = { name: string; description: string } & (
 	{ isAllowedUtilityCost: boolean; reasoning: string } | { error: string }
 );
 
@@ -95,10 +95,11 @@ export async function proposeAllocability(fetch: typeof globalThis.fetch, reques
 		response.ok && answer
 			? {
 					name: body.nameDE,
+					description: body.description,
 					isAllowedUtilityCost: answer.isAllowedUtilityCost === true,
 					reasoning: String(answer.reasoning ?? '')
 				}
-			: { name: body.nameDE, error: m.backend_ki_no_proposal() };
+			: { name: body.nameDE, description: body.description, error: m.backend_ki_no_proposal() };
 	return { proposal };
 }
 

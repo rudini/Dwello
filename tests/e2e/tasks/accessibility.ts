@@ -175,6 +175,9 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	// The KI stand-in (backend/scripts/llm-stub.ts) is sure about a renovation, not about guarding the building
 	'ki-proposal': () => askKi('Dachsanierung'),
 	'ki-no-proposal': () => askKi('Bewachung'),
+	// chosen first: the stand-in finds stairwell cleaning umlagefähig, the own choice stays
+	'ki-proposal-kept': () => (actor) =>
+		actor.attemptsTo(Check.the(on.notAllowedOption), askKi('Treppenhausreinigung')),
 	'profile-sum-invalid': () => (actor) =>
 		actor.attemptsTo(Enter.theValue('50').into(on.januaryShare), Wait.until(on.invalidProfileTotal)),
 	'mobile-menu-open': (_, viewport) => async (actor) => {

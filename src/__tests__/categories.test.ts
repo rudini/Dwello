@@ -139,7 +139,9 @@ describe('Vorschlag der KI', () => {
 		const { calls, result } = runAction(newActions.propose, '', 200, form, proposal);
 
 		// The proposal holds for the name the KI checked
-		expect(await result).toEqual({ proposal: { name: 'Treppenhausreinigung', ...proposal } });
+		expect(await result).toEqual({
+			proposal: { name: 'Treppenhausreinigung', description: 'Reinigung von Treppenhaus und Eingang', ...proposal }
+		});
 		expect(calls).toEqual([
 			{
 				method: 'POST',
@@ -161,6 +163,7 @@ describe('Vorschlag der KI', () => {
 		expect(await result).toEqual({
 			proposal: {
 				name: 'Treppenhausreinigung',
+				description: 'Reinigung von Treppenhaus und Eingang',
 				error: 'Die KI ist nicht erreichbar oder ist sich nicht sicher. Wählen Sie selbst, ob die Kosten umlagefähig sind.'
 			}
 		});
@@ -173,6 +176,7 @@ describe('Vorschlag der KI', () => {
 		expect(await result).toEqual({
 			proposal: {
 				name: 'Treppenhausreinigung',
+				description: 'Reinigung von Treppenhaus und Eingang',
 				error: 'Die KI ist nicht erreichbar oder ist sich nicht sicher. Wählen Sie selbst, ob die Kosten umlagefähig sind.'
 			}
 		});

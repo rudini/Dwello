@@ -49,12 +49,21 @@
 		},
 		{ value: 'false', label: m.invoices_not_allocable(), description: m.categories_allocable_no() }
 	];
-	// The KI's answer holds for the name it checked. It presets the choice unless the Liegenschaftsverwalter
-	// chose already; without a sure answer, or once the name changes, a choice the KI made goes again
-	let kiChoice = '';
+	// The KI's answer holds for the name and description it checked, also through a refused save (which
+	// brings no proposal). It presets the choice unless the Liegenschaftsverwalter chose already; without a
+	// sure answer, or once name or description change, a choice the KI made goes again
+	let kiChoice = $state('');
 	let applied = $state(false);
 	let checking = $state(false);
-	const current = $derived(proposal?.name === values.name.trim() ? proposal : undefined);
+	let answered = $state<Proposal>();
+	$effect.pre(() => {
+		if (proposal) answered = proposal;
+	});
+	const current = $derived(
+		answered?.name === values.name.trim() && answered.description === values.description.trim()
+			? answered
+			: undefined
+	);
 	$effect(() => {
 		const answer = current;
 		untrack(() => {
@@ -63,6 +72,10 @@
 				if (applied) values.allowed = kiChoice = String(answer.isAllowedUtilityCost);
 			} else if (values.allowed === kiChoice) values.allowed = kiChoice = '';
 		});
+	});
+	// A choice made by hand is the Liegenschaftsverwalter's, also when it equals the KI's
+	$effect(() => {
+		if (values.allowed !== kiChoice) kiChoice = '';
 	});
 </script>
 
@@ -119,7 +132,12 @@
 					{#if checking}
 						<p class="mt-4 text-ink-muted">{m.categories_proposal_checking()}</p>
 					{:else if current}
-						<div class="mt-4"><CategoryProposal proposal={current} {applied} /></div>
+						<div class="mt-4">
+							<CategoryProposal
+								proposal={current}
+								applied={applied && values.allowed === kiChoice}
+							/>
+						</div>
 					{/if}
 				</div>
 			</div>
