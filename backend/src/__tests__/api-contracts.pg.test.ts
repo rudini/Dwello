@@ -194,6 +194,16 @@ describe('API-Verträge des Frontends', () => {
 		expect(drift(await sample('buildings'), actual)).toEqual([]);
 	});
 
+	it('POST /statements/preview, die scheitert, liefert die Felder von statement-calculation-refused.json', async () => {
+		const response = await sendJson('POST', '/api/v1/statements/preview', {
+			contractId: 'keine-id',
+			periodStart: '2024-01-01',
+			periodEnd: '2024-12-31'
+		});
+		expect(response.status).toBe(400);
+		expect(drift(await sample('statement-calculation-refused'), await response.json())).toEqual([]);
+	});
+
 	it('GET /statements/:id/pdf einer unbekannten Abrechnung liefert die Felder von statement-pdf-refused.json', async () => {
 		const response = await callApi(`/api/v1/statements/${crypto.randomUUID()}/pdf`);
 		expect(response.status).toBe(404);

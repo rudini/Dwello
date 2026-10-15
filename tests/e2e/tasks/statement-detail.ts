@@ -7,6 +7,7 @@ import {
 	confirmSendButton,
 	deleteStatementButton,
 	downloadPdfLink,
+	pdfRefusalBackLink,
 	generatePdfButton,
 	markPaidButton,
 	paidDateInput,
@@ -48,3 +49,4 @@ export const generateStatementPdf = Click.on(generatePdfButton);
 export const downloadStatementPdf = DownloadFrom(downloadPdfLink);
 /** Follows the PDF link in the tab, as a browser does when the answer is no PDF */
 export const requestStatementPdf = Click.on(downloadPdfLink);
+export const leavePdfRefusal = Click.on(pdfRefusalBackLink);

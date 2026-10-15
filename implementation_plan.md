@@ -12,8 +12,12 @@ Task: open `bug` issues one by one (#122 in rudini/Dwello#181, #123 in rudini/Dw
 - [x] Messages `backend_iban_invalid`, `backend_pdf_failed`, `backend_calculation_failed` in de/fr/it/en; `docs/api-specification.md`; API contract `statement-pdf-refused.json`
 - [x] Skills: tdd, ponytail, ponytail-review
 - [x] Checks: test:coverage (2349), lint, check, backend test + type-check, deepcheck:audit, fallow audit, E2E chromium: both new scenarios, «PDF einer Abrechnung herunterladen», «PDF erstellen und herunterladen», «Vor dem Versand …»
-- [ ] code-reviewer
-- [ ] Personas (screen: statement detail and list, error text)
+- [x] code-reviewer
+  - code-reviewer round 1 (`docs/reviews/issue-125-review-1.md`): open none, fixed C-1 (Major; `statement-generation.test.ts` «meldet in Worten, wenn das Backend die Berechnung ablehnt» with contract `statement-calculation-refused.json`, red with the code left out of `call()`: received «Calculation failed»), C-2 (Minor; DOM test «nennt den Grund ohne Wiederholung …», red: the repeated sentence), C-3 (Minor; samples from `tests/contracts/`), C-4 (Minor; `pdfToView`'s generate step removed, the backend makes a missing PDF), C-5 (Minor; status of the proxy error kept, test expects 503), C-6 (Nit), rejected C-7: two routes, two answer shapes (refusal vs result), sharing them adds a layer for two lines; C-8: a statement deleted while its PDF is made, pre-existing and a race of seconds
+- [x] Personas (screen: statement detail and list, error text)
+  - persona helga round 1 (`docs/design/personas/helga-issue-125.md`): fixed P-1 (Major: a bare page, no way back; product owner chose a small page, 15.10.2026), P-2 (Minor: the link says what to do), P-3 (Nit: tab title, readable font); Beobachtungen in `offene-punkte.md` O-20
+  - persona marco round 1 (`docs/design/personas/marco-issue-125.md`): fixed P-1 (Major: tiny on a phone; viewport), P-2 (Minor: way back), P-3 (Nit: tab title); open P-4 (Nit, before the change: two file names) as O-20; Beobachtungen in O-20
+  - Fix: `pdfRefusal` answers a page (lang, viewport, title «Nebenkostenabrechnungen - Dwello», the sentence, link «Zu den Nebenkostenabrechnungen»; styles in a `<style>` element with the system colour `CanvasText`, as the design guard forbids colours in `style` attributes and the page has no app CSS). Test red: `statement-endpoints.test.ts` «zeigt den Satz auf einer Seite mit Titel, lesbar auf dem Handy und mit dem Weg zurück zur Liste»; scenario «PDF einer inzwischen gelöschten Abrechnung anfordern» extended by the way back; new screen `statement-pdf-refused` in `tests/a11y/screens.json`, `accessibility.feature`, `sprachen-bildschirme.feature` (axe red in dark mode with the browser's link colour, then green)
 - [ ] Workflow review `docs/reviews/workflow-rules-review-issue-125.md`
 - [ ] PR, CI, merge
 

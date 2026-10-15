@@ -9,6 +9,12 @@ import { localToday } from '$lib/contract-status';
 
 const API = 'http://localhost:3001/api/v1/statements/s1';
 
+/** The sentence of a refusal page, which opens in the tab instead of the PDF */
+async function sentenceOf(response: Response) {
+	expect(response.headers.get('Content-Type')).toMatch(/text\/html/);
+	return (await response.text()).match(/<p>([^<]*)<\/p>/)?.[1];
+}
+
 function call(handler: unknown, status: number, answer: object) {
 	const calls: { method?: string; url: string; body?: unknown }[] = [];
 	const fetch = async (url: string, init?: RequestInit) => {
@@ -111,30 +117,37 @@ describe('GET /statements/[id]/pdf', () => {
 		const fetch = async () => Response.json({ error: 'PDF not generated yet' }, { status: 404 });
 		const response = await get(fetch, '?ansehen');
 		expect(response.status).toBe(404);
-		expect(response.headers.get('Content-Type')).toMatch(/text\/plain/);
-		expect(await response.text()).toContain('Das PDF konnte nicht erstellt werden');
+		expect(await sentenceOf(response)).toContain('Das PDF konnte nicht erstellt werden');
 	});
 
 	// A tab with a statement deleted in the meantime: the download opens in the tab, as the view does
 	it('sagt beim Herunterladen in Worten, dass es die Abrechnung nicht gibt', async () => {
 		const response = await get(async () => Response.json(refusedPdf, { status: 404 }));
 		expect(response.status).toBe(404);
-		expect(response.headers.get('Content-Type')).toMatch(/text\/plain/);
-		expect(await response.text()).toBe('Abrechnung nicht gefunden.');
+		expect(await sentenceOf(response)).toBe('Abrechnung nicht gefunden.');
 	});
 
 	it('nennt beim Ansehen den Grund, den das Backend mit Code angibt', async () => {
-		const fetch = async () => Response.json({ error: 'IBAN not configured', code: 'IBAN_MISSING', params: {} }, { status: 400 });
-		const response = await get(fetch, '?ansehen');
-		expect(await response.text()).toBe('Es ist keine IBAN hinterlegt. Erfassen Sie die IBAN in den Einstellungen.');
+		const response = await get(async () => Response.json(refusedPdf, { status: 404 }), '?ansehen');
+		expect(await sentenceOf(response)).toBe('Abrechnung nicht gefunden.');
 	});
 
-	it('zeigt das PDF zum Ansehen im Browser und erstellt es, wenn es noch fehlt', async () => {
-		const { calls, fetch } = backend(false);
+	// Helga, Marco (#125): the sentence stood on a bare page, tiny on a phone, without a way back into Dwello
+	it('zeigt den Satz auf einer Seite mit Titel, lesbar auf dem Handy und mit dem Weg zurück zur Liste', async () => {
+		const html = await (await get(async () => Response.json(refusedPdf, { status: 404 }))).text();
+		expect(html).toContain('<html lang="de">');
+		expect(html).toContain('<meta name="viewport" content="width=device-width, initial-scale=1">');
+		expect(html).toContain('<title>Nebenkostenabrechnungen - Dwello</title>');
+		expect(html).toMatch(/<a [^>]*href="\/statements"[^>]*>Zu den Nebenkostenabrechnungen<\/a>/);
+	});
+
+	// The backend makes a missing PDF itself (getStatementPdf)
+	it('zeigt das PDF zum Ansehen im Browser', async () => {
+		const { calls, fetch } = backend(true);
 		const response = await get(fetch, '?ansehen');
 		expect(response.status).toBe(200);
 		expect(response.headers.get('Content-Disposition')).toMatch(/^inline/);
-		expect(calls).toEqual([`GET ${API}/pdf`, `POST ${API}/generate-pdf`, `GET ${API}/pdf`]);
+		expect(calls).toEqual([`GET ${API}/pdf`]);
 	});
 });
 
@@ -147,8 +160,7 @@ describe('GET /api/statements/[id]/pdf (PDF aus der Liste)', () => {
 		vi.stubGlobal('fetch', async () => Response.json(refusedPdf, { status: 404 }));
 		const response = await get();
 		expect(response.status).toBe(404);
-		expect(response.headers.get('Content-Type')).toMatch(/text\/plain/);
-		expect(await response.text()).toBe('Abrechnung nicht gefunden.');
+		expect(await sentenceOf(response)).toBe('Abrechnung nicht gefunden.');
 	});
 
 	it('sagt in Worten, wenn das Backend nicht erreichbar ist', async () => {
@@ -156,7 +168,7 @@ describe('GET /api/statements/[id]/pdf (PDF aus der Liste)', () => {
 			throw new TypeError('fetch failed');
 		});
 		const response = await get();
-		expect(response.headers.get('Content-Type')).toMatch(/text\/plain/);
-		expect(await response.text()).toBe('Das PDF konnte nicht erstellt werden. Versuchen Sie es später erneut.');
+		expect(response.status).toBe(503);
+		expect(await sentenceOf(response)).toBe('Das PDF konnte nicht erstellt werden. Versuchen Sie es später erneut.');
 	});
 });

@@ -5,7 +5,7 @@
 
 import type { RequestHandler } from './$types';
 import { forwardRequest, createBinaryResponse } from '$lib/server/api-proxy';
-import { logger } from '$lib/server/error-handler';
+import { AppError, logger } from '$lib/server/error-handler';
 import { pdfRefusal } from '$lib/server/statement';
 
 export const GET: RequestHandler = async ({ params, cookies }) => {
@@ -21,6 +21,6 @@ export const GET: RequestHandler = async ({ params, cookies }) => {
 		return createBinaryResponse(response.data, 'application/pdf', `statement-${params.id}.pdf`);
 	} catch (error) {
 		logger.error(`Proxy error: GET /statements/${params.id}/pdf`, error as Error);
-		return pdfRefusal(500, null);
+		return pdfRefusal(error instanceof AppError ? error.statusCode : 500, null);
 	}
 };

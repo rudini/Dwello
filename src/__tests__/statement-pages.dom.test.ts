@@ -683,6 +683,20 @@ describe('Abrechnungsdetail', () => {
 		expect(byTestId<HTMLButtonElement>('statement-generate-pdf-button')!.disabled).toBe(false);
 	});
 
+	// code review C-2 (#125): «PDF konnte nicht erstellt werden: Das PDF konnte nicht erstellt werden …»
+	it('nennt den Grund ohne Wiederholung, wenn das PDF aus einem unerwarteten Grund nicht entsteht', async () => {
+		fakeBff(() => [500, { error: 'PDF generation failed', code: 'PDF_FAILED', params: {} }]);
+		toasts.set([]);
+		detail();
+
+		click('statement-generate-pdf-button');
+		await settle();
+
+		expect(get(toasts).map((toast) => toast.message)).toEqual([
+			'Das PDF konnte nicht erstellt werden. Versuchen Sie es später erneut.'
+		]);
+	});
+
 	// Das Datumsfeld liegt im Dialog, ausserhalb des Formulars: der gewählte Tag muss mitgesendet werden
 	it('sendet das im Dialog gewählte Zahlungsdatum mit', () => {
 		detail({ status: 'sent' });

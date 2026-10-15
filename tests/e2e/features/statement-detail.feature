@@ -152,6 +152,8 @@ Funktionalität: Abrechnungsdetail
     Und die Abrechnung 2024 von "Eva Frei" wurde inzwischen gelöscht
     Wenn der Liegenschaftsverwalter das PDF der Abrechnung anfordert
     Dann liest der Liegenschaftsverwalter "Abrechnung nicht gefunden."
+    Wenn der Liegenschaftsverwalter von dort zu den Nebenkostenabrechnungen zurückkehrt
+    Dann ist der Liegenschaftsverwalter auf der Seite "Nebenkostenabrechnungen"
 
   # Der Mieter prüft die Abrechnung nach: Verteilschlüssel und Anteile je Position, Heizöl nach Verbrauch
   # (Art. 5 VMWG), Recht auf Belegeinsicht und detaillierte Heizkostenabrechnung (Art. 257b OR, Art. 8 VMWG)

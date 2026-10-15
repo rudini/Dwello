@@ -37,3 +37,4 @@ export const paidDateInput = target('Bezahlt am', (page) => page.getByTestId('pa
 export const statementHistory = target('Verlauf', (page) =>
 	page.getByRole('heading', { name: 'Verlauf' }).locator('xpath=ancestor::*[.//dl][1]')
 );
+export const pdfRefusalBackLink = target('Zu den Nebenkostenabrechnungen', (page) => page.getByTestId('pdf-refusal-back'));

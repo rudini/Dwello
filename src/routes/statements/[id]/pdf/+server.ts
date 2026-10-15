@@ -4,29 +4,14 @@ import type { RequestHandler } from './$types';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
-type Fetch = typeof globalThis.fetch;
-
-// The PDF to look at before sending is made first if it does not exist yet
-async function pdfToView(fetch: Fetch, id: string) {
-	const response = await fetch(`${BACKEND_URL}/api/v1/statements/${id}/pdf`);
-	if (response.status !== 404) return response;
-	await fetch(`${BACKEND_URL}/api/v1/statements/${id}/generate-pdf`, {
-		method: 'POST',
-		headers: { 'Content-Type': 'application/json' },
-		body: '{}' // the backend validates the body as an object
-	});
-	return fetch(`${BACKEND_URL}/api/v1/statements/${id}/pdf`);
-}
-
 /** The statement's PDF: as a download, or with ?ansehen shown in the browser */
 export const GET: RequestHandler = async ({ params, fetch, url }) => {
 	const { id } = params;
 	const view = url.searchParams.has('ansehen');
 
 	try {
-		const response = view
-			? await pdfToView(fetch, id)
-			: await fetch(`${BACKEND_URL}/api/v1/statements/${id}/pdf`);
+		// the backend makes a missing PDF first
+		const response = await fetch(`${BACKEND_URL}/api/v1/statements/${id}/pdf`);
 
 		if (!response.ok) {
 			const body = await response.json().catch(() => null);

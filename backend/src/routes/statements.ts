@@ -19,13 +19,13 @@ import {
 } from '../services/statement.service';
 import { generateStatementPdf, getStatementPdf } from '../services/statement-pdf.service';
 
-// Calculation parameters shared by preview and generate; the management fee overrides the configured default
 // A PDF that could not be made: a coded refusal (an invalid IBAN) as such, anything else logged and named
 function pdfFailure(error: unknown, set: { status?: number | string }) {
 	set.status = error instanceof CodedError ? 400 : 500;
 	return codedBody(error, 'PDF_FAILED', 'PDF generation failed');
 }
 
+// Calculation parameters shared by preview and generate; the management fee overrides the configured default
 const calculationBody = t.Object({
 	contractId: t.String(),
 	periodStart: t.String(),

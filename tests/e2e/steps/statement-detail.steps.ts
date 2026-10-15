@@ -20,6 +20,7 @@ import {
 	deleteStatement,
 	downloadStatementPdf,
 	requestStatementPdf,
+	leavePdfRefusal,
 	editStatementFromDetail,
 	generateStatementPdf,
 	markStatementPaid,
@@ -206,4 +207,8 @@ Then('nennt die Abrechnung das Heizprofil {string}', async ({ verwalter, names }
 
 When('der Liegenschaftsverwalter das PDF der Abrechnung anfordert', async ({ verwalter }) => {
 	await verwalter.attemptsTo(requestStatementPdf);
+});
+
+When('der Liegenschaftsverwalter von dort zu den Nebenkostenabrechnungen zurückkehrt', async ({ verwalter }) => {
+	await verwalter.attemptsTo(leavePdfRefusal);
 });

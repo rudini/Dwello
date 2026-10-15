@@ -143,5 +143,5 @@ Then('zeigt die Fusszeile die Version {string}', async ({ verwalter }, version: 
 });
 
 Then('liest der Liegenschaftsverwalter {string}', async ({ verwalter }, text: string) => {
-	await verwalter.sees(pageText).toBe(text);
+	await verwalter.sees(pageText).toContain(text);
 });
