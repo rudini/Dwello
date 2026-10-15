@@ -1,13 +1,14 @@
 # Workflow rules reviews: findings and their status (2026-10-15)
 
-Summary of all `docs/reviews/workflow-rules-review-*.md`. Reviews 1 to 9 were applied on 2026-10-14 (commits 3b4db73, 2f8b7ba, 7784acc), except the findings listed below as still open then; the reviews of issue-122 to issue-202 and migrations-frozen had not been applied. "Applied" names where the change now is.
+Summary of all `docs/reviews/workflow-rules-review-*.md` (issue-212 merged into `main` during this task and included). Reviews 1 to 9 were applied on 2026-10-14 (commits 3b4db73, 2f8b7ba, 7784acc), except the findings listed below as still open then; the reviews of issue-122 to issue-202 and migrations-frozen had not been applied. "Applied" names where the change now is.
 
 ## Applied in this change
 
 | Finding (review) | Point | Where now |
 |---|---|---|
 | W-28 (5), 123 R-1, 127 R-1, 202 #1, migrations W-2 | "No scenario" only named server-side failures; states the E2E stack cannot produce (server clock, backend start, a refusal's body, KI answer quality) had no rule; a scenario without steps cannot fail for the right reason | `CLAUDE.md` Workflow 1 |
-| 202 #1, #2 | KI prompt changes need `llm:eval` before and after; its needs were undocumented | `CLAUDE.md` Workflow 1, `backend/CLAUDE.md` Commands |
+| 202 #1, #2, 212 #1, #3 | KI prompt changes need `llm:eval` before and after, with the default model; without it the issue stays open (`Refs #n`, "Blocked on me"); its needs were undocumented | `CLAUDE.md` Workflow 1, `backend/CLAUDE.md` Commands |
+| 212 #2 | Prompts sent to the KI are domain rules for the `fach-reviewer` before implementing | `CLAUDE.md` Workflow 1 |
 | 176 W-9 | Data leaving the server in a new way makes the privacy statement a legal text of the task | `CLAUDE.md` Workflow 1 |
 | 135 W-2 | Check results given to a reviewer came from an older commit | `CLAUDE.md` Workflow 4 |
 | W-8 (2), 122 R-3, 174 W-8 | `git worktree remove --force` not needed; `node_modules` cannot be read (read dependencies through `node -e`; the deny rule stays) | `CLAUDE.md` Workflow 4 |
