@@ -58,6 +58,9 @@ Funktionalität: Jeder Bildschirm in jeder Sprache
       | tenant-new             | submit-empty        |
       | tenant-detail          | default             |
       | tenant-detail          | delete-dialog       |
+      | tenant-detail          | document-delete-dialog |
+      | tenant-detail          | upload-refused      |
+      | tenant-detail          | demo                |
       | tenant-edit            | default             |
       | tenant-edit            | submit-cleared      |
       | contracts              | default             |

@@ -14,9 +14,11 @@ async function redirectAfter(action: string) {
 }
 
 import TenantPage from '../routes/tenants/[id]/+page.svelte';
+import { flushSync } from 'svelte';
 import { get } from 'svelte/store';
 import { toasts } from '$lib/stores';
 import { allByTestId, byTestId, click, show } from './helpers/dom';
+import documentList from '../../tests/contracts/documents.json';
 
 const tenant = {
 	id: 't1',
@@ -56,7 +58,10 @@ const document_ = {
 	deliveryError: null
 };
 
-function open(contracts: unknown[] = [], form: unknown = null) {
+// as the backend lists it (00:30 on 14.10. in Switzerland)
+const [upload] = documentList.data;
+
+function open(contracts: unknown[] = [], form: unknown = null, documents: unknown[] = [document_], demo = false) {
 	show(TenantPage, {
 		data: {
 			tenant,
@@ -70,7 +75,8 @@ function open(contracts: unknown[] = [], form: unknown = null) {
 				upcoming: true
 			},
 			contractHistory: contracts,
-			documents: [document_]
+			documents,
+			demo
 		},
 		form
 	} as never);
@@ -115,7 +121,7 @@ describe('Mieterdetail', () => {
 		open();
 		expect(text('tenant-documents')).toContain('Zahlungserinnerung · NK-2024-001');
 		expect(text('document-status')).toBe('Zu versenden');
-		expect(byTestId('document-pdf-link')!.textContent).toContain('Zahlungserinnerung');
+		expect(byTestId('document-pdf-link')!.getAttribute('aria-label')).toContain('Zahlungserinnerung');
 	});
 
 	it('lässt einen Mieter mit Mietverträgen nicht löschen und sagt warum', () => {
@@ -140,5 +146,143 @@ describe('Mieterdetail', () => {
 		expect(document.querySelector('[role=dialog]')!.textContent).toContain(
 			'Mieter mit Mietverträgen können nicht gelöscht werden.'
 		);
+	});
+
+	it('nennt ein hochgeladenes Dokument mit Datum, ohne Versandstatus', () => {
+		open([], null, [upload]);
+		const row = byTestId('document-row')!.textContent!.replace(/\s+/g, ' ');
+		expect(row).toContain('Ausweiskopie');
+		expect(row).toContain('Hochgeladen am 14.10.2026');
+		expect(byTestId('document-status')).toBeNull();
+		expect(byTestId('document-delete-button')!.getAttribute('aria-label')).toBe('Löschen: Ausweiskopie');
+	});
+
+	it('bietet bei einer Mahnung kein Löschen an', () => {
+		open();
+		expect(byTestId('document-row')).not.toBeNull();
+		expect(byTestId('document-delete-button')).toBeNull();
+	});
+
+	it('sagt am Feld, welche Dateien Dwello annimmt und dass Kopien von Ausweisen gelöscht werden sollen', () => {
+		open([], null, []);
+		expect(text('tenant-documents-empty')).toBe('Noch keine Dokumente.');
+		const form = byTestId('tenant-document-upload')!.textContent!;
+		expect(form).toContain('PDF, JPG oder PNG, höchstens 10 MB.');
+		expect(form).toContain('Löschen Sie Ausweiskopien und Betreibungsauszüge');
+		expect(form).toContain('Ohne Titel heisst das Dokument wie die Datei, ohne Endung.');
+		expect(byTestId('tenant-document-demo')).toBeNull();
+	});
+
+	it('warnt in der öffentlichen Demo, dass alle Besucher die Dateien sehen', () => {
+		open([], null, [], true);
+		expect(text('tenant-document-demo')).toContain('Alle Besucher sehen die Dateien');
+	});
+
+	it('zeigt eine Ablehnung am Feld und behält den Titel', () => {
+		open([], { title: 'Scan', uploadError: 'Die Datei ist grösser als 10 MB.' }, []);
+		expect(text('form-error')).toBe('Die Datei ist grösser als 10 MB.');
+		expect(byTestId<HTMLInputElement>('tenant-document-title-input')!.value).toBe('Scan');
+	});
+
+	it('meldet ein gescheitertes Hochladen und behält den Titel', async () => {
+		open([], null, []);
+		const title = byTestId<HTMLInputElement>('tenant-document-title-input')!;
+		title.value = 'Betreibungsauszug';
+		title.dispatchEvent(new Event('input', { bubbles: true }));
+		const after = actions.get('?/upload')!({ formData: new FormData() }) as (input: unknown) => Promise<void>;
+		const update = vi.fn();
+		await after({ update, result: { type: 'error', error: new Error('500') } });
+		flushSync();
+		expect(text('form-error')).toContain(
+			'Das Dokument wurde nicht gespeichert, weil Dwello nicht geantwortet hat. Wählen Sie noch einmal «Dokument hochladen».'
+		);
+		expect(title.value).toBe('Betreibungsauszug');
+		expect(update).not.toHaveBeenCalled();
+		// not the file's fault: announced as an alert, the focus on the button that sends again; the file stays valid
+		expect(byTestId('form-error')!.getAttribute('role')).toBe('alert');
+		expect(byTestId('tenant-document-file-input')!.getAttribute('aria-invalid')).toBeNull();
+		await vi.waitFor(() => expect(document.activeElement).toBe(byTestId('tenant-document-upload-button')));
+	});
+
+	it('meldet ein hochgeladenes Dokument', async () => {
+		toasts.set([]);
+		open([], null, []);
+		const after = actions.get('?/upload')!({ formData: new FormData() }) as (input: unknown) => Promise<void>;
+		await after({ update: async () => {}, result: { type: 'success', data: { uploaded: 'Ausweiskopie' } } });
+		expect(get(toasts).map((toast) => toast.message)).toEqual(['Dokument «Ausweiskopie» hochgeladen']);
+		// stays where it was: at the form, below the new document
+		await vi.waitFor(() => expect(document.activeElement).toBe(byTestId('tenant-document-file-input')));
+	});
+
+	it('nennt beim Löschen eines Dokuments seine Folge und meldet es danach', async () => {
+		toasts.set([]);
+		open([], null, [upload]);
+		click('document-delete-button');
+		expect(text('document-delete-message')).toBe(
+			'Dokument «Ausweiskopie» wird endgültig gelöscht. Das lässt sich nicht rückgängig machen.'
+		);
+		const after = actions.get('?/deleteDocument')!({ formData: new FormData() }) as (input: unknown) => Promise<void>;
+		await after({ update: async () => {}, result: { type: 'success' } });
+		flushSync();
+		expect(get(toasts).map((toast) => toast.message)).toEqual(['Dokument «Ausweiskopie» gelöscht']);
+		await vi.waitFor(() => expect(document.activeElement).toBe(byTestId('tenant-documents')));
+	});
+
+	it('sagt, dass hochgeladene Dokumente mit dem Mieter gelöscht werden', () => {
+		open([], null, [upload]);
+		click('tenant-delete-button');
+		expect(text('delete-dialog-message')).toBe(
+			'Lea Frei wird endgültig gelöscht, zusammen mit den hochgeladenen Dokumenten. Das lässt sich nicht rückgängig machen.'
+		);
+	});
+
+	it('lehnt eine Datei über 10 MB ab, bevor sie gesendet wird', async () => {
+		open([], null, []);
+		const formData = new FormData();
+		formData.set('file', new File([new Uint8Array(10 * 1024 * 1024 + 1)], 'scan.pdf'));
+		const cancel = vi.fn();
+		actions.get('?/upload')!({ formData, cancel } as never);
+		flushSync();
+		expect(cancel).toHaveBeenCalled();
+		expect(text('form-error')).toBe(
+			'Die Datei ist grösser als 10 MB. Wählen Sie eine kleinere Datei oder verkleinern Sie den Scan.'
+		);
+		await vi.waitFor(() => expect(document.activeElement).toBe(byTestId('tenant-document-file-input')));
+	});
+
+	it('sendet eine Datei bis 10 MB', () => {
+		open([], null, []);
+		const formData = new FormData();
+		formData.set('file', new File([new Uint8Array(10 * 1024 * 1024)], 'scan.pdf'));
+		const cancel = vi.fn();
+		actions.get('?/upload')!({ formData, cancel } as never);
+		expect(cancel).not.toHaveBeenCalled();
+	});
+
+	it('bietet jede Datei mit einem Knopf zum Herunterladen an, der das Dokument nennt', () => {
+		open([], null, [document_, upload]);
+		const [letter, file] = allByTestId('document-pdf-link');
+		expect(letter.textContent!.trim()).toBe('PDF herunterladen');
+		expect(letter.getAttribute('aria-label')).toBe('PDF herunterladen: Zahlungserinnerung · NK-2024-001');
+		expect(file.textContent!.trim()).toBe('Datei herunterladen');
+		expect(file.getAttribute('aria-label')).toBe('Datei herunterladen: Ausweiskopie');
+	});
+
+	it('sagt bei einem Mieter mit Mietverträgen, dass hochgeladene Dokumente einzeln gelöscht werden', () => {
+		open([history('c1', 'Wohnung 1.01', '2015-01-01', '2019-12-31', 'ended')], null, [upload]);
+		click('tenant-delete-button');
+		expect(text('delete-dialog-message')).toContain(
+			'Auch die Dokumente, die Sie zu diesem Mieter hochgeladen haben, bleiben gespeichert. Löschen Sie sie einzeln unter «Dokumente» auf dieser Seite, sobald Sie sie nicht mehr brauchen.'
+		);
+	});
+
+	it('zeigt einen zu langen Titel am Feld «Titel» und setzt den Fokus dorthin', async () => {
+		open([], { title: 'T', titleError: 'Der Titel ist länger als 255 Zeichen. Kürzen Sie ihn.' }, []);
+		const title = byTestId<HTMLInputElement>('tenant-document-title-input')!;
+		expect(title.getAttribute('aria-invalid')).toBe('true');
+		expect(byTestId<HTMLInputElement>('tenant-document-file-input')!.getAttribute('aria-invalid')).toBeNull();
+		const after = actions.get('?/upload')!({ formData: new FormData() }) as (input: unknown) => Promise<void>;
+		await after({ update: async () => {}, result: { type: 'failure', status: 400, data: {} } });
+		await vi.waitFor(() => expect(document.activeElement).toBe(title));
 	});
 });

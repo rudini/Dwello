@@ -46,6 +46,9 @@ import { languageButton } from '../targets/language';
 import { demoNotice } from '../targets/demo';
 import { draftRestored, nextButton, saveStatus } from '../targets/wizard';
 import { DEMO_INSTANCE } from './demo';
+import { uploadDocument, wordFile } from './tenant-documents';
+import { deleteDocumentButton } from '../targets/documents';
+import { UPLOADED } from '../fixtures/screens';
 
 // How the axe check and the language check bring each screen of tests/a11y/screens.json into its state
 
@@ -129,6 +132,11 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 		await actor.attemptsTo(Wait.until(on.frenchPage));
 	},
 	'delete-dialog': () => openDialog(on.firstDeleteButton),
+	// the tenant's uploaded document (fixtures/screens.ts)
+	'document-delete-dialog': () => openDialog(deleteDocumentButton(UPLOADED)),
+	// a file Dwello does not take: the refusal at the file field
+	'upload-refused': () => (actor) =>
+		actor.attemptsTo(uploadDocument(wordFile('notizen.docx'), ''), Wait.until(on.formProblem)),
 	'fuel-stock-dialog': () => openDialog(on.firstFuelStockDelete),
 	// by keyboard: the gallery's toasts cover the page
 	'dialog-open': () => (actor) => actor.attemptsTo(Press.theKey('Enter').on(on.galleryDialogButton), Wait.until(on.dialog)),

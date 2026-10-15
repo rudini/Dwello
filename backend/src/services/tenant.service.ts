@@ -10,6 +10,7 @@ import {
 	rentalContracts,
 	apartments,
 	buildings,
+	documents,
 	type Tenant,
 	type NewTenant
 } from '../db/schema';
@@ -271,30 +272,10 @@ export async function updateTenant(id: string, data: Partial<NewTenant>): Promis
 
 /**
  * Delete a tenant
- * Returns false if tenant has active contracts
+ * Refused for a tenant with any contract, running or ended
  */
 export async function deleteTenant(id: string): Promise<{ success: boolean; error?: string }> {
-	// Check for active contracts
-	const today = swissToday();
-	const [activeContract] = await db
-		.select({ id: rentalContracts.id })
-		.from(rentalContracts)
-		.where(
-			and(
-				eq(rentalContracts.tenantId, id),
-				sql`(${rentalContracts.endDate} IS NULL OR ${rentalContracts.endDate} >= ${today})`
-			)
-		)
-		.limit(1);
-
-	if (activeContract) {
-		return {
-			success: false,
-			error: 'Cannot delete tenant with active contract'
-		};
-	}
-
-	// Check for any contracts (even ended ones have statements)
+	// Any contract, running or ended: statements and Mahnungen refer to the tenant
 	const [anyContract] = await db
 		.select({ id: rentalContracts.id })
 		.from(rentalContracts)
@@ -308,7 +289,11 @@ export async function deleteTenant(id: string): Promise<{ success: boolean; erro
 		};
 	}
 
-	const result = await db.delete(tenants).where(eq(tenants.id, id)).returning();
+	// Without contracts there are no Mahnungen: only uploaded documents, which go with the tenant
+	const result = await db.transaction(async (tx) => {
+		await tx.delete(documents).where(and(eq(documents.tenantId, id), eq(documents.type, 'upload')));
+		return tx.delete(tenants).where(eq(tenants.id, id)).returning();
+	});
 
 	if (result.length === 0) {
 		return { success: false, error: 'Tenant not found' };

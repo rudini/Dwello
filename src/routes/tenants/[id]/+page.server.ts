@@ -1,6 +1,6 @@
 import { m } from '$lib/paraglide/messages';
 import { fail, redirect } from '@sveltejs/kit';
-import { loadDocuments } from '$lib/server/documents';
+import { deleteDocument, loadDocuments, uploadDocument } from '$lib/server/documents';
 import { loadTenant } from '$lib/server/tenant';
 import { contractStatus, grossRent, toContractHistory } from '$lib/server/contract-history';
 import type { Actions, PageServerLoad } from './$types';
@@ -51,6 +51,8 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 };
 
 export const actions: Actions = {
+	upload: async ({ params, fetch, request }) => uploadDocument(fetch, params.id, await request.formData()),
+	deleteDocument: async ({ fetch, request }) => deleteDocument(fetch, await request.formData()),
 	delete: async ({ params, fetch }) => {
 		const response = await fetch(`${API}/tenants/${params.id}`, { method: 'DELETE' });
 		// The backend keeps tenants with rental contracts: statements and documents refer to them

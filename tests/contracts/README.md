@@ -27,4 +27,8 @@ Eine Zählung mit `count(*)` in Drizzles `sql<number>` liefert PostgreSQL als St
 | `tenants.json` | `GET /api/v1/tenants` |
 | `category.json` | `GET /api/v1/categories/:id` (eigene Kategorie) |
 | `category-proposal.json` | `POST /api/v1/categories/propose` (Vorschlag der KI für eine neue Kategorie) |
+| `documents.json` | `GET /api/v1/documents` (Dokumente eines Mieters, Dokumentenliste) |
+| `document-not-deletable.json` | `DELETE /api/v1/documents/:id` einer Mahnung (409) |
+| `document-uploaded.json` | `POST /api/v1/tenants/:id/documents` (Dokument hochladen) |
+| `document-refused.json` | `POST /api/v1/tenants/:id/documents` mit einer zu grossen Datei (400) |
 | `contract-end-refused.json` | `PUT /api/v1/contracts/:id` mit Vertragsdaten, die die abgerechneten Tage einer Abrechnung ändern (409) |

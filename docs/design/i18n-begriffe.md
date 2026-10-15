@@ -63,6 +63,10 @@ Style: French guillemets with a non-breaking space inside (« Immeubles »), I
 | Mahnung / Zahlungserinnerung / 2. Mahnung | rappel / rappel de paiement / 2e rappel | sollecito / promemoria di pagamento / 2° sollecito | reminder / payment reminder / 2nd reminder |
 | Mahnstufe / Mahnfrist | niveau de rappel / délai de rappel | livello di sollecito / termine di sollecito | reminder level / reminder period |
 | Dokument / Versandstatus / Zu versenden | document / statut d’envoi / à envoyer | documento / stato di invio / da inviare | document / dispatch status / to send |
+| hochladen / Hochgeladenes Dokument | téléverser / document téléversé | caricare / documento caricato | upload / uploaded document |
+| Übergabeprotokoll | procès-verbal de remise | verbale di consegna | handover report |
+| Betreibungsauszug | extrait du registre des poursuites | estratto del registro delle esecuzioni | debt collection register extract |
+| Ausweiskopie | copie de pièce d’identité | copia di un documento d’identità | copy of an ID document |
 | QR-Rechnung / Zahlteil / QR-Referenz | QR-facture / section paiement / référence QR | QR-fattura / sezione pagamento / riferimento QR | QR-bill / payment part / QR reference |
 | Tankbestand / Heizmaterial | stock de combustible / combustible | scorta di combustibile / combustibile | fuel stock / fuel |
 | Anfangsbestand / Endbestand | stock initial / stock final | scorta iniziale / scorta finale | opening stock / closing stock |

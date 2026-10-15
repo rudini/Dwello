@@ -4,6 +4,7 @@ vi.mock('$app/forms', () => ({ enhance: () => ({ destroy() {} }) }));
 
 import DocumentsPage from '../routes/documents/+page.svelte';
 import { allByTestId, byTestId, show } from './helpers/dom';
+import documentList from '../../tests/contracts/documents.json';
 
 const letter = (overrides = {}) => ({
 	id: 'd1',
@@ -67,6 +68,31 @@ describe('Dokumente', () => {
 		} as never);
 		expect(byTestId('form-error')!.textContent).toContain(
 			'Dokument konnte nicht aktualisiert werden.'
+		);
+	});
+
+	it('nennt bei einem hochgeladenen Dokument Mieter und Datum, ohne Versandstatus und ohne Markieren', () => {
+		documents([documentList.data[0] as never]);
+
+		const row = byTestId('document-row')!;
+		expect(row.textContent).toContain('Zu Marco Bernasconi, hochgeladen am 14.10.2026');
+		expect(byTestId('document-status')).toBeNull();
+		expect(byTestId('document-mark-sent')).toBeNull();
+		expect(byTestId('document-pdf-link')!.textContent).toContain('Datei herunterladen');
+		expect(byTestId('document-pdf-link')!.getAttribute('aria-label')).toBe('Datei herunterladen: Ausweiskopie');
+	});
+
+	it('nennt hochgeladene Dokumente, wenn noch keine Dokumente da sind', () => {
+		documents([]);
+		expect(byTestId('documents-empty')!.textContent).toContain(
+			'Mahnungen und Dokumente, die Sie zu einem Mieter hochladen, erscheinen hier.'
+		);
+	});
+
+	it('verspricht unter «Zu versenden» nur Briefe', () => {
+		documents([], 'to_send');
+		expect(byTestId('documents-empty')!.textContent).toContain(
+			'Briefe, die Sie ausdrucken und per Post schicken müssen, erscheinen hier.'
 		);
 	});
 });

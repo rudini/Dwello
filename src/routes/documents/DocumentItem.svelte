@@ -7,7 +7,7 @@
 	import Button from '$lib/ui/Button.svelte';
 	import { formatDate } from '$lib/utils/format';
 
-	// One stored letter: what, to whom, when, how it travels and whether it still has to be sent
+	// One stored letter: what, to whom, when, how it travels and whether it still has to be sent; or an uploaded file
 	let {
 		document,
 		showTenant = false,
@@ -20,14 +20,16 @@
 	const channel = $derived(
 		document.channel === 'email' ? m.tenants_document_by_email() : m.tenants_document_by_letter()
 	);
+	const date = $derived(formatDate(document.createdAt));
+	const upload = $derived(document.type === 'upload'); // no channel, no Versandstatus
 	const created = $derived(
-		showTenant
-			? m.documents_created_to({
-					name: document.tenantName,
-					date: formatDate(document.createdAt),
-					channel
-				})
-			: m.documents_created({ date: formatDate(document.createdAt), channel })
+		upload
+			? showTenant
+				? m.documents_uploaded_to({ name: document.tenantName, date })
+				: m.documents_uploaded({ date })
+			: showTenant
+				? m.documents_created_to({ name: document.tenantName, date, channel })
+				: m.documents_created({ date, channel })
 	);
 	const toSend = $derived(document.status === 'to_send');
 </script>
@@ -39,13 +41,15 @@
 	<div class="flex flex-col gap-1">
 		<p class="font-semibold text-ink">{heading}</p>
 		<p class="text-ink-muted">{created}</p>
-		<p>
-			<Badge
-				tone={toSend ? 'caution' : 'positive'}
-				label={toSend ? m.tenants_document_to_send() : m.statements_status_sent()}
-				testid="document-status"
-			/>
-		</p>
+		{#if !upload}
+			<p>
+				<Badge
+					tone={toSend ? 'caution' : 'positive'}
+					label={toSend ? m.tenants_document_to_send() : m.statements_status_sent()}
+					testid="document-status"
+				/>
+			</p>
+		{/if}
 		{#if document.deliveryError}<p class="text-caution">{deliveryErrorText(document)}</p>{/if}
 	</div>
 	<div class="flex flex-wrap gap-4">
@@ -53,8 +57,10 @@
 		<Button
 			href="/documents/{document.id}/pdf"
 			icon="document-download"
-			ariaLabel={m.documents_download_aria({ title: heading })}
-			testid="document-pdf-link">{m.documents_download()}</Button
+			ariaLabel={upload
+				? m.documents_download_file_aria({ title: heading })
+				: m.documents_download_aria({ title: heading })}
+			testid="document-pdf-link">{upload ? m.documents_download_file() : m.documents_download()}</Button
 		>
 	</div>
 </li>

@@ -7,6 +7,8 @@
 		"filtered-empty": "A list whose search matches nothing (?search=…).",
 		"submit-empty": "A new-record form submitted without input: all validation errors visible.",
 		"delete-dialog": "The delete confirmation dialog open.",
+		"document-delete-dialog": "The confirmation dialog for deleting a document the property manager uploaded to the tenant, open.",
+		"upload-refused": "A file Dwello does not take (a Word file) uploaded to the tenant: the refusal at the file field.",
 		"fuel-stock-dialog": "Building page with a Tankbestand reading: the confirmation before deleting it open.",
 		"end-dialog": "The dialog that ends a rental contract open.",
 		"end-dialog-error": "The dialog that ends a rental contract confirmed without a Vertragsende: the error at the field.",
@@ -184,7 +186,10 @@
 			"path": "/tenants/{tenant}",
 			"states": [
 				"default",
-				"delete-dialog"
+				"delete-dialog",
+				"document-delete-dialog",
+				"upload-refused",
+				"demo"
 			]
 		},
 		{

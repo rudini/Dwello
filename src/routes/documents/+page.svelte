@@ -28,6 +28,12 @@
 			active: data.status === 'to_send'
 		}
 	]);
+	// under «Zu versenden» only letters can appear, never uploaded documents
+	const empty = $derived(
+		data.status
+			? { title: m.documents_none_to_send(), text: m.documents_empty_to_send_text() }
+			: { title: m.documents_empty(), text: m.documents_empty_text() }
+	);
 </script>
 
 <svelte:head>
@@ -72,8 +78,8 @@
 		<div data-testid="documents-empty">
 			<EmptyState
 				illustration="envelope"
-				title={data.status ? m.documents_none_to_send() : m.documents_empty()}
-				text={m.documents_empty_text()}
+				title={empty.title}
+				text={empty.text}
 				actionLabel={m.documents_to_statements()}
 				actionHref="/statements"
 			/>
