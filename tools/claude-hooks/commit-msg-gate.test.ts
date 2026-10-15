@@ -60,6 +60,10 @@ describe('commit subject gate (CLAUDE.md, Conventions: Commits)', () => {
 		expect(hook(`git -C ${scratch} commit -m a`)).toMatchObject({ status: 0, stderr: '' });
 	});
 
+	it('checks a commit whose directory is no repository (the safe side)', () => {
+		expect(hook('git commit -m "bad."', writeProject({})).status).toBe(2);
+	});
+
 	it('checks a worktree of the project outside its folder', () => {
 		const project = writeRepo({
 			'.claude/hooks/commit-msg-gate.mjs': readFileSync(HOOK, 'utf8'),

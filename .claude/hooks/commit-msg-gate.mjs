@@ -12,7 +12,7 @@ import { fileURLToPath } from 'node:url';
 const input = JSON.parse(readFileSync(0, 'utf8'));
 const command = input.tool_input?.command ?? '';
 const repositoryOf = (dir) =>
-	spawnSync('git', ['-C', dir, 'rev-parse', '--path-format=absolute', '--git-common-dir'], { encoding: 'utf8' }).stdout.trim();
+	spawnSync('git', ['-C', dir, 'rev-parse', '--path-format=absolute', '--git-common-dir'], { encoding: 'utf8' }).stdout?.trim();
 const project = repositoryOf(fileURLToPath(new URL('../..', import.meta.url)));
 const inProject = (call) => {
 	const repository = repositoryOf(resolve(input.cwd ?? process.cwd(), call[2]?.trim().slice(2).trim() ?? '.'));

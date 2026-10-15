@@ -42,7 +42,7 @@ Summary of all `docs/reviews/workflow-rules-review-*.md`. Reviews 1 to 9 were ap
 | 173 R-1, R-2 | No layer for CI/deploy logic; build-time constants in components | `docs/test-pyramid.md` Rules |
 | 122 R-2, 176 W-5, 174 W-8 | Browser chrome; KI stand-in in the persona app; demo data is invented | `docs/design/personas/README.md` |
 | W-16 (3) | Personas may read network requests and cookies for claims about the system | `.claude/agents/persona.md` |
-| 125 R-2 (first half) | Pages outside the app: system colours in a `<style>` element | `docs/design/token-referenz.md` |
+| 125 R-2 | Pages outside the app: system colours in a `<style>` element, and the design guard allows exactly that (a named colour there is refused) | `docs/design/token-referenz.md`, `src/__tests__/design-guard.test.ts` |
 | W-13 (3), W-21 (4), 126 R-3, 176 W-12 | Issue template: the source of a complete list, tests that pin the old behaviour, migrations | `.github/ISSUE_TEMPLATE/task.md` |
 | 176 W-8 | Legal abbreviations («Abs.») made `abs` a German word | `src/__tests__/no-german-in-code.test.ts` |
 | 173 R-5 | Skill `grill-me` missing | `.claude/skills/grill-me/SKILL.md` |
@@ -57,5 +57,4 @@ Summary of all `docs/reviews/workflow-rules-review-*.md`. Reviews 1 to 9 were ap
 | migrations W-1 rules that end with an outside event name who records it | Not applied: the one case (migrations) is fixed and recorded; a rule about writing rules has no reader at the moment it matters |
 | W-7 (2–5), 174 W-9, 176 W-10 stop hook asks to push early | Outside the repository; `CLAUDE.md` Workflow 9 already says it does not override the workflow |
 | W-10 (2), 128 R-2, 202 #4 | The reviews propose no change |
-| 125 R-2 (second half) the design guard allows exactly that | No change needed: the guard checks only `style` attributes, so a `<style>` element already passes (`src/__tests__/design-guard.test.ts:21`) |
 | 176 W-7 E2E stand-ins in the test pyramid | Already applied in #176 (`docs/test-pyramid.md`, E2E row) |

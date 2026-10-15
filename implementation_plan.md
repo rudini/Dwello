@@ -12,10 +12,12 @@ Request (chat, no issue): summarize the findings of all `docs/reviews/workflow-r
 - [x] Scripts: `persona-stack.sh` from its own place (174 W-1); `session-start.sh` prints «some» instead of a count in a shallow clone (174 W-2; counting from the merge base gave 35 either way in a scratch clone)
 - [x] Rules in `CLAUDE.md`, `tests/e2e/CLAUDE.md`, `backend/CLAUDE.md`, `docs/test-pyramid.md`, personas README, `persona.md`, `token-referenz.md`, `screens.json`, task template
 - [x] Findings summary `docs/reviews/workflow-rules-findings-summary.md` (applied, rejected with reason)
-- [x] Checks: test:coverage (2438), lint, check, backend test (614) + type-check, deepcheck:audit, fallow audit
+- [x] Checks: test:coverage (2442), lint, check, backend test (614) + type-check, deepcheck:audit, fallow audit
 - [ ] Independent review against the Opus 5.5 guide (`code-reviewer`, own worktree), triage
   code-reviewer round 1 (`docs/reviews/workflow-rules-apply-review-1.md`): open -, fixed C-1 (Major), C-2 (Major), C-3 to C-18
+  code-reviewer round 2 (`docs/reviews/workflow-rules-apply-review-2.md`): open -, fixed C-19 to C-25 (Minor/Nit); C-1 to C-18 confirmed fixed
+  Test red (C-23): design guard «meldet <style> a { color: red }» - no finding; (C-20): «checks a commit whose directory is no repository» - status 0 with `!repository ||` removed
   Test red (C-1, C-3): commit-msg-gate worktree outside its folder and the two cd cases - status 0 with the hook of eee15f1
 - [ ] Archive session, push, pull request, CI, merge
 
-Files: `CLAUDE.md`, `tests/e2e/CLAUDE.md`, `backend/CLAUDE.md`, `docs/test-pyramid.md`, `docs/design/personas/README.md`, `docs/design/token-referenz.md`, `docs/design/tools/persona-stack.sh`, `.claude/agents/persona.md`, `.claude/hooks/{commit-msg-gate.mjs,fallow-gate.sh,deepcheck-gate.sh,session-start.sh}`, `.claude/skills/grill-me/SKILL.md`, `.github/ISSUE_TEMPLATE/task.md`, `tests/a11y/screens.json`, `src/__tests__/no-german-in-code.test.ts`, `tools/claude-hooks/*.test.ts`, `tools/deepcheck/test/hook.test.ts`, `docs/reviews/workflow-rules-findings-summary.md`, `docs/reviews/workflow-rules-apply-review-1.md`
+Files: `CLAUDE.md`, `tests/e2e/CLAUDE.md`, `backend/CLAUDE.md`, `docs/test-pyramid.md`, `docs/design/personas/README.md`, `docs/design/token-referenz.md`, `docs/design/tools/persona-stack.sh`, `.claude/agents/persona.md`, `.claude/hooks/{commit-msg-gate.mjs,fallow-gate.sh,deepcheck-gate.sh,session-start.sh}`, `.claude/skills/grill-me/SKILL.md`, `.github/ISSUE_TEMPLATE/task.md`, `tests/a11y/screens.json`, `src/__tests__/no-german-in-code.test.ts`, `tools/claude-hooks/*.test.ts`, `tools/deepcheck/test/hook.test.ts`, `docs/reviews/workflow-rules-findings-summary.md`, `docs/reviews/workflow-rules-apply-review-{1,2}.md`, `src/__tests__/design-guard.test.ts`
