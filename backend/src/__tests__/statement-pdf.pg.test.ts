@@ -194,7 +194,7 @@ describe('Zeitanteil einer Rechnung mit Leistungszeitraum im PDF', () => {
 	});
 
 	it('erklärt den Bruch einer Rechnung mit Leistungszeitraum', () => {
-		expect(text).toContain('Zeitanteil: Ihre Mietstage in der Abrechnungsperiode, bei einer Rechnung mit Leistungszeitraum Ihre Mietstage darin von dessen Tagen in der Periode.');
+		expect(text).toContain('Zeitanteil: Ihre Mietstage in der Abrechnungsperiode; bei einer Rechnung mit Leistungszeitraum Ihre Mietstage darin von dessen Tagen in der Periode.');
 	});
 
 	// Zwei Hauswart-Rechnungen über verschiedene Tage: der Anteil ist nach Beträgen gewichtet, kein Bruch von Tagen (#226)
@@ -213,6 +213,26 @@ describe('Zeitanteil einer Rechnung mit Leistungszeitraum im PDF', () => {
 
 		expect(mixed).toMatch(/Hauswart Pro Fläche \(m²\) 70\.00 \/ 70\.00 m² 1'206\.52 1'206\.52 51\.66 % /);
 		expect(mixed).not.toContain('Ihre Mietstage darin');
+	});
+
+	// Mietvertrag über die ganze Periode: der Mieter trägt alle Tage jeder Rechnung, der Anteil ist 92/92 (Regel 5)
+	it('druckt bei einem Mietvertrag über die ganze Periode auch eine Position über verschiedene Tage in Tagen', async () => {
+		const whole = await createRental(crypto.randomUUID(), { startDate: '2025-01-01', monthlyAdvancePayment: '0' });
+		await insertInvoice(whole.building, { amount: '900.00', invoiceDate: '2025-10-05', servicePeriodStart: '2025-07-01', servicePeriodEnd: '2025-09-30' });
+		await insertInvoice(whole.building, { amount: '600.00', invoiceDate: '2025-06-30', servicePeriodStart: '2025-06-01', servicePeriodEnd: '2025-06-30' });
+		const statement = await generateStatement({
+			contractId: whole.contract,
+			buildingId: whole.building,
+			periodStart: '2025-06-01',
+			periodEnd: '2025-08-31',
+			managementFeePercent: 0
+		});
+		await generateStatementPdf(statement.id, 'de');
+		const text = readPdf(Buffer.from((await getStatementPdf(statement.id)).pdfBlob!, 'base64')).flowing;
+		await deleteStatement(statement.id);
+		await whole.remove();
+
+		expect(text).toContain("Hauswart Pro Fläche (m²) 70.00 / 70.00 m² 1'206.52 1'206.52 92/92 Tage 1'206.52");
 	});
 });
 
