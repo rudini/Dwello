@@ -178,9 +178,6 @@ Verwaltung, Reparaturen, Renovation, Liegenschaftssteuer, Hypothekarzinsen, Geb�
 | Begriff | Definition |
 |---------|-----------|
 | **Obligationenrecht (OR)** | Schweizer Bundesgesetz, das die Mietvertragsbestimmungen regelt. Insbesondere Art. 257a-257b OR für Nebenkosten. |
-| **Art. 257a OR** | Definiert Nebenkosten als Entgelt für Leistungen des Vermieters, die mit dem Gebrauch der Sache zusammenhängen. |
-| **Art. 257b OR** | Nebenkosten sind die tatsächlichen Aufwendungen des Vermieters; Kosten für Reparaturen, Erneuerungen und Steuern gehören nicht dazu. |
-| **Art. 4 Abs. 3 VMWG** | Der Verwaltungsaufwand darf nach Aufwand oder im Rahmen der üblichen Ansätze angerechnet werden. In der Praxis gelten 3 % als Richtwert. |
 | **Umlagefähige Nebenkosten** | Kosten, die der Vermieter dem Mieter in Rechnung stellen darf (abschliessende Liste im Mietvertrag). |
 | **Datenschutzgesetz (DSG)** | Schweizer Datenschutzgesetz. Relevant für die Verarbeitung von Mieterdaten. |
 

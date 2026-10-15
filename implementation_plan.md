@@ -10,8 +10,9 @@ Task: «Setze #180, #184, #185 und #186 um». #184 is a decision issue, closed w
 - [x] Branch restarted from `origin/main` (PR #190 merged)
 - [x] #186 decisions recorded in the issue, label `entscheiden` removed
 - [x] Scenarios `@wip` in `categories.feature`: reason of a predefined category in the list and on its edit page, KI unsure, KI not reachable. Scenario red: `reasonOf("Feuerlöscher-Wartung")` null; `formReasonText` null; proposal «Die KI ist nicht erreichbar oder ist sich nicht sicher …» lacks «Die KI ist sich nicht sicher.» and «Die KI ist nicht erreichbar. Versuchen Sie es später nochmals»
+- [x] First lower-layer test while the domain review runs. Test red: `category-allocability.pg.test.ts` «schlägt nichts vor, wenn die KI unsicher ist» / «… nicht erreichbar ist» / «… unbrauchbar ist» – code `KI_NO_PROPOSAL` received, `KI_UNSURE` / `KI_UNAVAILABLE` expected
 - [ ] `fach-reviewer` on the scenarios and the draft texts (reasons, help, KI hints, #185, #216, glossary rows)
-- [ ] #180: remove the rows «Art. 257a OR», «Art. 257b OR», «Art. 4 Abs. 3 VMWG» from `UBIQUITOUS_LANGUAGE.md`
+- [x] #180 (product owner confirmed on 2026-10-15: «Ja, lösche die drei Glossarzeilen»): remove the rows «Art. 257a OR», «Art. 257b OR», «Art. 4 Abs. 3 VMWG» from `UBIQUITOUS_LANGUAGE.md`
 - [ ] #185: «Gebäudeversicherung» in `invoices_category_not_allocable_text` and `invoices_legal_text` (4 languages), DOM test red first. No scenario: decided in the issue (wording only)
 - [ ] #216: privacy text with the KI switched off, README «External LLM provider». No scenario: the E2E stack runs with the KI on and the privacy page loads the KI state server-side
 - [ ] #186 slice A: codes `KI_UNAVAILABLE` and `KI_UNSURE` instead of `KI_NO_PROPOSAL`
