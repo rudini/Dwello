@@ -6193,6 +6193,7 @@ Request (chat, no issue): summarize the findings of all `docs/reviews/workflow-r
   Test red (C-1, C-3): commit-msg-gate worktree outside its folder and the two cd cases - status 0 with the hook of eee15f1
 - [x] Merged `origin/main` (#212, archive conflict resolved: both sessions kept); its new `workflow-rules-review-issue-212.md` applied (212 #1, #2; #3 as 202 #2)
   code-reviewer round 1 of the #212 slice (`docs/reviews/workflow-rules-apply-212-review-1.md`): open -, fixed C-1 (Major), C-2 to C-6; merge fd87bba confirmed (both sessions kept)
+  code-reviewer round 2 of the #212 slice (`docs/reviews/workflow-rules-apply-212-review-2.md`): C-1 to C-6 confirmed fixed; fixed C-7 (Nit), C-8 (Minor)
 - [x] No workflow review (step 7): the task changes rules, hooks and test tooling, no app behaviour
 - [x] Archive session, push, pull request, CI, merge (pull request opened after archiving; merge follows green CI)
 
