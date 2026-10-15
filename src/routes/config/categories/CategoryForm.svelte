@@ -49,14 +49,20 @@
 		},
 		{ value: 'false', label: m.invoices_not_allocable(), description: m.categories_allocable_no() }
 	];
-	// The KI's answer becomes the choice; the Liegenschaftsverwalter can still change it
+	// The KI's answer becomes the choice; the Liegenschaftsverwalter can still change it. Without a sure
+	// answer a choice the KI made for an earlier name goes, one the Liegenschaftsverwalter made stays
+	let kiChoice = '';
+	let checking = $state(false);
 	$effect(() => {
-		if (proposal && 'reasoning' in proposal) values.allowed = String(proposal.isAllowedUtilityCost);
+		if (!proposal) return;
+		if ('reasoning' in proposal) values.allowed = kiChoice = String(proposal.isAllowedUtilityCost);
+		else if (untrack(() => values.allowed) === kiChoice) values.allowed = kiChoice = '';
 	});
 </script>
 
 <SaveForm
 	{action}
+	bind:checking
 	record="category"
 	error={errors.form}
 	cancelHref="/config/categories"
@@ -96,6 +102,7 @@
 				<Button
 					type="submit"
 					formaction="?/propose"
+					busy={checking}
 					icon="ai-suggestion"
 					testid="category-propose-button">{m.categories_propose()}</Button
 				>

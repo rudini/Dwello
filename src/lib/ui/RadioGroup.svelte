@@ -22,6 +22,11 @@
 		testid?: string;
 	} = $props();
 
+	// An option names its description and, on a refusal, the error, so the focus on it reads both
+	const describedByOption = (option: Option, id: string) =>
+		[option.description && `${id}-description`, error && `${name}-error`]
+			.filter(Boolean)
+			.join(' ') || undefined;
 	const describedBy = $derived(
 		[help && `${name}-help`, error && `${name}-error`].filter(Boolean).join(' ') || undefined
 	);
@@ -52,7 +57,7 @@
 				type="radio"
 				value={option.value}
 				bind:group={value}
-				aria-describedby={option.description ? `${id}-description` : undefined}
+				aria-describedby={describedByOption(option, id)}
 				class="mt-1 size-6 shrink-0 cursor-pointer accent-accent"
 			/>
 			<span class="flex flex-col gap-1">

@@ -164,6 +164,23 @@ describe('Vorschlag der KI', () => {
 		});
 	});
 
+	// Nie der eigene Text des Backends, z. B. Elysias Meldung zu einem zu langen Namen (E-6)
+	it('zeigt bei einer anderen Ablehnung des Backends denselben Hinweis', async () => {
+		const { result } = runAction(newActions.propose, '', 422, form, { type: 'validation', message: 'Expected string length less or equal to 100' });
+
+		expect(await result).toEqual({
+			proposal: {
+				error: 'Die KI ist nicht erreichbar oder ist sich nicht sicher. Wählen Sie selbst, ob die Kosten umlagefähig sind.'
+			}
+		});
+	});
+
+	it('zeigt den Hinweis auch, wenn eine Antwort ohne Inhalt kommt', async () => {
+		const { result } = runAction(newActions.propose, '', 200, form, null);
+
+		expect(await result).toMatchObject({ proposal: { error: expect.stringContaining('Wählen Sie selbst') } });
+	});
+
 	it('verlangt zuerst einen Namen', async () => {
 		const { calls, result } = runAction(newActions.propose, '', 200, { ...form, name: ' ' });
 

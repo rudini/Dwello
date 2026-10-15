@@ -79,7 +79,7 @@ Isolation as Farley describes it:
 
 - **Functional:** `seed.names` appends a UUID to every business name ("Lindenhof" → "Lindenhof 3f2a…"), so scenarios run in parallel.
 - **Temporal:** every scenario creates its own data and cleans it up.
-- **System:** external systems are replaced at the boundary (mail catcher, KI stand-in, session JWT; local stand-ins via `Bun.serve` for the OpenAI-compatible LLM provider in `invoice-categorization.pg.test.ts` and for Resend in `mail.test.ts`).
+- **System:** external systems are replaced at the boundary (mail catcher, KI stand-in, session JWT; local stand-ins via `Bun.serve` for the OpenAI-compatible LLM provider in `backend/src/__tests__/helpers/llm.ts` and for Resend in `mail.test.ts`).
 
 ## Workflow: one feature with ATDD
 

@@ -81,12 +81,21 @@ export async function proposeAllocability(fetch: typeof globalThis.fetch, reques
 	const response = await fetch(`${API}/propose`, {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify({ name: body.nameDE, description: body.description, language: getLocale() })
+		body: JSON.stringify({
+			name: body.nameDE,
+			description: body.description,
+			language: getLocale()
+		})
 	});
 	const answer = await response.json().catch(() => null);
-	const proposal: Proposal = response.ok
-		? { isAllowedUtilityCost: answer.isAllowedUtilityCost === true, reasoning: String(answer.reasoning ?? '') }
-		: { error: backendMessage(answer, m.backend_ki_no_proposal()) };
+	// Without a proposal the backend can only answer KI_NO_PROPOSAL, or a schema refusal in its own words
+	const proposal: Proposal =
+		response.ok && answer
+			? {
+					isAllowedUtilityCost: answer.isAllowedUtilityCost === true,
+					reasoning: String(answer.reasoning ?? '')
+				}
+			: { error: m.backend_ki_no_proposal() };
 	return { proposal };
 }
 

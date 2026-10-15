@@ -25,6 +25,9 @@ import NewCategoryPage from '../routes/config/categories/new/+page.svelte';
 import EditCategoryPage from '../routes/config/categories/[id]/edit/+page.svelte';
 import { toasts } from '$lib/stores';
 import { allByTestId, byTestId, click, fireEvent, settle, show } from './helpers/dom';
+import { reactiveProps } from './helpers/reactive-props.svelte';
+import { focusFirstError } from '$lib/ui/focus-error';
+import { flushSync } from 'svelte';
 
 const category = (
 	id: string,
@@ -215,12 +218,79 @@ describe('Umlagefähigkeit einer neuen Kategorie', () => {
 		expect(byTestId('category-proposal')!.textContent).toContain(error);
 	});
 
+	// Eine Wahl der KI gilt nur für den Namen, den sie geprüft hat (#176, E-1)
+	it('nimmt die Wahl der KI zurück, wenn eine spätere Prüfung keine sichere Antwort bringt', () => {
+		const props = reactiveProps({
+			form: { proposal: { isAllowedUtilityCost: false, reasoning: 'Erneuerung' } } as unknown
+		});
+		show(NewCategoryPage, props as never);
+		props.form = { proposal: { error: 'Die KI ist sich nicht sicher.' } };
+		flushSync();
+
+		expect(choice('Nicht umlagefähig').checked).toBe(false);
+	});
+
+	it('lässt eine eigene Wahl stehen, wenn eine spätere Prüfung keine sichere Antwort bringt', () => {
+		const props = reactiveProps({
+			form: { proposal: { isAllowedUtilityCost: false, reasoning: 'Erneuerung' } } as unknown
+		});
+		show(NewCategoryPage, props as never);
+		click(choice('Umlagefähig'));
+		props.form = { proposal: { error: 'Die KI ist sich nicht sicher.' } };
+		flushSync();
+
+		expect(choice('Umlagefähig').checked).toBe(true);
+	});
+
+	// Screenreader hören den Vorschlag, ohne den Fokus zu verlieren (E-3)
+	it('sagt den Vorschlag der KI an', () => {
+		show(NewCategoryPage, { form: { proposal: { isAllowedUtilityCost: true, reasoning: 'Betrieb' } } } as never);
+
+		expect(byTestId('category-proposal')!.closest('[role="status"]')).not.toBeNull();
+	});
+
+	// Die KI braucht bis zu 30 s: der Knopf zeigt, dass sie prüft, und lässt sich nicht nochmals drücken (E-4)
+	it('zeigt während der Prüfung, dass die KI arbeitet', async () => {
+		show(NewCategoryPage, { form: null } as never);
+		const button = byTestId<HTMLButtonElement>('category-propose-button')!;
+		const after = server.submit!({ formData: new FormData(server.form!), submitter: button }) as (
+			input: unknown
+		) => Promise<void>;
+		flushSync();
+
+		expect(button.textContent).toContain('Bitte warten');
+		await after({ update: async () => {}, result: { type: 'success' } });
+		await settle();
+		expect(button.textContent).toContain('Von der KI prüfen lassen');
+	});
+
+	// Enter in einem Feld speichert, wie in jedem Formular, und fragt nicht die KI (E-5)
+	it('speichert mit Enter im Namen, statt die KI zu fragen', () => {
+		show(NewCategoryPage, { form: null } as never);
+		const submit = vi.spyOn(server.form!, 'requestSubmit').mockImplementation(() => {});
+		byTestId('category-name-input')!.dispatchEvent(
+			new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true })
+		);
+
+		expect(submit).toHaveBeenCalledWith(byTestId('category-submit'));
+	});
+
 	it('meldet die fehlende Wahl an der Wahl', () => {
 		show(NewCategoryPage, {
 			form: { errors: { isAllowedUtilityCost: 'Wählen Sie, ob die Kosten umlagefähig sind.' } }
 		} as never);
 
 		expect(byTestId('category-allowance')!.textContent).toContain('Wählen Sie, ob die Kosten umlagefähig sind.');
+	});
+
+	// Nach der Ablehnung führt der Fokus zur Wahl, damit ein Screenreader die Meldung vorliest (E-2)
+	it('setzt den Fokus nach der Ablehnung auf die Wahl', async () => {
+		show(NewCategoryPage, {
+			form: { errors: { isAllowedUtilityCost: 'Wählen Sie, ob die Kosten umlagefähig sind.' } }
+		} as never);
+		await focusFirstError(document.querySelector('form')!);
+
+		expect(document.activeElement).toBe(choice('Umlagefähig'));
 	});
 
 	it('zeigt beim Bearbeiten die gespeicherte Wahl, ohne die KI anzubieten', () => {

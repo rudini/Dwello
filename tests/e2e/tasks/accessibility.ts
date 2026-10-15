@@ -19,6 +19,7 @@ import {
 	Wait
 } from '../screenplay/interactions';
 import { Visibility } from '../screenplay/questions';
+import { nameInput, proposal, proposeButton } from '../targets/categories';
 import type { Target } from '../screenplay/target';
 import * as on from '../targets/accessibility';
 import { userMenuButton } from '../targets/app-frame';
@@ -66,9 +67,9 @@ const clickOnShown = async (actor: Actor, text: string, place: (shown: string) =
 const openDialog = (button: Target): Activity => (actor) => actor.attemptsTo(Click.on(button), Wait.until(on.dialogConfirm));
 const askKi = (name: string): Activity => (actor) =>
 	actor.attemptsTo(
-		Enter.theValue(name).into(on.categoryNameInput),
-		Click.on(on.categoryProposeButton),
-		Wait.until(on.categoryProposal)
+		Enter.theValue(name).into(nameInput),
+		Click.on(proposeButton),
+		Wait.until(proposal)
 	);
 
 // The statement wizard's preview of a calendar year for this example's building (and others), heating profile and fee

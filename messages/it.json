@@ -1084,7 +1084,7 @@
 	"categories_name_german": "Nome (tedesco)",
 	"categories_description_predefined": "L’elenco non mostra la descrizione delle categorie predefinite.",
 	"categories_allocable": "Spese accessorie addebitabili",
-	"categories_allocable_help": "Sono addebitabili i costi legati all’uso dell’immobile (art. 257a–257b CO), p. es. riscaldamento, acqua, portineria. Riparazioni, rinnovi, assicurazione dell’edificio e imposte sono a carico del locatore; per ascensore e portineria contano solo esercizio e manutenzione. Il conduttore paga i costi addebitabili solo se il contratto di locazione li indica come spese accessorie (art. 257a cpv. 2 CO).",
+	"categories_allocable_help": "Sono addebitabili i costi legati all’uso dell’immobile (art. 257a–257b CO), p. es. riscaldamento, acqua, portineria. Riparazioni, rinnovi, assicurazione dell’edificio e imposte sono a carico del locatore; per ascensore e portineria contano solo esercizio e manutenzione. L’inquilino paga i costi addebitabili solo se il contratto di locazione li indica come spese accessorie (art. 257a cpv. 2 CO).",
 	"categories_heating": "Ripartire le spese di riscaldamento secondo il profilo di riscaldamento",
 	"categories_heating_help": "Per esempio olio combustibile, teleriscaldamento, pellet o spazzacamino. Se un inquilino entra o lascia l’appartamento durante il periodo di conteggio, Dwello ripartisce questi costi sui mesi secondo il profilo di riscaldamento, tutti gli altri per giorni. L’acqua calda conteggiata separatamente si consuma più o meno allo stesso modo tutto l’anno: in quel caso non metta la spunta.",
 	"categories_sort_order": "Ordine",
