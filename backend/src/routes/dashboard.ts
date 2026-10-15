@@ -9,6 +9,7 @@ import { db } from '../db/connection';
 import { buildings, apartments, utilityStatements, invoices } from '../db/schema';
 import { apartmentStatus } from '../services/apartment.service';
 import { statusCondition } from '../services/statement.service';
+import { swissToday } from '../services/today';
 
 const countApartments = async (where?: SQL) =>
 	Number((await db.select({ count: count() }).from(apartments).where(where))[0]?.count ?? 0);
@@ -110,9 +111,7 @@ async function recentActivity() {
 const owed = (status: string) => and(statusCondition(status), gt(utilityStatements.balance, '0'));
 
 export const dashboardRoutes = new Elysia().get('/api/v1/dashboard', async () => {
-	const thisMonth = new Date();
-	thisMonth.setDate(1);
-	const monthStart = thisMonth.toISOString().split('T')[0];
+	const monthStart = `${swissToday().slice(0, 8)}01`;
 
 	const statements = {
 		draft: await countStatements(statusCondition('draft')),

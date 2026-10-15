@@ -16,6 +16,7 @@ import {
 } from '../db/schema';
 import { apartmentStatus } from './apartment.service';
 import { CodedError } from './coded-error';
+import { swissToday } from './today';
 
 /** Contract with the names of its tenant, apartment and building; selected with those three tables joined */
 const contractFields = {
@@ -85,7 +86,7 @@ export async function listContracts(filters: ContractFilters = {}): Promise<{
 	total: number;
 }> {
 	const { apartmentId, tenantId, buildingId, status, search, limit = 50, offset = 0 } = filters;
-	const today = new Date().toISOString().split('T')[0];
+	const today = swissToday();
 
 	// Build conditions
 	const conditions = [];

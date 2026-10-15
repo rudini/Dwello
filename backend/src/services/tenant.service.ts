@@ -13,6 +13,7 @@ import {
 	type Tenant,
 	type NewTenant
 } from '../db/schema';
+import { sqlToday, swissToday } from './today';
 
 export interface TenantFilters {
 	search?: string;
@@ -33,7 +34,7 @@ export interface TenantWithOccupancy extends Tenant {
 /** Active: a rental contract runs today or is signed for later */
 const isActive = sql<boolean>`exists (
 	select 1 from rental_contracts c
-	where c.tenant_id = "tenants"."id" and (c.end_date is null or c.end_date >= current_date)
+	where c.tenant_id = "tenants"."id" and (c.end_date is null or c.end_date >= ${sqlToday})
 )`;
 const hasContracts = sql`exists (select 1 from rental_contracts c where c.tenant_id = "tenants"."id")`;
 
@@ -108,7 +109,7 @@ export async function listTenants(filters: TenantFilters = {}): Promise<{
 
 	// Batch load current occupancy for all tenants (avoids N+1 query)
 	const tenantIds = results.map((t) => t.id);
-	const today = new Date().toISOString().split('T')[0];
+	const today = swissToday();
 
 	const currentContracts =
 		tenantIds.length > 0
@@ -167,7 +168,7 @@ export async function getTenant(id: string): Promise<TenantWithOccupancy | null>
 	if (!tenant) return null;
 
 	// Get current occupancy
-	const today = new Date().toISOString().split('T')[0];
+	const today = swissToday();
 	const [currentContract] = await db
 		.select({
 			apartmentNumber: apartments.number,
@@ -210,7 +211,7 @@ export async function getTenantWithHistory(id: string): Promise<{
 	const tenant = await getTenant(id);
 	if (!tenant) return null;
 
-	const today = new Date().toISOString().split('T')[0];
+	const today = swissToday();
 
 	const contracts = await db
 		.select({
@@ -274,7 +275,7 @@ export async function updateTenant(id: string, data: Partial<NewTenant>): Promis
  */
 export async function deleteTenant(id: string): Promise<{ success: boolean; error?: string }> {
 	// Check for active contracts
-	const today = new Date().toISOString().split('T')[0];
+	const today = swissToday();
 	const [activeContract] = await db
 		.select({ id: rentalContracts.id })
 		.from(rentalContracts)

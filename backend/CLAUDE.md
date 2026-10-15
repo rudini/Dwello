@@ -35,6 +35,7 @@ Every `bun test` started in `backend/` itself loads the preload `scripts/test-db
 
 ## Swiss domain rules
 
+- **Today:** the Swiss day (`swissToday()`, in SQL `sqlToday`, `src/services/today.ts`), never `toISOString()` of now or SQL `current_date`: server and database run in UTC, a day behind between midnight and 01:00/02:00 Swiss time.
 - **Allocable costs (OR 257a):** a category that is not allocable (`categories.is_allowed_utility_cost`, seeded in `0002_stammdaten.sql`) always makes its invoices non-allocable, whatever the form or the LLM sends; an invoice in an allocable category can still be excluded.
 - **Management fee:** 3 % is the customary guideline, not a cap; statements apply the percentage that is set (`management-fee*.test.ts`).
 - **Prorating:** by days rented; heating costs by the heating profile's monthly shares (`prorating.service.ts`).

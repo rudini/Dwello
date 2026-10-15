@@ -23,6 +23,7 @@ import { getTypedConfig } from './config.service';
 import { fuelStockChange } from './fuel-stock.service';
 import { listApartments } from './apartment.service';
 import { refusal, type Refusal } from './coded-error';
+import { daysAfter, swissToday } from './today';
 
 export interface StatementFilters {
 	search?: string;
@@ -69,7 +70,7 @@ export interface StatementWithDetails extends Omit<UtilityStatement, 'pdfBlob'> 
  * 'open' covers all sent statements that are not paid yet (overdue included)
  */
 export function statusCondition(status: string) {
-	const today = new Date().toISOString().split('T')[0];
+	const today = swissToday();
 	if (status === 'open') return eq(utilityStatements.status, 'sent');
 	if (status === 'overdue') {
 		return and(eq(utilityStatements.status, 'sent'), lt(utilityStatements.paymentDeadline, today));
@@ -169,7 +170,7 @@ export async function listStatements(filters: StatementFilters = {}): Promise<{
 	}
 
 	// Build results with line items and compute effective status
-	const today = new Date().toISOString().split('T')[0];
+	const today = swissToday();
 	const statementsWithLineItems: StatementWithDetails[] = results.map((row) => {
 		// Compute effective status: if sent and past deadline, show as overdue
 		const effectiveStatus =
@@ -262,7 +263,7 @@ export async function getStatement(id: string): Promise<StatementWithDetails | n
 		.orderBy(utilityStatementLineItems.sortOrder);
 
 	// Compute effective status: if sent and past deadline, show as overdue
-	const today = new Date().toISOString().split('T')[0];
+	const today = swissToday();
 	const effectiveStatus =
 		result.statement.status === 'sent' &&
 		result.statement.paymentDeadline &&
@@ -311,9 +312,7 @@ export async function generateStatement(
 	);
 
 	const paymentDeadlineDays = await getTypedConfig('payment_deadline_days');
-	const statementDate = new Date();
-	const paymentDeadline = new Date(statementDate);
-	paymentDeadline.setDate(paymentDeadline.getDate() + paymentDeadlineDays);
+	const statementDate = swissToday();
 
 	return createStatement(
 		{
@@ -323,7 +322,7 @@ export async function generateStatement(
 			statementNumber,
 			periodStart: input.periodStart,
 			periodEnd: input.periodEnd,
-			statementDate: statementDate.toISOString().split('T')[0],
+			statementDate,
 			rentalDays: calculation.rentalDays,
 			rentalStart: calculation.rentalStart,
 			rentalEnd: calculation.rentalEnd,
@@ -336,7 +335,7 @@ export async function generateStatement(
 			keyValues: await keyValuesOf(input.buildingId, calculation.apartmentId),
 			balance: String(calculation.balance),
 			status: 'draft',
-			paymentDeadline: paymentDeadline.toISOString().split('T')[0]
+			paymentDeadline: daysAfter(statementDate, paymentDeadlineDays)
 		},
 		calculation.lineItems.map((item, index) => ({
 			categoryId: item.categoryId,
@@ -433,8 +432,8 @@ export async function keyValuesOf(buildingId: string, apartmentId: string): Prom
 
 /** A statement goes out dated on the day it is sent (Swiss time), with the full payment deadline, never a shorter one */
 export async function datedToday(paymentDeadline: string | null) {
-	const statementDate = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Zurich' });
-	const due = new Date(Date.parse(statementDate) + (await getTypedConfig('payment_deadline_days')) * 86_400_000).toISOString().slice(0, 10);
+	const statementDate = swissToday();
+	const due = daysAfter(statementDate, await getTypedConfig('payment_deadline_days'));
 	return { statementDate, paymentDeadline: paymentDeadline && paymentDeadline > due ? paymentDeadline : due };
 }
 
