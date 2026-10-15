@@ -6081,3 +6081,21 @@ Task: open `bug` issues one by one (#122, #123, #125, #126, #127 merged in rudin
 - [x] PR, CI, merge (pull request opened after archiving; merge follows green CI). Final checks: test:coverage, lint, check, backend test + type-check, deepcheck:audit, E2E chromium + api distribution-keys
 
 Files: `docs/api-specification.md`, `docs/design/offene-punkte.md` (O-24), `backend/src/services/formula.service.ts`, `backend/src/__tests__/formula-codes.test.ts`, `src/__tests__/backend-error.test.ts`, `messages/*.json`, `tests/e2e/features/distribution-keys.feature`
+
+## Session: #202 KI judges a new Kategorie without the existing ones
+
+- [x] Scenario «KI beurteilt eine neue Kategorie wie die vordefinierten» (@wip) red. Scenario red: `schlägt die KI vor, die Kategorie als umlagefähig zu erfassen` – allowedChosen false (categories.steps.ts:171)
+- [x] fach-reviewer on the @wip scenario
+- [x] Unit test: allocability prompt lists the predefined Kategorien (not own ones, product owner 2026-10-15 after M-1), red then green. Test red: «zeigt der KI die vordefinierten Kategorien mit ihrer Umlagefähigkeit (#202)» – expect(received).toContain(expected)
+- [x] Prompt gets the predefined Kategorien (`backend/src/config/llm.ts`, `backend/src/services/llm.service.ts`); stub answers from them
+- [x] `bun run llm:eval` before/after with MiniMax-M2.5 (qwen2.5:3b not reachable here): 30/38 (79 %, 3 provider errors) → 36/38 (95 %); Treppenhausreinigung and «Hauswart Reinigung» right after. `not.toContain(own)` shown red by removing the filter (C-3)
+- [x] code-reviewer round 1 (docs/reviews/202-review-1.md): open –, fixed C-2, C-3, rejected C-1: the product owner's chosen option said an edited predefined Kategorie counts
+- [x] Scenario green, @wip removed (moved to `tests/e2e/features/categories-ki.feature` after V-1)
+- Skills: tdd, ponytail, ponytail-review
+- Files: `backend/src/config/llm.ts`, `backend/src/services/llm.service.ts`, `backend/scripts/llm-stub.ts`, `backend/src/__tests__/category-allocability.pg.test.ts`, `tests/e2e/features/categories{,-ki}.feature`, `tests/e2e/steps/categories.steps.ts`, `backend/scripts/llm-eval.ts`, `docs/reviews/202-*`, `docs/reviews/workflow-rules-review-issue-202.md`
+- fach-reviewer round 1 (docs/reviews/202-scenario-fachreview-1.md): open –, fixed M-1, V-1, V-2, M-2, V-3
+- [x] Feature review: fach-reviewer; no persona (no screen, text or state changed; the persona stack shows the KI stand-in's answer, not a model's)
+- fach-reviewer round 2 (docs/reviews/202-fachreview-2.md): open V-4 (Minor) → #204, M-3 (Nit) → #204, V-5 (Nit) → #205; fixed M-1, V-1, V-2, M-2, V-3
+- [x] Before marking complete: coverage, lint, check, backend test (608 pass) + type-check, E2E categories (19 pass) and screens category-new/check/edit (20 pass)
+- [x] Workflow review `docs/reviews/workflow-rules-review-issue-202.md`
+- [x] PR `Fixes #202` (opened after archiving; merge follows green CI)

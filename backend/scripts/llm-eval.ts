@@ -1,7 +1,8 @@
 /**
  * How well the configured KI (LLM_BASE_URL, LLM_MODEL) judges whether a new category is umlagefähig (#176):
  * cost types from the leaflet of the Mieterverband «Zulässige und unzulässige Nebenkosten» (2026) and
- * Art. 5–6c VMWG, each with the expected answer. Reports the hit rate; no threshold, outside CI.
+ * Art. 5–6c VMWG, each with the expected answer. Reports the hit rate; no threshold, outside CI. Needs the
+ * migrated database (DATABASE_URL): the prompt lists the predefined Kategorien (#202).
  *
  *   bun run llm:eval
  */
