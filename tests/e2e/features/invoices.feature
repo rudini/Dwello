@@ -50,7 +50,6 @@ Funktionalität: Rechnungsliste
     Und der Liegenschaftsverwalter die Rechnung von "Hauswart Huber" bearbeiten will
     Dann ist der Liegenschaftsverwalter auf der Seite "Rechnung bearbeiten"
 
-  @wip
   Szenario: Mehrere Rechnungen hochladen und erstellen
     Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnung von "Elektro Blitz" und das Foto der Rechnung von "Gartenbau Grün" hochlädt
     Dann erinnert Dwello daran, die Originalrechnungen aufzubewahren
@@ -63,14 +62,12 @@ Funktionalität: Rechnungsliste
     Wenn der Liegenschaftsverwalter die Rechnung von "Elektro Blitz" ansieht
     Dann öffnet der Beleg die PDF-Rechnung von "Elektro Blitz"
 
-  @wip
   Szenario: Eine Datei, die weder PDF noch Bild ist, blockiert die anderen nicht
     Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnung von "Elektro Blitz" und die Word-Datei "notizen.docx" hochlädt
     Dann sagt die Datei "notizen.docx" "Dwello nimmt nur PDF-, JPG- und PNG-Dateien an. Speichern Sie die Datei als PDF und wählen Sie sie erneut."
     Wenn der Liegenschaftsverwalter die Rechnungen erstellt
     Dann sagt Dwello "1 Rechnung erstellt"
 
-  @wip
   Szenario: Rechnung ohne KI aus einer Datei erfassen
     Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnung von "Elektro Blitz" hochlädt, während die KI nicht verfügbar ist
     Dann sagt die Datei von "Elektro Blitz" "Die KI ist nicht verfügbar. Bitte füllen Sie die Felder aus."
@@ -81,31 +78,26 @@ Funktionalität: Rechnungsliste
     Und der Liegenschaftsverwalter die Rechnungen erstellt
     Dann sagt Dwello "1 Rechnung erstellt"
 
-  @wip
   Szenario: Eine schon erfasste Rechnung wird nicht doppelt erstellt
     Angenommen die Rechnung von "Hauswart Huber" hat die Rechnungsnummer "R-1001"
     Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnung von "Hauswart Huber" hochlädt
     Dann sagt die Datei von "Hauswart Huber" "Diese Rechnung ist schon erfasst."
     Und ist die Datei von "Hauswart Huber" nicht zum Erstellen ausgewählt
 
-  @wip
   Szenario: Eine Datei mit mehreren Rechnungen
     Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnung von "Sammelscan" hochlädt
     Dann sagt die Datei von "Sammelscan" "Diese Datei enthält mehrere Rechnungen. Laden Sie jede einzeln hoch."
     Und ist die Datei von "Sammelscan" nicht zum Erstellen ausgewählt
 
   # Die KI-Ersatzattrappe erkennt am Rechnungssteller, was auf der Rechnung steht (backend/scripts/llm-stub.ts)
-  @wip
   Szenario: Schlussrechnung mit abgezogenen Akontozahlungen
     Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnung von "Werke Schlussrechnung" hochlädt
     Dann sagt die Datei von "Werke Schlussrechnung" "Auf der Rechnung sind bereits bezahlte Beträge abgezogen (CHF 1’000.00). Erfassen Sie den Betrag so, dass jede Leistung nur einmal zählt."
 
-  @wip
   Szenario: Rechnung mit Kosten, die nicht umlagefähig sind
     Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnung von "Lift Service und Reparatur" hochlädt
     Dann sagt die Datei von "Lift Service und Reparatur" "Die Rechnung enthält Kosten, die nicht umlagefähig sind (z.B. Reparaturen). Erfassen Sie diese als eigene Rechnung."
 
-  @wip
   Szenario: Hochladen abbrechen verwirft die Dateien
     Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnung von "Elektro Blitz" hochlädt
     Und der Liegenschaftsverwalter das Hochladen abbrechen will
@@ -114,13 +106,11 @@ Funktionalität: Rechnungsliste
     Und der Liegenschaftsverwalter die Rechnungen nach dem Gebäude "Seeblick" filtert
     Dann die Rechnungsliste enthält genau 1 Rechnung
 
-  @wip
   Szenario: Das Auslesen einer Datei scheitert
     Angenommen das Auslesen von Dateien ist gestört
     Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnung von "Elektro Blitz" hochlädt
     Dann sagt die Datei von "Elektro Blitz" "Die Datei wurde nicht gelesen, weil Dwello nicht geantwortet hat. Wählen Sie «Erneut versuchen» oder füllen Sie die Felder aus."
 
-  @wip
   Szenario: Das Erstellen scheitert
     Angenommen das Erstellen von Rechnungen ist gestört
     Wenn der Liegenschaftsverwalter für das Gebäude "Seeblick" die PDF-Rechnung von "Elektro Blitz" hochlädt

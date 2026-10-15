@@ -5,7 +5,7 @@ export const uploadBuildingSelect = target('Gebäude der Belege', (page) => page
 export const uploadFileInput = target('Dateien der Belege', (page) => page.getByTestId('invoice-upload-file-input'));
 export const createInvoicesButton = target('Rechnungen erstellen', (page) => page.getByTestId('invoice-upload-create-button'));
 export const uploadResult = target('Ergebnis des Hochladens', (page) => page.getByTestId('invoice-upload-result'));
-export const cancelUploadButton = target('Hochladen abbrechen', (page) => page.getByTestId('invoice-upload-cancel-button'));
+export const cancelUploadButton = target('Hochladen abbrechen', (page) => page.getByTestId('dialog-cancel'));
 export const discardMessage = target('Rückfrage Abbrechen', (page) => page.getByTestId('invoice-upload-discard-message'));
 export const discardConfirm = target('Abbrechen bestätigen', (page) => page.getByTestId('invoice-upload-discard-confirm'));
 
@@ -30,12 +30,12 @@ export const belegUnsure = (fileName: string, field: string) =>
 	inRow(fileName, `Hinweis «unsicher» ${field}`, `invoice-upload-unsure-${field}`);
 
 // The Beleg of a saved invoice, on its detail page
-export const belegLink = target('Beleg anzeigen', (page) => page.getByTestId('invoice-beleg-link'));
-export const belegFileInput = target('Datei des Belegs', (page) => page.getByTestId('invoice-beleg-file-input'));
-export const belegUploadButton = target('Beleg hochladen', (page) => page.getByTestId('invoice-beleg-upload-button'));
+export const belegLink = target('Beleg anzeigen', (page) => page.getByTestId('invoice-document-link'));
+export const belegFileInput = target('Datei des Belegs', (page) => page.getByTestId('invoice-document-file-input'));
+export const belegUploadButton = target('Beleg hochladen', (page) => page.getByTestId('invoice-document-upload-button'));
 export const deleteBelegNote = target('Hinweis Beleg beim Löschen', (page) =>
-	page.getByTestId('invoice-delete-beleg-note')
+	page.getByTestId('invoice-delete-document-note')
 );
 // The reminder to keep the paper invoice, in the dialog and at the Beleg of an invoice
 export const keepOriginalHint = target('Hinweis Originalrechnung', (page) => page.getByTestId('invoice-keep-original'));
-export const belegBilledNote = target('Warnung abgerechneter Beleg', (page) => page.getByTestId('invoice-beleg-billed'));
+export const belegBilledNote = target('Warnung abgerechneter Beleg', (page) => page.getByTestId('invoice-document-billed'));

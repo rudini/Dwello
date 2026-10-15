@@ -50,6 +50,7 @@ const invoice = (overrides = {}) => ({
 	distributionKey: { id: 'k1', name: 'Nach Fläche' },
 	isValidUtilityCost: true,
 	categorizationStatus: 'manual' as const,
+	beleg: null as { fileName: string; mimeType: string } | null,
 	createdAt: '2024-03-16T10:00:00Z',
 	updatedAt: '2024-03-16T10:00:00Z',
 	...overrides
@@ -74,7 +75,9 @@ describe('Rechnungsliste', () => {
 				pageSize: 20,
 				buildings,
 				categories,
-				years: ['2026', '2025', '2024']
+				years: ['2026', '2025', '2024'],
+				distributionKeys: [],
+				defaultDistributionKeyId: ''
 			}
 		} as never);
 
@@ -171,6 +174,13 @@ describe('Rechnungsliste', () => {
 		expect(text()).toContain('Für 2025 sind noch keine Rechnungen erfasst');
 		expect(text()).not.toContain('Versuchen Sie es mit anderen Filtern.');
 		expect(byTestId('invoices-empty')!.querySelector('a[href="/invoices/new"]')).not.toBeNull();
+	});
+
+	it('öffnet «Rechnungen hochladen» als Dialog auf der Liste', () => {
+		list([invoice()]);
+		expect(document.querySelector('[role=dialog]')).toBeNull();
+		click('invoice-upload-button');
+		expect(document.querySelector('[role=dialog]')!.textContent).toContain('Rechnungen hochladen');
 	});
 
 	it('meldet eine leere Suche anders als eine leere Liste', () => {
@@ -765,3 +775,36 @@ describe('Rechnung bearbeiten', () => {
 		);
 	});
 });
+
+describe('Beleg einer Rechnung', () => {
+	const detail = (overrides = {}, billedIn: { start: string; end: string }[] = []) =>
+		show(InvoicePage, { data: { invoice: invoice(overrides), billedIn } } as never);
+
+	it('zeigt den gespeicherten Beleg zum Herunterladen und bietet an, ihn zu ersetzen', () => {
+		detail({ beleg: { fileName: 'huber-q1.pdf', mimeType: 'application/pdf' } });
+		expect(byTestId('invoice-document-link')!.getAttribute('href')).toBe('/invoices/i1/document');
+		expect(byTestId('invoice-document-upload-button')!.textContent).toContain('Beleg ersetzen');
+		expect(byTestId('invoice-keep-original')!.textContent).toContain('Bewahren Sie die Originalrechnung auf');
+	});
+
+	it('sagt, dass kein Beleg gespeichert ist, und bietet an, einen hinzuzufügen', () => {
+		detail();
+		expect(byTestId('invoice-document-link')).toBeNull();
+		expect(text()).toContain('Zu dieser Rechnung ist kein Beleg gespeichert.');
+		expect(byTestId('invoice-document-upload-button')!.textContent).toContain('Beleg hinzufügen');
+	});
+
+	it('warnt bei einer abgerechneten Rechnung, dass Mieter den Beleg verlangen können', () => {
+		detail({ beleg: { fileName: 'huber-q1.pdf', mimeType: 'application/pdf' } }, [{ start: '2024-01-01', end: '2024-12-31' }]);
+		expect(byTestId('invoice-document-billed')!.textContent).toContain(
+			'Die Rechnung ist abgerechnet; Mieter können den Beleg verlangen.'
+		);
+	});
+
+	it('sagt beim Löschen, dass der Beleg mitgelöscht wird', () => {
+		detail({ beleg: { fileName: 'huber-q1.pdf', mimeType: 'application/pdf' } });
+		click('invoice-delete-button');
+		expect(byTestId('invoice-delete-document-note')!.textContent).toBe('Der Beleg wird ebenfalls gelöscht.');
+	});
+});
+

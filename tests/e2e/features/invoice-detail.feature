@@ -39,26 +39,22 @@ Funktionalität: Rechnungsdetail
     Wenn der Liegenschaftsverwalter das Gebäude der Rechnung öffnet
     Dann ist der Liegenschaftsverwalter auf der Detailseite von "Seeblick"
 
-  @wip
   Szenario: Beleg einer Rechnung anzeigen
     Angenommen die Rechnung von "Hauswart Huber" hat den Beleg "huber-q1.pdf"
     Und der Liegenschaftsverwalter ist auf der Detailseite der Rechnung von "Hauswart Huber"
     Dann öffnet der Beleg die PDF-Datei "huber-q1.pdf"
 
-  @wip
   Szenario: Beleg ersetzen
     Angenommen die Rechnung von "Hauswart Huber" hat den Beleg "huber-q1.pdf"
     Und der Liegenschaftsverwalter ist auf der Detailseite der Rechnung von "Hauswart Huber"
     Wenn der Liegenschaftsverwalter den Beleg durch das Foto "huber-q1.jpg" ersetzt
     Dann öffnet der Beleg die JPG-Datei "huber-q1.jpg"
 
-  @wip
   Szenario: Beleg zu einer erfassten Rechnung hinzufügen
     Wenn der Liegenschaftsverwalter das Foto "huber-q1.jpg" als Beleg hinzufügt
     Dann öffnet der Beleg die JPG-Datei "huber-q1.jpg"
     Und erinnert Dwello daran, die Originalrechnung aufzubewahren
 
-  @wip
   Szenario: Warnung beim Ersetzen des Belegs einer abgerechneten Rechnung
     Angenommen die Rechnung von "Hauswart Huber" hat den Beleg "huber-q1.pdf"
     Und im Gebäude "Seeblick" gibt es die leere Wohnung "1.01"
@@ -68,7 +64,6 @@ Funktionalität: Rechnungsdetail
     Und der Liegenschaftsverwalter ist auf der Detailseite der Rechnung von "Hauswart Huber"
     Dann warnt der Beleg "Die Rechnung ist abgerechnet; Mieter können den Beleg verlangen."
 
-  @wip
   Szenario: Rechnung mit Beleg löschen
     Angenommen die Rechnung von "Hauswart Huber" hat den Beleg "huber-q1.pdf"
     Und der Liegenschaftsverwalter ist auf der Detailseite der Rechnung von "Hauswart Huber"

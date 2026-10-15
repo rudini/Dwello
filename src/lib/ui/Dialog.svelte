@@ -16,6 +16,9 @@
 		onconfirm,
 		onclose,
 		confirmTestid = 'dialog-confirm',
+		wide = false,
+		onrequestclose,
+		enterConfirms = true,
 		children
 	}: {
 		open?: boolean;
@@ -29,6 +32,9 @@
 		onconfirm: () => void;
 		onclose?: () => void;
 		confirmTestid?: string;
+		wide?: boolean; // room for a list of records, e.g. the files of «Rechnungen hochladen»
+		onrequestclose?: () => void; // asks before closing (cancel, Escape) instead of closing at once
+		enterConfirms?: boolean; // false where a form in the dialog holds many records
 		children: Snippet;
 	} = $props();
 
@@ -37,6 +43,7 @@
 
 	function close() {
 		if (busy) return;
+		if (onrequestclose) return onrequestclose();
 		open = false;
 		onclose?.();
 	}
@@ -71,13 +78,14 @@
 	});
 
 	function keydown(event: KeyboardEvent) {
-		if (!open) return;
+		// a dialog opened above this one (e.g. its own confirmation) handles the keys
+		if (!open || panel?.closest('[inert]')) return;
 		if (event.key === 'Escape') {
 			event.stopPropagation();
 			close();
 		}
 		if (event.key === 'Tab') trapFocus(event);
-		if (event.key === 'Enter') confirmFromField(event);
+		if (event.key === 'Enter' && enterConfirms) confirmFromField(event);
 	}
 
 	// Enter in a field of the dialog confirms, as in a form
@@ -124,7 +132,7 @@
 			aria-labelledby="{id}-title"
 			aria-describedby="{id}-body"
 			tabindex="-1"
-			class="flex max-h-full w-full max-w-lg flex-col gap-6 overflow-y-auto rounded-panel bg-surface p-6 text-ink shadow-overlay"
+			class="flex max-h-full w-full {wide ? 'max-w-4xl' : 'max-w-lg'} flex-col gap-6 overflow-y-auto rounded-panel bg-surface p-6 text-ink shadow-overlay"
 		>
 			<h2 id="{id}-title" class="text-xl font-bold leading-tight">{title}</h2>
 			<div id="{id}-body" class="flex flex-col gap-4">{@render children()}</div>

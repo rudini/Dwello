@@ -9,6 +9,8 @@
 		"delete-dialog": "The delete confirmation dialog open.",
 		"document-delete-dialog": "The confirmation dialog for deleting a document the property manager uploaded to the tenant, open.",
 		"upload-refused": "A file Dwello does not take (a Word file) uploaded to the tenant: the refusal at the file field.",
+		"upload-dialog": "«Rechnungen hochladen» open with a building chosen, a PDF the KI stand-in read (deducted amounts, costs not allocable, an unsure Rechnungsdatum) opened for checking, and a refused Word file.",
+		"upload-discard-dialog": "«Rechnungen hochladen» with a file in it, cancelled: the confirmation that the files and entries are lost.",
 		"fuel-stock-dialog": "Building page with a Tankbestand reading: the confirmation before deleting it open.",
 		"end-dialog": "The dialog that ends a rental contract open.",
 		"end-dialog-error": "The dialog that ends a rental contract confirmed without a Vertragsende: the error at the field.",
@@ -277,7 +279,9 @@
 			"states": [
 				"default",
 				"empty",
-				"filtered-empty"
+				"filtered-empty",
+				"upload-dialog",
+				"upload-discard-dialog"
 			]
 		},
 		{

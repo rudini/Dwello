@@ -1,5 +1,5 @@
 import type { InvoicesListData } from '$lib/types';
-import { localCategory, toInvoice } from '$lib/server/invoice';
+import { invoiceChoices, localCategory, toInvoice } from '$lib/server/invoice';
 import type { PageServerLoad } from './$types';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
@@ -36,10 +36,14 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<InvoicesList
 	try {
 		const params = invoiceQuery(url, page, pageSize);
 
-		const [invoicesRes, buildingsRes, categoriesRes] = await Promise.all([
+		const [invoicesRes, buildingsRes, categoriesRes, { distributionKeys }, defaultKey] = await Promise.all([
 			fetch(`${BACKEND_URL}/api/v1/invoices?${params}`),
 			fetch(`${BACKEND_URL}/api/v1/buildings?limit=100`),
-			fetch(`${BACKEND_URL}/api/v1/categories?limit=100`)
+			fetch(`${BACKEND_URL}/api/v1/categories?limit=100`),
+			invoiceChoices(fetch),
+			fetch(`${BACKEND_URL}/api/v1/config/default_distribution_key_id`)
+				.then((response) => (response.ok ? response.json() : {}))
+				.catch(() => ({})) as Promise<{ value?: string }>
 		]);
 
 		const invoicesData = await invoicesRes.json();
@@ -66,7 +70,9 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<InvoicesList
 			pageSize,
 			buildings,
 			categories,
-			years
+			years,
+			distributionKeys,
+			defaultDistributionKeyId: defaultKey.value ?? ''
 		};
 	} catch (err) {
 		console.error('Failed to fetch invoices:', err);
@@ -77,7 +83,9 @@ export const load: PageServerLoad = async ({ url, fetch }): Promise<InvoicesList
 			pageSize,
 			buildings: [],
 			categories: [],
-			years
+			years,
+			distributionKeys: [],
+			defaultDistributionKeyId: ''
 		};
 	}
 };

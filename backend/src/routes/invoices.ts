@@ -198,7 +198,7 @@ export const invoiceRoutes = new Elysia({ prefix: '/api/v1/invoices' })
 		return invoice;
 	})
 	// The Beleg of an invoice: its uploaded file
-	.get('/:id/beleg', async ({ params, set }) => {
+	.get('/:id/document', async ({ params, set }) => {
 		const beleg = await getBeleg(params.id);
 		if (!beleg) {
 			set.status = 404;
@@ -208,7 +208,7 @@ export const invoiceRoutes = new Elysia({ prefix: '/api/v1/invoices' })
 	})
 	// Adds or replaces the Beleg of an invoice
 	.put(
-		'/:id/beleg',
+		'/:id/document',
 		async ({ params, body, set }) => {
 			try {
 				const invoice = await setBeleg(params.id, body);

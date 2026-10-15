@@ -7,6 +7,7 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8): add the items when
 Branch `feat/invoice-upload-217`. Issue #217 "Done means" plus `CLAUDE.md`, "Workflow".
 
 - [x] Glossary term «Beleg» added on the product owner's request in this session (`UBIQUITOUS_LANGUAGE.md`, commit 6adf5a6)
+- [x] Scenarios green, `@wip` removed: 15 in `invoices.feature`/`invoice-detail.feature`; affected feature files (invoices, invoice-detail/-new/-edit, tenant-documents, documents, privacy, categories-ki) 65 passed (chromium, api)
 - [x] `@wip` scenarios in `tests/e2e/features/invoices.feature` (8) and `invoice-detail.feature` (4), steps in `tests/e2e/steps/invoice-upload.steps.ts`
   Scenario red: all 12 at the missing behavior: `getByTestId('invoice-upload-button')` not found (list), `PUT /invoices/:id/beleg` answers 404 (seed), `getByTestId('invoice-beleg-file-input')` not found (detail)
 - [x] `fach-reviewer` on the scenarios (new KI prompt, privacy statement, domain term «Beleg»); product owner decided V-1, V-2, M-1, M-2, M-3 (recorded in #217); scenarios revised (Datei for unsaved files, Kategorie required, new hints)
@@ -20,13 +21,17 @@ Branch `feat/invoice-upload-217`. Issue #217 "Done means" plus `CLAUDE.md`, "Wor
 - [x] Backend: default model `qwen2.5vl:7b`; README (with OpenRouter), docker-compose, docs
 - [ ] `llm:eval` before/after with the default model: the session cannot pull Ollama models → Blocked on me, PR says `Refs #217`
 - [x] KI stand-in answers the extraction prompt (by file name) and categorizes only the upload scenarios' suppliers
-- [ ] Frontend: dialog «Rechnungen hochladen» on `/invoices` (Hochladen, Prüfen, Erstellen; at most 20 files; PDF pages rendered in the browser for the KI)
-- [ ] Frontend: «Beleg anzeigen», «Beleg ersetzen» on the invoice; delete confirmation names the Beleg
-- [ ] Privacy statement: invoice files to the KI (local and external text)
-- [ ] UI texts in de/fr/it/en; `tests/a11y/screens.json`, `accessibility.feature`, `sprachen-bildschirme.feature`
+- [x] Frontend: dialog «Rechnungen hochladen» on `/invoices` (Hochladen, Prüfen, Erstellen; at most 20 files; PDF pages rendered in the browser with the pdf.js legacy build, bundled, no CDN; file sent as multipart, BFF converts to Base64)
+  Test red: `invoice-upload.test.ts` (module missing), `invoice-upload-endpoints.test.ts` (routes missing), `api-form.dom.test.ts` (body JSON), `ui-dialog.dom.test.ts` (3 new), `invoice-upload-dialog.dom.test.ts` written after the component, red shown with an empty component
+- [x] Frontend: «Beleg anzeigen», «Beleg ersetzen»/«Beleg hinzufügen», billed warning, keep-original hint on the invoice; delete confirmation names the Beleg (paths and test ids say `document`: no German in code strings)
+  Test red: `invoices.test.ts` «nennt den Beleg …», `invoice-pages.dom.test.ts` «Beleg einer Rechnung» (4)
+- [x] Privacy statement: invoice files to the KI (local and external text), stored Belege with purpose and retention (R-1, R-3)
+  Test red: `privacy-page.dom.test.ts` (3 new) with the texts before this task
+- [x] UI texts in de/fr/it/en (`docs/design/i18n-begriffe.md`: Beleg); `tests/a11y/screens.json` (`upload-dialog`, `upload-discard-dialog`; Beleg seeded on the detail screen), `accessibility.feature`, `sprachen-bildschirme.feature`: 48 rows of the invoice, tenant, privacy and document screens green
 - [x] API contracts (`invoice.json` beleg, new `invoice-extraction.json`), `docs/api-specification.md`
 - [ ] Slice reviews (`code-reviewer`), feature review (personas, `fach-reviewer`)
   Slice 1 (backend, 90631a2..f63afb6) Skills: tdd, ponytail, ponytail-review (reuse: one mapping of the KI suggestion)
+  Slice 2 (frontend, 56a2b3d..) Skills: tdd, ponytail, ponytail-review (app code typed its proposal from a test contract: own type); fallow: shared `proxyFile`, `UploadResult`, row and file chooser split
   code-reviewer round 1 (docs/reviews/upload-backend-review-1.md): fixed C-1 (Major; test «lässt ein Datum mit unmöglichem Monat leer …» red, `isRealDate` no longer throws), C-2, C-3 (tests), C-4 (code EXTRACTION_UNAVAILABLE), C-5 (code BELEG_NOT_FOUND, invoice checked before the file), C-6 (transaction; no test: a failing insert after the file check cannot be produced), C-7, C-8, C-9, C-10, C-11
   code-reviewer round 2 (docs/reviews/upload-backend-review-2.md): C-1..C-11 confirmed fixed; fixed C-13 (test), C-14 (`isRealDate` moved to `services/real-date.ts`), C-15 (test red: `-2`, `1.5`, `true` counted); C-12: the texts of the dialog and the privacy statement stay in this branch, their tests come with slice 2 (frontend)
 - [ ] Before marking complete: all checks in `CLAUDE.md`

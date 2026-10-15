@@ -116,6 +116,19 @@ describe('Rechnungsdetail', () => {
 		expect(shown.category?.name).toBe('Hauswart');
 		expect(shown.distributionKey?.name).toBe('Pro Fläche (m²)');
 	});
+
+	it('nennt den Beleg mit Dateiname und Art, oder keinen', async () => {
+		for (const [beleg, expected] of [
+			[backendInvoice.beleg, { fileName: 'huber-q1.pdf', mimeType: 'application/pdf' }],
+			[null, null]
+		] as const) {
+			const { fetch } = backend({ '/invoices/i1': invoice({ beleg }) });
+			const { invoice: shown } = (await detailLoad({ params: { id: 'i1' }, fetch } as never)) as {
+				invoice: { beleg: unknown };
+			};
+			expect(shown.beleg).toEqual(expected);
+		}
+	});
 });
 
 describe('Ursprüngliche KI-Kategorisierung', () => {

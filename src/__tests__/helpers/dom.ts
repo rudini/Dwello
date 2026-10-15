@@ -53,7 +53,8 @@ export function fakeBff(answer: (call: ApiCall) => [number, unknown?] = () => [2
 		const call = {
 			method: init?.method ?? 'GET',
 			path: String(url).replace(/^\/api/, ''),
-			body: init?.body ? JSON.parse(String(init.body)) : undefined
+			// a form (a file upload) as it was sent, JSON read
+			body: init?.body instanceof FormData ? init.body : init?.body ? JSON.parse(String(init.body)) : undefined
 		};
 		calls.push(call);
 		const [status, body] = answer(call);

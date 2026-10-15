@@ -19,7 +19,15 @@ import {
 	uploadFileInput,
 	uploadInvoicesButton
 } from '../targets/invoice-upload';
+import { PNG } from 'pngjs';
 import type { File } from './tenant-documents';
+
+/** A photo of an invoice the browser can show and draw (a white image), as a PNG */
+export function invoicePhoto(name: string): File {
+	const png = new PNG({ width: 40, height: 60 });
+	png.data = Buffer.alloc(png.data.length, 255);
+	return { name, mimeType: 'image/png', buffer: PNG.sync.write(png) };
+}
 
 /** A one-page PDF a viewer can open, with its cross-reference table at the right offsets */
 export function invoicePdf(name: string): File {

@@ -17,8 +17,20 @@ import {
 	PostFormAction,
 	Press,
 	Select,
+	Upload,
 	Wait
 } from '../screenplay/interactions';
+import { randomUUID } from 'crypto';
+import {
+	belegDetailsToggle,
+	belegUnsure,
+	cancelUploadButton,
+	discardMessage,
+	uploadBuildingSelect,
+	uploadFileInput,
+	uploadInvoicesButton
+} from '../targets/invoice-upload';
+import { invoicePdf } from './invoice-upload';
 import { Visibility } from '../screenplay/questions';
 import { nameInput, proposal, proposeButton } from '../targets/categories';
 import type { Target } from '../screenplay/target';
@@ -47,7 +59,7 @@ import { languageButton } from '../targets/language';
 import { demoNotice } from '../targets/demo';
 import { draftRestored, nextButton, saveStatus } from '../targets/wizard';
 import { DEMO_INSTANCE } from './demo';
-import { uploadDocument, wordFile } from './tenant-documents';
+import { type File, uploadDocument, wordFile } from './tenant-documents';
 import { deleteDocumentButton } from '../targets/documents';
 import { UPLOADED } from '../fixtures/screens';
 
@@ -111,6 +123,14 @@ const endWithPastDate: Activity = async (actor) => {
 	await actor.attemptsTo(Wait.until(on.invalidPastEndConfirm));
 };
 
+// «Rechnungen hochladen» for the first building with these files
+const startUpload = (files: File[]): Activity => (actor) =>
+	actor.attemptsTo(
+		Click.on(uploadInvoicesButton),
+		Select.option({ index: 1 }).from(uploadBuildingSelect),
+		Upload.theFile(files).into(uploadFileInput)
+	);
+
 // What a user does to reach each state
 const states: Record<string, (example: Example, viewport: Viewport) => Activity> = {
 	default: () => async () => {},
@@ -139,6 +159,24 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	'upload-refused': () => (actor) =>
 		actor.attemptsTo(uploadDocument(wordFile('notizen.docx'), ''), Wait.until(on.formProblem)),
 	'fuel-stock-dialog': () => openDialog(on.firstFuelStockDelete),
+	'upload-dialog': () => (actor) => {
+		// the stand-in finds deducted amounts and costs that are not allocable in a file so named; the UUID marks it user data
+		const read = `Werke Schlussrechnung Reparatur ${randomUUID()}.pdf`;
+		return actor.attemptsTo(
+			startUpload([invoicePdf(read), wordFile('notes.docx')]),
+			Click.on(belegDetailsToggle(read)),
+			Wait.until(belegUnsure(read, 'invoiceDate'))
+		);
+	},
+	'upload-discard-dialog': () => (actor) => {
+		const read = `Elektro ${randomUUID()}.pdf`;
+		return actor.attemptsTo(
+			startUpload([invoicePdf(read)]),
+			Wait.until(belegDetailsToggle(read)),
+			Click.on(cancelUploadButton),
+			Wait.until(discardMessage)
+		);
+	},
 	// by keyboard: the gallery's toasts cover the page
 	'dialog-open': () => (actor) => actor.attemptsTo(Press.theKey('Enter').on(on.galleryDialogButton), Wait.until(on.dialog)),
 	'busy-dialog-open': () => (actor) =>

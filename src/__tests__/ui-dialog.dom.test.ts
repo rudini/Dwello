@@ -156,4 +156,28 @@ describe('Dialog', () => {
 			expect(onconfirm, String(confirmDisabled)).toHaveBeenCalledTimes(confirmDisabled ? 0 : 1);
 		}
 	});
+
+	it('fragt vor dem Schliessen nach, wenn der Inhalt verloren ginge', () => {
+		const onrequestclose = vi.fn();
+		openDialog({ onrequestclose });
+		click('dialog-cancel');
+		press('Escape');
+		expect(onrequestclose).toHaveBeenCalledTimes(2);
+		expect(document.querySelector('[role=dialog]')).not.toBeNull();
+	});
+
+	it('bestätigt mit Enter in einem Feld nicht, wenn der Dialog viele Einträge hält', () => {
+		const { onconfirm } = openDialog({ enterConfirms: false, children: markup('<input data-testid="feld" />') });
+		byTestId('feld')!.focus();
+		press('Enter');
+		expect(onconfirm).not.toHaveBeenCalled();
+	});
+
+	it('überlässt die Tasten einem Dialog, der darüber geöffnet ist', () => {
+		const { onclose } = openDialog();
+		document.querySelector('[role=dialog]')!.parentElement!.setAttribute('inert', '');
+		press('Escape');
+		expect(onclose).not.toHaveBeenCalled();
+	});
 });
+

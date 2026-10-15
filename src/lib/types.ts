@@ -221,6 +221,7 @@ export interface InvoiceWithDetails extends Invoice {
 	distributionKey?: Pick<DistributionKey, 'id' | 'name'>;
 	llmCategory?: Pick<Category, 'id' | 'name'>; // what the KI suggested
 	categorizationStatus: 'pending' | 'auto-categorized' | 'manual';
+	beleg: { fileName: string; mimeType: string } | null; // the uploaded file of the invoice
 }
 
 // Invoices list response
@@ -232,6 +233,8 @@ export interface InvoicesListData {
 	buildings: { id: string; name: string; address: string }[];
 	categories: Category[];
 	years: string[]; // Rechnungsdatum years offered in the filter
+	distributionKeys: { id: string; name: string }[]; // offered for the invoices of «Rechnungen hochladen»
+	defaultDistributionKeyId: string; // preselected there, as set in the settings
 }
 
 // Heating Profile types

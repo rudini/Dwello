@@ -15,7 +15,10 @@
 		isValidUtilityCost = $bindable(),
 		categories,
 		distributionKeys,
-		after
+		after,
+		idPrefix = '',
+		categoryRequired = false,
+		categoryError
 	}: {
 		categoryId: string;
 		distributionKeyId: string;
@@ -23,6 +26,9 @@
 		categories: Category[];
 		distributionKeys: { id: string; name: string }[];
 		after?: Snippet; // shown below the distribution key
+		idPrefix?: string; // several invoices on one page (the upload dialog) need their own ids
+		categoryRequired?: boolean; // the upload dialog creates no invoice without a Kategorie (#217)
+		categoryError?: string;
 	} = $props();
 
 	const selectedCategory = $derived(categories.find((c) => c.id === categoryId));
@@ -45,7 +51,13 @@
 	}
 </script>
 
-<Field id="category" label={m.buildings_category()} help={m.invoices_category_help()} optional>
+<Field
+	id="{idPrefix}category"
+	label={m.buildings_category()}
+	help={m.invoices_category_help()}
+	optional={!categoryRequired}
+	error={categoryError}
+>
 	{#snippet children(control)}
 		<!-- The options are written here, not in a child component, so they are in the page before it is hydrated -->
 		<select
@@ -53,7 +65,8 @@
 			bind:value={categoryId}
 			onchange={chooseCategory}
 			aria-describedby={control.describedBy}
-			class={controlClass(false)}
+			aria-invalid={control.invalid || undefined}
+			class={controlClass(control.invalid)}
 			data-testid="invoice-category-select"
 		>
 			<option value="">{m.invoices_choose_category()}</option>
@@ -69,7 +82,7 @@
 </Field>
 
 <Select
-	id="distributionKey"
+	id="{idPrefix}distributionKey"
 	label={m.glossary_key_term()}
 	help={m.invoices_key_help()}
 	placeholder={m.invoices_choose_key()}
@@ -82,19 +95,19 @@
 {@render after?.()}
 
 <Checkbox
-	id="isValidUtilityCost"
+	id="{idPrefix}isValidUtilityCost"
 	label={m.glossary_allocable_term()}
 	help={m.invoices_allocable_help()}
 	bind:checked={isValidUtilityCost}
 	disabled={nonAllocable}
-	describedby={nonAllocable ? 'invoice-category-warning-text' : undefined}
+	describedby={nonAllocable ? `${idPrefix}invoice-category-warning-text` : undefined}
 	testid="invoice-utility-cost-checkbox"
 />
 
 {#if nonAllocable}
 	<div data-testid="invoice-category-warning">
 		<Alert tone="caution" title={m.invoices_category_not_allocable()}>
-			<p id="invoice-category-warning-text">{m.invoices_category_not_allocable_text()}</p>
+			<p id="{idPrefix}invoice-category-warning-text">{m.invoices_category_not_allocable_text()}</p>
 		</Alert>
 	</div>
 {/if}

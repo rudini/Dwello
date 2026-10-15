@@ -80,7 +80,8 @@ export function toInvoice(r: Record<string, unknown>, names: Named[] = []): Invo
 		llmCategory: suggested
 			? named({ id: suggested.id as string, name: toCategory(suggested).name })
 			: undefined,
-		categorizationStatus: categorizationStatus(r)
+		categorizationStatus: categorizationStatus(r),
+		beleg: (r.beleg as { fileName: string; mimeType: string } | null) ?? null
 	};
 }
 
@@ -116,3 +117,9 @@ export async function statementPeriods(
 		missedIn: periodsOf(overlapping.filter((s) => s.createdAt < recordedAt))
 	};
 }
+
+/** A file the property manager chose for an invoice, as the backend takes it: its name and its content in Base64 */
+export const belegOf = async (file: File) => ({
+	fileName: file.name,
+	content: Buffer.from(await file.arrayBuffer()).toString('base64')
+});

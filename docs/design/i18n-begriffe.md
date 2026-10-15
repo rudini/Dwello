@@ -33,6 +33,7 @@ Style: French guillemets with a non-breaking space inside (« Immeubles »), I
 | Geleistete Akontobeiträge | acomptes versés | acconti versati | advance payments made |
 | Referenzindex | taux de référence | tasso di riferimento | reference rate |
 | Rechnung | facture | fattura | invoice |
+| Beleg (hochgeladene Datei einer Rechnung, #217) | pièce justificative | giustificativo | supporting document |
 | Rechnungssteller | émetteur de la facture | emittente della fattura | invoice issuer |
 | Lieferant | fournisseur | fornitore | supplier |
 | Rechnungsnummer / Rechnungsdatum | numéro de facture / date de facture | numero di fattura / data della fattura | invoice number / invoice date |

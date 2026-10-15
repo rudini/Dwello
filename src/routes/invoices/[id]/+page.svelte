@@ -16,6 +16,7 @@
 	import { formatCurrency } from '$lib/utils/format';
 	import CategorizationPanel from './CategorizationPanel.svelte';
 	import InvoiceFacts from './InvoiceFacts.svelte';
+	import InvoiceBeleg from './InvoiceBeleg.svelte';
 
 	let {
 		data
@@ -112,6 +113,7 @@
 					</Alert>
 				</div>
 			{/if}
+			<InvoiceBeleg {invoice} billed={!!data.billedIn?.length} />
 			<Panel title={m.invoices_more_actions()}>
 				<Button
 					variant="danger-ghost"
@@ -140,6 +142,9 @@
 			amount: formatCurrency(invoice.amount)
 		})}
 	</p>
+	{#if invoice.beleg}
+		<p data-testid="invoice-delete-document-note">{m.invoices_delete_beleg()}</p>
+	{/if}
 	{#if data.billedIn?.length}
 		<BilledWarning periods={data.billedIn}>
 			<p>{m.invoices_delete_billed_text()}</p>

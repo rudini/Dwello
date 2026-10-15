@@ -49,7 +49,7 @@ describe('Beleg einer Rechnung', () => {
 		const invoice = (await response.json()) as { id: string; beleg: unknown };
 		expect(invoice.beleg).toEqual({ fileName: 'elektro-blitz.pdf', mimeType: 'application/pdf' });
 
-		const file = await callApi(`/api/v1/invoices/${invoice.id}/beleg`);
+		const file = await callApi(`/api/v1/invoices/${invoice.id}/document`);
 		expect(file.headers.get('content-type')).toBe('application/pdf');
 		expect(file.headers.get('content-disposition')).toContain('elektro-blitz.pdf');
 		expect(Buffer.from(await file.arrayBuffer())).toEqual(pdf);
@@ -59,13 +59,13 @@ describe('Beleg einer Rechnung', () => {
 		const id = await idOf(await newInvoice());
 		const jpg = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 1, 2, 3]);
 		const put = (fileName: string, content: Buffer) =>
-			sendJson('PUT', `/api/v1/invoices/${id}/beleg`, { fileName, content: content.toString('base64') });
+			sendJson('PUT', `/api/v1/invoices/${id}/document`, { fileName, content: content.toString('base64') });
 
 		expect(((await (await callApi(`/api/v1/invoices/${id}`)).json()) as { beleg: unknown }).beleg).toBeNull();
 		expect((await put('rechnung.pdf', pdf)).status).toBe(200);
 		const replaced = await put('rechnung.jpg', jpg);
 		expect(await replaced.json()).toMatchObject({ id, beleg: { fileName: 'rechnung.jpg', mimeType: 'image/jpeg' } });
-		expect(Buffer.from(await (await callApi(`/api/v1/invoices/${id}/beleg`)).arrayBuffer())).toEqual(jpg);
+		expect(Buffer.from(await (await callApi(`/api/v1/invoices/${id}/document`)).arrayBuffer())).toEqual(jpg);
 	});
 
 	it('lehnt eine Datei ab, die weder PDF noch Bild ist, und erstellt dann auch die Rechnung nicht', async () => {
@@ -91,10 +91,10 @@ describe('Beleg einer Rechnung', () => {
 	it('meldet eine unbekannte Rechnung, auch mit einer Datei, die Dwello nicht nimmt', async () => {
 		const unknown = crypto.randomUUID();
 		const word = Buffer.from('PK\x03\x04').toString('base64');
-		const put = await sendJson('PUT', `/api/v1/invoices/${unknown}/beleg`, { fileName: 'x.docx', content: word });
+		const put = await sendJson('PUT', `/api/v1/invoices/${unknown}/document`, { fileName: 'x.docx', content: word });
 		expect(put.status).toBe(404);
 		expect(await put.json()).toMatchObject({ code: 'INVOICE_NOT_FOUND' });
-		const get = await callApi(`/api/v1/invoices/${unknown}/beleg`);
+		const get = await callApi(`/api/v1/invoices/${unknown}/document`);
 		expect(get.status).toBe(404);
 		expect(await get.json()).toMatchObject({ code: 'BELEG_NOT_FOUND' });
 	});

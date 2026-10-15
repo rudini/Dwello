@@ -22,6 +22,7 @@ import {
 	extractionFails,
 	fillInBeleg,
 	invoicePdf,
+	invoicePhoto,
 	openBeleg,
 	openBelegOfInvoice,
 	replaceBeleg,
@@ -44,7 +45,7 @@ When(
 	async ({ verwalter, seed, names }, building: string, first: string, second: string) => {
 		const files = [
 			invoicePdf(pdfOf(supplierName(names, seed.unique, first))),
-			imageFile(`${supplierName(names, seed.unique, second)}.jpg`)
+			invoicePhoto(`${supplierName(names, seed.unique, second)}.png`)
 		];
 		await verwalter.attemptsTo(uploadBelege(seed.idOf(building)!, files));
 	}
@@ -178,7 +179,7 @@ Then(/^öffnet der Beleg die (PDF|JPG)-Datei "([^"]+)"$/, async ({ verwalter }, 
 
 for (const step of ['erinnert Dwello daran, die Originalrechnungen aufzubewahren', 'erinnert Dwello daran, die Originalrechnung aufzubewahren'])
 	Then(step, async ({ verwalter }) => {
-		await verwalter.sees(keepOriginalNote).toBe('Bewahren Sie die Originalrechnung auf; Mieter dürfen sie einsehen.');
+		await verwalter.sees(keepOriginalNote).toContain('Bewahren Sie die Originalrechnung auf; Mieter dürfen sie einsehen.');
 	});
 
 Then('warnt der Beleg {string}', async ({ verwalter }, text: string) => {
