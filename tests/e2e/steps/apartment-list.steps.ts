@@ -61,10 +61,6 @@ Then('die Wohnungsliste enthält genau {int} Wohnung(en)', async ({ verwalter },
 	await verwalter.sees(apartmentCount).toBe(count);
 });
 
-Given('der Liegenschaftsverwalter sucht nach Wohnungen mit {string}', async ({ verwalter, names }, term: string) => {
-	await verwalter.attemptsTo(searchApartments(names.get(term) ?? term));
-});
-
 When('der Liegenschaftsverwalter nach Wohnungen mit {string} sucht', async ({ verwalter, names }, term: string) => {
 	await verwalter.attemptsTo(searchApartments(names.get(term) ?? term));
 });

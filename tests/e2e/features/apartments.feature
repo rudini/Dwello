@@ -42,8 +42,8 @@ Funktionalität: Wohnungsliste
     Dann sieht der Liegenschaftsverwalter in der Wohnungsliste den Hinweis "Keine Wohnungen gefunden"
 
   Szenario: Filter nach dem Zurücksetzen leer
-    Angenommen der Liegenschaftsverwalter sucht nach Wohnungen mit "Gibt es nicht"
-    Wenn der Liegenschaftsverwalter wieder alle Wohnungen anzeigt
+    Wenn der Liegenschaftsverwalter nach Wohnungen mit "Gibt es nicht" sucht
+    Und der Liegenschaftsverwalter wieder alle Wohnungen anzeigt
     Dann zeigt die Wohnungsliste wieder Wohnungen
     Und die Wohnungssuche ist leer
 

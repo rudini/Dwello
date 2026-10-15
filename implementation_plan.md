@@ -16,7 +16,11 @@ The filter forms of apartments, buildings and invoices copy the URL into `$state
 - [x] Fix: `{#key $page.url.search}` around `ApartmentFilters` and `InvoiceSearch`; buildings' search and city as writable `$derived` (as `StatementSearch`)
 - [x] Checks: test:coverage (2458), lint, check, backend type-check, deepcheck:audit, E2E apartments, buildings, invoices, tenants, contracts (38 passed); backend test: 615 pass, the `afterAll` of `swiss-today.pg.test.ts` fails on `main` too at this hour -> `offene-punkte.md` H-27
 - [x] The two observations in the issue's comment (statements: filter lost after deleting a draft, deleted draft from the browser cache) are not in «Done means» and existed before -> `offene-punkte.md` U-31
-- [ ] code-reviewer round(s)
-- [ ] Persona (list screens changed: what a filter form shows)
-- [ ] Workflow review `docs/reviews/workflow-rules-review-issue-159.md`
+- [x] code-reviewer round(s)
+  code-reviewer round 1 (`docs/reviews/issue-159-review-1.md`): open C-1 (Minor, existed before) -> `offene-punkte.md` U-32; fixed C-2 (Nit, the second wording of the search step removed)
+- [x] Personas Helga, Marco, Sven (list screens; Marco for the phone, Sven for focus after the form is rebuilt); only looking
+  persona Helga (`docs/design/personas/helga-issue-159.md`): open P-1 (Minor, browser restores an unsent entry, existed before) -> U-32; observations -> U-34
+  persona Marco (`docs/design/personas/marco-issue-159.md`): open P-1 (Minor, same kind as Helga P-1) -> U-32; observations -> U-34
+  persona Sven (`docs/design/personas/sven-issue-159.md`): open P-1 to P-4 (Minor, focus after list navigations, set in `+layout.svelte`, which the change does not touch) -> U-33; observations -> U-34
+- [x] Workflow review `docs/reviews/workflow-rules-review-issue-159.md`
 - [ ] Archive session, push, PR `Fixes #159`, CI, merge
