@@ -70,6 +70,19 @@ describe('Schon abgerechnete Mietverträge je Gebäude', () => {
 			{ buildingId: 'b1', contracts: 2, billed: 1 }
 		]);
 	});
+
+	it('zählt eine Abrechnung, die die Periode nur teilweise abdeckt, und keine, die vorher endet', async () => {
+		// the period 01.10.2024–30.09.2025: a 2025 statement reaches into it, one ending 30.09.2024 not (#199)
+		const { fetch } = backend([
+			{ contractId: 'nachher', periodStart: '2025-01-01', periodEnd: '2025-12-31' },
+			{ contractId: 'einzug', periodStart: '2023-10-01', periodEnd: '2024-09-30' }
+		]);
+		const shifted = { ...period, periodStart: '2024-10-01', periodEnd: '2025-09-30' };
+
+		expect(await billedContracts(fetch, shifted)).toEqual([
+			{ buildingId: 'b1', contracts: 2, billed: 1 }
+		]);
+	});
 });
 
 describe('Abrechnungen erstellen', () => {

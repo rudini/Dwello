@@ -268,18 +268,22 @@ export const restoredSelection = (
 };
 
 /** What the restored draft named and is gone meanwhile, in words for the draft notice */
-export const droppedNotes = (dropped: { buildings: number; heatingProfile: boolean }) =>
-	[
+export const droppedNotes = (dropped: { buildings: number; heatingProfile: boolean }) => {
+	// a step by its number and name, both from the list of steps (code review C-12, C-13)
+	const step = (name: (typeof stepNames)[number]) => ({
+		number: stepNames.indexOf(name) + 1,
+		step: name()
+	});
+	const buildings = step(m.statements_step_buildings);
+	return [
 		dropped.buildings > 0 &&
 			(dropped.buildings === 1
-				? m.statements_draft_dropped_building_one({ step: m.statements_step_buildings() })
-				: m.statements_draft_dropped_building_many({
-						count: dropped.buildings,
-						step: m.statements_step_buildings()
-					})),
+				? m.statements_draft_dropped_building_one(buildings)
+				: m.statements_draft_dropped_building_many({ count: dropped.buildings, ...buildings })),
 		dropped.heatingProfile &&
-			m.statements_draft_dropped_heating_profile({ step: m.statements_step_settings() })
+			m.statements_draft_dropped_heating_profile(step(m.statements_step_settings))
 	].filter((note) => note !== false);
+};
 
 /** The wizard with one building and one period chosen, opened on the settings (A-10) */
 export const wizardLink = (building: string, start: string, end: string) =>

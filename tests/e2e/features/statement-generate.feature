@@ -158,7 +158,7 @@ Funktionalität: Nebenkostenabrechnungen erstellen
   Szenario: Schon abgerechnete Mietverträge zeigen sich bei der Wahl der Gebäude
     Angenommen für "Marc Huber" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024
     Wenn der Liegenschaftsverwalter die Gebäude für die Abrechnungen 2024 wählen will
-    Dann nennt die Wahl für "Lindenhof" "1 von 2 Mietverträgen hat schon eine Abrechnung, die diese Abrechnungsperiode ganz oder teilweise abdeckt."
+    Dann nennt die Wahl für "Lindenhof" "Von 2 Mietverträgen in dieser Abrechnungsperiode hat 1 schon eine Abrechnung, die diesen Zeitraum ganz oder teilweise abdeckt."
 
   Szenario: Erstellte Abrechnungen anzeigen
     Angenommen der Liegenschaftsverwalter hat die Abrechnungen 2024 für das Gebäude "Lindenhof" erstellt
