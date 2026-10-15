@@ -8,7 +8,8 @@ import {
 	pageOverflowsSideways,
 	pageTitleWidth,
 	sectionShown,
-	sectionText
+	sectionText,
+	tabIcon
 } from '../questions/app-frame';
 import { openPage } from '../tasks/navigation';
 import {
@@ -131,6 +132,10 @@ Then(
 		await verwalter.sees(sectionText(heading)).toContain('Dokumente, die Sie zu Mietern hochladen');
 	}
 );
+
+Then('zeigt das Browser-Tab das Dwello-Symbol', async ({ verwalter }) => {
+	await verwalter.sees(tabIcon).toBe('image/svg+xml');
+});
 
 Then('zeigt die Fusszeile die Version {string}', async ({ verwalter }, version: string) => {
 	await verwalter.sees(footerVersionText).toBe(`Version ${version}`);
