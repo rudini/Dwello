@@ -6,8 +6,9 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8): add the items when
 
 From issue #188 (decision #187, option A): rules of groups 1 and 2 move from `UBIQUITOUS_LANGUAGE.md` to the requirement documents (added there first where missing), group 3 is deleted, group 5 stays; the settings entry «Verwaltungspauschale» says only what the setting is. Editing the glossary is part of this task by the product owner's decision. No scenario: documentation only, no app behavior changes.
 
-- [ ] Map every rule of groups 1 and 2 to its place in `docs/nebenkostenabrechnung-anforderungen.md`, `docs/anforderungen-vertragsende.md` or `docs/PRD-Dwello.md` (and the scenario that shows it); add the missing ones there
-- [ ] Reduce the glossary entries of groups 1 to 3 to their definitions; settings entry «Verwaltungspauschale»
+- [x] Map every rule of groups 1 and 2 to its place in `docs/nebenkostenabrechnung-anforderungen.md`, `docs/anforderungen-vertragsende.md` or `docs/PRD-Dwello.md` (and the scenario that shows it); add the missing ones there (new sections «Regeln in Dwello» in both requirement docs; stale PRD lines aligned to the code as decided on #188)
+- [x] Reduce the glossary entries of groups 1 to 3 to their definitions; settings entry «Verwaltungspauschale»
+  Files: `UBIQUITOUS_LANGUAGE.md`, `docs/nebenkostenabrechnung-anforderungen.md`, `docs/anforderungen-vertragsende.md`, `docs/PRD-Dwello.md`, `implementation_plan.md`
 - [ ] fach-reviewer on the diff (no rule lost, no definition changed in meaning)
 - [ ] code-reviewer round (docs only)
 - [ ] Workflow review not needed (no app changes, `CLAUDE.md` Workflow 7)

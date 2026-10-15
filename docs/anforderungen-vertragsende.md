@@ -24,12 +24,22 @@ Priorität: «hoch» heisst vor dem ersten echten Einsatz, weil sonst falsche Da
 
 ---
 
+## Regeln in Dwello
+
+Aus dem Glossar hierher verschoben (#188); das Glossar sagt nur, was die Begriffe bedeuten.
+
+1. **Keine Überschneidung.** Pro Wohnung darf sich kein Mietvertrag mit einem anderen überschneiden; Dwello lehnt einen neuen oder geänderten Vertrag ab, der es täte (`CONTRACT_OVERLAP`; Szenarien in `contract-new.feature`, `contract-edit.feature`).
+2. **Kündigungstermin als Vertragsende.** Ist ein unbefristeter Mietvertrag gekündigt, erfasst Dwello den Kündigungstermin als Vertragsende und merkt sich, dass er gekündigt ist (A-1).
+3. **Kündigungsfrist.** Dwello prüft die Kündigungsfrist nicht; geplant ist ein Hinweis ohne Sperre (A-3, #112).
+
+---
+
 ## A-1 Befristung und Kündigung unterscheiden – umgesetzt
 
 **Umgesetzt** (Session 15): Spalte `rental_contracts.terminated` (*gekündigt*; sonst *vereinbart*), «Mietvertrag beenden» setzt sie. Die Detailseite zeigt «Befristet bis …» oder «Unbefristet, gekündigt auf den …», die Listen (Mietverträge, Wohnung, Mieter) hängen «befristet» oder «gekündigt» an den Zeitraum. Unter «Bearbeiten» bietet die Vertragsdauer bei einem gekündigten Vertrag «Unbefristet, gekündigt auf den …», «Kündigung aufheben» («Der Mietvertrag läuft dann ohne Ende weiter.») und «Befristet» an. Offen bleiben Punkt 6 (Glossar, Product Owner) und die offene Frage zur Aufhebungsvereinbarung. Abweichung von Punkt 3, offen für den Product Owner: Im Assistenten (neuer Mietvertrag und «Bearbeiten») heisst die Option nur «Befristet», das Datum steht im Feld darunter; ein Name, der sich mit dem Datum ändert, wird nicht angesagt (Review J-1 J-7, J-2 J2-4, Sven J1 m1). Die Demo-Daten kennzeichnen die Vormieter als gekündigt; ältere Verträge gelten nach Punkt 5 als befristet.
 
 
-**Problem.** Ein befristeter Mietvertrag endet am vereinbarten Tag ohne Kündigung. Ein unbefristeter endet erst durch eine Kündigung auf einen Kündigungstermin *(Glossar fehlt)*. Dwello speichert beides im selben Feld «Vertragsende». Nach «Beenden» zeigt der Assistent unter «Bearbeiten» einen gekündigten unbefristeten Vertrag als «Befristet: Der Mietvertrag endet an einem festen Tag, ohne Kündigung». Das ist rechtlich falsch, und wer «befristet» liest, prüft die Kündigung nicht mehr. Ausserdem passt die Definition im Glossar («leer bei unbefristeten Verträgen») nicht mehr.
+**Problem.** Ein befristeter Mietvertrag endet am vereinbarten Tag ohne Kündigung. Ein unbefristeter endet erst durch eine Kündigung auf einen Kündigungstermin. Dwello speichert beides im selben Feld «Vertragsende». Nach «Beenden» zeigt der Assistent unter «Bearbeiten» einen gekündigten unbefristeten Vertrag als «Befristet: Der Mietvertrag endet an einem festen Tag, ohne Kündigung». Das ist rechtlich falsch, und wer «befristet» liest, prüft die Kündigung nicht mehr. Ausserdem passt die Definition im Glossar («leer bei unbefristeten Verträgen») nicht mehr.
 
 **Anforderungen**
 
@@ -82,7 +92,7 @@ Umgesetzt nach Review I Runde 4 und den Personas Anna (I2, Blocker B1) und Helga
 
 ## A-3 Hinweis auf die Kündigungsfrist
 
-**Problem.** Für Wohnungen gilt eine Kündigungsfrist *(Glossar fehlt)* von mindestens 3 Monaten auf einen ortsüblichen Termin (Art. 266c OR). Eine zu späte Kündigung gilt erst auf den nächsten Termin (Art. 266a Abs. 2 OR). Trägt der Verwalter das Datum aus einem zu spät eingegangenen Kündigungsschreiben ein, ist die Wohnung in Dwello zu früh leer: Die Nebenkosten dieser Monate gehen an den Vermieter, das Akonto des Mieters wird nicht mehr gerechnet. Heute steht nur ein allgemeiner Satz im Dialog.
+**Problem.** Für Wohnungen gilt eine Kündigungsfrist von mindestens 3 Monaten auf einen ortsüblichen Termin (Art. 266c OR). Eine zu späte Kündigung gilt erst auf den nächsten Termin (Art. 266a Abs. 2 OR). Trägt der Verwalter das Datum aus einem zu spät eingegangenen Kündigungsschreiben ein, ist die Wohnung in Dwello zu früh leer: Die Nebenkosten dieser Monate gehen an den Vermieter, das Akonto des Mieters wird nicht mehr gerechnet. Heute steht nur ein allgemeiner Satz im Dialog.
 
 **Anforderungen**
 
