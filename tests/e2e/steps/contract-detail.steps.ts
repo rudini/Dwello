@@ -5,6 +5,7 @@ import {
 	endConfirmationInWindow,
 	endDateProblemShown,
 	endOfContract,
+	missingStatementsText,
 	statusOfContract,
 	totalRent
 } from '../questions/contract-detail';
@@ -29,8 +30,11 @@ import {
 	useWindowOf
 } from '../tasks/contract-detail';
 import { searchContracts } from '../tasks/contracts';
+import { inDays } from '../fixtures/dates';
 
 const { Given, When, Then } = createBdd(test);
+
+const lastYear = Number(inDays(0).slice(0, 4)) - 1;
 
 Given(
 	'für {string} gibt es die Abrechnung {int} im Gebäude {string}',
@@ -160,7 +164,15 @@ When('der Liegenschaftsverwalter den Entwurf löscht und den Mietvertrag beendet
 });
 
 When('der Liegenschaftsverwalter die fehlende Abrechnung des letzten Jahres erstellen will', async ({ verwalter }) => {
-	await verwalter.attemptsTo(createMissingStatement);
+	await verwalter.attemptsTo(createMissingStatement(`${lastYear}-01-01`));
+});
+
+Then('meldet der Mietvertrag die fehlende Abrechnung {int}', async ({ verwalter }, year: number) => {
+	await verwalter.sees(missingStatementsText).toContain(String(year));
+});
+
+Then('meldet der Mietvertrag keine fehlende Abrechnung des letzten Jahres', async ({ verwalter }) => {
+	await verwalter.sees(missingStatementsText).not.toContain(String(lastYear));
 });
 
 Then('endet der Mietvertrag von {string} am {string}', async ({ verwalter, seed }, tenant: string, date: string) => {

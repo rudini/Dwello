@@ -55,12 +55,12 @@ function open(
 	form: unknown = null,
 	today = '2026-10-10',
 	terminated = false,
-	missingStatement: { start: string; end: string; href: string } | null = null
+	missingStatements: { start: string; end: string; href: string }[] = []
 ) {
 	show(ContractPage, {
 		data: {
 			today,
-			missingStatement,
+			missingStatements,
 			nextSteps: terminated ? { successor: false } : null, // the loader decides (review K-1)
 			contract: contract(startDate, endDate, terminated),
 			rentBreakdown: { baseRent: 950, additionalRent: 50, advancePayment: 180, total: 1180 }
@@ -180,17 +180,32 @@ describe('Mietvertragsdetail', () => {
 	// A-10: Mietstage in der letzten Abrechnungsperiode ohne Abrechnung
 	it('meldet die fehlende Abrechnung und führt zum Assistenten', () => {
 		const href = '/statements/generate?building=b1&start=2025-01-01&end=2025-12-31';
-		open('2024-04-01', null, null, '2026-10-10', false, {
-			start: '2025-01-01',
-			end: '2025-12-31',
-			href
-		});
+		open('2024-04-01', null, null, '2026-10-10', false, [
+			{ start: '2025-01-01', end: '2025-12-31', href }
+		]);
 		expect(text('contract-missing-statement')).toContain('Abrechnung 2025 fehlt');
-		expect(byTestId('contract-missing-statement-link')!.getAttribute('href')).toBe(href);
+		expect(byTestId('contract-missing-statement-link-2025-01-01')!.getAttribute('href')).toBe(href);
+	});
+
+	// #142: every ended period without a statement, the newest first, each with its own way to the wizard
+	it('nennt mehrere fehlende Abrechnungen, die neueste zuerst, je mit ihrem Weg zum Assistenten', () => {
+		const missing = [2025, 2023].map((y) => ({
+			start: `${y}-01-01`,
+			end: `${y}-12-31`,
+			href: `/statements/generate?building=b1&start=${y}-01-01&end=${y}-12-31`
+		}));
+		open('2022-04-01', null, null, '2026-10-10', false, missing);
+		expect(text('contract-missing-statement')).toContain('2 Abrechnungen fehlen');
+		const links = [...byTestId('contract-missing-statement')!.querySelectorAll('a')];
+		expect(links.map((a) => a.textContent!.trim())).toEqual([
+			'Abrechnung 2025 erstellen',
+			'Abrechnung 2023 erstellen'
+		]);
+		expect(links.map((a) => a.getAttribute('href'))).toEqual(missing.map((m) => m.href));
 	});
 
 	it('nennt eine Periode über den Jahreswechsel mit beiden Tagen', () => {
-		const missing = { start: '2024-07-01', end: '2025-06-30', href: '/statements/generate' };
+		const missing = [{ start: '2024-07-01', end: '2025-06-30', href: '/statements/generate' }];
 		open('2024-04-01', null, null, '2026-10-10', false, missing);
 		expect(text('contract-missing-statement')).toContain(
 			'Abrechnung 01.07.2024 – 30.06.2025 fehlt'
@@ -201,7 +216,7 @@ describe('Mietvertragsdetail', () => {
 		show(ContractPage, {
 			data: {
 				today: '2026-10-10',
-				missingStatement: null,
+				missingStatements: [],
 				nextSteps: { successor: true },
 				contract: contract('2024-04-01', '2099-03-31', true),
 				rentBreakdown: { baseRent: 950, additionalRent: 50, advancePayment: 180, total: 1180 }

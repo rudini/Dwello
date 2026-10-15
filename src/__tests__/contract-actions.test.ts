@@ -81,9 +81,11 @@ describe('Nächste Schritte nach einer Kündigung', () => {
 	});
 });
 
-// A-10: Mietstage in der letzten Abrechnungsperiode ohne Abrechnung
-describe('Fehlende Abrechnung am Mietvertrag', () => {
-	const backend = (statements: unknown[]) =>
+// A-10, #142: Mietstage in abgelaufenen Abrechnungsperioden ohne Abrechnung
+describe('Fehlende Abrechnungen am Mietvertrag', () => {
+	const lastYear = new Date().getFullYear() - 1;
+	const year = (y: number) => ({ start: `${y}-01-01`, end: `${y}-12-31` });
+	const backend = (statements: unknown[], startDate = `${lastYear - 2}-04-01`) =>
 		(async (url: string) => {
 			if (url.endsWith('/config'))
 				return Response.json({ data: { accounting_period: 'calendar' } });
@@ -91,32 +93,39 @@ describe('Fehlende Abrechnung am Mietvertrag', () => {
 				return Response.json({ data: statements, total: statements.length });
 			return Response.json({
 				id: 'c1',
-				startDate: '2024-04-01',
+				startDate,
 				endDate: null,
 				apartmentId: 'a1',
 				apartment: { id: 'a1', buildingId: 'b1' },
 				building: { id: 'b1' }
 			});
 		}) as typeof globalThis.fetch;
-	const lastYear = new Date().getFullYear() - 1;
+	const missingOf = async (fetch: typeof globalThis.fetch) =>
+		((await load({ params: { id: 'c1' }, fetch } as never)) as { missingStatements: unknown })
+			.missingStatements;
 
-	it('nennt die Periode und führt zum Assistenten für dieses Gebäude', async () => {
-		const data = (await load({ params: { id: 'c1' }, fetch: backend([]) } as never)) as {
-			missingStatement: { start: string; end: string; href: string } | null;
+	it('nennt jede abgelaufene Periode ohne Abrechnung ab Vertragsbeginn, die neueste zuerst', async () => {
+		// three ended years with rent days; the middle one has its statement
+		const middle = {
+			contractId: 'c1',
+			periodStart: `${lastYear - 1}-01-01`,
+			periodEnd: `${lastYear - 1}-12-31`
 		};
-		expect(data.missingStatement).toEqual({
-			start: `${lastYear}-01-01`,
-			end: `${lastYear}-12-31`,
-			href: `/statements/generate?building=b1&start=${lastYear}-01-01&end=${lastYear}-12-31`
-		});
+		expect(await missingOf(backend([middle]))).toEqual(
+			[lastYear, lastYear - 2].map((y) => ({
+				...year(y),
+				href: `/statements/generate?building=b1&start=${y}-01-01&end=${y}-12-31`
+			}))
+		);
 	});
 
-	it('schweigt, wenn der Mietvertrag seine Abrechnung hat', async () => {
-		const data = (await load({
-			params: { id: 'c1' },
-			fetch: backend([{ contractId: 'c1' }])
-		} as never)) as { missingStatement: unknown };
-		expect(data.missingStatement).toBeNull();
+	it('schweigt für Perioden vor dem Vertragsbeginn und wenn jede ihre Abrechnung hat', async () => {
+		const own = {
+			contractId: 'c1',
+			periodStart: `${lastYear}-01-01`,
+			periodEnd: `${lastYear}-12-31`
+		};
+		expect(await missingOf(backend([own], `${lastYear}-03-01`))).toEqual([]);
 	});
 });
 
