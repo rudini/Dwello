@@ -78,18 +78,29 @@ describe('Vorschlag der KI für eine neue Kategorie', () => {
 		}
 	});
 
-	it('sagt der KI, dass die vordefinierten Kategorien nicht vollständig sind, ohne eine Antwort vorzugeben (#212)', async () => {
+	it('gibt der KI die Prüfregeln für kleine Modelle, ohne eine Antwort vorzugeben (#212)', async () => {
 		const llm = openAiCompatible({ isAllowedUtilityCost: true, confidence: 0.9, reasoning: '' });
 		try {
 			await sendJson('POST', '/api/v1/categories/propose', { name: 'Treppenhausreinigung' });
 
-			expect(llm.prompts[0]).toContain('Die vordefinierten Kategorien sind nicht vollständig.');
 			// Reparaturen gehen vor, sonst ordnet ein kleines Modell die Liftreparatur dem Lift zu
 			expect(llm.prompts[0]).toContain(
-				'1. Reparatur, Ersatz, Erneuerung, Renovation, Anschaffung und wertvermehrende Investitionen trägt immer der Vermieter'
+				'1. Reparatur, Renovation, Erneuerung, Ersatz und Anschaffung von Anlagen, Geräten und Bauteilen sowie wertvermehrende Investitionen trägt immer der Vermieter'
+			);
+			// Sonst schiebt ein kleines Modell das gekaufte Heizöl als «Anschaffung» zum Vermieter
+			expect(llm.prompts[0]).toContain(
+				'Brennstoffe und Energie, die verbraucht werden, sind keine Anschaffung (Art. 5 Abs. 2 Bst. a VMWG).'
+			);
+			expect(llm.prompts[0]).toContain('2. Die vordefinierten Kategorien sind nicht vollständig.');
+			expect(llm.prompts[0]).toContain(
+				'3. Art. 5 und 6 VMWG nur anwenden, wenn die Kategorie Heizung oder Warmwasser betrifft.'
+			);
+			expect(llm.prompts[0]).toContain(
+				'öffentliche Abgaben, die sich aus dem Gebrauch ergeben (z.B. Gebühren nach Verbrauch), sind umlagefähig'
 			);
 			// Ein kleines Modell übernimmt die Werte des Beispiels
 			expect(llm.prompts[0]).toContain('"isAllowedUtilityCost": <true oder false>');
+			expect(llm.prompts[0]).toContain('"confidence": <Zahl von 0 bis 1>');
 			expect(llm.prompts[0]).not.toContain('z.B. (Art. 257a Abs. 1 OR)');
 		} finally {
 			llm.stop();

@@ -63,7 +63,7 @@ Funktionalität: Kostenkategorien
     Angenommen der Liegenschaftsverwalter ist auf der Seite "Neue Kategorie"
     Wenn der Liegenschaftsverwalter die KI prüfen lässt, ob die Kategorie "Dachsanierung" umlagefähig ist
     Dann schlägt die KI vor, die Kategorie als nicht umlagefähig zu erfassen
-    Und begründet die KI ihren Vorschlag mit "Art. 256"
+    Und begründet die KI ihren Vorschlag mit "Art. 256 Abs. 1"
 
   Szenario: Liegenschaftsverwalter übersteuert den Vorschlag der KI
     Angenommen der Liegenschaftsverwalter ist auf der Seite "Neue Kategorie"
