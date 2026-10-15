@@ -4,6 +4,7 @@ import { pageAddress } from '../questions/navigation';
 import {
 	announcedFeeHint,
 	balanceOf,
+	billedOfBuilding,
 	buildingChosen,
 	categoryFindingOf,
 	draftsOnly,
@@ -25,11 +26,13 @@ import {
 	settingsChoiceCount,
 	settingsChoiceName,
 	createdStatements,
+	restoredDraftText,
 	statementsInPreview,
 	totalCostsOf
 } from '../questions/statement-generate';
 import {
 	chooseBuilding,
+	chooseBuildingsFor,
 	confirmDespiteWarnings,
 	generateMore,
 	generateStatements,
@@ -283,3 +286,19 @@ Then(
 		await verwalter.sees(heatingProfileOffered).toBe(true);
 	}
 );
+
+Given('das Gebäude {string} wird inzwischen gelöscht', async ({ seed }, building: string) => {
+	await seed.removeBuilding(building);
+});
+
+When('der Liegenschaftsverwalter die Gebäude für die Abrechnungen {int} wählen will', async ({ verwalter }, year: number) => {
+	await verwalter.attemptsTo(chooseBuildingsFor(year));
+});
+
+Then('sagt der wiederhergestellte Entwurf {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(restoredDraftText).toContain(text);
+});
+
+Then('nennt die Wahl für {string} {string}', async ({ verwalter, seed }, building: string, text: string) => {
+	await verwalter.sees(billedOfBuilding(seed.idOf(building)!)).toBe(text);
+});

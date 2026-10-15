@@ -3,6 +3,7 @@ import { baseLocale, overwriteGetLocale } from '$lib/paraglide/runtime';
 import { balanceLabel, paidDateError } from '$lib/statement';
 import { akontoHint, findingText, selectionErrors, statementSteps } from '$lib/statement-wizard';
 import { formatCurrency } from '$lib/utils/format';
+import { m } from '$lib/paraglide/messages';
 import { loadStatement } from '$lib/server/statement';
 import { sendStatementReminder } from '$lib/server/statement-actions';
 import { invoicesInPeriod } from '$lib/server/statement-generation';
@@ -26,6 +27,13 @@ const perArea = {
 };
 
 describe('Nebenkostenabrechnungen in der gewählten Sprache', () => {
+	it('nennt schon abgerechnete Mietverträge auf Italienisch und Englisch ohne falschen Bezug (fach-review V-10, V-11)', () => {
+		overwriteGetLocale(() => 'it');
+		expect(m.statements_building_billed_many({ billed: 2, total: 8 })).toMatch(/^Su 8 contratti/);
+		overwriteGetLocale(() => 'en');
+		expect(m.statements_building_billed_all_many()).toContain('covers all or part of this period');
+	});
+
 	it('nennt den Saldo auf Französisch wie das PDF', () => {
 		overwriteGetLocale(() => 'fr');
 		expect([balanceLabel(120), balanceLabel(-80), balanceLabel(0)]).toEqual([

@@ -249,17 +249,41 @@ export const invoiceRows = (
 		...categoryCheck(c.check)
 	}));
 
-/** A draft from this browser, without buildings or heating profiles deleted meanwhile */
+/** A draft from this browser, without buildings or heating profiles deleted meanwhile, and what it lost */
 export const restoredSelection = (
 	draft: WizardSelection,
 	known: { buildingIds: string[]; heatingProfileIds: string[] }
-): WizardSelection => ({
-	...draft,
-	buildingIds: draft.buildingIds.filter((id) => known.buildingIds.includes(id)),
-	heatingProfileId: known.heatingProfileIds.includes(draft.heatingProfileId)
+) => {
+	const buildingIds = draft.buildingIds.filter((id) => known.buildingIds.includes(id));
+	const heatingProfileId = known.heatingProfileIds.includes(draft.heatingProfileId)
 		? draft.heatingProfileId
-		: ''
-});
+		: '';
+	return {
+		selection: { ...draft, buildingIds, heatingProfileId },
+		dropped: {
+			buildings: draft.buildingIds.length - buildingIds.length,
+			heatingProfile: heatingProfileId !== draft.heatingProfileId
+		}
+	};
+};
+
+/** What the restored draft named and is gone meanwhile, in words for the draft notice */
+export const droppedNotes = (dropped: { buildings: number; heatingProfile: boolean }) => {
+	// a step by its number and name, both from the list of steps (code review C-12, C-13)
+	const step = (name: (typeof stepNames)[number]) => ({
+		number: stepNames.indexOf(name) + 1,
+		step: name()
+	});
+	const buildings = step(m.statements_step_buildings);
+	return [
+		dropped.buildings > 0 &&
+			(dropped.buildings === 1
+				? m.statements_draft_dropped_building_one(buildings)
+				: m.statements_draft_dropped_building_many({ count: dropped.buildings, ...buildings })),
+		dropped.heatingProfile &&
+			m.statements_draft_dropped_heating_profile(step(m.statements_step_settings))
+	].filter((note) => note !== false);
+};
 
 /** The wizard with one building and one period chosen, opened on the settings (A-10) */
 export const wizardLink = (building: string, start: string, end: string) =>

@@ -1,3 +1,4 @@
+import { writeDraft } from '../../../src/lib/wizard-draft';
 import { inDays } from '../fixtures/dates';
 import { type Example, type Viewport, variants, viewports } from '../fixtures/screens';
 import { accessibilityViolations } from '../questions/accessibility';
@@ -241,6 +242,23 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	'preview-all-billed': (example) => previewOf('2024', 'preview-all-billed')(example),
 	// 2025 with a second building that has heating costs but never had a Tankbestand
 	'tank-question': (example) => previewOf('2025', 'tank-question')(example, example.tankBuilding),
+	// a draft from an earlier visit whose building and heating profile were deleted since
+	'draft-dropped': () => (actor) =>
+		actor.attemptsTo(
+			Browser.keepInLocalStorage(
+				draftOf('statements', { periodStart: '2025-01-01', periodEnd: '2025-12-31', heatingProfileId: 'geloescht', managementFeePercent: 3, buildingIds: ['geloescht'] })
+			),
+			Navigate.reload,
+			Wait.until(on.shown('draft-note'))
+		),
+	// 2025, not the suggested period, which moves with today: Anna and Bruno have their statements, Carla not
+	'buildings-billed': (example) => (actor) =>
+		actor.attemptsTo(
+			EnterDate.of('2025-01-01').into(on.periodStartInput),
+			EnterDate.of('2025-12-31').into(on.periodEndInput),
+			Click.on(nextButton),
+			Wait.until(on.shown(`generate-building-billed-${example.building}`))
+		),
 	'period-not-over': () => (actor) =>
 		actor.attemptsTo(EnterDate.of('2099-12-31').into(on.periodEndInput), Wait.until(on.periodFutureWarning))
 };
@@ -275,6 +293,13 @@ const statementWizardSteps =
 		if (await actor.answer(Visibility.of(on.confirmMissingInvoices))) await actor.attemptsTo(Check.the(on.confirmMissingInvoices));
 		await nextStep('generate-drafts-note'); // "Erstellen"
 	};
+
+// A wizard draft as the app keeps it in the browser, written by the app's own code (code review C-7)
+function draftOf(name: string, values: object) {
+	const kept: Record<string, string> = {};
+	writeDraft({ setItem: (key: string, value: string) => void (kept[key] = value) } as unknown as Storage, name, values, new Date());
+	return kept;
+}
 
 // 'empty' and 'first-use' need a database without records: the empty instance of the stack (playwright.config.ts);
 // 'demo' the instance with DEMO=on

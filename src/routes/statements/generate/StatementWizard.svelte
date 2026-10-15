@@ -6,6 +6,7 @@
 		invoiceRows,
 		needsConfirmation,
 		restoredSelection,
+		droppedNotes,
 		selectionErrors,
 		statementSteps,
 		type WizardSelection
@@ -71,6 +72,7 @@
 	let touched = $state(false); // a draft is kept only once the user has chosen something
 	let savedAt = $state<Date | null>(null);
 	let restoredAt = $state<Date | null>(null);
+	let dropped = $state({ buildings: 0, heatingProfile: false }); // what the draft named and is gone meanwhile
 	let resumed = $state(false); // back from "Rechnung erfassen", on the step before the preview
 	let section = $state<HTMLElement>();
 
@@ -88,13 +90,15 @@
 		if (form || chosen) return; // coming back from the server, or a link chose for this visit
 		const draft = readDraft<WizardSelection>(browserStorage(), DRAFT);
 		if (!draft) return;
-		selection = restoredSelection(draft.values, {
+		({ selection, dropped } = restoredSelection(draft.values, {
 			buildingIds: data.buildings.map((b) => b.id),
 			heatingProfileIds: data.heatingProfiles.map((p) => p.id)
-		});
+		}));
 		restoredAt = draft.savedAt;
 		// Back from "Rechnung erfassen": the step before the preview, so "Weiter" calculates it anew
-		const complete = [1, 2].every((n) => !Object.keys(selectionErrors(selection, n)).length);
+		// a building gone meanwhile is checked first, in step 2 (code review C-5)
+		const complete =
+			!dropped.buildings && [1, 2].every((n) => !Object.keys(selectionErrors(selection, n)).length);
 		if (new URL(location.href).searchParams.get('schritt') === '3' && complete) {
 			step = 3;
 			resumed = true;
@@ -201,7 +205,7 @@
 	<input type="hidden" name="managementFeePercent" value={selection.managementFeePercent} />
 	<input type="hidden" name="buildingIds" value={selection.buildingIds.join(',')} />
 
-	<DraftNotice savedAt={restoredAt} ondiscard={discardDraft}>
+	<DraftNotice savedAt={restoredAt} ondiscard={discardDraft} notes={droppedNotes(dropped)}>
 		<!-- Back from "Rechnung erfassen": why the wizard shows the step before the preview -->
 		<p class:hidden={!resumed || step !== 3} data-testid="resume-notice">
 			{m.statements_resume()}
