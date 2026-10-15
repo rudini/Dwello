@@ -194,6 +194,10 @@ export function testData(api: CallTheApi) {
 			await put('config', { iban: iban.replace(/\s/g, '') });
 		},
 
+		async removeStatement(tenantTitle: string, year: number) {
+			await remove(`statements/${ids.get(`Abrechnung ${tenantTitle} ${year}`)}`);
+		},
+
 		async statementPdf(tenantTitle: string, year: number) {
 			await post(`statements/${ids.get(`Abrechnung ${tenantTitle} ${year}`)}/generate-pdf`, {});
 		},

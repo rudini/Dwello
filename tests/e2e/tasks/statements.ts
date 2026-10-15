@@ -53,3 +53,5 @@ export const startGeneratingStatements = Click.on(generateStatementsButton);
 export const openStatement = (tenantName: string, year: number) => Click.on(openStatementLink(tenantName, year));
 export const downloadStatementPdfFromList = (tenantName: string, year: number) =>
 	DownloadFrom(statementPdfLink(tenantName, year));
+/** Follows the list's PDF link in the tab, as a browser does when the answer is no PDF */
+export const requestStatementPdfFromList = (tenantName: string, year: number) => Click.on(statementPdfLink(tenantName, year));

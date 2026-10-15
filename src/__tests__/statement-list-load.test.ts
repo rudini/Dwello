@@ -93,13 +93,13 @@ describe('PDF einer Abrechnung herunterladen', () => {
 		expect(new TextDecoder().decode(await response.arrayBuffer())).toBe('%PDF');
 	});
 
-	it('gibt den Fehler des Backends weiter, z.B. wenn noch kein PDF erstellt wurde', async () => {
+	it('sagt in Worten, dass das PDF nicht entstand, wenn das Backend ohne Code ablehnt', async () => {
 		const response = await call(() =>
 			Response.json({ error: 'PDF not generated yet' }, { status: 404 })
 		);
 
 		expect(response.status).toBe(404);
-		expect(await response.json()).toEqual({ error: 'PDF not generated yet' });
+		expect(await response.text()).toBe('Das PDF konnte nicht erstellt werden. Versuchen Sie es später erneut.');
 	});
 
 	it('meldet einen Fehler, wenn das Backend nicht erreichbar ist', async () => {

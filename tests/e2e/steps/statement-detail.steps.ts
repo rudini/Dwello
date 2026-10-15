@@ -19,6 +19,7 @@ import { openStatementList, searchStatements } from '../tasks/statements';
 import {
 	deleteStatement,
 	downloadStatementPdf,
+	requestStatementPdf,
 	editStatementFromDetail,
 	generateStatementPdf,
 	markStatementPaid,
@@ -201,4 +202,8 @@ Then('steht im PDF {string}', async ({ verwalter }, text: string) => {
 
 Then('nennt die Abrechnung das Heizprofil {string}', async ({ verwalter, names }, profile: string) => {
 	await verwalter.sees(heatingProfileOfStatement).toContain(names.get(profile)!);
+});
+
+When('der Liegenschaftsverwalter das PDF der Abrechnung anfordert', async ({ verwalter }) => {
+	await verwalter.attemptsTo(requestStatementPdf);
 });

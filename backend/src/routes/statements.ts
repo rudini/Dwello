@@ -4,7 +4,7 @@
  */
 
 import { Elysia, t } from 'elysia';
-import { errorBody, refusal } from '../services/coded-error';
+import { CodedError, codedBody, refusal } from '../services/coded-error';
 import { deleteResponse } from './delete-response';
 import {
 	listStatements,
@@ -20,6 +20,12 @@ import {
 import { generateStatementPdf, getStatementPdf } from '../services/statement-pdf.service';
 
 // Calculation parameters shared by preview and generate; the management fee overrides the configured default
+// A PDF that could not be made: a coded refusal (an invalid IBAN) as such, anything else logged and named
+function pdfFailure(error: unknown, set: { status?: number | string }) {
+	set.status = error instanceof CodedError ? 400 : 500;
+	return codedBody(error, 'PDF_FAILED', 'PDF generation failed');
+}
+
 const calculationBody = t.Object({
 	contractId: t.String(),
 	periodStart: t.String(),
@@ -99,7 +105,7 @@ export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 				};
 			} catch (error) {
 				set.status = 400;
-				return errorBody(error, 'Calculation failed');
+				return codedBody(error, 'CALCULATION_FAILED', 'Calculation failed');
 			}
 		},
 		{
@@ -118,7 +124,7 @@ export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 				return statement;
 			} catch (error) {
 				set.status = 400;
-				return errorBody(error, 'Statement generation failed');
+				return codedBody(error, 'CALCULATION_FAILED', 'Statement generation failed');
 			}
 		},
 		{
@@ -286,9 +292,7 @@ export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 					...result
 				};
 			} catch (error) {
-				console.error('PDF generation error:', error);
-				set.status = 500;
-				return { error: error instanceof Error ? error.message : 'PDF generation failed' };
+				return pdfFailure(error, set);
 			}
 		},
 		{
@@ -307,9 +311,9 @@ export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 		async ({ params, set }) => {
 			try {
 				const result = await getStatementPdf(params.id);
-				if ('error' in result) {
-					set.status = 404;
-					return result;
+				if ('refusal' in result) {
+					set.status = result.status;
+					return result.refusal;
 				}
 
 				// Convert Base64 to Buffer
@@ -321,8 +325,7 @@ export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 
 				return pdfBuffer;
 			} catch (error) {
-				set.status = 500;
-				return { error: error instanceof Error ? error.message : 'Failed to retrieve PDF' };
+				return pdfFailure(error, set);
 			}
 		},
 		{
@@ -338,9 +341,9 @@ export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 		async ({ params, set }) => {
 			try {
 				const result = await getStatementPdf(params.id);
-				if ('error' in result) {
-					set.status = 404;
-					return result;
+				if ('refusal' in result) {
+					set.status = result.status;
+					return result.refusal;
 				}
 
 				return {
@@ -348,8 +351,7 @@ export const statementRoutes = new Elysia({ prefix: '/api/v1/statements' })
 					mimeType: 'application/pdf'
 				};
 			} catch (error) {
-				set.status = 500;
-				return { error: error instanceof Error ? error.message : 'Failed to retrieve PDF' };
+				return pdfFailure(error, set);
 			}
 		},
 		{

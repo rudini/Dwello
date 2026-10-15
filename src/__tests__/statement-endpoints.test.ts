@@ -1,8 +1,10 @@
-import { describe, it, expect } from 'vitest';
+import { afterEach, describe, it, expect, vi } from 'vitest';
 import { POST as markPaid } from '../routes/statements/[id]/mark-paid/+server';
 import { POST as sendReminder } from '../routes/statements/[id]/send-reminder/+server';
 import { POST as generatePdf } from '../routes/api/statements/[id]/generate-pdf/+server';
 import { GET as getPdf } from '../routes/statements/[id]/pdf/+server';
+import { GET as getListPdf } from '../routes/api/statements/[id]/pdf/+server';
+import refusedPdf from '../../tests/contracts/statement-pdf-refused.json';
 import { localToday } from '$lib/contract-status';
 
 const API = 'http://localhost:3001/api/v1/statements/s1';
@@ -113,11 +115,48 @@ describe('GET /statements/[id]/pdf', () => {
 		expect(await response.text()).toContain('Das PDF konnte nicht erstellt werden');
 	});
 
+	// A tab with a statement deleted in the meantime: the download opens in the tab, as the view does
+	it('sagt beim Herunterladen in Worten, dass es die Abrechnung nicht gibt', async () => {
+		const response = await get(async () => Response.json(refusedPdf, { status: 404 }));
+		expect(response.status).toBe(404);
+		expect(response.headers.get('Content-Type')).toMatch(/text\/plain/);
+		expect(await response.text()).toBe('Abrechnung nicht gefunden.');
+	});
+
+	it('nennt beim Ansehen den Grund, den das Backend mit Code angibt', async () => {
+		const fetch = async () => Response.json({ error: 'IBAN not configured', code: 'IBAN_MISSING', params: {} }, { status: 400 });
+		const response = await get(fetch, '?ansehen');
+		expect(await response.text()).toBe('Es ist keine IBAN hinterlegt. Erfassen Sie die IBAN in den Einstellungen.');
+	});
+
 	it('zeigt das PDF zum Ansehen im Browser und erstellt es, wenn es noch fehlt', async () => {
 		const { calls, fetch } = backend(false);
 		const response = await get(fetch, '?ansehen');
 		expect(response.status).toBe(200);
 		expect(response.headers.get('Content-Disposition')).toMatch(/^inline/);
 		expect(calls).toEqual([`GET ${API}/pdf`, `POST ${API}/generate-pdf`, `GET ${API}/pdf`]);
+	});
+});
+
+describe('GET /api/statements/[id]/pdf (PDF aus der Liste)', () => {
+	afterEach(() => vi.unstubAllGlobals());
+	const get = () =>
+		getListPdf({ params: { id: 's1' }, cookies: { get: () => 'jwt' } } as never);
+
+	it('sagt in Worten, dass es die Abrechnung nicht gibt, statt die Antwort als PDF auszugeben', async () => {
+		vi.stubGlobal('fetch', async () => Response.json(refusedPdf, { status: 404 }));
+		const response = await get();
+		expect(response.status).toBe(404);
+		expect(response.headers.get('Content-Type')).toMatch(/text\/plain/);
+		expect(await response.text()).toBe('Abrechnung nicht gefunden.');
+	});
+
+	it('sagt in Worten, wenn das Backend nicht erreichbar ist', async () => {
+		vi.stubGlobal('fetch', async () => {
+			throw new TypeError('fetch failed');
+		});
+		const response = await get();
+		expect(response.headers.get('Content-Type')).toMatch(/text\/plain/);
+		expect(await response.text()).toBe('Das PDF konnte nicht erstellt werden. Versuchen Sie es später erneut.');
 	});
 });

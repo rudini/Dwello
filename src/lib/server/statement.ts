@@ -1,4 +1,5 @@
 import { error } from '@sveltejs/kit';
+import { backendMessage, type BackendError } from '$lib/backend-error';
 import { localName } from '$lib/names';
 import { m } from '$lib/paraglide/messages';
 import type { StatementLineItem, StatementWithDetails } from '$lib/types';
@@ -86,3 +87,13 @@ export async function loadStatement(fetch: typeof globalThis.fetch, id: string) 
 	}));
 	return { ...statement, lineItems };
 }
+
+/**
+ * A statement PDF the backend refused, as a sentence in the UI language for the tab it opens in: the message of its
+ * code, else `fallback`, never the backend's own text or JSON
+ */
+export const pdfRefusal = (status: number, body: unknown, fallback = m.backend_pdf_failed()) =>
+	new Response(backendMessage({ code: (body as BackendError | null)?.code }, fallback), {
+		status,
+		headers: { 'Content-Type': 'text/plain; charset=utf-8' }
+	});

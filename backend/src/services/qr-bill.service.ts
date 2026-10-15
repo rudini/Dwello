@@ -8,6 +8,7 @@
  */
 
 import QRCode from 'qrcode';
+import { CodedError } from './coded-error';
 
 /**
  * QR-Bill data structure per Swiss standard
@@ -324,7 +325,7 @@ export async function generateQRBillForStatement(
 	// Validate IBAN
 	const ibanValidation = validateIBAN(config.iban);
 	if (!ibanValidation.valid) {
-		throw new Error(`Invalid IBAN: ${ibanValidation.error}`);
+		throw new CodedError('IBAN_INVALID', `Invalid IBAN: ${ibanValidation.error}`);
 	}
 
 	// Determine reference type based on IBAN type

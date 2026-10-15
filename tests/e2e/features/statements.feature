@@ -48,3 +48,11 @@ Funktionalität: Nebenkostenabrechnungen
     Und der Liegenschaftsverwalter zeigt die Abrechnungen im Gebäude "Ahornhof" an
     Wenn der Liegenschaftsverwalter das PDF der Abrechnung 2024 von "Anna Keller" herunterlädt
     Dann erhält der Liegenschaftsverwalter die Abrechnung als PDF
+
+  Szenario: PDF einer inzwischen gelöschten Abrechnung aus der Liste anfordern
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und für die Abrechnung 2024 von "Anna Keller" gibt es ein PDF
+    Und der Liegenschaftsverwalter zeigt die Abrechnungen im Gebäude "Ahornhof" an
+    Und die Abrechnung 2024 von "Anna Keller" wurde inzwischen gelöscht
+    Wenn der Liegenschaftsverwalter in der Liste das PDF der Abrechnung 2024 von "Anna Keller" anfordert
+    Dann liest der Liegenschaftsverwalter "Abrechnung nicht gefunden."
