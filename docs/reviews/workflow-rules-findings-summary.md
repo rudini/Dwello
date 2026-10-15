@@ -11,7 +11,7 @@ Summary of all `docs/reviews/workflow-rules-review-*.md`. Reviews 1 to 9 were ap
 | 176 W-9 | Data leaving the server in a new way makes the privacy statement a legal text of the task | `CLAUDE.md` Workflow 1 |
 | 135 W-2 | Check results given to a reviewer came from an older commit | `CLAUDE.md` Workflow 4 |
 | W-8 (2), 122 R-3, 174 W-8 | `git worktree remove --force` not needed; `node_modules` cannot be read (read dependencies through `node -e`; the deny rule stays) | `CLAUDE.md` Workflow 4 |
-| 123 R-2, 126 R-2, 127 R-2, 202 #3 | Persona runs for states the persona stack cannot produce; outside-service results via SQL in `dwello_persona` | `CLAUDE.md` Workflow 5 |
+| 123 R-2, 126 R-2, 127 R-2, 202 #3 | Persona runs for states the persona stack cannot produce, unless a persona can reach a new text of them; outside-service results via SQL in `dwello_persona`, run by the caller | `CLAUDE.md` Workflow 5 |
 | 137 W-1 | Whether personas review a PDF-only change | `CLAUDE.md` Workflow 5 |
 | 173 R-3 | Persona app shows one build state; name the build-time value (`APP_VERSION` already reaches the build) | `CLAUDE.md` Workflow 5 |
 | 176 W-3 | `fach-reviewer` and `daten-pruefer` in step 5 also need a worktree | `CLAUDE.md` Workflow 5 |
@@ -26,9 +26,9 @@ Summary of all `docs/reviews/workflow-rules-review-*.md`. Reviews 1 to 9 were ap
 | 125 R-1, 174 W-5 | `+server.ts` pages are screens; states need a meaning in `stateMeanings` | `CLAUDE.md` Design-Regeln, Process |
 | 174 W-6 | French guillemets with U+00A0 lived only in a test | `CLAUDE.md` Conventions, UI languages |
 | 176 W-2 | No commit scope for categories and privacy | `CLAUDE.md` Conventions, Commits |
-| 125 R-4, 135 W-4, 176 W-1 | A blocked commit drops the whole command, `git add` included | `CLAUDE.md` Gotchas; all three gates now say so |
+| 125 R-4, 135 W-4 (in part), 176 W-1 | A blocked commit drops the whole command, `git add` included | `CLAUDE.md` Gotchas; all three gates now say so. 135 W-4's dry run (`--check`) is not added: the message plus `git show --stat HEAD` covers the loss |
 | 135 W-1, 137 W-3, 174 W-3 | Fallow CRAP estimates on templates, duplication in touched code | `CLAUDE.md` Gotchas, Fallow gate |
-| 173 R-4 | Commit gate blocked commits in scratch repositories | `.claude/hooks/commit-msg-gate.mjs` (test: `tools/claude-hooks/commit-msg-gate.test.ts`) |
+| 173 R-4 | Commit gate blocked commits in scratch repositories (decided by repository, so Dwello worktrees elsewhere stay checked) | `.claude/hooks/commit-msg-gate.mjs` (test: `tools/claude-hooks/commit-msg-gate.test.ts`) |
 | 176 W-11 | `pkill -f` kills its own shell | `CLAUDE.md` Gotchas, One build |
 | 174 W-1 | `persona-stack.sh` assumed `/home/user/Dwello` | `docs/design/tools/persona-stack.sh` |
 | 174 W-2 | Session-start hook miscounted commits behind `main` in a shallow clone | `.claude/hooks/session-start.sh` (no number in a shallow clone; the merge base does not help there, checked in a scratch clone) |
@@ -42,7 +42,7 @@ Summary of all `docs/reviews/workflow-rules-review-*.md`. Reviews 1 to 9 were ap
 | 173 R-1, R-2 | No layer for CI/deploy logic; build-time constants in components | `docs/test-pyramid.md` Rules |
 | 122 R-2, 176 W-5, 174 W-8 | Browser chrome; KI stand-in in the persona app; demo data is invented | `docs/design/personas/README.md` |
 | W-16 (3) | Personas may read network requests and cookies for claims about the system | `.claude/agents/persona.md` |
-| 125 R-2 | Pages outside the app: system colours in a `<style>` element | `docs/design/token-referenz.md` |
+| 125 R-2 (first half) | Pages outside the app: system colours in a `<style>` element | `docs/design/token-referenz.md` |
 | W-13 (3), W-21 (4), 126 R-3, 176 W-12 | Issue template: the source of a complete list, tests that pin the old behaviour, migrations | `.github/ISSUE_TEMPLATE/task.md` |
 | 176 W-8 | Legal abbreviations («Abs.») made `abs` a German word | `src/__tests__/no-german-in-code.test.ts` |
 | 173 R-5 | Skill `grill-me` missing | `.claude/skills/grill-me/SKILL.md` |
@@ -57,4 +57,5 @@ Summary of all `docs/reviews/workflow-rules-review-*.md`. Reviews 1 to 9 were ap
 | migrations W-1 rules that end with an outside event name who records it | Not applied: the one case (migrations) is fixed and recorded; a rule about writing rules has no reader at the moment it matters |
 | W-7 (2–5), 174 W-9, 176 W-10 stop hook asks to push early | Outside the repository; `CLAUDE.md` Workflow 9 already says it does not override the workflow |
 | W-10 (2), 128 R-2, 202 #4 | The reviews propose no change |
+| 125 R-2 (second half) the design guard allows exactly that | No change needed: the guard checks only `style` attributes, so a `<style>` element already passes (`src/__tests__/design-guard.test.ts:21`) |
 | 176 W-7 E2E stand-ins in the test pyramid | Already applied in #176 (`docs/test-pyramid.md`, E2E row) |

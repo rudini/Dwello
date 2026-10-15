@@ -1,7 +1,9 @@
 import { spawnSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
+import { git, writeProject, writeRepo } from '../deepcheck/test/helpers.ts';
 
 const HOOK = fileURLToPath(new URL('../../.claude/hooks/commit-msg-gate.mjs', import.meta.url));
 const ROOT = fileURLToPath(new URL('../..', import.meta.url)).replace(/\/$/, '');
@@ -38,6 +40,8 @@ describe('commit subject gate (CLAUDE.md, Conventions: Commits)', () => {
 		[heredoc('fix(contracts): guard retries.\n\nBody.'), 'period'],
 		[`git -C ${ROOT} commit -m "fix: guard retries"`, 'type(scope)'],
 		[`cd ${ROOT}/backend && git commit -m "fix: guard retries"`, 'type(scope)'],
+		['cd /tmp && git commit -m "fix: guard retries"', 'type(scope)'],
+		['(cd /tmp && git commit -m a) && git commit -m "fix: guard retries"', 'type(scope)'],
 		['git commit -m "fix(contracts): guard retries" && git commit --amend -m "fix: guard"', 'type(scope)']
 	])('blocks %j: %s', (command, problem) => {
 		const result = hook(command);
@@ -49,12 +53,25 @@ describe('commit subject gate (CLAUDE.md, Conventions: Commits)', () => {
 		expect(hook('git add -A && git commit -m "fix: x"').stderr).toContain('nothing in this command ran');
 	});
 
-	it.each([
-		['git commit -m a', '/tmp/scratch-repo'],
-		['cd /tmp/scratch-repo && git commit -m a', ROOT],
-		['git -C /tmp/scratch-repo commit -m a', ROOT]
-	])('lets %j through in a repository outside the project (cwd %s)', (command, cwd) => {
-		expect(hook(command, cwd)).toMatchObject({ status: 0, stderr: '' });
+	it('lets a commit through in another repository (a scratch repository), by cwd or git -C', () => {
+		const scratch = mkdtempSync(`${tmpdir()}/scratch-`);
+		spawnSync('git', ['init', '-q', scratch]);
+		expect(hook('git commit -m a', scratch)).toMatchObject({ status: 0, stderr: '' });
+		expect(hook(`git -C ${scratch} commit -m a`)).toMatchObject({ status: 0, stderr: '' });
+	});
+
+	it('checks a worktree of the project outside its folder', () => {
+		const project = writeRepo({
+			'.claude/hooks/commit-msg-gate.mjs': readFileSync(HOOK, 'utf8'),
+			'CLAUDE.md': readFileSync(`${ROOT}/CLAUDE.md`, 'utf8')
+		});
+		const worktree = `${writeProject({})}/w`;
+		git(project, 'worktree', 'add', '-q', '--detach', worktree);
+		const result = spawnSync('node', [`${project}/.claude/hooks/commit-msg-gate.mjs`], {
+			input: JSON.stringify({ tool_input: { command: 'git commit -m "bad."' }, cwd: worktree }),
+			encoding: 'utf8'
+		});
+		expect(result.status).toBe(2);
 	});
 
 	it('takes types and scopes from CLAUDE.md, so the list exists once', () => {

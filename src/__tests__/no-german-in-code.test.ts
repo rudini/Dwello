@@ -5,7 +5,8 @@ import en from '../../messages/en.json';
 
 /** Every UI text comes from messages/de.json: no German text may be written into the code itself */
 const words = (text: string) => text.toLowerCase().match(/\p{L}{3,}/gu) ?? [];
-// abbreviations of a legal citation («Art. 257a Abs. 2 OR») are no words, so «abs» stays free for Math.abs
+// a short word before «. <digit>» is read as an abbreviation of a legal citation («Art. 257a Abs. 2 OR»), so «abs»
+// stays free for Math.abs; a sentence like «… im Jahr. 2025» loses that one word from the vocabulary
 const vocabulary = (messages: Record<string, string>) =>
 	new Set(Object.values(messages).flatMap((text) => words(text.replace(/(?<!\p{L})\p{L}{2,4}\.(?=\s*\d)/gu, ''))));
 const english = vocabulary(en);

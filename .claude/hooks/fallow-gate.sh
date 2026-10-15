@@ -77,7 +77,7 @@ IS_ERROR="$(jq -r '.error // false' <"$TMP_JSON" 2>/dev/null || echo false)"
 if [ "$VERDICT" = "fail" ]; then
   echo "fallow-gate: blocked by fallow ${VERSION:-unknown} at $BIN_DESC" >&2
   # Changed for Dwello (keep when regenerating): the whole Bash command was dropped, not only the git call
-  echo "fallow-gate: nothing in this command ran, edits and git add before the commit included." >&2
+  echo "fallow-gate: nothing in this command ran, edits and git add before the git call included." >&2
   cat "$TMP_JSON" >&2
   exit 2
 fi
@@ -89,7 +89,7 @@ if [ "$STATUS" -eq 2 ] || [ "$IS_ERROR" = "true" ]; then
   {
     echo "fallow-gate: blocked: fallow audit did not run (${MSG:-runtime error})."
     echo "fallow-gate: without a base branch run git fetch origin main:refs/remotes/origin/main, then commit again."
-    echo "fallow-gate: nothing in this command ran, edits and git add before the commit included."
+    echo "fallow-gate: nothing in this command ran, edits and git add before the git call included."
   } >&2
   exit 2
 fi

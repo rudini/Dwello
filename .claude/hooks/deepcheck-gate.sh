@@ -60,7 +60,7 @@ if [ "$STATUS" -eq 1 ] && grep -q 'fail the deep-module gate' "$TMP_OUT"; then
   {
     echo "deepcheck-gate: blocked: changed modules fail the deep-module gate. Fix the design before committing or pushing"
     echo "deepcheck-gate: (details: bun run deepcheck:audit; deliberate exception: // deepcheck-ignore-file -- reason)."
-    echo "deepcheck-gate: nothing in this command ran, edits and git add before the commit included."
+    echo "deepcheck-gate: nothing in this command ran, edits and git add before the git call included."
     cat "$TMP_OUT"
   } >&2
   exit 2
