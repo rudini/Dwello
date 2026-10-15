@@ -245,7 +245,8 @@ export function evaluateFormula(formula: string, variables: FormulaVariables): E
 		return {
 			isValid: false,
 			value: 0,
-			...coded('FORMULA_NOT_COMPUTABLE', `Die Formel kann nicht berechnet werden: ${detail}`, { detail })
+			// the engine's own (English) text stays in `error` for the log; the UI shows what to check
+			...coded('FORMULA_NOT_COMPUTABLE', `Die Formel kann nicht berechnet werden: ${detail}`)
 		};
 	}
 }
@@ -388,9 +389,16 @@ export function validateFormulaForDistribution(formula: string): {
 
 	// Test with default cases, which together stand for a building
 	const cases = getDefaultTestCases();
+	const variables = withTotals(cases.map((tc) => tc.variables));
+	// A formula the engine cannot read fails for any values: say so once, not per sample apartment
+	const firstTry = evaluateFormula(formula, variables[0]);
+	if (firstTry.errorCode?.code === 'FORMULA_NOT_COMPUTABLE') {
+		fail(firstTry);
+		return { isValid: false, errors, errorCodes, warnings };
+	}
 	const testResults = testFormula(
 		formula,
-		withTotals(cases.map((tc) => tc.variables)).map((variables, i) => ({ ...cases[i], variables }))
+		variables.map((v, i) => ({ ...cases[i], variables: v }))
 	);
 
 	for (const testResult of testResults) {

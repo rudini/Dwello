@@ -128,3 +128,18 @@ describe('Zustellfehler einer Mahnung', () => {
 		);
 	});
 });
+
+describe('Formel, die sich nicht berechnen lässt', () => {
+	// #128: an older backend still sends the engine's English text as detail
+	it('sagt, was zu prüfen ist, ohne den englischen Text der Rechenmaschine', () => {
+		const body = {
+			error: 'Die Formel kann nicht berechnet werden: Unexpected number',
+			code: 'FORMULA_NOT_COMPUTABLE',
+			params: { detail: "Unexpected number '2'" }
+		};
+
+		expect(backendMessage(body, '')).toBe(
+			'Die Formel kann nicht berechnet werden. Prüfen Sie die Rechenzeichen (+, -, *, /, %), die Klammern und die Variablen {area}, {rooms}, {volume}, {units} und ihre Summen wie {area_total}.'
+		);
+	});
+});
