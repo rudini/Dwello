@@ -19,7 +19,8 @@ import {
 	getInvoicesForStatement,
 	getBeleg,
 	setBeleg,
-	extractFromFile
+	extractFromFile,
+	suggestion
 } from '../services/invoice.service';
 import { fileResponse } from './file-response';
 import { isLlmAvailable, getCacheStats, categorizeInvoice } from '../services/llm.service';
@@ -125,19 +126,7 @@ export const invoiceRoutes = new Elysia({ prefix: '/api/v1/invoices' })
 				amount: body.amount
 			});
 
-			return {
-				category: result.category
-					? {
-							id: result.category.id,
-							name: result.category.name,
-							isAllowedUtilityCost: result.category.isAllowedUtilityCost
-						}
-					: null,
-				confidence: result.confidence,
-				isAllowedUtilityCost: result.isAllowedUtilityCost,
-				reasoning: result.reasoning,
-				source: result.source
-			};
+			return { ...suggestion(result), source: result.source };
 		},
 		{
 			body: t.Object({

@@ -345,6 +345,16 @@ export async function deleteInvoice(id: string): Promise<{ success: boolean; err
 	return { success: true };
 }
 
+/** The KI's category for an invoice as the form shows it */
+export const suggestion = (result: Awaited<ReturnType<typeof categorizeInvoice>>) => ({
+	category: result.category
+		? { id: result.category.id, name: result.category.name, isAllowedUtilityCost: result.category.isAllowedUtilityCost }
+		: null,
+	confidence: result.confidence,
+	isAllowedUtilityCost: result.isAllowedUtilityCost,
+	reasoning: result.reasoning
+});
+
 /**
  * Proposals for a new invoice of the building from its uploaded file: what the KI read, the Kategorie it suggests and
  * an invoice of the building with the same Rechnungssteller and Rechnungsnummer; null when the KI did not read it
@@ -371,18 +381,7 @@ export async function extractFromFile(buildingId: string, fileName: string, page
 			: [];
 	return {
 		...extraction,
-		categorization: categorization?.category
-			? {
-					category: {
-						id: categorization.category.id,
-						name: categorization.category.name,
-						isAllowedUtilityCost: categorization.category.isAllowedUtilityCost
-					},
-					confidence: categorization.confidence,
-					isAllowedUtilityCost: categorization.isAllowedUtilityCost,
-					reasoning: categorization.reasoning
-				}
-			: null,
+		categorization: categorization?.category ? suggestion(categorization) : null,
 		duplicateOf: duplicate?.id ?? null
 	};
 }
