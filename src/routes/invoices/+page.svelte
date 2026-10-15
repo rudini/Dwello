@@ -60,12 +60,15 @@
 		}}
 	/>
 
-	<InvoiceSearch
-		params={$page.url.searchParams}
-		buildings={data.buildings}
-		categories={data.categories}
-		years={data.years}
-	/>
+	<!-- new for each address: after a link, back or forward the form shows the filters of the list shown (#159) -->
+	{#key $page.url.search}
+		<InvoiceSearch
+			params={$page.url.searchParams}
+			buildings={data.buildings}
+			categories={data.categories}
+			years={data.years}
+		/>
+	{/key}
 
 	{#if data.invoices.length === 0}
 		<div data-testid="invoices-empty">
