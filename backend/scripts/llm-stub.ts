@@ -10,7 +10,21 @@ const PORT = Number(process.env.LLM_STUB_PORT ?? 2527);
 
 type Language = 'Deutsch' | 'Französisch' | 'Italienisch' | 'Englisch';
 
-const answers: { match: RegExp; isAllowedUtilityCost: boolean; confidence: number; reasoning: Record<Language, string> }[] = [
+const answers: {
+	match: RegExp;
+	isAllowedUtilityCost: boolean;
+	confidence: number;
+	reasoning: Record<Language, string>;
+	delay?: number;
+}[] = [
+	// A slow KI: the screen checks see «Die KI prüft die Kategorie …» while it answers
+	{
+		match: /langsam/i,
+		isAllowedUtilityCost: true,
+		confidence: 0.9,
+		delay: 60_000,
+		reasoning: { Deutsch: 'Betrieb.', Französisch: 'Exploitation.', Italienisch: 'Esercizio.', Englisch: 'Operation.' }
+	},
 	{
 		match: /sanierung|reparatur/i,
 		isAllowedUtilityCost: false,
@@ -49,9 +63,9 @@ function reply(prompt: string) {
 	const name = line(prompt, 'Kategorie');
 	if (!name) return new Response(null, { status: 503 });
 	const language = (line(prompt, 'Sprache der Begründung') ?? 'Deutsch') as Language;
-	const { isAllowedUtilityCost, confidence, reasoning } = answers.find(({ match }) => match.test(name))!;
+	const { isAllowedUtilityCost, confidence, reasoning, delay = 0 } = answers.find(({ match }) => match.test(name))!;
 	const answer = { isAllowedUtilityCost, confidence, reasoning: reasoning[language] };
-	return Response.json({ choices: [{ message: { content: JSON.stringify(answer) } }] });
+	return Bun.sleep(delay).then(() => Response.json({ choices: [{ message: { content: JSON.stringify(answer) } }] }));
 }
 
 Bun.serve({

@@ -58,6 +58,7 @@
 				value={option.value}
 				bind:group={value}
 				aria-describedby={describedByOption(option, id)}
+				data-testid={testid && `${testid}-${option.value}`}
 				class="mt-1 size-6 shrink-0 cursor-pointer accent-accent"
 			/>
 			<span class="flex flex-col gap-1">

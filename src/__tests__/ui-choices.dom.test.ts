@@ -106,4 +106,10 @@ describe('Auswahlgruppe', () => {
 		expect(first(document.querySelector('fieldset')!)).toBe('duration-error');
 		expect(first(document.querySelector('input[type="radio"]')!)).toBe('duration-error');
 	});
+
+	// Tests wählen eine Option über ihren Wert, in jeder Sprache (G-9 auf #176)
+	it('gibt jeder Option eine Test-ID aus Gruppe und Wert', () => {
+		show(RadioGroup, { name: 'duration', legend: 'Dauer', options, value: '', testid: 'contract-duration' });
+		expect(document.querySelector('[data-testid="contract-duration-limited"]')).not.toBeNull();
+	});
 });

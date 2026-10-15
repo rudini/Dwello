@@ -130,7 +130,9 @@
 				<!-- There before the first answer, so a screen reader announces it; empty, it adds no gap -->
 				<div role="status" data-testid="category-proposal-region">
 					{#if checking}
-						<p class="mt-4 text-ink-muted">{m.categories_proposal_checking()}</p>
+						<p class="mt-4 text-ink-muted" data-testid="category-proposal-checking">
+							{m.categories_proposal_checking()}
+						</p>
 					{:else if current}
 						<div class="mt-4">
 							<CategoryProposal

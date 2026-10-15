@@ -265,6 +265,7 @@ describe('Umlagefähigkeit einer neuen Kategorie', () => {
 		flushSync();
 
 		expect(byTestId('category-proposal')).toBeNull();
+		expect(choice('Nicht umlagefähig').checked).toBe(false);
 	});
 
 	// Sven P-2: eine eigene Wahl überschreibt die KI nicht
