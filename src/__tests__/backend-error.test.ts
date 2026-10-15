@@ -124,7 +124,7 @@ describe('Zustellfehler einer Mahnung', () => {
 		});
 
 		expect(text).toBe(
-			'Die E-Mail wurde nicht zugestellt. Drucken Sie die Mahnung aus, schicken Sie sie per Post und markieren Sie sie danach als versendet. Prüfen Sie für die nächste Mahnung die E-Mail-Adresse des Mieters.'
+			'Die E-Mail wurde nicht zugestellt. Drucken Sie die Mahnung aus, schicken Sie sie per Post und markieren Sie sie danach unter «Dokumente» als versendet. Prüfen Sie für die nächste Mahnung die E-Mail-Adresse des Mieters.'
 		);
 	});
 });
