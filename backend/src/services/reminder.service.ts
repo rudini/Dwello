@@ -55,8 +55,11 @@ async function nextLevel(statementId: string, status: string, balance: number) {
 }
 
 async function deliverByEmail(document: Document, to: string | null, letter: ReturnType<typeof reminderLetter>, pdf: Buffer) {
+	if (!to) {
+		const deliveryError = DELIVERY_ERRORS.TENANT_NO_EMAIL;
+		return { document: (await recordDeliveryError(document.id, deliveryError))!, deliveryError };
+	}
 	try {
-		if (!to) throw new Error(DELIVERY_ERRORS.TENANT_NO_EMAIL);
 		await createMailTransport().send({
 			to,
 			subject: letter.subject,
@@ -65,10 +68,9 @@ async function deliverByEmail(document: Document, to: string | null, letter: Ret
 		});
 		return { document: (await markDocumentSent(document.id))! };
 	} catch (error) {
+		if (!(error instanceof MailConfigError)) console.error('Reminder e-mail not delivered:', error);
 		const deliveryError =
-			error instanceof MailConfigError
-				? DELIVERY_ERRORS.MAIL_NOT_CONFIGURED
-				: (error as Error).message;
+			error instanceof MailConfigError ? DELIVERY_ERRORS.MAIL_NOT_CONFIGURED : DELIVERY_ERRORS.MAIL_DELIVERY_FAILED;
 		return { document: (await recordDeliveryError(document.id, deliveryError))!, deliveryError };
 	}
 }

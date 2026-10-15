@@ -31,7 +31,7 @@ Browser -> SvelteKit BFF (port 3000: /auth/*, /api/*, page loads/actions) -> Ely
   - Contracts and statements: `CONTRACT_OVERLAP {contract}`, `CONTRACT_NOTICE_WITHOUT_END`, `CONTRACT_PARTIES_FIXED`, `CONTRACT_NOT_IN_PERIOD`, `IBAN_MISSING`, `IBAN_INVALID` (the stored IBAN fails its check when a PDF needs the QR-bill), `CALCULATION_FAILED` (preview or generation failed for another reason, logged), `PDF_FAILED` (500: a PDF could not be made for another reason, logged)
   - Invoices: `KI_UNAVAILABLE`; categories: `KI_NO_PROPOSAL`
   - Uploaded documents: `DOCUMENT_TOO_LARGE {megabytes}`, `DOCUMENT_TYPE_NOT_ALLOWED`, `DOCUMENT_TITLE_TOO_LONG {max}`, `TENANT_NOT_FOUND` (404), `DOCUMENT_NOT_DELETABLE`
-  - Reminders: `REMINDER_NOT_SENT`, `REMINDER_NOT_OVERDUE`, `REMINDER_REFUND`, `REMINDER_LIMIT`; delivery errors as `deliveryErrorCode` of a document: `TENANT_NO_EMAIL`, `MAIL_NOT_CONFIGURED` (null for other delivery errors)
+  - Reminders: `REMINDER_NOT_SENT`, `REMINDER_NOT_OVERDUE`, `REMINDER_REFUND`, `REMINDER_LIMIT`; delivery errors as `deliveryErrorCode` of a document: `TENANT_NO_EMAIL`, `MAIL_NOT_CONFIGURED`, `MAIL_DELIVERY_FAILED` (any other failure, also one stored before this code existed; the mail server's text is logged, never stored)
 - **Schema validation:** a body/query that fails the Elysia `t` schema returns **422** with Elysia's validation error body.
 - **Types:** IDs are UUID strings. Money, area, rooms and percentages stored as `numeric` are **strings** (`"450.00"`). Dates are `YYYY-MM-DD`; timestamps ISO 8601.
 - **Pagination:** `limit` and `offset` query parameters (strings parsed as integers). Default `limit` per router is noted below. There is no sorting parameter; each list has a fixed order.

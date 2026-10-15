@@ -34,14 +34,18 @@ const summary = {
 	statementNumber: utilityStatements.statementNumber
 };
 
-/** The delivery errors the backend writes itself, by their code for the UI */
+/** The delivery errors the backend writes itself, by their code for the UI; any other failure is MAIL_DELIVERY_FAILED */
 export const DELIVERY_ERRORS = {
 	TENANT_NO_EMAIL: 'Der Mieter hat keine E-Mail-Adresse.',
-	MAIL_NOT_CONFIGURED: 'Der E-Mail-Versand ist nicht eingerichtet.'
+	MAIL_NOT_CONFIGURED: 'Der E-Mail-Versand ist nicht eingerichtet.',
+	MAIL_DELIVERY_FAILED: 'Die E-Mail konnte nicht zugestellt werden.'
 } as const;
 
+// An error stored before every failure had a code (the mail server's own text) reads as MAIL_DELIVERY_FAILED
 const deliveryErrorCode = (deliveryError: string | null) =>
-	Object.entries(DELIVERY_ERRORS).find(([, text]) => text === deliveryError)?.[0] ?? null;
+	deliveryError === null
+		? null
+		: (Object.entries(DELIVERY_ERRORS).find(([, text]) => text === deliveryError)?.[0] ?? 'MAIL_DELIVERY_FAILED');
 
 async function selectSummaries(where?: SQL) {
 	const rows = await db
