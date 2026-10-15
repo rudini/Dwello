@@ -1323,7 +1323,7 @@
 	"backend_document_type_not_allowed": "Dwello accepts only PDF, JPG and PNG files. Save the file as a PDF and choose it again.",
 	"backend_document_not_deletable": "Reminders are kept because they prove that the tenant was reminded.",
 	"documents_empty_to_send_text": "Letters you have to print and post appear here.",
-	"tenants_delete_has_contracts_documents": "Tenants with rental contracts are kept because statements and documents refer to them. Their uploaded documents therefore stay too. Delete them one by one under «Documents» on this page as soon as you no longer need them.",
+	"tenants_delete_has_contracts_documents": "Tenants with rental contracts are kept because statements and documents refer to them. The documents you uploaded for this tenant stay saved too. Delete them one by one under «Documents» on this page as soon as you no longer need them.",
 	"backend_document_title_too_long": "The title is longer than {max} characters. Shorten it.",
-	"backend_tenant_not_found": "This tenant no longer exists. It was probably deleted in another window. Open the list «Tenants»."
+	"backend_tenant_not_found": "This tenant no longer exists. They were probably deleted in another window. Open the list «Tenants»."
 }

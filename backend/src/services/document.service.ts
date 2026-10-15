@@ -101,7 +101,7 @@ export async function uploadDocument(tenantId: string, upload: { title: string; 
 	if (upload.title.trim().length > MAX_NAME)
 		throw new CodedError('DOCUMENT_TITLE_TOO_LONG', `The title is longer than ${MAX_NAME} characters`, { max: MAX_NAME });
 	if (!(await tenantExists(tenantId))) throw new CodedError('TENANT_NOT_FOUND', 'Tenant not found');
-	const fileName = upload.fileName.slice(-MAX_NAME); // the end keeps the extension
+	const fileName = [...upload.fileName].slice(-MAX_NAME).join(''); // in characters; the end keeps the extension
 	// without a title it is named like its file
 	const title = upload.title.trim() || fileName.replace(/\.[^.]*$/, '');
 	return createDocument({ tenantId, type: 'upload', title, fileName, content: upload.content, mimeType: kind.mimeType });

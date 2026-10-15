@@ -130,6 +130,13 @@ describe('Hochgeladene Dokumente', () => {
 		const id = await idOf(await upload('Scan', `${'n'.repeat(300)}.pdf`, pdf));
 		const file = await callApi(`/api/v1/documents/${id}/pdf`);
 		expect(file.headers.get('content-disposition')).toContain(`filename="${'n'.repeat(251)}.pdf"`);
+		// counted in characters: an emoji at the cut stays whole
+		const emoji = await idOf(await upload('Scan', `${'😀'.repeat(256)}.pdf`, pdf));
+		const name = decodeURIComponent(
+			(await callApi(`/api/v1/documents/${emoji}/pdf`)).headers.get('content-disposition')!.split("UTF-8''")[1]
+		);
+		expect([...name]).toHaveLength(255);
+		expect(name.startsWith('😀')).toBe(true);
 	});
 
 	it('lehnt ein Dokument zu einem unbekannten Mieter mit Code ab', async () => {

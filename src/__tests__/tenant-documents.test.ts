@@ -59,6 +59,17 @@ describe('Dokument hochladen', () => {
 		});
 	});
 
+	it('zeigt einen zu langen Titel am Feld «Titel»', async () => {
+		const tooLong = { error: 'The title is longer than 255 characters', code: 'DOCUMENT_TITLE_TOO_LONG', params: { max: 255 } };
+		const { result } = run(actions.upload, { title: 'T', file: pdf }, 400, tooLong);
+
+		expect(await result).toMatchObject({
+			status: 400,
+			data: { title: 'T', titleError: 'Der Titel ist länger als 255 Zeichen. Kürzen Sie ihn.' }
+		});
+		expect(((await result) as { data: object }).data).not.toHaveProperty('uploadError');
+	});
+
 	it('verlangt eine Datei, bevor es etwas sendet', async () => {
 		const empty = new File([], '', { type: 'application/octet-stream' }); // what a form without a file sends
 		const { calls, result } = run(actions.upload, { title: 'Scan', file: empty });
@@ -73,10 +84,11 @@ describe('Dokument hochladen', () => {
 
 describe('Dokument löschen', () => {
 	it('löscht das gewählte Dokument', async () => {
-		const { calls, result } = run(actions.deleteDocument, { id: 'd1' }, 200, { success: true });
+		const { calls, result } = run(actions.deleteDocument, { id: 'd1/../x' }, 200, { success: true });
 
 		expect(await result).toBeUndefined();
-		expect(calls).toEqual([{ method: 'DELETE', url: `${API}/documents/d1`, body: undefined }]);
+		// the id from the form stays one path segment
+		expect(calls).toEqual([{ method: 'DELETE', url: `${API}/documents/d1%2F..%2Fx`, body: undefined }]);
 	});
 
 	it('sagt, warum eine Mahnung bleibt', async () => {

@@ -1323,7 +1323,7 @@
 	"backend_document_type_not_allowed": "Dwello nimmt nur PDF-, JPG- und PNG-Dateien an. Speichern Sie die Datei als PDF und wählen Sie sie erneut.",
 	"backend_document_not_deletable": "Mahnungen bleiben erhalten, weil sie belegen, dass der Mieter gemahnt wurde.",
 	"documents_empty_to_send_text": "Briefe, die Sie ausdrucken und per Post schicken müssen, erscheinen hier.",
-	"tenants_delete_has_contracts_documents": "Mieter mit Mietverträgen bleiben erhalten, weil Abrechnungen und Dokumente auf sie verweisen. Ihre hochgeladenen Dokumente bleiben deshalb auch. Löschen Sie sie einzeln unter «Dokumente» auf dieser Seite, sobald Sie sie nicht mehr brauchen.",
+	"tenants_delete_has_contracts_documents": "Mieter mit Mietverträgen bleiben erhalten, weil Abrechnungen und Dokumente auf sie verweisen. Auch die Dokumente, die Sie zu diesem Mieter hochgeladen haben, bleiben gespeichert. Löschen Sie sie einzeln unter «Dokumente» auf dieser Seite, sobald Sie sie nicht mehr brauchen.",
 	"backend_document_title_too_long": "Der Titel ist länger als {max} Zeichen. Kürzen Sie ihn.",
 	"backend_tenant_not_found": "Diesen Mieter gibt es nicht mehr. Er wurde wohl in einem anderen Fenster gelöscht. Öffnen Sie die Liste «Mieter»."
 }

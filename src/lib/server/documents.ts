@@ -38,11 +38,16 @@ export async function uploadDocument(fetch: typeof globalThis.fetch, tenantId: s
 		})
 	});
 	const body = await response.json().catch(() => null);
-	if (!response.ok)
-		return fail(response.status, {
-			title,
-			uploadError: backendMessage(body, m.tenants_document_upload_failed())
-		});
+	if (!response.ok) {
+		const message = backendMessage(body, m.tenants_document_upload_failed());
+		// a refusal shows at the field it is about
+		return fail(
+			response.status,
+			body?.code === 'DOCUMENT_TITLE_TOO_LONG'
+				? { title, titleError: message }
+				: { title, uploadError: message }
+		);
+	}
 	return { uploaded: body.title as string };
 }
 

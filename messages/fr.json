@@ -1323,7 +1323,7 @@
 	"backend_document_type_not_allowed": "Dwello n’accepte que les fichiers PDF, JPG et PNG. Enregistrez le fichier en PDF et choisissez-le à nouveau.",
 	"backend_document_not_deletable": "Les rappels sont conservés, car ils prouvent que le locataire a été relancé.",
 	"documents_empty_to_send_text": "Les lettres que vous devez imprimer et envoyer par la poste apparaissent ici.",
-	"tenants_delete_has_contracts_documents": "Les locataires avec des contrats de bail sont conservés, car des décomptes et des documents y renvoient. Leurs documents téléversés sont donc conservés aussi. Supprimez-les un par un sous « Documents » sur cette page dès que vous n’en avez plus besoin.",
+	"tenants_delete_has_contracts_documents": "Les locataires avec des contrats de bail sont conservés, car des décomptes et des documents y renvoient. Les documents que vous avez téléversés pour ce locataire restent aussi enregistrés. Supprimez-les un par un sous « Documents » sur cette page dès que vous n’en avez plus besoin.",
 	"backend_document_title_too_long": "Le titre dépasse {max} caractères. Raccourcissez-le.",
 	"backend_tenant_not_found": "Ce locataire n’existe plus. Il a sans doute été supprimé dans une autre fenêtre. Ouvrez la liste « Locataires »."
 }

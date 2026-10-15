@@ -1323,7 +1323,7 @@
 	"backend_document_type_not_allowed": "Dwello accetta solo file PDF, JPG e PNG. Salvi il file in formato PDF e lo scelga di nuovo.",
 	"backend_document_not_deletable": "I solleciti vengono conservati perché provano che l’inquilino è stato sollecitato.",
 	"documents_empty_to_send_text": "Le lettere che deve stampare e spedire per posta compaiono qui.",
-	"tenants_delete_has_contracts_documents": "Gli inquilini con contratti di locazione vengono conservati perché conteggi e documenti vi fanno riferimento. Anche i loro documenti caricati restano quindi. Li elimini uno per uno in «Documenti» su questa pagina non appena non Le servono più.",
+	"tenants_delete_has_contracts_documents": "Gli inquilini con contratti di locazione vengono conservati perché conteggi e documenti vi fanno riferimento. Anche i documenti che ha caricato per questo inquilino restano salvati. Li elimini uno per uno in «Documenti» su questa pagina non appena non Le servono più.",
 	"backend_document_title_too_long": "Il titolo supera {max} caratteri. Lo accorci.",
 	"backend_tenant_not_found": "Questo inquilino non esiste più. Probabilmente è stato eliminato in un’altra finestra. Apra l’elenco «Inquilini»."
 }

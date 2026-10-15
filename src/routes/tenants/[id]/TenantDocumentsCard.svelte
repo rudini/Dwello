@@ -16,7 +16,7 @@
 		demo = false
 	}: {
 		documents: StatementDocument[];
-		form?: { title?: string; uploadError?: string; deleteError?: string } | null;
+		form?: { title?: string; uploadError?: string; titleError?: string; deleteError?: string } | null;
 		demo?: boolean;
 	} = $props();
 

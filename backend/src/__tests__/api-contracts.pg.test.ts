@@ -170,13 +170,14 @@ describe('API-Verträge des Frontends', () => {
 
 	it('GET /documents liefert die Felder von documents.json, DELETE einer Mahnung die von document-not-deletable.json', async () => {
 		const jpg = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 1, 2]).toString('base64');
-		const uploaded = (await (
-			await sendJson('POST', `/api/v1/tenants/${rental.tenant}/documents`, { title: 'Ausweiskopie', fileName: 'ausweis.jpg', content: jpg })
-		).json()) as { id: string };
 		const [reminder] = await db
 			.insert(documents)
 			.values({ tenantId: rental.tenant, type: 'reminder', reminderLevel: 1, title: 'Zahlungserinnerung', fileName: 'z.pdf', content: jpg, channel: 'letter', status: 'to_send' })
 			.returning({ id: documents.id });
+		// newest first: the upload is the element `drift` checks
+		const uploaded = (await (
+			await sendJson('POST', `/api/v1/tenants/${rental.tenant}/documents`, { title: 'Ausweiskopie', fileName: 'ausweis.jpg', content: jpg })
+		).json()) as { id: string };
 		try {
 			const actual = await (await callApi(`/api/v1/documents?tenantId=${rental.tenant}`)).json();
 			expect(drift(await sample('documents'), actual)).toEqual([]);

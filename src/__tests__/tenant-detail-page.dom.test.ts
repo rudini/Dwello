@@ -193,11 +193,15 @@ describe('Mieterdetail', () => {
 		const update = vi.fn();
 		await after({ update, result: { type: 'error', error: new Error('500') } });
 		flushSync();
-		expect(text('form-error')).toBe('Das Dokument wurde nicht gespeichert, weil Dwello nicht geantwortet hat. Wählen Sie noch einmal «Dokument hochladen».');
+		expect(text('form-error')).toContain(
+			'Das Dokument wurde nicht gespeichert, weil Dwello nicht geantwortet hat. Wählen Sie noch einmal «Dokument hochladen».'
+		);
 		expect(title.value).toBe('Betreibungsauszug');
 		expect(update).not.toHaveBeenCalled();
-		// read out: the focus goes to the field with the message
-		await vi.waitFor(() => expect(document.activeElement).toBe(byTestId('tenant-document-file-input')));
+		// not the file's fault: announced as an alert, the focus on the button that sends again; the file stays valid
+		expect(byTestId('form-error')!.getAttribute('role')).toBe('alert');
+		expect(byTestId('tenant-document-file-input')!.getAttribute('aria-invalid')).toBeNull();
+		await vi.waitFor(() => expect(document.activeElement).toBe(byTestId('tenant-document-upload-button')));
 	});
 
 	it('meldet ein hochgeladenes Dokument', async () => {
@@ -268,7 +272,17 @@ describe('Mieterdetail', () => {
 		open([history('c1', 'Wohnung 1.01', '2015-01-01', '2019-12-31', 'ended')], null, [upload]);
 		click('tenant-delete-button');
 		expect(text('delete-dialog-message')).toContain(
-			'Löschen Sie sie einzeln unter «Dokumente» auf dieser Seite, sobald Sie sie nicht mehr brauchen.'
+			'Auch die Dokumente, die Sie zu diesem Mieter hochgeladen haben, bleiben gespeichert. Löschen Sie sie einzeln unter «Dokumente» auf dieser Seite, sobald Sie sie nicht mehr brauchen.'
 		);
+	});
+
+	it('zeigt einen zu langen Titel am Feld «Titel» und setzt den Fokus dorthin', async () => {
+		open([], { title: 'T', titleError: 'Der Titel ist länger als 255 Zeichen. Kürzen Sie ihn.' }, []);
+		const title = byTestId<HTMLInputElement>('tenant-document-title-input')!;
+		expect(title.getAttribute('aria-invalid')).toBe('true');
+		expect(byTestId<HTMLInputElement>('tenant-document-file-input')!.getAttribute('aria-invalid')).toBeNull();
+		const after = actions.get('?/upload')!({ formData: new FormData() }) as (input: unknown) => Promise<void>;
+		await after({ update: async () => {}, result: { type: 'failure', status: 400, data: {} } });
+		await vi.waitFor(() => expect(document.activeElement).toBe(title));
 	});
 });
