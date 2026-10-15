@@ -167,6 +167,10 @@ When(
 	}
 );
 
+Then('schlägt die KI vor, die Kategorie als umlagefähig zu erfassen', async ({ verwalter }) => {
+	await verwalter.sees(allowedChosen).toBe(true);
+});
+
 Then('schlägt die KI vor, die Kategorie als nicht umlagefähig zu erfassen', async ({ verwalter }) => {
 	await verwalter.sees(notAllowedChosen).toBe(true);
 });

@@ -56,6 +56,28 @@ describe('Vorschlag der KI für eine neue Kategorie', () => {
 		}
 	});
 
+	it('zeigt der KI die vordefinierten Kategorien mit ihrer Umlagefähigkeit (#202)', async () => {
+		const llm = openAiCompatible({ isAllowedUtilityCost: true, confidence: 0.9, reasoning: '' });
+		const own = `Eigene Reinigung ${crypto.randomUUID()}`;
+		const { id } = (await (
+			await sendJson('POST', '/api/v1/categories', { name: own, nameDE: own, isAllowedUtilityCost: false })
+		).json()) as { id: string };
+		try {
+			await sendJson('POST', '/api/v1/categories/propose', { name: 'Treppenhausreinigung' });
+
+			const [allowed, notAllowed] = llm.prompts[0].split('VORDEFINIERTE NICHT UMLAGEFÄHIGE KATEGORIEN');
+			expect(allowed).toContain(
+				'- Caretaker (Hauswart): Lohn für Reinigung, Bedienung der Heizung und kleine Instandhaltung'
+			);
+			expect(notAllowed).toContain('- Repairs (Reparaturen): Reparaturen und Unterhalt (trägt der Vermieter)');
+			// Eine eigene Einstufung des Vermieters ist nicht geprüft und soll sich nicht fortpflanzen
+			expect(llm.prompts[0]).not.toContain(own);
+		} finally {
+			llm.stop();
+			await sendJson('DELETE', `/api/v1/categories/${id}`);
+		}
+	});
+
 	it('verlangt die Begründung in der Sprache der Oberfläche', async () => {
 		const llm = openAiCompatible({ isAllowedUtilityCost: false, confidence: 0.9, reasoning: '' });
 		try {
