@@ -25,6 +25,11 @@ export function testData(api: CallTheApi) {
 		extras.push(`categories/${category.id}`);
 	}
 
+	// A predefined category by its German name
+	async function predefinedCategory(categoryName: string): Promise<{ id: string; isAllowedUtilityCost: boolean }> {
+		return (await get('categories?limit=100')).categories.find((c: { nameDE: string }) => c.nameDE === categoryName);
+	}
+
 	async function removeContracts(filter: string) {
 		for (const contract of (await get(`contracts?${filter}&limit=100`)).contracts) {
 			await remove(`contracts/${contract.id}`);
@@ -269,14 +274,13 @@ export function testData(api: CallTheApi) {
 		},
 
 		async predefinedCategoryId(categoryName: string): Promise<string> {
-			const categories = (await get('categories?limit=100')).categories as { id: string; nameDE: string }[];
-			return categories.find((c) => c.nameDE === categoryName)!.id;
+			return (await predefinedCategory(categoryName)).id;
 		},
 
 		// A predefined category given by its German name, saved with another allocability; restored afterwards. Saving it
 		// as not umlagefähig also marks its invoices so, which the restore does not undo: use a category no scenario bills
 		async predefinedCategoryAllowance(categoryName: string, isAllowedUtilityCost: boolean) {
-			const category = (await get('categories?limit=100')).categories.find((c: { nameDE: string }) => c.nameDE === categoryName);
+			const category = await predefinedCategory(categoryName);
 			await put(`categories/${category.id}`, { isAllowedUtilityCost });
 			restores.push(() => put(`categories/${category.id}`, { isAllowedUtilityCost: category.isAllowedUtilityCost }));
 		},

@@ -469,6 +469,16 @@ describe('Grund der Umlagefähigkeit', () => {
 		);
 	});
 
+	// Die Wahl im Formular zählt, nicht der gespeicherte Wert (Code-Review M-1)
+	it('nennt keinen festen Grund, sobald im Formular die andere Umlagefähigkeit gewählt ist', async () => {
+		show(EditCategoryPage, { data: { category: fireExtinguisher }, form: null } as never);
+
+		click(byTestId('category-allowance-true')!);
+		await settle();
+
+		expect(byTestId('category-reason')).toBeNull();
+	});
+
 	it('nennt den Grund beim Bearbeiten einer vordefinierten Kategorie', () => {
 		show(EditCategoryPage, { data: { category: fireExtinguisher }, form: null } as never);
 

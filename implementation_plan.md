@@ -31,6 +31,7 @@ Files: `tests/e2e/features/categories.feature`, `tests/e2e/{steps,tasks,question
 
 Review lines:
 - fach-reviewer round 1 (`docs/reviews/186-fachreview-1.md`): open H-1 (Major), H-2 (Major), H-5–H-9, H-14–H-18, H-21; fixed H-3, H-4 (scenario), H-11, H-13, H-19, H-20; open work H-10, H-12
+- code-reviewer round 1 slice 186B (`docs/reviews/186b-review-1.md`): fixed M-1 (Major; test `categories-page.dom.test.ts` «nennt keinen festen Grund, sobald im Formular die andere Umlagefähigkeit gewählt ist», red: the reason stayed), M-3; open work M-2 (`offene-punkte.md`); rejected M-4: one more request among the dozens `seedFor` sends per row, M-5: `allocable-categories.pg.test.ts` pins the seed and the scenarios check the shown reasons, a test tying both copies costs more than it prevents
 - code-reviewer round 1 slice 216 (`docs/reviews/216-review-1.md`): fixed L-2 (test `invoice-pages.dom.test.ts` «nennt auf fr/it die Gebäudeversicherung …», red on the texts before K-2); L-1 goes to the feature review of `fach-reviewer` (privacy text in four languages); rejected L-3: the backend always sends `enabled`, the page data of older tests omit it; L-4: the help text is prose («l’assurance du bâtiment»), the invoice hint lists category names
 - code-reviewer round 1 slice 185 (`docs/reviews/185-review-1.md`): fixed K-2; open K-1 (Nit, title «Schweizer Mietrecht» over the note: asked in the feature review of `fach-reviewer`)
 - code-reviewer round 2 slice 186A (`docs/reviews/185-review-1.md`, delta): no new findings; rejections J-1, J-3, J-6 confirmed
