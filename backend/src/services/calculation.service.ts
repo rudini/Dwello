@@ -297,16 +297,20 @@ export async function calculateStatementForContract(
 		let tenantShare: number;
 		let periodShare: number;
 
-		// For heating costs, use heating profile if available
-		if (group.isHeatingCost && heatingProfileId) {
-			const heatingResult = await handleMidYearMoves(
-				heatingProfileId,
-				new Date(contract.startDate),
-				contract.endDate ? new Date(contract.endDate) : null,
-				periodStart,
-				periodEnd,
-				apartmentShareResult.share
-			);
+		// For heating costs, use heating profile if available; where it shares by days (no heating months in the
+		// period), the days count like any other invoice's, with its Leistungszeitraum (#137)
+		const heatingResult =
+			group.isHeatingCost && heatingProfileId
+				? await handleMidYearMoves(
+						heatingProfileId,
+						new Date(contract.startDate),
+						contract.endDate ? new Date(contract.endDate) : null,
+						periodStart,
+						periodEnd,
+						apartmentShareResult.share
+					)
+				: null;
+		if (heatingResult && !heatingResult.byDays) {
 			tenantShare = roundToRappen(heatingResult.share);
 			periodShare = heatingResult.percentage / 100;
 		} else {

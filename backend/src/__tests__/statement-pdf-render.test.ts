@@ -51,9 +51,6 @@ describe('PDF einer Rückerstattung', () => {
 	});
 });
 
-const due: StatementPDFData = { ...refund, totalAdvancePayments: 600, balance: 184.15, paymentDeadline: '2026-03-17' };
-
-// Der Saldo ist auf 5 Rappen gerundet; die Zeile «Rundung» lässt die Rechnung aufgehen
 describe('Heizkosten nach Mietstagen im PDF (#137)', () => {
 	// a period whose months carry 0 % in the profile: the calculation shared the heating costs by days
 	const byDays: StatementPDFData = {
@@ -76,6 +73,9 @@ describe('Heizkosten nach Mietstagen im PDF (#137)', () => {
 	});
 });
 
+const due: StatementPDFData = { ...refund, totalAdvancePayments: 600, balance: 184.15, paymentDeadline: '2026-03-17' };
+
+// Der Saldo ist auf 5 Rappen gerundet; die Zeile «Rundung» lässt die Rechnung aufgehen
 describe('Rundung des Saldos im PDF', () => {
 	it('nennt die Rundung zwischen Akonto und Saldo, bei Nachzahlung und Rückerstattung', async () => {
 		// von oben nach unten lesbar: der Betrag vor der Rundung, die Rundung dieses Betrags, der Saldo

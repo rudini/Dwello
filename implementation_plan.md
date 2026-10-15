@@ -13,9 +13,11 @@ Task: open `bug` issues one by one (#122, #123, #125, #126, #127, #128, #135 mer
 - [x] Skills: tdd, ponytail, ponytail-review (lean; the note moved into `sharesNote` for the fallow gate)
 - [x] Checks: test:coverage (2432), lint, check, backend test (611) + type-check, deepcheck:audit, fallow, E2E chromium + api statement-detail (24 passed)
 - [ ] code-reviewer
+  - code-reviewer round 1 (`docs/reviews/issue-137-review-1.md`): no Blocker/Major; fixed C-1 (Minor; pg test of a summer statement's PDF in `statement-pdf.pg.test.ts`, red with the `byDays` return in `heatingOf` taken out), C-2 (Nit; the render test block moved); its «not confirmed» point (the PDF recomputes with the current profile, existed before) is #209
 - [ ] daten-pruefer (PDF)
-- [ ] Personas (only if what the PDF shows a persona changes)
+  - daten-pruefer round 1 (`docs/reviews/issue-137-datenpruefung-1.md`): S1–S5 confirmed; fixed D-1 (Major; a heating invoice with a Leistungszeitraum in a period without heating months was shared by the days of the whole period; the calculation now takes the day rule of every other invoice once heating is shared by days; test red in `service-period.pg.test.ts`: tenantShare 316.45 instead of 469.56), open D-2, D-3 (Minor, existed before: percentages where days could be shown) in #208
+- [x] Personas: none; the change is in the PDF only, which `daten-pruefer` and `fach-reviewer` checked (workflow review W-1)
 - [ ] Workflow review `docs/reviews/workflow-rules-review-issue-137.md`
 - [ ] PR, CI, merge
 
-Files: `backend/src/services/{prorating,statement-pdf,pdf}.service.ts`, tests (`prorating.pg.test.ts`, `statement-pdf-data.test.ts`, `statement-pdf-render.test.ts`, `statement-detail.feature` and its steps, seed `statement` with a period), `docs/nebenkostenabrechnung-anforderungen.md` (rule 5)
+Files: `backend/src/services/{prorating,statement-pdf,pdf,calculation}.service.ts`, tests (`prorating.pg.test.ts`, `service-period.pg.test.ts`, `statement-pdf.pg.test.ts`, `statement-pdf-data.test.ts`, `statement-pdf-render.test.ts`, `statement-detail.feature` and its steps, seed `statement` with a period), `docs/nebenkostenabrechnung-anforderungen.md` (rule 5)
