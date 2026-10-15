@@ -146,12 +146,13 @@ export function testData(api: CallTheApi) {
 			ids.set(`Wohnung von ${tenantTitle}`, created.apartmentId);
 		},
 
-		async statement(tenantTitle: string, buildingTitle: string, year: number, heatingProfileTitle?: string) {
+		// A whole year, or the period given (a statement of a shorter period is still named by its year)
+		async statement(tenantTitle: string, buildingTitle: string, year: number, heatingProfileTitle?: string, period?: [string, string]) {
 			const statement = await post('statements/generate', {
 				contractId: ids.get(`Mietvertrag ${tenantTitle}`),
 				buildingId: ids.get(buildingTitle),
-				periodStart: `${year}-01-01`,
-				periodEnd: `${year}-12-31`,
+				periodStart: period?.[0] ?? `${year}-01-01`,
+				periodEnd: period?.[1] ?? `${year}-12-31`,
 				heatingProfileId: heatingProfileTitle && ids.get(heatingProfileTitle)
 			});
 			ids.set(`Abrechnung ${tenantTitle} ${year}`, statement.id);
@@ -230,6 +231,13 @@ export function testData(api: CallTheApi) {
 		},
 
 		// Monthly shares January..December in percent
+		// A profile of the scenario, or a predefined one by its German name: named explicitly, never the preselection, which
+		// a parallel scenario's own profile can take (own profiles are listed first)
+		async heatingProfileId(title: string) {
+			const profiles: { id: string; nameDE: string | null }[] = (await get('heating-profiles?limit=100')).data;
+			return ids.get(title) ?? profiles.find((profile) => profile.nameDE === title)!.id;
+		},
+
 		async heatingProfile(title: string, monthly: number[]) {
 			const months = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
 			const profile = await post('heating-profiles', {

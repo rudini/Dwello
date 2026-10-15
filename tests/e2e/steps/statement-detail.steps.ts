@@ -67,6 +67,13 @@ Given(
 	}
 );
 
+Given(
+	'für {string} im Gebäude {string} gibt es die Nebenkostenabrechnung vom {string} bis {string} mit dem Heizprofil {string}',
+	async ({ seed }, tenant: string, building: string, start: string, end: string, profile: string) => {
+		await seed.statement(tenant, building, Number(start.slice(0, 4)), profile, [start, end]);
+	}
+);
+
 Given('die Abrechnung {int} von {string} ist versendet', async ({ seed }, year: number, tenant: string) => {
 	await seed.sendStatement(tenant, year);
 });
@@ -200,6 +207,10 @@ Given('im Gebäude {string} war am {string} Heizöl für {string} Franken im Tan
 
 Then('steht im PDF {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(downloadedPdfText).toContain(text);
+});
+
+Then('steht im PDF nicht {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(downloadedPdfText).not.toContain(text);
 });
 
 Then('nennt die Abrechnung das Heizprofil {string}', async ({ verwalter, names }, profile: string) => {

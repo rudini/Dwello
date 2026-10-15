@@ -74,14 +74,26 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Dann kostet die Abrechnung von "Marc Huber" "CHF 927.00"
     Und kostet die Abrechnung von "Eva Frei" "CHF 0.00"
 
+  # Eine Abrechnungsperiode nur aus Monaten mit 0 % im Heizprofil (Mittelland: Juni bis August): die Heizkosten gehen nach Mietstagen wie jede andere
+  # Rechnung, mit ihrem Leistungszeitraum (#137). 900 Franken für Juli bis September: 900 × 62/92 = 606.52 in der Periode,
+  # die Hälfte für die Wohnung (303.26), davon 48 der 62 Tage: 234.78, plus 3 % Verwaltungspauschale (7.04)
+  @api
+  Szenario: Heizkosten einer Periode ohne Heizanteil gelten für ihren Leistungszeitraum
+    Angenommen im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
+    Und der Mieter "Lea Graf" existiert
+    Und "Lea Graf" mietet die Wohnung "3.02" seit "2024-07-15" für "900" Franken
+    Und im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Heizung" über "900" Franken vom "2024-10-05" für die Zeit vom "2024-07-01" bis "2024-09-30"
+    Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen vom "2024-06-01" bis "2024-08-31" für das Gebäude "Lindenhof" mit dem Heizprofil "Heizung Mittelland" öffnet
+    Dann kostet die Abrechnung von "Lea Graf" "CHF 241.82"
+
   # Abgerechnet wird das verbrauchte Heizöl: Anfangsbestand + Einkauf − Endbestand, hier 600 + 1000 − 100 = 1500 Franken,
-  # verteilt nach dem vorgewählten Heizprofil mit Warmwasser (Mai–Dezember 53.5 %, Januar–März 37.2 %) plus 3 % Verwaltungspauschale
+  # verteilt nach dem Heizprofil mit Warmwasser (Mai–Dezember 53.5 %, Januar–März 37.2 %) plus 3 % Verwaltungspauschale
   Szenario: Heizöl wird nach Verbrauch abgerechnet, nicht nach Einkauf
     Angenommen im Gebäude "Lindenhof" gibt es eine Rechnung der Kategorie "Heizung" über "1000" Franken vom "2024-06-15"
     Wenn der Liegenschaftsverwalter für das Gebäude "Lindenhof" den Tankbestand vom "2023-12-31" mit "600" Franken erfasst
     Und der Liegenschaftsverwalter für das Gebäude "Lindenhof" den Tankbestand vom "2024-12-31" mit "100" Franken erfasst
     Und der Liegenschaftsverwalter ist auf der Seite zum Erstellen von Abrechnungen
-    Und der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" öffnet
+    Und der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Lindenhof" mit dem Heizprofil "Heizung + Warmwasser" öffnet
     Dann kostet die Abrechnung von "Marc Huber" "CHF 826.58"
     Und kostet die Abrechnung von "Eva Frei" "CHF 574.74"
 

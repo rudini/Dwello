@@ -84,7 +84,8 @@ const translations: Record<Exclude<Language, 'rm'>, Record<string, string>> = {
 		refundAccount: 'Teilen Sie uns dafür Ihre IBAN mit, falls Sie das noch nicht getan haben.',
 		balancedNote: 'Ihre Nebenkosten und Ihre Akontobeiträge sind gleich hoch. Sie müssen nichts bezahlen.',
 		balancedRounded: 'Nach der Rundung auf 5 Rappen müssen Sie nichts bezahlen und erhalten nichts zurück.',
-		sharesNote: 'Kosten Liegenschaft: die Rechnungen der Abrechnungsperiode; eine Rechnung mit Leistungszeitraum zählt mit den Tagen, die in die Periode fallen. Wohnungsanteil: Kosten der Liegenschaft nach dem Verteilschlüssel. Zeitanteil: Ihre Mietstage in der Abrechnungsperiode, bei Heizkosten der Anteil nach dem Heizprofil.',
+		sharesNote: 'Kosten Liegenschaft: die Rechnungen der Abrechnungsperiode; eine Rechnung mit Leistungszeitraum zählt mit den Tagen, die in die Periode fallen. Wohnungsanteil: Kosten der Liegenschaft nach dem Verteilschlüssel. Zeitanteil: Ihre Mietstage in der Abrechnungsperiode{heating}.',
+		sharesNoteHeating: ', bei Heizkosten der Anteil nach dem Heizprofil',
 		sharesNoteFuel: 'Kosten Liegenschaft bei Heizmaterial aus dem Tank: der Verbrauch (siehe Heiz- und Warmwasserkosten).',
 		heatingSection: 'Heiz- und Warmwasserkosten',
 		fuelIntro: 'Abgerechnet wird das verbrauchte Heizmaterial, nicht der Einkauf.',
@@ -150,7 +151,8 @@ const translations: Record<Exclude<Language, 'rm'>, Record<string, string>> = {
 		refundAccount: 'Communiquez-nous votre IBAN si vous ne l’avez pas encore fait.',
 		balancedNote: 'Vos frais accessoires et vos acomptes sont égaux. Vous n’avez rien à payer.',
 		balancedRounded: 'Après l’arrondi à 5 centimes, vous n’avez rien à payer et ne recevez rien.',
-		sharesNote: 'Coûts de l’immeuble : les factures de la période de décompte ; une facture avec période de prestation compte pour les jours compris dans la période. Part du logement : coûts de l’immeuble selon la clé de répartition. Part temporelle : vos jours de location dans la période de décompte, pour le chauffage la part selon le profil de chauffage.',
+		sharesNote: 'Coûts de l’immeuble : les factures de la période de décompte ; une facture avec période de prestation compte pour les jours compris dans la période. Part du logement : coûts de l’immeuble selon la clé de répartition. Part temporelle : vos jours de location dans la période de décompte{heating}.',
+		sharesNoteHeating: ', pour le chauffage la part selon le profil de chauffage',
 		sharesNoteFuel: 'Coûts de l’immeuble pour le combustible en citerne : la consommation (voir frais de chauffage et d’eau chaude).',
 		heatingSection: 'Frais de chauffage et d’eau chaude',
 		fuelIntro: 'Le décompte porte sur le combustible consommé et non sur les achats.',
@@ -216,7 +218,8 @@ const translations: Record<Exclude<Language, 'rm'>, Record<string, string>> = {
 		refundAccount: 'Ci comunichi il suo IBAN, se non l’ha già fatto.',
 		balancedNote: 'Le sue spese accessorie e i suoi acconti sono uguali. Non deve pagare nulla.',
 		balancedRounded: 'Dopo l’arrotondamento a 5 centesimi non deve pagare nulla e non riceve nulla.',
-		sharesNote: 'Costi immobile: le fatture del periodo di conteggio; una fattura con periodo di prestazione conta per i giorni compresi nel periodo. Quota appartamento: costi dell’immobile secondo la chiave di riparto. Quota temporale: i suoi giorni di locazione nel periodo di conteggio, per il riscaldamento la quota secondo il profilo di riscaldamento.',
+		sharesNote: 'Costi immobile: le fatture del periodo di conteggio; una fattura con periodo di prestazione conta per i giorni compresi nel periodo. Quota appartamento: costi dell’immobile secondo la chiave di riparto. Quota temporale: i suoi giorni di locazione nel periodo di conteggio{heating}.',
+		sharesNoteHeating: ', per il riscaldamento la quota secondo il profilo di riscaldamento',
 		sharesNoteFuel: 'Costi immobile per il combustibile in cisterna: il consumo (vedi costi di riscaldamento e acqua calda).',
 		heatingSection: 'Spese di riscaldamento e acqua calda',
 		fuelIntro: 'Si conteggia il combustibile consumato, non quello acquistato.',
@@ -282,7 +285,8 @@ const translations: Record<Exclude<Language, 'rm'>, Record<string, string>> = {
 		refundAccount: 'Please send us your IBAN if you have not done so yet.',
 		balancedNote: 'Your utility costs equal your advance payments. You do not need to pay anything.',
 		balancedRounded: 'After rounding to 5 centimes, you do not need to pay anything and receive nothing back.',
-		sharesNote: 'Building costs: the invoices of the billing period; an invoice with a service period counts for its days within the period. Apartment share: the building’s costs by the distribution key. Time share: your days rented in the billing period, for heating the share by the heating profile.',
+		sharesNote: 'Building costs: the invoices of the billing period; an invoice with a service period counts for its days within the period. Apartment share: the building’s costs by the distribution key. Time share: your days rented in the billing period{heating}.',
+		sharesNoteHeating: ', for heating the share by the heating profile',
 		sharesNoteFuel: 'Building costs for fuel from a tank: the consumption (see heating and hot water costs).',
 		heatingSection: 'Heating and hot water costs',
 		fuelIntro: 'The fuel consumed is billed, not the fuel purchased.',
@@ -310,6 +314,7 @@ export interface LineItem {
 	apartmentShare?: number | null; // the apartment's part of the total by the key; none on older statements
 	periodShare?: number | null; // 0-1: days rented, or the heating profile's share
 	byProfile?: boolean; // shared by the heating profile, not by days
+	heating?: boolean; // a heating cost: the tenant may ask for the detailed heating statement (Art. 8 Abs. 1 VMWG)
 	tenantShare: number;
 }
 
@@ -598,11 +603,17 @@ function costTable(page: Page, y: number) {
 		top = row(doc, total(t.rounding, signed(rounding(data))), top);
 	}
 	top = row(doc, total(balanceLabel(page), formatCHF(Math.abs(data.balance))), top + 2, { bold: true, above: 1 });
-	const note = data.fuel ? `${t.sharesNote} ${t.sharesNoteFuel}` : t.sharesNote;
+	const note = sharesNote(data, t);
 	doc.font('Helvetica').fontSize(7.5);
 	const height = doc.heightOfString(note, { width: PAGE.right - PAGE.left });
 	doc.fillColor(COLORS.muted).text(note, PAGE.left, room(doc, top + 4, height), { width: PAGE.right - PAGE.left });
 	return doc.y + 18;
+}
+
+// How the shares are reached; the heating clause only where a line is shared by the profile, not by days (#137)
+function sharesNote(data: StatementPDFData, t: Record<string, string>) {
+	const shares = fill(t.sharesNote, { heating: data.lineItems.some((item) => item.byProfile) ? t.sharesNoteHeating : '' });
+	return data.fuel ? `${shares} ${t.sharesNoteFuel}` : shares;
 }
 
 // A long label wraps and pushes the next line down
@@ -660,7 +671,7 @@ function heatingSection(page: Page, y: number) {
 // (Art. 8 VMWG); kept on one page
 function notes({ doc, t, data, config }: Page, y: number) {
 	const contact = `${config.companyName}, ${config.address}, ${config.postalCode} ${config.city}`;
-	const lines = [fill(t.noteReceipts, { contact }), ...(data.heating || data.fuel ? [t.noteHeating] : []), ...(data.fuel ? [t.noteStock] : [])];
+	const lines = [fill(t.noteReceipts, { contact }), ...(data.fuel || data.lineItems.some((item) => item.heating) ? [t.noteHeating] : []), ...(data.fuel ? [t.noteStock] : [])];
 	const width = PAGE.right - PAGE.left;
 	doc.font('Helvetica').fontSize(9);
 	const height = lines.reduce((sum, line) => sum + doc.heightOfString(line, { width }) + 6, 0);

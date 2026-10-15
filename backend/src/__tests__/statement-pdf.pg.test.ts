@@ -101,6 +101,27 @@ describe('PDF der Nebenkostenabrechnung', () => {
 		expect(text).toContain('100.00 % der Heizkosten Ihrer Wohnung in der Abrechnungsperiode');
 	});
 
+	// Juni bis August: 0 % im Mittelland, die Heizkosten gehen nach Mietstagen (Einzug 1. Juli: 62 von 92 Tagen, #137)
+	it('nennt bei einer Periode ohne Heizanteil im Heizprofil die Mietstage und kein Heizprofil', async () => {
+		const [heating] = await db.select().from(categories).where(eq(categories.name, 'Heating'));
+		await insertInvoice(rental.building, { categoryId: heating.id, amount: '300.00', invoiceDate: '2025-07-15' });
+		const summer = await generateStatement({
+			contractId: rental.contract,
+			buildingId: rental.building,
+			periodStart: '2025-06-01',
+			periodEnd: '2025-08-31',
+			heatingProfileId: (await getHeatingProfileByName('Heating Mittelland'))!.id,
+			managementFeePercent: 3
+		});
+		await generateStatementPdf(summer.id, 'de');
+		const text = readPdf(Buffer.from((await getStatementPdf(summer.id)).pdfBlob!, 'base64')).flowing;
+		await deleteStatement(summer.id);
+
+		expect(text).toMatch(/Heizung Pro Fläche \(m²\) 70\.00 \/ 70\.00 m² [\d'.]+ [\d'.]+ 62\/92 Tage/);
+		expect(text).not.toContain('Heizprofil');
+		expect(text).toContain('detaillierte Abrechnung der Heiz- und Warmwasserkosten verlangen');
+	});
+
 	// Einzige Wohnung des Gebäudes: Wohnungsanteil = Kosten der Liegenschaft; Hauswart nach Tagen 184 / 365
 	it('nennt je Position den Verteilschlüssel, den Wohnungsanteil und den Zeitanteil', () => {
 		expect(pdf.flowing).toContain('Verteilschlüssel');

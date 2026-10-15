@@ -53,8 +53,8 @@ const openPreviewThroughUi =
 	(year: number, buildingId: string, options: RunOptions): Activity =>
 	async (actor) => {
 		await actor.attemptsTo(
-			EnterDate.of(`${year}-01-01`).into(periodStartInput),
-			EnterDate.of(`${year}-12-31`).into(periodEndInput),
+			EnterDate.of(options.periodStart ?? `${year}-01-01`).into(periodStartInput),
+			EnterDate.of(options.periodEnd ?? `${year}-12-31`).into(periodEndInput),
 			chooseBuilding(buildingId),
 			goToNextStep
 		);

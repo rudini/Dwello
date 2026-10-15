@@ -106,10 +106,26 @@ describe('handleMidYearMoves', () => {
 		);
 
 		// Januar bis Juni im Mittelland: 17.5 + 14.5 + 13.5 + 9.5 + 3.5 + 0 = 58.5 % der Heizkosten
-		expect(result.share).toBeCloseTo(5850);
+		expect(result).toMatchObject({ byDays: false, share: 5850 });
 	});
 
-	it('teilt nach Tagen, wenn das Heizprofil nicht existiert', async () => {
+	it('sagt, dass es nach Tagen geteilt hat, wenn die Monate der Periode im Heizprofil 0 % tragen (Sommer)', async () => {
+		const mittelland = (await getHeatingProfileByName('Heating Mittelland'))!;
+
+		// Juni bis August: 0 % im Mittelland; die Tage teilt die Berechnung wie bei jeder anderen Rechnung
+		const result = await handleMidYearMoves(
+			mittelland.id,
+			new Date('2024-07-15'),
+			new Date('2024-08-31'),
+			new Date('2024-06-01'),
+			new Date('2024-08-31'),
+			9200
+		);
+
+		expect(result).toEqual({ byDays: true });
+	});
+
+	it('sagt, dass nach Tagen geteilt wird, wenn das Heizprofil nicht existiert', async () => {
 		const result = await handleMidYearMoves(
 			crypto.randomUUID(),
 			new Date('2024-01-01'),
@@ -119,6 +135,6 @@ describe('handleMidYearMoves', () => {
 			10000
 		);
 
-		expect(result.share).toBeCloseTo((10000 * 182) / 366);
+		expect(result).toEqual({ byDays: true });
 	});
 });

@@ -182,7 +182,8 @@ async function handleMultipleContracts(
 }
 
 /**
- * Calculate heating costs for a mid-year move using heating profile
+ * Calculate heating costs for a mid-year move using heating profile. Without the profile, or for a period whose months
+ * carry 0 % in it (summer), the heating costs are shared by days like any other invoice: then only `byDays` (#137)
  */
 export async function handleMidYearMoves(
 	heatingProfileId: string,
@@ -191,35 +192,12 @@ export async function handleMidYearMoves(
 	periodStart: Date,
 	periodEnd: Date,
 	totalHeatingCosts: number
-): Promise<{
-	share: number;
-	percentage: number;
-	monthBreakdown: { month: number; percentage: number }[];
-}> {
+): Promise<
+	| { byDays: true }
+	| { byDays: false; share: number; percentage: number; monthBreakdown: { month: number; percentage: number }[] }
+> {
 	const profile = await getHeatingProfile(heatingProfileId);
-
-	if (!profile) {
-		// Fallback to simple day-based prorating
-		const proration = calculateProrationDays(
-			contractStart,
-			contractEnd,
-			periodStart,
-			periodEnd
-		);
-
-		if (!proration) {
-			return { share: 0, percentage: 0, monthBreakdown: [] };
-		}
-
-		const totalDays = calculateDaysBetween(periodStart, periodEnd);
-		const percentage = (proration.days / totalDays) * 100;
-
-		return {
-			share: totalHeatingCosts * (percentage / 100),
-			percentage,
-			monthBreakdown: []
-		};
-	}
+	if (!profile) return { byDays: true };
 
 	// Determine the actual period the tenant occupied
 	const effectiveStart = new Date(Math.max(contractStart.getTime(), periodStart.getTime()));
@@ -230,14 +208,9 @@ export async function handleMidYearMoves(
 	// The tenant's months against the months of the period: a period under a year carries only its months' shares
 	const tenant = calculateHeatingShare(profile, effectiveStart, effectiveEnd, totalHeatingCosts);
 	const period = calculateHeatingShare(profile, periodStart, periodEnd, totalHeatingCosts);
-	// a period of months without heating in the profile (summer): its heating costs are shared by days
-	if (period.percentage <= 0) {
-		const percentage =
-			(calculateDaysBetween(effectiveStart, effectiveEnd) / calculateDaysBetween(periodStart, periodEnd)) * 100;
-		return { ...tenant, share: totalHeatingCosts * (percentage / 100), percentage };
-	}
+	if (period.percentage <= 0) return { byDays: true };
 	const percentage = (tenant.percentage / period.percentage) * 100;
-	return { ...tenant, share: totalHeatingCosts * (percentage / 100), percentage };
+	return { ...tenant, share: totalHeatingCosts * (percentage / 100), percentage, byDays: false };
 }
 
 /**

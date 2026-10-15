@@ -6,8 +6,9 @@
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import { eq } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { invoices } from '../db/schema';
+import { categories, invoices } from '../db/schema';
 import { createContract, deleteContract } from '../services/contract.service';
+import { getHeatingProfileByName } from '../services/heating-profile.service';
 import { createTenant, deleteTenant } from '../services/tenant.service';
 import { calculateStatement } from '../services/statement.service';
 import { callApi, sendJson } from './helpers/auth';
@@ -77,6 +78,42 @@ describe('Leistungszeitraum einer Rechnung', () => {
 });
 
 const roundRappen = (amount: number) => Math.round(amount * 100) / 100;
+
+// Juni bis August: 0 % im Mittelland, die Heizkosten gehen nach Tagen wie jede andere Rechnung (#137): eine
+// Heizkostenrechnung für Juli bis September zählt mit 62 Tagen in der Periode, der Mieter ab 15. Juli trägt 48 davon
+describe('Leistungszeitraum einer Heizkostenrechnung in einer Periode ohne Heizanteil', () => {
+	let summer: Awaited<ReturnType<typeof createRental>>;
+
+	beforeAll(async () => {
+		summer = await createRental(crypto.randomUUID(), { startDate: '2024-07-15', monthlyAdvancePayment: '0' });
+		const [heating] = await db.select().from(categories).where(eq(categories.name, 'Heating'));
+		await insertInvoice(summer.building, {
+			categoryId: heating.id,
+			amount: '900.00',
+			invoiceDate: '2024-10-05',
+			servicePeriodStart: '2024-07-01',
+			servicePeriodEnd: '2024-09-30'
+		});
+	});
+
+	afterAll(async () => {
+		await db.delete(invoices).where(eq(invoices.buildingId, summer.building));
+		await summer.remove();
+	});
+
+	it('teilt die Heizkosten nach den Tagen des Leistungszeitraums in der Periode', async () => {
+		const { lineItems } = await calculateStatement({
+			contractId: summer.contract,
+			periodStart: '2024-06-01',
+			periodEnd: '2024-08-31',
+			heatingProfileId: (await getHeatingProfileByName('Heating Mittelland'))!.id,
+			managementFeePercent: 0
+		});
+
+		// 900 × 62/92 = 606.52 im Gebäude; davon 48/62 Tage: 606.52 × 48/62 = 469.56
+		expect(lineItems).toMatchObject([{ totalBuildingAmount: 606.52, periodShare: 0.7742, tenantShare: 469.56 }]);
+	});
+});
 
 describe('Leistungszeitraum über die API', () => {
 	const post = (period: object) =>
