@@ -4,12 +4,13 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
 const HOOK = fileURLToPath(new URL('../../.claude/hooks/commit-msg-gate.mjs', import.meta.url));
+const ROOT = fileURLToPath(new URL('../..', import.meta.url)).replace(/\/$/, '');
 const SETTINGS = fileURLToPath(new URL('../../.claude/settings.json', import.meta.url));
 
 /** Runs the hook the way Claude Code does: PreToolUse JSON on stdin */
-const hook = (command: string) =>
+const hook = (command: string, cwd = ROOT) =>
 	spawnSync('node', [HOOK], {
-		input: JSON.stringify({ hook_event_name: 'PreToolUse', tool_name: 'Bash', tool_input: { command } }),
+		input: JSON.stringify({ hook_event_name: 'PreToolUse', tool_name: 'Bash', cwd, tool_input: { command } }),
 		encoding: 'utf8'
 	});
 
@@ -35,12 +36,25 @@ describe('commit subject gate (CLAUDE.md, Conventions: Commits)', () => {
 		['git commit -m "feature(contracts): guard retries"', 'type(scope)'],
 		['git commit -m "fix(wizard): guard retries"', 'scope «wizard»'],
 		[heredoc('fix(contracts): guard retries.\n\nBody.'), 'period'],
-		['git -C /home/user/Dwello commit -m "fix: guard retries"', 'type(scope)'],
+		[`git -C ${ROOT} commit -m "fix: guard retries"`, 'type(scope)'],
+		[`cd ${ROOT}/backend && git commit -m "fix: guard retries"`, 'type(scope)'],
 		['git commit -m "fix(contracts): guard retries" && git commit --amend -m "fix: guard"', 'type(scope)']
 	])('blocks %j: %s', (command, problem) => {
 		const result = hook(command);
 		expect(result.status).toBe(2);
 		expect(result.stderr).toContain(problem);
+	});
+
+	it('says that nothing in the blocked command ran, edits and git add included', () => {
+		expect(hook('git add -A && git commit -m "fix: x"').stderr).toContain('nothing in this command ran');
+	});
+
+	it.each([
+		['git commit -m a', '/tmp/scratch-repo'],
+		['cd /tmp/scratch-repo && git commit -m a', ROOT],
+		['git -C /tmp/scratch-repo commit -m a', ROOT]
+	])('lets %j through in a repository outside the project (cwd %s)', (command, cwd) => {
+		expect(hook(command, cwd)).toMatchObject({ status: 0, stderr: '' });
 	});
 
 	it('takes types and scopes from CLAUDE.md, so the list exists once', () => {

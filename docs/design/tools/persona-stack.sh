@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Starts the app for persona runs: fresh database dwello_persona with demo data, backend :3301, frontend :3300 (from a copy of build/ in /tmp/persona-app)
 set -e
-cd /home/user/Dwello
+cd "$(dirname "$0")/../../.."
 export JWT_SECRET=persona-secret-key-at-least-32-characters-long
 DB=postgresql://dwello:dwello@localhost:5432/dwello_persona
 for p in 3300 3301; do fuser -k $p/tcp 2>/dev/null || true; done

@@ -1,6 +1,6 @@
 # Token reference
 
-All design values live in `src/styles/tokens.css` and reach components through the Tailwind names below (`tailwind.config.js`). Components never use raw colours, the old Tailwind palette, arbitrary values or other radii/shadows; `src/__tests__/design-guard.test.ts` enforces it, `src/__tests__/tokens.test.ts` checks the contrast ratios.
+All design values live in `src/styles/tokens.css` and reach components through the Tailwind names below (`tailwind.config.js`). Components never use raw colours, the old Tailwind palette, arbitrary values or other radii/shadows; `src/__tests__/design-guard.test.ts` enforces it, `src/__tests__/tokens.test.ts` checks the contrast ratios. A page outside the app (an HTML answer of a `+server.ts` route, served without the app's CSS) has no token classes: it uses the browser's system colours (`CanvasText`, `color-scheme: light dark`) in a `<style>` element, never a colour value (`pdfRefusal` in `src/lib/server/statement.ts`).
 
 ## Colour
 
