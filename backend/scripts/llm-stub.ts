@@ -17,8 +17,8 @@ const answers: { match: RegExp; isAllowedUtilityCost: boolean; confidence: numbe
 		confidence: 0.9,
 		reasoning: {
 			Deutsch: 'Erhalt und Erneuerung des Gebäudes hängen nicht mit dem Gebrauch zusammen (Art. 257a Abs. 1 OR).',
-			Französisch: 'L’entretien et la rénovation du bâtiment ne sont pas liés à son usage (art. 257a al. 1 CO).',
-			Italienisch: 'La manutenzione e il rinnovo dell’edificio non sono legati al suo uso (art. 257a cpv. 1 CO).',
+			Französisch: 'L’entretien et la rénovation du bâtiment ne sont pas liés à son usage (art. 257a, al. 1, CO).',
+			Italienisch: 'Il mantenimento e il rinnovo dell’edificio non sono legati al suo uso (art. 257a cpv. 1 CO).',
 			Englisch: 'Preserving and renewing the building is not linked to its use (Art. 257a para. 1 CO).'
 		}
 	},
@@ -35,7 +35,7 @@ const answers: { match: RegExp; isAllowedUtilityCost: boolean; confidence: numbe
 		confidence: 0.9,
 		reasoning: {
 			Deutsch: 'Laufende Betriebskosten aus dem Gebrauch der Mietsache (Art. 257b Abs. 1 OR).',
-			Französisch: 'Frais d’exploitation courants liés à l’usage de la chose louée (art. 257b al. 1 CO).',
+			Französisch: 'Frais d’exploitation courants liés à l’usage de la chose louée (art. 257b, al. 1, CO).',
 			Italienisch: 'Costi d’esercizio correnti legati all’uso della cosa locata (art. 257b cpv. 1 CO).',
 			Englisch: 'Running operating costs from the use of the rented property (Art. 257b para. 1 CO).'
 		}

@@ -46,7 +46,8 @@ const cases: [string, boolean][] = [
 	['Schädlingsbekämpfung', false],
 	['Wartung der Feuerlöscher', false],
 	['Entsorgung von Grümpel', false],
-	['Gebühren für die Verwaltungsapp', false]
+	['Gebühren für die Verwaltungsapp', false],
+	['Honorar für die Nebenkostenabrechnung', false]
 ];
 
 let hits = 0;

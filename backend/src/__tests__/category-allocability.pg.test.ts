@@ -44,6 +44,10 @@ describe('Vorschlag der KI für eine neue Kategorie', () => {
 
 			expect(llm.prompts[0]).toContain('Kategorie: Dachsanierung\n');
 			expect(llm.prompts[0]).toContain('Beschreibung: Neues Ziegeldach\n');
+			// Sonst würde der Aufwand neben der Verwaltungspauschale doppelt verrechnet (F-19)
+			expect(llm.prompts[0]).toContain(
+				'Den Aufwand für die Erstellung der Nebenkostenabrechnung (Art. 4 Abs. 3 VMWG) rechnet Dwello über die Verwaltungspauschale ab; eine Kategorie dafür ist nicht umlagefähig.'
+			);
 			expect(llm.prompts[0]).toContain(
 				'Die Nebenkosten sind das Entgelt für die Leistungen des Vermieters oder eines Dritten, die mit dem Gebrauch der Sache zusammenhängen.'
 			);

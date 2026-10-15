@@ -198,6 +198,8 @@ describe('Umlagefähigkeit einer neuen Kategorie', () => {
 
 		expect(text()).toContain('wenn der Mietvertrag sie als Nebenkosten nennt (Art. 257a Absatz 2 OR)');
 		expect(text()).toContain('Gebäudeversicherung');
+		// Wasser und Abwasser: Merkblatt des Mieterverbands, «Unzulässig» (C-8)
+		expect(text()).toContain('die Gebühr für Regenwasser nicht');
 	});
 
 	it('übernimmt den Vorschlag der KI und zeigt ihre Begründung', () => {

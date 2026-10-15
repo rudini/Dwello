@@ -18,7 +18,6 @@ Funktionalität: Datenschutz
       | Weitergabe an Dritte        |
       | Cookies                     |
 
-  @wip
   Szenario: KI auf dem Server des Betreibers
     Dann erfährt der Liegenschaftsverwalter unter "Weitergabe an Dritte", dass Rechnungen und neue Kategorien für die KI den Server nicht verlassen
 

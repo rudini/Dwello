@@ -47,7 +47,9 @@ describe('Rechtsgrundlage und Kategorien im Prompt', () => {
 			'Der Vermieter trägt die mit der Sache verbundenen Lasten und öffentlichen Abgaben.'
 		);
 		expect(prompt).toContain('a. die Reparatur und Erneuerung der Anlagen;');
-		expect(prompt).toContain('Art. 5 und 6 VMWG gelten nur für Heizungs- und Warmwasserkosten');
+		expect(prompt).toContain('Art. 5 und 6 VMWG gelten nur für Heizungs- und Warmwasserkosten.');
+		// Für Reparaturen trägt Art. 256 Abs. 1 OR die Antwort, für Steuern Art. 256b OR (F-18)
+		expect(prompt).toContain('Zitiere den Artikel aus der Rechtsgrundlage, der deine Antwort trägt, mit Absatz.');
 	});
 
 	it('setzt Platzhalter in Kategorienamen nicht ein', () => {
