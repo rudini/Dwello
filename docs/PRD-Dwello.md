@@ -447,7 +447,7 @@ Four profiles, seeded by `backend/migrations/0002_stammdaten.sql`; each distribu
 4. **Heizung Tessin** (Heating Only, Southern Switzerland): for Ticino and southern regions
 5. ~~**Nur Warmwasser** (Hot Water Only)~~: removed; separate hot water costs are shared by days
 
-Predefined profiles cannot be deleted and their monthly shares cannot change; their name can.
+Predefined profiles cannot be deleted and their monthly shares cannot change; the app does not edit them at all (only the API accepts a new name).
 
 **Manual Configuration:**
 - Option to input custom monthly percentages manually
@@ -711,7 +711,7 @@ BALANCE (refund): CHF 30
 - Global IBAN setting (Swiss bank account details)
 - Stored securely in configuration
 - Multiple IBANs per building (future feature)
-- Validation that the IBAN is Swiss or Liechtenstein (starts with CH or LI) with a valid MOD-97 checksum
+- Validation with a valid MOD-97 checksum: the settings form accepts only Swiss IBANs (CH), the QR-bill service also Liechtenstein (LI); which one applies is open (#191)
 
 **QR Code Generation:**
 - Encodes all necessary payment information
@@ -1056,7 +1056,7 @@ BALANCE (refund): CHF 30
   - Total validation: shows sum (must equal 100%)
   - Custom profile: checkbox to enable custom percentages
 
-**Tab 4: Payment Settings**
+**Tab 4: Payment Settings** (not on the settings page; the payment deadline is the backend setting `payment_deadline_days`, default 30)
 - Payment deadline (X days after the statement is sent, default 30)
 - Reminder deadline (Y days after payment deadline, default 14; not applied, see section 5.9 «Reminders»)
 - Default currency (CHF)
@@ -1101,7 +1101,7 @@ BALANCE (refund): CHF 30
 
 **Tab 7: IBAN Setting**
 - IBAN input field (for QR-bill generation)
-- Format validation (must start with CH or LI, MOD-97 checksum)
+- Format validation (settings form: CH only; QR-bill service: CH or LI, #191; MOD-97 checksum)
 - Test QR-bill preview
 - Help text: "Swiss or Liechtenstein account required for QR-bill generation"
 - A QR reference is printed only when the IBAN is a QR-IBAN; with a normal IBAN the QR-bill carries no reference

@@ -114,7 +114,7 @@ Verwaltung, Reparaturen, Renovation, Liegenschaftssteuer, Hypothekarzinsen, Geb�
 |---------|-----------|---------------|
 | **Heizprofil** | Monatliche Prozentverteilung der Heizkosten über 12 Monate. | `heating_profiles` Tabelle |
 | **Tankbestand** | Wert des Brennstoffs im Tank oder Lager (Öl, Flüssiggas, Pellets, Holz) an einem Stichtag, in CHF. | `fuel_stocks` Tabelle |
-| **Stichtag** | Tag, für den ein Tankbestand erfasst wird. Der Tankbestand zu Beginn der Abrechnungsperiode heisst Anfangsbestand, der an ihrem Ende Endbestand. | `reading_date` Feld |
+| **Stichtag** | Tag, für den ein Tankbestand erfasst wird. Der Tankbestand am Tag vor Beginn der Abrechnungsperiode heisst Anfangsbestand, der an ihrem letzten Tag Endbestand. | `reading_date` Feld |
 | **Vordefinierte Heizprofile** | Mit Dwello gelieferte Heizprofile: Heizung Mittelland, Heizung Bergregion, Heizung Tessin, Heizung + Warmwasser. | `type = 'predefined'` |
 | **Eigenes Heizprofil** | Vom Liegenschaftsverwalter erfasstes Profil. | `type = 'custom'` |
 
@@ -132,7 +132,7 @@ Verwaltung, Reparaturen, Renovation, Liegenschaftssteuer, Hypothekarzinsen, Geb�
 | **Eigene Nebenkosten** | Summe der Mieteranteile aller Abrechnungspositionen einer Abrechnung, vor der Verwaltungspauschale. Auf der Abrechnung: „Zwischensumme“. | Berechnung |
 | **Verwaltungspauschale** | Abgeltung des Aufwands für die Nebenkostenabrechnung: ein Prozentsatz der eigenen Nebenkosten des Mieters. Nur zulässig, wenn im Mietvertrag vereinbart. Üblich sind etwa 3 %. Ein höherer Satz muss dem tatsächlichen Aufwand entsprechen (Art. 4 Abs. 3 VMWG). | `management_fee`, `management_fee_percent` |
 | **Geleistete Akontobeiträge** | Summe der monatlichen Vorauszahlungen des Mieters während der Abrechnungsperiode. | `total_advance_payments` |
-| **Saldo** | Kostenanteil inklusive Verwaltungspauschale minus geleistete Akontobeiträge. Positiv = Nachzahlung, negativ = Rückerstattung. | `balance` |
+| **Saldo** | Kostenanteil inklusive Verwaltungspauschale minus geleistete Akontobeiträge, gerundet auf 5 Rappen. Positiv = Nachzahlung, negativ = Rückerstattung. | `balance` |
 | **Rundung auf 5 Rappen** | Betrag, um den der Saldo auf 5 Rappen gerundet wird. | Berechnung |
 | **Mietstage** | Anzahl Tage, die ein Mietvertrag in der Abrechnungsperiode läuft. Grundlage für die anteilsmässige Berechnung. | `rental_days` |
 | **Proration** | Anteilsmässige Berechnung der Nebenkosten bei unterjährigem Ein-/Auszug. | Berechnung |
