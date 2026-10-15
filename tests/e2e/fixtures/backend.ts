@@ -11,6 +11,7 @@ export function testData(api: CallTheApi) {
 	const put = (path: string, data: object) => api.put(path, data);
 	const remove = (path: string) => api.remove(path);
 	const extras: string[] = []; // invoices and configuration records, removed before their building
+	const restores: (() => Promise<unknown>)[] = []; // predefined records a scenario changed
 	const unique = (title: string) => {
 		const name = `${title} ${randomUUID()}`;
 		names.set(title, name);
@@ -267,6 +268,13 @@ export function testData(api: CallTheApi) {
 			return invoice(buildingTitle, { categoryId: category.id, ...period }, `${categoryName} ${date}`, amount, date);
 		},
 
+		// A predefined category given by its German name, saved with another allocability; restored afterwards
+		async predefinedCategoryAllowance(categoryName: string, isAllowedUtilityCost: boolean) {
+			const category = (await get('categories?limit=100')).categories.find((c: { nameDE: string }) => c.nameDE === categoryName);
+			await put(`categories/${category.id}`, { isAllowedUtilityCost });
+			restores.push(() => put(`categories/${category.id}`, { isAllowedUtilityCost: category.isAllowedUtilityCost }));
+		},
+
 		category: (title: string, isAllowedUtilityCost: boolean) => addCategory(title, () => ({ isAllowedUtilityCost })),
 
 		// An own category whose English name is its German one, as an own «Internet» would have
@@ -309,6 +317,7 @@ export function testData(api: CallTheApi) {
 		},
 
 		async cleanUp() {
+			for (const restore of restores) await restore();
 			const tokens = [...names.values()].map((name) => name.split(' ').pop()!);
 			for (const token of tokens) await removeTenants(token);
 			for (const path of extras) await remove(path);

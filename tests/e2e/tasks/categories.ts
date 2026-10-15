@@ -36,8 +36,14 @@ export const saveAsNotAllowed = (name: string): Activity => (actor) =>
 export const deleteCategory = (name: string): Activity => (actor) =>
 	actor.attemptsTo(Click.on(deleteButton(name)), Click.on(deleteConfirmButton));
 
+// The KI stand-in fails for a category whose name starts with «KI-Ausfall» (backend/scripts/llm-stub.ts)
+export const kiFails: Activity = async (actor) => actor.remember('kiFails', true);
+
 export const askKi = (name: string): Activity => (actor) =>
-	actor.attemptsTo(Enter.theValue(name).into(nameInput), Click.on(proposeButton));
+	actor.attemptsTo(
+		Enter.theValue(actor.recall('kiFails') ? `KI-Ausfall ${name}` : name).into(nameInput),
+		Click.on(proposeButton)
+	);
 
 export const saveWithoutChoice = (name: string): Activity => (actor) =>
 	actor.attemptsTo(Enter.theValue(name).into(nameInput), Click.on(submitButton));

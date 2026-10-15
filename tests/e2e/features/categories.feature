@@ -60,14 +60,23 @@ Funktionalität: Kostenkategorien
     Und ist die vordefinierte Kategorie "Feuerlöscher-Wartung" nicht umlagefähig
 
   @wip
-  Szenario: Vordefinierte Kategorie nennt den Grund ihrer Umlagefähigkeit
+  Szenario: Vordefinierte Kategorien nennen den Grund ihrer Umlagefähigkeit
     Angenommen der Liegenschaftsverwalter ist auf der Seite "Kategorien"
-    Dann erfährt der Liegenschaftsverwalter bei der vordefinierten Kategorie "Feuerlöscher-Wartung", dass ihre Kosten nicht mit dem Gebrauch zusammenhängen
+    Dann nennt die vordefinierte Kategorie "Feuerlöscher-Wartung" als Grund "nicht mit dem Gebrauch zusammen"
+    Und nennt die vordefinierte Kategorie "Lift" als Grund "Reparaturen, Ersatzteile und Serviceabos mit Reparaturen trägt der Vermieter"
+    Und erfährt der Liegenschaftsverwalter, dass der Mieter umlagefähige Kosten nur bezahlt, wenn der Mietvertrag sie nennt
 
   @wip
   Szenario: Grund der Umlagefähigkeit beim Bearbeiten einer vordefinierten Kategorie
     Angenommen der Liegenschaftsverwalter ist auf der Bearbeitungsseite der vordefinierten Kategorie "Feuerlöscher-Wartung"
-    Dann erfährt der Liegenschaftsverwalter, dass die Kosten der Kategorie nicht mit dem Gebrauch zusammenhängen
+    Dann nennt die Kategorie als Grund "nicht mit dem Gebrauch zusammen"
+
+  @wip
+  Szenario: Geänderte vordefinierte Kategorie nennt keinen festen Grund
+    Angenommen die vordefinierte Kategorie "Schneeräumung" ist als nicht umlagefähig gespeichert
+    Und der Liegenschaftsverwalter ist auf der Seite "Kategorien"
+    Dann ist die vordefinierte Kategorie "Schneeräumung" nicht umlagefähig
+    Und nennt die vordefinierte Kategorie "Schneeräumung" keinen Grund ihrer Umlagefähigkeit
 
   Szenario: KI schlägt vor, ob eine neue Kategorie umlagefähig ist
     Angenommen der Liegenschaftsverwalter ist auf der Seite "Neue Kategorie"
@@ -85,19 +94,14 @@ Funktionalität: Kostenkategorien
   Szenario: Ohne sichere Antwort der KI wählt der Liegenschaftsverwalter selbst
     Angenommen der Liegenschaftsverwalter ist auf der Seite "Neue Kategorie"
     Wenn der Liegenschaftsverwalter die KI prüfen lässt, ob die Kategorie "Bewachung" umlagefähig ist
-    Dann erfährt der Liegenschaftsverwalter, dass er selbst wählen muss, ob die Kosten umlagefähig sind
+    Dann erfährt der Liegenschaftsverwalter, dass die KI sich nicht sicher ist
+    Und erfährt der Liegenschaftsverwalter, dass er selbst wählen muss, ob die Kosten umlagefähig sind
     Und ist weder umlagefähig noch nicht umlagefähig gewählt
 
-  @wip
-  Szenario: KI ist sich nicht sicher
-    Angenommen der Liegenschaftsverwalter ist auf der Seite "Neue Kategorie"
-    Wenn der Liegenschaftsverwalter die KI prüfen lässt, ob die Kategorie "Bewachung" umlagefähig ist
-    Dann erfährt der Liegenschaftsverwalter, dass die KI sich nicht sicher ist
-
-  @wip
   Szenario: KI ist nicht erreichbar
-    Angenommen der Liegenschaftsverwalter ist auf der Seite "Neue Kategorie"
-    Wenn der Liegenschaftsverwalter die KI prüfen lässt, ob die Kategorie "Ausfall" umlagefähig ist
+    Angenommen die KI ist nicht erreichbar
+    Und der Liegenschaftsverwalter ist auf der Seite "Neue Kategorie"
+    Wenn der Liegenschaftsverwalter die KI prüfen lässt, ob die Kategorie "Fensterreinigung" umlagefähig ist
     Dann erfährt der Liegenschaftsverwalter, dass die KI nicht erreichbar ist und er es später nochmals versuchen kann
     Und ist weder umlagefähig noch nicht umlagefähig gewählt
 

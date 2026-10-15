@@ -8,8 +8,10 @@ import {
 	categoryListed,
 	invoicesOf,
 	descriptionOf,
+	contractHint,
 	formReasonText,
 	reasonOf,
+	reasonsOf,
 	allowedChosen,
 	listedCategoriesNamed,
 	notAllowedChosen,
@@ -17,6 +19,7 @@ import {
 } from '../questions/categories';
 import {
 	askKi,
+	kiFails,
 	createCategory,
 	deleteCategory,
 	openCategories,
@@ -206,18 +209,40 @@ Then('ist weder umlagefähig noch nicht umlagefähig gewählt', async ({ verwalt
 });
 
 Then(
-	'erfährt der Liegenschaftsverwalter bei der vordefinierten Kategorie {string}, dass ihre Kosten nicht mit dem Gebrauch zusammenhängen',
+	'nennt die vordefinierte Kategorie {string} als Grund {string}',
+	async ({ verwalter }, name: string, text: string) => {
+		await verwalter.sees(reasonOf(name)).toContain(text);
+	}
+);
+
+Then('nennt die Kategorie als Grund {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(formReasonText).toContain(text);
+});
+
+Then(
+	'nennt die vordefinierte Kategorie {string} keinen Grund ihrer Umlagefähigkeit',
 	async ({ verwalter }, name: string) => {
-		await verwalter.sees(reasonOf(name)).toContain('nicht mit dem Gebrauch zusammen');
+		await verwalter.sees(reasonsOf(name)).toBe(0);
 	}
 );
 
 Then(
-	'erfährt der Liegenschaftsverwalter, dass die Kosten der Kategorie nicht mit dem Gebrauch zusammenhängen',
+	'erfährt der Liegenschaftsverwalter, dass der Mieter umlagefähige Kosten nur bezahlt, wenn der Mietvertrag sie nennt',
 	async ({ verwalter }) => {
-		await verwalter.sees(formReasonText).toContain('nicht mit dem Gebrauch zusammen');
+		await verwalter.sees(contractHint).toContain('nur, wenn der Mietvertrag sie als Nebenkosten nennt');
 	}
 );
+
+Given(
+	'die vordefinierte Kategorie {string} ist als nicht umlagefähig gespeichert',
+	async ({ seed }, name: string) => {
+		await seed.predefinedCategoryAllowance(name, false);
+	}
+);
+
+Given('die KI ist nicht erreichbar', async ({ verwalter }) => {
+	await verwalter.attemptsTo(kiFails);
+});
 
 Then('erfährt der Liegenschaftsverwalter, dass die KI sich nicht sicher ist', async ({ verwalter }) => {
 	await verwalter.sees(proposalText).toContain('Die KI ist sich nicht sicher.');

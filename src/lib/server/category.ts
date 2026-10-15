@@ -90,7 +90,8 @@ export async function proposeAllocability(fetch: typeof globalThis.fetch, reques
 		})
 	});
 	const answer = await response.json().catch(() => null);
-	// Without a proposal the backend can only answer KI_NO_PROPOSAL, or a schema refusal in its own words
+	// Without a proposal the backend says whether the KI is unsure or not reachable (#186); any other refusal, in its
+	// own words, counts as not reachable
 	const proposal: Proposal =
 		response.ok && answer
 			? {
@@ -99,7 +100,14 @@ export async function proposeAllocability(fetch: typeof globalThis.fetch, reques
 					isAllowedUtilityCost: answer.isAllowedUtilityCost === true,
 					reasoning: String(answer.reasoning ?? '')
 				}
-			: { name: body.nameDE, description: body.description, error: m.backend_ki_no_proposal() };
+			: {
+					name: body.nameDE,
+					description: body.description,
+					error:
+						answer?.code === 'KI_PROPOSAL_UNSURE'
+							? m.backend_ki_proposal_unsure()
+							: m.backend_ki_proposal_unavailable()
+				};
 	return { proposal };
 }
 

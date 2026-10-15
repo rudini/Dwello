@@ -157,6 +157,16 @@ describe('API-Verträge des Frontends', () => {
 		}
 	});
 
+	it('POST /categories/propose ohne sichere Antwort liefert die Felder von category-proposal-refused.json', async () => {
+		const llm = openAiCompatible({ isAllowedUtilityCost: false, confidence: 0.5, reasoning: 'Vielleicht' });
+		try {
+			const actual = await (await sendJson('POST', '/api/v1/categories/propose', { name: 'Bewachung' })).json();
+			expect(drift(await sample('category-proposal-refused'), actual)).toEqual([]);
+		} finally {
+			llm.stop();
+		}
+	});
+
 	it('GET /tenants/:id liefert die Felder von tenant.json', async () => {
 		const actual = await (await callApi(`/api/v1/tenants/${rental.tenant}`)).json();
 		expect(drift(await sample('tenant'), actual)).toEqual([]);

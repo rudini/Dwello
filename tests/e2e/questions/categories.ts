@@ -5,6 +5,7 @@ import {
 	categoryRow,
 	deleteButton,
 	description,
+	contractNote,
 	formReason,
 	proposal,
 	reason,
@@ -21,4 +22,6 @@ export const notAllowedChosen = Checked.of(allowanceOption('Nicht umlagefähig')
 export const allowedChosen = Checked.of(allowanceOption('Umlagefähig'));
 export const proposalText = Text.of(proposal);
 export const reasonOf = (name: string) => Text.of(reason(name));
+export const reasonsOf = (name: string) => Count.of(reason(name));
+export const contractHint = Text.of(contractNote);
 export const formReasonText = Text.of(formReason);

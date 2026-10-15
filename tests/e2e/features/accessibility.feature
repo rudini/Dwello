@@ -134,6 +134,7 @@ Funktionalität: Barrierefreiheit
       | category-new           | submit-empty        |
       | category-new           | ki-proposal         |
       | category-new           | ki-no-proposal      |
+      | category-new           | ki-unavailable      |
       | category-new           | ki-proposal-kept    |
       | category-new           | ki-checking         |
       | category-edit          | default             |

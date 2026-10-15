@@ -4,6 +4,7 @@ import { actions as newActions } from '../routes/config/categories/new/+page.ser
 import { actions as editActions } from '../routes/config/categories/[id]/edit/+page.server';
 import { runAction } from './helpers/action';
 import proposal from '../../tests/contracts/category-proposal.json';
+import unsure from '../../tests/contracts/category-proposal-refused.json';
 
 const API = 'http://localhost:3001/api/v1/categories';
 
@@ -156,36 +157,32 @@ describe('Vorschlag der KI', () => {
 		]);
 	});
 
-	it('sagt, dass der Liegenschaftsverwalter selbst wählt, wenn die KI keine Einstufung liefert', async () => {
-		const refused = { error: 'Die KI ist nicht erreichbar oder ist sich nicht sicher.', code: 'KI_NO_PROPOSAL', params: {} };
-		const { result } = runAction(newActions.propose, '', 503, form, refused);
+	const hint = async (status: number, body: unknown) =>
+		((await runAction(newActions.propose, '', status, form, body).result) as { proposal: { error: string } }).proposal.error;
+	const UNSURE = 'Die KI ist sich nicht sicher. Wählen Sie selbst, ob die Kosten umlagefähig sind.';
+	const UNAVAILABLE =
+		'Die KI ist nicht erreichbar. Versuchen Sie es später nochmals oder wählen Sie selbst, ob die Kosten umlagefähig sind.';
+
+	// Whether trying again can help (#186)
+	it('sagt, dass die KI unsicher ist und der Liegenschaftsverwalter selbst wählt', async () => {
+		const { result } = runAction(newActions.propose, '', 503, form, unsure);
 
 		expect(await result).toEqual({
-			proposal: {
-				name: 'Treppenhausreinigung',
-				description: 'Reinigung von Treppenhaus und Eingang',
-				error: 'Die KI ist nicht erreichbar oder ist sich nicht sicher. Wählen Sie selbst, ob die Kosten umlagefähig sind.'
-			}
+			proposal: { name: 'Treppenhausreinigung', description: 'Reinigung von Treppenhaus und Eingang', error: UNSURE }
 		});
+	});
+
+	it('sagt, dass die KI nicht erreichbar ist und ein späterer Versuch helfen kann', async () => {
+		expect(await hint(503, { ...unsure, code: 'KI_PROPOSAL_UNAVAILABLE' })).toBe(UNAVAILABLE);
 	});
 
 	// Nie der eigene Text des Backends, z. B. Elysias Meldung zu einem zu langen Namen (E-6)
-	it('zeigt bei einer anderen Ablehnung des Backends denselben Hinweis', async () => {
-		const { result } = runAction(newActions.propose, '', 422, form, { type: 'validation', message: 'Expected string length less or equal to 100' });
-
-		expect(await result).toEqual({
-			proposal: {
-				name: 'Treppenhausreinigung',
-				description: 'Reinigung von Treppenhaus und Eingang',
-				error: 'Die KI ist nicht erreichbar oder ist sich nicht sicher. Wählen Sie selbst, ob die Kosten umlagefähig sind.'
-			}
-		});
+	it('zeigt bei einer anderen Ablehnung des Backends den Hinweis «nicht erreichbar»', async () => {
+		expect(await hint(422, { type: 'validation', message: 'Expected string length less or equal to 100' })).toBe(UNAVAILABLE);
 	});
 
 	it('zeigt den Hinweis auch, wenn eine Antwort ohne Inhalt kommt', async () => {
-		const { result } = runAction(newActions.propose, '', 200, form, null);
-
-		expect(await result).toMatchObject({ proposal: { error: expect.stringContaining('Wählen Sie selbst') } });
+		expect(await hint(200, null)).toBe(UNAVAILABLE);
 	});
 
 	it('verlangt zuerst einen Namen', async () => {

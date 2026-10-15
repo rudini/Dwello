@@ -24,3 +24,4 @@ export const description = (name: string) =>
 export const reason = (name: string) =>
 	target(`Grund der Umlagefähigkeit von ${name}`, (page) => categoryRow(name).locate(page).getByTestId('category-reason'));
 export const formReason = target('Grund der Umlagefähigkeit', (page) => page.getByTestId('category-reason'));
+export const contractNote = target('Hinweis auf den Mietvertrag', (page) => page.getByTestId('category-contract-note'));
