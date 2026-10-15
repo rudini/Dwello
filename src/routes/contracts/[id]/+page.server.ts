@@ -2,7 +2,7 @@ import { m } from '$lib/paraglide/messages';
 import type { RentalContract, Tenant, Apartment, Building, ApartmentStatus } from '$lib/types';
 import type { Actions, PageServerLoad } from './$types';
 import { error, fail, redirect } from '@sveltejs/kit';
-import { lastCompletedPeriod, type AccountingPeriodType } from '$lib/accounting-period';
+import { endedPeriodsSince, type AccountingPeriodType } from '$lib/accounting-period';
 import { wizardLink } from '$lib/statement-wizard';
 import {
 	contractEndError,
@@ -15,7 +15,7 @@ const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
 interface ContractDetailsData {
 	today: string; // the server's day, for the Vertragsstatus
-	missingStatement: { start: string; end: string; href: string } | null; // A-10
+	missingStatements: { start: string; end: string; href: string }[]; // A-10, #142: newest first
 	nextSteps: { successor: boolean } | null; // A-4: a notice still running
 	contract: RentalContract & {
 		tenant: Tenant;
@@ -32,12 +32,14 @@ interface ContractDetailsData {
 
 type Row = Record<string, unknown>;
 
-// The last ended Abrechnungsperiode, as the settings define it; null when they cannot be read
-async function lastPeriod(fetch: typeof globalThis.fetch) {
+// The kind of Abrechnungsperiode the settings define; null when they cannot be read
+async function periodType(fetch: typeof globalThis.fetch) {
 	const config = await fetch(`${BACKEND_URL}/api/v1/config`).catch(() => null);
 	if (!config?.ok) return null;
-	const type = (await config.json()).data?.accounting_period as AccountingPeriodType | undefined;
-	return lastCompletedPeriod(type ?? 'calendar');
+	return (
+		((await config.json()).data?.accounting_period as AccountingPeriodType | undefined) ??
+		'calendar'
+	);
 }
 
 // The rows the backend lists, or null when it cannot answer: better no hint than a wrong one
@@ -63,18 +65,24 @@ async function nextStepsDue(fetch: typeof globalThis.fetch, contract: Row) {
 	return { successor: others.some((o) => String(o.startDate).slice(0, 10) > end) };
 }
 
-// The last ended Abrechnungsperiode if the contract has rent days in it but no statement yet (A-10)
-async function missingStatement(fetch: typeof globalThis.fetch, contract: Row) {
-	const period = await lastPeriod(fetch);
-	if (!period || !rentDaysIn(contract, period)) return null;
-	const { start, end } = period;
-	const statements = await rows(
-		fetch,
-		`statements?apartmentId=${contract.apartmentId}&periodStart=${start}&periodEnd=${end}&limit=100`
+// Every ended Abrechnungsperiode from the Vertragsbeginn on in which the contract has rent days but no statement,
+// the newest first (A-10, #142); none when the settings or the statements cannot be read
+async function missingStatements(fetch: typeof globalThis.fetch, contract: Row) {
+	const type = await periodType(fetch);
+	if (!type) return [];
+	const periods = endedPeriodsSince(type, String(contract.startDate).slice(0, 10)).filter(
+		(period) => rentDaysIn(contract, period)
 	);
-	if (!statements || statements.some((s) => s.contractId === contract.id)) return null;
+	if (!periods.length) return [];
+	const statements = await rows(fetch, `statements?contractId=${contract.id}&limit=1000`);
+	if (!statements) return [];
 	const building = String((contract.building as Row | undefined)?.id);
-	return { start, end, href: wizardLink(building, start, end) };
+	return periods
+		.filter(
+			({ start, end }) =>
+				!statements.some((s) => String(s.periodStart) >= start && String(s.periodEnd) <= end)
+		)
+		.map(({ start, end }) => ({ start, end, href: wizardLink(building, start, end) }));
 }
 
 export const load: PageServerLoad = async ({ params, fetch }): Promise<ContractDetailsData> => {
@@ -135,7 +143,7 @@ export const load: PageServerLoad = async ({ params, fetch }): Promise<ContractD
 
 		return {
 			today: localToday(),
-			missingStatement: await missingStatement(fetch, data),
+			missingStatements: await missingStatements(fetch, data),
 			nextSteps: await nextStepsDue(fetch, data),
 			contract,
 			rentBreakdown: {

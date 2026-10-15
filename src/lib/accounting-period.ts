@@ -16,3 +16,15 @@ export function lastCompletedPeriod(type: AccountingPeriodType, today = new Date
 		end: isoDate(new Date(Date.UTC(currentStartYear, firstMonth - 1, 0)))
 	};
 }
+
+/** Every ended period that has days on or after `since`, the newest first (#142) */
+export function endedPeriodsSince(type: AccountingPeriodType, since: string, today = new Date()) {
+	const periods = [];
+	for (let back = 0; ; back++) {
+		const year = new Date(today);
+		year.setFullYear(today.getFullYear() - back);
+		const period = lastCompletedPeriod(type, year);
+		if (period.end < since) return periods;
+		periods.push(period);
+	}
+}

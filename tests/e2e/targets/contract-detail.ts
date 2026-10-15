@@ -36,6 +36,9 @@ export const refusedStatementLink = target('Genannter Entwurf', (page) =>
 export const deleteDraftAndEndButton = target('Entwurf löschen und Mietvertrag beenden', (page) =>
 	page.getByTestId('delete-draft-and-end')
 );
-export const missingStatementLink = target('Fehlende Abrechnung erstellen', (page) =>
-	page.getByTestId('contract-missing-statement-link')
-);
+// One link per Abrechnungsperiode without a statement, by the period's first day
+export const missingStatementLink = (periodStart: string) =>
+	target(`Fehlende Abrechnung ab ${periodStart} erstellen`, (page) =>
+		page.getByTestId(`contract-missing-statement-link-${periodStart}`)
+	);
+export const missingStatements = target('Fehlende Abrechnungen', (page) => page.getByTestId('contract-missing-statement'));

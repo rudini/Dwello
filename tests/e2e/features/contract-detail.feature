@@ -181,6 +181,13 @@ Funktionalität: Mietvertragsdetail
     Wenn der Liegenschaftsverwalter die fehlende Abrechnung des letzten Jahres erstellen will
     Dann ist der Liegenschaftsverwalter im Abrechnungsassistenten für das Gebäude "Ahornhof" und das letzte Jahr
 
+  # Eine Lücke in einer älteren Abrechnungsperiode zeigt sich auch, wenn die letzte abgerechnet ist (#142)
+  Szenario: Fehlende Abrechnung einer älteren Periode am Mietvertrag
+    Angenommen "Anna Keller" hat die Abrechnung des letzten Jahres für das Gebäude "Ahornhof"
+    Und der Liegenschaftsverwalter ist auf der Detailseite des Mietvertrags von "Anna Keller"
+    Dann meldet der Mietvertrag die fehlende Abrechnung 2024
+    Und meldet der Mietvertrag keine fehlende Abrechnung des letzten Jahres
+
   Szenario: Abrechnungen eines Mietvertrags anzeigen
     Angenommen im Gebäude "Ahornhof" gibt es die leere Wohnung "2.02"
     Und der Mieter "Ben Meier" existiert
