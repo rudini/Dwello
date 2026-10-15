@@ -51,7 +51,7 @@ describe('Migrationen anwenden', () => {
 		await query(name, `INSERT INTO schema_migrations (name) VALUES ('0001_initial_schema.sql')`);
 
 		await expect(migrate(`${server}/${name}`, migrations)).rejects.toThrow(
-			'Die Datenbank stammt von Migrationen, die es nicht mehr gibt (0001_initial_schema.sql). Bitte neu aufsetzen: bun run db:reset'
+			'Die Datenbank stammt von Migrationen, die es nicht mehr gibt (0001_initial_schema.sql). Eine lokale Datenbank neu aufsetzen: bun run db:reset. Eine Installation nicht zurücksetzen (alle Daten gingen verloren), sondern mit der Version starten, mit der sie zuletzt lief.'
 		);
 	});
 
@@ -61,7 +61,7 @@ describe('Migrationen anwenden', () => {
 		await query(name, 'CREATE TABLE buildings (id uuid PRIMARY KEY)');
 
 		await expect(migrate(`${server}/${name}`, migrations)).rejects.toThrow(
-			'Die Datenbank wurde ohne diese Migrationen eingerichtet. Bitte neu aufsetzen: bun run db:reset'
+			'Die Datenbank wurde ohne diese Migrationen eingerichtet. Eine lokale Datenbank neu aufsetzen: bun run db:reset. Eine Installation nicht zurücksetzen (alle Daten gingen verloren), sondern mit der Version starten, mit der sie zuletzt lief.'
 		);
 	});
 });

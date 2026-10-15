@@ -75,6 +75,15 @@ jobs:
       - run: bun run check
       - run: bun run type-check
         working-directory: backend
+      # An installation has applied every migration on the base branch and would not see a change to one (backend/CLAUDE.md)
+      - name: Migrations unchanged
+        if: github.event_name == 'pull_request'
+        run: |
+          changed=$(git diff --name-only --diff-filter=a "origin/${{ github.base_ref }}...HEAD" -- backend/migrations)
+          if [ -n "$changed" ]; then
+            echo "::error::Applied migrations changed: ${changed//$'\n'/, }. Put the change into a new numbered file in backend/migrations (backend/CLAUDE.md)."
+            exit 1
+          fi
       # Every TODO(fachlich prüfen, #n) marker names an open issue (CLAUDE.md, "Open work")
       - run: node tools/open-work/check-issues.mjs
         env:

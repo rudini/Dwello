@@ -7,6 +7,10 @@ import { readdir, readFile } from 'fs/promises';
 import { join } from 'path';
 import pg from 'pg';
 
+// db:reset deletes every record, so an installation must never follow it
+const RESET_HINT =
+	'Eine lokale Datenbank neu aufsetzen: bun run db:reset. Eine Installation nicht zurücksetzen (alle Daten gingen verloren), sondern mit der Version starten, mit der sie zuletzt lief.';
+
 /** Returns the files applied by this run, in order */
 export async function migrate(connectionString: string, directory: string) {
 	const client = new pg.Client({ connectionString });
@@ -15,7 +19,7 @@ export async function migrate(connectionString: string, directory: string) {
 		const files = (await readdir(directory)).filter((file) => file.endsWith('.sql')).sort();
 		const tracked = (await client.query(`SELECT to_regclass('schema_migrations') AS name`)).rows[0].name;
 		if (!tracked && (await client.query(`SELECT to_regclass('buildings') AS name`)).rows[0].name) {
-			throw new Error('Die Datenbank wurde ohne diese Migrationen eingerichtet. Bitte neu aufsetzen: bun run db:reset');
+			throw new Error(`Die Datenbank wurde ohne diese Migrationen eingerichtet. ${RESET_HINT}`);
 		}
 		await client.query(
 			'CREATE TABLE IF NOT EXISTS schema_migrations (name text PRIMARY KEY, applied_at timestamptz NOT NULL DEFAULT now())'
@@ -26,7 +30,7 @@ export async function migrate(connectionString: string, directory: string) {
 		const unknown = [...done].filter((name) => !files.includes(name));
 		if (unknown.length) {
 			throw new Error(
-				`Die Datenbank stammt von Migrationen, die es nicht mehr gibt (${unknown.join(', ')}). Bitte neu aufsetzen: bun run db:reset`
+				`Die Datenbank stammt von Migrationen, die es nicht mehr gibt (${unknown.join(', ')}). ${RESET_HINT}`
 			);
 		}
 

@@ -402,9 +402,9 @@ backend/migrations/
 
 `src/db/migrate.ts` applies the `.sql` files in file order, each in its own transaction, and records them in
 `schema_migrations`. It refuses a database that was set up without this table, or one that has records of
-migrations that no longer exist (databases from before a baseline); recreate those with `bun run db:reset`. Until the
-first installation, changes go into these two files (baselines of October 2026, last merged in session 12); afterwards
-a schema change is a new numbered file.
+migrations that no longer exist (databases from before the October 2026 baseline); set up a local one anew with
+`bun run db:reset`, never an installation (it deletes all records). Dwello is installed: every change to the schema or
+the master data is a new numbered file; a migration on `main` is never edited (`backend/CLAUDE.md`, CI "Migrations unchanged").
 
 Commands (in `backend/`):
 

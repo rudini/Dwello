@@ -6002,6 +6002,23 @@ From issue #188 (decision #187, option A): rules of groups 1 and 2 move from `UB
 - [x] Workflow review not needed (no app changes, `CLAUDE.md` Workflow 7)
 - [x] Session archived, pull request
   Files also: `docs/design/offene-punkte.md` (O-22), `docs/reviews/glossary-review-1.md`, `docs/reviews/glossary-fachreview-1.md`, `docs/reviews/glossary-fachreview-2.md`; issues opened: #191; commented: #89, #61
+
+## Session 2026-10-15: migrations frozen since the first installation
+
+No issue (task from chat). No scenario: server-side failure (migration errors only show at backend start, not in the app).
+
+- [x] Rule: `backend/CLAUDE.md`, `README.md`, `docs/data-model.md` and `docs/anforderungen-vertragsende.md` drop "until the first installation" (`docs/design/design-decisions.md` keeps the Session 12 row as history and gets a new row); every schema or master data change is a new file, a migration on `main` is never edited, renamed, deleted or merged into a new baseline
+- [x] CI: "Lint and types" fails when a pull request modifies, renames or deletes a file in `backend/migrations` (`.github/workflows/ci.yml`; checked locally: an edit of `0001` red, a new `0003` and the clean branch green)
+- [x] `migrate.ts`: the refusals no longer advise `db:reset` for an installation (`backend/src/db/migrate.ts`, `migrations.pg.test.ts`). Test red: migrations.pg.test.ts "lehnt eine Datenbank ab, die Migrationen kennt …" and "… ohne Buchführung …" – received "Bitte neu aufsetzen: bun run db:reset". Skills: tdd, ponytail, ponytail-review
+- [x] Review against the Opus 5.5 article (product owner, chat), fixes and delta review
+- [x] Checks (test:coverage, lint, check, backend test and type-check, deepcheck:audit; no E2E scenario affected), `code-reviewer`, workflow review (`docs/reviews/workflow-rules-review-migrations-frozen.md`), archive session, pull request
+
+Reviews:
+
+- general-purpose (Opus 5.5 article) round 1 (`docs/reviews/migrations-frozen-blogreview-1.md`): fixed B-1 (Major), B-2 (Minor), B-3 (Minor), B-4 (Nit) in `docs/data-model.md`, `docs/anforderungen-vertragsende.md`, `backend/CLAUDE.md`, the workflow review; no behavior change, confirmed by round 2
+- code-reviewer round 1 (`docs/reviews/migrations-frozen-review-1.md`): fixed C-1 (Major, same as B-1), C-2 (Minor; Test red: migrations.pg.test.ts both refusals – received "… sonst gehen ihre Daten verloren."), C-3, C-4, C-5 (Nits)
+- code-reviewer round 2 (`docs/reviews/migrations-frozen-review-2.md`): open none, confirmed C-1…C-5 fixed
+- general-purpose (Opus 5.5 article) round 2 (`docs/reviews/migrations-frozen-blogreview-2.md`): confirmed B-1…B-4 fixed; fixed N-1 (Nit, `name` as the key of master data rows in `backend/CLAUDE.md`), N-2 (Nit, these plan lines)
 ## Session 2026-10-15 (2): bug #126, failed reminder e-mails show the raw SMTP error
 
 Task: open `bug` issues one by one (#122, #123, #125 merged in rudini/Dwello#181, #182, #189); now #126. Skipped while labelled `entscheiden`: #93, #124, #130, #131, #136, #138, #141.
