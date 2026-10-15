@@ -17,12 +17,13 @@ const answers: {
 	reasoning: Record<Language, string>;
 	delay?: number;
 }[] = [
-	// A slow KI: the screen checks see «Die KI prüft die Kategorie …» while it answers
+	// A slow KI: the screen checks see «Die KI prüft die Kategorie …» while it answers, 25 s, below the
+	// backend's LLM_TIMEOUT of 30 s
 	{
 		match: /langsam/i,
 		isAllowedUtilityCost: true,
 		confidence: 0.9,
-		delay: 60_000,
+		delay: 25_000,
 		reasoning: { Deutsch: 'Betrieb.', Französisch: 'Exploitation.', Italienisch: 'Esercizio.', Englisch: 'Operation.' }
 	},
 	{
@@ -71,6 +72,8 @@ function reply(prompt: string) {
 Bun.serve({
 	port: PORT,
 	hostname: '127.0.0.1',
+	// Bun closes an idle request after 10 s by default; the slow answer needs longer
+	idleTimeout: 60,
 	fetch: async (request) =>
 		new URL(request.url).pathname.endsWith('/chat/completions')
 			? reply(((await request.json()) as { messages: { content: string }[] }).messages[0].content)

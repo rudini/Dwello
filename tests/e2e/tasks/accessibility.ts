@@ -183,7 +183,7 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	// The KI stand-in (backend/scripts/llm-stub.ts) is sure about a renovation, not about guarding the building
 	'ki-proposal': () => askKi('Dachsanierung'),
 	'ki-no-proposal': () => askKi('Bewachung'),
-	// the stand-in answers names with «langsam» after a minute: the check is still running
+	// the stand-in answers names with «langsam» after 25 s: the check is still running
 	'ki-checking': () => (actor) =>
 		actor.attemptsTo(
 			Enter.theValue('Langsame Prüfung').into(nameInput),
