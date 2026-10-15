@@ -13,8 +13,9 @@
 
 	let { data }: { data: BuildingsListData } = $props();
 
-	let searchTerm = $state($page.url.searchParams.get('search') || '');
-	let cityFilter = $state($page.url.searchParams.get('city') || '');
+	// follow the address, so a link, back or forward shows the filters of the list shown (#159)
+	let searchTerm = $derived($page.url.searchParams.get('search') || '');
+	let cityFilter = $derived($page.url.searchParams.get('city') || '');
 	const filtered = $derived(['search', 'city'].some((key) => $page.url.searchParams.get(key)));
 
 	function handleSearch(event: SubmitEvent) {

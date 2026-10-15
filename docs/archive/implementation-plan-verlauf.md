@@ -6278,10 +6278,10 @@ Task: «Setze #180, #184, #185 und #186 um». #184 is a decision issue, closed w
 - [x] Screen state `ki-unavailable`; `ki-no-proposal` renamed `ki-unsure` (J-7)
 - [x] Screen `category-edit-predefined` (a predefined category's edit page with its reason) in `screens.json`, `accessibility.feature`, `sprachen-bildschirme.feature`; the list's `categories default` shows the reasons and the note in `screens.json`, `accessibility.feature`, `sprachen-bildschirme.feature`
 - [x] `code-reviewer` per slice; `fach-reviewer` feature review
-- [x] Personas Helga, Dr. Weber, Marco; open work U-31 (`offene-punkte.md`) and #221
+- [x] Personas Helga, Dr. Weber, Marco; open work U-35 (`offene-punkte.md`) and #221
 - [x] Before marking complete: coverage (2475), lint, check, backend type-check, affected E2E (full E2E chromium + api 723 green at 12bc149; 124 after M-8). Backend `bun run test`: 619 pass after the fix of #223
 - [x] #223 (product owner: «In dieser Aufgabe»): `swiss-today.pg.test.ts` cleaned up its statements through `deleteStatement`, which deletes only drafts; the statements left behind blocked contract and apartment, and while the Swiss day is ahead of UTC (22:00–24:00 UTC) the ended contract let `deleteApartment` try and fail on the foreign key. The cleanup now deletes the tenant's statements directly. Test red: the file's `afterAll` at 22:56 UTC – `utility_statements_apartment_id_fkey`; green at 22:57 UTC. No scenario: a test-only defect. Skills: tdd, ponytail, ponytail-review
-- code-reviewer round 1 slice 223 (`docs/reviews/223-review-1.md`): fixed N-1; open work N-2 (U-32)
+- code-reviewer round 1 slice 223 (`docs/reviews/223-review-1.md`): fixed N-1; open work N-2 (U-36)
 - [x] Workflow review `docs/reviews/workflow-rules-review-issue-186.md` (W-1 to W-10)
 - [x] Merged `origin/main` (19 commits; conflict only in this plan). New rule «one pull request per issue» (Workflow 8) arrived after all slices were committed: one pull request for all four issues, see W-1
 - [x] Archive session; then push, one pull request (Fixes #180, #185, #186, #216), merge when green (Workflow 9)
@@ -6292,9 +6292,9 @@ Files: `tests/e2e/features/categories.feature`, `tests/e2e/{steps,tasks,question
 
 Review lines:
 - fach-reviewer round 1 (`docs/reviews/186-fachreview-1.md`): fixed H-1–H-9, H-11, H-13–H-21 (confirmed in round 2); open work H-10 (#219), H-12 (#75)
-- persona Helga round 1 (`docs/design/personas/helga-186.md`): open work P-2, P-4, P-5, P-6 (U-31), P-1, P-3 (#221)
-- persona Dr. Weber round 1 (`docs/design/personas/weber-186.md`): fixed P-5 (= M-1, its test), P-7 (test «nennt auf de den Grund von Administration …»); open work P-1, P-2, P-3, P-4, P-8 (#221), P-6 (U-31)
-- persona Marco round 1 (`docs/design/personas/marco-186.md`): fixed P-1 (test `categories.test.ts` «sagt auf Italienisch, dass die KI sich nicht sicher ist …», red: «L’IA non è sicura.»), P-4 (= M-1); open work P-3, P-5 (#221), P-2, P-6, P-7 (U-31). Beobachtungen of all three: existed before (checked on 1bc2a8d: navigation, search, button names, Reihenfolge, English name, filters, delete buttons, demo invoice), collected in U-31 and #221
+- persona Helga round 1 (`docs/design/personas/helga-186.md`): open work P-2, P-4, P-5, P-6 (U-35), P-1, P-3 (#221)
+- persona Dr. Weber round 1 (`docs/design/personas/weber-186.md`): fixed P-5 (= M-1, its test), P-7 (test «nennt auf de den Grund von Administration …»); open work P-1, P-2, P-3, P-4, P-8 (#221), P-6 (U-35)
+- persona Marco round 1 (`docs/design/personas/marco-186.md`): fixed P-1 (test `categories.test.ts` «sagt auf Italienisch, dass die KI sich nicht sicher ist …», red: «L’IA non è sicura.»), P-4 (= M-1); open work P-3, P-5 (#221), P-2, P-6, P-7 (U-35). Beobachtungen of all three: existed before (checked on 1bc2a8d: navigation, search, button names, Reihenfolge, English name, filters, delete buttons, demo invoice), collected in U-35 and #221
 - fach-reviewer round 2 (`docs/reviews/186-fachreview-2.md`): fixed H-22 (README), H-23 (test `invoice-pages.dom.test.ts` «erklärt, dass eine nicht umlagefähige Rechnung …», red: title «Schweizer Mietrecht»), H-25, H-27 (test «nennt auf %s den Grund von %s im geprüften Wortlaut», red on the old texts), H-26, H-28; open work H-24 (#220)
 - code-reviewer round 3 slice 186B (`docs/reviews/186b-review-3.md`, delta): M-6 to M-10 confirmed fixed; fixed M-11, M-12 (README: every country when there are several)
 - code-reviewer round 2 slice 186B (`docs/reviews/186b-review-2.md`, delta): fixed M-6 (Major; tests `categories-page.dom.test.ts` «nennt auf %s den Grund von %s …» it/en Administration, «nennt im Hilfetext auf %s die Gebäudeversicherung …» fr/it, `categories.test.ts` «sagt auf %s ohne Doppeldeutigkeit …» it/fr/en, `invoice-pages.dom.test.ts` «nennt auf %s die Gebäudeversicherung …» with title and citation fr/it/en; all 16 red against the texts of 80c804a), M-7 and M-9 (red in the same tests before the fix), M-10 (README), M-8 (`invoiceOn`, `supplierInvoice` use the shared lookup; 124 scenarios with «Rechnung», «Kostenkategorien» and the invoice screens green)
@@ -6303,3 +6303,29 @@ Review lines:
 - code-reviewer round 1 slice 185 (`docs/reviews/185-review-1.md`): fixed K-2; open K-1 (Nit, title «Schweizer Mietrecht» over the note: asked in the feature review of `fach-reviewer`)
 - code-reviewer round 2 slice 186A (`docs/reviews/185-review-1.md`, delta): no new findings; rejections J-1, J-3, J-6 confirmed
 - code-reviewer round 1 slice 186A (`docs/reviews/186a-review-1.md`): fixed J-2 (test), J-4, J-5, J-7; rejected J-1: a name over 100 characters is far-fetched (the field takes the German name of a cost type); the test now uses the real refusal from `validation-refused.json`; J-3: accepted risk, the scenario uses «Schneeräumung», which no scenario bills, noted at the fixture; J-6: the accessibility task has its own `askKi` that waits for the answer, the prefix is one literal
+
+## Session 2026-10-15 (12): #159 list filters keep old values after a navigation
+
+Request (chat): work through the open bug issues one by one (see session 10 in the archive); this is the second, #147 merged in #218. Next: #208, then #209.
+
+The filter forms of apartments, buildings and invoices copy the URL into `$state` once (`untrack`), so a later navigation within the list (empty-state link, back/forward, pagination) leaves the old values. Tenants and contracts render their GET forms from `$page` (`value=`, `selected=`), to be checked by a DOM test. Invoices are not in the issue's "Where" but are a list with the same pattern; "Done means" says any list, so they are included.
+
+- [x] Scenario «Filter nach dem Zurücksetzen leer» (`apartments.feature`, `@wip`) red
+  Scenario red: `die Wohnungssuche ist leer` – Expected "", Received "Gibt es nicht" (again after replacing the anchor «ist die Wohnung 2.01 Leer», which found 2.01 of parallel scenarios, by «zeigt die Wohnungsliste wieder Wohnungen»)
+- [x] DOM tests: apartments (back), buildings, tenants, contracts, invoices follow the URL after a navigation (`list-filters.dom.test.ts`)
+  Test red: «Filter der Liste /apartments|/buildings|/invoices › ist leer, wenn …» – expected 'Ahornh' to be ''; «… zeigt nach «Zurück» …» – the later term; «zeigt nach «Filter zurücksetzen» wieder alle Status» – expected 'reserved' to be ''. Tenants and contracts were green already (GET forms rendered from `$page`); statements follow the URL through a writable `$derived` and were not added
+  Skills: tdd, ponytail, ponytail-review (no findings)
+- [x] Fix: `{#key $page.url.search}` around `ApartmentFilters` and `InvoiceSearch`; buildings' search and city as writable `$derived` (as `StatementSearch`)
+- [x] Checks: test:coverage (2458), lint, check, backend type-check, deepcheck:audit, E2E apartments, buildings, invoices, tenants, contracts (38 passed); backend test: 615 pass, the `afterAll` of `swiss-today.pg.test.ts` fails on `main` too at this hour -> `offene-punkte.md` H-27
+- [x] The two observations in the issue's comment (statements: filter lost after deleting a draft, deleted draft from the browser cache) are not in «Done means» and existed before -> `offene-punkte.md` U-31
+- [x] code-reviewer round(s)
+  code-reviewer round 1 (`docs/reviews/issue-159-review-1.md`): open C-1 (Minor, existed before) -> `offene-punkte.md` U-32; fixed C-2 (Nit, the second wording of the search step removed)
+  code-reviewer round 2 (`docs/reviews/issue-159-review-2.md`): fixed C-3 (Nit, this line); C-2 confirmed fixed, triage of U-32 to U-34 confirmed
+- [x] Personas Helga, Marco, Sven (list screens; Marco for the phone, Sven for focus after the form is rebuilt); only looking
+  persona Helga (`docs/design/personas/helga-issue-159.md`): open P-1 (Minor, browser restores an unsent entry, existed before) -> U-32; observations -> U-34
+  persona Marco (`docs/design/personas/marco-issue-159.md`): open P-1 (Minor, same kind as Helga P-1) -> U-32; observations -> U-34
+  persona Sven (`docs/design/personas/sven-issue-159.md`): open P-1 to P-4 (Minor, focus after list navigations, set in `+layout.svelte`, which the change does not touch) -> U-33; observations -> U-34
+- [x] Workflow review `docs/reviews/workflow-rules-review-issue-159.md`
+- [x] Archive session, push, PR `Fixes #159`, CI, merge (pull request opened after archiving; merge follows green CI)
+
+Files: `src/routes/apartments/+page.svelte`, `src/routes/buildings/+page.svelte`, `src/routes/invoices/+page.svelte`, `src/__tests__/list-filters.dom.test.ts`, `tests/e2e/features/apartments.feature`, `tests/e2e/{steps/apartment-list.steps.ts,tasks/apartments.ts,questions/apartments.ts,targets/apartments.ts}`, `docs/design/offene-punkte.md`, `docs/design/personas/{helga,marco,sven}-issue-159.md`, `docs/reviews/issue-159-review-{1,2}.md`, `docs/reviews/workflow-rules-review-issue-159.md`

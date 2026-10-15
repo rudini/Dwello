@@ -30,7 +30,10 @@
 		{/snippet}
 	</PageHeader>
 
-	<ApartmentFilters buildings={data.buildings} />
+	<!-- new for each address: after a link, back or forward the form shows the filters of the list shown (#159) -->
+	{#key $page.url.search}
+		<ApartmentFilters buildings={data.buildings} />
+	{/key}
 
 	{#if data.apartments.length === 0}
 		<section class="rounded-panel border border-line bg-surface">
@@ -41,6 +44,7 @@
 					illustration="no-results"
 					actionLabel={m.buildings_reset_filters()}
 					actionHref="/apartments"
+					actionTestid="apartments-show-all"
 					testid="apartments-empty"
 				/>
 			{:else}

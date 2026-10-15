@@ -41,6 +41,12 @@ Funktionalität: Wohnungsliste
     Wenn der Liegenschaftsverwalter nach Wohnungen mit "Gibt es nicht" sucht
     Dann sieht der Liegenschaftsverwalter in der Wohnungsliste den Hinweis "Keine Wohnungen gefunden"
 
+  Szenario: Filter nach dem Zurücksetzen leer
+    Wenn der Liegenschaftsverwalter nach Wohnungen mit "Gibt es nicht" sucht
+    Und der Liegenschaftsverwalter wieder alle Wohnungen anzeigt
+    Dann zeigt die Wohnungsliste wieder Wohnungen
+    Und die Wohnungssuche ist leer
+
   Szenario: Neue Wohnung erfassen
     Wenn der Liegenschaftsverwalter eine neue Wohnung erfassen will
     Dann ist der Liegenschaftsverwalter auf der Seite "Neue Wohnung"
