@@ -113,7 +113,7 @@ a { display: inline-block; padding: 0.75rem 0; color: CanvasText }
 </head>
 <body data-hydrated>
 <main>
-<p>${escaped(sentence)}</p>
+<p data-testid="pdf-refusal-message">${escaped(sentence)}</p>
 <a href="/statements" data-testid="pdf-refusal-back">${escaped(m.documents_to_statements())}</a>
 </main>
 </body>

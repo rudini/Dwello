@@ -98,7 +98,7 @@ describe('PDF einer Abrechnung herunterladen', () => {
 		const response = await call(() => Response.json(refusedPdf, { status: 404 }));
 
 		expect(response.status).toBe(404);
-		expect(await response.text()).toContain('<p>Abrechnung nicht gefunden.</p>');
+		expect(await response.text()).toContain('>Abrechnung nicht gefunden.</p>');
 	});
 
 	it('meldet einen Fehler, wenn das Backend nicht erreichbar ist', async () => {

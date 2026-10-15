@@ -6,7 +6,6 @@ import {
 	llmRecipientNotice,
 	operatorNoticeText,
 	pageOverflowsSideways,
-	pageText,
 	pageTitleWidth,
 	sectionShown,
 	sectionText,
@@ -140,8 +139,4 @@ Then('zeigt das Browser-Tab das Dwello-Symbol', async ({ verwalter }) => {
 
 Then('zeigt die Fusszeile die Version {string}', async ({ verwalter }, version: string) => {
 	await verwalter.sees(footerVersionText).toBe(`Version ${version}`);
-});
-
-Then('liest der Liegenschaftsverwalter {string}', async ({ verwalter }, text: string) => {
-	await verwalter.sees(pageText).toContain(text);
 });

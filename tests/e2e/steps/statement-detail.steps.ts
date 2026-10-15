@@ -9,6 +9,7 @@ import {
 	history,
 	paidDateInvalid,
 	paidDateProblem,
+	pdfRefusalText,
 	pdfToView,
 	recipient,
 	sendConfirmation,
@@ -211,4 +212,8 @@ When('der Liegenschaftsverwalter das PDF der Abrechnung anfordert', async ({ ver
 
 When('der Liegenschaftsverwalter von dort zu den Nebenkostenabrechnungen zurückkehrt', async ({ verwalter }) => {
 	await verwalter.attemptsTo(leavePdfRefusal);
+});
+
+Then('liest der Liegenschaftsverwalter {string}', async ({ verwalter }, text: string) => {
+	await verwalter.sees(pdfRefusalText).toBe(text);
 });

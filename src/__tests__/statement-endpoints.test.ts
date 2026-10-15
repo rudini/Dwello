@@ -12,7 +12,7 @@ const API = 'http://localhost:3001/api/v1/statements/s1';
 /** The sentence of a refusal page, which opens in the tab instead of the PDF */
 async function sentenceOf(response: Response) {
 	expect(response.headers.get('Content-Type')).toMatch(/text\/html/);
-	return (await response.text()).match(/<p>([^<]*)<\/p>/)?.[1];
+	return (await response.text()).match(/<p[^>]*>([^<]*)<\/p>/)?.[1];
 }
 
 function call(handler: unknown, status: number, answer: object) {
@@ -90,13 +90,11 @@ describe('POST /api/statements/[id]/generate-pdf', () => {
 describe('GET /statements/[id]/pdf', () => {
 	const pdf = () => new Response(new Uint8Array([37, 80, 68, 70]), { status: 200 });
 
-	function backend(generated: boolean) {
+	function backend() {
 		const calls: string[] = [];
-		let ready = generated;
 		const fetch = async (url: string, init?: RequestInit) => {
 			calls.push(`${init?.method ?? 'GET'} ${url}`);
-			if (init?.method === 'POST') return ((ready = true), Response.json({ ok: true }));
-			return ready ? pdf() : Response.json({ error: 'PDF not generated yet' }, { status: 404 });
+			return pdf();
 		};
 		return { calls, fetch };
 	}
@@ -108,15 +106,16 @@ describe('GET /statements/[id]/pdf', () => {
 		} as never);
 
 	it('lädt das PDF herunter', async () => {
-		const response = await get(backend(true).fetch);
+		const response = await get(backend().fetch);
 		expect(response.headers.get('Content-Disposition')).toMatch(/^attachment/);
 	});
 
 	// Before marking a statement as sent, the user looks at the document the tenant gets
 	it('sagt in Worten, wenn das PDF nicht erstellt werden kann', async () => {
-		const fetch = async () => Response.json({ error: 'PDF not generated yet' }, { status: 404 });
+		// a refusal without a code the UI knows (an older backend, a proxy in between)
+		const fetch = async () => new Response('Bad Gateway', { status: 502 });
 		const response = await get(fetch, '?ansehen');
-		expect(response.status).toBe(404);
+		expect(response.status).toBe(502);
 		expect(await sentenceOf(response)).toContain('Das PDF konnte nicht erstellt werden');
 	});
 
@@ -143,7 +142,7 @@ describe('GET /statements/[id]/pdf', () => {
 
 	// The backend makes a missing PDF itself (getStatementPdf)
 	it('zeigt das PDF zum Ansehen im Browser', async () => {
-		const { calls, fetch } = backend(true);
+		const { calls, fetch } = backend();
 		const response = await get(fetch, '?ansehen');
 		expect(response.status).toBe(200);
 		expect(response.headers.get('Content-Disposition')).toMatch(/^inline/);

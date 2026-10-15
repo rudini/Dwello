@@ -204,6 +204,12 @@ describe('API-Verträge des Frontends', () => {
 		expect(drift(await sample('statement-calculation-refused'), await response.json())).toEqual([]);
 	});
 
+	it('POST /statements/:id/generate-pdf, das scheitert, liefert die Felder von statement-pdf-failed.json', async () => {
+		const response = await sendJson('POST', '/api/v1/statements/keine-id/generate-pdf', {});
+		expect(response.status).toBe(500);
+		expect(drift(await sample('statement-pdf-failed'), await response.json())).toEqual([]);
+	});
+
 	it('GET /statements/:id/pdf einer unbekannten Abrechnung liefert die Felder von statement-pdf-refused.json', async () => {
 		const response = await callApi(`/api/v1/statements/${crypto.randomUUID()}/pdf`);
 		expect(response.status).toBe(404);

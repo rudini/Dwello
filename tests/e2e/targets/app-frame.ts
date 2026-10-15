@@ -30,4 +30,3 @@ export const pageTitle = target('Seitentitel', (page) => page.getByRole('heading
 export const termsLinkOnLogin = target('Nutzungsbedingungen', (page) => page.getByTestId('login-terms-link'));
 export const publicLoginLink = target('Zur Anmeldung', (page) => page.getByTestId('public-login-link'));
 export const publicHelpLink = target('Zur Hilfe', (page) => page.getByTestId('public-help-link'));
-export const pageBody = target('Inhalt der Seite', (page) => page.locator('body'));

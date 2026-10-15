@@ -5,7 +5,6 @@ import {
 	footerVersion,
 	llmRecipient,
 	operatorNotice,
-	pageBody,
 	pageSection,
 	pageTitle,
 	userMenuButton
@@ -24,5 +23,4 @@ export const pageOverflowsSideways = question(
 );
 export const userMenuCount = Count.of(userMenuButton);
 export const tabIcon = ThePage.tabIcon;
-export const pageText = Text.of(pageBody);
 export const footerVersionText = Text.of(footerVersion);
