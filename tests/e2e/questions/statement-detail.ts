@@ -4,6 +4,7 @@ import { Accessible, Attribute, Count, Text } from '../screenplay/questions';
 import {
 	deleteStatementButton,
 	paidDateInput,
+	pdfRefusalMessage,
 	sendDialog,
 	sendPdfLink,
 	sendRecipient,
@@ -17,6 +18,8 @@ import { amountAfter } from './amounts';
 import { STATEMENT } from '../tasks/statement-detail';
 
 export const statusOfStatement = Text.of(statementStatus);
+/** The sentence the tab shows instead of a PDF the backend refused */
+export const pdfRefusalText = Text.of(pdfRefusalMessage);
 export const sendConfirmation = Text.of(sendDialog);
 export const recipient = Text.of(sendRecipient);
 export const pdfToView = Attribute.named('href').of(sendPdfLink);

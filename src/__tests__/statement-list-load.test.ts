@@ -4,6 +4,7 @@ import type { StatementsListData } from '$lib/types';
 import { GET as downloadPdf } from '../routes/statements/[id]/pdf/+server';
 import backendContract from '../../tests/contracts/contract.json';
 import periodStatements from '../../tests/contracts/period-statements.json';
+import refusedPdf from '../../tests/contracts/statement-pdf-refused.json';
 
 const API = 'http://localhost:3001/api/v1';
 
@@ -93,13 +94,11 @@ describe('PDF einer Abrechnung herunterladen', () => {
 		expect(new TextDecoder().decode(await response.arrayBuffer())).toBe('%PDF');
 	});
 
-	it('gibt den Fehler des Backends weiter, z.B. wenn noch kein PDF erstellt wurde', async () => {
-		const response = await call(() =>
-			Response.json({ error: 'PDF not generated yet' }, { status: 404 })
-		);
+	it('sagt in Worten, dass es die Abrechnung nicht gibt', async () => {
+		const response = await call(() => Response.json(refusedPdf, { status: 404 }));
 
 		expect(response.status).toBe(404);
-		expect(await response.json()).toEqual({ error: 'PDF not generated yet' });
+		expect(await response.text()).toContain('>Abrechnung nicht gefunden.</p>');
 	});
 
 	it('meldet einen Fehler, wenn das Backend nicht erreichbar ist', async () => {

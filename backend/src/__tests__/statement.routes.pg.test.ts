@@ -185,11 +185,7 @@ describe('PDF einer Abrechnung, die es nicht gibt oder die noch kein PDF hat', (
 			expect({ path, status: response.status, body: await response.json() }).toEqual({
 				path,
 				status: 404,
-				// the downloads answer from the PDF service, which stays as it is; only generation carries the code
-				body:
-					path === 'generate-pdf'
-						? { error: 'Statement not found', code: 'STATEMENT_NOT_FOUND', params: {} }
-						: { error: 'Statement not found' }
+				body: { error: 'Statement not found', code: 'STATEMENT_NOT_FOUND', params: {} }
 			});
 		}
 	});
@@ -200,10 +196,11 @@ describe('PDF einer Abrechnung, die es nicht gibt oder die noch kein PDF hat', (
 
 		for (const path of ['pdf', 'pdf/base64']) {
 			const response = await callApi(`/api/v1/statements/${statementId}/${path}`);
+			// made on demand, which needs the IBAN
 			expect({ path, status: response.status, body: await response.json() }).toEqual({
 				path,
-				status: 404,
-				body: { error: 'PDF not generated yet. Call POST /:id/generate-pdf first.' }
+				status: 400,
+				body: { error: 'IBAN not configured. Please set up company configuration first.', code: 'IBAN_MISSING', params: {} }
 			});
 		}
 	});

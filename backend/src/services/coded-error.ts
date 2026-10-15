@@ -24,6 +24,13 @@ export class CodedError extends Error {
 	}
 }
 
+/** Body for a caught error the UI shows: a coded one as it is, any other logged and refused with `code` */
+export function codedBody(error: unknown, code: string, message: string): Refusal {
+	if (error instanceof CodedError) return errorBody(error, message) as Refusal;
+	console.error(message, error);
+	return refusal(code, message);
+}
+
 /** Body for a caught error: its text, with code and params when it has them */
 export function errorBody(error: unknown, fallback: string): { error: string } | Refusal {
 	if (error instanceof CodedError)

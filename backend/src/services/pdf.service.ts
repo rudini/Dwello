@@ -17,6 +17,7 @@ import {
 	type QRBillConfig
 } from './qr-bill.service';
 import { formatCHF, formatSwissDate, roundToRappen } from './pdf-format';
+import { CodedError } from './coded-error';
 
 /**
  * Supported languages
@@ -779,6 +780,7 @@ async function qrCodeFor(data: StatementPDFData, config: QRBillConfig, t: Record
 			config
 		);
 	} catch (qrError) {
+		if (qrError instanceof CodedError) throw qrError; // an invalid IBAN: no PDF without its payment part
 		console.error('Failed to generate QR code:', qrError);
 		return null;
 	}
