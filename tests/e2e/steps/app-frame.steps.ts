@@ -79,8 +79,9 @@ Then(
 );
 
 Then(
-	'erfährt der Liegenschaftsverwalter unter {string}, dass Rechnungsdaten für die KI-Kategorisierung den Server nicht verlassen',
+	'erfährt der Liegenschaftsverwalter unter {string}, dass Rechnungen und neue Kategorien für die KI den Server nicht verlassen',
 	async ({ verwalter }, heading: string) => {
+		await verwalter.sees(llmRecipientNotice(heading)).toContain('neue Kategorien');
 		await verwalter.sees(llmRecipientNotice(heading)).toContain('verlassen dafür den Server nicht');
 	}
 );
