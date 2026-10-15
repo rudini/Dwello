@@ -184,7 +184,6 @@ describe('Vorschlag der KI', () => {
 		});
 	});
 
-	// «non è sicura» liest sich auch als «nicht ungefährlich» (Persona Marco, P-1)
 	// «non è sicura» / «n’est pas sûre» lesen sich auch als «nicht ungefährlich» (Persona Marco P-1, Code-Review M-9);
 	// Englisch «Decide yourself» (Fachreview H-28)
 	it.each([

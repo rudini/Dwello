@@ -294,7 +294,7 @@ By default invoices are categorized by the local Ollama and invoice data stays o
 Before switching, the operator (not Dwello) makes sure that, under the Swiss Data Protection Act (DSG):
 
 - a data processing agreement with the provider exists (Art. 9 DSG), and the provider does not use the data for training;
-- the data is processed only in Switzerland or in a country the Federal Council lists with adequate data protection (Art. 16 Abs. 1 DSG, DSV Anhang 1), data centers and subprocessors included, within the limits noted there (in the USA only providers certified under the Swiss-U.S. Data Privacy Framework); `LLM_PROVIDER_COUNTRY` names that country. The privacy statement names only the provider and its country (Art. 19 Abs. 4 DSG); it cannot name safeguards under Art. 16 Abs. 2 DSG (e.g. standard contractual clauses) or an exception under Art. 17 DSG, so such providers are not supported (#184);
+- the data is processed only in Switzerland or in a country the Federal Council lists with adequate data protection (Art. 16 Abs. 1 DSG, DSV Anhang 1), data centers and subprocessors included, within the limits noted there (in the USA only providers certified under the Swiss-U.S. Data Privacy Framework); `LLM_PROVIDER_COUNTRY` names that country, or all of them when the data is processed in several. The privacy statement names only the provider and its country (Art. 19 Abs. 4 DSG); it cannot name safeguards under Art. 16 Abs. 2 DSG (e.g. standard contractual clauses) or an exception under Art. 17 DSG, so such providers are not supported (#184);
 - data is kept no longer than needed (prefer providers with zero or short retention, and data centers in Switzerland or the EU).
 
 This is a checklist, not legal advice.
