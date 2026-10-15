@@ -112,6 +112,8 @@ Funktionalität: Barrierefreiheit
       | statement-generate     | tank-question       |
       | statement-generate     | preview-all-billed  |
       | statement-generate     | draft-restored      |
+      | statement-generate     | draft-dropped       |
+      | statement-generate     | buildings-billed    |
       | statement-generate     | link-preset         |
       | statement-detail       | default             |
       | statement-detail       | send-dialog         |

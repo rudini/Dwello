@@ -13,6 +13,9 @@ export const announcement = (text: string) =>
 	target(`Ansage «${text}»`, (page) => page.getByRole('status').filter({ hasText: text }));
 export const buildingCheckbox = (buildingId: string) =>
 	target(`Gebäude ${buildingId} für die Abrechnungen`, (page) => page.getByTestId(`generate-building-${buildingId}`));
+// Mietverträge of the building that already have a statement for the period (step 2)
+export const buildingBilled = (buildingId: string) =>
+	target(`Schon abgerechnet im Gebäude ${buildingId}`, (page) => page.getByTestId(`generate-building-billed-${buildingId}`));
 export const generateButton = target('Abrechnungen erstellen', (page) => page.getByTestId('generate-statements-button'));
 export const previewCount = target('Anzahl in der Vorschau', (page) => page.getByTestId('preview-count'));
 export const previewFee = target('Verwaltungspauschale der Vorschau', (page) => page.getByTestId('preview-fee'));

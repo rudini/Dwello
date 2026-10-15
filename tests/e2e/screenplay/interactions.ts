@@ -154,7 +154,10 @@ export const Browser = {
 	useColorScheme: (colorScheme: 'light' | 'dark'): Activity => (actor) =>
 		pageOf(actor).emulateMedia({ colorScheme, reducedMotion: 'reduce' }),
 	// No draft from an earlier visit; nothing to clear before the first page
-	clearLocalStorage: (async (actor) => pageOf(actor).evaluate(() => localStorage.clear()).catch(() => {})) as Activity
+	clearLocalStorage: (async (actor) => pageOf(actor).evaluate(() => localStorage.clear()).catch(() => {})) as Activity,
+	// What an earlier visit left in the browser, e.g. a wizard draft naming records deleted since
+	keepInLocalStorage: (entries: Record<string, string>): Activity => (actor) =>
+		pageOf(actor).evaluate((kept) => Object.entries(kept).forEach(([k, v]) => localStorage.setItem(k, v)), entries)
 };
 
 /** Posts a form action of the page without its UI, as from a tab that still shows an older state */

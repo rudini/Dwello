@@ -147,6 +147,19 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Wenn der Liegenschaftsverwalter weitergeht
     Dann ist für die Abrechnungen das Gebäude "Lindenhof" gewählt
 
+  Szenario: Ein gewähltes Gebäude gibt es nicht mehr
+    Angenommen das Gebäude "Ahornhof" in "Winterthur" existiert
+    Und der Liegenschaftsverwalter ist auf der Seite zum Erstellen von Abrechnungen
+    Wenn der Liegenschaftsverwalter das Gebäude "Ahornhof" für die Abrechnungen wählt
+    Und das Gebäude "Ahornhof" wird inzwischen gelöscht
+    Und der Liegenschaftsverwalter die Seite zum Erstellen von Abrechnungen später wieder öffnet
+    Dann sagt der wiederhergestellte Entwurf "Ein Gebäude aus Ihren Angaben gibt es nicht mehr. Dwello hat es aus der Auswahl entfernt. Prüfen Sie die Gebäude im Schritt 2 «Gebäude»."
+
+  Szenario: Schon abgerechnete Mietverträge zeigen sich bei der Wahl der Gebäude
+    Angenommen für "Marc Huber" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024
+    Wenn der Liegenschaftsverwalter die Gebäude für die Abrechnungen 2024 wählen will
+    Dann nennt die Wahl für "Lindenhof" "Von 2 Mietverträgen in dieser Abrechnungsperiode hat 1 schon eine Abrechnung, die diese Abrechnungsperiode ganz oder teilweise abdeckt."
+
   Szenario: Erstellte Abrechnungen anzeigen
     Angenommen der Liegenschaftsverwalter hat die Abrechnungen 2024 für das Gebäude "Lindenhof" erstellt
     Wenn der Liegenschaftsverwalter die erstellten Abrechnungen anzeigt
