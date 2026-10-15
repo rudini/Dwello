@@ -1,5 +1,6 @@
 import { randomUUID } from 'crypto';
 import type { CallTheApi } from '../screenplay/abilities';
+import { inDays } from './dates';
 
 // Scenario-scoped test data: Gherkin names map to UUID-namespaced names, and everything is removed afterwards.
 export function testData(api: CallTheApi) {
@@ -268,7 +269,7 @@ export function testData(api: CallTheApi) {
 				{ categoryId: category.id, billingEntityName: unique(supplier), isValidUtilityCost: category.isAllowedUtilityCost },
 				description,
 				amount,
-				new Date().toISOString().split('T')[0]
+				inDays(0)
 			);
 			ids.set(`Rechnung ${supplier}`, id);
 		},

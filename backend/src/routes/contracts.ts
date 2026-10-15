@@ -18,6 +18,7 @@ import {
 } from '../services/contract.service';
 import { apartmentExists } from '../services/apartment.service';
 import { tenantExists } from '../services/tenant.service';
+import { swissToday } from '../services/today';
 
 // Validation schemas
 const contractQuerySchema = t.Object({
@@ -99,7 +100,7 @@ export const contractRoutes = new Elysia({ prefix: '/api/v1/contracts' })
 	.get(
 		'/apartment/:apartmentId/active',
 		async ({ params, query, set }) => {
-			const date = (query as { date?: string }).date || new Date().toISOString().split('T')[0];
+			const date = (query as { date?: string }).date || swissToday();
 			const contract = await getActiveContract(params.apartmentId, date);
 			if (!contract) {
 				set.status = 404;

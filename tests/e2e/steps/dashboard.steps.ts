@@ -26,7 +26,7 @@ import { inDays } from '../fixtures/dates';
 
 const { Given, When, Then } = createBdd(test);
 
-const lastYear = new Date().getFullYear() - 1;
+const lastYear = Number(inDays(0).slice(0, 4)) - 1;
 
 // Sent earlier, with its deadline some days from today (the overview counts days from today); sending sets the
 // deadline, so it is set afterwards
