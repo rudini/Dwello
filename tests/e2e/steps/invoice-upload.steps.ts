@@ -14,8 +14,6 @@ import {
 	unsureNote,
 	uploadOutcome
 } from '../questions/invoice-upload';
-import { DownloadFrom } from '../screenplay/interactions';
-import { belegLink } from '../targets/invoice-upload';
 import {
 	chooseCategory,
 	confirmCancelling,
@@ -25,6 +23,7 @@ import {
 	fillInBeleg,
 	invoicePdf,
 	openBeleg,
+	openBelegOfInvoice,
 	replaceBeleg,
 	startCancellingUpload,
 	startDeletingInvoice,
@@ -164,7 +163,7 @@ Then('fragt Dwello zurück {string}', async ({ verwalter }, text: string) => {
 });
 
 Then('öffnet der Beleg die PDF-Rechnung von {string}', async ({ verwalter, names }, supplier: string) => {
-	await verwalter.attemptsTo(DownloadFrom(belegLink));
+	await verwalter.attemptsTo(openBelegOfInvoice);
 	await verwalter.sees(downloadedFileName).toBe(pdfOf(names.get(supplier)!));
 });
 
@@ -172,7 +171,7 @@ Then('öffnet der Beleg die PDF-Rechnung von {string}', async ({ verwalter, name
 const MAGIC: Record<string, string> = { PDF: '255044', JPG: 'ffd8ff' };
 
 Then(/^öffnet der Beleg die (PDF|JPG)-Datei "([^"]+)"$/, async ({ verwalter }, kind: string, fileName: string) => {
-	await verwalter.attemptsTo(DownloadFrom(belegLink));
+	await verwalter.attemptsTo(openBelegOfInvoice);
 	await verwalter.sees(downloadedFileName).toBe(fileName);
 	await verwalter.sees(downloadedFileMagic).toBe(MAGIC[kind]);
 });

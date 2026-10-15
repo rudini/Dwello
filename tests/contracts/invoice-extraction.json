@@ -1,0 +1,30 @@
+{
+	"invoiceCount": 1,
+	"documentType": "invoice",
+	"fields": {
+		"billingEntityName": "Elektro Blitz AG",
+		"invoiceNumber": "R-1001",
+		"invoiceDate": "2026-03-31",
+		"amount": "1250.00",
+		"servicePeriodStart": "2026-01-01",
+		"servicePeriodEnd": "2026-03-31",
+		"dueDate": "2026-04-30",
+		"description": "Allgemeinstrom Q1"
+	},
+	"deductedAmount": "1000.00",
+	"nonAllocableItems": false,
+	"unsure": [
+		"invoiceDate"
+	],
+	"categorization": {
+		"category": {
+			"id": "c1",
+			"name": "Electricity Common Areas",
+			"isAllowedUtilityCost": true
+		},
+		"confidence": 0.9,
+		"isAllowedUtilityCost": true,
+		"reasoning": "Laufende Betriebskosten"
+	},
+	"duplicateOf": "i1"
+}

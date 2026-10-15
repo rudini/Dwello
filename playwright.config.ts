@@ -69,7 +69,7 @@ export default defineConfig<{ driver: Driver }>({
 			timeout: 30000
 		},
 		{
-			// KI stand-in: answers only the allocability check of a new category (backend/scripts/llm-stub.ts)
+			// KI stand-in: the allocability check of a new category and the reading of uploaded invoice files (backend/scripts/llm-stub.ts)
 			command: 'cd backend && bun run llm-stub',
 			port: 2527,
 			reuseExistingServer: true,
@@ -89,7 +89,7 @@ export default defineConfig<{ driver: Driver }>({
 				MAIL_FROM: 'verwaltung@dwello.test',
 				SMTP_HOST: '127.0.0.1',
 				SMTP_PORT: '2525',
-				// The KI stand-in, whatever the developer's .env sets: invoices still find no KI
+				// The KI stand-in, whatever the developer's .env sets: it categorizes only the upload scenarios' invoices
 				LLM_BASE_URL: 'http://127.0.0.1:2527/v1'
 			}
 		},

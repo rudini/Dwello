@@ -192,12 +192,23 @@ llm_category_id         UUID REFERENCES categories ON DELETE SET NULL  -- KI-Kat
 llm_confidence          DECIMAL(5,4)           -- Konfidenz 0–1
 was_manually_overridden BOOLEAN DEFAULT false  -- Manuell überschrieben
 manual_override_reason  TEXT                   -- Grund der Änderung
-invoice_pdf             TEXT
 notes                   TEXT
 ```
 
 Indexes: `invoices_building_id_idx`, `invoices_invoice_date_idx`, `invoices_category_id_idx`.
 No CHECK on `amount`.
+
+### invoice_documents (Beleg)
+
+```sql
+invoice_id  UUID PRIMARY KEY REFERENCES invoices ON DELETE CASCADE  -- at most one Beleg per invoice, deleted with it
+file_name   VARCHAR(255) NOT NULL
+mime_type   VARCHAR(50) NOT NULL    -- application/pdf | image/jpeg | image/png (checked by the first bytes)
+content     TEXT NOT NULL           -- Base64 encoded file, at most 10 MB
+created_at  TIMESTAMP NOT NULL DEFAULT NOW()  -- uploaded or last replaced
+```
+
+Migration `0003_invoice_documents.sql` (#217) also drops the unused column `invoices.invoice_pdf`.
 
 ### fuel_stocks (Tankbestand)
 

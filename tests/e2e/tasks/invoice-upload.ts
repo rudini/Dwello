@@ -1,11 +1,12 @@
 import type { Activity } from '../screenplay/actor';
-import { Click, EnterDate, Enter, FailRequests, Select, Upload, Wait } from '../screenplay/interactions';
+import { Click, DownloadFrom, EnterDate, Enter, FailRequests, Select, Upload, Wait } from '../screenplay/interactions';
 import { deleteButton } from '../targets/invoice-detail';
 import {
 	belegBillingEntity,
 	belegDescription,
 	belegDetailsToggle,
 	belegFileInput,
+	belegLink,
 	belegAmount,
 	belegCategory,
 	belegInvoiceDate,
@@ -81,3 +82,5 @@ export const replaceBeleg = (file: File): Activity => (actor) =>
 	actor.attemptsTo(Upload.theFile(file).into(belegFileInput), Click.on(belegUploadButton));
 
 export const startDeletingInvoice = Click.on(deleteButton);
+
+export const openBelegOfInvoice = DownloadFrom(belegLink);

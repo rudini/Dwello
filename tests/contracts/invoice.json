@@ -36,5 +36,9 @@
 		"id": "c1",
 		"name": "Caretaker",
 		"nameDE": "Hauswart"
+	},
+	"beleg": {
+		"fileName": "huber-q1.pdf",
+		"mimeType": "application/pdf"
 	}
 }

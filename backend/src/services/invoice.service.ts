@@ -10,15 +10,20 @@ import {
 	buildings,
 	categories,
 	distributionKeys,
+	invoiceDocuments,
 	type Invoice,
 	type NewInvoice
 } from '../db/schema';
-import { categorizeInvoice, recategorizeInvoice } from './llm.service';
+import { categorizeInvoice, extractInvoice, recategorizeInvoice } from './llm.service';
 import { validateInvoiceForUtilityStatement } from './utility-validation.service';
 import { buildingExists } from './building.service';
 import { getCategory } from './category.service';
 import { roundToRappen } from './pdf-format';
 import { CodedError, refusal, type Refusal } from './coded-error';
+import { checkedFile } from './document.service';
+
+/** An uploaded file for an invoice, Base64 encoded */
+export type BelegUpload = { fileName: string; content: string };
 
 export interface InvoiceFilters {
 	search?: string;
@@ -37,6 +42,7 @@ export interface InvoiceWithDetails extends Invoice {
 	category: { id: string; name: string; nameDE: string | null; isAllowedUtilityCost: boolean; isHeatingCost: boolean } | null;
 	distributionKey: { id: string; name: string; nameDE: string | null } | null;
 	llmCategory: { id: string; name: string; nameDE: string | null } | null;
+	beleg: { fileName: string; mimeType: string } | null;
 }
 
 /**
@@ -62,12 +68,14 @@ function selectWithDetails() {
 				id: distributionKeys.id,
 				name: distributionKeys.name,
 				nameDE: distributionKeys.nameDE
-			}
+			},
+			beleg: { fileName: invoiceDocuments.fileName, mimeType: invoiceDocuments.mimeType }
 		})
 		.from(invoices)
 		.leftJoin(buildings, eq(invoices.buildingId, buildings.id))
 		.leftJoin(categories, eq(invoices.categoryId, categories.id))
-		.leftJoin(distributionKeys, eq(invoices.distributionKeyId, distributionKeys.id));
+		.leftJoin(distributionKeys, eq(invoices.distributionKeyId, distributionKeys.id))
+		.leftJoin(invoiceDocuments, eq(invoiceDocuments.invoiceId, invoices.id));
 }
 
 /**
@@ -141,7 +149,8 @@ export async function listInvoices(filters: InvoiceFilters = {}): Promise<{
 		building: row.building,
 		category: row.category,
 		distributionKey: row.distributionKey,
-		llmCategory: null // Would need another join for llm category
+		llmCategory: null, // Would need another join for llm category
+		beleg: row.beleg
 	}));
 
 	// Get total count
@@ -180,7 +189,8 @@ export async function getInvoice(id: string): Promise<InvoiceWithDetails | null>
 		building: result.building,
 		category: result.category,
 		distributionKey: result.distributionKey,
-		llmCategory
+		llmCategory,
+		beleg: result.beleg
 	};
 }
 
@@ -219,13 +229,15 @@ async function applyCategory(data: Partial<NewInvoice>, categoryId: string | nul
  * Create a new invoice with optional LLM categorization
  */
 export async function createInvoice(
-	data: NewInvoice,
+	{ beleg, ...data }: NewInvoice & { beleg?: BelegUpload },
 	options: { skipLlmCategorization?: boolean } = {}
 ): Promise<InvoiceWithDetails> {
 	// Validate building exists
 	if (!(await buildingExists(data.buildingId))) {
 		throw new CodedError('BUILDING_NOT_FOUND', 'Building not found');
 	}
+	// A file Dwello does not keep refuses the invoice before anything is saved
+	const file = beleg && checkedFile(beleg);
 
 	await applyCategory(data, data.categoryId);
 
@@ -241,6 +253,7 @@ export async function createInvoice(
 			wasManuallyOverridden: false
 		})
 		.returning();
+	if (file) await db.insert(invoiceDocuments).values({ invoiceId: invoice.id, ...file });
 
 	// Fetch and return with details
 	const result = await getInvoice(invoice.id);
@@ -249,6 +262,23 @@ export async function createInvoice(
 	}
 
 	return result;
+}
+
+/** The Beleg of an invoice with its file, or null without one */
+export async function getBeleg(invoiceId: string) {
+	const [beleg] = await db.select().from(invoiceDocuments).where(eq(invoiceDocuments.invoiceId, invoiceId));
+	return beleg && { fileName: beleg.fileName, mimeType: beleg.mimeType, content: Buffer.from(beleg.content, 'base64') };
+}
+
+/** Adds or replaces the Beleg of an invoice; null when there is no such invoice */
+export async function setBeleg(invoiceId: string, upload: BelegUpload) {
+	const file = checkedFile(upload);
+	if (!(await getInvoice(invoiceId))) return null;
+	await db
+		.insert(invoiceDocuments)
+		.values({ invoiceId, ...file })
+		.onConflictDoUpdate({ target: invoiceDocuments.invoiceId, set: { ...file, createdAt: new Date() } });
+	return getInvoice(invoiceId);
 }
 
 /**
@@ -313,6 +343,48 @@ export async function deleteInvoice(id: string): Promise<{ success: boolean; err
 	await db.delete(invoices).where(eq(invoices.id, id));
 
 	return { success: true };
+}
+
+/**
+ * Proposals for a new invoice of the building from its uploaded file: what the KI read, the Kategorie it suggests and
+ * an invoice of the building with the same Rechnungssteller and Rechnungsnummer; null when the KI did not read it
+ */
+export async function extractFromFile(buildingId: string, fileName: string, pages: string[]) {
+	const extraction = await extractInvoice(fileName, pages);
+	if (!extraction) return null;
+	const { billingEntityName, invoiceNumber, description, amount } = extraction.fields;
+	const categorization =
+		billingEntityName && description ? await categorizeInvoice({ billingEntityName, description, amount: amount ?? '0' }) : null;
+	const [duplicate] =
+		billingEntityName && invoiceNumber
+			? await db
+					.select({ id: invoices.id })
+					.from(invoices)
+					.where(
+						and(
+							eq(invoices.buildingId, buildingId),
+							sql`lower(trim(${invoices.billingEntityName})) = lower(${billingEntityName})`,
+							sql`lower(trim(${invoices.invoiceNumber})) = lower(${invoiceNumber})`
+						)
+					)
+					.limit(1)
+			: [];
+	return {
+		...extraction,
+		categorization: categorization?.category
+			? {
+					category: {
+						id: categorization.category.id,
+						name: categorization.category.name,
+						isAllowedUtilityCost: categorization.category.isAllowedUtilityCost
+					},
+					confidence: categorization.confidence,
+					isAllowedUtilityCost: categorization.isAllowedUtilityCost,
+					reasoning: categorization.reasoning
+				}
+			: null,
+		duplicateOf: duplicate?.id ?? null
+	};
 }
 
 /** Answer of the recategorization when the KI does not run or names no known category */
