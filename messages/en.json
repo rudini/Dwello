@@ -639,6 +639,7 @@
 	"contracts_deleted_toast": "Rental contract of {name} deleted",
 	"contracts_not_found": "Contract not found",
 	"contracts_load_failed": "Error loading the contract",
+	"contracts_choices_load_failed": "The tenants and apartments could not be loaded.",
 	"contracts_end_failed": "The rental contract could not be ended.",
 	"contracts_delete_failed": "The rental contract could not be deleted.",
 	"contracts_name": "Name",

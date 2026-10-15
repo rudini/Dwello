@@ -639,6 +639,7 @@
 	"contracts_deleted_toast": "Contratto di locazione di {name} eliminato",
 	"contracts_not_found": "Contratto non trovato",
 	"contracts_load_failed": "Errore durante il caricamento del contratto",
+	"contracts_choices_load_failed": "Non è stato possibile caricare gli inquilini e gli appartamenti.",
 	"contracts_end_failed": "Non è stato possibile terminare il contratto di locazione.",
 	"contracts_delete_failed": "Non è stato possibile eliminare il contratto di locazione.",
 	"contracts_name": "Nome",
