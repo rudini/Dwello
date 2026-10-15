@@ -21,6 +21,7 @@
 	// Utility invoices of each building in the Abrechnungsperiode, so a missing one shows before the preview:
 	// one request for the period, counted per building (fewer than 50 apartments, see CLAUDE.md)
 	let invoiceCounts = $state<Record<string, number>>({});
+	let billed = $state<Record<string, { contracts: number; billed: number }>>({});
 	$effect(() => {
 		const ids = buildings.map((b) => b.id);
 		api
@@ -35,6 +36,16 @@
 				const counts = Object.fromEntries(ids.map((id) => [id, 0]));
 				for (const { buildingId } of data.invoices) if (buildingId in counts) counts[buildingId]++;
 				invoiceCounts = counts;
+			});
+		// Contracts with a statement in the period already get none from this run
+		api
+			.get<{ buildingId: string; contracts: number; billed: number }[]>('/statements/billed', {
+				buildingIds: ids.join(','),
+				periodStart: period.start,
+				periodEnd: period.end
+			})
+			.then(({ data }) => {
+				if (data) billed = Object.fromEntries(data.map((row) => [row.buildingId, row]));
 			});
 	});
 
@@ -74,6 +85,7 @@
 			{building}
 			selected={selectedBuildingIds.includes(building.id)}
 			invoices={invoiceCounts[building.id]}
+			billed={billed[building.id]}
 			{error}
 			ontoggle={() => toggle(building.id)}
 		/>

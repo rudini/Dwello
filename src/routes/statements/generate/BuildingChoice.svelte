@@ -7,12 +7,14 @@
 		building,
 		selected,
 		invoices,
+		billed,
 		error,
 		ontoggle
 	}: {
 		building: Building & { apartmentCount: number };
 		selected: boolean;
 		invoices: number | undefined;
+		billed?: { contracts: number; billed: number };
 		error?: string;
 		ontoggle: () => void;
 	} = $props();
@@ -24,6 +26,19 @@
 				? m.statements_building_invoices_one({ count: invoices })
 				: m.statements_building_invoices_many({ count: invoices ?? 0 })
 	);
+
+	// Said only when some contract of the period has a statement already
+	const billedText = $derived.by(() => {
+		if (!billed?.billed) return '';
+		const { contracts: total, billed: count } = billed;
+		if (count < total)
+			return count === 1
+				? m.statements_building_billed_one({ billed: count, total })
+				: m.statements_building_billed_many({ billed: count, total });
+		return total === 1
+			? m.statements_building_billed_all_one()
+			: m.statements_building_billed_all_many({ total });
+	});
 </script>
 
 <label
@@ -47,6 +62,11 @@
 			<span
 				class={invoices === 0 ? 'font-semibold text-caution' : 'text-ink-muted'}
 				data-testid="generate-building-invoices-{building.id}">{invoicesText}</span
+			>
+		{/if}
+		{#if billedText}
+			<span class="text-ink-muted" data-testid="generate-building-billed-{building.id}"
+				>{billedText}</span
 			>
 		{/if}
 	</span>

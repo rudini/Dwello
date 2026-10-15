@@ -241,6 +241,19 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	'preview-all-billed': (example) => previewOf('2024', 'preview-all-billed')(example),
 	// 2025 with a second building that has heating costs but never had a Tankbestand
 	'tank-question': (example) => previewOf('2025', 'tank-question')(example, example.tankBuilding),
+	// a draft from an earlier visit whose building and heating profile were deleted since
+	'draft-dropped': () => (actor) =>
+		actor.attemptsTo(
+			Browser.keepInLocalStorage('dwello.draft.v1.statements', {
+				values: { periodStart: '2025-01-01', periodEnd: '2025-12-31', heatingProfileId: 'geloescht', managementFeePercent: 3, buildingIds: ['geloescht'] },
+				savedAt: new Date().toISOString()
+			}),
+			Navigate.reload,
+			Wait.until(on.shown('draft-note'))
+		),
+	// 2025: Anna and Bruno have their statements, Carla not
+	'buildings-billed': (example) => (actor) =>
+		actor.attemptsTo(Click.on(nextButton), Wait.until(on.shown(`generate-building-billed-${example.building}`))),
 	'period-not-over': () => (actor) =>
 		actor.attemptsTo(EnterDate.of('2099-12-31').into(on.periodEndInput), Wait.until(on.periodFutureWarning))
 };

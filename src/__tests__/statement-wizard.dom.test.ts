@@ -808,6 +808,49 @@ describe('Entwurf der Abrechnungen', () => {
 	});
 });
 
+describe('Wiederhergestellte Angaben, die es nicht mehr gibt', () => {
+	const notes = () => allByTestId('draft-note').map((note) => note.textContent!.trim());
+	const draftWith = (buildingIds: string[], heatingProfileId: string) =>
+		writeDraft(
+			browserStorage(),
+			'statements',
+			{
+				periodStart: '2024-01-01',
+				periodEnd: '2024-12-31',
+				heatingProfileId,
+				managementFeePercent: 3,
+				buildingIds
+			},
+			new Date()
+		);
+
+	it('nennt ein gelöschtes Gebäude und ein gelöschtes Heizprofil', async () => {
+		draftWith(['b1', 'weg'], 'alt');
+		open();
+		await settle();
+		expect(notes()).toEqual([
+			'Ein Gebäude aus Ihren Angaben gibt es nicht mehr. Prüfen Sie die gewählten Gebäude.',
+			'Das Heizprofil aus Ihren Angaben gibt es nicht mehr. Wählen Sie ein Heizprofil.'
+		]);
+	});
+
+	it('nennt die Zahl mehrerer gelöschter Gebäude und schweigt, wenn es alles noch gibt', async () => {
+		draftWith(['weg', 'fort'], 'hp1');
+		open();
+		await settle();
+		expect(notes()).toEqual([
+			'2 Gebäude aus Ihren Angaben gibt es nicht mehr. Prüfen Sie die gewählten Gebäude.'
+		]);
+
+		document.body.innerHTML = '';
+		draftWith(['b1'], 'hp1');
+		open();
+		await settle();
+		expect(byTestId('draft-restored')).not.toBeNull();
+		expect(notes()).toEqual([]);
+	});
+});
+
 describe('Zurück vom Erfassen einer Rechnung', () => {
 	it('führt zum Schritt vor der Vorschau, damit diese mit der neuen Rechnung neu berechnet wird', async () => {
 		writeDraft(
@@ -889,10 +932,70 @@ describe('Rechnungen schon bei der Wahl der Gebäude', () => {
 		expect(byTestId('generate-building-invoices-b2')!.textContent).toContain(
 			'Keine Rechnungen in der Abrechnungsperiode erfasst'
 		);
-		expect(calls).toHaveLength(1);
-		expect(calls[0].path).toMatch(/dateFrom=\d{4}-\d{2}-\d{2}&dateTo=\d{4}-\d{2}-\d{2}/);
-		expect(calls[0].path).not.toContain('buildingId');
+		const invoiceCalls = calls.filter((call) => call.path.startsWith('/invoices'));
+		expect(invoiceCalls).toHaveLength(1);
+		expect(invoiceCalls[0].path).toMatch(/dateFrom=\d{4}-\d{2}-\d{2}&dateTo=\d{4}-\d{2}-\d{2}/);
+		expect(invoiceCalls[0].path).not.toContain('buildingId');
 		// the list stays inside its panel on phones (a fieldset is as wide as its content by default)
 		expect(document.querySelector('fieldset')!.className).toMatch(/(^| )min-w-0( |$)/);
+	});
+});
+
+describe('Schon abgerechnete Mietverträge bei der Wahl der Gebäude', () => {
+	const billed = (rows: { buildingId: string; contracts: number; billed: number }[]) =>
+		fakeBff((call) =>
+			call.path.startsWith('/statements/billed') ? [200, rows] : [200, { invoices: [], total: 0 }]
+		);
+	const billedText = (id: string) => byTestId(`generate-building-billed-${id}`)?.textContent?.trim();
+
+	it('nennt, wie viele Mietverträge der Abrechnungsperiode schon eine Abrechnung haben', async () => {
+		const calls = billed([
+			{ buildingId: 'b1', contracts: 3, billed: 2 },
+			{ buildingId: 'b2', contracts: 2, billed: 0 }
+		]);
+		open();
+		await settle();
+		next();
+		await settle();
+
+		expect(billedText('b1')).toBe(
+			'2 von 3 Mietverträgen haben schon eine Abrechnung, die in diese Abrechnungsperiode fällt.'
+		);
+		expect(billedText('b2')).toBeUndefined();
+		// one request for all buildings and the period of step 1
+		const [call] = calls.filter((c) => c.path.startsWith('/statements/billed'));
+		expect(call.path).toBe(
+			'/statements/billed?buildingIds=b1%2Cb2&periodStart=2024-01-01&periodEnd=2024-12-31'
+		);
+	});
+
+	it('sagt, dass für ein Gebäude keine Abrechnung entsteht, wenn alle Mietverträge eine haben', async () => {
+		billed([
+			{ buildingId: 'b1', contracts: 2, billed: 2 },
+			{ buildingId: 'b2', contracts: 1, billed: 1 }
+		]);
+		open();
+		await settle();
+		next();
+		await settle();
+
+		expect(billedText('b1')).toBe(
+			'Alle 2 Mietverträge haben schon eine Abrechnung, die in diese Abrechnungsperiode fällt. Für dieses Gebäude entsteht keine neue.'
+		);
+		expect(billedText('b2')).toBe(
+			'Der Mietvertrag hat schon eine Abrechnung, die in diese Abrechnungsperiode fällt. Für dieses Gebäude entsteht keine neue.'
+		);
+	});
+
+	it('nennt einen einzelnen abgerechneten Mietvertrag in der Einzahl', async () => {
+		billed([{ buildingId: 'b1', contracts: 2, billed: 1 }]);
+		open();
+		await settle();
+		next();
+		await settle();
+
+		expect(billedText('b1')).toBe(
+			'1 von 2 Mietverträgen hat schon eine Abrechnung, die in diese Abrechnungsperiode fällt.'
+		);
 	});
 });

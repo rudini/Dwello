@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
+	billedContracts,
 	generateStatements,
 	invoicesInPeriod,
 	previewStatements
@@ -55,6 +56,21 @@ function backend(statements: { contractId: string; periodStart: string; periodEn
 	};
 	return { posts, fetch: fetch as typeof globalThis.fetch };
 }
+
+describe('Schon abgerechnete Mietverträge je Gebäude', () => {
+	it('zählt die Mietverträge der Periode und die mit einer Abrechnung darin, nach der Regel des Laufs', async () => {
+		// two statements of one contract count once; a statement of an earlier period counts not
+		const { fetch } = backend([
+			{ contractId: 'einzug', periodStart: '2024-05-01', periodEnd: '2024-12-31' },
+			{ contractId: 'einzug', periodStart: '2024-01-01', periodEnd: '2024-12-31' },
+			{ contractId: 'auszug', periodStart: '2023-01-01', periodEnd: '2023-12-31' }
+		]);
+
+		expect(await billedContracts(fetch, period)).toEqual([
+			{ buildingId: 'b1', contracts: 2, billed: 1 }
+		]);
+	});
+});
 
 describe('Abrechnungen erstellen', () => {
 	it('zeigt in der Vorschau jeden Mietvertrag, der in die Periode fällt', async () => {

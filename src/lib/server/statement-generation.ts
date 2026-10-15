@@ -43,11 +43,11 @@ async function call(fetch: Fetch, path: string, body?: object) {
 
 // Every contract of the selected buildings that overlaps the period gets its own statement (tenant change = two
 // statements); a contract that already has one in the period gets none, so a deleted draft can be created again
-async function contractsInPeriod(
-	fetch: Fetch,
-	{ buildingIds, periodStart, periodEnd }: GenerationRequest
-) {
-	const perBuilding = await Promise.all(
+// TODO(fachlich prüfen, #199): an overlapping statement counts as billed, the dashboard counts only one inside the period
+type Run = Pick<GenerationRequest, 'buildingIds' | 'periodStart' | 'periodEnd'>;
+
+async function contractsOf(fetch: Fetch, { buildingIds, periodStart, periodEnd }: Run) {
+	return Promise.all(
 		buildingIds.map(async (buildingId) => {
 			const [{ contracts }, { data: statements }] = await Promise.all([
 				call(fetch, `contracts?buildingId=${buildingId}&limit=1000`),
@@ -58,13 +58,27 @@ async function contractsInPeriod(
 					.filter((s) => s.periodStart <= periodEnd && s.periodEnd >= periodStart)
 					.map((s) => s.contractId)
 			);
-			return (contracts as Contract[])
-				.filter((c) => c.startDate <= periodEnd && (!c.endDate || c.endDate >= periodStart))
-				.filter((c) => !billed.has(c.id))
-				.map((contract) => ({ buildingId, contract }));
+			const inPeriod = (contracts as Contract[]).filter(
+				(c) => c.startDate <= periodEnd && (!c.endDate || c.endDate >= periodStart)
+			);
+			return { buildingId, inPeriod, billed: inPeriod.filter((c) => billed.has(c.id)) };
 		})
 	);
-	return perBuilding.flat();
+}
+
+async function contractsInPeriod(fetch: Fetch, request: GenerationRequest) {
+	return (await contractsOf(fetch, request)).flatMap(({ buildingId, inPeriod, billed }) =>
+		inPeriod.filter((c) => !billed.includes(c)).map((contract) => ({ buildingId, contract }))
+	);
+}
+
+/** Per building: its contracts in the period and how many of them have a statement there already (wizard step 2) */
+export async function billedContracts(fetch: Fetch, request: Run) {
+	return (await contractsOf(fetch, request)).map(({ buildingId, inPeriod, billed }) => ({
+		buildingId,
+		contracts: inPeriod.length,
+		billed: billed.length
+	}));
 }
 
 export async function previewStatements(fetch: Fetch, request: GenerationRequest) {

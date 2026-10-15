@@ -291,10 +291,6 @@ Given('das Gebäude {string} wird inzwischen gelöscht', async ({ seed }, buildi
 	await seed.removeBuilding(building);
 });
 
-Given('{string} hat die Abrechnung {int} für das Gebäude {string}', async ({ seed }, tenant: string, year: number, building: string) => {
-	await seed.statement(tenant, building, year);
-});
-
 When('der Liegenschaftsverwalter die Gebäude für die Abrechnungen {int} wählen will', async ({ verwalter }, year: number) => {
 	await verwalter.attemptsTo(chooseBuildingsFor(year));
 });

@@ -359,7 +359,18 @@ describe('Entwurf der Abrechnungen', () => {
 				{ ...selection, buildingIds: ['b1', 'weg'], heatingProfileId: 'alt' },
 				known
 			)
-		).toEqual({ ...selection, buildingIds: ['b1'], heatingProfileId: '' });
+		).toEqual({
+			selection: { ...selection, buildingIds: ['b1'], heatingProfileId: '' },
+			dropped: { buildings: 1, heatingProfile: true }
+		});
+	});
+
+	it('meldet nichts als weggefallen, wenn es alles noch gibt oder kein Heizprofil gewählt war', () => {
+		const known = { buildingIds: ['b1'], heatingProfileIds: ['hp1'] };
+		expect(restoredSelection({ ...selection, heatingProfileId: '' }, known).dropped).toEqual({
+			buildings: 0,
+			heatingProfile: false
+		});
 	});
 });
 

@@ -249,17 +249,33 @@ export const invoiceRows = (
 		...categoryCheck(c.check)
 	}));
 
-/** A draft from this browser, without buildings or heating profiles deleted meanwhile */
+/** A draft from this browser, without buildings or heating profiles deleted meanwhile, and what it lost */
 export const restoredSelection = (
 	draft: WizardSelection,
 	known: { buildingIds: string[]; heatingProfileIds: string[] }
-): WizardSelection => ({
-	...draft,
-	buildingIds: draft.buildingIds.filter((id) => known.buildingIds.includes(id)),
-	heatingProfileId: known.heatingProfileIds.includes(draft.heatingProfileId)
+) => {
+	const buildingIds = draft.buildingIds.filter((id) => known.buildingIds.includes(id));
+	const heatingProfileId = known.heatingProfileIds.includes(draft.heatingProfileId)
 		? draft.heatingProfileId
-		: ''
-});
+		: '';
+	return {
+		selection: { ...draft, buildingIds, heatingProfileId },
+		dropped: {
+			buildings: draft.buildingIds.length - buildingIds.length,
+			heatingProfile: heatingProfileId !== draft.heatingProfileId
+		}
+	};
+};
+
+/** What the restored draft named and is gone meanwhile, in words for the draft notice */
+export const droppedNotes = (dropped: { buildings: number; heatingProfile: boolean }) =>
+	[
+		dropped.buildings > 0 &&
+			(dropped.buildings === 1
+				? m.statements_draft_dropped_building_one()
+				: m.statements_draft_dropped_building_many({ count: dropped.buildings })),
+		dropped.heatingProfile && m.statements_draft_dropped_heating_profile()
+	].filter((note) => note !== false);
 
 /** The wizard with one building and one period chosen, opened on the settings (A-10) */
 export const wizardLink = (building: string, start: string, end: string) =>
