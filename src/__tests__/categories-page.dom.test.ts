@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { baseLocale, overwriteGetLocale } from '$lib/paraglide/runtime';
 import { get } from 'svelte/store';
 
 // enhance as SvelteKit wires it: the test plays the server's answer to the last submit
@@ -199,7 +200,7 @@ describe('Umlagefähigkeit einer neuen Kategorie', () => {
 		expect(text()).toContain('wenn der Mietvertrag sie als Nebenkosten nennt (Art. 257a Absatz 2 OR)');
 		expect(text()).toContain('Gebäudeversicherung');
 		// Wasser und Abwasser: Merkblatt des Mieterverbands, «Unzulässig» (C-8)
-		expect(text()).toContain('die Gebühr für Regenwasser nicht');
+		expect(text()).toContain('auch nicht die Gebühr für Regenwasser');
 	});
 
 	// Die KI hat den Namen geprüft, der im Feld steht: so kommt die Antwort nach «Von der KI prüfen lassen»
@@ -426,6 +427,110 @@ describe('Umlagefähigkeit einer neuen Kategorie', () => {
 
 		expect(choice('Nicht umlagefähig').checked).toBe(true);
 		expect(byTestId('category-propose-button')).toBeNull();
+	});
+});
+
+// Warum eine vordefinierte Kategorie umlagefähig ist oder nicht, mit festem, fachlich geprüftem Satz (#186)
+describe('Grund der Umlagefähigkeit', () => {
+	const fireExtinguisher = category('c6', 'Feuerlöscher-Wartung', false, 0, {
+		key: 'Fire Extinguisher Maintenance',
+		predefined: true
+	});
+	const lift = category('c3', 'Lift', true, 0, { key: 'Elevator', predefined: true });
+	const reasons = () => allByTestId('category-reason').map((reason) => reason.textContent!.trim());
+
+	it('nennt in der Liste den Grund jeder vordefinierten Kategorie', () => {
+		show(CategoriesPage, { data: { categories: [fireExtinguisher, lift] }, form: null } as never);
+
+		expect(reasons()).toEqual([
+			'Brandschutz ist auch nötig, wenn das Gebäude leer steht; die Wartung hängt nicht mit dem Gebrauch zusammen.',
+			'Strom, Notruftelefon und Wartung des Lifts hängen mit dem Gebrauch zusammen; Reparaturen, Ersatzteile und Serviceabos mit Reparaturen trägt der Vermieter.'
+		]);
+	});
+
+	// Sonst stünde neben «Umlagefähig» ein Satz, der das Gegenteil begründet (Fachreview H-4)
+	it('nennt keinen festen Grund, wenn der Liegenschaftsverwalter die Umlagefähigkeit geändert hat', () => {
+		show(CategoriesPage, { data: { categories: [{ ...fireExtinguisher, isAllowedUtilityCost: true }] }, form: null } as never);
+
+		expect(reasons()).toEqual([]);
+	});
+
+	it('nennt bei eigenen Kategorien keinen Grund, auch mit dem Namen einer vordefinierten', () => {
+		show(CategoriesPage, { data: { categories: [{ ...lift, predefined: false }] }, form: null } as never);
+
+		expect(reasons()).toEqual([]);
+	});
+
+	// Art. 257a Abs. 2 OR, einmal für die ganze Liste (Fachreview H-14)
+	it('sagt in der Liste, dass der Mieter nur bezahlt, was der Mietvertrag nennt', () => {
+		show(CategoriesPage, { data: { categories: [lift] }, form: null } as never);
+
+		expect(byTestId('category-contract-note')!.textContent).toContain(
+			'Der Mieter bezahlt umlagefähige Kosten nur, wenn der Mietvertrag sie als Nebenkosten nennt (Art. 257a Absatz 2 OR).'
+		);
+	});
+
+	// Die Wahl im Formular zählt, nicht der gespeicherte Wert (Code-Review M-1)
+	it('nennt keinen festen Grund, sobald im Formular die andere Umlagefähigkeit gewählt ist', async () => {
+		show(EditCategoryPage, { data: { category: fireExtinguisher }, form: null } as never);
+
+		click(byTestId('category-allowance-true')!);
+		await settle();
+
+		expect(byTestId('category-reason')).toBeNull();
+	});
+
+	// Fachreview Runde 2 (H-25 bis H-27) und Dr. Weber P-7: die Vereinbarung verlangt Art. 257a Abs. 2 OR
+	it.each([
+		['de', 'Administration', false, 'wenn der Mietvertrag sie nennt (Art. 257a Absatz 2 OR)'],
+		['it', 'Pest Control', false, 'è necessario anche quando è vuoto'],
+		['it', 'Caretaker', true, 'piccoli lavori di conservazione'],
+		['fr', 'Administration', false, 'si le contrat de bail les mentionne (art. 257a, al. 2, CO)'],
+		['it', 'Administration', false, 'se il contratto di locazione le indica (art. 257a cpv. 2 CO)'],
+		['en', 'Administration', false, 'if the rental contract names it (Art. 257a para. 2 CO)']
+	] as const)('nennt auf %s den Grund von %s im geprüften Wortlaut', (locale, key, allowed, wording) => {
+		overwriteGetLocale(() => locale);
+		try {
+			show(CategoriesPage, {
+				data: { categories: [category('c9', key, allowed, 0, { key, predefined: true })] },
+				form: null
+			} as never);
+
+			expect(reasons()[0]).toContain(wording);
+		} finally {
+			overwriteGetLocale(() => baseLocale);
+		}
+	});
+
+	// Wie die vordefinierte Kategorie heisst (Fachreview H-26)
+	it.each([
+		['fr', 'l’assurance bâtiment et les impôts'],
+		['it', 'assicurazione edificio e imposte']
+	] as const)('nennt im Hilfetext auf %s die Gebäudeversicherung mit dem Namen ihrer Kategorie', (locale, wording) => {
+		overwriteGetLocale(() => locale);
+		try {
+			show(EditCategoryPage, { data: { category: lift }, form: null } as never);
+
+			expect(text()).toContain(wording);
+		} finally {
+			overwriteGetLocale(() => baseLocale);
+		}
+	});
+
+	it('nennt den Grund beim Bearbeiten einer vordefinierten Kategorie', () => {
+		show(EditCategoryPage, { data: { category: fireExtinguisher }, form: null } as never);
+
+		expect(byTestId('category-reason')!.textContent).toContain('die Wartung hängt nicht mit dem Gebrauch zusammen');
+	});
+
+	// Wartung zählt nicht allgemein; Kehricht wie Wasser und Abwasser (#186, Fachreview H-16)
+	it('grenzt im Hilfetext Wartung ein und nennt Kehricht', () => {
+		show(EditCategoryPage, { data: { category: lift }, form: null } as never);
+
+		expect(text()).toContain('bei Heizung und Lift zählen nur Betrieb und Wartung der Anlage');
+		expect(text()).toContain(
+			'Bei Wasser, Abwasser und Kehricht zählen Grundgebühren nicht, die vom Wert der Liegenschaft abhängen; beim Abwasser auch nicht die Gebühr für Regenwasser.'
+		);
 	});
 });
 

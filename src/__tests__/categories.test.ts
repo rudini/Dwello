@@ -1,9 +1,13 @@
 import { describe, it, expect } from 'vitest';
+import { baseLocale, overwriteGetLocale } from '$lib/paraglide/runtime';
 import { actions as listActions, load } from '../routes/config/categories/+page.server';
 import { actions as newActions } from '../routes/config/categories/new/+page.server';
 import { actions as editActions } from '../routes/config/categories/[id]/edit/+page.server';
 import { runAction } from './helpers/action';
 import proposal from '../../tests/contracts/category-proposal.json';
+import unsure from '../../tests/contracts/category-proposal-refused.json';
+import invalid from '../../tests/contracts/validation-refused.json';
+import contract from '../../tests/contracts/category.json';
 
 const API = 'http://localhost:3001/api/v1/categories';
 
@@ -53,6 +57,15 @@ describe('Kategorien anzeigen', () => {
 				usageCount: 3
 			})
 		]);
+	});
+
+	// The key names a predefined category's reason (#186), whatever its German name
+	it('behält den Schlüssel einer Kategorie', async () => {
+		const fetch = (async () => Response.json({ categories: [contract], total: 1 })) as typeof globalThis.fetch;
+
+		const data = (await load({ fetch } as never)) as { categories: { key: string }[] };
+
+		expect(data.categories[0].key).toBe('Internet');
 	});
 });
 
@@ -156,36 +169,52 @@ describe('Vorschlag der KI', () => {
 		]);
 	});
 
-	it('sagt, dass der Liegenschaftsverwalter selbst wählt, wenn die KI keine Einstufung liefert', async () => {
-		const refused = { error: 'Die KI ist nicht erreichbar oder ist sich nicht sicher.', code: 'KI_NO_PROPOSAL', params: {} };
-		const { result } = runAction(newActions.propose, '', 503, form, refused);
+	const hint = async (status: number, body: unknown) =>
+		((await runAction(newActions.propose, '', status, form, body).result) as { proposal: { error: string } }).proposal.error;
+	const UNSURE = 'Die KI ist sich nicht sicher. Wählen Sie selbst, ob die Kosten umlagefähig sind.';
+	const UNAVAILABLE =
+		'Die KI ist nicht erreichbar. Versuchen Sie es später nochmals oder wählen Sie selbst, ob die Kosten umlagefähig sind.';
+
+	// Whether trying again can help (#186)
+	it('sagt, dass die KI unsicher ist und der Liegenschaftsverwalter selbst wählt', async () => {
+		const { result } = runAction(newActions.propose, '', 503, form, unsure);
 
 		expect(await result).toEqual({
-			proposal: {
-				name: 'Treppenhausreinigung',
-				description: 'Reinigung von Treppenhaus und Eingang',
-				error: 'Die KI ist nicht erreichbar oder ist sich nicht sicher. Wählen Sie selbst, ob die Kosten umlagefähig sind.'
-			}
+			proposal: { name: 'Treppenhausreinigung', description: 'Reinigung von Treppenhaus und Eingang', error: UNSURE }
 		});
+	});
+
+	// «non è sicura» / «n’est pas sûre» lesen sich auch als «nicht ungefährlich» (Persona Marco P-1, Code-Review M-9);
+	// Englisch «Decide yourself» (Fachreview H-28)
+	it.each([
+		['it', unsure, 'L’IA non ne è certa. Indichi Lei se i costi sono addebitabili.'],
+		['fr', unsure, 'L’IA n’en est pas certaine. Indiquez vous-même si les frais sont imputables.'],
+		['en', unsure, 'The AI is not sure. Decide yourself whether the costs are allocable.'],
+		[
+			'en',
+			{ ...unsure, code: 'KI_PROPOSAL_UNAVAILABLE' },
+			'The AI cannot be reached. Try again later or decide yourself whether the costs are allocable.'
+		]
+	] as const)('sagt auf %s ohne Doppeldeutigkeit, warum die KI nichts vorschlägt', async (locale, body, text) => {
+		overwriteGetLocale(() => locale);
+		try {
+			expect(await hint(503, body)).toBe(text);
+		} finally {
+			overwriteGetLocale(() => baseLocale);
+		}
+	});
+
+	it('sagt, dass die KI nicht erreichbar ist und ein späterer Versuch helfen kann', async () => {
+		expect(await hint(503, { ...unsure, code: 'KI_PROPOSAL_UNAVAILABLE' })).toBe(UNAVAILABLE);
 	});
 
 	// Nie der eigene Text des Backends, z. B. Elysias Meldung zu einem zu langen Namen (E-6)
-	it('zeigt bei einer anderen Ablehnung des Backends denselben Hinweis', async () => {
-		const { result } = runAction(newActions.propose, '', 422, form, { type: 'validation', message: 'Expected string length less or equal to 100' });
-
-		expect(await result).toEqual({
-			proposal: {
-				name: 'Treppenhausreinigung',
-				description: 'Reinigung von Treppenhaus und Eingang',
-				error: 'Die KI ist nicht erreichbar oder ist sich nicht sicher. Wählen Sie selbst, ob die Kosten umlagefähig sind.'
-			}
-		});
+	it('zeigt bei einer anderen Ablehnung des Backends den Hinweis «nicht erreichbar»', async () => {
+		expect(await hint(422, invalid)).toBe(UNAVAILABLE);
 	});
 
 	it('zeigt den Hinweis auch, wenn eine Antwort ohne Inhalt kommt', async () => {
-		const { result } = runAction(newActions.propose, '', 200, form, null);
-
-		expect(await result).toMatchObject({ proposal: { error: expect.stringContaining('Wählen Sie selbst') } });
+		expect(await hint(200, null)).toBe(UNAVAILABLE);
 	});
 
 	it('verlangt zuerst einen Namen', async () => {

@@ -8,12 +8,14 @@ import { deleteRecord, fetchRecord, saveRecord } from './save-form';
 const API = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1/categories`;
 const LIST = '/config/categories';
 
-export type CategoryWithUsage = Category & { usageCount: number; predefined: boolean };
+export type CategoryWithUsage = Category & { key: string; usageCount: number; predefined: boolean };
 
 /** Backend category as shown in the German interface: `name` stays the English key for invoice recognition */
 export function toCategory(c: Record<string, unknown>): CategoryWithUsage {
 	return {
 		id: c.id as string,
+		// The stored name: the English key of a predefined category, which names its reason (#186)
+		key: (c.name || '') as string,
 		name: (c.nameDE || c.name || '') as string,
 		nameFR: (c.nameFR || '') as string,
 		nameIT: (c.nameIT || '') as string,
@@ -90,7 +92,8 @@ export async function proposeAllocability(fetch: typeof globalThis.fetch, reques
 		})
 	});
 	const answer = await response.json().catch(() => null);
-	// Without a proposal the backend can only answer KI_NO_PROPOSAL, or a schema refusal in its own words
+	// Without a proposal the backend says whether the KI is unsure or not reachable (#186); any other refusal, in its
+	// own words, counts as not reachable
 	const proposal: Proposal =
 		response.ok && answer
 			? {
@@ -99,7 +102,14 @@ export async function proposeAllocability(fetch: typeof globalThis.fetch, reques
 					isAllowedUtilityCost: answer.isAllowedUtilityCost === true,
 					reasoning: String(answer.reasoning ?? '')
 				}
-			: { name: body.nameDE, description: body.description, error: m.backend_ki_no_proposal() };
+			: {
+					name: body.nameDE,
+					description: body.description,
+					error:
+						answer?.code === 'KI_PROPOSAL_UNSURE'
+							? m.backend_ki_proposal_unsure()
+							: m.backend_ki_proposal_unavailable()
+				};
 	return { proposal };
 }
 

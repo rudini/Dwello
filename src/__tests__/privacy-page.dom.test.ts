@@ -9,6 +9,13 @@ describe('Datenschutzerklärung zur KI-Kategorisierung', () => {
 		expect(byTestId('llm-recipient')?.textContent).toContain('verlassen dafür den Server nicht');
 	});
 
+	it('sagt bei abgeschalteter KI, dass kein Sprachmodell Rechnungen oder Kategorien bearbeitet (#216)', () => {
+		show(PrivacyPage, { data: { recipient: null, enabled: false, providers: ['Google'] } } as never);
+
+		const notice = byTestId('llm-recipient')?.textContent;
+		expect(notice).toBe('Rechnungen und Kategorien werden nicht von einem Sprachmodell bearbeitet.');
+	});
+
 	it('nennt Anbieter, Land und die übermittelten Angaben eines externen Anbieters (DSG Art. 19)', () => {
 		show(PrivacyPage, {
 			data: { recipient: { provider: 'Beispiel AG', country: 'Schweiz' }, providers: ['Google'] }

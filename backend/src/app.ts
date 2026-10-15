@@ -12,7 +12,7 @@ import { tenantRoutes } from './routes/tenants';
 import { contractRoutes } from './routes/contracts';
 import { categoryRoutes } from './routes/categories';
 import { invoiceRoutes } from './routes/invoices';
-import { llmRecipient } from './config/llm';
+import { llmConfig, llmRecipient } from './config/llm';
 import { distributionKeyRoutes } from './routes/distribution-keys';
 import { heatingProfileRoutes } from './routes/heating-profiles';
 import { configRoutes } from './routes/config';
@@ -66,7 +66,7 @@ export const app = new Elysia()
 		service: 'dwello-backend'
 	}))
 	// Who receives invoice data for the KI categorisation: the privacy notice is public, so this is too
-	.get('/api/v1/invoices/llm-recipient', () => ({ recipient: llmRecipient() }))
+	.get('/api/v1/invoices/llm-recipient', () => ({ recipient: llmRecipient(), enabled: llmConfig.enabled }))
 	// Everything below requires a valid JWT
 	.use(authMiddleware)
 	.use(dashboardRoutes)

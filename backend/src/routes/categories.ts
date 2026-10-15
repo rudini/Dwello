@@ -4,7 +4,7 @@
  */
 
 import { Elysia, t } from 'elysia';
-import { errorBody, refusal } from '../services/coded-error';
+import { codedBody, errorBody, refusal } from '../services/coded-error';
 import { authMiddleware } from '../middleware/auth';
 import {
 	listCategories,
@@ -69,10 +69,12 @@ export const categoryRoutes = new Elysia({ prefix: '/api/v1/categories' })
 	.post(
 		'/propose',
 		async ({ body, set }) => {
-			const proposal = await proposeAllocability(body);
-			if (proposal) return proposal;
-			set.status = 503;
-			return refusal('KI_NO_PROPOSAL', 'Die KI ist nicht erreichbar oder ist sich nicht sicher.');
+			try {
+				return await proposeAllocability(body);
+			} catch (error) {
+				set.status = 503;
+				return codedBody(error, 'KI_PROPOSAL_UNAVAILABLE', 'Die KI ist nicht erreichbar.');
+			}
 		},
 		{
 			body: t.Object({

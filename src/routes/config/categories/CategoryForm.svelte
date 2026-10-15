@@ -9,6 +9,7 @@
 	import TextInput from '$lib/ui/TextInput.svelte';
 	import SaveForm from '../SaveForm.svelte';
 	import CategoryProposal from './CategoryProposal.svelte';
+	import CategoryReason from './CategoryReason.svelte';
 
 	// `proposal` only on a new category: the KI's answer to «Von der KI prüfen lassen»
 	let {
@@ -19,7 +20,7 @@
 		submitLabel
 	}: {
 		action?: string;
-		category?: Category & { predefined?: boolean };
+		category?: Category & { key?: string; predefined?: boolean };
 		errors?: Record<string, string>;
 		proposal?: Proposal | null;
 		submitLabel: string;
@@ -41,6 +42,8 @@
 			heating: category?.isHeatingCost ?? false
 		}))
 	);
+	// The reason of a predefined category follows the choice in the form, not the saved one
+	const chosen = $derived(category && { ...category, isAllowedUtilityCost: values.allowed === 'true' });
 	const allowance = [
 		{
 			value: 'true',
@@ -116,6 +119,7 @@
 			error={values.allowed ? undefined : errors.isAllowedUtilityCost}
 			testid="category-allowance"
 		/>
+		<CategoryReason category={chosen} />
 		{#if action}
 			<div>
 				<div>

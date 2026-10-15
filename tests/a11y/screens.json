@@ -36,7 +36,8 @@
 		"buildings-billed": "Statement wizard step «Gebäude» with a building whose rental contracts partly have a statement in the period: the count at the building (#135).",
 		"formula-tested": "Distribution key form after testing a formula.",
 		"ki-proposal": "New category form after «Von der KI prüfen lassen»: the KI's proposal with its reasoning, the choice preset (#176).",
-		"ki-no-proposal": "New category form after the KI gave no sure answer: the hint to choose oneself, nothing preset (#176).",
+		"ki-unsure": "New category form after the KI was not sure: the hint to choose oneself, nothing preset (#176, #186).",
+		"ki-unavailable": "New category form after the KI could not be reached: the hint to try later or choose oneself, nothing preset (#186).",
 		"ki-checking": "New category form while the KI checks: the button busy, «Die KI prüft die Kategorie …» in the status region (#176, code review G-3).",
 		"ki-proposal-kept": "New category form where the Liegenschaftsverwalter chose before «Von der KI prüfen lassen»: the proposal says the own choice stays (#176, persona review).",
 		"profile-sum-invalid": "Heating profile form whose monthly shares do not add up to 100 %.",
@@ -442,7 +443,8 @@
 				"default",
 				"submit-empty",
 				"ki-proposal",
-				"ki-no-proposal",
+				"ki-unsure",
+				"ki-unavailable",
 				"ki-proposal-kept",
 				"ki-checking"
 			]
@@ -454,6 +456,13 @@
 				"default",
 				"submit-cleared",
 				"saved-toast"
+			]
+		},
+		{
+			"name": "category-edit-predefined",
+			"path": "/config/categories/{predefinedCategory}/edit",
+			"states": [
+				"default"
 			]
 		},
 		{

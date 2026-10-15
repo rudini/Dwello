@@ -9,7 +9,11 @@
 
 	// Who receives invoice data for the KI categorization (DSG Art. 19: recipient and country)
 	const llmNotice = $derived(
-		data.recipient ? m.privacy_llm_external(data.recipient) : m.privacy_llm_local()
+		data.enabled === false
+			? m.privacy_llm_off()
+			: data.recipient
+				? m.privacy_llm_external(data.recipient)
+				: m.privacy_llm_local()
 	);
 
 	const sections = $derived([
