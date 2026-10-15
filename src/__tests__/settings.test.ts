@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { actions, load } from '../routes/config/+page.server';
 import { load as loadWizard } from '../routes/statements/generate/+page.server';
-import { lastCompletedPeriod } from '../lib/accounting-period';
+import { endedPeriodsSince, lastCompletedPeriod } from '../lib/accounting-period';
 import { runAction } from './helpers/action';
 
 const API = 'http://localhost:3001/api/v1';
@@ -209,5 +209,22 @@ describe('Standard-Verteilschlüssel bei neuen Rechnungen', () => {
 		} as never)) as Record<string, unknown>;
 
 		expect(data.defaultDistributionKeyId).toBe('dk1');
+	});
+});
+
+// #142: every ended period with days from a day on, the newest first
+describe('Abgelaufene Abrechnungsperioden', () => {
+	it('nennt alle abgelaufenen Perioden ab einem Tag, die neueste zuerst', () => {
+		const today = new Date('2026-10-15T12:00:00');
+		expect(endedPeriodsSince('calendar', '2024-04-01', today)).toEqual([
+			{ start: '2025-01-01', end: '2025-12-31' },
+			{ start: '2024-01-01', end: '2024-12-31' }
+		]);
+		expect(endedPeriodsSince('july-june', '2025-06-30', today)).toEqual([
+			{ start: '2025-07-01', end: '2026-06-30' },
+			{ start: '2024-07-01', end: '2025-06-30' }
+		]);
+		// from a day in the running period on: none has ended
+		expect(endedPeriodsSince('calendar', '2026-02-01', today)).toEqual([]);
 	});
 });

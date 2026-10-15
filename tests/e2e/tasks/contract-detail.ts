@@ -43,7 +43,7 @@ export const showBuildingInvoices = Click.on(contractInvoicesLink);
 export const chooseNextStep = (label: string) => Click.on(nextStep(label));
 export const openRefusedStatement = Click.on(refusedStatementLink);
 export const deleteDraftAndEndContract = Click.on(deleteDraftAndEndButton);
-export const createMissingStatement = Click.on(missingStatementLink);
+export const createMissingStatement = (periodStart: string) => Click.on(missingStatementLink(periodStart));
 
 export const useWindowOf = (width: number, height: number) => Browser.resizeTo({ width, height });
 // the confirm button scrolled into view inside the dialog

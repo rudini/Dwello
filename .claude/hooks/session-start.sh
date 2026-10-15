@@ -10,7 +10,9 @@ cd "$CLAUDE_PROJECT_DIR"
 # (FETCH_HEAD, since a single-branch clone keeps no origin/main); a failing check never stops the hook
 if timeout 20 git fetch -q origin main 2>/dev/null; then
 	behind=$(git rev-list --count HEAD..FETCH_HEAD 2>/dev/null || echo 0)
-	[ "$behind" -eq 0 ] || echo "session-start: branch $(git rev-parse --abbrev-ref HEAD) is $behind commits behind origin/main;" \
+	# a shallow clone also counts every commit of main its short history cannot reach (801 for two pull requests)
+	[ "$(git rev-parse --is-shallow-repository)" = true ] && [ "$behind" -gt 0 ] && behind="some"
+	[ "$behind" = 0 ] || echo "session-start: branch $(git rev-parse --abbrev-ref HEAD) is $behind commits behind origin/main;" \
 		"before the first change, start it anew from origin/main if its pull request is merged, else merge origin/main (CLAUDE.md, Branches)."
 fi
 

@@ -9,6 +9,7 @@ const contractPage = (email: string | null) =>
 	render(ContractDetailPage, {
 		props: {
 			data: {
+				missingStatements: [],
 				contract: {
 					id: 'c1',
 					apartmentId: 'a1',

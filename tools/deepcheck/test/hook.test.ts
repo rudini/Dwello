@@ -24,6 +24,7 @@ describe('deepcheck Claude Code hook (commit/push gate, like fallow-gate.sh)', (
 		const result = hook(root, 'git add -A && git commit -m "feat: x"');
 		expect(result.status).toBe(2);
 		expect(result.stderr).toContain('deepcheck-gate: blocked');
+		expect(result.stderr).toContain('nothing in this command ran');
 		expect(result.stderr).toContain('G1 new shallow module');
 		expect(result.stdout).toBe('');
 	});

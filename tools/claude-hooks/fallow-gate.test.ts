@@ -38,6 +38,7 @@ describe('fallow gate without a base branch', () => {
 		const root = singleBranchClone();
 		const blocked = hook(root, 'git commit -m x');
 		expect(blocked.stderr).toContain('could not detect base branch');
+		expect(blocked.stderr).toContain('nothing in this command ran');
 		expect(blocked.status).toBe(2);
 		const advice = /run (git fetch [^,]+)/.exec(blocked.stderr)?.[1] ?? '';
 		git(root, ...advice.split(' ').slice(1));

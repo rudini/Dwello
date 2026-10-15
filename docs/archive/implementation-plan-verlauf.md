@@ -6157,6 +6157,35 @@ Task: open `bug` issues one by one (#122, #123, #125, #126, #127, #128, #135 mer
 
 Files: `backend/src/services/{prorating,statement-pdf,pdf,calculation}.service.ts`, tests (`statement-generate.feature` with a preview of a given period (`openPreview` takes `periodStart`/`periodEnd`), `prorating.pg.test.ts`, `service-period.pg.test.ts`, `statement-pdf.pg.test.ts`, `statement-pdf-data.test.ts`, `statement-pdf-render.test.ts`, `statement-detail.feature` and its steps, seed `statement` with a period), `docs/nebenkostenabrechnung-anforderungen.md` (rule 5), `docs/design/offene-punkte.md` (O-26)
 
+## Session 2026-10-15 (7): bug #142, contract page reports a missing statement only for the last period
+
+Task: open `bug` issues one by one (#122, #123, #125, #126, #127, #128, #135, #137 merged in rudini/Dwello#181, #182, #189, #196, #197, #198, #203, #210); now #142. Skipped while labelled `entscheiden`: #93, #124, #130, #131, #136, #138, #141, #193, #194 (and #199, #200, #201, #207 opened in this run).
+
+- [x] Scenario «Fehlende Abrechnung einer älteren Periode am Mietvertrag» in `contract-detail.feature`: last year's statement exists, the page names 2024 and not last year. Scenario red: the hint `contract-missing-statement` was missing (null)
+- [x] No fach-reviewer: the rule (rent days in an ended period without a statement of the contract) and the terms are those of A-10; only older periods are added
+- [x] `endedPeriodsSince` in `accounting-period.ts`; the page load lists every ended period from the Vertragsbeginn with rent days and no statement, newest first, from one request for the contract's statements. Test red: «nennt alle abgelaufenen Perioden ab einem Tag …» (`settings.test.ts`) – not a function; «nennt jede abgelaufene Periode ohne Abrechnung …», «schweigt für Perioden vor dem Vertragsbeginn …» (`contract-actions.test.ts`) – `missingStatements` undefined
+- [x] `MissingStatement.svelte`: one period as before; several: «{count} Abrechnungen fehlen» and one «Abrechnung {period} erstellen» per period. DOM test red: «nennt mehrere fehlende Abrechnungen …» – no such links
+- [x] Texts in de/fr/it/en; a11y and language state `missing-statements` on contract-detail (code review C-3)
+- [x] Skills: tdd, ponytail, ponytail-review
+- [x] Checks: lint, check, deepcheck:audit, fallow, test:coverage (2434; two page tests needed `missingStatements: []` in their data), E2E chromium + api contract-detail (28 passed), axe and language rows of contract-detail (12 passed)
+- [x] code-reviewer
+  - code-reviewer round 1 (`docs/reviews/issue-142-review-1.md`): no Blocker/Major; fixed C-1 (Minor; the load test uses `tests/contracts/contract.json` and `period-statements.json`, README names `?contractId=…`), C-2 (Minor; the fake filters by `contractId` and a previous tenant's statement must not count; test red with the filter taken out), C-3 (Minor; a11y and language state `missing-statements` on contract-detail), C-4 (Nit; the dead `variant` gone), C-7 (Nit; the helper test in its own `describe`), rejected C-5 (Nit): `start_date` is `notNull`, the endless loop cannot be reached; C-6 (Minor: a changed period setting reports every period as missing) added to #199
+  - code-reviewer round 2 (`docs/reviews/issue-142-review-2.md`): round 1 confirmed, no Blocker/Major; fixed C-8 (Minor; buttons «2023 abrechnen» with their verb, the `aria-label` gone so the visible text is the name), C-9 (Minor; «mit welcher Periode Sie beginnen, spielt keine Rolle»), C-10 (Minor; the single-period text says the wizard covers the whole building and invoices come first), C-11 (Minor; these lines with their red tests: DOM tests «meldet die fehlende Abrechnung …» and «nennt mehrere fehlende Abrechnungen …» red on the old texts and labels), C-12 (Nit; the comment back at `end-dialog-refused`)
+  - code-reviewer round 3 (`docs/reviews/issue-142-review-3.md`): C-8 to C-12 confirmed, no Blocker/Major; C-13 (Minor: personas on the new labels) answered by Helga and Marco round 3, the single-period text not yet seen, and C-14 (Nit: fr/it labels without object) in O-28; review of the slice ended
+- [x] Personas (Major P-1 of Helga and Anna stays open by product-owner decision: «from the Vertragsbeginn», merge approved; recorded in #133)
+  - persona helga round 1 (`docs/design/personas/helga-issue-142.md`): open P-1 (Major: old years without a way out; product owner kept «from the Vertragsbeginn», case added to #133; dashboard part in #211), fixed P-2 (Minor; the text says the wizard covers all contracts of the building), P-3 (Minor; «Erfassen Sie zuerst die Rechnungen der Periode»), rejected P-4 (Nit): a period that has its statement is not missing, the list names only what is open
+  - persona helga round 2 (`docs/design/personas/helga-issue-142-2.md`): P-2, P-3 fixed; fixed P-5 (Minor; the order sentence, as C-9), P-6 (Minor; verbs on the buttons, as C-8), open P-7 (Minor: a link to the period's invoices) in #211
+  - persona helga round 3 (`docs/design/personas/helga-issue-142-3.md`): P-5, P-6 fixed; open P-8 (Nit: «Schaltfläche») in O-28
+  - persona marco round 1 (`docs/design/personas/marco-issue-142.md`): fixed P-1, P-2 (Minor; several periods as short buttons side by side, named in full for a screen reader), P-3 (Minor; «die Reihenfolge spielt keine Rolle»); observations in O-27
+  - persona marco round 2 (`docs/design/personas/marco-issue-142-2.md`): P-2, P-3 fixed, P-1 down to a Nit (warning 368 px instead of 436 px); fixed P-4 (Minor; verbs on the buttons)
+  - persona marco round 3 (`docs/design/personas/marco-issue-142-3.md`): P-4 fixed; the warning's height at 390 px is the kind of his P-1 again (buttons with their verb stack), recorded once in O-28; review of the slice ended
+  - persona anna round 1 (`docs/design/personas/anna-issue-142.md`): open P-1 (Major, as Helga P-1, #133), P-2 (Minor: dashboard names only the last period) in #211, fixed P-3, P-4 (Minor; as Marco P-3, Helga P-2), P-5 (Nit: partial years) rejected: the wizard names the Mietstage per contract; observations in #211 and O-27
+  - persona anna round 2 (`docs/design/personas/anna-issue-142-2.md`): P-3, P-4 fixed; open P-6 (Minor: link to the invoices) in #211, fixed P-7 (Nit; «Jede Schaltfläche öffnet …»)
+- [x] Workflow review `docs/reviews/workflow-rules-review-issue-142.md`
+- [x] PR, CI, merge (pull request opened after archiving; merge follows green CI, approved by the product owner with the persona Major open in #133). Final checks: test:coverage 2434, lint, check, backend test (614) + type-check, deepcheck:audit, fallow, E2E chromium + api contract-detail (28 passed), axe and language rows of contract-detail (14 passed)
+
+Files: `src/lib/accounting-period.ts`, `tests/a11y/screens.json`, `accessibility.feature`, `sprachen-bildschirme.feature`, `tests/e2e/tasks/accessibility.ts`, `tests/contracts/README.md`, `docs/design/offene-punkte.md` (O-27, O-28), `src/routes/contracts/[id]/+page.server.ts`, `+page.svelte`, `MissingStatement.svelte`, `messages/*.json`, tests (`settings.test.ts`, `contract-actions.test.ts`, `contract-detail-page.dom.test.ts`, `contract-rent-labels.test.ts`, `tenant-email-link.test.ts`, `contract-detail.feature` and its steps, targets, tasks, questions)
+
 ## Session 2026-10-15 (7): bug #212, small KI model still rejects Treppenhausreinigung
 
 - [x] Stub reproduces the small model's answer unless the prompt carries the new rules; scenario «KI beurteilt eine neue Kategorie wie die vordefinierten» red. Scenario red: `schlägt die KI vor, die Kategorie als umlagefähig zu erfassen` – allowedChosen false (categories.steps.ts:171)
@@ -6173,3 +6202,60 @@ Files: `backend/src/services/{prorating,statement-pdf,pdf,calculation}.service.t
 - [x] `llm:eval` with qwen2.5:3b: handed to the product owner (not reachable here; under «Blocked on me»)
 - [x] Workflow review `docs/reviews/workflow-rules-review-issue-212.md`
 - [x] PR `Fixes #212` (opened after archiving; merge follows green CI)
+
+## Session 2026-10-15 (8): apply the workflow rules reviews
+
+Request (chat, no issue): summarize the findings of all `docs/reviews/workflow-rules-review-*.md`, apply those not yet applied, then review the changes independently against the Opus 5.5 guide (claude.dev/blog/getting-the-most-out-of-opus-5-5). Reviews 1 to 9 were applied on 2026-10-14 (commits 3b4db73, 2f8b7ba, 7784acc; W-1 left out on request); the later reviews (issue-122 to issue-202, migrations-frozen) were not. No scenario: changes rules, hooks and test tooling only, no app behaviour.
+
+- [x] Tooling, test first: commit gate skips commits outside the project and says the whole command was dropped; fallow and deepcheck gates say the same; `no-german-in-code` ignores abbreviations of legal citations (176 W-8, 173 R-4, 125 R-4, 135 W-4, 176 W-1)
+  Test red: commit-msg-gate «lets … through in a repository outside the project» (3 cases) – status 2; «says that nothing in the blocked command ran» – stderr without it; fallow/deepcheck gate tests (stashed hooks) – stderr without it; «zählt Abkürzungen einer Rechtsangabe nicht» – expected true to be false
+  Skills: tdd, ponytail, ponytail-review (round 2: reuse `tools/deepcheck/test/helpers.ts` in the worktree test, applied)
+- [x] Scripts: `persona-stack.sh` from its own place (174 W-1); `session-start.sh` prints «some» instead of a count in a shallow clone (174 W-2; counting from the merge base gave 35 either way in a scratch clone)
+- [x] Rules in `CLAUDE.md`, `tests/e2e/CLAUDE.md`, `backend/CLAUDE.md`, `docs/test-pyramid.md`, personas README, `persona.md`, `token-referenz.md`, `screens.json`, task template
+- [x] Findings summary `docs/reviews/workflow-rules-findings-summary.md` (applied, rejected with reason)
+- [x] Checks: test:coverage (2442), lint, check, backend test (614) + type-check, deepcheck:audit, fallow audit
+- [x] Independent review against the Opus 5.5 guide (`code-reviewer`, own worktree), triage
+  code-reviewer round 1 (`docs/reviews/workflow-rules-apply-review-1.md`): open -, fixed C-1 (Major), C-2 (Major), C-3 to C-18
+  code-reviewer round 2 (`docs/reviews/workflow-rules-apply-review-2.md`): open -, fixed C-19 to C-25 (Minor/Nit); C-1 to C-18 confirmed fixed
+  code-reviewer round 3 (`docs/reviews/workflow-rules-apply-review-3.md`): open C-26 (Nit), C-27 (Nit) -> `offene-punkte.md` H-25; C-19 to C-25 confirmed fixed
+  Test red (C-23): design guard «meldet <style> a { color: red }» - no finding; (C-20): «checks a commit whose directory is no repository» - status 0 with `!repository ||` removed
+  Test red (C-1, C-3): commit-msg-gate worktree outside its folder and the two cd cases - status 0 with the hook of eee15f1
+- [x] Merged `origin/main` (#212, archive conflict resolved: both sessions kept); its new `workflow-rules-review-issue-212.md` applied (212 #1, #2; #3 as 202 #2)
+  code-reviewer round 1 of the #212 slice (`docs/reviews/workflow-rules-apply-212-review-1.md`): open -, fixed C-1 (Major), C-2 to C-6; merge fd87bba confirmed (both sessions kept)
+  code-reviewer round 2 of the #212 slice (`docs/reviews/workflow-rules-apply-212-review-2.md`): C-1 to C-6 confirmed fixed; fixed C-7 (Nit), C-8 (Minor)
+- [x] No workflow review (step 7): the task changes rules, hooks and test tooling, no app behaviour
+- [x] Archive session, push, pull request, CI, merge (pull request opened after archiving; merge follows green CI)
+
+Files: `CLAUDE.md`, `tests/e2e/CLAUDE.md`, `backend/CLAUDE.md`, `docs/test-pyramid.md`, `docs/design/personas/README.md`, `docs/design/token-referenz.md`, `docs/design/tools/persona-stack.sh`, `.claude/agents/persona.md`, `.claude/hooks/{commit-msg-gate.mjs,fallow-gate.sh,deepcheck-gate.sh,session-start.sh}`, `.claude/skills/grill-me/SKILL.md`, `.github/ISSUE_TEMPLATE/task.md`, `tests/a11y/screens.json`, `src/__tests__/no-german-in-code.test.ts`, `tools/claude-hooks/*.test.ts`, `tools/deepcheck/test/hook.test.ts`, `docs/reviews/workflow-rules-findings-summary.md`, `docs/reviews/workflow-rules-apply-review-{1,2,3}.md`, `docs/design/offene-punkte.md`, `src/__tests__/design-guard.test.ts`
+
+## Session 2026-10-15 (9): skill slice-review
+
+Request (chat, no issue): move the procedure of `CLAUDE.md` Workflow 4 to 6 (worktree per reviewer, prompt, report path, plan line, triage) into a skill `slice-review`, so `CLAUDE.md` keeps the rules and gets shorter; the agents stay agents. No scenario: agent instructions only.
+
+- [x] Skill `.claude/skills/slice-review/SKILL.md` with the procedure, nothing lost from `CLAUDE.md`
+- [x] `CLAUDE.md` Workflow 1, 4, 5, 6 point to the skill instead of repeating it
+- [x] Checks: test:coverage (2442), lint, check, backend test (615) + type-check
+- [x] Review against the Opus 5.5 guide (`code-reviewer`, own worktree, run with the new skill), triage
+  code-reviewer round 1 (`docs/reviews/slice-review-skill-review-1.md`): open -, fixed C-1 to C-4 (Minor), C-5 to C-9 (Nit); no re-review (no Blocker/Major, no code, Workflow 6)
+- [x] Archive session, push to PR #215
+
+Files: `.claude/skills/slice-review/SKILL.md`, `CLAUDE.md`, `docs/design/arbeitsregeln.md`, `docs/reviews/slice-review-skill-review-1.md`
+
+## Session 2026-10-15 (10): #147 contract form shows empty lists when they cannot be loaded
+
+Request (chat): work through the open bug issues one by one, each with its own pull request, merged before the next starts. Issues with `entscheiden` are not started (#191, #141, #138, #136, #131, #130, #124, #93). Order: #147, #159, #208, #209.
+
+The edit page (`contracts/[id]/edit`) no longer loads tenants or apartments since #152 (both are fixed and only named), so the gap the issue names is gone there; the new-contract page (`contracts/new`), which the issue says to check, has it: a failed `/tenants` or `/apartments` gives an empty choice. Following the code, not the wording (CLAUDE.md, Coding guidelines). No scenario: the state needs a failing request between the load function and the backend (CLAUDE.md, Workflow 1). No persona: the text is reachable only through that server-side failure.
+
+- [x] Test first: `contract-new-load.test.ts` with a failing tenants and a failing apartments response -> load error
+  Test red: «meldet einen Ladefehler, wenn tenants fehlen» / «… apartments fehlen» – promise resolved instead of rejecting; «… wenn das Backend nicht antwortet» (fix without `.catch`) – expected TypeError to match { status: 500 }
+  Skills: tdd, ponytail, ponytail-review (no findings)
+- [x] Fix in `src/routes/contracts/new/+page.server.ts`, new text `contracts_choices_load_failed` in `messages/{de,fr,it,en}.json`
+- [x] Checks: test:coverage (2447), lint, check, backend test (615) + type-check, deepcheck:audit
+- [x] code-reviewer round(s)
+  code-reviewer round 1 (`docs/reviews/issue-147-review-1.md`): open -, fixed C-1 (Minor), C-2 (Minor), rejected C-3: passing the backend status on would show «Diese Seite gibt es nicht.» for a 404 of a list route; C-4: one text for both lists keeps the error page simple, the landlord's next step is the same
+  code-reviewer round 2 (`docs/reviews/issue-147-review-2.md`): open C-5 (Nit) -> `offene-punkte.md` H-26; C-1, C-2 confirmed fixed, rejections of C-3, C-4 accepted
+- [x] Workflow review `docs/reviews/workflow-rules-review-issue-147.md`
+- [x] Archive session, push, PR `Fixes #147`, CI, merge (pull request opened after archiving; merge follows green CI)
+
+Files: `src/routes/contracts/new/+page.server.ts`, `src/__tests__/contract-new-load.test.ts`, `messages/{de,fr,it,en}.json`, `docs/reviews/issue-147-review-{1,2}.md`, `docs/reviews/workflow-rules-review-issue-147.md`, `docs/design/offene-punkte.md`

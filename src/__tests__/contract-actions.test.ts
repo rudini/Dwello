@@ -5,6 +5,8 @@ import { load as listLoad } from '../routes/contracts/+page.server';
 import { localToday } from '../lib/contract-status';
 import refused from '../../tests/contracts/contract-end-refused.json';
 import contractList from '../../tests/contracts/contracts.json';
+import contractDetail from '../../tests/contracts/contract.json';
+import periodStatements from '../../tests/contracts/period-statements.json';
 
 describe('Vertragsstatus', () => {
 	it('gibt Liste und Detail den Tag des Servers mit', async () => {
@@ -81,42 +83,52 @@ describe('Nächste Schritte nach einer Kündigung', () => {
 	});
 });
 
-// A-10: Mietstage in der letzten Abrechnungsperiode ohne Abrechnung
-describe('Fehlende Abrechnung am Mietvertrag', () => {
-	const backend = (statements: unknown[]) =>
+// A-10, #142: Mietstage in abgelaufenen Abrechnungsperioden ohne Abrechnung
+describe('Fehlende Abrechnungen am Mietvertrag', () => {
+	const lastYear = new Date().getFullYear() - 1;
+	const year = (y: number) => ({ start: `${y}-01-01`, end: `${y}-12-31` });
+	// backend answers as checked against the real API (tests/contracts); the statements filter by contractId as the
+	// backend does: a previous tenant's statement in the same apartment comes back only without that filter
+	const statementOf = (contractId: string, y: number) => ({
+		...periodStatements.data[0],
+		contractId,
+		periodStart: `${y}-01-01`,
+		periodEnd: `${y}-12-31`
+	});
+	const backend = (
+		statements: ReturnType<typeof statementOf>[],
+		startDate = `${lastYear - 2}-04-01`
+	) =>
 		(async (url: string) => {
 			if (url.endsWith('/config'))
 				return Response.json({ data: { accounting_period: 'calendar' } });
-			if (url.includes('/statements?'))
-				return Response.json({ data: statements, total: statements.length });
-			return Response.json({
-				id: 'c1',
-				startDate: '2024-04-01',
-				endDate: null,
-				apartmentId: 'a1',
-				apartment: { id: 'a1', buildingId: 'b1' },
-				building: { id: 'b1' }
-			});
+			if (url.includes('/statements?')) {
+				const contractId = new URL(url).searchParams.get('contractId');
+				const data = statements.filter((s) => !contractId || s.contractId === contractId);
+				return Response.json({ data, total: data.length });
+			}
+			return Response.json({ ...contractDetail, startDate, endDate: null, terminated: false });
 		}) as typeof globalThis.fetch;
-	const lastYear = new Date().getFullYear() - 1;
+	const missingOf = async (fetch: typeof globalThis.fetch) =>
+		((await load({ params: { id: 'c1' }, fetch } as never)) as { missingStatements: unknown })
+			.missingStatements;
 
-	it('nennt die Periode und führt zum Assistenten für dieses Gebäude', async () => {
-		const data = (await load({ params: { id: 'c1' }, fetch: backend([]) } as never)) as {
-			missingStatement: { start: string; end: string; href: string } | null;
-		};
-		expect(data.missingStatement).toEqual({
-			start: `${lastYear}-01-01`,
-			end: `${lastYear}-12-31`,
-			href: `/statements/generate?building=b1&start=${lastYear}-01-01&end=${lastYear}-12-31`
-		});
+	it('nennt jede abgelaufene Periode ohne Abrechnung ab Vertragsbeginn, die neueste zuerst', async () => {
+		// three ended years with rent days; the middle one has its statement, the previous tenant's of the last year
+		// does not count
+		const statements = [statementOf('c1', lastYear - 1), statementOf('c0', lastYear)];
+		expect(await missingOf(backend(statements))).toEqual(
+			[lastYear, lastYear - 2].map((y) => ({
+				...year(y),
+				href: `/statements/generate?building=b1&start=${y}-01-01&end=${y}-12-31`
+			}))
+		);
 	});
 
-	it('schweigt, wenn der Mietvertrag seine Abrechnung hat', async () => {
-		const data = (await load({
-			params: { id: 'c1' },
-			fetch: backend([{ contractId: 'c1' }])
-		} as never)) as { missingStatement: unknown };
-		expect(data.missingStatement).toBeNull();
+	it('schweigt für Perioden vor dem Vertragsbeginn und wenn jede ihre Abrechnung hat', async () => {
+		expect(await missingOf(backend([statementOf('c1', lastYear)], `${lastYear}-03-01`))).toEqual(
+			[]
+		);
 	});
 });
 

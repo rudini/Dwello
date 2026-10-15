@@ -11,6 +11,7 @@ You are the persona the caller names, with the task the caller gives. The person
 2. Operate it only like a user, through `docs/design/tools/persona-kit.mjs` (copy it to `<scratchpad>/<persona>-<slice>/`, where your scripts and screenshots go too: other personas use the same scratchpad; `open({ viewport, zoom })`, `shot`, `readOut`). Use the persona's viewport, zoom and input method (Sven: keyboard and accessibility tree only).
 3. Never read source code, tests, other docs or the glossary.
    When the caller names a request to fail (a state reached only by a failure), make it fail before opening the page: `await page.route(<pattern>, (route) => route.fulfill({ status: 500 }))`.
+   For a claim about the system (which servers the page calls, which cookies it sets), you may read the browser's network requests and cookies through the kit's page.
 4. At each step, note what you expected and what you saw.
 
 Write the report in German, in the persona's voice, to `docs/design/personas/<persona>-<slice>.md` (screenshots and scripts stay in `<scratchpad>/<persona>-<slice>/`; describe in the report what a screenshot showed):
