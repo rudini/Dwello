@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { baseLocale, overwriteGetLocale } from '$lib/paraglide/runtime';
 import { actions as listActions, load } from '../routes/config/categories/+page.server';
 import { actions as newActions } from '../routes/config/categories/new/+page.server';
 import { actions as editActions } from '../routes/config/categories/[id]/edit/+page.server';
@@ -181,6 +182,16 @@ describe('Vorschlag der KI', () => {
 		expect(await result).toEqual({
 			proposal: { name: 'Treppenhausreinigung', description: 'Reinigung von Treppenhaus und Eingang', error: UNSURE }
 		});
+	});
+
+	// «non è sicura» liest sich auch als «nicht ungefährlich» (Persona Marco, P-1)
+	it('sagt auf Italienisch, dass die KI sich nicht sicher ist, ohne Doppeldeutigkeit', async () => {
+		overwriteGetLocale(() => 'it');
+		try {
+			expect(await hint(503, unsure)).toBe('L’IA non ne è certa. Indichi Lei se i costi sono addebitabili.');
+		} finally {
+			overwriteGetLocale(() => baseLocale);
+		}
 	});
 
 	it('sagt, dass die KI nicht erreichbar ist und ein späterer Versuch helfen kann', async () => {

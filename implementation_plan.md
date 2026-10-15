@@ -21,7 +21,7 @@ Task: «Setze #180, #184, #185 und #186 um». #184 is a decision issue, closed w
 - [x] Screen state `ki-unavailable`; `ki-no-proposal` renamed `ki-unsure` (J-7)
 - [x] Screen `category-edit-predefined` (a predefined category's edit page with its reason) in `screens.json`, `accessibility.feature`, `sprachen-bildschirme.feature`; the list's `categories default` shows the reasons and the note in `screens.json`, `accessibility.feature`, `sprachen-bildschirme.feature`
 - [x] `code-reviewer` per slice; `fach-reviewer` feature review
-- [ ] Personas Helga, Dr. Weber (done), Marco
+- [x] Personas Helga, Dr. Weber, Marco; open work U-31 (`offene-punkte.md`) and #221
 - [ ] Before marking complete: coverage, lint, check, backend test + type-check, affected E2E
 - [ ] Workflow review `docs/reviews/workflow-rules-review-issue-186.md`
 - [ ] Archive session, push, PR (Fixes #180, #185, #186, #216), merge when green
@@ -32,6 +32,9 @@ Files: `tests/e2e/features/categories.feature`, `tests/e2e/{steps,tasks,question
 
 Review lines:
 - fach-reviewer round 1 (`docs/reviews/186-fachreview-1.md`): fixed H-1–H-9, H-11, H-13–H-21 (confirmed in round 2); open work H-10 (#219), H-12 (#75)
+- persona Helga round 1 (`docs/design/personas/helga-186.md`): open work P-2, P-4, P-5, P-6 (U-31), P-1, P-3 (#221)
+- persona Dr. Weber round 1 (`docs/design/personas/weber-186.md`): fixed P-5 (= M-1, its test), P-7 (test «nennt auf de den Grund von Administration …»); open work P-1, P-2, P-3, P-4, P-8 (#221), P-6 (U-31)
+- persona Marco round 1 (`docs/design/personas/marco-186.md`): fixed P-1 (test `categories.test.ts` «sagt auf Italienisch, dass die KI sich nicht sicher ist …», red: «L’IA non è sicura.»), P-4 (= M-1); open work P-3, P-5 (#221), P-2, P-6, P-7 (U-31). Beobachtungen of all three: existed before (checked on 1bc2a8d: navigation, search, button names, Reihenfolge, English name, filters, delete buttons, demo invoice), collected in U-31 and #221
 - fach-reviewer round 2 (`docs/reviews/186-fachreview-2.md`): fixed H-22 (README), H-23 (test `invoice-pages.dom.test.ts` «erklärt, dass eine nicht umlagefähige Rechnung …», red: title «Schweizer Mietrecht»), H-25, H-27 (test «nennt auf %s den Grund von %s im geprüften Wortlaut», red on the old texts), H-26, H-28; open work H-24 (#220)
 - code-reviewer round 1 slice 186B (`docs/reviews/186b-review-1.md`): fixed M-1 (Major; test `categories-page.dom.test.ts` «nennt keinen festen Grund, sobald im Formular die andere Umlagefähigkeit gewählt ist», red: the reason stayed), M-3; open work M-2 (`offene-punkte.md`); rejected M-4: one more request among the dozens `seedFor` sends per row, M-5: `allocable-categories.pg.test.ts` pins the seed and the scenarios check the shown reasons, a test tying both copies costs more than it prevents
 - code-reviewer round 1 slice 216 (`docs/reviews/216-review-1.md`): fixed L-2 (test `invoice-pages.dom.test.ts` «nennt auf fr/it die Gebäudeversicherung …», red on the texts before K-2); L-1 goes to the feature review of `fach-reviewer` (privacy text in four languages); rejected L-3: the backend always sends `enabled`, the page data of older tests omit it; L-4: the help text is prose («l’assurance du bâtiment»), the invoice hint lists category names
