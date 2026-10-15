@@ -639,6 +639,7 @@
 	"contracts_deleted_toast": "Contrat de bail de {name} supprimé",
 	"contracts_not_found": "Contrat introuvable",
 	"contracts_load_failed": "Erreur lors du chargement du contrat",
+	"contracts_choices_load_failed": "Les locataires et les appartements n’ont pas pu être chargés.",
 	"contracts_end_failed": "Le contrat de bail n’a pas pu être terminé.",
 	"contracts_delete_failed": "Le contrat de bail n’a pas pu être supprimé.",
 	"contracts_name": "Nom",
