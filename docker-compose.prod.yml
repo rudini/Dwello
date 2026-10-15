@@ -11,6 +11,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        APP_VERSION: ${APP_VERSION:-}
     container_name: dwello-frontend
     restart: unless-stopped
     ports:

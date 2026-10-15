@@ -17,6 +17,8 @@ declare global {
 		// interface PageState {}
 		// interface Platform {}
 	}
+	/** The app version, baked in by vite.config.ts from `git describe --tags`; null without a tag */
+	const __APP_VERSION__: string | null;
 }
 
 export {};

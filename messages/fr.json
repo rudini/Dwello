@@ -25,6 +25,8 @@
 	"footer_legal": "Informations légales",
 	"footer_privacy": "Protection des données",
 	"footer_terms": "Conditions d’utilisation",
+	"footer_version": "Version {version}",
+	"footer_version_unknown": "Version inconnue",
 	"ui_breadcrumb": "Fil d’Ariane",
 	"ui_pages": "Pages",
 	"ui_previous_page": "Page précédente",

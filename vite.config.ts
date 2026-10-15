@@ -2,6 +2,18 @@ import { sveltekit } from '@sveltejs/kit/vite';
 import { paraglideVitePlugin } from '@inlang/paraglide-js';
 import { loadEnv } from 'vite';
 import { defineConfig } from 'vitest/config';
+import { execSync } from 'node:child_process';
+import { versionFrom } from './src/lib/version';
+
+// APP_VERSION from the Docker build or the E2E run, else the checkout's own tags; none without git
+function describeVersion(): string {
+	if (process.env.APP_VERSION) return process.env.APP_VERSION;
+	try {
+		return execSync('git describe --tags --match "v*"', { stdio: ['ignore', 'pipe', 'ignore'] }).toString();
+	} catch {
+		return '';
+	}
+}
 
 export default defineConfig(({ mode }) => {
 	// The server code reads BACKEND_URL from process.env, as `node build` gets it; in dev it comes from .env.
@@ -10,6 +22,7 @@ export default defineConfig(({ mode }) => {
 	Object.assign(process.env, { ...loadEnv(mode, process.cwd(), ''), ...process.env });
 
 	return {
+		define: { __APP_VERSION__: JSON.stringify(versionFrom(describeVersion()) ?? null) },
 		plugins: [
 			sveltekit(),
 			// UI language from the cookie, German without one (no URL prefix, not the browser language)

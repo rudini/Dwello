@@ -26,6 +26,8 @@ const frontendEnv = {
 	OAUTH_MICROSOFT_CLIENT_ID: '',
 	OAUTH_MICROSOFT_CLIENT_SECRET: '',
 	OAUTH_MICROSOFT_REDIRECT_URI: '',
+	// The version the build bakes in instead of `git describe` (navigation.feature, «Die Fusszeile zeigt die Version der App»)
+	APP_VERSION: 'v1.4.0',
 	// The operator that terms.feature expects under „Verfügbarkeit“
 	OPERATOR_NAME: 'Muster Hosting AG',
 	OPERATOR_ADDRESS: 'Bahnhofstrasse 1, 8001 Zürich',

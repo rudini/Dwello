@@ -12,6 +12,8 @@ export default defineConfig({
 			strategy: ['cookie', 'baseLocale']
 		})
 	],
+	// The version the build bakes in (vite.config.ts); tests see a fixed one
+	define: { __APP_VERSION__: JSON.stringify('1.4.0') },
 	test: {
 		globals: true,
 		alias: {

@@ -32,6 +32,9 @@ Funktionalität: Navigation
     Wenn der Liegenschaftsverwalter das Logo wählt
     Dann ist der Liegenschaftsverwalter auf der Seite "Übersicht"
 
+  Szenario: Das Browser-Tab zeigt das Dwello-Symbol
+    Dann zeigt das Browser-Tab das Dwello-Symbol
+
   Szenario: Einstellungen über das Benutzermenü öffnen
     Wenn der Liegenschaftsverwalter im Benutzermenü die Einstellungen wählt
     Dann ist der Liegenschaftsverwalter auf der Seite "Einstellungen"
@@ -48,3 +51,6 @@ Funktionalität: Navigation
   Szenario: Nur der aktuelle Bereich ist markiert
     Wenn der Liegenschaftsverwalter in der Hauptnavigation "Heizprofile" wählt
     Dann ist in der Hauptnavigation nur "Heizprofile" markiert
+
+  Szenario: Die Fusszeile zeigt die Version der App
+    Dann zeigt die Fusszeile die Version "1.4.0"

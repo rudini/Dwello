@@ -47,6 +47,7 @@ import {
 	typeManagementFee
 } from '../tasks/statement-generate';
 import { francs, signedFrancs } from '../questions/amounts';
+import { inDays } from '../fixtures/dates';
 
 const { Given, When, Then } = createBdd(test);
 
@@ -263,7 +264,7 @@ Then('schlägt der Assistent das Heizprofil {string} vor', async ({ verwalter, n
 	await verwalter.sees(proposedHeatingProfile).toContain(names.get(profile)!);
 });
 
-const lastYear = new Date().getFullYear() - 1;
+const lastYear = Number(inDays(0).slice(0, 4)) - 1;
 const wizardAddressFor = (buildingId: string, year: number) =>
 	new RegExp(`/statements/generate\\?building=${buildingId}&start=${year}-01-01&end=${year}-12-31`);
 

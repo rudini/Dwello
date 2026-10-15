@@ -20,6 +20,7 @@ import {
 	startGeneratingStatements,
 	turnToNextPage
 } from '../tasks/statements';
+import { inDays } from '../fixtures/dates';
 
 const { Given, When, Then } = createBdd(test);
 
@@ -33,7 +34,7 @@ Given(
 Given(
 	'für {string} im Gebäude {string} gibt es die Nebenkostenabrechnung des laufenden Jahres',
 	async ({ seed }, tenant: string, building: string) => {
-		await seed.statement(tenant, building, Number(new Date().toISOString().slice(0, 4))); // the year of the invoice dated today (UTC)
+		await seed.statement(tenant, building, Number(inDays(0).slice(0, 4))); // the year of the invoice dated today
 	}
 );
 

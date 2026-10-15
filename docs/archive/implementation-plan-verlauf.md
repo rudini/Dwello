@@ -5795,3 +5795,69 @@ code-reviewer round 1 (`docs/reviews/issue-triage-review-1.md`): fixed C-1 (Majo
 guide review round 1 (`docs/reviews/issue-triage-guide-review-1.md`): fixed G-1, G-2, G-3, G-4, G-5 (Major), G-6, G-7, G-8, G-9, G-10 (Minor), G-11, G-12 (Nit); G-13 (Nit) rejected: the owner chose Haiku; Sonnet stays the fallback if duplicate suggestions turn out wrong
 code-reviewer round 2 (`docs/reviews/issue-triage-review-2.md`): fixed C-9, C-10 (Minor), C-11, C-13, C-14 (Nit); rejected C-12: G-13 is a rejected finding, not open work
 guide review round 2 (`docs/reviews/issue-triage-guide-review-2.md`): fixed G-14, G-16, G-18 (Minor), G-15, G-17, G-19 (Nit)
+
+## Session 36 - October 2026: app version and release tags (#173)
+
+Decisions: issue #173 (grill-me with the product owner). The E2E build gets `APP_VERSION=v1.4.0` (playwright.config.ts), so the scenario can name the version.
+
+- [x] Scenario «Die Fusszeile zeigt die Version der App» (`navigation.feature`, @wip). Scenario red: `zeigt die Fusszeile "Version 1.4.0"` – Received: null; green, @wip removed
+- [x] Version string from `git describe` (`src/lib/version.ts`). Test red: version.test.ts «zeigt nach einem Tag die Commits seither …» – Received "0.4.0-3-gabc1234"; «kennt ohne Tag keine Version» – Received ""
+- [x] Footer shows «Version …» in de/fr/it/en (`Footer.svelte`, `vite.config.ts` define, `vitest.config.ts`, `src/app.d.ts`, `eslint.config.js`). Test red: shell.dom.test.ts «zeigt die Version der App» – Cannot read properties of null
+- [x] Next version from commit messages (`tools/release/next-version.mjs`). Test red: «erhöht bei einer neuen Funktion …» – Received "0.4.3"; «zählt einen Breaking Change vor 1.0 …» – Received "0.4.3"; «erhöht ab 1.0 …» – Received "1.3.0"
+- [x] Release workflow `.github/workflows/release.yml`: tag + GitHub Release on push to main, manual version by `workflow_dispatch`
+- [x] Docker build arg `APP_VERSION` (`Dockerfile`, `docker-compose.prod.yml`); demo `update.sh` waits for the tag and passes it
+- [x] README and `deploy/demo/README.md`
+- [x] Baseline tag `v0.1.0` on ba76d45: this session cannot push tags (the git proxy drops the push, the GitHub tools create no tags); the product owner pushes it before the merge (pull request text)
+- [x] Merged origin/main (docs only, no conflict)
+- [x] Workflow review: `docs/reviews/workflow-rules-review-issue-173.md`
+- [x] code-reviewer (3 rounds), personas Marco and Sven, checks of "Before marking anything complete"
+- [x] Session archived
+
+Files: `.github/workflows/release.yml`, `tools/release/{release.sh,next-version.mjs,*.test.ts}`, `src/lib/version.ts`, `src/lib/ui/Footer.svelte`, `src/app.d.ts`, `vite.config.ts`, `vitest.config.ts`, `eslint.config.js`, `playwright.config.ts`, `messages/*.json`, `src/__tests__/{version.test.ts,shell.dom.test.ts}`, `tests/e2e/{features/navigation.feature,steps,questions,targets}/app-frame*`, `Dockerfile`, `docker-compose.prod.yml`, `deploy/demo/{update.sh,README.md}`, `README.md`, `docs/design/offene-punkte.md`, `docs/reviews/app-version-review-{1,2,3}.md`, `docs/reviews/workflow-rules-review-issue-173.md`, `docs/design/personas/{marco,sven}-app-version.md`.
+Skills: tdd, ponytail, ponytail-review
+
+- code-reviewer round 1 (`docs/reviews/app-version-review-1.md`): open –, fixed C-1 (Major; reproduced in a scratch repo: two tags on one commit, describe names v0.5.0; the manual run now replaces the merge's tag, simulated with a stubbed gh), C-3, C-4, C-5, C-6, C-7; open work C-2 (`offene-punkte.md` O-15)
+- code-reviewer round 2 (`docs/reviews/app-version-review-2.md`): fixed C-8 (Test red: demo-update.test.ts «baut neu, wenn eine Version von Hand die Version von main ersetzt» – Received ["v0.5.0"]), C-9 (Test red: release.test.ts «lehnt eine Version von Hand ab, die es schon gibt …» – Received ["v0.1.0"]), C-10 (workflow logic moved to `tools/release/release.sh` with `release.test.ts`; C-1's test shown red with the fix taken out – Received v0.2.0 still on the remote)
+- code-reviewer round 3 (`docs/reviews/app-version-review-3.md`): fixed C-11 (the release tests «gibt einem Merge die nächste Version …», «lässt einen schon getaggten Merge …», «lehnt eine Version von Hand in falscher Form ab» and demo-update «baut main erst, wenn es getaggt ist» pin behaviour that existed before the move to `tools/release`; they were green on their first run, no red to show), C-12; open work C-13 (`offene-punkte.md` O-16)
+- persona Marco (`docs/design/personas/marco-app-version.md`): fixed –, rejected P-1: «Version unbekannt» decided in #173; open work P-2 (`offene-punkte.md` U-28)
+- persona Sven (`docs/design/personas/sven-app-version.md`): fixed P-1 (Test red: shell.dom.test.ts «lässt den Trennpunkt vor der Version nicht vorlesen» – Received undefined)
+
+## Session 2026-10-14: open bugs, starting with #122 (favicon)
+
+Task: work off the open `bug` issues one by one (issue, PR, merge, next). Skipped while labelled `entscheiden`: #93, #124, #130, #131, #136, #138, #141.
+
+### #122 Favicon link points to a missing file
+
+- [x] Scenario `Das Browser-Tab zeigt das Dwello-Symbol` (`navigation.feature`). Scenario red: `zeigt das Browser-Tab das Dwello-Symbol` – expected "image/svg+xml", received "HTTP 404"
+- [x] Test red: `app-html.test.ts` «verlinkt nur Dateien, die unter static/ liegen» – received ["favicon.png"]; «verlinkt das Seitensymbol als SVG» – favicon.png link
+- [x] `static/favicon.svg` (Lucide House, stroke 1.75, accent light/dark), `src/app.html` links it as SVG; production build (E2E) serves `/favicon.svg`, Docker copies `build/` with it
+- [x] `docs/design/design-decisions.md` D7a
+- [x] Skills: tdd, ponytail, ponytail-review
+- [x] Checks: test:coverage, lint, check, backend test + type-check, deepcheck:audit
+- [x] code-reviewer
+  - code-reviewer round 1 (`docs/reviews/issue-122-review-1.md`): open none, fixed C-1 (Minor; `app-html.test.ts` «zeigt im Seitensymbol das Haus aus dem Header», red with a changed path), C-2 (Minor), rejected C-3: a missing href fails the question, `actor.sees` reports it; C-4: the link is written once in our own file, attribute order does not drift
+- [x] Personas Marco (phone), Anna (finding the way in)
+  - persona marco round 1 (`docs/design/personas/marco-issue-122.md`): open P-1 (Minor), P-2 (Nit) as `offene-punkte.md` O-17; Beobachtungen in O-18 («Version unbekannt»: O-15)
+  - persona anna round 1 (`docs/design/personas/anna-issue-122.md`): open P-1 (Minor), P-2 (Nit) as O-17 (the issue decided the outline house and the scheme by system; a filled mark is a product decision); Beobachtungen in O-18
+- [x] Workflow review `docs/reviews/workflow-rules-review-issue-122.md`
+- [x] PR, CI, merge (pull request opened after archiving; merge follows green CI)
+
+Files: `src/app.html`, `static/favicon.svg`, `src/__tests__/app-html.test.ts`, `tests/e2e/features/navigation.feature`, `tests/e2e/steps/app-frame.steps.ts`, `tests/e2e/questions/app-frame.ts`, `tests/e2e/screenplay/questions.ts`, `docs/design/design-decisions.md`, `docs/design/offene-punkte.md`
+
+## Session 2026-10-14 (2): bug #123, the backend's today is the Swiss day
+
+Task: open `bug` issues one by one (#122 merged in rudini/Dwello#181); now #123. Skipped while labelled `entscheiden`: #93, #124, #130, #131, #136, #138, #141.
+
+- [x] No scenario (exception confirmed by the product owner, 15.10.2026): the backend's clock cannot be set in E2E; `swiss-today.pg.test.ts` sets it (the E2E steps and seed below now count from the Swiss day)
+- [x] Test red: `swiss-today.pg.test.ts` at 23:30 UTC (00:30/01:30 Swiss): overdue – received "sent"; ended contracts – [0, 1]; tenant – isActive true; apartment – received "occupied"; new statement – received the UTC day; reminder – letter dated and deadline counted from the UTC day
+- [x] `backend/src/services/today.ts` (`swissToday`, `daysAfter`, `sqlToday`); used in statement, contract, tenant, apartment, reminder services and the contracts and dashboard routes; SQL `current_date` replaced by `sqlToday` (tenant active, apartment status, next contract start, current contract end)
+- [x] E2E: `statements.steps.ts`, `dashboard.steps.ts`, `supplierInvoice` (`fixtures/backend.ts`) count from `inDays(0)`
+- [x] `backend/CLAUDE.md` says the backend's today is the Swiss day
+- [x] Skills: tdd, ponytail, ponytail-review
+- [x] Checks: test:coverage, lint, check, backend test + type-check, deepcheck:audit, E2E dashboard, statements, statement-reminder, contracts, contract-detail, tenants, apartments (chromium + api, 88 passed)
+- [x] code-reviewer
+  - code-reviewer round 1 (`docs/reviews/issue-123-review-1.md`): open none, fixed C-1 (Major; exception confirmed by the product owner, PR says `No scenario: server clock`), C-2 (Minor; «zählt eine am letzten Tag des Vormonats bezahlte Abrechnung nicht …», red: received 100), C-3 (Minor; «führt den Vertrag in der Geschichte des Mieters als beendet …» and «löscht eine Wohnung, deren Vertrag am Vortag endete», red with a UTC `swissToday`; the tenant's delete check has the same line as the apartment's and stays without its own test: a tenant with a contract cannot be deleted (FK RESTRICT)), C-4 (Nit; `statement-generate.steps.ts`)
+- [x] Workflow review `docs/reviews/workflow-rules-review-issue-123.md`
+- [x] PR, CI, merge (pull request opened after archiving; merge follows green CI)
+
+Files: `backend/src/services/today.ts`, `statement.service.ts`, `contract.service.ts`, `tenant.service.ts`, `apartment.service.ts`, `reminder.service.ts`, `backend/src/routes/contracts.ts`, `dashboard.ts`, `backend/src/__tests__/swiss-today.pg.test.ts`, `backend/CLAUDE.md`, `tests/e2e/steps/statements.steps.ts`, `dashboard.steps.ts`, `tests/e2e/fixtures/backend.ts`, `statement-generate.steps.ts`

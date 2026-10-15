@@ -99,7 +99,9 @@ export default [
 				parser: tsParser
 			},
 			globals: {
-				...globals.browser
+				...globals.browser,
+				// Baked in by vite.config.ts (src/app.d.ts)
+				__APP_VERSION__: 'readonly'
 			}
 		},
 		plugins: {

@@ -127,6 +127,13 @@ export const Width = {
 export const ThePage = {
 	url: question('the address of the page', (actor) => pageOf(actor).url()),
 	title: question('the title of the page', (actor) => pageOf(actor).title()),
+	/** The type of the icon the page names for its browser tab, or the status when it does not load */
+	tabIcon: question('the icon of the browser tab', async (actor) => {
+		const page = pageOf(actor);
+		const href = await page.locator('link[rel="icon"]').getAttribute('href', quick);
+		const response = await page.request.get(new URL(href!, page.url()).href);
+		return response.ok() ? response.headers()['content-type'] : `HTTP ${response.status()}`;
+	}),
 	/** How much wider the page is than the window: more than 0 means it scrolls sideways */
 	sidewaysOverflow: question('how far the page scrolls sideways', (actor) =>
 		pageOf(actor).evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)

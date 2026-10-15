@@ -13,21 +13,22 @@ import {
 	type Apartment,
 	type NewApartment
 } from '../db/schema';
+import { sqlToday, swissToday } from './today';
 
 export type ApartmentStatus = 'occupied' | 'relet' | 'vacant' | 'reserved';
 
 /** First day of the next rental contract that has not started yet */
 const nextContractStart = sql<string | null>`(
 	select min(c.start_date)::text from rental_contracts c
-	where c.apartment_id = "apartments"."id" and c.start_date > current_date
+	where c.apartment_id = "apartments"."id" and c.start_date > ${sqlToday}
 )`;
 
 /** Last day of the rental contract that runs today, null without one or when it has no end */
 const currentContractEnd = sql<string | null>`(
 	select c.end_date::text from rental_contracts c
 	where c.apartment_id = "apartments"."id"
-		and c.start_date <= current_date
-		and (c.end_date is null or c.end_date >= current_date)
+		and c.start_date <= ${sqlToday}
+		and (c.end_date is null or c.end_date >= ${sqlToday})
 	limit 1
 )`;
 
@@ -41,8 +42,8 @@ export const apartmentStatus = sql<ApartmentStatus>`(case
 	when exists (
 		select 1 from rental_contracts c
 		where c.apartment_id = "apartments"."id"
-			and c.start_date <= current_date
-			and (c.end_date is null or c.end_date >= current_date)
+			and c.start_date <= ${sqlToday}
+			and (c.end_date is null or c.end_date >= ${sqlToday})
 	) then 'occupied'
 	when ${nextContractStart} is not null then 'relet'
 	else "apartments"."status"
@@ -168,7 +169,7 @@ export async function getApartment(id: string): Promise<ApartmentWithDetails | n
 	if (!apartment) return null;
 
 	// Get current tenant if occupied
-	const today = new Date().toISOString().split('T')[0];
+	const today = swissToday();
 	const [currentContract] = await db
 		.select({
 			contractId: rentalContracts.id,
@@ -270,7 +271,7 @@ export async function updateApartment(
  */
 export async function deleteApartment(id: string): Promise<{ success: boolean; error?: string }> {
 	// Check for active contracts
-	const today = new Date().toISOString().split('T')[0];
+	const today = swissToday();
 	const [activeContract] = await db
 		.select({ id: rentalContracts.id })
 		.from(rentalContracts)

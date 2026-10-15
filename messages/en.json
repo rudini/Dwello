@@ -25,6 +25,8 @@
 	"footer_legal": "Legal",
 	"footer_privacy": "Privacy",
 	"footer_terms": "Terms of use",
+	"footer_version": "Version {version}",
+	"footer_version_unknown": "Version unknown",
 	"ui_breadcrumb": "Breadcrumb",
 	"ui_pages": "Pages",
 	"ui_previous_page": "Previous page",
