@@ -23,6 +23,7 @@ export const belegInvoiceNumber = (fileName: string) =>
 	inRow(fileName, 'Rechnungsnummer', 'invoice-upload-invoice-number-input');
 export const belegBillingEntity = (fileName: string) =>
 	inRow(fileName, 'Rechnungssteller', 'invoice-billing-entity-input');
+export const belegCategory = (fileName: string) => inRow(fileName, 'Kategorie', 'invoice-category-select');
 export const belegDescription = (fileName: string) => inRow(fileName, 'Beschreibung', 'invoice-description-input');
 export const belegInvoiceDate = (fileName: string) => inRow(fileName, 'Rechnungsdatum', 'invoice-date-input');
 export const belegUnsure = (fileName: string, field: string) =>
@@ -35,3 +36,6 @@ export const belegUploadButton = target('Beleg hochladen', (page) => page.getByT
 export const deleteBelegNote = target('Hinweis Beleg beim Löschen', (page) =>
 	page.getByTestId('invoice-delete-beleg-note')
 );
+// The reminder to keep the paper invoice, in the dialog and at the Beleg of an invoice
+export const keepOriginalHint = target('Hinweis Originalrechnung', (page) => page.getByTestId('invoice-keep-original'));
+export const belegBilledNote = target('Warnung abgerechneter Beleg', (page) => page.getByTestId('invoice-beleg-billed'));

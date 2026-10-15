@@ -53,9 +53,20 @@ Funktionalität: Rechnungsdetail
     Dann öffnet der Beleg die JPG-Datei "huber-q1.jpg"
 
   @wip
-  Szenario: Beleg zu einer erfassten Rechnung hochladen
-    Wenn der Liegenschaftsverwalter den Beleg durch das Foto "huber-q1.jpg" ersetzt
+  Szenario: Beleg zu einer erfassten Rechnung hinzufügen
+    Wenn der Liegenschaftsverwalter das Foto "huber-q1.jpg" als Beleg hinzufügt
     Dann öffnet der Beleg die JPG-Datei "huber-q1.jpg"
+    Und erinnert Dwello daran, die Originalrechnung aufzubewahren
+
+  @wip
+  Szenario: Warnung beim Ersetzen des Belegs einer abgerechneten Rechnung
+    Angenommen die Rechnung von "Hauswart Huber" hat den Beleg "huber-q1.pdf"
+    Und im Gebäude "Seeblick" gibt es die leere Wohnung "1.01"
+    Und der Mieter "Anna Keller" existiert
+    Und "Anna Keller" mietet die Wohnung "1.01" seit "2020-01-01" für "1500" Franken
+    Und für "Anna Keller" im Gebäude "Seeblick" gibt es die Nebenkostenabrechnung des laufenden Jahres
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Rechnung von "Hauswart Huber"
+    Dann warnt der Beleg "Die Rechnung ist abgerechnet; Mieter können den Beleg verlangen."
 
   @wip
   Szenario: Rechnung mit Beleg löschen

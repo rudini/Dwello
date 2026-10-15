@@ -7,6 +7,7 @@ import {
 	belegDetailsToggle,
 	belegFileInput,
 	belegAmount,
+	belegCategory,
 	belegInvoiceDate,
 	belegRow,
 	belegUploadButton,
@@ -64,6 +65,9 @@ export const fillInBeleg = (
 		Enter.theValue(invoice.amount).into(belegAmount(fileName)),
 		EnterDate.of(invoice.invoiceDate).into(belegInvoiceDate(fileName))
 	);
+
+export const chooseCategory = (fileName: string, category: string): Activity =>
+	Select.option({ label: category }).from(belegCategory(fileName));
 
 export const createInvoices = Click.on(createInvoicesButton);
 export const startCancellingUpload = Click.on(cancelUploadButton);
