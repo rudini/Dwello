@@ -268,7 +268,7 @@ export function testData(api: CallTheApi) {
 
 		// Invoice in a predefined category given by its German name, distributed by area; optionally the period it bills
 		async invoiceOn(buildingTitle: string, categoryName: string, amount: string, date: string, service?: [string, string]) {
-			const category = (await get('categories?limit=100')).categories.find((c: { nameDE: string }) => c.nameDE === categoryName);
+			const category = await predefinedCategory(categoryName);
 			const period = service && { servicePeriodStart: service[0], servicePeriodEnd: service[1] };
 			return invoice(buildingTitle, { categoryId: category.id, ...period }, `${categoryName} ${date}`, amount, date);
 		},
@@ -297,7 +297,7 @@ export function testData(api: CallTheApi) {
 
 		// Invoice of a supplier, in a predefined category given by its German name, dated today
 		async supplierInvoice(supplier: string, buildingTitle: string, amount: string, description: string, categoryName: string) {
-			const category = (await get('categories?limit=100')).categories.find((c: { nameDE: string }) => c.nameDE === categoryName);
+			const category = await predefinedCategory(categoryName);
 			const id = await invoice(
 				buildingTitle,
 				{ categoryId: category.id, billingEntityName: unique(supplier), isValidUtilityCost: category.isAllowedUtilityCost },
