@@ -118,10 +118,13 @@ describe('Fehler des Backends in der gewählten Sprache', () => {
 describe('Zustellfehler einer Mahnung', () => {
 	// #126: the mail server's own text («550 5.1.1 User unknown») reached the documents list
 	it('zeigt statt des Texts des Mailservers die Meldung, dass die E-Mail nicht zugestellt wurde', () => {
-		const text = deliveryErrorText({ deliveryError: '550 5.1.1 User unknown', deliveryErrorCode: null });
+		const text = deliveryErrorText({
+			deliveryError: '550 5.1.1 User unknown',
+			deliveryErrorCode: null
+		});
 
 		expect(text).toBe(
-			'Die E-Mail wurde nicht zugestellt. Prüfen Sie die E-Mail-Adresse des Mieters und senden Sie die Mahnung erneut, oder drucken Sie den Brief aus.'
+			'Die E-Mail wurde nicht zugestellt. Drucken Sie die Mahnung aus, schicken Sie sie per Post und markieren Sie sie danach als versendet. Prüfen Sie für die nächste Mahnung die E-Mail-Adresse des Mieters.'
 		);
 	});
 });

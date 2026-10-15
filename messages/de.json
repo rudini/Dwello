@@ -441,7 +441,7 @@
 	"backend_reminder_limit": "Es wurden bereits 3 Mahnungen versendet.",
 	"backend_tenant_no_email": "Der Mieter hat keine E-Mail-Adresse.",
 	"backend_mail_not_configured": "Der E-Mail-Versand ist nicht eingerichtet.",
-	"backend_mail_delivery_failed": "Die E-Mail wurde nicht zugestellt. Prüfen Sie die E-Mail-Adresse des Mieters und senden Sie die Mahnung erneut, oder drucken Sie den Brief aus.",
+	"backend_mail_delivery_failed": "Die E-Mail wurde nicht zugestellt. Drucken Sie die Mahnung aus, schicken Sie sie per Post und markieren Sie sie danach als versendet. Prüfen Sie für die nächste Mahnung die E-Mail-Adresse des Mieters.",
 	"apartments_purpose": "Alle Wohnungen Ihrer Gebäude mit Mietstatus.",
 	"apartments_none_found": "Keine Wohnungen gefunden",
 	"apartments_none_found_text": "Keine Wohnung passt zu Ihrer Suche. Wählen Sie andere Filter oder zeigen Sie alle Wohnungen.",

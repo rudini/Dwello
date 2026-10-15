@@ -441,7 +441,7 @@
 	"backend_reminder_limit": "Sono già stati inviati 3 solleciti.",
 	"backend_tenant_no_email": "L’inquilino non ha un indirizzo e-mail.",
 	"backend_mail_not_configured": "L’invio di e-mail non è configurato.",
-	"backend_mail_delivery_failed": "L’e-mail non è stata recapitata. Verifichi l’indirizzo e-mail dell’inquilino, poi invii di nuovo il sollecito o stampi la lettera.",
+	"backend_mail_delivery_failed": "L’e-mail non è stata recapitata. Stampi il sollecito, lo spedisca per posta e poi lo segni come inviato. Per il prossimo sollecito verifichi l’indirizzo e-mail dell’inquilino.",
 	"apartments_purpose": "Tutti gli appartamenti dei suoi immobili con il loro stato di locazione.",
 	"apartments_none_found": "Nessun appartamento trovato",
 	"apartments_none_found_text": "Nessun appartamento corrisponde alla sua ricerca. Scelga altri filtri o mostri tutti gli appartamenti.",

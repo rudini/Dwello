@@ -3,8 +3,8 @@
  * correspondence channel (real PostgreSQL database, real local SMTP server)
  */
 
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'bun:test';
-import { and, eq, inArray } from 'drizzle-orm';
+import { afterAll, beforeAll, beforeEach, describe, expect, it, spyOn } from 'bun:test';
+import { eq, inArray } from 'drizzle-orm';
 import { SMTPServer } from 'smtp-server';
 import { simpleParser, type ParsedMail } from 'mailparser';
 import type { AddressInfo } from 'net';
@@ -127,10 +127,16 @@ describe('Mahnung per E-Mail', () => {
 });
 
 describe('Mahnung per E-Mail, die der Mailserver ablehnt', () => {
+	let refused: string;
+
 	it('legt die Mahnung mit einem Code statt dem Text des Mailservers zum Versand bereit', async () => {
 		await updateTenant(rental.tenant, { email: 'abgelehnt@example.com', correspondenceChannel: 'email' });
+		const logged = spyOn(console, 'error').mockImplementation(() => {});
 
 		const result = await remind(await statement('sent'));
+		refused = result.document.id;
+		expect(String(logged.mock.calls[0])).toContain('550 5.1.1 User unknown'); // the mail server's text goes to the log
+		logged.mockRestore();
 		const list = (await (await api('GET', `/api/v1/documents?tenantId=${rental.tenant}&status=to_send`)).json()) as {
 			data: (Document & { deliveryError: string; deliveryErrorCode: string })[];
 		};
@@ -141,16 +147,16 @@ describe('Mahnung per E-Mail, die der Mailserver ablehnt', () => {
 	});
 
 	it('nennt auch für eine früher gespeicherte Fehlermeldung des Mailservers den Code', async () => {
-		const [{ id }] = await db
+		// as stored before every failure had a code
+		await db
 			.update(documents)
 			.set({ deliveryError: 'Can\'t send mail - all recipients were rejected: 550 5.1.1 User unknown' })
-			.where(and(eq(documents.tenantId, rental.tenant), eq(documents.status, 'to_send')))
-			.returning({ id: documents.id });
+			.where(eq(documents.id, refused));
 		const list = (await (await api('GET', `/api/v1/documents?tenantId=${rental.tenant}`)).json()) as {
 			data: (Document & { deliveryErrorCode: string })[];
 		};
 
-		expect(list.data.find((d) => d.id === id)?.deliveryErrorCode).toBe('MAIL_DELIVERY_FAILED');
+		expect(list.data.find((d) => d.id === refused)?.deliveryErrorCode).toBe('MAIL_DELIVERY_FAILED');
 	});
 });
 
