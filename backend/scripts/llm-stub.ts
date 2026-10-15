@@ -39,22 +39,22 @@ const answers: {
 			Englisch: 'Preserving and renewing the building is not linked to its use (Art. 257a para. 1 CO).'
 		}
 	},
-	// A cleaning judged like the predefined Hauswart when the prompt lists it as umlagefähig, else wrong as the
-	// default model judged «Treppenhausreinigung» without the Kategorien (#202)
+	// «Treppenhausreinigung» judged like the predefined Hauswart when the prompt lists it as umlagefähig, else wrong
+	// as the default model judged it without the predefined Kategorien (#202)
 	{
-		match: /reinigung/i,
-		when: (prompt) => /^ERLAUBTE KATEGORIEN[^]*?^- Caretaker \(Hauswart\)[^]*?^NICHT ERLAUBTE/m.test(prompt),
+		match: /treppenhaus/i,
+		when: (prompt) => /^VORDEFINIERTE UMLAGEFÄHIGE KATEGORIEN[^]*?^- Caretaker \(Hauswart\)[^]*?^VORDEFINIERTE NICHT UMLAGEFÄHIGE/m.test(prompt),
 		isAllowedUtilityCost: true,
 		confidence: 0.9,
 		reasoning: {
 			Deutsch: 'Reinigung wie beim Hauswart: laufende Betriebskosten (Art. 257b Abs. 1 OR).',
 			Französisch: 'Nettoyage comme pour le Concierge: frais d’exploitation courants (art. 257b, al. 1, CO).',
-			Italienisch: 'Pulizia come per il Portiere: costi d’esercizio correnti (art. 257b cpv. 1 CO).',
+			Italienisch: 'Pulizia come per il Portiere: spese d’esercizio correnti (art. 257b cpv. 1 CO).',
 			Englisch: 'Cleaning as for the Caretaker: running operating costs (Art. 257b para. 1 CO).'
 		}
 	},
 	{
-		match: /reinigung/i,
+		match: /treppenhaus/i,
 		isAllowedUtilityCost: false,
 		confidence: 0.9,
 		reasoning: {

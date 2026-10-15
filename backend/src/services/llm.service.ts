@@ -210,7 +210,9 @@ export async function proposeAllocability(
 ): Promise<{ isAllowedUtilityCost: boolean; reasoning: string } | null> {
 	if (!llmConfig.enabled) return null;
 	try {
-		const answer = parseAllocabilityResponse(await callLlm(buildAllocabilityPrompt(category)));
+		const { categories } = await listCategories({ limit: 1000 });
+		const predefined = categories.filter((c) => c.type === 'predefined');
+		const answer = parseAllocabilityResponse(await callLlm(buildAllocabilityPrompt(category, predefined)));
 		if (!answer || answer.confidence < 0.7) return null;
 		return { isAllowedUtilityCost: answer.isAllowedUtilityCost, reasoning: answer.reasoning };
 	} catch (error) {

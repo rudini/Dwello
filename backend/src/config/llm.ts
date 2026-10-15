@@ -135,12 +135,19 @@ export function buildCategorizationPrompt(
 	);
 }
 
-// Prompt for a new category: whether its costs may be passed on; {name} and {description} come from the form
+// Prompt for a new category: whether its costs may be passed on; {name} and {description} come from the form,
+// {categories_*} from the predefined categories only, so a landlord's own choice does not teach the KI (#202)
 const ALLOCABILITY_PROMPT = `Du bist ein Experte für Schweizer Nebenkostenabrechnungen. Ein Vermieter erfasst eine neue Kostenkategorie. Prüfe, ob ihre Kosten auf die Mieter umgelegt werden dürfen.
 
 ${LEGAL_BASIS}
 
 Den Aufwand für die Erstellung der Nebenkostenabrechnung (Art. 4 Abs. 3 VMWG) rechnet Dwello über die Verwaltungspauschale ab; eine Kategorie dafür ist nicht umlagefähig.
+
+VORDEFINIERTE UMLAGEFÄHIGE KATEGORIEN (dürfen auf Mieter umgelegt werden, wenn im Mietvertrag vereinbart, Art. 257a Abs. 2 OR):
+{categories_allowed}
+
+VORDEFINIERTE NICHT UMLAGEFÄHIGE KATEGORIEN (dürfen NICHT auf Mieter umgelegt werden):
+{categories_not_allowed}
 
 Kategorie: {name}
 Beschreibung: {description}
@@ -156,17 +163,25 @@ Antworte NUR im folgenden JSON-Format:
 // The interface languages, named as the German prompt names them
 const LANGUAGES = { de: 'Deutsch', fr: 'Französisch', it: 'Italienisch', en: 'Englisch' };
 
-export function buildAllocabilityPrompt(category: {
-	name: string;
-	description?: string | null;
-	language?: keyof typeof LANGUAGES;
-}): string {
+export function buildAllocabilityPrompt(
+	category: {
+		name: string;
+		description?: string | null;
+		language?: keyof typeof LANGUAGES;
+	},
+	predefined: PromptCategory[]
+): string {
 	const values: Record<string, string> = {
+		categories_allowed: categoryLines(predefined, true),
+		categories_not_allowed: categoryLines(predefined, false),
 		name: category.name,
 		description: category.description || '-',
 		language: LANGUAGES[category.language ?? 'de']
 	};
-	return ALLOCABILITY_PROMPT.replace(/\{(name|description|language)\}/g, (_, key: string) => values[key]);
+	return ALLOCABILITY_PROMPT.replace(
+		/\{(categories_allowed|categories_not_allowed|name|description|language)\}/g,
+		(_, key: string) => values[key]
+	);
 }
 
 /** The KI's answer for a new category, or null when it is not JSON of that shape */

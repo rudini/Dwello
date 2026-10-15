@@ -65,13 +65,6 @@ Funktionalität: Kostenkategorien
     Dann schlägt die KI vor, die Kategorie als nicht umlagefähig zu erfassen
     Und begründet die KI ihren Vorschlag mit "Art. 257a"
 
-  @wip
-  Szenario: KI beurteilt eine neue Kategorie wie die bestehenden
-    Angenommen der Liegenschaftsverwalter ist auf der Seite "Neue Kategorie"
-    Wenn der Liegenschaftsverwalter die KI prüfen lässt, ob die Kategorie "Treppenhausreinigung" umlagefähig ist
-    Dann schlägt die KI vor, die Kategorie als umlagefähig zu erfassen
-    Und begründet die KI ihren Vorschlag mit "Hauswart"
-
   Szenario: Liegenschaftsverwalter übersteuert den Vorschlag der KI
     Angenommen der Liegenschaftsverwalter ist auf der Seite "Neue Kategorie"
     Und die KI hat geprüft, ob die Kategorie "Fassadenreinigung" umlagefähig ist
