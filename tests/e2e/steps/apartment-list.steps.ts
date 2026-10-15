@@ -1,10 +1,11 @@
 import { createBdd } from 'playwright-bdd';
 import { test } from '../fixtures/test';
-import { apartmentCount, apartmentEmptyHint, occupancyOf } from '../questions/apartments';
+import { apartmentCount, apartmentEmptyHint, apartmentSearchTerm, occupancyOf } from '../questions/apartments';
 import {
 	openApartment,
 	openApartmentList,
 	searchApartments,
+	showAllApartments,
 	showApartmentsOfBuilding,
 	showApartmentsOfBuildingWhileLoading,
 	startNewApartment
@@ -60,8 +61,16 @@ Then('die Wohnungsliste enthält genau {int} Wohnung(en)', async ({ verwalter },
 	await verwalter.sees(apartmentCount).toBe(count);
 });
 
+Given('der Liegenschaftsverwalter sucht nach Wohnungen mit {string}', async ({ verwalter, names }, term: string) => {
+	await verwalter.attemptsTo(searchApartments(names.get(term) ?? term));
+});
+
 When('der Liegenschaftsverwalter nach Wohnungen mit {string} sucht', async ({ verwalter, names }, term: string) => {
 	await verwalter.attemptsTo(searchApartments(names.get(term) ?? term));
+});
+
+When('der Liegenschaftsverwalter wieder alle Wohnungen anzeigt', async ({ verwalter }) => {
+	await verwalter.attemptsTo(showAllApartments);
 });
 
 When(
@@ -73,4 +82,13 @@ When(
 
 Then('sieht der Liegenschaftsverwalter in der Wohnungsliste den Hinweis {string}', async ({ verwalter }, text: string) => {
 	await verwalter.sees(apartmentEmptyHint).toContain(text);
+});
+
+// other scenarios add apartments in parallel: the unfiltered list is only known to be not empty
+Then('zeigt die Wohnungsliste wieder Wohnungen', async ({ verwalter }) => {
+	await verwalter.sees(apartmentCount).toBeGreaterThan(0);
+});
+
+Then('die Wohnungssuche ist leer', async ({ verwalter }) => {
+	await verwalter.sees(apartmentSearchTerm).toBe('');
 });
