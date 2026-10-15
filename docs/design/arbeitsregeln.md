@@ -75,7 +75,7 @@ If blocked: record it as open work (`CLAUDE.md`, "Open work"), continue with the
 
 ## Persona runs: how
 
-- The subagent `persona` (`.claude/agents/persona.md`) runs one persona; the reviews after the redesign follow `CLAUDE.md`, Workflow steps 4 to 7.
+- The subagent `persona` (`.claude/agents/persona.md`) runs one persona; the reviews after the redesign follow `CLAUDE.md`, Workflow steps 4 to 7, run as the skill `slice-review` says.
 - Start the app for personas with `docs/design/tools/persona-stack.sh` (fresh database `dwello_persona` with the demo data, backend on 3301, a copy of the production build on 3300; `--no-build` reuses the last build).
 - Personas drive a signed-in Chromium through `docs/design/tools/persona-kit.mjs` (`open({ viewport, zoom })`, `shot`, `readOut` for the accessibility tree); copy it to a scratch directory if the session's scratchpad differs. They write their scripts and screenshots outside the repository and only their report into `docs/design/personas/`. Only the screenshots of the last redesign and i18n round are kept in `docs/design/personas/screens/`; earlier ones are in the git history.
 - Persona prompt essentials: character, task, "operate only like a user, no source code, docs, tests or glossary", report structure (completed yes/partly/no, effort, expected vs. seen per step, confusion incl. terms, error risks, suggestions marked Blocker/Major/Minor/Nit for what the task names as changed, everything else under "Beobachtungen" without severity).

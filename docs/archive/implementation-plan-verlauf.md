@@ -6198,3 +6198,16 @@ Request (chat, no issue): summarize the findings of all `docs/reviews/workflow-r
 - [x] Archive session, push, pull request, CI, merge (pull request opened after archiving; merge follows green CI)
 
 Files: `CLAUDE.md`, `tests/e2e/CLAUDE.md`, `backend/CLAUDE.md`, `docs/test-pyramid.md`, `docs/design/personas/README.md`, `docs/design/token-referenz.md`, `docs/design/tools/persona-stack.sh`, `.claude/agents/persona.md`, `.claude/hooks/{commit-msg-gate.mjs,fallow-gate.sh,deepcheck-gate.sh,session-start.sh}`, `.claude/skills/grill-me/SKILL.md`, `.github/ISSUE_TEMPLATE/task.md`, `tests/a11y/screens.json`, `src/__tests__/no-german-in-code.test.ts`, `tools/claude-hooks/*.test.ts`, `tools/deepcheck/test/hook.test.ts`, `docs/reviews/workflow-rules-findings-summary.md`, `docs/reviews/workflow-rules-apply-review-{1,2,3}.md`, `docs/design/offene-punkte.md`, `src/__tests__/design-guard.test.ts`
+
+## Session 2026-10-15 (9): skill slice-review
+
+Request (chat, no issue): move the procedure of `CLAUDE.md` Workflow 4 to 6 (worktree per reviewer, prompt, report path, plan line, triage) into a skill `slice-review`, so `CLAUDE.md` keeps the rules and gets shorter; the agents stay agents. No scenario: agent instructions only.
+
+- [x] Skill `.claude/skills/slice-review/SKILL.md` with the procedure, nothing lost from `CLAUDE.md`
+- [x] `CLAUDE.md` Workflow 1, 4, 5, 6 point to the skill instead of repeating it
+- [x] Checks: test:coverage (2442), lint, check, backend test (615) + type-check
+- [x] Review against the Opus 5.5 guide (`code-reviewer`, own worktree, run with the new skill), triage
+  code-reviewer round 1 (`docs/reviews/slice-review-skill-review-1.md`): open -, fixed C-1 to C-4 (Minor), C-5 to C-9 (Nit); no re-review (no Blocker/Major, no code, Workflow 6)
+- [x] Archive session, push to PR #215
+
+Files: `.claude/skills/slice-review/SKILL.md`, `CLAUDE.md`, `docs/design/arbeitsregeln.md`, `docs/reviews/slice-review-skill-review-1.md`
