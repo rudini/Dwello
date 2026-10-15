@@ -1,0 +1,20 @@
+import { Checked, Text, Value } from '../screenplay/questions';
+import {
+	belegAmount,
+	belegInvoiceNumber,
+	belegMessage,
+	belegSelected,
+	belegUnsure,
+	deleteBelegNote,
+	discardMessage,
+	uploadResult
+} from '../targets/invoice-upload';
+
+export const proposedAmount = (fileName: string) => Value.of(belegAmount(fileName));
+export const proposedInvoiceNumber = (fileName: string) => Value.of(belegInvoiceNumber(fileName));
+export const unsureNote = (fileName: string, field: string) => Text.of(belegUnsure(fileName, field));
+export const noteOnBeleg = (fileName: string) => Text.of(belegMessage(fileName));
+export const belegChosenForCreating = (fileName: string) => Checked.of(belegSelected(fileName));
+export const uploadOutcome = Text.of(uploadResult);
+export const discardQuestion = Text.of(discardMessage);
+export const belegNoteOnDelete = Text.of(deleteBelegNote);

@@ -38,3 +38,28 @@ Funktionalität: Rechnungsdetail
   Szenario: Zum Gebäude wechseln
     Wenn der Liegenschaftsverwalter das Gebäude der Rechnung öffnet
     Dann ist der Liegenschaftsverwalter auf der Detailseite von "Seeblick"
+
+  @wip
+  Szenario: Beleg einer Rechnung anzeigen
+    Angenommen die Rechnung von "Hauswart Huber" hat den Beleg "huber-q1.pdf"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Rechnung von "Hauswart Huber"
+    Dann öffnet der Beleg die PDF-Datei "huber-q1.pdf"
+
+  @wip
+  Szenario: Beleg ersetzen
+    Angenommen die Rechnung von "Hauswart Huber" hat den Beleg "huber-q1.pdf"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Rechnung von "Hauswart Huber"
+    Wenn der Liegenschaftsverwalter den Beleg durch das Foto "huber-q1.jpg" ersetzt
+    Dann öffnet der Beleg die JPG-Datei "huber-q1.jpg"
+
+  @wip
+  Szenario: Beleg zu einer erfassten Rechnung hochladen
+    Wenn der Liegenschaftsverwalter den Beleg durch das Foto "huber-q1.jpg" ersetzt
+    Dann öffnet der Beleg die JPG-Datei "huber-q1.jpg"
+
+  @wip
+  Szenario: Rechnung mit Beleg löschen
+    Angenommen die Rechnung von "Hauswart Huber" hat den Beleg "huber-q1.pdf"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Rechnung von "Hauswart Huber"
+    Wenn der Liegenschaftsverwalter die Rechnung löschen will
+    Dann sagt die Bestätigung zum Löschen der Rechnung "Der Beleg wird ebenfalls gelöscht."
