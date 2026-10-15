@@ -24,11 +24,11 @@
 
 	// An option names its description and, on a refusal, the error, so the focus on it reads both
 	const describedByOption = (option: Option, id: string) =>
-		[option.description && `${id}-description`, error && `${name}-error`]
+		[error && `${name}-error`, option.description && `${id}-description`]
 			.filter(Boolean)
 			.join(' ') || undefined;
 	const describedBy = $derived(
-		[help && `${name}-help`, error && `${name}-error`].filter(Boolean).join(' ') || undefined
+		[error && `${name}-error`, help && `${name}-help`].filter(Boolean).join(' ') || undefined
 	);
 </script>
 

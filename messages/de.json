@@ -1302,5 +1302,8 @@
 	"categories_allocable_no": "Die Kosten trägt der Vermieter.",
 	"categories_propose": "Von der KI prüfen lassen",
 	"categories_proposal": "Vorschlag der KI: {choice}",
-	"categories_proposal_none": "Kein Vorschlag der KI"
+	"categories_proposal_none": "Kein Vorschlag der KI",
+	"categories_proposal_checking": "Die KI prüft die Kategorie …",
+	"categories_proposal_applied": "Dwello hat diese Wahl vorgewählt. Sie entscheiden: Prüfen Sie die Begründung und ändern Sie die Wahl, wenn sie nicht passt.",
+	"categories_proposal_kept": "Ihre Wahl bleibt. Vergleichen Sie sie mit der Begründung der KI."
 }

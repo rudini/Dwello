@@ -202,18 +202,58 @@ describe('Umlagefähigkeit einer neuen Kategorie', () => {
 		expect(text()).toContain('die Gebühr für Regenwasser nicht');
 	});
 
+	// Die KI hat den Namen geprüft, der im Feld steht: so kommt die Antwort nach «Von der KI prüfen lassen»
+	function checked(name: string, proposal: object) {
+		const props = reactiveProps({ form: null as unknown });
+		show(NewCategoryPage, props as never);
+		fireEvent(byTestId<HTMLInputElement>('category-name-input')!, 'input', name);
+		props.form = { proposal: { name, ...proposal } };
+		flushSync();
+		return props;
+	}
+
 	it('übernimmt den Vorschlag der KI und zeigt ihre Begründung', () => {
 		const reasoning = 'Erneuerung des Gebäudes (Art. 257a Abs. 1 OR).';
-		show(NewCategoryPage, { form: { proposal: { isAllowedUtilityCost: false, reasoning } } } as never);
+		checked('Dachsanierung', { isAllowedUtilityCost: false, reasoning });
 
 		expect(choice('Nicht umlagefähig').checked).toBe(true);
 		expect(byTestId('category-proposal')!.textContent).toContain('Vorschlag der KI: Nicht umlagefähig');
 		expect(byTestId('category-proposal')!.textContent).toContain(reasoning);
 	});
 
+	// Die Wahl der KI ist ein Vorschlag: das Feld sagt, dass sie gesetzt ist und wer entscheidet (Personas #176)
+	it('sagt, dass die Wahl der KI vorgewählt ist und der Liegenschaftsverwalter entscheidet', () => {
+		checked('Dachsanierung', { isAllowedUtilityCost: false, reasoning: 'Erneuerung' });
+
+		expect(byTestId('category-proposal')!.textContent).toContain('Dwello hat diese Wahl vorgewählt. Sie entscheiden');
+	});
+
+	// Sven P-2: eine eigene Wahl überschreibt die KI nicht
+	it('lässt eine eigene Wahl vor der Prüfung stehen und sagt das', () => {
+		const props = reactiveProps({ form: null as unknown });
+		show(NewCategoryPage, props as never);
+		fireEvent(byTestId<HTMLInputElement>('category-name-input')!, 'input', 'Gartenpflege');
+		click(choice('Nicht umlagefähig'));
+		props.form = { proposal: { name: 'Gartenpflege', isAllowedUtilityCost: true, reasoning: 'Betrieb' } };
+		flushSync();
+
+		expect(choice('Nicht umlagefähig').checked).toBe(true);
+		expect(byTestId('category-proposal')!.textContent).toContain('Ihre Wahl bleibt');
+	});
+
+	// Helga P-1: ein Vorschlag gilt nur für den geprüften Namen
+	it('nimmt Vorschlag und Wahl der KI zurück, sobald der Name ändert', () => {
+		checked('Treppenhausreinigung', { isAllowedUtilityCost: true, reasoning: 'Betrieb' });
+		fireEvent(byTestId<HTMLInputElement>('category-name-input')!, 'input', 'Dachsanierung');
+		flushSync();
+
+		expect(byTestId('category-proposal')).toBeNull();
+		expect(choice('Umlagefähig').checked).toBe(false);
+	});
+
 	it('lässt ohne Antwort der KI nichts vorgewählt und sagt, dass Sie selbst wählen', () => {
 		const error = 'Die KI ist nicht erreichbar oder ist sich nicht sicher. Wählen Sie selbst, ob die Kosten umlagefähig sind.';
-		show(NewCategoryPage, { form: { proposal: { error } } } as never);
+		checked('Bewachung', { error });
 
 		expect(choice('Umlagefähig').checked).toBe(false);
 		expect(choice('Nicht umlagefähig').checked).toBe(false);
@@ -222,23 +262,17 @@ describe('Umlagefähigkeit einer neuen Kategorie', () => {
 
 	// Eine Wahl der KI gilt nur für den Namen, den sie geprüft hat (#176, E-1)
 	it('nimmt die Wahl der KI zurück, wenn eine spätere Prüfung keine sichere Antwort bringt', () => {
-		const props = reactiveProps({
-			form: { proposal: { isAllowedUtilityCost: false, reasoning: 'Erneuerung' } } as unknown
-		});
-		show(NewCategoryPage, props as never);
-		props.form = { proposal: { error: 'Die KI ist sich nicht sicher.' } };
+		const props = checked('Dachsanierung', { isAllowedUtilityCost: false, reasoning: 'Erneuerung' });
+		props.form = { proposal: { name: 'Dachsanierung', error: 'Die KI ist sich nicht sicher.' } };
 		flushSync();
 
 		expect(choice('Nicht umlagefähig').checked).toBe(false);
 	});
 
 	it('lässt eine eigene Wahl stehen, wenn eine spätere Prüfung keine sichere Antwort bringt', () => {
-		const props = reactiveProps({
-			form: { proposal: { isAllowedUtilityCost: false, reasoning: 'Erneuerung' } } as unknown
-		});
-		show(NewCategoryPage, props as never);
+		const props = checked('Dachsanierung', { isAllowedUtilityCost: false, reasoning: 'Erneuerung' });
 		click(choice('Umlagefähig'));
-		props.form = { proposal: { error: 'Die KI ist sich nicht sicher.' } };
+		props.form = { proposal: { name: 'Dachsanierung', error: 'Die KI ist sich nicht sicher.' } };
 		flushSync();
 
 		expect(choice('Umlagefähig').checked).toBe(true);
@@ -246,7 +280,7 @@ describe('Umlagefähigkeit einer neuen Kategorie', () => {
 
 	// Screenreader hören den Vorschlag, ohne den Fokus zu verlieren (E-3)
 	it('sagt den Vorschlag der KI an', () => {
-		show(NewCategoryPage, { form: { proposal: { isAllowedUtilityCost: true, reasoning: 'Betrieb' } } } as never);
+		checked('Gartenpflege', { isAllowedUtilityCost: true, reasoning: 'Betrieb' });
 
 		expect(byTestId('category-proposal')!.closest('[role="status"]')).not.toBeNull();
 	});
@@ -261,6 +295,8 @@ describe('Umlagefähigkeit einer neuen Kategorie', () => {
 		flushSync();
 
 		expect(button.textContent).toContain('Bitte warten');
+		// Sven P-1: die Ansage sagt, dass die KI prüft, solange der Knopf gesperrt ist
+		expect(byTestId('category-proposal-region')!.textContent).toContain('Die KI prüft die Kategorie');
 		await after({ update: async () => {}, result: { type: 'success' } });
 		await settle();
 		expect(button.textContent).toContain('Von der KI prüfen lassen');
@@ -298,6 +334,33 @@ describe('Umlagefähigkeit einer neuen Kategorie', () => {
 		await settle();
 
 		expect(document.activeElement).toBe(button);
+	});
+
+	// Sven P-4: wer während der Prüfung weitergegangen ist, bleibt dort
+	it('lässt den Fokus, wo er während der Prüfung hingegangen ist', async () => {
+		show(NewCategoryPage, { form: null } as never);
+		const after = server.submit!({
+			formData: new FormData(server.form!),
+			submitter: byTestId('category-propose-button')
+		}) as (input: unknown) => Promise<void>;
+		const sortOrder = document.querySelector<HTMLInputElement>('#sortOrder')!;
+		sortOrder.focus();
+		// SvelteKit's update can leave the focus on the page
+		await after({ update: async () => sortOrder.blur(), result: { type: 'success' } });
+		await settle();
+
+		expect(document.activeElement).toBe(sortOrder);
+	});
+
+	// Sven P-6, P-9: die Fehlermeldung kommt zuerst und verschwindet mit der Wahl
+	it('liest die fehlende Wahl zuerst vor und nimmt sie mit der Wahl zurück', () => {
+		show(NewCategoryPage, {
+			form: { errors: { isAllowedUtilityCost: 'Wählen Sie, ob die Kosten umlagefähig sind.' } }
+		} as never);
+		expect(choice('Umlagefähig').getAttribute('aria-describedby')!.split(' ')[0]).toBe('isAllowedUtilityCost-error');
+
+		click(choice('Umlagefähig'));
+		expect(byTestId('category-allowance')!.textContent).not.toContain('Wählen Sie, ob die Kosten umlagefähig sind.');
 	});
 
 	it('meldet die fehlende Wahl an der Wahl', () => {

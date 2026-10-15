@@ -71,8 +71,10 @@ export async function createCategory(fetch: typeof globalThis.fetch, request: Re
 	);
 }
 
-/** The KI's proposal whether a new category is umlagefähig, or why there is none */
-export type Proposal = { isAllowedUtilityCost: boolean; reasoning: string } | { error: string };
+/** The KI's proposal whether a new category is umlagefähig, or why there is none, for the name it checked */
+export type Proposal = { name: string } & (
+	{ isAllowedUtilityCost: boolean; reasoning: string } | { error: string }
+);
 
 /** "Von der KI prüfen lassen": asks the KI with the name and description the form holds */
 export async function proposeAllocability(fetch: typeof globalThis.fetch, request: Request) {
@@ -92,10 +94,11 @@ export async function proposeAllocability(fetch: typeof globalThis.fetch, reques
 	const proposal: Proposal =
 		response.ok && answer
 			? {
+					name: body.nameDE,
 					isAllowedUtilityCost: answer.isAllowedUtilityCost === true,
 					reasoning: String(answer.reasoning ?? '')
 				}
-			: { error: m.backend_ki_no_proposal() };
+			: { name: body.nameDE, error: m.backend_ki_no_proposal() };
 	return { proposal };
 }
 

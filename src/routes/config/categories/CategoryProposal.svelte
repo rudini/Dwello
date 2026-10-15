@@ -4,7 +4,8 @@
 	import Alert from '$lib/ui/Alert.svelte';
 
 	// The KI's answer to «Von der KI prüfen lassen»: its choice with the reasoning, or why there is none
-	let { proposal }: { proposal: Proposal } = $props();
+	// `applied`: the proposal became the choice; otherwise the Liegenschaftsverwalter had chosen before
+	let { proposal, applied }: { proposal: Proposal; applied: boolean } = $props();
 </script>
 
 {#if 'error' in proposal}
@@ -21,5 +22,6 @@
 		testid="category-proposal"
 	>
 		<p>{proposal.reasoning}</p>
+		<p>{applied ? m.categories_proposal_applied() : m.categories_proposal_kept()}</p>
 	</Alert>
 {/if}

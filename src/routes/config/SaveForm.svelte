@@ -49,13 +49,19 @@
 		else saving = true;
 		const name = String(formData.get('name') ?? '').trim();
 		return async ({ result, update, formElement }) => {
+			const focused = document.activeElement;
 			if (result.type === 'redirect') addToast('success', text.saved({ name }));
 			await update({ reset: false });
 			if (check) checking = false;
 			else saving = false;
 			await focusFirstError(formElement);
-			// the button was disabled while it ran: without an error to show, the focus goes back to it
-			if (check && document.activeElement === document.body) submitter?.focus();
+			// the button was disabled while it ran: without an error to show, the focus goes back to where
+			// the user went meanwhile, or to the button
+			if (check && document.activeElement === document.body)
+				(focused instanceof HTMLElement && focused !== document.body
+					? focused
+					: submitter
+				)?.focus();
 		};
 	}}
 	class="flex flex-col gap-8"

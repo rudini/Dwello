@@ -1302,5 +1302,8 @@
 	"categories_allocable_no": "The costs are borne by the landlord.",
 	"categories_propose": "Have the AI check",
 	"categories_proposal": "AI suggestion: {choice}",
-	"categories_proposal_none": "No AI suggestion"
+	"categories_proposal_none": "No AI suggestion",
+	"categories_proposal_checking": "The AI is checking the category …",
+	"categories_proposal_applied": "Dwello has preselected this choice. You decide: check the reasoning and change the choice if it does not fit.",
+	"categories_proposal_kept": "Your choice stays. Compare it with the AI’s reasoning."
 }

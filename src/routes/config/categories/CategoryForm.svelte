@@ -49,14 +49,20 @@
 		},
 		{ value: 'false', label: m.invoices_not_allocable(), description: m.categories_allocable_no() }
 	];
-	// The KI's answer becomes the choice; the Liegenschaftsverwalter can still change it. Without a sure
-	// answer a choice the KI made for an earlier name goes, one the Liegenschaftsverwalter made stays
+	// The KI's answer holds for the name it checked. It presets the choice unless the Liegenschaftsverwalter
+	// chose already; without a sure answer, or once the name changes, a choice the KI made goes again
 	let kiChoice = '';
+	let applied = $state(false);
 	let checking = $state(false);
+	const current = $derived(proposal?.name === values.name.trim() ? proposal : undefined);
 	$effect(() => {
-		if (!proposal) return;
-		if ('reasoning' in proposal) values.allowed = kiChoice = String(proposal.isAllowedUtilityCost);
-		else if (untrack(() => values.allowed) === kiChoice) values.allowed = kiChoice = '';
+		const answer = current;
+		untrack(() => {
+			if (answer && 'reasoning' in answer) {
+				applied = values.allowed === '' || values.allowed === kiChoice;
+				if (applied) values.allowed = kiChoice = String(answer.isAllowedUtilityCost);
+			} else if (values.allowed === kiChoice) values.allowed = kiChoice = '';
+		});
 	});
 </script>
 
@@ -94,24 +100,28 @@
 			help={m.categories_allocable_help()}
 			options={allowance}
 			bind:value={values.allowed}
-			error={errors.isAllowedUtilityCost}
+			error={values.allowed ? undefined : errors.isAllowedUtilityCost}
 			testid="category-allowance"
 		/>
 		{#if action}
 			<div>
-				<Button
-					type="submit"
-					formaction="?/propose"
-					busy={checking}
-					icon="ai-suggestion"
-					testid="category-propose-button">{m.categories_propose()}</Button
-				>
-			</div>
-		{/if}
-		{#if action}
-			<!-- There before the first answer, so a screen reader announces it -->
-			<div role="status" data-testid="category-proposal-region">
-				{#if proposal}<CategoryProposal {proposal} />{/if}
+				<div>
+					<Button
+						type="submit"
+						formaction="?/propose"
+						busy={checking}
+						icon="ai-suggestion"
+						testid="category-propose-button">{m.categories_propose()}</Button
+					>
+				</div>
+				<!-- There before the first answer, so a screen reader announces it; empty, it adds no gap -->
+				<div role="status" data-testid="category-proposal-region">
+					{#if checking}
+						<p class="mt-4 text-ink-muted">{m.categories_proposal_checking()}</p>
+					{:else if current}
+						<div class="mt-4"><CategoryProposal proposal={current} {applied} /></div>
+					{/if}
+				</div>
 			</div>
 		{/if}
 	</div>
