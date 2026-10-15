@@ -75,7 +75,7 @@ const nameIn = (map: Map<string, Names>, id: string | null, language: Language) 
 };
 
 // One position as the PDF prints it: names in the language, the key with the apartment's part, the shares
-function lineItemOf(item: StatementWithDetails['lineItems'][number], statement: StatementWithDetails, names: LineNames, language: Language) {
+function lineItemOf(item: StatementWithDetails['lineItems'][number], byProfile: boolean, names: LineNames, language: Language) {
 	const totalAmount = parseFloat(item.totalAmount);
 	const apartmentShare = amountOf(item.apartmentShare);
 	const heating = !!(item.categoryId && names.categoryNames.get(item.categoryId)?.isHeatingCost);
@@ -86,7 +86,8 @@ function lineItemOf(item: StatementWithDetails['lineItems'][number], statement: 
 		totalAmount,
 		apartmentShare,
 		periodShare: amountOf(item.periodShare),
-		byProfile: heating && !!statement.heatingProfileId,
+		byProfile: heating && byProfile,
+		heating,
 		tenantShare: parseFloat(item.tenantShare)
 	};
 }
@@ -114,7 +115,8 @@ export function toPdfData(
 		building: buildingOf(statement.building),
 		...run,
 		periodDays: Math.round((Date.parse(statement.periodEnd) - Date.parse(statement.periodStart)) / 86_400_000) + 1,
-		lineItems: statement.lineItems.map((item) => lineItemOf(item, statement, { categoryNames, keyNames, keyShares }, language)),
+		// by the profile only where the calculation shared the heating costs by it (run.heating), not by days (#137)
+		lineItems: statement.lineItems.map((item) => lineItemOf(item, !!run.heating, { categoryNames, keyNames, keyShares }, language)),
 		subtotal,
 		managementFee,
 		managementFeePercent: parseFloat(statement.managementFeePercent ?? '0'), // rate chosen for the generation run
@@ -132,7 +134,7 @@ async function heatingOf(statement: StatementWithDetails, period: { rentalStart:
 	const profile = hasHeating && statement.heatingProfileId ? await getHeatingProfile(statement.heatingProfileId) : null;
 	if (!profile) return {};
 	// the same share the calculation takes: the months rented against the months of the period
-	const { percentage, monthBreakdown } = await handleMidYearMoves(
+	const { percentage, monthBreakdown, byDays } = await handleMidYearMoves(
 		profile.id,
 		new Date(rentalStart),
 		new Date(rentalEnd),
@@ -140,6 +142,7 @@ async function heatingOf(statement: StatementWithDetails, period: { rentalStart:
 		new Date(statement.periodEnd),
 		100
 	);
+	if (byDays) return {}; // the months of the period carry 0 % in the profile: shared by days, no profile note
 	const months = monthBreakdown.map(({ month, percentage }) => ({ month, percentage: Math.round(percentage * 100) / 100 }));
 	return { heating: { profile: localName(profile, language), percent: percentage, months } };
 }

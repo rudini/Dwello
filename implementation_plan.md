@@ -7,12 +7,15 @@ Checklist of the current task (`CLAUDE.md`, Workflow step 8): add the items when
 Task: open `bug` issues one by one (#122, #123, #125, #126, #127, #128, #135 merged in rudini/Dwello#181, #182, #189, #196, #197, #198, #203); now #137. Skipped while labelled `entscheiden`: #93, #124, #130, #131, #136, #138, #141, #193, #194.
 
 - [x] Scenario `@wip` «Heizkosten einer Sommerperiode stehen im PDF nach Tagen» in `statement-detail.feature`: a move-in on 15.07.2024 in the period 01.06.–31.08.2024 of a profile with 0 % from June to August; the PDF shows the days, no «nach Heizprofil». Scenario red: expected «48/92 Tage», the PDF showed «52.17 %» and «Heizkosten nach Heizprofil «Winter»: 52.17 % … Jul 0.00 %, Aug 0.00 %»
-- [ ] fach-reviewer on the scenario (PDF, heating costs)
-- [ ] The calculation says when it shared heating costs by days (`handleMidYearMoves`); the PDF follows it (lower-layer test first)
-- [ ] Skills: tdd, ponytail, ponytail-review
-- [ ] Checks: test:coverage, lint, check, backend test + type-check, deepcheck:audit, E2E
+- [x] fach-reviewer on the scenario (PDF, heating costs)
+  - fach-reviewer round 1 (`docs/reviews/issue-137-fachreview-1.md`): fixed M-1 (Major; the Art. 8 Abs. 1 VMWG hint now follows the heating line, not the profile; the scenario checks it), M-2 (Major, existed before: a statement with heating costs but no profile and no tank lacked the hint; same fix, render test), V-1 (the general note drops its heating clause; the scenario checks «Heizprofil»), V-2 (rule 5 in `docs/nebenkostenabrechnung-anforderungen.md`), V-3 (scenario title in glossary terms; the missing term is #207), V-4, V-5, V-6 (Nits, no change: the rule, the heating-oil purchase and a 92-day statement are allowed and outside #137)
+- [x] The calculation says when it shared heating costs by days (`handleMidYearMoves` returns `byDays`); the PDF follows it: Mietstage on the line, no profile note, no heating clause in the note, the Art. 8 hint for every heating line. Test red: «sagt, dass es nach Tagen geteilt hat …» (`prorating.pg.test.ts`) – `byDays` undefined; «nennt die Heizkosten nach Heizprofil nur, wenn …» (`statement-pdf-data.test.ts`) – `byProfile: true`; «nennt die Mietstage, kein Heizprofil …» (`statement-pdf-render.test.ts`) – the PDF held «Heizprofil»
+- [x] Skills: tdd, ponytail, ponytail-review (lean; the note moved into `sharesNote` for the fallow gate)
+- [x] Checks: test:coverage (2432), lint, check, backend test (611) + type-check, deepcheck:audit, fallow, E2E chromium + api statement-detail (24 passed)
 - [ ] code-reviewer
 - [ ] daten-pruefer (PDF)
 - [ ] Personas (only if what the PDF shows a persona changes)
 - [ ] Workflow review `docs/reviews/workflow-rules-review-issue-137.md`
 - [ ] PR, CI, merge
+
+Files: `backend/src/services/{prorating,statement-pdf,pdf}.service.ts`, tests (`prorating.pg.test.ts`, `statement-pdf-data.test.ts`, `statement-pdf-render.test.ts`, `statement-detail.feature` and its steps, seed `statement` with a period), `docs/nebenkostenabrechnung-anforderungen.md` (rule 5)

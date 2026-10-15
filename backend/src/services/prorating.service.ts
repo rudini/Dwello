@@ -195,6 +195,7 @@ export async function handleMidYearMoves(
 	share: number;
 	percentage: number;
 	monthBreakdown: { month: number; percentage: number }[];
+	byDays: boolean; // shared by days, not by the profile: the statement shows Mietstage and no profile note (#137)
 }> {
 	const profile = await getHeatingProfile(heatingProfileId);
 
@@ -208,7 +209,7 @@ export async function handleMidYearMoves(
 		);
 
 		if (!proration) {
-			return { share: 0, percentage: 0, monthBreakdown: [] };
+			return { share: 0, percentage: 0, monthBreakdown: [], byDays: true };
 		}
 
 		const totalDays = calculateDaysBetween(periodStart, periodEnd);
@@ -217,7 +218,8 @@ export async function handleMidYearMoves(
 		return {
 			share: totalHeatingCosts * (percentage / 100),
 			percentage,
-			monthBreakdown: []
+			monthBreakdown: [],
+			byDays: true
 		};
 	}
 
@@ -234,10 +236,10 @@ export async function handleMidYearMoves(
 	if (period.percentage <= 0) {
 		const percentage =
 			(calculateDaysBetween(effectiveStart, effectiveEnd) / calculateDaysBetween(periodStart, periodEnd)) * 100;
-		return { ...tenant, share: totalHeatingCosts * (percentage / 100), percentage };
+		return { ...tenant, share: totalHeatingCosts * (percentage / 100), percentage, byDays: true };
 	}
 	const percentage = (tenant.percentage / period.percentage) * 100;
-	return { ...tenant, share: totalHeatingCosts * (percentage / 100), percentage };
+	return { ...tenant, share: totalHeatingCosts * (percentage / 100), percentage, byDays: false };
 }
 
 /**

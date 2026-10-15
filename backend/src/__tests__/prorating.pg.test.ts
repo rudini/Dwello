@@ -107,6 +107,24 @@ describe('handleMidYearMoves', () => {
 
 		// Januar bis Juni im Mittelland: 17.5 + 14.5 + 13.5 + 9.5 + 3.5 + 0 = 58.5 % der Heizkosten
 		expect(result.share).toBeCloseTo(5850);
+		expect(result.byDays).toBe(false);
+	});
+
+	it('sagt, dass es nach Tagen geteilt hat, wenn die Monate der Periode im Heizprofil 0 % tragen (Sommer)', async () => {
+		const mittelland = (await getHeatingProfileByName('Heating Mittelland'))!;
+
+		// Juni bis August: 0 % im Mittelland; Einzug am 15. Juli, 48 von 92 Tagen
+		const result = await handleMidYearMoves(
+			mittelland.id,
+			new Date('2024-07-15'),
+			new Date('2024-08-31'),
+			new Date('2024-06-01'),
+			new Date('2024-08-31'),
+			9200
+		);
+
+		expect(result.share).toBeCloseTo(4800);
+		expect(result.byDays).toBe(true);
 	});
 
 	it('teilt nach Tagen, wenn das Heizprofil nicht existiert', async () => {

@@ -54,6 +54,28 @@ describe('PDF einer Rückerstattung', () => {
 const due: StatementPDFData = { ...refund, totalAdvancePayments: 600, balance: 184.15, paymentDeadline: '2026-03-17' };
 
 // Der Saldo ist auf 5 Rappen gerundet; die Zeile «Rundung» lässt die Rechnung aufgehen
+describe('Heizkosten nach Mietstagen im PDF (#137)', () => {
+	// a period whose months carry 0 % in the profile: the calculation shared the heating costs by days
+	const byDays: StatementPDFData = {
+		...refund,
+		rentalDays: 48,
+		periodDays: 92,
+		lineItems: [{ category: 'Heizung', key: 'Pro Fläche (m²)', totalAmount: 1000, apartmentShare: 500, periodShare: 0.5217, byProfile: false, heating: true, tenantShare: 260.87 }]
+	};
+
+	it('nennt die Mietstage, kein Heizprofil und weiter das Recht auf die detaillierte Heizkostenabrechnung', async () => {
+		const pdf = (await textOf(byDays)).flowing;
+		expect(pdf).toContain('48/92 Tage');
+		expect(pdf).not.toContain('Heizprofil');
+		expect(pdf).toContain('detaillierte Abrechnung der Heiz- und Warmwasserkosten verlangen');
+	});
+
+	it('erklärt den Zeitanteil der Heizkosten nach dem Heizprofil, wenn eine Position danach geteilt ist', async () => {
+		const byProfile = { ...byDays, lineItems: [{ ...byDays.lineItems[0], byProfile: true }], heating: { profile: 'Winter', percent: 52.17, months: [] } };
+		expect((await textOf(byProfile)).flowing).toContain('bei Heizkosten der Anteil nach dem Heizprofil');
+	});
+});
+
 describe('Rundung des Saldos im PDF', () => {
 	it('nennt die Rundung zwischen Akonto und Saldo, bei Nachzahlung und Rückerstattung', async () => {
 		// von oben nach unten lesbar: der Betrag vor der Rundung, die Rundung dieses Betrags, der Saldo

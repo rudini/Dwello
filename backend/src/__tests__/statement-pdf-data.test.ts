@@ -77,6 +77,20 @@ describe('Daten der Abrechnung im PDF', () => {
 	});
 });
 
+describe('Heizkosten im PDF', () => {
+	const withProfile = { ...statement, heatingProfileId: 'hp1' } as StatementWithDetails;
+	const run = { rentalStart: '2024-07-15', rentalEnd: '2024-08-31' };
+	const heatingNames = new Map([['heating', { ...categories.get('heating')!, isHeatingCost: true }]]);
+
+	it('nennt die Heizkosten nach Heizprofil nur, wenn die Berechnung sie nach dem Profil geteilt hat (#137)', () => {
+		const byProfile = { ...run, heating: { profile: 'Winter', percent: 52.17, months: [] } };
+		expect(toPdfData(withProfile, heatingNames, 'de', byProfile).lineItems[0]).toMatchObject({ byProfile: true, heating: true });
+		// shared by days (the months of the period carry 0 % in the profile): no heating details from the run
+		expect(toPdfData(withProfile, heatingNames, 'de', run).lineItems[0]).toMatchObject({ byProfile: false, heating: true });
+		expect(toPdfData(withProfile, heatingNames, 'de', run).lineItems[1].heating).toBe(false);
+	});
+});
+
 describe('Rundung auf Rappen', () => {
 	// 3060 × 82/320 ist genau 784.125; als Fliesskommazahl 784.1249999…, darf aber nicht abgerundet werden
 	it('rundet kaufmännisch, auch wenn die Fliesskommazahl knapp darunter liegt', () => {
