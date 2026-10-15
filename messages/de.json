@@ -132,6 +132,7 @@
 	"privacy_record": "Datenschutzerklärung",
 	"privacy_llm_external": "Rechnungen werden von {provider} ({country}) mit einem Sprachmodell kategorisiert. Dafür werden Rechnungssteller (auch Einzelpersonen), Beschreibung und Betrag der Rechnung sowie Name und Beschreibung aller Kategorien übermittelt. Lassen Sie eine neue Kategorie von der KI prüfen, werden Name und Beschreibung der Kategorie übermittelt, damit die KI vorschlägt, ob ihre Kosten umlagefähig sind. Steht in diesen Angaben ein Name, wird auch er übermittelt.",
 	"privacy_llm_local": "Rechnungen werden mit einem Sprachmodell kategorisiert; auf Wunsch prüft es auch neue Kategorien darauf, ob ihre Kosten umlagefähig sind. Das Sprachmodell läuft auf dem Server des Betreibers; die Daten verlassen dafür den Server nicht.",
+	"privacy_llm_off": "Rechnungen und Kategorien werden nicht von einem Sprachmodell bearbeitet.",
 	"privacy_stored_title": "Welche Daten Dwello speichert",
 	"privacy_stored_1": "Dwello speichert die Daten, die für die Verwaltung der Liegenschaften und die Nebenkostenabrechnung nötig sind: Gebäude und Wohnungen, Mieter mit Kontaktdaten und Korrespondenzadresse, Mietverträge, Rechnungen, Dokumente, die Sie zu Mietern hochladen (etwa Übergabeprotokolle, Ausweiskopien oder Betreibungsauszüge), sowie die erstellten Abrechnungen, Zahlungen und Mahnungen.",
 	"privacy_stored_2": "Die Daten liegen in der PostgreSQL-Datenbank des Betreibers dieser Dwello-Installation.",

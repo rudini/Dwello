@@ -114,7 +114,7 @@ There is no "predefined" flag on categories.
 |---|---|---|
 | GET | `/` | Query: `search`, `buildingId`, `categoryId`, `dateFrom`, `dateTo`, `isValidUtilityCost`, `wasManuallyOverridden` (`true`\|`false`), `limit` (default 20), `offset`. → `{ invoices, total }` (`llmCategory` is always `null` in the list) |
 | GET | `/llm-status` | → `{ llmAvailable: boolean, cache: { size, maxSize } }` |
-| GET | `/llm-recipient` | → `{ recipient: { provider, country } \| null }`; `null` when the LLM runs on the operator's server (or is disabled). Used by the privacy page |
+| GET | `/llm-recipient` | → `{ recipient: { provider, country } \| null, enabled }`; `recipient` is `null` when the LLM runs on the operator's server or is disabled; `enabled: false` when `LLM_ENABLED=false` (#216). Used by the privacy page |
 | GET | `/utility-rules` | → `{ maxManagementFeePercent, allowedCategories, notAllowedCategories, notes }` (German texts) |
 | POST | `/categorize` | Preview only, stores nothing. Body: `billingEntityName`, `description`, `amount` (string). → `{ category: { id, name, isAllowedUtilityCost } \| null, confidence, isAllowedUtilityCost, reasoning, source: "llm"\|"cache"\|"fallback" }` |
 | GET | `/for-statement/:buildingId` | Query: `periodStart`, `periodEnd` (required). → array of the building's invoices with `isValidUtilityCost = true` whose Leistungszeitraum overlaps the period, or without one, dated in it; each with `inPeriod: { start, end, amount }` (its days and amount in the period) |

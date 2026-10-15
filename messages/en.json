@@ -132,6 +132,7 @@
 	"privacy_record": "Privacy notice",
 	"privacy_llm_external": "Invoices are categorised by {provider} ({country}) using a language model. For this, the invoice issuer (including individuals), the description and the amount of the invoice as well as the name and description of all categories are transmitted. If you have the AI check a new category, its name and description are transmitted so that the AI can suggest whether its costs are allocable. If this information contains a name, it is transmitted as well.",
 	"privacy_llm_local": "Invoices are categorised with a language model; on request it also checks whether the costs of new categories are allocable. The language model runs on the operator’s server; the data does not leave the server for this.",
+	"privacy_llm_off": "Invoices and categories are not processed by a language model.",
 	"privacy_stored_title": "What data Dwello stores",
 	"privacy_stored_1": "Dwello stores the data needed to manage the buildings and bill the utility costs: buildings and apartments, tenants with contact details and correspondence address, rental contracts, invoices, documents you upload for tenants (such as handover reports, copies of ID documents or debt collection register extracts), and the statements created, payments and reminders.",
 	"privacy_stored_2": "The data is kept in the PostgreSQL database of the operator of this Dwello installation.",

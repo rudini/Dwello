@@ -6,6 +6,7 @@
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import { eq, sql } from 'drizzle-orm';
 import { join } from 'path';
+import { llmConfig } from '../config/llm';
 import { db } from '../db/connection';
 import { buildings, categories, documents, heatingProfiles, invoices, tenants } from '../db/schema';
 import { deleteStatement } from '../services/statement.service';
@@ -144,6 +145,17 @@ describe('API-Verträge des Frontends', () => {
 			expect(drift(await sample('category'), actual)).toEqual([]);
 		} finally {
 			await callApi(`/api/v1/categories/${own.id}`, { method: 'DELETE' });
+		}
+	});
+
+	it('GET /invoices/llm-recipient eines externen Anbieters liefert die Felder von llm-recipient.json', async () => {
+		const configured = { ...llmConfig };
+		Object.assign(llmConfig, { baseUrl: 'https://llm.example.com/v1', provider: 'Beispiel AG', providerCountry: 'Schweiz' });
+		try {
+			const actual = await (await callApi('/api/v1/invoices/llm-recipient')).json();
+			expect(drift(await sample('llm-recipient'), actual)).toEqual([]);
+		} finally {
+			Object.assign(llmConfig, configured);
 		}
 	});
 
