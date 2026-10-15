@@ -86,6 +86,7 @@ function lineItemOf(item: StatementWithDetails['lineItems'][number], byProfile: 
 		totalAmount,
 		apartmentShare,
 		periodShare: amountOf(item.periodShare),
+		shareDays: item.billedDays ? { days: item.positionRentalDays ?? 0, total: item.billedDays } : undefined,
 		byProfile: heating && byProfile,
 		heating,
 		tenantShare: parseFloat(item.tenantShare)

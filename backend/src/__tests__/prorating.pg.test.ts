@@ -125,6 +125,15 @@ describe('handleMidYearMoves', () => {
 		expect(result).toEqual({ byDays: true });
 	});
 
+	// Regel 5: das Heizprofil nur bei Ein- oder Auszug; wer die ganze Periode mietet, trägt nach Tagen (#208, D-2)
+	it('sagt, dass nach Tagen geteilt wird, wenn der Mietvertrag die ganze Periode läuft', async () => {
+		const mittelland = (await getHeatingProfileByName('Heating Mittelland'))!;
+
+		const result = await handleMidYearMoves(mittelland.id, new Date('2023-01-01'), null, year.start, year.end, 10000);
+
+		expect(result).toEqual({ byDays: true });
+	});
+
 	it('sagt, dass nach Tagen geteilt wird, wenn das Heizprofil nicht existiert', async () => {
 		const result = await handleMidYearMoves(
 			crypto.randomUUID(),

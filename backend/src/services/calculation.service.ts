@@ -39,6 +39,8 @@ export interface CalculatedLineItem {
 	apartmentShare: number;
 	tenantShare: number;
 	periodShare: number; // share of the period (0-1): days rented / period days, or the heating profile's shares of the months rented
+	positionRentalDays: number | null; // the period share as days, when it is one: the tenant's days in the days billed (#208)
+	billedDays: number | null; // and the days the position's invoices bill in the period
 	isHeatingCost: boolean;
 }
 
@@ -133,6 +135,19 @@ function rentalShare(group: InvoiceGroup, rentalStart: string, rentalEnd: string
 		return sum + (invoice.amount * days(from, to)) / days(invoice.start, invoice.end);
 	}, 0);
 	return rented / group.totalAmount;
+}
+
+// The share as days the tenant can check (#208): when every invoice of the group bills the same days, his days in them
+// of those days; invoices over different days give a weighted share without such a fraction
+type LineDays = Pick<CalculatedLineItem, 'positionRentalDays' | 'billedDays'>;
+const noDays: LineDays = { positionRentalDays: null, billedDays: null };
+function daysOf(group: InvoiceGroup, rentalStart: string, rentalEnd: string): LineDays {
+	const [{ start, end }] = group.invoices;
+	if (group.invoices.some((invoice) => invoice.start !== start || invoice.end !== end))
+		return noDays;
+	const from = start > rentalStart ? start : rentalStart;
+	const to = end < rentalEnd ? end : rentalEnd;
+	return { positionRentalDays: days(from, to), billedDays: days(start, end) };
 }
 
 /**
@@ -296,6 +311,7 @@ export async function calculateStatementForContract(
 
 		let tenantShare: number;
 		let periodShare: number;
+		let shareDays: LineDays = noDays; // shared by the profile: no days
 
 		// For heating costs, use heating profile if available; where it shares by days (no heating months in the
 		// period), the days count like any other invoice's, with its Leistungszeitraum (#137)
@@ -315,7 +331,12 @@ export async function calculateStatementForContract(
 			periodShare = heatingResult.percentage / 100;
 		} else {
 			// By days: the tenant's days within the days each invoice bills in the period
-			periodShare = rentalShare(group, isoDay(contractOverlap.overlapStart), isoDay(contractOverlap.overlapEnd));
+			const [rentalStart, rentalEnd] = [
+				isoDay(contractOverlap.overlapStart),
+				isoDay(contractOverlap.overlapEnd)
+			];
+			periodShare = rentalShare(group, rentalStart, rentalEnd);
+			shareDays = daysOf(group, rentalStart, rentalEnd);
 			tenantShare = roundToRappen(apartmentShareResult.share * periodShare);
 		}
 
@@ -329,6 +350,7 @@ export async function calculateStatementForContract(
 			apartmentShare: apartmentShareResult.share,
 			tenantShare: roundToRappen(tenantShare),
 			periodShare: Math.round(periodShare * 10000) / 10000,
+			...shareDays,
 			isHeatingCost: group.isHeatingCost
 		});
 

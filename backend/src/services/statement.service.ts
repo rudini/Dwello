@@ -347,6 +347,8 @@ export async function generateStatement(
 			sharePercentage: item.totalBuildingAmount ? String((item.tenantShare / item.totalBuildingAmount) * 100) : '0',
 			apartmentShare: String(item.apartmentShare),
 			periodShare: String(item.periodShare),
+			positionRentalDays: item.positionRentalDays,
+			billedDays: item.billedDays,
 			sortOrder: index
 		}))
 	);

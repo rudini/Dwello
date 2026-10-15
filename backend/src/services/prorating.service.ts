@@ -205,6 +205,9 @@ export async function handleMidYearMoves(
 		? new Date(Math.min(contractEnd.getTime(), periodEnd.getTime()))
 		: periodEnd;
 
+	// Rule 5: the profile only on a move in or out; a contract over the whole period is shared by days (#208)
+	if (effectiveStart <= periodStart && effectiveEnd >= periodEnd) return { byDays: true };
+
 	// The tenant's months against the months of the period: a period under a year carries only its months' shares
 	const tenant = calculateHeatingShare(profile, effectiveStart, effectiveEnd, totalHeatingCosts);
 	const period = calculateHeatingShare(profile, periodStart, periodEnd, totalHeatingCosts);

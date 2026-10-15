@@ -10,10 +10,14 @@ Causes: D-2: `handleMidYearMoves` (`prorating.service.ts`) shares heating by the
 
 - [x] Scenarios «Heizkosten eines Mietvertrags über die ganze Periode stehen im PDF nach Mietstagen», «Eine Rechnung mit Leistungszeitraum steht im PDF mit ihren Tagen in der Periode» (`statement-detail.feature`, `@wip`) red
   Scenario red: D-2 `steht im PDF "366/366 Tage"` – the heating line prints «100.00 %»; D-3 `steht im PDF "48/62 Tage"` – the Hauswart line prints «77.42 %» (run together, D-2 first failed at setting the IBAN, a parallel write of the same configuration key; alone it fails at the assertion)
-- [ ] fach-reviewer on the `@wip` scenarios before implementing
-- [ ] D-2: test first (`handleMidYearMoves` or calculation), fix in `prorating.service.ts`
-- [ ] D-3: test first (`statement-pdf.pg.test.ts`), columns `rented_days`, `billed_days` on line items (migration, `schema.ts`, `docs/data-model.md`), calculation stores them, PDF prints them
-- [ ] Checks: test:coverage, lint, check, backend test + type-check, deepcheck:audit, affected E2E
+- [x] fach-reviewer on the `@wip` scenarios before implementing
+  fach-reviewer round 1 (`docs/reviews/issue-208-fachreview-1.md`): fixed F-1 (Major, the note explains the fraction of a Leistungszeitraum, four languages, scenario and test check it), F-2 (example 15.06.–31.07.: 31/62, not 47/62), F-4 (D-2 scenario checks the Art. 8 VMWG note), F-5 (covered by the existing «41.50 %» test of a move-in, which still prints the profile), F-6 (a line by the profile never prints stored days: none are stored for it, `timeShare` checks `byProfile` first), F-7 (rule 5 says how the share is printed); open F-3 (Minor, glossary terms) -> added to #75, marker `TODO(fachlich prüfen, #75)` at the new columns, which take the reviewer's names; F-8 (Nit, positions over different Leistungszeiträume stay in percent) -> #226
+- [x] D-2: test first (`handleMidYearMoves` or calculation), fix in `prorating.service.ts`
+  Test red: «sagt, dass nach Tagen geteilt wird, wenn der Mietvertrag die ganze Periode läuft» – received the profile's share instead of { byDays: true }. The PDF test «nennt bei einer Periode unter einem Jahr den Anteil …» asserted the old «100.00 % der Heizkosten» for a contract over the whole period; renamed and changed to the days (rule 5)
+- [x] D-3: test first (`statement-pdf.pg.test.ts`), columns `position_rental_days`, `billed_days` on line items (migration `0003_line_item_days.sql`, `schema.ts`, `docs/data-model.md`), calculation stores them, PDF prints them and explains them in the note
+  Test red: «druckt die Mietstage im Leistungszeitraum von dessen Tagen in der Periode» – «50.00 %» instead of «31/62 Tage»; «erklärt den Bruch einer Rechnung mit Leistungszeitraum» – the note without it
+  Skills: tdd, ponytail, ponytail-review (no findings)
+- [x] Checks: test:coverage (2458), lint, check, backend type-check, deepcheck:audit, E2E chromium + api all statement features and dashboard (112 passed); backend test: 618 pass, the `afterAll` of `swiss-today.pg.test.ts` fails between 22:00 and 24:00 UTC as on `main` (H-27)
 - [ ] code-reviewer round(s)
 - [ ] Feature review: fach-reviewer, daten-pruefer (PDF, amounts), persona Dr. Weber (PDF text)
 - [ ] Workflow review `docs/reviews/workflow-rules-review-issue-208.md`

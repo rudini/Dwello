@@ -405,6 +405,10 @@ export const utilityStatementLineItems = pgTable(
 		sharePercentage: decimal('share_percentage', { precision: 8, scale: 4 }), // e.g., 12.5000%
 		apartmentShare: decimal('apartment_share', { precision: 12, scale: 2 }), // the apartment's part of the total by the key
 		periodShare: decimal('period_share', { precision: 8, scale: 4 }), // 0-1: days rented, or the heating profile's share
+		// the period share as days (#208): the tenant's days in the days billed, and those days; null when not a ratio of days
+		// TODO(fachlich prüfen, #75): glossary terms for both
+		positionRentalDays: integer('position_rental_days'),
+		billedDays: integer('billed_days'),
 		sortOrder: integer('sort_order').default(0),
 		createdAt: timestamp('created_at').defaultNow().notNull()
 	},
