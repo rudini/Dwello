@@ -3,12 +3,12 @@
 	import { m } from '$lib/paraglide/messages';
 	import type { Proposal } from '$lib/server/category';
 	import type { Category } from '$lib/types';
-	import Alert from '$lib/ui/Alert.svelte';
 	import Button from '$lib/ui/Button.svelte';
 	import Checkbox from '$lib/ui/Checkbox.svelte';
 	import RadioGroup from '$lib/ui/RadioGroup.svelte';
 	import TextInput from '$lib/ui/TextInput.svelte';
 	import SaveForm from '../SaveForm.svelte';
+	import CategoryProposal from './CategoryProposal.svelte';
 
 	// `proposal` only on a new category: the KI's answer to «Von der KI prüfen lassen»
 	let {
@@ -42,7 +42,11 @@
 		}))
 	);
 	const allowance = [
-		{ value: 'true', label: m.glossary_allocable_term(), description: m.categories_allocable_yes() },
+		{
+			value: 'true',
+			label: m.glossary_allocable_term(),
+			description: m.categories_allocable_yes()
+		},
 		{ value: 'false', label: m.invoices_not_allocable(), description: m.categories_allocable_no() }
 	];
 	// The KI's answer becomes the choice; the Liegenschaftsverwalter can still change it
@@ -89,25 +93,16 @@
 		/>
 		{#if action}
 			<div>
-				<Button type="submit" formaction="?/propose" icon="ai-suggestion" testid="category-propose-button"
-					>{m.categories_propose()}</Button
+				<Button
+					type="submit"
+					formaction="?/propose"
+					icon="ai-suggestion"
+					testid="category-propose-button">{m.categories_propose()}</Button
 				>
 			</div>
 		{/if}
 		{#if proposal}
-			<Alert
-				tone={'error' in proposal ? 'caution' : 'info'}
-				title={'error' in proposal
-					? m.categories_proposal_none()
-					: m.categories_proposal({
-							choice: proposal.isAllowedUtilityCost
-								? m.glossary_allocable_term()
-								: m.invoices_not_allocable()
-						})}
-				testid="category-proposal"
-			>
-				<p>{'error' in proposal ? proposal.error : proposal.reasoning}</p>
-			</Alert>
+			<CategoryProposal {proposal} />
 		{/if}
 	</div>
 	<Checkbox

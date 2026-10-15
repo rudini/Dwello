@@ -42,18 +42,23 @@ const answers: { match: RegExp; isAllowedUtilityCost: boolean; confidence: numbe
 	}
 ];
 
+// The value of a line «label: value» of the prompt
+const line = (prompt: string, label: string) => prompt.match(new RegExp(`^${label}: (.*)$`, 'm'))?.[1];
+
+function reply(prompt: string) {
+	const name = line(prompt, 'Kategorie');
+	if (!name) return new Response(null, { status: 503 });
+	const language = (line(prompt, 'Sprache der Begründung') ?? 'Deutsch') as Language;
+	const { isAllowedUtilityCost, confidence, reasoning } = answers.find(({ match }) => match.test(name))!;
+	const answer = { isAllowedUtilityCost, confidence, reasoning: reasoning[language] };
+	return Response.json({ choices: [{ message: { content: JSON.stringify(answer) } }] });
+}
+
 Bun.serve({
 	port: PORT,
 	hostname: '127.0.0.1',
-	async fetch(request) {
-		if (!new URL(request.url).pathname.endsWith('/chat/completions')) return new Response(null, { status: 503 });
-		const { messages } = (await request.json()) as { messages: { content: string }[] };
-		const prompt = messages[0]?.content ?? '';
-		const name = prompt.match(/^Kategorie: (.*)$/m)?.[1];
-		if (!name) return new Response(null, { status: 503 });
-		const language = (prompt.match(/^Sprache der Begründung: (.*)$/m)?.[1] ?? 'Deutsch') as Language;
-		const { isAllowedUtilityCost, confidence, reasoning } = answers.find(({ match }) => match.test(name))!;
-		const answer = { isAllowedUtilityCost, confidence, reasoning: reasoning[language] };
-		return Response.json({ choices: [{ message: { content: JSON.stringify(answer) } }] });
-	}
+	fetch: async (request) =>
+		new URL(request.url).pathname.endsWith('/chat/completions')
+			? reply(((await request.json()) as { messages: { content: string }[] }).messages[0].content)
+			: new Response(null, { status: 503 })
 });
