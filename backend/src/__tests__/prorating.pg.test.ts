@@ -125,6 +125,24 @@ describe('handleMidYearMoves', () => {
 		expect(result).toEqual({ byDays: true });
 	});
 
+	// Periode Juli bis Dezember, Einzug am 1. Oktober, Mittelland: Oktober bis Dezember 10 + 13.5 + 17 = 40.5 % des Jahres,
+	// von den 41.5 % der Periode (Juli 0, August 0, September 1): 97.59 % der Heizkosten der Periode
+	it('teilt bei einem Einzug in einer Periode unter einem Jahr durch die Anteile der Periode', async () => {
+		const mittelland = (await getHeatingProfileByName('Heating Mittelland'))!;
+
+		const result = await handleMidYearMoves(
+			mittelland.id,
+			new Date('2024-10-01'),
+			null,
+			new Date('2024-07-01'),
+			new Date('2024-12-31'),
+			10000
+		);
+
+		expect(result).toMatchObject({ byDays: false });
+		expect((result as { share: number }).share).toBeCloseTo(9759.04, 2);
+	});
+
 	// Regel 5: das Heizprofil nur bei Ein- oder Auszug; wer die ganze Periode mietet, trägt nach Tagen (#208, D-2)
 	it('sagt, dass nach Tagen geteilt wird, wenn der Mietvertrag die ganze Periode läuft', async () => {
 		const mittelland = (await getHeatingProfileByName('Heating Mittelland'))!;

@@ -164,7 +164,6 @@ describe('PDF der Nebenkostenabrechnung', () => {
 	});
 });
 
-// Heizöl im Tank: abgerechnet wird der Verbrauch, das PDF zeigt, wie er zustande kommt (Art. 5 und 8 VMWG)
 // Eine Rechnung mit Leistungszeitraum: Hauswart Juli bis September in der Periode Juni bis August (62 Tage darin),
 // Mietvertrag 15. Juni bis 31. Juli: 31 Mietstage im Leistungszeitraum, 47 in der Periode (#208, D-3; Regel 5)
 describe('Zeitanteil einer Rechnung mit Leistungszeitraum im PDF', () => {
@@ -197,8 +196,27 @@ describe('Zeitanteil einer Rechnung mit Leistungszeitraum im PDF', () => {
 	it('erklärt den Bruch einer Rechnung mit Leistungszeitraum', () => {
 		expect(text).toContain('bei einer Rechnung mit Leistungszeitraum Ihre Mietstage darin von dessen Tagen in der Periode');
 	});
+
+	// Zwei Hauswart-Rechnungen über verschiedene Tage: der Anteil ist nach Beträgen gewichtet, kein Bruch von Tagen (#226)
+	it('druckt den Anteil in Prozent, wenn die Rechnungen einer Position verschiedene Tage abrechnen', async () => {
+		await insertInvoice(shared.building, { amount: '600.00', invoiceDate: '2025-06-30', servicePeriodStart: '2025-06-01', servicePeriodEnd: '2025-06-30' });
+		const statement = await generateStatement({
+			contractId: shared.contract,
+			buildingId: shared.building,
+			periodStart: '2025-06-01',
+			periodEnd: '2025-08-31',
+			managementFeePercent: 0
+		});
+		await generateStatementPdf(statement.id, 'de');
+		const mixed = readPdf(Buffer.from((await getStatementPdf(statement.id)).pdfBlob!, 'base64')).flowing;
+		await deleteStatement(statement.id);
+
+		expect(mixed).toMatch(/Hauswart Pro Fläche \(m²\) 70\.00 \/ 70\.00 m² 1'206\.52 1'206\.52 \d+\.\d\d % /);
+		expect(mixed).not.toContain('Ihre Mietstage darin');
+	});
 });
 
+// Heizöl im Tank: abgerechnet wird der Verbrauch, das PDF zeigt, wie er zustande kommt (Art. 5 und 8 VMWG)
 describe('Tankbestand im PDF', () => {
 	let tank: Awaited<ReturnType<typeof createRental>>;
 	let text: string;

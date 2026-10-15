@@ -221,7 +221,7 @@ const translations: Record<Exclude<Language, 'rm'>, Record<string, string>> = {
 		balancedNote: 'Le sue spese accessorie e i suoi acconti sono uguali. Non deve pagare nulla.',
 		balancedRounded: 'Dopo l’arrotondamento a 5 centesimi non deve pagare nulla e non riceve nulla.',
 		sharesNote: 'Costi immobile: le fatture del periodo di conteggio; una fattura con periodo di prestazione conta per i giorni compresi nel periodo. Quota appartamento: costi dell’immobile secondo la chiave di riparto. Quota temporale: i suoi giorni di locazione nel periodo di conteggio{days}{heating}.',
-		sharesNoteDays: '; per una fattura con periodo di prestazione, i suoi giorni di locazione compresi in esso sui suoi giorni nel periodo',
+		sharesNoteDays: '; per una fattura con periodo di prestazione, i suoi giorni di locazione nel periodo di prestazione sui giorni di tale periodo compresi nel periodo di conteggio',
 		sharesNoteHeating: ', per il riscaldamento la quota secondo il profilo di riscaldamento',
 		sharesNoteFuel: 'Costi immobile per il combustibile in cisterna: il consumo (vedi costi di riscaldamento e acqua calda).',
 		heatingSection: 'Spese di riscaldamento e acqua calda',

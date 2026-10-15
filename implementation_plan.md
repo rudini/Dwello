@@ -19,6 +19,8 @@ Causes: D-2: `handleMidYearMoves` (`prorating.service.ts`) shares heating by the
   Skills: tdd, ponytail, ponytail-review (no findings)
 - [x] Checks: test:coverage (2458), lint, check, backend type-check, deepcheck:audit, E2E chromium + api all statement features and dashboard (112 passed); backend test: 618 pass, the `afterAll` of `swiss-today.pg.test.ts` fails between 22:00 and 24:00 UTC as on `main` (H-27)
 - [ ] code-reviewer round(s)
+  code-reviewer round 1 (`docs/reviews/issue-208-review-1.md`): fixed C-1 (Major, the profile's division by the period's shares for a move in a period under a year is tested again: «teilt bei einem Einzug in einer Periode unter einem Jahr durch die Anteile der Periode»), C-2 (Minor, «druckt den Anteil in Prozent, wenn die Rechnungen einer Position verschiedene Tage abrechnen»), C-3 (Nit, comment moved to its block), C-4 (Nit, Italian note reworded)
+  Test red (C-1): without the division – expected 9759.04, received 4050; (C-2): without the same-days check in `daysOf` – the mixed position printed a fraction
 - [ ] Feature review: fach-reviewer, daten-pruefer (PDF, amounts), persona Dr. Weber (PDF text)
 - [ ] Workflow review `docs/reviews/workflow-rules-review-issue-208.md`
 - [ ] Archive session, push, PR `Fixes #208`, CI, merge
