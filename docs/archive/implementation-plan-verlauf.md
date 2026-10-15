@@ -5843,3 +5843,21 @@ Task: work off the open `bug` issues one by one (issue, PR, merge, next). Skippe
 - [x] PR, CI, merge (pull request opened after archiving; merge follows green CI)
 
 Files: `src/app.html`, `static/favicon.svg`, `src/__tests__/app-html.test.ts`, `tests/e2e/features/navigation.feature`, `tests/e2e/steps/app-frame.steps.ts`, `tests/e2e/questions/app-frame.ts`, `tests/e2e/screenplay/questions.ts`, `docs/design/design-decisions.md`, `docs/design/offene-punkte.md`
+
+## Session 2026-10-14 (2): bug #123, the backend's today is the Swiss day
+
+Task: open `bug` issues one by one (#122 merged in rudini/Dwello#181); now #123. Skipped while labelled `entscheiden`: #93, #124, #130, #131, #136, #138, #141.
+
+- [x] No scenario (exception confirmed by the product owner, 15.10.2026): the backend's clock cannot be set in E2E; `swiss-today.pg.test.ts` sets it (the E2E steps and seed below now count from the Swiss day)
+- [x] Test red: `swiss-today.pg.test.ts` at 23:30 UTC (00:30/01:30 Swiss): overdue – received "sent"; ended contracts – [0, 1]; tenant – isActive true; apartment – received "occupied"; new statement – received the UTC day; reminder – letter dated and deadline counted from the UTC day
+- [x] `backend/src/services/today.ts` (`swissToday`, `daysAfter`, `sqlToday`); used in statement, contract, tenant, apartment, reminder services and the contracts and dashboard routes; SQL `current_date` replaced by `sqlToday` (tenant active, apartment status, next contract start, current contract end)
+- [x] E2E: `statements.steps.ts`, `dashboard.steps.ts`, `supplierInvoice` (`fixtures/backend.ts`) count from `inDays(0)`
+- [x] `backend/CLAUDE.md` says the backend's today is the Swiss day
+- [x] Skills: tdd, ponytail, ponytail-review
+- [x] Checks: test:coverage, lint, check, backend test + type-check, deepcheck:audit, E2E dashboard, statements, statement-reminder, contracts, contract-detail, tenants, apartments (chromium + api, 88 passed)
+- [x] code-reviewer
+  - code-reviewer round 1 (`docs/reviews/issue-123-review-1.md`): open none, fixed C-1 (Major; exception confirmed by the product owner, PR says `No scenario: server clock`), C-2 (Minor; «zählt eine am letzten Tag des Vormonats bezahlte Abrechnung nicht …», red: received 100), C-3 (Minor; «führt den Vertrag in der Geschichte des Mieters als beendet …» and «löscht eine Wohnung, deren Vertrag am Vortag endete», red with a UTC `swissToday`; the tenant's delete check has the same line as the apartment's and stays without its own test: a tenant with a contract cannot be deleted (FK RESTRICT)), C-4 (Nit; `statement-generate.steps.ts`)
+- [x] Workflow review `docs/reviews/workflow-rules-review-issue-123.md`
+- [x] PR, CI, merge (pull request opened after archiving; merge follows green CI)
+
+Files: `backend/src/services/today.ts`, `statement.service.ts`, `contract.service.ts`, `tenant.service.ts`, `apartment.service.ts`, `reminder.service.ts`, `backend/src/routes/contracts.ts`, `dashboard.ts`, `backend/src/__tests__/swiss-today.pg.test.ts`, `backend/CLAUDE.md`, `tests/e2e/steps/statements.steps.ts`, `dashboard.steps.ts`, `tests/e2e/fixtures/backend.ts`, `statement-generate.steps.ts`
