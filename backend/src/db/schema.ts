@@ -430,7 +430,7 @@ export const utilityStatementLineItemsRelations = relations(
 );
 
 // ============================================================================
-// Documents Table (generated letters such as payment reminders)
+// Documents Table (generated letters such as payment reminders, files uploaded to a tenant)
 // ============================================================================
 export const documents = pgTable(
 	'documents',
@@ -440,13 +440,14 @@ export const documents = pgTable(
 			.notNull()
 			.references(() => tenants.id, { onDelete: 'restrict' }),
 		statementId: uuid('statement_id').references(() => utilityStatements.id, { onDelete: 'restrict' }),
-		type: varchar('type', { length: 30 }).notNull(), // reminder
+		type: varchar('type', { length: 30 }).notNull(), // reminder, upload
 		reminderLevel: integer('reminder_level'), // 1 = Zahlungserinnerung, 2 and 3 = Mahnung
 		title: varchar('title', { length: 255 }).notNull(),
 		fileName: varchar('file_name', { length: 255 }).notNull(),
-		pdf: text('pdf').notNull(), // Base64 encoded PDF
-		channel: varchar('channel', { length: 10 }).notNull(), // email, letter
-		status: varchar('status', { length: 20 }).notNull(), // sent, to_send
+		content: text('content').notNull(), // Base64 encoded file
+		mimeType: varchar('mime_type', { length: 50 }).notNull().default('application/pdf'),
+		channel: varchar('channel', { length: 10 }), // email, letter; null for an upload
+		status: varchar('status', { length: 20 }), // sent, to_send; null for an upload
 		sentAt: timestamp('sent_at'),
 		deliveryError: text('delivery_error'),
 		createdAt: timestamp('created_at').defaultNow().notNull()

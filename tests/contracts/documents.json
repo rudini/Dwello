@@ -1,0 +1,22 @@
+{
+	"data": [
+		{
+			"id": "d0000001-0001-0001-0001-000000000001",
+			"tenantId": "a0000001-0001-0001-0001-000000000007",
+			"statementId": null,
+			"type": "upload",
+			"reminderLevel": null,
+			"title": "Ausweiskopie",
+			"fileName": "ausweis.jpg",
+			"mimeType": "image/jpeg",
+			"channel": null,
+			"status": null,
+			"sentAt": null,
+			"deliveryError": null,
+			"deliveryErrorCode": null,
+			"createdAt": "2026-10-13T22:30:00.000Z",
+			"tenantName": "Marco Bernasconi",
+			"statementNumber": null
+		}
+	]
+}

@@ -30,6 +30,7 @@ Browser -> SvelteKit BFF (port 3000: /auth/*, /api/*, page loads/actions) -> Ely
   - Heating profiles: `HEATING_PROFILE_SHARES_SUM {sum}`, `HEATING_PROFILE_SHARE_NEGATIVE {month}`, `HEATING_PROFILE_TYPE_FIXED`, `HEATING_PROFILE_SHARES_FIXED`
   - Contracts and statements: `CONTRACT_OVERLAP {contract}`, `CONTRACT_NOTICE_WITHOUT_END`, `CONTRACT_PARTIES_FIXED`, `CONTRACT_NOT_IN_PERIOD`, `IBAN_MISSING`, `IBAN_INVALID` (the stored IBAN fails its check when a PDF needs the QR-bill), `CALCULATION_FAILED` (preview or generation failed for another reason, logged), `PDF_FAILED` (500: a PDF could not be made for another reason, logged)
   - Invoices: `KI_UNAVAILABLE`
+  - Uploaded documents: `DOCUMENT_TOO_LARGE {megabytes}`, `DOCUMENT_TYPE_NOT_ALLOWED`, `DOCUMENT_TITLE_TOO_LONG {max}`, `TENANT_NOT_FOUND` (404), `DOCUMENT_NOT_DELETABLE`
   - Reminders: `REMINDER_NOT_SENT`, `REMINDER_NOT_OVERDUE`, `REMINDER_REFUND`, `REMINDER_LIMIT`; delivery errors as `deliveryErrorCode` of a document: `TENANT_NO_EMAIL`, `MAIL_NOT_CONFIGURED` (null for other delivery errors)
 - **Schema validation:** a body/query that fails the Elysia `t` schema returns **422** with Elysia's validation error body.
 - **Types:** IDs are UUID strings. Money, area, rooms and percentages stored as `numeric` are **strings** (`"450.00"`). Dates are `YYYY-MM-DD`; timestamps ISO 8601.
@@ -223,11 +224,13 @@ Filter `status` in `GET /` and `/counts`: `draft`, `paid`, `sent` (sent, deadlin
 | Method | Path | Notes |
 |---|---|---|
 | POST | `/statements/:id/reminders` | No body. Creates the next reminder letter (levels 1–3) as a PDF document and delivers it via the tenant's `correspondenceChannel`: e-mail is sent right away (status `sent`, or `deliveryError` set if sending fails); `letter` stays `to_send` for printing. Sets the statement's `reminderSentDate`. → **201** `{ document, deliveryError? }`. 404 statement; 400 statement not sent/overdue, or 3 reminders already sent |
-| GET | `/documents` | Query: `tenantId`, `statementId`, `status` (`sent`\|`to_send`). → `{ data: [document] }`, newest first |
-| GET | `/documents/:id/pdf` | → `application/pdf` attachment. 404 |
-| PUT | `/documents/:id/sent` | Marks a printed letter as posted (`status: sent`, `sentAt`). → document. 404 |
+| POST | `/tenants/:id/documents` | Uploads a file to the tenant (Hochgeladenes Dokument). Body: `title` (empty: the file name without its extension), `fileName`, `content` (Base64). The kind is told by the first bytes: PDF, JPEG or PNG, at most 10 × 1024 × 1024 bytes; title at most 255 characters, a longer file name keeps its last 255. → **201** document (`type: upload`, no `channel`, no `status`). 400 `DOCUMENT_TYPE_NOT_ALLOWED`, `DOCUMENT_TOO_LARGE`, `DOCUMENT_TITLE_TOO_LONG`; 404 `TENANT_NOT_FOUND` |
+| GET | `/documents` | Query: `tenantId`, `statementId`, `status` (`sent`\|`to_send`). → `{ data: [document] }`, newest first; `status` never lists uploads |
+| GET | `/documents/:id/pdf` | → the file as an attachment with its `mimeType` (PDF, JPEG or PNG); `filename*` carries a name outside ASCII. 404 |
+| DELETE | `/documents/:id` | Deletes an uploaded document. → `{ success: true }`. 404; 409 `DOCUMENT_NOT_DELETABLE` for a reminder |
+| PUT | `/documents/:id/sent` | Marks a printed letter as posted (`status: sent`, `sentAt`). → document. 404, also for an upload |
 
-Document fields: `id, tenantId, statementId, type ("reminder"), reminderLevel, title, fileName, channel, status, sentAt, deliveryError, deliveryErrorCode, createdAt, tenantName, statementNumber` (the PDF itself only via `/pdf`).
+Document fields: `id, tenantId, statementId, type ("reminder" | "upload"), reminderLevel, title, fileName, mimeType, channel, status, sentAt, deliveryError, deliveryErrorCode, createdAt, tenantName, statementNumber` (the file itself only via `/pdf`; `channel` and `status` are null for an upload). Deleting a tenant without contracts (`DELETE /tenants/:id`) deletes their uploaded documents too.
 
 ## 14. Dashboard `/api/v1/dashboard`
 
