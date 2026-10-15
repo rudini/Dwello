@@ -6,7 +6,8 @@ import {
 	apartmentSearchButton,
 	apartmentSearchInput,
 	apartmentStatusFilter,
-	newApartmentButton
+	newApartmentButton,
+	showAllApartmentsLink
 } from '../targets/apartments';
 
 const APARTMENTS = '/apartments';
@@ -40,6 +41,10 @@ export const searchApartments = (term: string, buildingId = ''): Activity => (ac
 		Click.on(apartmentSearchButton),
 		Wait.forUrl((url) => url.searchParams.get('search') === term)
 	);
+
+// The link of the empty result leads back to the unfiltered list
+export const showAllApartments: Activity = (actor) =>
+	actor.attemptsTo(Click.on(showAllApartmentsLink), Wait.forUrl((url) => url.search === ''));
 
 export const startNewApartment = Click.on(newApartmentButton);
 

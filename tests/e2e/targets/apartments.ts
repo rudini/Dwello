@@ -11,3 +11,4 @@ export const apartmentCard = (number: string) =>
 export const apartmentStatus = (number: string) =>
 	target(`Status der Wohnung «${number}»`, (page) => apartmentCard(number).locate(page).getByTestId('apartment-status'));
 export const apartmentEmptyNotice = target('Hinweis leere Wohnungsliste', (page) => page.getByTestId('apartments-empty'));
+export const showAllApartmentsLink = target('Alle Wohnungen anzeigen', (page) => page.getByTestId('apartments-show-all'));
