@@ -147,6 +147,21 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Wenn der Liegenschaftsverwalter weitergeht
     Dann ist für die Abrechnungen das Gebäude "Lindenhof" gewählt
 
+  @wip
+  Szenario: Ein Gebäude aus dem Entwurf gibt es nicht mehr
+    Angenommen das Gebäude "Ahornhof" in "Winterthur" existiert
+    Und der Liegenschaftsverwalter ist auf der Seite zum Erstellen von Abrechnungen
+    Wenn der Liegenschaftsverwalter das Gebäude "Ahornhof" für die Abrechnungen wählt
+    Und das Gebäude "Ahornhof" wird inzwischen gelöscht
+    Und der Liegenschaftsverwalter die Seite zum Erstellen von Abrechnungen später wieder öffnet
+    Dann sagt der wiederhergestellte Entwurf "Ein Gebäude aus dem Entwurf gibt es nicht mehr. Wählen Sie die Gebäude neu."
+
+  @wip
+  Szenario: Schon abgerechnete Mietverträge zeigen sich bei der Wahl der Gebäude
+    Angenommen "Marc Huber" hat die Abrechnung 2024 für das Gebäude "Lindenhof"
+    Wenn der Liegenschaftsverwalter die Gebäude für die Abrechnungen 2024 wählen will
+    Dann nennt die Wahl für "Lindenhof" "1 von 2 Mietverträgen hat für diese Periode schon eine Abrechnung."
+
   Szenario: Erstellte Abrechnungen anzeigen
     Angenommen der Liegenschaftsverwalter hat die Abrechnungen 2024 für das Gebäude "Lindenhof" erstellt
     Wenn der Liegenschaftsverwalter die erstellten Abrechnungen anzeigt

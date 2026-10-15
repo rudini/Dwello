@@ -200,6 +200,10 @@ export function testData(api: CallTheApi) {
 			await put('config', { iban: iban.replace(/\s/g, '') });
 		},
 
+		async removeBuilding(title: string) {
+			await remove(`buildings/${ids.get(title)}`);
+		},
+
 		async removeStatement(tenantTitle: string, year: number) {
 			await remove(`statements/${ids.get(`Abrechnung ${tenantTitle} ${year}`)}`);
 		},

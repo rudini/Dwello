@@ -3,6 +3,7 @@ import { type Question, question } from '../screenplay/actor';
 import { Accessible, Checked, Count, Text, Value, Visibility } from '../screenplay/questions';
 import {
 	announcement,
+	buildingBilled,
 	buildingCheckbox,
 	buildingInvoices,
 	categoryFinding,
@@ -19,6 +20,7 @@ import {
 	previewRows,
 	wizardChoices
 } from '../targets/statement-generate';
+import { draftRestored } from '../targets/wizard';
 import { CREATED_STATEMENTS, PREVIEW_BALANCES, PREVIEW_TOTALS } from '../tasks/statement-generate-api';
 import { amountAfter, signedFrancs } from './amounts';
 
@@ -101,6 +103,8 @@ export const missingInvoicesWarning = Text.of(missingInvoices);
 export const missingInvoicesWarnings = Count.of(missingInvoices);
 export const invoicesOfBuilding = (buildingName: string) => Text.of(buildingInvoices(buildingName));
 export const draftsOnly = Text.of(draftsOnlyNote);
+export const billedOfBuilding = (buildingId: string) => Text.of(buildingBilled(buildingId));
+export const restoredDraftText = Text.of(draftRestored);
 export const buildingChosen = (buildingId: string) => Checked.of(buildingCheckbox(buildingId));
 export const categoryFindingOf = (category: string) => Text.of(categoryFinding(category));
 // the option names the profile and its sum, «Winter … (100%)»
