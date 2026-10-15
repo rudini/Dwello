@@ -50,7 +50,7 @@ export const deliveryErrorText = (document: {
 	deliveryError: string | null;
 	deliveryErrorCode?: string | null;
 }) =>
-	backendMessage(
-		{ error: document.deliveryError, code: document.deliveryErrorCode ?? undefined },
-		''
-	);
+	// never the stored text: a mail server's own error reads as MAIL_DELIVERY_FAILED
+	document.deliveryError === null
+		? ''
+		: backendMessage({ code: document.deliveryErrorCode ?? 'MAIL_DELIVERY_FAILED' }, '');

@@ -441,6 +441,7 @@
 	"backend_reminder_limit": "3 rappels ont déjà été envoyés.",
 	"backend_tenant_no_email": "Le locataire n’a pas d’adresse e-mail.",
 	"backend_mail_not_configured": "L’envoi d’e-mails n’est pas configuré.",
+	"backend_mail_delivery_failed": "L’e-mail n’a pas été distribué. Vérifiez l’adresse e-mail du locataire, puis renvoyez le rappel ou imprimez la lettre.",
 	"apartments_purpose": "Tous les appartements de vos immeubles avec leur statut de location.",
 	"apartments_none_found": "Aucun appartement trouvé",
 	"apartments_none_found_text": "Aucun appartement ne correspond à votre recherche. Choisissez d’autres filtres ou affichez tous les appartements.",

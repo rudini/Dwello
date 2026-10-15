@@ -4,7 +4,7 @@
  */
 
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'bun:test';
-import { eq, inArray } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 import { SMTPServer } from 'smtp-server';
 import { simpleParser, type ParsedMail } from 'mailparser';
 import type { AddressInfo } from 'net';
@@ -58,6 +58,10 @@ beforeAll(async () => {
 	smtp = new SMTPServer({
 		authOptional: true,
 		disabledCommands: ['STARTTLS'],
+		// a mail server that refuses one address, as for a mistyped e-mail address
+		onRcptTo(address, _session, callback) {
+			callback(address.address.startsWith('abgelehnt@') ? Object.assign(new Error('550 5.1.1 User unknown'), { responseCode: 550 }) : undefined);
+		},
 		onData(stream, _session, callback) {
 			simpleParser(stream).then((mail) => {
 				mails.push(mail);
@@ -119,6 +123,34 @@ describe('Mahnung per E-Mail', () => {
 		expect(result.deliveryError).toBe('Der E-Mail-Versand ist nicht eingerichtet.');
 		expect(result.document.deliveryErrorCode).toBe('MAIL_NOT_CONFIGURED');
 		expect(mails.length).toBe(before);
+	});
+});
+
+describe('Mahnung per E-Mail, die der Mailserver ablehnt', () => {
+	it('legt die Mahnung mit einem Code statt dem Text des Mailservers zum Versand bereit', async () => {
+		await updateTenant(rental.tenant, { email: 'abgelehnt@example.com', correspondenceChannel: 'email' });
+
+		const result = await remind(await statement('sent'));
+		const list = (await (await api('GET', `/api/v1/documents?tenantId=${rental.tenant}&status=to_send`)).json()) as {
+			data: (Document & { deliveryError: string; deliveryErrorCode: string })[];
+		};
+
+		expect(result.document).toMatchObject({ status: 'to_send', deliveryErrorCode: 'MAIL_DELIVERY_FAILED' });
+		expect(result.deliveryError).not.toContain('550');
+		expect(list.data.find((d) => d.id === result.document.id)).toMatchObject({ deliveryErrorCode: 'MAIL_DELIVERY_FAILED' });
+	});
+
+	it('nennt auch für eine früher gespeicherte Fehlermeldung des Mailservers den Code', async () => {
+		const [{ id }] = await db
+			.update(documents)
+			.set({ deliveryError: 'Can\'t send mail - all recipients were rejected: 550 5.1.1 User unknown' })
+			.where(and(eq(documents.tenantId, rental.tenant), eq(documents.status, 'to_send')))
+			.returning({ id: documents.id });
+		const list = (await (await api('GET', `/api/v1/documents?tenantId=${rental.tenant}`)).json()) as {
+			data: (Document & { deliveryErrorCode: string })[];
+		};
+
+		expect(list.data.find((d) => d.id === id)?.deliveryErrorCode).toBe('MAIL_DELIVERY_FAILED');
 	});
 });
 

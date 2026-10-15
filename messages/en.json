@@ -441,6 +441,7 @@
 	"backend_reminder_limit": "3 reminders have already been sent.",
 	"backend_tenant_no_email": "The tenant has no email address.",
 	"backend_mail_not_configured": "Email sending is not set up.",
+	"backend_mail_delivery_failed": "The e-mail was not delivered. Check the tenant’s e-mail address, then send the reminder again or print the letter.",
 	"apartments_purpose": "All apartments in your buildings with their rental status.",
 	"apartments_none_found": "No apartments found",
 	"apartments_none_found_text": "No apartment matches your search. Choose other filters or show all apartments.",

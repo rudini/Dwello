@@ -65,10 +65,10 @@ async function deliverByEmail(document: Document, to: string | null, letter: Ret
 		});
 		return { document: (await markDocumentSent(document.id))! };
 	} catch (error) {
+		const known = Object.values(DELIVERY_ERRORS).find((text) => text === (error as Error).message);
+		if (!known && !(error instanceof MailConfigError)) console.error('Reminder e-mail not delivered:', error);
 		const deliveryError =
-			error instanceof MailConfigError
-				? DELIVERY_ERRORS.MAIL_NOT_CONFIGURED
-				: (error as Error).message;
+			error instanceof MailConfigError ? DELIVERY_ERRORS.MAIL_NOT_CONFIGURED : (known ?? DELIVERY_ERRORS.MAIL_DELIVERY_FAILED);
 		return { document: (await recordDeliveryError(document.id, deliveryError))!, deliveryError };
 	}
 }

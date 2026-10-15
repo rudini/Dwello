@@ -834,14 +834,14 @@ describe('Abrechnungsdetail', () => {
 	});
 
 	it('meldet, wenn eine Mahnung nicht per E-Mail zugestellt werden konnte', () => {
-		const document = { title: 'Zahlungserinnerung', channel: 'email' };
+		const document = { title: 'Zahlungserinnerung', channel: 'email', deliveryErrorCode: 'MAIL_DELIVERY_FAILED' };
 		detail(
 			{ status: 'overdue' },
-			{ reminder: { document, deliveryError: 'Mailserver nicht erreichbar.' } }
+			{ reminder: { document, deliveryError: 'Die E-Mail konnte nicht zugestellt werden.' } }
 		);
 
 		expect(byTestId('reminder-feedback')!.textContent).toContain(
-			'Zahlungserinnerung: Mailserver nicht erreichbar. Sie liegt in den Dokumenten zum Versand bereit.'
+			'Zahlungserinnerung: Die E-Mail wurde nicht zugestellt. Prüfen Sie die E-Mail-Adresse des Mieters und senden Sie die Mahnung erneut, oder drucken Sie den Brief aus. Sie liegt in den Dokumenten zum Versand bereit.'
 		);
 	});
 

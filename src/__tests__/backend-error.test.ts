@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { baseLocale, overwriteGetLocale } from '$lib/paraglide/runtime';
-import { backendMessage } from '$lib/backend-error';
+import { backendMessage, deliveryErrorText } from '$lib/backend-error';
 
 afterEach(() => overwriteGetLocale(() => baseLocale));
 
@@ -112,5 +112,16 @@ describe('Fehler des Backends in der gewählten Sprache', () => {
 		expect(
 			backendMessage({ code: 'KI_UNAVAILABLE', message: 'Die KI ist nicht erreichbar.' }, 'Repli')
 		).toBe('L’IA n’est pas joignable ou n’a pas proposé de catégorie adaptée.');
+	});
+});
+
+describe('Zustellfehler einer Mahnung', () => {
+	// #126: the mail server's own text («550 5.1.1 User unknown») reached the documents list
+	it('zeigt statt des Texts des Mailservers die Meldung, dass die E-Mail nicht zugestellt wurde', () => {
+		const text = deliveryErrorText({ deliveryError: '550 5.1.1 User unknown', deliveryErrorCode: null });
+
+		expect(text).toBe(
+			'Die E-Mail wurde nicht zugestellt. Prüfen Sie die E-Mail-Adresse des Mieters und senden Sie die Mahnung erneut, oder drucken Sie den Brief aus.'
+		);
 	});
 });
