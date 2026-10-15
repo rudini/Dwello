@@ -1103,7 +1103,7 @@ BALANCE (refund): CHF 30
 - IBAN input field (for QR-bill generation)
 - Format validation (settings form: CH only; QR-bill service: CH or LI, #191; MOD-97 checksum)
 - Test QR-bill preview
-- Help text: "Swiss or Liechtenstein account required for QR-bill generation"
+- Help text: "Konto, auf das Ihre Mieter Nachzahlungen überweisen; es steht auf der QR-Rechnung."
 - A QR reference is printed only when the IBAN is a QR-IBAN; with a normal IBAN the QR-bill carries no reference
 
 ---

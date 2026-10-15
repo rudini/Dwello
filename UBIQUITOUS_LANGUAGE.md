@@ -133,7 +133,7 @@ Verwaltung, Reparaturen, Renovation, Liegenschaftssteuer, Hypothekarzinsen, Geb�
 | **Verwaltungspauschale** | Abgeltung des Aufwands für die Nebenkostenabrechnung: ein Prozentsatz der eigenen Nebenkosten des Mieters. Nur zulässig, wenn im Mietvertrag vereinbart. Üblich sind etwa 3 %. Ein höherer Satz muss dem tatsächlichen Aufwand entsprechen (Art. 4 Abs. 3 VMWG). | `management_fee`, `management_fee_percent` |
 | **Geleistete Akontobeiträge** | Summe der monatlichen Vorauszahlungen des Mieters während der Abrechnungsperiode. | `total_advance_payments` |
 | **Saldo** | Kostenanteil inklusive Verwaltungspauschale minus geleistete Akontobeiträge, gerundet auf 5 Rappen. Positiv = Nachzahlung, negativ = Rückerstattung. | `balance` |
-| **Rundung auf 5 Rappen** | Betrag, um den der Saldo auf 5 Rappen gerundet wird. | Berechnung |
+| **Rundung auf 5 Rappen** | Differenz zwischen dem Saldo und dem Saldo vor Rundung. | Berechnung |
 | **Mietstage** | Anzahl Tage, die ein Mietvertrag in der Abrechnungsperiode läuft. Grundlage für die anteilsmässige Berechnung. | `rental_days` |
 | **Proration** | Anteilsmässige Berechnung der Nebenkosten bei unterjährigem Ein-/Auszug. | Berechnung |
 
