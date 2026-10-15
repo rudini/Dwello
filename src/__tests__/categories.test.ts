@@ -185,10 +185,21 @@ describe('Vorschlag der KI', () => {
 	});
 
 	// «non è sicura» liest sich auch als «nicht ungefährlich» (Persona Marco, P-1)
-	it('sagt auf Italienisch, dass die KI sich nicht sicher ist, ohne Doppeldeutigkeit', async () => {
-		overwriteGetLocale(() => 'it');
+	// «non è sicura» / «n’est pas sûre» lesen sich auch als «nicht ungefährlich» (Persona Marco P-1, Code-Review M-9);
+	// Englisch «Decide yourself» (Fachreview H-28)
+	it.each([
+		['it', unsure, 'L’IA non ne è certa. Indichi Lei se i costi sono addebitabili.'],
+		['fr', unsure, 'L’IA n’en est pas certaine. Indiquez vous-même si les frais sont imputables.'],
+		['en', unsure, 'The AI is not sure. Decide yourself whether the costs are allocable.'],
+		[
+			'en',
+			{ ...unsure, code: 'KI_PROPOSAL_UNAVAILABLE' },
+			'The AI cannot be reached. Try again later or decide yourself whether the costs are allocable.'
+		]
+	] as const)('sagt auf %s ohne Doppeldeutigkeit, warum die KI nichts vorschlägt', async (locale, body, text) => {
+		overwriteGetLocale(() => locale);
 		try {
-			expect(await hint(503, unsure)).toBe('L’IA non ne è certa. Indichi Lei se i costi sono addebitabili.');
+			expect(await hint(503, body)).toBe(text);
 		} finally {
 			overwriteGetLocale(() => baseLocale);
 		}

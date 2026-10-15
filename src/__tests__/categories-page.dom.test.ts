@@ -485,7 +485,9 @@ describe('Grund der Umlagefähigkeit', () => {
 		['de', 'Administration', false, 'wenn der Mietvertrag sie nennt (Art. 257a Absatz 2 OR)'],
 		['it', 'Pest Control', false, 'è necessario anche quando è vuoto'],
 		['it', 'Caretaker', true, 'piccoli lavori di conservazione'],
-		['fr', 'Administration', false, 'si le contrat de bail les mentionne (art. 257a, al. 2, CO)']
+		['fr', 'Administration', false, 'si le contrat de bail les mentionne (art. 257a, al. 2, CO)'],
+		['it', 'Administration', false, 'se il contratto di locazione le indica (art. 257a cpv. 2 CO)'],
+		['en', 'Administration', false, 'if the rental contract names it (Art. 257a para. 2 CO)']
 	] as const)('nennt auf %s den Grund von %s im geprüften Wortlaut', (locale, key, allowed, wording) => {
 		overwriteGetLocale(() => locale);
 		try {
@@ -495,6 +497,21 @@ describe('Grund der Umlagefähigkeit', () => {
 			} as never);
 
 			expect(reasons()[0]).toContain(wording);
+		} finally {
+			overwriteGetLocale(() => baseLocale);
+		}
+	});
+
+	// Wie die vordefinierte Kategorie heisst (Fachreview H-26)
+	it.each([
+		['fr', 'l’assurance bâtiment et les impôts'],
+		['it', 'assicurazione edificio e imposte']
+	] as const)('nennt im Hilfetext auf %s die Gebäudeversicherung mit dem Namen ihrer Kategorie', (locale, wording) => {
+		overwriteGetLocale(() => locale);
+		try {
+			show(EditCategoryPage, { data: { category: lift }, form: null } as never);
+
+			expect(text()).toContain(wording);
 		} finally {
 			overwriteGetLocale(() => baseLocale);
 		}
