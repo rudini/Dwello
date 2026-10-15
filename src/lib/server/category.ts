@@ -8,12 +8,14 @@ import { deleteRecord, fetchRecord, saveRecord } from './save-form';
 const API = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/v1/categories`;
 const LIST = '/config/categories';
 
-export type CategoryWithUsage = Category & { usageCount: number; predefined: boolean };
+export type CategoryWithUsage = Category & { key: string; usageCount: number; predefined: boolean };
 
 /** Backend category as shown in the German interface: `name` stays the English key for invoice recognition */
 export function toCategory(c: Record<string, unknown>): CategoryWithUsage {
 	return {
 		id: c.id as string,
+		// The stored name: the English key of a predefined category, which names its reason (#186)
+		key: (c.name || '') as string,
 		name: (c.nameDE || c.name || '') as string,
 		nameFR: (c.nameFR || '') as string,
 		nameIT: (c.nameIT || '') as string,

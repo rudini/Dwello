@@ -268,6 +268,11 @@ export function testData(api: CallTheApi) {
 			return invoice(buildingTitle, { categoryId: category.id, ...period }, `${categoryName} ${date}`, amount, date);
 		},
 
+		async predefinedCategoryId(categoryName: string): Promise<string> {
+			const categories = (await get('categories?limit=100')).categories as { id: string; nameDE: string }[];
+			return categories.find((c) => c.nameDE === categoryName)!.id;
+		},
+
 		// A predefined category given by its German name, saved with another allocability; restored afterwards. Saving it
 		// as not umlagefähig also marks its invoices so, which the restore does not undo: use a category no scenario bills
 		async predefinedCategoryAllowance(categoryName: string, isAllowedUtilityCost: boolean) {

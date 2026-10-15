@@ -140,6 +140,7 @@ Funktionalität: Barrierefreiheit
       | category-edit          | default             |
       | category-edit          | submit-cleared      |
       | category-edit          | saved-toast         |
+      | category-edit-predefined | default           |
       | categories             | delete-dialog       |
       | distribution-keys      | default             |
       | distribution-key-new   | default             |

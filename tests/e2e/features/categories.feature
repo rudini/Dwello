@@ -59,19 +59,16 @@ Funktionalität: Kostenkategorien
     Dann ist die vordefinierte Kategorie "Schädlingsbekämpfung" nicht umlagefähig
     Und ist die vordefinierte Kategorie "Feuerlöscher-Wartung" nicht umlagefähig
 
-  @wip
   Szenario: Vordefinierte Kategorien nennen den Grund ihrer Umlagefähigkeit
     Angenommen der Liegenschaftsverwalter ist auf der Seite "Kategorien"
     Dann nennt die vordefinierte Kategorie "Feuerlöscher-Wartung" als Grund "nicht mit dem Gebrauch zusammen"
     Und nennt die vordefinierte Kategorie "Lift" als Grund "Reparaturen, Ersatzteile und Serviceabos mit Reparaturen trägt der Vermieter"
     Und erfährt der Liegenschaftsverwalter, dass der Mieter umlagefähige Kosten nur bezahlt, wenn der Mietvertrag sie nennt
 
-  @wip
   Szenario: Grund der Umlagefähigkeit beim Bearbeiten einer vordefinierten Kategorie
     Angenommen der Liegenschaftsverwalter ist auf der Bearbeitungsseite der vordefinierten Kategorie "Feuerlöscher-Wartung"
     Dann nennt die Kategorie als Grund "nicht mit dem Gebrauch zusammen"
 
-  @wip
   Szenario: Geänderte vordefinierte Kategorie nennt keinen festen Grund
     Angenommen die vordefinierte Kategorie "Schneeräumung" ist als nicht umlagefähig gespeichert
     Und der Liegenschaftsverwalter ist auf der Seite "Kategorien"

@@ -9,6 +9,7 @@
 	import TextInput from '$lib/ui/TextInput.svelte';
 	import SaveForm from '../SaveForm.svelte';
 	import CategoryProposal from './CategoryProposal.svelte';
+	import CategoryReason from './CategoryReason.svelte';
 
 	// `proposal` only on a new category: the KI's answer to «Von der KI prüfen lassen»
 	let {
@@ -19,7 +20,7 @@
 		submitLabel
 	}: {
 		action?: string;
-		category?: Category & { predefined?: boolean };
+		category?: Category & { key?: string; predefined?: boolean };
 		errors?: Record<string, string>;
 		proposal?: Proposal | null;
 		submitLabel: string;
@@ -116,6 +117,7 @@
 			error={values.allowed ? undefined : errors.isAllowedUtilityCost}
 			testid="category-allowance"
 		/>
+		<CategoryReason {category} />
 		{#if action}
 			<div>
 				<div>

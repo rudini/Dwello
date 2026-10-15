@@ -1,3 +1,4 @@
+import { baseLocale, overwriteGetLocale } from '$lib/paraglide/runtime';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { readable } from 'svelte/store';
 
@@ -198,11 +199,26 @@ describe('Rechnungsdetail', () => {
 
 	// Auch eine Rechnung, die der Liegenschaftsverwalter selbst ausgeschlossen hat: der Hinweis nennt nicht das Gesetz als
 	// Grund, und nur die Gebäudeversicherung, nicht Versicherungen allgemein (#185, Fachreview H-11)
+	// Das Beispiel heisst wie die vordefinierte Kategorie (Code-Review K-2)
+	it.each([
+		['fr', 'assurance bâtiment, impôt foncier'],
+		['it', 'assicurazione edificio, imposta immobiliare']
+	] as const)('nennt auf %s die Gebäudeversicherung mit dem Namen ihrer Kategorie', (locale, example) => {
+		overwriteGetLocale(() => locale);
+		try {
+			show(InvoicePage, { data: { invoice: invoice({ isValidUtilityCost: false }) } });
+
+			expect(byTestId('invoice-legal-note')!.textContent).toContain(example);
+		} finally {
+			overwriteGetLocale(() => baseLocale);
+		}
+	});
+
 	it('erklärt, dass eine nicht umlagefähige Rechnung nicht abgerechnet wird', () => {
 		show(InvoicePage, { data: { invoice: invoice({ isValidUtilityCost: false }) } });
 
 		expect(byTestId('invoice-legal-note')!.textContent).toContain(
-			'Diese Rechnung fliesst nicht in die Nebenkostenabrechnung ein. Typische nicht umlagefähige Kosten: Reparaturen, Gebäudeversicherung, Liegenschaftssteuer, Hypothekarzinsen (Art. 256 Abs. 1, 256b und 257a OR).'
+			'Diese Rechnung fliesst nicht in die Nebenkostenabrechnung ein. Typische nicht umlagefähige Kosten: Reparaturen, Gebäudeversicherung, Liegenschaftssteuer, Hypothekarzinsen (Art. 256 Absatz 1, 256b und 257a OR).'
 		);
 	});
 

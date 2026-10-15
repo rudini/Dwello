@@ -457,6 +457,13 @@
 			]
 		},
 		{
+			"name": "category-edit-predefined",
+			"path": "/config/categories/{predefinedCategory}/edit",
+			"states": [
+				"default"
+			]
+		},
+		{
 			"name": "distribution-keys",
 			"path": "/config/distribution-keys",
 			"states": [

@@ -6,6 +6,7 @@ import { runAction } from './helpers/action';
 import proposal from '../../tests/contracts/category-proposal.json';
 import unsure from '../../tests/contracts/category-proposal-refused.json';
 import invalid from '../../tests/contracts/validation-refused.json';
+import contract from '../../tests/contracts/category.json';
 
 const API = 'http://localhost:3001/api/v1/categories';
 
@@ -55,6 +56,15 @@ describe('Kategorien anzeigen', () => {
 				usageCount: 3
 			})
 		]);
+	});
+
+	// The key names a predefined category's reason (#186), whatever its German name
+	it('behält den Schlüssel einer Kategorie', async () => {
+		const fetch = (async () => Response.json({ categories: [contract], total: 1 })) as typeof globalThis.fetch;
+
+		const data = (await load({ fetch } as never)) as { categories: { key: string }[] };
+
+		expect(data.categories[0].key).toBe('Internet');
 	});
 });
 

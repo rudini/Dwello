@@ -1,5 +1,5 @@
 import type { Activity } from '../screenplay/actor';
-import { Check, Click, Enter, Navigate } from '../screenplay/interactions';
+import { Check, Click, Enter, Navigate, Wait } from '../screenplay/interactions';
 import {
 	allowanceOption,
 	allowedFilter,
@@ -16,7 +16,7 @@ export const openNewCategory = Navigate.to('/config/categories/new');
 export const openCategoryEdit = (categoryId: string) => Navigate.to(`/config/categories/${categoryId}/edit`);
 // A predefined category has no seeded id: open it from the list
 export const openPredefinedCategory = (name: string): Activity => (actor) =>
-	actor.attemptsTo(openCategories, Click.on(editButton(name)));
+	actor.attemptsTo(openCategories, Click.on(editButton(name)), Wait.until(nameInput));
 
 export const showAllowedCategories = Click.on(allowedFilter);
 
