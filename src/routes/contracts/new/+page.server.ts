@@ -29,7 +29,10 @@ export const load: PageServerLoad = async ({ fetch }) => {
 	const [tenantsRes, apartmentsRes] = await Promise.all([
 		fetch(`${BACKEND_URL}/api/v1/tenants?limit=1000`), // far more than a small portfolio has
 		fetch(`${BACKEND_URL}/api/v1/apartments?limit=1000`)
-	]).catch(() => []);
+	]).catch((err) => {
+		console.error('Failed to load data for contract form:', err);
+		return [];
+	});
 	// an empty choice would read as "no tenants yet" (#147): the landlord sees a load error instead
 	if (!tenantsRes?.ok || !apartmentsRes?.ok) {
 		console.error(
