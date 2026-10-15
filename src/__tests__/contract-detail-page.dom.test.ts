@@ -184,6 +184,10 @@ describe('Mietvertragsdetail', () => {
 			{ start: '2025-01-01', end: '2025-12-31', href }
 		]);
 		expect(text('contract-missing-statement')).toContain('Abrechnung 2025 fehlt');
+		// the wizard bills the whole building, the invoices come first (code review C-10)
+		expect(text('contract-missing-statement')).toContain(
+			'Der Assistent erstellt die Abrechnungen für alle Mietverträge des Gebäudes. Erfassen Sie zuerst die Rechnungen der Periode.'
+		);
 		expect(byTestId('contract-missing-statement-link-2025-01-01')!.getAttribute('href')).toBe(href);
 	});
 
@@ -198,15 +202,11 @@ describe('Mietvertragsdetail', () => {
 		expect(text('contract-missing-statement')).toContain('2 Abrechnungen fehlen');
 		// the wizard bills the whole building, the invoices come first, any order (personas Helga, Anna, Marco #142)
 		expect(text('contract-missing-statement')).toContain(
-			'Jede Periode öffnet den Assistenten für alle Mietverträge des Gebäudes. Erfassen Sie zuerst die Rechnungen der Periode; die Reihenfolge spielt keine Rolle.'
+			'Jede Schaltfläche öffnet den Assistenten für alle Mietverträge des Gebäudes in dieser Periode. Erfassen Sie zuerst die Rechnungen der Periode; mit welcher Periode Sie beginnen, spielt keine Rolle.'
 		);
-		// short labels side by side, each named in full for a screen reader
+		// short labels side by side, each with its verb (personas Marco P-4, Helga P-6, code review C-8)
 		const links = [...byTestId('contract-missing-statement')!.querySelectorAll('a')];
-		expect(links.map((a) => a.textContent!.trim())).toEqual(['2025', '2023']);
-		expect(links.map((a) => a.getAttribute('aria-label'))).toEqual([
-			'Abrechnungen 2025 erstellen',
-			'Abrechnungen 2023 erstellen'
-		]);
+		expect(links.map((a) => a.textContent!.trim())).toEqual(['2025 abrechnen', '2023 abrechnen']);
 		expect(links.map((a) => a.getAttribute('href'))).toEqual(missing.map((m) => m.href));
 	});
 
