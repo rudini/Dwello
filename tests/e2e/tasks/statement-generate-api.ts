@@ -2,7 +2,7 @@ import { type GenerationRequest, generateStatements, previewStatements } from '.
 import { CallTheApi } from '../screenplay/abilities';
 import type { Activity } from '../screenplay/actor';
 
-export type RunOptions = { heatingProfileId?: string; managementFeePercent?: number };
+export type RunOptions = { heatingProfileId?: string; managementFeePercent?: number; periodStart?: string; periodEnd?: string };
 
 // What the API protocol driver remembers for the questions in questions/statement-generate.ts
 export const PREVIEW_TOTALS = 'preview';

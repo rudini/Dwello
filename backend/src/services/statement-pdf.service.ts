@@ -134,7 +134,7 @@ async function heatingOf(statement: StatementWithDetails, period: { rentalStart:
 	const profile = hasHeating && statement.heatingProfileId ? await getHeatingProfile(statement.heatingProfileId) : null;
 	if (!profile) return {};
 	// the same share the calculation takes: the months rented against the months of the period
-	const { percentage, monthBreakdown, byDays } = await handleMidYearMoves(
+	const shared = await handleMidYearMoves(
 		profile.id,
 		new Date(rentalStart),
 		new Date(rentalEnd),
@@ -142,7 +142,8 @@ async function heatingOf(statement: StatementWithDetails, period: { rentalStart:
 		new Date(statement.periodEnd),
 		100
 	);
-	if (byDays) return {}; // the months of the period carry 0 % in the profile: shared by days, no profile note
+	if (shared.byDays) return {}; // the months of the period carry 0 % in the profile: shared by days, no profile note
+	const { percentage, monthBreakdown } = shared;
 	const months = monthBreakdown.map(({ month, percentage }) => ({ month, percentage: Math.round(percentage * 100) / 100 }));
 	return { heating: { profile: localName(profile, language), percent: percentage, months } };
 }
