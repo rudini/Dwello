@@ -7,7 +7,7 @@ Summary of all `docs/reviews/workflow-rules-review-*.md` (issue-212 merged into 
 | Finding (review) | Point | Where now |
 |---|---|---|
 | W-28 (5), 123 R-1, 127 R-1, 202 #1, migrations W-2 | "No scenario" only named server-side failures; states the E2E stack cannot produce (server clock, backend start, a refusal's body, KI answer quality) had no rule; a scenario without steps cannot fail for the right reason | `CLAUDE.md` Workflow 1 |
-| 202 #1, #2, 212 #1, #3 | KI prompt changes need `llm:eval` before and after, with the default model; without it the issue stays open (`Refs #n`, "Blocked on me"); its needs were undocumented | `CLAUDE.md` Workflow 1, `backend/CLAUDE.md` Commands |
+| 202 #1, #2, 212 #1, #3 | A change to the allocability prompt needs `llm:eval` before and after, with the default model; without it the issue stays open (`Refs #n`, "Blocked on me"); its needs were undocumented | `CLAUDE.md` Workflow 1, `backend/CLAUDE.md` Commands |
 | 212 #2 | Prompts sent to the KI are domain rules for the `fach-reviewer` before implementing | `CLAUDE.md` Workflow 1 |
 | 176 W-9 | Data leaving the server in a new way makes the privacy statement a legal text of the task | `CLAUDE.md` Workflow 1 |
 | 135 W-2 | Check results given to a reviewer came from an older commit | `CLAUDE.md` Workflow 4 |

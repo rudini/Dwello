@@ -15,7 +15,7 @@ bun run db:demo         # load demo data; running it twice adds nothing
 bun run llm:eval        # hit rate of the configured KI on the allocability cases (LLM_* variables, migrated DATABASE_URL)
 ```
 
-`llm:eval` measures only the allocability check (`proposeAllocability`); it is run before and after a change to that prompt (the invoice prompts have no cases yet). In a cloud session the default Ollama model cannot be pulled: point `LLM_BASE_URL`, `LLM_API_KEY` and `LLM_MODEL` at an allowed OpenAI-compatible provider and name that model with the result, which then is not the default model's and does not finish the task (`CLAUDE.md`, Workflow 1).
+`llm:eval` measures only the allocability check (`proposeAllocability`); it is run before and after a change to that prompt (the invoice prompts have no cases yet). In a cloud session the default Ollama model cannot be pulled: point `LLM_BASE_URL`, `LLM_API_KEY` and `LLM_MODEL` at an allowed OpenAI-compatible provider and name that model with the result, which then is not the default model's and leaves the issue open (`CLAUDE.md`, Workflow 1).
 
 Every `bun test` started in `backend/` itself loads the preload `scripts/test-db.ts` (`bunfig.toml`), so no test writes into the dev database; from a subdirectory Bun skips `bunfig.toml` and the preload. One backend test run at a time: each run drops and recreates `dwello_test` (`TEST_DATABASE_URL` overrides it).
 
