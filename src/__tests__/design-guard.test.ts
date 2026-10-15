@@ -19,6 +19,11 @@ const rules: [string, RegExp][] = [
 		/#[0-9a-fA-F]{3,8}\b(?![-\w])|\b(?:rgba?|hsla?|oklch|oklab|lab|lch|hwb)\(/
 	],
 	['Farbe im style-Attribut', /style="[^"]*\b(?:color|background(?:-color)?|border-color)\s*:/],
+	// a <style> element (a page outside the app) may name only the browser's system colours
+	[
+		'Farbe im style-Element',
+		/<style[^>]*>[^<]*\b(?:color|background(?:-color)?|border-color)\s*:\s*(?!(?:CanvasText|Canvas|LinkText|currentColor|inherit|transparent)\b)[a-z]/i
+	],
 	['SVG-Farbe ausserhalb der Tokens', /\b(?:fill|stroke)="(?!none"|currentColor"|var\()[^"]+"/],
 	['beliebiger Wert statt Token', /\b[a-z][a-z-]*-\[[^\]]+\]/],
 	['Schrift unter 14 px', /\btext-xs\b/],
@@ -76,6 +81,7 @@ describe('Wächter des Designsystems', () => {
 		'class="leading-[13px]"',
 		'style="color: red"',
 		'style="color: oklch(50% 0.1 200)"',
+		'<style>\na { color: red }\n</style>',
 		'<path fill="white" />',
 		'class="outline-primary"',
 		'class="divide-gray-200"',
@@ -100,7 +106,9 @@ describe('Wächter des Designsystems', () => {
 		// an issue named in a comment is not a colour
 		'let shown = false; // no hint until the contracts are loaded (#143)',
 		'<!-- the region is there before the hint (#143) -->',
-		"/* see #143 */ const url = 'https://example.com/a#b';"
+		"/* see #143 */ const url = 'https://example.com/a#b';",
+		// a page outside the app uses the browser's system colours (docs/design/token-referenz.md)
+		'<style>\na { padding: 0; color: CanvasText }\n</style>'
 	])('lässt %s zu', (sample) => {
 		expect(findingsIn(sample)).toEqual([]);
 	});

@@ -5,8 +5,10 @@ import en from '../../messages/en.json';
 
 /** Every UI text comes from messages/de.json: no German text may be written into the code itself */
 const words = (text: string) => text.toLowerCase().match(/\p{L}{3,}/gu) ?? [];
+// a short word before «. <digit>» is read as an abbreviation of a legal citation («Art. 257a Abs. 2 OR»), so «abs»
+// stays free for Math.abs; a sentence like «… im Jahr. 2025» loses that one word from the vocabulary
 const vocabulary = (messages: Record<string, string>) =>
-	new Set(Object.values(messages).flatMap(words));
+	new Set(Object.values(messages).flatMap((text) => words(text.replace(/(?<!\p{L})\p{L}{2,4}\.(?=\s*\d)/gu, ''))));
 const english = vocabulary(en);
 const german = vocabulary(de);
 // Words only German UI texts use, and anything with ä, ö, ü or ß
@@ -65,6 +67,13 @@ const sources = (readdirSync('src', { recursive: true }) as string[])
 	.filter((path) => !/__tests__|\/paraglide\//.test(path));
 
 describe('Keine deutschen Texte im Code', () => {
+	it('zählt Abkürzungen einer Rechtsangabe nicht als deutsche Wörter (Art. 257a Abs. 2 OR)', () => {
+		const words = vocabulary({ a: 'Nach Art. 257a Abs. 2 OR gespeichert.' });
+		expect(words.has('abs')).toBe(false);
+		expect(words.has('art')).toBe(false);
+		expect(words.has('gespeichert')).toBe(true);
+	});
+
 	it('erkennt deutschen Text in Markup, Attributen und Zeichenketten', () => {
 		const found = texts(
 			`<script>const a = 'Gespeichert';</script><p>Mieter erfassen</p><button aria-label="Schliessen">{x}</button>`,

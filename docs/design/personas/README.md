@@ -2,7 +2,7 @@
 
 The users Dwello is built for (`CLAUDE.md`, "Design-Regeln"): private landlords with little experience who use Dwello a few times a year. The five personas below stand for them in usability reviews. They were defined in the redesign brief (`docs/archive/redesign/REDESIGN_BRIEF.md`) and are run by the subagent `persona` (`.claude/agents/persona.md`); how a run works: `docs/design/arbeitsregeln.md`, "Persona runs: how".
 
-Personas are AI agents that operate the running app with the demo data, not real test users. Their reports are in this folder as `<persona>-<round>.md`.
+Personas are AI agents that operate the running app with the demo data, not real test users. The demo data is invented, so a report may quote its names. The persona stack answers the KI check of a new category with the stand-in of the acceptance tests (`backend/scripts/llm-stub.ts`, fixed answers), not a model; invoices find no KI. A finding about the quality of a KI answer is about the stand-in. Their reports are in this folder as `<persona>-<round>.md`.
 
 | Persona | Who | Default task | Viewport and input |
 |---|---|---|---|
@@ -21,5 +21,6 @@ A persona is affected by a change (`CLAUDE.md`, Workflow 5) when one of these ho
 - **Screen:** the persona's default task uses the changed screen.
 - **Device:** every changed view is also checked on a phone: Marco.
 - **Kind of change:** new claims, texts or anything with legal weight: Dr. Weber; keyboard, focus or what a screen reader announces: Sven; finding the way in, first use or a return after months: Anna; forms and terms for beginners: Helga.
+- **Browser chrome** (tab icon, title, manifest): headless Chromium draws no tab bar, so the persona judges the asset rendered at its real sizes on light and dark backgrounds instead of browsing.
 
 Unknown terms are fixed with better help texts, never by renaming the glossary term.

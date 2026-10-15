@@ -6202,3 +6202,41 @@ Files: `src/lib/accounting-period.ts`, `tests/a11y/screens.json`, `accessibility
 - [x] `llm:eval` with qwen2.5:3b: handed to the product owner (not reachable here; under «Blocked on me»)
 - [x] Workflow review `docs/reviews/workflow-rules-review-issue-212.md`
 - [x] PR `Fixes #212` (opened after archiving; merge follows green CI)
+
+## Session 2026-10-15 (8): apply the workflow rules reviews
+
+Request (chat, no issue): summarize the findings of all `docs/reviews/workflow-rules-review-*.md`, apply those not yet applied, then review the changes independently against the Opus 5.5 guide (claude.dev/blog/getting-the-most-out-of-opus-5-5). Reviews 1 to 9 were applied on 2026-10-14 (commits 3b4db73, 2f8b7ba, 7784acc; W-1 left out on request); the later reviews (issue-122 to issue-202, migrations-frozen) were not. No scenario: changes rules, hooks and test tooling only, no app behaviour.
+
+- [x] Tooling, test first: commit gate skips commits outside the project and says the whole command was dropped; fallow and deepcheck gates say the same; `no-german-in-code` ignores abbreviations of legal citations (176 W-8, 173 R-4, 125 R-4, 135 W-4, 176 W-1)
+  Test red: commit-msg-gate «lets … through in a repository outside the project» (3 cases) – status 2; «says that nothing in the blocked command ran» – stderr without it; fallow/deepcheck gate tests (stashed hooks) – stderr without it; «zählt Abkürzungen einer Rechtsangabe nicht» – expected true to be false
+  Skills: tdd, ponytail, ponytail-review (round 2: reuse `tools/deepcheck/test/helpers.ts` in the worktree test, applied)
+- [x] Scripts: `persona-stack.sh` from its own place (174 W-1); `session-start.sh` prints «some» instead of a count in a shallow clone (174 W-2; counting from the merge base gave 35 either way in a scratch clone)
+- [x] Rules in `CLAUDE.md`, `tests/e2e/CLAUDE.md`, `backend/CLAUDE.md`, `docs/test-pyramid.md`, personas README, `persona.md`, `token-referenz.md`, `screens.json`, task template
+- [x] Findings summary `docs/reviews/workflow-rules-findings-summary.md` (applied, rejected with reason)
+- [x] Checks: test:coverage (2442), lint, check, backend test (614) + type-check, deepcheck:audit, fallow audit
+- [x] Independent review against the Opus 5.5 guide (`code-reviewer`, own worktree), triage
+  code-reviewer round 1 (`docs/reviews/workflow-rules-apply-review-1.md`): open -, fixed C-1 (Major), C-2 (Major), C-3 to C-18
+  code-reviewer round 2 (`docs/reviews/workflow-rules-apply-review-2.md`): open -, fixed C-19 to C-25 (Minor/Nit); C-1 to C-18 confirmed fixed
+  code-reviewer round 3 (`docs/reviews/workflow-rules-apply-review-3.md`): open C-26 (Nit), C-27 (Nit) -> `offene-punkte.md` H-25; C-19 to C-25 confirmed fixed
+  Test red (C-23): design guard «meldet <style> a { color: red }» - no finding; (C-20): «checks a commit whose directory is no repository» - status 0 with `!repository ||` removed
+  Test red (C-1, C-3): commit-msg-gate worktree outside its folder and the two cd cases - status 0 with the hook of eee15f1
+- [x] Merged `origin/main` (#212, archive conflict resolved: both sessions kept); its new `workflow-rules-review-issue-212.md` applied (212 #1, #2; #3 as 202 #2)
+  code-reviewer round 1 of the #212 slice (`docs/reviews/workflow-rules-apply-212-review-1.md`): open -, fixed C-1 (Major), C-2 to C-6; merge fd87bba confirmed (both sessions kept)
+  code-reviewer round 2 of the #212 slice (`docs/reviews/workflow-rules-apply-212-review-2.md`): C-1 to C-6 confirmed fixed; fixed C-7 (Nit), C-8 (Minor)
+- [x] No workflow review (step 7): the task changes rules, hooks and test tooling, no app behaviour
+- [x] Archive session, push, pull request, CI, merge (pull request opened after archiving; merge follows green CI)
+
+Files: `CLAUDE.md`, `tests/e2e/CLAUDE.md`, `backend/CLAUDE.md`, `docs/test-pyramid.md`, `docs/design/personas/README.md`, `docs/design/token-referenz.md`, `docs/design/tools/persona-stack.sh`, `.claude/agents/persona.md`, `.claude/hooks/{commit-msg-gate.mjs,fallow-gate.sh,deepcheck-gate.sh,session-start.sh}`, `.claude/skills/grill-me/SKILL.md`, `.github/ISSUE_TEMPLATE/task.md`, `tests/a11y/screens.json`, `src/__tests__/no-german-in-code.test.ts`, `tools/claude-hooks/*.test.ts`, `tools/deepcheck/test/hook.test.ts`, `docs/reviews/workflow-rules-findings-summary.md`, `docs/reviews/workflow-rules-apply-review-{1,2,3}.md`, `docs/design/offene-punkte.md`, `src/__tests__/design-guard.test.ts`
+
+## Session 2026-10-15 (9): skill slice-review
+
+Request (chat, no issue): move the procedure of `CLAUDE.md` Workflow 4 to 6 (worktree per reviewer, prompt, report path, plan line, triage) into a skill `slice-review`, so `CLAUDE.md` keeps the rules and gets shorter; the agents stay agents. No scenario: agent instructions only.
+
+- [x] Skill `.claude/skills/slice-review/SKILL.md` with the procedure, nothing lost from `CLAUDE.md`
+- [x] `CLAUDE.md` Workflow 1, 4, 5, 6 point to the skill instead of repeating it
+- [x] Checks: test:coverage (2442), lint, check, backend test (615) + type-check
+- [x] Review against the Opus 5.5 guide (`code-reviewer`, own worktree, run with the new skill), triage
+  code-reviewer round 1 (`docs/reviews/slice-review-skill-review-1.md`): open -, fixed C-1 to C-4 (Minor), C-5 to C-9 (Nit); no re-review (no Blocker/Major, no code, Workflow 6)
+- [x] Archive session, push to PR #215
+
+Files: `.claude/skills/slice-review/SKILL.md`, `CLAUDE.md`, `docs/design/arbeitsregeln.md`, `docs/reviews/slice-review-skill-review-1.md`
