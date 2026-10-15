@@ -26,8 +26,8 @@ From the issue (decided by the product owner 2026-10-14): the KI proposes whethe
 - [x] code-reviewer per slice; feature review (personas Helga, Sven, Marco, Dr. Weber; fach-reviewer round 3; daten-pruefer) on the persona stack, which now starts the KI stand-in (`docs/design/tools/persona-stack.sh`)
 - [x] Persona fixes: a proposal holds for the name it checked (Helga P-1), does not overwrite a choice made before and says whether it preset the choice (Sven P-2, Marco P-1, Helga P-2, Dr. Weber P-2, Sven P-3), «Die KI prüft die Kategorie …» while it runs (Sven P-1), focus stays where the user went (Sven P-4), the error first and gone once chosen (Sven P-6, P-9)
   - Test red: `categories-page.dom.test.ts` «sagt, dass die Wahl der KI vorgewählt ist …», «lässt eine eigene Wahl vor der Prüfung stehen …», «nimmt Vorschlag und Wahl der KI zurück, sobald der Name ändert», «zeigt während der Prüfung …» (checking text), «lässt den Fokus, wo er …», «liest die fehlende Wahl zuerst vor …»; `categories.test.ts` proposal with `name`; `privacy-i18n.dom.test.ts` «sagt idiomatisch …» (E-22, F-21)
-- [ ] Docs: `docs/nebenkostenabrechnung-anforderungen.md:29`, `docs/api-specification.md`, `docs/data-model.md` if touched
-- [ ] Workflow review `docs/reviews/workflow-rules-review-issue-176.md`
+- [x] Docs: `docs/nebenkostenabrechnung-anforderungen.md:29`, `docs/api-specification.md`, `docs/data-model.md`, `docs/PRD-Dwello.md`, `docs/test-pyramid.md`, `tests/e2e/CLAUDE.md`, `tests/contracts/README.md`, `README.md`, `docs/design/i18n-begriffe.md`, `docs/migration-mva.md`
+- [x] Workflow review `docs/reviews/workflow-rules-review-issue-176.md` (W-1 to W-12)
 - [ ] Checks, push, pull request `Fixes #176`, session archived
 
 Skills: tdd, ponytail, ponytail-review (slice 1: nothing to cut, one table and one regex; slice 2: dropped the hard-coded category list instead of syncing it; slice 3: lean already; review fixes, slice 5 and persona fixes: tdd and ponytail, ponytail-review cut the global Enter handler (E-11) and the `empty:hidden` live region).
