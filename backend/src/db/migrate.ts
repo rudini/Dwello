@@ -9,7 +9,7 @@ import pg from 'pg';
 
 // db:reset deletes every record, so an installation must never follow it
 const RESET_HINT =
-	'Eine lokale Datenbank neu aufsetzen: bun run db:reset. Eine Installation nicht zurücksetzen, sonst gehen ihre Daten verloren.';
+	'Eine lokale Datenbank neu aufsetzen: bun run db:reset. Eine Installation nicht zurücksetzen (alle Daten gingen verloren), sondern mit der Version starten, mit der sie zuletzt lief.';
 
 /** Returns the files applied by this run, in order */
 export async function migrate(connectionString: string, directory: string) {
