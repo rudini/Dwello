@@ -217,6 +217,9 @@ describe('Rechnungsdetail', () => {
 	it('erklärt, dass eine nicht umlagefähige Rechnung nicht abgerechnet wird', () => {
 		show(InvoicePage, { data: { invoice: invoice({ isValidUtilityCost: false }) } });
 
+		// Der Titel nennt die Folge, nicht das Gesetz als Grund (Fachreview H-23)
+		expect(byTestId('invoice-legal-note')!.textContent).toContain('Nicht in der Nebenkostenabrechnung');
+		expect(byTestId('invoice-legal-note')!.textContent).not.toContain('Schweizer Mietrecht');
 		expect(byTestId('invoice-legal-note')!.textContent).toContain(
 			'Diese Rechnung fliesst nicht in die Nebenkostenabrechnung ein. Typische nicht umlagefähige Kosten: Reparaturen, Gebäudeversicherung, Liegenschaftssteuer, Hypothekarzinsen (Art. 256 Absatz 1, 256b und 257a OR).'
 		);

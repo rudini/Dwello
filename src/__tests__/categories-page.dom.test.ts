@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { baseLocale, overwriteGetLocale } from '$lib/paraglide/runtime';
 import { get } from 'svelte/store';
 
 // enhance as SvelteKit wires it: the test plays the server's answer to the last submit
@@ -477,6 +478,26 @@ describe('Grund der Umlagefähigkeit', () => {
 		await settle();
 
 		expect(byTestId('category-reason')).toBeNull();
+	});
+
+	// Fachreview Runde 2 (H-25 bis H-27) und Dr. Weber P-7: die Vereinbarung verlangt Art. 257a Abs. 2 OR
+	it.each([
+		['de', 'Administration', false, 'wenn der Mietvertrag sie nennt (Art. 257a Absatz 2 OR)'],
+		['it', 'Pest Control', false, 'è necessario anche quando è vuoto'],
+		['it', 'Caretaker', true, 'piccoli lavori di conservazione'],
+		['fr', 'Administration', false, 'si le contrat de bail les mentionne (art. 257a, al. 2, CO)']
+	] as const)('nennt auf %s den Grund von %s im geprüften Wortlaut', (locale, key, allowed, wording) => {
+		overwriteGetLocale(() => locale);
+		try {
+			show(CategoriesPage, {
+				data: { categories: [category('c9', key, allowed, 0, { key, predefined: true })] },
+				form: null
+			} as never);
+
+			expect(reasons()[0]).toContain(wording);
+		} finally {
+			overwriteGetLocale(() => baseLocale);
+		}
 	});
 
 	it('nennt den Grund beim Bearbeiten einer vordefinierten Kategorie', () => {
