@@ -221,6 +221,12 @@ describe('API-Verträge des Frontends', () => {
 		expect(drift(await sample('statement-pdf-failed'), await response.json())).toEqual([]);
 	});
 
+	it('eine Anfrage, die das Schema verletzt, liefert die Felder von validation-refused.json', async () => {
+		const response = await sendJson('POST', '/api/v1/statements/preview', { contractId: 42 });
+		expect(response.status).toBe(422);
+		expect(drift(await sample('validation-refused'), await response.json())).toEqual([]);
+	});
+
 	it('GET /statements/:id/pdf einer unbekannten Abrechnung liefert die Felder von statement-pdf-refused.json', async () => {
 		const response = await callApi(`/api/v1/statements/${crypto.randomUUID()}/pdf`);
 		expect(response.status).toBe(404);

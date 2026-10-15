@@ -1,0 +1,5 @@
+{
+	"error": "Invalid request",
+	"code": "VALIDATION_ERROR",
+	"params": {}
+}

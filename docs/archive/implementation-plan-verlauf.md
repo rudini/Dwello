@@ -6043,3 +6043,20 @@ Task: open `bug` issues one by one (#122, #123, #125 merged in rudini/Dwello#181
 - [x] PR, CI, merge (pull request opened after archiving; merge follows green CI). Final checks: test:coverage 2416 (once red on French guillemets without no-break space, fixed), lint, check, backend test + type-check, deepcheck:audit, E2E chromium + api statement-reminder, documents, tenant-detail (18 passed)
 
 Files: `backend/src/services/document.service.ts`, `reminder.service.ts`, `backend/src/__tests__/reminders.pg.test.ts`, `src/lib/backend-error.ts`, `src/__tests__/backend-error.test.ts`, `statement-pages.dom.test.ts`, `messages/*.json`, `docs/api-specification.md`, `docs/design/offene-punkte.md` (O-23), review reports in `docs/reviews/issue-126-*.md`, persona reports `docs/design/personas/helga-issue-126*.md`, `docs/reviews/workflow-rules-review-issue-126.md`
+
+## Session 2026-10-15 (3): bug #127, schema refusals without code; invoice edit shows raw text
+
+Task: open `bug` issues one by one (#122, #123, #125, #126 merged in rudini/Dwello#181, #182, #189, #196); now #127. Skipped while labelled `entscheiden`: #93, #124, #130, #131, #136, #138, #141.
+
+- [x] No scenario: server-side failure. The bug needs a backend refusal with its own text and no code; a failure the browser can cause (status only, `FailRequests`) has no body and already shows «Ein unerwarteter Fehler ist aufgetreten. …» (a `@wip` scenario showed exactly that and was dropped). DOM tests show it instead
+- [x] Backend: one global `onError` answers every schema refusal 422 `{ error, code: 'VALIDATION_ERROR', params }`; `error-codes.pg.test.ts`; `docs/api-specification.md` «Schema validation». Test red: «meldet eine Anfrage, die das Schema verletzt, mit Code» – received Elysia's own body without code
+- [x] Invoice edit and recategorisation: a refusal without a known code shows `invoices_save_failed` / `invoices_categorisation_failed`, never the backend's text (detail: `backend_unknown_error`, the message it showed for an unreadable answer; edit: the sentence alone, without «Fehler beim Speichern:» before it); DOM tests. Test red: «zeigt einen Fehler beim Speichern in Worten der Oberfläche …» (it pinned «Fehler beim Speichern: Datenbank nicht erreichbar»), «meldet ein misslungenes Neu-Kategorisieren ohne Code …» – received «Failed to recategorize invoice»; «nennt den Grund, wenn die KI nicht kategorisieren konnte» now sends the code `KI_UNAVAILABLE` the backend sends
+- [x] Skills: tdd, ponytail, ponytail-review
+- [x] Checks: test:coverage (2418), lint, check, backend test + type-check, deepcheck:audit, E2E chromium + api invoice-edit, invoice-detail, invoice-new (18 passed)
+- [x] code-reviewer
+  - code-reviewer round 1 (`docs/reviews/issue-127-review-1.md`): open none, fixed C-1 (Major; contract `tests/contracts/validation-refused.json`, checked in `api-contracts.pg.test.ts`, used by the DOM test), C-2 (Minor; the uncoded edit test sends `errorBody`'s `{ error: 'Failed to update invoice' }`), rejected C-3: one global handler for every `VALIDATION` error, wherever in the request it arises; the body case shows the handler
+- [x] Personas: not run. The changed texts appear only on a backend refusal without a code, which neither the browser nor the persona stack can produce; DOM tests show them
+- [x] Workflow review `docs/reviews/workflow-rules-review-issue-127.md`
+- [x] PR, CI, merge (pull request opened after archiving; merge follows green CI)
+
+Files: `backend/src/app.ts`, `backend/src/__tests__/error-codes.pg.test.ts`, `src/routes/invoices/[id]/edit/+page.svelte`, `src/routes/invoices/[id]/+page.svelte`, `src/__tests__/invoice-pages.dom.test.ts`, `docs/api-specification.md`, `tests/contracts/validation-refused.json`, `tests/contracts/README.md`, `backend/src/__tests__/api-contracts.pg.test.ts`, `docs/reviews/issue-127-review-1.md`, `docs/reviews/workflow-rules-review-issue-127.md`

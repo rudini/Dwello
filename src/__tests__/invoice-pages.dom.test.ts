@@ -25,6 +25,7 @@ import {
 	show,
 	submit
 } from './helpers/dom';
+import validationRefused from '../../tests/contracts/validation-refused.json';
 
 const buildings = [{ id: 'b1', name: 'Seeblick', address: 'Seeweg 1, 8400 Winterthur' }];
 const categories = [
@@ -739,7 +740,7 @@ describe('Rechnung bearbeiten', () => {
 
 	// #127: a refusal without a code the UI knows showed the server's own text
 	it('zeigt einen Fehler beim Speichern in Worten der Oberfläche, nicht den Text des Servers', async () => {
-		fakeBff(() => [500, { error: { code: 'ERR', message: 'Datenbank nicht erreichbar' } }]);
+		fakeBff(() => [400, { error: 'Failed to update invoice' }]); // errorBody of a refusal without code
 		edit();
 
 		fireEvent(byTestId<HTMLInputElement>('invoice-amount-input')!, 'input', '480');
@@ -747,12 +748,12 @@ describe('Rechnung bearbeiten', () => {
 		await settle();
 
 		expect(text()).toContain('Die Rechnung konnte nicht gespeichert werden. Versuchen Sie es erneut.');
-		expect(text()).not.toContain('Datenbank nicht erreichbar');
+		expect(text()).not.toContain('Failed to update invoice');
 		expect(allByTestId('submit-button')).toHaveLength(1);
 	});
 
 	it('nennt beim Speichern den Grund, den das Backend mit Code angibt', async () => {
-		fakeBff(() => [422, { error: 'Invalid request', code: 'VALIDATION_ERROR', params: {} }]);
+		fakeBff(() => [422, validationRefused]);
 		edit();
 
 		fireEvent(byTestId<HTMLInputElement>('invoice-amount-input')!, 'input', '480');
