@@ -172,6 +172,20 @@ Funktionalität: Abrechnungsdetail
     Und steht im PDF "können die Belege einsehen"
     Und steht im PDF "detaillierte Abrechnung der Heiz- und Warmwasserkosten"
 
+  # Eine Periode nur aus Monaten mit 0 % im Heizprofil (Sommer): die Heizkosten werden nach Tagen verteilt
+  @wip
+  Szenario: Heizkosten einer Sommerperiode stehen im PDF nach Tagen
+    Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
+    Und im Gebäude "Lindenhof" gibt es die leere Wohnung "3.02"
+    Und der Mieter "Lea Graf" existiert
+    Und "Lea Graf" mietet die Wohnung "3.02" seit "2024-07-15" für "900" Franken
+    Und für "Lea Graf" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung vom "2024-06-01" bis "2024-08-31" mit dem Heizprofil "Winter"
+    Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Lea Graf"
+    Wenn der Liegenschaftsverwalter das PDF der Abrechnung erstellt
+    Und der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt
+    Dann steht im PDF "48/92 Tage"
+    Und steht im PDF nicht "nach Heizprofil"
+
   Szenario: PDF in der Sprache des Mieters
     Angenommen die Verwaltung hat die IBAN "CH93 0076 2011 6238 5295 7" hinterlegt
     Und die Korrespondenz an "Eva Frei" ist auf "Französisch"
