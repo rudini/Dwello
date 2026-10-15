@@ -231,6 +231,13 @@ export function testData(api: CallTheApi) {
 		},
 
 		// Monthly shares January..December in percent
+		// A profile of the scenario, or a predefined one by its German name: named explicitly, never the preselection, which
+		// a parallel scenario's own profile can take (own profiles are listed first)
+		async heatingProfileId(title: string) {
+			const profiles: { id: string; nameDE: string | null }[] = (await get('heating-profiles?limit=100')).data;
+			return ids.get(title) ?? profiles.find((profile) => profile.nameDE === title)!.id;
+		},
+
 		async heatingProfile(title: string, monthly: number[]) {
 			const months = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
 			const profile = await post('heating-profiles', {

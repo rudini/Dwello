@@ -120,8 +120,15 @@ When(
 When(
 	'der Liegenschaftsverwalter die Vorschau der Abrechnungen vom {string} bis {string} für das Gebäude {string} mit dem Heizprofil {string} öffnet',
 	async ({ verwalter, seed }, start: string, end: string, building: string, profile: string) => {
-		const options = { periodStart: start, periodEnd: end, heatingProfileId: seed.idOf(profile) };
+		const options = { periodStart: start, periodEnd: end, heatingProfileId: await seed.heatingProfileId(profile) };
 		await verwalter.attemptsTo(openPreview(Number(start.slice(0, 4)), seed.idOf(building)!, options));
+	}
+);
+
+When(
+	'der Liegenschaftsverwalter die Vorschau der Abrechnungen {int} für das Gebäude {string} mit dem Heizprofil {string} öffnet',
+	async ({ verwalter, seed }, year: number, building: string, profile: string) => {
+		await verwalter.attemptsTo(openPreview(year, seed.idOf(building)!, { heatingProfileId: await seed.heatingProfileId(profile) }));
 	}
 );
 

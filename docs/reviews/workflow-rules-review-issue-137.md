@@ -28,3 +28,11 @@ Task: bug #137, «PDF says «nach Heizprofil» when heating costs were shared by
   - The note moved into its own function `sharesNote`.
   - Same finding as W-1 in `docs/reviews/workflow-rules-review-issue-135.md`.
 - **Proposed change:** as there: say how to treat an estimated CRAP finding.
+
+### W-4: A preselection shared by parallel scenarios makes amounts flaky
+
+- **Rule:** `tests/e2e/CLAUDE.md`, Rules, «Isolation»: every scenario creates its own data.
+- **What happened:**
+  - Isolated records are not enough when the app preselects from all records. Step 3 of the wizard preselects the first own Heizprofil, so a profile created by a parallel scenario changed the amounts of «Heizöl wird nach Verbrauch abgerechnet» (2 of 8 repeats).
+  - The rule does not mention preselections or defaults.
+- **Proposed change:** add «a scenario whose result depends on a choice the app preselects names that choice explicitly; a preselection reads all records, also those of parallel scenarios».
