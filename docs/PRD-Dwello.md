@@ -207,7 +207,7 @@ Dwello is built for private landlords with little experience who use it a few ti
   - Utility meter IDs (optional) - for tracking metered utilities
 
 **Occupancy Tracking:**
-- Current occupancy status (occupied, relet, vacant, reserved)
+- Current occupancy status (Mietstatus: occupied, relet, vacant, reserved): occupied (a rental contract runs today) and relet (only a future contract is signed) follow from the rental contracts; by hand the property manager sets only vacant or reserved (e.g. during a renovation), and reserved holds only while no contract runs or is signed (scenarios in `apartment-edit.feature`)
 - Occupancy duration
 - Historical occupancy records
 
@@ -311,7 +311,7 @@ Dwello is built for private landlords with little experience who use it a few ti
 **Invoice Entry:**
 - Add invoices manually (web form or bulk import in future)
 - Invoice attributes:
-  - Invoice date (date invoice was issued)
+  - Invoice date (date invoice was issued; without a service period it decides the accounting period the invoice counts in, see `docs/nebenkostenabrechnung-anforderungen.md`, «Regeln in Dwello»)
   - Billing entity name (company providing service)
   - Billing entity address (for records)
   - Work description / service description
@@ -379,7 +379,7 @@ Dwello is built for private landlords with little experience who use it a few ti
 **Use Cases:**
 1. Monthly invoice processing: Add heating oil delivery invoice, LLM categorizes as Heizkosten
 2. Validity validation: Add invoice for building repairs, system flags as "Not allowed"
-3. Category override: Manually override LLM categorization if incorrect
+3. Category override: Manually override LLM categorization if incorrect; the form requires a reason for the change (Grund der Änderung), the API accepts the change without one
 4. Cost analysis: Review all Heizkosten invoices for a building over a period
 5. Statement preparation: Gather all valid invoices for a specific period
 
@@ -391,7 +391,7 @@ Dwello is built for private landlords with little experience who use it a few ti
 
 **Predefined Distribution Keys:**
 
-Seeded by `backend/migrations/0002_stammdaten.sql`. The divisor is always all apartments of the building, occupied or not: the owner (Vermieter) bears the share of vacant apartments.
+Seeded by `backend/migrations/0002_stammdaten.sql`. The divisor is always all apartments of the building, occupied or not: the owner (Vermieter) bears the share of vacant apartments. An invoice without a distribution key is shared equally among all apartments of the building (like Pro Einheit). The Verwaltungspauschale has no distribution key.
 
 1. **Pro Einheit** (Per Unit), formula `{units}`
    - Equal share per apartment
@@ -447,6 +447,8 @@ Four profiles, seeded by `backend/migrations/0002_stammdaten.sql`; each distribu
 4. **Heizung Tessin** (Heating Only, Southern Switzerland): for Ticino and southern regions
 5. ~~**Nur Warmwasser** (Hot Water Only)~~: removed; separate hot water costs are shared by days
 
+Predefined profiles cannot be deleted and their monthly shares cannot change; the app does not edit them at all (only the API accepts a new name).
+
 **Manual Configuration:**
 - Option to input custom monthly percentages manually
 - Visual editor with percentage inputs for each month
@@ -454,23 +456,25 @@ Four profiles, seeded by `backend/migrations/0002_stammdaten.sql`; each distribu
 - Ability to save custom profiles for reuse
 
 **Usage:**
-- Applied during utility statement generation
+- Chosen per statement run (Abrechnungslauf), not per building; without a heating profile, heating costs are shared by days
 - Used to prorate heating costs for tenants who moved mid-year
 - Example: Tenant occupied Oct 1 - Dec 31, gets (Oct% + Nov% + Dec%) of annual heating cost
 
 **Use Cases:**
-1. Building setup: Select appropriate heating profile based on location
-2. Multi-building management: Use different profiles for buildings in different regions
+1. Statement run: select the heating profile that fits the location of the buildings in the run
+2. Multi-building management: buildings in different regions go into separate statement runs, each with its profile
 3. Custom adjustments: Manually adjust percentages if building has unique heating characteristics
 
 ---
 
 ### 5.8 Management Costs Configuration
 
-**Overview:** Configure the property manager's fee as a percentage of total utility costs. Up to 3% is the customary guideline in Switzerland, not a legal cap; a higher agreed percentage is applied as set.
+**Overview:** Configure the property manager's fee (Verwaltungspauschale) as a percentage of the tenant's own utility costs (subtotal). Up to 3% is the customary guideline in Switzerland, not a legal cap; a higher agreed percentage is applied as set.
 
 **Features:**
-- Global management cost percentage (0% or more; default suggestion for new statements, adjustable per building and period)
+- Global management cost percentage (0% or more; default suggestion for new statements, adjustable per statement run)
+- The rate of a statement run applies to every rental contract in it; Dwello does not check whether the fee is agreed in the rental contract
+- No distribution key: the fee is a percentage of each tenant's own costs
 - Automatic calculation and inclusion in statements
 - Formula: `Tenant's own utility costs (subtotal) × (Management Cost % / 100)`
 - The Saldo (costs minus Akonto) is rounded commercially to 5 Rappen; the statement shows the amount before rounding and the rounding
@@ -508,8 +512,8 @@ Four profiles, seeded by `backend/migrations/0002_stammdaten.sql`; each distribu
 **Other Configuration:**
 - Management cost percentage (see section 5.8)
 - Heating distribution profile (see section 5.7)
-- Payment deadline from statement date (e.g., 30 days)
-- Reminder deadline after payment deadline (default 14 days)
+- Payment deadline: days after the statement is sent (setting, default 30 days)
+- Reminder deadline after payment deadline (setting `reminder_after_days`, default 14 days; not applied: a reminder is possible as soon as the payment deadline has passed)
 - Currency (CHF - Swiss Francs)
 
 **Statement Generation Workflow:**
@@ -536,7 +540,7 @@ Four profiles, seeded by `backend/migrations/0002_stammdaten.sql`; each distribu
 - Ability to regenerate if invoices/contracts change: delete the draft and run the wizard again; a run creates drafts only for contracts without a statement in the period, and a draft names invoices recorded after it was created
 
 **Step 4: Generate PDFs**
-- Generate statement PDF for each apartment (requirements and sources: `docs/nebenkostenabrechnung-anforderungen.md`):
+- Generate statement PDF for each rental contract, one per contract and period; at a tenant change each contract gets its own (requirements and sources: `docs/nebenkostenabrechnung-anforderungen.md`):
   A4, sender and «Seite x von y» on every page, property and period in the footer; recipient in the address field;
   the balance first (Nachzahlung with payment deadline or Rückerstattung); per category the distribution key, the
   building's costs, the Wohnungsanteil, the Zeitanteil (days rented or heating profile) and the tenant's share;
@@ -593,8 +597,8 @@ BALANCE (refund): CHF 30
 - If tenant changed during accounting period
 - Prorate base rent and advance payments to number of days occupied
 - Example: Tenant 1 occupied 200 days, Tenant 2 occupied 165 days
-  - Tenant 1 owes: Total Costs × (200/365)
-  - Tenant 2 owes: Total Costs × (165/365)
+  - Tenant 1 owes: Wohnungsanteil × (200/365)
+  - Tenant 2 owes: Wohnungsanteil × (165/365)
 
 **Heating Costs with Mid-Year Move:**
 - Use monthly distribution profile
@@ -606,6 +610,7 @@ BALANCE (refund): CHF 30
 - Track periods when apartment was vacant
 - Allocate "Leerstandskosten" (vacancy costs) to building/owner
 - Occupied apartments don't pay for vacant period costs
+- Always, without the exception of Art. 7 Abs. 2 VMWG (no meters, heated only frost-free), which Dwello does not apply
 
 **Statement Status Tracking:**
 
@@ -625,8 +630,9 @@ BALANCE (refund): CHF 30
 **Reminder System:**
 
 **Reminders (manual, levels 1–3):**
-- The property manager creates a reminder for an overdue statement
-- Reminder period: X days after payment deadline (configurable, default 14 days); automatic reminders are planned, not implemented
+- The property manager creates a reminder for an overdue statement: Zahlungserinnerung (level 1), 2. Mahnung, 3. Mahnung; a fourth is not possible
+- A reminder is possible as soon as the payment deadline has passed; the setting «Reminder period» (`reminder_after_days`, default 14 days) is not applied; automatic reminders are planned, not implemented
+- Each reminder is a PDF in the tenant's documents and goes out by e-mail or letter according to the tenant's Korrespondenzkanal (scenarios in `statement-reminder.feature`)
 - Show reminder status on statement detail view
 - Log of all reminders sent (for audit trail)
 
@@ -705,7 +711,7 @@ BALANCE (refund): CHF 30
 - Global IBAN setting (Swiss bank account details)
 - Stored securely in configuration
 - Multiple IBANs per building (future feature)
-- Validation that the IBAN is Swiss or Liechtenstein (starts with CH or LI) with a valid MOD-97 checksum
+- Validation with a valid MOD-97 checksum: the settings form accepts only Swiss IBANs (CH), the QR-bill service also Liechtenstein (LI); which one applies is open (#191)
 
 **QR Code Generation:**
 - Encodes all necessary payment information
@@ -756,8 +762,7 @@ BALANCE (refund): CHF 30
 - Validation reason shown to user (e.g., "Repair costs - not allowed utility expense")
 
 **Manual Override:**
-- User can manually override validity flag (with reason logged)
-- Useful for edge cases or special contractual agreements
+- An invoice of an allocable category can be excluded from statements; an invoice of a non-allocable category is never allocable, whatever the form or the LLM sends
 - Override creates audit log entry (planned, not implemented)
 
 **Reporting:**
@@ -877,7 +882,6 @@ BALANCE (refund): CHF 30
   - Filter by period
 
 - Tab 4: Configuration
-  - Heating profile selection (for this building)
   - Notes/metadata
 
 **Map View:**
@@ -949,8 +953,9 @@ BALANCE (refund): CHF 30
 - First name (required)
 - Last name (required)
 - Date of birth (optional)
-- Email (required)
+- Email (required only when the Korrespondenzkanal is e-mail)
 - Phone (optional)
+- Korrespondenzkanal: letter (default) or e-mail
 - Address (street, postal code, city)
 - Notes (optional)
 - Submit/Cancel
@@ -1011,7 +1016,7 @@ BALANCE (refund): CHF 30
 **Category Validation:**
 - System automatically marks invalid categories with warning
 - Shows reason why category is not allowed
-- User can override with justification (logged)
+- User can change the AI category; the form requires a reason (Grund der Änderung)
 
 **Invalid Cost Handling:**
 - Invalid invoices highlighted in list
@@ -1036,7 +1041,7 @@ BALANCE (refund): CHF 30
 **Tab 2: Management Costs**
 - Percentage input (0% or more)
 - Label: "Verwaltungspauschale"
-- Help text: "Vorschlag beim Erstellen der Abrechnungen, pro Liegenschaft und Periode anpassbar. Üblicher Richtwert: bis 3%."
+- Help text: "Vorschlag beim Erstellen der Abrechnungen, dort für jeden Lauf anpassbar."
 - Checkbox: "Include management costs in statements"
 
 **Tab 3: Heating Distribution**
@@ -1051,9 +1056,9 @@ BALANCE (refund): CHF 30
   - Total validation: shows sum (must equal 100%)
   - Custom profile: checkbox to enable custom percentages
 
-**Tab 4: Payment Settings**
-- Payment deadline (X days from statement date, default 30)
-- Reminder deadline (Y days after payment deadline, default 14)
+**Tab 4: Payment Settings** (not on the settings page; the payment deadline is the backend setting `payment_deadline_days`, default 30)
+- Payment deadline (X days after the statement is sent, default 30)
+- Reminder deadline (Y days after payment deadline, default 14; not applied, see section 5.9 «Reminders»)
 - Default currency (CHF)
 
 **Tab 5: Distribution Keys Management**
@@ -1096,9 +1101,9 @@ BALANCE (refund): CHF 30
 
 **Tab 7: IBAN Setting**
 - IBAN input field (for QR-bill generation)
-- Format validation (must start with CH or LI, MOD-97 checksum)
+- Format validation (settings form: CH only; QR-bill service: CH or LI, #191; MOD-97 checksum)
 - Test QR-bill preview
-- Help text: "Swiss or Liechtenstein account required for QR-bill generation"
+- Help text: "Konto, auf das Ihre Mieter Nachzahlungen überweisen; es steht auf der QR-Rechnung."
 - A QR reference is printed only when the IBAN is a QR-IBAN; with a normal IBAN the QR-bill carries no reference
 
 ---
