@@ -196,10 +196,16 @@ describe('Mietvertragsdetail', () => {
 		}));
 		open('2022-04-01', null, null, '2026-10-10', false, missing);
 		expect(text('contract-missing-statement')).toContain('2 Abrechnungen fehlen');
+		// the wizard bills the whole building, the invoices come first, any order (personas Helga, Anna, Marco #142)
+		expect(text('contract-missing-statement')).toContain(
+			'Jede Periode öffnet den Assistenten für alle Mietverträge des Gebäudes. Erfassen Sie zuerst die Rechnungen der Periode; die Reihenfolge spielt keine Rolle.'
+		);
+		// short labels side by side, each named in full for a screen reader
 		const links = [...byTestId('contract-missing-statement')!.querySelectorAll('a')];
-		expect(links.map((a) => a.textContent!.trim())).toEqual([
-			'Abrechnung 2025 erstellen',
-			'Abrechnung 2023 erstellen'
+		expect(links.map((a) => a.textContent!.trim())).toEqual(['2025', '2023']);
+		expect(links.map((a) => a.getAttribute('aria-label'))).toEqual([
+			'Abrechnungen 2025 erstellen',
+			'Abrechnungen 2023 erstellen'
 		]);
 		expect(links.map((a) => a.getAttribute('href'))).toEqual(missing.map((m) => m.href));
 	});

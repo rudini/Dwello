@@ -149,6 +149,8 @@ const states: Record<string, (example: Example, viewport: Viewport) => Activity>
 	// the end dialog on the contract page, the contract form on its edit page
 	'past-end-error': () => endWithPastDate,
 	// the 2025 draft already bills rent days after 31.03.2025: the dialog links it and offers to delete it (A-10)
+	// the seeded contract runs since 2015 with statements only for 2024 and 2025: several periods are missing (#142)
+	'missing-statements': () => Wait.until(on.shown('contract-missing-statement')),
 	'end-dialog-refused': () => (actor) =>
 		actor.attemptsTo(
 			openDialog(endContractButton),

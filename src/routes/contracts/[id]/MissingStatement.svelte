@@ -30,14 +30,15 @@
 		<p>{single ? m.contracts_statement_missing_text() : m.contracts_statements_missing_text()}</p>
 		<div class="flex flex-wrap gap-2">
 			{#each missing as period (period.start)}
+				<!-- several: the period alone, named in full for a screen reader (personas Marco P-1, P-2 #142) -->
 				<Button
 					href={period.href}
 					icon="calculate"
-					variant={single ? undefined : 'secondary'}
+					ariaLabel={single
+						? undefined
+						: m.contracts_statement_create({ period: periodOf(period) })}
 					testid="contract-missing-statement-link-{period.start}"
-					>{single
-						? m.dashboard_create_statements()
-						: m.contracts_statement_create({ period: periodOf(period) })}</Button
+					>{single ? m.dashboard_create_statements() : periodOf(period)}</Button
 				>
 			{/each}
 		</div>

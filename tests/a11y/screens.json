@@ -31,6 +31,7 @@
 		"contracts-unknown": "Rental contract wizard or form whose apartments' rental contracts cannot be loaded (that request answered with an error): the hint at the apartment, in the form also at the start (#143), and the message after «Erneut versuchen» failed again (#151).",
 		"contracts-unknown-review": "Rental contract wizard at the step before saving, the apartment's rental contracts not loaded (that request answered with an error): the hint above the review (#143).",
 		"draft-restored": "A wizard reopened with a draft saved in the browser: restore notice and save status visible.",
+		"missing-statements": "Contract page of a contract with several ended Abrechnungsperioden without a statement (the seeded contract runs since 2015, statements only for 2024 and 2025): the warning with one button per period (#142).",
 		"draft-dropped": "Statement wizard reopened with a draft whose building and heating profile were deleted since: the restore notice says so (#135).",
 		"buildings-billed": "Statement wizard step «Gebäude» with a building whose rental contracts partly have a statement in the period: the count at the building (#135).",
 		"formula-tested": "Distribution key form after testing a formula.",
@@ -241,7 +242,8 @@
 				"end-dialog-error",
 				"past-end-error",
 				"end-dialog-refused",
-				"delete-dialog"
+				"delete-dialog",
+				"missing-statements"
 			]
 		},
 		{
