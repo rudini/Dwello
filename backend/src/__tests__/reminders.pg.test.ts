@@ -127,36 +127,49 @@ describe('Mahnung per E-Mail', () => {
 });
 
 describe('Mahnung per E-Mail, die der Mailserver ablehnt', () => {
-	let refused: string;
-
-	it('legt die Mahnung mit einem Code statt dem Text des Mailservers zum Versand bereit', async () => {
+	/** A reminder to an address the mail server refuses, and what went to the log */
+	async function refusedReminder() {
 		await updateTenant(rental.tenant, { email: 'abgelehnt@example.com', correspondenceChannel: 'email' });
 		const logged = spyOn(console, 'error').mockImplementation(() => {});
-
-		const result = await remind(await statement('sent'));
-		refused = result.document.id;
-		expect(String(logged.mock.calls[0])).toContain('550 5.1.1 User unknown'); // the mail server's text goes to the log
-		logged.mockRestore();
-		const list = (await (await api('GET', `/api/v1/documents?tenantId=${rental.tenant}&status=to_send`)).json()) as {
-			data: (Document & { deliveryError: string; deliveryErrorCode: string })[];
+		try {
+			return { result: await remind(await statement('sent')), log: String(logged.mock.calls) };
+		} finally {
+			logged.mockRestore();
+		}
+	}
+	const listed = async (id: string) => {
+		const list = (await (await api('GET', `/api/v1/documents?tenantId=${rental.tenant}`)).json()) as {
+			data: (Document & { deliveryErrorCode: string })[];
 		};
+		return list.data.find((d) => d.id === id);
+	};
 
+	it('legt die Mahnung mit einem Code statt dem Text des Mailservers zum Versand bereit', async () => {
+		const { result, log } = await refusedReminder();
+
+		expect(log).toContain('550 5.1.1 User unknown'); // the mail server's text goes to the log
 		expect(result.document).toMatchObject({ status: 'to_send', deliveryErrorCode: 'MAIL_DELIVERY_FAILED' });
 		expect(result.deliveryError).not.toContain('550');
-		expect(list.data.find((d) => d.id === result.document.id)).toMatchObject({ deliveryErrorCode: 'MAIL_DELIVERY_FAILED' });
+		expect(await listed(result.document.id)).toMatchObject({ deliveryErrorCode: 'MAIL_DELIVERY_FAILED' });
 	});
 
 	it('nennt auch für eine früher gespeicherte Fehlermeldung des Mailservers den Code', async () => {
+		const { result } = await refusedReminder();
 		// as stored before every failure had a code
 		await db
 			.update(documents)
 			.set({ deliveryError: 'Can\'t send mail - all recipients were rejected: 550 5.1.1 User unknown' })
-			.where(eq(documents.id, refused));
-		const list = (await (await api('GET', `/api/v1/documents?tenantId=${rental.tenant}`)).json()) as {
-			data: (Document & { deliveryErrorCode: string })[];
-		};
+			.where(eq(documents.id, result.document.id));
 
-		expect(list.data.find((d) => d.id === refused)?.deliveryErrorCode).toBe('MAIL_DELIVERY_FAILED');
+		expect((await listed(result.document.id))?.deliveryErrorCode).toBe('MAIL_DELIVERY_FAILED');
+	});
+
+	it('nennt den Mieter ohne E-Mail-Adresse mit seinem eigenen Code', async () => {
+		await updateTenant(rental.tenant, { email: '', correspondenceChannel: 'email' });
+
+		const result = await remind(await statement('sent'));
+
+		expect(result.document).toMatchObject({ status: 'to_send', deliveryErrorCode: 'TENANT_NO_EMAIL' });
 	});
 });
 
