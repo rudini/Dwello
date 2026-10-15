@@ -108,8 +108,11 @@
 				>
 			</div>
 		{/if}
-		{#if proposal}
-			<CategoryProposal {proposal} />
+		{#if action}
+			<!-- There before the first answer, so a screen reader announces it -->
+			<div role="status" data-testid="category-proposal-region">
+				{#if proposal}<CategoryProposal {proposal} />{/if}
+			</div>
 		{/if}
 	</div>
 	<Checkbox

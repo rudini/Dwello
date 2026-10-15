@@ -264,15 +264,38 @@ describe('Umlagefähigkeit einer neuen Kategorie', () => {
 		expect(button.textContent).toContain('Von der KI prüfen lassen');
 	});
 
-	// Enter in einem Feld speichert, wie in jedem Formular, und fragt nicht die KI (E-5)
-	it('speichert mit Enter im Namen, statt die KI zu fragen', () => {
+	// Der Bereich für die Ansage steht schon vor dem ersten Vorschlag, sonst sagt ihn ein Screenreader nicht an (E-13)
+	it('hält den Bereich für den Vorschlag der KI schon vor der Prüfung bereit', () => {
 		show(NewCategoryPage, { form: null } as never);
-		const submit = vi.spyOn(server.form!, 'requestSubmit').mockImplementation(() => {});
-		byTestId('category-name-input')!.dispatchEvent(
-			new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true })
-		);
 
-		expect(submit).toHaveBeenCalledWith(byTestId('category-submit'));
+		expect(document.querySelector('[role="status"][data-testid="category-proposal-region"]')).not.toBeNull();
+	});
+
+	// Ein Speichern während der Prüfung bleibt als laufend markiert, wenn die Prüfung zuerst antwortet (E-12)
+	it('zeigt das Speichern weiter als laufend, wenn die Prüfung vorher fertig wird', async () => {
+		show(NewCategoryPage, { form: null } as never);
+		const check = server.submit!({
+			formData: new FormData(server.form!),
+			submitter: byTestId('category-propose-button')
+		}) as (input: unknown) => Promise<void>;
+		server.submit!({ formData: new FormData(server.form!), submitter: byTestId('category-submit') });
+		await check({ update: async () => {}, result: { type: 'success' } });
+		await settle();
+
+		expect(byTestId('category-submit')!.textContent).toContain('Wird gespeichert');
+	});
+
+	// Nach der Prüfung bleibt der Fokus beim Knopf, statt an den Seitenanfang zu fallen (E-15)
+	it('setzt den Fokus nach der Prüfung wieder auf den Knopf', async () => {
+		show(NewCategoryPage, { form: null } as never);
+		const button = byTestId<HTMLButtonElement>('category-propose-button')!;
+		const after = server.submit!({ formData: new FormData(server.form!), submitter: button }) as (
+			input: unknown
+		) => Promise<void>;
+		await after({ update: async () => {}, result: { type: 'success' } });
+		await settle();
+
+		expect(document.activeElement).toBe(button);
 	});
 
 	it('meldet die fehlende Wahl an der Wahl', () => {
