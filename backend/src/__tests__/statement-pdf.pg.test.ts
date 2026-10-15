@@ -194,7 +194,7 @@ describe('Zeitanteil einer Rechnung mit Leistungszeitraum im PDF', () => {
 	});
 
 	it('erklärt den Bruch einer Rechnung mit Leistungszeitraum', () => {
-		expect(text).toContain('bei einer Rechnung mit Leistungszeitraum Ihre Mietstage darin von dessen Tagen in der Periode');
+		expect(text).toContain('Zeitanteil: Ihre Mietstage in der Abrechnungsperiode, bei einer Rechnung mit Leistungszeitraum Ihre Mietstage darin von dessen Tagen in der Periode.');
 	});
 
 	// Zwei Hauswart-Rechnungen über verschiedene Tage: der Anteil ist nach Beträgen gewichtet, kein Bruch von Tagen (#226)
@@ -211,7 +211,7 @@ describe('Zeitanteil einer Rechnung mit Leistungszeitraum im PDF', () => {
 		const mixed = readPdf(Buffer.from((await getStatementPdf(statement.id)).pdfBlob!, 'base64')).flowing;
 		await deleteStatement(statement.id);
 
-		expect(mixed).toMatch(/Hauswart Pro Fläche \(m²\) 70\.00 \/ 70\.00 m² 1'206\.52 1'206\.52 \d+\.\d\d % /);
+		expect(mixed).toMatch(/Hauswart Pro Fläche \(m²\) 70\.00 \/ 70\.00 m² 1'206\.52 1'206\.52 51\.66 % /);
 		expect(mixed).not.toContain('Ihre Mietstage darin');
 	});
 });

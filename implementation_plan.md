@@ -18,9 +18,13 @@ Causes: D-2: `handleMidYearMoves` (`prorating.service.ts`) shares heating by the
   Test red: «druckt die Mietstage im Leistungszeitraum von dessen Tagen in der Periode» – «50.00 %» instead of «31/62 Tage»; «erklärt den Bruch einer Rechnung mit Leistungszeitraum» – the note without it
   Skills: tdd, ponytail, ponytail-review (no findings)
 - [x] Checks: test:coverage (2458), lint, check, backend type-check, deepcheck:audit, E2E chromium + api all statement features and dashboard (112 passed); backend test: 618 pass, the `afterAll` of `swiss-today.pg.test.ts` fails between 22:00 and 24:00 UTC as on `main` (H-27)
-- [ ] code-reviewer round(s)
+- [x] code-reviewer round(s)
   code-reviewer round 1 (`docs/reviews/issue-208-review-1.md`): fixed C-1 (Major, the profile's division by the period's shares for a move in a period under a year is tested again: «teilt bei einem Einzug in einer Periode unter einem Jahr durch die Anteile der Periode»), C-2 (Minor, «druckt den Anteil in Prozent, wenn die Rechnungen einer Position verschiedene Tage abrechnen»), C-3 (Nit, comment moved to its block), C-4 (Nit, Italian note reworded)
   Test red (C-1): without the division – expected 9759.04, received 4050; (C-2): without the same-days check in `daysOf` – the mixed position printed a fraction
-- [ ] Feature review: fach-reviewer, daten-pruefer (PDF, amounts), persona Dr. Weber (PDF text)
+  code-reviewer round 2 (`docs/reviews/issue-208-review-2.md`): C-1 to C-4 confirmed fixed; fixed C-5 (Nit, the mixed position's share pinned at 51.66 %)
+- [x] Feature review: fach-reviewer, daten-pruefer (PDF, amounts), persona Dr. Weber (PDF text)
+  fach-reviewer round 2 (`docs/reviews/issue-208-fachreview-2.md`): F-1 to F-7 confirmed; fixed V-1 (Nit, the new clause starts with «,» like the heating clause; test «erklärt den Bruch …» pins the sentence, red with «;»), V-2 (Nit, «Abrechnungsposition» in rule 5); V-3 (Nit, the Leistungszeitraum's dates are not in the PDF) -> added to #226; V-4 (Nit, French spacing, existed before) -> `offene-punkte.md` U-35; «Leistungszeitraum» missing in `i18n-begriffe.md` (existed before) -> added to #75
+  daten-pruefer round 1 (`docs/reviews/issue-208-datenpruefung-1.md`): amounts of all 8 statements 2025 (and 9 of 2024) to the Rappen, stored days, PDFs and QR-bills right; D-1 (Minor): a mixed position of a whole-year contract prints «365/365 Tage» (the fallback for statements without stored days) where the new rule 5 said percent -> rejected as a behaviour change: the fraction is right and checkable (the tenant bears every day of every invoice); rule 5 now names the case
+  persona Dr. Weber (`docs/design/personas/weber-issue-208.md`): every figure recomputed, explanation right; P-1 to P-3 (Minor, explanation texts that existed before) and observations -> `offene-punkte.md` U-35 (the detail page naming the Heizprofil of a whole-period contract is made visible by this change: recorded there for a decision)
 - [ ] Workflow review `docs/reviews/workflow-rules-review-issue-208.md`
 - [ ] Archive session, push, PR `Fixes #208`, CI, merge
