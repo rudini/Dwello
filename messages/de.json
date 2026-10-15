@@ -910,7 +910,7 @@
 	"statements_no_more_reminders_title": "Keine weitere Mahnung möglich",
 	"statements_understood": "Verstanden",
 	"statements_no_more_reminders_text": "Es wurden bereits 3 Mahnungen versendet. Dwello erstellt keine weitere. Klären Sie das weitere Vorgehen direkt mit dem Mieter.",
-	"statements_reminder_undelivered": "{title} liegt in den Dokumenten zum Versand bereit. {reason}",
+	"statements_reminder_undelivered": "Das Dokument «{title}» liegt unter «Dokumente» zum Versand bereit. {reason}",
 	"statements_reminder_emailed": "{title} wurde per E-Mail versendet.",
 	"statements_reminder_letter": "{title} liegt als Brief zum Ausdrucken in den Dokumenten bereit.",
 	"statements_email_not_delivered": "E-Mail nicht zugestellt",
