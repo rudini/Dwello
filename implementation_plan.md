@@ -16,3 +16,4 @@ Reviews:
 
 - general-purpose (Opus 5.5 article) round 1 (`docs/reviews/migrations-frozen-blogreview-1.md`): fixed B-1 (Major), B-2 (Minor), B-3 (Minor), B-4 (Nit) in `docs/data-model.md`, `docs/anforderungen-vertragsende.md`, `backend/CLAUDE.md`, the workflow review; no behavior change, confirmed by delta review
 - code-reviewer round 1 (`docs/reviews/migrations-frozen-review-1.md`): fixed C-1 (Major, same as B-1), C-2 (Minor; Test red: migrations.pg.test.ts both refusals – received "… sonst gehen ihre Daten verloren."), C-3, C-4, C-5 (Nits)
+- code-reviewer round 2 (`docs/reviews/migrations-frozen-review-2.md`): open none, confirmed C-1…C-5 fixed
