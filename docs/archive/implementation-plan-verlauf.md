@@ -243,3 +243,19 @@ Plan: the line items keep the days of each invoice when any invoice of the posit
 - code-reviewer round 5 (docs/reviews/226-review-5.md, the step fix): no Blocker/Major; fixed C-14 (comment named the removed O-31); rejected C-15: waiting in the step follows `tenants.steps.ts` and `contract-form.steps.ts`
 
 Files: `backend/migrations/0006_line_item_invoice_parts.sql`, `backend/src/db/schema.ts`, `backend/src/services/{calculation,statement,statement-pdf,pdf}.service.ts`, `backend/src/__tests__/{statement-pdf.pg,statement-pdf-render}.test.ts`, `backend/src/__tests__/helpers/pdf-text.ts`, `docs/data-model.md`, `docs/nebenkostenabrechnung-anforderungen.md`, `tests/e2e/features/statement-detail.feature`, reviews in `docs/reviews/226-*.md`, `docs/reviews/workflow-rules-review-issue-226.md`, `docs/design/personas/dr-weber-226{,-2}.md`. Issues opened: #236, #237, #239, #240, #241; comments on #211, #240.
+
+## Session 2026-10-16 (glossary #243)
+
+Task: add the terms the product owner decided in #243 to `UBIQUITOUS_LANGUAGE.md`, at the product owner's request (as in #244), and remove the two `TODO(fachlich prüfen, #75)` markers the glossary now answers.
+
+- [x] Glossary: Abgerechnete Tage, Mietstage der Position, Monatsanteil, Anteil nach Heizprofil, Hinweis auf fehlende Abrechnungen; Saldo 0.00 and the PDF sign of the rounding; «Zeitanteil» refers to the new terms
+- [x] Markers `#75` removed from `backend/src/db/schema.ts` and `backend/src/services/pdf.service.ts` (comments only)
+- [x] Checks: test:coverage (2606), lint, check, backend test (670) + type-check; no E2E (docs and comments only)
+- [x] fach-reviewer and code-reviewer round
+  code-reviewer round 1 (`docs/reviews/glossary-243-review-1.md`): fixed C-1 (Minor, «No scenario» in the PR text), C-2 (Nit), C-3 (Nit)
+  fach-reviewer round 1 (`docs/reviews/glossary-243-fachreview-1.md`): fixed V-1 (Major, product owner confirmed changing the #243 wording), V-2 (Major, existed before: «geplant (#79)»), V-3, V-4, V-5, V-6, V-7, V-9, V-10, V-11, V-12; V-8 fixed with V-1 («über die Mietstage»)
+  fach-reviewer round 2 (`docs/reviews/glossary-243-fachreview-2.md`): V-1 to V-12 confirmed; fixed V-13, V-14, V-15 (Nits); no re-review (Nits in docs)
+- [x] Archive session, push, PR `Fixes #243` with «No scenario: glossary and comments only, no behaviour change», CI, merge
+  Skills: none (no behaviour change; tdd and ponytail do not apply to glossary text and comment removal)
+
+Files: `UBIQUITOUS_LANGUAGE.md`, `docs/reviews/glossary-243-{review-1,fachreview-1,fachreview-2}.md`, `backend/src/db/schema.ts`, `backend/src/services/pdf.service.ts`
