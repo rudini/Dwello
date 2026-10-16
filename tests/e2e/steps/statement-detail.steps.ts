@@ -15,7 +15,14 @@ import {
 	sendConfirmation,
 	statusOfStatement
 } from '../questions/statement-detail';
-import { listedStatementsOfYear, pageAddressInApp, statementListEmpty, statementPath } from '../questions/statements';
+import {
+	downloadedFileNameByNumber,
+	listedStatementNumber,
+	listedStatementsOfYear,
+	pageAddressInApp,
+	statementListEmpty,
+	statementPath
+} from '../questions/statements';
 import { openStatementList, searchStatements } from '../tasks/statements';
 import {
 	deleteStatement,
@@ -183,6 +190,14 @@ When('der Liegenschaftsverwalter das PDF der Abrechnung herunterlädt', async ({
 Then('erhält der Liegenschaftsverwalter die Abrechnung als PDF', async ({ verwalter }) => {
 	await verwalter.sees(downloadedFileName).toMatch(/\.pdf$/);
 	await verwalter.sees(downloadedFileHeader).toBe('%PDF-');
+});
+
+Then('heisst die Datei wie die Abrechnungsnummer, mit der Endung {string}', async ({ verwalter }, ending: string) => {
+	await verwalter.sees(downloadedFileNameByNumber).toBe(`<Nummer>${ending}`);
+});
+
+Then('endet die Abrechnungsnummer von {string} auf {string}', async ({ verwalter, names }, tenant: string, ending: string) => {
+	await verwalter.sees(listedStatementNumber(names.get(tenant) ?? tenant)).toMatch(new RegExp(`${ending}$`));
 });
 
 // from any page: the list of statements, searched for the tenant

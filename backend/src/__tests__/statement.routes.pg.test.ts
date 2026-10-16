@@ -158,6 +158,19 @@ describe('GET /api/v1/statements ohne PDF-Inhalt', () => {
 		}));
 });
 
+// Der Liegenschaftsverwalter unterscheidet die Dateien an der Nummer, die auf dem PDF steht (#101)
+describe('Dateiname des PDF', () => {
+	it('nennt das PDF nach der Nummer der Abrechnung', () =>
+		withIban(async () => {
+			await generatePdf();
+			const { statementNumber } = (await call(`/${statementId}`)) as { statementNumber: string };
+
+			expect((await callApi(`/api/v1/statements/${statementId}/pdf`)).headers.get('content-disposition')).toBe(
+				`attachment; filename="${statementNumber}.pdf"`
+			);
+		}));
+});
+
 describe('PDF einer Abrechnung, die es nicht gibt oder die noch kein PDF hat', () => {
 	const unknown = crypto.randomUUID();
 
