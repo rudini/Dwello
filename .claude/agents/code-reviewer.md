@@ -14,7 +14,8 @@ Check against `CLAUDE.md` and the docs it names:
 - Design rules: tokens only (`docs/design/token-referenz.md`), components from `src/lib/ui`, accessibility (labels, focus, keyboard, 48 px controls).
 - Security: auth and XSRF checks, input validation, no data leaking to the client.
 - Simplicity: the shortest diff that works; nothing unused left behind.
-- Red notes (Minor when missing, never more): `implementation_plan.md` holds only the current session; the commit messages of the range (`git log <range>`) carry a `Red: <test or scenario> – <message>` line for each new test of a behavior and each new or changed scenario (a test written after the code: red shown by taking the code out). Judge whether a test can fail by reading it, not by its note.
+- Plan (Minor): `implementation_plan.md` holds only the current session.
+- Red notes (Minor when missing, never more): the commit messages of the range (`git log <range>`) carry a `Red: <test or scenario> – <message>` line for each new test of a behavior and each new or changed scenario (a test written after the code: red shown by taking the code out). Judge whether a test can fail by reading it, not by its note.
 - Acceptance tests, when the diff touches `tests/e2e/`: lint already enforces the Screenplay layers (`tests/e2e/CLAUDE.md`); judge the design it cannot see:
   - Questions answer the value itself (text, amount in francs, count), so a failing check shows what the system says; yes/no only for real states (shown, enabled, checked).
   - The UI and the API path of a `throughUiOrApi` task or question answer in the same form; the API path calls system code (backend, or BFF server code in `src/lib/server`) and never copies a rule into the test.

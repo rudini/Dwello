@@ -9,6 +9,7 @@ Request (chat): apply the three proposals of the guardrail analysis: re-review o
 - [ ] Re-review only for a Blocker/Major fix; Minor/Nit code fixes go into the closing `code-reviewer` round before the push (`CLAUDE.md` Workflow 6, 9)
 - [ ] Red evidence in the slice's commit message (`Red:` lines) instead of `Scenario red`/`Test red`/`Skills` plan lines; a missing one is a Minor (`CLAUDE.md` Workflow 1–3, `.claude/agents/code-reviewer.md`)
 - [ ] Workflow notes per task only when something came up; a collected workflow review on request, which may propose removing or shortening rules (`CLAUDE.md` Workflow 7)
-- [ ] `code-reviewer` round on the rule diff
+- [x] `code-reviewer` round on the rule diff
 - [x] Checks (exit 0 each): `bun run test:coverage`, `bun run lint`, `bun run check`, `cd backend && bun run test && bun run type-check`
 - [ ] Archive the session, push, pull request, CI, merge
+  code-reviewer round 1 (docs/reviews/guardrails-review-1.md): fixed C-1 (Major: closing round without end; Minor/Nit fixes from it get no further round), C-2 (test pyramid), C-3, C-4, C-5, C-6, C-7
