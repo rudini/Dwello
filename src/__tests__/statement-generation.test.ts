@@ -135,6 +135,21 @@ describe('Abrechnungen erstellen', () => {
 		]);
 	});
 
+	// #133: bis «Abgerechnet bis» ausserhalb von Dwello abgerechnet; ohne Mietstage danach erhält er keine Abrechnung
+	it('übergeht einen Mietvertrag, der in der Periode nach «Abgerechnet bis» keine Mietstage hat', async () => {
+		const inBuilding = [
+			{ ...contract('auszug', '2020-01-01', '2024-03-31'), billedUntil: '2024-03-31' },
+			{ ...contract('einzug', '2024-05-01', null), billedUntil: '2023-12-31' }
+		];
+		const { fetch, posts } = backend([], inBuilding);
+
+		expect(await generateStatements(fetch, period)).toBe(1);
+		expect(posts.map((post) => post.body.contractId)).toEqual(['einzug']);
+		expect(await billedContracts(fetch, period)).toEqual([
+			{ buildingId: 'b1', contracts: 1, billed: 0, withoutFee: [] }
+		]);
+	});
+
 	// Abrechnung 2024 im Jahr 2026 erstellt, Auszug im März 2025: der Mieter ist schon weg, eine Akonto-Erhöhung nützt nichts
 	it('zählt einen Mieter, der bis heute ausgezogen ist, als ausgezogen', async () => {
 		const { fetch } = backend([], [contract('spaeter', '2020-01-01', '2025-03-31'), contract('bleibt', '2020-01-01', '2099-12-31')]);
