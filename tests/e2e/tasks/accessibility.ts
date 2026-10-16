@@ -369,7 +369,7 @@ function draftOf(name: string, values: object) {
 }
 
 // 'empty' and 'first-use' need a database without records: the empty instance of the stack (playwright.config.ts);
-// 'demo' the instance with DEMO=on
+// 'demo' the instance with DEMO=on. Both start only for the features playwright.config.ts names in `usesExtraInstances`
 const EMPTY_INSTANCE = 'http://localhost:3102';
 const instanceOf = (state: string) =>
 	['empty', 'first-use'].includes(state) ? EMPTY_INSTANCE : state === 'demo' ? DEMO_INSTANCE : '';

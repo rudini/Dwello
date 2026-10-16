@@ -1,6 +1,7 @@
 import { Navigate } from '../screenplay/interactions';
 
-// The instance of the E2E stack with DEMO=on (playwright.config.ts); the session cookies hold for every port of localhost
+// The instance of the E2E stack with DEMO=on (playwright.config.ts); the session cookies hold for every port of localhost.
+// It starts only for the features playwright.config.ts names in `usesExtraInstances`: a new feature using it goes there
 export const DEMO_INSTANCE = 'http://localhost:3104';
 
 export const openDemoSignIn = Navigate.to(`${DEMO_INSTANCE}/login`);

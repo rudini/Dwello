@@ -14,6 +14,8 @@ Task (product owner, in chat): speed up E2E runs during ATDD, not on CI. Measure
 - [x] Docs: `tests/e2e/CLAUDE.md` (Run)
   Skills: tdd, ponytail, ponytail-review (lean already), slice-review
 - [ ] Checks: test:coverage, lint, check, backend test + type-check, deepcheck:audit, E2E (wip-style subset and full chromium+api)
-- [ ] code-reviewer round
+- [ ] code-reviewer rounds
+  code-reviewer round 1 (`docs/reviews/e2e-speed-review-1.md`): fixed C-1 (`src/lib/paraglide` written by the build no longer counts; likely the one 48 s run), C-2 (`playwright.config.ts` with APP_VERSION is an input; the stamp lists the inputs that existed, so a deleted configuration file counts), C-3 (test for a file saved during the build), C-4 (comments in `tasks/demo.ts`, `tasks/accessibility.ts`), C-5 (plan lines added after the reviewed commit); rejected C-6: Node 20.0 runs nowhere (CI `NODE_VERSION: 22`, local 22, Docker `node:20` takes the latest 20.x and runs no E2E)
+  Test red: «baut neu, wenn während des Builds eine Datei gespeichert wurde» – expected 1 to be 2 (written after the code, shown by taking `utimesSync` out); «baut nicht neu, wenn der Build nur die Übersetzungen aus messages/ erzeugt hat» – expected 2 to be 1; «baut neu, wenn sich die Version für den Build geändert hat» and «baut neu, wenn eine Konfigurationsdatei gelöscht wurde» – expected 1 to be 2
 - [x] Workflow review `docs/reviews/workflow-rules-review-e2e-speed.md`
 - [ ] Archive session, push, PR, CI, merge
