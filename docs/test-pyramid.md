@@ -103,7 +103,7 @@ UI behavior that is not business behavior lives in its own features: `breadcrumb
 | Unit frontend | `bunx vitest run` (with coverage: `bun run test:coverage`) | job "Unit tests": all tests with the coverage floor |
 | Unit + integration backend | `cd backend && bun run test` (DB only: `bun run test:pg`) | job "Unit tests", in PRs when `backend/` or `tests/contracts/` changed, always on `main`; with the coverage floor |
 | Acceptance | `bun run test:e2e` (API driver only: `-- --project=api`) | job "E2E tests" (without `@a11y`); PRs Chromium and `api`, `main` all browsers and `api` |
-| Accessibility | `bun run test:e2e -- --project=chromium --grep @a11y` | job "Accessibility (axe)": every screen and state of `tests/a11y/screens.json` with axe-core in Chromium, light and dark; its own check so it can be required |
+| Accessibility | `bun run test:e2e -- --project=chromium --grep @a11y` | job "Accessibility (axe)": every screen and state of `tests/a11y/screens.json` with axe-core in Chromium, light and dark; its own check so it can be required; on a pull request that changes nothing it sees (frontend code other than unit tests, `messages/`, `static/`, `project.inlang/`, styles and build config, dependencies, `tests/a11y/`, the E2E code and `accessibility.feature`, `ci.yml`; a backend-only change, demo and E2E seed data included, does not count) its steps are skipped and it passes; pushes to `main` always run it |
 
 Local prerequisite: PostgreSQL on port 5432 with user `dwello`. The test databases `dwello_test` and `dwello_e2e` are set up fresh automatically; the development database stays untouched because every `bun test` started in `backend/` itself loads the preload (`backend/bunfig.toml`; Bun reads it only from the working directory).
 
