@@ -131,8 +131,9 @@ jobs:
         working-directory: backend
 
   # The axe check (@a11y, every screen and state in tests/a11y/screens.json) runs as its own check, so it can be required on its own
+  # Each runs in shards (Playwright --shard) on parallel runners; the job "e2e-results" reports each under its own name
   e2e-tests:
-    name: ${{ matrix.name }}
+    name: ${{ matrix.name }} (${{ matrix.shard }}/${{ matrix.shards }})
     needs: changes
     if: needs.changes.outputs.app == 'true'
     runs-on: ubuntu-latest
@@ -141,12 +142,11 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - name: E2E tests
-            filter: --grep-invert @a11y
-            reports: e2e-reports
-          - name: Accessibility (axe)
-            filter: --project=chromium --grep @a11y
-            reports: a11y-reports
+          - { name: E2E tests, filter: --grep-invert @a11y, reports: e2e-reports, shard: 1, shards: 2 }
+          - { name: E2E tests, filter: --grep-invert @a11y, reports: e2e-reports, shard: 2, shards: 2 }
+          - { name: Accessibility (axe), filter: --project=chromium --grep @a11y, reports: a11y-reports, shard: 1, shards: 3 }
+          - { name: Accessibility (axe), filter: --project=chromium --grep @a11y, reports: a11y-reports, shard: 2, shards: 3 }
+          - { name: Accessibility (axe), filter: --project=chromium --grep @a11y, reports: a11y-reports, shard: 3, shards: 3 }
     # A pull request that changes nothing the axe check sees skips its steps; the check still reports, as passed
     env:
       SKIP: ${{ matrix.reports == 'a11y-reports' && needs.changes.outputs.ui != 'true' }}
@@ -187,17 +187,40 @@ jobs:
         run: bunx playwright install --with-deps ${{ (github.event_name == 'pull_request' || matrix.reports == 'a11y-reports') && 'chromium' || '' }}
       - name: ${{ matrix.name }}
         if: env.SKIP != 'true'
-        run: bun run test:e2e -- ${{ matrix.filter }} ${{ github.event_name == 'pull_request' && matrix.reports == 'e2e-reports' && '--project=chromium --project=api' || '' }}
+        run: bun run test:e2e -- ${{ matrix.filter }} --shard=${{ matrix.shard }}/${{ matrix.shards }} ${{ github.event_name == 'pull_request' && matrix.reports == 'e2e-reports' && '--project=chromium --project=api' || '' }}
       - name: Upload reports
         if: ${{ failure() }}
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.reports }}
+          name: ${{ matrix.reports }}-${{ matrix.shard }}
           path: |
             playwright-report/
             cucumber-report/
             test-results/
           retention-days: 7
+
+  # The checks "E2E tests" and "Accessibility (axe)" under their old names, so they can stay required: each passes only when all its shards did
+  e2e-results:
+    name: ${{ matrix.name }}
+    needs: [changes, e2e-tests]
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+    strategy:
+      matrix:
+        include:
+          - { name: E2E tests, shards: 2 }
+          - { name: Accessibility (axe), shards: 3 }
+    steps:
+      - env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "${{ needs.changes.result }}" != success ]; then echo "::error::The job Changes failed, so no shard ran."; exit 1; fi
+          if [ "${{ needs.changes.outputs.app }}" != true ]; then exit 0; fi
+          passed=$(gh api "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs?per_page=100" \
+            --jq '[.jobs[] | select(.name | startswith("${{ matrix.name }} (")) | select(.conclusion == "success")] | length')
+          if [ "$passed" != "${{ matrix.shards }}" ]; then echo "::error::$passed of ${{ matrix.shards }} shards passed."; exit 1; fi
 
   fallow:
     name: Fallow audit
