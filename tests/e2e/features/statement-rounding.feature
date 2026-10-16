@@ -2,8 +2,8 @@
 @statements @api
 Funktionalität: Saldo auf 5 Rappen runden
   Als Liegenschaftsverwalter
-  möchte ich, dass der Saldo einer Abrechnung auf 5 Rappen gerundet ist
-  damit der Mieter einen Betrag erhält, den er bar oder per QR-Rechnung genau bezahlen kann
+  möchte ich, dass der Saldo einer Abrechnung auf 5 Rappen gerundet ist, nur zugunsten des Mieters
+  damit der Mieter einen Betrag erhält, den er bar oder per QR-Rechnung genau bezahlen kann, und nie mehr bezahlt als die tatsächlichen Kosten
 
   Grundlage:
     Angenommen das Gebäude "Rosenhof" in "Winterthur" existiert
@@ -13,7 +13,8 @@ Funktionalität: Saldo auf 5 Rappen runden
     Und der Liegenschaftsverwalter ist auf der Seite zum Erstellen von Abrechnungen
 
   # Nebenkosten 1001.00 + 3 % = 1031.03; die Positionen bleiben auf den Rappen genau
-  Szenariogrundriss: Nachzahlung und Rückerstattung kaufmännisch auf 5 Rappen
+  @wip
+  Szenariogrundriss: Eine Nachzahlung wird ab-, eine Rückerstattung aufgerundet
     Angenommen "Anna Keller" mietet die Wohnung "1.01" seit "2020-01-01" für "900" Franken mit "<Akonto>" Franken Akonto
     Wenn der Liegenschaftsverwalter die Vorschau der Abrechnungen 2024 für das Gebäude "Rosenhof" mit 3 % Verwaltungspauschale öffnet
     Dann kostet die Abrechnung von "Anna Keller" "CHF 1’031.03"
@@ -21,5 +22,6 @@ Funktionalität: Saldo auf 5 Rappen runden
 
     Beispiele:
       | Akonto | Saldo                    |
-      | 20     | Nachzahlung CHF 791.05   |
-      | 90     | Rückerstattung CHF 48.95 |
+      | 20     | Nachzahlung CHF 791.00   |
+      | 90     | Rückerstattung CHF 49.00 |
+      | 85.92  | Rückerstattung CHF 0.05  |
