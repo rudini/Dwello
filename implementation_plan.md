@@ -24,9 +24,9 @@ Branch `feat/glossary-texts-222`. Issue #222 "Decided (product owner)" (the glos
   Files: `messages/{de,fr,it,en}.json`, `tests/e2e/features/invoices.feature`, `src/__tests__/invoice-upload.test.ts`, `src/__tests__/invoice-pages.dom.test.ts`, `docs/design/i18n-begriffe.md`, `docs/reviews/222-*.md`, `implementation_plan.md`
   Checks on 017fd97d: `bun run test:coverage` exit 0, `bun run check` exit 0, backend `bun run test` exit 0, `bun run type-check` exit 0, `bun run test:e2e`: chromium 769 passed, 0 failed (incl. invoices and the a11y/language screens); firefox and webkit did not start (browser executables missing in this container), CI runs them
   Feature review: personas Dr. Weber (texts), Helga (terms for beginners), Marco (phone); `fach-reviewer` round 3 already checked the final texts, and code-reviewer round 1 confirmed the strings in `messages/*.json` equal them, so no separate domain round
-  persona Marco (docs/design/personas/marco-222.md): open P-1..P-4 (Minor), P-5 (Nit) → collected issue
-  persona Helga (docs/design/personas/helga-222.md): P-1 (Major) fixed by the product owner's decision (separate sentences, where to delete); open P-2..P-4 (Minor), P-5 (Nit) → collected issue
-  persona Dr. Weber (docs/design/personas/weber-222.md): P-1 (Major, = #261 first part) fixed by the product owner's decision (service period after the period already in a statement); open P-2..P-5 (Minor), P-6, P-7 (Nit) → collected issue
+  persona Marco (docs/design/personas/marco-222.md): open P-1..P-4 (Minor), P-5 (Nit) → #268
+  persona Helga (docs/design/personas/helga-222.md): P-1 (Major) fixed by the product owner's decision (separate sentences, where to delete); open P-2..P-4 (Minor), P-5 (Nit) → #268
+  persona Dr. Weber (docs/design/personas/weber-222.md): P-1 (Major, = #261 first part) fixed by the product owner's decision (service period after the period already in a statement); open P-2..P-5 (Minor), P-6, P-7 (Nit) → #268
   Product owner 2026-10-16 (recorded in #222): both hints changed for Helga P-1 and Weber P-1
   Scenario red (chromium, persona fixes): upload hint received «… Haben Sie die Akontorechnungen schon erfasst oder hier ausgewählt, löschen oder entfernen Sie sie …»; invoice page received the hint without the service period
   Test red: invoice-upload.test.ts (2) and invoice-pages.dom.test.ts «zeigt, was die KI beim Hochladen auf dem Beleg gesehen hat» – expected the new texts, received the round-2 ones
