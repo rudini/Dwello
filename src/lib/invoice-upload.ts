@@ -59,6 +59,7 @@ export type UploadRow = {
 	notes: string[]; // what the property manager should know about the file
 	duplicateOf: string | null;
 	several: boolean;
+	documentType: string; // invoice, reminder or credit_note, as the KI read it
 	hints: { deductedAmount: string | null; nonAllocableItems: boolean }; // kept with the Beleg (persona Anna)
 	selected: boolean;
 	createError?: string; // why the invoice was not created
@@ -107,6 +108,7 @@ export const newRow = (key: number, file: File, defaults: { distributionKeyId: s
 	notes: [],
 	duplicateOf: null,
 	several: false,
+	documentType: 'invoice',
 	hints: { deductedAmount: null, nonAllocableItems: false },
 	selected: true
 });
@@ -135,11 +137,16 @@ const named = (fields: string[]) =>
  * no invoice is created from
  */
 export function toDoOf(row: UploadRow): string[] {
-	if (row.status !== 'check' || row.several) return [];
+	// nothing to fill in on a file no invoice is created from: several invoices, a Gutschrift, a Mahnung (persona Dr. Weber)
+	if (row.status !== 'check' || row.several || row.documentType !== 'invoice') return [];
+	// costs that are not allocable only on an invoice that is: a Kategorie that is not keeps them out already, also
+	// one the property manager chooses later (domain review V-1, V-8)
+	const mixed = row.hints.nonAllocableItems && row.values.isValidUtilityCost;
 	const missing = row.missing.filter((field) => !row.values[FORM_FIELD[field as keyof Proposal['fields']]]);
 	const required = missing.filter((field) => REQUIRED.includes(field));
 	const optional = missing.filter((field) => !REQUIRED.includes(field));
 	return [
+		mixed && m.invoices_upload_mixed(),
 		!row.values.categoryId && m.invoices_upload_category_missing(),
 		required.length > 0 && m.invoices_upload_fill_in({ fields: named(required) }),
 		row.unsure.length > 0 && m.invoices_upload_check_these({ fields: named(row.unsure) }),
@@ -147,9 +154,8 @@ export function toDoOf(row: UploadRow): string[] {
 	].filter((note) => !!note) as string[];
 }
 
-// What the property manager should know about the proposal, in the order the file raises it; costs that are not
-// allocable only on an invoice that is: a Kategorie that is not already keeps them out (domain review V-1)
-function notesOn(proposal: Proposal, morePages: boolean, allocable: boolean) {
+// What the property manager should know about the file, in the order it raises it
+function notesOn(proposal: Proposal, morePages: boolean) {
 	return [
 		morePages && m.invoices_upload_more_pages({ pages: MAX_PAGES }),
 		proposal.invoiceCount > 1 && m.invoices_upload_several(),
@@ -157,8 +163,7 @@ function notesOn(proposal: Proposal, morePages: boolean, allocable: boolean) {
 		proposal.documentType === 'reminder' && m.invoices_upload_reminder(),
 		// TODO(fachlich prüfen, #222): «Gutschrift» is decided there but not yet in the glossary
 		proposal.documentType === 'credit_note' && m.invoices_upload_credit_note(),
-		proposal.deductedAmount && m.invoices_upload_deducted({ amount: formatCurrency(Number(proposal.deductedAmount)) }),
-		proposal.nonAllocableItems && allocable && m.invoices_upload_mixed()
+		proposal.deductedAmount && m.invoices_upload_deducted({ amount: formatCurrency(Number(proposal.deductedAmount)) })
 	];
 }
 
@@ -210,7 +215,7 @@ export function withProposal(row: UploadRow, proposal: Proposal): UploadRow {
 	const values = valuesOf(row, proposal.fields, category);
 	const read = readIn(row, proposal);
 	const several = proposal.invoiceCount > 1;
-	const notes = notesOn(proposal, row.morePages, values.isValidUtilityCost);
+	const notes = notesOn(proposal, row.morePages);
 	return {
 		...row,
 		status: 'check',
@@ -220,6 +225,7 @@ export function withProposal(row: UploadRow, proposal: Proposal): UploadRow {
 		notes: notes.filter((note) => !!note) as string[],
 		duplicateOf: proposal.duplicateOf,
 		several,
+		documentType: proposal.documentType,
 		hints: { deductedAmount: proposal.deductedAmount, nonAllocableItems: proposal.nonAllocableItems },
 		selected: preselected(proposal)
 	};

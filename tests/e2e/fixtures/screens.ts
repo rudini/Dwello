@@ -53,8 +53,13 @@ async function seedFor(seed: TestData, path: string, state: string) {
 	await seed.fuelStock('Seeblick', '2025-12-31', '800.00'); // a Tankbestand to list and to delete
 	// 2025 recorded from its start: a year to compare 2026 with; the 2025 statements take it
 	const billedInvoice = await seed.invoiceOn('Seeblick', 'Hauswart', '300.00', '2025-01-31');
-	await seed.supplierInvoice('Hauswart Huber', 'Seeblick', '450.00', 'Treppenhausreinigung Q1', 'Hauswart');
-	await seed.beleg('Hauswart Huber', 'huber-q1.pdf'); // the detail page shows its Beleg, the delete dialog names it
+	await seed.belegFor(billedInvoice, 'hauswart-2025.pdf'); // its delete dialog advises to keep the Beleg first
+	// the detail page shows its Beleg with what the KI saw on it, the delete dialog names it
+	await seed.supplierInvoice('Hauswart Huber', 'Seeblick', '450.00', 'Treppenhausreinigung Q1', 'Hauswart', {
+		fileName: 'huber-q1.pdf',
+		deductedAmount: '1000.00',
+		nonAllocableItems: true
+	});
 	await seed.statement('Anna', 'Seeblick', 2025, 'Standard');
 	await seed.statement('Bruno', 'Seeblick', 2025, 'Standard');
 	await seed.sendStatement('Bruno', 2025);

@@ -60,16 +60,14 @@ describe('Vorschlag der KI für eine Datei', () => {
 		]);
 	});
 
-	it('übernimmt eine unsichere Kategorie (unter 70 %) nicht und nennt Mahnung, Gutschrift und gemischte Kosten', () => {
+	it('übernimmt eine unsichere Kategorie (unter 70 %) nicht und nennt bei einer Mahnung nur sie', () => {
 		const unsure = proposal({ duplicateOf: null, deductedAmount: null, documentType: 'reminder', nonAllocableItems: true });
 		unsure.categorization = { ...unsure.categorization!, confidence: 0.5 };
 		const row = withProposal(newRow(1, pdf, defaults), unsure);
 		expect(row.values.categoryId).toBe('');
 		expect(said(row)).toEqual([
-			'Das ist eine Mahnung. Mahngebühren und Verzugszinsen sind keine Nebenkosten; erfassen Sie die ursprüngliche Rechnung.',
-			'Die Rechnung enthält Kosten, die nicht umlagefähig sind (z.B. Reparaturen). Tragen Sie hier nur den umlagefähigen Betrag ein und erfassen Sie den Rest danach mit «Rechnung erfassen» in der Kategorie Reparaturen.',
-			'Wählen Sie eine Kategorie.',
-			'Prüfen Sie: Rechnungsdatum.'
+			// a Mahnung becomes no invoice: nothing to fill in (persona Dr. Weber)
+			'Das ist eine Mahnung. Mahngebühren und Verzugszinsen sind keine Nebenkosten; erfassen Sie die ursprüngliche Rechnung.'
 		]);
 		expect(withProposal(newRow(2, pdf, defaults), proposal({ duplicateOf: null, nonAllocableItems: true })).selected).toBe(false);
 	});
@@ -84,11 +82,25 @@ describe('Vorschlag der KI für eine Datei', () => {
 		expect(mixed(proposal().categorization).selected).toBe(false);
 	});
 
+	it('folgt mit dem Hinweis auf gemischte Kosten der Kategorie, die der Liegenschaftsverwalter wählt (Fachreview V-8)', () => {
+		const row = withProposal(newRow(1, pdf, defaults), proposal({ duplicateOf: null, nonAllocableItems: true }));
+		expect(said(row).join(' ')).toContain('nicht umlagefähig sind');
+		row.values.isValidUtilityCost = false; // «Reparaturen» chosen
+		expect(said(row).join(' ')).not.toContain('nicht umlagefähig sind');
+	});
+
 	it('sagt bei einer Gutschrift, dass keine Rechnung daraus entsteht und wo sie abgezogen wird', () => {
 		const row = withProposal(newRow(1, pdf, defaults), proposal({ duplicateOf: null, documentType: 'credit_note' }));
 		expect(said(row)[0]).toBe(
 			'Das ist eine Gutschrift. Erstellen Sie daraus keine Rechnung. Verringern Sie den Betrag der Rechnung, zu der sie gehört, um die Gutschrift: hier in ihrer Zeile oder, wenn sie schon erfasst ist, mit «Rechnung bearbeiten». Bewahren Sie die Gutschrift mit der Originalrechnung auf.'
 		);
+	});
+
+	it('verlangt bei einer Gutschrift und einer Mahnung nichts zum Ausfüllen, weil keine Rechnung daraus entsteht (Persona Dr. Weber)', () => {
+		for (const documentType of ['credit_note', 'reminder']) {
+			const row = withProposal(newRow(1, pdf, defaults), proposal({ duplicateOf: null, documentType, categorization: null }));
+			expect(toDoOf(row)).toEqual([]);
+		}
 	});
 
 	it('wählt eine Gutschrift und eine Mahnung nicht zum Erstellen, mit ihrem Hinweis', () => {

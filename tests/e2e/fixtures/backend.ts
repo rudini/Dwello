@@ -307,11 +307,25 @@ export function testData(api: CallTheApi) {
 		},
 
 		// Invoice of a supplier, in a predefined category given by its German name, dated today
-		async supplierInvoice(supplier: string, buildingTitle: string, amount: string, description: string, categoryName: string) {
+		// with a Beleg as «Rechnungen hochladen» creates it: the file and what the KI saw on it
+		async supplierInvoice(
+			supplier: string,
+			buildingTitle: string,
+			amount: string,
+			description: string,
+			categoryName: string,
+			beleg?: { fileName: string; deductedAmount: string; nonAllocableItems: boolean }
+		) {
 			const category = await predefinedCategory(categoryName);
+			const content = Buffer.from('%PDF-1.4\n%%EOF\n').toString('base64');
 			const id = await invoice(
 				buildingTitle,
-				{ categoryId: category.id, billingEntityName: unique(supplier), isValidUtilityCost: category.isAllowedUtilityCost },
+				{
+					categoryId: category.id,
+					billingEntityName: unique(supplier),
+					isValidUtilityCost: category.isAllowedUtilityCost,
+					...(beleg && { beleg: { ...beleg, content } })
+				},
 				description,
 				amount,
 				inDays(0)
@@ -325,8 +339,12 @@ export function testData(api: CallTheApi) {
 
 		// The original file of the supplier's invoice
 		async beleg(supplier: string, fileName: string) {
+			await this.belegFor(ids.get(`Rechnung ${supplier}`)!, fileName);
+		},
+
+		async belegFor(invoiceId: string, fileName: string) {
 			const content = Buffer.from('%PDF-1.4\n%%EOF\n').toString('base64');
-			await put(`invoices/${ids.get(`Rechnung ${supplier}`)}/document`, { fileName, content });
+			await put(`invoices/${invoiceId}/document`, { fileName, content });
 		},
 
 		// The KI suggested the category the supplier's invoice has

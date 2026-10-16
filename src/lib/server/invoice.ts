@@ -136,11 +136,14 @@ export const formOf = (request: Request) =>
 
 /** The invoice fields a form sends as JSON; anything else is refused as a bad request */
 export function fieldsOf(value: FormDataEntryValue | null): Record<string, unknown> {
+	let fields: unknown;
 	try {
-		return JSON.parse(String(value));
+		fields = JSON.parse(String(value));
 	} catch {
-		throw new ValidationError('Invalid invoice fields', 'invoice');
+		fields = null;
 	}
+	if (typeof fields !== 'object' || fields === null) throw new ValidationError('Invalid invoice fields', 'invoice');
+	return fields as Record<string, unknown>;
 }
 
 /** A file the property manager chose for an invoice, as the backend takes it: its name and its content in Base64 */
