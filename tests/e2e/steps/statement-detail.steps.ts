@@ -196,6 +196,15 @@ Then(
 );
 
 Then(
+	'findet die Abrechnungsliste die Abrechnung {int} von {string}',
+	async ({ verwalter, names }, year: number, tenant: string) => {
+		const name = names.get(tenant) ?? tenant;
+		await verwalter.attemptsTo(openStatementList, searchStatements(name));
+		await verwalter.sees(listedStatementsOfYear(name, year)).toBe(1);
+	}
+);
+
+Then(
 	'die Abrechnung {int} von {string} ist nicht mehr auffindbar',
 	async ({ verwalter, names }, year: number, tenant: string) => {
 		const name = names.get(tenant) ?? tenant;
