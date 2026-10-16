@@ -364,7 +364,7 @@ export const suggestion = (result: Awaited<ReturnType<typeof categorizeInvoice>>
  */
 export async function extractFromFile(buildingId: string, fileName: string, pages: string[]) {
 	const extraction = await extractInvoice(fileName, pages);
-	if (!extraction) return null;
+	if (!extraction || extraction === 'unreadable') return extraction;
 	const { billingEntityName, invoiceNumber, description, amount } = extraction.fields;
 	const categorization =
 		billingEntityName && description ? await categorizeInvoice({ billingEntityName, description, amount: amount ?? '0' }) : null;

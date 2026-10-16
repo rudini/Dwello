@@ -6,21 +6,23 @@
 	// What the property manager should know about a file, then what keeps its invoice from being created
 	let { row, errors }: { row: UploadRow; errors: Record<string, string> } = $props();
 
-	const messages = $derived(
-		[
-			...row.notes,
-			row.status === 'failed' && m.invoices_upload_read_failed(),
-			errors.category,
-			Object.keys(errors).some((field) => field !== 'category') && m.invoices_upload_fields_missing(),
-			row.createError
-		].filter((text) => !!text) as string[]
-	);
+	// a sentence once: the Kategorie missing after creating is the note the row had before
+	const messages = $derived([
+		...new Set(
+			[
+				...row.notes,
+				errors.category,
+				Object.keys(errors).some((field) => field !== 'category') && m.invoices_upload_fields_missing(),
+				row.createError
+			].filter((text) => !!text) as string[]
+		)
+	]);
 	const tone = $derived(row.status === 'check' && !row.createError ? 'caution' : 'critical');
 </script>
 
 {#if messages.length}
 	<div data-testid="invoice-upload-row-message">
-		<Alert {tone} title={m.invoices_upload_notes_title()}>
+		<Alert {tone} title={m.invoices_upload_notes_title({ name: row.file.name })}>
 			{#each messages as message (message)}<p>{message}</p>{/each}
 			{#if row.duplicateOf}
 				<p>

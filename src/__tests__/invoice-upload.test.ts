@@ -49,7 +49,11 @@ describe('Vorschlag der KI für eine Datei', () => {
 		expect(withProposal(newRow(1, pdf, defaults), proposal()).selected).toBe(false);
 		const several = withProposal(newRow(2, pdf, defaults), proposal({ invoiceCount: 2, duplicateOf: null }));
 		expect(several).toMatchObject({ selected: false, several: true });
-		expect(several.notes).toContain('Diese Datei enthält mehrere Rechnungen. Laden Sie jede einzeln hoch.');
+		// nothing to check or fill in on a file no invoice is created from (persona Anna)
+		expect(several.notes).toEqual([
+			'Diese Datei enthält mehrere Rechnungen. Laden Sie jede Rechnung als eigene Datei hoch, oder erfassen Sie jede mit «Rechnung erfassen» und fügen Sie diese Datei danach auf ihrer Seite mit «Beleg hinzufügen» an.',
+			'Auf der Rechnung sind bereits bezahlte Beträge abgezogen (CHF\u00a01’000.00). Vorgeschlagen ist das Total der Leistungen vor dem Abzug. Erfassen Sie die Akontozahlungen nicht zusätzlich als eigene Rechnungen, sonst zählen sie doppelt.'
+		]);
 	});
 
 	it('übernimmt eine unsichere Kategorie (unter 70 %) nicht und nennt Mahnung, Gutschrift und gemischte Kosten', () => {
@@ -60,9 +64,26 @@ describe('Vorschlag der KI für eine Datei', () => {
 		expect(row.notes).toEqual([
 			'Das ist eine Mahnung. Mahngebühren und Verzugszinsen sind keine Nebenkosten; erfassen Sie die ursprüngliche Rechnung.',
 			'Die Rechnung enthält Kosten, die nicht umlagefähig sind (z.B. Reparaturen). Tragen Sie hier nur den umlagefähigen Betrag ein und erfassen Sie den Rest danach mit «Rechnung erfassen» in der Kategorie Reparaturen.',
-			'Prüfen Sie: Rechnungsdatum, Kategorie.'
+			'Wählen Sie eine Kategorie.',
+			'Prüfen Sie: Rechnungsdatum.'
 		]);
 		expect(withProposal(newRow(2, pdf, defaults), proposal({ duplicateOf: null, nonAllocableItems: true })).selected).toBe(false);
+	});
+
+	it('nennt gemischte Kosten nur, wenn die gewählte Kategorie umlagefähig ist, und wählt die Rechnung nicht (Fachreview V-1)', () => {
+		const repairs = { ...proposal().categorization!, category: { id: 'c2', name: 'Repairs', isAllowedUtilityCost: false } };
+		const mixed = (categorization: Proposal['categorization']) =>
+			withProposal(newRow(1, pdf, defaults), proposal({ duplicateOf: null, nonAllocableItems: true, categorization }));
+		expect(mixed(repairs).notes.join(' ')).not.toContain('nicht umlagefähig sind');
+		expect(mixed(repairs).selected).toBe(false);
+		expect(mixed(proposal().categorization).notes.join(' ')).toContain('nicht umlagefähig sind');
+	});
+
+	it('sagt bei einer Gutschrift, dass keine Rechnung daraus entsteht und wo sie abgezogen wird', () => {
+		const row = withProposal(newRow(1, pdf, defaults), proposal({ duplicateOf: null, documentType: 'credit_note' }));
+		expect(row.notes[0]).toBe(
+			'Das ist eine Gutschrift. Erstellen Sie daraus keine Rechnung. Verringern Sie den Betrag der Rechnung, zu der sie gehört, um die Gutschrift: hier in ihrer Zeile oder, wenn sie schon erfasst ist, mit «Rechnung bearbeiten». Bewahren Sie die Gutschrift mit der Originalrechnung auf.'
+		);
 	});
 
 	it('wählt eine Gutschrift und eine Mahnung nicht zum Erstellen, mit ihrem Hinweis', () => {
@@ -76,16 +97,28 @@ describe('Vorschlag der KI für eine Datei', () => {
 		}
 	});
 
-	it('nennt die Felder, die die KI nicht gefunden hat', () => {
-		const fields = { ...extraction.fields, invoiceNumber: null, dueDate: null };
-		const row = withProposal(newRow(1, pdf, defaults), proposal({ duplicateOf: null, fields }));
-		expect(row.missing).toEqual(['invoiceNumber', 'dueDate']);
-		expect(row.notes).toContain('Prüfen Sie: Rechnungsnummer, Rechnungsdatum, Fälligkeitsdatum.');
+	it('nennt fehlende Pflichtangaben, unsichere und nicht gefundene freiwillige Felder getrennt (Personas Anna, Helga; Fachreview V-5)', () => {
+		const fields = { ...extraction.fields, invoiceNumber: null, dueDate: null, amount: null };
+		const row = withProposal(newRow(1, pdf, defaults), proposal({ duplicateOf: null, deductedAmount: null, fields }));
+		expect(row.missing).toEqual(['invoiceNumber', 'amount', 'dueDate']);
+		expect(row.notes).toEqual([
+			'Füllen Sie aus: Betrag.',
+			'Prüfen Sie: Rechnungsdatum.',
+			'Ergänzen Sie, wenn auf der Rechnung angegeben: Rechnungsnummer, Fälligkeitsdatum.'
+		]);
 	});
 
-	it('nennt eine fehlende Kategorie bei dem, was zu prüfen ist (Personas Anna, Helga, Dr. Weber)', () => {
+	it('nennt eine fehlende Kategorie zuerst (Personas Anna, Helga, Dr. Weber)', () => {
 		const unsure = proposal({ duplicateOf: null, deductedAmount: null, categorization: null });
-		expect(withProposal(newRow(1, pdf, defaults), unsure).notes).toEqual(['Prüfen Sie: Rechnungsdatum, Kategorie.']);
+		expect(withProposal(newRow(1, pdf, defaults), unsure).notes).toEqual(['Wählen Sie eine Kategorie.', 'Prüfen Sie: Rechnungsdatum.']);
+	});
+
+	it('nennt ein selbst ausgefülltes Feld nach erneutem Lesen nicht als unsicher (Code-Review C-42)', () => {
+		const typed = newRow(1, pdf, defaults);
+		typed.values.invoiceDate = '2026-03-30';
+		const row = withProposal(typed, proposal({ duplicateOf: null, deductedAmount: null }));
+		expect(row.unsure).toEqual([]);
+		expect(row.notes).toEqual([]);
 	});
 
 	it('nennt ein selbst ausgefülltes Feld nach erneutem Lesen nicht mehr als nicht gefunden', () => {

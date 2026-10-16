@@ -48,7 +48,7 @@ Funktionalität: Rechnungsdetail
   Szenario: Beleg ersetzen
     Angenommen die Rechnung von "Hauswart Huber" hat den Beleg "huber-q1.pdf"
     Und der Liegenschaftsverwalter ist auf der Detailseite der Rechnung von "Hauswart Huber"
-    Dann erklärt der Beleg "Wählen Sie die neue Datei und klicken Sie dann auf «Beleg ersetzen»."
+    Dann erklärt der Beleg "Wählen Sie die neue Datei und dann «Beleg ersetzen»."
     Wenn der Liegenschaftsverwalter den Beleg durch das Foto "huber-q1.jpg" ersetzt
     Dann öffnet der Beleg die JPG-Datei "huber-q1.jpg"
 

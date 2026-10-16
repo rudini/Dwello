@@ -15,6 +15,7 @@
 		type UploadRow
 	} from '$lib/invoice-upload';
 	import type { Category } from '$lib/types';
+	import { formatDate } from '$lib/utils/format';
 	import { focusFirstError } from '$lib/ui/focus-error';
 	import { tick } from 'svelte';
 	import Alert from '$lib/ui/Alert.svelte';
@@ -62,9 +63,22 @@
 	const chosen = $derived(rows.filter((row) => row.selected && row.status !== 'reading' && row.status !== 'refused'));
 	const resultShown = $derived(created.length > 0);
 	const done = $derived(rows.filter((row) => row.status !== 'reading').length);
+	// the button counts what it creates: a chosen row that still lacks something is named apart (#233)
+	const complete = $derived(chosen.filter((row) => !Object.keys(checkRow(row)).length).length);
+	const incomplete = $derived(chosen.length - complete);
 	const createLabel = $derived(
-		chosen.length === 1 ? m.invoices_upload_create_one() : m.invoices_upload_create({ count: chosen.length })
+		[
+			complete === 1 ? m.invoices_upload_create_one() : m.invoices_upload_create({ count: complete }),
+			incomplete === 1 && m.invoices_upload_incomplete_one(),
+			incomplete > 1 && m.invoices_upload_incomplete({ count: incomplete })
+		]
+			.filter(Boolean)
+			.join(' ')
 	);
+
+	// a refusal the backend explains in the UI's words (a code with its message), else what failed
+	const reasonOf = (error: { code: string; params?: Record<string, string | number> } | undefined, fallback: string) =>
+		error?.params ? backendMessage({ code: error.code, params: error.params }, fallback) : fallback;
 
 	const update = (key: number, change: (row: UploadRow) => UploadRow) =>
 		(rows = rows.map((row) => (row.key === key ? change(row) : row)));
@@ -89,7 +103,7 @@
 		});
 		if (answer.data) update(key, (one) => withProposal(one, answer.data!));
 		else if (answer.error?.code === 'EXTRACTION_UNAVAILABLE') update(key, (one) => withoutKi(one, 'unavailable'));
-		else update(key, (one) => ({ ...one, status: 'failed' }));
+		else update(key, (one) => ({ ...one, status: 'failed', notes: [reasonOf(answer.error, m.invoices_upload_read_failed())] }));
 	}
 
 	// The rows are added at once, so a second choice while the first is still checked counts them too
@@ -122,13 +136,11 @@
 		form.set('file', row.file);
 		const answer = await api.post<{ id: string }>('/invoices', form);
 		if (answer.data) {
-			created = [...created, { id: answer.data.id, name: row.values.billingEntity.trim() }];
+			// named with its date: two invoices of one Rechnungssteller are told apart (C-27)
+			created = [...created, { id: answer.data.id, name: `${row.values.billingEntity.trim()}, ${formatDate(row.values.invoiceDate)}` }];
 			return remove(row.key);
 		}
-		const reason = answer.error?.params
-			? backendMessage({ code: answer.error.code, params: answer.error.params }, m.invoices_upload_create_failed())
-			: m.invoices_upload_create_failed();
-		update(row.key, (one) => ({ ...one, createError: reason }));
+		update(row.key, (one) => ({ ...one, createError: reasonOf(answer.error, m.invoices_upload_create_failed()) }));
 	}
 
 	async function create() {
@@ -181,7 +193,9 @@
 		{m.invoices_upload_keep_original()}
 	</p>
 
-	{#if resultShown}<UploadResult {created} />{/if}
+	{#if resultShown}
+		<UploadResult {created} open={rows.filter((row) => row.status !== 'refused').map((row) => row.file.name)} />
+	{/if}
 
 	<Select
 		id="invoice-upload-building"
@@ -233,5 +247,7 @@
 		finish();
 	}}
 >
-	<p data-testid="invoice-upload-discard-message">{m.invoices_upload_discard_text()}</p>
+	<p data-testid="invoice-upload-discard-message">
+		{created.length ? m.invoices_upload_discard_text_created() : m.invoices_upload_discard_text()}
+	</p>
 </Dialog>

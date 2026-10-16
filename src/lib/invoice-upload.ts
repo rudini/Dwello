@@ -100,7 +100,7 @@ export const newRow = (key: number, file: File, defaults: { distributionKeyId: s
 	selected: true
 });
 
-// The fields the property manager checks, with their labels, in the order «Prüfen Sie: …» names them
+// The fields the property manager checks, with their labels, in the order the notes name them
 const FIELD_LABELS: [string, () => string][] = [
 	['billingEntityName', m.invoices_billing_entity],
 	['invoiceNumber', m.invoices_invoice_number],
@@ -108,27 +108,44 @@ const FIELD_LABELS: [string, () => string][] = [
 	['servicePeriodStart', m.invoices_service_period],
 	['dueDate', m.invoices_due_date],
 	['amount', m.invoices_amount],
-	['description', m.invoices_description],
-	['category', m.buildings_category]
+	['description', m.invoices_description]
 ];
+// without these an invoice is not created (validateInvoice)
+const REQUIRED = ['billingEntityName', 'invoiceDate', 'amount', 'description'];
 
-// What the property manager should know about the proposal, in the order the file raises it, and the fields to check
-function notesOn(proposal: Proposal, morePages: boolean, check: string[]) {
-	const fields = FIELD_LABELS.filter(([field]) => check.includes(field)).map(([, label]) => label());
+const named = (fields: string[]) =>
+	FIELD_LABELS.filter(([field]) => fields.includes(field))
+		.map(([, label]) => label())
+		.join(', ');
+
+// What is left to do before creating: the Kategorie, required fields not found, unsure fields, then optional fields
+// not found (personas Anna, Helga; domain review V-5); nothing on a file no invoice is created from
+function toDo(read: { unsure: string[]; missing: string[] }, categoryId: string) {
+	const required = read.missing.filter((field) => REQUIRED.includes(field));
+	const optional = read.missing.filter((field) => !REQUIRED.includes(field));
+	return [
+		!categoryId && m.invoices_upload_category_missing(),
+		required.length > 0 && m.invoices_upload_fill_in({ fields: named(required) }),
+		read.unsure.length > 0 && m.invoices_upload_check_these({ fields: named(read.unsure) }),
+		optional.length > 0 && m.invoices_upload_add_if_shown({ fields: named(optional) })
+	];
+}
+
+// What the property manager should know about the proposal, in the order the file raises it; costs that are not
+// allocable only on an invoice that is: a Kategorie that is not already keeps them out (domain review V-1)
+function notesOn(proposal: Proposal, morePages: boolean, allocable: boolean) {
 	return [
 		morePages && m.invoices_upload_more_pages({ pages: MAX_PAGES }),
 		proposal.invoiceCount > 1 && m.invoices_upload_several(),
 		proposal.duplicateOf && m.invoices_upload_duplicate(),
 		proposal.documentType === 'reminder' && m.invoices_upload_reminder(),
+		// TODO(fachlich prüfen, #222): «Gutschrift» is decided there but not yet in the glossary
 		proposal.documentType === 'credit_note' && m.invoices_upload_credit_note(),
 		proposal.deductedAmount && m.invoices_upload_deducted({ amount: formatCurrency(Number(proposal.deductedAmount)) }),
-		proposal.nonAllocableItems && m.invoices_upload_mixed(),
-		fields.length > 0 && m.invoices_upload_check_these({ fields: fields.join(', ') })
-	].filter((note) => !!note) as string[];
+		proposal.nonAllocableItems && allocable && m.invoices_upload_mixed()
+	];
 }
 
-// The values the KI read, under what the property manager typed before (a file read again after a failure); a
-// Kategorie they chose keeps whether its costs are allocable with it (domain review V-15)
 // The fields of the form each value of the KI's answer goes to
 const FORM_FIELD: Record<keyof Proposal['fields'], keyof UploadValues> = {
 	billingEntityName: 'billingEntity',
@@ -141,6 +158,8 @@ const FORM_FIELD: Record<keyof Proposal['fields'], keyof UploadValues> = {
 	description: 'description'
 };
 
+// The values the KI read, under what the property manager typed before (a file read again after a failure); a
+// Kategorie they chose keeps whether its costs are allocable with it (domain review V-15)
 function valuesOf(row: UploadRow, fields: Proposal['fields'], category: Suggestion['category']): UploadValues {
 	const read = Object.fromEntries(
 		Object.entries(FORM_FIELD).map(([field, formField]) => [formField, fields[field as keyof Proposal['fields']] ?? ''])
@@ -151,12 +170,13 @@ function valuesOf(row: UploadRow, fields: Proposal['fields'], category: Suggesti
 	return { ...row.values, ...read, ...chosen, ...typed, distributionKeyId: row.values.distributionKeyId };
 }
 
-// What the KI did not find and the property manager did not fill in before
-function missingIn(row: UploadRow, fields: Proposal['fields']) {
+// What the KI did not find, or read without being sure, and the property manager did not fill in before (C-42)
+function readIn(row: UploadRow, proposal: Proposal) {
 	const filledIn = (field: string) => !!row.values[FORM_FIELD[field as keyof Proposal['fields']]];
-	return Object.entries(fields)
+	const missing = Object.entries(proposal.fields)
 		.filter(([field, value]) => value === null && field !== 'servicePeriodEnd' && !filledIn(field))
 		.map(([field]) => field);
+	return { missing, unsure: proposal.unsure.filter((field) => !filledIn(field)) };
 }
 
 // Only an invoice that can be created as it is: not a file with several invoices, one already entered, a Gutschrift,
@@ -172,19 +192,18 @@ export function withProposal(row: UploadRow, proposal: Proposal): UploadRow {
 	const suggested = proposal.categorization;
 	const category = suggested && suggested.confidence >= 0.7 ? suggested.category : null;
 	const values = valuesOf(row, proposal.fields, category);
-	const missing = missingIn(row, proposal.fields);
-	// a Kategorie is required here: one the KI could not choose is named with the fields to check
-	const check = [...proposal.unsure, ...missing, ...(values.categoryId ? [] : ['category'])];
+	const read = readIn(row, proposal);
+	const several = proposal.invoiceCount > 1;
+	const notes = [...notesOn(proposal, row.morePages, values.isValidUtilityCost), ...(several ? [] : toDo(read, values.categoryId))];
 	return {
 		...row,
 		status: 'check',
 		values,
 		suggestion: suggested,
-		unsure: proposal.unsure,
-		missing,
-		notes: notesOn(proposal, row.morePages, check),
+		...read,
+		notes: notes.filter((note) => !!note) as string[],
 		duplicateOf: proposal.duplicateOf,
-		several: proposal.invoiceCount > 1,
+		several,
 		selected: preselected(proposal)
 	};
 }

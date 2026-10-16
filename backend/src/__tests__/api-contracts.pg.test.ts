@@ -187,6 +187,18 @@ describe('API-Verträge des Frontends', () => {
 		}
 	});
 
+	it('POST /invoices/extract ohne lesbare Antwort der KI liefert die Felder von invoice-extraction-unreadable.json', async () => {
+		const llm = openAiCompatible('Ich kann diese Datei nicht lesen.' as never);
+		try {
+			const actual = await (
+				await sendJson('POST', '/api/v1/invoices/extract', { buildingId: rental.building, fileName: 'r.pdf', pages: ['data:image/png;base64,iVBO'] })
+			).json();
+			expect(drift(await sample('invoice-extraction-unreadable'), actual)).toEqual([]);
+		} finally {
+			llm.stop();
+		}
+	});
+
 	it('POST /categories/propose ohne sichere Antwort liefert die Felder von category-proposal-refused.json', async () => {
 		const llm = openAiCompatible({ isAllowedUtilityCost: false, confidence: 0.5, reasoning: 'Vielleicht' });
 		try {

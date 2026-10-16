@@ -11,6 +11,7 @@ import { pagesOf } from '$lib/file-pages';
 import InvoiceUploadDialog from '../routes/invoices/InvoiceUploadDialog.svelte';
 import { allByTestId, byTestId, click, fakeBff, fireEvent, settle, show } from './helpers/dom';
 import extraction from '../../tests/contracts/invoice-extraction.json';
+import unreadable from '../../tests/contracts/invoice-extraction-unreadable.json';
 
 const buildings = [
 	{ id: 'b1', name: 'Seeblick', address: 'Seeweg 1' },
@@ -54,6 +55,58 @@ describe('Rechnungen hochladen', () => {
 		chooseBuilding();
 		expect(byTestId<HTMLInputElement>('invoice-upload-file-input')!.disabled).toBe(false);
 		expect(byTestId('invoice-keep-original')!.textContent).toContain('Bewahren Sie die Originalrechnung auf');
+		// only files invoices are created from are kept (persona Dr. Weber)
+		expect(byTestId('invoice-keep-original')!.textContent).toContain(
+			'Dwello speichert die Datei jeder erstellten Rechnung als Beleg. Dateien, aus denen Sie keine Rechnung erstellen, speichert Dwello nicht.'
+		);
+	});
+
+	it('zählt auf dem Knopf nur Rechnungen, die sich erstellen lassen, und nennt die unvollständigen', async () => {
+		open((call) => [200, (call.body as { fileName: string }).fileName === 'werke.pdf' ? { ...read, categorization: null } : read]);
+		chooseBuilding();
+		await upload(pdf('blitz.pdf'), pdf('werke.pdf'));
+		expect(byTestId('invoice-upload-create-button')!.textContent?.trim()).toBe('1 Rechnung erstellen (1 unvollständig)');
+	});
+
+	it('nennt im Hinweis einer Datei ihren Namen, auch wenn er ohne die Zeile vorgelesen wird (Persona Sven)', async () => {
+		open(() => [200, read]);
+		chooseBuilding();
+		await upload(word);
+		expect(byTestId('invoice-upload-row-message')!.textContent).toContain('Hinweise zu notizen.docx');
+	});
+
+	it('nennt nach einem Teil-Erfolg die offenen Dateien und behält beim Verwerfen die erstellten Rechnungen (Persona Anna, C-39)', async () => {
+		const answers = (call: { path: string; body: unknown }) =>
+			call.path === '/invoices'
+				? [201, { id: 'i9' }]
+				: [200, (call.body as { fileName: string }).fileName === 'werke.pdf' ? { ...read, categorization: null } : read];
+		const { oncreated } = open(answers as never);
+		chooseBuilding();
+		await upload(pdf('blitz.pdf'), pdf('werke.pdf'));
+		click('invoice-upload-create-button');
+		await settle();
+		expect(byTestId('invoice-upload-result')!.textContent).toContain('Noch offen: werke.pdf.');
+		expect(byTestId('invoice-upload-result')!.querySelector('a')!.textContent).toBe('Elektro Blitz AG, 31.03.2026');
+
+		click('dialog-cancel');
+		await settle();
+		expect(byTestId('invoice-upload-discard-message')!.textContent).toBe(
+			'Erstellte Rechnungen bleiben gespeichert. Die übrigen Dateien und Ihre Eingaben gehen verloren.'
+		);
+		click('invoice-upload-discard-confirm');
+		await settle();
+		expect(oncreated).toHaveBeenCalledWith([{ id: 'i9', name: 'Elektro Blitz AG, 31.03.2026' }]);
+	});
+
+	it('bietet erneutes Lesen an, wenn die KI nichts Lesbares antwortet (Fachreview V-14)', async () => {
+		open(() => [502, unreadable]);
+		chooseBuilding();
+		await upload(pdf('blitz.pdf'));
+		expect(byTestId('invoice-upload-row-message')!.textContent).toContain(
+			'Die KI hat keine lesbare Antwort gegeben. Wählen Sie «Erneut versuchen» oder füllen Sie die Felder aus.'
+		);
+		expect(byTestId('invoice-upload-row-message')!.textContent).not.toContain('nicht geantwortet');
+		expect(byTestId('invoice-upload-row-retry')).not.toBeNull();
 	});
 
 	it('liest jede Datei sofort aus und erstellt die gewählten Rechnungen mit ihrem Beleg', async () => {
@@ -76,7 +129,7 @@ describe('Rechnungen hochladen', () => {
 		const sent = calls.find((call) => call.path === '/invoices')!.body as FormData;
 		expect(JSON.parse(String(sent.get('invoice')))).toMatchObject({ buildingId: 'b1', categoryId: 'c1', amount: '1250.00' });
 		expect((sent.get('file') as File).name).toBe('blitz.pdf');
-		expect(oncreated).toHaveBeenCalledWith([{ id: 'i9', name: 'Elektro Blitz AG' }]);
+		expect(oncreated).toHaveBeenCalledWith([{ id: 'i9', name: 'Elektro Blitz AG, 31.03.2026' }]);
 	});
 
 	it('markiert unsichere und nicht gefundene Werte mit Text, den der Screenreader beim Feld ansagt', async () => {

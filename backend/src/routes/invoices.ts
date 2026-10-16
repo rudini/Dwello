@@ -146,9 +146,13 @@ export const invoiceRoutes = new Elysia({ prefix: '/api/v1/invoices' })
 				return refusal('BUILDING_NOT_FOUND', 'Building not found');
 			}
 			const proposal = await extractFromFile(body.buildingId, body.fileName, body.pages);
+			if (proposal === 'unreadable') {
+				set.status = 502;
+				return refusal('EXTRACTION_UNREADABLE', 'The KI answered nothing readable');
+			}
 			if (proposal) return proposal;
 			set.status = 503;
-			return refusal('EXTRACTION_UNAVAILABLE', 'The KI is disabled, unreachable or read nothing');
+			return refusal('EXTRACTION_UNAVAILABLE', 'The KI is disabled or unreachable');
 		},
 		{
 			body: t.Object({
