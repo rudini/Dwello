@@ -77,6 +77,10 @@ export function toStatement(data: BackendStatement): StatementWithDetails {
 		rentalStart: data.rentalStart,
 		rentalEnd: data.rentalEnd,
 		heatingProfileName: profileName(data),
+		paymentResets: (data.paymentResets ?? []).map(({ resetOn, paidDate }: BackendStatement) => ({
+			resetOn,
+			paidDate
+		})),
 		lineItems: (data.lineItems || []).map(toLineItem)
 	};
 }
