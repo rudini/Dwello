@@ -132,6 +132,19 @@ Plan: F-6: the stored share also keeps the period's sum (`periodPercent`); the P
 
 Files: `backend/src/services/{prorating,calculation,statement-pdf,pdf}.service.ts`, `backend/src/db/schema.ts`, `backend/src/__tests__/{statement-pdf.pg,statement-pdf-render}.test.ts`, `src/lib/server/statement.ts`, `src/__tests__/statement-mapping.test.ts`, `tests/contracts/statement.json`, `tests/e2e/features/statement-detail.feature`, `tests/e2e/steps/statement-detail.steps.ts`, `tests/e2e/fixtures/backend.ts`, `docs/design/offene-punkte.md`, `docs/design/personas/weber-issue-229{,-2}.md`, `docs/reviews/issue-229-{fachreview-1,fachreview-2,datenpruefung-1,datenpruefung-2,review-1,review-2,review-3}.md`, `docs/reviews/workflow-rules-review-issue-229.md`
 
+## Session 2026-10-16 (glossary from the entscheiden round)
+
+Task: add to `UBIQUITOUS_LANGUAGE.md` the terms the product owner decided in the issues, at the product owner's request in this session (CLAUDE.md says Claude never edits the glossary; the product owner asked for it explicitly).
+
+- [x] Glossary entries and changes from #56, #58, #62, #63, #68, #75, #79, #85, #100, #102, #120, #133, #140, #205, #222, #239
+- [x] Checks: test:coverage (2577), lint, check, backend test (656) + type-check; no E2E (docs only)
+- [x] fach-reviewer round on the diff
+  fach-reviewer round 1 (`docs/reviews/glossary-decisions-fachreview-1.md`): fixed V-1 (Major), V-2 (Major, product owner confirmed changing the #239 wording), V-3, M-1, M-2 (product owner: with «Ersatzmieter»), V-4, V-5, V-6, M-3, V-7, V-8, V-9 (V-4, V-7, V-9 decided by the product owner in this session), V-11, V-12, V-13, V-14, V-16, V-17, V-18, V-19; open V-10 (Minor, requirement docs follow with #79, #120: comments there), V-15 (Nit) and the missing terms -> #243
+  fach-reviewer round 2 (`docs/reviews/glossary-decisions-fachreview-2.md`): round-1 fixes confirmed; fixed V-20 (Minor), M-4 (Minor, wording of Art. 264 Abs. 1 OR), V-21 (Nit), V-22 (Nit); no re-review: Minor/Nit wording in docs only (Workflow 6)
+- [x] Archive session, push, PR (`Refs` the issues: their implementation is still open), CI, merge
+
+Files: `UBIQUITOUS_LANGUAGE.md`, `docs/reviews/glossary-decisions-fachreview-{1,2}.md`
+
 ## Session 2026-10-16 (15): #226 statement PDF: a position over different Leistungszeiträume cannot be recomputed
 
 Request (chat): work through the open issues without `entscheiden` one by one (session 14 in the archive); this is the second, #229 merged in #235.
