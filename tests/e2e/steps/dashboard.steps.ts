@@ -4,7 +4,9 @@ import {
 	deadlineText,
 	deadlines,
 	markedNavItems,
+	occupancyHelp,
 	occupancyOf,
+	occupancyText,
 	occupancyShown,
 	overviewTaskShown,
 	overviewTaskShownFor,
@@ -177,3 +179,11 @@ Then(
 		await verwalter.sees(overviewTasksNaming(names.get(tenant)!)).toBe(0);
 	}
 );
+
+Then('nennt die Belegung von {string} {string}', async ({ verwalter, names }, building: string, text: string) => {
+	await verwalter.sees(occupancyText(names.get(building)!)).toContain(text);
+});
+
+Then('erklärt die Belegung {string}', async ({ verwalter }, help: string) => {
+	await verwalter.sees(occupancyHelp).toBe(help);
+});
