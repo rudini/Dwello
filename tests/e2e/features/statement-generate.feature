@@ -82,7 +82,7 @@ Funktionalität: Nebenkostenabrechnungen erstellen
     Und für "Marc Huber" im Gebäude "Lindenhof" gibt es die Nebenkostenabrechnung 2024
     Und die Abrechnung 2024 von "Marc Huber" wurde inzwischen gelöscht
     Wenn der Liegenschaftsverwalter die Abrechnungen 2024 für das Gebäude "Lindenhof" erstellt
-    Und der Liegenschaftsverwalter zeigt die Abrechnungen im Gebäude "Lindenhof" an
+    Und der Liegenschaftsverwalter die erstellten Abrechnungen anzeigt
     Dann endet die Nummer der Abrechnung von "Marc Huber" auf "-2024-0003"
 
   # Eine Abrechnungsperiode nur aus Monaten mit 0 % im Heizprofil (Mittelland: Juni bis August): die Heizkosten gehen nach Mietstagen wie jede andere

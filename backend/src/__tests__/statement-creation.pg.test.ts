@@ -98,3 +98,46 @@ describe('Nebenkostenabrechnung speichern', () => {
 		expect((await listStatements({ tenantId: rental.tenant })).total).toBe(0);
 	});
 });
+
+// Das PDF eines Entwurfs kann schon weitergegeben sein: eine Nummer gibt es nur einmal, ein gelöschter Entwurf lässt eine Lücke (#97)
+describe('Nummer einer Nebenkostenabrechnung', () => {
+	const prefix = () => `NK-${rental.building.substring(0, 8).toUpperCase()}-`;
+	const draft = (periodEnd = '2024-12-31') =>
+		generateStatement({
+			contractId: rental.contract,
+			buildingId: rental.building,
+			periodStart: `${periodEnd.slice(0, 4)}-01-01`,
+			periodEnd,
+			managementFeePercent: 0
+		});
+
+	it('vergibt die Nummer eines gelöschten Entwurfs nicht wieder', async () => {
+		await draft();
+		const second = await draft();
+		await deleteStatement(second.id);
+
+		expect((await draft()).statementNumber).toBe(`${prefix()}2024-0003`);
+	});
+
+	// Nummern von vor der Änderung bleiben, wie sie sind; die nächste folgt auf die höchste
+	it('zählt nach der höchsten schon vergebenen Nummer weiter', async () => {
+		await createStatement({
+			tenantId: rental.tenant,
+			apartmentId: rental.apartment,
+			contractId: rental.contract,
+			statementNumber: `${prefix()}2025-0007`,
+			periodStart: '2025-01-01',
+			periodEnd: '2025-12-31',
+			statementDate: '2026-01-15',
+			rentalDays: 0,
+			rentalStart: '2025-01-01',
+			rentalEnd: '2025-12-31',
+			totalCosts: '0.00',
+			totalAdvancePayments: '0.00',
+			managementFee: '0.00',
+			balance: '0.00'
+		}, []);
+
+		expect((await draft('2025-12-31')).statementNumber).toBe(`${prefix()}2025-0008`);
+	});
+});
