@@ -51,6 +51,7 @@ export function toStatement(data: BackendStatement): StatementWithDetails {
 		paidDate: data.paidDate,
 		pdfGeneratedAt: data.pdfGeneratedAt,
 		lastReminderDate: data.reminderSentDate,
+		nextReminderFrom: data.nextReminderFrom,
 		notes: data.notes,
 		createdAt: data.createdAt,
 		tenantName: data.tenant ? `${tenant.firstName} ${tenant.lastName}` : m.common_unknown(),

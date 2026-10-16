@@ -32,6 +32,15 @@ When('der Liegenschaftsverwalter eine Mahnung sendet', async ({ verwalter }) => 
 });
 
 When(
+	'der Liegenschaftsverwalter die {string} an {string} in den Dokumenten als versendet markiert',
+	async ({ verwalter, names }, title: string, tenant: string) => {
+		const name = names.get(tenant) ?? tenant;
+		await verwalter.attemptsTo(openDocumentsToSend, markLetterSent(title, name));
+		await verwalter.sees(documentsFor(title, name)).toBe(0); // saved: no longer to send
+	}
+);
+
+When(
 	'der Liegenschaftsverwalter die {string} an {string} als versendet markiert',
 	async ({ verwalter, names }, title: string, tenant: string) => {
 		await verwalter.attemptsTo(markLetterSent(title, names.get(tenant) ?? tenant));
@@ -97,7 +106,7 @@ Given('{string} wünscht Korrespondenz per E-Mail, hat aber keine E-Mail-Adresse
 Then(
 	'führt die Abrechnung die {string} mit der Zahlungsfrist in {int} Tagen',
 	async ({ verwalter }, title: string, days: number) => {
-		await verwalter.sees(documentFor(title, '')).toContain(`Zahlungsfrist ${swissDate(inDays(days))}`);
+		await verwalter.sees(documentFor(title, '')).toContain(`Zahlungsfrist der Mahnung: ${swissDate(inDays(days))}`);
 	}
 );
 
@@ -111,7 +120,7 @@ Then(
 		await verwalter.attemptsTo(openStatementList);
 		await verwalter
 			.sees(listedStatement(names.get(tenant) ?? tenant))
-			.toContain(`Nächste Mahnung ab ${swissDate(inDays(days))}`);
+			.toContain(`Nächste Mahnung möglich ab ${swissDate(inDays(days))}`);
 	}
 );
 

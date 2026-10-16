@@ -402,6 +402,13 @@
 			]
 		},
 		{
+			"name": "statement-reminded-detail",
+			"path": "/statements/{remindedStatement}",
+			"states": [
+				"default"
+			]
+		},
+		{
 			"name": "statement-empty-detail",
 			"path": "/statements/{emptyStatement}",
 			"states": [

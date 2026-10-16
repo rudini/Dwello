@@ -128,6 +128,7 @@ Funktionalität: Barrierefreiheit
       | statement-sent-detail  | reminder-dialog     |
       | statement-sent-detail  | mark-paid-dialog    |
       | statement-sent-detail  | action-error        |
+      | statement-reminded-detail | default          |
       | statement-empty-detail | default             |
       | statement-pdf-refused  | default             |
       | statement-edit         | default             |

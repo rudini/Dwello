@@ -13,7 +13,13 @@ export interface OverviewInput {
 		reletApartments: number;
 	};
 	statementCounts: { draft: number; sent: number; paid: number; overdue: number };
-	dueStatements: { id: string; tenantName: string; paymentDeadline: string }[];
+	// with the day from which the next Mahnung is possible, after the last reminder's Zahlungsfrist (#107)
+	dueStatements: {
+		id: string;
+		tenantName: string;
+		paymentDeadline: string;
+		nextReminderFrom?: string | null;
+	}[];
 	lettersToSend: number;
 	// ended Abrechnungsperiode with rented buildings that have no statements yet
 	missingPeriod?: { start: string; end: string; buildings: string[] } | null;
@@ -94,17 +100,23 @@ function invoicesOf({ start, end }: { start: string; end: string }) {
 }
 
 // Recurring work, most urgent first: money already late, letters waiting at home, statements not yet sent
-function workTasks({ statementCounts, lettersToSend, missingPeriod }: OverviewInput): Task[] {
+function workTasks({
+	today,
+	statementCounts,
+	dueStatements,
+	lettersToSend,
+	missingPeriod
+}: OverviewInput): Task[] {
+	// nothing to do yet while the Zahlungsfrist of the last Mahnung runs (#107)
+	const overdue =
+		statementCounts.overdue -
+		dueStatements.filter((s) => (s.nextReminderFrom ?? '') > today).length;
 	const tasks: (Task | false)[] = [
-		statementCounts.overdue > 0 && {
+		overdue > 0 && {
 			id: 'overdue',
 			// TODO(fachlich prüfen, #64): shown from the Zahlungsfrist on; a Mahnung is customary only after the Mahnfrist
 			title: m.dashboard_task_overdue(),
-			text: count(
-				statementCounts.overdue,
-				m.dashboard_task_overdue_text_one,
-				m.dashboard_task_overdue_text_many
-			),
+			text: count(overdue, m.dashboard_task_overdue_text_one, m.dashboard_task_overdue_text_many),
 			href: '/statements?status=overdue',
 			action: m.dashboard_task_overdue_action(),
 			icon: 'reminder'

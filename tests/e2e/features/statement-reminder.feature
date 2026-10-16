@@ -38,7 +38,6 @@ Funktionalität: Mahnungen
 
   # Jede Mahnung setzt eine neue Zahlungsfrist; die nächste Mahnstufe erst ab dem Tag danach (#107).
   # Dass sie danach möglich ist, prüft reminders.pg.test.ts: die Uhr des Backends lässt sich hier nicht vorstellen.
-  @wip
   Szenario: Nächste Mahnung erst nach der Zahlungsfrist der letzten
     Angenommen "Anna Keller" wünscht Korrespondenz per Brief
     Und "Anna Keller" hat für die Abrechnung 2024 bereits eine Zahlungserinnerung erhalten
@@ -49,11 +48,9 @@ Funktionalität: Mahnungen
     Und nennt die Liste der Abrechnungen bei "Anna Keller" die nächste Mahnung ab dem Tag in 11 Tagen
 
   # Die E-Mail kam nicht an, der Verwalter hat den Brief ausgedruckt und per Post geschickt (#194)
-  @wip
   Szenario: Nach gescheiterter E-Mail per Post versendete Mahnung gilt als Brief
     Angenommen "Anna Keller" wünscht Korrespondenz per E-Mail, hat aber keine E-Mail-Adresse
     Und der Liegenschaftsverwalter ist auf der Detailseite der Abrechnung 2024 von "Anna Keller"
-    Und der Liegenschaftsverwalter eine Mahnung sendet
-    Und der Liegenschaftsverwalter ist bei den zu versendenden Dokumenten
-    Wenn der Liegenschaftsverwalter die "Zahlungserinnerung" an "Anna Keller" als versendet markiert
+    Wenn der Liegenschaftsverwalter eine Mahnung sendet
+    Und der Liegenschaftsverwalter die "Zahlungserinnerung" an "Anna Keller" in den Dokumenten als versendet markiert
     Dann ist die "Zahlungserinnerung" an "Anna Keller" per Brief versendet festgehalten
