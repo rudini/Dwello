@@ -306,7 +306,7 @@ prefix       VARCHAR(50)   PRIMARY KEY  -- NK-{first 8 characters of the buildin
 last_number  INTEGER       NOT NULL     -- the last number given with this prefix
 ```
 
-Migration `0008` (#97). `generateStatementNumber` (`backend/src/services/calculation.service.ts`) counts `last_number`
+Migration `0009` (#97). `generateStatementNumber` (`backend/src/services/calculation.service.ts`) counts `last_number`
 up for every new statement, so a number is never given twice: a deleted draft leaves a gap, because its PDF may already
 have been handed out. A prefix without a row (its first statement since the migration) starts after the highest
 `statement_number` with that prefix; existing numbers stay as they are. A number deleted before the migration that was
@@ -434,7 +434,7 @@ Demo data (`backend/demo/`, `bun run db:demo`) is never part of the migrations.
 backend/migrations/
   0001_schema.sql       -- schema
   0002_stammdaten.sql   -- master data: categories, distribution keys, heating profiles
-  0003 … 0008           -- later changes, each named in its table above
+  0003 … 0009           -- later changes, each named in its table above
 ```
 
 `src/db/migrate.ts` applies the `.sql` files in file order, each in its own transaction, and records them in
