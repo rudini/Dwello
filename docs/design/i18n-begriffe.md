@@ -35,6 +35,9 @@ Style: French guillemets with a non-breaking space inside (« Immeubles »), I
 | Rechnung | facture | fattura | invoice |
 | Beleg (hochgeladene Datei einer Rechnung, #217) | pièce justificative | giustificativo | supporting document |
 | Gutschrift (eines Rechnungsstellers) | note de crédit | nota di credito | credit note |
+| Akontorechnung (eines Rechnungsstellers) | facture d’acompte | fattura d’acconto | advance invoice |
+| Mahnung eines Rechnungsstellers | rappel | sollecito | payment reminder |
+| Auslesen | lire (les indications) | leggere (i dati) | read (the details) |
 | Mahngebühr / Verzugszins | frais de rappel / intérêt moratoire | spese di sollecito / interesse di mora | reminder fee / default interest |
 | Rechnungssteller | émetteur de la facture | emittente della fattura | invoice issuer |
 | Lieferant | fournisseur | fornitore | supplier |
